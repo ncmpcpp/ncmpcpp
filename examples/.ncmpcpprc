@@ -1,0 +1,72 @@
+### ncmpc++ config file ###
+#
+## set it in order to make tag editor work
+#
+#mpd_music_dir = "/var/lib/mpd/music"
+#
+#mpd_connection_timeout = "5"
+#
+#mpd_crossfade_time = "5"
+#
+## delay after playlist highlighting will be disabled (0 = don't disable)
+#
+#playlist_disable_highlight_delay = "5"
+#
+## defines how long various messages are supposed to be visible
+#
+#message_delay_time = "4"
+#
+## for song format you can use:
+##
+## %l - length
+## %f - short filename
+## %F - full filename
+## %a - artist
+## %t - title
+## %b - album
+## %y - year
+## %n - track number
+## %g - genre
+## %c - comment
+##
+## you can also put them in { } and then it will be displayed
+## only if all requested values are available and/or define alternate
+## value with { }|{ } eg. {%a - %t}|{%f}
+##
+## text can also have different color than the main window has,
+## eg. if you want length to have other color, write [color]%t[/color]
+##
+## available colors:
+##
+## - black
+## - red
+## - green
+## - yellow
+## - blue
+## - magenta
+## - cyan
+## - white
+##
+#
+#song_list_format = "[green](%l)[/green] {%a - }{%t}|{[white]%f[/white]}"
+#
+#song_status_format = "(%l) {%a - }{%t}|{%f}"
+#
+## window title settings
+#
+#enable_window_title = "yes"
+#
+#song_window_title_format = "{%a - }{%t}|{%f}"
+#
+## colors definitions
+#
+#empty_tag_color = "cyan"
+#
+#header_window_color = "default"
+#
+#main_window_color = "yellow"
+#
+#progressbar_color = "default"
+#
+#statusbar_color = "default"
+
