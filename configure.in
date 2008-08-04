@@ -1,0 +1,31 @@
+AC_INIT(configure.in)
+
+AM_CONFIG_HEADER(config.h)
+AM_INIT_AUTOMAKE(ncmpcpp, 0.1)
+
+AC_LANG_CPLUSPLUS
+AC_PROG_CXX
+AM_PROG_LIBTOOL
+
+CPPFLAGS="$CPPFLAGS `taglib-config --cflags`"
+
+AC_ARG_ENABLE(unicode,[  --enable-unicode	Enable utf8 support ], [unicode=$enableval], [unicode=yes])
+
+if test "$unicode" = "yes" ; then
+	AC_CHECK_LIB(ncursesw, initscr, , AC_MSG_ERROR([ncursesw library is required]))
+	AC_CHECK_HEADERS([ncursesw/ncurses.h], , AC_MSG_ERROR([missing ncursesw.h header]))
+	CPPFLAGS="$CPPFLAGS -DUTF8_ENABLED"
+	LDFLAGS="$LDFLAGS -lncursesw"
+else
+	AC_CHECK_LIB(ncurses, initscr, , AC_MSG_ERROR([ncurses library is required]))
+	AC_CHECK_HEADERS([ncurses.h], , AC_MSG_ERROR([missing ncurses.h header]))
+	LDFLAGS="$LDFLAGS -lncurses"
+fi
+
+PKG_CHECK_MODULES([libmpd], libmpd, LDFLAGS="$LDFLAGS -lmpd", AC_MSG_ERROR([mpd library is required]))
+AC_CHECK_HEADERS([libmpd/libmpd.h], , AC_MSG_ERROR([missing libmpd.h header]))
+
+PKG_CHECK_MODULES([taglib], taglib, LDFLAGS="$LDFLAGS `taglib-config --libs`", AC_MSG_ERROR([taglib library is required]))
+AC_CHECK_HEADERS([taglib.h], , AC_MSG_ERROR([missing taglib.h header]))
+
+AC_OUTPUT(Makefile src/Makefile)
