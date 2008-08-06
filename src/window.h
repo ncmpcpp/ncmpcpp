@@ -21,11 +21,7 @@
 #ifndef HAVE_WINDOW_H
 #define HAVE_WINDOW_H
 
-#ifdef UTF8_ENABLED
-# include <ncursesw/ncurses.h>
-#else
-# include <ncurses.h>
-#endif
+#include "ncurses.h"
 
 #include <vector>
 #include <string>

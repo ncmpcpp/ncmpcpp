@@ -22,7 +22,7 @@
 
 extern ncmpcpp_config Config;
 
-string EMPTY;
+string EMPTY_TAG;
 string UNKNOWN_ARTIST;
 string UNKNOWN_TITLE;
 string UNKNOWN_ALBUM;
@@ -30,7 +30,7 @@ string UNKNOWN_ALBUM;
 void DefineEmptyTags()
 {
 	const string et_col = IntoStr(Config.empty_tags_color);
-	EMPTY = "[" + et_col + "]<empty>[/" + et_col + "]";
+	EMPTY_TAG = "[" + et_col + "]<empty>[/" + et_col + "]";
 	UNKNOWN_ARTIST = "[" + et_col + "]<no artist>[/" + et_col + "]";
 	UNKNOWN_TITLE = "[" + et_col + "]<no title>[/" + et_col + "]";
 	UNKNOWN_ALBUM = "[" + et_col + "]<no album>[/" + et_col + "]";
@@ -115,17 +115,17 @@ bool Song::Empty() const
 
 string Song::GetFile() const
 {
-	return itsGetEmptyFields ? (itsFile.empty() ? "" : itsFile) : (itsFile.empty() ? EMPTY : itsFile);
+	return itsGetEmptyFields ? (itsFile.empty() ? "" : itsFile) : (itsFile.empty() ? EMPTY_TAG : itsFile);
 }
 
 string Song::GetShortFilename() const
 {
-	return itsGetEmptyFields ? (itsShortName.empty() ? "" : itsShortName) : (itsShortName.empty() ? EMPTY : itsShortName);
+	return itsGetEmptyFields ? (itsShortName.empty() ? "" : itsShortName) : (itsShortName.empty() ? EMPTY_TAG : itsShortName);
 }
 
 string Song::GetDirectory() const
 {
-	return itsGetEmptyFields ? (itsDirectory.empty() ? "" : itsDirectory) : (itsDirectory.empty() ? EMPTY : itsDirectory);
+	return itsGetEmptyFields ? (itsDirectory.empty() ? "" : itsDirectory) : (itsDirectory.empty() ? EMPTY_TAG : itsDirectory);
 }
 
 string Song::GetArtist() const
@@ -145,21 +145,21 @@ string Song::GetAlbum() const
 
 string Song::GetTrack() const
 {
-	return itsGetEmptyFields ? (itsTrack.empty() ? "" : itsTrack) : (itsTrack.empty() ? EMPTY : itsTrack);
+	return itsGetEmptyFields ? (itsTrack.empty() ? "" : itsTrack) : (itsTrack.empty() ? EMPTY_TAG : itsTrack);
 }
 
 string Song::GetYear() const
 {
-	return itsGetEmptyFields ? (itsYear.empty() ? "" : itsYear) : (itsYear.empty() ? EMPTY : itsYear);
+	return itsGetEmptyFields ? (itsYear.empty() ? "" : itsYear) : (itsYear.empty() ? EMPTY_TAG : itsYear);
 }
 
 string Song::GetGenre() const
 {
-	return itsGetEmptyFields ? (itsGenre.empty() ? "" : itsGenre) : (itsGenre.empty() ? EMPTY : itsGenre);
+	return itsGetEmptyFields ? (itsGenre.empty() ? "" : itsGenre) : (itsGenre.empty() ? EMPTY_TAG : itsGenre);
 }
 
 string Song::GetComment() const
 {
-	return itsGetEmptyFields ? (itsComment.empty() ? "" : itsComment) : (itsComment.empty() ? EMPTY : itsComment);
+	return itsGetEmptyFields ? (itsComment.empty() ? "" : itsComment) : (itsComment.empty() ? EMPTY_TAG : itsComment);
 }
 

@@ -56,7 +56,7 @@ extern bool block_statusbar_update;
 extern bool search_case_sensitive;
 extern bool search_mode_match;
 
-extern string EMPTY;
+extern string EMPTY_TAG;
 extern string UNKNOWN_ARTIST;
 extern string UNKNOWN_TITLE;
 extern string UNKNOWN_ALBUM;
@@ -159,7 +159,7 @@ string DisplaySong(const Song &s, const string &song_template)
 				{
 					if (link_tags)
 					{
-						if (s.GetYear() != EMPTY)
+						if (s.GetYear() != EMPTY_TAG)
 							result += s.GetYear();
 						else
 							tags_present = 0;
@@ -172,7 +172,7 @@ string DisplaySong(const Song &s, const string &song_template)
 				{
 					if (link_tags)
 					{
-						if (s.GetTrack() != EMPTY)
+						if (s.GetTrack() != EMPTY_TAG)
 							result += s.GetTrack();
 						else
 							tags_present = 0;
@@ -185,7 +185,7 @@ string DisplaySong(const Song &s, const string &song_template)
 				{
 					if (link_tags)
 					{
-						if (s.GetGenre() != EMPTY)
+						if (s.GetGenre() != EMPTY_TAG)
 							result += s.GetGenre();
 						else
 							tags_present = 0;
@@ -198,7 +198,7 @@ string DisplaySong(const Song &s, const string &song_template)
 				{
 					if (link_tags)
 					{
-						if (s.GetComment() != EMPTY)
+						if (s.GetComment() != EMPTY_TAG)
 							result += s.GetComment();
 						else
 							tags_present = 0;
@@ -435,7 +435,6 @@ void GetDirectory(string dir)
 		vFileType.push_back(MPD_DATA_TYPE_DIRECTORY);
 		vNameList.push_back("");
 	}
-	
 	browser = mpd_database_get_directory(conn, (char *)dir.c_str());
 	FOR_EACH_MPD_DATA(browser)
 	{

@@ -30,6 +30,15 @@
 
 #define FOR_EACH_MPD_DATA(x) for (; (x); (x) = mpd_data_get_next(x))
 
+#define BLOCK_STATUSBAR_UPDATE \
+			block_statusbar_update = 1; \
+			allow_statusbar_unblock = 0;
+
+#define UNBLOCK_STATUSBAR_UPDATE \
+			allow_statusbar_unblock = 1; \
+			if (block_statusbar_update_delay < 0) \
+				block_statusbar_update = 0;
+
 char *MPD_HOST = getenv("MPD_HOST");
 int MPD_PORT = getenv("MPD_PORT") ? atoi(getenv("MPD_PORT")) : 6600;
 char *MPD_PASSWORD = getenv("MPD_PASSWORD");
@@ -41,8 +50,8 @@ vector<Song> vSearched;
 vector<MpdDataType> vFileType;
 vector<string> vNameList;
 
-Window *mCurrent = 0;
-Window *mPrev = 0;
+Window *wCurrent = 0;
+Window *wPrev = 0;
 Menu *mPlaylist;
 Menu *mBrowser;
 Menu *mTagEditor;
@@ -65,8 +74,6 @@ int playing_song_scroll_begin = 0;
 int browsed_dir_scroll_begin = 0;
 
 int block_statusbar_update_delay = -1;
-
-long long current_playlist_id = -1;
 
 string browsed_dir = "/";
 string browsed_subdir;
@@ -99,7 +106,7 @@ bool block_playlist_update = 0;
 bool search_case_sensitive = 1;
 bool search_mode_match = 1;
 
-extern string EMPTY;
+extern string EMPTY_TAG;
 extern string UNKNOWN_ARTIST;
 extern string UNKNOWN_TITLE;
 extern string UNKNOWN_ALBUM;
@@ -208,10 +215,10 @@ int main(int argc, char *argv[])
 	wFooter->SetColor(Config.statusbar_color);
 	wFooter->Refresh();
 	
-	mCurrent = mPlaylist;
+	wCurrent = mPlaylist;
 	current_screen = csPlaylist;
 	
-	mCurrent->Display();
+	wCurrent->Display();
 	
 	int input;
 	timer = time(NULL);
@@ -286,9 +293,9 @@ int main(int argc, char *argv[])
 			wHeader->Bold(0);
 		}
 		
-		mCurrent->Refresh();
+		wCurrent->Refresh();
 		
-		mCurrent->ReadKey(input);
+		wCurrent->ReadKey(input);
 		if (input == ERR)
 			continue;
 		
@@ -305,19 +312,19 @@ int main(int argc, char *argv[])
 		
 		switch (input)
 		{
-			case KEY_UP: mCurrent->Go(UP); continue;
-			case KEY_DOWN: mCurrent->Go(DOWN); continue;
-			case KEY_PPAGE: mCurrent->Go(PAGE_UP); continue;
-			case KEY_NPAGE: mCurrent->Go(PAGE_DOWN); continue;
-			case KEY_HOME: mCurrent->Go(HOME); continue;
-			case KEY_END: mCurrent->Go(END); continue;
+			case KEY_UP: wCurrent->Go(UP); continue;
+			case KEY_DOWN: wCurrent->Go(DOWN); continue;
+			case KEY_PPAGE: wCurrent->Go(PAGE_UP); continue;
+			case KEY_NPAGE: wCurrent->Go(PAGE_DOWN); continue;
+			case KEY_HOME: wCurrent->Go(HOME); continue;
+			case KEY_END: wCurrent->Go(END); continue;
 			case KEY_RESIZE:
 			{
 				int in;
 				
 				while (1)
 				{
-					mCurrent->ReadKey(in);
+					wCurrent->ReadKey(in);
 					if (in == KEY_RESIZE)
 						continue;
 					else
@@ -342,19 +349,11 @@ int main(int argc, char *argv[])
 				wFooter->MoveTo(0, LINES-2);
 				wFooter->Resize(COLS, wFooter->GetHeight());
 				
-				if (mCurrent != sHelp)
-					mCurrent->Hide();
-				mCurrent->Display();
+				if (wCurrent != sHelp)
+					wCurrent->Hide();
+				wCurrent->Display();
 				
-				wHeader->DisableBB();
-				wHeader->Bold(1);
-				mvwhline(wHeader->RawWin(), 1, 0, 0, wHeader->GetWidth());
-				if (!switch_state.empty())
-					wHeader->WriteXY(wHeader->GetWidth()-switch_state.length()-3, 1, "[" + switch_state + "]");
-				wHeader->Refresh();
-				wHeader->Bold(0);
-				wHeader->EnableBB();
-				
+				header_update_status = 1;
 				int mpd_state = mpd_player_get_state(conn);
 				if (mpd_state == MPD_PLAYER_PLAY || mpd_state == MPD_PLAYER_PAUSE)
 					NcmpcppStatusChanged(conn, MPD_CST_ELAPSED_TIME); // restore status
@@ -449,8 +448,7 @@ int main(int argc, char *argv[])
 					{
 						int id = mTagEditor->GetRealChoice();
 						int option = mTagEditor->GetChoice();
-						block_statusbar_update = 1;
-						allow_statusbar_unblock = 0;
+						BLOCK_STATUSBAR_UPDATE
 						Song &s = edited_song;
 					
 						switch (id)
@@ -488,7 +486,7 @@ int main(int argc, char *argv[])
 							case 4:
 							{
 								wFooter->WriteXY(0, 1, "[b]New year:[/b] ", 1);
-								if (s.GetYear() == EMPTY)
+								if (s.GetYear() == EMPTY_TAG)
 									s.SetDate(wFooter->GetString(4, TraceMpdStatus));
 								else
 									s.SetDate(wFooter->GetString(s.GetYear(), 4, TraceMpdStatus));
@@ -498,7 +496,7 @@ int main(int argc, char *argv[])
 							case 5:
 							{
 								wFooter->WriteXY(0, 1, "[b]New track:[/b] ", 1);
-								if (s.GetTrack() == EMPTY)
+								if (s.GetTrack() == EMPTY_TAG)
 									s.SetTrack(wFooter->GetString(3, TraceMpdStatus));
 								else
 									s.SetTrack(wFooter->GetString(s.GetTrack(), 3, TraceMpdStatus));
@@ -508,7 +506,7 @@ int main(int argc, char *argv[])
 							case 6:
 							{
 								wFooter->WriteXY(0, 1, "[b]New genre:[/b] ", 1);
-								if (s.GetGenre() == EMPTY)
+								if (s.GetGenre() == EMPTY_TAG)
 									s.SetGenre(wFooter->GetString("", TraceMpdStatus));
 								else
 									s.SetGenre(wFooter->GetString(s.GetGenre(), TraceMpdStatus));
@@ -518,7 +516,7 @@ int main(int argc, char *argv[])
 							case 7:
 							{
 								wFooter->WriteXY(0, 1, "[b]New comment:[/b] ", 1);
-								if (s.GetComment() == EMPTY)
+								if (s.GetComment() == EMPTY_TAG)
 									s.SetComment(wFooter->GetString("", TraceMpdStatus));
 								else
 									s.SetComment(wFooter->GetString(s.GetComment(), TraceMpdStatus));
@@ -554,23 +552,20 @@ int main(int argc, char *argv[])
 							}
 							case 9:
 							{
-								mCurrent->Clear();
-								mCurrent = mPrev;
+								wCurrent->Clear();
+								wCurrent = wPrev;
 								current_screen = prev_screen;
 								break;
 							}
 						}
-						allow_statusbar_unblock = 1;
-						if (block_statusbar_update_delay < 0)
-							block_statusbar_update = 0;
+						UNBLOCK_STATUSBAR_UPDATE
 						break;
 					}
 					case csSearcher:
 					{
 						int id = mSearcher->GetChoice();
 						int option = mSearcher->GetChoice();
-						block_statusbar_update = 1;
-						allow_statusbar_unblock = 0;
+						BLOCK_STATUSBAR_UPDATE
 						Song &s = searched_song;
 					
 						switch (id)
@@ -578,7 +573,7 @@ int main(int argc, char *argv[])
 							case 1:
 							{
 								wFooter->WriteXY(0, 1, "[b]Filename:[/b] ", 1);
-								if (s.GetShortFilename() == EMPTY)
+								if (s.GetShortFilename() == EMPTY_TAG)
 									s.SetShortFilename(wFooter->GetString("", TraceMpdStatus));
 								else
 									s.SetShortFilename(wFooter->GetString(s.GetShortFilename(), TraceMpdStatus));
@@ -618,7 +613,7 @@ int main(int argc, char *argv[])
 							case 5:
 							{
 								wFooter->WriteXY(0, 1, "[b]Year:[/b] ", 1);
-								if (s.GetYear() == EMPTY)
+								if (s.GetYear() == EMPTY_TAG)
 									s.SetDate(wFooter->GetString(4, TraceMpdStatus));
 								else
 									s.SetDate(wFooter->GetString(s.GetYear(), 4, TraceMpdStatus));
@@ -628,7 +623,7 @@ int main(int argc, char *argv[])
 							case 6:
 							{
 								wFooter->WriteXY(0, 1, "[b]Track:[/b] ", 1);
-								if (s.GetTrack() == EMPTY)
+								if (s.GetTrack() == EMPTY_TAG)
 									s.SetTrack(wFooter->GetString(3, TraceMpdStatus));
 								else
 									s.SetTrack(wFooter->GetString(s.GetTrack(), 3, TraceMpdStatus));
@@ -638,7 +633,7 @@ int main(int argc, char *argv[])
 							case 7:
 							{
 								wFooter->WriteXY(0, 1, "[b]Genre:[/b] ", 1);
-								if (s.GetGenre() == EMPTY)
+								if (s.GetGenre() == EMPTY_TAG)
 									s.SetGenre(wFooter->GetString("", TraceMpdStatus));
 								else
 									s.SetGenre(wFooter->GetString(s.GetGenre(), TraceMpdStatus));
@@ -648,7 +643,7 @@ int main(int argc, char *argv[])
 							case 8:
 							{
 								wFooter->WriteXY(0, 1, "[b]Comment:[/b] ", 1);
-								if (s.GetComment() == EMPTY)
+								if (s.GetComment() == EMPTY_TAG)
 									s.SetComment(wFooter->GetString("", TraceMpdStatus));
 								else
 									s.SetComment(wFooter->GetString(s.GetComment(), TraceMpdStatus));
@@ -723,10 +718,7 @@ int main(int argc, char *argv[])
 								break;
 							}
 						}
-						allow_statusbar_unblock = 1;
-						if (block_statusbar_update_delay < 0)
-							block_statusbar_update = 0;
-						
+						UNBLOCK_STATUSBAR_UPDATE
 						break;
 					}
 				}
@@ -840,9 +832,7 @@ int main(int argc, char *argv[])
 				}
 				if (current_screen == csBrowser)
 				{
-					block_statusbar_update = 1;
-					allow_statusbar_unblock = 0;
-					
+					BLOCK_STATUSBAR_UPDATE
 					int id = mBrowser->GetChoice()-1;
 					if (vFileType[id] == MPD_DATA_TYPE_PLAYLIST)
 					{
@@ -866,9 +856,7 @@ int main(int argc, char *argv[])
 						else
 							ShowMessage("Aborted!");
 						curs_set(0);
-						allow_statusbar_unblock = 1;
-						if (block_statusbar_update_delay < 0)
-							block_statusbar_update = 0;
+						UNBLOCK_STATUSBAR_UPDATE
 					}
 				}
 				break;
@@ -891,13 +879,10 @@ int main(int argc, char *argv[])
 			case 'S': // save playlist
 			{
 				string playlist_name;
-				block_statusbar_update = 1;
-				allow_statusbar_unblock = 0;
+				BLOCK_STATUSBAR_UPDATE
 				wFooter->WriteXY(0, 1, "Save playlist as: ", 1);
 				playlist_name = wFooter->GetString("", TraceMpdStatus);
-				allow_statusbar_unblock = 1;
-				if (block_statusbar_update_delay < 0)
-					block_statusbar_update = 0;
+				UNBLOCK_STATUSBAR_UPDATE
 				if (playlist_name.find("/") != string::npos)
 				{
 					ShowMessage("Playlist name cannot contain slashes!");
@@ -950,7 +935,7 @@ int main(int argc, char *argv[])
 					break;
 				
 				block_progressbar_update = 1;
-				block_statusbar_update = 1;
+				BLOCK_STATUSBAR_UPDATE
 				
 				int songpos, in;
 				
@@ -989,7 +974,7 @@ int main(int argc, char *argv[])
 				mpd_player_seek(conn, songpos);
 				
 				block_progressbar_update = 0;
-				block_statusbar_update = 0;
+				UNBLOCK_STATUSBAR_UPDATE
 				
 				break;
 			}
@@ -1029,15 +1014,15 @@ int main(int argc, char *argv[])
 			}
 			case 'E': case 'e': // edit song's tags
 			{
-				int id = mCurrent->GetChoice()-1;
+				int id = wCurrent->GetChoice()-1;
 				switch (current_screen)
 				{
 					case csPlaylist:
 					{
 						if (GetSongInfo(vPlaylist[id]))
 						{
-							mCurrent = mTagEditor;
-							mPrev = mPlaylist;
+							wCurrent = mTagEditor;
+							wPrev = mPlaylist;
 							current_screen = csTagEditor;
 							prev_screen = csPlaylist;
 						}
@@ -1052,8 +1037,8 @@ int main(int argc, char *argv[])
 							Song edited = mpd_database_get_fileinfo(conn, vNameList[id].c_str());
 							if (GetSongInfo(edited))
 							{
-								mCurrent = mTagEditor;
-								mPrev = mBrowser;
+								wCurrent = mTagEditor;
+								wPrev = mBrowser;
 								current_screen = csTagEditor;
 								prev_screen = csBrowser;
 							}
@@ -1068,8 +1053,8 @@ int main(int argc, char *argv[])
 						{
 							if (GetSongInfo(vSearched[id-search_engine_static_option]))
 							{
-								mCurrent = mTagEditor;
-								mPrev = mSearcher;
+								wCurrent = mTagEditor;
+								wPrev = mSearcher;
 								current_screen = csTagEditor;
 								prev_screen = csSearcher;
 							}
@@ -1089,16 +1074,13 @@ int main(int argc, char *argv[])
 					break;
 				int newpos = 0;
 				string position;
-				block_statusbar_update = 1;
-				allow_statusbar_unblock = 0;
+				BLOCK_STATUSBAR_UPDATE
 				wFooter->WriteXY(0, 1, "Position to go (in %): ", 1);
 				position = wFooter->GetString(3, TraceMpdStatus);
 				newpos = atoi(position.c_str());
 				if (newpos > 0 && newpos < 100 && !position.empty())
 					mpd_player_seek(conn, vPlaylist[now_playing].GetTotalLength()*newpos/100.0);
-				allow_statusbar_unblock = 1;
-				if (block_statusbar_update_delay < 0)
-					block_statusbar_update = 0;
+				UNBLOCK_STATUSBAR_UPDATE
 				break;
 			}
 			case 'c': // clear playlist
@@ -1109,20 +1091,20 @@ int main(int argc, char *argv[])
 			}
 			case '1': // help screen
 			{
-				if (mCurrent != sHelp)
+				if (wCurrent != sHelp)
 				{
-					mCurrent->Hide();
-					mCurrent = sHelp;
+					wCurrent->Hide();
+					wCurrent = sHelp;
 					current_screen = csHelp;
 				}
 				break;
 			}
 			case '2': // playlist screen
 			{
-				if (mCurrent != mPlaylist && current_screen != csTagEditor)
+				if (wCurrent != mPlaylist && current_screen != csTagEditor)
 				{
-					mCurrent->Hide();
-					mCurrent = mPlaylist;
+					wCurrent->Hide();
+					wCurrent = mPlaylist;
 					current_screen = csPlaylist;
 				}
 				break;
@@ -1132,10 +1114,10 @@ int main(int argc, char *argv[])
 				if (browsed_dir.empty())
 					browsed_dir = "/";
 				
-				if (mCurrent != mBrowser && current_screen != csTagEditor)
+				if (wCurrent != mBrowser && current_screen != csTagEditor)
 				{
-					mCurrent->Hide();
-					mCurrent = mBrowser;
+					wCurrent->Hide();
+					wCurrent = mBrowser;
 					current_screen = csBrowser;
 				}
 				if (mBrowser->Empty())
@@ -1146,10 +1128,10 @@ int main(int argc, char *argv[])
 			{
 				if (current_screen != csTagEditor && current_screen != csSearcher)
 				{
-					mCurrent->Hide();
+					wCurrent->Hide();
 					if (vSearched.empty())
 						PrepareSearchEngine(searched_song);
-					mCurrent = mSearcher;
+					wCurrent = mSearcher;
 					current_screen = csSearcher;
 				}
 				break;

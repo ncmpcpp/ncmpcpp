@@ -31,12 +31,15 @@ const bool UNICODE = 0;
 # define NCMPCPP_TO_WSTRING(x) (x)
 #endif
 
+#define NCMPCPP_VERSION "0.1"
+
 #define ENTER 10
 #define KEY_SPACE 32
 
 #include "fileref.h"
 #include "tag.h"
-#include <libmpd/libmpd.h>
+#include "libmpd/libmpd.h"
+
 #include <clocale>
 #include <ctime>
 #include <unistd.h>

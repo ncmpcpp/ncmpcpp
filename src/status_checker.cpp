@@ -31,7 +31,7 @@ extern ncmpcpp_config Config;
 
 extern Menu *mPlaylist;
 extern Menu *mBrowser;
-extern Menu *mCurrent;
+extern Menu *wCurrent;
 extern Menu *mSearcher;
 
 extern Window *wHeader;
@@ -50,8 +50,6 @@ extern int now_playing;
 extern int playing_song_scroll_begin;
 
 extern int block_statusbar_update_delay;
-
-extern long long current_playlist_id;
 
 extern string browsed_dir;
 
@@ -72,6 +70,8 @@ extern bool allow_statusbar_unblock;
 extern bool block_progressbar_update;
 extern bool block_statusbar_update;
 extern bool block_playlist_update;
+
+int old_playing;
 
 void TraceMpdStatus()
 {
@@ -119,6 +119,12 @@ void NcmpcppStatusChanged(MpdObj *conn, ChangedStatusType what)
 	wFooter->Bold(1);
 	wFooter->GetXY(sx, sy);
 	
+	if (now_playing != mpd_player_get_current_song_pos(conn))
+	{
+		old_playing = now_playing;
+		now_playing = mpd_player_get_current_song_pos(conn);
+	}
+	
 	if (what & MPD_CST_PLAYLIST)
 	{
 		if (!block_playlist_update)
@@ -143,18 +149,14 @@ void NcmpcppStatusChanged(MpdObj *conn, ChangedStatusType what)
 					{
 						vPlaylist.push_back(playlist->song);
 						Song &s = vPlaylist.back();
-						if (mpd_player_get_current_song_pos(conn) != s.GetPosition())
+						if (now_playing != s.GetPosition())
 							mPlaylist->AddOption(DisplaySong(s));
 						else
-						{
-							now_playing = mpd_player_get_current_song_pos(conn);
 							mPlaylist->AddBoldOption(DisplaySong(s));
-						}
 					}
 				}
 				mpd_data_free(playlist);
 				
-				current_playlist_id = mpd_playlist_get_playlist_id(conn);
 				if (current_screen == csPlaylist)
 				{
 					if (!playlist_length || mPlaylist->MaxChoice() < mPlaylist->GetHeight())
@@ -166,8 +168,7 @@ void NcmpcppStatusChanged(MpdObj *conn, ChangedStatusType what)
 			{
 				int i = 1;
 				
-				mPlaylist->BoldOption(now_playing+1, 0);
-				now_playing = mpd_player_get_current_song_pos(conn);
+				mPlaylist->BoldOption(old_playing+1, 0);
 				mPlaylist->BoldOption(now_playing+1, 1);
 				
 				playlist = mpd_playlist_get_changes(conn, -1);
@@ -185,8 +186,6 @@ void NcmpcppStatusChanged(MpdObj *conn, ChangedStatusType what)
 					playlist = mpd_data_get_next(playlist);
 				}
 				mpd_data_free(playlist);
-				if (current_screen == csPlaylist)
-					mPlaylist->Refresh();
 			}
 		}
 		
@@ -207,8 +206,6 @@ void NcmpcppStatusChanged(MpdObj *conn, ChangedStatusType what)
 					bold = 0;
 				}
 			}
-			if (current_screen == csBrowser)
-				mBrowser->Refresh();
 		}
 		if (!vSearched.empty())
 		{
@@ -222,21 +219,47 @@ void NcmpcppStatusChanged(MpdObj *conn, ChangedStatusType what)
 					mSearcher->BoldOption(i+1, bold);
 					bold = 0;
 			}
-			if (current_screen == csSearcher)
-				mSearcher->Refresh();
 		}
 	}
 	if(what & MPD_CST_DATABASE)
-	{
 		GetDirectory(browsed_dir);
-		mCurrent->Refresh();
+	if (what & MPD_CST_STATE)
+	{
+		int mpd_state = mpd_player_get_state(conn);
+		switch (mpd_state)
+		{
+			case MPD_PLAYER_PLAY:
+			{
+				Song &s = vPlaylist[now_playing];
+				player_state = "Playing: ";
+				mPlaylist->BoldOption(now_playing+1, 1);
+				break;
+			}
+			case MPD_PLAYER_PAUSE:
+			{
+				player_state = "[Paused] ";
+				break;
+			}
+			case MPD_PLAYER_STOP:
+			{
+				WindowTitle("ncmpc++ ver. "NCMPCPP_VERSION);
+				wFooter->SetColor(Config.progressbar_color);
+				mvwhline(wFooter->RawWin(), 0, 0, 0, wFooter->GetWidth());
+				wFooter->SetColor(Config.statusbar_color);
+				mPlaylist->BoldOption(old_playing+1, 0);
+				now_playing = -1;
+				player_state.clear();
+				break;
+			}
+		}
+		if (!block_statusbar_update)
+			wFooter->WriteXY(0, 1, player_state, player_state.empty());
 	}
 	if ((what & MPD_CST_ELAPSED_TIME))
 	{
-		mpd_Song *song = mpd_playlist_get_current_song(conn);
-		if (song)
+		Song &s = vPlaylist[now_playing];
+		if (!player_state.empty())
 		{
-			Song s = song;
 			WindowTitle(DisplaySong(s, Config.song_window_title_format));
 			
 			int elapsed = mpd_status_get_elapsed_song_time(conn);
@@ -246,7 +269,7 @@ void NcmpcppStatusChanged(MpdObj *conn, ChangedStatusType what)
 				string tracklength = " [" + ShowTime(elapsed) + "/" + s.GetLength() + "]";
 				ncmpcpp_string_t playing_song = NCMPCPP_TO_WSTRING(OmitBBCodes(DisplaySong(s, Config.song_status_format)));
 				
-				int max_length_without_scroll = wFooter->GetWidth()-9-tracklength.length();
+				int max_length_without_scroll = wFooter->GetWidth()-player_state.length()-tracklength.length();
 				
 				wFooter->WriteXY(0, 1, player_state);
 				wFooter->Bold(0);
@@ -257,17 +280,16 @@ void NcmpcppStatusChanged(MpdObj *conn, ChangedStatusType what)
 #					else
 					playing_song += " ** ";
 #					endif
-					
-					const int scrollsize = max_length_without_scroll+4;
+					const int scrollsize = max_length_without_scroll+playing_song.length();
 					ncmpcpp_string_t part = playing_song.substr(playing_song_scroll_begin++, scrollsize);
 					if (part.length() < scrollsize)
 						part += playing_song.substr(0, scrollsize-part.length());
-					wFooter->WriteXY(9, 1, part);
+					wFooter->WriteXY(player_state.length(), 1, part);
 					if (playing_song_scroll_begin >= playing_song.length())
 						playing_song_scroll_begin = 0;
 				}
 				else
-					wFooter->WriteXY(9, 1, OmitBBCodes(DisplaySong(s, Config.song_status_format)), 1);
+					wFooter->WriteXY(player_state.length(), 1, OmitBBCodes(DisplaySong(s, Config.song_status_format)), 1);
 				wFooter->Bold(1);
 				
 				wFooter->WriteXY(wFooter->GetWidth()-tracklength.length(), 1, tracklength);
@@ -283,48 +305,9 @@ void NcmpcppStatusChanged(MpdObj *conn, ChangedStatusType what)
 				wFooter->SetColor(Config.statusbar_color);
 			}
 		}
-	}
-	if (what & MPD_CST_STATE)
-	{
-		string state;
-		int mpd_state = mpd_player_get_state(conn);
-		switch (mpd_state)
+		else
 		{
-			case MPD_PLAYER_PLAY:
-			{
-				Song &s = vPlaylist[mpd_player_get_current_song_pos(conn)];
-				now_playing = s.GetPosition();
-				player_state = "Playing: ";
-				mPlaylist->BoldOption(now_playing+1, 1);
-				if (current_screen == csPlaylist)
-					mPlaylist->Refresh();
-				break;
-			}
-			case MPD_PLAYER_PAUSE:
-			{
-				player_state = "[Paused] ";
-				break;
-			}
-			case MPD_PLAYER_STOP:
-			{
-				WindowTitle("ncmpc++ ver. 0.1");
-				wFooter->SetColor(Config.progressbar_color);
-				mvwhline(wFooter->RawWin(), 0, 0, 0, wFooter->GetWidth());
-				wFooter->SetColor(Config.statusbar_color);
-				now_playing = -1;
-				player_state.clear();
-				for (int i = 1; i <= mPlaylist->MaxChoice(); i++)
-					mPlaylist->BoldOption(i, 0);
-				if (current_screen == csPlaylist)
-					mPlaylist->Refresh();
-				break;
-			}
-		}
-		if (!block_statusbar_update || mpd_state == MPD_PLAYER_STOP)
-		{
-			if (!player_state.empty())
-				wFooter->WriteXY(0, 1, player_state);
-			else
+			if (!block_statusbar_update)
 				wFooter->WriteXY(0, 1, "", 1);
 		}
 	}
@@ -374,25 +357,14 @@ void NcmpcppStatusChanged(MpdObj *conn, ChangedStatusType what)
 		if (!vPlaylist.empty() && id >= 0)
 		{
 			Song &s = vPlaylist[id];
-			/*if (s.GetArtist() != UNKNOWN_ARTIST || s.GetTitle() != UNKNOWN_TITLE)
-			printf("\033]0;%s - %s\7",OmitBBCodes(s.GetArtist()).c_str(), OmitBBCodes(s.GetTitle()).c_str());
-			else
-			printf("\033]0;%s\7",s.GetShortFilename().c_str());*/
-			//wHeader->WriteXY(0, 0, "Song: " + (string)song->artist + " - " + (string)song->title);
 			if (!mPlaylist->Empty())
 			{
-				if (now_playing >= 0)
-					mPlaylist->BoldOption(now_playing+1, 0);
-				mPlaylist->BoldOption(s.GetPosition()+1, 1);
-				now_playing = s.GetPosition();
-				if (current_screen == csPlaylist)
-					mPlaylist->Display();
+				if (old_playing >= 0)
+					mPlaylist->BoldOption(old_playing+1, 0);
+				mPlaylist->BoldOption(now_playing+1, 1);
 			}
 			if (!mpd_status_get_elapsed_song_time(conn))
-			{
 				mvwhline(wFooter->RawWin(), 0, 0, 0, wFooter->GetWidth());
-				wFooter->Refresh();
-			}
 		}
 		playing_song_scroll_begin = 0;
 	}
