@@ -381,7 +381,7 @@ void Menu::Highlight(int which)
 		itsHighlight = which-1;
 	
 	if (which > itsHeight)
-		itsBeginning = which-itsHeight/2;
+		itsBeginning = itsHighlight-itsHeight/2;
 	else
 		itsBeginning = 0;
 }

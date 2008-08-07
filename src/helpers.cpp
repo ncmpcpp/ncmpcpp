@@ -90,6 +90,24 @@ string DisplaySong(const Song &s, const string &song_template)
 				if (!tags_present)
 					it++;
 				else
+					while (*++it != '}');
+			}
+		}
+		
+		if (*it == '}')
+		{
+			if (!tags_present)
+				result = result.substr(0, result.length()-i);
+			
+			it++;
+			link_tags = 0;
+			i = 0;
+			
+			if (*it == '|' && *(it+1) == '{')
+			{
+				if (!tags_present)
+					it++;
+				else
 					while (*it++ != '}');
 			}
 		}
@@ -119,7 +137,10 @@ string DisplaySong(const Song &s, const string &song_template)
 					if (link_tags)
 					{
 						if (s.GetTotalLength() > 0)
+						{
 							result += s.GetLength();
+							i += s.GetLength().length();
+						}
 						else
 							tags_present = 0;
 					}
@@ -130,11 +151,13 @@ string DisplaySong(const Song &s, const string &song_template)
 				case 'F':
 				{
 					result += s.GetFile();
+					i += s.GetFile().length();
 					break;
 				}
 				case 'f':
 				{
 					result += s.GetShortFilename();
+					i += s.GetShortFilename().length();
 					break;
 				}
 				case 'a':
@@ -142,7 +165,10 @@ string DisplaySong(const Song &s, const string &song_template)
 					if (link_tags)
 					{
 						if (s.GetArtist() != UNKNOWN_ARTIST)
+						{
 							result += s.GetArtist();
+							i += s.GetArtist().length();
+						}
 						else
 							tags_present = 0;
 					}
@@ -155,7 +181,10 @@ string DisplaySong(const Song &s, const string &song_template)
 					if (link_tags)
 					{
 						if (s.GetAlbum() != UNKNOWN_ALBUM)
+						{
 							result += s.GetAlbum();
+							i += s.GetAlbum().length();
+						}
 						else
 							tags_present = 0;
 					}
@@ -168,7 +197,10 @@ string DisplaySong(const Song &s, const string &song_template)
 					if (link_tags)
 					{
 						if (s.GetYear() != EMPTY_TAG)
+						{
 							result += s.GetYear();
+							i += s.GetYear().length();
+						}
 						else
 							tags_present = 0;
 					}
@@ -181,7 +213,10 @@ string DisplaySong(const Song &s, const string &song_template)
 					if (link_tags)
 					{
 						if (s.GetTrack() != EMPTY_TAG)
+						{
 							result += s.GetTrack();
+							i += s.GetTrack().length();
+						}
 						else
 							tags_present = 0;
 					}
@@ -194,7 +229,10 @@ string DisplaySong(const Song &s, const string &song_template)
 					if (link_tags)
 					{
 						if (s.GetGenre() != EMPTY_TAG)
+						{
 							result += s.GetGenre();
+							i += s.GetGenre().length();
+						}
 						else
 							tags_present = 0;
 					}
@@ -207,7 +245,10 @@ string DisplaySong(const Song &s, const string &song_template)
 					if (link_tags)
 					{
 						if (s.GetComment() != EMPTY_TAG)
+						{
 							result += s.GetComment();
+							i += s.GetComment().length();
+						}
 						else
 							tags_present = 0;
 					}
@@ -220,7 +261,10 @@ string DisplaySong(const Song &s, const string &song_template)
 					if (link_tags)
 					{
 						if (s.GetTitle() != UNKNOWN_TITLE)
+						{
 							result += s.GetTitle();
+							i += s.GetTitle().length();
+						}
 						else
 							tags_present = 0;
 					}
@@ -382,9 +426,12 @@ void ShowMessage(const string &message, int delay)
 	{
 		block_delay = time(NULL);
 		block_statusbar_update_delay = delay;
-		block_statusbar_update = 1;
+		if (Config.statusbar_visibility)
+			block_statusbar_update = 1;
+		else
+			block_progressbar_update = 1;
 		wFooter->Bold(0);
-		wFooter->WriteXY(0, 1, message, 1);
+		wFooter->WriteXY(0, Config.statusbar_visibility, message, 1);
 		wFooter->Bold(1);
 	}
 }

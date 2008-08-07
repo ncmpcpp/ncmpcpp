@@ -27,13 +27,21 @@
 #define FOR_EACH_MPD_DATA(x) for (; (x); (x) = mpd_data_get_next(x))
 
 #define BLOCK_STATUSBAR_UPDATE \
-			block_statusbar_update = 1; \
+			if (Config.statusbar_visibility) \
+				block_statusbar_update = 1; \
+			else \
+				block_progressbar_update = 1; \
 			allow_statusbar_unblock = 0
 
 #define UNBLOCK_STATUSBAR_UPDATE \
 			allow_statusbar_unblock = 1; \
 			if (block_statusbar_update_delay < 0) \
-				block_statusbar_update = 0
+			{ \
+				if (Config.statusbar_visibility) \
+					block_statusbar_update = 0; \
+				else \
+					block_progressbar_update = 0; \
+			}
 
 #ifdef HAVE_TAGLIB_H
  const string tag_screen_keydesc = "\tE e       : Edit song's tags\n";
@@ -137,12 +145,23 @@ int main(int argc, char *argv[])
 	curs_set(0);
 	EnableColors();
 	
-	mPlaylist = new Menu(0, 2, COLS, LINES-4, "", Config.main_color, brNone);
+	int main_start_y = 2;
+	int main_height = LINES-4;
+	
+	if (!Config.header_visibility)
+	{
+		main_start_y -= 2;
+		main_height += 2;
+	}
+	if (!Config.statusbar_visibility)
+		main_height++;
+	
+	mPlaylist = new Menu(0, main_start_y, COLS, main_height, "", Config.main_color, brNone);
 	mBrowser = new Menu(mPlaylist->EmptyClone());
 	mTagEditor = new Menu(mPlaylist->EmptyClone());
 	mSearcher = new Menu(mPlaylist->EmptyClone());
 	
-	sHelp = new Scrollpad(0, 2, COLS, LINES-4, "", Config.main_color, brNone);
+	sHelp = new Scrollpad(0, main_start_y, COLS, main_height, "", Config.main_color, brNone);
 	
 	sHelp->Add("   [b]Keys - Movement\n -----------------------------------------[/b]\n");
 	sHelp->Add("\tUp        : Move Cursor up\n");
@@ -201,21 +220,20 @@ int main(int argc, char *argv[])
 	sHelp->Add("   [b]Keys - Tag Editor\n -----------------------------------------[/b]\n");
 	sHelp->Add("\tEnter     : Change option\n");
 	
-	wHeader = new Window(0, 0, COLS, 2, "", Config.header_color, brNone);
-	wFooter = new Window(0, LINES-2, COLS, 2, "", Config.statusbar_color, brNone);
+	if (Config.header_visibility)
+	{
+		wHeader = new Window(0, 0, COLS, 2, "", Config.header_color, brNone);
+		wHeader->Display();
+	}
 	
-	wHeader->Display();
+	int footer_start_y = LINES-(Config.statusbar_visibility ? 2 : 1);
+	int footer_height = Config.statusbar_visibility ? 2 : 1;
+	
+	wFooter = new Window(0, footer_start_y, COLS, footer_height, "", Config.statusbar_color, brNone);
 	wFooter->Display();
 	
 	mpd_signal_connect_error(conn, (ErrorCallback)NcmpcppErrorCallback, NULL);
 	mpd_signal_connect_status_changed(conn, (StatusChangedCallback)NcmpcppStatusChanged, NULL);
-	
-	mvwhline(wHeader->RawWin(), 1, 0, 0, wHeader->GetWidth());
-	wHeader->Refresh();
-	wFooter->SetColor(Config.progressbar_color);
-	mvwhline(wFooter->RawWin(), 0, 0, 0, wFooter->GetWidth());
-	wFooter->SetColor(Config.statusbar_color);
-	wFooter->Refresh();
 	
 	wCurrent = mPlaylist;
 	current_screen = csPlaylist;
@@ -236,69 +254,72 @@ int main(int argc, char *argv[])
 	{
 		TraceMpdStatus();
 		
-		string title;
-		int max_allowed_title_length = wHeader->GetWidth()-volume_state.length();
-		
 		messages_allowed = 1;
 		
-		switch (current_screen)
+		if (Config.header_visibility)
 		{
-			case csHelp:
-				title = "Help";
-				break;
-			case csPlaylist:
-				title = "Playlist";
-				break;
-			case csBrowser:
-				title = "Browse: ";
-				break;
-			case csTagEditor:
-#				ifdef HAVE_TAGLIB_H
-				title = "Tag editor";
-#				else
-				title = "Tag info";
-#				endif
-				break;
-			case csSearcher:
-				title = "Search engine";
-		}
-		
-		if (title_allowed)
-		{
-			wHeader->Bold(1);
-			wHeader->WriteXY(0, 0, title, 1);
-			wHeader->Bold(0);
-		}
-		else
-			wHeader->WriteXY(0, 0, "[b]1:[/b]Help  [b]2:[/b]Playlist  [b]3:[/b]Browse  [b]4:[/b]Search", 1);
-		
-		wHeader->SetColor(Config.volume_color);
-		wHeader->WriteXY(max_allowed_title_length, 0, volume_state);
-		wHeader->SetColor(Config.header_color);
-		
-		if (current_screen == csBrowser)
-		{
-			int max_length_without_scroll = wHeader->GetWidth()-volume_state.length()-title.length();
-			ncmpcpp_string_t wbrowseddir = NCMPCPP_TO_WSTRING(browsed_dir);
-			wHeader->Bold(1);
-			if (browsed_dir.length() > max_length_without_scroll)
+			string title;
+			int max_allowed_title_length = wHeader->GetWidth()-volume_state.length();
+			
+			switch (current_screen)
 			{
-#				ifdef UTF8_ENABLED
-				wbrowseddir += L" ** ";
+				case csHelp:
+					title = "Help";
+					break;
+				case csPlaylist:
+					title = "Playlist";
+					break;
+				case csBrowser:
+					title = "Browse: ";
+					break;
+				case csTagEditor:
+#				ifdef HAVE_TAGLIB_H
+					title = "Tag editor";
 #				else
-				wbrowseddir += " ** ";
+					title = "Tag info";
 #				endif
-				const int scrollsize = max_length_without_scroll;
-				ncmpcpp_string_t part = wbrowseddir.substr(browsed_dir_scroll_begin++, scrollsize);
-				if (part.length() < scrollsize)
-					part += wbrowseddir.substr(0, scrollsize-part.length());
-				wHeader->WriteXY(8, 0, part);
-				if (browsed_dir_scroll_begin >= wbrowseddir.length())
-					browsed_dir_scroll_begin = 0;
+					break;
+				case csSearcher:
+					title = "Search engine";
+			}
+		
+			if (title_allowed)
+			{
+				wHeader->Bold(1);
+				wHeader->WriteXY(0, 0, title, 1);
+				wHeader->Bold(0);
 			}
 			else
-				wHeader->WriteXY(8, 0, browsed_dir);
-			wHeader->Bold(0);
+				wHeader->WriteXY(0, 0, "[b]1:[/b]Help  [b]2:[/b]Playlist  [b]3:[/b]Browse  [b]4:[/b]Search", 1);
+		
+			wHeader->SetColor(Config.volume_color);
+			wHeader->WriteXY(max_allowed_title_length, 0, volume_state);
+			wHeader->SetColor(Config.header_color);
+		
+			if (current_screen == csBrowser)
+			{
+				int max_length_without_scroll = wHeader->GetWidth()-volume_state.length()-title.length();
+				ncmpcpp_string_t wbrowseddir = NCMPCPP_TO_WSTRING(browsed_dir);
+				wHeader->Bold(1);
+				if (browsed_dir.length() > max_length_without_scroll)
+				{
+#					ifdef UTF8_ENABLED
+					wbrowseddir += L" ** ";
+#					else
+					wbrowseddir += " ** ";
+#					endif
+					const int scrollsize = max_length_without_scroll;
+					ncmpcpp_string_t part = wbrowseddir.substr(browsed_dir_scroll_begin++, scrollsize);
+					if (part.length() < scrollsize)
+						part += wbrowseddir.substr(0, scrollsize-part.length());
+					wHeader->WriteXY(8, 0, part);
+					if (browsed_dir_scroll_begin >= wbrowseddir.length())
+						browsed_dir_scroll_begin = 0;
+				}
+				else
+					wHeader->WriteXY(8, 0, browsed_dir);
+				wHeader->Bold(0);
+			}
 		}
 		
 		wCurrent->Refresh();
@@ -346,15 +367,25 @@ int main(int argc, char *argv[])
 					return 1;
 				}
 				
-				sHelp->Resize(COLS, LINES-4);
-				sHelp->Timeout(ncmpcpp_window_timeout);
-				mPlaylist->Resize(COLS, LINES-4);
-				mBrowser->Resize(COLS, LINES-4);
-				mTagEditor->Resize(COLS, LINES-4);
-				mSearcher->Resize(COLS, LINES-4);
+				main_height = LINES-4;
+	
+				if (!Config.header_visibility)
+					main_height += 2;
+				if (!Config.statusbar_visibility)
+					main_height++;
 				
-				wHeader->Resize(COLS, wHeader->GetHeight());
-				wFooter->MoveTo(0, LINES-2);
+				sHelp->Resize(COLS, main_height);
+				sHelp->Timeout(ncmpcpp_window_timeout);
+				mPlaylist->Resize(COLS, main_height);
+				mBrowser->Resize(COLS, main_height);
+				mTagEditor->Resize(COLS, main_height);
+				mSearcher->Resize(COLS, main_height);
+				
+				if (Config.header_visibility)
+					wHeader->Resize(COLS, wHeader->GetHeight());
+				
+				footer_start_y = LINES-(Config.statusbar_visibility ? 2 : 1);
+				wFooter->MoveTo(0, footer_start_y);
 				wFooter->Resize(COLS, wFooter->GetHeight());
 				
 				if (wCurrent != sHelp)

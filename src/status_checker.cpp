@@ -93,7 +93,12 @@ void TraceMpdStatus()
 	if (!block_statusbar_update_delay)
 	{
 		block_statusbar_update_delay = -1;
-		block_statusbar_update = !allow_statusbar_unblock;
+		
+		if (Config.statusbar_visibility)
+			block_statusbar_update = !allow_statusbar_unblock;
+		else
+			block_progressbar_update = !allow_statusbar_unblock;
+		
 		switch (mpd_player_get_state(conn))
 		{
 			case MPD_PLAYER_STOP:
@@ -253,7 +258,7 @@ void NcmpcppStatusChanged(MpdObj *conn, ChangedStatusType what)
 				break;
 			}
 		}
-		if (!block_statusbar_update)
+		if (!block_statusbar_update && Config.statusbar_visibility)
 			wFooter->WriteXY(0, 1, player_state, player_state.empty());
 	}
 	if ((what & MPD_CST_ELAPSED_TIME))
@@ -265,7 +270,7 @@ void NcmpcppStatusChanged(MpdObj *conn, ChangedStatusType what)
 			
 			int elapsed = mpd_status_get_elapsed_song_time(conn);
 			
-			if (!block_statusbar_update)
+			if (!block_statusbar_update && Config.statusbar_visibility)
 			{
 				string tracklength;
 				if (s.GetTotalLength() > 0)
@@ -312,7 +317,7 @@ void NcmpcppStatusChanged(MpdObj *conn, ChangedStatusType what)
 		}
 		else
 		{
-			if (!block_statusbar_update)
+			if (!block_statusbar_update && Config.statusbar_visibility)
 				wFooter->WriteXY(0, 1, "", 1);
 		}
 	}
@@ -342,7 +347,7 @@ void NcmpcppStatusChanged(MpdObj *conn, ChangedStatusType what)
 		ShowMessage(mpd_db_updating.empty() ? "Database update finished!" : "Database update started!");
 		header_update_status = 1;
 	}
-	if (header_update_status)
+	if (header_update_status && Config.header_visibility)
 	{
 		switch_state = mpd_repeat + mpd_random + mpd_crossfade + mpd_db_updating;
 		
@@ -381,7 +386,7 @@ void NcmpcppStatusChanged(MpdObj *conn, ChangedStatusType what)
 		}
 		playing_song_scroll_begin = 0;
 	}
-	if (what & MPD_CST_VOLUME)
+	if ((what & MPD_CST_VOLUME) && Config.header_visibility)
 	{
 		int vol = mpd_status_get_volume(conn);
 		volume_state = " Volume: " + IntoStr(vol) + "%";

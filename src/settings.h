@@ -44,6 +44,8 @@ struct ncmpcpp_config
 	COLOR statusbar_color;
 	
 	bool set_window_title;
+	bool header_visibility;
+	bool statusbar_visibility;
 	
 	int mpd_connection_timeout;
 	int crossfade_time;

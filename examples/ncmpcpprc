@@ -61,11 +61,15 @@
 #
 #song_status_format = "(%l) {%a - }{%t}|{%f}"
 #
-##### window title settings #####
+#song_window_title_format = "{%a - }{%t}|{%f}"
+#
+##### interface settings #####
+#
+#header_visibility = "yes"
+#
+#statusbar_visibility = "yes"
 #
 #enable_window_title = "yes"
-#
-#song_window_title_format = "{%a - }{%t}|{%f}"
 #
 ##### colors definitions #####
 #

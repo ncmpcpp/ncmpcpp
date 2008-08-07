@@ -38,6 +38,8 @@ void DefaultConfiguration(ncmpcpp_config &conf)
 	conf.main_color = clYellow;
 	conf.progressbar_color = clDefault;
 	conf.statusbar_color = clDefault;
+	conf.header_visibility = true;
+	conf.statusbar_visibility = true;
 	conf.set_window_title = true;
 	conf.mpd_connection_timeout = 5;
 	conf.crossfade_time = 5;
@@ -161,8 +163,11 @@ void ReadConfiguration(ncmpcpp_config &conf)
 				if (!v.empty())
 					conf.song_status_format = v;
 			
-			if (it->find("enable_window_title") != string::npos)
-				conf.set_window_title = v == "yes";
+			if (it->find("header_visibility") != string::npos)
+				conf.header_visibility = v == "yes";
+			
+			if (it->find("statusbar_visibility") != string::npos)
+				conf.statusbar_visibility = v == "yes";
 			
 			if (it->find("song_window_title_format") != string::npos)
 				if (!v.empty())

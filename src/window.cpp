@@ -221,8 +221,8 @@ void Window::Clear()
 
 void Window::Hide(char x) const
 {
-	for (int i = GetStartY(); i <= GetHeight()+1; i++)
-		mvhline(i, GetStartX(), x, GetWidth());
+	for (int i = 0; i < GetHeight(); i++)
+		mvhline(i+GetStartY(), GetStartX(), x, GetWidth());
 	refresh();
 }
 
