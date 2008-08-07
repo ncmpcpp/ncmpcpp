@@ -116,7 +116,15 @@ string DisplaySong(const Song &s, const string &song_template)
 			{
 				case 'l':
 				{
-					result += s.GetLength();
+					if (link_tags)
+					{
+						if (s.GetTotalLength() > 0)
+							result += s.GetLength();
+						else
+							tags_present = 0;
+					}
+					else
+						result += s.GetLength();
 					break;
 				}
 				case 'F':
@@ -388,23 +396,26 @@ bool GetSongInfo(Song &s)
 	
 	string path_to_file = Config.mpd_music_dir + "/" + s.GetFile();
 	
+#	ifdef HAVE_TAGLIB_H
 	TagLib::FileRef f(path_to_file.c_str());
-	
 	if (f.isNull())
 		return false;
-	
 	s.SetComment(f.tag()->comment().to8Bit(UNICODE));
+#	endif
 	
 	mTagEditor->AddStaticOption("[b][white]Song name: [green][/b]" + s.GetShortFilename());
 	mTagEditor->AddStaticOption("[b][white]Location in DB: [green][/b]" + s.GetDirectory());
 	mTagEditor->AddStaticOption("");
-	mTagEditor->AddStaticOption("[b][white]Length: [green][/b]" + s.GetLength());
+	mTagEditor->AddStaticOption("[b][white]Length: [green][/b]" + s.GetLength() + "[/green]");
+#	ifdef HAVE_TAGLIB_H
 	mTagEditor->AddStaticOption("[b][white]Bitrate: [green][/b]" + IntoStr(f.audioProperties()->bitrate()) + " kbps");
 	mTagEditor->AddStaticOption("[b][white]Sample rate: [green][/b]" + IntoStr(f.audioProperties()->sampleRate()) + " Hz");
 	mTagEditor->AddStaticOption("[b][white]Channels: [green][/b]" + (string)(f.audioProperties()->channels() == 1 ? "Mono" : "Stereo") + "[/green]");
+#	endif
 	
 	mTagEditor->AddSeparator();
 	
+#	ifdef HAVE_TAGLIB_H
 	mTagEditor->AddOption("[b]Title:[/b] " + s.GetTitle());
 	mTagEditor->AddOption("[b]Artist:[/b] " + s.GetArtist());
 	mTagEditor->AddOption("[b]Album:[/b] " + s.GetAlbum());
@@ -415,7 +426,18 @@ bool GetSongInfo(Song &s)
 	mTagEditor->AddSeparator();
 	mTagEditor->AddOption("Save");
 	mTagEditor->AddOption("Cancel");
-	
+#	else
+	mTagEditor->AddStaticOption("[b]Title:[/b] " + s.GetTitle());
+	mTagEditor->AddStaticOption("[b]Artist:[/b] " + s.GetArtist());
+	mTagEditor->AddStaticOption("[b]Album:[/b] " + s.GetAlbum());
+	mTagEditor->AddStaticOption("[b]Year:[/b] " + s.GetYear());
+	mTagEditor->AddStaticOption("[b]Track:[/b] " + s.GetTrack());
+	mTagEditor->AddStaticOption("[b]Genre:[/b] " + s.GetGenre());
+	mTagEditor->AddStaticOption("[b]Comment:[/b] " + s.GetComment());
+	mTagEditor->AddSeparator();
+	mTagEditor->AddOption("Back");
+#	endif
+
 	edited_song = s;
 	return true;
 }

@@ -36,6 +36,9 @@ struct ncmpcpp_config
 	
 	COLOR empty_tags_color;
 	COLOR header_color;
+	COLOR volume_color;
+	COLOR state_line_color;
+	COLOR state_flags_color;
 	COLOR main_color;
 	COLOR progressbar_color;
 	COLOR statusbar_color;

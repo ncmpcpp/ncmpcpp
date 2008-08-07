@@ -116,6 +116,7 @@ void NcmpcppStatusChanged(MpdObj *conn, ChangedStatusType what)
 {
 	int sx, sy;
 	wFooter->DisableBB();
+	wFooter->AutoRefresh(0);
 	wFooter->Bold(1);
 	wFooter->GetXY(sx, sy);
 	
@@ -242,7 +243,7 @@ void NcmpcppStatusChanged(MpdObj *conn, ChangedStatusType what)
 			}
 			case MPD_PLAYER_STOP:
 			{
-				WindowTitle("ncmpc++ ver. "NCMPCPP_VERSION);
+				WindowTitle("ncmpc++ ver. "VERSION);
 				wFooter->SetColor(Config.progressbar_color);
 				mvwhline(wFooter->RawWin(), 0, 0, 0, wFooter->GetWidth());
 				wFooter->SetColor(Config.statusbar_color);
@@ -266,7 +267,11 @@ void NcmpcppStatusChanged(MpdObj *conn, ChangedStatusType what)
 			
 			if (!block_statusbar_update)
 			{
-				string tracklength = " [" + ShowTime(elapsed) + "/" + s.GetLength() + "]";
+				string tracklength;
+				if (s.GetTotalLength() > 0)
+					tracklength = " [" + ShowTime(elapsed) + "/" + s.GetLength() + "]";
+				else
+					tracklength = " [" + ShowTime(elapsed) + "]";
 				ncmpcpp_string_t playing_song = NCMPCPP_TO_WSTRING(OmitBBCodes(DisplaySong(s, Config.song_status_format)));
 				
 				int max_length_without_scroll = wFooter->GetWidth()-player_state.length()-tracklength.length();
@@ -343,10 +348,18 @@ void NcmpcppStatusChanged(MpdObj *conn, ChangedStatusType what)
 		
 		wHeader->DisableBB();
 		wHeader->Bold(1);
+		wHeader->SetColor(Config.state_line_color);
 		mvwhline(wHeader->RawWin(), 1, 0, 0, wHeader->GetWidth());
 		if (!switch_state.empty())
-			wHeader->WriteXY(wHeader->GetWidth()-switch_state.length()-3, 1, "[" + switch_state + "]");
+		{
+			wHeader->WriteXY(wHeader->GetWidth()-switch_state.length()-3, 1, "[");
+			wHeader->SetColor(Config.state_flags_color);
+			wHeader->WriteXY(wHeader->GetWidth()-switch_state.length()-2, 1, switch_state);
+			wHeader->SetColor(Config.state_line_color);
+			wHeader->WriteXY(wHeader->GetWidth()-2, 1, "]");
+		}
 		wHeader->Refresh();
+		wHeader->SetColor(Config.header_color);
 		wHeader->Bold(0);
 		wHeader->EnableBB();
 		header_update_status = 0;
@@ -372,11 +385,14 @@ void NcmpcppStatusChanged(MpdObj *conn, ChangedStatusType what)
 	{
 		int vol = mpd_status_get_volume(conn);
 		volume_state = " Volume: " + IntoStr(vol) + "%";
+		wHeader->SetColor(Config.volume_color);
 		wHeader->WriteXY(wHeader->GetWidth()-volume_state.length(), 0, volume_state);
+		wHeader->SetColor(Config.header_color);
 	}
 	wFooter->Bold(0);
 	wFooter->GotoXY(sx, sy);
 	wFooter->Refresh();
+	wFooter->AutoRefresh(1);
 	wFooter->EnableBB();
 }
 

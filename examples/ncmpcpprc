@@ -1,4 +1,9 @@
-### ncmpc++ config file ###
+###########################################################
+## this is example configuration file, copy it to your   ##
+## home folder as .ncmpcpprc and set up your preferences ##
+###########################################################
+#
+##### connection settings #####
 #
 ## set it in order to make tag editor work
 #
@@ -8,6 +13,8 @@
 #
 #mpd_crossfade_time = "5"
 #
+##### delays #####
+#
 ## delay after playlist highlighting will be disabled (0 = don't disable)
 #
 #playlist_disable_highlight_delay = "5"
@@ -16,6 +23,8 @@
 #
 #message_delay_time = "4"
 #
+##### song format #####
+##
 ## for song format you can use:
 ##
 ## %l - length
@@ -52,21 +61,27 @@
 #
 #song_status_format = "(%l) {%a - }{%t}|{%f}"
 #
-## window title settings
+##### window title settings #####
 #
 #enable_window_title = "yes"
 #
 #song_window_title_format = "{%a - }{%t}|{%f}"
 #
-## colors definitions
+##### colors definitions #####
 #
 #empty_tag_color = "cyan"
 #
 #header_window_color = "default"
+#
+#volume_color = "default"
+#
+#state_line_color = "default"
+#
+#state_flags_color = "default"
 #
 #main_window_color = "yellow"
 #
 #progressbar_color = "default"
 #
 #statusbar_color = "default"
-
+#

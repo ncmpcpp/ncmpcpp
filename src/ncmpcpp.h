@@ -21,6 +21,10 @@
 #ifndef HAVE_NCMPCPP_H
 #define HAVE_NCMPCPP_H
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #ifdef UTF8_ENABLED
 const bool UNICODE = 1;
 # define ncmpcpp_string_t wstring
@@ -31,13 +35,14 @@ const bool UNICODE = 0;
 # define NCMPCPP_TO_WSTRING(x) (x)
 #endif
 
-#define NCMPCPP_VERSION "0.1"
-
 #define ENTER 10
 #define KEY_SPACE 32
 
-#include "fileref.h"
-#include "tag.h"
+#ifdef HAVE_TAGLIB_H
+# include "fileref.h"
+# include "tag.h"
+#endif
+
 #include "libmpd/libmpd.h"
 
 #include <clocale>

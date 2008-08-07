@@ -20,7 +20,7 @@
 
 #include "window.h"
 
-Window::Window(int startx, int starty, int width, int height, string title, COLOR color, BORDER border) : itsWindow(0), itsWinBorder(0), itsStartX(startx), itsStartY(starty), itsWidth(width), itsHeight(height), BBEnabled(1), itsTitle(title), itsColor(color), itsBaseColor(color), itsBgColor(clDefault), itsBaseBgColor(clDefault), itsBorder(border)
+Window::Window(int startx, int starty, int width, int height, string title, COLOR color, BORDER border) : itsWindow(0), itsWinBorder(0), itsStartX(startx), itsStartY(starty), itsWidth(width), itsHeight(height), BBEnabled(1), AutoRefreshEnabled(1), itsTitle(title), itsColor(color), itsBaseColor(color), itsBgColor(clDefault), itsBaseBgColor(clDefault), itsBorder(border)
 {
 	if (itsStartX < 0) itsStartX = 0;
 	if (itsStartY < 0) itsStartY = 0;
@@ -308,8 +308,10 @@ void Window::Write(const string &str, CLEAR_TO_EOL clrtoeol)
 	else
 		waddstr(itsWindow,str.c_str());
 	
-	if (clrtoeol) wclrtoeol(itsWindow);
-	wrefresh(itsWindow);
+	if (clrtoeol)
+		wclrtoeol(itsWindow);
+	if (AutoRefreshEnabled)
+		wrefresh(itsWindow);
 }
 
 #ifdef UTF8_ENABLED
@@ -359,8 +361,11 @@ void Window::Write(const wstring &str, CLEAR_TO_EOL clrtoeol)
 	}
 	else
 		waddwstr(itsWindow,str.c_str());
-	if (clrtoeol) wclrtoeol(itsWindow);
-	wrefresh(itsWindow);
+	
+	if (clrtoeol)
+		wclrtoeol(itsWindow);
+	if (AutoRefreshEnabled)
+		wrefresh(itsWindow);
 }
 
 void Window::WriteXY(int x, int y, const wstring &str, CLEAR_TO_EOL cleartoeol)

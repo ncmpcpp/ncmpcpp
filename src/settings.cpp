@@ -28,10 +28,13 @@ void DefaultConfiguration(ncmpcpp_config &conf)
 {
 	conf.mpd_music_dir = "/var/lib/mpd/music";
 	conf.song_list_format = "[green](%l)[/green] {%a - }{%t}|{[white]%f[/white]}";
-	conf.song_status_format = conf.song_list_format;
+	conf.song_status_format = "(%l) {%a - }{%t}|{%f}";
 	conf.song_window_title_format = "{%a - }{%t}|{%f}";
 	conf.empty_tags_color = clCyan;
 	conf.header_color = clDefault;
+	conf.volume_color = clDefault;
+	conf.state_line_color = clDefault;
+	conf.state_flags_color = clDefault;
 	conf.main_color = clYellow;
 	conf.progressbar_color = clDefault;
 	conf.statusbar_color = clDefault;
@@ -173,6 +176,18 @@ void ReadConfiguration(ncmpcpp_config &conf)
 				if (!v.empty())
 					conf.header_color = IntoColor(v);
 			
+			if (it->find("volume_color") != string::npos)
+				if (!v.empty())
+					conf.volume_color = IntoColor(v);
+			
+			if (it->find("state_line_color") != string::npos)
+				if (!v.empty())
+					conf.state_line_color = IntoColor(v);
+			
+			if (it->find("state_flags_color") != string::npos)
+				if (!v.empty())
+					conf.state_flags_color = IntoColor(v);
+			
 			if (it->find("main_window_color") != string::npos)
 				if (!v.empty())
 					conf.main_color = IntoColor(v);
@@ -185,6 +200,7 @@ void ReadConfiguration(ncmpcpp_config &conf)
 				if (!v.empty())
 					conf.statusbar_color = IntoColor(v);
 		}
+		f.close();
 	}
 }
 

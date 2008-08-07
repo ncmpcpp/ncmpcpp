@@ -18,10 +18,6 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
-
 #include "ncmpcpp.h"
 #include "status_checker.h"
 #include "helpers.h"
@@ -32,12 +28,18 @@
 
 #define BLOCK_STATUSBAR_UPDATE \
 			block_statusbar_update = 1; \
-			allow_statusbar_unblock = 0;
+			allow_statusbar_unblock = 0
 
 #define UNBLOCK_STATUSBAR_UPDATE \
 			allow_statusbar_unblock = 1; \
 			if (block_statusbar_update_delay < 0) \
-				block_statusbar_update = 0;
+				block_statusbar_update = 0
+
+#ifdef HAVE_TAGLIB_H
+ const string tag_screen_keydesc = "\tE e       : Edit song's tags\n";
+#else
+ const string tag_screen_keydesc = "\tE e       : Show song's tags\n";
+#endif
 
 char *MPD_HOST = getenv("MPD_HOST");
 int MPD_PORT = getenv("MPD_PORT") ? atoi(getenv("MPD_PORT")) : 6600;
@@ -182,19 +184,19 @@ int main(int argc, char *argv[])
 	sHelp->Add("\tm         : Move song up\n");
 	sHelp->Add("\tn         : Move song down\n");
 	sHelp->Add("\tS         : Save playlist\n");
-	sHelp->Add("\tE e       : Edit song's tags\n");
+	sHelp->Add(tag_screen_keydesc);
 	sHelp->Add("\to         : Go to currently playing position\n\n\n");
 	
 	sHelp->Add("   [b]Keys - Browse screen\n -----------------------------------------[/b]\n");
 	sHelp->Add("\tEnter     : Enter directory/Select and play song\n");
 	sHelp->Add("\tSpace     : Add song to playlist\n");
 	sHelp->Add("\tDelete    : Delete playlist\n");
-	sHelp->Add("\tE e       : Edit song's tags\n\n\n");
+	sHelp->Add(tag_screen_keydesc + "\n\n");
 	
 	sHelp->Add("   [b]Keys - Search engine\n -----------------------------------------[/b]\n");
 	sHelp->Add("\tEnter     : Change option/Select and play song\n");
 	sHelp->Add("\tSpace     : Add song to playlist\n");
-	sHelp->Add("\tE e       : Edit song's tags\n\n\n");
+	sHelp->Add(tag_screen_keydesc + "\n\n");
 	
 	sHelp->Add("   [b]Keys - Tag Editor\n -----------------------------------------[/b]\n");
 	sHelp->Add("\tEnter     : Change option\n");
@@ -251,7 +253,11 @@ int main(int argc, char *argv[])
 				title = "Browse: ";
 				break;
 			case csTagEditor:
+#				ifdef HAVE_TAGLIB_H
 				title = "Tag editor";
+#				else
+				title = "Tag info";
+#				endif
 				break;
 			case csSearcher:
 				title = "Search engine";
@@ -266,7 +272,9 @@ int main(int argc, char *argv[])
 		else
 			wHeader->WriteXY(0, 0, "[b]1:[/b]Help  [b]2:[/b]Playlist  [b]3:[/b]Browse  [b]4:[/b]Search", 1);
 		
+		wHeader->SetColor(Config.volume_color);
 		wHeader->WriteXY(max_allowed_title_length, 0, volume_state);
+		wHeader->SetColor(Config.header_color);
 		
 		if (current_screen == csBrowser)
 		{
@@ -446,9 +454,10 @@ int main(int argc, char *argv[])
 					}
 					case csTagEditor:
 					{
+#						ifdef HAVE_TAGLIB_H
 						int id = mTagEditor->GetRealChoice();
 						int option = mTagEditor->GetChoice();
-						BLOCK_STATUSBAR_UPDATE
+						BLOCK_STATUSBAR_UPDATE;
 						Song &s = edited_song;
 					
 						switch (id)
@@ -558,14 +567,19 @@ int main(int argc, char *argv[])
 								break;
 							}
 						}
-						UNBLOCK_STATUSBAR_UPDATE
+						UNBLOCK_STATUSBAR_UPDATE;
+#						else
+						wCurrent->Clear();
+						wCurrent = wPrev;
+						current_screen = prev_screen;
+#						endif // HAVE_TAGLIB_H
 						break;
 					}
 					case csSearcher:
 					{
 						int id = mSearcher->GetChoice();
 						int option = mSearcher->GetChoice();
-						BLOCK_STATUSBAR_UPDATE
+						BLOCK_STATUSBAR_UPDATE;
 						Song &s = searched_song;
 					
 						switch (id)
@@ -718,7 +732,7 @@ int main(int argc, char *argv[])
 								break;
 							}
 						}
-						UNBLOCK_STATUSBAR_UPDATE
+						UNBLOCK_STATUSBAR_UPDATE;
 						break;
 					}
 				}
@@ -832,7 +846,7 @@ int main(int argc, char *argv[])
 				}
 				if (current_screen == csBrowser)
 				{
-					BLOCK_STATUSBAR_UPDATE
+					BLOCK_STATUSBAR_UPDATE;
 					int id = mBrowser->GetChoice()-1;
 					if (vFileType[id] == MPD_DATA_TYPE_PLAYLIST)
 					{
@@ -856,7 +870,7 @@ int main(int argc, char *argv[])
 						else
 							ShowMessage("Aborted!");
 						curs_set(0);
-						UNBLOCK_STATUSBAR_UPDATE
+						UNBLOCK_STATUSBAR_UPDATE;
 					}
 				}
 				break;
@@ -879,10 +893,10 @@ int main(int argc, char *argv[])
 			case 'S': // save playlist
 			{
 				string playlist_name;
-				BLOCK_STATUSBAR_UPDATE
+				BLOCK_STATUSBAR_UPDATE;
 				wFooter->WriteXY(0, 1, "Save playlist as: ", 1);
 				playlist_name = wFooter->GetString("", TraceMpdStatus);
-				UNBLOCK_STATUSBAR_UPDATE
+				UNBLOCK_STATUSBAR_UPDATE;
 				if (playlist_name.find("/") != string::npos)
 				{
 					ShowMessage("Playlist name cannot contain slashes!");
@@ -935,7 +949,7 @@ int main(int argc, char *argv[])
 					break;
 				
 				block_progressbar_update = 1;
-				BLOCK_STATUSBAR_UPDATE
+				BLOCK_STATUSBAR_UPDATE;
 				
 				int songpos, in;
 				
@@ -974,7 +988,7 @@ int main(int argc, char *argv[])
 				mpd_player_seek(conn, songpos);
 				
 				block_progressbar_update = 0;
-				UNBLOCK_STATUSBAR_UPDATE
+				UNBLOCK_STATUSBAR_UPDATE;
 				
 				break;
 			}
@@ -1074,13 +1088,13 @@ int main(int argc, char *argv[])
 					break;
 				int newpos = 0;
 				string position;
-				BLOCK_STATUSBAR_UPDATE
+				BLOCK_STATUSBAR_UPDATE;
 				wFooter->WriteXY(0, 1, "Position to go (in %): ", 1);
 				position = wFooter->GetString(3, TraceMpdStatus);
 				newpos = atoi(position.c_str());
 				if (newpos > 0 && newpos < 100 && !position.empty())
 					mpd_player_seek(conn, vPlaylist[now_playing].GetTotalLength()*newpos/100.0);
-				UNBLOCK_STATUSBAR_UPDATE
+				UNBLOCK_STATUSBAR_UPDATE;
 				break;
 			}
 			case 'c': // clear playlist

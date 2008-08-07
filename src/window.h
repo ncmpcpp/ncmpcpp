@@ -77,6 +77,7 @@ class Window
 		virtual void AltCharset(bool) const;
 		virtual void Delay(bool) const;
 		virtual void Timeout(int) const;
+		virtual void AutoRefresh(bool val) { AutoRefreshEnabled = val; }
 		virtual void ReadKey(int &) const;
 		virtual void ReadKey() const;
 		virtual void Write(const string &, CLEAR_TO_EOL = 1);
@@ -117,6 +118,7 @@ class Window
 		int itsWidth;
 		int itsHeight;
 		bool BBEnabled;
+		bool AutoRefreshEnabled;
 		string itsTitle;
 		COLOR itsColor;
 		COLOR itsBaseColor;

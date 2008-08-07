@@ -39,12 +39,6 @@ void Scrollpad::Add(string str)
 	int space_pos = 0;
 	bool collect = 0;
 	
-	// no idea why does it work, but it prevents text from going out of the window
-	// ugly hack, but i didn't come up with anything better
-	/*if (!itsContent.empty())
-		for (int i = itsContent.length()-1; itsContent[i] != '\0' && i >= 0; i--)
-			x++;*/
-	
 	for (size_t i = 0; i <= s.length(); i++, itsXPos++)
 	{
 		if (BBEnabled)
