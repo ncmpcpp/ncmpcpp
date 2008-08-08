@@ -23,12 +23,17 @@
 
 #include <algorithm>
 
+#include <pthread.h>
+
 #include "ncmpcpp.h"
 #include "settings.h"
 #include "song.h"
 
 extern ncmpcpp_config Config;
 
+void * BoldSongsFromPlaylist(void *);
+bool SortSongsByTrack(const Song &, const Song &);
+bool CaseInsensitiveComparison(string, string);
 void WindowTitle(const string &);
 string DisplaySong(const Song &, const string & = Config.song_list_format);
 void ShowMessage(const string &, int = Config.message_delay_time);

@@ -30,6 +30,7 @@ void DefaultConfiguration(ncmpcpp_config &conf)
 	conf.song_list_format = "[green](%l)[/green] {%a - }{%t}|{[white]%f[/white]}";
 	conf.song_status_format = "(%l) {%a - }{%t}|{%f}";
 	conf.song_window_title_format = "{%a - }{%t}|{%f}";
+	conf.song_library_format = "{%n - }{%t}|{%f}";
 	conf.empty_tags_color = clCyan;
 	conf.header_color = clDefault;
 	conf.volume_color = clDefault;
@@ -38,10 +39,11 @@ void DefaultConfiguration(ncmpcpp_config &conf)
 	conf.main_color = clYellow;
 	conf.progressbar_color = clDefault;
 	conf.statusbar_color = clDefault;
+	conf.library_active_column_color = clRed;
 	conf.header_visibility = true;
 	conf.statusbar_visibility = true;
 	conf.set_window_title = true;
-	conf.mpd_connection_timeout = 5;
+	conf.mpd_connection_timeout = 60;
 	conf.crossfade_time = 5;
 	conf.playlist_disable_highlight_delay = 5;
 	conf.message_delay_time = 4;
@@ -163,6 +165,10 @@ void ReadConfiguration(ncmpcpp_config &conf)
 				if (!v.empty())
 					conf.song_status_format = v;
 			
+			if (it->find("song_library_format") != string::npos)
+				if (!v.empty())
+					conf.song_library_format = v;
+			
 			if (it->find("header_visibility") != string::npos)
 				conf.header_visibility = v == "yes";
 			
@@ -204,6 +210,10 @@ void ReadConfiguration(ncmpcpp_config &conf)
 			if (it->find("statusbar_color") != string::npos)
 				if (!v.empty())
 					conf.statusbar_color = IntoColor(v);
+			
+			if (it->find("library_active_column_color") != string::npos)
+				if (!v.empty())
+					conf.library_active_column_color = IntoColor(v);
 		}
 		f.close();
 	}

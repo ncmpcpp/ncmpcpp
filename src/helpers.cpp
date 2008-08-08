@@ -38,6 +38,8 @@ extern vector<Song> vPlaylist;
 extern vector<MpdDataType> vFileType;
 extern vector<string> vNameList;
 
+extern CurrScreen current_screen;
+
 extern Song edited_song;
 extern Song searched_song;
 
@@ -60,6 +62,45 @@ extern string EMPTY_TAG;
 extern string UNKNOWN_ARTIST;
 extern string UNKNOWN_TITLE;
 extern string UNKNOWN_ALBUM;
+
+void * BoldSongsFromPlaylist(void *t)
+{
+	if (!vNameList.empty())
+	{
+		bool bold = 0;
+		for (int i = 0; i < vFileType.size(); i++)
+		{
+			if (vFileType[i] == MPD_DATA_TYPE_SONG)
+			{
+				for (vector<Song>::const_iterator it = vPlaylist.begin(); it != vPlaylist.end(); it++)
+				{
+					if (it->GetFile() == vNameList[i])
+					{
+						bold = 1;
+						break;
+					}
+				}
+				mBrowser->BoldOption(i+1, bold);
+				bold = 0;
+			}
+		}
+	}
+	if (current_screen == csBrowser)
+		mBrowser->Refresh();
+	pthread_exit(NULL);
+}
+
+bool SortSongsByTrack(const Song &a, const Song &b)
+{
+	return StrToInt(a.GetTrack()) < StrToInt(b.GetTrack());
+}
+
+bool CaseInsensitiveComparison(string a, string b)
+{
+	transform(a.begin(), a.end(), a.begin(), tolower);
+	transform(b.begin(), b.end(), b.begin(), tolower);
+	return a < b;
+}
 
 void WindowTitle(const string &status)
 {
@@ -491,13 +532,14 @@ bool GetSongInfo(Song &s)
 
 void GetDirectory(string dir)
 {
+	pthread_t bolder;
 	browsed_dir_scroll_begin = 0;
 	if (browsed_dir != dir)
 		mBrowser->Reset();
 	browsed_dir = dir;
 	vFileType.clear();
 	vNameList.clear();
-	mBrowser->Clear();
+	mBrowser->Clear(current_screen != csLibrary);
 	if (dir != "/")
 	{
 		mBrowser->AddOption("[..]");
@@ -535,15 +577,14 @@ void GetDirectory(string dir)
 				vFileType.push_back(MPD_DATA_TYPE_SONG);
 				Song s = browser->song;
 				vNameList.push_back(s.GetFile());
-				bool bold = 0;
-				for (vector<Song>::const_iterator it = vPlaylist.begin(); it != vPlaylist.end(); it++)
-					if (it->GetFile() == s.GetFile())
-						bold = 1;
-				bold ? mBrowser->AddBoldOption(DisplaySong(s)) : mBrowser->AddOption(DisplaySong(s));
+				mBrowser->AddOption(DisplaySong(s));
 				break;
 			}
 		}
 	}
+	
+	pthread_create(&bolder, NULL, BoldSongsFromPlaylist, NULL);
+	
 	mpd_data_free(browser);
 	browsed_subdir.clear();
 }

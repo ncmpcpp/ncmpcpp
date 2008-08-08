@@ -63,6 +63,8 @@
 #
 #song_window_title_format = "{%a - }{%t}|{%f}"
 #
+#song_library_format = "{%n - }{%t}|{%f}"
+#
 ##### interface settings #####
 #
 #header_visibility = "yes"
@@ -88,4 +90,6 @@
 #progressbar_color = "default"
 #
 #statusbar_color = "default"
+#
+#library_active_column_color = "red"
 #

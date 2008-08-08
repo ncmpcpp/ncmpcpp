@@ -140,6 +140,30 @@ void Menu::MakeStatic(int index, IS_STATIC stat)
 	}
 }
 
+string Menu::GetCurrentOption() const
+{
+	try
+	{
+		return itsOptions.at(itsHighlight);
+	}
+	catch (std::out_of_range)
+	{
+		return "";
+	}
+}
+
+string Menu::GetOption(int i) const
+{
+	try
+	{
+		return itsOptions.at(i-1);
+	}
+	catch (std::out_of_range)
+	{
+		return "";
+	}
+}
+
 void Menu::DeleteOption(int no)
 {
 	try
@@ -211,7 +235,10 @@ void Menu::Refresh()
 	for (int i = itsBeginning; i < last; i++)
 	{
 		if (i == itsHighlight && itsHighlightEnabled)
+		{
 			Reverse(1);
+			SetColor(itsHighlightColor);
+		}
 		if (itsBold[i])
 			Bold(1);
 		
@@ -260,7 +287,10 @@ void Menu::Refresh()
 		line++;
 		
 		if (i == itsHighlight && itsHighlightEnabled)
+		{
 			Reverse(0);
+			SetColor(itsBaseColor);
+		}
 		if (itsBold[i])
 			Bold(0);
 	}

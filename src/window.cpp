@@ -169,7 +169,7 @@ void Window::Resize(int width, int height)
 		height -= 2;
 	}
 	if (!itsTitle.empty())
-		width -= 2;
+		height -= 2;
 	
 	if (height > 0 && width > 0 && wresize(itsWindow, height, width) == OK)
 	{
@@ -188,12 +188,10 @@ void Window::show_border() const
 	if (!itsTitle.empty())
 	{
 		if (itsBorder != brNone)
-		{
 			attron(COLOR_PAIR(itsBorder));
-			mvhline(itsStartY-1, itsStartX, 0, itsWidth);
-		}
 		else
 			attron(COLOR_PAIR(itsBaseColor));
+		mvhline(itsStartY-1, itsStartX, 0, itsWidth);
 		attron(A_BOLD);
 		mvaddstr(itsStartY-2, itsStartX, itsTitle.c_str());
 		attroff(COLOR_PAIR(itsBorder) | A_BOLD);
@@ -263,7 +261,7 @@ void Window::ReadKey() const
 
 void Window::Write(const string &str, CLEAR_TO_EOL clrtoeol)
 {
-	if (BBEnabled)
+	if (BBEnabled && !str.empty())
 	{
 		bool collect = false;
 		string color, tmp;

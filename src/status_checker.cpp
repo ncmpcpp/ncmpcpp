@@ -33,7 +33,9 @@ extern Menu *mPlaylist;
 extern Menu *mBrowser;
 extern Menu *wCurrent;
 extern Menu *mSearcher;
-
+extern Menu *mLibArtists;
+extern Menu *mLibAlbums;
+extern Menu *mLibSongs;
 extern Window *wHeader;
 extern Window *wFooter;
 
@@ -70,6 +72,7 @@ extern bool allow_statusbar_unblock;
 extern bool block_progressbar_update;
 extern bool block_statusbar_update;
 extern bool block_playlist_update;
+extern bool block_library_update;
 
 int old_playing;
 
@@ -141,7 +144,7 @@ void NcmpcppStatusChanged(MpdObj *conn, ChangedStatusType what)
 			{
 				if (playlist_length < vPlaylist.size())
 				{
-					mPlaylist->Clear(!playlist_length);
+					mPlaylist->Clear(!playlist_length && current_screen != csLibrary);
 					vPlaylist.clear();
 				}
 				
@@ -206,8 +209,13 @@ void NcmpcppStatusChanged(MpdObj *conn, ChangedStatusType what)
 				if (vFileType[i] == MPD_DATA_TYPE_SONG)
 				{
 					for (vector<Song>::const_iterator it = vPlaylist.begin(); it != vPlaylist.end(); it++)
+					{
 						if (it->GetFile() == vNameList[i])
+						{
 							bold = 1;
+							break;
+						}
+					}
 					mBrowser->BoldOption(i+1, bold);
 					bold = 0;
 				}
@@ -220,15 +228,24 @@ void NcmpcppStatusChanged(MpdObj *conn, ChangedStatusType what)
 			for (vector<Song>::const_iterator it = vSearched.begin(); it != vSearched.end(); it++, i++)
 			{
 				for (vector<Song>::const_iterator j = vPlaylist.begin(); j != vPlaylist.end(); j++)
-						if (j->GetFile() == it->GetFile())
-							bold = 1;
-					mSearcher->BoldOption(i+1, bold);
-					bold = 0;
+				{
+					if (j->GetFile() == it->GetFile())
+					{
+						bold = 1;
+						break;
+					}
+				}
+				mSearcher->BoldOption(i+1, bold);
+				bold = 0;
 			}
 		}
+		block_library_update = 0;
 	}
 	if(what & MPD_CST_DATABASE)
+	{
 		GetDirectory(browsed_dir);
+		block_library_update = 0;
+	}
 	if (what & MPD_CST_STATE)
 	{
 		int mpd_state = mpd_player_get_state(conn);

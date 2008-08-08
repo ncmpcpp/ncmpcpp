@@ -145,7 +145,7 @@ string Song::GetAlbum() const
 
 string Song::GetTrack() const
 {
-	return itsGetEmptyFields ? (itsTrack.empty() ? "" : itsTrack) : (itsTrack.empty() ? EMPTY_TAG : itsTrack);
+	return itsGetEmptyFields ? (itsTrack.empty() ? "" : (StrToInt(itsTrack) < 10 && itsTrack[0] != '0' ? "0"+itsTrack : itsTrack)) : (itsTrack.empty() ? EMPTY_TAG : (StrToInt(itsTrack) < 10 && itsTrack[0] != '0' ? "0"+itsTrack : itsTrack));
 }
 
 string Song::GetYear() const

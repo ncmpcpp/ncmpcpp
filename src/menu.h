@@ -34,7 +34,7 @@ enum LOCATION { lLeft, lCenter, lRight };
 class Menu : public Window
 {
 	public:
-		Menu(int startx, int starty, int width, int height, string title, COLOR color, BORDER border) : Window(startx, starty, width, height, title, color, border), itsStaticsNumber(0), itsChoice(0), itsBeginning(0), itsHighlight(0), itsHighlightEnabled(1) { SetColor(color); }
+		Menu(int startx, int starty, int width, int height, string title, COLOR color, BORDER border) : Window(startx, starty, width, height, title, color, border), itsStaticsNumber(0), itsChoice(0), itsBeginning(0), itsHighlight(0), itsHighlightColor(itsBaseColor), itsHighlightEnabled(1) { SetColor(color); }
 		virtual ~Menu() {}
 		
 		virtual void Add(string str) { AddOption(str); }
@@ -47,8 +47,8 @@ class Menu : public Window
 		void BoldOption(int, IS_BOLD);
 		void MakeStatic(int, IS_STATIC);
 		void DeleteOption(int);
-		string GetCurrentOption() { return itsOptions[itsHighlight]; }
-		string GetOption(int i) { return itsOptions[i-1]; }
+		string GetCurrentOption() const;
+		string GetOption(int i) const;
 		
 		virtual void Display();
 		virtual void Refresh();
@@ -57,7 +57,8 @@ class Menu : public Window
 		virtual void Reset();
 		virtual void Clear(bool clear_screen = 1);
 		
-		void Highlighting(bool hl) { itsHighlightEnabled = hl; }
+		void HighlightColor(COLOR col) { itsHighlightColor = col; }
+		void Highlighting(bool hl) { itsHighlightEnabled = hl; Refresh(); }
 		
 		int GetRealChoice() const;
 		virtual int GetChoice() const { return itsHighlight+1; }
@@ -83,6 +84,8 @@ class Menu : public Window
 		int itsChoice;
 		int itsBeginning;
 		int itsHighlight;
+		
+		COLOR itsHighlightColor;
 		
 		bool itsHighlightEnabled;
 };

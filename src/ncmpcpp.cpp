@@ -60,12 +60,18 @@ vector<Song> vSearched;
 vector<MpdDataType> vFileType;
 vector<string> vNameList;
 
+vector<string> vArtists;
+vector<Song> vSongs;
+
 Window *wCurrent = 0;
 Window *wPrev = 0;
 Menu *mPlaylist;
 Menu *mBrowser;
 Menu *mTagEditor;
 Menu *mSearcher;
+Menu *mLibArtists;
+Menu *mLibAlbums;
+Menu *mLibSongs;
 Scrollpad *sHelp;
 
 Window *wHeader;
@@ -112,6 +118,7 @@ bool block_progressbar_update = 0;
 bool block_statusbar_update = 0;
 bool allow_statusbar_unblock = 1;
 bool block_playlist_update = 0;
+bool block_library_update = 0;
 
 bool search_case_sensitive = 1;
 bool search_mode_match = 1;
@@ -161,6 +168,16 @@ int main(int argc, char *argv[])
 	mTagEditor = new Menu(mPlaylist->EmptyClone());
 	mSearcher = new Menu(mPlaylist->EmptyClone());
 	
+	int lib_artist_width = COLS/3-1;
+	int lib_albums_width = COLS/3;
+	int lib_albums_start_x = lib_artist_width+1;
+	int lib_songs_width = COLS-COLS/3*2-1;
+	int lib_songs_start_x = lib_artist_width+lib_albums_width+2;
+	
+	mLibArtists = new Menu(0, main_start_y, lib_artist_width, main_height, "Artists", Config.main_color, brNone);
+	mLibAlbums = new Menu(lib_albums_start_x, main_start_y, lib_albums_width, main_height, "Albums", Config.main_color, brNone);
+	mLibSongs = new Menu(lib_songs_start_x, main_start_y, lib_songs_width, main_height, "Songs", Config.main_color, brNone);
+	
 	sHelp = new Scrollpad(0, main_start_y, COLS, main_height, "", Config.main_color, brNone);
 	
 	sHelp->Add("   [b]Keys - Movement\n -----------------------------------------[/b]\n");
@@ -192,6 +209,7 @@ int main(int argc, char *argv[])
 	sHelp->Add("\tZ         : Shuffle playlist\n");
 	sHelp->Add("\tU u       : Start a music database update\n\n");
 	
+	sHelp->Add(tag_screen_keydesc);
 	sHelp->Add("\tg         : Go to chosen position in current song\n\n");
 	
 	sHelp->Add("\tQ q       :  Quit\n\n\n");
@@ -203,19 +221,22 @@ int main(int argc, char *argv[])
 	sHelp->Add("\tm         : Move song up\n");
 	sHelp->Add("\tn         : Move song down\n");
 	sHelp->Add("\tS         : Save playlist\n");
-	sHelp->Add(tag_screen_keydesc);
 	sHelp->Add("\to         : Go to currently playing position\n\n\n");
 	
 	sHelp->Add("   [b]Keys - Browse screen\n -----------------------------------------[/b]\n");
 	sHelp->Add("\tEnter     : Enter directory/Select and play song\n");
 	sHelp->Add("\tSpace     : Add song to playlist\n");
-	sHelp->Add("\tDelete    : Delete playlist\n");
-	sHelp->Add(tag_screen_keydesc + "\n\n");
+	sHelp->Add("\tDelete    : Delete playlist\n\n");
 	
 	sHelp->Add("   [b]Keys - Search engine\n -----------------------------------------[/b]\n");
 	sHelp->Add("\tEnter     : Change option/Select and play song\n");
-	sHelp->Add("\tSpace     : Add song to playlist\n");
-	sHelp->Add(tag_screen_keydesc + "\n\n");
+	sHelp->Add("\tSpace     : Add song to playlist\n\n\n");
+	
+	sHelp->Add("   [b]Keys - Media library\n -----------------------------------------[/b]\n");
+	sHelp->Add("\tLeft      : Previous column\n");
+	sHelp->Add("\tRight     : Next column\n");
+	sHelp->Add("\tEnter     : Select and play song/album/artist's songs\n");
+	sHelp->Add("\tSpace     : Select song/album/artist's songs\n\n\n");
 	
 	sHelp->Add("   [b]Keys - Tag Editor\n -----------------------------------------[/b]\n");
 	sHelp->Add("\tEnter     : Change option\n");
@@ -248,6 +269,9 @@ int main(int argc, char *argv[])
 	mBrowser->Timeout(ncmpcpp_window_timeout);
 	mTagEditor->Timeout(ncmpcpp_window_timeout);
 	mSearcher->Timeout(ncmpcpp_window_timeout);
+	mLibArtists->Timeout(ncmpcpp_window_timeout);
+	mLibAlbums->Timeout(ncmpcpp_window_timeout);
+	mLibSongs->Timeout(ncmpcpp_window_timeout);
 	wFooter->Timeout(ncmpcpp_window_timeout);
 	
 	while (!main_exit)
@@ -273,14 +297,18 @@ int main(int argc, char *argv[])
 					title = "Browse: ";
 					break;
 				case csTagEditor:
-#				ifdef HAVE_TAGLIB_H
+#					ifdef HAVE_TAGLIB_H
 					title = "Tag editor";
-#				else
+#					else
 					title = "Tag info";
-#				endif
+#					endif
 					break;
 				case csSearcher:
 					title = "Search engine";
+					break;
+				case csLibrary:
+					title = "Media library";
+					break;
 			}
 		
 			if (title_allowed)
@@ -290,7 +318,7 @@ int main(int argc, char *argv[])
 				wHeader->Bold(0);
 			}
 			else
-				wHeader->WriteXY(0, 0, "[b]1:[/b]Help  [b]2:[/b]Playlist  [b]3:[/b]Browse  [b]4:[/b]Search", 1);
+				wHeader->WriteXY(0, 0, "[b]1:[/b]Help  [b]2:[/b]Playlist  [b]3:[/b]Browse  [b]4:[/b]Search  [b]5:[/b]Library", 1);
 		
 			wHeader->SetColor(Config.volume_color);
 			wHeader->WriteXY(max_allowed_title_length, 0, volume_state);
@@ -322,22 +350,105 @@ int main(int argc, char *argv[])
 			}
 		}
 		
+		if (current_screen == csLibrary && !block_library_update)
+		{
+			MpdData *data;
+			
+			if (wCurrent == mLibAlbums && mLibAlbums->Empty())
+				wCurrent = mLibArtists;
+			
+			if (wCurrent == mLibArtists)
+			{
+				mLibAlbums->Clear();
+				data = mpd_database_get_albums(conn, (char *) mLibArtists->GetCurrentOption().c_str());
+				FOR_EACH_MPD_DATA(data)
+						mLibAlbums->AddOption(data->tag);
+				mpd_data_free(data);
+				
+				if (mLibAlbums->Empty())
+				{
+					mLibAlbums->WriteXY(0, 0, "No albums found.");
+					vSongs.clear();
+					mLibSongs->Clear();
+					mpd_database_search_start(conn, 1);
+					mpd_database_search_add_constraint(conn, MPD_TAG_ITEM_ARTIST, mLibArtists->GetCurrentOption().c_str());
+					mpd_database_search_add_constraint(conn, MPD_TAG_ITEM_ALBUM, mLibAlbums->GetCurrentOption().c_str());
+					data = mpd_database_search_commit(conn);
+					FOR_EACH_MPD_DATA(data)
+							vSongs.push_back(data->song);
+					mpd_data_free(data);
+				}
+			}
+			
+			vSongs.clear();
+			mLibSongs->Clear(0);
+			mpd_database_search_start(conn, 1);
+			mpd_database_search_add_constraint(conn, MPD_TAG_ITEM_ARTIST, mLibArtists->GetCurrentOption().c_str());
+			mpd_database_search_add_constraint(conn, MPD_TAG_ITEM_ALBUM, mLibAlbums->GetCurrentOption().c_str());
+			data = mpd_database_search_commit(conn);
+			FOR_EACH_MPD_DATA(data)
+					vSongs.push_back(data->song);
+			mpd_data_free(data);
+				
+			sort(vSongs.begin(), vSongs.end(), SortSongsByTrack);
+				
+			bool bold = 0;
+			for (vector<Song>::const_iterator it = vSongs.begin(); it != vSongs.end(); it++)
+			{
+				for (vector<Song>::const_iterator j = vPlaylist.begin(); j != vPlaylist.end(); j++)
+				{
+					if (it->GetFile() == j->GetFile())
+					{
+						bold = 1;
+						break;
+					}
+				}
+				bold ? mLibSongs->AddBoldOption(DisplaySong(*it, Config.song_library_format)) : mLibSongs->AddOption(DisplaySong(*it, Config.song_library_format));
+				bold = 0;
+			}
+			mLibAlbums->Refresh();
+			mLibSongs->Hide();
+			mLibSongs->Display();
+
+			block_library_update = 1;
+		}
+		
 		wCurrent->Refresh();
 		
 		wCurrent->ReadKey(input);
 		if (input == ERR)
 			continue;
 		
+		if (current_screen == csLibrary)
+			block_library_update = 0;
+		
 		title_allowed = 1;
 		timer = time(NULL);
 		
-		if (current_screen == csPlaylist)
+		switch (current_screen)
 		{
-			mPlaylist->Highlighting(1);
-			mPlaylist->Refresh();
+			case csPlaylist:
+				mPlaylist->Highlighting(1);
+				mPlaylist->Refresh();
+				break;
+			
+			case csBrowser:
+				browsed_dir_scroll_begin--;
+				break;
+			case csLibrary:
+			{
+				if (input == KEY_UP || input == KEY_DOWN || input == KEY_PPAGE || input == KEY_NPAGE || input == KEY_HOME || input == KEY_END)
+				{
+					if (wCurrent == mLibArtists)
+					{	mLibAlbums->Reset();
+						mLibSongs->Reset();
+					}
+					if (wCurrent == mLibAlbums)
+						mLibSongs->Reset();
+				}
+				break;
+			}
 		}
-		if (current_screen == csBrowser)
-			browsed_dir_scroll_begin--;
 		
 		switch (input)
 		{
@@ -381,6 +492,19 @@ int main(int argc, char *argv[])
 				mTagEditor->Resize(COLS, main_height);
 				mSearcher->Resize(COLS, main_height);
 				
+				lib_artist_width = COLS/3-1;
+				lib_albums_start_x = lib_artist_width+1;
+				lib_albums_width = COLS/3;
+				lib_songs_start_x = lib_artist_width+lib_albums_width+2;
+				lib_songs_width = COLS-COLS/3*2-1;
+				
+				mLibArtists->Resize(lib_artist_width, main_height);
+				mLibAlbums->Resize(lib_albums_width, main_height);
+				mLibSongs->Resize(lib_songs_width, main_height);
+				
+				mLibAlbums->MoveTo(lib_albums_start_x, main_start_y);
+				mLibSongs->MoveTo(lib_songs_start_x, main_start_y);
+				
 				if (Config.header_visibility)
 					wHeader->Resize(COLS, wHeader->GetHeight());
 				
@@ -391,6 +515,17 @@ int main(int argc, char *argv[])
 				if (wCurrent != sHelp)
 					wCurrent->Hide();
 				wCurrent->Display();
+				if (current_screen == csLibrary)
+				{
+					mLibArtists->Hide();
+					mLibArtists->Display();
+					mvvline(main_start_y, lib_albums_start_x-1, 0, main_height);
+					mLibAlbums->Hide();
+					mLibAlbums->Display();
+					mvvline(main_start_y, lib_songs_start_x-1, 0, main_height);
+					mLibSongs->Hide();
+					mLibSongs->Display();
+				}
 				
 				header_update_status = 1;
 				int mpd_state = mpd_player_get_state(conn);
@@ -592,17 +727,26 @@ int main(int argc, char *argv[])
 							}
 							case 9:
 							{
+#								endif // HAVE_TAGLIB_H
 								wCurrent->Clear();
 								wCurrent = wPrev;
 								current_screen = prev_screen;
+								if (current_screen == csLibrary)
+								{
+									mLibSongs->HighlightColor(Config.main_color);
+									mLibArtists->HighlightColor(Config.library_active_column_color);
+									wCurrent = mLibArtists;
+									mLibArtists->Display();
+									mvvline(main_start_y, lib_albums_start_x-1, 0, main_height);
+									mLibAlbums->Display();
+									mvvline(main_start_y, lib_songs_start_x-1, 0, main_height);
+									mLibSongs->Display();
+								}
+#								ifdef HAVE_TAGLIB_H
 								break;
 							}
 						}
 						UNBLOCK_STATUSBAR_UPDATE;
-#						else
-						wCurrent->Clear();
-						wCurrent = wPrev;
-						current_screen = prev_screen;
 #						endif // HAVE_TAGLIB_H
 						break;
 					}
@@ -766,6 +910,80 @@ int main(int argc, char *argv[])
 						UNBLOCK_STATUSBAR_UPDATE;
 						break;
 					}
+					case csLibrary:
+					{
+						Start_Point_For_KEY_SPACE: // same code for KEY_SPACE, but without playing.
+						
+						MpdData *data;
+						
+						if (wCurrent == mLibArtists)
+						{
+							const string &artist = mLibArtists->GetCurrentOption();
+							ShowMessage("Adding all songs artist's: " + artist);
+							mpd_database_search_start(conn, 1);
+							mpd_database_search_add_constraint(conn, MPD_TAG_ITEM_ARTIST, (char *) artist.c_str());
+							data = mpd_database_search_commit(conn);
+							int howmany = 0;
+							FOR_EACH_MPD_DATA(data)
+							{
+								howmany++;
+								mpd_playlist_queue_add(conn, data->song->file);
+							}
+							mpd_data_free(data);
+							mpd_playlist_queue_commit(conn);
+							if (input == ENTER)
+							{
+								int new_id;
+								try
+								{
+									new_id = vPlaylist.at(mPlaylist->MaxChoice()-howmany).GetID();
+								}
+								catch (std::out_of_range)
+								{
+									new_id = -1;
+								}
+								if (new_id >= 0)
+									mpd_player_play_id(conn, new_id);
+							}
+						}
+						
+						if (wCurrent == mLibAlbums)
+						{
+							int howmany = 0;
+							ShowMessage("Adding songs from album: " + mLibAlbums->GetCurrentOption());
+							for (vector<Song>::const_iterator it = vSongs.begin(); it != vSongs.end(); it++, howmany++)
+								mpd_playlist_queue_add(conn, (char *) it->GetFile().c_str());
+							mpd_playlist_queue_commit(conn);
+							if (input == ENTER)
+							{
+								int new_id;
+								try
+								{
+									new_id = vPlaylist.at(mPlaylist->MaxChoice()-howmany).GetID();
+								}
+								catch (std::out_of_range)
+								{
+									new_id = -1;
+								}
+								if (new_id >= 0)
+									mpd_player_play_id(conn, new_id);
+							}
+						}
+						
+						if (wCurrent == mLibSongs)
+						{
+							Song &s = vSongs[mLibSongs->GetChoice()-1];
+							ShowMessage("Added to playlist: " + OmitBBCodes(DisplaySong(s)));
+							mpd_playlist_add(conn, (char *) s.GetFile().c_str());
+							if (input == ENTER)
+								mpd_player_play_id(conn, vPlaylist.back().GetID());
+						}
+						
+						if (input == KEY_SPACE)
+							wCurrent->Go(DOWN);
+						
+						break;
+					}
 				}
 				break;
 			}
@@ -830,14 +1048,64 @@ int main(int argc, char *argv[])
 						ShowMessage("Error adding file!");
 					}
 				}
+				if (current_screen == csLibrary)
+					goto Start_Point_For_KEY_SPACE; // sorry, but that's stupid to copy the same code here.
 				break;
 			}
-			case KEY_RIGHT: case '+': // volume up
+			case KEY_RIGHT:
+			{
+				if (current_screen == csLibrary)
+				{
+					if (wCurrent == mLibArtists)
+					{
+						mLibArtists->HighlightColor(Config.main_color);
+						wCurrent->Refresh();
+						wCurrent = mLibAlbums;
+						mLibAlbums->HighlightColor(Config.library_active_column_color);
+						if (!mLibAlbums->Empty())
+							break;
+					}
+					if (wCurrent == mLibAlbums)
+					{
+						mLibAlbums->HighlightColor(Config.main_color);
+						wCurrent->Refresh();
+						wCurrent = mLibSongs;
+						mLibSongs->HighlightColor(Config.library_active_column_color);
+						break;
+					}
+					break;
+				}
+			}
+			case '+': // volume up
 			{
 				mpd_status_set_volume(conn, mpd_status_get_volume(conn)+1);
 				break;
 			}
-			case KEY_LEFT: case '-': //volume down
+			case KEY_LEFT:
+			{
+				if (current_screen == csLibrary)
+				{
+					if (wCurrent == mLibSongs)
+					{
+						mLibSongs->HighlightColor(Config.main_color);
+						wCurrent->Refresh();
+						wCurrent = mLibAlbums;
+						mLibAlbums->HighlightColor(Config.library_active_column_color);
+						if (!mLibAlbums->Empty())
+							break;
+					}
+					if (wCurrent == mLibAlbums)
+					{
+						mLibAlbums->HighlightColor(Config.main_color);
+						wCurrent->Refresh();
+						wCurrent = mLibArtists;
+						mLibArtists->HighlightColor(Config.library_active_column_color);
+						break;
+					}
+					break;
+				}
+			}
+			case '-': //volume down
 			{
 				mpd_status_set_volume(conn, mpd_status_get_volume(conn)-1);
 				break;
@@ -860,10 +1128,6 @@ int main(int argc, char *argv[])
 							id = mPlaylist->GetChoice()-1;
 							
 							mpd_playlist_queue_delete_pos(conn, id);
-							for (vector<Song>::iterator it = vPlaylist.begin()+id; it != vPlaylist.end(); it++)
-								it->SetPosition(it->GetPosition()-1);
-							if (now_playing > id)
-								now_playing--;
 							vPlaylist.erase(vPlaylist.begin()+id);
 							mPlaylist->DeleteOption(id+1);
 							mPlaylist->Refresh();
@@ -1108,6 +1372,19 @@ int main(int argc, char *argv[])
 						}
 						break;
 					}
+					case csLibrary:
+					{
+						if (!vSongs.empty() && wCurrent == mLibSongs)
+						{
+							if (GetSongInfo(vSongs[id]))
+							{
+								wPrev = wCurrent;
+								wCurrent = mTagEditor;
+								current_screen = csTagEditor;
+								prev_screen = csLibrary;
+							}
+						}
+					}
 					default:
 						break;
 				}
@@ -1138,8 +1415,8 @@ int main(int argc, char *argv[])
 			{
 				if (wCurrent != sHelp)
 				{
-					wCurrent->Hide();
 					wCurrent = sHelp;
+					wCurrent->Hide();
 					current_screen = csHelp;
 				}
 				break;
@@ -1148,8 +1425,8 @@ int main(int argc, char *argv[])
 			{
 				if (wCurrent != mPlaylist && current_screen != csTagEditor)
 				{
-					wCurrent->Hide();
 					wCurrent = mPlaylist;
+					wCurrent->Hide();
 					current_screen = csPlaylist;
 				}
 				break;
@@ -1161,8 +1438,8 @@ int main(int argc, char *argv[])
 				
 				if (wCurrent != mBrowser && current_screen != csTagEditor)
 				{
-					wCurrent->Hide();
 					wCurrent = mBrowser;
+					wCurrent->Hide();
 					current_screen = csBrowser;
 				}
 				if (mBrowser->Empty())
@@ -1173,11 +1450,46 @@ int main(int argc, char *argv[])
 			{
 				if (current_screen != csTagEditor && current_screen != csSearcher)
 				{
-					wCurrent->Hide();
 					if (vSearched.empty())
 						PrepareSearchEngine(searched_song);
 					wCurrent = mSearcher;
+					wCurrent->Hide();
 					current_screen = csSearcher;
+				}
+				break;
+			}
+			case '5': // artist library
+			{
+				if (current_screen != csLibrary)
+				{
+					if (mLibArtists->Empty())
+					{
+						MpdData *data = mpd_database_get_artists(conn);
+				
+						FOR_EACH_MPD_DATA(data)
+								vArtists.push_back(data->tag);
+						mpd_data_free(data);
+				
+						sort(vArtists.begin(), vArtists.end(), CaseInsensitiveComparison);
+				
+						for (vector<string>::const_iterator it = vArtists.begin(); it != vArtists.end(); it++)
+							mLibArtists->AddOption(*it);
+					}
+					
+					mLibArtists->HighlightColor(Config.library_active_column_color);
+					mLibAlbums->HighlightColor(Config.main_color);
+					mLibSongs->HighlightColor(Config.main_color);
+					
+					wCurrent->Hide();
+					
+					mLibArtists->Display();
+					mvvline(main_start_y, lib_albums_start_x-1, 0, main_height);
+					mLibAlbums->Display();
+					mvvline(main_start_y, lib_songs_start_x-1, 0, main_height);
+					mLibSongs->Display();
+				
+					wCurrent = mLibArtists;
+					current_screen = csLibrary;
 				}
 				break;
 			}

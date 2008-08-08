@@ -55,7 +55,7 @@ const bool UNICODE = 0;
 #include "scrollpad.h"
 #include "misc.h"
 
-enum CurrScreen { csHelp, csPlaylist, csBrowser, csTagEditor, csSearcher };
+enum CurrScreen { csHelp, csPlaylist, csBrowser, csTagEditor, csSearcher, csLibrary };
 
 const int ncmpcpp_window_timeout = 500;
 const int search_engine_static_option = 17;

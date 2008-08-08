@@ -10,7 +10,7 @@ AC_PROG_CXX
 AM_PROG_LIBTOOL
 
 AC_ARG_ENABLE(unicode, AS_HELP_STRING([--enable-unicode], [Enable utf8 support]), [unicode=$enableval], [unicode=yes])
-AC_ARG_WITH(taglib, AS_HELP_STRING([--with-taglib], [Enable tag editor]), [taglib=$withval], [taglib=yes])
+AC_ARG_WITH(taglib, AS_HELP_STRING([--with-taglib], [Enable tag editor]), [taglib=$withval], [taglib=no])
 
 dnl ========================
 dnl = checking for ncurses =
@@ -47,6 +47,11 @@ CPPFLAGS="$CPPFLAGS $libmpd_CFLAGS"
 LDFLAGS="$LDFLAGS $libmpd_LIBS"
 AC_CHECK_HEADERS([libmpd/libmpd.h], , AC_MSG_ERROR([missing libmpd.h header]))
 
+dnl ========================
+dnl = checking for pthread =
+dnl ========================
+AC_CHECK_LIB(pthread, pthread_create, LDFLAGS="$LDFLAGS -pthread", AC_MSG_ERROR([missing pthread library]))
+AC_CHECK_HEADERS([pthread.h], , AC_MSG_ERROR([missing pthread.h header]))
 
 dnl =======================
 dnl = checking for taglib =
