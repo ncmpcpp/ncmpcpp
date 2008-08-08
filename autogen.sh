@@ -84,6 +84,43 @@ do
 	fi
 done
 
+if test -n "$LIBTOOLIZE"
+then
+	echo "LIBTOOLIZE=$LIBTOOLIZE in environment," \
+			"will not attempt to auto-detect"
+else
+	printf "checking for libtoolize ... "
+	for x in libtoolize glibtoolize
+	do
+		($x --version < /dev/null > /dev/null 2>&1) > /dev/null 2>&1
+		if test $? -eq 0
+		then
+			echo $x
+			LIBTOOLIZE=$x
+			break
+		fi
+	done
+fi
+
+if test -z "$LIBTOOLIZE"
+then
+	DIE="$DIE libtoolize(libtool)"
+fi
+
+if test -n "$DIE"
+then
+	echo "You must have the following installed to compile $package:"
+	for i in $DIE
+	do
+		printf '  '
+		echo $i | sed -e 's/(/ (from /' -e 's/=\(.*\)/ (>= \1)/'
+	done
+	echo "Download the appropriate package(s) for your system,"
+	echo "or get the source from one of the GNU ftp sites"
+	echo "listed in http://www.gnu.org/order/ftp.html"
+        exit 1
+fi
+
 echo "Generating configuration files for $package, please wait...."
 
 ACLOCAL_FLAGS="$ACLOCAL_FLAGS"
@@ -110,6 +147,9 @@ $ACLOCAL $ACLOCAL_FLAGS || exit 1
 
 echo "  $AUTOHEADER"
 $AUTOHEADER || exit 1
+
+echo "  $LIBTOOLIZE --automake"
+$LIBTOOLIZE --automake || exit 1
 
 echo "  $AUTOMAKE --add-missing $AUTOMAKE_FLAGS"
 $AUTOMAKE --add-missing $AUTOMAKE_FLAGS || exit 1
