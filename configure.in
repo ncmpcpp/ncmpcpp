@@ -47,12 +47,6 @@ CPPFLAGS="$CPPFLAGS $libmpd_CFLAGS"
 LDFLAGS="$LDFLAGS $libmpd_LIBS"
 AC_CHECK_HEADERS([libmpd/libmpd.h], , AC_MSG_ERROR([missing libmpd.h header]))
 
-dnl ========================
-dnl = checking for pthread =
-dnl ========================
-AC_CHECK_LIB(pthread, pthread_create, LDFLAGS="$LDFLAGS -pthread", AC_MSG_ERROR([missing pthread library]))
-AC_CHECK_HEADERS([pthread.h], , AC_MSG_ERROR([missing pthread.h header]))
-
 dnl =======================
 dnl = checking for taglib =
 dnl =======================

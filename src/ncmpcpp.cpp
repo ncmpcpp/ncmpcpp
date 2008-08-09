@@ -59,6 +59,7 @@ vector<Song> vPlaylist;
 vector<Song> vSearched;
 vector<MpdDataType> vFileType;
 vector<string> vNameList;
+vector<long long> vHashList;
 
 vector<string> vArtists;
 vector<Song> vSongs;
@@ -397,7 +398,7 @@ int main(int argc, char *argv[])
 			{
 				for (vector<Song>::const_iterator j = vPlaylist.begin(); j != vPlaylist.end(); j++)
 				{
-					if (it->GetFile() == j->GetFile())
+					if (it->GetHash() == j->GetHash())
 					{
 						bold = 1;
 						break;
@@ -866,12 +867,14 @@ int main(int argc, char *argv[])
 									for (vector<Song>::const_iterator it = vSearched.begin(); it != vSearched.end(); it++)
 									{	
 										for (vector<Song>::const_iterator j = vPlaylist.begin(); j != vPlaylist.end(); j++)
-											if (j->GetFile() == it->GetFile())
+										{
+											if (j->GetHash() == it->GetHash())
+											{
 												bold = 1;
-										if (bold)
-											mSearcher->AddBoldOption(DisplaySong(*it));
-										else
-											mSearcher->AddOption(DisplaySong(*it));
+												break;
+											}
+										}
+										bold ? mSearcher->AddBoldOption(DisplaySong(*it)) : mSearcher->AddOption(DisplaySong(*it));
 										bold = 0;
 									}
 									

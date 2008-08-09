@@ -43,6 +43,7 @@ extern vector<Song> vPlaylist;
 extern vector<Song> vSearched;
 extern vector<MpdDataType> vFileType;
 extern vector<string> vNameList;
+extern vector<long long> vHashList;
 
 extern time_t block_delay;
 extern time_t timer;
@@ -210,7 +211,7 @@ void NcmpcppStatusChanged(MpdObj *conn, ChangedStatusType what)
 				{
 					for (vector<Song>::const_iterator it = vPlaylist.begin(); it != vPlaylist.end(); it++)
 					{
-						if (it->GetFile() == vNameList[i])
+						if (it->GetHash() == vHashList[i])
 						{
 							bold = 1;
 							break;
@@ -229,7 +230,7 @@ void NcmpcppStatusChanged(MpdObj *conn, ChangedStatusType what)
 			{
 				for (vector<Song>::const_iterator j = vPlaylist.begin(); j != vPlaylist.end(); j++)
 				{
-					if (j->GetFile() == it->GetFile())
+					if (j->GetHash() == it->GetHash())
 					{
 						bold = 1;
 						break;

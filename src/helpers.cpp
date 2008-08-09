@@ -37,6 +37,7 @@ extern Window *wFooter;
 extern vector<Song> vPlaylist;
 extern vector<MpdDataType> vFileType;
 extern vector<string> vNameList;
+extern vector<long long> vHashList;
 
 extern CurrScreen current_screen;
 
@@ -62,33 +63,6 @@ extern string EMPTY_TAG;
 extern string UNKNOWN_ARTIST;
 extern string UNKNOWN_TITLE;
 extern string UNKNOWN_ALBUM;
-
-void * BoldSongsFromPlaylist(void *t)
-{
-	if (!vNameList.empty())
-	{
-		bool bold = 0;
-		for (int i = 0; i < vFileType.size(); i++)
-		{
-			if (vFileType[i] == MPD_DATA_TYPE_SONG)
-			{
-				for (vector<Song>::const_iterator it = vPlaylist.begin(); it != vPlaylist.end(); it++)
-				{
-					if (it->GetFile() == vNameList[i])
-					{
-						bold = 1;
-						break;
-					}
-				}
-				mBrowser->BoldOption(i+1, bold);
-				bold = 0;
-			}
-		}
-	}
-	if (current_screen == csBrowser)
-		mBrowser->Refresh();
-	pthread_exit(NULL);
-}
 
 bool SortSongsByTrack(const Song &a, const Song &b)
 {
@@ -539,12 +513,14 @@ void GetDirectory(string dir)
 	browsed_dir = dir;
 	vFileType.clear();
 	vNameList.clear();
-	mBrowser->Clear(current_screen != csLibrary);
+	vHashList.clear();
+	mBrowser->Clear(0);
 	if (dir != "/")
 	{
 		mBrowser->AddOption("[..]");
 		vFileType.push_back(MPD_DATA_TYPE_DIRECTORY);
 		vNameList.push_back("");
+		vHashList.push_back(0);
 	}
 	browser = mpd_database_get_directory(conn, (char *)dir.c_str());
 	FOR_EACH_MPD_DATA(browser)
@@ -555,6 +531,7 @@ void GetDirectory(string dir)
 			{
 				vFileType.push_back(MPD_DATA_TYPE_PLAYLIST);
 				vNameList.push_back(browser->playlist);
+				vHashList.push_back(0);
 				mBrowser->AddOption("[red](playlist)[/red] " + string(browser->playlist));
 				break;
 			}
@@ -562,6 +539,7 @@ void GetDirectory(string dir)
 			{
 				string subdir = browser->directory;
 				vFileType.push_back(MPD_DATA_TYPE_DIRECTORY);
+				vHashList.push_back(0);
 				if (dir == "/")
 					vNameList.push_back(subdir.substr(browsed_dir.size()-1,subdir.size()-browsed_dir.size()+1));
 				else
@@ -577,15 +555,25 @@ void GetDirectory(string dir)
 				vFileType.push_back(MPD_DATA_TYPE_SONG);
 				Song s = browser->song;
 				vNameList.push_back(s.GetFile());
-				mBrowser->AddOption(DisplaySong(s));
+				vHashList.push_back(s.GetHash());
+				bool bold = 0;
+				for (vector<Song>::const_iterator it = vPlaylist.begin(); it != vPlaylist.end(); it++)
+				{
+					if (it->GetHash() == s.GetHash())
+					{
+						bold = 1;
+						break;
+					}
+				}
+				bold ? mBrowser->AddBoldOption(DisplaySong(s)) : mBrowser->AddOption(DisplaySong(s));
 				break;
 			}
 		}
 	}
-	
-	pthread_create(&bolder, NULL, BoldSongsFromPlaylist, NULL);
-	
 	mpd_data_free(browser);
 	browsed_subdir.clear();
+	
+	if (current_screen != csLibrary && current_screen == csBrowser)
+		mBrowser->Hide();
 }
 

@@ -36,7 +36,8 @@ void DefineEmptyTags()
 	UNKNOWN_ALBUM = "[" + et_col + "]<no album>[/" + et_col + "]";
 }
 
-Song::Song(mpd_Song *s) : itsMinutesLength(s->time/60),
+Song::Song(mpd_Song *s) : itsHash(0),
+			  itsMinutesLength(s->time/60),
 			  itsSecondsLength((s->time-itsMinutesLength*60)),
 			  itsPosition(s->pos),
 			  itsID(s->id),
@@ -66,6 +67,14 @@ Song::Song(mpd_Song *s) : itsMinutesLength(s->time/60),
 	{
 		itsDirectory = "/";
 		itsShortName = itsFile;
+	}
+	// generate pseudo-hash
+	i = 0;
+	for (string::const_iterator it = itsFile.begin(); it != itsFile.end(); it++, i++)
+	{
+		itsHash += *it;
+		if (i%2)
+			itsHash *= *it;
 	}
 }
 

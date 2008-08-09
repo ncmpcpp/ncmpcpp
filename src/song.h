@@ -37,7 +37,7 @@ void DefineEmptyTags();
 class Song
 {
 	public:
-		Song() : itsMinutesLength(0), itsSecondsLength(0), itsPosition(0), itsID(0), itsGetEmptyFields(0) { }
+		Song() : itsHash(0), itsMinutesLength(0), itsSecondsLength(0), itsPosition(0), itsID(0), itsGetEmptyFields(0) { }
 		Song(mpd_Song *);
 		~Song() {};
 		
@@ -56,6 +56,7 @@ class Song
 		//string GetDisc() const { return itsDisc; }
 		string GetComment() const;
 		string GetLength() const;
+		long long GetHash() const { return itsHash; }
 		int GetTotalLength() const { return itsMinutesLength*60+itsSecondsLength; }
 		int GetMinutesLength() const { return itsMinutesLength; }
 		int GetSecondsLength() const { return itsSecondsLength; }
@@ -91,6 +92,7 @@ class Song
 		//string itsPerformer;
 		//string itsDisc;
 		string itsComment;
+		long long itsHash;
 		int itsMinutesLength;
 		int itsSecondsLength;
 		int itsPosition;
