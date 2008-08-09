@@ -172,3 +172,36 @@ string Song::GetComment() const
 	return itsGetEmptyFields ? (itsComment.empty() ? "" : itsComment) : (itsComment.empty() ? EMPTY_TAG : itsComment);
 }
 
+Song & Song::operator=(const Song &s)
+{
+	if (this == &s)
+		return *this;
+	itsFile = s.itsFile;
+	itsShortName = s.itsShortName;
+	itsDirectory = s.itsDirectory;
+	itsArtist = s.itsArtist;
+	itsTitle = s.itsTitle;
+	itsAlbum = s.itsAlbum;
+	itsTrack = s.itsTrack;
+	itsYear = s.itsYear;
+	itsGenre = s.itsGenre;
+	itsComment = s.itsComment;
+	itsHash = s.itsHash;
+	itsMinutesLength = s.itsMinutesLength;
+	itsSecondsLength = s.itsSecondsLength;
+	itsPosition = s.itsPosition;
+	itsID = s.itsID;
+	itsGetEmptyFields = s.itsGetEmptyFields;
+	return *this;
+}
+
+bool Song::operator==(const Song &s) const
+{
+	return itsFile == s.itsFile && itsArtist == s.itsArtist && itsTitle == s.itsTitle && itsAlbum == s.itsAlbum && itsTrack == s.itsTrack && itsYear == s.itsYear && itsGenre == s.itsGenre && itsComment == s.itsComment && itsHash == s.itsHash && itsMinutesLength && s.itsMinutesLength && itsSecondsLength == s.itsSecondsLength && itsPosition == s.itsPosition && itsID == s.itsID;
+}
+
+bool Song::operator<(const Song &s) const
+{
+	return itsPosition < s.itsPosition;
+}
+

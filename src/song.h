@@ -77,6 +77,10 @@ class Song
 		void GetEmptyFields(bool get) { itsGetEmptyFields = get; }
 		void Clear();
 		bool Empty() const;
+		
+		Song & operator=(const Song &);
+		bool operator==(const Song &) const;
+		bool operator<(const Song &rhs) const;
 	private:
 		string itsFile;
 		string itsShortName;
