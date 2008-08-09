@@ -80,6 +80,7 @@ class Song
 		
 		Song & operator=(const Song &);
 		bool operator==(const Song &) const;
+		bool operator!=(const Song &) const;
 		bool operator<(const Song &rhs) const;
 	private:
 		string itsFile;

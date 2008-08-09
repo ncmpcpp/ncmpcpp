@@ -34,7 +34,7 @@ extern Menu *mSearcher;
 
 extern Window *wFooter;
 
-extern vector<Song> vPlaylist;
+extern vector<Song *> vPlaylist;
 extern vector<MpdDataType> vFileType;
 extern vector<string> vNameList;
 extern vector<long long> vHashList;
@@ -557,9 +557,9 @@ void GetDirectory(string dir)
 				vNameList.push_back(s.GetFile());
 				vHashList.push_back(s.GetHash());
 				bool bold = 0;
-				for (vector<Song>::const_iterator it = vPlaylist.begin(); it != vPlaylist.end(); it++)
+				for (vector<Song *>::const_iterator it = vPlaylist.begin(); it != vPlaylist.end(); it++)
 				{
-					if (it->GetHash() == s.GetHash())
+					if ((*it)->GetHash() == s.GetHash())
 					{
 						bold = 1;
 						break;

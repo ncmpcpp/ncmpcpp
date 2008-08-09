@@ -39,7 +39,7 @@ extern Menu *mLibSongs;
 extern Window *wHeader;
 extern Window *wFooter;
 
-extern vector<Song> vPlaylist;
+extern vector<Song *> vPlaylist;
 extern vector<Song> vSearched;
 extern vector<MpdDataType> vFileType;
 extern vector<string> vNameList;
@@ -74,6 +74,8 @@ extern bool block_progressbar_update;
 extern bool block_statusbar_update;
 extern bool block_playlist_update;
 extern bool block_library_update;
+
+long long playlist_old_id = -1;
 
 int old_playing;
 
@@ -129,7 +131,7 @@ void NcmpcppStatusChanged(MpdObj *conn, ChangedStatusType what)
 	wFooter->Bold(1);
 	wFooter->GetXY(sx, sy);
 	
-	if (now_playing != mpd_player_get_current_song_pos(conn))
+	if (now_playing != mpd_player_get_current_song_pos(conn) && !block_playlist_update)
 	{
 		old_playing = now_playing;
 		now_playing = mpd_player_get_current_song_pos(conn);
@@ -137,6 +139,8 @@ void NcmpcppStatusChanged(MpdObj *conn, ChangedStatusType what)
 	
 	if (what & MPD_CST_PLAYLIST)
 	{
+		playlist_old_id = mpd_playlist_get_old_playlist_id(conn);
+		
 		if (!block_playlist_update)
 		{
 			int playlist_length = mpd_playlist_get_playlist_length(conn);
@@ -146,24 +150,24 @@ void NcmpcppStatusChanged(MpdObj *conn, ChangedStatusType what)
 				if (playlist_length < vPlaylist.size())
 				{
 					mPlaylist->Clear(!playlist_length && current_screen != csLibrary);
+					for (vector<Song *>::iterator it = vPlaylist.begin(); it != vPlaylist.end(); it++)
+						delete *it;
 					vPlaylist.clear();
+					playlist = mpd_playlist_get_changes(conn, -1);
 				}
-				
-				playlist = mpd_playlist_get_changes(conn, -1);
+				else
+					playlist = mpd_playlist_get_changes(conn, playlist_old_id);
 				
 				vPlaylist.reserve(playlist_length);
 				
 				FOR_EACH_MPD_DATA(playlist)
 				{
-					if ((playlist_length > vPlaylist.size() && playlist->song->pos >= vPlaylist.size()) || playlist_length < vPlaylist.size())
-					{
-						vPlaylist.push_back(playlist->song);
-						Song &s = vPlaylist.back();
-						if (now_playing != s.GetPosition())
-							mPlaylist->AddOption(DisplaySong(s));
-						else
-							mPlaylist->AddBoldOption(DisplaySong(s));
-					}
+					Song *s = new Song(playlist->song);
+					vPlaylist.push_back(s);
+					if (now_playing != s->GetPosition())
+						mPlaylist->AddOption(DisplaySong(*s));
+					else
+						mPlaylist->AddBoldOption(DisplaySong(*s));
 				}
 				mpd_data_free(playlist);
 				
@@ -183,14 +187,15 @@ void NcmpcppStatusChanged(MpdObj *conn, ChangedStatusType what)
 				
 				playlist = mpd_playlist_get_changes(conn, -1);
 				
-				for (vector<Song>::iterator it = vPlaylist.begin(); it != vPlaylist.end(); it++, i++)
+				for (vector<Song *>::iterator it = vPlaylist.begin(); it != vPlaylist.end(); it++, i++)
 				{
 					Song ss = playlist->song;
 					ss.GetEmptyFields(1);
-					if (it->GetFile() != ss.GetFile() || it->GetTitle() != ss.GetTitle() || it->GetArtist() != ss.GetArtist() || it->GetAlbum() != ss.GetAlbum() || it->GetYear() != ss.GetYear() || it->GetTrack() != ss.GetTrack() || it->GetGenre() != ss.GetGenre() || it->GetComment() != ss.GetComment() || it->GetID() != ss.GetID() || it->GetPosition() != ss.GetPosition())
+					(*it)->GetEmptyFields(1);
+					if (**it != ss)
 					{
 						ss.GetEmptyFields(0);
-						*it = ss;
+						**it = ss;
 						mPlaylist->UpdateOption(i, DisplaySong(ss));
 					}
 					playlist = mpd_data_get_next(playlist);
@@ -202,16 +207,16 @@ void NcmpcppStatusChanged(MpdObj *conn, ChangedStatusType what)
 		if (vPlaylist.empty())
 			ShowMessage("Cleared playlist!");
 		
-		if (!vNameList.empty())
+		if (current_screen == csBrowser)
 		{
 			bool bold = 0;
 			for (int i = 0; i < vFileType.size(); i++)
 			{
 				if (vFileType[i] == MPD_DATA_TYPE_SONG)
 				{
-					for (vector<Song>::const_iterator it = vPlaylist.begin(); it != vPlaylist.end(); it++)
+					for (vector<Song *>::const_iterator it = vPlaylist.begin(); it != vPlaylist.end(); it++)
 					{
-						if (it->GetHash() == vHashList[i])
+						if ((*it)->GetHash() == vHashList[i])
 						{
 							bold = 1;
 							break;
@@ -222,15 +227,15 @@ void NcmpcppStatusChanged(MpdObj *conn, ChangedStatusType what)
 				}
 			}
 		}
-		if (!vSearched.empty())
+		if (current_screen == csSearcher)
 		{
 			bool bold = 0;
 			int i = search_engine_static_option;
 			for (vector<Song>::const_iterator it = vSearched.begin(); it != vSearched.end(); it++, i++)
 			{
-				for (vector<Song>::const_iterator j = vPlaylist.begin(); j != vPlaylist.end(); j++)
+				for (vector<Song *>::const_iterator j = vPlaylist.begin(); j != vPlaylist.end(); j++)
 				{
-					if (j->GetHash() == it->GetHash())
+					if ((*j)->GetHash() == it->GetHash())
 					{
 						bold = 1;
 						break;
@@ -254,7 +259,7 @@ void NcmpcppStatusChanged(MpdObj *conn, ChangedStatusType what)
 		{
 			case MPD_PLAYER_PLAY:
 			{
-				Song &s = vPlaylist[now_playing];
+				Song &s = *vPlaylist[now_playing];
 				player_state = "Playing: ";
 				mPlaylist->BoldOption(now_playing+1, 1);
 				break;
@@ -281,7 +286,7 @@ void NcmpcppStatusChanged(MpdObj *conn, ChangedStatusType what)
 	}
 	if ((what & MPD_CST_ELAPSED_TIME))
 	{
-		Song &s = vPlaylist[now_playing];
+		Song &s = *vPlaylist[now_playing];
 		if (!player_state.empty())
 		{
 			WindowTitle(DisplaySong(s, Config.song_window_title_format));
@@ -392,7 +397,7 @@ void NcmpcppStatusChanged(MpdObj *conn, ChangedStatusType what)
 		int id = mpd_player_get_current_song_pos(conn);
 		if (!vPlaylist.empty() && id >= 0)
 		{
-			Song &s = vPlaylist[id];
+			Song &s = *vPlaylist[id];
 			if (!mPlaylist->Empty())
 			{
 				if (old_playing >= 0)

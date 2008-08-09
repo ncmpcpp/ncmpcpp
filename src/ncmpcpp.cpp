@@ -55,7 +55,7 @@ char *MPD_PASSWORD = getenv("MPD_PASSWORD");
 
 ncmpcpp_config Config;
 
-vector<Song> vPlaylist;
+vector<Song *> vPlaylist;
 vector<Song> vSearched;
 vector<MpdDataType> vFileType;
 vector<string> vNameList;
@@ -279,6 +279,7 @@ int main(int argc, char *argv[])
 	{
 		TraceMpdStatus();
 		
+		block_playlist_update = 0;
 		messages_allowed = 1;
 		
 		if (Config.header_visibility)
@@ -396,9 +397,9 @@ int main(int argc, char *argv[])
 			bool bold = 0;
 			for (vector<Song>::const_iterator it = vSongs.begin(); it != vSongs.end(); it++)
 			{
-				for (vector<Song>::const_iterator j = vPlaylist.begin(); j != vPlaylist.end(); j++)
+				for (vector<Song *>::const_iterator j = vPlaylist.begin(); j != vPlaylist.end(); j++)
 				{
-					if (it->GetHash() == j->GetHash())
+					if (it->GetHash() == (*j)->GetHash())
 					{
 						bold = 1;
 						break;
@@ -544,7 +545,7 @@ int main(int argc, char *argv[])
 					case csPlaylist:
 					{
 						if (!mPlaylist->Empty())
-							mpd_player_play_id(conn, vPlaylist[mPlaylist->GetChoice()-1].GetID());
+							mpd_player_play_id(conn, vPlaylist[mPlaylist->GetChoice()-1]->GetID());
 						break;
 					}
 					case csBrowser:
@@ -584,7 +585,7 @@ int main(int argc, char *argv[])
 								if (test)
 								{
 									mpd_playlist_add(conn, file);
-									Song &s = vPlaylist.back();
+									Song &s = *vPlaylist.back();
 									mpd_player_play_id(conn, s.GetID());
 									ShowMessage("Added to playlist: " +  OmitBBCodes(DisplaySong(s)));
 									mBrowser->Refresh();
@@ -606,7 +607,7 @@ int main(int argc, char *argv[])
 								int new_id;
 								try
 								{
-									new_id = vPlaylist.at(mPlaylist->MaxChoice()-howmany).GetID();
+									new_id = vPlaylist.at(mPlaylist->MaxChoice()-howmany)->GetID();
 								}
 								catch (std::out_of_range)
 								{
@@ -866,9 +867,9 @@ int main(int argc, char *argv[])
 									
 									for (vector<Song>::const_iterator it = vSearched.begin(); it != vSearched.end(); it++)
 									{	
-										for (vector<Song>::const_iterator j = vPlaylist.begin(); j != vPlaylist.end(); j++)
+										for (vector<Song *>::const_iterator j = vPlaylist.begin(); j != vPlaylist.end(); j++)
 										{
-											if (j->GetHash() == it->GetHash())
+											if ((*j)->GetHash() == it->GetHash())
 											{
 												bold = 1;
 												break;
@@ -902,7 +903,7 @@ int main(int argc, char *argv[])
 								if (test)
 								{
 									mpd_playlist_add(conn, file);
-									Song &s = vPlaylist.back();
+									Song &s = *vPlaylist.back();
 									mpd_player_play_id(conn, s.GetID());
 									ShowMessage("Added to playlist: " +  OmitBBCodes(DisplaySong(s)));
 									mSearcher->Refresh();
@@ -939,7 +940,7 @@ int main(int argc, char *argv[])
 								int new_id;
 								try
 								{
-									new_id = vPlaylist.at(mPlaylist->MaxChoice()-howmany).GetID();
+									new_id = vPlaylist.at(mPlaylist->MaxChoice()-howmany)->GetID();
 								}
 								catch (std::out_of_range)
 								{
@@ -962,7 +963,7 @@ int main(int argc, char *argv[])
 								int new_id;
 								try
 								{
-									new_id = vPlaylist.at(mPlaylist->MaxChoice()-howmany).GetID();
+									new_id = vPlaylist.at(mPlaylist->MaxChoice()-howmany)->GetID();
 								}
 								catch (std::out_of_range)
 								{
@@ -979,7 +980,7 @@ int main(int argc, char *argv[])
 							ShowMessage("Added to playlist: " + OmitBBCodes(DisplaySong(s)));
 							mpd_playlist_add(conn, (char *) s.GetFile().c_str());
 							if (input == ENTER)
-								mpd_player_play_id(conn, vPlaylist.back().GetID());
+								mpd_player_play_id(conn, vPlaylist.back()->GetID());
 						}
 						
 						if (input == KEY_SPACE)
@@ -1005,17 +1006,16 @@ int main(int argc, char *argv[])
 							FOR_EACH_MPD_DATA(queue)
 								mpd_playlist_queue_add(conn, queue->song->file);
 							mpd_data_free(queue);
-							mpd_playlist_queue_commit(conn);
 							ShowMessage("Added folder: " + getdir);
+							mpd_playlist_queue_commit(conn);
 							break;
 						}
 						case MPD_DATA_TYPE_SONG:
 						{
-							if (mpd_playlist_add(conn, (char *) vNameList[ci].c_str()) == MPD_OK);
-							{
-								Song &s = vPlaylist.back();
-								ShowMessage("Added to playlist: " + OmitBBCodes(DisplaySong(s)));
-							}
+							mpd_playlist_queue_add(conn, (char *) vNameList[ci].c_str());
+							Song &s = *vPlaylist.back();
+							ShowMessage("Added to playlist: " + OmitBBCodes(DisplaySong(s)));
+							mpd_playlist_queue_commit(conn);
 							break;
 						}
 						case MPD_DATA_TYPE_PLAYLIST:
@@ -1023,7 +1023,7 @@ int main(int argc, char *argv[])
 							ShowMessage("Loading playlist " + vNameList[ci] + "...");
 							MpdData *list = mpd_database_get_playlist_content(conn, (char *) vNameList[ci].c_str());
 							FOR_EACH_MPD_DATA(list)
-									mpd_playlist_queue_add(conn, list->song->file);
+								mpd_playlist_queue_add(conn, list->song->file);
 							mpd_data_free(list);
 							mpd_playlist_queue_commit(conn);
 							break;
@@ -1036,20 +1036,12 @@ int main(int argc, char *argv[])
 					int id = mSearcher->GetChoice()-search_engine_static_option-1;
 					if (id < 0)
 						break;
-					try
-					{
 						
-						if (mpd_playlist_add(conn, (char *)vSearched.at(id).GetFile().c_str()) == MPD_OK);
-						{
-							Song &s = vPlaylist.back();
-							ShowMessage("Added to playlist: " + OmitBBCodes(DisplaySong(s)));
-							mSearcher->Go(DOWN);
-						}
-					}
-					catch (std::out_of_range)
-					{
-						ShowMessage("Error adding file!");
-					}
+					mpd_playlist_queue_add(conn, (char *)vSearched[id].GetFile().c_str());
+					Song &s = vSearched[id];
+					ShowMessage("Added to playlist: " + OmitBBCodes(DisplaySong(s)));
+					mpd_playlist_queue_commit(conn);
+					mSearcher->Go(DOWN);
 				}
 				if (current_screen == csLibrary)
 					goto Start_Point_For_KEY_SPACE; // sorry, but that's stupid to copy the same code here.
@@ -1121,7 +1113,7 @@ int main(int argc, char *argv[])
 					mPlaylist->Timeout(50);
 					int id = mPlaylist->GetChoice()-1;
 					
-					while (!vPlaylist.empty() && input != ERR)
+					while (!vPlaylist.empty() && input == KEY_DC)
 					{
 						TraceMpdStatus();
 						timer = time(NULL);
@@ -1131,13 +1123,15 @@ int main(int argc, char *argv[])
 							id = mPlaylist->GetChoice()-1;
 							
 							mpd_playlist_queue_delete_pos(conn, id);
+							if (now_playing > id)
+								now_playing--;
+							delete vPlaylist[id];
 							vPlaylist.erase(vPlaylist.begin()+id);
 							mPlaylist->DeleteOption(id+1);
 							mPlaylist->Refresh();
 						}
 						mPlaylist->ReadKey(input);
 					}
-					
 					mpd_playlist_queue_commit(conn);
 					mPlaylist->Timeout(ncmpcpp_window_timeout);
 					block_playlist_update = 0;
@@ -1223,9 +1217,13 @@ int main(int argc, char *argv[])
 			}
 			case 'm': // move song up
 			{
+				block_playlist_update = 1;
 				int pos = mPlaylist->GetChoice()-1;
 				if (pos > 0 && !mPlaylist->Empty() && current_screen == csPlaylist)
 				{
+					std::swap<Song *>(vPlaylist[pos], vPlaylist[pos-1]);
+					mPlaylist->UpdateOption(pos, DisplaySong(*vPlaylist[pos-1]));
+					mPlaylist->UpdateOption(pos+1, DisplaySong(*vPlaylist[pos]));
 					mpd_playlist_move_pos(conn, pos, pos-1);
 					mPlaylist->Go(UP);
 				}
@@ -1233,9 +1231,13 @@ int main(int argc, char *argv[])
 			}
 			case 'n': //move song down
 			{
+				block_playlist_update = 1;
 				int pos = mPlaylist->GetChoice()-1;
 				if (pos+1 < mpd_playlist_get_playlist_length(conn) && !mPlaylist->Empty() && current_screen == csPlaylist)
 				{
+					std::swap<Song *>(vPlaylist[pos+1], vPlaylist[pos]);
+					mPlaylist->UpdateOption(pos+2, DisplaySong(*vPlaylist[pos+1]));
+					mPlaylist->UpdateOption(pos+1, DisplaySong(*vPlaylist[pos]));
 					mpd_playlist_move_pos(conn, pos, pos+1);
 					mPlaylist->Go(DOWN);
 				}
@@ -1252,7 +1254,7 @@ int main(int argc, char *argv[])
 				int songpos, in;
 				
 				songpos = mpd_status_get_elapsed_song_time(conn);
-				Song &s = vPlaylist[now_playing];
+				Song &s = *vPlaylist[now_playing];
 				
 				while (1)
 				{
@@ -1331,7 +1333,7 @@ int main(int argc, char *argv[])
 				{
 					case csPlaylist:
 					{
-						if (GetSongInfo(vPlaylist[id]))
+						if (GetSongInfo(*vPlaylist[id]))
 						{
 							wCurrent = mTagEditor;
 							wPrev = mPlaylist;
@@ -1404,7 +1406,7 @@ int main(int argc, char *argv[])
 				position = wFooter->GetString(3, TraceMpdStatus);
 				newpos = atoi(position.c_str());
 				if (newpos > 0 && newpos < 100 && !position.empty())
-					mpd_player_seek(conn, vPlaylist[now_playing].GetTotalLength()*newpos/100.0);
+					mpd_player_seek(conn, vPlaylist[now_playing]->GetTotalLength()*newpos/100.0);
 				UNBLOCK_STATUSBAR_UPDATE;
 				break;
 			}
@@ -1439,14 +1441,34 @@ int main(int argc, char *argv[])
 				if (browsed_dir.empty())
 					browsed_dir = "/";
 				
+				if (mBrowser->Empty())
+					GetDirectory(browsed_dir);
+				else
+				{
+					bool bold = 0;
+					for (int i = 0; i < vFileType.size(); i++)
+					{
+						if (vFileType[i] == MPD_DATA_TYPE_SONG)
+						{
+							for (vector<Song *>::const_iterator it = vPlaylist.begin(); it != vPlaylist.end(); it++)
+							{
+								if ((*it)->GetHash() == vHashList[i])
+								{
+									bold = 1;
+									break;
+								}
+							}
+							mBrowser->BoldOption(i+1, bold);
+							bold = 0;
+						}
+					}
+				}
 				if (wCurrent != mBrowser && current_screen != csTagEditor)
 				{
 					wCurrent = mBrowser;
 					wCurrent->Hide();
 					current_screen = csBrowser;
 				}
-				if (mBrowser->Empty())
-					GetDirectory(browsed_dir);
 				break;
 			}
 			case '4': // search screen
@@ -1458,6 +1480,25 @@ int main(int argc, char *argv[])
 					wCurrent = mSearcher;
 					wCurrent->Hide();
 					current_screen = csSearcher;
+					if (!vSearched.empty())
+					{
+						wCurrent->WriteXY(0, 0, "Updating list...");
+						bool bold = 0;
+						int i = search_engine_static_option;
+						for (vector<Song>::const_iterator it = vSearched.begin(); it != vSearched.end(); it++, i++)
+						{
+							for (vector<Song *>::const_iterator j = vPlaylist.begin(); j != vPlaylist.end(); j++)
+							{
+								if ((*j)->GetHash() == it->GetHash())
+								{
+									bold = 1;
+									break;
+								}
+							}
+							mSearcher->BoldOption(i+1, bold);
+							bold = 0;
+						}
+					}
 				}
 				break;
 			}

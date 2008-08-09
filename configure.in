@@ -36,7 +36,6 @@ else
 fi
 AC_CHECK_HEADERS([ncurses.h], , AC_MSG_ERROR([missing ncurses.h header]))
 
-
 dnl =======================
 dnl = checking for libmpd =
 dnl =======================
