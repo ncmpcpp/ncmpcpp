@@ -1222,6 +1222,12 @@ int main(int argc, char *argv[])
 				if (pos > 0 && !mPlaylist->Empty() && current_screen == csPlaylist)
 				{
 					std::swap<Song *>(vPlaylist[pos], vPlaylist[pos-1]);
+					if (pos == now_playing)
+					{
+						now_playing--;
+						mPlaylist->BoldOption(pos, 1);
+						mPlaylist->BoldOption(pos+1, 0);
+					}
 					mPlaylist->UpdateOption(pos, DisplaySong(*vPlaylist[pos-1]));
 					mPlaylist->UpdateOption(pos+1, DisplaySong(*vPlaylist[pos]));
 					mpd_playlist_move_pos(conn, pos, pos-1);
@@ -1236,6 +1242,12 @@ int main(int argc, char *argv[])
 				if (pos+1 < mpd_playlist_get_playlist_length(conn) && !mPlaylist->Empty() && current_screen == csPlaylist)
 				{
 					std::swap<Song *>(vPlaylist[pos+1], vPlaylist[pos]);
+					if (pos == now_playing)
+					{
+						now_playing++;
+						mPlaylist->BoldOption(pos+2, 1);
+						mPlaylist->BoldOption(pos+1, 0);
+					}
 					mPlaylist->UpdateOption(pos+2, DisplaySong(*vPlaylist[pos+1]));
 					mPlaylist->UpdateOption(pos+1, DisplaySong(*vPlaylist[pos]));
 					mpd_playlist_move_pos(conn, pos, pos+1);
