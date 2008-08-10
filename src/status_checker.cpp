@@ -131,10 +131,12 @@ void NcmpcppStatusChanged(MpdObj *conn, ChangedStatusType what)
 	wFooter->Bold(1);
 	wFooter->GetXY(sx, sy);
 	
-	if (now_playing != mpd_player_get_current_song_pos(conn) && what & MPD_CST_SONGID)
+	if (now_playing != mpd_player_get_current_song_pos(conn) || what & MPD_CST_SONGID)
 	{
 		old_playing = now_playing;
 		now_playing = mpd_player_get_current_song_pos(conn);
+		mPlaylist->BoldOption(old_playing+1, 0);
+		mPlaylist->BoldOption(now_playing+1, 1);
 	}
 	
 	if (what & MPD_CST_PLAYLIST)
@@ -287,9 +289,11 @@ void NcmpcppStatusChanged(MpdObj *conn, ChangedStatusType what)
 	}
 	if ((what & MPD_CST_ELAPSED_TIME))
 	{
-		Song &s = *vPlaylist[now_playing];
-		if (!player_state.empty())
+		mpd_Song *current = mpd_playlist_get_current_song(conn);
+		if (!player_state.empty() && current)
 		{
+			Song s = current;
+			
 			WindowTitle(DisplaySong(s, Config.song_window_title_format));
 			
 			int elapsed = mpd_status_get_elapsed_song_time(conn);
