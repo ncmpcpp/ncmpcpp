@@ -586,7 +586,8 @@ int main(int argc, char *argv[])
 								{
 									mpd_playlist_add(conn, (char *) file.c_str());
 									Song s = test;
-									mpd_player_play_id(conn, s.GetID());
+									if (s.GetHash() == vPlaylist.back()->GetHash())
+										mpd_player_play_id(conn, vPlaylist.back()->GetID());
 									ShowMessage("Added to playlist: " +  OmitBBCodes(DisplaySong(s)));
 									mBrowser->Refresh();
 								}
@@ -598,6 +599,9 @@ int main(int argc, char *argv[])
 								int howmany = 0;
 								ShowMessage("Loading and playing playlist " + vNameList[ci] + "...");
 								MpdData *list = mpd_database_get_playlist_content(conn, (char *) vNameList[ci].c_str());
+								Song tmp;
+								if (list)
+									tmp = list->song;
 								FOR_EACH_MPD_DATA(list)
 								{
 									howmany++;
@@ -615,7 +619,8 @@ int main(int argc, char *argv[])
 									new_id = -1;
 								}
 								if (new_id >= 0)
-									mpd_player_play_id(conn, new_id);
+									if (vPlaylist[mPlaylist->MaxChoice()-howmany]->GetHash() == tmp.GetHash())
+										mpd_player_play_id(conn, new_id);
 								break;
 							}
 						}
@@ -905,7 +910,8 @@ int main(int argc, char *argv[])
 								{
 									mpd_playlist_add(conn, (char *) file.c_str());
 									Song s = test;
-									mpd_player_play_id(conn, s.GetID());
+									if (s.GetHash() == vPlaylist.back()->GetHash())
+										mpd_player_play_id(conn, vPlaylist.back()->GetID());
 									ShowMessage("Added to playlist: " +  OmitBBCodes(DisplaySong(s)));
 								}
 								mpd_freeSong(test);
@@ -929,6 +935,9 @@ int main(int argc, char *argv[])
 							mpd_database_search_add_constraint(conn, MPD_TAG_ITEM_ARTIST, (char *) artist.c_str());
 							data = mpd_database_search_commit(conn);
 							int howmany = 0;
+							Song tmp;
+							if (data)
+								tmp = data->song;
 							FOR_EACH_MPD_DATA(data)
 							{
 								howmany++;
@@ -948,7 +957,8 @@ int main(int argc, char *argv[])
 									new_id = -1;
 								}
 								if (new_id >= 0)
-									mpd_player_play_id(conn, new_id);
+									if (vPlaylist[mPlaylist->MaxChoice()-howmany]->GetHash() == tmp.GetHash())
+										mpd_player_play_id(conn, new_id);
 							}
 						}
 						
@@ -971,7 +981,8 @@ int main(int argc, char *argv[])
 									new_id = -1;
 								}
 								if (new_id >= 0)
-									mpd_player_play_id(conn, new_id);
+									if (vPlaylist[mPlaylist->MaxChoice()-howmany]->GetHash() == vSongs.begin()->GetHash())
+										mpd_player_play_id(conn, new_id);
 							}
 						}
 						
@@ -980,7 +991,7 @@ int main(int argc, char *argv[])
 							Song &s = vSongs[mLibSongs->GetChoice()-1];
 							ShowMessage("Added to playlist: " + OmitBBCodes(DisplaySong(s)));
 							mpd_playlist_add(conn, (char *) s.GetFile().c_str());
-							if (input == ENTER)
+							if (input == ENTER && s.GetHash() == vPlaylist.back()->GetHash())
 								mpd_player_play_id(conn, vPlaylist.back()->GetID());
 						}
 						
