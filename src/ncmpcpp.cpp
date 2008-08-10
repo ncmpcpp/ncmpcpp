@@ -580,16 +580,17 @@ int main(int argc, char *argv[])
 							}
 							case MPD_DATA_TYPE_SONG:
 							{
-								char *file = (char *)vNameList[ci].c_str();
-								mpd_Song *test = mpd_database_get_fileinfo(conn, file);
+								string &file = vNameList[ci];
+								mpd_Song *test = mpd_database_get_fileinfo(conn, (char *) file.c_str());
 								if (test)
 								{
-									mpd_playlist_add(conn, file);
-									Song &s = *vPlaylist.back();
+									mpd_playlist_add(conn, (char *) file.c_str());
+									Song s = test;
 									mpd_player_play_id(conn, s.GetID());
 									ShowMessage("Added to playlist: " +  OmitBBCodes(DisplaySong(s)));
 									mBrowser->Refresh();
 								}
+								mpd_freeSong(test);
 								break;
 							}
 							case MPD_DATA_TYPE_PLAYLIST:
@@ -898,16 +899,16 @@ int main(int argc, char *argv[])
 							default:
 							{
 								int ci = mSearcher->GetRealChoice()-1;
-								char *file = (char *)vSearched[ci-1].GetFile().c_str();
-								mpd_Song *test = mpd_database_get_fileinfo(conn, file);
+								const string &file = vSearched[ci-1].GetFile();
+								mpd_Song *test = mpd_database_get_fileinfo(conn, (char *) file.c_str());
 								if (test)
 								{
-									mpd_playlist_add(conn, file);
-									Song &s = *vPlaylist.back();
+									mpd_playlist_add(conn, (char *) file.c_str());
+									Song s = test;
 									mpd_player_play_id(conn, s.GetID());
 									ShowMessage("Added to playlist: " +  OmitBBCodes(DisplaySong(s)));
-									mSearcher->Refresh();
 								}
+								mpd_freeSong(test);
 								break;
 							}
 						}
@@ -1012,10 +1013,15 @@ int main(int argc, char *argv[])
 						}
 						case MPD_DATA_TYPE_SONG:
 						{
-							mpd_playlist_queue_add(conn, (char *) vNameList[ci].c_str());
-							Song &s = *vPlaylist.back();
-							ShowMessage("Added to playlist: " + OmitBBCodes(DisplaySong(s)));
-							mpd_playlist_queue_commit(conn);
+							mpd_Song *test = mpd_database_get_fileinfo(conn, (char *) vNameList[ci].c_str());
+							if (test)
+							{
+								mpd_playlist_queue_add(conn, (char *) vNameList[ci].c_str());
+								Song s = test;
+								ShowMessage("Added to playlist: " + OmitBBCodes(DisplaySong(s)));
+								mpd_playlist_queue_commit(conn);
+							}
+							mpd_freeSong(test);
 							break;
 						}
 						case MPD_DATA_TYPE_PLAYLIST:
