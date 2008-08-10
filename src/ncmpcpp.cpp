@@ -44,8 +44,10 @@
 			}
 
 #ifdef HAVE_TAGLIB_H
+ const string tag_screen = "Tag editor";
  const string tag_screen_keydesc = "\tE e       : Edit song's tags\n";
 #else
+ const string tag_screen = "Tag info";
  const string tag_screen_keydesc = "\tE e       : Show song's tags\n";
 #endif
 
@@ -218,7 +220,8 @@ int main(int argc, char *argv[])
 	sHelp->Add("   [b]Keys - Playlist screen\n -----------------------------------------[/b]\n");
 	sHelp->Add("\tEnter     : Play\n");
 	sHelp->Add("\tDelete    : Delete song from playlist\n");
-	sHelp->Add("\tc         : Clear playlist\n");
+	sHelp->Add("\tc         : Clear whole playlist\n");
+	sHelp->Add("\tC         : Clear playlist but hold currently playing song\n");
 	sHelp->Add("\tm         : Move song up\n");
 	sHelp->Add("\tn         : Move song down\n");
 	sHelp->Add("\tS         : Save playlist\n");
@@ -239,8 +242,13 @@ int main(int argc, char *argv[])
 	sHelp->Add("\tEnter     : Select and play song/album/artist's songs\n");
 	sHelp->Add("\tSpace     : Select song/album/artist's songs\n\n\n");
 	
-	sHelp->Add("   [b]Keys - Tag Editor\n -----------------------------------------[/b]\n");
+#	ifdef HAVE_TAGLIB_H
+	sHelp->Add("   [b]Keys - Tag editor\n -----------------------------------------[/b]\n");
 	sHelp->Add("\tEnter     : Change option\n");
+#	else
+	sHelp->Add("   [b]Keys - Tag info\n -----------------------------------------[/b]\n");
+	sHelp->Add("\tEnter     : Return\n");
+#	endif
 	
 	if (Config.header_visibility)
 	{
@@ -299,11 +307,7 @@ int main(int argc, char *argv[])
 					title = "Browse: ";
 					break;
 				case csTagEditor:
-#					ifdef HAVE_TAGLIB_H
-					title = "Tag editor";
-#					else
-					title = "Tag info";
-#					endif
+					title = tag_screen;
 					break;
 				case csSearcher:
 					title = "Search engine";
@@ -670,9 +674,9 @@ int main(int argc, char *argv[])
 							{
 								wFooter->WriteXY(0, 1, "[b]New year:[/b] ", 1);
 								if (s.GetYear() == EMPTY_TAG)
-									s.SetDate(wFooter->GetString(4, TraceMpdStatus));
+									s.SetYear(wFooter->GetString(4, TraceMpdStatus));
 								else
-									s.SetDate(wFooter->GetString(s.GetYear(), 4, TraceMpdStatus));
+									s.SetYear(wFooter->GetString(s.GetYear(), 4, TraceMpdStatus));
 								mTagEditor->UpdateOption(option, "[b]Year:[/b] " + s.GetYear());
 								break;
 							}
@@ -811,9 +815,9 @@ int main(int argc, char *argv[])
 							{
 								wFooter->WriteXY(0, 1, "[b]Year:[/b] ", 1);
 								if (s.GetYear() == EMPTY_TAG)
-									s.SetDate(wFooter->GetString(4, TraceMpdStatus));
+									s.SetYear(wFooter->GetString(4, TraceMpdStatus));
 								else
-									s.SetDate(wFooter->GetString(s.GetYear(), 4, TraceMpdStatus));
+									s.SetYear(wFooter->GetString(s.GetYear(), 4, TraceMpdStatus));
 								mSearcher->UpdateOption(option, "[b]Year:[/b] " + s.GetYear());
 								break;
 							}
@@ -1435,6 +1439,8 @@ int main(int argc, char *argv[])
 								current_screen = csTagEditor;
 								prev_screen = csLibrary;
 							}
+							else
+								ShowMessage("Cannot read file!");
 						}
 					}
 					default:
@@ -1457,8 +1463,25 @@ int main(int argc, char *argv[])
 				UNBLOCK_STATUSBAR_UPDATE;
 				break;
 			}
+			case 'C': // clear playlist but holds currently playing song
+			{
+				if (now_playing < 0)
+				{
+					ShowMessage("Nothing is playing now!");
+					break;
+				}
+				for (vector<Song *>::iterator it = vPlaylist.begin(); it != vPlaylist.begin()+now_playing; it++)
+					mpd_playlist_queue_delete_id(conn, (*it)->GetID());
+				for (vector<Song *>::iterator it = vPlaylist.begin()+now_playing+1; it != vPlaylist.end(); it++)
+					mpd_playlist_queue_delete_id(conn, (*it)->GetID());
+				ShowMessage("Deleting all songs except now playing one...");
+				mpd_playlist_queue_commit(conn);
+				ShowMessage("Songs deleted!");
+				break;
+			}
 			case 'c': // clear playlist
 			{
+				ShowMessage("Clearing playlist...");
 				mpd_playlist_clear(conn);
 				ShowMessage("Cleared playlist!");
 				break;
