@@ -131,7 +131,7 @@ void NcmpcppStatusChanged(MpdObj *conn, ChangedStatusType what)
 	wFooter->Bold(1);
 	wFooter->GetXY(sx, sy);
 	
-	if (now_playing != mpd_player_get_current_song_pos(conn) && !block_playlist_update)
+	if (now_playing != mpd_player_get_current_song_pos(conn) && what & MPD_CST_SONGID)
 	{
 		old_playing = now_playing;
 		now_playing = mpd_player_get_current_song_pos(conn);
@@ -194,6 +194,7 @@ void NcmpcppStatusChanged(MpdObj *conn, ChangedStatusType what)
 					(*it)->GetEmptyFields(1);
 					if (**it != ss)
 					{
+						(*it)->GetEmptyFields(0);
 						ss.GetEmptyFields(0);
 						**it = ss;
 						mPlaylist->UpdateOption(i, DisplaySong(ss));
@@ -394,10 +395,9 @@ void NcmpcppStatusChanged(MpdObj *conn, ChangedStatusType what)
 	}
 	if (what & MPD_CST_SONGID)
 	{
-		int id = mpd_player_get_current_song_pos(conn);
-		if (!vPlaylist.empty() && id >= 0)
+		if (!vPlaylist.empty() && now_playing >= 0)
 		{
-			Song &s = *vPlaylist[id];
+			Song &s = *vPlaylist[now_playing];
 			if (!mPlaylist->Empty())
 			{
 				if (old_playing >= 0)

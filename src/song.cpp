@@ -111,9 +111,9 @@ void Song::Clear()
 	//itsPerformer.clear();
 	//itsDisc.clear();
 	itsComment.clear();
-	itsMinutesLength = 0;;
-	itsSecondsLength = 0;;
-	itsPosition = 0;;
+	itsMinutesLength = 0;
+	itsSecondsLength = 0;
+	itsPosition = 0;
 	itsID = 0;
 }
 

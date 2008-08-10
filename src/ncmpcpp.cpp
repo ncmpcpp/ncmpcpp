@@ -1228,6 +1228,15 @@ int main(int argc, char *argv[])
 						mPlaylist->BoldOption(pos, 1);
 						mPlaylist->BoldOption(pos+1, 0);
 					}
+					else
+					{
+						if (pos-1 == now_playing)
+						{
+							now_playing++;
+							mPlaylist->BoldOption(pos, 0);
+							mPlaylist->BoldOption(pos+1, 1);
+						}
+					}
 					mPlaylist->UpdateOption(pos, DisplaySong(*vPlaylist[pos-1]));
 					mPlaylist->UpdateOption(pos+1, DisplaySong(*vPlaylist[pos]));
 					mpd_playlist_move_pos(conn, pos, pos-1);
@@ -1245,8 +1254,17 @@ int main(int argc, char *argv[])
 					if (pos == now_playing)
 					{
 						now_playing++;
-						mPlaylist->BoldOption(pos+2, 1);
 						mPlaylist->BoldOption(pos+1, 0);
+						mPlaylist->BoldOption(pos+2, 1);
+					}
+					else
+					{
+						if (pos+1 == now_playing)
+						{
+							now_playing--;
+							mPlaylist->BoldOption(pos+1, 1);
+							mPlaylist->BoldOption(pos+2, 0);
+						}
 					}
 					mPlaylist->UpdateOption(pos+2, DisplaySong(*vPlaylist[pos+1]));
 					mPlaylist->UpdateOption(pos+1, DisplaySong(*vPlaylist[pos]));
