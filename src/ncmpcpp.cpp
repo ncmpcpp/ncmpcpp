@@ -365,7 +365,11 @@ int main(int argc, char *argv[])
 			MpdData *data;
 			
 			if (wCurrent == mLibAlbums && mLibAlbums->Empty())
+			{
+				mLibAlbums->HighlightColor(Config.main_color);
+				mLibArtists->HighlightColor(Config.library_active_column_color);
 				wCurrent = mLibArtists;
+			}
 			
 			if (wCurrent == mLibArtists)
 			{
@@ -1009,11 +1013,14 @@ int main(int argc, char *argv[])
 						
 						if (wCurrent == mLibSongs)
 						{
-							Song &s = vSongs[mLibSongs->GetChoice()-1];
-							ShowMessage("Added to playlist: " + OmitBBCodes(DisplaySong(s)));
-							mpd_playlist_add(conn, (char *) s.GetFile().c_str());
-							if (input == ENTER && s.GetHash() == vPlaylist.back()->GetHash())
-								mpd_player_play_id(conn, vPlaylist.back()->GetID());
+							if (!vSongs.empty())
+							{
+								Song &s = vSongs[mLibSongs->GetChoice()-1];
+								ShowMessage("Added to playlist: " + OmitBBCodes(DisplaySong(s)));
+								mpd_playlist_add(conn, (char *) s.GetFile().c_str());
+								if (input == ENTER && s.GetHash() == vPlaylist.back()->GetHash())
+									mpd_player_play_id(conn, vPlaylist.back()->GetID());
+							}
 						}
 						
 						if (input == KEY_SPACE)
@@ -1240,7 +1247,7 @@ int main(int argc, char *argv[])
 							ShowMessage("Playlist saved as: " + playlist_name);
 							break;
 						case MPD_DATABASE_PLAYLIST_EXIST:
-							ShowMessage("Playlist already exist!");
+							ShowMessage("Playlist already exists!");
 							break;
 					}
 				}

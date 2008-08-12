@@ -43,6 +43,8 @@ extern vector<Song *> vPlaylist;
 extern vector<Song> vSearched;
 extern vector<BrowsedItem> vBrowser;
 
+extern vector<string> vArtists;
+
 extern time_t block_delay;
 extern time_t timer;
 extern time_t now;
@@ -251,6 +253,25 @@ void NcmpcppStatusChanged(MpdObj *conn, ChangedStatusType what)
 	if(what & MPD_CST_DATABASE)
 	{
 		GetDirectory(browsed_dir);
+		if (!mLibArtists->Empty())
+		{
+			ShowMessage("Updating artists' list...");
+			mLibArtists->Clear(0);
+			vArtists.clear();
+			MpdData *data = mpd_database_get_artists(conn);
+			FOR_EACH_MPD_DATA(data)
+				vArtists.push_back(data->tag);
+			mpd_data_free(data);
+			sort(vArtists.begin(), vArtists.end(), CaseInsensitiveComparison);
+			for (vector<string>::const_iterator it = vArtists.begin(); it != vArtists.end(); it++)
+				mLibArtists->AddOption(*it);
+			if (current_screen == csLibrary)
+			{
+				mLibArtists->Hide();
+				mLibArtists->Display();
+			}
+			ShowMessage("List updated!");
+		}
 		block_library_update = 0;
 	}
 	if (what & MPD_CST_STATE)
