@@ -195,7 +195,8 @@ int main(int argc, char *argv[])
 	sHelp->Add("\t1         : Help screen\n");
 	sHelp->Add("\t2         : Playlist screen\n");
 	sHelp->Add("\t3         : Browse screen\n");
-	sHelp->Add("\t4         : Search engine\n\n\n");
+	sHelp->Add("\t4         : Search engine\n");
+	sHelp->Add("\t5         : Media library\n\n\n");
 	
 	sHelp->Add("   [b]Keys - Global\n -----------------------------------------[/b]\n");
 	sHelp->Add("\ts         : Stop\n");
@@ -234,7 +235,7 @@ int main(int argc, char *argv[])
 	sHelp->Add("   [b]Keys - Browse screen\n -----------------------------------------[/b]\n");
 	sHelp->Add("\tEnter     : Enter directory/Add to playlist and play song\n");
 	sHelp->Add("\tSpace     : Add song to playlist\n");
-	sHelp->Add("\tDelete    : Delete playlist\n\n");
+	sHelp->Add("\tDelete    : Delete playlist\n\n\n");
 	
 	sHelp->Add("   [b]Keys - Search engine\n -----------------------------------------[/b]\n");
 	sHelp->Add("\tEnter     : Change option/Add to playlist and play song\n");
