@@ -21,6 +21,12 @@
 #include "menu.h"
 #include "misc.h"
 
+Menu::~Menu()
+{
+	for (vector<Option *>::iterator it = itsOptions.begin(); it != itsOptions.end(); it++)
+		delete *it;
+}
+
 int Menu::count_length(string str)
 {
 	if (str.empty())
@@ -60,39 +66,47 @@ int Menu::count_length(string str)
 
 void Menu::AddOption(const string &str, LOCATION location, HAVE_SEPARATOR separator)
 {
-	itsLocations.push_back(location);
-	itsOptions.push_back(str);
-	itsSeparators.push_back(separator);
-	itsStaticOptions.push_back(0);
-	itsBold.push_back(0);
+	Option *new_option = new Option;
+	new_option->content = str;
+	new_option->location = location;
+	new_option->have_separator = separator;
+	new_option->is_static = 0;
+	new_option->is_bold = 0;
+	itsOptions.push_back(new_option);
 }
 
 void Menu::AddBoldOption(const string &str, LOCATION location, HAVE_SEPARATOR separator)
 {
-	itsLocations.push_back(location);
-	itsOptions.push_back(str);
-	itsSeparators.push_back(separator);
-	itsStaticOptions.push_back(0);
-	itsBold.push_back(1);
+	Option *new_option = new Option;
+	new_option->content = str;
+	new_option->location = location;
+	new_option->have_separator = separator;
+	new_option->is_static = 0;
+	new_option->is_bold = 1;
+	itsOptions.push_back(new_option);
 }
 
 void Menu::AddStaticOption(const string &str, LOCATION location, HAVE_SEPARATOR separator)
 {
-	itsLocations.push_back(location);
-	itsOptions.push_back(str);
-	itsSeparators.push_back(separator);
-	itsStaticOptions.push_back(1);
-	itsBold.push_back(0);
+	Option *new_option = new Option;
+	new_option->content = str;
+	new_option->location = location;
+	new_option->have_separator = separator;
+	new_option->is_static = 1;
+	new_option->is_bold = 0;
+	itsOptions.push_back(new_option);
 	itsStaticsNumber++;
 }
 
 void Menu::AddStaticBoldOption(const string &str, LOCATION location, HAVE_SEPARATOR separator)
 {
-	itsLocations.push_back(location);
-	itsOptions.push_back(str);
-	itsSeparators.push_back(separator);
-	itsStaticOptions.push_back(1);
-	itsBold.push_back(1);
+	Option *new_option = new Option;
+	new_option->content = str;
+	new_option->location = location;
+	new_option->have_separator = separator;
+	new_option->is_static = 1;
+	new_option->is_bold = 1;
+	itsOptions.push_back(new_option);
 	itsStaticsNumber++;
 }
 
@@ -105,9 +119,9 @@ void Menu::UpdateOption(int index, string str, LOCATION location, HAVE_SEPARATOR
 {
 	try
 	{
-		itsLocations.at(index-1) = location;
-		itsOptions.at(index-1) = str;
-		itsSeparators.at(index-1) = separator;
+		itsOptions.at(index-1)->location = location;
+		itsOptions.at(index-1)->content = str;
+		itsOptions.at(index-1)->have_separator = separator;
 	}
 	catch (std::out_of_range)
 	{
@@ -118,7 +132,7 @@ void Menu::BoldOption(int index, IS_BOLD bold)
 {
 	try
 	{
-		itsBold.at(index-1) = bold;
+		itsOptions.at(index-1)->is_bold = bold;
 	}
 	catch (std::out_of_range)
 	{
@@ -129,11 +143,11 @@ void Menu::MakeStatic(int index, IS_STATIC stat)
 {
 	try
 	{
-		if (stat && !itsStaticOptions.at(index-1))
+		if (stat && !itsOptions.at(index-1)->is_static)
 			itsStaticsNumber++;
-		if (!stat && itsStaticOptions.at(index-1))
+		if (!stat && itsOptions.at(index-1)->is_static)
 			itsStaticsNumber--;
-		itsStaticOptions.at(index-1) = stat;
+		itsOptions.at(index-1)->is_static = stat;
 	}
 	catch (std::out_of_range)
 	{
@@ -144,7 +158,7 @@ string Menu::GetCurrentOption() const
 {
 	try
 	{
-		return itsOptions.at(itsHighlight);
+		return itsOptions.at(itsHighlight)->content;
 	}
 	catch (std::out_of_range)
 	{
@@ -156,7 +170,7 @@ string Menu::GetOption(int i) const
 {
 	try
 	{
-		return itsOptions.at(i-1);
+		return itsOptions.at(i-1)->content;
 	}
 	catch (std::out_of_range)
 	{
@@ -168,18 +182,15 @@ void Menu::DeleteOption(int no)
 {
 	try
 	{
-		if (itsStaticOptions.at(no-1))
+		if (itsOptions.at(no-1)->is_static)
 			itsStaticsNumber--;
 	}
 	catch (std::out_of_range)
 	{
 		return;
 	}
-	itsLocations.erase(itsLocations.begin()+no-1);
+	delete itsOptions[no-1];
 	itsOptions.erase(itsOptions.begin()+no-1);
-	itsStaticOptions.erase(itsStaticOptions.begin()+no-1);
-	itsSeparators.erase(itsSeparators.begin()+no-1);
-	itsBold.erase(itsBold.begin()+no-1);
 	/*if (itsBeginning > 0 && itsBeginning == itsOptions.size()-itsHeight)
 		itsBeginning--;
 	Go(UP);*/
@@ -221,7 +232,7 @@ void Menu::Refresh()
 		next = 0;
 		try
 		{
-			itsSeparators.at(i);
+			itsOptions.at(i);
 		}
 		catch (std::out_of_range)
 		{
@@ -239,19 +250,19 @@ void Menu::Refresh()
 			Reverse(1);
 			SetColor(itsHighlightColor);
 		}
-		if (itsBold[i])
+		if (itsOptions[i]->is_bold)
 			Bold(1);
 		
-		int ch = itsSeparators[i] ? 0 : 32;
+		int ch = itsOptions[i]->have_separator ? 0 : 32;
 		mvwhline(itsWindow,line, 0, ch, itsWidth);
 		
-		int strlength = itsLocations[i] != lLeft && BBEnabled ? count_length(itsOptions[i]) : itsOptions[i].length();
+		int strlength = itsOptions[i]->location != lLeft && BBEnabled ? count_length(itsOptions[i]->content) : itsOptions[i]->content.length();
 		
 		if (strlength)
 		{
 			int x = 0;
 			
-			if (itsLocations[i] == lCenter)
+			if (itsOptions[i]->location == lCenter)
 			{
 				for (; x < (itsWidth-strlength-(!ch ? 4 : 0))/2; x++);
 				if (!ch)
@@ -262,7 +273,7 @@ void Menu::Refresh()
 					x += 2;
 				}
 			}
-			if (itsLocations[i] == lRight)
+			if (itsOptions[i]->location == lRight)
 			{
 				for (; x < (itsWidth-strlength); x++)
 				if (!ch)
@@ -274,9 +285,9 @@ void Menu::Refresh()
 				}
 			}
 			
-			WriteXY(x, line, itsOptions[i], 0);
+			WriteXY(x, line, itsOptions[i]->content, 0);
 			
-			if (!ch && (itsLocations[i] == lCenter || itsLocations[i] == lLeft))
+			if (!ch && (itsOptions[i]->location == lCenter || itsOptions[i]->location == lLeft))
 			{
 				x += strlength;
 				AltCharset(1);
@@ -291,7 +302,7 @@ void Menu::Refresh()
 			Reverse(0);
 			SetColor(itsBaseColor);
 		}
-		if (itsBold[i])
+		if (itsOptions[i]->is_bold)
 			Bold(0);
 	}
 	wrefresh(itsWindow);
@@ -409,6 +420,8 @@ void Menu::Highlight(int which)
 {
 	if (which <= itsOptions.size())
 		itsHighlight = which-1;
+	else
+		return;
 	
 	if (which > itsHeight)
 		itsBeginning = itsHighlight-itsHeight/2;
@@ -424,11 +437,9 @@ void Menu::Reset()
 
 void Menu::Clear(bool clear_screen)
 {
+	for (vector<Option *>::iterator it = itsOptions.begin(); it != itsOptions.end(); it++)
+		delete *it;
 	itsOptions.clear();
-	itsStaticOptions.clear();
-	itsSeparators.clear();
-	itsLocations.clear();
-	itsBold.clear();
 	itsStaticsNumber = 0;
 	if (clear_screen)
 		Window::Clear();
@@ -437,11 +448,23 @@ void Menu::Clear(bool clear_screen)
 int Menu::GetRealChoice() const
 {
 	int real_choice	= 0;
-	vector<IS_STATIC>::const_iterator it = itsStaticOptions.begin();
+	vector<Option *>::const_iterator it = itsOptions.begin();
 	for (int i = 0; i < itsHighlight; it++, i++)
-		if (!*it) real_choice++;
+		if (!(*it)->is_static) real_choice++;
 	
 	return real_choice+1;
+}
+
+bool Menu::IsStatic(int option)
+{
+	try
+	{
+		return itsOptions.at(option-1)->is_static;
+	}
+	catch (std::out_of_range)
+	{
+		return 1;
+	}
 }
 
 Menu Menu::EmptyClone()

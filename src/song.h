@@ -68,8 +68,8 @@ class Song
 		void SetArtist(string str) { itsArtist = str; }
 		void SetTitle(string str) { itsTitle = str; }
 		void SetAlbum(string str) { itsAlbum = str; }
-		void SetTrack(string str) { itsTrack = IntoStr(StrToInt(str)); }
-		void SetYear(string str) { itsYear = IntoStr(StrToInt(str)); }
+		void SetTrack(string str) { itsTrack = str.empty() ? "" : IntoStr(StrToInt(str)); }
+		void SetYear(string str) { itsYear = str.empty() ? "" : IntoStr(StrToInt(str)); }
 		void SetGenre(string str) { itsGenre = str; }
 		void SetComment(string str) { itsComment = str; }
 		void SetPosition(int pos) { itsPosition = pos; }

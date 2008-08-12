@@ -27,6 +27,14 @@
 #include "settings.h"
 #include "song.h"
 
+struct BrowsedItem
+{
+	BrowsedItem() : hash(0) { }
+	string name;
+	MpdDataType type;
+	long long hash;
+};
+
 extern ncmpcpp_config Config;
 
 bool SortSongsByTrack(const Song &, const Song &);

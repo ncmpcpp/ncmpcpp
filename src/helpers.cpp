@@ -35,9 +35,7 @@ extern Menu *mSearcher;
 extern Window *wFooter;
 
 extern vector<Song *> vPlaylist;
-extern vector<MpdDataType> vFileType;
-extern vector<string> vNameList;
-extern vector<long long> vHashList;
+extern vector<BrowsedItem> vBrowser;
 
 extern CurrScreen current_screen;
 
@@ -511,16 +509,14 @@ void GetDirectory(string dir)
 	if (browsed_dir != dir)
 		mBrowser->Reset();
 	browsed_dir = dir;
-	vFileType.clear();
-	vNameList.clear();
-	vHashList.clear();
+	vBrowser.clear();
 	mBrowser->Clear(0);
 	if (dir != "/")
 	{
 		mBrowser->AddOption("[..]");
-		vFileType.push_back(MPD_DATA_TYPE_DIRECTORY);
-		vNameList.push_back("");
-		vHashList.push_back(0);
+		BrowsedItem parent;
+		parent.type = MPD_DATA_TYPE_DIRECTORY;
+		vBrowser.push_back(parent);
 	}
 	browser = mpd_database_get_directory(conn, (char *)dir.c_str());
 	FOR_EACH_MPD_DATA(browser)
@@ -529,33 +525,35 @@ void GetDirectory(string dir)
 		{
 			case MPD_DATA_TYPE_PLAYLIST:
 			{
-				vFileType.push_back(MPD_DATA_TYPE_PLAYLIST);
-				vNameList.push_back(browser->playlist);
-				vHashList.push_back(0);
+				BrowsedItem playlist;
+				playlist.type = MPD_DATA_TYPE_PLAYLIST;
+				playlist.name = browser->playlist;
+				vBrowser.push_back(playlist);
 				mBrowser->AddOption("[red](playlist)[/red] " + string(browser->playlist));
 				break;
 			}
 			case MPD_DATA_TYPE_DIRECTORY:
 			{
 				string subdir = browser->directory;
-				vFileType.push_back(MPD_DATA_TYPE_DIRECTORY);
-				vHashList.push_back(0);
+				BrowsedItem directory;
+				directory.type = MPD_DATA_TYPE_DIRECTORY;
 				if (dir == "/")
-					vNameList.push_back(subdir.substr(browsed_dir.size()-1,subdir.size()-browsed_dir.size()+1));
+					directory.name = subdir.substr(browsed_dir.size()-1,subdir.size()-browsed_dir.size()+1);
 				else
-					vNameList.push_back(subdir.substr(browsed_dir.size()+1,subdir.size()-browsed_dir.size()-1));
-				
-				mBrowser->AddOption("[" + vNameList.back() + "]");
-				if (vNameList.back() == browsed_subdir)
+					directory.name = subdir.substr(browsed_dir.size()+1,subdir.size()-browsed_dir.size()-1);
+				vBrowser.push_back(directory);
+				mBrowser->AddOption("[" + directory.name + "]");
+				if (directory.name == browsed_subdir)
 					mBrowser->Highlight(mBrowser->MaxChoice());
 				break;
 			}
 			case MPD_DATA_TYPE_SONG:
 			{
-				vFileType.push_back(MPD_DATA_TYPE_SONG);
+				BrowsedItem song;
+				song.type = MPD_DATA_TYPE_SONG;
 				Song s = browser->song;
-				vNameList.push_back(s.GetFile());
-				vHashList.push_back(s.GetHash());
+				song.name = s.GetFile();
+				song.hash = s.GetHash();
 				bool bold = 0;
 				for (vector<Song *>::const_iterator it = vPlaylist.begin(); it != vPlaylist.end(); it++)
 				{
@@ -566,6 +564,7 @@ void GetDirectory(string dir)
 					}
 				}
 				bold ? mBrowser->AddBoldOption(DisplaySong(s)) : mBrowser->AddOption(DisplaySong(s));
+				vBrowser.push_back(song);
 				break;
 			}
 		}

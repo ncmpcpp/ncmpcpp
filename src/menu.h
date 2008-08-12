@@ -31,11 +31,20 @@ typedef bool IS_BOLD;
 
 enum LOCATION { lLeft, lCenter, lRight };
 
+struct Option
+{
+	string content;
+	bool is_static;
+	bool is_bold;
+	bool have_separator;
+	LOCATION location;
+};
+
 class Menu : public Window
 {
 	public:
 		Menu(int startx, int starty, int width, int height, string title, COLOR color, BORDER border) : Window(startx, starty, width, height, title, color, border), itsStaticsNumber(0), itsChoice(0), itsBeginning(0), itsHighlight(0), itsHighlightColor(itsBaseColor), itsHighlightEnabled(1) { SetColor(color); }
-		virtual ~Menu() {}
+		virtual ~Menu();
 		
 		virtual void Add(string str) { AddOption(str); }
 		void AddOption(const string &, LOCATION = lLeft, HAVE_SEPARATOR = 0);
@@ -67,19 +76,16 @@ class Menu : public Window
 		int MaxRealChoice() const { return itsOptions.size()-itsStaticsNumber; }
 		
 		bool Empty() { return itsOptions.empty(); }
+		bool IsStatic(int);
 		Menu EmptyClone();
 		
 	protected:
-		vector<string> itsOptions;
-		vector<IS_STATIC> itsStaticOptions;
-		vector<HAVE_SEPARATOR> itsSeparators;
-		vector<LOCATION> itsLocations;
-		vector<IS_BOLD> itsBold;
+		vector<Option *> itsOptions;
 		
 		int itsStaticsNumber;
 		int count_length(string);
 		
-		bool is_static() { return itsStaticOptions[itsHighlight]; }
+		bool is_static() { return itsOptions[itsHighlight]->is_static; }
 		
 		int itsChoice;
 		int itsBeginning;

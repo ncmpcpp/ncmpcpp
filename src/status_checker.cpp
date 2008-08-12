@@ -41,9 +41,7 @@ extern Window *wFooter;
 
 extern vector<Song *> vPlaylist;
 extern vector<Song> vSearched;
-extern vector<MpdDataType> vFileType;
-extern vector<string> vNameList;
-extern vector<long long> vHashList;
+extern vector<BrowsedItem> vBrowser;
 
 extern time_t block_delay;
 extern time_t timer;
@@ -213,13 +211,13 @@ void NcmpcppStatusChanged(MpdObj *conn, ChangedStatusType what)
 		if (current_screen == csBrowser)
 		{
 			bool bold = 0;
-			for (int i = 0; i < vFileType.size(); i++)
+			for (int i = 0; i < vBrowser.size(); i++)
 			{
-				if (vFileType[i] == MPD_DATA_TYPE_SONG)
+				if (vBrowser[i].type == MPD_DATA_TYPE_SONG)
 				{
 					for (vector<Song *>::const_iterator it = vPlaylist.begin(); it != vPlaylist.end(); it++)
 					{
-						if ((*it)->GetHash() == vHashList[i])
+						if ((*it)->GetHash() == vBrowser[i].hash)
 						{
 							bold = 1;
 							break;
