@@ -241,6 +241,7 @@ void Menu::DeleteOption(int no)
 
 void Menu::redraw_screen()
 {
+	NeedsRedraw.clear();
 	vector<Option *>::const_iterator it = itsOptions.begin()+itsBeginning;
 	NeedsRedraw.reserve(itsHeight);
 	for (int i = itsBeginning; i < itsBeginning+itsHeight && it != itsOptions.end(); i++, it++)
@@ -511,11 +512,7 @@ void Menu::Go(WHERE where)
 void Menu::Highlight(int which)
 {
 	if (which <= itsOptions.size())
-	{
-		NeedsRedraw.push_back(itsHighlight);
 		itsHighlight = which-1;
-		NeedsRedraw.push_back(itsHighlight);
-	}
 	else
 		return;
 	
@@ -523,6 +520,8 @@ void Menu::Highlight(int which)
 		itsBeginning = itsHighlight-itsHeight/2;
 	else
 		itsBeginning = 0;
+	
+	redraw_screen();
 }
 
 void Menu::Reset()
