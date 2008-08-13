@@ -75,6 +75,8 @@ extern bool block_statusbar_update;
 extern bool block_playlist_update;
 extern bool block_library_update;
 
+extern bool redraw_me;
+
 long long playlist_old_id = -1;
 
 int old_playing;
@@ -85,11 +87,8 @@ void TraceMpdStatus()
 	now = time(NULL);
 	
 	if (now == timer+Config.playlist_disable_highlight_delay && current_screen == csPlaylist)
-	{
 		mPlaylist->Highlighting(!Config.playlist_disable_highlight_delay);
-		mPlaylist->Refresh();
-	}
-	
+
 	if (block_statusbar_update_delay > 0)
 	{
 		if (now >= block_delay+block_statusbar_update_delay)
@@ -151,7 +150,7 @@ void NcmpcppStatusChanged(MpdObj *conn, ChangedStatusType what)
 			{
 				if (playlist_length < vPlaylist.size())
 				{
-					mPlaylist->Clear(!playlist_length && current_screen != csLibrary);
+					mPlaylist->Clear(!playlist_length && current_screen == csPlaylist);
 					for (vector<Song *>::iterator it = vPlaylist.begin(); it != vPlaylist.end(); it++)
 						delete *it;
 					vPlaylist.clear();
@@ -177,7 +176,7 @@ void NcmpcppStatusChanged(MpdObj *conn, ChangedStatusType what)
 				{
 					if (!playlist_length || mPlaylist->MaxChoice() < mPlaylist->GetHeight())
 						mPlaylist->Hide();
-					mPlaylist->Refresh();
+					mPlaylist->Refresh(1);
 				}
 			}
 			else
@@ -208,7 +207,10 @@ void NcmpcppStatusChanged(MpdObj *conn, ChangedStatusType what)
 		}
 		
 		if (vPlaylist.empty())
+		{
+			mPlaylist->Reset();
 			ShowMessage("Cleared playlist!");
+		}
 		
 		if (current_screen == csBrowser)
 		{

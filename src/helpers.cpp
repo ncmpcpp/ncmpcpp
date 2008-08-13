@@ -504,7 +504,6 @@ bool GetSongInfo(Song &s)
 
 void GetDirectory(string dir)
 {
-	pthread_t bolder;
 	browsed_dir_scroll_begin = 0;
 	if (browsed_dir != dir)
 		mBrowser->Reset();

@@ -199,13 +199,13 @@ void Window::show_border() const
 	refresh();
 }
 
-void Window::Display()
+void Window::Display(bool stub)
 {
 	show_border();
 	wrefresh(itsWindow);
 }
 
-void Window::Refresh()
+void Window::Refresh(bool stub)
 {
 	wrefresh(itsWindow);
 }
@@ -617,6 +617,88 @@ string OmitBBCodes(const string &str)
 	}
 	if (!tmp.empty()) result += tmp;
 	return result;
+}
+
+int CountBBCodes(const string &str)
+{
+	if (str.empty())
+		return 0;
+	bool collect = false;
+	int length = 0;
+	string color;
+	for (string::const_iterator it = str.begin(); it != str.end(); it++)
+	{
+		if (*it != '[' && !collect);
+		else
+			collect = 1;
+		
+		if (collect)
+		{
+			if (*it != '[')
+			{
+				color += *it;
+				length++;
+			}
+			else
+			{
+				length -= color.length();
+				length++;
+				color = *it;
+			}
+		}
+		
+		if (*it == ']' || it+1 == str.end())
+			collect = 0;
+		
+		if (!collect)
+		{
+			if (!is_valid_color(color))
+				length -= color.length();
+			color.clear();
+		}
+	}
+	return length;
+}
+
+int CountBBCodes(const wstring &str)
+{
+	if (str.empty())
+		return 0;
+	bool collect = false;
+	int length = 0;
+	wstring color;
+	for (wstring::const_iterator it = str.begin(); it != str.end(); it++)
+	{
+		if (*it != '[' && !collect);
+		else
+			collect = 1;
+		
+		if (collect)
+		{
+			if (*it != '[')
+			{
+				color += *it;
+				length++;
+			}
+			else
+			{
+				length -= color.length();
+				length++;
+				color = *it;
+			}
+		}
+		
+		if (*it == ']' || it+1 == str.end())
+			collect = 0;
+		
+		if (!collect)
+		{
+			if (!is_valid_color(ToString(color)))
+				length -= color.length();
+			color.clear();
+		}
+	}
+	return length;
 }
 
 wchar_t * ToWString(const char *s)

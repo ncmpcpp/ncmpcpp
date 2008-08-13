@@ -96,13 +96,13 @@ void Scrollpad::recreate_win()
 	Write(itsContent.c_str());
 }
 
-void Scrollpad::Display()
+void Scrollpad::Display(bool stub)
 {
 	Window::show_border();
-	Refresh();
+	Refresh(stub);
 }
 
-void Scrollpad::Refresh()
+void Scrollpad::Refresh(bool stub)
 {
 	prefresh(itsWindow,itsBeginning,0,itsStartY,itsStartX,itsStartY+itsHeight-1,itsStartX+itsWidth);
 }

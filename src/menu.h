@@ -59,15 +59,15 @@ class Menu : public Window
 		string GetCurrentOption() const;
 		string GetOption(int i) const;
 		
-		virtual void Display();
-		virtual void Refresh();
+		virtual void Display(bool = 0);
+		virtual void Refresh(bool = 0);
 		virtual void Go(WHERE);
 		void Highlight(int);
 		virtual void Reset();
 		virtual void Clear(bool clear_screen = 1);
 		
-		void HighlightColor(COLOR col) { itsHighlightColor = col; }
-		void Highlighting(bool hl) { itsHighlightEnabled = hl; Refresh(); }
+		void HighlightColor(COLOR col) { itsHighlightColor = col; NeedsRedraw.push_back(itsHighlight); }
+		void Highlighting(bool hl) { itsHighlightEnabled = hl; NeedsRedraw.push_back(itsHighlight); Refresh(); }
 		
 		int GetRealChoice() const;
 		virtual int GetChoice() const { return itsHighlight+1; }
@@ -81,10 +81,12 @@ class Menu : public Window
 		
 	protected:
 		vector<Option *> itsOptions;
+		vector<int> NeedsRedraw;
 		
 		int itsStaticsNumber;
 		int count_length(string);
 		
+		void redraw_screen();
 		bool is_static() { return itsOptions[itsHighlight]->is_static; }
 		
 		int itsChoice;

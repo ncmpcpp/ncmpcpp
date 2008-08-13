@@ -127,6 +127,8 @@ bool block_library_update = 0;
 bool search_case_sensitive = 1;
 bool search_mode_match = 1;
 
+bool redraw_me = 0;
+
 extern string EMPTY_TAG;
 extern string UNKNOWN_ARTIST;
 extern string UNKNOWN_TITLE;
@@ -428,7 +430,8 @@ int main(int argc, char *argv[])
 			block_library_update = 1;
 		}
 		
-		wCurrent->Refresh();
+		wCurrent->Refresh(redraw_me);
+		redraw_me = 0;
 		
 		wCurrent->ReadKey(input);
 		if (input == ERR)
@@ -444,7 +447,6 @@ int main(int argc, char *argv[])
 		{
 			case csPlaylist:
 				mPlaylist->Highlighting(1);
-				mPlaylist->Refresh();
 				break;
 			
 			case csBrowser:
@@ -476,6 +478,8 @@ int main(int argc, char *argv[])
 			case KEY_RESIZE:
 			{
 				int in;
+				
+				redraw_me = 1;
 				
 				while (1)
 				{
@@ -529,17 +533,17 @@ int main(int argc, char *argv[])
 				
 				if (wCurrent != sHelp)
 					wCurrent->Hide();
-				wCurrent->Display();
+				wCurrent->Display(redraw_me);
 				if (current_screen == csLibrary)
 				{
 					mLibArtists->Hide();
-					mLibArtists->Display();
+					mLibArtists->Display(redraw_me);
 					mvvline(main_start_y, lib_albums_start_x-1, 0, main_height);
 					mLibAlbums->Hide();
-					mLibAlbums->Display();
+					mLibAlbums->Display(redraw_me);
 					mvvline(main_start_y, lib_songs_start_x-1, 0, main_height);
 					mLibSongs->Hide();
-					mLibSongs->Display();
+					mLibSongs->Display(redraw_me);
 				}
 				
 				header_update_status = 1;
@@ -754,6 +758,7 @@ int main(int argc, char *argv[])
 								wCurrent->Clear();
 								wCurrent = wPrev;
 								current_screen = prev_screen;
+								redraw_me = 1;
 								if (current_screen == csLibrary)
 								{
 #									ifdef HAVE_TAGLIB_H
@@ -768,11 +773,11 @@ int main(int argc, char *argv[])
 #									else
 									wCurrent = wPrev;
 #									endif
-									mLibArtists->Display();
+									mLibArtists->Display(redraw_me);
 									mvvline(main_start_y, lib_albums_start_x-1, 0, main_height);
-									mLibAlbums->Display();
+									mLibAlbums->Display(redraw_me);
 									mvvline(main_start_y, lib_songs_start_x-1, 0, main_height);
-									mLibSongs->Display();
+									mLibSongs->Display(redraw_me);
 								}
 #								ifdef HAVE_TAGLIB_H
 								break;
@@ -1380,6 +1385,7 @@ int main(int argc, char *argv[])
 			{
 				if (current_screen == csPlaylist && now_playing >= 0)
 					mPlaylist->Highlight(now_playing+1);
+				redraw_me = 1;
 				break;
 			}
 			case 'r': // switch repeat state
@@ -1409,15 +1415,18 @@ int main(int argc, char *argv[])
 				{
 					case csPlaylist:
 					{
-						if (GetSongInfo(*vPlaylist[id]))
+						if (!mPlaylist->Empty())
 						{
-							wCurrent = mTagEditor;
-							wPrev = mPlaylist;
-							current_screen = csTagEditor;
-							prev_screen = csPlaylist;
+							if (GetSongInfo(*vPlaylist[id]))
+							{
+								wCurrent = mTagEditor;
+								wPrev = mPlaylist;
+								current_screen = csTagEditor;
+								prev_screen = csPlaylist;
+							}
+							else
+								ShowMessage("Cannot read file!");
 						}
-						else
-							ShowMessage("Cannot read file!");
 						break;
 					}
 					case csBrowser:
@@ -1502,6 +1511,7 @@ int main(int argc, char *argv[])
 				ShowMessage("Deleting all songs except now playing one...");
 				mpd_playlist_queue_commit(conn);
 				ShowMessage("Songs deleted!");
+				redraw_me = 1;
 				break;
 			}
 			case 'c': // clear playlist
@@ -1580,6 +1590,7 @@ int main(int argc, char *argv[])
 					wCurrent = sHelp;
 					wCurrent->Hide();
 					current_screen = csHelp;
+					redraw_me = 1;
 				}
 				break;
 			}
@@ -1592,6 +1603,7 @@ int main(int argc, char *argv[])
 					wCurrent = mPlaylist;
 					wCurrent->Hide();
 					current_screen = csPlaylist;
+					redraw_me = 1;
 				}
 				break;
 			}
@@ -1629,6 +1641,7 @@ int main(int argc, char *argv[])
 					wCurrent = mBrowser;
 					wCurrent->Hide();
 					current_screen = csBrowser;
+					redraw_me = 1;
 				}
 				break;
 			}
@@ -1643,6 +1656,7 @@ int main(int argc, char *argv[])
 					wCurrent = mSearcher;
 					wCurrent->Hide();
 					current_screen = csSearcher;
+					redraw_me = 1;
 					if (!vSearched.empty())
 					{
 						wCurrent->WriteXY(0, 0, "Updating list...");
@@ -1700,6 +1714,7 @@ int main(int argc, char *argv[])
 				
 					wCurrent = mLibArtists;
 					current_screen = csLibrary;
+					redraw_me = 1;
 				}
 				break;
 			}

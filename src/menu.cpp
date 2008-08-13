@@ -73,6 +73,9 @@ void Menu::AddOption(const string &str, LOCATION location, HAVE_SEPARATOR separa
 	new_option->is_static = 0;
 	new_option->is_bold = 0;
 	itsOptions.push_back(new_option);
+	
+	if (itsOptions.size() > itsBeginning && itsOptions.size() <= itsBeginning+itsHeight)
+		NeedsRedraw.push_back(itsOptions.size()-1);
 }
 
 void Menu::AddBoldOption(const string &str, LOCATION location, HAVE_SEPARATOR separator)
@@ -84,6 +87,9 @@ void Menu::AddBoldOption(const string &str, LOCATION location, HAVE_SEPARATOR se
 	new_option->is_static = 0;
 	new_option->is_bold = 1;
 	itsOptions.push_back(new_option);
+	
+	if (itsOptions.size() > itsBeginning && itsOptions.size() <= itsBeginning+itsHeight)
+		NeedsRedraw.push_back(itsOptions.size()-1);
 }
 
 void Menu::AddStaticOption(const string &str, LOCATION location, HAVE_SEPARATOR separator)
@@ -96,6 +102,9 @@ void Menu::AddStaticOption(const string &str, LOCATION location, HAVE_SEPARATOR 
 	new_option->is_bold = 0;
 	itsOptions.push_back(new_option);
 	itsStaticsNumber++;
+	
+	if (itsOptions.size() > itsBeginning && itsOptions.size() <= itsBeginning+itsHeight)
+		NeedsRedraw.push_back(itsOptions.size()-1);
 }
 
 void Menu::AddStaticBoldOption(const string &str, LOCATION location, HAVE_SEPARATOR separator)
@@ -108,6 +117,9 @@ void Menu::AddStaticBoldOption(const string &str, LOCATION location, HAVE_SEPARA
 	new_option->is_bold = 1;
 	itsOptions.push_back(new_option);
 	itsStaticsNumber++;
+	
+	if (itsOptions.size() > itsBeginning && itsOptions.size() <= itsBeginning+itsHeight)
+		NeedsRedraw.push_back(itsOptions.size()-1);
 }
 
 void Menu::AddSeparator()
@@ -117,11 +129,14 @@ void Menu::AddSeparator()
 
 void Menu::UpdateOption(int index, string str, LOCATION location, HAVE_SEPARATOR separator)
 {
+	index--;
 	try
 	{
-		itsOptions.at(index-1)->location = location;
-		itsOptions.at(index-1)->content = str;
-		itsOptions.at(index-1)->have_separator = separator;
+		itsOptions.at(index)->location = location;
+		itsOptions.at(index)->content = str;
+		itsOptions.at(index)->have_separator = separator;
+		if (index >= itsBeginning && index < itsBeginning+itsHeight)
+			NeedsRedraw.push_back(index);
 	}
 	catch (std::out_of_range)
 	{
@@ -130,9 +145,12 @@ void Menu::UpdateOption(int index, string str, LOCATION location, HAVE_SEPARATOR
 
 void Menu::BoldOption(int index, IS_BOLD bold)
 {
+	index--;
 	try
 	{
-		itsOptions.at(index-1)->is_bold = bold;
+		itsOptions.at(index)->is_bold = bold;
+		if (index >= itsBeginning && index < itsBeginning+itsHeight)
+			NeedsRedraw.push_back(index);
 	}
 	catch (std::out_of_range)
 	{
@@ -141,13 +159,14 @@ void Menu::BoldOption(int index, IS_BOLD bold)
 
 void Menu::MakeStatic(int index, IS_STATIC stat)
 {
+	index--;
 	try
 	{
-		if (stat && !itsOptions.at(index-1)->is_static)
+		if (stat && !itsOptions.at(index)->is_static)
 			itsStaticsNumber++;
-		if (!stat && itsOptions.at(index-1)->is_static)
+		if (!stat && itsOptions.at(index)->is_static)
 			itsStaticsNumber--;
-		itsOptions.at(index-1)->is_static = stat;
+		itsOptions.at(index)->is_static = stat;
 	}
 	catch (std::out_of_range)
 	{
@@ -191,19 +210,50 @@ void Menu::DeleteOption(int no)
 	}
 	delete itsOptions[no-1];
 	itsOptions.erase(itsOptions.begin()+no-1);
+	
+	if (itsHighlight > itsOptions.size()-1)
+		itsHighlight = itsOptions.size()-1;
+	
+	int MaxBeginning = itsOptions.size() < itsHeight ? 0 : itsOptions.size()-itsHeight;
+	if (itsBeginning > MaxBeginning)
+	{
+		itsBeginning = MaxBeginning;
+		NeedsRedraw.push_back(itsHighlight);
+		Refresh();
+		redraw_screen();
+	}
+	else
+	{
+		vector<Option *>::const_iterator it = itsOptions.begin()+itsHighlight;
+		NeedsRedraw.reserve(itsHeight);
+		int i = itsHighlight;
+		for (; i < itsBeginning+itsHeight && it != itsOptions.end(); i++, it++)
+			NeedsRedraw.push_back(i);
+		for (; i < itsBeginning+itsHeight; i++)
+			mvwhline(itsWindow, i, 0, 32, itsWidth);
+	}
+	
 	/*if (itsBeginning > 0 && itsBeginning == itsOptions.size()-itsHeight)
 		itsBeginning--;
 	Go(UP);*/
-	Window::Clear();
+	//Window::Clear();
 }
 
-void Menu::Display()
+void Menu::redraw_screen()
+{
+	vector<Option *>::const_iterator it = itsOptions.begin()+itsBeginning;
+	NeedsRedraw.reserve(itsHeight);
+	for (int i = itsBeginning; i < itsBeginning+itsHeight && it != itsOptions.end(); i++, it++)
+		NeedsRedraw.push_back(i);
+}
+
+void Menu::Display(bool redraw_whole_window)
 {
 	Window::show_border();
-	Refresh();
+	Refresh(redraw_whole_window);
 }
 
-void Menu::Refresh()
+void Menu::Refresh(bool redraw_whole_window)
 {
 	if (!itsOptions.empty() && is_static())
 		if (itsHighlight == 0)
@@ -211,14 +261,18 @@ void Menu::Refresh()
 		else
 			Go(UP);
 	
-	if (MaxChoice() < GetChoice() && !Empty())
-		Highlight(MaxChoice());
+	int MaxBeginning = itsOptions.size() < itsHeight ? 0 : itsOptions.size()-itsHeight;
+	if (itsBeginning > MaxBeginning)
+		itsBeginning = MaxBeginning;
 	
-	if (itsHighlight > itsBeginning+itsHeight)
-		Highlight(itsBeginning+itsHeight);
+	if (itsHighlight > itsOptions.size()-1)
+		Highlight(itsOptions.size());
+	
+	if (redraw_whole_window)
+		redraw_screen();
 	
 	int line = 0;
-	int last;
+	/*int last;
 	
 	if (itsOptions.size() < itsHeight)
 		last = itsOptions.size();
@@ -241,28 +295,39 @@ void Menu::Refresh()
 		}
 	}
 	itsBeginning -= check;
-	last -= check;
+	last -= check;*/
 	
-	for (int i = itsBeginning; i < last; i++)
+	for (vector<int>::const_iterator it = NeedsRedraw.begin(); it != NeedsRedraw.end(); it++)
 	{
-		if (i == itsHighlight && itsHighlightEnabled)
+		try
+		{
+			itsOptions.at(*it);
+		}
+		catch (std::out_of_range)
+		{
+			break;
+		}
+		
+		line = *it-itsBeginning;
+		
+		if (*it == itsHighlight && itsHighlightEnabled)
 		{
 			Reverse(1);
 			SetColor(itsHighlightColor);
 		}
-		if (itsOptions[i]->is_bold)
+		if (itsOptions[*it]->is_bold)
 			Bold(1);
 		
-		int ch = itsOptions[i]->have_separator ? 0 : 32;
+		int ch = itsOptions[*it]->have_separator ? 0 : 32;
 		mvwhline(itsWindow,line, 0, ch, itsWidth);
 		
-		int strlength = itsOptions[i]->location != lLeft && BBEnabled ? count_length(itsOptions[i]->content) : itsOptions[i]->content.length();
+		int strlength = itsOptions[*it]->location != lLeft && BBEnabled ? count_length(itsOptions[*it]->content) : itsOptions[*it]->content.length();
 		
 		if (strlength)
 		{
 			int x = 0;
 			
-			if (itsOptions[i]->location == lCenter)
+			if (itsOptions[*it]->location == lCenter)
 			{
 				for (; x < (itsWidth-strlength-(!ch ? 4 : 0))/2; x++);
 				if (!ch)
@@ -273,7 +338,7 @@ void Menu::Refresh()
 					x += 2;
 				}
 			}
-			if (itsOptions[i]->location == lRight)
+			if (itsOptions[*it]->location == lRight)
 			{
 				for (; x < (itsWidth-strlength); x++)
 				if (!ch)
@@ -285,9 +350,16 @@ void Menu::Refresh()
 				}
 			}
 			
-			WriteXY(x, line, itsOptions[i]->content, 0);
+#			ifdef UTF8_ENABLED
+			wstring option = ToWString(itsOptions[*it]->content);
+			int bbcodes_length = CountBBCodes(option);
+			WriteXY(x, line, option.substr(0, itsWidth+bbcodes_length), 0);
+#			else
+			int bbcodes_length = CountBBCodes(itsOptions[*it]->content);
+			WriteXY(x, line, itsOptions[*it]->content.substr(0, itsWidth+bbcodes_length), 0);
+#			endif
 			
-			if (!ch && (itsOptions[i]->location == lCenter || itsOptions[i]->location == lLeft))
+			if (!ch && (itsOptions[*it]->location == lCenter || itsOptions[*it]->location == lLeft))
 			{
 				x += strlength;
 				AltCharset(1);
@@ -297,14 +369,15 @@ void Menu::Refresh()
 		}
 		line++;
 		
-		if (i == itsHighlight && itsHighlightEnabled)
+		if (*it == itsHighlight && itsHighlightEnabled)
 		{
 			Reverse(0);
 			SetColor(itsBaseColor);
 		}
-		if (itsOptions[i]->is_bold)
+		if (itsOptions[*it]->is_bold)
 			Bold(0);
 	}
+	NeedsRedraw.clear();
 	wrefresh(itsWindow);
 }
 
@@ -312,20 +385,26 @@ void Menu::Go(WHERE where)
 {
 	if (Empty()) return;
 	int MaxHighlight = itsOptions.size()-1;
-	int MaxBeginning;
-	if (itsOptions.size() < itsHeight)
-		MaxBeginning = 0;
-	else MaxBeginning = itsOptions.size()-itsHeight;
+	int MaxBeginning = itsOptions.size() < itsHeight ? 0 : itsOptions.size()-itsHeight;
 	int MaxCurrentHighlight = itsBeginning+itsHeight-1;
+	idlok(itsWindow, 1);
+	scrollok(itsWindow, 1);
 	switch (where)
 	{
 		case UP:
 		{
-			if (itsHighlight <= itsBeginning && itsHighlight > 0) itsBeginning--; // for scrolling
+			if (itsHighlight <= itsBeginning && itsHighlight > 0)
+			{
+				itsBeginning--; // for scrolling
+				wscrl(itsWindow, -1);
+			}
 			if (itsHighlight == 0)
 				break;
 			else
-				itsHighlight--;
+			{
+				NeedsRedraw.push_back(itsHighlight--);
+				NeedsRedraw.push_back(itsHighlight);
+			}
 			if (is_static())
 			{
 				if (itsHighlight == 0)
@@ -337,11 +416,18 @@ void Menu::Go(WHERE where)
 		}
 		case DOWN:
 		{
-			if (itsHighlight >= MaxCurrentHighlight && itsHighlight < MaxHighlight) itsBeginning++; // scroll
+			if (itsHighlight >= MaxCurrentHighlight && itsHighlight < MaxHighlight)
+			{
+				itsBeginning++; // scroll
+				wscrl(itsWindow, 1);
+			}
 			if (itsHighlight == MaxHighlight)
 				break;
 			else
-				itsHighlight++;
+			{
+				NeedsRedraw.push_back(itsHighlight++);
+				NeedsRedraw.push_back(itsHighlight);
+			}
 			if (is_static())
 			{
 				if (itsHighlight == MaxHighlight)
@@ -367,6 +453,7 @@ void Menu::Go(WHERE where)
 				else
 					Go(UP);
 			}
+			redraw_screen();
 			break;
 		}
 		case PAGE_DOWN:
@@ -385,6 +472,7 @@ void Menu::Go(WHERE where)
 				else
 					Go(DOWN);
 			}
+			redraw_screen();
 			break;
 		}
 		case HOME:
@@ -398,6 +486,7 @@ void Menu::Go(WHERE where)
 				else
 					Go(UP);
 			}
+			redraw_screen();
 			break;
 		}
 		case END:
@@ -411,15 +500,22 @@ void Menu::Go(WHERE where)
 				else
 					Go(DOWN);
 			}
+			redraw_screen();
 			break;
 		}
 	}
+	idlok(itsWindow, 0);
+	scrollok(itsWindow, 0);
 }
 
 void Menu::Highlight(int which)
 {
 	if (which <= itsOptions.size())
+	{
+		NeedsRedraw.push_back(itsHighlight);
 		itsHighlight = which-1;
+		NeedsRedraw.push_back(itsHighlight);
+	}
 	else
 		return;
 	

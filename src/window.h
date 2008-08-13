@@ -53,6 +53,8 @@ wstring ToWString(const string &);
 
 bool is_valid_color(const string &);
 string OmitBBCodes(const string &);
+int CountBBCodes(const string &);
+int CountBBCodes(const wstring &);
 
 class Window
 {
@@ -68,8 +70,8 @@ class Window
 		virtual void SetTitle(string);
 		virtual void MoveTo(int, int);
 		virtual void Resize(int, int);
-		virtual void Display();
-		virtual void Refresh();
+		virtual void Display(bool = 0);
+		virtual void Refresh(bool = 0);
 		virtual void Clear();
 		virtual void Hide(char = 32) const;
 		virtual void Bold(bool) const;

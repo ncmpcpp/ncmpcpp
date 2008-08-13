@@ -29,8 +29,8 @@ class Scrollpad: public Window
 		Scrollpad(int startx, int starty, int width, int height, string title, COLOR color, BORDER border) : Window(startx, starty, width, height, title, color, border), itsBeginning(0), itsRealHeight(1), itsXPos(0) { delwin(itsWindow); itsWindow = newpad(0,0); }
 		virtual ~Scrollpad() {}
 		virtual void Add(string);
-		virtual void Display();
-		virtual void Refresh();
+		virtual void Display(bool = 0);
+		virtual void Refresh(bool = 0);
 		virtual void Go(WHERE);
 		virtual void MoveTo(int newx, int newy) { reallocate_win(newx, newy); }
 		virtual void Resize(int, int);
