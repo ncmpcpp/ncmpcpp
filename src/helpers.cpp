@@ -57,6 +57,8 @@ extern bool block_statusbar_update;
 extern bool search_case_sensitive;
 extern bool search_mode_match;
 
+extern bool redraw_me;
+
 extern string EMPTY_TAG;
 extern string UNKNOWN_ARTIST;
 extern string UNKNOWN_TITLE;
@@ -544,6 +546,7 @@ void GetDirectory(string dir)
 				mBrowser->AddOption("[" + directory.name + "]");
 				if (directory.name == browsed_subdir)
 					mBrowser->Highlight(mBrowser->MaxChoice());
+				redraw_me = 1;
 				break;
 			}
 			case MPD_DATA_TYPE_SONG:
