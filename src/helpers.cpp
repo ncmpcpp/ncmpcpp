@@ -451,9 +451,6 @@ void ShowMessage(const string &message, int delay)
 
 bool GetSongInfo(Song &s)
 {
-	mTagEditor->Clear();
-	mTagEditor->Reset();
-	
 	string path_to_file = Config.mpd_music_dir + "/" + s.GetFile();
 	
 #	ifdef HAVE_TAGLIB_H
@@ -462,6 +459,9 @@ bool GetSongInfo(Song &s)
 		return false;
 	s.SetComment(f.tag()->comment().to8Bit(UNICODE));
 #	endif
+	
+	mTagEditor->Clear();
+	mTagEditor->Reset();
 	
 	mTagEditor->AddStaticOption("[b][white]Song name: [green][/b]" + s.GetShortFilename());
 	mTagEditor->AddStaticOption("[b][white]Location in DB: [green][/b]" + s.GetDirectory());
