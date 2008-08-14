@@ -40,6 +40,7 @@ extern ncmpcpp_config Config;
 bool SortSongsByTrack(const Song &, const Song &);
 bool CaseInsensitiveComparison(string, string);
 void WindowTitle(const string &);
+string TotalPlaylistLength();
 string DisplaySong(const Song &, const string & = Config.song_list_format);
 void ShowMessage(const string &, int = Config.message_delay_time);
 void GetDirectory(string);

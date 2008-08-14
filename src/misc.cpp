@@ -22,14 +22,14 @@
 
 using std::stringstream;
 
+int Abs(int num)
+{
+	return (num < 0 ? -num : num);
+}
+
 int StrToInt(string str)
 {
 	return atoi(str.c_str());
-}
-
-int StrToInt(char str[])
-{
-	return atoi(str);
 }
 
 string IntoStr(int liczba)
@@ -65,5 +65,4 @@ string ShowTime(int length)
 		ss << seconds;
 	return ss.str();
 }
-
 

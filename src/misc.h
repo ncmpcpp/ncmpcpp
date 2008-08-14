@@ -28,8 +28,9 @@
 
 using std::string;
 
+int Abs(int);
+
 int StrToInt(string);
-int StrToInt(char);
 
 string IntoStr(int);
 string IntoStr(double, int);

@@ -69,6 +69,7 @@ extern CurrScreen current_screen;
 
 extern bool header_update_status;
 
+extern bool dont_change_now_playing;
 extern bool allow_statusbar_unblock;
 extern bool block_progressbar_update;
 extern bool block_statusbar_update;
@@ -80,6 +81,8 @@ extern bool redraw_me;
 long long playlist_old_id = -1;
 
 int old_playing;
+
+string playlist_stats;
 
 void TraceMpdStatus()
 {
@@ -130,7 +133,7 @@ void NcmpcppStatusChanged(MpdObj *conn, ChangedStatusType what)
 	wFooter->Bold(1);
 	wFooter->GetXY(sx, sy);
 	
-	if (now_playing != mpd_player_get_current_song_pos(conn) || what & MPD_CST_SONGID)
+	if ((now_playing != mpd_player_get_current_song_pos(conn) || what & MPD_CST_SONGID) && !dont_change_now_playing)
 	{
 		old_playing = now_playing;
 		now_playing = mpd_player_get_current_song_pos(conn);
@@ -208,9 +211,12 @@ void NcmpcppStatusChanged(MpdObj *conn, ChangedStatusType what)
 		
 		if (vPlaylist.empty())
 		{
+			playlist_stats.clear();
 			mPlaylist->Reset();
 			ShowMessage("Cleared playlist!");
 		}
+		else
+			playlist_stats = "(" + IntoStr(vPlaylist.size()) + (vPlaylist.size() == 1 ? " song" : " songs") + ", length: " + TotalPlaylistLength() + ")";
 		
 		if (current_screen == csBrowser)
 		{
@@ -422,7 +428,6 @@ void NcmpcppStatusChanged(MpdObj *conn, ChangedStatusType what)
 	{
 		if (!vPlaylist.empty() && now_playing >= 0)
 		{
-			Song &s = *vPlaylist[now_playing];
 			if (!mPlaylist->Empty())
 			{
 				if (old_playing >= 0)
@@ -447,5 +452,6 @@ void NcmpcppStatusChanged(MpdObj *conn, ChangedStatusType what)
 	wFooter->Refresh();
 	wFooter->AutoRefresh(1);
 	wFooter->EnableBB();
+	wCurrent->Refresh();
 }
 

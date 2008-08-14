@@ -92,6 +92,7 @@ time_t now;
 int now_playing = -1;
 int playing_song_scroll_begin = 0;
 int browsed_dir_scroll_begin = 0;
+int stats_scroll_begin = 0;
 
 int block_statusbar_update_delay = -1;
 
@@ -118,6 +119,7 @@ bool title_allowed = 0;
 
 bool header_update_status = 0;
 
+bool dont_change_now_playing = 0;
 bool block_progressbar_update = 0;
 bool block_statusbar_update = 0;
 bool allow_statusbar_unblock = 1;
@@ -133,6 +135,8 @@ extern string EMPTY_TAG;
 extern string UNKNOWN_ARTIST;
 extern string UNKNOWN_TITLE;
 extern string UNKNOWN_ALBUM;
+
+extern string playlist_stats;
 
 int main(int argc, char *argv[])
 {
@@ -308,7 +312,7 @@ int main(int argc, char *argv[])
 					title = "Help";
 					break;
 				case csPlaylist:
-					title = "Playlist";
+					title = "Playlist ";
 					break;
 				case csBrowser:
 					title = "Browse: ";
@@ -329,6 +333,40 @@ int main(int argc, char *argv[])
 				wHeader->Bold(1);
 				wHeader->WriteXY(0, 0, title, 1);
 				wHeader->Bold(0);
+				
+				if (current_screen == csPlaylist && !playlist_stats.empty())
+				{
+					int max_length = wHeader->GetWidth()-volume_state.length()-title.length();
+					if (playlist_stats.length() > max_length)
+						wHeader->WriteXY(title.length(), 0, playlist_stats.substr(0, max_length));
+					else
+						wHeader->WriteXY(title.length(), 0, playlist_stats);
+				}
+				
+				if (current_screen == csBrowser)
+				{
+					int max_length_without_scroll = wHeader->GetWidth()-volume_state.length()-title.length();
+					ncmpcpp_string_t wbrowseddir = NCMPCPP_TO_WSTRING(browsed_dir);
+					wHeader->Bold(1);
+					if (browsed_dir.length() > max_length_without_scroll)
+					{
+#						ifdef UTF8_ENABLED
+						wbrowseddir += L" ** ";
+#						else
+						wbrowseddir += " ** ";
+#						endif
+						const int scrollsize = max_length_without_scroll;
+						ncmpcpp_string_t part = wbrowseddir.substr(browsed_dir_scroll_begin++, scrollsize);
+						if (part.length() < scrollsize)
+							part += wbrowseddir.substr(0, scrollsize-part.length());
+						wHeader->WriteXY(title.length(), 0, part);
+						if (browsed_dir_scroll_begin >= wbrowseddir.length())
+							browsed_dir_scroll_begin = 0;
+					}
+					else
+						wHeader->WriteXY(title.length(), 0, browsed_dir);
+					wHeader->Bold(0);
+				}
 			}
 			else
 				wHeader->WriteXY(0, 0, "[b]1:[/b]Help  [b]2:[/b]Playlist  [b]3:[/b]Browse  [b]4:[/b]Search  [b]5:[/b]Library", 1);
@@ -336,31 +374,6 @@ int main(int argc, char *argv[])
 			wHeader->SetColor(Config.volume_color);
 			wHeader->WriteXY(max_allowed_title_length, 0, volume_state);
 			wHeader->SetColor(Config.header_color);
-		
-			if (current_screen == csBrowser)
-			{
-				int max_length_without_scroll = wHeader->GetWidth()-volume_state.length()-title.length();
-				ncmpcpp_string_t wbrowseddir = NCMPCPP_TO_WSTRING(browsed_dir);
-				wHeader->Bold(1);
-				if (browsed_dir.length() > max_length_without_scroll)
-				{
-#					ifdef UTF8_ENABLED
-					wbrowseddir += L" ** ";
-#					else
-					wbrowseddir += " ** ";
-#					endif
-					const int scrollsize = max_length_without_scroll;
-					ncmpcpp_string_t part = wbrowseddir.substr(browsed_dir_scroll_begin++, scrollsize);
-					if (part.length() < scrollsize)
-						part += wbrowseddir.substr(0, scrollsize-part.length());
-					wHeader->WriteXY(8, 0, part);
-					if (browsed_dir_scroll_begin >= wbrowseddir.length())
-						browsed_dir_scroll_begin = 0;
-				}
-				else
-					wHeader->WriteXY(8, 0, browsed_dir);
-				wHeader->Bold(0);
-			}
 		}
 		
 		if (current_screen == csLibrary && !block_library_update)
@@ -1161,6 +1174,7 @@ int main(int argc, char *argv[])
 				if (!mPlaylist->Empty() && current_screen == csPlaylist)
 				{
 					block_playlist_update = 1;
+					dont_change_now_playing = 1;
 					mPlaylist->Timeout(50);
 					int id = mPlaylist->GetChoice()-1;
 					
@@ -1174,17 +1188,18 @@ int main(int argc, char *argv[])
 							id = mPlaylist->GetChoice()-1;
 							
 							mpd_playlist_queue_delete_pos(conn, id);
-							if (now_playing > id)
-								now_playing--;
 							delete vPlaylist[id];
 							vPlaylist.erase(vPlaylist.begin()+id);
 							mPlaylist->DeleteOption(id+1);
+							if (now_playing > id)
+								now_playing--;
 							mPlaylist->Refresh();
 						}
 						mPlaylist->ReadKey(input);
 					}
 					mpd_playlist_queue_commit(conn);
 					mPlaylist->Timeout(ncmpcpp_window_timeout);
+					dont_change_now_playing = 0;
 					block_playlist_update = 0;
 				}
 				if (current_screen == csBrowser)
@@ -1385,7 +1400,6 @@ int main(int argc, char *argv[])
 			{
 				if (current_screen == csPlaylist && now_playing >= 0)
 					mPlaylist->Highlight(now_playing+1);
-				redraw_me = 1;
 				break;
 			}
 			case 'r': // switch repeat state
@@ -1536,7 +1550,7 @@ int main(int argc, char *argv[])
 					timer = time(NULL);
 					if (findme.empty())
 						break;
-					transform(findme.begin(), findme.end(), findme.end(), tolower);
+					transform(findme.begin(), findme.end(), findme.begin(), tolower);
 					
 					if (input == '/') // forward
 					{
@@ -1562,7 +1576,10 @@ int main(int argc, char *argv[])
 					if (vFoundPositions.empty())
 						ShowMessage("Unable to find \"" + findme + "\"");
 					else
+					{
 						mCurrent->Highlight(vFoundPositions.front());
+						mCurrent->Highlighting(1);
+					}
 				}
 				break;
 			}

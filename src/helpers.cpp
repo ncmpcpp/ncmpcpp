@@ -82,6 +82,54 @@ void WindowTitle(const string &status)
 		   printf("\033]0;%s\7",status.c_str());
 }
 
+string TotalPlaylistLength()
+{
+	const int MINUTE = 60;
+	const int HOUR = 60*MINUTE;
+	const int DAY = 24*HOUR;
+	const int YEAR = 365*DAY;
+	string result;
+	int length = 0;
+	for (vector<Song *>::const_iterator it = vPlaylist.begin(); it != vPlaylist.end(); it++)
+		length += (*it)->GetTotalLength();
+	
+	int years = length/YEAR;
+	if (years)
+	{
+		result += IntoStr(years) + (years == 1 ? " year" : " years");
+		length -= years*YEAR;
+		if (length)
+			result += ", ";
+	}
+	int days = length/DAY;
+	if (days)
+	{
+		result += IntoStr(days) + (days == 1 ? " day" : " days");
+		length -= days*DAY;
+		if (length)
+			result += ", ";
+	}
+	int hours = length/HOUR;
+	if (hours)
+	{
+		result += IntoStr(hours) + (hours == 1 ? " hour" : " hours");
+		length -= hours*HOUR;
+		if (length)
+			result += ", ";
+	}
+	int minutes = length/MINUTE;
+	if (minutes)
+	{
+		result += IntoStr(minutes) + (minutes == 1 ? " minute" : " minutes");
+		length -= minutes*MINUTE;
+		if (length)
+			result += ", ";
+	}
+	if (length)
+		result += IntoStr(length) + (length == 1 ? " second" : " seconds");
+	return result;
+}
+
 string DisplaySong(const Song &s, const string &song_template)
 {	
 	string result;
@@ -506,6 +554,7 @@ bool GetSongInfo(Song &s)
 
 void GetDirectory(string dir)
 {
+	int highlightme = -1;
 	browsed_dir_scroll_begin = 0;
 	if (browsed_dir != dir)
 		mBrowser->Reset();
@@ -545,8 +594,7 @@ void GetDirectory(string dir)
 				vBrowser.push_back(directory);
 				mBrowser->AddOption("[" + directory.name + "]");
 				if (directory.name == browsed_subdir)
-					mBrowser->Highlight(mBrowser->MaxChoice());
-				redraw_me = 1;
+					highlightme = mBrowser->MaxChoice();
 				break;
 			}
 			case MPD_DATA_TYPE_SONG:
@@ -571,6 +619,7 @@ void GetDirectory(string dir)
 			}
 		}
 	}
+	mBrowser->Highlight(highlightme);
 	mpd_data_free(browser);
 	browsed_subdir.clear();
 	

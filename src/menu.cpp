@@ -214,29 +214,26 @@ void Menu::DeleteOption(int no)
 	if (itsHighlight > itsOptions.size()-1)
 		itsHighlight = itsOptions.size()-1;
 	
+	idlok(itsWindow, 1);
+	scrollok(itsWindow, 1);
 	int MaxBeginning = itsOptions.size() < itsHeight ? 0 : itsOptions.size()-itsHeight;
 	if (itsBeginning > MaxBeginning)
 	{
 		itsBeginning = MaxBeginning;
-		NeedsRedraw.push_back(itsHighlight);
-		Refresh();
-		redraw_screen();
+		wmove(itsWindow, no-1-itsBeginning, 0);
+		wdeleteln(itsWindow);
+		wscrl(itsWindow, -1);
+		NeedsRedraw.push_back(itsBeginning);
 	}
 	else
 	{
-		vector<Option *>::const_iterator it = itsOptions.begin()+itsHighlight;
-		NeedsRedraw.reserve(itsHeight);
-		int i = itsHighlight;
-		for (; i < itsBeginning+itsHeight && it != itsOptions.end(); i++, it++)
-			NeedsRedraw.push_back(i);
-		for (; i < itsBeginning+itsHeight; i++)
-			mvwhline(itsWindow, i, 0, 32, itsWidth);
+		wmove(itsWindow, no-1-itsBeginning, 0);
+		wdeleteln(itsWindow);
 	}
-	
-	/*if (itsBeginning > 0 && itsBeginning == itsOptions.size()-itsHeight)
-		itsBeginning--;
-	Go(UP);*/
-	//Window::Clear();
+	NeedsRedraw.push_back(itsHighlight);
+	NeedsRedraw.push_back(itsBeginning+itsHeight-1);
+	scrollok(itsWindow, 0);
+	idlok(itsWindow, 0);
 }
 
 void Menu::redraw_screen()
@@ -511,17 +508,46 @@ void Menu::Go(WHERE where)
 
 void Menu::Highlight(int which)
 {
-	if (which <= itsOptions.size())
-		itsHighlight = which-1;
+	which--;
+	
+	int old_highlight = itsHighlight;
+	int old_beginning = itsBeginning;
+	
+	if (which < itsOptions.size())
+		itsHighlight = which;
 	else
 		return;
 	
-	if (which > itsHeight)
+	if (which >= itsHeight)
+	{
 		itsBeginning = itsHighlight-itsHeight/2;
+		if (itsBeginning > itsOptions.size()-itsHeight)
+			itsBeginning = itsOptions.size()-itsHeight;
+	}
 	else
 		itsBeginning = 0;
 	
-	redraw_screen();
+	int howmuch = itsBeginning-old_beginning;
+	
+	if (Abs(howmuch) > itsHeight/2)
+		redraw_screen();
+	else
+	{
+		idlok(itsWindow, 1);
+		scrollok(itsWindow, 1);
+		if (old_highlight >= itsBeginning && old_highlight < itsBeginning+itsHeight)
+			NeedsRedraw.push_back(old_highlight);
+		wscrl(itsWindow, howmuch);
+		if (howmuch < 0)
+			for (int i = 0; i < Abs(howmuch); i++)
+				NeedsRedraw.push_back(itsBeginning+i);
+		else
+			for (int i = 0; i < Abs(howmuch); i++)
+				NeedsRedraw.push_back(itsBeginning+itsHeight-1-i);
+		NeedsRedraw.push_back(itsHighlight);
+		scrollok(itsWindow, 0);
+		idlok(itsWindow, 0);
+	}
 }
 
 void Menu::Reset()
