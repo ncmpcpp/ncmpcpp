@@ -37,7 +37,7 @@ extern Window *wFooter;
 extern vector<Song *> vPlaylist;
 extern vector<BrowsedItem> vBrowser;
 
-extern CurrScreen current_screen;
+extern NcmpcppScreen current_screen;
 
 extern Song edited_song;
 extern Song searched_song;

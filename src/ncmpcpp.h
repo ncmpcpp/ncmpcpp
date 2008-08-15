@@ -55,11 +55,12 @@ const bool UNICODE = 0;
 #include "scrollpad.h"
 #include "misc.h"
 
-enum CurrScreen { csHelp, csPlaylist, csBrowser, csTagEditor, csSearcher, csLibrary };
+enum NcmpcppScreen { csHelp, csPlaylist, csBrowser, csTagEditor, csSearcher, csLibrary, csLyrics };
 
 const int ncmpcpp_window_timeout = 500;
 const int search_engine_static_option = 17;
 
+const string home_folder = getenv("HOME");
 const string TERMINAL_TYPE = getenv("TERM");
 
 const string search_mode_one = "Match if tag contains searched phrase";

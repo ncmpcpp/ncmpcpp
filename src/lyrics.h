@@ -18,46 +18,17 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef HAVE_SETTINGS_H
-#define HAVE_SETTINGS_H
-
-#include <fstream>
+#ifndef HAVE_LYRICS_H
+#define HAVE_LYRICS_H
 
 #include "ncmpcpp.h"
 
-struct ncmpcpp_config
-{
-	string mpd_music_dir;
-	string song_list_format;
-	string song_status_format;
-	string song_window_title_format;
-	string song_library_format;
-	
-	COLOR empty_tags_color;
-	COLOR header_color;
-	COLOR volume_color;
-	COLOR state_line_color;
-	COLOR state_flags_color;
-	COLOR main_color;
-	COLOR progressbar_color;
-	COLOR statusbar_color;
-	COLOR library_active_column_color;
-	
-	bool set_window_title;
-	bool header_visibility;
-	bool statusbar_visibility;
-	
-	int mpd_connection_timeout;
-	int crossfade_time;
-	int playlist_disable_highlight_delay;
-	int message_delay_time;
-};
+#include <fstream>
+#ifdef HAVE_CURL_CURL_H
+# include <curl/curl.h>
+#endif
 
-void DefaultConfiguration(ncmpcpp_config &);
-string GetLineValue(const string &);
-string IntoStr(COLOR);
-COLOR IntoColor(const string &);
-void ReadConfiguration(ncmpcpp_config &);
+string GetLyrics(string, string);
 
 #endif
 

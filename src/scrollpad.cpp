@@ -22,7 +22,7 @@
 
 void Scrollpad::Add(string str)
 {
-	if (itsXPos > 0 && str[0] != ' ')
+	if (itsXPos > 0 && (str[0] != ' ' || str[0] != '\n'))
 		str = " " + str;
 	
 	itsRawContent += str;
@@ -39,8 +39,13 @@ void Scrollpad::Add(string str)
 	int space_pos = 0;
 	bool collect = 0;
 	
-	for (size_t i = 0; i <= s.length(); i++, itsXPos++)
+	for (size_t i = 0; i < s.length(); i++)
 	{
+		if (s[i] != '\t')
+			itsXPos++;
+		else
+			itsXPos += 8;
+		
 		if (BBEnabled)
 		{
 			if (s[i] == '[')

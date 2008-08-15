@@ -65,7 +65,7 @@ extern string mpd_random;
 extern string mpd_crossfade;
 extern string mpd_db_updating;
 
-extern CurrScreen current_screen;
+extern NcmpcppScreen current_screen;
 
 extern bool header_update_status;
 

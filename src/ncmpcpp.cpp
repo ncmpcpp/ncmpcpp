@@ -23,6 +23,7 @@
 #include "helpers.h"
 #include "settings.h"
 #include "song.h"
+#include "lyrics.h"
 
 #define FOR_EACH_MPD_DATA(x) for (; (x); (x) = mpd_data_get_next(x))
 
@@ -42,6 +43,13 @@
 				else \
 					block_progressbar_update = 0; \
 			}
+
+#define REFRESH_MEDIA_LIBRARY_SCREEN \
+			mLibArtists->Display(redraw_me); \
+			mvvline(main_start_y, lib_albums_start_x-1, 0, main_height); \
+			mLibAlbums->Display(redraw_me); \
+			mvvline(main_start_y, lib_songs_start_x-1, 0, main_height); \
+			mLibSongs->Display(redraw_me)
 
 #ifdef HAVE_TAGLIB_H
  const string tag_screen = "Tag editor";
@@ -77,6 +85,7 @@ Menu *mLibArtists;
 Menu *mLibAlbums;
 Menu *mLibSongs;
 Scrollpad *sHelp;
+Scrollpad *sLyrics;
 
 Window *wHeader;
 Window *wFooter;
@@ -107,8 +116,8 @@ string mpd_random;
 string mpd_crossfade;
 string mpd_db_updating;
 
-CurrScreen current_screen;
-CurrScreen prev_screen;
+NcmpcppScreen current_screen;
+NcmpcppScreen prev_screen;
 
 Song edited_song;
 Song searched_song;
@@ -189,6 +198,7 @@ int main(int argc, char *argv[])
 	mLibSongs = new Menu(lib_songs_start_x, main_start_y, lib_songs_width, main_height, "Songs", Config.main_color, brNone);
 	
 	sHelp = new Scrollpad(0, main_start_y, COLS, main_height, "", Config.main_color, brNone);
+	sLyrics = new Scrollpad(sHelp->EmptyClone());
 	
 	sHelp->Add("   [b]Keys - Movement\n -----------------------------------------[/b]\n");
 	sHelp->Add("\tUp        : Move Cursor up\n");
@@ -224,7 +234,8 @@ int main(int argc, char *argv[])
 	sHelp->Add("\t?         : Backward find\n");
 	sHelp->Add("\t.         : Go to next/previous found position\n");
 	sHelp->Add(tag_screen_keydesc);
-	sHelp->Add("\tg         : Go to chosen position in current song\n\n");
+	sHelp->Add("\tg         : Go to chosen position in current song\n");
+	sHelp->Add("\tl         : Show/hide song's lyrics\n\n");
 	
 	sHelp->Add("\tQ q       :  Quit\n\n\n");
 	
@@ -292,6 +303,7 @@ int main(int argc, char *argv[])
 	mLibArtists->Timeout(ncmpcpp_window_timeout);
 	mLibAlbums->Timeout(ncmpcpp_window_timeout);
 	mLibSongs->Timeout(ncmpcpp_window_timeout);
+	sLyrics->Timeout(ncmpcpp_window_timeout);
 	wFooter->Timeout(ncmpcpp_window_timeout);
 	
 	while (!main_exit)
@@ -325,6 +337,9 @@ int main(int argc, char *argv[])
 					break;
 				case csLibrary:
 					title = "Media library";
+					break;
+				case csLyrics:
+					title = "Lyrics";
 					break;
 			}
 		
@@ -523,6 +538,8 @@ int main(int argc, char *argv[])
 				mBrowser->Resize(COLS, main_height);
 				mTagEditor->Resize(COLS, main_height);
 				mSearcher->Resize(COLS, main_height);
+				sLyrics->Resize(COLS, main_height);
+				sLyrics->Timeout(ncmpcpp_window_timeout);
 				
 				lib_artist_width = COLS/3-1;
 				lib_albums_start_x = lib_artist_width+1;
@@ -550,13 +567,9 @@ int main(int argc, char *argv[])
 				if (current_screen == csLibrary)
 				{
 					mLibArtists->Hide();
-					mLibArtists->Display(redraw_me);
-					mvvline(main_start_y, lib_albums_start_x-1, 0, main_height);
 					mLibAlbums->Hide();
-					mLibAlbums->Display(redraw_me);
-					mvvline(main_start_y, lib_songs_start_x-1, 0, main_height);
 					mLibSongs->Hide();
-					mLibSongs->Display(redraw_me);
+					REFRESH_MEDIA_LIBRARY_SCREEN;
 				}
 				
 				header_update_status = 1;
@@ -786,11 +799,7 @@ int main(int argc, char *argv[])
 #									else
 									wCurrent = wPrev;
 #									endif
-									mLibArtists->Display(redraw_me);
-									mvvline(main_start_y, lib_albums_start_x-1, 0, main_height);
-									mLibAlbums->Display(redraw_me);
-									mvvline(main_start_y, lib_songs_start_x-1, 0, main_height);
-									mLibSongs->Display(redraw_me);
+									REFRESH_MEDIA_LIBRARY_SCREEN;
 								}
 #								ifdef HAVE_TAGLIB_H
 								break;
@@ -1599,6 +1608,60 @@ int main(int argc, char *argv[])
 				}
 				break;
 			}
+			case 'l': // show lyrics
+			{
+				if (wCurrent == sLyrics)
+				{
+					wCurrent->Hide();
+					current_screen = prev_screen;
+					wCurrent = wPrev;
+					redraw_me = 1;
+					if (current_screen == csLibrary)
+					{
+						REFRESH_MEDIA_LIBRARY_SCREEN;
+					}
+					break;
+				}
+				if ((wCurrent == mPlaylist && !vPlaylist.empty())
+				||  (wCurrent == mBrowser && vBrowser[mBrowser->GetChoice()-1].type == MPD_DATA_TYPE_SONG)
+				||  (wCurrent == mSearcher && !vSearched.empty() && mSearcher->GetChoice() > search_engine_static_option)
+				||  (wCurrent == mLibSongs))
+				{
+					Song s;
+					switch (current_screen)
+					{
+						case csPlaylist:
+							s = *vPlaylist[mPlaylist->GetChoice()-1];
+							break;
+						case csBrowser:
+							s = mpd_database_get_fileinfo(conn, vBrowser[mBrowser->GetChoice()-1].name.c_str());
+							break;
+						case csSearcher:
+							s = vSearched[mSearcher->GetChoice()-search_engine_static_option-1];
+							break;
+						case csLibrary:
+							s = vSongs[mLibSongs->GetChoice()-1];
+							break;
+					}
+					
+					if (s.GetArtist() != UNKNOWN_ARTIST && s.GetTitle() != UNKNOWN_TITLE)
+					{
+						wPrev = wCurrent;
+						prev_screen = current_screen;
+						wCurrent = sLyrics;
+						wCurrent->Hide();
+						wCurrent->Clear();
+						current_screen = csLyrics;
+						
+						sLyrics->WriteXY(0, 0, "Fetching lyrics...");
+						sLyrics->Refresh();
+						sLyrics->Add("[b]" + s.GetArtist() + " - " + s.GetTitle() + "[/b]\n\n");
+						sLyrics->Add(GetLyrics(s.GetArtist(), s.GetTitle()));
+						sLyrics->Timeout(ncmpcpp_window_timeout);
+					}
+				}
+				break;
+			}
 			case '1': // help screen
 			{
 				if (wCurrent != sHelp)
@@ -1606,7 +1669,6 @@ int main(int argc, char *argv[])
 					wCurrent = sHelp;
 					wCurrent->Hide();
 					current_screen = csHelp;
-					redraw_me = 1;
 				}
 				break;
 			}
@@ -1722,11 +1784,7 @@ int main(int argc, char *argv[])
 					
 					wCurrent->Hide();
 					
-					mLibArtists->Display();
-					mvvline(main_start_y, lib_albums_start_x-1, 0, main_height);
-					mLibAlbums->Display();
-					mvvline(main_start_y, lib_songs_start_x-1, 0, main_height);
-					mLibSongs->Display();
+					REFRESH_MEDIA_LIBRARY_SCREEN;
 				
 					wCurrent = mLibArtists;
 					current_screen = csLibrary;

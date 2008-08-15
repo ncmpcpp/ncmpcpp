@@ -26,7 +26,7 @@
 class Scrollpad: public Window
 {
 	public:
-		Scrollpad(int startx, int starty, int width, int height, string title, COLOR color, BORDER border) : Window(startx, starty, width, height, title, color, border), itsBeginning(0), itsRealHeight(1), itsXPos(0) { delwin(itsWindow); itsWindow = newpad(0,0); }
+		Scrollpad(int startx, int starty, int width, int height, string title, COLOR color, BORDER border) : Window(startx, starty, width, height, title, color, border), itsBeginning(0), itsRealHeight(1), itsXPos(0) { delwin(itsWindow); itsWindow = newpad(itsHeight,itsWidth); }
 		virtual ~Scrollpad() {}
 		virtual void Add(string);
 		virtual void Display(bool = 0);
