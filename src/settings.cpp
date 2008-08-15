@@ -27,7 +27,7 @@ using std::ifstream;
 void DefaultConfiguration(ncmpcpp_config &conf)
 {
 	conf.mpd_music_dir = "/var/lib/mpd/music";
-	conf.song_list_format = "[green](%l)[/green] {%a - }{%t}|{[white]%f[/white]}";
+	conf.song_list_format = "[green](%l)[/green] {%a - }{%t}|{[white]%f}";
 	conf.song_status_format = "(%l) {%a - }{%t}|{%f}";
 	conf.song_window_title_format = "{%a - }{%t}|{%f}";
 	conf.song_library_format = "{%n - }{%t}|{%f}";

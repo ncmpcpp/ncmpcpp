@@ -368,12 +368,11 @@ void Menu::Refresh(bool redraw_whole_window)
 		line++;
 		
 		if (*it == itsHighlight && itsHighlightEnabled)
-		{
 			Reverse(0);
-			SetColor(itsBaseColor);
-		}
 		if (itsOptions[*it]->is_bold)
 			Bold(0);
+		
+		SetColor(itsBaseColor);
 	}
 	NeedsRedraw.clear();
 	wrefresh(itsWindow);
