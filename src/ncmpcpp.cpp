@@ -1525,7 +1525,6 @@ int main(int argc, char *argv[])
 				ShowMessage("Deleting all songs except now playing one...");
 				mpd_playlist_queue_commit(conn);
 				ShowMessage("Songs deleted!");
-				redraw_me = 1;
 				break;
 			}
 			case 'c': // clear playlist

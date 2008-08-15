@@ -153,7 +153,7 @@ void NcmpcppStatusChanged(MpdObj *conn, ChangedStatusType what)
 			{
 				if (playlist_length < vPlaylist.size())
 				{
-					mPlaylist->Clear(!playlist_length && current_screen == csPlaylist);
+					mPlaylist->Clear(playlist_length < mPlaylist->GetHeight() && current_screen == csPlaylist);
 					for (vector<Song *>::iterator it = vPlaylist.begin(); it != vPlaylist.end(); it++)
 						delete *it;
 					vPlaylist.clear();

@@ -529,7 +529,7 @@ void Menu::Highlight(int which)
 	
 	int howmuch = itsBeginning-old_beginning;
 	
-	if (Abs(howmuch) > itsHeight/2)
+	if (Abs(howmuch) > itsHeight)
 		redraw_screen();
 	else
 	{
@@ -561,6 +561,7 @@ void Menu::Clear(bool clear_screen)
 	for (vector<Option *>::iterator it = itsOptions.begin(); it != itsOptions.end(); it++)
 		delete *it;
 	itsOptions.clear();
+	NeedsRedraw.clear();
 	itsStaticsNumber = 0;
 	if (clear_screen)
 		Window::Clear();

@@ -43,7 +43,7 @@ struct Option
 class Menu : public Window
 {
 	public:
-		Menu(int startx, int starty, int width, int height, string title, COLOR color, BORDER border) : Window(startx, starty, width, height, title, color, border), itsStaticsNumber(0), itsChoice(0), itsBeginning(0), itsHighlight(0), itsHighlightColor(itsBaseColor), itsHighlightEnabled(1) { SetColor(color); }
+		Menu(int startx, int starty, int width, int height, string title, COLOR color, BORDER border) : Window(startx, starty, width, height, title, color, border), itsStaticsNumber(0), itsBeginning(0), itsHighlight(0), itsHighlightColor(itsBaseColor), itsHighlightEnabled(1) { SetColor(color); }
 		virtual ~Menu();
 		
 		virtual void Add(string str) { AddOption(str); }
@@ -89,7 +89,6 @@ class Menu : public Window
 		void redraw_screen();
 		bool is_static() { return itsOptions[itsHighlight]->is_static; }
 		
-		int itsChoice;
 		int itsBeginning;
 		int itsHighlight;
 		
