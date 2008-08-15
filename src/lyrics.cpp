@@ -95,6 +95,10 @@ string GetLyrics(string artist, string song)
 		result.replace(i, 4, "<");
 	for (int i = result.find("&gt;"); i != string::npos; i = result.find("&gt;"))
 		result.replace(i, 4, ">");
+	for (int i = result.find("<lyric>"); i != string::npos; i = result.find("<lyric>"))
+		result.replace(i, 7, "");
+	for (int i = result.find("</lyric>"); i != string::npos; i = result.find("</lyric>"))
+		result.replace(i, 8, "");
 	
 	std::ofstream output(fullpath.c_str());
 	
