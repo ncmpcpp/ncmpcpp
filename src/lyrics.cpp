@@ -55,7 +55,7 @@ string GetLyrics(string artist, string song)
 	for (string::iterator it = artist.begin(); it != artist.end(); it++)
 		if (*it == ' ')
 			*it = '+';
-	
+
 	for (string::iterator it = song.begin(); it != song.end(); it++)
 		if (*it == ' ')
 			*it = '+';
@@ -91,6 +91,10 @@ string GetLyrics(string artist, string song)
 		result.replace(i, 6, "'");
 	for (int i = result.find("&quot;"); i != string::npos; i = result.find("&quot;"))
 		result.replace(i, 6, "\"");
+	for (int i = result.find("&lt;"); i != string::npos; i = result.find("&lt;"))
+		result.replace(i, 4, "<");
+	for (int i = result.find("&gt;"); i != string::npos; i = result.find("&gt;"))
+		result.replace(i, 4, ">");
 	
 	std::ofstream output(fullpath.c_str());
 	
