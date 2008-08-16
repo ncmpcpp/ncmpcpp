@@ -208,6 +208,7 @@ int main(int argc, char *argv[])
 	sHelp->Add("\tHome      : Home\n");
 	sHelp->Add("\tEnd       : End\n\n");
 	
+	sHelp->Add("\tTab       : Switch between playlist and browser\n");
 	sHelp->Add("\t1         : Help screen\n");
 	sHelp->Add("\t2         : Playlist screen\n");
 	sHelp->Add("\t3         : Browse screen\n");
@@ -1672,8 +1673,16 @@ int main(int argc, char *argv[])
 				}
 				break;
 			}
+			case KEY_TAB: //switch between playlist and browser
+			{
+				if (wCurrent == mPlaylist)
+					goto KEY_TAB_BROWSER_REDIRECT;
+				else
+					goto KEY_TAB_PLAYLIST_REDIRECT;
+			}
 			case '2': // playlist screen
 			{
+				KEY_TAB_PLAYLIST_REDIRECT:
 				if (wCurrent != mPlaylist && current_screen != csTagEditor)
 				{
 					found_pos = 0;
@@ -1687,6 +1696,7 @@ int main(int argc, char *argv[])
 			}
 			case '3': // browse screen
 			{
+				KEY_TAB_BROWSER_REDIRECT:
 				if (browsed_dir.empty())
 					browsed_dir = "/";
 				

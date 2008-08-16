@@ -35,6 +35,7 @@ const bool UNICODE = 0;
 # define NCMPCPP_TO_WSTRING(x) (x)
 #endif
 
+#define KEY_TAB 9
 #define ENTER 10
 #define KEY_SPACE 32
 
