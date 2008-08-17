@@ -19,13 +19,12 @@
  ***************************************************************************/
 
 #include "ncmpcpp.h"
+#include "mpdpp.h"
 #include "status_checker.h"
 #include "helpers.h"
 #include "settings.h"
 #include "song.h"
 #include "lyrics.h"
-
-#define FOR_EACH_MPD_DATA(x) for (; (x); (x) = mpd_data_get_next(x))
 
 #define BLOCK_STATUSBAR_UPDATE \
 			if (Config.statusbar_visibility) \
@@ -59,18 +58,14 @@
  const string tag_screen_keydesc = "\tE e       : Show song's tags\n";
 #endif
 
-char *MPD_HOST = getenv("MPD_HOST");
-int MPD_PORT = getenv("MPD_PORT") ? atoi(getenv("MPD_PORT")) : 6600;
-char *MPD_PASSWORD = getenv("MPD_PASSWORD");
-
 ncmpcpp_config Config;
 
-vector<Song *> vPlaylist;
-vector<Song> vSearched;
-vector<BrowsedItem> vBrowser;
+SongList vPlaylist;
+SongList vSearched;
+ItemList vBrowser;
 
-vector<string> vArtists;
-vector<Song> vSongs;
+TagList vArtists;
+SongList vSongs;
 
 vector<int> vFoundPositions;
 int found_pos = 0;
@@ -90,9 +85,7 @@ Scrollpad *sLyrics;
 Window *wHeader;
 Window *wFooter;
 
-MpdObj *conn;
-MpdData *playlist;
-MpdData *browser;
+MPDConnection *Mpd;
 
 time_t block_delay;
 time_t timer;
@@ -153,16 +146,24 @@ int main(int argc, char *argv[])
 	ReadConfiguration(Config);
 	DefineEmptyTags();
 	
-	conn = mpd_new(MPD_HOST, MPD_PORT, MPD_PASSWORD);
+	Mpd = new MPDConnection;
 	
-	mpd_set_connection_timeout(conn, Config.mpd_connection_timeout);
+	if (getenv("MPD_HOST"))
+		Mpd->SetHostname(getenv("MPD_HOST"));
+	if (getenv("MPD_PORT"))
+		Mpd->SetPort(atoi(getenv("MPD_PORT")));
+	if (getenv("MPD_PASSWORD"))
+		Mpd->SetPassword(getenv("MPD_PASSWORD"));
 	
-	if (mpd_connect(conn) != MPD_OK)
+	Mpd->Connect();
+	
+	if (!Mpd->Connected())
 	{
-		printf("Cannot connect to mpd.\n");
+		printf("Cannot connect to mpd (%s)\n", Mpd->GetLastErrorMessage().c_str());
 		return -1;
 	}
-	mpd_send_password(conn);
+	
+	Mpd->SendPassword();
 	
 	setlocale(LC_ALL,"");
 	initscr();
@@ -285,9 +286,6 @@ int main(int argc, char *argv[])
 	wFooter = new Window(0, footer_start_y, COLS, footer_height, "", Config.statusbar_color, brNone);
 	wFooter->Display();
 	
-	mpd_signal_connect_error(conn, (ErrorCallback)NcmpcppErrorCallback, NULL);
-	mpd_signal_connect_status_changed(conn, (StatusChangedCallback)NcmpcppStatusChanged, NULL);
-	
 	wCurrent = mPlaylist;
 	current_screen = csPlaylist;
 	
@@ -307,8 +305,21 @@ int main(int argc, char *argv[])
 	sLyrics->Timeout(ncmpcpp_window_timeout);
 	wFooter->Timeout(ncmpcpp_window_timeout);
 	
+	Mpd->SetStatusUpdater(NcmpcppStatusChanged, NULL);
+	Mpd->SetErrorHandler(NcmpcppErrorCallback, NULL);
+	
 	while (!main_exit)
 	{
+		if (!Mpd->Connected())
+		{
+			ShowMessage("Attempting to reconnect...");
+			Mpd->Disconnect();
+			Mpd->Connect();
+			if (Mpd->Connected())
+				ShowMessage("Connected!");
+			messages_allowed = 0;
+		}
+		
 		TraceMpdStatus();
 		
 		block_playlist_update = 0;
@@ -394,8 +405,6 @@ int main(int argc, char *argv[])
 		
 		if (current_screen == csLibrary && !block_library_update)
 		{
-			MpdData *data;
-			
 			if (wCurrent == mLibAlbums && mLibAlbums->Empty())
 			{
 				mLibAlbums->HighlightColor(Config.main_color);
@@ -405,53 +414,48 @@ int main(int argc, char *argv[])
 			
 			if (wCurrent == mLibArtists)
 			{
+				TagList list;
 				mLibAlbums->Clear();
-				data = mpd_database_get_albums(conn, (char *) mLibArtists->GetCurrentOption().c_str());
-				FOR_EACH_MPD_DATA(data)
-						mLibAlbums->AddOption(data->tag);
-				mpd_data_free(data);
-				
-				if (mLibAlbums->Empty())
-				{
-					mLibAlbums->WriteXY(0, 0, "No albums found.");
-					vSongs.clear();
-					mLibSongs->Clear();
-					mpd_database_search_start(conn, 1);
-					mpd_database_search_add_constraint(conn, MPD_TAG_ITEM_ARTIST, mLibArtists->GetCurrentOption().c_str());
-					mpd_database_search_add_constraint(conn, MPD_TAG_ITEM_ALBUM, mLibAlbums->GetCurrentOption().c_str());
-					data = mpd_database_search_commit(conn);
-					FOR_EACH_MPD_DATA(data)
-							vSongs.push_back(data->song);
-					mpd_data_free(data);
-				}
+				Mpd->GetAlbums(mLibArtists->GetCurrentOption(), list);
+				for (TagList::const_iterator it = list.begin(); it != list.end(); it++)
+						mLibAlbums->AddOption(*it);
 			}
 			
-			vSongs.clear();
-			mLibSongs->Clear(0);
-			mpd_database_search_start(conn, 1);
-			mpd_database_search_add_constraint(conn, MPD_TAG_ITEM_ARTIST, mLibArtists->GetCurrentOption().c_str());
-			mpd_database_search_add_constraint(conn, MPD_TAG_ITEM_ALBUM, mLibAlbums->GetCurrentOption().c_str());
-			data = mpd_database_search_commit(conn);
-			FOR_EACH_MPD_DATA(data)
-					vSongs.push_back(data->song);
-			mpd_data_free(data);
-				
-			sort(vSongs.begin(), vSongs.end(), SortSongsByTrack);
-				
-			bool bold = 0;
-			for (vector<Song>::const_iterator it = vSongs.begin(); it != vSongs.end(); it++)
+			if (mLibAlbums->Empty())
 			{
-				for (vector<Song *>::const_iterator j = vPlaylist.begin(); j != vPlaylist.end(); j++)
+				mLibAlbums->WriteXY(0, 0, "No albums found.");
+				mLibSongs->Clear(0);
+				FreeSongList(vSongs);
+				Mpd->StartSearch(1);
+				Mpd->AddSearch(MPD_TAG_ITEM_ARTIST, mLibArtists->GetCurrentOption());
+				Mpd->CommitSearch(vSongs);
+			}
+			else
+			{
+				FreeSongList(vSongs);
+				mLibSongs->Clear(0);
+				Mpd->StartSearch(1);
+				Mpd->AddSearch(MPD_TAG_ITEM_ARTIST, mLibArtists->GetCurrentOption());
+				Mpd->AddSearch(MPD_TAG_ITEM_ALBUM, mLibAlbums->GetCurrentOption());
+				Mpd->CommitSearch(vSongs);
+			}
+			sort(vSongs.begin(), vSongs.end(), SortSongsByTrack);
+			bool bold = 0;
+			
+			for (SongList::const_iterator it = vSongs.begin(); it != vSongs.end(); it++)
+			{
+				for (SongList::const_iterator j = vPlaylist.begin(); j != vPlaylist.end(); j++)
 				{
-					if (it->GetHash() == (*j)->GetHash())
+					if ((*it)->GetHash() == (*j)->GetHash())
 					{
 						bold = 1;
 						break;
 					}
 				}
-				bold ? mLibSongs->AddBoldOption(DisplaySong(*it, Config.song_library_format)) : mLibSongs->AddOption(DisplaySong(*it, Config.song_library_format));
+				bold ? mLibSongs->AddBoldOption(DisplaySong(**it, Config.song_library_format)) : mLibSongs->AddOption(DisplaySong(**it, Config.song_library_format));
 				bold = 0;
 			}
+			
 			mLibAlbums->Refresh();
 			mLibSongs->Hide();
 			mLibSongs->Display();
@@ -494,6 +498,8 @@ int main(int argc, char *argv[])
 				}
 				break;
 			}
+			default:
+				break;
 		}
 		
 		switch (input)
@@ -574,11 +580,14 @@ int main(int argc, char *argv[])
 				}
 				
 				header_update_status = 1;
-				int mpd_state = mpd_player_get_state(conn);
-				if (mpd_state == MPD_PLAYER_PLAY || mpd_state == MPD_PLAYER_PAUSE)
-					NcmpcppStatusChanged(conn, MPD_CST_ELAPSED_TIME); // restore status
+				PlayerState mpd_state = Mpd->GetState();
+				MPDStatusChanges changes;
+				if (mpd_state == psPlay || mpd_state == psPause)
+					changes.ElapsedTime = 1; // restore status
 				else
-					NcmpcppStatusChanged(conn, MPD_CST_STATE);
+					changes.PlayerState = 1;
+				
+				NcmpcppStatusChanged(Mpd, changes, NULL);
 				
 				break;
 			}
@@ -589,7 +598,7 @@ int main(int argc, char *argv[])
 					case csPlaylist:
 					{
 						if (!mPlaylist->Empty())
-							mpd_player_play_id(conn, vPlaylist[mPlaylist->GetChoice()-1]->GetID());
+							Mpd->PlayID(vPlaylist[mPlaylist->GetChoice()-1]->GetID());
 						break;
 					}
 					case csBrowser:
@@ -597,7 +606,7 @@ int main(int argc, char *argv[])
 						int ci = mBrowser->GetChoice()-1;
 						switch (vBrowser[ci].type)
 						{
-							case MPD_DATA_TYPE_DIRECTORY:
+							case itDirectory:
 							{
 								found_pos = 0;
 								vFoundPositions.clear();
@@ -624,49 +633,38 @@ int main(int argc, char *argv[])
 										GetDirectory(vBrowser[ci].name);
 								break;
 							}
-							case MPD_DATA_TYPE_SONG:
+							case itSong:
 							{
-								string &file = vBrowser[ci].name;
-								mpd_Song *test = mpd_database_get_fileinfo(conn, (char *) file.c_str());
-								if (test)
+								Song s = Mpd->GetSong(vBrowser[ci].name);
+								int id = Mpd->AddSong(s);
+								if (id >= 0)
 								{
-									mpd_playlist_add(conn, (char *) file.c_str());
-									Song s = test;
-									if (s.GetHash() == vPlaylist.back()->GetHash())
-										mpd_player_play_id(conn, vPlaylist.back()->GetID());
+									Mpd->PlayID(id);
 									ShowMessage("Added to playlist: " +  OmitBBCodes(DisplaySong(s)));
-									mBrowser->Refresh();
 								}
-								mpd_freeSong(test);
+								mBrowser->Refresh();
 								break;
 							}
-							case MPD_DATA_TYPE_PLAYLIST:
+							case itPlaylist:
 							{
-								int howmany = 0;
+								SongList list;
 								ShowMessage("Loading and playing playlist " + vBrowser[ci].name + "...");
-								MpdData *list = mpd_database_get_playlist_content(conn, (char *) vBrowser[ci].name.c_str());
-								Song tmp;
-								if (list)
-									tmp = list->song;
-								FOR_EACH_MPD_DATA(list)
-								{
-									howmany++;
-									mpd_playlist_queue_add(conn, list->song->file);
-								}
-								mpd_data_free(list);
-								mpd_playlist_queue_commit(conn);
-								int new_id;
+								Mpd->GetPlaylistContent(vBrowser[ci].name, list);
+								for(SongList::const_iterator it = list.begin(); it != list.end(); it++)
+									Mpd->QueueAddSong(**it);
+								Mpd->CommitQueue();
+								
 								try
 								{
-									new_id = vPlaylist.at(mPlaylist->MaxChoice()-howmany)->GetID();
+									Song *s = vPlaylist.at(vPlaylist.size()-list.size());
+									if (s->GetHash() == list.at(0)->GetHash())
+										Mpd->PlayID(s->GetID());
 								}
 								catch (std::out_of_range)
 								{
-									new_id = -1;
+									ShowMessage("Couldn't play playlist!");
 								}
-								if (new_id >= 0)
-									if (vPlaylist[mPlaylist->MaxChoice()-howmany]->GetHash() == tmp.GetHash())
-										mpd_player_play_id(conn, new_id);
+								FreeSongList(list);
 								break;
 							}
 						}
@@ -768,12 +766,12 @@ int main(int argc, char *argv[])
 									f.tag()->setComment(NCMPCPP_TO_WSTRING(s.GetComment()));
 									s.GetEmptyFields(0);
 									f.save();
-									mpd_database_update_dir(conn, (char *) s.GetDirectory().c_str());
+									Mpd->UpdateDirectory(s.GetDirectory());
 									if (prev_screen == csSearcher)
 									{
 										int upid = mSearcher->GetChoice()-search_engine_static_option-1;
-										vSearched[upid] = s;
-										mSearcher->UpdateOption(upid+1, DisplaySong(s));
+										*vSearched[upid] = s;
+										mSearcher->UpdateOption(mSearcher->GetChoice(), DisplaySong(s));
 									}
 								}
 								else
@@ -923,17 +921,17 @@ int main(int argc, char *argv[])
 									mSearcher->AddStaticBoldOption("[white]Search results:[/white] [green]Found " + IntoStr(vSearched.size()) + (vSearched.size() > 1 ? " songs" : " song") + "[/green]");
 									mSearcher->AddSeparator();
 									
-									for (vector<Song>::const_iterator it = vSearched.begin(); it != vSearched.end(); it++)
+									for (SongList::const_iterator it = vSearched.begin(); it != vSearched.end(); it++)
 									{	
-										for (vector<Song *>::const_iterator j = vPlaylist.begin(); j != vPlaylist.end(); j++)
+										for (SongList::const_iterator j = vPlaylist.begin(); j != vPlaylist.end(); j++)
 										{
-											if ((*j)->GetHash() == it->GetHash())
+											if ((*j)->GetHash() == (*it)->GetHash())
 											{
 												bold = 1;
 												break;
 											}
 										}
-										bold ? mSearcher->AddBoldOption(DisplaySong(*it)) : mSearcher->AddOption(DisplaySong(*it));
+										bold ? mSearcher->AddBoldOption(DisplaySong(**it)) : mSearcher->AddOption(DisplaySong(**it));
 										bold = 0;
 									}
 									
@@ -958,17 +956,13 @@ int main(int argc, char *argv[])
 							default:
 							{
 								int ci = mSearcher->GetRealChoice()-1;
-								const string &file = vSearched[ci-1].GetFile();
-								mpd_Song *test = mpd_database_get_fileinfo(conn, (char *) file.c_str());
-								if (test)
+								Song s = Mpd->GetSong(vSearched[ci-1]->GetFile());
+								int id = Mpd->AddSong(s);
+								if (id >= 0)
 								{
-									mpd_playlist_add(conn, (char *) file.c_str());
-									Song s = test;
-									if (s.GetHash() == vPlaylist.back()->GetHash())
-										mpd_player_play_id(conn, vPlaylist.back()->GetID());
+									Mpd->PlayID(id);
 									ShowMessage("Added to playlist: " +  OmitBBCodes(DisplaySong(s)));
 								}
-								mpd_freeSong(test);
 								break;
 							}
 						}
@@ -979,64 +973,52 @@ int main(int argc, char *argv[])
 					{
 						Start_Point_For_KEY_SPACE: // same code for KEY_SPACE, but without playing.
 						
-						MpdData *data;
+						SongList list;
 						
 						if (wCurrent == mLibArtists)
 						{
 							const string &artist = mLibArtists->GetCurrentOption();
 							ShowMessage("Adding all songs artist's: " + artist);
-							mpd_database_search_start(conn, 1);
-							mpd_database_search_add_constraint(conn, MPD_TAG_ITEM_ARTIST, (char *) artist.c_str());
-							data = mpd_database_search_commit(conn);
-							int howmany = 0;
-							Song tmp;
-							if (data)
-								tmp = data->song;
-							FOR_EACH_MPD_DATA(data)
-							{
-								howmany++;
-								mpd_playlist_queue_add(conn, data->song->file);
-							}
-							mpd_data_free(data);
-							mpd_playlist_queue_commit(conn);
+							Mpd->StartSearch(1);
+							Mpd->AddSearch(MPD_TAG_ITEM_ARTIST, artist);
+							Mpd->CommitSearch(list);
+							for (SongList::const_iterator it = list.begin(); it != list.end(); it++)
+								Mpd->QueueAddSong(**it);
+							Mpd->CommitQueue();
+							
 							if (input == ENTER)
 							{
-								int new_id;
 								try
 								{
-									new_id = vPlaylist.at(mPlaylist->MaxChoice()-howmany)->GetID();
+									Song *s = vPlaylist.at(vPlaylist.size()-list.size());
+									if (s->GetHash() == list.at(0)->GetHash())
+										Mpd->PlayID(s->GetID());
 								}
 								catch (std::out_of_range)
 								{
-									new_id = -1;
+									ShowMessage("Couldn't play!");
 								}
-								if (new_id >= 0)
-									if (vPlaylist[mPlaylist->MaxChoice()-howmany]->GetHash() == tmp.GetHash())
-										mpd_player_play_id(conn, new_id);
 							}
 						}
 						
 						if (wCurrent == mLibAlbums)
 						{
-							int howmany = 0;
 							ShowMessage("Adding songs from album: " + mLibAlbums->GetCurrentOption());
-							for (vector<Song>::const_iterator it = vSongs.begin(); it != vSongs.end(); it++, howmany++)
-								mpd_playlist_queue_add(conn, (char *) it->GetFile().c_str());
-							mpd_playlist_queue_commit(conn);
+							for (SongList::const_iterator it = vSongs.begin(); it != vSongs.end(); it++)
+								Mpd->QueueAddSong(**it);
+							Mpd->CommitQueue();
 							if (input == ENTER)
 							{
-								int new_id;
 								try
 								{
-									new_id = vPlaylist.at(mPlaylist->MaxChoice()-howmany)->GetID();
+									Song *s = vPlaylist.at(vPlaylist.size()-vSongs.size());
+									if (s->GetHash() == vSongs.at(0)->GetHash())
+										Mpd->PlayID(s->GetID());
 								}
 								catch (std::out_of_range)
 								{
-									new_id = -1;
+									ShowMessage("Couldn't play!");
 								}
-								if (new_id >= 0)
-									if (vPlaylist[mPlaylist->MaxChoice()-howmany]->GetHash() == vSongs.begin()->GetHash())
-										mpd_player_play_id(conn, new_id);
 							}
 						}
 						
@@ -1044,19 +1026,26 @@ int main(int argc, char *argv[])
 						{
 							if (!vSongs.empty())
 							{
-								Song &s = vSongs[mLibSongs->GetChoice()-1];
-								ShowMessage("Added to playlist: " + OmitBBCodes(DisplaySong(s)));
-								mpd_playlist_add(conn, (char *) s.GetFile().c_str());
-								if (input == ENTER && s.GetHash() == vPlaylist.back()->GetHash())
-									mpd_player_play_id(conn, vPlaylist.back()->GetID());
+								Song &s = *vSongs[mLibSongs->GetChoice()-1];
+								int id = Mpd->AddSong(s);
+								if (id >= 0)
+								{
+									ShowMessage("Added to playlist: " + OmitBBCodes(DisplaySong(s)));
+									if (input == ENTER)
+										Mpd->PlayID(id);
+								}
 							}
 						}
+						
+						FreeSongList(list);
 						
 						if (input == KEY_SPACE)
 							wCurrent->Go(DOWN);
 						
 						break;
 					}
+					default:
+						break;
 				}
 				break;
 			}
@@ -1067,39 +1056,38 @@ int main(int argc, char *argv[])
 					int ci = mBrowser->GetChoice()-1;
 					switch (vBrowser[ci].type)
 					{
-						case MPD_DATA_TYPE_DIRECTORY:
+						case itDirectory:
 						{
 							string getdir = browsed_dir == "/" ? vBrowser[ci].name : browsed_dir + "/" + vBrowser[ci].name;
-							MpdData *queue = mpd_database_get_directory_recursive(conn, (char *) getdir.c_str());
 							
-							FOR_EACH_MPD_DATA(queue)
-								mpd_playlist_queue_add(conn, queue->song->file);
-							mpd_data_free(queue);
+							SongList list;
+							Mpd->GetDirectoryRecursive(getdir, list);
+							
+							for (SongList::const_iterator it = list.begin(); it != list.end(); it++)
+								Mpd->QueueAddSong(**it);
+							
+							FreeSongList(list);
 							ShowMessage("Added folder: " + getdir);
-							mpd_playlist_queue_commit(conn);
+							Mpd->CommitQueue();
 							break;
 						}
-						case MPD_DATA_TYPE_SONG:
+						case itSong:
 						{
-							mpd_Song *test = mpd_database_get_fileinfo(conn, (char *) vBrowser[ci].name.c_str());
-							if (test)
-							{
-								mpd_playlist_queue_add(conn, (char *) vBrowser[ci].name.c_str());
-								Song s = test;
+							Song s = Mpd->GetSong(vBrowser[ci].name);
+							int id = Mpd->AddSong(s);
+							if (id >= 0)
 								ShowMessage("Added to playlist: " + OmitBBCodes(DisplaySong(s)));
-								mpd_playlist_queue_commit(conn);
-							}
-							mpd_freeSong(test);
 							break;
 						}
-						case MPD_DATA_TYPE_PLAYLIST:
+						case itPlaylist:
 						{
 							ShowMessage("Loading playlist " + vBrowser[ci].name + "...");
-							MpdData *list = mpd_database_get_playlist_content(conn, (char *) vBrowser[ci].name.c_str());
-							FOR_EACH_MPD_DATA(list)
-								mpd_playlist_queue_add(conn, list->song->file);
-							mpd_data_free(list);
-							mpd_playlist_queue_commit(conn);
+							SongList list;
+							Mpd->GetPlaylistContent(vBrowser[ci].name, list);
+							for (SongList::const_iterator it = list.begin(); it != list.end(); it++)
+								Mpd->QueueAddSong(**it);
+							FreeSongList(list);
+							Mpd->CommitQueue();
 							break;
 						}
 					}
@@ -1111,10 +1099,9 @@ int main(int argc, char *argv[])
 					if (id < 0)
 						break;
 						
-					mpd_playlist_queue_add(conn, (char *)vSearched[id].GetFile().c_str());
-					Song &s = vSearched[id];
+					Song &s = *vSearched[id];
+					Mpd->AddSong(s);
 					ShowMessage("Added to playlist: " + OmitBBCodes(DisplaySong(s)));
-					mpd_playlist_queue_commit(conn);
 					mSearcher->Go(DOWN);
 				}
 				if (current_screen == csLibrary)
@@ -1147,7 +1134,7 @@ int main(int argc, char *argv[])
 			}
 			case '+': // volume up
 			{
-				mpd_status_set_volume(conn, mpd_status_get_volume(conn)+1);
+				Mpd->SetVolume(Mpd->GetVolume()+1);
 				break;
 			}
 			case KEY_LEFT:
@@ -1176,7 +1163,7 @@ int main(int argc, char *argv[])
 			}
 			case '-': //volume down
 			{
-				mpd_status_set_volume(conn, mpd_status_get_volume(conn)-1);
+				Mpd->SetVolume(Mpd->GetVolume()-1);
 				break;
 			}
 			case KEY_DC: // delete position from list
@@ -1197,7 +1184,7 @@ int main(int argc, char *argv[])
 						{
 							id = mPlaylist->GetChoice()-1;
 							
-							mpd_playlist_queue_delete_pos(conn, id);
+							Mpd->QueueDeleteSong(id);
 							delete vPlaylist[id];
 							vPlaylist.erase(vPlaylist.begin()+id);
 							mPlaylist->DeleteOption(id+1);
@@ -1207,16 +1194,15 @@ int main(int argc, char *argv[])
 						}
 						mPlaylist->ReadKey(input);
 					}
-					mpd_playlist_queue_commit(conn);
+					Mpd->CommitQueue();
 					mPlaylist->Timeout(ncmpcpp_window_timeout);
 					dont_change_now_playing = 0;
-					block_playlist_update = 0;
 				}
 				if (current_screen == csBrowser)
 				{
 					BLOCK_STATUSBAR_UPDATE;
 					int id = mBrowser->GetChoice()-1;
-					if (vBrowser[id].type == MPD_DATA_TYPE_PLAYLIST)
+					if (vBrowser[id].type == itPlaylist)
 					{
 						block_statusbar_update = 1;
 						wFooter->WriteXY(0, Config.statusbar_visibility, "Delete playlist " + vBrowser[id].name + " ? [y/n] ", 1);
@@ -1231,7 +1217,7 @@ int main(int argc, char *argv[])
 						block_statusbar_update = 0;
 						if (in == 'y')
 						{
-							mpd_database_delete_playlist(conn, (char *) vBrowser[id].name.c_str());
+							//mpd_database_delete_playlist(conn, (char *) vBrowser[id].name.c_str());
 							ShowMessage("Playlist " + vBrowser[id].name + " deleted!");
 							GetDirectory("/");
 						}
@@ -1245,20 +1231,20 @@ int main(int argc, char *argv[])
 			}
 			case '<':
 			{
-				mpd_player_prev(conn);
+				Mpd->Prev();
 				break;
 			}
 			case '>':
 			{
-				mpd_player_next(conn);
+				Mpd->Next();
 				break;
 			}
 			case 'P': // pause
 			{
-				mpd_player_pause(conn);
+				Mpd->Pause();
 				break;
 			}
-			case 'S': // save playlist
+			/*case 'S': // save playlist
 			{
 				string playlist_name;
 				BLOCK_STATUSBAR_UPDATE;
@@ -1285,10 +1271,10 @@ int main(int argc, char *argv[])
 				if (browsed_dir == "/" && !vBrowser.empty())
 					GetDirectory(browsed_dir);
 				break;
-			}
+			}*/
 			case 's': // stop
 			{
-				mpd_player_stop(conn);
+				Mpd->Stop();
 				break;
 			}
 			case 'm': // move song up
@@ -1315,7 +1301,7 @@ int main(int argc, char *argv[])
 					}
 					mPlaylist->UpdateOption(pos, DisplaySong(*vPlaylist[pos-1]));
 					mPlaylist->UpdateOption(pos+1, DisplaySong(*vPlaylist[pos]));
-					mpd_playlist_move_pos(conn, pos, pos-1);
+					Mpd->Move(pos, pos-1);
 					mPlaylist->Go(UP);
 				}
 				break;
@@ -1324,7 +1310,7 @@ int main(int argc, char *argv[])
 			{
 				block_playlist_update = 1;
 				int pos = mPlaylist->GetChoice()-1;
-				if (pos+1 < mpd_playlist_get_playlist_length(conn) && !mPlaylist->Empty() && current_screen == csPlaylist)
+				if (pos+1 < vPlaylist.size() && !mPlaylist->Empty() && current_screen == csPlaylist)
 				{
 					std::swap<Song *>(vPlaylist[pos+1], vPlaylist[pos]);
 					if (pos == now_playing)
@@ -1344,7 +1330,7 @@ int main(int argc, char *argv[])
 					}
 					mPlaylist->UpdateOption(pos+2, DisplaySong(*vPlaylist[pos+1]));
 					mPlaylist->UpdateOption(pos+1, DisplaySong(*vPlaylist[pos]));
-					mpd_playlist_move_pos(conn, pos, pos+1);
+					Mpd->Move(pos, pos+1);
 					mPlaylist->Go(DOWN);
 				}
 				break;
@@ -1359,7 +1345,7 @@ int main(int argc, char *argv[])
 				
 				int songpos, in;
 				
-				songpos = mpd_status_get_elapsed_song_time(conn);
+				songpos = Mpd->GetElapsedTime();
 				Song &s = *vPlaylist[now_playing];
 				
 				while (1)
@@ -1391,7 +1377,7 @@ int main(int argc, char *argv[])
 					else
 						break;
 				}
-				mpd_player_seek(conn, songpos);
+				Mpd->Seek(songpos);
 				
 				block_progressbar_update = 0;
 				UNBLOCK_STATUSBAR_UPDATE;
@@ -1401,9 +1387,9 @@ int main(int argc, char *argv[])
 			case 'U': case 'u': // update database
 			{
 				if (current_screen == csBrowser)
-					mpd_database_update_dir(conn, (char *) browsed_dir.c_str());
+					Mpd->UpdateDirectory(browsed_dir);
 				else
-					mpd_database_update_dir(conn, "/");
+					Mpd->UpdateDirectory("/");
 				break;
 			}
 			case 'O': case 'o': // go to playing song
@@ -1414,22 +1400,22 @@ int main(int argc, char *argv[])
 			}
 			case 'r': // switch repeat state
 			{
-				mpd_player_set_repeat(conn, !mpd_player_get_repeat(conn));
+				Mpd->SetRepeat(!Mpd->GetRepeat());
 				break;
 			}
 			case 'Z':
 			{
-				mpd_playlist_shuffle(conn);
+				//mpd_playlist_shuffle(conn);
 				break;
 			}
 			case 'z': //switch random state
 			{
-				mpd_player_set_random(conn, !mpd_player_get_random(conn));
+				Mpd->SetRandom(!Mpd->GetRandom());
 				break;
 			}
 			case 'x': // switch crossfade state
 			{
-				mpd_status_set_crossfade(conn, (mpd_status_get_crossfade(conn) ? 0 : Config.crossfade_time));
+				Mpd->SetCrossfade(Mpd->GetCrossfade() ? 0 : Config.crossfade_time);
 				break;
 			}
 			case 'E': case 'e': // edit song's tags
@@ -1455,9 +1441,9 @@ int main(int argc, char *argv[])
 					}
 					case csBrowser:
 					{
-						if (vBrowser[id].type == MPD_DATA_TYPE_SONG)
+						if (vBrowser[id].type == itSong)
 						{
-							Song edited = mpd_database_get_fileinfo(conn, vBrowser[id].name.c_str());
+							Song edited = Mpd->GetSong(vBrowser[id].name.c_str());
 							if (GetSongInfo(edited))
 							{
 								wCurrent = mTagEditor;
@@ -1474,7 +1460,7 @@ int main(int argc, char *argv[])
 					{
 						if (id >= search_engine_static_option && !vSearched.empty())
 						{
-							if (GetSongInfo(vSearched[id-search_engine_static_option]))
+							if (GetSongInfo(*vSearched[id-search_engine_static_option]))
 							{
 								wCurrent = mTagEditor;
 								wPrev = mSearcher;
@@ -1490,7 +1476,7 @@ int main(int argc, char *argv[])
 					{
 						if (!vSongs.empty() && wCurrent == mLibSongs)
 						{
-							if (GetSongInfo(vSongs[id]))
+							if (GetSongInfo(*vSongs[id]))
 							{
 								wPrev = wCurrent;
 								wCurrent = mTagEditor;
@@ -1517,7 +1503,7 @@ int main(int argc, char *argv[])
 				position = wFooter->GetString(3, TraceMpdStatus);
 				newpos = atoi(position.c_str());
 				if (newpos > 0 && newpos < 100 && !position.empty())
-					mpd_player_seek(conn, vPlaylist[now_playing]->GetTotalLength()*newpos/100.0);
+					Mpd->Seek(vPlaylist[now_playing]->GetTotalLength()*newpos/100.0);
 				UNBLOCK_STATUSBAR_UPDATE;
 				break;
 			}
@@ -1528,25 +1514,25 @@ int main(int argc, char *argv[])
 					ShowMessage("Nothing is playing now!");
 					break;
 				}
-				for (vector<Song *>::iterator it = vPlaylist.begin(); it != vPlaylist.begin()+now_playing; it++)
-					mpd_playlist_queue_delete_id(conn, (*it)->GetID());
-				for (vector<Song *>::iterator it = vPlaylist.begin()+now_playing+1; it != vPlaylist.end(); it++)
-					mpd_playlist_queue_delete_id(conn, (*it)->GetID());
+				for (SongList::iterator it = vPlaylist.begin(); it != vPlaylist.begin()+now_playing; it++)
+					Mpd->QueueDeleteSongId((*it)->GetID());
+				for (SongList::iterator it = vPlaylist.begin()+now_playing+1; it != vPlaylist.end(); it++)
+					Mpd->QueueDeleteSongId((*it)->GetID());
 				ShowMessage("Deleting all songs except now playing one...");
-				mpd_playlist_queue_commit(conn);
+				Mpd->CommitQueue();
 				ShowMessage("Songs deleted!");
 				break;
 			}
 			case 'c': // clear playlist
 			{
 				ShowMessage("Clearing playlist...");
-				mpd_playlist_clear(conn);
+				Mpd->ClearPlaylist();
 				ShowMessage("Cleared playlist!");
 				break;
 			}
 			case '/': case '?': // find forward/backward
 			{
-				if (current_screen != csHelp && current_screen != csSearcher || (current_screen == csSearcher && !vSearched.empty()))
+				if ((current_screen != csHelp && current_screen != csSearcher) || (current_screen == csSearcher && !vSearched.empty()))
 				{
 					string how = input == '/' ? "forward" : "backward";
 					found_pos = 0;
@@ -1624,7 +1610,7 @@ int main(int argc, char *argv[])
 					break;
 				}
 				if ((wCurrent == mPlaylist && !vPlaylist.empty())
-				||  (wCurrent == mBrowser && vBrowser[mBrowser->GetChoice()-1].type == MPD_DATA_TYPE_SONG)
+				||  (wCurrent == mBrowser && vBrowser[mBrowser->GetChoice()-1].type == itSong)
 				||  (wCurrent == mSearcher && !vSearched.empty() && mSearcher->GetChoice() > search_engine_static_option)
 				||  (wCurrent == mLibSongs))
 				{
@@ -1635,13 +1621,15 @@ int main(int argc, char *argv[])
 							s = *vPlaylist[mPlaylist->GetChoice()-1];
 							break;
 						case csBrowser:
-							s = mpd_database_get_fileinfo(conn, vBrowser[mBrowser->GetChoice()-1].name.c_str());
+							s = Mpd->GetSong(vBrowser[mBrowser->GetChoice()-1].name.c_str());
 							break;
 						case csSearcher:
-							s = vSearched[mSearcher->GetChoice()-search_engine_static_option-1];
+							s = *vSearched[mSearcher->GetChoice()-search_engine_static_option-1];
 							break;
 						case csLibrary:
-							s = vSongs[mLibSongs->GetChoice()-1];
+							s = *vSongs[mLibSongs->GetChoice()-1];
+							break;
+						default:
 							break;
 					}
 					
@@ -1707,11 +1695,11 @@ int main(int argc, char *argv[])
 					bool bold = 0;
 					for (int i = 0; i < vBrowser.size(); i++)
 					{
-						if (vBrowser[i].type == MPD_DATA_TYPE_SONG)
+						if (vBrowser[i].type == itSong)
 						{
-							for (vector<Song *>::const_iterator it = vPlaylist.begin(); it != vPlaylist.end(); it++)
+							for (SongList::const_iterator it = vPlaylist.begin(); it != vPlaylist.end(); it++)
 							{
-								if ((*it)->GetHash() == vBrowser[i].hash)
+								if ((*it)->GetHash() == vBrowser[i].song->GetHash())
 								{
 									bold = 1;
 									break;
@@ -1750,11 +1738,11 @@ int main(int argc, char *argv[])
 						wCurrent->WriteXY(0, 0, "Updating list...");
 						bool bold = 0;
 						int i = search_engine_static_option;
-						for (vector<Song>::const_iterator it = vSearched.begin(); it != vSearched.end(); it++, i++)
+						for (SongList::const_iterator it = vSearched.begin(); it != vSearched.end(); it++, i++)
 						{
-							for (vector<Song *>::const_iterator j = vPlaylist.begin(); j != vPlaylist.end(); j++)
+							for (SongList::const_iterator j = vPlaylist.begin(); j != vPlaylist.end(); j++)
 							{
-								if ((*j)->GetHash() == it->GetHash())
+								if ((*j)->GetHash() == (*it)->GetHash())
 								{
 									bold = 1;
 									break;
@@ -1776,15 +1764,9 @@ int main(int argc, char *argv[])
 					
 					if (mLibArtists->Empty())
 					{
-						MpdData *data = mpd_database_get_artists(conn);
-				
-						FOR_EACH_MPD_DATA(data)
-								vArtists.push_back(data->tag);
-						mpd_data_free(data);
-				
+						Mpd->GetArtists(vArtists);
 						sort(vArtists.begin(), vArtists.end(), CaseInsensitiveComparison);
-				
-						for (vector<string>::const_iterator it = vArtists.begin(); it != vArtists.end(); it++)
+						for (TagList::const_iterator it = vArtists.begin(); it != vArtists.end(); it++)
 							mLibArtists->AddOption(*it);
 					}
 					
@@ -1808,8 +1790,7 @@ int main(int argc, char *argv[])
 		}
 	}
 	
-	mpd_disconnect(conn);
-	mpd_free(conn);
+	Mpd->Disconnect();
 	curs_set(1);
 	endwin();
 	printf("\n");

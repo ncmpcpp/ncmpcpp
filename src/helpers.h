@@ -24,20 +24,13 @@
 #include <algorithm>
 
 #include "ncmpcpp.h"
+#include "mpdpp.h"
 #include "settings.h"
 #include "song.h"
 
-struct BrowsedItem
-{
-	BrowsedItem() : hash(0) { }
-	string name;
-	MpdDataType type;
-	long long hash;
-};
-
 extern ncmpcpp_config Config;
 
-bool SortSongsByTrack(const Song &, const Song &);
+bool SortSongsByTrack(Song *, Song *);
 bool CaseInsensitiveComparison(string, string);
 void WindowTitle(const string &);
 string TotalPlaylistLength();
@@ -46,7 +39,7 @@ void ShowMessage(const string &, int = Config.message_delay_time);
 void GetDirectory(string);
 bool GetSongInfo(Song &);
 void PrepareSearchEngine(Song &s);
-void Search(vector<Song> &, Song &);
+void Search(SongList &, Song &);
 
 #endif
 

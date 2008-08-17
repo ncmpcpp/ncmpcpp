@@ -21,10 +21,7 @@
 #include "helpers.h"
 #include "settings.h"
 
-#define FOR_EACH_MPD_DATA(x) for (; (x); (x) = mpd_data_get_next(x))
-
-extern MpdObj *conn;
-extern MpdData *browser;
+extern MPDConnection *Mpd;
 
 extern ncmpcpp_config Config;
 
@@ -34,8 +31,8 @@ extern Menu *mSearcher;
 
 extern Window *wFooter;
 
-extern vector<Song *> vPlaylist;
-extern vector<BrowsedItem> vBrowser;
+extern SongList vPlaylist;
+extern ItemList vBrowser;
 
 extern NcmpcppScreen current_screen;
 
@@ -64,9 +61,9 @@ extern string UNKNOWN_ARTIST;
 extern string UNKNOWN_TITLE;
 extern string UNKNOWN_ALBUM;
 
-bool SortSongsByTrack(const Song &a, const Song &b)
+bool SortSongsByTrack(Song *a, Song *b)
 {
-	return StrToInt(a.GetTrack()) < StrToInt(b.GetTrack());
+	return StrToInt(a->GetTrack()) < StrToInt(b->GetTrack());
 }
 
 bool CaseInsensitiveComparison(string a, string b)
@@ -90,7 +87,7 @@ string TotalPlaylistLength()
 	const int YEAR = 365*DAY;
 	string result;
 	int length = 0;
-	for (vector<Song *>::const_iterator it = vPlaylist.begin(); it != vPlaylist.end(); it++)
+	for (SongList::const_iterator it = vPlaylist.begin(); it != vPlaylist.end(); it++)
 		length += (*it)->GetTotalLength();
 	
 	int years = length/YEAR;
@@ -363,14 +360,16 @@ void PrepareSearchEngine(Song &s)
 	mSearcher->AddOption("Reset");
 }
 
-void Search(vector<Song> &result, Song &s)
+void Search(SongList &result, Song &s)
 {
-	result.clear();
+	FreeSongList(result);
 	
 	if (s.Empty())
 		return;
 	
-	MpdData *everything = mpd_database_get_complete(conn);
+	SongList list;
+	Mpd->GetDirectoryRecursive("/", list);
+	
 	bool found = 1;
 	
 	s.GetEmptyFields(1);
@@ -403,10 +402,9 @@ void Search(vector<Song> &result, Song &s)
 		s.SetComment(t);
 	}
 	
-	FOR_EACH_MPD_DATA(everything)
+	for (SongList::const_iterator it = list.begin(); it != list.end(); it++)
 	{
-		Song new_song = everything->song;
-		Song copy = new_song;
+		Song copy = **it;
 		
 		if (!search_case_sensitive)
 		{
@@ -476,10 +474,14 @@ void Search(vector<Song> &result, Song &s)
 		}
 		
 		if (found)
-			result.push_back(new_song);
+		{
+			Song *ss = new Song(**it);
+			result.push_back(ss);
+		}
 		
 		found = 1;
 	}
+	FreeSongList(list);
 	s.GetEmptyFields(0);
 }
 
@@ -564,63 +566,53 @@ void GetDirectory(string dir)
 	if (dir != "/")
 	{
 		mBrowser->AddOption("[..]");
-		BrowsedItem parent;
-		parent.type = MPD_DATA_TYPE_DIRECTORY;
+		Item parent;
+		parent.type = itDirectory;
 		vBrowser.push_back(parent);
 	}
-	browser = mpd_database_get_directory(conn, (char *)dir.c_str());
-	FOR_EACH_MPD_DATA(browser)
+	Mpd->GetDirectory(dir, vBrowser);
+	for (ItemList::iterator it = vBrowser.begin()+(dir != "/" ? 1 : 0); it != vBrowser.end(); it++)
 	{
-		switch (browser->type)
+		switch (it->type)
 		{
-			case MPD_DATA_TYPE_PLAYLIST:
+			case itPlaylist:
 			{
-				BrowsedItem playlist;
-				playlist.type = MPD_DATA_TYPE_PLAYLIST;
-				playlist.name = browser->playlist;
-				vBrowser.push_back(playlist);
-				mBrowser->AddOption("[red](playlist)[/red] " + string(browser->playlist));
+				mBrowser->AddOption("[red](playlist)[/red] " + string(it->name));
 				break;
 			}
-			case MPD_DATA_TYPE_DIRECTORY:
+			case itDirectory:
 			{
-				string subdir = browser->directory;
-				BrowsedItem directory;
-				directory.type = MPD_DATA_TYPE_DIRECTORY;
+				string directory;
+				string subdir = it->name;
 				if (dir == "/")
-					directory.name = subdir.substr(browsed_dir.size()-1,subdir.size()-browsed_dir.size()+1);
+					directory = subdir.substr(browsed_dir.size()-1,subdir.size()-browsed_dir.size()+1);
 				else
-					directory.name = subdir.substr(browsed_dir.size()+1,subdir.size()-browsed_dir.size()-1);
-				vBrowser.push_back(directory);
-				mBrowser->AddOption("[" + directory.name + "]");
-				if (directory.name == browsed_subdir)
+					directory = subdir.substr(browsed_dir.size()+1,subdir.size()-browsed_dir.size()-1);
+				mBrowser->AddOption("[" + directory + "]");
+				if (directory == browsed_subdir)
 					highlightme = mBrowser->MaxChoice();
+				it->name = directory;
 				break;
 			}
-			case MPD_DATA_TYPE_SONG:
+			case itSong:
 			{
-				BrowsedItem song;
-				song.type = MPD_DATA_TYPE_SONG;
-				Song s = browser->song;
-				song.name = s.GetFile();
-				song.hash = s.GetHash();
+				it->name = it->song->GetFile();
+				Song *s = it->song;
 				bool bold = 0;
-				for (vector<Song *>::const_iterator it = vPlaylist.begin(); it != vPlaylist.end(); it++)
+				for (SongList::const_iterator it = vPlaylist.begin(); it != vPlaylist.end(); it++)
 				{
-					if ((*it)->GetHash() == s.GetHash())
+					if ((*it)->GetHash() == s->GetHash())
 					{
 						bold = 1;
 						break;
 					}
 				}
-				bold ? mBrowser->AddBoldOption(DisplaySong(s)) : mBrowser->AddOption(DisplaySong(s));
-				vBrowser.push_back(song);
+				bold ? mBrowser->AddBoldOption(DisplaySong(*s)) : mBrowser->AddOption(DisplaySong(*s));
 				break;
 			}
 		}
 	}
 	mBrowser->Highlight(highlightme);
-	mpd_data_free(browser);
 	browsed_subdir.clear();
 	
 	if (current_screen != csLibrary && current_screen == csBrowser)

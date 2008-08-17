@@ -44,7 +44,7 @@ const bool UNICODE = 0;
 # include "tag.h"
 #endif
 
-#include "libmpd/libmpd.h"
+#include "libmpdclient.h"
 
 #include <clocale>
 #include <ctime>

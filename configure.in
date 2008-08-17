@@ -33,16 +33,6 @@ else
 fi
 AC_CHECK_HEADERS([ncurses.h], , AC_MSG_ERROR([missing ncurses.h header]))
 
-dnl =======================
-dnl = checking for libmpd =
-dnl =======================
-PKG_CHECK_MODULES([libmpd], libmpd >= 0.15.3, , AC_MSG_ERROR([libmpd-0.15.3 or higher is required]))
-AC_SUBST(libmpd_CFLAGS)
-AC_SUBST(libmpd_LIBS)
-CPPFLAGS="$CPPFLAGS $libmpd_CFLAGS"
-LDFLAGS="$LDFLAGS $libmpd_LIBS"
-AC_CHECK_HEADERS([libmpd/libmpd.h], , AC_MSG_ERROR([missing libmpd.h header]))
-
 dnl =====================
 dnl = checking for curl =
 dnl =====================

@@ -22,10 +22,11 @@
 #define HAVE_STATUS_CHECKER_H
 
 #include "ncmpcpp.h"
+#include "mpdpp.h"
 
 void TraceMpdStatus();
-void NcmpcppStatusChanged(MpdObj *, ChangedStatusType);
-void NcmpcppErrorCallback(MpdObj *, int, char *, void *);
+void NcmpcppStatusChanged(MPDConnection *, MPDStatusChanges, void *);
+void NcmpcppErrorCallback(MPDConnection *, int, string, void *);
 
 #endif
 

@@ -24,8 +24,7 @@
 
 #define FOR_EACH_MPD_DATA(x) for (; (x); (x) = mpd_data_get_next(x))
 
-extern MpdObj *conn;
-extern MpdData *playlist;
+extern MPDConnection *Mpd;
 
 extern ncmpcpp_config Config;
 
@@ -39,11 +38,11 @@ extern Menu *mLibSongs;
 extern Window *wHeader;
 extern Window *wFooter;
 
-extern vector<Song *> vPlaylist;
-extern vector<Song> vSearched;
-extern vector<BrowsedItem> vBrowser;
+extern SongList vPlaylist;
+extern SongList vSearched;
+extern ItemList vBrowser;
 
-extern vector<string> vArtists;
+extern TagList vArtists;
 
 extern time_t block_delay;
 extern time_t timer;
@@ -86,7 +85,7 @@ string playlist_stats;
 
 void TraceMpdStatus()
 {
-	mpd_status_update(conn);
+	Mpd->UpdateStatus();
 	now = time(NULL);
 	
 	if (now == timer+Config.playlist_disable_highlight_delay && current_screen == csPlaylist)
@@ -107,25 +106,27 @@ void TraceMpdStatus()
 		else
 			block_progressbar_update = !allow_statusbar_unblock;
 		
-		switch (mpd_player_get_state(conn))
+		MPDStatusChanges changes;
+		switch (Mpd->GetState())
 		{
-			case MPD_PLAYER_STOP:
-				NcmpcppStatusChanged(conn, MPD_CST_STATE);
+			case psStop:
+				changes.PlayerState = 1;
 				break;
-			case MPD_PLAYER_PLAY: case MPD_PLAYER_PAUSE:
-				NcmpcppStatusChanged(conn, MPD_CST_ELAPSED_TIME); // restore status
+			case psPlay: case psPause:
+				changes.ElapsedTime = 1; // restore status
 				break;
 		}
+		NcmpcppStatusChanged(Mpd, changes, NULL);
 	}
 	//wHeader->WriteXY(0,1, IntoStr(now_playing), 1);
 }
 
-void NcmpcppErrorCallback(MpdObj *conn, int errorid, char *msg, void *userdata)
+void NcmpcppErrorCallback(MPDConnection *Mpd, int errorid, string msg, void *data)
 {
 	ShowMessage(msg);
 }
 
-void NcmpcppStatusChanged(MpdObj *conn, ChangedStatusType what)
+void NcmpcppStatusChanged(MPDConnection *Mpd, MPDStatusChanges changed, void *data)
 {
 	int sx, sy;
 	wFooter->DisableBB();
@@ -133,47 +134,45 @@ void NcmpcppStatusChanged(MpdObj *conn, ChangedStatusType what)
 	wFooter->Bold(1);
 	wFooter->GetXY(sx, sy);
 	
-	if ((now_playing != mpd_player_get_current_song_pos(conn) || what & MPD_CST_SONGID) && !dont_change_now_playing)
+	if ((now_playing != Mpd->GetCurrentSongPos() || changed.SongID) && !dont_change_now_playing)
 	{
 		old_playing = now_playing;
-		now_playing = mpd_player_get_current_song_pos(conn);
+		now_playing = Mpd->GetCurrentSongPos();
 		mPlaylist->BoldOption(old_playing+1, 0);
 		mPlaylist->BoldOption(now_playing+1, 1);
 	}
 	
-	if (what & MPD_CST_PLAYLIST)
+	if (changed.Playlist)
 	{
-		playlist_old_id = mpd_playlist_get_old_playlist_id(conn);
+		playlist_old_id = Mpd->GetOldPlaylistID();
 		
 		if (!block_playlist_update)
 		{
-			int playlist_length = mpd_playlist_get_playlist_length(conn);
+			SongList list;
+			
+			int playlist_length = Mpd->GetPlaylistLength();
 			
 			if (playlist_length != vPlaylist.size())
 			{
 				if (playlist_length < vPlaylist.size())
 				{
 					mPlaylist->Clear(playlist_length < mPlaylist->GetHeight() && current_screen == csPlaylist);
-					for (vector<Song *>::iterator it = vPlaylist.begin(); it != vPlaylist.end(); it++)
-						delete *it;
-					vPlaylist.clear();
-					playlist = mpd_playlist_get_changes(conn, -1);
+					FreeSongList(vPlaylist);
+					Mpd->GetPlaylistChanges(-1, list);
 				}
 				else
-					playlist = mpd_playlist_get_changes(conn, playlist_old_id);
+					Mpd->GetPlaylistChanges(playlist_old_id, list);
 				
 				vPlaylist.reserve(playlist_length);
 				
-				FOR_EACH_MPD_DATA(playlist)
+				for (SongList::const_iterator it = list.begin(); it != list.end(); it++)
 				{
-					Song *s = new Song(playlist->song);
-					vPlaylist.push_back(s);
-					if (now_playing != s->GetPosition())
-						mPlaylist->AddOption(DisplaySong(*s));
+					vPlaylist.push_back(*it);
+					if (now_playing != (*it)->GetPosition())
+						mPlaylist->AddOption(DisplaySong(**it));
 					else
-						mPlaylist->AddBoldOption(DisplaySong(*s));
+						mPlaylist->AddBoldOption(DisplaySong(**it));
 				}
-				mpd_data_free(playlist);
 				
 				if (current_screen == csPlaylist)
 				{
@@ -189,23 +188,26 @@ void NcmpcppStatusChanged(MpdObj *conn, ChangedStatusType what)
 				mPlaylist->BoldOption(old_playing+1, 0);
 				mPlaylist->BoldOption(now_playing+1, 1);
 				
-				playlist = mpd_playlist_get_changes(conn, -1);
+				Mpd->GetPlaylistChanges(-1, list);
 				
-				for (vector<Song *>::iterator it = vPlaylist.begin(); it != vPlaylist.end(); it++, i++)
+				SongList::iterator j = list.begin();
+				
+				for (SongList::iterator it = vPlaylist.begin(); it != vPlaylist.end(); it++, i++)
 				{
-					Song ss = playlist->song;
-					ss.GetEmptyFields(1);
+					
+					(*j)->GetEmptyFields(1);
 					(*it)->GetEmptyFields(1);
-					if (**it != ss)
+					if (**it != **j)
 					{
 						(*it)->GetEmptyFields(0);
-						ss.GetEmptyFields(0);
-						**it = ss;
-						mPlaylist->UpdateOption(i, DisplaySong(ss));
+						(*j)->GetEmptyFields(0);
+						Song *s = new Song(**j);
+						**it = *s;
+						mPlaylist->UpdateOption(i, DisplaySong(*s));
 					}
-					playlist = mpd_data_get_next(playlist);
+					j++;
 				}
-				mpd_data_free(playlist);
+				FreeSongList(list);
 			}
 		}
 		
@@ -223,11 +225,11 @@ void NcmpcppStatusChanged(MpdObj *conn, ChangedStatusType what)
 			bool bold = 0;
 			for (int i = 0; i < vBrowser.size(); i++)
 			{
-				if (vBrowser[i].type == MPD_DATA_TYPE_SONG)
+				if (vBrowser[i].type == itSong)
 				{
-					for (vector<Song *>::const_iterator it = vPlaylist.begin(); it != vPlaylist.end(); it++)
+					for (SongList::const_iterator it = vPlaylist.begin(); it != vPlaylist.end(); it++)
 					{
-						if ((*it)->GetHash() == vBrowser[i].hash)
+						if ((*it)->GetHash() == vBrowser[i].song->GetHash())
 						{
 							bold = 1;
 							break;
@@ -242,11 +244,11 @@ void NcmpcppStatusChanged(MpdObj *conn, ChangedStatusType what)
 		{
 			bool bold = 0;
 			int i = search_engine_static_option;
-			for (vector<Song>::const_iterator it = vSearched.begin(); it != vSearched.end(); it++, i++)
+			for (SongList::const_iterator it = vSearched.begin(); it != vSearched.end(); it++, i++)
 			{
-				for (vector<Song *>::const_iterator j = vPlaylist.begin(); j != vPlaylist.end(); j++)
+				for (SongList::const_iterator j = vPlaylist.begin(); j != vPlaylist.end(); j++)
 				{
-					if ((*j)->GetHash() == it->GetHash())
+					if ((*j)->GetHash() == (*it)->GetHash())
 					{
 						bold = 1;
 						break;
@@ -258,7 +260,7 @@ void NcmpcppStatusChanged(MpdObj *conn, ChangedStatusType what)
 		}
 		block_library_update = 0;
 	}
-	if(what & MPD_CST_DATABASE)
+	if (changed.Database)
 	{
 		GetDirectory(browsed_dir);
 		if (!mLibArtists->Empty())
@@ -266,12 +268,9 @@ void NcmpcppStatusChanged(MpdObj *conn, ChangedStatusType what)
 			ShowMessage("Updating artists' list...");
 			mLibArtists->Clear(0);
 			vArtists.clear();
-			MpdData *data = mpd_database_get_artists(conn);
-			FOR_EACH_MPD_DATA(data)
-				vArtists.push_back(data->tag);
-			mpd_data_free(data);
+			Mpd->GetArtists(vArtists);
 			sort(vArtists.begin(), vArtists.end(), CaseInsensitiveComparison);
-			for (vector<string>::const_iterator it = vArtists.begin(); it != vArtists.end(); it++)
+			for (TagList::const_iterator it = vArtists.begin(); it != vArtists.end(); it++)
 				mLibArtists->AddOption(*it);
 			if (current_screen == csLibrary)
 			{
@@ -282,24 +281,23 @@ void NcmpcppStatusChanged(MpdObj *conn, ChangedStatusType what)
 		}
 		block_library_update = 0;
 	}
-	if (what & MPD_CST_STATE)
+	if (changed.PlayerState)
 	{
-		int mpd_state = mpd_player_get_state(conn);
+		PlayerState mpd_state = Mpd->GetState();
 		switch (mpd_state)
 		{
-			case MPD_PLAYER_PLAY:
+			case psPlay:
 			{
-				Song &s = *vPlaylist[now_playing];
 				player_state = "Playing: ";
 				mPlaylist->BoldOption(now_playing+1, 1);
 				break;
 			}
-			case MPD_PLAYER_PAUSE:
+			case psPause:
 			{
 				player_state = "[Paused] ";
 				break;
 			}
-			case MPD_PLAYER_STOP:
+			case psStop:
 			{
 				WindowTitle("ncmpc++ ver. "VERSION);
 				wFooter->SetColor(Config.progressbar_color);
@@ -314,16 +312,32 @@ void NcmpcppStatusChanged(MpdObj *conn, ChangedStatusType what)
 		if (!block_statusbar_update && Config.statusbar_visibility)
 			wFooter->WriteXY(0, 1, player_state, player_state.empty());
 	}
-	if ((what & MPD_CST_ELAPSED_TIME))
+	if (changed.SongID)
 	{
-		mpd_Song *current = mpd_playlist_get_current_song(conn);
-		if (!player_state.empty() && current)
+		if (!vPlaylist.empty() && now_playing >= 0)
 		{
-			Song s = current;
-			
+			if (!mPlaylist->Empty())
+			{
+				if (old_playing >= 0)
+					mPlaylist->BoldOption(old_playing+1, 0);
+				mPlaylist->BoldOption(now_playing+1, 1);
+			}
+			if (!Mpd->GetElapsedTime())
+				mvwhline(wFooter->RawWin(), 0, 0, 0, wFooter->GetWidth());
+		}
+		playing_song_scroll_begin = 0;
+		
+		if (Mpd->GetState() == psPlay)
+			changed.ElapsedTime = 1;
+	}
+	if (changed.ElapsedTime)
+	{
+		Song s = Mpd->GetCurrentSong();
+		if (!player_state.empty() && !s.Empty())
+		{
 			WindowTitle(DisplaySong(s, Config.song_window_title_format));
 			
-			int elapsed = mpd_status_get_elapsed_song_time(conn);
+			int elapsed = Mpd->GetElapsedTime();
 			
 			if (!block_statusbar_update && Config.statusbar_visibility)
 			{
@@ -376,29 +390,29 @@ void NcmpcppStatusChanged(MpdObj *conn, ChangedStatusType what)
 				wFooter->WriteXY(0, 1, "", 1);
 		}
 	}
-	if (what & MPD_CST_REPEAT)
+	if (changed.Repeat)
 	{
-		mpd_repeat = (mpd_player_get_repeat(conn) ? "r" : "");
+		mpd_repeat = (Mpd->GetRepeat() ? "r" : "");
 		ShowMessage("Repeat is " + (string)(mpd_repeat.empty() ? "off" : "on"));
 		header_update_status = 1;
 
 	}
-	if (what & MPD_CST_RANDOM)
+	if (changed.Random)
 	{
-		mpd_random = mpd_player_get_random(conn) ? "z" : "";
+		mpd_random = Mpd->GetRandom() ? "z" : "";
 		ShowMessage("Random is " + (string)(mpd_random.empty() ? "off" : "on"));
 		header_update_status = 1;
 	}
-	if (what & MPD_CST_CROSSFADE)
+	if (changed.Crossfade)
 	{
-		int crossfade = mpd_status_get_crossfade(conn);
+		int crossfade = Mpd->GetCrossfade();
 		mpd_crossfade = crossfade ? "x" : "";
 		ShowMessage("Crossfade set to " + IntoStr(crossfade) + " seconds");
 		header_update_status = 1;
 	}
-	if (what & MPD_CST_UPDATING)
+	if (changed.DBUpdating)
 	{
-		mpd_db_updating = mpd_status_db_is_updating(conn) ? "U" : "";
+		mpd_db_updating = Mpd->GetDBIsUpdating() ? "U" : "";
 		ShowMessage(mpd_db_updating.empty() ? "Database update finished!" : "Database update started!");
 		header_update_status = 1;
 	}
@@ -424,24 +438,9 @@ void NcmpcppStatusChanged(MpdObj *conn, ChangedStatusType what)
 		wHeader->EnableBB();
 		header_update_status = 0;
 	}
-	if (what & MPD_CST_SONGID)
+	if ((changed.Volume) && Config.header_visibility)
 	{
-		if (!vPlaylist.empty() && now_playing >= 0)
-		{
-			if (!mPlaylist->Empty())
-			{
-				if (old_playing >= 0)
-					mPlaylist->BoldOption(old_playing+1, 0);
-				mPlaylist->BoldOption(now_playing+1, 1);
-			}
-			if (!mpd_status_get_elapsed_song_time(conn))
-				mvwhline(wFooter->RawWin(), 0, 0, 0, wFooter->GetWidth());
-		}
-		playing_song_scroll_begin = 0;
-	}
-	if ((what & MPD_CST_VOLUME) && Config.header_visibility)
-	{
-		int vol = mpd_status_get_volume(conn);
+		int vol = Mpd->GetVolume();
 		volume_state = " Volume: " + IntoStr(vol) + "%";
 		wHeader->SetColor(Config.volume_color);
 		wHeader->WriteXY(wHeader->GetWidth()-volume_state.length(), 0, volume_state);
