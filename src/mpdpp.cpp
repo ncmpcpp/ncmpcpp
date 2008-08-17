@@ -469,6 +469,27 @@ void MPDConnection::CommitQueue()
 	itsQueue.clear();
 }
 
+void MPDConnection::DeletePlaylist(const string &name)
+{
+	if (isConnected)
+	{
+		mpd_sendRmCommand(itsConnection, name.c_str());
+		mpd_finishCommand(itsConnection);
+	}
+}
+
+bool MPDConnection::SavePlaylist(const string &name)
+{
+	if (isConnected)
+	{
+		mpd_sendSaveCommand(itsConnection, name.c_str());
+		mpd_finishCommand(itsConnection);
+		return !(itsConnection->error == MPD_ERROR_ACK && itsConnection->errorCode == MPD_ACK_ERROR_EXIST);
+	}
+	else
+		return 0;
+}
+
 void MPDConnection::GetArtists(TagList &v) const
 {
 	if (isConnected)

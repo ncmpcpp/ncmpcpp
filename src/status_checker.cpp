@@ -451,6 +451,7 @@ void NcmpcppStatusChanged(MPDConnection *Mpd, MPDStatusChanges changed, void *da
 	wFooter->Refresh();
 	wFooter->AutoRefresh(1);
 	wFooter->EnableBB();
-	wCurrent->Refresh();
+	if (changed.SongID || changed.PlayerState)
+		wCurrent->Refresh();
 }
 

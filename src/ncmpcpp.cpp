@@ -490,7 +490,8 @@ int main(int argc, char *argv[])
 				if (input == KEY_UP || input == KEY_DOWN || input == KEY_PPAGE || input == KEY_NPAGE || input == KEY_HOME || input == KEY_END)
 				{
 					if (wCurrent == mLibArtists)
-					{	mLibAlbums->Reset();
+					{
+						mLibAlbums->Reset();
 						mLibSongs->Reset();
 					}
 					if (wCurrent == mLibAlbums)
@@ -1217,7 +1218,7 @@ int main(int argc, char *argv[])
 						block_statusbar_update = 0;
 						if (in == 'y')
 						{
-							//mpd_database_delete_playlist(conn, (char *) vBrowser[id].name.c_str());
+							Mpd->DeletePlaylist(vBrowser[id].name);
 							ShowMessage("Playlist " + vBrowser[id].name + " deleted!");
 							GetDirectory("/");
 						}
@@ -1244,12 +1245,11 @@ int main(int argc, char *argv[])
 				Mpd->Pause();
 				break;
 			}
-			/*case 'S': // save playlist
+			case 'S': // save playlist
 			{
-				string playlist_name;
 				BLOCK_STATUSBAR_UPDATE;
 				wFooter->WriteXY(0, Config.statusbar_visibility, "Save playlist as: ", 1);
-				playlist_name = wFooter->GetString("", TraceMpdStatus);
+				string playlist_name = wFooter->GetString("", TraceMpdStatus);
 				UNBLOCK_STATUSBAR_UPDATE;
 				if (playlist_name.find("/") != string::npos)
 				{
@@ -1258,20 +1258,15 @@ int main(int argc, char *argv[])
 				}
 				if (!playlist_name.empty())
 				{
-					switch (mpd_database_save_playlist(conn, (char *) playlist_name.c_str()))
-					{
-						case MPD_OK:
-							ShowMessage("Playlist saved as: " + playlist_name);
-							break;
-						case MPD_DATABASE_PLAYLIST_EXIST:
-							ShowMessage("Playlist already exists!");
-							break;
-					}
+					if (Mpd->SavePlaylist(playlist_name))
+						ShowMessage("Playlist saved as: " + playlist_name);
+					else
+						ShowMessage("Playlist already exists!");
 				}
 				if (browsed_dir == "/" && !vBrowser.empty())
 					GetDirectory(browsed_dir);
 				break;
-			}*/
+			}
 			case 's': // stop
 			{
 				Mpd->Stop();

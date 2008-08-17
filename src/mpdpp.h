@@ -137,6 +137,9 @@ class MPDConnection
 		void QueueDeleteSongId(int);
 		void CommitQueue();
 		
+		void DeletePlaylist(const string &);
+		bool SavePlaylist(const string &);
+		
 		void StartSearch(bool) const;
 		void AddSearch(mpd_TagItems, const string &) const;
 		void CommitSearch(SongList &v) const;
