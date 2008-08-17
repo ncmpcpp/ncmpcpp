@@ -21,7 +21,6 @@
 #ifndef HAVE_SONG_H
 #define HAVE_SONG_H
 
-#include "libmpd/libmpd.h"
 #include <cstdlib>
 #include <string>
 #include <sstream>
