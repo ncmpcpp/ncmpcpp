@@ -290,6 +290,7 @@ void NcmpcppStatusChanged(MPDConnection *Mpd, MPDStatusChanges changed, void *da
 			{
 				player_state = "Playing: ";
 				mPlaylist->BoldOption(now_playing+1, 1);
+				changed.ElapsedTime = 1;
 				break;
 			}
 			case psPause:
