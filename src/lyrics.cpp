@@ -68,7 +68,7 @@ string GetLyrics(string artist, string song)
 	curl_easy_setopt(lyrics, CURLOPT_URL, url.c_str());
 	curl_easy_setopt(lyrics, CURLOPT_WRITEFUNCTION, write_data);
 	curl_easy_setopt(lyrics, CURLOPT_WRITEDATA, &result);
-	curl_easy_setopt(lyrics, CURLOPT_CONNECTTIMEOUT, 30);
+	curl_easy_setopt(lyrics, CURLOPT_CONNECTTIMEOUT, 10);
 	code = curl_easy_perform(lyrics);
 	curl_easy_cleanup(lyrics);
 	

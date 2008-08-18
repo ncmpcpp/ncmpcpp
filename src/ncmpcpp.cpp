@@ -140,6 +140,8 @@ extern string UNKNOWN_ALBUM;
 
 extern string playlist_stats;
 
+const string message_part_of_songs_added = "Only part of requested songs' list added to playlist!";
+
 int main(int argc, char *argv[])
 {
 	DefaultConfiguration(Config);
@@ -155,15 +157,13 @@ int main(int argc, char *argv[])
 	if (getenv("MPD_PASSWORD"))
 		Mpd->SetPassword(getenv("MPD_PASSWORD"));
 	
-	Mpd->Connect();
+	Mpd->SetTimeout(Config.mpd_connection_timeout);
 	
-	if (!Mpd->Connected())
+	if (!Mpd->Connect())
 	{
 		printf("Cannot connect to mpd (%s)\n", Mpd->GetLastErrorMessage().c_str());
 		return -1;
 	}
-	
-	Mpd->SendPassword();
 	
 	setlocale(LC_ALL,"");
 	initscr();
@@ -314,8 +314,7 @@ int main(int argc, char *argv[])
 		{
 			ShowMessage("Attempting to reconnect...");
 			Mpd->Disconnect();
-			Mpd->Connect();
-			if (Mpd->Connected())
+			if (Mpd->Connect())
 				ShowMessage("Connected!");
 			messages_allowed = 0;
 		}
@@ -636,7 +635,7 @@ int main(int argc, char *argv[])
 							}
 							case itSong:
 							{
-								Song s = Mpd->GetSong(vBrowser[ci].name);
+								Song &s = *vBrowser[ci].song;
 								int id = Mpd->AddSong(s);
 								if (id >= 0)
 								{
@@ -649,21 +648,17 @@ int main(int argc, char *argv[])
 							case itPlaylist:
 							{
 								SongList list;
-								ShowMessage("Loading and playing playlist " + vBrowser[ci].name + "...");
 								Mpd->GetPlaylistContent(vBrowser[ci].name, list);
-								for(SongList::const_iterator it = list.begin(); it != list.end(); it++)
+								for (SongList::const_iterator it = list.begin(); it != list.end(); it++)
 									Mpd->QueueAddSong(**it);
-								Mpd->CommitQueue();
-								
-								try
+								if (Mpd->CommitQueue())
 								{
-									Song *s = vPlaylist.at(vPlaylist.size()-list.size());
-									if (s->GetHash() == list.at(0)->GetHash())
+									ShowMessage("Loading and playing playlist " + vBrowser[ci].name + "...");
+									Song *s = vPlaylist[vPlaylist.size()-list.size()];
+									if (s->GetHash() == list[0]->GetHash())
 										Mpd->PlayID(s->GetID());
-								}
-								catch (std::out_of_range)
-								{
-									ShowMessage("Couldn't play playlist!");
+									else
+										ShowMessage(message_part_of_songs_added);
 								}
 								FreeSongList(list);
 								break;
@@ -956,8 +951,7 @@ int main(int argc, char *argv[])
 							}
 							default:
 							{
-								int ci = mSearcher->GetRealChoice()-1;
-								Song s = Mpd->GetSong(vSearched[ci-1]->GetFile());
+								Song &s = *vSearched[mSearcher->GetRealChoice()-2];
 								int id = Mpd->AddSong(s);
 								if (id >= 0)
 								{
@@ -979,47 +973,40 @@ int main(int argc, char *argv[])
 						if (wCurrent == mLibArtists)
 						{
 							const string &artist = mLibArtists->GetCurrentOption();
-							ShowMessage("Adding all songs artist's: " + artist);
 							Mpd->StartSearch(1);
 							Mpd->AddSearch(MPD_TAG_ITEM_ARTIST, artist);
 							Mpd->CommitSearch(list);
 							for (SongList::const_iterator it = list.begin(); it != list.end(); it++)
 								Mpd->QueueAddSong(**it);
-							Mpd->CommitQueue();
-							
-							if (input == ENTER)
+							if (Mpd->CommitQueue())
 							{
-								try
+								ShowMessage("Adding all songs artist's: " + artist);
+								Song *s = vPlaylist[vPlaylist.size()-list.size()];
+								if (s->GetHash() == list[0]->GetHash())
 								{
-									Song *s = vPlaylist.at(vPlaylist.size()-list.size());
-									if (s->GetHash() == list.at(0)->GetHash())
+									if (input == ENTER)
 										Mpd->PlayID(s->GetID());
 								}
-								catch (std::out_of_range)
-								{
-									ShowMessage("Couldn't play!");
-								}
+								else
+									ShowMessage(message_part_of_songs_added);
 							}
 						}
 						
 						if (wCurrent == mLibAlbums)
 						{
-							ShowMessage("Adding songs from album: " + mLibAlbums->GetCurrentOption());
 							for (SongList::const_iterator it = vSongs.begin(); it != vSongs.end(); it++)
 								Mpd->QueueAddSong(**it);
-							Mpd->CommitQueue();
-							if (input == ENTER)
+							if (Mpd->CommitQueue())
 							{
-								try
+								ShowMessage("Adding songs from album: " + mLibAlbums->GetCurrentOption());
+								Song *s = vPlaylist[vPlaylist.size()-vSongs.size()];
+								if (s->GetHash() == vSongs[0]->GetHash())
 								{
-									Song *s = vPlaylist.at(vPlaylist.size()-vSongs.size());
-									if (s->GetHash() == vSongs.at(0)->GetHash())
+									if (input == ENTER)
 										Mpd->PlayID(s->GetID());
 								}
-								catch (std::out_of_range)
-								{
-									ShowMessage("Couldn't play!");
-								}
+								else
+									ShowMessage(message_part_of_songs_added);
 							}
 						}
 						
@@ -1066,29 +1053,37 @@ int main(int argc, char *argv[])
 							
 							for (SongList::const_iterator it = list.begin(); it != list.end(); it++)
 								Mpd->QueueAddSong(**it);
-							
+							if (Mpd->CommitQueue())
+							{
+								ShowMessage("Added folder: " + getdir);
+								Song *s = vPlaylist[vPlaylist.size()-list.size()];
+								if (s->GetHash() != list[0]->GetHash())
+									ShowMessage(message_part_of_songs_added);
+							}
 							FreeSongList(list);
-							ShowMessage("Added folder: " + getdir);
-							Mpd->CommitQueue();
 							break;
 						}
 						case itSong:
 						{
-							Song s = Mpd->GetSong(vBrowser[ci].name);
-							int id = Mpd->AddSong(s);
-							if (id >= 0)
+							Song &s = *vBrowser[ci].song;
+							if (Mpd->AddSong(s) != -1)
 								ShowMessage("Added to playlist: " + OmitBBCodes(DisplaySong(s)));
 							break;
 						}
 						case itPlaylist:
 						{
-							ShowMessage("Loading playlist " + vBrowser[ci].name + "...");
 							SongList list;
 							Mpd->GetPlaylistContent(vBrowser[ci].name, list);
 							for (SongList::const_iterator it = list.begin(); it != list.end(); it++)
 								Mpd->QueueAddSong(**it);
+							if (Mpd->CommitQueue())
+							{
+								ShowMessage("Loading playlist " + vBrowser[ci].name + "...");
+								Song *s = vPlaylist[vPlaylist.size()-list.size()];
+								if (s->GetHash() != list[0]->GetHash())
+									ShowMessage(message_part_of_songs_added);
+							}
 							FreeSongList(list);
-							Mpd->CommitQueue();
 							break;
 						}
 					}
@@ -1101,8 +1096,8 @@ int main(int argc, char *argv[])
 						break;
 						
 					Song &s = *vSearched[id];
-					Mpd->AddSong(s);
-					ShowMessage("Added to playlist: " + OmitBBCodes(DisplaySong(s)));
+					if (Mpd->AddSong(s) != -1)
+						ShowMessage("Added to playlist: " + OmitBBCodes(DisplaySong(s)));
 					mSearcher->Go(DOWN);
 				}
 				if (current_screen == csLibrary)
@@ -1162,7 +1157,7 @@ int main(int argc, char *argv[])
 					break;
 				}
 			}
-			case '-': //volume down
+			case '-': // volume down
 			{
 				Mpd->SetVolume(Mpd->GetVolume()-1);
 				break;
@@ -1230,12 +1225,12 @@ int main(int argc, char *argv[])
 				}
 				break;
 			}
-			case '<':
+			case '<': // previous
 			{
 				Mpd->Prev();
 				break;
 			}
-			case '>':
+			case '>': // next
 			{
 				Mpd->Next();
 				break;
@@ -1301,7 +1296,7 @@ int main(int argc, char *argv[])
 				}
 				break;
 			}
-			case 'n': //move song down
+			case 'n': // move song down
 			{
 				block_playlist_update = 1;
 				int pos = mPlaylist->GetChoice()-1;
@@ -1398,12 +1393,12 @@ int main(int argc, char *argv[])
 				Mpd->SetRepeat(!Mpd->GetRepeat());
 				break;
 			}
-			case 'Z':
+			case 'Z': // shuffle playlist
 			{
-				//mpd_playlist_shuffle(conn);
+				Mpd->Shuffle();
 				break;
 			}
-			case 'z': //switch random state
+			case 'z': // switch random state
 			{
 				Mpd->SetRandom(!Mpd->GetRandom());
 				break;
@@ -1609,26 +1604,26 @@ int main(int argc, char *argv[])
 				||  (wCurrent == mSearcher && !vSearched.empty() && mSearcher->GetChoice() > search_engine_static_option)
 				||  (wCurrent == mLibSongs))
 				{
-					Song s;
+					Song *s;
 					switch (current_screen)
 					{
 						case csPlaylist:
-							s = *vPlaylist[mPlaylist->GetChoice()-1];
+							s = vPlaylist[mPlaylist->GetChoice()-1];
 							break;
 						case csBrowser:
-							s = Mpd->GetSong(vBrowser[mBrowser->GetChoice()-1].name.c_str());
+							s = vBrowser[mBrowser->GetChoice()-1].song;
 							break;
 						case csSearcher:
-							s = *vSearched[mSearcher->GetChoice()-search_engine_static_option-1];
+							s = vSearched[mSearcher->GetChoice()-search_engine_static_option-1];
 							break;
 						case csLibrary:
-							s = *vSongs[mLibSongs->GetChoice()-1];
+							s = vSongs[mLibSongs->GetChoice()-1];
 							break;
 						default:
 							break;
 					}
 					
-					if (s.GetArtist() != UNKNOWN_ARTIST && s.GetTitle() != UNKNOWN_TITLE)
+					if (s->GetArtist() != UNKNOWN_ARTIST && s->GetTitle() != UNKNOWN_TITLE)
 					{
 						wPrev = wCurrent;
 						prev_screen = current_screen;
@@ -1639,8 +1634,8 @@ int main(int argc, char *argv[])
 						
 						sLyrics->WriteXY(0, 0, "Fetching lyrics...");
 						sLyrics->Refresh();
-						sLyrics->Add("[b]" + s.GetArtist() + " - " + s.GetTitle() + "[/b]\n\n");
-						sLyrics->Add(GetLyrics(s.GetArtist(), s.GetTitle()));
+						sLyrics->Add("[b]" + s->GetArtist() + " - " + s->GetTitle() + "[/b]\n\n");
+						sLyrics->Add(GetLyrics(s->GetArtist(), s->GetTitle()));
 						sLyrics->Timeout(ncmpcpp_window_timeout);
 					}
 				}
@@ -1656,7 +1651,7 @@ int main(int argc, char *argv[])
 				}
 				break;
 			}
-			case KEY_TAB: //switch between playlist and browser
+			case KEY_TAB: // switch between playlist and browser
 			{
 				if (wCurrent == mPlaylist)
 					goto KEY_TAB_BROWSER_REDIRECT;
@@ -1779,12 +1774,11 @@ int main(int argc, char *argv[])
 				}
 				break;
 			}
-			case 'q': case 'Q':
+			case 'q': case 'Q': // quit
 				main_exit = 1;
 			default: continue;
 		}
 	}
-	
 	Mpd->Disconnect();
 	curs_set(1);
 	endwin();

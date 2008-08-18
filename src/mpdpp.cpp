@@ -22,7 +22,7 @@
 
 const string playlist_max_message = "playlist is at the max size";
 
-MPDConnection::MPDConnection() : isConnected(0), MPD_HOST("localhost"), MPD_PORT(6600), MPD_TIMEOUT(30), itsUpdater(0), itsErrorHandler(0), itsQueueIndex(0), itsMaxPlaylistLength(-1)
+MPDConnection::MPDConnection() : isConnected(0), MPD_HOST("localhost"), MPD_PORT(6600), MPD_TIMEOUT(30), itsUpdater(0), itsErrorHandler(0), itsMaxPlaylistLength(-1)
 {
 	itsConnection = 0;
 	itsCurrentStats = 0;
@@ -43,16 +43,23 @@ MPDConnection::~MPDConnection()
 		mpd_freeStatus(itsOldStatus);
 	if (itsCurrentStatus)
 		mpd_freeStatus(itsCurrentStatus);
+	ClearQueue();
 }
 
-void MPDConnection::Connect()
+bool MPDConnection::Connect()
 {
 	if (!isConnected && !itsConnection)
 	{
 		itsConnection = mpd_newConnection(MPD_HOST.c_str(), MPD_PORT, MPD_TIMEOUT);
 		isConnected = 1;
+		if (!CheckForErrors())
+			return isConnected;
+		SendPassword();
 		CheckForErrors();
+		return isConnected;
 	}
+	else
+		return true;
 }
 
 bool MPDConnection::Connected()
@@ -79,8 +86,7 @@ void MPDConnection::Disconnect()
 	itsOldStatus = 0;
 	isConnected = 0;
 	itsMaxPlaylistLength = -1;
-	itsQueueIndex = 0;
-	itsQueue.clear();
+	ClearQueue();
 }
 
 void MPDConnection::SendPassword()
@@ -245,6 +251,15 @@ void MPDConnection::Seek(int where) const
 	}
 }
 
+void MPDConnection::Shuffle() const
+{
+	if (isConnected)
+	{
+		mpd_sendShuffleCommand(itsConnection);
+		mpd_finishCommand(itsConnection);
+	}
+}
+
 void MPDConnection::ClearPlaylist() const
 {
 	if (isConnected)
@@ -390,83 +405,78 @@ int MPDConnection::AddSong(const string &path)
 
 int MPDConnection::AddSong(const Song &s)
 {
-	int id = -1;
-	if (isConnected)
-	{
-		if (GetPlaylistLength() < itsMaxPlaylistLength)
-		{
-			id = mpd_sendAddIdCommand(itsConnection, s.GetFile().c_str());
-			mpd_finishCommand(itsConnection);
-			UpdateStatus();
-		}
-		else
-			if (itsErrorHandler)
-				itsErrorHandler(this, MPD_ACK_ERROR_PLAYLIST_MAX, playlist_max_message, NULL);
-	}
-	return id;
+	return !s.Empty() ? AddSong(s.GetFile()) : -1;
 }
 
 void MPDConnection::QueueAddSong(const string &path)
 {
 	if (isConnected && GetPlaylistLength() < itsMaxPlaylistLength)
 	{
-		itsQueue[itsQueueIndex].type = qctAdd;
-		itsQueue[itsQueueIndex++].path = path;
+		QueueCommand *q = new QueueCommand;
+		q->type = qctAdd;
+		q->path = path;
+		itsQueue.push_back(q);
 	}
 }
 
 void MPDConnection::QueueAddSong(const Song &s)
 {
-	itsQueue[itsQueueIndex].type = qctAdd;
-	itsQueue[itsQueueIndex++].path = s.GetFile();
+	if (!s.Empty())
+		QueueAddSong(s.GetFile());
 }
 
 void MPDConnection::QueueDeleteSong(int id)
 {
-	itsQueue[itsQueueIndex].type = qctDelete;
-	itsQueue[itsQueueIndex++].id = id;
+	if (isConnected)
+	{
+		QueueCommand *q = new QueueCommand;
+		q->type = qctDelete;
+		q->id = id;
+		itsQueue.push_back(q);
+	}
 }
 
 void MPDConnection::QueueDeleteSongId(int id)
 {
-	itsQueue[itsQueueIndex].type = qctDeleteID;
-	itsQueue[itsQueueIndex++].id = id;
-}
-
-void MPDConnection::CommitQueue()
-{
 	if (isConnected)
 	{
-		int playlist_length = GetPlaylistLength();
+		QueueCommand *q = new QueueCommand;
+		q->type = qctDeleteID;
+		q->id = id;
+		itsQueue.push_back(q);
+	}
+}
+
+bool MPDConnection::CommitQueue()
+{
+	bool retval = false;
+	if (isConnected)
+	{
 		mpd_sendCommandListBegin(itsConnection);
-		for (std::map<int, QueueCommand>::const_iterator it = itsQueue.begin(); it != itsQueue.end(); it++)
+		for (std::vector<QueueCommand *>::const_iterator it = itsQueue.begin(); it != itsQueue.end(); it++)
 		{
-			switch (it->second.type)
+			switch ((*it)->type)
 			{
 				case qctAdd:
-					if (playlist_length < itsMaxPlaylistLength)
-					{
-						mpd_sendAddCommand(itsConnection, it->second.path.c_str());
-						playlist_length++;
-					}
-					else
-						if (itsErrorHandler)
-							itsErrorHandler(this, MPD_ACK_ERROR_PLAYLIST_MAX, playlist_max_message, NULL);
+					mpd_sendAddCommand(itsConnection, (*it)->path.c_str());
 					break;
 				case qctDelete:
-					mpd_sendDeleteCommand(itsConnection, it->second.id);
+					mpd_sendDeleteCommand(itsConnection, (*it)->id);
 					break;
 				case qctDeleteID:
-					mpd_sendDeleteIdCommand(itsConnection, it->second.id);
+					mpd_sendDeleteIdCommand(itsConnection, (*it)->id);
 					break;
 			}
 		}
 		mpd_sendCommandListEnd(itsConnection);
 		mpd_finishCommand(itsConnection);
 		UpdateStatus();
+		if (GetPlaylistLength() == itsMaxPlaylistLength && itsErrorHandler)
+			itsErrorHandler(this, MPD_ACK_ERROR_PLAYLIST_MAX, playlist_max_message, NULL);
+		retval = !itsQueue.empty();
 	}
-	itsQueueIndex = 0;
-	itsQueue.clear();
+	ClearQueue();
+	return retval;
 }
 
 void MPDConnection::DeletePlaylist(const string &name)
@@ -487,7 +497,7 @@ bool MPDConnection::SavePlaylist(const string &name)
 		return !(itsConnection->error == MPD_ERROR_ACK && itsConnection->errorCode == MPD_ACK_ERROR_EXIST);
 	}
 	else
-		return 0;
+		return false;
 }
 
 void MPDConnection::GetArtists(TagList &v) const
@@ -609,6 +619,7 @@ int MPDConnection::CheckForErrors()
 		if (itsConnection->error == MPD_ERROR_ACK)
 		{
 			// this is to avoid setting too small max size as we check it before fetching current status
+			// setting real max playlist length is in UpdateStatus()
 			if (itsConnection->errorCode == MPD_ACK_ERROR_PLAYLIST_MAX && itsMaxPlaylistLength == -1)
 				itsMaxPlaylistLength = 0;
 			
@@ -627,6 +638,13 @@ int MPDConnection::CheckForErrors()
 		mpd_clearError(itsConnection);
 	}
 	return errid;
+}
+
+void MPDConnection::ClearQueue()
+{
+	for (std::vector<QueueCommand *>::iterator it = itsQueue.begin(); it != itsQueue.end(); it++)
+		delete *it;
+	itsQueue.clear();
 }
 
 void FreeSongList(SongList &l)

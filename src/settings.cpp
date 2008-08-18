@@ -43,7 +43,7 @@ void DefaultConfiguration(ncmpcpp_config &conf)
 	conf.header_visibility = true;
 	conf.statusbar_visibility = true;
 	conf.set_window_title = true;
-	conf.mpd_connection_timeout = 60;
+	conf.mpd_connection_timeout = 15;
 	conf.crossfade_time = 5;
 	conf.playlist_disable_highlight_delay = 5;
 	conf.message_delay_time = 4;

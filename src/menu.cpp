@@ -254,10 +254,7 @@ void Menu::Display(bool redraw_whole_window)
 void Menu::Refresh(bool redraw_whole_window)
 {
 	if (!itsOptions.empty() && is_static())
-		if (itsHighlight == 0)
-			Go(DOWN);
-		else
-			Go(UP);
+		itsHighlight == 0 ? Go(DOWN) : Go(UP);
 	
 	int MaxBeginning = itsOptions.size() < itsHeight ? 0 : itsOptions.size()-itsHeight;
 	if (itsBeginning > MaxBeginning)
@@ -268,32 +265,6 @@ void Menu::Refresh(bool redraw_whole_window)
 	
 	if (redraw_whole_window)
 		redraw_screen();
-	
-	int line = 0;
-	/*int last;
-	
-	if (itsOptions.size() < itsHeight)
-		last = itsOptions.size();
-	else
-		last = itsBeginning+itsHeight;
-	
-	int check = 0;
-	bool next = 1;
-	for (int i = last-1; i > itsBeginning && next; i--)
-	{
-		next = 0;
-		try
-		{
-			itsOptions.at(i);
-		}
-		catch (std::out_of_range)
-		{
-			check++;
-			next = 1;
-		}
-	}
-	itsBeginning -= check;
-	last -= check;*/
 	
 	for (vector<int>::const_iterator it = NeedsRedraw.begin(); it != NeedsRedraw.end(); it++)
 	{
@@ -306,7 +277,7 @@ void Menu::Refresh(bool redraw_whole_window)
 			break;
 		}
 		
-		line = *it-itsBeginning;
+		int line = *it-itsBeginning;
 		
 		if (*it == itsHighlight && itsHighlightEnabled)
 		{

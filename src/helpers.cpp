@@ -596,7 +596,6 @@ void GetDirectory(string dir)
 			}
 			case itSong:
 			{
-				it->name = it->song->GetFile();
 				Song *s = it->song;
 				bool bold = 0;
 				for (SongList::const_iterator it = vPlaylist.begin(); it != vPlaylist.end(); it++)

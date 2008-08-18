@@ -21,8 +21,6 @@
 #ifndef HAVE_MPDPP_H
 #define HAVE_MPDPP_H
 
-#include <map>
-
 #include "ncmpcpp.h"
 #include "song.h"
 
@@ -77,7 +75,7 @@ class MPDConnection
 		MPDConnection();
 		~MPDConnection();
 		
-		void Connect();
+		bool Connect();
 		bool Connected();
 		void Disconnect();
 		
@@ -101,6 +99,7 @@ class MPDConnection
 		void Prev() const;
 		void Move(int, int) const;
 		void Seek(int) const;
+		void Shuffle() const;
 		void ClearPlaylist() const;
 		
 		PlayerState GetState() const { return isConnected && itsCurrentStatus ? (PlayerState)itsCurrentStatus->state : psUnknown; }
@@ -135,7 +134,7 @@ class MPDConnection
 		void QueueAddSong(const Song &);
 		void QueueDeleteSong(int);
 		void QueueDeleteSongId(int);
-		void CommitQueue();
+		bool CommitQueue();
 		
 		void DeletePlaylist(const string &);
 		bool SavePlaylist(const string &);
@@ -151,6 +150,7 @@ class MPDConnection
 	
 	private:
 		int CheckForErrors();
+		void ClearQueue();
 		string itsLastErrorMessage;
 		
 		mpd_Connection *itsConnection;
@@ -171,8 +171,7 @@ class MPDConnection
 		ErrorHandler itsErrorHandler;
 		void *itsErrorHandlerUserdata;
 		
-		std::map<int, QueueCommand> itsQueue;
-		int itsQueueIndex;
+		std::vector<QueueCommand *> itsQueue;
 		unsigned int itsMaxPlaylistLength;
 };
 

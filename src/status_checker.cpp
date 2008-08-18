@@ -22,8 +22,6 @@
 #include "helpers.h"
 #include "settings.h"
 
-#define FOR_EACH_MPD_DATA(x) for (; (x); (x) = mpd_data_get_next(x))
-
 extern MPDConnection *Mpd;
 
 extern ncmpcpp_config Config;
@@ -447,12 +445,11 @@ void NcmpcppStatusChanged(MPDConnection *Mpd, MPDStatusChanges changed, void *da
 		wHeader->WriteXY(wHeader->GetWidth()-volume_state.length(), 0, volume_state);
 		wHeader->SetColor(Config.header_color);
 	}
+	wCurrent->Refresh();
 	wFooter->Bold(0);
 	wFooter->GotoXY(sx, sy);
 	wFooter->Refresh();
 	wFooter->AutoRefresh(1);
 	wFooter->EnableBB();
-	if (changed.SongID || changed.PlayerState)
-		wCurrent->Refresh();
 }
 
