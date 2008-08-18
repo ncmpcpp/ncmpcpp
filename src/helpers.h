@@ -36,6 +36,7 @@ void WindowTitle(const string &);
 string TotalPlaylistLength();
 string DisplaySong(const Song &, const string & = Config.song_list_format);
 void ShowMessage(const string &, int = Config.message_delay_time);
+bool SortDirectory(const Item &a, const Item &b);
 void GetDirectory(string);
 bool GetSongInfo(Song &);
 void PrepareSearchEngine(Song &s);

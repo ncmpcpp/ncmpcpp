@@ -25,7 +25,7 @@
 #include "song.h"
 
 enum QueueCommandType { qctAdd, qctDelete, qctDeleteID };
-enum ItemType { itSong, itDirectory, itPlaylist };
+enum ItemType { itDirectory, itSong, itPlaylist };
 enum PlayerState { psUnknown, psStop, psPlay, psPause };
 
 struct MPDStatusChanges

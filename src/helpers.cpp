@@ -554,6 +554,20 @@ bool GetSongInfo(Song &s)
 	return true;
 }
 
+bool SortDirectory(const Item &a, const Item &b)
+{
+	if (a.type == b.type)
+	{
+		string sa = a.type == itSong ? a.song->GetShortFilename() : a.name;
+		string sb = b.type == itSong ? b.song->GetShortFilename() : b.name;
+		transform(sa.begin(), sa.end(), sa.begin(), tolower);
+		transform(sb.begin(), sb.end(), sb.begin(), tolower);
+		return sa < sb;
+	}
+	else
+		return a.type < b.type;
+}
+
 void GetDirectory(string dir)
 {
 	int highlightme = -1;
@@ -571,6 +585,9 @@ void GetDirectory(string dir)
 		vBrowser.push_back(parent);
 	}
 	Mpd->GetDirectory(dir, vBrowser);
+	
+	sort(vBrowser.begin(), vBrowser.end(), SortDirectory);
+	
 	for (ItemList::iterator it = vBrowser.begin()+(dir != "/" ? 1 : 0); it != vBrowser.end(); it++)
 	{
 		switch (it->type)
