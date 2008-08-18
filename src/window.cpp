@@ -424,7 +424,7 @@ string Window::GetString(const string &base, unsigned int length, void (*given_f
 					x++;
 				break;
 			}
-			case KEY_BACKSPACE:
+			case KEY_BACKSPACE: case 127:
 			{
 				if (x <= minx) break;
 			}
@@ -432,7 +432,7 @@ string Window::GetString(const string &base, unsigned int length, void (*given_f
 			{
 				if (x > minx)
 					x--;
-				if (input != KEY_BACKSPACE) break; // backspace = left & delete.
+				if (input != KEY_BACKSPACE && input != 127) break; // backspace = left & delete.
 			}
 			case KEY_DC:
 			{
