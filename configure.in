@@ -54,7 +54,7 @@ if test "$taglib" = "yes" ; then
 	AC_PATH_PROG(TAGLIB_CONFIG, taglib-config)
 	if test "$TAGLIB_CONFIG" != "" ; then
 		CPPFLAGS="$CPPFLAGS `$TAGLIB_CONFIG --cflags`"
-		PKG_CHECK_MODULES([taglib], taglib, LDFLAGS="$LDFLAGS `$TAGLIB_CONFIG --libs`", AC_MSG_ERROR([taglib library is required]))
+		LDFLAGS="$LDFLAGS `$TAGLIB_CONFIG --libs`"
 		AC_CHECK_HEADERS([taglib.h], , AC_MSG_ERROR([missing taglib.h header]))
 	else
 		AC_MSG_ERROR([taglib-config executable is missing])
