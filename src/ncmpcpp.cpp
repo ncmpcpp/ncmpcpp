@@ -254,7 +254,8 @@ int main(int argc, char *argv[])
 	sHelp->Add("\tm         : Move song up\n");
 	sHelp->Add("\tn         : Move song down\n");
 	sHelp->Add("\tS         : Save playlist\n");
-	sHelp->Add("\to         : Go to currently playing position\n\n\n");
+	sHelp->Add("\to         : Go to currently playing position\n");
+	sHelp->Add("\tU         : Toggle auto center mode\n\n\n");
 	
 	sHelp->Add("   [b]Keys - Browse screen\n -----------------------------------------[/b]\n");
 	sHelp->Add("\tEnter     : Enter directory/Add item to playlist and play\n");
