@@ -26,16 +26,16 @@
 #include "song.h"
 #include "lyrics.h"
 
-#define BLOCK_STATUSBAR_UPDATE \
+#define LOCK_STATUSBAR \
 			if (Config.statusbar_visibility) \
 				block_statusbar_update = 1; \
 			else \
 				block_progressbar_update = 1; \
 			allow_statusbar_unblock = 0
 
-#define UNBLOCK_STATUSBAR_UPDATE \
+#define UNLOCK_STATUSBAR \
 			allow_statusbar_unblock = 1; \
-			if (block_statusbar_update_delay < 0) \
+			if (block_statusbar_update_delay <= 0) \
 			{ \
 				if (Config.statusbar_visibility) \
 					block_statusbar_update = 0; \
@@ -52,10 +52,10 @@
 
 #ifdef HAVE_TAGLIB_H
  const string tag_screen = "Tag editor";
- const string tag_screen_keydesc = "\tE e       : Edit song's tags\n";
+ const string tag_screen_keydesc = "\te         : Edit song's tags\n";
 #else
  const string tag_screen = "Tag info";
- const string tag_screen_keydesc = "\tE e       : Show song's tags\n";
+ const string tag_screen_keydesc = "\te         : Show song's tags\n";
 #endif
 
 ncmpcpp_config Config;
@@ -100,6 +100,7 @@ int block_statusbar_update_delay = -1;
 
 string browsed_dir = "/";
 string browsed_subdir;
+string song_lyrics;
 string player_state;
 string volume_state;
 string switch_state;
@@ -170,7 +171,9 @@ int main(int argc, char *argv[])
 	noecho();
 	cbreak();
 	curs_set(0);
-	EnableColors();
+	
+	if (Config.colors_enabled)
+		EnableColors();
 	
 	int main_start_y = 2;
 	int main_height = LINES-4;
@@ -228,13 +231,15 @@ int main(int argc, char *argv[])
 	
 	sHelp->Add("\tr         : Toggle repeat mode\n");
 	sHelp->Add("\tz         : Toggle random mode\n");
-	sHelp->Add("\tx         : Toggle crossfade mode\n");
 	sHelp->Add("\tZ         : Shuffle playlist\n");
-	sHelp->Add("\tU u       : Start a music database update\n\n");
+	sHelp->Add("\tx         : Toggle crossfade mode\n");
+	sHelp->Add("\tX         : Set crossfade\n");
+	sHelp->Add("\tu         : Start a music database update\n\n");
 	
 	sHelp->Add("\t/         : Forward find\n");
 	sHelp->Add("\t?         : Backward find\n");
-	sHelp->Add("\t.         : Go to next/previous found position\n");
+	sHelp->Add("\t,         : Go to previous found position\n");
+	sHelp->Add("\t.         : Go to next found position\n");
 	sHelp->Add(tag_screen_keydesc);
 	sHelp->Add("\tg         : Go to chosen position in current song\n");
 	sHelp->Add("\tl         : Show/hide song's lyrics\n\n");
@@ -254,6 +259,7 @@ int main(int argc, char *argv[])
 	sHelp->Add("   [b]Keys - Browse screen\n -----------------------------------------[/b]\n");
 	sHelp->Add("\tEnter     : Enter directory/Add to playlist and play song\n");
 	sHelp->Add("\tSpace     : Add song to playlist\n");
+	sHelp->Add("\tBackspace : Go to parent directory\n");
 	sHelp->Add("\tDelete    : Delete playlist\n\n\n");
 	
 	sHelp->Add("   [b]Keys - Search engine\n -----------------------------------------[/b]\n");
@@ -305,6 +311,15 @@ int main(int argc, char *argv[])
 	sLyrics->Timeout(ncmpcpp_window_timeout);
 	wFooter->Timeout(ncmpcpp_window_timeout);
 	
+	mPlaylist->HighlightColor(Config.main_highlight_color);
+	mBrowser->HighlightColor(Config.main_highlight_color);
+	mTagEditor->HighlightColor(Config.main_highlight_color);
+	mSearcher->HighlightColor(Config.main_highlight_color);
+	mLibArtists->HighlightColor(Config.main_highlight_color);
+	mLibArtists->HighlightColor(Config.main_highlight_color);
+	mLibAlbums->HighlightColor(Config.main_highlight_color);
+	mLibSongs->HighlightColor(Config.main_highlight_color);
+	
 	Mpd->SetStatusUpdater(NcmpcppStatusChanged, NULL);
 	Mpd->SetErrorHandler(NcmpcppErrorCallback, NULL);
 	
@@ -327,7 +342,7 @@ int main(int argc, char *argv[])
 		if (Config.header_visibility)
 		{
 			string title;
-			int max_allowed_title_length = wHeader->GetWidth()-volume_state.length();
+			const int max_allowed_title_length = wHeader->GetWidth()-volume_state.length();
 			
 			switch (current_screen)
 			{
@@ -350,24 +365,18 @@ int main(int argc, char *argv[])
 					title = "Media library";
 					break;
 				case csLyrics:
-					title = "Lyrics";
+					title = song_lyrics;
 					break;
 			}
 		
 			if (title_allowed)
 			{
 				wHeader->Bold(1);
-				wHeader->WriteXY(0, 0, title, 1);
+				wHeader->WriteXY(0, 0, max_allowed_title_length, title, 1);
 				wHeader->Bold(0);
 				
 				if (current_screen == csPlaylist && !playlist_stats.empty())
-				{
-					int max_length = wHeader->GetWidth()-volume_state.length()-title.length();
-					if (playlist_stats.length() > max_length)
-						wHeader->WriteXY(title.length(), 0, playlist_stats.substr(0, max_length));
-					else
-						wHeader->WriteXY(title.length(), 0, playlist_stats);
-				}
+					wHeader->WriteXY(title.length(), 0, max_allowed_title_length-title.length(), playlist_stats);
 				
 				if (current_screen == csBrowser)
 				{
@@ -395,7 +404,7 @@ int main(int argc, char *argv[])
 				}
 			}
 			else
-				wHeader->WriteXY(0, 0, "[b]1:[/b]Help  [b]2:[/b]Playlist  [b]3:[/b]Browse  [b]4:[/b]Search  [b]5:[/b]Library", 1);
+				wHeader->WriteXY(0, 0, max_allowed_title_length, "[b]1:[/b]Help  [b]2:[/b]Playlist  [b]3:[/b]Browse  [b]4:[/b]Search  [b]5:[/b]Library", 1);
 		
 			wHeader->SetColor(Config.volume_color);
 			wHeader->WriteXY(max_allowed_title_length, 0, volume_state);
@@ -406,7 +415,7 @@ int main(int argc, char *argv[])
 		{
 			if (wCurrent == mLibAlbums && mLibAlbums->Empty())
 			{
-				mLibAlbums->HighlightColor(Config.main_color);
+				mLibAlbums->HighlightColor(Config.main_highlight_color);
 				mLibArtists->HighlightColor(Config.library_active_column_color);
 				wCurrent = mLibArtists;
 			}
@@ -591,6 +600,13 @@ int main(int argc, char *argv[])
 				
 				break;
 			}
+			case KEY_BACKSPACE: case 127:
+			{
+				if (wCurrent == mBrowser && browsed_dir != "/")
+					mBrowser->Reset();
+				else
+					break;
+			}
 			case ENTER:
 			{
 				switch (current_screen)
@@ -627,10 +643,12 @@ int main(int argc, char *argv[])
 									}
 								}
 								else
+								{
 									if (browsed_dir != "/")
 										GetDirectory(browsed_dir + "/" + vBrowser[ci].name);
 									else
 										GetDirectory(vBrowser[ci].name);
+								}
 								break;
 							}
 							case itSong:
@@ -671,7 +689,7 @@ int main(int argc, char *argv[])
 #						ifdef HAVE_TAGLIB_H
 						int id = mTagEditor->GetRealChoice();
 						int option = mTagEditor->GetChoice();
-						BLOCK_STATUSBAR_UPDATE;
+						LOCK_STATUSBAR;
 						Song &s = edited_song;
 					
 						switch (id)
@@ -785,7 +803,7 @@ int main(int argc, char *argv[])
 #									ifdef HAVE_TAGLIB_H
 									if (id == 8)
 									{
-										mLibSongs->HighlightColor(Config.main_color);
+										mLibSongs->HighlightColor(Config.main_highlight_color);
 										mLibArtists->HighlightColor(Config.library_active_column_color);
 										wCurrent = mLibArtists;
 									}
@@ -800,7 +818,7 @@ int main(int argc, char *argv[])
 								break;
 							}
 						}
-						UNBLOCK_STATUSBAR_UPDATE;
+						UNLOCK_STATUSBAR;
 #						endif // HAVE_TAGLIB_H
 						break;
 					}
@@ -808,7 +826,7 @@ int main(int argc, char *argv[])
 					{
 						int id = mSearcher->GetChoice();
 						int option = mSearcher->GetChoice();
-						BLOCK_STATUSBAR_UPDATE;
+						LOCK_STATUSBAR;
 						Song &s = searched_song;
 					
 						switch (id)
@@ -961,7 +979,7 @@ int main(int argc, char *argv[])
 								break;
 							}
 						}
-						UNBLOCK_STATUSBAR_UPDATE;
+						UNLOCK_STATUSBAR;
 						break;
 					}
 					case csLibrary:
@@ -1110,7 +1128,7 @@ int main(int argc, char *argv[])
 				{
 					if (wCurrent == mLibArtists)
 					{
-						mLibArtists->HighlightColor(Config.main_color);
+						mLibArtists->HighlightColor(Config.main_highlight_color);
 						wCurrent->Refresh();
 						wCurrent = mLibAlbums;
 						mLibAlbums->HighlightColor(Config.library_active_column_color);
@@ -1119,7 +1137,7 @@ int main(int argc, char *argv[])
 					}
 					if (wCurrent == mLibAlbums)
 					{
-						mLibAlbums->HighlightColor(Config.main_color);
+						mLibAlbums->HighlightColor(Config.main_highlight_color);
 						wCurrent->Refresh();
 						wCurrent = mLibSongs;
 						mLibSongs->HighlightColor(Config.library_active_column_color);
@@ -1139,7 +1157,7 @@ int main(int argc, char *argv[])
 				{
 					if (wCurrent == mLibSongs)
 					{
-						mLibSongs->HighlightColor(Config.main_color);
+						mLibSongs->HighlightColor(Config.main_highlight_color);
 						wCurrent->Refresh();
 						wCurrent = mLibAlbums;
 						mLibAlbums->HighlightColor(Config.library_active_column_color);
@@ -1148,7 +1166,7 @@ int main(int argc, char *argv[])
 					}
 					if (wCurrent == mLibAlbums)
 					{
-						mLibAlbums->HighlightColor(Config.main_color);
+						mLibAlbums->HighlightColor(Config.main_highlight_color);
 						wCurrent->Refresh();
 						wCurrent = mLibArtists;
 						mLibArtists->HighlightColor(Config.library_active_column_color);
@@ -1196,7 +1214,7 @@ int main(int argc, char *argv[])
 				}
 				if (current_screen == csBrowser)
 				{
-					BLOCK_STATUSBAR_UPDATE;
+					LOCK_STATUSBAR;
 					int id = mBrowser->GetChoice()-1;
 					if (vBrowser[id].type == itPlaylist)
 					{
@@ -1220,7 +1238,7 @@ int main(int argc, char *argv[])
 						else
 							ShowMessage("Aborted!");
 						curs_set(0);
-						UNBLOCK_STATUSBAR_UPDATE;
+						UNLOCK_STATUSBAR;
 					}
 				}
 				break;
@@ -1242,10 +1260,10 @@ int main(int argc, char *argv[])
 			}
 			case 'S': // save playlist
 			{
-				BLOCK_STATUSBAR_UPDATE;
+				LOCK_STATUSBAR;
 				wFooter->WriteXY(0, Config.statusbar_visibility, "Save playlist as: ", 1);
 				string playlist_name = wFooter->GetString("", TraceMpdStatus);
-				UNBLOCK_STATUSBAR_UPDATE;
+				UNLOCK_STATUSBAR;
 				if (playlist_name.find("/") != string::npos)
 				{
 					ShowMessage("Playlist name cannot contain slashes!");
@@ -1331,7 +1349,7 @@ int main(int argc, char *argv[])
 					break;
 				
 				block_progressbar_update = 1;
-				BLOCK_STATUSBAR_UPDATE;
+				LOCK_STATUSBAR;
 				
 				int songpos, in;
 				
@@ -1370,11 +1388,11 @@ int main(int argc, char *argv[])
 				Mpd->Seek(songpos);
 				
 				block_progressbar_update = 0;
-				UNBLOCK_STATUSBAR_UPDATE;
+				UNLOCK_STATUSBAR;
 				
 				break;
 			}
-			case 'U': case 'u': // update database
+			case 'u': // update database
 			{
 				if (current_screen == csBrowser)
 					Mpd->UpdateDirectory(browsed_dir);
@@ -1382,7 +1400,7 @@ int main(int argc, char *argv[])
 					Mpd->UpdateDirectory("/");
 				break;
 			}
-			case 'O': case 'o': // go to playing song
+			case 'o': // go to playing song
 			{
 				if (current_screen == csPlaylist && now_playing >= 0)
 					mPlaylist->Highlight(now_playing+1);
@@ -1408,77 +1426,55 @@ int main(int argc, char *argv[])
 				Mpd->SetCrossfade(Mpd->GetCrossfade() ? 0 : Config.crossfade_time);
 				break;
 			}
-			case 'E': case 'e': // edit song's tags
+			case 'X': // set crossfade
 			{
-				int id = wCurrent->GetChoice()-1;
-				switch (current_screen)
+				LOCK_STATUSBAR;
+				wFooter->WriteXY(0, Config.statusbar_visibility, "Set crossfade to: ", 1);
+				string crossfade = wFooter->GetString(3, TraceMpdStatus);
+				UNLOCK_STATUSBAR;
+				int cf = StrToInt(crossfade);
+				if (cf > 0)
 				{
-					case csPlaylist:
+					Config.crossfade_time = cf;
+					Mpd->SetCrossfade(cf);
+				}
+				break;
+			}
+			case 'e': // edit song's tags
+			{
+				if ((wCurrent == mPlaylist && !vPlaylist.empty())
+				||  (wCurrent == mBrowser && vBrowser[mBrowser->GetChoice()-1].type == itSong)
+				||  (wCurrent == mSearcher && !vSearched.empty() && mSearcher->GetChoice() > search_engine_static_option)
+				||  (wCurrent == mLibSongs && !vSongs.empty()))
+				{
+					int id = wCurrent->GetChoice()-1;
+					Song *s;
+					switch (current_screen)
 					{
-						if (!mPlaylist->Empty())
-						{
-							if (GetSongInfo(*vPlaylist[id]))
-							{
-								wCurrent = mTagEditor;
-								wPrev = mPlaylist;
-								current_screen = csTagEditor;
-								prev_screen = csPlaylist;
-							}
-							else
-								ShowMessage("Cannot read file!");
-						}
-						break;
+						case csPlaylist:
+							s = vPlaylist[id];
+							break;
+						case csBrowser:
+							s = vBrowser[id].song;
+							break;
+						case csSearcher:
+							s = vSearched[id-search_engine_static_option];
+							break;
+						case csLibrary:
+							s = vSongs[id];
+							break;
+						default:
+							break;
 					}
-					case csBrowser:
+					if (GetSongInfo(*s))
 					{
-						if (vBrowser[id].type == itSong)
-						{
-							Song edited = Mpd->GetSong(vBrowser[id].name.c_str());
-							if (GetSongInfo(edited))
-							{
-								wCurrent = mTagEditor;
-								wPrev = mBrowser;
-								current_screen = csTagEditor;
-								prev_screen = csBrowser;
-							}
-							else
-								ShowMessage("Cannot read file!");
-						}
-						break;
+						wPrev = wCurrent;
+						wCurrent = mTagEditor;
+						prev_screen = current_screen;
+						current_screen = csTagEditor;
 					}
-					case csSearcher:
-					{
-						if (id >= search_engine_static_option && !vSearched.empty())
-						{
-							if (GetSongInfo(*vSearched[id-search_engine_static_option]))
-							{
-								wCurrent = mTagEditor;
-								wPrev = mSearcher;
-								current_screen = csTagEditor;
-								prev_screen = csSearcher;
-							}
-							else
-								ShowMessage("Cannot read file!");
-						}
-						break;
-					}
-					case csLibrary:
-					{
-						if (!vSongs.empty() && wCurrent == mLibSongs)
-						{
-							if (GetSongInfo(*vSongs[id]))
-							{
-								wPrev = wCurrent;
-								wCurrent = mTagEditor;
-								current_screen = csTagEditor;
-								prev_screen = csLibrary;
-							}
-							else
-								ShowMessage("Cannot read file!");
-						}
-					}
-					default:
-						break;
+					else
+						ShowMessage("Cannot read file!");
 				}
 				break;
 			}
@@ -1488,13 +1484,13 @@ int main(int argc, char *argv[])
 					break;
 				int newpos = 0;
 				string position;
-				BLOCK_STATUSBAR_UPDATE;
+				LOCK_STATUSBAR;
 				wFooter->WriteXY(0, Config.statusbar_visibility, "Position to go (in %): ", 1);
 				position = wFooter->GetString(3, TraceMpdStatus);
 				newpos = atoi(position.c_str());
 				if (newpos > 0 && newpos < 100 && !position.empty())
 					Mpd->Seek(vPlaylist[now_playing]->GetTotalLength()*newpos/100.0);
-				UNBLOCK_STATUSBAR_UPDATE;
+				UNLOCK_STATUSBAR;
 				break;
 			}
 			case 'C': // clear playlist but holds currently playing song
@@ -1528,10 +1524,10 @@ int main(int argc, char *argv[])
 					found_pos = 0;
 					vFoundPositions.clear();
 					Menu *mCurrent = static_cast<Menu *>(wCurrent);
-					BLOCK_STATUSBAR_UPDATE;
+					LOCK_STATUSBAR;
 					wFooter->WriteXY(0, Config.statusbar_visibility, "Find " + how + ": ", 1);
 					string findme = wFooter->GetString("", TraceMpdStatus);
-					UNBLOCK_STATUSBAR_UPDATE;
+					UNLOCK_STATUSBAR;
 					timer = time(NULL);
 					if (findme.empty())
 						break;
@@ -1568,19 +1564,27 @@ int main(int argc, char *argv[])
 				}
 				break;
 			}
-			case '.': // go to next/previous found position
+			case ',': case '.': // go to previous/next found position
 			{
 				if (!vFoundPositions.empty())
 				{
 					Menu *mCurrent = static_cast<Menu *>(wCurrent);
 					try
 					{
-						mCurrent->Highlight(vFoundPositions.at(++found_pos));
+						mCurrent->Highlight(vFoundPositions.at(input == '.' ? ++found_pos : --found_pos));
 					}
 					catch (std::out_of_range)
 					{
-						mCurrent->Highlight(vFoundPositions.front());
-						found_pos = 0;
+						if (input == '.')
+						{
+							mCurrent->Highlight(vFoundPositions.front());
+							found_pos = 0;
+						}
+						else
+						{
+							mCurrent->Highlight(vFoundPositions.back());
+							found_pos = vFoundPositions.size()-1;
+						}
 					}
 				}
 				break;
@@ -1602,7 +1606,7 @@ int main(int argc, char *argv[])
 				if ((wCurrent == mPlaylist && !vPlaylist.empty())
 				||  (wCurrent == mBrowser && vBrowser[mBrowser->GetChoice()-1].type == itSong)
 				||  (wCurrent == mSearcher && !vSearched.empty() && mSearcher->GetChoice() > search_engine_static_option)
-				||  (wCurrent == mLibSongs))
+				||  (wCurrent == mLibSongs && !vSongs.empty()))
 				{
 					Song *s;
 					switch (current_screen)
@@ -1614,7 +1618,7 @@ int main(int argc, char *argv[])
 							s = vBrowser[mBrowser->GetChoice()-1].song;
 							break;
 						case csSearcher:
-							s = vSearched[mSearcher->GetChoice()-search_engine_static_option-1];
+							s = vSearched[mSearcher->GetRealChoice()-2]; // first one is 'Reset'
 							break;
 						case csLibrary:
 							s = vSongs[mLibSongs->GetChoice()-1];
@@ -1631,10 +1635,9 @@ int main(int argc, char *argv[])
 						wCurrent->Hide();
 						wCurrent->Clear();
 						current_screen = csLyrics;
-						
+						song_lyrics = "Lyrics: " + s->GetArtist() + " - " + s->GetTitle();
 						sLyrics->WriteXY(0, 0, "Fetching lyrics...");
 						sLyrics->Refresh();
-						sLyrics->Add("[b]" + s->GetArtist() + " - " + s->GetTitle() + "[/b]\n\n");
 						sLyrics->Add(GetLyrics(s->GetArtist(), s->GetTitle()));
 						sLyrics->Timeout(ncmpcpp_window_timeout);
 					}
@@ -1761,8 +1764,8 @@ int main(int argc, char *argv[])
 					}
 					
 					mLibArtists->HighlightColor(Config.library_active_column_color);
-					mLibAlbums->HighlightColor(Config.main_color);
-					mLibSongs->HighlightColor(Config.main_color);
+					mLibAlbums->HighlightColor(Config.main_highlight_color);
+					mLibSongs->HighlightColor(Config.main_highlight_color);
 					
 					wCurrent->Hide();
 					

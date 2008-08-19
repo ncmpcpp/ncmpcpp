@@ -106,8 +106,8 @@ class MPDConnection
 		bool GetRepeat() const { return isConnected && itsCurrentStatus ? itsCurrentStatus->repeat : 0; }
 		bool GetRandom() const { return isConnected && itsCurrentStatus ? itsCurrentStatus->random : 0; }
 		bool GetDBIsUpdating() const { return isConnected && itsCurrentStatus ? itsCurrentStatus->updatingDb : 0; }
-		int GetVolume() const { return isConnected && itsCurrentStatus ? itsCurrentStatus->volume : 0; }
-		int GetCrossfade() const { return isConnected && itsCurrentStatus ? itsCurrentStatus->crossfade : 0; }
+		int GetVolume() const { return isConnected && itsCurrentStatus ? itsCurrentStatus->volume : -1; }
+		int GetCrossfade() const { return isConnected && itsCurrentStatus ? itsCurrentStatus->crossfade : -1; }
 		long long GetPlaylistID() const { return isConnected && itsCurrentStatus ? itsCurrentStatus->playlist : -1; }
 		long long GetOldPlaylistID() const { return isConnected && itsOldStatus ? itsOldStatus->playlist : -1; }
 		int GetElapsedTime() const { return isConnected && itsCurrentStatus ? itsCurrentStatus->elapsedTime : -1; }

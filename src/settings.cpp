@@ -27,19 +27,22 @@ using std::ifstream;
 void DefaultConfiguration(ncmpcpp_config &conf)
 {
 	conf.mpd_music_dir = "/var/lib/mpd/music";
-	conf.song_list_format = "[green](%l)[/green] {%a - }{%t}|{[white]%f}";
+	conf.song_list_format = "[green](%l)[/green] {%a - }{%t}|{[white]%f[/white]}";
 	conf.song_status_format = "(%l) {%a - }{%t}|{%f}";
 	conf.song_window_title_format = "{%a - }{%t}|{%f}";
 	conf.song_library_format = "{%n - }{%t}|{%f}";
+	conf.browser_playlist_prefix = "[red](playlist)[/red] ";
 	conf.empty_tags_color = clCyan;
 	conf.header_color = clDefault;
 	conf.volume_color = clDefault;
 	conf.state_line_color = clDefault;
 	conf.state_flags_color = clDefault;
 	conf.main_color = clYellow;
+	conf.main_highlight_color = conf.main_color;
 	conf.progressbar_color = clDefault;
 	conf.statusbar_color = clDefault;
 	conf.library_active_column_color = clRed;
+	conf.colors_enabled = true;
 	conf.header_visibility = true;
 	conf.statusbar_visibility = true;
 	conf.set_window_title = true;
@@ -169,11 +172,21 @@ void ReadConfiguration(ncmpcpp_config &conf)
 				if (!v.empty())
 					conf.song_library_format = v;
 			
+			if (it->find("browser_playlist_prefix") != string::npos)
+				if (!v.empty())
+					conf.browser_playlist_prefix = v;
+			
+			if (it->find("colors_enabled") != string::npos)
+				conf.colors_enabled = v == "yes";
+			
 			if (it->find("header_visibility") != string::npos)
 				conf.header_visibility = v == "yes";
 			
 			if (it->find("statusbar_visibility") != string::npos)
 				conf.statusbar_visibility = v == "yes";
+			
+			if (it->find("enable_window_title") != string::npos)
+				conf.set_window_title = v == "yes";
 			
 			if (it->find("song_window_title_format") != string::npos)
 				if (!v.empty())
@@ -202,6 +215,10 @@ void ReadConfiguration(ncmpcpp_config &conf)
 			if (it->find("main_window_color") != string::npos)
 				if (!v.empty())
 					conf.main_color = IntoColor(v);
+			
+			if (it->find("main_window_highlight_color") != string::npos)
+				if (!v.empty())
+					conf.main_highlight_color = IntoColor(v);
 			
 			if (it->find("progressbar_color") != string::npos)
 				if (!v.empty())

@@ -259,25 +259,32 @@ void Window::ReadKey() const
 	wgetch(itsWindow);
 }
 
-void Window::Write(const string &str, CLEAR_TO_EOL clrtoeol)
+void Window::Write(int limit, const string &str, CLEAR_TO_EOL clrtoeol)
 {
 	if (BBEnabled && !str.empty())
 	{
 		bool collect = false;
 		string color, tmp;
-		for (string::const_iterator it = str.begin(); it != str.end(); it++)
+		for (string::const_iterator it = str.begin(); it != str.end() && limit > 0; it++)
 		{
 			if (*it != '[' && !collect)
+			{
 				tmp += *it;
+				limit--;
+			}
 			else
 				collect = 1;
 		
 			if (collect)
 			{
 				if (*it != '[')
+				{
 					color += *it;
+					if (color.length() > 10) collect = 0; // longest bbcode is 10 chars long
+				}
 				else
 				{
+					limit -= color.length();
 					tmp += color;
 					color = *it;
 				}
@@ -285,8 +292,8 @@ void Window::Write(const string &str, CLEAR_TO_EOL clrtoeol)
 		
 			if (*it == ']' || it+1 == str.end())
 				collect = 0;
-		
-			if (!collect)
+			
+			if (!collect && !color.empty())
 			{
 				waddstr(itsWindow,tmp.c_str());
 				tmp.clear();
@@ -297,7 +304,10 @@ void Window::Write(const string &str, CLEAR_TO_EOL clrtoeol)
 					delete [] colors;
 				}
 				else
-					tmp += color;
+				{
+					limit -= color.length();
+					tmp += limit > 0 ? color : color.substr(0, color.length()+limit);
+				}
 				color.clear();
 			}
 		}
@@ -313,25 +323,32 @@ void Window::Write(const string &str, CLEAR_TO_EOL clrtoeol)
 }
 
 #ifdef UTF8_ENABLED
-void Window::Write(const wstring &str, CLEAR_TO_EOL clrtoeol)
+void Window::Write(int limit, const wstring &str, CLEAR_TO_EOL clrtoeol)
 {
 	if (BBEnabled)
 	{
 		bool collect = false;
 		wstring color, tmp;
-		for (wstring::const_iterator it = str.begin(); it != str.end(); it++)
+		for (wstring::const_iterator it = str.begin(); it != str.end() && limit > 0; it++)
 		{
 			if (*it != '[' && !collect)
+			{
 				tmp += *it;
+				limit--;
+			}
 			else
 				collect = 1;
 		
 			if (collect)
 			{
 				if (*it != '[')
+				{
 					color += *it;
+					if (color.length() > 10) collect = 0; // longest bbcode is 10 chars long
+				}
 				else
 				{
+					limit -= color.length();
 					tmp += color;
 					color = *it;
 				}
@@ -340,7 +357,7 @@ void Window::Write(const wstring &str, CLEAR_TO_EOL clrtoeol)
 			if (*it == ']' || it+1 == str.end())
 				collect = 0;
 			
-			if (!collect)
+			if (!collect && !color.empty())
 			{
 				waddwstr(itsWindow,tmp.c_str());
 				tmp.clear();
@@ -351,7 +368,10 @@ void Window::Write(const wstring &str, CLEAR_TO_EOL clrtoeol)
 					delete [] colors;
 				}
 				else
-					tmp += color;
+				{
+					limit -= color.length();
+					tmp += limit > 0 ? color : color.substr(0, color.length()+limit);
+				}
 				color.clear();
 			}
 		}
@@ -366,17 +386,17 @@ void Window::Write(const wstring &str, CLEAR_TO_EOL clrtoeol)
 		wrefresh(itsWindow);
 }
 
-void Window::WriteXY(int x, int y, const wstring &str, CLEAR_TO_EOL cleartoeol)
+void Window::WriteXY(int x, int y, int limit, const wstring &str, CLEAR_TO_EOL cleartoeol)
 {
 	wmove(itsWindow,y,x);
-	Write(str, cleartoeol);
+	Write(limit, str, cleartoeol);
 }
 #endif
 
-void Window::WriteXY(int x, int y, const string &str, CLEAR_TO_EOL cleartoeol)
+void Window::WriteXY(int x, int y, int limit, const string &str, CLEAR_TO_EOL cleartoeol)
 {
 	wmove(itsWindow,y,x);
-	Write(str, cleartoeol);
+	Write(limit, str, cleartoeol);
 }
 
 

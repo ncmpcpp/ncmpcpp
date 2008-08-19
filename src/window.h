@@ -82,11 +82,15 @@ class Window
 		virtual void AutoRefresh(bool val) { AutoRefreshEnabled = val; }
 		virtual void ReadKey(int &) const;
 		virtual void ReadKey() const;
-		virtual void Write(const string &, CLEAR_TO_EOL = 1);
-		virtual void WriteXY(int, int, const string &, CLEAR_TO_EOL = 0);
+		virtual void Write(const string &s, CLEAR_TO_EOL cte = 0) { Write(0xFFFF, s, cte); }
+		virtual void Write(int, const string &, CLEAR_TO_EOL = 0);
+		virtual void WriteXY(int x, int y, const string &s, CLEAR_TO_EOL ete = 0) { WriteXY(x, y, 0xFFFF, s, ete); }
+		virtual void WriteXY(int, int, int, const string &, CLEAR_TO_EOL = 0);
 #ifdef UTF8_ENABLED
-		virtual void Write(const wstring &, CLEAR_TO_EOL = 1);
-		virtual void WriteXY(int, int, const wstring &, CLEAR_TO_EOL = 0);
+		virtual void Write(const wstring &s, CLEAR_TO_EOL cte = 0) { Write(0xFFFF, s, cte); }
+		virtual void Write(int, const wstring &, CLEAR_TO_EOL = 0);
+		virtual void WriteXY(int x, int y, const wstring &s, CLEAR_TO_EOL ete = 0) { WriteXY(x, y, 0xFFFF, s, ete); }
+		virtual void WriteXY(int, int, int, const wstring &, CLEAR_TO_EOL = 0);
 #endif
 		virtual string GetString(int num, void (*ptr)() = NULL) const { return GetString("", num, ptr); }
 		virtual string GetString(const string &str, void (*ptr)()) const { return GetString(str, -1, ptr); }

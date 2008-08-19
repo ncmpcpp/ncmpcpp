@@ -278,10 +278,12 @@ void Menu::Refresh(bool redraw_whole_window)
 		}
 		
 		int line = *it-itsBeginning;
+		COLOR old_basecolor = itsBaseColor;
 		
 		if (*it == itsHighlight && itsHighlightEnabled)
 		{
 			Reverse(1);
+			SetBaseColor(itsHighlightColor);
 			SetColor(itsHighlightColor);
 		}
 		if (itsOptions[*it]->is_bold)
@@ -320,12 +322,9 @@ void Menu::Refresh(bool redraw_whole_window)
 			}
 			
 #			ifdef UTF8_ENABLED
-			wstring option = ToWString(itsOptions[*it]->content);
-			int bbcodes_length = CountBBCodes(option);
-			WriteXY(x, line, option.substr(0, itsWidth+bbcodes_length), 0);
+			WriteXY(x, line, itsWidth, ToWString(itsOptions[*it]->content), 0);
 #			else
-			int bbcodes_length = CountBBCodes(itsOptions[*it]->content);
-			WriteXY(x, line, itsOptions[*it]->content.substr(0, itsWidth+bbcodes_length), 0);
+			WriteXY(x, line, itsWidth, itsOptions[*it]->content, 0);
 #			endif
 			
 			if (!ch && (itsOptions[*it]->location == lCenter || itsOptions[*it]->location == lLeft))
@@ -339,11 +338,13 @@ void Menu::Refresh(bool redraw_whole_window)
 		line++;
 		
 		if (*it == itsHighlight && itsHighlightEnabled)
+		{
 			Reverse(0);
+			SetBaseColor(old_basecolor);
+			SetColor(old_basecolor);
+		}
 		if (itsOptions[*it]->is_bold)
 			Bold(0);
-		
-		SetColor(itsBaseColor);
 	}
 	NeedsRedraw.clear();
 	wrefresh(itsWindow);
@@ -488,11 +489,13 @@ void Menu::Highlight(int which)
 	else
 		return;
 	
-	if (which >= itsHeight)
+	if (which >= itsHeight/2)
 	{
 		itsBeginning = itsHighlight-itsHeight/2;
 		if (itsBeginning > itsOptions.size()-itsHeight)
 			itsBeginning = itsOptions.size()-itsHeight;
+		if (itsBeginning < 0)
+			itsBeginning = 0;
 	}
 	else
 		itsBeginning = 0;
@@ -522,6 +525,7 @@ void Menu::Highlight(int which)
 
 void Menu::Reset()
 {
+	NeedsRedraw.clear();
 	itsHighlight = 0;
 	itsBeginning = 0;
 }

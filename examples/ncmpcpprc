@@ -57,13 +57,15 @@
 ## - white
 ##
 #
-#song_list_format = "[green](%l)[/green] {%a - }{%t}|{[white]%f}"
+#song_list_format = "[green](%l)[/green] {%a - }{%t}|{[white]%f[/white]}"
 #
 #song_status_format = "(%l) {%a - }{%t}|{%f}"
 #
 #song_window_title_format = "{%a - }{%t}|{%f}"
 #
 #song_library_format = "{%n - }{%t}|{%f}"
+#
+#browser_playlist_prefix = "[red]playlist[/red] "
 #
 ##### interface settings #####
 #
@@ -74,6 +76,8 @@
 #enable_window_title = "yes"
 #
 ##### colors definitions #####
+#
+#colors_enabled = "yes"
 #
 #empty_tag_color = "cyan"
 #
@@ -86,6 +90,8 @@
 #state_flags_color = "default"
 #
 #main_window_color = "yellow"
+#
+#main_window_highlight_color = "yellow"
 #
 #progressbar_color = "default"
 #

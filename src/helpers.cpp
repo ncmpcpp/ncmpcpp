@@ -594,7 +594,7 @@ void GetDirectory(string dir)
 		{
 			case itPlaylist:
 			{
-				mBrowser->AddOption("[red](playlist)[/red] " + string(it->name));
+				mBrowser->AddOption(Config.browser_playlist_prefix + string(it->name));
 				break;
 			}
 			case itDirectory:
@@ -631,7 +631,7 @@ void GetDirectory(string dir)
 	mBrowser->Highlight(highlightme);
 	browsed_subdir.clear();
 	
-	if (current_screen != csLibrary && current_screen == csBrowser)
+	if (current_screen == csBrowser)
 		mBrowser->Hide();
 }
 

@@ -32,6 +32,7 @@ struct ncmpcpp_config
 	string song_status_format;
 	string song_window_title_format;
 	string song_library_format;
+	string browser_playlist_prefix;
 	
 	COLOR empty_tags_color;
 	COLOR header_color;
@@ -39,10 +40,12 @@ struct ncmpcpp_config
 	COLOR state_line_color;
 	COLOR state_flags_color;
 	COLOR main_color;
+	COLOR main_highlight_color;
 	COLOR progressbar_color;
 	COLOR statusbar_color;
 	COLOR library_active_column_color;
 	
+	bool colors_enabled;
 	bool set_window_title;
 	bool header_visibility;
 	bool statusbar_visibility;
