@@ -69,6 +69,8 @@
 #
 ##### interface settings #####
 #
+#autocenter_mode = "no"
+#
 #header_visibility = "yes"
 #
 #statusbar_visibility = "yes"

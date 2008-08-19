@@ -257,8 +257,8 @@ int main(int argc, char *argv[])
 	sHelp->Add("\to         : Go to currently playing position\n\n\n");
 	
 	sHelp->Add("   [b]Keys - Browse screen\n -----------------------------------------[/b]\n");
-	sHelp->Add("\tEnter     : Enter directory/Add to playlist and play song\n");
-	sHelp->Add("\tSpace     : Add song to playlist\n");
+	sHelp->Add("\tEnter     : Enter directory/Add item to playlist and play\n");
+	sHelp->Add("\tSpace     : Add item to playlist\n");
 	sHelp->Add("\tBackspace : Go to parent directory\n");
 	sHelp->Add("\tDelete    : Delete playlist\n\n\n");
 	
@@ -1390,6 +1390,12 @@ int main(int argc, char *argv[])
 				block_progressbar_update = 0;
 				UNLOCK_STATUSBAR;
 				
+				break;
+			}
+			case 'U': // toggle autocenter mode
+			{
+				Config.autocenter_mode = !Config.autocenter_mode;
+				ShowMessage("Auto center mode: " + string(Config.autocenter_mode ? "On" : "Off"));
 				break;
 			}
 			case 'u': // update database

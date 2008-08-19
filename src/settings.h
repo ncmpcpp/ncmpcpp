@@ -49,6 +49,7 @@ struct ncmpcpp_config
 	bool set_window_title;
 	bool header_visibility;
 	bool statusbar_visibility;
+	bool autocenter_mode;
 	
 	int mpd_connection_timeout;
 	int crossfade_time;

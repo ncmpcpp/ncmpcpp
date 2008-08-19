@@ -45,6 +45,7 @@ void DefaultConfiguration(ncmpcpp_config &conf)
 	conf.colors_enabled = true;
 	conf.header_visibility = true;
 	conf.statusbar_visibility = true;
+	conf.autocenter_mode = false;
 	conf.set_window_title = true;
 	conf.mpd_connection_timeout = 15;
 	conf.crossfade_time = 5;
@@ -184,6 +185,9 @@ void ReadConfiguration(ncmpcpp_config &conf)
 			
 			if (it->find("statusbar_visibility") != string::npos)
 				conf.statusbar_visibility = v == "yes";
+			
+			if (it->find("autocenter_mode") != string::npos)
+				conf.autocenter_mode = v == "yes";
 			
 			if (it->find("enable_window_title") != string::npos)
 				conf.set_window_title = v == "yes";

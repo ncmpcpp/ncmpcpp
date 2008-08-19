@@ -320,6 +320,8 @@ void NcmpcppStatusChanged(MPDConnection *Mpd, MPDStatusChanges changed, void *da
 				if (old_playing >= 0)
 					mPlaylist->BoldOption(old_playing+1, 0);
 				mPlaylist->BoldOption(now_playing+1, 1);
+				if (Config.autocenter_mode)
+					mPlaylist->Highlight(now_playing+1);
 			}
 			if (!Mpd->GetElapsedTime())
 				mvwhline(wFooter->RawWin(), 0, 0, 0, wFooter->GetWidth());
