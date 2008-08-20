@@ -113,7 +113,7 @@ class MPDConnection
 		int GetElapsedTime() const { return isConnected && itsCurrentStatus ? itsCurrentStatus->elapsedTime : -1; }
 		
 		unsigned int GetMaxPlaylistLength() { return itsMaxPlaylistLength; }
-		int GetPlaylistLength() const { return isConnected && itsCurrentStatus ? itsCurrentStatus->playlistLength : -1; }
+		int GetPlaylistLength() const { return isConnected && itsCurrentStatus ? itsCurrentStatus->playlistLength : 0; }
 		void GetPlaylistChanges(long long, SongList &) const;
 		
 		string GetLastErrorMessage() const { return itsLastErrorMessage; }

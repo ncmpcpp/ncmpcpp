@@ -52,11 +52,10 @@ bool MPDConnection::Connect()
 	{
 		itsConnection = mpd_newConnection(MPD_HOST.c_str(), MPD_PORT, MPD_TIMEOUT);
 		isConnected = 1;
-		if (!CheckForErrors())
-			return isConnected;
-		SendPassword();
 		CheckForErrors();
-		return isConnected;
+		if (!MPD_PASSWORD.empty())
+			SendPassword();
+		return !CheckForErrors();
 	}
 	else
 		return true;
@@ -93,7 +92,6 @@ void MPDConnection::SendPassword()
 {
 	mpd_sendPasswordCommand(itsConnection, MPD_PASSWORD.c_str());
 	mpd_finishCommand(itsConnection);
-	CheckForErrors();
 }
 
 void MPDConnection::SetStatusUpdater(StatusUpdater updater, void *data)
@@ -121,9 +119,7 @@ void MPDConnection::UpdateStatus()
 	if (!itsMaxPlaylistLength)
 		itsMaxPlaylistLength = GetPlaylistLength();
 	
-	CheckForErrors();
-	
-	if (!isConnected)
+	if (CheckForErrors())
 		return;
 	
 	MPDStatusChanges changes;
@@ -632,7 +628,7 @@ int MPDConnection::CheckForErrors()
 			isConnected = 0; // the rest of errors are fatal to connection
 			if (itsErrorHandler)
 				itsErrorHandler(this, itsConnection->error, itsConnection->errorStr, itsErrorHandlerUserdata);
-			errid = itsConnection->errorCode;
+			errid = itsConnection->error;
 		}
 		itsLastErrorMessage = itsConnection->errorStr;
 		mpd_clearError(itsConnection);
