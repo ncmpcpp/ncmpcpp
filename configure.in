@@ -19,13 +19,14 @@ dnl ========================
 if test "$unicode" = "yes" ; then
 	ncurses_config_bin=ncursesw5-config
 	ncurses_lib=ncursesw
+	CPPFLAGS="$CPPFLAGS -DUTF8_ENABLED"
 else
 	ncurses_config_bin=ncurses5-config
 	ncurses_lib=ncurses
 fi
 AC_PATH_PROG(NCURSES_CONFIG, $ncurses_config_bin)
 if test "$NCURSES_CONFIG" != "" ; then
-	CPPFLAGS="$CPPFLAGS -DUTF8_ENABLED `$NCURSES_CONFIG --cflags`"
+	CPPFLAGS="$CPPFLAGS `$NCURSES_CONFIG --cflags`"
 	LDFLAGS="$LDFLAGS `$NCURSES_CONFIG --libs`"
 	AC_CHECK_LIB($ncurses_lib, initscr, , AC_MSG_ERROR([$ncurses_lib library is required]))
 else
