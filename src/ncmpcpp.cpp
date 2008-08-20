@@ -205,8 +205,8 @@ int main(int argc, char *argv[])
 	sLyrics = new Scrollpad(sHelp->EmptyClone());
 	
 	sHelp->Add("   [b]Keys - Movement\n -----------------------------------------[/b]\n");
-	sHelp->Add("\tUp        : Move Cursor up\n");
-	sHelp->Add("\tDown      : Move Cursor down\n");
+	sHelp->Add("\tUp k      : Move Cursor up\n");
+	sHelp->Add("\tDown j    : Move Cursor down\n");
 	sHelp->Add("\tPage up   : Page up\n");
 	sHelp->Add("\tPage down : Page down\n");
 	sHelp->Add("\tHome      : Home\n");
@@ -496,7 +496,7 @@ int main(int argc, char *argv[])
 				break;
 			case csLibrary:
 			{
-				if (input == KEY_UP || input == KEY_DOWN || input == KEY_PPAGE || input == KEY_NPAGE || input == KEY_HOME || input == KEY_END)
+				if (input == KEY_UP || input == 'k' || input == KEY_DOWN || input == 'j' || input == KEY_PPAGE || input == KEY_NPAGE || input == KEY_HOME || input == KEY_END)
 				{
 					if (wCurrent == mLibArtists)
 					{
@@ -514,8 +514,8 @@ int main(int argc, char *argv[])
 		
 		switch (input)
 		{
-			case KEY_UP: wCurrent->Go(UP); continue;
-			case KEY_DOWN: wCurrent->Go(DOWN); continue;
+			case KEY_UP: case 'k': wCurrent->Go(UP); continue;
+			case KEY_DOWN: case 'j': wCurrent->Go(DOWN); continue;
 			case KEY_PPAGE: wCurrent->Go(PAGE_UP); continue;
 			case KEY_NPAGE: wCurrent->Go(PAGE_DOWN); continue;
 			case KEY_HOME: wCurrent->Go(HOME); continue;
