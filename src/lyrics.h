@@ -25,7 +25,7 @@
 
 #include <fstream>
 #ifdef HAVE_CURL_CURL_H
-# include <curl/curl.h>
+# include "curl/curl.h"
 #endif
 
 string GetLyrics(string, string);
