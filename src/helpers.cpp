@@ -304,6 +304,54 @@ string DisplaySong(const Song &s, const string &song_template)
 				{
 					if (link_tags)
 					{
+						if (s.GetComposer() != EMPTY_TAG)
+						{
+							result += s.GetComposer();
+							i += s.GetComposer().length();
+						}
+						else
+							tags_present = 0;
+					}
+					else
+						result += s.GetComposer();
+					break;
+				}
+				case 'p':
+				{
+					if (link_tags)
+					{
+						if (s.GetPerformer() != EMPTY_TAG)
+						{
+							result += s.GetPerformer();
+							i += s.GetPerformer().length();
+						}
+						else
+							tags_present = 0;
+					}
+					else
+						result += s.GetPerformer();
+					break;
+				}
+				case 'd':
+				{
+					if (link_tags)
+					{
+						if (s.GetDisc() != EMPTY_TAG)
+						{
+							result += s.GetDisc();
+							i += s.GetDisc().length();
+						}
+						else
+							tags_present = 0;
+					}
+					else
+						result += s.GetDisc();
+					break;
+				}
+				case 'C':
+				{
+					if (link_tags)
+					{
 						if (s.GetComment() != EMPTY_TAG)
 						{
 							result += s.GetComment();

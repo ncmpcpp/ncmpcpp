@@ -36,7 +36,10 @@
 ## %y - year
 ## %n - track number
 ## %g - genre
-## %c - comment
+## %c - composer
+## %p - performer
+## %d - disc
+## %C - comment
 ##
 ## you can also put them in { } and then it will be displayed
 ## only if all requested values are available and/or define alternate

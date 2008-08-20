@@ -50,9 +50,9 @@ class Song
 		string GetYear() const;
 		string GetGenre() const;
 		//string GetName() const { return itsName; }
-		//string GetComposer() const { return itsComposer; }
-		//string GetPerformer() const { return itsPerformer; }
-		//string GetDisc() const { return itsDisc; }
+		string GetComposer() const;
+		string GetPerformer() const;
+		string GetDisc() const;
 		string GetComment() const;
 		string GetLength() const;
 		long long GetHash() const { return itsHash; }
@@ -92,9 +92,9 @@ class Song
 		//string itsName;
 		string itsYear;
 		string itsGenre;
-		//string itsComposer;
-		//string itsPerformer;
-		//string itsDisc;
+		string itsComposer;
+		string itsPerformer;
+		string itsDisc;
 		string itsComment;
 		long long itsHash;
 		int itsMinutesLength;
@@ -103,8 +103,6 @@ class Song
 		int itsID;
 		bool itsGetEmptyFields;
 };
-
-//void GetCurrentPlaylist(vector<Song> &);
 
 #endif
 

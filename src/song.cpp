@@ -51,9 +51,9 @@ Song::Song(mpd_Song *s) : itsHash(0),
 	//s->name ? itsName = s->name : itsName = "";
 	s->date ? itsYear = s->date : itsYear = "";
 	s->genre ? itsGenre = s->genre : itsGenre = "";
-	//s->composer ? itsComposer = s->composer : itsComposer = "";
-	//s->performer ? itsPerformer = s->performer : itsPerformer = "";
-	//s->disc ? itsDisc = s->disc : itsDisc = "";
+	s->composer ? itsComposer = s->composer : itsComposer = "";
+	s->performer ? itsPerformer = s->performer : itsPerformer = "";
+	s->disc ? itsDisc = s->disc : itsDisc = "";
 	s->comment ? itsComment = s->comment : itsComment = "";
 	
 	int i = itsFile.size();
@@ -107,9 +107,9 @@ void Song::Clear()
 	//itsName.clear();
 	itsYear.clear();
 	itsGenre.clear();
-	//itsComposer.clear();
-	//itsPerformer.clear();
-	//itsDisc.clear();
+	itsComposer.clear();
+	itsPerformer.clear();
+	itsDisc.clear();
 	itsComment.clear();
 	itsMinutesLength = 0;
 	itsSecondsLength = 0;
@@ -124,52 +124,67 @@ bool Song::Empty() const
 
 string Song::GetFile() const
 {
-	return itsGetEmptyFields ? (itsFile.empty() ? "" : itsFile) : (itsFile.empty() ? EMPTY_TAG : itsFile);
+	return itsFile.empty() ? (itsGetEmptyFields ? "" : EMPTY_TAG) : itsFile;
 }
 
 string Song::GetShortFilename() const
 {
-	return itsGetEmptyFields ? (itsShortName.empty() ? "" : itsShortName) : (itsShortName.empty() ? EMPTY_TAG : itsShortName);
+	return itsShortName.empty() ? (itsGetEmptyFields ? "" : EMPTY_TAG) : itsShortName;
 }
 
 string Song::GetDirectory() const
 {
-	return itsGetEmptyFields ? (itsDirectory.empty() ? "" : itsDirectory) : (itsDirectory.empty() ? EMPTY_TAG : itsDirectory);
+	return itsDirectory.empty() ? (itsGetEmptyFields ? "" : EMPTY_TAG) : itsDirectory;
 }
 
 string Song::GetArtist() const
 {
-	return itsGetEmptyFields ? (itsArtist.empty() ? "" : itsArtist) : (itsArtist.empty() ? UNKNOWN_ARTIST : itsArtist);
+	return itsArtist.empty() ? (itsGetEmptyFields ? "" : UNKNOWN_ARTIST) : itsArtist;
 }
 
 string Song::GetTitle() const
 {
-	return itsGetEmptyFields ? (itsTitle.empty() ? "" : itsTitle) : (itsTitle.empty() ? UNKNOWN_TITLE : itsTitle);
+	return itsTitle.empty() ? (itsGetEmptyFields ? "" : UNKNOWN_TITLE) : itsTitle;
 }
 
 string Song::GetAlbum() const
 {
-	return itsGetEmptyFields ? (itsAlbum.empty() ? "" : itsAlbum) : (itsAlbum.empty() ? UNKNOWN_ALBUM : itsAlbum);
+	return itsAlbum.empty() ? (itsGetEmptyFields ? "" : UNKNOWN_ALBUM) : itsAlbum;
 }
 
 string Song::GetTrack() const
 {
-	return itsGetEmptyFields ? (itsTrack.empty() ? "" : (StrToInt(itsTrack) < 10 && itsTrack[0] != '0' ? "0"+itsTrack : itsTrack)) : (itsTrack.empty() ? EMPTY_TAG : (StrToInt(itsTrack) < 10 && itsTrack[0] != '0' ? "0"+itsTrack : itsTrack));
+	return itsTrack.empty() ? (itsGetEmptyFields ? "" : EMPTY_TAG) : (StrToInt(itsTrack) < 10 && itsTrack[0] != '0' ? "0"+itsTrack : itsTrack);
 }
 
 string Song::GetYear() const
 {
-	return itsGetEmptyFields ? (itsYear.empty() ? "" : itsYear) : (itsYear.empty() ? EMPTY_TAG : itsYear);
+	return itsYear.empty() ? (itsGetEmptyFields ? "" : EMPTY_TAG) : itsYear;
 }
 
 string Song::GetGenre() const
 {
-	return itsGetEmptyFields ? (itsGenre.empty() ? "" : itsGenre) : (itsGenre.empty() ? EMPTY_TAG : itsGenre);
+	return itsGenre.empty() ? (itsGetEmptyFields ? "" : EMPTY_TAG) : itsGenre;
+}
+
+string Song::GetComposer() const
+{
+	return itsComposer.empty() ? (itsGetEmptyFields ? "" : EMPTY_TAG) : itsComposer;
+}
+
+string Song::GetPerformer() const
+{
+	return itsPerformer.empty() ? (itsGetEmptyFields ? "" : EMPTY_TAG) : itsPerformer;
+}
+
+string Song::GetDisc() const
+{
+	return itsDisc.empty() ? (itsGetEmptyFields ? "" : EMPTY_TAG) : itsDisc;
 }
 
 string Song::GetComment() const
 {
-	return itsGetEmptyFields ? (itsComment.empty() ? "" : itsComment) : (itsComment.empty() ? EMPTY_TAG : itsComment);
+	return itsComment.empty() ? (itsGetEmptyFields ? "" : EMPTY_TAG) : itsComment;
 }
 
 Song & Song::operator=(const Song &s)
