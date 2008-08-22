@@ -30,6 +30,7 @@
 
 extern ncmpcpp_config Config;
 
+bool Keypressed(int, const int *);
 bool SortSongsByTrack(Song *, Song *);
 bool CaseInsensitiveComparison(string, string);
 void WindowTitle(const string &);

@@ -61,6 +61,11 @@ extern string UNKNOWN_ARTIST;
 extern string UNKNOWN_TITLE;
 extern string UNKNOWN_ALBUM;
 
+bool Keypressed(int in, const int *key)
+{
+	return in == key[0] || in == key[1];
+}
+
 bool SortSongsByTrack(Song *a, Song *b)
 {
 	return StrToInt(a->GetTrack()) < StrToInt(b->GetTrack());

@@ -25,6 +25,55 @@
 
 #include "ncmpcpp.h"
 
+struct ncmpcpp_keys
+{
+	int Up[2];
+	int Down[2];
+	int PageUp[2];
+	int PageDown[2];
+	int Home[2];
+	int End[2];
+	int Space[2];
+	int Enter[2];
+	int Delete[2];
+	int VolumeUp[2];
+	int VolumeDown[2];
+	int ScreenSwitcher[2];
+	int Help[2];
+	int Playlist[2];
+	int Browser[2];
+	int SearchEngine[2];
+	int MediaLibrary[2];
+	int Stop[2];
+	int Pause[2];
+	int Next[2];
+	int Prev[2];
+	int SeekForward[2];
+	int SeekBackward[2];
+	int ToggleRepeat[2];
+	int ToggleRandom[2];
+	int Shuffle[2];
+	int ToggleCrossfade[2];
+	int SetCrossfade[2];
+	int UpdateDB[2];
+	int FindForward[2];
+	int FindBackward[2];
+	int NextFoundPosition[2];
+	int PrevFoundPosition[2];
+	int EditTags[2];
+	int GoToPosition[2];
+	int Lyrics[2];
+	int Clear[2];
+	int Crop[2];
+	int MvSongUp[2];
+	int MvSongDown[2];
+	int SavePlaylist[2];
+	int GoToNowPlaying[2];
+	int ToggleAutoCenter[2];
+	int GoToParentDir[2];
+	int Quit[2];
+};
+
 struct ncmpcpp_config
 {
 	string mpd_music_dir;
@@ -57,6 +106,7 @@ struct ncmpcpp_config
 	int message_delay_time;
 };
 
+void DefaultKeys(ncmpcpp_keys &);
 void DefaultConfiguration(ncmpcpp_config &);
 string GetLineValue(const string &);
 string IntoStr(COLOR);

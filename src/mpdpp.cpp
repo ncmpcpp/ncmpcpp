@@ -269,7 +269,7 @@ void MPDConnection::GetPlaylistChanges(long long id, SongList &v) const
 {
 	if (isConnected)
 	{
-		if (id == -1)
+		if (id < 0)
 		{
 			id = 0;
 			v.reserve(GetPlaylistLength());

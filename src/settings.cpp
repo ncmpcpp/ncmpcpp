@@ -24,6 +24,103 @@ const string config_file = home_folder + "/.ncmpcpprc";
 
 using std::ifstream;
 
+void DefaultKeys(ncmpcpp_keys &keys)
+{
+	const int null_key = 0x0fffffff;
+	
+	keys.Up[0] = KEY_UP;
+	keys.Down[0] = KEY_DOWN;
+	keys.PageUp[0] = KEY_PPAGE;
+	keys.PageDown[0] = KEY_NPAGE;
+	keys.Home[0] = KEY_HOME;
+	keys.End[0] = KEY_END;
+	keys.Space[0] = 32;
+	keys.Enter[0] = 10;
+	keys.Delete[0] = KEY_DC;
+	keys.VolumeUp[0] = KEY_RIGHT;
+	keys.VolumeDown[0] = KEY_LEFT;
+	keys.ScreenSwitcher[0] = 9;
+	keys.Help[0] = '1';
+	keys.Playlist[0] = '2';
+	keys.Browser[0] = '3';
+	keys.SearchEngine[0] = '4';
+	keys.MediaLibrary[0] = '5';
+	keys.Stop[0] = 's';
+	keys.Pause[0] = 'P';
+	keys.Next[0] = '>';
+	keys.Prev[0] = '<';
+	keys.SeekForward[0] = 'f';
+	keys.SeekBackward[0] = 'b';
+	keys.ToggleRepeat[0] = 'r';
+	keys.ToggleRandom[0] = 'z';
+	keys.Shuffle[0] = 'Z';
+	keys.ToggleCrossfade[0] = 'x';
+	keys.SetCrossfade[0] = 'X';
+	keys.UpdateDB[0] = 'u';
+	keys.FindForward[0] = '/';
+	keys.FindBackward[0] = '?';
+	keys.NextFoundPosition[0] = '.';
+	keys.PrevFoundPosition[0] = ',';
+	keys.EditTags[0] = 'e';
+	keys.GoToPosition[0] = 'g';
+	keys.Lyrics[0] = 'l';
+	keys.Clear[0] = 'c';
+	keys.Crop[0] = 'C';
+	keys.MvSongUp[0] = 'm';
+	keys.MvSongDown[0] = 'n';
+	keys.SavePlaylist[0] = 'S';
+	keys.GoToNowPlaying[0] = 'o';
+	keys.ToggleAutoCenter[0] = 'U';
+	keys.GoToParentDir[0] = 263;
+	keys.Quit[0] = 'q';
+	
+	keys.Up[1] = 'k';
+	keys.Down[1] = 'j';
+	keys.PageUp[1] = null_key;
+	keys.PageDown[1] = null_key;
+	keys.Home[1] = null_key;
+	keys.End[1] = null_key;
+	keys.Space[1] = null_key;
+	keys.Enter[1] = null_key;
+	keys.Delete[1] = 'd';
+	keys.VolumeUp[1] = '+';
+	keys.VolumeDown[1] = '-';
+	keys.ScreenSwitcher[1] = null_key;
+	keys.Help[1] = null_key;
+	keys.Playlist[1] = null_key;
+	keys.Browser[1] = null_key;
+	keys.SearchEngine[1] = null_key;
+	keys.MediaLibrary[1] = null_key;
+	keys.Stop[1] = null_key;
+	keys.Pause[1] = null_key;
+	keys.Next[1] = null_key;
+	keys.Prev[1] = null_key;
+	keys.SeekForward[1] = null_key;
+	keys.SeekBackward[1] = null_key;
+	keys.ToggleRepeat[1] = null_key;
+	keys.ToggleRandom[1] = null_key;
+	keys.Shuffle[1] = null_key;
+	keys.ToggleCrossfade[1] = null_key;
+	keys.SetCrossfade[1] = null_key;
+	keys.UpdateDB[1] = null_key;
+	keys.FindForward[1] = null_key;
+	keys.FindBackward[1] = null_key;
+	keys.NextFoundPosition[1] = null_key;
+	keys.PrevFoundPosition[1] = null_key;
+	keys.EditTags[1] = null_key;
+	keys.GoToPosition[1] = null_key;
+	keys.Lyrics[1] = null_key;
+	keys.Clear[1] = null_key;
+	keys.Crop[1] = null_key;
+	keys.MvSongUp[1] = null_key;
+	keys.MvSongDown[1] = null_key;
+	keys.SavePlaylist[1] = null_key;
+	keys.GoToNowPlaying[1] = null_key;
+	keys.ToggleAutoCenter[1] = null_key;
+	keys.GoToParentDir[1] = 127;
+	keys.Quit[1] = 'Q';
+}
+
 void DefaultConfiguration(ncmpcpp_config &conf)
 {
 	conf.mpd_music_dir = "/var/lib/mpd/music";
@@ -239,4 +336,5 @@ void ReadConfiguration(ncmpcpp_config &conf)
 		f.close();
 	}
 }
+
 
