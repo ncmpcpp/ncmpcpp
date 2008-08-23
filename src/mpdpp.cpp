@@ -22,7 +22,7 @@
 
 const string playlist_max_message = "playlist is at the max size";
 
-MPDConnection::MPDConnection() : isConnected(0), MPD_HOST("localhost"), MPD_PORT(6600), MPD_TIMEOUT(30), itsUpdater(0), itsErrorHandler(0), itsMaxPlaylistLength(-1)
+MPDConnection::MPDConnection() : isConnected(0), itsMaxPlaylistLength(-1), MPD_HOST("localhost"), MPD_PORT(6600), MPD_TIMEOUT(15), itsUpdater(0), itsErrorHandler(0)
 {
 	itsConnection = 0;
 	itsCurrentStats = 0;
@@ -61,7 +61,7 @@ bool MPDConnection::Connect()
 		return true;
 }
 
-bool MPDConnection::Connected()
+bool MPDConnection::Connected() const
 {
 	return isConnected;
 }
@@ -88,7 +88,7 @@ void MPDConnection::Disconnect()
 	ClearQueue();
 }
 
-void MPDConnection::SendPassword()
+void MPDConnection::SendPassword() const
 {
 	mpd_sendPasswordCommand(itsConnection, MPD_PASSWORD.c_str());
 	mpd_finishCommand(itsConnection);
@@ -475,7 +475,7 @@ bool MPDConnection::CommitQueue()
 	return retval;
 }
 
-void MPDConnection::DeletePlaylist(const string &name)
+void MPDConnection::DeletePlaylist(const string &name) const
 {
 	if (isConnected)
 	{
@@ -484,7 +484,7 @@ void MPDConnection::DeletePlaylist(const string &name)
 	}
 }
 
-bool MPDConnection::SavePlaylist(const string &name)
+bool MPDConnection::SavePlaylist(const string &name) const
 {
 	if (isConnected)
 	{

@@ -293,6 +293,11 @@ void NcmpcppStatusChanged(MPDConnection *Mpd, MPDStatusChanges changed, void *da
 		PlayerState mpd_state = Mpd->GetState();
 		switch (mpd_state)
 		{
+			case psUnknown:
+			{
+				player_state = "[unknown]";
+				break;
+			}
 			case psPlay:
 			{
 				player_state = "Playing: ";

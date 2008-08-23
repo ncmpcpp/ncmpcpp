@@ -1,0 +1,105 @@
+#####################################################
+## this is example key configuration file, copy it ##
+## to ~/.ncmpcpp_keys and set up your preferences  ##
+#####################################################
+##
+## Tips:
+## - it's possible to bind maximum two keys to a command
+## - keys can be defined with a character or a decimal value
+## - a command can be disabled by binding it to 0
+##
+## Note: First bind of volume_up/down
+## will be used to switch between columns
+## on media library screen.
+##
+#
+#key_up = 259 'k'
+#
+#key_down = 258 'j'
+#
+#key_page_up = 339
+#
+#key_page_down = 338
+#
+#key_home = 262
+#
+#key_end = 360
+#
+#key_space = 32
+#
+#key_enter = 10
+#
+#key_delete = 330 'd'
+#
+#key_volume_up = 261 '+'
+#
+#key_volume_down = 260 '-'
+#
+#key_screen_switcher = 9
+#
+#key_help = '1' 265
+#
+#key_playlist = '2' 266
+#
+#key_browser = '3' 267
+#
+#key_search_engine = '4' 268
+#
+#key_media_library = '5' 269
+#
+#key_stop = 's'
+#
+#key_pause = 'P'
+#
+#key_next = '>'
+#
+#key_prev = '<'
+#
+#key_seek_forward = 'f'
+#
+#key_seek_backward = 'b'
+#
+#key_toggle_repeat = 'r'
+#
+#key_toggle_random = 'z'
+#
+#key_shuffle = 'Z'
+#
+#key_toggle_crossfade = 'x'
+#
+#key_set_crossfade = 'X'
+#
+#key_update_db = 'u'
+#
+#key_find_forward = '/'
+#
+#key_find_backward = '?'
+#
+#key_next_found_position = '.'
+#
+#key_prev_found_position = ','
+#
+#key_edit_tags = 'e'
+#
+#key_go_to_position = 'g'
+#
+#key_lyrics = 'l'
+#
+#key_clear = 'c'
+#
+#key_crop = 'C'
+#
+#key_move_song_up = 'm'
+#
+#key_move_song_down = 'n'
+#
+#key_save_playlist = 'S'
+#
+#key_go_to_now_playing = 'o'
+#
+#key_toggle_auto_center = 'U'
+#
+#key_go_to_parent_dir = 263 127
+#
+#key_quit = 'q' 'Q'
+#

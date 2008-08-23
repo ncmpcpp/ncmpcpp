@@ -52,10 +52,10 @@
 
 #ifdef HAVE_TAGLIB_H
  const string tag_screen = "Tag editor";
- const string tag_screen_keydesc = "\te         : Edit song's tags\n";
+ const string tag_screen_keydesc = "Edit song's tags\n";
 #else
  const string tag_screen = "Tag info";
- const string tag_screen_keydesc = "\te         : Show song's tags\n";
+ const string tag_screen_keydesc = "Show song's tags\n";
 #endif
 
 ncmpcpp_config Config;
@@ -149,6 +149,7 @@ int main(int argc, char *argv[])
 	DefaultConfiguration(Config);
 	DefaultKeys(Key);
 	ReadConfiguration(Config);
+	ReadKeys(Key);
 	DefineEmptyTags();
 	
 	Mpd = new MPDConnection;
@@ -207,80 +208,80 @@ int main(int argc, char *argv[])
 	sLyrics = new Scrollpad(sHelp->EmptyClone());
 	
 	sHelp->Add("   [b]Keys - Movement\n -----------------------------------------[/b]\n");
-	sHelp->Add("\tUp k      : Move Cursor up\n");
-	sHelp->Add("\tDown j    : Move Cursor down\n");
-	sHelp->Add("\tPage up   : Page up\n");
-	sHelp->Add("\tPage down : Page down\n");
-	sHelp->Add("\tHome      : Home\n");
-	sHelp->Add("\tEnd       : End\n\n");
+	sHelp->Add(DisplayKeys(Key.Up) + "Move Cursor up\n");
+	sHelp->Add(DisplayKeys(Key.Down) + "Move Cursor down\n");
+	sHelp->Add(DisplayKeys(Key.PageUp) + "Page up\n");
+	sHelp->Add(DisplayKeys(Key.PageDown) + "Page down\n");
+	sHelp->Add(DisplayKeys(Key.Home) + "Home\n");
+	sHelp->Add(DisplayKeys(Key.End) + "End\n\n");
 	
-	sHelp->Add("\tTab       : Switch between playlist and browser\n");
-	sHelp->Add("\t1         : Help screen\n");
-	sHelp->Add("\t2         : Playlist screen\n");
-	sHelp->Add("\t3         : Browse screen\n");
-	sHelp->Add("\t4         : Search engine\n");
-	sHelp->Add("\t5         : Media library\n\n\n");
+	sHelp->Add(DisplayKeys(Key.ScreenSwitcher) + "Switch between playlist and browser\n");
+	sHelp->Add(DisplayKeys(Key.Help) + "Help screen\n");
+	sHelp->Add(DisplayKeys(Key.Playlist) + "Playlist screen\n");
+	sHelp->Add(DisplayKeys(Key.Browser) + "Browse screen\n");
+	sHelp->Add(DisplayKeys(Key.SearchEngine) + "Search engine\n");
+	sHelp->Add(DisplayKeys(Key.MediaLibrary) + "Media library\n\n\n");
 	
 	sHelp->Add("   [b]Keys - Global\n -----------------------------------------[/b]\n");
-	sHelp->Add("\ts         : Stop\n");
-	sHelp->Add("\tP         : Pause\n");
-	sHelp->Add("\t>         : Next track\n");
-	sHelp->Add("\t<         : Previous track\n");
-	sHelp->Add("\tf         : Seek forward\n");
-	sHelp->Add("\tb         : Seek backward\n");
-	sHelp->Add("\t- Left    : Decrease volume\n");
-	sHelp->Add("\t+ Right   : Increase volume\n\n");
+	sHelp->Add(DisplayKeys(Key.Stop) + "Stop\n");
+	sHelp->Add(DisplayKeys(Key.Pause) + "Pause\n");
+	sHelp->Add(DisplayKeys(Key.Next) + "Next track\n");
+	sHelp->Add(DisplayKeys(Key.Prev) + "Previous track\n");
+	sHelp->Add(DisplayKeys(Key.SeekForward) + "Seek forward\n");
+	sHelp->Add(DisplayKeys(Key.SeekBackward) + "Seek backward\n");
+	sHelp->Add(DisplayKeys(Key.VolumeDown) + "Decrease volume\n");
+	sHelp->Add(DisplayKeys(Key.VolumeUp) + "Increase volume\n\n");
 	
-	sHelp->Add("\tr         : Toggle repeat mode\n");
-	sHelp->Add("\tz         : Toggle random mode\n");
-	sHelp->Add("\tZ         : Shuffle playlist\n");
-	sHelp->Add("\tx         : Toggle crossfade mode\n");
-	sHelp->Add("\tX         : Set crossfade\n");
-	sHelp->Add("\tu         : Start a music database update\n\n");
+	sHelp->Add(DisplayKeys(Key.ToggleRepeat) + "Toggle repeat mode\n");
+	sHelp->Add(DisplayKeys(Key.ToggleRandom) + "Toggle random mode\n");
+	sHelp->Add(DisplayKeys(Key.Shuffle) + "Shuffle playlist\n");
+	sHelp->Add(DisplayKeys(Key.ToggleCrossfade) + "Toggle crossfade mode\n");
+	sHelp->Add(DisplayKeys(Key.SetCrossfade) + "Set crossfade\n");
+	sHelp->Add(DisplayKeys(Key.UpdateDB) + "Start a music database update\n\n");
 	
-	sHelp->Add("\t/         : Forward find\n");
-	sHelp->Add("\t?         : Backward find\n");
-	sHelp->Add("\t,         : Go to previous found position\n");
-	sHelp->Add("\t.         : Go to next found position\n");
-	sHelp->Add(tag_screen_keydesc);
-	sHelp->Add("\tg         : Go to chosen position in current song\n");
-	sHelp->Add("\tl         : Show/hide song's lyrics\n\n");
+	sHelp->Add(DisplayKeys(Key.FindForward) + "Forward find\n");
+	sHelp->Add(DisplayKeys(Key.FindBackward) + "Backward find\n");
+	sHelp->Add(DisplayKeys(Key.PrevFoundPosition) + "Go to previous found position\n");
+	sHelp->Add(DisplayKeys(Key.NextFoundPosition) + "Go to next found position\n");
+	sHelp->Add(DisplayKeys(Key.EditTags) + tag_screen_keydesc);
+	sHelp->Add(DisplayKeys(Key.GoToPosition) + "Go to chosen position in current song\n");
+	sHelp->Add(DisplayKeys(Key.Lyrics) + "Show/hide song's lyrics\n\n");
 	
-	sHelp->Add("\tQ q       :  Quit\n\n\n");
+	sHelp->Add(DisplayKeys(Key.Quit) + "Quit\n\n\n");
 	
 	sHelp->Add("   [b]Keys - Playlist screen\n -----------------------------------------[/b]\n");
-	sHelp->Add("\tEnter     : Play\n");
-	sHelp->Add("\tDelete d  : Delete song from playlist\n");
-	sHelp->Add("\tc         : Clear whole playlist\n");
-	sHelp->Add("\tC         : Clear playlist but hold currently playing song\n");
-	sHelp->Add("\tm         : Move song up\n");
-	sHelp->Add("\tn         : Move song down\n");
-	sHelp->Add("\tS         : Save playlist\n");
-	sHelp->Add("\to         : Go to currently playing position\n");
-	sHelp->Add("\tU         : Toggle auto center mode\n\n\n");
+	sHelp->Add(DisplayKeys(Key.Enter) + "Play\n");
+	sHelp->Add(DisplayKeys(Key.Delete) + "Delete song from playlist\n");
+	sHelp->Add(DisplayKeys(Key.Clear) + "Clear whole playlist\n");
+	sHelp->Add(DisplayKeys(Key.Crop) + "Clear playlist but hold currently playing song\n");
+	sHelp->Add(DisplayKeys(Key.MvSongUp) + "Move song up\n");
+	sHelp->Add(DisplayKeys(Key.MvSongDown) + "Move song down\n");
+	sHelp->Add(DisplayKeys(Key.SavePlaylist) + "Save playlist\n");
+	sHelp->Add(DisplayKeys(Key.GoToNowPlaying) + "Go to currently playing position\n");
+	sHelp->Add(DisplayKeys(Key.ToggleAutoCenter) + "Toggle auto center mode\n\n\n");
 	
 	sHelp->Add("   [b]Keys - Browse screen\n -----------------------------------------[/b]\n");
-	sHelp->Add("\tEnter     : Enter directory/Add item to playlist and play\n");
-	sHelp->Add("\tSpace     : Add item to playlist\n");
-	sHelp->Add("\tBackspace : Go to parent directory\n");
-	sHelp->Add("\tDelete d  : Delete playlist\n\n\n");
+	sHelp->Add(DisplayKeys(Key.Enter) + "Enter directory/Add item to playlist and play\n");
+	sHelp->Add(DisplayKeys(Key.Space) + "Add item to playlist\n");
+	sHelp->Add(DisplayKeys(Key.GoToParentDir) + "Go to parent directory\n");
+	sHelp->Add(DisplayKeys(Key.Delete) + "Delete playlist\n\n\n");
 	
 	sHelp->Add("   [b]Keys - Search engine\n -----------------------------------------[/b]\n");
-	sHelp->Add("\tEnter     : Change option/Add to playlist and play song\n");
-	sHelp->Add("\tSpace     : Add song to playlist\n\n\n");
+	sHelp->Add(DisplayKeys(Key.Enter) + "Change option/Add to playlist and play song\n");
+	sHelp->Add(DisplayKeys(Key.Space) + "Add song to playlist\n\n\n");
 	
 	sHelp->Add("   [b]Keys - Media library\n -----------------------------------------[/b]\n");
-	sHelp->Add("\tLeft      : Previous column\n");
-	sHelp->Add("\tRight     : Next column\n");
-	sHelp->Add("\tEnter     : Add to playlist and play song/album/artist's songs\n");
-	sHelp->Add("\tSpace     : Add to playlist song/album/artist's songs\n\n\n");
+	sHelp->Add(DisplayKeys(&Key.VolumeDown[0], 1) + "Previous column\n");
+	sHelp->Add(DisplayKeys(&Key.VolumeUp[0], 1) + "Next column\n");
+	sHelp->Add(DisplayKeys(Key.Enter) + "Add to playlist and play song/album/artist's songs\n");
+	sHelp->Add(DisplayKeys(Key.Space) + "Add to playlist song/album/artist's songs\n\n\n");
 	
 #	ifdef HAVE_TAGLIB_H
 	sHelp->Add("   [b]Keys - Tag editor\n -----------------------------------------[/b]\n");
-	sHelp->Add("\tEnter     : Change option\n");
+	sHelp->Add(DisplayKeys(Key.Enter) + "Change option\n");
 #	else
 	sHelp->Add("   [b]Keys - Tag info\n -----------------------------------------[/b]\n");
-	sHelp->Add("\tEnter     : Return\n");
+	sHelp->Add(DisplayKeys(Key.Enter) + "Return\n");
 #	endif
 	
 	if (Config.header_visibility)
@@ -1245,7 +1246,7 @@ int main(int argc, char *argv[])
 			if (playlist_name.find("/") != string::npos)
 			{
 				ShowMessage("Playlist name cannot contain slashes!");
-				break;
+				continue;
 			}
 			if (!playlist_name.empty())
 			{
@@ -1487,7 +1488,7 @@ int main(int argc, char *argv[])
 				UNLOCK_STATUSBAR;
 				timer = time(NULL);
 				if (findme.empty())
-					break;
+					continue;
 				transform(findme.begin(), findme.end(), findme.begin(), tolower);
 				
 				if (Keypressed(input, Key.FindForward)) // forward

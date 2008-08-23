@@ -76,14 +76,14 @@ class MPDConnection
 		~MPDConnection();
 		
 		bool Connect();
-		bool Connected();
+		bool Connected() const;
 		void Disconnect();
 		
 		void SetHostname(string hostname) { MPD_HOST = hostname; }
 		void SetPort(int port) { MPD_PORT = port; }
 		void SetTimeout(int timeout) { MPD_TIMEOUT = timeout; }
 		void SetPassword(string password) { MPD_PASSWORD = password; }
-		void SendPassword();
+		void SendPassword() const;
 		
 		void SetStatusUpdater(StatusUpdater, void *);
 		void SetErrorHandler(ErrorHandler, void *);
@@ -112,7 +112,7 @@ class MPDConnection
 		long long GetOldPlaylistID() const { return isConnected && itsOldStatus ? itsOldStatus->playlist : -1; }
 		int GetElapsedTime() const { return isConnected && itsCurrentStatus ? itsCurrentStatus->elapsedTime : -1; }
 		
-		unsigned int GetMaxPlaylistLength() { return itsMaxPlaylistLength; }
+		unsigned int GetMaxPlaylistLength() const { return itsMaxPlaylistLength; }
 		int GetPlaylistLength() const { return isConnected && itsCurrentStatus ? itsCurrentStatus->playlistLength : 0; }
 		void GetPlaylistChanges(long long, SongList &) const;
 		
@@ -136,8 +136,8 @@ class MPDConnection
 		void QueueDeleteSongId(int);
 		bool CommitQueue();
 		
-		void DeletePlaylist(const string &);
-		bool SavePlaylist(const string &);
+		void DeletePlaylist(const string &) const;
+		bool SavePlaylist(const string &) const;
 		
 		void StartSearch(bool) const;
 		void AddSearch(mpd_TagItems, const string &) const;
@@ -151,10 +151,12 @@ class MPDConnection
 	private:
 		int CheckForErrors();
 		void ClearQueue();
-		string itsLastErrorMessage;
 		
 		mpd_Connection *itsConnection;
 		bool isConnected;
+		
+		string itsLastErrorMessage;
+		unsigned int itsMaxPlaylistLength;
 		
 		string MPD_HOST;
 		int MPD_PORT;
@@ -172,7 +174,6 @@ class MPDConnection
 		void *itsErrorHandlerUserdata;
 		
 		std::vector<QueueCommand *> itsQueue;
-		unsigned int itsMaxPlaylistLength;
 };
 
 #endif

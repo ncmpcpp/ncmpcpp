@@ -1,7 +1,7 @@
-###########################################################
-## this is example configuration file, copy it to your   ##
-## home folder as .ncmpcpprc and set up your preferences ##
-###########################################################
+#################################################
+## this is example configuration file, copy it ##
+## to ~/.ncmpcpprc and set up your preferences ##
+#################################################
 #
 ##### connection settings #####
 #

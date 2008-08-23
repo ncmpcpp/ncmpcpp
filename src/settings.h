@@ -25,6 +25,8 @@
 
 #include "ncmpcpp.h"
 
+const int null_key = 0x0fffffff;
+
 struct ncmpcpp_keys
 {
 	int Up[2];
@@ -108,9 +110,11 @@ struct ncmpcpp_config
 
 void DefaultKeys(ncmpcpp_keys &);
 void DefaultConfiguration(ncmpcpp_config &);
+void GetKeys(string, int *);
 string GetLineValue(const string &);
 string IntoStr(COLOR);
 COLOR IntoColor(const string &);
+void ReadKeys(ncmpcpp_keys &);
 void ReadConfiguration(ncmpcpp_config &);
 
 #endif

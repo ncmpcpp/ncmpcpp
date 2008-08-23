@@ -21,13 +21,12 @@
 #include "settings.h"
 
 const string config_file = home_folder + "/.ncmpcpprc";
+const string keys_config_file = home_folder + "/.ncmpcpp_keys";
 
 using std::ifstream;
 
 void DefaultKeys(ncmpcpp_keys &keys)
 {
-	const int null_key = 0x0fffffff;
-	
 	keys.Up[0] = KEY_UP;
 	keys.Down[0] = KEY_DOWN;
 	keys.PageUp[0] = KEY_PPAGE;
@@ -150,6 +149,29 @@ void DefaultConfiguration(ncmpcpp_config &conf)
 	conf.message_delay_time = 4;
 }
 
+void GetKeys(string line, int *key)
+{
+	int i = line.find("=")+1;
+	line = line.substr(i, line.length()-i);
+	i = 0;
+	if (line[i] == ' ')
+		while (line[++i] == ' ');
+	line = line.substr(i, line.length()-i);
+	i = line.find(" ");
+	string one;
+	string two;
+	if (i != string::npos)
+	{
+		one = line.substr(0, i);
+		i++;
+		two = line.substr(i, line.length()-i);
+	}
+	else
+		one = line;
+	key[0] = !one.empty() && one[0] == '\'' ? one[1] : (atoi(one.c_str()) == 0 ? null_key : atoi(one.c_str()));
+	key[1] = !two.empty() && two[0] == '\'' ? two[1] : (atoi(two.c_str()) == 0 ? null_key : atoi(two.c_str()));
+}
+
 string GetConfigLineValue(const string &line)
 {
 	int i = 0;
@@ -176,19 +198,19 @@ string IntoStr(COLOR color)
 	
 	if (color == clBlack)
 		result = "black";
-	if (color == clRed)
+	else if (color == clRed)
 		result = "red";
-	if (color == clGreen)
+	else if (color == clGreen)
 		result = "green";
-	if (color == clYellow)
+	else if (color == clYellow)
 		result = "yellow";
-	if (color == clBlue)
+	else if (color == clBlue)
 		result = "blue";
-	if (color == clMagenta)
+	else if (color == clMagenta)
 		result = "magenta";
-	if (color == clCyan)
+	else if (color == clCyan)
 		result = "cyan";
-	if (color == clWhite)
+	else if (color == clWhite)
 		result = "white";
 	
 	return result;
@@ -200,22 +222,133 @@ COLOR IntoColor(const string &color)
 	
 	if (color == "black")
 		result = clBlack;
-	if (color == "red")
+	else if (color == "red")
 		result = clRed;
-	if (color == "green")
+	else if (color == "green")
 		result = clGreen;
-	if (color == "yellow")
+	else if (color == "yellow")
 		result = clYellow;
-	if (color == "blue")
+	else if (color == "blue")
 		result = clBlue;
-	if (color == "magenta")
+	else if (color == "magenta")
 		result = clMagenta;
-	if (color == "cyan")
+	else if (color == "cyan")
 		result = clCyan;
-	if (color == "white")
+	else if (color == "white")
 		result = clWhite;
 	
 	return result;
+}
+
+void ReadKeys(ncmpcpp_keys &keys)
+{
+	ifstream f(keys_config_file.c_str());
+	
+	string key_line;
+	vector<string> keys_sets;
+	
+	if (f.is_open())
+	{
+		while (!f.eof())
+		{
+			getline(f, key_line);
+			if (!key_line.empty() && key_line[0] != '#')
+				keys_sets.push_back(key_line);
+		}
+		for (vector<string>::const_iterator it = keys_sets.begin(); it != keys_sets.end(); it++)
+		{
+			if (it->find("key_up ") != string::npos)
+				GetKeys(*it, keys.Up);
+			else if (it->find("key_down ") != string::npos)
+				GetKeys(*it, keys.Down);
+			else if (it->find("key_page_up ") != string::npos)
+				GetKeys(*it, keys.PageUp);
+			else if (it->find("key_page_down ") != string::npos)
+				GetKeys(*it, keys.PageDown);
+			else if (it->find("key_home ") != string::npos)
+				GetKeys(*it, keys.Home);
+			else if (it->find("key_end ") != string::npos)
+				GetKeys(*it, keys.End);
+			else if (it->find("key_space ") != string::npos)
+				GetKeys(*it, keys.Space);
+			else if (it->find("key_enter ") != string::npos)
+				GetKeys(*it, keys.Enter);
+			else if (it->find("key_delete ") != string::npos)
+				GetKeys(*it, keys.Delete);
+			else if (it->find("key_volume_up ") != string::npos)
+				GetKeys(*it, keys.VolumeUp);
+			else if (it->find("key_volume_down ") != string::npos)
+				GetKeys(*it, keys.VolumeDown);
+			else if (it->find("key_screen_switcher ") != string::npos)
+				GetKeys(*it, keys.ScreenSwitcher);
+			else if (it->find("key_help ") != string::npos)
+				GetKeys(*it, keys.Help);
+			else if (it->find("key_playlist ") != string::npos)
+				GetKeys(*it, keys.Playlist);
+			else if (it->find("key_browser ") != string::npos)
+				GetKeys(*it, keys.Browser);
+			else if (it->find("key_search_engine ") != string::npos)
+				GetKeys(*it, keys.SearchEngine);
+			else if (it->find("key_media_library ") != string::npos)
+				GetKeys(*it, keys.MediaLibrary);
+			else if (it->find("key_stop ") != string::npos)
+				GetKeys(*it, keys.Stop);
+			else if (it->find("key_pause ") != string::npos)
+				GetKeys(*it, keys.Pause);
+			else if (it->find("key_next ") != string::npos)
+				GetKeys(*it, keys.Next);
+			else if (it->find("key_prev ") != string::npos)
+				GetKeys(*it, keys.Prev);
+			else if (it->find("key_seek_forward ") != string::npos)
+				GetKeys(*it, keys.SeekForward);
+			else if (it->find("key_seek_backward ") != string::npos)
+				GetKeys(*it, keys.SeekBackward);
+			else if (it->find("key_toggle_repeat ") != string::npos)
+				GetKeys(*it, keys.ToggleRepeat);
+			else if (it->find("key_toggle_random ") != string::npos)
+				GetKeys(*it, keys.ToggleRandom);
+			else if (it->find("key_shuffle ") != string::npos)
+				GetKeys(*it, keys.Shuffle);
+			else if (it->find("key_toggle_crossfade ") != string::npos)
+				GetKeys(*it, keys.ToggleCrossfade);
+			else if (it->find("key_set_crossfade ") != string::npos)
+				GetKeys(*it, keys.SetCrossfade);
+			else if (it->find("key_update_db ") != string::npos)
+				GetKeys(*it, keys.UpdateDB);
+			else if (it->find("key_find_forward ") != string::npos)
+				GetKeys(*it, keys.FindForward);
+			else if (it->find("key_find_backward ") != string::npos)
+				GetKeys(*it, keys.FindBackward);
+			else if (it->find("key_next_found_position ") != string::npos)
+				GetKeys(*it, keys.NextFoundPosition);
+			else if (it->find("key_prev_found_position ") != string::npos)
+				GetKeys(*it, keys.PrevFoundPosition);
+			else if (it->find("key_edit_tags ") != string::npos)
+				GetKeys(*it, keys.EditTags);
+			else if (it->find("key_go_to_position ") != string::npos)
+				GetKeys(*it, keys.GoToPosition);
+			else if (it->find("key_lyrics ") != string::npos)
+				GetKeys(*it, keys.Lyrics);
+			else if (it->find("key_clear ") != string::npos)
+				GetKeys(*it, keys.Clear);
+			else if (it->find("key_crop ") != string::npos)
+				GetKeys(*it, keys.Crop);
+			else if (it->find("key_move_song_up ") != string::npos)
+				GetKeys(*it, keys.MvSongUp);
+			else if (it->find("key_move_song_down ") != string::npos)
+				GetKeys(*it, keys.MvSongDown);
+			else if (it->find("key_save_playlist ") != string::npos)
+				GetKeys(*it, keys.SavePlaylist);
+			else if (it->find("key_go_to_now_playing ") != string::npos)
+				GetKeys(*it, keys.GoToNowPlaying);
+			else if (it->find("key_toggle_auto_center ") != string::npos)
+				GetKeys(*it, keys.ToggleAutoCenter);
+			else if (it->find("key_go_to_parent_dir ") != string::npos)
+				GetKeys(*it, keys.GoToParentDir);
+			else if (it->find("key_quit ") != string::npos)
+				GetKeys(*it, keys.Quit);
+		}
+	}
 }
 
 void ReadConfiguration(ncmpcpp_config &conf)
