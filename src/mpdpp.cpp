@@ -52,7 +52,8 @@ bool MPDConnection::Connect()
 	{
 		itsConnection = mpd_newConnection(MPD_HOST.c_str(), MPD_PORT, MPD_TIMEOUT);
 		isConnected = 1;
-		CheckForErrors();
+		if (CheckForErrors())
+			return false;
 		if (!MPD_PASSWORD.empty())
 			SendPassword();
 		return !CheckForErrors();
