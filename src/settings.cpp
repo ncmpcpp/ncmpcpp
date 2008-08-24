@@ -67,6 +67,7 @@ void DefaultKeys(ncmpcpp_keys &keys)
 	keys.Crop[0] = 'C';
 	keys.MvSongUp[0] = 'm';
 	keys.MvSongDown[0] = 'n';
+	keys.Add[0] = 'a';
 	keys.SavePlaylist[0] = 'S';
 	keys.GoToNowPlaying[0] = 'o';
 	keys.ToggleAutoCenter[0] = 'U';
@@ -113,6 +114,7 @@ void DefaultKeys(ncmpcpp_keys &keys)
 	keys.Crop[1] = null_key;
 	keys.MvSongUp[1] = null_key;
 	keys.MvSongDown[1] = null_key;
+	keys.Add[1] = null_key;
 	keys.SavePlaylist[1] = null_key;
 	keys.GoToNowPlaying[1] = null_key;
 	keys.ToggleAutoCenter[1] = null_key;
@@ -123,8 +125,8 @@ void DefaultKeys(ncmpcpp_keys &keys)
 void DefaultConfiguration(ncmpcpp_config &conf)
 {
 	conf.mpd_music_dir = "/var/lib/mpd/music";
-	conf.song_list_format = "[green](%l)[/green] {%a - }{%t}|{[white]%f[/white]}";
-	conf.song_status_format = "(%l) {%a - }{%t}|{%f}";
+	conf.song_list_format = "{[green](%l)[/green] }{%a - }{%t}|{[white]%f[/white]}";
+	conf.song_status_format = "{(%l) }{%a - }{%t}|{%f}";
 	conf.song_window_title_format = "{%a - }{%t}|{%f}";
 	conf.song_library_format = "{%n - }{%t}|{%f}";
 	conf.browser_playlist_prefix = "[red](playlist)[/red] ";
@@ -337,6 +339,8 @@ void ReadKeys(ncmpcpp_keys &keys)
 				GetKeys(*it, keys.MvSongUp);
 			else if (it->find("key_move_song_down ") != string::npos)
 				GetKeys(*it, keys.MvSongDown);
+			else if (it->find("key_add ") != string::npos)
+				GetKeys(*it, keys.Add);
 			else if (it->find("key_save_playlist ") != string::npos)
 				GetKeys(*it, keys.SavePlaylist);
 			else if (it->find("key_go_to_now_playing ") != string::npos)

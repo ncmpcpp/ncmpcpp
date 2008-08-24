@@ -153,6 +153,11 @@ string TotalPlaylistLength()
 	for (SongList::const_iterator it = vPlaylist.begin(); it != vPlaylist.end(); it++)
 		length += (*it)->GetTotalLength();
 	
+	if (!length)
+		return result;
+	
+	result += ", length: ";
+	
 	int years = length/YEAR;
 	if (years)
 	{

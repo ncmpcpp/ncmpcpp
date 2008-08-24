@@ -225,7 +225,7 @@ void NcmpcppStatusChanged(MPDConnection *Mpd, MPDStatusChanges changed, void *da
 			ShowMessage("Cleared playlist!");
 		}
 		else
-			playlist_stats = "(" + IntoStr(vPlaylist.size()) + (vPlaylist.size() == 1 ? " song" : " songs") + ", length: " + TotalPlaylistLength() + ")";
+			playlist_stats = "(" + IntoStr(vPlaylist.size()) + (vPlaylist.size() == 1 ? " item" : " items") + TotalPlaylistLength() + ")";
 		
 		if (current_screen == csBrowser)
 		{
@@ -357,7 +357,7 @@ void NcmpcppStatusChanged(MPDConnection *Mpd, MPDStatusChanges changed, void *da
 			if (!block_statusbar_update && Config.statusbar_visibility)
 			{
 				string tracklength;
-				if (s.GetTotalLength() > 0)
+				if (s.GetTotalLength())
 					tracklength = " [" + ShowTime(elapsed) + "/" + s.GetLength() + "]";
 				else
 					tracklength = " [" + ShowTime(elapsed) + "]";
@@ -390,12 +390,15 @@ void NcmpcppStatusChanged(MPDConnection *Mpd, MPDStatusChanges changed, void *da
 			}
 			if (!block_progressbar_update)
 			{
-				double progressbar_size = (double)elapsed/(s.GetMinutesLength()*60+s.GetSecondsLength());
+				double progressbar_size = (double)elapsed/(s.GetTotalLength());
 				int howlong = wFooter->GetWidth()*progressbar_size;
 				wFooter->SetColor(Config.progressbar_color);
 				mvwhline(wFooter->RawWin(), 0, 0, 0, wFooter->GetWidth());
-				mvwhline(wFooter->RawWin(), 0, 0, '=',howlong);
-				mvwaddch(wFooter->RawWin(), 0, howlong, '>');
+				if (s.GetTotalLength())
+				{
+					mvwhline(wFooter->RawWin(), 0, 0, '=',howlong);
+					mvwaddch(wFooter->RawWin(), 0, howlong, '>');
+				}
 				wFooter->SetColor(Config.statusbar_color);
 			}
 		}

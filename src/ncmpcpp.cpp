@@ -256,6 +256,7 @@ int main(int argc, char *argv[])
 	sHelp->Add(DisplayKeys(Key.Crop) + "Clear playlist but hold currently playing song\n");
 	sHelp->Add(DisplayKeys(Key.MvSongUp) + "Move song up\n");
 	sHelp->Add(DisplayKeys(Key.MvSongDown) + "Move song down\n");
+	sHelp->Add(DisplayKeys(Key.Add) + "Add url/file/directory to playlist\n");
 	sHelp->Add(DisplayKeys(Key.SavePlaylist) + "Save playlist\n");
 	sHelp->Add(DisplayKeys(Key.GoToNowPlaying) + "Go to currently playing position\n");
 	sHelp->Add(DisplayKeys(Key.ToggleAutoCenter) + "Toggle auto center mode\n\n\n");
@@ -1316,11 +1317,41 @@ int main(int argc, char *argv[])
 				mPlaylist->Go(DOWN);
 			}
 		}
+		else if (Keypressed(input, Key.Add))
+		{
+			LOCK_STATUSBAR;
+			wFooter->WriteXY(0, Config.statusbar_visibility, "Add: ", 1);
+			string path = wFooter->GetString("");
+			UNLOCK_STATUSBAR;
+			SongList list;
+			Mpd->GetDirectoryRecursive(path, list);
+			if (!list.empty())
+			{
+				for (SongList::const_iterator it = list.begin(); it != list.end(); it++)
+					Mpd->QueueAddSong(**it);
+				if (Mpd->CommitQueue())
+				{
+					Song *s = vPlaylist[vPlaylist.size()-list.size()];
+					if (s->GetHash() != list[0]->GetHash())
+						ShowMessage(message_part_of_songs_added);
+				}
+			}
+			else
+			{
+				if (!path.empty())
+					Mpd->AddSong(path);
+			}
+			FreeSongList(list);
+		}
 		else if (Keypressed(input, Key.SeekForward) || Keypressed(input, Key.SeekBackward))
 		{
 			if (now_playing < 0)
 				continue;
-			
+			if (!vPlaylist[now_playing]->GetTotalLength())
+			{
+				ShowMessage("Unknown item length!");
+				continue;
+			}
 			block_progressbar_update = 1;
 			LOCK_STATUSBAR;
 			
@@ -1442,12 +1473,15 @@ int main(int argc, char *argv[])
 		{
 			if (now_playing < 0)
 				continue;
-			int newpos = 0;
-			string position;
+			if (!vPlaylist[now_playing]->GetTotalLength())
+			{
+				ShowMessage("Unknown item length!");
+				continue;
+			}
 			LOCK_STATUSBAR;
 			wFooter->WriteXY(0, Config.statusbar_visibility, "Position to go (in %): ", 1);
-			position = wFooter->GetString(3, TraceMpdStatus);
-			newpos = atoi(position.c_str());
+			string position = wFooter->GetString(3, TraceMpdStatus);
+			int newpos = atoi(position.c_str());
 			if (newpos > 0 && newpos < 100 && !position.empty())
 				Mpd->Seek(vPlaylist[now_playing]->GetTotalLength()*newpos/100.0);
 			UNLOCK_STATUSBAR;

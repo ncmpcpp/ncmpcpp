@@ -56,7 +56,7 @@ class Song
 		string GetComment() const;
 		string GetLength() const;
 		long long GetHash() const { return itsHash; }
-		int GetTotalLength() const { return itsMinutesLength*60+itsSecondsLength; }
+		int GetTotalLength() const { return itsSecondsLength < 0 ? 0 : itsMinutesLength*60+itsSecondsLength; }
 		int GetMinutesLength() const { return itsMinutesLength; }
 		int GetSecondsLength() const { return itsSecondsLength; }
 		int GetPosition() const { return itsPosition; }

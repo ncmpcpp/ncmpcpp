@@ -93,6 +93,8 @@
 #
 #key_move_song_down = 'n'
 #
+#key_add = 'a'
+#
 #key_save_playlist = 'S'
 #
 #key_go_to_now_playing = 'o'

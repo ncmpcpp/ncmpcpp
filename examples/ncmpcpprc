@@ -60,9 +60,9 @@
 ## - white
 ##
 #
-#song_list_format = "[green](%l)[/green] {%a - }{%t}|{[white]%f[/white]}"
+#song_list_format = "{[green](%l)[/green] }{%a - }{%t}|{[white]%f[/white]}"
 #
-#song_status_format = "(%l) {%a - }{%t}|{%f}"
+#song_status_format = "{(%l) }{%a - }{%t}|{%f}"
 #
 #song_window_title_format = "{%a - }{%t}|{%f}"
 #
