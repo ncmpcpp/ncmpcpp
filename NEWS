@@ -1,0 +1,34 @@
+ncmpcpp-0.2
+
+ + libmpd dependency dropped
+ + pkgconfig is not needed anymore
+ + ncmpcpp now shows more info if it cannot connect to mpd
+ + proper handling for mpd password added
+ + if ncmpcpp lose connection to mpd it'll try to reconnect
+ + playlist status added
+ + new screen - lyrics
+ + switching between playlist and browser with tab key added
+ + alternate movement keys added (j and k keys)
+ + auto center mode added
+ + new option - crossfade can be set to any value now (X key)
+ + new option - going to parent directory in browser using backspace key
+ + issue with backspace key fixed
+ + sorting items in browser is case insensitive now
+ + many fixes and improvements
+
+
+ncmpcpp-0.1.2
+
+ + parts of interface are hideable now
+ + new screen - media library
+ + new option - crop (it removes all songs from playlist except the playing one)
+ + many fixes and optimizations
+
+
+ncmpcpp-0.1.1
+
+ + add example configuration file
+ + configure.in now works as expected
+ + taglib dependency is optional now
+ + more customizable options
+

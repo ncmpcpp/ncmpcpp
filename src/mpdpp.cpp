@@ -533,6 +533,15 @@ void MPDConnection::StartSearch(bool exact_match) const
 		mpd_startSearch(itsConnection, exact_match);
 }
 
+void MPDConnection::StartFieldSearch(mpd_TagItems item)
+{
+	if (isConnected)
+	{
+		itsSearchedField = item;
+		mpd_startFieldSearch(itsConnection, item);
+	}
+}
+
 void MPDConnection::AddSearch(mpd_TagItems item, const string &str) const
 {
 	if (isConnected)
@@ -553,6 +562,23 @@ void MPDConnection::CommitSearch(SongList &v) const
 				v.push_back(s);
 			}
 			mpd_freeInfoEntity(item);
+		}
+		mpd_finishCommand(itsConnection);
+	}
+}
+
+void MPDConnection::CommitSearch(TagList &v) const
+{
+	if (isConnected)
+	{
+		mpd_commitSearch(itsConnection);
+		char *tag = NULL;
+		while ((tag = mpd_getNextTag(itsConnection, itsSearchedField)) != NULL)
+		{
+			string s_tag = tag;
+			if (v.empty() || v.back() != s_tag)
+				v.push_back(s_tag);
+			delete [] tag;
 		}
 		mpd_finishCommand(itsConnection);
 	}
@@ -612,7 +638,7 @@ int MPDConnection::CheckForErrors()
 {
 	int errid = 0;
 	if (itsConnection->error)
-	{	
+	{
 		if (itsConnection->error == MPD_ERROR_ACK)
 		{
 			// this is to avoid setting too small max size as we check it before fetching current status

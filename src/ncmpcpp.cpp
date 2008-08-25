@@ -1739,7 +1739,7 @@ int main(int argc, char *argv[])
 			{
 				found_pos = 0;
 				vFoundPositions.clear();
-					
+				
 				if (mLibArtists->Empty())
 				{
 					Mpd->GetArtists(vArtists);
@@ -1747,13 +1747,13 @@ int main(int argc, char *argv[])
 					for (TagList::const_iterator it = vArtists.begin(); it != vArtists.end(); it++)
 						mLibArtists->AddOption(*it);
 				}
-					
+				
 				mLibArtists->HighlightColor(Config.library_active_column_color);
 				mLibAlbums->HighlightColor(Config.main_highlight_color);
 				mLibSongs->HighlightColor(Config.main_highlight_color);
-					
+				
 				wCurrent->Hide();
-					
+				
 				REFRESH_MEDIA_LIBRARY_SCREEN;
 				
 				wCurrent = mLibArtists;

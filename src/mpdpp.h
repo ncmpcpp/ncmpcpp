@@ -140,8 +140,10 @@ class MPDConnection
 		bool SavePlaylist(const string &) const;
 		
 		void StartSearch(bool) const;
+		void StartFieldSearch(mpd_TagItems);
 		void AddSearch(mpd_TagItems, const string &) const;
-		void CommitSearch(SongList &v) const;
+		void CommitSearch(SongList &) const;
+		void CommitSearch(TagList &) const;
 		
 		void GetArtists(TagList &) const;
 		void GetAlbums(string, TagList &) const;
@@ -173,6 +175,7 @@ class MPDConnection
 		ErrorHandler itsErrorHandler;
 		void *itsErrorHandlerUserdata;
 		
+		mpd_TagItems itsSearchedField;
 		std::vector<QueueCommand *> itsQueue;
 };
 
