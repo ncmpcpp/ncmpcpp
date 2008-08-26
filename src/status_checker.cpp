@@ -201,16 +201,10 @@ void NcmpcppStatusChanged(MPDConnection *Mpd, MPDStatusChanges changed, void *da
 				
 				for (SongList::iterator it = vPlaylist.begin(); it != vPlaylist.end(); it++, i++)
 				{
-					
-					(*j)->GetEmptyFields(1);
-					(*it)->GetEmptyFields(1);
 					if (**it != **j)
 					{
-						(*it)->GetEmptyFields(0);
-						(*j)->GetEmptyFields(0);
-						Song *s = new Song(**j);
-						**it = *s;
-						mPlaylist->UpdateOption(i, DisplaySong(*s));
+						**it = **j;
+						mPlaylist->UpdateOption(i, DisplaySong(**it));
 					}
 					j++;
 				}

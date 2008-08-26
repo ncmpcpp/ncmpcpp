@@ -200,6 +200,9 @@ Song & Song::operator=(const Song &s)
 	itsTrack = s.itsTrack;
 	itsYear = s.itsYear;
 	itsGenre = s.itsGenre;
+	itsComposer = s.itsComposer;
+	itsPerformer = s.itsPerformer;
+	itsDisc = s.itsDisc;
 	itsComment = s.itsComment;
 	itsHash = s.itsHash;
 	itsMinutesLength = s.itsMinutesLength;
@@ -212,12 +215,12 @@ Song & Song::operator=(const Song &s)
 
 bool Song::operator==(const Song &s) const
 {
-	return itsFile == s.itsFile && itsArtist == s.itsArtist && itsTitle == s.itsTitle && itsAlbum == s.itsAlbum && itsTrack == s.itsTrack && itsYear == s.itsYear && itsGenre == s.itsGenre && itsComment == s.itsComment && itsHash == s.itsHash && itsMinutesLength && s.itsMinutesLength && itsSecondsLength == s.itsSecondsLength && itsPosition == s.itsPosition && itsID == s.itsID;
+	return itsFile == s.itsFile && itsArtist == s.itsArtist && itsTitle == s.itsTitle && itsAlbum == s.itsAlbum && itsTrack == s.itsTrack && itsYear == s.itsYear && itsGenre == s.itsGenre && itsComposer == s.itsComposer && itsPerformer == s.itsPerformer && itsDisc == s.itsDisc && itsComment == s.itsComment && itsHash == s.itsHash && itsMinutesLength && s.itsMinutesLength && itsSecondsLength == s.itsSecondsLength && itsPosition == s.itsPosition && itsID == s.itsID;
 }
 
 bool Song::operator!=(const Song &s) const
 {
-	return itsFile != s.itsFile || itsArtist != s.itsArtist || itsTitle != s.itsTitle || itsAlbum != s.itsAlbum || itsTrack != s.itsTrack || itsYear != s.itsYear || itsGenre != s.itsGenre || itsComment != s.itsComment || itsHash != s.itsHash || itsMinutesLength || s.itsMinutesLength || itsSecondsLength != s.itsSecondsLength || itsPosition != s.itsPosition || itsID != s.itsID;
+	return itsFile != s.itsFile || itsArtist != s.itsArtist || itsTitle != s.itsTitle || itsAlbum != s.itsAlbum || itsTrack != s.itsTrack || itsYear != s.itsYear || itsGenre != s.itsGenre || itsComposer != s.itsComposer || itsPerformer != s.itsPerformer || itsDisc != s.itsDisc || itsComment != s.itsComment || itsHash != s.itsHash || itsMinutesLength != s.itsMinutesLength || itsSecondsLength != s.itsSecondsLength || itsPosition != s.itsPosition || itsID != s.itsID;
 }
 
 bool Song::operator<(const Song &s) const
