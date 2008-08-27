@@ -327,7 +327,7 @@ void NcmpcppStatusChanged(MPDConnection *Mpd, MPDStatusChanges changed, void *da
 		{
 			if (!mPlaylist->Empty())
 			{
-				if (Config.repeat_one_mode && repeat_one_allowed && old_playing+1 == now_playing)
+				if (Config.repeat_one_mode && repeat_one_allowed && (old_playing+1 == now_playing || old_playing-vPlaylist.size()+1 == now_playing))
 				{
 					std::swap<int>(now_playing,old_playing);
 					Mpd->Play(now_playing);
