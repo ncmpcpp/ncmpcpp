@@ -327,7 +327,7 @@ void NcmpcppStatusChanged(MPDConnection *Mpd, MPDStatusChanges changed, void *da
 		{
 			if (!mPlaylist->Empty())
 			{
-				if (Config.repeat_one_mode && repeat_one_allowed && (old_playing+1 == now_playing || old_playing-vPlaylist.size()+1 == now_playing))
+				if (Config.repeat_one_mode && repeat_one_allowed && (old_playing+1 == now_playing || !now_playing))
 				{
 					std::swap<int>(now_playing,old_playing);
 					Mpd->Play(now_playing);
@@ -357,7 +357,7 @@ void NcmpcppStatusChanged(MPDConnection *Mpd, MPDStatusChanges changed, void *da
 			int elapsed = Mpd->GetElapsedTime();
 			
 			// 'repeat one' mode check - be sure that we deal with item with known length
-			if (Mpd->GetCurrentSong().GetTotalLength() && elapsed == Mpd->GetCurrentSong().GetTotalLength())
+			if (Mpd->GetCurrentSong().GetTotalLength() && elapsed == Mpd->GetCurrentSong().GetTotalLength()-1)
 				repeat_one_allowed = 1;
 			
 			if (!block_statusbar_update && Config.statusbar_visibility)

@@ -1322,7 +1322,7 @@ int main(int argc, char *argv[])
 		{
 			LOCK_STATUSBAR;
 			wFooter->WriteXY(0, Config.statusbar_visibility, "Add: ", 1);
-			string path = wFooter->GetString("");
+			string path = wFooter->GetString("", TraceMpdStatus);
 			UNLOCK_STATUSBAR;
 			if (!path.empty())
 			{
