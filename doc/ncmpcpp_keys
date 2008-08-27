@@ -61,6 +61,8 @@
 #
 #key_toggle_repeat = 'r'
 #
+#key_toggle_repeat_one = 'R'
+#
 #key_toggle_random = 'z'
 #
 #key_shuffle = 'Z'

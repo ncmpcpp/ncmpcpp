@@ -106,6 +106,8 @@ class Window
 		virtual COLOR GetColor() const;
 		virtual BORDER GetBorder() const;
 		
+		virtual Window * EmptyClone();
+		
 		virtual void Go(WHERE) { } // for Menu and Scrollpad class
 		virtual int GetChoice() const { return -1; } // for Menu class
 		virtual void Add(string str) { Write(str); } // for Scrollpad class

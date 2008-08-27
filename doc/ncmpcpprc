@@ -74,6 +74,8 @@
 #
 #autocenter_mode = "no"
 #
+#repeat_one_mode = "no"
+#
 #header_visibility = "yes"
 #
 #statusbar_visibility = "yes"

@@ -51,6 +51,7 @@ void DefaultKeys(ncmpcpp_keys &keys)
 	keys.SeekForward[0] = 'f';
 	keys.SeekBackward[0] = 'b';
 	keys.ToggleRepeat[0] = 'r';
+	keys.ToggleRepeatOne[0] = 'R';
 	keys.ToggleRandom[0] = 'z';
 	keys.Shuffle[0] = 'Z';
 	keys.ToggleCrossfade[0] = 'x';
@@ -98,6 +99,7 @@ void DefaultKeys(ncmpcpp_keys &keys)
 	keys.SeekForward[1] = null_key;
 	keys.SeekBackward[1] = null_key;
 	keys.ToggleRepeat[1] = null_key;
+	keys.ToggleRepeatOne[1] = null_key;
 	keys.ToggleRandom[1] = null_key;
 	keys.Shuffle[1] = null_key;
 	keys.ToggleCrossfade[1] = null_key;
@@ -144,6 +146,7 @@ void DefaultConfiguration(ncmpcpp_config &conf)
 	conf.header_visibility = true;
 	conf.statusbar_visibility = true;
 	conf.autocenter_mode = false;
+	conf.repeat_one_mode = false;
 	conf.set_window_title = true;
 	conf.mpd_connection_timeout = 15;
 	conf.crossfade_time = 5;
@@ -307,6 +310,8 @@ void ReadKeys(ncmpcpp_keys &keys)
 				GetKeys(*it, keys.SeekBackward);
 			else if (it->find("key_toggle_repeat ") != string::npos)
 				GetKeys(*it, keys.ToggleRepeat);
+			else if (it->find("key_toggle_repeat_one ") != string::npos)
+				GetKeys(*it, keys.ToggleRepeatOne);
 			else if (it->find("key_toggle_random ") != string::npos)
 				GetKeys(*it, keys.ToggleRandom);
 			else if (it->find("key_shuffle ") != string::npos)
@@ -422,6 +427,9 @@ void ReadConfiguration(ncmpcpp_config &conf)
 			
 			if (it->find("autocenter_mode") != string::npos)
 				conf.autocenter_mode = v == "yes";
+			
+			if (it->find("repeat_one_mode") != string::npos)
+				conf.repeat_one_mode = v == "yes";
 			
 			if (it->find("enable_window_title") != string::npos)
 				conf.set_window_title = v == "yes";

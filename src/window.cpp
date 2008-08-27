@@ -586,6 +586,11 @@ void EnableColors()
 	}
 }
 
+Window * Window::EmptyClone()
+{
+	return new Window(GetStartX(),GetStartY(),GetWidth(),GetHeight(),itsTitle,itsBaseColor,itsBorder);
+}
+
 char * ToString(const wchar_t *ws)
 {
 	string s;

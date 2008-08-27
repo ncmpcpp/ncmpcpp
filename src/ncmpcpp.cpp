@@ -190,9 +190,9 @@ int main(int argc, char *argv[])
 		main_height++;
 	
 	mPlaylist = new Menu(0, main_start_y, COLS, main_height, "", Config.main_color, brNone);
-	mBrowser = new Menu(mPlaylist->EmptyClone());
-	mTagEditor = new Menu(mPlaylist->EmptyClone());
-	mSearcher = new Menu(mPlaylist->EmptyClone());
+	mBrowser = static_cast<Menu *>(mPlaylist->EmptyClone());
+	mTagEditor = static_cast<Menu *>(mPlaylist->EmptyClone());
+	mSearcher = static_cast<Menu *>(mPlaylist->EmptyClone());
 	
 	int lib_artist_width = COLS/3-1;
 	int lib_albums_width = COLS/3;
@@ -205,7 +205,7 @@ int main(int argc, char *argv[])
 	mLibSongs = new Menu(lib_songs_start_x, main_start_y, lib_songs_width, main_height, "Songs", Config.main_color, brNone);
 	
 	sHelp = new Scrollpad(0, main_start_y, COLS, main_height, "", Config.main_color, brNone);
-	sLyrics = new Scrollpad(sHelp->EmptyClone());
+	sLyrics = static_cast<Scrollpad *>(sHelp->EmptyClone());
 	
 	sHelp->Add("   [b]Keys - Movement\n -----------------------------------------[/b]\n");
 	sHelp->Add(DisplayKeys(Key.Up) + "Move Cursor up\n");
@@ -233,6 +233,7 @@ int main(int argc, char *argv[])
 	sHelp->Add(DisplayKeys(Key.VolumeUp) + "Increase volume\n\n");
 	
 	sHelp->Add(DisplayKeys(Key.ToggleRepeat) + "Toggle repeat mode\n");
+	sHelp->Add(DisplayKeys(Key.ToggleRepeatOne) + "Toggle \"repeat one\" mode\n");
 	sHelp->Add(DisplayKeys(Key.ToggleRandom) + "Toggle random mode\n");
 	sHelp->Add(DisplayKeys(Key.Shuffle) + "Shuffle playlist\n");
 	sHelp->Add(DisplayKeys(Key.ToggleCrossfade) + "Toggle crossfade mode\n");
@@ -431,21 +432,21 @@ int main(int argc, char *argv[])
 				mLibAlbums->Clear();
 				Mpd->GetAlbums(mLibArtists->GetCurrentOption(), list);
 				for (TagList::const_iterator it = list.begin(); it != list.end(); it++)
-						mLibAlbums->AddOption(*it);
+					mLibAlbums->AddOption(*it);
 			}
+			
+			FreeSongList(vSongs);
 			
 			if (mLibAlbums->Empty())
 			{
 				mLibAlbums->WriteXY(0, 0, "No albums found.");
 				mLibSongs->Clear(0);
-				FreeSongList(vSongs);
 				Mpd->StartSearch(1);
 				Mpd->AddSearch(MPD_TAG_ITEM_ARTIST, mLibArtists->GetCurrentOption());
 				Mpd->CommitSearch(vSongs);
 			}
 			else
 			{
-				FreeSongList(vSongs);
 				mLibSongs->Clear(0);
 				Mpd->StartSearch(1);
 				Mpd->AddSearch(MPD_TAG_ITEM_ARTIST, mLibArtists->GetCurrentOption());
@@ -974,7 +975,7 @@ int main(int argc, char *argv[])
 						{
 							found_pos = 0;
 							vFoundPositions.clear();
-							vSearched.clear();
+							FreeSongList(vSearched);
 							PrepareSearchEngine(searched_song);
 							ShowMessage("Search state reset");
 							break;
@@ -1323,25 +1324,25 @@ int main(int argc, char *argv[])
 			wFooter->WriteXY(0, Config.statusbar_visibility, "Add: ", 1);
 			string path = wFooter->GetString("");
 			UNLOCK_STATUSBAR;
-			SongList list;
-			Mpd->GetDirectoryRecursive(path, list);
-			if (!list.empty())
+			if (!path.empty())
 			{
-				for (SongList::const_iterator it = list.begin(); it != list.end(); it++)
-					Mpd->QueueAddSong(**it);
-				if (Mpd->CommitQueue())
+				SongList list;
+				Mpd->GetDirectoryRecursive(path, list);
+				if (!list.empty())
 				{
-					Song *s = vPlaylist[vPlaylist.size()-list.size()];
-					if (s->GetHash() != list[0]->GetHash())
-						ShowMessage(message_part_of_songs_added);
+					for (SongList::const_iterator it = list.begin(); it != list.end(); it++)
+						Mpd->QueueAddSong(**it);
+					if (Mpd->CommitQueue())
+					{
+						Song *s = vPlaylist[vPlaylist.size()-list.size()];
+						if (s->GetHash() != list[0]->GetHash())
+							ShowMessage(message_part_of_songs_added);
+					}
 				}
-			}
-			else
-			{
-				if (!path.empty())
+				else
 					Mpd->AddSong(path);
+				FreeSongList(list);
 			}
-			FreeSongList(list);
 		}
 		else if (Keypressed(input, Key.SeekForward) || Keypressed(input, Key.SeekBackward))
 		{
@@ -1413,6 +1414,11 @@ int main(int argc, char *argv[])
 		}
 		else if (Keypressed(input, Key.ToggleRepeat))
 			Mpd->SetRepeat(!Mpd->GetRepeat());
+		else if (Keypressed(input, Key.ToggleRepeatOne))
+		{
+			Config.repeat_one_mode = !Config.repeat_one_mode;
+			ShowMessage("'Repeat one' mode: " + string(Config.repeat_one_mode ? "On" : "Off"));
+		}
 		else if (Keypressed(input, Key.Shuffle))
 			Mpd->Shuffle();
 		else if (Keypressed(input, Key.ToggleRandom))

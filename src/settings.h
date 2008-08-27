@@ -53,6 +53,7 @@ struct ncmpcpp_keys
 	int SeekForward[2];
 	int SeekBackward[2];
 	int ToggleRepeat[2];
+	int ToggleRepeatOne[2];
 	int ToggleRandom[2];
 	int Shuffle[2];
 	int ToggleCrossfade[2];
@@ -102,6 +103,7 @@ struct ncmpcpp_config
 	bool header_visibility;
 	bool statusbar_visibility;
 	bool autocenter_mode;
+	bool repeat_one_mode;
 	
 	int mpd_connection_timeout;
 	int crossfade_time;

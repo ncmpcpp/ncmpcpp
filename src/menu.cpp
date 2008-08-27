@@ -563,7 +563,7 @@ bool Menu::IsStatic(int option)
 	}
 }
 
-Menu Menu::EmptyClone()
+Window * Menu::EmptyClone()
 {
-	return Menu(GetStartX(),GetStartY(),GetWidth(),GetHeight(),itsTitle,itsBaseColor,itsBorder);
+	return new Menu(GetStartX(),GetStartY(),GetWidth(),GetHeight(),itsTitle,itsBaseColor,itsBorder);
 }

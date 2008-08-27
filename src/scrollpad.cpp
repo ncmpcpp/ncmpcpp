@@ -215,9 +215,9 @@ void Scrollpad::Clear()
 	Window::Clear();
 }
 
-Scrollpad Scrollpad::EmptyClone()
+Window * Scrollpad::EmptyClone()
 {
-	return Scrollpad(GetStartX(),GetStartY(),GetWidth(),GetHeight(),itsTitle,itsBaseColor,itsBorder);
+	return new Scrollpad(GetStartX(),GetStartY(),GetWidth(),GetHeight(),itsTitle,itsBaseColor,itsBorder);
 }
 
 Scrollpad & Scrollpad::operator=(const Scrollpad &base)

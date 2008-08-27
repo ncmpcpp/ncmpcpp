@@ -77,8 +77,7 @@ class Menu : public Window
 		
 		bool Empty() { return itsOptions.empty(); }
 		bool IsStatic(int);
-		Menu EmptyClone();
-		
+		virtual Window * EmptyClone();
 	protected:
 		vector<Option *> itsOptions;
 		vector<int> NeedsRedraw;

@@ -37,7 +37,7 @@ class Scrollpad: public Window
 		virtual void SetBorder(BORDER);
 		virtual void SetTitle(string);
 		virtual void Clear();
-		Scrollpad EmptyClone();
+		virtual Window * EmptyClone();
 		Scrollpad & operator=(const Scrollpad &);
 	protected:
 		void print_content();
