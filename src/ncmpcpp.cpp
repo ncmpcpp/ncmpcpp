@@ -526,6 +526,7 @@ int main(int argc, char *argv[])
 				wCurrent->Timeout(50);
 				while (Keypressed(input, Key.Up))
 				{
+					TraceMpdStatus();
 					wCurrent->Go(UP);
 					wCurrent->Refresh();
 					wCurrent->ReadKey(input);
@@ -542,6 +543,7 @@ int main(int argc, char *argv[])
 				wCurrent->Timeout(50);
 				while (Keypressed(input, Key.Down))
 				{
+					TraceMpdStatus();
 					wCurrent->Go(DOWN);
 					wCurrent->Refresh();
 					wCurrent->ReadKey(input);
