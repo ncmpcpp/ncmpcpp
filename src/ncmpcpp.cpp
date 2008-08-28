@@ -520,9 +520,37 @@ int main(int argc, char *argv[])
 		// key mapping beginning
 		
 		if (Keypressed(input, Key.Up))
-			wCurrent->Go(UP);
+		{
+			if (wCurrent == mLibArtists)
+			{
+				wCurrent->Timeout(50);
+				while (Keypressed(input, Key.Up))
+				{
+					wCurrent->Go(UP);
+					wCurrent->Refresh();
+					wCurrent->ReadKey(input);
+				}
+				wCurrent->Timeout(ncmpcpp_window_timeout);
+			}
+			else
+				wCurrent->Go(UP);
+		}
 		else if (Keypressed(input, Key.Down))
-			wCurrent->Go(DOWN);
+		{
+			if (wCurrent == mLibArtists)
+			{
+				wCurrent->Timeout(50);
+				while (Keypressed(input, Key.Down))
+				{
+					wCurrent->Go(DOWN);
+					wCurrent->Refresh();
+					wCurrent->ReadKey(input);
+				}
+				wCurrent->Timeout(ncmpcpp_window_timeout);
+			}
+			else
+				wCurrent->Go(DOWN);
+		}
 		else if (Keypressed(input, Key.PageUp))
 			wCurrent->Go(PAGE_UP);
 		else if (Keypressed(input, Key.PageDown))
