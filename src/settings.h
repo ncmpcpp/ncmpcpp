@@ -63,6 +63,7 @@ struct ncmpcpp_keys
 	int FindBackward[2];
 	int NextFoundPosition[2];
 	int PrevFoundPosition[2];
+	int ToggleFindMode[2];
 	int EditTags[2];
 	int GoToPosition[2];
 	int Lyrics[2];
@@ -104,6 +105,7 @@ struct ncmpcpp_config
 	bool statusbar_visibility;
 	bool autocenter_mode;
 	bool repeat_one_mode;
+	bool wrapped_search;
 	
 	int mpd_connection_timeout;
 	int crossfade_time;

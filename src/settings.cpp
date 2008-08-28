@@ -61,6 +61,7 @@ void DefaultKeys(ncmpcpp_keys &keys)
 	keys.FindBackward[0] = '?';
 	keys.NextFoundPosition[0] = '.';
 	keys.PrevFoundPosition[0] = ',';
+	keys.ToggleFindMode[0] = 'w';
 	keys.EditTags[0] = 'e';
 	keys.GoToPosition[0] = 'g';
 	keys.Lyrics[0] = 'l';
@@ -109,6 +110,7 @@ void DefaultKeys(ncmpcpp_keys &keys)
 	keys.FindBackward[1] = null_key;
 	keys.NextFoundPosition[1] = null_key;
 	keys.PrevFoundPosition[1] = null_key;
+	keys.ToggleFindMode[1] = null_key;
 	keys.EditTags[1] = null_key;
 	keys.GoToPosition[1] = null_key;
 	keys.Lyrics[1] = null_key;
@@ -147,6 +149,7 @@ void DefaultConfiguration(ncmpcpp_config &conf)
 	conf.statusbar_visibility = true;
 	conf.autocenter_mode = false;
 	conf.repeat_one_mode = false;
+	conf.wrapped_search = true;
 	conf.set_window_title = true;
 	conf.mpd_connection_timeout = 15;
 	conf.crossfade_time = 5;
@@ -330,6 +333,8 @@ void ReadKeys(ncmpcpp_keys &keys)
 				GetKeys(*it, keys.NextFoundPosition);
 			else if (it->find("key_prev_found_position ") != string::npos)
 				GetKeys(*it, keys.PrevFoundPosition);
+			else if (it->find("key_toggle_find_mode ") != string::npos)
+				GetKeys(*it, keys.ToggleFindMode);
 			else if (it->find("key_edit_tags ") != string::npos)
 				GetKeys(*it, keys.EditTags);
 			else if (it->find("key_go_to_position ") != string::npos)
@@ -430,6 +435,9 @@ void ReadConfiguration(ncmpcpp_config &conf)
 			
 			if (it->find("repeat_one_mode") != string::npos)
 				conf.repeat_one_mode = v == "yes";
+			
+			if (it->find("find_mode") != string::npos)
+				conf.wrapped_search = v == "wrapped";
 			
 			if (it->find("enable_window_title") != string::npos)
 				conf.set_window_title = v == "yes";

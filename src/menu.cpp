@@ -489,13 +489,11 @@ void Menu::Highlight(int which)
 	else
 		return;
 	
-	if (which >= itsHeight/2)
+	if (which >= itsHeight/2 && itsOptions.size() > itsHeight)
 	{
 		itsBeginning = itsHighlight-itsHeight/2;
 		if (itsBeginning > itsOptions.size()-itsHeight)
 			itsBeginning = itsOptions.size()-itsHeight;
-		if (itsBeginning < 0)
-			itsBeginning = 0;
 	}
 	else
 		itsBeginning = 0;

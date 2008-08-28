@@ -81,6 +81,8 @@
 #
 #key_prev_found_position = ','
 #
+#key_toggle_find_mode = 'w'
+#
 #key_edit_tags = 'e'
 #
 #key_go_to_position = 'g'

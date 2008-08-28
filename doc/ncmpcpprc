@@ -70,11 +70,13 @@
 #
 #browser_playlist_prefix = "[red]playlist[/red] "
 #
-##### interface settings #####
+##### various settings #####
 #
 #autocenter_mode = "no"
 #
 #repeat_one_mode = "no"
+#
+#find_mode = "wrapped"
 #
 #header_visibility = "yes"
 #

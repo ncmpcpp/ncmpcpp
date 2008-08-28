@@ -244,6 +244,7 @@ int main(int argc, char *argv[])
 	sHelp->Add(DisplayKeys(Key.FindBackward) + "Backward find\n");
 	sHelp->Add(DisplayKeys(Key.PrevFoundPosition) + "Go to previous found position\n");
 	sHelp->Add(DisplayKeys(Key.NextFoundPosition) + "Go to next found position\n");
+	sHelp->Add(DisplayKeys(Key.ToggleFindMode) + "Toggle find mode\n");
 	sHelp->Add(DisplayKeys(Key.EditTags) + tag_screen_keydesc);
 	sHelp->Add(DisplayKeys(Key.GoToPosition) + "Go to chosen position in current song\n");
 	sHelp->Add(DisplayKeys(Key.Lyrics) + "Show/hide song's lyrics\n\n");
@@ -1549,7 +1550,7 @@ int main(int argc, char *argv[])
 			||  (current_screen == csSearcher && !vSearched.empty()))
 			{
 				string how = Keypressed(input, Key.FindForward) ? "forward" : "backward";
-				found_pos = 0;
+				found_pos = -1;
 				vFoundPositions.clear();
 				Menu *mCurrent = static_cast<Menu *>(wCurrent);
 				LOCK_STATUSBAR;
@@ -1561,32 +1562,31 @@ int main(int argc, char *argv[])
 					continue;
 				transform(findme.begin(), findme.end(), findme.begin(), tolower);
 				
-				if (Keypressed(input, Key.FindForward)) // forward
+				for (int i = 1; i <= mCurrent->MaxChoice(); i++)
 				{
-					for (int i = mCurrent->GetChoice(); i <= mCurrent->MaxChoice(); i++)
+					string name = mCurrent->GetOption(i);
+					transform(name.begin(), name.end(), name.begin(), tolower);
+					if (name.find(findme) != string::npos && !mCurrent->IsStatic(i))
 					{
-						string name = mCurrent->GetOption(i);
-						transform(name.begin(), name.end(), name.begin(), tolower);
-						if (name.find(findme) != string::npos && !mCurrent->IsStatic(i))
-							vFoundPositions.push_back(i);
-					}
-				}
-				else // backward
-				{
-					for (int i = mCurrent->GetChoice(); i > 0; i--)
-					{
-						string name = mCurrent->GetOption(i);
-						transform(name.begin(), name.end(), name.begin(), tolower);
-						if (name.find(findme) != string::npos && !mCurrent->IsStatic(i))
-							vFoundPositions.push_back(i);
+						vFoundPositions.push_back(i);
+						if (Keypressed(input, Key.FindForward)) // forward
+						{
+							if (found_pos < 0 && i >= mCurrent->GetChoice())
+								found_pos = vFoundPositions.size()-1;
+						}
+						else // backward
+						{
+							if (i <= mCurrent->GetChoice())
+								found_pos = vFoundPositions.size()-1;
+						}
 					}
 				}
 				
-				if (vFoundPositions.empty())
+				if (Config.wrapped_search ? vFoundPositions.empty() : found_pos < 0)
 					ShowMessage("Unable to find \"" + findme + "\"");
 				else
 				{
-					mCurrent->Highlight(vFoundPositions.front());
+					mCurrent->Highlight(vFoundPositions[found_pos < 0 ? 0 : found_pos]);
 					mCurrent->Highlighting(1);
 				}
 			}
@@ -1602,18 +1602,28 @@ int main(int argc, char *argv[])
 				}
 				catch (std::out_of_range)
 				{
-					if (Keypressed(input, Key.NextFoundPosition))
+					if (Config.wrapped_search)
 					{
-						mCurrent->Highlight(vFoundPositions.front());
-						found_pos = 0;
+						if (Keypressed(input, Key.NextFoundPosition))
+						{
+							mCurrent->Highlight(vFoundPositions.front());
+							found_pos = 0;
+						}
+						else
+						{
+							mCurrent->Highlight(vFoundPositions.back());
+							found_pos = vFoundPositions.size()-1;
+						}
 					}
 					else
-					{
-						mCurrent->Highlight(vFoundPositions.back());
-						found_pos = vFoundPositions.size()-1;
-					}
+						found_pos = Keypressed(input, Key.NextFoundPosition) ? vFoundPositions.size()-1 : 0;
 				}
 			}
+		}
+		else if (Keypressed(input, Key.ToggleFindMode))
+		{
+			Config.wrapped_search = !Config.wrapped_search;
+			ShowMessage("Search mode: " + string(Config.wrapped_search ? "Wrapped" : "Normal"));
 		}
 		else if (Keypressed(input, Key.Lyrics))
 		{
