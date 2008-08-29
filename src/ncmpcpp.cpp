@@ -430,10 +430,29 @@ int main(int argc, char *argv[])
 			if (wCurrent == mLibArtists)
 			{
 				TagList list;
-				mLibAlbums->Clear();
+				mLibAlbums->Clear(0);
 				Mpd->GetAlbums(mLibArtists->GetCurrentOption(), list);
+				for (TagList::iterator it = list.begin(); it != list.end(); it++)
+				{
+					SongList l;
+					Mpd->StartSearch(1);
+					Mpd->AddSearch(MPD_TAG_ITEM_ARTIST, mLibArtists->GetCurrentOption());
+					Mpd->AddSearch(MPD_TAG_ITEM_ALBUM, *it);
+					Mpd->CommitSearch(l);
+					for (SongList::const_iterator j = l.begin(); j != l.end(); j++)
+					{
+						if ((*j)->GetYear() != EMPTY_TAG)
+						{
+							*it = "(" + (*j)->GetYear() + ") " + *it;
+							break;
+						}
+					}
+					FreeSongList(l);
+				}
+				sort(list.begin(), list.end());
 				for (TagList::const_iterator it = list.begin(); it != list.end(); it++)
 					mLibAlbums->AddOption(*it);
+				mLibAlbums->Window::Clear();
 			}
 			
 			FreeSongList(vSongs);
@@ -453,6 +472,14 @@ int main(int argc, char *argv[])
 				Mpd->AddSearch(MPD_TAG_ITEM_ARTIST, mLibArtists->GetCurrentOption());
 				Mpd->AddSearch(MPD_TAG_ITEM_ALBUM, mLibAlbums->GetCurrentOption());
 				Mpd->CommitSearch(vSongs);
+				if (vSongs.empty())
+				{
+					const string &album = mLibAlbums->GetCurrentOption();
+					Mpd->StartSearch(1);
+					Mpd->AddSearch(MPD_TAG_ITEM_ARTIST, mLibArtists->GetCurrentOption());
+					Mpd->AddSearch(MPD_TAG_ITEM_ALBUM, album.substr(7, album.length()-7));
+					Mpd->CommitSearch(vSongs);
+				}
 			}
 			sort(vSongs.begin(), vSongs.end(), SortSongsByTrack);
 			bool bold = 0;
@@ -472,9 +499,9 @@ int main(int argc, char *argv[])
 			}
 			
 			mLibAlbums->Refresh();
-			mLibSongs->Hide();
-			mLibSongs->Display();
-
+			mLibSongs->Window::Clear();
+			mLibSongs->Refresh();
+			
 			block_library_update = 1;
 		}
 		
