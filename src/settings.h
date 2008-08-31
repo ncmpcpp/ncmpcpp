@@ -67,6 +67,8 @@ struct ncmpcpp_keys
 	int EditTags[2];
 	int GoToPosition[2];
 	int Lyrics[2];
+	int ReverseSelection[2];
+	int DeselectAll[2];
 	int Clear[2];
 	int Crop[2];
 	int MvSongUp[2];
@@ -87,6 +89,9 @@ struct ncmpcpp_config
 	string song_window_title_format;
 	string song_library_format;
 	string browser_playlist_prefix;
+	
+	string selected_item_prefix;
+	string selected_item_suffix;
 	
 	COLOR empty_tags_color;
 	COLOR header_color;

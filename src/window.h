@@ -23,6 +23,7 @@
 
 #include "ncurses.h"
 
+#include <stack>
 #include <vector>
 #include <string>
 #include <cstdlib>
@@ -117,7 +118,7 @@ class Window
 		virtual bool reallocate_win(int, int);
 		virtual void recreate_win();
 		virtual void show_border() const;
-		virtual const COLOR * into_color(const string &) const;
+		virtual std::pair<COLOR, COLOR> into_color(const string &);
 		//bool is_valid_color(const string &);
 		WINDOW *itsWindow;
 		WINDOW *itsWinBorder;
@@ -128,6 +129,7 @@ class Window
 		bool BBEnabled;
 		bool AutoRefreshEnabled;
 		string itsTitle;
+		std::stack< std::pair<COLOR, COLOR> > itsColors;
 		COLOR itsColor;
 		COLOR itsBaseColor;
 		COLOR itsBgColor;

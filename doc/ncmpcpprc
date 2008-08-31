@@ -70,6 +70,10 @@
 #
 #browser_playlist_prefix = "[red]playlist[/red] "
 #
+#selected_item_prefix = "[magenta]"
+#
+#selected_item_suffix = "[/magenta]"
+#
 ##### various settings #####
 #
 #autocenter_mode = "no"

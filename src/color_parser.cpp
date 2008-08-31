@@ -20,381 +20,384 @@
 
 #include "window.h"
 
-const COLOR * Window::into_color(const string &str) const
+std::pair<COLOR, COLOR> Window::into_color(const string &str)
 {
-	COLOR *colors = new COLOR[2];
+	std::pair<COLOR, COLOR> colors;
 	
 	if (str == "[/]")
 	{
 		Bold(0);
 		Reverse(0);
 		AltCharset(0);
-		colors[0] = itsBaseColor;
-		colors[1] = itsBaseBgColor;
-		return colors;
+		if (!itsColors.empty())
+			itsColors.pop();
 	}
-	
-	if (str[1] == '/')
+	else if (str[1] == '/')
 	{
 		if (str == "[/a]")
 			AltCharset(0);
-		
-		if (str == "[/b]")
+		else if (str == "[/b]")
 			Bold(0);
-		
-		if (str == "[/r]")
+		else if (str == "[/r]")
 			Reverse(0);
-		
-		if (str.length() > 4) // /green etc.
+		else if (str.length() > 4) // /green etc.
 		{
-			colors[0] = itsBaseColor; 
-			colors[1] = itsBaseBgColor;
-			return colors;
+			if (!itsColors.empty())
+				itsColors.pop();
 		}
-		colors[0] = itsColor;
-		colors[1] = itsBgColor;
-		return colors;
 	}
 	else
 	{
-		if (str == "[a]") AltCharset(1);
-		if (str == "[b]") Bold(1);
-		if (str == "[r]") Reverse(1);
-		
-		if (str.length() <= 3)
+		if (str == "[a]")
+			AltCharset(1);
+		else if (str == "[b]")
+			Bold(1);
+		else if (str == "[r]")
+			Reverse(1);
+		else if (str == "[red]")
 		{
-			colors[0] = itsColor;
-			colors[1] = itsBgColor;
+			colors.first = clRed;
+			colors.second = itsBaseBgColor;
+			itsColors.push(colors);
 		}
-	
-		if (str == "[red]")
+		else if (str == "[black]")
 		{
-			colors[0] = clRed;
-			colors[1] = itsBaseBgColor;
+			colors.first = clBlack;
+			colors.second = itsBaseBgColor;
+			itsColors.push(colors);
 		}
-		if (str == "[black]")
+		else if (str == "[blue]")
 		{
-			colors[0] = clBlack;
-			colors[1] = itsBaseBgColor;
+			colors.first = clBlue;
+			colors.second = itsBaseBgColor;
+			itsColors.push(colors);
 		}
-		if (str == "[blue]")
+		else if (str == "[green]")
 		{
-			colors[0] = clBlue;
-			colors[1] = itsBaseBgColor;
+			colors.first = clGreen;
+			colors.second = itsBaseBgColor;
+			itsColors.push(colors);
 		}
-		if (str == "[green]")
+		else if (str == "[yellow]")
 		{
-			colors[0] = clGreen;
-			colors[1] = itsBaseBgColor;
+			colors.first = clYellow;
+			colors.second = itsBaseBgColor;
+			itsColors.push(colors);
 		}
-		if (str == "[yellow]")
+		else if (str == "[magenta]")
 		{
-			colors[0] = clYellow;
-			colors[1] = itsBaseBgColor;
+			colors.first = clMagenta;
+			colors.second = itsBaseBgColor;
+			itsColors.push(colors);
 		}
-		if (str == "[magenta]")
+		else if (str == "[cyan]")
 		{
-			colors[0] = clMagenta;
-			colors[1] = itsBaseBgColor;
+			colors.first = clCyan;
+			colors.second = itsBaseBgColor;
+			itsColors.push(colors);
 		}
-		if (str == "[cyan]")
+		else if (str == "[white]")
 		{
-			colors[0] = clCyan;
-			colors[1] = itsBaseBgColor;
-		}
-		if (str == "[white]")
-		{
-			colors[0] = clWhite;
-			colors[1] = itsBaseBgColor;
+			colors.first = clWhite;
+			colors.second = itsBaseBgColor;
+			itsColors.push(colors);
 		}
 		
 		/*if (str == "[black_red]")
 		{
-			colors[0] = clBlack;
-			colors[1] = clRed;
+			colors.first = clBlack;
+			colors.second = clRed;
 		}
 		if (str == "[black_blue]")
 		{
-			colors[0] = clBlack;
-			colors[1] = clBlue;
+			colors.first = clBlack;
+			colors.second = clBlue;
 		}
 		if (str == "[black_green]")
 		{
-			colors[0] = clBlack;
-			colors[1] = clGreen;
+			colors.first = clBlack;
+			colors.second = clGreen;
 		}
 		if (str == "[black_yellow]")
 		{
-			colors[0] = clBlack;
-			colors[1] = clYellow;
+			colors.first = clBlack;
+			colors.second = clYellow;
 		}
 		if (str == "[black_magenta]")
 		{
-			colors[0] = clBlack;
-			colors[1] = clMagenta;
+			colors.first = clBlack;
+			colors.second = clMagenta;
 		}
 		if (str == "[black_cyan]")
 		{
-			colors[0] = clBlack;
-			colors[1] = clCyan;
+			colors.first = clBlack;
+			colors.second = clCyan;
 		}
 		if (str == "[black_white]")
 		{
-			colors[0] = clBlack;
-			colors[1] = clWhite;
+			colors.first = clBlack;
+			colors.second = clWhite;
 		}
 		if (str == "[red_black]")
 		{
-			colors[0] = clRed;
-			colors[1] = clBlack;
+			colors.first = clRed;
+			colors.second = clBlack;
 		}
 		if (str == "[red_blue]")
 		{
-			colors[0] = clRed;
-			colors[1] = clBlue;
+			colors.first = clRed;
+			colors.second = clBlue;
 		}
 		if (str == "[red_green]")
 		{
-			colors[0] = clRed;
-			colors[1] = clGreen;
+			colors.first = clRed;
+			colors.second = clGreen;
 		}
 		if (str == "[red_yellow]")
 		{
-			colors[0] = clRed;
-			colors[1] = clYellow;
+			colors.first = clRed;
+			colors.second = clYellow;
 		}
 		if (str == "[red_magenta]")
 		{
-			colors[0] = clRed;
-			colors[1] = clMagenta;
+			colors.first = clRed;
+			colors.second = clMagenta;
 		}
 		if (str == "[red_cyan]")
 		{
-			colors[0] = clRed;
-			colors[1] = clCyan;
+			colors.first = clRed;
+			colors.second = clCyan;
 		}
 		if (str == "[red_white]")
 		{
-			colors[0] = clRed;
-			colors[1] = clWhite;
+			colors.first = clRed;
+			colors.second = clWhite;
 		}
 		if (str == "[red_white]")
 		{
-			colors[0] = clRed;
-			colors[1] = clWhite;
+			colors.first = clRed;
+			colors.second = clWhite;
 		}
 		if (str == "[blue_black]")
 		{
-			colors[0] = clBlue;
-			colors[1] = clBlack;
+			colors.first = clBlue;
+			colors.second = clBlack;
 		}
 		if (str == "[blue_red]")
 		{
-			colors[0] = clBlue;
-			colors[1] = clRed;
+			colors.first = clBlue;
+			colors.second = clRed;
 		}
 		if (str == "[blue_green]")
 		{
-			colors[0] = clBlue;
-			colors[1] = clGreen;
+			colors.first = clBlue;
+			colors.second = clGreen;
 		}
 		if (str == "[blue_yellow]")
 		{
-			colors[0] = clBlue;
-			colors[1] = clYellow;
+			colors.first = clBlue;
+			colors.second = clYellow;
 		}
 		if (str == "[blue_magenta]")
 		{
-			colors[0] = clBlue;
-			colors[1] = clMagenta;
+			colors.first = clBlue;
+			colors.second = clMagenta;
 		}
 		if (str == "[blue_cyan]")
 		{
-			colors[0] = clBlue;
-			colors[1] = clCyan;
+			colors.first = clBlue;
+			colors.second = clCyan;
 		}
 		if (str == "[blue_white]")
 		{
-			colors[0] = clBlue;
-			colors[1] = clWhite;
+			colors.first = clBlue;
+			colors.second = clWhite;
 		}
 		if (str == "[green_black]")
 		{
-			colors[0] = clGreen;
-			colors[1] = clBlack;
+			colors.first = clGreen;
+			colors.second = clBlack;
 		}
 		if (str == "[green_red]")
 		{
-			colors[0] = clGreen;
-			colors[1] = clRed;
+			colors.first = clGreen;
+			colors.second = clRed;
 		}
 		if (str == "[green_blue]")
 		{
-			colors[0] = clGreen;
-			colors[1] = clBlue;
+			colors.first = clGreen;
+			colors.second = clBlue;
 		}
 		if (str == "[green_yellow]")
 		{
-			colors[0] = clGreen;
-			colors[1] = clYellow;
+			colors.first = clGreen;
+			colors.second = clYellow;
 		}
 		if (str == "[green_magenta]")
 		{
-			colors[0] = clGreen;
-			colors[1] = clMagenta;
+			colors.first = clGreen;
+			colors.second = clMagenta;
 		}
 		if (str == "[green_cyan]")
 		{
-			colors[0] = clGreen;
-			colors[1] = clCyan;
+			colors.first = clGreen;
+			colors.second = clCyan;
 		}
 		if (str == "[green_white]")
 		{
-			colors[0] = clGreen;
-			colors[1] = clWhite;
+			colors.first = clGreen;
+			colors.second = clWhite;
 		}
 		if (str == "[yellow_black]")
 		{
-			colors[0] = clYellow;
-			colors[1] = clBlack;
+			colors.first = clYellow;
+			colors.second = clBlack;
 		}
 		if (str == "[yellow_red]")
 		{
-			colors[0] = clYellow;
-			colors[1] = clRed;
+			colors.first = clYellow;
+			colors.second = clRed;
 		}
 		if (str == "[yellow_blue]")
 		{
-			colors[0] = clYellow;
-			colors[1] = clBlue;
+			colors.first = clYellow;
+			colors.second = clBlue;
 		}
 		if (str == "[yellow_green]")
 		{
-			colors[0] = clYellow;
-			colors[1] = clGreen;
+			colors.first = clYellow;
+			colors.second = clGreen;
 		}
 		if (str == "[yellow_magenta]")
 		{
-			colors[0] = clYellow;
-			colors[1] = clMagenta;
+			colors.first = clYellow;
+			colors.second = clMagenta;
 		}
 		if (str == "[yellow_cyan]")
 		{
-			colors[0] = clYellow;
-			colors[1] = clCyan;
+			colors.first = clYellow;
+			colors.second = clCyan;
 		}
 		if (str == "[yellow_white]")
 		{
-			colors[0] = clYellow;
-			colors[1] = clWhite;
+			colors.first = clYellow;
+			colors.second = clWhite;
 		}
 		if (str == "[magenta_black]")
 		{
-			colors[0] = clMagenta;
-			colors[1] = clBlack;
+			colors.first = clMagenta;
+			colors.second = clBlack;
 		}
 		if (str == "[magenta_red]")
 		{
-			colors[0] = clMagenta;
-			colors[1] = clRed;
+			colors.first = clMagenta;
+			colors.second = clRed;
 		}
 		if (str == "[magenta_blue]")
 		{
-			colors[0] = clMagenta;
-			colors[1] = clBlue;
+			colors.first = clMagenta;
+			colors.second = clBlue;
 		}
 		if (str == "[magenta_green]")
 		{
-			colors[0] = clMagenta;
-			colors[1] = clGreen;
+			colors.first = clMagenta;
+			colors.second = clGreen;
 		}
 		if (str == "[magenta_yellow]")
 		{
-			colors[0] = clMagenta;
-			colors[1] = clYellow;
+			colors.first = clMagenta;
+			colors.second = clYellow;
 		}
 		if (str == "[magenta_cyan]")
 		{
-			colors[0] = clMagenta;
-			colors[1] = clCyan;
+			colors.first = clMagenta;
+			colors.second = clCyan;
 		}
 		if (str == "[magenta_white]")
 		{
-			colors[0] = clMagenta;
-			colors[1] = clWhite;
+			colors.first = clMagenta;
+			colors.second = clWhite;
 		}
 		if (str == "[cyan_black]")
 		{
-			colors[0] = clCyan;
-			colors[1] = clBlack;
+			colors.first = clCyan;
+			colors.second = clBlack;
 		}
 		if (str == "[cyan_red]")
 		{
-			colors[0] = clCyan;
-			colors[1] = clRed;
+			colors.first = clCyan;
+			colors.second = clRed;
 		}
 		if (str == "[cyan_blue]")
 		{
-			colors[0] = clCyan;
-			colors[1] = clBlue;
+			colors.first = clCyan;
+			colors.second = clBlue;
 		}
 		if (str == "[cyan_green]")
 		{
-			colors[0] = clCyan;
-			colors[1] = clGreen;
+			colors.first = clCyan;
+			colors.second = clGreen;
 		}
 		if (str == "[cyan_yellow]")
 		{
-			colors[0] = clCyan;
-			colors[1] = clYellow;
+			colors.first = clCyan;
+			colors.second = clYellow;
 		}
 		if (str == "[cyan_magenta]")
 		{
-			colors[0] = clCyan;
-			colors[1] = clMagenta;
+			colors.first = clCyan;
+			colors.second = clMagenta;
 		}
 		if (str == "[cyan_white]")
 		{
-			colors[0] = clCyan;
-			colors[1] = clWhite;
+			colors.first = clCyan;
+			colors.second = clWhite;
 		}
 		if (str == "[white_black]")
 		{
-			colors[0] = clWhite;
-			colors[1] = clBlack;
+			colors.first = clWhite;
+			colors.second = clBlack;
 		}
 		if (str == "[white_red]")
 		{
-			colors[0] = clWhite;
-			colors[1] = clRed;
+			colors.first = clWhite;
+			colors.second = clRed;
 		}
 		if (str == "[white_blue]")
 		{
-			colors[0] = clWhite;
-			colors[1] = clBlue;
+			colors.first = clWhite;
+			colors.second = clBlue;
 		}
 		if (str == "[white_green]")
 		{
-			colors[0] = clWhite;
-			colors[1] = clGreen;
+			colors.first = clWhite;
+			colors.second = clGreen;
 		}
 		if (str == "[white_yellow]")
 		{
-			colors[0] = clWhite;
-			colors[1] = clYellow;
+			colors.first = clWhite;
+			colors.second = clYellow;
 		}
 		if (str == "[white_magenta]")
 		{
-			colors[0] = clWhite;
-			colors[1] = clMagenta;
+			colors.first = clWhite;
+			colors.second = clMagenta;
 		}
 		if (str == "[white_cyan]")
 		{
-			colors[0] = clWhite;
-			colors[1] = clCyan;
+			colors.first = clWhite;
+			colors.second = clCyan;
 		}*/
 	}
-	return colors;
+	
+	if (itsColors.empty())
+	{
+		colors.first = itsBaseColor;
+		colors.second = itsBaseBgColor;
+		return colors;
+	}
+	else
+		return itsColors.top();
 }
 
 bool is_valid_color(const string &str)

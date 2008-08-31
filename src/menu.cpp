@@ -70,8 +70,6 @@ void Menu::AddOption(const string &str, LOCATION location, HAVE_SEPARATOR separa
 	new_option->content = str;
 	new_option->location = location;
 	new_option->have_separator = separator;
-	new_option->is_static = 0;
-	new_option->is_bold = 0;
 	itsOptions.push_back(new_option);
 	
 	if (itsOptions.size() > itsBeginning && itsOptions.size() <= itsBeginning+itsHeight)
@@ -84,7 +82,6 @@ void Menu::AddBoldOption(const string &str, LOCATION location, HAVE_SEPARATOR se
 	new_option->content = str;
 	new_option->location = location;
 	new_option->have_separator = separator;
-	new_option->is_static = 0;
 	new_option->is_bold = 1;
 	itsOptions.push_back(new_option);
 	
@@ -99,7 +96,6 @@ void Menu::AddStaticOption(const string &str, LOCATION location, HAVE_SEPARATOR 
 	new_option->location = location;
 	new_option->have_separator = separator;
 	new_option->is_static = 1;
-	new_option->is_bold = 0;
 	itsOptions.push_back(new_option);
 	itsStaticsNumber++;
 	
@@ -199,17 +195,18 @@ string Menu::GetOption(int i) const
 
 void Menu::DeleteOption(int no)
 {
+	no--;
 	try
 	{
-		if (itsOptions.at(no-1)->is_static)
+		if (itsOptions.at(no)->is_static)
 			itsStaticsNumber--;
 	}
 	catch (std::out_of_range)
 	{
 		return;
 	}
-	delete itsOptions[no-1];
-	itsOptions.erase(itsOptions.begin()+no-1);
+	delete itsOptions[no];
+	itsOptions.erase(itsOptions.begin()+no);
 	
 	if (itsHighlight > itsOptions.size()-1)
 		itsHighlight = itsOptions.size()-1;
@@ -220,20 +217,33 @@ void Menu::DeleteOption(int no)
 	if (itsBeginning > MaxBeginning)
 	{
 		itsBeginning = MaxBeginning;
-		wmove(itsWindow, no-1-itsBeginning, 0);
+		wmove(itsWindow, no-itsBeginning, 0);
 		wdeleteln(itsWindow);
 		wscrl(itsWindow, -1);
 		NeedsRedraw.push_back(itsBeginning);
 	}
 	else
 	{
-		wmove(itsWindow, no-1-itsBeginning, 0);
+		wmove(itsWindow, no-itsBeginning, 0);
 		wdeleteln(itsWindow);
 	}
 	NeedsRedraw.push_back(itsHighlight);
 	NeedsRedraw.push_back(itsBeginning+itsHeight-1);
 	scrollok(itsWindow, 0);
 	idlok(itsWindow, 0);
+}
+
+void Menu::Swap(int one, int two)
+{
+	try
+	{
+		std::swap<Option *>(itsOptions.at(one), itsOptions.at(two));
+		NeedsRedraw.push_back(one);
+		NeedsRedraw.push_back(two);
+	}
+	catch (std::out_of_range)
+	{
+	}
 }
 
 void Menu::redraw_screen()
@@ -260,7 +270,7 @@ void Menu::Refresh(bool redraw_whole_window)
 	if (itsBeginning > MaxBeginning)
 		itsBeginning = MaxBeginning;
 	
-	if (itsHighlight > itsOptions.size()-1)
+	if (itsHighlight >= itsOptions.size()-1)
 		Highlight(itsOptions.size());
 	
 	if (redraw_whole_window)
@@ -278,6 +288,10 @@ void Menu::Refresh(bool redraw_whole_window)
 		}
 		
 		int line = *it-itsBeginning;
+		
+		if (line < 0 || line+1 > itsHeight) // do not draw if line should be invisible anyway
+			continue;
+		
 		COLOR old_basecolor = itsBaseColor;
 		
 		if (*it == itsHighlight && itsHighlightEnabled)
@@ -322,9 +336,15 @@ void Menu::Refresh(bool redraw_whole_window)
 			}
 			
 #			ifdef UTF8_ENABLED
-			WriteXY(x, line, itsWidth, ToWString(itsOptions[*it]->content), 0);
+			if (itsOptions[*it]->selected)
+				WriteXY(x, line, itsWidth, ToWString(itsSelectedPrefix + itsOptions[*it]->content + itsSelectedSuffix), 0);
+			else
+				WriteXY(x, line, itsWidth, ToWString(itsOptions[*it]->content), 0);
 #			else
-			WriteXY(x, line, itsWidth, itsOptions[*it]->content, 0);
+			if (itsOptions[*it]->selected)
+				WriteXY(x, line, itsWidth, itsSelectedPrefix + itsOptions[*it]->content + itsSelectedSuffix, 0);
+			else
+				WriteXY(x, line, itsWidth, itsOptions[*it]->content, 0);
 #			endif
 			
 			if (!ch && (itsOptions[*it]->location == lCenter || itsOptions[*it]->location == lLeft))
@@ -335,7 +355,6 @@ void Menu::Refresh(bool redraw_whole_window)
 				AltCharset(0);
 			}
 		}
-		line++;
 		
 		if (*it == itsHighlight && itsHighlightEnabled)
 		{
@@ -345,6 +364,9 @@ void Menu::Refresh(bool redraw_whole_window)
 		}
 		if (itsOptions[*it]->is_bold)
 			Bold(0);
+		
+		while (!itsColors.empty()) // clear color stack as some items are
+			itsColors.pop();   // too long to close all tags properly
 	}
 	NeedsRedraw.clear();
 	wrefresh(itsWindow);
@@ -537,6 +559,55 @@ void Menu::Clear(bool clear_screen)
 	itsStaticsNumber = 0;
 	if (clear_screen)
 		Window::Clear();
+}
+
+void Menu::Select(int option, bool selected)
+{
+	option--;
+	try
+	{
+		if (itsOptions.at(option)->selected != selected)
+			NeedsRedraw.push_back(option);
+		itsOptions.at(option)->selected = selected;
+	}
+	catch (std::out_of_range)
+	{
+	}
+}
+
+bool Menu::Selected(int option)
+{
+	option--;
+	try
+	{
+		return itsOptions.at(option)->selected;
+	}
+	catch (std::out_of_range)
+	{
+		return false;
+	}
+}
+
+bool Menu::IsAnySelected()
+{
+	bool result = 0;
+	for (vector<Option *>::const_iterator it = itsOptions.begin(); it != itsOptions.end(); it++)
+	{
+		if ((*it)->selected)
+		{
+			result = 1;
+			break;
+		}
+	}
+	return result;
+}
+
+void Menu::GetSelectedList(vector<int> &v)
+{
+	int i = 1;
+	for (vector<Option *>::const_iterator it = itsOptions.begin(); it != itsOptions.end(); it++, i++)
+		if ((*it)->selected)
+			v.push_back(i);
 }
 
 int Menu::GetRealChoice() const

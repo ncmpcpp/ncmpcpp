@@ -30,6 +30,10 @@
 
 extern ncmpcpp_config Config;
 
+void DeleteSong(int);
+bool MoveSongUp(int);
+bool MoveSongDown(int);
+
 string DisplayKeys(int *, int = 2);
 bool Keypressed(int, const int *);
 bool SortSongsByTrack(Song *, Song *);

@@ -190,6 +190,9 @@ int main(int argc, char *argv[])
 		main_height++;
 	
 	mPlaylist = new Menu(0, main_start_y, COLS, main_height, "", Config.main_color, brNone);
+	mPlaylist->SetSelectPrefix(Config.selected_item_prefix);
+	mPlaylist->SetSelectSuffix(Config.selected_item_suffix);
+	
 	mBrowser = static_cast<Menu *>(mPlaylist->EmptyClone());
 	mTagEditor = static_cast<Menu *>(mPlaylist->EmptyClone());
 	mSearcher = static_cast<Menu *>(mPlaylist->EmptyClone());
@@ -253,11 +256,14 @@ int main(int argc, char *argv[])
 	
 	sHelp->Add("   [b]Keys - Playlist screen\n -----------------------------------------[/b]\n");
 	sHelp->Add(DisplayKeys(Key.Enter) + "Play\n");
-	sHelp->Add(DisplayKeys(Key.Delete) + "Delete song from playlist\n");
+	sHelp->Add(DisplayKeys(Key.Delete) + "Delete item/selected items from playlist\n");
+	sHelp->Add(DisplayKeys(Key.Space) + "Select/deselect item\n");
+	sHelp->Add(DisplayKeys(Key.ReverseSelection) + "Reverse selection\n");
+	sHelp->Add(DisplayKeys(Key.DeselectAll) + "Deselect all items\n");
 	sHelp->Add(DisplayKeys(Key.Clear) + "Clear whole playlist\n");
-	sHelp->Add(DisplayKeys(Key.Crop) + "Clear playlist but hold currently playing song\n");
-	sHelp->Add(DisplayKeys(Key.MvSongUp) + "Move song up\n");
-	sHelp->Add(DisplayKeys(Key.MvSongDown) + "Move song down\n");
+	sHelp->Add(DisplayKeys(Key.Crop) + "Clear playlist but hold currently playing/selected items\n");
+	sHelp->Add(DisplayKeys(Key.MvSongUp) + "Move item up\n");
+	sHelp->Add(DisplayKeys(Key.MvSongDown) + "Move item down\n");
 	sHelp->Add(DisplayKeys(Key.Add) + "Add url/file/directory to playlist\n");
 	sHelp->Add(DisplayKeys(Key.SavePlaylist) + "Save playlist\n");
 	sHelp->Add(DisplayKeys(Key.GoToNowPlaying) + "Go to currently playing position\n");
@@ -270,8 +276,8 @@ int main(int argc, char *argv[])
 	sHelp->Add(DisplayKeys(Key.Delete) + "Delete playlist\n\n\n");
 	
 	sHelp->Add("   [b]Keys - Search engine\n -----------------------------------------[/b]\n");
-	sHelp->Add(DisplayKeys(Key.Enter) + "Change option/Add to playlist and play song\n");
-	sHelp->Add(DisplayKeys(Key.Space) + "Add song to playlist\n\n\n");
+	sHelp->Add(DisplayKeys(Key.Enter) + "Change option/Add to playlist and play\n");
+	sHelp->Add(DisplayKeys(Key.Space) + "Add item to playlist\n\n\n");
 	
 	sHelp->Add("   [b]Keys - Media library\n -----------------------------------------[/b]\n");
 	sHelp->Add(DisplayKeys(&Key.VolumeDown[0], 1) + "Previous column\n");
@@ -841,6 +847,7 @@ int main(int argc, char *argv[])
 							TagLib::FileRef f(path_to_file.c_str());
 							if (!f.isNull())
 							{
+								ShowMessage("Updating tags...");
 								s.GetEmptyFields(1);
 								f.tag()->setTitle(NCMPCPP_TO_WSTRING(s.GetTitle()));
 								f.tag()->setArtist(NCMPCPP_TO_WSTRING(s.GetArtist()));
@@ -851,6 +858,7 @@ int main(int argc, char *argv[])
 								f.tag()->setComment(NCMPCPP_TO_WSTRING(s.GetComment()));
 								s.GetEmptyFields(0);
 								f.save();
+								ShowMessage("Tags updated!");
 								Mpd->UpdateDirectory(s.GetDirectory());
 								if (prev_screen == csSearcher)
 								{
@@ -1125,7 +1133,13 @@ int main(int argc, char *argv[])
 		}
 		else if (Keypressed(input, Key.Space))
 		{
-			if (current_screen == csBrowser)
+			if (current_screen == csPlaylist)
+			{
+				int i = mPlaylist->GetChoice();
+				mPlaylist->Select(i, !mPlaylist->Selected(i));
+				mPlaylist->Go(DOWN);
+			}
+			else if (current_screen == csBrowser)
 			{
 				int ci = mBrowser->GetChoice()-1;
 				switch (vBrowser[ci].type)
@@ -1241,27 +1255,32 @@ int main(int argc, char *argv[])
 		{
 			if (!mPlaylist->Empty() && current_screen == csPlaylist)
 			{
-				block_playlist_update = 1;
-				dont_change_now_playing = 1;
-				mPlaylist->Timeout(50);
-				int id = mPlaylist->GetChoice()-1;
-				
-				while (!vPlaylist.empty() && Keypressed(input, Key.Delete))
+				if (mPlaylist->IsAnySelected())
 				{
-					TraceMpdStatus();
-					timer = time(NULL);
-					id = mPlaylist->GetChoice()-1;
-					
-					Mpd->QueueDeleteSong(id);
-					delete vPlaylist[id];
-					vPlaylist.erase(vPlaylist.begin()+id);
-					mPlaylist->DeleteOption(id+1);
-					mPlaylist->Refresh();
-					mPlaylist->ReadKey(input);
+					vector<int> list;
+					mPlaylist->GetSelectedList(list);
+					for (vector<int>::const_reverse_iterator it = list.rbegin(); it != list.rend(); it++)
+						DeleteSong(*it-1);
+					ShowMessage("Selected items deleted!");
+					redraw_me = 1;
+				}
+				else
+				{
+					block_playlist_update = 1;
+					dont_change_now_playing = 1;
+					mPlaylist->Timeout(50);
+					while (!vPlaylist.empty() && Keypressed(input, Key.Delete))
+					{
+						TraceMpdStatus();
+						timer = time(NULL);
+						DeleteSong(mPlaylist->GetChoice()-1);
+						mPlaylist->Refresh();
+						mPlaylist->ReadKey(input);
+					}
+					mPlaylist->Timeout(ncmpcpp_window_timeout);
+					dont_change_now_playing = 0;
 				}
 				Mpd->CommitQueue();
-				mPlaylist->Timeout(ncmpcpp_window_timeout);
-				dont_change_now_playing = 0;
 			}
 			if (current_screen == csBrowser)
 			{
@@ -1323,58 +1342,44 @@ int main(int argc, char *argv[])
 		else if (Keypressed(input, Key.MvSongUp))
 		{
 			block_playlist_update = 1;
-			int pos = mPlaylist->GetChoice()-1;
-			if (pos > 0 && !mPlaylist->Empty() && current_screen == csPlaylist)
+			if (mPlaylist->IsAnySelected())
 			{
-				std::swap<Song *>(vPlaylist[pos], vPlaylist[pos-1]);
-				if (pos == now_playing)
+				vector<int> list;
+				mPlaylist->GetSelectedList(list);
+				mPlaylist->Highlight(list[(list.size()-1)/2]-1);
+				for (vector<int>::const_iterator it = list.begin(); it != list.end(); it++)
 				{
-					now_playing--;
-					mPlaylist->BoldOption(pos, 1);
-					mPlaylist->BoldOption(pos+1, 0);
-				}
-				else
-				{
-					if (pos-1 == now_playing)
+					if (!MoveSongUp(*it-1))
 					{
-						now_playing++;
-						mPlaylist->BoldOption(pos, 0);
-						mPlaylist->BoldOption(pos+1, 1);
+						mPlaylist->Go(DOWN);
+						break;
 					}
 				}
-				mPlaylist->UpdateOption(pos, DisplaySong(*vPlaylist[pos-1]));
-				mPlaylist->UpdateOption(pos+1, DisplaySong(*vPlaylist[pos]));
-				Mpd->Move(pos, pos-1);
-				mPlaylist->Go(UP);
 			}
+			else
+				if (MoveSongUp(mPlaylist->GetChoice()-1))
+					mPlaylist->Go(UP);
 		}
 		else if (Keypressed(input, Key.MvSongDown))
 		{
 			block_playlist_update = 1;
-			int pos = mPlaylist->GetChoice()-1;
-			if (pos+1 < vPlaylist.size() && !mPlaylist->Empty() && current_screen == csPlaylist)
+			if (mPlaylist->IsAnySelected())
 			{
-				std::swap<Song *>(vPlaylist[pos+1], vPlaylist[pos]);
-				if (pos == now_playing)
+				vector<int> list;
+				mPlaylist->GetSelectedList(list);
+				mPlaylist->Highlight(list[(list.size()-1)/2]+1);
+				for (vector<int>::const_reverse_iterator it = list.rbegin(); it != list.rend(); it++)
 				{
-					now_playing++;
-					mPlaylist->BoldOption(pos+1, 0);
-					mPlaylist->BoldOption(pos+2, 1);
-				}
-				else
-				{
-					if (pos+1 == now_playing)
+					if (!MoveSongDown(*it-1))
 					{
-						now_playing--;
-						mPlaylist->BoldOption(pos+1, 1);
-						mPlaylist->BoldOption(pos+2, 0);
+						mPlaylist->Go(UP);
+						break;
 					}
 				}
-				mPlaylist->UpdateOption(pos+2, DisplaySong(*vPlaylist[pos+1]));
-				mPlaylist->UpdateOption(pos+1, DisplaySong(*vPlaylist[pos]));
-				Mpd->Move(pos, pos+1);
-				mPlaylist->Go(DOWN);
 			}
+			else
+				if (MoveSongDown(mPlaylist->GetChoice()-1))
+					mPlaylist->Go(DOWN);
 		}
 		else if (Keypressed(input, Key.Add))
 		{
@@ -1550,20 +1555,57 @@ int main(int argc, char *argv[])
 				Mpd->Seek(vPlaylist[now_playing]->GetTotalLength()*newpos/100.0);
 			UNLOCK_STATUSBAR;
 		}
+		else if (Keypressed(input, Key.ReverseSelection))
+		{
+			if (current_screen == csPlaylist)
+			{
+				for (int i = 1; i <= mPlaylist->MaxChoice(); i++)
+					mPlaylist->Select(i, !mPlaylist->Selected(i));
+				ShowMessage("Selection reversed!");
+			}
+		}
+		else if (Keypressed(input, Key.DeselectAll))
+		{
+			if (current_screen == csPlaylist && mPlaylist->IsAnySelected())
+			{
+				for (int i = 1; i <= mPlaylist->MaxChoice(); i++)
+					mPlaylist->Select(i, 0);
+				ShowMessage("Items deselected!");
+			}
+		}
 		else if (Keypressed(input, Key.Crop))
 		{
-			if (now_playing < 0)
+			if (mPlaylist->IsAnySelected())
 			{
-				ShowMessage("Nothing is playing now!");
-				continue;
+				for (int i = 0; i < mPlaylist->MaxChoice(); i++)
+				{
+					if (!mPlaylist->Selected(i+1) && i != now_playing)
+						Mpd->QueueDeleteSongId(vPlaylist[i]->GetID());
+				}
+				// if mpd deletes now playing song deletion will be sluggishly slow
+				// then so we have to assure it will be deleted at the very end.
+				if (!mPlaylist->Selected(now_playing+1))
+					Mpd->QueueDeleteSongId(vPlaylist[now_playing]->GetID());
+				
+				ShowMessage("Deleting all items but selected...");
+				Mpd->CommitQueue();
+				ShowMessage("Items deleted!");
 			}
-			for (SongList::iterator it = vPlaylist.begin(); it != vPlaylist.begin()+now_playing; it++)
-				Mpd->QueueDeleteSongId((*it)->GetID());
-			for (SongList::iterator it = vPlaylist.begin()+now_playing+1; it != vPlaylist.end(); it++)
-				Mpd->QueueDeleteSongId((*it)->GetID());
-			ShowMessage("Deleting all songs except now playing one...");
-			Mpd->CommitQueue();
-			ShowMessage("Songs deleted!");
+			else
+			{
+				if (now_playing < 0)
+				{
+					ShowMessage("Nothing is playing now!");
+					continue;
+				}
+				for (SongList::iterator it = vPlaylist.begin(); it != vPlaylist.begin()+now_playing; it++)
+					Mpd->QueueDeleteSongId((*it)->GetID());
+				for (SongList::iterator it = vPlaylist.begin()+now_playing+1; it != vPlaylist.end(); it++)
+					Mpd->QueueDeleteSongId((*it)->GetID());
+				ShowMessage("Deleting all items except now playing one...");
+				Mpd->CommitQueue();
+				ShowMessage("Items deleted!");
+			}
 		}
 		else if (Keypressed(input, Key.Clear))
 		{

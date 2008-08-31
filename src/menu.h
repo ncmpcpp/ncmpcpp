@@ -33,9 +33,11 @@ enum LOCATION { lLeft, lCenter, lRight };
 
 struct Option
 {
+	Option() : is_static(0), is_bold(0), selected(0), have_separator(0) { }
 	string content;
 	bool is_static;
 	bool is_bold;
+	bool selected;
 	bool have_separator;
 	LOCATION location;
 };
@@ -43,7 +45,7 @@ struct Option
 class Menu : public Window
 {
 	public:
-		Menu(int startx, int starty, int width, int height, string title, COLOR color, BORDER border) : Window(startx, starty, width, height, title, color, border), itsStaticsNumber(0), itsBeginning(0), itsHighlight(0), itsHighlightColor(itsBaseColor), itsHighlightEnabled(1) { SetColor(color); }
+		Menu(int startx, int starty, int width, int height, string title, COLOR color, BORDER border) : Window(startx, starty, width, height, title, color, border), itsSelectedPrefix("[r]"), itsSelectedSuffix("[/r]"), itsStaticsNumber(0), itsBeginning(0), itsHighlight(0), itsHighlightColor(itsBaseColor), itsHighlightEnabled(1) { SetColor(color); }
 		virtual ~Menu();
 		
 		virtual void Add(string str) { AddOption(str); }
@@ -56,6 +58,7 @@ class Menu : public Window
 		void BoldOption(int, IS_BOLD);
 		void MakeStatic(int, IS_STATIC);
 		void DeleteOption(int);
+		void Swap(int, int);
 		string GetCurrentOption() const;
 		string GetOption(int i) const;
 		
@@ -65,6 +68,13 @@ class Menu : public Window
 		void Highlight(int);
 		virtual void Reset();
 		virtual void Clear(bool clear_screen = 1);
+		
+		void Select(int, bool);
+		bool Selected(int);
+		bool IsAnySelected();
+		void SetSelectPrefix(string str) { itsSelectedPrefix = str; }
+		void SetSelectSuffix(string str) { itsSelectedSuffix = str; }
+		void GetSelectedList(vector<int> &);
 		
 		void HighlightColor(COLOR col) { itsHighlightColor = col; NeedsRedraw.push_back(itsHighlight); }
 		void Highlighting(bool hl) { itsHighlightEnabled = hl; NeedsRedraw.push_back(itsHighlight); Refresh(); }
@@ -81,6 +91,9 @@ class Menu : public Window
 	protected:
 		vector<Option *> itsOptions;
 		vector<int> NeedsRedraw;
+		
+		string itsSelectedPrefix;
+		string itsSelectedSuffix;
 		
 		int itsStaticsNumber;
 		int count_length(string);

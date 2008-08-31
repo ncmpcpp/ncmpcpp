@@ -65,6 +65,8 @@ void DefaultKeys(ncmpcpp_keys &keys)
 	keys.EditTags[0] = 'e';
 	keys.GoToPosition[0] = 'g';
 	keys.Lyrics[0] = 'l';
+	keys.ReverseSelection[0] = 'v';
+	keys.DeselectAll[0] = 'V';
 	keys.Clear[0] = 'c';
 	keys.Crop[0] = 'C';
 	keys.MvSongUp[0] = 'm';
@@ -114,6 +116,8 @@ void DefaultKeys(ncmpcpp_keys &keys)
 	keys.EditTags[1] = null_key;
 	keys.GoToPosition[1] = null_key;
 	keys.Lyrics[1] = null_key;
+	keys.ReverseSelection[1] = null_key;
+	keys.DeselectAll[1] = null_key;
 	keys.Clear[1] = null_key;
 	keys.Crop[1] = null_key;
 	keys.MvSongUp[1] = null_key;
@@ -134,6 +138,8 @@ void DefaultConfiguration(ncmpcpp_config &conf)
 	conf.song_window_title_format = "{%a - }{%t}|{%f}";
 	conf.song_library_format = "{%n - }{%t}|{%f}";
 	conf.browser_playlist_prefix = "[red](playlist)[/red] ";
+	conf.selected_item_prefix = "[magenta]";
+	conf.selected_item_suffix = "[/magenta]";
 	conf.empty_tags_color = clCyan;
 	conf.header_color = clDefault;
 	conf.volume_color = clDefault;
@@ -341,6 +347,10 @@ void ReadKeys(ncmpcpp_keys &keys)
 				GetKeys(*it, keys.GoToPosition);
 			else if (it->find("key_lyrics ") != string::npos)
 				GetKeys(*it, keys.Lyrics);
+			else if (it->find("key_reverse_selection ") != string::npos)
+				GetKeys(*it, keys.ReverseSelection);
+			else if (it->find("key_deselect_all ") != string::npos)
+				GetKeys(*it, keys.DeselectAll);
 			else if (it->find("key_clear ") != string::npos)
 				GetKeys(*it, keys.Clear);
 			else if (it->find("key_crop ") != string::npos)
@@ -386,105 +396,129 @@ void ReadConfiguration(ncmpcpp_config &conf)
 			v = GetConfigLineValue(*it);
 			
 			if (it->find("mpd_music_dir") != string::npos)
+			{
 				if (!v.empty())
 					conf.mpd_music_dir = v;
-			
-			if (it->find("mpd_connection_timeout") != string::npos)
+			}
+			else if (it->find("mpd_connection_timeout") != string::npos)
+			{
 				if (StrToInt(v))
 					conf.mpd_connection_timeout = StrToInt(v);
-			
-			if (it->find("mpd_crossfade_time") != string::npos)
+			}
+			else if (it->find("mpd_crossfade_time") != string::npos)
+			{
 				if (StrToInt(v) > 0)
 					conf.crossfade_time = StrToInt(v);
-			
-			if (it->find("playlist_disable_highlight_delay") != string::npos)
+			}
+			else if (it->find("playlist_disable_highlight_delay") != string::npos)
+			{
 				if (StrToInt(v) >= 0)
 					conf.playlist_disable_highlight_delay = StrToInt(v);
-			
-			if (it->find("message_delay_time") != string::npos)
+			}
+			else if (it->find("message_delay_time") != string::npos)
+			{
 				if (StrToInt(v) > 0)
 					conf.message_delay_time = StrToInt(v);
-			
-			if (it->find("song_list_format") != string::npos)
-				 if (!v.empty())
+			}
+			else if (it->find("song_list_format") != string::npos)
+			{
+				if (!v.empty())
 					conf.song_list_format = v;
-			
-			if (it->find("song_status_format") != string::npos)
+			}
+			else if (it->find("song_status_format") != string::npos)
+			{
 				if (!v.empty())
 					conf.song_status_format = v;
-			
-			if (it->find("song_library_format") != string::npos)
+			}
+			else if (it->find("song_library_format") != string::npos)
+			{
 				if (!v.empty())
 					conf.song_library_format = v;
-			
-			if (it->find("browser_playlist_prefix") != string::npos)
+			}
+			else if (it->find("browser_playlist_prefix") != string::npos)
+			{
 				if (!v.empty())
 					conf.browser_playlist_prefix = v;
-			
-			if (it->find("colors_enabled") != string::npos)
+			}
+			else if (it->find("selected_item_prefix") != string::npos)
+			{
+				if (!v.empty())
+					conf.selected_item_prefix = v;
+			}
+			else if (it->find("selected_item_suffix") != string::npos)
+			{
+				if (!v.empty())
+					conf.selected_item_suffix = v;
+			}
+			else if (it->find("colors_enabled") != string::npos)
 				conf.colors_enabled = v == "yes";
-			
-			if (it->find("header_visibility") != string::npos)
+			else if (it->find("header_visibility") != string::npos)
 				conf.header_visibility = v == "yes";
-			
-			if (it->find("statusbar_visibility") != string::npos)
+			else if (it->find("statusbar_visibility") != string::npos)
 				conf.statusbar_visibility = v == "yes";
-			
-			if (it->find("autocenter_mode") != string::npos)
+			else if (it->find("autocenter_mode") != string::npos)
 				conf.autocenter_mode = v == "yes";
-			
-			if (it->find("repeat_one_mode") != string::npos)
+			else if (it->find("repeat_one_mode") != string::npos)
 				conf.repeat_one_mode = v == "yes";
-			
-			if (it->find("find_mode") != string::npos)
+			else if (it->find("find_mode") != string::npos)
 				conf.wrapped_search = v == "wrapped";
-			
-			if (it->find("enable_window_title") != string::npos)
+			else if (it->find("enable_window_title") != string::npos)
 				conf.set_window_title = v == "yes";
-			
-			if (it->find("song_window_title_format") != string::npos)
+			else if (it->find("song_window_title_format") != string::npos)
+			{
 				if (!v.empty())
 					conf.song_window_title_format = v;
-			
-			if (it->find("empty_tag_color") != string::npos)
+			}
+			else if (it->find("empty_tag_color") != string::npos)
+			{
 				if (!v.empty())
 					conf.empty_tags_color = IntoColor(v);
-			
-			if (it->find("header_window_color") != string::npos)
+			}
+			else if (it->find("header_window_color") != string::npos)
+			{
 				if (!v.empty())
 					conf.header_color = IntoColor(v);
-			
-			if (it->find("volume_color") != string::npos)
+			}
+			else if (it->find("volume_color") != string::npos)
+			{
 				if (!v.empty())
 					conf.volume_color = IntoColor(v);
-			
-			if (it->find("state_line_color") != string::npos)
+			}
+			else if (it->find("state_line_color") != string::npos)
+			{
 				if (!v.empty())
 					conf.state_line_color = IntoColor(v);
-			
-			if (it->find("state_flags_color") != string::npos)
+			}
+			else if (it->find("state_flags_color") != string::npos)
+			{
 				if (!v.empty())
 					conf.state_flags_color = IntoColor(v);
-			
-			if (it->find("main_window_color") != string::npos)
+			}
+			else if (it->find("main_window_color") != string::npos)
+			{
 				if (!v.empty())
 					conf.main_color = IntoColor(v);
-			
-			if (it->find("main_window_highlight_color") != string::npos)
+			}
+			else if (it->find("main_window_highlight_color") != string::npos)
+			{
 				if (!v.empty())
 					conf.main_highlight_color = IntoColor(v);
-			
-			if (it->find("progressbar_color") != string::npos)
+			}
+			else if (it->find("progressbar_color") != string::npos)
+			{
 				if (!v.empty())
 					conf.progressbar_color = IntoColor(v);
-			
-			if (it->find("statusbar_color") != string::npos)
+			}
+			else if (it->find("statusbar_color") != string::npos)
+			{
 				if (!v.empty())
 					conf.statusbar_color = IntoColor(v);
-			
-			if (it->find("library_active_column_color") != string::npos)
+			}
+			else if (it->find("library_active_column_color") != string::npos)
+			{
 				if (!v.empty())
 					conf.library_active_column_color = IntoColor(v);
+			}
 		}
 		f.close();
 	}

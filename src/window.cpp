@@ -299,9 +299,8 @@ void Window::Write(int limit, const string &str, CLEAR_TO_EOL clrtoeol)
 				tmp.clear();
 				if (is_valid_color(color))
 				{
-					const COLOR *colors = into_color(color);
-					SetColor(colors[0],colors[1]);
-					delete [] colors;
+					std::pair<COLOR, COLOR> colors = into_color(color);
+					SetColor(colors.first, colors.second);
 				}
 				else
 				{
@@ -361,11 +360,10 @@ void Window::Write(int limit, const wstring &str, CLEAR_TO_EOL clrtoeol)
 			{
 				waddwstr(itsWindow,tmp.c_str());
 				tmp.clear();
-				if (is_valid_color(ToString(color.c_str())))
+				if (is_valid_color(ToString(color)))
 				{
-					const COLOR *colors = into_color(ToString(color.c_str()));
-					SetColor(colors[0],colors[1]);
-					delete [] colors;
+					std::pair<COLOR, COLOR> colors = into_color(ToString(color));
+					SetColor(colors.first, colors.second);
 				}
 				else
 				{

@@ -25,6 +25,7 @@ extern MPDConnection *Mpd;
 
 extern ncmpcpp_config Config;
 
+extern Menu *mPlaylist;
 extern Menu *mBrowser;
 extern Menu *mTagEditor;
 extern Menu *mSearcher;
@@ -60,6 +61,40 @@ extern string EMPTY_TAG;
 extern string UNKNOWN_ARTIST;
 extern string UNKNOWN_TITLE;
 extern string UNKNOWN_ALBUM;
+
+void DeleteSong(int id)
+{
+	Mpd->QueueDeleteSong(id);
+	delete vPlaylist[id];
+	vPlaylist.erase(vPlaylist.begin()+id);
+	mPlaylist->DeleteOption(id+1);
+}
+
+bool MoveSongUp(int pos)
+{
+	if (pos > 0 && !mPlaylist->Empty() && current_screen == csPlaylist)
+	{
+		std::swap<Song *>(vPlaylist[pos], vPlaylist[pos-1]);
+		mPlaylist->Swap(pos, pos-1);
+		Mpd->Move(pos, pos-1);
+		return true;
+	}
+	else
+		return false;
+}
+
+bool MoveSongDown(int pos)
+{
+	if (pos+1 < vPlaylist.size() && !mPlaylist->Empty() && current_screen == csPlaylist)
+	{
+		std::swap<Song *>(vPlaylist[pos+1], vPlaylist[pos]);
+		mPlaylist->Swap(pos+1, pos);
+		Mpd->Move(pos, pos+1);
+		return true;
+	}
+	else
+		return false;
+}
 
 string DisplayKeys(int *key, int size)
 {
@@ -631,14 +666,14 @@ bool GetSongInfo(Song &s)
 	mTagEditor->Clear();
 	mTagEditor->Reset();
 	
-	mTagEditor->AddStaticOption("[b][white]Song name: [green][/b]" + s.GetShortFilename());
-	mTagEditor->AddStaticOption("[b][white]Location in DB: [green][/b]" + s.GetDirectory());
+	mTagEditor->AddStaticOption("[b][white]Song name: [/white][green][/b]" + s.GetShortFilename() + "[/green]");
+	mTagEditor->AddStaticOption("[b][white]Location in DB: [/white][green][/b]" + s.GetDirectory() + "[/green]");
 	mTagEditor->AddStaticOption("");
-	mTagEditor->AddStaticOption("[b][white]Length: [green][/b]" + s.GetLength() + "[/green]");
+	mTagEditor->AddStaticOption("[b][white]Length: [/white][green][/b]" + s.GetLength() + "[/green]");
 #	ifdef HAVE_TAGLIB_H
-	mTagEditor->AddStaticOption("[b][white]Bitrate: [green][/b]" + IntoStr(f.audioProperties()->bitrate()) + " kbps");
-	mTagEditor->AddStaticOption("[b][white]Sample rate: [green][/b]" + IntoStr(f.audioProperties()->sampleRate()) + " Hz");
-	mTagEditor->AddStaticOption("[b][white]Channels: [green][/b]" + (string)(f.audioProperties()->channels() == 1 ? "Mono" : "Stereo") + "[/green]");
+	mTagEditor->AddStaticOption("[b][white]Bitrate: [/white][green][/b]" + IntoStr(f.audioProperties()->bitrate()) + " kbps[/green]");
+	mTagEditor->AddStaticOption("[b][white]Sample rate: [/white][green][/b]" + IntoStr(f.audioProperties()->sampleRate()) + " Hz[/green]");
+	mTagEditor->AddStaticOption("[b][white]Channels: [/white][green][/b]" + (string)(f.audioProperties()->channels() == 1 ? "Mono" : "Stereo") + "[/green]");
 #	endif
 	
 	mTagEditor->AddSeparator();

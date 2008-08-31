@@ -89,6 +89,10 @@
 #
 #key_lyrics = 'l'
 #
+#key_reverse_selection = 'v'
+#
+#key_deselect_all = 'V'
+#
 #key_clear = 'c'
 #
 #key_crop = 'C'
