@@ -61,6 +61,7 @@ class Window
 {
 	public:
 		Window(int, int, int, int, string, COLOR, BORDER);
+		Window(const Window &);
 		virtual ~Window();
 		virtual WINDOW *RawWin() { return itsWindow; }
 		virtual void SetColor(COLOR, COLOR = clDefault);
@@ -107,6 +108,7 @@ class Window
 		virtual COLOR GetColor() const;
 		virtual BORDER GetBorder() const;
 		
+		virtual Window * Clone() { return new Window(*this); }
 		virtual Window * EmptyClone();
 		
 		virtual void Go(WHERE) { } // for Menu and Scrollpad class

@@ -35,6 +35,8 @@
 #
 #key_volume_down = 260 '-'
 #
+#key_toggle_space_mode = 't'
+#
 #key_screen_switcher = 9
 #
 #key_help = '1' 265
@@ -46,6 +48,8 @@
 #key_search_engine = '4' 268
 #
 #key_media_library = '5' 269
+#
+#key_playlist_editor = '6' 270
 #
 #key_stop = 's'
 #
@@ -92,6 +96,8 @@
 #key_reverse_selection = 'v'
 #
 #key_deselect_all = 'V'
+#
+#key_add_selected_items = 'A'
 #
 #key_clear = 'c'
 #

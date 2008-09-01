@@ -29,10 +29,12 @@ extern Menu *mPlaylist;
 extern Menu *mBrowser;
 extern Menu *mTagEditor;
 extern Menu *mSearcher;
+extern Menu *mPlaylistEditor;
 
 extern Window *wFooter;
 
 extern SongList vPlaylist;
+extern SongList vPlaylistContent;
 extern ItemList vBrowser;
 
 extern NcmpcppScreen current_screen;
@@ -70,6 +72,14 @@ void DeleteSong(int id)
 	mPlaylist->DeleteOption(id+1);
 }
 
+void PlaylistDeleteSong(const string &path, int id)
+{
+	Mpd->QueueDeleteFromPlaylist(path, id);
+	delete vPlaylistContent[id];
+	vPlaylistContent.erase(vPlaylistContent.begin()+id);
+	mPlaylistEditor->DeleteOption(id+1);
+}
+
 bool MoveSongUp(int pos)
 {
 	if (pos > 0 && !mPlaylist->Empty() && current_screen == csPlaylist)
@@ -90,6 +100,30 @@ bool MoveSongDown(int pos)
 		std::swap<Song *>(vPlaylist[pos+1], vPlaylist[pos]);
 		mPlaylist->Swap(pos+1, pos);
 		Mpd->Move(pos, pos+1);
+		return true;
+	}
+	else
+		return false;
+}
+
+bool PlaylistMoveSongUp(const string &path, int pos)
+{
+	if (pos > 0 && !mPlaylistEditor->Empty() && current_screen == csPlaylistEditor)
+	{
+		mPlaylistEditor->Swap(pos, pos-1);
+		Mpd->Move(path, pos, pos-1);
+		return true;
+	}
+	else
+		return false;
+}
+
+bool PlaylistMoveSongDown(const string &path, int pos)
+{
+	if (pos+1 < mPlaylistEditor->MaxChoice() && !mPlaylistEditor->Empty() && current_screen == csPlaylistEditor)
+	{
+		mPlaylistEditor->Swap(pos+1, pos);
+		Mpd->Move(path, pos, pos+1);
 		return true;
 	}
 	else

@@ -49,6 +49,25 @@ Window::Window(int startx, int starty, int width, int height, string title, COLO
 	SetColor(itsColor);
 }
 
+Window::Window(const Window &w)
+{
+	itsWindow = dupwin(w.itsWindow);
+	itsWinBorder = dupwin(w.itsWinBorder);
+	itsStartX = w.itsStartX;
+	itsStartY = w.itsStartY;
+	itsWidth = w.itsWidth;
+	itsHeight = w.itsHeight;
+	BBEnabled = w.BBEnabled;
+	AutoRefreshEnabled = w.AutoRefreshEnabled;
+	itsTitle = w.itsTitle;
+	itsColors = w.itsColors;
+	itsColor = w.itsColor;
+	itsBaseColor = w.itsBaseColor;
+	itsBgColor = w.itsBgColor;
+	itsBaseBgColor = w.itsBaseBgColor;
+	itsBorder = w.itsBorder;
+}
+
 Window::~Window()
 {
 	delwin(itsWindow);
@@ -193,6 +212,7 @@ void Window::show_border() const
 			attron(COLOR_PAIR(itsBaseColor));
 		mvhline(itsStartY-1, itsStartX, 0, itsWidth);
 		attron(A_BOLD);
+		mvhline(itsStartY-2, itsStartX, 32, itsWidth); // clear title line
 		mvaddstr(itsStartY-2, itsStartX, itsTitle.c_str());
 		attroff(COLOR_PAIR(itsBorder) | A_BOLD);
 	}

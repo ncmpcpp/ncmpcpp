@@ -80,7 +80,9 @@
 #
 #repeat_one_mode = "no"
 #
-#find_mode = "wrapped"
+#default_find_mode = "wrapped"
+#
+#default_space_mode = "add"
 #
 #header_visibility = "yes"
 #
@@ -110,5 +112,5 @@
 #
 #statusbar_color = "default"
 #
-#library_active_column_color = "red"
+#active_column_color = "red"
 #

@@ -50,6 +50,11 @@
 			mvvline(main_start_y, lib_songs_start_x-1, 0, main_height); \
 			mLibSongs->Display(redraw_me)
 
+#define REFRESH_PLAYLIST_EDITOR_SCREEN \
+			mPlaylistList->Display(redraw_me); \
+			mvvline(main_start_y, lib_albums_start_x-1, 0, main_height); \
+			mPlaylistEditor->Display(redraw_me)
+
 #ifdef HAVE_TAGLIB_H
  const string tag_screen = "Tag editor";
  const string tag_screen_keydesc = "Edit song's tags\n";
@@ -63,10 +68,12 @@ ncmpcpp_keys Key;
 
 SongList vPlaylist;
 SongList vSearched;
-ItemList vBrowser;
+SongList vLibSongs;
+SongList vPlaylistContent;
 
+ItemList vBrowser;
 TagList vArtists;
-SongList vSongs;
+
 
 vector<int> vFoundPositions;
 int found_pos = 0;
@@ -80,6 +87,8 @@ Menu *mSearcher;
 Menu *mLibArtists;
 Menu *mLibAlbums;
 Menu *mLibSongs;
+Menu *mPlaylistList;
+Menu *mPlaylistEditor;
 Scrollpad *sHelp;
 Scrollpad *sLyrics;
 
@@ -128,7 +137,6 @@ bool block_progressbar_update = 0;
 bool block_statusbar_update = 0;
 bool allow_statusbar_unblock = 1;
 bool block_playlist_update = 0;
-bool block_library_update = 0;
 
 bool search_case_sensitive = 1;
 bool search_mode_match = 1;
@@ -193,9 +201,9 @@ int main(int argc, char *argv[])
 	mPlaylist->SetSelectPrefix(Config.selected_item_prefix);
 	mPlaylist->SetSelectSuffix(Config.selected_item_suffix);
 	
-	mBrowser = static_cast<Menu *>(mPlaylist->EmptyClone());
-	mTagEditor = static_cast<Menu *>(mPlaylist->EmptyClone());
-	mSearcher = static_cast<Menu *>(mPlaylist->EmptyClone());
+	mBrowser = static_cast<Menu *>(mPlaylist->Clone());
+	mTagEditor = static_cast<Menu *>(mPlaylist->Clone());
+	mSearcher = static_cast<Menu *>(mPlaylist->Clone());
 	
 	int lib_artist_width = COLS/3-1;
 	int lib_albums_width = COLS/3;
@@ -206,6 +214,13 @@ int main(int argc, char *argv[])
 	mLibArtists = new Menu(0, main_start_y, lib_artist_width, main_height, "Artists", Config.main_color, brNone);
 	mLibAlbums = new Menu(lib_albums_start_x, main_start_y, lib_albums_width, main_height, "Albums", Config.main_color, brNone);
 	mLibSongs = new Menu(lib_songs_start_x, main_start_y, lib_songs_width, main_height, "Songs", Config.main_color, brNone);
+	mLibSongs->SetSelectPrefix(Config.selected_item_prefix);
+	mLibSongs->SetSelectSuffix(Config.selected_item_suffix);
+	
+	mPlaylistList = new Menu(0, main_start_y, lib_artist_width, main_height, "Playlists", Config.main_color, brNone);
+	mPlaylistEditor = new Menu(lib_albums_start_x, main_start_y, lib_albums_width+lib_songs_width+1, main_height, "Playlist's content", Config.main_color, brNone);
+	mPlaylistEditor->SetSelectPrefix(Config.selected_item_prefix);
+	mPlaylistEditor->SetSelectSuffix(Config.selected_item_suffix);
 	
 	sHelp = new Scrollpad(0, main_start_y, COLS, main_height, "", Config.main_color, brNone);
 	sLyrics = static_cast<Scrollpad *>(sHelp->EmptyClone());
@@ -223,7 +238,8 @@ int main(int argc, char *argv[])
 	sHelp->Add(DisplayKeys(Key.Playlist) + "Playlist screen\n");
 	sHelp->Add(DisplayKeys(Key.Browser) + "Browse screen\n");
 	sHelp->Add(DisplayKeys(Key.SearchEngine) + "Search engine\n");
-	sHelp->Add(DisplayKeys(Key.MediaLibrary) + "Media library\n\n\n");
+	sHelp->Add(DisplayKeys(Key.MediaLibrary) + "Media library\n");
+	sHelp->Add(DisplayKeys(Key.PlaylistEditor) + "Playlist editor\n\n\n");
 	
 	sHelp->Add("   [b]Keys - Global\n -----------------------------------------[/b]\n");
 	sHelp->Add(DisplayKeys(Key.Stop) + "Stop\n");
@@ -234,6 +250,11 @@ int main(int argc, char *argv[])
 	sHelp->Add(DisplayKeys(Key.SeekBackward) + "Seek backward\n");
 	sHelp->Add(DisplayKeys(Key.VolumeDown) + "Decrease volume\n");
 	sHelp->Add(DisplayKeys(Key.VolumeUp) + "Increase volume\n\n");
+	
+	sHelp->Add(DisplayKeys(Key.ToggleSpaceMode) + "Toggle space mode (select/add items)\n");
+	sHelp->Add(DisplayKeys(Key.ReverseSelection) + "Reverse selection\n");
+	sHelp->Add(DisplayKeys(Key.DeselectAll) + "Deselect all items\n");
+	sHelp->Add(DisplayKeys(Key.AddSelected) + "Add selected items to playlist/m3u file\n\n");
 	
 	sHelp->Add(DisplayKeys(Key.ToggleRepeat) + "Toggle repeat mode\n");
 	sHelp->Add(DisplayKeys(Key.ToggleRepeatOne) + "Toggle \"repeat one\" mode\n");
@@ -247,7 +268,7 @@ int main(int argc, char *argv[])
 	sHelp->Add(DisplayKeys(Key.FindBackward) + "Backward find\n");
 	sHelp->Add(DisplayKeys(Key.PrevFoundPosition) + "Go to previous found position\n");
 	sHelp->Add(DisplayKeys(Key.NextFoundPosition) + "Go to next found position\n");
-	sHelp->Add(DisplayKeys(Key.ToggleFindMode) + "Toggle find mode\n");
+	sHelp->Add(DisplayKeys(Key.ToggleFindMode) + "Toggle find mode (normal/wrapped)\n");
 	sHelp->Add(DisplayKeys(Key.EditTags) + tag_screen_keydesc);
 	sHelp->Add(DisplayKeys(Key.GoToPosition) + "Go to chosen position in current song\n");
 	sHelp->Add(DisplayKeys(Key.Lyrics) + "Show/hide song's lyrics\n\n");
@@ -257,9 +278,6 @@ int main(int argc, char *argv[])
 	sHelp->Add("   [b]Keys - Playlist screen\n -----------------------------------------[/b]\n");
 	sHelp->Add(DisplayKeys(Key.Enter) + "Play\n");
 	sHelp->Add(DisplayKeys(Key.Delete) + "Delete item/selected items from playlist\n");
-	sHelp->Add(DisplayKeys(Key.Space) + "Select/deselect item\n");
-	sHelp->Add(DisplayKeys(Key.ReverseSelection) + "Reverse selection\n");
-	sHelp->Add(DisplayKeys(Key.DeselectAll) + "Deselect all items\n");
 	sHelp->Add(DisplayKeys(Key.Clear) + "Clear whole playlist\n");
 	sHelp->Add(DisplayKeys(Key.Crop) + "Clear playlist but hold currently playing/selected items\n");
 	sHelp->Add(DisplayKeys(Key.MvSongUp) + "Move item up\n");
@@ -323,15 +341,18 @@ int main(int argc, char *argv[])
 	mLibSongs->Timeout(ncmpcpp_window_timeout);
 	sLyrics->Timeout(ncmpcpp_window_timeout);
 	wFooter->Timeout(ncmpcpp_window_timeout);
+	mPlaylistList->Timeout(ncmpcpp_window_timeout);
+	mPlaylistEditor->Timeout(ncmpcpp_window_timeout);
 	
 	mPlaylist->HighlightColor(Config.main_highlight_color);
 	mBrowser->HighlightColor(Config.main_highlight_color);
 	mTagEditor->HighlightColor(Config.main_highlight_color);
 	mSearcher->HighlightColor(Config.main_highlight_color);
 	mLibArtists->HighlightColor(Config.main_highlight_color);
-	mLibArtists->HighlightColor(Config.main_highlight_color);
 	mLibAlbums->HighlightColor(Config.main_highlight_color);
 	mLibSongs->HighlightColor(Config.main_highlight_color);
+	mPlaylistList->HighlightColor(Config.main_highlight_color);
+	mPlaylistEditor->HighlightColor(Config.main_highlight_color);
 	
 	Mpd->SetStatusUpdater(NcmpcppStatusChanged, NULL);
 	Mpd->SetErrorHandler(NcmpcppErrorCallback, NULL);
@@ -380,6 +401,9 @@ int main(int argc, char *argv[])
 				case csLyrics:
 					title = song_lyrics;
 					break;
+				case csPlaylistEditor:
+					title = "Playlist editor";
+					break;
 			}
 		
 			if (title_allowed)
@@ -417,26 +441,33 @@ int main(int argc, char *argv[])
 				}
 			}
 			else
-				wHeader->WriteXY(0, 0, max_allowed_title_length, "[b]1:[/b]Help  [b]2:[/b]Playlist  [b]3:[/b]Browse  [b]4:[/b]Search  [b]5:[/b]Library", 1);
+				wHeader->WriteXY(0, 0, max_allowed_title_length, "[b]1:[/b]Help  [b]2:[/b]Playlist  [b]3:[/b]Browse  [b]4:[/b]Search  [b]5:[/b]Library [b]6:[/b]Playlist editor", 1);
 		
 			wHeader->SetColor(Config.volume_color);
 			wHeader->WriteXY(max_allowed_title_length, 0, volume_state);
 			wHeader->SetColor(Config.header_color);
 		}
 		
-		if (current_screen == csLibrary && !block_library_update)
+		// media library stuff
+		
+		if (current_screen == csLibrary)
 		{
-			if (wCurrent == mLibAlbums && mLibAlbums->Empty())
+			if (mLibArtists->Empty())
 			{
-				mLibAlbums->HighlightColor(Config.main_highlight_color);
-				mLibArtists->HighlightColor(Config.library_active_column_color);
-				wCurrent = mLibArtists;
+				mLibAlbums->Clear(0);
+				vArtists.clear();
+				Mpd->GetArtists(vArtists);
+				sort(vArtists.begin(), vArtists.end(), CaseInsensitiveComparison);
+				for (TagList::const_iterator it = vArtists.begin(); it != vArtists.end(); it++)
+					mLibArtists->AddOption(*it);
+				mLibArtists->Window::Clear();
+				mLibArtists->Refresh();
 			}
 			
-			if (wCurrent == mLibArtists)
+			if (mLibAlbums->Empty())
 			{
+				mLibSongs->Clear(0);
 				TagList list;
-				mLibAlbums->Clear(0);
 				Mpd->GetAlbums(mLibArtists->GetCurrentOption(), list);
 				for (TagList::iterator it = list.begin(); it != list.end(); it++)
 				{
@@ -459,57 +490,103 @@ int main(int argc, char *argv[])
 				for (TagList::const_iterator it = list.begin(); it != list.end(); it++)
 					mLibAlbums->AddOption(*it);
 				mLibAlbums->Window::Clear();
+				mLibAlbums->Refresh();
 			}
 			
-			FreeSongList(vSongs);
-			
-			if (mLibAlbums->Empty())
+			if (wCurrent == mLibAlbums && mLibAlbums->Empty())
 			{
-				mLibAlbums->WriteXY(0, 0, "No albums found.");
-				mLibSongs->Clear(0);
-				Mpd->StartSearch(1);
-				Mpd->AddSearch(MPD_TAG_ITEM_ARTIST, mLibArtists->GetCurrentOption());
-				Mpd->CommitSearch(vSongs);
+				mLibAlbums->HighlightColor(Config.main_highlight_color);
+				mLibArtists->HighlightColor(Config.active_column_color);
+				wCurrent = mLibArtists;
 			}
-			else
+			
+			if (mLibSongs->Empty())
 			{
-				mLibSongs->Clear(0);
-				Mpd->StartSearch(1);
-				Mpd->AddSearch(MPD_TAG_ITEM_ARTIST, mLibArtists->GetCurrentOption());
-				Mpd->AddSearch(MPD_TAG_ITEM_ALBUM, mLibAlbums->GetCurrentOption());
-				Mpd->CommitSearch(vSongs);
-				if (vSongs.empty())
+				FreeSongList(vLibSongs);
+				if (mLibAlbums->Empty())
 				{
-					const string &album = mLibAlbums->GetCurrentOption();
+					mLibAlbums->WriteXY(0, 0, "No albums found.");
+					mLibSongs->Clear(0);
 					Mpd->StartSearch(1);
 					Mpd->AddSearch(MPD_TAG_ITEM_ARTIST, mLibArtists->GetCurrentOption());
-					Mpd->AddSearch(MPD_TAG_ITEM_ALBUM, album.substr(7, album.length()-7));
-					Mpd->CommitSearch(vSongs);
+					Mpd->CommitSearch(vLibSongs);
 				}
-			}
-			sort(vSongs.begin(), vSongs.end(), SortSongsByTrack);
-			bool bold = 0;
-			
-			for (SongList::const_iterator it = vSongs.begin(); it != vSongs.end(); it++)
-			{
-				for (SongList::const_iterator j = vPlaylist.begin(); j != vPlaylist.end(); j++)
+				else
 				{
-					if ((*it)->GetHash() == (*j)->GetHash())
+					mLibSongs->Clear(0);
+					Mpd->StartSearch(1);
+					Mpd->AddSearch(MPD_TAG_ITEM_ARTIST, mLibArtists->GetCurrentOption());
+					Mpd->AddSearch(MPD_TAG_ITEM_ALBUM, mLibAlbums->GetCurrentOption());
+					Mpd->CommitSearch(vLibSongs);
+					if (vLibSongs.empty())
 					{
-						bold = 1;
-						break;
+						const string &album = mLibAlbums->GetCurrentOption();
+						Mpd->StartSearch(1);
+						Mpd->AddSearch(MPD_TAG_ITEM_ARTIST, mLibArtists->GetCurrentOption());
+						Mpd->AddSearch(MPD_TAG_ITEM_ALBUM, album.substr(7, album.length()-7));
+						Mpd->CommitSearch(vLibSongs);
 					}
 				}
-				bold ? mLibSongs->AddBoldOption(DisplaySong(**it, Config.song_library_format)) : mLibSongs->AddOption(DisplaySong(**it, Config.song_library_format));
-				bold = 0;
+				sort(vLibSongs.begin(), vLibSongs.end(), SortSongsByTrack);
+				bool bold = 0;
+			
+				for (SongList::const_iterator it = vLibSongs.begin(); it != vLibSongs.end(); it++)
+				{
+					for (SongList::const_iterator j = vPlaylist.begin(); j != vPlaylist.end(); j++)
+					{
+						if ((*it)->GetHash() == (*j)->GetHash())
+						{
+							bold = 1;
+							break;
+						}
+					}
+					bold ? mLibSongs->AddBoldOption(DisplaySong(**it, Config.song_library_format)) : mLibSongs->AddOption(DisplaySong(**it, Config.song_library_format));
+					bold = 0;
+				}
+				mLibSongs->Window::Clear();
+				mLibSongs->Refresh();
+			}
+		}
+		
+		// media library end
+		
+		// playlist editor stuff
+		
+		if (current_screen == csPlaylistEditor)
+		{
+			if (mPlaylistList->Empty())
+			{
+				mPlaylistEditor->Clear(0);
+				TagList list;
+				Mpd->GetPlaylists(list);
+				for (TagList::const_iterator it = list.begin(); it != list.end(); it++)
+					mPlaylistList->AddOption(*it);
+				mPlaylistList->Window::Clear();
+				mPlaylistList->Refresh();
+			}
+		
+			if (wCurrent == mPlaylistList && mPlaylistEditor->Empty())
+			{
+				FreeSongList(vPlaylistContent);
+				Mpd->GetPlaylistContent(mPlaylistList->GetCurrentOption(), vPlaylistContent);
+				for (SongList::const_iterator it = vPlaylistContent.begin(); it != vPlaylistContent.end(); it++)
+					mPlaylistEditor->AddOption(DisplaySong(**it));
+				mPlaylistEditor->Window::Clear();
+				mPlaylistEditor->Refresh();
 			}
 			
-			mLibAlbums->Refresh();
-			mLibSongs->Window::Clear();
-			mLibSongs->Refresh();
+			if (wCurrent == mPlaylistEditor && mPlaylistEditor->Empty())
+			{
+				mPlaylistEditor->HighlightColor(Config.main_highlight_color);
+				mPlaylistList->HighlightColor(Config.active_column_color);
+				wCurrent = mPlaylistList;
+			}
 			
-			block_library_update = 1;
+			if (mPlaylistEditor->Empty())
+				mPlaylistEditor->WriteXY(0, 0, "Playlist is empty.");
 		}
+		
+		// playlist editor end
 		
 		wCurrent->Refresh(redraw_me);
 		redraw_me = 0;
@@ -517,9 +594,6 @@ int main(int argc, char *argv[])
 		wCurrent->ReadKey(input);
 		if (input == ERR)
 			continue;
-		
-		if (current_screen == csLibrary)
-			block_library_update = 0;
 		
 		title_allowed = 1;
 		timer = time(NULL);
@@ -529,23 +603,24 @@ int main(int argc, char *argv[])
 			case csPlaylist:
 				mPlaylist->Highlighting(1);
 				break;
-			
 			case csBrowser:
 				browsed_dir_scroll_begin--;
 				break;
 			case csLibrary:
 			{
-				if (Keypressed(input, Key.Up) || Keypressed(input, Key.Down) || Keypressed(input, Key.PageUp) || Keypressed(input, Key.PageDown) || Keypressed(input, Key.Home) || Keypressed(input, Key.End))
+				if (Keypressed(input, Key.Up) || Keypressed(input, Key.Down) || Keypressed(input, Key.PageUp) || Keypressed(input, Key.PageDown) || Keypressed(input, Key.Home) || Keypressed(input, Key.End) || Keypressed(input, Key.FindForward) || Keypressed(input, Key.FindBackward) || Keypressed(input, Key.NextFoundPosition) || Keypressed(input, Key.PrevFoundPosition))
 				{
 					if (wCurrent == mLibArtists)
-					{
-						mLibAlbums->Reset();
-						mLibSongs->Reset();
-					}
-					if (wCurrent == mLibAlbums)
-						mLibSongs->Reset();
+						mLibAlbums->Clear(0);
+					else if (wCurrent == mLibAlbums)
+						mLibSongs->Clear(0);
 				}
 				break;
+			}
+			case csPlaylistEditor:
+			{
+				if (wCurrent == mPlaylistList && (Keypressed(input, Key.Up) || Keypressed(input, Key.Down) || Keypressed(input, Key.PageUp) || Keypressed(input, Key.PageDown) || Keypressed(input, Key.Home) || Keypressed(input, Key.End) || Keypressed(input, Key.FindForward) || Keypressed(input, Key.FindBackward) || Keypressed(input, Key.NextFoundPosition) || Keypressed(input, Key.PrevFoundPosition)))
+					mPlaylistEditor->Clear(0);
 			}
 			default:
 				break;
@@ -646,6 +721,10 @@ int main(int argc, char *argv[])
 			mLibAlbums->MoveTo(lib_albums_start_x, main_start_y);
 			mLibSongs->MoveTo(lib_songs_start_x, main_start_y);
 			
+			mPlaylistList->Resize(lib_artist_width, main_height);
+			mPlaylistEditor->Resize(lib_albums_width+lib_songs_width+1, main_height);
+			mPlaylistEditor->MoveTo(lib_albums_start_x, main_start_y);
+			
 			if (Config.header_visibility)
 				wHeader->Resize(COLS, wHeader->GetHeight());
 			
@@ -658,12 +737,12 @@ int main(int argc, char *argv[])
 			wCurrent->Display(redraw_me);
 			if (current_screen == csLibrary)
 			{
-				mLibArtists->Hide();
-				mLibAlbums->Hide();
-				mLibSongs->Hide();
 				REFRESH_MEDIA_LIBRARY_SCREEN;
 			}
-			
+			else if (current_screen == csPlaylistEditor)
+			{
+				REFRESH_PLAYLIST_EDITOR_SCREEN;
+			}
 			header_update_status = 1;
 			PlayerState mpd_state = Mpd->GetState();
 			MPDStatusChanges changes;
@@ -883,7 +962,7 @@ int main(int argc, char *argv[])
 								if (id == 8)
 								{
 									mLibSongs->HighlightColor(Config.main_highlight_color);
-									mLibArtists->HighlightColor(Config.library_active_column_color);
+									mLibArtists->HighlightColor(Config.active_column_color);
 									wCurrent = mLibArtists;
 								}
 								else
@@ -1090,13 +1169,13 @@ int main(int argc, char *argv[])
 					}
 					else if (wCurrent == mLibAlbums)
 					{
-						for (SongList::const_iterator it = vSongs.begin(); it != vSongs.end(); it++)
+						for (SongList::const_iterator it = vLibSongs.begin(); it != vLibSongs.end(); it++)
 							Mpd->QueueAddSong(**it);
 						if (Mpd->CommitQueue())
 						{
 							ShowMessage("Adding songs from: " + mLibArtists->GetCurrentOption() + " \"" + mLibAlbums->GetCurrentOption() + "\"");
-							Song *s = vPlaylist[vPlaylist.size()-vSongs.size()];
-							if (s->GetHash() == vSongs[0]->GetHash())
+							Song *s = vPlaylist[vPlaylist.size()-vLibSongs.size()];
+							if (s->GetHash() == vLibSongs[0]->GetHash())
 							{
 								if (Keypressed(input, Key.Enter))
 									Mpd->PlayID(s->GetID());
@@ -1107,9 +1186,9 @@ int main(int argc, char *argv[])
 					}
 					else if (wCurrent == mLibSongs)
 					{
-						if (!vSongs.empty())
+						if (!vLibSongs.empty())
 						{
-							Song &s = *vSongs[mLibSongs->GetChoice()-1];
+							Song &s = *vLibSongs[mLibSongs->GetChoice()-1];
 							int id = Mpd->AddSong(s);
 							if (id >= 0)
 							{
@@ -1133,86 +1212,95 @@ int main(int argc, char *argv[])
 		}
 		else if (Keypressed(input, Key.Space))
 		{
-			if (current_screen == csPlaylist)
+			if (Config.space_selects || wCurrent == mPlaylist || wCurrent == mPlaylistEditor)
 			{
-				int i = mPlaylist->GetChoice();
-				mPlaylist->Select(i, !mPlaylist->Selected(i));
-				mPlaylist->Go(DOWN);
-			}
-			else if (current_screen == csBrowser)
-			{
-				int ci = mBrowser->GetChoice()-1;
-				switch (vBrowser[ci].type)
+				if (wCurrent == mPlaylist || (wCurrent == mBrowser && wCurrent->GetChoice() > (browsed_dir != "/" ? 1 : 0)) || (wCurrent == mSearcher && !vSearched.empty() && wCurrent->GetChoice() > search_engine_static_option) || wCurrent == mLibSongs || wCurrent == mPlaylistEditor)
 				{
-					case itDirectory:
-					{
-						string getdir = browsed_dir == "/" ? vBrowser[ci].name : browsed_dir + "/" + vBrowser[ci].name;
-						
-						SongList list;
-						Mpd->GetDirectoryRecursive(getdir, list);
-						
-						for (SongList::const_iterator it = list.begin(); it != list.end(); it++)
-							Mpd->QueueAddSong(**it);
-						if (Mpd->CommitQueue())
-						{
-							ShowMessage("Added folder: " + getdir);
-							Song *s = vPlaylist[vPlaylist.size()-list.size()];
-							if (s->GetHash() != list[0]->GetHash())
-								ShowMessage(message_part_of_songs_added);
-						}
-						FreeSongList(list);
-						break;
-					}
-					case itSong:
-					{
-						Song &s = *vBrowser[ci].song;
-						if (Mpd->AddSong(s) != -1)
-							ShowMessage("Added to playlist: " + OmitBBCodes(DisplaySong(s)));
-						break;
-					}
-					case itPlaylist:
-					{
-						SongList list;
-						Mpd->GetPlaylistContent(vBrowser[ci].name, list);
-						for (SongList::const_iterator it = list.begin(); it != list.end(); it++)
-							Mpd->QueueAddSong(**it);
-						if (Mpd->CommitQueue())
-						{
-							ShowMessage("Loading playlist " + vBrowser[ci].name + "...");
-							Song *s = vPlaylist[vPlaylist.size()-list.size()];
-							if (s->GetHash() != list[0]->GetHash())
-								ShowMessage(message_part_of_songs_added);
-						}
-						FreeSongList(list);
-						break;
-					}
+					Menu *mCurrent = static_cast<Menu *>(wCurrent);
+					int i = mCurrent->GetChoice();
+					mCurrent->Select(i, !mCurrent->Selected(i));
+					mCurrent->Go(DOWN);
 				}
-				mBrowser->Go(DOWN);
 			}
-			else if (current_screen == csSearcher && !vSearched.empty())
+			else
 			{
-				int id = mSearcher->GetChoice()-search_engine_static_option-1;
-				if (id < 0)
-					continue;
+				if (current_screen == csBrowser)
+				{
+					int ci = mBrowser->GetChoice()-1;
+					switch (vBrowser[ci].type)
+					{
+						case itDirectory:
+						{
+							string getdir = browsed_dir == "/" ? vBrowser[ci].name : browsed_dir + "/" + vBrowser[ci].name;
+						
+							SongList list;
+							Mpd->GetDirectoryRecursive(getdir, list);
+						
+							for (SongList::const_iterator it = list.begin(); it != list.end(); it++)
+								Mpd->QueueAddSong(**it);
+							if (Mpd->CommitQueue())
+							{
+								ShowMessage("Added folder: " + getdir);
+								Song *s = vPlaylist[vPlaylist.size()-list.size()];
+								if (s->GetHash() != list[0]->GetHash())
+									ShowMessage(message_part_of_songs_added);
+							}
+							FreeSongList(list);
+							break;
+						}
+						case itSong:
+						{
+							Song &s = *vBrowser[ci].song;
+							if (Mpd->AddSong(s) != -1)
+								ShowMessage("Added to playlist: " + OmitBBCodes(DisplaySong(s)));
+							break;
+						}
+						case itPlaylist:
+						{
+							SongList list;
+							Mpd->GetPlaylistContent(vBrowser[ci].name, list);
+							for (SongList::const_iterator it = list.begin(); it != list.end(); it++)
+								Mpd->QueueAddSong(**it);
+							if (Mpd->CommitQueue())
+							{
+								ShowMessage("Loading playlist " + vBrowser[ci].name + "...");
+								Song *s = vPlaylist[vPlaylist.size()-list.size()];
+								if (s->GetHash() != list[0]->GetHash())
+									ShowMessage(message_part_of_songs_added);
+							}
+							FreeSongList(list);
+							break;
+						}
+					}
+					mBrowser->Go(DOWN);
+				}
+				else if (current_screen == csSearcher && !vSearched.empty())
+				{
+					int id = mSearcher->GetChoice()-search_engine_static_option-1;
+					if (id < 0)
+						continue;
 				
-				Song &s = *vSearched[id];
-				if (Mpd->AddSong(s) != -1)
-					ShowMessage("Added to playlist: " + OmitBBCodes(DisplaySong(s)));
-				mSearcher->Go(DOWN);
+					Song &s = *vSearched[id];
+					if (Mpd->AddSong(s) != -1)
+						ShowMessage("Added to playlist: " + OmitBBCodes(DisplaySong(s)));
+					mSearcher->Go(DOWN);
+				}
+				else if (current_screen == csLibrary)
+					goto ENTER_LIBRARY_SCREEN; // sorry, but that's stupid to copy the same code here.
 			}
-			else if (current_screen == csLibrary)
-				goto ENTER_LIBRARY_SCREEN; // sorry, but that's stupid to copy the same code here.
 		}
 		else if (Keypressed(input, Key.VolumeUp))
 		{
 			if (current_screen == csLibrary && input == Key.VolumeUp[0])
 			{
+				found_pos = 0;
+				vFoundPositions.clear();
 				if (wCurrent == mLibArtists)
 				{
 					mLibArtists->HighlightColor(Config.main_highlight_color);
 					wCurrent->Refresh();
 					wCurrent = mLibAlbums;
-					mLibAlbums->HighlightColor(Config.library_active_column_color);
+					mLibAlbums->HighlightColor(Config.active_column_color);
 					if (!mLibAlbums->Empty())
 						continue;
 				}
@@ -1221,8 +1309,17 @@ int main(int argc, char *argv[])
 					mLibAlbums->HighlightColor(Config.main_highlight_color);
 					wCurrent->Refresh();
 					wCurrent = mLibSongs;
-					mLibSongs->HighlightColor(Config.library_active_column_color);
+					mLibSongs->HighlightColor(Config.active_column_color);
 				}
+			}
+			else if (wCurrent == mPlaylistList && input == Key.VolumeUp[0])
+			{
+				found_pos = 0;
+				vFoundPositions.clear();
+				mPlaylistList->HighlightColor(Config.main_highlight_color);
+				wCurrent->Refresh();
+				wCurrent = mPlaylistEditor;
+				mPlaylistEditor->HighlightColor(Config.active_column_color);
 			}
 			else
 				Mpd->SetVolume(Mpd->GetVolume()+1);
@@ -1231,12 +1328,14 @@ int main(int argc, char *argv[])
 		{
 			if (current_screen == csLibrary && input == Key.VolumeDown[0])
 			{
+				found_pos = 0;
+				vFoundPositions.clear();
 				if (wCurrent == mLibSongs)
 				{
 					mLibSongs->HighlightColor(Config.main_highlight_color);
 					wCurrent->Refresh();
 					wCurrent = mLibAlbums;
-					mLibAlbums->HighlightColor(Config.library_active_column_color);
+					mLibAlbums->HighlightColor(Config.active_column_color);
 					if (!mLibAlbums->Empty())
 						continue;
 				}
@@ -1245,8 +1344,17 @@ int main(int argc, char *argv[])
 					mLibAlbums->HighlightColor(Config.main_highlight_color);
 					wCurrent->Refresh();
 					wCurrent = mLibArtists;
-					mLibArtists->HighlightColor(Config.library_active_column_color);
+					mLibArtists->HighlightColor(Config.active_column_color);
 				}
+			}
+			else if (wCurrent == mPlaylistEditor && input == Key.VolumeDown[0])
+			{
+				found_pos = 0;
+				vFoundPositions.clear();
+				mPlaylistEditor->HighlightColor(Config.main_highlight_color);
+				wCurrent->Refresh();
+				wCurrent = mPlaylistList;
+				mPlaylistList->HighlightColor(Config.active_column_color);
 			}
 			else
 				Mpd->SetVolume(Mpd->GetVolume()-1);
@@ -1282,13 +1390,15 @@ int main(int argc, char *argv[])
 				}
 				Mpd->CommitQueue();
 			}
-			if (current_screen == csBrowser)
+			else if (current_screen == csBrowser || wCurrent == mPlaylistList)
 			{
 				LOCK_STATUSBAR;
-				int id = mBrowser->GetChoice()-1;
-				if (vBrowser[id].type == itPlaylist)
+				Menu *mCurrent = static_cast<Menu *>(wCurrent);
+				int id = mCurrent->GetChoice()-1;
+				const string &name = wCurrent == mBrowser ? vBrowser[id].name : mPlaylistList->GetCurrentOption();
+				if (current_screen != csBrowser || vBrowser[id].type == itPlaylist)
 				{
-					wFooter->WriteXY(0, Config.statusbar_visibility, "Delete playlist " + vBrowser[id].name + " ? [y/n] ", 1);
+					wFooter->WriteXY(0, Config.statusbar_visibility, "Delete playlist " + name + " ? [y/n] ", 1);
 					curs_set(1);
 					int in = 0;
 					do
@@ -1299,15 +1409,42 @@ int main(int argc, char *argv[])
 					while (in != 'y' && in != 'n');
 					if (in == 'y')
 					{
-						Mpd->DeletePlaylist(vBrowser[id].name);
-						ShowMessage("Playlist " + vBrowser[id].name + " deleted!");
+						Mpd->DeletePlaylist(name);
+						ShowMessage("Playlist " + name + " deleted!");
 						GetDirectory("/");
 					}
 					else
 						ShowMessage("Aborted!");
 					curs_set(0);
+					mPlaylistList->Clear(0); // make playlists list update itself
 				}
 				UNLOCK_STATUSBAR;
+			}
+			else if (wCurrent == mPlaylistEditor && !mPlaylistEditor->Empty())
+			{
+				if (mPlaylistEditor->IsAnySelected())
+				{
+					vector<int> list;
+					mPlaylistEditor->GetSelectedList(list);
+					for (vector<int>::const_reverse_iterator it = list.rbegin(); it != list.rend(); it++)
+						PlaylistDeleteSong(mPlaylistList->GetCurrentOption(), *it-1);
+					ShowMessage("Selected items deleted from playlist '" + mPlaylistList->GetCurrentOption() + "'!");
+					redraw_me = 1;
+				}
+				else
+				{
+					mPlaylistEditor->Timeout(50);
+					while (!vPlaylistContent.empty() && Keypressed(input, Key.Delete))
+					{
+						TraceMpdStatus();
+						timer = time(NULL);
+						PlaylistDeleteSong(mPlaylistList->GetCurrentOption(), mPlaylistEditor->GetChoice()-1);
+						mPlaylistEditor->Refresh();
+						mPlaylistEditor->ReadKey(input);
+					}
+					mPlaylistEditor->Timeout(ncmpcpp_window_timeout);
+				}
+				Mpd->CommitQueue();
 			}
 		}
 		else if (Keypressed(input, Key.Prev))
@@ -1330,9 +1467,31 @@ int main(int argc, char *argv[])
 			if (!playlist_name.empty())
 			{
 				if (Mpd->SavePlaylist(playlist_name))
+				{
 					ShowMessage("Playlist saved as: " + playlist_name);
+					mPlaylistList->Clear(0); // make playlist's list update itself
+				}
 				else
-					ShowMessage("Playlist already exists!");
+				{
+					LOCK_STATUSBAR;
+					wFooter->WriteXY(0, Config.statusbar_visibility, "Playlist already exists, overwrite: " + playlist_name + " ? [y/n] ", 1);
+					curs_set(1);
+					int in = 0;
+					while (in != 'y' && in != 'n')
+						wFooter->ReadKey(in);
+					
+					if (in == 'y')
+					{
+						Mpd->DeletePlaylist(playlist_name);
+						if (Mpd->SavePlaylist(playlist_name))
+							ShowMessage("Playlist overwritten!");
+					}
+					else
+						ShowMessage("Aborted!");
+					curs_set(0);
+					mPlaylistList->Clear(0); // make playlist's list update itself
+					UNLOCK_STATUSBAR;
+				}
 			}
 			if (browsed_dir == "/" && !vBrowser.empty())
 				GetDirectory(browsed_dir);
@@ -1341,45 +1500,91 @@ int main(int argc, char *argv[])
 			Mpd->Stop();
 		else if (Keypressed(input, Key.MvSongUp))
 		{
-			block_playlist_update = 1;
-			if (mPlaylist->IsAnySelected())
+			if (current_screen == csPlaylist)
 			{
-				vector<int> list;
-				mPlaylist->GetSelectedList(list);
-				mPlaylist->Highlight(list[(list.size()-1)/2]-1);
-				for (vector<int>::const_iterator it = list.begin(); it != list.end(); it++)
+				block_playlist_update = 1;
+				if (mPlaylist->IsAnySelected())
 				{
-					if (!MoveSongUp(*it-1))
+					vector<int> list;
+					mPlaylist->GetSelectedList(list);
+					mPlaylist->Highlight(list[(list.size()-1)/2]-1);
+					for (vector<int>::const_iterator it = list.begin(); it != list.end(); it++)
 					{
-						mPlaylist->Go(DOWN);
-						break;
+						if (!MoveSongUp(*it-1))
+						{
+							mPlaylist->Go(DOWN);
+							break;
+						}
 					}
 				}
+				else
+					if (MoveSongUp(mPlaylist->GetChoice()-1))
+						mPlaylist->Go(UP);
 			}
-			else
-				if (MoveSongUp(mPlaylist->GetChoice()-1))
-					mPlaylist->Go(UP);
+			else if (wCurrent == mPlaylistEditor)
+			{
+				if (mPlaylistEditor->IsAnySelected())
+				{
+					vector<int> list;
+					mPlaylistEditor->GetSelectedList(list);
+					mPlaylistEditor->Highlight(list[(list.size()-1)/2]-1);
+					for (vector<int>::const_iterator it = list.begin(); it != list.end(); it++)
+					{
+						if (!PlaylistMoveSongUp(mPlaylistList->GetCurrentOption(), *it-1))
+						{
+							mPlaylistEditor->Go(DOWN);
+							break;
+						}
+					}
+				}
+				else
+					if (PlaylistMoveSongUp(mPlaylistList->GetCurrentOption(), mPlaylistEditor->GetChoice()-1))
+						mPlaylistEditor->Go(UP);
+			}
 		}
 		else if (Keypressed(input, Key.MvSongDown))
 		{
-			block_playlist_update = 1;
-			if (mPlaylist->IsAnySelected())
+			if (current_screen == csPlaylist)
 			{
-				vector<int> list;
-				mPlaylist->GetSelectedList(list);
-				mPlaylist->Highlight(list[(list.size()-1)/2]+1);
-				for (vector<int>::const_reverse_iterator it = list.rbegin(); it != list.rend(); it++)
+				block_playlist_update = 1;
+				if (mPlaylist->IsAnySelected())
 				{
-					if (!MoveSongDown(*it-1))
+					vector<int> list;
+					mPlaylist->GetSelectedList(list);
+					mPlaylist->Highlight(list[(list.size()-1)/2]+1);
+					for (vector<int>::const_reverse_iterator it = list.rbegin(); it != list.rend(); it++)
 					{
-						mPlaylist->Go(UP);
-						break;
+						if (!MoveSongDown(*it-1))
+						{
+							mPlaylist->Go(UP);
+							break;
+						}
 					}
 				}
+				else
+					if (MoveSongDown(mPlaylist->GetChoice()-1))
+						mPlaylist->Go(DOWN);
 			}
-			else
-				if (MoveSongDown(mPlaylist->GetChoice()-1))
-					mPlaylist->Go(DOWN);
+			else if (wCurrent == mPlaylistEditor)
+			{
+				if (mPlaylistEditor->IsAnySelected())
+				{
+					vector<int> list;
+					mPlaylistEditor->GetSelectedList(list);
+					mPlaylistEditor->Highlight(list[(list.size()-1)/2]+1);
+					for (vector<int>::const_reverse_iterator it = list.rbegin(); it != list.rend(); it++)
+					{
+						if (!PlaylistMoveSongDown(mPlaylistList->GetCurrentOption(), *it-1))
+						{
+							mPlaylistEditor->Go(UP);
+							break;
+						}
+					}
+				}
+				else
+					if (PlaylistMoveSongDown(mPlaylistList->GetCurrentOption(), mPlaylistEditor->GetChoice()-1))
+						mPlaylistEditor->Go(DOWN);
+			}
 		}
 		else if (Keypressed(input, Key.Add))
 		{
@@ -1506,7 +1711,7 @@ int main(int argc, char *argv[])
 			if ((wCurrent == mPlaylist && !vPlaylist.empty())
 			||  (wCurrent == mBrowser && vBrowser[mBrowser->GetChoice()-1].type == itSong)
 			||  (wCurrent == mSearcher && !vSearched.empty() && mSearcher->GetChoice() > search_engine_static_option)
-			||  (wCurrent == mLibSongs && !vSongs.empty()))
+			||  (wCurrent == mLibSongs && !vLibSongs.empty()))
 			{
 				int id = wCurrent->GetChoice()-1;
 				Song *s;
@@ -1522,7 +1727,7 @@ int main(int argc, char *argv[])
 						s = vSearched[id-search_engine_static_option];
 						break;
 					case csLibrary:
-						s = vSongs[id];
+						s = vLibSongs[id];
 						break;
 					default:
 						break;
@@ -1557,20 +1762,171 @@ int main(int argc, char *argv[])
 		}
 		else if (Keypressed(input, Key.ReverseSelection))
 		{
-			if (current_screen == csPlaylist)
+			if (wCurrent == mPlaylist || wCurrent == mBrowser || (wCurrent == mSearcher && !vSearched.empty()) || wCurrent == mLibSongs || wCurrent == mPlaylistEditor)
 			{
-				for (int i = 1; i <= mPlaylist->MaxChoice(); i++)
-					mPlaylist->Select(i, !mPlaylist->Selected(i));
+				Menu *mCurrent = static_cast<Menu *>(wCurrent);
+				for (int i = 1; i <= mCurrent->MaxChoice(); i++)
+					mCurrent->Select(i, !mCurrent->Selected(i) && !mCurrent->IsStatic(i));
+				// hackish shit begins
+				if (mCurrent == mBrowser && browsed_dir != "/")
+					mCurrent->Select(1, 0); // [..] cannot be selected, uhm.
+				if (mCurrent == mSearcher)
+					mCurrent->Select(14, 0); // 'Reset' cannot be selected, omgplz.
+				// hacking shit ends. need better solution :/
 				ShowMessage("Selection reversed!");
 			}
 		}
 		else if (Keypressed(input, Key.DeselectAll))
 		{
-			if (current_screen == csPlaylist && mPlaylist->IsAnySelected())
+			if (wCurrent == mPlaylist || wCurrent == mBrowser || wCurrent == mSearcher || wCurrent == mLibSongs || wCurrent == mPlaylistEditor)
 			{
-				for (int i = 1; i <= mPlaylist->MaxChoice(); i++)
-					mPlaylist->Select(i, 0);
-				ShowMessage("Items deselected!");
+				Menu *mCurrent = static_cast<Menu *>(wCurrent);
+				if (mCurrent->IsAnySelected())
+				{
+					for (int i = 1; i <= mCurrent->MaxChoice(); i++)
+						mCurrent->Select(i, 0);
+					ShowMessage("Items deselected!");
+				}
+			}
+		}
+		else if (Keypressed(input, Key.AddSelected))
+		{
+			if (wCurrent == mPlaylist || wCurrent == mBrowser || wCurrent == mSearcher || wCurrent == mLibSongs || wCurrent == mPlaylistEditor)
+			{
+				Menu *mCurrent = static_cast<Menu *>(wCurrent);
+				if (mCurrent->IsAnySelected())
+				{
+					vector<int> list;
+					mCurrent->GetSelectedList(list);
+					SongList result;
+					for (vector<int>::const_iterator it = list.begin(); it != list.end(); it++)
+					{
+						switch (current_screen)
+						{
+							case csPlaylist:
+							{
+								Song *s = new Song(*vPlaylist[*it-1]);
+								result.push_back(s);
+								break;
+							}
+							case csBrowser:
+							{
+								switch (vBrowser[*it-1].type)
+								{
+									case itDirectory:
+									{
+										if (browsed_dir != "/")
+											Mpd->GetDirectoryRecursive(browsed_dir + "/" + vBrowser[*it-1].name, result);
+										else
+											Mpd->GetDirectoryRecursive(vBrowser[*it-1].name, result);
+										break;
+									}
+									case itSong:
+									{
+										Song *s = new Song(*vBrowser[*it-1].song);
+										result.push_back(s);
+										break;
+									}
+									case itPlaylist:
+									{
+										Mpd->GetPlaylistContent(vBrowser[*it-1].name, result);
+										break;
+									}
+								}
+								break;
+							}
+							case csSearcher:
+							{
+								Song *s = new Song(*vSearched[*it-search_engine_static_option-1]);
+								result.push_back(s);
+								break;
+							}
+							case csLibrary:
+							{
+								Song *s = new Song(*vLibSongs[*it-1]);
+								result.push_back(s);
+								break;
+							}
+							case csPlaylistEditor:
+							{
+								Song *s = new Song(*vPlaylistContent[*it-1]);
+								result.push_back(s);
+								break;
+							}
+							default:
+								break;
+						}
+					}
+					
+					Menu *mDialog = new Menu((COLS-50)/2, (LINES-10)/2, 50, 10, "Add selected items to...", clYellow, brGreen);
+					mDialog->Timeout(ncmpcpp_window_timeout);
+					
+					mDialog->AddOption("Current MPD playlist");
+					mDialog->AddSeparator();
+					TagList playlists;
+					Mpd->GetPlaylists(playlists);
+					for (TagList::const_iterator it = playlists.begin(); it != playlists.end(); it++)
+						mDialog->AddOption(*it);
+					mDialog->AddSeparator();
+					mDialog->AddOption("Cancel");
+					
+					mDialog->Display();
+					
+					while (!Keypressed(input, Key.Enter))
+					{
+						mDialog->Refresh();
+						mDialog->ReadKey(input);
+						
+						if (Keypressed(input, Key.Up))
+							mDialog->Go(UP);
+						else if (Keypressed(input, Key.Down))
+							mDialog->Go(DOWN);
+						else if (Keypressed(input, Key.PageUp))
+							mDialog->Go(PAGE_UP);
+						else if (Keypressed(input, Key.PageDown))
+							mDialog->Go(PAGE_DOWN);
+						else if (Keypressed(input, Key.Home))
+							mDialog->Go(HOME);
+						else if (Keypressed(input, Key.End))
+							mDialog->Go(END);
+					}
+					
+					int id = mDialog->GetChoice();
+					
+					if (id == 1)
+					{
+						for (SongList::const_iterator it = result.begin(); it != result.end(); it++)
+							Mpd->QueueAddSong(**it);
+						if (Mpd->CommitQueue())
+						{
+							ShowMessage("Selected items added!");
+							Song *s = vPlaylist[vPlaylist.size()-result.size()];
+							if (s->GetHash() != result[0]->GetHash())
+								ShowMessage(message_part_of_songs_added);
+						}
+					}
+					else if (id > 1 && id < mDialog->MaxChoice())
+					{
+						for (SongList::const_iterator it = result.begin(); it != result.end(); it++)
+							Mpd->QueueAddToPlaylist(mDialog->GetCurrentOption(), **it);
+						Mpd->CommitQueue();
+						ShowMessage("Selected items added to playlist '" + mDialog->GetCurrentOption() + "'!");
+					}
+					
+					redraw_me = 1;
+					mPlaylistEditor->Clear(0); // make playlist editor update itself
+					if (current_screen == csLibrary)
+					{
+						REFRESH_MEDIA_LIBRARY_SCREEN;
+					}
+					else if (current_screen == csPlaylistEditor)
+					{
+						REFRESH_PLAYLIST_EDITOR_SCREEN;
+					}
+					FreeSongList(result);
+				}
+				else
+					ShowMessage("No selected items!");
 			}
 		}
 		else if (Keypressed(input, Key.Crop))
@@ -1694,6 +2050,11 @@ int main(int argc, char *argv[])
 			Config.wrapped_search = !Config.wrapped_search;
 			ShowMessage("Search mode: " + string(Config.wrapped_search ? "Wrapped" : "Normal"));
 		}
+		else if (Keypressed(input, Key.ToggleSpaceMode))
+		{
+			Config.space_selects = !Config.space_selects;
+			ShowMessage("Space mode: " + string(Config.space_selects ? "Select/deselect" : "Add") + " item");
+		}
 		else if (Keypressed(input, Key.Lyrics))
 		{
 			if (wCurrent == sLyrics)
@@ -1711,7 +2072,7 @@ int main(int argc, char *argv[])
 			if ((wCurrent == mPlaylist && !vPlaylist.empty())
 			||  (wCurrent == mBrowser && vBrowser[mBrowser->GetChoice()-1].type == itSong)
 			||  (wCurrent == mSearcher && !vSearched.empty() && mSearcher->GetChoice() > search_engine_static_option)
-			||  (wCurrent == mLibSongs && !vSongs.empty()))
+			||  (wCurrent == mLibSongs && !vLibSongs.empty()))
 			{
 				Song *s;
 				switch (current_screen)
@@ -1726,7 +2087,7 @@ int main(int argc, char *argv[])
 						s = vSearched[mSearcher->GetRealChoice()-2]; // first one is 'Reset'
 						break;
 					case csLibrary:
-						s = vSongs[mLibSongs->GetChoice()-1];
+						s = vLibSongs[mLibSongs->GetChoice()-1];
 						break;
 					default:
 						break;
@@ -1855,25 +2216,55 @@ int main(int argc, char *argv[])
 				found_pos = 0;
 				vFoundPositions.clear();
 				
-				if (mLibArtists->Empty())
-				{
-					Mpd->GetArtists(vArtists);
-					sort(vArtists.begin(), vArtists.end(), CaseInsensitiveComparison);
-					for (TagList::const_iterator it = vArtists.begin(); it != vArtists.end(); it++)
-						mLibArtists->AddOption(*it);
-				}
-				
-				mLibArtists->HighlightColor(Config.library_active_column_color);
+				mLibArtists->HighlightColor(Config.active_column_color);
 				mLibAlbums->HighlightColor(Config.main_highlight_color);
 				mLibSongs->HighlightColor(Config.main_highlight_color);
 				
-				wCurrent->Hide();
+				mPlaylist->Hide(); // hack, should be wCurrent, but it doesn't always have 100% width
 				
+				redraw_me = 1;
 				REFRESH_MEDIA_LIBRARY_SCREEN;
 				
 				wCurrent = mLibArtists;
 				current_screen = csLibrary;
+				
+				if (!vLibSongs.empty())
+				{
+					bool bold = 0;
+					for (int i = 0; i < vLibSongs.size(); i++)
+					{
+						for (SongList::const_iterator it = vPlaylist.begin(); it != vPlaylist.end(); it++)
+						{
+							if ((*it)->GetHash() == vLibSongs[i]->GetHash())
+							{
+								bold = 1;
+								break;
+							}
+						}
+						mLibSongs->BoldOption(i+1, bold);
+						bold = 0;
+					}
+					mLibSongs->Refresh();
+				}
+			}
+		}
+		else if (Keypressed(input, Key.PlaylistEditor))
+		{
+			if (current_screen != csPlaylistEditor)
+			{
+				found_pos = 0;
+				vFoundPositions.clear();
+				
+				mPlaylistList->HighlightColor(Config.active_column_color);
+				mPlaylistEditor->HighlightColor(Config.main_highlight_color);
+				
+				mPlaylist->Hide(); // hack, should be wCurrent, but it doesn't always have 100% width
+				
 				redraw_me = 1;
+				REFRESH_PLAYLIST_EDITOR_SCREEN;
+				
+				wCurrent = mPlaylistList;
+				current_screen = csPlaylistEditor;
 			}
 		}
 		else if (Keypressed(input, Key.Quit))

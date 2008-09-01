@@ -266,6 +266,30 @@ void MPDConnection::ClearPlaylist() const
 	}
 }
 
+void MPDConnection::AddToPlaylist(const string &path, const Song &s) const
+{
+	if (!s.Empty())
+		AddToPlaylist(path, s.GetFile());
+}
+
+void MPDConnection::AddToPlaylist(const string &path, const string &file) const
+{
+	if (isConnected)
+	{
+		mpd_sendPlaylistAddCommand(itsConnection, (char *) path.c_str(), (char *) file.c_str());
+		mpd_finishCommand(itsConnection);
+	}
+}
+
+void MPDConnection::Move(const string &path, int from, int to) const
+{
+	if (isConnected)
+	{
+		mpd_sendPlaylistMoveCommand(itsConnection, (char *) path.c_str(), from, to);
+		mpd_finishCommand(itsConnection);
+	}
+}
+
 void MPDConnection::GetPlaylistChanges(long long id, SongList &v) const
 {
 	if (isConnected)
@@ -411,7 +435,7 @@ void MPDConnection::QueueAddSong(const string &path)
 	{
 		QueueCommand *q = new QueueCommand;
 		q->type = qctAdd;
-		q->path = path;
+		q->item_path = path;
 		itsQueue.push_back(q);
 	}
 }
@@ -420,6 +444,24 @@ void MPDConnection::QueueAddSong(const Song &s)
 {
 	if (!s.Empty())
 		QueueAddSong(s.GetFile());
+}
+
+void MPDConnection::QueueAddToPlaylist(const string &playlist, const string &path)
+{
+	if (isConnected)
+	{
+		QueueCommand *q = new QueueCommand;
+		q->type = qctAddToPlaylist;
+		q->playlist_path = playlist;
+		q->item_path = path;
+		itsQueue.push_back(q);
+	}
+}
+
+void MPDConnection::QueueAddToPlaylist(const string &playlist, const Song &s)
+{
+	if (!s.Empty())
+		QueueAddToPlaylist(playlist, s.GetFile());
 }
 
 void MPDConnection::QueueDeleteSong(int id)
@@ -444,6 +486,18 @@ void MPDConnection::QueueDeleteSongId(int id)
 	}
 }
 
+void MPDConnection::QueueDeleteFromPlaylist(const string &playlist, int pos)
+{
+	if (isConnected)
+	{
+		QueueCommand *q = new QueueCommand;
+		q->type = qctDeleteFromPlaylist;
+		q->playlist_path = playlist;
+		q->id = pos;
+		itsQueue.push_back(q);
+	}
+}
+
 bool MPDConnection::CommitQueue()
 {
 	bool retval = false;
@@ -455,13 +509,19 @@ bool MPDConnection::CommitQueue()
 			switch ((*it)->type)
 			{
 				case qctAdd:
-					mpd_sendAddCommand(itsConnection, (*it)->path.c_str());
+					mpd_sendAddCommand(itsConnection, (*it)->item_path.c_str());
+					break;
+				case qctAddToPlaylist:
+					mpd_sendPlaylistAddCommand(itsConnection, (char *) (*it)->playlist_path.c_str(), (char *) (*it)->item_path.c_str());
 					break;
 				case qctDelete:
 					mpd_sendDeleteCommand(itsConnection, (*it)->id);
 					break;
 				case qctDeleteID:
 					mpd_sendDeleteIdCommand(itsConnection, (*it)->id);
+					break;
+				case qctDeleteFromPlaylist:
+					mpd_sendPlaylistDeleteCommand(itsConnection, (char *) (*it)->playlist_path.c_str(), (*it)->id);
 					break;
 			}
 		}
@@ -495,6 +555,21 @@ bool MPDConnection::SavePlaylist(const string &name) const
 	}
 	else
 		return false;
+}
+
+void MPDConnection::GetPlaylists(TagList &v) const
+{
+	if (isConnected)
+	{
+		ItemList list;
+		GetDirectory("/", list);
+		for (ItemList::const_iterator it = list.begin(); it != list.end(); it++)
+		{
+			if (it->type == itPlaylist)
+				v.push_back(it->name);
+		}
+		FreeItemList(list);
+	}
 }
 
 void MPDConnection::GetArtists(TagList &v) const

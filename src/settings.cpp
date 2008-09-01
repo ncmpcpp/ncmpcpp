@@ -44,6 +44,7 @@ void DefaultKeys(ncmpcpp_keys &keys)
 	keys.Browser[0] = '3';
 	keys.SearchEngine[0] = '4';
 	keys.MediaLibrary[0] = '5';
+	keys.PlaylistEditor[0] = '6';
 	keys.Stop[0] = 's';
 	keys.Pause[0] = 'P';
 	keys.Next[0] = '>';
@@ -53,6 +54,7 @@ void DefaultKeys(ncmpcpp_keys &keys)
 	keys.ToggleRepeat[0] = 'r';
 	keys.ToggleRepeatOne[0] = 'R';
 	keys.ToggleRandom[0] = 'z';
+	keys.ToggleSpaceMode[0] = 't';
 	keys.Shuffle[0] = 'Z';
 	keys.ToggleCrossfade[0] = 'x';
 	keys.SetCrossfade[0] = 'X';
@@ -67,6 +69,7 @@ void DefaultKeys(ncmpcpp_keys &keys)
 	keys.Lyrics[0] = 'l';
 	keys.ReverseSelection[0] = 'v';
 	keys.DeselectAll[0] = 'V';
+	keys.AddSelected[0] = 'A';
 	keys.Clear[0] = 'c';
 	keys.Crop[0] = 'C';
 	keys.MvSongUp[0] = 'm';
@@ -90,11 +93,12 @@ void DefaultKeys(ncmpcpp_keys &keys)
 	keys.VolumeUp[1] = '+';
 	keys.VolumeDown[1] = '-';
 	keys.ScreenSwitcher[1] = null_key;
-	keys.Help[1] = null_key;
-	keys.Playlist[1] = null_key;
-	keys.Browser[1] = null_key;
-	keys.SearchEngine[1] = null_key;
-	keys.MediaLibrary[1] = null_key;
+	keys.Help[1] = 265;
+	keys.Playlist[1] = 266;
+	keys.Browser[1] = 267;
+	keys.SearchEngine[1] = 268;
+	keys.MediaLibrary[1] = 269;
+	keys.PlaylistEditor[1] = 270;
 	keys.Stop[1] = null_key;
 	keys.Pause[1] = null_key;
 	keys.Next[1] = null_key;
@@ -104,6 +108,7 @@ void DefaultKeys(ncmpcpp_keys &keys)
 	keys.ToggleRepeat[1] = null_key;
 	keys.ToggleRepeatOne[1] = null_key;
 	keys.ToggleRandom[1] = null_key;
+	keys.ToggleSpaceMode[1] = null_key;
 	keys.Shuffle[1] = null_key;
 	keys.ToggleCrossfade[1] = null_key;
 	keys.SetCrossfade[1] = null_key;
@@ -118,6 +123,7 @@ void DefaultKeys(ncmpcpp_keys &keys)
 	keys.Lyrics[1] = null_key;
 	keys.ReverseSelection[1] = null_key;
 	keys.DeselectAll[1] = null_key;
+	keys.AddSelected[1] = null_key;
 	keys.Clear[1] = null_key;
 	keys.Crop[1] = null_key;
 	keys.MvSongUp[1] = null_key;
@@ -149,13 +155,14 @@ void DefaultConfiguration(ncmpcpp_config &conf)
 	conf.main_highlight_color = conf.main_color;
 	conf.progressbar_color = clDefault;
 	conf.statusbar_color = clDefault;
-	conf.library_active_column_color = clRed;
+	conf.active_column_color = clRed;
 	conf.colors_enabled = true;
 	conf.header_visibility = true;
 	conf.statusbar_visibility = true;
 	conf.autocenter_mode = false;
 	conf.repeat_one_mode = false;
 	conf.wrapped_search = true;
+	conf.space_selects = false;
 	conf.set_window_title = true;
 	conf.mpd_connection_timeout = 15;
 	conf.crossfade_time = 5;
@@ -305,6 +312,8 @@ void ReadKeys(ncmpcpp_keys &keys)
 				GetKeys(*it, keys.SearchEngine);
 			else if (it->find("key_media_library ") != string::npos)
 				GetKeys(*it, keys.MediaLibrary);
+			else if (it->find("key_playlist_editor ") != string::npos)
+				GetKeys(*it, keys.PlaylistEditor);
 			else if (it->find("key_stop ") != string::npos)
 				GetKeys(*it, keys.Stop);
 			else if (it->find("key_pause ") != string::npos)
@@ -323,6 +332,8 @@ void ReadKeys(ncmpcpp_keys &keys)
 				GetKeys(*it, keys.ToggleRepeatOne);
 			else if (it->find("key_toggle_random ") != string::npos)
 				GetKeys(*it, keys.ToggleRandom);
+			else if (it->find("key_toggle_space_mode ") != string::npos)
+				GetKeys(*it, keys.ToggleSpaceMode);
 			else if (it->find("key_shuffle ") != string::npos)
 				GetKeys(*it, keys.Shuffle);
 			else if (it->find("key_toggle_crossfade ") != string::npos)
@@ -351,6 +362,8 @@ void ReadKeys(ncmpcpp_keys &keys)
 				GetKeys(*it, keys.ReverseSelection);
 			else if (it->find("key_deselect_all ") != string::npos)
 				GetKeys(*it, keys.DeselectAll);
+			else if (it->find("key_add_selected_items ") != string::npos)
+				GetKeys(*it, keys.AddSelected);
 			else if (it->find("key_clear ") != string::npos)
 				GetKeys(*it, keys.Clear);
 			else if (it->find("key_crop ") != string::npos)
@@ -460,8 +473,10 @@ void ReadConfiguration(ncmpcpp_config &conf)
 				conf.autocenter_mode = v == "yes";
 			else if (it->find("repeat_one_mode") != string::npos)
 				conf.repeat_one_mode = v == "yes";
-			else if (it->find("find_mode") != string::npos)
+			else if (it->find("default_find_mode") != string::npos)
 				conf.wrapped_search = v == "wrapped";
+			else if (it->find("default_space_mode") != string::npos)
+				conf.space_selects = v == "select";
 			else if (it->find("enable_window_title") != string::npos)
 				conf.set_window_title = v == "yes";
 			else if (it->find("song_window_title_format") != string::npos)
@@ -514,10 +529,10 @@ void ReadConfiguration(ncmpcpp_config &conf)
 				if (!v.empty())
 					conf.statusbar_color = IntoColor(v);
 			}
-			else if (it->find("library_active_column_color") != string::npos)
+			else if (it->find("active_column_color") != string::npos)
 			{
 				if (!v.empty())
-					conf.library_active_column_color = IntoColor(v);
+					conf.active_column_color = IntoColor(v);
 			}
 		}
 		f.close();

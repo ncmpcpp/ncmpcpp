@@ -21,6 +21,23 @@
 #include "menu.h"
 #include "misc.h"
 
+Menu::Menu(const Menu &m) : Window(m)
+{
+	for (vector<Option *>::const_iterator it = m.itsOptions.begin(); it != m.itsOptions.end(); it++)
+	{
+		Option *new_option = new Option(**it);
+		itsOptions.push_back(new_option);
+	}
+	NeedsRedraw = m.NeedsRedraw;
+	itsSelectedPrefix = m.itsSelectedPrefix;
+	itsSelectedSuffix = m.itsSelectedSuffix;
+	itsStaticsNumber = m.itsStaticsNumber;
+	itsBeginning = m.itsBeginning;
+	itsHighlight = m.itsHighlight;
+	itsHighlightColor = m.itsHighlightColor;
+	itsHighlightEnabled = m.itsHighlightEnabled;
+}
+
 Menu::~Menu()
 {
 	for (vector<Option *>::iterator it = itsOptions.begin(); it != itsOptions.end(); it++)
@@ -274,7 +291,10 @@ void Menu::Refresh(bool redraw_whole_window)
 		Highlight(itsOptions.size());
 	
 	if (redraw_whole_window)
+	{
+		Window::Clear();
 		redraw_screen();
+	}
 	
 	for (vector<int>::const_iterator it = NeedsRedraw.begin(); it != NeedsRedraw.end(); it++)
 	{
@@ -356,17 +376,12 @@ void Menu::Refresh(bool redraw_whole_window)
 			}
 		}
 		
-		if (*it == itsHighlight && itsHighlightEnabled)
-		{
-			Reverse(0);
-			SetBaseColor(old_basecolor);
-			SetColor(old_basecolor);
-		}
-		if (itsOptions[*it]->is_bold)
-			Bold(0);
-		
-		while (!itsColors.empty()) // clear color stack as some items are
-			itsColors.pop();   // too long to close all tags properly
+		SetBaseColor(old_basecolor);
+		SetColor(old_basecolor);
+		while (!itsColors.empty()) // clear color stack and disable bold and reverse as
+			itsColors.pop();   // some items are too long to close all tags properly
+		Reverse(0);
+		Bold(0);
 	}
 	NeedsRedraw.clear();
 	wrefresh(itsWindow);

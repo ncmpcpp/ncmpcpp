@@ -24,7 +24,7 @@
 #include "ncmpcpp.h"
 #include "song.h"
 
-enum QueueCommandType { qctAdd, qctDelete, qctDeleteID };
+enum QueueCommandType { qctAdd, qctAddToPlaylist, qctDelete, qctDeleteID, qctDeleteFromPlaylist };
 enum ItemType { itDirectory, itSong, itPlaylist };
 enum PlayerState { psUnknown, psStop, psPlay, psPause };
 
@@ -47,7 +47,8 @@ struct QueueCommand
 {
 	QueueCommand() : id(0) { }
 	QueueCommandType type;
-	string path;
+	string playlist_path;
+	string item_path;
 	int id;
 };
 
@@ -132,12 +133,19 @@ class MPDConnection
 		int AddSong(const Song &); // returns id of added song
 		void QueueAddSong(const string &);
 		void QueueAddSong(const Song &);
+		void QueueAddToPlaylist(const string &, const string &);
+		void QueueAddToPlaylist(const string &, const Song &);
 		void QueueDeleteSong(int);
 		void QueueDeleteSongId(int);
+		void QueueDeleteFromPlaylist(const string &, int);
 		bool CommitQueue();
 		
 		void DeletePlaylist(const string &) const;
 		bool SavePlaylist(const string &) const;
+		void ClearPlaylist(const string &) const;
+		void AddToPlaylist(const string &, const Song &) const;
+		void AddToPlaylist(const string &, const string &) const;
+		void Move(const string &, int, int) const;
 		
 		void StartSearch(bool) const;
 		void StartFieldSearch(mpd_TagItems);
@@ -145,6 +153,7 @@ class MPDConnection
 		void CommitSearch(SongList &) const;
 		void CommitSearch(TagList &) const;
 		
+		void GetPlaylists(TagList &) const;
 		void GetArtists(TagList &) const;
 		void GetAlbums(string, TagList &) const;
 		void GetDirectory(const string &, ItemList &) const;

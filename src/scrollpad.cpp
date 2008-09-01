@@ -20,6 +20,15 @@
 
 #include "scrollpad.h"
 
+Scrollpad::Scrollpad(const Scrollpad &s) : Window(s)
+{
+	itsContent = s.itsContent;
+	itsRawContent = s.itsRawContent;
+	itsBeginning = s.itsBeginning;
+	itsRealHeight = s.itsRealHeight;
+	itsXPos = s.itsXPos;
+}
+
 void Scrollpad::Add(string str)
 {
 	if (itsXPos > 0 && (str[0] != ' ' || str[0] != '\n'))
@@ -220,20 +229,3 @@ Window * Scrollpad::EmptyClone()
 	return new Scrollpad(GetStartX(),GetStartY(),GetWidth(),GetHeight(),itsTitle,itsBaseColor,itsBorder);
 }
 
-Scrollpad & Scrollpad::operator=(const Scrollpad &base)
-{
-	if (this == &base)
-		return *this;
-	itsWindow = base.itsWindow;
-	itsStartX = base.itsStartX;
-	itsStartY = base.itsStartY;
-	itsWidth = base.itsWidth;
-	itsHeight = base.itsHeight;
-	itsTitle = base.itsTitle;
-	itsBorder = base.itsBorder;
-	itsColor = base.itsColor;
-	itsContent = base.itsContent;
-	itsBeginning = base.itsBeginning;
-	itsRealHeight = base.itsRealHeight;
-	return *this;
-}

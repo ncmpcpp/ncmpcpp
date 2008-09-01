@@ -46,6 +46,7 @@ struct ncmpcpp_keys
 	int Browser[2];
 	int SearchEngine[2];
 	int MediaLibrary[2];
+	int PlaylistEditor[2];
 	int Stop[2];
 	int Pause[2];
 	int Next[2];
@@ -55,6 +56,7 @@ struct ncmpcpp_keys
 	int ToggleRepeat[2];
 	int ToggleRepeatOne[2];
 	int ToggleRandom[2];
+	int ToggleSpaceMode[2];
 	int Shuffle[2];
 	int ToggleCrossfade[2];
 	int SetCrossfade[2];
@@ -69,6 +71,7 @@ struct ncmpcpp_keys
 	int Lyrics[2];
 	int ReverseSelection[2];
 	int DeselectAll[2];
+	int AddSelected[2];
 	int Clear[2];
 	int Crop[2];
 	int MvSongUp[2];
@@ -102,7 +105,7 @@ struct ncmpcpp_config
 	COLOR main_highlight_color;
 	COLOR progressbar_color;
 	COLOR statusbar_color;
-	COLOR library_active_column_color;
+	COLOR active_column_color;
 	
 	bool colors_enabled;
 	bool set_window_title;
@@ -111,6 +114,7 @@ struct ncmpcpp_config
 	bool autocenter_mode;
 	bool repeat_one_mode;
 	bool wrapped_search;
+	bool space_selects;
 	
 	int mpd_connection_timeout;
 	int crossfade_time;

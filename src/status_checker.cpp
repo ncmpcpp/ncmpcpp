@@ -38,6 +38,7 @@ extern Window *wFooter;
 
 extern SongList vPlaylist;
 extern SongList vSearched;
+extern SongList vLibSongs;
 extern ItemList vBrowser;
 
 extern TagList vArtists;
@@ -71,7 +72,6 @@ extern bool allow_statusbar_unblock;
 extern bool block_progressbar_update;
 extern bool block_statusbar_update;
 extern bool block_playlist_update;
-extern bool block_library_update;
 
 extern bool redraw_me;
 
@@ -243,7 +243,7 @@ void NcmpcppStatusChanged(MPDConnection *Mpd, MPDStatusChanges changed, void *da
 				}
 			}
 		}
-		if (current_screen == csSearcher)
+		else if (current_screen == csSearcher)
 		{
 			bool bold = 0;
 			int i = search_engine_static_option;
@@ -261,28 +261,29 @@ void NcmpcppStatusChanged(MPDConnection *Mpd, MPDStatusChanges changed, void *da
 				bold = 0;
 			}
 		}
-		block_library_update = 0;
+		else if (current_screen == csLibrary)
+		{
+			bool bold = 0;
+			for (int i = 0; i < vLibSongs.size(); i++)
+			{
+				for (SongList::const_iterator it = vPlaylist.begin(); it != vPlaylist.end(); it++)
+				{
+					if ((*it)->GetHash() == vLibSongs[i]->GetHash())
+					{
+						bold = 1;
+						break;
+					}
+				}
+				mLibSongs->BoldOption(i+1, bold);
+				bold = 0;
+			}
+			mLibSongs->Refresh();
+		}
 	}
 	if (changed.Database)
 	{
 		GetDirectory(browsed_dir);
-		if (!mLibArtists->Empty())
-		{
-			ShowMessage("Updating artists' list...");
-			mLibArtists->Clear(0);
-			vArtists.clear();
-			Mpd->GetArtists(vArtists);
-			sort(vArtists.begin(), vArtists.end(), CaseInsensitiveComparison);
-			for (TagList::const_iterator it = vArtists.begin(); it != vArtists.end(); it++)
-				mLibArtists->AddOption(*it);
-			if (current_screen == csLibrary)
-			{
-				mLibArtists->Hide();
-				mLibArtists->Display();
-			}
-			ShowMessage("List updated!");
-		}
-		block_library_update = 0;
+		mLibArtists->Clear(0);
 	}
 	if (changed.PlayerState)
 	{

@@ -31,8 +31,11 @@
 extern ncmpcpp_config Config;
 
 void DeleteSong(int);
+void PlaylistDeleteSong(const string &, int);
 bool MoveSongUp(int);
 bool MoveSongDown(int);
+bool PlaylistMoveSongUp(const string &, int);
+bool PlaylistMoveSongDown(const string &, int);
 
 string DisplayKeys(int *, int = 2);
 bool Keypressed(int, const int *);

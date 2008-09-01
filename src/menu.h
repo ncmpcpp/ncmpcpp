@@ -46,6 +46,7 @@ class Menu : public Window
 {
 	public:
 		Menu(int startx, int starty, int width, int height, string title, COLOR color, BORDER border) : Window(startx, starty, width, height, title, color, border), itsSelectedPrefix("[r]"), itsSelectedSuffix("[/r]"), itsStaticsNumber(0), itsBeginning(0), itsHighlight(0), itsHighlightColor(itsBaseColor), itsHighlightEnabled(1) { SetColor(color); }
+		Menu(const Menu &);
 		virtual ~Menu();
 		
 		virtual void Add(string str) { AddOption(str); }
@@ -87,6 +88,7 @@ class Menu : public Window
 		
 		bool Empty() { return itsOptions.empty(); }
 		bool IsStatic(int);
+		virtual Window * Clone() { return new Menu(*this); }
 		virtual Window * EmptyClone();
 	protected:
 		vector<Option *> itsOptions;
