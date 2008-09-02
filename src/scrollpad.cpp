@@ -162,34 +162,34 @@ void Scrollpad::Go(Where where)
 	
 	switch (where)
 	{
-		case UP:
+		case wUp:
 		{
 			if (itsBeginning > 0) itsBeginning--; // for scrolling
 			break;
 		}
-		case DOWN:
+		case wDown:
 		{
 			if (itsBeginning < MaxBeginning) itsBeginning++; // scroll
 			break;
 		}
-		case PAGE_UP:
+		case wPageUp:
 		{
 			itsBeginning -= itsHeight;
 			if (itsBeginning < 0) itsBeginning = 0;
 			break;
 		}
-		case PAGE_DOWN:
+		case wPageDown:
 		{
 			itsBeginning += itsHeight;
 			if (itsBeginning > MaxBeginning) itsBeginning = MaxBeginning;
 			break;
 		}
-		case HOME:
+		case wHome:
 		{
 			itsBeginning = 0;
 			break;
 		}
-		case END:
+		case wEnd:
 		{
 			itsBeginning = MaxBeginning;
 			break;

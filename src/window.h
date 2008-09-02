@@ -41,7 +41,7 @@ using std::vector;
 
 enum Color { clDefault, clBlack, clRed, clGreen, clYellow, clBlue, clMagenta, clCyan, clWhite };
 enum Border { brNone, brBlack, brRed, brGreen, brYellow, brBlue, brMagenta, brCyan, brWhite };
-enum Where { UP, DOWN, PAGE_UP, PAGE_DOWN, HOME, END };
+enum Where { wUp, wDown, wPageUp, wPageDown, wHome, wEnd };
 
 typedef void (*GetStringHelper)();
 typedef std::pair<Color, Color> ColorPair;
@@ -63,7 +63,7 @@ class Window
 		Window(const Window &);
 		virtual ~Window();
 		virtual WINDOW *RawWin() { return itsWindow; }
-		virtual void GetGetStringHelper(GetStringHelper helper) { itsGetStringHelper = helper; }
+		virtual void SetGetStringHelper(GetStringHelper helper) { itsGetStringHelper = helper; }
 		virtual void SetColor(Color, Color = clDefault);
 		virtual void SetBaseColor(Color, Color = clDefault);
 		virtual void SetBorder(Border);

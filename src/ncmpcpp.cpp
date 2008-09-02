@@ -330,7 +330,7 @@ int main(int argc, char *argv[])
 	int footer_height = Config.statusbar_visibility ? 2 : 1;
 	
 	wFooter = new Window(0, footer_start_y, COLS, footer_height, "", Config.statusbar_color, brNone);
-	wFooter->GetGetStringHelper(TraceMpdStatus);
+	wFooter->SetGetStringHelper(TraceMpdStatus);
 	wFooter->Display();
 	
 	wCurrent = mPlaylist;
@@ -658,14 +658,14 @@ int main(int argc, char *argv[])
 				while (Keypressed(input, Key.Up))
 				{
 					TraceMpdStatus();
-					wCurrent->Go(UP);
+					wCurrent->Go(wUp);
 					wCurrent->Refresh();
 					wCurrent->ReadKey(input);
 				}
 				wCurrent->Timeout(ncmpcpp_window_timeout);
 			}
 			else
-				wCurrent->Go(UP);
+				wCurrent->Go(wUp);
 		}
 		else if (Keypressed(input, Key.Down))
 		{
@@ -675,30 +675,30 @@ int main(int argc, char *argv[])
 				while (Keypressed(input, Key.Down))
 				{
 					TraceMpdStatus();
-					wCurrent->Go(DOWN);
+					wCurrent->Go(wDown);
 					wCurrent->Refresh();
 					wCurrent->ReadKey(input);
 				}
 				wCurrent->Timeout(ncmpcpp_window_timeout);
 			}
 			else
-				wCurrent->Go(DOWN);
+				wCurrent->Go(wDown);
 		}
 		else if (Keypressed(input, Key.PageUp))
 		{
-			wCurrent->Go(PAGE_UP);
+			wCurrent->Go(wPageUp);
 		}
 		else if (Keypressed(input, Key.PageDown))
 		{
-			wCurrent->Go(PAGE_DOWN);
+			wCurrent->Go(wPageDown);
 		}
 		else if (Keypressed(input, Key.Home))
 		{
-			wCurrent->Go(HOME);
+			wCurrent->Go(wHome);
 		}
 		else if (Keypressed(input, Key.End))
 		{
-			wCurrent->Go(END);
+			wCurrent->Go(wEnd);
 		}
 		else if (input == KEY_RESIZE)
 		{
@@ -1139,8 +1139,8 @@ int main(int argc, char *argv[])
 									
 								for (int i = 1; i <=13; i++)
 									mSearcher->MakeStatic(i, 1);
-								mSearcher->Go(DOWN);
-								mSearcher->Go(DOWN);
+								mSearcher->Go(wDown);
+								mSearcher->Go(wDown);
 							}
 							else
 								ShowMessage("No results found");
@@ -1230,7 +1230,7 @@ int main(int argc, char *argv[])
 					}
 					FreeSongList(list);
 					if (Keypressed(input, Key.Space))
-						wCurrent->Go(DOWN);
+						wCurrent->Go(wDown);
 					break;
 				}
 				case csPlaylistEditor:
@@ -1274,7 +1274,7 @@ int main(int argc, char *argv[])
 					}
 					FreeSongList(list);
 					if (Keypressed(input, Key.Space))
-						wCurrent->Go(DOWN);
+						wCurrent->Go(wDown);
 					break;
 				}
 				default:
@@ -1290,7 +1290,7 @@ int main(int argc, char *argv[])
 					Menu *mCurrent = static_cast<Menu *>(wCurrent);
 					int i = mCurrent->GetChoice();
 					mCurrent->Select(i, !mCurrent->Selected(i));
-					mCurrent->Go(DOWN);
+					mCurrent->Go(wDown);
 				}
 			}
 			else
@@ -1343,7 +1343,7 @@ int main(int argc, char *argv[])
 							break;
 						}
 					}
-					mBrowser->Go(DOWN);
+					mBrowser->Go(wDown);
 				}
 				else if (current_screen == csSearcher && !vSearched.empty())
 				{
@@ -1354,7 +1354,7 @@ int main(int argc, char *argv[])
 					Song &s = *vSearched[id];
 					if (Mpd->AddSong(s) != -1)
 						ShowMessage("Added to playlist: " + OmitBBCodes(DisplaySong(s)));
-					mSearcher->Go(DOWN);
+					mSearcher->Go(wDown);
 				}
 				else if (current_screen == csLibrary)
 					goto ENTER_LIBRARY_SCREEN; // sorry, but that's stupid to copy the same code here.
@@ -1598,14 +1598,14 @@ int main(int argc, char *argv[])
 					{
 						if (!MoveSongUp(*it-1))
 						{
-							mPlaylist->Go(DOWN);
+							mPlaylist->Go(wDown);
 							break;
 						}
 					}
 				}
 				else
 					if (MoveSongUp(mPlaylist->GetChoice()-1))
-						mPlaylist->Go(UP);
+						mPlaylist->Go(wUp);
 			}
 			else if (wCurrent == mPlaylistEditor)
 			{
@@ -1618,14 +1618,14 @@ int main(int argc, char *argv[])
 					{
 						if (!PlaylistMoveSongUp(mPlaylistList->GetCurrentOption(), *it-1))
 						{
-							mPlaylistEditor->Go(DOWN);
+							mPlaylistEditor->Go(wDown);
 							break;
 						}
 					}
 				}
 				else
 					if (PlaylistMoveSongUp(mPlaylistList->GetCurrentOption(), mPlaylistEditor->GetChoice()-1))
-						mPlaylistEditor->Go(UP);
+						mPlaylistEditor->Go(wUp);
 			}
 		}
 		else if (Keypressed(input, Key.MvSongDown))
@@ -1642,14 +1642,14 @@ int main(int argc, char *argv[])
 					{
 						if (!MoveSongDown(*it-1))
 						{
-							mPlaylist->Go(UP);
+							mPlaylist->Go(wUp);
 							break;
 						}
 					}
 				}
 				else
 					if (MoveSongDown(mPlaylist->GetChoice()-1))
-						mPlaylist->Go(DOWN);
+						mPlaylist->Go(wDown);
 			}
 			else if (wCurrent == mPlaylistEditor)
 			{
@@ -1662,14 +1662,14 @@ int main(int argc, char *argv[])
 					{
 						if (!PlaylistMoveSongDown(mPlaylistList->GetCurrentOption(), *it-1))
 						{
-							mPlaylistEditor->Go(UP);
+							mPlaylistEditor->Go(wUp);
 							break;
 						}
 					}
 				}
 				else
 					if (PlaylistMoveSongDown(mPlaylistList->GetCurrentOption(), mPlaylistEditor->GetChoice()-1))
-						mPlaylistEditor->Go(DOWN);
+						mPlaylistEditor->Go(wDown);
 			}
 		}
 		else if (Keypressed(input, Key.Add))
@@ -1843,8 +1843,13 @@ int main(int argc, char *argv[])
 			{
 				GetDirectory(vSearched[mSearcher->GetChoice()-search_engine_static_option-1]->GetDirectory());
 				for (int i = 1; i < mBrowser->MaxChoice(); i++)
+				{
 					if (mSearcher->GetCurrentOption() == mBrowser->GetOption(i))
+					{
 						mBrowser->Highlight(i);
+						break;
+					}
+				}
 				goto SWITCHER_BROWSER_REDIRECT;
 			}
 		}
@@ -1986,17 +1991,17 @@ int main(int argc, char *argv[])
 						mDialog->ReadKey(input);
 						
 						if (Keypressed(input, Key.Up))
-							mDialog->Go(UP);
+							mDialog->Go(wUp);
 						else if (Keypressed(input, Key.Down))
-							mDialog->Go(DOWN);
+							mDialog->Go(wDown);
 						else if (Keypressed(input, Key.PageUp))
-							mDialog->Go(PAGE_UP);
+							mDialog->Go(wPageUp);
 						else if (Keypressed(input, Key.PageDown))
-							mDialog->Go(PAGE_DOWN);
+							mDialog->Go(wPageDown);
 						else if (Keypressed(input, Key.Home))
-							mDialog->Go(HOME);
+							mDialog->Go(wHome);
 						else if (Keypressed(input, Key.End))
-							mDialog->Go(END);
+							mDialog->Go(wEnd);
 					}
 					
 					int id = mDialog->GetChoice();

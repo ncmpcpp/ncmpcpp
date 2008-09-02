@@ -281,7 +281,7 @@ void Menu::Display(bool redraw_whole_window)
 void Menu::Refresh(bool redraw_whole_window)
 {
 	if (!itsOptions.empty() && is_static())
-		itsHighlight == 0 ? Go(DOWN) : Go(UP);
+		itsHighlight == 0 ? Go(wDown) : Go(wUp);
 	
 	int MaxBeginning = itsOptions.size() < itsHeight ? 0 : itsOptions.size()-itsHeight;
 	if (itsBeginning > MaxBeginning)
@@ -397,7 +397,7 @@ void Menu::Go(Where where)
 	scrollok(itsWindow, 1);
 	switch (where)
 	{
-		case UP:
+		case wUp:
 		{
 			if (itsHighlight <= itsBeginning && itsHighlight > 0)
 			{
@@ -414,13 +414,13 @@ void Menu::Go(Where where)
 			if (is_static())
 			{
 				if (itsHighlight == 0)
-					Go(DOWN);
+					Go(wDown);
 				else
-					Go(UP);
+					Go(wUp);
 			}
 			break;
 		}
-		case DOWN:
+		case wDown:
 		{
 			if (itsHighlight >= MaxCurrentHighlight && itsHighlight < MaxHighlight)
 			{
@@ -437,13 +437,13 @@ void Menu::Go(Where where)
 			if (is_static())
 			{
 				if (itsHighlight == MaxHighlight)
-					Go(UP);
+					Go(wUp);
 				else
-					Go(DOWN);
+					Go(wDown);
 			}
 			break;
 		}
-		case PAGE_UP:
+		case wPageUp:
 		{
 			itsHighlight -= itsHeight;
 			itsBeginning -= itsHeight;
@@ -455,14 +455,14 @@ void Menu::Go(Where where)
 			if (is_static())
 			{
 				if (itsHighlight == 0)
-					Go(DOWN);
+					Go(wDown);
 				else
-					Go(UP);
+					Go(wUp);
 			}
 			redraw_screen();
 			break;
 		}
-		case PAGE_DOWN:
+		case wPageDown:
 		{
 			itsHighlight += itsHeight;
 			itsBeginning += itsHeight;
@@ -474,37 +474,37 @@ void Menu::Go(Where where)
 			if (is_static())
 			{
 				if (itsHighlight == MaxHighlight)
-					Go(UP);
+					Go(wUp);
 				else
-					Go(DOWN);
+					Go(wDown);
 			}
 			redraw_screen();
 			break;
 		}
-		case HOME:
+		case wHome:
 		{
 			itsHighlight = 0;
 			itsBeginning = 0;
 			if (is_static())
 			{
 				if (itsHighlight == 0)
-					Go(DOWN);
+					Go(wDown);
 				else
-					Go(UP);
+					Go(wUp);
 			}
 			redraw_screen();
 			break;
 		}
-		case END:
+		case wEnd:
 		{
 			itsHighlight = MaxHighlight;
 			itsBeginning = MaxBeginning;
 			if (is_static())
 			{
 				if (itsHighlight == MaxHighlight)
-					Go(UP);
+					Go(wUp);
 				else
-					Go(DOWN);
+					Go(wDown);
 			}
 			redraw_screen();
 			break;
