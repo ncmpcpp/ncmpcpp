@@ -25,17 +25,13 @@ extern MPDConnection *Mpd;
 
 extern ncmpcpp_config Config;
 
-extern Menu *mPlaylist;
-extern Menu *mBrowser;
-extern Menu *mTagEditor;
-extern Menu *mSearcher;
-extern Menu *mPlaylistEditor;
+extern Menu<Song> *mPlaylist;
+extern Menu<Item> *mBrowser;
+extern Menu<string> *mTagEditor;
+extern Menu<string> *mSearcher;
+extern Menu<Song> *mPlaylistEditor;
 
 extern Window *wFooter;
-
-extern SongList vPlaylist;
-extern SongList vPlaylistContent;
-extern ItemList vBrowser;
 
 extern NcmpcppScreen current_screen;
 
@@ -64,36 +60,56 @@ extern string UNKNOWN_ARTIST;
 extern string UNKNOWN_TITLE;
 extern string UNKNOWN_ALBUM;
 
-void UpdateItemList(const ItemList &v, Menu *menu, int i)
+void UpdateItemList(Menu<Item> *menu)
 {
 	bool bold = 0;
-	for (ItemList::const_iterator it = v.begin(); it != v.end(); it++, i++)
+	for (int i = 0; i < menu->Size(); i++)
 	{
-		if (it->type == itSong)
+		if (menu->at(i).type == itSong)
 		{
-			for (SongList::const_iterator j = vPlaylist.begin(); j != vPlaylist.end(); j++)
+			for (int j = 0; j < mPlaylist->Size(); j++)
 			{
-				if ((*j)->GetHash() == it->song->GetHash())
+				if (mPlaylist->at(j).GetHash() == menu->at(i).song->GetHash())
 				{
 					bold = 1;
 					break;
 				}
 			}
-			menu->BoldOption(i, bold);
+			menu->BoldOption(i+1, bold);
 			bold = 0;
 		}
 	}
 	menu->Refresh();
 }
 
-void UpdateSongList(const SongList &v, Menu *menu, int i)
+void UpdateSongList(Menu<Song> *menu)
 {
+	bool bold = 0;
+	for (int i = 0; i < menu->Size(); i++)
+	{
+		for (int j = 0; j < mPlaylist->Size(); j++)
+		{
+			if (mPlaylist->at(j).GetHash() == menu->at(i).GetHash())
+			{
+				bold = 1;
+				break;
+			}
+		}
+		menu->BoldOption(i+1, bold);
+		bold = 0;
+	}
+	menu->Refresh();
+}
+
+void UpdateFoundList(const SongList &v, Menu<string> *menu)
+{
+	int i = search_engine_static_option+1;
 	bool bold = 0;
 	for (SongList::const_iterator it = v.begin(); it != v.end(); it++, i++)
 	{
-		for (SongList::const_iterator j = vPlaylist.begin(); j != vPlaylist.end(); j++)
+		for (int j = 0; j < mPlaylist->Size(); j++)
 		{
-			if ((*j)->GetHash() == (*it)->GetHash())
+			if (mPlaylist->at(j).GetHash() == (*it)->GetHash())
 			{
 				bold = 1;
 				break;
@@ -108,16 +124,12 @@ void UpdateSongList(const SongList &v, Menu *menu, int i)
 void DeleteSong(int id)
 {
 	Mpd->QueueDeleteSong(id);
-	delete vPlaylist[id];
-	vPlaylist.erase(vPlaylist.begin()+id);
 	mPlaylist->DeleteOption(id+1);
 }
 
 void PlaylistDeleteSong(const string &path, int id)
 {
 	Mpd->QueueDeleteFromPlaylist(path, id);
-	delete vPlaylistContent[id];
-	vPlaylistContent.erase(vPlaylistContent.begin()+id);
 	mPlaylistEditor->DeleteOption(id+1);
 }
 
@@ -125,7 +137,6 @@ bool MoveSongUp(int pos)
 {
 	if (pos > 0 && !mPlaylist->Empty() && current_screen == csPlaylist)
 	{
-		std::swap<Song *>(vPlaylist[pos], vPlaylist[pos-1]);
 		mPlaylist->Swap(pos, pos-1);
 		Mpd->Move(pos, pos-1);
 		return true;
@@ -136,9 +147,8 @@ bool MoveSongUp(int pos)
 
 bool MoveSongDown(int pos)
 {
-	if (pos+1 < vPlaylist.size() && !mPlaylist->Empty() && current_screen == csPlaylist)
+	if (pos+1 < mPlaylist->Size() && !mPlaylist->Empty() && current_screen == csPlaylist)
 	{
-		std::swap<Song *>(vPlaylist[pos+1], vPlaylist[pos]);
 		mPlaylist->Swap(pos+1, pos);
 		Mpd->Move(pos, pos+1);
 		return true;
@@ -161,7 +171,7 @@ bool PlaylistMoveSongUp(const string &path, int pos)
 
 bool PlaylistMoveSongDown(const string &path, int pos)
 {
-	if (pos+1 < mPlaylistEditor->MaxChoice() && !mPlaylistEditor->Empty() && current_screen == csPlaylistEditor)
+	if (pos+1 < mPlaylistEditor->Size() && !mPlaylistEditor->Empty() && current_screen == csPlaylistEditor)
 	{
 		mPlaylistEditor->Swap(pos+1, pos);
 		Mpd->Move(path, pos, pos+1);
@@ -260,8 +270,8 @@ string TotalPlaylistLength()
 	const int YEAR = 365*DAY;
 	string result;
 	int length = 0;
-	for (SongList::const_iterator it = vPlaylist.begin(); it != vPlaylist.end(); it++)
-		length += (*it)->GetTotalLength();
+	for (int i = 0; i < mPlaylist->Size(); i++)
+		length += mPlaylist->at(i).GetTotalLength();
 	
 	if (!length)
 		return result;
@@ -305,8 +315,22 @@ string TotalPlaylistLength()
 	return result;
 }
 
-string DisplaySong(const Song &s, const string &song_template)
+string DisplayItem(const Item &item, void *)
+{
+	switch (item.type)
+	{
+		case itDirectory:
+			return "[" + item.name + "]";
+		case itSong:
+			return DisplaySong(*item.song);
+		case itPlaylist:
+			return Config.browser_playlist_prefix + item.name;
+	}
+}
+
+string DisplaySong(const Song &s, void *s_template)
 {	
+	const string &song_template = s_template ? *static_cast<string *>(s_template) : "";
 	string result;
 	bool link_tags = 0;
 	bool tags_present = 0;
@@ -801,26 +825,26 @@ void GetDirectory(string dir)
 	if (browsed_dir != dir)
 		mBrowser->Reset();
 	browsed_dir = dir;
-	vBrowser.clear();
 	mBrowser->Clear(0);
 	if (dir != "/")
 	{
-		mBrowser->AddOption("[..]");
 		Item parent;
+		parent.name = "..";
 		parent.type = itDirectory;
-		vBrowser.push_back(parent);
+		mBrowser->AddOption(parent);
 	}
-	Mpd->GetDirectory(dir, vBrowser);
 	
-	sort(vBrowser.begin(), vBrowser.end(), SortDirectory);
+	ItemList list;
+	Mpd->GetDirectory(dir, list);
+	sort(list.begin(), list.end(), SortDirectory);
 	
-	for (ItemList::iterator it = vBrowser.begin()+(dir != "/" ? 1 : 0); it != vBrowser.end(); it++)
+	for (ItemList::iterator it = list.begin(); it != list.end(); it++)
 	{
 		switch (it->type)
 		{
 			case itPlaylist:
 			{
-				mBrowser->AddOption(Config.browser_playlist_prefix + string(it->name));
+				mBrowser->AddOption(*it);
 				break;
 			}
 			case itDirectory:
@@ -831,25 +855,24 @@ void GetDirectory(string dir)
 					directory = subdir.substr(browsed_dir.size()-1,subdir.size()-browsed_dir.size()+1);
 				else
 					directory = subdir.substr(browsed_dir.size()+1,subdir.size()-browsed_dir.size()-1);
-				mBrowser->AddOption("[" + directory + "]");
 				if (directory == browsed_subdir)
-					highlightme = mBrowser->MaxChoice();
+					highlightme = mBrowser->Size()+1;
 				it->name = directory;
+				mBrowser->AddOption(*it);
 				break;
 			}
 			case itSong:
 			{
-				Song *s = it->song;
 				bool bold = 0;
-				for (SongList::const_iterator it = vPlaylist.begin(); it != vPlaylist.end(); it++)
+				for (int i = 0; i < mPlaylist->Size(); i++)
 				{
-					if ((*it)->GetHash() == s->GetHash())
+					if (mPlaylist->at(i).GetHash() == it->song->GetHash())
 					{
 						bold = 1;
 						break;
 					}
 				}
-				bold ? mBrowser->AddBoldOption(DisplaySong(*s)) : mBrowser->AddOption(DisplaySong(*s));
+				bold ? mBrowser->AddBoldOption(*it) : mBrowser->AddOption(*it);
 				break;
 			}
 		}

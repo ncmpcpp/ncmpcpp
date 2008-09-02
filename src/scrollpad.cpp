@@ -211,17 +211,19 @@ void Scrollpad::SetTitle(string newtitle)
 	itsTitle = newtitle;
 }
 
-void Scrollpad::Clear()
+void Scrollpad::Clear(bool clear_screen)
 {
 	itsBeginning = 0;
 	itsRealHeight = 1;
 	itsXPos = 0;
 	itsContent.clear();
 	itsRawContent.clear();
+	wclear(itsWindow);
 	delwin(itsWindow);
-	itsWindow = newpad(itsRealHeight, itsWidth);
+	itsWindow = newpad(itsHeight, itsWidth);
 	SetColor(itsColor, itsBgColor);
-	Window::Clear();
+	if (clear_screen)
+		Window::Clear();
 }
 
 Window * Scrollpad::EmptyClone()

@@ -231,7 +231,7 @@ void Window::Refresh(bool stub)
 	wrefresh(itsWindow);
 }
 
-void Window::Clear()
+void Window::Clear(bool stub)
 {
 	for (int i = 0; i < GetHeight(); i++)
 		mvwhline(itsWindow, i, 0, 32, GetWidth());

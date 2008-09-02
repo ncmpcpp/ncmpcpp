@@ -37,7 +37,7 @@ class Scrollpad: public Window
 		virtual void Resize(int, int);
 		virtual void SetBorder(Border);
 		virtual void SetTitle(string);
-		virtual void Clear();
+		virtual void Clear(bool clear_screen = 1);
 		virtual Window * Clone() { return new Scrollpad(*this); }
 		virtual Window * EmptyClone();
 	protected:

@@ -26,24 +26,19 @@ extern MPDConnection *Mpd;
 
 extern ncmpcpp_config Config;
 
-extern Menu *mPlaylist;
-extern Menu *mBrowser;
-extern Menu *wCurrent;
-extern Menu *mSearcher;
-extern Menu *mLibArtists;
-extern Menu *mLibAlbums;
-extern Menu *mLibSongs;
-extern Menu *mPlaylistEditor;
+extern Menu<Song> *mPlaylist;
+extern Menu<Item> *mBrowser;
+extern Menu<string> *mSearcher;
+extern Menu<string> *mLibArtists;
+extern Menu<string> *mLibAlbums;
+extern Menu<Song> *mLibSongs;
+extern Menu<Song> *mPlaylistEditor;
+
+extern Window *wCurrent;
 extern Window *wHeader;
 extern Window *wFooter;
 
-extern SongList vPlaylist;
 extern SongList vSearched;
-extern SongList vLibSongs;
-extern SongList vPlaylistContent;
-extern ItemList vBrowser;
-
-extern TagList vArtists;
 
 extern time_t block_delay;
 extern time_t timer;
@@ -160,92 +155,79 @@ void NcmpcppStatusChanged(MPDConnection *Mpd, MPDStatusChanges changed, void *da
 		if (!block_playlist_update)
 		{
 			SongList list;
-			
 			int playlist_length = Mpd->GetPlaylistLength();
-			
-			if (playlist_length != vPlaylist.size())
+			if (playlist_length != mPlaylist->Size())
 			{
-				if (playlist_length < vPlaylist.size())
+				if (playlist_length < mPlaylist->Size())
 				{
 					mPlaylist->Clear(playlist_length < mPlaylist->GetHeight() && current_screen == csPlaylist);
-					FreeSongList(vPlaylist);
 					Mpd->GetPlaylistChanges(-1, list);
 				}
 				else
 					Mpd->GetPlaylistChanges(playlist_old_id, list);
 				
-				vPlaylist.reserve(playlist_length);
-				
 				for (SongList::const_iterator it = list.begin(); it != list.end(); it++)
 				{
-					vPlaylist.push_back(*it);
 					if (now_playing != (*it)->GetPosition())
-						mPlaylist->AddOption(DisplaySong(**it));
+						mPlaylist->AddOption(**it);
 					else
-						mPlaylist->AddBoldOption(DisplaySong(**it));
+						mPlaylist->AddBoldOption(**it);
 				}
 				
 				if (current_screen == csPlaylist)
 				{
-					if (!playlist_length || mPlaylist->MaxChoice() < mPlaylist->GetHeight())
-						mPlaylist->Hide();
+					if (!playlist_length || mPlaylist->Size() < mPlaylist->GetHeight())
+						mPlaylist->Window::Clear();
 					mPlaylist->Refresh(1);
 				}
 			}
 			else
 			{
-				int i = 1;
-				
-				mPlaylist->BoldOption(old_playing+1, 0);
-				mPlaylist->BoldOption(now_playing+1, 1);
+			//	mPlaylist->BoldOption(old_playing+1, 0);
+			//	mPlaylist->BoldOption(now_playing+1, 1);
 				
 				Mpd->GetPlaylistChanges(-1, list);
 				
-				SongList::iterator j = list.begin();
-				
-				for (SongList::iterator it = vPlaylist.begin(); it != vPlaylist.end(); it++, i++)
+				for (int i = 0; i < mPlaylist->Size(); i++)
 				{
-					if (**it != **j)
-					{
-						**it = **j;
-						mPlaylist->UpdateOption(i, DisplaySong(**it));
-					}
-					j++;
+					if (*list[i] != mPlaylist->at(i))
+						mPlaylist->UpdateOption(i+1, *list[i]);
 				}
-				FreeSongList(list);
 			}
+			FreeSongList(list);
 		}
 		
-		if (vPlaylist.empty())
+		if (mPlaylist->Empty())
 		{
 			playlist_stats.clear();
 			mPlaylist->Reset();
 			ShowMessage("Cleared playlist!");
 		}
 		else
-			playlist_stats = "(" + IntoStr(vPlaylist.size()) + (vPlaylist.size() == 1 ? " item" : " items") + TotalPlaylistLength() + ")";
+			playlist_stats = "(" + IntoStr(mPlaylist->Size()) + (mPlaylist->Size() == 1 ? " item" : " items") + TotalPlaylistLength() + ")";
 		
 		if (current_screen == csBrowser)
 		{
-			UpdateItemList(vBrowser, mBrowser);
+			UpdateItemList(mBrowser);
 		}
 		else if (current_screen == csSearcher)
 		{
-			UpdateSongList(vSearched, mSearcher, search_engine_static_option+1);
+			UpdateFoundList(vSearched, mSearcher);
 		}
 		else if (current_screen == csLibrary)
 		{
-			UpdateSongList(vLibSongs, mLibSongs);
+			UpdateSongList(mLibSongs);
 		}
 		else if (current_screen == csPlaylistEditor)
 		{
-			UpdateSongList(vPlaylistContent, mPlaylistEditor);
+			UpdateSongList(mPlaylistEditor);
 		}
 	}
 	if (changed.Database)
 	{
 		GetDirectory(browsed_dir);
 		mLibArtists->Clear(0);
+		mPlaylistEditor->Clear(0);
 	}
 	if (changed.PlayerState)
 	{
@@ -286,7 +268,7 @@ void NcmpcppStatusChanged(MPDConnection *Mpd, MPDStatusChanges changed, void *da
 	}
 	if (changed.SongID)
 	{
-		if (!vPlaylist.empty() && now_playing >= 0)
+		if (!mPlaylist->Empty() && now_playing >= 0)
 		{
 			if (!mPlaylist->Empty())
 			{
@@ -315,7 +297,7 @@ void NcmpcppStatusChanged(MPDConnection *Mpd, MPDStatusChanges changed, void *da
 		Song s = Mpd->GetCurrentSong();
 		if (!player_state.empty() && !s.Empty())
 		{
-			WindowTitle(DisplaySong(s, Config.song_window_title_format));
+			WindowTitle(DisplaySong(s, &Config.song_window_title_format));
 			
 			int elapsed = Mpd->GetElapsedTime();
 			
@@ -330,7 +312,7 @@ void NcmpcppStatusChanged(MPDConnection *Mpd, MPDStatusChanges changed, void *da
 					tracklength = " [" + ShowTime(elapsed) + "/" + s.GetLength() + "]";
 				else
 					tracklength = " [" + ShowTime(elapsed) + "]";
-				ncmpcpp_string_t playing_song = NCMPCPP_TO_WSTRING(OmitBBCodes(DisplaySong(s, Config.song_status_format)));
+				ncmpcpp_string_t playing_song = NCMPCPP_TO_WSTRING(OmitBBCodes(DisplaySong(s, &Config.song_status_format)));
 				
 				int max_length_without_scroll = wFooter->GetWidth()-player_state.length()-tracklength.length();
 				
@@ -352,7 +334,7 @@ void NcmpcppStatusChanged(MPDConnection *Mpd, MPDStatusChanges changed, void *da
 						playing_song_scroll_begin = 0;
 				}
 				else
-					wFooter->WriteXY(player_state.length(), 1, OmitBBCodes(DisplaySong(s, Config.song_status_format)), 1);
+					wFooter->WriteXY(player_state.length(), 1, OmitBBCodes(DisplaySong(s, &Config.song_status_format)), 1);
 				wFooter->Bold(1);
 				
 				wFooter->WriteXY(wFooter->GetWidth()-tracklength.length(), 1, tracklength);

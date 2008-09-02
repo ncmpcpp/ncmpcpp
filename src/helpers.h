@@ -30,8 +30,9 @@
 
 extern ncmpcpp_config Config;
 
-void UpdateItemList(const ItemList &, Menu *, int = 1);
-void UpdateSongList(const SongList &, Menu *, int = 1);
+void UpdateItemList(Menu<Item> *);
+void UpdateSongList(Menu<Song> *);
+void UpdateFoundList(const SongList &, Menu<string> *);
 
 void DeleteSong(int);
 void PlaylistDeleteSong(const string &, int);
@@ -46,7 +47,8 @@ bool SortSongsByTrack(Song *, Song *);
 bool CaseInsensitiveComparison(string, string);
 void WindowTitle(const string &);
 string TotalPlaylistLength();
-string DisplaySong(const Song &, const string & = Config.song_list_format);
+string DisplayItem(const Item &, void * = NULL);
+string DisplaySong(const Song &, void * = &Config.song_list_format);
 void ShowMessage(const string &, int = Config.message_delay_time);
 bool SortDirectory(const Item &a, const Item &b);
 void GetDirectory(string);

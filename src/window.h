@@ -74,7 +74,7 @@ class Window
 		virtual void Resize(int, int);
 		virtual void Display(bool = 0);
 		virtual void Refresh(bool = 0);
-		virtual void Clear();
+		virtual void Clear(bool stub = 1);
 		virtual void Hide(char = 32) const;
 		virtual void Bold(bool) const;
 		virtual void Reverse(bool) const;
@@ -110,6 +110,14 @@ class Window
 		virtual Window * Clone() { return new Window(*this); }
 		virtual Window * EmptyClone();
 		
+		// stubs for inherits, ugly shit, needs improvement
+		virtual void Select(int, bool) { }
+		virtual bool Selected(int) { return 0; }
+		virtual int Size() const { return 0; }
+		virtual bool IsAnySelected() { return 0; }
+		virtual void GetSelectedList(vector<int> &) { }
+		virtual bool IsStatic(int) { return 0; }
+		virtual void Highlight(int) { }
 		virtual void Go(Where) { } // for Menu and Scrollpad class
 		virtual int GetChoice() const { return -1; } // for Menu class
 		virtual void Add(string str) { Write(str); } // for Scrollpad class
