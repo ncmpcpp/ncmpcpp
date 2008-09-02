@@ -96,16 +96,16 @@ struct ncmpcpp_config
 	string selected_item_prefix;
 	string selected_item_suffix;
 	
-	COLOR empty_tags_color;
-	COLOR header_color;
-	COLOR volume_color;
-	COLOR state_line_color;
-	COLOR state_flags_color;
-	COLOR main_color;
-	COLOR main_highlight_color;
-	COLOR progressbar_color;
-	COLOR statusbar_color;
-	COLOR active_column_color;
+	Color empty_tags_color;
+	Color header_color;
+	Color volume_color;
+	Color state_line_color;
+	Color state_flags_color;
+	Color main_color;
+	Color main_highlight_color;
+	Color progressbar_color;
+	Color statusbar_color;
+	Color active_column_color;
 	
 	bool colors_enabled;
 	bool set_window_title;
@@ -126,8 +126,8 @@ void DefaultKeys(ncmpcpp_keys &);
 void DefaultConfiguration(ncmpcpp_config &);
 void GetKeys(string, int *);
 string GetLineValue(const string &);
-string IntoStr(COLOR);
-COLOR IntoColor(const string &);
+string IntoStr(Color);
+Color IntoColor(const string &);
 void ReadKeys(ncmpcpp_keys &);
 void ReadConfiguration(ncmpcpp_config &);
 

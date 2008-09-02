@@ -213,7 +213,7 @@ string GetConfigLineValue(const string &line)
 		return "";
 }
 
-string IntoStr(COLOR color)
+string IntoStr(Color color)
 {
 	string result = "";
 	
@@ -237,9 +237,9 @@ string IntoStr(COLOR color)
 	return result;
 }
 
-COLOR IntoColor(const string &color)
+Color IntoColor(const string &color)
 {
-	COLOR result = clDefault;
+	Color result = clDefault;
 	
 	if (color == "black")
 		result = clBlack;

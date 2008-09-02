@@ -151,7 +151,7 @@ void Scrollpad::Resize(int width, int height)
 	}
 }
 
-void Scrollpad::Go(WHERE where)
+void Scrollpad::Go(Where where)
 {
 	int MaxBeginning;
 	
@@ -197,7 +197,7 @@ void Scrollpad::Go(WHERE where)
 	}
 }
 
-void Scrollpad::SetBorder(BORDER border)
+void Scrollpad::SetBorder(Border border)
 {
 	if (have_to_recreate(border))
 		recreate_win();

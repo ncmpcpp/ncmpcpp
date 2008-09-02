@@ -20,7 +20,7 @@
 
 #include "window.h"
 
-Window::Window(int startx, int starty, int width, int height, string title, COLOR color, BORDER border) : itsWindow(0), itsWinBorder(0), itsStartX(startx), itsStartY(starty), itsWidth(width), itsHeight(height), BBEnabled(1), AutoRefreshEnabled(1), itsTitle(title), itsColor(color), itsBaseColor(color), itsBgColor(clDefault), itsBaseBgColor(clDefault), itsBorder(border)
+Window::Window(int startx, int starty, int width, int height, string title, Color color, Border border) : itsWindow(0), itsWinBorder(0), itsGetStringHelper(0), itsStartX(startx), itsStartY(starty), itsWidth(width), itsHeight(height), BBEnabled(1), AutoRefreshEnabled(1), itsTitle(title), itsColor(color), itsBaseColor(color), itsBgColor(clDefault), itsBaseBgColor(clDefault), itsBorder(border)
 {
 	if (itsStartX < 0) itsStartX = 0;
 	if (itsStartY < 0) itsStartY = 0;
@@ -53,6 +53,7 @@ Window::Window(const Window &w)
 {
 	itsWindow = dupwin(w.itsWindow);
 	itsWinBorder = dupwin(w.itsWinBorder);
+	itsGetStringHelper = w.itsGetStringHelper;
 	itsStartX = w.itsStartX;
 	itsStartY = w.itsStartY;
 	itsWidth = w.itsWidth;
@@ -74,7 +75,7 @@ Window::~Window()
 	delwin(itsWinBorder);
 }
 
-void Window::SetColor(COLOR col, COLOR background)
+void Window::SetColor(Color col, Color background)
 {
 	if (col != clDefault)
 		wattron(itsWindow,COLOR_PAIR(background*8+col));
@@ -84,13 +85,13 @@ void Window::SetColor(COLOR col, COLOR background)
 	itsBgColor = background;
 }
 
-void Window::SetBaseColor(COLOR col, COLOR background)
+void Window::SetBaseColor(Color col, Color background)
 {
 	itsBaseColor = col;
 	itsBaseBgColor = background;
 }
 
-bool Window::have_to_recreate(BORDER border)
+bool Window::have_to_recreate(Border border)
 {
 	if (border == brNone && itsBorder != brNone)
 	{
@@ -132,7 +133,7 @@ bool Window::have_to_recreate(string newtitle)
 	return false;
 }
 
-void Window::SetBorder(BORDER border)
+void Window::SetBorder(Border border)
 {
 	if (have_to_recreate(border))
 		recreate_win();
@@ -279,7 +280,7 @@ void Window::ReadKey() const
 	wgetch(itsWindow);
 }
 
-void Window::Write(int limit, const string &str, CLEAR_TO_EOL clrtoeol)
+void Window::Write(int limit, const string &str, bool clrtoeol)
 {
 	if (BBEnabled && !str.empty())
 	{
@@ -319,7 +320,7 @@ void Window::Write(int limit, const string &str, CLEAR_TO_EOL clrtoeol)
 				tmp.clear();
 				if (is_valid_color(color))
 				{
-					std::pair<COLOR, COLOR> colors = into_color(color);
+					ColorPair colors = into_color(color);
 					SetColor(colors.first, colors.second);
 				}
 				else
@@ -342,7 +343,7 @@ void Window::Write(int limit, const string &str, CLEAR_TO_EOL clrtoeol)
 }
 
 #ifdef UTF8_ENABLED
-void Window::Write(int limit, const wstring &str, CLEAR_TO_EOL clrtoeol)
+void Window::Write(int limit, const wstring &str, bool clrtoeol)
 {
 	if (BBEnabled)
 	{
@@ -382,7 +383,7 @@ void Window::Write(int limit, const wstring &str, CLEAR_TO_EOL clrtoeol)
 				tmp.clear();
 				if (is_valid_color(ToString(color)))
 				{
-					std::pair<COLOR, COLOR> colors = into_color(ToString(color));
+					ColorPair colors = into_color(ToString(color));
 					SetColor(colors.first, colors.second);
 				}
 				else
@@ -404,21 +405,21 @@ void Window::Write(int limit, const wstring &str, CLEAR_TO_EOL clrtoeol)
 		wrefresh(itsWindow);
 }
 
-void Window::WriteXY(int x, int y, int limit, const wstring &str, CLEAR_TO_EOL cleartoeol)
+void Window::WriteXY(int x, int y, int limit, const wstring &str, bool cleartoeol)
 {
 	wmove(itsWindow,y,x);
 	Write(limit, str, cleartoeol);
 }
 #endif
 
-void Window::WriteXY(int x, int y, int limit, const string &str, CLEAR_TO_EOL cleartoeol)
+void Window::WriteXY(int x, int y, int limit, const string &str, bool cleartoeol)
 {
 	wmove(itsWindow,y,x);
 	Write(limit, str, cleartoeol);
 }
 
 
-string Window::GetString(const string &base, unsigned int length, void (*given_function)()) const
+string Window::GetString(const string &base, unsigned int length) const
 {
 	curs_set(1);
 	
@@ -445,8 +446,8 @@ string Window::GetString(const string &base, unsigned int length, void (*given_f
 	
 	do
 	{
-		if (given_function)
-			given_function();
+		if (itsGetStringHelper)
+			itsGetStringHelper();
 		wmove(itsWindow,y,x);
 		input = wgetch(itsWindow);
 	
@@ -578,29 +579,26 @@ string Window::GetTitle() const
 	return itsTitle;
 }
 
-COLOR Window::GetColor() const
+Color Window::GetColor() const
 {
 	return itsColor;
 }
 
-BORDER Window::GetBorder() const
+Border Window::GetBorder() const
 {
 	return itsBorder;
 }
 
-void EnableColors()
+void Window::EnableColors()
 {
 	if (has_colors())
 	{
 		start_color();
+		use_default_colors();
 		int num = 1;
-		if (use_default_colors() != ERR)
-			for (int i = -1; i < 8; i++)
-				for (int j = 0; j < 8; j++)
-					init_pair(num++, j, i);
-		else
-			for (int i = 1; i <= 8; i++)
-				init_pair(i, i, COLOR_BLACK);
+		for (int i = -1; i < 8; i++)
+			for (int j = 0; j < 8; j++)
+				init_pair(num++, j, i);
 	}
 }
 

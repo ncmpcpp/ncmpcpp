@@ -26,16 +26,16 @@
 class Scrollpad: public Window
 {
 	public:
-		Scrollpad(int startx, int starty, int width, int height, string title, COLOR color, BORDER border) : Window(startx, starty, width, height, title, color, border), itsBeginning(0), itsRealHeight(1), itsXPos(0) { delwin(itsWindow); itsWindow = newpad(itsHeight,itsWidth); }
+		Scrollpad(int startx, int starty, int width, int height, string title, Color color, Border border) : Window(startx, starty, width, height, title, color, border), itsBeginning(0), itsRealHeight(1), itsXPos(0) { delwin(itsWindow); itsWindow = newpad(itsHeight,itsWidth); }
 		Scrollpad(const Scrollpad &);
 		virtual ~Scrollpad() {}
 		virtual void Add(string);
 		virtual void Display(bool = 0);
 		virtual void Refresh(bool = 0);
-		virtual void Go(WHERE);
+		virtual void Go(Where);
 		virtual void MoveTo(int newx, int newy) { reallocate_win(newx, newy); }
 		virtual void Resize(int, int);
-		virtual void SetBorder(BORDER);
+		virtual void SetBorder(Border);
 		virtual void SetTitle(string);
 		virtual void Clear();
 		virtual Window * Clone() { return new Scrollpad(*this); }

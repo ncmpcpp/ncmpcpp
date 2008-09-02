@@ -184,7 +184,7 @@ int main(int argc, char *argv[])
 	curs_set(0);
 	
 	if (Config.colors_enabled)
-		EnableColors();
+		Window::EnableColors();
 	
 	int main_start_y = 2;
 	int main_height = LINES-4;
@@ -329,6 +329,7 @@ int main(int argc, char *argv[])
 	int footer_height = Config.statusbar_visibility ? 2 : 1;
 	
 	wFooter = new Window(0, footer_start_y, COLS, footer_height, "", Config.statusbar_color, brNone);
+	wFooter->GetGetStringHelper(TraceMpdStatus);
 	wFooter->Display();
 	
 	wCurrent = mPlaylist;
@@ -882,9 +883,9 @@ int main(int argc, char *argv[])
 						{
 							wFooter->WriteXY(0, Config.statusbar_visibility, "[b]New title:[/b] ", 1);
 							if (s.GetTitle() == UNKNOWN_TITLE)
-								s.SetTitle(wFooter->GetString("", TraceMpdStatus));
+								s.SetTitle(wFooter->GetString());
 							else
-								s.SetTitle(wFooter->GetString(s.GetTitle(), TraceMpdStatus));
+								s.SetTitle(wFooter->GetString(s.GetTitle()));
 							mTagEditor->UpdateOption(option, "[b]Title:[/b] " + s.GetTitle());
 							break;
 						}
@@ -892,9 +893,9 @@ int main(int argc, char *argv[])
 						{
 							wFooter->WriteXY(0, Config.statusbar_visibility, "[b]New artist:[/b] ", 1);
 							if (s.GetArtist() == UNKNOWN_ARTIST)
-								s.SetArtist(wFooter->GetString("", TraceMpdStatus));
+								s.SetArtist(wFooter->GetString());
 							else
-								s.SetArtist(wFooter->GetString(s.GetArtist(), TraceMpdStatus));
+								s.SetArtist(wFooter->GetString(s.GetArtist()));
 							mTagEditor->UpdateOption(option, "[b]Artist:[/b] " + s.GetArtist());
 							break;
 						}
@@ -902,9 +903,9 @@ int main(int argc, char *argv[])
 						{
 							wFooter->WriteXY(0, Config.statusbar_visibility, "[b]New album:[/b] ", 1);
 							if (s.GetAlbum() == UNKNOWN_ALBUM)
-								s.SetAlbum(wFooter->GetString("", TraceMpdStatus));
+								s.SetAlbum(wFooter->GetString());
 							else
-								s.SetAlbum(wFooter->GetString(s.GetAlbum(), TraceMpdStatus));
+								s.SetAlbum(wFooter->GetString(s.GetAlbum()));
 							mTagEditor->UpdateOption(option, "[b]Album:[/b] " + s.GetAlbum());
 							break;
 						}
@@ -912,9 +913,9 @@ int main(int argc, char *argv[])
 						{
 							wFooter->WriteXY(0, Config.statusbar_visibility, "[b]New year:[/b] ", 1);
 							if (s.GetYear() == EMPTY_TAG)
-								s.SetYear(wFooter->GetString(4, TraceMpdStatus));
+								s.SetYear(wFooter->GetString(4));
 							else
-								s.SetYear(wFooter->GetString(s.GetYear(), 4, TraceMpdStatus));
+								s.SetYear(wFooter->GetString(s.GetYear(), 4));
 							mTagEditor->UpdateOption(option, "[b]Year:[/b] " + s.GetYear());
 							break;
 						}
@@ -922,9 +923,9 @@ int main(int argc, char *argv[])
 						{
 							wFooter->WriteXY(0, Config.statusbar_visibility, "[b]New track:[/b] ", 1);
 							if (s.GetTrack() == EMPTY_TAG)
-								s.SetTrack(wFooter->GetString(3, TraceMpdStatus));
+								s.SetTrack(wFooter->GetString(3));
 							else
-								s.SetTrack(wFooter->GetString(s.GetTrack(), 3, TraceMpdStatus));
+								s.SetTrack(wFooter->GetString(s.GetTrack(), 3));
 							mTagEditor->UpdateOption(option, "[b]Track:[/b] " + s.GetTrack());
 							break;
 						}
@@ -932,9 +933,9 @@ int main(int argc, char *argv[])
 						{
 							wFooter->WriteXY(0, Config.statusbar_visibility, "[b]New genre:[/b] ", 1);
 							if (s.GetGenre() == EMPTY_TAG)
-								s.SetGenre(wFooter->GetString("", TraceMpdStatus));
+								s.SetGenre(wFooter->GetString());
 							else
-								s.SetGenre(wFooter->GetString(s.GetGenre(), TraceMpdStatus));
+								s.SetGenre(wFooter->GetString(s.GetGenre()));
 							mTagEditor->UpdateOption(option, "[b]Genre:[/b] " + s.GetGenre());
 							break;
 						}
@@ -942,9 +943,9 @@ int main(int argc, char *argv[])
 						{
 							wFooter->WriteXY(0, Config.statusbar_visibility, "[b]New comment:[/b] ", 1);
 							if (s.GetComment() == EMPTY_TAG)
-								s.SetComment(wFooter->GetString("", TraceMpdStatus));
+								s.SetComment(wFooter->GetString());
 							else
-								s.SetComment(wFooter->GetString(s.GetComment(), TraceMpdStatus));
+								s.SetComment(wFooter->GetString(s.GetComment()));
 							mTagEditor->UpdateOption(option, "[b]Comment:[/b] " + s.GetComment());
 							break;
 						}
@@ -1021,9 +1022,9 @@ int main(int argc, char *argv[])
 						{
 							wFooter->WriteXY(0, Config.statusbar_visibility, "[b]Filename:[/b] ", 1);
 							if (s.GetShortFilename() == EMPTY_TAG)
-								s.SetShortFilename(wFooter->GetString("", TraceMpdStatus));
+								s.SetShortFilename(wFooter->GetString());
 							else
-								s.SetShortFilename(wFooter->GetString(s.GetShortFilename(), TraceMpdStatus));
+								s.SetShortFilename(wFooter->GetString(s.GetShortFilename()));
 							mSearcher->UpdateOption(option, "[b]Filename:[/b] " + s.GetShortFilename());
 							break;
 						}
@@ -1031,9 +1032,9 @@ int main(int argc, char *argv[])
 						{
 							wFooter->WriteXY(0, Config.statusbar_visibility, "[b]Title:[/b] ", 1);
 							if (s.GetTitle() == UNKNOWN_TITLE)
-								s.SetTitle(wFooter->GetString("", TraceMpdStatus));
+								s.SetTitle(wFooter->GetString());
 							else
-								s.SetTitle(wFooter->GetString(s.GetTitle(), TraceMpdStatus));
+								s.SetTitle(wFooter->GetString(s.GetTitle()));
 							mSearcher->UpdateOption(option, "[b]Title:[/b] " + s.GetTitle());
 							break;
 						}
@@ -1041,9 +1042,9 @@ int main(int argc, char *argv[])
 						{
 							wFooter->WriteXY(0, Config.statusbar_visibility, "[b]Artist:[/b] ", 1);
 							if (s.GetArtist() == UNKNOWN_ARTIST)
-								s.SetArtist(wFooter->GetString("", TraceMpdStatus));
+								s.SetArtist(wFooter->GetString());
 							else
-								s.SetArtist(wFooter->GetString(s.GetArtist(), TraceMpdStatus));
+								s.SetArtist(wFooter->GetString(s.GetArtist()));
 							mSearcher->UpdateOption(option, "[b]Artist:[/b] " + s.GetArtist());
 							break;
 						}
@@ -1051,9 +1052,9 @@ int main(int argc, char *argv[])
 						{
 							wFooter->WriteXY(0, Config.statusbar_visibility, "[b]Album:[/b] ", 1);
 							if (s.GetAlbum() == UNKNOWN_ALBUM)
-								s.SetAlbum(wFooter->GetString("", TraceMpdStatus));
+								s.SetAlbum(wFooter->GetString());
 							else
-								s.SetAlbum(wFooter->GetString(s.GetAlbum(), TraceMpdStatus));
+								s.SetAlbum(wFooter->GetString(s.GetAlbum()));
 							mSearcher->UpdateOption(option, "[b]Album:[/b] " + s.GetAlbum());
 							break;
 						}
@@ -1061,9 +1062,9 @@ int main(int argc, char *argv[])
 						{
 							wFooter->WriteXY(0, Config.statusbar_visibility, "[b]Year:[/b] ", 1);
 							if (s.GetYear() == EMPTY_TAG)
-								s.SetYear(wFooter->GetString(4, TraceMpdStatus));
+								s.SetYear(wFooter->GetString(4));
 							else
-								s.SetYear(wFooter->GetString(s.GetYear(), 4, TraceMpdStatus));
+								s.SetYear(wFooter->GetString(s.GetYear(), 4));
 							mSearcher->UpdateOption(option, "[b]Year:[/b] " + s.GetYear());
 							break;
 						}
@@ -1071,9 +1072,9 @@ int main(int argc, char *argv[])
 						{
 							wFooter->WriteXY(0, Config.statusbar_visibility, "[b]Track:[/b] ", 1);
 							if (s.GetTrack() == EMPTY_TAG)
-								s.SetTrack(wFooter->GetString(3, TraceMpdStatus));
+								s.SetTrack(wFooter->GetString(3));
 							else
-								s.SetTrack(wFooter->GetString(s.GetTrack(), 3, TraceMpdStatus));
+								s.SetTrack(wFooter->GetString(s.GetTrack(), 3));
 							mSearcher->UpdateOption(option, "[b]Track:[/b] " + s.GetTrack());
 							break;
 						}
@@ -1081,9 +1082,9 @@ int main(int argc, char *argv[])
 						{
 							wFooter->WriteXY(0, Config.statusbar_visibility, "[b]Genre:[/b] ", 1);
 							if (s.GetGenre() == EMPTY_TAG)
-								s.SetGenre(wFooter->GetString("", TraceMpdStatus));
+								s.SetGenre(wFooter->GetString());
 							else
-								s.SetGenre(wFooter->GetString(s.GetGenre(), TraceMpdStatus));
+								s.SetGenre(wFooter->GetString(s.GetGenre()));
 							mSearcher->UpdateOption(option, "[b]Genre:[/b] " + s.GetGenre());
 							break;
 						}
@@ -1091,9 +1092,9 @@ int main(int argc, char *argv[])
 						{
 							wFooter->WriteXY(0, Config.statusbar_visibility, "[b]Comment:[/b] ", 1);
 							if (s.GetComment() == EMPTY_TAG)
-								s.SetComment(wFooter->GetString("", TraceMpdStatus));
+								s.SetComment(wFooter->GetString());
 							else
-								s.SetComment(wFooter->GetString(s.GetComment(), TraceMpdStatus));
+								s.SetComment(wFooter->GetString(s.GetComment()));
 							mSearcher->UpdateOption(option, "[b]Comment:[/b] " + s.GetComment());
 							break;
 						}
@@ -1534,7 +1535,7 @@ int main(int argc, char *argv[])
 		{
 			LOCK_STATUSBAR;
 			wFooter->WriteXY(0, Config.statusbar_visibility, "Save playlist as: ", 1);
-			string playlist_name = wFooter->GetString("", TraceMpdStatus);
+			string playlist_name = wFooter->GetString();
 			UNLOCK_STATUSBAR;
 			if (playlist_name.find("/") != string::npos)
 			{
@@ -1674,7 +1675,7 @@ int main(int argc, char *argv[])
 		{
 			LOCK_STATUSBAR;
 			wFooter->WriteXY(0, Config.statusbar_visibility, "Add: ", 1);
-			string path = wFooter->GetString("", TraceMpdStatus);
+			string path = wFooter->GetString();
 			UNLOCK_STATUSBAR;
 			if (!path.empty())
 			{
@@ -1789,7 +1790,7 @@ int main(int argc, char *argv[])
 		{
 			LOCK_STATUSBAR;
 			wFooter->WriteXY(0, Config.statusbar_visibility, "Set crossfade to: ", 1);
-			string crossfade = wFooter->GetString(3, TraceMpdStatus);
+			string crossfade = wFooter->GetString(3);
 			UNLOCK_STATUSBAR;
 			int cf = StrToInt(crossfade);
 			if (cf > 0)
@@ -1846,7 +1847,7 @@ int main(int argc, char *argv[])
 			}
 			LOCK_STATUSBAR;
 			wFooter->WriteXY(0, Config.statusbar_visibility, "Position to go (in %): ", 1);
-			string position = wFooter->GetString(3, TraceMpdStatus);
+			string position = wFooter->GetString(3);
 			int newpos = atoi(position.c_str());
 			if (newpos > 0 && newpos < 100 && !position.empty())
 				Mpd->Seek(vPlaylist[now_playing]->GetTotalLength()*newpos/100.0);
@@ -2016,7 +2017,7 @@ int main(int argc, char *argv[])
 					{
 						LOCK_STATUSBAR;
 						wFooter->WriteXY(0, Config.statusbar_visibility, "Save playlist as: ", 1);
-						string playlist = wFooter->GetString("", TraceMpdStatus);
+						string playlist = wFooter->GetString();
 						UNLOCK_STATUSBAR;
 						if (!playlist.empty())
 						{
@@ -2100,7 +2101,7 @@ int main(int argc, char *argv[])
 				Menu *mCurrent = static_cast<Menu *>(wCurrent);
 				LOCK_STATUSBAR;
 				wFooter->WriteXY(0, Config.statusbar_visibility, "Find " + how + ": ", 1);
-				string findme = wFooter->GetString("", TraceMpdStatus);
+				string findme = wFooter->GetString();
 				UNLOCK_STATUSBAR;
 				timer = time(NULL);
 				if (findme.empty())

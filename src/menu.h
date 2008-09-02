@@ -25,11 +25,7 @@
 
 #include <stdexcept>
 
-typedef bool IS_STATIC;
-typedef bool HAVE_SEPARATOR;
-typedef bool IS_BOLD;
-
-enum LOCATION { lLeft, lCenter, lRight };
+enum Location { lLeft, lCenter, lRight };
 
 struct Option
 {
@@ -39,33 +35,33 @@ struct Option
 	bool is_bold;
 	bool selected;
 	bool have_separator;
-	LOCATION location;
+	Location location;
 };
 
 class Menu : public Window
 {
 	public:
-		Menu(int startx, int starty, int width, int height, string title, COLOR color, BORDER border) : Window(startx, starty, width, height, title, color, border), itsSelectedPrefix("[r]"), itsSelectedSuffix("[/r]"), itsStaticsNumber(0), itsBeginning(0), itsHighlight(0), itsHighlightColor(itsBaseColor), itsHighlightEnabled(1) { SetColor(color); }
+		Menu(int startx, int starty, int width, int height, string title, Color color, Border border) : Window(startx, starty, width, height, title, color, border), itsSelectedPrefix("[r]"), itsSelectedSuffix("[/r]"), itsStaticsNumber(0), itsBeginning(0), itsHighlight(0), itsHighlightColor(itsBaseColor), itsHighlightEnabled(1) { SetColor(color); }
 		Menu(const Menu &);
 		virtual ~Menu();
 		
 		virtual void Add(string str) { AddOption(str); }
-		void AddOption(const string &, LOCATION = lLeft, HAVE_SEPARATOR = 0);
-		void AddBoldOption(const string &str, LOCATION location = lLeft, HAVE_SEPARATOR sep = 0);
-		void AddStaticOption(const string &str, LOCATION location = lLeft, HAVE_SEPARATOR sep = 0);
-		void AddStaticBoldOption(const string &str, LOCATION location = lLeft, HAVE_SEPARATOR sep = 0);
+		void AddOption(const string &, Location = lLeft, bool separator = 0);
+		void AddBoldOption(const string &str, Location location = lLeft, bool separator = 0);
+		void AddStaticOption(const string &str, Location location = lLeft, bool separator = 0);
+		void AddStaticBoldOption(const string &str, Location location = lLeft, bool separator = 0);
 		void AddSeparator();
-		void UpdateOption(int, string, LOCATION = lLeft, HAVE_SEPARATOR = 0);
-		void BoldOption(int, IS_BOLD);
-		void MakeStatic(int, IS_STATIC);
+		void UpdateOption(int, string, Location = lLeft, bool separator = 0);
+		void BoldOption(int, bool);
+		void MakeStatic(int, bool);
 		void DeleteOption(int);
 		void Swap(int, int);
 		string GetCurrentOption() const;
 		string GetOption(int i) const;
 		
-		virtual void Display(bool = 0);
-		virtual void Refresh(bool = 0);
-		virtual void Go(WHERE);
+		virtual void Display(bool redraw_whole_window = 0);
+		virtual void Refresh(bool redraw_whole_window = 0);
+		virtual void Go(Where);
 		void Highlight(int);
 		virtual void Reset();
 		virtual void Clear(bool clear_screen = 1);
@@ -77,7 +73,7 @@ class Menu : public Window
 		void SetSelectSuffix(string str) { itsSelectedSuffix = str; }
 		void GetSelectedList(vector<int> &);
 		
-		void HighlightColor(COLOR col) { itsHighlightColor = col; NeedsRedraw.push_back(itsHighlight); }
+		void HighlightColor(Color col) { itsHighlightColor = col; NeedsRedraw.push_back(itsHighlight); }
 		void Highlighting(bool hl) { itsHighlightEnabled = hl; NeedsRedraw.push_back(itsHighlight); Refresh(); }
 		
 		int GetRealChoice() const;
@@ -106,7 +102,7 @@ class Menu : public Window
 		int itsBeginning;
 		int itsHighlight;
 		
-		COLOR itsHighlightColor;
+		Color itsHighlightColor;
 		
 		bool itsHighlightEnabled;
 };

@@ -35,17 +35,16 @@
 # define TO_STRING(x) x
 #endif
 
-typedef bool CLEAR_TO_EOL;
-
 using std::string;
 using std::wstring;
 using std::vector;
 
-enum COLOR { clDefault, clBlack, clRed, clGreen, clYellow, clBlue, clMagenta, clCyan, clWhite };
-enum BORDER { brNone, brBlack, brRed, brGreen, brYellow, brBlue, brMagenta, brCyan, brWhite };
-enum WHERE { UP, DOWN, PAGE_UP, PAGE_DOWN, HOME, END };
+enum Color { clDefault, clBlack, clRed, clGreen, clYellow, clBlue, clMagenta, clCyan, clWhite };
+enum Border { brNone, brBlack, brRed, brGreen, brYellow, brBlue, brMagenta, brCyan, brWhite };
+enum Where { UP, DOWN, PAGE_UP, PAGE_DOWN, HOME, END };
 
-void EnableColors();
+typedef void (*GetStringHelper)();
+typedef std::pair<Color, Color> ColorPair;
 
 char * ToString(const wchar_t *);
 wchar_t * ToWString(const char *);
@@ -60,13 +59,14 @@ int CountBBCodes(const wstring &);
 class Window
 {
 	public:
-		Window(int, int, int, int, string, COLOR, BORDER);
+		Window(int, int, int, int, string, Color, Border);
 		Window(const Window &);
 		virtual ~Window();
 		virtual WINDOW *RawWin() { return itsWindow; }
-		virtual void SetColor(COLOR, COLOR = clDefault);
-		virtual void SetBaseColor(COLOR, COLOR = clDefault);
-		virtual void SetBorder(BORDER);
+		virtual void GetGetStringHelper(GetStringHelper helper) { itsGetStringHelper = helper; }
+		virtual void SetColor(Color, Color = clDefault);
+		virtual void SetBaseColor(Color, Color = clDefault);
+		virtual void SetBorder(Border);
 		virtual void EnableBB() { BBEnabled = 1; }
 		virtual void DisableBB() { BBEnabled = 0; }
 		virtual void SetTitle(string);
@@ -84,19 +84,18 @@ class Window
 		virtual void AutoRefresh(bool val) { AutoRefreshEnabled = val; }
 		virtual void ReadKey(int &) const;
 		virtual void ReadKey() const;
-		virtual void Write(const string &s, CLEAR_TO_EOL cte = 0) { Write(0xFFFF, s, cte); }
-		virtual void Write(int, const string &, CLEAR_TO_EOL = 0);
-		virtual void WriteXY(int x, int y, const string &s, CLEAR_TO_EOL ete = 0) { WriteXY(x, y, 0xFFFF, s, ete); }
-		virtual void WriteXY(int, int, int, const string &, CLEAR_TO_EOL = 0);
+		virtual void Write(const string &s, bool cte = 0) { Write(0xFFFF, s, cte); }
+		virtual void Write(int, const string &, bool = 0);
+		virtual void WriteXY(int x, int y, const string &s, bool ete = 0) { WriteXY(x, y, 0xFFFF, s, ete); }
+		virtual void WriteXY(int, int, int, const string &, bool = 0);
 #ifdef UTF8_ENABLED
-		virtual void Write(const wstring &s, CLEAR_TO_EOL cte = 0) { Write(0xFFFF, s, cte); }
-		virtual void Write(int, const wstring &, CLEAR_TO_EOL = 0);
-		virtual void WriteXY(int x, int y, const wstring &s, CLEAR_TO_EOL ete = 0) { WriteXY(x, y, 0xFFFF, s, ete); }
-		virtual void WriteXY(int, int, int, const wstring &, CLEAR_TO_EOL = 0);
+		virtual void Write(const wstring &s, bool cte = 0) { Write(0xFFFF, s, cte); }
+		virtual void Write(int, const wstring &, bool = 0);
+		virtual void WriteXY(int x, int y, const wstring &s, bool ete = 0) { WriteXY(x, y, 0xFFFF, s, ete); }
+		virtual void WriteXY(int, int, int, const wstring &, bool = 0);
 #endif
-		virtual string GetString(int num, void (*ptr)() = NULL) const { return GetString("", num, ptr); }
-		virtual string GetString(const string &str, void (*ptr)()) const { return GetString(str, -1, ptr); }
-		virtual string GetString(const string &, unsigned int = -1, void (*)() = NULL) const;
+		virtual string GetString(const string &, unsigned int = -1) const;
+		virtual string GetString(unsigned int length = -1) const { return GetString("", length); }
 		virtual void Scrollable(bool) const;
 		virtual void GetXY(int &, int &) const;
 		virtual void GotoXY(int, int) const;
@@ -105,25 +104,28 @@ class Window
 		virtual int GetStartX() const;
 		virtual int GetStartY() const;
 		virtual string GetTitle() const;
-		virtual COLOR GetColor() const;
-		virtual BORDER GetBorder() const;
+		virtual Color GetColor() const;
+		virtual Border GetBorder() const;
 		
 		virtual Window * Clone() { return new Window(*this); }
 		virtual Window * EmptyClone();
 		
-		virtual void Go(WHERE) { } // for Menu and Scrollpad class
+		virtual void Go(Where) { } // for Menu and Scrollpad class
 		virtual int GetChoice() const { return -1; } // for Menu class
 		virtual void Add(string str) { Write(str); } // for Scrollpad class
+		
+		static void EnableColors();
+		
 	protected:
 		virtual bool have_to_recreate(string);
-		virtual bool have_to_recreate(BORDER);
+		virtual bool have_to_recreate(Border);
 		virtual bool reallocate_win(int, int);
 		virtual void recreate_win();
 		virtual void show_border() const;
-		virtual std::pair<COLOR, COLOR> into_color(const string &);
-		//bool is_valid_color(const string &);
+		virtual ColorPair into_color(const string &);
 		WINDOW *itsWindow;
 		WINDOW *itsWinBorder;
+		GetStringHelper itsGetStringHelper;
 		int itsStartX;
 		int itsStartY;
 		int itsWidth;
@@ -131,12 +133,12 @@ class Window
 		bool BBEnabled;
 		bool AutoRefreshEnabled;
 		string itsTitle;
-		std::stack< std::pair<COLOR, COLOR> > itsColors;
-		COLOR itsColor;
-		COLOR itsBaseColor;
-		COLOR itsBgColor;
-		COLOR itsBaseBgColor;
-		BORDER itsBorder;
+		std::stack<ColorPair> itsColors;
+		Color itsColor;
+		Color itsBaseColor;
+		Color itsBgColor;
+		Color itsBaseBgColor;
+		Border itsBorder;
 };
 
 #endif

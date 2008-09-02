@@ -20,9 +20,9 @@
 
 #include "window.h"
 
-std::pair<COLOR, COLOR> Window::into_color(const string &str)
+ColorPair Window::into_color(const string &str)
 {
-	std::pair<COLOR, COLOR> colors;
+	ColorPair colors;
 	
 	if (str == "[/]")
 	{

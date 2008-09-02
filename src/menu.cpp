@@ -81,7 +81,7 @@ int Menu::count_length(string str)
 	return length;
 }
 
-void Menu::AddOption(const string &str, LOCATION location, HAVE_SEPARATOR separator)
+void Menu::AddOption(const string &str, Location location, bool separator)
 {
 	Option *new_option = new Option;
 	new_option->content = str;
@@ -93,7 +93,7 @@ void Menu::AddOption(const string &str, LOCATION location, HAVE_SEPARATOR separa
 		NeedsRedraw.push_back(itsOptions.size()-1);
 }
 
-void Menu::AddBoldOption(const string &str, LOCATION location, HAVE_SEPARATOR separator)
+void Menu::AddBoldOption(const string &str, Location location, bool separator)
 {
 	Option *new_option = new Option;
 	new_option->content = str;
@@ -106,7 +106,7 @@ void Menu::AddBoldOption(const string &str, LOCATION location, HAVE_SEPARATOR se
 		NeedsRedraw.push_back(itsOptions.size()-1);
 }
 
-void Menu::AddStaticOption(const string &str, LOCATION location, HAVE_SEPARATOR separator)
+void Menu::AddStaticOption(const string &str, Location location, bool separator)
 {
 	Option *new_option = new Option;
 	new_option->content = str;
@@ -120,7 +120,7 @@ void Menu::AddStaticOption(const string &str, LOCATION location, HAVE_SEPARATOR 
 		NeedsRedraw.push_back(itsOptions.size()-1);
 }
 
-void Menu::AddStaticBoldOption(const string &str, LOCATION location, HAVE_SEPARATOR separator)
+void Menu::AddStaticBoldOption(const string &str, Location location, bool separator)
 {
 	Option *new_option = new Option;
 	new_option->content = str;
@@ -140,7 +140,7 @@ void Menu::AddSeparator()
 	AddStaticOption("", lLeft, 1);
 }
 
-void Menu::UpdateOption(int index, string str, LOCATION location, HAVE_SEPARATOR separator)
+void Menu::UpdateOption(int index, string str, Location location, bool separator)
 {
 	index--;
 	try
@@ -156,7 +156,7 @@ void Menu::UpdateOption(int index, string str, LOCATION location, HAVE_SEPARATOR
 	}
 }
 
-void Menu::BoldOption(int index, IS_BOLD bold)
+void Menu::BoldOption(int index, bool bold)
 {
 	index--;
 	try
@@ -170,7 +170,7 @@ void Menu::BoldOption(int index, IS_BOLD bold)
 	}
 }
 
-void Menu::MakeStatic(int index, IS_STATIC stat)
+void Menu::MakeStatic(int index, bool stat)
 {
 	index--;
 	try
@@ -312,7 +312,7 @@ void Menu::Refresh(bool redraw_whole_window)
 		if (line < 0 || line+1 > itsHeight) // do not draw if line should be invisible anyway
 			continue;
 		
-		COLOR old_basecolor = itsBaseColor;
+		Color old_basecolor = itsBaseColor;
 		
 		if (*it == itsHighlight && itsHighlightEnabled)
 		{
@@ -387,7 +387,7 @@ void Menu::Refresh(bool redraw_whole_window)
 	wrefresh(itsWindow);
 }
 
-void Menu::Go(WHERE where)
+void Menu::Go(Where where)
 {
 	if (Empty()) return;
 	int MaxHighlight = itsOptions.size()-1;
