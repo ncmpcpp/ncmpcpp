@@ -117,6 +117,8 @@
 #
 #key_go_to_containing_directory = 'G'
 #
+#key_start_searching = 'y'
+#
 #key_go_to_parent_dir = 263 127
 #
 #key_quit = 'q' 'Q'

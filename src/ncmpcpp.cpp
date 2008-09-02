@@ -296,6 +296,7 @@ int main(int argc, char *argv[])
 	sHelp->Add("   [b]Keys - Search engine\n -----------------------------------------[/b]\n");
 	sHelp->Add(DisplayKeys(Key.Enter) + "Add item to playlist and play/change option\n");
 	sHelp->Add(DisplayKeys(Key.Space) + "Add item to playlist\n");
+	sHelp->Add(DisplayKeys(Key.StartSearching) + "Start searching immediately\n");
 	sHelp->Add(DisplayKeys(Key.GoToContainingDir) + "Go to directory containing found item\n\n\n");
 	
 	sHelp->Add("   [b]Keys - Media library\n -----------------------------------------[/b]\n");
@@ -1012,6 +1013,8 @@ int main(int argc, char *argv[])
 				}
 				case csSearcher:
 				{
+					ENTER_SEARCH_ENGINE_SCREEN:
+					
 					int id = mSearcher->GetChoice();
 					int option = mSearcher->GetChoice();
 					LOCK_STATUSBAR;
@@ -1851,6 +1854,14 @@ int main(int argc, char *argv[])
 					}
 				}
 				goto SWITCHER_BROWSER_REDIRECT;
+			}
+		}
+		else if (Keypressed(input, Key.StartSearching))
+		{
+			if (wCurrent == mSearcher)
+			{
+				mSearcher->Highlight(13);
+				goto ENTER_SEARCH_ENGINE_SCREEN;
 			}
 		}
 		else if (Keypressed(input, Key.GoToPosition))

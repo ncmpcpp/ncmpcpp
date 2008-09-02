@@ -80,6 +80,7 @@ struct ncmpcpp_keys
 	int SavePlaylist[2];
 	int GoToNowPlaying[2];
 	int GoToContainingDir[2];
+	int StartSearching[2];
 	int ToggleAutoCenter[2];
 	int GoToParentDir[2];
 	int Quit[2];
