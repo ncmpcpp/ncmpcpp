@@ -295,7 +295,8 @@ int main(int argc, char *argv[])
 	
 	sHelp->Add("   [b]Keys - Search engine\n -----------------------------------------[/b]\n");
 	sHelp->Add(DisplayKeys(Key.Enter) + "Add item to playlist and play/change option\n");
-	sHelp->Add(DisplayKeys(Key.Space) + "Add item to playlist\n\n\n");
+	sHelp->Add(DisplayKeys(Key.Space) + "Add item to playlist\n");
+	sHelp->Add(DisplayKeys(Key.GoToContainingDir) + "Go to directory containing found item\n\n\n");
 	
 	sHelp->Add("   [b]Keys - Media library\n -----------------------------------------[/b]\n");
 	sHelp->Add(DisplayKeys(&Key.VolumeDown[0], 1) + "Previous column\n");
@@ -1834,6 +1835,17 @@ int main(int argc, char *argv[])
 				}
 				else
 					ShowMessage("Cannot read file!");
+			}
+		}
+		else if (Keypressed(input, Key.GoToContainingDir))
+		{
+			if (wCurrent == mSearcher && !vSearched.empty() && mSearcher->GetChoice() > search_engine_static_option)
+			{
+				GetDirectory(vSearched[mSearcher->GetChoice()-search_engine_static_option-1]->GetDirectory());
+				for (int i = 1; i < mBrowser->MaxChoice(); i++)
+					if (mSearcher->GetCurrentOption() == mBrowser->GetOption(i))
+						mBrowser->Highlight(i);
+				goto SWITCHER_BROWSER_REDIRECT;
 			}
 		}
 		else if (Keypressed(input, Key.GoToPosition))

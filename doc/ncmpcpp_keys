@@ -115,6 +115,8 @@
 #
 #key_toggle_auto_center = 'U'
 #
+#key_go_to_containing_directory = 'G'
+#
 #key_go_to_parent_dir = 263 127
 #
 #key_quit = 'q' 'Q'

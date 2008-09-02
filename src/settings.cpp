@@ -77,6 +77,7 @@ void DefaultKeys(ncmpcpp_keys &keys)
 	keys.Add[0] = 'a';
 	keys.SavePlaylist[0] = 'S';
 	keys.GoToNowPlaying[0] = 'o';
+	keys.GoToContainingDir[0] = 'G';
 	keys.ToggleAutoCenter[0] = 'U';
 	keys.GoToParentDir[0] = 263;
 	keys.Quit[0] = 'q';
@@ -131,6 +132,7 @@ void DefaultKeys(ncmpcpp_keys &keys)
 	keys.Add[1] = null_key;
 	keys.SavePlaylist[1] = null_key;
 	keys.GoToNowPlaying[1] = null_key;
+	keys.GoToContainingDir[1] = null_key;
 	keys.ToggleAutoCenter[1] = null_key;
 	keys.GoToParentDir[1] = 127;
 	keys.Quit[1] = 'Q';
@@ -380,6 +382,8 @@ void ReadKeys(ncmpcpp_keys &keys)
 				GetKeys(*it, keys.GoToNowPlaying);
 			else if (it->find("key_toggle_auto_center ") != string::npos)
 				GetKeys(*it, keys.ToggleAutoCenter);
+			else if (it->find("key_go_to_containing_directory ") != string::npos)
+				GetKeys(*it, keys.GoToContainingDir);
 			else if (it->find("key_go_to_parent_dir ") != string::npos)
 				GetKeys(*it, keys.GoToParentDir);
 			else if (it->find("key_quit ") != string::npos)
