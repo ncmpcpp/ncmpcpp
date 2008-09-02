@@ -64,6 +64,47 @@ extern string UNKNOWN_ARTIST;
 extern string UNKNOWN_TITLE;
 extern string UNKNOWN_ALBUM;
 
+void UpdateItemList(const ItemList &v, Menu *menu, int i)
+{
+	bool bold = 0;
+	for (ItemList::const_iterator it = v.begin(); it != v.end(); it++, i++)
+	{
+		if (it->type == itSong)
+		{
+			for (SongList::const_iterator j = vPlaylist.begin(); j != vPlaylist.end(); j++)
+			{
+				if ((*j)->GetHash() == it->song->GetHash())
+				{
+					bold = 1;
+					break;
+				}
+			}
+			menu->BoldOption(i, bold);
+			bold = 0;
+		}
+	}
+	menu->Refresh();
+}
+
+void UpdateSongList(const SongList &v, Menu *menu, int i)
+{
+	bool bold = 0;
+	for (SongList::const_iterator it = v.begin(); it != v.end(); it++, i++)
+	{
+		for (SongList::const_iterator j = vPlaylist.begin(); j != vPlaylist.end(); j++)
+		{
+			if ((*j)->GetHash() == (*it)->GetHash())
+			{
+				bold = 1;
+				break;
+			}
+		}
+		menu->BoldOption(i, bold);
+		bold = 0;
+	}
+	menu->Refresh();
+}
+
 void DeleteSong(int id)
 {
 	Mpd->QueueDeleteSong(id);

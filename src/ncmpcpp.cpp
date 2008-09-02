@@ -251,7 +251,7 @@ int main(int argc, char *argv[])
 	sHelp->Add(DisplayKeys(Key.VolumeDown) + "Decrease volume\n");
 	sHelp->Add(DisplayKeys(Key.VolumeUp) + "Increase volume\n\n");
 	
-	sHelp->Add(DisplayKeys(Key.ToggleSpaceMode) + "Toggle space mode (select/add items)\n");
+	sHelp->Add(DisplayKeys(Key.ToggleSpaceMode) + "Toggle space mode (select/add)\n");
 	sHelp->Add(DisplayKeys(Key.ReverseSelection) + "Reverse selection\n");
 	sHelp->Add(DisplayKeys(Key.DeselectAll) + "Deselect all items\n");
 	sHelp->Add(DisplayKeys(Key.AddSelected) + "Add selected items to playlist/m3u file\n\n");
@@ -278,10 +278,10 @@ int main(int argc, char *argv[])
 	sHelp->Add("   [b]Keys - Playlist screen\n -----------------------------------------[/b]\n");
 	sHelp->Add(DisplayKeys(Key.Enter) + "Play\n");
 	sHelp->Add(DisplayKeys(Key.Delete) + "Delete item/selected items from playlist\n");
-	sHelp->Add(DisplayKeys(Key.Clear) + "Clear whole playlist\n");
+	sHelp->Add(DisplayKeys(Key.Clear) + "Clear playlist\n");
 	sHelp->Add(DisplayKeys(Key.Crop) + "Clear playlist but hold currently playing/selected items\n");
-	sHelp->Add(DisplayKeys(Key.MvSongUp) + "Move item up\n");
-	sHelp->Add(DisplayKeys(Key.MvSongDown) + "Move item down\n");
+	sHelp->Add(DisplayKeys(Key.MvSongUp) + "Move item/group of items up\n");
+	sHelp->Add(DisplayKeys(Key.MvSongDown) + "Move item/group of items down\n");
 	sHelp->Add(DisplayKeys(Key.Add) + "Add url/file/directory to playlist\n");
 	sHelp->Add(DisplayKeys(Key.SavePlaylist) + "Save playlist\n");
 	sHelp->Add(DisplayKeys(Key.GoToNowPlaying) + "Go to currently playing position\n");
@@ -294,7 +294,7 @@ int main(int argc, char *argv[])
 	sHelp->Add(DisplayKeys(Key.Delete) + "Delete playlist\n\n\n");
 	
 	sHelp->Add("   [b]Keys - Search engine\n -----------------------------------------[/b]\n");
-	sHelp->Add(DisplayKeys(Key.Enter) + "Change option/Add to playlist and play\n");
+	sHelp->Add(DisplayKeys(Key.Enter) + "Add item to playlist and play/change option\n");
 	sHelp->Add(DisplayKeys(Key.Space) + "Add item to playlist\n\n\n");
 	
 	sHelp->Add("   [b]Keys - Media library\n -----------------------------------------[/b]\n");
@@ -302,6 +302,14 @@ int main(int argc, char *argv[])
 	sHelp->Add(DisplayKeys(&Key.VolumeUp[0], 1) + "Next column\n");
 	sHelp->Add(DisplayKeys(Key.Enter) + "Add to playlist and play song/album/artist's songs\n");
 	sHelp->Add(DisplayKeys(Key.Space) + "Add to playlist song/album/artist's songs\n\n\n");
+	
+	sHelp->Add("   [b]Keys - Playlist Editor\n -----------------------------------------[/b]\n");
+	sHelp->Add(DisplayKeys(&Key.VolumeDown[0], 1) + "Previous column\n");
+	sHelp->Add(DisplayKeys(&Key.VolumeUp[0], 1) + "Next column\n");
+	sHelp->Add(DisplayKeys(Key.Enter) + "Add item to playlist and play\n");
+	sHelp->Add(DisplayKeys(Key.Space) + "Add to playlist/select item\n");
+	sHelp->Add(DisplayKeys(Key.MvSongUp) + "Move item/group of items up\n");
+	sHelp->Add(DisplayKeys(Key.MvSongDown) + "Move item/group of items down\n\n\n");
 	
 #	ifdef HAVE_TAGLIB_H
 	sHelp->Add("   [b]Keys - Tag editor\n -----------------------------------------[/b]\n");
@@ -565,12 +573,24 @@ int main(int argc, char *argv[])
 				mPlaylistList->Refresh();
 			}
 		
-			if (wCurrent == mPlaylistList && mPlaylistEditor->Empty())
+			if (mPlaylistEditor->Empty())
 			{
 				FreeSongList(vPlaylistContent);
 				Mpd->GetPlaylistContent(mPlaylistList->GetCurrentOption(), vPlaylistContent);
+				bool bold = 0;
 				for (SongList::const_iterator it = vPlaylistContent.begin(); it != vPlaylistContent.end(); it++)
-					mPlaylistEditor->AddOption(DisplaySong(**it));
+				{
+					for (SongList::const_iterator j = vPlaylist.begin(); j != vPlaylist.end(); j++)
+					{
+						if ((*it)->GetHash() == (*j)->GetHash())
+						{
+							bold = 1;
+							break;
+						}
+					}
+					bold ? mPlaylistEditor->AddBoldOption(DisplaySong(**it)) : mPlaylistEditor->AddOption(DisplaySong(**it));
+					bold = 0;
+				}
 				mPlaylistEditor->Window::Clear();
 				mPlaylistEditor->Refresh();
 			}
@@ -663,13 +683,21 @@ int main(int argc, char *argv[])
 				wCurrent->Go(DOWN);
 		}
 		else if (Keypressed(input, Key.PageUp))
+		{
 			wCurrent->Go(PAGE_UP);
+		}
 		else if (Keypressed(input, Key.PageDown))
+		{
 			wCurrent->Go(PAGE_DOWN);
+		}
 		else if (Keypressed(input, Key.Home))
+		{
 			wCurrent->Go(HOME);
+		}
 		else if (Keypressed(input, Key.End))
+		{
 			wCurrent->Go(END);
+		}
 		else if (input == KEY_RESIZE)
 		{
 			int in;
@@ -1198,12 +1226,53 @@ int main(int argc, char *argv[])
 							}
 						}
 					}
-					
 					FreeSongList(list);
-					
 					if (Keypressed(input, Key.Space))
 						wCurrent->Go(DOWN);
+					break;
+				}
+				case csPlaylistEditor:
+				{
+					ENTER_PLAYLIST_EDITOR_SCREEN: // same code for Key.Space, but without playing.
 					
+					SongList list;
+					
+					if (wCurrent == mPlaylistList)
+					{
+						const string &playlist = mPlaylistList->GetCurrentOption();
+						Mpd->GetPlaylistContent(playlist, list);
+						for (SongList::const_iterator it = list.begin(); it != list.end(); it++)
+							Mpd->QueueAddSong(**it);
+						if (Mpd->CommitQueue())
+						{
+							ShowMessage("Loading playlist " + playlist + "...");
+							Song *s = vPlaylist[vPlaylist.size()-list.size()];
+							if (s->GetHash() == list[0]->GetHash())
+							{
+								if (Keypressed(input, Key.Enter))
+									Mpd->PlayID(s->GetID());
+							}
+							else
+								ShowMessage(message_part_of_songs_added);
+						}
+					}
+					else if (wCurrent == mPlaylistEditor)
+					{
+						if (!vPlaylistContent.empty())
+						{
+							Song &s = *vPlaylistContent[mPlaylistEditor->GetChoice()-1];
+							int id = Mpd->AddSong(s);
+							if (id >= 0)
+							{
+								ShowMessage("Added to playlist: " + OmitBBCodes(DisplaySong(s)));
+								if (Keypressed(input, Key.Enter))
+									Mpd->PlayID(id);
+							}
+						}
+					}
+					FreeSongList(list);
+					if (Keypressed(input, Key.Space))
+						wCurrent->Go(DOWN);
 					break;
 				}
 				default:
@@ -1212,7 +1281,7 @@ int main(int argc, char *argv[])
 		}
 		else if (Keypressed(input, Key.Space))
 		{
-			if (Config.space_selects || wCurrent == mPlaylist || wCurrent == mPlaylistEditor)
+			if (Config.space_selects || wCurrent == mPlaylist)
 			{
 				if (wCurrent == mPlaylist || (wCurrent == mBrowser && wCurrent->GetChoice() > (browsed_dir != "/" ? 1 : 0)) || (wCurrent == mSearcher && !vSearched.empty() && wCurrent->GetChoice() > search_engine_static_option) || wCurrent == mLibSongs || wCurrent == mPlaylistEditor)
 				{
@@ -1287,6 +1356,8 @@ int main(int argc, char *argv[])
 				}
 				else if (current_screen == csLibrary)
 					goto ENTER_LIBRARY_SCREEN; // sorry, but that's stupid to copy the same code here.
+				else if (current_screen == csPlaylistEditor)
+					goto ENTER_PLAYLIST_EDITOR_SCREEN; // same what in library screen.
 			}
 		}
 		else if (Keypressed(input, Key.VolumeUp))
@@ -1448,11 +1519,17 @@ int main(int argc, char *argv[])
 			}
 		}
 		else if (Keypressed(input, Key.Prev))
+		{
 			Mpd->Prev();
+		}
 		else if (Keypressed(input, Key.Next))
+		{
 			Mpd->Next();
+		}
 		else if (Keypressed(input, Key.Pause))
+		{
 			Mpd->Pause();
+		}
 		else if (Keypressed(input, Key.SavePlaylist))
 		{
 			LOCK_STATUSBAR;
@@ -1477,8 +1554,13 @@ int main(int argc, char *argv[])
 					wFooter->WriteXY(0, Config.statusbar_visibility, "Playlist already exists, overwrite: " + playlist_name + " ? [y/n] ", 1);
 					curs_set(1);
 					int in = 0;
+					messages_allowed = 0;
 					while (in != 'y' && in != 'n')
+					{
+						Mpd->UpdateStatus();
 						wFooter->ReadKey(in);
+					}
+					messages_allowed = 1;
 					
 					if (in == 'y')
 					{
@@ -1497,7 +1579,9 @@ int main(int argc, char *argv[])
 				GetDirectory(browsed_dir);
 		}
 		else if (Keypressed(input, Key.Stop))
+		{
 			Mpd->Stop();
+		}
 		else if (Keypressed(input, Key.MvSongUp))
 		{
 			if (current_screen == csPlaylist)
@@ -1681,18 +1765,26 @@ int main(int argc, char *argv[])
 				mPlaylist->Highlight(now_playing+1);
 		}
 		else if (Keypressed(input, Key.ToggleRepeat))
+		{
 			Mpd->SetRepeat(!Mpd->GetRepeat());
+		}
 		else if (Keypressed(input, Key.ToggleRepeatOne))
 		{
 			Config.repeat_one_mode = !Config.repeat_one_mode;
 			ShowMessage("'Repeat one' mode: " + string(Config.repeat_one_mode ? "On" : "Off"));
 		}
 		else if (Keypressed(input, Key.Shuffle))
+		{
 			Mpd->Shuffle();
+		}
 		else if (Keypressed(input, Key.ToggleRandom))
+		{
 			Mpd->SetRandom(!Mpd->GetRandom());
+		}
 		else if (Keypressed(input, Key.ToggleCrossfade))
+		{
 			Mpd->SetCrossfade(Mpd->GetCrossfade() ? 0 : Config.crossfade_time);
+		}
 		else if (Keypressed(input, Key.SetCrossfade))
 		{
 			LOCK_STATUSBAR;
@@ -1858,15 +1950,18 @@ int main(int argc, char *argv[])
 						}
 					}
 					
-					Menu *mDialog = new Menu((COLS-50)/2, (LINES-10)/2, 50, 10, "Add selected items to...", clYellow, brGreen);
+					const int dialog_width = COLS*0.8;
+					const int dialog_height = LINES*0.6;
+					Menu *mDialog = new Menu((COLS-dialog_width)/2, (LINES-dialog_height)/2, dialog_width, dialog_height, "Add selected items to...", clYellow, brGreen);
 					mDialog->Timeout(ncmpcpp_window_timeout);
 					
 					mDialog->AddOption("Current MPD playlist");
+					mDialog->AddOption("New playlist (m3u file)");
 					mDialog->AddSeparator();
 					TagList playlists;
 					Mpd->GetPlaylists(playlists);
 					for (TagList::const_iterator it = playlists.begin(); it != playlists.end(); it++)
-						mDialog->AddOption(*it);
+						mDialog->AddOption("'" + *it + "' playlist");
 					mDialog->AddSeparator();
 					mDialog->AddOption("Cancel");
 					
@@ -1893,6 +1988,18 @@ int main(int argc, char *argv[])
 					
 					int id = mDialog->GetChoice();
 					
+					redraw_me = 1;
+					if (current_screen == csLibrary)
+					{
+						REFRESH_MEDIA_LIBRARY_SCREEN;
+					}
+					else if (current_screen == csPlaylistEditor)
+					{
+						REFRESH_PLAYLIST_EDITOR_SCREEN;
+					}
+					else
+						wCurrent->Refresh(1);
+					
 					if (id == 1)
 					{
 						for (SongList::const_iterator it = result.begin(); it != result.end(); it++)
@@ -1905,24 +2012,37 @@ int main(int argc, char *argv[])
 								ShowMessage(message_part_of_songs_added);
 						}
 					}
-					else if (id > 1 && id < mDialog->MaxChoice())
+					else if (id == 2)
+					{
+						LOCK_STATUSBAR;
+						wFooter->WriteXY(0, Config.statusbar_visibility, "Save playlist as: ", 1);
+						string playlist = wFooter->GetString("", TraceMpdStatus);
+						UNLOCK_STATUSBAR;
+						if (!playlist.empty())
+						{
+							for (SongList::const_iterator it = result.begin(); it != result.end(); it++)
+								Mpd->QueueAddToPlaylist(playlist, **it);
+							Mpd->CommitQueue();
+							ShowMessage("Selected items added to playlist '" + playlist + "'!");
+						}
+						
+					}
+					else if (id > 2 && id < mDialog->MaxChoice())
 					{
 						for (SongList::const_iterator it = result.begin(); it != result.end(); it++)
-							Mpd->QueueAddToPlaylist(mDialog->GetCurrentOption(), **it);
+							Mpd->QueueAddToPlaylist(playlists[id-4], **it);
 						Mpd->CommitQueue();
-						ShowMessage("Selected items added to playlist '" + mDialog->GetCurrentOption() + "'!");
+						ShowMessage("Selected items added to playlist '" + playlists[id-4] + "'!");
 					}
 					
-					redraw_me = 1;
-					mPlaylistEditor->Clear(0); // make playlist editor update itself
-					if (current_screen == csLibrary)
+					if (id != mDialog->MaxChoice())
 					{
-						REFRESH_MEDIA_LIBRARY_SCREEN;
+						// refresh playlist's lists
+						if (browsed_dir == "/")
+							GetDirectory("/");
+						mPlaylistList->Clear(0); // make playlist editor update itself
 					}
-					else if (current_screen == csPlaylistEditor)
-					{
-						REFRESH_PLAYLIST_EDITOR_SCREEN;
-					}
+					delete mDialog;
 					FreeSongList(result);
 				}
 				else
@@ -2144,28 +2264,8 @@ int main(int argc, char *argv[])
 			if (browsed_dir.empty())
 				browsed_dir = "/";
 			
-			if (mBrowser->Empty())
-				GetDirectory(browsed_dir);
-			else
-			{
-				bool bold = 0;
-				for (int i = 0; i < vBrowser.size(); i++)
-				{
-					if (vBrowser[i].type == itSong)
-					{
-						for (SongList::const_iterator it = vPlaylist.begin(); it != vPlaylist.end(); it++)
-						{
-							if ((*it)->GetHash() == vBrowser[i].song->GetHash())
-							{
-								bold = 1;
-								break;
-							}
-						}
-						mBrowser->BoldOption(i+1, bold);
-						bold = 0;
-					}
-				}
-			}
+			mBrowser->Empty() ? GetDirectory(browsed_dir) : UpdateItemList(vBrowser, mBrowser);
+			
 			if (wCurrent != mBrowser && current_screen != csTagEditor)
 			{
 				found_pos = 0;
@@ -2191,21 +2291,7 @@ int main(int argc, char *argv[])
 				if (!vSearched.empty())
 				{
 					wCurrent->WriteXY(0, 0, "Updating list...");
-					bool bold = 0;
-					int i = search_engine_static_option;
-					for (SongList::const_iterator it = vSearched.begin(); it != vSearched.end(); it++, i++)
-					{
-						for (SongList::const_iterator j = vPlaylist.begin(); j != vPlaylist.end(); j++)
-						{
-							if ((*j)->GetHash() == (*it)->GetHash())
-							{
-								bold = 1;
-								break;
-							}
-						}
-						mSearcher->BoldOption(i+1, bold);
-						bold = 0;
-					}
+					UpdateSongList(vSearched, mSearcher, search_engine_static_option+1);
 				}
 			}
 		}
@@ -2228,24 +2314,7 @@ int main(int argc, char *argv[])
 				wCurrent = mLibArtists;
 				current_screen = csLibrary;
 				
-				if (!vLibSongs.empty())
-				{
-					bool bold = 0;
-					for (int i = 0; i < vLibSongs.size(); i++)
-					{
-						for (SongList::const_iterator it = vPlaylist.begin(); it != vPlaylist.end(); it++)
-						{
-							if ((*it)->GetHash() == vLibSongs[i]->GetHash())
-							{
-								bold = 1;
-								break;
-							}
-						}
-						mLibSongs->BoldOption(i+1, bold);
-						bold = 0;
-					}
-					mLibSongs->Refresh();
-				}
+				UpdateSongList(vLibSongs, mLibSongs);
 			}
 		}
 		else if (Keypressed(input, Key.PlaylistEditor))
@@ -2265,6 +2334,8 @@ int main(int argc, char *argv[])
 				
 				wCurrent = mPlaylistList;
 				current_screen = csPlaylistEditor;
+				
+				UpdateSongList(vPlaylistContent, mPlaylistEditor);
 			}
 		}
 		else if (Keypressed(input, Key.Quit))

@@ -33,12 +33,14 @@ extern Menu *mSearcher;
 extern Menu *mLibArtists;
 extern Menu *mLibAlbums;
 extern Menu *mLibSongs;
+extern Menu *mPlaylistEditor;
 extern Window *wHeader;
 extern Window *wFooter;
 
 extern SongList vPlaylist;
 extern SongList vSearched;
 extern SongList vLibSongs;
+extern SongList vPlaylistContent;
 extern ItemList vBrowser;
 
 extern TagList vArtists;
@@ -225,59 +227,19 @@ void NcmpcppStatusChanged(MPDConnection *Mpd, MPDStatusChanges changed, void *da
 		
 		if (current_screen == csBrowser)
 		{
-			bool bold = 0;
-			for (int i = 0; i < vBrowser.size(); i++)
-			{
-				if (vBrowser[i].type == itSong)
-				{
-					for (SongList::const_iterator it = vPlaylist.begin(); it != vPlaylist.end(); it++)
-					{
-						if ((*it)->GetHash() == vBrowser[i].song->GetHash())
-						{
-							bold = 1;
-							break;
-						}
-					}
-					mBrowser->BoldOption(i+1, bold);
-					bold = 0;
-				}
-			}
+			UpdateItemList(vBrowser, mBrowser);
 		}
 		else if (current_screen == csSearcher)
 		{
-			bool bold = 0;
-			int i = search_engine_static_option;
-			for (SongList::const_iterator it = vSearched.begin(); it != vSearched.end(); it++, i++)
-			{
-				for (SongList::const_iterator j = vPlaylist.begin(); j != vPlaylist.end(); j++)
-				{
-					if ((*j)->GetHash() == (*it)->GetHash())
-					{
-						bold = 1;
-						break;
-					}
-				}
-				mSearcher->BoldOption(i+1, bold);
-				bold = 0;
-			}
+			UpdateSongList(vSearched, mSearcher, search_engine_static_option+1);
 		}
 		else if (current_screen == csLibrary)
 		{
-			bool bold = 0;
-			for (int i = 0; i < vLibSongs.size(); i++)
-			{
-				for (SongList::const_iterator it = vPlaylist.begin(); it != vPlaylist.end(); it++)
-				{
-					if ((*it)->GetHash() == vLibSongs[i]->GetHash())
-					{
-						bold = 1;
-						break;
-					}
-				}
-				mLibSongs->BoldOption(i+1, bold);
-				bold = 0;
-			}
-			mLibSongs->Refresh();
+			UpdateSongList(vLibSongs, mLibSongs);
+		}
+		else if (current_screen == csPlaylistEditor)
+		{
+			UpdateSongList(vPlaylistContent, mPlaylistEditor);
 		}
 	}
 	if (changed.Database)

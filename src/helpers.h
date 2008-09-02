@@ -30,6 +30,9 @@
 
 extern ncmpcpp_config Config;
 
+void UpdateItemList(const ItemList &, Menu *, int = 1);
+void UpdateSongList(const SongList &, Menu *, int = 1);
+
 void DeleteSong(int);
 void PlaylistDeleteSong(const string &, int);
 bool MoveSongUp(int);
