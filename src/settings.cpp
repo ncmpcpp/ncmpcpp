@@ -144,6 +144,7 @@ void DefaultConfiguration(ncmpcpp_config &conf)
 {
 	conf.mpd_music_dir = "/var/lib/mpd/music";
 	conf.song_list_format = "{[.green](%l)[/green] }{%a - }{%t}|{[.white]%f[/white]}";
+	conf.song_columns_list_format = "(8)[green]{l} (28)[cyan]{a} (28){b} (50)[red]{t}";
 	conf.song_status_format = "{(%l) }{%a - }{%t}|{%f}";
 	conf.song_window_title_format = "{%a - }{%t}|{%f}";
 	conf.song_library_format = "{%n - }{%t}|{%f}";
@@ -161,6 +162,7 @@ void DefaultConfiguration(ncmpcpp_config &conf)
 	conf.statusbar_color = clDefault;
 	conf.active_column_color = clRed;
 	conf.colors_enabled = true;
+	conf.columns_in_playlist = false;
 	conf.header_visibility = true;
 	conf.statusbar_visibility = true;
 	conf.autocenter_mode = false;
@@ -197,13 +199,13 @@ void GetKeys(string line, int *key)
 	key[1] = !two.empty() && two[0] == '\'' ? two[1] : (atoi(two.c_str()) == 0 ? null_key : atoi(two.c_str()));
 }
 
-string GetConfigLineValue(const string &line)
+string GetLineValue(const string &line, char a, char b)
 {
 	int i = 0;
 	int begin = -1, end = -1;
 	for (string::const_iterator it = line.begin(); it != line.end(); i++, it++)
 	{
-		if (*it == '"')
+		if (*it == a || *it == b)
 		{
 			if (begin < 0)
 				begin = i+1;
@@ -414,7 +416,7 @@ void ReadConfiguration(ncmpcpp_config &conf)
 		}
 		for (vector<string>::const_iterator it = config_sets.begin(); it != config_sets.end(); it++)
 		{
-			v = GetConfigLineValue(*it);
+			v = GetLineValue(*it);
 			
 			if (it->find("mpd_music_dir") != string::npos)
 			{
@@ -446,6 +448,11 @@ void ReadConfiguration(ncmpcpp_config &conf)
 				if (!v.empty())
 					conf.song_list_format = v;
 			}
+			else if (it->find("song_columns_list_format") != string::npos)
+			{
+				if (!v.empty())
+					conf.song_columns_list_format = v;
+			}
 			else if (it->find("song_status_format") != string::npos)
 			{
 				if (!v.empty())
@@ -473,6 +480,8 @@ void ReadConfiguration(ncmpcpp_config &conf)
 			}
 			else if (it->find("colors_enabled") != string::npos)
 				conf.colors_enabled = v == "yes";
+			else if (it->find("playlist_display_mode") != string::npos)
+				conf.columns_in_playlist = v == "columns";
 			else if (it->find("header_visibility") != string::npos)
 				conf.header_visibility = v == "yes";
 			else if (it->find("statusbar_visibility") != string::npos)

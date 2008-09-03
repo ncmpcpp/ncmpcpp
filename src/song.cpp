@@ -87,7 +87,7 @@ string Song::GetLength() const
 	std::stringstream ss;
 	
 	if (!GetTotalLength())
-		return "unknown";
+		return "-:--";
 	
 	ss << itsMinutesLength << ":";
 	if (!itsSecondsLength)

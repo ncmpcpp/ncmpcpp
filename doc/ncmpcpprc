@@ -74,11 +74,30 @@
 #
 #selected_item_suffix = "[/magenta]"
 #
+##### columns settings #####
+##
+## syntax of song columns list format is "column column etc."
+##
+## - syntax for each column is:
+##
+## (width of column in %)[column's color]{displayed tag}
+##
+## - color is optional (if it's not present, default window color will be used)
+##
+#
+#song_columns_list_format = "(8)[green]{l} (28)[cyan]{a} (28)[yellow]{b} (50)[red]{t}"
+#
 ##### various settings #####
+#
+## can be "normal" or "columns"
+#
+#playlist_display_mode = "normal"
 #
 #autocenter_mode = "no"
 #
 #repeat_one_mode = "no"
+#
+## can be "wrapped" or "normal"
 #
 #default_find_mode = "wrapped"
 #

@@ -189,11 +189,11 @@ int main(int argc, char *argv[])
 	if (!Config.statusbar_visibility)
 		main_height++;
 	
-	mPlaylist = new Menu<Song>(0, main_start_y, COLS, main_height, "", Config.main_color, brNone);
+	mPlaylist = new Menu<Song>(0, main_start_y, COLS, main_height, Config.columns_in_playlist ? DisplayColumns(Config.song_columns_list_format) : "", Config.main_color, brNone);
 	mPlaylist->SetSelectPrefix(Config.selected_item_prefix);
 	mPlaylist->SetSelectSuffix(Config.selected_item_suffix);
-	mPlaylist->SetItemDisplayer(DisplaySong);
-	mPlaylist->SetItemDisplayerUserData(&Config.song_list_format);
+	mPlaylist->SetItemDisplayer(Config.columns_in_playlist ? DisplaySongInColumns : DisplaySong);
+	mPlaylist->SetItemDisplayerUserData(Config.columns_in_playlist ? &Config.song_columns_list_format : &Config.song_list_format);
 	
 	mBrowser = new Menu<Item>(0, main_start_y, COLS, main_height, "", Config.main_color, brNone);
 	mBrowser->SetSelectPrefix(Config.selected_item_prefix);
@@ -339,8 +339,6 @@ int main(int argc, char *argv[])
 	wCurrent = mPlaylist;
 	current_screen = csPlaylist;
 	
-	wCurrent->Display();
-	
 	int input;
 	timer = time(NULL);
 	
@@ -431,7 +429,7 @@ int main(int argc, char *argv[])
 				if (current_screen == csBrowser)
 				{
 					int max_length_without_scroll = wHeader->GetWidth()-volume_state.length()-title.length();
-					ncmpcpp_string_t wbrowseddir = NCMPCPP_TO_WSTRING(browsed_dir);
+					ncmpcpp_string_t wbrowseddir = TO_WSTRING(browsed_dir);
 					wHeader->Bold(1);
 					if (browsed_dir.length() > max_length_without_scroll)
 					{
@@ -626,7 +624,10 @@ int main(int argc, char *argv[])
 		
 		// playlist editor end
 		
-		wCurrent->Refresh(redraw_me);
+		if (Config.columns_in_playlist && wCurrent == mPlaylist)
+			wCurrent->Display(redraw_me);
+		else
+			wCurrent->Refresh(redraw_me);
 		redraw_me = 0;
 		
 		wCurrent->ReadKey(input);
@@ -722,6 +723,7 @@ int main(int argc, char *argv[])
 			sHelp->Resize(COLS, main_height);
 			sHelp->Timeout(ncmpcpp_window_timeout);
 			mPlaylist->Resize(COLS, main_height);
+			mPlaylist->SetTitle(Config.columns_in_playlist ? DisplayColumns(Config.song_columns_list_format) : "");
 			mBrowser->Resize(COLS, main_height);
 			mTagEditor->Resize(COLS, main_height);
 			mSearcher->Resize(COLS, main_height);
@@ -926,13 +928,13 @@ int main(int argc, char *argv[])
 							{
 								ShowMessage("Updating tags...");
 								s.GetEmptyFields(1);
-								f.tag()->setTitle(NCMPCPP_TO_WSTRING(s.GetTitle()));
-								f.tag()->setArtist(NCMPCPP_TO_WSTRING(s.GetArtist()));
-								f.tag()->setAlbum(NCMPCPP_TO_WSTRING(s.GetAlbum()));
+								f.tag()->setTitle(TO_WSTRING(s.GetTitle()));
+								f.tag()->setArtist(TO_WSTRING(s.GetArtist()));
+								f.tag()->setAlbum(TO_WSTRING(s.GetAlbum()));
 								f.tag()->setYear(StrToInt(s.GetYear()));
 								f.tag()->setTrack(StrToInt(s.GetTrack()));
-								f.tag()->setGenre(NCMPCPP_TO_WSTRING(s.GetGenre()));
-								f.tag()->setComment(NCMPCPP_TO_WSTRING(s.GetComment()));
+								f.tag()->setGenre(TO_WSTRING(s.GetGenre()));
+								f.tag()->setComment(TO_WSTRING(s.GetComment()));
 								s.GetEmptyFields(0);
 								f.save();
 								ShowMessage("Tags updated!");

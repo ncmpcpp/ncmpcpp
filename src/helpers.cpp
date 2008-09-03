@@ -332,6 +332,170 @@ string DisplayItem(const Item &item, void *)
 	}
 }
 
+string DisplayColumns(string song_template)
+{
+	vector<string> cols;
+	for (int i = song_template.find(" "); i != string::npos; i = song_template.find(" "))
+	{
+		cols.push_back(song_template.substr(0, i));
+		song_template = song_template.substr(i+1);
+	}
+	cols.push_back(song_template);
+	
+	string result, v;
+	
+	for (vector<string>::const_iterator it = cols.begin(); it != cols.end(); it++)
+	{
+		int width = StrToInt(GetLineValue(*it, '(', ')'));
+		char type = GetLineValue(*it, '{', '}')[0];
+		
+		width *= COLS/100.0;
+		
+		switch (type)
+		{
+			case 'l':
+				v = "Time";
+				break;
+			case 'f':
+				v = "Filename";
+				break;
+			case 'F':
+				v = "Full filename";
+				break;
+			case 'a':
+				v = "Artist";
+				break;
+			case 't':
+				v = "Title";
+				break;
+			case 'b':
+				v = "Album";
+				break;
+			case 'y':
+				v = "Year";
+				break;
+			case 'n':
+				v = "Track";
+				break;
+			case 'g':
+				v = "Genre";
+				break;
+			case 'c':
+				v = "Composer";
+				break;
+			case 'p':
+				v = "Performer";
+				break;
+			case 'd':
+				v = "Disc";
+				break;
+			case 'C':
+				v = "Comment";
+				break;
+			default:
+				break;
+		}
+		
+		v = v.substr(0, width-1);
+		for (int i = v.length(); i < width; i++, v += " ");
+		result += v;
+	}
+	
+	return result.substr(0, COLS);
+}
+
+string DisplaySongInColumns(const Song &s, void *s_template)
+{
+	string song_template = s_template ? *static_cast<string *>(s_template) : "";
+	
+	vector<string> cols;
+	for (int i = song_template.find(" "); i != string::npos; i = song_template.find(" "))
+	{
+		cols.push_back(song_template.substr(0, i));
+		song_template = song_template.substr(i+1);
+	}
+	cols.push_back(song_template);
+	
+	ncmpcpp_string_t result, v;
+	
+#	ifdef UTF8_ENABLED
+	const wstring space = L" ";
+	const wstring open_col = L"[.";
+	const wstring close_col = L"]";
+	const wstring close_col2 = L"[/red]";
+#	else
+	const string space = " ";
+	const string open_col = "[.";
+	const string close_col = "]";
+	const string close_col2 = "[/red]";
+#	endif
+	
+	for (vector<string>::const_iterator it = cols.begin(); it != cols.end(); it++)
+	{
+		int width = StrToInt(GetLineValue(*it, '(', ')'));
+		ncmpcpp_string_t color = TO_WSTRING(GetLineValue(*it, '[', ']'));
+		char type = GetLineValue(*it, '{', '}')[0];
+		
+		width *= COLS/100.0;
+		
+		string ss;
+		switch (type)
+		{
+			case 'l':
+				ss = s.GetLength();
+				break;
+			case 'f':
+				ss = s.GetShortFilename();
+				break;
+			case 'F':
+				ss = s.GetFile();
+				break;
+			case 'a':
+				ss = s.GetArtist();
+				break;
+			case 't':
+				ss = s.GetTitle();
+				break;
+			case 'b':
+				ss = s.GetAlbum();
+				break;
+			case 'y':
+				ss = s.GetYear();
+				break;
+			case 'n':
+				ss = s.GetTrack();
+				break;
+			case 'g':
+				ss = s.GetGenre();
+				break;
+			case 'c':
+				ss = s.GetComposer();
+				break;
+			case 'p':
+				ss = s.GetPerformer();
+				break;
+			case 'd':
+				ss = s.GetDisc();
+				break;
+			case 'C':
+				ss = s.GetComment();
+				break;
+			default:
+				break;
+		}
+		
+		v = TO_WSTRING(OmitBBCodes(ss)).substr(0, width-1);
+		for (int i = v.length(); i < width; i++, v += space);
+		if (!color.empty())
+			result += open_col + color + close_col;
+		result += v;
+		if (!color.empty())
+			result += close_col2;
+	}
+	
+	return TO_STRING(result);
+}
+
 string DisplaySong(const Song &s, void *s_template)
 {	
 	const string &song_template = s_template ? *static_cast<string *>(s_template) : "";

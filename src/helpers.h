@@ -48,6 +48,8 @@ bool CaseInsensitiveComparison(string, string);
 void WindowTitle(const string &);
 string TotalPlaylistLength();
 string DisplayItem(const Item &, void * = NULL);
+string DisplayColumns(string);
+string DisplaySongInColumns(const Song &, void *);
 string DisplaySong(const Song &, void * = &Config.song_list_format);
 void ShowMessage(const string &, int = Config.message_delay_time);
 bool SortDirectory(const Item &a, const Item &b);

@@ -27,12 +27,8 @@
 
 #ifdef UTF8_ENABLED
 const bool UNICODE = 1;
-# define ncmpcpp_string_t wstring
-# define NCMPCPP_TO_WSTRING(x) ToWString(x)
 #else
 const bool UNICODE = 0;
-# define ncmpcpp_string_t string
-# define NCMPCPP_TO_WSTRING(x) (x)
 #endif
 
 #ifdef HAVE_TAGLIB_H

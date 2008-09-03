@@ -126,7 +126,6 @@ class Menu : public Window
 		bool itsHighlightEnabled;
 };
 
-
 template <class T>
 Menu<T>::Menu(const Menu &m) : Window(m)
 {
@@ -797,6 +796,9 @@ string Menu<T>::DisplayOption(const T &t) const
 {
 	return itsItemDisplayer ? itsItemDisplayer(t, itsUserdata) : "";
 }
+
+template <>
+string Menu<string>::DisplayOption(const string &str) const;
 
 #endif
 

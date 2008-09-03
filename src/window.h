@@ -30,9 +30,13 @@
 #include <cstring>
 
 #ifdef UTF8_ENABLED
+# define ncmpcpp_string_t wstring
 # define TO_STRING(x) ToString(x)
+# define TO_WSTRING(x) ToWString(x)
 #else
+# define ncmpcpp_string_t string
 # define TO_STRING(x) x
+# define TO_WSTRING(x) x
 #endif
 
 using std::string;

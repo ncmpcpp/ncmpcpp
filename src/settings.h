@@ -90,6 +90,7 @@ struct ncmpcpp_config
 {
 	string mpd_music_dir;
 	string song_list_format;
+	string song_columns_list_format;
 	string song_status_format;
 	string song_window_title_format;
 	string song_library_format;
@@ -110,6 +111,7 @@ struct ncmpcpp_config
 	Color active_column_color;
 	
 	bool colors_enabled;
+	bool columns_in_playlist;
 	bool set_window_title;
 	bool header_visibility;
 	bool statusbar_visibility;
@@ -127,7 +129,7 @@ struct ncmpcpp_config
 void DefaultKeys(ncmpcpp_keys &);
 void DefaultConfiguration(ncmpcpp_config &);
 void GetKeys(string, int *);
-string GetLineValue(const string &);
+string GetLineValue(const string &, char = '"', char = '"');
 string IntoStr(Color);
 Color IntoColor(const string &);
 void ReadKeys(ncmpcpp_keys &);
