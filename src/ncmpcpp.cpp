@@ -271,6 +271,7 @@ int main(int argc, char *argv[])
 	sHelp->Add(DisplayKeys(Key.PrevFoundPosition) + "Go to previous found position\n");
 	sHelp->Add(DisplayKeys(Key.NextFoundPosition) + "Go to next found position\n");
 	sHelp->Add(DisplayKeys(Key.ToggleFindMode) + "Toggle find mode (normal/wrapped)\n");
+	sHelp->Add(DisplayKeys(Key.GoToContainingDir) + "Go to directory containing current item\n");
 	sHelp->Add(DisplayKeys(Key.EditTags) + tag_screen_keydesc);
 	sHelp->Add(DisplayKeys(Key.GoToPosition) + "Go to chosen position in current song\n");
 	sHelp->Add(DisplayKeys(Key.Lyrics) + "Show/hide song's lyrics\n\n");
@@ -298,8 +299,7 @@ int main(int argc, char *argv[])
 	sHelp->Add("   [.b]Keys - Search engine\n -----------------------------------------[/b]\n");
 	sHelp->Add(DisplayKeys(Key.Enter) + "Add item to playlist and play/change option\n");
 	sHelp->Add(DisplayKeys(Key.Space) + "Add item to playlist\n");
-	sHelp->Add(DisplayKeys(Key.StartSearching) + "Start searching immediately\n");
-	sHelp->Add(DisplayKeys(Key.GoToContainingDir) + "Go to directory containing found item\n\n\n");
+	sHelp->Add(DisplayKeys(Key.StartSearching) + "Start searching immediately\n\n\n");
 	
 	sHelp->Add("   [.b]Keys - Media library\n -----------------------------------------[/b]\n");
 	sHelp->Add(DisplayKeys(&Key.VolumeDown[0], 1) + "Previous column\n");
@@ -1803,12 +1803,39 @@ int main(int argc, char *argv[])
 		}
 		else if (Keypressed(input, Key.GoToContainingDir))
 		{
-			if (wCurrent == mSearcher && !vSearched.empty() && mSearcher->GetChoice() > search_engine_static_option)
+			if ((wCurrent == mPlaylist && !mPlaylist->Empty())
+			|| (wCurrent == mSearcher && !vSearched.empty() && mSearcher->GetChoice() > search_engine_static_option)
+			|| (wCurrent == mLibSongs && !mLibSongs->Empty())
+			|| (wCurrent == mPlaylistEditor && !mPlaylistEditor->Empty()))
 			{
-				GetDirectory(vSearched[mSearcher->GetRealChoice()-2]->GetDirectory());
-				for (int i = 1; i < mBrowser->Size(); i++)
+				int id = wCurrent->GetChoice()-1;
+				Song *s;
+				switch (current_screen)
 				{
-					if (mSearcher->GetCurrentOption() == mBrowser->GetOption(i))
+					case csPlaylist:
+						s = &mPlaylist->at(id);
+						break;
+					case csSearcher:
+						s = vSearched[mSearcher->GetRealChoice()-2];
+						break;
+					case csLibrary:
+						s = &mLibSongs->at(id);
+						break;
+					case csPlaylistEditor:
+						s = &mPlaylistEditor->at(id);
+						break;
+					default:
+						break;
+				}
+				
+				if (s->GetDirectory() == EMPTY_TAG) // for streams
+					continue;
+				
+				string option = OmitBBCodes(DisplaySong(*s));
+				GetDirectory(s->GetDirectory());
+				for (int i = 1; i <= mBrowser->Size(); i++)
+				{
+					if (option == mBrowser->GetOption(i))
 					{
 						mBrowser->Highlight(i);
 						break;

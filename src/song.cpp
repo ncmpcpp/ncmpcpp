@@ -57,7 +57,12 @@ Song::Song(mpd_Song *s) : itsHash(0),
 	s->comment ? itsComment = s->comment : itsComment = "";
 	
 	int i = itsFile.find_last_of("/");
-	if (i != string::npos)
+	
+	if (itsFile.substr(0, 7) == "http://")
+	{
+		itsShortName = itsFile;
+	}
+	else if (i != string::npos)
 	{
 		itsDirectory = itsFile.substr(0, i);
 		itsShortName = itsFile.substr(i+1);
@@ -80,6 +85,9 @@ Song::Song(mpd_Song *s) : itsHash(0),
 string Song::GetLength() const
 {
 	std::stringstream ss;
+	
+	if (!GetTotalLength())
+		return "unknown";
 	
 	ss << itsMinutesLength << ":";
 	if (!itsSecondsLength)
