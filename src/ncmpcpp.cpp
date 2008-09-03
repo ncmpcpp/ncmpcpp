@@ -102,7 +102,6 @@ int stats_scroll_begin = 0;
 int block_statusbar_update_delay = -1;
 
 string browsed_dir = "/";
-string browsed_subdir;
 string song_lyrics;
 string player_state;
 string volume_state;
@@ -228,7 +227,7 @@ int main(int argc, char *argv[])
 	sHelp = new Scrollpad(0, main_start_y, COLS, main_height, "", Config.main_color, brNone);
 	sLyrics = static_cast<Scrollpad *>(sHelp->EmptyClone());
 	
-	sHelp->Add("   [b]Keys - Movement\n -----------------------------------------[/b]\n");
+	sHelp->Add("   [.b]Keys - Movement\n -----------------------------------------[/b]\n");
 	sHelp->Add(DisplayKeys(Key.Up) + "Move Cursor up\n");
 	sHelp->Add(DisplayKeys(Key.Down) + "Move Cursor down\n");
 	sHelp->Add(DisplayKeys(Key.PageUp) + "Page up\n");
@@ -244,7 +243,7 @@ int main(int argc, char *argv[])
 	sHelp->Add(DisplayKeys(Key.MediaLibrary) + "Media library\n");
 	sHelp->Add(DisplayKeys(Key.PlaylistEditor) + "Playlist editor\n\n\n");
 	
-	sHelp->Add("   [b]Keys - Global\n -----------------------------------------[/b]\n");
+	sHelp->Add("   [.b]Keys - Global\n -----------------------------------------[/b]\n");
 	sHelp->Add(DisplayKeys(Key.Stop) + "Stop\n");
 	sHelp->Add(DisplayKeys(Key.Pause) + "Pause\n");
 	sHelp->Add(DisplayKeys(Key.Next) + "Next track\n");
@@ -278,7 +277,7 @@ int main(int argc, char *argv[])
 	
 	sHelp->Add(DisplayKeys(Key.Quit) + "Quit\n\n\n");
 	
-	sHelp->Add("   [b]Keys - Playlist screen\n -----------------------------------------[/b]\n");
+	sHelp->Add("   [.b]Keys - Playlist screen\n -----------------------------------------[/b]\n");
 	sHelp->Add(DisplayKeys(Key.Enter) + "Play\n");
 	sHelp->Add(DisplayKeys(Key.Delete) + "Delete item/selected items from playlist\n");
 	sHelp->Add(DisplayKeys(Key.Clear) + "Clear playlist\n");
@@ -290,25 +289,25 @@ int main(int argc, char *argv[])
 	sHelp->Add(DisplayKeys(Key.GoToNowPlaying) + "Go to currently playing position\n");
 	sHelp->Add(DisplayKeys(Key.ToggleAutoCenter) + "Toggle auto center mode\n\n\n");
 	
-	sHelp->Add("   [b]Keys - Browse screen\n -----------------------------------------[/b]\n");
+	sHelp->Add("   [.b]Keys - Browse screen\n -----------------------------------------[/b]\n");
 	sHelp->Add(DisplayKeys(Key.Enter) + "Enter directory/Add item to playlist and play\n");
 	sHelp->Add(DisplayKeys(Key.Space) + "Add item to playlist\n");
 	sHelp->Add(DisplayKeys(Key.GoToParentDir) + "Go to parent directory\n");
 	sHelp->Add(DisplayKeys(Key.Delete) + "Delete playlist\n\n\n");
 	
-	sHelp->Add("   [b]Keys - Search engine\n -----------------------------------------[/b]\n");
+	sHelp->Add("   [.b]Keys - Search engine\n -----------------------------------------[/b]\n");
 	sHelp->Add(DisplayKeys(Key.Enter) + "Add item to playlist and play/change option\n");
 	sHelp->Add(DisplayKeys(Key.Space) + "Add item to playlist\n");
 	sHelp->Add(DisplayKeys(Key.StartSearching) + "Start searching immediately\n");
 	sHelp->Add(DisplayKeys(Key.GoToContainingDir) + "Go to directory containing found item\n\n\n");
 	
-	sHelp->Add("   [b]Keys - Media library\n -----------------------------------------[/b]\n");
+	sHelp->Add("   [.b]Keys - Media library\n -----------------------------------------[/b]\n");
 	sHelp->Add(DisplayKeys(&Key.VolumeDown[0], 1) + "Previous column\n");
 	sHelp->Add(DisplayKeys(&Key.VolumeUp[0], 1) + "Next column\n");
 	sHelp->Add(DisplayKeys(Key.Enter) + "Add to playlist and play song/album/artist's songs\n");
 	sHelp->Add(DisplayKeys(Key.Space) + "Add to playlist song/album/artist's songs\n\n\n");
 	
-	sHelp->Add("   [b]Keys - Playlist Editor\n -----------------------------------------[/b]\n");
+	sHelp->Add("   [.b]Keys - Playlist Editor\n -----------------------------------------[/b]\n");
 	sHelp->Add(DisplayKeys(&Key.VolumeDown[0], 1) + "Previous column\n");
 	sHelp->Add(DisplayKeys(&Key.VolumeUp[0], 1) + "Next column\n");
 	sHelp->Add(DisplayKeys(Key.Enter) + "Add item to playlist and play\n");
@@ -317,10 +316,10 @@ int main(int argc, char *argv[])
 	sHelp->Add(DisplayKeys(Key.MvSongDown) + "Move item/group of items down\n\n\n");
 	
 #	ifdef HAVE_TAGLIB_H
-	sHelp->Add("   [b]Keys - Tag editor\n -----------------------------------------[/b]\n");
+	sHelp->Add("   [.b]Keys - Tag editor\n -----------------------------------------[/b]\n");
 	sHelp->Add(DisplayKeys(Key.Enter) + "Change option\n");
 #	else
-	sHelp->Add("   [b]Keys - Tag info\n -----------------------------------------[/b]\n");
+	sHelp->Add("   [.b]Keys - Tag info\n -----------------------------------------[/b]\n");
 	sHelp->Add(DisplayKeys(Key.Enter) + "Return\n");
 #	endif
 	
@@ -455,7 +454,7 @@ int main(int argc, char *argv[])
 				}
 			}
 			else
-				wHeader->WriteXY(0, 0, max_allowed_title_length, "[b]1:[/b]Help  [b]2:[/b]Playlist  [b]3:[/b]Browse  [b]4:[/b]Search  [b]5:[/b]Library [b]6:[/b]Playlist editor", 1);
+				wHeader->WriteXY(0, 0, max_allowed_title_length, "[.b]1:[/b]Help  [.b]2:[/b]Playlist  [.b]3:[/b]Browse  [.b]4:[/b]Search  [.b]5:[/b]Library [.b]6:[/b]Playlist editor", 1);
 		
 			wHeader->SetColor(Config.volume_color);
 			wHeader->WriteXY(max_allowed_title_length, 0, volume_state);
@@ -538,10 +537,11 @@ int main(int argc, char *argv[])
 					Mpd->CommitSearch(list);
 					if (list.empty())
 					{
+						const int year_length = 7;
 						const string &album = mLibAlbums->GetCurrentOption();
 						Mpd->StartSearch(1);
 						Mpd->AddSearch(MPD_TAG_ITEM_ARTIST, mLibArtists->GetCurrentOption());
-						Mpd->AddSearch(MPD_TAG_ITEM_ALBUM, album.substr(7, album.length()-7));
+						Mpd->AddSearch(MPD_TAG_ITEM_ALBUM, album.substr(year_length));
 						Mpd->CommitSearch(list);
 					}
 				}
@@ -589,6 +589,10 @@ int main(int argc, char *argv[])
 				mPlaylistEditor->Reset();
 				SongList list;
 				Mpd->GetPlaylistContent(mPlaylistList->GetCurrentOption(), list);
+				if (!list.empty())
+					mPlaylistEditor->SetTitle("Playlist's content (" + IntoStr(list.size()) + " item" + (list.size() == 1 ? ")" : "s)"));
+				else
+					mPlaylistEditor->SetTitle("Playlist's content");
 				bool bold = 0;
 				for (SongList::const_iterator it = list.begin(); it != list.end(); it++)
 				{
@@ -605,7 +609,7 @@ int main(int argc, char *argv[])
 				}
 				FreeSongList(list);
 				mPlaylistEditor->Window::Clear();
-				mPlaylistEditor->Refresh();
+				mPlaylistEditor->Display();
 			}
 			
 			if (wCurrent == mPlaylistEditor && mPlaylistEditor->Empty())
@@ -798,29 +802,7 @@ int main(int argc, char *argv[])
 						{
 							found_pos = 0;
 							vFoundPositions.clear();
-							if (item.name == "..")
-							{
-								int i = browsed_dir.size();
-								while (browsed_dir[--i] != '/');
-								string tmp = browsed_dir.substr(0, i);
-								if (tmp != browsed_dir)
-								{
-									browsed_subdir = browsed_dir.substr(i+1, browsed_dir.size()-i-1);
-									GetDirectory(tmp);
-								}
-								else
-								{
-									browsed_subdir = tmp;
-									GetDirectory("/");
-								}
-							}
-							else
-							{
-								if (browsed_dir != "/")
-									GetDirectory(browsed_dir + "/" + item.name);
-								else
-									GetDirectory(item.name);
-							}
+							GetDirectory(item.name, browsed_dir);
 							break;
 						}
 						case itSong:
@@ -868,72 +850,72 @@ int main(int argc, char *argv[])
 					{
 						case 1:
 						{
-							wFooter->WriteXY(0, Config.statusbar_visibility, "[b]New title:[/b] ", 1);
+							wFooter->WriteXY(0, Config.statusbar_visibility, "[.b]New title:[/b] ", 1);
 							if (s.GetTitle() == UNKNOWN_TITLE)
 								s.SetTitle(wFooter->GetString());
 							else
 								s.SetTitle(wFooter->GetString(s.GetTitle()));
-							mTagEditor->UpdateOption(option, "[b]Title:[/b] " + s.GetTitle());
+							mTagEditor->UpdateOption(option, "[.b]Title:[/b] " + s.GetTitle());
 							break;
 						}
 						case 2:
 						{
-							wFooter->WriteXY(0, Config.statusbar_visibility, "[b]New artist:[/b] ", 1);
+							wFooter->WriteXY(0, Config.statusbar_visibility, "[.b]New artist:[/b] ", 1);
 							if (s.GetArtist() == UNKNOWN_ARTIST)
 								s.SetArtist(wFooter->GetString());
 							else
 								s.SetArtist(wFooter->GetString(s.GetArtist()));
-							mTagEditor->UpdateOption(option, "[b]Artist:[/b] " + s.GetArtist());
+							mTagEditor->UpdateOption(option, "[.b]Artist:[/b] " + s.GetArtist());
 							break;
 						}
 						case 3:
 						{
-							wFooter->WriteXY(0, Config.statusbar_visibility, "[b]New album:[/b] ", 1);
+							wFooter->WriteXY(0, Config.statusbar_visibility, "[.b]New album:[/b] ", 1);
 							if (s.GetAlbum() == UNKNOWN_ALBUM)
 								s.SetAlbum(wFooter->GetString());
 							else
 								s.SetAlbum(wFooter->GetString(s.GetAlbum()));
-							mTagEditor->UpdateOption(option, "[b]Album:[/b] " + s.GetAlbum());
+							mTagEditor->UpdateOption(option, "[.b]Album:[/b] " + s.GetAlbum());
 							break;
 						}
 						case 4:
 						{
-							wFooter->WriteXY(0, Config.statusbar_visibility, "[b]New year:[/b] ", 1);
+							wFooter->WriteXY(0, Config.statusbar_visibility, "[.b]New year:[/b] ", 1);
 							if (s.GetYear() == EMPTY_TAG)
 								s.SetYear(wFooter->GetString(4));
 							else
 								s.SetYear(wFooter->GetString(s.GetYear(), 4));
-							mTagEditor->UpdateOption(option, "[b]Year:[/b] " + s.GetYear());
+							mTagEditor->UpdateOption(option, "[.b]Year:[/b] " + s.GetYear());
 							break;
 						}
 						case 5:
 						{
-							wFooter->WriteXY(0, Config.statusbar_visibility, "[b]New track:[/b] ", 1);
+							wFooter->WriteXY(0, Config.statusbar_visibility, "[.b]New track:[/b] ", 1);
 							if (s.GetTrack() == EMPTY_TAG)
 								s.SetTrack(wFooter->GetString(3));
 							else
 								s.SetTrack(wFooter->GetString(s.GetTrack(), 3));
-							mTagEditor->UpdateOption(option, "[b]Track:[/b] " + s.GetTrack());
+							mTagEditor->UpdateOption(option, "[.b]Track:[/b] " + s.GetTrack());
 							break;
 						}
 						case 6:
 						{
-							wFooter->WriteXY(0, Config.statusbar_visibility, "[b]New genre:[/b] ", 1);
+							wFooter->WriteXY(0, Config.statusbar_visibility, "[.b]New genre:[/b] ", 1);
 							if (s.GetGenre() == EMPTY_TAG)
 								s.SetGenre(wFooter->GetString());
 							else
 								s.SetGenre(wFooter->GetString(s.GetGenre()));
-							mTagEditor->UpdateOption(option, "[b]Genre:[/b] " + s.GetGenre());
+							mTagEditor->UpdateOption(option, "[.b]Genre:[/b] " + s.GetGenre());
 							break;
 						}
 						case 7:
 						{
-							wFooter->WriteXY(0, Config.statusbar_visibility, "[b]New comment:[/b] ", 1);
+							wFooter->WriteXY(0, Config.statusbar_visibility, "[.b]New comment:[/b] ", 1);
 							if (s.GetComment() == EMPTY_TAG)
 								s.SetComment(wFooter->GetString());
 							else
 								s.SetComment(wFooter->GetString(s.GetComment()));
-							mTagEditor->UpdateOption(option, "[b]Comment:[/b] " + s.GetComment());
+							mTagEditor->UpdateOption(option, "[.b]Comment:[/b] " + s.GetComment());
 							break;
 						}
 						case 8:
@@ -1000,94 +982,94 @@ int main(int argc, char *argv[])
 					{
 						case 1:
 						{
-							wFooter->WriteXY(0, Config.statusbar_visibility, "[b]Filename:[/b] ", 1);
+							wFooter->WriteXY(0, Config.statusbar_visibility, "[.b]Filename:[/b] ", 1);
 							if (s.GetShortFilename() == EMPTY_TAG)
 								s.SetShortFilename(wFooter->GetString());
 							else
 								s.SetShortFilename(wFooter->GetString(s.GetShortFilename()));
-							mSearcher->UpdateOption(option, "[b]Filename:[/b] " + s.GetShortFilename());
+							mSearcher->UpdateOption(option, "[.b]Filename:[/b] " + s.GetShortFilename());
 							break;
 						}
 						case 2:
 						{
-							wFooter->WriteXY(0, Config.statusbar_visibility, "[b]Title:[/b] ", 1);
+							wFooter->WriteXY(0, Config.statusbar_visibility, "[.b]Title:[/b] ", 1);
 							if (s.GetTitle() == UNKNOWN_TITLE)
 								s.SetTitle(wFooter->GetString());
 							else
 								s.SetTitle(wFooter->GetString(s.GetTitle()));
-							mSearcher->UpdateOption(option, "[b]Title:[/b] " + s.GetTitle());
+							mSearcher->UpdateOption(option, "[.b]Title:[/b] " + s.GetTitle());
 							break;
 						}
 						case 3:
 						{
-							wFooter->WriteXY(0, Config.statusbar_visibility, "[b]Artist:[/b] ", 1);
+							wFooter->WriteXY(0, Config.statusbar_visibility, "[.b]Artist:[/b] ", 1);
 							if (s.GetArtist() == UNKNOWN_ARTIST)
 								s.SetArtist(wFooter->GetString());
 							else
 								s.SetArtist(wFooter->GetString(s.GetArtist()));
-							mSearcher->UpdateOption(option, "[b]Artist:[/b] " + s.GetArtist());
+							mSearcher->UpdateOption(option, "[.b]Artist:[/b] " + s.GetArtist());
 							break;
 						}
 						case 4:
 						{
-							wFooter->WriteXY(0, Config.statusbar_visibility, "[b]Album:[/b] ", 1);
+							wFooter->WriteXY(0, Config.statusbar_visibility, "[.b]Album:[/b] ", 1);
 							if (s.GetAlbum() == UNKNOWN_ALBUM)
 								s.SetAlbum(wFooter->GetString());
 							else
 								s.SetAlbum(wFooter->GetString(s.GetAlbum()));
-							mSearcher->UpdateOption(option, "[b]Album:[/b] " + s.GetAlbum());
+							mSearcher->UpdateOption(option, "[.b]Album:[/b] " + s.GetAlbum());
 							break;
 						}
 						case 5:
 						{
-							wFooter->WriteXY(0, Config.statusbar_visibility, "[b]Year:[/b] ", 1);
+							wFooter->WriteXY(0, Config.statusbar_visibility, "[.b]Year:[/b] ", 1);
 							if (s.GetYear() == EMPTY_TAG)
 								s.SetYear(wFooter->GetString(4));
 							else
 								s.SetYear(wFooter->GetString(s.GetYear(), 4));
-							mSearcher->UpdateOption(option, "[b]Year:[/b] " + s.GetYear());
+							mSearcher->UpdateOption(option, "[.b]Year:[/b] " + s.GetYear());
 							break;
 						}
 						case 6:
 						{
-							wFooter->WriteXY(0, Config.statusbar_visibility, "[b]Track:[/b] ", 1);
+							wFooter->WriteXY(0, Config.statusbar_visibility, "[.b]Track:[/b] ", 1);
 							if (s.GetTrack() == EMPTY_TAG)
 								s.SetTrack(wFooter->GetString(3));
 							else
 								s.SetTrack(wFooter->GetString(s.GetTrack(), 3));
-							mSearcher->UpdateOption(option, "[b]Track:[/b] " + s.GetTrack());
+							mSearcher->UpdateOption(option, "[.b]Track:[/b] " + s.GetTrack());
 							break;
 						}
 						case 7:
 						{
-							wFooter->WriteXY(0, Config.statusbar_visibility, "[b]Genre:[/b] ", 1);
+							wFooter->WriteXY(0, Config.statusbar_visibility, "[.b]Genre:[/b] ", 1);
 							if (s.GetGenre() == EMPTY_TAG)
 								s.SetGenre(wFooter->GetString());
 							else
 								s.SetGenre(wFooter->GetString(s.GetGenre()));
-							mSearcher->UpdateOption(option, "[b]Genre:[/b] " + s.GetGenre());
+							mSearcher->UpdateOption(option, "[.b]Genre:[/b] " + s.GetGenre());
 							break;
 						}
 						case 8:
 						{
-							wFooter->WriteXY(0, Config.statusbar_visibility, "[b]Comment:[/b] ", 1);
+							wFooter->WriteXY(0, Config.statusbar_visibility, "[.b]Comment:[/b] ", 1);
 							if (s.GetComment() == EMPTY_TAG)
 								s.SetComment(wFooter->GetString());
 							else
 								s.SetComment(wFooter->GetString(s.GetComment()));
-							mSearcher->UpdateOption(option, "[b]Comment:[/b] " + s.GetComment());
+							mSearcher->UpdateOption(option, "[.b]Comment:[/b] " + s.GetComment());
 							break;
 						}
 						case 10:
 						{
 							search_mode_match = !search_mode_match;
-							mSearcher->UpdateOption(option, "[b]Search mode:[/b] " + (search_mode_match ? search_mode_one : search_mode_two));
+							mSearcher->UpdateOption(option, "[.b]Search mode:[/b] " + (search_mode_match ? search_mode_one : search_mode_two));
 							break;
 						}
 						case 11:
 						{
 							search_case_sensitive = !search_case_sensitive;
-							mSearcher->UpdateOption(option, "[b]Case sensitive:[/b] " + (string)(search_case_sensitive ? "Yes" : "No"));
+							mSearcher->UpdateOption(option, "[.b]Case sensitive:[/b] " + (string)(search_case_sensitive ? "Yes" : "No"));
 							break;
 						}
 						case 13:
@@ -1099,7 +1081,7 @@ int main(int argc, char *argv[])
 							{
 								bool bold = 0;
 								mSearcher->AddSeparator();
-								mSearcher->AddStaticBoldOption("[white]Search results:[/white] [green]Found " + IntoStr(vSearched.size()) + (vSearched.size() > 1 ? " songs" : " song") + "[/green]");
+								mSearcher->AddStaticBoldOption("[.white]Search results:[/white] [.green]Found " + IntoStr(vSearched.size()) + (vSearched.size() > 1 ? " songs" : " song") + "[/green]");
 								mSearcher->AddSeparator();
 									
 								for (SongList::const_iterator it = vSearched.begin(); it != vSearched.end(); it++)
@@ -1166,7 +1148,7 @@ int main(int argc, char *argv[])
 						if (Mpd->CommitQueue())
 						{
 							ShowMessage("Adding all songs artist's: " + artist);
-							Song *s = &mPlaylist->at(mPlaylist->GetChoice()-list.size());
+							Song *s = &mPlaylist->at(mPlaylist->Size()-list.size());
 							if (s->GetHash() == list[0]->GetHash())
 							{
 								if (Keypressed(input, Key.Enter))
@@ -1280,16 +1262,17 @@ int main(int argc, char *argv[])
 					{
 						case itDirectory:
 						{
-							string getdir = browsed_dir == "/" ? item.name : browsed_dir + "/" + item.name;
-						
+							if (browsed_dir != "/" && mBrowser->GetChoice() == 1)
+								continue; // do not let add parent dir.
+							
 							SongList list;
-							Mpd->GetDirectoryRecursive(getdir, list);
+							Mpd->GetDirectoryRecursive(item.name, list);
 						
 							for (SongList::const_iterator it = list.begin(); it != list.end(); it++)
 								Mpd->QueueAddSong(**it);
 							if (Mpd->CommitQueue())
 							{
-								ShowMessage("Added folder: " + getdir);
+								ShowMessage("Added folder: " + item.name);
 								Song &s = mPlaylist->at(mPlaylist->Size()-list.size());
 								if (s.GetHash() != list[0]->GetHash())
 									ShowMessage(message_part_of_songs_added);
@@ -1822,7 +1805,7 @@ int main(int argc, char *argv[])
 		{
 			if (wCurrent == mSearcher && !vSearched.empty() && mSearcher->GetChoice() > search_engine_static_option)
 			{
-				GetDirectory(vSearched[mSearcher->GetChoice()-search_engine_static_option-1]->GetDirectory());
+				GetDirectory(vSearched[mSearcher->GetRealChoice()-2]->GetDirectory());
 				for (int i = 1; i < mBrowser->Size(); i++)
 				{
 					if (mSearcher->GetCurrentOption() == mBrowser->GetOption(i))

@@ -46,7 +46,7 @@
 ## value with { }|{ } eg. {%a - %t}|{%f}
 ##
 ## text can also have different color than the main window has,
-## eg. if you want length to have other color, write [color]%t[/color]
+## eg. if you want length to have other color, write [.color]%t[/color]
 ##
 ## available colors:
 ##
@@ -60,7 +60,7 @@
 ## - white
 ##
 #
-#song_list_format = "{[green](%l)[/green] }{%a - }{%t}|{[white]%f[/white]}"
+#song_list_format = "{[.green](%l)[/green] }{%a - }{%t}|{[.white]%f[/white]}"
 #
 #song_status_format = "{(%l) }{%a - }{%t}|{%f}"
 #
@@ -68,9 +68,9 @@
 #
 #song_library_format = "{%n - }{%t}|{%f}"
 #
-#browser_playlist_prefix = "[red]playlist[/red] "
+#browser_playlist_prefix = "[.red]playlist[/red] "
 #
-#selected_item_prefix = "[magenta]"
+#selected_item_prefix = "[.magenta]"
 #
 #selected_item_suffix = "[/magenta]"
 #

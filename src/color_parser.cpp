@@ -48,55 +48,55 @@ ColorPair Window::into_color(const string &str)
 	}
 	else
 	{
-		if (str == "[a]")
+		if (str == "[.a]")
 			AltCharset(1);
-		else if (str == "[b]")
+		else if (str == "[.b]")
 			Bold(1);
-		else if (str == "[r]")
+		else if (str == "[.r]")
 			Reverse(1);
-		else if (str == "[red]")
+		else if (str == "[.red]")
 		{
 			colors.first = clRed;
 			colors.second = itsBaseBgColor;
 			itsColors.push(colors);
 		}
-		else if (str == "[black]")
+		else if (str == "[.black]")
 		{
 			colors.first = clBlack;
 			colors.second = itsBaseBgColor;
 			itsColors.push(colors);
 		}
-		else if (str == "[blue]")
+		else if (str == "[.blue]")
 		{
 			colors.first = clBlue;
 			colors.second = itsBaseBgColor;
 			itsColors.push(colors);
 		}
-		else if (str == "[green]")
+		else if (str == "[.green]")
 		{
 			colors.first = clGreen;
 			colors.second = itsBaseBgColor;
 			itsColors.push(colors);
 		}
-		else if (str == "[yellow]")
+		else if (str == "[.yellow]")
 		{
 			colors.first = clYellow;
 			colors.second = itsBaseBgColor;
 			itsColors.push(colors);
 		}
-		else if (str == "[magenta]")
+		else if (str == "[.magenta]")
 		{
 			colors.first = clMagenta;
 			colors.second = itsBaseBgColor;
 			itsColors.push(colors);
 		}
-		else if (str == "[cyan]")
+		else if (str == "[.cyan]")
 		{
 			colors.first = clCyan;
 			colors.second = itsBaseBgColor;
 			itsColors.push(colors);
 		}
-		else if (str == "[white]")
+		else if (str == "[.white]")
 		{
 			colors.first = clWhite;
 			colors.second = itsBaseBgColor;
@@ -403,28 +403,28 @@ ColorPair Window::into_color(const string &str)
 bool is_valid_color(const string &str)
 {
 	return  str == "[/]" ||
-		str == "[b]" ||
+		str == "[.b]" ||
 		str == "[/b]" ||
-		str == "[r]" ||
+		str == "[.r]" ||
 		str == "[/r]" ||
-		str == "[a]" ||
+		str == "[.a]" ||
 		str == "[/a]" ||
 		
-		str == "[black]" ||
+		str == "[.black]" ||
 		str == "[/black]" ||
-		str == "[red]" ||
+		str == "[.red]" ||
 		str == "[/red]" ||
-		str == "[blue]" ||
+		str == "[.blue]" ||
 		str == "[/blue]" ||
-		str == "[green]" ||
+		str == "[.green]" ||
 		str == "[/green]" ||
-		str == "[yellow]" ||
+		str == "[.yellow]" ||
 		str == "[/yellow]" ||
-		str == "[magenta]" ||
+		str == "[.magenta]" ||
 		str == "[/magenta]" ||
-		str == "[cyan]" ||
+		str == "[.cyan]" ||
 		str == "[/cyan]" ||
-		str == "[white]" ||
+		str == "[.white]" ||
 		str == "[/white]";
 			
 		/*str == "[black_red]"||

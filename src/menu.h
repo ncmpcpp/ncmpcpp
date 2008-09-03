@@ -48,7 +48,7 @@ class Menu : public Window
 	typedef string (*ItemDisplayer) (const T &, void *);
 	
 	public:
-		Menu(int startx, int starty, int width, int height, string title, Color color, Border border) : itsItemDisplayer(0), itsUserdata(0), Window(startx, starty, width, height, title, color, border), itsSelectedPrefix("[r]"), itsSelectedSuffix("[/r]"), itsStaticsNumber(0), itsBeginning(0), itsHighlight(0), itsHighlightColor(itsBaseColor), itsHighlightEnabled(1) { SetColor(color); }
+		Menu(int startx, int starty, int width, int height, string title, Color color, Border border) : itsItemDisplayer(0), itsUserdata(0), Window(startx, starty, width, height, title, color, border), itsSelectedPrefix("[.r]"), itsSelectedSuffix("[/r]"), itsStaticsNumber(0), itsBeginning(0), itsHighlight(0), itsHighlightColor(itsBaseColor), itsHighlightEnabled(1) { SetColor(color); }
 		Menu(const Menu &);
 		virtual ~Menu();
 		

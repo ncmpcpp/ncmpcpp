@@ -44,7 +44,6 @@ extern int browsed_dir_scroll_begin;
 extern time_t block_delay;
 
 extern string browsed_dir;
-extern string browsed_subdir;
 
 extern bool messages_allowed;
 extern bool block_progressbar_update;
@@ -320,7 +319,12 @@ string DisplayItem(const Item &item, void *)
 	switch (item.type)
 	{
 		case itDirectory:
-			return "[" + item.name + "]";
+		{
+			if (item.song)
+				return "[..]";
+			int slash = item.name.find_last_of("/");
+			return "[" + (slash != string::npos ? item.name.substr(slash+1) : item.name) + "]";
+		}
 		case itSong:
 			return DisplaySong(*item.song);
 		case itPlaylist:
@@ -594,17 +598,17 @@ void PrepareSearchEngine(Song &s)
 	s.Clear();
 	mSearcher->Clear();
 	mSearcher->Reset();
-	mSearcher->AddOption("[b]Filename:[/b] " + s.GetShortFilename());
-	mSearcher->AddOption("[b]Title:[/b] " + s.GetTitle());
-	mSearcher->AddOption("[b]Artist:[/b] " + s.GetArtist());
-	mSearcher->AddOption("[b]Album:[/b] " + s.GetAlbum());
-	mSearcher->AddOption("[b]Year:[/b] " + s.GetYear());
-	mSearcher->AddOption("[b]Track:[/b] " + s.GetTrack());
-	mSearcher->AddOption("[b]Genre:[/b] " + s.GetGenre());
-	mSearcher->AddOption("[b]Comment:[/b] " + s.GetComment());
+	mSearcher->AddOption("[.b]Filename:[/b] " + s.GetShortFilename());
+	mSearcher->AddOption("[.b]Title:[/b] " + s.GetTitle());
+	mSearcher->AddOption("[.b]Artist:[/b] " + s.GetArtist());
+	mSearcher->AddOption("[.b]Album:[/b] " + s.GetAlbum());
+	mSearcher->AddOption("[.b]Year:[/b] " + s.GetYear());
+	mSearcher->AddOption("[.b]Track:[/b] " + s.GetTrack());
+	mSearcher->AddOption("[.b]Genre:[/b] " + s.GetGenre());
+	mSearcher->AddOption("[.b]Comment:[/b] " + s.GetComment());
 	mSearcher->AddSeparator();
-	mSearcher->AddOption("[b]Search mode:[/b] " + (search_mode_match ? search_mode_one : search_mode_two));
-	mSearcher->AddOption("[b]Case sensitive:[/b] " + (string)(search_case_sensitive ? "Yes" : "No"));
+	mSearcher->AddOption("[.b]Search mode:[/b] " + (search_mode_match ? search_mode_one : search_mode_two));
+	mSearcher->AddOption("[.b]Case sensitive:[/b] " + (string)(search_case_sensitive ? "Yes" : "No"));
 	mSearcher->AddSeparator();
 	mSearcher->AddOption("Search");
 	mSearcher->AddOption("Reset");
@@ -765,37 +769,37 @@ bool GetSongInfo(Song &s)
 	mTagEditor->Clear();
 	mTagEditor->Reset();
 	
-	mTagEditor->AddStaticOption("[b][white]Song name: [/white][green][/b]" + s.GetShortFilename() + "[/green]");
-	mTagEditor->AddStaticOption("[b][white]Location in DB: [/white][green][/b]" + s.GetDirectory() + "[/green]");
+	mTagEditor->AddStaticOption("[.b][.white]Song name: [/white][.green][/b]" + s.GetShortFilename() + "[/green]");
+	mTagEditor->AddStaticOption("[.b][.white]Location in DB: [/white][.green][/b]" + s.GetDirectory() + "[/green]");
 	mTagEditor->AddStaticOption("");
-	mTagEditor->AddStaticOption("[b][white]Length: [/white][green][/b]" + s.GetLength() + "[/green]");
+	mTagEditor->AddStaticOption("[.b][.white]Length: [/white][.green][/b]" + s.GetLength() + "[/green]");
 #	ifdef HAVE_TAGLIB_H
-	mTagEditor->AddStaticOption("[b][white]Bitrate: [/white][green][/b]" + IntoStr(f.audioProperties()->bitrate()) + " kbps[/green]");
-	mTagEditor->AddStaticOption("[b][white]Sample rate: [/white][green][/b]" + IntoStr(f.audioProperties()->sampleRate()) + " Hz[/green]");
-	mTagEditor->AddStaticOption("[b][white]Channels: [/white][green][/b]" + (string)(f.audioProperties()->channels() == 1 ? "Mono" : "Stereo") + "[/green]");
+	mTagEditor->AddStaticOption("[.b][.white]Bitrate: [/white][.green][/b]" + IntoStr(f.audioProperties()->bitrate()) + " kbps[/green]");
+	mTagEditor->AddStaticOption("[.b][.white]Sample rate: [/white][.green][/b]" + IntoStr(f.audioProperties()->sampleRate()) + " Hz[/green]");
+	mTagEditor->AddStaticOption("[.b][.white]Channels: [/white][.green][/b]" + (string)(f.audioProperties()->channels() == 1 ? "Mono" : "Stereo") + "[/green]");
 #	endif
 	
 	mTagEditor->AddSeparator();
 	
 #	ifdef HAVE_TAGLIB_H
-	mTagEditor->AddOption("[b]Title:[/b] " + s.GetTitle());
-	mTagEditor->AddOption("[b]Artist:[/b] " + s.GetArtist());
-	mTagEditor->AddOption("[b]Album:[/b] " + s.GetAlbum());
-	mTagEditor->AddOption("[b]Year:[/b] " + s.GetYear());
-	mTagEditor->AddOption("[b]Track:[/b] " + s.GetTrack());
-	mTagEditor->AddOption("[b]Genre:[/b] " + s.GetGenre());
-	mTagEditor->AddOption("[b]Comment:[/b] " + s.GetComment());
+	mTagEditor->AddOption("[.b]Title:[/b] " + s.GetTitle());
+	mTagEditor->AddOption("[.b]Artist:[/b] " + s.GetArtist());
+	mTagEditor->AddOption("[.b]Album:[/b] " + s.GetAlbum());
+	mTagEditor->AddOption("[.b]Year:[/b] " + s.GetYear());
+	mTagEditor->AddOption("[.b]Track:[/b] " + s.GetTrack());
+	mTagEditor->AddOption("[.b]Genre:[/b] " + s.GetGenre());
+	mTagEditor->AddOption("[.b]Comment:[/b] " + s.GetComment());
 	mTagEditor->AddSeparator();
 	mTagEditor->AddOption("Save");
 	mTagEditor->AddOption("Cancel");
 #	else
-	mTagEditor->AddStaticOption("[b]Title:[/b] " + s.GetTitle());
-	mTagEditor->AddStaticOption("[b]Artist:[/b] " + s.GetArtist());
-	mTagEditor->AddStaticOption("[b]Album:[/b] " + s.GetAlbum());
-	mTagEditor->AddStaticOption("[b]Year:[/b] " + s.GetYear());
-	mTagEditor->AddStaticOption("[b]Track:[/b] " + s.GetTrack());
-	mTagEditor->AddStaticOption("[b]Genre:[/b] " + s.GetGenre());
-	mTagEditor->AddStaticOption("[b]Comment:[/b] " + s.GetComment());
+	mTagEditor->AddStaticOption("[.b]Title:[/b] " + s.GetTitle());
+	mTagEditor->AddStaticOption("[.b]Artist:[/b] " + s.GetArtist());
+	mTagEditor->AddStaticOption("[.b]Album:[/b] " + s.GetAlbum());
+	mTagEditor->AddStaticOption("[.b]Year:[/b] " + s.GetYear());
+	mTagEditor->AddStaticOption("[.b]Track:[/b] " + s.GetTrack());
+	mTagEditor->AddStaticOption("[.b]Genre:[/b] " + s.GetGenre());
+	mTagEditor->AddStaticOption("[.b]Comment:[/b] " + s.GetComment());
 	mTagEditor->AddSeparator();
 	mTagEditor->AddOption("Back");
 #	endif
@@ -818,7 +822,7 @@ bool SortDirectory(const Item &a, const Item &b)
 		return a.type < b.type;
 }
 
-void GetDirectory(string dir)
+void GetDirectory(string dir, string subdir)
 {
 	int highlightme = -1;
 	browsed_dir_scroll_begin = 0;
@@ -826,10 +830,13 @@ void GetDirectory(string dir)
 		mBrowser->Reset();
 	browsed_dir = dir;
 	mBrowser->Clear(0);
+	
 	if (dir != "/")
 	{
 		Item parent;
-		parent.name = "..";
+		int slash = dir.find_last_of("/");
+		parent.song = (Song *) 1; // in that way we assume that's really parent dir
+		parent.name = slash != string::npos ? dir.substr(0, slash) : "/";
 		parent.type = itDirectory;
 		mBrowser->AddOption(parent);
 	}
@@ -849,15 +856,8 @@ void GetDirectory(string dir)
 			}
 			case itDirectory:
 			{
-				string directory;
-				string subdir = it->name;
-				if (dir == "/")
-					directory = subdir.substr(browsed_dir.size()-1,subdir.size()-browsed_dir.size()+1);
-				else
-					directory = subdir.substr(browsed_dir.size()+1,subdir.size()-browsed_dir.size()-1);
-				if (directory == browsed_subdir)
+				if (it->name == subdir)
 					highlightme = mBrowser->Size()+1;
-				it->name = directory;
 				mBrowser->AddOption(*it);
 				break;
 			}
@@ -878,7 +878,6 @@ void GetDirectory(string dir)
 		}
 	}
 	mBrowser->Highlight(highlightme);
-	browsed_subdir.clear();
 	
 	if (current_screen == csBrowser)
 		mBrowser->Hide();

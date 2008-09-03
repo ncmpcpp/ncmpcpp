@@ -51,7 +51,7 @@ string DisplayItem(const Item &, void * = NULL);
 string DisplaySong(const Song &, void * = &Config.song_list_format);
 void ShowMessage(const string &, int = Config.message_delay_time);
 bool SortDirectory(const Item &a, const Item &b);
-void GetDirectory(string);
+void GetDirectory(string, string = "/");
 bool GetSongInfo(Song &);
 void PrepareSearchEngine(Song &s);
 void Search(SongList &, Song &);

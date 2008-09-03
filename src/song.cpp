@@ -30,10 +30,10 @@ string UNKNOWN_ALBUM;
 void DefineEmptyTags()
 {
 	const string et_col = IntoStr(Config.empty_tags_color);
-	EMPTY_TAG = "[" + et_col + "]<empty>[/" + et_col + "]";
-	UNKNOWN_ARTIST = "[" + et_col + "]<no artist>[/" + et_col + "]";
-	UNKNOWN_TITLE = "[" + et_col + "]<no title>[/" + et_col + "]";
-	UNKNOWN_ALBUM = "[" + et_col + "]<no album>[/" + et_col + "]";
+	EMPTY_TAG = "[." + et_col + "]<empty>[/" + et_col + "]";
+	UNKNOWN_ARTIST = "[." + et_col + "]<no artist>[/" + et_col + "]";
+	UNKNOWN_TITLE = "[." + et_col + "]<no title>[/" + et_col + "]";
+	UNKNOWN_ALBUM = "[." + et_col + "]<no album>[/" + et_col + "]";
 }
 
 Song::Song(mpd_Song *s) : itsHash(0),
@@ -56,14 +56,13 @@ Song::Song(mpd_Song *s) : itsHash(0),
 	s->disc ? itsDisc = s->disc : itsDisc = "";
 	s->comment ? itsComment = s->comment : itsComment = "";
 	
-	int i = itsFile.size();
-	try
+	int i = itsFile.find_last_of("/");
+	if (i != string::npos)
 	{
-		while (itsFile[--i] != '/');
 		itsDirectory = itsFile.substr(0, i);
-		itsShortName = itsFile.substr(i+1, itsFile.size()-i-1);
+		itsShortName = itsFile.substr(i+1);
 	}
-	catch (std::out_of_range)
+	else
 	{
 		itsDirectory = "/";
 		itsShortName = itsFile;
