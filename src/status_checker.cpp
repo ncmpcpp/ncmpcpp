@@ -312,7 +312,7 @@ void NcmpcppStatusChanged(MPDConnection *Mpd, MPDStatusChanges changed, void *da
 					tracklength = " [" + ShowTime(elapsed) + "/" + s.GetLength() + "]";
 				else
 					tracklength = " [" + ShowTime(elapsed) + "]";
-				ncmpcpp_string_t playing_song = TO_WSTRING(OmitBBCodes(DisplaySong(s, &Config.song_status_format)));
+				ncmpcpp_string_t playing_song = TO_WSTRING(DisplaySong(s, &Config.song_status_format));
 				
 				int max_length_without_scroll = wFooter->GetWidth()-player_state.length()-tracklength.length();
 				
@@ -334,7 +334,7 @@ void NcmpcppStatusChanged(MPDConnection *Mpd, MPDStatusChanges changed, void *da
 						playing_song_scroll_begin = 0;
 				}
 				else
-					wFooter->WriteXY(player_state.length(), 1, OmitBBCodes(DisplaySong(s, &Config.song_status_format)), 1);
+					wFooter->WriteXY(player_state.length(), 1, DisplaySong(s, &Config.song_status_format), 1);
 				wFooter->Bold(1);
 				
 				wFooter->WriteXY(wFooter->GetWidth()-tracklength.length(), 1, tracklength);

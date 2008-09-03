@@ -19,9 +19,9 @@
  ***************************************************************************/
 
 #include "lyrics.h"
+#include <fcntl.h>
 
 const string lyrics_folder = home_folder + "/" + ".lyrics";
-const string mkdir_command = "mkdir " + lyrics_folder + " &>/dev/null";
 
 size_t write_data(char *buffer, size_t size, size_t nmemb, string data)
 {
@@ -38,7 +38,7 @@ string GetLyrics(string artist, string song)
 {
 	const string filename = artist + " - " + song + ".txt";
 	const string fullpath = lyrics_folder + "/" + filename;
-	system(mkdir_command.c_str());
+	mkdir(lyrics_folder.c_str(), 0755);
 	
 	string result;
 	std::ifstream input(fullpath.c_str());

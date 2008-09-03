@@ -309,7 +309,7 @@ string Menu<T>::GetCurrentOption() const
 {
 	try
 	{
-		return OmitBBCodes(DisplayOption(itsOptions.at(itsHighlight)->item));
+		return DisplayOption(itsOptions.at(itsHighlight)->item);
 	}
 	catch (std::out_of_range)
 	{
@@ -322,7 +322,7 @@ string Menu<T>::GetOption(int i) const
 {
 	try
 	{
-		return OmitBBCodes(DisplayOption(itsOptions.at(i-1)->item));
+		return DisplayOption(itsOptions.at(i-1)->item);
 	}
 	catch (std::out_of_range)
 	{

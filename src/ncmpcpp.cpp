@@ -814,7 +814,7 @@ int main(int argc, char *argv[])
 							if (id >= 0)
 							{
 								Mpd->PlayID(id);
-								ShowMessage("Added to playlist: " +  OmitBBCodes(DisplaySong(s)));
+								ShowMessage("Added to playlist: " + DisplaySong(s, &Config.song_status_format));
 							}
 							mBrowser->Refresh();
 							break;
@@ -1125,7 +1125,7 @@ int main(int argc, char *argv[])
 							if (id >= 0)
 							{
 								Mpd->PlayID(id);
-								ShowMessage("Added to playlist: " +  OmitBBCodes(DisplaySong(s)));
+								ShowMessage("Added to playlist: " + DisplaySong(s, &Config.song_status_format));
 							}
 							break;
 						}
@@ -1185,7 +1185,7 @@ int main(int argc, char *argv[])
 							int id = Mpd->AddSong(s);
 							if (id >= 0)
 							{
-								ShowMessage("Added to playlist: " + OmitBBCodes(DisplaySong(s)));
+								ShowMessage("Added to playlist: " + DisplaySong(s, &Config.song_status_format));
 								if (Keypressed(input, Key.Enter))
 									Mpd->PlayID(id);
 							}
@@ -1229,7 +1229,7 @@ int main(int argc, char *argv[])
 							int id = Mpd->AddSong(s);
 							if (id >= 0)
 							{
-								ShowMessage("Added to playlist: " + OmitBBCodes(DisplaySong(s)));
+								ShowMessage("Added to playlist: " + DisplaySong(s, &Config.song_status_format));
 								if (Keypressed(input, Key.Enter))
 									Mpd->PlayID(id);
 							}
@@ -1286,7 +1286,7 @@ int main(int argc, char *argv[])
 						{
 							Song &s = *item.song;
 							if (Mpd->AddSong(s) != -1)
-								ShowMessage("Added to playlist: " + OmitBBCodes(DisplaySong(s)));
+								ShowMessage("Added to playlist: " + DisplaySong(s, &Config.song_status_format));
 							break;
 						}
 						case itPlaylist:
@@ -1316,7 +1316,7 @@ int main(int argc, char *argv[])
 				
 					Song &s = *vSearched[id];
 					if (Mpd->AddSong(s) != -1)
-						ShowMessage("Added to playlist: " + OmitBBCodes(DisplaySong(s)));
+						ShowMessage("Added to playlist: " + DisplaySong(s, &Config.song_status_format));
 					mSearcher->Go(wDown);
 				}
 				else if (current_screen == csLibrary)
@@ -1833,7 +1833,7 @@ int main(int argc, char *argv[])
 				if (s->GetDirectory() == EMPTY_TAG) // for streams
 					continue;
 				
-				string option = OmitBBCodes(DisplaySong(*s));
+				string option = DisplaySong(*s);
 				GetDirectory(s->GetDirectory());
 				for (int i = 1; i <= mBrowser->Size(); i++)
 				{
@@ -2127,7 +2127,7 @@ int main(int argc, char *argv[])
 				
 				for (int i = (wCurrent == mBrowser ? search_engine_static_option : 1); i <= mCurrent->Size(); i++)
 				{
-					string name = mCurrent->GetOption(i);
+					string name = OmitBBCodes(mCurrent->GetOption(i));
 					transform(name.begin(), name.end(), name.begin(), tolower);
 					if (name.find(findme) != string::npos && !mCurrent->IsStatic(i))
 					{

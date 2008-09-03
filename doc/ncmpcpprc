@@ -85,7 +85,7 @@
 ## - color is optional (if it's not present, default window color will be used)
 ##
 #
-#song_columns_list_format = "(8)[green]{l} (28)[cyan]{a} (28)[yellow]{b} (50)[red]{t}"
+#song_columns_list_format = "(8)[green]{l} (28)[cyan]{a} (28){b} (50)[red]{t}"
 #
 ##### various settings #####
 #
