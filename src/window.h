@@ -84,7 +84,7 @@ class Window
 		virtual void Reverse(bool) const;
 		virtual void AltCharset(bool) const;
 		virtual void Delay(bool) const;
-		virtual void Timeout(int) const;
+		virtual void SetTimeout(int);
 		virtual void AutoRefresh(bool val) { AutoRefreshEnabled = val; }
 		virtual void ReadKey(int &) const;
 		virtual void ReadKey() const;
@@ -142,6 +142,7 @@ class Window
 		int itsStartY;
 		int itsWidth;
 		int itsHeight;
+		int itsWindowTimeout;
 		bool BBEnabled;
 		bool AutoRefreshEnabled;
 		string itsTitle;

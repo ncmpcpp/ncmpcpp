@@ -415,6 +415,9 @@ void Menu<T>::Refresh(bool redraw_whole_window)
 	if (itsHighlight >= itsOptions.size()-1)
 		Highlight(itsOptions.size());
 	
+	while (itsHighlight-itsBeginning > itsHeight-1)
+		itsBeginning++;
+	
 	if (redraw_whole_window)
 	{
 		Window::Clear();

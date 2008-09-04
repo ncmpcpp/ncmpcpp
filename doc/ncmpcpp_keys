@@ -115,6 +115,8 @@
 #
 #key_toggle_auto_center = 'U'
 #
+#key_toggle_playlist_display_mode = 'p'
+#
 #key_go_to_containing_directory = 'G'
 #
 #key_start_searching = 'y'

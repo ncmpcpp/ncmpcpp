@@ -863,9 +863,9 @@ void Search(SongList &result, Song &s)
 			if (found && !s.GetAlbum().empty())
 				found = copy.GetAlbum().find(s.GetAlbum()) != string::npos;
 			if (found && !s.GetYear().empty())
-				found = atoi(copy.GetYear().c_str()) == atoi(s.GetYear().c_str()) && atoi(s.GetYear().c_str());
+				found = StrToInt(copy.GetYear()) == StrToInt(s.GetYear()) && StrToInt(s.GetYear());
 			if (found && !s.GetTrack().empty())
-				found = atoi(copy.GetTrack().c_str()) == atoi(s.GetTrack().c_str()) && atoi(s.GetTrack().c_str());
+				found = StrToInt(copy.GetTrack()) == StrToInt(s.GetTrack()) && StrToInt(s.GetTrack());
 			if (found && !s.GetGenre().empty())
 				found = copy.GetGenre().find(s.GetGenre()) != string::npos;
 			if (found && !s.GetComment().empty())
@@ -882,9 +882,9 @@ void Search(SongList &result, Song &s)
 			if (found && !s.GetAlbum().empty())
 				found = copy.GetAlbum() == s.GetAlbum();
 			if (found && !s.GetYear().empty())
-				found = atoi(copy.GetYear().c_str()) == atoi(s.GetYear().c_str()) && atoi(s.GetYear().c_str());
+				found = StrToInt(copy.GetYear()) == StrToInt(s.GetYear()) && StrToInt(s.GetYear());
 			if (found && !s.GetTrack().empty())
-				found = atoi(copy.GetTrack().c_str()) == atoi(s.GetTrack().c_str()) && atoi(s.GetTrack().c_str());
+				found = StrToInt(copy.GetTrack()) == StrToInt(s.GetTrack()) && StrToInt(s.GetTrack());
 			if (found && !s.GetGenre().empty())
 				found = copy.GetGenre() == s.GetGenre();
 			if (found && !s.GetComment().empty())

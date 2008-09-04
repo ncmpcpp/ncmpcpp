@@ -288,6 +288,7 @@ int main(int argc, char *argv[])
 	sHelp->Add(DisplayKeys(Key.Add) + "Add url/file/directory to playlist\n");
 	sHelp->Add(DisplayKeys(Key.SavePlaylist) + "Save playlist\n");
 	sHelp->Add(DisplayKeys(Key.GoToNowPlaying) + "Go to currently playing position\n");
+	sHelp->Add(DisplayKeys(Key.TogglePlaylistDisplayMode) + "Toggle playlist display mode\n");
 	sHelp->Add(DisplayKeys(Key.ToggleAutoCenter) + "Toggle auto center mode\n\n\n");
 	
 	sHelp->Add("   [.b]Keys - Browse screen\n -----------------------------------------[/b]\n");
@@ -342,18 +343,18 @@ int main(int argc, char *argv[])
 	int input;
 	timer = time(NULL);
 	
-	sHelp->Timeout(ncmpcpp_window_timeout);
-	mPlaylist->Timeout(ncmpcpp_window_timeout);
-	mBrowser->Timeout(ncmpcpp_window_timeout);
-	mTagEditor->Timeout(ncmpcpp_window_timeout);
-	mSearcher->Timeout(ncmpcpp_window_timeout);
-	mLibArtists->Timeout(ncmpcpp_window_timeout);
-	mLibAlbums->Timeout(ncmpcpp_window_timeout);
-	mLibSongs->Timeout(ncmpcpp_window_timeout);
-	sLyrics->Timeout(ncmpcpp_window_timeout);
-	wFooter->Timeout(ncmpcpp_window_timeout);
-	mPlaylistList->Timeout(ncmpcpp_window_timeout);
-	mPlaylistEditor->Timeout(ncmpcpp_window_timeout);
+	sHelp->SetTimeout(ncmpcpp_window_timeout);
+	mPlaylist->SetTimeout(ncmpcpp_window_timeout);
+	mBrowser->SetTimeout(ncmpcpp_window_timeout);
+	mTagEditor->SetTimeout(ncmpcpp_window_timeout);
+	mSearcher->SetTimeout(ncmpcpp_window_timeout);
+	mLibArtists->SetTimeout(ncmpcpp_window_timeout);
+	mLibAlbums->SetTimeout(ncmpcpp_window_timeout);
+	mLibSongs->SetTimeout(ncmpcpp_window_timeout);
+	sLyrics->SetTimeout(ncmpcpp_window_timeout);
+	wFooter->SetTimeout(ncmpcpp_window_timeout);
+	mPlaylistList->SetTimeout(ncmpcpp_window_timeout);
+	mPlaylistEditor->SetTimeout(ncmpcpp_window_timeout);
 	
 	mPlaylist->HighlightColor(Config.main_highlight_color);
 	mBrowser->HighlightColor(Config.main_highlight_color);
@@ -721,14 +722,12 @@ int main(int argc, char *argv[])
 				main_height++;
 			
 			sHelp->Resize(COLS, main_height);
-			sHelp->Timeout(ncmpcpp_window_timeout);
 			mPlaylist->Resize(COLS, main_height);
 			mPlaylist->SetTitle(Config.columns_in_playlist ? DisplayColumns(Config.song_columns_list_format) : "");
 			mBrowser->Resize(COLS, main_height);
 			mTagEditor->Resize(COLS, main_height);
 			mSearcher->Resize(COLS, main_height);
 			sLyrics->Resize(COLS, main_height);
-			sLyrics->Timeout(ncmpcpp_window_timeout);
 			
 			lib_artist_width = COLS/3-1;
 			lib_albums_start_x = lib_artist_width+1;
@@ -1412,7 +1411,7 @@ int main(int argc, char *argv[])
 				{
 					block_playlist_update = 1;
 					dont_change_now_playing = 1;
-					mPlaylist->Timeout(50);
+					mPlaylist->SetTimeout(50);
 					while (!mPlaylist->Empty() && Keypressed(input, Key.Delete))
 					{
 						TraceMpdStatus();
@@ -1421,7 +1420,7 @@ int main(int argc, char *argv[])
 						mPlaylist->Refresh();
 						mPlaylist->ReadKey(input);
 					}
-					mPlaylist->Timeout(ncmpcpp_window_timeout);
+					mPlaylist->SetTimeout(ncmpcpp_window_timeout);
 					dont_change_now_playing = 0;
 				}
 				Mpd->CommitQueue();
@@ -1468,7 +1467,7 @@ int main(int argc, char *argv[])
 				}
 				else
 				{
-					mPlaylistEditor->Timeout(50);
+					mPlaylistEditor->SetTimeout(50);
 					while (!mPlaylistEditor->Empty() && Keypressed(input, Key.Delete))
 					{
 						TraceMpdStatus();
@@ -1477,7 +1476,7 @@ int main(int argc, char *argv[])
 						mPlaylistEditor->Refresh();
 						mPlaylistEditor->ReadKey(input);
 					}
-					mPlaylistEditor->Timeout(ncmpcpp_window_timeout);
+					mPlaylistEditor->SetTimeout(ncmpcpp_window_timeout);
 				}
 				Mpd->CommitQueue();
 			}
@@ -1710,6 +1709,15 @@ int main(int argc, char *argv[])
 			
 			block_progressbar_update = 0;
 			UNLOCK_STATUSBAR;
+		}
+		else if (Keypressed(input, Key.TogglePlaylistDisplayMode) && wCurrent == mPlaylist)
+		{
+			Config.columns_in_playlist = !Config.columns_in_playlist;
+			ShowMessage("Playlist display mode: " + string(Config.columns_in_playlist ? "Columns" : "Classic"));
+			mPlaylist->SetItemDisplayer(Config.columns_in_playlist ? DisplaySongInColumns : DisplaySong);
+			mPlaylist->SetItemDisplayerUserData(Config.columns_in_playlist ? &Config.song_columns_list_format : &Config.song_list_format);
+			mPlaylist->SetTitle(Config.columns_in_playlist ? DisplayColumns(Config.song_columns_list_format) : "");
+			redraw_me = 1;
 		}
 		else if (Keypressed(input, Key.ToggleAutoCenter))
 		{
@@ -1970,7 +1978,7 @@ int main(int argc, char *argv[])
 					const int dialog_width = COLS*0.8;
 					const int dialog_height = LINES*0.6;
 					Menu<string> *mDialog = new Menu<string>((COLS-dialog_width)/2, (LINES-dialog_height)/2, dialog_width, dialog_height, "Add selected items to...", clYellow, brGreen);
-					mDialog->Timeout(ncmpcpp_window_timeout);
+					mDialog->SetTimeout(ncmpcpp_window_timeout);
 					
 					mDialog->AddOption("Current MPD playlist");
 					mDialog->AddOption("Create new playlist (m3u file)");
@@ -2250,7 +2258,6 @@ int main(int argc, char *argv[])
 					sLyrics->WriteXY(0, 0, "Fetching lyrics...");
 					sLyrics->Refresh();
 					sLyrics->Add(GetLyrics(s->GetArtist(), s->GetTitle()));
-					sLyrics->Timeout(ncmpcpp_window_timeout);
 				}
 			}
 		}

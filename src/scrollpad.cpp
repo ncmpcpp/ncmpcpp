@@ -106,6 +106,7 @@ void Scrollpad::recreate_win()
 {
 	delwin(itsWindow);
 	itsWindow = newpad(itsRealHeight, itsWidth);
+	SetTimeout(itsWindowTimeout);
 	SetColor(itsBaseColor, itsBgColor);
 	Write(itsContent.c_str());
 }

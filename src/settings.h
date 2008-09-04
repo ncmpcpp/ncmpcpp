@@ -82,6 +82,7 @@ struct ncmpcpp_keys
 	int GoToContainingDir[2];
 	int StartSearching[2];
 	int ToggleAutoCenter[2];
+	int TogglePlaylistDisplayMode[2];
 	int GoToParentDir[2];
 	int Quit[2];
 };

@@ -20,7 +20,7 @@
 
 #include "window.h"
 
-Window::Window(int startx, int starty, int width, int height, string title, Color color, Border border) : itsWindow(0), itsWinBorder(0), itsGetStringHelper(0), itsStartX(startx), itsStartY(starty), itsWidth(width), itsHeight(height), BBEnabled(1), AutoRefreshEnabled(1), itsTitle(title), itsColor(color), itsBaseColor(color), itsBgColor(clDefault), itsBaseBgColor(clDefault), itsBorder(border)
+Window::Window(int startx, int starty, int width, int height, string title, Color color, Border border) : itsWindow(0), itsWinBorder(0), itsGetStringHelper(0), itsStartX(startx), itsStartY(starty), itsWidth(width), itsHeight(height), itsWindowTimeout(-1), BBEnabled(1), AutoRefreshEnabled(1), itsTitle(title), itsColor(color), itsBaseColor(color), itsBgColor(clDefault), itsBaseBgColor(clDefault), itsBorder(border)
 {
 	if (itsStartX < 0) itsStartX = 0;
 	if (itsStartY < 0) itsStartY = 0;
@@ -153,7 +153,8 @@ void Window::recreate_win()
 {
 	delwin(itsWindow);
 	itsWindow = newwin(itsHeight, itsWidth, itsStartY, itsStartX);
-	SetColor(itsColor);
+	SetTimeout(itsWindowTimeout);
+	SetColor(itsColor, itsBgColor);
 }
 
 bool Window::reallocate_win(int newx, int newy)
@@ -265,8 +266,9 @@ void Window::Delay(bool delay) const
 	nodelay(itsWindow, !delay);
 }
 
-void Window::Timeout(int timeout) const
+void Window::SetTimeout(int timeout)
 {
+	itsWindowTimeout = timeout;
 	wtimeout(itsWindow, timeout);
 }
 
