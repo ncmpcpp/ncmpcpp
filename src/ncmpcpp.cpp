@@ -165,7 +165,7 @@ int main(int argc, char *argv[])
 	
 	if (!Mpd->Connect())
 	{
-		printf("Cannot connect to mpd (%s)\n", Mpd->GetLastErrorMessage().c_str());
+		printf("Cannot connect to mpd: %s\n", Mpd->GetLastErrorMessage().c_str());
 		return -1;
 	}
 	
@@ -1550,43 +1550,97 @@ int main(int argc, char *argv[])
 			if (current_screen == csPlaylist)
 			{
 				block_playlist_update = 1;
+				mPlaylist->SetTimeout(50);
 				if (mPlaylist->IsAnySelected())
 				{
 					vector<int> list;
 					mPlaylist->GetSelectedList(list);
-					mPlaylist->Highlight(list[(list.size()-1)/2]-1);
-					for (vector<int>::const_iterator it = list.begin(); it != list.end(); it++)
+					
+					for (vector<int>::iterator it = list.begin(); it != list.end(); it++)
 					{
-						if (!MoveSongUp(*it-1))
-						{
-							mPlaylist->Go(wDown);
-							break;
-						}
+						--*it;
+						if (*it == now_playing)
+							mPlaylist->BoldOption(now_playing+1, 0);
 					}
+					
+					vector<int>origs(list);
+					
+					while (Keypressed(input, Key.MvSongUp) && list.front() > 0)
+					{
+						TraceMpdStatus();
+						timer = time(NULL);
+						mPlaylist->Highlight(list[(list.size()-1)/2]);
+						for (vector<int>::iterator it = list.begin(); it != list.end(); it++)
+							mPlaylist->Swap(--*it, *it);
+						mPlaylist->Refresh();
+						mPlaylist->ReadKey(input);
+					}
+					for (int i = 0; i < list.size(); i++)
+						Mpd->QueueMove(origs[i], list[i]);
+					Mpd->CommitQueue();
 				}
 				else
-					if (MoveSongUp(mPlaylist->GetChoice()-1))
+				{
+					int from, to;
+					from = to = mPlaylist->GetChoice()-1;
+					while (Keypressed(input, Key.MvSongUp) && to > 0)
+					{
+						TraceMpdStatus();
+						timer = time(NULL);
+						mPlaylist->Swap(to--, to);
 						mPlaylist->Go(wUp);
+						mPlaylist->Refresh();
+						mPlaylist->ReadKey(input);
+					}
+					Mpd->Move(from, to);
+				}
+				mPlaylist->SetTimeout(ncmpcpp_window_timeout);
 			}
 			else if (wCurrent == mPlaylistEditor)
 			{
+				mPlaylistEditor->SetTimeout(50);
 				if (mPlaylistEditor->IsAnySelected())
 				{
 					vector<int> list;
 					mPlaylistEditor->GetSelectedList(list);
-					mPlaylistEditor->Highlight(list[(list.size()-1)/2]-1);
-					for (vector<int>::const_iterator it = list.begin(); it != list.end(); it++)
+					
+					for (vector<int>::iterator it = list.begin(); it != list.end(); it++)
+						--*it;
+					
+					vector<int>origs(list);
+					
+					while (Keypressed(input, Key.MvSongUp) && list.front() > 0)
 					{
-						if (!PlaylistMoveSongUp(mPlaylistList->GetCurrentOption(), *it-1))
-						{
-							mPlaylistEditor->Go(wDown);
-							break;
-						}
+						TraceMpdStatus();
+						timer = time(NULL);
+						mPlaylistEditor->Highlight(list[(list.size()-1)/2]);
+						for (vector<int>::iterator it = list.begin(); it != list.end(); it++)
+							mPlaylistEditor->Swap(--*it, *it);
+						mPlaylistEditor->Refresh();
+						mPlaylistEditor->ReadKey(input);
 					}
+					for (int i = 0; i < list.size(); i++)
+						if (origs[i] != list[i])
+							Mpd->QueueMove(mPlaylistList->GetCurrentOption(), origs[i], list[i]);
+					Mpd->CommitQueue();
 				}
 				else
-					if (PlaylistMoveSongUp(mPlaylistList->GetCurrentOption(), mPlaylistEditor->GetChoice()-1))
+				{
+					int from, to;
+					from = to = mPlaylistEditor->GetChoice()-1;
+					while (Keypressed(input, Key.MvSongUp) && to > 0)
+					{
+						TraceMpdStatus();
+						timer = time(NULL);
+						mPlaylistEditor->Swap(to--, to);
 						mPlaylistEditor->Go(wUp);
+						mPlaylistEditor->Refresh();
+						mPlaylistEditor->ReadKey(input);
+					}
+					if (from != to)
+						Mpd->Move(mPlaylistList->GetCurrentOption(), from, to);
+				}
+				mPlaylistEditor->SetTimeout(ncmpcpp_window_timeout);
 			}
 		}
 		else if (Keypressed(input, Key.MvSongDown))
@@ -1594,43 +1648,98 @@ int main(int argc, char *argv[])
 			if (current_screen == csPlaylist)
 			{
 				block_playlist_update = 1;
+				mPlaylist->SetTimeout(50);
 				if (mPlaylist->IsAnySelected())
 				{
 					vector<int> list;
 					mPlaylist->GetSelectedList(list);
-					mPlaylist->Highlight(list[(list.size()-1)/2]+1);
-					for (vector<int>::const_reverse_iterator it = list.rbegin(); it != list.rend(); it++)
+					
+					for (vector<int>::iterator it = list.begin(); it != list.end(); it++)
 					{
-						if (!MoveSongDown(*it-1))
-						{
-							mPlaylist->Go(wUp);
-							break;
-						}
+						--*it;
+						if (*it == now_playing)
+							mPlaylist->BoldOption(now_playing+1, 0);
 					}
+					
+					vector<int>origs(list);
+					
+					while (Keypressed(input, Key.MvSongDown) && list.back() < mPlaylist->Size()-1)
+					{
+						TraceMpdStatus();
+						timer = time(NULL);
+						mPlaylist->Highlight(list[(list.size()-1)/2]+2);
+						for (vector<int>::reverse_iterator it = list.rbegin(); it != list.rend(); it++)
+							mPlaylist->Swap(++*it, *it);
+						mPlaylist->Refresh();
+						mPlaylist->ReadKey(input);
+					}
+					for (int i = list.size()-1; i >= 0; i--)
+						Mpd->QueueMove(origs[i], list[i]);
+					Mpd->CommitQueue();
 				}
 				else
-					if (MoveSongDown(mPlaylist->GetChoice()-1))
+				{
+					int from, to;
+					from = to = mPlaylist->GetChoice()-1;
+					while (Keypressed(input, Key.MvSongDown) && to < mPlaylist->Size()-1)
+					{
+						TraceMpdStatus();
+						timer = time(NULL);
+						mPlaylist->Swap(to++, to);
 						mPlaylist->Go(wDown);
+						mPlaylist->Refresh();
+						mPlaylist->ReadKey(input);
+					}
+					Mpd->Move(from, to);
+				}
+				mPlaylist->SetTimeout(ncmpcpp_window_timeout);
+				
 			}
 			else if (wCurrent == mPlaylistEditor)
 			{
+				mPlaylistEditor->SetTimeout(50);
 				if (mPlaylistEditor->IsAnySelected())
 				{
 					vector<int> list;
 					mPlaylistEditor->GetSelectedList(list);
-					mPlaylistEditor->Highlight(list[(list.size()-1)/2]+1);
-					for (vector<int>::const_reverse_iterator it = list.rbegin(); it != list.rend(); it++)
+					
+					for (vector<int>::iterator it = list.begin(); it != list.end(); it++)
+						--*it;
+					
+					vector<int>origs(list);
+					
+					while (Keypressed(input, Key.MvSongDown) && list.back() < mPlaylistEditor->Size()-1)
 					{
-						if (!PlaylistMoveSongDown(mPlaylistList->GetCurrentOption(), *it-1))
-						{
-							mPlaylistEditor->Go(wUp);
-							break;
-						}
+						TraceMpdStatus();
+						timer = time(NULL);
+						mPlaylistEditor->Highlight(list[(list.size()-1)/2]+2);
+						for (vector<int>::reverse_iterator it = list.rbegin(); it != list.rend(); it++)
+							mPlaylistEditor->Swap(++*it, *it);
+						mPlaylistEditor->Refresh();
+						mPlaylistEditor->ReadKey(input);
 					}
+					for (int i = list.size()-1; i >= 0; i--)
+						if (origs[i] != list[i])
+							Mpd->QueueMove(mPlaylistList->GetCurrentOption(), origs[i], list[i]);
+					Mpd->CommitQueue();
 				}
 				else
-					if (PlaylistMoveSongDown(mPlaylistList->GetCurrentOption(), mPlaylistEditor->GetChoice()-1))
+				{
+					int from, to;
+					from = to = mPlaylistEditor->GetChoice()-1;
+					while (Keypressed(input, Key.MvSongDown) && to < mPlaylistEditor->Size()-1)
+					{
+						TraceMpdStatus();
+						timer = time(NULL);
+						mPlaylistEditor->Swap(to++, to);
 						mPlaylistEditor->Go(wDown);
+						mPlaylistEditor->Refresh();
+						mPlaylistEditor->ReadKey(input);
+					}
+					if (from != to)
+						Mpd->Move(mPlaylistList->GetCurrentOption(), from, to);
+				}
+				mPlaylistEditor->SetTimeout(ncmpcpp_window_timeout);
 			}
 		}
 		else if (Keypressed(input, Key.Add))
@@ -2131,27 +2240,27 @@ int main(int argc, char *argv[])
 					continue;
 				transform(findme.begin(), findme.end(), findme.begin(), tolower);
 				
-				Menu<Song> *mCurrent = static_cast<Menu<Song> *>(wCurrent);
-				
-				for (int i = (wCurrent == mBrowser ? search_engine_static_option : 1); i <= mCurrent->Size(); i++)
+				ShowMessage("Searching...");
+				for (int i = (wCurrent == mBrowser ? search_engine_static_option : 1); i <= wCurrent->Size(); i++)
 				{
-					string name = OmitBBCodes(mCurrent->GetOption(i));
+					string name = OmitBBCodes(wCurrent->GetOption(i));
 					transform(name.begin(), name.end(), name.begin(), tolower);
-					if (name.find(findme) != string::npos && !mCurrent->IsStatic(i))
+					if (name.find(findme) != string::npos && !wCurrent->IsStatic(i))
 					{
 						vFoundPositions.push_back(i);
 						if (Keypressed(input, Key.FindForward)) // forward
 						{
-							if (found_pos < 0 && i >= mCurrent->GetChoice())
+							if (found_pos < 0 && i >= wCurrent->GetChoice())
 								found_pos = vFoundPositions.size()-1;
 						}
 						else // backward
 						{
-							if (i <= mCurrent->GetChoice())
+							if (i <= wCurrent->GetChoice())
 								found_pos = vFoundPositions.size()-1;
 						}
 					}
 				}
+				ShowMessage("Searching finished!");
 				
 				if (Config.wrapped_search ? vFoundPositions.empty() : found_pos < 0)
 					ShowMessage("Unable to find \"" + findme + "\"");
@@ -2159,7 +2268,10 @@ int main(int argc, char *argv[])
 				{
 					wCurrent->Highlight(vFoundPositions[found_pos < 0 ? 0 : found_pos]);
 					if (wCurrent == mPlaylist)
+					{
+						timer = time(NULL);
 						mPlaylist->Highlighting(1);
+					}
 				}
 			}
 		}

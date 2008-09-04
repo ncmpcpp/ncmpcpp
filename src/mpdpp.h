@@ -24,7 +24,7 @@
 #include "ncmpcpp.h"
 #include "song.h"
 
-enum QueueCommandType { qctAdd, qctAddToPlaylist, qctDelete, qctDeleteID, qctDeleteFromPlaylist };
+enum QueueCommandType { qctAdd, qctAddToPlaylist, qctDelete, qctDeleteID, qctMove, qctPlaylistMove, qctDeleteFromPlaylist };
 enum ItemType { itDirectory, itSong, itPlaylist };
 enum PlayerState { psUnknown, psStop, psPlay, psPause };
 
@@ -45,11 +45,12 @@ struct MPDStatusChanges
 
 struct QueueCommand
 {
-	QueueCommand() : id(0) { }
+	QueueCommand() : id(0), id2(0) { }
 	QueueCommandType type;
 	string playlist_path;
 	string item_path;
 	int id;
+	int id2;
 };
 
 struct Item
@@ -80,10 +81,10 @@ class MPDConnection
 		bool Connected() const;
 		void Disconnect();
 		
-		void SetHostname(string hostname) { MPD_HOST = hostname; }
+		void SetHostname(const string &);
 		void SetPort(int port) { MPD_PORT = port; }
 		void SetTimeout(int timeout) { MPD_TIMEOUT = timeout; }
-		void SetPassword(string password) { MPD_PASSWORD = password; }
+		void SetPassword(const string &password) { MPD_PASSWORD = password; }
 		void SendPassword() const;
 		
 		void SetStatusUpdater(StatusUpdater, void *);
@@ -118,6 +119,7 @@ class MPDConnection
 		void GetPlaylistChanges(long long, SongList &) const;
 		
 		string GetLastErrorMessage() const { return itsLastErrorMessage; }
+		int GetErrorCode() const { return itsErrorCode; }
 		
 		Song GetCurrentSong() const;
 		int GetCurrentSongPos() const;
@@ -137,6 +139,8 @@ class MPDConnection
 		void QueueAddToPlaylist(const string &, const Song &);
 		void QueueDeleteSong(int);
 		void QueueDeleteSongId(int);
+		void QueueMove(int, int);
+		void QueueMove(const string &, int, int);
 		void QueueDeleteFromPlaylist(const string &, int);
 		bool CommitQueue();
 		
@@ -167,6 +171,7 @@ class MPDConnection
 		bool isConnected;
 		
 		string itsLastErrorMessage;
+		int itsErrorCode;
 		unsigned int itsMaxPlaylistLength;
 		
 		string MPD_HOST;

@@ -22,7 +22,7 @@
 
 const string playlist_max_message = "playlist is at the max size";
 
-MPDConnection::MPDConnection() : isConnected(0), itsMaxPlaylistLength(-1), MPD_HOST("localhost"), MPD_PORT(6600), MPD_TIMEOUT(15), itsUpdater(0), itsErrorHandler(0)
+MPDConnection::MPDConnection() : isConnected(0), itsErrorCode(0), itsMaxPlaylistLength(-1), MPD_HOST("localhost"), MPD_PORT(6600), MPD_TIMEOUT(15), itsUpdater(0), itsErrorHandler(0)
 {
 	itsConnection = 0;
 	itsCurrentStats = 0;
@@ -87,6 +87,18 @@ void MPDConnection::Disconnect()
 	isConnected = 0;
 	itsMaxPlaylistLength = -1;
 	ClearQueue();
+}
+
+void MPDConnection::SetHostname(const string &host)
+{
+	int at = host.find("@");
+	if (at != string::npos)
+	{
+		MPD_PASSWORD = host.substr(0, at);
+		MPD_HOST = host.substr(at+1);
+	}
+	else
+		MPD_HOST = host;
 }
 
 void MPDConnection::SendPassword() const
@@ -486,6 +498,31 @@ void MPDConnection::QueueDeleteSongId(int id)
 	}
 }
 
+void MPDConnection::QueueMove(int from, int to)
+{
+	if (isConnected)
+	{
+		QueueCommand *q = new QueueCommand;
+		q->type = qctMove;
+		q->id = from;
+		q->id2 = to;
+		itsQueue.push_back(q);
+	}
+}
+
+void MPDConnection::QueueMove(const string &playlist, int from, int to)
+{
+	if (isConnected)
+	{
+		QueueCommand *q = new QueueCommand;
+		q->type = qctPlaylistMove;
+		q->playlist_path = playlist;
+		q->id = from;
+		q->id2 = to;
+		itsQueue.push_back(q);
+	}
+}
+
 void MPDConnection::QueueDeleteFromPlaylist(const string &playlist, int pos)
 {
 	if (isConnected)
@@ -519,6 +556,12 @@ bool MPDConnection::CommitQueue()
 					break;
 				case qctDeleteID:
 					mpd_sendDeleteIdCommand(itsConnection, (*it)->id);
+					break;
+				case qctMove:
+					mpd_sendMoveCommand(itsConnection, (*it)->id, (*it)->id2);
+					break;
+				case qctPlaylistMove:
+					mpd_sendPlaylistMoveCommand(itsConnection, (char *) (*it)->playlist_path.c_str(), (*it)->id, (*it)->id2);
 					break;
 				case qctDeleteFromPlaylist:
 					mpd_sendPlaylistDeleteCommand(itsConnection, (char *) (*it)->playlist_path.c_str(), (*it)->id);
@@ -711,7 +754,7 @@ void MPDConnection::GetDirectoryRecursive(const string &path, SongList &v) const
 
 int MPDConnection::CheckForErrors()
 {
-	int errid = 0;
+	itsErrorCode = 0;
 	if (itsConnection->error)
 	{
 		if (itsConnection->error == MPD_ERROR_ACK)
@@ -723,19 +766,19 @@ int MPDConnection::CheckForErrors()
 			
 			if (itsErrorHandler)
 				itsErrorHandler(this, itsConnection->errorCode, itsConnection->errorStr, itsErrorHandlerUserdata);
-			errid = itsConnection->errorCode;
+			itsErrorCode = itsConnection->errorCode;
 		}
 		else
 		{
 			isConnected = 0; // the rest of errors are fatal to connection
 			if (itsErrorHandler)
 				itsErrorHandler(this, itsConnection->error, itsConnection->errorStr, itsErrorHandlerUserdata);
-			errid = itsConnection->error;
+			itsErrorCode = itsConnection->error;
 		}
 		itsLastErrorMessage = itsConnection->errorStr;
 		mpd_clearError(itsConnection);
 	}
-	return errid;
+	return itsErrorCode;
 }
 
 void MPDConnection::ClearQueue()

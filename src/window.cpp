@@ -460,7 +460,7 @@ string Window::GetString(const string &base, unsigned int length) const
 			case KEY_UP:
 			case KEY_DOWN: break;
 			case KEY_RIGHT:
-			{	
+			{
 				if (x < maxx)
 					x++;
 				break;
@@ -619,8 +619,39 @@ char * ToString(const wchar_t *ws)
 		s += c;
 		delete [] c;
 	}
-	return (char *)s.c_str();
+	char *result = strdup(s.c_str());
+	return result;
 }
+
+wchar_t * ToWString(const char *s)
+{
+	wchar_t *ws = (wchar_t *)calloc(strlen(s)+1, sizeof(wchar_t));
+	mbstowcs(ws, s, strlen(s));
+	return ws;
+}
+
+string ToString(const wstring &ws)
+{
+	string s;
+	for (wstring::const_iterator it = ws.begin(); it != ws.end(); it++)
+	{
+		char *c = (char *)calloc(MB_CUR_MAX, sizeof(char));
+		wctomb(c, *it);
+		s += c;
+		delete [] c;
+	}
+	return s;
+}
+
+wstring ToWString(const string &s)
+{
+	wchar_t *ws = (wchar_t *)calloc(s.length()+1, sizeof(wchar_t));
+	mbstowcs(ws, s.c_str(), s.length());
+	wstring result = ws;
+	delete [] ws;
+	return result;
+}
+
 
 string OmitBBCodes(const string &str)
 {
@@ -662,7 +693,7 @@ string OmitBBCodes(const string &str)
 	return result;
 }
 
-int CountBBCodes(const string &str)
+/*int CountBBCodes(const string &str)
 {
 	if (str.empty())
 		return 0;
@@ -742,33 +773,5 @@ int CountBBCodes(const wstring &str)
 		}
 	}
 	return length;
-}
+}*/
 
-wchar_t * ToWString(const char *s)
-{
-	wchar_t *ws = (wchar_t *)calloc(strlen(s)+1, sizeof(wchar_t));
-	mbstowcs(ws, s, strlen(s));
-	return ws;
-}
-
-string ToString(const wstring &ws)
-{
-	string s;
-	for (wstring::const_iterator it = ws.begin(); it != ws.end(); it++)
-	{
-		char *c = (char *)calloc(MB_CUR_MAX, sizeof(char));
-		wctomb(c, *it);
-		s += c;
-		delete [] c;
-	}
-	return s;
-}
-
-wstring ToWString(const string &s)
-{
-	wchar_t *ws = (wchar_t *)calloc(s.length()+1, sizeof(wchar_t));
-	mbstowcs(ws, s.c_str(), s.length());
-	wstring result = ws;
-	delete [] ws;
-	return result;
-}

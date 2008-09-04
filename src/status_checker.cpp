@@ -122,11 +122,13 @@ void NcmpcppErrorCallback(MPDConnection *Mpd, int errorid, string msg, void *dat
 {
 	if (errorid == MPD_ACK_ERROR_PERMISSION)
 	{
+		wFooter->SetGetStringHelper(NULL);
 		wFooter->WriteXY(0, Config.statusbar_visibility, "Password: ", 1);
-		string password = wFooter->GetString("");
+		string password = wFooter->GetString();
 		Mpd->SetPassword(password);
 		Mpd->SendPassword();
 		Mpd->UpdateStatus();
+		wFooter->SetGetStringHelper(TraceMpdStatus);
 	}
 	else
 		ShowMessage(msg);

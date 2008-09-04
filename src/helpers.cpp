@@ -132,54 +132,6 @@ void PlaylistDeleteSong(const string &path, int id)
 	mPlaylistEditor->DeleteOption(id+1);
 }
 
-bool MoveSongUp(int pos)
-{
-	if (pos > 0 && !mPlaylist->Empty() && current_screen == csPlaylist)
-	{
-		mPlaylist->Swap(pos, pos-1);
-		Mpd->Move(pos, pos-1);
-		return true;
-	}
-	else
-		return false;
-}
-
-bool MoveSongDown(int pos)
-{
-	if (pos+1 < mPlaylist->Size() && !mPlaylist->Empty() && current_screen == csPlaylist)
-	{
-		mPlaylist->Swap(pos+1, pos);
-		Mpd->Move(pos, pos+1);
-		return true;
-	}
-	else
-		return false;
-}
-
-bool PlaylistMoveSongUp(const string &path, int pos)
-{
-	if (pos > 0 && !mPlaylistEditor->Empty() && current_screen == csPlaylistEditor)
-	{
-		mPlaylistEditor->Swap(pos, pos-1);
-		Mpd->Move(path, pos, pos-1);
-		return true;
-	}
-	else
-		return false;
-}
-
-bool PlaylistMoveSongDown(const string &path, int pos)
-{
-	if (pos+1 < mPlaylistEditor->Size() && !mPlaylistEditor->Empty() && current_screen == csPlaylistEditor)
-	{
-		mPlaylistEditor->Swap(pos+1, pos);
-		Mpd->Move(path, pos, pos+1);
-		return true;
-	}
-	else
-		return false;
-}
-
 string DisplayKeys(int *key, int size)
 {
 	bool backspace = 1;
@@ -258,7 +210,7 @@ bool CaseInsensitiveComparison(string a, string b)
 void WindowTitle(const string &status)
 {
 	if (TERMINAL_TYPE != "linux" && Config.set_window_title)
-		   printf("\033]0;%s\7",status.c_str());
+		printf("\033]0;%s\7",status.c_str());
 }
 
 string TotalPlaylistLength()

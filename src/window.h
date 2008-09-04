@@ -57,8 +57,8 @@ wstring ToWString(const string &);
 
 bool is_valid_color(const string &);
 string OmitBBCodes(const string &);
-int CountBBCodes(const string &);
-int CountBBCodes(const wstring &);
+//int CountBBCodes(const string &);
+//int CountBBCodes(const wstring &);
 
 class Window
 {
@@ -122,6 +122,7 @@ class Window
 		virtual void GetSelectedList(vector<int> &) { }
 		virtual bool IsStatic(int) { return 0; }
 		virtual void Highlight(int) { }
+		virtual string GetOption(int) const { return ""; }
 		virtual void Go(Where) { } // for Menu and Scrollpad class
 		virtual int GetChoice() const { return -1; } // for Menu class
 		virtual void Add(string str) { Write(str); } // for Scrollpad class
