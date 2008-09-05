@@ -30,20 +30,14 @@ class Scrollpad: public Window
 		Scrollpad(const Scrollpad &);
 		virtual ~Scrollpad() {}
 		virtual void Add(string);
-		virtual void Display(bool = 0);
 		virtual void Refresh(bool = 0);
 		virtual void Go(Where);
-		virtual void MoveTo(int newx, int newy) { reallocate_win(newx, newy); }
 		virtual void Resize(int, int);
-		virtual void SetBorder(Border);
-		virtual void SetTitle(string);
 		virtual void Clear(bool clear_screen = 1);
-		virtual Window * Clone() { return new Scrollpad(*this); }
-		virtual Window * EmptyClone();
+		virtual Window * Clone() const { return new Scrollpad(*this); }
+		virtual Window * EmptyClone() const;
 	protected:
-		void print_content();
-		virtual void recreate_win();
-		
+		virtual void Recreate();
 		string itsContent;
 		string itsRawContent;
 		int itsBeginning;

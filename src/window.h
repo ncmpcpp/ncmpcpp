@@ -30,11 +30,11 @@
 #include <cstring>
 
 #ifdef UTF8_ENABLED
-# define ncmpcpp_string_t wstring
+# define my_string_t wstring
 # define TO_STRING(x) ToString(x)
 # define TO_WSTRING(x) ToWString(x)
 #else
-# define ncmpcpp_string_t string
+# define my_string_t string
 # define TO_STRING(x) x
 # define TO_WSTRING(x) x
 #endif
@@ -55,25 +55,23 @@ wchar_t * ToWString(const char *);
 string ToString(const wstring &);
 wstring ToWString(const string &);
 
-bool is_valid_color(const string &);
-string OmitBBCodes(const string &);
 //int CountBBCodes(const string &);
 //int CountBBCodes(const wstring &);
 
 class Window
 {
 	public:
-		Window(int, int, int, int, string, Color, Border);
+		Window(int, int, int, int, const string &, Color, Border);
 		Window(const Window &);
 		virtual ~Window();
-		virtual WINDOW *RawWin() { return itsWindow; }
+		virtual WINDOW *RawWin() const { return itsWindow; }
 		virtual void SetGetStringHelper(GetStringHelper helper) { itsGetStringHelper = helper; }
 		virtual void SetColor(Color, Color = clDefault);
 		virtual void SetBaseColor(Color, Color = clDefault);
 		virtual void SetBorder(Border);
 		virtual void EnableBB() { BBEnabled = 1; }
 		virtual void DisableBB() { BBEnabled = 0; }
-		virtual void SetTitle(string);
+		virtual void SetTitle(const string &);
 		virtual void MoveTo(int, int);
 		virtual void Resize(int, int);
 		virtual void Display(bool = 0);
@@ -111,31 +109,30 @@ class Window
 		virtual Color GetColor() const;
 		virtual Border GetBorder() const;
 		
-		virtual Window * Clone() { return new Window(*this); }
-		virtual Window * EmptyClone();
+		virtual Window * Clone() const { return new Window(*this); }
+		virtual Window * EmptyClone() const;
 		
 		// stubs for inherits, ugly shit, needs improvement
 		virtual void Select(int, bool) { }
-		virtual bool Selected(int) { return 0; }
+		virtual bool Selected(int) const { return 0; }
 		virtual int Size() const { return 0; }
-		virtual bool IsAnySelected() { return 0; }
-		virtual void GetSelectedList(vector<int> &) { }
-		virtual bool IsStatic(int) { return 0; }
+		virtual bool IsAnySelected() const { return 0; }
+		virtual void GetSelectedList(vector<int> &) const { }
+		virtual bool IsStatic(int) const { return 0; }
 		virtual void Highlight(int) { }
-		virtual string GetOption(int) const { return ""; }
+		virtual string GetOption(int = -1) const { return ""; }
 		virtual void Go(Where) { } // for Menu and Scrollpad class
 		virtual int GetChoice() const { return -1; } // for Menu class
 		virtual void Add(string str) { Write(str); } // for Scrollpad class
 		
 		static void EnableColors();
+		static bool IsValidColor(const string &);
+		static string OmitBBCodes(const string &);
 		
 	protected:
-		virtual bool have_to_recreate(string);
-		virtual bool have_to_recreate(Border);
-		virtual bool reallocate_win(int, int);
-		virtual void recreate_win();
-		virtual void show_border() const;
-		virtual ColorPair into_color(const string &);
+		virtual void Recreate();
+		virtual void ShowBorder() const;
+		virtual ColorPair IntoColor(const string &);
 		WINDOW *itsWindow;
 		WINDOW *itsWinBorder;
 		GetStringHelper itsGetStringHelper;

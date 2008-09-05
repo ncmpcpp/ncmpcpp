@@ -432,7 +432,7 @@ int main(int argc, char *argv[])
 				if (current_screen == csBrowser)
 				{
 					int max_length_without_scroll = wHeader->GetWidth()-volume_state.length()-title.length();
-					ncmpcpp_string_t wbrowseddir = TO_WSTRING(browsed_dir);
+					my_string_t wbrowseddir = TO_WSTRING(browsed_dir);
 					wHeader->Bold(1);
 					if (browsed_dir.length() > max_length_without_scroll)
 					{
@@ -442,7 +442,7 @@ int main(int argc, char *argv[])
 						wbrowseddir += " ** ";
 #						endif
 						const int scrollsize = max_length_without_scroll;
-						ncmpcpp_string_t part = wbrowseddir.substr(browsed_dir_scroll_begin++, scrollsize);
+						my_string_t part = wbrowseddir.substr(browsed_dir_scroll_begin++, scrollsize);
 						if (part.length() < scrollsize)
 							part += wbrowseddir.substr(0, scrollsize-part.length());
 						wHeader->WriteXY(title.length(), 0, part);
@@ -485,12 +485,12 @@ int main(int argc, char *argv[])
 				mLibAlbums->Reset();
 				mLibSongs->Clear(0);
 				TagList list;
-				Mpd->GetAlbums(mLibArtists->GetCurrentOption(), list);
+				Mpd->GetAlbums(mLibArtists->GetOption(), list);
 				for (TagList::iterator it = list.begin(); it != list.end(); it++)
 				{
 					SongList l;
 					Mpd->StartSearch(1);
-					Mpd->AddSearch(MPD_TAG_ITEM_ARTIST, mLibArtists->GetCurrentOption());
+					Mpd->AddSearch(MPD_TAG_ITEM_ARTIST, mLibArtists->GetOption());
 					Mpd->AddSearch(MPD_TAG_ITEM_ALBUM, *it);
 					Mpd->CommitSearch(l);
 					for (SongList::const_iterator j = l.begin(); j != l.end(); j++)
@@ -526,22 +526,22 @@ int main(int argc, char *argv[])
 					mLibAlbums->WriteXY(0, 0, "No albums found.");
 					mLibSongs->Clear(0);
 					Mpd->StartSearch(1);
-					Mpd->AddSearch(MPD_TAG_ITEM_ARTIST, mLibArtists->GetCurrentOption());
+					Mpd->AddSearch(MPD_TAG_ITEM_ARTIST, mLibArtists->GetOption());
 					Mpd->CommitSearch(list);
 				}
 				else
 				{
 					mLibSongs->Clear(0);
 					Mpd->StartSearch(1);
-					Mpd->AddSearch(MPD_TAG_ITEM_ARTIST, mLibArtists->GetCurrentOption());
-					Mpd->AddSearch(MPD_TAG_ITEM_ALBUM, mLibAlbums->GetCurrentOption());
+					Mpd->AddSearch(MPD_TAG_ITEM_ARTIST, mLibArtists->GetOption());
+					Mpd->AddSearch(MPD_TAG_ITEM_ALBUM, mLibAlbums->GetOption());
 					Mpd->CommitSearch(list);
 					if (list.empty())
 					{
 						const int year_length = 7;
-						const string &album = mLibAlbums->GetCurrentOption();
+						const string &album = mLibAlbums->GetOption();
 						Mpd->StartSearch(1);
-						Mpd->AddSearch(MPD_TAG_ITEM_ARTIST, mLibArtists->GetCurrentOption());
+						Mpd->AddSearch(MPD_TAG_ITEM_ARTIST, mLibArtists->GetOption());
 						Mpd->AddSearch(MPD_TAG_ITEM_ALBUM, album.substr(year_length));
 						Mpd->CommitSearch(list);
 					}
@@ -589,7 +589,7 @@ int main(int argc, char *argv[])
 			{
 				mPlaylistEditor->Reset();
 				SongList list;
-				Mpd->GetPlaylistContent(mPlaylistList->GetCurrentOption(), list);
+				Mpd->GetPlaylistContent(mPlaylistList->GetOption(), list);
 				if (!list.empty())
 					mPlaylistEditor->SetTitle("Playlist's content (" + IntoStr(list.size()) + " item" + (list.size() == 1 ? ")" : "s)"));
 				else
@@ -1139,7 +1139,7 @@ int main(int argc, char *argv[])
 					
 					if (wCurrent == mLibArtists)
 					{
-						const string &artist = mLibArtists->GetCurrentOption();
+						const string &artist = mLibArtists->GetOption();
 						Mpd->StartSearch(1);
 						Mpd->AddSearch(MPD_TAG_ITEM_ARTIST, artist);
 						Mpd->CommitSearch(list);
@@ -1164,7 +1164,7 @@ int main(int argc, char *argv[])
 							Mpd->QueueAddSong(mLibSongs->at(i));
 						if (Mpd->CommitQueue())
 						{
-							ShowMessage("Adding songs from: " + mLibArtists->GetCurrentOption() + " \"" + mLibAlbums->GetCurrentOption() + "\"");
+							ShowMessage("Adding songs from: " + mLibArtists->GetOption() + " \"" + mLibAlbums->GetOption() + "\"");
 							Song *s = &mPlaylist->at(mPlaylist->Size()-mLibSongs->Size());
 							if (s->GetHash() == mLibSongs->at(0).GetHash())
 							{
@@ -1208,7 +1208,7 @@ int main(int argc, char *argv[])
 					
 					if (wCurrent == mPlaylistList)
 					{
-						const string &playlist = mPlaylistList->GetCurrentOption();
+						const string &playlist = mPlaylistList->GetOption();
 						Mpd->GetPlaylistContent(playlist, list);
 						for (SongList::const_iterator it = list.begin(); it != list.end(); it++)
 							Mpd->QueueAddSong(**it);
@@ -1471,10 +1471,10 @@ int main(int argc, char *argv[])
 					mPlaylistEditor->GetSelectedList(list);
 					for (vector<int>::const_reverse_iterator it = list.rbegin(); it != list.rend(); it++)
 					{
-						Mpd->QueueDeleteFromPlaylist(mPlaylistList->GetCurrentOption(), *it);
+						Mpd->QueueDeleteFromPlaylist(mPlaylistList->GetOption(), *it);
 						mPlaylistEditor->DeleteOption(*it);
 					}
-					ShowMessage("Selected items deleted from playlist '" + mPlaylistList->GetCurrentOption() + "'!");
+					ShowMessage("Selected items deleted from playlist '" + mPlaylistList->GetOption() + "'!");
 					redraw_me = 1;
 				}
 				else
@@ -1484,7 +1484,7 @@ int main(int argc, char *argv[])
 					{
 						TraceMpdStatus();
 						timer = time(NULL);
-						Mpd->QueueDeleteFromPlaylist(mPlaylistList->GetCurrentOption(), mPlaylistEditor->GetChoice());
+						Mpd->QueueDeleteFromPlaylist(mPlaylistList->GetOption(), mPlaylistEditor->GetChoice());
 						mPlaylistEditor->DeleteOption(mPlaylistEditor->GetChoice());
 						mPlaylistEditor->Refresh();
 						mPlaylistEditor->ReadKey(input);
@@ -1628,7 +1628,7 @@ int main(int argc, char *argv[])
 					}
 					for (int i = 0; i < list.size(); i++)
 						if (origs[i] != list[i])
-							Mpd->QueueMove(mPlaylistList->GetCurrentOption(), origs[i], list[i]);
+							Mpd->QueueMove(mPlaylistList->GetOption(), origs[i], list[i]);
 					Mpd->CommitQueue();
 				}
 				else
@@ -1645,7 +1645,7 @@ int main(int argc, char *argv[])
 						mPlaylistEditor->ReadKey(input);
 					}
 					if (from != to)
-						Mpd->Move(mPlaylistList->GetCurrentOption(), from, to);
+						Mpd->Move(mPlaylistList->GetOption(), from, to);
 				}
 				mPlaylistEditor->SetTimeout(ncmpcpp_window_timeout);
 			}
@@ -1721,7 +1721,7 @@ int main(int argc, char *argv[])
 					}
 					for (int i = list.size()-1; i >= 0; i--)
 						if (origs[i] != list[i])
-							Mpd->QueueMove(mPlaylistList->GetCurrentOption(), origs[i], list[i]);
+							Mpd->QueueMove(mPlaylistList->GetOption(), origs[i], list[i]);
 					Mpd->CommitQueue();
 				}
 				else
@@ -1738,7 +1738,7 @@ int main(int argc, char *argv[])
 						mPlaylistEditor->ReadKey(input);
 					}
 					if (from != to)
-						Mpd->Move(mPlaylistList->GetCurrentOption(), from, to);
+						Mpd->Move(mPlaylistList->GetOption(), from, to);
 				}
 				mPlaylistEditor->SetTimeout(ncmpcpp_window_timeout);
 			}
@@ -2244,7 +2244,7 @@ int main(int argc, char *argv[])
 				ShowMessage("Searching...");
 				for (int i = (wCurrent == mSearcher ? search_engine_static_option-1 : 0); i < wCurrent->Size(); i++)
 				{
-					string name = OmitBBCodes(wCurrent->GetOption(i));
+					string name = Window::OmitBBCodes(wCurrent->GetOption(i));
 					transform(name.begin(), name.end(), name.begin(), tolower);
 					if (name.find(findme) != string::npos && !wCurrent->IsStatic(i))
 					{

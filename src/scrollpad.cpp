@@ -68,7 +68,7 @@ void Scrollpad::Add(string str)
 		
 			if (!collect && !tmp.empty())
 			{
-				if (is_valid_color(TO_STRING(tmp)))
+				if (IsValidColor(TO_STRING(tmp)))
 					itsXPos -= tmp.length();
 				tmp.clear();
 			}
@@ -99,22 +99,16 @@ void Scrollpad::Add(string str)
 		}
 	}
 	itsContent += TO_STRING(s);
-	recreate_win();
+	Recreate();
 }
 
-void Scrollpad::recreate_win()
+void Scrollpad::Recreate()
 {
 	delwin(itsWindow);
 	itsWindow = newpad(itsRealHeight, itsWidth);
 	SetTimeout(itsWindowTimeout);
 	SetColor(itsBaseColor, itsBgColor);
 	Write(itsContent.c_str());
-}
-
-void Scrollpad::Display(bool stub)
-{
-	Window::show_border();
-	Refresh(stub);
 }
 
 void Scrollpad::Refresh(bool stub)
@@ -148,18 +142,13 @@ void Scrollpad::Resize(int width, int height)
 		string tmp = itsRawContent;
 		itsRawContent.clear();
 		Add(tmp);
-		recreate_win();
+		Recreate();
 	}
 }
 
 void Scrollpad::Go(Where where)
 {
-	int MaxBeginning;
-	
-	if (itsContent.size() < itsHeight)
-		MaxBeginning = 0;
-	else
-		MaxBeginning = itsRealHeight-itsHeight;
+	int MaxBeginning = itsContent.size() < itsHeight ? 0 : itsRealHeight-itsHeight;
 	
 	switch (where)
 	{
@@ -198,20 +187,6 @@ void Scrollpad::Go(Where where)
 	}
 }
 
-void Scrollpad::SetBorder(Border border)
-{
-	if (have_to_recreate(border))
-		recreate_win();
-	itsBorder = border;
-}
-
-void Scrollpad::SetTitle(string newtitle)
-{
-	if (have_to_recreate(newtitle))
-		recreate_win();
-	itsTitle = newtitle;
-}
-
 void Scrollpad::Clear(bool clear_screen)
 {
 	itsBeginning = 0;
@@ -227,7 +202,7 @@ void Scrollpad::Clear(bool clear_screen)
 		Window::Clear();
 }
 
-Window * Scrollpad::EmptyClone()
+Window * Scrollpad::EmptyClone() const
 {
 	return new Scrollpad(GetStartX(),GetStartY(),GetWidth(),GetHeight(),itsTitle,itsBaseColor,itsBorder);
 }

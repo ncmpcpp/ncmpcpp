@@ -20,7 +20,7 @@
 
 #include "window.h"
 
-ColorPair Window::into_color(const string &str)
+ColorPair Window::IntoColor(const string &str)
 {
 	ColorPair colors;
 	
@@ -400,7 +400,7 @@ ColorPair Window::into_color(const string &str)
 		return itsColors.top();
 }
 
-bool is_valid_color(const string &str)
+bool Window::IsValidColor(const string &str)
 {
 	return  str == "[/]" ||
 		str == "[.b]" ||

@@ -356,7 +356,7 @@ string DisplaySongInColumns(const Song &s, void *s_template)
 	}
 	cols.push_back(song_template);
 	
-	ncmpcpp_string_t result, v;
+	my_string_t result, v;
 	
 #	ifdef UTF8_ENABLED
 	const wstring space = L" ";
@@ -373,7 +373,7 @@ string DisplaySongInColumns(const Song &s, void *s_template)
 	for (vector<string>::const_iterator it = cols.begin(); it != cols.end(); it++)
 	{
 		int width = StrToInt(GetLineValue(*it, '(', ')'));
-		ncmpcpp_string_t color = TO_WSTRING(GetLineValue(*it, '[', ']'));
+		my_string_t color = TO_WSTRING(GetLineValue(*it, '[', ']'));
 		char type = GetLineValue(*it, '{', '}')[0];
 		
 		width *= COLS/100.0;
@@ -424,7 +424,7 @@ string DisplaySongInColumns(const Song &s, void *s_template)
 				break;
 		}
 		
-		v = TO_WSTRING(OmitBBCodes(ss)).substr(0, width-1);
+		v = TO_WSTRING(Window::OmitBBCodes(ss)).substr(0, width-1);
 		for (int i = v.length(); i < width; i++, v += space);
 		if (!color.empty())
 			result += open_col + color + close_col;

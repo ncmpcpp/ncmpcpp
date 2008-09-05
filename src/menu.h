@@ -48,12 +48,12 @@ class Menu : public Window
 	typedef string (*ItemDisplayer) (const T &, void *);
 	
 	public:
-		Menu(int startx, int starty, int width, int height, string title, Color color, Border border) : itsItemDisplayer(0), itsUserdata(0), Window(startx, starty, width, height, title, color, border), itsSelectedPrefix("[.r]"), itsSelectedSuffix("[/r]"), itsStaticsNumber(0), itsBeginning(0), itsHighlight(0), itsHighlightColor(itsBaseColor), itsHighlightEnabled(1) { SetColor(color); }
+		Menu(int startx, int starty, int width, int height, string title, Color color, Border border) : itsItemDisplayer(0), itsItemDisplayerUserdata(0), Window(startx, starty, width, height, title, color, border), itsSelectedPrefix("[.r]"), itsSelectedSuffix("[/r]"), itsStaticsNumber(0), itsBeginning(0), itsHighlight(0), itsHighlightColor(itsBaseColor), itsHighlightEnabled(1) { SetColor(color); }
 		Menu(const Menu &);
 		virtual ~Menu();
 		
 		void SetItemDisplayer(ItemDisplayer ptr) { itsItemDisplayer = ptr; }
-		void SetItemDisplayerUserData(void *data) { itsUserdata = data; }
+		void SetItemDisplayerUserData(void *data) { itsItemDisplayerUserdata = data; }
 		
 		void AddOption(const T &, Location = lLeft, bool separator = 0);
 		void AddBoldOption(const T &item, Location location = lLeft, bool separator = 0);
@@ -65,10 +65,8 @@ class Menu : public Window
 		void MakeStatic(int, bool);
 		void DeleteOption(int);
 		void Swap(int, int);
-		string GetCurrentOption() const;
-		virtual string GetOption(int i) const;
+		virtual string GetOption(int i = -1) const;
 		
-		virtual void Display(bool redraw_whole_window = 0);
 		virtual void Refresh(bool redraw_whole_window = 0);
 		virtual void Go(Where);
 		virtual void Highlight(int);
@@ -76,34 +74,32 @@ class Menu : public Window
 		virtual void Clear(bool clear_screen = 1);
 		
 		virtual void Select(int, bool);
-		virtual bool Selected(int);
-		virtual bool IsAnySelected();
-		virtual void GetSelectedList(vector<int> &);
+		virtual bool Selected(int) const;
+		virtual bool IsAnySelected() const;
+		virtual void GetSelectedList(vector<int> &) const;
 		void SetSelectPrefix(string str) { itsSelectedPrefix = str; }
 		void SetSelectSuffix(string str) { itsSelectedSuffix = str; }
 		
 		void HighlightColor(Color col) { itsHighlightColor = col; NeedsRedraw.push_back(itsHighlight); }
-		virtual void Highlighting(bool hl) { itsHighlightEnabled = hl; NeedsRedraw.push_back(itsHighlight); Refresh(); }
+		void Highlighting(bool hl) { itsHighlightEnabled = hl; NeedsRedraw.push_back(itsHighlight); Refresh(); }
 		
 		int GetRealChoice() const;
-		
 		virtual int GetChoice() const { return itsHighlight; }
 		virtual int Size() const { return itsOptions.size(); }
 		
-		bool Empty() { return itsOptions.empty(); }
-		virtual bool IsStatic(int);
-		virtual Window * Clone() { return new Menu(*this); }
-		virtual Window * EmptyClone();
+		bool Empty() const { return itsOptions.empty(); }
+		virtual bool IsStatic(int) const;
+		virtual Window * Clone() const { return new Menu(*this); }
+		virtual Window * EmptyClone() const;
 		
 		T & at(int i) { return itsOptions.at(i)->item; }
 		const T & at(int i) const { return itsOptions.at(i)->item; }
 		const T & operator[](int i) const { return itsOptions[i]->item; }
 		T & operator[](int i) { return itsOptions[i]->item; }
-		
 	protected:
 		string DisplayOption(const T &t) const;
 		ItemDisplayer itsItemDisplayer;
-		void *itsUserdata;
+		void *itsItemDisplayerUserdata;
 		
 		vector<Option<T> *> itsOptions;
 		vector<int> NeedsRedraw;
@@ -134,7 +130,7 @@ Menu<T>::Menu(const Menu &m) : Window(m)
 		itsOptions.push_back(new_option);
 	}
 	itsItemDisplayer = m.itsItemDisplayer;
-	itsUserdata = m.itsUserdata;
+	itsItemDisplayerUserdata = m.itsItemDisplayerUserdata;
 	NeedsRedraw = m.NeedsRedraw;
 	itsSelectedPrefix = m.itsSelectedPrefix;
 	itsSelectedSuffix = m.itsSelectedSuffix;
@@ -182,7 +178,7 @@ int Menu<T>::count_length(string str)
 		
 		if (!collect && !tmp.empty())
 		{
-			if (is_valid_color(TO_STRING(tmp)))
+			if (IsValidColor(TO_STRING(tmp)))
 				length -= tmp.length();
 			tmp.clear();
 		}
@@ -291,24 +287,11 @@ void Menu<T>::MakeStatic(int index, bool stat)
 }
 
 template <class T>
-string Menu<T>::GetCurrentOption() const
-{
-	try
-	{
-		return DisplayOption(itsOptions.at(itsHighlight)->item);
-	}
-	catch (std::out_of_range)
-	{
-		return "";
-	}
-}
-
-template <class T>
 string Menu<T>::GetOption(int i) const
 {
 	try
 	{
-		return DisplayOption(itsOptions.at(i)->item);
+		return DisplayOption(itsOptions.at(i == -1 ? itsHighlight : i)->item);
 	}
 	catch (std::out_of_range)
 	{
@@ -378,13 +361,6 @@ void Menu<T>::redraw_screen()
 	NeedsRedraw.reserve(itsHeight);
 	for (int i = itsBeginning; i < itsBeginning+itsHeight && it != itsOptions.end(); i++, it++)
 		NeedsRedraw.push_back(i);
-}
-
-template <class T>
-void Menu<T>::Display(bool redraw_whole_window)
-{
-	Window::show_border();
-	Refresh(redraw_whole_window);
 }
 
 template <class T>
@@ -709,7 +685,7 @@ void Menu<T>::Select(int option, bool selected)
 }
 
 template <class T>
-bool Menu<T>::Selected(int option)
+bool Menu<T>::Selected(int option) const
 {
 	try
 	{
@@ -722,7 +698,7 @@ bool Menu<T>::Selected(int option)
 }
 
 template <class T>
-bool Menu<T>::IsAnySelected()
+bool Menu<T>::IsAnySelected() const
 {
 	bool result = 0;
 	for (T_const_iterator it = itsOptions.begin(); it != itsOptions.end(); it++)
@@ -737,7 +713,7 @@ bool Menu<T>::IsAnySelected()
 }
 
 template <class T>
-void Menu<T>::GetSelectedList(vector<int> &v)
+void Menu<T>::GetSelectedList(vector<int> &v) const
 {
 	int i = 0;
 	for (T_const_iterator it = itsOptions.begin(); it != itsOptions.end(); it++, i++)
@@ -757,7 +733,7 @@ int Menu<T>::GetRealChoice() const
 }
 
 template <class T>
-bool Menu<T>::IsStatic(int option)
+bool Menu<T>::IsStatic(int option) const
 {
 	try
 	{
@@ -770,7 +746,7 @@ bool Menu<T>::IsStatic(int option)
 }
 
 template <class T>
-Window * Menu<T>::EmptyClone()
+Window * Menu<T>::EmptyClone() const
 {
 	return new Menu(GetStartX(),GetStartY(),GetWidth(),GetHeight(),itsTitle,itsBaseColor,itsBorder);
 }
@@ -778,7 +754,7 @@ Window * Menu<T>::EmptyClone()
 template <class T>
 string Menu<T>::DisplayOption(const T &t) const
 {
-	return itsItemDisplayer ? itsItemDisplayer(t, itsUserdata) : "";
+	return itsItemDisplayer ? itsItemDisplayer(t, itsItemDisplayerUserdata) : "";
 }
 
 template <>

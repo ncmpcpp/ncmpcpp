@@ -20,7 +20,7 @@
 
 #include "window.h"
 
-Window::Window(int startx, int starty, int width, int height, string title, Color color, Border border) : itsWindow(0), itsWinBorder(0), itsGetStringHelper(0), itsStartX(startx), itsStartY(starty), itsWidth(width), itsHeight(height), itsWindowTimeout(-1), BBEnabled(1), AutoRefreshEnabled(1), itsTitle(title), itsColor(color), itsBaseColor(color), itsBgColor(clDefault), itsBaseBgColor(clDefault), itsBorder(border)
+Window::Window(int startx, int starty, int width, int height, const string &title, Color color, Border border) : itsWindow(0), itsWinBorder(0), itsGetStringHelper(0), itsStartX(startx), itsStartY(starty), itsWidth(width), itsHeight(height), itsWindowTimeout(-1), BBEnabled(1), AutoRefreshEnabled(1), itsTitle(title), itsColor(color), itsBaseColor(color), itsBgColor(clDefault), itsBaseBgColor(clDefault), itsBorder(border)
 {
 	if (itsStartX < 0) itsStartX = 0;
 	if (itsStartY < 0) itsStartY = 0;
@@ -91,7 +91,7 @@ void Window::SetBaseColor(Color col, Color background)
 	itsBaseBgColor = background;
 }
 
-bool Window::have_to_recreate(Border border)
+void Window::SetBorder(Border border)
 {
 	if (border == brNone && itsBorder != brNone)
 	{
@@ -100,9 +100,9 @@ bool Window::have_to_recreate(Border border)
 		itsStartY--;
 		itsHeight += 2;
 		itsWidth += 2;
-		return true;
+		Recreate();
 	}
-	if (border != brNone && itsBorder == brNone)
+	else if (border != brNone && itsBorder == brNone)
 	{
 		itsWinBorder = newpad(itsHeight,itsWidth);
 		wattron(itsWinBorder,COLOR_PAIR(border));
@@ -111,45 +111,33 @@ bool Window::have_to_recreate(Border border)
 		itsStartY++;
 		itsHeight -= 2;
 		itsWidth -= 2;
-		return true;
+		Recreate();
 	}
-	return false;
-}
-
-bool Window::have_to_recreate(string newtitle)
-{
-	if (!newtitle.empty() && itsTitle.empty())
-	{
-		itsStartY += 2;
-		itsHeight -= 2;
-		return true;
-	}
-	if (newtitle.empty() && !itsTitle.empty())
-	{
-		itsStartY -= 2;
-		itsHeight += 2;
-		return true;
-	}
-	return false;
-}
-
-void Window::SetBorder(Border border)
-{
-	if (have_to_recreate(border))
-		recreate_win();
 	itsBorder = border;
 }
 
-void Window::SetTitle(string newtitle)
+void Window::SetTitle(const string &newtitle)
 {
 	if (itsTitle == newtitle)
+	{
 		return;
-	if (have_to_recreate(newtitle))
-		recreate_win();
+	}
+	else if (!newtitle.empty() && itsTitle.empty())
+	{
+		itsStartY += 2;
+		itsHeight -= 2;
+		Recreate();
+	}
+	else if (newtitle.empty() && !itsTitle.empty())
+	{
+		itsStartY -= 2;
+		itsHeight += 2;
+		Recreate();
+	}
 	itsTitle = newtitle;
 }
 
-void Window::recreate_win()
+void Window::Recreate()
 {
 	delwin(itsWindow);
 	itsWindow = newwin(itsHeight, itsWidth, itsStartY, itsStartX);
@@ -157,25 +145,23 @@ void Window::recreate_win()
 	SetColor(itsColor, itsBgColor);
 }
 
-bool Window::reallocate_win(int newx, int newy)
-{
-	if (newx < 0 || newy < 0 || (newx == itsStartX && newy == itsStartY)) return false;
-	itsStartX = newx;
-	itsStartY = newy;
-	if (itsBorder != brNone)
-	{
-		itsStartX++;
-		itsStartY++;
-	}
-	if (!itsTitle.empty())
-		itsStartY += 2;
-	return true;
-}
-
 void Window::MoveTo(int newx, int newy)
 {
-	if (reallocate_win(newx, newy))
+	if (newx < 0 || newy < 0 || (newx == itsStartX && newy == itsStartY))
+		return;
+	else
+	{
+		itsStartX = newx;
+		itsStartY = newy;
+		if (itsBorder != brNone)
+		{
+			itsStartX++;
+			itsStartY++;
+		}
+		if (!itsTitle.empty())
+			itsStartY += 2;
 		mvwin(itsWindow, itsStartY, itsStartX);
+	}
 }
 
 void Window::Resize(int width, int height)
@@ -199,7 +185,7 @@ void Window::Resize(int width, int height)
 	}
 }
 
-void Window::show_border() const
+void Window::ShowBorder() const
 {
 	if (itsBorder != brNone)
 	{
@@ -223,8 +209,8 @@ void Window::show_border() const
 
 void Window::Display(bool stub)
 {
-	show_border();
-	wrefresh(itsWindow);
+	ShowBorder();
+	Refresh(stub);
 }
 
 void Window::Refresh(bool stub)
@@ -320,9 +306,9 @@ void Window::Write(int limit, const string &str, bool clrtoeol)
 			{
 				waddstr(itsWindow,tmp.c_str());
 				tmp.clear();
-				if (is_valid_color(color))
+				if (IsValidColor(color))
 				{
-					ColorPair colors = into_color(color);
+					ColorPair colors = IntoColor(color);
 					SetColor(colors.first, colors.second);
 				}
 				else
@@ -383,9 +369,9 @@ void Window::Write(int limit, const wstring &str, bool clrtoeol)
 			{
 				waddwstr(itsWindow,tmp.c_str());
 				tmp.clear();
-				if (is_valid_color(ToString(color)))
+				if (IsValidColor(ToString(color)))
 				{
-					ColorPair colors = into_color(ToString(color));
+					ColorPair colors = IntoColor(ToString(color));
 					SetColor(colors.first, colors.second);
 				}
 				else
@@ -419,7 +405,6 @@ void Window::WriteXY(int x, int y, int limit, const string &str, bool cleartoeol
 	wmove(itsWindow,y,x);
 	Write(limit, str, cleartoeol);
 }
-
 
 string Window::GetString(const string &base, unsigned int length) const
 {
@@ -604,7 +589,7 @@ void Window::EnableColors()
 	}
 }
 
-Window * Window::EmptyClone()
+Window * Window::EmptyClone() const
 {
 	return new Window(GetStartX(),GetStartY(),GetWidth(),GetHeight(),itsTitle,itsBaseColor,itsBorder);
 }
@@ -653,7 +638,7 @@ wstring ToWString(const string &s)
 }
 
 
-string OmitBBCodes(const string &str)
+string Window::OmitBBCodes(const string &str)
 {
 	if (str.empty())
 		return "";
@@ -684,7 +669,7 @@ string OmitBBCodes(const string &str)
 		{
 			result += tmp;
 			tmp.clear();
-			if (!is_valid_color(color))
+			if (!IsValidColor(color))
 				tmp += color;
 			color.clear();
 		}
@@ -726,7 +711,7 @@ string OmitBBCodes(const string &str)
 		
 		if (!collect)
 		{
-			if (!is_valid_color(color))
+			if (!IsValidColor(color))
 				length -= color.length();
 			color.clear();
 		}
@@ -767,7 +752,7 @@ int CountBBCodes(const wstring &str)
 		
 		if (!collect)
 		{
-			if (!is_valid_color(ToString(color)))
+			if (!IsValidColor(ToString(color)))
 				length -= color.length();
 			color.clear();
 		}
