@@ -1570,7 +1570,7 @@ int main(int argc, char *argv[])
 					mPlaylist->GetSelectedList(list);
 					
 					for (vector<int>::iterator it = list.begin(); it != list.end(); it++)
-						if (*it == now_playing)
+						if (*it == now_playing && list.front() > 0)
 							mPlaylist->BoldOption(now_playing, 0);
 					
 					vector<int>origs(list);
@@ -1662,7 +1662,7 @@ int main(int argc, char *argv[])
 					mPlaylist->GetSelectedList(list);
 					
 					for (vector<int>::iterator it = list.begin(); it != list.end(); it++)
-						if (*it == now_playing)
+						if (*it == now_playing && list.back() < mPlaylist->Size()-1)
 							mPlaylist->BoldOption(now_playing, 0);
 					
 					vector<int>origs(list);
