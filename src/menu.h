@@ -199,9 +199,7 @@ void Menu<T>::AddOption(const T &item, Location location, bool separator)
 	new_option->location = location;
 	new_option->have_separator = separator;
 	itsOptions.push_back(new_option);
-	
-	if (itsOptions.size() > itsBeginning && itsOptions.size() <= itsBeginning+itsHeight)
-		NeedsRedraw.push_back(itsOptions.size()-1);
+	NeedsRedraw.push_back(itsOptions.size()-1);
 }
 
 template <class T>
@@ -213,9 +211,7 @@ void Menu<T>::AddBoldOption(const T &item, Location location, bool separator)
 	new_option->have_separator = separator;
 	new_option->is_bold = 1;
 	itsOptions.push_back(new_option);
-	
-	if (itsOptions.size() > itsBeginning && itsOptions.size() <= itsBeginning+itsHeight)
-		NeedsRedraw.push_back(itsOptions.size()-1);
+	NeedsRedraw.push_back(itsOptions.size()-1);
 }
 
 template <class T>
@@ -228,9 +224,7 @@ void Menu<T>::AddStaticOption(const T &item, Location location, bool separator)
 	new_option->is_static = 1;
 	itsOptions.push_back(new_option);
 	itsStaticsNumber++;
-	
-	if (itsOptions.size() > itsBeginning && itsOptions.size() <= itsBeginning+itsHeight)
-		NeedsRedraw.push_back(itsOptions.size()-1);
+	NeedsRedraw.push_back(itsOptions.size()-1);
 }
 
 template <class T>
@@ -244,9 +238,7 @@ void Menu<T>::AddStaticBoldOption(const T &item, Location location, bool separat
 	new_option->is_bold = 1;
 	itsOptions.push_back(new_option);
 	itsStaticsNumber++;
-	
-	if (itsOptions.size() > itsBeginning && itsOptions.size() <= itsBeginning+itsHeight)
-		NeedsRedraw.push_back(itsOptions.size()-1);
+	NeedsRedraw.push_back(itsOptions.size()-1);
 }
 
 template <class T>
@@ -264,8 +256,7 @@ void Menu<T>::UpdateOption(int index, const T &item, Location location, bool sep
 		itsOptions.at(index)->location = location;
 		itsOptions.at(index)->item = item;
 		itsOptions.at(index)->have_separator = separator;
-		if (index >= itsBeginning && index < itsBeginning+itsHeight)
-			NeedsRedraw.push_back(index);
+		NeedsRedraw.push_back(index);
 	}
 	catch (std::out_of_range)
 	{
@@ -279,8 +270,7 @@ void Menu<T>::BoldOption(int index, bool bold)
 	try
 	{
 		itsOptions.at(index)->is_bold = bold;
-		if (index >= itsBeginning && index < itsBeginning+itsHeight)
-			NeedsRedraw.push_back(index);
+		NeedsRedraw.push_back(index);
 	}
 	catch (std::out_of_range)
 	{

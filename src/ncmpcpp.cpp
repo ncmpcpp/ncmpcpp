@@ -1192,7 +1192,13 @@ int main(int argc, char *argv[])
 					}
 					FreeSongList(list);
 					if (Keypressed(input, Key.Space))
+					{
 						wCurrent->Go(wDown);
+						if (wCurrent == mLibArtists)
+							mLibAlbums->Clear(0);
+						else if (wCurrent == mLibAlbums)
+							mLibSongs->Clear(0);
+					}
 					break;
 				}
 				case csPlaylistEditor:
