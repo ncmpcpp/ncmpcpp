@@ -1,3 +1,27 @@
+ncmpcpp-0.2.2
+
+ + new screen - playlist editor
+ + new playlist view - columns
+ + playlist view switcher added (key 'p' by default)
+ + find function modes added (wrapped/normal, switch is 'w' by default)
+ + albums in media library sorted by year (and it's also displayed)
+ + multiple items selection support and related functions added
+ + playlists management support
+ + new function - "go to dir containing selected song" (key 'G' by default)
+ + moving items improved
+ + lots of minor fixes
+
+
+ncmpcpp-0.2.1
+
+ + support for composer, performer and disc tag
+ + customizable keybindings
+ + "add" option added
+ + example config files are installed automatically now
+ + "repeat one song" mode added (works only if ncmpcpp is running)
+ + minor fixes, improvements etc.
+
+
 ncmpcpp-0.2
 
  + libmpd dependency dropped
