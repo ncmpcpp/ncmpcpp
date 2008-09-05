@@ -86,10 +86,9 @@ class Menu : public Window
 		virtual void Highlighting(bool hl) { itsHighlightEnabled = hl; NeedsRedraw.push_back(itsHighlight); Refresh(); }
 		
 		int GetRealChoice() const;
-		virtual int GetChoice() const { return itsHighlight+1; }
 		
+		virtual int GetChoice() const { return itsHighlight; }
 		virtual int Size() const { return itsOptions.size(); }
-		int MaxRealChoice() const { return itsOptions.size()-itsStaticsNumber; }
 		
 		bool Empty() { return itsOptions.empty(); }
 		virtual bool IsStatic(int);
@@ -250,7 +249,6 @@ void Menu<T>::AddSeparator()
 template <class T>
 void Menu<T>::UpdateOption(int index, const T &item, Location location, bool separator)
 {
-	index--;
 	try
 	{
 		itsOptions.at(index)->location = location;
@@ -266,7 +264,6 @@ void Menu<T>::UpdateOption(int index, const T &item, Location location, bool sep
 template <class T>
 void Menu<T>::BoldOption(int index, bool bold)
 {
-	index--;
 	try
 	{
 		itsOptions.at(index)->is_bold = bold;
@@ -280,7 +277,6 @@ void Menu<T>::BoldOption(int index, bool bold)
 template <class T>
 void Menu<T>::MakeStatic(int index, bool stat)
 {
-	index--;
 	try
 	{
 		if (stat && !itsOptions.at(index)->is_static)
@@ -312,7 +308,7 @@ string Menu<T>::GetOption(int i) const
 {
 	try
 	{
-		return DisplayOption(itsOptions.at(i-1)->item);
+		return DisplayOption(itsOptions.at(i)->item);
 	}
 	catch (std::out_of_range)
 	{
@@ -323,7 +319,6 @@ string Menu<T>::GetOption(int i) const
 template <class T>
 void Menu<T>::DeleteOption(int no)
 {
-	no--;
 	try
 	{
 		if (itsOptions.at(no)->is_static)
@@ -403,7 +398,7 @@ void Menu<T>::Refresh(bool redraw_whole_window)
 		itsBeginning = MaxBeginning;
 	
 	if (itsHighlight >= itsOptions.size()-1)
-		Highlight(itsOptions.size());
+		Highlight(itsOptions.size()-1);
 	
 	while (itsHighlight-itsBeginning > itsHeight-1)
 		itsBeginning++;
@@ -639,8 +634,6 @@ void Menu<T>::Go(Where where)
 template <class T>
 void Menu<T>::Highlight(int which)
 {
-	which--;
-	
 	int old_highlight = itsHighlight;
 	int old_beginning = itsBeginning;
 	
@@ -704,7 +697,6 @@ void Menu<T>::Clear(bool clear_screen)
 template <class T>
 void Menu<T>::Select(int option, bool selected)
 {
-	option--;
 	try
 	{
 		if (itsOptions.at(option)->selected != selected)
@@ -719,7 +711,6 @@ void Menu<T>::Select(int option, bool selected)
 template <class T>
 bool Menu<T>::Selected(int option)
 {
-	option--;
 	try
 	{
 		return itsOptions.at(option)->selected;
@@ -748,7 +739,7 @@ bool Menu<T>::IsAnySelected()
 template <class T>
 void Menu<T>::GetSelectedList(vector<int> &v)
 {
-	int i = 1;
+	int i = 0;
 	for (T_const_iterator it = itsOptions.begin(); it != itsOptions.end(); it++, i++)
 		if ((*it)->selected)
 			v.push_back(i);
@@ -762,7 +753,7 @@ int Menu<T>::GetRealChoice() const
 	for (int i = 0; i < itsHighlight; it++, i++)
 		if (!(*it)->is_static) real_choice++;
 	
-	return real_choice+1;
+	return real_choice;
 }
 
 template <class T>
@@ -770,7 +761,7 @@ bool Menu<T>::IsStatic(int option)
 {
 	try
 	{
-		return itsOptions.at(option-1)->is_static;
+		return itsOptions.at(option)->is_static;
 	}
 	catch (std::out_of_range)
 	{

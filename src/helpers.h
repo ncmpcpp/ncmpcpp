@@ -34,9 +34,6 @@ void UpdateItemList(Menu<Item> *);
 void UpdateSongList(Menu<Song> *);
 void UpdateFoundList(const SongList &, Menu<string> *);
 
-void DeleteSong(int);
-void PlaylistDeleteSong(const string &, int);
-
 string DisplayKeys(int *, int = 2);
 bool Keypressed(int, const int *);
 bool SortSongsByTrack(Song *, Song *);

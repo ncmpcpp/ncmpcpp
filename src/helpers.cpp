@@ -74,7 +74,7 @@ void UpdateItemList(Menu<Item> *menu)
 					break;
 				}
 			}
-			menu->BoldOption(i+1, bold);
+			menu->BoldOption(i, bold);
 			bold = 0;
 		}
 	}
@@ -94,7 +94,7 @@ void UpdateSongList(Menu<Song> *menu)
 				break;
 			}
 		}
-		menu->BoldOption(i+1, bold);
+		menu->BoldOption(i, bold);
 		bold = 0;
 	}
 	menu->Refresh();
@@ -102,7 +102,7 @@ void UpdateSongList(Menu<Song> *menu)
 
 void UpdateFoundList(const SongList &v, Menu<string> *menu)
 {
-	int i = search_engine_static_option+1;
+	int i = search_engine_static_option;
 	bool bold = 0;
 	for (SongList::const_iterator it = v.begin(); it != v.end(); it++, i++)
 	{
@@ -118,18 +118,6 @@ void UpdateFoundList(const SongList &v, Menu<string> *menu)
 		bold = 0;
 	}
 	menu->Refresh();
-}
-
-void DeleteSong(int id)
-{
-	Mpd->QueueDeleteSong(id);
-	mPlaylist->DeleteOption(id+1);
-}
-
-void PlaylistDeleteSong(const string &path, int id)
-{
-	Mpd->QueueDeleteFromPlaylist(path, id);
-	mPlaylistEditor->DeleteOption(id+1);
 }
 
 string DisplayKeys(int *key, int size)
@@ -973,7 +961,7 @@ void GetDirectory(string dir, string subdir)
 			case itDirectory:
 			{
 				if (it->name == subdir)
-					highlightme = mBrowser->Size()+1;
+					highlightme = mBrowser->Size();
 				mBrowser->AddOption(*it);
 				break;
 			}

@@ -202,6 +202,8 @@ int main(int argc, char *argv[])
 	
 	mTagEditor = new Menu<string>(0, main_start_y, COLS, main_height, "", Config.main_color, brNone);
 	mSearcher = static_cast<Menu<string> *>(mTagEditor->Clone());
+	mSearcher->SetSelectPrefix(Config.selected_item_prefix);
+	mSearcher->SetSelectSuffix(Config.selected_item_suffix);
 	
 	int lib_artist_width = COLS/3-1;
 	int lib_albums_width = COLS/3;
@@ -789,14 +791,14 @@ int main(int argc, char *argv[])
 				case csPlaylist:
 				{
 					if (!mPlaylist->Empty())
-						Mpd->PlayID(mPlaylist->at(mPlaylist->GetChoice()-1).GetID());
+						Mpd->PlayID(mPlaylist->at(mPlaylist->GetChoice()).GetID());
 					break;
 				}
 				case csBrowser:
 				{
 					GO_TO_PARENT_DIR:
 					
-					const Item &item = mBrowser->at(mBrowser->GetChoice()-1);
+					const Item &item = mBrowser->at(mBrowser->GetChoice());
 					switch (item.type)
 					{
 						case itDirectory:
@@ -842,7 +844,7 @@ int main(int argc, char *argv[])
 				case csTagEditor:
 				{
 #					ifdef HAVE_TAGLIB_H
-					int id = mTagEditor->GetRealChoice();
+					int id = mTagEditor->GetRealChoice()+1;
 					int option = mTagEditor->GetChoice();
 					LOCK_STATUSBAR;
 					Song &s = edited_song;
@@ -940,7 +942,7 @@ int main(int argc, char *argv[])
 								Mpd->UpdateDirectory(s.GetDirectory());
 								if (prev_screen == csSearcher)
 								{
-									*vSearched[mSearcher->GetRealChoice()-2] = s;
+									*vSearched[mSearcher->GetRealChoice()-1] = s;
 									mSearcher->UpdateOption(mSearcher->GetChoice(), DisplaySong(s));
 								}
 							}
@@ -974,12 +976,11 @@ int main(int argc, char *argv[])
 				{
 					ENTER_SEARCH_ENGINE_SCREEN:
 					
-					int id = mSearcher->GetChoice();
 					int option = mSearcher->GetChoice();
 					LOCK_STATUSBAR;
 					Song &s = searched_song;
 					
-					switch (id)
+					switch (option+1)
 					{
 						case 1:
 						{
@@ -1077,16 +1078,14 @@ int main(int argc, char *argv[])
 						{
 							ShowMessage("Searching...");
 							Search(vSearched, s);
-							ShowMessage("Searching finished!");
 							if (!vSearched.empty())
 							{
 								bool bold = 0;
 								mSearcher->AddSeparator();
 								mSearcher->AddStaticBoldOption("[.white]Search results:[/white] [.green]Found " + IntoStr(vSearched.size()) + (vSearched.size() > 1 ? " songs" : " song") + "[/green]");
 								mSearcher->AddSeparator();
-									
 								for (SongList::const_iterator it = vSearched.begin(); it != vSearched.end(); it++)
-								{	
+								{
 									for (int j = 0; j < mPlaylist->Size(); j++)
 									{
 										if (mPlaylist->at(j).GetHash() == (*it)->GetHash())
@@ -1098,8 +1097,8 @@ int main(int argc, char *argv[])
 									bold ? mSearcher->AddBoldOption(DisplaySong(**it)) : mSearcher->AddOption(DisplaySong(**it));
 									bold = 0;
 								}
-									
-								for (int i = 1; i <=13; i++)
+								ShowMessage("Searching finished!");
+								for (int i = 0; i < 13; i++)
 									mSearcher->MakeStatic(i, 1);
 								mSearcher->Go(wDown);
 								mSearcher->Go(wDown);
@@ -1119,7 +1118,7 @@ int main(int argc, char *argv[])
 						}
 						default:
 						{
-							Song &s = *vSearched[mSearcher->GetRealChoice()-2];
+							Song &s = *vSearched[mSearcher->GetRealChoice()-1];
 							int id = Mpd->AddSong(s);
 							if (id >= 0)
 							{
@@ -1180,7 +1179,7 @@ int main(int argc, char *argv[])
 					{
 						if (!mLibSongs->Empty())
 						{
-							Song &s = mLibSongs->at(mLibSongs->GetChoice()-1);
+							Song &s = mLibSongs->at(mLibSongs->GetChoice());
 							int id = Mpd->AddSong(s);
 							if (id >= 0)
 							{
@@ -1230,7 +1229,7 @@ int main(int argc, char *argv[])
 					{
 						if (!mPlaylistEditor->Empty())
 						{
-							Song &s = mPlaylistEditor->at(mPlaylistEditor->GetChoice()-1);
+							Song &s = mPlaylistEditor->at(mPlaylistEditor->GetChoice());
 							int id = Mpd->AddSong(s);
 							if (id >= 0)
 							{
@@ -1264,12 +1263,12 @@ int main(int argc, char *argv[])
 			{
 				if (current_screen == csBrowser)
 				{
-					const Item &item = mBrowser->at(mBrowser->GetChoice()-1);
+					const Item &item = mBrowser->at(mBrowser->GetChoice());
 					switch (item.type)
 					{
 						case itDirectory:
 						{
-							if (browsed_dir != "/" && mBrowser->GetChoice() == 1)
+							if (browsed_dir != "/" && !mBrowser->GetChoice())
 								continue; // do not let add parent dir.
 							
 							SongList list;
@@ -1315,7 +1314,7 @@ int main(int argc, char *argv[])
 				}
 				else if (current_screen == csSearcher && !vSearched.empty())
 				{
-					int id = mSearcher->GetChoice()-search_engine_static_option-1;
+					int id = mSearcher->GetChoice()-search_engine_static_option;
 					if (id < 0)
 						continue;
 				
@@ -1409,7 +1408,10 @@ int main(int argc, char *argv[])
 					vector<int> list;
 					mPlaylist->GetSelectedList(list);
 					for (vector<int>::const_reverse_iterator it = list.rbegin(); it != list.rend(); it++)
-						DeleteSong(*it-1);
+					{
+						Mpd->QueueDeleteSong(*it);
+						mPlaylist->DeleteOption(*it);
+					}
 					ShowMessage("Selected items deleted!");
 					redraw_me = 1;
 				}
@@ -1422,7 +1424,8 @@ int main(int argc, char *argv[])
 					{
 						TraceMpdStatus();
 						timer = time(NULL);
-						DeleteSong(mPlaylist->GetChoice()-1);
+						Mpd->QueueDeleteSong(mPlaylist->GetChoice());
+						mPlaylist->DeleteOption(mPlaylist->GetChoice());
 						mPlaylist->Refresh();
 						mPlaylist->ReadKey(input);
 					}
@@ -1434,7 +1437,7 @@ int main(int argc, char *argv[])
 			else if (current_screen == csBrowser || wCurrent == mPlaylistList)
 			{
 				LOCK_STATUSBAR;
-				int id = wCurrent->GetChoice()-1;
+				int id = wCurrent->GetChoice();
 				const string &name = wCurrent == mBrowser ? mBrowser->at(id).name : mPlaylistList->at(id);
 				if (current_screen != csBrowser || mBrowser->at(id).type == itPlaylist)
 				{
@@ -1467,7 +1470,10 @@ int main(int argc, char *argv[])
 					vector<int> list;
 					mPlaylistEditor->GetSelectedList(list);
 					for (vector<int>::const_reverse_iterator it = list.rbegin(); it != list.rend(); it++)
-						PlaylistDeleteSong(mPlaylistList->GetCurrentOption(), *it-1);
+					{
+						Mpd->QueueDeleteFromPlaylist(mPlaylistList->GetCurrentOption(), *it);
+						mPlaylistEditor->DeleteOption(*it);
+					}
 					ShowMessage("Selected items deleted from playlist '" + mPlaylistList->GetCurrentOption() + "'!");
 					redraw_me = 1;
 				}
@@ -1478,7 +1484,8 @@ int main(int argc, char *argv[])
 					{
 						TraceMpdStatus();
 						timer = time(NULL);
-						PlaylistDeleteSong(mPlaylistList->GetCurrentOption(), mPlaylistEditor->GetChoice()-1);
+						Mpd->QueueDeleteFromPlaylist(mPlaylistList->GetCurrentOption(), mPlaylistEditor->GetChoice());
+						mPlaylistEditor->DeleteOption(mPlaylistEditor->GetChoice());
 						mPlaylistEditor->Refresh();
 						mPlaylistEditor->ReadKey(input);
 					}
@@ -1563,11 +1570,8 @@ int main(int argc, char *argv[])
 					mPlaylist->GetSelectedList(list);
 					
 					for (vector<int>::iterator it = list.begin(); it != list.end(); it++)
-					{
-						--*it;
 						if (*it == now_playing)
-							mPlaylist->BoldOption(now_playing+1, 0);
-					}
+							mPlaylist->BoldOption(now_playing, 0);
 					
 					vector<int>origs(list);
 					
@@ -1575,9 +1579,9 @@ int main(int argc, char *argv[])
 					{
 						TraceMpdStatus();
 						timer = time(NULL);
-						mPlaylist->Highlight(list[(list.size()-1)/2]);
 						for (vector<int>::iterator it = list.begin(); it != list.end(); it++)
 							mPlaylist->Swap(--*it, *it);
+						mPlaylist->Highlight(list[(list.size()-1)/2]);
 						mPlaylist->Refresh();
 						mPlaylist->ReadKey(input);
 					}
@@ -1588,7 +1592,7 @@ int main(int argc, char *argv[])
 				else
 				{
 					int from, to;
-					from = to = mPlaylist->GetChoice()-1;
+					from = to = mPlaylist->GetChoice();
 					while (Keypressed(input, Key.MvSongUp) && to > 0)
 					{
 						TraceMpdStatus();
@@ -1610,18 +1614,15 @@ int main(int argc, char *argv[])
 					vector<int> list;
 					mPlaylistEditor->GetSelectedList(list);
 					
-					for (vector<int>::iterator it = list.begin(); it != list.end(); it++)
-						--*it;
-					
 					vector<int>origs(list);
 					
 					while (Keypressed(input, Key.MvSongUp) && list.front() > 0)
 					{
 						TraceMpdStatus();
 						timer = time(NULL);
-						mPlaylistEditor->Highlight(list[(list.size()-1)/2]);
 						for (vector<int>::iterator it = list.begin(); it != list.end(); it++)
 							mPlaylistEditor->Swap(--*it, *it);
+						mPlaylistEditor->Highlight(list[(list.size()-1)/2]);
 						mPlaylistEditor->Refresh();
 						mPlaylistEditor->ReadKey(input);
 					}
@@ -1633,7 +1634,7 @@ int main(int argc, char *argv[])
 				else
 				{
 					int from, to;
-					from = to = mPlaylistEditor->GetChoice()-1;
+					from = to = mPlaylistEditor->GetChoice();
 					while (Keypressed(input, Key.MvSongUp) && to > 0)
 					{
 						TraceMpdStatus();
@@ -1661,11 +1662,8 @@ int main(int argc, char *argv[])
 					mPlaylist->GetSelectedList(list);
 					
 					for (vector<int>::iterator it = list.begin(); it != list.end(); it++)
-					{
-						--*it;
 						if (*it == now_playing)
-							mPlaylist->BoldOption(now_playing+1, 0);
-					}
+							mPlaylist->BoldOption(now_playing, 0);
 					
 					vector<int>origs(list);
 					
@@ -1673,9 +1671,9 @@ int main(int argc, char *argv[])
 					{
 						TraceMpdStatus();
 						timer = time(NULL);
-						mPlaylist->Highlight(list[(list.size()-1)/2]+2);
 						for (vector<int>::reverse_iterator it = list.rbegin(); it != list.rend(); it++)
 							mPlaylist->Swap(++*it, *it);
+						mPlaylist->Highlight(list[(list.size()-1)/2]);
 						mPlaylist->Refresh();
 						mPlaylist->ReadKey(input);
 					}
@@ -1686,7 +1684,7 @@ int main(int argc, char *argv[])
 				else
 				{
 					int from, to;
-					from = to = mPlaylist->GetChoice()-1;
+					from = to = mPlaylist->GetChoice();
 					while (Keypressed(input, Key.MvSongDown) && to < mPlaylist->Size()-1)
 					{
 						TraceMpdStatus();
@@ -1709,18 +1707,15 @@ int main(int argc, char *argv[])
 					vector<int> list;
 					mPlaylistEditor->GetSelectedList(list);
 					
-					for (vector<int>::iterator it = list.begin(); it != list.end(); it++)
-						--*it;
-					
 					vector<int>origs(list);
 					
 					while (Keypressed(input, Key.MvSongDown) && list.back() < mPlaylistEditor->Size()-1)
 					{
 						TraceMpdStatus();
 						timer = time(NULL);
-						mPlaylistEditor->Highlight(list[(list.size()-1)/2]+2);
 						for (vector<int>::reverse_iterator it = list.rbegin(); it != list.rend(); it++)
 							mPlaylistEditor->Swap(++*it, *it);
+						mPlaylistEditor->Highlight(list[(list.size()-1)/2]);
 						mPlaylistEditor->Refresh();
 						mPlaylistEditor->ReadKey(input);
 					}
@@ -1732,7 +1727,7 @@ int main(int argc, char *argv[])
 				else
 				{
 					int from, to;
-					from = to = mPlaylistEditor->GetChoice()-1;
+					from = to = mPlaylistEditor->GetChoice();
 					while (Keypressed(input, Key.MvSongDown) && to < mPlaylistEditor->Size()-1)
 					{
 						TraceMpdStatus();
@@ -1849,7 +1844,7 @@ int main(int argc, char *argv[])
 		else if (Keypressed(input, Key.GoToNowPlaying))
 		{
 			if (current_screen == csPlaylist && now_playing >= 0)
-				mPlaylist->Highlight(now_playing+1);
+				mPlaylist->Highlight(now_playing);
 		}
 		else if (Keypressed(input, Key.ToggleRepeat))
 		{
@@ -1888,12 +1883,12 @@ int main(int argc, char *argv[])
 		else if (Keypressed(input, Key.EditTags))
 		{
 			if ((wCurrent == mPlaylist && !mPlaylist->Empty())
-			||  (wCurrent == mBrowser && mBrowser->at(mBrowser->GetChoice()-1).type == itSong)
+			||  (wCurrent == mBrowser && mBrowser->at(mBrowser->GetChoice()).type == itSong)
 			||  (wCurrent == mSearcher && !vSearched.empty() && mSearcher->GetChoice() > search_engine_static_option)
 			||  (wCurrent == mLibSongs && !mLibSongs->Empty())
 			||  (wCurrent == mPlaylistEditor && !mPlaylistEditor->Empty()))
 			{
-				int id = wCurrent->GetChoice()-1;
+				int id = wCurrent->GetChoice();
 				Song *s;
 				switch (current_screen)
 				{
@@ -1933,7 +1928,7 @@ int main(int argc, char *argv[])
 			|| (wCurrent == mLibSongs && !mLibSongs->Empty())
 			|| (wCurrent == mPlaylistEditor && !mPlaylistEditor->Empty()))
 			{
-				int id = wCurrent->GetChoice()-1;
+				int id = wCurrent->GetChoice();
 				Song *s;
 				switch (current_screen)
 				{
@@ -1941,7 +1936,7 @@ int main(int argc, char *argv[])
 						s = &mPlaylist->at(id);
 						break;
 					case csSearcher:
-						s = vSearched[mSearcher->GetRealChoice()-2];
+						s = vSearched[id-search_engine_static_option];
 						break;
 					case csLibrary:
 						s = &mLibSongs->at(id);
@@ -1958,7 +1953,7 @@ int main(int argc, char *argv[])
 				
 				string option = DisplaySong(*s);
 				GetDirectory(s->GetDirectory());
-				for (int i = 1; i <= mBrowser->Size(); i++)
+				for (int i = 0; i < mBrowser->Size(); i++)
 				{
 					if (option == mBrowser->GetOption(i))
 					{
@@ -1973,7 +1968,7 @@ int main(int argc, char *argv[])
 		{
 			if (wCurrent == mSearcher)
 			{
-				mSearcher->Highlight(13); // highlight 'search' button
+				mSearcher->Highlight(12); // highlight 'search' button
 				goto ENTER_SEARCH_ENGINE_SCREEN;
 			}
 		}
@@ -1998,13 +1993,13 @@ int main(int argc, char *argv[])
 		{
 			if (wCurrent == mPlaylist || wCurrent == mBrowser || (wCurrent == mSearcher && !vSearched.empty()) || wCurrent == mLibSongs || wCurrent == mPlaylistEditor)
 			{
-				for (int i = 1; i <= wCurrent->Size(); i++)
+				for (int i = 0; i < wCurrent->Size(); i++)
 					wCurrent->Select(i, !wCurrent->Selected(i) && !wCurrent->IsStatic(i));
 				// hackish shit begins
 				if (wCurrent == mBrowser && browsed_dir != "/")
-					wCurrent->Select(1, 0); // [..] cannot be selected, uhm.
+					wCurrent->Select(0, 0); // [..] cannot be selected, uhm.
 				if (wCurrent == mSearcher)
-					wCurrent->Select(14, 0); // 'Reset' cannot be selected, omgplz.
+					wCurrent->Select(13, 0); // 'Reset' cannot be selected, omgplz.
 				// hacking shit ends. need better solution :/
 				ShowMessage("Selection reversed!");
 			}
@@ -2015,7 +2010,7 @@ int main(int argc, char *argv[])
 			{
 				if (wCurrent->IsAnySelected())
 				{
-					for (int i = 1; i <= wCurrent->Size(); i++)
+					for (int i = 0; i < wCurrent->Size(); i++)
 						wCurrent->Select(i, 0);
 					ShowMessage("Items deselected!");
 				}
@@ -2036,13 +2031,13 @@ int main(int argc, char *argv[])
 						{
 							case csPlaylist:
 							{
-								Song *s = new Song(mPlaylist->at(*it-1));
+								Song *s = new Song(mPlaylist->at(*it));
 								result.push_back(s);
 								break;
 							}
 							case csBrowser:
 							{
-								const Item &item = mBrowser->at(*it-1);
+								const Item &item = mBrowser->at(*it);
 								switch (item.type)
 								{
 									case itDirectory:
@@ -2069,19 +2064,19 @@ int main(int argc, char *argv[])
 							}
 							case csSearcher:
 							{
-								Song *s = new Song(*vSearched[*it-search_engine_static_option-1]);
+								Song *s = new Song(*vSearched[*it-search_engine_static_option]);
 								result.push_back(s);
 								break;
 							}
 							case csLibrary:
 							{
-								Song *s = new Song(mLibSongs->at(*it-1));
+								Song *s = new Song(mLibSongs->at(*it));
 								result.push_back(s);
 								break;
 							}
 							case csPlaylistEditor:
 							{
-								Song *s = new Song(mPlaylistEditor->at(*it-1));
+								Song *s = new Song(mPlaylistEditor->at(*it));
 								result.push_back(s);
 								break;
 							}
@@ -2140,7 +2135,7 @@ int main(int argc, char *argv[])
 					else
 						wCurrent->Refresh(1);
 					
-					if (id == 1)
+					if (id == 0)
 					{
 						for (SongList::const_iterator it = result.begin(); it != result.end(); it++)
 							Mpd->QueueAddSong(**it);
@@ -2152,7 +2147,7 @@ int main(int argc, char *argv[])
 								ShowMessage(message_part_of_songs_added);
 						}
 					}
-					else if (id == 2)
+					else if (id == 1)
 					{
 						LOCK_STATUSBAR;
 						wFooter->WriteXY(0, Config.statusbar_visibility, "Save playlist as: ", 1);
@@ -2167,15 +2162,15 @@ int main(int argc, char *argv[])
 						}
 						
 					}
-					else if (id > 2 && id < mDialog->Size())
+					else if (id > 1 && id < mDialog->Size()-1)
 					{
 						for (SongList::const_iterator it = result.begin(); it != result.end(); it++)
-							Mpd->QueueAddToPlaylist(playlists[id-4], **it);
+							Mpd->QueueAddToPlaylist(playlists[id-3], **it);
 						Mpd->CommitQueue();
-						ShowMessage("Selected items added to playlist '" + playlists[id-4] + "'!");
+						ShowMessage("Selected items added to playlist '" + playlists[id-3] + "'!");
 					}
 					
-					if (id != mDialog->Size())
+					if (id != mDialog->Size()-1)
 					{
 						// refresh playlist's lists
 						if (browsed_dir == "/")
@@ -2195,12 +2190,12 @@ int main(int argc, char *argv[])
 			{
 				for (int i = 0; i < mPlaylist->Size(); i++)
 				{
-					if (!mPlaylist->Selected(i+1) && i != now_playing)
+					if (!mPlaylist->Selected(i) && i != now_playing)
 						Mpd->QueueDeleteSongId(mPlaylist->at(i).GetID());
 				}
 				// if mpd deletes now playing song deletion will be sluggishly slow
 				// then so we have to assure it will be deleted at the very end.
-				if (!mPlaylist->Selected(now_playing+1))
+				if (!mPlaylist->Selected(now_playing))
 					Mpd->QueueDeleteSongId(mPlaylist->at(now_playing).GetID());
 				
 				ShowMessage("Deleting all items but selected...");
@@ -2247,7 +2242,7 @@ int main(int argc, char *argv[])
 				transform(findme.begin(), findme.end(), findme.begin(), tolower);
 				
 				ShowMessage("Searching...");
-				for (int i = (wCurrent == mBrowser ? search_engine_static_option : 1); i <= wCurrent->Size(); i++)
+				for (int i = (wCurrent == mBrowser ? search_engine_static_option-1 : 0); i < wCurrent->Size(); i++)
 				{
 					string name = OmitBBCodes(wCurrent->GetOption(i));
 					transform(name.begin(), name.end(), name.begin(), tolower);
@@ -2338,13 +2333,13 @@ int main(int argc, char *argv[])
 			}
 			else if (
 			    (wCurrent == mPlaylist && !mPlaylist->Empty())
-			||  (wCurrent == mBrowser && mBrowser->at(mBrowser->GetChoice()-1).type == itSong)
+			||  (wCurrent == mBrowser && mBrowser->at(mBrowser->GetChoice()).type == itSong)
 			||  (wCurrent == mSearcher && !vSearched.empty() && mSearcher->GetChoice() > search_engine_static_option)
 			||  (wCurrent == mLibSongs && !mLibSongs->Empty())
 			||  (wCurrent == mPlaylistEditor && !mPlaylistEditor->Empty()))
 			{
 				Song *s;
-				int id = wCurrent->GetChoice()-1;
+				int id = wCurrent->GetChoice();
 				switch (current_screen)
 				{
 					case csPlaylist:

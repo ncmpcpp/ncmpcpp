@@ -146,8 +146,8 @@ void NcmpcppStatusChanged(MPDConnection *Mpd, MPDStatusChanges changed, void *da
 	{
 		old_playing = now_playing;
 		now_playing = Mpd->GetCurrentSongPos();
-		mPlaylist->BoldOption(old_playing+1, 0);
-		mPlaylist->BoldOption(now_playing+1, 1);
+		mPlaylist->BoldOption(old_playing, 0);
+		mPlaylist->BoldOption(now_playing, 1);
 	}
 	
 	if (changed.Playlist)
@@ -193,7 +193,7 @@ void NcmpcppStatusChanged(MPDConnection *Mpd, MPDStatusChanges changed, void *da
 				for (int i = 0; i < mPlaylist->Size(); i++)
 				{
 					if (*list[i] != mPlaylist->at(i))
-						mPlaylist->UpdateOption(i+1, *list[i]);
+						mPlaylist->UpdateOption(i, *list[i]);
 				}
 			}
 			FreeSongList(list);
@@ -244,7 +244,7 @@ void NcmpcppStatusChanged(MPDConnection *Mpd, MPDStatusChanges changed, void *da
 			case psPlay:
 			{
 				player_state = "Playing: ";
-				mPlaylist->BoldOption(now_playing+1, 1);
+				mPlaylist->BoldOption(now_playing, 1);
 				changed.ElapsedTime = 1;
 				break;
 			}
@@ -259,7 +259,7 @@ void NcmpcppStatusChanged(MPDConnection *Mpd, MPDStatusChanges changed, void *da
 				wFooter->SetColor(Config.progressbar_color);
 				mvwhline(wFooter->RawWin(), 0, 0, 0, wFooter->GetWidth());
 				wFooter->SetColor(Config.statusbar_color);
-				mPlaylist->BoldOption(old_playing+1, 0);
+				mPlaylist->BoldOption(old_playing, 0);
 				now_playing = -1;
 				player_state.clear();
 				break;
@@ -280,10 +280,10 @@ void NcmpcppStatusChanged(MPDConnection *Mpd, MPDStatusChanges changed, void *da
 					Mpd->Play(now_playing);
 				}
 				if (old_playing >= 0)
-					mPlaylist->BoldOption(old_playing+1, 0);
-				mPlaylist->BoldOption(now_playing+1, 1);
+					mPlaylist->BoldOption(old_playing, 0);
+				mPlaylist->BoldOption(now_playing, 1);
 				if (Config.autocenter_mode)
-					mPlaylist->Highlight(now_playing+1);
+					mPlaylist->Highlight(now_playing);
 				repeat_one_allowed = 0;
 			}
 			if (!Mpd->GetElapsedTime())
