@@ -2242,7 +2242,7 @@ int main(int argc, char *argv[])
 				transform(findme.begin(), findme.end(), findme.begin(), tolower);
 				
 				ShowMessage("Searching...");
-				for (int i = (wCurrent == mBrowser ? search_engine_static_option-1 : 0); i < wCurrent->Size(); i++)
+				for (int i = (wCurrent == mSearcher ? search_engine_static_option-1 : 0); i < wCurrent->Size(); i++)
 				{
 					string name = OmitBBCodes(wCurrent->GetOption(i));
 					transform(name.begin(), name.end(), name.begin(), tolower);
