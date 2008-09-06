@@ -49,7 +49,7 @@ const bool UNICODE = 0;
 #include "scrollpad.h"
 #include "misc.h"
 
-enum NcmpcppScreen { csHelp, csPlaylist, csBrowser, csTagEditor, csSearcher, csLibrary, csLyrics, csPlaylistEditor };
+enum NcmpcppScreen { csHelp, csPlaylist, csBrowser, csTagEditor, csSearcher, csLibrary, csLyrics, csPlaylistEditor, csAlbumEditor };
 
 const int ncmpcpp_window_timeout = 500;
 const int search_engine_static_option = 17;

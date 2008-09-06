@@ -188,13 +188,6 @@ bool SortSongsByTrack(Song *a, Song *b)
 	return StrToInt(a->GetTrack()) < StrToInt(b->GetTrack());
 }
 
-bool CaseInsensitiveComparison(string a, string b)
-{
-	transform(a.begin(), a.end(), a.begin(), tolower);
-	transform(b.begin(), b.end(), b.begin(), tolower);
-	return a < b;
-}
-
 void WindowTitle(const string &status)
 {
 	if (TERMINAL_TYPE != "linux" && Config.set_window_title)
@@ -252,6 +245,29 @@ string TotalPlaylistLength()
 	if (length)
 		result += IntoStr(length) + (length == 1 ? " second" : " seconds");
 	return result;
+}
+
+string DisplayTag(const Song &s, void *data)
+{
+	switch (static_cast<Menu<string> *>(data)->GetChoice())
+	{
+		case 0:
+			return s.GetTitle();
+		case 1:
+			return s.GetArtist();
+		case 2:
+			return s.GetAlbum();
+		case 3:
+			return s.GetYear();
+		case 4:
+			return s.GetTrack();
+		case 5:
+			return s.GetGenre();
+		case 6:
+			return s.GetComment();
+		default:
+			return "";
+	}
 }
 
 string DisplayItem(const Item &item, void *)
@@ -858,6 +874,30 @@ void ShowMessage(const string &message, int delay)
 		wFooter->Bold(1);
 	}
 }
+
+#ifdef HAVE_TAGLIB_H
+bool WriteTags(Song &s)
+{
+	string path_to_file = Config.mpd_music_dir + "/" + s.GetFile();
+	TagLib::FileRef f(path_to_file.c_str());
+	if (!f.isNull())
+	{
+		s.GetEmptyFields(1);
+		f.tag()->setTitle(TO_WSTRING(s.GetTitle()));
+		f.tag()->setArtist(TO_WSTRING(s.GetArtist()));
+		f.tag()->setAlbum(TO_WSTRING(s.GetAlbum()));
+		f.tag()->setYear(StrToInt(s.GetYear()));
+		f.tag()->setTrack(StrToInt(s.GetTrack()));
+		f.tag()->setGenre(TO_WSTRING(s.GetGenre()));
+		f.tag()->setComment(TO_WSTRING(s.GetComment()));
+		s.GetEmptyFields(0);
+		f.save();
+		return true;
+	}
+	else
+		return false;
+}
+#endif // HAVE_TAGLIB_H
 
 bool GetSongInfo(Song &s)
 {

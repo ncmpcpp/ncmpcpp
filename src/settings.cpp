@@ -45,6 +45,7 @@ void DefaultKeys(ncmpcpp_keys &keys)
 	keys.SearchEngine[0] = '4';
 	keys.MediaLibrary[0] = '5';
 	keys.PlaylistEditor[0] = '6';
+	keys.AlbumEditor[0] = '7';
 	keys.Stop[0] = 's';
 	keys.Pause[0] = 'P';
 	keys.Next[0] = '>';
@@ -102,6 +103,7 @@ void DefaultKeys(ncmpcpp_keys &keys)
 	keys.SearchEngine[1] = 268;
 	keys.MediaLibrary[1] = 269;
 	keys.PlaylistEditor[1] = 270;
+	keys.AlbumEditor[1] = 271;
 	keys.Stop[1] = null_key;
 	keys.Pause[1] = null_key;
 	keys.Next[1] = null_key;

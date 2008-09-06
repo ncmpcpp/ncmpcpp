@@ -55,6 +55,13 @@
 			mvvline(main_start_y, lib_albums_start_x-1, 0, main_height); \
 			mPlaylistEditor->Display(redraw_me)
 
+#define REFRESH_ALBUM_EDITOR_SCREEN \
+			mEditorAlbums->Display(redraw_me); \
+			mvvline(main_start_y, lib_albums_start_x-1, 0, main_height); \
+			mEditorTagTypes->Display(redraw_me); \
+			mvvline(main_start_y, lib_songs_start_x-1, 0, main_height); \
+			mEditorTags->Display(redraw_me)
+
 #ifdef HAVE_TAGLIB_H
  const string tag_screen = "Tag editor";
  const string tag_screen_keydesc = "Edit song's tags/playlist's name\n";
@@ -67,22 +74,31 @@ ncmpcpp_config Config;
 ncmpcpp_keys Key;
 
 SongList vSearched;
-std::map<string, string> vAlbums;
+std::map<string, string, CaseInsensitiveComparison> vLibAlbums;
+std::map<string, string, CaseInsensitiveComparison> vEditorAlbums;
 
 vector<int> vFoundPositions;
 int found_pos = 0;
 
 Window *wCurrent = 0;
 Window *wPrev = 0;
+
 Menu<Song> *mPlaylist;
 Menu<Item> *mBrowser;
 Menu<string> *mTagEditor;
 Menu<string> *mSearcher;
+
 Menu<string> *mLibArtists;
 Menu<string> *mLibAlbums;
 Menu<Song> *mLibSongs;
+
+Menu<string> *mEditorAlbums;
+Menu<string> *mEditorTagTypes;
+Menu<Song> *mEditorTags;
+
 Menu<string> *mPlaylistList;
 Menu<Song> *mPlaylistEditor;
+
 Scrollpad *sHelp;
 Scrollpad *sLyrics;
 
@@ -220,6 +236,12 @@ int main(int argc, char *argv[])
 	mLibSongs->SetItemDisplayer(DisplaySong);
 	mLibSongs->SetItemDisplayerUserData(&Config.song_library_format);
 	
+	mEditorAlbums = new Menu<string>(0, main_start_y, lib_artist_width, main_height, "Albums", Config.main_color, brNone);
+	mEditorTagTypes = new Menu<string>(lib_albums_start_x, main_start_y, lib_albums_width, main_height, "Tag types", Config.main_color, brNone);
+	mEditorTags = new Menu<Song>(lib_songs_start_x, main_start_y, lib_songs_width, main_height, "Tags", Config.main_color, brNone);
+	mEditorTags->SetItemDisplayer(DisplayTag);
+	mEditorTags->SetItemDisplayerUserData(mEditorTagTypes);
+	
 	mPlaylistList = new Menu<string>(0, main_start_y, lib_artist_width, main_height, "Playlists", Config.main_color, brNone);
 	mPlaylistEditor = new Menu<Song>(lib_albums_start_x, main_start_y, lib_albums_width+lib_songs_width+1, main_height, "Playlist's content", Config.main_color, brNone);
 	mPlaylistEditor->SetSelectPrefix(Config.selected_item_prefix);
@@ -244,7 +266,8 @@ int main(int argc, char *argv[])
 	sHelp->Add(DisplayKeys(Key.Browser) + "Browse screen\n");
 	sHelp->Add(DisplayKeys(Key.SearchEngine) + "Search engine\n");
 	sHelp->Add(DisplayKeys(Key.MediaLibrary) + "Media library\n");
-	sHelp->Add(DisplayKeys(Key.PlaylistEditor) + "Playlist editor\n\n\n");
+	sHelp->Add(DisplayKeys(Key.PlaylistEditor) + "Playlist editor\n");
+	sHelp->Add(DisplayKeys(Key.AlbumEditor) + "Album editor\n\n\n");
 	
 	sHelp->Add("   [.b]Keys - Global\n -----------------------------------------[/b]\n");
 	sHelp->Add(DisplayKeys(Key.Stop) + "Stop\n");
@@ -354,6 +377,9 @@ int main(int argc, char *argv[])
 	mLibArtists->SetTimeout(ncmpcpp_window_timeout);
 	mLibAlbums->SetTimeout(ncmpcpp_window_timeout);
 	mLibSongs->SetTimeout(ncmpcpp_window_timeout);
+	mEditorAlbums->SetTimeout(ncmpcpp_window_timeout);
+	mEditorTagTypes->SetTimeout(ncmpcpp_window_timeout);
+	mEditorTags->SetTimeout(ncmpcpp_window_timeout);
 	sLyrics->SetTimeout(ncmpcpp_window_timeout);
 	wFooter->SetTimeout(ncmpcpp_window_timeout);
 	mPlaylistList->SetTimeout(ncmpcpp_window_timeout);
@@ -419,6 +445,9 @@ int main(int argc, char *argv[])
 				case csPlaylistEditor:
 					title = "Playlist editor";
 					break;
+				case csAlbumEditor:
+					title = "Albums' tag editor";
+					break;
 			}
 		
 			if (title_allowed)
@@ -456,7 +485,7 @@ int main(int argc, char *argv[])
 				}
 			}
 			else
-				wHeader->WriteXY(0, 0, max_allowed_title_length, "[.b]1:[/b]Help  [.b]2:[/b]Playlist  [.b]3:[/b]Browse  [.b]4:[/b]Search  [.b]5:[/b]Library [.b]6:[/b]Playlist editor", 1);
+				wHeader->WriteXY(0, 0, max_allowed_title_length, "[.b]1:[/b]Help  [.b]2:[/b]Playlist  [.b]3:[/b]Browse  [.b]4:[/b]Search  [.b]5:[/b]Library [.b]6:[/b]Playlist editor [.b]7:[/b]Albums' editor", 1);
 		
 			wHeader->SetColor(Config.volume_color);
 			wHeader->WriteXY(max_allowed_title_length, 0, volume_state);
@@ -475,7 +504,7 @@ int main(int argc, char *argv[])
 				mLibAlbums->Clear(0);
 				mLibSongs->Clear(0);
 				Mpd->GetArtists(list);
-				sort(list.begin(), list.end(), CaseInsensitiveComparison);
+				sort(list.begin(), list.end(), CaseInsensitiveComparison());
 				for (TagList::const_iterator it = list.begin(); it != list.end(); it++)
 					mLibArtists->AddOption(*it);
 				mLibArtists->Window::Clear();
@@ -485,7 +514,7 @@ int main(int argc, char *argv[])
 			if (mLibAlbums->Empty() && mLibSongs->Empty())
 			{
 				mLibAlbums->Reset();
-				vAlbums.clear();
+				vLibAlbums.clear();
 				TagList list;
 				Mpd->GetAlbums(mLibArtists->GetOption(), list);
 				for (TagList::const_iterator it = list.begin(); it != list.end(); it++)
@@ -500,16 +529,16 @@ int main(int argc, char *argv[])
 					{
 						if ((*j)->GetYear() != EMPTY_TAG)
 						{
-							vAlbums["(" + (*j)->GetYear() + ") " + *it] = *it;
+							vLibAlbums["(" + (*j)->GetYear() + ") " + *it] = *it;
 							written = 1;
 							break;
 						}
 					}
 					if (!written)
-						vAlbums[*it] = *it;
+						vLibAlbums[*it] = *it;
 					FreeSongList(l);
 				}
-				for (std::map<string, string>::const_iterator it = vAlbums.begin(); it != vAlbums.end(); it++)
+				for (std::map<string, string>::const_iterator it = vLibAlbums.begin(); it != vLibAlbums.end(); it++)
 					mLibAlbums->AddOption(it->first);
 				mLibAlbums->Window::Clear();
 				mLibAlbums->Refresh();
@@ -539,7 +568,7 @@ int main(int argc, char *argv[])
 					mLibSongs->Clear(0);
 					Mpd->StartSearch(1);
 					Mpd->AddSearch(MPD_TAG_ITEM_ARTIST, mLibArtists->GetOption());
-					Mpd->AddSearch(MPD_TAG_ITEM_ALBUM, vAlbums[mLibAlbums->GetOption()]);
+					Mpd->AddSearch(MPD_TAG_ITEM_ALBUM, vLibAlbums[mLibAlbums->GetOption()]);
 					Mpd->CommitSearch(list);
 				}
 				sort(list.begin(), list.end(), SortSongsByTrack);
@@ -623,6 +652,65 @@ int main(int argc, char *argv[])
 		
 		// playlist editor end
 		
+		// album editor stuff
+		
+		if (current_screen == csAlbumEditor)
+		{
+			if (mEditorAlbums->Empty())
+			{
+				found_pos = 0;
+				vFoundPositions.clear();
+				vEditorAlbums.clear();
+				mEditorAlbums->Window::Clear();
+				mEditorTags->Clear();
+				TagList list;
+				mEditorAlbums->WriteXY(0, 0, "Fetching albums' list...");
+				Mpd->GetAlbums("", list);
+				for (TagList::const_iterator it = list.begin(); it != list.end(); it++)
+				{
+					bool written = 0;
+					SongList l;
+					Mpd->StartSearch(1);
+					Mpd->AddSearch(MPD_TAG_ITEM_ALBUM, *it);
+					Mpd->CommitSearch(l);
+					for (SongList::const_iterator j = l.begin(); j != l.end(); j++)
+					{
+						if ((*j)->GetYear() != EMPTY_TAG)
+						{
+							vEditorAlbums["(" + (*j)->GetYear() + ") " + *it] = *it;
+							written = 1;
+							break;
+						}
+					}
+					if (!written)
+						vEditorAlbums[*it] = *it;
+					FreeSongList(l);
+				}
+				for (std::map<string, string>::const_iterator it = vEditorAlbums.begin(); it != vEditorAlbums.end(); it++)
+					mEditorAlbums->AddOption(it->first);
+				mEditorAlbums->Refresh();
+				mEditorTagTypes->Refresh();
+			}
+			
+			if (mEditorTags->Empty())
+			{
+				mEditorTags->Reset();
+				SongList list;
+				Mpd->StartSearch(1);
+				Mpd->AddSearch(MPD_TAG_ITEM_ALBUM, vEditorAlbums[mEditorAlbums->GetOption()]);
+				Mpd->CommitSearch(list);
+				for (SongList::iterator it = list.begin(); it != list.end(); it++)
+					mEditorTags->AddOption(**it);
+				FreeSongList(list);
+				mEditorTags->Window::Clear();
+				mEditorTags->Refresh();
+			}
+			
+			mEditorTagTypes->GetChoice() < 7 ? mEditorTags->Refresh(1) : mEditorTags->Window::Clear();
+		}
+		
+		// album editor end
+		
 		if (Config.columns_in_playlist && wCurrent == mPlaylist)
 			wCurrent->Display(redraw_me);
 		else
@@ -645,6 +733,8 @@ int main(int argc, char *argv[])
 				browsed_dir_scroll_begin--;
 				break;
 			case csLibrary:
+			case csPlaylistEditor:
+			case csAlbumEditor:
 			{
 				if (Keypressed(input, Key.Up) || Keypressed(input, Key.Down) || Keypressed(input, Key.PageUp) || Keypressed(input, Key.PageDown) || Keypressed(input, Key.Home) || Keypressed(input, Key.End) || Keypressed(input, Key.FindForward) || Keypressed(input, Key.FindBackward) || Keypressed(input, Key.NextFoundPosition) || Keypressed(input, Key.PrevFoundPosition))
 				{
@@ -654,14 +744,20 @@ int main(int argc, char *argv[])
 						mLibSongs->Clear(0);
 					}
 					else if (wCurrent == mLibAlbums)
+					{
 						mLibSongs->Clear(0);
+					}
+					else if (wCurrent == mPlaylistList)
+					{
+						mPlaylistEditor->Clear(0);
+					}
+					else if (wCurrent == mEditorAlbums)
+					{
+						mEditorTags->Clear(0);
+						mEditorTagTypes->Reset();
+						mEditorTagTypes->Refresh();
+					}
 				}
-				break;
-			}
-			case csPlaylistEditor:
-			{
-				if (wCurrent == mPlaylistList && (Keypressed(input, Key.Up) || Keypressed(input, Key.Down) || Keypressed(input, Key.PageUp) || Keypressed(input, Key.PageDown) || Keypressed(input, Key.Home) || Keypressed(input, Key.End) || Keypressed(input, Key.FindForward) || Keypressed(input, Key.FindBackward) || Keypressed(input, Key.NextFoundPosition) || Keypressed(input, Key.PrevFoundPosition)))
-					mPlaylistEditor->Clear(0);
 			}
 			default:
 				break;
@@ -728,9 +824,14 @@ int main(int argc, char *argv[])
 			mLibArtists->Resize(lib_artist_width, main_height);
 			mLibAlbums->Resize(lib_albums_width, main_height);
 			mLibSongs->Resize(lib_songs_width, main_height);
-			
 			mLibAlbums->MoveTo(lib_albums_start_x, main_start_y);
 			mLibSongs->MoveTo(lib_songs_start_x, main_start_y);
+			
+			mEditorAlbums->Resize(lib_artist_width, main_height);
+			mEditorTagTypes->Resize(lib_albums_width, main_height);
+			mEditorTags->Resize(lib_songs_width, main_height);
+			mEditorTagTypes->MoveTo(lib_albums_start_x, main_start_y);
+			mEditorTags->MoveTo(lib_songs_start_x, main_start_y);
 			
 			mPlaylistList->Resize(lib_artist_width, main_height);
 			mPlaylistEditor->Resize(lib_albums_width+lib_songs_width+1, main_height);
@@ -753,6 +854,10 @@ int main(int argc, char *argv[])
 			else if (current_screen == csPlaylistEditor)
 			{
 				REFRESH_PLAYLIST_EDITOR_SCREEN;
+			}
+			else if (current_screen == csAlbumEditor)
+			{
+				REFRESH_ALBUM_EDITOR_SCREEN;
 			}
 			header_update_status = 1;
 			PlayerState mpd_state = Mpd->GetState();
@@ -911,21 +1016,9 @@ int main(int argc, char *argv[])
 						}
 						case 8:
 						{
-							string path_to_file = Config.mpd_music_dir + "/" + s.GetFile();
-							TagLib::FileRef f(path_to_file.c_str());
-							if (!f.isNull())
+							ShowMessage("Updating tags...");
+							if (WriteTags(s))
 							{
-								ShowMessage("Updating tags...");
-								s.GetEmptyFields(1);
-								f.tag()->setTitle(TO_WSTRING(s.GetTitle()));
-								f.tag()->setArtist(TO_WSTRING(s.GetArtist()));
-								f.tag()->setAlbum(TO_WSTRING(s.GetAlbum()));
-								f.tag()->setYear(StrToInt(s.GetYear()));
-								f.tag()->setTrack(StrToInt(s.GetTrack()));
-								f.tag()->setGenre(TO_WSTRING(s.GetGenre()));
-								f.tag()->setComment(TO_WSTRING(s.GetComment()));
-								s.GetEmptyFields(0);
-								f.save();
 								ShowMessage("Tags updated!");
 								Mpd->UpdateDirectory(s.GetDirectory());
 								if (prev_screen == csSearcher)
@@ -934,7 +1027,6 @@ int main(int argc, char *argv[])
 									mSearcher->UpdateOption(mSearcher->GetChoice(), DisplaySong(s));
 								}
 							}
-							else
 								ShowMessage("Error writing tags!");
 						}
 						case 9:
@@ -1152,7 +1244,7 @@ int main(int argc, char *argv[])
 							Mpd->QueueAddSong(mLibSongs->at(i));
 						if (Mpd->CommitQueue())
 						{
-							ShowMessage("Adding songs from: " + mLibArtists->GetOption() + " \"" + vAlbums[mLibAlbums->GetOption()] + "\"");
+							ShowMessage("Adding songs from: " + mLibArtists->GetOption() + " \"" + vLibAlbums[mLibAlbums->GetOption()] + "\"");
 							Song *s = &mPlaylist->at(mPlaylist->Size()-mLibSongs->Size());
 							if (s->GetHash() == mLibSongs->at(0).GetHash())
 							{
@@ -1235,6 +1327,93 @@ int main(int argc, char *argv[])
 						wCurrent->Go(wDown);
 					break;
 				}
+#				ifdef HVAE_TAGLIB_H
+				case csAlbumEditor:
+				{
+					void (Song::*set)(const string &) = 0;
+					switch (mEditorTagTypes->GetRealChoice())
+					{
+						case 0:
+							set = &Song::SetTitle;
+							break;
+						case 1:
+							set = &Song::SetArtist;
+							break;
+						case 2:
+							set = &Song::SetAlbum;
+							break;
+						case 3:
+							set = &Song::SetYear;
+							break;
+						case 4:
+							set = &Song::SetTrack;
+							break;
+						case 5:
+							set = &Song::SetGenre;
+							break;
+						case 6:
+							set = &Song::SetComment;
+							break;
+						case 7: // reset
+							mEditorTags->Clear(0);
+							ShowMessage("Changes reset");
+							continue;
+						case 8: // save
+						{
+							bool success = 1;
+							ShowMessage("Writing changes...");
+							for (int i = 0; i < mEditorTags->Size(); i++)
+							{
+								if (!WriteTags(mEditorTags->at(i)))
+								{
+									ShowMessage("Error writing tags!");
+									success = 0;
+									break;
+								}
+							}
+							if (success)
+							{
+								ShowMessage("Tags updated!");
+								mEditorTagTypes->HighlightColor(Config.main_highlight_color);
+								mEditorTagTypes->Reset();
+								wCurrent->Refresh();
+								wCurrent = mEditorAlbums;
+								mEditorAlbums->HighlightColor(Config.active_column_color);
+								Mpd->UpdateDirectory("/");
+							}
+							else
+								mEditorTags->Clear(0);
+							continue;
+						}
+						default:
+							break;
+					}
+					if (wCurrent == mEditorTagTypes)
+					{
+						LOCK_STATUSBAR;
+						wFooter->WriteXY(0, Config.statusbar_visibility, "[.b]" + mEditorTagTypes->GetOption() + "[/b]: ", 1);
+						mEditorTags->at(mEditorTags->GetChoice()).GetEmptyFields(1);
+						string new_tag = wFooter->GetString(mEditorTags->GetOption());
+						mEditorTags->at(mEditorTags->GetChoice()).GetEmptyFields(0);
+						UNLOCK_STATUSBAR;
+						if (!new_tag.empty())
+							for (int i = 0; i < mEditorTags->Size(); i++)
+								(mEditorTags->at(i).*set)(new_tag);
+					}
+					else if (wCurrent == mEditorTags)
+					{
+						LOCK_STATUSBAR;
+						wFooter->WriteXY(0, Config.statusbar_visibility, "[.b]" + mEditorTagTypes->GetOption() + "[/b]: ", 1);
+						mEditorTags->at(mEditorTags->GetChoice()).GetEmptyFields(1);
+						string new_tag = wFooter->GetString(mEditorTags->GetOption());
+						mEditorTags->at(mEditorTags->GetChoice()).GetEmptyFields(0);
+						UNLOCK_STATUSBAR;
+						if (new_tag != mEditorTags->GetOption())
+							(mEditorTags->at(mEditorTags->GetChoice()).*set)(new_tag);
+						mEditorTags->Go(wDown);
+					}
+				}
+#				endif // HAVE_TAGLIB_H
 				default:
 					break;
 			}
@@ -1352,6 +1531,25 @@ int main(int argc, char *argv[])
 				wCurrent = mPlaylistEditor;
 				mPlaylistEditor->HighlightColor(Config.active_column_color);
 			}
+			else if (current_screen == csAlbumEditor && input == Key.VolumeUp[0])
+			{
+				found_pos = 0;
+				vFoundPositions.clear();
+				if (wCurrent == mEditorAlbums)
+				{
+					mEditorAlbums->HighlightColor(Config.main_highlight_color);
+					wCurrent->Refresh();
+					wCurrent = mEditorTagTypes;
+					mEditorTagTypes->HighlightColor(Config.active_column_color);
+				}
+				else if (wCurrent == mEditorTagTypes && mEditorTagTypes->GetChoice() < 7)
+				{
+					mEditorTagTypes->HighlightColor(Config.main_highlight_color);
+					wCurrent->Refresh();
+					wCurrent = mEditorTags;
+					mEditorTags->HighlightColor(Config.active_column_color);
+				}
+			}
 			else
 				Mpd->SetVolume(Mpd->GetVolume()+1);
 		}
@@ -1386,6 +1584,25 @@ int main(int argc, char *argv[])
 				wCurrent->Refresh();
 				wCurrent = mPlaylistList;
 				mPlaylistList->HighlightColor(Config.active_column_color);
+			}
+			else if (current_screen == csAlbumEditor && input == Key.VolumeDown[0])
+			{
+				found_pos = 0;
+				vFoundPositions.clear();
+				if (wCurrent == mEditorTags)
+				{
+					mEditorTags->HighlightColor(Config.main_highlight_color);
+					wCurrent->Refresh();
+					wCurrent = mEditorTagTypes;
+					mEditorTagTypes->HighlightColor(Config.active_column_color);
+				}
+				else if (wCurrent == mEditorTagTypes)
+				{
+					mEditorTagTypes->HighlightColor(Config.main_highlight_color);
+					wCurrent->Refresh();
+					wCurrent = mEditorAlbums;
+					mEditorAlbums->HighlightColor(Config.active_column_color);
+				}
 			}
 			else
 				Mpd->SetVolume(Mpd->GetVolume()-1);
@@ -1909,15 +2126,15 @@ int main(int argc, char *argv[])
 			{
 				LOCK_STATUSBAR;
 				wFooter->WriteXY(0, Config.statusbar_visibility, "[.b]Album:[/b] ", 1);
-				string new_album = wFooter->GetString(vAlbums[mLibAlbums->GetOption()]);
+				string new_album = wFooter->GetString(vLibAlbums[mLibAlbums->GetOption()]);
 				UNLOCK_STATUSBAR;
-				if (!new_album.empty() && new_album != vAlbums[mLibAlbums->GetOption()])
+				if (!new_album.empty() && new_album != vLibAlbums[mLibAlbums->GetOption()])
 				{
 					bool success = 1;
 					SongList list;
 					Mpd->StartSearch(1);
 					Mpd->AddSearch(MPD_TAG_ITEM_ARTIST, mLibArtists->GetOption());
-					Mpd->AddSearch(MPD_TAG_ITEM_ALBUM, vAlbums[mLibAlbums->GetOption()]);
+					Mpd->AddSearch(MPD_TAG_ITEM_ALBUM, vLibAlbums[mLibAlbums->GetOption()]);
 					Mpd->CommitSearch(list);
 					for (SongList::const_iterator it = list.begin(); it != list.end(); it++)
 					{
@@ -1941,7 +2158,7 @@ int main(int argc, char *argv[])
 #			endif
 			if ((wCurrent == mPlaylist && !mPlaylist->Empty())
 			||  (wCurrent == mBrowser && mBrowser->at(mBrowser->GetChoice()).type == itSong)
-			||  (wCurrent == mSearcher && !vSearched.empty() && mSearcher->GetChoice() > search_engine_static_option)
+			||  (wCurrent == mSearcher && !vSearched.empty() && mSearcher->GetChoice() >= search_engine_static_option)
 			||  (wCurrent == mLibSongs && !mLibSongs->Empty())
 			||  (wCurrent == mPlaylistEditor && !mPlaylistEditor->Empty()))
 			{
@@ -1994,7 +2211,7 @@ int main(int argc, char *argv[])
 		else if (Keypressed(input, Key.GoToContainingDir))
 		{
 			if ((wCurrent == mPlaylist && !mPlaylist->Empty())
-			|| (wCurrent == mSearcher && !vSearched.empty() && mSearcher->GetChoice() > search_engine_static_option)
+			|| (wCurrent == mSearcher && !vSearched.empty() && mSearcher->GetChoice() >= search_engine_static_option)
 			|| (wCurrent == mLibSongs && !mLibSongs->Empty())
 			|| (wCurrent == mPlaylistEditor && !mPlaylistEditor->Empty()))
 			{
@@ -2404,7 +2621,7 @@ int main(int argc, char *argv[])
 			else if (
 			    (wCurrent == mPlaylist && !mPlaylist->Empty())
 			||  (wCurrent == mBrowser && mBrowser->at(mBrowser->GetChoice()).type == itSong)
-			||  (wCurrent == mSearcher && !vSearched.empty() && mSearcher->GetChoice() > search_engine_static_option)
+			||  (wCurrent == mSearcher && !vSearched.empty() && mSearcher->GetChoice() >= search_engine_static_option)
 			||  (wCurrent == mLibSongs && !mLibSongs->Empty())
 			||  (wCurrent == mPlaylistEditor && !mPlaylistEditor->Empty()))
 			{
@@ -2551,6 +2768,40 @@ int main(int argc, char *argv[])
 				current_screen = csPlaylistEditor;
 				
 				UpdateSongList(mPlaylistEditor);
+			}
+		}
+		else if (Keypressed(input, Key.AlbumEditor))
+		{
+			if (current_screen != csAlbumEditor)
+			{
+				found_pos = 0;
+				vFoundPositions.clear();
+				
+				mEditorAlbums->HighlightColor(Config.active_column_color);
+				mEditorTagTypes->HighlightColor(Config.main_highlight_color);
+				mEditorTags->HighlightColor(Config.main_highlight_color);
+				
+				mPlaylist->Hide(); // hack, should be wCurrent, but it doesn't always have 100% width
+				
+				redraw_me = 1;
+				REFRESH_ALBUM_EDITOR_SCREEN;
+				
+				if (mEditorTagTypes->Empty())
+				{
+					mEditorTagTypes->AddOption("Title");
+					mEditorTagTypes->AddOption("Artist");
+					mEditorTagTypes->AddOption("Album");
+					mEditorTagTypes->AddOption("Year");
+					mEditorTagTypes->AddOption("Track");
+					mEditorTagTypes->AddOption("Genre");
+					mEditorTagTypes->AddOption("Comment");
+					mEditorTagTypes->AddSeparator();
+					mEditorTagTypes->AddOption("Reset");
+					mEditorTagTypes->AddOption("Save");
+				}
+				
+				wCurrent = mEditorAlbums;
+				current_screen = csAlbumEditor;
 			}
 		}
 		else if (Keypressed(input, Key.Quit))

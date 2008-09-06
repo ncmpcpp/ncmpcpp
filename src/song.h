@@ -62,15 +62,15 @@ class Song
 		int GetPosition() const { return itsPosition; }
 		int GetID() const { return itsID; }
 		
-		void SetFile(string str) { itsFile = str; }
-		void SetShortFilename(string str) { itsShortName = str; }
-		void SetArtist(string str) { itsArtist = str; }
-		void SetTitle(string str) { itsTitle = str; }
-		void SetAlbum(string str) { itsAlbum = str; }
-		void SetTrack(string str) { itsTrack = str.empty() ? "" : IntoStr(StrToInt(str)); }
-		void SetYear(string str) { itsYear = str.empty() ? "" : IntoStr(StrToInt(str)); }
-		void SetGenre(string str) { itsGenre = str; }
-		void SetComment(string str) { itsComment = str; }
+		void SetFile(const string &str) { itsFile = str; }
+		void SetShortFilename(const string &str) { itsShortName = str; }
+		void SetArtist(const string &str) { itsArtist = str; }
+		void SetTitle(const string &str) { itsTitle = str; }
+		void SetAlbum(const string &str) { itsAlbum = str; }
+		void SetTrack(const string &str) { itsTrack = str.empty() ? "" : IntoStr(StrToInt(str)); }
+		void SetYear(const string &str) { itsYear = str.empty() ? "" : IntoStr(StrToInt(str)); }
+		void SetGenre(const string &str) { itsGenre = str; }
+		void SetComment(const string &str) { itsComment = str; }
 		void SetPosition(int pos) { itsPosition = pos; }
 		
 		void GetEmptyFields(bool get) { itsGetEmptyFields = get; }

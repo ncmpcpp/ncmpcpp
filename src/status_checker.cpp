@@ -31,10 +31,10 @@ extern Menu<Item> *mBrowser;
 extern Menu<string> *mSearcher;
 extern Menu<string> *mLibArtists;
 extern Menu<string> *mLibAlbums;
+extern Menu<string> *mEditorAlbums;
 extern Menu<Song> *mLibSongs;
 extern Menu<Song> *mPlaylistEditor;
 
-extern Window *wCurrent;
 extern Window *wHeader;
 extern Window *wFooter;
 
@@ -230,6 +230,7 @@ void NcmpcppStatusChanged(MPDConnection *Mpd, MPDStatusChanges changed, void *da
 		GetDirectory(browsed_dir);
 		mLibArtists->Clear(0);
 		mPlaylistEditor->Clear(0);
+		mEditorAlbums->Clear(0);
 	}
 	if (changed.PlayerState)
 	{
@@ -417,7 +418,8 @@ void NcmpcppStatusChanged(MPDConnection *Mpd, MPDStatusChanges changed, void *da
 		wHeader->WriteXY(wHeader->GetWidth()-volume_state.length(), 0, volume_state);
 		wHeader->SetColor(Config.header_color);
 	}
-	wCurrent->Refresh();
+	if (current_screen == csPlaylist)
+		mPlaylist->Refresh();
 	wFooter->Bold(0);
 	wFooter->GotoXY(sx, sy);
 	wFooter->Refresh();

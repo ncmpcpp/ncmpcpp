@@ -653,7 +653,11 @@ void Menu<T>::Highlight(int which)
 template <class T>
 void Menu<T>::Reset()
 {
-	NeedsRedraw.clear();
+	if (!Empty())
+	{
+		NeedsRedraw.push_back(0);
+		NeedsRedraw.push_back(itsHighlight);
+	}
 	itsHighlight = 0;
 	itsBeginning = 0;
 }

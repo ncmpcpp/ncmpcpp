@@ -30,6 +30,17 @@
 
 extern ncmpcpp_config Config;
 
+class CaseInsensitiveComparison
+{
+	public:
+		bool operator()(string a, string b)
+		{
+			transform(a.begin(), a.end(), a.begin(), tolower);
+			transform(b.begin(), b.end(), b.begin(), tolower);
+			return a < b;
+		}
+};
+
 void UpdateItemList(Menu<Item> *);
 void UpdateSongList(Menu<Song> *);
 void UpdateFoundList(const SongList &, Menu<string> *);
@@ -37,9 +48,10 @@ void UpdateFoundList(const SongList &, Menu<string> *);
 string DisplayKeys(int *, int = 2);
 bool Keypressed(int, const int *);
 bool SortSongsByTrack(Song *, Song *);
-bool CaseInsensitiveComparison(string, string);
+
 void WindowTitle(const string &);
 string TotalPlaylistLength();
+string DisplayTag(const Song &, void *);
 string DisplayItem(const Item &, void * = NULL);
 string DisplayColumns(string);
 string DisplaySongInColumns(const Song &, void *);
@@ -47,6 +59,9 @@ string DisplaySong(const Song &, void * = &Config.song_list_format);
 void ShowMessage(const string &, int = Config.message_delay_time);
 bool SortDirectory(const Item &a, const Item &b);
 void GetDirectory(string, string = "/");
+#ifdef HAVE_TAGLIB_H
+bool WriteTags(Song &);
+#endif
 bool GetSongInfo(Song &);
 void PrepareSearchEngine(Song &s);
 void Search(SongList &, Song &);
