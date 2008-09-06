@@ -150,6 +150,7 @@ class MPDConnection
 		void AddToPlaylist(const string &, const Song &) const;
 		void AddToPlaylist(const string &, const string &) const;
 		void Move(const string &, int, int) const;
+		void Rename(const string &, const string &) const;
 		
 		void StartSearch(bool) const;
 		void StartFieldSearch(mpd_TagItems);

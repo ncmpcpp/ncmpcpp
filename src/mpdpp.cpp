@@ -302,6 +302,15 @@ void MPDConnection::Move(const string &path, int from, int to) const
 	}
 }
 
+void MPDConnection::Rename(const string &from, const string &to) const
+{
+	if (isConnected)
+	{
+		mpd_sendRenameCommand(itsConnection, from.c_str(), to.c_str());
+		mpd_finishCommand(itsConnection);
+	}
+}
+
 void MPDConnection::GetPlaylistChanges(long long id, SongList &v) const
 {
 	if (isConnected)

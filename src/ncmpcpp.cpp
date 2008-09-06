@@ -57,10 +57,10 @@
 
 #ifdef HAVE_TAGLIB_H
  const string tag_screen = "Tag editor";
- const string tag_screen_keydesc = "Edit song's tags\n";
+ const string tag_screen_keydesc = "Edit song's tags/playlist's name\n";
 #else
  const string tag_screen = "Tag info";
- const string tag_screen_keydesc = "Show song's tags\n";
+ const string tag_screen_keydesc = "Show song's tags/edit playlist's name\n";
 #endif
 
 ncmpcpp_config Config;
@@ -1976,6 +1976,19 @@ int main(int argc, char *argv[])
 				}
 				else
 					ShowMessage("Cannot read file!");
+			}
+			else if (wCurrent == mPlaylistList)
+			{
+				LOCK_STATUSBAR;
+				wFooter->WriteXY(0, Config.statusbar_visibility, "[.b]Playlist:[/b] ", 1);
+				string new_name = wFooter->GetString(mPlaylistList->GetOption());
+				UNLOCK_STATUSBAR;
+				if (!new_name.empty() && new_name != mPlaylistList->GetOption())
+				{
+					Mpd->Rename(mPlaylistList->GetOption(), new_name);
+					ShowMessage("Playlist '" + mPlaylistList->GetOption() + "' renamed to '" + new_name + "'");
+					mPlaylistList->Clear(0);
+				}
 			}
 		}
 		else if (Keypressed(input, Key.GoToContainingDir))
