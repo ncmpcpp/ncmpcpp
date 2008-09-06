@@ -695,18 +695,7 @@ int main(int argc, char *argv[])
 		}
 		else if (input == KEY_RESIZE)
 		{
-			int in;
-			
 			redraw_me = 1;
-			
-			while (1)
-			{
-				wCurrent->ReadKey(in);
-				if (in == KEY_RESIZE)
-					continue;
-				else
-					break;
-			}
 			
 			if (COLS < 20 || LINES < 5)
 			{
