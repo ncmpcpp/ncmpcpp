@@ -67,6 +67,7 @@ ncmpcpp_config Config;
 ncmpcpp_keys Key;
 
 SongList vSearched;
+std::map<string, string> vAlbums;
 
 vector<int> vFoundPositions;
 int found_pos = 0;
@@ -484,10 +485,12 @@ int main(int argc, char *argv[])
 			{
 				mLibAlbums->Reset();
 				mLibSongs->Clear(0);
+				vAlbums.clear();
 				TagList list;
 				Mpd->GetAlbums(mLibArtists->GetOption(), list);
-				for (TagList::iterator it = list.begin(); it != list.end(); it++)
+				for (TagList::const_iterator it = list.begin(); it != list.end(); it++)
 				{
+					bool written = 0;
 					SongList l;
 					Mpd->StartSearch(1);
 					Mpd->AddSearch(MPD_TAG_ITEM_ARTIST, mLibArtists->GetOption());
@@ -497,15 +500,17 @@ int main(int argc, char *argv[])
 					{
 						if ((*j)->GetYear() != EMPTY_TAG)
 						{
-							*it = "(" + (*j)->GetYear() + ") " + *it;
+							vAlbums["(" + (*j)->GetYear() + ") " + *it] = *it;
+							written = 1;
 							break;
 						}
 					}
+					if (!written)
+						vAlbums[*it] = *it;
 					FreeSongList(l);
 				}
-				sort(list.begin(), list.end());
-				for (TagList::const_iterator it = list.begin(); it != list.end(); it++)
-					mLibAlbums->AddOption(*it);
+				for (std::map<string, string>::const_iterator it = vAlbums.begin(); it != vAlbums.end(); it++)
+					mLibAlbums->AddOption(it->first);
 				mLibAlbums->Window::Clear();
 				mLibAlbums->Refresh();
 			}
@@ -534,17 +539,8 @@ int main(int argc, char *argv[])
 					mLibSongs->Clear(0);
 					Mpd->StartSearch(1);
 					Mpd->AddSearch(MPD_TAG_ITEM_ARTIST, mLibArtists->GetOption());
-					Mpd->AddSearch(MPD_TAG_ITEM_ALBUM, mLibAlbums->GetOption());
+					Mpd->AddSearch(MPD_TAG_ITEM_ALBUM, vAlbums[mLibAlbums->GetOption()]);
 					Mpd->CommitSearch(list);
-					if (list.empty())
-					{
-						const int year_length = 7;
-						const string &album = mLibAlbums->GetOption();
-						Mpd->StartSearch(1);
-						Mpd->AddSearch(MPD_TAG_ITEM_ARTIST, mLibArtists->GetOption());
-						Mpd->AddSearch(MPD_TAG_ITEM_ALBUM, album.substr(year_length));
-						Mpd->CommitSearch(list);
-					}
 				}
 				sort(list.begin(), list.end(), SortSongsByTrack);
 				bool bold = 0;
@@ -1164,7 +1160,7 @@ int main(int argc, char *argv[])
 							Mpd->QueueAddSong(mLibSongs->at(i));
 						if (Mpd->CommitQueue())
 						{
-							ShowMessage("Adding songs from: " + mLibArtists->GetOption() + " \"" + mLibAlbums->GetOption() + "\"");
+							ShowMessage("Adding songs from: " + mLibArtists->GetOption() + " \"" + vAlbums[mLibAlbums->GetOption()] + "\"");
 							Song *s = &mPlaylist->at(mPlaylist->Size()-mLibSongs->Size());
 							if (s->GetHash() == mLibSongs->at(0).GetHash())
 							{

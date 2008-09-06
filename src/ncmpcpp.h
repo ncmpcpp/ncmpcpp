@@ -41,6 +41,7 @@ const bool UNICODE = 0;
 #include <clocale>
 #include <ctime>
 #include <unistd.h>
+#include <map>
 #include <vector>
 
 #include "window.h"
