@@ -1975,7 +1975,7 @@ int main(int argc, char *argv[])
 					current_screen = csTagEditor;
 				}
 				else
-					ShowMessage("Cannot read file!");
+					ShowMessage("Cannot read file '" + Config.mpd_music_dir + "/" + s->GetFile() + "'!");
 			}
 			else if (wCurrent == mPlaylistList)
 			{
