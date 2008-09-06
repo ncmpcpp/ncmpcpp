@@ -473,6 +473,7 @@ int main(int argc, char *argv[])
 				vFoundPositions.clear();
 				TagList list;
 				mLibAlbums->Clear(0);
+				mLibSongs->Clear(0);
 				Mpd->GetArtists(list);
 				sort(list.begin(), list.end(), CaseInsensitiveComparison);
 				for (TagList::const_iterator it = list.begin(); it != list.end(); it++)
@@ -481,10 +482,9 @@ int main(int argc, char *argv[])
 				mLibArtists->Refresh();
 			}
 			
-			if (mLibAlbums->Empty())
+			if (mLibAlbums->Empty() && mLibSongs->Empty())
 			{
 				mLibAlbums->Reset();
-				mLibSongs->Clear(0);
 				vAlbums.clear();
 				TagList list;
 				Mpd->GetAlbums(mLibArtists->GetOption(), list);
@@ -649,7 +649,10 @@ int main(int argc, char *argv[])
 				if (Keypressed(input, Key.Up) || Keypressed(input, Key.Down) || Keypressed(input, Key.PageUp) || Keypressed(input, Key.PageDown) || Keypressed(input, Key.Home) || Keypressed(input, Key.End) || Keypressed(input, Key.FindForward) || Keypressed(input, Key.FindBackward) || Keypressed(input, Key.NextFoundPosition) || Keypressed(input, Key.PrevFoundPosition))
 				{
 					if (wCurrent == mLibArtists)
+					{
 						mLibAlbums->Clear(0);
+						mLibSongs->Clear(0);
+					}
 					else if (wCurrent == mLibAlbums)
 						mLibSongs->Clear(0);
 				}
@@ -1190,7 +1193,10 @@ int main(int argc, char *argv[])
 					{
 						wCurrent->Go(wDown);
 						if (wCurrent == mLibArtists)
+						{
 							mLibAlbums->Clear(0);
+							mLibSongs->Clear(0);
+						}
 						else if (wCurrent == mLibAlbums)
 							mLibSongs->Clear(0);
 					}
