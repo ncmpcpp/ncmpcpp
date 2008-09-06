@@ -1878,6 +1878,72 @@ int main(int argc, char *argv[])
 		}
 		else if (Keypressed(input, Key.EditTags))
 		{
+#			ifdef HAVE_TAGLIB_H
+			if (wCurrent == mLibArtists)
+			{
+				LOCK_STATUSBAR;
+				wFooter->WriteXY(0, Config.statusbar_visibility, "[.b]Artist:[/b] ", 1);
+				string new_artist = wFooter->GetString(mLibArtists->GetOption());
+				UNLOCK_STATUSBAR;
+				if (!new_artist.empty() && new_artist != mLibArtists->GetOption())
+				{
+					bool success = 1;
+					SongList list;
+					Mpd->StartSearch(1);
+					Mpd->AddSearch(MPD_TAG_ITEM_ARTIST, mLibArtists->GetOption());
+					Mpd->CommitSearch(list);
+					for (SongList::const_iterator it = list.begin(); it != list.end(); it++)
+					{
+						string path = Config.mpd_music_dir + "/" + (*it)->GetFile();
+						TagLib::FileRef f(path.c_str());
+						if (f.isNull())
+						{
+							success = 0;
+							break;
+						}
+						f.tag()->setArtist(TO_WSTRING(new_artist));
+						f.save();
+					}
+					if (success)
+						Mpd->UpdateDirectory("/");
+					FreeSongList(list);
+					ShowMessage(success ? "Tags written succesfully!" : "Error while writing tags!");
+				}
+			}
+			else if (wCurrent == mLibAlbums)
+			{
+				LOCK_STATUSBAR;
+				wFooter->WriteXY(0, Config.statusbar_visibility, "[.b]Album:[/b] ", 1);
+				string new_album = wFooter->GetString(vAlbums[mLibAlbums->GetOption()]);
+				UNLOCK_STATUSBAR;
+				if (!new_album.empty() && new_album != vAlbums[mLibAlbums->GetOption()])
+				{
+					bool success = 1;
+					SongList list;
+					Mpd->StartSearch(1);
+					Mpd->AddSearch(MPD_TAG_ITEM_ARTIST, mLibArtists->GetOption());
+					Mpd->AddSearch(MPD_TAG_ITEM_ALBUM, vAlbums[mLibAlbums->GetOption()]);
+					Mpd->CommitSearch(list);
+					for (SongList::const_iterator it = list.begin(); it != list.end(); it++)
+					{
+						string path = Config.mpd_music_dir + "/" + (*it)->GetFile();
+						TagLib::FileRef f(path.c_str());
+						if (f.isNull())
+						{
+							success = 0;
+							break;
+						}
+						f.tag()->setAlbum(TO_WSTRING(new_album));
+						f.save();
+					}
+					if (success)
+						Mpd->UpdateDirectory("/");
+					FreeSongList(list);
+					ShowMessage(success ? "Tags written succesfully!" : "Error while writing tags!");
+				}
+			}
+			else
+#			endif
 			if ((wCurrent == mPlaylist && !mPlaylist->Empty())
 			||  (wCurrent == mBrowser && mBrowser->at(mBrowser->GetChoice()).type == itSong)
 			||  (wCurrent == mSearcher && !vSearched.empty() && mSearcher->GetChoice() > search_engine_static_option)
