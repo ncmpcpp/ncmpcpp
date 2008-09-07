@@ -471,7 +471,7 @@ string DisplaySongInColumns(const Song &s, void *s_template)
 				ss = s.GetArtist();
 				break;
 			case 't':
-				ss = s.GetTitle();
+				ss = s.GetTitle() != UNKNOWN_TITLE ? s.GetTitle() : s.GetShortFilename().substr(0, s.GetShortFilename().find_last_of("."));
 				break;
 			case 'b':
 				ss = s.GetAlbum();
