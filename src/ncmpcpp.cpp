@@ -1327,7 +1327,7 @@ int main(int argc, char *argv[])
 						wCurrent->Go(wDown);
 					break;
 				}
-#				ifdef HVAE_TAGLIB_H
+#				ifdef HAVE_TAGLIB_H
 				case csAlbumEditor:
 				{
 					void (Song::*set)(const string &) = 0;
