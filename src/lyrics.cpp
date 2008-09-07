@@ -19,7 +19,7 @@
  ***************************************************************************/
 
 #include "lyrics.h"
-#include <fcntl.h>
+#include <sys/stat.h>
 
 const string lyrics_folder = home_folder + "/" + ".lyrics";
 
