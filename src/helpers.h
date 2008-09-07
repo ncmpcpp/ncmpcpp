@@ -50,6 +50,8 @@ bool Keypressed(int, const int *);
 bool SortSongsByTrack(Song *, Song *);
 
 void WindowTitle(const string &);
+string FindSharedDir(Menu<Song> *);
+string FindSharedDir(const SongList &);
 string TotalPlaylistLength();
 string DisplayTag(const Song &, void *);
 string DisplayItem(const Item &, void * = NULL);

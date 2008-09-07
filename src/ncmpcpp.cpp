@@ -706,7 +706,7 @@ int main(int argc, char *argv[])
 				mEditorTags->Refresh();
 			}
 			
-			mEditorTagTypes->GetChoice() < 7 ? mEditorTags->Refresh(1) : mEditorTags->Window::Clear();
+			mEditorTagTypes->GetChoice() < 10 ? mEditorTags->Refresh(1) : mEditorTags->Window::Clear();
 		}
 		
 		// album editor end
@@ -754,7 +754,6 @@ int main(int argc, char *argv[])
 					else if (wCurrent == mEditorAlbums)
 					{
 						mEditorTags->Clear(0);
-						mEditorTagTypes->Reset();
 						mEditorTagTypes->Refresh();
 					}
 				}
@@ -1354,11 +1353,11 @@ int main(int argc, char *argv[])
 						case 6:
 							set = &Song::SetComment;
 							break;
-						case 7: // reset
+						case 8: // reset
 							mEditorTags->Clear(0);
 							ShowMessage("Changes reset");
 							continue;
-						case 8: // save
+						case 9: // save
 						{
 							bool success = 1;
 							ShowMessage("Writing changes...");
@@ -1379,7 +1378,7 @@ int main(int argc, char *argv[])
 								wCurrent->Refresh();
 								wCurrent = mEditorAlbums;
 								mEditorAlbums->HighlightColor(Config.active_column_color);
-								Mpd->UpdateDirectory("/");
+								Mpd->UpdateDirectory(FindSharedDir(mEditorTags));
 							}
 							else
 								mEditorTags->Clear(0);
@@ -1388,7 +1387,7 @@ int main(int argc, char *argv[])
 						default:
 							break;
 					}
-					if (wCurrent == mEditorTagTypes)
+					if (wCurrent == mEditorTagTypes && set != NULL)
 					{
 						LOCK_STATUSBAR;
 						wFooter->WriteXY(0, Config.statusbar_visibility, "[.b]" + mEditorTagTypes->GetOption() + "[/b]: ", 1);
@@ -1400,7 +1399,7 @@ int main(int argc, char *argv[])
 							for (int i = 0; i < mEditorTags->Size(); i++)
 								(mEditorTags->at(i).*set)(new_tag);
 					}
-					else if (wCurrent == mEditorTags)
+					else if (wCurrent == mEditorTags && set != NULL)
 					{
 						LOCK_STATUSBAR;
 						wFooter->WriteXY(0, Config.statusbar_visibility, "[.b]" + mEditorTagTypes->GetOption() + "[/b]: ", 1);
@@ -1542,7 +1541,7 @@ int main(int argc, char *argv[])
 					wCurrent = mEditorTagTypes;
 					mEditorTagTypes->HighlightColor(Config.active_column_color);
 				}
-				else if (wCurrent == mEditorTagTypes && mEditorTagTypes->GetChoice() < 7)
+				else if (wCurrent == mEditorTagTypes && mEditorTagTypes->GetChoice() < 10)
 				{
 					mEditorTagTypes->HighlightColor(Config.main_highlight_color);
 					wCurrent->Refresh();
@@ -2101,6 +2100,7 @@ int main(int argc, char *argv[])
 				{
 					bool success = 1;
 					SongList list;
+					ShowMessage("Updating tags...");
 					Mpd->StartSearch(1);
 					Mpd->AddSearch(MPD_TAG_ITEM_ARTIST, mLibArtists->GetOption());
 					Mpd->CommitSearch(list);
@@ -2117,7 +2117,7 @@ int main(int argc, char *argv[])
 						f.save();
 					}
 					if (success)
-						Mpd->UpdateDirectory("/");
+						Mpd->UpdateDirectory(FindSharedDir(list));
 					FreeSongList(list);
 					ShowMessage(success ? "Tags written succesfully!" : "Error while writing tags!");
 				}
@@ -2132,6 +2132,7 @@ int main(int argc, char *argv[])
 				{
 					bool success = 1;
 					SongList list;
+					ShowMessage("Updating tags...");
 					Mpd->StartSearch(1);
 					Mpd->AddSearch(MPD_TAG_ITEM_ARTIST, mLibArtists->GetOption());
 					Mpd->AddSearch(MPD_TAG_ITEM_ALBUM, vLibAlbums[mLibAlbums->GetOption()]);
@@ -2149,7 +2150,7 @@ int main(int argc, char *argv[])
 						f.save();
 					}
 					if (success)
-						Mpd->UpdateDirectory("/");
+						Mpd->UpdateDirectory(FindSharedDir(list));
 					FreeSongList(list);
 					ShowMessage(success ? "Tags written succesfully!" : "Error while writing tags!");
 				}
@@ -2795,6 +2796,8 @@ int main(int argc, char *argv[])
 					mEditorTagTypes->AddOption("Track");
 					mEditorTagTypes->AddOption("Genre");
 					mEditorTagTypes->AddOption("Comment");
+					mEditorTagTypes->AddSeparator();
+					mEditorTagTypes->AddOption("Filename");
 					mEditorTagTypes->AddSeparator();
 					mEditorTagTypes->AddOption("Reset");
 					mEditorTagTypes->AddOption("Save");

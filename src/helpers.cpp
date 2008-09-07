@@ -194,6 +194,33 @@ void WindowTitle(const string &status)
 		printf("\033]0;%s\7",status.c_str());
 }
 
+string FindSharedDir(Menu<Song> *menu)
+{
+	SongList list;
+	for (int i = 0; i < menu->Size(); i++)
+		list.push_back(&menu->at(i));
+	return FindSharedDir(list);
+}
+
+string FindSharedDir(const SongList &v)
+{
+	string result;
+	if (!v.empty())
+	{
+		result = v.front()->GetFile();
+		for (SongList::const_iterator it = v.begin()+1; it != v.end(); it++)
+		{
+			int i = 1;
+			while (result.substr(0, i) == (*it)->GetFile().substr(0, i))
+				i++;
+			result = result.substr(0, i);
+		}
+		int slash = result.find_last_of("/");
+		result = slash != string::npos ? result.substr(0, slash) : "/";
+	}
+	return result;
+}
+
 string TotalPlaylistLength()
 {
 	const int MINUTE = 60;
@@ -265,6 +292,8 @@ string DisplayTag(const Song &s, void *data)
 			return s.GetGenre();
 		case 6:
 			return s.GetComment();
+		case 8:
+			return s.GetShortFilename();
 		default:
 			return "";
 	}
