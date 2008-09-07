@@ -152,6 +152,7 @@ void DefaultConfiguration(ncmpcpp_config &conf)
 	conf.song_status_format = "{(%l) }{%a - }{%t}|{%f}";
 	conf.song_window_title_format = "{%a - }{%t}|{%f}";
 	conf.song_library_format = "{%n - }{%t}|{%f}";
+	conf.tag_editor_album_format = "{(%y) }%b";
 	conf.browser_playlist_prefix = "[.red](playlist)[/red] ";
 	conf.selected_item_prefix = "[.magenta]";
 	conf.selected_item_suffix = "[/magenta]";
@@ -324,6 +325,8 @@ void ReadKeys(ncmpcpp_keys &keys)
 				GetKeys(*it, keys.MediaLibrary);
 			else if (it->find("key_playlist_editor ") != string::npos)
 				GetKeys(*it, keys.PlaylistEditor);
+			else if (it->find("key_album_tag_editor ") != string::npos)
+				GetKeys(*it, keys.AlbumEditor);
 			else if (it->find("key_stop ") != string::npos)
 				GetKeys(*it, keys.Stop);
 			else if (it->find("key_pause ") != string::npos)
@@ -468,6 +471,11 @@ void ReadConfiguration(ncmpcpp_config &conf)
 			{
 				if (!v.empty())
 					conf.song_library_format = v;
+			}
+			else if (it->find("tag_editor_album_format") != string::npos)
+			{
+				if (!v.empty())
+					conf.tag_editor_album_format = v;
 			}
 			else if (it->find("browser_playlist_prefix") != string::npos)
 			{

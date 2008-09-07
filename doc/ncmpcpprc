@@ -62,17 +62,21 @@
 #
 #song_list_format = "{[.green](%l)[/green] }{%a - }{%t}|{[.white]%f[/white]}"
 #
-#song_status_format = "{(%l) }{%a - }{%t}|{%f}"
-#
-#song_window_title_format = "{%a - }{%t}|{%f}"
-#
 #song_library_format = "{%n - }{%t}|{%f}"
+#
+#tag_editor_album_format = "{(%y) }%b"
 #
 #browser_playlist_prefix = "[.red]playlist[/red] "
 #
 #selected_item_prefix = "[.magenta]"
 #
 #selected_item_suffix = "[/magenta]"
+#
+## colors are not supported for below veriables
+#
+#song_status_format = "{(%l) }{%a - }{%t}|{%f}"
+#
+#song_window_title_format = "{%a - }{%t}|{%f}"
 #
 ##### columns settings #####
 ##

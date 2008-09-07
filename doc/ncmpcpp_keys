@@ -51,6 +51,8 @@
 #
 #key_playlist_editor = '6' 270
 #
+#key_album_tag_editor = '7' 271
+#
 #key_stop = 's'
 #
 #key_pause = 'P'

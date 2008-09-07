@@ -30,15 +30,12 @@
 
 extern ncmpcpp_config Config;
 
-class CaseInsensitiveComparison
+class CaseInsensitiveSorting
 {
 	public:
-		bool operator()(string a, string b)
-		{
-			transform(a.begin(), a.end(), a.begin(), tolower);
-			transform(b.begin(), b.end(), b.begin(), tolower);
-			return a < b;
-		}
+		bool operator()(string, string);
+		bool operator()(Song *, Song *);
+		bool operator()(const Item &, const Item &);
 };
 
 void UpdateItemList(Menu<Item> *);
@@ -59,7 +56,6 @@ string DisplayColumns(string);
 string DisplaySongInColumns(const Song &, void *);
 string DisplaySong(const Song &, void * = &Config.song_list_format);
 void ShowMessage(const string &, int = Config.message_delay_time);
-bool SortDirectory(const Item &a, const Item &b);
 void GetDirectory(string, string = "/");
 #ifdef HAVE_TAGLIB_H
 bool WriteTags(Song &);

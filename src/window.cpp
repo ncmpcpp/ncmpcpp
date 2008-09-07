@@ -433,6 +433,9 @@ string Window::GetString(const string &base, unsigned int length) const
 	
 	do
 	{
+		mvwprintw(itsWindow, y, minx, "%ls",tmp.c_str());
+		wclrtoeol(itsWindow);
+		
 		if (itsGetStringHelper)
 			itsGetStringHelper();
 		wmove(itsWindow,y,x);
@@ -465,7 +468,7 @@ string Window::GetString(const string &base, unsigned int length) const
 				if ((maxx-x) < 1) break;
 				tmp.erase(tmp.end()-(maxx-x));
 				wmove(itsWindow,y,x); // for backspace
-				wdelch(itsWindow);
+				//wdelch(itsWindow);
 				maxx--;
 				break;
 			}
@@ -494,7 +497,7 @@ string Window::GetString(const string &base, unsigned int length) const
 				else
 					tmp.insert(tmp.end()-(maxx-x),wc_in);
 				
-				winsstr(itsWindow, tmp_in.c_str());
+				//winsstr(itsWindow, tmp_in.c_str());
 				tmp_in.clear();
 				
 				x++;

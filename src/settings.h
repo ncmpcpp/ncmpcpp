@@ -96,6 +96,7 @@ struct ncmpcpp_config
 	string song_status_format;
 	string song_window_title_format;
 	string song_library_format;
+	string tag_editor_album_format;
 	string browser_playlist_prefix;
 	
 	string selected_item_prefix;

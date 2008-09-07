@@ -74,8 +74,8 @@ ncmpcpp_config Config;
 ncmpcpp_keys Key;
 
 SongList vSearched;
-std::map<string, string, CaseInsensitiveComparison> vLibAlbums;
-std::map<string, string, CaseInsensitiveComparison> vEditorAlbums;
+std::map<string, string, CaseInsensitiveSorting> vLibAlbums;
+std::map<string, string, CaseInsensitiveSorting> vEditorAlbums;
 
 vector<int> vFoundPositions;
 int found_pos = 0;
@@ -504,7 +504,7 @@ int main(int argc, char *argv[])
 				mLibAlbums->Clear(0);
 				mLibSongs->Clear(0);
 				Mpd->GetArtists(list);
-				sort(list.begin(), list.end(), CaseInsensitiveComparison());
+				sort(list.begin(), list.end(), CaseInsensitiveSorting());
 				for (TagList::const_iterator it = list.begin(); it != list.end(); it++)
 					mLibArtists->AddOption(*it);
 				mLibArtists->Window::Clear();
@@ -673,17 +673,7 @@ int main(int argc, char *argv[])
 					Mpd->StartSearch(1);
 					Mpd->AddSearch(MPD_TAG_ITEM_ALBUM, *it);
 					Mpd->CommitSearch(l);
-					for (SongList::const_iterator j = l.begin(); j != l.end(); j++)
-					{
-						if ((*j)->GetYear() != EMPTY_TAG)
-						{
-							vEditorAlbums["(" + (*j)->GetYear() + ") " + *it] = *it;
-							written = 1;
-							break;
-						}
-					}
-					if (!written)
-						vEditorAlbums[*it] = *it;
+					vEditorAlbums[DisplaySong(*l[0], &Config.tag_editor_album_format)] = *it;
 					FreeSongList(l);
 				}
 				for (std::map<string, string>::const_iterator it = vEditorAlbums.begin(); it != vEditorAlbums.end(); it++)
@@ -699,6 +689,7 @@ int main(int argc, char *argv[])
 				Mpd->StartSearch(1);
 				Mpd->AddSearch(MPD_TAG_ITEM_ALBUM, vEditorAlbums[mEditorAlbums->GetOption()]);
 				Mpd->CommitSearch(list);
+				sort(list.begin(), list.end(), CaseInsensitiveSorting());
 				for (SongList::iterator it = list.begin(); it != list.end(); it++)
 					mEditorTags->AddOption(**it);
 				FreeSongList(list);
@@ -1330,7 +1321,8 @@ int main(int argc, char *argv[])
 				case csAlbumEditor:
 				{
 					void (Song::*set)(const string &) = 0;
-					switch (mEditorTagTypes->GetRealChoice())
+					int id = mEditorTagTypes->GetRealChoice();
+					switch (id)
 					{
 						case 0:
 							set = &Song::SetTitle;
@@ -1346,6 +1338,29 @@ int main(int argc, char *argv[])
 							break;
 						case 4:
 							set = &Song::SetTrack;
+							if (wCurrent == mEditorTagTypes)
+							{
+								LOCK_STATUSBAR;
+								wFooter->WriteXY(0, Config.statusbar_visibility, "Number tracks? [y/n] ", 1);
+								curs_set(1);
+								int in = 0;
+								do
+								{
+									TraceMpdStatus();
+									wFooter->ReadKey(in);
+								}
+								while (in != 'y' && in != 'n');
+								if (in == 'y')
+								{
+									for (int i = 0; i < mEditorTags->Size(); i++)
+										mEditorTags->at(i).SetTrack(i+1);
+									ShowMessage("Tracks numbered!");
+								}
+								else
+									ShowMessage("Aborted!");
+								curs_set(0);
+								UNLOCK_STATUSBAR;
+							}
 							break;
 						case 5:
 							set = &Song::SetGenre;
@@ -1354,9 +1369,11 @@ int main(int argc, char *argv[])
 							set = &Song::SetComment;
 							break;
 						case 8: // reset
+						{
 							mEditorTags->Clear(0);
 							ShowMessage("Changes reset");
 							continue;
+						}
 						case 9: // save
 						{
 							bool success = 1;
@@ -1387,7 +1404,7 @@ int main(int argc, char *argv[])
 						default:
 							break;
 					}
-					if (wCurrent == mEditorTagTypes && set != NULL)
+					if (wCurrent == mEditorTagTypes && id != 0 && id != 4 && set != NULL)
 					{
 						LOCK_STATUSBAR;
 						wFooter->WriteXY(0, Config.statusbar_visibility, "[.b]" + mEditorTagTypes->GetOption() + "[/b]: ", 1);
@@ -1395,9 +1412,8 @@ int main(int argc, char *argv[])
 						string new_tag = wFooter->GetString(mEditorTags->GetOption());
 						mEditorTags->at(mEditorTags->GetChoice()).GetEmptyFields(0);
 						UNLOCK_STATUSBAR;
-						if (!new_tag.empty())
-							for (int i = 0; i < mEditorTags->Size(); i++)
-								(mEditorTags->at(i).*set)(new_tag);
+						for (int i = 0; i < mEditorTags->Size(); i++)
+							(mEditorTags->at(i).*set)(new_tag);
 					}
 					else if (wCurrent == mEditorTags && set != NULL)
 					{
@@ -2801,6 +2817,7 @@ int main(int argc, char *argv[])
 					mEditorTagTypes->AddSeparator();
 					mEditorTagTypes->AddOption("Reset");
 					mEditorTagTypes->AddOption("Save");
+
 				}
 				
 				wCurrent = mEditorAlbums;

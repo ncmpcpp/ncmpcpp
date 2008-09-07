@@ -59,6 +59,38 @@ extern string UNKNOWN_ARTIST;
 extern string UNKNOWN_TITLE;
 extern string UNKNOWN_ALBUM;
 
+bool CaseInsensitiveSorting::operator()(string a, string b)
+{
+	//a = Window::OmitBBCodes(a);
+	//b = Window::OmitBBCodes(b);
+	transform(a.begin(), a.end(), a.begin(), tolower);
+	transform(b.begin(), b.end(), b.begin(), tolower);
+	return a < b;
+}
+
+bool CaseInsensitiveSorting::operator()(Song *sa, Song *sb)
+{
+	string a = sa->GetShortFilename();
+	string b = sb->GetShortFilename();
+	transform(a.begin(), a.end(), a.begin(), tolower);
+	transform(b.begin(), b.end(), b.begin(), tolower);
+	return a < b;
+}
+
+bool CaseInsensitiveSorting::operator()(const Item &a, const Item &b)
+{
+	if (a.type == b.type)
+	{
+		string sa = a.type == itSong ? a.song->GetShortFilename() : a.name;
+		string sb = b.type == itSong ? b.song->GetShortFilename() : b.name;
+		transform(sa.begin(), sa.end(), sa.begin(), tolower);
+		transform(sb.begin(), sb.end(), sb.begin(), tolower);
+		return sa < sb;
+	}
+	else
+		return a.type < b.type;
+}
+
 void UpdateItemList(Menu<Item> *menu)
 {
 	bool bold = 0;
@@ -981,20 +1013,6 @@ bool GetSongInfo(Song &s)
 	return true;
 }
 
-bool SortDirectory(const Item &a, const Item &b)
-{
-	if (a.type == b.type)
-	{
-		string sa = a.type == itSong ? a.song->GetShortFilename() : a.name;
-		string sb = b.type == itSong ? b.song->GetShortFilename() : b.name;
-		transform(sa.begin(), sa.end(), sa.begin(), tolower);
-		transform(sb.begin(), sb.end(), sb.begin(), tolower);
-		return sa < sb;
-	}
-	else
-		return a.type < b.type;
-}
-
 void GetDirectory(string dir, string subdir)
 {
 	int highlightme = -1;
@@ -1016,7 +1034,7 @@ void GetDirectory(string dir, string subdir)
 	
 	ItemList list;
 	Mpd->GetDirectory(dir, list);
-	sort(list.begin(), list.end(), SortDirectory);
+	sort(list.begin(), list.end(), CaseInsensitiveSorting());
 	
 	for (ItemList::iterator it = list.begin(); it != list.end(); it++)
 	{
