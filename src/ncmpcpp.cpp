@@ -834,9 +834,9 @@ int main(int argc, char *argv[])
 			wFooter->MoveTo(0, footer_start_y);
 			wFooter->Resize(COLS, wFooter->GetHeight());
 			
-			if (wCurrent != sHelp)
+			if (wCurrent != sHelp && wCurrent != sLyrics)
 				wCurrent->Window::Clear();
-			wCurrent->Refresh(1);
+			
 			if (current_screen == csLibrary)
 			{
 				REFRESH_MEDIA_LIBRARY_SCREEN;
