@@ -99,9 +99,9 @@ string GetLyrics(string artist, string song)
 		result.replace(i, 7, "");
 	for (int i = result.find("</lyric>"); i != string::npos; i = result.find("</lyric>"))
 		result.replace(i, 8, "");
-	for (int i = result.find("<lyrics>"); i != string::npos; i = result.find("<lyric>"))
+	for (int i = result.find("<lyrics>"); i != string::npos; i = result.find("<lyrics>"))
 		result.replace(i, 8, "");
-	for (int i = result.find("</lyrics>"); i != string::npos; i = result.find("</lyric>"))
+	for (int i = result.find("</lyrics>"); i != string::npos; i = result.find("</lyrics>"))
 		result.replace(i, 9, "");
 	for (int i = result.find("<b>"); i != string::npos; i = result.find("<b>"))
 		result.replace(i, 3, "");
