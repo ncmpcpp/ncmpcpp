@@ -18,24 +18,28 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef HAVE_MISC_H
-#define HAVE_MISC_H
+#include "ncmpcpp.h"
 
-#include <cstdlib>
-#include <sstream>
-#include <iomanip>
-#include <string>
+#ifdef HAVE_TAGLIB_H
 
-using std::string;
+#ifndef HAVE_TAG_EDITOR_H
+#define HAVE_TAG_EDITOR_H
 
-int Abs(int);
+// taglib headers
+#include "fileref.h"
+#include "tag.h"
 
-int StrToInt(string);
+#include "mpdpp.h"
+#include "settings.h"
 
-string IntoStr(int);
-string IntoStr(double, int);
+string FindSharedDir(Menu<Song> *);
+string FindSharedDir(const SongList &);
+string DisplayTag(const Song &, void *);
 
-string ShowTime(int);
+bool GetSongTags(Song &);
+bool WriteTags(Song &);
+
+#endif
 
 #endif
 

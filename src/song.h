@@ -27,7 +27,7 @@
 #include <stdexcept>
 
 #include "misc.h"
-#include "settings.h"
+#include "libmpdclient.h"
 
 using std::string;
 
@@ -79,7 +79,6 @@ class Song
 		void Clear();
 		bool Empty() const;
 		
-		Song & operator=(const Song &);
 		bool operator==(const Song &) const;
 		bool operator!=(const Song &) const;
 		bool operator<(const Song &rhs) const;

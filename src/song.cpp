@@ -19,6 +19,7 @@
  ***************************************************************************/
 
 #include "song.h"
+#include "settings.h"
 
 extern ncmpcpp_config Config;
 
@@ -194,32 +195,6 @@ string Song::GetComment() const
 	return itsComment.empty() ? (itsGetEmptyFields ? "" : EMPTY_TAG) : itsComment;
 }
 
-Song & Song::operator=(const Song &s)
-{
-	if (this == &s)
-		return *this;
-	itsFile = s.itsFile;
-	itsShortName = s.itsShortName;
-	itsDirectory = s.itsDirectory;
-	itsArtist = s.itsArtist;
-	itsTitle = s.itsTitle;
-	itsAlbum = s.itsAlbum;
-	itsTrack = s.itsTrack;
-	itsYear = s.itsYear;
-	itsGenre = s.itsGenre;
-	itsComposer = s.itsComposer;
-	itsPerformer = s.itsPerformer;
-	itsDisc = s.itsDisc;
-	itsComment = s.itsComment;
-	itsHash = s.itsHash;
-	itsMinutesLength = s.itsMinutesLength;
-	itsSecondsLength = s.itsSecondsLength;
-	itsPosition = s.itsPosition;
-	itsID = s.itsID;
-	itsGetEmptyFields = s.itsGetEmptyFields;
-	return *this;
-}
-
 bool Song::operator==(const Song &s) const
 {
 	return itsFile == s.itsFile && itsArtist == s.itsArtist && itsTitle == s.itsTitle && itsAlbum == s.itsAlbum && itsTrack == s.itsTrack && itsYear == s.itsYear && itsGenre == s.itsGenre && itsComposer == s.itsComposer && itsPerformer == s.itsPerformer && itsDisc == s.itsDisc && itsComment == s.itsComment && itsHash == s.itsHash && itsMinutesLength && s.itsMinutesLength && itsSecondsLength == s.itsSecondsLength && itsPosition == s.itsPosition && itsID == s.itsID;
@@ -227,7 +202,7 @@ bool Song::operator==(const Song &s) const
 
 bool Song::operator!=(const Song &s) const
 {
-	return itsFile != s.itsFile || itsArtist != s.itsArtist || itsTitle != s.itsTitle || itsAlbum != s.itsAlbum || itsTrack != s.itsTrack || itsYear != s.itsYear || itsGenre != s.itsGenre || itsComposer != s.itsComposer || itsPerformer != s.itsPerformer || itsDisc != s.itsDisc || itsComment != s.itsComment || itsHash != s.itsHash || itsMinutesLength != s.itsMinutesLength || itsSecondsLength != s.itsSecondsLength || itsPosition != s.itsPosition || itsID != s.itsID;
+	return !operator==(s);
 }
 
 bool Song::operator<(const Song &s) const

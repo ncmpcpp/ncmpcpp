@@ -18,24 +18,15 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef HAVE_MISC_H
-#define HAVE_MISC_H
+#ifndef HAVE_SEARCH_ENGINE_H
+#define HAVE_SEARCH_ENGINE_H
 
-#include <cstdlib>
-#include <sstream>
-#include <iomanip>
-#include <string>
+#include "mpdpp.h"
+#include "ncmpcpp.h"
 
-using std::string;
-
-int Abs(int);
-
-int StrToInt(string);
-
-string IntoStr(int);
-string IntoStr(double, int);
-
-string ShowTime(int);
+void UpdateFoundList(const SongList &);
+void PrepareSearchEngine(Song &s);
+void Search(SongList &, Song &);
 
 #endif
 

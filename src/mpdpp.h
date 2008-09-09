@@ -21,6 +21,7 @@
 #ifndef HAVE_MPDPP_H
 #define HAVE_MPDPP_H
 
+#include "libmpdclient.h"
 #include "ncmpcpp.h"
 #include "song.h"
 

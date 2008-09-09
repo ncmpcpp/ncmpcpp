@@ -21,8 +21,8 @@
 #ifndef HAVE_STATUS_CHECKER_H
 #define HAVE_STATUS_CHECKER_H
 
-#include "ncmpcpp.h"
 #include "mpdpp.h"
+#include "ncmpcpp.h"
 
 void TraceMpdStatus();
 void NcmpcppStatusChanged(MPDConnection *, MPDStatusChanges, void *);

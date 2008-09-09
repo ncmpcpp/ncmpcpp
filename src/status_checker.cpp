@@ -18,36 +18,35 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include "status_checker.h"
 #include "helpers.h"
+#include "search_engine.h"
 #include "settings.h"
+#include "status_checker.h"
 
 extern MPDConnection *Mpd;
-
 extern ncmpcpp_config Config;
 
 extern Menu<Song> *mPlaylist;
 extern Menu<Item> *mBrowser;
-extern Menu<string> *mSearcher;
 extern Menu<string> *mLibArtists;
-extern Menu<string> *mLibAlbums;
-extern Menu<string> *mEditorAlbums;
 extern Menu<Song> *mLibSongs;
 extern Menu<Song> *mPlaylistEditor;
+
+#ifdef HAVE_TAGLIB_H
+extern Menu<string> *mEditorAlbums;
+#endif // HAVE_TAGLIB_H
 
 extern Window *wHeader;
 extern Window *wFooter;
 
 extern SongList vSearched;
 
-extern time_t block_delay;
 extern time_t timer;
-extern time_t now;
 
 extern int now_playing;
 extern int playing_song_scroll_begin;
 
-extern int block_statusbar_update_delay;
+extern int lock_statusbar_delay;
 
 extern string browsed_dir;
 
@@ -62,8 +61,6 @@ extern string mpd_db_updating;
 
 extern NcmpcppScreen current_screen;
 
-extern bool header_update_status;
-
 extern bool dont_change_now_playing;
 extern bool allow_statusbar_unblock;
 extern bool block_progressbar_update;
@@ -71,15 +68,27 @@ extern bool block_statusbar_update;
 extern bool block_playlist_update;
 extern bool block_found_item_list_update;
 
-extern bool redraw_me;
+extern bool redraw_screen;
 
+bool header_update_status = 0;
 bool repeat_one_allowed = 0;
 
 long long playlist_old_id = -1;
 
 int old_playing;
 
+time_t time_of_statusbar_lock;
+time_t now;
+
 string playlist_stats;
+string volume_state;
+string switch_state;
+string player_state;
+
+string mpd_repeat;
+string mpd_random;
+string mpd_crossfade;
+string mpd_db_updating;
 
 void TraceMpdStatus()
 {
@@ -89,15 +98,15 @@ void TraceMpdStatus()
 	if (now == timer+Config.playlist_disable_highlight_delay && current_screen == csPlaylist)
 		mPlaylist->Highlighting(!Config.playlist_disable_highlight_delay);
 
-	if (block_statusbar_update_delay > 0)
+	if (lock_statusbar_delay > 0)
 	{
-		if (now >= block_delay+block_statusbar_update_delay)
-			block_statusbar_update_delay = 0;
+		if (now >= time_of_statusbar_lock+lock_statusbar_delay)
+			lock_statusbar_delay = 0;
 	}
 	
-	if (!block_statusbar_update_delay)
+	if (!lock_statusbar_delay)
 	{
-		block_statusbar_update_delay = -1;
+		lock_statusbar_delay = -1;
 		
 		if (Config.statusbar_visibility)
 			block_statusbar_update = !allow_statusbar_unblock;
@@ -229,9 +238,11 @@ void NcmpcppStatusChanged(MPDConnection *Mpd, MPDStatusChanges changed, void *da
 	if (changed.Database)
 	{
 		GetDirectory(browsed_dir);
+#		ifdef HAVE_TAGLIB_H
+		mEditorAlbums->Clear(0);
+#		endif // HAVE_TAGLIB_H
 		mLibArtists->Clear(0);
 		mPlaylistEditor->Clear(0);
-		mEditorAlbums->Clear(0);
 	}
 	if (changed.PlayerState)
 	{

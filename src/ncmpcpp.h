@@ -26,30 +26,33 @@
 #endif
 
 #ifdef UTF8_ENABLED
-const bool UNICODE = 1;
+# define UNICODE 1
 #else
-const bool UNICODE = 0;
+# define UNICODE 0
 #endif
-
-#ifdef HAVE_TAGLIB_H
-# include "fileref.h"
-# include "tag.h"
-#endif
-
-#include "libmpdclient.h"
 
 #include <clocale>
 #include <ctime>
-#include <unistd.h>
+#include <algorithm>
 #include <map>
-#include <vector>
 
 #include "window.h"
 #include "menu.h"
 #include "scrollpad.h"
 #include "misc.h"
 
-enum NcmpcppScreen { csHelp, csPlaylist, csBrowser, csTagEditor, csSearcher, csLibrary, csLyrics, csPlaylistEditor, csAlbumEditor };
+enum NcmpcppScreen
+{
+	csHelp,
+	csPlaylist,
+	csBrowser,
+	csTagEditor,
+	csSearcher,
+	csLibrary,
+	csLyrics,
+	csPlaylistEditor,
+	csAlbumEditor
+};
 
 const int ncmpcpp_window_timeout = 500;
 const int search_engine_static_option = 17;
@@ -57,8 +60,8 @@ const int search_engine_static_option = 17;
 const string home_folder = getenv("HOME");
 const string TERMINAL_TYPE = getenv("TERM");
 
-const string search_mode_one = "Match if tag contains searched phrase";
-const string search_mode_two = "Match only if both values are the same";
+const string search_mode_normal = "Match if tag contains searched phrase";
+const string search_mode_strict = "Match only if both values are the same";
 
 #endif
 

@@ -21,12 +21,9 @@
 #ifndef HAVE_HELPERS_H
 #define HAVE_HELPERS_H
 
-#include <algorithm>
-
-#include "ncmpcpp.h"
 #include "mpdpp.h"
+#include "ncmpcpp.h"
 #include "settings.h"
-#include "song.h"
 
 extern ncmpcpp_config Config;
 
@@ -38,31 +35,23 @@ class CaseInsensitiveSorting
 		bool operator()(const Item &, const Item &);
 };
 
+bool SortSongsByTrack(Song *, Song *);
+
 void UpdateItemList(Menu<Item> *);
 void UpdateSongList(Menu<Song> *);
-void UpdateFoundList(const SongList &);
 
 string DisplayKeys(int *, int = 2);
 bool Keypressed(int, const int *);
-bool SortSongsByTrack(Song *, Song *);
 
 void WindowTitle(const string &);
-string FindSharedDir(Menu<Song> *);
-string FindSharedDir(const SongList &);
+
 string TotalPlaylistLength();
-string DisplayTag(const Song &, void *);
 string DisplayItem(const Item &, void * = NULL);
 string DisplayColumns(string);
 string DisplaySongInColumns(const Song &, void *);
 string DisplaySong(const Song &, void * = &Config.song_list_format);
 void ShowMessage(const string &, int = Config.message_delay_time);
 void GetDirectory(string, string = "/");
-#ifdef HAVE_TAGLIB_H
-bool WriteTags(Song &);
-#endif
-bool GetSongInfo(Song &);
-void PrepareSearchEngine(Song &s);
-void Search(SongList &, Song &);
 
 #endif
 
