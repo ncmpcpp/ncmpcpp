@@ -146,6 +146,7 @@ bool block_progressbar_update = 0;
 bool block_statusbar_update = 0;
 bool allow_statusbar_unblock = 1;
 bool block_playlist_update = 0;
+bool block_found_item_list_update = 0;
 
 bool search_case_sensitive = 1;
 bool search_mode_match = 1;
@@ -411,6 +412,7 @@ int main(int argc, char *argv[])
 		
 		TraceMpdStatus();
 		
+		block_found_item_list_update = 0;
 		block_playlist_update = 0;
 		messages_allowed = 1;
 		
@@ -1188,12 +1190,14 @@ int main(int argc, char *argv[])
 						}
 						default:
 						{
+							block_found_item_list_update = 1;
 							Song &s = *vSearched[mSearcher->GetRealChoice()-1];
 							int id = Mpd->AddSong(s);
 							if (id >= 0)
 							{
 								Mpd->PlayID(id);
 								ShowMessage("Added to playlist: " + DisplaySong(s, &Config.song_status_format));
+								mSearcher->BoldOption(mSearcher->GetChoice(), 1);
 							}
 							break;
 						}
@@ -1502,10 +1506,13 @@ int main(int argc, char *argv[])
 					int id = mSearcher->GetChoice()-search_engine_static_option;
 					if (id < 0)
 						continue;
-				
+					block_found_item_list_update = 1;
 					Song &s = *vSearched[id];
 					if (Mpd->AddSong(s) != -1)
+					{
 						ShowMessage("Added to playlist: " + DisplaySong(s, &Config.song_status_format));
+						mSearcher->BoldOption(mSearcher->GetChoice(), 1);
+					}
 					mSearcher->Go(wDown);
 				}
 				else if (current_screen == csLibrary)
@@ -2740,7 +2747,7 @@ int main(int argc, char *argv[])
 				if (!vSearched.empty())
 				{
 					wCurrent->WriteXY(0, 0, "Updating list...");
-					UpdateFoundList(vSearched, mSearcher);
+					UpdateFoundList(vSearched);
 				}
 			}
 		}

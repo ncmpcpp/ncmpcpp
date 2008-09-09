@@ -132,7 +132,7 @@ void UpdateSongList(Menu<Song> *menu)
 	menu->Refresh();
 }
 
-void UpdateFoundList(const SongList &v, Menu<string> *menu)
+void UpdateFoundList(const SongList &v)
 {
 	int i = search_engine_static_option;
 	bool bold = 0;
@@ -146,10 +146,9 @@ void UpdateFoundList(const SongList &v, Menu<string> *menu)
 				break;
 			}
 		}
-		menu->BoldOption(i, bold);
+		mSearcher->BoldOption(i, bold);
 		bold = 0;
 	}
-	menu->Refresh();
 }
 
 string DisplayKeys(int *key, int size)

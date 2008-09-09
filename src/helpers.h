@@ -40,7 +40,7 @@ class CaseInsensitiveSorting
 
 void UpdateItemList(Menu<Item> *);
 void UpdateSongList(Menu<Song> *);
-void UpdateFoundList(const SongList &, Menu<string> *);
+void UpdateFoundList(const SongList &);
 
 string DisplayKeys(int *, int = 2);
 bool Keypressed(int, const int *);

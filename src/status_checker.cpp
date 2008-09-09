@@ -69,6 +69,7 @@ extern bool allow_statusbar_unblock;
 extern bool block_progressbar_update;
 extern bool block_statusbar_update;
 extern bool block_playlist_update;
+extern bool block_found_item_list_update;
 
 extern bool redraw_me;
 
@@ -212,9 +213,9 @@ void NcmpcppStatusChanged(MPDConnection *Mpd, MPDStatusChanges changed, void *da
 		{
 			UpdateItemList(mBrowser);
 		}
-		else if (current_screen == csSearcher)
+		else if (current_screen == csSearcher && !block_found_item_list_update)
 		{
-			UpdateFoundList(vSearched, mSearcher);
+			UpdateFoundList(vSearched);
 		}
 		else if (current_screen == csLibrary)
 		{
