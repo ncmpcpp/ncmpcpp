@@ -250,6 +250,11 @@ string TotalPlaylistLength()
 	return result;
 }
 
+string DisplayStringPair(const StringPair &pair, void *null)
+{
+	return pair.first;
+}
+
 string DisplayItem(const Item &item, void *)
 {
 	switch (item.type)

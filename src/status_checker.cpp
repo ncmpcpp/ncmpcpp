@@ -62,7 +62,7 @@ extern string mpd_db_updating;
 extern NcmpcppScreen current_screen;
 
 extern bool dont_change_now_playing;
-extern bool allow_statusbar_unblock;
+extern bool allow_statusbar_unlock;
 extern bool block_progressbar_update;
 extern bool block_statusbar_update;
 extern bool block_playlist_update;
@@ -109,9 +109,9 @@ void TraceMpdStatus()
 		lock_statusbar_delay = -1;
 		
 		if (Config.statusbar_visibility)
-			block_statusbar_update = !allow_statusbar_unblock;
+			block_statusbar_update = !allow_statusbar_unlock;
 		else
-			block_progressbar_update = !allow_statusbar_unblock;
+			block_progressbar_update = !allow_statusbar_unlock;
 		
 		MPDStatusChanges changes;
 		switch (Mpd->GetState())
@@ -224,7 +224,7 @@ void NcmpcppStatusChanged(MPDConnection *Mpd, MPDStatusChanges changed, void *da
 		}
 		else if (current_screen == csSearcher && !block_found_item_list_update)
 		{
-			UpdateFoundList(vSearched);
+			UpdateFoundList();
 		}
 		else if (current_screen == csLibrary)
 		{

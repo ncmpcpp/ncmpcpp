@@ -34,10 +34,10 @@
 				block_statusbar_update = 1; \
 			else \
 				block_progressbar_update = 1; \
-			allow_statusbar_unblock = 0
+			allow_statusbar_unlock = 0
 
 #define UNLOCK_STATUSBAR \
-			allow_statusbar_unblock = 1; \
+			allow_statusbar_unlock = 1; \
 			if (lock_statusbar_delay < 0) \
 			{ \
 				if (Config.statusbar_visibility) \
@@ -68,10 +68,6 @@
 ncmpcpp_config Config;
 ncmpcpp_keys Key;
 
-SongList vSearched;
-std::map<string, string, CaseInsensitiveSorting> vLibAlbums;
-std::map<string, string, CaseInsensitiveSorting> vEditorAlbums;
-
 vector<int> vFoundPositions;
 int found_pos = 0;
 
@@ -80,15 +76,15 @@ Window *wPrev = 0;
 
 Menu<Song> *mPlaylist;
 Menu<Item> *mBrowser;
-Menu<string> *mSearcher;
+Menu< std::pair<string, Song> > *mSearcher;
 
 Menu<string> *mLibArtists;
-Menu<string> *mLibAlbums;
+Menu<StringPair> *mLibAlbums;
 Menu<Song> *mLibSongs;
 
 #ifdef HAVE_TAGLIB_H
 Menu<string> *mTagEditor;
-Menu<string> *mEditorAlbums;
+Menu<StringPair> *mEditorAlbums;
 Menu<string> *mEditorTagTypes;
 Menu<Song> *mEditorTags;
 #endif // HAVE_TAGLIB_H
@@ -121,7 +117,7 @@ NcmpcppScreen prev_screen;
 bool dont_change_now_playing = 0;
 bool block_progressbar_update = 0;
 bool block_statusbar_update = 0;
-bool allow_statusbar_unblock = 1;
+bool allow_statusbar_unlock = 1;
 bool block_playlist_update = 0;
 bool block_found_item_list_update = 0;
 
@@ -197,7 +193,8 @@ int main(int argc, char *argv[])
 	mBrowser->SetSelectSuffix(Config.selected_item_suffix);
 	mBrowser->SetItemDisplayer(DisplayItem);
 	
-	mSearcher = new Menu<string>(0, main_start_y, COLS, main_height, "", Config.main_color, brNone);
+	mSearcher = new Menu< std::pair<string, Song> >(0, main_start_y, COLS, main_height, "", Config.main_color, brNone);
+	mSearcher->SetItemDisplayer(SearchEngineDisplayer);
 	mSearcher->SetSelectPrefix(Config.selected_item_prefix);
 	mSearcher->SetSelectSuffix(Config.selected_item_suffix);
 	
@@ -208,7 +205,8 @@ int main(int argc, char *argv[])
 	int lib_songs_start_x = lib_artist_width+lib_albums_width+2;
 	
 	mLibArtists = new Menu<string>(0, main_start_y, lib_artist_width, main_height, "Artists", Config.main_color, brNone);
-	mLibAlbums = new Menu<string>(lib_albums_start_x, main_start_y, lib_albums_width, main_height, "Albums", Config.main_color, brNone);
+	mLibAlbums = new Menu<StringPair>(lib_albums_start_x, main_start_y, lib_albums_width, main_height, "Albums", Config.main_color, brNone);
+	mLibAlbums->SetItemDisplayer(DisplayStringPair);
 	mLibSongs = new Menu<Song>(lib_songs_start_x, main_start_y, lib_songs_width, main_height, "Songs", Config.main_color, brNone);
 	mLibSongs->SetSelectPrefix(Config.selected_item_prefix);
 	mLibSongs->SetSelectSuffix(Config.selected_item_suffix);
@@ -216,8 +214,9 @@ int main(int argc, char *argv[])
 	mLibSongs->SetItemDisplayerUserData(&Config.song_library_format);
 	
 #	ifdef HAVE_TAGLIB_H
-	mTagEditor = static_cast<Menu<string> *>(mSearcher->Clone());
-	mEditorAlbums = new Menu<string>(0, main_start_y, lib_artist_width, main_height, "Albums", Config.main_color, brNone);
+	mTagEditor = new Menu<string>(0, main_start_y, COLS, main_height, "", Config.main_color, brNone);
+	mEditorAlbums = new Menu<StringPair>(0, main_start_y, lib_artist_width, main_height, "Albums", Config.main_color, brNone);
+	mEditorAlbums->SetItemDisplayer(DisplayStringPair);
 	mEditorTagTypes = new Menu<string>(lib_albums_start_x, main_start_y, lib_albums_width, main_height, "Tag types", Config.main_color, brNone);
 	mEditorTags = new Menu<Song>(lib_songs_start_x, main_start_y, lib_songs_width, main_height, "Tags", Config.main_color, brNone);
 	mEditorTags->SetItemDisplayer(DisplayTag);
@@ -523,8 +522,8 @@ int main(int argc, char *argv[])
 			if (mLibAlbums->Empty() && mLibSongs->Empty())
 			{
 				mLibAlbums->Reset();
-				vLibAlbums.clear();
 				TagList list;
+				std::map<string, string, CaseInsensitiveSorting> maplist;
 				Mpd->GetAlbums(mLibArtists->GetOption(), list);
 				for (TagList::const_iterator it = list.begin(); it != list.end(); it++)
 				{
@@ -538,17 +537,17 @@ int main(int argc, char *argv[])
 					{
 						if ((*j)->GetYear() != EMPTY_TAG)
 						{
-							vLibAlbums["(" + (*j)->GetYear() + ") " + *it] = *it;
+							maplist["(" + (*j)->GetYear() + ") " + *it] = *it;
 							written = 1;
 							break;
 						}
 					}
 					if (!written)
-						vLibAlbums[*it] = *it;
+						maplist[*it] = *it;
 					FreeSongList(l);
 				}
-				for (std::map<string, string>::const_iterator it = vLibAlbums.begin(); it != vLibAlbums.end(); it++)
-					mLibAlbums->AddOption(it->first);
+				for (std::map<string, string>::const_iterator it = maplist.begin(); it != maplist.end(); it++)
+					mLibAlbums->AddOption(StringPair(it->first, it->second));
 				mLibAlbums->Window::Clear();
 				mLibAlbums->Refresh();
 			}
@@ -577,7 +576,7 @@ int main(int argc, char *argv[])
 					mLibSongs->Clear(0);
 					Mpd->StartSearch(1);
 					Mpd->AddSearch(MPD_TAG_ITEM_ARTIST, mLibArtists->GetOption());
-					Mpd->AddSearch(MPD_TAG_ITEM_ALBUM, vLibAlbums[mLibAlbums->GetOption()]);
+					Mpd->AddSearch(MPD_TAG_ITEM_ALBUM, mLibAlbums->Current().second);
 					Mpd->CommitSearch(list);
 				}
 				sort(list.begin(), list.end(), SortSongsByTrack);
@@ -668,10 +667,10 @@ int main(int argc, char *argv[])
 			{
 				found_pos = 0;
 				vFoundPositions.clear();
-				vEditorAlbums.clear();
 				mEditorAlbums->Window::Clear();
 				mEditorTags->Clear();
 				TagList list;
+				std::map<string, string, CaseInsensitiveSorting> maplist;
 				mEditorAlbums->WriteXY(0, 0, "Fetching albums' list...");
 				Mpd->GetAlbums("", list);
 				for (TagList::const_iterator it = list.begin(); it != list.end(); it++)
@@ -681,11 +680,11 @@ int main(int argc, char *argv[])
 					Mpd->StartSearch(1);
 					Mpd->AddSearch(MPD_TAG_ITEM_ALBUM, *it);
 					Mpd->CommitSearch(l);
-					vEditorAlbums[DisplaySong(*l[0], &Config.tag_editor_album_format)] = *it;
+					maplist[DisplaySong(*l[0], &Config.tag_editor_album_format)] = *it;
 					FreeSongList(l);
 				}
-				for (std::map<string, string>::const_iterator it = vEditorAlbums.begin(); it != vEditorAlbums.end(); it++)
-					mEditorAlbums->AddOption(it->first);
+				for (std::map<string, string>::const_iterator it = maplist.begin(); it != maplist.end(); it++)
+					mEditorAlbums->AddOption(StringPair(it->first, it->second));
 				mEditorAlbums->Refresh();
 				mEditorTagTypes->Refresh();
 			}
@@ -695,7 +694,7 @@ int main(int argc, char *argv[])
 				mEditorTags->Reset();
 				SongList list;
 				Mpd->StartSearch(1);
-				Mpd->AddSearch(MPD_TAG_ITEM_ALBUM, vEditorAlbums[mEditorAlbums->GetOption()]);
+				Mpd->AddSearch(MPD_TAG_ITEM_ALBUM, mEditorAlbums->Current().second);
 				Mpd->CommitSearch(list);
 				sort(list.begin(), list.end(), CaseInsensitiveSorting());
 				for (SongList::iterator it = list.begin(); it != list.end(); it++)
@@ -1028,10 +1027,7 @@ int main(int argc, char *argv[])
 								ShowMessage("Tags updated!");
 								Mpd->UpdateDirectory(s.GetDirectory());
 								if (prev_screen == csSearcher)
-								{
-									*vSearched[mSearcher->GetRealChoice()-1] = s;
-									mSearcher->UpdateOption(mSearcher->GetChoice(), DisplaySong(s));
-								}
+									mSearcher->Current().second = s;
 							}
 								ShowMessage("Error writing tags!");
 						}
@@ -1073,7 +1069,7 @@ int main(int argc, char *argv[])
 								s.SetShortFilename(wFooter->GetString());
 							else
 								s.SetShortFilename(wFooter->GetString(s.GetShortFilename()));
-							mSearcher->UpdateOption(option, "[.b]Filename:[/b] " + s.GetShortFilename());
+							mSearcher->Current().first = "[.b]Filename:[/b] " + s.GetShortFilename();
 							break;
 						}
 						case 2:
@@ -1083,7 +1079,7 @@ int main(int argc, char *argv[])
 								s.SetTitle(wFooter->GetString());
 							else
 								s.SetTitle(wFooter->GetString(s.GetTitle()));
-							mSearcher->UpdateOption(option, "[.b]Title:[/b] " + s.GetTitle());
+							mSearcher->Current().first = "[.b]Title:[/b] " + s.GetTitle();
 							break;
 						}
 						case 3:
@@ -1093,7 +1089,7 @@ int main(int argc, char *argv[])
 								s.SetArtist(wFooter->GetString());
 							else
 								s.SetArtist(wFooter->GetString(s.GetArtist()));
-							mSearcher->UpdateOption(option, "[.b]Artist:[/b] " + s.GetArtist());
+							mSearcher->Current().first = "[.b]Artist:[/b] " + s.GetArtist();
 							break;
 						}
 						case 4:
@@ -1103,7 +1099,7 @@ int main(int argc, char *argv[])
 								s.SetAlbum(wFooter->GetString());
 							else
 								s.SetAlbum(wFooter->GetString(s.GetAlbum()));
-							mSearcher->UpdateOption(option, "[.b]Album:[/b] " + s.GetAlbum());
+							mSearcher->Current().first = "[.b]Album:[/b] " + s.GetAlbum();
 							break;
 						}
 						case 5:
@@ -1113,7 +1109,7 @@ int main(int argc, char *argv[])
 								s.SetYear(wFooter->GetString(4));
 							else
 								s.SetYear(wFooter->GetString(s.GetYear(), 4));
-							mSearcher->UpdateOption(option, "[.b]Year:[/b] " + s.GetYear());
+							mSearcher->Current().first = "[.b]Year:[/b] " + s.GetYear();
 							break;
 						}
 						case 6:
@@ -1123,7 +1119,7 @@ int main(int argc, char *argv[])
 								s.SetTrack(wFooter->GetString(3));
 							else
 								s.SetTrack(wFooter->GetString(s.GetTrack(), 3));
-							mSearcher->UpdateOption(option, "[.b]Track:[/b] " + s.GetTrack());
+							mSearcher->Current().first = "[.b]Track:[/b] " + s.GetTrack();
 							break;
 						}
 						case 7:
@@ -1133,7 +1129,7 @@ int main(int argc, char *argv[])
 								s.SetGenre(wFooter->GetString());
 							else
 								s.SetGenre(wFooter->GetString(s.GetGenre()));
-							mSearcher->UpdateOption(option, "[.b]Genre:[/b] " + s.GetGenre());
+							mSearcher->Current().first = "[.b]Genre:[/b] " + s.GetGenre();
 							break;
 						}
 						case 8:
@@ -1143,44 +1139,33 @@ int main(int argc, char *argv[])
 								s.SetComment(wFooter->GetString());
 							else
 								s.SetComment(wFooter->GetString(s.GetComment()));
-							mSearcher->UpdateOption(option, "[.b]Comment:[/b] " + s.GetComment());
+							mSearcher->Current().first = "[.b]Comment:[/b] " + s.GetComment();
 							break;
 						}
 						case 10:
 						{
 							search_match_to_pattern = !search_match_to_pattern;
-							mSearcher->UpdateOption(option, "[.b]Search mode:[/b] " + (search_match_to_pattern ? search_mode_normal : search_mode_strict));
+							mSearcher->Current().first = "[.b]Search mode:[/b] " + (search_match_to_pattern ? search_mode_normal : search_mode_strict);
 							break;
 						}
 						case 11:
 						{
 							search_case_sensitive = !search_case_sensitive;
-							mSearcher->UpdateOption(option, "[.b]Case sensitive:[/b] " + (string)(search_case_sensitive ? "Yes" : "No"));
+							mSearcher->Current().first = "[.b]Case sensitive:[/b] " + string(search_case_sensitive ? "Yes" : "No");
 							break;
 						}
 						case 13:
 						{
 							ShowMessage("Searching...");
-							Search(vSearched, s);
-							if (!vSearched.empty())
+							Search(s);
+							if (mSearcher->Back().first == ".")
 							{
 								bool bold = 0;
-								mSearcher->AddSeparator();
-								mSearcher->AddStaticBoldOption("[.white]Search results:[/white] [.green]Found " + IntoStr(vSearched.size()) + (vSearched.size() > 1 ? " songs" : " song") + "[/green]");
-								mSearcher->AddSeparator();
-								for (SongList::const_iterator it = vSearched.begin(); it != vSearched.end(); it++)
-								{
-									for (int j = 0; j < mPlaylist->Size(); j++)
-									{
-										if (mPlaylist->at(j).GetHash() == (*it)->GetHash())
-										{
-											bold = 1;
-											break;
-										}
-									}
-									bold ? mSearcher->AddBoldOption(DisplaySong(**it)) : mSearcher->AddOption(DisplaySong(**it));
-									bold = 0;
-								}
+								int found = mSearcher->Size()-search_engine_static_options;
+								mSearcher->InsertSeparator(14);
+								mSearcher->Insert(15, std::pair<string, Song>("[.white]Search results:[/white] [.green]Found " + IntoStr(found) + (found > 1 ? " songs" : " song") + "[/green]", Song()), 1, 1);
+								mSearcher->InsertSeparator(16);
+								UpdateFoundList();
 								ShowMessage("Searching finished!");
 								for (int i = 0; i < 13; i++)
 									mSearcher->MakeStatic(i, 1);
@@ -1195,7 +1180,6 @@ int main(int argc, char *argv[])
 						{
 							found_pos = 0;
 							vFoundPositions.clear();
-							FreeSongList(vSearched);
 							PrepareSearchEngine(sought_pattern);
 							ShowMessage("Search state reset");
 							break;
@@ -1203,7 +1187,7 @@ int main(int argc, char *argv[])
 						default:
 						{
 							block_found_item_list_update = 1;
-							Song &s = *vSearched[mSearcher->GetRealChoice()-1];
+							const Song &s = mSearcher->Current().second;
 							int id = Mpd->AddSong(s);
 							if (id >= 0)
 							{
@@ -1214,6 +1198,8 @@ int main(int argc, char *argv[])
 							break;
 						}
 					}
+					if (option <= 10)
+						mSearcher->RefreshOption(option);
 					UNLOCK_STATUSBAR;
 					break;
 				}
@@ -1250,7 +1236,7 @@ int main(int argc, char *argv[])
 							Mpd->QueueAddSong(mLibSongs->at(i));
 						if (Mpd->CommitQueue())
 						{
-							ShowMessage("Adding songs from: " + mLibArtists->GetOption() + " \"" + vLibAlbums[mLibAlbums->GetOption()] + "\"");
+							ShowMessage("Adding songs from: " + mLibArtists->GetOption() + " \"" + mLibAlbums->Current().second + "\"");
 							Song *s = &mPlaylist->at(mPlaylist->Size()-mLibSongs->Size());
 							if (s->GetHash() == mLibSongs->at(0).GetHash())
 							{
@@ -1453,7 +1439,7 @@ int main(int argc, char *argv[])
 		{
 			if (Config.space_selects || wCurrent == mPlaylist)
 			{
-				if (wCurrent == mPlaylist || (wCurrent == mBrowser && wCurrent->GetChoice() > (browsed_dir != "/" ? 1 : 0)) || (wCurrent == mSearcher && !vSearched.empty() && wCurrent->GetChoice() > search_engine_static_option) || wCurrent == mLibSongs || wCurrent == mPlaylistEditor)
+				if (wCurrent == mPlaylist || (wCurrent == mBrowser && wCurrent->GetChoice() >= (browsed_dir != "/" ? 1 : 0)) || (wCurrent == mSearcher && mSearcher->Current().first == ".") || wCurrent == mLibSongs || wCurrent == mPlaylistEditor)
 				{
 					int i = wCurrent->GetChoice();
 					wCurrent->Select(i, !wCurrent->Selected(i));
@@ -1513,13 +1499,10 @@ int main(int argc, char *argv[])
 					}
 					mBrowser->Go(wDown);
 				}
-				else if (current_screen == csSearcher && !vSearched.empty())
+				else if (current_screen == csSearcher && mSearcher->Current().first == ".")
 				{
-					int id = mSearcher->GetChoice()-search_engine_static_option;
-					if (id < 0)
-						continue;
 					block_found_item_list_update = 1;
-					Song &s = *vSearched[id];
+					Song &s = mSearcher->Current().second;
 					if (Mpd->AddSong(s) != -1)
 					{
 						ShowMessage("Added to playlist: " + DisplaySong(s, &Config.song_status_format));
@@ -2165,16 +2148,16 @@ int main(int argc, char *argv[])
 			{
 				LOCK_STATUSBAR;
 				wFooter->WriteXY(0, Config.statusbar_visibility, "[.b]Album:[/b] ", 1);
-				string new_album = wFooter->GetString(vLibAlbums[mLibAlbums->GetOption()]);
+				string new_album = wFooter->GetString(mLibAlbums->Current().second);
 				UNLOCK_STATUSBAR;
-				if (!new_album.empty() && new_album != vLibAlbums[mLibAlbums->GetOption()])
+				if (!new_album.empty() && new_album != mLibAlbums->Current().second)
 				{
 					bool success = 1;
 					SongList list;
 					ShowMessage("Updating tags...");
 					Mpd->StartSearch(1);
 					Mpd->AddSearch(MPD_TAG_ITEM_ARTIST, mLibArtists->GetOption());
-					Mpd->AddSearch(MPD_TAG_ITEM_ALBUM, vLibAlbums[mLibAlbums->GetOption()]);
+					Mpd->AddSearch(MPD_TAG_ITEM_ALBUM, mLibAlbums->Current().second);
 					Mpd->CommitSearch(list);
 					for (SongList::const_iterator it = list.begin(); it != list.end(); it++)
 					{
@@ -2197,7 +2180,7 @@ int main(int argc, char *argv[])
 			else if (
 			    (wCurrent == mPlaylist && !mPlaylist->Empty())
 			||  (wCurrent == mBrowser && mBrowser->at(mBrowser->GetChoice()).type == itSong)
-			||  (wCurrent == mSearcher && !vSearched.empty() && mSearcher->GetChoice() >= search_engine_static_option)
+			||  (wCurrent == mSearcher && mSearcher->Current().first == ".")
 			||  (wCurrent == mLibSongs && !mLibSongs->Empty())
 			||  (wCurrent == mPlaylistEditor && !mPlaylistEditor->Empty()))
 			{
@@ -2211,7 +2194,7 @@ int main(int argc, char *argv[])
 						edited_song = *mBrowser->at(id).song;
 						break;
 					case csSearcher:
-						edited_song = *vSearched[id-search_engine_static_option];
+						edited_song = mSearcher->at(id).second;
 						break;
 					case csLibrary:
 						edited_song = mLibSongs->at(id);
@@ -2251,7 +2234,7 @@ int main(int argc, char *argv[])
 		else if (Keypressed(input, Key.GoToContainingDir))
 		{
 			if ((wCurrent == mPlaylist && !mPlaylist->Empty())
-			|| (wCurrent == mSearcher && !vSearched.empty() && mSearcher->GetChoice() >= search_engine_static_option)
+			|| (wCurrent == mSearcher && mSearcher->Current().first == ".")
 			|| (wCurrent == mLibSongs && !mLibSongs->Empty())
 			|| (wCurrent == mPlaylistEditor && !mPlaylistEditor->Empty()))
 			{
@@ -2263,7 +2246,7 @@ int main(int argc, char *argv[])
 						s = &mPlaylist->at(id);
 						break;
 					case csSearcher:
-						s = vSearched[id-search_engine_static_option];
+						s = &mSearcher->at(id).second;
 						break;
 					case csLibrary:
 						s = &mLibSongs->at(id);
@@ -2318,7 +2301,7 @@ int main(int argc, char *argv[])
 		}
 		else if (Keypressed(input, Key.ReverseSelection))
 		{
-			if (wCurrent == mPlaylist || wCurrent == mBrowser || (wCurrent == mSearcher && !vSearched.empty()) || wCurrent == mLibSongs || wCurrent == mPlaylistEditor)
+			if (wCurrent == mPlaylist || wCurrent == mBrowser || (wCurrent == mSearcher && mSearcher->Current().first == ".") || wCurrent == mLibSongs || wCurrent == mPlaylistEditor)
 			{
 				for (int i = 0; i < wCurrent->Size(); i++)
 					wCurrent->Select(i, !wCurrent->Selected(i) && !wCurrent->IsStatic(i));
@@ -2391,7 +2374,7 @@ int main(int argc, char *argv[])
 							}
 							case csSearcher:
 							{
-								Song *s = new Song(*vSearched[*it-search_engine_static_option]);
+								Song *s = new Song(mSearcher->at(*it).second);
 								result.push_back(s);
 								break;
 							}
@@ -2554,7 +2537,7 @@ int main(int argc, char *argv[])
 		else if (Keypressed(input, Key.FindForward) || Keypressed(input, Key.FindBackward))
 		{
 			if ((current_screen != csHelp && current_screen != csSearcher)
-			||  (current_screen == csSearcher && !vSearched.empty()))
+			||  (current_screen == csSearcher && mSearcher->Current().first == "."))
 			{
 				string how = Keypressed(input, Key.FindForward) ? "forward" : "backward";
 				found_pos = -1;
@@ -2569,7 +2552,7 @@ int main(int argc, char *argv[])
 				transform(findme.begin(), findme.end(), findme.begin(), tolower);
 				
 				ShowMessage("Searching...");
-				for (int i = (wCurrent == mSearcher ? search_engine_static_option-1 : 0); i < wCurrent->Size(); i++)
+				for (int i = (wCurrent == mSearcher ? search_engine_static_options-1 : 0); i < wCurrent->Size(); i++)
 				{
 					string name = Window::OmitBBCodes(wCurrent->GetOption(i));
 					transform(name.begin(), name.end(), name.begin(), tolower);
@@ -2661,7 +2644,7 @@ int main(int argc, char *argv[])
 			else if (
 			    (wCurrent == mPlaylist && !mPlaylist->Empty())
 			||  (wCurrent == mBrowser && mBrowser->at(mBrowser->GetChoice()).type == itSong)
-			||  (wCurrent == mSearcher && !vSearched.empty() && mSearcher->GetChoice() >= search_engine_static_option)
+			||  (wCurrent == mSearcher && mSearcher->Current().first == ".")
 			||  (wCurrent == mLibSongs && !mLibSongs->Empty())
 			||  (wCurrent == mPlaylistEditor && !mPlaylistEditor->Empty()))
 			{
@@ -2676,7 +2659,7 @@ int main(int argc, char *argv[])
 						s = mBrowser->at(id).song;
 						break;
 					case csSearcher:
-						s = vSearched[id-search_engine_static_option]; // first one is 'Reset'
+						s = &mSearcher->at(id).second;
 						break;
 					case csLibrary:
 						s = &mLibSongs->at(id);
@@ -2754,16 +2737,16 @@ int main(int argc, char *argv[])
 			{
 				found_pos = 0;
 				vFoundPositions.clear();
-				if (vSearched.empty())
+				if (mSearcher->Empty())
 					PrepareSearchEngine(sought_pattern);
 				wCurrent = mSearcher;
 				wCurrent->Hide();
 				current_screen = csSearcher;
 				redraw_screen = 1;
-				if (!vSearched.empty())
+				if (mSearcher->Back().first == ".")
 				{
 					wCurrent->WriteXY(0, 0, "Updating list...");
-					UpdateFoundList(vSearched);
+					UpdateFoundList();
 				}
 			}
 		}

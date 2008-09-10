@@ -46,6 +46,7 @@ bool Keypressed(int, const int *);
 void WindowTitle(const string &);
 
 string TotalPlaylistLength();
+string DisplayStringPair(const StringPair &, void * = NULL);
 string DisplayItem(const Item &, void * = NULL);
 string DisplayColumns(string);
 string DisplaySongInColumns(const Song &, void *);

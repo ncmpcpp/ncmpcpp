@@ -48,7 +48,7 @@ class Menu : public Window
 	typedef string (*ItemDisplayer) (const T &, void *);
 	
 	public:
-		Menu(int startx, int starty, int width, int height, string title, Color color, Border border) : itsItemDisplayer(0), itsItemDisplayerUserdata(0), Window(startx, starty, width, height, title, color, border), itsSelectedPrefix("[.r]"), itsSelectedSuffix("[/r]"), itsStaticsNumber(0), itsBeginning(0), itsHighlight(0), itsHighlightColor(itsBaseColor), itsHighlightEnabled(1) { SetColor(color); }
+		Menu(int startx, int starty, int width, int height, string title, Color color, Border border) : itsItemDisplayer(0), itsItemDisplayerUserdata(0), Window(startx, starty, width, height, title, color, border), itsSelectedPrefix("[.r]"), itsSelectedSuffix("[/r]"), itsStaticsNumber(0), itsBeginning(0), itsHighlight(0), itsHighlightColor(itsBaseColor), itsHighlightEnabled(1) { }
 		Menu(const Menu &);
 		virtual ~Menu();
 		
@@ -61,10 +61,13 @@ class Menu : public Window
 		void AddStaticBoldOption(const T &item, Location location = lLeft, bool separator = 0);
 		void AddSeparator();
 		void UpdateOption(int, const T &, Location = lLeft, bool separator = 0);
+		void RefreshOption(int option = -1) { NeedsRedraw.push_back(option < 0 ? itsHighlight : option); }
 		void BoldOption(int, bool);
 		void MakeStatic(int, bool);
 		void DeleteOption(int);
 		void Swap(int, int);
+		void Insert(int, const T &, bool bold = 0, bool is_static = 0, bool separator = 0, Location location = lLeft);
+		void InsertSeparator(int where) { Insert(where, T(), 0, 1, 1); }
 		virtual string GetOption(int i = -1) const;
 		
 		virtual void Refresh(bool redraw_whole_window = 0);
@@ -92,6 +95,10 @@ class Menu : public Window
 		virtual Window * Clone() const { return new Menu(*this); }
 		virtual Window * EmptyClone() const;
 		
+		T & Back() { return itsOptions.back()->item; }
+		const T & Back() const { return itsOptions.back()->item; }
+		T & Current() { return itsOptions.at(itsHighlight)->item; }
+		const T & Current() const { return itsOptions.at(itsHighlight)->item; }
 		T & at(int i) { return itsOptions.at(i)->item; }
 		const T & at(int i) const { return itsOptions.at(i)->item; }
 		const T & operator[](int i) const { return itsOptions[i]->item; }
@@ -239,7 +246,7 @@ void Menu<T>::AddStaticBoldOption(const T &item, Location location, bool separat
 template <class T>
 void Menu<T>::AddSeparator()
 {
-	AddStaticOption("", lLeft, 1);
+	AddStaticOption(T(), lLeft, 1);
 }
 
 template <class T>
@@ -351,6 +358,20 @@ void Menu<T>::Swap(int one, int two)
 	catch (std::out_of_range)
 	{
 	}
+}
+
+template <class T>
+void Menu<T>::Insert(int where, const T &item, bool bold, bool is_static, bool separator, Location location)
+{
+	Option<T> *new_option = new Option<T>;
+	new_option->item = item;
+	new_option->location = lLeft;
+	new_option->have_separator = separator;
+	new_option->is_static = is_static;
+	new_option->is_bold = bold;
+	if (is_static)
+		itsStaticsNumber++;
+	itsOptions.insert(itsOptions.begin()+where, new_option);
 }
 
 template <class T>

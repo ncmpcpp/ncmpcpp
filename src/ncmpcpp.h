@@ -41,6 +41,8 @@
 #include "scrollpad.h"
 #include "misc.h"
 
+typedef std::pair<string, string> StringPair;
+
 enum NcmpcppScreen
 {
 	csHelp,
@@ -55,7 +57,6 @@ enum NcmpcppScreen
 };
 
 const int ncmpcpp_window_timeout = 500;
-const int search_engine_static_option = 17;
 
 const string home_folder = getenv("HOME");
 const string TERMINAL_TYPE = getenv("TERM");

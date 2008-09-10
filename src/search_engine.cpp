@@ -18,25 +18,29 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include <algorithm>
+#include "helpers.h"
 #include "search_engine.h"
 
 extern MPDConnection *Mpd;
 extern Menu<Song> *mPlaylist;
-extern Menu<string> *mSearcher;
+extern Menu< std::pair<string, Song> > *mSearcher;
 
-bool search_match_to_pattern = 0;
+bool search_match_to_pattern = 1;
 bool search_case_sensitive = 1;
 
-void UpdateFoundList(const SongList &v)
+string SearchEngineDisplayer(const std::pair<string, Song> &pair, void *null)
 {
-	int i = search_engine_static_option;
+	return pair.first == "." ? DisplaySong(pair.second) : pair.first;
+}
+
+void UpdateFoundList()
+{
 	bool bold = 0;
-	for (SongList::const_iterator it = v.begin(); it != v.end(); it++, i++)
+	for (int i = search_engine_static_options-1; i < mSearcher->Size(); i++)
 	{
 		for (int j = 0; j < mPlaylist->Size(); j++)
 		{
-			if (mPlaylist->at(j).GetHash() == (*it)->GetHash())
+			if (mPlaylist->at(j).GetHash() == mSearcher->at(i).second.GetHash())
 			{
 				bold = 1;
 				break;
@@ -49,29 +53,29 @@ void UpdateFoundList(const SongList &v)
 
 void PrepareSearchEngine(Song &s)
 {
+	// adding several empty songs may seem riddiculous, but they hardly steal memory
+	// and it's much cleaner solution than having two different containers imo
 	s.Clear();
 	mSearcher->Clear();
 	mSearcher->Reset();
-	mSearcher->AddOption("[.b]Filename:[/b] " + s.GetShortFilename());
-	mSearcher->AddOption("[.b]Title:[/b] " + s.GetTitle());
-	mSearcher->AddOption("[.b]Artist:[/b] " + s.GetArtist());
-	mSearcher->AddOption("[.b]Album:[/b] " + s.GetAlbum());
-	mSearcher->AddOption("[.b]Year:[/b] " + s.GetYear());
-	mSearcher->AddOption("[.b]Track:[/b] " + s.GetTrack());
-	mSearcher->AddOption("[.b]Genre:[/b] " + s.GetGenre());
-	mSearcher->AddOption("[.b]Comment:[/b] " + s.GetComment());
+	mSearcher->AddOption(std::pair<string, Song>("[.b]Filename:[/b] " + s.GetShortFilename(), Song()));
+	mSearcher->AddOption(std::pair<string, Song>("[.b]Title:[/b] " + s.GetTitle(), Song()));
+	mSearcher->AddOption(std::pair<string, Song>("[.b]Artist:[/b] " + s.GetArtist(), Song()));
+	mSearcher->AddOption(std::pair<string, Song>("[.b]Album:[/b] " + s.GetAlbum(), Song()));
+	mSearcher->AddOption(std::pair<string, Song>("[.b]Year:[/b] " + s.GetYear(), Song()));
+	mSearcher->AddOption(std::pair<string, Song>("[.b]Track:[/b] " + s.GetTrack(), Song()));
+	mSearcher->AddOption(std::pair<string, Song>("[.b]Genre:[/b] " + s.GetGenre(), Song()));
+	mSearcher->AddOption(std::pair<string, Song>("[.b]Comment:[/b] " + s.GetComment(), Song()));
 	mSearcher->AddSeparator();
-	mSearcher->AddOption("[.b]Search mode:[/b] " + (search_match_to_pattern ? search_mode_normal : search_mode_strict));
-	mSearcher->AddOption("[.b]Case sensitive:[/b] " + (string)(search_case_sensitive ? "Yes" : "No"));
+	mSearcher->AddOption(std::pair<string, Song>("[.b]Search mode:[/b] " + (search_match_to_pattern ? search_mode_normal : search_mode_strict), Song()));
+	mSearcher->AddOption(std::pair<string, Song>("[.b]Case sensitive:[/b] " + (string)(search_case_sensitive ? "Yes" : "No"), Song()));
 	mSearcher->AddSeparator();
-	mSearcher->AddOption("Search");
-	mSearcher->AddOption("Reset");
+	mSearcher->AddOption(std::pair<string, Song>("Search", Song()));
+	mSearcher->AddOption(std::pair<string, Song>("Reset", Song()));
 }
 
-void Search(SongList &result, Song &s)
+void Search(Song &s)
 {
-	FreeSongList(result);
-	
 	if (s.Empty())
 		return;
 	
@@ -182,11 +186,7 @@ void Search(SongList &result, Song &s)
 		}
 		
 		if (found)
-		{
-			Song *ss = new Song(**it);
-			result.push_back(ss);
-		}
-		
+			mSearcher->AddOption(std::pair<string, Song>(".", **it));
 		found = 1;
 	}
 	FreeSongList(list);

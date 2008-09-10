@@ -24,9 +24,12 @@
 #include "mpdpp.h"
 #include "ncmpcpp.h"
 
-void UpdateFoundList(const SongList &);
+const int search_engine_static_options = 17;
+
+string SearchEngineDisplayer(const std::pair<string, Song> &, void * = NULL);
+void UpdateFoundList();
 void PrepareSearchEngine(Song &s);
-void Search(SongList &, Song &);
+void Search(Song &);
 
 #endif
 
