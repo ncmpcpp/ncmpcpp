@@ -51,6 +51,7 @@ string DisplayItem(const Item &, void * = NULL);
 string DisplayColumns(string);
 string DisplaySongInColumns(const Song &, void *);
 string DisplaySong(const Song &, void * = &Config.song_list_format);
+string GetInfo(Song &);
 void ShowMessage(const string &, int = Config.message_delay_time);
 void GetDirectory(string, string = "/");
 

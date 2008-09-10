@@ -66,6 +66,7 @@ void DefaultKeys(ncmpcpp_keys &keys)
 	keys.PrevFoundPosition[0] = ',';
 	keys.ToggleFindMode[0] = 'w';
 	keys.EditTags[0] = 'e';
+	keys.ShowInfo[0] = 'i';
 	keys.GoToPosition[0] = 'g';
 	keys.Lyrics[0] = 'l';
 	keys.ReverseSelection[0] = 'v';
@@ -124,6 +125,7 @@ void DefaultKeys(ncmpcpp_keys &keys)
 	keys.PrevFoundPosition[1] = null_key;
 	keys.ToggleFindMode[1] = null_key;
 	keys.EditTags[1] = null_key;
+	keys.ShowInfo[1] = null_key;
 	keys.GoToPosition[1] = null_key;
 	keys.Lyrics[1] = null_key;
 	keys.ReverseSelection[1] = null_key;
@@ -369,6 +371,8 @@ void ReadKeys(ncmpcpp_keys &keys)
 				GetKeys(*it, keys.EditTags);
 			else if (it->find("key_go_to_position ") != string::npos)
 				GetKeys(*it, keys.GoToPosition);
+			else if (it->find("key_song_info ") != string::npos)
+				GetKeys(*it, keys.ShowInfo);
 			else if (it->find("key_lyrics ") != string::npos)
 				GetKeys(*it, keys.Lyrics);
 			else if (it->find("key_reverse_selection ") != string::npos)

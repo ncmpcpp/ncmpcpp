@@ -49,6 +49,7 @@ enum NcmpcppScreen
 	csPlaylist,
 	csBrowser,
 	csTagEditor,
+	csInfo,
 	csSearcher,
 	csLibrary,
 	csLyrics,

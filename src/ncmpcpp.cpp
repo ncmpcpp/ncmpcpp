@@ -94,6 +94,7 @@ Menu<Song> *mPlaylistEditor;
 
 Scrollpad *sHelp;
 Scrollpad *sLyrics;
+Scrollpad *sInfo;
 
 Window *wHeader;
 Window *wFooter;
@@ -232,6 +233,7 @@ int main(int argc, char *argv[])
 	
 	sHelp = new Scrollpad(0, main_start_y, COLS, main_height, "", Config.main_color, brNone);
 	sLyrics = static_cast<Scrollpad *>(sHelp->EmptyClone());
+	sInfo = static_cast<Scrollpad *>(sHelp->EmptyClone());
 	
 	sHelp->Add("   [.b]Keys - Movement\n -----------------------------------------[/b]\n");
 	sHelp->Add(DisplayKeys(Key.Up) + "Move Cursor up\n");
@@ -283,6 +285,7 @@ int main(int argc, char *argv[])
 	sHelp->Add(DisplayKeys(Key.EditTags) + "Edit song's tags/playlist's name\n");
 #	endif // HAVE_TAGLIB_H
 	sHelp->Add(DisplayKeys(Key.GoToPosition) + "Go to chosen position in current song\n");
+	sHelp->Add(DisplayKeys(Key.ShowInfo) + "Show song's info\n");
 	sHelp->Add(DisplayKeys(Key.Lyrics) + "Show/hide song's lyrics\n\n");
 	
 	sHelp->Add(DisplayKeys(Key.Quit) + "Quit\n\n\n");
@@ -365,6 +368,7 @@ int main(int argc, char *argv[])
 	mEditorTags->SetTimeout(ncmpcpp_window_timeout);
 #	endif // HAVE_TAGLIB_H
 	sLyrics->SetTimeout(ncmpcpp_window_timeout);
+	sInfo->SetTimeout(ncmpcpp_window_timeout);
 	wFooter->SetTimeout(ncmpcpp_window_timeout);
 	mPlaylistList->SetTimeout(ncmpcpp_window_timeout);
 	mPlaylistEditor->SetTimeout(ncmpcpp_window_timeout);
@@ -434,6 +438,9 @@ int main(int argc, char *argv[])
 					break;
 				case csTagEditor:
 					title = "Tag editor";
+					break;
+				case csInfo:
+					title = "Song info";
 					break;
 				case csSearcher:
 					title = "Search engine";
@@ -811,6 +818,7 @@ int main(int argc, char *argv[])
 			mPlaylist->SetTitle(Config.columns_in_playlist ? DisplayColumns(Config.song_columns_list_format) : "");
 			mBrowser->Resize(COLS, main_height);
 			mSearcher->Resize(COLS, main_height);
+			sInfo->Resize(COLS, main_height);
 			sLyrics->Resize(COLS, main_height);
 			
 			lib_artist_width = COLS/3-1;
@@ -846,8 +854,7 @@ int main(int argc, char *argv[])
 			wFooter->MoveTo(0, footer_start_y);
 			wFooter->Resize(COLS, wFooter->GetHeight());
 			
-			if (wCurrent != sHelp && wCurrent != sLyrics)
-				wCurrent->Window::Clear();
+			wCurrent->Hide();
 			
 #			ifdef HAVE_TAGLIB_H
 			if (current_screen == csLibrary)
@@ -2624,11 +2631,66 @@ int main(int argc, char *argv[])
 			Config.space_selects = !Config.space_selects;
 			ShowMessage("Space mode: " + string(Config.space_selects ? "Select/deselect" : "Add") + " item");
 		}
+		else if (Keypressed(input, Key.ShowInfo))
+		{
+			if (wCurrent == sInfo)
+			{
+				wCurrent->Hide();
+				current_screen = prev_screen;
+				wCurrent = wPrev;
+				redraw_screen = 1;
+				if (current_screen == csLibrary)
+				{
+					REFRESH_MEDIA_LIBRARY_SCREEN;
+				}
+				else if (current_screen == csPlaylistEditor)
+				{
+					REFRESH_PLAYLIST_EDITOR_SCREEN;
+				}
+			}
+			else if (
+			    (wCurrent == mPlaylist && !mPlaylist->Empty())
+			||  (wCurrent == mBrowser && mBrowser->at(mBrowser->GetChoice()).type == itSong)
+			||  (wCurrent == mSearcher && mSearcher->Current().first == ".")
+			||  (wCurrent == mLibSongs && !mLibSongs->Empty())
+			||  (wCurrent == mPlaylistEditor && !mPlaylistEditor->Empty()))
+			{
+				Song *s;
+				int id = wCurrent->GetChoice();
+				switch (current_screen)
+				{
+					case csPlaylist:
+						s = &mPlaylist->at(id);
+						break;
+					case csBrowser:
+						s = mBrowser->at(id).song;
+						break;
+					case csSearcher:
+						s = &mSearcher->at(id).second;
+						break;
+					case csLibrary:
+						s = &mLibSongs->at(id);
+						break;
+					case csPlaylistEditor:
+						s = &mPlaylistEditor->at(id);
+						break;
+					default:
+						break;
+				}
+				wPrev = wCurrent;
+				wCurrent = sInfo;
+				prev_screen = current_screen;
+				current_screen = csInfo;
+				sInfo->Clear();
+				sInfo->Add(GetInfo(*s));
+				sInfo->Hide();
+			}
+		}
 		else if (Keypressed(input, Key.Lyrics))
 		{
 			if (wCurrent == sLyrics)
 			{
-				wCurrent->Window::Clear();
+				wCurrent->Hide();
 				current_screen = prev_screen;
 				wCurrent = wPrev;
 				redraw_screen = 1;

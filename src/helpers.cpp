@@ -20,6 +20,7 @@
 
 #include <algorithm>
 #include "helpers.h"
+#include "tag_editor.h"
 
 extern MPDConnection *Mpd;
 
@@ -695,6 +696,40 @@ string DisplaySong(const Song &s, void *s_template)
 			}
 		}
 	}
+	return result;
+}
+
+string GetInfo(Song &s)
+{
+	string result;
+#	ifdef HAVE_TAGLIB_H
+	string path_to_file = Config.mpd_music_dir + "/" + s.GetFile();
+	TagLib::FileRef f(path_to_file.c_str());
+	if (!f.isNull())
+		s.SetComment(f.tag()->comment().to8Bit(UNICODE));
+#	endif // HAVE_TAGLIB_H
+	
+	result = "[.b][.white]Filename: [/white][.green][/b]" + s.GetShortFilename() + "[/green]\n";
+	result += "[.b][.white]Directory: [/white][.green][/b]" + s.GetDirectory() + "[/green]\n\n";
+	result += "[.b][.white]Length: [/white][.green][/b]" + s.GetLength() + "[/green]\n";
+#	ifdef HAVE_TAGLIB_H
+	if (!f.isNull())
+	{
+		result += "[.b][.white]Bitrate: [/white][.green][/b]" + IntoStr(f.audioProperties()->bitrate()) + " kbps[/green]\n";
+		result += "[.b][.white]Sample rate: [/white][.green][/b]" + IntoStr(f.audioProperties()->sampleRate()) + " Hz[/green]\n";
+		result += "[.b][.white]Channels: [/white][.green][/b]" + string(f.audioProperties()->channels() == 1 ? "Mono" : "Stereo") + "[/green]\n";
+	}
+#	endif // HAVE_TAGLIB_H
+	result += "\n[.b]Title:[/b] " + s.GetTitle();
+	result += "\n[.b]Artist:[/b] " + s.GetArtist();
+	result += "\n[.b]Album:[/b] " + s.GetAlbum();
+	result += "\n[.b]Year:[/b] " + s.GetYear();
+	result += "\n[.b]Track:[/b] " + s.GetTrack();
+	result += "\n[.b]Genre:[/b] " + s.GetGenre();
+	result += "\n[.b]Composer:[/b] " + s.GetComposer();
+	result += "\n[.b]Performer:[/b] " + s.GetPerformer();
+	result += "\n[.b]Disc:[/b] " + s.GetDisc();
+	result += "\n[.b]Comment:[/b] " + s.GetComment();
 	return result;
 }
 
