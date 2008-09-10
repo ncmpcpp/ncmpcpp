@@ -1636,7 +1636,7 @@ int main(int argc, char *argv[])
 				{
 					vector<int> list;
 					mPlaylist->GetSelectedList(list);
-					for (vector<int>::const_reverse_iterator it = list.rbegin(); it != list.rend(); it++)
+					for (vector<int>::const_reverse_iterator it = list.rbegin(); it != ((const vector<int> &)list).rend(); it++)
 					{
 						Mpd->QueueDeleteSong(*it);
 						mPlaylist->DeleteOption(*it);
@@ -1698,7 +1698,7 @@ int main(int argc, char *argv[])
 				{
 					vector<int> list;
 					mPlaylistEditor->GetSelectedList(list);
-					for (vector<int>::const_reverse_iterator it = list.rbegin(); it != list.rend(); it++)
+					for (vector<int>::const_reverse_iterator it = list.rbegin(); it != ((const vector<int> &)list).rend(); it++)
 					{
 						Mpd->QueueDeleteFromPlaylist(mPlaylistList->GetOption(), *it);
 						mPlaylistEditor->DeleteOption(*it);
