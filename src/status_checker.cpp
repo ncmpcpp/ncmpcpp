@@ -179,12 +179,7 @@ void NcmpcppStatusChanged(MPDConnection *Mpd, MPDStatusChanges changed, void *da
 					Mpd->GetPlaylistChanges(playlist_old_id, list);
 				
 				for (SongList::const_iterator it = list.begin(); it != list.end(); it++)
-				{
-					if (now_playing != (*it)->GetPosition())
-						mPlaylist->AddOption(**it);
-					else
-						mPlaylist->AddBoldOption(**it);
-				}
+					mPlaylist->AddOption(**it, now_playing == (*it)->GetPosition());
 				
 				if (current_screen == csPlaylist)
 				{

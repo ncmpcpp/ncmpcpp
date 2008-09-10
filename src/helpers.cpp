@@ -764,7 +764,7 @@ void GetDirectory(string dir, string subdir)
 						break;
 					}
 				}
-				bold ? mBrowser->AddBoldOption(*it) : mBrowser->AddOption(*it);
+				mBrowser->AddOption(*it, bold);
 				break;
 			}
 		}

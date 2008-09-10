@@ -55,11 +55,8 @@ class Menu : public Window
 		void SetItemDisplayer(ItemDisplayer ptr) { itsItemDisplayer = ptr; }
 		void SetItemDisplayerUserData(void *data) { itsItemDisplayerUserdata = data; }
 		
-		void AddOption(const T &, Location = lLeft, bool separator = 0);
-		void AddBoldOption(const T &item, Location location = lLeft, bool separator = 0);
-		void AddStaticOption(const T &item, Location location = lLeft, bool separator = 0);
-		void AddStaticBoldOption(const T &item, Location location = lLeft, bool separator = 0);
-		void AddSeparator();
+		void AddOption(const T &, bool bold = 0, bool is_static = 0, bool separator = 0, Location = lLeft);
+		void AddSeparator() { AddOption(T(), 0, 1, 1); }
 		void UpdateOption(int, const T &, Location = lLeft, bool separator = 0);
 		void RefreshOption(int option = -1) { NeedsRedraw.push_back(option < 0 ? itsHighlight : option); }
 		void BoldOption(int, bool);
@@ -194,59 +191,18 @@ int Menu<T>::count_length(string str)
 }
 
 template <class T>
-void Menu<T>::AddOption(const T &item, Location location, bool separator)
+void Menu<T>::AddOption(const T &item, bool bold, bool is_static, bool separator, Location location)
 {
 	Option<T> *new_option = new Option<T>;
 	new_option->item = item;
-	new_option->location = location;
+	new_option->is_bold = bold;
+	new_option->is_static = is_static;
 	new_option->have_separator = separator;
+	new_option->location = location;
+	if (is_static)
+		itsStaticsNumber++;
 	itsOptions.push_back(new_option);
 	NeedsRedraw.push_back(itsOptions.size()-1);
-}
-
-template <class T>
-void Menu<T>::AddBoldOption(const T &item, Location location, bool separator)
-{
-	Option<T> *new_option = new Option<T>;
-	new_option->item = item;
-	new_option->location = location;
-	new_option->have_separator = separator;
-	new_option->is_bold = 1;
-	itsOptions.push_back(new_option);
-	NeedsRedraw.push_back(itsOptions.size()-1);
-}
-
-template <class T>
-void Menu<T>::AddStaticOption(const T &item, Location location, bool separator)
-{
-	Option<T> *new_option = new Option<T>;
-	new_option->item = item;
-	new_option->location = location;
-	new_option->have_separator = separator;
-	new_option->is_static = 1;
-	itsOptions.push_back(new_option);
-	itsStaticsNumber++;
-	NeedsRedraw.push_back(itsOptions.size()-1);
-}
-
-template <class T>
-void Menu<T>::AddStaticBoldOption(const T &item, Location location, bool separator)
-{
-	Option<T> *new_option = new Option<T>;
-	new_option->item = item;
-	new_option->location = location;
-	new_option->have_separator = separator;
-	new_option->is_static = 1;
-	new_option->is_bold = 1;
-	itsOptions.push_back(new_option);
-	itsStaticsNumber++;
-	NeedsRedraw.push_back(itsOptions.size()-1);
-}
-
-template <class T>
-void Menu<T>::AddSeparator()
-{
-	AddStaticOption(T(), lLeft, 1);
 }
 
 template <class T>

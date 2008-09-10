@@ -592,7 +592,7 @@ int main(int argc, char *argv[])
 							break;
 						}
 					}
-					bold ? mLibSongs->AddBoldOption(**it) : mLibSongs->AddOption(**it);
+					mLibSongs->AddOption(**it, bold);
 					bold = 0;
 				}
 				FreeSongList(list);
@@ -638,7 +638,7 @@ int main(int argc, char *argv[])
 							break;
 						}
 					}
-					bold ? mPlaylistEditor->AddBoldOption(**it) : mPlaylistEditor->AddOption(**it);
+					mPlaylistEditor->AddOption(**it, bold);
 					bold = 0;
 				}
 				FreeSongList(list);

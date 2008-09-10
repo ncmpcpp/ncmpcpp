@@ -89,13 +89,13 @@ bool GetSongTags(Song &s)
 	mTagEditor->Clear();
 	mTagEditor->Reset();
 	
-	mTagEditor->AddStaticOption("[.b][.white]Song name: [/white][.green][/b]" + s.GetShortFilename() + "[/green]");
-	mTagEditor->AddStaticOption("[.b][.white]Location in DB: [/white][.green][/b]" + s.GetDirectory() + "[/green]");
-	mTagEditor->AddStaticOption("");
-	mTagEditor->AddStaticOption("[.b][.white]Length: [/white][.green][/b]" + s.GetLength() + "[/green]");
-	mTagEditor->AddStaticOption("[.b][.white]Bitrate: [/white][.green][/b]" + IntoStr(f.audioProperties()->bitrate()) + " kbps[/green]");
-	mTagEditor->AddStaticOption("[.b][.white]Sample rate: [/white][.green][/b]" + IntoStr(f.audioProperties()->sampleRate()) + " Hz[/green]");
-	mTagEditor->AddStaticOption("[.b][.white]Channels: [/white][.green][/b]" + (string)(f.audioProperties()->channels() == 1 ? "Mono" : "Stereo") + "[/green]");
+	mTagEditor->AddOption("[.b][.white]Song name: [/white][.green][/b]" + s.GetShortFilename() + "[/green]", 0, 1);
+	mTagEditor->AddOption("[.b][.white]Location in DB: [/white][.green][/b]" + s.GetDirectory() + "[/green]", 0, 1);
+	mTagEditor->AddOption("", 0, 1);
+	mTagEditor->AddOption("[.b][.white]Length: [/white][.green][/b]" + s.GetLength() + "[/green]", 0, 1);
+	mTagEditor->AddOption("[.b][.white]Bitrate: [/white][.green][/b]" + IntoStr(f.audioProperties()->bitrate()) + " kbps[/green]", 0, 1);
+	mTagEditor->AddOption("[.b][.white]Sample rate: [/white][.green][/b]" + IntoStr(f.audioProperties()->sampleRate()) + " Hz[/green]", 0, 1);
+	mTagEditor->AddOption("[.b][.white]Channels: [/white][.green][/b]" + (string)(f.audioProperties()->channels() == 1 ? "Mono" : "Stereo") + "[/green]", 0, 1);
 	
 	mTagEditor->AddSeparator();
 	
