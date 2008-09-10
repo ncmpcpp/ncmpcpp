@@ -57,15 +57,24 @@ void Scrollpad::Add(string str)
 		
 		if (BBEnabled)
 		{
-			if (s[i] == '[')
+			if (s[i] == '[' && (s[i+1] == '.' || s[i+1] == '/'))
 				collect = 1;
-		
+			
 			if (collect)
-				tmp += s[i];
-		
-			if (s[i] == ']' || tmp.length() > 10) // the longest bbcode is 10 chars long
+			{
+				if (s[i] != '[')
+				{
+					tmp += s[i];
+					if (tmp.length() > 10) // the longest bbcode is 10 chars long
+						collect = 0;
+				}
+				else
+					tmp = s[i];
+			}
+			
+			if (s[i] == ']')
 				collect = 0;
-		
+			
 			if (!collect && !tmp.empty())
 			{
 				if (IsValidColor(TO_STRING(tmp)))

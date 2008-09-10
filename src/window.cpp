@@ -270,20 +270,21 @@ void Window::ReadKey() const
 
 void Window::Write(int limit, const string &str, bool clrtoeol)
 {
-	if (BBEnabled && !str.empty())
+	if (BBEnabled)
 	{
 		bool collect = false;
 		string color, tmp;
 		for (string::const_iterator it = str.begin(); it != str.end() && limit > 0; it++)
 		{
-			if (*it != '[' && !collect)
+			if (*it == '[' && (*(it+1) == '.' || *(it+1) == '/'))
+				collect = 1;
+			
+			if (!collect)
 			{
 				tmp += *it;
 				limit--;
 			}
-			else
-				collect = 1;
-		
+			
 			if (collect)
 			{
 				if (*it != '[')
@@ -339,13 +340,14 @@ void Window::Write(int limit, const wstring &str, bool clrtoeol)
 		wstring color, tmp;
 		for (wstring::const_iterator it = str.begin(); it != str.end() && limit > 0; it++)
 		{
-			if (*it != '[' && !collect)
+			if (*it == '[' && (*(it+1) == '.' || *(it+1) == '/'))
+				collect = 1;
+			
+			if (!collect)
 			{
 				tmp += *it;
 				limit--;
 			}
-			else
-				collect = 1;
 		
 			if (collect)
 			{
@@ -643,18 +645,16 @@ wstring ToWString(const string &s)
 
 string Window::OmitBBCodes(const string &str)
 {
-	if (str.empty())
-		return "";
 	bool collect = false;
 	string tmp, color, result;
 	for (string::const_iterator it = str.begin(); it != str.end(); it++)
 	{
-		if (*it != '[' && !collect)
-			tmp += *it;
-		else
+		if (*it == '[' && (*(it+1) == '.' || *(it+1) == '/'))
 			collect = 1;
 		
-		if (collect)
+		if (!collect)
+			tmp += *it;
+		else
 		{
 			if (*it != '[')
 				color += *it;
@@ -668,7 +668,7 @@ string Window::OmitBBCodes(const string &str)
 		if (*it == ']' || it+1 == str.end())
 			collect = 0;
 		
-		if (!collect)
+		if (!collect && !color.empty())
 		{
 			result += tmp;
 			tmp.clear();
