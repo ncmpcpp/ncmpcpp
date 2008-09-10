@@ -408,108 +408,127 @@ void Window::WriteXY(int x, int y, int limit, const string &str, bool cleartoeol
 	Write(limit, str, cleartoeol);
 }
 
-string Window::GetString(const string &base, unsigned int length) const
+string Window::GetString(const string &base, unsigned int length, int width) const
 {
-	curs_set(1);
-	
-	keypad(itsWindow,TRUE);
-	
-	int input, minx, x, y, maxx;
-	wstring tmp;
-	
+	int input, beginning, maxbeginning, minx, x, y, maxx;
 	getyx(itsWindow,y,x);
 	minx = maxx = x;
 	
-	tmp = ToWString(base);
+	if (width == -1)
+		width = itsWidth-x-1;
+	if (width < 0)
+		return "";
 	
-	wmove(itsWindow,y,minx);
-	wprintw(itsWindow, "%ls",tmp.c_str());
-	
-	maxx += tmp.length();
-	
-	wrefresh(itsWindow);
+	curs_set(1);
+	keypad(itsWindow, 1);
+	wstring tmp = ToWString(base);
 	
 	string tmp_in;
 	wchar_t wc_in;
+	
+	maxbeginning = beginning = tmp.length() < width ? 0 : tmp.length()-width;
+	maxx += tmp.length() < width ? tmp.length() : width;
 	x = maxx;
 	
 	do
 	{
-		mvwprintw(itsWindow, y, minx, "%ls",tmp.c_str());
-		wclrtoeol(itsWindow);
+		maxbeginning = tmp.length() < width ? 0 : tmp.length()-width;
+		maxx = minx + (tmp.length() < width ? tmp.length() : width);
+		
+		if (beginning > maxbeginning)
+			beginning = maxbeginning;
+		
+		mvwhline(itsWindow, y, minx, 32, width);
+		mvwprintw(itsWindow, y, minx, "%ls", tmp.substr(beginning, width+1).c_str());
 		
 		if (itsGetStringHelper)
 			itsGetStringHelper();
+		
 		wmove(itsWindow,y,x);
 		input = wgetch(itsWindow);
-	
+		
 		switch (input)
 		{
 			case ERR:
 				continue;
 			case KEY_UP:
-			case KEY_DOWN: break;
+			case KEY_DOWN:
+				break;
 			case KEY_RIGHT:
 			{
 				if (x < maxx)
 					x++;
+				else if (beginning < maxbeginning)
+					beginning++;
 				break;
 			}
 			case KEY_BACKSPACE: case 127:
 			{
-				if (x <= minx) break;
+				if (x <= minx && !beginning)
+					break;
 			}
 			case KEY_LEFT:
 			{
 				if (x > minx)
 					x--;
-				if (input != KEY_BACKSPACE && input != 127) break; // backspace = left & delete.
+				else if (beginning > 0)
+					beginning--;
+				if (input != KEY_BACKSPACE && input != 127)
+					break; // backspace = left & delete.
 			}
 			case KEY_DC:
 			{
-				if ((maxx-x) < 1) break;
-				tmp.erase(tmp.end()-(maxx-x));
-				wmove(itsWindow,y,x); // for backspace
-				//wdelch(itsWindow);
-				maxx--;
+				if ((x-minx)+beginning == tmp.length())
+					break;
+				tmp.erase(tmp.begin()+(x-minx)+beginning);
+				if (beginning && beginning == maxbeginning && x < maxx)
+					x++;
 				break;
 			}
 			case KEY_HOME:
 			{
 				x = minx;
+				beginning = 0;
 				break;
 			}
 			case KEY_END:
 			{
 				x = maxx;
+				beginning = maxbeginning;
 				break;
 			}
-			case 10: break;
+			case 10:
+				break;
 			default:
 			{
-				if (maxx-minx >= length)
+				if (tmp.length() >= length)
 					break;
 				
 				tmp_in += input;
 				if (mbtowc(&wc_in, tmp_in.c_str(), MB_CUR_MAX) < 0)
 					break;
 				
-				if (maxx == x)
+				if ((x-minx)+beginning == tmp.length())
+				{
 					tmp.push_back(wc_in);
+					if (!beginning)
+						x++;
+					beginning++;
+				}
 				else
-					tmp.insert(tmp.end()-(maxx-x),wc_in);
-				
-				//winsstr(itsWindow, tmp_in.c_str());
+				{
+					tmp.insert(tmp.begin()+(x-minx)+beginning, wc_in);
+					if (x < maxx)
+						x++;
+					else if (beginning < maxbeginning)
+						beginning++;
+				}
 				tmp_in.clear();
-				
-				x++;
-				maxx++;
 			}
 		}
 	}
 	while (input != 10);
-	
-	keypad(itsWindow, FALSE);
+	keypad(itsWindow, 0);
 	curs_set(0);
 	return ToString(tmp);
 }

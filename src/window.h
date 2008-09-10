@@ -96,8 +96,8 @@ class Window
 		virtual void WriteXY(int x, int y, const wstring &s, bool ete = 0) { WriteXY(x, y, 0xFFFF, s, ete); }
 		virtual void WriteXY(int, int, int, const wstring &, bool = 0);
 #endif
-		virtual string GetString(const string &, unsigned int = -1) const;
-		virtual string GetString(unsigned int length = -1) const { return GetString("", length); }
+		virtual string GetString(const string &, unsigned int = -1, int = -1) const;
+		virtual string GetString(unsigned int length = -1, int width = -1) const { return GetString("", length, width); }
 		virtual void Scrollable(bool) const;
 		virtual void GetXY(int &, int &) const;
 		virtual void GotoXY(int, int) const;
