@@ -703,7 +703,7 @@ string GetInfo(Song &s)
 {
 	string result;
 #	ifdef HAVE_TAGLIB_H
-	string path_to_file = Config.mpd_music_dir + "/" + s.GetFile();
+	string path_to_file = Config.mpd_music_dir + s.GetFile();
 	TagLib::FileRef f(path_to_file.c_str());
 	if (!f.isNull())
 		s.SetComment(f.tag()->comment().to8Bit(UNICODE));

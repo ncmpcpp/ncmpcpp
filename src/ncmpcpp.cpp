@@ -64,7 +64,7 @@
 			mEditorTagTypes->Display(redraw_screen); \
 			mvvline(main_start_y, lib_songs_start_x-1, 0, main_height); \
 			mEditorTags->Display(redraw_screen)
-
+#define HAVE_TAGLIB_H
 ncmpcpp_config Config;
 ncmpcpp_keys Key;
 
@@ -2206,7 +2206,7 @@ int main(int argc, char *argv[])
 					Mpd->CommitSearch(list);
 					for (SongList::const_iterator it = list.begin(); it != list.end(); it++)
 					{
-						string path = Config.mpd_music_dir + "/" + (*it)->GetFile();
+						string path = Config.mpd_music_dir + (*it)->GetFile();
 						TagLib::FileRef f(path.c_str());
 						if (f.isNull())
 						{
@@ -2239,7 +2239,7 @@ int main(int argc, char *argv[])
 					Mpd->CommitSearch(list);
 					for (SongList::const_iterator it = list.begin(); it != list.end(); it++)
 					{
-						string path = Config.mpd_music_dir + "/" + (*it)->GetFile();
+						string path = Config.mpd_music_dir + (*it)->GetFile();
 						TagLib::FileRef f(path.c_str());
 						if (f.isNull())
 						{
@@ -2291,7 +2291,26 @@ int main(int argc, char *argv[])
 					current_screen = csTagEditor;
 				}
 				else
-					ShowMessage("Cannot read file '" + Config.mpd_music_dir + "/" + edited_song.GetFile() + "'!");
+					ShowMessage("Cannot read file '" + Config.mpd_music_dir + edited_song.GetFile() + "'!");
+			}
+			else if (wCurrent == mEditorDirs)
+			{
+				LOCK_STATUSBAR;
+				wFooter->WriteXY(0, Config.statusbar_visibility, "Directory: ", 1);
+				string new_dir = wFooter->GetString(mEditorDirs->Current().first);
+				UNLOCK_STATUSBAR;
+				if (!new_dir.empty() && new_dir != mEditorDirs->Current().first)
+				{
+					string old_dir = Config.mpd_music_dir + mEditorDirs->Current().second;
+					new_dir = Config.mpd_music_dir + editor_browsed_dir + "/" + new_dir;
+					if (rename(old_dir.c_str(), new_dir.c_str()) == 0)
+					{
+						ShowMessage("'" + mEditorDirs->Current().first + "' renamed to '" + new_dir);
+						Mpd->UpdateDirectory(editor_browsed_dir);
+					}
+					else
+						ShowMessage("Cannot rename '" + old_dir + "' to '" + new_dir + "'!");
+				}
 			}
 			else
 #			endif // HAVE_TAGLIB_H

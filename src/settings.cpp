@@ -148,7 +148,7 @@ void DefaultKeys(ncmpcpp_keys &keys)
 
 void DefaultConfiguration(ncmpcpp_config &conf)
 {
-	conf.mpd_music_dir = "/var/lib/mpd/music";
+	conf.mpd_music_dir = "/var/lib/mpd/music/";
 	conf.song_list_format = "{[.green](%l)[/green] }{%a - }{%t}|{[.white]%f[/white]}";
 	conf.song_columns_list_format = "(8)[green]{l} (28)[cyan]{a} (28){b} (50)[red]{t}";
 	conf.song_status_format = "{(%l) }{%a - }{%t}|{%f}";
@@ -435,7 +435,7 @@ void ReadConfiguration(ncmpcpp_config &conf)
 			if (it->find("mpd_music_dir") != string::npos)
 			{
 				if (!v.empty())
-					conf.mpd_music_dir = v;
+					conf.mpd_music_dir = v + "/";
 			}
 			else if (it->find("mpd_connection_timeout") != string::npos)
 			{

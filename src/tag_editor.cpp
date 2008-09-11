@@ -79,7 +79,7 @@ string DisplayTag(const Song &s, void *data)
 
 bool GetSongTags(Song &s)
 {
-	string path_to_file = Config.mpd_music_dir + "/" + s.GetFile();
+	string path_to_file = Config.mpd_music_dir + s.GetFile();
 	
 	TagLib::FileRef f(path_to_file.c_str());
 	if (f.isNull())
@@ -114,7 +114,7 @@ bool GetSongTags(Song &s)
 
 bool WriteTags(Song &s)
 {
-	string path_to_file = Config.mpd_music_dir + "/" + s.GetFile();
+	string path_to_file = Config.mpd_music_dir + s.GetFile();
 	TagLib::FileRef f(path_to_file.c_str());
 	if (!f.isNull())
 	{

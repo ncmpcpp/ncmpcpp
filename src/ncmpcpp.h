@@ -31,6 +31,7 @@
 # define UNICODE 0
 #endif
 
+#include <cstdio>
 #include <clocale>
 #include <ctime>
 #include <algorithm>
