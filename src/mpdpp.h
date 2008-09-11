@@ -164,6 +164,8 @@ class MPDConnection
 		void GetAlbums(string, TagList &) const;
 		void GetDirectory(const string &, ItemList &) const;
 		void GetDirectoryRecursive(const string &, SongList &) const;
+		void GetSongs(const string &, SongList &) const;
+		void GetDirectories(const string &, TagList &) const;
 	
 	private:
 		int CheckForErrors();

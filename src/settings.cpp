@@ -176,6 +176,7 @@ void DefaultConfiguration(ncmpcpp_config &conf)
 	conf.repeat_one_mode = false;
 	conf.wrapped_search = true;
 	conf.space_selects = false;
+	conf.albums_in_tag_editor = true;
 	conf.set_window_title = true;
 	conf.mpd_connection_timeout = 15;
 	conf.crossfade_time = 5;

@@ -84,7 +84,9 @@ Menu<Song> *mLibSongs;
 
 #ifdef HAVE_TAGLIB_H
 Menu<string> *mTagEditor;
+Menu<StringPair> *mEditorLeftCol;
 Menu<StringPair> *mEditorAlbums;
+Menu<StringPair> *mEditorDirs;
 Menu<string> *mEditorTagTypes;
 Menu<Song> *mEditorTags;
 #endif // HAVE_TAGLIB_H
@@ -111,6 +113,8 @@ int stats_scroll_begin = 0;
 int lock_statusbar_delay = -1;
 
 string browsed_dir = "/";
+string editor_browsed_dir = "/";
+string editor_highlighted_dir;
 
 NcmpcppScreen current_screen;
 NcmpcppScreen prev_screen;
@@ -218,6 +222,9 @@ int main(int argc, char *argv[])
 	mTagEditor = new Menu<string>(0, main_start_y, COLS, main_height, "", Config.main_color, brNone);
 	mEditorAlbums = new Menu<StringPair>(0, main_start_y, lib_artist_width, main_height, "Albums", Config.main_color, brNone);
 	mEditorAlbums->SetItemDisplayer(DisplayStringPair);
+	mEditorDirs = new Menu<StringPair>(0, main_start_y, lib_artist_width, main_height, "Directories", Config.main_color, brNone);
+	mEditorDirs->SetItemDisplayer(DisplayStringPair);
+	mEditorLeftCol = Config.albums_in_tag_editor ? mEditorAlbums : mEditorDirs;
 	mEditorTagTypes = new Menu<string>(lib_albums_start_x, main_start_y, lib_albums_width, main_height, "Tag types", Config.main_color, brNone);
 	mEditorTags = new Menu<Song>(lib_songs_start_x, main_start_y, lib_songs_width, main_height, "Tags", Config.main_color, brNone);
 	mEditorTags->SetItemDisplayer(DisplayTag);
@@ -363,6 +370,7 @@ int main(int argc, char *argv[])
 #	ifdef HAVE_TAGLIB_H
 	mTagEditor->SetTimeout(ncmpcpp_window_timeout);
 	mEditorAlbums->SetTimeout(ncmpcpp_window_timeout);
+	mEditorDirs->SetTimeout(ncmpcpp_window_timeout);
 	mEditorTagTypes->SetTimeout(ncmpcpp_window_timeout);
 	mEditorTags->SetTimeout(ncmpcpp_window_timeout);
 #	endif // HAVE_TAGLIB_H
@@ -381,6 +389,7 @@ int main(int argc, char *argv[])
 #	ifdef HAVE_TAGLIB_H
 	mTagEditor->HighlightColor(Config.main_highlight_color);
 	mEditorAlbums->HighlightColor(Config.main_highlight_color);
+	mEditorDirs->HighlightColor(Config.main_highlight_color);
 	mEditorTagTypes->HighlightColor(Config.main_highlight_color);
 	mEditorTags->HighlightColor(Config.main_highlight_color);
 #	endif // HAVE_TAGLIB_H
@@ -436,6 +445,7 @@ int main(int argc, char *argv[])
 					title = "Browse: ";
 					break;
 				case csTagEditor:
+				case csAlbumEditor:
 					title = "Tag editor";
 					break;
 				case csInfo:
@@ -452,9 +462,6 @@ int main(int argc, char *argv[])
 					break;
 				case csPlaylistEditor:
 					title = "Playlist editor";
-					break;
-				case csAlbumEditor:
-					title = "Albums' tag editor";
 					break;
 			}
 			
@@ -496,7 +503,7 @@ int main(int argc, char *argv[])
 			{
 				string screens = "[.b]1:[/b]Help  [.b]2:[/b]Playlist  [.b]3:[/b]Browse  [.b]4:[/b]Search  [.b]5:[/b]Library  [.b]6:[/b]Playlist editor";
 #				ifdef HAVE_TAGLIB_H
-				screens += "  [.b]7:[/b]Albums' tag editor";
+				screens += "  [.b]7:[/b]Tag editor";
 #				endif // HAVE_TAGLIB_H
 				wHeader->WriteXY(0, 0, max_allowed_title_length, screens, 1);
 			}
@@ -669,29 +676,54 @@ int main(int argc, char *argv[])
 #		ifdef HAVE_TAGLIB_H
 		if (current_screen == csAlbumEditor)
 		{
-			if (mEditorAlbums->Empty())
+			if (mEditorLeftCol->Empty())
 			{
 				found_pos = 0;
 				vFoundPositions.clear();
-				mEditorAlbums->Window::Clear();
+				mEditorLeftCol->Window::Clear();
 				mEditorTags->Clear();
 				TagList list;
-				std::map<string, string, CaseInsensitiveSorting> maplist;
-				mEditorAlbums->WriteXY(0, 0, "Fetching albums' list...");
-				Mpd->GetAlbums("", list);
-				for (TagList::const_iterator it = list.begin(); it != list.end(); it++)
+				if (Config.albums_in_tag_editor)
 				{
-					bool written = 0;
-					SongList l;
-					Mpd->StartSearch(1);
-					Mpd->AddSearch(MPD_TAG_ITEM_ALBUM, *it);
-					Mpd->CommitSearch(l);
-					maplist[DisplaySong(*l[0], &Config.tag_editor_album_format)] = *it;
-					FreeSongList(l);
+					std::map<string, string, CaseInsensitiveSorting> maplist;
+					mEditorAlbums->WriteXY(0, 0, "Fetching albums' list...");
+					Mpd->GetAlbums("", list);
+					for (TagList::const_iterator it = list.begin(); it != list.end(); it++)
+					{
+						bool written = 0;
+						SongList l;
+						Mpd->StartSearch(1);
+						Mpd->AddSearch(MPD_TAG_ITEM_ALBUM, *it);
+						Mpd->CommitSearch(l);
+						maplist[DisplaySong(*l[0], &Config.tag_editor_album_format)] = *it;
+						FreeSongList(l);
+					}
+					for (std::map<string, string>::const_iterator it = maplist.begin(); it != maplist.end(); it++)
+						mEditorAlbums->AddOption(StringPair(it->first, it->second));
 				}
-				for (std::map<string, string>::const_iterator it = maplist.begin(); it != maplist.end(); it++)
-					mEditorAlbums->AddOption(StringPair(it->first, it->second));
-				mEditorAlbums->Refresh();
+				else
+				{
+					int highlightme = -1;
+					Mpd->GetDirectories(editor_browsed_dir, list);
+					sort(list.begin(), list.end(), CaseInsensitiveSorting());
+					if (editor_browsed_dir != "/")
+					{
+						int slash = editor_browsed_dir.find_last_of("/");
+						string parent = slash != string::npos ? editor_browsed_dir.substr(0, slash) : "/";
+						mEditorDirs->AddOption(StringPair("[..]", parent));
+					}
+					for (TagList::const_iterator it = list.begin(); it != list.end(); it++)
+					{
+						int slash = it->find_last_of("/");
+						string to_display = slash != string::npos ? it->substr(slash+1) : *it;
+						mEditorDirs->AddOption(StringPair(to_display, *it));
+						if (*it == editor_highlighted_dir)
+							highlightme = mEditorDirs->Size()-1;
+					}
+					if (highlightme != -1)
+						mEditorDirs->Highlight(highlightme);
+				}
+				mEditorLeftCol->Display();
 				mEditorTagTypes->Refresh();
 			}
 			
@@ -699,12 +731,22 @@ int main(int argc, char *argv[])
 			{
 				mEditorTags->Reset();
 				SongList list;
-				Mpd->StartSearch(1);
-				Mpd->AddSearch(MPD_TAG_ITEM_ALBUM, mEditorAlbums->Current().second);
-				Mpd->CommitSearch(list);
-				sort(list.begin(), list.end(), CaseInsensitiveSorting());
-				for (SongList::iterator it = list.begin(); it != list.end(); it++)
-					mEditorTags->AddOption(**it);
+				if (Config.albums_in_tag_editor)
+				{
+					Mpd->StartSearch(1);
+					Mpd->AddSearch(MPD_TAG_ITEM_ALBUM, mEditorAlbums->Current().second);
+					Mpd->CommitSearch(list);
+					sort(list.begin(), list.end(), CaseInsensitiveSorting());
+					for (SongList::iterator it = list.begin(); it != list.end(); it++)
+						mEditorTags->AddOption(**it);
+				}
+				else
+				{
+					Mpd->GetSongs(mEditorDirs->Current().second, list);
+					sort(list.begin(), list.end(), CaseInsensitiveSorting());
+					for (SongList::const_iterator it = list.begin(); it != list.end(); it++)
+						mEditorTags->AddOption(**it);
+				}
 				FreeSongList(list);
 				mEditorTags->Window::Clear();
 				mEditorTags->Refresh();
@@ -756,7 +798,7 @@ int main(int argc, char *argv[])
 						mPlaylistEditor->Clear(0);
 					}
 #					ifdef HAVE_TAGLIB_H
-					else if (wCurrent == mEditorAlbums)
+					else if (wCurrent == mEditorLeftCol)
 					{
 						mEditorTags->Clear(0);
 						mEditorTagTypes->Refresh();
@@ -836,6 +878,7 @@ int main(int argc, char *argv[])
 			mTagEditor->Resize(COLS, main_height);
 			
 			mEditorAlbums->Resize(lib_artist_width, main_height);
+			mEditorDirs->Resize(lib_artist_width, main_height);
 			mEditorTagTypes->Resize(lib_albums_width, main_height);
 			mEditorTags->Resize(lib_songs_width, main_height);
 			mEditorTagTypes->MoveTo(lib_albums_start_x, main_start_y);
@@ -1328,6 +1371,22 @@ int main(int argc, char *argv[])
 #				ifdef HAVE_TAGLIB_H
 				case csAlbumEditor:
 				{
+					if (wCurrent == mEditorDirs)
+					{
+						TagList test;
+						Mpd->GetDirectories(mEditorLeftCol->Current().second, test);
+						if (!test.empty())
+						{
+							editor_highlighted_dir = editor_browsed_dir;
+							editor_browsed_dir = mEditorLeftCol->Current().second;
+							mEditorLeftCol->Clear(0);
+							mEditorLeftCol->Reset();
+						}
+						else
+							ShowMessage("No subdirs found");
+						break;
+					}
+					
 					void (Song::*set)(const string &) = 0;
 					int id = mEditorTagTypes->GetRealChoice();
 					switch (id)
@@ -1401,8 +1460,8 @@ int main(int argc, char *argv[])
 								mEditorTagTypes->HighlightColor(Config.main_highlight_color);
 								mEditorTagTypes->Reset();
 								wCurrent->Refresh();
-								wCurrent = mEditorAlbums;
-								mEditorAlbums->HighlightColor(Config.active_column_color);
+								wCurrent = mEditorLeftCol;
+								mEditorLeftCol->HighlightColor(Config.active_column_color);
 								Mpd->UpdateDirectory(FindSharedDir(mEditorTags));
 							}
 							else
@@ -1412,6 +1471,7 @@ int main(int argc, char *argv[])
 						default:
 							break;
 					}
+					
 					if (wCurrent == mEditorTagTypes && id != 0 && id != 4 && set != NULL)
 					{
 						LOCK_STATUSBAR;
@@ -1520,6 +1580,18 @@ int main(int argc, char *argv[])
 					goto ENTER_LIBRARY_SCREEN; // sorry, but that's stupid to copy the same code here.
 				else if (current_screen == csPlaylistEditor)
 					goto ENTER_PLAYLIST_EDITOR_SCREEN; // same what in library screen.
+#				ifdef HAVE_TAGLIB_H
+				else if (wCurrent == mEditorLeftCol)
+				{
+					Config.albums_in_tag_editor = !Config.albums_in_tag_editor;
+					mEditorLeftCol = Config.albums_in_tag_editor ? mEditorAlbums : mEditorDirs;
+					wCurrent = mEditorLeftCol;
+					ShowMessage("Switched to " + string(Config.albums_in_tag_editor ? "albums" : "directories") + " view");
+					mEditorLeftCol->Display();
+					mEditorTags->Clear(0);
+					redraw_screen = 1;
+				}
+#				endif // HAVE_TAGLIB_H
 			}
 		}
 		else if (Keypressed(input, Key.VolumeUp))
@@ -1559,14 +1631,14 @@ int main(int argc, char *argv[])
 			{
 				found_pos = 0;
 				vFoundPositions.clear();
-				if (wCurrent == mEditorAlbums)
+				if (wCurrent == mEditorLeftCol)
 				{
-					mEditorAlbums->HighlightColor(Config.main_highlight_color);
+					mEditorLeftCol->HighlightColor(Config.main_highlight_color);
 					wCurrent->Refresh();
 					wCurrent = mEditorTagTypes;
 					mEditorTagTypes->HighlightColor(Config.active_column_color);
 				}
-				else if (wCurrent == mEditorTagTypes && mEditorTagTypes->GetChoice() < 10)
+				else if (wCurrent == mEditorTagTypes && mEditorTagTypes->GetChoice() < 10 && !mEditorTags->Empty())
 				{
 					mEditorTagTypes->HighlightColor(Config.main_highlight_color);
 					wCurrent->Refresh();
@@ -1626,8 +1698,8 @@ int main(int argc, char *argv[])
 				{
 					mEditorTagTypes->HighlightColor(Config.main_highlight_color);
 					wCurrent->Refresh();
-					wCurrent = mEditorAlbums;
-					mEditorAlbums->HighlightColor(Config.active_column_color);
+					wCurrent = mEditorLeftCol;
+					mEditorLeftCol->HighlightColor(Config.active_column_color);
 				}
 			}
 #			endif // HAVE_TAGLIB_H
@@ -2863,6 +2935,7 @@ int main(int argc, char *argv[])
 				vFoundPositions.clear();
 				
 				mEditorAlbums->HighlightColor(Config.active_column_color);
+				mEditorDirs->HighlightColor(Config.active_column_color);
 				mEditorTagTypes->HighlightColor(Config.main_highlight_color);
 				mEditorTags->HighlightColor(Config.main_highlight_color);
 				
@@ -2888,7 +2961,7 @@ int main(int argc, char *argv[])
 
 				}
 				
-				wCurrent = mEditorAlbums;
+				wCurrent = mEditorLeftCol;
 				current_screen = csAlbumEditor;
 			}
 		}

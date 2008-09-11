@@ -761,6 +761,41 @@ void MPDConnection::GetDirectoryRecursive(const string &path, SongList &v) const
 	}
 }
 
+void MPDConnection::GetSongs(const string &path, SongList &v) const
+{
+	if (isConnected)
+	{
+		mpd_InfoEntity *item = NULL;
+		mpd_sendLsInfoCommand(itsConnection, path.c_str());
+		while ((item = mpd_getNextInfoEntity(itsConnection)) != NULL)
+		{
+			if (item->type == MPD_INFO_ENTITY_TYPE_SONG)
+			{
+				Song *s = new Song(item->info.song);
+				v.push_back(s);
+			}
+			mpd_freeInfoEntity(item);
+		}
+		mpd_finishCommand(itsConnection);
+	}
+}
+
+void MPDConnection::GetDirectories(const string &path, TagList &v) const
+{
+	if (isConnected)
+	{
+		mpd_InfoEntity *item = NULL;
+		mpd_sendLsInfoCommand(itsConnection, path.c_str());
+		while ((item = mpd_getNextInfoEntity(itsConnection)) != NULL)
+		{
+			if (item->type == MPD_INFO_ENTITY_TYPE_DIRECTORY)
+				v.push_back(item->info.directory->path);
+			mpd_freeInfoEntity(item);
+		}
+		mpd_finishCommand(itsConnection);
+	}
+}
+
 int MPDConnection::CheckForErrors()
 {
 	itsErrorCode = 0;

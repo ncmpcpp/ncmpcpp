@@ -123,6 +123,7 @@ struct ncmpcpp_config
 	bool repeat_one_mode;
 	bool wrapped_search;
 	bool space_selects;
+	bool albums_in_tag_editor;
 	
 	int mpd_connection_timeout;
 	int crossfade_time;

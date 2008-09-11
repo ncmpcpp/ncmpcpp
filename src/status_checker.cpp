@@ -34,6 +34,7 @@ extern Menu<Song> *mPlaylistEditor;
 
 #ifdef HAVE_TAGLIB_H
 extern Menu<string> *mEditorAlbums;
+extern Menu<string> *mEditorDirs;
 #endif // HAVE_TAGLIB_H
 
 extern Window *wHeader;
@@ -235,6 +236,7 @@ void NcmpcppStatusChanged(MPDConnection *Mpd, MPDStatusChanges changed, void *da
 		GetDirectory(browsed_dir);
 #		ifdef HAVE_TAGLIB_H
 		mEditorAlbums->Clear(0);
+		mEditorDirs->Clear(0);
 #		endif // HAVE_TAGLIB_H
 		mLibArtists->Clear(0);
 		mPlaylistEditor->Clear(0);
