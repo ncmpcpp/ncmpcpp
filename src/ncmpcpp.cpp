@@ -21,6 +21,7 @@
 #include "mpdpp.h"
 #include "ncmpcpp.h"
 
+#include "help.h"
 #include "helpers.h"
 #include "lyrics.h"
 #include "search_engine.h"
@@ -48,23 +49,23 @@
 
 #define REFRESH_MEDIA_LIBRARY_SCREEN \
 			mLibArtists->Display(redraw_screen); \
-			mvvline(main_start_y, lib_albums_start_x-1, 0, main_height); \
+			mvvline(main_start_y, middle_col_startx-1, 0, main_height); \
 			mLibAlbums->Display(redraw_screen); \
-			mvvline(main_start_y, lib_songs_start_x-1, 0, main_height); \
+			mvvline(main_start_y, right_col_startx-1, 0, main_height); \
 			mLibSongs->Display(redraw_screen)
 
 #define REFRESH_PLAYLIST_EDITOR_SCREEN \
 			mPlaylistList->Display(redraw_screen); \
-			mvvline(main_start_y, lib_albums_start_x-1, 0, main_height); \
+			mvvline(main_start_y, middle_col_startx-1, 0, main_height); \
 			mPlaylistEditor->Display(redraw_screen)
 
 #define REFRESH_ALBUM_EDITOR_SCREEN \
 			mEditorAlbums->Display(redraw_screen); \
-			mvvline(main_start_y, lib_albums_start_x-1, 0, main_height); \
+			mvvline(main_start_y, middle_col_startx-1, 0, main_height); \
 			mEditorTagTypes->Display(redraw_screen); \
-			mvvline(main_start_y, lib_songs_start_x-1, 0, main_height); \
+			mvvline(main_start_y, right_col_startx-1, 0, main_height); \
 			mEditorTags->Display(redraw_screen)
-#define HAVE_TAGLIB_H
+
 ncmpcpp_config Config;
 ncmpcpp_keys Key;
 
@@ -188,31 +189,45 @@ int main(int argc, char *argv[])
 		main_height++;
 	
 	mPlaylist = new Menu<Song>(0, main_start_y, COLS, main_height, Config.columns_in_playlist ? DisplayColumns(Config.song_columns_list_format) : "", Config.main_color, brNone);
+	mPlaylist->SetTimeout(ncmpcpp_window_timeout);
+	mPlaylist->HighlightColor(Config.main_highlight_color);
 	mPlaylist->SetSelectPrefix(Config.selected_item_prefix);
 	mPlaylist->SetSelectSuffix(Config.selected_item_suffix);
 	mPlaylist->SetItemDisplayer(Config.columns_in_playlist ? DisplaySongInColumns : DisplaySong);
 	mPlaylist->SetItemDisplayerUserData(Config.columns_in_playlist ? &Config.song_columns_list_format : &Config.song_list_format);
 	
 	mBrowser = new Menu<Item>(0, main_start_y, COLS, main_height, "", Config.main_color, brNone);
+	mBrowser->HighlightColor(Config.main_highlight_color);
+	mBrowser->SetTimeout(ncmpcpp_window_timeout);
 	mBrowser->SetSelectPrefix(Config.selected_item_prefix);
 	mBrowser->SetSelectSuffix(Config.selected_item_suffix);
 	mBrowser->SetItemDisplayer(DisplayItem);
 	
 	mSearcher = new Menu< std::pair<string, Song> >(0, main_start_y, COLS, main_height, "", Config.main_color, brNone);
+	mSearcher->HighlightColor(Config.main_highlight_color);
+	mSearcher->SetTimeout(ncmpcpp_window_timeout);
 	mSearcher->SetItemDisplayer(SearchEngineDisplayer);
 	mSearcher->SetSelectPrefix(Config.selected_item_prefix);
 	mSearcher->SetSelectSuffix(Config.selected_item_suffix);
 	
-	int lib_artist_width = COLS/3-1;
-	int lib_albums_width = COLS/3;
-	int lib_albums_start_x = lib_artist_width+1;
-	int lib_songs_width = COLS-COLS/3*2-1;
-	int lib_songs_start_x = lib_artist_width+lib_albums_width+2;
+	int left_col_width = COLS/3-1;
+	int middle_col_width = COLS/3;
+	int middle_col_startx = left_col_width+1;
+	int right_col_width = COLS-COLS/3*2-1;
+	int right_col_startx = left_col_width+middle_col_width+2;
 	
-	mLibArtists = new Menu<string>(0, main_start_y, lib_artist_width, main_height, "Artists", Config.main_color, brNone);
-	mLibAlbums = new Menu<StringPair>(lib_albums_start_x, main_start_y, lib_albums_width, main_height, "Albums", Config.main_color, brNone);
+	mLibArtists = new Menu<string>(0, main_start_y, left_col_width, main_height, "Artists", Config.main_color, brNone);
+	mLibArtists->HighlightColor(Config.main_highlight_color);
+	mLibArtists->SetTimeout(ncmpcpp_window_timeout);
+	
+	mLibAlbums = new Menu<StringPair>(middle_col_startx, main_start_y, middle_col_width, main_height, "Albums", Config.main_color, brNone);
+	mLibAlbums->HighlightColor(Config.main_highlight_color);
+	mLibAlbums->SetTimeout(ncmpcpp_window_timeout);
 	mLibAlbums->SetItemDisplayer(DisplayStringPair);
-	mLibSongs = new Menu<Song>(lib_songs_start_x, main_start_y, lib_songs_width, main_height, "Songs", Config.main_color, brNone);
+	
+	mLibSongs = new Menu<Song>(right_col_startx, main_start_y, right_col_width, main_height, "Songs", Config.main_color, brNone);
+	mLibSongs->HighlightColor(Config.main_highlight_color);
+	mLibSongs->SetTimeout(ncmpcpp_window_timeout);
 	mLibSongs->SetSelectPrefix(Config.selected_item_prefix);
 	mLibSongs->SetSelectSuffix(Config.selected_item_suffix);
 	mLibSongs->SetItemDisplayer(DisplaySong);
@@ -220,128 +235,52 @@ int main(int argc, char *argv[])
 	
 #	ifdef HAVE_TAGLIB_H
 	mTagEditor = new Menu<string>(0, main_start_y, COLS, main_height, "", Config.main_color, brNone);
-	mEditorAlbums = new Menu<StringPair>(0, main_start_y, lib_artist_width, main_height, "Albums", Config.main_color, brNone);
+	mTagEditor->HighlightColor(Config.main_highlight_color);
+	mTagEditor->SetTimeout(ncmpcpp_window_timeout);
+	
+	mEditorAlbums = new Menu<StringPair>(0, main_start_y, left_col_width, main_height, "Albums", Config.main_color, brNone);
+	mEditorAlbums->HighlightColor(Config.main_highlight_color);
+	mEditorAlbums->SetTimeout(ncmpcpp_window_timeout);
 	mEditorAlbums->SetItemDisplayer(DisplayStringPair);
-	mEditorDirs = new Menu<StringPair>(0, main_start_y, lib_artist_width, main_height, "Directories", Config.main_color, brNone);
+	
+	mEditorDirs = new Menu<StringPair>(0, main_start_y, left_col_width, main_height, "Directories", Config.main_color, brNone);
+	mEditorDirs->HighlightColor(Config.main_highlight_color);
+	mEditorDirs->SetTimeout(ncmpcpp_window_timeout);
 	mEditorDirs->SetItemDisplayer(DisplayStringPair);
 	mEditorLeftCol = Config.albums_in_tag_editor ? mEditorAlbums : mEditorDirs;
-	mEditorTagTypes = new Menu<string>(lib_albums_start_x, main_start_y, lib_albums_width, main_height, "Tag types", Config.main_color, brNone);
-	mEditorTags = new Menu<Song>(lib_songs_start_x, main_start_y, lib_songs_width, main_height, "Tags", Config.main_color, brNone);
+	
+	mEditorTagTypes = new Menu<string>(middle_col_startx, main_start_y, middle_col_width, main_height, "Tag types", Config.main_color, brNone);
+	mEditorTagTypes->HighlightColor(Config.main_highlight_color);
+	mEditorTagTypes->SetTimeout(ncmpcpp_window_timeout);
+	
+	mEditorTags = new Menu<Song>(right_col_startx, main_start_y, right_col_width, main_height, "Tags", Config.main_color, brNone);
+	mEditorTags->HighlightColor(Config.main_highlight_color);
+	mEditorTags->SetTimeout(ncmpcpp_window_timeout);
 	mEditorTags->SetItemDisplayer(DisplayTag);
 	mEditorTags->SetItemDisplayerUserData(mEditorTagTypes);
 #	endif // HAVE_TAGLIB_H
 	
-	mPlaylistList = new Menu<string>(0, main_start_y, lib_artist_width, main_height, "Playlists", Config.main_color, brNone);
-	mPlaylistEditor = new Menu<Song>(lib_albums_start_x, main_start_y, lib_albums_width+lib_songs_width+1, main_height, "Playlist's content", Config.main_color, brNone);
+	mPlaylistList = new Menu<string>(0, main_start_y, left_col_width, main_height, "Playlists", Config.main_color, brNone);
+	mPlaylistList->HighlightColor(Config.main_highlight_color);
+	mPlaylistList->SetTimeout(ncmpcpp_window_timeout);
+	
+	mPlaylistEditor = new Menu<Song>(middle_col_startx, main_start_y, middle_col_width+right_col_width+1, main_height, "Playlist's content", Config.main_color, brNone);
+	mPlaylistEditor->HighlightColor(Config.main_highlight_color);
+	mPlaylistEditor->SetTimeout(ncmpcpp_window_timeout);
 	mPlaylistEditor->SetSelectPrefix(Config.selected_item_prefix);
 	mPlaylistEditor->SetSelectSuffix(Config.selected_item_suffix);
 	mPlaylistEditor->SetItemDisplayer(DisplaySong);
 	mPlaylistEditor->SetItemDisplayerUserData(&Config.song_list_format);
 	
 	sHelp = new Scrollpad(0, main_start_y, COLS, main_height, "", Config.main_color, brNone);
+	sHelp->SetTimeout(ncmpcpp_window_timeout);
+	sHelp->Add(GetKeybindings());
+	
 	sLyrics = static_cast<Scrollpad *>(sHelp->EmptyClone());
+	sLyrics->SetTimeout(ncmpcpp_window_timeout);
+	
 	sInfo = static_cast<Scrollpad *>(sHelp->EmptyClone());
-	
-	sHelp->Add("   [.b]Keys - Movement\n -----------------------------------------[/b]\n");
-	sHelp->Add(DisplayKeys(Key.Up) + "Move Cursor up\n");
-	sHelp->Add(DisplayKeys(Key.Down) + "Move Cursor down\n");
-	sHelp->Add(DisplayKeys(Key.PageUp) + "Page up\n");
-	sHelp->Add(DisplayKeys(Key.PageDown) + "Page down\n");
-	sHelp->Add(DisplayKeys(Key.Home) + "Home\n");
-	sHelp->Add(DisplayKeys(Key.End) + "End\n\n");
-	
-	sHelp->Add(DisplayKeys(Key.ScreenSwitcher) + "Switch between playlist and browser\n");
-	sHelp->Add(DisplayKeys(Key.Help) + "Help screen\n");
-	sHelp->Add(DisplayKeys(Key.Playlist) + "Playlist screen\n");
-	sHelp->Add(DisplayKeys(Key.Browser) + "Browse screen\n");
-	sHelp->Add(DisplayKeys(Key.SearchEngine) + "Search engine\n");
-	sHelp->Add(DisplayKeys(Key.MediaLibrary) + "Media library\n");
-	sHelp->Add(DisplayKeys(Key.PlaylistEditor) + "Playlist editor\n");
-	sHelp->Add(DisplayKeys(Key.AlbumEditor) + "Album editor\n\n\n");
-	
-	sHelp->Add("   [.b]Keys - Global\n -----------------------------------------[/b]\n");
-	sHelp->Add(DisplayKeys(Key.Stop) + "Stop\n");
-	sHelp->Add(DisplayKeys(Key.Pause) + "Pause\n");
-	sHelp->Add(DisplayKeys(Key.Next) + "Next track\n");
-	sHelp->Add(DisplayKeys(Key.Prev) + "Previous track\n");
-	sHelp->Add(DisplayKeys(Key.SeekForward) + "Seek forward\n");
-	sHelp->Add(DisplayKeys(Key.SeekBackward) + "Seek backward\n");
-	sHelp->Add(DisplayKeys(Key.VolumeDown) + "Decrease volume\n");
-	sHelp->Add(DisplayKeys(Key.VolumeUp) + "Increase volume\n\n");
-	
-	sHelp->Add(DisplayKeys(Key.ToggleSpaceMode) + "Toggle space mode (select/add)\n");
-	sHelp->Add(DisplayKeys(Key.ReverseSelection) + "Reverse selection\n");
-	sHelp->Add(DisplayKeys(Key.DeselectAll) + "Deselect all items\n");
-	sHelp->Add(DisplayKeys(Key.AddSelected) + "Add selected items to playlist/m3u file\n\n");
-	
-	sHelp->Add(DisplayKeys(Key.ToggleRepeat) + "Toggle repeat mode\n");
-	sHelp->Add(DisplayKeys(Key.ToggleRepeatOne) + "Toggle \"repeat one\" mode\n");
-	sHelp->Add(DisplayKeys(Key.ToggleRandom) + "Toggle random mode\n");
-	sHelp->Add(DisplayKeys(Key.Shuffle) + "Shuffle playlist\n");
-	sHelp->Add(DisplayKeys(Key.ToggleCrossfade) + "Toggle crossfade mode\n");
-	sHelp->Add(DisplayKeys(Key.SetCrossfade) + "Set crossfade\n");
-	sHelp->Add(DisplayKeys(Key.UpdateDB) + "Start a music database update\n\n");
-	
-	sHelp->Add(DisplayKeys(Key.FindForward) + "Forward find\n");
-	sHelp->Add(DisplayKeys(Key.FindBackward) + "Backward find\n");
-	sHelp->Add(DisplayKeys(Key.PrevFoundPosition) + "Go to previous found position\n");
-	sHelp->Add(DisplayKeys(Key.NextFoundPosition) + "Go to next found position\n");
-	sHelp->Add(DisplayKeys(Key.ToggleFindMode) + "Toggle find mode (normal/wrapped)\n");
-	sHelp->Add(DisplayKeys(Key.GoToContainingDir) + "Go to directory containing current item\n");
-#	ifdef HAVE_TAGLIB_H
-	sHelp->Add(DisplayKeys(Key.EditTags) + "Edit song's tags/playlist's name\n");
-#	endif // HAVE_TAGLIB_H
-	sHelp->Add(DisplayKeys(Key.GoToPosition) + "Go to chosen position in current song\n");
-	sHelp->Add(DisplayKeys(Key.ShowInfo) + "Show song's info\n");
-	sHelp->Add(DisplayKeys(Key.Lyrics) + "Show/hide song's lyrics\n\n");
-	
-	sHelp->Add(DisplayKeys(Key.Quit) + "Quit\n\n\n");
-	
-	sHelp->Add("   [.b]Keys - Playlist screen\n -----------------------------------------[/b]\n");
-	sHelp->Add(DisplayKeys(Key.Enter) + "Play\n");
-	sHelp->Add(DisplayKeys(Key.Delete) + "Delete item/selected items from playlist\n");
-	sHelp->Add(DisplayKeys(Key.Clear) + "Clear playlist\n");
-	sHelp->Add(DisplayKeys(Key.Crop) + "Clear playlist but hold currently playing/selected items\n");
-	sHelp->Add(DisplayKeys(Key.MvSongUp) + "Move item/group of items up\n");
-	sHelp->Add(DisplayKeys(Key.MvSongDown) + "Move item/group of items down\n");
-	sHelp->Add(DisplayKeys(Key.Add) + "Add url/file/directory to playlist\n");
-	sHelp->Add(DisplayKeys(Key.SavePlaylist) + "Save playlist\n");
-	sHelp->Add(DisplayKeys(Key.GoToNowPlaying) + "Go to currently playing position\n");
-	sHelp->Add(DisplayKeys(Key.TogglePlaylistDisplayMode) + "Toggle playlist display mode\n");
-	sHelp->Add(DisplayKeys(Key.ToggleAutoCenter) + "Toggle auto center mode\n\n\n");
-	
-	sHelp->Add("   [.b]Keys - Browse screen\n -----------------------------------------[/b]\n");
-	sHelp->Add(DisplayKeys(Key.Enter) + "Enter directory/Add item to playlist and play\n");
-	sHelp->Add(DisplayKeys(Key.Space) + "Add item to playlist\n");
-	sHelp->Add(DisplayKeys(Key.GoToParentDir) + "Go to parent directory\n");
-	sHelp->Add(DisplayKeys(Key.Delete) + "Delete playlist\n\n\n");
-	
-	sHelp->Add("   [.b]Keys - Search engine\n -----------------------------------------[/b]\n");
-	sHelp->Add(DisplayKeys(Key.Enter) + "Add item to playlist and play/change option\n");
-	sHelp->Add(DisplayKeys(Key.Space) + "Add item to playlist\n");
-	sHelp->Add(DisplayKeys(Key.StartSearching) + "Start searching immediately\n\n\n");
-	
-	sHelp->Add("   [.b]Keys - Media library\n -----------------------------------------[/b]\n");
-	sHelp->Add(DisplayKeys(&Key.VolumeDown[0], 1) + "Previous column\n");
-	sHelp->Add(DisplayKeys(&Key.VolumeUp[0], 1) + "Next column\n");
-	sHelp->Add(DisplayKeys(Key.Enter) + "Add to playlist and play song/album/artist's songs\n");
-	sHelp->Add(DisplayKeys(Key.Space) + "Add to playlist song/album/artist's songs\n\n\n");
-	
-	sHelp->Add("   [.b]Keys - Playlist Editor\n -----------------------------------------[/b]\n");
-	sHelp->Add(DisplayKeys(&Key.VolumeDown[0], 1) + "Previous column\n");
-	sHelp->Add(DisplayKeys(&Key.VolumeUp[0], 1) + "Next column\n");
-	sHelp->Add(DisplayKeys(Key.Enter) + "Add item to playlist and play\n");
-	sHelp->Add(DisplayKeys(Key.Space) + "Add to playlist/select item\n");
-#	ifndef HAVE_TAGLIB_H
-	sHelp->Add(DisplayKeys(Key.EditTags) + "Edit playlist's name\n");
-#	endif // ! HAVE_TAGLIB_H
-	sHelp->Add(DisplayKeys(Key.MvSongUp) + "Move item/group of items up\n");
-	sHelp->Add(DisplayKeys(Key.MvSongDown) + "Move item/group of items down\n");
-	
-#	ifdef HAVE_TAGLIB_H
-	sHelp->Add("\n\n   [.b]Keys - Tag editor\n -----------------------------------------[/b]\n");
-	sHelp->Add(DisplayKeys(Key.Enter) + "Change option\n");
-#	endif // HAVE_TAGLIB_H
+	sInfo->SetTimeout(ncmpcpp_window_timeout);
 	
 	if (Config.header_visibility)
 	{
@@ -353,48 +292,14 @@ int main(int argc, char *argv[])
 	int footer_height = Config.statusbar_visibility ? 2 : 1;
 	
 	wFooter = new Window(0, footer_start_y, COLS, footer_height, "", Config.statusbar_color, brNone);
+	wFooter->SetTimeout(ncmpcpp_window_timeout);
 	wFooter->SetGetStringHelper(TraceMpdStatus);
 	wFooter->Display();
+	
 	wCurrent = mPlaylist;
 	current_screen = csPlaylist;
 	
 	timer = time(NULL);
-	
-	sHelp->SetTimeout(ncmpcpp_window_timeout);
-	mPlaylist->SetTimeout(ncmpcpp_window_timeout);
-	mBrowser->SetTimeout(ncmpcpp_window_timeout);
-	mSearcher->SetTimeout(ncmpcpp_window_timeout);
-	mLibArtists->SetTimeout(ncmpcpp_window_timeout);
-	mLibAlbums->SetTimeout(ncmpcpp_window_timeout);
-	mLibSongs->SetTimeout(ncmpcpp_window_timeout);
-#	ifdef HAVE_TAGLIB_H
-	mTagEditor->SetTimeout(ncmpcpp_window_timeout);
-	mEditorAlbums->SetTimeout(ncmpcpp_window_timeout);
-	mEditorDirs->SetTimeout(ncmpcpp_window_timeout);
-	mEditorTagTypes->SetTimeout(ncmpcpp_window_timeout);
-	mEditorTags->SetTimeout(ncmpcpp_window_timeout);
-#	endif // HAVE_TAGLIB_H
-	sLyrics->SetTimeout(ncmpcpp_window_timeout);
-	sInfo->SetTimeout(ncmpcpp_window_timeout);
-	wFooter->SetTimeout(ncmpcpp_window_timeout);
-	mPlaylistList->SetTimeout(ncmpcpp_window_timeout);
-	mPlaylistEditor->SetTimeout(ncmpcpp_window_timeout);
-	
-	mPlaylist->HighlightColor(Config.main_highlight_color);
-	mBrowser->HighlightColor(Config.main_highlight_color);
-	mSearcher->HighlightColor(Config.main_highlight_color);
-	mLibArtists->HighlightColor(Config.main_highlight_color);
-	mLibAlbums->HighlightColor(Config.main_highlight_color);
-	mLibSongs->HighlightColor(Config.main_highlight_color);
-#	ifdef HAVE_TAGLIB_H
-	mTagEditor->HighlightColor(Config.main_highlight_color);
-	mEditorAlbums->HighlightColor(Config.main_highlight_color);
-	mEditorDirs->HighlightColor(Config.main_highlight_color);
-	mEditorTagTypes->HighlightColor(Config.main_highlight_color);
-	mEditorTags->HighlightColor(Config.main_highlight_color);
-#	endif // HAVE_TAGLIB_H
-	mPlaylistList->HighlightColor(Config.main_highlight_color);
-	mPlaylistEditor->HighlightColor(Config.main_highlight_color);
 	
 	Mpd->SetStatusUpdater(NcmpcppStatusChanged, NULL);
 	Mpd->SetErrorHandler(NcmpcppErrorCallback, NULL);
@@ -862,31 +767,31 @@ int main(int argc, char *argv[])
 			sInfo->Resize(COLS, main_height);
 			sLyrics->Resize(COLS, main_height);
 			
-			lib_artist_width = COLS/3-1;
-			lib_albums_start_x = lib_artist_width+1;
-			lib_albums_width = COLS/3;
-			lib_songs_start_x = lib_artist_width+lib_albums_width+2;
-			lib_songs_width = COLS-COLS/3*2-1;
+			left_col_width = COLS/3-1;
+			middle_col_startx = left_col_width+1;
+			middle_col_width = COLS/3;
+			right_col_startx = left_col_width+middle_col_width+2;
+			right_col_width = COLS-COLS/3*2-1;
 			
-			mLibArtists->Resize(lib_artist_width, main_height);
-			mLibAlbums->Resize(lib_albums_width, main_height);
-			mLibSongs->Resize(lib_songs_width, main_height);
-			mLibAlbums->MoveTo(lib_albums_start_x, main_start_y);
-			mLibSongs->MoveTo(lib_songs_start_x, main_start_y);
+			mLibArtists->Resize(left_col_width, main_height);
+			mLibAlbums->Resize(middle_col_width, main_height);
+			mLibSongs->Resize(right_col_width, main_height);
+			mLibAlbums->MoveTo(middle_col_startx, main_start_y);
+			mLibSongs->MoveTo(right_col_startx, main_start_y);
 			
 #			ifdef HAVE_TAGLIB_H
 			mTagEditor->Resize(COLS, main_height);
 			
-			mEditorAlbums->Resize(lib_artist_width, main_height);
-			mEditorDirs->Resize(lib_artist_width, main_height);
-			mEditorTagTypes->Resize(lib_albums_width, main_height);
-			mEditorTags->Resize(lib_songs_width, main_height);
-			mEditorTagTypes->MoveTo(lib_albums_start_x, main_start_y);
-			mEditorTags->MoveTo(lib_songs_start_x, main_start_y);
+			mEditorAlbums->Resize(left_col_width, main_height);
+			mEditorDirs->Resize(left_col_width, main_height);
+			mEditorTagTypes->Resize(middle_col_width, main_height);
+			mEditorTags->Resize(right_col_width, main_height);
+			mEditorTagTypes->MoveTo(middle_col_startx, main_start_y);
+			mEditorTags->MoveTo(right_col_startx, main_start_y);
 			
-			mPlaylistList->Resize(lib_artist_width, main_height);
-			mPlaylistEditor->Resize(lib_albums_width+lib_songs_width+1, main_height);
-			mPlaylistEditor->MoveTo(lib_albums_start_x, main_start_y);
+			mPlaylistList->Resize(left_col_width, main_height);
+			mPlaylistEditor->Resize(middle_col_width+right_col_width+1, main_height);
+			mPlaylistEditor->MoveTo(middle_col_startx, main_start_y);
 #			endif // HAVE_TAGLIB_H
 			
 			if (Config.header_visibility)

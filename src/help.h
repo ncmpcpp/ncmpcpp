@@ -18,41 +18,12 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef HAVE_HELPERS_H
-#define HAVE_HELPERS_H
+#ifndef HAVE_HELP_H
+#define HAVE_HELP_H
 
-#include "mpdpp.h"
 #include "ncmpcpp.h"
-#include "settings.h"
 
-extern ncmpcpp_config Config;
-
-class CaseInsensitiveSorting
-{
-	public:
-		bool operator()(string, string);
-		bool operator()(Song *, Song *);
-		bool operator()(const Item &, const Item &);
-};
-
-bool SortSongsByTrack(Song *, Song *);
-
-void UpdateItemList(Menu<Item> *);
-void UpdateSongList(Menu<Song> *);
-
-bool Keypressed(int, const int *);
-
-void WindowTitle(const string &);
-
-string TotalPlaylistLength();
-string DisplayStringPair(const StringPair &, void * = NULL);
-string DisplayItem(const Item &, void * = NULL);
-string DisplayColumns(string);
-string DisplaySongInColumns(const Song &, void *);
-string DisplaySong(const Song &, void * = &Config.song_list_format);
-string GetInfo(Song &);
-void ShowMessage(const string &, int = Config.message_delay_time);
-void GetDirectory(string, string = "/");
+string GetKeybindings();
 
 #endif
 
