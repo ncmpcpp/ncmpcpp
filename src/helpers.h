@@ -27,6 +27,9 @@
 
 extern ncmpcpp_config Config;
 
+void LockStatusbar();
+void UnlockStatusbar();
+
 class CaseInsensitiveSorting
 {
 	public:

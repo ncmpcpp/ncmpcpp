@@ -93,19 +93,17 @@
 #
 ##### various settings #####
 #
-## can be "normal" or "columns"
-#
-#playlist_display_mode = "normal"
+#playlist_display_mode = "normal" (classic/columns)
 #
 #autocenter_mode = "no"
 #
 #repeat_one_mode = "no"
 #
-## can be "wrapped" or "normal"
+#default_find_mode = "wrapped" (wrapped/normal)
 #
-#default_find_mode = "wrapped"
+#default_space_mode = "add" (add/select)
 #
-#default_space_mode = "add"
+#default_tag_editor_left_col = "albums" (albums/dirs)
 #
 #header_visibility = "yes"
 #

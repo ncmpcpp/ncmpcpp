@@ -100,7 +100,7 @@ string GetKeybindings()
 	result += DisplayKeys(Key.SearchEngine) + "Search engine\n";
 	result += DisplayKeys(Key.MediaLibrary) + "Media library\n";
 	result += DisplayKeys(Key.PlaylistEditor) + "Playlist editor\n";
-	result += DisplayKeys(Key.AlbumEditor) + "Album editor\n\n\n";
+	result += DisplayKeys(Key.TagEditor) + "Tag editor\n\n\n";
 	
 	
 	result += "   [.b]Keys - Global\n -----------------------------------------[/b]\n";
@@ -188,7 +188,13 @@ string GetKeybindings()
 	
 #	ifdef HAVE_TAGLIB_H
 	result += "\n\n   [.b]Keys - Tag editor\n -----------------------------------------[/b]\n";
-	result += DisplayKeys(Key.Enter) + "Change option\n";
+	result += DisplayKeys(Key.Enter) + "Change tag/filename for one song (left column)\n";
+	result += DisplayKeys(Key.Enter) + "Perform operation on all/selected songs (middle column)\n";
+	result += DisplayKeys(Key.Space) + "Switch to albums/directories view (left column)\n";
+	result += DisplayKeys(Key.Space) + "Select/deselect song (right column)\n";
+	result += DisplayKeys(&Key.VolumeDown[0], 1) + "Previous column\n";
+	result += DisplayKeys(&Key.VolumeUp[0], 1) + "Next column\n";
+	
 #	endif // HAVE_TAGLIB_H
 	
 	return result;

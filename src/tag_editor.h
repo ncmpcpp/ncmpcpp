@@ -32,12 +32,17 @@
 #include "mpdpp.h"
 #include "settings.h"
 
+typedef void (Song::*SongSetFunction)(const string &);
+
 string FindSharedDir(Menu<Song> *);
 string FindSharedDir(const SongList &);
 string DisplayTag(const Song &, void *);
 
 bool GetSongTags(Song &);
 bool WriteTags(Song &);
+
+string ParseFilename(Song &, string, bool);
+void __deal_with_filenames(SongList &);
 
 #endif
 

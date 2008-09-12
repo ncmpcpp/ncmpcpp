@@ -75,6 +75,9 @@ class Song
 		void SetComment(const string &str) { itsComment = str; }
 		void SetPosition(int pos) { itsPosition = pos; }
 		
+		void SetNewName(string name) { itsNewName = name == itsShortName ? "" : name; }
+		string GetNewName() const { return itsNewName; }
+		
 		void GetEmptyFields(bool get) { itsGetEmptyFields = get; }
 		void Clear();
 		bool Empty() const;
@@ -85,6 +88,7 @@ class Song
 	private:
 		string itsFile;
 		string itsShortName;
+		string itsNewName;
 		string itsDirectory;
 		string itsArtist;
 		string itsTitle;

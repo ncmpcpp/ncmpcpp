@@ -45,7 +45,7 @@ void DefaultKeys(ncmpcpp_keys &keys)
 	keys.SearchEngine[0] = '4';
 	keys.MediaLibrary[0] = '5';
 	keys.PlaylistEditor[0] = '6';
-	keys.AlbumEditor[0] = '7';
+	keys.TagEditor[0] = '7';
 	keys.Stop[0] = 's';
 	keys.Pause[0] = 'P';
 	keys.Next[0] = '>';
@@ -104,7 +104,7 @@ void DefaultKeys(ncmpcpp_keys &keys)
 	keys.SearchEngine[1] = 268;
 	keys.MediaLibrary[1] = 269;
 	keys.PlaylistEditor[1] = 270;
-	keys.AlbumEditor[1] = 271;
+	keys.TagEditor[1] = 271;
 	keys.Stop[1] = null_key;
 	keys.Pause[1] = null_key;
 	keys.Next[1] = null_key;
@@ -176,7 +176,7 @@ void DefaultConfiguration(ncmpcpp_config &conf)
 	conf.repeat_one_mode = false;
 	conf.wrapped_search = true;
 	conf.space_selects = false;
-	conf.albums_in_tag_editor = true;
+	conf.albums_in_tag_editor = false;
 	conf.set_window_title = true;
 	conf.mpd_connection_timeout = 15;
 	conf.crossfade_time = 5;
@@ -328,8 +328,8 @@ void ReadKeys(ncmpcpp_keys &keys)
 				GetKeys(*it, keys.MediaLibrary);
 			else if (it->find("key_playlist_editor ") != string::npos)
 				GetKeys(*it, keys.PlaylistEditor);
-			else if (it->find("key_album_tag_editor ") != string::npos)
-				GetKeys(*it, keys.AlbumEditor);
+			else if (it->find("key_tag_editor ") != string::npos)
+				GetKeys(*it, keys.TagEditor);
 			else if (it->find("key_stop ") != string::npos)
 				GetKeys(*it, keys.Stop);
 			else if (it->find("key_pause ") != string::npos)
@@ -498,23 +498,45 @@ void ReadConfiguration(ncmpcpp_config &conf)
 					conf.selected_item_suffix = v;
 			}
 			else if (it->find("colors_enabled") != string::npos)
+			{
 				conf.colors_enabled = v == "yes";
+			}
 			else if (it->find("playlist_display_mode") != string::npos)
+			{
 				conf.columns_in_playlist = v == "columns";
+			}
 			else if (it->find("header_visibility") != string::npos)
+			{
 				conf.header_visibility = v == "yes";
+			}
 			else if (it->find("statusbar_visibility") != string::npos)
+			{
 				conf.statusbar_visibility = v == "yes";
+			}
 			else if (it->find("autocenter_mode") != string::npos)
+			{
 				conf.autocenter_mode = v == "yes";
+			}
 			else if (it->find("repeat_one_mode") != string::npos)
+			{
 				conf.repeat_one_mode = v == "yes";
+			}
 			else if (it->find("default_find_mode") != string::npos)
+			{
 				conf.wrapped_search = v == "wrapped";
+			}
 			else if (it->find("default_space_mode") != string::npos)
+			{
 				conf.space_selects = v == "select";
+			}
+			else if (it->find("default_tag_editor_left_col") != string::npos)
+			{
+				conf.albums_in_tag_editor = v == "albums";
+			}
 			else if (it->find("enable_window_title") != string::npos)
+			{
 				conf.set_window_title = v == "yes";
+			}
 			else if (it->find("song_window_title_format") != string::npos)
 			{
 				if (!v.empty())

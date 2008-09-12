@@ -49,13 +49,14 @@ enum NcmpcppScreen
 	csHelp,
 	csPlaylist,
 	csBrowser,
-	csTagEditor,
+	csTinyTagEditor,
 	csInfo,
 	csSearcher,
 	csLibrary,
 	csLyrics,
 	csPlaylistEditor,
-	csAlbumEditor
+	csTagEditor,
+	csOther
 };
 
 const int ncmpcpp_window_timeout = 500;

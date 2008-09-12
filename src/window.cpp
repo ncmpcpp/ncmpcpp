@@ -113,6 +113,11 @@ void Window::SetBorder(Border border)
 		itsWidth -= 2;
 		Recreate();
 	}
+	else
+	{
+		wattron(itsWinBorder,COLOR_PAIR(border));
+		box(itsWinBorder,0,0);
+	}
 	itsBorder = border;
 }
 
@@ -414,6 +419,7 @@ string Window::GetString(const string &base, unsigned int length, int width) con
 	getyx(itsWindow,y,x);
 	minx = maxx = x;
 	
+	width--;
 	if (width == -1)
 		width = itsWidth-x-1;
 	if (width < 0)
@@ -438,7 +444,7 @@ string Window::GetString(const string &base, unsigned int length, int width) con
 		if (beginning > maxbeginning)
 			beginning = maxbeginning;
 		
-		mvwhline(itsWindow, y, minx, 32, width);
+		mvwhline(itsWindow, y, minx, 32, width+1);
 		mvwprintw(itsWindow, y, minx, "%ls", tmp.substr(beginning, width+1).c_str());
 		
 		if (itsGetStringHelper)

@@ -47,7 +47,7 @@ struct ncmpcpp_keys
 	int SearchEngine[2];
 	int MediaLibrary[2];
 	int PlaylistEditor[2];
-	int AlbumEditor[2];
+	int TagEditor[2];
 	int Stop[2];
 	int Pause[2];
 	int Next[2];

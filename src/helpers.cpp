@@ -42,6 +42,7 @@ extern string browsed_dir;
 extern bool messages_allowed;
 extern bool block_progressbar_update;
 extern bool block_statusbar_update;
+extern bool allow_statusbar_unlock;
 
 extern bool search_case_sensitive;
 extern bool search_match_to_pattern;
@@ -52,6 +53,27 @@ extern string EMPTY_TAG;
 extern string UNKNOWN_ARTIST;
 extern string UNKNOWN_TITLE;
 extern string UNKNOWN_ALBUM;
+
+void LockStatusbar()
+{
+	if (Config.statusbar_visibility)
+		block_statusbar_update = 1;
+	else
+		block_progressbar_update = 1;
+	allow_statusbar_unlock = 0;
+}
+
+void UnlockStatusbar()
+{
+	allow_statusbar_unlock = 1;
+	if (lock_statusbar_delay < 0)
+	{
+		if (Config.statusbar_visibility)
+			block_statusbar_update = 0;
+		else
+			block_progressbar_update = 0;
+	}
+}
 
 bool CaseInsensitiveSorting::operator()(string a, string b)
 {
@@ -478,7 +500,7 @@ string DisplaySong(const Song &s, void *s_template)
 				{
 					if (link_tags)
 					{
-						if (s.GetArtist() != UNKNOWN_ARTIST)
+						if (!s.GetArtist().empty() && s.GetArtist() != UNKNOWN_ARTIST)
 						{
 							result += s.GetArtist();
 							i += s.GetArtist().length();
@@ -494,7 +516,7 @@ string DisplaySong(const Song &s, void *s_template)
 				{
 					if (link_tags)
 					{
-						if (s.GetAlbum() != UNKNOWN_ALBUM)
+						if (!s.GetAlbum().empty() && s.GetAlbum() != UNKNOWN_ALBUM)
 						{
 							result += s.GetAlbum();
 							i += s.GetAlbum().length();
@@ -510,7 +532,7 @@ string DisplaySong(const Song &s, void *s_template)
 				{
 					if (link_tags)
 					{
-						if (s.GetYear() != EMPTY_TAG)
+						if (!s.GetYear().empty() && s.GetYear() != EMPTY_TAG)
 						{
 							result += s.GetYear();
 							i += s.GetYear().length();
@@ -526,7 +548,7 @@ string DisplaySong(const Song &s, void *s_template)
 				{
 					if (link_tags)
 					{
-						if (s.GetTrack() != EMPTY_TAG)
+						if (!s.GetTrack().empty() && s.GetTrack() != EMPTY_TAG)
 						{
 							result += s.GetTrack();
 							i += s.GetTrack().length();
@@ -542,7 +564,7 @@ string DisplaySong(const Song &s, void *s_template)
 				{
 					if (link_tags)
 					{
-						if (s.GetGenre() != EMPTY_TAG)
+						if (!s.GetGenre().empty() && s.GetGenre() != EMPTY_TAG)
 						{
 							result += s.GetGenre();
 							i += s.GetGenre().length();
@@ -558,7 +580,7 @@ string DisplaySong(const Song &s, void *s_template)
 				{
 					if (link_tags)
 					{
-						if (s.GetComposer() != EMPTY_TAG)
+						if (!s.GetComposer().empty() && s.GetComposer() != EMPTY_TAG)
 						{
 							result += s.GetComposer();
 							i += s.GetComposer().length();
@@ -574,7 +596,7 @@ string DisplaySong(const Song &s, void *s_template)
 				{
 					if (link_tags)
 					{
-						if (s.GetPerformer() != EMPTY_TAG)
+						if (!s.GetPerformer().empty() && s.GetPerformer() != EMPTY_TAG)
 						{
 							result += s.GetPerformer();
 							i += s.GetPerformer().length();
@@ -590,7 +612,7 @@ string DisplaySong(const Song &s, void *s_template)
 				{
 					if (link_tags)
 					{
-						if (s.GetDisc() != EMPTY_TAG)
+						if (!s.GetDisc().empty() && s.GetDisc() != EMPTY_TAG)
 						{
 							result += s.GetDisc();
 							i += s.GetDisc().length();
@@ -606,7 +628,7 @@ string DisplaySong(const Song &s, void *s_template)
 				{
 					if (link_tags)
 					{
-						if (s.GetComment() != EMPTY_TAG)
+						if (!s.GetComment().empty() && s.GetComment() != EMPTY_TAG)
 						{
 							result += s.GetComment();
 							i += s.GetComment().length();
@@ -622,7 +644,7 @@ string DisplaySong(const Song &s, void *s_template)
 				{
 					if (link_tags)
 					{
-						if (s.GetTitle() != UNKNOWN_TITLE)
+						if (!s.GetTitle().empty() && s.GetTitle() != UNKNOWN_TITLE)
 						{
 							result += s.GetTitle();
 							i += s.GetTitle().length();

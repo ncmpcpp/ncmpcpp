@@ -30,23 +30,6 @@
 #include "status_checker.h"
 #include "tag_editor.h"
 
-#define LOCK_STATUSBAR \
-			if (Config.statusbar_visibility) \
-				block_statusbar_update = 1; \
-			else \
-				block_progressbar_update = 1; \
-			allow_statusbar_unlock = 0
-
-#define UNLOCK_STATUSBAR \
-			allow_statusbar_unlock = 1; \
-			if (lock_statusbar_delay < 0) \
-			{ \
-				if (Config.statusbar_visibility) \
-					block_statusbar_update = 0; \
-				else \
-					block_progressbar_update = 0; \
-			}
-
 #define REFRESH_MEDIA_LIBRARY_SCREEN \
 			mLibArtists->Display(redraw_screen); \
 			mvvline(main_start_y, middle_col_startx-1, 0, main_height); \
@@ -60,7 +43,7 @@
 			mPlaylistEditor->Display(redraw_screen)
 
 #define REFRESH_ALBUM_EDITOR_SCREEN \
-			mEditorAlbums->Display(redraw_screen); \
+			mEditorLeftCol->Display(redraw_screen); \
 			mvvline(main_start_y, middle_col_startx-1, 0, main_height); \
 			mEditorTagTypes->Display(redraw_screen); \
 			mvvline(main_start_y, right_col_startx-1, 0, main_height); \
@@ -89,8 +72,8 @@ Menu<StringPair> *mEditorLeftCol;
 Menu<StringPair> *mEditorAlbums;
 Menu<StringPair> *mEditorDirs;
 Menu<string> *mEditorTagTypes;
-Menu<Song> *mEditorTags;
 #endif // HAVE_TAGLIB_H
+Menu<Song> *mEditorTags = 0; // blah, I use it in conditionals, so just let it be.
 
 Menu<string> *mPlaylistList;
 Menu<Song> *mPlaylistEditor;
@@ -256,6 +239,8 @@ int main(int argc, char *argv[])
 	mEditorTags = new Menu<Song>(right_col_startx, main_start_y, right_col_width, main_height, "Tags", Config.main_color, brNone);
 	mEditorTags->HighlightColor(Config.main_highlight_color);
 	mEditorTags->SetTimeout(ncmpcpp_window_timeout);
+	mEditorTags->SetSelectPrefix(Config.selected_item_prefix);
+	mEditorTags->SetSelectSuffix(Config.selected_item_suffix);
 	mEditorTags->SetItemDisplayer(DisplayTag);
 	mEditorTags->SetItemDisplayerUserData(mEditorTagTypes);
 #	endif // HAVE_TAGLIB_H
@@ -349,8 +334,8 @@ int main(int argc, char *argv[])
 				case csBrowser:
 					title = "Browse: ";
 					break;
+				case csTinyTagEditor:
 				case csTagEditor:
-				case csAlbumEditor:
 					title = "Tag editor";
 					break;
 				case csInfo:
@@ -579,7 +564,7 @@ int main(int argc, char *argv[])
 		
 		// album editor stuff
 #		ifdef HAVE_TAGLIB_H
-		if (current_screen == csAlbumEditor)
+		if (current_screen == csTagEditor)
 		{
 			if (mEditorLeftCol->Empty())
 			{
@@ -685,7 +670,7 @@ int main(int argc, char *argv[])
 				break;
 			case csLibrary:
 			case csPlaylistEditor:
-			case csAlbumEditor:
+			case csTagEditor:
 			{
 				if (Keypressed(input, Key.Up) || Keypressed(input, Key.Down) || Keypressed(input, Key.PageUp) || Keypressed(input, Key.PageDown) || Keypressed(input, Key.Home) || Keypressed(input, Key.End) || Keypressed(input, Key.FindForward) || Keypressed(input, Key.FindBackward) || Keypressed(input, Key.NextFoundPosition) || Keypressed(input, Key.PrevFoundPosition))
 				{
@@ -808,7 +793,7 @@ int main(int argc, char *argv[])
 			{
 				REFRESH_MEDIA_LIBRARY_SCREEN;
 			}
-			else if (current_screen == csAlbumEditor)
+			else if (current_screen == csTagEditor)
 			{
 				REFRESH_ALBUM_EDITOR_SCREEN;
 			}
@@ -894,18 +879,18 @@ int main(int argc, char *argv[])
 					break;
 				}
 #				ifdef HAVE_TAGLIB_H
-				case csTagEditor:
+				case csTinyTagEditor:
 				{
 					int id = mTagEditor->GetRealChoice()+1;
 					int option = mTagEditor->GetChoice();
-					LOCK_STATUSBAR;
+					LockStatusbar();
 					Song &s = edited_song;
 					
 					switch (id)
 					{
 						case 1:
 						{
-							wFooter->WriteXY(0, Config.statusbar_visibility, "[.b]New title:[/b] ", 1);
+							wFooter->WriteXY(0, Config.statusbar_visibility, "[.b]Title:[/b] ", 1);
 							if (s.GetTitle() == UNKNOWN_TITLE)
 								s.SetTitle(wFooter->GetString());
 							else
@@ -915,7 +900,7 @@ int main(int argc, char *argv[])
 						}
 						case 2:
 						{
-							wFooter->WriteXY(0, Config.statusbar_visibility, "[.b]New artist:[/b] ", 1);
+							wFooter->WriteXY(0, Config.statusbar_visibility, "[.b]Artist:[/b] ", 1);
 							if (s.GetArtist() == UNKNOWN_ARTIST)
 								s.SetArtist(wFooter->GetString());
 							else
@@ -925,7 +910,7 @@ int main(int argc, char *argv[])
 						}
 						case 3:
 						{
-							wFooter->WriteXY(0, Config.statusbar_visibility, "[.b]New album:[/b] ", 1);
+							wFooter->WriteXY(0, Config.statusbar_visibility, "[.b]Album:[/b] ", 1);
 							if (s.GetAlbum() == UNKNOWN_ALBUM)
 								s.SetAlbum(wFooter->GetString());
 							else
@@ -935,7 +920,7 @@ int main(int argc, char *argv[])
 						}
 						case 4:
 						{
-							wFooter->WriteXY(0, Config.statusbar_visibility, "[.b]New year:[/b] ", 1);
+							wFooter->WriteXY(0, Config.statusbar_visibility, "[.b]Year:[/b] ", 1);
 							if (s.GetYear() == EMPTY_TAG)
 								s.SetYear(wFooter->GetString(4));
 							else
@@ -945,7 +930,7 @@ int main(int argc, char *argv[])
 						}
 						case 5:
 						{
-							wFooter->WriteXY(0, Config.statusbar_visibility, "[.b]New track:[/b] ", 1);
+							wFooter->WriteXY(0, Config.statusbar_visibility, "[.b]Track:[/b] ", 1);
 							if (s.GetTrack() == EMPTY_TAG)
 								s.SetTrack(wFooter->GetString(3));
 							else
@@ -955,7 +940,7 @@ int main(int argc, char *argv[])
 						}
 						case 6:
 						{
-							wFooter->WriteXY(0, Config.statusbar_visibility, "[.b]New genre:[/b] ", 1);
+							wFooter->WriteXY(0, Config.statusbar_visibility, "[.b]Genre:[/b] ", 1);
 							if (s.GetGenre() == EMPTY_TAG)
 								s.SetGenre(wFooter->GetString());
 							else
@@ -965,7 +950,7 @@ int main(int argc, char *argv[])
 						}
 						case 7:
 						{
-							wFooter->WriteXY(0, Config.statusbar_visibility, "[.b]New comment:[/b] ", 1);
+							wFooter->WriteXY(0, Config.statusbar_visibility, "[.b]Comment:[/b] ", 1);
 							if (s.GetComment() == EMPTY_TAG)
 								s.SetComment(wFooter->GetString());
 							else
@@ -1002,7 +987,7 @@ int main(int argc, char *argv[])
 							break;
 						}
 					}
-					UNLOCK_STATUSBAR;
+					UnlockStatusbar();
 					break;
 				}
 #				endif // HAVE_TAGLIB_H
@@ -1011,7 +996,7 @@ int main(int argc, char *argv[])
 					ENTER_SEARCH_ENGINE_SCREEN:
 					
 					int option = mSearcher->GetChoice();
-					LOCK_STATUSBAR;
+					LockStatusbar();
 					Song &s = sought_pattern;
 					
 					switch (option+1)
@@ -1154,7 +1139,7 @@ int main(int argc, char *argv[])
 					}
 					if (option <= 10)
 						mSearcher->RefreshOption(option);
-					UNLOCK_STATUSBAR;
+					UnlockStatusbar();
 					break;
 				}
 				case csLibrary:
@@ -1274,7 +1259,7 @@ int main(int argc, char *argv[])
 					break;
 				}
 #				ifdef HAVE_TAGLIB_H
-				case csAlbumEditor:
+				case csTagEditor:
 				{
 					if (wCurrent == mEditorDirs)
 					{
@@ -1292,7 +1277,20 @@ int main(int argc, char *argv[])
 						break;
 					}
 					
-					void (Song::*set)(const string &) = 0;
+					// if there are selected songs, perform operations only on them
+					SongList list;
+					if (mEditorTags->IsAnySelected())
+					{
+						vector<int> selected;
+						mEditorTags->GetSelectedList(selected);
+						for (vector<int>::const_iterator it = selected.begin(); it != selected.end(); it++)
+							list.push_back(&mEditorTags->at(*it));
+					}
+					else
+						for (int i = 0; i < mEditorTags->Size(); i++)
+							list.push_back(&mEditorTags->at(i));
+					
+					SongSetFunction set = 0;
 					int id = mEditorTagTypes->GetRealChoice();
 					switch (id)
 					{
@@ -1312,7 +1310,7 @@ int main(int argc, char *argv[])
 							set = &Song::SetTrack;
 							if (wCurrent == mEditorTagTypes)
 							{
-								LOCK_STATUSBAR;
+								LockStatusbar();
 								wFooter->WriteXY(0, Config.statusbar_visibility, "Number tracks? [y/n] ", 1);
 								curs_set(1);
 								int in = 0;
@@ -1324,14 +1322,15 @@ int main(int argc, char *argv[])
 								while (in != 'y' && in != 'n');
 								if (in == 'y')
 								{
-									for (int i = 0; i < mEditorTags->Size(); i++)
-										mEditorTags->at(i).SetTrack(i+1);
+									int i = 1;
+									for (SongList::iterator it = list.begin(); it != list.end(); it++, i++)
+										(*it)->SetTrack(i);
 									ShowMessage("Tracks numbered!");
 								}
 								else
 									ShowMessage("Aborted!");
 								curs_set(0);
-								UNLOCK_STATUSBAR;
+								UnlockStatusbar();
 							}
 							break;
 						case 5:
@@ -1340,6 +1339,32 @@ int main(int argc, char *argv[])
 						case 6:
 							set = &Song::SetComment;
 							break;
+						case 7:
+						{
+							if (wCurrent == mEditorTagTypes)
+							{
+								current_screen = csOther;
+								__deal_with_filenames(list);
+								current_screen = csTagEditor;
+								redraw_screen = 1;
+								REFRESH_ALBUM_EDITOR_SCREEN;
+							}
+							else if (wCurrent == mEditorTags)
+							{
+								Song &s = mEditorTags->Current();
+								string old_name = s.GetNewName().empty() ? s.GetShortFilename() : s.GetNewName();
+								int last_dot = old_name.find_last_of(".");
+								string extension = old_name.substr(last_dot);
+								old_name = old_name.substr(0, last_dot);
+								LockStatusbar();
+								wFooter->WriteXY(0, Config.statusbar_visibility, "[.b]New filename:[/b] ", 1);
+								string new_name = wFooter->GetString(old_name);
+								UnlockStatusbar();
+								if (!new_name.empty() && new_name != old_name)
+									s.SetNewName(new_name + extension);
+							}
+							continue;
+						}
 						case 8: // reset
 						{
 							mEditorTags->Clear(0);
@@ -1350,9 +1375,9 @@ int main(int argc, char *argv[])
 						{
 							bool success = 1;
 							ShowMessage("Writing changes...");
-							for (int i = 0; i < mEditorTags->Size(); i++)
+							for (SongList::iterator it = list.begin(); it != list.end(); it++)
 							{
-								if (!WriteTags(mEditorTags->at(i)))
+								if (!WriteTags(**it))
 								{
 									ShowMessage("Error writing tags!");
 									success = 0;
@@ -1379,23 +1404,23 @@ int main(int argc, char *argv[])
 					
 					if (wCurrent == mEditorTagTypes && id != 0 && id != 4 && set != NULL)
 					{
-						LOCK_STATUSBAR;
+						LockStatusbar();
 						wFooter->WriteXY(0, Config.statusbar_visibility, "[.b]" + mEditorTagTypes->GetOption() + "[/b]: ", 1);
 						mEditorTags->at(mEditorTags->GetChoice()).GetEmptyFields(1);
 						string new_tag = wFooter->GetString(mEditorTags->GetOption());
 						mEditorTags->at(mEditorTags->GetChoice()).GetEmptyFields(0);
-						UNLOCK_STATUSBAR;
-						for (int i = 0; i < mEditorTags->Size(); i++)
-							(mEditorTags->at(i).*set)(new_tag);
+						UnlockStatusbar();
+						for (SongList::iterator it = list.begin(); it != list.end(); it++)
+							(**it.*set)(new_tag);
 					}
 					else if (wCurrent == mEditorTags && set != NULL)
 					{
-						LOCK_STATUSBAR;
+						LockStatusbar();
 						wFooter->WriteXY(0, Config.statusbar_visibility, "[.b]" + mEditorTagTypes->GetOption() + "[/b]: ", 1);
 						mEditorTags->at(mEditorTags->GetChoice()).GetEmptyFields(1);
 						string new_tag = wFooter->GetString(mEditorTags->GetOption());
 						mEditorTags->at(mEditorTags->GetChoice()).GetEmptyFields(0);
-						UNLOCK_STATUSBAR;
+						UnlockStatusbar();
 						if (new_tag != mEditorTags->GetOption())
 							(mEditorTags->at(mEditorTags->GetChoice()).*set)(new_tag);
 						mEditorTags->Go(wDown);
@@ -1408,9 +1433,9 @@ int main(int argc, char *argv[])
 		}
 		else if (Keypressed(input, Key.Space))
 		{
-			if (Config.space_selects || wCurrent == mPlaylist)
+			if (Config.space_selects || wCurrent == mPlaylist || wCurrent == mEditorTags)
 			{
-				if (wCurrent == mPlaylist || (wCurrent == mBrowser && wCurrent->GetChoice() >= (browsed_dir != "/" ? 1 : 0)) || (wCurrent == mSearcher && mSearcher->Current().first == ".") || wCurrent == mLibSongs || wCurrent == mPlaylistEditor)
+				if (wCurrent == mPlaylist || wCurrent == mEditorTags || (wCurrent == mBrowser && wCurrent->GetChoice() >= (browsed_dir != "/" ? 1 : 0)) || (wCurrent == mSearcher && mSearcher->Current().first == ".") || wCurrent == mLibSongs || wCurrent == mPlaylistEditor)
 				{
 					int i = wCurrent->GetChoice();
 					wCurrent->Select(i, !wCurrent->Selected(i));
@@ -1532,7 +1557,7 @@ int main(int argc, char *argv[])
 				mPlaylistEditor->HighlightColor(Config.active_column_color);
 			}
 #			ifdef HAVE_TAGLIB_H
-			else if (current_screen == csAlbumEditor && input == Key.VolumeUp[0])
+			else if (current_screen == csTagEditor && input == Key.VolumeUp[0])
 			{
 				found_pos = 0;
 				vFoundPositions.clear();
@@ -1588,7 +1613,7 @@ int main(int argc, char *argv[])
 				mPlaylistList->HighlightColor(Config.active_column_color);
 			}
 #			ifdef HAVE_TAGLIB_H
-			else if (current_screen == csAlbumEditor && input == Key.VolumeDown[0])
+			else if (current_screen == csTagEditor && input == Key.VolumeDown[0])
 			{
 				found_pos = 0;
 				vFoundPositions.clear();
@@ -1648,7 +1673,7 @@ int main(int argc, char *argv[])
 			}
 			else if (current_screen == csBrowser || wCurrent == mPlaylistList)
 			{
-				LOCK_STATUSBAR;
+				LockStatusbar();
 				int id = wCurrent->GetChoice();
 				const string &name = wCurrent == mBrowser ? mBrowser->at(id).name : mPlaylistList->at(id);
 				if (current_screen != csBrowser || mBrowser->at(id).type == itPlaylist)
@@ -1673,7 +1698,7 @@ int main(int argc, char *argv[])
 					curs_set(0);
 					mPlaylistList->Clear(0); // make playlists list update itself
 				}
-				UNLOCK_STATUSBAR;
+				UnlockStatusbar();
 			}
 			else if (wCurrent == mPlaylistEditor && !mPlaylistEditor->Empty())
 			{
@@ -1720,10 +1745,10 @@ int main(int argc, char *argv[])
 		}
 		else if (Keypressed(input, Key.SavePlaylist))
 		{
-			LOCK_STATUSBAR;
+			LockStatusbar();
 			wFooter->WriteXY(0, Config.statusbar_visibility, "Save playlist as: ", 1);
 			string playlist_name = wFooter->GetString();
-			UNLOCK_STATUSBAR;
+			UnlockStatusbar();
 			if (playlist_name.find("/") != string::npos)
 			{
 				ShowMessage("Playlist name cannot contain slashes!");
@@ -1738,7 +1763,7 @@ int main(int argc, char *argv[])
 				}
 				else
 				{
-					LOCK_STATUSBAR;
+					LockStatusbar();
 					wFooter->WriteXY(0, Config.statusbar_visibility, "Playlist already exists, overwrite: " + playlist_name + " ? [y/n] ", 1);
 					curs_set(1);
 					int in = 0;
@@ -1760,7 +1785,7 @@ int main(int argc, char *argv[])
 						ShowMessage("Aborted!");
 					curs_set(0);
 					mPlaylistList->Clear(0); // make playlist's list update itself
-					UNLOCK_STATUSBAR;
+					UnlockStatusbar();
 				}
 			}
 			if (browsed_dir == "/" && !mBrowser->Empty())
@@ -1957,10 +1982,10 @@ int main(int argc, char *argv[])
 		}
 		else if (Keypressed(input, Key.Add))
 		{
-			LOCK_STATUSBAR;
+			LockStatusbar();
 			wFooter->WriteXY(0, Config.statusbar_visibility, "Add: ", 1);
 			string path = wFooter->GetString();
-			UNLOCK_STATUSBAR;
+			UnlockStatusbar();
 			if (!path.empty())
 			{
 				SongList list;
@@ -1991,7 +2016,7 @@ int main(int argc, char *argv[])
 				continue;
 			}
 			block_progressbar_update = 1;
-			LOCK_STATUSBAR;
+			LockStatusbar();
 			
 			int songpos, in;
 			
@@ -2030,7 +2055,7 @@ int main(int argc, char *argv[])
 			Mpd->Seek(songpos);
 			
 			block_progressbar_update = 0;
-			UNLOCK_STATUSBAR;
+			UnlockStatusbar();
 		}
 		else if (Keypressed(input, Key.TogglePlaylistDisplayMode) && wCurrent == mPlaylist)
 		{
@@ -2081,10 +2106,10 @@ int main(int argc, char *argv[])
 		}
 		else if (Keypressed(input, Key.SetCrossfade))
 		{
-			LOCK_STATUSBAR;
+			LockStatusbar();
 			wFooter->WriteXY(0, Config.statusbar_visibility, "Set crossfade to: ", 1);
 			string crossfade = wFooter->GetString(3);
-			UNLOCK_STATUSBAR;
+			UnlockStatusbar();
 			int cf = StrToInt(crossfade);
 			if (cf > 0)
 			{
@@ -2097,10 +2122,10 @@ int main(int argc, char *argv[])
 #			ifdef HAVE_TAGLIB_H
 			if (wCurrent == mLibArtists)
 			{
-				LOCK_STATUSBAR;
+				LockStatusbar();
 				wFooter->WriteXY(0, Config.statusbar_visibility, "[.b]Artist:[/b] ", 1);
 				string new_artist = wFooter->GetString(mLibArtists->GetOption());
-				UNLOCK_STATUSBAR;
+				UnlockStatusbar();
 				if (!new_artist.empty() && new_artist != mLibArtists->GetOption())
 				{
 					bool success = 1;
@@ -2129,10 +2154,10 @@ int main(int argc, char *argv[])
 			}
 			else if (wCurrent == mLibAlbums)
 			{
-				LOCK_STATUSBAR;
+				LockStatusbar();
 				wFooter->WriteXY(0, Config.statusbar_visibility, "[.b]Album:[/b] ", 1);
 				string new_album = wFooter->GetString(mLibAlbums->Current().second);
-				UNLOCK_STATUSBAR;
+				UnlockStatusbar();
 				if (!new_album.empty() && new_album != mLibAlbums->Current().second)
 				{
 					bool success = 1;
@@ -2193,17 +2218,17 @@ int main(int argc, char *argv[])
 					wPrev = wCurrent;
 					wCurrent = mTagEditor;
 					prev_screen = current_screen;
-					current_screen = csTagEditor;
+					current_screen = csTinyTagEditor;
 				}
 				else
 					ShowMessage("Cannot read file '" + Config.mpd_music_dir + edited_song.GetFile() + "'!");
 			}
 			else if (wCurrent == mEditorDirs)
 			{
-				LOCK_STATUSBAR;
+				LockStatusbar();
 				wFooter->WriteXY(0, Config.statusbar_visibility, "Directory: ", 1);
 				string new_dir = wFooter->GetString(mEditorDirs->Current().first);
-				UNLOCK_STATUSBAR;
+				UnlockStatusbar();
 				if (!new_dir.empty() && new_dir != mEditorDirs->Current().first)
 				{
 					string old_dir = Config.mpd_music_dir + mEditorDirs->Current().second;
@@ -2221,10 +2246,10 @@ int main(int argc, char *argv[])
 #			endif // HAVE_TAGLIB_H
 			if (wCurrent == mPlaylistList)
 			{
-				LOCK_STATUSBAR;
+				LockStatusbar();
 				wFooter->WriteXY(0, Config.statusbar_visibility, "[.b]Playlist:[/b] ", 1);
 				string new_name = wFooter->GetString(mPlaylistList->GetOption());
-				UNLOCK_STATUSBAR;
+				UnlockStatusbar();
 				if (!new_name.empty() && new_name != mPlaylistList->GetOption())
 				{
 					Mpd->Rename(mPlaylistList->GetOption(), new_name);
@@ -2293,17 +2318,17 @@ int main(int argc, char *argv[])
 				ShowMessage("Unknown item length!");
 				continue;
 			}
-			LOCK_STATUSBAR;
+			LockStatusbar();
 			wFooter->WriteXY(0, Config.statusbar_visibility, "Position to go (in %): ", 1);
 			string position = wFooter->GetString(3);
 			int newpos = StrToInt(position);
 			if (newpos > 0 && newpos < 100 && !position.empty())
 				Mpd->Seek(mPlaylist->at(now_playing).GetTotalLength()*newpos/100.0);
-			UNLOCK_STATUSBAR;
+			UnlockStatusbar();
 		}
 		else if (Keypressed(input, Key.ReverseSelection))
 		{
-			if (wCurrent == mPlaylist || wCurrent == mBrowser || (wCurrent == mSearcher && mSearcher->Current().first == ".") || wCurrent == mLibSongs || wCurrent == mPlaylistEditor)
+			if (wCurrent == mPlaylist || wCurrent == mBrowser || (wCurrent == mSearcher && mSearcher->Current().first == ".") || wCurrent == mLibSongs || wCurrent == mPlaylistEditor || wCurrent == mEditorTags)
 			{
 				for (int i = 0; i < wCurrent->Size(); i++)
 					wCurrent->Select(i, !wCurrent->Selected(i) && !wCurrent->IsStatic(i));
@@ -2318,7 +2343,7 @@ int main(int argc, char *argv[])
 		}
 		else if (Keypressed(input, Key.DeselectAll))
 		{
-			if (wCurrent == mPlaylist || wCurrent == mBrowser || wCurrent == mSearcher || wCurrent == mLibSongs || wCurrent == mPlaylistEditor)
+			if (wCurrent == mPlaylist || wCurrent == mBrowser || wCurrent == mSearcher || wCurrent == mLibSongs || wCurrent == mPlaylistEditor || wCurrent == mEditorTags)
 			{
 				if (wCurrent->IsAnySelected())
 				{
@@ -2413,9 +2438,12 @@ int main(int argc, char *argv[])
 					mDialog->AddOption("Cancel");
 					
 					mDialog->Display();
+					prev_screen = current_screen;
+					current_screen = csOther;
 					
 					while (!Keypressed(input, Key.Enter))
 					{
+						TraceMpdStatus();
 						mDialog->Refresh();
 						mDialog->ReadKey(input);
 						
@@ -2461,10 +2489,10 @@ int main(int argc, char *argv[])
 					}
 					else if (id == 1)
 					{
-						LOCK_STATUSBAR;
+						LockStatusbar();
 						wFooter->WriteXY(0, Config.statusbar_visibility, "Save playlist as: ", 1);
 						string playlist = wFooter->GetString();
-						UNLOCK_STATUSBAR;
+						UnlockStatusbar();
 						if (!playlist.empty())
 						{
 							for (SongList::const_iterator it = result.begin(); it != result.end(); it++)
@@ -2489,6 +2517,8 @@ int main(int argc, char *argv[])
 							GetDirectory("/");
 						mPlaylistList->Clear(0); // make playlist editor update itself
 					}
+					current_screen = prev_screen;
+					timer = time(NULL);
 					delete mDialog;
 					FreeSongList(result);
 				}
@@ -2544,10 +2574,10 @@ int main(int argc, char *argv[])
 				string how = Keypressed(input, Key.FindForward) ? "forward" : "backward";
 				found_pos = -1;
 				vFoundPositions.clear();
-				LOCK_STATUSBAR;
+				LockStatusbar();
 				wFooter->WriteXY(0, Config.statusbar_visibility, "Find " + how + ": ", 1);
 				string findme = wFooter->GetString();
-				UNLOCK_STATUSBAR;
+				UnlockStatusbar();
 				timer = time(NULL);
 				if (findme.empty())
 					continue;
@@ -2760,7 +2790,7 @@ int main(int argc, char *argv[])
 		else if (Keypressed(input, Key.Playlist))
 		{
 			SWITCHER_PLAYLIST_REDIRECT:
-			if (wCurrent != mPlaylist && current_screen != csTagEditor)
+			if (wCurrent != mPlaylist && current_screen != csTinyTagEditor)
 			{
 				found_pos = 0;
 				vFoundPositions.clear();
@@ -2778,7 +2808,7 @@ int main(int argc, char *argv[])
 			
 			mBrowser->Empty() ? GetDirectory(browsed_dir) : UpdateItemList(mBrowser);
 			
-			if (wCurrent != mBrowser && current_screen != csTagEditor)
+			if (wCurrent != mBrowser && current_screen != csTinyTagEditor)
 			{
 				found_pos = 0;
 				vFoundPositions.clear();
@@ -2790,7 +2820,7 @@ int main(int argc, char *argv[])
 		}
 		else if (Keypressed(input, Key.SearchEngine))
 		{
-			if (current_screen != csTagEditor && current_screen != csSearcher)
+			if (current_screen != csTinyTagEditor && current_screen != csSearcher)
 			{
 				found_pos = 0;
 				vFoundPositions.clear();
@@ -2851,9 +2881,9 @@ int main(int argc, char *argv[])
 			}
 		}
 #		ifdef HAVE_TAGLIB_H
-		else if (Keypressed(input, Key.AlbumEditor))
+		else if (Keypressed(input, Key.TagEditor))
 		{
-			if (current_screen != csAlbumEditor)
+			if (current_screen != csTagEditor)
 			{
 				found_pos = 0;
 				vFoundPositions.clear();
@@ -2880,13 +2910,16 @@ int main(int argc, char *argv[])
 					mEditorTagTypes->AddSeparator();
 					mEditorTagTypes->AddOption("Filename");
 					mEditorTagTypes->AddSeparator();
+					mEditorTagTypes->AddOption("Options", 1, 1, 0, lCenter);
+					mEditorTagTypes->AddSeparator();
 					mEditorTagTypes->AddOption("Reset");
 					mEditorTagTypes->AddOption("Save");
-
+					/*mEditorTagTypes->AddSeparator();
+					mEditorTagTypes->AddOption("Capitalize first letters");*/
 				}
 				
 				wCurrent = mEditorLeftCol;
-				current_screen = csAlbumEditor;
+				current_screen = csTagEditor;
 			}
 		}
 #		endif // HAVE_TAGLIB_H
