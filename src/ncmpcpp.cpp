@@ -112,6 +112,7 @@ bool block_found_item_list_update = 0;
 
 bool messages_allowed = 0;
 bool redraw_screen = 0;
+bool redraw_header = 1;
 
 extern bool header_update_status;
 extern bool search_case_sensitive;
@@ -318,10 +319,14 @@ int main(int argc, char *argv[])
 		block_playlist_update = 0;
 		messages_allowed = 1;
 		
-		if (Config.header_visibility)
+		// header stuff
+		
+		const int max_allowed_title_length = wHeader->GetWidth()-volume_state.length();
+		if (current_screen == csBrowser && input == ERR && browsed_dir.length() > max_allowed_title_length)
+			redraw_header = 1;
+		if (Config.header_visibility && redraw_header)
 		{
 			string title;
-			const int max_allowed_title_length = wHeader->GetWidth()-volume_state.length();
 			
 			switch (current_screen)
 			{
@@ -397,11 +402,14 @@ int main(int argc, char *argv[])
 #				endif // HAVE_TAGLIB_H
 				wHeader->WriteXY(0, 0, max_allowed_title_length, screens, 1);
 			}
-		
+			
 			wHeader->SetColor(Config.volume_color);
 			wHeader->WriteXY(max_allowed_title_length, 0, volume_state);
 			wHeader->SetColor(Config.header_color);
+			redraw_header = 0;
 		}
+		
+		// header stuff end
 		
 		// media library stuff
 		
@@ -642,7 +650,11 @@ int main(int argc, char *argv[])
 				mEditorTags->Refresh();
 			}
 			
-			mEditorTagTypes->GetChoice() < 10 ? mEditorTags->Refresh(1) : mEditorTags->Window::Clear();
+			if (redraw_screen && wCurrent == mEditorTagTypes && mEditorTagTypes->GetChoice() < 10)
+				mEditorTags->Refresh(1);
+			else if (mEditorTagTypes->GetChoice() >= 10)
+				mEditorTags->Window::Clear();
+			redraw_screen = 0;
 		}
 #		endif // HAVE_TAGLIB_H
 		// album editor end
@@ -657,6 +669,8 @@ int main(int argc, char *argv[])
 		if (input == ERR)
 			continue;
 		
+		if (!title_allowed)
+			redraw_header = 1;
 		title_allowed = 1;
 		timer = time(NULL);
 		
@@ -664,9 +678,6 @@ int main(int argc, char *argv[])
 		{
 			case csPlaylist:
 				mPlaylist->Highlighting(1);
-				break;
-			case csBrowser:
-				browsed_dir_scroll_begin--;
 				break;
 			case csLibrary:
 			case csPlaylistEditor:
@@ -693,6 +704,8 @@ int main(int argc, char *argv[])
 						mEditorTags->Clear(0);
 						mEditorTagTypes->Refresh();
 					}
+					else if (wCurrent == mEditorTagTypes)
+						redraw_screen = 1;
 #					endif // HAVE_TAGLIB_H
 				}
 			}
@@ -729,6 +742,7 @@ int main(int argc, char *argv[])
 		else if (input == KEY_RESIZE)
 		{
 			redraw_screen = 1;
+			redraw_header = 1;
 			
 			if (COLS < 20 || LINES < 5)
 			{
@@ -843,6 +857,7 @@ int main(int argc, char *argv[])
 							found_pos = 0;
 							vFoundPositions.clear();
 							GetDirectory(item.name, browsed_dir);
+							redraw_header = 1;
 							break;
 						}
 						case itSong:
@@ -976,6 +991,7 @@ int main(int argc, char *argv[])
 							wCurrent = wPrev;
 							current_screen = prev_screen;
 							redraw_screen = 1;
+							redraw_header = 1;
 							if (current_screen == csLibrary)
 							{
 								REFRESH_MEDIA_LIBRARY_SCREEN;
@@ -1362,6 +1378,7 @@ int main(int argc, char *argv[])
 								UnlockStatusbar();
 								if (!new_name.empty() && new_name != old_name)
 									s.SetNewName(new_name + extension);
+								mEditorTags->Go(wDown);
 							}
 							continue;
 						}
@@ -2219,6 +2236,7 @@ int main(int argc, char *argv[])
 					wCurrent = mTagEditor;
 					prev_screen = current_screen;
 					current_screen = csTinyTagEditor;
+					redraw_header = 1;
 				}
 				else
 					ShowMessage("Cannot read file '" + Config.mpd_music_dir + edited_song.GetFile() + "'!");
@@ -2664,6 +2682,7 @@ int main(int argc, char *argv[])
 				current_screen = prev_screen;
 				wCurrent = wPrev;
 				redraw_screen = 1;
+				redraw_header = 1;
 				if (current_screen == csLibrary)
 				{
 					REFRESH_MEDIA_LIBRARY_SCREEN;
@@ -2706,6 +2725,7 @@ int main(int argc, char *argv[])
 				wCurrent = sInfo;
 				prev_screen = current_screen;
 				current_screen = csInfo;
+				redraw_header = 1;
 				sInfo->Clear();
 				sInfo->Add(GetInfo(*s));
 				sInfo->Hide();
@@ -2719,6 +2739,7 @@ int main(int argc, char *argv[])
 				current_screen = prev_screen;
 				wCurrent = wPrev;
 				redraw_screen = 1;
+				redraw_header = 1;
 				if (current_screen == csLibrary)
 				{
 					REFRESH_MEDIA_LIBRARY_SCREEN;
@@ -2762,6 +2783,7 @@ int main(int argc, char *argv[])
 					wPrev = wCurrent;
 					prev_screen = current_screen;
 					wCurrent = sLyrics;
+					redraw_header = 1;
 					wCurrent->Clear();
 					current_screen = csLyrics;
 					lyrics_title = "Lyrics: " + s->GetArtist() + " - " + s->GetTitle();
@@ -2778,6 +2800,7 @@ int main(int argc, char *argv[])
 				wCurrent = sHelp;
 				wCurrent->Hide();
 				current_screen = csHelp;
+				redraw_header = 1;
 			}
 		}
 		else if (Keypressed(input, Key.ScreenSwitcher))
@@ -2798,6 +2821,7 @@ int main(int argc, char *argv[])
 				wCurrent->Hide();
 				current_screen = csPlaylist;
 				redraw_screen = 1;
+				redraw_header = 1;
 			}
 		}
 		else if (Keypressed(input, Key.Browser))
@@ -2816,6 +2840,7 @@ int main(int argc, char *argv[])
 				wCurrent->Hide();
 				current_screen = csBrowser;
 				redraw_screen = 1;
+				redraw_header = 1;
 			}
 		}
 		else if (Keypressed(input, Key.SearchEngine))
@@ -2830,6 +2855,7 @@ int main(int argc, char *argv[])
 				wCurrent->Hide();
 				current_screen = csSearcher;
 				redraw_screen = 1;
+				redraw_header = 1;
 				if (mSearcher->Back().first == ".")
 				{
 					wCurrent->WriteXY(0, 0, "Updating list...");
@@ -2851,6 +2877,7 @@ int main(int argc, char *argv[])
 				mPlaylist->Hide(); // hack, should be wCurrent, but it doesn't always have 100% width
 				
 				redraw_screen = 1;
+				redraw_header = 1;
 				REFRESH_MEDIA_LIBRARY_SCREEN;
 				
 				wCurrent = mLibArtists;
@@ -2872,6 +2899,7 @@ int main(int argc, char *argv[])
 				mPlaylist->Hide(); // hack, should be wCurrent, but it doesn't always have 100% width
 				
 				redraw_screen = 1;
+				redraw_header = 1;
 				REFRESH_PLAYLIST_EDITOR_SCREEN;
 				
 				wCurrent = mPlaylistList;
@@ -2896,6 +2924,7 @@ int main(int argc, char *argv[])
 				mPlaylist->Hide(); // hack, should be wCurrent, but it doesn't always have 100% width
 				
 				redraw_screen = 1;
+				redraw_header = 1;
 				REFRESH_ALBUM_EDITOR_SCREEN;
 				
 				if (mEditorTagTypes->Empty())

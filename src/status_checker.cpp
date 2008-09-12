@@ -70,6 +70,7 @@ extern bool block_playlist_update;
 extern bool block_found_item_list_update;
 
 extern bool redraw_screen;
+extern bool redraw_header;
 
 bool header_update_status = 0;
 bool repeat_one_allowed = 0;
@@ -204,6 +205,8 @@ void NcmpcppStatusChanged(MPDConnection *Mpd, MPDStatusChanges changed, void *da
 			}
 			FreeSongList(list);
 		}
+		
+		redraw_header = 1;
 		
 		if (mPlaylist->Empty())
 		{
