@@ -1277,6 +1277,9 @@ int main(int argc, char *argv[])
 #				ifdef HAVE_TAGLIB_H
 				case csTagEditor:
 				{
+					if (mEditorTags->Empty())
+						break;
+					
 					if (wCurrent == mEditorDirs)
 					{
 						TagList test;
