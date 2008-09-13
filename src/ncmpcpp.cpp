@@ -844,14 +844,14 @@ int main(int argc, char *argv[])
 				case csPlaylist:
 				{
 					if (!mPlaylist->Empty())
-						Mpd->PlayID(mPlaylist->at(mPlaylist->GetChoice()).GetID());
+						Mpd->PlayID(mPlaylist->Current().GetID());
 					break;
 				}
 				case csBrowser:
 				{
 					GO_TO_PARENT_DIR:
 					
-					const Item &item = mBrowser->at(mBrowser->GetChoice());
+					const Item &item = mBrowser->Current();
 					switch (item.type)
 					{
 						case itDirectory:
@@ -1208,7 +1208,7 @@ int main(int argc, char *argv[])
 					{
 						if (!mLibSongs->Empty())
 						{
-							Song &s = mLibSongs->at(mLibSongs->GetChoice());
+							Song &s = mLibSongs->Current();
 							int id = Mpd->AddSong(s);
 							if (id >= 0)
 							{
@@ -1428,9 +1428,9 @@ int main(int argc, char *argv[])
 					{
 						LockStatusbar();
 						wFooter->WriteXY(0, Config.statusbar_visibility, "[.b]" + mEditorTagTypes->GetOption() + "[/b]: ", 1);
-						mEditorTags->at(mEditorTags->GetChoice()).GetEmptyFields(1);
+						mEditorTags->Current().GetEmptyFields(1);
 						string new_tag = wFooter->GetString(mEditorTags->GetOption());
-						mEditorTags->at(mEditorTags->GetChoice()).GetEmptyFields(0);
+						mEditorTags->Current().GetEmptyFields(0);
 						UnlockStatusbar();
 						for (SongList::iterator it = list.begin(); it != list.end(); it++)
 							(**it.*set)(new_tag);
@@ -1439,12 +1439,12 @@ int main(int argc, char *argv[])
 					{
 						LockStatusbar();
 						wFooter->WriteXY(0, Config.statusbar_visibility, "[.b]" + mEditorTagTypes->GetOption() + "[/b]: ", 1);
-						mEditorTags->at(mEditorTags->GetChoice()).GetEmptyFields(1);
+						mEditorTags->Current().GetEmptyFields(1);
 						string new_tag = wFooter->GetString(mEditorTags->GetOption());
-						mEditorTags->at(mEditorTags->GetChoice()).GetEmptyFields(0);
+						mEditorTags->Current().GetEmptyFields(0);
 						UnlockStatusbar();
 						if (new_tag != mEditorTags->GetOption())
-							(mEditorTags->at(mEditorTags->GetChoice()).*set)(new_tag);
+							(mEditorTags->Current().*set)(new_tag);
 						mEditorTags->Go(wDown);
 					}
 				}
@@ -1468,7 +1468,7 @@ int main(int argc, char *argv[])
 			{
 				if (current_screen == csBrowser)
 				{
-					const Item &item = mBrowser->at(mBrowser->GetChoice());
+					const Item &item = mBrowser->Current();
 					switch (item.type)
 					{
 						case itDirectory:
@@ -1696,9 +1696,8 @@ int main(int argc, char *argv[])
 			else if (current_screen == csBrowser || wCurrent == mPlaylistList)
 			{
 				LockStatusbar();
-				int id = wCurrent->GetChoice();
-				const string &name = wCurrent == mBrowser ? mBrowser->at(id).name : mPlaylistList->at(id);
-				if (current_screen != csBrowser || mBrowser->at(id).type == itPlaylist)
+				const string &name = wCurrent == mBrowser ? mBrowser->Current().name : mPlaylistList->Current();
+				if (current_screen != csBrowser || mBrowser->Current().type == itPlaylist)
 				{
 					wFooter->WriteXY(0, Config.statusbar_visibility, "Delete playlist " + name + " ? [y/n] ", 1);
 					curs_set(1);
@@ -2209,7 +2208,7 @@ int main(int argc, char *argv[])
 			}
 			else if (
 			    (wCurrent == mPlaylist && !mPlaylist->Empty())
-			||  (wCurrent == mBrowser && mBrowser->at(mBrowser->GetChoice()).type == itSong)
+			||  (wCurrent == mBrowser && mBrowser->Current().type == itSong)
 			||  (wCurrent == mSearcher && mSearcher->Current().first == ".")
 			||  (wCurrent == mLibSongs && !mLibSongs->Empty())
 			||  (wCurrent == mPlaylistEditor && !mPlaylistEditor->Empty()))
@@ -2699,7 +2698,7 @@ int main(int argc, char *argv[])
 			}
 			else if (
 			    (wCurrent == mPlaylist && !mPlaylist->Empty())
-			||  (wCurrent == mBrowser && mBrowser->at(mBrowser->GetChoice()).type == itSong)
+			||  (wCurrent == mBrowser && mBrowser->Current().type == itSong)
 			||  (wCurrent == mSearcher && mSearcher->Current().first == ".")
 			||  (wCurrent == mLibSongs && !mLibSongs->Empty())
 			||  (wCurrent == mPlaylistEditor && !mPlaylistEditor->Empty()))
@@ -2756,7 +2755,7 @@ int main(int argc, char *argv[])
 			}
 			else if (
 			    (wCurrent == mPlaylist && !mPlaylist->Empty())
-			||  (wCurrent == mBrowser && mBrowser->at(mBrowser->GetChoice()).type == itSong)
+			||  (wCurrent == mBrowser && mBrowser->Current().type == itSong)
 			||  (wCurrent == mSearcher && mSearcher->Current().first == ".")
 			||  (wCurrent == mLibSongs && !mLibSongs->Empty())
 			||  (wCurrent == mPlaylistEditor && !mPlaylistEditor->Empty()))
