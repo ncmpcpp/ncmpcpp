@@ -225,9 +225,7 @@ void Window::Refresh(bool stub)
 
 void Window::Clear(bool stub)
 {
-	for (int i = 0; i < GetHeight(); i++)
-		mvwhline(itsWindow, i, 0, 32, GetWidth());
-	wrefresh(itsWindow);
+	werase(itsWindow);
 }
 
 void Window::Hide(char x) const
