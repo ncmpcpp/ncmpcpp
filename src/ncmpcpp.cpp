@@ -68,12 +68,13 @@ Menu<Song> *mLibSongs;
 
 #ifdef HAVE_TAGLIB_H
 Menu<string> *mTagEditor;
-Menu<StringPair> *mEditorLeftCol;
 Menu<StringPair> *mEditorAlbums;
 Menu<StringPair> *mEditorDirs;
 Menu<string> *mEditorTagTypes;
 #endif // HAVE_TAGLIB_H
-Menu<Song> *mEditorTags = 0; // blah, I use it in conditionals, so just let it be.
+// blah, I use them in conditionals, so just let them be.
+Menu<StringPair> *mEditorLeftCol = 0;
+Menu<Song> *mEditorTags = 0;
 
 Menu<string> *mPlaylistList;
 Menu<Song> *mPlaylistEditor;
