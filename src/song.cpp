@@ -30,16 +30,25 @@ string UNKNOWN_ALBUM;
 
 void DefineEmptyTags()
 {
-	const string et_col = IntoStr(Config.empty_tags_color);
-	EMPTY_TAG = "[." + et_col + "]<empty>[/" + et_col + "]";
-	UNKNOWN_ARTIST = "[." + et_col + "]<no artist>[/" + et_col + "]";
-	UNKNOWN_TITLE = "[." + et_col + "]<no title>[/" + et_col + "]";
-	UNKNOWN_ALBUM = "[." + et_col + "]<no album>[/" + et_col + "]";
+	if (Config.empty_tags_color != clDefault)
+	{
+		const string et_col = IntoStr(Config.empty_tags_color);
+		EMPTY_TAG = "[." + et_col + "]<empty>[/" + et_col + "]";
+		UNKNOWN_ARTIST = "[." + et_col + "]<no artist>[/" + et_col + "]";
+		UNKNOWN_TITLE = "[." + et_col + "]<no title>[/" + et_col + "]";
+		UNKNOWN_ALBUM = "[." + et_col + "]<no album>[/" + et_col + "]";
+	}
+	else
+	{
+		EMPTY_TAG = "<empty>";
+		UNKNOWN_ARTIST = "<no artist>";
+		UNKNOWN_TITLE = "<no title>";
+		UNKNOWN_ALBUM = "<no album";
+	}
 }
 
 Song::Song(mpd_Song *s) : itsHash(0),
-			  itsMinutesLength(s->time/60),
-			  itsSecondsLength((s->time-itsMinutesLength*60)),
+			  itsLength(s->time),
 			  itsPosition(s->pos),
 			  itsID(s->id),
 			  itsGetEmptyFields(0)
@@ -85,22 +94,9 @@ Song::Song(mpd_Song *s) : itsHash(0),
 
 string Song::GetLength() const
 {
-	std::stringstream ss;
-	
-	if (!GetTotalLength())
+	if (!itsLength)
 		return "-:--";
-	
-	ss << itsMinutesLength << ":";
-	if (!itsSecondsLength)
-	{
-		ss << "00";
-		return ss.str();
-	}
-	if (itsSecondsLength < 10)
-		ss << "0" << itsSecondsLength;
-	else
-		ss << itsSecondsLength;
-	return ss.str();
+	return ShowTime(itsLength);
 }
 
 void Song::Clear()
@@ -119,15 +115,14 @@ void Song::Clear()
 	itsPerformer.clear();
 	itsDisc.clear();
 	itsComment.clear();
-	itsMinutesLength = 0;
-	itsSecondsLength = 0;
+	itsLength = 0;
 	itsPosition = 0;
 	itsID = 0;
 }
 
 bool Song::Empty() const
 {
-	return itsFile.empty() && itsShortName.empty() && itsArtist.empty() && itsTitle.empty() && itsAlbum.empty() && itsTrack.empty() && itsYear.empty() && itsGenre.empty();
+	return itsFile.empty() && itsShortName.empty() && itsArtist.empty() && itsTitle.empty() && itsAlbum.empty() && itsTrack.empty() && itsYear.empty() && itsGenre.empty() && itsComposer.empty() && itsPerformer.empty() && itsDisc.empty() && itsComment.empty();
 }
 
 string Song::GetFile() const
@@ -197,7 +192,7 @@ string Song::GetComment() const
 
 bool Song::operator==(const Song &s) const
 {
-	return itsFile == s.itsFile && itsArtist == s.itsArtist && itsTitle == s.itsTitle && itsAlbum == s.itsAlbum && itsTrack == s.itsTrack && itsYear == s.itsYear && itsGenre == s.itsGenre && itsComposer == s.itsComposer && itsPerformer == s.itsPerformer && itsDisc == s.itsDisc && itsComment == s.itsComment && itsHash == s.itsHash && itsMinutesLength && s.itsMinutesLength && itsSecondsLength == s.itsSecondsLength && itsPosition == s.itsPosition && itsID == s.itsID;
+	return itsFile == s.itsFile && itsArtist == s.itsArtist && itsTitle == s.itsTitle && itsAlbum == s.itsAlbum && itsTrack == s.itsTrack && itsYear == s.itsYear && itsGenre == s.itsGenre && itsComposer == s.itsComposer && itsPerformer == s.itsPerformer && itsDisc == s.itsDisc && itsComment == s.itsComment && itsHash == s.itsHash && itsLength && s.itsLength && itsPosition == s.itsPosition && itsID == s.itsID;
 }
 
 bool Song::operator!=(const Song &s) const
@@ -208,5 +203,29 @@ bool Song::operator!=(const Song &s) const
 bool Song::operator<(const Song &s) const
 {
 	return itsPosition < s.itsPosition;
+}
+
+string Song::ShowTime(int length)
+{
+	std::stringstream ss;
+	
+	int hours = length/3600;
+	length -= hours*3600;
+	int minutes = length/60;
+	length -= minutes*60;
+	int seconds = length;
+	
+	if (hours > 0)
+	{
+		ss << hours << ":"
+		<< std::setw(2) << std::setfill('0') << minutes << ":"
+		<< std::setw(2) << std::setfill('0') << seconds;
+	}
+	else
+	{
+		ss << minutes << ":"
+		<< std::setw(2) << std::setfill('0') << seconds;
+	}
+	return ss.str();
 }
 

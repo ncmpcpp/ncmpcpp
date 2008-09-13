@@ -321,9 +321,9 @@ void NcmpcppStatusChanged(MPDConnection *Mpd, MPDStatusChanges changed, void *da
 			{
 				string tracklength;
 				if (s.GetTotalLength())
-					tracklength = " [" + ShowTime(elapsed) + "/" + s.GetLength() + "]";
+					tracklength = " [" + Song::ShowTime(elapsed) + "/" + s.GetLength() + "]";
 				else
-					tracklength = " [" + ShowTime(elapsed) + "]";
+					tracklength = " [" + Song::ShowTime(elapsed) + "]";
 				my_string_t playing_song = TO_WSTRING(DisplaySong(s, &Config.song_status_format));
 				
 				int max_length_without_scroll = wFooter->GetWidth()-player_state.length()-tracklength.length();

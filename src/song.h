@@ -36,7 +36,7 @@ void DefineEmptyTags();
 class Song
 {
 	public:
-		Song() : itsHash(0), itsMinutesLength(0), itsSecondsLength(0), itsPosition(0), itsID(0), itsGetEmptyFields(0) { }
+		Song() : itsHash(0), itsLength(0), itsPosition(0), itsID(0), itsGetEmptyFields(0) { }
 		Song(mpd_Song *);
 		~Song() {};
 		
@@ -56,9 +56,7 @@ class Song
 		string GetComment() const;
 		string GetLength() const;
 		long long GetHash() const { return itsHash; }
-		int GetTotalLength() const { return itsSecondsLength < 0 ? 0 : itsMinutesLength*60+itsSecondsLength; }
-		int GetMinutesLength() const { return itsMinutesLength; }
-		int GetSecondsLength() const { return itsSecondsLength; }
+		int GetTotalLength() const { return itsLength < 0 ? 0 : itsLength; }
 		int GetPosition() const { return itsPosition; }
 		int GetID() const { return itsID; }
 		
@@ -85,6 +83,8 @@ class Song
 		bool operator==(const Song &) const;
 		bool operator!=(const Song &) const;
 		bool operator<(const Song &rhs) const;
+		
+		static string ShowTime(int);
 	private:
 		string itsFile;
 		string itsShortName;
@@ -102,8 +102,7 @@ class Song
 		string itsDisc;
 		string itsComment;
 		long long itsHash;
-		int itsMinutesLength;
-		int itsSecondsLength;
+		int itsLength;
 		int itsPosition;
 		int itsID;
 		bool itsGetEmptyFields;

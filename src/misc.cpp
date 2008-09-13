@@ -46,23 +46,3 @@ string IntoStr(double liczba, int precision)
 	return ss.str();
 }
 
-string ShowTime(int length)
-{
-	stringstream ss;
-	
-	int minutes = length/60;
-	length -= minutes*60;
-	int seconds = length;
-	
-	ss << minutes << ":";
-	if (seconds == 0)
-	{	ss << "00";
-		return ss.str();
-	}
-	if (seconds < 10)
-		ss << "0" << seconds;
-	else
-		ss << seconds;
-	return ss.str();
-}
-

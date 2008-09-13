@@ -35,7 +35,5 @@ int StrToInt(string);
 string IntoStr(int);
 string IntoStr(double, int);
 
-string ShowTime(int);
-
 #endif
 

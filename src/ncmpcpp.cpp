@@ -2060,7 +2060,7 @@ int main(int argc, char *argv[])
 						songpos = 0;
 					
 					wFooter->Bold(1);
-					string tracklength = "[" + ShowTime(songpos) + "/" + s.GetLength() + "]";
+					string tracklength = "[" + Song::ShowTime(songpos) + "/" + s.GetLength() + "]";
 					wFooter->WriteXY(wFooter->GetWidth()-tracklength.length(), 1, tracklength);
 					double progressbar_size = (double)songpos/(s.GetTotalLength());
 					int howlong = wFooter->GetWidth()*progressbar_size;
