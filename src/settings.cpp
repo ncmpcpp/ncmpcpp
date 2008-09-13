@@ -169,6 +169,7 @@ void DefaultConfiguration(ncmpcpp_config &conf)
 	conf.statusbar_color = clDefault;
 	conf.active_column_color = clRed;
 	conf.colors_enabled = true;
+	conf.fancy_scrolling = true;
 	conf.columns_in_playlist = false;
 	conf.header_visibility = true;
 	conf.statusbar_visibility = true;
@@ -500,6 +501,10 @@ void ReadConfiguration(ncmpcpp_config &conf)
 			else if (it->find("colors_enabled") != string::npos)
 			{
 				conf.colors_enabled = v == "yes";
+			}
+			else if (it->find("fancy_scrolling") != string::npos)
+			{
+				conf.fancy_scrolling = v == "yes";
 			}
 			else if (it->find("playlist_display_mode") != string::npos)
 			{

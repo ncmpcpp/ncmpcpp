@@ -226,6 +226,7 @@ void Window::Refresh(bool stub)
 void Window::Clear(bool stub)
 {
 	werase(itsWindow);
+	wrefresh(itsWindow);
 }
 
 void Window::Hide(char x) const

@@ -719,11 +719,35 @@ int main(int argc, char *argv[])
 		
 		if (Keypressed(input, Key.Up))
 		{
-			wCurrent->Go(wUp);
+			if (!Config.fancy_scrolling && (wCurrent == mLibArtists || wCurrent == mPlaylistList || wCurrent == mEditorLeftCol))
+			{
+				wCurrent->SetTimeout(50);
+				while (Keypressed(input, Key.Up))
+				{
+					wCurrent->Go(wUp);
+					wCurrent->Refresh();
+					wCurrent->ReadKey(input);
+				}
+				wCurrent->SetTimeout(ncmpcpp_window_timeout);
+			}
+			else
+				wCurrent->Go(wUp);
 		}
 		else if (Keypressed(input, Key.Down))
 		{
-			wCurrent->Go(wDown);
+			if (!Config.fancy_scrolling && (wCurrent == mLibArtists || wCurrent == mPlaylistList || wCurrent == mEditorLeftCol))
+			{
+				wCurrent->SetTimeout(50);
+				while (Keypressed(input, Key.Down))
+				{
+					wCurrent->Go(wDown);
+					wCurrent->Refresh();
+					wCurrent->ReadKey(input);
+				}
+				wCurrent->SetTimeout(ncmpcpp_window_timeout);
+			}
+			else
+				wCurrent->Go(wDown);
 		}
 		else if (Keypressed(input, Key.PageUp))
 		{

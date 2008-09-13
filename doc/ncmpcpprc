@@ -116,6 +116,8 @@
 #
 #colors_enabled = "yes"
 #
+#fancy_scrolling = "yes"
+#
 #empty_tag_color = "cyan"
 #
 #header_window_color = "default"

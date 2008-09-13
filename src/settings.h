@@ -115,6 +115,7 @@ struct ncmpcpp_config
 	Color active_column_color;
 	
 	bool colors_enabled;
+	bool fancy_scrolling;
 	bool columns_in_playlist;
 	bool set_window_title;
 	bool header_visibility;
