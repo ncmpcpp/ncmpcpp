@@ -171,11 +171,16 @@ int Menu<T>::count_length(string str)
 	
 	for (int i = 0; i < str2.length(); i++, length++)
 	{
-		if (str2[i] == '[')
+		if (str2[i] == '[' && (str2[i+1] == '.' || str2[i+1] == '/'))
 			collect = 1;
 		
 		if (collect)
-			tmp += str2[i];
+		{
+			if (str2[i] != '[')
+				tmp += str2[i];
+			else
+				tmp = str2[i];
+		}
 		
 		if (str2[i] == ']')
 			collect = 0;
@@ -423,17 +428,10 @@ void Menu<T>::Refresh(bool redraw_whole_window)
 				}
 			}
 			
-#			ifdef UTF8_ENABLED
 			if (itsOptions[*it]->selected)
-				WriteXY(x, line, itsWidth, ToWString(itsSelectedPrefix + option + itsSelectedSuffix), 0);
+				WriteXY(x, line, itsWidth, TO_WSTRING(itsSelectedPrefix + option + itsSelectedSuffix), 0);
 			else
-				WriteXY(x, line, itsWidth, ToWString(option), 0);
-#			else
-			if (itsOptions[*it]->selected)
-				WriteXY(x, line, itsWidth, itsSelectedPrefix + option + itsSelectedSuffix, 0);
-			else
-				WriteXY(x, line, itsWidth, option, 0);
-#			endif
+				WriteXY(x, line, itsWidth, TO_WSTRING(option), 0);
 			
 			if (!ch && (itsOptions[*it]->location == lCenter || itsOptions[*it]->location == lLeft))
 			{

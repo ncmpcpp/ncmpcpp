@@ -192,9 +192,6 @@ void NcmpcppStatusChanged(MPDConnection *Mpd, MPDStatusChanges changed, void *da
 			}
 			else
 			{
-			//	mPlaylist->BoldOption(old_playing+1, 0);
-			//	mPlaylist->BoldOption(now_playing+1, 1);
-				
 				Mpd->GetPlaylistChanges(-1, list);
 				
 				for (int i = 0; i < mPlaylist->Size(); i++)

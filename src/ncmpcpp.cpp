@@ -173,6 +173,7 @@ int main(int argc, char *argv[])
 		main_height++;
 	
 	mPlaylist = new Menu<Song>(0, main_start_y, COLS, main_height, Config.columns_in_playlist ? DisplayColumns(Config.song_columns_list_format) : "", Config.main_color, brNone);
+	mPlaylist->AutoRefresh(0);
 	mPlaylist->SetTimeout(ncmpcpp_window_timeout);
 	mPlaylist->HighlightColor(Config.main_highlight_color);
 	mPlaylist->SetSelectPrefix(Config.selected_item_prefix);
@@ -368,8 +369,7 @@ int main(int argc, char *argv[])
 				
 				if (current_screen == csPlaylist && !playlist_stats.empty())
 					wHeader->WriteXY(title.length(), 0, max_allowed_title_length-title.length(), playlist_stats);
-				
-				if (current_screen == csBrowser)
+				else if (current_screen == csBrowser)
 				{
 					int max_length_without_scroll = wHeader->GetWidth()-volume_state.length()-title.length();
 					my_string_t wbrowseddir = TO_WSTRING(browsed_dir);
@@ -651,10 +651,12 @@ int main(int argc, char *argv[])
 			}
 			
 			if (redraw_screen && wCurrent == mEditorTagTypes && mEditorTagTypes->GetChoice() < 10)
+			{
 				mEditorTags->Refresh(1);
+				redraw_screen = 0;
+			}
 			else if (mEditorTagTypes->GetChoice() >= 10)
 				mEditorTags->Window::Clear();
-			redraw_screen = 0;
 		}
 #		endif // HAVE_TAGLIB_H
 		// album editor end
@@ -1277,9 +1279,6 @@ int main(int argc, char *argv[])
 #				ifdef HAVE_TAGLIB_H
 				case csTagEditor:
 				{
-					if (mEditorTags->Empty())
-						break;
-					
 					if (wCurrent == mEditorDirs)
 					{
 						TagList test;
@@ -1295,6 +1294,9 @@ int main(int argc, char *argv[])
 							ShowMessage("No subdirs found");
 						break;
 					}
+					
+					if (mEditorTags->Empty()) // we need songs to deal with, don't we?
+						break;
 					
 					// if there are selected songs, perform operations only on them
 					SongList list;

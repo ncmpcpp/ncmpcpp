@@ -629,7 +629,7 @@ char * ToString(const wchar_t *ws)
 	string s;
 	for (int i = 0; i < wcslen(ws); i++)
 	{
-		char *c = (char *)calloc(MB_CUR_MAX, sizeof(char));
+		char *c = new char[MB_CUR_MAX]();
 		wctomb(c, ws[i]);
 		s += c;
 		delete [] c;
@@ -640,7 +640,7 @@ char * ToString(const wchar_t *ws)
 
 wchar_t * ToWString(const char *s)
 {
-	wchar_t *ws = (wchar_t *)calloc(strlen(s)+1, sizeof(wchar_t));
+	wchar_t *ws = new wchar_t[strlen(s)+1]();
 	mbstowcs(ws, s, strlen(s));
 	return ws;
 }
@@ -650,7 +650,7 @@ string ToString(const wstring &ws)
 	string s;
 	for (wstring::const_iterator it = ws.begin(); it != ws.end(); it++)
 	{
-		char *c = (char *)calloc(MB_CUR_MAX, sizeof(char));
+		char *c = new char[MB_CUR_MAX]();
 		wctomb(c, *it);
 		s += c;
 		delete [] c;
@@ -660,13 +660,12 @@ string ToString(const wstring &ws)
 
 wstring ToWString(const string &s)
 {
-	wchar_t *ws = (wchar_t *)calloc(s.length()+1, sizeof(wchar_t));
+	wchar_t *ws = new wchar_t[s.length()+1]();
 	mbstowcs(ws, s.c_str(), s.length());
 	wstring result = ws;
 	delete [] ws;
 	return result;
 }
-
 
 string Window::OmitBBCodes(const string &str)
 {
