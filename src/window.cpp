@@ -312,7 +312,16 @@ void Window::Write(int limit, const string &str, bool clrtoeol)
 			{
 				waddstr(itsWindow,tmp.c_str());
 				tmp.clear();
-				if (IsValidColor(color))
+				
+				if (isdigit(color[2]))
+				{
+					int x, y;
+					getyx(itsWindow, y, x);
+					Coordinates coords = IntoCoordinates(color);
+					wmove(itsWindow, coords.second == -1 ? y : coords.second, coords.first);
+					limit -= coords.first-x;
+				}
+				else if (IsValidColor(color))
 				{
 					ColorPair colors = IntoColor(color);
 					SetColor(colors.first, colors.second);
@@ -376,7 +385,16 @@ void Window::Write(int limit, const wstring &str, bool clrtoeol)
 			{
 				waddwstr(itsWindow,tmp.c_str());
 				tmp.clear();
-				if (IsValidColor(ToString(color)))
+				
+				if (isdigit(color[2]))
+				{
+					int x, y;
+					getyx(itsWindow, y, x);
+					Coordinates coords = IntoCoordinates(ToString(color));
+					wmove(itsWindow, coords.second == -1 ? y : coords.second, coords.first);
+					limit -= coords.first-x;
+				}
+				else if (IsValidColor(ToString(color)))
 				{
 					ColorPair colors = IntoColor(ToString(color));
 					SetColor(colors.first, colors.second);
@@ -664,6 +682,23 @@ wstring ToWString(const string &s)
 	mbstowcs(ws, s.c_str(), s.length());
 	wstring result = ws;
 	delete [] ws;
+	return result;
+}
+
+Coordinates Window::IntoCoordinates(const string &s)
+{
+	Coordinates result;
+	unsigned int sep = s.find(",");
+	if (sep != string::npos)
+	{
+		result.first = atoi(s.substr(2, sep-2).c_str());
+		result.second = atoi(s.substr(sep+1).c_str());
+	}
+	else
+	{
+		result.first = atoi(s.substr(2).c_str());
+		result.second = -1;
+	}
 	return result;
 }
 

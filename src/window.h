@@ -49,6 +49,7 @@ enum Where { wUp, wDown, wPageUp, wPageDown, wHome, wEnd };
 
 typedef void (*GetStringHelper)();
 typedef std::pair<Color, Color> ColorPair;
+typedef std::pair<int, int> Coordinates;
 
 char * ToString(const wchar_t *);
 wchar_t * ToWString(const char *);
@@ -126,6 +127,7 @@ class Window
 		virtual void Add(string str) { Write(str); } // for Scrollpad class
 		
 		static void EnableColors();
+		static Coordinates IntoCoordinates(const string &);
 		static bool IsValidColor(const string &);
 		static string OmitBBCodes(const string &);
 		
