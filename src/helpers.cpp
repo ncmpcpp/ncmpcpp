@@ -215,12 +215,12 @@ string TotalPlaylistLength()
 	return result;
 }
 
-string DisplayStringPair(const StringPair &pair, void *null)
+string DisplayStringPair(const StringPair &pair, void *, const Menu<StringPair> *)
 {
 	return pair.first;
 }
 
-string DisplayItem(const Item &item, void *)
+string DisplayItem(const Item &item, void *, const Menu<Item> *menu)
 {
 	switch (item.type)
 	{
@@ -232,7 +232,8 @@ string DisplayItem(const Item &item, void *)
 			return "[" + (slash != string::npos ? item.name.substr(slash+1) : item.name) + "]";
 		}
 		case itSong:
-			return DisplaySong(*item.song);
+			// I know casting that way is ugly etc., but it works.
+			return DisplaySong(*item.song, &Config.song_list_format, (const Menu<Song> *)menu);
 		case itPlaylist:
 			return Config.browser_playlist_prefix + item.name;
 	}
@@ -310,7 +311,7 @@ string DisplayColumns(string song_template)
 	return result.substr(0, COLS);
 }
 
-string DisplaySongInColumns(const Song &s, void *s_template)
+string DisplaySongInColumns(const Song &s, void *s_template, const Menu<Song> *)
 {
 	string song_template = s_template ? *static_cast<string *>(s_template) : "";
 	
@@ -402,12 +403,14 @@ string DisplaySongInColumns(const Song &s, void *s_template)
 	return TO_STRING(result);
 }
 
-string DisplaySong(const Song &s, void *s_template)
+string DisplaySong(const Song &s, void *s_template, const Menu<Song> *menu)
 {	
 	const string &song_template = s_template ? *static_cast<string *>(s_template) : "";
 	string result;
+	string lresult;
 	bool link_tags = 0;
 	bool tags_present = 0;
+	bool right = 0;
 	int i = 0;
 	
 	for (string::const_iterator it = song_template.begin(); it != song_template.end(); it++)
@@ -656,9 +659,23 @@ string DisplaySong(const Song &s, void *s_template)
 						result += s.GetTitle();
 					break;
 				}
+				case 'r':
+				{
+					if (!right)
+					{
+						right = 1;
+						lresult = result;
+						result = "";
+						i = 0;
+					}
+				}
 				
 			}
 		}
+	}
+	if (right && menu)
+	{
+		result = lresult + "[." + IntoStr(menu->GetWidth()-Window::RealLength(result)) + "]" + result;
 	}
 	return result;
 }

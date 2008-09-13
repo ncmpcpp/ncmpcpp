@@ -45,7 +45,7 @@ class Menu : public Window
 {
 	typedef typename vector<Option<T> *>::iterator T_iterator;
 	typedef typename vector<Option<T> *>::const_iterator T_const_iterator;
-	typedef string (*ItemDisplayer) (const T &, void *);
+	typedef string (*ItemDisplayer) (const T &, void *, const Menu<T> *);
 	
 	public:
 		Menu(int startx, int starty, int width, int height, string title, Color color, Border border) : itsItemDisplayer(0), itsItemDisplayerUserdata(0), Window(startx, starty, width, height, title, color, border), itsSelectedPrefix("[.r]"), itsSelectedSuffix("[/r]"), itsStaticsNumber(0), itsBeginning(0), itsHighlight(0), itsHighlightColor(itsBaseColor), itsHighlightEnabled(1) { }
@@ -100,6 +100,7 @@ class Menu : public Window
 		const T & at(int i) const { return itsOptions.at(i)->item; }
 		const T & operator[](int i) const { return itsOptions[i]->item; }
 		T & operator[](int i) { return itsOptions[i]->item; }
+		
 	protected:
 		string DisplayOption(const T &t) const;
 		ItemDisplayer itsItemDisplayer;
@@ -112,7 +113,6 @@ class Menu : public Window
 		string itsSelectedSuffix;
 		
 		int itsStaticsNumber;
-		int count_length(string);
 		
 		void redraw_screen();
 		bool is_static() { return itsOptions[itsHighlight]->is_static; }
@@ -150,49 +150,6 @@ Menu<T>::~Menu()
 {
 	for (T_iterator it = itsOptions.begin(); it != itsOptions.end(); it++)
 		delete *it;
-}
-
-template <class T>
-int Menu<T>::count_length(string str)
-{
-	if (str.empty())
-		return 0;
-	
-	bool collect = false;
-	int length = 0;
-	
-#ifdef UTF8_ENABLED
-	wstring str2 = ToWString(str);
-	wstring tmp;
-#else
-	string &str2 = str;
-	string tmp;
-#endif
-	
-	for (int i = 0; i < str2.length(); i++, length++)
-	{
-		if (str2[i] == '[' && (str2[i+1] == '.' || str2[i+1] == '/'))
-			collect = 1;
-		
-		if (collect)
-		{
-			if (str2[i] != '[')
-				tmp += str2[i];
-			else
-				tmp = str2[i];
-		}
-		
-		if (str2[i] == ']')
-			collect = 0;
-		
-		if (!collect && !tmp.empty())
-		{
-			if (IsValidColor(TO_STRING(tmp)))
-				length -= tmp.length();
-			tmp.clear();
-		}
-	}
-	return length;
 }
 
 template <class T>
@@ -399,7 +356,7 @@ void Menu<T>::Refresh(bool redraw_whole_window)
 		
 		string option = DisplayOption(itsOptions[*it]->item);
 		
-		int strlength = itsOptions[*it]->location != lLeft && BBEnabled ? count_length(option) : option.length();
+		int strlength = itsOptions[*it]->location != lLeft && BBEnabled ? Window::RealLength(option) : option.length();
 		
 		if (strlength)
 		{
@@ -733,7 +690,7 @@ Window * Menu<T>::EmptyClone() const
 template <class T>
 string Menu<T>::DisplayOption(const T &t) const
 {
-	return itsItemDisplayer ? itsItemDisplayer(t, itsItemDisplayerUserdata) : "";
+	return itsItemDisplayer ? itsItemDisplayer(t, itsItemDisplayerUserdata, this) : "";
 }
 
 template <>

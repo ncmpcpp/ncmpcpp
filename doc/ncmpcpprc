@@ -40,6 +40,7 @@
 ## %p - performer
 ## %d - disc
 ## %C - comment
+## %r - begin right align
 ##
 ## you can also put them in { } and then it will be displayed
 ## only if all requested values are available and/or define alternate

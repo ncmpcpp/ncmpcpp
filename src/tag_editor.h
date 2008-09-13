@@ -36,7 +36,7 @@ typedef void (Song::*SongSetFunction)(const string &);
 
 string FindSharedDir(Menu<Song> *);
 string FindSharedDir(const SongList &);
-string DisplayTag(const Song &, void *);
+string DisplayTag(const Song &, void *, const Menu<Song> *);
 
 bool GetSongTags(Song &);
 bool WriteTags(Song &);

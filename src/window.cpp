@@ -740,6 +740,48 @@ string Window::OmitBBCodes(const string &str)
 	return result;
 }
 
+int Window::RealLength(const string &str)
+{
+	if (str.empty())
+		return 0;
+	
+	bool collect = false;
+	int length = 0;
+	
+#ifdef UTF8_ENABLED
+	wstring str2 = ToWString(str);
+	wstring tmp;
+#else
+	const string &str2 = str;
+	string tmp;
+#endif
+	
+	for (int i = 0; i < str2.length(); i++, length++)
+	{
+		if (str2[i] == '[' && (str2[i+1] == '.' || str2[i+1] == '/'))
+			collect = 1;
+		
+		if (collect)
+		{
+			if (str2[i] != '[')
+				tmp += str2[i];
+			else
+				tmp = str2[i];
+		}
+		
+		if (str2[i] == ']')
+			collect = 0;
+		
+		if (!collect && !tmp.empty())
+		{
+			if (isdigit(tmp[2]) || IsValidColor(TO_STRING(tmp)))
+				length -= tmp.length();
+			tmp.clear();
+		}
+	}
+	return length;
+}
+
 /*int CountBBCodes(const string &str)
 {
 	if (str.empty())
