@@ -177,6 +177,21 @@ SongSetFunction IntoSetFunction(char c)
 	}
 }
 
+string GenerateFilename(const Song &s, string &pattern)
+{
+	const string unallowed_chars = "\"*/:<>?\\|";
+	string result = Window::OmitBBCodes(DisplaySong(s, &pattern));
+	for (string::const_iterator it = unallowed_chars.begin(); it != unallowed_chars.end(); it++)
+	{
+		for (int i = 0; i < result.length(); i++)
+		{
+			if (result[i] == *it)
+				result.erase(result.begin()+i);
+		}
+	}
+	return result;
+}
+
 string ParseFilename(Song &s, string mask, bool preview)
 {
 	std::stringstream result;
@@ -376,7 +391,7 @@ void __deal_with_filenames(SongList &v)
 								int last_dot = file.find_last_of(".");
 								string extension = file.substr(last_dot);
 								s.GetEmptyFields(1);
-								string new_file = Window::OmitBBCodes(DisplaySong(s, &pattern));
+								string new_file = GenerateFilename(s, pattern);
 								if (new_file.empty())
 								{
 									if (preview)

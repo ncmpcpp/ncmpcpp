@@ -41,6 +41,7 @@ string DisplayTag(const Song &, void *, const Menu<Song> *);
 bool GetSongTags(Song &);
 bool WriteTags(Song &);
 
+string GenerateFilename(const Song &, string &);
 string ParseFilename(Song &, string, bool);
 void __deal_with_filenames(SongList &);
 

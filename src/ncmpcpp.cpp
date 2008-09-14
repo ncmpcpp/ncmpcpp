@@ -42,12 +42,14 @@
 			mvvline(main_start_y, middle_col_startx-1, 0, main_height); \
 			mPlaylistEditor->Display(redraw_screen)
 
-#define REFRESH_ALBUM_EDITOR_SCREEN \
+#ifdef HAVE_TAGLIB_H
+# define REFRESH_TAG_EDITOR_SCREEN \
 			mEditorLeftCol->Display(redraw_screen); \
 			mvvline(main_start_y, middle_col_startx-1, 0, main_height); \
 			mEditorTagTypes->Display(redraw_screen); \
 			mvvline(main_start_y, right_col_startx-1, 0, main_height); \
 			mEditorTags->Display(redraw_screen)
+#endif // HAVE_TAGLIB_H
 
 ncmpcpp_config Config;
 ncmpcpp_keys Key;
@@ -836,7 +838,7 @@ int main(int argc, char *argv[])
 			}
 			else if (current_screen == csTagEditor)
 			{
-				REFRESH_ALBUM_EDITOR_SCREEN;
+				REFRESH_TAG_EDITOR_SCREEN;
 			}
 			else
 #			endif // HAVE_TAGLIB_H
@@ -1026,6 +1028,10 @@ int main(int argc, char *argv[])
 							else if (current_screen == csPlaylistEditor)
 							{
 								REFRESH_PLAYLIST_EDITOR_SCREEN;
+							}
+							else if (current_screen == csTagEditor)
+							{
+								REFRESH_TAG_EDITOR_SCREEN;
 							}
 							break;
 						}
@@ -1393,7 +1399,7 @@ int main(int argc, char *argv[])
 								__deal_with_filenames(list);
 								current_screen = csTagEditor;
 								redraw_screen = 1;
-								REFRESH_ALBUM_EDITOR_SCREEN;
+								REFRESH_TAG_EDITOR_SCREEN;
 							}
 							else if (wCurrent == mEditorTags)
 							{
@@ -2236,7 +2242,8 @@ int main(int argc, char *argv[])
 			||  (wCurrent == mBrowser && mBrowser->Current().type == itSong)
 			||  (wCurrent == mSearcher && mSearcher->Current().first == ".")
 			||  (wCurrent == mLibSongs && !mLibSongs->Empty())
-			||  (wCurrent == mPlaylistEditor && !mPlaylistEditor->Empty()))
+			||  (wCurrent == mPlaylistEditor && !mPlaylistEditor->Empty())
+			||  (wCurrent == mEditorTags && !mEditorTags->Empty()))
 			{
 				int id = wCurrent->GetChoice();
 				switch (current_screen)
@@ -2255,6 +2262,9 @@ int main(int argc, char *argv[])
 						break;
 					case csPlaylistEditor:
 						edited_song = mPlaylistEditor->at(id);
+						break;
+					case csTagEditor:
+						edited_song = mEditorTags->at(id);
 						break;
 					default:
 						break;
@@ -2310,7 +2320,8 @@ int main(int argc, char *argv[])
 			if ((wCurrent == mPlaylist && !mPlaylist->Empty())
 			|| (wCurrent == mSearcher && mSearcher->Current().first == ".")
 			|| (wCurrent == mLibSongs && !mLibSongs->Empty())
-			|| (wCurrent == mPlaylistEditor && !mPlaylistEditor->Empty()))
+			|| (wCurrent == mPlaylistEditor && !mPlaylistEditor->Empty())
+			|| (wCurrent == mEditorTags && !mEditorTags->Empty()))
 			{
 				int id = wCurrent->GetChoice();
 				Song *s;
@@ -2327,6 +2338,9 @@ int main(int argc, char *argv[])
 						break;
 					case csPlaylistEditor:
 						s = &mPlaylistEditor->at(id);
+						break;
+					case csTagEditor:
+						s = &mEditorTags->at(id);
 						break;
 					default:
 						break;
@@ -2720,13 +2734,20 @@ int main(int argc, char *argv[])
 				{
 					REFRESH_PLAYLIST_EDITOR_SCREEN;
 				}
+#				ifdef HAVE_TAGLIB_H
+				else if (current_screen == csTagEditor)
+				{
+					REFRESH_TAG_EDITOR_SCREEN;
+				}
+#				endif // HAVE_TAGLIB_H
 			}
 			else if (
 			    (wCurrent == mPlaylist && !mPlaylist->Empty())
 			||  (wCurrent == mBrowser && mBrowser->Current().type == itSong)
 			||  (wCurrent == mSearcher && mSearcher->Current().first == ".")
 			||  (wCurrent == mLibSongs && !mLibSongs->Empty())
-			||  (wCurrent == mPlaylistEditor && !mPlaylistEditor->Empty()))
+			||  (wCurrent == mPlaylistEditor && !mPlaylistEditor->Empty())
+			||  (wCurrent == mEditorTags && !mEditorTags->Empty()))
 			{
 				Song *s;
 				int id = wCurrent->GetChoice();
@@ -2746,6 +2767,9 @@ int main(int argc, char *argv[])
 						break;
 					case csPlaylistEditor:
 						s = &mPlaylistEditor->at(id);
+						break;
+					case csTagEditor:
+						s = &mEditorTags->at(id);
 						break;
 					default:
 						break;
@@ -2777,13 +2801,20 @@ int main(int argc, char *argv[])
 				{
 					REFRESH_PLAYLIST_EDITOR_SCREEN;
 				}
+#				ifdef HAVE_TAGLIB_H
+				else if (current_screen == csTagEditor)
+				{
+					REFRESH_TAG_EDITOR_SCREEN;
+				}
+#				endif // HAVE_TAGLIB_H
 			}
 			else if (
 			    (wCurrent == mPlaylist && !mPlaylist->Empty())
 			||  (wCurrent == mBrowser && mBrowser->Current().type == itSong)
 			||  (wCurrent == mSearcher && mSearcher->Current().first == ".")
 			||  (wCurrent == mLibSongs && !mLibSongs->Empty())
-			||  (wCurrent == mPlaylistEditor && !mPlaylistEditor->Empty()))
+			||  (wCurrent == mPlaylistEditor && !mPlaylistEditor->Empty())
+			||  (wCurrent == mEditorTags && !mEditorTags->Empty()))
 			{
 				Song *s;
 				int id = wCurrent->GetChoice();
@@ -2803,6 +2834,9 @@ int main(int argc, char *argv[])
 						break;
 					case csPlaylistEditor:
 						s = &mPlaylistEditor->at(id);
+						break;
+					case csTagEditor:
+						s = &mEditorTags->at(id);
 						break;
 					default:
 						break;
@@ -2954,7 +2988,7 @@ int main(int argc, char *argv[])
 				
 				redraw_screen = 1;
 				redraw_header = 1;
-				REFRESH_ALBUM_EDITOR_SCREEN;
+				REFRESH_TAG_EDITOR_SCREEN;
 				
 				if (mEditorTagTypes->Empty())
 				{
