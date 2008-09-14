@@ -156,8 +156,11 @@ void DefaultConfiguration(ncmpcpp_config &conf)
 	conf.song_library_format = "{%n - }{%t}|{%f}";
 	conf.tag_editor_album_format = "{(%y) }%b";
 	conf.browser_playlist_prefix = "[.red](playlist)[/red] ";
+	conf.pattern = "%n - %t";
 	conf.selected_item_prefix = "[.magenta]";
 	conf.selected_item_suffix = "[/magenta]";
+	conf.color1 = "white";
+	conf.color2 = "green";
 	conf.empty_tags_color = clCyan;
 	conf.header_color = clDefault;
 	conf.volume_color = clDefault;
@@ -168,6 +171,8 @@ void DefaultConfiguration(ncmpcpp_config &conf)
 	conf.progressbar_color = clDefault;
 	conf.statusbar_color = clDefault;
 	conf.active_column_color = clRed;
+	conf.window_border = brGreen;
+	conf.active_window_border = brRed;
 	conf.colors_enabled = true;
 	conf.fancy_scrolling = true;
 	conf.columns_in_playlist = false;
@@ -230,9 +235,11 @@ string GetLineValue(const string &line, char a, char b)
 
 string IntoStr(Color color)
 {
-	string result = "";
+	string result;
 	
-	if (color == clBlack)
+	if (color == clDefault)
+		result = "default";
+	else if (color == clBlack)
 		result = "black";
 	else if (color == clRed)
 		result = "red";
@@ -488,6 +495,11 @@ void ReadConfiguration(ncmpcpp_config &conf)
 				if (!v.empty())
 					conf.browser_playlist_prefix = v;
 			}
+			else if (it->find("default_tag_editor_pattern") != string::npos)
+			{
+				if (!v.empty())
+					conf.pattern = v;
+			}
 			else if (it->find("selected_item_prefix") != string::npos)
 			{
 				if (!v.empty())
@@ -497,6 +509,16 @@ void ReadConfiguration(ncmpcpp_config &conf)
 			{
 				if (!v.empty())
 					conf.selected_item_suffix = v;
+			}
+			else if (it->find("color1") != string::npos)
+			{
+				if (!v.empty())
+					conf.color1 = v;
+			}
+			else if (it->find("color2") != string::npos)
+			{
+				if (!v.empty())
+					conf.color2 = v;
 			}
 			else if (it->find("colors_enabled") != string::npos)
 			{
@@ -596,6 +618,16 @@ void ReadConfiguration(ncmpcpp_config &conf)
 			{
 				if (!v.empty())
 					conf.active_column_color = IntoColor(v);
+			}
+			else if (it->find("window_border_color ") != string::npos)
+			{
+				if (!v.empty())
+					conf.window_border = Border(IntoColor(v));
+			}
+			else if (it->find("active_window_border") != string::npos)
+			{
+				if (!v.empty())
+					conf.active_window_border = Border(IntoColor(v));
 			}
 		}
 		f.close();

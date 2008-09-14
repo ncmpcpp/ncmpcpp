@@ -665,7 +665,7 @@ string DisplaySong(const Song &s, void *s_template, const Menu<Song> *menu)
 					{
 						right = 1;
 						lresult = result;
-						result = "";
+						result.clear();
 						i = 0;
 					}
 				}
@@ -690,15 +690,15 @@ string GetInfo(Song &s)
 		s.SetComment(f.tag()->comment().to8Bit(UNICODE));
 #	endif // HAVE_TAGLIB_H
 	
-	result = "[.b][.white]Filename: [/white][.green][/b]" + s.GetShortFilename() + "[/green]\n";
-	result += "[.b][.white]Directory: [/white][.green][/b]" + s.GetDirectory() + "[/green]\n\n";
-	result += "[.b][.white]Length: [/white][.green][/b]" + s.GetLength() + "[/green]\n";
+	result = "[.b][." + Config.color1 + "]Filename: [/" + Config.color1 + "][." + Config.color2 + "][/b]" + s.GetShortFilename() + "[/" + Config.color2 + "]\n";
+	result += "[.b][." + Config.color1 + "]Directory: [/" + Config.color1 + "][." + Config.color2 + "][/b]" + s.GetDirectory() + "[/" + Config.color2 + "]\n\n";
+	result += "[.b][." + Config.color1 + "]Length: [/" + Config.color1 + "][." + Config.color2 + "][/b]" + s.GetLength() + "[/" + Config.color2 + "]\n";
 #	ifdef HAVE_TAGLIB_H
 	if (!f.isNull())
 	{
-		result += "[.b][.white]Bitrate: [/white][.green][/b]" + IntoStr(f.audioProperties()->bitrate()) + " kbps[/green]\n";
-		result += "[.b][.white]Sample rate: [/white][.green][/b]" + IntoStr(f.audioProperties()->sampleRate()) + " Hz[/green]\n";
-		result += "[.b][.white]Channels: [/white][.green][/b]" + string(f.audioProperties()->channels() == 1 ? "Mono" : "Stereo") + "[/green]\n";
+		result += "[.b][." + Config.color1 + "]Bitrate: [/" + Config.color1 + "][." + Config.color2 + "][/b]" + IntoStr(f.audioProperties()->bitrate()) + " kbps[/" + Config.color2 + "]\n";
+		result += "[.b][." + Config.color1 + "]Sample rate: [/" + Config.color1 + "][." + Config.color2 + "][/b]" + IntoStr(f.audioProperties()->sampleRate()) + " Hz[/" + Config.color2 + "]\n";
+		result += "[.b][." + Config.color1 + "]Channels: [/" + Config.color1 + "][." + Config.color2 + "][/b]" + string(f.audioProperties()->channels() == 1 ? "Mono" : "Stereo") + "[/" + Config.color2 + "]\n";
 	}
 #	endif // HAVE_TAGLIB_H
 	result += "\n[.b]Title:[/b] " + s.GetTitle();

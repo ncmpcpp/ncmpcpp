@@ -1151,7 +1151,7 @@ int main(int argc, char *argv[])
 								bool bold = 0;
 								int found = mSearcher->Size()-search_engine_static_options;
 								mSearcher->InsertSeparator(14);
-								mSearcher->Insert(15, std::pair<string, Song>("[.white]Search results:[/white] [.green]Found " + IntoStr(found) + (found > 1 ? " songs" : " song") + "[/green]", Song()), 1, 1);
+								mSearcher->Insert(15, std::pair<string, Song>("[." + Config.color1 + "]Search results:[/" + Config.color1 + "] [." + Config.color2 + "]Found " + IntoStr(found) + (found > 1 ? " songs" : " song") + "[/" + Config.color2 + "]", Song()), 1, 1);
 								mSearcher->InsertSeparator(16);
 								UpdateFoundList();
 								ShowMessage("Searching finished!");
@@ -2485,7 +2485,7 @@ int main(int argc, char *argv[])
 					
 					const int dialog_width = COLS*0.8;
 					const int dialog_height = LINES*0.6;
-					Menu<string> *mDialog = new Menu<string>((COLS-dialog_width)/2, (LINES-dialog_height)/2, dialog_width, dialog_height, "Add selected items to...", clYellow, brGreen);
+					Menu<string> *mDialog = new Menu<string>((COLS-dialog_width)/2, (LINES-dialog_height)/2, dialog_width, dialog_height, "Add selected items to...", Config.main_color, Config.window_border);
 					mDialog->SetTimeout(ncmpcpp_window_timeout);
 					
 					mDialog->AddOption("Current MPD playlist");

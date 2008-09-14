@@ -106,6 +106,8 @@
 #
 #default_tag_editor_left_col = "albums" (albums/dirs)
 #
+#default_tag_editor_pattern = "%n - %t"
+#
 #header_visibility = "yes"
 #
 #statusbar_visibility = "yes"
@@ -130,6 +132,10 @@
 #
 #main_window_color = "yellow"
 #
+#color1 = "white"
+#
+#color2 = "green"
+#
 #main_window_highlight_color = "yellow"
 #
 #progressbar_color = "default"
@@ -137,4 +143,8 @@
 #statusbar_color = "default"
 #
 #active_column_color = "red"
+#
+#window_border_color = "green"
+#
+#active_window_border = "red"
 #

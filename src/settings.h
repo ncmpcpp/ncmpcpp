@@ -100,8 +100,13 @@ struct ncmpcpp_config
 	string tag_editor_album_format;
 	string browser_playlist_prefix;
 	
+	string pattern;
+	
 	string selected_item_prefix;
 	string selected_item_suffix;
+	
+	string color1;
+	string color2;
 	
 	Color empty_tags_color;
 	Color header_color;
@@ -113,6 +118,9 @@ struct ncmpcpp_config
 	Color progressbar_color;
 	Color statusbar_color;
 	Color active_column_color;
+	
+	Border window_border;
+	Border active_window_border;
 	
 	bool colors_enabled;
 	bool fancy_scrolling;

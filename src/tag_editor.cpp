@@ -31,8 +31,6 @@ extern ncmpcpp_keys Key;
 extern Menu<string> *mTagEditor;
 extern Window *wFooter;
 
-string pattern = "%n - %t";
-
 string FindSharedDir(Menu<Song> *menu)
 {
 	SongList list;
@@ -79,7 +77,7 @@ string DisplayTag(const Song &s, void *data, const Menu<Song> *null)
 		case 6:
 			return s.GetComment();
 		case 8:
-			return s.GetNewName().empty() ? s.GetShortFilename() : s.GetShortFilename() + " [.green]->[/green] " + s.GetNewName();
+			return s.GetNewName().empty() ? s.GetShortFilename() : s.GetShortFilename() + " [." + Config.color2 + "]->[/" + Config.color2 + "] " + s.GetNewName();
 		default:
 			return "";
 	}
@@ -97,13 +95,13 @@ bool GetSongTags(Song &s)
 	mTagEditor->Clear();
 	mTagEditor->Reset();
 	
-	mTagEditor->AddOption("[.b][.white]Song name: [/white][.green][/b]" + s.GetShortFilename() + "[/green]", 0, 1);
-	mTagEditor->AddOption("[.b][.white]Location in DB: [/white][.green][/b]" + s.GetDirectory() + "[/green]", 0, 1);
+	mTagEditor->AddOption("[.b][." + Config.color1 + "]Song name: [/" + Config.color1 + "][." + Config.color2 + "][/b]" + s.GetShortFilename() + "[/" + Config.color2 + "]", 0, 1);
+	mTagEditor->AddOption("[.b][." + Config.color1 + "]Location in DB: [/" + Config.color1 + "][." + Config.color2 + "][/b]" + s.GetDirectory() + "[/" + Config.color2 + "]", 0, 1);
 	mTagEditor->AddOption("", 0, 1);
-	mTagEditor->AddOption("[.b][.white]Length: [/white][.green][/b]" + s.GetLength() + "[/green]", 0, 1);
-	mTagEditor->AddOption("[.b][.white]Bitrate: [/white][.green][/b]" + IntoStr(f.audioProperties()->bitrate()) + " kbps[/green]", 0, 1);
-	mTagEditor->AddOption("[.b][.white]Sample rate: [/white][.green][/b]" + IntoStr(f.audioProperties()->sampleRate()) + " Hz[/green]", 0, 1);
-	mTagEditor->AddOption("[.b][.white]Channels: [/white][.green][/b]" + (string)(f.audioProperties()->channels() == 1 ? "Mono" : "Stereo") + "[/green]", 0, 1);
+	mTagEditor->AddOption("[.b][." + Config.color1 + "]Length: [/" + Config.color1 + "][." + Config.color2 + "][/b]" + s.GetLength() + "[/" + Config.color2 + "]", 0, 1);
+	mTagEditor->AddOption("[.b][." + Config.color1 + "]Bitrate: [/" + Config.color1 + "][." + Config.color2 + "][/b]" + IntoStr(f.audioProperties()->bitrate()) + " kbps[/" + Config.color2 + "]", 0, 1);
+	mTagEditor->AddOption("[.b][." + Config.color1 + "]Sample rate: [/" + Config.color1 + "][." + Config.color2 + "][/b]" + IntoStr(f.audioProperties()->sampleRate()) + " Hz[/" + Config.color2 + "]", 0, 1);
+	mTagEditor->AddOption("[.b][." + Config.color1 + "]Channels: [/" + Config.color1 + "][." + Config.color2 + "][/b]" + (string)(f.audioProperties()->channels() == 1 ? "Mono" : "Stereo") + "[/" + Config.color2 + "]", 0, 1);
 	
 	mTagEditor->AddSeparator();
 	
@@ -247,7 +245,7 @@ void __deal_with_filenames(SongList &v)
 	int width = 30;
 	int height = 6;
 	
-	Menu<string> *Main = new Menu<string>((COLS-width)/2, (LINES-height)/2, width, height, "", Config.main_color, brGreen);
+	Menu<string> *Main = new Menu<string>((COLS-width)/2, (LINES-height)/2, width, height, "", Config.main_color, Config.window_border);
 	Main->SetTimeout(ncmpcpp_window_timeout);
 	Main->AddOption("Get tags from filename");
 	Main->AddOption("Rename files");
@@ -285,7 +283,7 @@ void __deal_with_filenames(SongList &v)
 	
 	if (choice != 3)
 	{
-		Legend = new Scrollpad((COLS-width)/2+one_width, (LINES-height)/2, two_width, height, "Legend", Config.main_color, brGreen);
+		Legend = new Scrollpad((COLS-width)/2+one_width, (LINES-height)/2, two_width, height, "Legend", Config.main_color, Config.window_border);
 		Legend->SetTimeout(ncmpcpp_window_timeout);
 		Legend->Add("%a - artist\n");
 		Legend->Add("%t - title\n");
@@ -302,16 +300,16 @@ void __deal_with_filenames(SongList &v)
 		Legend->Add("%C - comment\n\n");
 		Legend->Add("[.b]Files:[/b]\n");
 		for (SongList::const_iterator it = v.begin(); it != v.end(); it++)
-			Legend->Add("[.green]*[/green] " + (*it)->GetShortFilename() + "\n");
+			Legend->Add("[." + Config.color2 + "]*[/" + Config.color2 + "] " + (*it)->GetShortFilename() + "\n");
 		
 		Preview = static_cast<Scrollpad *>(Legend->EmptyClone());
 		Preview->SetTitle("Preview");
 		Preview->SetTimeout(ncmpcpp_window_timeout);
 		
-		Main = new Menu<string>((COLS-width)/2, (LINES-height)/2, one_width, height, "", Config.main_color, brRed);
+		Main = new Menu<string>((COLS-width)/2, (LINES-height)/2, one_width, height, "", Config.main_color, Config.active_window_border);
 		Main->SetTimeout(ncmpcpp_window_timeout);
 		
-		Main->AddOption("[.b]Pattern:[/b] " + pattern);
+		Main->AddOption("[.b]Pattern:[/b] " + Config.pattern);
 		Main->AddOption("Preview");
 		Main->AddOption("Legend");
 		Main->AddSeparator();
@@ -356,12 +354,12 @@ void __deal_with_filenames(SongList &v)
 					{
 						LockStatusbar();
 						wFooter->WriteXY(0, Config.statusbar_visibility, "[.b]Pattern:[/b] ", 1);
-						string new_pattern = wFooter->GetString(pattern);
+						string new_pattern = wFooter->GetString(Config.pattern);
 						UnlockStatusbar();
 						if (!new_pattern.empty())
 						{
-							pattern = new_pattern;
-							Main->UpdateOption(0, "[.b]Pattern:[/b] " + pattern);
+							Config.pattern = new_pattern;
+							Main->UpdateOption(0, "[.b]Pattern:[/b] " + Config.pattern);
 						}
 						break;
 					}
@@ -380,10 +378,10 @@ void __deal_with_filenames(SongList &v)
 								if (preview)
 								{
 									Preview->Add("[.b]" + s.GetShortFilename() + ":[/b]\n");
-									Preview->Add(ParseFilename(s, pattern, preview) + "\n");
+									Preview->Add(ParseFilename(s, Config.pattern, preview) + "\n");
 								}
 								else
-									ParseFilename(s, pattern, preview);
+									ParseFilename(s, Config.pattern, preview);
 							}
 							else
 							{
@@ -391,7 +389,7 @@ void __deal_with_filenames(SongList &v)
 								int last_dot = file.find_last_of(".");
 								string extension = file.substr(last_dot);
 								s.GetEmptyFields(1);
-								string new_file = GenerateFilename(s, pattern);
+								string new_file = GenerateFilename(s, Config.pattern);
 								if (new_file.empty())
 								{
 									if (preview)
@@ -405,7 +403,7 @@ void __deal_with_filenames(SongList &v)
 								}
 								if (!preview)
 									s.SetNewName(new_file + extension);
-								Preview->Add(file + " [.green]->[/green] " + new_file + extension + "\n");
+								Preview->Add(file + " [." + Config.color2 + "]->[/" + Config.color2 + "] " + new_file + extension + "\n");
 								s.GetEmptyFields(0);
 							}
 						}
@@ -437,18 +435,18 @@ void __deal_with_filenames(SongList &v)
 			}
 			else if (Keypressed(input, Key.VolumeUp) && Active == Main)
 			{
-				Active->SetBorder(brGreen);
+				Active->SetBorder(Config.window_border);
 				Active->Display(1);
 				Active = Helper;
-				Active->SetBorder(brRed);
+				Active->SetBorder(Config.active_window_border);
 				Active->Display();
 			}
 			else if (Keypressed(input, Key.VolumeDown) && Active == Helper)
 			{
-				Active->SetBorder(brGreen);
+				Active->SetBorder(Config.window_border);
 				Active->Display();
 				Active = Main;
-				Active->SetBorder(brRed);
+				Active->SetBorder(Config.active_window_border);
 				Active->Display(1);
 			}
 		}

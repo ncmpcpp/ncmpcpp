@@ -54,6 +54,12 @@ ColorPair Window::IntoColor(const string &str)
 			Bold(1);
 		else if (str == "[.r]")
 			Reverse(1);
+		else if (str == "[.default]")
+		{
+			colors.first = itsBaseColor;
+			colors.second = itsBaseBgColor;
+			itsColors.push(colors);
+		}
 		else if (str == "[.red]")
 		{
 			colors.first = clRed;
@@ -410,6 +416,8 @@ bool Window::IsValidColor(const string &str)
 		str == "[.a]" ||
 		str == "[/a]" ||
 		
+		str == "[.default]" ||
+		str == "[/default]" ||
 		str == "[.black]" ||
 		str == "[/black]" ||
 		str == "[.red]" ||
