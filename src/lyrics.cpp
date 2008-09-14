@@ -34,6 +34,21 @@ size_t write_data(char *buffer, size_t size, size_t nmemb, string data)
 	return result;
 }
 
+void EscapeHtml(string &str)
+{
+	for (int i = str.find("<"); i != string::npos; i = str.find("<"))
+	{
+		int j = str.find(">")+1;
+		str.replace(i, j-i, "");
+	}
+	for (int i = str.find("&#039;"); i != string::npos; i = str.find("&#039;"))
+		str.replace(i, 6, "'");
+	for (int i = str.find("&quot;"); i != string::npos; i = str.find("&quot;"))
+		str.replace(i, 6, "\"");
+	for (int i = str.find("&amp;"); i != string::npos; i = str.find("&amp;"))
+		str.replace(i, 6, "&");
+}
+
 string GetLyrics(string artist, string song)
 {
 	const string filename = artist + " - " + song + ".txt";
@@ -87,30 +102,12 @@ string GetLyrics(string artist, string song)
 	if (result == "Not found")
 		return result;
 	
-	for (int i = result.find("&#039;"); i != string::npos; i = result.find("&#039;"))
-		result.replace(i, 6, "'");
-	for (int i = result.find("&quot;"); i != string::npos; i = result.find("&quot;"))
-		result.replace(i, 6, "\"");
 	for (int i = result.find("&lt;"); i != string::npos; i = result.find("&lt;"))
 		result.replace(i, 4, "<");
 	for (int i = result.find("&gt;"); i != string::npos; i = result.find("&gt;"))
 		result.replace(i, 4, ">");
-	for (int i = result.find("<lyric>"); i != string::npos; i = result.find("<lyric>"))
-		result.replace(i, 7, "");
-	for (int i = result.find("</lyric>"); i != string::npos; i = result.find("</lyric>"))
-		result.replace(i, 8, "");
-	for (int i = result.find("<lyrics>"); i != string::npos; i = result.find("<lyrics>"))
-		result.replace(i, 8, "");
-	for (int i = result.find("</lyrics>"); i != string::npos; i = result.find("</lyrics>"))
-		result.replace(i, 9, "");
-	for (int i = result.find("<b>"); i != string::npos; i = result.find("<b>"))
-		result.replace(i, 3, "");
-	for (int i = result.find("</b>"); i != string::npos; i = result.find("</b>"))
-		result.replace(i, 4, "");
-	for (int i = result.find("<i>"); i != string::npos; i = result.find("<i>"))
-		result.replace(i, 3, "");
-	for (int i = result.find("</i>"); i != string::npos; i = result.find("</i>"))
-		result.replace(i, 4, "");
+	
+	EscapeHtml(result);
 	
 	std::ofstream output(fullpath.c_str());
 	

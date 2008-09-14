@@ -28,6 +28,7 @@
 # include "curl/curl.h"
 #endif
 
+void EscapeHtml(string &);
 string GetLyrics(string, string);
 
 #endif
