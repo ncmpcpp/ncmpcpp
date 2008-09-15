@@ -26,6 +26,7 @@
 #include <fstream>
 #ifdef HAVE_CURL_CURL_H
 # include "curl/curl.h"
+string GetArtistInfo(string);
 #endif
 
 void EscapeHtml(string &);

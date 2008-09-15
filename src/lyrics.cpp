@@ -20,6 +20,9 @@
 
 #include <sys/stat.h>
 #include "lyrics.h"
+#include "settings.h"
+
+extern ncmpcpp_config Config;
 
 const string lyrics_folder = home_folder + "/" + ".lyrics";
 
@@ -49,6 +52,136 @@ void EscapeHtml(string &str)
 		str.replace(i, 6, "&");
 }
 
+#ifdef HAVE_CURL_CURL_H
+string GetArtistInfo(string artist)
+{
+	const string filename = artist + ".txt";
+	const string fullpath = lyrics_folder + "/" + filename;
+	mkdir(lyrics_folder.c_str(), 0755);
+	
+	string result;
+	std::ifstream input(fullpath.c_str());
+	
+	if (input.is_open())
+	{
+		string line;
+		while (getline(input, line))
+			result += line + "\n";
+		return result.substr(0, result.length()-1);
+	}
+	
+	for (string::iterator it = artist.begin(); it != artist.end(); it++)
+		if (*it == ' ')
+			*it = '+';
+	
+	CURLcode code;
+	
+	string url = "http://ws.audioscrobbler.com/2.0/?method=artist.getinfo&artist=" + artist + "&api_key=d94e5b6e26469a2d1ffae8ef20131b79";
+	
+	CURL *info = curl_easy_init();
+	curl_easy_setopt(info, CURLOPT_URL, url.c_str());
+	curl_easy_setopt(info, CURLOPT_WRITEFUNCTION, write_data);
+	curl_easy_setopt(info, CURLOPT_WRITEDATA, &result);
+	curl_easy_setopt(info, CURLOPT_CONNECTTIMEOUT, 10);
+	code = curl_easy_perform(info);
+	curl_easy_cleanup(info);
+	
+	if (code != CURLE_OK)
+	{
+		result = "Error while fetching artist's info: " + string(curl_easy_strerror(code));
+		return result;
+	}
+	
+	int a, b;
+	bool erase = 0;
+	bool save = 1;
+	
+	a = result.find("status=\"failed\"");
+	
+	if (a != string::npos)
+	{
+		EscapeHtml(result);
+		return "Last.fm returned an error message: " + result;
+	}
+	
+	vector<string> similar;
+	for (int i = result.find("<name>"); i != string::npos; i = result.find("<name>"))
+	{
+		result[i] = '.';
+		int j = result.find("</name>");
+		result[j] = '.';
+		i += 6;
+		similar.push_back(result.substr(i, j-i));
+	}
+	vector<string> urls;
+	for (int i = result.find("<url>"); i != string::npos; i = result.find("<url>"))
+	{
+		result[i] = '.';
+		int j = result.find("</url>");
+		result[j] = '.';
+		i += 5;
+		urls.push_back(result.substr(i, j-i));
+	}
+	
+	a = result.find("<content>")+9;
+	b = result.find("</content>");
+	
+	if (a == b)
+	{
+		result = "No description available for this artist.";
+		save = 0;
+	}
+	else
+	{
+		a += 9; // for <![CDATA[
+		b -= 3; // for ]]>
+		result = result.substr(a, b-a);
+	}
+	
+	EscapeHtml(result);
+	for (int i = 0; i < result.length(); i++)
+	{
+		if (erase)
+		{
+			result.erase(result.begin()+i);
+			erase = 0;
+		}
+		if (result[i] == 13)
+		{
+			result[i] = '\n';
+			erase = 1;
+		}
+		else if (result[i] == '\t')
+			result[i] = ' ';
+	}
+	
+	int i = result.length();
+	if (result[i-1] == '\n')
+	{
+		while (result[--i] == '\n');
+		result = result.substr(0, i+1);
+	}
+	
+	result += "\n\n[.b]Similar artists:[/b]\n";
+	for (int i = 1; i < similar.size(); i++)
+		result += "\n [." + Config.color2 + "]*[/" + Config.color2 + "] " + similar[i] + " (" + urls[i] + ")";
+	
+	result += "\n\n" + urls.front();
+	
+	if (save)
+	{
+		std::ofstream output(fullpath.c_str());
+		if (output.is_open())
+		{
+			output << result;
+			output.close();
+		}
+	}
+	
+	return result;
+}
+#endif // HAVE_CURL_CURL_H
+
 string GetLyrics(string artist, string song)
 {
 	const string filename = artist + " - " + song + ".txt";
@@ -63,7 +196,7 @@ string GetLyrics(string artist, string song)
 		string line;
 		while (getline(input, line))
 			result += line + "\n";
-		return result;
+		return result.substr(0, result.length()-1);
 	}
 	
 #	ifdef HAVE_CURL_CURL_H
@@ -110,7 +243,6 @@ string GetLyrics(string artist, string song)
 	EscapeHtml(result);
 	
 	std::ofstream output(fullpath.c_str());
-	
 	if (output.is_open())
 	{
 		output << result;
@@ -119,6 +251,6 @@ string GetLyrics(string artist, string song)
 #	else
 	result = "Local lyrics not found. As ncmpcpp has been compiled without curl support, you can put appropriate lyrics into ~/.lyrics directory (file syntax is \"ARTIST - TITLE.txt\") or recompile ncmpcpp with curl support.";
 #	endif
-	return result + '\n';
+	return result;
 }
 

@@ -68,7 +68,8 @@ struct ncmpcpp_keys
 	int PrevFoundPosition[2];
 	int ToggleFindMode[2];
 	int EditTags[2];
-	int ShowInfo[2];
+	int SongInfo[2];
+	int ArtistInfo[2];
 	int GoToPosition[2];
 	int Lyrics[2];
 	int ReverseSelection[2];

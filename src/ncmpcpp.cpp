@@ -304,6 +304,7 @@ int main(int argc, char *argv[])
 	bool title_allowed = 0;
 	
 	string lyrics_title;
+	string info_title;
 	// local variables end
 	
 	while (!main_exit)
@@ -348,7 +349,7 @@ int main(int argc, char *argv[])
 					title = "Tag editor";
 					break;
 				case csInfo:
-					title = "Song info";
+					title = info_title;
 					break;
 				case csSearcher:
 					title = "Search engine";
@@ -2717,7 +2718,7 @@ int main(int argc, char *argv[])
 			Config.space_selects = !Config.space_selects;
 			ShowMessage("Space mode: " + string(Config.space_selects ? "Select/deselect" : "Add") + " item");
 		}
-		else if (Keypressed(input, Key.ShowInfo))
+		else if (Keypressed(input, Key.SongInfo))
 		{
 			if (wCurrent == sInfo)
 			{
@@ -2779,11 +2780,88 @@ int main(int argc, char *argv[])
 				prev_screen = current_screen;
 				current_screen = csInfo;
 				redraw_header = 1;
+				info_title = "Song info";
 				sInfo->Clear();
 				sInfo->Add(GetInfo(*s));
 				sInfo->Hide();
 			}
 		}
+#		ifdef HAVE_CURL_CURL_H
+		else if (Keypressed(input, Key.ArtistInfo))
+		{
+			if (wCurrent == sInfo)
+			{
+				wCurrent->Hide();
+				current_screen = prev_screen;
+				wCurrent = wPrev;
+				redraw_screen = 1;
+				redraw_header = 1;
+				if (current_screen == csLibrary)
+				{
+					REFRESH_MEDIA_LIBRARY_SCREEN;
+				}
+				else if (current_screen == csPlaylistEditor)
+				{
+					REFRESH_PLAYLIST_EDITOR_SCREEN;
+				}
+#				ifdef HAVE_TAGLIB_H
+				else if (current_screen == csTagEditor)
+				{
+					REFRESH_TAG_EDITOR_SCREEN;
+				}
+#				endif // HAVE_TAGLIB_H
+			}
+			else if (
+			    (wCurrent == mPlaylist && !mPlaylist->Empty())
+			||  (wCurrent == mBrowser && mBrowser->Current().type == itSong)
+			||  (wCurrent == mSearcher && mSearcher->Current().first == ".")
+			||  (wCurrent == mLibArtists && !mLibArtists->Empty())
+			||  (wCurrent == mLibSongs && !mLibSongs->Empty())
+			||  (wCurrent == mPlaylistEditor && !mPlaylistEditor->Empty())
+			||  (wCurrent == mEditorTags && !mEditorTags->Empty()))
+			{
+				string artist;
+				int id = wCurrent->GetChoice();
+				switch (current_screen)
+				{
+					case csPlaylist:
+						artist = mPlaylist->at(id).GetArtist();
+						break;
+					case csBrowser:
+						artist = mBrowser->at(id).song->GetArtist();
+						break;
+					case csSearcher:
+						artist = mSearcher->at(id).second.GetArtist();
+						break;
+					case csLibrary:
+						artist = mLibArtists->at(id);
+						break;
+					case csPlaylistEditor:
+						artist = mPlaylistEditor->at(id).GetArtist();
+						break;
+					case csTagEditor:
+						artist = mEditorTags->at(id).GetArtist();
+						break;
+					default:
+						break;
+				}
+				if (artist != UNKNOWN_ARTIST)
+				{
+					wPrev = wCurrent;
+					wCurrent = sInfo;
+					prev_screen = current_screen;
+					current_screen = csInfo;
+					redraw_header = 1;
+					info_title = "Artist's info - " + artist;
+					sInfo->Clear();
+					sInfo->WriteXY(0, 0, "Fetching artist's info...");
+					sInfo->Refresh();
+					sInfo->Add(GetArtistInfo(artist));
+					sInfo->Hide();
+				}
+			}
+		}
+#		endif // HAVE_CURL_CURL_H
 		else if (Keypressed(input, Key.Lyrics))
 		{
 			if (wCurrent == sLyrics)

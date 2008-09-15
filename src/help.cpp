@@ -136,7 +136,10 @@ string GetKeybindings()
 	result += DisplayKeys(Key.EditTags) + "Edit song's tags/playlist's name\n";
 #	endif // HAVE_TAGLIB_H
 	result += DisplayKeys(Key.GoToPosition) + "Go to chosen position in current song\n";
-	result += DisplayKeys(Key.ShowInfo) + "Show song's info\n";
+	result += DisplayKeys(Key.SongInfo) + "Show song's info\n";
+#	ifdef HAVE_CURL_CURL_H
+	result += DisplayKeys(Key.ArtistInfo) + "Show artist's info\n";
+#	endif // HAVE_CURL_CURL_H
 	result += DisplayKeys(Key.Lyrics) + "Show/hide song's lyrics\n\n";
 	
 	result += DisplayKeys(Key.Quit) + "Quit\n\n\n";

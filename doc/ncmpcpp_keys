@@ -95,6 +95,8 @@
 #
 #key_song_info = 'i'
 #
+#key_artist_info = 'I'
+#
 #key_lyrics = 'l'
 #
 #key_reverse_selection = 'v'
