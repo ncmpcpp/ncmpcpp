@@ -1703,6 +1703,7 @@ int main(int argc, char *argv[])
 		{
 			if (!mPlaylist->Empty() && current_screen == csPlaylist)
 			{
+				block_playlist_update = 1;
 				if (mPlaylist->IsAnySelected())
 				{
 					vector<int> list;
@@ -1717,15 +1718,17 @@ int main(int argc, char *argv[])
 				}
 				else
 				{
-					block_playlist_update = 1;
 					dont_change_now_playing = 1;
 					mPlaylist->SetTimeout(50);
 					while (!mPlaylist->Empty() && Keypressed(input, Key.Delete))
 					{
+						int id = mPlaylist->GetChoice();
 						TraceMpdStatus();
 						timer = time(NULL);
-						Mpd->QueueDeleteSong(mPlaylist->GetChoice());
-						mPlaylist->DeleteOption(mPlaylist->GetChoice());
+						if (now_playing > id)  // needed for keeping proper
+							now_playing--; // position of now playing song.
+						Mpd->QueueDeleteSong(id);
+						mPlaylist->DeleteOption(id);
 						mPlaylist->Refresh();
 						mPlaylist->ReadKey(input);
 					}
@@ -1872,7 +1875,7 @@ int main(int argc, char *argv[])
 						if (*it == now_playing && list.front() > 0)
 							mPlaylist->BoldOption(now_playing, 0);
 					
-					vector<int>origs(list);
+					vector<int> origs(list);
 					
 					while (Keypressed(input, Key.MvSongUp) && list.front() > 0)
 					{
@@ -1892,6 +1895,9 @@ int main(int argc, char *argv[])
 				{
 					int from, to;
 					from = to = mPlaylist->GetChoice();
+					// unbold now playing as if song changes during move, this won't be unbolded.
+					if (to == now_playing && to > 0)
+						mPlaylist->BoldOption(now_playing, 0);
 					while (Keypressed(input, Key.MvSongUp) && to > 0)
 					{
 						TraceMpdStatus();
@@ -1913,7 +1919,7 @@ int main(int argc, char *argv[])
 					vector<int> list;
 					mPlaylistEditor->GetSelectedList(list);
 					
-					vector<int>origs(list);
+					vector<int> origs(list);
 					
 					while (Keypressed(input, Key.MvSongUp) && list.front() > 0)
 					{
@@ -1964,7 +1970,7 @@ int main(int argc, char *argv[])
 						if (*it == now_playing && list.back() < mPlaylist->Size()-1)
 							mPlaylist->BoldOption(now_playing, 0);
 					
-					vector<int>origs(list);
+					vector<int> origs(list);
 					
 					while (Keypressed(input, Key.MvSongDown) && list.back() < mPlaylist->Size()-1)
 					{
@@ -1984,6 +1990,9 @@ int main(int argc, char *argv[])
 				{
 					int from, to;
 					from = to = mPlaylist->GetChoice();
+					// unbold now playing as if song changes during move, this won't be unbolded.
+					if (to == now_playing && to < mPlaylist->Size()-1)
+						mPlaylist->BoldOption(now_playing, 0);
 					while (Keypressed(input, Key.MvSongDown) && to < mPlaylist->Size()-1)
 					{
 						TraceMpdStatus();
@@ -2006,7 +2015,7 @@ int main(int argc, char *argv[])
 					vector<int> list;
 					mPlaylistEditor->GetSelectedList(list);
 					
-					vector<int>origs(list);
+					vector<int> origs(list);
 					
 					while (Keypressed(input, Key.MvSongDown) && list.back() < mPlaylistEditor->Size()-1)
 					{

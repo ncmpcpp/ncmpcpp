@@ -285,20 +285,18 @@ void NcmpcppStatusChanged(MPDConnection *Mpd, MPDStatusChanges changed, void *da
 	{
 		if (!mPlaylist->Empty() && now_playing >= 0)
 		{
-			if (!mPlaylist->Empty())
+			if (Config.repeat_one_mode && repeat_one_allowed)
 			{
-				if (Config.repeat_one_mode && repeat_one_allowed)
-				{
-					std::swap(now_playing, old_playing);
-					Mpd->Play(now_playing);
-				}
-				if (old_playing >= 0)
-					mPlaylist->BoldOption(old_playing, 0);
-				mPlaylist->BoldOption(now_playing, 1);
-				if (Config.autocenter_mode)
-					mPlaylist->Highlight(now_playing);
-				repeat_one_allowed = 0;
+				std::swap(now_playing, old_playing);
+				Mpd->Play(now_playing);
 			}
+			if (old_playing >= 0)
+				mPlaylist->BoldOption(old_playing, 0);
+			mPlaylist->BoldOption(now_playing, 1);
+			if (Config.autocenter_mode)
+				mPlaylist->Highlight(now_playing);
+			repeat_one_allowed = 0;
+			
 			if (!Mpd->GetElapsedTime())
 				mvwhline(wFooter->RawWin(), 0, 0, 0, wFooter->GetWidth());
 		}
