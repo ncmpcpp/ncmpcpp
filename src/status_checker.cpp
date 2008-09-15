@@ -67,7 +67,7 @@ extern bool allow_statusbar_unlock;
 extern bool block_progressbar_update;
 extern bool block_statusbar_update;
 extern bool block_playlist_update;
-extern bool block_found_item_list_update;
+extern bool block_item_list_update;
 
 extern bool redraw_screen;
 extern bool redraw_header;
@@ -214,21 +214,24 @@ void NcmpcppStatusChanged(MPDConnection *Mpd, MPDStatusChanges changed, void *da
 		else
 			playlist_stats = "(" + IntoStr(mPlaylist->Size()) + (mPlaylist->Size() == 1 ? " item" : " items") + TotalPlaylistLength() + ")";
 		
-		if (current_screen == csBrowser)
+		if (!block_item_list_update)
 		{
-			UpdateItemList(mBrowser);
-		}
-		else if (current_screen == csSearcher && !block_found_item_list_update)
-		{
-			UpdateFoundList();
-		}
-		else if (current_screen == csLibrary)
-		{
-			UpdateSongList(mLibSongs);
-		}
-		else if (current_screen == csPlaylistEditor)
-		{
-			UpdateSongList(mPlaylistEditor);
+			if (current_screen == csBrowser)
+			{
+				UpdateItemList(mBrowser);
+			}
+			else if (current_screen == csSearcher)
+			{
+				UpdateFoundList();
+			}
+			else if (current_screen == csLibrary)
+			{
+				UpdateSongList(mLibSongs);
+			}
+			else if (current_screen == csPlaylistEditor)
+			{
+				UpdateSongList(mPlaylistEditor);
+			}
 		}
 	}
 	if (changed.Database)

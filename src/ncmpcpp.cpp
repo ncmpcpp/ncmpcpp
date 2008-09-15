@@ -111,7 +111,7 @@ bool block_progressbar_update = 0;
 bool block_statusbar_update = 0;
 bool allow_statusbar_unlock = 1;
 bool block_playlist_update = 0;
-bool block_found_item_list_update = 0;
+bool block_item_list_update = 0;
 
 bool messages_allowed = 0;
 bool redraw_screen = 0;
@@ -320,7 +320,7 @@ int main(int argc, char *argv[])
 		
 		TraceMpdStatus();
 		
-		block_found_item_list_update = 0;
+		block_item_list_update = 0;
 		block_playlist_update = 0;
 		messages_allowed = 1;
 		
@@ -892,14 +892,15 @@ int main(int argc, char *argv[])
 						}
 						case itSong:
 						{
+							block_item_list_update = 1;
 							Song &s = *item.song;
 							int id = Mpd->AddSong(s);
 							if (id >= 0)
 							{
 								Mpd->PlayID(id);
 								ShowMessage("Added to playlist: " + DisplaySong(s, &Config.song_status_format));
+								mBrowser->BoldOption(mBrowser->GetChoice(), 1);
 							}
-							mBrowser->Refresh();
 							break;
 						}
 						case itPlaylist:
@@ -1175,7 +1176,7 @@ int main(int argc, char *argv[])
 						}
 						default:
 						{
-							block_found_item_list_update = 1;
+							block_item_list_update = 1;
 							const Song &s = mSearcher->Current().second;
 							int id = Mpd->AddSong(s);
 							if (id >= 0)
@@ -1240,6 +1241,7 @@ int main(int argc, char *argv[])
 					{
 						if (!mLibSongs->Empty())
 						{
+							block_item_list_update = 1;
 							Song &s = mLibSongs->Current();
 							int id = Mpd->AddSong(s);
 							if (id >= 0)
@@ -1247,6 +1249,7 @@ int main(int argc, char *argv[])
 								ShowMessage("Added to playlist: " + DisplaySong(s, &Config.song_status_format));
 								if (Keypressed(input, Key.Enter))
 									Mpd->PlayID(id);
+								mLibSongs->BoldOption(mLibSongs->GetChoice(), 1);
 							}
 						}
 					}
@@ -1293,6 +1296,7 @@ int main(int argc, char *argv[])
 					{
 						if (!mPlaylistEditor->Empty())
 						{
+							block_item_list_update = 1;
 							Song &s = mPlaylistEditor->at(mPlaylistEditor->GetChoice());
 							int id = Mpd->AddSong(s);
 							if (id >= 0)
@@ -1300,6 +1304,7 @@ int main(int argc, char *argv[])
 								ShowMessage("Added to playlist: " + DisplaySong(s, &Config.song_status_format));
 								if (Keypressed(input, Key.Enter))
 									Mpd->PlayID(id);
+								mPlaylistEditor->BoldOption(mPlaylistEditor->GetChoice(), 1);
 							}
 						}
 					}
@@ -1525,9 +1530,13 @@ int main(int argc, char *argv[])
 						}
 						case itSong:
 						{
+							block_item_list_update = 1;
 							Song &s = *item.song;
 							if (Mpd->AddSong(s) != -1)
+							{
 								ShowMessage("Added to playlist: " + DisplaySong(s, &Config.song_status_format));
+								mBrowser->BoldOption(mBrowser->GetChoice(), 1);
+							}
 							break;
 						}
 						case itPlaylist:
@@ -1551,7 +1560,7 @@ int main(int argc, char *argv[])
 				}
 				else if (current_screen == csSearcher && mSearcher->Current().first == ".")
 				{
-					block_found_item_list_update = 1;
+					block_item_list_update = 1;
 					Song &s = mSearcher->Current().second;
 					if (Mpd->AddSong(s) != -1)
 					{
