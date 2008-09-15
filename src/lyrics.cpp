@@ -49,7 +49,7 @@ void EscapeHtml(string &str)
 	for (int i = str.find("&quot;"); i != string::npos; i = str.find("&quot;"))
 		str.replace(i, 6, "\"");
 	for (int i = str.find("&amp;"); i != string::npos; i = str.find("&amp;"))
-		str.replace(i, 6, "&");
+		str.replace(i, 5, "&");
 }
 
 #ifdef HAVE_CURL_CURL_H
@@ -112,6 +112,7 @@ string GetArtistInfo(string artist)
 		result[j] = '.';
 		i += 6;
 		similar.push_back(result.substr(i, j-i));
+		EscapeHtml(similar.back());
 	}
 	vector<string> urls;
 	for (int i = result.find("<url>"); i != string::npos; i = result.find("<url>"))
@@ -156,9 +157,9 @@ string GetArtistInfo(string artist)
 	}
 	
 	int i = result.length();
-	if (result[i-1] == '\n')
+	if (!isgraph(result[i-1]))
 	{
-		while (result[--i] == '\n');
+		while (!isgraph(result[--i]));
 		result = result.substr(0, i+1);
 	}
 	
