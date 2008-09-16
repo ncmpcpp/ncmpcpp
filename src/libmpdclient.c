@@ -100,18 +100,21 @@ static int do_connect_fail(mpd_Connection *connection,
                            const struct sockaddr *serv_addr, int addrlen)
 {
 	int iMode = 1; /* 0 = blocking, else non-blocking */
+	if (connect(connection->sock, serv_addr, addrlen) == SOCKET_ERROR)
+		return 1;
 	ioctlsocket(connection->sock, FIONBIO, (u_long FAR*) &iMode);
-	return (connect(connection->sock,serv_addr,addrlen) == SOCKET_ERROR
-			&& WSAGetLastError() != WSAEWOULDBLOCK);
+	return 0;
 }
 #else /* !WIN32 (sane operating systems) */
 static int do_connect_fail(mpd_Connection *connection,
                            const struct sockaddr *serv_addr, int addrlen)
 {
-	int flags = fcntl(connection->sock, F_GETFL, 0);
+	int flags;
+	if (connect(connection->sock, serv_addr, addrlen) < 0)
+		return 1;
+	flags = fcntl(connection->sock, F_GETFL, 0);
 	fcntl(connection->sock, F_SETFL, flags | O_NONBLOCK);
-	return (connect(connection->sock,serv_addr,addrlen)<0 &&
-				errno!=EINPROGRESS);
+	return 0;
 }
 #endif /* !WIN32 */
 
@@ -129,7 +132,7 @@ static int mpd_connect(mpd_Connection * connection, const char * host, int port,
 	 * Setup hints
 	 */
 	hints.ai_flags     = AI_ADDRCONFIG;
-	hints.ai_family    = PF_UNSPEC;
+	hints.ai_family    = AF_UNSPEC;
 	hints.ai_socktype  = SOCK_STREAM;
 	hints.ai_protocol  = IPPROTO_TCP;
 	hints.ai_addrlen   = 0;
@@ -151,6 +154,8 @@ static int mpd_connect(mpd_Connection * connection, const char * host, int port,
 
 	for (res = addrinfo; res; res = res->ai_next) {
 		/* create socket */
+		if (connection->sock >= 0)
+			closesocket(connection->sock);
 		connection->sock = socket(res->ai_family, SOCK_STREAM,
 		                          res->ai_protocol);
 		if (connection->sock < 0) {
@@ -167,11 +172,13 @@ static int mpd_connect(mpd_Connection * connection, const char * host, int port,
 		/* connect stuff */
  		if (do_connect_fail(connection,
 		                    res->ai_addr, res->ai_addrlen)) {
- 			/* try the next address family */
+ 			/* try the next address */
  			closesocket(connection->sock);
  			connection->sock = -1;
  			continue;
 		}
+
+		break;
 	}
 
 	freeaddrinfo(addrinfo);
@@ -222,6 +229,8 @@ static int mpd_connect(mpd_Connection * connection, const char * host, int port,
 		break;
 	}
 
+	if (connection->sock >= 0)
+		closesocket(connection->sock);
 	if((connection->sock = socket(dest->sa_family,SOCK_STREAM,0))<0) {
 		strcpy(connection->errorStr,"problems creating socket");
 		connection->error = MPD_ERROR_SYSTEM;
@@ -306,7 +315,7 @@ void mpd_setConnectionTimeout(mpd_Connection * connection, float timeout) {
 }
 
 static int mpd_parseWelcome(mpd_Connection * connection, const char * host, int port,
-                            char * rt, char * output) {
+                            char * output) {
 	char * tmp;
 	char * test;
 	int i;
@@ -347,6 +356,7 @@ mpd_Connection * mpd_newConnection(const char * host, int port, float timeout) {
 	struct timeval tv;
 	fd_set fds;
 	strcpy(connection->buffer,"");
+	connection->sock = -1;
 	connection->buflen = 0;
 	connection->bufstart = 0;
 	strcpy(connection->errorStr,"");
@@ -409,7 +419,7 @@ mpd_Connection * mpd_newConnection(const char * host, int port, float timeout) {
 	strcpy(connection->buffer,rt+1);
 	connection->buflen = strlen(connection->buffer);
 
-	if(mpd_parseWelcome(connection,host,port,rt,output) == 0) connection->doneProcessing = 1;
+	if(mpd_parseWelcome(connection,host,port,output) == 0) connection->doneProcessing = 1;
 
 	free(output);
 
@@ -939,6 +949,7 @@ static void mpd_finishSong(mpd_Song * song) {
 	if(song->date) free(song->date);
 	if(song->genre) free(song->genre);
 	if(song->composer) free(song->composer);
+	if(song->performer) free(song->performer);
 	if(song->disc) free(song->disc);
 	if(song->comment) free(song->comment);
 }
@@ -968,6 +979,7 @@ mpd_Song * mpd_songDup(mpd_Song * song) {
 	if(song->date) ret->date = strdup(song->date);
 	if(song->genre) ret->genre= strdup(song->genre);
 	if(song->composer) ret->composer= strdup(song->composer);
+	if(song->performer) ret->performer = strdup(song->performer);
 	if(song->disc) ret->disc = strdup(song->disc);
 	if(song->comment) ret->comment = strdup(song->comment);
 	ret->time = song->time;
