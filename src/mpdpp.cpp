@@ -326,7 +326,8 @@ void MPDConnection::GetPlaylistChanges(long long id, SongList &v) const
 		{
 			if (item->type == MPD_INFO_ENTITY_TYPE_SONG)
 			{
-				Song *s = new Song(item->info.song);
+				Song *s = new Song(item->info.song, 1);
+				item->info.song = 0;
 				v.push_back(s);
 			}
 			mpd_freeInfoEntity(item);
@@ -343,6 +344,7 @@ Song MPDConnection::GetSong(const string &path) const
 		mpd_InfoEntity *item = NULL;
 		item = mpd_getNextInfoEntity(itsConnection);
 		Song result = item->info.song;
+		item->info.song = 0;
 		mpd_freeInfoEntity(item);
 		mpd_finishCommand(itsConnection);
 		return result;
@@ -364,6 +366,7 @@ Song MPDConnection::GetCurrentSong() const
 		mpd_InfoEntity *item = NULL;
 		item = mpd_getNextInfoEntity(itsConnection);
 		Song result = item->info.song;
+		item->info.song = 0;
 		mpd_freeInfoEntity(item);
 		mpd_finishCommand(itsConnection);
 		return result;
@@ -383,6 +386,7 @@ void MPDConnection::GetPlaylistContent(const string &path, SongList &v) const
 			if (item->type == MPD_INFO_ENTITY_TYPE_SONG)
 			{
 				Song *s = new Song(item->info.song);
+				item->info.song = 0;
 				v.push_back(s);
 			}
 			mpd_freeInfoEntity(item);
@@ -686,6 +690,7 @@ void MPDConnection::CommitSearch(SongList &v) const
 			if (item->type == MPD_INFO_ENTITY_TYPE_SONG)
 			{
 				Song *s = new Song(item->info.song);
+				item->info.song = 0;
 				v.push_back(s);
 			}
 			mpd_freeInfoEntity(item);
@@ -728,6 +733,7 @@ void MPDConnection::GetDirectory(const string &path, ItemList &v) const
 					break;
 				case MPD_INFO_ENTITY_TYPE_SONG:
 					i.song = new Song(item->info.song);
+					item->info.song = 0;
 					i.type = itSong;
 					break;
 				case MPD_INFO_ENTITY_TYPE_PLAYLISTFILE:
@@ -753,6 +759,7 @@ void MPDConnection::GetDirectoryRecursive(const string &path, SongList &v) const
 			if (item->type == MPD_INFO_ENTITY_TYPE_SONG)
 			{
 				Song *s = new Song(item->info.song);
+				item->info.song = 0;
 				v.push_back(s);
 			}
 			mpd_freeInfoEntity(item);
@@ -772,6 +779,7 @@ void MPDConnection::GetSongs(const string &path, SongList &v) const
 			if (item->type == MPD_INFO_ENTITY_TYPE_SONG)
 			{
 				Song *s = new Song(item->info.song);
+				item->info.song = 0;
 				v.push_back(s);
 			}
 			mpd_freeInfoEntity(item);

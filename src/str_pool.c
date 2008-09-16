@@ -38,7 +38,7 @@ calc_hash(const char *p)
 {
 	unsigned hash = 5381;
 
-	assert(p != NULL);
+	//assert(p != NULL);
 
 	while (*p != 0)
 		hash = (hash << 5) + hash + *p++;
@@ -47,7 +47,7 @@ calc_hash(const char *p)
 }
 
 static inline struct slot *
-value_to_slot(char *value)
+value_to_slot(const char *value)
 {
 	return (struct slot*)(value - offsetof(struct slot, value));
 }
@@ -72,7 +72,7 @@ char *str_pool_get(const char *value)
 	slot_p = &slots[calc_hash(value) % NUM_SLOTS];
 	for (slot = *slot_p; slot != NULL; slot = slot->next) {
 		if (strcmp(value, slot->value) == 0 && slot->ref < 0xff) {
-			assert(slot->ref > 0);
+			//assert(slot->ref > 0);
 			++slot->ref;
 			return slot->value;
 		}
@@ -83,15 +83,15 @@ char *str_pool_get(const char *value)
 	return slot->value;
 }
 
-char *str_pool_dup(char *value)
+char *str_pool_dup(const char *value)
 {
 	struct slot *slot = value_to_slot(value);
 
-	assert(slot->ref > 0);
+	//assert(slot->ref > 0);
 
 	if (slot->ref < 0xff) {
 		++slot->ref;
-		return value;
+		return (char *) value;
 	} else {
 		/* the reference counter overflows above 0xff;
 		   duplicate the value, and start with 1 */
@@ -103,12 +103,12 @@ char *str_pool_dup(char *value)
 	}
 }
 
-void str_pool_put(char *value)
+void str_pool_put(const char *value)
 {
 	struct slot **slot_p, *slot;
 
 	slot = value_to_slot(value);
-	assert(slot->ref > 0);
+	//assert(slot->ref > 0);
 	--slot->ref;
 
 	if (slot->ref > 0)
@@ -117,7 +117,7 @@ void str_pool_put(char *value)
 	for (slot_p = &slots[calc_hash(value) % NUM_SLOTS];
 	     *slot_p != slot;
 	     slot_p = &(*slot_p)->next) {
-		assert(*slot_p != NULL);
+		//assert(*slot_p != NULL);
 	}
 
 	*slot_p = slot->next;

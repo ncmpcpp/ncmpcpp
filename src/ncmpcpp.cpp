@@ -1056,10 +1056,10 @@ int main(int argc, char *argv[])
 						{
 							wFooter->WriteXY(0, Config.statusbar_visibility, "[.b]Filename:[/b] ", 1);
 							if (s.GetShortFilename() == EMPTY_TAG)
-								s.SetShortFilename(wFooter->GetString());
+								s.SetFile(wFooter->GetString());
 							else
-								s.SetShortFilename(wFooter->GetString(s.GetShortFilename()));
-							mSearcher->Current().first = "[.b]Filename:[/b] " + s.GetShortFilename();
+								s.SetFile(wFooter->GetString(s.GetFile()));
+							mSearcher->Current().first = "[.b]Filename:[/b] " + s.GetFile();
 							break;
 						}
 						case 2:

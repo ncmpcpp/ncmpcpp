@@ -36,9 +36,10 @@ void DefineEmptyTags();
 class Song
 {
 	public:
-		Song() : itsHash(0), itsLength(0), itsPosition(0), itsID(0), itsGetEmptyFields(0) { }
-		Song(mpd_Song *);
-		~Song() {};
+		Song() : itsHash(0), copyPtr(0), isStream(0), itsGetEmptyFields(0) { itsSong = mpd_newSong(); }
+		Song(mpd_Song *, bool = 0);
+		Song(const Song &);
+		~Song();
 		
 		string GetFile() const;
 		string GetShortFilename() const;
@@ -56,55 +57,45 @@ class Song
 		string GetComment() const;
 		string GetLength() const;
 		long long GetHash() const { return itsHash; }
-		int GetTotalLength() const { return itsLength < 0 ? 0 : itsLength; }
-		int GetPosition() const { return itsPosition; }
-		int GetID() const { return itsID; }
+		int GetTotalLength() const { return itsSong->time < 0 ? 0 : itsSong->time; }
+		int GetPosition() const { return itsSong->pos; }
+		int GetID() const { return itsSong->id; }
 		
-		void SetFile(const string &str) { itsFile = str; }
-		void SetShortFilename(const string &str) { itsShortName = str; }
-		void SetArtist(const string &str) { itsArtist = str; }
-		void SetTitle(const string &str) { itsTitle = str; }
-		void SetAlbum(const string &str) { itsAlbum = str; }
-		void SetTrack(const string &str) { itsTrack = str.empty() ? "" : IntoStr(StrToInt(str)); }
-		void SetTrack(int track) { itsTrack = IntoStr(track); }
-		void SetYear(const string &str) { itsYear = str.empty() ? "" : IntoStr(StrToInt(str)); }
-		void SetYear(int year) { itsYear = IntoStr(year); }
-		void SetGenre(const string &str) { itsGenre = str; }
-		void SetComment(const string &str) { itsComment = str; }
-		void SetPosition(int pos) { itsPosition = pos; }
+		void SetFile(const string &str);
+		void SetArtist(const string &str);
+		void SetTitle(const string &str);
+		void SetAlbum(const string &str);
+		void SetTrack(const string &str);
+		void SetTrack(int track);
+		void SetYear(const string &str);
+		void SetYear(int year);
+		void SetGenre(const string &str);
+		void SetComment(const string &str);
+		void SetPosition(int pos);
 		
-		void SetNewName(string name) { itsNewName = name == itsShortName ? "" : name; }
+		void SetNewName(string name) { itsNewName = name == GetShortFilename() ? "" : name; }
 		string GetNewName() const { return itsNewName; }
+		
+		void NullMe() { itsSong = 0; }
+		void CopyPtr(bool copy) { copyPtr = copy; }
 		
 		void GetEmptyFields(bool get) { itsGetEmptyFields = get; }
 		void Clear();
 		bool Empty() const;
 		
+		Song & operator=(const Song &);
 		bool operator==(const Song &) const;
 		bool operator!=(const Song &) const;
 		bool operator<(const Song &rhs) const;
 		
 		static string ShowTime(int);
 	private:
-		string itsFile;
-		string itsShortName;
+		mpd_Song *itsSong;
 		string itsNewName;
-		string itsDirectory;
-		string itsArtist;
-		string itsTitle;
-		string itsAlbum;
-		string itsTrack;
-		//string itsName;
-		string itsYear;
-		string itsGenre;
-		string itsComposer;
-		string itsPerformer;
-		string itsDisc;
-		string itsComment;
+		unsigned itsSlash;
 		long long itsHash;
-		int itsLength;
-		int itsPosition;
-		int itsID;
+		bool copyPtr;
+		bool isStream;
 		bool itsGetEmptyFields;
 };
 

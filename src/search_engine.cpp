@@ -89,9 +89,9 @@ void Search(Song &s)
 	if (!search_case_sensitive)
 	{
 		string t;
-		t = s.GetShortFilename();
+		t = s.GetFile();
 		transform(t.begin(), t.end(), t.begin(), tolower);
-		s.SetShortFilename(t);
+		s.SetFile(t);
 		
 		t = s.GetTitle();
 		transform(t.begin(), t.end(), t.begin(), tolower);
@@ -123,7 +123,7 @@ void Search(Song &s)
 			string t;
 			t = copy.GetShortFilename();
 			transform(t.begin(), t.end(), t.begin(), tolower);
-			copy.SetShortFilename(t);
+			copy.SetFile(t);
 		
 			t = copy.GetTitle();
 			transform(t.begin(), t.end(), t.begin(), tolower);
@@ -145,11 +145,13 @@ void Search(Song &s)
 			transform(t.begin(), t.end(), t.begin(), tolower);
 			copy.SetComment(t);
 		}
+		else
+			copy.SetFile(copy.GetShortFilename());
 		
 		if (search_match_to_pattern)
 		{
-			if (found && !s.GetShortFilename().empty())
-				found = copy.GetShortFilename().find(s.GetShortFilename()) != string::npos;
+			if (found && !s.GetFile().empty())
+				found = copy.GetFile().find(s.GetFile()) != string::npos;
 			if (found && !s.GetTitle().empty())
 				found = copy.GetTitle().find(s.GetTitle()) != string::npos;
 			if (found && !s.GetArtist().empty())
@@ -167,8 +169,8 @@ void Search(Song &s)
 		}
 		else
 		{
-			if (found && !s.GetShortFilename().empty())
-				found = copy.GetShortFilename() == s.GetShortFilename();
+			if (found && !s.GetFile().empty())
+				found = copy.GetFile() == s.GetFile();
 			if (found && !s.GetTitle().empty())
 				found = copy.GetTitle() == s.GetTitle();
 			if (found && !s.GetArtist().empty())

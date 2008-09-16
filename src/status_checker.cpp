@@ -181,7 +181,11 @@ void NcmpcppStatusChanged(MPDConnection *Mpd, MPDStatusChanges changed, void *da
 					Mpd->GetPlaylistChanges(playlist_old_id, list);
 				
 				for (SongList::const_iterator it = list.begin(); it != list.end(); it++)
+				{
 					mPlaylist->AddOption(**it, now_playing == (*it)->GetPosition());
+					mPlaylist->Back().CopyPtr(0);
+					(*it)->NullMe();
+				}
 				
 				if (current_screen == csPlaylist)
 				{
@@ -197,7 +201,11 @@ void NcmpcppStatusChanged(MPDConnection *Mpd, MPDStatusChanges changed, void *da
 				for (int i = 0; i < mPlaylist->Size(); i++)
 				{
 					if (*list[i] != mPlaylist->at(i))
+					{
 						mPlaylist->UpdateOption(i, *list[i]);
+						mPlaylist->at(i).CopyPtr(0);
+						list[i]->NullMe();
+					}
 				}
 			}
 			FreeSongList(list);
@@ -315,7 +323,7 @@ void NcmpcppStatusChanged(MPDConnection *Mpd, MPDStatusChanges changed, void *da
 			int elapsed = Mpd->GetElapsedTime();
 			
 			// 'repeat one' mode check - be sure that we deal with item with known length
-			if (Mpd->GetCurrentSong().GetTotalLength() && elapsed == Mpd->GetCurrentSong().GetTotalLength()-1)
+			if (s.GetTotalLength() && elapsed == s.GetTotalLength()-1)
 				repeat_one_allowed = 1;
 			
 			if (!block_statusbar_update && Config.statusbar_visibility)

@@ -25,9 +25,9 @@ extern "C" {
 
 char *str_pool_get(const char *value);
 
-char *str_pool_dup(char *value);
+char *str_pool_dup(const char *value);
 
-void str_pool_put(char *value);
+void str_pool_put(const char *value);
 
 #ifdef __cplusplus
 }
