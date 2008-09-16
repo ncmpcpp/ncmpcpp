@@ -2146,6 +2146,8 @@ int main(int argc, char *argv[])
 		{
 			if (current_screen == csBrowser)
 				Mpd->UpdateDirectory(browsed_dir);
+			else if (current_screen == csTagEditor && !Config.albums_in_tag_editor)
+				Mpd->UpdateDirectory(editor_browsed_dir);
 			else
 				Mpd->UpdateDirectory("/");
 		}
