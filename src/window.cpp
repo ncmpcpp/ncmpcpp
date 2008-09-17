@@ -531,7 +531,7 @@ string Window::GetString(const string &base, unsigned int length, int width) con
 				if (mbtowc(&wc_in, tmp_in.c_str(), MB_CUR_MAX) < 0)
 					break;
 				
-				if ((x-minx)+beginning == tmp.length())
+				if ((x-minx)+beginning >= tmp.length())
 				{
 					tmp.push_back(wc_in);
 					if (!beginning)
