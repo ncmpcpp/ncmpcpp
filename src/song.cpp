@@ -88,7 +88,7 @@ Song::~Song()
 
 string Song::GetLength() const
 {
-	if (!itsSong->time)
+	if (itsSong->time <= 0)
 		return "-:--";
 	return ShowTime(itsSong->time);
 }

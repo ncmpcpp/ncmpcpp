@@ -2291,7 +2291,11 @@ int main(int argc, char *argv[])
 					default:
 						break;
 				}
-				if (GetSongTags(edited_song))
+				if (edited_song.IsStream())
+				{
+					ShowMessage("Cannot edit streams!");
+				}
+				else if (GetSongTags(edited_song))
 				{
 					wPrev = wCurrent;
 					wCurrent = mTagEditor;

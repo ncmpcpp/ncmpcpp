@@ -361,7 +361,13 @@ string DisplaySongInColumns(const Song &s, void *s_template, const Menu<Song> *)
 				ss = s.GetArtist();
 				break;
 			case 't':
-				ss = s.GetTitle() != UNKNOWN_TITLE ? s.GetTitle() : s.GetShortFilename().substr(0, s.GetShortFilename().find_last_of("."));
+				if (s.GetTitle() != UNKNOWN_TITLE)
+					ss = s.GetTitle();
+				else
+				{
+					const string &file = s.GetShortFilename();
+					ss = !s.IsStream() ? file.substr(0, file.find_last_of(".")) : file;
+				}
 				break;
 			case 'b':
 				ss = s.GetAlbum();
