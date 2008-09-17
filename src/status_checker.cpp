@@ -211,7 +211,8 @@ void NcmpcppStatusChanged(MPDConnection *Mpd, MPDStatusChanges changed, void *da
 			FreeSongList(list);
 		}
 		
-		redraw_header = 1;
+		if (current_screen == csPlaylist)
+			redraw_header = 1;
 		
 		if (mPlaylist->Empty())
 		{
