@@ -179,70 +179,70 @@ void Song::SetFile(const string &str)
 {
 	if (itsSong->file)
 		str_pool_put(itsSong->file);
-	itsSong->file = str.empty() ? 0 : str_pool_dup(str.c_str());
+	itsSong->file = str.empty() ? 0 : str_pool_get(str.c_str());
 }
 
 void Song::SetArtist(const string &str)
 {
 	if (itsSong->artist)
 		str_pool_put(itsSong->artist);
-	itsSong->artist = str.empty() ? 0 : str_pool_dup(str.c_str());
+	itsSong->artist = str.empty() ? 0 : str_pool_get(str.c_str());
 }
 
 void Song::SetTitle(const string &str)
 {
 	if (itsSong->title)
 		str_pool_put(itsSong->title);
-	itsSong->title = str.empty() ? 0 : str_pool_dup(str.c_str());
+	itsSong->title = str.empty() ? 0 : str_pool_get(str.c_str());
 }
 
 void Song::SetAlbum(const string &str)
 {
 	if (itsSong->album)
 		str_pool_put(itsSong->album);
-	itsSong->album = str.empty() ? 0 : str_pool_dup(str.c_str());
+	itsSong->album = str.empty() ? 0 : str_pool_get(str.c_str());
 }
 
 void Song::SetTrack(const string &str)
 {
 	if (itsSong->track)
 		str_pool_put(itsSong->track);
-	itsSong->track = str.empty() ? 0 : str_pool_dup(IntoStr(StrToInt(str)).c_str());
+	itsSong->track = str.empty() ? 0 : str_pool_get(IntoStr(StrToInt(str)).c_str());
 }
 
 void Song::SetTrack(int track)
 {
 	if (itsSong->track)
 		str_pool_put(itsSong->track);
-	itsSong->track = str_pool_dup(IntoStr(track).c_str());
+	itsSong->track = str_pool_get(IntoStr(track).c_str());
 }
 
 void Song::SetYear(const string &str)
 {
 	if (itsSong->date)
 		str_pool_put(itsSong->date);
-	itsSong->date = str.empty() ? 0 : str_pool_dup(IntoStr(StrToInt(str)).c_str());
+	itsSong->date = str.empty() ? 0 : str_pool_get(IntoStr(StrToInt(str)).c_str());
 }
 
 void Song::SetYear(int year)
 {
 	if (itsSong->date)
 		str_pool_put(itsSong->date);
-	itsSong->date = str_pool_dup(IntoStr(year).c_str());
+	itsSong->date = str_pool_get(IntoStr(year).c_str());
 }
 
 void Song::SetGenre(const string &str)
 {
 	if (itsSong->genre)
 		str_pool_put(itsSong->genre);
-	itsSong->genre = str.empty() ? 0 : str_pool_dup(str.c_str());
+	itsSong->genre = str.empty() ? 0 : str_pool_get(str.c_str());
 }
 
 void Song::SetComment(const string &str)
 {
 	if (itsSong->comment)
 		str_pool_put(itsSong->comment);
-	itsSong->comment = str.empty() ? 0 : str_pool_dup(str.c_str());
+	itsSong->comment = str.empty() ? 0 : str_pool_get(str.c_str());
 }
 
 void Song::SetPosition(int pos)
