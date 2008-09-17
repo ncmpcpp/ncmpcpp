@@ -2090,39 +2090,44 @@ int main(int argc, char *argv[])
 			block_progressbar_update = 1;
 			LockStatusbar();
 			
-			int songpos, in;
+			int songpos;
+			time_t t = time(NULL);
 			
 			songpos = Mpd->GetElapsedTime();
 			Song &s = mPlaylist->at(now_playing);
 			
-			while (1)
+			while (Keypressed(input, Key.SeekForward) || Keypressed(input, Key.SeekBackward))
 			{
 				TraceMpdStatus();
 				timer = time(NULL);
-				mPlaylist->ReadKey(in);
-				if (Keypressed(in, Key.SeekForward) || Keypressed(in, Key.SeekBackward))
+				mPlaylist->ReadKey(input);
+				
+				int howmuch = Config.incremental_seeking ? (timer-t)/2+1 : 1;
+				
+				if (songpos < s.GetTotalLength() && Keypressed(input, Key.SeekForward))
 				{
-					if (songpos < s.GetTotalLength() && Keypressed(in, Key.SeekForward))
-						songpos++;
-					if (songpos < s.GetTotalLength() && songpos > 0 && Keypressed(in, Key.SeekBackward))
-						songpos--;
+					songpos += howmuch;
+					if (songpos > s.GetTotalLength())
+						songpos = s.GetTotalLength();
+				}
+				if (songpos < s.GetTotalLength() && songpos > 0 && Keypressed(input, Key.SeekBackward))
+				{
+					songpos -= howmuch;
 					if (songpos < 0)
 						songpos = 0;
-					
-					wFooter->Bold(1);
-					string tracklength = "[" + Song::ShowTime(songpos) + "/" + s.GetLength() + "]";
-					wFooter->WriteXY(wFooter->GetWidth()-tracklength.length(), 1, tracklength);
-					double progressbar_size = (double)songpos/(s.GetTotalLength());
-					int howlong = wFooter->GetWidth()*progressbar_size;
-					
-					mvwhline(wFooter->RawWin(), 0, 0, 0, wFooter->GetWidth());
-					mvwhline(wFooter->RawWin(), 0, 0, '=',howlong);
-					mvwaddch(wFooter->RawWin(), 0, howlong, '>');
-					wFooter->Bold(0);
-					wFooter->Refresh();
 				}
-				else
-					break;
+				
+				wFooter->Bold(1);
+				string tracklength = "[" + Song::ShowTime(songpos) + "/" + s.GetLength() + "]";
+				wFooter->WriteXY(wFooter->GetWidth()-tracklength.length(), 1, tracklength);
+				double progressbar_size = (double)songpos/(s.GetTotalLength());
+				int howlong = wFooter->GetWidth()*progressbar_size;
+				
+				mvwhline(wFooter->RawWin(), 0, 0, 0, wFooter->GetWidth());
+				mvwhline(wFooter->RawWin(), 0, 0, '=',howlong);
+				mvwaddch(wFooter->RawWin(), 0, howlong, '>');
+				wFooter->Bold(0);
+				wFooter->Refresh();
 			}
 			Mpd->Seek(songpos);
 			

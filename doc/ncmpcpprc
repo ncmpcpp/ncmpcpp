@@ -96,6 +96,8 @@
 #
 #playlist_display_mode = "normal" (classic/columns)
 #
+#incremental_seeking = "yes"
+#
 #autocenter_mode = "no"
 #
 #repeat_one_mode = "no"
@@ -112,13 +114,13 @@
 #
 #statusbar_visibility = "yes"
 #
+#fancy_scrolling = "yes"
+#
 #enable_window_title = "yes"
 #
 ##### colors definitions #####
 #
 #colors_enabled = "yes"
-#
-#fancy_scrolling = "yes"
 #
 #empty_tag_color = "cyan"
 #

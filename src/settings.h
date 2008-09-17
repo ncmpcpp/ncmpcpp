@@ -134,6 +134,7 @@ struct ncmpcpp_config
 	bool wrapped_search;
 	bool space_selects;
 	bool albums_in_tag_editor;
+	bool incremental_seeking;
 	
 	int mpd_connection_timeout;
 	int crossfade_time;
