@@ -646,9 +646,9 @@ char * ToString(const wchar_t *ws)
 	string s;
 	for (int i = 0; i < wcslen(ws); i++)
 	{
-		char *c = new char[MB_CUR_MAX]();
-		wctomb(c, ws[i]);
-		s += c;
+		char *c = new char[MB_CUR_MAX+1]();
+		if (wctomb(c, ws[i]) > 0)
+			s += c;
 		delete [] c;
 	}
 	char *result = strdup(s.c_str());
@@ -667,9 +667,9 @@ string ToString(const wstring &ws)
 	string s;
 	for (wstring::const_iterator it = ws.begin(); it != ws.end(); it++)
 	{
-		char *c = new char[MB_CUR_MAX]();
-		wctomb(c, *it);
-		s += c;
+		char *c = new char[MB_CUR_MAX+1]();
+		if (wctomb(c, *it) > 0)
+			s += c;
 		delete [] c;
 	}
 	return s;
