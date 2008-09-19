@@ -46,14 +46,17 @@ void Scrollpad::Add(string str)
 	
 	int x_pos = 0;
 	int space_pos = 0;
+	int tab_size;
 	bool collect = 0;
 	
 	for (size_t i = 0; i < s.length(); i++)
 	{
+		tab_size = 8-itsXPos%8;
+		
 		if (s[i] != '\t')
 			itsXPos++;
 		else
-			itsXPos += 8;
+			itsXPos += tab_size;
 		
 		if (BBEnabled)
 		{
