@@ -47,6 +47,7 @@ bool Keypressed(int, const int *);
 
 void WindowTitle(const string &);
 
+string FindSharedDir(const string &, const string &);
 string TotalPlaylistLength();
 string DisplayStringPair(const StringPair &, void *, const Menu<StringPair> *);
 string DisplayItem(const Item &, void *, const Menu<Item> *);

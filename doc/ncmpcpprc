@@ -5,7 +5,7 @@
 #
 ##### connection settings #####
 #
-## set it in order to make tag editor work
+## set it in order to make tag editor and renaming files work properly
 #
 #mpd_music_dir = "/var/lib/mpd/music"
 #

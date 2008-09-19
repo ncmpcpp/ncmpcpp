@@ -2313,35 +2313,79 @@ int main(int argc, char *argv[])
 			}
 			else if (wCurrent == mEditorDirs)
 			{
+				string old_dir = mEditorDirs->Current().first;
 				LockStatusbar();
 				wFooter->WriteXY(0, Config.statusbar_visibility, "Directory: ", 1);
-				string new_dir = wFooter->GetString(mEditorDirs->Current().first);
+				string new_dir = wFooter->GetString(old_dir);
 				UnlockStatusbar();
-				if (!new_dir.empty() && new_dir != mEditorDirs->Current().first)
+				if (!new_dir.empty() && new_dir != old_dir)
 				{
-					string old_dir = Config.mpd_music_dir + mEditorDirs->Current().second;
-					new_dir = Config.mpd_music_dir + editor_browsed_dir + "/" + new_dir;
-					if (rename(old_dir.c_str(), new_dir.c_str()) == 0)
+					string full_old_dir = Config.mpd_music_dir + editor_browsed_dir + "/" + old_dir;
+					string full_new_dir = Config.mpd_music_dir + editor_browsed_dir + "/" + new_dir;
+					if (rename(full_old_dir.c_str(), full_new_dir.c_str()) == 0)
 					{
-						ShowMessage("'" + mEditorDirs->Current().first + "' renamed to '" + new_dir);
 						Mpd->UpdateDirectory(editor_browsed_dir);
+						ShowMessage("'" + old_dir + "' renamed to '" + new_dir + "'");
 					}
 					else
-						ShowMessage("Cannot rename '" + old_dir + "' to '" + new_dir + "'!");
+						ShowMessage("Cannot rename '" + full_old_dir + "' to '" + full_new_dir + "'!");
 				}
 			}
 			else
 #			endif // HAVE_TAGLIB_H
-			if (wCurrent == mPlaylistList)
+			if (wCurrent == mBrowser && mBrowser->Current().type == itDirectory)
 			{
+				string old_dir = mBrowser->Current().name;
+				LockStatusbar();
+				wFooter->WriteXY(0, Config.statusbar_visibility, "[.b]Directory:[/b] ", 1);
+				string new_dir = wFooter->GetString(old_dir);
+				UnlockStatusbar();
+				if (!new_dir.empty() && new_dir != old_dir)
+				{
+					string full_old_dir = Config.mpd_music_dir + old_dir;
+					string full_new_dir = Config.mpd_music_dir + new_dir;
+					if (rename(full_old_dir.c_str(), full_new_dir.c_str()) == 0)
+					{
+						ShowMessage("'" + old_dir + "' renamed to '" + new_dir + "'");
+						Mpd->UpdateDirectory(FindSharedDir(old_dir, new_dir));
+					}
+					else
+						ShowMessage("Cannot rename '" + full_old_dir + "' to '" + full_new_dir + "'!");
+				}
+			}
+			// blah, this key is already reserved for TagEditor. I'll merge this to its screen later.
+			/*else if (wCurrent == mBrowser && mBrowser->Current().type == itSong)
+			{
+				string old_name = mBrowser->Current().song->GetFile();
+				LockStatusbar();
+				wFooter->WriteXY(0, Config.statusbar_visibility, "[.b]Filename:[/b] ", 1);
+				string new_name = wFooter->GetString(old_name);
+				UnlockStatusbar();
+				if (!new_name.empty() && new_name != old_name)
+				{
+					string full_old_name = Config.mpd_music_dir + old_name;
+					string full_new_name = Config.mpd_music_dir + new_name;
+					if (rename(full_old_name.c_str(), full_new_name.c_str()) == 0)
+					{
+						Mpd->UpdateDirectory(FindSharedDir(old_name, new_name));
+						ShowMessage("'" + old_name + "' renamed to '" + new_name + "'");
+					}
+					else
+						ShowMessage("Cannot rename '" + old_name + "' to '" + new_name + "'!");
+				}
+			}*/
+			else if (wCurrent == mPlaylistList || wCurrent == mBrowser && mBrowser->Current().type == itPlaylist)
+			{
+				string old_name = wCurrent == mPlaylistList ? mPlaylistList->GetOption() : mBrowser->Current().name;
 				LockStatusbar();
 				wFooter->WriteXY(0, Config.statusbar_visibility, "[.b]Playlist:[/b] ", 1);
-				string new_name = wFooter->GetString(mPlaylistList->GetOption());
+				string new_name = wFooter->GetString(old_name);
 				UnlockStatusbar();
-				if (!new_name.empty() && new_name != mPlaylistList->GetOption())
+				if (!new_name.empty() && new_name != old_name)
 				{
-					Mpd->Rename(mPlaylistList->GetOption(), new_name);
-					ShowMessage("Playlist '" + mPlaylistList->GetOption() + "' renamed to '" + new_name + "'");
+					Mpd->Rename(old_name, new_name);
+					ShowMessage("Playlist '" + old_name + "' renamed to '" + new_name + "'");
+					GetDirectory("/");
 					mPlaylistList->Clear(0);
 				}
 			}

@@ -162,6 +162,19 @@ void WindowTitle(const string &status)
 		printf("\033]0;%s\7",status.c_str());
 }
 
+string FindSharedDir(const string &one, const string &two)
+{
+	if (one == two)
+		return one;
+	string result;
+	int i = 1;
+	while (one.substr(0, i) == two.substr(0, i))
+		i++;
+	result = one.substr(0, i);
+	i = result.find_last_of("/");
+	return i != string::npos ? result.substr(0, i) : "/";
+}
+
 string TotalPlaylistLength()
 {
 	const int MINUTE = 60;
