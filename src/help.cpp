@@ -189,6 +189,9 @@ string GetKeybindings()
 	result += DisplayKeys(Key.MvSongUp) + "Move item/group of items up\n";
 	result += DisplayKeys(Key.MvSongDown) + "Move item/group of items down\n";
 	
+	result += "\n\n   [.b]Keys - Lyrics\n -----------------------------------------[/b]\n";
+	result += DisplayKeys(Key.Space) + "Switch for following lyrics of now playing song\n";
+	
 #	ifdef HAVE_TAGLIB_H
 	result += "\n\n   [.b]Keys - Tag editor\n -----------------------------------------[/b]\n";
 	result += DisplayKeys(Key.Enter) + "Change tag/filename for one song (left column)\n";
@@ -197,7 +200,6 @@ string GetKeybindings()
 	result += DisplayKeys(Key.Space) + "Select/deselect song (right column)\n";
 	result += DisplayKeys(&Key.VolumeDown[0], 1) + "Previous column\n";
 	result += DisplayKeys(&Key.VolumeUp[0], 1) + "Next column\n";
-	
 #	endif // HAVE_TAGLIB_H
 	
 	return result;

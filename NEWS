@@ -1,3 +1,21 @@
+ncmpcpp-0.2.3
+
+ + new screen - complex tag editor (with albums/directories view)
+ + brand new song info screen (old one removed)
+ + support for renaming files and directories
+ + support for reading tags from filename
+ + support for editing artist and album in media library
+ + support for playlist renaming
+ + support for following lyrics of now playing song
+ + support for fetching artist's info from last.fm
+ + fixed compilation for Mac OS X and *BSD
+ + fixed compilation for older gcc versions
+ + extended configuration (e.g. all colors can be user-defined)
+ + 'repeat one song' mode works with random mode now
+ + incremental seeking (old behaviour is still available through config)
+ + a bunch of fixes and improvements
+
+
 ncmpcpp-0.2.2
 
  + new screen - playlist editor
