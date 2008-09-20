@@ -61,6 +61,7 @@ extern string mpd_crossfade;
 extern string mpd_db_updating;
 
 extern NcmpcppScreen current_screen;
+extern NcmpcppScreen prev_screen;
 
 extern bool dont_change_now_playing;
 extern bool allow_statusbar_unlock;
@@ -71,6 +72,7 @@ extern bool block_item_list_update;
 
 extern bool redraw_screen;
 extern bool redraw_header;
+extern bool reload_lyrics;
 
 bool header_update_status = 0;
 bool repeat_one_allowed = 0;
@@ -308,6 +310,9 @@ void NcmpcppStatusChanged(MPDConnection *Mpd, MPDStatusChanges changed, void *da
 			
 			if (!Mpd->GetElapsedTime())
 				mvwhline(wFooter->RawWin(), 0, 0, 0, wFooter->GetWidth());
+			
+			if (Config.now_playing_lyrics && current_screen == csLyrics && prev_screen == csPlaylist)
+				reload_lyrics = 1;
 		}
 		playing_song_scroll_begin = 0;
 		

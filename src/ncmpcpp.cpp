@@ -116,6 +116,7 @@ bool block_item_list_update = 0;
 bool messages_allowed = 0;
 bool redraw_screen = 0;
 bool redraw_header = 1;
+bool reload_lyrics = 0;
 
 extern bool header_update_status;
 extern bool search_case_sensitive;
@@ -325,7 +326,6 @@ int main(int argc, char *argv[])
 		messages_allowed = 1;
 		
 		// header stuff
-		
 		const int max_allowed_title_length = wHeader->GetWidth()-volume_state.length();
 		if (current_screen == csBrowser && input == ERR && browsed_dir.length() > max_allowed_title_length)
 			redraw_header = 1;
@@ -412,11 +412,9 @@ int main(int argc, char *argv[])
 			wHeader->SetColor(Config.header_color);
 			redraw_header = 0;
 		}
-		
 		// header stuff end
 		
 		// media library stuff
-		
 		if (current_screen == csLibrary)
 		{
 			if (mLibArtists->Empty())
@@ -515,11 +513,9 @@ int main(int argc, char *argv[])
 				mLibSongs->Refresh();
 			}
 		}
-		
 		// media library end
-		
+		else
 		// playlist editor stuff
-		
 		if (current_screen == csPlaylistEditor)
 		{
 			if (mPlaylistList->Empty())
@@ -532,7 +528,7 @@ int main(int argc, char *argv[])
 				mPlaylistList->Window::Clear();
 				mPlaylistList->Refresh();
 			}
-		
+			
 			if (mPlaylistEditor->Empty())
 			{
 				mPlaylistEditor->Reset();
@@ -571,11 +567,10 @@ int main(int argc, char *argv[])
 			if (mPlaylistEditor->Empty())
 				mPlaylistEditor->WriteXY(0, 0, "Playlist is empty.");
 		}
-		
 		// playlist editor end
-		
-		// album editor stuff
+		else
 #		ifdef HAVE_TAGLIB_H
+		// album editor stuff
 		if (current_screen == csTagEditor)
 		{
 			if (mEditorLeftCol->Empty())
@@ -662,8 +657,19 @@ int main(int argc, char *argv[])
 			else if (mEditorTagTypes->GetChoice() >= 10)
 				mEditorTags->Window::Clear();
 		}
-#		endif // HAVE_TAGLIB_H
 		// album editor end
+		else
+#		endif // HAVE_TAGLIB_H
+		// lyrics stuff
+		if (current_screen == csLyrics && reload_lyrics)
+		{
+			const Song &s = mPlaylist->at(now_playing);
+			if (s.GetArtist() != UNKNOWN_ARTIST && s.GetTitle() != UNKNOWN_TITLE)
+				goto LOAD_LYRICS;
+			else
+				reload_lyrics = 0;
+		}
+		// lyrics end
 		
 		if (Config.columns_in_playlist && wCurrent == mPlaylist)
 			wCurrent->Display(redraw_screen);
@@ -1586,6 +1592,11 @@ int main(int argc, char *argv[])
 					redraw_screen = 1;
 				}
 #				endif // HAVE_TAGLIB_H
+				else if (current_screen == csLyrics)
+				{
+					Config.now_playing_lyrics = !Config.now_playing_lyrics;
+					ShowMessage("Reload lyrics if song changes: " + string(Config.now_playing_lyrics ? "On" : "Off"));
+				}
 			}
 		}
 		else if (Keypressed(input, Key.VolumeUp))
@@ -2968,8 +2979,21 @@ int main(int argc, char *argv[])
 			||  (wCurrent == mPlaylistEditor && !mPlaylistEditor->Empty())
 			||  (wCurrent == mEditorTags && !mEditorTags->Empty()))
 			{
+				LOAD_LYRICS:
+				
 				Song *s;
-				int id = wCurrent->GetChoice();
+				int id;
+				
+				if (reload_lyrics)
+				{
+					current_screen = csPlaylist;
+					wCurrent = mPlaylist;
+					reload_lyrics = 0;
+					id = now_playing;
+				}
+				else
+					id = wCurrent->GetChoice();
+				
 				switch (current_screen)
 				{
 					case csPlaylist:

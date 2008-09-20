@@ -135,6 +135,7 @@ struct ncmpcpp_config
 	bool space_selects;
 	bool albums_in_tag_editor;
 	bool incremental_seeking;
+	bool now_playing_lyrics;
 	
 	int mpd_connection_timeout;
 	int crossfade_time;

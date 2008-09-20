@@ -186,6 +186,7 @@ void DefaultConfiguration(ncmpcpp_config &conf)
 	conf.space_selects = false;
 	conf.albums_in_tag_editor = false;
 	conf.incremental_seeking = true;
+	conf.now_playing_lyrics = false;
 	conf.set_window_title = true;
 	conf.mpd_connection_timeout = 15;
 	conf.crossfade_time = 5;
@@ -568,6 +569,10 @@ void ReadConfiguration(ncmpcpp_config &conf)
 			else if (it->find("incremental_seeking") != string::npos)
 			{
 				conf.incremental_seeking = v == "yes";
+			}
+			else if (it->find("follow_now_playing_lyrics") != string::npos)
+			{
+				conf.now_playing_lyrics = v == "yes";
 			}
 			else if (it->find("enable_window_title") != string::npos)
 			{
