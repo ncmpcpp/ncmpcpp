@@ -201,7 +201,7 @@ string ParseFilename(Song &s, string mask, bool preview)
 	{
 		for (int i = mask.find("%"); i != string::npos; i = mask.find("%"))
 		{
-			tags.push_back(std::pair<char, string>(mask.at(i+1), ""));
+			tags.push_back(make_pair(mask.at(i+1), ""));
 			mask = mask.substr(i+2);
 			i = mask.find("%");
 			if (!mask.empty())

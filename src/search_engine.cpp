@@ -58,20 +58,20 @@ void PrepareSearchEngine(Song &s)
 	s.Clear();
 	mSearcher->Clear();
 	mSearcher->Reset();
-	mSearcher->AddOption(std::pair<string, Song>("[.b]Filename:[/b] " + s.GetShortFilename(), Song()));
-	mSearcher->AddOption(std::pair<string, Song>("[.b]Title:[/b] " + s.GetTitle(), Song()));
-	mSearcher->AddOption(std::pair<string, Song>("[.b]Artist:[/b] " + s.GetArtist(), Song()));
-	mSearcher->AddOption(std::pair<string, Song>("[.b]Album:[/b] " + s.GetAlbum(), Song()));
-	mSearcher->AddOption(std::pair<string, Song>("[.b]Year:[/b] " + s.GetYear(), Song()));
-	mSearcher->AddOption(std::pair<string, Song>("[.b]Track:[/b] " + s.GetTrack(), Song()));
-	mSearcher->AddOption(std::pair<string, Song>("[.b]Genre:[/b] " + s.GetGenre(), Song()));
-	mSearcher->AddOption(std::pair<string, Song>("[.b]Comment:[/b] " + s.GetComment(), Song()));
+	mSearcher->AddOption(make_pair("[.b]Filename:[/b] " + s.GetShortFilename(), Song()));
+	mSearcher->AddOption(make_pair("[.b]Title:[/b] " + s.GetTitle(), Song()));
+	mSearcher->AddOption(make_pair("[.b]Artist:[/b] " + s.GetArtist(), Song()));
+	mSearcher->AddOption(make_pair("[.b]Album:[/b] " + s.GetAlbum(), Song()));
+	mSearcher->AddOption(make_pair("[.b]Year:[/b] " + s.GetYear(), Song()));
+	mSearcher->AddOption(make_pair("[.b]Track:[/b] " + s.GetTrack(), Song()));
+	mSearcher->AddOption(make_pair("[.b]Genre:[/b] " + s.GetGenre(), Song()));
+	mSearcher->AddOption(make_pair("[.b]Comment:[/b] " + s.GetComment(), Song()));
 	mSearcher->AddSeparator();
-	mSearcher->AddOption(std::pair<string, Song>("[.b]Search mode:[/b] " + (search_match_to_pattern ? search_mode_normal : search_mode_strict), Song()));
-	mSearcher->AddOption(std::pair<string, Song>("[.b]Case sensitive:[/b] " + (string)(search_case_sensitive ? "Yes" : "No"), Song()));
+	mSearcher->AddOption(make_pair("[.b]Search mode:[/b] " + (search_match_to_pattern ? search_mode_normal : search_mode_strict), Song()));
+	mSearcher->AddOption(make_pair("[.b]Case sensitive:[/b] " + (string)(search_case_sensitive ? "Yes" : "No"), Song()));
 	mSearcher->AddSeparator();
-	mSearcher->AddOption(std::pair<string, Song>("Search", Song()));
-	mSearcher->AddOption(std::pair<string, Song>("Reset", Song()));
+	mSearcher->AddOption(make_pair("Search", Song()));
+	mSearcher->AddOption(make_pair("Reset", Song()));
 }
 
 void Search(Song &s)
@@ -188,7 +188,7 @@ void Search(Song &s)
 		}
 		
 		if (found)
-			mSearcher->AddOption(std::pair<string, Song>(".", **it));
+			mSearcher->AddOption(make_pair(".", **it));
 		found = 1;
 	}
 	FreeSongList(list);

@@ -1160,7 +1160,7 @@ int main(int argc, char *argv[])
 								int found = mSearcher->Size()-search_engine_static_options;
 								found += 3; // don't count options inserted below
 								mSearcher->InsertSeparator(14);
-								mSearcher->Insert(15, std::pair<string, Song>("[." + Config.color1 + "]Search results:[/" + Config.color1 + "] [." + Config.color2 + "]Found " + IntoStr(found) + (found > 1 ? " songs" : " song") + "[/" + Config.color2 + "]", Song()), 1, 1);
+								mSearcher->Insert(15, make_pair("[." + Config.color1 + "]Search results:[/" + Config.color1 + "] [." + Config.color2 + "]Found " + IntoStr(found) + (found > 1 ? " songs" : " song") + "[/" + Config.color2 + "]", Song()), 1, 1);
 								mSearcher->InsertSeparator(16);
 								UpdateFoundList();
 								ShowMessage("Searching finished!");

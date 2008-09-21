@@ -43,6 +43,7 @@
 #include "misc.h"
 
 typedef std::pair<string, string> StringPair;
+using std::make_pair;
 
 enum NcmpcppScreen
 {
