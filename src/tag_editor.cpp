@@ -113,6 +113,8 @@ bool GetSongTags(Song &s)
 	mTagEditor->AddOption("[.b]Genre:[/b] " + s.GetGenre());
 	mTagEditor->AddOption("[.b]Comment:[/b] " + s.GetComment());
 	mTagEditor->AddSeparator();
+	mTagEditor->AddOption("[.b]Filename:[/b] " + s.GetName());
+	mTagEditor->AddSeparator();
 	mTagEditor->AddOption("Save");
 	mTagEditor->AddOption("Cancel");
 	return true;

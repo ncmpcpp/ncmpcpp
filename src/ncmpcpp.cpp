@@ -1028,6 +1028,18 @@ int main(int argc, char *argv[])
 						}
 						case 8:
 						{
+							wFooter->WriteXY(0, Config.statusbar_visibility, "[.b]Filename:[/b] ", 1);
+							string filename = s.GetNewName().empty() ? s.GetName() : s.GetNewName();
+							int dot = filename.find_last_of(".");
+							string extension = filename.substr(dot);
+							filename = filename.substr(0, dot);
+							string new_name = wFooter->GetString(filename);
+							s.SetNewName(new_name + extension);
+							mTagEditor->UpdateOption(option, "[.b]Filename:[/b] " + (s.GetNewName().empty() ? s.GetName() : s.GetNewName()));
+							break;
+						}
+						case 9:
+						{
 							ShowMessage("Updating tags...");
 							if (WriteTags(s))
 							{
@@ -1038,7 +1050,7 @@ int main(int argc, char *argv[])
 							}
 								ShowMessage("Error writing tags!");
 						}
-						case 9:
+						case 10:
 						{
 							wCurrent->Clear();
 							wCurrent = wPrev;
