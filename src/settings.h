@@ -58,6 +58,7 @@ struct ncmpcpp_keys
 	int ToggleRepeatOne[2];
 	int ToggleRandom[2];
 	int ToggleSpaceMode[2];
+	int ToggleAddMode[2];
 	int Shuffle[2];
 	int ToggleCrossfade[2];
 	int SetCrossfade[2];
@@ -133,6 +134,7 @@ struct ncmpcpp_config
 	bool repeat_one_mode;
 	bool wrapped_search;
 	bool space_selects;
+	bool ncmpc_like_songs_adding;
 	bool albums_in_tag_editor;
 	bool incremental_seeking;
 	bool now_playing_lyrics;

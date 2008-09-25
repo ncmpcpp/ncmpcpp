@@ -37,6 +37,8 @@
 #
 #key_toggle_space_mode = 't'
 #
+#key_toggle_add_mode = 'T'
+#
 #key_screen_switcher = 9
 #
 #key_help = '1' 265

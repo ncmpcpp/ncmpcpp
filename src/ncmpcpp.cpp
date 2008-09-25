@@ -899,6 +899,22 @@ int main(int argc, char *argv[])
 						case itSong:
 						{
 							block_item_list_update = 1;
+							if (Config.ncmpc_like_songs_adding && mBrowser->IsBold())
+							{
+								bool found = 0;
+								long long hash = mBrowser->Current().song->GetHash();
+								for (int i = 0; i < mPlaylist->Size(); i++)
+								{
+									if (mPlaylist->at(i).GetHash() == hash)
+									{
+										Mpd->Play(i);
+										found = 1;
+										break;
+									}
+								}
+								if (found)
+									break;
+							}
 							Song &s = *item.song;
 							int id = Mpd->AddSong(s);
 							if (id >= 0)
@@ -1184,13 +1200,28 @@ int main(int argc, char *argv[])
 						default:
 						{
 							block_item_list_update = 1;
-							const Song &s = mSearcher->Current().second;
-							int id = Mpd->AddSong(s);
-							if (id >= 0)
+							if (Config.ncmpc_like_songs_adding && mSearcher->IsBold())
 							{
-								Mpd->PlayID(id);
-								ShowMessage("Added to playlist: " + DisplaySong(s, &Config.song_status_format));
-								mSearcher->BoldOption(mSearcher->GetChoice(), 1);
+								long long hash = mSearcher->Current().second.GetHash();
+								for (int i = 0; i < mPlaylist->Size(); i++)
+								{
+									if (mPlaylist->at(i).GetHash() == hash)
+									{
+										Mpd->Play(i);
+										break;
+									}
+								}
+							}
+							else
+							{
+								const Song &s = mSearcher->Current().second;
+								int id = Mpd->AddSong(s);
+								if (id >= 0)
+								{
+									Mpd->PlayID(id);
+									ShowMessage("Added to playlist: " + DisplaySong(s, &Config.song_status_format));
+									mSearcher->BoldOption(mSearcher->GetChoice(), 1);
+								}
 							}
 							break;
 						}
@@ -1249,14 +1280,47 @@ int main(int argc, char *argv[])
 						if (!mLibSongs->Empty())
 						{
 							block_item_list_update = 1;
-							Song &s = mLibSongs->Current();
-							int id = Mpd->AddSong(s);
-							if (id >= 0)
+							if (Config.ncmpc_like_songs_adding && mLibSongs->IsBold())
 							{
-								ShowMessage("Added to playlist: " + DisplaySong(s, &Config.song_status_format));
+								long long hash = mLibSongs->Current().GetHash();
 								if (Keypressed(input, Key.Enter))
-									Mpd->PlayID(id);
-								mLibSongs->BoldOption(mLibSongs->GetChoice(), 1);
+								{
+									for (int i = 0; i < mPlaylist->Size(); i++)
+									{
+										if (mPlaylist->at(i).GetHash() == hash)
+										{
+											Mpd->Play(i);
+											break;
+										}
+									}
+								}
+								else
+								{
+									block_playlist_update = 1;
+									for (int i = 0; i < mPlaylist->Size(); i++)
+									{
+										if (mPlaylist->at(i).GetHash() == hash)
+										{
+											Mpd->QueueDeleteSong(i);
+											mPlaylist->DeleteOption(i);
+											i--;
+										}
+									}
+									Mpd->CommitQueue();
+									mLibSongs->BoldOption(mLibSongs->GetChoice(), 0);
+								}
+							}
+							else
+							{
+								Song &s = mLibSongs->Current();
+								int id = Mpd->AddSong(s);
+								if (id >= 0)
+								{
+									ShowMessage("Added to playlist: " + DisplaySong(s, &Config.song_status_format));
+									if (Keypressed(input, Key.Enter))
+										Mpd->PlayID(id);
+									mLibSongs->BoldOption(mLibSongs->GetChoice(), 1);
+								}
 							}
 						}
 					}
@@ -1304,14 +1368,47 @@ int main(int argc, char *argv[])
 						if (!mPlaylistEditor->Empty())
 						{
 							block_item_list_update = 1;
-							Song &s = mPlaylistEditor->at(mPlaylistEditor->GetChoice());
-							int id = Mpd->AddSong(s);
-							if (id >= 0)
+							if (Config.ncmpc_like_songs_adding && mPlaylistEditor->IsBold())
 							{
-								ShowMessage("Added to playlist: " + DisplaySong(s, &Config.song_status_format));
+								long long hash = mPlaylistEditor->Current().GetHash();
 								if (Keypressed(input, Key.Enter))
-									Mpd->PlayID(id);
-								mPlaylistEditor->BoldOption(mPlaylistEditor->GetChoice(), 1);
+								{
+									for (int i = 0; i < mPlaylist->Size(); i++)
+									{
+										if (mPlaylist->at(i).GetHash() == hash)
+										{
+											Mpd->Play(i);
+											break;
+										}
+									}
+								}
+								else
+								{
+									block_playlist_update = 1;
+									for (int i = 0; i < mPlaylist->Size(); i++)
+									{
+										if (mPlaylist->at(i).GetHash() == hash)
+										{
+											Mpd->QueueDeleteSong(i);
+											mPlaylist->DeleteOption(i);
+											i--;
+										}
+									}
+									Mpd->CommitQueue();
+									mPlaylistEditor->BoldOption(mPlaylistEditor->GetChoice(), 0);
+								}
+							}
+							else
+							{
+								Song &s = mPlaylistEditor->at(mPlaylistEditor->GetChoice());
+								int id = Mpd->AddSong(s);
+								if (id >= 0)
+								{
+									ShowMessage("Added to playlist: " + DisplaySong(s, &Config.song_status_format));
+									if (Keypressed(input, Key.Enter))
+										Mpd->PlayID(id);
+									mPlaylistEditor->BoldOption(mPlaylistEditor->GetChoice(), 1);
+								}
 							}
 						}
 					}
@@ -1522,7 +1619,7 @@ int main(int argc, char *argv[])
 							
 							SongList list;
 							Mpd->GetDirectoryRecursive(item.name, list);
-						
+							
 							for (SongList::const_iterator it = list.begin(); it != list.end(); it++)
 								Mpd->QueueAddSong(**it);
 							if (Mpd->CommitQueue())
@@ -1538,11 +1635,30 @@ int main(int argc, char *argv[])
 						case itSong:
 						{
 							block_item_list_update = 1;
-							Song &s = *item.song;
-							if (Mpd->AddSong(s) != -1)
+							if (Config.ncmpc_like_songs_adding && mBrowser->IsBold())
 							{
-								ShowMessage("Added to playlist: " + DisplaySong(s, &Config.song_status_format));
-								mBrowser->BoldOption(mBrowser->GetChoice(), 1);
+								block_playlist_update = 1;
+								long long hash = mBrowser->Current().song->GetHash();
+								for (int i = 0; i < mPlaylist->Size(); i++)
+								{
+									if (mPlaylist->at(i).GetHash() == hash)
+									{
+										Mpd->QueueDeleteSong(i);
+										mPlaylist->DeleteOption(i);
+										i--;
+									}
+								}
+								Mpd->CommitQueue();
+								mBrowser->BoldOption(mBrowser->GetChoice(), 0);
+							}
+							else
+							{
+								Song &s = *item.song;
+								if (Mpd->AddSong(s) != -1)
+								{
+									ShowMessage("Added to playlist: " + DisplaySong(s, &Config.song_status_format));
+									mBrowser->BoldOption(mBrowser->GetChoice(), 1);
+								}
 							}
 							break;
 						}
@@ -1568,11 +1684,30 @@ int main(int argc, char *argv[])
 				else if (current_screen == csSearcher && mSearcher->Current().first == ".")
 				{
 					block_item_list_update = 1;
-					Song &s = mSearcher->Current().second;
-					if (Mpd->AddSong(s) != -1)
+					if (Config.ncmpc_like_songs_adding && mSearcher->IsBold())
 					{
-						ShowMessage("Added to playlist: " + DisplaySong(s, &Config.song_status_format));
-						mSearcher->BoldOption(mSearcher->GetChoice(), 1);
+						block_playlist_update = 1;
+						long long hash = mSearcher->Current().second.GetHash();
+						for (int i = 0; i < mPlaylist->Size(); i++)
+						{
+							if (mPlaylist->at(i).GetHash() == hash)
+							{
+								Mpd->QueueDeleteSong(i);
+								mPlaylist->DeleteOption(i);
+								i--;
+							}
+						}
+						Mpd->CommitQueue();
+						mSearcher->BoldOption(mSearcher->GetChoice(), 0);
+					}
+					else
+					{
+						Song &s = mSearcher->Current().second;
+						if (Mpd->AddSong(s) != -1)
+						{
+							ShowMessage("Added to playlist: " + DisplaySong(s, &Config.song_status_format));
+							mSearcher->BoldOption(mSearcher->GetChoice(), 1);
+						}
 					}
 					mSearcher->Go(wDown);
 				}
@@ -2802,6 +2937,11 @@ int main(int argc, char *argv[])
 		{
 			Config.space_selects = !Config.space_selects;
 			ShowMessage("Space mode: " + string(Config.space_selects ? "Select/deselect" : "Add") + " item");
+		}
+		else if (Keypressed(input, Key.ToggleAddMode))
+		{
+			Config.ncmpc_like_songs_adding = !Config.ncmpc_like_songs_adding;
+			ShowMessage("Add mode: " + string(Config.ncmpc_like_songs_adding ? "Add item to playlist, remove if already added" : "Always add item to playlist"));
 		}
 		else if (Keypressed(input, Key.SongInfo))
 		{

@@ -56,6 +56,7 @@ void DefaultKeys(ncmpcpp_keys &keys)
 	keys.ToggleRepeatOne[0] = 'R';
 	keys.ToggleRandom[0] = 'z';
 	keys.ToggleSpaceMode[0] = 't';
+	keys.ToggleAddMode[0] = 'T';
 	keys.Shuffle[0] = 'Z';
 	keys.ToggleCrossfade[0] = 'x';
 	keys.SetCrossfade[0] = 'X';
@@ -116,6 +117,7 @@ void DefaultKeys(ncmpcpp_keys &keys)
 	keys.ToggleRepeatOne[1] = null_key;
 	keys.ToggleRandom[1] = null_key;
 	keys.ToggleSpaceMode[1] = null_key;
+	keys.ToggleAddMode[1] = null_key;
 	keys.Shuffle[1] = null_key;
 	keys.ToggleCrossfade[1] = null_key;
 	keys.SetCrossfade[1] = null_key;
@@ -184,6 +186,7 @@ void DefaultConfiguration(ncmpcpp_config &conf)
 	conf.repeat_one_mode = false;
 	conf.wrapped_search = true;
 	conf.space_selects = false;
+	conf.ncmpc_like_songs_adding = false;
 	conf.albums_in_tag_editor = false;
 	conf.incremental_seeking = true;
 	conf.now_playing_lyrics = false;
@@ -362,6 +365,8 @@ void ReadKeys(ncmpcpp_keys &keys)
 				GetKeys(*it, keys.ToggleRandom);
 			else if (it->find("key_toggle_space_mode ") != string::npos)
 				GetKeys(*it, keys.ToggleSpaceMode);
+			else if (it->find("key_toggle_add_mode ") != string::npos)
+				GetKeys(*it, keys.ToggleAddMode);
 			else if (it->find("key_shuffle ") != string::npos)
 				GetKeys(*it, keys.Shuffle);
 			else if (it->find("key_toggle_crossfade ") != string::npos)
@@ -573,6 +578,10 @@ void ReadConfiguration(ncmpcpp_config &conf)
 			else if (it->find("follow_now_playing_lyrics") != string::npos)
 			{
 				conf.now_playing_lyrics = v == "yes";
+			}
+			else if (it->find("ncmpc_like_songs_adding") != string::npos)
+			{
+				conf.ncmpc_like_songs_adding = v == "yes";
 			}
 			else if (it->find("enable_window_title") != string::npos)
 			{

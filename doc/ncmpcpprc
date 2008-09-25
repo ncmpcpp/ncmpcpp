@@ -94,7 +94,7 @@
 #
 ##### various settings #####
 #
-#playlist_display_mode = "normal" (classic/columns)
+#playlist_display_mode = "classic" (classic/columns)
 #
 #incremental_seeking = "yes"
 #
@@ -117,6 +117,8 @@
 #fancy_scrolling = "yes"
 #
 #follow_now_playing_lyrics = "no"
+#
+#ncmpc_like_songs_adding = "no" (enabled - add/remove, disabled - always add)
 #
 #enable_window_title = "yes"
 #

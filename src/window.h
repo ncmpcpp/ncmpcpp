@@ -119,7 +119,7 @@ class Window
 		virtual int Size() const { return 0; }
 		virtual bool IsAnySelected() const { return 0; }
 		virtual void GetSelectedList(vector<int> &) const { }
-		virtual bool IsStatic(int) const { return 0; }
+		virtual bool IsStatic(int = -1) const { return 0; }
 		virtual void Highlight(int) { }
 		virtual string GetOption(int = -1) const { return ""; }
 		virtual void Go(Where) { } // for Menu and Scrollpad class

@@ -88,7 +88,8 @@ class Menu : public Window
 		virtual int Size() const { return itsOptions.size(); }
 		
 		bool Empty() const { return itsOptions.empty(); }
-		virtual bool IsStatic(int) const;
+		bool IsBold(int = -1) const;
+		virtual bool IsStatic(int = -1) const;
 		virtual Window * Clone() const { return new Menu(*this); }
 		virtual Window * EmptyClone() const;
 		
@@ -669,11 +670,24 @@ int Menu<T>::GetRealChoice() const
 }
 
 template <class T>
+bool Menu<T>::IsBold(int option) const
+{
+	try
+	{
+		return itsOptions.at(option == -1 ? itsHighlight : option)->is_bold;
+	}
+	catch (std::out_of_range)
+	{
+		return 0;
+	}
+}
+
+template <class T>
 bool Menu<T>::IsStatic(int option) const
 {
 	try
 	{
-		return itsOptions.at(option)->is_static;
+		return itsOptions.at(option == -1 ? itsHighlight : option)->is_static;
 	}
 	catch (std::out_of_range)
 	{

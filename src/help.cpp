@@ -114,6 +114,7 @@ string GetKeybindings()
 	result += DisplayKeys(Key.VolumeUp) + "Increase volume\n\n";
 	
 	result += DisplayKeys(Key.ToggleSpaceMode) + "Toggle space mode (select/add)\n";
+	result += DisplayKeys(Key.ToggleAddMode) + "Toggle add mode\n";
 	result += DisplayKeys(Key.ReverseSelection) + "Reverse selection\n";
 	result += DisplayKeys(Key.DeselectAll) + "Deselect all items\n";
 	result += DisplayKeys(Key.AddSelected) + "Add selected items to playlist/m3u file\n\n";
