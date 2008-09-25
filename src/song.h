@@ -42,7 +42,7 @@ class Song
 		~Song();
 		
 		string GetFile() const;
-		string GetShortFilename() const;
+		string GetName() const;
 		string GetDirectory() const;
 		string GetArtist() const;
 		string GetTitle() const;
@@ -73,7 +73,7 @@ class Song
 		void SetComment(const string &str);
 		void SetPosition(int pos);
 		
-		void SetNewName(string name) { itsNewName = name == GetShortFilename() ? "" : name; }
+		void SetNewName(string name) { itsNewName = name == GetName() ? "" : name; }
 		string GetNewName() const { return itsNewName; }
 		
 		void NullMe() { itsSong = 0; }

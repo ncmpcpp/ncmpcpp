@@ -84,8 +84,8 @@ bool CaseInsensitiveSorting::operator()(string a, string b)
 
 bool CaseInsensitiveSorting::operator()(Song *sa, Song *sb)
 {
-	string a = sa->GetShortFilename();
-	string b = sb->GetShortFilename();
+	string a = sa->GetName();
+	string b = sb->GetName();
 	transform(a.begin(), a.end(), a.begin(), tolower);
 	transform(b.begin(), b.end(), b.begin(), tolower);
 	return a < b;
@@ -95,8 +95,8 @@ bool CaseInsensitiveSorting::operator()(const Item &a, const Item &b)
 {
 	if (a.type == b.type)
 	{
-		string sa = a.type == itSong ? a.song->GetShortFilename() : a.name;
-		string sb = b.type == itSong ? b.song->GetShortFilename() : b.name;
+		string sa = a.type == itSong ? a.song->GetName() : a.name;
+		string sb = b.type == itSong ? b.song->GetName() : b.name;
 		transform(sa.begin(), sa.end(), sa.begin(), tolower);
 		transform(sb.begin(), sb.end(), sb.begin(), tolower);
 		return sa < sb;
@@ -365,7 +365,7 @@ string DisplaySongInColumns(const Song &s, void *s_template, const Menu<Song> *)
 				ss = s.GetLength();
 				break;
 			case 'f':
-				ss = s.GetShortFilename();
+				ss = s.GetName();
 				break;
 			case 'F':
 				ss = s.GetFile();
@@ -378,7 +378,7 @@ string DisplaySongInColumns(const Song &s, void *s_template, const Menu<Song> *)
 					ss = s.GetTitle();
 				else
 				{
-					const string &file = s.GetShortFilename();
+					const string &file = s.GetName();
 					ss = !s.IsStream() ? file.substr(0, file.find_last_of(".")) : file;
 				}
 				break;
@@ -514,8 +514,8 @@ string DisplaySong(const Song &s, void *s_template, const Menu<Song> *menu)
 				}
 				case 'f':
 				{
-					result += s.GetShortFilename();
-					i += s.GetShortFilename().length();
+					result += s.GetName();
+					i += s.GetName().length();
 					break;
 				}
 				case 'a':
@@ -709,7 +709,7 @@ string GetInfo(Song &s)
 		s.SetComment(f.tag()->comment().to8Bit(UNICODE));
 #	endif // HAVE_TAGLIB_H
 	
-	result = "[.b][." + Config.color1 + "]Filename: [/" + Config.color1 + "][." + Config.color2 + "][/b]" + s.GetShortFilename() + "[/" + Config.color2 + "]\n";
+	result = "[.b][." + Config.color1 + "]Filename: [/" + Config.color1 + "][." + Config.color2 + "][/b]" + s.GetName() + "[/" + Config.color2 + "]\n";
 	result += "[.b][." + Config.color1 + "]Directory: [/" + Config.color1 + "][." + Config.color2 + "][/b]" + s.GetDirectory() + "[/" + Config.color2 + "]\n\n";
 	result += "[.b][." + Config.color1 + "]Length: [/" + Config.color1 + "][." + Config.color2 + "][/b]" + s.GetLength() + "[/" + Config.color2 + "]\n";
 #	ifdef HAVE_TAGLIB_H

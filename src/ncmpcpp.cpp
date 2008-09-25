@@ -1077,7 +1077,7 @@ int main(int argc, char *argv[])
 						case 1:
 						{
 							wFooter->WriteXY(0, Config.statusbar_visibility, "[.b]Filename:[/b] ", 1);
-							if (s.GetShortFilename() == EMPTY_TAG)
+							if (s.GetName() == EMPTY_TAG)
 								s.SetFile(wFooter->GetString());
 							else
 								s.SetFile(wFooter->GetString(s.GetFile()));
@@ -1514,7 +1514,7 @@ int main(int argc, char *argv[])
 							else if (wCurrent == mEditorTags)
 							{
 								Song &s = mEditorTags->Current();
-								string old_name = s.GetNewName().empty() ? s.GetShortFilename() : s.GetNewName();
+								string old_name = s.GetNewName().empty() ? s.GetName() : s.GetNewName();
 								int last_dot = old_name.find_last_of(".");
 								string extension = old_name.substr(last_dot);
 								old_name = old_name.substr(0, last_dot);

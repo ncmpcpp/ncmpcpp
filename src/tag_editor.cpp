@@ -77,7 +77,7 @@ string DisplayTag(const Song &s, void *data, const Menu<Song> *null)
 		case 6:
 			return s.GetComment();
 		case 8:
-			return s.GetNewName().empty() ? s.GetShortFilename() : s.GetShortFilename() + " [." + Config.color2 + "]->[/" + Config.color2 + "] " + s.GetNewName();
+			return s.GetNewName().empty() ? s.GetName() : s.GetName() + " [." + Config.color2 + "]->[/" + Config.color2 + "] " + s.GetNewName();
 		default:
 			return "";
 	}
@@ -95,7 +95,7 @@ bool GetSongTags(Song &s)
 	mTagEditor->Clear();
 	mTagEditor->Reset();
 	
-	mTagEditor->AddOption("[.b][." + Config.color1 + "]Song name: [/" + Config.color1 + "][." + Config.color2 + "][/b]" + s.GetShortFilename() + "[/" + Config.color2 + "]", 0, 1);
+	mTagEditor->AddOption("[.b][." + Config.color1 + "]Song name: [/" + Config.color1 + "][." + Config.color2 + "][/b]" + s.GetName() + "[/" + Config.color2 + "]", 0, 1);
 	mTagEditor->AddOption("[.b][." + Config.color1 + "]Location in DB: [/" + Config.color1 + "][." + Config.color2 + "][/b]" + s.GetDirectory() + "[/" + Config.color2 + "]", 0, 1);
 	mTagEditor->AddOption("", 0, 1);
 	mTagEditor->AddOption("[.b][." + Config.color1 + "]Length: [/" + Config.color1 + "][." + Config.color2 + "][/b]" + s.GetLength() + "[/" + Config.color2 + "]", 0, 1);
@@ -195,7 +195,7 @@ string ParseFilename(Song &s, string mask, bool preview)
 	std::stringstream result;
 	vector<string> separators;
 	vector< std::pair<char, string> > tags;
-	string file = s.GetShortFilename().substr(0, s.GetShortFilename().find_last_of("."));
+	string file = s.GetName().substr(0, s.GetName().find_last_of("."));
 	
 	try
 	{
@@ -300,7 +300,7 @@ void __deal_with_filenames(SongList &v)
 		Legend->Add("%C - comment\n\n");
 		Legend->Add("[.b]Files:[/b]\n");
 		for (SongList::const_iterator it = v.begin(); it != v.end(); it++)
-			Legend->Add("[." + Config.color2 + "]*[/" + Config.color2 + "] " + (*it)->GetShortFilename() + "\n");
+			Legend->Add("[." + Config.color2 + "]*[/" + Config.color2 + "] " + (*it)->GetName() + "\n");
 		
 		Preview = static_cast<Scrollpad *>(Legend->EmptyClone());
 		Preview->SetTitle("Preview");
@@ -377,7 +377,7 @@ void __deal_with_filenames(SongList &v)
 							{
 								if (preview)
 								{
-									Preview->Add("[.b]" + s.GetShortFilename() + ":[/b]\n");
+									Preview->Add("[.b]" + s.GetName() + ":[/b]\n");
 									Preview->Add(ParseFilename(s, Config.pattern, preview) + "\n");
 								}
 								else
@@ -385,7 +385,7 @@ void __deal_with_filenames(SongList &v)
 							}
 							else
 							{
-								const string &file = s.GetShortFilename();
+								const string &file = s.GetName();
 								int last_dot = file.find_last_of(".");
 								string extension = file.substr(last_dot);
 								s.GetEmptyFields(1);
@@ -396,7 +396,7 @@ void __deal_with_filenames(SongList &v)
 										new_file = "[.red]!EMPTY![/red]";
 									else
 									{
-										ShowMessage("File '" + s.GetShortFilename() + "' would have an empty name!");
+										ShowMessage("File '" + s.GetName() + "' would have an empty name!");
 										success = 0;
 										break;
 									}

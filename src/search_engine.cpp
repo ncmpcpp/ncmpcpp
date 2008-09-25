@@ -58,7 +58,7 @@ void PrepareSearchEngine(Song &s)
 	s.Clear();
 	mSearcher->Clear();
 	mSearcher->Reset();
-	mSearcher->AddOption(make_pair("[.b]Filename:[/b] " + s.GetShortFilename(), Song()));
+	mSearcher->AddOption(make_pair("[.b]Filename:[/b] " + s.GetName(), Song()));
 	mSearcher->AddOption(make_pair("[.b]Title:[/b] " + s.GetTitle(), Song()));
 	mSearcher->AddOption(make_pair("[.b]Artist:[/b] " + s.GetArtist(), Song()));
 	mSearcher->AddOption(make_pair("[.b]Album:[/b] " + s.GetAlbum(), Song()));
@@ -121,7 +121,7 @@ void Search(Song &s)
 		if (!search_case_sensitive)
 		{
 			string t;
-			t = copy.GetShortFilename();
+			t = copy.GetName();
 			transform(t.begin(), t.end(), t.begin(), tolower);
 			copy.SetFile(t);
 		
@@ -146,7 +146,7 @@ void Search(Song &s)
 			copy.SetComment(t);
 		}
 		else
-			copy.SetFile(copy.GetShortFilename());
+			copy.SetFile(copy.GetName());
 		
 		if (search_match_to_pattern)
 		{

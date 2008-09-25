@@ -115,7 +115,7 @@ string Song::GetFile() const
 	return !itsSong->file ? (itsGetEmptyFields ? "" : EMPTY_TAG) : itsSong->file;
 }
 
-string Song::GetShortFilename() const
+string Song::GetName() const
 {
 	return !itsSong->file ? (itsGetEmptyFields ? "" : EMPTY_TAG) : (itsSlash != string::npos && !isStream ? string(itsSong->file).substr(itsSlash+1) : itsSong->file);
 }
