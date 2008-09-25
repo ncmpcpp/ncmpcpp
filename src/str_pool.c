@@ -18,7 +18,7 @@
 
 #include "str_pool.h"
 
-#include <assert.h>
+//#include <assert.h>
 #include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
@@ -38,7 +38,7 @@ calc_hash(const char *p)
 {
 	unsigned hash = 5381;
 
-	assert(p != NULL);
+	//assert(p != NULL);
 
 	while (*p != 0)
 		hash = (hash << 5) + hash + *p++;
@@ -72,7 +72,7 @@ char *str_pool_get(const char *value)
 	slot_p = &slots[calc_hash(value) % NUM_SLOTS];
 	for (slot = *slot_p; slot != NULL; slot = slot->next) {
 		if (strcmp(value, slot->value) == 0 && slot->ref < 0xff) {
-			assert(slot->ref > 0);
+			//assert(slot->ref > 0);
 			++slot->ref;
 			return slot->value;
 		}
@@ -87,7 +87,7 @@ char *str_pool_dup(const char *value)
 {
 	struct slot *slot = value_to_slot(value);
 
-	assert(slot->ref > 0);
+	//assert(slot->ref > 0);
 
 	if (slot->ref < 0xff) {
 		++slot->ref;
@@ -108,7 +108,7 @@ void str_pool_put(const char *value)
 	struct slot **slot_p, *slot;
 
 	slot = value_to_slot(value);
-	assert(slot->ref > 0);
+	//assert(slot->ref > 0);
 	--slot->ref;
 
 	if (slot->ref > 0)
@@ -117,7 +117,7 @@ void str_pool_put(const char *value)
 	for (slot_p = &slots[calc_hash(value) % NUM_SLOTS];
 	     *slot_p != slot;
 	     slot_p = &(*slot_p)->next) {
-		assert(*slot_p != NULL);
+		//assert(*slot_p != NULL);
 	}
 
 	*slot_p = slot->next;
