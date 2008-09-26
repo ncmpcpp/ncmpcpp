@@ -28,9 +28,9 @@ extern Menu< std::pair<string, Song> > *mSearcher;
 bool search_match_to_pattern = 1;
 bool search_case_sensitive = 0;
 
-string SearchEngineDisplayer(const std::pair<string, Song> &pair, void *, const Menu< std::pair<string, Song> > *)
+string SearchEngineDisplayer(const std::pair<string, Song> &pair, void *, const Menu< std::pair<string, Song> > *menu)
 {
-	return pair.first == "." ? DisplaySong(pair.second) : pair.first;
+	return pair.first == "." ? DisplaySong(pair.second, &Config.song_list_format, (Menu<Song> *) menu) : pair.first;
 }
 
 void UpdateFoundList()
