@@ -2621,7 +2621,7 @@ int main(int argc, char *argv[])
 				if (s->GetDirectory() == EMPTY_TAG) // for streams
 					continue;
 				
-				string option = DisplaySong(*s);
+				string option = DisplaySong(*s, &Config.song_list_format, mPlaylist);
 				GetDirectory(s->GetDirectory());
 				for (int i = 0; i < mBrowser->Size(); i++)
 				{
