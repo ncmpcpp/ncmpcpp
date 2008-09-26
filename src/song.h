@@ -61,17 +61,20 @@ class Song
 		int GetPosition() const { return itsSong->pos; }
 		int GetID() const { return itsSong->id; }
 		
-		void SetFile(const string &str);
-		void SetArtist(const string &str);
-		void SetTitle(const string &str);
-		void SetAlbum(const string &str);
-		void SetTrack(const string &str);
-		void SetTrack(int track);
-		void SetYear(const string &str);
-		void SetYear(int year);
-		void SetGenre(const string &str);
-		void SetComment(const string &str);
-		void SetPosition(int pos);
+		void SetFile(const string &);
+		void SetArtist(const string &);
+		void SetTitle(const string &);
+		void SetAlbum(const string &);
+		void SetTrack(const string &);
+		void SetTrack(int);
+		void SetYear(const string &);
+		void SetYear(int);
+		void SetGenre(const string &);
+		void SetComposer(const string &);
+		void SetPerformer(const string &);
+		void SetDisc(const string &);
+		void SetComment(const string &);
+		void SetPosition(int);
 		
 		void SetNewName(string name) { itsNewName = name == GetName() ? "" : name; }
 		string GetNewName() const { return itsNewName; }

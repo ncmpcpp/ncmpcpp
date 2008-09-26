@@ -238,6 +238,27 @@ void Song::SetGenre(const string &str)
 	itsSong->genre = str.empty() ? 0 : str_pool_get(str.c_str());
 }
 
+void Song::SetComposer(const string &str)
+{
+	if (itsSong->composer)
+		str_pool_put(itsSong->composer);
+	itsSong->composer = str.empty() ? 0 : str_pool_get(str.c_str());
+}
+
+void Song::SetPerformer(const string &str)
+{
+	if (itsSong->performer)
+		str_pool_put(itsSong->performer);
+	itsSong->performer = str.empty() ? 0 : str_pool_get(str.c_str());
+}
+
+void Song::SetDisc(const string &str)
+{
+	if (itsSong->disc)
+		str_pool_put(itsSong->disc);
+	itsSong->disc = str.empty() ? 0 : str_pool_get(str.c_str());
+}
+
 void Song::SetComment(const string &str)
 {
 	if (itsSong->comment)

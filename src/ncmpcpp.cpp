@@ -649,12 +649,12 @@ int main(int argc, char *argv[])
 				mEditorTags->Refresh();
 			}
 			
-			if (redraw_screen && wCurrent == mEditorTagTypes && mEditorTagTypes->GetChoice() < 10)
+			if (redraw_screen && wCurrent == mEditorTagTypes && mEditorTagTypes->GetChoice() < 13)
 			{
 				mEditorTags->Refresh(1);
 				redraw_screen = 0;
 			}
-			else if (mEditorTagTypes->GetChoice() >= 10)
+			else if (mEditorTagTypes->GetChoice() >= 13)
 				mEditorTags->Window::Clear();
 		}
 		// album editor end
@@ -949,12 +949,11 @@ int main(int argc, char *argv[])
 #				ifdef HAVE_TAGLIB_H
 				case csTinyTagEditor:
 				{
-					int id = mTagEditor->GetRealChoice()+1;
 					int option = mTagEditor->GetChoice();
 					LockStatusbar();
 					Song &s = edited_song;
 					
-					switch (id)
+					switch (option-7)
 					{
 						case 1:
 						{
@@ -1018,6 +1017,36 @@ int main(int argc, char *argv[])
 						}
 						case 7:
 						{
+							wFooter->WriteXY(0, Config.statusbar_visibility, "[.b]Composer:[/b] ", 1);
+							if (s.GetComposer() == EMPTY_TAG)
+								s.SetComposer(wFooter->GetString());
+							else
+								s.SetComposer(wFooter->GetString(s.GetComposer()));
+							mTagEditor->UpdateOption(option, "[.b]Composer:[/b] " + s.GetComposer());
+							break;
+						}
+						case 8:
+						{
+							wFooter->WriteXY(0, Config.statusbar_visibility, "[.b]Performer:[/b] ", 1);
+							if (s.GetPerformer() == EMPTY_TAG)
+								s.SetPerformer(wFooter->GetString());
+							else
+								s.SetPerformer(wFooter->GetString(s.GetPerformer()));
+							mTagEditor->UpdateOption(option, "[.b]Performer:[/b] " + s.GetPerformer());
+							break;
+						}
+						case 9:
+						{
+							wFooter->WriteXY(0, Config.statusbar_visibility, "[.b]Disc:[/b] ", 1);
+							if (s.GetDisc() == EMPTY_TAG)
+								s.SetDisc(wFooter->GetString());
+							else
+								s.SetDisc(wFooter->GetString(s.GetDisc()));
+							mTagEditor->UpdateOption(option, "[.b]Disc:[/b] " + s.GetDisc());
+							break;
+						}
+						case 10:
+						{
 							wFooter->WriteXY(0, Config.statusbar_visibility, "[.b]Comment:[/b] ", 1);
 							if (s.GetComment() == EMPTY_TAG)
 								s.SetComment(wFooter->GetString());
@@ -1026,7 +1055,7 @@ int main(int argc, char *argv[])
 							mTagEditor->UpdateOption(option, "[.b]Comment:[/b] " + s.GetComment());
 							break;
 						}
-						case 8:
+						case 12:
 						{
 							wFooter->WriteXY(0, Config.statusbar_visibility, "[.b]Filename:[/b] ", 1);
 							string filename = s.GetNewName().empty() ? s.GetName() : s.GetNewName();
@@ -1038,7 +1067,7 @@ int main(int argc, char *argv[])
 							mTagEditor->UpdateOption(option, "[.b]Filename:[/b] " + (s.GetNewName().empty() ? s.GetName() : s.GetNewName()));
 							break;
 						}
-						case 9:
+						case 14:
 						{
 							ShowMessage("Updating tags...");
 							if (WriteTags(s))
@@ -1050,7 +1079,7 @@ int main(int argc, char *argv[])
 							}
 								ShowMessage("Error writing tags!");
 						}
-						case 10:
+						case 15:
 						{
 							wCurrent->Clear();
 							wCurrent = wPrev;
@@ -1511,9 +1540,18 @@ int main(int argc, char *argv[])
 							set = &Song::SetGenre;
 							break;
 						case 6:
-							set = &Song::SetComment;
+							set = &Song::SetComposer;
 							break;
 						case 7:
+							set = &Song::SetPerformer;
+							break;
+						case 8:
+							set = &Song::SetDisc;
+							break;
+						case 9:
+							set = &Song::SetComment;
+							break;
+						case 10:
 						{
 							if (wCurrent == mEditorTagTypes)
 							{
@@ -1540,13 +1578,13 @@ int main(int argc, char *argv[])
 							}
 							continue;
 						}
-						case 8: // reset
+						case 11: // reset
 						{
 							mEditorTags->Clear(0);
 							ShowMessage("Changes reset");
 							continue;
 						}
-						case 9: // save
+						case 12: // save
 						{
 							bool success = 1;
 							ShowMessage("Writing changes...");
@@ -1554,7 +1592,7 @@ int main(int argc, char *argv[])
 							{
 								if (!WriteTags(**it))
 								{
-									ShowMessage("Error writing tags!");
+									ShowMessage("Error writing tags in '" + (*it)->GetFile() + "'!");
 									success = 0;
 									break;
 								}
@@ -1587,6 +1625,7 @@ int main(int argc, char *argv[])
 						UnlockStatusbar();
 						for (SongList::iterator it = list.begin(); it != list.end(); it++)
 							(**it.*set)(new_tag);
+						redraw_screen = 1;
 					}
 					else if (wCurrent == mEditorTags && set != NULL)
 					{
@@ -1790,7 +1829,7 @@ int main(int argc, char *argv[])
 					wCurrent = mEditorTagTypes;
 					mEditorTagTypes->HighlightColor(Config.active_column_color);
 				}
-				else if (wCurrent == mEditorTagTypes && mEditorTagTypes->GetChoice() < 10 && !mEditorTags->Empty())
+				else if (wCurrent == mEditorTagTypes && mEditorTagTypes->GetChoice() < 12 && !mEditorTags->Empty())
 				{
 					mEditorTagTypes->HighlightColor(Config.main_highlight_color);
 					wCurrent->Refresh();
@@ -3326,6 +3365,9 @@ int main(int argc, char *argv[])
 					mEditorTagTypes->AddOption("Year");
 					mEditorTagTypes->AddOption("Track");
 					mEditorTagTypes->AddOption("Genre");
+					mEditorTagTypes->AddOption("Composer");
+					mEditorTagTypes->AddOption("Performer");
+					mEditorTagTypes->AddOption("Disc");
 					mEditorTagTypes->AddOption("Comment");
 					mEditorTagTypes->AddSeparator();
 					mEditorTagTypes->AddOption("Filename");

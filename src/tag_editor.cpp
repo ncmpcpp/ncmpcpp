@@ -22,6 +22,11 @@
 
 #ifdef HAVE_TAGLIB_H
 
+#include "id3v2tag.h"
+#include "textidentificationframe.h"
+#include "mpegfile.h"
+#include "flacfile.h"
+
 #include "helpers.h"
 #include "status_checker.h"
 
@@ -75,8 +80,14 @@ string DisplayTag(const Song &s, void *data, const Menu<Song> *null)
 		case 5:
 			return s.GetGenre();
 		case 6:
-			return s.GetComment();
+			return s.GetComposer();
+		case 7:
+			return s.GetPerformer();
 		case 8:
+			return s.GetDisc();
+		case 9:
+			return s.GetComment();
+		case 11:
 			return s.GetNewName().empty() ? s.GetName() : s.GetName() + " [." + Config.color2 + "]->[/" + Config.color2 + "] " + s.GetNewName();
 		default:
 			return "";
@@ -91,6 +102,9 @@ bool GetSongTags(Song &s)
 	if (f.isNull())
 		return false;
 	s.SetComment(f.tag()->comment().to8Bit(UNICODE));
+	
+	string ext = s.GetFile();
+	ext = ext.substr(ext.find_last_of(".")+1);
 	
 	mTagEditor->Clear();
 	mTagEditor->Reset();
@@ -111,6 +125,9 @@ bool GetSongTags(Song &s)
 	mTagEditor->AddOption("[.b]Year:[/b] " + s.GetYear());
 	mTagEditor->AddOption("[.b]Track:[/b] " + s.GetTrack());
 	mTagEditor->AddOption("[.b]Genre:[/b] " + s.GetGenre());
+	mTagEditor->AddOption("[.b]Composer:[/b] " + s.GetComposer(), 0, ext != "mp3" && ext != "flac");
+	mTagEditor->AddOption("[.b]Performer:[/b] " + s.GetPerformer(), 0, ext != "mp3" && ext != "flac");
+	mTagEditor->AddOption("[.b]Disc:[/b] " + s.GetDisc(), 0, ext != "mp3" && ext != "flac");
 	mTagEditor->AddOption("[.b]Comment:[/b] " + s.GetComment());
 	mTagEditor->AddSeparator();
 	mTagEditor->AddOption("[.b]Filename:[/b] " + s.GetName());
@@ -122,20 +139,57 @@ bool GetSongTags(Song &s)
 
 bool WriteTags(Song &s)
 {
+	using namespace TagLib;
 	string path_to_file = Config.mpd_music_dir + s.GetFile();
-	TagLib::FileRef f(path_to_file.c_str());
+	FileRef f(path_to_file.c_str());
 	if (!f.isNull())
 	{
 		s.GetEmptyFields(1);
-		f.tag()->setTitle(s.GetTitle());
+		f.tag()->setTitle(TO_WSTRING(s.GetTitle()));
 		f.tag()->setArtist(TO_WSTRING(s.GetArtist()));
 		f.tag()->setAlbum(TO_WSTRING(s.GetAlbum()));
 		f.tag()->setYear(StrToInt(s.GetYear()));
 		f.tag()->setTrack(StrToInt(s.GetTrack()));
 		f.tag()->setGenre(TO_WSTRING(s.GetGenre()));
 		f.tag()->setComment(TO_WSTRING(s.GetComment()));
-		s.GetEmptyFields(0);
 		f.save();
+		
+		string ext = s.GetFile();
+		ext = ext.substr(ext.find_last_of(".")+1);
+		ID3v2::Tag *tag = 0;
+		File *file = 0;
+		
+		if (ext == "mp3")
+		{
+			file = new MPEG::File(path_to_file.c_str());
+			tag = ((MPEG::File *)file)->ID3v2Tag();
+		}
+		else if (ext == "flac")
+		{
+			file = new FLAC::File(path_to_file.c_str());
+			tag = ((FLAC::File *)file)->ID3v2Tag();
+		}
+		if (file && tag)
+		{
+			ByteVector Composer("TCOM");
+			ByteVector Performer("TOPE");
+			ByteVector Disc("TPOS");
+			ID3v2::Frame *ComposerFrame = new ID3v2::TextIdentificationFrame(Composer);
+			ID3v2::Frame *PerformerFrame = new ID3v2::TextIdentificationFrame(Performer);
+			ID3v2::Frame *DiscFrame = new ID3v2::TextIdentificationFrame(Disc);
+			ComposerFrame->setText(TO_WSTRING(s.GetComposer()));
+			PerformerFrame->setText(TO_WSTRING(s.GetPerformer()));
+			DiscFrame->setText(TO_WSTRING(s.GetDisc()));
+			tag->removeFrames(Composer);
+			tag->addFrame(ComposerFrame);
+			tag->removeFrames(Performer);
+			tag->addFrame(PerformerFrame);
+			tag->removeFrames(Disc);
+			tag->addFrame(DiscFrame);
+			file->save();
+			delete file;
+		}
+		s.GetEmptyFields(0);
 		if (!s.GetNewName().empty())
 		{
 			string old_name = Config.mpd_music_dir + s.GetFile();
