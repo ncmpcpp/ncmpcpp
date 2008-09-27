@@ -141,6 +141,7 @@ struct ncmpcpp_config
 	
 	int mpd_connection_timeout;
 	int crossfade_time;
+	int seek_time;
 	int playlist_disable_highlight_delay;
 	int message_delay_time;
 };

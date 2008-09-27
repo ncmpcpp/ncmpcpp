@@ -2329,7 +2329,7 @@ int main(int argc, char *argv[])
 				timer = time(NULL);
 				mPlaylist->ReadKey(input);
 				
-				int howmuch = Config.incremental_seeking ? (timer-t)/2+1 : 1;
+				int howmuch = Config.incremental_seeking ? (timer-t)/2+Config.seek_time : Config.seek_time;
 				
 				if (songpos < s.GetTotalLength() && Keypressed(input, Key.SeekForward))
 				{

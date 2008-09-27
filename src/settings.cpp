@@ -193,6 +193,7 @@ void DefaultConfiguration(ncmpcpp_config &conf)
 	conf.set_window_title = true;
 	conf.mpd_connection_timeout = 15;
 	conf.crossfade_time = 5;
+	conf.seek_time = 1;
 	conf.playlist_disable_highlight_delay = 5;
 	conf.message_delay_time = 4;
 }
@@ -468,6 +469,11 @@ void ReadConfiguration(ncmpcpp_config &conf)
 			{
 				if (StrToInt(v) > 0)
 					conf.crossfade_time = StrToInt(v);
+			}
+			else if (it->find("seek_time") != string::npos)
+			{
+				if (StrToInt(v) > 0)
+					conf.seek_time = StrToInt(v);
 			}
 			else if (it->find("playlist_disable_highlight_delay") != string::npos)
 			{

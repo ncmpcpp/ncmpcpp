@@ -98,6 +98,8 @@
 #
 #incremental_seeking = "yes"
 #
+#seek_time = "1"
+#
 #autocenter_mode = "no"
 #
 #repeat_one_mode = "no"
