@@ -210,6 +210,7 @@ void Scrollpad::Clear(bool clear_screen)
 	delwin(itsWindow);
 	itsWindow = newpad(itsHeight, itsWidth);
 	SetColor(itsColor, itsBgColor);
+	SetTimeout(itsWindowTimeout);
 	if (clear_screen)
 		Window::Clear();
 }

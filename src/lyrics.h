@@ -25,12 +25,13 @@
 
 #include <fstream>
 #ifdef HAVE_CURL_CURL_H
+# include <pthread.h>
 # include "curl/curl.h"
-string GetArtistInfo(string);
+void * GetArtistInfo(void *);
 #endif
 
 void EscapeHtml(string &);
-string GetLyrics(string, string);
+void * GetLyrics(void *);
 
 #endif
 

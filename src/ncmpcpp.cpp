@@ -106,6 +106,12 @@ string editor_highlighted_dir;
 NcmpcppScreen current_screen;
 NcmpcppScreen prev_screen;
 
+#ifdef HAVE_CURL_CURL_H
+pthread_t lyrics_downloader;
+pthread_t artist_info_downloader;
+extern bool data_ready;
+#endif
+
 bool dont_change_now_playing = 0;
 bool block_progressbar_update = 0;
 bool block_statusbar_update = 0;
@@ -669,6 +675,29 @@ int main(int argc, char *argv[])
 			else
 				reload_lyrics = 0;
 		}
+#		ifdef HAVE_CURL_CURL_H
+		if (data_ready)
+		{
+			void *result;
+			string *str_result = 0;
+			if (lyrics_downloader)
+			{
+				pthread_join(lyrics_downloader, &result);
+				str_result = static_cast<string *>(result);
+				sLyrics->Add(*str_result);
+				lyrics_downloader = 0;
+			}
+			if (artist_info_downloader)
+			{
+				pthread_join(artist_info_downloader, &result);
+				str_result = static_cast<string *>(result);
+				sInfo->Add(*str_result);
+				artist_info_downloader = 0;
+			}
+			delete str_result;
+			data_ready = 0;
+		}
+#		endif
 		// lyrics end
 		
 		if (Config.columns_in_playlist && wCurrent == mPlaylist)
@@ -3097,45 +3126,47 @@ int main(int argc, char *argv[])
 			||  (wCurrent == mPlaylistEditor && !mPlaylistEditor->Empty())
 			||  (wCurrent == mEditorTags && !mEditorTags->Empty()))
 			{
-				string artist;
+				string *artist = new string();
 				int id = wCurrent->GetChoice();
 				switch (current_screen)
 				{
 					case csPlaylist:
-						artist = mPlaylist->at(id).GetArtist();
+						*artist = mPlaylist->at(id).GetArtist();
 						break;
 					case csBrowser:
-						artist = mBrowser->at(id).song->GetArtist();
+						*artist = mBrowser->at(id).song->GetArtist();
 						break;
 					case csSearcher:
-						artist = mSearcher->at(id).second.GetArtist();
+						*artist = mSearcher->at(id).second.GetArtist();
 						break;
 					case csLibrary:
-						artist = mLibArtists->at(id);
+						*artist = mLibArtists->at(id);
 						break;
 					case csPlaylistEditor:
-						artist = mPlaylistEditor->at(id).GetArtist();
+						*artist = mPlaylistEditor->at(id).GetArtist();
 						break;
 					case csTagEditor:
-						artist = mEditorTags->at(id).GetArtist();
+						*artist = mEditorTags->at(id).GetArtist();
 						break;
 					default:
 						break;
 				}
-				if (artist != UNKNOWN_ARTIST)
+				if (*artist != UNKNOWN_ARTIST)
 				{
 					wPrev = wCurrent;
 					wCurrent = sInfo;
 					prev_screen = current_screen;
 					current_screen = csInfo;
 					redraw_header = 1;
-					info_title = "Artist's info - " + artist;
+					info_title = "Artist's info - " + *artist;
 					sInfo->Clear();
 					sInfo->WriteXY(0, 0, "Fetching artist's info...");
 					sInfo->Refresh();
-					sInfo->Add(GetArtistInfo(artist));
-					sInfo->Hide();
+					if (!artist_info_downloader)
+						pthread_create(&artist_info_downloader, NULL, GetArtistInfo, artist);
 				}
+				else
+					delete artist;
 			}
 		}
 #		endif // HAVE_CURL_CURL_H
@@ -3220,7 +3251,14 @@ int main(int argc, char *argv[])
 					lyrics_title = "Lyrics: " + s->GetArtist() + " - " + s->GetTitle();
 					sLyrics->WriteXY(0, 0, "Fetching lyrics...");
 					sLyrics->Refresh();
-					sLyrics->Add(GetLyrics(s->GetArtist(), s->GetTitle()));
+#					ifdef HAVE_CURL_CURL_H
+					if (!lyrics_downloader)
+						pthread_create(&lyrics_downloader, NULL, GetLyrics, s);
+#					else
+					string *lyrics = static_cast<string *>(GetLyrics(s));
+					sLyrics->Add(*lyrics);
+					delete lyrics;
+#					endif
 				}
 			}
 		}
