@@ -151,6 +151,7 @@ void DefaultConfiguration(ncmpcpp_config &);
 void ReadKeys(ncmpcpp_keys &);
 void ReadConfiguration(ncmpcpp_config &);
 
+string IntoStr(Color);
 string GetLineValue(const string &, char = '"', char = '"');
 
 #endif

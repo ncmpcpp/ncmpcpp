@@ -218,6 +218,32 @@ string GetLineValue(const string &line, char a, char b)
 		return "";
 }
 
+string IntoStr(Color color)
+{
+	string result;
+	
+	if (color == clDefault)
+		result = "default";
+	else if (color == clBlack)
+		result = "black";
+	else if (color == clRed)
+		result = "red";
+	else if (color == clGreen)
+		result = "green";
+	else if (color == clYellow)
+		result = "yellow";
+	else if (color == clBlue)
+		result = "blue";
+	else if (color == clMagenta)
+		result = "magenta";
+	else if (color == clCyan)
+		result = "cyan";
+	else if (color == clWhite)
+		result = "white";
+	
+	return result;
+}
+
 namespace
 {
 	void GetKeys(string line, int *key)
@@ -241,32 +267,6 @@ namespace
 			one = line;
 		key[0] = !one.empty() && one[0] == '\'' ? one[1] : (atoi(one.c_str()) == 0 ? null_key : atoi(one.c_str()));
 		key[1] = !two.empty() && two[0] == '\'' ? two[1] : (atoi(two.c_str()) == 0 ? null_key : atoi(two.c_str()));
-	}
-	
-	string IntoStr(Color color)
-	{
-		string result;
-		
-		if (color == clDefault)
-			result = "default";
-		else if (color == clBlack)
-			result = "black";
-		else if (color == clRed)
-			result = "red";
-		else if (color == clGreen)
-			result = "green";
-		else if (color == clYellow)
-			result = "yellow";
-		else if (color == clBlue)
-			result = "blue";
-		else if (color == clMagenta)
-			result = "magenta";
-		else if (color == clCyan)
-			result = "cyan";
-		else if (color == clWhite)
-			result = "white";
-		
-		return result;
 	}
 
 	Color IntoColor(const string &color)
