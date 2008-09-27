@@ -30,7 +30,6 @@
 void * GetArtistInfo(void *);
 #endif
 
-void EscapeHtml(string &);
 void * GetLyrics(void *);
 
 #endif

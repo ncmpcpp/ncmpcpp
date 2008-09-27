@@ -23,62 +23,65 @@
 
 extern ncmpcpp_keys Key;
 
-string DisplayKeys(int *key, int size = 2)
+namespace
 {
-	bool backspace = 1;
-	string result = "\t";
-	for (int i = 0; i < size; i++)
+	string DisplayKeys(int *key, int size = 2)
 	{
-		if (key[i] == null_key);
-		else if (key[i] == 259)
-			result += "Up";
-		else if (key[i] == 258)
-			result += "Down";
-		else if (key[i] == 339)
-			result += "Page Up";
-		else if (key[i] == 338)
-			result += "Page Down";
-		else if (key[i] == 262)
-			result += "Home";
-		else if (key[i] == 360)
-			result += "End";
-		else if (key[i] == 32)
-			result += "Space";
-		else if (key[i] == 10)
-			result += "Enter";
-		else if (key[i] == 330)
-			result += "Delete";
-		else if (key[i] == 261)
-			result += "Right";
-		else if (key[i] == 260)
-			result += "Left";
-		else if (key[i] == 9)
-			result += "Tab";
-		else if (key[i] >= 1 && key[i] <= 26)
+		bool backspace = 1;
+		string result = "\t";
+		for (int i = 0; i < size; i++)
 		{
-			result += "Ctrl-";
-			result += key[i]+64;
+			if (key[i] == null_key);
+			else if (key[i] == 259)
+				result += "Up";
+			else if (key[i] == 258)
+				result += "Down";
+			else if (key[i] == 339)
+				result += "Page Up";
+			else if (key[i] == 338)
+				result += "Page Down";
+			else if (key[i] == 262)
+				result += "Home";
+			else if (key[i] == 360)
+				result += "End";
+			else if (key[i] == 32)
+				result += "Space";
+			else if (key[i] == 10)
+				result += "Enter";
+			else if (key[i] == 330)
+				result += "Delete";
+			else if (key[i] == 261)
+				result += "Right";
+			else if (key[i] == 260)
+				result += "Left";
+			else if (key[i] == 9)
+				result += "Tab";
+			else if (key[i] >= 1 && key[i] <= 26)
+			{
+				result += "Ctrl-";
+				result += key[i]+64;
+			}
+			else if (key[i] >= 265 && key[i] <= 276)
+			{
+				result += "F";
+				result += key[i]-216;
+			}
+			else if ((key[i] == 263 || key[i] == 127) && !backspace);
+			else if ((key[i] == 263 || key[i] == 127) && backspace)
+			{
+				result += "Backspace";
+				backspace = 0;
+			}
+			else
+				result += key[i];
+			result += " ";
 		}
-		else if (key[i] >= 265 && key[i] <= 276)
-		{
-			result += "F";
-			result += key[i]-216;
-		}
-		else if ((key[i] == 263 || key[i] == 127) && !backspace);
-		else if ((key[i] == 263 || key[i] == 127) && backspace)
-		{
-			result += "Backspace";
-			backspace = 0;
-		}
-		else
-			result += key[i];
-		result += " ";
+		if (result.length() > 12)
+			result = result.substr(0, 12);
+		for (int i = result.length(); i <= 12; result += " ", i++);
+		result += ": ";
+		return result;
 	}
-	if (result.length() > 12)
-		result = result.substr(0, 12);
-	for (int i = result.length(); i <= 12; result += " ", i++);
-	result += ": ";
-	return result;
 }
 
 string GetKeybindings()

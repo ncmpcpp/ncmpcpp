@@ -147,12 +147,10 @@ struct ncmpcpp_config
 
 void DefaultKeys(ncmpcpp_keys &);
 void DefaultConfiguration(ncmpcpp_config &);
-void GetKeys(string, int *);
-string GetLineValue(const string &, char = '"', char = '"');
-string IntoStr(Color);
-Color IntoColor(const string &);
 void ReadKeys(ncmpcpp_keys &);
 void ReadConfiguration(ncmpcpp_config &);
+
+string GetLineValue(const string &, char = '"', char = '"');
 
 #endif
 

@@ -197,29 +197,6 @@ void DefaultConfiguration(ncmpcpp_config &conf)
 	conf.message_delay_time = 4;
 }
 
-void GetKeys(string line, int *key)
-{
-	int i = line.find("=")+1;
-	line = line.substr(i, line.length()-i);
-	i = 0;
-	if (line[i] == ' ')
-		while (line[++i] == ' ');
-	line = line.substr(i, line.length()-i);
-	i = line.find(" ");
-	string one;
-	string two;
-	if (i != string::npos)
-	{
-		one = line.substr(0, i);
-		i++;
-		two = line.substr(i, line.length()-i);
-	}
-	else
-		one = line;
-	key[0] = !one.empty() && one[0] == '\'' ? one[1] : (atoi(one.c_str()) == 0 ? null_key : atoi(one.c_str()));
-	key[1] = !two.empty() && two[0] == '\'' ? two[1] : (atoi(two.c_str()) == 0 ? null_key : atoi(two.c_str()));
-}
-
 string GetLineValue(const string &line, char a, char b)
 {
 	int i = 0;
@@ -240,54 +217,80 @@ string GetLineValue(const string &line, char a, char b)
 		return "";
 }
 
-string IntoStr(Color color)
+namespace
 {
-	string result;
+	void GetKeys(string line, int *key)
+	{
+		int i = line.find("=")+1;
+		line = line.substr(i, line.length()-i);
+		i = 0;
+		if (line[i] == ' ')
+			while (line[++i] == ' ');
+		line = line.substr(i, line.length()-i);
+		i = line.find(" ");
+		string one;
+		string two;
+		if (i != string::npos)
+		{
+			one = line.substr(0, i);
+			i++;
+			two = line.substr(i, line.length()-i);
+		}
+		else
+			one = line;
+		key[0] = !one.empty() && one[0] == '\'' ? one[1] : (atoi(one.c_str()) == 0 ? null_key : atoi(one.c_str()));
+		key[1] = !two.empty() && two[0] == '\'' ? two[1] : (atoi(two.c_str()) == 0 ? null_key : atoi(two.c_str()));
+	}
 	
-	if (color == clDefault)
-		result = "default";
-	else if (color == clBlack)
-		result = "black";
-	else if (color == clRed)
-		result = "red";
-	else if (color == clGreen)
-		result = "green";
-	else if (color == clYellow)
-		result = "yellow";
-	else if (color == clBlue)
-		result = "blue";
-	else if (color == clMagenta)
-		result = "magenta";
-	else if (color == clCyan)
-		result = "cyan";
-	else if (color == clWhite)
-		result = "white";
-	
-	return result;
-}
+	string IntoStr(Color color)
+	{
+		string result;
+		
+		if (color == clDefault)
+			result = "default";
+		else if (color == clBlack)
+			result = "black";
+		else if (color == clRed)
+			result = "red";
+		else if (color == clGreen)
+			result = "green";
+		else if (color == clYellow)
+			result = "yellow";
+		else if (color == clBlue)
+			result = "blue";
+		else if (color == clMagenta)
+			result = "magenta";
+		else if (color == clCyan)
+			result = "cyan";
+		else if (color == clWhite)
+			result = "white";
+		
+		return result;
+	}
 
-Color IntoColor(const string &color)
-{
-	Color result = clDefault;
-	
-	if (color == "black")
-		result = clBlack;
-	else if (color == "red")
-		result = clRed;
-	else if (color == "green")
-		result = clGreen;
-	else if (color == "yellow")
-		result = clYellow;
-	else if (color == "blue")
-		result = clBlue;
-	else if (color == "magenta")
-		result = clMagenta;
-	else if (color == "cyan")
-		result = clCyan;
-	else if (color == "white")
-		result = clWhite;
-	
-	return result;
+	Color IntoColor(const string &color)
+	{
+		Color result = clDefault;
+		
+		if (color == "black")
+			result = clBlack;
+		else if (color == "red")
+			result = clRed;
+		else if (color == "green")
+			result = clGreen;
+		else if (color == "yellow")
+			result = clYellow;
+		else if (color == "blue")
+			result = clBlue;
+		else if (color == "magenta")
+			result = clMagenta;
+		else if (color == "cyan")
+			result = clCyan;
+		else if (color == "white")
+			result = clWhite;
+		
+		return result;
+	}
 }
 
 void ReadKeys(ncmpcpp_keys &keys)

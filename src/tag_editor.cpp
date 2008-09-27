@@ -189,98 +189,101 @@ bool WriteTags(Song &s)
 		return false;
 }
 
-SongSetFunction IntoSetFunction(char c)
+namespace
 {
-	switch (c)
+	SongSetFunction IntoSetFunction(char c)
 	{
-		case 'a':
-			return &Song::SetArtist;
-		case 't':
-			return &Song::SetTitle;
-		case 'b':
-			return &Song::SetAlbum;
-		case 'y':
-			return &Song::SetYear;
-		case 'n':
-			return &Song::SetTrack;
-		case 'g':
-			return &Song::SetGenre;
-		case 'c':
-			return &Song::SetComposer;
-		case 'p':
-			return &Song::SetPerformer;
-		case 'd':
-			return &Song::SetDisc;
-		case 'C':
-			return &Song::SetComment;
-		default:
-			return NULL;
+		switch (c)
+		{
+			case 'a':
+				return &Song::SetArtist;
+			case 't':
+				return &Song::SetTitle;
+			case 'b':
+				return &Song::SetAlbum;
+			case 'y':
+				return &Song::SetYear;
+			case 'n':
+				return &Song::SetTrack;
+			case 'g':
+				return &Song::SetGenre;
+			case 'c':
+				return &Song::SetComposer;
+			case 'p':
+				return &Song::SetPerformer;
+			case 'd':
+				return &Song::SetDisc;
+			case 'C':
+				return &Song::SetComment;
+			default:
+				return NULL;
+		}
 	}
-}
 
-string GenerateFilename(const Song &s, string &pattern)
-{
-	const string unallowed_chars = "\"*/:<>?\\|";
-	string result = Window::OmitBBCodes(DisplaySong(s, &pattern));
-	for (string::const_iterator it = unallowed_chars.begin(); it != unallowed_chars.end(); it++)
+	string GenerateFilename(const Song &s, string &pattern)
 	{
-		for (int i = 0; i < result.length(); i++)
+		const string unallowed_chars = "\"*/:<>?\\|";
+		string result = Window::OmitBBCodes(DisplaySong(s, &pattern));
+		for (string::const_iterator it = unallowed_chars.begin(); it != unallowed_chars.end(); it++)
 		{
-			if (result[i] == *it)
-				result.erase(result.begin()+i);
+			for (int i = 0; i < result.length(); i++)
+			{
+				if (result[i] == *it)
+					result.erase(result.begin()+i);
+			}
 		}
+		return result;
 	}
-	return result;
-}
 
-string ParseFilename(Song &s, string mask, bool preview)
-{
-	std::stringstream result;
-	vector<string> separators;
-	vector< std::pair<char, string> > tags;
-	string file = s.GetName().substr(0, s.GetName().find_last_of("."));
-	
-	try
+	string ParseFilename(Song &s, string mask, bool preview)
 	{
-		for (int i = mask.find("%"); i != string::npos; i = mask.find("%"))
-		{
-			tags.push_back(make_pair(mask.at(i+1), ""));
-			mask = mask.substr(i+2);
-			i = mask.find("%");
-			if (!mask.empty())
-				separators.push_back(mask.substr(0, i));
-		}
-		int i = 0;
-		for (vector<string>::const_iterator it = separators.begin(); it != separators.end(); it++, i++)
-		{
-			int j = file.find(*it);
-			tags.at(i).second = file.substr(0, j);
-			file = file.substr(j+it->length());
-		}
-		if (!file.empty())
-			tags.at(i).second = file;
-	}
-	catch (std::out_of_range)
-	{
-		return "Error while parsing filename!";
-	}
-	
-	for (vector< std::pair<char, string> >::iterator it = tags.begin(); it != tags.end(); it++)
-	{
-		for (string::iterator j = it->second.begin(); j != it->second.end(); j++)
-			if (*j == '_')
-				*j = ' ';
+		std::stringstream result;
+		vector<string> separators;
+		vector< std::pair<char, string> > tags;
+		string file = s.GetName().substr(0, s.GetName().find_last_of("."));
 		
-		if (!preview)
+		try
 		{
-			SongSetFunction set = IntoSetFunction(it->first);
-			if (set)
-				(s.*set)(it->second);
+			for (int i = mask.find("%"); i != string::npos; i = mask.find("%"))
+			{
+				tags.push_back(make_pair(mask.at(i+1), ""));
+				mask = mask.substr(i+2);
+				i = mask.find("%");
+				if (!mask.empty())
+					separators.push_back(mask.substr(0, i));
+			}
+			int i = 0;
+			for (vector<string>::const_iterator it = separators.begin(); it != separators.end(); it++, i++)
+			{
+				int j = file.find(*it);
+				tags.at(i).second = file.substr(0, j);
+				file = file.substr(j+it->length());
+			}
+			if (!file.empty())
+				tags.at(i).second = file;
 		}
-		else
-			result << "%" << it->first << ": " << it->second << "\n";
+		catch (std::out_of_range)
+		{
+			return "Error while parsing filename!";
+		}
+		
+		for (vector< std::pair<char, string> >::iterator it = tags.begin(); it != tags.end(); it++)
+		{
+			for (string::iterator j = it->second.begin(); j != it->second.end(); j++)
+				if (*j == '_')
+					*j = ' ';
+			
+			if (!preview)
+			{
+				SongSetFunction set = IntoSetFunction(it->first);
+				if (set)
+					(s.*set)(it->second);
+			}
+			else
+				result << "%" << it->first << ": " << it->second << "\n";
+		}
+		return result.str();
 	}
-	return result.str();
 }
 
 void __deal_with_filenames(SongList &v)
