@@ -25,7 +25,6 @@
 #include "id3v2tag.h"
 #include "textidentificationframe.h"
 #include "mpegfile.h"
-#include "flacfile.h"
 
 #include "helpers.h"
 #include "status_checker.h"
@@ -125,9 +124,9 @@ bool GetSongTags(Song &s)
 	mTagEditor->AddOption("[.b]Year:[/b] " + s.GetYear());
 	mTagEditor->AddOption("[.b]Track:[/b] " + s.GetTrack());
 	mTagEditor->AddOption("[.b]Genre:[/b] " + s.GetGenre());
-	mTagEditor->AddOption("[.b]Composer:[/b] " + s.GetComposer(), 0, ext != "mp3" && ext != "flac");
-	mTagEditor->AddOption("[.b]Performer:[/b] " + s.GetPerformer(), 0, ext != "mp3" && ext != "flac");
-	mTagEditor->AddOption("[.b]Disc:[/b] " + s.GetDisc(), 0, ext != "mp3" && ext != "flac");
+	mTagEditor->AddOption("[.b]Composer:[/b] " + s.GetComposer(), 0, ext != "mp3");
+	mTagEditor->AddOption("[.b]Performer:[/b] " + s.GetPerformer(), 0, ext != "mp3");
+	mTagEditor->AddOption("[.b]Disc:[/b] " + s.GetDisc(), 0, ext != "mp3");
 	mTagEditor->AddOption("[.b]Comment:[/b] " + s.GetComment());
 	mTagEditor->AddSeparator();
 	mTagEditor->AddOption("[.b]Filename:[/b] " + s.GetName());
@@ -156,21 +155,10 @@ bool WriteTags(Song &s)
 		
 		string ext = s.GetFile();
 		ext = ext.substr(ext.find_last_of(".")+1);
-		ID3v2::Tag *tag = 0;
-		File *file = 0;
-		
 		if (ext == "mp3")
 		{
-			file = new MPEG::File(path_to_file.c_str());
-			tag = ((MPEG::File *)file)->ID3v2Tag();
-		}
-		else if (ext == "flac")
-		{
-			file = new FLAC::File(path_to_file.c_str());
-			tag = ((FLAC::File *)file)->ID3v2Tag();
-		}
-		if (file && tag)
-		{
+			MPEG::File file(path_to_file.c_str());
+			ID3v2::Tag *tag = file.ID3v2Tag();
 			ByteVector Composer("TCOM");
 			ByteVector Performer("TOPE");
 			ByteVector Disc("TPOS");
@@ -186,8 +174,7 @@ bool WriteTags(Song &s)
 			tag->addFrame(PerformerFrame);
 			tag->removeFrames(Disc);
 			tag->addFrame(DiscFrame);
-			file->save();
-			delete file;
+			file.save();
 		}
 		s.GetEmptyFields(0);
 		if (!s.GetNewName().empty())
