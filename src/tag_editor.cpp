@@ -205,12 +205,12 @@ SongSetFunction IntoSetFunction(char c)
 			return &Song::SetTrack;
 		case 'g':
 			return &Song::SetGenre;
-		/*case 'c':
+		case 'c':
 			return &Song::SetComposer;
 		case 'p':
 			return &Song::SetPerformer;
 		case 'd':
-			return &Song::SetDisc;*/
+			return &Song::SetDisc;
 		case 'C':
 			return &Song::SetComment;
 		default:
@@ -334,12 +334,9 @@ void __deal_with_filenames(SongList &v)
 		Legend->Add("%y - year\n");
 		Legend->Add("%n - track number\n");
 		Legend->Add("%g - genre\n");
-		if (choice)
-		{
-			Legend->Add("%c - composer\n");
-			Legend->Add("%p - performer\n");
-			Legend->Add("%d - disc\n");
-		}
+		Legend->Add("%c - composer\n");
+		Legend->Add("%p - performer\n");
+		Legend->Add("%d - disc\n");
 		Legend->Add("%C - comment\n\n");
 		Legend->Add("[.b]Files:[/b]\n");
 		for (SongList::const_iterator it = v.begin(); it != v.end(); it++)
