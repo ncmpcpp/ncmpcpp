@@ -1590,6 +1590,7 @@ int main(int argc, char *argv[])
 							ShowMessage("Writing changes...");
 							for (SongList::iterator it = list.begin(); it != list.end(); it++)
 							{
+								ShowMessage("Writing tags in '" + (*it)->GetName() + "'...");
 								if (!WriteTags(**it))
 								{
 									ShowMessage("Error writing tags in '" + (*it)->GetFile() + "'!");
