@@ -1,6 +1,6 @@
 #####################################################
 ## this is example key configuration file, copy it ##
-## to ~/.ncmpcpp_keys and set up your preferences  ##
+## to ~/.ncmpcpp/keys and set up your preferences  ##
 #####################################################
 ##
 ## Tips:
@@ -9,8 +9,7 @@
 ## - a command can be disabled by binding it to 0
 ##
 ## Note: First bind of volume_up/down
-## will be used to switch between columns
-## on media library screen.
+## will be used to switch between columns.
 ##
 #
 #key_up = 259 'k'

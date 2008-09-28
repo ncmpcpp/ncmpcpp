@@ -20,8 +20,8 @@
 
 #include "settings.h"
 
-const string config_file = home_folder + "/.ncmpcpprc";
-const string keys_config_file = home_folder + "/.ncmpcpp_keys";
+const string config_file = home_folder + "/.ncmpcpp/config";
+const string keys_config_file = home_folder + "/.ncmpcpp/keys";
 
 using std::ifstream;
 
@@ -153,8 +153,8 @@ void DefaultKeys(ncmpcpp_keys &keys)
 void DefaultConfiguration(ncmpcpp_config &conf)
 {
 	conf.mpd_music_dir = "/var/lib/mpd/music/";
-	conf.song_list_format = "{[.green](%l)[/green] }{%a - }{%t}|{[.white]%f[/white]}";
-	conf.song_columns_list_format = "(8)[green]{l} (28)[cyan]{a} (28){b} (50)[red]{t}";
+	conf.song_list_format = "{%a - }{%t}|{[.white]%f[/white]}%r{[.green](%l)[/green]}";
+	conf.song_columns_list_format = "(8)[green]{l} (25)[cyan]{a} (40){t} (30)[red]{b}";
 	conf.song_status_format = "{(%l) }{%a - }{%t}|{%f}";
 	conf.song_window_title_format = "{%a - }{%t}|{%f}";
 	conf.song_library_format = "{%n - }{%t}|{%f}";
