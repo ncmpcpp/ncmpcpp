@@ -2945,13 +2945,13 @@ int main(int argc, char *argv[])
 				timer = time(NULL);
 				if (findme.empty())
 					continue;
-				transform(findme.begin(), findme.end(), findme.begin(), tolower);
+				ToLower(findme);
 				
 				ShowMessage("Searching...");
 				for (int i = (wCurrent == mSearcher ? search_engine_static_options-1 : 0); i < wCurrent->Size(); i++)
 				{
 					string name = Window::OmitBBCodes(wCurrent->GetOption(i));
-					transform(name.begin(), name.end(), name.begin(), tolower);
+					ToLower(name);
 					if (name.find(findme) != string::npos && !wCurrent->IsStatic(i))
 					{
 						vFoundPositions.push_back(i);

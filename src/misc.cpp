@@ -18,6 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
+#include <algorithm>
 #include "misc.h"
 
 using std::stringstream;
@@ -25,6 +26,11 @@ using std::stringstream;
 int Abs(int num)
 {
 	return (num < 0 ? -num : num);
+}
+
+void ToLower(string &s)
+{
+	transform(s.begin(), s.end(), s.begin(), tolower);
 }
 
 int StrToInt(string str)

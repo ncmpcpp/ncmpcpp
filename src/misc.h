@@ -30,6 +30,8 @@ using std::string;
 
 int Abs(int);
 
+void ToLower(string &);
+
 int StrToInt(string);
 
 string IntoStr(int);

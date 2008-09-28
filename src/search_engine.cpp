@@ -90,27 +90,27 @@ void Search(Song &s)
 	{
 		string t;
 		t = s.GetFile();
-		transform(t.begin(), t.end(), t.begin(), tolower);
+		ToLower(t);
 		s.SetFile(t);
 		
 		t = s.GetTitle();
-		transform(t.begin(), t.end(), t.begin(), tolower);
+		ToLower(t);
 		s.SetTitle(t);
 		
 		t = s.GetArtist();
-		transform(t.begin(), t.end(), t.begin(), tolower);
+		ToLower(t);
 		s.SetArtist(t);
 		
 		t = s.GetAlbum();
-		transform(t.begin(), t.end(), t.begin(), tolower);
+		ToLower(t);
 		s.SetAlbum(t);
 		
 		t = s.GetGenre();
-		transform(t.begin(), t.end(), t.begin(), tolower);
+		ToLower(t);
 		s.SetGenre(t);
 		
 		t = s.GetComment();
-		transform(t.begin(), t.end(), t.begin(), tolower);
+		ToLower(t);
 		s.SetComment(t);
 	}
 	
@@ -122,27 +122,27 @@ void Search(Song &s)
 		{
 			string t;
 			t = copy.GetName();
-			transform(t.begin(), t.end(), t.begin(), tolower);
+			ToLower(t);
 			copy.SetFile(t);
-		
+			
 			t = copy.GetTitle();
-			transform(t.begin(), t.end(), t.begin(), tolower);
+			ToLower(t);
 			copy.SetTitle(t);
-		
+			
 			t = copy.GetArtist();
-			transform(t.begin(), t.end(), t.begin(), tolower);
+			ToLower(t);
 			copy.SetArtist(t);
-		
+			
 			t = copy.GetAlbum();
-			transform(t.begin(), t.end(), t.begin(), tolower);
+			ToLower(t);
 			copy.SetAlbum(t);
-		
+			
 			t = copy.GetGenre();
-			transform(t.begin(), t.end(), t.begin(), tolower);
+			ToLower(t);
 			copy.SetGenre(t);
-		
+			
 			t = copy.GetComment();
-			transform(t.begin(), t.end(), t.begin(), tolower);
+			ToLower(t);
 			copy.SetComment(t);
 		}
 		else

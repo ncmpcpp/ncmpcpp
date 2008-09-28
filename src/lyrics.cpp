@@ -71,7 +71,7 @@ void * GetArtistInfo(void *ptr)
 	delete strptr;
 	
 	string filename = artist + ".txt";
-	transform(filename.begin(), filename.end(), filename.begin(), tolower);
+	ToLower(filename);
 	EscapeUnallowedChars(filename);
 	
 	const string fullpath = artists_folder + "/" + filename;

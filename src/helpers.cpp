@@ -18,7 +18,6 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include <algorithm>
 #include "helpers.h"
 #include "tag_editor.h"
 
@@ -77,8 +76,8 @@ void UnlockStatusbar()
 
 bool CaseInsensitiveSorting::operator()(string a, string b)
 {
-	transform(a.begin(), a.end(), a.begin(), tolower);
-	transform(b.begin(), b.end(), b.begin(), tolower);
+	ToLower(a);
+	ToLower(b);
 	return a < b;
 }
 
@@ -86,8 +85,8 @@ bool CaseInsensitiveSorting::operator()(Song *sa, Song *sb)
 {
 	string a = sa->GetName();
 	string b = sb->GetName();
-	transform(a.begin(), a.end(), a.begin(), tolower);
-	transform(b.begin(), b.end(), b.begin(), tolower);
+	ToLower(a);
+	ToLower(b);
 	return a < b;
 }
 
@@ -97,8 +96,8 @@ bool CaseInsensitiveSorting::operator()(const Item &a, const Item &b)
 	{
 		string sa = a.type == itSong ? a.song->GetName() : a.name;
 		string sb = b.type == itSong ? b.song->GetName() : b.name;
-		transform(sa.begin(), sa.end(), sa.begin(), tolower);
-		transform(sb.begin(), sb.end(), sb.begin(), tolower);
+		ToLower(sa);
+		ToLower(sb);
 		return sa < sb;
 	}
 	else
