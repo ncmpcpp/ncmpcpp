@@ -19,12 +19,14 @@
  ***************************************************************************/
 
 #include <sys/stat.h>
+#include "helpers.h"
 #include "lyrics.h"
 #include "settings.h"
 #include "song.h"
 
 extern ncmpcpp_config Config;
 
+const string artists_folder = home_folder + "/" + ".ncmpcpp/artists";
 const string lyrics_folder = home_folder + "/" + ".lyrics";
 
 #ifdef HAVE_CURL_CURL_H
@@ -68,9 +70,12 @@ void * GetArtistInfo(void *ptr)
 	string artist = *strptr;
 	delete strptr;
 	
-	const string filename = artist + ".txt";
-	const string fullpath = lyrics_folder + "/" + filename;
-	mkdir(lyrics_folder.c_str(), 0755);
+	string filename = artist + ".txt";
+	transform(filename.begin(), filename.end(), filename.begin(), tolower);
+	EscapeUnallowedChars(filename);
+	
+	const string fullpath = artists_folder + "/" + filename;
+	mkdir(artists_folder.c_str(), 0755);
 	
 	string *result = new string();
 	std::ifstream input(fullpath.c_str());

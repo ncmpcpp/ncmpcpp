@@ -46,6 +46,7 @@ void UpdateSongList(Menu<Song> *);
 bool Keypressed(int, const int *);
 
 void WindowTitle(const string &);
+void EscapeUnallowedChars(string &);
 
 string FindSharedDir(const string &, const string &);
 string TotalPlaylistLength();

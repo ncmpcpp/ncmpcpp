@@ -139,6 +139,7 @@ const string message_part_of_songs_added = "Only part of requested songs' list a
 
 int main(int argc, char *argv[])
 {
+	CreateConfigDir();
 	DefaultConfiguration(Config);
 	DefaultKeys(Key);
 	ReadConfiguration(Config);

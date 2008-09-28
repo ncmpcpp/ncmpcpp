@@ -162,6 +162,22 @@ void WindowTitle(const string &status)
 		printf("\033]0;%s\7",status.c_str());
 }
 
+void EscapeUnallowedChars(string &s)
+{
+	const string unallowed_chars = "\"*/:<>?\\|";
+	for (string::const_iterator it = unallowed_chars.begin(); it != unallowed_chars.end(); it++)
+	{
+		for (int i = 0; i < s.length(); i++)
+		{
+			if (s[i] == *it)
+			{
+				s.erase(s.begin()+i);
+				i--;
+			}
+		}
+	}
+}
+
 string FindSharedDir(const string &one, const string &two)
 {
 	if (one == two)

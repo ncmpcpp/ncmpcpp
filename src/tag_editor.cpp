@@ -222,16 +222,8 @@ namespace
 
 	string GenerateFilename(const Song &s, string &pattern)
 	{
-		const string unallowed_chars = "\"*/:<>?\\|";
 		string result = Window::OmitBBCodes(DisplaySong(s, &pattern));
-		for (string::const_iterator it = unallowed_chars.begin(); it != unallowed_chars.end(); it++)
-		{
-			for (int i = 0; i < result.length(); i++)
-			{
-				if (result[i] == *it)
-					result.erase(result.begin()+i);
-			}
-		}
+		EscapeUnallowedChars(result);
 		return result;
 	}
 

@@ -25,6 +25,7 @@
 
 #include "ncmpcpp.h"
 
+const string config_dir = home_folder + "/.ncmpcpp/";
 const int null_key = 0x0fffffff;
 
 struct ncmpcpp_keys
@@ -146,6 +147,7 @@ struct ncmpcpp_config
 	int message_delay_time;
 };
 
+void CreateConfigDir();
 void DefaultKeys(ncmpcpp_keys &);
 void DefaultConfiguration(ncmpcpp_config &);
 void ReadKeys(ncmpcpp_keys &);

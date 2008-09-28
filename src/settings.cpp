@@ -18,12 +18,18 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
+#include <sys/stat.h>
 #include "settings.h"
 
-const string config_file = home_folder + "/.ncmpcpp/config";
-const string keys_config_file = home_folder + "/.ncmpcpp/keys";
+const string config_file = config_dir + "config";
+const string keys_config_file = config_dir + "keys";
 
 using std::ifstream;
+
+void CreateConfigDir()
+{
+	mkdir(config_dir.c_str(), 0755);
+}
 
 void DefaultKeys(ncmpcpp_keys &keys)
 {
