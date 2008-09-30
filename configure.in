@@ -52,14 +52,12 @@ dnl =======================
 dnl = checking for taglib =
 dnl =======================
 if test "$taglib" = "yes" ; then
-	AC_PATH_PROG(TAGLIB_CONFIG, taglib-config)
-	if test "$TAGLIB_CONFIG" != "" ; then
-		CPPFLAGS="$CPPFLAGS `$TAGLIB_CONFIG --cflags`"
-		LDFLAGS="$LDFLAGS `$TAGLIB_CONFIG --libs`"
-		AC_CHECK_HEADERS([taglib.h], , AC_MSG_ERROR([missing taglib.h header]))
-	else
-		AC_MSG_ERROR([taglib-config executable is missing])
-	fi
+	PKG_CHECK_MODULES([taglib], taglib >= 1.5, , AC_MSG_ERROR([TagLib >= 1.5 is required]))
+	AC_SUBST(taglib_LIBS)
+	AC_SUBST(taglib_CFLAGS)
+	CPPFLAGS="$CPPFLAGS $taglib_CFLAGS"
+	LDFLAGS="$LDFLAGS $taglib_LIBS"
+	AC_CHECK_HEADERS([taglib.h], , AC_MSG_ERROR([missing taglib.h header]))
 fi
 
 AC_CONFIG_FILES([Makefile src/Makefile doc/Makefile])
