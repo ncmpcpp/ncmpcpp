@@ -85,6 +85,7 @@ void * GetArtistInfo(void *ptr)
 		string line;
 		while (getline(input, line))
 			*result += line + "\n";
+		input.close();
 		*result = result->substr(0, result->length()-1);
 		data_ready = 1;
 		pthread_exit(result);
@@ -227,6 +228,7 @@ void * GetLyrics(void *song)
 		string line;
 		while (getline(input, line))
 			*result += line + "\n";
+		input.close();
 		*result = result->substr(0, result->length()-1);
 #		ifdef HAVE_CURL_CURL_H
 		data_ready = 1;
