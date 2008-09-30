@@ -159,12 +159,13 @@ bool WriteTags(Song &s)
 		{
 			MPEG::File file(path_to_file.c_str());
 			ID3v2::Tag *tag = file.ID3v2Tag();
+			String::Type encoding = UNICODE ? String::UTF8 : String::Latin1;
 			ByteVector Composer("TCOM");
 			ByteVector Performer("TOPE");
 			ByteVector Disc("TPOS");
-			ID3v2::Frame *ComposerFrame = new ID3v2::TextIdentificationFrame(Composer);
-			ID3v2::Frame *PerformerFrame = new ID3v2::TextIdentificationFrame(Performer);
-			ID3v2::Frame *DiscFrame = new ID3v2::TextIdentificationFrame(Disc);
+			ID3v2::Frame *ComposerFrame = new ID3v2::TextIdentificationFrame(Composer, encoding);
+			ID3v2::Frame *PerformerFrame = new ID3v2::TextIdentificationFrame(Performer, encoding);
+			ID3v2::Frame *DiscFrame = new ID3v2::TextIdentificationFrame(Disc, encoding);
 			ComposerFrame->setText(TO_WSTRING(s.GetComposer()));
 			PerformerFrame->setText(TO_WSTRING(s.GetPerformer()));
 			DiscFrame->setText(TO_WSTRING(s.GetDisc()));
