@@ -191,6 +191,38 @@ bool WriteTags(Song &s)
 
 namespace
 {
+	const string patterns_list_file = config_dir + "patterns.list";
+	vector<string> patterns_list;
+	
+	void GetPatternList()
+	{
+		if (patterns_list.empty())
+		{
+			std::ifstream input(patterns_list_file.c_str());
+			if (input.is_open())
+			{
+				string line;
+				while (getline(input, line))
+				{
+					if (!line.empty())
+						patterns_list.push_back(line);
+				}
+				input.close();
+			}
+		}
+	}
+	
+	void SavePatternList()
+	{
+		std::ofstream output(patterns_list_file.c_str());
+		if (output.is_open())
+		{
+			for (vector<string>::const_iterator it = patterns_list.begin(); it != patterns_list.end() && it != patterns_list.begin()+30; it++)
+				output << *it << std::endl;
+			output.close();
+		}
+	}
+	
 	SongSetFunction IntoSetFunction(char c)
 	{
 		switch (c)
@@ -283,6 +315,8 @@ void __deal_with_filenames(SongList &v)
 	int width = 30;
 	int height = 6;
 	
+	GetPatternList();
+	
 	Menu<string> *Main = new Menu<string>((COLS-width)/2, (LINES-height)/2, width, height, "", Config.main_color, Config.window_border);
 	Main->SetTimeout(ncmpcpp_window_timeout);
 	Main->AddOption("Get tags from filename");
@@ -344,17 +378,22 @@ void __deal_with_filenames(SongList &v)
 		Main = new Menu<string>((COLS-width)/2, (LINES-height)/2, one_width, height, "", Config.main_color, Config.active_window_border);
 		Main->SetTimeout(ncmpcpp_window_timeout);
 		
+		if (!patterns_list.empty())
+			Config.pattern = patterns_list.front();
 		Main->AddOption("[.b]Pattern:[/b] " + Config.pattern);
 		Main->AddOption("Preview");
 		Main->AddOption("Legend");
 		Main->AddSeparator();
 		Main->AddOption("Proceed");
 		Main->AddOption("Cancel");
-		/*Main->AddSeparator();
-		Main->AddOption("Recent patterns", 1, 1, 0, lCenter);
-		Main->AddSeparator();
-		Main->AddOption("item1");
-		Main->AddOption("item2 etc.");*/
+		if (!patterns_list.empty())
+		{
+			Main->AddSeparator();
+			Main->AddOption("Recent patterns", 1, 1, 0, lCenter);
+			Main->AddSeparator();
+			for (vector<string>::const_iterator it = patterns_list.begin(); it != patterns_list.end(); it++)
+				Main->AddOption(*it);
+		}
 		
 		Active = Main;
 		Helper = Legend;
@@ -438,7 +477,7 @@ void __deal_with_filenames(SongList &v)
 								}
 								if (!preview)
 									s.SetNewName(new_file + extension);
-								Preview->Add(file + " [." + Config.color2 + "]->[/" + Config.color2 + "] " + new_file + extension + "\n");
+								Preview->Add(file + " [." + Config.color2 + "]->[/" + Config.color2 + "] " + new_file + extension + "\n\n");
 								s.GetEmptyFields(0);
 							}
 						}
@@ -446,6 +485,18 @@ void __deal_with_filenames(SongList &v)
 						{
 							preview = 1;
 							continue;
+						}
+						else
+						{
+							for (int i = 0; i < patterns_list.size(); i++)
+							{
+								if (patterns_list[i] == Config.pattern)
+								{
+									patterns_list.erase(patterns_list.begin()+i);
+									i--;
+								}
+							}
+							patterns_list.insert(patterns_list.begin(), Config.pattern);
 						}
 						ShowMessage("Operation finished!");
 						if (preview)
@@ -465,6 +516,11 @@ void __deal_with_filenames(SongList &v)
 						Helper = Legend;
 						Helper->Display();
 						break;
+					}
+					default:
+					{
+						Config.pattern = Main->GetOption();
+						Main->UpdateOption(0, "[.b]Pattern:[/b] " + Config.pattern);
 					}
 				}
 			}
@@ -486,6 +542,7 @@ void __deal_with_filenames(SongList &v)
 			}
 		}
 	}
+	SavePatternList();
 	delete Main;
 	delete Legend;
 	delete Preview;
