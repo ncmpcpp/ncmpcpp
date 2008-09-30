@@ -382,7 +382,7 @@ void Window::Write(int limit, const wstring &str, bool clrtoeol)
 			
 			if (!collect && !color.empty())
 			{
-				waddwstr(itsWindow,tmp.c_str());
+				wprintw(itsWindow, "%ls", tmp.c_str());
 				tmp.clear();
 				
 				if (isdigit(color[2]))
@@ -406,10 +406,10 @@ void Window::Write(int limit, const wstring &str, bool clrtoeol)
 				color.clear();
 			}
 		}
-		if (!tmp.empty()) waddwstr(itsWindow,tmp.c_str());
+		if (!tmp.empty()) wprintw(itsWindow, "%ls", tmp.c_str());
 	}
 	else
-		waddwstr(itsWindow,str.c_str());
+		wprintw(itsWindow, "%ls", str.c_str());
 	
 	if (clrtoeol)
 		wclrtoeol(itsWindow);
