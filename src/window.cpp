@@ -641,7 +641,7 @@ Window * Window::EmptyClone() const
 	return new Window(GetStartX(),GetStartY(),GetWidth(),GetHeight(),itsTitle,itsBaseColor,itsBorder);
 }
 
-char * ToString(const wchar_t *ws)
+/*char * ToString(const wchar_t *ws)
 {
 	string s;
 	for (int i = 0; i < wcslen(ws); i++)
@@ -660,7 +660,7 @@ wchar_t * ToWString(const char *s)
 	wchar_t *ws = new wchar_t[strlen(s)+1]();
 	mbstowcs(ws, s, strlen(s));
 	return ws;
-}
+}*/
 
 string ToString(const wstring &ws)
 {

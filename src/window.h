@@ -51,8 +51,8 @@ typedef void (*GetStringHelper)();
 typedef std::pair<Color, Color> ColorPair;
 typedef std::pair<int, int> Coordinates;
 
-char * ToString(const wchar_t *);
-wchar_t * ToWString(const char *);
+//char * ToString(const wchar_t *);
+//wchar_t * ToWString(const char *);
 string ToString(const wstring &);
 wstring ToWString(const string &);
 
