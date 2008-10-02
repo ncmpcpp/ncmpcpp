@@ -311,7 +311,7 @@ void NcmpcppStatusChanged(MPDConnection *Mpd, MPDStatusChanges changed, void *da
 			if (!Mpd->GetElapsedTime())
 				mvwhline(wFooter->RawWin(), 0, 0, 0, wFooter->GetWidth());
 			
-			if (Config.now_playing_lyrics && current_screen == csLyrics && prev_screen == csPlaylist)
+			if (Config.now_playing_lyrics && !Config.repeat_one_mode && current_screen == csLyrics && prev_screen == csPlaylist)
 				reload_lyrics = 1;
 		}
 		playing_song_scroll_begin = 0;
