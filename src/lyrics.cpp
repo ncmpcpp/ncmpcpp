@@ -31,7 +31,8 @@ const string lyrics_folder = home_folder + "/" + ".lyrics";
 
 #ifdef HAVE_CURL_CURL_H
 pthread_mutex_t curl = PTHREAD_MUTEX_INITIALIZER;
-bool data_ready = 0;
+bool artist_info_ready = 0;
+bool lyrics_ready = 0;
 #endif
 
 namespace
@@ -87,7 +88,7 @@ void * GetArtistInfo(void *ptr)
 			*result += line + "\n";
 		input.close();
 		*result = result->substr(0, result->length()-1);
-		data_ready = 1;
+		artist_info_ready = 1;
 		pthread_exit(result);
 	}
 	
@@ -112,7 +113,7 @@ void * GetArtistInfo(void *ptr)
 	if (code != CURLE_OK)
 	{
 		*result = "Error while fetching artist's info: " + string(curl_easy_strerror(code));
-		data_ready = 1;
+		artist_info_ready = 1;
 		pthread_exit(result);
 	}
 	
@@ -126,7 +127,7 @@ void * GetArtistInfo(void *ptr)
 	{
 		EscapeHtml(*result);
 		*result = "Last.fm returned an error message: " + *result;
-		data_ready = 1;
+		artist_info_ready = 1;
 		pthread_exit(result);
 	}
 	
@@ -205,7 +206,7 @@ void * GetArtistInfo(void *ptr)
 		}
 	}
 	
-	data_ready = 1;
+	artist_info_ready = 1;
 	pthread_exit(result);
 }
 #endif // HAVE_CURL_CURL_H
@@ -231,7 +232,7 @@ void * GetLyrics(void *song)
 		input.close();
 		*result = result->substr(0, result->length()-1);
 #		ifdef HAVE_CURL_CURL_H
-		data_ready = 1;
+		lyrics_ready = 1;
 		pthread_exit(result);
 #		endif
 	}
@@ -262,7 +263,7 @@ void * GetLyrics(void *song)
 	if (code != CURLE_OK)
 	{
 		*result = "Error while fetching lyrics: " + string(curl_easy_strerror(code));
-		data_ready = 1;
+		lyrics_ready = 1;
 		pthread_exit(result);
 	}
 	
@@ -274,7 +275,7 @@ void * GetLyrics(void *song)
 	
 	if (*result == "Not found")
 	{
-		data_ready = 1;
+		lyrics_ready = 1;
 		pthread_exit(result);
 	}
 	
@@ -292,7 +293,7 @@ void * GetLyrics(void *song)
 		output.close();
 	}
 	
-	data_ready = 1;
+	lyrics_ready = 1;
 	pthread_exit(result);
 #	else
 	else

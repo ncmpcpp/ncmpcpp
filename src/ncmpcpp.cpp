@@ -109,7 +109,8 @@ NcmpcppScreen prev_screen;
 #ifdef HAVE_CURL_CURL_H
 pthread_t lyrics_downloader;
 pthread_t artist_info_downloader;
-extern bool data_ready;
+extern bool artist_info_ready;
+extern bool lyrics_ready;
 #endif
 
 bool dont_change_now_playing = 0;
@@ -677,26 +678,27 @@ int main(int argc, char *argv[])
 				reload_lyrics = 0;
 		}
 #		ifdef HAVE_CURL_CURL_H
-		if (data_ready)
+		if (artist_info_ready)
 		{
 			void *result;
 			string *str_result = 0;
-			if (lyrics_downloader)
-			{
-				pthread_join(lyrics_downloader, &result);
-				str_result = static_cast<string *>(result);
-				sLyrics->Add(*str_result);
-				lyrics_downloader = 0;
-			}
-			if (artist_info_downloader)
-			{
-				pthread_join(artist_info_downloader, &result);
-				str_result = static_cast<string *>(result);
-				sInfo->Add(*str_result);
-				artist_info_downloader = 0;
-			}
+			pthread_join(artist_info_downloader, &result);
+			str_result = static_cast<string *>(result);
+			sInfo->Add(*str_result);
 			delete str_result;
-			data_ready = 0;
+			artist_info_downloader = 0;
+			artist_info_ready = 0;
+		}
+		else if (lyrics_ready)
+		{
+			void *result;
+			string *str_result = 0;
+			pthread_join(lyrics_downloader, &result);
+			str_result = static_cast<string *>(result);
+			sLyrics->Add(*str_result);
+			delete str_result;
+			lyrics_downloader = 0;
+			lyrics_ready = 0;
 		}
 #		endif
 		// lyrics end
