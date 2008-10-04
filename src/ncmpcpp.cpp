@@ -35,7 +35,9 @@
 			mvvline(main_start_y, middle_col_startx-1, 0, main_height); \
 			mLibAlbums->Display(redraw_screen); \
 			mvvline(main_start_y, right_col_startx-1, 0, main_height); \
-			mLibSongs->Display(redraw_screen)
+			mLibSongs->Display(redraw_screen); \
+			if (mLibAlbums->Empty()) \
+				mLibAlbums->WriteXY(0, 0, "No albums found.")
 
 #define REFRESH_PLAYLIST_EDITOR_SCREEN \
 			mPlaylistList->Display(redraw_screen); \
@@ -213,7 +215,7 @@ int main(int argc, char *argv[])
 	int right_col_width = COLS-COLS/3*2-1;
 	int right_col_startx = left_col_width+middle_col_width+2;
 	
-	mLibArtists = new Menu<string>(0, main_start_y, left_col_width, main_height, "Artists", Config.main_color, brNone);
+	mLibArtists = new Menu<string>(0, main_start_y, left_col_width, main_height, IntoStr(Config.media_lib_primary_tag) + "s", Config.main_color, brNone);
 	mLibArtists->HighlightColor(Config.main_highlight_color);
 	mLibArtists->SetTimeout(ncmpcpp_window_timeout);
 	
@@ -432,55 +434,65 @@ int main(int argc, char *argv[])
 				TagList list;
 				mLibAlbums->Clear(0);
 				mLibSongs->Clear(0);
-				Mpd->GetArtists(list);
+				if (Config.media_lib_primary_tag == MPD_TAG_ITEM_ARTIST)
+					Mpd->GetArtists(list);
+				else
+				{
+					Mpd->StartSearch(0);
+					Mpd->AddSearch(Config.media_lib_primary_tag, "");
+					Mpd->StartFieldSearch(Config.media_lib_primary_tag);
+					Mpd->CommitSearch(list);
+					sort(list.begin(), list.end());
+				}
 				sort(list.begin(), list.end(), CaseInsensitiveSorting());
 				for (TagList::const_iterator it = list.begin(); it != list.end(); it++)
-					mLibArtists->AddOption(*it);
+				{
+					if (mLibArtists->Empty() || mLibArtists->Back() != *it)
+						mLibArtists->AddOption(*it);
+				}
 				mLibArtists->Window::Clear();
 				mLibArtists->Refresh();
 			}
 			
-			if (mLibAlbums->Empty() && mLibSongs->Empty())
+			if (!mLibArtists->Empty() && mLibAlbums->Empty() && mLibSongs->Empty())
 			{
 				mLibAlbums->Reset();
 				TagList list;
 				std::map<string, string, CaseInsensitiveSorting> maplist;
-				Mpd->GetAlbums(mLibArtists->GetOption(), list);
+				if (Config.media_lib_primary_tag == MPD_TAG_ITEM_ARTIST)
+					Mpd->GetAlbums(mLibArtists->GetOption(), list);
+				else
+				{
+					Mpd->StartSearch(1);
+					Mpd->AddSearch(Config.media_lib_primary_tag, mLibArtists->GetOption());
+					Mpd->StartFieldSearch(MPD_TAG_ITEM_ALBUM);
+					Mpd->CommitSearch(list);
+					//sort(list.begin(), list.end());
+				}
 				for (TagList::const_iterator it = list.begin(); it != list.end(); it++)
 				{
-					bool written = 0;
 					SongList l;
 					Mpd->StartSearch(1);
-					Mpd->AddSearch(MPD_TAG_ITEM_ARTIST, mLibArtists->GetOption());
+					Mpd->AddSearch(Config.media_lib_primary_tag, mLibArtists->GetOption());
 					Mpd->AddSearch(MPD_TAG_ITEM_ALBUM, *it);
 					Mpd->CommitSearch(l);
-					for (SongList::const_iterator j = l.begin(); j != l.end(); j++)
-					{
-						if ((*j)->GetYear() != EMPTY_TAG)
-						{
-							maplist["(" + (*j)->GetYear() + ") " + *it] = *it;
-							written = 1;
-							break;
-						}
-					}
-					if (!written)
-						maplist[*it] = *it;
+					maplist[DisplaySong(*l[0], &Config.media_lib_album_format)] = *it;
 					FreeSongList(l);
 				}
 				for (std::map<string, string>::const_iterator it = maplist.begin(); it != maplist.end(); it++)
-					mLibAlbums->AddOption(StringPair(it->first, it->second));
+					mLibAlbums->AddOption(make_pair(it->first, it->second));
 				mLibAlbums->Window::Clear();
 				mLibAlbums->Refresh();
 			}
 			
-			if (wCurrent == mLibAlbums && mLibAlbums->Empty())
+			if (!mLibArtists->Empty() && wCurrent == mLibAlbums && mLibAlbums->Empty())
 			{
 				mLibAlbums->HighlightColor(Config.main_highlight_color);
 				mLibArtists->HighlightColor(Config.active_column_color);
 				wCurrent = mLibArtists;
 			}
 			
-			if (mLibSongs->Empty())
+			if (!mLibArtists->Empty() && mLibSongs->Empty())
 			{
 				mLibSongs->Reset();
 				SongList list;
@@ -489,14 +501,14 @@ int main(int argc, char *argv[])
 					mLibAlbums->WriteXY(0, 0, "No albums found.");
 					mLibSongs->Clear(0);
 					Mpd->StartSearch(1);
-					Mpd->AddSearch(MPD_TAG_ITEM_ARTIST, mLibArtists->GetOption());
+					Mpd->AddSearch(Config.media_lib_primary_tag, mLibArtists->GetOption());
 					Mpd->CommitSearch(list);
 				}
 				else
 				{
 					mLibSongs->Clear(0);
 					Mpd->StartSearch(1);
-					Mpd->AddSearch(MPD_TAG_ITEM_ARTIST, mLibArtists->GetOption());
+					Mpd->AddSearch(Config.media_lib_primary_tag, mLibArtists->GetOption());
 					Mpd->AddSearch(MPD_TAG_ITEM_ALBUM, mLibAlbums->Current().second);
 					Mpd->CommitSearch(list);
 				}
@@ -595,7 +607,6 @@ int main(int argc, char *argv[])
 					Mpd->GetAlbums("", list);
 					for (TagList::const_iterator it = list.begin(); it != list.end(); it++)
 					{
-						bool written = 0;
 						SongList l;
 						Mpd->StartSearch(1);
 						Mpd->AddSearch(MPD_TAG_ITEM_ALBUM, *it);
@@ -604,7 +615,7 @@ int main(int argc, char *argv[])
 						FreeSongList(l);
 					}
 					for (std::map<string, string>::const_iterator it = maplist.begin(); it != maplist.end(); it++)
-						mEditorAlbums->AddOption(StringPair(it->first, it->second));
+						mEditorAlbums->AddOption(make_pair(it->first, it->second));
 				}
 				else
 				{
@@ -615,13 +626,13 @@ int main(int argc, char *argv[])
 					{
 						int slash = editor_browsed_dir.find_last_of("/");
 						string parent = slash != string::npos ? editor_browsed_dir.substr(0, slash) : "/";
-						mEditorDirs->AddOption(StringPair("[..]", parent));
+						mEditorDirs->AddOption(make_pair("[..]", parent));
 					}
 					for (TagList::const_iterator it = list.begin(); it != list.end(); it++)
 					{
 						int slash = it->find_last_of("/");
 						string to_display = slash != string::npos ? it->substr(slash+1) : *it;
-						mEditorDirs->AddOption(StringPair(to_display, *it));
+						mEditorDirs->AddOption(make_pair(to_display, *it));
 						if (*it == editor_highlighted_dir)
 							highlightme = mEditorDirs->Size()-1;
 					}
@@ -1312,15 +1323,17 @@ int main(int argc, char *argv[])
 					
 					if (wCurrent == mLibArtists)
 					{
-						const string &artist = mLibArtists->GetOption();
+						const string &tag = mLibArtists->GetOption();
 						Mpd->StartSearch(1);
-						Mpd->AddSearch(MPD_TAG_ITEM_ARTIST, artist);
+						Mpd->AddSearch(Config.media_lib_primary_tag, tag);
 						Mpd->CommitSearch(list);
 						for (SongList::const_iterator it = list.begin(); it != list.end(); it++)
 							Mpd->QueueAddSong(**it);
 						if (Mpd->CommitQueue())
 						{
-							ShowMessage("Adding all songs artist's: " + artist);
+							string tag_type = IntoStr(Config.media_lib_primary_tag);
+							ToLower(tag_type);
+							ShowMessage("Adding songs of " + tag_type + " \"" + tag + "\"");
 							Song *s = &mPlaylist->at(mPlaylist->Size()-list.size());
 							if (s->GetHash() == list[0]->GetHash())
 							{
@@ -1337,7 +1350,7 @@ int main(int argc, char *argv[])
 							Mpd->QueueAddSong(mLibSongs->at(i));
 						if (Mpd->CommitQueue())
 						{
-							ShowMessage("Adding songs from: " + mLibArtists->GetOption() + " \"" + mLibAlbums->Current().second + "\"");
+							ShowMessage("Adding songs from album \"" + mLibAlbums->Current().second + "\"");
 							Song *s = &mPlaylist->at(mPlaylist->Size()-mLibSongs->Size());
 							if (s->GetHash() == mLibSongs->at(0).GetHash())
 							{
@@ -1826,6 +1839,8 @@ int main(int argc, char *argv[])
 				vFoundPositions.clear();
 				if (wCurrent == mLibArtists)
 				{
+					if (mLibSongs->Empty())
+						continue;
 					mLibArtists->HighlightColor(Config.main_highlight_color);
 					wCurrent->Refresh();
 					wCurrent = mLibAlbums;
@@ -1833,7 +1848,7 @@ int main(int argc, char *argv[])
 					if (!mLibAlbums->Empty())
 						continue;
 				}
-				if (wCurrent == mLibAlbums)
+				if (wCurrent == mLibAlbums && !mLibSongs->Empty())
 				{
 					mLibAlbums->HighlightColor(Config.main_highlight_color);
 					wCurrent->Refresh();
@@ -2432,33 +2447,38 @@ int main(int argc, char *argv[])
 			if (wCurrent == mLibArtists)
 			{
 				LockStatusbar();
-				wFooter->WriteXY(0, Config.statusbar_visibility, "[.b]Artist:[/b] ", 1);
-				string new_artist = wFooter->GetString(mLibArtists->GetOption());
+				wFooter->WriteXY(0, Config.statusbar_visibility, "[.b]" + IntoStr(Config.media_lib_primary_tag) + ":[/b] ", 1);
+				string new_tag = wFooter->GetString(mLibArtists->GetOption());
 				UnlockStatusbar();
-				if (!new_artist.empty() && new_artist != mLibArtists->GetOption())
+				if (!new_tag.empty() && new_tag != mLibArtists->GetOption())
 				{
 					bool success = 1;
 					SongList list;
 					ShowMessage("Updating tags...");
 					Mpd->StartSearch(1);
-					Mpd->AddSearch(MPD_TAG_ITEM_ARTIST, mLibArtists->GetOption());
+					Mpd->AddSearch(Config.media_lib_primary_tag, mLibArtists->GetOption());
 					Mpd->CommitSearch(list);
+					SongSetFunction set = IntoSetFunction(Config.media_lib_primary_tag);
+					if (!set)
+						continue;
 					for (SongList::const_iterator it = list.begin(); it != list.end(); it++)
 					{
+						((*it)->*set)(new_tag);
+						ShowMessage("Updating tags in '" + (*it)->GetName() + "'...");
 						string path = Config.mpd_music_dir + (*it)->GetFile();
-						TagLib::FileRef f(path.c_str());
-						if (f.isNull())
+						if (!WriteTags(**it))
 						{
+							ShowMessage("Error updating tags in '" + (*it)->GetFile() + "'!");
 							success = 0;
 							break;
 						}
-						f.tag()->setArtist(TO_WSTRING(new_artist));
-						f.save();
 					}
 					if (success)
+					{
 						Mpd->UpdateDirectory(FindSharedDir(list));
+						ShowMessage("Tags updated succesfully!");
+					}
 					FreeSongList(list);
-					ShowMessage(success ? "Tags written succesfully!" : "Error while writing tags!");
 				}
 			}
 			else if (wCurrent == mLibAlbums)
@@ -2473,15 +2493,17 @@ int main(int argc, char *argv[])
 					SongList list;
 					ShowMessage("Updating tags...");
 					Mpd->StartSearch(1);
-					Mpd->AddSearch(MPD_TAG_ITEM_ARTIST, mLibArtists->GetOption());
+					Mpd->AddSearch(Config.media_lib_primary_tag, mLibArtists->GetOption());
 					Mpd->AddSearch(MPD_TAG_ITEM_ALBUM, mLibAlbums->Current().second);
 					Mpd->CommitSearch(list);
 					for (SongList::const_iterator it = list.begin(); it != list.end(); it++)
 					{
+						ShowMessage("Updating tags in '" + (*it)->GetName() + "'...");
 						string path = Config.mpd_music_dir + (*it)->GetFile();
 						TagLib::FileRef f(path.c_str());
 						if (f.isNull())
 						{
+							ShowMessage("Error updating tags in '" + (*it)->GetFile() + "'!");
 							success = 0;
 							break;
 						}
@@ -2489,9 +2511,11 @@ int main(int argc, char *argv[])
 						f.save();
 					}
 					if (success)
+					{
 						Mpd->UpdateDirectory(FindSharedDir(list));
+						ShowMessage("Tags updated succesfully!");
+					}
 					FreeSongList(list);
-					ShowMessage(success ? "Tags written succesfully!" : "Error while writing tags!");
 				}
 			}
 			else if (

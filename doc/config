@@ -65,6 +65,8 @@
 #
 #song_library_format = "{%n - }{%t}|{%f}"
 #
+#media_library_album_format = "{(%y) }%b"
+#
 #tag_editor_album_format = "{(%y) }%b"
 #
 #browser_playlist_prefix = "[.red]playlist[/red] "
@@ -103,6 +105,8 @@
 #autocenter_mode = "no"
 #
 #repeat_one_mode = "no"
+#
+#media_library_left_column = "a" (possible values: a,y,g,c,p, legend above)
 #
 #default_find_mode = "wrapped" (wrapped/normal)
 #

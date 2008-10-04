@@ -76,7 +76,7 @@ class Song
 		void SetComment(const string &);
 		void SetPosition(int);
 		
-		void SetNewName(string name) { itsNewName = name == GetName() ? "" : name; }
+		void SetNewName(const string &name) { itsNewName = name == GetName() ? "" : name; }
 		string GetNewName() const { return itsNewName; }
 		
 		void NullMe() { itsSong = 0; }

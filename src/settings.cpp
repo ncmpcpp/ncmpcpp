@@ -164,6 +164,7 @@ void DefaultConfiguration(ncmpcpp_config &conf)
 	conf.song_status_format = "{(%l) }{%a - }{%t}|{%f}";
 	conf.song_window_title_format = "{%a - }{%t}|{%f}";
 	conf.song_library_format = "{%n - }{%t}|{%f}";
+	conf.media_lib_album_format = "{(%y) }%b";
 	conf.tag_editor_album_format = "{(%y) }%b";
 	conf.browser_playlist_prefix = "[.red](playlist)[/red] ";
 	conf.pattern = "%n - %t";
@@ -183,6 +184,7 @@ void DefaultConfiguration(ncmpcpp_config &conf)
 	conf.active_column_color = clRed;
 	conf.window_border = brGreen;
 	conf.active_window_border = brRed;
+	conf.media_lib_primary_tag = MPD_TAG_ITEM_ARTIST;
 	conf.colors_enabled = true;
 	conf.fancy_scrolling = true;
 	conf.columns_in_playlist = false;
@@ -274,7 +276,26 @@ namespace
 		key[0] = !one.empty() && one[0] == '\'' ? one[1] : (atoi(one.c_str()) == 0 ? null_key : atoi(one.c_str()));
 		key[1] = !two.empty() && two[0] == '\'' ? two[1] : (atoi(two.c_str()) == 0 ? null_key : atoi(two.c_str()));
 	}
-
+	
+	mpd_TagItems IntoTagItem(char c)
+	{
+		switch (c)
+		{
+			case 'a':
+				return MPD_TAG_ITEM_ARTIST;
+			case 'y':
+				return MPD_TAG_ITEM_DATE;
+			case 'g':
+				return MPD_TAG_ITEM_GENRE;
+			case 'c':
+				return MPD_TAG_ITEM_COMPOSER;
+			case 'p':
+				return MPD_TAG_ITEM_PERFORMER;
+			default:
+				return MPD_TAG_ITEM_ARTIST;
+		}
+	}
+	
 	Color IntoColor(const string &color)
 	{
 		Color result = clDefault;
@@ -297,6 +318,11 @@ namespace
 			result = clWhite;
 		
 		return result;
+	}
+	
+	Border IntoBorder(const string &color)
+	{
+		return (Border) IntoColor(color);
 	}
 }
 
@@ -511,6 +537,11 @@ void ReadConfiguration(ncmpcpp_config &conf)
 				if (!v.empty())
 					conf.song_library_format = v;
 			}
+			else if (it->find("media_library_album_format") != string::npos)
+			{
+				if (!v.empty())
+					conf.media_lib_album_format = v;
+			}
 			else if (it->find("tag_editor_album_format") != string::npos)
 			{
 				if (!v.empty())
@@ -660,12 +691,17 @@ void ReadConfiguration(ncmpcpp_config &conf)
 			else if (it->find("window_border_color ") != string::npos)
 			{
 				if (!v.empty())
-					conf.window_border = Border(IntoColor(v));
+					conf.window_border = IntoBorder(v);
 			}
 			else if (it->find("active_window_border") != string::npos)
 			{
 				if (!v.empty())
-					conf.active_window_border = Border(IntoColor(v));
+					conf.active_window_border = IntoBorder(v);
+			}
+			else if (it->find("media_library_left_column") != string::npos)
+			{
+				if (!v.empty())
+					conf.media_lib_primary_tag = IntoTagItem(v[0]);
 			}
 		}
 		f.close();

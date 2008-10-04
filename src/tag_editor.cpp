@@ -35,6 +35,68 @@ extern ncmpcpp_keys Key;
 extern Menu<string> *mTagEditor;
 extern Window *wFooter;
 
+string IntoStr(mpd_TagItems tag)
+{
+	switch (tag)
+	{
+		case MPD_TAG_ITEM_ARTIST:
+			return "Artist";
+		case MPD_TAG_ITEM_ALBUM:
+			return "Album";
+		case MPD_TAG_ITEM_TITLE:
+			return "Title";
+		case MPD_TAG_ITEM_TRACK:
+			return "Track";
+		case MPD_TAG_ITEM_GENRE:
+			return "Genre";
+		case MPD_TAG_ITEM_DATE:
+			return "Year";
+		case MPD_TAG_ITEM_COMPOSER:
+			return "Composer";
+		case MPD_TAG_ITEM_PERFORMER:
+			return "Performer";
+		case MPD_TAG_ITEM_COMMENT:
+			return "Comment";
+		case MPD_TAG_ITEM_DISC:
+			return "Disc";
+		case MPD_TAG_ITEM_FILENAME:
+			return "Filename";
+		default:
+			return "";
+	}
+}
+
+SongSetFunction IntoSetFunction(mpd_TagItems tag)
+{
+	switch (tag)
+	{
+		case MPD_TAG_ITEM_ARTIST:
+			return &Song::SetArtist;
+		case MPD_TAG_ITEM_ALBUM:
+			return &Song::SetAlbum;
+		case MPD_TAG_ITEM_TITLE:
+			return &Song::SetTitle;
+		case MPD_TAG_ITEM_TRACK:
+			return &Song::SetTrack;
+		case MPD_TAG_ITEM_GENRE:
+			return &Song::SetGenre;
+		case MPD_TAG_ITEM_DATE:
+			return &Song::SetYear;
+		case MPD_TAG_ITEM_COMPOSER:
+			return &Song::SetComposer;
+		case MPD_TAG_ITEM_PERFORMER:
+			return &Song::SetPerformer;
+		case MPD_TAG_ITEM_COMMENT:
+			return &Song::SetComment;
+		case MPD_TAG_ITEM_DISC:
+			return &Song::SetDisc;
+		case MPD_TAG_ITEM_FILENAME:
+			return &Song::SetNewName;
+		default:
+			return NULL;
+	}
+}
+
 string FindSharedDir(Menu<Song> *menu)
 {
 	SongList list;

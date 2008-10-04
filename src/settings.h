@@ -23,6 +23,7 @@
 
 #include <fstream>
 
+#include "libmpdclient.h"
 #include "ncmpcpp.h"
 
 const string config_dir = home_folder + "/.ncmpcpp/";
@@ -100,6 +101,7 @@ struct ncmpcpp_config
 	string song_status_format;
 	string song_window_title_format;
 	string song_library_format;
+	string media_lib_album_format;
 	string tag_editor_album_format;
 	string browser_playlist_prefix;
 	
@@ -124,6 +126,8 @@ struct ncmpcpp_config
 	
 	Border window_border;
 	Border active_window_border;
+	
+	mpd_TagItems media_lib_primary_tag;
 	
 	bool colors_enabled;
 	bool fancy_scrolling;
