@@ -295,6 +295,8 @@ string DisplayItem(const Item &item, void *, const Menu<Item> *menu)
 			return DisplaySong(*item.song, &Config.song_list_format, (const Menu<Song> *)menu);
 		case itPlaylist:
 			return Config.browser_playlist_prefix + item.name;
+		default:
+			return "";
 	}
 }
 
@@ -363,7 +365,7 @@ string DisplayColumns(string song_template)
 		}
 		
 		v = v.substr(0, width-1);
-		for (int i = v.length(); i < width; i++, v += " ");
+		for (int i = v.length(); i < width; i++, v += " ") { }
 		result += v;
 	}
 	
@@ -457,7 +459,7 @@ string DisplaySongInColumns(const Song &s, void *s_template, const Menu<Song> *)
 		}
 		
 		v = TO_WSTRING(Window::OmitBBCodes(ss)).substr(0, width-1);
-		for (int i = v.length(); i < width; i++, v += space);
+		for (int i = v.length(); i < width; i++, v += space) { }
 		if (!color.empty())
 			result += open_col + color + close_col;
 		result += v;
@@ -494,7 +496,7 @@ string DisplaySong(const Song &s, void *s_template, const Menu<Song> *menu)
 				if (!tags_present)
 					it++;
 				else
-					while (*++it != '}');
+					while (*++it != '}') { }
 			}
 		}
 		
@@ -512,7 +514,7 @@ string DisplaySong(const Song &s, void *s_template, const Menu<Song> *menu)
 				if (!tags_present)
 					it++;
 				else
-					while (*it++ != '}');
+					while (*it++ != '}') { }
 			}
 		}
 		

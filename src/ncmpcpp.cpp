@@ -373,6 +373,8 @@ int main(int argc, char *argv[])
 				case csPlaylistEditor:
 					title = "Playlist editor";
 					break;
+				default:
+					break;
 			}
 			
 			if (title_allowed)
@@ -1258,7 +1260,6 @@ int main(int argc, char *argv[])
 							Search(s);
 							if (mSearcher->Back().first == ".")
 							{
-								bool bold = 0;
 								int found = mSearcher->Size()-search_engine_static_options;
 								found += 3; // don't count options inserted below
 								mSearcher->InsertSeparator(14);
@@ -2130,7 +2131,10 @@ int main(int argc, char *argv[])
 						TraceMpdStatus();
 						timer = time(NULL);
 						for (vector<int>::iterator it = list.begin(); it != list.end(); it++)
-							mPlaylist->Swap(--*it, *it);
+						{
+							(*it)--;
+							mPlaylist->Swap(*it, (*it)+1);
+						}
 						mPlaylist->Highlight(list[(list.size()-1)/2]);
 						mPlaylist->Refresh();
 						mPlaylist->ReadKey(input);
@@ -2150,7 +2154,8 @@ int main(int argc, char *argv[])
 					{
 						TraceMpdStatus();
 						timer = time(NULL);
-						mPlaylist->Swap(to--, to);
+						to--;
+						mPlaylist->Swap(to, to+1);
 						mPlaylist->Go(wUp);
 						mPlaylist->Refresh();
 						mPlaylist->ReadKey(input);
@@ -2174,7 +2179,10 @@ int main(int argc, char *argv[])
 						TraceMpdStatus();
 						timer = time(NULL);
 						for (vector<int>::iterator it = list.begin(); it != list.end(); it++)
-							mPlaylistEditor->Swap(--*it, *it);
+						{
+							(*it)--;
+							mPlaylistEditor->Swap(*it, (*it)+1);
+						}
 						mPlaylistEditor->Highlight(list[(list.size()-1)/2]);
 						mPlaylistEditor->Refresh();
 						mPlaylistEditor->ReadKey(input);
@@ -2192,7 +2200,8 @@ int main(int argc, char *argv[])
 					{
 						TraceMpdStatus();
 						timer = time(NULL);
-						mPlaylistEditor->Swap(to--, to);
+						to--;
+						mPlaylistEditor->Swap(to, to+1);
 						mPlaylistEditor->Go(wUp);
 						mPlaylistEditor->Refresh();
 						mPlaylistEditor->ReadKey(input);
@@ -2225,7 +2234,10 @@ int main(int argc, char *argv[])
 						TraceMpdStatus();
 						timer = time(NULL);
 						for (vector<int>::reverse_iterator it = list.rbegin(); it != list.rend(); it++)
-							mPlaylist->Swap(++*it, *it);
+						{
+							(*it)++;
+							mPlaylist->Swap(*it, (*it)-1);
+						}
 						mPlaylist->Highlight(list[(list.size()-1)/2]);
 						mPlaylist->Refresh();
 						mPlaylist->ReadKey(input);
@@ -2245,7 +2257,8 @@ int main(int argc, char *argv[])
 					{
 						TraceMpdStatus();
 						timer = time(NULL);
-						mPlaylist->Swap(to++, to);
+						to++;
+						mPlaylist->Swap(to, to-1);
 						mPlaylist->Go(wDown);
 						mPlaylist->Refresh();
 						mPlaylist->ReadKey(input);
@@ -2270,7 +2283,10 @@ int main(int argc, char *argv[])
 						TraceMpdStatus();
 						timer = time(NULL);
 						for (vector<int>::reverse_iterator it = list.rbegin(); it != list.rend(); it++)
-							mPlaylistEditor->Swap(++*it, *it);
+						{
+							(*it)++;
+							mPlaylistEditor->Swap(*it, (*it)-1);
+						}
 						mPlaylistEditor->Highlight(list[(list.size()-1)/2]);
 						mPlaylistEditor->Refresh();
 						mPlaylistEditor->ReadKey(input);
@@ -2288,7 +2304,8 @@ int main(int argc, char *argv[])
 					{
 						TraceMpdStatus();
 						timer = time(NULL);
-						mPlaylistEditor->Swap(to++, to);
+						to++;
+						mPlaylistEditor->Swap(to, to-1);
 						mPlaylistEditor->Go(wDown);
 						mPlaylistEditor->Refresh();
 						mPlaylistEditor->ReadKey(input);
@@ -2630,7 +2647,7 @@ int main(int argc, char *argv[])
 						ShowMessage("Cannot rename '" + old_name + "' to '" + new_name + "'!");
 				}
 			}*/
-			else if (wCurrent == mPlaylistList || wCurrent == mBrowser && mBrowser->Current().type == itPlaylist)
+			else if (wCurrent == mPlaylistList || (wCurrent == mBrowser && mBrowser->Current().type == itPlaylist))
 			{
 				string old_name = wCurrent == mPlaylistList ? mPlaylistList->GetOption() : mBrowser->Current().name;
 				LockStatusbar();

@@ -186,7 +186,7 @@ void * GetArtistInfo(void *ptr)
 	int i = result->length();
 	if (!isgraph((*result)[i-1]))
 	{
-		while (!isgraph((*result)[--i]));
+		while (!isgraph((*result)[--i])) { }
 		*result = result->substr(0, i+1);
 	}
 	

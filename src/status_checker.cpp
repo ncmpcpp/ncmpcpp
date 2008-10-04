@@ -126,13 +126,15 @@ void TraceMpdStatus()
 			case psPlay: case psPause:
 				changes.ElapsedTime = 1; // restore status
 				break;
+			default:
+				break;
 		}
 		NcmpcppStatusChanged(Mpd, changes, NULL);
 	}
 	//wHeader->WriteXY(0,1, IntoStr(now_playing), 1);
 }
 
-void NcmpcppErrorCallback(MPDConnection *Mpd, int errorid, string msg, void *data)
+void NcmpcppErrorCallback(MPDConnection *Mpd, int errorid, string msg, void *)
 {
 	if (errorid == MPD_ACK_ERROR_PERMISSION)
 	{
@@ -148,7 +150,7 @@ void NcmpcppErrorCallback(MPDConnection *Mpd, int errorid, string msg, void *dat
 		ShowMessage(msg);
 }
 
-void NcmpcppStatusChanged(MPDConnection *Mpd, MPDStatusChanges changed, void *data)
+void NcmpcppStatusChanged(MPDConnection *Mpd, MPDStatusChanges changed, void *)
 {
 	int sx, sy;
 	wFooter->DisableBB();

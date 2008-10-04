@@ -281,7 +281,7 @@ namespace
 		line = line.substr(i, line.length()-i);
 		i = 0;
 		if (line[i] == ' ')
-			while (line[++i] == ' ');
+			while (line[++i] == ' ') { }
 		line = line.substr(i, line.length()-i);
 		i = line.find(" ");
 		string one;

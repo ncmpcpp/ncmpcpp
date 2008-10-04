@@ -218,12 +218,12 @@ void Window::Display(bool stub)
 	Refresh(stub);
 }
 
-void Window::Refresh(bool stub)
+void Window::Refresh(bool)
 {
 	wrefresh(itsWindow);
 }
 
-void Window::Clear(bool stub)
+void Window::Clear(bool)
 {
 	werase(itsWindow);
 	wrefresh(itsWindow);

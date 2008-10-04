@@ -123,7 +123,7 @@ void Scrollpad::Recreate()
 	Write(itsContent.c_str());
 }
 
-void Scrollpad::Refresh(bool stub)
+void Scrollpad::Refresh(bool)
 {
 	prefresh(itsWindow,itsBeginning,0,itsStartY,itsStartX,itsStartY+itsHeight-1,itsStartX+itsWidth);
 }

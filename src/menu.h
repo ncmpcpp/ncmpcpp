@@ -48,7 +48,7 @@ class Menu : public Window
 	typedef string (*ItemDisplayer) (const T &, void *, const Menu<T> *);
 	
 	public:
-		Menu(int startx, int starty, int width, int height, string title, Color color, Border border) : itsItemDisplayer(0), itsItemDisplayerUserdata(0), Window(startx, starty, width, height, title, color, border), itsSelectedPrefix("[.r]"), itsSelectedSuffix("[/r]"), itsStaticsNumber(0), itsBeginning(0), itsHighlight(0), itsHighlightColor(itsBaseColor), itsHighlightEnabled(1) { }
+		Menu(int startx, int starty, int width, int height, string title, Color color, Border border) : Window(startx, starty, width, height, title, color, border), itsItemDisplayer(0), itsItemDisplayerUserdata(0), itsSelectedPrefix("[.r]"), itsSelectedSuffix("[/r]"), itsStaticsNumber(0), itsBeginning(0), itsHighlight(0), itsHighlightColor(itsBaseColor), itsHighlightEnabled(1) { }
 		Menu(const Menu &);
 		virtual ~Menu();
 		
@@ -284,7 +284,7 @@ void Menu<T>::Insert(int where, const T &item, bool bold, bool is_static, bool s
 {
 	Option<T> *new_option = new Option<T>;
 	new_option->item = item;
-	new_option->location = lLeft;
+	new_option->location = location;
 	new_option->have_separator = separator;
 	new_option->is_static = is_static;
 	new_option->is_bold = bold;
@@ -365,7 +365,7 @@ void Menu<T>::Refresh(bool redraw_whole_window)
 			
 			if (itsOptions[*it]->location == lCenter)
 			{
-				for (; x < (itsWidth-strlength-(!ch ? 4 : 0))/2; x++);
+				x = (itsWidth-strlength-(!ch ? 2 : 0))/2;
 				if (!ch)
 				{
 					AltCharset(1);
@@ -376,8 +376,8 @@ void Menu<T>::Refresh(bool redraw_whole_window)
 			}
 			if (itsOptions[*it]->location == lRight)
 			{
-				for (; x < (itsWidth-strlength); x++)
-					if (!ch)
+				x = itsWidth-strlength-(!ch ? 2 : 0);
+				if (!ch)
 				{
 					AltCharset(1);
 					mvwaddstr(itsWindow, line, x, "u ");

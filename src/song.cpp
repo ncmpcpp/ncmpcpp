@@ -48,9 +48,9 @@ void DefineEmptyTags()
 }
 
 Song::Song(mpd_Song *s, bool copy_ptr) : itsSong(s),
-					 isStream(0),
 					 itsHash(0),
 					 copyPtr(copy_ptr),
+					 isStream(0),
 					 itsGetEmptyFields(0)
 {
 	string itsFile = itsSong->file ? itsSong->file : "";
@@ -284,6 +284,7 @@ Song & Song::operator=(const Song &s)
 	copyPtr = s.copyPtr;
 	isStream = s.isStream;
 	itsGetEmptyFields = s.itsGetEmptyFields;
+	return *this;
 }
 
 bool Song::operator==(const Song &s) const

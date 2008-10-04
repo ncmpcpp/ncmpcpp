@@ -93,7 +93,7 @@ string FindSharedDir(const SongList &v)
 	return result;
 }
 
-string DisplayTag(const Song &s, void *data, const Menu<Song> *null)
+string DisplayTag(const Song &s, void *data, const Menu<Song> *)
 {
 	switch (static_cast<Menu<string> *>(data)->GetChoice())
 	{
