@@ -447,7 +447,7 @@ int main(int argc, char *argv[])
 				sort(list.begin(), list.end(), CaseInsensitiveSorting());
 				for (TagList::const_iterator it = list.begin(); it != list.end(); it++)
 				{
-					if (mLibArtists->Empty() || mLibArtists->Back() != *it)
+					if ((mLibArtists->Empty() || mLibArtists->Back() != *it) && !it->empty())
 						mLibArtists->AddOption(*it);
 				}
 				mLibArtists->Window::Clear();
@@ -476,7 +476,8 @@ int main(int argc, char *argv[])
 					Mpd->AddSearch(Config.media_lib_primary_tag, mLibArtists->GetOption());
 					Mpd->AddSearch(MPD_TAG_ITEM_ALBUM, *it);
 					Mpd->CommitSearch(l);
-					maplist[DisplaySong(*l[0], &Config.media_lib_album_format)] = *it;
+					if (!l.empty() && l[0]->GetAlbum() != UNKNOWN_ALBUM)
+						maplist[DisplaySong(*l[0], &Config.media_lib_album_format)] = *it;
 					FreeSongList(l);
 				}
 				for (std::map<string, string>::const_iterator it = maplist.begin(); it != maplist.end(); it++)
@@ -611,7 +612,8 @@ int main(int argc, char *argv[])
 						Mpd->StartSearch(1);
 						Mpd->AddSearch(MPD_TAG_ITEM_ALBUM, *it);
 						Mpd->CommitSearch(l);
-						maplist[DisplaySong(*l[0], &Config.tag_editor_album_format)] = *it;
+						if (!l.empty())
+							maplist[DisplaySong(*l[0], &Config.tag_editor_album_format)] = *it;
 						FreeSongList(l);
 					}
 					for (std::map<string, string>::const_iterator it = maplist.begin(); it != maplist.end(); it++)
