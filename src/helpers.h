@@ -48,6 +48,7 @@ bool Keypressed(int, const int *);
 void WindowTitle(const string &);
 void EscapeUnallowedChars(string &);
 
+string IntoStr(mpd_TagItems);
 string FindSharedDir(const string &, const string &);
 string TotalPlaylistLength();
 string DisplayStringPair(const StringPair &, void *, const Menu<StringPair> *);

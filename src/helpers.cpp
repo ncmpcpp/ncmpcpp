@@ -177,6 +177,37 @@ void EscapeUnallowedChars(string &s)
 	}
 }
 
+string IntoStr(mpd_TagItems tag)
+{
+	switch (tag)
+	{
+		case MPD_TAG_ITEM_ARTIST:
+			return "Artist";
+		case MPD_TAG_ITEM_ALBUM:
+			return "Album";
+		case MPD_TAG_ITEM_TITLE:
+			return "Title";
+		case MPD_TAG_ITEM_TRACK:
+			return "Track";
+		case MPD_TAG_ITEM_GENRE:
+			return "Genre";
+		case MPD_TAG_ITEM_DATE:
+			return "Year";
+		case MPD_TAG_ITEM_COMPOSER:
+			return "Composer";
+		case MPD_TAG_ITEM_PERFORMER:
+			return "Performer";
+		case MPD_TAG_ITEM_COMMENT:
+			return "Comment";
+		case MPD_TAG_ITEM_DISC:
+			return "Disc";
+		case MPD_TAG_ITEM_FILENAME:
+			return "Filename";
+		default:
+			return "";
+	}
+}
+
 string FindSharedDir(const string &one, const string &two)
 {
 	if (one == two)

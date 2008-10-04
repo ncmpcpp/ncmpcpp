@@ -38,7 +38,6 @@ string FindSharedDir(Menu<Song> *);
 string FindSharedDir(const SongList &);
 string DisplayTag(const Song &, void *, const Menu<Song> *);
 
-string IntoStr(mpd_TagItems);
 SongSetFunction IntoSetFunction(mpd_TagItems);
 
 bool GetSongTags(Song &);
