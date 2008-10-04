@@ -3051,6 +3051,33 @@ int main(int argc, char *argv[])
 			Config.ncmpc_like_songs_adding = !Config.ncmpc_like_songs_adding;
 			ShowMessage("Add mode: " + string(Config.ncmpc_like_songs_adding ? "Add item to playlist, remove if already added" : "Always add item to playlist"));
 		}
+		else if (Keypressed(input, Key.SwitchTagTypeList) && wCurrent == mLibArtists)
+		{
+			LockStatusbar();
+			wFooter->WriteXY(0, Config.statusbar_visibility, "Tag type ? [[.b]a[/b]rtist/[.b]y[/b]ear/[.b]g[/b]enre/[.b]c[/b]omposer/[.b]p[/b]erformer] ", 1);
+			int item;
+			curs_set(1);
+			do
+			{
+				TraceMpdStatus();
+				wFooter->ReadKey(item);
+			}
+			while (item != 'a' && item != 'y' && item != 'g' && item != 'c' && item != 'p');
+			curs_set(0);
+			UnlockStatusbar();
+			mpd_TagItems new_tagitem = IntoTagItem(item);
+			if (new_tagitem != Config.media_lib_primary_tag)
+			{
+				Config.media_lib_primary_tag = new_tagitem;
+				string item_type = IntoStr(Config.media_lib_primary_tag);
+				mLibArtists->SetTitle(item_type + "s");
+				mLibArtists->Reset();
+				mLibArtists->Clear(0);
+				mLibArtists->Display();
+				ToLower(item_type);
+				ShowMessage("Switched to list of " + item_type + " tag");
+			}
+		}
 		else if (Keypressed(input, Key.SongInfo))
 		{
 			if (wCurrent == sInfo)

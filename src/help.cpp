@@ -179,8 +179,8 @@ string GetKeybindings()
 	result += DisplayKeys(&Key.VolumeDown[0], 1) + "Previous column\n";
 	result += DisplayKeys(&Key.VolumeUp[0], 1) + "Next column\n";
 	result += DisplayKeys(Key.Enter) + "Add to playlist and play song/album/artist's songs\n";
-	result += DisplayKeys(Key.Space) + "Add to playlist song/album/artist's songs\n\n\n";
-	
+	result += DisplayKeys(Key.Space) + "Add to playlist song/album/artist's songs\n";
+	result += DisplayKeys(Key.SwitchTagTypeList) + "Tag type list switcher (left column)\n\n\n";
 	
 	result += "   [.b]Keys - Playlist Editor\n -----------------------------------------[/b]\n";
 	result += DisplayKeys(&Key.VolumeDown[0], 1) + "Previous column\n";

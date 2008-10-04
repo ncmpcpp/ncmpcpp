@@ -92,6 +92,7 @@ void DefaultKeys(ncmpcpp_keys &keys)
 	keys.ToggleAutoCenter[0] = 'U';
 	keys.TogglePlaylistDisplayMode[0] = 'p';
 	keys.GoToParentDir[0] = 263;
+	keys.SwitchTagTypeList[0] = '`';
 	keys.Quit[0] = 'q';
 	
 	keys.Up[1] = 'k';
@@ -153,6 +154,7 @@ void DefaultKeys(ncmpcpp_keys &keys)
 	keys.ToggleAutoCenter[1] = null_key;
 	keys.TogglePlaylistDisplayMode[1] = null_key;
 	keys.GoToParentDir[1] = 127;
+	keys.SwitchTagTypeList[1] = null_key;
 	keys.Quit[1] = 'Q';
 }
 
@@ -252,6 +254,25 @@ string IntoStr(Color color)
 	return result;
 }
 
+mpd_TagItems IntoTagItem(char c)
+{
+	switch (c)
+	{
+		case 'a':
+			return MPD_TAG_ITEM_ARTIST;
+		case 'y':
+			return MPD_TAG_ITEM_DATE;
+		case 'g':
+			return MPD_TAG_ITEM_GENRE;
+		case 'c':
+			return MPD_TAG_ITEM_COMPOSER;
+		case 'p':
+			return MPD_TAG_ITEM_PERFORMER;
+		default:
+			return MPD_TAG_ITEM_ARTIST;
+	}
+}
+
 namespace
 {
 	void GetKeys(string line, int *key)
@@ -275,25 +296,6 @@ namespace
 			one = line;
 		key[0] = !one.empty() && one[0] == '\'' ? one[1] : (atoi(one.c_str()) == 0 ? null_key : atoi(one.c_str()));
 		key[1] = !two.empty() && two[0] == '\'' ? two[1] : (atoi(two.c_str()) == 0 ? null_key : atoi(two.c_str()));
-	}
-	
-	mpd_TagItems IntoTagItem(char c)
-	{
-		switch (c)
-		{
-			case 'a':
-				return MPD_TAG_ITEM_ARTIST;
-			case 'y':
-				return MPD_TAG_ITEM_DATE;
-			case 'g':
-				return MPD_TAG_ITEM_GENRE;
-			case 'c':
-				return MPD_TAG_ITEM_COMPOSER;
-			case 'p':
-				return MPD_TAG_ITEM_PERFORMER;
-			default:
-				return MPD_TAG_ITEM_ARTIST;
-		}
 	}
 	
 	Color IntoColor(const string &color)
@@ -461,6 +463,8 @@ void ReadKeys(ncmpcpp_keys &keys)
 				GetKeys(*it, keys.StartSearching);
 			else if (it->find("key_go_to_parent_dir ") != string::npos)
 				GetKeys(*it, keys.GoToParentDir);
+			else if (it->find("key_switch_tag_type_list ") != string::npos)
+				GetKeys(*it, keys.SwitchTagTypeList);
 			else if (it->find("key_quit ") != string::npos)
 				GetKeys(*it, keys.Quit);
 		}

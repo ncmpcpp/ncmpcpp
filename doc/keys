@@ -130,5 +130,7 @@
 #
 #key_go_to_parent_dir = 263 127
 #
+#key_switch_tag_type_list = '`'
+#
 #key_quit = 'q' 'Q'
 #

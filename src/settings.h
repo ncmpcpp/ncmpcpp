@@ -90,6 +90,7 @@ struct ncmpcpp_keys
 	int ToggleAutoCenter[2];
 	int TogglePlaylistDisplayMode[2];
 	int GoToParentDir[2];
+	int SwitchTagTypeList[2];
 	int Quit[2];
 };
 
@@ -158,6 +159,7 @@ void ReadKeys(ncmpcpp_keys &);
 void ReadConfiguration(ncmpcpp_config &);
 
 string IntoStr(Color);
+mpd_TagItems IntoTagItem(char);
 string GetLineValue(const string &, char = '"', char = '"');
 
 #endif
