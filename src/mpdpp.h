@@ -90,8 +90,11 @@ class MPDConnection
 		
 		void SetStatusUpdater(StatusUpdater, void *);
 		void SetErrorHandler(ErrorHandler, void *);
+		void GetStatus();
 		void UpdateStatus();
 		void UpdateDirectory(const string &) const;
+		
+		void Execute(const string &) const;
 		
 		void Play() const;
 		void Play(int) const;
@@ -119,7 +122,7 @@ class MPDConnection
 		int GetPlaylistLength() const { return isConnected && itsCurrentStatus ? itsCurrentStatus->playlistLength : 0; }
 		void GetPlaylistChanges(long long, SongList &) const;
 		
-		string GetLastErrorMessage() const { return itsLastErrorMessage; }
+		string GetErrorMessage() const { return itsErrorMessage; }
 		int GetErrorCode() const { return itsErrorCode; }
 		
 		Song GetCurrentSong() const;
@@ -167,15 +170,16 @@ class MPDConnection
 		void GetDirectoryRecursive(const string &, SongList &) const;
 		void GetSongs(const string &, SongList &) const;
 		void GetDirectories(const string &, TagList &) const;
-	
-	private:
+		
 		int CheckForErrors();
+		
+	private:
 		void ClearQueue();
 		
 		mpd_Connection *itsConnection;
 		bool isConnected;
 		
-		string itsLastErrorMessage;
+		string itsErrorMessage;
 		int itsErrorCode;
 		unsigned int itsMaxPlaylistLength;
 		

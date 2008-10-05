@@ -160,11 +160,21 @@ int main(int argc, char *argv[])
 	
 	Mpd->SetTimeout(Config.mpd_connection_timeout);
 	
-	if (!Mpd->Connect())
+	if (argc > 1)
 	{
-		printf("Cannot connect to mpd: %s\n", Mpd->GetLastErrorMessage().c_str());
-		return -1;
+		vector<string> args;
+		args.reserve(argc-1);
+		for (int i = 1; i < argc; i++)
+			args.push_back(argv[i]);
+		if (ParseArgv(args))
+		{
+			Mpd->Disconnect();
+			return 0;
+		}
 	}
+	
+	if (!ConnectToMPD())
+		return -1;
 	
 	setlocale(LC_ALL,"");
 	initscr();

@@ -119,15 +119,20 @@ void MPDConnection::SetErrorHandler(ErrorHandler handler, void *data)
 	itsErrorHandlerUserdata = data;
 }
 
-void MPDConnection::UpdateStatus()
+void MPDConnection::GetStatus()
 {
-	CheckForErrors();
-	
 	if (itsOldStatus)
 		mpd_freeStatus(itsOldStatus);
 	itsOldStatus = itsCurrentStatus;
 	mpd_sendStatusCommand(itsConnection);
 	itsCurrentStatus = mpd_getStatus(itsConnection);
+}
+
+void MPDConnection::UpdateStatus()
+{
+	CheckForErrors();
+	
+	GetStatus();
 	
 	if (!itsMaxPlaylistLength)
 		itsMaxPlaylistLength = GetPlaylistLength();
@@ -178,6 +183,15 @@ void MPDConnection::UpdateDirectory(const string &path) const
 	if (isConnected)
 	{
 		mpd_sendUpdateCommand(itsConnection, (char *) path.c_str());
+		mpd_finishCommand(itsConnection);
+	}
+}
+
+void MPDConnection::Execute(const string &command) const
+{
+	if (isConnected)
+	{
+		mpd_executeCommand(itsConnection, command.c_str());
 		mpd_finishCommand(itsConnection);
 	}
 }
@@ -842,7 +856,7 @@ int MPDConnection::CheckForErrors()
 				itsErrorHandler(this, itsConnection->error, itsConnection->errorStr, itsErrorHandlerUserdata);
 			itsErrorCode = itsConnection->error;
 		}
-		itsLastErrorMessage = itsConnection->errorStr;
+		itsErrorMessage = itsConnection->errorStr;
 		mpd_clearError(itsConnection);
 	}
 	return itsErrorCode;

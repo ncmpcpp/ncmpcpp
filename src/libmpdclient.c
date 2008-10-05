@@ -439,11 +439,11 @@ void mpd_closeConnection(mpd_Connection * connection) {
 	WSACleanup();
 }
 
-static void mpd_executeCommand(mpd_Connection * connection, char * command) {
+void mpd_executeCommand(mpd_Connection * connection, const char * command) {
 	int ret;
 	struct timeval tv;
 	fd_set fds;
-	char * commandPtr = command;
+	const char * commandPtr = command;
 	int commandLen = strlen(command);
 
 	if(!connection->doneProcessing && !connection->commandList) {

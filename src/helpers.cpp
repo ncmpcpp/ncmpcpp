@@ -53,6 +53,111 @@ extern string UNKNOWN_ARTIST;
 extern string UNKNOWN_TITLE;
 extern string UNKNOWN_ALBUM;
 
+bool ConnectToMPD()
+{
+	if (!Mpd->Connect())
+	{
+		printf("Cannot connect to mpd: %s\n", Mpd->GetErrorMessage().c_str());
+		return false;
+	}
+	return true;
+}
+
+bool ParseArgv(vector<string> &v)
+{
+	using std::cout;
+	using std::endl;
+	
+	bool exit = 0;
+	for (vector<string>::iterator it = v.begin(); it != v.end() && !exit; it++)
+	{
+		if (*it == "-v" || *it == "--version")
+		{
+			cout << "ncmpcpp version: " << VERSION << endl
+			<< "build with support for:"
+#			ifdef HAVE_CURL_CURL_H
+			<< " curl"
+#			endif
+#			ifdef HAVE_TAGLIB_H
+			<< " taglib"
+#			endif
+#			ifdef UTF8_ENABLED
+			<< " unicode"
+#			endif
+			<< endl;
+			return 1;
+		}
+		else if (*it == "-?" || *it == "--help")
+		{
+			cout
+			<< "Usage: ncmpcpp [OPTION]...\n"
+			<< "  -?, --help                show this help message\n"
+			<< "  -v, --version             display version information\n\n"
+			<< "  play                      start playing\n"
+			<< "  pause                     pause the currently playing song\n"
+			<< "  toggle                    toggle play/pause mode\n"
+			<< "  next                      play the next song\n"
+			<< "  prev                      play the previous song\n"
+			<< "  volume [+-]<num>          adjusts volume by [+-]<num>\n"
+			;
+			return 1;
+		}
+		
+		if (!ConnectToMPD())
+			return 1;
+		
+		if (*it == "play")
+		{
+			Mpd->Play();
+			exit = 1;
+		}
+		else if (*it == "pause")
+		{
+			Mpd->Execute("pause \"1\"\n");
+			exit = 1;
+		}
+		else if (*it == "toggle")
+		{
+			Mpd->Execute("pause\n");
+			exit = 1;
+		}
+		else if (*it == "next")
+		{
+			Mpd->Next();
+			exit = 1;
+		}
+		else if (*it == "prev")
+		{
+			Mpd->Prev();
+			exit = 1;
+		}
+		else if (*it == "volume")
+		{
+			it++;
+			Mpd->GetStatus();
+			if (Mpd->CheckForErrors())
+			{
+				cout << "Error: " << Mpd->GetErrorMessage() << endl;
+				return 1;
+			}
+			if (it != v.end())
+				Mpd->SetVolume(Mpd->GetVolume()+StrToInt(*it));
+			exit = 1;
+		}
+		else
+		{
+			cout << "ncmpcpp: invalid option " << *it << endl;
+			return 1;
+		}
+		if (Mpd->CheckForErrors())
+		{
+			cout << "Error: " << Mpd->GetErrorMessage() << endl;
+			return 1;
+		}
+	}
+	return exit;
+}
+
 void LockStatusbar()
 {
 	if (Config.statusbar_visibility)

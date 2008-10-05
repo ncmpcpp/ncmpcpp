@@ -149,6 +149,9 @@ void mpd_closeConnection(mpd_Connection * connection);
  */
 void mpd_clearError(mpd_Connection * connection);
 
+/* added by unK, make this extern as I want to use it */
+void mpd_executeCommand(mpd_Connection * connection, const char * command);
+
 /* STATUS STUFF */
 
 /* use these with status.state to determine what state the player is in */

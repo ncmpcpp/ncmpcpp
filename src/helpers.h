@@ -27,6 +27,9 @@
 
 extern ncmpcpp_config Config;
 
+bool ConnectToMPD();
+bool ParseArgv(vector<string> &);
+
 void LockStatusbar();
 void UnlockStatusbar();
 
