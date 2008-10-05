@@ -160,6 +160,7 @@ class MPDConnection
 		void CommitSearch(TagList &) const;
 		
 		void GetPlaylists(TagList &) const;
+		void GetList(TagList &, mpd_TagItems) const;
 		void GetArtists(TagList &) const;
 		void GetAlbums(string, TagList &) const;
 		void GetDirectory(const string &, ItemList &) const;

@@ -628,6 +628,21 @@ void MPDConnection::GetPlaylists(TagList &v) const
 	}
 }
 
+void MPDConnection::GetList(TagList &v, mpd_TagItems type) const
+{
+	if (isConnected)
+	{
+		mpd_sendListCommand(itsConnection, type, NULL);
+		char *item;
+		while ((item = mpd_getNextTag(itsConnection, type)) != NULL)
+		{
+			v.push_back(item);
+			delete [] item;
+		}
+		mpd_finishCommand(itsConnection);
+	}
+}
+
 void MPDConnection::GetArtists(TagList &v) const
 {
 	if (isConnected)

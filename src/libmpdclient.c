@@ -1340,12 +1340,44 @@ void mpd_sendListCommand(mpd_Connection * connection, int table,
 	char st[10];
 	int len;
 	char *string;
-	if(table == MPD_TABLE_ARTIST) strcpy(st,"artist");
-	else if(table == MPD_TABLE_ALBUM) strcpy(st,"album");
-	else {
-		connection->error = 1;
-		strcpy(connection->errorStr,"unknown table for list");
-		return;
+	switch(table) {
+		case MPD_TABLE_ARTIST:
+			strcpy(st,"artist");
+			break;
+		case MPD_TABLE_ALBUM:
+			strcpy(st,"album");
+			break;
+		case MPD_TABLE_TITLE:
+			strcpy(st,"title");
+			break;
+		case MPD_TABLE_TRACK:
+			strcpy(st,"track");
+			break;
+		case MPD_TABLE_GENRE:
+			strcpy(st,"genre");
+			break;
+		case MPD_TABLE_DATE:
+			strcpy(st,"date");
+			break;
+		case MPD_TABLE_COMPOSER:
+			strcpy(st,"composer");
+			break;
+		case MPD_TABLE_PERFORMER:
+			strcpy(st,"performer");
+			break;
+		case MPD_TABLE_COMMENT:
+			strcpy(st,"comment");
+			break;
+		case MPD_TABLE_DISC:
+			strcpy(st,"disc");
+			break;
+		case MPD_TABLE_FILENAME:
+			strcpy(st,"filename");
+			break;
+		default:
+			connection->error = 1;
+			strcpy(connection->errorStr,"unknown table for list");
+			return;
 	}
 	if(arg1) {
 		char * sanitArg1 = mpd_sanitizeArg(arg1);

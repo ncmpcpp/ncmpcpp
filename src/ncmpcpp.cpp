@@ -436,16 +436,7 @@ int main(int argc, char *argv[])
 				TagList list;
 				mLibAlbums->Clear(0);
 				mLibSongs->Clear(0);
-				if (Config.media_lib_primary_tag == MPD_TAG_ITEM_ARTIST)
-					Mpd->GetArtists(list);
-				else
-				{
-					Mpd->StartSearch(0);
-					Mpd->AddSearch(Config.media_lib_primary_tag, "");
-					Mpd->StartFieldSearch(Config.media_lib_primary_tag);
-					Mpd->CommitSearch(list);
-					sort(list.begin(), list.end());
-				}
+				Mpd->GetList(list, Config.media_lib_primary_tag);
 				sort(list.begin(), list.end(), CaseInsensitiveSorting());
 				for (TagList::const_iterator it = list.begin(); it != list.end(); it++)
 				{
