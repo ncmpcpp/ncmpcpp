@@ -18,6 +18,8 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
+#include <iostream>
+
 #include "helpers.h"
 #include "tag_editor.h"
 
@@ -57,7 +59,7 @@ bool ConnectToMPD()
 {
 	if (!Mpd->Connect())
 	{
-		printf("Cannot connect to mpd: %s\n", Mpd->GetErrorMessage().c_str());
+		std::cout << "Cannot connect to mpd: " << Mpd->GetErrorMessage() << std::endl;
 		return false;
 	}
 	return true;
@@ -263,7 +265,7 @@ bool SortSongsByTrack(Song *a, Song *b)
 void WindowTitle(const string &status)
 {
 	if (TERMINAL_TYPE != "linux" && Config.set_window_title)
-		printf("\033]0;%s\7",status.c_str());
+		std::cout << "\033]0;" << status << "\7";
 }
 
 void EscapeUnallowedChars(string &s)

@@ -18,6 +18,8 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
+#include <iostream>
+
 #include "mpdpp.h"
 #include "ncmpcpp.h"
 
@@ -831,7 +833,7 @@ int main(int argc, char *argv[])
 			if (COLS < 20 || LINES < 5)
 			{
 				endwin();
-				printf("Screen too small!\n");
+				std::cout << "Screen too small!\n";
 				return 1;
 			}
 			
@@ -3506,7 +3508,7 @@ int main(int argc, char *argv[])
 	Mpd->Disconnect();
 	curs_set(1);
 	endwin();
-	printf("\n");
+	std::cout << std::endl;
 	return 0;
 }
 
