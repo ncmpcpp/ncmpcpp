@@ -40,25 +40,12 @@ extern Menu<string> *mEditorDirs;
 extern Window *wHeader;
 extern Window *wFooter;
 
-extern SongList vSearched;
-
 extern time_t timer;
 
 extern int now_playing;
-extern int playing_song_scroll_begin;
-
 extern int lock_statusbar_delay;
 
 extern string browsed_dir;
-
-extern string player_state;
-extern string volume_state;
-extern string switch_state;
-
-extern string mpd_repeat;
-extern string mpd_random;
-extern string mpd_crossfade;
-extern string mpd_db_updating;
 
 extern NcmpcppScreen current_screen;
 extern NcmpcppScreen prev_screen;
@@ -80,6 +67,7 @@ bool repeat_one_allowed = 0;
 long long playlist_old_id = -1;
 
 int old_playing;
+int playing_song_scroll_begin = 0;
 
 time_t time_of_statusbar_lock;
 time_t now;

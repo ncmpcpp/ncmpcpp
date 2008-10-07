@@ -22,6 +22,8 @@
 
 #ifdef HAVE_TAGLIB_H
 
+#include <fstream>
+
 #include "id3v2tag.h"
 #include "textidentificationframe.h"
 #include "mpegfile.h"

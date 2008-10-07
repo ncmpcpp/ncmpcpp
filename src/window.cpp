@@ -20,7 +20,23 @@
 
 #include "window.h"
 
-Window::Window(int startx, int starty, int width, int height, const string &title, Color color, Border border) : itsWindow(0), itsWinBorder(0), itsGetStringHelper(0), itsStartX(startx), itsStartY(starty), itsWidth(width), itsHeight(height), itsWindowTimeout(-1), BBEnabled(1), AutoRefreshEnabled(1), itsTitle(title), itsColor(color), itsBaseColor(color), itsBgColor(clDefault), itsBaseBgColor(clDefault), itsBorder(border)
+Window::Window(int startx, int starty, int width, int height, const string &title, Color color, Border border) :
+	itsWindow(0),
+	itsWinBorder(0),
+	itsGetStringHelper(0),
+	itsStartX(startx),
+	itsStartY(starty),
+	itsWidth(width),
+	itsHeight(height),
+	itsWindowTimeout(-1),
+	BBEnabled(1),
+	AutoRefreshEnabled(1),
+	itsTitle(title),
+	itsColor(color),
+	itsBaseColor(color),
+	itsBgColor(clDefault),
+	itsBaseBgColor(clDefault),
+	itsBorder(border)
 {
 	if (itsStartX < 0) itsStartX = 0;
 	if (itsStartY < 0) itsStartY = 0;
@@ -28,8 +44,8 @@ Window::Window(int startx, int starty, int width, int height, const string &titl
 	if (itsBorder != brNone)
 	{
 		itsWinBorder = newpad(itsHeight, itsWidth);
-		wattron(itsWinBorder,COLOR_PAIR(itsBorder));
-		box(itsWinBorder,0,0);
+		wattron(itsWinBorder, COLOR_PAIR(itsBorder));
+		box(itsWinBorder, 0, 0);
 		itsStartX++;
 		itsStartY++;
 		itsWidth -= 2;
@@ -47,6 +63,7 @@ Window::Window(int startx, int starty, int width, int height, const string &titl
 		itsWindow = newwin(0, 0, 0, 0);
 	
 	SetColor(itsColor);
+	keypad(itsWindow, 1);
 }
 
 Window::Window(const Window &w)
@@ -78,9 +95,9 @@ Window::~Window()
 void Window::SetColor(Color col, Color background)
 {
 	if (col != clDefault)
-		wattron(itsWindow,COLOR_PAIR(background*8+col));
+		wattron(itsWindow, COLOR_PAIR(background*8+col));
 	else
-		wattroff(itsWindow,COLOR_PAIR(itsColor));
+		wattroff(itsWindow, COLOR_PAIR(itsColor));
 	itsColor = col;
 	itsBgColor = background;
 }
@@ -104,8 +121,8 @@ void Window::SetBorder(Border border)
 	}
 	else if (border != brNone && itsBorder == brNone)
 	{
-		itsWinBorder = newpad(itsHeight,itsWidth);
-		wattron(itsWinBorder,COLOR_PAIR(border));
+		itsWinBorder = newpad(itsHeight, itsWidth);
+		wattron(itsWinBorder, COLOR_PAIR(border));
 		box(itsWinBorder,0,0);
 		itsStartX++;
 		itsStartY++;
@@ -116,7 +133,7 @@ void Window::SetBorder(Border border)
 	else
 	{
 		wattron(itsWinBorder,COLOR_PAIR(border));
-		box(itsWinBorder,0,0);
+		box(itsWinBorder, 0, 0);
 	}
 	itsBorder = border;
 }
@@ -148,6 +165,7 @@ void Window::Recreate()
 	itsWindow = newwin(itsHeight, itsWidth, itsStartY, itsStartX);
 	SetTimeout(itsWindowTimeout);
 	SetColor(itsColor, itsBgColor);
+	keypad(itsWindow, 1);
 }
 
 void Window::MoveTo(int newx, int newy)
@@ -175,8 +193,8 @@ void Window::Resize(int width, int height)
 	{
 		delwin(itsWinBorder);
 		itsWinBorder = newpad(height, width);
-		wattron(itsWinBorder,COLOR_PAIR(itsBorder));
-		box(itsWinBorder,0,0);
+		wattron(itsWinBorder, COLOR_PAIR(itsBorder));
+		box(itsWinBorder, 0, 0);
 		width -= 2;
 		height -= 2;
 	}
@@ -195,7 +213,7 @@ void Window::ShowBorder() const
 	if (itsBorder != brNone)
 	{
 		refresh();
-		prefresh(itsWinBorder,0,0,GetStartY(),GetStartX(),itsStartY+itsHeight,itsStartX+itsWidth);
+		prefresh(itsWinBorder, 0, 0, GetStartY(), GetStartX(), itsStartY+itsHeight, itsStartX+itsWidth);
 	}
 	if (!itsTitle.empty())
 	{
@@ -264,7 +282,7 @@ void Window::SetTimeout(int timeout)
 
 void Window::ReadKey(int &input) const
 {
-	 keypad(itsWindow, TRUE); input = wgetch(itsWindow); keypad(itsWindow, FALSE);
+	input = wgetch(itsWindow);
 }
 
 void Window::ReadKey() const
@@ -288,8 +306,7 @@ void Window::Write(int limit, const string &str, bool clrtoeol)
 				tmp += *it;
 				limit--;
 			}
-			
-			if (collect)
+			else
 			{
 				if (*it != '[')
 				{
@@ -361,8 +378,7 @@ void Window::Write(int limit, const wstring &str, bool clrtoeol)
 				tmp += *it;
 				limit -= wcwidth(*it);
 			}
-		
-			if (collect)
+			else
 			{
 				if (*it != '[')
 				{
@@ -419,21 +435,21 @@ void Window::Write(int limit, const wstring &str, bool clrtoeol)
 
 void Window::WriteXY(int x, int y, int limit, const wstring &str, bool cleartoeol)
 {
-	wmove(itsWindow,y,x);
+	wmove(itsWindow, y, x);
 	Write(limit, str, cleartoeol);
 }
 #endif
 
 void Window::WriteXY(int x, int y, int limit, const string &str, bool cleartoeol)
 {
-	wmove(itsWindow,y,x);
+	wmove(itsWindow, y, x);
 	Write(limit, str, cleartoeol);
 }
 
 string Window::GetString(const string &base, unsigned int length, int width) const
 {
 	int input, beginning, maxbeginning, minx, x, y, maxx;
-	getyx(itsWindow,y,x);
+	getyx(itsWindow, y, x);
 	minx = maxx = x;
 	
 	width--;
@@ -443,7 +459,6 @@ string Window::GetString(const string &base, unsigned int length, int width) con
 		return "";
 	
 	curs_set(1);
-	keypad(itsWindow, 1);
 	wstring tmp = ToWString(base);
 	
 	string tmp_in;
@@ -470,7 +485,7 @@ string Window::GetString(const string &base, unsigned int length, int width) con
 		if (itsGetStringHelper)
 			itsGetStringHelper();
 		
-		wmove(itsWindow,y,x);
+		wmove(itsWindow, y, x);
 		input = wgetch(itsWindow);
 		
 		switch (input)
@@ -554,7 +569,6 @@ string Window::GetString(const string &base, unsigned int length, int width) con
 		}
 	}
 	while (input != 10);
-	keypad(itsWindow, 0);
 	curs_set(0);
 	return ToString(tmp);
 }
@@ -813,86 +827,4 @@ size_t Window::Length(const wstring &ws)
 		length += wcwidth(*it);
 	return length;
 }
-
-/*int CountBBCodes(const string &str)
-{
-	if (str.empty())
-		return 0;
-	bool collect = false;
-	int length = 0;
-	string color;
-	for (string::const_iterator it = str.begin(); it != str.end(); it++)
-	{
-		if (*it != '[' && !collect);
-		else
-			collect = 1;
-		
-		if (collect)
-		{
-			if (*it != '[')
-			{
-				color += *it;
-				length++;
-			}
-			else
-			{
-				length -= color.length();
-				length++;
-				color = *it;
-			}
-		}
-		
-		if (*it == ']' || it+1 == str.end())
-			collect = 0;
-		
-		if (!collect)
-		{
-			if (!IsValidColor(color))
-				length -= color.length();
-			color.clear();
-		}
-	}
-	return length;
-}
-
-int CountBBCodes(const wstring &str)
-{
-	if (str.empty())
-		return 0;
-	bool collect = false;
-	int length = 0;
-	wstring color;
-	for (wstring::const_iterator it = str.begin(); it != str.end(); it++)
-	{
-		if (*it != '[' && !collect);
-		else
-			collect = 1;
-		
-		if (collect)
-		{
-			if (*it != '[')
-			{
-				color += *it;
-				length++;
-			}
-			else
-			{
-				length -= color.length();
-				length++;
-				color = *it;
-			}
-		}
-		
-		if (*it == ']' || it+1 == str.end())
-			collect = 0;
-		
-		if (!collect)
-		{
-			if (!IsValidColor(ToString(color)))
-				length -= color.length();
-			color.clear();
-		}
-	}
-	return length;
-}*/
 

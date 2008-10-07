@@ -21,8 +21,6 @@
 #ifndef HAVE_SETTINGS_H
 #define HAVE_SETTINGS_H
 
-#include <fstream>
-
 #include "libmpdclient.h"
 #include "ncmpcpp.h"
 

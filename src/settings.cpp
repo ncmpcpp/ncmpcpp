@@ -19,6 +19,8 @@
  ***************************************************************************/
 
 #include <sys/stat.h>
+#include <fstream>
+
 #include "settings.h"
 
 const string config_file = config_dir + "config";

@@ -19,6 +19,8 @@
  ***************************************************************************/
 
 #include <sys/stat.h>
+#include <fstream>
+
 #include "helpers.h"
 #include "lyrics.h"
 #include "settings.h"

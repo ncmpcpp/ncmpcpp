@@ -26,7 +26,7 @@
 class Scrollpad: public Window
 {
 	public:
-		Scrollpad(int startx, int starty, int width, int height, string title, Color color, Border border) : Window(startx, starty, width, height, title, color, border), itsBeginning(0), itsRealHeight(1), itsXPos(0) { delwin(itsWindow); itsWindow = newpad(itsHeight,itsWidth); }
+		Scrollpad(int, int, int, int, const string &, Color, Border);
 		Scrollpad(const Scrollpad &);
 		virtual ~Scrollpad() {}
 		virtual void Add(string);
@@ -36,6 +36,7 @@ class Scrollpad: public Window
 		virtual void Clear(bool clear_screen = 1);
 		virtual Window * Clone() const { return new Scrollpad(*this); }
 		virtual Window * EmptyClone() const;
+		
 	protected:
 		virtual void Recreate();
 		string itsContent;

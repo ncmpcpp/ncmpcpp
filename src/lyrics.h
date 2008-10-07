@@ -23,7 +23,6 @@
 
 #include "ncmpcpp.h"
 
-#include <fstream>
 #ifdef HAVE_CURL_CURL_H
 # include <pthread.h>
 # include "curl/curl.h"

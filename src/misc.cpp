@@ -21,8 +21,6 @@
 #include <algorithm>
 #include "misc.h"
 
-using std::stringstream;
-
 int Abs(int num)
 {
 	return (num < 0 ? -num : num);
@@ -38,17 +36,17 @@ int StrToInt(string str)
 	return atoi(str.c_str());
 }
 
-string IntoStr(int liczba)
+string IntoStr(int l)
 {
-	stringstream ss;
-	ss << liczba;
+	std::stringstream ss;
+	ss << l;
 	return ss.str();
 }
 
-string IntoStr(double liczba, int precision)
+string IntoStr(double l, int precision)
 {
-	stringstream ss;
-	ss << std::fixed << std::setprecision(precision) << liczba;
+	std::stringstream ss;
+	ss << std::fixed << std::setprecision(precision) << l;
 	return ss.str();
 }
 

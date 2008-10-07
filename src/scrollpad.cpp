@@ -20,6 +20,18 @@
 
 #include "scrollpad.h"
 
+Scrollpad::Scrollpad(int startx, int starty, int width, int height, const string &title, Color color, Border border) :
+	Window(startx, starty, width, height, title, color, border),
+	itsBeginning(0),
+	itsRealHeight(1),
+	itsXPos(0)
+{
+	delwin(itsWindow);
+	itsWindow = newpad(itsHeight, itsWidth);
+	SetColor(itsColor);
+	keypad(itsWindow, 1);
+}
+
 Scrollpad::Scrollpad(const Scrollpad &s) : Window(s)
 {
 	itsContent = s.itsContent;
@@ -126,12 +138,13 @@ void Scrollpad::Recreate()
 	itsWindow = newpad(itsRealHeight, itsWidth);
 	SetTimeout(itsWindowTimeout);
 	SetColor(itsBaseColor, itsBgColor);
+	keypad(itsWindow, 1);
 	Write(itsContent.c_str());
 }
 
 void Scrollpad::Refresh(bool)
 {
-	prefresh(itsWindow,itsBeginning,0,itsStartY,itsStartX,itsStartY+itsHeight-1,itsStartX+itsWidth);
+	prefresh(itsWindow, itsBeginning, 0, itsStartY, itsStartX, itsStartY+itsHeight-1, itsStartX+itsWidth);
 }
 
 void Scrollpad::Resize(int width, int height)
@@ -140,8 +153,8 @@ void Scrollpad::Resize(int width, int height)
 	{
 		delwin(itsWinBorder);
 		itsWinBorder = newpad(height, width);
-		wattron(itsWinBorder,COLOR_PAIR(itsBorder));
-		box(itsWinBorder,0,0);
+		wattron(itsWinBorder, COLOR_PAIR(itsBorder));
+		box(itsWinBorder, 0, 0);
 		width -= 2;
 		height -= 2;
 	}
@@ -215,14 +228,15 @@ void Scrollpad::Clear(bool clear_screen)
 	wclear(itsWindow);
 	delwin(itsWindow);
 	itsWindow = newpad(itsHeight, itsWidth);
-	SetColor(itsColor, itsBgColor);
 	SetTimeout(itsWindowTimeout);
+	SetColor(itsColor, itsBgColor);
+	keypad(itsWindow, 1);
 	if (clear_screen)
 		Window::Clear();
 }
 
 Window * Scrollpad::EmptyClone() const
 {
-	return new Scrollpad(GetStartX(),GetStartY(),GetWidth(),GetHeight(),itsTitle,itsBaseColor,itsBorder);
+	return new Scrollpad(GetStartX(), GetStartY(), GetWidth(), GetHeight(), itsTitle, itsBaseColor, itsBorder);
 }
 

@@ -101,7 +101,6 @@ MPDConnection *Mpd;
 time_t timer;
 
 int now_playing = -1;
-int playing_song_scroll_begin = 0;
 int browsed_dir_scroll_begin = 0;
 int stats_scroll_begin = 0;
 
@@ -182,7 +181,7 @@ int main(int argc, char *argv[])
 	if (!ConnectToMPD())
 		return -1;
 	
-	setlocale(LC_ALL,"");
+	setlocale(LC_ALL, "");
 	initscr();
 	noecho();
 	cbreak();
@@ -476,7 +475,6 @@ int main(int argc, char *argv[])
 					Mpd->AddSearch(Config.media_lib_primary_tag, mLibArtists->GetOption());
 					Mpd->StartFieldSearch(MPD_TAG_ITEM_ALBUM);
 					Mpd->CommitSearch(list);
-					//sort(list.begin(), list.end());
 				}
 				for (TagList::const_iterator it = list.begin(); it != list.end(); it++)
 				{
