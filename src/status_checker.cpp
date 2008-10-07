@@ -319,15 +319,16 @@ void NcmpcppStatusChanged(MPDConnection *Mpd, MPDStatusChanges changed, void *)
 		playing_song_scroll_begin = 0;
 		
 		if (Mpd->GetState() == psPlay)
+		{
+			WindowTitle(DisplaySong(Mpd->GetCurrentSong(), &Config.song_window_title_format));
 			changed.ElapsedTime = 1;
+		}
 	}
 	if (changed.ElapsedTime)
 	{
-		Song s = Mpd->GetCurrentSong();
+		const Song &s = Mpd->GetCurrentSong();
 		if (!player_state.empty() && !s.Empty())
 		{
-			WindowTitle(DisplaySong(s, &Config.song_window_title_format));
-			
 			int elapsed = Mpd->GetElapsedTime();
 			
 			// 'repeat one' mode check - be sure that we deal with item with known length
@@ -391,14 +392,14 @@ void NcmpcppStatusChanged(MPDConnection *Mpd, MPDStatusChanges changed, void *)
 	if (changed.Repeat)
 	{
 		mpd_repeat = (Mpd->GetRepeat() ? "r" : "");
-		ShowMessage("Repeat is " + (string)(mpd_repeat.empty() ? "off" : "on"));
+		ShowMessage("Repeat is " + string(mpd_repeat.empty() ? "off" : "on"));
 		header_update_status = 1;
 
 	}
 	if (changed.Random)
 	{
 		mpd_random = Mpd->GetRandom() ? "z" : "";
-		ShowMessage("Random is " + (string)(mpd_random.empty() ? "off" : "on"));
+		ShowMessage("Random is " + string(mpd_random.empty() ? "off" : "on"));
 		header_update_status = 1;
 	}
 	if (changed.Crossfade)

@@ -136,8 +136,8 @@ bool ParseArgv(vector<string> &v)
 		else if (*it == "volume")
 		{
 			it++;
-			Mpd->GetStatus();
-			if (Mpd->CheckForErrors())
+			Mpd->UpdateStatus();
+			if (!Mpd->GetErrorMessage().empty())
 			{
 				cout << "Error: " << Mpd->GetErrorMessage() << endl;
 				return 1;
@@ -151,7 +151,7 @@ bool ParseArgv(vector<string> &v)
 			cout << "ncmpcpp: invalid option " << *it << endl;
 			return 1;
 		}
-		if (Mpd->CheckForErrors())
+		if (!Mpd->GetErrorMessage().empty())
 		{
 			cout << "Error: " << Mpd->GetErrorMessage() << endl;
 			return 1;

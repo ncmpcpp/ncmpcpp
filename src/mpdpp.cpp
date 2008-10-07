@@ -119,20 +119,15 @@ void MPDConnection::SetErrorHandler(ErrorHandler handler, void *data)
 	itsErrorHandlerUserdata = data;
 }
 
-void MPDConnection::GetStatus()
+void MPDConnection::UpdateStatus()
 {
+	CheckForErrors();
+	
 	if (itsOldStatus)
 		mpd_freeStatus(itsOldStatus);
 	itsOldStatus = itsCurrentStatus;
 	mpd_sendStatusCommand(itsConnection);
 	itsCurrentStatus = mpd_getStatus(itsConnection);
-}
-
-void MPDConnection::UpdateStatus()
-{
-	CheckForErrors();
-	
-	GetStatus();
 	
 	if (!itsMaxPlaylistLength)
 		itsMaxPlaylistLength = GetPlaylistLength();
@@ -140,42 +135,44 @@ void MPDConnection::UpdateStatus()
 	if (CheckForErrors())
 		return;
 	
-	MPDStatusChanges changes;
-	
 	if (itsOldStats)
 		mpd_freeStats(itsOldStats);
 	itsOldStats = itsCurrentStats;
 	mpd_sendStatsCommand(itsConnection);
 	itsCurrentStats = mpd_getStats(itsConnection);
 	
-	if (itsOldStatus == NULL)
+	if (itsCurrentStatus && itsUpdater)
 	{
-		changes.Playlist = 1;
-		changes.SongID = 1;
-		changes.Database = 1;
-		changes.DBUpdating = 1;
-		changes.Volume = 1;
-		changes.ElapsedTime = 1;
-		changes.Crossfade = 1;
-		changes.Random = 1;
-		changes.Repeat = 1;
-		changes.PlayerState = 1;
-	}
-	else
-	{
-		changes.Playlist = itsOldStatus->playlist != itsCurrentStatus->playlist;
-		changes.SongID = itsOldStatus->songid != itsCurrentStatus->songid;
-		changes.Database = itsOldStats->dbUpdateTime != itsCurrentStats->dbUpdateTime;
-		changes.DBUpdating = itsOldStatus->updatingDb != itsCurrentStatus->updatingDb;
-		changes.Volume = itsOldStatus->volume != itsCurrentStatus->volume;
-		changes.ElapsedTime = itsOldStatus->elapsedTime != itsCurrentStatus->elapsedTime;
-		changes.Crossfade = itsOldStatus->crossfade != itsCurrentStatus->crossfade;
-		changes.Random = itsOldStatus->random != itsCurrentStatus->random;
-		changes.Repeat = itsOldStatus->repeat != itsCurrentStatus->repeat;
-		changes.PlayerState = itsOldStatus->state != itsCurrentStatus->state;
-	}
-	if (itsUpdater)
+		MPDStatusChanges changes;
+		
+		if (itsOldStatus == NULL)
+		{
+			changes.Playlist = 1;
+			changes.SongID = 1;
+			changes.Database = 1;
+			changes.DBUpdating = 1;
+			changes.Volume = 1;
+			changes.ElapsedTime = 1;
+			changes.Crossfade = 1;
+			changes.Random = 1;
+			changes.Repeat = 1;
+			changes.PlayerState = 1;
+		}
+		else
+		{
+			changes.Playlist = itsOldStatus->playlist != itsCurrentStatus->playlist;
+			changes.SongID = itsOldStatus->songid != itsCurrentStatus->songid;
+			changes.Database = itsOldStats->dbUpdateTime != itsCurrentStats->dbUpdateTime;
+			changes.DBUpdating = itsOldStatus->updatingDb != itsCurrentStatus->updatingDb;
+			changes.Volume = itsOldStatus->volume != itsCurrentStatus->volume;
+			changes.ElapsedTime = itsOldStatus->elapsedTime != itsCurrentStatus->elapsedTime;
+			changes.Crossfade = itsOldStatus->crossfade != itsCurrentStatus->crossfade;
+			changes.Random = itsOldStatus->random != itsCurrentStatus->random;
+			changes.Repeat = itsOldStatus->repeat != itsCurrentStatus->repeat;
+			changes.PlayerState = itsOldStatus->state != itsCurrentStatus->state;
+		}
 		itsUpdater(this, changes, itsErrorHandlerUserdata);
+	}
 }
 
 void MPDConnection::UpdateDirectory(const string &path) const
