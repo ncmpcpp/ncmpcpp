@@ -130,7 +130,9 @@ class Window
 		static Coordinates IntoCoordinates(const string &);
 		static bool IsValidColor(const string &);
 		static string OmitBBCodes(const string &);
-		static int RealLength(const string &);
+		static size_t RealLength(const string &);
+		static size_t Length(const string &s) { return Length(ToWString(s)); }
+		static size_t Length(const wstring &);
 		
 	protected:
 		virtual void Recreate();

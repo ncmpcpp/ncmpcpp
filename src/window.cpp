@@ -359,7 +359,7 @@ void Window::Write(int limit, const wstring &str, bool clrtoeol)
 			if (!collect)
 			{
 				tmp += *it;
-				limit--;
+				limit -= wcwidth(*it);
 			}
 		
 			if (collect)
@@ -371,7 +371,7 @@ void Window::Write(int limit, const wstring &str, bool clrtoeol)
 				}
 				else
 				{
-					limit -= color.length();
+					limit -= Length(color);
 					tmp += color;
 					color = *it;
 				}
@@ -390,7 +390,7 @@ void Window::Write(int limit, const wstring &str, bool clrtoeol)
 					int x, y;
 					getyx(itsWindow, y, x);
 					Coordinates coords = IntoCoordinates(ToString(color));
-					wmove(itsWindow, coords.second == -1 ? y : coords.second, coords.first);
+					wmove(itsWindow, coords.second < 0 ? y : coords.second, coords.first);
 					limit -= coords.first-x;
 				}
 				else if (IsValidColor(ToString(color)))
@@ -400,7 +400,7 @@ void Window::Write(int limit, const wstring &str, bool clrtoeol)
 				}
 				else
 				{
-					limit -= color.length();
+					limit -= Length(color);
 					tmp += limit > 0 ? color : color.substr(0, color.length()+limit);
 				}
 				color.clear();
@@ -448,6 +448,9 @@ string Window::GetString(const string &base, unsigned int length, int width) con
 	
 	string tmp_in;
 	wchar_t wc_in;
+	
+	mbstate_t state;
+	memset(&state, 0, sizeof(state));
 	
 	maxbeginning = beginning = tmp.length() < width ? 0 : tmp.length()-width;
 	maxx += tmp.length() < width ? tmp.length() : width;
@@ -528,7 +531,7 @@ string Window::GetString(const string &base, unsigned int length, int width) con
 					break;
 				
 				tmp_in += input;
-				if (mbtowc(&wc_in, tmp_in.c_str(), MB_CUR_MAX) < 0)
+				if ((int)mbrtowc(&wc_in, tmp_in.c_str(), MB_CUR_MAX, &state) < 0)
 					break;
 				
 				if ((x-minx)+beginning >= tmp.length())
@@ -665,23 +668,39 @@ wchar_t * ToWString(const char *s)
 string ToString(const wstring &ws)
 {
 	string s;
-	for (wstring::const_iterator it = ws.begin(); it != ws.end(); it++)
-	{
-		char *c = new char[MB_CUR_MAX+1]();
-		if (wctomb(c, *it) > 0)
-			s += c;
-		delete [] c;
-	}
+	const wchar_t *c_ws = ws.c_str();
+	mbstate_t mbs;
+	memset(&mbs, 0, sizeof(mbs));
+	int len = wcsrtombs(NULL, &c_ws, 0, &mbs);
+	
+	if (len <= 0)
+		return s;
+	
+	char *c_s = new char[len+1]();
+	wcsrtombs(c_s, &c_ws, len, &mbs);
+	c_s[len] = 0;
+	s = c_s;
+	delete [] c_s;
 	return s;
 }
 
 wstring ToWString(const string &s)
 {
-	wchar_t *ws = new wchar_t[s.length()+1]();
-	mbstowcs(ws, s.c_str(), s.length());
-	wstring result = ws;
-	delete [] ws;
-	return result;
+	wstring ws;
+	const char *c_s = s.c_str();
+	mbstate_t mbs;
+	memset(&mbs, 0, sizeof(mbs));
+	int len = mbsrtowcs(NULL, &c_s, 0, &mbs);
+	
+	if (len <= 0)
+		return ws;
+	
+	wchar_t *c_ws = new wchar_t[len+1]();
+	mbsrtowcs(c_ws, &c_s, len, &mbs);
+	c_ws[len] = 0;
+	ws = c_ws;
+	delete [] c_ws;
+	return ws;
 }
 
 Coordinates Window::IntoCoordinates(const string &s)
@@ -730,7 +749,7 @@ string Window::OmitBBCodes(const string &str)
 		{
 			result += tmp;
 			tmp.clear();
-			if (!IsValidColor(color))
+			if (!isdigit(tmp[2]) && !IsValidColor(color))
 				tmp += color;
 			color.clear();
 		}
@@ -739,45 +758,59 @@ string Window::OmitBBCodes(const string &str)
 	return result;
 }
 
-int Window::RealLength(const string &str)
+size_t Window::RealLength(const string &s)
 {
-	if (str.empty())
+	if (s.empty())
 		return 0;
 	
 	bool collect = false;
 	int length = 0;
 	
-#ifdef UTF8_ENABLED
-	wstring str2 = ToWString(str);
+#	ifdef UTF8_ENABLED
+	wstring ws = ToWString(s);
 	wstring tmp;
-#else
-	const string &str2 = str;
+#	else
+	const string &ws = s;
 	string tmp;
-#endif
+#	endif
 	
-	for (int i = 0; i < str2.length(); i++, length++)
+	for (int i = 0; i < ws.length(); i++, length++)
 	{
-		if (str2[i] == '[' && (str2[i+1] == '.' || str2[i+1] == '/'))
+		if (ws[i] == '[' && (ws[i+1] == '.' || ws[i+1] == '/'))
 			collect = 1;
 		
 		if (collect)
 		{
-			if (str2[i] != '[')
-				tmp += str2[i];
+			if (ws[i] != '[')
+				tmp += ws[i];
 			else
-				tmp = str2[i];
+				tmp = ws[i];
 		}
 		
-		if (str2[i] == ']')
+		if (ws[i] == ']')
 			collect = 0;
 		
 		if (!collect && !tmp.empty())
 		{
 			if (isdigit(tmp[2]) || IsValidColor(TO_STRING(tmp)))
+			{
+#				ifdef UTF8_ENABLED
+				length -= Length(tmp);
+#				else
 				length -= tmp.length();
+#				endif
+			}
 			tmp.clear();
 		}
 	}
+	return length;
+}
+
+size_t Window::Length(const wstring &ws)
+{
+	size_t length = 0;
+	for (wstring::const_iterator it = ws.begin(); it != ws.end(); it++)
+		length += wcwidth(*it);
 	return length;
 }
 

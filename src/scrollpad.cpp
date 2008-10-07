@@ -54,7 +54,13 @@ void Scrollpad::Add(string str)
 		tab_size = 8-itsXPos%8;
 		
 		if (s[i] != '\t')
+		{
+#			ifdef UTF8_ENABLED
+			itsXPos += wcwidth(s[i]);
+#			else
 			itsXPos++;
+#			endif
+		}
 		else
 			itsXPos += tab_size;
 		

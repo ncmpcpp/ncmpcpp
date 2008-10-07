@@ -141,11 +141,11 @@ void MPDConnection::UpdateStatus()
 	mpd_sendStatsCommand(itsConnection);
 	itsCurrentStats = mpd_getStats(itsConnection);
 	
-	if (itsCurrentStatus && itsUpdater)
+	if (itsCurrentStatus && itsCurrentStats && itsUpdater)
 	{
 		MPDStatusChanges changes;
 		
-		if (itsOldStatus == NULL)
+		if (itsOldStatus == NULL || itsOldStats == NULL)
 		{
 			changes.Playlist = 1;
 			changes.SongID = 1;
