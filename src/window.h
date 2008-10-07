@@ -21,6 +21,10 @@
 #ifndef HAVE_WINDOW_H
 #define HAVE_WINDOW_H
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #include "ncurses.h"
 
 #include <stack>
@@ -30,10 +34,12 @@
 #include <cstring>
 
 #ifdef UTF8_ENABLED
+# define UNICODE 1
 # define my_string_t wstring
 # define TO_STRING(x) ToString(x)
 # define TO_WSTRING(x) ToWString(x)
 #else
+# define UNICODE 0
 # define my_string_t string
 # define TO_STRING(x) x
 # define TO_WSTRING(x) x
@@ -91,12 +97,12 @@ class Window
 		virtual void Write(int, const string &, bool = 0);
 		virtual void WriteXY(int x, int y, const string &s, bool ete = 0) { WriteXY(x, y, 0xFFFF, s, ete); }
 		virtual void WriteXY(int, int, int, const string &, bool = 0);
-#ifdef UTF8_ENABLED
+#		ifdef UTF8_ENABLED
 		virtual void Write(const wstring &s, bool cte = 0) { Write(0xFFFF, s, cte); }
 		virtual void Write(int, const wstring &, bool = 0);
 		virtual void WriteXY(int x, int y, const wstring &s, bool ete = 0) { WriteXY(x, y, 0xFFFF, s, ete); }
 		virtual void WriteXY(int, int, int, const wstring &, bool = 0);
-#endif
+#		endif
 		virtual string GetString(const string &, unsigned int = -1, int = 0) const;
 		virtual string GetString(unsigned int length = -1, int width = 0) const { return GetString("", length, width); }
 		virtual void Scrollable(bool) const;

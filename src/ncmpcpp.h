@@ -21,22 +21,6 @@
 #ifndef HAVE_NCMPCPP_H
 #define HAVE_NCMPCPP_H
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
-
-#ifdef UTF8_ENABLED
-# define UNICODE 1
-#else
-# define UNICODE 0
-#endif
-
-#include <cstdio>
-#include <clocale>
-#include <ctime>
-#include <algorithm>
-#include <map>
-
 #include "window.h"
 #include "menu.h"
 #include "scrollpad.h"

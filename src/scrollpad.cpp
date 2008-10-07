@@ -36,13 +36,13 @@ void Scrollpad::Add(string str)
 	
 	itsRawContent += str;
 	
-#ifdef UTF8_ENABLED
+#	ifdef UTF8_ENABLED
 	wstring s = ToWString(str);
 	wstring tmp;
-#else
+#	else
 	string &s = str;
 	string tmp;
-#endif
+#	endif
 	
 	int x_pos = 0;
 	int space_pos = 0;
