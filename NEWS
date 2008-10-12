@@ -1,3 +1,18 @@
+ncmpcpp-0.2.4
+
+ + fixed bug with not null terminated strings on mac os x
+ + support for renaming files in tiny tag editor
+ + support for editing composer, performer and disc tag in mp3 files
+ + support for user defined base seek time
+ + support for user defined tag type in left column of media library
+ + support for user defined display format in album column of media library
+ + support for basic mpc commands and command line arguments
+ + adding items to playlist can be done like in ncmpc
+ + fetching lyrics and artist's info doesn't lock ncmpcpp anymore
+ + changed place of storing config files
+ + list of recently used patterns in tag editor is now remembered
+
+
 ncmpcpp-0.2.3
 
  + new screen - complex tag editor (with albums/directories view)

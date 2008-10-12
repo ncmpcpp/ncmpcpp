@@ -77,7 +77,7 @@ bool ParseArgv(vector<string> &v)
 		if (*it == "-v" || *it == "--version")
 		{
 			cout << "ncmpcpp version: " << VERSION << endl
-			<< "build with support for:"
+			<< "built with support for:"
 #			ifdef HAVE_CURL_CURL_H
 			<< " curl"
 #			endif
