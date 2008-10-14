@@ -686,7 +686,7 @@ mpd_Status * mpd_getStatus(mpd_Connection * connection) {
 	status->playlistLength = -1;
 	status->state = -1;
 	status->song = 0;
-	status->songid = 0;
+	status->songid = -1;
 	status->elapsedTime = 0;
 	status->totalTime = 0;
 	status->bitRate = 0;
