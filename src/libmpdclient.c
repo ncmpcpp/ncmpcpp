@@ -66,6 +66,10 @@
 #  endif
 #endif
 
+#ifndef WIN32
+#include <sys/un.h>
+#endif
+
 #ifndef MSG_DONTWAIT
 #  define MSG_DONTWAIT 0
 #endif
@@ -348,6 +352,53 @@ static int mpd_parseWelcome(mpd_Connection * connection, const char * host, int 
 	return 0;
 }
 
+#ifndef WIN32
+static int mpd_connect_un(mpd_Connection * connection,
+			  const char * host, float timeout)
+{
+	int error, flags;
+	size_t path_length;
+	struct sockaddr_un sun;
+
+	path_length = strlen(host);
+	if (path_length >= sizeof(sun.sun_path)) {
+		strcpy(connection->errorStr, "unix socket path is too long");
+		connection->error = MPD_ERROR_UNKHOST;
+		return -1;
+	}
+
+	sun.sun_family = AF_UNIX;
+	memcpy(sun.sun_path, host, path_length + 1);
+
+	connection->sock = socket(AF_UNIX, SOCK_STREAM, 0);
+	if (connection->sock < 0) {
+		strcpy(connection->errorStr, "problems creating socket");
+		connection->error = MPD_ERROR_SYSTEM;
+		return -1;
+	}
+
+	mpd_setConnectionTimeout(connection, timeout);
+
+	flags = fcntl(connection->sock, F_GETFL, 0);
+	fcntl(connection->sock, F_SETFL, flags | O_NONBLOCK);
+
+	error = connect(connection->sock, (struct sockaddr*)&sun, sizeof(sun));
+	if (error < 0) {
+		/* try the next address family */
+		close(connection->sock);
+		connection->sock = 0;
+
+		snprintf(connection->errorStr,MPD_BUFFER_MAX_LENGTH,
+			 "problems connecting to \"%s\": %s",
+			 host, strerror(errno));
+		connection->error = MPD_ERROR_CONNPORT;
+		return -1;
+	}
+
+	return 0;
+}
+#endif /* WIN32 */
+
 mpd_Connection * mpd_newConnection(const char * host, int port, float timeout) {
 	int err;
 	char * rt;
@@ -371,7 +422,13 @@ mpd_Connection * mpd_newConnection(const char * host, int port, float timeout) {
 	if (winsock_dll_error(connection))
 		return connection;
 
-	if (mpd_connect(connection, host, port, timeout) < 0)
+#ifndef WIN32
+	if (host[0] == '/')
+		err = mpd_connect_un(connection, host, timeout);
+	else
+#endif
+		err = mpd_connect(connection, host, port, timeout);
+	if (err < 0)
 		return connection;
 
 	while(!(rt = strstr(connection->buffer,"\n"))) {
