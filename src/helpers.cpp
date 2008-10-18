@@ -101,6 +101,7 @@ bool ParseArgv(vector<string> &v)
 			<< "  play                      start playing\n"
 			<< "  pause                     pause the currently playing song\n"
 			<< "  toggle                    toggle play/pause mode\n"
+			<< "  stop                      stop playing\n"
 			<< "  next                      play the next song\n"
 			<< "  prev                      play the previous song\n"
 			<< "  volume [+-]<num>          adjusts volume by [+-]<num>\n"
@@ -124,6 +125,11 @@ bool ParseArgv(vector<string> &v)
 		else if (*it == "toggle")
 		{
 			Mpd->Execute("pause\n");
+			exit = 1;
+		}
+		else if (*it == "stop")
+		{
+			Mpd->Stop();
 			exit = 1;
 		}
 		else if (*it == "next")
