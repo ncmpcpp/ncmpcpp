@@ -23,6 +23,8 @@
 #include "settings.h"
 #include "status_checker.h"
 
+#define UPDATE_WINDOW_TITLE WindowTitle(DisplaySong(Mpd->GetCurrentSong(), &Config.song_window_title_format))
+
 extern MPDConnection *Mpd;
 extern ncmpcpp_config Config;
 
@@ -259,6 +261,7 @@ void NcmpcppStatusChanged(MPDConnection *Mpd, MPDStatusChanges changed, void *)
 			{
 				player_state = "Playing: ";
 				mPlaylist->BoldOption(now_playing, 1);
+				UPDATE_WINDOW_TITLE;
 				changed.ElapsedTime = 1;
 				break;
 			}
@@ -308,7 +311,7 @@ void NcmpcppStatusChanged(MPDConnection *Mpd, MPDStatusChanges changed, void *)
 		
 		if (Mpd->GetState() == psPlay)
 		{
-			WindowTitle(DisplaySong(Mpd->GetCurrentSong(), &Config.song_window_title_format));
+			UPDATE_WINDOW_TITLE;
 			changed.ElapsedTime = 1;
 		}
 	}
