@@ -19,6 +19,7 @@
  ***************************************************************************/
 
 #include <clocale>
+#include <csignal>
 
 #include <algorithm>
 #include <iostream>
@@ -332,6 +333,8 @@ int main(int argc, char *argv[])
 	string lyrics_title;
 	string info_title;
 	// local variables end
+	
+	signal(SIGPIPE, SIG_IGN);
 	
 	while (!main_exit)
 	{
