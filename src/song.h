@@ -85,6 +85,7 @@ class Song
 		void GetEmptyFields(bool get) { itsGetEmptyFields = get; }
 		void Clear();
 		bool Empty() const;
+		bool IsFromDB() const;
 		bool IsStream() const { return isStream; }
 		
 		Song & operator=(const Song &);

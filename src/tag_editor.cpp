@@ -34,6 +34,9 @@
 extern ncmpcpp_config Config;
 extern ncmpcpp_keys Key;
 
+extern MPDConnection *Mpd;
+extern Menu<Song> *mPlaylist;
+
 extern Menu<string> *mTagEditor;
 extern Window *wFooter;
 
@@ -128,7 +131,10 @@ string DisplayTag(const Song &s, void *data, const Menu<Song> *)
 
 bool GetSongTags(Song &s)
 {
-	string path_to_file = Config.mpd_music_dir + s.GetFile();
+	string path_to_file;
+	if (s.IsFromDB())
+		path_to_file += Config.mpd_music_dir;
+	path_to_file += s.GetFile();
 	
 	TagLib::FileRef f(path_to_file.c_str());
 	if (f.isNull())
@@ -172,7 +178,11 @@ bool GetSongTags(Song &s)
 bool WriteTags(Song &s)
 {
 	using namespace TagLib;
-	string path_to_file = Config.mpd_music_dir + s.GetFile();
+	string path_to_file;
+	bool file_is_from_db = s.IsFromDB();
+	if (file_is_from_db)
+		path_to_file += Config.mpd_music_dir;
+	path_to_file += s.GetFile();
 	FileRef f(path_to_file.c_str());
 	if (!f.isNull())
 	{
@@ -213,9 +223,28 @@ bool WriteTags(Song &s)
 		s.GetEmptyFields(0);
 		if (!s.GetNewName().empty())
 		{
-			string old_name = Config.mpd_music_dir + s.GetFile();
-			string new_name = Config.mpd_music_dir + s.GetDirectory() + "/" + s.GetNewName();
-			rename(old_name.c_str(), new_name.c_str());
+			string old_name;
+			if (file_is_from_db)
+				old_name += Config.mpd_music_dir;
+			old_name += s.GetFile();
+			string new_name;
+			if (file_is_from_db)
+				new_name += Config.mpd_music_dir;
+			new_name += s.GetDirectory() + "/" + s.GetNewName();
+			if (rename(old_name.c_str(), new_name.c_str()) == 0 && !file_is_from_db)
+			{
+				// if we rename local file, it won't get updated
+				// so just remove it from playlist and add again
+				int pos = mPlaylist->GetChoice();
+				Mpd->QueueDeleteSong(pos);
+				Mpd->CommitQueue();
+				int id = Mpd->AddSong("file://" + new_name);
+				if (id >= 0)
+				{
+					s = mPlaylist->Back();
+					Mpd->Move(s.GetPosition(), pos);
+				}
+			}
 		}
 		return true;
 	}

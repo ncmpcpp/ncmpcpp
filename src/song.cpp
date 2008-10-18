@@ -110,6 +110,12 @@ bool Song::Empty() const
 	return !itsSong || (!itsSong->file && !itsSong->title && !itsSong->artist && !itsSong->album && !itsSong->date && !itsSong->track && !itsSong->genre && !itsSong->composer && !itsSong->performer && !itsSong->disc && !itsSong->comment);
 }
 
+bool Song::IsFromDB() const
+{
+	const string &dir = GetDirectory();
+	return dir[0] != '/' || dir == "/";
+}
+
 string Song::GetFile() const
 {
 	return !itsSong->file ? (itsGetEmptyFields ? "" : EMPTY_TAG) : itsSong->file;

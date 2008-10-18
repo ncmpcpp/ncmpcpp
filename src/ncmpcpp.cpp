@@ -1128,10 +1128,16 @@ int main(int argc, char *argv[])
 							if (WriteTags(s))
 							{
 								ShowMessage("Tags updated!");
-								Mpd->UpdateDirectory(s.GetDirectory());
-								if (prev_screen == csSearcher)
-									mSearcher->Current().second = s;
+								if (s.IsFromDB())
+								{
+									Mpd->UpdateDirectory(s.GetDirectory());
+									if (prev_screen == csSearcher)
+										mSearcher->Current().second = s;
+								}
+								else
+									mPlaylist->Current() = s;
 							}
+							else
 								ShowMessage("Error writing tags!");
 						}
 						case 15:
@@ -2590,7 +2596,14 @@ int main(int argc, char *argv[])
 					redraw_header = 1;
 				}
 				else
-					ShowMessage("Cannot read file '" + Config.mpd_music_dir + edited_song.GetFile() + "'!");
+				{
+					string message = "Cannot read file '";
+					if (edited_song.IsFromDB())
+						message += Config.mpd_music_dir;
+					message += edited_song.GetFile();
+					message += "'!";
+					ShowMessage(message);
+				}
 			}
 			else if (wCurrent == mEditorDirs)
 			{
