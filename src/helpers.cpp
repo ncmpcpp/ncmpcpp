@@ -56,6 +56,8 @@ extern string UNKNOWN_ARTIST;
 extern string UNKNOWN_TITLE;
 extern string UNKNOWN_ALBUM;
 
+const string term_type = getenv("TERM") ? getenv("TERM") : "";
+
 bool ConnectToMPD()
 {
 	if (!Mpd->Connect())
@@ -265,7 +267,7 @@ bool SortSongsByTrack(Song *a, Song *b)
 
 void WindowTitle(const string &status)
 {
-	if (TERMINAL_TYPE != "linux" && Config.set_window_title)
+	if (term_type != "linux" && Config.set_window_title)
 		std::cout << "\033]0;" << status << "\7";
 }
 

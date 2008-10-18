@@ -46,8 +46,7 @@ enum NcmpcppScreen
 
 const int ncmpcpp_window_timeout = 500;
 
-const string home_folder = getenv("HOME");
-const string TERMINAL_TYPE = getenv("TERM");
+const string home_folder = getenv("HOME") ? getenv("HOME") : "";
 
 const string search_mode_normal = "Match if tag contains searched phrase";
 const string search_mode_strict = "Match only if both values are the same";
