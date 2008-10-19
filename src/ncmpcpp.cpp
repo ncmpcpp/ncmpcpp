@@ -103,7 +103,6 @@ time_t timer;
 
 int now_playing = -1;
 int browsed_dir_scroll_begin = 0;
-int stats_scroll_begin = 0;
 
 int lock_statusbar_delay = -1;
 

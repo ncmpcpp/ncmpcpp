@@ -376,11 +376,16 @@ Song MPDConnection::GetCurrentSong() const
 		mpd_sendCurrentSongCommand(itsConnection);
 		mpd_InfoEntity *item = NULL;
 		item = mpd_getNextInfoEntity(itsConnection);
-		Song result = item->info.song;
-		item->info.song = 0;
-		mpd_freeInfoEntity(item);
-		mpd_finishCommand(itsConnection);
-		return result;
+		if (item)
+		{
+			Song result = item->info.song;
+			item->info.song = 0;
+			mpd_freeInfoEntity(item);
+			mpd_finishCommand(itsConnection);
+			return result;
+		}
+		else
+			return Song();
 	}
 	else
 		return Song();
