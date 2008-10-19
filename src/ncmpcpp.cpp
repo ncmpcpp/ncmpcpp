@@ -133,6 +133,7 @@ bool redraw_header = 1;
 bool reload_lyrics = 0;
 
 extern bool header_update_status;
+extern bool search_place;
 extern bool search_case_sensitive;
 extern bool search_match_to_pattern;
 
@@ -1257,17 +1258,23 @@ int main(int argc, char *argv[])
 						}
 						case 10:
 						{
+							search_place = !search_place;
+							mSearcher->Current().first = "[.b]Search in:[/b] " + string(search_place ? "Database" : "Current playlist");
+							break;
+						}
+						case 11:
+						{
 							search_match_to_pattern = !search_match_to_pattern;
 							mSearcher->Current().first = "[.b]Search mode:[/b] " + (search_match_to_pattern ? search_mode_normal : search_mode_strict);
 							break;
 						}
-						case 11:
+						case 12:
 						{
 							search_case_sensitive = !search_case_sensitive;
 							mSearcher->Current().first = "[.b]Case sensitive:[/b] " + string(search_case_sensitive ? "Yes" : "No");
 							break;
 						}
-						case 13:
+						case 14:
 						{
 							ShowMessage("Searching...");
 							Search(s);
@@ -1275,12 +1282,12 @@ int main(int argc, char *argv[])
 							{
 								int found = mSearcher->Size()-search_engine_static_options;
 								found += 3; // don't count options inserted below
-								mSearcher->InsertSeparator(14);
-								mSearcher->Insert(15, make_pair("[." + Config.color1 + "]Search results:[/" + Config.color1 + "] [." + Config.color2 + "]Found " + IntoStr(found) + (found > 1 ? " songs" : " song") + "[/" + Config.color2 + "]", Song()), 1, 1);
-								mSearcher->InsertSeparator(16);
+								mSearcher->InsertSeparator(15);
+								mSearcher->Insert(16, make_pair("[." + Config.color1 + "]Search results:[/" + Config.color1 + "] [." + Config.color2 + "]Found " + IntoStr(found) + (found > 1 ? " songs" : " song") + "[/" + Config.color2 + "]", Song()), 1, 1);
+								mSearcher->InsertSeparator(17);
 								UpdateFoundList();
 								ShowMessage("Searching finished!");
-								for (int i = 0; i < 13; i++)
+								for (int i = 0; i < search_engine_static_options-4; i++)
 									mSearcher->MakeStatic(i, 1);
 								mSearcher->Go(wDown);
 								mSearcher->Go(wDown);
@@ -1289,7 +1296,7 @@ int main(int argc, char *argv[])
 								ShowMessage("No results found");
 							break;
 						}
-						case 14:
+						case 15:
 						{
 							found_pos = 0;
 							vFoundPositions.clear();
@@ -2734,7 +2741,7 @@ int main(int argc, char *argv[])
 		{
 			if (wCurrent == mSearcher)
 			{
-				mSearcher->Highlight(12); // highlight 'search' button
+				mSearcher->Highlight(13); // highlight 'search' button
 				goto ENTER_SEARCH_ENGINE_SCREEN;
 			}
 		}
@@ -2765,7 +2772,7 @@ int main(int argc, char *argv[])
 				if (wCurrent == mBrowser && browsed_dir != "/")
 					wCurrent->Select(0, 0); // [..] cannot be selected, uhm.
 				if (wCurrent == mSearcher)
-					wCurrent->Select(13, 0); // 'Reset' cannot be selected, omgplz.
+					wCurrent->Select(14, 0); // 'Reset' cannot be selected, omgplz.
 				// hacking shit ends. need better solution :/
 				ShowMessage("Selection reversed!");
 			}

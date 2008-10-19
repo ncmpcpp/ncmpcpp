@@ -381,11 +381,11 @@ Song MPDConnection::GetCurrentSong() const
 			Song result = item->info.song;
 			item->info.song = 0;
 			mpd_freeInfoEntity(item);
-			mpd_finishCommand(itsConnection);
 			return result;
 		}
 		else
 			return Song();
+		mpd_finishCommand(itsConnection);
 	}
 	else
 		return Song();
