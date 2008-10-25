@@ -354,7 +354,7 @@ int main(int argc, char *argv[])
 		messages_allowed = 1;
 		
 		// header stuff
-		const int max_allowed_title_length = wHeader->GetWidth()-volume_state.length();
+		const int max_allowed_title_length = wHeader ? wHeader->GetWidth()-volume_state.length() : 0;
 		if (current_screen == csBrowser && input == ERR && browsed_dir.length() > max_allowed_title_length)
 			redraw_header = 1;
 		if (Config.header_visibility && redraw_header)
