@@ -162,6 +162,8 @@ void DefaultKeys(ncmpcpp_keys &keys)
 
 void DefaultConfiguration(ncmpcpp_config &conf)
 {
+	conf.mpd_host = "localhost";
+	conf.mpd_password = "";
 	conf.mpd_music_dir = "/var/lib/mpd/music/";
 	conf.song_list_format = "{%a - }{%t}|{[.white]%f[/white]}%r{[.green](%l)[/green]}";
 	conf.song_columns_list_format = "(8)[green]{l} (25)[cyan]{a} (40){t} (30)[red]{b}";
@@ -204,6 +206,7 @@ void DefaultConfiguration(ncmpcpp_config &conf)
 	conf.now_playing_lyrics = false;
 	conf.local_browser = false;
 	conf.set_window_title = true;
+	conf.mpd_port = 6600;
 	conf.mpd_connection_timeout = 15;
 	conf.crossfade_time = 5;
 	conf.seek_time = 1;
@@ -494,10 +497,25 @@ void ReadConfiguration(ncmpcpp_config &conf)
 		{
 			v = GetLineValue(*it);
 			
-			if (it->find("mpd_music_dir") != string::npos)
+			if (it->find("mpd_host") != string::npos)
+			{
+				if (!v.empty())
+					conf.mpd_host = v;
+			}
+			else if (it->find("mpd_password") != string::npos)
+			{
+				if (!v.empty())
+					conf.mpd_password = v;
+			}
+			else if (it->find("mpd_music_dir") != string::npos)
 			{
 				if (!v.empty())
 					conf.mpd_music_dir = v + "/";
+			}
+			else if (it->find("mpd_port") != string::npos)
+			{
+				if (StrToInt(v))
+					conf.mpd_port = StrToInt(v);
 			}
 			else if (it->find("mpd_connection_timeout") != string::npos)
 			{

@@ -94,6 +94,8 @@ struct ncmpcpp_keys
 
 struct ncmpcpp_config
 {
+	string mpd_host;
+	string mpd_password;
 	string mpd_music_dir;
 	string song_list_format;
 	string song_columns_list_format;
@@ -144,6 +146,7 @@ struct ncmpcpp_config
 	bool now_playing_lyrics;
 	bool local_browser;
 	
+	int mpd_port;
 	int mpd_connection_timeout;
 	int crossfade_time;
 	int seek_time;
