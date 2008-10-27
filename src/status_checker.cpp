@@ -18,6 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
+#include "browser.h"
 #include "helpers.h"
 #include "search_engine.h"
 #include "settings.h"

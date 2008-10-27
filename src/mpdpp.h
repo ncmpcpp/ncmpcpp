@@ -82,6 +82,9 @@ class MPDConnection
 		bool Connected() const;
 		void Disconnect();
 		
+		const string & GetHostname() { return MPD_HOST; }
+		int GetPort() { return MPD_PORT; }
+		
 		void SetHostname(const string &);
 		void SetPort(int port) { MPD_PORT = port; }
 		void SetTimeout(int timeout) { MPD_TIMEOUT = timeout; }

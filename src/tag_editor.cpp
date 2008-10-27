@@ -129,6 +129,21 @@ string DisplayTag(const Song &s, void *data, const Menu<Song> *)
 	}
 }
 
+void ReadTagsFromFile(mpd_Song *s)
+{
+	TagLib::FileRef f(s->file);
+	if (f.isNull())
+		return;
+	s->artist = !f.tag()->artist().isEmpty() ? str_pool_get(f.tag()->artist().to8Bit(UNICODE).c_str()) : 0;
+	s->title = !f.tag()->title().isEmpty() ? str_pool_get(f.tag()->title().to8Bit(UNICODE).c_str()) : 0;
+	s->album = !f.tag()->album().isEmpty() ? str_pool_get(f.tag()->album().to8Bit(UNICODE).c_str()) : 0;
+	s->track = f.tag()->track() ? str_pool_get(IntoStr(f.tag()->track()).c_str()) : 0;
+	s->date = f.tag()->year() ? str_pool_get(IntoStr(f.tag()->year()).c_str()) : 0;
+	s->genre = !f.tag()->genre().isEmpty() ? str_pool_get(f.tag()->genre().to8Bit(UNICODE).c_str()) : 0;
+	s->comment = !f.tag()->comment().isEmpty() ? str_pool_get(f.tag()->comment().to8Bit(UNICODE).c_str()) : 0;
+	s->time = f.audioProperties()->length();
+}
+
 bool GetSongTags(Song &s)
 {
 	string path_to_file;

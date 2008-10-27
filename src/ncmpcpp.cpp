@@ -28,6 +28,7 @@
 #include "mpdpp.h"
 #include "ncmpcpp.h"
 
+#include "browser.h"
 #include "help.h"
 #include "helpers.h"
 #include "lyrics.h"
@@ -923,7 +924,7 @@ int main(int argc, char *argv[])
 			if (wCurrent == mBrowser && browsed_dir != "/")
 			{
 				mBrowser->Reset();
-				goto GO_TO_PARENT_DIR;
+				goto ENTER_BROWSER_SCREEN;
 			}
 		}
 		else if (Keypressed(input, Key.Enter))
@@ -938,7 +939,7 @@ int main(int argc, char *argv[])
 				}
 				case csBrowser:
 				{
-					GO_TO_PARENT_DIR:
+					ENTER_BROWSER_SCREEN:
 					
 					const Item &item = mBrowser->Current();
 					switch (item.type)
@@ -1135,7 +1136,12 @@ int main(int argc, char *argv[])
 										mSearcher->Current().second = s;
 								}
 								else
-									mPlaylist->Current() = s;
+								{
+									if (wPrev == mPlaylist)
+										mPlaylist->Current() = s;
+									else if (wPrev == mBrowser)
+										*mBrowser->Current().song = s;
+								}
 							}
 							else
 								ShowMessage("Error writing tags!");
@@ -2025,7 +2031,8 @@ int main(int argc, char *argv[])
 					{
 						Mpd->DeletePlaylist(name);
 						ShowMessage("Playlist " + name + " deleted!");
-						GetDirectory("/");
+						if (!Config.local_browser)
+							GetDirectory("/");
 					}
 					else
 						ShowMessage("Aborted!");
@@ -2122,7 +2129,7 @@ int main(int argc, char *argv[])
 					UnlockStatusbar();
 				}
 			}
-			if (browsed_dir == "/" && !mBrowser->Empty())
+			if (!Config.local_browser && browsed_dir == "/" && !mBrowser->Empty())
 				GetDirectory(browsed_dir);
 		}
 		else if (Keypressed(input, Key.Stop))
@@ -2653,27 +2660,6 @@ int main(int argc, char *argv[])
 						ShowMessage("Cannot rename '" + full_old_dir + "' to '" + full_new_dir + "'!");
 				}
 			}
-			// blah, this key is already reserved for TagEditor. I'll merge this to its screen later.
-			/*else if (wCurrent == mBrowser && mBrowser->Current().type == itSong)
-			{
-				string old_name = mBrowser->Current().song->GetFile();
-				LockStatusbar();
-				wFooter->WriteXY(0, Config.statusbar_visibility, "[.b]Filename:[/b] ", 1);
-				string new_name = wFooter->GetString(old_name);
-				UnlockStatusbar();
-				if (!new_name.empty() && new_name != old_name)
-				{
-					string full_old_name = Config.mpd_music_dir + old_name;
-					string full_new_name = Config.mpd_music_dir + new_name;
-					if (rename(full_old_name.c_str(), full_new_name.c_str()) == 0)
-					{
-						Mpd->UpdateDirectory(FindSharedDir(old_name, new_name));
-						ShowMessage("'" + old_name + "' renamed to '" + new_name + "'");
-					}
-					else
-						ShowMessage("Cannot rename '" + old_name + "' to '" + new_name + "'!");
-				}
-			}*/
 			else if (wCurrent == mPlaylistList || (wCurrent == mBrowser && mBrowser->Current().type == itPlaylist))
 			{
 				string old_name = wCurrent == mPlaylistList ? mPlaylistList->GetOption() : mBrowser->Current().name;
@@ -2685,7 +2671,8 @@ int main(int argc, char *argv[])
 				{
 					Mpd->Rename(old_name, new_name);
 					ShowMessage("Playlist '" + old_name + "' renamed to '" + new_name + "'");
-					GetDirectory("/");
+					if (!Config.local_browser)
+						GetDirectory("/");
 					mPlaylistList->Clear(0);
 				}
 			}
@@ -2723,6 +2710,8 @@ int main(int argc, char *argv[])
 				
 				if (s->GetDirectory() == EMPTY_TAG) // for streams
 					continue;
+				
+				Config.local_browser = !s->IsFromDB();
 				
 				string option = DisplaySong(*s, &Config.song_list_format, mPlaylist);
 				GetDirectory(s->GetDirectory());
@@ -2949,7 +2938,7 @@ int main(int argc, char *argv[])
 					if (id != mDialog->Size()-1)
 					{
 						// refresh playlist's lists
-						if (browsed_dir == "/")
+						if (!Config.local_browser && browsed_dir == "/")
 							GetDirectory("/");
 						mPlaylistList->Clear(0); // make playlist editor update itself
 					}
@@ -3097,31 +3086,43 @@ int main(int argc, char *argv[])
 			Config.ncmpc_like_songs_adding = !Config.ncmpc_like_songs_adding;
 			ShowMessage("Add mode: " + string(Config.ncmpc_like_songs_adding ? "Add item to playlist, remove if already added" : "Always add item to playlist"));
 		}
-		else if (Keypressed(input, Key.SwitchTagTypeList) && wCurrent == mLibArtists)
+		else if (Keypressed(input, Key.SwitchTagTypeList))
 		{
-			LockStatusbar();
-			wFooter->WriteXY(0, Config.statusbar_visibility, "Tag type ? [[.b]a[/b]rtist/[.b]y[/b]ear/[.b]g[/b]enre/[.b]c[/b]omposer/[.b]p[/b]erformer] ", 1);
-			int item;
-			curs_set(1);
-			do
+			if (wCurrent == mBrowser && Mpd->GetHostname()[0] == '/')
 			{
-				TraceMpdStatus();
-				wFooter->ReadKey(item);
+				Config.local_browser = !Config.local_browser;
+				ShowMessage("Browse mode: " + string(Config.local_browser ? "Local filesystem" : "MPD music dir"));
+				browsed_dir = Config.local_browser ? home_folder : "/";
+				mBrowser->Reset();
+				GetDirectory(browsed_dir);
+				redraw_header = 1;
 			}
-			while (item != 'a' && item != 'y' && item != 'g' && item != 'c' && item != 'p');
-			curs_set(0);
-			UnlockStatusbar();
-			mpd_TagItems new_tagitem = IntoTagItem(item);
-			if (new_tagitem != Config.media_lib_primary_tag)
+			else if (wCurrent == mLibArtists)
 			{
-				Config.media_lib_primary_tag = new_tagitem;
-				string item_type = IntoStr(Config.media_lib_primary_tag);
-				mLibArtists->SetTitle(item_type + "s");
-				mLibArtists->Reset();
-				mLibArtists->Clear(0);
-				mLibArtists->Display();
-				ToLower(item_type);
-				ShowMessage("Switched to list of " + item_type + " tag");
+				LockStatusbar();
+				wFooter->WriteXY(0, Config.statusbar_visibility, "Tag type ? [[.b]a[/b]rtist/[.b]y[/b]ear/[.b]g[/b]enre/[.b]c[/b]omposer/[.b]p[/b]erformer] ", 1);
+				int item;
+				curs_set(1);
+				do
+				{
+					TraceMpdStatus();
+					wFooter->ReadKey(item);
+				}
+				while (item != 'a' && item != 'y' && item != 'g' && item != 'c' && item != 'p');
+				curs_set(0);
+				UnlockStatusbar();
+				mpd_TagItems new_tagitem = IntoTagItem(item);
+				if (new_tagitem != Config.media_lib_primary_tag)
+				{
+					Config.media_lib_primary_tag = new_tagitem;
+					string item_type = IntoStr(Config.media_lib_primary_tag);
+					mLibArtists->SetTitle(item_type + "s");
+					mLibArtists->Reset();
+					mLibArtists->Clear(0);
+					mLibArtists->Display();
+					ToLower(item_type);
+					ShowMessage("Switched to list of " + item_type + " tag");
+				}
 			}
 		}
 		else if (Keypressed(input, Key.SongInfo))

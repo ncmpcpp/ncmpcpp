@@ -202,6 +202,7 @@ void DefaultConfiguration(ncmpcpp_config &conf)
 	conf.albums_in_tag_editor = false;
 	conf.incremental_seeking = true;
 	conf.now_playing_lyrics = false;
+	conf.local_browser = false;
 	conf.set_window_title = true;
 	conf.mpd_connection_timeout = 15;
 	conf.crossfade_time = 5;

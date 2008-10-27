@@ -18,8 +18,12 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
+#include "mpdpp.h"
+
 #include "help.h"
 #include "settings.h"
+
+extern MPDConnection *Mpd;
 
 extern ncmpcpp_keys Key;
 
@@ -165,6 +169,8 @@ string GetKeybindings()
 	result += "   [.b]Keys - Browse screen\n -----------------------------------------[/b]\n";
 	result += DisplayKeys(Key.Enter) + "Enter directory/Add item to playlist and play\n";
 	result += DisplayKeys(Key.Space) + "Add item to playlist\n";
+	if (Mpd->GetHostname()[0] == '/') // are we connected to unix socket?
+		result += DisplayKeys(Key.SwitchTagTypeList) + "Browse MPD database/local filesystem\n";
 	result += DisplayKeys(Key.GoToParentDir) + "Go to parent directory\n";
 	result += DisplayKeys(Key.Delete) + "Delete playlist\n\n\n";
 	

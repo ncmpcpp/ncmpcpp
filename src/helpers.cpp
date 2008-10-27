@@ -35,11 +35,8 @@ extern Window *wFooter;
 extern NcmpcppScreen current_screen;
 
 extern int lock_statusbar_delay;
-extern int browsed_dir_scroll_begin;
 
 extern time_t time_of_statusbar_lock;
-
-extern string browsed_dir;
 
 extern bool messages_allowed;
 extern bool block_progressbar_update;
@@ -220,28 +217,6 @@ bool CaseInsensitiveSorting::operator()(const Item &a, const Item &b)
 		return a.type < b.type;
 }
 
-void UpdateItemList(Menu<Item> *menu)
-{
-	bool bold = 0;
-	for (int i = 0; i < menu->Size(); i++)
-	{
-		if (menu->at(i).type == itSong)
-		{
-			for (int j = 0; j < mPlaylist->Size(); j++)
-			{
-				if (mPlaylist->at(j).GetHash() == menu->at(i).song->GetHash())
-				{
-					bold = 1;
-					break;
-				}
-			}
-			menu->BoldOption(i, bold);
-			bold = 0;
-		}
-	}
-	menu->Refresh();
-}
-
 void UpdateSongList(Menu<Song> *menu)
 {
 	bool bold = 0;
@@ -393,27 +368,6 @@ string TotalPlaylistLength()
 string DisplayStringPair(const StringPair &pair, void *, const Menu<StringPair> *)
 {
 	return pair.first;
-}
-
-string DisplayItem(const Item &item, void *, const Menu<Item> *menu)
-{
-	switch (item.type)
-	{
-		case itDirectory:
-		{
-			if (item.song)
-				return "[..]";
-			int slash = item.name.find_last_of("/");
-			return "[" + (slash != string::npos ? item.name.substr(slash+1) : item.name) + "]";
-		}
-		case itSong:
-			// I know casting that way is ugly etc., but it works.
-			return DisplaySong(*item.song, &Config.song_list_format, (const Menu<Song> *)menu);
-		case itPlaylist:
-			return Config.browser_playlist_prefix + item.name;
-		default:
-			return "";
-	}
 }
 
 string DisplayColumns(string song_template)
@@ -577,7 +531,11 @@ string DisplaySongInColumns(const Song &s, void *s_template, const Menu<Song> *)
 		v = TO_WSTRING(Window::OmitBBCodes(ss)).substr(0, width-1);
 		for (int i = v.length(); i < width; i++, v += space) { }
 		if (!color.empty())
-			result += open_col + color + close_col;
+		{
+			result += open_col;
+			result += color;
+			result += close_col;
+		}
 		result += v;
 		if (!color.empty())
 			result += close_col2;
@@ -911,66 +869,5 @@ void ShowMessage(const string &message, int delay)
 		wFooter->WriteXY(0, Config.statusbar_visibility, message, 1);
 		wFooter->Bold(1);
 	}
-}
-
-void GetDirectory(string dir, string subdir)
-{
-	int highlightme = -1;
-	browsed_dir_scroll_begin = 0;
-	if (browsed_dir != dir)
-		mBrowser->Reset();
-	browsed_dir = dir;
-	mBrowser->Clear(0);
-	
-	if (dir != "/")
-	{
-		Item parent;
-		int slash = dir.find_last_of("/");
-		parent.song = (Song *) 1; // in that way we assume that's really parent dir
-		parent.name = slash != string::npos ? dir.substr(0, slash) : "/";
-		parent.type = itDirectory;
-		mBrowser->AddOption(parent);
-	}
-	
-	ItemList list;
-	Mpd->GetDirectory(dir, list);
-	sort(list.begin(), list.end(), CaseInsensitiveSorting());
-	
-	for (ItemList::iterator it = list.begin(); it != list.end(); it++)
-	{
-		switch (it->type)
-		{
-			case itPlaylist:
-			{
-				mBrowser->AddOption(*it);
-				break;
-			}
-			case itDirectory:
-			{
-				if (it->name == subdir)
-					highlightme = mBrowser->Size();
-				mBrowser->AddOption(*it);
-				break;
-			}
-			case itSong:
-			{
-				bool bold = 0;
-				for (int i = 0; i < mPlaylist->Size(); i++)
-				{
-					if (mPlaylist->at(i).GetHash() == it->song->GetHash())
-					{
-						bold = 1;
-						break;
-					}
-				}
-				mBrowser->AddOption(*it, bold);
-				break;
-			}
-		}
-	}
-	mBrowser->Highlight(highlightme);
-	
-	if (current_screen == csBrowser)
-		mBrowser->Hide();
 }
 

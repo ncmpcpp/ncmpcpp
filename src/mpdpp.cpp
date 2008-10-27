@@ -22,7 +22,14 @@
 
 const string playlist_max_message = "playlist is at the max size";
 
-MPDConnection::MPDConnection() : isConnected(0), itsErrorCode(0), itsMaxPlaylistLength(-1), MPD_HOST("localhost"), MPD_PORT(6600), MPD_TIMEOUT(15), itsUpdater(0), itsErrorHandler(0)
+MPDConnection::MPDConnection() : isConnected(0),
+				 itsErrorCode(0),
+				 itsMaxPlaylistLength(-1),
+				 MPD_HOST("localhost"),
+				 MPD_PORT(6600),
+				 MPD_TIMEOUT(15),
+				 itsUpdater(0),
+				 itsErrorHandler(0)
 {
 	itsConnection = 0;
 	itsCurrentStats = 0;
@@ -467,7 +474,7 @@ int MPDConnection::AddSong(const string &path)
 
 int MPDConnection::AddSong(const Song &s)
 {
-	return !s.Empty() ? AddSong(s.GetFile()) : -1;
+	return !s.Empty() ? (s.IsFromDB() ? AddSong(s.GetFile()) : AddSong("file://" + s.GetFile())) : -1;
 }
 
 void MPDConnection::QueueAddSong(const string &path)
