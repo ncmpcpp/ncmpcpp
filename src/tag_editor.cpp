@@ -39,6 +39,7 @@ extern Menu<Song> *mPlaylist;
 
 extern Menu<string> *mTagEditor;
 extern Window *wFooter;
+extern Window *wPrev;
 
 SongSetFunction IntoSetFunction(mpd_TagItems tag)
 {
@@ -248,17 +249,22 @@ bool WriteTags(Song &s)
 			new_name += s.GetDirectory() + "/" + s.GetNewName();
 			if (rename(old_name.c_str(), new_name.c_str()) == 0 && !file_is_from_db)
 			{
-				// if we rename local file, it won't get updated
-				// so just remove it from playlist and add again
-				int pos = mPlaylist->GetChoice();
-				Mpd->QueueDeleteSong(pos);
-				Mpd->CommitQueue();
-				int id = Mpd->AddSong("file://" + new_name);
-				if (id >= 0)
+				if (wPrev == mPlaylist)
 				{
-					s = mPlaylist->Back();
-					Mpd->Move(s.GetPosition(), pos);
+					// if we rename local file, it won't get updated
+					// so just remove it from playlist and add again
+					int pos = mPlaylist->GetChoice();
+					Mpd->QueueDeleteSong(pos);
+					Mpd->CommitQueue();
+					int id = Mpd->AddSong("file://" + new_name);
+					if (id >= 0)
+					{
+						s = mPlaylist->Back();
+						Mpd->Move(s.GetPosition(), pos);
+					}
 				}
+				else // only mBrowser
+					s.SetFile(new_name);
 			}
 		}
 		return true;
