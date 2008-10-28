@@ -41,6 +41,127 @@ extern Menu<string> *mTagEditor;
 extern Window *wFooter;
 extern Window *wPrev;
 
+namespace
+{
+	const string patterns_list_file = config_dir + "patterns.list";
+	vector<string> patterns_list;
+	
+	void GetPatternList()
+	{
+		if (patterns_list.empty())
+		{
+			std::ifstream input(patterns_list_file.c_str());
+			if (input.is_open())
+			{
+				string line;
+				while (getline(input, line))
+				{
+					if (!line.empty())
+						patterns_list.push_back(line);
+				}
+				input.close();
+			}
+		}
+	}
+	
+	void SavePatternList()
+	{
+		std::ofstream output(patterns_list_file.c_str());
+		if (output.is_open())
+		{
+			for (vector<string>::const_iterator it = patterns_list.begin(); it != patterns_list.end() && it != patterns_list.begin()+30; it++)
+				output << *it << std::endl;
+			output.close();
+		}
+	}
+	
+	SongSetFunction IntoSetFunction(char c)
+	{
+		switch (c)
+		{
+			case 'a':
+				return &Song::SetArtist;
+			case 't':
+				return &Song::SetTitle;
+			case 'b':
+				return &Song::SetAlbum;
+			case 'y':
+				return &Song::SetYear;
+			case 'n':
+				return &Song::SetTrack;
+			case 'g':
+				return &Song::SetGenre;
+			case 'c':
+				return &Song::SetComposer;
+			case 'p':
+				return &Song::SetPerformer;
+			case 'd':
+				return &Song::SetDisc;
+			case 'C':
+				return &Song::SetComment;
+			default:
+				return NULL;
+		}
+	}
+
+	string GenerateFilename(const Song &s, string &pattern)
+	{
+		string result = Window::OmitBBCodes(DisplaySong(s, &pattern));
+		EscapeUnallowedChars(result);
+		return result;
+	}
+
+	string ParseFilename(Song &s, string mask, bool preview)
+	{
+		std::stringstream result;
+		vector<string> separators;
+		vector< std::pair<char, string> > tags;
+		string file = s.GetName().substr(0, s.GetName().find_last_of("."));
+		
+		try
+		{
+			for (int i = mask.find("%"); i != string::npos; i = mask.find("%"))
+			{
+				tags.push_back(make_pair(mask.at(i+1), ""));
+				mask = mask.substr(i+2);
+				i = mask.find("%");
+				if (!mask.empty())
+					separators.push_back(mask.substr(0, i));
+			}
+			int i = 0;
+			for (vector<string>::const_iterator it = separators.begin(); it != separators.end(); it++, i++)
+			{
+				int j = file.find(*it);
+				tags.at(i).second = file.substr(0, j);
+				file = file.substr(j+it->length());
+			}
+			if (!file.empty())
+				tags.at(i).second = file;
+		}
+		catch (std::out_of_range)
+		{
+			return "Error while parsing filename!";
+		}
+		
+		for (vector< std::pair<char, string> >::iterator it = tags.begin(); it != tags.end(); it++)
+		{
+			for (string::iterator j = it->second.begin(); j != it->second.end(); j++)
+				if (*j == '_')
+					*j = ' ';
+			
+			if (!preview)
+			{
+				SongSetFunction set = IntoSetFunction(it->first);
+				if (set)
+					(s.*set)(it->second);
+			}
+			else
+				result << "%" << it->first << ": " << it->second << "\n";
+		}
+		return result.str();
+	}
+}
+
 SongSetFunction IntoSetFunction(mpd_TagItems tag)
 {
 	switch (tag)
@@ -292,127 +413,6 @@ bool WriteTags(Song &s)
 	}
 	else
 		return false;
-}
-
-namespace
-{
-	const string patterns_list_file = config_dir + "patterns.list";
-	vector<string> patterns_list;
-	
-	void GetPatternList()
-	{
-		if (patterns_list.empty())
-		{
-			std::ifstream input(patterns_list_file.c_str());
-			if (input.is_open())
-			{
-				string line;
-				while (getline(input, line))
-				{
-					if (!line.empty())
-						patterns_list.push_back(line);
-				}
-				input.close();
-			}
-		}
-	}
-	
-	void SavePatternList()
-	{
-		std::ofstream output(patterns_list_file.c_str());
-		if (output.is_open())
-		{
-			for (vector<string>::const_iterator it = patterns_list.begin(); it != patterns_list.end() && it != patterns_list.begin()+30; it++)
-				output << *it << std::endl;
-			output.close();
-		}
-	}
-	
-	SongSetFunction IntoSetFunction(char c)
-	{
-		switch (c)
-		{
-			case 'a':
-				return &Song::SetArtist;
-			case 't':
-				return &Song::SetTitle;
-			case 'b':
-				return &Song::SetAlbum;
-			case 'y':
-				return &Song::SetYear;
-			case 'n':
-				return &Song::SetTrack;
-			case 'g':
-				return &Song::SetGenre;
-			case 'c':
-				return &Song::SetComposer;
-			case 'p':
-				return &Song::SetPerformer;
-			case 'd':
-				return &Song::SetDisc;
-			case 'C':
-				return &Song::SetComment;
-			default:
-				return NULL;
-		}
-	}
-
-	string GenerateFilename(const Song &s, string &pattern)
-	{
-		string result = Window::OmitBBCodes(DisplaySong(s, &pattern));
-		EscapeUnallowedChars(result);
-		return result;
-	}
-
-	string ParseFilename(Song &s, string mask, bool preview)
-	{
-		std::stringstream result;
-		vector<string> separators;
-		vector< std::pair<char, string> > tags;
-		string file = s.GetName().substr(0, s.GetName().find_last_of("."));
-		
-		try
-		{
-			for (int i = mask.find("%"); i != string::npos; i = mask.find("%"))
-			{
-				tags.push_back(make_pair(mask.at(i+1), ""));
-				mask = mask.substr(i+2);
-				i = mask.find("%");
-				if (!mask.empty())
-					separators.push_back(mask.substr(0, i));
-			}
-			int i = 0;
-			for (vector<string>::const_iterator it = separators.begin(); it != separators.end(); it++, i++)
-			{
-				int j = file.find(*it);
-				tags.at(i).second = file.substr(0, j);
-				file = file.substr(j+it->length());
-			}
-			if (!file.empty())
-				tags.at(i).second = file;
-		}
-		catch (std::out_of_range)
-		{
-			return "Error while parsing filename!";
-		}
-		
-		for (vector< std::pair<char, string> >::iterator it = tags.begin(); it != tags.end(); it++)
-		{
-			for (string::iterator j = it->second.begin(); j != it->second.end(); j++)
-				if (*j == '_')
-					*j = ' ';
-			
-			if (!preview)
-			{
-				SongSetFunction set = IntoSetFunction(it->first);
-				if (set)
-					(s.*set)(it->second);
-			}
-			else
-				result << "%" << it->first << ": " << it->second << "\n";
-		}
-		return result.str();
-	}
 }
 
 void __deal_with_filenames(SongList &v)

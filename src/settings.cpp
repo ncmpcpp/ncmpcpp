@@ -28,6 +28,61 @@ const string keys_config_file = config_dir + "keys";
 
 using std::ifstream;
 
+namespace
+{
+	void GetKeys(string line, int *key)
+	{
+		int i = line.find("=")+1;
+		line = line.substr(i, line.length()-i);
+		i = 0;
+		if (line[i] == ' ')
+			while (line[++i] == ' ') { }
+		line = line.substr(i, line.length()-i);
+		i = line.find(" ");
+		string one;
+		string two;
+		if (i != string::npos)
+		{
+			one = line.substr(0, i);
+			i++;
+			two = line.substr(i, line.length()-i);
+		}
+		else
+			one = line;
+		key[0] = !one.empty() && one[0] == '\'' ? one[1] : (atoi(one.c_str()) == 0 ? null_key : atoi(one.c_str()));
+		key[1] = !two.empty() && two[0] == '\'' ? two[1] : (atoi(two.c_str()) == 0 ? null_key : atoi(two.c_str()));
+	}
+	
+	Color IntoColor(const string &color)
+	{
+		Color result = clDefault;
+		
+		if (color == "black")
+			result = clBlack;
+		else if (color == "red")
+			result = clRed;
+		else if (color == "green")
+			result = clGreen;
+		else if (color == "yellow")
+			result = clYellow;
+		else if (color == "blue")
+			result = clBlue;
+		else if (color == "magenta")
+			result = clMagenta;
+		else if (color == "cyan")
+			result = clCyan;
+		else if (color == "white")
+			result = clWhite;
+		
+		return result;
+	}
+	
+	Border IntoBorder(const string &color)
+	{
+		return (Border) IntoColor(color);
+	}
+}
+
 void CreateConfigDir()
 {
 	mkdir(config_dir.c_str(), 0755);
@@ -276,61 +331,6 @@ mpd_TagItems IntoTagItem(char c)
 			return MPD_TAG_ITEM_PERFORMER;
 		default:
 			return MPD_TAG_ITEM_ARTIST;
-	}
-}
-
-namespace
-{
-	void GetKeys(string line, int *key)
-	{
-		int i = line.find("=")+1;
-		line = line.substr(i, line.length()-i);
-		i = 0;
-		if (line[i] == ' ')
-			while (line[++i] == ' ') { }
-		line = line.substr(i, line.length()-i);
-		i = line.find(" ");
-		string one;
-		string two;
-		if (i != string::npos)
-		{
-			one = line.substr(0, i);
-			i++;
-			two = line.substr(i, line.length()-i);
-		}
-		else
-			one = line;
-		key[0] = !one.empty() && one[0] == '\'' ? one[1] : (atoi(one.c_str()) == 0 ? null_key : atoi(one.c_str()));
-		key[1] = !two.empty() && two[0] == '\'' ? two[1] : (atoi(two.c_str()) == 0 ? null_key : atoi(two.c_str()));
-	}
-	
-	Color IntoColor(const string &color)
-	{
-		Color result = clDefault;
-		
-		if (color == "black")
-			result = clBlack;
-		else if (color == "red")
-			result = clRed;
-		else if (color == "green")
-			result = clGreen;
-		else if (color == "yellow")
-			result = clYellow;
-		else if (color == "blue")
-			result = clBlue;
-		else if (color == "magenta")
-			result = clMagenta;
-		else if (color == "cyan")
-			result = clCyan;
-		else if (color == "white")
-			result = clWhite;
-		
-		return result;
-	}
-	
-	Border IntoBorder(const string &color)
-	{
-		return (Border) IntoColor(color);
 	}
 }
 
