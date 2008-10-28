@@ -135,13 +135,34 @@ void ReadTagsFromFile(mpd_Song *s)
 	TagLib::FileRef f(s->file);
 	if (f.isNull())
 		return;
-	s->artist = !f.tag()->artist().isEmpty() ? str_pool_get(f.tag()->artist().to8Bit(UNICODE).c_str()) : 0;
-	s->title = !f.tag()->title().isEmpty() ? str_pool_get(f.tag()->title().to8Bit(UNICODE).c_str()) : 0;
-	s->album = !f.tag()->album().isEmpty() ? str_pool_get(f.tag()->album().to8Bit(UNICODE).c_str()) : 0;
+	
+	TagLib::MPEG::File *mpegf = dynamic_cast<TagLib::MPEG::File *>(f.file());
+
+	s->artist = !f.tag()->artist().isEmpty() ? str_pool_get(f.tag()->artist().toCString(UNICODE)) : 0;
+	s->title = !f.tag()->title().isEmpty() ? str_pool_get(f.tag()->title().toCString(UNICODE)) : 0;
+	s->album = !f.tag()->album().isEmpty() ? str_pool_get(f.tag()->album().toCString(UNICODE)) : 0;
 	s->track = f.tag()->track() ? str_pool_get(IntoStr(f.tag()->track()).c_str()) : 0;
 	s->date = f.tag()->year() ? str_pool_get(IntoStr(f.tag()->year()).c_str()) : 0;
-	s->genre = !f.tag()->genre().isEmpty() ? str_pool_get(f.tag()->genre().to8Bit(UNICODE).c_str()) : 0;
-	s->comment = !f.tag()->comment().isEmpty() ? str_pool_get(f.tag()->comment().to8Bit(UNICODE).c_str()) : 0;
+	s->genre = !f.tag()->genre().isEmpty() ? str_pool_get(f.tag()->genre().toCString(UNICODE)) : 0;
+	if (mpegf)
+	{
+		s->composer = !mpegf->ID3v2Tag()->frameListMap()["TCOM"].isEmpty()
+		? (!mpegf->ID3v2Tag()->frameListMap()["TCOM"].front()->toString().isEmpty()
+		   ? str_pool_get(mpegf->ID3v2Tag()->frameListMap()["TCOM"].front()->toString().toCString(UNICODE))
+		   : 0)
+		: 0;
+		s->performer = !mpegf->ID3v2Tag()->frameListMap()["TOPE"].isEmpty()
+		? (!mpegf->ID3v2Tag()->frameListMap()["TOPE"].front()->toString().isEmpty()
+		   ? str_pool_get(mpegf->ID3v2Tag()->frameListMap()["TOPE"].front()->toString().toCString(UNICODE))
+		   : 0)
+		: 0;
+		s->disc = !mpegf->ID3v2Tag()->frameListMap()["TPOS"].isEmpty()
+		? (!mpegf->ID3v2Tag()->frameListMap()["TPOS"].front()->toString().isEmpty()
+		   ? str_pool_get(mpegf->ID3v2Tag()->frameListMap()["TPOS"].front()->toString().toCString(UNICODE))
+		   : 0)
+		: 0;
+	}
+	s->comment = !f.tag()->comment().isEmpty() ? str_pool_get(f.tag()->comment().toCString(UNICODE)) : 0;
 	s->time = f.audioProperties()->length();
 }
 
