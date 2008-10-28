@@ -64,11 +64,10 @@ namespace
 	{
 		dirent **list;
 		int n = scandir(dir.c_str(), &list, NULL, alphasort);
-		if (n < 2)
-		{
-			delete list;
+		
+		if (n < 0)
 			return;
-		}
+		
 		struct stat file_stat;
 		string full_path;
 		for (int i = 2; i < n; i++)
