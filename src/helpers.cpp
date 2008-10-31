@@ -243,7 +243,10 @@ bool Keypressed(int in, const int *key)
 
 bool SortSongsByTrack(Song *a, Song *b)
 {
-	return StrToInt(a->GetTrack()) < StrToInt(b->GetTrack());
+	if (a->GetDisc() == b->GetDisc())
+		return StrToInt(a->GetTrack()) < StrToInt(b->GetTrack());
+	else
+		return StrToInt(a->GetDisc()) < StrToInt(b->GetDisc());
 }
 
 void WindowTitle(const string &status)
