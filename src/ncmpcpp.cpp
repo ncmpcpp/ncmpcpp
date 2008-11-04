@@ -67,6 +67,12 @@
 			} while (0)
 #endif // HAVE_TAGLIB_H
 
+#define CLEAR_FIND_HISTORY \
+			do { \
+				found_pos = 0; \
+				vFoundPositions.clear(); \
+			} while (0)
+
 ncmpcpp_config Config;
 ncmpcpp_keys Key;
 
@@ -459,8 +465,7 @@ int main(int argc, char *argv[])
 		{
 			if (mLibArtists->Empty())
 			{
-				found_pos = 0;
-				vFoundPositions.clear();
+				CLEAR_FIND_HISTORY;
 				TagList list;
 				mLibAlbums->Clear(0);
 				mLibSongs->Clear(0);
@@ -616,8 +621,7 @@ int main(int argc, char *argv[])
 		{
 			if (mEditorLeftCol->Empty())
 			{
-				found_pos = 0;
-				vFoundPositions.clear();
+				CLEAR_FIND_HISTORY;
 				mEditorLeftCol->Window::Clear();
 				mEditorTags->Clear();
 				TagList list;
@@ -955,8 +959,7 @@ int main(int argc, char *argv[])
 					{
 						case itDirectory:
 						{
-							found_pos = 0;
-							vFoundPositions.clear();
+							CLEAR_FIND_HISTORY;
 							GetDirectory(item.name, browsed_dir);
 							redraw_header = 1;
 							break;
@@ -1313,8 +1316,7 @@ int main(int argc, char *argv[])
 						}
 						case 15:
 						{
-							found_pos = 0;
-							vFoundPositions.clear();
+							CLEAR_FIND_HISTORY;
 							PrepareSearchEngine(sought_pattern);
 							ShowMessage("Search state reset");
 							break;
@@ -1874,8 +1876,7 @@ int main(int argc, char *argv[])
 		{
 			if (current_screen == csLibrary && input == Key.VolumeUp[0])
 			{
-				found_pos = 0;
-				vFoundPositions.clear();
+				CLEAR_FIND_HISTORY;
 				if (wCurrent == mLibArtists)
 				{
 					if (mLibSongs->Empty())
@@ -1897,8 +1898,7 @@ int main(int argc, char *argv[])
 			}
 			else if (wCurrent == mPlaylistList && input == Key.VolumeUp[0])
 			{
-				found_pos = 0;
-				vFoundPositions.clear();
+				CLEAR_FIND_HISTORY;
 				mPlaylistList->HighlightColor(Config.main_highlight_color);
 				wCurrent->Refresh();
 				wCurrent = mPlaylistEditor;
@@ -1907,8 +1907,7 @@ int main(int argc, char *argv[])
 #			ifdef HAVE_TAGLIB_H
 			else if (current_screen == csTagEditor && input == Key.VolumeUp[0])
 			{
-				found_pos = 0;
-				vFoundPositions.clear();
+				CLEAR_FIND_HISTORY;
 				if (wCurrent == mEditorLeftCol)
 				{
 					mEditorLeftCol->HighlightColor(Config.main_highlight_color);
@@ -1932,8 +1931,7 @@ int main(int argc, char *argv[])
 		{
 			if (current_screen == csLibrary && input == Key.VolumeDown[0])
 			{
-				found_pos = 0;
-				vFoundPositions.clear();
+				CLEAR_FIND_HISTORY;
 				if (wCurrent == mLibSongs)
 				{
 					mLibSongs->HighlightColor(Config.main_highlight_color);
@@ -1953,8 +1951,7 @@ int main(int argc, char *argv[])
 			}
 			else if (wCurrent == mPlaylistEditor && input == Key.VolumeDown[0])
 			{
-				found_pos = 0;
-				vFoundPositions.clear();
+				CLEAR_FIND_HISTORY;
 				mPlaylistEditor->HighlightColor(Config.main_highlight_color);
 				wCurrent->Refresh();
 				wCurrent = mPlaylistList;
@@ -1963,8 +1960,7 @@ int main(int argc, char *argv[])
 #			ifdef HAVE_TAGLIB_H
 			else if (current_screen == csTagEditor && input == Key.VolumeDown[0])
 			{
-				found_pos = 0;
-				vFoundPositions.clear();
+				CLEAR_FIND_HISTORY;
 				if (wCurrent == mEditorTags)
 				{
 					mEditorTags->HighlightColor(Config.main_highlight_color);
@@ -3395,8 +3391,7 @@ int main(int argc, char *argv[])
 			SWITCHER_PLAYLIST_REDIRECT:
 			if (current_screen != csPlaylist && current_screen != csTinyTagEditor)
 			{
-				found_pos = 0;
-				vFoundPositions.clear();
+				CLEAR_FIND_HISTORY;
 				wCurrent = mPlaylist;
 				wCurrent->Hide();
 				current_screen = csPlaylist;
@@ -3409,8 +3404,7 @@ int main(int argc, char *argv[])
 			SWITCHER_BROWSER_REDIRECT:
 			if (current_screen != csBrowser && current_screen != csTinyTagEditor)
 			{
-				found_pos = 0;
-				vFoundPositions.clear();
+				CLEAR_FIND_HISTORY;
 				mBrowser->Empty() ? GetDirectory(browsed_dir) : UpdateItemList(mBrowser);
 				wCurrent = mBrowser;
 				wCurrent->Hide();
@@ -3423,8 +3417,7 @@ int main(int argc, char *argv[])
 		{
 			if (current_screen != csSearcher && current_screen != csTinyTagEditor)
 			{
-				found_pos = 0;
-				vFoundPositions.clear();
+				CLEAR_FIND_HISTORY;
 				if (mSearcher->Empty())
 					PrepareSearchEngine(sought_pattern);
 				wCurrent = mSearcher;
@@ -3443,8 +3436,7 @@ int main(int argc, char *argv[])
 		{
 			if (current_screen != csLibrary && current_screen != csTinyTagEditor)
 			{
-				found_pos = 0;
-				vFoundPositions.clear();
+				CLEAR_FIND_HISTORY;
 				
 				mLibArtists->HighlightColor(Config.active_column_color);
 				mLibAlbums->HighlightColor(Config.main_highlight_color);
@@ -3466,8 +3458,7 @@ int main(int argc, char *argv[])
 		{
 			if (current_screen != csPlaylistEditor && current_screen != csTinyTagEditor)
 			{
-				found_pos = 0;
-				vFoundPositions.clear();
+				CLEAR_FIND_HISTORY;
 				
 				mPlaylistList->HighlightColor(Config.active_column_color);
 				mPlaylistEditor->HighlightColor(Config.main_highlight_color);
@@ -3489,8 +3480,7 @@ int main(int argc, char *argv[])
 		{
 			if (current_screen != csTagEditor && current_screen != csTinyTagEditor)
 			{
-				found_pos = 0;
-				vFoundPositions.clear();
+				CLEAR_FIND_HISTORY;
 				
 				mEditorAlbums->HighlightColor(Config.active_column_color);
 				mEditorDirs->HighlightColor(Config.active_column_color);
