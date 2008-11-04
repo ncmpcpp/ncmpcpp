@@ -3369,7 +3369,7 @@ int main(int argc, char *argv[])
 		}
 		else if (Keypressed(input, Key.Help))
 		{
-			if (wCurrent != sHelp)
+			if (current_screen != csHelp && current_screen != csTinyTagEditor)
 			{
 				wCurrent = sHelp;
 				wCurrent->Hide();
@@ -3379,7 +3379,7 @@ int main(int argc, char *argv[])
 		}
 		else if (Keypressed(input, Key.ScreenSwitcher))
 		{
-			if (wCurrent == mPlaylist)
+			if (current_screen == csPlaylist)
 				goto SWITCHER_BROWSER_REDIRECT;
 			else
 				goto SWITCHER_PLAYLIST_REDIRECT;
@@ -3387,7 +3387,7 @@ int main(int argc, char *argv[])
 		else if (Keypressed(input, Key.Playlist))
 		{
 			SWITCHER_PLAYLIST_REDIRECT:
-			if (wCurrent != mPlaylist && current_screen != csTinyTagEditor)
+			if (current_screen != csPlaylist && current_screen != csTinyTagEditor)
 			{
 				found_pos = 0;
 				vFoundPositions.clear();
@@ -3401,15 +3401,11 @@ int main(int argc, char *argv[])
 		else if (Keypressed(input, Key.Browser))
 		{
 			SWITCHER_BROWSER_REDIRECT:
-			if (browsed_dir.empty())
-				browsed_dir = "/";
-			
-			mBrowser->Empty() ? GetDirectory(browsed_dir) : UpdateItemList(mBrowser);
-			
-			if (wCurrent != mBrowser && current_screen != csTinyTagEditor)
+			if (current_screen != csBrowser && current_screen != csTinyTagEditor)
 			{
 				found_pos = 0;
 				vFoundPositions.clear();
+				mBrowser->Empty() ? GetDirectory(browsed_dir) : UpdateItemList(mBrowser);
 				wCurrent = mBrowser;
 				wCurrent->Hide();
 				current_screen = csBrowser;
@@ -3419,7 +3415,7 @@ int main(int argc, char *argv[])
 		}
 		else if (Keypressed(input, Key.SearchEngine))
 		{
-			if (current_screen != csTinyTagEditor && current_screen != csSearcher)
+			if (current_screen != csSearcher && current_screen != csTinyTagEditor)
 			{
 				found_pos = 0;
 				vFoundPositions.clear();
@@ -3439,7 +3435,7 @@ int main(int argc, char *argv[])
 		}
 		else if (Keypressed(input, Key.MediaLibrary))
 		{
-			if (current_screen != csLibrary)
+			if (current_screen != csLibrary && current_screen != csTinyTagEditor)
 			{
 				found_pos = 0;
 				vFoundPositions.clear();
@@ -3462,7 +3458,7 @@ int main(int argc, char *argv[])
 		}
 		else if (Keypressed(input, Key.PlaylistEditor))
 		{
-			if (current_screen != csPlaylistEditor)
+			if (current_screen != csPlaylistEditor && current_screen != csTinyTagEditor)
 			{
 				found_pos = 0;
 				vFoundPositions.clear();
@@ -3485,7 +3481,7 @@ int main(int argc, char *argv[])
 #		ifdef HAVE_TAGLIB_H
 		else if (Keypressed(input, Key.TagEditor))
 		{
-			if (current_screen != csTagEditor)
+			if (current_screen != csTagEditor && current_screen != csTinyTagEditor)
 			{
 				found_pos = 0;
 				vFoundPositions.clear();
