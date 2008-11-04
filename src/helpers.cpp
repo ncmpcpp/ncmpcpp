@@ -65,10 +65,15 @@ bool ConnectToMPD()
 	return true;
 }
 
-bool ParseArgv(vector<string> &v)
+bool ParseArgv(int argc, char **argv)
 {
 	using std::cout;
 	using std::endl;
+	
+	vector<string> v;
+	v.reserve(argc-1);
+	for (int i = 1; i < argc; i++)
+		v.push_back(argv[i]);
 	
 	bool exit = 0;
 	for (vector<string>::iterator it = v.begin(); it != v.end() && !exit; it++)
