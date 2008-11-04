@@ -39,26 +39,32 @@
 #include "tag_editor.h"
 
 #define REFRESH_MEDIA_LIBRARY_SCREEN \
-			mLibArtists->Display(redraw_screen); \
-			mvvline(main_start_y, middle_col_startx-1, 0, main_height); \
-			mLibAlbums->Display(redraw_screen); \
-			mvvline(main_start_y, right_col_startx-1, 0, main_height); \
-			mLibSongs->Display(redraw_screen); \
-			if (mLibAlbums->Empty()) \
-				mLibAlbums->WriteXY(0, 0, "No albums found.")
+			do { \
+				mLibArtists->Display(redraw_screen); \
+				mvvline(main_start_y, middle_col_startx-1, 0, main_height); \
+				mLibAlbums->Display(redraw_screen); \
+				mvvline(main_start_y, right_col_startx-1, 0, main_height); \
+				mLibSongs->Display(redraw_screen); \
+				if (mLibAlbums->Empty()) \
+					mLibAlbums->WriteXY(0, 0, "No albums found."); \
+			} while (0)
 
 #define REFRESH_PLAYLIST_EDITOR_SCREEN \
-			mPlaylistList->Display(redraw_screen); \
-			mvvline(main_start_y, middle_col_startx-1, 0, main_height); \
-			mPlaylistEditor->Display(redraw_screen)
+			do { \
+				mPlaylistList->Display(redraw_screen); \
+				mvvline(main_start_y, middle_col_startx-1, 0, main_height); \
+				mPlaylistEditor->Display(redraw_screen); \
+			} while (0)
 
 #ifdef HAVE_TAGLIB_H
 # define REFRESH_TAG_EDITOR_SCREEN \
-			mEditorLeftCol->Display(redraw_screen); \
-			mvvline(main_start_y, middle_col_startx-1, 0, main_height); \
-			mEditorTagTypes->Display(redraw_screen); \
-			mvvline(main_start_y, right_col_startx-1, 0, main_height); \
-			mEditorTags->Display(redraw_screen)
+			do { \
+				mEditorLeftCol->Display(redraw_screen); \
+				mvvline(main_start_y, middle_col_startx-1, 0, main_height); \
+				mEditorTagTypes->Display(redraw_screen); \
+				mvvline(main_start_y, right_col_startx-1, 0, main_height); \
+				mEditorTags->Display(redraw_screen); \
+			} while (0)
 #endif // HAVE_TAGLIB_H
 
 ncmpcpp_config Config;
