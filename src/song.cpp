@@ -123,7 +123,7 @@ string Song::GetFile() const
 
 string Song::GetName() const
 {
-	return !itsSong->file ? (itsGetEmptyFields ? "" : EMPTY_TAG) : (itsSlash != string::npos && !isStream ? string(itsSong->file).substr(itsSlash+1) : itsSong->file);
+	return !itsSong->file ? (itsGetEmptyFields ? "" : EMPTY_TAG) : (itsSlash != string::npos && !isStream ? string(itsSong->file).substr(itsSlash+1) : (isStream && itsSong->name ? itsSong->name : itsSong->file));
 }
 
 string Song::GetDirectory() const
