@@ -1614,6 +1614,7 @@ int main(int argc, char *argv[])
 								else
 									ShowMessage("Aborted!");
 								curs_set(0);
+								redraw_screen = 1;
 								UnlockStatusbar();
 							}
 							break;
