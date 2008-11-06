@@ -131,7 +131,7 @@ string DisplayItem(const Item &item, void *, const Menu<Item> *menu)
 		{
 			if (item.song)
 				return "[..]";
-			int slash = item.name.find_last_of("/");
+			size_t slash = item.name.find_last_of("/");
 			return "[" + (slash != string::npos ? item.name.substr(slash+1) : item.name) + "]";
 		}
 		case itSong:
@@ -159,7 +159,7 @@ void GetDirectory(string dir, string subdir)
 	if (dir != "/")
 	{
 		Item parent;
-		int slash = dir.find_last_of("/");
+		size_t slash = dir.find_last_of("/");
 		parent.song = (Song *) 1; // in that way we assume that's really parent dir
 		parent.name = slash != string::npos ? dir.substr(0, slash) : "/";
 		parent.type = itDirectory;

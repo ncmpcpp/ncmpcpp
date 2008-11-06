@@ -70,7 +70,8 @@ bool repeat_one_allowed = 0;
 long long playlist_old_id = -1;
 
 int old_playing;
-int playing_song_scroll_begin = 0;
+
+size_t playing_song_scroll_begin = 0;
 
 time_t time_of_statusbar_lock;
 time_t now;
@@ -336,7 +337,7 @@ void NcmpcppStatusChanged(MPDConnection *Mpd, MPDStatusChanges changed, void *)
 					tracklength = " [" + Song::ShowTime(elapsed) + "]";
 				my_string_t playing_song = TO_WSTRING(DisplaySong(s, &Config.song_status_format));
 				
-				int max_length_without_scroll = wFooter->GetWidth()-player_state.length()-tracklength.length();
+				const size_t max_length_without_scroll = wFooter->GetWidth()-player_state.length()-tracklength.length();
 				
 				wFooter->WriteXY(0, 1, player_state);
 				wFooter->Bold(0);
@@ -347,7 +348,7 @@ void NcmpcppStatusChanged(MPDConnection *Mpd, MPDStatusChanges changed, void *)
 #					else
 					playing_song += " ** ";
 #					endif
-					const int scrollsize = max_length_without_scroll+playing_song.length();
+					const size_t scrollsize = max_length_without_scroll+playing_song.length();
 					my_string_t part = playing_song.substr(playing_song_scroll_begin++, scrollsize);
 					if (part.length() < scrollsize)
 						part += playing_song.substr(0, scrollsize-part.length());

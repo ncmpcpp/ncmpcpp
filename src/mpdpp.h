@@ -182,7 +182,7 @@ class MPDConnection
 		
 		string itsErrorMessage;
 		int itsErrorCode;
-		unsigned int itsMaxPlaylistLength;
+		int itsMaxPlaylistLength;
 		
 		string MPD_HOST;
 		int MPD_PORT;

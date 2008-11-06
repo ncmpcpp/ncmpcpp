@@ -112,12 +112,12 @@ Window *wFooter;
 
 MPDConnection *Mpd;
 
-time_t timer;
-
 int now_playing = -1;
-int browsed_dir_scroll_begin = 0;
-
 int lock_statusbar_delay = -1;
+
+size_t browsed_dir_scroll_begin = 0;
+
+time_t timer;
 
 string browsed_dir = "/";
 string editor_browsed_dir = "/";
@@ -370,7 +370,7 @@ int main(int argc, char *argv[])
 		messages_allowed = 1;
 		
 		// header stuff
-		const int max_allowed_title_length = wHeader ? wHeader->GetWidth()-volume_state.length() : 0;
+		const size_t max_allowed_title_length = wHeader ? wHeader->GetWidth()-volume_state.length() : 0;
 		if (current_screen == csBrowser && input == ERR && browsed_dir.length() > max_allowed_title_length)
 			redraw_header = 1;
 		if (Config.header_visibility && redraw_header)
@@ -421,7 +421,7 @@ int main(int argc, char *argv[])
 					wHeader->WriteXY(title.length(), 0, max_allowed_title_length-title.length(), playlist_stats);
 				else if (current_screen == csBrowser)
 				{
-					int max_length_without_scroll = wHeader->GetWidth()-volume_state.length()-title.length();
+					size_t max_length_without_scroll = wHeader->GetWidth()-volume_state.length()-title.length();
 					my_string_t wbrowseddir = TO_WSTRING(browsed_dir);
 					wHeader->Bold(1);
 					if (browsed_dir.length() > max_length_without_scroll)
@@ -431,7 +431,7 @@ int main(int argc, char *argv[])
 #						else
 						wbrowseddir += " ** ";
 #						endif
-						const int scrollsize = max_length_without_scroll;
+						const size_t scrollsize = max_length_without_scroll;
 						my_string_t part = wbrowseddir.substr(browsed_dir_scroll_begin++, scrollsize);
 						if (part.length() < scrollsize)
 							part += wbrowseddir.substr(0, scrollsize-part.length());
@@ -650,13 +650,13 @@ int main(int argc, char *argv[])
 					sort(list.begin(), list.end(), CaseInsensitiveSorting());
 					if (editor_browsed_dir != "/")
 					{
-						int slash = editor_browsed_dir.find_last_of("/");
+						size_t slash = editor_browsed_dir.find_last_of("/");
 						string parent = slash != string::npos ? editor_browsed_dir.substr(0, slash) : "/";
 						mEditorDirs->AddOption(make_pair("[..]", parent));
 					}
 					for (TagList::const_iterator it = list.begin(); it != list.end(); it++)
 					{
-						int slash = it->find_last_of("/");
+						size_t slash = it->find_last_of("/");
 						string to_display = slash != string::npos ? it->substr(slash+1) : *it;
 						mEditorDirs->AddOption(make_pair(to_display, *it));
 						if (*it == editor_highlighted_dir)
@@ -2172,7 +2172,7 @@ int main(int argc, char *argv[])
 						mPlaylist->Refresh();
 						mPlaylist->ReadKey(input);
 					}
-					for (int i = 0; i < list.size(); i++)
+					for (size_t i = 0; i < list.size(); i++)
 						Mpd->QueueMove(origs[i], list[i]);
 					Mpd->CommitQueue();
 				}
@@ -2220,7 +2220,7 @@ int main(int argc, char *argv[])
 						mPlaylistEditor->Refresh();
 						mPlaylistEditor->ReadKey(input);
 					}
-					for (int i = 0; i < list.size(); i++)
+					for (size_t i = 0; i < list.size(); i++)
 						if (origs[i] != list[i])
 							Mpd->QueueMove(mPlaylistList->GetOption(), origs[i], list[i]);
 					Mpd->CommitQueue();

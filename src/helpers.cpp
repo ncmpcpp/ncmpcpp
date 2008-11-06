@@ -265,7 +265,7 @@ void EscapeUnallowedChars(string &s)
 	const string unallowed_chars = "\"*/:<>?\\|";
 	for (string::const_iterator it = unallowed_chars.begin(); it != unallowed_chars.end(); it++)
 	{
-		for (int i = 0; i < s.length(); i++)
+		for (size_t i = 0; i < s.length(); i++)
 		{
 			if (s[i] == *it)
 			{
@@ -312,7 +312,7 @@ string FindSharedDir(const string &one, const string &two)
 	if (one == two)
 		return one;
 	string result;
-	int i = 1;
+	size_t i = 1;
 	while (one.substr(0, i) == two.substr(0, i))
 		i++;
 	result = one.substr(0, i);
@@ -381,7 +381,7 @@ string DisplayStringPair(const StringPair &pair, void *, const Menu<StringPair> 
 string DisplayColumns(string song_template)
 {
 	vector<string> cols;
-	for (int i = song_template.find(" "); i != string::npos; i = song_template.find(" "))
+	for (size_t i = song_template.find(" "); i != string::npos; i = song_template.find(" "))
 	{
 		cols.push_back(song_template.substr(0, i));
 		song_template = song_template.substr(i+1);
@@ -455,7 +455,7 @@ string DisplaySongInColumns(const Song &s, void *s_template, const Menu<Song> *)
 	string song_template = s_template ? *static_cast<string *>(s_template) : "";
 	
 	vector<string> cols;
-	for (int i = song_template.find(" "); i != string::npos; i = song_template.find(" "))
+	for (size_t i = song_template.find(" "); i != string::npos; i = song_template.find(" "))
 	{
 		cols.push_back(song_template.substr(0, i));
 		song_template = song_template.substr(i+1);

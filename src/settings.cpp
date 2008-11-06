@@ -32,7 +32,7 @@ namespace
 {
 	void GetKeys(string line, int *key)
 	{
-		int i = line.find("=")+1;
+		size_t i = line.find("=")+1;
 		line = line.substr(i, line.length()-i);
 		i = 0;
 		if (line[i] == ' ')

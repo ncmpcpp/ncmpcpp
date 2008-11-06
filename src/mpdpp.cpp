@@ -98,7 +98,7 @@ void MPDConnection::Disconnect()
 
 void MPDConnection::SetHostname(const string &host)
 {
-	int at = host.find("@");
+	size_t at = host.find("@");
 	if (at != string::npos)
 	{
 		MPD_PASSWORD = host.substr(0, at);

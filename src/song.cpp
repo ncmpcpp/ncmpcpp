@@ -61,7 +61,7 @@ Song::Song(mpd_Song *s, bool copy_ptr) : itsSong(s),
 		isStream = 1;
 	
 	// generate pseudo-hash
-	for (int i = 0; i < itsFile.length(); i++)
+	for (size_t i = 0; i < itsFile.length(); i++)
 	{
 		itsHash += itsFile[i];
 		if (i%3)

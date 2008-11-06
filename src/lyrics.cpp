@@ -48,16 +48,16 @@ namespace
 
 	void EscapeHtml(string &str)
 	{
-		for (int i = str.find("<"); i != string::npos; i = str.find("<"))
+		for (size_t i = str.find("<"); i != string::npos; i = str.find("<"))
 		{
 			int j = str.find(">")+1;
 			str.replace(i, j-i, "");
 		}
-		for (int i = str.find("&#039;"); i != string::npos; i = str.find("&#039;"))
+		for (size_t i = str.find("&#039;"); i != string::npos; i = str.find("&#039;"))
 			str.replace(i, 6, "'");
-		for (int i = str.find("&quot;"); i != string::npos; i = str.find("&quot;"))
+		for (size_t i = str.find("&quot;"); i != string::npos; i = str.find("&quot;"))
 			str.replace(i, 6, "\"");
-		for (int i = str.find("&amp;"); i != string::npos; i = str.find("&amp;"))
+		for (size_t i = str.find("&amp;"); i != string::npos; i = str.find("&amp;"))
 			str.replace(i, 5, "&");
 	}
 }
@@ -115,7 +115,7 @@ void * GetArtistInfo(void *ptr)
 		pthread_exit(result);
 	}
 	
-	int a, b;
+	size_t a, b;
 	bool erase = 0;
 	bool save = 1;
 	
@@ -130,20 +130,20 @@ void * GetArtistInfo(void *ptr)
 	}
 	
 	vector<string> similar;
-	for (int i = result->find("<name>"); i != string::npos; i = result->find("<name>"))
+	for (size_t i = result->find("<name>"); i != string::npos; i = result->find("<name>"))
 	{
 		(*result)[i] = '.';
-		int j = result->find("</name>");
+		size_t j = result->find("</name>");
 		(*result)[j] = '.';
 		i += 6;
 		similar.push_back(result->substr(i, j-i));
 		EscapeHtml(similar.back());
 	}
 	vector<string> urls;
-	for (int i = result->find("<url>"); i != string::npos; i = result->find("<url>"))
+	for (size_t i = result->find("<url>"); i != string::npos; i = result->find("<url>"))
 	{
 		(*result)[i] = '.';
-		int j = result->find("</url>");
+		size_t j = result->find("</url>");
 		(*result)[j] = '.';
 		i += 5;
 		urls.push_back(result->substr(i, j-i));
@@ -165,7 +165,7 @@ void * GetArtistInfo(void *ptr)
 	}
 	
 	EscapeHtml(*result);
-	for (int i = 0; i < result->length(); i++)
+	for (size_t i = 0; i < result->length(); i++)
 	{
 		if (erase)
 		{
@@ -189,7 +189,7 @@ void * GetArtistInfo(void *ptr)
 	}
 	
 	*result += "\n\n[.b]Similar artists:[/b]\n";
-	for (int i = 1; i < similar.size(); i++)
+	for (size_t i = 1; i < similar.size(); i++)
 		*result += "\n [." + Config.color2 + "]*[/" + Config.color2 + "] " + similar[i] + " (" + urls[i] + ")";
 	
 	*result += "\n\n" + urls.front();
@@ -277,9 +277,9 @@ void * GetLyrics(void *song)
 		pthread_exit(result);
 	}
 	
-	for (int i = result->find("&lt;"); i != string::npos; i = result->find("&lt;"))
+	for (size_t i = result->find("&lt;"); i != string::npos; i = result->find("&lt;"))
 		result->replace(i, 4, "<");
-	for (int i = result->find("&gt;"); i != string::npos; i = result->find("&gt;"))
+	for (size_t i = result->find("&gt;"); i != string::npos; i = result->find("&gt;"))
 		result->replace(i, 4, ">");
 	
 	EscapeHtml(*result);
