@@ -41,12 +41,8 @@ namespace
 {
 	size_t write_data(char *buffer, size_t size, size_t nmemb, string data)
 	{
-		int result = 0;
-		if (buffer)
-		{
-			data += buffer;
-			result = size*nmemb;
-		}
+		size_t result = size * nmemb;
+		data.append(buffer, result);
 		return result;
 	}
 
