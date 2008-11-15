@@ -1896,13 +1896,16 @@ int main(int argc, char *argv[])
 					mLibSongs->HighlightColor(Config.active_column_color);
 				}
 			}
-			else if (wCurrent == mPlaylistList && input == Key.VolumeUp[0])
+			else if (current_screen == csPlaylistEditor && input == Key.VolumeUp[0])
 			{
-				CLEAR_FIND_HISTORY;
-				mPlaylistList->HighlightColor(Config.main_highlight_color);
-				wCurrent->Refresh();
-				wCurrent = mPlaylistEditor;
-				mPlaylistEditor->HighlightColor(Config.active_column_color);
+				if (wCurrent == mPlaylistList)
+				{
+					CLEAR_FIND_HISTORY;
+					mPlaylistList->HighlightColor(Config.main_highlight_color);
+					wCurrent->Refresh();
+					wCurrent = mPlaylistEditor;
+					mPlaylistEditor->HighlightColor(Config.active_column_color);
+				}
 			}
 #			ifdef HAVE_TAGLIB_H
 			else if (current_screen == csTagEditor && input == Key.VolumeUp[0])
@@ -1949,13 +1952,16 @@ int main(int argc, char *argv[])
 					mLibArtists->HighlightColor(Config.active_column_color);
 				}
 			}
-			else if (wCurrent == mPlaylistEditor && input == Key.VolumeDown[0])
+			else if (current_screen == csPlaylistEditor && input == Key.VolumeDown[0])
 			{
-				CLEAR_FIND_HISTORY;
-				mPlaylistEditor->HighlightColor(Config.main_highlight_color);
-				wCurrent->Refresh();
-				wCurrent = mPlaylistList;
-				mPlaylistList->HighlightColor(Config.active_column_color);
+				if (wCurrent == mPlaylistEditor)
+				{
+					CLEAR_FIND_HISTORY;
+					mPlaylistEditor->HighlightColor(Config.main_highlight_color);
+					wCurrent->Refresh();
+					wCurrent = mPlaylistList;
+					mPlaylistList->HighlightColor(Config.active_column_color);
+				}
 			}
 #			ifdef HAVE_TAGLIB_H
 			else if (current_screen == csTagEditor && input == Key.VolumeDown[0])
