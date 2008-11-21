@@ -53,6 +53,7 @@ namespace
 			return false;
 		
 		string ext = file.substr(last_dot+1);
+		ToLower(ext);
 		for (int i = 0; supported_extensions[i] != "."; i++)
 			if (ext == supported_extensions[i])
 				return true;

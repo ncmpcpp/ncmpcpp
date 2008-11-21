@@ -301,6 +301,7 @@ bool GetSongTags(Song &s)
 	
 	string ext = s.GetFile();
 	ext = ext.substr(ext.find_last_of(".")+1);
+	ToLower(ext);
 	
 	mTagEditor->Clear();
 	mTagEditor->Reset();
@@ -356,6 +357,7 @@ bool WriteTags(Song &s)
 		
 		string ext = s.GetFile();
 		ext = ext.substr(ext.find_last_of(".")+1);
+		ToLower(ext);
 		if (ext == "mp3")
 		{
 			MPEG::File file(path_to_file.c_str());
