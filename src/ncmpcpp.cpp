@@ -661,6 +661,10 @@ int main(int argc, char *argv[])
 						string parent = slash != string::npos ? editor_browsed_dir.substr(0, slash) : "/";
 						mEditorDirs->AddOption(make_pair("[..]", parent));
 					}
+					else
+					{
+						mEditorDirs->AddOption(make_pair(".", "/"));
+					}
 					for (TagList::const_iterator it = list.begin(); it != list.end(); it++)
 					{
 						size_t slash = it->find_last_of("/");
