@@ -38,6 +38,13 @@
 #include "status_checker.h"
 #include "tag_editor.h"
 
+#define CHECK_MPD_MUSIC_DIR \
+			if (Config.mpd_music_dir.empty()) \
+			{ \
+				ShowMessage("configuration variable mpd_music_dir is not set!"); \
+				continue; \
+			}
+
 #define REFRESH_MEDIA_LIBRARY_SCREEN \
 			do { \
 				mLibArtists->Display(redraw_screen); \
@@ -2501,6 +2508,7 @@ int main(int argc, char *argv[])
 		}
 		else if (Keypressed(input, Key.EditTags))
 		{
+			CHECK_MPD_MUSIC_DIR;
 #			ifdef HAVE_TAGLIB_H
 			if (wCurrent == mLibArtists)
 			{
@@ -3484,6 +3492,7 @@ int main(int argc, char *argv[])
 #		ifdef HAVE_TAGLIB_H
 		else if (Keypressed(input, Key.TagEditor))
 		{
+			CHECK_MPD_MUSIC_DIR;
 			if (current_screen != csTagEditor && current_screen != csTinyTagEditor)
 			{
 				CLEAR_FIND_HISTORY;

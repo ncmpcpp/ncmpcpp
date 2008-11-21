@@ -13,7 +13,7 @@
 #
 #mpd_port = "6600"
 #
-#mpd_music_dir = "/var/lib/mpd/music"
+#mpd_music_dir = ""
 #
 #mpd_connection_timeout = "5"
 #

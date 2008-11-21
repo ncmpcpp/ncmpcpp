@@ -219,7 +219,6 @@ void DefaultConfiguration(ncmpcpp_config &conf)
 {
 	conf.mpd_host = "localhost";
 	conf.mpd_password = "";
-	conf.mpd_music_dir = "/var/lib/mpd/music/";
 	conf.song_list_format = "{%a - }{%t}|{[.white]%f[/white]}%r{[.green](%l)[/green]}";
 	conf.song_columns_list_format = "(8)[green]{l} (25)[cyan]{a} (40){t} (30)[red]{b}";
 	conf.song_status_format = "{(%l) }{%a - }{%t}|{%f}";
