@@ -48,24 +48,34 @@ void DefineEmptyTags()
 }
 
 Song::Song(mpd_Song *s, bool copy_ptr) : itsSong(s),
+					 itsSlash(string::npos),
 					 itsHash(0),
 					 copyPtr(copy_ptr),
 					 isStream(0),
 					 itsGetEmptyFields(0)
 {
-	string itsFile = itsSong->file ? itsSong->file : "";
+	size_t file_len = itsSong->file ? strlen(itsSong->file) : 0;
 	
-	itsSlash = itsFile.find_last_of("/");
-	
-	if (itsFile.substr(0, 7) == "http://")
-		isStream = 1;
+	if (itsSong->file)
+	{
+		for (size_t i = file_len-1; i < file_len; i--)
+		{
+			if (itsSong->file[i] == '/')
+			{
+				itsSlash = i;
+				break;
+			}
+		}
+		if (strncmp(itsSong->file, "http://", 7) == 0)
+			isStream = 1;
+	}
 	
 	// generate pseudo-hash
-	for (size_t i = 0; i < itsFile.length(); i++)
+	for (size_t i = 0; i < file_len; i++)
 	{
-		itsHash += itsFile[i];
+		itsHash += itsSong->file[i];
 		if (i%3)
-			itsHash *= itsFile[i];
+			itsHash *= itsSong->file[i];
 	}
 }
 
@@ -123,7 +133,7 @@ string Song::GetFile() const
 
 string Song::GetName() const
 {
-	return !itsSong->file ? (itsGetEmptyFields ? "" : EMPTY_TAG) : (itsSlash != string::npos && !isStream ? string(itsSong->file).substr(itsSlash+1) : (isStream && itsSong->name ? itsSong->name : itsSong->file));
+	return !itsSong->file ? (itsGetEmptyFields ? "" : EMPTY_TAG) : (itsSlash != string::npos && !isStream ? itsSong->file+itsSlash+1 : (isStream && itsSong->name ? itsSong->name : itsSong->file));
 }
 
 string Song::GetDirectory() const

@@ -36,7 +36,7 @@ void DefineEmptyTags();
 class Song
 {
 	public:
-		Song() : itsHash(0), copyPtr(0), isStream(0), itsGetEmptyFields(0) { itsSong = mpd_newSong(); }
+		Song() : itsSlash(string::npos), itsHash(0), copyPtr(0), isStream(0), itsGetEmptyFields(0) { itsSong = mpd_newSong(); }
 		Song(mpd_Song *, bool = 0);
 		Song(const Song &);
 		~Song();
@@ -97,7 +97,7 @@ class Song
 	private:
 		mpd_Song *itsSong;
 		string itsNewName;
-		unsigned itsSlash;
+		size_t itsSlash;
 		long long itsHash;
 		bool copyPtr;
 		bool isStream;
