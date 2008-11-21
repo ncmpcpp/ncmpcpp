@@ -107,8 +107,11 @@ string GetKeybindings()
 	result += DisplayKeys(Key.SearchEngine) + "Search engine\n";
 	result += DisplayKeys(Key.MediaLibrary) + "Media library\n";
 	result += DisplayKeys(Key.PlaylistEditor) + "Playlist editor\n";
+#	ifdef HAVE_TAGLIB_H
 	result += DisplayKeys(Key.TagEditor) + "Tag editor\n\n\n";
-	
+#	else
+	result += "\n\n";
+#	endif // HAVE_TAGLIB_H
 	
 	result += "   [.b]Keys - Global\n -----------------------------------------[/b]\n";
 	result += DisplayKeys(Key.Stop) + "Stop\n";
