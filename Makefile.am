@@ -4,5 +4,5 @@ AUTOMAKE_OPTIONS = foreign 1.4
 
 SUBDIRS = src doc
 docdir = $(prefix)/share/doc/$(PACKAGE)
-doc_DATA = AUTHORS NEWS
-EXTRA_DIST = COPYING $(doc_DATA)
+doc_DATA = AUTHORS NEWS COPYING
+EXTRA_DIST = $(doc_DATA)
