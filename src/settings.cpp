@@ -259,6 +259,7 @@ void DefaultConfiguration(ncmpcpp_config &conf)
 	conf.incremental_seeking = true;
 	conf.now_playing_lyrics = false;
 	conf.local_browser = false;
+	conf.search_in_db = true;
 	conf.set_window_title = true;
 	conf.mpd_port = 6600;
 	conf.mpd_connection_timeout = 15;
@@ -652,6 +653,10 @@ void ReadConfiguration(ncmpcpp_config &conf)
 			else if (it->find("ncmpc_like_songs_adding") != string::npos)
 			{
 				conf.ncmpc_like_songs_adding = v == "yes";
+			}
+			else if (it->find("default_place_to_search_in") != string::npos)
+			{
+				conf.search_in_db = v == "database";
 			}
 			else if (it->find("enable_window_title") != string::npos)
 			{

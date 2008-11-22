@@ -153,7 +153,6 @@ bool redraw_header = 1;
 bool reload_lyrics = 0;
 
 extern bool header_update_status;
-extern bool search_place;
 extern bool search_case_sensitive;
 extern bool search_match_to_pattern;
 
@@ -1287,8 +1286,8 @@ int main(int argc, char *argv[])
 						}
 						case 10:
 						{
-							search_place = !search_place;
-							mSearcher->Current().first = "[.b]Search in:[/b] " + string(search_place ? "Database" : "Current playlist");
+							Config.search_in_db = !Config.search_in_db;
+							mSearcher->Current().first = "[.b]Search in:[/b] " + string(Config.search_in_db ? "Database" : "Current playlist");
 							break;
 						}
 						case 11:

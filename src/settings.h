@@ -145,6 +145,7 @@ struct ncmpcpp_config
 	bool incremental_seeking;
 	bool now_playing_lyrics;
 	bool local_browser;
+	bool search_in_db;
 	
 	int mpd_port;
 	int mpd_connection_timeout;

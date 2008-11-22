@@ -26,7 +26,6 @@ extern Menu<Song> *mPlaylist;
 extern Menu< std::pair<string, Song> > *mSearcher;
 
 bool search_match_to_pattern = 1;
-bool search_place = 1;
 bool search_case_sensitive = 0;
 
 string SearchEngineDisplayer(const std::pair<string, Song> &pair, void *, const Menu< std::pair<string, Song> > *menu)
@@ -68,7 +67,7 @@ void PrepareSearchEngine(Song &s)
 	mSearcher->AddOption(make_pair("[.b]Genre:[/b] " + s.GetGenre(), Song()));
 	mSearcher->AddOption(make_pair("[.b]Comment:[/b] " + s.GetComment(), Song()));
 	mSearcher->AddSeparator();
-	mSearcher->AddOption(make_pair("[.b]Search in:[/b] " + string(search_place ? "Database" : "Current playlist"), Song()));
+	mSearcher->AddOption(make_pair("[.b]Search in:[/b] " + string(Config.search_in_db ? "Database" : "Current playlist"), Song()));
 	mSearcher->AddOption(make_pair("[.b]Search mode:[/b] " + (search_match_to_pattern ? search_mode_normal : search_mode_strict), Song()));
 	mSearcher->AddOption(make_pair("[.b]Case sensitive:[/b] " + string(search_case_sensitive ? "Yes" : "No"), Song()));
 	mSearcher->AddSeparator();
@@ -82,7 +81,7 @@ void Search(Song &s)
 		return;
 	
 	SongList list;
-	if (search_place)
+	if (Config.search_in_db)
 		Mpd->GetDirectoryRecursive("/", list);
 	else
 	{
@@ -200,7 +199,7 @@ void Search(Song &s)
 			mSearcher->AddOption(make_pair(".", **it));
 		found = 1;
 	}
-	if (search_place) // free song list only if it's database
+	if (Config.search_in_db) // free song list only if it's database
 		FreeSongList(list);
 	s.GetEmptyFields(0);
 }

@@ -112,6 +112,8 @@
 #
 #repeat_one_mode = "no"
 #
+#default_place_to_search_in = "database" (database/playlist)
+#
 #media_library_left_column = "a" (possible values: a,y,g,c,p, legend above)
 #
 #default_find_mode = "wrapped" (wrapped/normal)
