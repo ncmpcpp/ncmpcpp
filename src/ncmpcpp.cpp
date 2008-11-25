@@ -3547,7 +3547,6 @@ int main(int argc, char *argv[])
 	Mpd->Disconnect();
 	curs_set(1);
 	endwin();
-	std::cout << std::endl;
 	return 0;
 }
 
