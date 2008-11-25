@@ -2672,12 +2672,20 @@ int main(int argc, char *argv[])
 				UnlockStatusbar();
 				if (!new_dir.empty() && new_dir != old_dir)
 				{
-					string full_old_dir = Config.mpd_music_dir + old_dir;
-					string full_new_dir = Config.mpd_music_dir + new_dir;
+					string full_old_dir;
+					if (!Config.local_browser)
+						full_old_dir += Config.mpd_music_dir;
+					full_old_dir += old_dir;
+					string full_new_dir;
+					if (!Config.local_browser)
+						full_new_dir += Config.mpd_music_dir;
+					full_new_dir += new_dir;
 					if (rename(full_old_dir.c_str(), full_new_dir.c_str()) == 0)
 					{
 						ShowMessage("'" + old_dir + "' renamed to '" + new_dir + "'");
-						Mpd->UpdateDirectory(FindSharedDir(old_dir, new_dir));
+						if (!Config.local_browser)
+							Mpd->UpdateDirectory(FindSharedDir(old_dir, new_dir));
+						GetDirectory(browsed_dir);
 					}
 					else
 						ShowMessage("Cannot rename '" + full_old_dir + "' to '" + full_new_dir + "'!");
