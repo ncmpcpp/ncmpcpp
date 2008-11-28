@@ -58,14 +58,9 @@ Song::Song(mpd_Song *s, bool copy_ptr) : itsSong(s),
 	
 	if (itsSong->file)
 	{
-		for (size_t i = file_len-1; i < file_len; i--)
-		{
-			if (itsSong->file[i] == '/')
-			{
-				itsSlash = i;
-				break;
-			}
-		}
+		char *tmp = strrchr(itsSong->file, '/');
+		if (tmp)
+			itsSlash = tmp-itsSong->file;
 		if (strncmp(itsSong->file, "http://", 7) == 0)
 			isStream = 1;
 	}
