@@ -187,8 +187,6 @@ int main(int argc, char *argv[])
 		Mpd->SetHostname(Config.mpd_host);
 	if (Config.mpd_port != 6600)
 		Mpd->SetPort(Config.mpd_port);
-	if (!Config.mpd_password.empty())
-		Mpd->SetPassword(Config.mpd_password);
 	
 	Mpd->SetTimeout(Config.mpd_connection_timeout);
 	

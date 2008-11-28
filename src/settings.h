@@ -95,7 +95,6 @@ struct ncmpcpp_keys
 struct ncmpcpp_config
 {
 	string mpd_host;
-	string mpd_password;
 	string mpd_music_dir;
 	string song_list_format;
 	string song_columns_list_format;
