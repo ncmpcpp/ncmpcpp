@@ -720,7 +720,7 @@ wstring ToWString(const string &s)
 Coordinates Window::IntoCoordinates(const string &s)
 {
 	Coordinates result;
-	unsigned int sep = s.find(",");
+	size_t sep = s.find(",");
 	if (sep != string::npos)
 	{
 		result.first = atoi(s.substr(2, sep-2).c_str());
