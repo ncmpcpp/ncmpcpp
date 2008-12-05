@@ -1,3 +1,12 @@
+ncmpcpp-0.2.5
+
+ + support for unix domain sockets
+ + support for adding to playlist files outside mpd music directory (requires mpd >= 0.14_alpha*)
+ + support for browsing local directories tree (requires mpd >= 0.14_alpha*)
+ + support for searching in current playlist
+ + many bugfixes
+
+
 ncmpcpp-0.2.4
 
  + fixed bug with not null terminated strings on mac os x
