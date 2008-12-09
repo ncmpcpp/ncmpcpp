@@ -866,19 +866,25 @@ string GetInfo(Song &s)
 	return result;
 }
 
-void ShowMessage(const string &message, int delay)
+void ShowMessage(const char *format, ...)
 {
 	if (messages_allowed)
 	{
 		time_of_statusbar_lock = time(NULL);
-		lock_statusbar_delay = delay;
+		lock_statusbar_delay = Config.message_delay_time;
 		if (Config.statusbar_visibility)
 			block_statusbar_update = 1;
 		else
 			block_progressbar_update = 1;
 		wFooter->Bold(0);
-		wFooter->WriteXY(0, Config.statusbar_visibility, message, 1);
+		va_list list;
+		va_start(list, format);
+		wmove(wFooter->RawWin(), Config.statusbar_visibility, 0);
+		vw_printw(wFooter->RawWin(), format, list);
+		wclrtoeol(wFooter->RawWin());
+		va_end(list);
 		wFooter->Bold(1);
+		wFooter->Refresh();
 	}
 }
 

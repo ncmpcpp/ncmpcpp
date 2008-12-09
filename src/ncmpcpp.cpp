@@ -163,7 +163,7 @@ extern string UNKNOWN_ALBUM;
 extern string playlist_stats;
 extern string volume_state;
 
-const string message_part_of_songs_added = "Only part of requested songs' list added to playlist!";
+const char *message_part_of_songs_added = "Only part of requested songs' list added to playlist!";
 
 int main(int argc, char *argv[])
 {
@@ -996,7 +996,7 @@ int main(int argc, char *argv[])
 							if (id >= 0)
 							{
 								Mpd->PlayID(id);
-								ShowMessage("Added to playlist: " + DisplaySong(s, &Config.song_status_format));
+								ShowMessage("Added to playlist: %s", DisplaySong(s, &Config.song_status_format).c_str());
 								mBrowser->BoldOption(mBrowser->GetChoice(), 1);
 							}
 							break;
@@ -1009,12 +1009,12 @@ int main(int argc, char *argv[])
 								Mpd->QueueAddSong(**it);
 							if (Mpd->CommitQueue())
 							{
-								ShowMessage("Loading and playing playlist " + item.name + "...");
+								ShowMessage("Loading and playing playlist %s...", item.name.c_str());
 								Song *s = &mPlaylist->at(mPlaylist->Size()-list.size());
 								if (s->GetHash() == list[0]->GetHash())
 									Mpd->PlayID(s->GetID());
 								else
-									ShowMessage(message_part_of_songs_added);
+									ShowMessage("%s", message_part_of_songs_added);
 							}
 							FreeSongList(list);
 							break;
@@ -1351,7 +1351,7 @@ int main(int argc, char *argv[])
 								if (id >= 0)
 								{
 									Mpd->PlayID(id);
-									ShowMessage("Added to playlist: " + DisplaySong(s, &Config.song_status_format));
+									ShowMessage("Added to playlist: %s", DisplaySong(s, &Config.song_status_format).c_str());
 									mSearcher->BoldOption(mSearcher->GetChoice(), 1);
 								}
 							}
@@ -1381,7 +1381,7 @@ int main(int argc, char *argv[])
 						{
 							string tag_type = IntoStr(Config.media_lib_primary_tag);
 							ToLower(tag_type);
-							ShowMessage("Adding songs of " + tag_type + " \"" + tag + "\"");
+							ShowMessage("Adding songs of %s \"%s\"", tag_type.c_str(), tag.c_str());
 							Song *s = &mPlaylist->at(mPlaylist->Size()-list.size());
 							if (s->GetHash() == list[0]->GetHash())
 							{
@@ -1389,7 +1389,7 @@ int main(int argc, char *argv[])
 									Mpd->PlayID(s->GetID());
 							}
 							else
-								ShowMessage(message_part_of_songs_added);
+								ShowMessage("%s", message_part_of_songs_added);
 						}
 					}
 					else if (wCurrent == mLibAlbums)
@@ -1398,7 +1398,7 @@ int main(int argc, char *argv[])
 							Mpd->QueueAddSong(mLibSongs->at(i));
 						if (Mpd->CommitQueue())
 						{
-							ShowMessage("Adding songs from album \"" + mLibAlbums->Current().second + "\"");
+							ShowMessage("Adding songs from album \"%s\"", mLibAlbums->Current().second.c_str());
 							Song *s = &mPlaylist->at(mPlaylist->Size()-mLibSongs->Size());
 							if (s->GetHash() == mLibSongs->at(0).GetHash())
 							{
@@ -1406,7 +1406,7 @@ int main(int argc, char *argv[])
 									Mpd->PlayID(s->GetID());
 							}
 							else
-								ShowMessage(message_part_of_songs_added);
+								ShowMessage("%s", message_part_of_songs_added);
 						}
 					}
 					else if (wCurrent == mLibSongs)
@@ -1450,7 +1450,7 @@ int main(int argc, char *argv[])
 								int id = Mpd->AddSong(s);
 								if (id >= 0)
 								{
-									ShowMessage("Added to playlist: " + DisplaySong(s, &Config.song_status_format));
+									ShowMessage("Added to playlist: %s", DisplaySong(s, &Config.song_status_format).c_str());
 									if (Keypressed(input, Key.Enter))
 										Mpd->PlayID(id);
 									mLibSongs->BoldOption(mLibSongs->GetChoice(), 1);
@@ -1486,7 +1486,7 @@ int main(int argc, char *argv[])
 							Mpd->QueueAddSong(**it);
 						if (Mpd->CommitQueue())
 						{
-							ShowMessage("Loading playlist " + playlist + "...");
+							ShowMessage("Loading playlist %s...", playlist.c_str());
 							Song &s = mPlaylist->at(mPlaylist->Size()-list.size());
 							if (s.GetHash() == list[0]->GetHash())
 							{
@@ -1494,7 +1494,7 @@ int main(int argc, char *argv[])
 									Mpd->PlayID(s.GetID());
 							}
 							else
-								ShowMessage(message_part_of_songs_added);
+								ShowMessage("%s", message_part_of_songs_added);
 						}
 					}
 					else if (wCurrent == mPlaylistEditor)
@@ -1538,7 +1538,7 @@ int main(int argc, char *argv[])
 								int id = Mpd->AddSong(s);
 								if (id >= 0)
 								{
-									ShowMessage("Added to playlist: " + DisplaySong(s, &Config.song_status_format));
+									ShowMessage("Added to playlist: %s", DisplaySong(s, &Config.song_status_format).c_str());
 									if (Keypressed(input, Key.Enter))
 										Mpd->PlayID(id);
 									mPlaylistEditor->BoldOption(mPlaylistEditor->GetChoice(), 1);
@@ -1684,10 +1684,10 @@ int main(int argc, char *argv[])
 							ShowMessage("Writing changes...");
 							for (SongList::iterator it = list.begin(); it != list.end(); it++)
 							{
-								ShowMessage("Writing tags in '" + (*it)->GetName() + "'...");
+								ShowMessage("Writing tags in '%s'...", (*it)->GetName().c_str());
 								if (!WriteTags(**it))
 								{
-									ShowMessage("Error writing tags in '" + (*it)->GetFile() + "'!");
+									ShowMessage("Error writing tags in '%s'!", (*it)->GetFile().c_str());
 									success = 0;
 									break;
 								}
@@ -1770,10 +1770,10 @@ int main(int argc, char *argv[])
 								Mpd->QueueAddSong(**it);
 							if (Mpd->CommitQueue())
 							{
-								ShowMessage("Added folder: " + item.name);
+								ShowMessage("Added folder: %s", item.name.c_str());
 								Song &s = mPlaylist->at(mPlaylist->Size()-list.size());
 								if (s.GetHash() != list[0]->GetHash())
-									ShowMessage(message_part_of_songs_added);
+									ShowMessage("%s", message_part_of_songs_added);
 							}
 							FreeSongList(list);
 							break;
@@ -1802,7 +1802,7 @@ int main(int argc, char *argv[])
 								Song &s = *item.song;
 								if (Mpd->AddSong(s) != -1)
 								{
-									ShowMessage("Added to playlist: " + DisplaySong(s, &Config.song_status_format));
+									ShowMessage("Added to playlist: %s", DisplaySong(s, &Config.song_status_format).c_str());
 									mBrowser->BoldOption(mBrowser->GetChoice(), 1);
 								}
 							}
@@ -1816,10 +1816,10 @@ int main(int argc, char *argv[])
 								Mpd->QueueAddSong(**it);
 							if (Mpd->CommitQueue())
 							{
-								ShowMessage("Loading playlist " + item.name + "...");
+								ShowMessage("Loading playlist %s...", item.name.c_str());
 								Song &s = mPlaylist->at(mPlaylist->Size()-list.size());
 								if (s.GetHash() != list[0]->GetHash())
-									ShowMessage(message_part_of_songs_added);
+									ShowMessage("%s", message_part_of_songs_added);
 							}
 							FreeSongList(list);
 							break;
@@ -1851,7 +1851,7 @@ int main(int argc, char *argv[])
 						Song &s = mSearcher->Current().second;
 						if (Mpd->AddSong(s) != -1)
 						{
-							ShowMessage("Added to playlist: " + DisplaySong(s, &Config.song_status_format));
+							ShowMessage("Added to playlist: %s", DisplaySong(s, &Config.song_status_format).c_str());
 							mSearcher->BoldOption(mSearcher->GetChoice(), 1);
 						}
 					}
@@ -1867,7 +1867,7 @@ int main(int argc, char *argv[])
 					Config.albums_in_tag_editor = !Config.albums_in_tag_editor;
 					mEditorLeftCol = Config.albums_in_tag_editor ? mEditorAlbums : mEditorDirs;
 					wCurrent = mEditorLeftCol;
-					ShowMessage("Switched to " + string(Config.albums_in_tag_editor ? "albums" : "directories") + " view");
+					ShowMessage("Switched to %s view", Config.albums_in_tag_editor ? "albums" : "directories");
 					mEditorLeftCol->Display();
 					mEditorTags->Clear(0);
 					redraw_screen = 1;
@@ -1876,7 +1876,7 @@ int main(int argc, char *argv[])
 				else if (current_screen == csLyrics)
 				{
 					Config.now_playing_lyrics = !Config.now_playing_lyrics;
-					ShowMessage("Reload lyrics if song changes: " + string(Config.now_playing_lyrics ? "On" : "Off"));
+					ShowMessage("Reload lyrics if song changes: %s", Config.now_playing_lyrics ? "On" : "Off");
 				}
 			}
 		}
@@ -2050,7 +2050,7 @@ int main(int argc, char *argv[])
 					if (in == 'y')
 					{
 						Mpd->DeletePlaylist(name);
-						ShowMessage("Playlist " + name + " deleted!");
+						ShowMessage("Playlist %s deleted!", name.c_str());
 						if (!Config.local_browser)
 							GetDirectory("/");
 					}
@@ -2072,7 +2072,7 @@ int main(int argc, char *argv[])
 						Mpd->QueueDeleteFromPlaylist(mPlaylistList->GetOption(), *it);
 						mPlaylistEditor->DeleteOption(*it);
 					}
-					ShowMessage("Selected items deleted from playlist '" + mPlaylistList->GetOption() + "'!");
+					ShowMessage("Selected items deleted from playlist '%s'!", mPlaylistList->GetOption().c_str());
 					redraw_screen = 1;
 				}
 				else
@@ -2119,7 +2119,7 @@ int main(int argc, char *argv[])
 			{
 				if (Mpd->SavePlaylist(playlist_name))
 				{
-					ShowMessage("Playlist saved as: " + playlist_name);
+					ShowMessage("Playlist saved as: %s", playlist_name.c_str());
 					mPlaylistList->Clear(0); // make playlist's list update itself
 				}
 				else
@@ -2381,7 +2381,7 @@ int main(int argc, char *argv[])
 					{
 						Song &s = mPlaylist->at(mPlaylist->Size()-list.size());
 						if (s.GetHash() != list[0]->GetHash())
-							ShowMessage(message_part_of_songs_added);
+							ShowMessage("%s", message_part_of_songs_added);
 					}
 				}
 				else
@@ -2448,7 +2448,7 @@ int main(int argc, char *argv[])
 		else if (Keypressed(input, Key.TogglePlaylistDisplayMode) && wCurrent == mPlaylist)
 		{
 			Config.columns_in_playlist = !Config.columns_in_playlist;
-			ShowMessage("Playlist display mode: " + string(Config.columns_in_playlist ? "Columns" : "Classic"));
+			ShowMessage("Playlist display mode: %s", Config.columns_in_playlist ? "Columns" : "Classic");
 			mPlaylist->SetItemDisplayer(Config.columns_in_playlist ? DisplaySongInColumns : DisplaySong);
 			mPlaylist->SetItemDisplayerUserData(Config.columns_in_playlist ? &Config.song_columns_list_format : &Config.song_list_format);
 			mPlaylist->SetTitle(Config.columns_in_playlist ? DisplayColumns(Config.song_columns_list_format) : "");
@@ -2457,7 +2457,7 @@ int main(int argc, char *argv[])
 		else if (Keypressed(input, Key.ToggleAutoCenter))
 		{
 			Config.autocenter_mode = !Config.autocenter_mode;
-			ShowMessage("Auto center mode: " + string(Config.autocenter_mode ? "On" : "Off"));
+			ShowMessage("Auto center mode: %s", Config.autocenter_mode ? "On" : "Off");
 		}
 		else if (Keypressed(input, Key.UpdateDB))
 		{
@@ -2480,7 +2480,7 @@ int main(int argc, char *argv[])
 		else if (Keypressed(input, Key.ToggleRepeatOne))
 		{
 			Config.repeat_one_mode = !Config.repeat_one_mode;
-			ShowMessage("'Repeat one' mode: " + string(Config.repeat_one_mode ? "On" : "Off"));
+			ShowMessage("'Repeat one' mode: %s", Config.repeat_one_mode ? "On" : "Off");
 		}
 		else if (Keypressed(input, Key.Shuffle))
 		{
@@ -2531,11 +2531,11 @@ int main(int argc, char *argv[])
 					for (SongList::const_iterator it = list.begin(); it != list.end(); it++)
 					{
 						((*it)->*set)(new_tag);
-						ShowMessage("Updating tags in '" + (*it)->GetName() + "'...");
+						ShowMessage("Updating tags in '%s'...", (*it)->GetName().c_str());
 						string path = Config.mpd_music_dir + (*it)->GetFile();
 						if (!WriteTags(**it))
 						{
-							ShowMessage("Error updating tags in '" + (*it)->GetFile() + "'!");
+							ShowMessage("Error updating tags in '%s'!", (*it)->GetFile().c_str());
 							success = 0;
 							break;
 						}
@@ -2565,12 +2565,12 @@ int main(int argc, char *argv[])
 					Mpd->CommitSearch(list);
 					for (SongList::const_iterator it = list.begin(); it != list.end(); it++)
 					{
-						ShowMessage("Updating tags in '" + (*it)->GetName() + "'...");
+						ShowMessage("Updating tags in '%s'...", (*it)->GetName().c_str());
 						string path = Config.mpd_music_dir + (*it)->GetFile();
 						TagLib::FileRef f(path.c_str());
 						if (f.isNull())
 						{
-							ShowMessage("Error updating tags in '" + (*it)->GetFile() + "'!");
+							ShowMessage("Error updating tags in '%s'!", (*it)->GetFile().c_str());
 							success = 0;
 							break;
 						}
@@ -2636,7 +2636,7 @@ int main(int argc, char *argv[])
 						message += Config.mpd_music_dir;
 					message += edited_song.GetFile();
 					message += "'!";
-					ShowMessage(message);
+					ShowMessage("%s", message.c_str());
 				}
 			}
 			else if (wCurrent == mEditorDirs)
@@ -2653,10 +2653,10 @@ int main(int argc, char *argv[])
 					if (rename(full_old_dir.c_str(), full_new_dir.c_str()) == 0)
 					{
 						Mpd->UpdateDirectory(editor_browsed_dir);
-						ShowMessage("'" + old_dir + "' renamed to '" + new_dir + "'");
+						ShowMessage("'%s' renamed to '%s'", old_dir.c_str(), new_dir.c_str());
 					}
 					else
-						ShowMessage("Cannot rename '" + full_old_dir + "' to '" + full_new_dir + "'!");
+						ShowMessage("Cannot rename '%s' to '%s'!", full_old_dir.c_str(), full_new_dir.c_str());
 				}
 			}
 			else
@@ -2680,13 +2680,13 @@ int main(int argc, char *argv[])
 					full_new_dir += new_dir;
 					if (rename(full_old_dir.c_str(), full_new_dir.c_str()) == 0)
 					{
-						ShowMessage("'" + old_dir + "' renamed to '" + new_dir + "'");
+						ShowMessage("'%s' renamed to '%s'", old_dir.c_str(), new_dir.c_str());
 						if (!Config.local_browser)
 							Mpd->UpdateDirectory(FindSharedDir(old_dir, new_dir));
 						GetDirectory(browsed_dir);
 					}
 					else
-						ShowMessage("Cannot rename '" + full_old_dir + "' to '" + full_new_dir + "'!");
+						ShowMessage("Cannot rename '%s' to '%s'!", full_old_dir.c_str(), full_new_dir.c_str());
 				}
 			}
 			else if (wCurrent == mPlaylistList || (wCurrent == mBrowser && mBrowser->Current().type == itPlaylist))
@@ -2699,7 +2699,7 @@ int main(int argc, char *argv[])
 				if (!new_name.empty() && new_name != old_name)
 				{
 					Mpd->Rename(old_name, new_name);
-					ShowMessage("Playlist '" + old_name + "' renamed to '" + new_name + "'");
+					ShowMessage("Playlist '%s' renamed to '%s'", old_name.c_str(), new_name.c_str());
 					if (!Config.local_browser)
 						GetDirectory("/");
 					mPlaylistList->Clear(0);
@@ -2938,7 +2938,7 @@ int main(int argc, char *argv[])
 							ShowMessage("Selected items added!");
 							Song &s = mPlaylist->at(mPlaylist->Size()-result.size());
 							if (s.GetHash() != result[0]->GetHash())
-								ShowMessage(message_part_of_songs_added);
+								ShowMessage("%s", message_part_of_songs_added);
 						}
 					}
 					else if (id == 1)
@@ -2952,7 +2952,7 @@ int main(int argc, char *argv[])
 							for (SongList::const_iterator it = result.begin(); it != result.end(); it++)
 								Mpd->QueueAddToPlaylist(playlist, **it);
 							Mpd->CommitQueue();
-							ShowMessage("Selected items added to playlist '" + playlist + "'!");
+							ShowMessage("Selected items added to playlist '%s'!", playlist.c_str());
 						}
 						
 					}
@@ -2961,7 +2961,7 @@ int main(int argc, char *argv[])
 						for (SongList::const_iterator it = result.begin(); it != result.end(); it++)
 							Mpd->QueueAddToPlaylist(playlists[id-3], **it);
 						Mpd->CommitQueue();
-						ShowMessage("Selected items added to playlist '" + playlists[id-3] + "'!");
+						ShowMessage("Selected items added to playlist '%s'!", playlists[id-3].c_str());
 					}
 					
 					if (id != mDialog->Size()-1)
@@ -3060,7 +3060,7 @@ int main(int argc, char *argv[])
 				ShowMessage("Searching finished!");
 				
 				if (Config.wrapped_search ? vFoundPositions.empty() : found_pos < 0)
-					ShowMessage("Unable to find \"" + findme + "\"");
+					ShowMessage("Unable to find \"%s\"", findme.c_str());
 				else
 				{
 					wCurrent->Highlight(vFoundPositions[found_pos < 0 ? 0 : found_pos]);
@@ -3103,24 +3103,24 @@ int main(int argc, char *argv[])
 		else if (Keypressed(input, Key.ToggleFindMode))
 		{
 			Config.wrapped_search = !Config.wrapped_search;
-			ShowMessage("Search mode: " + string(Config.wrapped_search ? "Wrapped" : "Normal"));
+			ShowMessage("Search mode: %s", Config.wrapped_search ? "Wrapped" : "Normal");
 		}
 		else if (Keypressed(input, Key.ToggleSpaceMode))
 		{
 			Config.space_selects = !Config.space_selects;
-			ShowMessage("Space mode: " + string(Config.space_selects ? "Select/deselect" : "Add") + " item");
+			ShowMessage("Space mode: %s item", Config.space_selects ? "Select/deselect" : "Add");
 		}
 		else if (Keypressed(input, Key.ToggleAddMode))
 		{
 			Config.ncmpc_like_songs_adding = !Config.ncmpc_like_songs_adding;
-			ShowMessage("Add mode: " + string(Config.ncmpc_like_songs_adding ? "Add item to playlist, remove if already added" : "Always add item to playlist"));
+			ShowMessage("Add mode: %s", Config.ncmpc_like_songs_adding ? "Add item to playlist, remove if already added" : "Always add item to playlist");
 		}
 		else if (Keypressed(input, Key.SwitchTagTypeList))
 		{
 			if (wCurrent == mBrowser && Mpd->GetHostname()[0] == '/')
 			{
 				Config.local_browser = !Config.local_browser;
-				ShowMessage("Browse mode: " + string(Config.local_browser ? "Local filesystem" : "MPD music dir"));
+				ShowMessage("Browse mode: %s", Config.local_browser ? "Local filesystem" : "MPD music dir");
 				browsed_dir = Config.local_browser ? home_folder : "/";
 				mBrowser->Reset();
 				GetDirectory(browsed_dir);
@@ -3150,7 +3150,7 @@ int main(int argc, char *argv[])
 					mLibArtists->Clear(0);
 					mLibArtists->Display();
 					ToLower(item_type);
-					ShowMessage("Switched to list of " + item_type + " tag");
+					ShowMessage("Switched to list of %s tag", item_type.c_str());
 				}
 			}
 		}

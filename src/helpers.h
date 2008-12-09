@@ -58,7 +58,7 @@ string DisplayColumns(string);
 string DisplaySongInColumns(const Song &, void *, const Menu<Song> *);
 string DisplaySong(const Song &, void * = &Config.song_list_format, const Menu<Song> * = NULL);
 string GetInfo(Song &);
-void ShowMessage(const string &, int = Config.message_delay_time);
+void ShowMessage(const char *, ...);
 
 #endif
 

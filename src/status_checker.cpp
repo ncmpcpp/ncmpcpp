@@ -139,7 +139,7 @@ void NcmpcppErrorCallback(MPDConnection *Mpd, int errorid, string msg, void *)
 		wFooter->SetGetStringHelper(TraceMpdStatus);
 	}
 	else
-		ShowMessage(msg);
+		ShowMessage("%s", msg.c_str());
 }
 
 void NcmpcppStatusChanged(MPDConnection *Mpd, MPDStatusChanges changed, void *)
@@ -385,21 +385,21 @@ void NcmpcppStatusChanged(MPDConnection *Mpd, MPDStatusChanges changed, void *)
 	if (changed.Repeat)
 	{
 		mpd_repeat = (Mpd->GetRepeat() ? "r" : "");
-		ShowMessage("Repeat is " + string(mpd_repeat.empty() ? "off" : "on"));
+		ShowMessage("Repeat is %s", mpd_repeat.empty() ? "off" : "on");
 		header_update_status = 1;
 
 	}
 	if (changed.Random)
 	{
 		mpd_random = Mpd->GetRandom() ? "z" : "";
-		ShowMessage("Random is " + string(mpd_random.empty() ? "off" : "on"));
+		ShowMessage("Random is %s", mpd_random.empty() ? "off" : "on");
 		header_update_status = 1;
 	}
 	if (changed.Crossfade)
 	{
 		int crossfade = Mpd->GetCrossfade();
 		mpd_crossfade = crossfade ? "x" : "";
-		ShowMessage("Crossfade set to " + IntoStr(crossfade) + " seconds");
+		ShowMessage("Crossfade set to %d seconds", crossfade);
 		header_update_status = 1;
 	}
 	if (changed.DBUpdating)

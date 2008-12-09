@@ -577,7 +577,7 @@ void __deal_with_filenames(SongList &v)
 										new_file = "[.red]!EMPTY![/red]";
 									else
 									{
-										ShowMessage("File '" + s.GetName() + "' would have an empty name!");
+										ShowMessage("File '%s' would have an empty name!", s.GetName().c_str());
 										success = 0;
 										break;
 									}
