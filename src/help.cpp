@@ -23,7 +23,7 @@
 #include "help.h"
 #include "settings.h"
 
-extern MPDConnection *Mpd;
+extern MPD::Connection *Mpd;
 
 extern ncmpcpp_keys Key;
 

@@ -24,9 +24,9 @@
 #include "mpdpp.h"
 #include "ncmpcpp.h"
 
-void UpdateItemList(Menu<Item> *);
+void UpdateItemList(Menu<MPD::Item> *);
 
-string DisplayItem(const Item &, void *, const Menu<Item> *);
+string DisplayItem(const MPD::Item &, void *, const Menu<MPD::Item> *);
 
 void GetDirectory(string, string = "/");
 

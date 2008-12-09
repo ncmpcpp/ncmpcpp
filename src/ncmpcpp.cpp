@@ -80,6 +80,8 @@
 				vFoundPositions.clear(); \
 			} while (0)
 
+using namespace MPD;
+
 ncmpcpp_config Config;
 ncmpcpp_keys Key;
 
@@ -117,7 +119,7 @@ Scrollpad *sInfo;
 Window *wHeader;
 Window *wFooter;
 
-MPDConnection *Mpd;
+Connection *Mpd;
 
 int now_playing = -1;
 int lock_statusbar_delay = -1;
@@ -174,7 +176,7 @@ int main(int argc, char *argv[])
 	ReadKeys(Key);
 	DefineEmptyTags();
 	
-	Mpd = new MPDConnection;
+	Mpd = new Connection;
 	
 	if (getenv("MPD_HOST"))
 		Mpd->SetHostname(getenv("MPD_HOST"));
@@ -932,7 +934,7 @@ int main(int argc, char *argv[])
 			}
 			header_update_status = 1;
 			PlayerState mpd_state = Mpd->GetState();
-			MPDStatusChanges changes;
+			StatusChanges changes;
 			if (mpd_state == psPlay || mpd_state == psPause)
 				changes.ElapsedTime = 1; // restore status
 			else

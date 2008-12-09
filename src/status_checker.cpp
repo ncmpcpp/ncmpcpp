@@ -26,7 +26,9 @@
 
 #define UPDATE_WINDOW_TITLE WindowTitle(DisplaySong(Mpd->GetCurrentSong(), &Config.song_window_title_format))
 
-extern MPDConnection *Mpd;
+using namespace MPD;
+
+extern Connection *Mpd;
 extern ncmpcpp_config Config;
 
 extern Menu<Song> *mPlaylist;
@@ -109,7 +111,7 @@ void TraceMpdStatus()
 		else
 			block_progressbar_update = !allow_statusbar_unlock;
 		
-		MPDStatusChanges changes;
+		StatusChanges changes;
 		switch (Mpd->GetState())
 		{
 			case psStop:
@@ -126,7 +128,7 @@ void TraceMpdStatus()
 	//wHeader->WriteXY(0,1, IntoStr(now_playing), 1);
 }
 
-void NcmpcppErrorCallback(MPDConnection *Mpd, int errorid, string msg, void *)
+void NcmpcppErrorCallback(Connection *Mpd, int errorid, const char *msg, void *)
 {
 	if (errorid == MPD_ACK_ERROR_PERMISSION)
 	{
@@ -139,10 +141,10 @@ void NcmpcppErrorCallback(MPDConnection *Mpd, int errorid, string msg, void *)
 		wFooter->SetGetStringHelper(TraceMpdStatus);
 	}
 	else
-		ShowMessage("%s", msg.c_str());
+		ShowMessage("%s", msg);
 }
 
-void NcmpcppStatusChanged(MPDConnection *Mpd, MPDStatusChanges changed, void *)
+void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 {
 	int sx, sy;
 	wFooter->DisableBB();

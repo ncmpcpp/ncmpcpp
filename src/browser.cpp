@@ -29,7 +29,9 @@
 # include "tag_editor.h"
 #endif // HAVE_TAGLIB_H
 
-extern MPDConnection *Mpd;
+using namespace MPD;
+
+extern Connection *Mpd;
 
 extern ncmpcpp_config Config;
 

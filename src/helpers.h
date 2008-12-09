@@ -38,7 +38,7 @@ class CaseInsensitiveSorting
 	public:
 		bool operator()(string, string);
 		bool operator()(Song *, Song *);
-		bool operator()(const Item &, const Item &);
+		bool operator()(const MPD::Item &, const MPD::Item &);
 };
 
 bool SortSongsByTrack(Song *, Song *);

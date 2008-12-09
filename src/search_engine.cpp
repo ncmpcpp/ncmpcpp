@@ -21,7 +21,9 @@
 #include "helpers.h"
 #include "search_engine.h"
 
-extern MPDConnection *Mpd;
+using namespace MPD;
+
+extern Connection *Mpd;
 extern Menu<Song> *mPlaylist;
 extern Menu< std::pair<string, Song> > *mSearcher;
 

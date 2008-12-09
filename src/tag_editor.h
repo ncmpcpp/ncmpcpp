@@ -35,7 +35,7 @@
 typedef void (Song::*SongSetFunction)(const string &);
 
 string FindSharedDir(Menu<Song> *);
-string FindSharedDir(const SongList &);
+string FindSharedDir(const MPD::SongList &);
 string DisplayTag(const Song &, void *, const Menu<Song> *);
 
 SongSetFunction IntoSetFunction(mpd_TagItems);
@@ -44,7 +44,7 @@ void ReadTagsFromFile(mpd_Song *);
 bool GetSongTags(Song &);
 bool WriteTags(Song &);
 
-void __deal_with_filenames(SongList &);
+void __deal_with_filenames(MPD::SongList &);
 
 #endif
 

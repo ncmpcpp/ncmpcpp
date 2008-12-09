@@ -24,12 +24,14 @@
 #include "helpers.h"
 #include "tag_editor.h"
 
-extern MPDConnection *Mpd;
+using namespace MPD;
+
+extern Connection *Mpd;
 
 extern ncmpcpp_config Config;
 
 extern Menu<Song> *mPlaylist;
-extern Menu<Item> *mBrowser;
+extern Menu<MPD::Item> *mBrowser;
 extern Window *wFooter;
 
 extern NcmpcppScreen current_screen;

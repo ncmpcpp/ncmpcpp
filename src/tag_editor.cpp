@@ -31,10 +31,12 @@
 #include "helpers.h"
 #include "status_checker.h"
 
+using namespace MPD;
+
 extern ncmpcpp_config Config;
 extern ncmpcpp_keys Key;
 
-extern MPDConnection *Mpd;
+extern Connection *Mpd;
 extern Menu<Song> *mPlaylist;
 
 extern Menu<string> *mTagEditor;

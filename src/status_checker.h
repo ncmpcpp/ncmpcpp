@@ -25,8 +25,8 @@
 #include "ncmpcpp.h"
 
 void TraceMpdStatus();
-void NcmpcppStatusChanged(MPDConnection *, MPDStatusChanges, void *);
-void NcmpcppErrorCallback(MPDConnection *, int, string, void *);
+void NcmpcppStatusChanged(MPD::Connection *, MPD::StatusChanges, void *);
+void NcmpcppErrorCallback(MPD::Connection *, int, const char *, void *);
 
 #endif
 
