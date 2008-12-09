@@ -1,8 +1,7 @@
 bin_PROGRAMS = ncmpcpp
-ncmpcpp_SOURCES = browser.cpp color_parser.cpp help.cpp helpers.cpp \
-	libmpdclient.c lyrics.cpp menu.cpp misc.cpp mpdpp.cpp ncmpcpp.cpp scrollpad.cpp \
-	search_engine.cpp settings.cpp song.cpp status_checker.cpp str_pool.c tag_editor.cpp \
-	window.cpp
+ncmpcpp_SOURCES = browser.cpp help.cpp helpers.cpp libmpdclient.c lyrics.cpp \
+	menu.cpp misc.cpp mpdpp.cpp ncmpcpp.cpp scrollpad.cpp search_engine.cpp \
+	settings.cpp song.cpp status_checker.cpp str_pool.c tag_editor.cpp window.cpp
 
 # set the include path found by configure
 INCLUDES= $(all_includes)

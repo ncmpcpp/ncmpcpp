@@ -20,26 +20,59 @@
 
 #include "window.h"
 
-Window::Window(int startx, int starty, int width, int height, const string &title, Color color, Border border) :
-	itsWindow(0),
-	itsWinBorder(0),
-	itsGetStringHelper(0),
-	itsStartX(startx),
-	itsStartY(starty),
-	itsWidth(width),
-	itsHeight(height),
-	itsWindowTimeout(-1),
-	BBEnabled(1),
-	AutoRefreshEnabled(1),
-	itsTitle(title),
-	itsColor(color),
-	itsBaseColor(color),
-	itsBgColor(clDefault),
-	itsBaseBgColor(clDefault),
-	itsBorder(border)
+void InitScreen()
 {
-	if (itsStartX < 0) itsStartX = 0;
-	if (itsStartY < 0) itsStartY = 0;
+	setlocale(LC_ALL, "");
+	initscr();
+	if (has_colors())
+	{
+		start_color();
+		use_default_colors();
+		int num = 1;
+		for (int i = -1; i < 8; i++)
+			for (int j = 0; j < 8; j++)
+				init_pair(num++, j, i);
+	}
+	noecho();
+	cbreak();
+	curs_set(0);
+}
+
+void DestroyScreen()
+{
+	curs_set(1);
+	endwin();
+}
+
+Window::Window(size_t startx,
+		size_t starty,
+		size_t width,
+		size_t height,
+		const string &title,
+		Color color,
+		Border border)
+		: itsWindow(0),
+		itsWinBorder(0),
+		itsGetStringHelper(0),
+		itsStartX(startx),
+		itsStartY(starty),
+		itsWidth(width),
+		itsHeight(height),
+		itsWindowTimeout(-1),
+		itsX(0),
+		itsY(0),
+		itsTitle(title),
+		itsColor(color),
+		itsBaseColor(color),
+		itsBgColor(clDefault),
+		itsBaseBgColor(clDefault),
+		itsBorder(border)
+{
+	if (itsStartX > size_t(COLS)
+	||  itsStartY > size_t(LINES)
+	||  itsWidth+itsStartX > size_t(COLS)
+	||  itsHeight+itsStartY > size_t(LINES))
+		throw BadSize();
 	
 	if (itsBorder != brNone)
 	{
@@ -57,10 +90,7 @@ Window::Window(int startx, int starty, int width, int height, const string &titl
 		itsHeight -= 2;
 	}
 	
-	if (itsWidth > 0 && itsHeight > 0)
-		itsWindow = newwin(itsHeight, itsWidth, itsStartY, itsStartX);
-	else
-		itsWindow = newwin(0, 0, 0, 0);
+	itsWindow = newwin(itsHeight, itsWidth, itsStartY, itsStartX);
 	
 	SetColor(itsColor);
 	keypad(itsWindow, 1);
@@ -71,12 +101,13 @@ Window::Window(const Window &w)
 	itsWindow = dupwin(w.itsWindow);
 	itsWinBorder = dupwin(w.itsWinBorder);
 	itsGetStringHelper = w.itsGetStringHelper;
+	itsWindowTimeout = w.itsWindowTimeout;
+	itsX = w.itsX;
+	itsY = w.itsY;
 	itsStartX = w.itsStartX;
 	itsStartY = w.itsStartY;
 	itsWidth = w.itsWidth;
 	itsHeight = w.itsHeight;
-	BBEnabled = w.BBEnabled;
-	AutoRefreshEnabled = w.AutoRefreshEnabled;
 	itsTitle = w.itsTitle;
 	itsColors = w.itsColors;
 	itsColor = w.itsColor;
@@ -84,6 +115,8 @@ Window::Window(const Window &w)
 	itsBgColor = w.itsBgColor;
 	itsBaseBgColor = w.itsBaseBgColor;
 	itsBorder = w.itsBorder;
+	SetColor(itsColor, itsBgColor);
+	keypad(itsWindow, 1);
 }
 
 Window::~Window()
@@ -230,13 +263,13 @@ void Window::ShowBorder() const
 	refresh();
 }
 
-void Window::Display(bool stub)
+void Window::Display()
 {
 	ShowBorder();
-	Refresh(stub);
+	Refresh();
 }
 
-void Window::Refresh(bool)
+void Window::Refresh()
 {
 	wrefresh(itsWindow);
 }
@@ -269,11 +302,6 @@ void Window::AltCharset(bool alt) const
 	alt ? wattron(itsWindow, A_ALTCHARSET) : wattroff(itsWindow, A_ALTCHARSET);
 }
 
-void Window::Delay(bool delay) const
-{
-	nodelay(itsWindow, !delay);
-}
-
 void Window::SetTimeout(int timeout)
 {
 	itsWindowTimeout = timeout;
@@ -292,145 +320,17 @@ void Window::ReadKey() const
 
 void Window::Write(int limit, const string &str, bool clrtoeol)
 {
-	if (BBEnabled)
-	{
-		bool collect = false;
-		string color, tmp;
-		for (string::const_iterator it = str.begin(); it != str.end() && limit > 0; it++)
-		{
-			if (*it == '[' && (*(it+1) == '.' || *(it+1) == '/'))
-				collect = 1;
-			
-			if (!collect)
-			{
-				tmp += *it;
-				limit--;
-			}
-			else
-			{
-				if (*it != '[')
-				{
-					color += *it;
-					if (color.length() > 10) collect = 0; // longest bbcode is 10 chars long
-				}
-				else
-				{
-					limit -= color.length();
-					tmp += color;
-					color = *it;
-				}
-			}
-		
-			if (*it == ']' || it+1 == str.end())
-				collect = 0;
-			
-			if (!collect && !color.empty())
-			{
-				waddstr(itsWindow,tmp.c_str());
-				tmp.clear();
-				
-				if (isdigit(color[2]))
-				{
-					int x, y;
-					getyx(itsWindow, y, x);
-					Coordinates coords = IntoCoordinates(color);
-					wmove(itsWindow, coords.second == -1 ? y : coords.second, coords.first);
-					limit -= coords.first-x;
-				}
-				else if (IsValidColor(color))
-				{
-					ColorPair colors = IntoColor(color);
-					SetColor(colors.first, colors.second);
-				}
-				else
-				{
-					limit -= color.length();
-					tmp += limit > 0 ? color : color.substr(0, color.length()+limit);
-				}
-				color.clear();
-			}
-		}
-		if (!tmp.empty()) waddstr(itsWindow,tmp.c_str());
-	}
-	else
-		waddstr(itsWindow,str.c_str());
-	
+	waddstr(itsWindow,str.c_str());
 	if (clrtoeol)
 		wclrtoeol(itsWindow);
-	if (AutoRefreshEnabled)
-		wrefresh(itsWindow);
 }
 
-#ifdef UTF8_ENABLED
+#ifdef _UTF8
 void Window::Write(int limit, const wstring &str, bool clrtoeol)
 {
-	if (BBEnabled)
-	{
-		bool collect = false;
-		wstring color, tmp;
-		for (wstring::const_iterator it = str.begin(); it != str.end() && limit > 0; it++)
-		{
-			if (*it == '[' && (*(it+1) == '.' || *(it+1) == '/'))
-				collect = 1;
-			
-			if (!collect)
-			{
-				tmp += *it;
-				limit -= wcwidth(*it);
-			}
-			else
-			{
-				if (*it != '[')
-				{
-					color += *it;
-					if (color.length() > 10) collect = 0; // longest bbcode is 10 chars long
-				}
-				else
-				{
-					limit -= Length(color);
-					tmp += color;
-					color = *it;
-				}
-			}
-			
-			if (*it == ']' || it+1 == str.end())
-				collect = 0;
-			
-			if (!collect && !color.empty())
-			{
-				wprintw(itsWindow, "%ls", tmp.c_str());
-				tmp.clear();
-				
-				if (isdigit(color[2]))
-				{
-					int x, y;
-					getyx(itsWindow, y, x);
-					Coordinates coords = IntoCoordinates(ToString(color));
-					wmove(itsWindow, coords.second < 0 ? y : coords.second, coords.first);
-					limit -= coords.first-x;
-				}
-				else if (IsValidColor(ToString(color)))
-				{
-					ColorPair colors = IntoColor(ToString(color));
-					SetColor(colors.first, colors.second);
-				}
-				else
-				{
-					limit -= Length(color);
-					tmp += limit > 0 ? color : color.substr(0, color.length()+limit);
-				}
-				color.clear();
-			}
-		}
-		if (!tmp.empty()) wprintw(itsWindow, "%ls", tmp.c_str());
-	}
-	else
-		wprintw(itsWindow, "%ls", str.c_str());
-	
+	wprintw(itsWindow, "%ls", str.c_str());
 	if (clrtoeol)
 		wclrtoeol(itsWindow);
-	if (AutoRefreshEnabled)
-		wrefresh(itsWindow);
 }
 
 void Window::WriteXY(int x, int y, int limit, const wstring &str, bool cleartoeol)
@@ -446,20 +346,20 @@ void Window::WriteXY(int x, int y, int limit, const string &str, bool cleartoeol
 	Write(limit, str, cleartoeol);
 }
 
-string Window::GetString(const string &base, unsigned int length, int width) const
+string Window::GetString(const string &base, size_t length, size_t width) const
 {
-	int input, beginning, maxbeginning, minx, x, y, maxx;
+	int input;
+	size_t beginning, maxbeginning, minx, x, y, maxx;
+	
 	getyx(itsWindow, y, x);
 	minx = maxx = x;
 	
 	width--;
-	if (width == -1)
+	if (width == size_t(-1))
 		width = itsWidth-x-1;
-	if (width < 0)
-		return "";
 	
 	curs_set(1);
-	wstring tmp = ToWString(base);
+	std::wstring tmp = ToWString(base);
 	
 	string tmp_in;
 	wchar_t wc_in;
@@ -570,7 +470,32 @@ string Window::GetString(const string &base, unsigned int length, int width) con
 	}
 	while (input != 10);
 	curs_set(0);
+	
 	return ToString(tmp);
+}
+
+void Window::GetXY(int &x, int &y)
+{
+	getyx(itsWindow, y, x);
+	itsX = x;
+	itsY = y;
+}
+
+void Window::GotoXY(int x, int y)
+{
+	wmove(itsWindow, y, x);
+	itsX = x;
+	itsY = y;
+}
+
+const int &Window::X() const
+{
+	return itsX;
+}
+
+const int &Window::Y() const
+{
+	return itsY;
 }
 
 void Window::Scrollable(bool scrollable) const
@@ -579,17 +504,7 @@ void Window::Scrollable(bool scrollable) const
 	idlok(itsWindow, scrollable);
 }
 
-void Window::GetXY(int &x, int &y) const
-{
-	getyx(itsWindow, y, x);
-}
-
-void Window::GotoXY(int x, int y) const
-{
-	wmove(itsWindow, y, x);
-}
-
-int Window::GetWidth() const
+size_t Window::GetWidth() const
 {
 	if (itsBorder != brNone)
 		return itsWidth+2;
@@ -597,9 +512,9 @@ int Window::GetWidth() const
 		return itsWidth;
 }
 
-int Window::GetHeight() const
+size_t Window::GetHeight() const
 {
-	int height = itsHeight;
+	size_t height = itsHeight;
 	if (itsBorder != brNone)
 		height += 2;
 	if (!itsTitle.empty())
@@ -607,7 +522,7 @@ int Window::GetHeight() const
 	return height;
 }
 
-int Window::GetStartX() const
+size_t Window::GetStartX() const
 {
 	if (itsBorder != brNone)
 		return itsStartX-1;
@@ -615,9 +530,9 @@ int Window::GetStartX() const
 		return itsStartX;
 }
 
-int Window::GetStartY() const
+size_t Window::GetStartY() const
 {
-	int starty = itsStartY;
+	size_t starty = itsStartY;
 	if (itsBorder != brNone)
 		starty--;
 	if (!itsTitle.empty())
@@ -625,7 +540,7 @@ int Window::GetStartY() const
 	return starty;
 }
 
-string Window::GetTitle() const
+const string &Window::GetTitle() const
 {
 	return itsTitle;
 }
@@ -640,184 +555,214 @@ Border Window::GetBorder() const
 	return itsBorder;
 }
 
-void Window::EnableColors()
+void Window::Scroll(Where where)
 {
-	if (has_colors())
+	idlok(itsWindow, 1);
+	scrollok(itsWindow, 1);
+	switch (where)
 	{
-		start_color();
-		use_default_colors();
-		int num = 1;
-		for (int i = -1; i < 8; i++)
-			for (int j = 0; j < 8; j++)
-				init_pair(num++, j, i);
+		case wUp:
+			wscrl(itsWindow, 1);
+			break;
+		case wDown:
+			wscrl(itsWindow, -1);
+			break;
+		case wPageUp:
+			wscrl(itsWindow, itsWidth);
+			break;
+		case wPageDown:
+			wscrl(itsWindow, -itsWidth);
+			break;
+		default:
+			break;
 	}
+	idlok(itsWindow, 0);
+	scrollok(itsWindow, 0);
+}
+
+
+Window &Window::operator<<(const Colors &colors)
+{
+	if (colors.fg == clEnd || colors.bg == clEnd)
+		return *this;
+	itsColors.push(colors);
+	SetColor(colors.fg, colors.bg);
+	return *this;
+}
+
+Window &Window::operator<<(const Color &color)
+{
+	switch (color)
+	{
+		case clDefault:
+			while (!itsColors.empty())
+				itsColors.pop();
+			SetColor(itsBaseColor, itsBaseBgColor);
+			break;
+		case clEnd:
+			if (!itsColors.empty())
+				itsColors.pop();
+			if (!itsColors.empty())
+				SetColor(itsColors.top().fg, itsColors.top().bg);
+			else
+				SetColor(itsBaseColor, itsBaseBgColor);
+			break;
+		default:
+			itsColors.push(Colors(color, clDefault));
+			SetColor(itsColors.top().fg, itsColors.top().bg);
+	}
+	return *this;
+}
+
+Window &Window::operator<<(const Format &format)
+{
+	switch (format)
+	{
+		case fmtNone:
+			Bold(0);
+			Reverse(0);
+			AltCharset(0);
+			break;
+		case fmtBold:
+			Bold(1);
+			break;
+		case fmtBoldEnd:
+			Bold(0);
+			break;
+		case fmtReverse:
+			Reverse(1);
+			break;
+		case fmtReverseEnd:
+			Reverse(0);
+			break;
+		case fmtAltCharset:
+			AltCharset(1);
+			break;
+		case fmtAltCharsetEnd:
+			AltCharset(0);
+			break;
+	}
+	return *this;
+}
+
+Window &Window::operator<<(const XY &coords)
+{
+	GotoXY(coords.x, coords.y);
+	return *this;
+}
+
+Window &Window::operator<<(const char *s)
+{
+	wprintw(itsWindow, "%s", s);
+	return *this;
+}
+
+Window &Window::operator<<(const char &c)
+{
+	wprintw(itsWindow, "%c", c);
+	return *this;
+}
+
+Window &Window::operator<<(const wchar_t *ws)
+{
+	wprintw(itsWindow, "%ls", ws);
+	return *this;
+}
+
+Window &Window::operator<<(const wchar_t &wc)
+{
+	wprintw(itsWindow, "%lc", wc);
+	return *this;
+}
+
+Window &Window::operator<<(const int &i)
+{
+	wprintw(itsWindow, "%d", i);
+	return *this;
+}
+
+Window &Window::operator<<(const double &d)
+{
+	wprintw(itsWindow, "%f", d);
+	return *this;
+}
+
+Window &Window::operator<<(const string &s)
+{
+	wprintw(itsWindow, "%s", s.c_str());
+	return *this;
+}
+
+Window &Window::operator<<(const wstring &ws)
+{
+	for (wstring::const_iterator it = ws.begin(); it != ws.end(); it++)
+		wprintw(itsWindow, "%lc", *it);
+	return *this;
+}
+
+Window &Window::operator<<(const size_t &s)
+{
+	wprintw(itsWindow, "%u", s);
+	return *this;
 }
 
 Window * Window::EmptyClone() const
 {
-	return new Window(GetStartX(),GetStartY(),GetWidth(),GetHeight(),itsTitle,itsBaseColor,itsBorder);
+	return new Window(GetStartX(), GetStartY(), GetWidth(), GetHeight(), itsTitle, itsBaseColor, itsBorder);
 }
 
-/*char * ToString(const wchar_t *ws)
+char *ToString(const wchar_t *ws)
 {
-	string s;
-	for (int i = 0; i < wcslen(ws); i++)
-	{
-		char *c = new char[MB_CUR_MAX+1]();
-		if (wctomb(c, ws[i]) > 0)
-			s += c;
-		delete [] c;
-	}
-	char *result = strdup(s.c_str());
-	return result;
+	mbstate_t mbs;
+	memset(&mbs, 0, sizeof(mbs));
+	size_t len = wcsrtombs(NULL, &ws, 0, &mbs);
+	
+	if (len == size_t(-1))
+		return 0;
+	
+	char *s = new char[len+1]();
+	wcsrtombs(s, &ws, len, &mbs);
+	s[len] = 0;
+	return s;
 }
 
-wchar_t * ToWString(const char *s)
+wchar_t *ToWString(const char *s)
 {
-	wchar_t *ws = new wchar_t[strlen(s)+1]();
-	mbstowcs(ws, s, strlen(s));
+	mbstate_t mbs;
+	memset(&mbs, 0, sizeof(mbs));
+	size_t len = mbsrtowcs(NULL, &s, 0, &mbs);
+	
+	if (len == size_t(-1))
+		return 0;
+	
+	wchar_t *ws = new wchar_t[len+1]();
+	mbsrtowcs(ws, &s, len, &mbs);
+	ws[len] = 0;
 	return ws;
-}*/
+}
 
 string ToString(const wstring &ws)
 {
-	string s;
-	const wchar_t *c_ws = ws.c_str();
-	mbstate_t mbs;
-	memset(&mbs, 0, sizeof(mbs));
-	int len = wcsrtombs(NULL, &c_ws, 0, &mbs);
-	
-	if (len <= 0)
-		return s;
-	
-	char *c_s = new char[len+1]();
-	wcsrtombs(c_s, &c_ws, len, &mbs);
-	c_s[len] = 0;
-	s = c_s;
-	delete [] c_s;
-	return s;
+	string result;
+	char *s = ToString(ws.c_str());
+	if (s)
+	{
+		result = s;
+		delete [] s;
+	}
+	return result;
 }
 
 wstring ToWString(const string &s)
 {
-	wstring ws;
-	const char *c_s = s.c_str();
-	mbstate_t mbs;
-	memset(&mbs, 0, sizeof(mbs));
-	int len = mbsrtowcs(NULL, &c_s, 0, &mbs);
-	
-	if (len <= 0)
-		return ws;
-	
-	wchar_t *c_ws = new wchar_t[len+1]();
-	mbsrtowcs(c_ws, &c_s, len, &mbs);
-	c_ws[len] = 0;
-	ws = c_ws;
-	delete [] c_ws;
-	return ws;
-}
-
-Coordinates Window::IntoCoordinates(const string &s)
-{
-	Coordinates result;
-	size_t sep = s.find(",");
-	if (sep != string::npos)
+	wstring result;
+	wchar_t *ws = ToWString(s.c_str());
+	if (ws)
 	{
-		result.first = atoi(s.substr(2, sep-2).c_str());
-		result.second = atoi(s.substr(sep+1).c_str());
-	}
-	else
-	{
-		result.first = atoi(s.substr(2).c_str());
-		result.second = -1;
+		result = ws;
+		delete [] ws;
 	}
 	return result;
-}
-
-string Window::OmitBBCodes(const string &str)
-{
-	bool collect = false;
-	string tmp, color, result;
-	for (string::const_iterator it = str.begin(); it != str.end(); it++)
-	{
-		if (*it == '[' && (*(it+1) == '.' || *(it+1) == '/'))
-			collect = 1;
-		
-		if (!collect)
-			tmp += *it;
-		else
-		{
-			if (*it != '[')
-				color += *it;
-			else
-			{
-				tmp += color;
-				color = *it;
-			}
-		}
-		
-		if (*it == ']' || it+1 == str.end())
-			collect = 0;
-		
-		if (!collect && !color.empty())
-		{
-			result += tmp;
-			tmp.clear();
-			if (!isdigit(tmp[2]) && !IsValidColor(color))
-				tmp += color;
-			color.clear();
-		}
-	}
-	if (!tmp.empty()) result += tmp;
-	return result;
-}
-
-size_t Window::RealLength(const string &s)
-{
-	if (s.empty())
-		return 0;
-	
-	bool collect = false;
-	int length = 0;
-	
-#	ifdef UTF8_ENABLED
-	wstring ws = ToWString(s);
-	wstring tmp;
-#	else
-	const string &ws = s;
-	string tmp;
-#	endif
-	
-	for (int i = 0; i < ws.length(); i++, length++)
-	{
-		if (ws[i] == '[' && (ws[i+1] == '.' || ws[i+1] == '/'))
-			collect = 1;
-		
-		if (collect)
-		{
-			if (ws[i] != '[')
-				tmp += ws[i];
-			else
-				tmp = ws[i];
-		}
-		
-		if (ws[i] == ']')
-			collect = 0;
-		
-		if (!collect && !tmp.empty())
-		{
-			if (isdigit(tmp[2]) || IsValidColor(TO_STRING(tmp)))
-			{
-#				ifdef UTF8_ENABLED
-				length -= Length(tmp);
-#				else
-				length -= tmp.length();
-#				endif
-			}
-			tmp.clear();
-		}
-	}
-	return length;
 }
 
 size_t Window::Length(const wstring &ws)

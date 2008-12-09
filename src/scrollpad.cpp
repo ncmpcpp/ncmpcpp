@@ -20,11 +20,17 @@
 
 #include "scrollpad.h"
 
-Scrollpad::Scrollpad(int startx, int starty, int width, int height, const string &title, Color color, Border border) :
-	Window(startx, starty, width, height, title, color, border),
-	itsBeginning(0),
-	itsRealHeight(1),
-	itsXPos(0)
+Scrollpad::Scrollpad(size_t startx,
+			size_t starty,
+			size_t width,
+			size_t height,
+			const string &title,
+			Color color,
+			Border border)
+			: Window(startx, starty, width, height, title, color, border),
+			itsBeginning(0),
+			itsRealHeight(1),
+			itsXPos(0)
 {
 	delwin(itsWindow);
 	itsWindow = newpad(itsHeight, itsWidth);
@@ -34,32 +40,21 @@ Scrollpad::Scrollpad(int startx, int starty, int width, int height, const string
 
 Scrollpad::Scrollpad(const Scrollpad &s) : Window(s)
 {
-	itsContent = s.itsContent;
-	itsRawContent = s.itsRawContent;
+	itsBuffer << s.itsBuffer;
 	itsBeginning = s.itsBeginning;
 	itsRealHeight = s.itsRealHeight;
 	itsXPos = s.itsXPos;
 }
 
-void Scrollpad::Add(string str)
+void Scrollpad::Flush()
 {
-	if (itsXPos > 0 && (str[0] != ' ' || str[0] != '\n'))
-		str = " " + str;
+	itsRealHeight = 1;
 	
-	itsRawContent += str;
+	std::basic_string<my_char_t> s = itsBuffer.Str();
 	
-#	ifdef UTF8_ENABLED
-	wstring s = ToWString(str);
-	wstring tmp;
-#	else
-	string &s = str;
-	string tmp;
-#	endif
-	
-	int x_pos = 0;
-	int space_pos = 0;
+	int x_pos;
+	int space_pos;
 	int tab_size;
-	bool collect = 0;
 	
 	for (size_t i = 0; i < s.length(); i++)
 	{
@@ -67,7 +62,7 @@ void Scrollpad::Add(string str)
 		
 		if (s[i] != '\t')
 		{
-#			ifdef UTF8_ENABLED
+#			ifdef _UTF8
 			itsXPos += wcwidth(s[i]);
 #			else
 			itsXPos++;
@@ -76,41 +71,13 @@ void Scrollpad::Add(string str)
 		else
 			itsXPos += tab_size;
 		
-		if (BBEnabled)
-		{
-			if (s[i] == '[' && (s[i+1] == '.' || s[i+1] == '/'))
-				collect = 1;
-			
-			if (collect)
-			{
-				if (s[i] != '[')
-				{
-					tmp += s[i];
-					if (tmp.length() > 10) // the longest bbcode is 10 chars long
-						collect = 0;
-				}
-				else
-					tmp = s[i];
-			}
-			
-			if (s[i] == ']')
-				collect = 0;
-			
-			if (!collect && !tmp.empty())
-			{
-				if (IsValidColor(TO_STRING(tmp)))
-					itsXPos -= tmp.length();
-				tmp.clear();
-			}
-		}
-		
 		if (s[i] == ' ') // if space, remember its position;
 		{
 			space_pos = i;
 			x_pos = itsXPos;
 		}
 		
-		if (!collect && itsXPos >= itsWidth)
+		if (itsXPos >= itsWidth)
 		{
 			// if line is over, there was at least one space in this line and we are in the middle of the word, restore position to last known space and make it EOL
 			if (space_pos > 0 && (s[i] != ' ' || s[i+1] != ' '))
@@ -121,15 +88,17 @@ void Scrollpad::Add(string str)
 			}
 		}
 		
-		if (!collect && (itsXPos >= itsWidth || s[i] == '\n'))
+		if (itsXPos >= itsWidth || s[i] == '\n')
 		{
 			itsRealHeight++;
 			itsXPos = 0;
 			space_pos = 0;
 		}
 	}
-	itsContent += TO_STRING(s);
 	Recreate();
+	itsBuffer.SetTemp(&s);
+	reinterpret_cast<Window &>(*this) << itsBuffer;
+	itsBuffer.SetTemp(0);
 }
 
 void Scrollpad::Recreate()
@@ -139,16 +108,25 @@ void Scrollpad::Recreate()
 	SetTimeout(itsWindowTimeout);
 	SetColor(itsBaseColor, itsBgColor);
 	keypad(itsWindow, 1);
-	Write(itsContent.c_str());
 }
 
-void Scrollpad::Refresh(bool)
+void Scrollpad::Refresh()
 {
 	prefresh(itsWindow, itsBeginning, 0, itsStartY, itsStartX, itsStartY+itsHeight-1, itsStartX+itsWidth);
 }
 
-void Scrollpad::Resize(int width, int height)
+void Scrollpad::MoveTo(size_t x, size_t y)
 {
+	itsStartX = x;
+	itsStartY = y;
+}
+
+void Scrollpad::Resize(size_t width, size_t height)
+{
+	if (width+itsStartX > size_t(COLS)
+	||  height+itsStartY > size_t(LINES))
+		throw BadSize();
+	
 	if (itsBorder != brNone)
 	{
 		delwin(itsWinBorder);
@@ -161,48 +139,45 @@ void Scrollpad::Resize(int width, int height)
 	if (!itsTitle.empty())
 		width -= 2;
 	
-	if (height > 0 && width > 0)
-	{
-		itsHeight = height;
-		itsWidth = width;
-		
-		itsBeginning = 0;
-		itsRealHeight = 1;
-		itsXPos = 0;
-		itsContent.clear();
-		string tmp = itsRawContent;
-		itsRawContent.clear();
-		Add(tmp);
-		Recreate();
-	}
+	itsHeight = height;
+	itsWidth = width;
+	
+	itsBeginning = 0;
+	itsRealHeight = itsHeight;
+	itsXPos = 0;
+	Flush();
 }
 
-void Scrollpad::Go(Where where)
+void Scrollpad::Scroll(Where where)
 {
-	int MaxBeginning = itsContent.size() < itsHeight ? 0 : itsRealHeight-itsHeight;
+	int MaxBeginning = /*itsContent.size() < itsHeight ? 0 : */itsRealHeight-itsHeight;
 	
 	switch (where)
 	{
 		case wUp:
 		{
-			if (itsBeginning > 0) itsBeginning--; // for scrolling
+			if (itsBeginning > 0)
+				itsBeginning--;
 			break;
 		}
 		case wDown:
 		{
-			if (itsBeginning < MaxBeginning) itsBeginning++; // scroll
+			if (itsBeginning < MaxBeginning)
+				itsBeginning++;
 			break;
 		}
 		case wPageUp:
 		{
 			itsBeginning -= itsHeight;
-			if (itsBeginning < 0) itsBeginning = 0;
+			if (itsBeginning < 0)
+				itsBeginning = 0;
 			break;
 		}
 		case wPageDown:
 		{
 			itsBeginning += itsHeight;
-			if (itsBeginning > MaxBeginning) itsBeginning = MaxBeginning;
+			if (itsBeginning > MaxBeginning)
+				itsBeginning = MaxBeginning;
 			break;
 		}
 		case wHome:
@@ -218,24 +193,44 @@ void Scrollpad::Go(Where where)
 	}
 }
 
-void Scrollpad::Clear(bool clear_screen)
+void Scrollpad::Clear(bool clrscr)
 {
 	itsBeginning = 0;
-	itsRealHeight = 1;
+	itsRealHeight = itsHeight;
 	itsXPos = 0;
-	itsContent.clear();
-	itsRawContent.clear();
+	itsBuffer.Clear();
 	wclear(itsWindow);
 	delwin(itsWindow);
 	itsWindow = newpad(itsHeight, itsWidth);
 	SetTimeout(itsWindowTimeout);
 	SetColor(itsColor, itsBgColor);
 	keypad(itsWindow, 1);
-	if (clear_screen)
+	if (clrscr)
 		Window::Clear();
 }
 
-Window * Scrollpad::EmptyClone() const
+Scrollpad &Scrollpad::operator<<(std::ostream &(*os)(std::ostream&))
+{
+	itsBuffer << os;
+	return *this;
+}
+
+#ifdef _UTF8
+Scrollpad &Scrollpad::operator<<(const char *s)
+{
+	wchar_t *ws = ToWString(s);
+	itsBuffer << ws;
+	delete [] ws;
+	return *this;
+}
+
+Scrollpad &Scrollpad::operator<<(const std::string &s)
+{
+	return operator<<(s.c_str());
+}
+#endif // _UTF8
+
+Scrollpad *Scrollpad::EmptyClone() const
 {
 	return new Scrollpad(GetStartX(), GetStartY(), GetWidth(), GetHeight(), itsTitle, itsBaseColor, itsBorder);
 }

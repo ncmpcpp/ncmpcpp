@@ -134,8 +134,6 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 	static string player_state;
 	
 	int sx, sy;
-	wFooter->DisableBB();
-	wFooter->AutoRefresh(0);
 	wFooter->Bold(1);
 	wFooter->GetXY(sx, sy);
 	
@@ -174,7 +172,7 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 				{
 					if (!playlist_length || mPlaylist->Size() < mPlaylist->GetHeight())
 						mPlaylist->Window::Clear();
-					mPlaylist->Refresh(1);
+					mPlaylist->Refresh();
 				}
 			}
 			else
@@ -263,7 +261,7 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 			{
 				WindowTitle("ncmpc++ ver. "VERSION);
 				wFooter->SetColor(Config.progressbar_color);
-				mvwhline(wFooter->RawWin(), 0, 0, 0, wFooter->GetWidth());
+				mvwhline(wFooter->Raw(), 0, 0, 0, wFooter->GetWidth());
 				wFooter->SetColor(Config.statusbar_color);
 				mPlaylist->BoldOption(old_playing, 0);
 				now_playing = -1;
@@ -291,7 +289,7 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 			repeat_one_allowed = 0;
 			
 			if (!Mpd->GetElapsedTime())
-				mvwhline(wFooter->RawWin(), 0, 0, 0, wFooter->GetWidth());
+				mvwhline(wFooter->Raw(), 0, 0, 0, wFooter->GetWidth());
 			
 			if (Config.now_playing_lyrics && !Config.repeat_one_mode && current_screen == csLyrics && prev_screen == csPlaylist)
 				reload_lyrics = 1;
@@ -330,7 +328,7 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 				wFooter->Bold(0);
 				if (playing_song.length() > max_length_without_scroll)
 				{
-#					ifdef UTF8_ENABLED
+#					ifdef _UTF8
 					playing_song += L" ** ";
 #					else
 					playing_song += " ** ";
@@ -354,11 +352,11 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 				double progressbar_size = (double)elapsed/(s.GetTotalLength());
 				int howlong = wFooter->GetWidth()*progressbar_size;
 				wFooter->SetColor(Config.progressbar_color);
-				mvwhline(wFooter->RawWin(), 0, 0, 0, wFooter->GetWidth());
+				mvwhline(wFooter->Raw(), 0, 0, 0, wFooter->GetWidth());
 				if (s.GetTotalLength())
 				{
-					mvwhline(wFooter->RawWin(), 0, 0, '=',howlong);
-					mvwaddch(wFooter->RawWin(), 0, howlong, '>');
+					mvwhline(wFooter->Raw(), 0, 0, '=',howlong);
+					mvwaddch(wFooter->Raw(), 0, howlong, '>');
 				}
 				wFooter->SetColor(Config.statusbar_color);
 			}
@@ -413,10 +411,9 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 		if (mpd_db_updating)
 			switch_state += mpd_db_updating;
 		
-		wHeader->DisableBB();
 		wHeader->Bold(1);
 		wHeader->SetColor(Config.state_line_color);
-		mvwhline(wHeader->RawWin(), 1, 0, 0, wHeader->GetWidth());
+		mvwhline(wHeader->Raw(), 1, 0, 0, wHeader->GetWidth());
 		if (!switch_state.empty())
 		{
 			wHeader->WriteXY(wHeader->GetWidth()-switch_state.length()-3, 1, "[");
@@ -425,10 +422,8 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 			wHeader->SetColor(Config.state_line_color);
 			wHeader->WriteXY(wHeader->GetWidth()-2, 1, "]");
 		}
-		wHeader->Refresh();
 		wHeader->SetColor(Config.header_color);
 		wHeader->Bold(0);
-		wHeader->EnableBB();
 		header_update_status = 0;
 	}
 	if ((changed.Volume) && Config.header_visibility)
@@ -439,12 +434,11 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 		wHeader->WriteXY(wHeader->GetWidth()-volume_state.length(), 0, volume_state);
 		wHeader->SetColor(Config.header_color);
 	}
+	wHeader->Refresh();
 	if (current_screen == csPlaylist)
 		mPlaylist->Refresh();
 	wFooter->Bold(0);
 	wFooter->GotoXY(sx, sy);
 	wFooter->Refresh();
-	wFooter->AutoRefresh(1);
-	wFooter->EnableBB();
 }
 

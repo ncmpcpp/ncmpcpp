@@ -23,7 +23,7 @@
 
 #include "ncmpcpp.h"
 
-string GetKeybindings();
+void GetKeybindings(Scrollpad &);
 
 #endif
 

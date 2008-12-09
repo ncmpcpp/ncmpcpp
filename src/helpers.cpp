@@ -86,7 +86,7 @@ bool ParseArgv(int argc, char **argv)
 #			ifdef HAVE_TAGLIB_H
 			<< " taglib"
 #			endif
-#			ifdef UTF8_ENABLED
+#			ifdef _UTF8
 			<< " unicode"
 #			endif
 			<< endl;
@@ -462,7 +462,7 @@ string DisplaySongInColumns(const Song &s, void *s_template, const Menu<Song> *)
 	
 	my_string_t result, v;
 	
-#	ifdef UTF8_ENABLED
+#	ifdef _UTF8
 	const wstring space = L" ";
 	const wstring open_col = L"[.";
 	const wstring close_col = L"]";
@@ -534,7 +534,7 @@ string DisplaySongInColumns(const Song &s, void *s_template, const Menu<Song> *)
 				break;
 		}
 		
-		v = TO_WSTRING(Window::OmitBBCodes(ss)).substr(0, width-1);
+		v = TO_WSTRING(ss.substr(0, width-1));
 		for (int i = v.length(); i < width; i++, v += space) { }
 		if (!color.empty())
 		{
@@ -822,14 +822,13 @@ string DisplaySong(const Song &s, void *s_template, const Menu<Song> *menu)
 	}
 	if (right && menu)
 	{
-		result = lresult + "[." + IntoStr(menu->GetWidth()-Window::RealLength(result)) + "]" + result;
+		result = lresult + "[." + IntoStr(menu->GetWidth()-result.length()) + "]" + result;
 	}
 	return result;
 }
 
-string GetInfo(Song &s)
+void GetInfo(Song &s, Scrollpad &info)
 {
-	string result;
 #	ifdef HAVE_TAGLIB_H
 	string path_to_file;
 	if (s.IsFromDB())
@@ -840,28 +839,27 @@ string GetInfo(Song &s)
 		s.SetComment(f.tag()->comment().to8Bit(UNICODE));
 #	endif // HAVE_TAGLIB_H
 	
-	result = "[.b][." + Config.color1 + "]Filename: [/" + Config.color1 + "][." + Config.color2 + "][/b]" + s.GetName() + "[/" + Config.color2 + "]\n";
-	result += "[.b][." + Config.color1 + "]Directory: [/" + Config.color1 + "][." + Config.color2 + "][/b]" + s.GetDirectory() + "[/" + Config.color2 + "]\n\n";
-	result += "[.b][." + Config.color1 + "]Length: [/" + Config.color1 + "][." + Config.color2 + "][/b]" + s.GetLength() + "[/" + Config.color2 + "]\n";
+	info << fmtBold << clWhite << "Filename: " << fmtBoldEnd << clGreen << s.GetName() << "\n" << clEnd;
+	info << fmtBold << "Directory: " << fmtBoldEnd << clGreen << s.GetDirectory() + "\n\n" << clEnd;
+	info << fmtBold << "Length: " << fmtBoldEnd << clGreen << s.GetLength() + "\n" << clEnd;
 #	ifdef HAVE_TAGLIB_H
 	if (!f.isNull())
 	{
-		result += "[.b][." + Config.color1 + "]Bitrate: [/" + Config.color1 + "][." + Config.color2 + "][/b]" + IntoStr(f.audioProperties()->bitrate()) + " kbps[/" + Config.color2 + "]\n";
-		result += "[.b][." + Config.color1 + "]Sample rate: [/" + Config.color1 + "][." + Config.color2 + "][/b]" + IntoStr(f.audioProperties()->sampleRate()) + " Hz[/" + Config.color2 + "]\n";
-		result += "[.b][." + Config.color1 + "]Channels: [/" + Config.color1 + "][." + Config.color2 + "][/b]" + string(f.audioProperties()->channels() == 1 ? "Mono" : "Stereo") + "[/" + Config.color2 + "]\n";
+		info << fmtBold << "Bitrate: " << fmtBoldEnd << clGreen << f.audioProperties()->bitrate() << " kbps\n" << clEnd;
+		info << fmtBold << "Sample rate: " << fmtBoldEnd << clGreen << f.audioProperties()->sampleRate() << " Hz\n" << clEnd;
+		info << fmtBold << "Channels: " << fmtBoldEnd << clGreen << (f.audioProperties()->channels() == 1 ? "Mono" : "Stereo") << "\n" << clDefault;
 	}
 #	endif // HAVE_TAGLIB_H
-	result += "\n[.b]Title:[/b] " + s.GetTitle();
-	result += "\n[.b]Artist:[/b] " + s.GetArtist();
-	result += "\n[.b]Album:[/b] " + s.GetAlbum();
-	result += "\n[.b]Year:[/b] " + s.GetYear();
-	result += "\n[.b]Track:[/b] " + s.GetTrack();
-	result += "\n[.b]Genre:[/b] " + s.GetGenre();
-	result += "\n[.b]Composer:[/b] " + s.GetComposer();
-	result += "\n[.b]Performer:[/b] " + s.GetPerformer();
-	result += "\n[.b]Disc:[/b] " + s.GetDisc();
-	result += "\n[.b]Comment:[/b] " + s.GetComment();
-	return result;
+	info << fmtBold << "\nTitle: " << fmtBoldEnd << s.GetTitle();
+	info << fmtBold << "\nArtist: " << fmtBoldEnd << s.GetArtist();
+	info << fmtBold << "\nAlbum: " << fmtBoldEnd << s.GetAlbum();
+	info << fmtBold << "\nYear: " << fmtBoldEnd << s.GetYear();
+	info << fmtBold << "\nTrack: " << fmtBoldEnd << s.GetTrack();
+	info << fmtBold << "\nGenre: " << fmtBoldEnd << s.GetGenre();
+	info << fmtBold << "\nComposer: " << fmtBoldEnd << s.GetComposer();
+	info << fmtBold << "\nPerformer: " << fmtBoldEnd << s.GetPerformer();
+	info << fmtBold << "\nDisc: " << fmtBoldEnd << s.GetDisc();
+	info << fmtBold << "\nComment: " << fmtBoldEnd << s.GetComment();
 }
 
 void ShowMessage(const char *format, ...)
@@ -877,9 +875,9 @@ void ShowMessage(const char *format, ...)
 		wFooter->Bold(0);
 		va_list list;
 		va_start(list, format);
-		wmove(wFooter->RawWin(), Config.statusbar_visibility, 0);
-		vw_printw(wFooter->RawWin(), format, list);
-		wclrtoeol(wFooter->RawWin());
+		wmove(wFooter->Raw(), Config.statusbar_visibility, 0);
+		vw_printw(wFooter->Raw(), format, list);
+		wclrtoeol(wFooter->Raw());
 		va_end(list);
 		wFooter->Bold(1);
 		wFooter->Refresh();

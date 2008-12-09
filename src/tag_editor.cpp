@@ -107,7 +107,7 @@ namespace
 
 	string GenerateFilename(const Song &s, string &pattern)
 	{
-		string result = Window::OmitBBCodes(DisplaySong(s, &pattern));
+		string result = DisplaySong(s, &pattern);
 		EscapeUnallowedChars(result);
 		return result;
 	}
@@ -440,9 +440,9 @@ void __deal_with_filenames(SongList &v)
 		Main->Refresh();
 		Main->ReadKey(input);
 		if (Keypressed(input, Key.Down))
-			Main->Go(wDown);
+			Main->Scroll(wDown);
 		else if (Keypressed(input, Key.Up))
-			Main->Go(wUp);
+			Main->Scroll(wUp);
 	}
 	
 	width = COLS*0.9;
@@ -465,7 +465,7 @@ void __deal_with_filenames(SongList &v)
 	{
 		Legend = new Scrollpad((COLS-width)/2+one_width, (LINES-height)/2, two_width, height, "Legend", Config.main_color, Config.window_border);
 		Legend->SetTimeout(ncmpcpp_window_timeout);
-		Legend->Add("%a - artist\n");
+/*		Legend->Add("%a - artist\n");
 		Legend->Add("%t - title\n");
 		Legend->Add("%b - album\n");
 		Legend->Add("%y - year\n");
@@ -477,7 +477,7 @@ void __deal_with_filenames(SongList &v)
 		Legend->Add("%C - comment\n\n");
 		Legend->Add("[.b]Files:[/b]\n");
 		for (SongList::const_iterator it = v.begin(); it != v.end(); it++)
-			Legend->Add("[." + Config.color2 + "]*[/" + Config.color2 + "] " + (*it)->GetName() + "\n");
+			Legend->Add("[." + Config.color2 + "]*[/" + Config.color2 + "] " + (*it)->GetName() + "\n");*/
 		
 		Preview = static_cast<Scrollpad *>(Legend->EmptyClone());
 		Preview->SetTitle("Preview");
@@ -517,17 +517,17 @@ void __deal_with_filenames(SongList &v)
 			Active->ReadKey(input);
 				
 			if (Keypressed(input, Key.Up))
-				Active->Go(wUp);
+				Active->Scroll(wUp);
 			else if (Keypressed(input, Key.Down))
-				Active->Go(wDown);
+				Active->Scroll(wDown);
 			else if (Keypressed(input, Key.PageUp))
-				Active->Go(wPageUp);
+				Active->Scroll(wPageUp);
 			else if (Keypressed(input, Key.PageDown))
-				Active->Go(wPageDown);
+				Active->Scroll(wPageDown);
 			else if (Keypressed(input, Key.Home))
-				Active->Go(wHome);
+				Active->Scroll(wHome);
 			else if (Keypressed(input, Key.End))
-				Active->Go(wEnd);
+				Active->Scroll(wEnd);
 			else if (Keypressed(input, Key.Enter) && Active == Main)
 			{
 				switch (Main->GetRealChoice())
@@ -559,8 +559,8 @@ void __deal_with_filenames(SongList &v)
 							{
 								if (preview)
 								{
-									Preview->Add("[.b]" + s.GetName() + ":[/b]\n");
-									Preview->Add(ParseFilename(s, Config.pattern, preview) + "\n");
+//									Preview->Add("[.b]" + s.GetName() + ":[/b]\n");
+//									Preview->Add(ParseFilename(s, Config.pattern, preview) + "\n");
 								}
 								else
 									ParseFilename(s, Config.pattern, preview);
@@ -585,7 +585,7 @@ void __deal_with_filenames(SongList &v)
 								}
 								if (!preview)
 									s.SetNewName(new_file + extension);
-								Preview->Add(file + " [." + Config.color2 + "]->[/" + Config.color2 + "] " + new_file + extension + "\n\n");
+//								Preview->Add(file + " [." + Config.color2 + "]->[/" + Config.color2 + "] " + new_file + extension + "\n\n");
 								s.GetEmptyFields(0);
 							}
 						}
@@ -635,7 +635,7 @@ void __deal_with_filenames(SongList &v)
 			else if (Keypressed(input, Key.VolumeUp) && Active == Main)
 			{
 				Active->SetBorder(Config.window_border);
-				Active->Display(1);
+				Active->Display();
 				Active = Helper;
 				Active->SetBorder(Config.active_window_border);
 				Active->Display();
@@ -646,7 +646,7 @@ void __deal_with_filenames(SongList &v)
 				Active->Display();
 				Active = Main;
 				Active->SetBorder(Config.active_window_border);
-				Active->Display(1);
+				Active->Display();
 			}
 		}
 	}

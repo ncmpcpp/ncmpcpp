@@ -30,7 +30,7 @@ string UNKNOWN_ALBUM;
 
 void DefineEmptyTags()
 {
-	if (Config.empty_tags_color != clDefault)
+	/*if (Config.empty_tags_color != clDefault)
 	{
 		const string et_col = IntoStr(Config.empty_tags_color);
 		EMPTY_TAG = "[." + et_col + "]<empty>[/" + et_col + "]";
@@ -39,12 +39,12 @@ void DefineEmptyTags()
 		UNKNOWN_ALBUM = "[." + et_col + "]<no album>[/" + et_col + "]";
 	}
 	else
-	{
+	{*/
 		EMPTY_TAG = "<empty>";
-		UNKNOWN_ARTIST = "<no artist>";
-		UNKNOWN_TITLE = "<no title>";
-		UNKNOWN_ALBUM = "<no album";
-	}
+		UNKNOWN_ARTIST = "<empty>";
+		UNKNOWN_TITLE = "<empty>";
+		UNKNOWN_ALBUM = "<empty>";
+//	}
 }
 
 Song::Song(mpd_Song *s, bool copy_ptr) : itsSong(s),

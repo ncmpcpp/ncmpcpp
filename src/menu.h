@@ -67,8 +67,8 @@ class Menu : public Window
 		void InsertSeparator(int where) { Insert(where, T(), 0, 1, 1); }
 		virtual string GetOption(int i = -1) const;
 		
-		virtual void Refresh(bool redraw_whole_window = 0);
-		virtual void Go(Where);
+		virtual void Refresh();
+		virtual void Scroll(Where);
 		virtual void Highlight(int);
 		virtual void Reset();
 		virtual void Clear(bool clear_screen = 1);
@@ -90,8 +90,8 @@ class Menu : public Window
 		bool Empty() const { return itsOptions.empty(); }
 		bool IsBold(int = -1) const;
 		virtual bool IsStatic(int = -1) const;
-		virtual Window * Clone() const { return new Menu(*this); }
-		virtual Window * EmptyClone() const;
+		virtual Menu<T> *Clone() const { return new Menu<T>(*this); }
+		virtual Menu<T> *EmptyClone() const;
 		
 		T & Back() { return itsOptions.back()->item; }
 		const T & Back() const { return itsOptions.back()->item; }
@@ -317,10 +317,11 @@ void Menu<T>::redraw_screen()
 }
 
 template <class T>
-void Menu<T>::Refresh(bool redraw_whole_window)
+void Menu<T>::Refresh()
 {
+	bool redraw_whole_window = 1;
 	if (!itsOptions.empty() && is_static())
-		itsHighlight == 0 ? Go(wDown) : Go(wUp);
+		itsHighlight == 0 ? Scroll(wDown) : Scroll(wUp);
 	
 	int MaxBeginning = itsOptions.size() < itsHeight ? 0 : itsOptions.size()-itsHeight;
 	if (itsBeginning > MaxBeginning)
@@ -376,7 +377,7 @@ void Menu<T>::Refresh(bool redraw_whole_window)
 		if (itsOptions[*it]->selected)
 			option += itsSelectedSuffix;
 		
-		int strlength = itsOptions[*it]->location != lLeft && BBEnabled ? Window::RealLength(option) : option.length();
+		int strlength = option.length();
 		
 		if (strlength)
 		{
@@ -429,7 +430,7 @@ void Menu<T>::Refresh(bool redraw_whole_window)
 }
 
 template <class T>
-void Menu<T>::Go(Where where)
+void Menu<T>::Scroll(Where where)
 {
 	if (Empty())
 		return;
@@ -459,7 +460,7 @@ void Menu<T>::Go(Where where)
 			}
 			if (is_static())
 			{
-				itsHighlight == 0 ? Go(wDown) : Go(wUp);
+				itsHighlight == 0 ? Scroll(wDown) : Scroll(wUp);
 			}
 			break;
 		}
@@ -481,7 +482,7 @@ void Menu<T>::Go(Where where)
 			}
 			if (is_static())
 			{
-				itsHighlight == MaxHighlight ? Go(wUp) : Go(wDown);
+				itsHighlight == MaxHighlight ? Scroll(wUp) : Scroll(wDown);
 			}
 			break;
 		}
@@ -497,7 +498,7 @@ void Menu<T>::Go(Where where)
 			}
 			if (is_static())
 			{
-				itsHighlight == 0 ? Go(wDown) : Go(wUp);
+				itsHighlight == 0 ? Scroll(wDown) : Scroll(wUp);
 			}
 			redraw_screen();
 			break;
@@ -514,7 +515,7 @@ void Menu<T>::Go(Where where)
 			}
 			if (is_static())
 			{
-				itsHighlight == MaxHighlight ? Go(wUp) : Go(wDown);
+				itsHighlight == MaxHighlight ? Scroll(wUp) : Scroll(wDown);
 			}
 			redraw_screen();
 			break;
@@ -525,7 +526,7 @@ void Menu<T>::Go(Where where)
 			itsBeginning = 0;
 			if (is_static())
 			{
-				itsHighlight == 0 ? Go(wDown) : Go(wUp);
+				itsHighlight == 0 ? Scroll(wDown) : Scroll(wUp);
 			}
 			redraw_screen();
 			break;
@@ -536,7 +537,7 @@ void Menu<T>::Go(Where where)
 			itsBeginning = MaxBeginning;
 			if (is_static())
 			{
-				itsHighlight == MaxHighlight ? Go(wUp) : Go(wDown);
+				itsHighlight == MaxHighlight ? Scroll(wUp) : Scroll(wDown);
 			}
 			redraw_screen();
 			break;
@@ -702,9 +703,9 @@ bool Menu<T>::IsStatic(int option) const
 }
 
 template <class T>
-Window * Menu<T>::EmptyClone() const
+Menu<T> *Menu<T>::EmptyClone() const
 {
-	return new Menu(GetStartX(), GetStartY(), GetWidth(), GetHeight(), itsTitle, itsBaseColor, itsBorder);
+	return new Menu<T>(GetStartX(), GetStartY(), GetWidth(), GetHeight(), itsTitle, itsBaseColor, itsBorder);
 }
 
 template <class T>

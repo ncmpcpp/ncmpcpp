@@ -47,30 +47,30 @@
 
 #define REFRESH_MEDIA_LIBRARY_SCREEN \
 			do { \
-				mLibArtists->Display(redraw_screen); \
+				mLibArtists->Display(); \
 				mvvline(main_start_y, middle_col_startx-1, 0, main_height); \
-				mLibAlbums->Display(redraw_screen); \
+				mLibAlbums->Display(); \
 				mvvline(main_start_y, right_col_startx-1, 0, main_height); \
-				mLibSongs->Display(redraw_screen); \
+				mLibSongs->Display(); \
 				if (mLibAlbums->Empty()) \
 					mLibAlbums->WriteXY(0, 0, "No albums found."); \
 			} while (0)
 
 #define REFRESH_PLAYLIST_EDITOR_SCREEN \
 			do { \
-				mPlaylistList->Display(redraw_screen); \
+				mPlaylistList->Display(); \
 				mvvline(main_start_y, middle_col_startx-1, 0, main_height); \
-				mPlaylistEditor->Display(redraw_screen); \
+				mPlaylistEditor->Display(); \
 			} while (0)
 
 #ifdef HAVE_TAGLIB_H
 # define REFRESH_TAG_EDITOR_SCREEN \
 			do { \
-				mEditorLeftCol->Display(redraw_screen); \
+				mEditorLeftCol->Display(); \
 				mvvline(main_start_y, middle_col_startx-1, 0, main_height); \
-				mEditorTagTypes->Display(redraw_screen); \
+				mEditorTagTypes->Display(); \
 				mvvline(main_start_y, right_col_startx-1, 0, main_height); \
-				mEditorTags->Display(redraw_screen); \
+				mEditorTags->Display(); \
 			} while (0)
 #endif // HAVE_TAGLIB_H
 
@@ -138,8 +138,6 @@ NcmpcppScreen prev_screen;
 #ifdef HAVE_CURL_CURL_H
 pthread_t lyrics_downloader;
 pthread_t artist_info_downloader;
-extern bool artist_info_ready;
-extern bool lyrics_ready;
 #endif
 
 bool dont_change_now_playing = 0;
@@ -202,14 +200,10 @@ int main(int argc, char *argv[])
 	if (!ConnectToMPD())
 		return -1;
 	
-	setlocale(LC_ALL, "");
-	initscr();
-	noecho();
-	cbreak();
-	curs_set(0);
+	InitScreen();
 	
-	if (Config.colors_enabled)
-		Window::EnableColors();
+	//if (Config.colors_enabled)
+	//	Window::EnableColors();
 	
 	int main_start_y = 2;
 	int main_height = LINES-4;
@@ -223,7 +217,6 @@ int main(int argc, char *argv[])
 		main_height++;
 	
 	mPlaylist = new Menu<Song>(0, main_start_y, COLS, main_height, Config.columns_in_playlist ? DisplayColumns(Config.song_columns_list_format) : "", Config.main_color, brNone);
-	mPlaylist->AutoRefresh(0);
 	mPlaylist->SetTimeout(ncmpcpp_window_timeout);
 	mPlaylist->HighlightColor(Config.main_highlight_color);
 	mPlaylist->SetSelectPrefix(Config.selected_item_prefix);
@@ -311,12 +304,13 @@ int main(int argc, char *argv[])
 	
 	sHelp = new Scrollpad(0, main_start_y, COLS, main_height, "", Config.main_color, brNone);
 	sHelp->SetTimeout(ncmpcpp_window_timeout);
-	sHelp->Add(GetKeybindings());
+	GetKeybindings(*sHelp);
+	sHelp->Flush();
 	
-	sLyrics = static_cast<Scrollpad *>(sHelp->EmptyClone());
+	sLyrics = sHelp->EmptyClone();
 	sLyrics->SetTimeout(ncmpcpp_window_timeout);
 	
-	sInfo = static_cast<Scrollpad *>(sHelp->EmptyClone());
+	sInfo = sHelp->EmptyClone();
 	sInfo->SetTimeout(ncmpcpp_window_timeout);
 	
 	if (Config.header_visibility)
@@ -355,6 +349,12 @@ int main(int argc, char *argv[])
 	// local variables end
 	
 	signal(SIGPIPE, SIG_IGN);
+	
+#	ifdef HAVE_CURL_CURL_H
+	pthread_attr_t attr_detached;
+	pthread_attr_init(&attr_detached);
+	pthread_attr_setdetachstate(&attr_detached, PTHREAD_CREATE_DETACHED);
+#	endif // HAVE_CURL_CURL_H
 	
 	while (!main_exit)
 	{
@@ -430,7 +430,7 @@ int main(int argc, char *argv[])
 					wHeader->Bold(1);
 					if (browsed_dir.length() > max_length_without_scroll)
 					{
-#						ifdef UTF8_ENABLED
+#						ifdef _UTF8
 						wbrowseddir += L" ** ";
 #						else
 						wbrowseddir += " ** ";
@@ -460,10 +460,10 @@ int main(int argc, char *argv[])
 			wHeader->SetColor(Config.volume_color);
 			wHeader->WriteXY(max_allowed_title_length, 0, volume_state);
 			wHeader->SetColor(Config.header_color);
+			wHeader->Refresh();
 			redraw_header = 0;
 		}
 		// header stuff end
-		
 		// media library stuff
 		if (current_screen == csLibrary)
 		{
@@ -704,7 +704,7 @@ int main(int argc, char *argv[])
 			
 			if (redraw_screen && wCurrent == mEditorTagTypes && mEditorTagTypes->GetChoice() < 13)
 			{
-				mEditorTags->Refresh(1);
+				mEditorTags->Refresh();
 				redraw_screen = 0;
 			}
 			else if (mEditorTagTypes->GetChoice() >= 13)
@@ -722,36 +722,11 @@ int main(int argc, char *argv[])
 			else
 				reload_lyrics = 0;
 		}
-#		ifdef HAVE_CURL_CURL_H
-		if (artist_info_ready)
-		{
-			void *result;
-			string *str_result = 0;
-			pthread_join(artist_info_downloader, &result);
-			str_result = static_cast<string *>(result);
-			sInfo->Add(*str_result);
-			delete str_result;
-			artist_info_downloader = 0;
-			artist_info_ready = 0;
-		}
-		else if (lyrics_ready)
-		{
-			void *result;
-			string *str_result = 0;
-			pthread_join(lyrics_downloader, &result);
-			str_result = static_cast<string *>(result);
-			sLyrics->Add(*str_result);
-			delete str_result;
-			lyrics_downloader = 0;
-			lyrics_ready = 0;
-		}
-#		endif
-		// lyrics end
 		
 		if (Config.columns_in_playlist && wCurrent == mPlaylist)
-			wCurrent->Display(redraw_screen);
+			wCurrent->Display();
 		else
-			wCurrent->Refresh(redraw_screen);
+			wCurrent->Refresh();
 		redraw_screen = 0;
 		
 		wCurrent->ReadKey(input);
@@ -811,14 +786,14 @@ int main(int argc, char *argv[])
 				wCurrent->SetTimeout(50);
 				while (Keypressed(input, Key.Up))
 				{
-					wCurrent->Go(wUp);
+					wCurrent->Scroll(wUp);
 					wCurrent->Refresh();
 					wCurrent->ReadKey(input);
 				}
 				wCurrent->SetTimeout(ncmpcpp_window_timeout);
 			}
 			else
-				wCurrent->Go(wUp);
+				wCurrent->Scroll(wUp);
 		}
 		else if (Keypressed(input, Key.Down))
 		{
@@ -827,30 +802,30 @@ int main(int argc, char *argv[])
 				wCurrent->SetTimeout(50);
 				while (Keypressed(input, Key.Down))
 				{
-					wCurrent->Go(wDown);
+					wCurrent->Scroll(wDown);
 					wCurrent->Refresh();
 					wCurrent->ReadKey(input);
 				}
 				wCurrent->SetTimeout(ncmpcpp_window_timeout);
 			}
 			else
-				wCurrent->Go(wDown);
+				wCurrent->Scroll(wDown);
 		}
 		else if (Keypressed(input, Key.PageUp))
 		{
-			wCurrent->Go(wPageUp);
+			wCurrent->Scroll(wPageUp);
 		}
 		else if (Keypressed(input, Key.PageDown))
 		{
-			wCurrent->Go(wPageDown);
+			wCurrent->Scroll(wPageDown);
 		}
 		else if (Keypressed(input, Key.Home))
 		{
-			wCurrent->Go(wHome);
+			wCurrent->Scroll(wHome);
 		}
 		else if (Keypressed(input, Key.End))
 		{
-			wCurrent->Go(wEnd);
+			wCurrent->Scroll(wEnd);
 		}
 		else if (input == KEY_RESIZE)
 		{
@@ -1315,8 +1290,8 @@ int main(int argc, char *argv[])
 								ShowMessage("Searching finished!");
 								for (int i = 0; i < search_engine_static_options-4; i++)
 									mSearcher->MakeStatic(i, 1);
-								mSearcher->Go(wDown);
-								mSearcher->Go(wDown);
+								mSearcher->Scroll(wDown);
+								mSearcher->Scroll(wDown);
 							}
 							else
 								ShowMessage("No results found");
@@ -1461,7 +1436,7 @@ int main(int argc, char *argv[])
 					FreeSongList(list);
 					if (Keypressed(input, Key.Space))
 					{
-						wCurrent->Go(wDown);
+						wCurrent->Scroll(wDown);
 						if (wCurrent == mLibArtists)
 						{
 							mLibAlbums->Clear(0);
@@ -1548,7 +1523,7 @@ int main(int argc, char *argv[])
 					}
 					FreeSongList(list);
 					if (Keypressed(input, Key.Space))
-						wCurrent->Go(wDown);
+						wCurrent->Scroll(wDown);
 					break;
 				}
 #				ifdef HAVE_TAGLIB_H
@@ -1668,7 +1643,7 @@ int main(int argc, char *argv[])
 								UnlockStatusbar();
 								if (!new_name.empty() && new_name != old_name)
 									s.SetNewName(new_name + extension);
-								mEditorTags->Go(wDown);
+								mEditorTags->Scroll(wDown);
 							}
 							continue;
 						}
@@ -1732,7 +1707,7 @@ int main(int argc, char *argv[])
 						UnlockStatusbar();
 						if (new_tag != mEditorTags->GetOption())
 							(mEditorTags->Current().*set)(new_tag);
-						mEditorTags->Go(wDown);
+						mEditorTags->Scroll(wDown);
 					}
 				}
 #				endif // HAVE_TAGLIB_H
@@ -1748,7 +1723,7 @@ int main(int argc, char *argv[])
 				{
 					int i = wCurrent->GetChoice();
 					wCurrent->Select(i, !wCurrent->Selected(i));
-					wCurrent->Go(wDown);
+					wCurrent->Scroll(wDown);
 				}
 			}
 			else
@@ -1825,7 +1800,7 @@ int main(int argc, char *argv[])
 							break;
 						}
 					}
-					mBrowser->Go(wDown);
+					mBrowser->Scroll(wDown);
 				}
 				else if (current_screen == csSearcher && mSearcher->Current().first == ".")
 				{
@@ -1855,7 +1830,7 @@ int main(int argc, char *argv[])
 							mSearcher->BoldOption(mSearcher->GetChoice(), 1);
 						}
 					}
-					mSearcher->Go(wDown);
+					mSearcher->Scroll(wDown);
 				}
 				else if (current_screen == csLibrary)
 					goto ENTER_LIBRARY_SCREEN; // sorry, but that's stupid to copy the same code here.
@@ -2203,7 +2178,7 @@ int main(int argc, char *argv[])
 						timer = time(NULL);
 						to--;
 						mPlaylist->Swap(to, to+1);
-						mPlaylist->Go(wUp);
+						mPlaylist->Scroll(wUp);
 						mPlaylist->Refresh();
 						mPlaylist->ReadKey(input);
 					}
@@ -2249,7 +2224,7 @@ int main(int argc, char *argv[])
 						timer = time(NULL);
 						to--;
 						mPlaylistEditor->Swap(to, to+1);
-						mPlaylistEditor->Go(wUp);
+						mPlaylistEditor->Scroll(wUp);
 						mPlaylistEditor->Refresh();
 						mPlaylistEditor->ReadKey(input);
 					}
@@ -2306,7 +2281,7 @@ int main(int argc, char *argv[])
 						timer = time(NULL);
 						to++;
 						mPlaylist->Swap(to, to-1);
-						mPlaylist->Go(wDown);
+						mPlaylist->Scroll(wDown);
 						mPlaylist->Refresh();
 						mPlaylist->ReadKey(input);
 					}
@@ -2353,7 +2328,7 @@ int main(int argc, char *argv[])
 						timer = time(NULL);
 						to++;
 						mPlaylistEditor->Swap(to, to-1);
-						mPlaylistEditor->Go(wDown);
+						mPlaylistEditor->Scroll(wDown);
 						mPlaylistEditor->Refresh();
 						mPlaylistEditor->ReadKey(input);
 					}
@@ -2434,9 +2409,9 @@ int main(int argc, char *argv[])
 				double progressbar_size = (double)songpos/(s.GetTotalLength());
 				int howlong = wFooter->GetWidth()*progressbar_size;
 				
-				mvwhline(wFooter->RawWin(), 0, 0, 0, wFooter->GetWidth());
-				mvwhline(wFooter->RawWin(), 0, 0, '=',howlong);
-				mvwaddch(wFooter->RawWin(), 0, howlong, '>');
+				mvwhline(wFooter->Raw(), 0, 0, 0, wFooter->GetWidth());
+				mvwhline(wFooter->Raw(), 0, 0, '=',howlong);
+				mvwaddch(wFooter->Raw(), 0, howlong, '>');
 				wFooter->Bold(0);
 				wFooter->Refresh();
 			}
@@ -2902,17 +2877,17 @@ int main(int argc, char *argv[])
 						mDialog->ReadKey(input);
 						
 						if (Keypressed(input, Key.Up))
-							mDialog->Go(wUp);
+							mDialog->Scroll(wUp);
 						else if (Keypressed(input, Key.Down))
-							mDialog->Go(wDown);
+							mDialog->Scroll(wDown);
 						else if (Keypressed(input, Key.PageUp))
-							mDialog->Go(wPageUp);
+							mDialog->Scroll(wPageUp);
 						else if (Keypressed(input, Key.PageDown))
-							mDialog->Go(wPageDown);
+							mDialog->Scroll(wPageDown);
 						else if (Keypressed(input, Key.Home))
-							mDialog->Go(wHome);
+							mDialog->Scroll(wHome);
 						else if (Keypressed(input, Key.End))
-							mDialog->Go(wEnd);
+							mDialog->Scroll(wEnd);
 					}
 					
 					int id = mDialog->GetChoice();
@@ -2927,7 +2902,7 @@ int main(int argc, char *argv[])
 						REFRESH_PLAYLIST_EDITOR_SCREEN;
 					}
 					else
-						wCurrent->Refresh(1);
+						wCurrent->Refresh();
 					
 					if (id == 0)
 					{
@@ -3040,7 +3015,7 @@ int main(int argc, char *argv[])
 				ShowMessage("Searching...");
 				for (int i = (wCurrent == mSearcher ? search_engine_static_options-1 : 0); i < wCurrent->Size(); i++)
 				{
-					string name = Window::OmitBBCodes(wCurrent->GetOption(i));
+					string name = wCurrent->GetOption(i);
 					ToLower(name);
 					if (name.find(findme) != string::npos && !wCurrent->IsStatic(i))
 					{
@@ -3218,7 +3193,8 @@ int main(int argc, char *argv[])
 				redraw_header = 1;
 				info_title = "Song info";
 				sInfo->Clear();
-				sInfo->Add(GetInfo(*s));
+				GetInfo(*s, *sInfo);
+				sInfo->Flush();
 				sInfo->Hide();
 			}
 		}
@@ -3293,7 +3269,9 @@ int main(int argc, char *argv[])
 					sInfo->WriteXY(0, 0, "Fetching artist's info...");
 					sInfo->Refresh();
 					if (!artist_info_downloader)
-						pthread_create(&artist_info_downloader, NULL, GetArtistInfo, artist);
+					{
+						pthread_create(&artist_info_downloader, &attr_detached, GetArtistInfo, artist);
+					}
 				}
 				else
 					delete artist;
@@ -3383,11 +3361,11 @@ int main(int argc, char *argv[])
 					sLyrics->Refresh();
 #					ifdef HAVE_CURL_CURL_H
 					if (!lyrics_downloader)
-						pthread_create(&lyrics_downloader, NULL, GetLyrics, s);
+					{
+						pthread_create(&lyrics_downloader, &attr_detached, GetLyrics, s);
+					}
 #					else
-					string *lyrics = static_cast<string *>(GetLyrics(s));
-					sLyrics->Add(*lyrics);
-					delete lyrics;
+					GetLyrics(s);
 #					endif
 				}
 			}
@@ -3551,8 +3529,7 @@ int main(int argc, char *argv[])
 		// key mapping end
 	}
 	Mpd->Disconnect();
-	curs_set(1);
-	endwin();
+	DestroyScreen();
 	return 0;
 }
 

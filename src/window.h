@@ -33,13 +33,15 @@
 #include <cstdlib>
 #include <cstring>
 
-#ifdef UTF8_ENABLED
+#ifdef _UTF8
 # define UNICODE 1
+# define my_char_t wchar_t
 # define my_string_t wstring
 # define TO_STRING(x) ToString(x)
 # define TO_WSTRING(x) ToWString(x)
 #else
 # define UNICODE 0
+# define my_char_t char
 # define my_string_t string
 # define TO_STRING(x) x
 # define TO_WSTRING(x) x
@@ -49,70 +51,114 @@ using std::string;
 using std::wstring;
 using std::vector;
 
-enum Color { clDefault, clBlack, clRed, clGreen, clYellow, clBlue, clMagenta, clCyan, clWhite };
+enum Color { clDefault, clBlack, clRed, clGreen, clYellow, clBlue, clMagenta, clCyan, clWhite, clEnd };
+enum Format { fmtNone = 100, fmtBold, fmtBoldEnd, fmtReverse, fmtReverseEnd, fmtAltCharset, fmtAltCharsetEnd };
 enum Border { brNone, brBlack, brRed, brGreen, brYellow, brBlue, brMagenta, brCyan, brWhite };
 enum Where { wUp, wDown, wPageUp, wPageDown, wHome, wEnd };
 
 typedef void (*GetStringHelper)();
-typedef std::pair<Color, Color> ColorPair;
-typedef std::pair<int, int> Coordinates;
 
-string ToString(const wstring &);
-wstring ToWString(const string &);
+void InitScreen();
+void DestroyScreen();
+
+struct Colors
+{
+	Colors(Color one, Color two = clDefault) : fg(one), bg(two) { }
+	Color fg;
+	Color bg;
+};
+	
+struct XY
+{
+	XY(int xx, int yy) : x(xx), y(yy) { }
+	int x;
+	int y;
+};
+
+char *ToString(const wchar_t *);
+wchar_t *ToWString(const char *);
+std::string ToString(const std::wstring &);
+std::wstring ToWString(const std::string &);
 
 class Window
 {
 	public:
-		Window(int, int, int, int, const string &, Color, Border);
+		Window(size_t, size_t, size_t, size_t, const std::string &, Color, Border);
 		Window(const Window &);
 		virtual ~Window();
-		virtual WINDOW *RawWin() const { return itsWindow; }
-		virtual void SetGetStringHelper(GetStringHelper helper) { itsGetStringHelper = helper; }
-		virtual void SetColor(Color, Color = clDefault);
-		virtual void SetBaseColor(Color, Color = clDefault);
-		virtual void SetBorder(Border);
-		virtual void EnableBB() { BBEnabled = 1; }
-		virtual void DisableBB() { BBEnabled = 0; }
-		virtual void SetTitle(const string &);
+		
+		WINDOW *Raw() const { return itsWindow; }
+		
+		size_t GetWidth() const;
+		size_t GetHeight() const;
+		size_t GetStartX() const;
+		size_t GetStartY() const;
+		
+		const std::string &GetTitle() const;
+		Color GetColor() const;
+		Border GetBorder() const;
+		std::string GetString(const std::string &, size_t = -1, size_t = 0) const;
+		string GetString(unsigned int length = -1, int width = 0) const { return GetString("", length, width); }
+		void GetXY(int &, int &);
+		void GotoXY(int, int);
+		const int &X() const;
+		const int &Y() const;
+		
+		void SetGetStringHelper(GetStringHelper helper) { itsGetStringHelper = helper; }
+		void SetColor(Color, Color = clDefault);
+		void SetBaseColor(Color, Color = clDefault);
+		void SetBorder(Border);
+		void SetTimeout(int);
+		void SetTitle(const string &);
+		
+		void Hide(char = 32) const;
+		void Bold(bool) const;
+		void Reverse(bool) const;
+		void AltCharset(bool) const;
+		
+		void Display();
+		virtual void Refresh();
+		
 		virtual void MoveTo(int, int);
 		virtual void Resize(int, int);
-		virtual void Display(bool = 0);
-		virtual void Refresh(bool = 0);
 		virtual void Clear(bool stub = 1);
-		virtual void Hide(char = 32) const;
-		virtual void Bold(bool) const;
-		virtual void Reverse(bool) const;
-		virtual void AltCharset(bool) const;
-		virtual void Delay(bool) const;
-		virtual void SetTimeout(int);
-		virtual void AutoRefresh(bool val) { AutoRefreshEnabled = val; }
-		virtual void ReadKey(int &) const;
-		virtual void ReadKey() const;
-		virtual void Write(const string &s, bool cte = 0) { Write(0xFFFF, s, cte); }
-		virtual void Write(int, const string &, bool = 0);
-		virtual void WriteXY(int x, int y, const string &s, bool ete = 0) { WriteXY(x, y, 0xFFFF, s, ete); }
-		virtual void WriteXY(int, int, int, const string &, bool = 0);
-#		ifdef UTF8_ENABLED
-		virtual void Write(const wstring &s, bool cte = 0) { Write(0xFFFF, s, cte); }
-		virtual void Write(int, const wstring &, bool = 0);
-		virtual void WriteXY(int x, int y, const wstring &s, bool ete = 0) { WriteXY(x, y, 0xFFFF, s, ete); }
-		virtual void WriteXY(int, int, int, const wstring &, bool = 0);
-#		endif
-		virtual string GetString(const string &, unsigned int = -1, int = 0) const;
-		virtual string GetString(unsigned int length = -1, int width = 0) const { return GetString("", length, width); }
-		virtual void Scrollable(bool) const;
-		virtual void GetXY(int &, int &) const;
-		virtual void GotoXY(int, int) const;
-		virtual int GetWidth() const;
-		virtual int GetHeight() const;
-		virtual int GetStartX() const;
-		virtual int GetStartY() const;
-		virtual string GetTitle() const;
-		virtual Color GetColor() const;
-		virtual Border GetBorder() const;
+	
+		void ReadKey(int &) const;
+		void ReadKey() const;
 		
-		virtual Window * Clone() const { return new Window(*this); }
-		virtual Window * EmptyClone() const;
+		void Write(const string &s, bool cte = 0) { Write(0xFFFF, s, cte); }
+		void Write(int, const string &, bool = 0);
+		void WriteXY(int x, int y, const string &s, bool ete = 0) { WriteXY(x, y, 0xFFFF, s, ete); }
+		void WriteXY(int, int, int, const string &, bool = 0);
+#		ifdef _UTF8
+		void Write(const wstring &s, bool cte = 0) { Write(0xFFFF, s, cte); }
+		void Write(int, const wstring &, bool = 0);
+		void WriteXY(int x, int y, const wstring &s, bool ete = 0) { WriteXY(x, y, 0xFFFF, s, ete); }
+		void WriteXY(int, int, int, const wstring &, bool = 0);
+#		endif
+		
+		void Scrollable(bool) const;
+		virtual void Scroll(Where);
+		
+		Window &operator<<(const Colors &);
+		Window &operator<<(const Color &);
+		Window &operator<<(const Format &);
+		Window &operator<<(const XY &);
+		Window &operator<<(const char *);
+		Window &operator<<(const char &);
+		Window &operator<<(const wchar_t *);
+		Window &operator<<(const wchar_t &);
+		Window &operator<<(const int &);
+		Window &operator<<(const double &);
+		Window &operator<<(const size_t &);
+		
+		Window &operator<<(const std::string &);
+		Window &operator<<(const std::wstring &);
+		
+		virtual Window *Clone() const { return new Window(*this); }
+		virtual Window *EmptyClone() const;
+		
+		
 		
 		// stubs for inherits, ugly shit, needs improvement
 		virtual void Select(int, bool) { }
@@ -123,38 +169,40 @@ class Window
 		virtual bool IsStatic(int = -1) const { return 0; }
 		virtual void Highlight(int) { }
 		virtual string GetOption(int = -1) const { return ""; }
-		virtual void Go(Where) { } // for Menu and Scrollpad class
 		virtual int GetChoice() const { return -1; } // for Menu class
-		virtual void Add(string str) { Write(str); } // for Scrollpad class
+		//virtual void Add(string str) { Write(str); } // for Scrollpad class
 		
-		static void EnableColors();
-		static Coordinates IntoCoordinates(const string &);
-		static bool IsValidColor(const string &);
-		static string OmitBBCodes(const string &);
-		static size_t RealLength(const string &);
-		static size_t Length(const string &s) { return Length(ToWString(s)); }
 		static size_t Length(const wstring &);
 		
 	protected:
+		
+		class BadSize { };
+		
 		virtual void Recreate();
 		virtual void ShowBorder() const;
-		virtual ColorPair IntoColor(const string &);
+		
 		WINDOW *itsWindow;
 		WINDOW *itsWinBorder;
+		
 		GetStringHelper itsGetStringHelper;
-		int itsStartX;
-		int itsStartY;
-		int itsWidth;
-		int itsHeight;
+		
+		size_t itsStartX;
+		size_t itsStartY;
+		size_t itsWidth;
+		size_t itsHeight;
+		
 		int itsWindowTimeout;
-		bool BBEnabled;
-		bool AutoRefreshEnabled;
+		int itsX;
+		int itsY;
+		
 		string itsTitle;
-		std::stack<ColorPair> itsColors;
+		std::stack<Colors> itsColors;
+		
 		Color itsColor;
 		Color itsBaseColor;
 		Color itsBgColor;
 		Color itsBaseBgColor;
+		
 		Border itsBorder;
 };
 

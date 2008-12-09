@@ -26,13 +26,16 @@
 #include "settings.h"
 #include "song.h"
 
+extern Scrollpad *sLyrics;
+extern Scrollpad *sInfo;
+
 const string artists_folder = home_folder + "/" + ".ncmpcpp/artists";
 const string lyrics_folder = home_folder + "/" + ".lyrics";
 
 #ifdef HAVE_CURL_CURL_H
+extern pthread_t lyrics_downloader;
+extern pthread_t artist_info_downloader;
 pthread_mutex_t curl = PTHREAD_MUTEX_INITIALIZER;
-bool artist_info_ready = 0;
-bool lyrics_ready = 0;
 #endif
 
 namespace
@@ -74,18 +77,24 @@ void * GetArtistInfo(void *ptr)
 	const string fullpath = artists_folder + "/" + filename;
 	mkdir(artists_folder.c_str(), 0755);
 	
-	string *result = new string();
+	string result;
 	std::ifstream input(fullpath.c_str());
 	
 	if (input.is_open())
 	{
+		bool first = 1;
 		string line;
 		while (getline(input, line))
-			*result += line + "\n";
+		{
+			if (!first)
+				*sInfo << "\n";
+			*sInfo << line;
+			first = 0;
+		}
 		input.close();
-		*result = result->substr(0, result->length()-1);
-		artist_info_ready = 1;
-		pthread_exit(result);
+		sInfo->Flush();
+		artist_info_downloader = 0;
+		pthread_exit(NULL);
 	}
 	
 	for (string::iterator it = artist.begin(); it != artist.end(); it++)
@@ -100,7 +109,7 @@ void * GetArtistInfo(void *ptr)
 	CURL *info = curl_easy_init();
 	curl_easy_setopt(info, CURLOPT_URL, url.c_str());
 	curl_easy_setopt(info, CURLOPT_WRITEFUNCTION, write_data);
-	curl_easy_setopt(info, CURLOPT_WRITEDATA, result);
+	curl_easy_setopt(info, CURLOPT_WRITEDATA, &result);
 	curl_easy_setopt(info, CURLOPT_CONNECTTIMEOUT, 10);
 	code = curl_easy_perform(info);
 	curl_easy_cleanup(info);
@@ -108,131 +117,137 @@ void * GetArtistInfo(void *ptr)
 	
 	if (code != CURLE_OK)
 	{
-		*result = "Error while fetching artist's info: " + string(curl_easy_strerror(code));
-		artist_info_ready = 1;
-		pthread_exit(result);
+		*sInfo << "Error while fetching artist's info: " << curl_easy_strerror(code);
+		sInfo->Flush();
+		artist_info_downloader = 0;
+		pthread_exit(NULL);
 	}
 	
 	size_t a, b;
 	bool erase = 0;
 	bool save = 1;
 	
-	a = result->find("status=\"failed\"");
+	a = result.find("status=\"failed\"");
 	
 	if (a != string::npos)
 	{
-		EscapeHtml(*result);
-		*result = "Last.fm returned an error message: " + *result;
-		artist_info_ready = 1;
-		pthread_exit(result);
+		EscapeHtml(result);
+		*sInfo << "Last.fm returned an error message: " << result;
+		sInfo->Flush();
+		artist_info_downloader = 0;
+		pthread_exit(NULL);
 	}
 	
 	vector<string> similar;
-	for (size_t i = result->find("<name>"); i != string::npos; i = result->find("<name>"))
+	for (size_t i = result.find("<name>"); i != string::npos; i = result.find("<name>"))
 	{
-		(*result)[i] = '.';
-		size_t j = result->find("</name>");
-		(*result)[j] = '.';
+		result[i] = '.';
+		size_t j = result.find("</name>");
+		result[j] = '.';
 		i += 6;
-		similar.push_back(result->substr(i, j-i));
+		similar.push_back(result.substr(i, j-i));
 		EscapeHtml(similar.back());
 	}
 	vector<string> urls;
-	for (size_t i = result->find("<url>"); i != string::npos; i = result->find("<url>"))
+	for (size_t i = result.find("<url>"); i != string::npos; i = result.find("<url>"))
 	{
-		(*result)[i] = '.';
-		size_t j = result->find("</url>");
-		(*result)[j] = '.';
+		result[i] = '.';
+		size_t j = result.find("</url>");
+		result[j] = '.';
 		i += 5;
-		urls.push_back(result->substr(i, j-i));
+		urls.push_back(result.substr(i, j-i));
 	}
 	
-	a = result->find("<content>")+9;
-	b = result->find("</content>");
+	a = result.find("<content>")+9;
+	b = result.find("</content>");
 	
 	if (a == b)
 	{
-		*result = "No description available for this artist.";
+		result = "No description available for this artist.";
 		save = 0;
 	}
 	else
 	{
 		a += 9; // for <![CDATA[
 		b -= 3; // for ]]>
-		*result = result->substr(a, b-a);
+		result = result.substr(a, b-a);
 	}
 	
-	EscapeHtml(*result);
-	for (size_t i = 0; i < result->length(); i++)
+	EscapeHtml(result);
+	for (size_t i = 0; i < result.length(); i++)
 	{
 		if (erase)
 		{
-			result->erase(result->begin()+i);
+			result.erase(result.begin()+i);
 			erase = 0;
 		}
-		if ((*result)[i] == 13)
+		if (result[i] == 13)
 		{
-			(*result)[i] = '\n';
+			result[i] = '\n';
 			erase = 1;
 		}
-		else if ((*result)[i] == '\t')
-			(*result)[i] = ' ';
+		else if (result[i] == '\t')
+			result[i] = ' ';
 	}
 	
-	int i = result->length();
-	if (!isgraph((*result)[i-1]))
+	int i = result.length();
+	if (!isgraph(result[i-1]))
 	{
-		while (!isgraph((*result)[--i])) { }
-		*result = result->substr(0, i+1);
+		while (!isgraph(result[--i])) { }
+		result = result.substr(0, i+1);
 	}
 	
-	*result += "\n\n[.b]Similar artists:[/b]\n";
-	for (size_t i = 1; i < similar.size(); i++)
-		*result += "\n [." + Config.color2 + "]*[/" + Config.color2 + "] " + similar[i] + " (" + urls[i] + ")";
+	*sInfo << result;
 	
-	*result += "\n\n" + urls.front();
+	*sInfo << fmtBold << "\n\nSimilar artists:\n" << fmtBoldEnd;
+	for (size_t i = 1; i < similar.size(); i++)
+		*sInfo << "\n" << clGreen << " * " << clEnd << similar[i] << " (" << urls[i] << ")";
+	
+	*sInfo << "\n\n" << urls.front();
 	
 	if (save)
 	{
 		std::ofstream output(fullpath.c_str());
 		if (output.is_open())
 		{
-			output << *result;
+			output << TO_STRING(sInfo->Content());
 			output.close();
 		}
 	}
-	
-	artist_info_ready = 1;
-	pthread_exit(result);
+	sInfo->Flush();
+	artist_info_downloader = 0;
+	pthread_exit(NULL);
 }
 #endif // HAVE_CURL_CURL_H
 
-void * GetLyrics(void *song)
+void *GetLyrics(void *song)
 {
 	string artist = static_cast<Song *>(song)->GetArtist();
 	string title = static_cast<Song *>(song)->GetTitle();
 	
-	const string filename = artist + " - " + title + ".txt";
+	string filename = artist + " - " + title + ".txt";
 	const string fullpath = lyrics_folder + "/" + filename;
 	mkdir(lyrics_folder.c_str(), 0755);
-	
-	string *result = new string();
 	
 	std::ifstream input(fullpath.c_str());
 	
 	if (input.is_open())
 	{
+		bool first = 1;
 		string line;
 		while (getline(input, line))
-			*result += line + "\n";
-		input.close();
-		*result = result->substr(0, result->length()-1);
+		{
+			if (!first)
+				*sLyrics << "\n";
+			*sLyrics << line;
+			first = 0;
+		}
 #		ifdef HAVE_CURL_CURL_H
-		lyrics_ready = 1;
-		pthread_exit(result);
+		sLyrics->Flush();
+		lyrics_downloader = 0;
+		pthread_exit(NULL);
 #		endif
 	}
-	
 #	ifdef HAVE_CURL_CURL_H
 	for (string::iterator it = artist.begin(); it != artist.end(); it++)
 		if (*it == ' ')
@@ -244,13 +259,19 @@ void * GetLyrics(void *song)
 	
 	CURLcode code;
 	
-	string url = "http://lyricwiki.org/api.php?artist=" + artist + "&song=" + title + "&fmt=xml";
+	string result;
+	
+	string url = "http://lyricwiki.org/api.php?artist=";
+	url += artist;
+	url += "&song=";
+	url += title;
+	url += "&fmt=xml";
 	
 	pthread_mutex_lock(&curl);
 	CURL *lyrics = curl_easy_init();
 	curl_easy_setopt(lyrics, CURLOPT_URL, url.c_str());
 	curl_easy_setopt(lyrics, CURLOPT_WRITEFUNCTION, write_data);
-	curl_easy_setopt(lyrics, CURLOPT_WRITEDATA, result);
+	curl_easy_setopt(lyrics, CURLOPT_WRITEDATA, &result);
 	curl_easy_setopt(lyrics, CURLOPT_CONNECTTIMEOUT, 10);
 	code = curl_easy_perform(lyrics);
 	curl_easy_cleanup(lyrics);
@@ -258,43 +279,49 @@ void * GetLyrics(void *song)
 	
 	if (code != CURLE_OK)
 	{
-		*result = "Error while fetching lyrics: " + string(curl_easy_strerror(code));
-		lyrics_ready = 1;
-		pthread_exit(result);
+		*sLyrics << "Error while fetching lyrics: " << curl_easy_strerror(code);
+		sLyrics->Flush();
+		lyrics_downloader = 0;
+		pthread_exit(NULL);
 	}
 	
 	int a, b;
-	a = result->find("<lyrics>")+8;
-	b = result->find("</lyrics>");
+	a = result.find("<lyrics>")+8;
+	b = result.find("</lyrics>");
 	
-	*result = result->substr(a, b-a);
+	result = result.substr(a, b-a);
 	
-	if (*result == "Not found")
+	if (result == "Not found")
 	{
-		lyrics_ready = 1;
-		pthread_exit(result);
+		*sLyrics << result;
+		sLyrics->Flush();
+		lyrics_downloader = 0;
+		pthread_exit(NULL);
 	}
 	
-	for (size_t i = result->find("&lt;"); i != string::npos; i = result->find("&lt;"))
-		result->replace(i, 4, "<");
-	for (size_t i = result->find("&gt;"); i != string::npos; i = result->find("&gt;"))
-		result->replace(i, 4, ">");
+	for (size_t i = result.find("&lt;"); i != string::npos; i = result.find("&lt;"))
+		result.replace(i, 4, "<");
+	for (size_t i = result.find("&gt;"); i != string::npos; i = result.find("&gt;"))
+		result.replace(i, 4, ">");
 	
-	EscapeHtml(*result);
+	EscapeHtml(result);
+	
+	*sLyrics << result;
 	
 	std::ofstream output(fullpath.c_str());
 	if (output.is_open())
 	{
-		output << *result;
+		output << result;
 		output.close();
 	}
-	
-	lyrics_ready = 1;
-	pthread_exit(result);
+	sLyrics->Flush();
+	lyrics_downloader = 0;
+	pthread_exit(NULL);
 #	else
 	else
-		*result = "Local lyrics not found. As ncmpcpp has been compiled without curl support, you can put appropriate lyrics into ~/.lyrics directory (file syntax is \"ARTIST - TITLE.txt\") or recompile ncmpcpp with curl support.";
-	return result;
+		*sLyrics << "Local lyrics not found. As ncmpcpp has been compiled without curl support, you can put appropriate lyrics into ~/.lyrics directory (file syntax is \"ARTIST - TITLE.txt\") or recompile ncmpcpp with curl support.";
+	sLyrics->Flush();
+	return NULL;
 #	endif
 }
 

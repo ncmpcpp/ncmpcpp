@@ -19,7 +19,7 @@ dnl ========================
 if test "$unicode" = "yes" ; then
 	ncurses_config_bin=ncursesw5-config
 	ncurses_lib=ncursesw
-	CPPFLAGS="$CPPFLAGS -DUTF8_ENABLED"
+	CPPFLAGS="$CPPFLAGS -D_UTF8"
 else
 	ncurses_config_bin=ncurses5-config
 	ncurses_lib=ncurses
