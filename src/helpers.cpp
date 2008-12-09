@@ -28,8 +28,6 @@ using namespace MPD;
 
 extern Connection *Mpd;
 
-extern ncmpcpp_config Config;
-
 extern Menu<Song> *mPlaylist;
 extern Menu<MPD::Item> *mBrowser;
 extern Window *wFooter;
@@ -47,8 +45,6 @@ extern bool allow_statusbar_unlock;
 
 extern bool search_case_sensitive;
 extern bool search_match_to_pattern;
-
-extern bool redraw_screen;
 
 extern string EMPTY_TAG;
 extern string UNKNOWN_ARTIST;

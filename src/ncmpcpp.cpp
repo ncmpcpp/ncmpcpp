@@ -144,8 +144,6 @@ extern bool lyrics_ready;
 
 bool dont_change_now_playing = 0;
 bool block_progressbar_update = 0;
-bool block_statusbar_update = 0;
-bool allow_statusbar_unlock = 1;
 bool block_playlist_update = 0;
 bool block_item_list_update = 0;
 

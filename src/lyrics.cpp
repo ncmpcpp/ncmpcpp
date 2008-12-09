@@ -26,8 +26,6 @@
 #include "settings.h"
 #include "song.h"
 
-extern ncmpcpp_config Config;
-
 const string artists_folder = home_folder + "/" + ".ncmpcpp/artists";
 const string lyrics_folder = home_folder + "/" + ".lyrics";
 

@@ -25,8 +25,6 @@
 #include "ncmpcpp.h"
 #include "settings.h"
 
-extern ncmpcpp_config Config;
-
 bool ConnectToMPD();
 bool ParseArgv(int, char **);
 

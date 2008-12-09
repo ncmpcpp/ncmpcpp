@@ -29,7 +29,6 @@
 using namespace MPD;
 
 extern Connection *Mpd;
-extern ncmpcpp_config Config;
 
 extern Menu<Song> *mPlaylist;
 extern Menu<Item> *mBrowser;
@@ -56,9 +55,7 @@ extern NcmpcppScreen current_screen;
 extern NcmpcppScreen prev_screen;
 
 extern bool dont_change_now_playing;
-extern bool allow_statusbar_unlock;
 extern bool block_progressbar_update;
-extern bool block_statusbar_update;
 extern bool block_playlist_update;
 extern bool block_item_list_update;
 
@@ -66,64 +63,51 @@ extern bool redraw_screen;
 extern bool redraw_header;
 extern bool reload_lyrics;
 
-bool header_update_status = 0;
-bool repeat_one_allowed = 0;
-
-long long playlist_old_id = -1;
-
 int old_playing;
 
-size_t playing_song_scroll_begin = 0;
-
 time_t time_of_statusbar_lock;
-time_t now;
 
 string playlist_stats;
 string volume_state;
 string switch_state;
-string player_state;
 
-string mpd_repeat;
-string mpd_random;
-string mpd_crossfade;
-string mpd_db_updating;
+bool block_statusbar_update = 0;
+bool allow_statusbar_unlock = 1;
+bool header_update_status = 0;
+bool repeat_one_allowed = 0;
 
 void TraceMpdStatus()
 {
 	Mpd->UpdateStatus();
-	now = time(NULL);
+	time_t now = time(NULL);
 	
-	if (now == timer+Config.playlist_disable_highlight_delay && current_screen == csPlaylist)
+	if (current_screen == csPlaylist && now == timer+Config.playlist_disable_highlight_delay)
 		mPlaylist->Highlighting(!Config.playlist_disable_highlight_delay);
 
 	if (lock_statusbar_delay > 0)
 	{
 		if (now >= time_of_statusbar_lock+lock_statusbar_delay)
-			lock_statusbar_delay = 0;
-	}
-	
-	if (!lock_statusbar_delay)
-	{
-		lock_statusbar_delay = -1;
-		
-		if (Config.statusbar_visibility)
-			block_statusbar_update = !allow_statusbar_unlock;
-		else
-			block_progressbar_update = !allow_statusbar_unlock;
-		
-		StatusChanges changes;
-		switch (Mpd->GetState())
 		{
-			case psStop:
-				changes.PlayerState = 1;
-				break;
-			case psPlay: case psPause:
-				changes.ElapsedTime = 1; // restore status
-				break;
-			default:
-				break;
+			if (Config.statusbar_visibility)
+				block_statusbar_update = !allow_statusbar_unlock;
+			else
+				block_progressbar_update = !allow_statusbar_unlock;
+			
+			StatusChanges changes;
+			switch (Mpd->GetState())
+			{
+				case psStop:
+					changes.PlayerState = 1;
+					NcmpcppStatusChanged(Mpd, changes, NULL);
+					break;
+				case psPause:
+					changes.ElapsedTime = 1; // restore status
+					NcmpcppStatusChanged(Mpd, changes, NULL);
+					break;
+				default:
+					break;
+			}
 		}
-		NcmpcppStatusChanged(Mpd, changes, NULL);
 	}
 	//wHeader->WriteXY(0,1, IntoStr(now_playing), 1);
 }
@@ -146,6 +130,9 @@ void NcmpcppErrorCallback(Connection *Mpd, int errorid, const char *msg, void *)
 
 void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 {
+	static size_t playing_song_scroll_begin = 0;
+	static string player_state;
+	
 	int sx, sy;
 	wFooter->DisableBB();
 	wFooter->AutoRefresh(0);
@@ -162,8 +149,6 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 	
 	if (changed.Playlist)
 	{
-		playlist_old_id = Mpd->GetOldPlaylistID();
-		
 		if (!block_playlist_update)
 		{
 			SongList list;
@@ -176,7 +161,7 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 					Mpd->GetPlaylistChanges(-1, list);
 				}
 				else
-					Mpd->GetPlaylistChanges(playlist_old_id, list);
+					Mpd->GetPlaylistChanges(Mpd->GetOldPlaylistID(), list);
 				
 				for (SongList::const_iterator it = list.begin(); it != list.end(); it++)
 				{
@@ -384,35 +369,49 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 				wFooter->WriteXY(0, 1, "", 1);
 		}
 	}
+	
+	static char mpd_repeat;
+	static char mpd_random;
+	static char mpd_crossfade;
+	static char mpd_db_updating;
+	
 	if (changed.Repeat)
 	{
-		mpd_repeat = (Mpd->GetRepeat() ? "r" : "");
-		ShowMessage("Repeat is %s", mpd_repeat.empty() ? "off" : "on");
+		mpd_repeat = Mpd->GetRepeat() ? 'r' : 0;
+		ShowMessage("Repeat is %s", !mpd_repeat ? "off" : "on");
 		header_update_status = 1;
 
 	}
 	if (changed.Random)
 	{
-		mpd_random = Mpd->GetRandom() ? "z" : "";
-		ShowMessage("Random is %s", mpd_random.empty() ? "off" : "on");
+		mpd_random = Mpd->GetRandom() ? 'z' : 0;
+		ShowMessage("Random is %s", !mpd_random ? "off" : "on");
 		header_update_status = 1;
 	}
 	if (changed.Crossfade)
 	{
 		int crossfade = Mpd->GetCrossfade();
-		mpd_crossfade = crossfade ? "x" : "";
+		mpd_crossfade = crossfade ? 'x' : 0;
 		ShowMessage("Crossfade set to %d seconds", crossfade);
 		header_update_status = 1;
 	}
 	if (changed.DBUpdating)
 	{
-		mpd_db_updating = Mpd->GetDBIsUpdating() ? "U" : "";
-		ShowMessage(mpd_db_updating.empty() ? "Database update finished!" : "Database update started!");
+		mpd_db_updating = Mpd->GetDBIsUpdating() ? 'U' : 0;
+		ShowMessage(!mpd_db_updating ? "Database update finished!" : "Database update started!");
 		header_update_status = 1;
 	}
 	if (header_update_status && Config.header_visibility)
 	{
-		switch_state = mpd_repeat + mpd_random + mpd_crossfade + mpd_db_updating;
+		switch_state.clear();
+		if (mpd_repeat)
+			switch_state += mpd_repeat;
+		if (mpd_random)
+			switch_state += mpd_random;
+		if (mpd_crossfade)
+			switch_state += mpd_crossfade;
+		if (mpd_db_updating)
+			switch_state += mpd_db_updating;
 		
 		wHeader->DisableBB();
 		wHeader->Bold(1);

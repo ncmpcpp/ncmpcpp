@@ -33,7 +33,6 @@
 
 using namespace MPD;
 
-extern ncmpcpp_config Config;
 extern ncmpcpp_keys Key;
 
 extern Connection *Mpd;
