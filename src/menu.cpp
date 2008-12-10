@@ -20,9 +20,15 @@
 
 #include "menu.h"
 
-template <>
-string Menu<string>::DisplayOption(const string &str) const
+/*template <> void Menu<Buffer>::AddOption(const Buffer &buf, bool is_bold, bool is_static, bool have_separator)
 {
-	return str;
+	Option o;
+	o.Item = new Buffer();
+	*o.Item << buf;
+	o.isBold = is_bold;
+	o.isStatic = is_static;
+	o.haveSeparator = have_separator;
+	itsOptions.push_back(o);
 }
 
+*/

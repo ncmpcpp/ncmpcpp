@@ -223,9 +223,9 @@ bool CaseInsensitiveSorting::operator()(const Item &a, const Item &b)
 void UpdateSongList(Menu<Song> *menu)
 {
 	bool bold = 0;
-	for (int i = 0; i < menu->Size(); i++)
+	for (size_t i = 0; i < menu->Size(); i++)
 	{
-		for (int j = 0; j < mPlaylist->Size(); j++)
+		for (size_t j = 0; j < mPlaylist->Size(); j++)
 		{
 			if (mPlaylist->at(j).GetHash() == menu->at(i).GetHash())
 			{
@@ -326,7 +326,7 @@ string TotalPlaylistLength()
 	const int YEAR = 365*DAY;
 	string result;
 	int length = 0;
-	for (int i = 0; i < mPlaylist->Size(); i++)
+	for (size_t i = 0; i < mPlaylist->Size(); i++)
 		length += mPlaylist->at(i).GetTotalLength();
 	
 	if (!length)
@@ -371,9 +371,9 @@ string TotalPlaylistLength()
 	return result;
 }
 
-string DisplayStringPair(const StringPair &pair, void *, const Menu<StringPair> *)
+void DisplayStringPair(const StringPair &pair, void *, Menu<StringPair> *menu)
 {
-	return pair.first;
+	*menu << pair.first;
 }
 
 string DisplayColumns(string song_template)
@@ -448,9 +448,9 @@ string DisplayColumns(string song_template)
 	return result.substr(0, COLS);
 }
 
-string DisplaySongInColumns(const Song &s, void *s_template, const Menu<Song> *)
+void DisplaySongInColumns(const Song &s, void *s_template, Menu<Song> *menu)
 {
-	string song_template = s_template ? *static_cast<string *>(s_template) : "";
+	/*string song_template = s_template ? *static_cast<string *>(s_template) : "";
 	
 	vector<string> cols;
 	for (size_t i = song_template.find(" "); i != string::npos; i = song_template.find(" "))
@@ -547,284 +547,184 @@ string DisplaySongInColumns(const Song &s, void *s_template, const Menu<Song> *)
 			result += close_col2;
 	}
 	
-	return TO_STRING(result);
+	return TO_STRING(result);*/
+	*menu << "dupa";
 }
 
-string DisplaySong(const Song &s, void *s_template, const Menu<Song> *menu)
-{	
-	const string &song_template = s_template ? *static_cast<string *>(s_template) : "";
-	string result;
-	string lresult;
-	bool link_tags = 0;
-	bool tags_present = 0;
+void DisplaySong(const Song &s, void *data, Menu<Song> *menu)
+{
+	const string &song_template = data ? *static_cast<string *>(data) : "";
+	basic_buffer<char> lresult;
 	bool right = 0;
-	int i = 0;
+	
+	string::const_iterator goto_pos, prev_pos;
 	
 	for (string::const_iterator it = song_template.begin(); it != song_template.end(); it++)
 	{
-		if (*it == '}')
-		{
-			if (!tags_present)
-				result = result.substr(0, result.length()-i);
-			
-			it++;
-			link_tags = 0;
-			i = 0;
-			
-			if (*it == '|' && *(it+1) == '{')
-			{
-				if (!tags_present)
-					it++;
-				else
-					while (*++it != '}') { }
-			}
-		}
-		
-		if (*it == '}')
-		{
-			if (!tags_present)
-				result = result.substr(0, result.length()-i);
-			
-			it++;
-			link_tags = 0;
-			i = 0;
-			
-			if (*it == '|' && *(it+1) == '{')
-			{
-				if (!tags_present)
-					it++;
-				else
-					while (*it++ != '}') { }
-			}
-		}
-		
+		CHECK_LINKED_TAGS:;
 		if (*it == '{')
 		{
-			i = 0;
-			tags_present = 1;
-			link_tags = 1;
-			it++;
+			prev_pos = it;
+			string (Song::*get)() const = 0;
+			for (; *it != '}'; it++)
+			{
+				if (*it == '%')
+				{
+					switch (*++it)
+					{
+						case 'l':
+							get = &Song::GetLength;
+							break;
+						case 'F':
+							get = &Song::GetFile;
+							break;
+						case 'f':
+							get = &Song::GetName;
+							break;
+						case 'a':
+							get = &Song::GetArtist;
+							break;
+						case 'b':
+							get = &Song::GetAlbum;
+							break;
+						case 'y':
+							get = &Song::GetYear;
+							break;
+						case 'n':
+							get = &Song::GetTrack;
+							break;
+						case 'g':
+							get = &Song::GetGenre;
+							break;
+						case 'c':
+							get = &Song::GetComposer;
+							break;
+						case 'p':
+							get = &Song::GetPerformer;
+							break;
+						case 'd':
+							get = &Song::GetDisc;
+							break;
+						case 'C':
+							get = &Song::GetComment;
+							break;
+						case 't':
+							get = &Song::GetTitle;
+							break;
+						default:
+							break;
+					}
+					if (get && (s.*get)() == EMPTY_TAG)
+						break;
+				}
+			}
+			if (*it == '}')
+			{
+				while (1)
+				{
+					if (*it == '}' && *(it+1) != '|')
+						break;
+					it++;
+				}
+				goto_pos = ++it;
+				it = ++prev_pos;
+			}
+			else
+			{
+				for (; *it != '}'; it++) { }
+				it++;
+				if (*it == '{' || *it == '|')
+				{
+					if (*it == '|')
+						it++;
+					goto CHECK_LINKED_TAGS;
+				}
+			}
 		}
 		
-		if (it == song_template.end())
-			break;
-		
-		if (*it != '%')
+		if (*it == '}')
 		{
-			i++;
-			result += *it;
+			if (goto_pos == song_template.end())
+				break;
+			it = goto_pos;
+			if (*it == '{')
+				goto CHECK_LINKED_TAGS;
 		}
-		else
+		
+		if (*it != '%' && *it != '$')
+		{
+			if (!right)
+				*menu << *it;
+			else
+				lresult << *it;
+		}
+		else if (*it == '%')
 		{
 			switch (*++it)
 			{
 				case 'l':
-				{
-					if (link_tags)
-					{
-						if (s.GetTotalLength() > 0)
-						{
-							result += s.GetLength();
-							i += s.GetLength().length();
-						}
-						else
-							tags_present = 0;
-					}
-					else
-						result += s.GetLength();
-					break;
-				}
-				case 'F':
-				{
-					result += s.GetFile();
-					i += s.GetFile().length();
-					break;
-				}
-				case 'f':
-				{
-					result += s.GetName();
-					i += s.GetName().length();
-					break;
-				}
-				case 'a':
-				{
-					if (link_tags)
-					{
-						if (!s.GetArtist().empty() && s.GetArtist() != UNKNOWN_ARTIST)
-						{
-							result += s.GetArtist();
-							i += s.GetArtist().length();
-						}
-						else
-							tags_present = 0;
-					}
-					else
-						result += s.GetArtist();
-					break;
-				}
-				case 'b':
-				{
-					if (link_tags)
-					{
-						if (!s.GetAlbum().empty() && s.GetAlbum() != UNKNOWN_ALBUM)
-						{
-							result += s.GetAlbum();
-							i += s.GetAlbum().length();
-						}
-						else
-							tags_present = 0;
-					}
-					else
-						result += s.GetAlbum();
-					break;
-				}
-				case 'y':
-				{
-					if (link_tags)
-					{
-						if (!s.GetYear().empty() && s.GetYear() != EMPTY_TAG)
-						{
-							result += s.GetYear();
-							i += s.GetYear().length();
-						}
-						else
-							tags_present = 0;
-					}
-					else
-						result += s.GetYear();
-					break;
-				}
-				case 'n':
-				{
-					if (link_tags)
-					{
-						if (!s.GetTrack().empty() && s.GetTrack() != EMPTY_TAG)
-						{
-							result += s.GetTrack();
-							i += s.GetTrack().length();
-						}
-						else
-							tags_present = 0;
-					}
-					else
-						result += s.GetTrack();
-					break;
-				}
-				case 'g':
-				{
-					if (link_tags)
-					{
-						if (!s.GetGenre().empty() && s.GetGenre() != EMPTY_TAG)
-						{
-							result += s.GetGenre();
-							i += s.GetGenre().length();
-						}
-						else
-							tags_present = 0;
-					}
-					else
-						result += s.GetGenre();
-					break;
-				}
-				case 'c':
-				{
-					if (link_tags)
-					{
-						if (!s.GetComposer().empty() && s.GetComposer() != EMPTY_TAG)
-						{
-							result += s.GetComposer();
-							i += s.GetComposer().length();
-						}
-						else
-							tags_present = 0;
-					}
-					else
-						result += s.GetComposer();
-					break;
-				}
-				case 'p':
-				{
-					if (link_tags)
-					{
-						if (!s.GetPerformer().empty() && s.GetPerformer() != EMPTY_TAG)
-						{
-							result += s.GetPerformer();
-							i += s.GetPerformer().length();
-						}
-						else
-							tags_present = 0;
-					}
-					else
-						result += s.GetPerformer();
-					break;
-				}
-				case 'd':
-				{
-					if (link_tags)
-					{
-						if (!s.GetDisc().empty() && s.GetDisc() != EMPTY_TAG)
-						{
-							result += s.GetDisc();
-							i += s.GetDisc().length();
-						}
-						else
-							tags_present = 0;
-					}
-					else
-						result += s.GetDisc();
-					break;
-				}
-				case 'C':
-				{
-					if (link_tags)
-					{
-						if (!s.GetComment().empty() && s.GetComment() != EMPTY_TAG)
-						{
-							result += s.GetComment();
-							i += s.GetComment().length();
-						}
-						else
-							tags_present = 0;
-					}
-					else
-						result += s.GetComment();
-					break;
-				}
-				case 't':
-				{
-					if (link_tags)
-					{
-						if (!s.GetTitle().empty() && s.GetTitle() != UNKNOWN_TITLE)
-						{
-							result += s.GetTitle();
-							i += s.GetTitle().length();
-						}
-						else
-							tags_present = 0;
-					}
-					else
-						result += s.GetTitle();
-					break;
-				}
-				case 'r':
-				{
 					if (!right)
-					{
-						right = 1;
-						lresult = result;
-						result.clear();
-						i = 0;
-					}
-				}
-				
+						*menu << s.GetLength();
+					else
+						lresult << s.GetLength();
+					break;
+				case 'F':
+					*menu << s.GetFile();
+					break;
+				case 'f':
+					*menu << s.GetName();
+					break;
+				case 'a':
+					*menu << s.GetArtist();
+					break;
+				case 'b':
+					*menu << s.GetAlbum();
+					break;
+				case 'y':
+					*menu << s.GetYear();
+					break;
+				case 'n':
+					*menu << s.GetTrack();
+					break;
+				case 'g':
+					*menu << s.GetGenre();
+					break;
+				case 'c':
+					*menu << s.GetComposer();
+					break;
+				case 'p':
+					*menu << s.GetPerformer();
+					break;
+				case 'd':
+					*menu << s.GetDisc();
+					break;
+				case 'C':
+					*menu << s.GetComment();
+					break;
+				case 't':
+					*menu << s.GetTitle();
+					break;
+				case 'r':
+					right = 1;
+					break;
+				default:
+					break;
 			}
 		}
+		else
+		{
+			it++;
+			if (!right)
+				*menu << Color(*it-'0');
+			else
+				lresult << Color(*it-'0');
+		}
 	}
-	if (right && menu)
+	if (right)
 	{
-		result = lresult + "[." + IntoStr(menu->GetWidth()-result.length()) + "]" + result;
+		menu->GotoXY(menu->GetWidth()-lresult.Str().length(), menu->Y());
+		*menu << lresult;
 	}
-	return result;
 }
 
 void GetInfo(Song &s, Scrollpad &info)

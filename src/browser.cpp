@@ -107,11 +107,11 @@ namespace
 void UpdateItemList(Menu<Item> *menu)
 {
 	bool bold = 0;
-	for (int i = 0; i < menu->Size(); i++)
+	for (size_t i = 0; i < menu->Size(); i++)
 	{
 		if (menu->at(i).type == itSong)
 		{
-			for (int j = 0; j < mPlaylist->Size(); j++)
+			for (size_t j = 0; j < mPlaylist->Size(); j++)
 			{
 				if (mPlaylist->at(j).GetHash() == menu->at(i).song->GetHash())
 				{
@@ -126,24 +126,30 @@ void UpdateItemList(Menu<Item> *menu)
 	menu->Refresh();
 }
 
-string DisplayItem(const Item &item, void *, const Menu<Item> *menu)
+void DisplayItem(const Item &item, void *, Menu<Item> *menu)
 {
 	switch (item.type)
 	{
 		case itDirectory:
 		{
 			if (item.song)
-				return "[..]";
+			{
+				*menu << "[..]";
+				return;
+			}
 			size_t slash = item.name.find_last_of("/");
-			return "[" + (slash != string::npos ? item.name.substr(slash+1) : item.name) + "]";
+			*menu << "[" << (slash != string::npos ? item.name.substr(slash+1) : item.name) << "]";
+			return;
 		}
 		case itSong:
 			// I know casting that way is ugly etc., but it works.
-			return DisplaySong(*item.song, &Config.song_list_format, (const Menu<Song> *)menu);
+			DisplaySong(*item.song, &Config.song_list_format, (Menu<Song> *)menu);
+			return;
 		case itPlaylist:
-			return Config.browser_playlist_prefix + item.name;
+			*menu << Config.browser_playlist_prefix << item.name;
+			return;
 		default:
-			return "";
+			return;
 	}
 }
 
@@ -157,6 +163,11 @@ void GetDirectory(string dir, string subdir)
 	if (browsed_dir != dir)
 		mBrowser->Reset();
 	browsed_dir = dir;
+	
+	for (size_t i = 0; i < mBrowser->Size(); i++)
+		if (mBrowser->at(i).song != (void *)1)
+			delete mBrowser->at(i).song;
+	
 	mBrowser->Clear(0);
 	
 	if (dir != "/")
@@ -192,7 +203,7 @@ void GetDirectory(string dir, string subdir)
 			case itSong:
 			{
 				bool bold = 0;
-				for (int i = 0; i < mPlaylist->Size(); i++)
+				for (size_t i = 0; i < mPlaylist->Size(); i++)
 				{
 					if (mPlaylist->at(i).GetHash() == it->song->GetHash())
 					{
@@ -205,8 +216,8 @@ void GetDirectory(string dir, string subdir)
 			}
 		}
 	}
-	mBrowser->Highlight(highlightme);
-	
+	if (highlightme >= 0)
+		mBrowser->Highlight(highlightme);
 	if (current_screen == csBrowser)
 		mBrowser->Hide();
 }

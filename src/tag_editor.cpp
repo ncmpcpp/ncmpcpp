@@ -38,7 +38,7 @@ extern ncmpcpp_keys Key;
 extern Connection *Mpd;
 extern Menu<Song> *mPlaylist;
 
-extern Menu<string> *mTagEditor;
+extern Menu<Buffer> *mTagEditor;
 extern Window *wFooter;
 extern Window *wPrev;
 
@@ -107,7 +107,7 @@ namespace
 
 	string GenerateFilename(const Song &s, string &pattern)
 	{
-		string result = DisplaySong(s, &pattern);
+		string result = s.toString(pattern);
 		EscapeUnallowedChars(result);
 		return result;
 	}
@@ -221,34 +221,48 @@ string FindSharedDir(const SongList &v)
 	return result;
 }
 
-string DisplayTag(const Song &s, void *data, const Menu<Song> *)
+void DisplayTag(const Song &s, void *data, Menu<Song> *menu)
 {
-	switch (static_cast<Menu<string> *>(data)->GetChoice())
+	switch (static_cast<Menu<string> *>(data)->Choice())
 	{
 		case 0:
-			return s.GetTitle();
+			*menu << s.GetTitle();
+			return;
 		case 1:
-			return s.GetArtist();
+			*menu << s.GetArtist();
+			return;
 		case 2:
-			return s.GetAlbum();
+			*menu << s.GetAlbum();
+			return;
 		case 3:
-			return s.GetYear();
+			*menu << s.GetYear();
+			return;
 		case 4:
-			return s.GetTrack();
+			*menu << s.GetTrack();
+			return;
 		case 5:
-			return s.GetGenre();
+			*menu << s.GetGenre();
+			return;
 		case 6:
-			return s.GetComposer();
+			*menu << s.GetComposer();
+			return;
 		case 7:
-			return s.GetPerformer();
+			*menu << s.GetPerformer();
+			return;
 		case 8:
-			return s.GetDisc();
+			*menu << s.GetDisc();
+			return;
 		case 9:
-			return s.GetComment();
+			*menu << s.GetComment();
+			return;
 		case 11:
-			return s.GetNewName().empty() ? s.GetName() : s.GetName() + " [." + Config.color2 + "]->[/" + Config.color2 + "] " + s.GetNewName();
+			if (s.GetNewName().empty())
+				*menu << s.GetName();
+			else
+				*menu << s.GetName() << clGreen << " -> " << clEnd << s.GetNewName();
+			return;
 		default:
-			return "";
+			return;
 	}
 }
 
@@ -307,31 +321,41 @@ bool GetSongTags(Song &s)
 	mTagEditor->Clear();
 	mTagEditor->Reset();
 	
-	mTagEditor->AddOption("[.b][." + Config.color1 + "]Song name: [/" + Config.color1 + "][." + Config.color2 + "][/b]" + s.GetName() + "[/" + Config.color2 + "]", 0, 1);
-	mTagEditor->AddOption("[.b][." + Config.color1 + "]Location in DB: [/" + Config.color1 + "][." + Config.color2 + "][/b]" + s.GetDirectory() + "[/" + Config.color2 + "]", 0, 1);
-	mTagEditor->AddOption("", 0, 1);
-	mTagEditor->AddOption("[.b][." + Config.color1 + "]Length: [/" + Config.color1 + "][." + Config.color2 + "][/b]" + s.GetLength() + "[/" + Config.color2 + "]", 0, 1);
-	mTagEditor->AddOption("[.b][." + Config.color1 + "]Bitrate: [/" + Config.color1 + "][." + Config.color2 + "][/b]" + IntoStr(f.audioProperties()->bitrate()) + " kbps[/" + Config.color2 + "]", 0, 1);
-	mTagEditor->AddOption("[.b][." + Config.color1 + "]Sample rate: [/" + Config.color1 + "][." + Config.color2 + "][/b]" + IntoStr(f.audioProperties()->sampleRate()) + " Hz[/" + Config.color2 + "]", 0, 1);
-	mTagEditor->AddOption("[.b][." + Config.color1 + "]Channels: [/" + Config.color1 + "][." + Config.color2 + "][/b]" + (string)(f.audioProperties()->channels() == 1 ? "Mono" : "Stereo") + "[/" + Config.color2 + "]", 0, 1);
+	mTagEditor->ResizeBuffer(23);
+	for (size_t i = 0; i < 7; i++)
+		mTagEditor->Static(i, 1);
+	mTagEditor->IntoSeparator(7);
+	mTagEditor->IntoSeparator(18);
+	mTagEditor->IntoSeparator(20);
 	
-	mTagEditor->AddSeparator();
+	if (ext != "mp3")
+		for (size_t i = 14; i <= 16; i++)
+			mTagEditor->Static(i, 1);
 	
-	mTagEditor->AddOption("[.b]Title:[/b] " + s.GetTitle());
-	mTagEditor->AddOption("[.b]Artist:[/b] " + s.GetArtist());
-	mTagEditor->AddOption("[.b]Album:[/b] " + s.GetAlbum());
-	mTagEditor->AddOption("[.b]Year:[/b] " + s.GetYear());
-	mTagEditor->AddOption("[.b]Track:[/b] " + s.GetTrack());
-	mTagEditor->AddOption("[.b]Genre:[/b] " + s.GetGenre());
-	mTagEditor->AddOption("[.b]Composer:[/b] " + s.GetComposer(), 0, ext != "mp3");
-	mTagEditor->AddOption("[.b]Performer:[/b] " + s.GetPerformer(), 0, ext != "mp3");
-	mTagEditor->AddOption("[.b]Disc:[/b] " + s.GetDisc(), 0, ext != "mp3");
-	mTagEditor->AddOption("[.b]Comment:[/b] " + s.GetComment());
-	mTagEditor->AddSeparator();
-	mTagEditor->AddOption("[.b]Filename:[/b] " + s.GetName());
-	mTagEditor->AddSeparator();
-	mTagEditor->AddOption("Save");
-	mTagEditor->AddOption("Cancel");
+	mTagEditor->Highlight(8);
+	
+	mTagEditor->at(0) << fmtBold << clWhite << "Song name: " << fmtBoldEnd << clGreen << s.GetName() << clEnd;
+	mTagEditor->at(1) << fmtBold << clWhite << "Location in DB: " << fmtBoldEnd << clGreen << s.GetDirectory() << clEnd;
+	mTagEditor->at(3) << fmtBold << clWhite << "Length: " << fmtBoldEnd << clGreen << s.GetLength() << clEnd;
+	mTagEditor->at(4) << fmtBold << clWhite << "Bitrate: " << fmtBoldEnd << clGreen << f.audioProperties()->bitrate() << " kbps" << clEnd;
+	mTagEditor->at(5) << fmtBold << clWhite << "Sample rate: " << fmtBoldEnd << clGreen << f.audioProperties()->sampleRate() << " Hz" << clEnd;
+	mTagEditor->at(6) << fmtBold << clWhite << "Channels: " << fmtBoldEnd << clGreen << (f.audioProperties()->channels() == 1 ? "Mono" : "Stereo") << clDefault;
+	
+	mTagEditor->at(8) << fmtBold << "Title:" << fmtBoldEnd << ' ' << s.GetTitle();
+	mTagEditor->at(9) << fmtBold << "Artist:" << fmtBoldEnd << ' ' << s.GetArtist();
+	mTagEditor->at(10) << fmtBold << "Album:" << fmtBoldEnd << ' ' << s.GetAlbum();
+	mTagEditor->at(11) << fmtBold << "Year:" << fmtBoldEnd << ' ' << s.GetYear();
+	mTagEditor->at(12) << fmtBold << "Track:" << fmtBoldEnd << ' ' << s.GetTrack();
+	mTagEditor->at(13) << fmtBold << "Genre:" << fmtBoldEnd << ' ' <<s.GetGenre();
+	mTagEditor->at(14) << fmtBold << "Composer:" << fmtBoldEnd << ' ' << s.GetComposer();
+	mTagEditor->at(15) << fmtBold << "Performer:" << fmtBoldEnd << ' ' << s.GetPerformer();
+	mTagEditor->at(16) << fmtBold << "Disc:" << fmtBoldEnd << ' ' << s.GetDisc();
+	mTagEditor->at(17) << fmtBold << "Comment:" << fmtBoldEnd << ' ' << s.GetComment();
+
+	mTagEditor->at(19) << fmtBold << "Filename:" << fmtBoldEnd << ' ' << s.GetName();
+
+	mTagEditor->at(21) << "Save";
+	mTagEditor->at(22) << "Cancel";
 	return true;
 }
 
@@ -398,7 +422,7 @@ bool WriteTags(Song &s)
 				{
 					// if we rename local file, it won't get updated
 					// so just remove it from playlist and add again
-					int pos = mPlaylist->GetChoice();
+					int pos = mPlaylist->Choice();
 					Mpd->QueueDeleteSong(pos);
 					Mpd->CommitQueue();
 					int id = Mpd->AddSong("file://" + new_name);
@@ -427,6 +451,7 @@ void __deal_with_filenames(SongList &v)
 	
 	Menu<string> *Main = new Menu<string>((COLS-width)/2, (LINES-height)/2, width, height, "", Config.main_color, Config.window_border);
 	Main->SetTimeout(ncmpcpp_window_timeout);
+	Main->SetItemDisplayer(GenericDisplayer);
 	Main->AddOption("Get tags from filename");
 	Main->AddOption("Rename files");
 	Main->AddSeparator();
@@ -449,7 +474,7 @@ void __deal_with_filenames(SongList &v)
 	height = LINES*0.8;
 	bool exit = 0;
 	bool preview = 1;
-	int choice = Main->GetChoice();
+	int choice = Main->Choice();
 	int one_width = width/2;
 	int two_width = width-one_width;
 	
@@ -465,19 +490,20 @@ void __deal_with_filenames(SongList &v)
 	{
 		Legend = new Scrollpad((COLS-width)/2+one_width, (LINES-height)/2, two_width, height, "Legend", Config.main_color, Config.window_border);
 		Legend->SetTimeout(ncmpcpp_window_timeout);
-/*		Legend->Add("%a - artist\n");
-		Legend->Add("%t - title\n");
-		Legend->Add("%b - album\n");
-		Legend->Add("%y - year\n");
-		Legend->Add("%n - track number\n");
-		Legend->Add("%g - genre\n");
-		Legend->Add("%c - composer\n");
-		Legend->Add("%p - performer\n");
-		Legend->Add("%d - disc\n");
-		Legend->Add("%C - comment\n\n");
-		Legend->Add("[.b]Files:[/b]\n");
+		*Legend << "%a - artist\n";
+		*Legend << "%t - title\n";
+		*Legend << "%b - album\n";
+		*Legend << "%y - year\n";
+		*Legend << "%n - track number\n";
+		*Legend << "%g - genre\n";
+		*Legend << "%c - composer\n";
+		*Legend << "%p - performer\n";
+		*Legend << "%d - disc\n";
+		*Legend << "%C - comment\n\n";
+		*Legend << fmtBold << "Files:\n" << fmtBoldEnd;
 		for (SongList::const_iterator it = v.begin(); it != v.end(); it++)
-			Legend->Add("[." + Config.color2 + "]*[/" + Config.color2 + "] " + (*it)->GetName() + "\n");*/
+			*Legend << clGreen << " * " << clEnd << (*it)->GetName() << "\n";
+		Legend->Flush();
 		
 		Preview = static_cast<Scrollpad *>(Legend->EmptyClone());
 		Preview->SetTitle("Preview");
@@ -485,10 +511,11 @@ void __deal_with_filenames(SongList &v)
 		
 		Main = new Menu<string>((COLS-width)/2, (LINES-height)/2, one_width, height, "", Config.main_color, Config.active_window_border);
 		Main->SetTimeout(ncmpcpp_window_timeout);
+		Main->SetItemDisplayer(GenericDisplayer);
 		
 		if (!patterns_list.empty())
 			Config.pattern = patterns_list.front();
-		Main->AddOption("[.b]Pattern:[/b] " + Config.pattern);
+		Main->AddOption("Pattern: " + Config.pattern);
 		Main->AddOption("Preview");
 		Main->AddOption("Legend");
 		Main->AddSeparator();
@@ -497,7 +524,7 @@ void __deal_with_filenames(SongList &v)
 		if (!patterns_list.empty())
 		{
 			Main->AddSeparator();
-			Main->AddOption("Recent patterns", 1, 1, 0, lCenter);
+			Main->AddOption("Recent patterns", 1, 1, 0);
 			Main->AddSeparator();
 			for (vector<string>::const_iterator it = patterns_list.begin(); it != patterns_list.end(); it++)
 				Main->AddOption(*it);
@@ -530,18 +557,18 @@ void __deal_with_filenames(SongList &v)
 				Active->Scroll(wEnd);
 			else if (Keypressed(input, Key.Enter) && Active == Main)
 			{
-				switch (Main->GetRealChoice())
+				switch (Main->RealChoice())
 				{
 					case 0:
 					{
 						LockStatusbar();
-						wFooter->WriteXY(0, Config.statusbar_visibility, "[.b]Pattern:[/b] ", 1);
+						wFooter->WriteXY(0, Config.statusbar_visibility, "Pattern: ", 1);
 						string new_pattern = wFooter->GetString(Config.pattern);
 						UnlockStatusbar();
 						if (!new_pattern.empty())
 						{
 							Config.pattern = new_pattern;
-							Main->UpdateOption(0, "[.b]Pattern:[/b] " + Config.pattern);
+							Main->at(0) = "Pattern: " + Config.pattern;
 						}
 						break;
 					}
@@ -559,8 +586,8 @@ void __deal_with_filenames(SongList &v)
 							{
 								if (preview)
 								{
-//									Preview->Add("[.b]" + s.GetName() + ":[/b]\n");
-//									Preview->Add(ParseFilename(s, Config.pattern, preview) + "\n");
+									*Preview << fmtBold << s.GetName() << ":\n" << fmtBoldEnd;
+									*Preview << ParseFilename(s, Config.pattern, preview) << "\n";
 								}
 								else
 									ParseFilename(s, Config.pattern, preview);
@@ -571,11 +598,12 @@ void __deal_with_filenames(SongList &v)
 								int last_dot = file.find_last_of(".");
 								string extension = file.substr(last_dot);
 								s.GetEmptyFields(1);
-								string new_file = GenerateFilename(s, Config.pattern);
-								if (new_file.empty())
+								basic_buffer<my_char_t> new_file;
+								new_file << TO_WSTRING(GenerateFilename(s, Config.pattern));
+								if (new_file.Str().empty())
 								{
 									if (preview)
-										new_file = "[.red]!EMPTY![/red]";
+										new_file << clRed << "!EMPTY!" << clEnd;
 									else
 									{
 										ShowMessage("File '%s' would have an empty name!", s.GetName().c_str());
@@ -584,8 +612,8 @@ void __deal_with_filenames(SongList &v)
 									}
 								}
 								if (!preview)
-									s.SetNewName(new_file + extension);
-//								Preview->Add(file + " [." + Config.color2 + "]->[/" + Config.color2 + "] " + new_file + extension + "\n\n");
+									s.SetNewName(TO_STRING(new_file.Str()) + extension);
+								*Preview << file << clGreen << " -> " << clEnd << new_file << extension << "\n\n";
 								s.GetEmptyFields(0);
 							}
 						}
@@ -610,6 +638,7 @@ void __deal_with_filenames(SongList &v)
 						if (preview)
 						{
 							Helper = Preview;
+							Helper->Flush();
 							Helper->Display();
 							break;
 						}
@@ -627,8 +656,8 @@ void __deal_with_filenames(SongList &v)
 					}
 					default:
 					{
-						Config.pattern = Main->GetOption();
-						Main->UpdateOption(0, "[.b]Pattern:[/b] " + Config.pattern);
+						Config.pattern = Main->Current();
+						Main->at(0) = "Pattern: " + Config.pattern;
 					}
 				}
 			}

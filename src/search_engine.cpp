@@ -25,24 +25,30 @@ using namespace MPD;
 
 extern Connection *Mpd;
 extern Menu<Song> *mPlaylist;
-extern Menu< std::pair<string, Song> > *mSearcher;
+extern Menu< std::pair<Buffer *, Song *> > *mSearcher;
 
 bool search_match_to_pattern = 1;
 bool search_case_sensitive = 0;
 
-string SearchEngineDisplayer(const std::pair<string, Song> &pair, void *, const Menu< std::pair<string, Song> > *menu)
+extern const char *search_mode_normal = "Match if tag contains searched phrase";
+extern const char *search_mode_strict = "Match only if both values are the same";
+
+void SearchEngineDisplayer(const std::pair<Buffer *, Song *> &pair, void *, Menu< std::pair<Buffer *, Song *> > *menu)
 {
-	return pair.first == "." ? DisplaySong(pair.second, &Config.song_list_format, (Menu<Song> *) menu) : pair.first;
+	if (pair.second)
+		DisplaySong(*pair.second, &Config.song_list_format, reinterpret_cast<Menu<Song> *>(menu));
+	else
+		*menu << *pair.first;
 }
 
 void UpdateFoundList()
 {
 	bool bold = 0;
-	for (int i = search_engine_static_options-1; i < mSearcher->Size(); i++)
+	for (size_t i = search_engine_static_options; i < mSearcher->Size(); i++)
 	{
-		for (int j = 0; j < mPlaylist->Size(); j++)
+		for (size_t j = 0; j < mPlaylist->Size(); j++)
 		{
-			if (mPlaylist->at(j).GetHash() == mSearcher->at(i).second.GetHash())
+			if (mPlaylist->at(j).GetHash() == mSearcher->at(i).second->GetHash())
 			{
 				bold = 1;
 				break;
@@ -55,26 +61,48 @@ void UpdateFoundList()
 
 void PrepareSearchEngine(Song &s)
 {
-	// adding several empty songs may seem riddiculous, but they hardly steal memory
-	// and it's much cleaner solution than having two different containers imo
+	for (size_t i = 0; i < mSearcher->Size(); i++)
+	{
+		try
+		{
+			delete (*mSearcher)[i].first;
+			delete (*mSearcher)[i].second;
+		}
+		catch (List::InvalidItem) { }
+	}
+	
 	s.Clear();
 	mSearcher->Clear();
 	mSearcher->Reset();
-	mSearcher->AddOption(make_pair("[.b]Filename:[/b] " + s.GetName(), Song()));
-	mSearcher->AddOption(make_pair("[.b]Title:[/b] " + s.GetTitle(), Song()));
-	mSearcher->AddOption(make_pair("[.b]Artist:[/b] " + s.GetArtist(), Song()));
-	mSearcher->AddOption(make_pair("[.b]Album:[/b] " + s.GetAlbum(), Song()));
-	mSearcher->AddOption(make_pair("[.b]Year:[/b] " + s.GetYear(), Song()));
-	mSearcher->AddOption(make_pair("[.b]Track:[/b] " + s.GetTrack(), Song()));
-	mSearcher->AddOption(make_pair("[.b]Genre:[/b] " + s.GetGenre(), Song()));
-	mSearcher->AddOption(make_pair("[.b]Comment:[/b] " + s.GetComment(), Song()));
-	mSearcher->AddSeparator();
-	mSearcher->AddOption(make_pair("[.b]Search in:[/b] " + string(Config.search_in_db ? "Database" : "Current playlist"), Song()));
-	mSearcher->AddOption(make_pair("[.b]Search mode:[/b] " + (search_match_to_pattern ? search_mode_normal : search_mode_strict), Song()));
-	mSearcher->AddOption(make_pair("[.b]Case sensitive:[/b] " + string(search_case_sensitive ? "Yes" : "No"), Song()));
-	mSearcher->AddSeparator();
-	mSearcher->AddOption(make_pair("Search", Song()));
-	mSearcher->AddOption(make_pair("Reset", Song()));
+	mSearcher->ResizeBuffer(15);
+	
+	mSearcher->IntoSeparator(8);
+	mSearcher->IntoSeparator(12);
+	
+	for (size_t i = 0; i < 15; i++)
+	{
+		try
+		{
+			mSearcher->at(i).first = new Buffer();
+		}
+		catch (List::InvalidItem) { }
+	}
+	
+	*mSearcher->at(0).first << fmtBold << "Filename:" << fmtBoldEnd << ' ' << s.GetName();
+	*mSearcher->at(1).first << fmtBold << "Title:" << fmtBoldEnd << ' ' << s.GetTitle();
+	*mSearcher->at(2).first << fmtBold << "Artist:" << fmtBoldEnd << ' ' << s.GetArtist();
+	*mSearcher->at(3).first << fmtBold << "Album:" << fmtBoldEnd << ' ' << s.GetAlbum();
+	*mSearcher->at(4).first << fmtBold << "Year:" << fmtBoldEnd << ' ' << s.GetYear();
+	*mSearcher->at(5).first << fmtBold << "Track:" << fmtBoldEnd << ' ' << s.GetTrack();
+	*mSearcher->at(6).first << fmtBold << "Genre:" << fmtBoldEnd << ' ' << s.GetGenre();
+	*mSearcher->at(7).first << fmtBold << "Comment:" << fmtBoldEnd << ' ' << s.GetComment();
+	
+	*mSearcher->at(9).first << fmtBold << "Search in:" << fmtBoldEnd << ' ' << (Config.search_in_db ? "Database" : "Current playlist");
+	*mSearcher->at(10).first << fmtBold << "Search mode:" << fmtBoldEnd << ' ' << (search_match_to_pattern ? search_mode_normal : search_mode_strict);
+	*mSearcher->at(11).first << fmtBold << "Case sensitive:" << fmtBoldEnd << ' ' << (search_case_sensitive ? "Yes" : "No");
+	
+	*mSearcher->at(13).first << "Search";
+	*mSearcher->at(14).first << "Reset";
 }
 
 void Search(Song &s)
@@ -88,7 +116,7 @@ void Search(Song &s)
 	else
 	{
 		list.reserve(mPlaylist->Size());
-		for (int i = 0; i < mPlaylist->Size(); i++)
+		for (size_t i = 0; i < mPlaylist->Size(); i++)
 			list.push_back(&(*mPlaylist)[i]);
 	}
 	
@@ -198,7 +226,10 @@ void Search(Song &s)
 		}
 		
 		if (found)
-			mSearcher->AddOption(make_pair(".", **it));
+		{
+			mSearcher->AddOption(make_pair((Buffer *)0, *it));
+			list[it-list.begin()] = 0;
+		}
 		found = 1;
 	}
 	if (Config.search_in_db) // free song list only if it's database

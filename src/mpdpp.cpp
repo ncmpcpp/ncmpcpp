@@ -346,7 +346,7 @@ void Connection::GetPlaylistChanges(long long id, SongList &v) const
 		{
 			if (item->type == MPD_INFO_ENTITY_TYPE_SONG)
 			{
-				Song *s = new Song(item->info.song);
+				Song *s = new Song(item->info.song, 1);
 				item->info.song = 0;
 				v.push_back(s);
 			}

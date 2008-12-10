@@ -39,6 +39,11 @@ class CaseInsensitiveSorting
 		bool operator()(const MPD::Item &, const MPD::Item &);
 };
 
+template <class T> void GenericDisplayer(const T &t, void *, Menu<T> *menu)
+{
+	*menu << t;
+}
+
 bool SortSongsByTrack(Song *, Song *);
 
 void UpdateSongList(Menu<Song> *);
@@ -51,10 +56,10 @@ void EscapeUnallowedChars(string &);
 string IntoStr(mpd_TagItems);
 string FindSharedDir(const string &, const string &);
 string TotalPlaylistLength();
-string DisplayStringPair(const StringPair &, void *, const Menu<StringPair> *);
+void DisplayStringPair(const StringPair &, void *, Menu<StringPair> *);
 string DisplayColumns(string);
-string DisplaySongInColumns(const Song &, void *, const Menu<Song> *);
-string DisplaySong(const Song &, void * = &Config.song_list_format, const Menu<Song> * = NULL);
+void DisplaySongInColumns(const Song &, void *, Menu<Song> *);
+void DisplaySong(const Song &, void * = &Config.song_list_format, Menu<Song> * = NULL);
 void GetInfo(Song &, Scrollpad &);
 void ShowMessage(const char *, ...);
 

@@ -218,17 +218,17 @@ void DefaultKeys(ncmpcpp_keys &keys)
 void DefaultConfiguration(ncmpcpp_config &conf)
 {
 	conf.mpd_host = "localhost";
-	conf.song_list_format = "{%a - }{%t}|{[.white]%f[/white]}%r{[.green](%l)[/green]}";
+	conf.song_list_format = "{%a - }{%t}|{$8%f$9}%r{$3(%l)$9}";
 	conf.song_columns_list_format = "(8)[green]{l} (25)[cyan]{a} (40){t} (30)[red]{b}";
 	conf.song_status_format = "{(%l) }{%a - }{%t}|{%f}";
 	conf.song_window_title_format = "{%a - }{%t}|{%f}";
 	conf.song_library_format = "{%n - }{%t}|{%f}";
 	conf.media_lib_album_format = "{(%y) }%b";
 	conf.tag_editor_album_format = "{(%y) }%b";
-	conf.browser_playlist_prefix = "[.red](playlist)[/red] ";
+	conf.browser_playlist_prefix << clRed << "(playlist)" << clEnd << ' ';
 	conf.pattern = "%n - %t";
-	conf.selected_item_prefix = "[.magenta]";
-	conf.selected_item_suffix = "[/magenta]";
+	conf.selected_item_prefix << clMagenta;
+	conf.selected_item_suffix << clEnd;
 	conf.color1 = "white";
 	conf.color2 = "green";
 	conf.empty_tags_color = clCyan;
@@ -569,7 +569,7 @@ void ReadConfiguration(ncmpcpp_config &conf)
 			else if (it->find("browser_playlist_prefix") != string::npos)
 			{
 				if (!v.empty())
-					conf.browser_playlist_prefix = v;
+					conf.browser_playlist_prefix << v;
 			}
 			else if (it->find("default_tag_editor_pattern") != string::npos)
 			{
@@ -579,12 +579,12 @@ void ReadConfiguration(ncmpcpp_config &conf)
 			else if (it->find("selected_item_prefix") != string::npos)
 			{
 				if (!v.empty())
-					conf.selected_item_prefix = v;
+					conf.selected_item_prefix << v;
 			}
 			else if (it->find("selected_item_suffix") != string::npos)
 			{
 				if (!v.empty())
-					conf.selected_item_suffix = v;
+					conf.selected_item_suffix << v;
 			}
 			else if (it->find("color1") != string::npos)
 			{

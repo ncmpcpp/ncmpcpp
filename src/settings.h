@@ -103,12 +103,12 @@ struct ncmpcpp_config
 	string song_library_format;
 	string media_lib_album_format;
 	string tag_editor_album_format;
-	string browser_playlist_prefix;
 	
 	string pattern;
 	
-	string selected_item_prefix;
-	string selected_item_suffix;
+	Buffer browser_playlist_prefix;
+	Buffer selected_item_prefix;
+	Buffer selected_item_suffix;
 	
 	string color1;
 	string color2;

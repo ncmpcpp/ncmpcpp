@@ -79,6 +79,8 @@ class Song
 		void SetNewName(const string &name) { itsNewName = name == GetName() ? "" : name; }
 		string GetNewName() const { return itsNewName; }
 		
+		std::string toString(const std::string &) const;
+		
 		void NullMe() { itsSong = 0; }
 		void CopyPtr(bool copy) { copyPtr = copy; }
 		

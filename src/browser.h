@@ -26,7 +26,7 @@
 
 void UpdateItemList(Menu<MPD::Item> *);
 
-string DisplayItem(const MPD::Item &, void *, const Menu<MPD::Item> *);
+void DisplayItem(const MPD::Item &, void *, Menu<MPD::Item> *);
 
 void GetDirectory(string, string = "/");
 

@@ -33,10 +33,11 @@
 #include "settings.h"
 
 typedef void (Song::*SongSetFunction)(const string &);
+typedef string (Song::*SongGetFunction)() const;
 
 string FindSharedDir(Menu<Song> *);
 string FindSharedDir(const MPD::SongList &);
-string DisplayTag(const Song &, void *, const Menu<Song> *);
+void DisplayTag(const Song &, void *, Menu<Song> *);
 
 SongSetFunction IntoSetFunction(mpd_TagItems);
 

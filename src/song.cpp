@@ -282,6 +282,158 @@ void Song::SetPosition(int pos)
 	itsSong->pos = pos;
 }
 
+string Song::toString(const std::string &format) const
+{
+	string result;
+	string::const_iterator goto_pos, prev_pos;
+	
+	for (string::const_iterator it = format.begin(); it != format.end(); it++)
+	{
+		CHECK_LINKED_TAGS:;
+		if (*it == '{')
+		{
+			prev_pos = it;
+			string (Song::*get)() const = 0;
+			for (; *it != '}'; it++)
+			{
+				if (*it == '%')
+				{
+					switch (*++it)
+					{
+						case 'l':
+							get = &Song::GetLength;
+							break;
+						case 'F':
+							get = &Song::GetFile;
+							break;
+						case 'f':
+							get = &Song::GetName;
+							break;
+						case 'a':
+							get = &Song::GetArtist;
+							break;
+						case 'b':
+							get = &Song::GetAlbum;
+							break;
+						case 'y':
+							get = &Song::GetYear;
+							break;
+						case 'n':
+							get = &Song::GetTrack;
+							break;
+						case 'g':
+							get = &Song::GetGenre;
+							break;
+						case 'c':
+							get = &Song::GetComposer;
+							break;
+						case 'p':
+							get = &Song::GetPerformer;
+							break;
+						case 'd':
+							get = &Song::GetDisc;
+							break;
+						case 'C':
+							get = &Song::GetComment;
+							break;
+						case 't':
+							get = &Song::GetTitle;
+							break;
+						default:
+							break;
+					}
+					if (get && (this->*get)() == EMPTY_TAG)
+						break;
+				}
+			}
+			if (*it == '}')
+			{
+				while (1)
+				{
+					if (*it == '}' && *(it+1) != '|')
+						break;
+					it++;
+				}
+				goto_pos = ++it;
+				it = ++prev_pos;
+			}
+			else
+			{
+				for (; *it != '}'; it++) { }
+				it++;
+				if (*it == '{' || *it == '|')
+				{
+					if (*it == '|')
+						it++;
+					goto CHECK_LINKED_TAGS;
+				}
+			}
+		}
+		
+		if (*it == '}')
+		{
+			if (goto_pos == format.end())
+				break;
+			it = goto_pos;
+			if (*it == '{')
+				goto CHECK_LINKED_TAGS;
+		}
+		
+		if (*it != '%')
+		{
+			result += *it;
+		}
+		else if (*it == '%')
+		{
+			switch (*++it)
+			{
+				case 'l':
+					result += GetLength();
+					break;
+				case 'F':
+					result += GetFile();
+					break;
+				case 'f':
+					result += GetName();
+					break;
+				case 'a':
+					result += GetArtist();
+					break;
+				case 'b':
+					result += GetAlbum();
+					break;
+				case 'y':
+					result += GetYear();
+					break;
+				case 'n':
+					result += GetTrack();
+					break;
+				case 'g':
+					result += GetGenre();
+					break;
+				case 'c':
+					result += GetComposer();
+					break;
+				case 'p':
+					result += GetPerformer();
+					break;
+				case 'd':
+					result += GetDisc();
+					break;
+				case 'C':
+					result += GetComment();
+					break;
+				case 't':
+					result += GetTitle();
+					break;
+				default:
+					break;
+			}
+		}
+	}
+	return result;
+}
+
 Song & Song::operator=(const Song &s)
 {
 	if (this == &s)

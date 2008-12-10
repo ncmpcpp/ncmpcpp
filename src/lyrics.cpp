@@ -26,6 +26,7 @@
 #include "settings.h"
 #include "song.h"
 
+extern Window *wCurrent;
 extern Scrollpad *sLyrics;
 extern Scrollpad *sInfo;
 
@@ -93,6 +94,8 @@ void * GetArtistInfo(void *ptr)
 		}
 		input.close();
 		sInfo->Flush();
+		if (wCurrent == sInfo)
+			sInfo->Refresh();
 		artist_info_downloader = 0;
 		pthread_exit(NULL);
 	}
@@ -119,6 +122,8 @@ void * GetArtistInfo(void *ptr)
 	{
 		*sInfo << "Error while fetching artist's info: " << curl_easy_strerror(code);
 		sInfo->Flush();
+		if (wCurrent == sInfo)
+			sInfo->Refresh();
 		artist_info_downloader = 0;
 		pthread_exit(NULL);
 	}
@@ -134,6 +139,8 @@ void * GetArtistInfo(void *ptr)
 		EscapeHtml(result);
 		*sInfo << "Last.fm returned an error message: " << result;
 		sInfo->Flush();
+		if (wCurrent == sInfo)
+			sInfo->Refresh();
 		artist_info_downloader = 0;
 		pthread_exit(NULL);
 	}
@@ -215,6 +222,8 @@ void * GetArtistInfo(void *ptr)
 		}
 	}
 	sInfo->Flush();
+	if (wCurrent == sInfo)
+		sInfo->Refresh();
 	artist_info_downloader = 0;
 	pthread_exit(NULL);
 }
@@ -244,6 +253,8 @@ void *GetLyrics(void *song)
 		}
 #		ifdef HAVE_CURL_CURL_H
 		sLyrics->Flush();
+		if (wCurrent == sLyrics)
+			sLyrics->Refresh();
 		lyrics_downloader = 0;
 		pthread_exit(NULL);
 #		endif
@@ -281,6 +292,8 @@ void *GetLyrics(void *song)
 	{
 		*sLyrics << "Error while fetching lyrics: " << curl_easy_strerror(code);
 		sLyrics->Flush();
+		if (wCurrent == sLyrics)
+			sLyrics->Refresh();
 		lyrics_downloader = 0;
 		pthread_exit(NULL);
 	}
@@ -295,6 +308,8 @@ void *GetLyrics(void *song)
 	{
 		*sLyrics << result;
 		sLyrics->Flush();
+		if (wCurrent == sLyrics)
+			sLyrics->Refresh();
 		lyrics_downloader = 0;
 		pthread_exit(NULL);
 	}
@@ -315,12 +330,16 @@ void *GetLyrics(void *song)
 		output.close();
 	}
 	sLyrics->Flush();
+	if (wCurrent == sLyrics)
+		sLyrics->Refresh();
 	lyrics_downloader = 0;
 	pthread_exit(NULL);
 #	else
 	else
 		*sLyrics << "Local lyrics not found. As ncmpcpp has been compiled without curl support, you can put appropriate lyrics into ~/.lyrics directory (file syntax is \"ARTIST - TITLE.txt\") or recompile ncmpcpp with curl support.";
 	sLyrics->Flush();
+	if (wCurrent == sLyrics)
+		sLyrics->Refresh();
 	return NULL;
 #	endif
 }

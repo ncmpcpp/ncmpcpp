@@ -24,7 +24,7 @@
 #include "settings.h"
 #include "status_checker.h"
 
-#define UPDATE_WINDOW_TITLE WindowTitle(DisplaySong(Mpd->GetCurrentSong(), &Config.song_window_title_format))
+#define UPDATE_WINDOW_TITLE WindowTitle(Mpd->GetCurrentSong().toString(Config.song_window_title_format))
 
 using namespace MPD;
 
@@ -76,10 +76,16 @@ bool allow_statusbar_unlock = 1;
 bool header_update_status = 0;
 bool repeat_one_allowed = 0;
 
+//time_t past, now = time(NULL)-1;
+
 void TraceMpdStatus()
 {
-	Mpd->UpdateStatus();
-	time_t now = time(NULL);
+	//past = time(NULL);
+	//if (past == now+1)
+	//{
+		Mpd->UpdateStatus();
+		time_t now = time(NULL);
+	//}
 	
 	if (current_screen == csPlaylist && now == timer+Config.playlist_disable_highlight_delay)
 		mPlaylist->Highlighting(!Config.playlist_disable_highlight_delay);
@@ -141,8 +147,12 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 	{
 		old_playing = now_playing;
 		now_playing = Mpd->GetCurrentSongPos();
-		mPlaylist->BoldOption(old_playing, 0);
-		mPlaylist->BoldOption(now_playing, 1);
+		try
+		{
+			mPlaylist->BoldOption(old_playing, 0);
+			mPlaylist->BoldOption(now_playing, 1);
+		}
+		catch (std::out_of_range) { }
 	}
 	
 	if (changed.Playlist)
@@ -161,6 +171,7 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 				else
 					Mpd->GetPlaylistChanges(Mpd->GetOldPlaylistID(), list);
 				
+				mPlaylist->Reserve(playlist_length);
 				for (SongList::const_iterator it = list.begin(); it != list.end(); it++)
 				{
 					mPlaylist->AddOption(**it, now_playing == (*it)->GetPosition());
@@ -183,7 +194,7 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 				{
 					if (*list[i] != mPlaylist->at(i))
 					{
-						mPlaylist->UpdateOption(i, *list[i]);
+						mPlaylist->at(i) = *list[i];
 						mPlaylist->at(i).CopyPtr(0);
 						list[i]->NullMe();
 					}
@@ -263,7 +274,11 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 				wFooter->SetColor(Config.progressbar_color);
 				mvwhline(wFooter->Raw(), 0, 0, 0, wFooter->GetWidth());
 				wFooter->SetColor(Config.statusbar_color);
-				mPlaylist->BoldOption(old_playing, 0);
+				try
+				{
+					mPlaylist->BoldOption(old_playing, 0);
+				}
+				catch (std::out_of_range) { }
 				now_playing = -1;
 				player_state.clear();
 				break;
@@ -320,7 +335,7 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 					tracklength = " [" + Song::ShowTime(elapsed) + "/" + s.GetLength() + "]";
 				else
 					tracklength = " [" + Song::ShowTime(elapsed) + "]";
-				my_string_t playing_song = TO_WSTRING(DisplaySong(s, &Config.song_status_format));
+				my_string_t playing_song = TO_WSTRING(s.toString(Config.song_status_format));
 				
 				const size_t max_length_without_scroll = wFooter->GetWidth()-player_state.length()-tracklength.length();
 				
@@ -342,7 +357,7 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 						playing_song_scroll_begin = 0;
 				}
 				else
-					wFooter->WriteXY(player_state.length(), 1, DisplaySong(s, &Config.song_status_format), 1);
+					wFooter->WriteXY(player_state.length(), 1, s.toString(Config.song_status_format), 1);
 				wFooter->Bold(1);
 				
 				wFooter->WriteXY(wFooter->GetWidth()-tracklength.length(), 1, tracklength);
