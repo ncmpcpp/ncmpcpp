@@ -283,7 +283,7 @@ template <class T> void Menu<T>::Refresh()
 		}
 		if (itsOptions[i].isBold)
 			Bold(1);
-		if (int(i) == itsHighlight)
+		if (highlightEnabled && int(i) == itsHighlight)
 		{
 			Reverse(1);
 			*this << itsHighlightColor;
@@ -295,7 +295,7 @@ template <class T> void Menu<T>::Refresh()
 			itsItemDisplayer(*itsOptions[i].Item, itsItemDisplayerUserdata, this);
 		if (itsOptions[i].isSelected && itsSelectedSuffix)
 			*this << *itsSelectedSuffix;
-		if (int(i) == itsHighlight)
+		if (highlightEnabled && int(i) == itsHighlight)
 		{
 			*this << clEnd;
 			Reverse(0);
