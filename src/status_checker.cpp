@@ -67,7 +67,6 @@ int old_playing;
 
 time_t time_of_statusbar_lock;
 
-//string playlist_stats;
 string volume_state;
 string switch_state;
 

@@ -88,14 +88,14 @@ void PrepareSearchEngine(Song &s)
 		catch (List::InvalidItem) { }
 	}
 	
-	*mSearcher->at(0).first << fmtBold << "Filename:" << fmtBoldEnd << ' ' << s.GetName();
-	*mSearcher->at(1).first << fmtBold << "Title:" << fmtBoldEnd << ' ' << s.GetTitle();
-	*mSearcher->at(2).first << fmtBold << "Artist:" << fmtBoldEnd << ' ' << s.GetArtist();
-	*mSearcher->at(3).first << fmtBold << "Album:" << fmtBoldEnd << ' ' << s.GetAlbum();
-	*mSearcher->at(4).first << fmtBold << "Year:" << fmtBoldEnd << ' ' << s.GetYear();
-	*mSearcher->at(5).first << fmtBold << "Track:" << fmtBoldEnd << ' ' << s.GetTrack();
-	*mSearcher->at(6).first << fmtBold << "Genre:" << fmtBoldEnd << ' ' << s.GetGenre();
-	*mSearcher->at(7).first << fmtBold << "Comment:" << fmtBoldEnd << ' ' << s.GetComment();
+	*mSearcher->at(0).first << fmtBold << "Filename:" << fmtBoldEnd << ' ' << ShowTag(s.GetName());
+	*mSearcher->at(1).first << fmtBold << "Title:" << fmtBoldEnd << ' ' << ShowTag(s.GetTitle());
+	*mSearcher->at(2).first << fmtBold << "Artist:" << fmtBoldEnd << ' ' << ShowTag(s.GetArtist());
+	*mSearcher->at(3).first << fmtBold << "Album:" << fmtBoldEnd << ' ' << ShowTag(s.GetAlbum());
+	*mSearcher->at(4).first << fmtBold << "Year:" << fmtBoldEnd << ' ' << ShowTag(s.GetYear());
+	*mSearcher->at(5).first << fmtBold << "Track:" << fmtBoldEnd << ' ' << ShowTag(s.GetTrack());
+	*mSearcher->at(6).first << fmtBold << "Genre:" << fmtBoldEnd << ' ' << ShowTag(s.GetGenre());
+	*mSearcher->at(7).first << fmtBold << "Comment:" << fmtBoldEnd << ' ' << ShowTag(s.GetComment());
 	
 	*mSearcher->at(9).first << fmtBold << "Search in:" << fmtBoldEnd << ' ' << (Config.search_in_db ? "Database" : "Current playlist");
 	*mSearcher->at(10).first << fmtBold << "Search mode:" << fmtBoldEnd << ' ' << (search_match_to_pattern ? search_mode_normal : search_mode_strict);
@@ -121,8 +121,6 @@ void Search(Song &s)
 	}
 	
 	bool found = 1;
-	
-	s.GetEmptyFields(1);
 	
 	if (!search_case_sensitive)
 	{
@@ -234,6 +232,5 @@ void Search(Song &s)
 	}
 	if (Config.search_in_db) // free song list only if it's database
 		FreeSongList(list);
-	s.GetEmptyFields(0);
 }
 

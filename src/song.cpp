@@ -21,16 +21,11 @@
 #include "song.h"
 #include "settings.h"
 
-extern ncmpcpp_config Config;
-
-string EMPTY_TAG = "<empty>";
-
 Song::Song(mpd_Song *s, bool copy_ptr) : itsSong(s),
 					 itsSlash(string::npos),
 					 itsHash(0),
 					 copyPtr(copy_ptr),
-					 isStream(0),
-					 itsGetEmptyFields(0)
+					 isStream(0)
 {
 	size_t file_len = itsSong->file ? strlen(itsSong->file) : 0;
 	
@@ -57,8 +52,7 @@ Song::Song(const Song &s) : itsSong(0),
 			    itsSlash(s.itsSlash),
 			    itsHash(s.itsHash),
 			    copyPtr(s.copyPtr),
-			    isStream(s.isStream),
-			    itsGetEmptyFields(s.itsGetEmptyFields)
+			    isStream(s.isStream)
 {
 	itsSong = s.copyPtr ? s.itsSong : mpd_songDup(s.itsSong);
 }
@@ -85,7 +79,6 @@ void Song::Clear()
 	itsSlash = 0;
 	itsHash = 0;
 	copyPtr = 0;
-	itsGetEmptyFields = 0;
 }
 
 bool Song::Empty() const
@@ -101,67 +94,67 @@ bool Song::IsFromDB() const
 
 string Song::GetFile() const
 {
-	return !itsSong->file ? (itsGetEmptyFields ? "" : EMPTY_TAG) : itsSong->file;
+	return !itsSong->file ? "" : itsSong->file;
 }
 
 string Song::GetName() const
 {
-	return !itsSong->file ? (itsGetEmptyFields ? "" : EMPTY_TAG) : (itsSlash != string::npos && !isStream ? itsSong->file+itsSlash+1 : (isStream && itsSong->name ? itsSong->name : itsSong->file));
+	return !itsSong->file ? "" : (itsSlash != string::npos && !isStream ? itsSong->file+itsSlash+1 : (isStream && itsSong->name ? itsSong->name : itsSong->file));
 }
 
 string Song::GetDirectory() const
 {
-	return !itsSong->file || isStream ? (itsGetEmptyFields ? "" : EMPTY_TAG) : itsSlash != string::npos ? string(itsSong->file).substr(0, itsSlash) : "/";
+	return !itsSong->file || isStream ? "" : itsSlash != string::npos ? string(itsSong->file).substr(0, itsSlash) : "/";
 }
 
 string Song::GetArtist() const
 {
-	return !itsSong->artist ? (itsGetEmptyFields ? "" : EMPTY_TAG) : itsSong->artist;
+	return !itsSong->artist ? "" : itsSong->artist;
 }
 
 string Song::GetTitle() const
 {
-	return !itsSong->title ? (itsGetEmptyFields ? "" : EMPTY_TAG) : itsSong->title;
+	return !itsSong->title ? "" : itsSong->title;
 }
 
 string Song::GetAlbum() const
 {
-	return !itsSong->album ? (itsGetEmptyFields ? "" : EMPTY_TAG) : itsSong->album;
+	return !itsSong->album ? "" : itsSong->album;
 }
 
 string Song::GetTrack() const
 {
-	return !itsSong->track ? (itsGetEmptyFields ? "" : EMPTY_TAG) : (StrToInt(itsSong->track) < 10 && itsSong->track[0] != '0' ? "0"+string(itsSong->track) : itsSong->track);
+	return !itsSong->track ? "" : (StrToInt(itsSong->track) < 10 && itsSong->track[0] != '0' ? "0"+string(itsSong->track) : itsSong->track);
 }
 
 string Song::GetYear() const
 {
-	return !itsSong->date ? (itsGetEmptyFields ? "" : EMPTY_TAG) : itsSong->date;
+	return !itsSong->date ? "" : itsSong->date;
 }
 
 string Song::GetGenre() const
 {
-	return !itsSong->genre ? (itsGetEmptyFields ? "" : EMPTY_TAG) : itsSong->genre;
+	return !itsSong->genre ? "" : itsSong->genre;
 }
 
 string Song::GetComposer() const
 {
-	return !itsSong->composer ? (itsGetEmptyFields ? "" : EMPTY_TAG) : itsSong->composer;
+	return !itsSong->composer ? "" : itsSong->composer;
 }
 
 string Song::GetPerformer() const
 {
-	return !itsSong->performer ? (itsGetEmptyFields ? "" : EMPTY_TAG) : itsSong->performer;
+	return !itsSong->performer ? "" : itsSong->performer;
 }
 
 string Song::GetDisc() const
 {
-	return !itsSong->disc ? (itsGetEmptyFields ? "" : EMPTY_TAG) : itsSong->disc;
+	return !itsSong->disc ? "" : itsSong->disc;
 }
 
 string Song::GetComment() const
 {
-	return !itsSong->comment ? (itsGetEmptyFields ? "" : EMPTY_TAG) : itsSong->comment;
+	return !itsSong->comment ? "" : itsSong->comment;
 }
 
 void Song::SetFile(const string &str)
@@ -320,8 +313,16 @@ string Song::toString(const std::string &format) const
 						default:
 							break;
 					}
-					if (get && (this->*get)() == EMPTY_TAG)
-						break;
+					if (get == &Song::GetLength)
+					{
+						if  (!GetTotalLength())
+							break;
+					}
+					else if (get)
+					{
+						if ((this->*get)().empty())
+							break;
+					}
 				}
 			}
 			if (*it == '}')
@@ -339,6 +340,8 @@ string Song::toString(const std::string &format) const
 			{
 				for (; *it != '}'; it++) { }
 				it++;
+				if (it == format.end())
+					break;
 				if (*it == '{' || *it == '|')
 				{
 					if (*it == '|')
@@ -424,7 +427,6 @@ Song & Song::operator=(const Song &s)
 	itsHash = s.itsHash;
 	copyPtr = s.copyPtr;
 	isStream = s.isStream;
-	itsGetEmptyFields = s.itsGetEmptyFields;
 	return *this;
 }
 

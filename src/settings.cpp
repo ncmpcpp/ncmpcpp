@@ -218,6 +218,7 @@ void DefaultKeys(ncmpcpp_keys &keys)
 void DefaultConfiguration(ncmpcpp_config &conf)
 {
 	conf.mpd_host = "localhost";
+	conf.empty_tag = "<empty>";
 	conf.song_list_format = "{%a - }{%t}|{$8%f$9}%r{$3(%l)$9}";
 	conf.song_columns_list_format = "(8)[green]{l} (25)[cyan]{a} (40){t} (30)[red]{b}";
 	conf.song_status_format = "{(%l) }{%a - }{%t}|{%f}";

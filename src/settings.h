@@ -96,6 +96,7 @@ struct ncmpcpp_config
 {
 	string mpd_host;
 	string mpd_music_dir;
+	string empty_tag;
 	string song_list_format;
 	string song_columns_list_format;
 	string song_status_format;

@@ -322,8 +322,10 @@ bool GetSongTags(Song &s)
 	mTagEditor->Reset();
 	
 	mTagEditor->ResizeBuffer(23);
+	
 	for (size_t i = 0; i < 7; i++)
 		mTagEditor->Static(i, 1);
+	
 	mTagEditor->IntoSeparator(7);
 	mTagEditor->IntoSeparator(18);
 	mTagEditor->IntoSeparator(20);
@@ -335,22 +337,22 @@ bool GetSongTags(Song &s)
 	mTagEditor->Highlight(8);
 	
 	mTagEditor->at(0) << fmtBold << clWhite << "Song name: " << fmtBoldEnd << clGreen << s.GetName() << clEnd;
-	mTagEditor->at(1) << fmtBold << clWhite << "Location in DB: " << fmtBoldEnd << clGreen << s.GetDirectory() << clEnd;
+	mTagEditor->at(1) << fmtBold << clWhite << "Location in DB: " << fmtBoldEnd << clGreen << ShowTag(s.GetDirectory()) << clEnd;
 	mTagEditor->at(3) << fmtBold << clWhite << "Length: " << fmtBoldEnd << clGreen << s.GetLength() << clEnd;
 	mTagEditor->at(4) << fmtBold << clWhite << "Bitrate: " << fmtBoldEnd << clGreen << f.audioProperties()->bitrate() << " kbps" << clEnd;
 	mTagEditor->at(5) << fmtBold << clWhite << "Sample rate: " << fmtBoldEnd << clGreen << f.audioProperties()->sampleRate() << " Hz" << clEnd;
 	mTagEditor->at(6) << fmtBold << clWhite << "Channels: " << fmtBoldEnd << clGreen << (f.audioProperties()->channels() == 1 ? "Mono" : "Stereo") << clDefault;
 	
-	mTagEditor->at(8) << fmtBold << "Title:" << fmtBoldEnd << ' ' << s.GetTitle();
-	mTagEditor->at(9) << fmtBold << "Artist:" << fmtBoldEnd << ' ' << s.GetArtist();
-	mTagEditor->at(10) << fmtBold << "Album:" << fmtBoldEnd << ' ' << s.GetAlbum();
-	mTagEditor->at(11) << fmtBold << "Year:" << fmtBoldEnd << ' ' << s.GetYear();
-	mTagEditor->at(12) << fmtBold << "Track:" << fmtBoldEnd << ' ' << s.GetTrack();
-	mTagEditor->at(13) << fmtBold << "Genre:" << fmtBoldEnd << ' ' <<s.GetGenre();
-	mTagEditor->at(14) << fmtBold << "Composer:" << fmtBoldEnd << ' ' << s.GetComposer();
-	mTagEditor->at(15) << fmtBold << "Performer:" << fmtBoldEnd << ' ' << s.GetPerformer();
-	mTagEditor->at(16) << fmtBold << "Disc:" << fmtBoldEnd << ' ' << s.GetDisc();
-	mTagEditor->at(17) << fmtBold << "Comment:" << fmtBoldEnd << ' ' << s.GetComment();
+	mTagEditor->at(8) << fmtBold << "Title:" << fmtBoldEnd << ' ' << ShowTag(s.GetTitle());
+	mTagEditor->at(9) << fmtBold << "Artist:" << fmtBoldEnd << ' ' << ShowTag(s.GetArtist());
+	mTagEditor->at(10) << fmtBold << "Album:" << fmtBoldEnd << ' ' << ShowTag(s.GetAlbum());
+	mTagEditor->at(11) << fmtBold << "Year:" << fmtBoldEnd << ' ' << ShowTag(s.GetYear());
+	mTagEditor->at(12) << fmtBold << "Track:" << fmtBoldEnd << ' ' << ShowTag(s.GetTrack());
+	mTagEditor->at(13) << fmtBold << "Genre:" << fmtBoldEnd << ' ' << ShowTag(s.GetGenre());
+	mTagEditor->at(14) << fmtBold << "Composer:" << fmtBoldEnd << ' ' << ShowTag(s.GetComposer());
+	mTagEditor->at(15) << fmtBold << "Performer:" << fmtBoldEnd << ' ' << ShowTag(s.GetPerformer());
+	mTagEditor->at(16) << fmtBold << "Disc:" << fmtBoldEnd << ' ' << ShowTag(s.GetDisc());
+	mTagEditor->at(17) << fmtBold << "Comment:" << fmtBoldEnd << ' ' << ShowTag(s.GetComment());
 
 	mTagEditor->at(19) << fmtBold << "Filename:" << fmtBoldEnd << ' ' << s.GetName();
 
@@ -370,7 +372,6 @@ bool WriteTags(Song &s)
 	FileRef f(path_to_file.c_str());
 	if (!f.isNull())
 	{
-		s.GetEmptyFields(1);
 		f.tag()->setTitle(TO_WSTRING(s.GetTitle()));
 		f.tag()->setArtist(TO_WSTRING(s.GetArtist()));
 		f.tag()->setAlbum(TO_WSTRING(s.GetAlbum()));
@@ -405,7 +406,6 @@ bool WriteTags(Song &s)
 			tag->addFrame(DiscFrame);
 			file.save();
 		}
-		s.GetEmptyFields(0);
 		if (!s.GetNewName().empty())
 		{
 			string old_name;
@@ -505,7 +505,7 @@ void __deal_with_filenames(SongList &v)
 			*Legend << clGreen << " * " << clEnd << (*it)->GetName() << "\n";
 		Legend->Flush();
 		
-		Preview = static_cast<Scrollpad *>(Legend->EmptyClone());
+		Preview = Legend->EmptyClone();
 		Preview->SetTitle("Preview");
 		Preview->SetTimeout(ncmpcpp_window_timeout);
 		
@@ -598,7 +598,6 @@ void __deal_with_filenames(SongList &v)
 								const string &file = s.GetName();
 								int last_dot = file.find_last_of(".");
 								string extension = file.substr(last_dot);
-								s.GetEmptyFields(1);
 								basic_buffer<my_char_t> new_file;
 								new_file << TO_WSTRING(GenerateFilename(s, Config.pattern));
 								if (new_file.Str().empty())
@@ -615,7 +614,6 @@ void __deal_with_filenames(SongList &v)
 								if (!preview)
 									s.SetNewName(TO_STRING(new_file.Str()) + extension);
 								*Preview << file << clGreen << " -> " << clEnd << new_file << extension << "\n\n";
-								s.GetEmptyFields(0);
 							}
 						}
 						if (!success)

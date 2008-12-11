@@ -46,8 +46,6 @@ extern bool allow_statusbar_unlock;
 extern bool search_case_sensitive;
 extern bool search_match_to_pattern;
 
-extern string EMPTY_TAG;
-
 const string term_type = getenv("TERM") ? getenv("TERM") : "";
 
 bool ConnectToMPD()
@@ -656,8 +654,16 @@ void DisplaySong(const Song &s, void *data, Menu<Song> *menu)
 						default:
 							break;
 					}
-					if (get && (s.*get)() == EMPTY_TAG)
-						break;
+					if (get == &Song::GetLength)
+					{
+						if  (!s.GetTotalLength())
+							break;
+					}
+					else if (get)
+					{
+						if ((s.*get)().empty())
+							break;
+					}
 				}
 			}
 			if (*it == '}')
@@ -675,6 +681,8 @@ void DisplaySong(const Song &s, void *data, Menu<Song> *menu)
 			{
 				for (; *it != '}'; it++) { }
 				it++;
+				if (it == song_template.end())
+					break;
 				if (*it == '{' || *it == '|')
 				{
 					if (*it == '|')
@@ -817,8 +825,8 @@ void GetInfo(Song &s, Scrollpad &info)
 #	endif // HAVE_TAGLIB_H
 	
 	info << fmtBold << clWhite << "Filename: " << fmtBoldEnd << clGreen << s.GetName() << "\n" << clEnd;
-	info << fmtBold << "Directory: " << fmtBoldEnd << clGreen << s.GetDirectory() + "\n\n" << clEnd;
-	info << fmtBold << "Length: " << fmtBoldEnd << clGreen << s.GetLength() + "\n" << clEnd;
+	info << fmtBold << "Directory: " << fmtBoldEnd << clGreen << ShowTagInInfoScreen(s.GetDirectory()) << "\n\n" << clEnd;
+	info << fmtBold << "Length: " << fmtBoldEnd << clGreen << s.GetLength() << "\n" << clEnd;
 #	ifdef HAVE_TAGLIB_H
 	if (!f.isNull())
 	{
@@ -826,17 +834,19 @@ void GetInfo(Song &s, Scrollpad &info)
 		info << fmtBold << "Sample rate: " << fmtBoldEnd << clGreen << f.audioProperties()->sampleRate() << " Hz\n" << clEnd;
 		info << fmtBold << "Channels: " << fmtBoldEnd << clGreen << (f.audioProperties()->channels() == 1 ? "Mono" : "Stereo") << "\n" << clDefault;
 	}
+	else
+		info << clDefault;
 #	endif // HAVE_TAGLIB_H
-	info << fmtBold << "\nTitle: " << fmtBoldEnd << s.GetTitle();
-	info << fmtBold << "\nArtist: " << fmtBoldEnd << s.GetArtist();
-	info << fmtBold << "\nAlbum: " << fmtBoldEnd << s.GetAlbum();
-	info << fmtBold << "\nYear: " << fmtBoldEnd << s.GetYear();
-	info << fmtBold << "\nTrack: " << fmtBoldEnd << s.GetTrack();
-	info << fmtBold << "\nGenre: " << fmtBoldEnd << s.GetGenre();
-	info << fmtBold << "\nComposer: " << fmtBoldEnd << s.GetComposer();
-	info << fmtBold << "\nPerformer: " << fmtBoldEnd << s.GetPerformer();
-	info << fmtBold << "\nDisc: " << fmtBoldEnd << s.GetDisc();
-	info << fmtBold << "\nComment: " << fmtBoldEnd << s.GetComment();
+	info << fmtBold << "\nTitle: " << fmtBoldEnd << ShowTagInInfoScreen(s.GetTitle());
+	info << fmtBold << "\nArtist: " << fmtBoldEnd << ShowTagInInfoScreen(s.GetArtist());
+	info << fmtBold << "\nAlbum: " << fmtBoldEnd << ShowTagInInfoScreen(s.GetAlbum());
+	info << fmtBold << "\nYear: " << fmtBoldEnd << ShowTagInInfoScreen(s.GetYear());
+	info << fmtBold << "\nTrack: " << fmtBoldEnd << ShowTagInInfoScreen(s.GetTrack());
+	info << fmtBold << "\nGenre: " << fmtBoldEnd << ShowTagInInfoScreen(s.GetGenre());
+	info << fmtBold << "\nComposer: " << fmtBoldEnd << ShowTagInInfoScreen(s.GetComposer());
+	info << fmtBold << "\nPerformer: " << fmtBoldEnd << ShowTagInInfoScreen(s.GetPerformer());
+	info << fmtBold << "\nDisc: " << fmtBoldEnd << ShowTagInInfoScreen(s.GetDisc());
+	info << fmtBold << "\nComment: " << fmtBoldEnd << ShowTagInInfoScreen(s.GetComment());
 }
 
 void ShowMessage(const char *format, ...)
@@ -867,4 +877,30 @@ Window &Statusbar()
 	wFooter->GotoXY(0, Config.statusbar_visibility);
 	wclrtoeol(wFooter->Raw());
 	return *wFooter;
+}
+
+const Buffer &ShowTag(const string &tag)
+{
+	static Buffer result;
+	result.Clear();
+	if (tag.empty())
+		result << Config.empty_tags_color << Config.empty_tag << clEnd;
+	else
+		result << tag;
+	return result;
+}
+
+const basic_buffer<my_char_t> &ShowTagInInfoScreen(const string &tag)
+{
+#	ifdef _UTF8
+	static WBuffer result;
+	result.Clear();
+	if (tag.empty())
+		result << Config.empty_tags_color << ToWString(Config.empty_tag) << clEnd;
+	else
+		result << TO_WSTRING(tag);
+	return result;
+#	else
+	return ShowTag(tag);
+#	endif
 }

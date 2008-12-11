@@ -157,8 +157,6 @@ extern bool header_update_status;
 extern bool search_case_sensitive;
 extern bool search_match_to_pattern;
 
-extern string EMPTY_TAG;
-extern string playlist_stats;
 extern string volume_state;
 
 extern const char *search_mode_normal;
@@ -513,7 +511,7 @@ int main(int argc, char *argv[])
 					Mpd->AddSearch(Config.media_lib_primary_tag, mLibArtists->Current());
 					Mpd->AddSearch(MPD_TAG_ITEM_ALBUM, *it);
 					Mpd->CommitSearch(l);
-					if (!l.empty() && l[0]->GetAlbum() != EMPTY_TAG)
+					if (!l.empty() && !l[0]->GetAlbum().empty())
 						maplist[l[0]->toString(Config.media_lib_album_format)] = *it;
 					FreeSongList(l);
 				}
@@ -729,7 +727,7 @@ int main(int argc, char *argv[])
 		if (current_screen == csLyrics && reload_lyrics)
 		{
 			const Song &s = mPlaylist->at(now_playing);
-			if (s.GetArtist() != EMPTY_TAG && s.GetTitle() != EMPTY_TAG)
+			if (!s.GetArtist().empty() && !s.GetTitle().empty())
 				goto LOAD_LYRICS;
 			else
 				reload_lyrics = 0;
@@ -1024,101 +1022,71 @@ int main(int argc, char *argv[])
 						case 1:
 						{
 							Statusbar() << fmtBold << "Title: " << fmtBoldEnd;
-							if (s.GetTitle() == EMPTY_TAG)
-								s.SetTitle(wFooter->GetString());
-							else
-								s.SetTitle(wFooter->GetString(s.GetTitle()));
-							mTagEditor->at(option) << fmtBold << "Title:" << fmtBoldEnd << ' ' << s.GetTitle();
+							s.SetTitle(wFooter->GetString(s.GetTitle()));
+							mTagEditor->at(option) << fmtBold << "Title:" << fmtBoldEnd << ' ' << ShowTag(s.GetTitle());
 							break;
 						}
 						case 2:
 						{
 							Statusbar() << fmtBold << "Artist: " << fmtBoldEnd;
-							if (s.GetArtist() == EMPTY_TAG)
-								s.SetArtist(wFooter->GetString());
-							else
-								s.SetArtist(wFooter->GetString(s.GetArtist()));
-							mTagEditor->at(option) << fmtBold << "Artist:" << fmtBoldEnd << ' ' << s.GetArtist();
+							s.SetArtist(wFooter->GetString(s.GetArtist()));
+							mTagEditor->at(option) << fmtBold << "Artist:" << fmtBoldEnd << ' ' << ShowTag(s.GetArtist());
 							break;
 						}
 						case 3:
 						{
 							Statusbar() << fmtBold << "Album: " << fmtBoldEnd;
-							if (s.GetAlbum() == EMPTY_TAG)
-								s.SetAlbum(wFooter->GetString());
-							else
-								s.SetAlbum(wFooter->GetString(s.GetAlbum()));
-							mTagEditor->at(option) << fmtBold << "Album:" << fmtBoldEnd << ' ' << s.GetAlbum();
+							s.SetAlbum(wFooter->GetString(s.GetAlbum()));
+							mTagEditor->at(option) << fmtBold << "Album:" << fmtBoldEnd << ' ' << ShowTag(s.GetAlbum());
 							break;
 						}
 						case 4:
 						{
 							Statusbar() << fmtBold << "Year: " << fmtBoldEnd;
-							if (s.GetYear() == EMPTY_TAG)
-								s.SetYear(wFooter->GetString(4));
-							else
-								s.SetYear(wFooter->GetString(s.GetYear(), 4));
-							mTagEditor->at(option) << fmtBold << "Year:" << fmtBoldEnd << ' ' << s.GetYear();
+							s.SetYear(wFooter->GetString(s.GetYear(), 4));
+							mTagEditor->at(option) << fmtBold << "Year:" << fmtBoldEnd << ' ' << ShowTag(s.GetYear());
 							break;
 						}
 						case 5:
 						{
 							Statusbar() << fmtBold << "Track: " << fmtBoldEnd;
-							if (s.GetTrack() == EMPTY_TAG)
-								s.SetTrack(wFooter->GetString(3));
-							else
-								s.SetTrack(wFooter->GetString(s.GetTrack(), 3));
-							mTagEditor->at(option) << fmtBold << "Track:" << fmtBoldEnd << ' ' << s.GetTrack();
+							s.SetTrack(wFooter->GetString(s.GetTrack(), 3));
+							mTagEditor->at(option) << fmtBold << "Track:" << fmtBoldEnd << ' ' << ShowTag(s.GetTrack());
 							break;
 						}
 						case 6:
 						{
 							Statusbar() << fmtBold << "Genre: " << fmtBoldEnd;
-							if (s.GetGenre() == EMPTY_TAG)
-								s.SetGenre(wFooter->GetString());
-							else
-								s.SetGenre(wFooter->GetString(s.GetGenre()));
-							mTagEditor->at(option) << fmtBold << "Genre:" << fmtBoldEnd << ' ' << s.GetGenre();
+							s.SetGenre(wFooter->GetString(s.GetGenre()));
+							mTagEditor->at(option) << fmtBold << "Genre:" << fmtBoldEnd << ' ' << ShowTag(s.GetGenre());
 							break;
 						}
 						case 7:
 						{
 							Statusbar() << fmtBold << "Composer: " << fmtBoldEnd;
-							if (s.GetComposer() == EMPTY_TAG)
-								s.SetComposer(wFooter->GetString());
-							else
-								s.SetComposer(wFooter->GetString(s.GetComposer()));
-							mTagEditor->at(option) << fmtBold << "Composer:" << fmtBoldEnd << ' ' << s.GetComposer();
+							s.SetComposer(wFooter->GetString(s.GetComposer()));
+							mTagEditor->at(option) << fmtBold << "Composer:" << fmtBoldEnd << ' ' << ShowTag(s.GetComposer());
 							break;
 						}
 						case 8:
 						{
 							Statusbar() << fmtBold << "Performer: " << fmtBoldEnd;
-							if (s.GetPerformer() == EMPTY_TAG)
-								s.SetPerformer(wFooter->GetString());
-							else
-								s.SetPerformer(wFooter->GetString(s.GetPerformer()));
-							mTagEditor->at(option) << fmtBold << "Performer:" << fmtBoldEnd << ' ' << s.GetPerformer();
+							s.SetPerformer(wFooter->GetString(s.GetPerformer()));
+							mTagEditor->at(option) << fmtBold << "Performer:" << fmtBoldEnd << ' ' << ShowTag(s.GetPerformer());
 							break;
 						}
 						case 9:
 						{
 							Statusbar() << fmtBold << "Disc: " << fmtBoldEnd;
-							if (s.GetDisc() == EMPTY_TAG)
-								s.SetDisc(wFooter->GetString());
-							else
-								s.SetDisc(wFooter->GetString(s.GetDisc()));
-							mTagEditor->at(option) << fmtBold << "Disc:" << fmtBoldEnd << ' ' << s.GetDisc();
+							s.SetDisc(wFooter->GetString(s.GetDisc()));
+							mTagEditor->at(option) << fmtBold << "Disc:" << fmtBoldEnd << ' ' << ShowTag(s.GetDisc());
 							break;
 						}
 						case 10:
 						{
 							Statusbar() << fmtBold << "Comment: " << fmtBoldEnd;
-							if (s.GetComment() == EMPTY_TAG)
-								s.SetComment(wFooter->GetString());
-							else
-								s.SetComment(wFooter->GetString(s.GetComment()));
-							mTagEditor->at(option) << fmtBold << "Comment:" << fmtBoldEnd << ' ' << s.GetComment();
+							s.SetComment(wFooter->GetString(s.GetComment()));
+							mTagEditor->at(option) << fmtBold << "Comment:" << fmtBoldEnd << ' ' << ShowTag(s.GetComment());
 							break;
 						}
 						case 12:
@@ -1198,81 +1166,57 @@ int main(int argc, char *argv[])
 						case 1:
 						{
 							Statusbar() << fmtBold << "Filename: " << fmtBoldEnd;
-							if (s.GetName() == EMPTY_TAG)
-								s.SetFile(wFooter->GetString());
-							else
-								s.SetFile(wFooter->GetString(s.GetFile()));
-							*mSearcher->Current().first << fmtBold << "Filename:" << fmtBoldEnd << ' ' << s.GetFile();
+							s.SetFile(wFooter->GetString(s.GetFile()));
+							*mSearcher->Current().first << fmtBold << "Filename:" << fmtBoldEnd << ' ' << ShowTag(s.GetFile());
 							break;
 						}
 						case 2:
 						{
 							Statusbar() << fmtBold << "Title: " << fmtBoldEnd;
-							if (s.GetTitle() == EMPTY_TAG)
-								s.SetTitle(wFooter->GetString());
-							else
-								s.SetTitle(wFooter->GetString(s.GetTitle()));
-							*mSearcher->Current().first << fmtBold << "Title:" << fmtBoldEnd << ' ' << s.GetTitle();
+							s.SetTitle(wFooter->GetString(s.GetTitle()));
+							*mSearcher->Current().first << fmtBold << "Title:" << fmtBoldEnd << ' ' << ShowTag(s.GetTitle());
 							break;
 						}
 						case 3:
 						{
 							Statusbar() << fmtBold << "Artist: " << fmtBoldEnd;
-							if (s.GetArtist() == EMPTY_TAG)
-								s.SetArtist(wFooter->GetString());
-							else
-								s.SetArtist(wFooter->GetString(s.GetArtist()));
-							*mSearcher->Current().first << fmtBold << "Artist:" << fmtBoldEnd << ' ' << s.GetArtist();
+							s.SetArtist(wFooter->GetString(s.GetArtist()));
+							*mSearcher->Current().first << fmtBold << "Artist:" << fmtBoldEnd << ' ' << ShowTag(s.GetArtist());
 							break;
 						}
 						case 4:
 						{
 							Statusbar() << fmtBold << "Album: " << fmtBoldEnd;
-							if (s.GetAlbum() == EMPTY_TAG)
-								s.SetAlbum(wFooter->GetString());
-							else
-								s.SetAlbum(wFooter->GetString(s.GetAlbum()));
-							*mSearcher->Current().first << fmtBold << "Album:" << fmtBoldEnd << ' ' << s.GetAlbum();
+							s.SetAlbum(wFooter->GetString(s.GetAlbum()));
+							*mSearcher->Current().first << fmtBold << "Album:" << fmtBoldEnd << ' ' << ShowTag(s.GetAlbum());
 							break;
 						}
 						case 5:
 						{
 							Statusbar() << fmtBold << "Year: " << fmtBoldEnd;
-							if (s.GetYear() == EMPTY_TAG)
-								s.SetYear(wFooter->GetString(4));
-							else
-								s.SetYear(wFooter->GetString(s.GetYear(), 4));
-							*mSearcher->Current().first << fmtBold << "Year:" << fmtBoldEnd << ' ' << s.GetYear();
+							s.SetYear(wFooter->GetString(s.GetYear(), 4));
+							*mSearcher->Current().first << fmtBold << "Year:" << fmtBoldEnd << ' ' << ShowTag(s.GetYear());
 							break;
 						}
 						case 6:
 						{
 							Statusbar() << fmtBold << "Track: " << fmtBoldEnd;
-							if (s.GetTrack() == EMPTY_TAG)
-								s.SetTrack(wFooter->GetString(3));
-							else
-								s.SetTrack(wFooter->GetString(s.GetTrack(), 3));
-							*mSearcher->Current().first << fmtBold << "Track:" << fmtBoldEnd << ' ' << s.GetTrack();
+							s.SetTrack(wFooter->GetString(s.GetTrack(), 3));
+							*mSearcher->Current().first << fmtBold << "Track:" << fmtBoldEnd << ' ' << ShowTag(s.GetTrack());
 							break;
 						}
 						case 7:
 						{
 							Statusbar() << fmtBold << "Genre: " << fmtBoldEnd;
-							if (s.GetGenre() == EMPTY_TAG)
-								s.SetGenre(wFooter->GetString());
-							else
-								s.SetGenre(wFooter->GetString(s.GetGenre()));
-							*mSearcher->Current().first << fmtBold << "Genre:" << fmtBoldEnd << ' ' << s.GetGenre();
+							s.SetGenre(wFooter->GetString(s.GetGenre()));
+							*mSearcher->Current().first << fmtBold << "Genre:" << fmtBoldEnd << ' ' << ShowTag(s.GetGenre());
 							break;
 						}
 						case 8:
 						{
 							Statusbar() << fmtBold << "Comment: " << fmtBoldEnd;
-							if (s.GetComment() == EMPTY_TAG)
-								s.SetComment(wFooter->GetString());
-							else
-								s.SetComment(wFooter->GetString(s.GetComment()));
-							*mSearcher->Current().first << fmtBold << "Comment:" << fmtBoldEnd << ' ' << s.GetComment();
+							s.SetComment(wFooter->GetString(s.GetComment()));
+							*mSearcher->Current().first << fmtBold << "Comment:" << fmtBoldEnd << ' ' << ShowTag(s.GetComment());
 							break;
 						}
 						case 10:
@@ -1719,9 +1663,7 @@ int main(int argc, char *argv[])
 					{
 						LockStatusbar();
 						Statusbar() << fmtBold << mEditorTagTypes->Current() << fmtBoldEnd << ": ";
-						mEditorTags->Current().GetEmptyFields(1);
 						string new_tag = wFooter->GetString((mEditorTags->Current().*get)());
-						mEditorTags->Current().GetEmptyFields(0);
 						UnlockStatusbar();
 						for (SongList::iterator it = list.begin(); it != list.end(); it++)
 							(**it.*set)(new_tag);
@@ -1731,9 +1673,7 @@ int main(int argc, char *argv[])
 					{
 						LockStatusbar();
 						Statusbar() << fmtBold << mEditorTagTypes->Current() << fmtBoldEnd << ": ";
-						mEditorTags->Current().GetEmptyFields(1);
 						string new_tag = wFooter->GetString((mEditorTags->Current().*get)());
-						mEditorTags->Current().GetEmptyFields(0);
 						UnlockStatusbar();
 						if (new_tag != (mEditorTags->Current().*get)())
 							(mEditorTags->Current().*set)(new_tag);
@@ -2744,7 +2684,7 @@ int main(int argc, char *argv[])
 						break;
 				}
 				
-				if (s->GetDirectory() == EMPTY_TAG) // for streams
+				if (s->GetDirectory().empty()) // for streams
 					continue;
 				
 				Config.local_browser = !s->IsFromDB();
@@ -3305,7 +3245,7 @@ int main(int argc, char *argv[])
 					default:
 						break;
 				}
-				if (*artist != EMPTY_TAG)
+				if (!artist->empty())
 				{
 					wPrev = wCurrent;
 					wCurrent = sInfo;
@@ -3396,7 +3336,7 @@ int main(int argc, char *argv[])
 					default:
 						break;
 				}
-				if (s->GetArtist() != EMPTY_TAG && s->GetTitle() != EMPTY_TAG)
+				if (!s->GetArtist().empty() && !s->GetTitle().empty())
 				{
 					wPrev = wCurrent;
 					prev_screen = current_screen;

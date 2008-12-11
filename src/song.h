@@ -34,7 +34,7 @@ using std::string;
 class Song
 {
 	public:
-		Song() : itsSlash(string::npos), itsHash(0), copyPtr(0), isStream(0), itsGetEmptyFields(0) { itsSong = mpd_newSong(); }
+		Song() : itsSlash(string::npos), itsHash(0), copyPtr(0), isStream(0) { itsSong = mpd_newSong(); }
 		Song(mpd_Song *, bool = 0);
 		Song(const Song &);
 		~Song();
@@ -48,13 +48,12 @@ class Song
 		string GetTrack() const;
 		string GetYear() const;
 		string GetGenre() const;
-		//string GetName() const { return itsName; }
 		string GetComposer() const;
 		string GetPerformer() const;
 		string GetDisc() const;
 		string GetComment() const;
 		string GetLength() const;
-		long long GetHash() const { return itsHash; }
+		const long long &GetHash() const { return itsHash; }
 		int GetTotalLength() const { return itsSong->time < 0 ? 0 : itsSong->time; }
 		int GetPosition() const { return itsSong->pos; }
 		int GetID() const { return itsSong->id; }
@@ -82,7 +81,7 @@ class Song
 		void NullMe() { itsSong = 0; }
 		void CopyPtr(bool copy) { copyPtr = copy; }
 		
-		void GetEmptyFields(bool get) { itsGetEmptyFields = get; }
+		//void GetEmptyFields(bool get) { itsGetEmptyFields = get; }
 		void Clear();
 		bool Empty() const;
 		bool IsFromDB() const;
@@ -101,7 +100,7 @@ class Song
 		long long itsHash;
 		bool copyPtr;
 		bool isStream;
-		bool itsGetEmptyFields;
+		//bool itsGetEmptyFields;
 };
 
 #endif
