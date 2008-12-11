@@ -847,6 +847,7 @@ void ShowMessage(const char *format, ...)
 			block_statusbar_update = 1;
 		else
 			block_progressbar_update = 1;
+		wFooter->GotoXY(0, Config.statusbar_visibility);
 		wFooter->Bold(0);
 		va_list list;
 		va_start(list, format);

@@ -53,7 +53,10 @@
 				mvvline(main_start_y, right_col_startx-1, 0, main_height); \
 				mLibSongs->Display(); \
 				if (mLibAlbums->Empty()) \
-					mLibAlbums->WriteXY(0, 0, "No albums found."); \
+				{ \
+					mLibAlbums->WriteXY(0, 0, 0, "No albums found."); \
+					mLibAlbums->Refresh(); \
+				} \
 			} while (0)
 
 #define REFRESH_PLAYLIST_EDITOR_SCREEN \
@@ -419,11 +422,11 @@ int main(int argc, char *argv[])
 			if (title_allowed)
 			{
 				wHeader->Bold(1);
-				wHeader->WriteXY(0, 0, max_allowed_title_length, title, 1);
+				wHeader->WriteXY(0, 0, 1, "%s", title.c_str());
 				wHeader->Bold(0);
 				
 				if (current_screen == csPlaylist && !playlist_stats.empty())
-					wHeader->WriteXY(title.length(), 0, max_allowed_title_length-title.length(), playlist_stats);
+					wHeader->WriteXY(title.length(), 0, 0, "%s", playlist_stats.c_str());
 				else if (current_screen == csBrowser)
 				{
 					size_t max_length_without_scroll = wHeader->GetWidth()-volume_state.length()-title.length();
@@ -440,12 +443,12 @@ int main(int argc, char *argv[])
 						my_string_t part = wbrowseddir.substr(browsed_dir_scroll_begin++, scrollsize);
 						if (part.length() < scrollsize)
 							part += wbrowseddir.substr(0, scrollsize-part.length());
-						wHeader->WriteXY(title.length(), 0, part);
+						wHeader->WriteXY(title.length(), 0, 0, UTF_S_FMT, part.c_str());
 						if (browsed_dir_scroll_begin >= wbrowseddir.length())
 							browsed_dir_scroll_begin = 0;
 					}
 					else
-						wHeader->WriteXY(title.length(), 0, browsed_dir);
+						wHeader->WriteXY(title.length(), 0, 0, "%s", browsed_dir.c_str());
 					wHeader->Bold(0);
 				}
 			}
@@ -455,16 +458,21 @@ int main(int argc, char *argv[])
 #				ifdef HAVE_TAGLIB_H
 				screens += "  [.b]7:[/b]Tag editor";
 #				endif // HAVE_TAGLIB_H
-				wHeader->WriteXY(0, 0, max_allowed_title_length, screens, 1);
+				wHeader->WriteXY(0, 0, 1, "%s", screens.c_str());
 			}
 			
 			wHeader->SetColor(Config.volume_color);
-			wHeader->WriteXY(max_allowed_title_length, 0, volume_state);
+			wHeader->WriteXY(max_allowed_title_length, 0, 0, "%s", volume_state.c_str());
 			wHeader->SetColor(Config.header_color);
 			wHeader->Refresh();
 			redraw_header = 0;
 		}
 		// header stuff end
+		
+		if (current_screen == csHelp
+		||  current_screen == csPlaylist
+		||  current_screen == csBrowser);
+		else
 		// media library stuff
 		if (current_screen == csLibrary)
 		{
@@ -531,7 +539,8 @@ int main(int argc, char *argv[])
 				SongList list;
 				if (mLibAlbums->Empty())
 				{
-					mLibAlbums->WriteXY(0, 0, "No albums found.");
+					mLibAlbums->WriteXY(0, 0, 0, "No albums found.");
+					mLibAlbums->Refresh();
 					mLibSongs->Clear(0);
 					Mpd->StartSearch(1);
 					Mpd->AddSearch(Config.media_lib_primary_tag, mLibArtists->Current());
@@ -618,7 +627,10 @@ int main(int argc, char *argv[])
 			}
 			
 			if (mPlaylistEditor->Empty())
-				mPlaylistEditor->WriteXY(0, 0, "Playlist is empty.");
+			{
+				mPlaylistEditor->WriteXY(0, 0, 0, "Playlist is empty.");
+				mPlaylistEditor->Refresh();
+			}
 		}
 		// playlist editor end
 		else
@@ -635,7 +647,7 @@ int main(int argc, char *argv[])
 				if (Config.albums_in_tag_editor)
 				{
 					std::map<string, string, CaseInsensitiveSorting> maplist;
-					mEditorAlbums->WriteXY(0, 0, "Fetching albums' list...");
+					mEditorAlbums->WriteXY(0, 0, 0, "Fetching albums' list...");
 					Mpd->GetAlbums("", list);
 					for (TagList::const_iterator it = list.begin(); it != list.end(); it++)
 					{
@@ -2427,7 +2439,7 @@ int main(int argc, char *argv[])
 				
 				wFooter->Bold(1);
 				string tracklength = "[" + Song::ShowTime(songpos) + "/" + s.GetLength() + "]";
-				wFooter->WriteXY(wFooter->GetWidth()-tracklength.length(), 1, tracklength);
+				wFooter->WriteXY(wFooter->GetWidth()-tracklength.length(), 1, 0, "%s", tracklength.c_str());
 				double progressbar_size = (double)songpos/(s.GetTotalLength());
 				int howlong = wFooter->GetWidth()*progressbar_size;
 				
@@ -3305,7 +3317,7 @@ int main(int argc, char *argv[])
 					redraw_header = 1;
 					info_title = "Artist's info - " + *artist;
 					sInfo->Clear();
-					sInfo->WriteXY(0, 0, "Fetching artist's info...");
+					sInfo->WriteXY(0, 0, 0, "Fetching artist's info...");
 					sInfo->Refresh();
 					if (!artist_info_downloader)
 					{
@@ -3396,7 +3408,7 @@ int main(int argc, char *argv[])
 					wCurrent->Clear();
 					current_screen = csLyrics;
 					lyrics_title = "Lyrics: " + s->GetArtist() + " - " + s->GetTitle();
-					sLyrics->WriteXY(0, 0, "Fetching lyrics...");
+					sLyrics->WriteXY(0, 0, 0, "Fetching lyrics...");
 					sLyrics->Refresh();
 #					ifdef HAVE_CURL_CURL_H
 					if (!lyrics_downloader)
@@ -3467,7 +3479,7 @@ int main(int argc, char *argv[])
 				redraw_header = 1;
 				if (!mSearcher->Back().first)
 				{
-					wCurrent->WriteXY(0, 0, "Updating list...");
+					wCurrent->WriteXY(0, 0, 0, "Updating list...");
 					UpdateFoundList();
 				}
 			}

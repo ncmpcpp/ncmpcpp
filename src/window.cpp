@@ -326,32 +326,25 @@ void Window::ReadKey() const
 	wgetch(itsWindow);
 }
 
-void Window::Write(int limit, const string &str, bool clrtoeol)
+void Window::Write(bool cte, const char *format, ...) const
 {
-	waddstr(itsWindow,str.c_str());
-	if (clrtoeol)
+	va_list list;
+	va_start(list, format);
+	vw_printw(itsWindow, format, list);
+	va_end(list);
+	if (cte)
 		wclrtoeol(itsWindow);
 }
 
-#ifdef _UTF8
-void Window::Write(int limit, const wstring &str, bool clrtoeol)
+void Window::WriteXY(int x, int y, bool cte, const char *format, ...) const
 {
-	wprintw(itsWindow, "%ls", str.c_str());
-	if (clrtoeol)
+	va_list list;
+	va_start(list, format);
+	wmove(itsWindow, y, x);
+	vw_printw(itsWindow, format, list);
+	va_end(list);
+	if (cte)
 		wclrtoeol(itsWindow);
-}
-
-void Window::WriteXY(int x, int y, int limit, const wstring &str, bool cleartoeol)
-{
-	wmove(itsWindow, y, x);
-	Write(limit, str, cleartoeol);
-}
-#endif
-
-void Window::WriteXY(int x, int y, int limit, const string &str, bool cleartoeol)
-{
-	wmove(itsWindow, y, x);
-	Write(limit, str, cleartoeol);
 }
 
 string Window::GetString(const string &base, size_t length, size_t width) const

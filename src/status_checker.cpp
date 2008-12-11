@@ -285,7 +285,7 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 			}
 		}
 		if (!block_statusbar_update && Config.statusbar_visibility)
-			wFooter->WriteXY(0, 1, player_state, player_state.empty());
+			wFooter->WriteXY(0, 1, player_state.empty(), "%s", player_state.c_str());
 	}
 	if (changed.SongID)
 	{
@@ -339,7 +339,7 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 				
 				const size_t max_length_without_scroll = wFooter->GetWidth()-player_state.length()-tracklength.length();
 				
-				wFooter->WriteXY(0, 1, player_state);
+				wFooter->WriteXY(0, 1, 0, "%s", player_state.c_str());
 				wFooter->Bold(0);
 				if (playing_song.length() > max_length_without_scroll)
 				{
@@ -352,15 +352,15 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 					my_string_t part = playing_song.substr(playing_song_scroll_begin++, scrollsize);
 					if (part.length() < scrollsize)
 						part += playing_song.substr(0, scrollsize-part.length());
-					wFooter->WriteXY(player_state.length(), 1, part);
+					wFooter->WriteXY(player_state.length(), 1, 0, UTF_S_FMT, part.c_str());
 					if (playing_song_scroll_begin >= playing_song.length())
 						playing_song_scroll_begin = 0;
 				}
 				else
-					wFooter->WriteXY(player_state.length(), 1, s.toString(Config.song_status_format), 1);
+					wFooter->WriteXY(player_state.length(), 1, 1, "%s", s.toString(Config.song_status_format).c_str());
 				wFooter->Bold(1);
 				
-				wFooter->WriteXY(wFooter->GetWidth()-tracklength.length(), 1, tracklength);
+				wFooter->WriteXY(wFooter->GetWidth()-tracklength.length(), 1, 1, "%s", tracklength.c_str());
 			}
 			if (!block_progressbar_update)
 			{
@@ -379,7 +379,7 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 		else
 		{
 			if (!block_statusbar_update && Config.statusbar_visibility)
-				wFooter->WriteXY(0, 1, "", 1);
+				wFooter->WriteXY(0, 1, 1, 0);
 		}
 	}
 	
@@ -431,11 +431,11 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 		mvwhline(wHeader->Raw(), 1, 0, 0, wHeader->GetWidth());
 		if (!switch_state.empty())
 		{
-			wHeader->WriteXY(wHeader->GetWidth()-switch_state.length()-3, 1, "[");
+			wHeader->WriteXY(wHeader->GetWidth()-switch_state.length()-3, 1, 0, "[");
 			wHeader->SetColor(Config.state_flags_color);
-			wHeader->WriteXY(wHeader->GetWidth()-switch_state.length()-2, 1, switch_state);
+			wHeader->WriteXY(wHeader->GetWidth()-switch_state.length()-2, 1, 0, "%s", switch_state.c_str());
 			wHeader->SetColor(Config.state_line_color);
-			wHeader->WriteXY(wHeader->GetWidth()-2, 1, "]");
+			wHeader->WriteXY(wHeader->GetWidth()-2, 1, 0, "]");
 		}
 		wHeader->SetColor(Config.header_color);
 		wHeader->Bold(0);
@@ -446,7 +446,7 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 		int vol = Mpd->GetVolume();
 		volume_state = " Volume: " + IntoStr(vol) + "%";
 		wHeader->SetColor(Config.volume_color);
-		wHeader->WriteXY(wHeader->GetWidth()-volume_state.length(), 0, volume_state);
+		wHeader->WriteXY(wHeader->GetWidth()-volume_state.length(), 0, 1, "%s", volume_state.c_str());
 		wHeader->SetColor(Config.header_color);
 	}
 	wHeader->Refresh();

@@ -259,6 +259,11 @@ void Menu<T>::Swap(size_t one, size_t two)
 
 template <class T> void Menu<T>::Refresh()
 {
+	if (itsOptions.empty())
+	{
+		wrefresh(itsWindow);
+		return;
+	}
 	int MaxBeginning = itsOptions.size() < itsHeight ? 0 : itsOptions.size()-itsHeight;
 	if (itsBeginning < 0)
 		itsBeginning = 0;

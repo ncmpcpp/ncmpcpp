@@ -37,12 +37,14 @@
 # define UNICODE 1
 # define my_char_t wchar_t
 # define my_string_t wstring
+# define UTF_S_FMT "%ls"
 # define TO_STRING(x) ToString(x)
 # define TO_WSTRING(x) ToWString(x)
 #else
 # define UNICODE 0
 # define my_char_t char
 # define my_string_t string
+# define UTF_S_FMT "%s"
 # define TO_STRING(x) x
 # define TO_WSTRING(x) x
 #endif
@@ -126,16 +128,8 @@ class Window
 		void ReadKey(int &) const;
 		void ReadKey() const;
 		
-		void Write(const string &s, bool cte = 0) { Write(0xFFFF, s, cte); }
-		void Write(int, const string &, bool = 0);
-		void WriteXY(int x, int y, const string &s, bool ete = 0) { WriteXY(x, y, 0xFFFF, s, ete); }
-		void WriteXY(int, int, int, const string &, bool = 0);
-#		ifdef _UTF8
-		void Write(const wstring &s, bool cte = 0) { Write(0xFFFF, s, cte); }
-		void Write(int, const wstring &, bool = 0);
-		void WriteXY(int x, int y, const wstring &s, bool ete = 0) { WriteXY(x, y, 0xFFFF, s, ete); }
-		void WriteXY(int, int, int, const wstring &, bool = 0);
-#		endif
+		void Write(bool, const char *, ...) const;
+		void WriteXY(int, int, bool, const char *, ...) const;
 		
 		void Scrollable(bool) const;
 		virtual void Scroll(Where);
