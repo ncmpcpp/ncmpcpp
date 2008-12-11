@@ -58,7 +58,7 @@ enum Where { wUp, wDown, wPageUp, wPageDown, wHome, wEnd };
 
 typedef void (*GetStringHelper)();
 
-void InitScreen();
+void InitScreen(bool);
 void DestroyScreen();
 
 struct Colors
@@ -119,9 +119,9 @@ class Window
 		void Display();
 		virtual void Refresh();
 		
-		virtual void MoveTo(int, int);
-		virtual void Resize(int, int);
-		virtual void Clear(bool stub = 1);
+		virtual void MoveTo(size_t, size_t);
+		virtual void Resize(size_t, size_t);
+		virtual void Clear(bool = 1);
 	
 		void ReadKey(int &) const;
 		void ReadKey() const;

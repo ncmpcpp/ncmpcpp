@@ -28,14 +28,14 @@
 
 using std::string;
 
-int Abs(int);
+//int Abs(int);
 
 void ToLower(string &);
 
 int StrToInt(string);
 
 string IntoStr(int);
-string IntoStr(double, int);
+//string IntoStr(double, int);
 
 #endif
 

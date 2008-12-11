@@ -47,9 +47,6 @@ extern bool search_case_sensitive;
 extern bool search_match_to_pattern;
 
 extern string EMPTY_TAG;
-extern string UNKNOWN_ARTIST;
-extern string UNKNOWN_TITLE;
-extern string UNKNOWN_ALBUM;
 
 const string term_type = getenv("TERM") ? getenv("TERM") : "";
 
@@ -272,6 +269,49 @@ void EscapeUnallowedChars(string &s)
 			}
 		}
 	}
+}
+
+Window &operator<<(Window &w, mpd_TagItems tag)
+{
+	switch (tag)
+	{
+		case MPD_TAG_ITEM_ARTIST:
+			w << "Artist";
+			break;
+		case MPD_TAG_ITEM_ALBUM:
+			w << "Album";
+			break;
+		case MPD_TAG_ITEM_TITLE:
+			w << "Title";
+			break;
+		case MPD_TAG_ITEM_TRACK:
+			w << "Track";
+			break;
+		case MPD_TAG_ITEM_GENRE:
+			w << "Genre";
+			break;
+		case MPD_TAG_ITEM_DATE:
+			w << "Year";
+			break;
+		case MPD_TAG_ITEM_COMPOSER:
+			w << "Composer";
+			break;
+		case MPD_TAG_ITEM_PERFORMER:
+			w << "Performer";
+			break;
+		case MPD_TAG_ITEM_COMMENT:
+			w << "Comment";
+			break;
+		case MPD_TAG_ITEM_DISC:
+			w << "Disc";
+			break;
+		case MPD_TAG_ITEM_FILENAME:
+			w << "Filename";
+			break;
+		default:
+			break;
+	}
+	return w;
 }
 
 string IntoStr(mpd_TagItems tag)
@@ -498,7 +538,7 @@ void DisplaySongInColumns(const Song &s, void *s_template, Menu<Song> *menu)
 				ss = s.GetArtist();
 				break;
 			case 't':
-				if (s.GetTitle() != UNKNOWN_TITLE)
+				if (s.GetTitle() != EMPTY_TAG)
 					ss = s.GetTitle();
 				else
 				{
@@ -554,7 +594,7 @@ void DisplaySongInColumns(const Song &s, void *s_template, Menu<Song> *menu)
 void DisplaySong(const Song &s, void *data, Menu<Song> *menu)
 {
 	const string &song_template = data ? *static_cast<string *>(data) : "";
-	basic_buffer<char> lresult;
+	basic_buffer<my_char_t> buf;
 	bool right = 0;
 	
 	string::const_iterator goto_pos, prev_pos;
@@ -656,7 +696,7 @@ void DisplaySong(const Song &s, void *data, Menu<Song> *menu)
 			if (!right)
 				*menu << *it;
 			else
-				lresult << *it;
+				buf << *it;
 		}
 		else if (*it == '%')
 		{
@@ -666,43 +706,78 @@ void DisplaySong(const Song &s, void *data, Menu<Song> *menu)
 					if (!right)
 						*menu << s.GetLength();
 					else
-						lresult << s.GetLength();
+						buf << TO_WSTRING(s.GetLength());
 					break;
 				case 'F':
-					*menu << s.GetFile();
+					if (!right)
+						*menu << s.GetFile();
+					else
+						buf << TO_WSTRING(s.GetFile());
 					break;
 				case 'f':
-					*menu << s.GetName();
+					if (!right)
+						*menu << s.GetName();
+					else
+						buf << TO_WSTRING(s.GetName());
 					break;
 				case 'a':
-					*menu << s.GetArtist();
+					if (!right)
+						*menu << s.GetArtist();
+					else
+						buf << TO_WSTRING(s.GetArtist());
 					break;
 				case 'b':
-					*menu << s.GetAlbum();
+					if (!right)
+						*menu << s.GetAlbum();
+					else
 					break;
 				case 'y':
-					*menu << s.GetYear();
+					if (!right)
+						*menu << s.GetYear();
+					else
+						buf << TO_WSTRING(s.GetYear());
 					break;
 				case 'n':
-					*menu << s.GetTrack();
+					if (!right)
+						*menu << s.GetTrack();
+					else
+						buf << TO_WSTRING(s.GetTrack());
 					break;
 				case 'g':
-					*menu << s.GetGenre();
+					if (!right)
+						*menu << s.GetGenre();
+					else
+						buf << TO_WSTRING(s.GetGenre());
 					break;
 				case 'c':
-					*menu << s.GetComposer();
+					if (!right)
+						*menu << s.GetComposer();
+					else
+						buf << TO_WSTRING(s.GetComposer());
 					break;
 				case 'p':
-					*menu << s.GetPerformer();
+					if (!right)
+						*menu << s.GetPerformer();
+					else
+						buf << TO_WSTRING(s.GetPerformer());
 					break;
 				case 'd':
-					*menu << s.GetDisc();
+					if (!right)
+						*menu << s.GetDisc();
+					else
+						buf << TO_WSTRING(s.GetDisc());
 					break;
 				case 'C':
-					*menu << s.GetComment();
+					if (!right)
+						*menu << s.GetComment();
+					else
+						buf << TO_WSTRING(s.GetComment());
 					break;
 				case 't':
-					*menu << s.GetTitle();
+					if (!right)
+						*menu << s.GetTitle();
+					else
+						buf << TO_WSTRING(s.GetTitle());
 					break;
 				case 'r':
 					right = 1;
@@ -717,13 +792,13 @@ void DisplaySong(const Song &s, void *data, Menu<Song> *menu)
 			if (!right)
 				*menu << Color(*it-'0');
 			else
-				lresult << Color(*it-'0');
+				buf << Color(*it-'0');
 		}
 	}
 	if (right)
 	{
-		menu->GotoXY(menu->GetWidth()-lresult.Str().length(), menu->Y());
-		*menu << lresult;
+		menu->GotoXY(menu->GetWidth()-buf.Str().length(), menu->Y());
+		*menu << buf;
 	}
 }
 
@@ -784,3 +859,9 @@ void ShowMessage(const char *format, ...)
 	}
 }
 
+Window &Statusbar()
+{
+	wFooter->GotoXY(0, Config.statusbar_visibility);
+	wclrtoeol(wFooter->Raw());
+	return *wFooter;
+}

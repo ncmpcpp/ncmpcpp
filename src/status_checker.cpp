@@ -123,7 +123,7 @@ void NcmpcppErrorCallback(Connection *Mpd, int errorid, const char *msg, void *)
 	if (errorid == MPD_ACK_ERROR_PERMISSION)
 	{
 		wFooter->SetGetStringHelper(NULL);
-		wFooter->WriteXY(0, Config.statusbar_visibility, "Password: ", 1);
+		Statusbar() << "Password: ";
 		string password = wFooter->GetString();
 		Mpd->SetPassword(password);
 		Mpd->SendPassword();
@@ -160,7 +160,7 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 		if (!block_playlist_update)
 		{
 			SongList list;
-			int playlist_length = Mpd->GetPlaylistLength();
+			size_t playlist_length = Mpd->GetPlaylistLength();
 			if (playlist_length != mPlaylist->Size())
 			{
 				if (playlist_length < mPlaylist->Size())
@@ -190,7 +190,7 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 			{
 				Mpd->GetPlaylistChanges(-1, list);
 				
-				for (int i = 0; i < mPlaylist->Size(); i++)
+				for (size_t i = 0; i < mPlaylist->Size(); i++)
 				{
 					if (*list[i] != mPlaylist->at(i))
 					{

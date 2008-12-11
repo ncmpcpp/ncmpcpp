@@ -155,9 +155,6 @@ extern bool search_case_sensitive;
 extern bool search_match_to_pattern;
 
 extern string EMPTY_TAG;
-extern string UNKNOWN_ARTIST;
-extern string UNKNOWN_TITLE;
-extern string UNKNOWN_ALBUM;
 extern string playlist_stats;
 extern string volume_state;
 
@@ -203,10 +200,7 @@ int main(int argc, char *argv[])
 	if (!ConnectToMPD())
 		return -1;
 	
-	InitScreen();
-	
-	//if (Config.colors_enabled)
-	//	Window::EnableColors();
+	InitScreen(Config.colors_enabled);
 	
 	int main_start_y = 2;
 	int main_height = LINES-4;
@@ -514,7 +508,7 @@ int main(int argc, char *argv[])
 					Mpd->AddSearch(Config.media_lib_primary_tag, mLibArtists->Current());
 					Mpd->AddSearch(MPD_TAG_ITEM_ALBUM, *it);
 					Mpd->CommitSearch(l);
-					if (!l.empty() && l[0]->GetAlbum() != UNKNOWN_ALBUM)
+					if (!l.empty() && l[0]->GetAlbum() != EMPTY_TAG)
 						maplist[l[0]->toString(Config.media_lib_album_format)] = *it;
 					FreeSongList(l);
 				}
@@ -726,7 +720,7 @@ int main(int argc, char *argv[])
 		if (current_screen == csLyrics && reload_lyrics)
 		{
 			const Song &s = mPlaylist->at(now_playing);
-			if (s.GetArtist() != UNKNOWN_ARTIST && s.GetTitle() != UNKNOWN_TITLE)
+			if (s.GetArtist() != EMPTY_TAG && s.GetTitle() != EMPTY_TAG)
 				goto LOAD_LYRICS;
 			else
 				reload_lyrics = 0;
@@ -1020,8 +1014,8 @@ int main(int argc, char *argv[])
 					{
 						case 1:
 						{
-							wFooter->WriteXY(0, Config.statusbar_visibility, "[.b]Title:[/b] ", 1);
-							if (s.GetTitle() == UNKNOWN_TITLE)
+							Statusbar() << fmtBold << "Title: " << fmtBoldEnd;
+							if (s.GetTitle() == EMPTY_TAG)
 								s.SetTitle(wFooter->GetString());
 							else
 								s.SetTitle(wFooter->GetString(s.GetTitle()));
@@ -1030,8 +1024,8 @@ int main(int argc, char *argv[])
 						}
 						case 2:
 						{
-							wFooter->WriteXY(0, Config.statusbar_visibility, "[.b]Artist:[/b] ", 1);
-							if (s.GetArtist() == UNKNOWN_ARTIST)
+							Statusbar() << fmtBold << "Artist: " << fmtBoldEnd;
+							if (s.GetArtist() == EMPTY_TAG)
 								s.SetArtist(wFooter->GetString());
 							else
 								s.SetArtist(wFooter->GetString(s.GetArtist()));
@@ -1040,8 +1034,8 @@ int main(int argc, char *argv[])
 						}
 						case 3:
 						{
-							wFooter->WriteXY(0, Config.statusbar_visibility, "[.b]Album:[/b] ", 1);
-							if (s.GetAlbum() == UNKNOWN_ALBUM)
+							Statusbar() << fmtBold << "Album: " << fmtBoldEnd;
+							if (s.GetAlbum() == EMPTY_TAG)
 								s.SetAlbum(wFooter->GetString());
 							else
 								s.SetAlbum(wFooter->GetString(s.GetAlbum()));
@@ -1050,7 +1044,7 @@ int main(int argc, char *argv[])
 						}
 						case 4:
 						{
-							wFooter->WriteXY(0, Config.statusbar_visibility, "[.b]Year:[/b] ", 1);
+							Statusbar() << fmtBold << "Year: " << fmtBoldEnd;
 							if (s.GetYear() == EMPTY_TAG)
 								s.SetYear(wFooter->GetString(4));
 							else
@@ -1060,7 +1054,7 @@ int main(int argc, char *argv[])
 						}
 						case 5:
 						{
-							wFooter->WriteXY(0, Config.statusbar_visibility, "[.b]Track:[/b] ", 1);
+							Statusbar() << fmtBold << "Track: " << fmtBoldEnd;
 							if (s.GetTrack() == EMPTY_TAG)
 								s.SetTrack(wFooter->GetString(3));
 							else
@@ -1070,7 +1064,7 @@ int main(int argc, char *argv[])
 						}
 						case 6:
 						{
-							wFooter->WriteXY(0, Config.statusbar_visibility, "[.b]Genre:[/b] ", 1);
+							Statusbar() << fmtBold << "Genre: " << fmtBoldEnd;
 							if (s.GetGenre() == EMPTY_TAG)
 								s.SetGenre(wFooter->GetString());
 							else
@@ -1080,7 +1074,7 @@ int main(int argc, char *argv[])
 						}
 						case 7:
 						{
-							wFooter->WriteXY(0, Config.statusbar_visibility, "[.b]Composer:[/b] ", 1);
+							Statusbar() << fmtBold << "Composer: " << fmtBoldEnd;
 							if (s.GetComposer() == EMPTY_TAG)
 								s.SetComposer(wFooter->GetString());
 							else
@@ -1090,7 +1084,7 @@ int main(int argc, char *argv[])
 						}
 						case 8:
 						{
-							wFooter->WriteXY(0, Config.statusbar_visibility, "[.b]Performer:[/b] ", 1);
+							Statusbar() << fmtBold << "Performer: " << fmtBoldEnd;
 							if (s.GetPerformer() == EMPTY_TAG)
 								s.SetPerformer(wFooter->GetString());
 							else
@@ -1100,7 +1094,7 @@ int main(int argc, char *argv[])
 						}
 						case 9:
 						{
-							wFooter->WriteXY(0, Config.statusbar_visibility, "[.b]Disc:[/b] ", 1);
+							Statusbar() << fmtBold << "Disc: " << fmtBoldEnd;
 							if (s.GetDisc() == EMPTY_TAG)
 								s.SetDisc(wFooter->GetString());
 							else
@@ -1110,7 +1104,7 @@ int main(int argc, char *argv[])
 						}
 						case 10:
 						{
-							wFooter->WriteXY(0, Config.statusbar_visibility, "[.b]Comment:[/b] ", 1);
+							Statusbar() << fmtBold << "Comment: " << fmtBoldEnd;
 							if (s.GetComment() == EMPTY_TAG)
 								s.SetComment(wFooter->GetString());
 							else
@@ -1120,7 +1114,7 @@ int main(int argc, char *argv[])
 						}
 						case 12:
 						{
-							wFooter->WriteXY(0, Config.statusbar_visibility, "[.b]Filename:[/b] ", 1);
+							Statusbar() << fmtBold << "Filename: " << fmtBoldEnd;
 							string filename = s.GetNewName().empty() ? s.GetName() : s.GetNewName();
 							int dot = filename.find_last_of(".");
 							string extension = filename.substr(dot);
@@ -1194,7 +1188,7 @@ int main(int argc, char *argv[])
 					{
 						case 1:
 						{
-							wFooter->WriteXY(0, Config.statusbar_visibility, "[.b]Filename:[/b] ", 1);
+							Statusbar() << fmtBold << "Filename: " << fmtBoldEnd;
 							if (s.GetName() == EMPTY_TAG)
 								s.SetFile(wFooter->GetString());
 							else
@@ -1204,8 +1198,8 @@ int main(int argc, char *argv[])
 						}
 						case 2:
 						{
-							wFooter->WriteXY(0, Config.statusbar_visibility, "[.b]Title:[/b] ", 1);
-							if (s.GetTitle() == UNKNOWN_TITLE)
+							Statusbar() << fmtBold << "Title: " << fmtBoldEnd;
+							if (s.GetTitle() == EMPTY_TAG)
 								s.SetTitle(wFooter->GetString());
 							else
 								s.SetTitle(wFooter->GetString(s.GetTitle()));
@@ -1214,8 +1208,8 @@ int main(int argc, char *argv[])
 						}
 						case 3:
 						{
-							wFooter->WriteXY(0, Config.statusbar_visibility, "[.b]Artist:[/b] ", 1);
-							if (s.GetArtist() == UNKNOWN_ARTIST)
+							Statusbar() << fmtBold << "Artist: " << fmtBoldEnd;
+							if (s.GetArtist() == EMPTY_TAG)
 								s.SetArtist(wFooter->GetString());
 							else
 								s.SetArtist(wFooter->GetString(s.GetArtist()));
@@ -1224,8 +1218,8 @@ int main(int argc, char *argv[])
 						}
 						case 4:
 						{
-							wFooter->WriteXY(0, Config.statusbar_visibility, "[.b]Album:[/b] ", 1);
-							if (s.GetAlbum() == UNKNOWN_ALBUM)
+							Statusbar() << fmtBold << "Album: " << fmtBoldEnd;
+							if (s.GetAlbum() == EMPTY_TAG)
 								s.SetAlbum(wFooter->GetString());
 							else
 								s.SetAlbum(wFooter->GetString(s.GetAlbum()));
@@ -1234,7 +1228,7 @@ int main(int argc, char *argv[])
 						}
 						case 5:
 						{
-							wFooter->WriteXY(0, Config.statusbar_visibility, "[.b]Year:[/b] ", 1);
+							Statusbar() << fmtBold << "Year: " << fmtBoldEnd;
 							if (s.GetYear() == EMPTY_TAG)
 								s.SetYear(wFooter->GetString(4));
 							else
@@ -1244,7 +1238,7 @@ int main(int argc, char *argv[])
 						}
 						case 6:
 						{
-							wFooter->WriteXY(0, Config.statusbar_visibility, "[.b]Track:[/b] ", 1);
+							Statusbar() << fmtBold << "Track: " << fmtBoldEnd;
 							if (s.GetTrack() == EMPTY_TAG)
 								s.SetTrack(wFooter->GetString(3));
 							else
@@ -1254,7 +1248,7 @@ int main(int argc, char *argv[])
 						}
 						case 7:
 						{
-							wFooter->WriteXY(0, Config.statusbar_visibility, "[.b]Genre:[/b] ", 1);
+							Statusbar() << fmtBold << "Genre: " << fmtBoldEnd;
 							if (s.GetGenre() == EMPTY_TAG)
 								s.SetGenre(wFooter->GetString());
 							else
@@ -1264,7 +1258,7 @@ int main(int argc, char *argv[])
 						}
 						case 8:
 						{
-							wFooter->WriteXY(0, Config.statusbar_visibility, "[.b]Comment:[/b] ", 1);
+							Statusbar() << fmtBold << "Comment: " << fmtBoldEnd;
 							if (s.GetComment() == EMPTY_TAG)
 								s.SetComment(wFooter->GetString());
 							else
@@ -1604,7 +1598,7 @@ int main(int argc, char *argv[])
 							if (wCurrent == mEditorTagTypes)
 							{
 								LockStatusbar();
-								wFooter->WriteXY(0, Config.statusbar_visibility, "Number tracks? [y/n] ", 1);
+								Statusbar() << "Number tracks? [y/n] ";
 								curs_set(1);
 								int in = 0;
 								do
@@ -1665,7 +1659,7 @@ int main(int argc, char *argv[])
 								string extension = old_name.substr(last_dot);
 								old_name = old_name.substr(0, last_dot);
 								LockStatusbar();
-								wFooter->WriteXY(0, Config.statusbar_visibility, "[.b]New filename:[/b] ", 1);
+								Statusbar() << fmtBold << "New filename: " << fmtBoldEnd;
 								string new_name = wFooter->GetString(old_name);
 								UnlockStatusbar();
 								if (!new_name.empty() && new_name != old_name)
@@ -1715,7 +1709,7 @@ int main(int argc, char *argv[])
 					if (wCurrent == mEditorTagTypes && id != 0 && id != 4 && set != NULL)
 					{
 						LockStatusbar();
-						wFooter->WriteXY(0, Config.statusbar_visibility, "[.b]" + mEditorTagTypes->Current() + "[/b]: ", 1);
+						Statusbar() << fmtBold << mEditorTagTypes->Current() << fmtBoldEnd << ": ";
 						mEditorTags->Current().GetEmptyFields(1);
 						string new_tag = wFooter->GetString((mEditorTags->Current().*get)());
 						mEditorTags->Current().GetEmptyFields(0);
@@ -1727,7 +1721,7 @@ int main(int argc, char *argv[])
 					else if (wCurrent == mEditorTags && set != NULL)
 					{
 						LockStatusbar();
-						wFooter->WriteXY(0, Config.statusbar_visibility, "[.b]" + mEditorTagTypes->Current() + "[/b]: ", 1);
+						Statusbar() << fmtBold << mEditorTagTypes->Current() << fmtBoldEnd << ": ";
 						mEditorTags->Current().GetEmptyFields(1);
 						string new_tag = wFooter->GetString((mEditorTags->Current().*get)());
 						mEditorTags->Current().GetEmptyFields(0);
@@ -2041,7 +2035,7 @@ int main(int argc, char *argv[])
 				const string &name = wCurrent == mBrowser ? mBrowser->Current().name : mPlaylistList->Current();
 				if (current_screen != csBrowser || mBrowser->Current().type == itPlaylist)
 				{
-					wFooter->WriteXY(0, Config.statusbar_visibility, "Delete playlist " + name + " ? [y/n] ", 1);
+					Statusbar() << "Delete playlist " << name << " ? [y/n] ";
 					curs_set(1);
 					int in = 0;
 					do
@@ -2110,7 +2104,7 @@ int main(int argc, char *argv[])
 		else if (Keypressed(input, Key.SavePlaylist))
 		{
 			LockStatusbar();
-			wFooter->WriteXY(0, Config.statusbar_visibility, "Save playlist as: ", 1);
+			Statusbar() << "Save playlist as: ";
 			string playlist_name = wFooter->GetString();
 			UnlockStatusbar();
 			if (playlist_name.find("/") != string::npos)
@@ -2128,7 +2122,7 @@ int main(int argc, char *argv[])
 				else
 				{
 					LockStatusbar();
-					wFooter->WriteXY(0, Config.statusbar_visibility, "Playlist already exists, overwrite: " + playlist_name + " ? [y/n] ", 1);
+					Statusbar() << "Playlist already exists, overwrite: " << playlist_name << " ? [y/n] ";
 					curs_set(1);
 					int in = 0;
 					messages_allowed = 0;
@@ -2298,7 +2292,7 @@ int main(int argc, char *argv[])
 				}
 				else
 				{
-					int from, to;
+					size_t from, to;
 					from = to = mPlaylist->Choice();
 					// unbold now playing as if song changes during move, this won't be unbolded.
 					if (to == now_playing && to < mPlaylist->Size()-1)
@@ -2348,7 +2342,7 @@ int main(int argc, char *argv[])
 				}
 				else
 				{
-					int from, to;
+					size_t from, to;
 					from = to = mPlaylistEditor->Choice();
 					while (Keypressed(input, Key.MvSongDown) && to < mPlaylistEditor->Size()-1)
 					{
@@ -2369,7 +2363,7 @@ int main(int argc, char *argv[])
 		else if (Keypressed(input, Key.Add))
 		{
 			LockStatusbar();
-			wFooter->WriteXY(0, Config.statusbar_visibility, "Add: ", 1);
+			Statusbar() << "Add: ";
 			string path = wFooter->GetString();
 			UnlockStatusbar();
 			if (!path.empty())
@@ -2500,7 +2494,7 @@ int main(int argc, char *argv[])
 		else if (Keypressed(input, Key.SetCrossfade))
 		{
 			LockStatusbar();
-			wFooter->WriteXY(0, Config.statusbar_visibility, "Set crossfade to: ", 1);
+			Statusbar() << "Set crossfade to: ";
 			string crossfade = wFooter->GetString(3);
 			UnlockStatusbar();
 			int cf = StrToInt(crossfade);
@@ -2517,7 +2511,7 @@ int main(int argc, char *argv[])
 			if (wCurrent == mLibArtists)
 			{
 				LockStatusbar();
-				wFooter->WriteXY(0, Config.statusbar_visibility, "[.b]" + IntoStr(Config.media_lib_primary_tag) + ":[/b] ", 1);
+				Statusbar() << fmtBold << Config.media_lib_primary_tag << fmtBoldEnd << ": ";
 				string new_tag = wFooter->GetString(mLibArtists->Current());
 				UnlockStatusbar();
 				if (!new_tag.empty() && new_tag != mLibArtists->Current())
@@ -2554,7 +2548,7 @@ int main(int argc, char *argv[])
 			else if (wCurrent == mLibAlbums)
 			{
 				LockStatusbar();
-				wFooter->WriteXY(0, Config.statusbar_visibility, "[.b]Album:[/b] ", 1);
+				Statusbar() << fmtBold << "Album: " << fmtBoldEnd;
 				string new_album = wFooter->GetString(mLibAlbums->Current().second);
 				UnlockStatusbar();
 				if (!new_album.empty() && new_album != mLibAlbums->Current().second)
@@ -2647,7 +2641,7 @@ int main(int argc, char *argv[])
 			{
 				string old_dir = mEditorDirs->Current().first;
 				LockStatusbar();
-				wFooter->WriteXY(0, Config.statusbar_visibility, "Directory: ", 1);
+				Statusbar() << fmtBold << "Directory: " << fmtBoldEnd;
 				string new_dir = wFooter->GetString(old_dir);
 				UnlockStatusbar();
 				if (!new_dir.empty() && new_dir != old_dir)
@@ -2669,7 +2663,7 @@ int main(int argc, char *argv[])
 			{
 				string old_dir = mBrowser->Current().name;
 				LockStatusbar();
-				wFooter->WriteXY(0, Config.statusbar_visibility, "[.b]Directory:[/b] ", 1);
+				Statusbar() << fmtBold << "Directory: " << fmtBoldEnd;
 				string new_dir = wFooter->GetString(old_dir);
 				UnlockStatusbar();
 				if (!new_dir.empty() && new_dir != old_dir)
@@ -2697,7 +2691,7 @@ int main(int argc, char *argv[])
 			{
 				string old_name = wCurrent == mPlaylistList ? mPlaylistList->Current() : mBrowser->Current().name;
 				LockStatusbar();
-				wFooter->WriteXY(0, Config.statusbar_visibility, "[.b]Playlist:[/b] ", 1);
+				Statusbar() << fmtBold << "Playlist: " << fmtBoldEnd;
 				string new_name = wFooter->GetString(old_name);
 				UnlockStatusbar();
 				if (!new_name.empty() && new_name != old_name)
@@ -2777,7 +2771,7 @@ int main(int argc, char *argv[])
 				continue;
 			}
 			LockStatusbar();
-			wFooter->WriteXY(0, Config.statusbar_visibility, "Position to go (in %): ", 1);
+			Statusbar() << "Position to go (in %): ";
 			string position = wFooter->GetString(3);
 			int newpos = StrToInt(position);
 			if (newpos > 0 && newpos < 100 && !position.empty())
@@ -2924,7 +2918,7 @@ int main(int argc, char *argv[])
 							mDialog->Scroll(wEnd);
 					}
 					
-					int id = mDialog->Choice();
+					size_t id = mDialog->Choice();
 					
 					redraw_screen = 1;
 					if (current_screen == csLibrary)
@@ -2953,7 +2947,7 @@ int main(int argc, char *argv[])
 					else if (id == 1)
 					{
 						LockStatusbar();
-						wFooter->WriteXY(0, Config.statusbar_visibility, "Save playlist as: ", 1);
+						Statusbar() << "Save playlist as: ";
 						string playlist = wFooter->GetString();
 						UnlockStatusbar();
 						if (!playlist.empty())
@@ -3038,7 +3032,7 @@ int main(int argc, char *argv[])
 				found_pos = -1;
 				vFoundPositions.clear();
 				LockStatusbar();
-				wFooter->WriteXY(0, Config.statusbar_visibility, "Find " + how + ": ", 1);
+				Statusbar() << "Find " << how << ": ";
 				string findme = wFooter->GetString();
 				UnlockStatusbar();
 				timer = time(NULL);
@@ -3149,7 +3143,7 @@ int main(int argc, char *argv[])
 			else if (wCurrent == mLibArtists)
 			{
 				LockStatusbar();
-				wFooter->WriteXY(0, Config.statusbar_visibility, "Tag type ? [[.b]a[/b]rtist/[.b]y[/b]ear/[.b]g[/b]enre/[.b]c[/b]omposer/[.b]p[/b]erformer] ", 1);
+				Statusbar() << "Tag type ? [" << fmtBold << 'a' << fmtBoldEnd << "rtist/" << fmtBold << 'y' << fmtBoldEnd << "ear/" << fmtBold << 'g' << fmtBoldEnd << "enre/" << fmtBold << 'c' << fmtBoldEnd << "omposer/" << fmtBold << 'p' << fmtBoldEnd << "erformer] ";
 				int item;
 				curs_set(1);
 				do
@@ -3302,7 +3296,7 @@ int main(int argc, char *argv[])
 					default:
 						break;
 				}
-				if (*artist != UNKNOWN_ARTIST)
+				if (*artist != EMPTY_TAG)
 				{
 					wPrev = wCurrent;
 					wCurrent = sInfo;
@@ -3393,7 +3387,7 @@ int main(int argc, char *argv[])
 					default:
 						break;
 				}
-				if (s->GetArtist() != UNKNOWN_ARTIST && s->GetTitle() != UNKNOWN_TITLE)
+				if (s->GetArtist() != EMPTY_TAG && s->GetTitle() != EMPTY_TAG)
 				{
 					wPrev = wCurrent;
 					prev_screen = current_screen;

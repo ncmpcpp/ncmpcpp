@@ -53,6 +53,8 @@ bool Keypressed(int, const int *);
 void WindowTitle(const string &);
 void EscapeUnallowedChars(string &);
 
+Window &operator<<(Window &, mpd_TagItems);
+
 string IntoStr(mpd_TagItems);
 string FindSharedDir(const string &, const string &);
 string TotalPlaylistLength();
@@ -61,7 +63,9 @@ string DisplayColumns(string);
 void DisplaySongInColumns(const Song &, void *, Menu<Song> *);
 void DisplaySong(const Song &, void * = &Config.song_list_format, Menu<Song> * = NULL);
 void GetInfo(Song &, Scrollpad &);
+
 void ShowMessage(const char *, ...);
+Window &Statusbar();
 
 #endif
 

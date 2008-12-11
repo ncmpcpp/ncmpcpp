@@ -20,11 +20,11 @@
 
 #include "window.h"
 
-void InitScreen()
+void InitScreen(bool enable_colors)
 {
 	setlocale(LC_ALL, "");
 	initscr();
-	if (has_colors())
+	if (has_colors() && enable_colors)
 	{
 		start_color();
 		use_default_colors();
@@ -201,27 +201,35 @@ void Window::Recreate()
 	keypad(itsWindow, 1);
 }
 
-void Window::MoveTo(int newx, int newy)
+void Window::MoveTo(size_t newx, size_t newy)
 {
-	if (newx < 0 || newy < 0 || (newx == itsStartX && newy == itsStartY))
+	if (newx == itsStartX && newy == itsStartY)
 		return;
-	else
+	
+	/*if (newx > size_t(COLS)
+	||  newy > size_t(LINES)
+	||  itsWidth+newx > size_t(COLS)
+	||  itsHeight+newy > size_t(LINES))
+		throw BadSize();*/
+	
+	itsStartX = newx;
+	itsStartY = newy;
+	if (itsBorder != brNone)
 	{
-		itsStartX = newx;
-		itsStartY = newy;
-		if (itsBorder != brNone)
-		{
-			itsStartX++;
-			itsStartY++;
-		}
-		if (!itsTitle.empty())
-			itsStartY += 2;
-		mvwin(itsWindow, itsStartY, itsStartX);
+		itsStartX++;
+		itsStartY++;
 	}
+	if (!itsTitle.empty())
+		itsStartY += 2;
+	mvwin(itsWindow, itsStartY, itsStartX);
 }
 
-void Window::Resize(int width, int height)
+void Window::Resize(size_t width, size_t height)
 {
+	/*if (width+itsStartX > size_t(COLS)
+	||  height+itsStartY > size_t(LINES))
+		throw BadSize();*/
+	
 	if (itsBorder != brNone)
 	{
 		delwin(itsWinBorder);
@@ -234,7 +242,7 @@ void Window::Resize(int width, int height)
 	if (!itsTitle.empty())
 		height -= 2;
 	
-	if (height > 0 && width > 0 && wresize(itsWindow, height, width) == OK)
+	if (wresize(itsWindow, height, width) == OK)
 	{
 		itsHeight = height;
 		itsWidth = width;
@@ -282,7 +290,7 @@ void Window::Clear(bool)
 
 void Window::Hide(char x) const
 {
-	for (int i = 0; i < GetHeight(); i++)
+	for (size_t i = 0; i < GetHeight(); i++)
 		mvhline(i+GetStartY(), GetStartX(), x, GetWidth());
 	refresh();
 }

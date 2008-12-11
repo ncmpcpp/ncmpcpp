@@ -24,27 +24,10 @@
 extern ncmpcpp_config Config;
 
 string EMPTY_TAG;
-string UNKNOWN_ARTIST;
-string UNKNOWN_TITLE;
-string UNKNOWN_ALBUM;
 
 void DefineEmptyTags()
 {
-	/*if (Config.empty_tags_color != clDefault)
-	{
-		const string et_col = IntoStr(Config.empty_tags_color);
-		EMPTY_TAG = "[." + et_col + "]<empty>[/" + et_col + "]";
-		UNKNOWN_ARTIST = "[." + et_col + "]<no artist>[/" + et_col + "]";
-		UNKNOWN_TITLE = "[." + et_col + "]<no title>[/" + et_col + "]";
-		UNKNOWN_ALBUM = "[." + et_col + "]<no album>[/" + et_col + "]";
-	}
-	else
-	{*/
-		EMPTY_TAG = "<empty>";
-		UNKNOWN_ARTIST = "<empty>";
-		UNKNOWN_TITLE = "<empty>";
-		UNKNOWN_ALBUM = "<empty>";
-//	}
+	EMPTY_TAG = "<empty>";
 }
 
 Song::Song(mpd_Song *s, bool copy_ptr) : itsSong(s),
@@ -138,17 +121,17 @@ string Song::GetDirectory() const
 
 string Song::GetArtist() const
 {
-	return !itsSong->artist ? (itsGetEmptyFields ? "" : UNKNOWN_ARTIST) : itsSong->artist;
+	return !itsSong->artist ? (itsGetEmptyFields ? "" : EMPTY_TAG) : itsSong->artist;
 }
 
 string Song::GetTitle() const
 {
-	return !itsSong->title ? (itsGetEmptyFields ? "" : UNKNOWN_TITLE) : itsSong->title;
+	return !itsSong->title ? (itsGetEmptyFields ? "" : EMPTY_TAG) : itsSong->title;
 }
 
 string Song::GetAlbum() const
 {
-	return !itsSong->album ? (itsGetEmptyFields ? "" : UNKNOWN_ALBUM) : itsSong->album;
+	return !itsSong->album ? (itsGetEmptyFields ? "" : EMPTY_TAG) : itsSong->album;
 }
 
 string Song::GetTrack() const

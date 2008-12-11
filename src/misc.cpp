@@ -21,10 +21,10 @@
 #include <algorithm>
 #include "misc.h"
 
-int Abs(int num)
+/*int Abs(int num)
 {
 	return (num < 0 ? -num : num);
-}
+}*/
 
 void ToLower(string &s)
 {
@@ -43,10 +43,10 @@ string IntoStr(int l)
 	return ss.str();
 }
 
-string IntoStr(double l, int precision)
+/*string IntoStr(double l, int precision)
 {
 	std::stringstream ss;
 	ss << std::fixed << std::setprecision(precision) << l;
 	return ss.str();
-}
+}*/
 

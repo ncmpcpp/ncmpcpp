@@ -123,9 +123,9 @@ void Scrollpad::MoveTo(size_t x, size_t y)
 
 void Scrollpad::Resize(size_t width, size_t height)
 {
-	if (width+itsStartX > size_t(COLS)
+	/*if (width+itsStartX > size_t(COLS)
 	||  height+itsStartY > size_t(LINES))
-		throw BadSize();
+		throw BadSize();*/
 	
 	if (itsBorder != brNone)
 	{

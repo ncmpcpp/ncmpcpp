@@ -121,7 +121,7 @@ namespace
 		
 		try
 		{
-			for (int i = mask.find("%"); i != string::npos; i = mask.find("%"))
+			for (size_t i = mask.find("%"); i != string::npos; i = mask.find("%"))
 			{
 				tags.push_back(make_pair(mask.at(i+1), ""));
 				mask = mask.substr(i+2);
@@ -197,7 +197,7 @@ SongSetFunction IntoSetFunction(mpd_TagItems tag)
 string FindSharedDir(Menu<Song> *menu)
 {
 	SongList list;
-	for (int i = 0; i < menu->Size(); i++)
+	for (size_t i = 0; i < menu->Size(); i++)
 		list.push_back(&menu->at(i));
 	return FindSharedDir(list);
 }
@@ -215,7 +215,7 @@ string FindSharedDir(const SongList &v)
 				i++;
 			result = result.substr(0, i);
 		}
-		int slash = result.find_last_of("/");
+		size_t slash = result.find_last_of("/");
 		result = slash != string::npos ? result.substr(0, slash) : "/";
 	}
 	return result;
@@ -562,13 +562,14 @@ void __deal_with_filenames(SongList &v)
 					case 0:
 					{
 						LockStatusbar();
-						wFooter->WriteXY(0, Config.statusbar_visibility, "Pattern: ", 1);
+						Statusbar() << "Pattern: ";
 						string new_pattern = wFooter->GetString(Config.pattern);
 						UnlockStatusbar();
 						if (!new_pattern.empty())
 						{
 							Config.pattern = new_pattern;
-							Main->at(0) = "Pattern: " + Config.pattern;
+							Main->at(0) = "Pattern: ";
+							Main->at(0) += Config.pattern;
 						}
 						break;
 					}
@@ -624,7 +625,7 @@ void __deal_with_filenames(SongList &v)
 						}
 						else
 						{
-							for (int i = 0; i < patterns_list.size(); i++)
+							for (size_t i = 0; i < patterns_list.size(); i++)
 							{
 								if (patterns_list[i] == Config.pattern)
 								{
