@@ -358,57 +358,59 @@ string FindSharedDir(const string &one, const string &two)
 	return i != string::npos ? result.substr(0, i) : "/";
 }
 
-string TotalPlaylistLength()
+void DisplayTotalPlaylistLength(Window &w)
 {
 	const int MINUTE = 60;
 	const int HOUR = 60*MINUTE;
 	const int DAY = 24*HOUR;
 	const int YEAR = 365*DAY;
-	string result;
 	int length = 0;
+	
 	for (size_t i = 0; i < mPlaylist->Size(); i++)
 		length += mPlaylist->at(i).GetTotalLength();
 	
-	if (!length)
-		return result;
+	w << '(' << mPlaylist->Size() << (mPlaylist->Size() == 1 ? " item" : " items");
 	
-	result += ", length: ";
-	
-	int years = length/YEAR;
-	if (years)
-	{
-		result += IntoStr(years) + (years == 1 ? " year" : " years");
-		length -= years*YEAR;
-		if (length)
-			result += ", ";
-	}
-	int days = length/DAY;
-	if (days)
-	{
-		result += IntoStr(days) + (days == 1 ? " day" : " days");
-		length -= days*DAY;
-		if (length)
-			result += ", ";
-	}
-	int hours = length/HOUR;
-	if (hours)
-	{
-		result += IntoStr(hours) + (hours == 1 ? " hour" : " hours");
-		length -= hours*HOUR;
-		if (length)
-			result += ", ";
-	}
-	int minutes = length/MINUTE;
-	if (minutes)
-	{
-		result += IntoStr(minutes) + (minutes == 1 ? " minute" : " minutes");
-		length -= minutes*MINUTE;
-		if (length)
-			result += ", ";
-	}
 	if (length)
-		result += IntoStr(length) + (length == 1 ? " second" : " seconds");
-	return result;
+	{
+		w << ", length: ";
+		int years = length/YEAR;
+		if (years)
+		{
+			w << years << (years == 1 ? " year" : " years");
+			length -= years*YEAR;
+			if (length)
+				w << ", ";
+		}
+		int days = length/DAY;
+		if (days)
+		{
+			w << days << (days == 1 ? " day" : " days");
+			length -= days*DAY;
+			if (length)
+				w << ", ";
+		}
+		int hours = length/HOUR;
+		if (hours)
+		{
+			w << hours << (hours == 1 ? " hour" : " hours");
+			length -= hours*HOUR;
+			if (length)
+				w << ", ";
+		}
+		int minutes = length/MINUTE;
+		if (minutes)
+		{
+			w << minutes << (minutes == 1 ? " minute" : " minutes");
+			length -= minutes*MINUTE;
+			if (length)
+				w << ", ";
+		}
+		if (length)
+			w << length << (length == 1 ? " second" : " seconds");
+	}
+	w << ')';
+	w.Refresh();
 }
 
 void DisplayStringPair(const StringPair &pair, void *, Menu<StringPair> *menu)

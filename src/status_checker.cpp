@@ -67,7 +67,7 @@ int old_playing;
 
 time_t time_of_statusbar_lock;
 
-string playlist_stats;
+//string playlist_stats;
 string volume_state;
 string switch_state;
 
@@ -208,12 +208,9 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 		
 		if (mPlaylist->Empty())
 		{
-			playlist_stats.clear();
 			mPlaylist->Reset();
 			ShowMessage("Cleared playlist!");
 		}
-		else
-			playlist_stats = "(" + IntoStr(mPlaylist->Size()) + (mPlaylist->Size() == 1 ? " item" : " items") + TotalPlaylistLength() + ")";
 		
 		if (!block_item_list_update)
 		{
@@ -332,9 +329,19 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 			{
 				string tracklength;
 				if (s.GetTotalLength())
-					tracklength = " [" + Song::ShowTime(elapsed) + "/" + s.GetLength() + "]";
+				{
+					tracklength = " [";
+					tracklength += Song::ShowTime(elapsed);
+					tracklength += "/";
+					tracklength += s.GetLength();
+					tracklength += "]";
+				}
 				else
-					tracklength = " [" + Song::ShowTime(elapsed) + "]";
+				{
+					tracklength = " [";
+					tracklength += Song::ShowTime(elapsed);
+					tracklength += "]";
+				}
 				my_string_t playing_song = TO_WSTRING(s.toString(Config.song_status_format));
 				
 				const size_t max_length_without_scroll = wFooter->GetWidth()-player_state.length()-tracklength.length();
@@ -444,7 +451,9 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 	if ((changed.Volume) && Config.header_visibility)
 	{
 		int vol = Mpd->GetVolume();
-		volume_state = " Volume: " + IntoStr(vol) + "%";
+		volume_state = " Volume: ";
+		volume_state += IntoStr(vol);
+		volume_state += "%";
 		wHeader->SetColor(Config.volume_color);
 		wHeader->WriteXY(wHeader->GetWidth()-volume_state.length(), 0, 1, "%s", volume_state.c_str());
 		wHeader->SetColor(Config.header_color);

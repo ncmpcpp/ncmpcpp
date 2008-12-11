@@ -23,12 +23,7 @@
 
 extern ncmpcpp_config Config;
 
-string EMPTY_TAG;
-
-void DefineEmptyTags()
-{
-	EMPTY_TAG = "<empty>";
-}
+string EMPTY_TAG = "<empty>";
 
 Song::Song(mpd_Song *s, bool copy_ptr) : itsSong(s),
 					 itsSlash(string::npos),

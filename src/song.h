@@ -31,8 +31,6 @@
 
 using std::string;
 
-void DefineEmptyTags();
-
 class Song
 {
 	public:

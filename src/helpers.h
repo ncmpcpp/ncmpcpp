@@ -57,7 +57,7 @@ Window &operator<<(Window &, mpd_TagItems);
 
 string IntoStr(mpd_TagItems);
 string FindSharedDir(const string &, const string &);
-string TotalPlaylistLength();
+void DisplayTotalPlaylistLength(Window &);
 void DisplayStringPair(const StringPair &, void *, Menu<StringPair> *);
 string DisplayColumns(string);
 void DisplaySongInColumns(const Song &, void *, Menu<Song> *);

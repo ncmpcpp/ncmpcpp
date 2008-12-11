@@ -173,7 +173,6 @@ int main(int argc, char *argv[])
 	DefaultKeys(Key);
 	ReadConfiguration(Config);
 	ReadKeys(Key);
-	DefineEmptyTags();
 	
 	Mpd = new Connection;
 	
@@ -181,8 +180,6 @@ int main(int argc, char *argv[])
 		Mpd->SetHostname(getenv("MPD_HOST"));
 	if (getenv("MPD_PORT"))
 		Mpd->SetPort(atoi(getenv("MPD_PORT")));
-	if (getenv("MPD_PASSWORD"))
-		Mpd->SetPassword(getenv("MPD_PASSWORD"));
 	
 	if (Config.mpd_host != "localhost")
 		Mpd->SetHostname(Config.mpd_host);
@@ -425,8 +422,8 @@ int main(int argc, char *argv[])
 				wHeader->WriteXY(0, 0, 1, "%s", title.c_str());
 				wHeader->Bold(0);
 				
-				if (current_screen == csPlaylist && !playlist_stats.empty())
-					wHeader->WriteXY(title.length(), 0, 0, "%s", playlist_stats.c_str());
+				if (current_screen == csPlaylist)
+					DisplayTotalPlaylistLength(*wHeader);
 				else if (current_screen == csBrowser)
 				{
 					size_t max_length_without_scroll = wHeader->GetWidth()-volume_state.length()-title.length();
