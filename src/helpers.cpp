@@ -824,15 +824,15 @@ void GetInfo(Song &s, Scrollpad &info)
 		s.SetComment(f.tag()->comment().to8Bit(UNICODE));
 #	endif // HAVE_TAGLIB_H
 	
-	info << fmtBold << clWhite << "Filename: " << fmtBoldEnd << clGreen << s.GetName() << "\n" << clEnd;
-	info << fmtBold << "Directory: " << fmtBoldEnd << clGreen << ShowTagInInfoScreen(s.GetDirectory()) << "\n\n" << clEnd;
-	info << fmtBold << "Length: " << fmtBoldEnd << clGreen << s.GetLength() << "\n" << clEnd;
+	info << fmtBold << Config.color1 << "Filename: " << fmtBoldEnd << Config.color2 << s.GetName() << "\n" << clEnd;
+	info << fmtBold << "Directory: " << fmtBoldEnd << Config.color2 << ShowTagInInfoScreen(s.GetDirectory()) << "\n\n" << clEnd;
+	info << fmtBold << "Length: " << fmtBoldEnd << Config.color2 << s.GetLength() << "\n" << clEnd;
 #	ifdef HAVE_TAGLIB_H
 	if (!f.isNull())
 	{
-		info << fmtBold << "Bitrate: " << fmtBoldEnd << clGreen << f.audioProperties()->bitrate() << " kbps\n" << clEnd;
-		info << fmtBold << "Sample rate: " << fmtBoldEnd << clGreen << f.audioProperties()->sampleRate() << " Hz\n" << clEnd;
-		info << fmtBold << "Channels: " << fmtBoldEnd << clGreen << (f.audioProperties()->channels() == 1 ? "Mono" : "Stereo") << "\n" << clDefault;
+		info << fmtBold << "Bitrate: " << fmtBoldEnd << Config.color2 << f.audioProperties()->bitrate() << " kbps\n" << clEnd;
+		info << fmtBold << "Sample rate: " << fmtBoldEnd << Config.color2 << f.audioProperties()->sampleRate() << " Hz\n" << clEnd;
+		info << fmtBold << "Channels: " << fmtBoldEnd << Config.color2 << (f.audioProperties()->channels() == 1 ? "Mono" : "Stereo") << "\n" << clDefault;
 	}
 	else
 		info << clDefault;

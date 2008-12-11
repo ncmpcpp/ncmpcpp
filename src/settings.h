@@ -111,9 +111,8 @@ struct ncmpcpp_config
 	Buffer selected_item_prefix;
 	Buffer selected_item_suffix;
 	
-	string color1;
-	string color2;
-	
+	Color color1;
+	Color color2;
 	Color empty_tags_color;
 	Color header_color;
 	Color volume_color;

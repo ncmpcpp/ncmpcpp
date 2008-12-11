@@ -259,7 +259,7 @@ void DisplayTag(const Song &s, void *data, Menu<Song> *menu)
 			if (s.GetNewName().empty())
 				*menu << s.GetName();
 			else
-				*menu << s.GetName() << clGreen << " -> " << clEnd << s.GetNewName();
+				*menu << s.GetName() << Config.color2 << " -> " << clEnd << s.GetNewName();
 			return;
 		default:
 			return;
@@ -336,12 +336,12 @@ bool GetSongTags(Song &s)
 	
 	mTagEditor->Highlight(8);
 	
-	mTagEditor->at(0) << fmtBold << clWhite << "Song name: " << fmtBoldEnd << clGreen << s.GetName() << clEnd;
-	mTagEditor->at(1) << fmtBold << clWhite << "Location in DB: " << fmtBoldEnd << clGreen << ShowTag(s.GetDirectory()) << clEnd;
-	mTagEditor->at(3) << fmtBold << clWhite << "Length: " << fmtBoldEnd << clGreen << s.GetLength() << clEnd;
-	mTagEditor->at(4) << fmtBold << clWhite << "Bitrate: " << fmtBoldEnd << clGreen << f.audioProperties()->bitrate() << " kbps" << clEnd;
-	mTagEditor->at(5) << fmtBold << clWhite << "Sample rate: " << fmtBoldEnd << clGreen << f.audioProperties()->sampleRate() << " Hz" << clEnd;
-	mTagEditor->at(6) << fmtBold << clWhite << "Channels: " << fmtBoldEnd << clGreen << (f.audioProperties()->channels() == 1 ? "Mono" : "Stereo") << clDefault;
+	mTagEditor->at(0) << fmtBold << Config.color1 << "Song name: " << fmtBoldEnd << Config.color2 << s.GetName() << clEnd;
+	mTagEditor->at(1) << fmtBold << Config.color1 << "Location in DB: " << fmtBoldEnd << Config.color2 << ShowTag(s.GetDirectory()) << clEnd;
+	mTagEditor->at(3) << fmtBold << Config.color1 << "Length: " << fmtBoldEnd << Config.color2 << s.GetLength() << clEnd;
+	mTagEditor->at(4) << fmtBold << Config.color1 << "Bitrate: " << fmtBoldEnd << Config.color2 << f.audioProperties()->bitrate() << " kbps" << clEnd;
+	mTagEditor->at(5) << fmtBold << Config.color1 << "Sample rate: " << fmtBoldEnd << Config.color2 << f.audioProperties()->sampleRate() << " Hz" << clEnd;
+	mTagEditor->at(6) << fmtBold << Config.color1 << "Channels: " << fmtBoldEnd << Config.color2 << (f.audioProperties()->channels() == 1 ? "Mono" : "Stereo") << clDefault;
 	
 	mTagEditor->at(8) << fmtBold << "Title:" << fmtBoldEnd << ' ' << ShowTag(s.GetTitle());
 	mTagEditor->at(9) << fmtBold << "Artist:" << fmtBoldEnd << ' ' << ShowTag(s.GetArtist());
@@ -502,7 +502,7 @@ void __deal_with_filenames(SongList &v)
 		*Legend << "%C - comment\n\n";
 		*Legend << fmtBold << "Files:\n" << fmtBoldEnd;
 		for (SongList::const_iterator it = v.begin(); it != v.end(); it++)
-			*Legend << clGreen << " * " << clEnd << (*it)->GetName() << "\n";
+			*Legend << Config.color2 << " * " << clEnd << (*it)->GetName() << "\n";
 		Legend->Flush();
 		
 		Preview = Legend->EmptyClone();
@@ -613,7 +613,7 @@ void __deal_with_filenames(SongList &v)
 								}
 								if (!preview)
 									s.SetNewName(TO_STRING(new_file.Str()) + extension);
-								*Preview << file << clGreen << " -> " << clEnd << new_file << extension << "\n\n";
+								*Preview << file << Config.color2 << " -> " << clEnd << new_file << extension << "\n\n";
 							}
 						}
 						if (!success)

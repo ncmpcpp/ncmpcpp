@@ -1248,7 +1248,7 @@ int main(int argc, char *argv[])
 								mSearcher->InsertSeparator(15);
 								mSearcher->InsertOption(16, make_pair((Buffer *)0, (Song *)0), 1, 1);
 								mSearcher->at(16).first = new Buffer();
-								*mSearcher->at(16).first << clWhite << "Search results: " << clGreen << "Found " << found  << (found > 1 ? " songs" : " song") << clDefault;
+								*mSearcher->at(16).first << Config.color1 << "Search results: " << Config.color2 << "Found " << found  << (found > 1 ? " songs" : " song") << clDefault;
 								mSearcher->InsertSeparator(17);
 								UpdateFoundList();
 								ShowMessage("Searching finished!");

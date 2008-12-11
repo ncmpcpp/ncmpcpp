@@ -208,7 +208,7 @@ void * GetArtistInfo(void *ptr)
 	
 	*sInfo << fmtBold << "\n\nSimilar artists:\n" << fmtBoldEnd;
 	for (size_t i = 1; i < similar.size(); i++)
-		*sInfo << "\n" << clGreen << " * " << clEnd << similar[i] << " (" << urls[i] << ")";
+		*sInfo << "\n" << Config.color2 << " * " << clEnd << similar[i] << " (" << urls[i] << ")";
 	
 	*sInfo << "\n\n" << urls.front();
 	
