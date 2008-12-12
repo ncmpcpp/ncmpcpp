@@ -385,7 +385,7 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 		else
 		{
 			if (!block_statusbar_update && Config.statusbar_visibility)
-				wFooter->WriteXY(0, 1, 1, 0);
+				wFooter->WriteXY(0, 1, 1, "");
 		}
 	}
 	
