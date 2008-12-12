@@ -2974,62 +2974,151 @@ int main(int argc, char *argv[])
 		}
 		else if (Keypressed(input, Key.FindForward) || Keypressed(input, Key.FindBackward))
 		{
-			if ((current_screen != csHelp && current_screen != csSearcher)
-			||  (current_screen == csSearcher && !mSearcher->Current().first))
+			if ((current_screen == csHelp
+			||   current_screen == csSearcher
+			||   current_screen == csTinyTagEditor
+			||   wCurrent == mEditorTagTypes)
+			&&  (current_screen != csSearcher
+			|| mSearcher->Current().first))
+				continue;
+			
+			string how = Keypressed(input, Key.FindForward) ? "forward" : "backward";
+			found_pos = -1;
+			vFoundPositions.clear();
+			LockStatusbar();
+			Statusbar() << "Find " << how << ": ";
+			string findme = wFooter->GetString();
+			UnlockStatusbar();
+			timer = time(NULL);
+			if (findme.empty())
+				continue;
+			ToLower(findme);
+			
+			ShowMessage("Searching...");
+			List *mList = reinterpret_cast<Menu<Song> *>(wCurrent);
+			for (size_t i = (wCurrent == mSearcher ? search_engine_static_options : 0); i < mList->Size(); i++)
 			{
-				string how = Keypressed(input, Key.FindForward) ? "forward" : "backward";
-				found_pos = -1;
-				vFoundPositions.clear();
-				LockStatusbar();
-				Statusbar() << "Find " << how << ": ";
-				string findme = wFooter->GetString();
-				UnlockStatusbar();
-				timer = time(NULL);
-				if (findme.empty())
-					continue;
-				ToLower(findme);
-				
-				ShowMessage("Searching...");
-				List *mList = reinterpret_cast<Menu<Song> *>(wCurrent);
-				for (size_t i = (wCurrent == mSearcher ? search_engine_static_options-1 : 0); i < mList->Size(); i++)
+				string name;
+				switch (current_screen)
 				{
-					string name;
-					switch (current_screen)
+					case csPlaylist:
+						name = mPlaylist->at(i).toString(Config.song_list_format);
+						break;
+					case csBrowser:
+						switch (mBrowser->at(i).type)
+						{
+							case itDirectory:
+								name = mBrowser->at(i).name;
+								break;
+							case itSong:
+								name = mBrowser->at(i).song->toString(Config.song_list_format);
+								break;
+							case itPlaylist:
+								name = Config.browser_playlist_prefix.Str();
+								name += mBrowser->at(i).name;
+								break;
+						}
+						break;
+					case csSearcher:
+						name = mSearcher->at(i).second->toString(Config.song_list_format);
+						break;
+					case csLibrary:
+						if (wCurrent == mLibArtists)
+							name = mLibArtists->at(i);
+						else if (wCurrent == mLibAlbums)
+							name = mLibAlbums->at(i).first;
+						else
+							name = mLibSongs->at(i).toString(Config.song_library_format);
+						break;
+					case csPlaylistEditor:
+						if (wCurrent == mPlaylistList)
+							name = mPlaylistList->at(i);
+						else
+							name = mPlaylistEditor->at(i).toString(Config.song_list_format);
+						break;
+					case csTagEditor:
+						if (wCurrent == mEditorLeftCol)
+							name = mEditorLeftCol->at(i).first;
+						else
+						{
+							const Song &s = mEditorTags->at(i);
+							switch (mEditorTagTypes->Choice())
+							{
+								case 0:
+									name = s.GetTitle();
+									break;
+								case 1:
+									name = s.GetArtist();
+									break;
+								case 2:
+									name = s.GetAlbum();
+									break;
+								case 3:
+									name = s.GetYear();
+									break;
+								case 4:
+									name = s.GetTrack();
+									break;
+								case 5:
+									name = s.GetGenre();
+									break;
+								case 6:
+									name = s.GetComposer();
+									break;
+								case 7:
+									name = s.GetPerformer();
+									break;
+								case 8:
+									name = s.GetDisc();
+									break;
+								case 9:
+									name = s.GetComment();
+									break;
+								case 11:
+									if (s.GetNewName().empty())
+										name = s.GetName();
+									else
+									{
+										name = s.GetName();
+										name += " -> ";
+										name += s.GetNewName();
+									}
+									break;
+								default:
+									break;
+							}
+						}
+						break;
+					default:
+						break;
+				}
+				ToLower(name);
+				if (name.find(findme) != string::npos && !mList->isStatic(i))
+				{
+					vFoundPositions.push_back(i);
+					if (Keypressed(input, Key.FindForward)) // forward
 					{
-						case csPlaylist:
-							name = mPlaylist->at(i).toString(Config.columns_in_playlist ? Config.song_columns_list_format : Config.song_list_format);
-							break;
-						default:
-							break;
+						if (found_pos < 0 && i >= mList->Choice())
+							found_pos = vFoundPositions.size()-1;
 					}
-					ToLower(name);
-					if (name.find(findme) != string::npos && !mList->isStatic(i))
+					else // backward
 					{
-						vFoundPositions.push_back(i);
-						if (Keypressed(input, Key.FindForward)) // forward
-						{
-							if (found_pos < 0 && i >= mList->Choice())
-								found_pos = vFoundPositions.size()-1;
-						}
-						else // backward
-						{
-							if (i <= mList->Choice())
-								found_pos = vFoundPositions.size()-1;
-						}
+						if (i <= mList->Choice())
+							found_pos = vFoundPositions.size()-1;
 					}
 				}
-				ShowMessage("Searching finished!");
+			}
+			ShowMessage("Searching finished!");
 				
-				if (Config.wrapped_search ? vFoundPositions.empty() : found_pos < 0)
-					ShowMessage("Unable to find \"%s\"", findme.c_str());
-				else
+			if (Config.wrapped_search ? vFoundPositions.empty() : found_pos < 0)
+				ShowMessage("Unable to find \"%s\"", findme.c_str());
+			else
+			{
+				mList->Highlight(vFoundPositions[found_pos < 0 ? 0 : found_pos]);
+				if (wCurrent == mPlaylist)
 				{
-					mList->Highlight(vFoundPositions[found_pos < 0 ? 0 : found_pos]);
-					if (wCurrent == mPlaylist)
-					{
-						timer = time(NULL);
-						mPlaylist->Highlighting(1);
-					}
+					timer = time(NULL);
+					mPlaylist->Highlighting(1);
 				}
 			}
 		}
