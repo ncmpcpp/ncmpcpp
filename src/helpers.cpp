@@ -416,179 +416,151 @@ void DisplayStringPair(const StringPair &pair, void *, Menu<StringPair> *menu)
 	*menu << pair.first;
 }
 
-string DisplayColumns(string song_template)
+string DisplayColumns(string st)
 {
-	vector<string> cols;
-	for (size_t i = song_template.find(" "); i != string::npos; i = song_template.find(" "))
-	{
-		cols.push_back(song_template.substr(0, i));
-		song_template = song_template.substr(i+1);
-	}
-	cols.push_back(song_template);
+	string result;
+	size_t where = 0;
 	
-	string result, v;
-	
-	for (vector<string>::const_iterator it = cols.begin(); it != cols.end(); it++)
+	for (int width = StrToInt(GetLineValue(st, '(', ')', 1)); width; width = StrToInt(GetLineValue(st, '(', ')', 1)))
 	{
-		int width = StrToInt(GetLineValue(*it, '(', ')'));
-		char type = GetLineValue(*it, '{', '}')[0];
-		
 		width *= COLS/100.0;
+		char type = GetLineValue(st, '{', '}', 1)[0];
 		
 		switch (type)
 		{
 			case 'l':
-				v = "Time";
+				result += "Time";
 				break;
 			case 'f':
-				v = "Filename";
+				result += "Filename";
 				break;
 			case 'F':
-				v = "Full filename";
+				result += "Full filename";
 				break;
 			case 'a':
-				v = "Artist";
+				result += "Artist";
 				break;
 			case 't':
-				v = "Title";
+				result += "Title";
 				break;
 			case 'b':
-				v = "Album";
+				result += "Album";
 				break;
 			case 'y':
-				v = "Year";
+				result += "Year";
 				break;
 			case 'n':
-				v = "Track";
+				result += "Track";
 				break;
 			case 'g':
-				v = "Genre";
+				result += "Genre";
 				break;
 			case 'c':
-				v = "Composer";
+				result += "Composer";
 				break;
 			case 'p':
-				v = "Performer";
+				result += "Performer";
 				break;
 			case 'd':
-				v = "Disc";
+				result += "Disc";
 				break;
 			case 'C':
-				v = "Comment";
+				result += "Comment";
 				break;
 			default:
 				break;
 		}
+		where += width;
 		
-		v = v.substr(0, width-1);
-		for (int i = v.length(); i < width; i++, v += " ") { }
-		result += v;
+		if (result.length() > where)
+			result = result.substr(0, where);
+		else
+			for (int i = result.length(); i <= where && i < COLS; i++, result += ' ') { }
 	}
-	
-	return result.substr(0, COLS);
+	return result;
 }
 
 void DisplaySongInColumns(const Song &s, void *s_template, Menu<Song> *menu)
 {
-	/*string song_template = s_template ? *static_cast<string *>(s_template) : "";
+	string st = s_template ? *static_cast<string *>(s_template) : "";
+	size_t where = 0;
+	Color color;
 	
-	vector<string> cols;
-	for (size_t i = song_template.find(" "); i != string::npos; i = song_template.find(" "))
+	for (int width = StrToInt(GetLineValue(st, '(', ')', 1)); width; width = StrToInt(GetLineValue(st, '(', ')', 1)))
 	{
-		cols.push_back(song_template.substr(0, i));
-		song_template = song_template.substr(i+1);
-	}
-	cols.push_back(song_template);
-	
-	my_string_t result, v;
-	
-#	ifdef _UTF8
-	const wstring space = L" ";
-	const wstring open_col = L"[.";
-	const wstring close_col = L"]";
-	const wstring close_col2 = L"[/red]";
-#	else
-	const string space = " ";
-	const string open_col = "[.";
-	const string close_col = "]";
-	const string close_col2 = "[/red]";
-#	endif
-	
-	for (vector<string>::const_iterator it = cols.begin(); it != cols.end(); it++)
-	{
-		int width = StrToInt(GetLineValue(*it, '(', ')'));
-		my_string_t color = TO_WSTRING(GetLineValue(*it, '[', ']'));
-		char type = GetLineValue(*it, '{', '}')[0];
+		if (where)
+		{
+			menu->GotoXY(where, menu->Y());
+			*menu << ' ';
+			if (color != clDefault)
+				*menu << clEnd;
+		}
 		
 		width *= COLS/100.0;
+		color = IntoColor(GetLineValue(st, '[', ']', 1));
+		char type = GetLineValue(st, '{', '}', 1)[0];
 		
-		string ss;
+		string (Song::*get)() const = 0;
+		
 		switch (type)
 		{
 			case 'l':
-				ss = s.GetLength();
-				break;
-			case 'f':
-				ss = s.GetName();
+				get = &Song::GetLength;
 				break;
 			case 'F':
-				ss = s.GetFile();
+				get = &Song::GetFile;
+				break;
+			case 'f':
+				get = &Song::GetName;
 				break;
 			case 'a':
-				ss = s.GetArtist();
-				break;
-			case 't':
-				if (s.GetTitle() != EMPTY_TAG)
-					ss = s.GetTitle();
-				else
-				{
-					const string &file = s.GetName();
-					ss = !s.IsStream() ? file.substr(0, file.find_last_of(".")) : file;
-				}
+				get = &Song::GetArtist;
 				break;
 			case 'b':
-				ss = s.GetAlbum();
+				get = &Song::GetAlbum;
 				break;
 			case 'y':
-				ss = s.GetYear();
+				get = &Song::GetYear;
 				break;
 			case 'n':
-				ss = s.GetTrack();
+				get = &Song::GetTrack;
 				break;
 			case 'g':
-				ss = s.GetGenre();
+				get = &Song::GetGenre;
 				break;
 			case 'c':
-				ss = s.GetComposer();
+				get = &Song::GetComposer;
 				break;
 			case 'p':
-				ss = s.GetPerformer();
+				get = &Song::GetPerformer;
 				break;
 			case 'd':
-				ss = s.GetDisc();
+				get = &Song::GetDisc;
 				break;
 			case 'C':
-				ss = s.GetComment();
+				get = &Song::GetComment;
+				break;
+			case 't':
+				if (!s.GetTitle().empty())
+					get = &Song::GetTitle;
+				else
+					get = &Song::GetName;
 				break;
 			default:
 				break;
 		}
-		
-		v = TO_WSTRING(ss.substr(0, width-1));
-		for (int i = v.length(); i < width; i++, v += space) { }
-		if (!color.empty())
-		{
-			result += open_col;
-			result += color;
-			result += close_col;
-		}
-		result += v;
-		if (!color.empty())
-			result += close_col2;
+		if (color != clDefault)
+			*menu << color;
+		whline(menu->Raw(), 32, menu->GetWidth()-where);
+		string tag = (s.*get)();
+		if (!tag.empty())
+			*menu << tag;
+		else
+			*menu << Config.empty_tag;
+		where += width;
 	}
-	
-	return TO_STRING(result);*/
-	*menu << "dupa";
+	if (color != clDefault)
+		*menu << clEnd;
 }
 
 void DisplaySong(const Song &s, void *data, Menu<Song> *menu)

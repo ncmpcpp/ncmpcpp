@@ -127,6 +127,9 @@ Window::~Window()
 
 void Window::SetColor(Color col, Color background)
 {
+	if (col == clDefault)
+		col = itsBaseColor;
+	
 	if (col != clDefault)
 		wattron(itsWindow, COLOR_PAIR(background*8+col));
 	else

@@ -53,34 +53,34 @@ namespace
 		key[1] = !two.empty() && two[0] == '\'' ? two[1] : (atoi(two.c_str()) == 0 ? null_key : atoi(two.c_str()));
 	}
 	
-	Color IntoColor(const string &color)
-	{
-		Color result = clDefault;
-		
-		if (color == "black")
-			result = clBlack;
-		else if (color == "red")
-			result = clRed;
-		else if (color == "green")
-			result = clGreen;
-		else if (color == "yellow")
-			result = clYellow;
-		else if (color == "blue")
-			result = clBlue;
-		else if (color == "magenta")
-			result = clMagenta;
-		else if (color == "cyan")
-			result = clCyan;
-		else if (color == "white")
-			result = clWhite;
-		
-		return result;
-	}
-	
 	Border IntoBorder(const string &color)
 	{
 		return (Border) IntoColor(color);
 	}
+}
+
+Color IntoColor(const string &color)
+{
+	Color result = clDefault;
+	
+	if (color == "black")
+		result = clBlack;
+	else if (color == "red")
+		result = clRed;
+	else if (color == "green")
+		result = clGreen;
+	else if (color == "yellow")
+		result = clYellow;
+	else if (color == "blue")
+		result = clBlue;
+	else if (color == "magenta")
+		result = clMagenta;
+	else if (color == "cyan")
+		result = clCyan;
+	else if (color == "white")
+		result = clWhite;
+	
+	return result;
 }
 
 void CreateConfigDir()
@@ -220,7 +220,7 @@ void DefaultConfiguration(ncmpcpp_config &conf)
 	conf.mpd_host = "localhost";
 	conf.empty_tag = "<empty>";
 	conf.song_list_format = "{%a - }{%t}|{$8%f$9}%r{$3(%l)$9}";
-	conf.song_columns_list_format = "(8)[green]{l} (25)[cyan]{a} (40){t} (30)[red]{b}";
+	conf.song_columns_list_format = "(7)[green]{l} (25)[cyan]{a} (40)[]{t} (30)[red]{b}";
 	conf.song_status_format = "{(%l) }{%a - }{%t}|{%f}";
 	conf.song_window_title_format = "{%a - }{%t}|{%f}";
 	conf.song_library_format = "{%n - }{%t}|{%f}";
@@ -269,14 +269,16 @@ void DefaultConfiguration(ncmpcpp_config &conf)
 	conf.message_delay_time = 4;
 }
 
-string GetLineValue(const string &line, char a, char b)
+string GetLineValue(string &line, char a, char b, bool once)
 {
 	int i = 0;
 	int begin = -1, end = -1;
-	for (string::const_iterator it = line.begin(); it != line.end(); i++, it++)
+	for (string::iterator it = line.begin(); it != line.end() && (begin == -1 || end == -1); i++, it++)
 	{
 		if (*it == a || *it == b)
 		{
+			if (once)
+				*it = 0;
 			if (begin < 0)
 				begin = i+1;
 			else

@@ -162,9 +162,10 @@ void DefaultConfiguration(ncmpcpp_config &);
 void ReadKeys(ncmpcpp_keys &);
 void ReadConfiguration(ncmpcpp_config &);
 
+Color IntoColor(const string &);
 string IntoStr(Color);
 mpd_TagItems IntoTagItem(char);
-string GetLineValue(const string &, char = '"', char = '"');
+string GetLineValue(string &, char = '"', char = '"', bool = 0);
 
 #endif
 

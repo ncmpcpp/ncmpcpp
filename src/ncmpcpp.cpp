@@ -106,10 +106,10 @@ Menu<Song> *mLibSongs;
 Menu<Buffer> *mTagEditor;
 Menu<StringPair> *mEditorAlbums;
 Menu<StringPair> *mEditorDirs;
-Menu<string> *mEditorTagTypes;
 #endif // HAVE_TAGLIB_H
 // blah, I use them in conditionals, so just let them be.
 Menu<StringPair> *mEditorLeftCol = 0;
+Menu<string> *mEditorTagTypes;
 Menu<Song> *mEditorTags = 0;
 
 Menu<string> *mPlaylistList;
