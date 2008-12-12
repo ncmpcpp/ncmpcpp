@@ -226,34 +226,34 @@ void DisplayTag(const Song &s, void *data, Menu<Song> *menu)
 	switch (static_cast<Menu<string> *>(data)->Choice())
 	{
 		case 0:
-			*menu << s.GetTitle();
+			*menu << ShowTag(s.GetTitle());
 			return;
 		case 1:
-			*menu << s.GetArtist();
+			*menu << ShowTag(s.GetArtist());
 			return;
 		case 2:
-			*menu << s.GetAlbum();
+			*menu << ShowTag(s.GetAlbum());
 			return;
 		case 3:
-			*menu << s.GetYear();
+			*menu << ShowTag(s.GetYear());
 			return;
 		case 4:
-			*menu << s.GetTrack();
+			*menu << ShowTag(s.GetTrack());
 			return;
 		case 5:
-			*menu << s.GetGenre();
+			*menu << ShowTag(s.GetGenre());
 			return;
 		case 6:
-			*menu << s.GetComposer();
+			*menu << ShowTag(s.GetComposer());
 			return;
 		case 7:
-			*menu << s.GetPerformer();
+			*menu << ShowTag(s.GetPerformer());
 			return;
 		case 8:
-			*menu << s.GetDisc();
+			*menu << ShowTag(s.GetDisc());
 			return;
 		case 9:
-			*menu << s.GetComment();
+			*menu << ShowTag(s.GetComment());
 			return;
 		case 11:
 			if (s.GetNewName().empty())
