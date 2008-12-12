@@ -51,21 +51,25 @@
 ## value with { }|{ } eg. {%a - %t}|{%f}
 ##
 ## text can also have different color than the main window has,
-## eg. if you want length to have other color, write [.color]%t[/color]
+## eg. if you want length to be green, write $3%l$9
 ##
-## available colors:
+## available values:
 ##
-## - black
-## - red
-## - green
-## - yellow
-## - blue
-## - magenta
-## - cyan
-## - white
+## - 0 - default window color
+## - 1 - black
+## - 2 - red
+## - 3 - green
+## - 4 - yellow
+## - 5 - blue
+## - 6 - magenta
+## - 7 - cyan
+## - 8 - white
+## - 9 - end of current color
+##
+## Note: colors can be nested.
 ##
 #
-#song_list_format = "{[.green](%l)[/green] }{%a - }{%t}|{[.white]%f[/white]}"
+#song_list_format = "{%a - }{%t}|{$8%f$9}%r{$3(%l)$9}"
 #
 #song_library_format = "{%n - }{%t}|{%f}"
 #
@@ -73,11 +77,11 @@
 #
 #tag_editor_album_format = "{(%y) }%b"
 #
-#browser_playlist_prefix = "[.red]playlist[/red] "
+#browser_playlist_prefix = "$2playlist$9 "
 #
-#selected_item_prefix = "[.magenta]"
+#selected_item_prefix = "$6"
 #
-#selected_item_suffix = "[/magenta]"
+#selected_item_suffix = "$9"
 #
 ## colors are not supported for below veriables
 #
@@ -93,10 +97,10 @@
 ##
 ## (width of column in %)[column's color]{displayed tag}
 ##
-## - color is optional (if it's not present, default window color will be used)
+## - color is optional (if you want the default one, type [])
 ##
 #
-#song_columns_list_format = "(8)[green]{l} (28)[cyan]{a} (28){b} (50)[red]{t}"
+#song_columns_list_format = "(7)[green]{l} (28)[cyan]{a} (28)[]{b} (50)[red]{t}"
 #
 ##### various settings #####
 #

@@ -53,6 +53,17 @@ namespace
 		key[1] = !two.empty() && two[0] == '\'' ? two[1] : (atoi(two.c_str()) == 0 ? null_key : atoi(two.c_str()));
 	}
 	
+	void String2Buffer(const string &s, Buffer &buf)
+	{
+		for (string::const_iterator it = s.begin(); it != s.end(); it++)
+		{
+			if (*it != '$')
+				buf << *it;
+			else
+				buf << Color(*++it-'0');
+		}
+	}
+	
 	Border IntoBorder(const string &color)
 	{
 		return (Border) IntoColor(color);
@@ -563,7 +574,10 @@ void ReadConfiguration(ncmpcpp_config &conf)
 			else if (cl.find("browser_playlist_prefix") != string::npos)
 			{
 				if (!v.empty())
-					conf.browser_playlist_prefix << v;
+				{
+					conf.browser_playlist_prefix.Clear();
+					String2Buffer(v, conf.browser_playlist_prefix);
+				}
 			}
 			else if (cl.find("default_tag_editor_pattern") != string::npos)
 			{
@@ -573,12 +587,18 @@ void ReadConfiguration(ncmpcpp_config &conf)
 			else if (cl.find("selected_item_prefix") != string::npos)
 			{
 				if (!v.empty())
-					conf.selected_item_prefix << v;
+				{
+					conf.selected_item_prefix.Clear();
+					String2Buffer(v, conf.selected_item_prefix);
+				}
 			}
 			else if (cl.find("selected_item_suffix") != string::npos)
 			{
 				if (!v.empty())
-					conf.selected_item_suffix << v;
+				{
+					conf.selected_item_suffix.Clear();
+					String2Buffer(v, conf.selected_item_suffix);
+				}
 			}
 			else if (cl.find("color1") != string::npos)
 			{
