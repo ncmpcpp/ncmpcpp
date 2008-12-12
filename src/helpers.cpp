@@ -740,6 +740,7 @@ void DisplaySong(const Song &s, void *data, Menu<Song> *menu)
 					if (!right)
 						*menu << s.GetAlbum();
 					else
+						buf << TO_WSTRING(s.GetAlbum());
 					break;
 				case 'y':
 					if (!right)
