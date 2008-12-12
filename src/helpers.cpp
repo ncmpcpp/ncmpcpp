@@ -475,7 +475,7 @@ string DisplayColumns(string st)
 		if (result.length() > where)
 			result = result.substr(0, where);
 		else
-			for (int i = result.length(); i <= where && i < COLS; i++, result += ' ') { }
+			for (size_t i = result.length(); i <= where && i < size_t(COLS); i++, result += ' ') { }
 	}
 	return result;
 }

@@ -123,8 +123,8 @@ namespace MPD
 			long long GetOldPlaylistID() const { return isConnected && itsOldStatus ? itsOldStatus->playlist : -1; }
 			int GetElapsedTime() const { return isConnected && itsCurrentStatus ? itsCurrentStatus->elapsedTime : -1; }
 		
-			unsigned int GetMaxPlaylistLength() const { return itsMaxPlaylistLength; }
-			int GetPlaylistLength() const { return isConnected && itsCurrentStatus ? itsCurrentStatus->playlistLength : 0; }
+			size_t GetMaxPlaylistLength() const { return itsMaxPlaylistLength; }
+			size_t GetPlaylistLength() const { return isConnected && itsCurrentStatus ? itsCurrentStatus->playlistLength : 0; }
 			void GetPlaylistChanges(long long, SongList &) const;
 		
 			const std::string & GetErrorMessage() const { return itsErrorMessage; }
@@ -185,7 +185,7 @@ namespace MPD
 		
 			std::string itsErrorMessage;
 			int itsErrorCode;
-			unsigned int itsMaxPlaylistLength;
+			size_t itsMaxPlaylistLength;
 		
 			std::string itsHost;
 			int itsPort;

@@ -2114,7 +2114,7 @@ int main(int argc, char *argv[])
 					mPlaylist->GetSelected(list);
 					
 					for (vector<size_t>::iterator it = list.begin(); it != list.end(); it++)
-						if (*it == now_playing && list.front() > 0)
+						if (*it == size_t(now_playing) && list.front() > 0)
 							mPlaylist->BoldOption(now_playing, 0);
 					
 					vector<size_t> origs(list);
@@ -2217,7 +2217,7 @@ int main(int argc, char *argv[])
 					mPlaylist->GetSelected(list);
 					
 					for (vector<size_t>::iterator it = list.begin(); it != list.end(); it++)
-						if (*it == now_playing && list.back() < mPlaylist->Size()-1)
+						if (*it == size_t(now_playing) && list.back() < mPlaylist->Size()-1)
 							mPlaylist->BoldOption(now_playing, 0);
 					
 					vector<size_t> origs(list);
@@ -2244,7 +2244,7 @@ int main(int argc, char *argv[])
 					size_t from, to;
 					from = to = mPlaylist->Choice();
 					// unbold now playing as if song changes during move, this won't be unbolded.
-					if (to == now_playing && to < mPlaylist->Size()-1)
+					if (to == size_t(now_playing) && to < mPlaylist->Size()-1)
 						mPlaylist->BoldOption(now_playing, 0);
 					while (Keypressed(input, Key.MvSongDown) && to < mPlaylist->Size()-1)
 					{
@@ -2938,7 +2938,7 @@ int main(int argc, char *argv[])
 			{
 				for (size_t i = 0; i < mPlaylist->Size(); i++)
 				{
-					if (!mPlaylist->isSelected(i) && i != now_playing)
+					if (!mPlaylist->isSelected(i) && i != size_t(now_playing))
 						Mpd->QueueDeleteSongId(mPlaylist->at(i).GetID());
 				}
 				// if mpd deletes now playing song deletion will be sluggishly slow

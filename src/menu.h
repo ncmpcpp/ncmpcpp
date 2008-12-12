@@ -265,7 +265,7 @@ template <class T> void Menu<T>::Refresh()
 		return;
 	}
 	int MaxBeginning = itsOptions.size() < itsHeight ? 0 : itsOptions.size()-itsHeight;
-	if (itsHighlight > itsBeginning+itsHeight-1)
+	if (itsHighlight > itsBeginning+int(itsHeight)-1)
 		itsBeginning = itsHighlight-itsHeight+1;
 	if (itsBeginning < 0)
 		itsBeginning = 0;

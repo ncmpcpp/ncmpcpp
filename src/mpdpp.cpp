@@ -853,7 +853,7 @@ int Connection::CheckForErrors()
 		{
 			// this is to avoid setting too small max size as we check it before fetching current status
 			// setting real max playlist length is in UpdateStatus()
-			if (itsConnection->errorCode == MPD_ACK_ERROR_PLAYLIST_MAX && itsMaxPlaylistLength == -1)
+			if (itsConnection->errorCode == MPD_ACK_ERROR_PLAYLIST_MAX && itsMaxPlaylistLength == size_t(-1))
 				itsMaxPlaylistLength = 0;
 			
 			if (itsErrorHandler)
