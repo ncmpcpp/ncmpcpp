@@ -46,7 +46,7 @@ extern int browsed_dir_scroll_begin;
 
 namespace
 {
-	const string supported_extensions[] = { "wma", "asf", "rm", "mp1", "mp2", "mp3", "mp4", "m4a", "flac", "ogg", "wav", "au", "aiff", "aif", "ac3", "aac", "mpc", "it", "mod", "s3m", "xm", "wv", "." };
+	const char *supported_extensions[] = { "wma", "asf", "rm", "mp1", "mp2", "mp3", "mp4", "m4a", "flac", "ogg", "wav", "au", "aiff", "aif", "ac3", "aac", "mpc", "it", "mod", "s3m", "xm", "wv", 0 };
 	
 	bool hasSupportedExtension(const string &file)
 	{
@@ -56,8 +56,8 @@ namespace
 		
 		string ext = file.substr(last_dot+1);
 		ToLower(ext);
-		for (int i = 0; supported_extensions[i] != "."; i++)
-			if (ext == supported_extensions[i])
+		for (int i = 0; supported_extensions[i]; i++)
+			if (strcmp(ext.c_str(), supported_extensions[i]) == 0)
 				return true;
 		
 		return false;
@@ -142,8 +142,7 @@ void DisplayItem(const Item &item, void *, Menu<Item> *menu)
 			return;
 		}
 		case itSong:
-			// I know casting that way is ugly etc., but it works.
-			DisplaySong(*item.song, &Config.song_list_format, (Menu<Song> *)menu);
+			DisplaySong(*item.song, &Config.song_list_format, reinterpret_cast<Menu<Song> *>(menu));
 			return;
 		case itPlaylist:
 			*menu << Config.browser_playlist_prefix << item.name;

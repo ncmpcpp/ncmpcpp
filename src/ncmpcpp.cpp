@@ -88,11 +88,8 @@ using namespace MPD;
 ncmpcpp_config Config;
 ncmpcpp_keys Key;
 
-vector<int> vFoundPositions;
-int found_pos = 0;
-
-Window *wCurrent = 0;
-Window *wPrev = 0;
+Window *wCurrent;
+Window *wPrev;
 
 Menu<Song> *mPlaylist;
 Menu<Item> *mBrowser;
@@ -107,10 +104,10 @@ Menu<Buffer> *mTagEditor;
 Menu<StringPair> *mEditorAlbums;
 Menu<StringPair> *mEditorDirs;
 #endif // HAVE_TAGLIB_H
-// blah, I use them in conditionals, so just let them be.
-Menu<StringPair> *mEditorLeftCol = 0;
+// blah, I use below in conditionals.
+Menu<StringPair> *mEditorLeftCol;
 Menu<string> *mEditorTagTypes;
-Menu<Song> *mEditorTags = 0;
+Menu<Song> *mEditorTags;
 
 Menu<string> *mPlaylistList;
 Menu<Song> *mPlaylistEditor;
@@ -200,8 +197,8 @@ int main(int argc, char *argv[])
 	
 	InitScreen(Config.colors_enabled);
 	
-	int main_start_y = 2;
-	int main_height = LINES-4;
+	size_t main_start_y = 2;
+	size_t main_height = LINES-4;
 	
 	if (!Config.header_visibility)
 	{
@@ -233,11 +230,11 @@ int main(int argc, char *argv[])
 	mSearcher->SetSelectPrefix(&Config.selected_item_prefix);
 	mSearcher->SetSelectSuffix(&Config.selected_item_suffix);
 	
-	int left_col_width = COLS/3-1;
-	int middle_col_width = COLS/3;
-	int middle_col_startx = left_col_width+1;
-	int right_col_width = COLS-COLS/3*2-1;
-	int right_col_startx = left_col_width+middle_col_width+2;
+	size_t left_col_width = COLS/3-1;
+	size_t middle_col_width = COLS/3;
+	size_t middle_col_startx = left_col_width+1;
+	size_t right_col_width = COLS-COLS/3*2-1;
+	size_t right_col_startx = left_col_width+middle_col_width+2;
 	
 	mLibArtists = new Menu<string>(0, main_start_y, left_col_width, main_height, IntoStr(Config.media_lib_primary_tag) + "s", Config.main_color, brNone);
 	mLibArtists->HighlightColor(Config.main_highlight_color);
@@ -318,8 +315,8 @@ int main(int argc, char *argv[])
 		wHeader->Display();
 	}
 	
-	int footer_start_y = LINES-(Config.statusbar_visibility ? 2 : 1);
-	int footer_height = Config.statusbar_visibility ? 2 : 1;
+	size_t footer_start_y = LINES-(Config.statusbar_visibility ? 2 : 1);
+	size_t footer_height = Config.statusbar_visibility ? 2 : 1;
 	
 	wFooter = new Window(0, footer_start_y, COLS, footer_height, "", Config.statusbar_color, brNone);
 	wFooter->SetTimeout(ncmpcpp_window_timeout);
@@ -335,6 +332,9 @@ int main(int argc, char *argv[])
 	Mpd->SetErrorHandler(NcmpcppErrorCallback, NULL);
 	
 	// local variables
+	vector<int> vFoundPositions;
+	
+	int found_pos = 0;
 	int input;
 	
 	Song edited_song;
@@ -1010,7 +1010,7 @@ int main(int argc, char *argv[])
 #				ifdef HAVE_TAGLIB_H
 				case csTinyTagEditor:
 				{
-					int option = mTagEditor->Choice();
+					size_t option = mTagEditor->Choice();
 					LockStatusbar();
 					Song &s = edited_song;
 					
@@ -1154,11 +1154,11 @@ int main(int argc, char *argv[])
 				{
 					ENTER_SEARCH_ENGINE_SCREEN:
 					
-					int option = mSearcher->Choice();
+					size_t option = mSearcher->Choice();
 					LockStatusbar();
 					Song &s = sought_pattern;
 					
-					if (option >= 0 && option <= 11)
+					if (option <= 11)
 						mSearcher->Current().first->Clear();
 					
 					switch (option+1)
@@ -1243,7 +1243,7 @@ int main(int argc, char *argv[])
 							Search(s);
 							if (!mSearcher->Back().first)
 							{
-								int found = mSearcher->Size()-search_engine_static_options;
+								size_t found = mSearcher->Size()-search_engine_static_options;
 								found += 3; // don't count options inserted below
 								mSearcher->InsertSeparator(15);
 								mSearcher->InsertOption(16, make_pair((Buffer *)0, (Song *)0), 1, 1);
@@ -1252,7 +1252,7 @@ int main(int argc, char *argv[])
 								mSearcher->InsertSeparator(17);
 								UpdateFoundList();
 								ShowMessage("Searching finished!");
-								for (int i = 0; i < search_engine_static_options-4; i++)
+								for (size_t i = 0; i < search_engine_static_options-4; i++)
 									mSearcher->Static(i, 1);
 								mSearcher->Scroll(wDown);
 								mSearcher->Scroll(wDown);
@@ -1526,7 +1526,7 @@ int main(int argc, char *argv[])
 					SongGetFunction get = 0;
 					SongSetFunction set = 0;
 					
-					int id = mEditorTagTypes->RealChoice();
+					size_t id = mEditorTagTypes->RealChoice();
 					switch (id)
 					{
 						case 0:
@@ -1692,7 +1692,7 @@ int main(int argc, char *argv[])
 				if (wCurrent == mPlaylist || wCurrent == mEditorTags || (wCurrent == mBrowser && ((Menu<Song> *)wCurrent)->Choice() >= (browsed_dir != "/" ? 1 : 0)) || (wCurrent == mSearcher && !mSearcher->Current().first) || wCurrent == mLibSongs || wCurrent == mPlaylistEditor)
 				{
 					List *mList = (Menu<Song> *)wCurrent;
-					int i = mList->Choice();
+					size_t i = mList->Choice();
 					mList->Select(i, !mList->isSelected(i));
 					wCurrent->Scroll(wDown);
 				}
@@ -1963,10 +1963,10 @@ int main(int argc, char *argv[])
 					mPlaylist->SetTimeout(50);
 					while (!mPlaylist->Empty() && Keypressed(input, Key.Delete))
 					{
-						int id = mPlaylist->Choice();
+						size_t id = mPlaylist->Choice();
 						TraceMpdStatus();
 						timer = time(NULL);
-						if (now_playing > id)  // needed for keeping proper
+						if (size_t(now_playing) > id)  // needed for keeping proper
 							now_playing--; // position of now playing song.
 						Mpd->QueueDeleteSong(id);
 						mPlaylist->DeleteOption(id);
@@ -2138,10 +2138,10 @@ int main(int argc, char *argv[])
 				}
 				else
 				{
-					int from, to;
+					size_t from, to;
 					from = to = mPlaylist->Choice();
 					// unbold now playing as if song changes during move, this won't be unbolded.
-					if (to == now_playing && to > 0)
+					if (to == size_t(now_playing) && to > 0)
 						mPlaylist->BoldOption(now_playing, 0);
 					while (Keypressed(input, Key.MvSongUp) && to > 0)
 					{
@@ -2187,7 +2187,7 @@ int main(int argc, char *argv[])
 				}
 				else
 				{
-					int from, to;
+					size_t from, to;
 					from = to = mPlaylistEditor->Choice();
 					while (Keypressed(input, Key.MvSongUp) && to > 0)
 					{
@@ -2540,7 +2540,7 @@ int main(int argc, char *argv[])
 			||  (wCurrent == mEditorTags && !mEditorTags->Empty()))
 			{
 				List *mList = reinterpret_cast<Menu<Song> *>(wCurrent);
-				int id = mList->Choice();
+				size_t id = mList->Choice();
 				switch (current_screen)
 				{
 					case csPlaylist:
@@ -2661,7 +2661,7 @@ int main(int argc, char *argv[])
 			|| (wCurrent == mPlaylistEditor && !mPlaylistEditor->Empty())
 			|| (wCurrent == mEditorTags && !mEditorTags->Empty()))
 			{
-				int id = ((Menu<Song> *)wCurrent)->Choice();
+				size_t id = ((Menu<Song> *)wCurrent)->Choice();
 				Song *s;
 				switch (current_screen)
 				{
@@ -2827,8 +2827,8 @@ int main(int argc, char *argv[])
 						}
 					}
 					
-					const int dialog_width = COLS*0.8;
-					const int dialog_height = LINES*0.6;
+					size_t dialog_width = COLS*0.8;
+					size_t dialog_height = LINES*0.6;
 					Menu<string> *mDialog = new Menu<string>((COLS-dialog_width)/2, (LINES-dialog_height)/2, dialog_width, dialog_height, "Add selected items to...", Config.main_color, Config.window_border);
 					mDialog->SetTimeout(ncmpcpp_window_timeout);
 					mDialog->SetItemDisplayer(GenericDisplayer);
@@ -3239,7 +3239,7 @@ int main(int argc, char *argv[])
 			||  (wCurrent == mEditorTags && !mEditorTags->Empty()))
 			{
 				Song *s;
-				int id = ((Menu<Song> *)wCurrent)->Choice();
+				size_t id = ((Menu<Song> *)wCurrent)->Choice();
 				switch (current_screen)
 				{
 					case csPlaylist:

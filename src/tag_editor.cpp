@@ -422,7 +422,7 @@ bool WriteTags(Song &s)
 				{
 					// if we rename local file, it won't get updated
 					// so just remove it from playlist and add again
-					int pos = mPlaylist->Choice();
+					size_t pos = mPlaylist->Choice();
 					Mpd->QueueDeleteSong(pos);
 					Mpd->CommitQueue();
 					int id = Mpd->AddSong("file://" + new_name);
@@ -474,9 +474,9 @@ void __deal_with_filenames(SongList &v)
 	height = LINES*0.8;
 	bool exit = 0;
 	bool preview = 1;
-	int choice = Main->Choice();
-	int one_width = width/2;
-	int two_width = width-one_width;
+	size_t choice = Main->Choice();
+	size_t one_width = width/2;
+	size_t two_width = width-one_width;
 	
 	delete Main;
 	

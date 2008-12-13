@@ -871,7 +871,7 @@ const basic_buffer<my_char_t> &ShowTagInInfoScreen(const string &tag)
 	if (tag.empty())
 		result << Config.empty_tags_color << ToWString(Config.empty_tag) << clEnd;
 	else
-		result << TO_WSTRING(tag);
+		result << ToWString(tag);
 	return result;
 #	else
 	return ShowTag(tag);
