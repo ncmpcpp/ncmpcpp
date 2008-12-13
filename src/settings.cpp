@@ -352,7 +352,7 @@ void ReadKeys(ncmpcpp_keys &keys)
 	ifstream f(keys_config_file.c_str());
 	string key;
 	
-	if (f.is_open())
+	if (!f.is_open())
 		return;
 	
 	while (!f.eof())
