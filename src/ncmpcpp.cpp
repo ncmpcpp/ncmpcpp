@@ -2759,178 +2759,182 @@ int main(int argc, char *argv[])
 		}
 		else if (Keypressed(input, Key.AddSelected))
 		{
-			if (wCurrent == mPlaylist || wCurrent == mBrowser || wCurrent == mSearcher || wCurrent == mLibSongs || wCurrent == mPlaylistEditor)
+			if (wCurrent != mPlaylist
+			&&  wCurrent != mBrowser
+			&&  wCurrent != mSearcher
+			&&  wCurrent != mLibSongs
+			&&  wCurrent != mPlaylistEditor)
+				continue;
+			
+			List *mList = reinterpret_cast<Menu<Song> *>(wCurrent);
+			if (!mList->hasSelected())
 			{
-				List *mList = reinterpret_cast<Menu<Song> *>(wCurrent);
-				if (mList->hasSelected())
-				{
-					vector<size_t> list;
-					mList->GetSelected(list);
-					SongList result;
-					for (vector<size_t>::const_iterator it = list.begin(); it != list.end(); it++)
-					{
-						switch (current_screen)
-						{
-							case csPlaylist:
-							{
-								Song *s = new Song(mPlaylist->at(*it));
-								result.push_back(s);
-								break;
-							}
-							case csBrowser:
-							{
-								const Item &item = mBrowser->at(*it);
-								switch (item.type)
-								{
-									case itDirectory:
-									{
-										if (browsed_dir != "/")
-										Mpd->GetDirectoryRecursive(browsed_dir + "/" + item.name, result);
-										else
-										Mpd->GetDirectoryRecursive(item.name, result);
-										break;
-									}
-									case itSong:
-									{
-										Song *s = new Song(*item.song);
-										result.push_back(s);
-										break;
-									}
-									case itPlaylist:
-									{
-										Mpd->GetPlaylistContent(item.name, result);
-										break;
-									}
-								}
-								break;
-							}
-							case csSearcher:
-							{
-								Song *s = mSearcher->at(*it).second;
-								result.push_back(s);
-								break;
-							}
-							case csLibrary:
-							{
-								Song *s = new Song(mLibSongs->at(*it));
-								result.push_back(s);
-								break;
-							}
-							case csPlaylistEditor:
-							{
-								Song *s = new Song(mPlaylistEditor->at(*it));
-								result.push_back(s);
-								break;
-							}
-							default:
-								break;
-						}
-					}
-					
-					size_t dialog_width = COLS*0.8;
-					size_t dialog_height = LINES*0.6;
-					Menu<string> *mDialog = new Menu<string>((COLS-dialog_width)/2, (LINES-dialog_height)/2, dialog_width, dialog_height, "Add selected items to...", Config.main_color, Config.window_border);
-					mDialog->SetTimeout(ncmpcpp_window_timeout);
-					mDialog->SetItemDisplayer(GenericDisplayer);
-					
-					mDialog->AddOption("Current MPD playlist");
-					mDialog->AddOption("Create new playlist (m3u file)");
-					mDialog->AddSeparator();
-					TagList playlists;
-					Mpd->GetPlaylists(playlists);
-					for (TagList::const_iterator it = playlists.begin(); it != playlists.end(); it++)
-						mDialog->AddOption("'" + *it + "' playlist");
-					mDialog->AddSeparator();
-					mDialog->AddOption("Cancel");
-					
-					mDialog->Display();
-					prev_screen = current_screen;
-					current_screen = csOther;
-					
-					while (!Keypressed(input, Key.Enter))
-					{
-						TraceMpdStatus();
-						mDialog->Refresh();
-						mDialog->ReadKey(input);
-						
-						if (Keypressed(input, Key.Up))
-							mDialog->Scroll(wUp);
-						else if (Keypressed(input, Key.Down))
-							mDialog->Scroll(wDown);
-						else if (Keypressed(input, Key.PageUp))
-							mDialog->Scroll(wPageUp);
-						else if (Keypressed(input, Key.PageDown))
-							mDialog->Scroll(wPageDown);
-						else if (Keypressed(input, Key.Home))
-							mDialog->Scroll(wHome);
-						else if (Keypressed(input, Key.End))
-							mDialog->Scroll(wEnd);
-					}
-					
-					size_t id = mDialog->Choice();
-					
-					redraw_screen = 1;
-					if (current_screen == csLibrary)
-					{
-						REFRESH_MEDIA_LIBRARY_SCREEN;
-					}
-					else if (current_screen == csPlaylistEditor)
-					{
-						REFRESH_PLAYLIST_EDITOR_SCREEN;
-					}
-					else
-						wCurrent->Refresh();
-					
-					if (id == 0)
-					{
-						for (SongList::const_iterator it = result.begin(); it != result.end(); it++)
-							Mpd->QueueAddSong(**it);
-						if (Mpd->CommitQueue())
-						{
-							ShowMessage("Selected items added!");
-							Song &s = mPlaylist->at(mPlaylist->Size()-result.size());
-							if (s.GetHash() != result[0]->GetHash())
-								ShowMessage("%s", message_part_of_songs_added);
-						}
-					}
-					else if (id == 1)
-					{
-						LockStatusbar();
-						Statusbar() << "Save playlist as: ";
-						string playlist = wFooter->GetString();
-						UnlockStatusbar();
-						if (!playlist.empty())
-						{
-							for (SongList::const_iterator it = result.begin(); it != result.end(); it++)
-								Mpd->QueueAddToPlaylist(playlist, **it);
-							Mpd->CommitQueue();
-							ShowMessage("Selected items added to playlist '%s'!", playlist.c_str());
-						}
-						
-					}
-					else if (id > 1 && id < mDialog->Size()-1)
-					{
-						for (SongList::const_iterator it = result.begin(); it != result.end(); it++)
-							Mpd->QueueAddToPlaylist(playlists[id-3], **it);
-						Mpd->CommitQueue();
-						ShowMessage("Selected items added to playlist '%s'!", playlists[id-3].c_str());
-					}
-					
-					if (id != mDialog->Size()-1)
-					{
-						// refresh playlist's lists
-						if (!Config.local_browser && browsed_dir == "/")
-							GetDirectory("/");
-						mPlaylistList->Clear(0); // make playlist editor update itself
-					}
-					current_screen = prev_screen;
-					timer = time(NULL);
-					delete mDialog;
-					FreeSongList(result);
-				}
-				else
-					ShowMessage("No selected items!");
+				ShowMessage("No selected items!");
+				continue;
 			}
+			
+			vector<size_t> list;
+			mList->GetSelected(list);
+			SongList result;
+			for (vector<size_t>::const_iterator it = list.begin(); it != list.end(); it++)
+			{
+				switch (current_screen)
+				{
+					case csPlaylist:
+					{
+						Song *s = new Song(mPlaylist->at(*it));
+						result.push_back(s);
+						break;
+					}
+					case csBrowser:
+					{
+						const Item &item = mBrowser->at(*it);
+						switch (item.type)
+						{
+							case itDirectory:
+							{
+								if (browsed_dir != "/")
+									Mpd->GetDirectoryRecursive(browsed_dir + "/" + item.name, result);
+								else
+									Mpd->GetDirectoryRecursive(item.name, result);
+								break;
+							}
+							case itSong:
+							{
+								Song *s = new Song(*item.song);
+								result.push_back(s);
+								break;
+							}
+							case itPlaylist:
+							{
+								Mpd->GetPlaylistContent(item.name, result);
+								break;
+							}
+						}
+						break;
+					}
+					case csSearcher:
+					{
+						Song *s = mSearcher->at(*it).second;
+						result.push_back(s);
+						break;
+					}
+					case csLibrary:
+					{
+						Song *s = new Song(mLibSongs->at(*it));
+						result.push_back(s);
+						break;
+					}
+					case csPlaylistEditor:
+					{
+						Song *s = new Song(mPlaylistEditor->at(*it));
+						result.push_back(s);
+						break;
+					}
+					default:
+						break;
+				}
+			}
+			
+			size_t dialog_width = COLS*0.8;
+			size_t dialog_height = LINES*0.6;
+			Menu<string> *mDialog = new Menu<string>((COLS-dialog_width)/2, (LINES-dialog_height)/2, dialog_width, dialog_height, "Add selected items to...", Config.main_color, Config.window_border);
+			mDialog->SetTimeout(ncmpcpp_window_timeout);
+			mDialog->SetItemDisplayer(GenericDisplayer);
+			
+			mDialog->AddOption("Current MPD playlist");
+			mDialog->AddOption("Create new playlist (m3u file)");
+			mDialog->AddSeparator();
+			TagList playlists;
+			Mpd->GetPlaylists(playlists);
+			for (TagList::const_iterator it = playlists.begin(); it != playlists.end(); it++)
+				mDialog->AddOption("'" + *it + "' playlist");
+			mDialog->AddSeparator();
+			mDialog->AddOption("Cancel");
+			
+			mDialog->Display();
+			prev_screen = current_screen;
+			current_screen = csOther;
+			
+			while (!Keypressed(input, Key.Enter))
+			{
+				TraceMpdStatus();
+				mDialog->Refresh();
+				mDialog->ReadKey(input);
+				
+				if (Keypressed(input, Key.Up))
+					mDialog->Scroll(wUp);
+				else if (Keypressed(input, Key.Down))
+					mDialog->Scroll(wDown);
+				else if (Keypressed(input, Key.PageUp))
+					mDialog->Scroll(wPageUp);
+				else if (Keypressed(input, Key.PageDown))
+					mDialog->Scroll(wPageDown);
+				else if (Keypressed(input, Key.Home))
+					mDialog->Scroll(wHome);
+				else if (Keypressed(input, Key.End))
+					mDialog->Scroll(wEnd);
+			}
+			
+			size_t id = mDialog->Choice();
+			
+			redraw_screen = 1;
+			if (current_screen == csLibrary)
+			{
+				REFRESH_MEDIA_LIBRARY_SCREEN;
+			}
+			else if (current_screen == csPlaylistEditor)
+			{
+				REFRESH_PLAYLIST_EDITOR_SCREEN;
+			}
+			else
+				wCurrent->Refresh();
+			
+			if (id == 0)
+			{
+				for (SongList::const_iterator it = result.begin(); it != result.end(); it++)
+					Mpd->QueueAddSong(**it);
+				if (Mpd->CommitQueue())
+				{
+					ShowMessage("Selected items added!");
+					Song &s = mPlaylist->at(mPlaylist->Size()-result.size());
+					if (s.GetHash() != result[0]->GetHash())
+						ShowMessage("%s", message_part_of_songs_added);
+				}
+			}
+			else if (id == 1)
+			{
+				LockStatusbar();
+				Statusbar() << "Save playlist as: ";
+				string playlist = wFooter->GetString();
+				UnlockStatusbar();
+				if (!playlist.empty())
+				{
+					for (SongList::const_iterator it = result.begin(); it != result.end(); it++)
+						Mpd->QueueAddToPlaylist(playlist, **it);
+					Mpd->CommitQueue();
+					ShowMessage("Selected items added to playlist '%s'!", playlist.c_str());
+				}
+			}
+			else if (id > 1 && id < mDialog->Size()-1)
+			{
+				for (SongList::const_iterator it = result.begin(); it != result.end(); it++)
+					Mpd->QueueAddToPlaylist(playlists[id-3], **it);
+				Mpd->CommitQueue();
+				ShowMessage("Selected items added to playlist '%s'!", playlists[id-3].c_str());
+			}
+			
+			if (id != mDialog->Size()-1)
+			{
+				// refresh playlist's lists
+				if (!Config.local_browser && browsed_dir == "/")
+					GetDirectory("/");
+				mPlaylistList->Clear(0); // make playlist editor update itself
+			}
+			current_screen = prev_screen;
+			timer = time(NULL);
+			delete mDialog;
+			FreeSongList(result);
 		}
 		else if (Keypressed(input, Key.Crop))
 		{
@@ -3109,7 +3113,7 @@ int main(int argc, char *argv[])
 				}
 			}
 			ShowMessage("Searching finished!");
-				
+			
 			if (Config.wrapped_search ? vFoundPositions.empty() : found_pos < 0)
 				ShowMessage("Unable to find \"%s\"", findme.c_str());
 			else
