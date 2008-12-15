@@ -291,8 +291,11 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 				std::swap(now_playing, old_playing);
 				Mpd->Play(now_playing);
 			}
-			if (old_playing >= 0)
+			try
+			{
 				mPlaylist->BoldOption(old_playing, 0);
+			}
+			catch (std::out_of_range &) { }
 			mPlaylist->BoldOption(now_playing, 1);
 			if (Config.autocenter_mode)
 				mPlaylist->Highlight(now_playing);
