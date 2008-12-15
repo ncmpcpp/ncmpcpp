@@ -146,7 +146,7 @@ bool block_playlist_update = 0;
 bool block_item_list_update = 0;
 
 bool messages_allowed = 0;
-bool redraw_screen = 0;
+//bool redraw_screen = 0;
 bool redraw_header = 1;
 bool reload_lyrics = 0;
 
@@ -712,10 +712,10 @@ int main(int argc, char *argv[])
 				mEditorTags->Refresh();
 			}
 			
-			if (redraw_screen && wCurrent == mEditorTagTypes && mEditorTagTypes->Choice() < 13)
+			if (/*redraw_screen && */wCurrent == mEditorTagTypes && mEditorTagTypes->Choice() < 13)
 			{
 				mEditorTags->Refresh();
-				redraw_screen = 0;
+//				redraw_screen = 0;
 			}
 			else if (mEditorTagTypes->Choice() >= 13)
 				mEditorTags->Window::Clear();
@@ -737,7 +737,7 @@ int main(int argc, char *argv[])
 			wCurrent->Display();
 		else
 			wCurrent->Refresh();
-		redraw_screen = 0;
+//		redraw_screen = 0;
 		
 		wCurrent->ReadKey(input);
 		if (input == ERR)
@@ -778,8 +778,8 @@ int main(int argc, char *argv[])
 						mEditorTags->Clear(0);
 						mEditorTagTypes->Refresh();
 					}
-					else if (wCurrent == mEditorTagTypes)
-						redraw_screen = 1;
+//					else if (wCurrent == mEditorTagTypes)
+//						redraw_screen = 1;
 #					endif // HAVE_TAGLIB_H
 				}
 			}
@@ -839,7 +839,7 @@ int main(int argc, char *argv[])
 		}
 		else if (input == KEY_RESIZE)
 		{
-			redraw_screen = 1;
+//			redraw_screen = 1;
 			redraw_header = 1;
 			
 			if (COLS < 20 || LINES < 5)
@@ -1129,7 +1129,7 @@ int main(int argc, char *argv[])
 							wCurrent->Clear();
 							wCurrent = wPrev;
 							current_screen = prev_screen;
-							redraw_screen = 1;
+//							redraw_screen = 1;
 							redraw_header = 1;
 							if (current_screen == csLibrary)
 							{
@@ -1570,7 +1570,7 @@ int main(int argc, char *argv[])
 								else
 									ShowMessage("Aborted!");
 								curs_set(0);
-								redraw_screen = 1;
+//								redraw_screen = 1;
 								UnlockStatusbar();
 							}
 							break;
@@ -1601,7 +1601,7 @@ int main(int argc, char *argv[])
 								current_screen = csOther;
 								__deal_with_filenames(list);
 								current_screen = csTagEditor;
-								redraw_screen = 1;
+//								redraw_screen = 1;
 								REFRESH_TAG_EDITOR_SCREEN;
 							}
 							else if (wCurrent == mEditorTags)
@@ -1667,7 +1667,7 @@ int main(int argc, char *argv[])
 						UnlockStatusbar();
 						for (SongList::iterator it = list.begin(); it != list.end(); it++)
 							(**it.*set)(new_tag);
-						redraw_screen = 1;
+//						redraw_screen = 1;
 					}
 					else if (wCurrent == mEditorTags && set != NULL)
 					{
@@ -1816,7 +1816,7 @@ int main(int argc, char *argv[])
 					ShowMessage("Switched to %s view", Config.albums_in_tag_editor ? "albums" : "directories");
 					mEditorLeftCol->Display();
 					mEditorTags->Clear(0);
-					redraw_screen = 1;
+//					redraw_screen = 1;
 				}
 #				endif // HAVE_TAGLIB_H
 				else if (current_screen == csLyrics)
@@ -1955,7 +1955,7 @@ int main(int argc, char *argv[])
 						mPlaylist->DeleteOption(*it);
 					}
 					ShowMessage("Selected items deleted!");
-					redraw_screen = 1;
+//					redraw_screen = 1;
 				}
 				else
 				{
@@ -2019,7 +2019,7 @@ int main(int argc, char *argv[])
 						mPlaylistEditor->DeleteOption(*it);
 					}
 					ShowMessage("Selected items deleted from playlist '%s'!", mPlaylistList->Current().c_str());
-					redraw_screen = 1;
+//					redraw_screen = 1;
 				}
 				else
 				{
@@ -2398,7 +2398,7 @@ int main(int argc, char *argv[])
 			mPlaylist->SetItemDisplayer(Config.columns_in_playlist ? DisplaySongInColumns : DisplaySong);
 			mPlaylist->SetItemDisplayerUserData(Config.columns_in_playlist ? &Config.song_columns_list_format : &Config.song_list_format);
 			mPlaylist->SetTitle(Config.columns_in_playlist ? DisplayColumns(Config.song_columns_list_format) : "");
-			redraw_screen = 1;
+//			redraw_screen = 1;
 		}
 		else if (Keypressed(input, Key.ToggleAutoCenter))
 		{
@@ -2878,7 +2878,7 @@ int main(int argc, char *argv[])
 			
 			size_t id = mDialog->Choice();
 			
-			redraw_screen = 1;
+//			redraw_screen = 1;
 			if (current_screen == csLibrary)
 			{
 				REFRESH_MEDIA_LIBRARY_SCREEN;
@@ -3217,7 +3217,7 @@ int main(int argc, char *argv[])
 				wCurrent->Hide();
 				current_screen = prev_screen;
 				wCurrent = wPrev;
-				redraw_screen = 1;
+//				redraw_screen = 1;
 				redraw_header = 1;
 				if (current_screen == csLibrary)
 				{
@@ -3287,7 +3287,7 @@ int main(int argc, char *argv[])
 				wCurrent->Hide();
 				current_screen = prev_screen;
 				wCurrent = wPrev;
-				redraw_screen = 1;
+//				redraw_screen = 1;
 				redraw_header = 1;
 				if (current_screen == csLibrary)
 				{
@@ -3366,7 +3366,7 @@ int main(int argc, char *argv[])
 				wCurrent->Hide();
 				current_screen = prev_screen;
 				wCurrent = wPrev;
-				redraw_screen = 1;
+//				redraw_screen = 1;
 				redraw_header = 1;
 				if (current_screen == csLibrary)
 				{
@@ -3477,7 +3477,7 @@ int main(int argc, char *argv[])
 				wCurrent = mPlaylist;
 				wCurrent->Hide();
 				current_screen = csPlaylist;
-				redraw_screen = 1;
+//				redraw_screen = 1;
 				redraw_header = 1;
 			}
 		}
@@ -3491,7 +3491,7 @@ int main(int argc, char *argv[])
 				wCurrent = mBrowser;
 				wCurrent->Hide();
 				current_screen = csBrowser;
-				redraw_screen = 1;
+//				redraw_screen = 1;
 				redraw_header = 1;
 			}
 		}
@@ -3505,7 +3505,7 @@ int main(int argc, char *argv[])
 				wCurrent = mSearcher;
 				wCurrent->Hide();
 				current_screen = csSearcher;
-				redraw_screen = 1;
+//				redraw_screen = 1;
 				redraw_header = 1;
 				if (!mSearcher->Back().first)
 				{
@@ -3526,7 +3526,7 @@ int main(int argc, char *argv[])
 				
 				mPlaylist->Hide(); // hack, should be wCurrent, but it doesn't always have 100% width
 				
-				redraw_screen = 1;
+//				redraw_screen = 1;
 				redraw_header = 1;
 				REFRESH_MEDIA_LIBRARY_SCREEN;
 				
@@ -3547,7 +3547,7 @@ int main(int argc, char *argv[])
 				
 				mPlaylist->Hide(); // hack, should be wCurrent, but it doesn't always have 100% width
 				
-				redraw_screen = 1;
+//				redraw_screen = 1;
 				redraw_header = 1;
 				REFRESH_PLAYLIST_EDITOR_SCREEN;
 				
@@ -3572,7 +3572,7 @@ int main(int argc, char *argv[])
 				
 				mPlaylist->Hide(); // hack, should be wCurrent, but it doesn't always have 100% width
 				
-				redraw_screen = 1;
+//				redraw_screen = 1;
 				redraw_header = 1;
 				REFRESH_TAG_EDITOR_SCREEN;
 				

@@ -59,7 +59,6 @@ extern bool block_progressbar_update;
 extern bool block_playlist_update;
 extern bool block_item_list_update;
 
-extern bool redraw_screen;
 extern bool redraw_header;
 extern bool reload_lyrics;
 
