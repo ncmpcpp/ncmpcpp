@@ -311,7 +311,7 @@ int main(int argc, char *argv[])
 	
 	if (Config.header_visibility)
 	{
-		wHeader = new Window(0, 0, COLS, 2, "", Config.header_color, brNone);
+		wHeader = new Window(0, 0, COLS, 1, "", Config.header_color, brNone);
 		wHeader->Display();
 	}
 	

@@ -432,26 +432,27 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 		if (mpd_db_updating)
 			switch_state += mpd_db_updating;
 		
-		wHeader->Bold(1);
-		wHeader->SetColor(Config.state_line_color);
-		mvwhline(wHeader->Raw(), 1, 0, 0, wHeader->GetWidth());
+		// this is done by raw ncurses because creating another
+		// window only for handling this is quite silly
+		attrset(A_BOLD|COLOR_PAIR(Config.state_line_color));
+		mvhline(1, 0, 0, COLS);
 		if (!switch_state.empty())
 		{
-			wHeader->WriteXY(wHeader->GetWidth()-switch_state.length()-3, 1, 0, "[");
-			wHeader->SetColor(Config.state_flags_color);
-			wHeader->WriteXY(wHeader->GetWidth()-switch_state.length()-2, 1, 0, "%s", switch_state.c_str());
-			wHeader->SetColor(Config.state_line_color);
-			wHeader->WriteXY(wHeader->GetWidth()-2, 1, 0, "]");
+			
+			mvprintw(1, COLS-switch_state.length()-3, "[");
+			attron(COLOR_PAIR(Config.state_flags_color));
+			mvprintw(1, COLS-switch_state.length()-2, "%s", switch_state.c_str());
+			attron(COLOR_PAIR(Config.state_line_color));
+			mvprintw(1, COLS-2, "]");
 		}
-		wHeader->SetColor(Config.header_color);
-		wHeader->Bold(0);
+		attroff(A_BOLD|COLOR_PAIR(Config.state_line_color));
+		refresh();
 		header_update_status = 0;
 	}
 	if ((changed.Volume) && Config.header_visibility)
 	{
-		int vol = Mpd->GetVolume();
 		volume_state = " Volume: ";
-		volume_state += IntoStr(vol);
+		volume_state += IntoStr(Mpd->GetVolume());
 		volume_state += "%";
 		wHeader->SetColor(Config.volume_color);
 		wHeader->WriteXY(wHeader->GetWidth()-volume_state.length(), 0, 1, "%s", volume_state.c_str());
