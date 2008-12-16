@@ -341,7 +341,7 @@ int main(int argc, char *argv[])
 	Song sought_pattern;
 	
 	bool main_exit = 0;
-	bool title_allowed = 1;
+	bool title_allowed = !Config.display_screens_numbers_on_start;
 	
 	string lyrics_title;
 	string info_title;
@@ -449,11 +449,10 @@ int main(int argc, char *argv[])
 			}
 			else
 			{
-				string screens = "[.b]1:[/b]Help  [.b]2:[/b]Playlist  [.b]3:[/b]Browse  [.b]4:[/b]Search  [.b]5:[/b]Library  [.b]6:[/b]Playlist editor";
+				*wHeader << XY(0, 0) << fmtBold << 1 << fmtBoldEnd << ":Help  " << fmtBold << 2 << fmtBoldEnd << ":Playlist  " << fmtBold << 3 << fmtBoldEnd << ":Browse  " << fmtBold << 4 << fmtBoldEnd << ":Search  " << fmtBold << 5 << fmtBoldEnd << ":Library  " << fmtBold << 6 << fmtBoldEnd << ":Playlist editor";
 #				ifdef HAVE_TAGLIB_H
-				screens += "  [.b]7:[/b]Tag editor";
+				*wHeader << "  " << fmtBold << 7 << fmtBoldEnd << ":Tag editor";
 #				endif // HAVE_TAGLIB_H
-				wHeader->WriteXY(0, 0, 1, "%s", screens.c_str());
 			}
 			
 			wHeader->SetColor(Config.volume_color);

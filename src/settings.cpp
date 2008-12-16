@@ -271,6 +271,7 @@ void DefaultConfiguration(ncmpcpp_config &conf)
 	conf.now_playing_lyrics = false;
 	conf.local_browser = false;
 	conf.search_in_db = true;
+	conf.display_screens_numbers_on_start = true;
 	conf.set_window_title = true;
 	conf.mpd_port = 6600;
 	conf.mpd_connection_timeout = 15;
@@ -665,6 +666,10 @@ void ReadConfiguration(ncmpcpp_config &conf)
 			else if (cl.find("default_place_to_search_in") != string::npos)
 			{
 				conf.search_in_db = v == "database";
+			}
+			else if (cl.find("display_screens_numbers_on_start") != string::npos)
+			{
+				conf.display_screens_numbers_on_start = v == "yes";
 			}
 			else if (cl.find("enable_window_title") != string::npos)
 			{

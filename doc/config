@@ -136,6 +136,8 @@
 #
 #ncmpc_like_songs_adding = "no" (enabled - add/remove, disabled - always add)
 #
+#display_screens_numbers_on_start = "yes"
+#
 #enable_window_title = "yes"
 #
 ##### colors definitions #####

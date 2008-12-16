@@ -145,6 +145,7 @@ struct ncmpcpp_config
 	bool now_playing_lyrics;
 	bool local_browser;
 	bool search_in_db;
+	bool display_screens_numbers_on_start;
 	
 	int mpd_port;
 	int mpd_connection_timeout;
