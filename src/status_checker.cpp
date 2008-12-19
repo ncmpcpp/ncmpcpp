@@ -24,8 +24,6 @@
 #include "settings.h"
 #include "status_checker.h"
 
-#define UPDATE_WINDOW_TITLE WindowTitle(Mpd->GetCurrentSong().toString(Config.song_window_title_format))
-
 using namespace MPD;
 
 extern Connection *Mpd;
@@ -254,7 +252,6 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 			{
 				player_state = "Playing: ";
 				mPlaylist->BoldOption(now_playing, 1);
-				UPDATE_WINDOW_TITLE;
 				changed.ElapsedTime = 1;
 				break;
 			}
@@ -311,7 +308,6 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 		
 		if (Mpd->GetState() == psPlay)
 		{
-			UPDATE_WINDOW_TITLE;
 			changed.ElapsedTime = 1;
 		}
 	}
@@ -325,6 +321,8 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 			// 'repeat one' mode check - be sure that we deal with item with known length
 			if (s.GetTotalLength() && elapsed == s.GetTotalLength()-1)
 				repeat_one_allowed = 1;
+			
+			WindowTitle(s.toString(Config.song_window_title_format));
 			
 			if (!block_statusbar_update && Config.statusbar_visibility)
 			{
