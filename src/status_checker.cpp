@@ -343,29 +343,9 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 					tracklength += Song::ShowTime(elapsed);
 					tracklength += "]";
 				}
-				my_string_t playing_song = TO_WSTRING(s.toString(Config.song_status_format));
-				
-				const size_t max_length_without_scroll = wFooter->GetWidth()-player_state.length()-tracklength.length();
-				
-				wFooter->WriteXY(0, 1, 0, "%s", player_state.c_str());
+				wFooter->WriteXY(0, 1, 1, "%s", player_state.c_str());
 				wFooter->Bold(0);
-				if (playing_song.length() > max_length_without_scroll)
-				{
-#					ifdef _UTF8
-					playing_song += L" ** ";
-#					else
-					playing_song += " ** ";
-#					endif
-					const size_t scrollsize = max_length_without_scroll+playing_song.length();
-					my_string_t part = playing_song.substr(playing_song_scroll_begin++, scrollsize);
-					if (part.length() < scrollsize)
-						part += playing_song.substr(0, scrollsize-part.length());
-					wFooter->WriteXY(player_state.length(), 1, 0, UTF_S_FMT, part.c_str());
-					if (playing_song_scroll_begin >= playing_song.length())
-						playing_song_scroll_begin = 0;
-				}
-				else
-					wFooter->WriteXY(player_state.length(), 1, 1, "%s", s.toString(Config.song_status_format).c_str());
+				Scroller(*wFooter, s.toString(Config.song_status_format), wFooter->GetWidth()-player_state.length()-tracklength.length(), playing_song_scroll_begin);
 				wFooter->Bold(1);
 				
 				wFooter->WriteXY(wFooter->GetWidth()-tracklength.length(), 1, 1, "%s", tracklength.c_str());

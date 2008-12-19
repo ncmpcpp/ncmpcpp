@@ -70,5 +70,7 @@ Window &Statusbar();
 const Buffer &ShowTag(const string &);
 const basic_buffer<my_char_t> &ShowTagInInfoScreen(const string &);
 
+void Scroller(Window &, const string &, size_t, size_t &);
+
 #endif
 

@@ -337,13 +337,16 @@ int main(int argc, char *argv[])
 	int found_pos = 0;
 	int input;
 	
+	size_t lyrics_scroll_begin = 0;
+	
+	Song lyrics_song;
 	Song edited_song;
 	Song sought_pattern;
 	
 	bool main_exit = 0;
 	bool title_allowed = !Config.display_screens_numbers_on_start;
 	
-	string lyrics_title;
+	string screen_title;
 	string info_title;
 	// local variables end
 	
@@ -373,42 +376,42 @@ int main(int argc, char *argv[])
 		messages_allowed = 1;
 		
 		// header stuff
-		const size_t max_allowed_title_length = wHeader ? wHeader->GetWidth()-volume_state.length() : 0;
-		if (current_screen == csBrowser && input == ERR && browsed_dir.length() > max_allowed_title_length)
+		const size_t max_allowed_title_length = wHeader ? wHeader->GetWidth()-volume_state.length()-screen_title.length() : 0;
+		if (input == ERR
+		&& ((current_screen == csBrowser && browsed_dir.length() > max_allowed_title_length)
+		||  current_screen == csLyrics))
 			redraw_header = 1;
 		if (Config.header_visibility && redraw_header)
 		{
-			string title;
-			
 			switch (current_screen)
 			{
 				case csHelp:
-					title = "Help";
+					screen_title = "Help";
 					break;
 				case csPlaylist:
-					title = "Playlist ";
+					screen_title = "Playlist ";
 					break;
 				case csBrowser:
-					title = "Browse: ";
+					screen_title = "Browse: ";
 					break;
 				case csTinyTagEditor:
 				case csTagEditor:
-					title = "Tag editor";
+					screen_title = "Tag editor";
 					break;
 				case csInfo:
-					title = info_title;
+					screen_title = info_title;
 					break;
 				case csSearcher:
-					title = "Search engine";
+					screen_title = "Search engine";
 					break;
 				case csLibrary:
-					title = "Media library";
+					screen_title = "Media library";
 					break;
 				case csLyrics:
-					title = lyrics_title;
+					screen_title = "Lyrics: ";
 					break;
 				case csPlaylistEditor:
-					title = "Playlist editor";
+					screen_title = "Playlist editor";
 					break;
 				default:
 					break;
@@ -417,33 +420,24 @@ int main(int argc, char *argv[])
 			if (title_allowed)
 			{
 				wHeader->Bold(1);
-				wHeader->WriteXY(0, 0, 1, "%s", title.c_str());
+				wHeader->WriteXY(0, 0, 1, "%s", screen_title.c_str());
 				wHeader->Bold(0);
 				
 				if (current_screen == csPlaylist)
+				{
 					DisplayTotalPlaylistLength(*wHeader);
+				}
 				else if (current_screen == csBrowser)
 				{
-					size_t max_length_without_scroll = wHeader->GetWidth()-volume_state.length()-title.length();
-					my_string_t wbrowseddir = TO_WSTRING(browsed_dir);
 					wHeader->Bold(1);
-					if (browsed_dir.length() > max_length_without_scroll)
-					{
-#						ifdef _UTF8
-						wbrowseddir += L" ** ";
-#						else
-						wbrowseddir += " ** ";
-#						endif
-						const size_t scrollsize = max_length_without_scroll;
-						my_string_t part = wbrowseddir.substr(browsed_dir_scroll_begin++, scrollsize);
-						if (part.length() < scrollsize)
-							part += wbrowseddir.substr(0, scrollsize-part.length());
-						wHeader->WriteXY(title.length(), 0, 0, UTF_S_FMT, part.c_str());
-						if (browsed_dir_scroll_begin >= wbrowseddir.length())
-							browsed_dir_scroll_begin = 0;
-					}
-					else
-						wHeader->WriteXY(title.length(), 0, 0, "%s", browsed_dir.c_str());
+					Scroller(*wHeader, browsed_dir, max_allowed_title_length, browsed_dir_scroll_begin);
+					wHeader->Bold(0);
+				}
+				else if (current_screen == csLyrics)
+				{
+					
+					wHeader->Bold(1);
+					Scroller(*wHeader, lyrics_song.toString("%a - %t"), max_allowed_title_length, lyrics_scroll_begin);
 					wHeader->Bold(0);
 				}
 			}
@@ -456,7 +450,7 @@ int main(int argc, char *argv[])
 			}
 			
 			wHeader->SetColor(Config.volume_color);
-			wHeader->WriteXY(max_allowed_title_length, 0, 0, "%s", volume_state.c_str());
+			wHeader->WriteXY(wHeader->GetWidth()-volume_state.length(), 0, 0, "%s", volume_state.c_str());
 			wHeader->SetColor(Config.header_color);
 			wHeader->Refresh();
 			redraw_header = 0;
@@ -3430,13 +3424,14 @@ int main(int argc, char *argv[])
 				}
 				if (!s->GetArtist().empty() && !s->GetTitle().empty())
 				{
+					lyrics_scroll_begin = 0;
+					lyrics_song = *s;
 					wPrev = wCurrent;
 					prev_screen = current_screen;
 					wCurrent = sLyrics;
 					redraw_header = 1;
 					wCurrent->Clear();
 					current_screen = csLyrics;
-					lyrics_title = "Lyrics: " + s->GetArtist() + " - " + s->GetTitle();
 					sLyrics->WriteXY(0, 0, 0, "Fetching lyrics...");
 					sLyrics->Refresh();
 #					ifdef HAVE_CURL_CURL_H

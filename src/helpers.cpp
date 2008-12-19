@@ -877,3 +877,40 @@ const basic_buffer<my_char_t> &ShowTagInInfoScreen(const string &tag)
 	return ShowTag(tag);
 #	endif
 }
+
+void Scroller(Window &w, const string &string, size_t width, size_t &pos)
+{
+	std::basic_string<my_char_t> s = TO_WSTRING(string);
+	size_t len;
+#	ifdef _UTF8
+	len = Window::Length(s);
+#	else
+	len = s.length();
+#	endif
+	
+	if (len > width)
+	{
+#		ifdef _UTF8
+		s += L" ** ";
+#		else
+		s += " ** ";
+#		endif
+		len = 0;
+		std::basic_string<my_char_t>::const_iterator b = s.begin(), e = s.end();
+		for (std::basic_string<my_char_t>::const_iterator it = b+pos; it != e && len < width; it++)
+		{
+			len += wcwidth(*it);
+			w << *it;
+		}
+		if (++pos >= s.length())
+			pos = 0;
+		for (; len < width; b++)
+		{
+			len += wcwidth(*b);
+			w << *b;
+		}
+	}
+	else
+		w << s;
+}
+
