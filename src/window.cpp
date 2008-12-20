@@ -353,10 +353,10 @@ void Window::WriteXY(int x, int y, bool cte, const char *format, ...) const
 string Window::GetString(const string &base, size_t length, size_t width) const
 {
 	int input;
-	size_t beginning, maxbeginning, minx, x, y, maxx;
+	size_t beginning, maxbeginning, minx, x, real_x, y, maxx, real_maxx;
 	
 	getyx(itsWindow, y, x);
-	minx = maxx = x;
+	minx = real_maxx = maxx = real_x = x;
 	
 	width--;
 	if (width == size_t(-1))
@@ -367,21 +367,27 @@ string Window::GetString(const string &base, size_t length, size_t width) const
 	
 	string tmp_in;
 	wchar_t wc_in;
+	bool gotoend = 1;
 	
 	mbstate_t state;
 	memset(&state, 0, sizeof(state));
 	
-	maxbeginning = beginning = tmp.length() < width ? 0 : tmp.length()-width;
-	maxx += tmp.length() < width ? tmp.length() : width;
-	x = maxx;
-	
 	do
 	{
 		maxbeginning = tmp.length() < width ? 0 : tmp.length()-width;
-		maxx = minx + (tmp.length() < width ? tmp.length() : width);
+		maxx = minx + (Length(tmp) < width ? Length(tmp) : width);
+		
+		real_maxx = minx + (tmp.length() < width ? tmp.length() : width);
 		
 		if (beginning > maxbeginning)
 			beginning = maxbeginning;
+		
+		if (gotoend)
+		{
+			real_x = real_maxx;
+			x = maxx;
+			gotoend = 0;
+		}
 		
 		mvwhline(itsWindow, y, minx, 32, width+1);
 		mvwprintw(itsWindow, y, minx, "%ls", tmp.substr(beginning, width+1).c_str());
@@ -402,7 +408,10 @@ string Window::GetString(const string &base, size_t length, size_t width) const
 			case KEY_RIGHT:
 			{
 				if (x < maxx)
-					x++;
+				{
+					real_x++;
+					x += wcwidth(tmp[beginning+real_x-minx-1]);
+				}
 				else if (beginning < maxbeginning)
 					beginning++;
 				break;
@@ -415,7 +424,10 @@ string Window::GetString(const string &base, size_t length, size_t width) const
 			case KEY_LEFT:
 			{
 				if (x > minx)
-					x--;
+				{
+					real_x--;
+					x -= wcwidth(tmp[beginning+real_x-minx]);
+				}
 				else if (beginning > 0)
 					beginning--;
 				if (input != KEY_BACKSPACE && input != 127)
@@ -423,21 +435,25 @@ string Window::GetString(const string &base, size_t length, size_t width) const
 			}
 			case KEY_DC:
 			{
-				if ((x-minx)+beginning == tmp.length())
+				if ((real_x-minx)+beginning == tmp.length())
 					break;
-				tmp.erase(tmp.begin()+(x-minx)+beginning);
-				if (beginning && beginning == maxbeginning && x < maxx)
+				tmp.erase(tmp.begin()+(real_x-minx)+beginning);
+				if (beginning && beginning == maxbeginning && real_x < maxx)
+				{
+					real_x++;
 					x++;
+				}
 				break;
 			}
 			case KEY_HOME:
 			{
-				x = minx;
+				real_x = x = minx;
 				beginning = 0;
 				break;
 			}
 			case KEY_END:
 			{
+				real_x = real_maxx;
 				x = maxx;
 				beginning = maxbeginning;
 				break;
@@ -453,18 +469,25 @@ string Window::GetString(const string &base, size_t length, size_t width) const
 				if ((int)mbrtowc(&wc_in, tmp_in.c_str(), MB_CUR_MAX, &state) < 0)
 					break;
 				
-				if ((x-minx)+beginning >= tmp.length())
+				else if ((real_x-minx)+beginning >= tmp.length())
 				{
 					tmp.push_back(wc_in);
 					if (!beginning)
+					{
+						real_x++;
 						x++;
+					}
 					beginning++;
+					gotoend = 1;
 				}
 				else
 				{
-					tmp.insert(tmp.begin()+(x-minx)+beginning, wc_in);
+					tmp.insert(tmp.begin()+(real_x-minx)+beginning, wc_in);
 					if (x < maxx)
-						x++;
+					{
+						real_x++;
+						x += wcwidth(wc_in);
+					}
 					else if (beginning < maxbeginning)
 						beginning++;
 				}
