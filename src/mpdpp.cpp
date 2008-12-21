@@ -132,11 +132,17 @@ void Connection::SetErrorHandler(ErrorHandler handler, void *data)
 
 void Connection::UpdateStatus()
 {
+	if (!itsConnection)
+		return;
+	
 	CheckForErrors();
 	
 	if (itsOldStatus)
 		mpd_freeStatus(itsOldStatus);
+	
 	itsOldStatus = itsCurrentStatus;
+	itsCurrentStatus = 0;
+	
 	mpd_sendStatusCommand(itsConnection);
 	itsCurrentStatus = mpd_getStatus(itsConnection);
 	
@@ -849,6 +855,7 @@ int Connection::CheckForErrors()
 	itsErrorCode = 0;
 	if (itsConnection->error)
 	{
+		itsErrorMessage = itsConnection->errorStr;
 		if (itsConnection->error == MPD_ERROR_ACK)
 		{
 			// this is to avoid setting too small max size as we check it before fetching current status
@@ -862,13 +869,13 @@ int Connection::CheckForErrors()
 		}
 		else
 		{
-			isConnected = 0; // the rest of errors are fatal to connection
 			if (itsErrorHandler)
 				itsErrorHandler(this, itsConnection->error, itsConnection->errorStr, itsErrorHandlerUserdata);
 			itsErrorCode = itsConnection->error;
+			Disconnect(); // the rest of errors are fatal to connection
 		}
-		itsErrorMessage = itsConnection->errorStr;
-		mpd_clearError(itsConnection);
+		if (itsConnection)
+			mpd_clearError(itsConnection);
 	}
 	return itsErrorCode;
 }

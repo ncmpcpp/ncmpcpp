@@ -363,7 +363,6 @@ int main(int argc, char *argv[])
 		if (!Mpd->Connected())
 		{
 			ShowMessage("Attempting to reconnect...");
-			Mpd->Disconnect();
 			if (Mpd->Connect())
 				ShowMessage("Connected!");
 			messages_allowed = 0;
