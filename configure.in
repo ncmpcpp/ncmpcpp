@@ -38,7 +38,7 @@ dnl =================================
 dnl = checking for curl and pthread =
 dnl =================================
 if test "$curl" = "yes" ; then
-	AC_CHECK_LIB(pthread, pthread_create, LDFLAGS="$LDFLAGS -pthread", AC_MSG_ERROR([pthread library is required]))
+	AC_CHECK_LIB(pthread, pthread_create, LDFLAGS="$LDFLAGS -lpthread", AC_MSG_ERROR([pthread library is required]))
 	AC_CHECK_HEADERS([pthread.h], , AC_MSG_ERROR([missing pthread.h header]))
 	AC_PATH_PROG(CURL_CONFIG, curl-config)
 	if test "$CURL_CONFIG" != "" ; then
