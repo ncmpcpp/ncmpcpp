@@ -22,7 +22,7 @@
 #include <csignal>
 
 #include <algorithm>
-#include <iostream>
+#include <fstream>
 #include <map>
 
 #include "mpdpp.h"
@@ -351,6 +351,10 @@ int main(int argc, char *argv[])
 	// local variables end
 	
 	signal(SIGPIPE, SIG_IGN);
+	
+	// redirect std::cerr output to ~/.ncmpcpp/error.log file
+	std::ofstream errorlog((config_dir + "error.log").c_str(), std::ios::app);
+	std::cerr.rdbuf(errorlog.rdbuf());
 	
 #	ifdef HAVE_CURL_CURL_H
 	pthread_attr_t attr_detached;
@@ -3602,6 +3606,7 @@ int main(int argc, char *argv[])
 		
 		// key mapping end
 	}
+	errorlog.close();
 	Mpd->Disconnect();
 	DestroyScreen();
 	return 0;
