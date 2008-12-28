@@ -72,20 +72,14 @@ bool allow_statusbar_unlock = 1;
 bool header_update_status = 0;
 bool repeat_one_allowed = 0;
 
-//time_t past, now = time(NULL)-1;
-
 void TraceMpdStatus()
 {
-	//past = time(NULL);
-	//if (past == now+1)
-	//{
-		Mpd->UpdateStatus();
-		time_t now = time(NULL);
-	//}
+	Mpd->UpdateStatus();
+	time_t now = time(NULL);
 	
 	if (current_screen == csPlaylist && now == timer+Config.playlist_disable_highlight_delay)
 		mPlaylist->Highlighting(!Config.playlist_disable_highlight_delay);
-
+	
 	if (lock_statusbar_delay > 0)
 	{
 		if (now >= time_of_statusbar_lock+lock_statusbar_delay)
