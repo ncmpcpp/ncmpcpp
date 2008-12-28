@@ -34,15 +34,6 @@ extern Window *wFooter;
 
 extern NcmpcppScreen current_screen;
 
-extern int lock_statusbar_delay;
-
-extern time_t time_of_statusbar_lock;
-
-extern bool messages_allowed;
-extern bool block_progressbar_update;
-extern bool block_statusbar_update;
-extern bool allow_statusbar_unlock;
-
 extern bool search_case_sensitive;
 extern bool search_match_to_pattern;
 
@@ -162,27 +153,6 @@ bool ParseArgv(int argc, char **argv)
 		}
 	}
 	return exit;
-}
-
-void LockStatusbar()
-{
-	if (Config.statusbar_visibility)
-		block_statusbar_update = 1;
-	else
-		block_progressbar_update = 1;
-	allow_statusbar_unlock = 0;
-}
-
-void UnlockStatusbar()
-{
-	allow_statusbar_unlock = 1;
-	if (lock_statusbar_delay < 0)
-	{
-		if (Config.statusbar_visibility)
-			block_statusbar_update = 0;
-		else
-			block_progressbar_update = 0;
-	}
 }
 
 bool CaseInsensitiveSorting::operator()(string a, string b)
@@ -312,7 +282,7 @@ Window &operator<<(Window &w, mpd_TagItems tag)
 	return w;
 }
 
-string IntoStr(mpd_TagItems tag)
+string IntoStr(mpd_TagItems tag) // this is only for left column's title in media library
 {
 	switch (tag)
 	{
@@ -820,29 +790,6 @@ void GetInfo(Song &s, Scrollpad &info)
 	info << fmtBold << "\nPerformer: " << fmtBoldEnd << ShowTagInInfoScreen(s.GetPerformer());
 	info << fmtBold << "\nDisc: " << fmtBoldEnd << ShowTagInInfoScreen(s.GetDisc());
 	info << fmtBold << "\nComment: " << fmtBoldEnd << ShowTagInInfoScreen(s.GetComment());
-}
-
-void ShowMessage(const char *format, ...)
-{
-	if (messages_allowed)
-	{
-		time_of_statusbar_lock = time(NULL);
-		lock_statusbar_delay = Config.message_delay_time;
-		if (Config.statusbar_visibility)
-			block_statusbar_update = 1;
-		else
-			block_progressbar_update = 1;
-		wFooter->GotoXY(0, Config.statusbar_visibility);
-		wFooter->Bold(0);
-		va_list list;
-		va_start(list, format);
-		wmove(wFooter->Raw(), Config.statusbar_visibility, 0);
-		vw_printw(wFooter->Raw(), format, list);
-		wclrtoeol(wFooter->Raw());
-		va_end(list);
-		wFooter->Bold(1);
-		wFooter->Refresh();
-	}
 }
 
 Window &Statusbar()

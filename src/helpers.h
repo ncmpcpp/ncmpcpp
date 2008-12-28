@@ -28,9 +28,6 @@
 bool ConnectToMPD();
 bool ParseArgv(int, char **);
 
-void LockStatusbar();
-void UnlockStatusbar();
-
 class CaseInsensitiveSorting
 {
 	public:
@@ -64,7 +61,6 @@ void DisplaySongInColumns(const Song &, void *, Menu<Song> *);
 void DisplaySong(const Song &, void * = &Config.song_list_format, Menu<Song> * = NULL);
 void GetInfo(Song &, Scrollpad &);
 
-void ShowMessage(const char *, ...);
 Window &Statusbar();
 
 const Buffer &ShowTag(const string &);

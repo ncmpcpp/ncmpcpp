@@ -57,6 +57,7 @@ extern bool block_progressbar_update;
 extern bool block_playlist_update;
 extern bool block_item_list_update;
 
+extern bool messages_allowed;
 extern bool redraw_header;
 extern bool reload_lyrics;
 
@@ -71,6 +72,27 @@ bool block_statusbar_update = 0;
 bool allow_statusbar_unlock = 1;
 bool header_update_status = 0;
 bool repeat_one_allowed = 0;
+
+void LockStatusbar()
+{
+	if (Config.statusbar_visibility)
+		block_statusbar_update = 1;
+	else
+		block_progressbar_update = 1;
+	allow_statusbar_unlock = 0;
+}
+
+void UnlockStatusbar()
+{
+	allow_statusbar_unlock = 1;
+	if (lock_statusbar_delay < 0)
+	{
+		if (Config.statusbar_visibility)
+			block_statusbar_update = 0;
+		else
+			block_progressbar_update = 0;
+	}
+}
 
 void TraceMpdStatus()
 {
@@ -438,5 +460,28 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 	wFooter->Bold(0);
 	wFooter->GotoXY(sx, sy);
 	wFooter->Refresh();
+}
+
+void ShowMessage(const char *format, ...)
+{
+	if (messages_allowed)
+	{
+		time_of_statusbar_lock = time(NULL);
+		lock_statusbar_delay = Config.message_delay_time;
+		if (Config.statusbar_visibility)
+			block_statusbar_update = 1;
+		else
+			block_progressbar_update = 1;
+		wFooter->GotoXY(0, Config.statusbar_visibility);
+		wFooter->Bold(0);
+		va_list list;
+		va_start(list, format);
+		wmove(wFooter->Raw(), Config.statusbar_visibility, 0);
+		vw_printw(wFooter->Raw(), format, list);
+		wclrtoeol(wFooter->Raw());
+		va_end(list);
+		wFooter->Bold(1);
+		wFooter->Refresh();
+	}
 }
 

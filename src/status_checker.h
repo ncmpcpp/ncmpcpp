@@ -24,9 +24,14 @@
 #include "mpdpp.h"
 #include "ncmpcpp.h"
 
+void LockStatusbar();
+void UnlockStatusbar();
+
 void TraceMpdStatus();
 void NcmpcppStatusChanged(MPD::Connection *, MPD::StatusChanges, void *);
 void NcmpcppErrorCallback(MPD::Connection *, int, const char *, void *);
+
+void ShowMessage(const char *, ...);
 
 #endif
 
