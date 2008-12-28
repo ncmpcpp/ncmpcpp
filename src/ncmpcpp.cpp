@@ -487,10 +487,8 @@ int main(int argc, char *argv[])
 				sort(list.begin(), list.end(), CaseInsensitiveSorting());
 				for (TagList::iterator it = list.begin(); it != list.end(); it++)
 				{
-					if ((mLibArtists->Empty() || mLibArtists->Back() != *it) && !it->empty())
-					{
+					if (!it->empty())
 						mLibArtists->AddOption(*it);
-					}
 				}
 				mLibArtists->Window::Clear();
 				mLibArtists->Refresh();
@@ -953,6 +951,9 @@ int main(int argc, char *argv[])
 				{
 					ENTER_BROWSER_SCREEN:
 					
+					if (mBrowser->Empty())
+						continue;
+					
 					const Item &item = mBrowser->Current();
 					switch (item.type)
 					{
@@ -1312,7 +1313,7 @@ int main(int argc, char *argv[])
 					
 					SongList list;
 					
-					if (wCurrent == mLibArtists)
+					if (!mLibArtists->Empty() && wCurrent == mLibArtists)
 					{
 						const string &tag = mLibArtists->Current();
 						Mpd->StartSearch(1);
@@ -1421,7 +1422,7 @@ int main(int argc, char *argv[])
 					
 					SongList list;
 					
-					if (wCurrent == mPlaylistList)
+					if (wCurrent == mPlaylistList && !mPlaylistList->Empty())
 					{
 						const string &playlist = mPlaylistList->Current();
 						Mpd->GetPlaylistContent(playlist, list);
@@ -1698,6 +1699,8 @@ int main(int argc, char *argv[])
 				if (wCurrent == mPlaylist || wCurrent == mEditorTags || (wCurrent == mBrowser && ((Menu<Song> *)wCurrent)->Choice() >= (browsed_dir != "/" ? 1 : 0)) || (wCurrent == mSearcher && !mSearcher->Current().first) || wCurrent == mLibSongs || wCurrent == mPlaylistEditor)
 				{
 					List *mList = (Menu<Song> *)wCurrent;
+					if (mList->Empty())
+						continue;
 					size_t i = mList->Choice();
 					mList->Select(i, !mList->isSelected(i));
 					wCurrent->Scroll(wDown);
@@ -1705,7 +1708,7 @@ int main(int argc, char *argv[])
 			}
 			else
 			{
-				if (current_screen == csBrowser)
+				if (current_screen == csBrowser && !mBrowser->Empty())
 				{
 					const Item &item = mBrowser->Current();
 					switch (item.type)

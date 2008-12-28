@@ -38,6 +38,7 @@ class List
 		virtual ~List() { };
 		virtual void Select(int, bool) = 0;
 		virtual void Static(int, bool) = 0;
+		virtual bool Empty() const = 0;
 		virtual bool isSelected(int = -1) const = 0;
 		virtual bool isStatic(int = -1) const = 0;
 		virtual bool hasSelected() const = 0;
@@ -108,7 +109,7 @@ template <class T> class Menu : public Window, public List
 		void HighlightColor(Color col) { itsHighlightColor = col; }
 		void Highlighting(bool hl) { highlightEnabled = hl; }
 		
-		bool Empty() const { return itsOptions.empty(); }
+		virtual bool Empty() const { return itsOptions.empty(); }
 		
 		T &Back();
 		const T &Back() const;
@@ -311,6 +312,8 @@ template <class T> void Menu<T>::Refresh()
 
 template <class T> void Menu<T>::Scroll(Where where)
 {
+	if (itsOptions.empty())
+		return;
 	int MaxHighlight = itsOptions.size()-1;
 	int MaxBeginning = itsOptions.size() < itsHeight ? 0 : itsOptions.size()-itsHeight;
 	int MaxCurrentHighlight = itsBeginning+itsHeight-1;
