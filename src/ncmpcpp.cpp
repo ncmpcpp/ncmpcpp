@@ -349,6 +349,8 @@ int main(int argc, char *argv[])
 	
 	string screen_title;
 	string info_title;
+	
+	timeval now, past;
 	// local variables end
 	
 	signal(SIGPIPE, SIG_IGN);
@@ -362,6 +364,8 @@ int main(int argc, char *argv[])
 	pthread_attr_init(&attr_detached);
 	pthread_attr_setdetachstate(&attr_detached, PTHREAD_CREATE_DETACHED);
 #	endif // HAVE_CURL_CURL_H
+	
+	gettimeofday(&now, 0);
 	
 	while (!main_exit)
 	{
@@ -380,11 +384,16 @@ int main(int argc, char *argv[])
 		messages_allowed = 1;
 		
 		// header stuff
+		gettimeofday(&past, 0);
 		const size_t max_allowed_title_length = wHeader ? wHeader->GetWidth()-volume_state.length()-screen_title.length() : 0;
-		if (input == ERR
-		&& ((current_screen == csBrowser && browsed_dir.length() > max_allowed_title_length)
-		||  current_screen == csLyrics))
+		if (((past.tv_sec == now.tv_sec && past.tv_usec >= now.tv_usec+500000)
+		||    past.tv_sec >= now.tv_sec+1)
+		&&  ((current_screen == csBrowser && browsed_dir.length() > max_allowed_title_length)
+		||    current_screen == csLyrics))
+		{
 			redraw_header = 1;
+			gettimeofday(&now, 0);
+		}
 		if (Config.header_visibility && redraw_header)
 		{
 			switch (current_screen)
