@@ -445,7 +445,7 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 		refresh();
 		header_update_status = 0;
 	}
-	if ((changed.Volume) && Config.header_visibility)
+	if (changed.Volume && Config.header_visibility)
 	{
 		volume_state = " Volume: ";
 		volume_state += IntoStr(Mpd->GetVolume());
@@ -453,8 +453,8 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 		wHeader->SetColor(Config.volume_color);
 		wHeader->WriteXY(wHeader->GetWidth()-volume_state.length(), 0, 1, "%s", volume_state.c_str());
 		wHeader->SetColor(Config.header_color);
+		wHeader->Refresh();
 	}
-	wHeader->Refresh();
 	if (current_screen == csPlaylist)
 		mPlaylist->Refresh();
 	wFooter->Bold(0);
