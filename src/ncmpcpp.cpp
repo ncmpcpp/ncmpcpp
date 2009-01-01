@@ -186,11 +186,7 @@ int main(int argc, char *argv[])
 	
 	if (argc > 1)
 	{
-		if (ParseArgv(argc, argv))
-		{
-			Mpd->Disconnect();
-			return 0;
-		}
+		ParseArgv(argc, argv);
 	}
 	
 	if (!ConnectToMPD())

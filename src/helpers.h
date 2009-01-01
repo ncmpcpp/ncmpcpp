@@ -26,7 +26,7 @@
 #include "settings.h"
 
 bool ConnectToMPD();
-bool ParseArgv(int, char **);
+void ParseArgv(int, char **);
 
 class CaseInsensitiveSorting
 {

@@ -49,20 +49,16 @@ bool ConnectToMPD()
 	return true;
 }
 
-bool ParseArgv(int argc, char **argv)
+void ParseArgv(int argc, char **argv)
 {
 	using std::cout;
 	using std::endl;
 	
-	vector<string> v;
-	v.reserve(argc-1);
-	for (int i = 1; i < argc; i++)
-		v.push_back(argv[i]);
+	bool quit = 0;
 	
-	bool exit = 0;
-	for (vector<string>::iterator it = v.begin(); it != v.end() && !exit; it++)
+	for (int i = 1; i < argc; i++)
 	{
-		if (*it == "-v" || *it == "--version")
+		if (strcmp(argv[i], "-v") == 0 || strcmp(argv[i], "--version") == 0)
 		{
 			cout << "ncmpcpp version: " << VERSION << endl
 			<< "built with support for:"
@@ -76,9 +72,9 @@ bool ParseArgv(int argc, char **argv)
 			<< " unicode"
 #			endif
 			<< endl;
-			return 1;
+			exit(0);
 		}
-		else if (*it == "-?" || *it == "--help")
+		else if (strcmp(argv[i], "-?") == 0 || strcmp(argv[i], "--help") == 0)
 		{
 			cout
 			<< "Usage: ncmpcpp [OPTION]...\n"
@@ -92,67 +88,68 @@ bool ParseArgv(int argc, char **argv)
 			<< "  prev                      play the previous song\n"
 			<< "  volume [+-]<num>          adjusts volume by [+-]<num>\n"
 			;
-			return 1;
+			exit(0);
 		}
 		
 		if (!ConnectToMPD())
-			return 1;
+			exit(0);
 		
-		if (*it == "play")
+		if (strcmp(argv[i], "play") == 0)
 		{
 			Mpd->Play();
-			exit = 1;
+			quit = 1;
 		}
-		else if (*it == "pause")
+		else if (strcmp(argv[i], "pause") == 0)
 		{
 			Mpd->Execute("pause \"1\"\n");
-			exit = 1;
+			quit = 1;
 		}
-		else if (*it == "toggle")
+		else if (strcmp(argv[i], "toggle") == 0)
 		{
 			Mpd->Execute("pause\n");
-			exit = 1;
+			quit = 1;
 		}
-		else if (*it == "stop")
+		else if (strcmp(argv[i], "stop") == 0)
 		{
 			Mpd->Stop();
-			exit = 1;
+			quit = 1;
 		}
-		else if (*it == "next")
+		else if (strcmp(argv[i], "next") == 0)
 		{
 			Mpd->Next();
-			exit = 1;
+			quit = 1;
 		}
-		else if (*it == "prev")
+		else if (strcmp(argv[i], "prev") == 0)
 		{
 			Mpd->Prev();
-			exit = 1;
+			quit = 1;
 		}
-		else if (*it == "volume")
+		else if (strcmp(argv[i], "volume") == 0)
 		{
-			it++;
+			i++;
 			Mpd->UpdateStatus();
 			if (!Mpd->GetErrorMessage().empty())
 			{
 				cout << "Error: " << Mpd->GetErrorMessage() << endl;
-				return 1;
+				exit(0);
 			}
-			if (it != v.end())
-				Mpd->SetVolume(Mpd->GetVolume()+StrToInt(*it));
-			exit = 1;
+			if (i != argc)
+				Mpd->SetVolume(Mpd->GetVolume()+atoi(argv[i]));
+			quit = 1;
 		}
 		else
 		{
-			cout << "ncmpcpp: invalid option " << *it << endl;
-			return 1;
+			cout << "ncmpcpp: invalid option: " << argv[i] << endl;
+			exit(0);
 		}
 		if (!Mpd->GetErrorMessage().empty())
 		{
 			cout << "Error: " << Mpd->GetErrorMessage() << endl;
-			return 1;
+			exit(0);
 		}
 	}
-	return exit;
+	if (quit)
+		exit(0);
 }
 
 bool CaseInsensitiveSorting::operator()(string a, string b)
