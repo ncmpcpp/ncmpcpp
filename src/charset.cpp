@@ -34,11 +34,16 @@
 namespace
 {
 	char *locale_charset = 0;
+
+	static inline bool char_non_ascii(char ch)
+	{
+		return (ch & 0x80) != 0;
+	}
 	
 	bool has_non_ascii_chars(const char *s)
 	{
 		for (; s; s++)
-			if (*s < 0)
+			if (char_non_ascii(*s))
 				return true;
 		return false;
 	}
@@ -46,7 +51,7 @@ namespace
 	bool has_non_ascii_chars(const std::string &s)
 	{
 		for (std::string::const_iterator it = s.begin(); it != s.end(); it++)
-			if (*it < 0)
+			if (char_non_ascii(*it))
 				return true;
 		return false;
 	}
