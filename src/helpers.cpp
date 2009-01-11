@@ -21,6 +21,7 @@
 #include <algorithm>
 #include <iostream>
 
+#include "charset.h"
 #include "helpers.h"
 #include "tag_editor.h"
 
@@ -532,6 +533,8 @@ void DisplaySongInColumns(const Song &s, void *s_template, Menu<Song> *menu)
 
 void DisplaySong(const Song &s, void *data, Menu<Song> *menu)
 {
+	const_cast<Song *>(&s)->LocalizeTags();
+	
 	const string &song_template = data ? *static_cast<string *>(data) : "";
 	basic_buffer<my_char_t> buf;
 	bool right = 0;

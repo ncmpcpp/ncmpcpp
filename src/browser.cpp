@@ -23,6 +23,7 @@
 #include <algorithm>
 
 #include "browser.h"
+#include "charset.h"
 #include "helpers.h"
 #include "settings.h"
 #ifdef HAVE_TAGLIB_H
@@ -163,6 +164,8 @@ void GetDirectory(string dir, string subdir)
 		mBrowser->Reset();
 	browsed_dir = dir;
 	
+	locale_to_utf(dir);
+	
 	for (size_t i = 0; i < mBrowser->Size(); i++)
 		if (mBrowser->at(i).song != (void *)1)
 			delete mBrowser->at(i).song;
@@ -189,11 +192,13 @@ void GetDirectory(string dir, string subdir)
 		{
 			case itPlaylist:
 			{
+				utf_to_locale(it->name);
 				mBrowser->AddOption(*it);
 				break;
 			}
 			case itDirectory:
 			{
+				utf_to_locale(it->name);
 				if (it->name == subdir)
 					highlightme = mBrowser->Size();
 				mBrowser->AddOption(*it);

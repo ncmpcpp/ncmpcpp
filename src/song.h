@@ -34,7 +34,7 @@ using std::string;
 class Song
 {
 	public:
-		Song() : itsSlash(string::npos), itsHash(0), copyPtr(0), isStream(0) { itsSong = mpd_newSong(); }
+		Song() : itsSlash(string::npos), itsHash(0), copyPtr(0), isStream(0), isLocalised(0) { itsSong = mpd_newSong(); }
 		Song(mpd_Song *, bool = 0);
 		Song(const Song &);
 		~Song();
@@ -82,6 +82,8 @@ class Song
 		void CopyPtr(bool copy) { copyPtr = copy; }
 		
 		//void GetEmptyFields(bool get) { itsGetEmptyFields = get; }
+		void LocalizeTags();
+		void DelocalizeTags();
 		void Clear();
 		bool Empty() const;
 		bool IsFromDB() const;
@@ -94,12 +96,15 @@ class Song
 		
 		static string ShowTime(int);
 	private:
+		void __Count_Last_Slash_Position();
+		
 		mpd_Song *itsSong;
 		string itsNewName;
 		size_t itsSlash;
 		long long itsHash;
 		bool copyPtr;
 		bool isStream;
+		bool isLocalised;
 		//bool itsGetEmptyFields;
 };
 

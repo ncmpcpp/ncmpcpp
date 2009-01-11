@@ -18,6 +18,11 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
+#include "charset.h"
 #include "song.h"
 #include "settings.h"
 
@@ -25,15 +30,14 @@ Song::Song(mpd_Song *s, bool copy_ptr) : itsSong(s),
 					 itsSlash(string::npos),
 					 itsHash(0),
 					 copyPtr(copy_ptr),
-					 isStream(0)
+					 isStream(0),
+					 isLocalised(0)
 {
 	size_t file_len = itsSong->file ? strlen(itsSong->file) : 0;
 	
 	if (itsSong->file)
 	{
-		char *tmp = strrchr(itsSong->file, '/');
-		if (tmp)
-			itsSlash = tmp-itsSong->file;
+		__Count_Last_Slash_Position();
 		if (strncmp(itsSong->file, "http://", 7) == 0)
 			isStream = 1;
 	}
@@ -52,7 +56,8 @@ Song::Song(const Song &s) : itsSong(0),
 			    itsSlash(s.itsSlash),
 			    itsHash(s.itsHash),
 			    copyPtr(s.copyPtr),
-			    isStream(s.isStream)
+			    isStream(s.isStream),
+			    isLocalised(s.isLocalised)
 {
 	itsSong = s.copyPtr ? s.itsSong : mpd_songDup(s.itsSong);
 }
@@ -70,6 +75,46 @@ string Song::GetLength() const
 	return ShowTime(itsSong->time);
 }
 
+void Song::LocalizeTags()
+{
+#	if !defined(_UTF8) && defined(HAVE_ICONV_H)
+	if (isLocalised)
+		return;
+	str_pool_utf_to_locale(itsSong->artist);
+	str_pool_utf_to_locale(itsSong->title);
+	str_pool_utf_to_locale(itsSong->album);
+	str_pool_utf_to_locale(itsSong->track);
+	str_pool_utf_to_locale(itsSong->name);
+	str_pool_utf_to_locale(itsSong->date);
+	str_pool_utf_to_locale(itsSong->genre);
+	str_pool_utf_to_locale(itsSong->composer);
+	str_pool_utf_to_locale(itsSong->performer);
+	str_pool_utf_to_locale(itsSong->disc);
+	str_pool_utf_to_locale(itsSong->comment);
+	isLocalised = 1;
+#	endif // !_UTF8 && HAVE_ICONV_H
+}
+
+void Song::DelocalizeTags()
+{
+#	if !defined(_UTF8) && defined(HAVE_ICONV_H)
+	if (!isLocalised)
+		return;
+	str_pool_locale_to_utf(itsSong->artist);
+	str_pool_locale_to_utf(itsSong->title);
+	str_pool_locale_to_utf(itsSong->album);
+	str_pool_locale_to_utf(itsSong->track);
+	str_pool_locale_to_utf(itsSong->name);
+	str_pool_locale_to_utf(itsSong->date);
+	str_pool_locale_to_utf(itsSong->genre);
+	str_pool_locale_to_utf(itsSong->composer);
+	str_pool_locale_to_utf(itsSong->performer);
+	str_pool_locale_to_utf(itsSong->disc);
+	str_pool_locale_to_utf(itsSong->comment);
+	isLocalised = 0;
+#	endif // !_UTF8 && HAVE_ICONV_H
+}
+
 void Song::Clear()
 {
 	if (itsSong)
@@ -78,6 +123,8 @@ void Song::Clear()
 	itsNewName.clear();
 	itsSlash = 0;
 	itsHash = 0;
+	isStream = 0;
+	isLocalised = 0;
 	copyPtr = 0;
 }
 
@@ -427,6 +474,7 @@ Song & Song::operator=(const Song &s)
 	itsHash = s.itsHash;
 	copyPtr = s.copyPtr;
 	isStream = s.isStream;
+	isLocalised = s.isLocalised;
 	return *this;
 }
 
@@ -503,5 +551,12 @@ string Song::ShowTime(int length)
 		<< std::setw(2) << std::setfill('0') << seconds;
 	}
 	return ss.str();
+}
+
+void Song::__Count_Last_Slash_Position()
+{
+	char *tmp = strrchr(itsSong->file, '/');
+	if (tmp)
+		itsSlash = tmp-itsSong->file;
 }
 

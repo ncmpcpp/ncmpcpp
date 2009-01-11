@@ -23,6 +23,11 @@ if test "$unicode" = "yes" ; then
 else
 	ncurses_config_bin=ncurses5-config
 	ncurses_lib=ncurses
+	AC_CHECK_FILE([/usr/share/i18n/SUPPORTED], AC_DEFINE([SUPPORTED_LOCALES], ["/usr/share/i18n/SUPPORTED"], [ ]),
+		AC_CHECK_FILE([/etc/locale.gen], AC_DEFINE([SUPPORTED_LOCALES], ["/etc/locale.gen"], [ ]),
+		AC_MSG_ERROR([cannot find list of supported locales]))
+	)
+	AC_CHECK_HEADERS([iconv.h], ,)
 fi
 AC_PATH_PROG(NCURSES_CONFIG, $ncurses_config_bin)
 if test "$NCURSES_CONFIG" != "" ; then
