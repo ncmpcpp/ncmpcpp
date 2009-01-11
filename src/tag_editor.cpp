@@ -274,31 +274,31 @@ void ReadTagsFromFile(mpd_Song *s)
 	
 	TagLib::MPEG::File *mpegf = dynamic_cast<TagLib::MPEG::File *>(f.file());
 
-	s->artist = !f.tag()->artist().isEmpty() ? str_pool_get(f.tag()->artist().toCString(UNICODE)) : 0;
-	s->title = !f.tag()->title().isEmpty() ? str_pool_get(f.tag()->title().toCString(UNICODE)) : 0;
-	s->album = !f.tag()->album().isEmpty() ? str_pool_get(f.tag()->album().toCString(UNICODE)) : 0;
+	s->artist = !f.tag()->artist().isEmpty() ? str_pool_get(f.tag()->artist().toCString(1)) : 0;
+	s->title = !f.tag()->title().isEmpty() ? str_pool_get(f.tag()->title().toCString(1)) : 0;
+	s->album = !f.tag()->album().isEmpty() ? str_pool_get(f.tag()->album().toCString(1)) : 0;
 	s->track = f.tag()->track() ? str_pool_get(IntoStr(f.tag()->track()).c_str()) : 0;
 	s->date = f.tag()->year() ? str_pool_get(IntoStr(f.tag()->year()).c_str()) : 0;
-	s->genre = !f.tag()->genre().isEmpty() ? str_pool_get(f.tag()->genre().toCString(UNICODE)) : 0;
+	s->genre = !f.tag()->genre().isEmpty() ? str_pool_get(f.tag()->genre().toCString(1)) : 0;
 	if (mpegf)
 	{
 		s->composer = !mpegf->ID3v2Tag()->frameListMap()["TCOM"].isEmpty()
 		? (!mpegf->ID3v2Tag()->frameListMap()["TCOM"].front()->toString().isEmpty()
-		   ? str_pool_get(mpegf->ID3v2Tag()->frameListMap()["TCOM"].front()->toString().toCString(UNICODE))
+		   ? str_pool_get(mpegf->ID3v2Tag()->frameListMap()["TCOM"].front()->toString().toCString(1))
 		   : 0)
 		: 0;
 		s->performer = !mpegf->ID3v2Tag()->frameListMap()["TOPE"].isEmpty()
 		? (!mpegf->ID3v2Tag()->frameListMap()["TOPE"].front()->toString().isEmpty()
-		   ? str_pool_get(mpegf->ID3v2Tag()->frameListMap()["TOPE"].front()->toString().toCString(UNICODE))
+		   ? str_pool_get(mpegf->ID3v2Tag()->frameListMap()["TOPE"].front()->toString().toCString(1))
 		   : 0)
 		: 0;
 		s->disc = !mpegf->ID3v2Tag()->frameListMap()["TPOS"].isEmpty()
 		? (!mpegf->ID3v2Tag()->frameListMap()["TPOS"].front()->toString().isEmpty()
-		   ? str_pool_get(mpegf->ID3v2Tag()->frameListMap()["TPOS"].front()->toString().toCString(UNICODE))
+		   ? str_pool_get(mpegf->ID3v2Tag()->frameListMap()["TPOS"].front()->toString().toCString(1))
 		   : 0)
 		: 0;
 	}
-	s->comment = !f.tag()->comment().isEmpty() ? str_pool_get(f.tag()->comment().toCString(UNICODE)) : 0;
+	s->comment = !f.tag()->comment().isEmpty() ? str_pool_get(f.tag()->comment().toCString(1)) : 0;
 	s->time = f.audioProperties()->length();
 }
 
@@ -312,7 +312,7 @@ bool GetSongTags(Song &s)
 	TagLib::FileRef f(path_to_file.c_str());
 	if (f.isNull())
 		return false;
-	s.SetComment(f.tag()->comment().to8Bit(UNICODE));
+	s.SetComment(f.tag()->comment().to8Bit(1));
 	
 	string ext = s.GetFile();
 	ext = ext.substr(ext.find_last_of(".")+1);
@@ -372,13 +372,13 @@ bool WriteTags(Song &s)
 	FileRef f(path_to_file.c_str());
 	if (!f.isNull())
 	{
-		f.tag()->setTitle(TO_WSTRING(s.GetTitle()));
-		f.tag()->setArtist(TO_WSTRING(s.GetArtist()));
-		f.tag()->setAlbum(TO_WSTRING(s.GetAlbum()));
+		f.tag()->setTitle(ToWString(s.GetTitle()));
+		f.tag()->setArtist(ToWString(s.GetArtist()));
+		f.tag()->setAlbum(ToWString(s.GetAlbum()));
 		f.tag()->setYear(StrToInt(s.GetYear()));
 		f.tag()->setTrack(StrToInt(s.GetTrack()));
-		f.tag()->setGenre(TO_WSTRING(s.GetGenre()));
-		f.tag()->setComment(TO_WSTRING(s.GetComment()));
+		f.tag()->setGenre(ToWString(s.GetGenre()));
+		f.tag()->setComment(ToWString(s.GetComment()));
 		f.save();
 		
 		string ext = s.GetFile();
@@ -388,16 +388,16 @@ bool WriteTags(Song &s)
 		{
 			MPEG::File file(path_to_file.c_str());
 			ID3v2::Tag *tag = file.ID3v2Tag();
-			String::Type encoding = UNICODE ? String::UTF8 : String::Latin1;
+			String::Type encoding = String::UTF8;
 			ByteVector Composer("TCOM");
 			ByteVector Performer("TOPE");
 			ByteVector Disc("TPOS");
 			ID3v2::Frame *ComposerFrame = new ID3v2::TextIdentificationFrame(Composer, encoding);
 			ID3v2::Frame *PerformerFrame = new ID3v2::TextIdentificationFrame(Performer, encoding);
 			ID3v2::Frame *DiscFrame = new ID3v2::TextIdentificationFrame(Disc, encoding);
-			ComposerFrame->setText(TO_WSTRING(s.GetComposer()));
-			PerformerFrame->setText(TO_WSTRING(s.GetPerformer()));
-			DiscFrame->setText(TO_WSTRING(s.GetDisc()));
+			ComposerFrame->setText(ToWString(s.GetComposer()));
+			PerformerFrame->setText(ToWString(s.GetPerformer()));
+			DiscFrame->setText(ToWString(s.GetDisc()));
 			tag->removeFrames(Composer);
 			tag->addFrame(ComposerFrame);
 			tag->removeFrames(Performer);
@@ -599,7 +599,7 @@ void __deal_with_filenames(SongList &v)
 								int last_dot = file.find_last_of(".");
 								string extension = file.substr(last_dot);
 								basic_buffer<my_char_t> new_file;
-								new_file << TO_WSTRING(GenerateFilename(s, Config.pattern));
+								new_file << ToWString(GenerateFilename(s, Config.pattern));
 								if (new_file.Str().empty())
 								{
 									if (preview)

@@ -34,14 +34,12 @@
 #include <cstring>
 
 #ifdef _UTF8
-# define UNICODE 1
 # define my_char_t wchar_t
 # define my_string_t wstring
 # define UTF_S_FMT "%ls"
 # define TO_STRING(x) ToString(x)
 # define TO_WSTRING(x) ToWString(x)
 #else
-# define UNICODE 0
 # define my_char_t char
 # define my_string_t string
 # define UTF_S_FMT "%s"

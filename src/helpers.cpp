@@ -764,7 +764,7 @@ void GetInfo(Song &s, Scrollpad &info)
 	path_to_file += s.GetFile();
 	TagLib::FileRef f(path_to_file.c_str());
 	if (!f.isNull())
-		s.SetComment(f.tag()->comment().to8Bit(UNICODE));
+		s.SetComment(f.tag()->comment().to8Bit(1));
 #	endif // HAVE_TAGLIB_H
 	
 	info << fmtBold << Config.color1 << "Filename: " << fmtBoldEnd << Config.color2 << s.GetName() << "\n" << clEnd;

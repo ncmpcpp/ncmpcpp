@@ -2571,7 +2571,7 @@ int main(int argc, char *argv[])
 							success = 0;
 							break;
 						}
-						f.tag()->setAlbum(TO_WSTRING(new_album));
+						f.tag()->setAlbum(ToWString(new_album));
 						f.save();
 					}
 					if (success)
