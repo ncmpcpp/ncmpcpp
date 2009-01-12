@@ -90,7 +90,7 @@ namespace
 
 void init_current_locale()
 {
-	std::string envlocale = getenv("LC_CTYPE") ? getenv("LC_CTYPE") : (getenv("LC_ALL") ? getenv("LC_ALL") : "");
+	std::string envlocale = setlocale(LC_CTYPE, "");
 	if (envlocale.empty())
 		return;
 	std::ifstream f(SUPPORTED_LOCALES);
