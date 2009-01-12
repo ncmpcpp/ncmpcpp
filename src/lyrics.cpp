@@ -21,6 +21,7 @@
 #include <sys/stat.h>
 #include <fstream>
 
+#include "charset.h"
 #include "helpers.h"
 #include "lyrics.h"
 #include "settings.h"
@@ -71,6 +72,8 @@ void * GetArtistInfo(void *ptr)
 	string artist = *strptr;
 	delete strptr;
 	
+	locale_to_utf(artist);
+	
 	string filename = artist + ".txt";
 	ToLower(filename);
 	EscapeUnallowedChars(filename);
@@ -89,6 +92,7 @@ void * GetArtistInfo(void *ptr)
 		{
 			if (!first)
 				*sInfo << "\n";
+			utf_to_locale(line);
 			*sInfo << line;
 			first = 0;
 		}
@@ -204,12 +208,27 @@ void * GetArtistInfo(void *ptr)
 		result = result.substr(0, i+1);
 	}
 	
+	Buffer filebuffer;
+	if (save)
+		filebuffer << result;
+	utf_to_locale(result);
 	*sInfo << result;
 	
+	if (save)
+		filebuffer << "\n\nSimilar artists:\n";
 	*sInfo << fmtBold << "\n\nSimilar artists:\n" << fmtBoldEnd;
 	for (size_t i = 1; i < similar.size(); i++)
+	{
+		if (save)
+			filebuffer << "\n * " << similar[i] << " (" << urls[i] << ")";
+		utf_to_locale(similar[i]);
+		utf_to_locale(urls[i]);
 		*sInfo << "\n" << Config.color2 << " * " << clEnd << similar[i] << " (" << urls[i] << ")";
+	}
 	
+	if (save)
+		filebuffer << "\n\n" << urls.front();
+	utf_to_locale(urls.front());
 	*sInfo << "\n\n" << urls.front();
 	
 	if (save)
@@ -217,7 +236,7 @@ void * GetArtistInfo(void *ptr)
 		std::ofstream output(fullpath.c_str());
 		if (output.is_open())
 		{
-			output << TO_STRING(sInfo->Content());
+			output << filebuffer.Str();
 			output.close();
 		}
 	}
@@ -234,6 +253,9 @@ void *GetLyrics(void *song)
 	string artist = static_cast<Song *>(song)->GetArtist();
 	string title = static_cast<Song *>(song)->GetTitle();
 	
+	locale_to_utf(artist);
+	locale_to_utf(title);
+	
 	string filename = artist + " - " + title + ".txt";
 	const string fullpath = lyrics_folder + "/" + filename;
 	mkdir(lyrics_folder.c_str(), 0755);
@@ -248,6 +270,7 @@ void *GetLyrics(void *song)
 		{
 			if (!first)
 				*sLyrics << "\n";
+			utf_to_locale(line);
 			*sLyrics << line;
 			first = 0;
 		}
@@ -321,7 +344,9 @@ void *GetLyrics(void *song)
 	
 	EscapeHtml(result);
 	
-	*sLyrics << result;
+	string localized_result = result;
+	utf_to_locale(localized_result);
+	*sLyrics << localized_result;
 	
 	std::ofstream output(fullpath.c_str());
 	if (output.is_open())

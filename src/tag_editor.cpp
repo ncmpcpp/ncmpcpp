@@ -599,7 +599,7 @@ void __deal_with_filenames(SongList &v)
 								int last_dot = file.find_last_of(".");
 								string extension = file.substr(last_dot);
 								basic_buffer<my_char_t> new_file;
-								new_file << ToWString(GenerateFilename(s, Config.pattern));
+								new_file << TO_WSTRING(GenerateFilename(s, Config.pattern));
 								if (new_file.Str().empty())
 								{
 									if (preview)

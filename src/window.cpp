@@ -716,7 +716,8 @@ Window &Window::operator<<(const double &d)
 
 Window &Window::operator<<(const string &s)
 {
-	wprintw(itsWindow, "%s", s.c_str());
+	for (string::const_iterator it = s.begin(); it != s.end(); it++)
+		wprintw(itsWindow, "%c", *it);
 	return *this;
 }
 
