@@ -355,6 +355,7 @@ int main(int argc, char *argv[])
 	
 	// redirect std::cerr output to ~/.ncmpcpp/error.log file
 	std::ofstream errorlog((config_dir + "error.log").c_str(), std::ios::app);
+	std::streambuf * cerr_buffer = std::cerr.rdbuf();
 	std::cerr.rdbuf(errorlog.rdbuf());
 	
 #	ifdef HAVE_CURL_CURL_H
@@ -3684,6 +3685,8 @@ int main(int argc, char *argv[])
 		
 		// key mapping end
 	}
+	// restore old cerr buffer
+	std::cerr.rdbuf(cerr_buffer);
 	errorlog.close();
 	Mpd->Disconnect();
 	DestroyScreen();
