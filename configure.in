@@ -35,7 +35,7 @@ if test "$NCURSES_CONFIG" != "" ; then
 	LDFLAGS="$LDFLAGS `$NCURSES_CONFIG --libs`"
 	AC_CHECK_LIB($ncurses_lib, initscr, , AC_MSG_ERROR([$ncurses_lib library is required]))
 else
-	AC_MSG_ERROR([$ncurses_config_bin executable is missing])
+	AC_CHECK_LIB($ncurses_lib, initscr, LDFLAGS="$LDFLAGS -l$ncurses_lib", AC_MSG_ERROR([$ncurses_lib library is required]))
 fi
 AC_CHECK_HEADERS([ncurses.h], , AC_MSG_ERROR([missing ncurses.h header]))
 
