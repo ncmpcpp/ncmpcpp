@@ -52,9 +52,9 @@ void Scrollpad::Flush()
 	
 	std::basic_string<my_char_t> s = itsBuffer.Str();
 	
-	int x_pos;
-	int space_pos;
-	int tab_size;
+	int x_pos = 0;
+	int space_pos = 0;
+	int tab_size = 0;
 	
 	for (size_t i = 0; i < s.length(); i++)
 	{
