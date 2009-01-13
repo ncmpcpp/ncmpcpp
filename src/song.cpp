@@ -26,7 +26,7 @@
 #include "song.h"
 #include "settings.h"
 
-Song::Song(mpd_Song *s, bool copy_ptr) : itsSong(s),
+Song::Song(mpd_Song *s, bool copy_ptr) : itsSong(s ? s : mpd_newSong()),
 					 itsSlash(string::npos),
 					 itsHash(0),
 					 copyPtr(copy_ptr),
