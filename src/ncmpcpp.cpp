@@ -72,9 +72,9 @@
 # define REFRESH_TAG_EDITOR_SCREEN \
 			do { \
 				mEditorLeftCol->Display(); \
-				mvvline(main_start_y, middle_col_startx-1, 0, main_height); \
+				mvvline(main_start_y, tagedit_middle_col_startx-1, 0, main_height); \
 				mEditorTagTypes->Display(); \
-				mvvline(main_start_y, right_col_startx-1, 0, main_height); \
+				mvvline(main_start_y, tagedit_right_col_startx-1, 0, main_height); \
 				mEditorTags->Display(); \
 			} while (0)
 #endif // HAVE_TAGLIB_H
@@ -259,23 +259,29 @@ int main(int argc, char *argv[])
 	mTagEditor->SetTimeout(ncmpcpp_window_timeout);
 	mTagEditor->SetItemDisplayer(GenericDisplayer);
 	
-	mEditorAlbums = new Menu<StringPair>(0, main_start_y, left_col_width, main_height, "Albums", Config.main_color, brNone);
+	size_t tagedit_middle_col_width = 26;
+	size_t tagedit_left_col_width = COLS/2-tagedit_middle_col_width/2;
+	size_t tagedit_middle_col_startx = tagedit_left_col_width+1;
+	size_t tagedit_right_col_width = COLS-tagedit_left_col_width-tagedit_middle_col_width-2;
+	size_t tagedit_right_col_startx = tagedit_left_col_width+tagedit_middle_col_width+2;
+	
+	mEditorAlbums = new Menu<StringPair>(0, main_start_y, tagedit_left_col_width, main_height, "Albums", Config.main_color, brNone);
 	mEditorAlbums->HighlightColor(Config.main_highlight_color);
 	mEditorAlbums->SetTimeout(ncmpcpp_window_timeout);
 	mEditorAlbums->SetItemDisplayer(DisplayStringPair);
 	
-	mEditorDirs = new Menu<StringPair>(0, main_start_y, left_col_width, main_height, "Directories", Config.main_color, brNone);
+	mEditorDirs = new Menu<StringPair>(0, main_start_y, tagedit_left_col_width, main_height, "Directories", Config.main_color, brNone);
 	mEditorDirs->HighlightColor(Config.main_highlight_color);
 	mEditorDirs->SetTimeout(ncmpcpp_window_timeout);
 	mEditorDirs->SetItemDisplayer(DisplayStringPair);
 	mEditorLeftCol = Config.albums_in_tag_editor ? mEditorAlbums : mEditorDirs;
 	
-	mEditorTagTypes = new Menu<string>(middle_col_startx, main_start_y, middle_col_width, main_height, "Tag types", Config.main_color, brNone);
+	mEditorTagTypes = new Menu<string>(tagedit_middle_col_startx, main_start_y, tagedit_middle_col_width, main_height, "Tag types", Config.main_color, brNone);
 	mEditorTagTypes->HighlightColor(Config.main_highlight_color);
 	mEditorTagTypes->SetTimeout(ncmpcpp_window_timeout);
 	mEditorTagTypes->SetItemDisplayer(GenericDisplayer);
 	
-	mEditorTags = new Menu<Song>(right_col_startx, main_start_y, right_col_width, main_height, "Tags", Config.main_color, brNone);
+	mEditorTags = new Menu<Song>(tagedit_right_col_startx, main_start_y, tagedit_right_col_width, main_height, "Tags", Config.main_color, brNone);
 	mEditorTags->HighlightColor(Config.main_highlight_color);
 	mEditorTags->SetTimeout(ncmpcpp_window_timeout);
 	mEditorTags->SetSelectPrefix(&Config.selected_item_prefix);
@@ -910,12 +916,17 @@ int main(int argc, char *argv[])
 #			ifdef HAVE_TAGLIB_H
 			mTagEditor->Resize(COLS, main_height);
 			
-			mEditorAlbums->Resize(left_col_width, main_height);
-			mEditorDirs->Resize(left_col_width, main_height);
-			mEditorTagTypes->Resize(middle_col_width, main_height);
-			mEditorTags->Resize(right_col_width, main_height);
-			mEditorTagTypes->MoveTo(middle_col_startx, main_start_y);
-			mEditorTags->MoveTo(right_col_startx, main_start_y);
+			tagedit_left_col_width = COLS/2-tagedit_middle_col_width/2;
+			tagedit_middle_col_startx = tagedit_left_col_width+1;
+			tagedit_right_col_width = COLS-tagedit_left_col_width-tagedit_middle_col_width-2;
+			tagedit_right_col_startx = tagedit_left_col_width+tagedit_middle_col_width+2;
+			
+			mEditorAlbums->Resize(tagedit_left_col_width, main_height);
+			mEditorDirs->Resize(tagedit_left_col_width, main_height);
+			mEditorTagTypes->Resize(tagedit_middle_col_width, main_height);
+			mEditorTags->Resize(tagedit_right_col_width, main_height);
+			mEditorTagTypes->MoveTo(tagedit_middle_col_startx, main_start_y);
+			mEditorTags->MoveTo(tagedit_right_col_startx, main_start_y);
 			
 			mPlaylistList->Resize(left_col_width, main_height);
 			mPlaylistEditor->Resize(middle_col_width+right_col_width+1, main_height);
