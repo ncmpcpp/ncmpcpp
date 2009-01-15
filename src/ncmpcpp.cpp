@@ -1693,6 +1693,22 @@ int main(int argc, char *argv[])
 								mEditorTags->Clear(0);
 							continue;
 						}
+						case 13: // capitalize first letters
+						{
+							ShowMessage("Processing...");
+							for (SongList::iterator it = list.begin(); it != list.end(); it++)
+								CapitalizeFirstLetters(**it);
+							ShowMessage("Done!");
+							break;
+						}
+						case 14: // lower all letters
+						{
+							ShowMessage("Processing...");
+							for (SongList::iterator it = list.begin(); it != list.end(); it++)
+								LowerAllLetters(**it);
+							ShowMessage("Done!");
+							break;
+						}
 						default:
 							break;
 					}
@@ -3671,8 +3687,9 @@ int main(int argc, char *argv[])
 					mEditorTagTypes->AddSeparator();
 					mEditorTagTypes->AddOption("Reset");
 					mEditorTagTypes->AddOption("Save");
-					/*mEditorTagTypes->AddSeparator();
-					mEditorTagTypes->AddOption("Capitalize first letters");*/
+					mEditorTagTypes->AddSeparator();
+					mEditorTagTypes->AddOption("Capitalize First Letters");
+					mEditorTagTypes->AddOption("lower all letters");
 				}
 				
 				wCurrent = mEditorLeftCol;

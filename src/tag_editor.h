@@ -47,6 +47,9 @@ bool WriteTags(Song &);
 
 void __deal_with_filenames(MPD::SongList &);
 
+void CapitalizeFirstLetters(Song &);
+void LowerAllLetters(Song &);
+
 #endif
 
 #endif

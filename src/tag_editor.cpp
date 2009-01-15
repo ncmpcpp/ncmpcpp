@@ -161,6 +161,21 @@ namespace
 		}
 		return result.str();
 	}
+	
+	string tag_capitalize_first_letters(const string &s)
+	{
+		if (s.empty())
+			return "";
+		string result = s;
+		if (isalpha(result[0]))
+			result[0] = toupper(result[0]);
+		for (string::iterator it = result.begin()+1; it != result.end(); it++)
+		{
+			if (isalpha(*it) && *(it-1) == ' ')
+				*it = toupper(*it);
+		}
+		return result;
+	}
 }
 
 SongSetFunction IntoSetFunction(mpd_TagItems tag)
@@ -682,6 +697,53 @@ void __deal_with_filenames(SongList &v)
 	delete Main;
 	delete Legend;
 	delete Preview;
+}
+
+void CapitalizeFirstLetters(Song &s)
+{
+	s.SetTitle(tag_capitalize_first_letters(s.GetTitle()));
+	s.SetArtist(tag_capitalize_first_letters(s.GetArtist()));
+	s.SetAlbum(tag_capitalize_first_letters(s.GetAlbum()));
+	s.SetGenre(tag_capitalize_first_letters(s.GetGenre()));
+	s.SetComposer(tag_capitalize_first_letters(s.GetComposer()));
+	s.SetPerformer(tag_capitalize_first_letters(s.GetPerformer()));
+	s.SetDisc(tag_capitalize_first_letters(s.GetDisc()));
+	s.SetComment(tag_capitalize_first_letters(s.GetComment()));
+}
+
+void LowerAllLetters(Song &s)
+{
+	string conv = s.GetTitle();
+	ToLower(conv);
+	s.SetTitle(conv);
+	
+	conv = s.GetArtist();
+	ToLower(conv);
+	s.SetArtist(conv);
+	
+	conv = s.GetAlbum();
+	ToLower(conv);
+	s.SetAlbum(conv);
+	
+	conv = s.GetGenre();
+	ToLower(conv);
+	s.SetGenre(conv);
+	
+	conv = s.GetComposer();
+	ToLower(conv);
+	s.SetComposer(conv);
+	
+	conv = s.GetPerformer();
+	ToLower(conv);
+	s.SetPerformer(conv);
+	
+	conv = s.GetDisc();
+	ToLower(conv);
+	s.SetDisc(conv);
+	
+	conv = s.GetComment();
+	ToLower(conv);
+	s.SetComment(conv);
 }
 
 #endif
