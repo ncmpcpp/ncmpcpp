@@ -107,6 +107,8 @@ void TraceMpdStatus()
 	{
 		if (now >= time_of_statusbar_lock+lock_statusbar_delay)
 		{
+			lock_statusbar_delay = -1;
+			
 			if (Config.statusbar_visibility)
 				block_statusbar_update = !allow_statusbar_unlock;
 			else
