@@ -75,11 +75,13 @@ string Song::GetLength() const
 	return ShowTime(itsSong->time);
 }
 
-void Song::LocalizeTags()
+void Song::Localize()
 {
 #	if !defined(_UTF8) && defined(HAVE_ICONV_H)
 	if (isLocalised)
 		return;
+	str_pool_utf_to_locale(itsSong->file);
+	__Count_Last_Slash_Position();
 	str_pool_utf_to_locale(itsSong->artist);
 	str_pool_utf_to_locale(itsSong->title);
 	str_pool_utf_to_locale(itsSong->album);
@@ -95,11 +97,13 @@ void Song::LocalizeTags()
 #	endif // !_UTF8 && HAVE_ICONV_H
 }
 
-void Song::DelocalizeTags()
+/*void Song::Delocalize()
 {
 #	if !defined(_UTF8) && defined(HAVE_ICONV_H)
 	if (!isLocalised)
 		return;
+	str_pool_locale_to_utf(itsSong->file);
+	__Count_Last_Slash_Position();
 	str_pool_locale_to_utf(itsSong->artist);
 	str_pool_locale_to_utf(itsSong->title);
 	str_pool_locale_to_utf(itsSong->album);
@@ -113,7 +117,7 @@ void Song::DelocalizeTags()
 	str_pool_locale_to_utf(itsSong->comment);
 	isLocalised = 0;
 #	endif // !_UTF8 && HAVE_ICONV_H
-}
+}*/
 
 void Song::Clear()
 {

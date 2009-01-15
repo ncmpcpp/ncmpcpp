@@ -82,12 +82,13 @@ class Song
 		void CopyPtr(bool copy) { copyPtr = copy; }
 		
 		//void GetEmptyFields(bool get) { itsGetEmptyFields = get; }
-		void LocalizeTags();
-		void DelocalizeTags();
+		void Localize();
+		//void Delocalize();
 		void Clear();
 		bool Empty() const;
 		bool IsFromDB() const;
 		bool IsStream() const { return isStream; }
+		bool Localized() const { return isLocalised; }
 		
 		Song & operator=(const Song &);
 		bool operator==(const Song &) const;

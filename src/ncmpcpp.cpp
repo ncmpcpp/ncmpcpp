@@ -527,7 +527,7 @@ int main(int argc, char *argv[])
 					if (!l.empty() && !l[0]->GetAlbum().empty())
 					{
 						utf_to_locale(*it);
-						l[0]->LocalizeTags();
+						l[0]->Localize();
 						maplist[l[0]->toString(Config.media_lib_album_format)] = *it;
 					}
 					FreeSongList(l);
@@ -556,9 +556,7 @@ int main(int argc, char *argv[])
 					mLibAlbums->Refresh();
 					mLibSongs->Clear(0);
 					Mpd->StartSearch(1);
-					locale_to_utf(mLibArtists->Current());
-					Mpd->AddSearch(Config.media_lib_primary_tag, mLibArtists->Current());
-					utf_to_locale(mLibArtists->Current());
+					Mpd->AddSearch(Config.media_lib_primary_tag, locale_to_utf_cpy(mLibArtists->Current()));
 					Mpd->CommitSearch(list);
 				}
 				else
@@ -566,9 +564,7 @@ int main(int argc, char *argv[])
 					mLibSongs->Clear(0);
 					Mpd->StartSearch(1);
 					Mpd->AddSearch(Config.media_lib_primary_tag, mLibArtists->Current());
-					locale_to_utf(mLibAlbums->Current().second);
-					Mpd->AddSearch(MPD_TAG_ITEM_ALBUM, mLibAlbums->Current().second);
-					utf_to_locale(mLibAlbums->Current().second);
+					Mpd->AddSearch(MPD_TAG_ITEM_ALBUM, locale_to_utf_cpy(mLibAlbums->Current().second));
 					Mpd->CommitSearch(list);
 				}
 				sort(list.begin(), list.end(), SortSongsByTrack);
@@ -615,9 +611,7 @@ int main(int argc, char *argv[])
 			{
 				mPlaylistEditor->Reset();
 				SongList list;
-				locale_to_utf(mPlaylistList->Current());
-				Mpd->GetPlaylistContent(mPlaylistList->Current(), list);
-				utf_to_locale(mPlaylistList->Current());
+				Mpd->GetPlaylistContent(locale_to_utf_cpy(mPlaylistList->Current()), list);
 				if (!list.empty())
 					mPlaylistEditor->SetTitle("Playlist's content (" + IntoStr(list.size()) + " item" + (list.size() == 1 ? ")" : "s)"));
 				else
@@ -679,7 +673,7 @@ int main(int argc, char *argv[])
 						Mpd->CommitSearch(l);
 						if (!l.empty())
 						{
-							l[0]->LocalizeTags();
+							l[0]->Localize();
 							maplist[l[0]->toString(Config.tag_editor_album_format)] = *it;
 						}
 						FreeSongList(l);
@@ -730,7 +724,7 @@ int main(int argc, char *argv[])
 					sort(list.begin(), list.end(), CaseInsensitiveSorting());
 					for (SongList::iterator it = list.begin(); it != list.end(); it++)
 					{
-						(*it)->LocalizeTags();
+						(*it)->Localize();
 						mEditorTags->AddOption(**it);
 					}
 				}
@@ -740,7 +734,7 @@ int main(int argc, char *argv[])
 					sort(list.begin(), list.end(), CaseInsensitiveSorting());
 					for (SongList::const_iterator it = list.begin(); it != list.end(); it++)
 					{
-						(*it)->LocalizeTags();
+						(*it)->Localize();
 						mEditorTags->AddOption(**it);
 					}
 				}
@@ -1034,9 +1028,7 @@ int main(int argc, char *argv[])
 						case itPlaylist:
 						{
 							SongList list;
-							string playlist_real_name = item.name;
-							locale_to_utf(playlist_real_name);
-							Mpd->GetPlaylistContent(playlist_real_name, list);
+							Mpd->GetPlaylistContent(locale_to_utf_cpy(item.name), list);
 							for (SongList::const_iterator it = list.begin(); it != list.end(); it++)
 								Mpd->QueueAddSong(**it);
 							if (Mpd->CommitQueue())
@@ -1156,7 +1148,7 @@ int main(int argc, char *argv[])
 								ShowMessage("Tags updated!");
 								if (s.IsFromDB())
 								{
-									Mpd->UpdateDirectory(s.GetDirectory());
+									Mpd->UpdateDirectory(locale_to_utf_cpy(s.GetDirectory()));
 									if (prev_screen == csSearcher)
 										*mSearcher->Current().second = s;
 								}
@@ -1355,10 +1347,8 @@ int main(int argc, char *argv[])
 					
 					if (!mLibArtists->Empty() && wCurrent == mLibArtists)
 					{
-						string tag = mLibArtists->Current();
-						locale_to_utf(tag);
 						Mpd->StartSearch(1);
-						Mpd->AddSearch(Config.media_lib_primary_tag, tag);
+						Mpd->AddSearch(Config.media_lib_primary_tag, locale_to_utf_cpy(mLibArtists->Current()));
 						Mpd->CommitSearch(list);
 						for (SongList::const_iterator it = list.begin(); it != list.end(); it++)
 							Mpd->QueueAddSong(**it);
@@ -1465,9 +1455,7 @@ int main(int argc, char *argv[])
 					
 					if (wCurrent == mPlaylistList && !mPlaylistList->Empty())
 					{
-						string playlist = mPlaylistList->Current();
-						locale_to_utf(playlist);
-						Mpd->GetPlaylistContent(playlist, list);
+						Mpd->GetPlaylistContent(locale_to_utf_cpy(mPlaylistList->Current()), list);
 						for (SongList::const_iterator it = list.begin(); it != list.end(); it++)
 							Mpd->QueueAddSong(**it);
 						if (Mpd->CommitQueue())
@@ -1776,11 +1764,8 @@ int main(int argc, char *argv[])
 							if (browsed_dir != "/" && !mBrowser->Choice())
 								continue; // do not let add parent dir.
 							
-							string real_dir_name = item.name;
-							locale_to_utf(real_dir_name);
-							
 							SongList list;
-							Mpd->GetDirectoryRecursive(real_dir_name, list);
+							Mpd->GetDirectoryRecursive(locale_to_utf_cpy(item.name), list);
 							
 							for (SongList::const_iterator it = list.begin(); it != list.end(); it++)
 								Mpd->QueueAddSong(**it);
@@ -1827,9 +1812,7 @@ int main(int argc, char *argv[])
 						case itPlaylist:
 						{
 							SongList list;
-							string playlist_real_name = item.name;
-							locale_to_utf(playlist_real_name);
-							Mpd->GetPlaylistContent(playlist_real_name, list);
+							Mpd->GetPlaylistContent(locale_to_utf_cpy(item.name), list);
 							for (SongList::const_iterator it = list.begin(); it != list.end(); it++)
 								Mpd->QueueAddSong(**it);
 							if (Mpd->CommitQueue())
@@ -2067,9 +2050,7 @@ int main(int argc, char *argv[])
 					while (in != 'y' && in != 'n');
 					if (in == 'y')
 					{
-						locale_to_utf(name);
-						Mpd->DeletePlaylist(name);
-						utf_to_locale(name);
+						Mpd->DeletePlaylist(locale_to_utf_cpy(name));
 						ShowMessage("Playlist %s deleted!", name.c_str());
 						if (!Config.local_browser)
 							GetDirectory("/");
@@ -2549,16 +2530,14 @@ int main(int argc, char *argv[])
 					SongList list;
 					ShowMessage("Updating tags...");
 					Mpd->StartSearch(1);
-					locale_to_utf(mLibArtists->Current());
-					Mpd->AddSearch(Config.media_lib_primary_tag, mLibArtists->Current());
-					utf_to_locale(mLibArtists->Current());
+					Mpd->AddSearch(Config.media_lib_primary_tag, locale_to_utf_cpy(mLibArtists->Current()));
 					Mpd->CommitSearch(list);
 					SongSetFunction set = IntoSetFunction(Config.media_lib_primary_tag);
 					if (!set)
 						continue;
 					for (SongList::iterator it = list.begin(); it != list.end(); it++)
 					{
-						(*it)->LocalizeTags();
+						(*it)->Localize();
 						((*it)->*set)(new_tag);
 						ShowMessage("Updating tags in '%s'...", (*it)->GetName().c_str());
 						string path = Config.mpd_music_dir + (*it)->GetFile();
@@ -2589,7 +2568,7 @@ int main(int argc, char *argv[])
 					ShowMessage("Updating tags...");
 					for (size_t i = 0;  i < mLibSongs->Size(); i++)
 					{
-						(*mLibSongs)[i].LocalizeTags();
+						(*mLibSongs)[i].Localize();
 						ShowMessage("Updating tags in '%s'...", (*mLibSongs)[i].GetName().c_str());
 						string path = Config.mpd_music_dir + (*mLibSongs)[i].GetFile();
 						TagLib::FileRef f(path.c_str());
@@ -2673,18 +2652,14 @@ int main(int argc, char *argv[])
 				UnlockStatusbar();
 				if (!new_dir.empty() && new_dir != old_dir)
 				{
-					locale_to_utf(old_dir);
-					locale_to_utf(new_dir);
-					string full_old_dir = Config.mpd_music_dir + editor_browsed_dir + "/" + old_dir;
-					string full_new_dir = Config.mpd_music_dir + editor_browsed_dir + "/" + new_dir;
+					string full_old_dir = Config.mpd_music_dir + editor_browsed_dir + "/" + locale_to_utf_cpy(old_dir);
+					string full_new_dir = Config.mpd_music_dir + editor_browsed_dir + "/" + locale_to_utf_cpy(new_dir);
 					if (rename(full_old_dir.c_str(), full_new_dir.c_str()) == 0)
 					{
 						Mpd->UpdateDirectory(editor_browsed_dir);
 					}
 					else
 					{
-						utf_to_locale(old_dir);
-						utf_to_locale(new_dir);
 						ShowMessage("Cannot rename '%s' to '%s'!", old_dir.c_str(), new_dir.c_str());
 					}
 				}
@@ -2700,19 +2675,15 @@ int main(int argc, char *argv[])
 				UnlockStatusbar();
 				if (!new_dir.empty() && new_dir != old_dir)
 				{
-					locale_to_utf(old_dir);
-					locale_to_utf(new_dir);
 					string full_old_dir;
 					if (!Config.local_browser)
 						full_old_dir += Config.mpd_music_dir;
-					full_old_dir += old_dir;
+					full_old_dir += locale_to_utf_cpy(old_dir);
 					string full_new_dir;
 					if (!Config.local_browser)
 						full_new_dir += Config.mpd_music_dir;
-					full_new_dir += new_dir;
+					full_new_dir += locale_to_utf_cpy(new_dir);
 					int rename_result = rename(full_old_dir.c_str(), full_new_dir.c_str());
-					utf_to_locale(old_dir);
-					utf_to_locale(new_dir);
 					if (rename_result == 0)
 					{
 						ShowMessage("'%s' renamed to '%s'", old_dir.c_str(), new_dir.c_str());
@@ -2733,11 +2704,7 @@ int main(int argc, char *argv[])
 				UnlockStatusbar();
 				if (!new_name.empty() && new_name != old_name)
 				{
-					locale_to_utf(old_name);
-					locale_to_utf(new_name);
-					Mpd->Rename(old_name, new_name);
-					utf_to_locale(old_name);
-					utf_to_locale(new_name);
+					Mpd->Rename(locale_to_utf_cpy(old_name), locale_to_utf_cpy(new_name));
 					ShowMessage("Playlist '%s' renamed to '%s'", old_name.c_str(), new_name.c_str());
 					if (!Config.local_browser)
 						GetDirectory("/");
@@ -2782,10 +2749,8 @@ int main(int argc, char *argv[])
 				Config.local_browser = !s->IsFromDB();
 				
 				string option = s->toString(Config.song_status_format);
-				string localed_dir = s->GetDirectory();
 				locale_to_utf(option);
-				utf_to_locale(localed_dir);
-				GetDirectory(localed_dir);
+				GetDirectory(s->GetDirectory());
 				for (size_t i = 0; i < mBrowser->Size(); i++)
 				{
 					if (mBrowser->at(i).type == itSong && option == mBrowser->at(i).song->toString(Config.song_status_format))

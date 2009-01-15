@@ -127,6 +127,13 @@ void utf_to_locale(std::string &s)
 	str_pool_put(tmp);
 }
 
+std::string utf_to_locale_cpy(const std::string &s)
+{
+	std::string result = s;
+	utf_to_locale(result);
+	return result;
+}
+
 void locale_to_utf(std::string &s)
 {
 	if (s.empty() || !locale_charset || !has_non_ascii_chars(s))
@@ -135,6 +142,13 @@ void locale_to_utf(std::string &s)
 	charset_convert(locale_charset, "utf8", tmp, s.length());
 	s = tmp;
 	str_pool_put(tmp);
+}
+
+std::string locale_to_utf_cpy(const std::string &s)
+{
+	std::string result = s;
+	locale_to_utf(result);
+	return result;
 }
 
 void str_pool_utf_to_locale(char *&s)

@@ -18,6 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
+#include "charset.h"
 #include "mpdpp.h"
 
 using namespace MPD;
@@ -482,7 +483,7 @@ int Connection::AddSong(const string &path)
 
 int Connection::AddSong(const Song &s)
 {
-	return !s.Empty() ? (s.IsFromDB() ? AddSong(s.GetFile()) : AddSong("file://" + string(s.GetFile()))) : -1;
+	return !s.Empty() ? (s.IsFromDB() ? (AddSong(s.Localized() ? locale_to_utf_cpy(s.GetFile()) : s.GetFile())) : AddSong("file://" + (s.Localized() ? locale_to_utf_cpy(s.GetFile()) : s.GetFile()))) : -1;
 }
 
 void Connection::QueueAddSong(const string &path)
@@ -499,7 +500,7 @@ void Connection::QueueAddSong(const string &path)
 void Connection::QueueAddSong(const Song &s)
 {
 	if (!s.Empty())
-		QueueAddSong(s.GetFile());
+		QueueAddSong(s.Localized() ? locale_to_utf_cpy(s.GetFile()) : s.GetFile());
 }
 
 void Connection::QueueAddToPlaylist(const string &playlist, const string &path)

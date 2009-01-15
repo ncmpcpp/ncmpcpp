@@ -341,9 +341,7 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 			if (s.GetTotalLength() && elapsed == s.GetTotalLength()-1)
 				repeat_one_allowed = 1;
 			
-			string song_str = s.toString(Config.song_window_title_format);
-			utf_to_locale(song_str);
-			WindowTitle(song_str);
+			WindowTitle(utf_to_locale_cpy(s.toString(Config.song_window_title_format)));
 			
 			if (!block_statusbar_update && Config.statusbar_visibility)
 			{
@@ -364,9 +362,7 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 				}
 				wFooter->WriteXY(0, 1, 1, "%s", player_state.c_str());
 				wFooter->Bold(0);
-				song_str = s.toString(Config.song_status_format);
-				utf_to_locale(song_str);
-				Scroller(*wFooter, song_str, wFooter->GetWidth()-player_state.length()-tracklength.length(), playing_song_scroll_begin);
+				Scroller(*wFooter, utf_to_locale_cpy(s.toString(Config.song_status_format)), wFooter->GetWidth()-player_state.length()-tracklength.length(), playing_song_scroll_begin);
 				wFooter->Bold(1);
 				
 				wFooter->WriteXY(wFooter->GetWidth()-tracklength.length(), 1, 1, "%s", tracklength.c_str());

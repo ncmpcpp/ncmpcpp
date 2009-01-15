@@ -25,14 +25,17 @@
 #include <config.h>
 #endif
 
-#if !defined(_UTF8) && defined(HAVE_ICONV_H)
-
 #include <string>
+
+#if !defined(_UTF8) && defined(HAVE_ICONV_H)
 
 void init_current_locale();
 
 void utf_to_locale(std::string &);
 void locale_to_utf(std::string &);
+
+std::string utf_to_locale_cpy(const std::string &s);
+std::string locale_to_utf_cpy(const std::string &s);
 
 void str_pool_utf_to_locale(char *&);
 void str_pool_locale_to_utf(char *&);
@@ -43,6 +46,9 @@ void str_pool_locale_to_utf(char *&);
 
 #define utf_to_locale(x);
 #define locale_to_utf(x);
+
+#define utf_to_locale_cpy(x) (x)
+#define locale_to_utf_cpy(x) (x)
 
 #define str_pool_utf_to_locale(x);
 #define str_pool_locale_to_utf(x);

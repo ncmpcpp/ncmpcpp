@@ -28,6 +28,7 @@
 #include "textidentificationframe.h"
 #include "mpegfile.h"
 
+#include "charset.h"
 #include "helpers.h"
 #include "status_checker.h"
 
@@ -323,6 +324,7 @@ bool GetSongTags(Song &s)
 	if (s.IsFromDB())
 		path_to_file += Config.mpd_music_dir;
 	path_to_file += s.GetFile();
+	locale_to_utf(path_to_file);
 	
 	TagLib::FileRef f(path_to_file.c_str());
 	if (f.isNull())
@@ -384,6 +386,7 @@ bool WriteTags(Song &s)
 	if (file_is_from_db)
 		path_to_file += Config.mpd_music_dir;
 	path_to_file += s.GetFile();
+	locale_to_utf(path_to_file);
 	FileRef f(path_to_file.c_str());
 	if (!f.isNull())
 	{
@@ -423,15 +426,12 @@ bool WriteTags(Song &s)
 		}
 		if (!s.GetNewName().empty())
 		{
-			string old_name;
-			if (file_is_from_db)
-				old_name += Config.mpd_music_dir;
-			old_name += s.GetFile();
 			string new_name;
 			if (file_is_from_db)
 				new_name += Config.mpd_music_dir;
 			new_name += s.GetDirectory() + "/" + s.GetNewName();
-			if (rename(old_name.c_str(), new_name.c_str()) == 0 && !file_is_from_db)
+			locale_to_utf(new_name);
+			if (rename(path_to_file.c_str(), new_name.c_str()) == 0 && !file_is_from_db)
 			{
 				if (wPrev == mPlaylist)
 				{
