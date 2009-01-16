@@ -167,7 +167,7 @@ void GetDirectory(string dir, string subdir)
 	locale_to_utf(dir);
 	
 	for (size_t i = 0; i < mBrowser->Size(); i++)
-		if (mBrowser->at(i).song != (void *)1)
+		if (mBrowser->at(i).type == itSong)
 			delete mBrowser->at(i).song;
 	
 	mBrowser->Clear(0);
