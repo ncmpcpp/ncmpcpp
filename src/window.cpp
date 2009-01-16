@@ -368,13 +368,22 @@ string Window::GetString(const string &base, size_t length, size_t width) const
 	string tmp_in;
 	wchar_t wc_in;
 	bool gotoend = 1;
+	bool block_scrolling = 0;
 	
 	mbstate_t state;
 	memset(&state, 0, sizeof(state));
 	
+	// disable scrolling if wide chars are used
+	for (wstring::const_iterator it = tmp.begin(); it != tmp.end(); it++)
+		if (wcwidth(*it) > 1)
+			block_scrolling = 1;
+	
 	do
 	{
-		maxbeginning = tmp.length() < width ? 0 : tmp.length()-width;
+		if (tmp.empty())
+			block_scrolling = 0;
+		
+		maxbeginning = block_scrolling ? 0 : (tmp.length() < width ? 0 : tmp.length()-width);
 		maxx = minx + (Length(tmp) < width ? Length(tmp) : width);
 		
 		real_maxx = minx + (tmp.length() < width ? tmp.length() : width);
@@ -384,8 +393,21 @@ string Window::GetString(const string &base, size_t length, size_t width) const
 		
 		if (gotoend)
 		{
-			real_x = real_maxx;
-			x = maxx;
+			size_t real_real_maxx = minx;
+			size_t biggest_x = minx+width;
+				
+			if (block_scrolling && maxx >= biggest_x)
+			{
+				size_t i = 0;
+				for (wstring::const_iterator it = tmp.begin(); i < width; it++, real_real_maxx++)
+					i += wcwidth(*it);
+			}
+			else
+				real_real_maxx = real_maxx;
+				
+			real_x = real_real_maxx;
+			x = block_scrolling ? (maxx > biggest_x ? biggest_x : maxx) : maxx;
+			beginning = maxbeginning;
 			gotoend = 0;
 		}
 		
@@ -401,7 +423,6 @@ string Window::GetString(const string &base, size_t length, size_t width) const
 		switch (input)
 		{
 			case ERR:
-				continue;
 			case KEY_UP:
 			case KEY_DOWN:
 				break;
@@ -453,9 +474,7 @@ string Window::GetString(const string &base, size_t length, size_t width) const
 			}
 			case KEY_END:
 			{
-				real_x = real_maxx;
-				x = maxx;
-				beginning = maxbeginning;
+				gotoend = 1;
 				break;
 			}
 			case 10:
@@ -469,13 +488,16 @@ string Window::GetString(const string &base, size_t length, size_t width) const
 				if ((int)mbrtowc(&wc_in, tmp_in.c_str(), MB_CUR_MAX, &state) < 0)
 					break;
 				
-				else if ((real_x-minx)+beginning >= tmp.length())
+				if (wcwidth(wc_in) > 1)
+					block_scrolling = 1;
+				
+				if ((real_x-minx)+beginning >= tmp.length())
 				{
 					tmp.push_back(wc_in);
 					if (!beginning)
 					{
 						real_x++;
-						x++;
+						x += wcwidth(wc_in);
 					}
 					beginning++;
 					gotoend = 1;
