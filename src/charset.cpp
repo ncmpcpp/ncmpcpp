@@ -35,7 +35,7 @@ namespace
 {
 	char *locale_charset = 0;
 
-	static inline bool char_non_ascii(char ch)
+	inline bool char_non_ascii(char ch)
 	{
 		return (ch & 0x80) != 0;
 	}
