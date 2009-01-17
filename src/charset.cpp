@@ -20,12 +20,13 @@
 
 #include "charset.h"
 
-#if !defined(_UTF8) && defined(HAVE_ICONV_H)
+#if defined(SUPPORTED_LOCALES) && defined(HAVE_ICONV_H)
 
 #include <iconv.h>
 #include <cstdlib>
 #include <cstring>
 #include <fstream>
+#include <iostream>
 #include <stdexcept>
 
 #include "locale.h"
@@ -95,7 +96,10 @@ void init_current_locale()
 		return;
 	std::ifstream f(SUPPORTED_LOCALES);
 	if (!f.is_open())
+	{
+		std::cerr << "ncmpcpp: cannot open file "SUPPORTED_LOCALES"!\n";
 		return;
+	}
 	envlocale += " ";
 	std::string line;
 	while (!f.eof())
@@ -105,10 +109,19 @@ void init_current_locale()
 		{
 			try
 			{
-				locale_charset = strdup((line.substr(line.find(" ")+1) + "//TRANSLIT").c_str());
+				std::string charset = line.substr(line.find(" ")+1);
+				if (charset == "UTF-8"
+				||  charset == "utf-8"
+				||  charset == "utf8")
+				{
+					f.close();
+					return;
+				}
+				locale_charset = strdup((charset + "//TRANSLIT").c_str());
 			}
 			catch (std::out_of_range)
 			{
+				f.close();
 				return;
 			}
 			break;
@@ -165,5 +178,5 @@ void str_pool_locale_to_utf(char *&s)
 	charset_convert(locale_charset, "utf8", s);
 }
 
-#endif
+#endif // SUPPORTED_LOCALES && HAVE_ICONV_H
 

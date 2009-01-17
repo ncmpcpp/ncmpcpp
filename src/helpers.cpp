@@ -533,7 +533,8 @@ void DisplaySongInColumns(const Song &s, void *s_template, Menu<Song> *menu)
 
 void DisplaySong(const Song &s, void *data, Menu<Song> *menu)
 {
-	const_cast<Song *>(&s)->Localize();
+	if (!s.Localized())
+		const_cast<Song *>(&s)->Localize();
 	
 	const string &song_template = data ? *static_cast<string *>(data) : "";
 	basic_buffer<my_char_t> buf;

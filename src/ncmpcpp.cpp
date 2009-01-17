@@ -193,6 +193,11 @@ int main(int argc, char *argv[])
 	if (!ConnectToMPD())
 		return -1;
 	
+	// redirect std::cerr output to ~/.ncmpcpp/error.log file
+	std::ofstream errorlog((config_dir + "error.log").c_str(), std::ios::app);
+	std::streambuf *cerr_buffer = std::cerr.rdbuf();
+	std::cerr.rdbuf(errorlog.rdbuf());
+	
 	InitScreen(Config.colors_enabled);
 	init_current_locale();
 	
@@ -358,11 +363,6 @@ int main(int argc, char *argv[])
 	// local variables end
 	
 	signal(SIGPIPE, SIG_IGN);
-	
-	// redirect std::cerr output to ~/.ncmpcpp/error.log file
-	std::ofstream errorlog((config_dir + "error.log").c_str(), std::ios::app);
-	std::streambuf * cerr_buffer = std::cerr.rdbuf();
-	std::cerr.rdbuf(errorlog.rdbuf());
 	
 #	ifdef HAVE_CURL_CURL_H
 	pthread_attr_t attr_detached;
