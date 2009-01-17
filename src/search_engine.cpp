@@ -30,8 +30,8 @@ extern Menu< std::pair<Buffer *, Song *> > *mSearcher;
 bool search_match_to_pattern = 1;
 bool search_case_sensitive = 0;
 
-extern const char *search_mode_normal = "Match if tag contains searched phrase";
-extern const char *search_mode_strict = "Match only if both values are the same";
+const char *search_mode_normal = "Match if tag contains searched phrase";
+const char *search_mode_strict = "Match only if both values are the same";
 
 void SearchEngineDisplayer(const std::pair<Buffer *, Song *> &pair, void *, Menu< std::pair<Buffer *, Song *> > *menu)
 {
