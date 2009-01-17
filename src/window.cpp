@@ -378,6 +378,8 @@ string Window::GetString(const string &base, size_t length, size_t width) const
 		if (wcwidth(*it) > 1)
 			block_scrolling = 1;
 	
+	beginning = -1;
+	
 	do
 	{
 		if (tmp.empty())

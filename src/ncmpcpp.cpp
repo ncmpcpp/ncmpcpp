@@ -2721,7 +2721,7 @@ int main(int argc, char *argv[])
 			|| (wCurrent == mEditorTags && !mEditorTags->Empty()))
 			{
 				size_t id = ((Menu<Song> *)wCurrent)->Choice();
-				Song *s;
+				Song *s = 0;
 				switch (current_screen)
 				{
 					case csPlaylist:
@@ -3309,7 +3309,7 @@ int main(int argc, char *argv[])
 			||  (wCurrent == mPlaylistEditor && !mPlaylistEditor->Empty())
 			||  (wCurrent == mEditorTags && !mEditorTags->Empty()))
 			{
-				Song *s;
+				Song *s = 0;
 				size_t id = ((Menu<Song> *)wCurrent)->Choice();
 				switch (current_screen)
 				{
@@ -3460,7 +3460,7 @@ int main(int argc, char *argv[])
 			{
 				LOAD_LYRICS:
 				
-				Song *s;
+				Song *s = 0;
 				int id;
 				
 				if (reload_lyrics)
