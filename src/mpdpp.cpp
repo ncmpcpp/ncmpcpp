@@ -138,6 +138,9 @@ void Connection::UpdateStatus()
 	
 	CheckForErrors();
 	
+	if (!itsConnection)
+		return;
+	
 	if (itsOldStatus)
 		mpd_freeStatus(itsOldStatus);
 	

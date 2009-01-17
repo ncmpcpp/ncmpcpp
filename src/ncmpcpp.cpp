@@ -31,6 +31,7 @@
 
 #include "browser.h"
 #include "charset.h"
+#include "clock.h"
 #include "help.h"
 #include "helpers.h"
 #include "lyrics.h"
@@ -120,6 +121,9 @@ Scrollpad *sInfo;
 
 Window *wHeader;
 Window *wFooter;
+#ifdef ENABLE_CLOCK
+Window *wClock;
+#endif
 
 Connection *Mpd;
 
@@ -308,6 +312,11 @@ int main(int argc, char *argv[])
 	mPlaylistEditor->SetItemDisplayer(DisplaySong);
 	mPlaylistEditor->SetItemDisplayerUserData(&Config.song_list_format);
 	
+#	ifdef ENABLE_CLOCK
+	size_t clock_width = Config.clock_display_seconds ? 60 : 40;
+	size_t clock_height = 8;
+#	endif // ENABLE_CLOCK
+	
 	sHelp = new Scrollpad(0, main_start_y, COLS, main_height, "", Config.main_color, brNone);
 	sHelp->SetTimeout(ncmpcpp_window_timeout);
 	GetKeybindings(*sHelp);
@@ -431,6 +440,9 @@ int main(int argc, char *argv[])
 				case csPlaylistEditor:
 					screen_title = "Playlist editor";
 					break;
+				case csClock:
+					screen_title = "Clock";
+					break;
 				default:
 					break;
 			}
@@ -461,10 +473,19 @@ int main(int argc, char *argv[])
 			}
 			else
 			{
-				*wHeader << XY(0, 0) << fmtBold << 1 << fmtBoldEnd << ":Help  " << fmtBold << 2 << fmtBoldEnd << ":Playlist  " << fmtBold << 3 << fmtBoldEnd << ":Browse  " << fmtBold << 4 << fmtBoldEnd << ":Search  " << fmtBold << 5 << fmtBoldEnd << ":Library  " << fmtBold << 6 << fmtBoldEnd << ":Playlist editor";
+				*wHeader << XY(0, 0)
+				<< fmtBold << (char)Key.Help[0] << fmtBoldEnd << ":Help  "
+				<< fmtBold << (char)Key.Playlist[0] << fmtBoldEnd << ":Playlist  "
+				<< fmtBold << (char)Key.Browser[0] << fmtBoldEnd << ":Browse  "
+				<< fmtBold << (char)Key.SearchEngine[0] << fmtBoldEnd << ":Search  "
+				<< fmtBold << (char)Key.MediaLibrary[0] << fmtBoldEnd << ":Library  "
+				<< fmtBold << (char)Key.PlaylistEditor[0] << fmtBoldEnd << ":Playlist editor";
 #				ifdef HAVE_TAGLIB_H
-				*wHeader << "  " << fmtBold << 7 << fmtBoldEnd << ":Tag editor";
+				*wHeader << "  " << fmtBold << (char)Key.TagEditor[0] << fmtBoldEnd << ":Tag editor";
 #				endif // HAVE_TAGLIB_H
+#				ifdef ENABLE_CLOCK
+				*wHeader << "  " << fmtBold << (char)Key.Clock[0] << fmtBoldEnd << ":Clock";
+#				endif // ENABLE_CLOCK
 			}
 			
 			wHeader->SetColor(Config.volume_color);
@@ -754,6 +775,25 @@ int main(int argc, char *argv[])
 		// album editor end
 		else
 #		endif // HAVE_TAGLIB_H
+#		ifdef ENABLE_CLOCK
+		if (current_screen == csClock)
+		{
+			if (clock_width <= size_t(COLS) && clock_height <= main_height)
+			{
+				time_t rawtime;
+				time(&rawtime);
+				tm *t = localtime(&rawtime);
+				DisplayClock(*wClock, t);
+			}
+			else
+			{
+				delete wClock;
+				wClock = 0;
+				goto SWITCHER_PLAYLIST_REDIRECT;
+			}
+		}
+		else
+#		endif
 		// lyrics stuff
 		if (current_screen == csLyrics && reload_lyrics)
 		{
@@ -820,7 +860,7 @@ int main(int argc, char *argv[])
 		
 		// key mapping beginning
 		
-		if (Keypressed(input, Key.Up))
+		if (current_screen != csClock && Keypressed(input, Key.Up))
 		{
 			if (!Config.fancy_scrolling && (wCurrent == mLibArtists || wCurrent == mPlaylistList || wCurrent == mEditorLeftCol))
 			{
@@ -836,7 +876,7 @@ int main(int argc, char *argv[])
 			else
 				wCurrent->Scroll(wUp);
 		}
-		else if (Keypressed(input, Key.Down))
+		else if (current_screen != csClock && Keypressed(input, Key.Down))
 		{
 			if (!Config.fancy_scrolling && (wCurrent == mLibArtists || wCurrent == mPlaylistList || wCurrent == mEditorLeftCol))
 			{
@@ -852,11 +892,11 @@ int main(int argc, char *argv[])
 			else
 				wCurrent->Scroll(wDown);
 		}
-		else if (Keypressed(input, Key.PageUp))
+		else if (current_screen != csClock && Keypressed(input, Key.PageUp))
 		{
 			wCurrent->Scroll(wPageUp);
 		}
-		else if (Keypressed(input, Key.PageDown))
+		else if (current_screen != csClock && Keypressed(input, Key.PageDown))
 		{
 			wCurrent->Scroll(wPageDown);
 		}
@@ -881,7 +921,7 @@ int main(int argc, char *argv[])
 			}
 			
 			main_height = LINES-4;
-	
+			
 			if (!Config.header_visibility)
 				main_height += 2;
 			if (!Config.statusbar_visibility)
@@ -927,14 +967,25 @@ int main(int argc, char *argv[])
 			mPlaylistEditor->MoveTo(middle_col_startx, main_start_y);
 #			endif // HAVE_TAGLIB_H
 			
+#			ifdef ENABLE_CLOCK
+			if (wClock)
+			{
+				wClock->MoveTo((COLS-clock_width)/2, (LINES-clock_height)/2);
+				if (current_screen == csClock)
+				{
+					mPlaylist->Hide();
+					InitClock();
+					wClock->Display();
+				}
+			}
+#			endif // ENABLE_CLOCK
+			
 			if (Config.header_visibility)
 				wHeader->Resize(COLS, wHeader->GetHeight());
 			
 			footer_start_y = LINES-(Config.statusbar_visibility ? 2 : 1);
 			wFooter->MoveTo(0, footer_start_y);
 			wFooter->Resize(COLS, wFooter->GetHeight());
-			
-			wCurrent->Hide();
 			
 #			ifdef HAVE_TAGLIB_H
 			if (current_screen == csLibrary)
@@ -3673,6 +3724,33 @@ int main(int argc, char *argv[])
 			}
 		}
 #		endif // HAVE_TAGLIB_H
+#		ifdef ENABLE_CLOCK
+		else if (Keypressed(input, Key.Clock))
+		{
+			if (clock_width > size_t(COLS) || clock_height > main_height)
+			{
+				ShowMessage("Screen is too small to display clock!");
+			}
+			else if (current_screen != csClock && current_screen != csTinyTagEditor)
+			{
+				if (!wClock)
+				{
+					wClock = new Window((COLS-clock_width)/2, (LINES-clock_height)/2, clock_width, clock_height-1, "", Config.main_color, Border(Config.main_color));
+					wClock->SetTimeout(ncmpcpp_window_timeout);
+					wClock->Reverse(1);
+				}
+				
+				CLEAR_FIND_HISTORY;
+				wCurrent = wClock;
+				mPlaylist->Hide();
+				current_screen = csClock;
+//				redraw_screen = 1;
+				redraw_header = 1;
+				wCurrent->Display();
+				InitClock();
+			}
+		}
+#		endif // ENABLE_CLOCK
 		else if (Keypressed(input, Key.Quit))
 			main_exit = 1;
 		

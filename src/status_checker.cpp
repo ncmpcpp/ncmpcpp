@@ -97,7 +97,8 @@ void UnlockStatusbar()
 
 void TraceMpdStatus()
 {
-	Mpd->UpdateStatus();
+	if (Mpd->Connected())
+		Mpd->UpdateStatus();
 	time_t now = time(NULL);
 	
 	if (current_screen == csPlaylist && now == timer+Config.playlist_disable_highlight_delay)

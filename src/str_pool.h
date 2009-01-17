@@ -27,7 +27,7 @@ char *str_pool_get(const char *value);
 
 char *str_pool_dup(const char *value);
 
-void str_pool_put(const char *value);
+void str_pool_put(char *value);
 
 #ifdef __cplusplus
 }

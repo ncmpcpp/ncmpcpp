@@ -48,6 +48,7 @@ struct ncmpcpp_keys
 	int MediaLibrary[2];
 	int PlaylistEditor[2];
 	int TagEditor[2];
+	int Clock[2];
 	int Stop[2];
 	int Pause[2];
 	int Next[2];
@@ -146,6 +147,7 @@ struct ncmpcpp_config
 	bool local_browser;
 	bool search_in_db;
 	bool display_screens_numbers_on_start;
+	bool clock_display_seconds;
 	
 	int mpd_port;
 	int mpd_connection_timeout;

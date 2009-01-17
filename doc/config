@@ -138,6 +138,8 @@
 #
 #display_screens_numbers_on_start = "yes"
 #
+#clock_display_seconds = "no"
+#
 #enable_window_title = "yes"
 #
 ##### colors definitions #####

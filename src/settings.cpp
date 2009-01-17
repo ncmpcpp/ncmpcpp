@@ -120,6 +120,7 @@ void DefaultKeys(ncmpcpp_keys &keys)
 	keys.MediaLibrary[0] = '5';
 	keys.PlaylistEditor[0] = '6';
 	keys.TagEditor[0] = '7';
+	keys.Clock[0] = '0';
 	keys.Stop[0] = 's';
 	keys.Pause[0] = 'P';
 	keys.Next[0] = '>';
@@ -182,6 +183,7 @@ void DefaultKeys(ncmpcpp_keys &keys)
 	keys.MediaLibrary[1] = 269;
 	keys.PlaylistEditor[1] = 270;
 	keys.TagEditor[1] = 271;
+	keys.Clock[1] = 274;
 	keys.Stop[1] = null_key;
 	keys.Pause[1] = null_key;
 	keys.Next[1] = null_key;
@@ -272,6 +274,7 @@ void DefaultConfiguration(ncmpcpp_config &conf)
 	conf.local_browser = false;
 	conf.search_in_db = true;
 	conf.display_screens_numbers_on_start = true;
+	conf.clock_display_seconds = false;
 	conf.set_window_title = true;
 	conf.mpd_port = 6600;
 	conf.mpd_connection_timeout = 15;
@@ -399,6 +402,8 @@ void ReadKeys(ncmpcpp_keys &keys)
 				GetKeys(key, keys.PlaylistEditor);
 			else if (key.find("key_tag_editor ") != string::npos)
 				GetKeys(key, keys.TagEditor);
+			else if (key.find("key_clock ") != string::npos)
+				GetKeys(key, keys.Clock);
 			else if (key.find("key_stop ") != string::npos)
 				GetKeys(key, keys.Stop);
 			else if (key.find("key_pause ") != string::npos)
@@ -670,6 +675,10 @@ void ReadConfiguration(ncmpcpp_config &conf)
 			else if (cl.find("display_screens_numbers_on_start") != string::npos)
 			{
 				conf.display_screens_numbers_on_start = v == "yes";
+			}
+			else if (cl.find("clock_display_seconds") != string::npos)
+			{
+				conf.clock_display_seconds = v == "yes";
 			}
 			else if (cl.find("enable_window_title") != string::npos)
 			{

@@ -18,36 +18,23 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
-#ifndef HAVE_NCMPCPP_H
-#define HAVE_NCMPCPP_H
+#ifndef _CLOCK_H
+#define _CLOCK_H
 
-#include "window.h"
-#include "menu.h"
-#include "scrollpad.h"
-#include "misc.h"
-
-typedef std::pair<string, string> StringPair;
-using std::make_pair;
-
-enum NcmpcppScreen
-{
-	csHelp,
-	csPlaylist,
-	csBrowser,
-	csTinyTagEditor,
-	csInfo,
-	csSearcher,
-	csLibrary,
-	csLyrics,
-	csPlaylistEditor,
-	csTagEditor,
-	csClock,
-	csOther
-};
-
-const int ncmpcpp_window_timeout = 500;
-
-const string home_folder = getenv("HOME") ? getenv("HOME") : "";
-
+#ifdef HAVE_CONFIG_H
+#include <config.h>
 #endif
 
+#ifdef ENABLE_CLOCK
+
+#include <ctime>
+
+#include "window.h"
+
+void InitClock();
+
+void DisplayClock(Window &, const tm *);
+
+#endif // ENABLE_CLOCK
+
+#endif

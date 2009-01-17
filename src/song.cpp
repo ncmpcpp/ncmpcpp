@@ -520,7 +520,7 @@ bool Song::operator==(const Song &s) const
 	&&	itsSong->time == s.itsSong->time
 	&&	itsSong->pos == s.itsSong->pos
 	&&	itsSong->id == s.itsSong->id
-	&&	itsHash == itsHash;
+	&&	itsHash == s.itsHash;
 }
 
 bool Song::operator!=(const Song &s) const

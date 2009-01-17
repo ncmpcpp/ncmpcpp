@@ -103,7 +103,7 @@ char *str_pool_dup(const char *value)
 	}
 }
 
-void str_pool_put(const char *value)
+void str_pool_put(char *value)
 {
 	struct slot **slot_p, *slot;
 

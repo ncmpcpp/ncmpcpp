@@ -68,7 +68,7 @@ namespace
 			else if (key[i] >= 265 && key[i] <= 276)
 			{
 				result += "F";
-				result += key[i]-216;
+				result += IntoStr(key[i]-264);
 			}
 			else if ((key[i] == 263 || key[i] == 127) && !backspace);
 			else if ((key[i] == 263 || key[i] == 127) && backspace)
@@ -106,10 +106,12 @@ void GetKeybindings(Scrollpad &help)
 	help << DisplayKeys(Key.MediaLibrary) << "Media library\n";
 	help << DisplayKeys(Key.PlaylistEditor) << "Playlist editor\n";
 #	ifdef HAVE_TAGLIB_H
-	help << DisplayKeys(Key.TagEditor) << "Tag editor\n\n\n";
-#	else
-	help << "\n\n";
+	help << DisplayKeys(Key.TagEditor) << "Tag editor\n";
 #	endif // HAVE_TAGLIB_H
+#	ifdef ENABLE_CLOCK
+	help << DisplayKeys(Key.Clock) << "Clock screen\n";
+#	endif // ENABLE_CLOCK
+	help << "\n\n";
 	
 	help << "   " << fmtBold << "Keys - Global\n -----------------------------------------\n" << fmtBoldEnd;
 	help << DisplayKeys(Key.Stop) << "Stop\n";
