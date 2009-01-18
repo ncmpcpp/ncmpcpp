@@ -845,7 +845,7 @@ void Scroller(Window &w, const string &string, size_t width, size_t &pos)
 #		endif
 		len = 0;
 		std::basic_string<my_char_t>::const_iterator b = s.begin(), e = s.end();
-		for (std::basic_string<my_char_t>::const_iterator it = b+pos; it != e && len < width; it++)
+		for (std::basic_string<my_char_t>::const_iterator it = b+pos; it < e && len < width; it++)
 		{
 #			ifdef _UTF8
 			len += wcwidth(*it);
