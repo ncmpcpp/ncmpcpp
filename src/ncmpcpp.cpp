@@ -2516,6 +2516,8 @@ int main(int argc, char *argv[])
 		{
 			Config.autocenter_mode = !Config.autocenter_mode;
 			ShowMessage("Auto center mode: %s", Config.autocenter_mode ? "On" : "Off");
+			if (Config.autocenter_mode && now_playing >= 0)
+				mPlaylist->Highlight(now_playing);
 		}
 		else if (Keypressed(input, Key.UpdateDB))
 		{
