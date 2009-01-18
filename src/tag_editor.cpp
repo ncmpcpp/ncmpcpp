@@ -172,7 +172,7 @@ namespace
 			result[0] = toupper(result[0]);
 		for (string::iterator it = result.begin()+1; it != result.end(); it++)
 		{
-			if (isalpha(*it) && *(it-1) == ' ')
+			if (isalpha(*it) && !isalpha(*(it-1)))
 				*it = toupper(*it);
 		}
 		return result;
