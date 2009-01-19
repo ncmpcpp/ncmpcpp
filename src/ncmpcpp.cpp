@@ -2906,10 +2906,7 @@ int main(int argc, char *argv[])
 						{
 							case itDirectory:
 							{
-								if (browsed_dir != "/")
-									Mpd->GetDirectoryRecursive(browsed_dir + "/" + item.name, result);
-								else
-									Mpd->GetDirectoryRecursive(item.name, result);
+								Mpd->GetDirectoryRecursive(item.name, result);
 								break;
 							}
 							case itSong:
