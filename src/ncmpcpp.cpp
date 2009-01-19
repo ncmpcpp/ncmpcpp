@@ -1815,6 +1815,12 @@ int main(int argc, char *argv[])
 							if (browsed_dir != "/" && !mBrowser->Choice())
 								continue; // do not let add parent dir.
 							
+							if (Config.local_browser)
+							{
+								ShowMessage("Adding whole directories from local browser is not supported!");
+								continue;
+							}
+							
 							SongList list;
 							Mpd->GetDirectoryRecursive(locale_to_utf_cpy(item.name), list);
 							
