@@ -3748,8 +3748,8 @@ int main(int argc, char *argv[])
 				current_screen = csClock;
 //				redraw_screen = 1;
 				redraw_header = 1;
-				wCurrent->Display();
 				InitClock();
+				wCurrent->Display();
 			}
 		}
 #		endif // ENABLE_CLOCK
