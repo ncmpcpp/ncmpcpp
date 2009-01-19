@@ -2906,7 +2906,7 @@ int main(int argc, char *argv[])
 						{
 							case itDirectory:
 							{
-								Mpd->GetDirectoryRecursive(item.name, result);
+								Mpd->GetDirectoryRecursive(locale_to_utf_cpy(item.name), result);
 								break;
 							}
 							case itSong:
@@ -2917,7 +2917,7 @@ int main(int argc, char *argv[])
 							}
 							case itPlaylist:
 							{
-								Mpd->GetPlaylistContent(item.name, result);
+								Mpd->GetPlaylistContent(locale_to_utf_cpy(item.name), result);
 								break;
 							}
 						}
@@ -2925,7 +2925,7 @@ int main(int argc, char *argv[])
 					}
 					case csSearcher:
 					{
-						Song *s = mSearcher->at(*it).second;
+						Song *s = new Song(*mSearcher->at(*it).second);
 						result.push_back(s);
 						break;
 					}
@@ -2952,15 +2952,22 @@ int main(int argc, char *argv[])
 			mDialog->SetTimeout(ncmpcpp_window_timeout);
 			mDialog->SetItemDisplayer(GenericDisplayer);
 			
+			bool playlists_not_active = current_screen == csBrowser && Config.local_browser;
+			
+			if (playlists_not_active)
+			{
+				ShowMessage("Local items cannot be added to m3u playlist!");
+			}
+			
 			mDialog->AddOption("Current MPD playlist");
-			mDialog->AddOption("Create new playlist (m3u file)");
+			mDialog->AddOption("Create new playlist (m3u file)", 0, playlists_not_active);
 			mDialog->AddSeparator();
 			TagList playlists;
 			Mpd->GetPlaylists(playlists);
 			for (TagList::iterator it = playlists.begin(); it != playlists.end(); it++)
 			{
 				utf_to_locale(*it);
-				mDialog->AddOption("'" + *it + "' playlist");
+				mDialog->AddOption("'" + *it + "' playlist", 0, playlists_not_active);
 			}
 			mDialog->AddSeparator();
 			mDialog->AddOption("Cancel");
@@ -2989,6 +2996,7 @@ int main(int argc, char *argv[])
 					mDialog->Scroll(wEnd);
 			}
 			
+			current_screen = prev_screen;
 			size_t id = mDialog->Choice();
 			
 //			redraw_screen = 1;
@@ -3048,7 +3056,6 @@ int main(int argc, char *argv[])
 					GetDirectory("/");
 				mPlaylistList->Clear(0); // make playlist editor update itself
 			}
-			current_screen = prev_screen;
 			timer = time(NULL);
 			delete mDialog;
 			FreeSongList(result);

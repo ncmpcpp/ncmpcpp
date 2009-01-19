@@ -486,7 +486,7 @@ int Connection::AddSong(const string &path)
 
 int Connection::AddSong(const Song &s)
 {
-	return !s.Empty() ? (s.IsFromDB() ? (AddSong(s.Localized() ? locale_to_utf_cpy(s.GetFile()) : s.GetFile())) : AddSong("file://" + (s.Localized() ? locale_to_utf_cpy(s.GetFile()) : s.GetFile()))) : -1;
+	return !s.Empty() ? (AddSong((!s.IsFromDB() ? "file://" : "") + (s.Localized() ? locale_to_utf_cpy(s.GetFile()) : s.GetFile()))) : -1;
 }
 
 void Connection::QueueAddSong(const string &path)
@@ -503,7 +503,7 @@ void Connection::QueueAddSong(const string &path)
 void Connection::QueueAddSong(const Song &s)
 {
 	if (!s.Empty())
-		QueueAddSong(s.Localized() ? locale_to_utf_cpy(s.GetFile()) : s.GetFile());
+		QueueAddSong((!s.IsFromDB() ? "file://" : "") + (s.Localized() ? locale_to_utf_cpy(s.GetFile()) : s.GetFile()));
 }
 
 void Connection::QueueAddToPlaylist(const string &playlist, const string &path)
@@ -521,7 +521,7 @@ void Connection::QueueAddToPlaylist(const string &playlist, const string &path)
 void Connection::QueueAddToPlaylist(const string &playlist, const Song &s)
 {
 	if (!s.Empty())
-		QueueAddToPlaylist(playlist, s.GetFile());
+		QueueAddToPlaylist(playlist, s.Localized() ? locale_to_utf_cpy(s.GetFile()) : s.GetFile());
 }
 
 void Connection::QueueDeleteSong(int id)
