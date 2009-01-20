@@ -144,6 +144,8 @@ NcmpcppScreen prev_screen;
 #ifdef HAVE_CURL_CURL_H
 pthread_t lyrics_downloader;
 pthread_t artist_info_downloader;
+bool lyrics_ready = 0;
+bool artist_info_ready = 0;
 #endif
 
 bool dont_change_now_playing = 0;
@@ -372,12 +374,6 @@ int main(int argc, char *argv[])
 	// local variables end
 	
 	signal(SIGPIPE, SIG_IGN);
-	
-#	ifdef HAVE_CURL_CURL_H
-	pthread_attr_t attr_detached;
-	pthread_attr_init(&attr_detached);
-	pthread_attr_setdetachstate(&attr_detached, PTHREAD_CREATE_DETACHED);
-#	endif // HAVE_CURL_CURL_H
 	
 	gettimeofday(&now, 0);
 	
@@ -803,6 +799,22 @@ int main(int argc, char *argv[])
 			else
 				reload_lyrics = 0;
 		}
+#		ifdef HAVE_CURL_CURL_H
+		if (artist_info_ready)
+		{
+			pthread_join(artist_info_downloader, NULL);
+			sInfo->Flush();
+			artist_info_downloader = 0;
+			artist_info_ready = 0;
+		}
+		else if (lyrics_ready)
+		{
+			pthread_join(lyrics_downloader, NULL);
+			sLyrics->Flush();
+			lyrics_downloader = 0;
+			lyrics_ready = 0;
+		}
+#		endif
 		
 		if (Config.columns_in_playlist && wCurrent == mPlaylist)
 			wCurrent->Display();
@@ -3443,6 +3455,12 @@ int main(int argc, char *argv[])
 			||  (wCurrent == mPlaylistEditor && !mPlaylistEditor->Empty())
 			||  (wCurrent == mEditorTags && !mEditorTags->Empty()))
 			{
+				if (artist_info_downloader)
+				{
+					ShowMessage("Artist's info is being downloaded...");
+					continue;
+				}
+				
 				string *artist = new string();
 				int id = ((Menu<Song> *)wCurrent)->Choice();
 				switch (current_screen)
@@ -3481,7 +3499,7 @@ int main(int argc, char *argv[])
 					sInfo->Refresh();
 					if (!artist_info_downloader)
 					{
-						pthread_create(&artist_info_downloader, &attr_detached, GetArtistInfo, artist);
+						pthread_create(&artist_info_downloader, NULL, GetArtistInfo, artist);
 					}
 				}
 				else
@@ -3522,6 +3540,14 @@ int main(int argc, char *argv[])
 			||  (wCurrent == mEditorTags && !mEditorTags->Empty()))
 			{
 				LOAD_LYRICS:
+				
+#				ifdef HAVE_CURL_CURL_H
+				if (lyrics_downloader)
+				{
+					ShowMessage("Lyrics are being downloaded...");
+					continue;
+				}
+#				endif
 				
 				Song *s = 0;
 				int id;
@@ -3566,18 +3592,19 @@ int main(int argc, char *argv[])
 					wPrev = wCurrent;
 					prev_screen = current_screen;
 					wCurrent = sLyrics;
-					redraw_header = 1;
-					wCurrent->Clear();
 					current_screen = csLyrics;
+					redraw_header = 1;
+					sLyrics->Clear();
 					sLyrics->WriteXY(0, 0, 0, "Fetching lyrics...");
 					sLyrics->Refresh();
 #					ifdef HAVE_CURL_CURL_H
 					if (!lyrics_downloader)
 					{
-						pthread_create(&lyrics_downloader, &attr_detached, GetLyrics, s);
+						pthread_create(&lyrics_downloader, NULL, GetLyrics, s);
 					}
 #					else
 					GetLyrics(s);
+					sLyrics->Flush();
 #					endif
 				}
 			}
