@@ -29,8 +29,7 @@ Scrollpad::Scrollpad(size_t startx,
 			Border border)
 			: Window(startx, starty, width, height, title, color, border),
 			itsBeginning(0),
-			itsRealHeight(1),
-			itsXPos(0)
+			itsRealHeight(1)
 {
 	delwin(itsWindow);
 	itsWindow = newpad(itsHeight, itsWidth);
@@ -43,7 +42,6 @@ Scrollpad::Scrollpad(const Scrollpad &s) : Window(s)
 	itsBuffer << s.itsBuffer;
 	itsBeginning = s.itsBeginning;
 	itsRealHeight = s.itsRealHeight;
-	itsXPos = s.itsXPos;
 }
 
 void Scrollpad::Flush()
@@ -52,46 +50,48 @@ void Scrollpad::Flush()
 	
 	std::basic_string<my_char_t> s = itsBuffer.Str();
 	
+	size_t x = 0;
+	
 	int x_pos = 0;
 	int space_pos = 0;
 	int tab_size = 0;
 	
 	for (size_t i = 0; i < s.length(); i++)
 	{
-		tab_size = 8-itsXPos%8;
+		tab_size = 8-x%8;
 		
 		if (s[i] != '\t')
 		{
 #			ifdef _UTF8
-			itsXPos += wcwidth(s[i]);
+			x += wcwidth(s[i]);
 #			else
-			itsXPos++;
+			x++;
 #			endif
 		}
 		else
-			itsXPos += tab_size;
+			x += tab_size;
 		
 		if (s[i] == ' ') // if space, remember its position;
 		{
 			space_pos = i;
-			x_pos = itsXPos;
+			x_pos = x;
 		}
 		
-		if (itsXPos >= itsWidth)
+		if (x >= itsWidth)
 		{
 			// if line is over, there was at least one space in this line and we are in the middle of the word, restore position to last known space and make it EOL
 			if (space_pos > 0 && (s[i] != ' ' || s[i+1] != ' '))
 			{
 				i = space_pos;
-				itsXPos = x_pos;
+				x = x_pos;
 				s[i] = '\n';
 			}
 		}
 		
-		if (itsXPos >= itsWidth || s[i] == '\n')
+		if (x >= itsWidth || s[i] == '\n')
 		{
 			itsRealHeight++;
-			itsXPos = 0;
+			x = 0;
 			space_pos = 0;
 		}
 	}
@@ -144,7 +144,6 @@ void Scrollpad::Resize(size_t width, size_t height)
 	
 	itsBeginning = 0;
 	itsRealHeight = itsHeight;
-	itsXPos = 0;
 	Flush();
 }
 
@@ -197,7 +196,6 @@ void Scrollpad::Clear(bool clrscr)
 {
 	itsBeginning = 0;
 	itsRealHeight = itsHeight;
-	itsXPos = 0;
 	itsBuffer.Clear();
 	wclear(itsWindow);
 	delwin(itsWindow);

@@ -65,7 +65,6 @@ class Scrollpad: public Window
 		int itsBeginning;
 		
 		size_t itsRealHeight;
-		size_t itsXPos;
 };
 
 #endif
