@@ -2645,12 +2645,17 @@ int main(int argc, char *argv[])
 						TagLib::FileRef f(path.c_str());
 						if (f.isNull())
 						{
-							ShowMessage("Error updating tags in '%s'!", (*mLibSongs)[i].GetFile().c_str());
+							ShowMessage("Error opening file '%s'!", (*mLibSongs)[i].GetFile().c_str());
 							success = 0;
 							break;
 						}
 						f.tag()->setAlbum(ToWString(new_album));
-						f.save();
+						if (!f.save())
+						{
+							ShowMessage("Error writing tags in '%s'!", (*mLibSongs)[i].GetFile().c_str());
+							success = 0;
+							break;
+						}
 					}
 					if (success)
 					{
