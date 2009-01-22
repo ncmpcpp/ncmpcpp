@@ -397,7 +397,8 @@ bool WriteTags(Song &s)
 		f.tag()->setTrack(StrToInt(s.GetTrack()));
 		f.tag()->setGenre(ToWString(s.GetGenre()));
 		f.tag()->setComment(ToWString(s.GetComment()));
-		f.save();
+		if (!f.save())
+			return false;
 		
 		string ext = s.GetFile();
 		ext = ext.substr(ext.find_last_of(".")+1);
@@ -422,7 +423,8 @@ bool WriteTags(Song &s)
 			tag->addFrame(PerformerFrame);
 			tag->removeFrames(Disc);
 			tag->addFrame(DiscFrame);
-			file.save();
+			if (!file.save())
+				return false;
 		}
 		if (!s.GetNewName().empty())
 		{
