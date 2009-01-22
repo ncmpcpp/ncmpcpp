@@ -82,7 +82,7 @@
 
 #define CLEAR_FIND_HISTORY \
 			do { \
-				found_pos = 0; \
+				found_pos = -1; \
 				vFoundPositions.clear(); \
 			} while (0)
 
@@ -3134,8 +3134,6 @@ int main(int argc, char *argv[])
 				continue;
 			
 			string how = Keypressed(input, Key.FindForward) ? "forward" : "backward";
-			found_pos = -1;
-			vFoundPositions.clear();
 			LockStatusbar();
 			Statusbar() << "Find " << how << ": ";
 			string findme = wFooter->GetString();
@@ -3144,6 +3142,8 @@ int main(int argc, char *argv[])
 			if (findme.empty())
 				continue;
 			ToLower(findme);
+			
+			CLEAR_FIND_HISTORY;
 			
 			ShowMessage("Searching...");
 			List *mList = reinterpret_cast<Menu<Song> *>(wCurrent);
