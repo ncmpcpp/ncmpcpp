@@ -24,9 +24,6 @@
 
 #ifdef ENABLE_CLOCK
 
-#include <iomanip>
-#include <sstream>
-
 #include "settings.h"
 
 namespace
