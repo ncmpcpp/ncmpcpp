@@ -1,3 +1,12 @@
+ncmpcpp-0.3
+
+ + general core rewrite
+ + new screen - clock
+ + support for asian wide characters
+ + support for non-utf8 encodings
+ + a lot of bugfixes
+
+
 ncmpcpp-0.2.5
 
  + support for unix domain sockets
