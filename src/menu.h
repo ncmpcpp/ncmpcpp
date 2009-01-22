@@ -262,7 +262,7 @@ template <class T> void Menu<T>::Refresh()
 {
 	if (itsOptions.empty())
 	{
-		wrefresh(itsWindow);
+		Window::Clear();
 		return;
 	}
 	int MaxBeginning = itsOptions.size() < itsHeight ? 0 : itsOptions.size()-itsHeight;
