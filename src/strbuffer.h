@@ -47,6 +47,7 @@ template <class C> class basic_buffer
 		basic_buffer() : itsTempString(0) { }
 		
 		std::basic_string<C> Str() const;
+		void SetFormatting(short vb, const std::basic_string<C> &s, short ve, bool for_each = 1);
 		void SetTemp(std::basic_string<C> *);
 		void Clear();
 		
@@ -70,6 +71,25 @@ typedef basic_buffer<wchar_t> WBuffer;
 template <class C> std::basic_string<C> basic_buffer<C>::Str() const
 {
 	return itsString.str();
+}
+
+template <class C> void basic_buffer<C>::SetFormatting(short vb, const std::basic_string<C> &s, short ve, bool for_each)
+{
+	std::basic_string<C> base = itsString.str();
+	FormatPos fp;
+	
+	for (size_t i = base.find(s); i != std::basic_string<C>::npos; i = base.find(s))
+	{
+		base[i] = 0;
+		fp.Value = vb;
+		fp.Position = i;
+		itsFormat.push_back(fp);
+		fp.Value = ve;
+		fp.Position = i+s.length();
+		itsFormat.push_back(fp);
+		if (!for_each)
+			break;
+	}
 }
 
 template <class C> void basic_buffer<C>::SetTemp(std::basic_string<C> *tmp)

@@ -32,6 +32,7 @@ class Scrollpad: public Window
 		virtual ~Scrollpad() { }
 		
 		void Flush();
+		void SetFormatting(short, const std::basic_string<my_char_t> &, short, bool for_each = 1);
 		std::basic_string<my_char_t> Content() { return itsBuffer.Str(); }
 		
 		virtual void Refresh();
@@ -50,6 +51,7 @@ class Scrollpad: public Window
 		Scrollpad &operator<<(std::ostream &(*os)(std::ostream &));
 		
 #		ifdef _UTF8
+		void SetFormatting(short vb, const std::string &s, short ve, bool for_each = 1) { SetFormatting(vb, ToWString(s), ve, for_each); }
 		Scrollpad &operator<<(const char *s);
 		Scrollpad &operator<<(const std::string &s);
 #		endif // _UTF8

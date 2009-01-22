@@ -101,6 +101,11 @@ void Scrollpad::Flush()
 	itsBuffer.SetTemp(0);
 }
 
+void Scrollpad::SetFormatting(short vb, const std::basic_string<my_char_t> &s, short ve, bool for_each)
+{
+	itsBuffer.SetFormatting(vb, s, ve, for_each);
+}
+
 void Scrollpad::Recreate()
 {
 	delwin(itsWindow);

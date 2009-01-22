@@ -99,6 +99,8 @@ void * GetArtistInfo(void *ptr)
 			first = 0;
 		}
 		input.close();
+		sInfo->SetFormatting(fmtBold, "\n\nSimilar artists:\n", fmtBoldEnd, 0);
+		sInfo->SetFormatting(Config.color2, "\n * ", clEnd);
 		artist_info_ready = 1;
 		pthread_exit(NULL);
 	}
