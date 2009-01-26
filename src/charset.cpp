@@ -166,14 +166,14 @@ std::string locale_to_utf_cpy(const std::string &s)
 
 void str_pool_utf_to_locale(char *&s)
 {
-	if (!has_non_ascii_chars(s))
+	if (!s || !locale_charset || !has_non_ascii_chars(s))
 		return;
 	charset_convert("utf8", locale_charset, s);
 }
 
 void str_pool_locale_to_utf(char *&s)
 {
-	if (!has_non_ascii_chars(s))
+	if (!s || !locale_charset || !has_non_ascii_chars(s))
 		return;
 	charset_convert(locale_charset, "utf8", s);
 }
