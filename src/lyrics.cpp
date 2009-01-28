@@ -119,6 +119,7 @@ void * GetArtistInfo(void *ptr)
 	curl_easy_setopt(info, CURLOPT_WRITEFUNCTION, write_data);
 	curl_easy_setopt(info, CURLOPT_WRITEDATA, &result);
 	curl_easy_setopt(info, CURLOPT_CONNECTTIMEOUT, 10);
+	curl_easy_setopt(info, CURLOPT_NOSIGNAL, 1);
 	code = curl_easy_perform(info);
 	curl_easy_cleanup(info);
 	pthread_mutex_unlock(&curl);
@@ -296,6 +297,7 @@ void *GetLyrics(void *song)
 	curl_easy_setopt(lyrics, CURLOPT_WRITEFUNCTION, write_data);
 	curl_easy_setopt(lyrics, CURLOPT_WRITEDATA, &result);
 	curl_easy_setopt(lyrics, CURLOPT_CONNECTTIMEOUT, 10);
+	curl_easy_setopt(lyrics, CURLOPT_NOSIGNAL, 1);
 	code = curl_easy_perform(lyrics);
 	curl_easy_cleanup(lyrics);
 	pthread_mutex_unlock(&curl);
