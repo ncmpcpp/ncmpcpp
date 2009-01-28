@@ -111,7 +111,11 @@ void * GetArtistInfo(void *ptr)
 	
 	CURLcode code;
 	
-	string url = "http://ws.audioscrobbler.com/2.0/?method=artist.getinfo&artist=" + artist + "&api_key=d94e5b6e26469a2d1ffae8ef20131b79";
+	char *c_artist = curl_easy_escape(0, artist.c_str(), artist.length());
+	
+	string url = "http://ws.audioscrobbler.com/2.0/?method=artist.getinfo&artist=";
+	url += c_artist;
+	url += "&api_key=d94e5b6e26469a2d1ffae8ef20131b79";
 	
 	pthread_mutex_lock(&curl);
 	CURL *info = curl_easy_init();
@@ -123,6 +127,8 @@ void * GetArtistInfo(void *ptr)
 	code = curl_easy_perform(info);
 	curl_easy_cleanup(info);
 	pthread_mutex_unlock(&curl);
+	
+	curl_free(c_artist);
 	
 	if (code != CURLE_OK)
 	{
@@ -285,10 +291,13 @@ void *GetLyrics(void *song)
 	
 	string result;
 	
+	char *c_artist = curl_easy_escape(0, artist.c_str(), artist.length());
+	char *c_title = curl_easy_escape(0, title.c_str(), title.length());
+	
 	string url = "http://lyricwiki.org/api.php?artist=";
-	url += artist;
+	url += c_artist;
 	url += "&song=";
-	url += title;
+	url += c_title;
 	url += "&fmt=xml";
 	
 	pthread_mutex_lock(&curl);
@@ -301,6 +310,9 @@ void *GetLyrics(void *song)
 	code = curl_easy_perform(lyrics);
 	curl_easy_cleanup(lyrics);
 	pthread_mutex_unlock(&curl);
+	
+	curl_free(c_artist);
+	curl_free(c_title);
 	
 	if (code != CURLE_OK)
 	{
