@@ -107,7 +107,19 @@ void ParseArgv(int argc, char **argv)
 		}
 		else if (strcmp(argv[i], "toggle") == 0)
 		{
-			Mpd->Execute("pause\n");
+			Mpd->UpdateStatus();
+			switch (Mpd->GetState())
+			{
+				case psPause:
+				case psPlay:
+					Mpd->Pause();
+					break;
+				case psStop:
+					Mpd->Play();
+					break;
+				default:
+					break;
+			}
 			quit = 1;
 		}
 		else if (strcmp(argv[i], "stop") == 0)
