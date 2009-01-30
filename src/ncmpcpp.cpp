@@ -1256,16 +1256,16 @@ int main(int argc, char *argv[])
 					LockStatusbar();
 					Song &s = sought_pattern;
 					
-					if (option <= 11)
+					if (option <= 12)
 						mSearcher->Current().first->Clear();
 					
 					switch (option+1)
 					{
 						case 1:
 						{
-							Statusbar() << fmtBold << "Filename: " << fmtBoldEnd;
-							s.SetFile(wFooter->GetString(s.GetFile()));
-							*mSearcher->Current().first << fmtBold << "Filename:" << fmtBoldEnd << ' ' << ShowTag(s.GetFile());
+							Statusbar() << fmtBold << "Artist: " << fmtBoldEnd;
+							s.SetArtist(wFooter->GetString(s.GetArtist()));
+							*mSearcher->Current().first << fmtBold << "Artist:" << fmtBoldEnd << ' ' << ShowTag(s.GetArtist());
 							break;
 						}
 						case 2:
@@ -1277,30 +1277,30 @@ int main(int argc, char *argv[])
 						}
 						case 3:
 						{
-							Statusbar() << fmtBold << "Artist: " << fmtBoldEnd;
-							s.SetArtist(wFooter->GetString(s.GetArtist()));
-							*mSearcher->Current().first << fmtBold << "Artist:" << fmtBoldEnd << ' ' << ShowTag(s.GetArtist());
-							break;
-						}
-						case 4:
-						{
 							Statusbar() << fmtBold << "Album: " << fmtBoldEnd;
 							s.SetAlbum(wFooter->GetString(s.GetAlbum()));
 							*mSearcher->Current().first << fmtBold << "Album:" << fmtBoldEnd << ' ' << ShowTag(s.GetAlbum());
 							break;
 						}
+						case 4:
+						{
+							Statusbar() << fmtBold << "Filename: " << fmtBoldEnd;
+							s.SetFile(wFooter->GetString(s.GetFile()));
+							*mSearcher->Current().first << fmtBold << "Filename:" << fmtBoldEnd << ' ' << ShowTag(s.GetFile());
+							break;
+						}
 						case 5:
 						{
-							Statusbar() << fmtBold << "Year: " << fmtBoldEnd;
-							s.SetYear(wFooter->GetString(s.GetYear(), 4));
-							*mSearcher->Current().first << fmtBold << "Year:" << fmtBoldEnd << ' ' << ShowTag(s.GetYear());
+							Statusbar() << fmtBold << "Composer: " << fmtBoldEnd;
+							s.SetComposer(wFooter->GetString(s.GetComposer()));
+							*mSearcher->Current().first << fmtBold << "Composer:" << fmtBoldEnd << ' ' << ShowTag(s.GetComposer());
 							break;
 						}
 						case 6:
 						{
-							Statusbar() << fmtBold << "Track: " << fmtBoldEnd;
-							s.SetTrack(wFooter->GetString(s.GetTrack(), 3));
-							*mSearcher->Current().first << fmtBold << "Track:" << fmtBoldEnd << ' ' << ShowTag(s.GetTrack());
+							Statusbar() << fmtBold << "Performer: " << fmtBoldEnd;
+							s.SetPerformer(wFooter->GetString(s.GetPerformer()));
+							*mSearcher->Current().first << fmtBold << "Performer:" << fmtBoldEnd << ' ' << ShowTag(s.GetPerformer());
 							break;
 						}
 						case 7:
@@ -1312,30 +1312,37 @@ int main(int argc, char *argv[])
 						}
 						case 8:
 						{
+							Statusbar() << fmtBold << "Year: " << fmtBoldEnd;
+							s.SetYear(wFooter->GetString(s.GetYear(), 4));
+							*mSearcher->Current().first << fmtBold << "Year:" << fmtBoldEnd << ' ' << ShowTag(s.GetYear());
+							break;
+						}
+						case 9:
+						{
 							Statusbar() << fmtBold << "Comment: " << fmtBoldEnd;
 							s.SetComment(wFooter->GetString(s.GetComment()));
 							*mSearcher->Current().first << fmtBold << "Comment:" << fmtBoldEnd << ' ' << ShowTag(s.GetComment());
 							break;
 						}
-						case 10:
+						case 11:
 						{
 							Config.search_in_db = !Config.search_in_db;
 							*mSearcher->Current().first << fmtBold << "Search in:" << fmtBoldEnd << ' ' << (Config.search_in_db ? "Database" : "Current playlist");
 							break;
 						}
-						case 11:
+						case 12:
 						{
 							search_match_to_pattern = !search_match_to_pattern;
 							*mSearcher->Current().first << fmtBold << "Search mode:" << fmtBoldEnd << ' ' << (search_match_to_pattern ? search_mode_normal : search_mode_strict);
 							break;
 						}
-						case 12:
+						case 13:
 						{
 							search_case_sensitive = !search_case_sensitive;
 							*mSearcher->Current().first << fmtBold << "Case sensitive:" << fmtBoldEnd << ' ' << (search_case_sensitive ? "Yes" : "No");
 							break;
 						}
-						case 14:
+						case 15:
 						{
 							ShowMessage("Searching...");
 							Search(s);
@@ -1343,11 +1350,11 @@ int main(int argc, char *argv[])
 							{
 								size_t found = mSearcher->Size()-search_engine_static_options;
 								found += 3; // don't count options inserted below
-								mSearcher->InsertSeparator(15);
-								mSearcher->InsertOption(16, make_pair((Buffer *)0, (Song *)0), 1, 1);
-								mSearcher->at(16).first = new Buffer();
-								*mSearcher->at(16).first << Config.color1 << "Search results: " << Config.color2 << "Found " << found  << (found > 1 ? " songs" : " song") << clDefault;
-								mSearcher->InsertSeparator(17);
+								mSearcher->InsertSeparator(16);
+								mSearcher->InsertOption(17, make_pair((Buffer *)0, (Song *)0), 1, 1);
+								mSearcher->at(17).first = new Buffer();
+								*mSearcher->at(17).first << Config.color1 << "Search results: " << Config.color2 << "Found " << found  << (found > 1 ? " songs" : " song") << clDefault;
+								mSearcher->InsertSeparator(18);
 								UpdateFoundList();
 								ShowMessage("Searching finished!");
 								for (size_t i = 0; i < search_engine_static_options-4; i++)
@@ -1359,7 +1366,7 @@ int main(int argc, char *argv[])
 								ShowMessage("No results found");
 							break;
 						}
-						case 15:
+						case 16:
 						{
 							CLEAR_FIND_HISTORY;
 							PrepareSearchEngine(sought_pattern);
@@ -2834,7 +2841,10 @@ int main(int argc, char *argv[])
 		{
 			if (wCurrent == mSearcher)
 			{
-				mSearcher->Highlight(13); // highlight 'search' button
+				mSearcher->Highlight(seach_engine_search_button);
+				mSearcher->Highlighting(0);
+				mSearcher->Refresh();
+				mSearcher->Highlighting(1);
 				goto ENTER_SEARCH_ENGINE_SCREEN;
 			}
 		}
@@ -2867,8 +2877,8 @@ int main(int argc, char *argv[])
 				if (wCurrent == mBrowser && browsed_dir != "/")
 					mList->Select(0, 0); // [..] cannot be selected, uhm.
 				if (wCurrent == mSearcher)
-					mList->Select(14, 0); // 'Reset' cannot be selected, omgplz.
-				// hacking shit ends. need better solution :/
+					mList->Select(seach_engine_reset_button, 0); // 'Reset' cannot be selected, omgplz.
+				// hacking shit ends.
 				ShowMessage("Selection reversed!");
 			}
 		}

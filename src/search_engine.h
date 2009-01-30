@@ -24,7 +24,9 @@
 #include "mpdpp.h"
 #include "ncmpcpp.h"
 
-const size_t search_engine_static_options = 18;
+const size_t search_engine_static_options = 19;
+const size_t seach_engine_search_button = 14;
+const size_t seach_engine_reset_button = 15;
 
 void SearchEngineDisplayer(const std::pair<Buffer *, Song *> &, void *, Menu< std::pair<Buffer *, Song *> > *);
 void UpdateFoundList();

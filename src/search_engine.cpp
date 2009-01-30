@@ -74,12 +74,12 @@ void PrepareSearchEngine(Song &s)
 	s.Clear();
 	mSearcher->Clear();
 	mSearcher->Reset();
-	mSearcher->ResizeBuffer(15);
+	mSearcher->ResizeBuffer(16);
 	
-	mSearcher->IntoSeparator(8);
-	mSearcher->IntoSeparator(12);
+	mSearcher->IntoSeparator(9);
+	mSearcher->IntoSeparator(13);
 	
-	for (size_t i = 0; i < 15; i++)
+	for (size_t i = 0; i < 16; i++)
 	{
 		try
 		{
@@ -88,21 +88,22 @@ void PrepareSearchEngine(Song &s)
 		catch (List::InvalidItem) { }
 	}
 	
-	*mSearcher->at(0).first << fmtBold << "Filename:" << fmtBoldEnd << ' ' << ShowTag(s.GetName());
+	*mSearcher->at(0).first << fmtBold << "Artist:" << fmtBoldEnd << ' ' << ShowTag(s.GetArtist());
 	*mSearcher->at(1).first << fmtBold << "Title:" << fmtBoldEnd << ' ' << ShowTag(s.GetTitle());
-	*mSearcher->at(2).first << fmtBold << "Artist:" << fmtBoldEnd << ' ' << ShowTag(s.GetArtist());
-	*mSearcher->at(3).first << fmtBold << "Album:" << fmtBoldEnd << ' ' << ShowTag(s.GetAlbum());
-	*mSearcher->at(4).first << fmtBold << "Year:" << fmtBoldEnd << ' ' << ShowTag(s.GetYear());
-	*mSearcher->at(5).first << fmtBold << "Track:" << fmtBoldEnd << ' ' << ShowTag(s.GetTrack());
+	*mSearcher->at(2).first << fmtBold << "Album:" << fmtBoldEnd << ' ' << ShowTag(s.GetAlbum());
+	*mSearcher->at(3).first << fmtBold << "Filename:" << fmtBoldEnd << ' ' << ShowTag(s.GetName());
+	*mSearcher->at(4).first << fmtBold << "Composer:" << fmtBoldEnd << ' ' << ShowTag(s.GetComposer());
+	*mSearcher->at(5).first << fmtBold << "Performer:" << fmtBoldEnd << ' ' << ShowTag(s.GetPerformer());
 	*mSearcher->at(6).first << fmtBold << "Genre:" << fmtBoldEnd << ' ' << ShowTag(s.GetGenre());
-	*mSearcher->at(7).first << fmtBold << "Comment:" << fmtBoldEnd << ' ' << ShowTag(s.GetComment());
+	*mSearcher->at(7).first << fmtBold << "Year:" << fmtBoldEnd << ' ' << ShowTag(s.GetYear());
+	*mSearcher->at(8).first << fmtBold << "Comment:" << fmtBoldEnd << ' ' << ShowTag(s.GetComment());
 	
-	*mSearcher->at(9).first << fmtBold << "Search in:" << fmtBoldEnd << ' ' << (Config.search_in_db ? "Database" : "Current playlist");
-	*mSearcher->at(10).first << fmtBold << "Search mode:" << fmtBoldEnd << ' ' << (search_match_to_pattern ? search_mode_normal : search_mode_strict);
-	*mSearcher->at(11).first << fmtBold << "Case sensitive:" << fmtBoldEnd << ' ' << (search_case_sensitive ? "Yes" : "No");
+	*mSearcher->at(10).first << fmtBold << "Search in:" << fmtBoldEnd << ' ' << (Config.search_in_db ? "Database" : "Current playlist");
+	*mSearcher->at(11).first << fmtBold << "Search mode:" << fmtBoldEnd << ' ' << (search_match_to_pattern ? search_mode_normal : search_mode_strict);
+	*mSearcher->at(12).first << fmtBold << "Case sensitive:" << fmtBoldEnd << ' ' << (search_case_sensitive ? "Yes" : "No");
 	
-	*mSearcher->at(13).first << "Search";
-	*mSearcher->at(14).first << "Reset";
+	*mSearcher->at(14).first << "Search";
+	*mSearcher->at(15).first << "Reset";
 }
 
 void Search(Song &s)
