@@ -234,6 +234,8 @@ template <class T> void Menu<T>::DeleteOption(size_t pos)
 		return;
 	delete itsOptions.at(pos).Item;
 	itsOptions.erase(itsOptions.begin()+pos);
+	if (itsOptions.empty())
+		Window::Clear();
 }
 
 template <class T> void Menu<T>::IntoSeparator(size_t pos)
@@ -262,7 +264,7 @@ template <class T> void Menu<T>::Refresh()
 {
 	if (itsOptions.empty())
 	{
-		Window::Clear();
+		Window::Refresh();
 		return;
 	}
 	int MaxBeginning = itsOptions.size() < itsHeight ? 0 : itsOptions.size()-itsHeight;
