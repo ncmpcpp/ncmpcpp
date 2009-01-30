@@ -92,7 +92,7 @@ namespace
 void init_current_locale()
 {
 	std::string envlocale = setlocale(LC_CTYPE, "");
-	if (envlocale.empty())
+	if (envlocale.empty() || envlocale == "C")
 		return;
 	std::ifstream f(SUPPORTED_LOCALES);
 	if (!f.is_open())
