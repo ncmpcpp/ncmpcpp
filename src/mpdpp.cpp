@@ -101,6 +101,11 @@ void Connection::Disconnect()
 	ClearQueue();
 }
 
+float Connection::Version() const
+{
+	return itsConnection ? itsConnection->version[1] + itsConnection->version[2]*0.1 : 0;
+}
+
 void Connection::SetHostname(const string &host)
 {
 	size_t at = host.find("@");

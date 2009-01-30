@@ -131,7 +131,6 @@ void TraceMpdStatus()
 			}
 		}
 	}
-	//wHeader->WriteXY(0,1, IntoStr(now_playing), 1);
 }
 
 void NcmpcppErrorCallback(Connection *Mpd, int errorid, const char *msg, void *)

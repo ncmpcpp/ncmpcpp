@@ -55,6 +55,11 @@
 				mLibAlbums->Display(); \
 				mvvline(main_start_y, right_col_startx-1, 0, main_height); \
 				mLibSongs->Display(); \
+				if (mLibAlbums->Empty()) \
+				{ \
+					mLibAlbums->WriteXY(0, 0, 0, "No albums found."); \
+					mLibAlbums->Refresh(); \
+				} \
 			} while (0)
 
 #define REFRESH_PLAYLIST_EDITOR_SCREEN \
@@ -530,15 +535,18 @@ int main(int argc, char *argv[])
 					Mpd->CommitSearch(list);
 				}
 				
-				// check if there are songs without album tag
-				SongList noalbum_list;
-				Mpd->StartSearch(1);
-				Mpd->AddSearch(Config.media_lib_primary_tag, mLibArtists->Current());
-				Mpd->AddSearch(MPD_TAG_ITEM_ALBUM, "");
-				Mpd->CommitSearch(noalbum_list);
-				if (!noalbum_list.empty())
-					mLibAlbums->AddOption(make_pair("<no album>", ""));
-				FreeSongList(noalbum_list);
+				// <mpd-0.14 doesn't support searching for empty tag
+				if (Mpd->Version() > 13)
+				{
+					SongList noalbum_list;
+					Mpd->StartSearch(1);
+					Mpd->AddSearch(Config.media_lib_primary_tag, mLibArtists->Current());
+					Mpd->AddSearch(MPD_TAG_ITEM_ALBUM, "");
+					Mpd->CommitSearch(noalbum_list);
+					if (!noalbum_list.empty())
+						mLibAlbums->AddOption(make_pair("<no album>", ""));
+					FreeSongList(noalbum_list);
+				}
 				
 				for (TagList::iterator it = list.begin(); it != list.end(); it++)
 				{
@@ -576,8 +584,14 @@ int main(int argc, char *argv[])
 				
 				mLibSongs->Clear(0);
 				Mpd->StartSearch(1);
-				Mpd->AddSearch(Config.media_lib_primary_tag, mLibArtists->Current());
-				Mpd->AddSearch(MPD_TAG_ITEM_ALBUM, locale_to_utf_cpy(mLibAlbums->Current().second));
+				Mpd->AddSearch(Config.media_lib_primary_tag, locale_to_utf_cpy(mLibArtists->Current()));
+				if (mLibAlbums->Empty()) // left for compatibility with <mpd-0.14
+				{
+					mLibAlbums->WriteXY(0, 0, 0, "No albums found.");
+					mLibAlbums->Refresh();
+				}
+				else
+					Mpd->AddSearch(MPD_TAG_ITEM_ALBUM, locale_to_utf_cpy(mLibAlbums->Current().second));
 				Mpd->CommitSearch(list);
 				
 				sort(list.begin(), list.end(), SortSongsByTrack);
@@ -1966,8 +1980,10 @@ int main(int argc, char *argv[])
 					wCurrent->Refresh();
 					wCurrent = mLibAlbums;
 					mLibAlbums->HighlightColor(Config.active_column_color);
+					if (!mLibAlbums->Empty())
+						continue;
 				}
-				else if (wCurrent == mLibAlbums && !mLibSongs->Empty())
+				if (wCurrent == mLibAlbums && !mLibSongs->Empty())
 				{
 					mLibAlbums->HighlightColor(Config.main_highlight_color);
 					wCurrent->Refresh();
@@ -2020,8 +2036,10 @@ int main(int argc, char *argv[])
 					wCurrent->Refresh();
 					wCurrent = mLibAlbums;
 					mLibAlbums->HighlightColor(Config.active_column_color);
+					if (!mLibAlbums->Empty())
+						continue;
 				}
-				else if (wCurrent == mLibAlbums)
+				if (wCurrent == mLibAlbums)
 				{
 					mLibAlbums->HighlightColor(Config.main_highlight_color);
 					wCurrent->Refresh();

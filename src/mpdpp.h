@@ -80,27 +80,29 @@ namespace MPD
 		public:
 			Connection();
 			~Connection();
-		
+			
 			bool Connect();
 			bool Connected() const;
 			void Disconnect();
-		
+			
 			const std::string & GetHostname() { return itsHost; }
 			int GetPort() { return itsPort; }
-		
+			
+			float Version() const;
+			
 			void SetHostname(const std::string &);
 			void SetPort(int port) { itsPort = port; }
 			void SetTimeout(int timeout) { itsTimeout = timeout; }
 			void SetPassword(const std::string &password) { itsPassword = password; }
 			void SendPassword() const;
-		
+			
 			void SetStatusUpdater(StatusUpdater, void *);
 			void SetErrorHandler(ErrorHandler, void *);
 			void UpdateStatus();
 			void UpdateDirectory(const std::string &) const;
-		
+			
 			void Execute(const std::string &) const;
-		
+			
 			void Play() const;
 			void Play(int) const;
 			void PlayID(int) const;
@@ -112,7 +114,7 @@ namespace MPD
 			void Seek(int) const;
 			void Shuffle() const;
 			void ClearPlaylist() const;
-		
+			
 			PlayerState GetState() const { return isConnected && itsCurrentStatus ? (PlayerState)itsCurrentStatus->state : psUnknown; }
 			bool GetRepeat() const { return isConnected && itsCurrentStatus ? itsCurrentStatus->repeat : 0; }
 			bool GetRandom() const { return isConnected && itsCurrentStatus ? itsCurrentStatus->random : 0; }
@@ -122,24 +124,24 @@ namespace MPD
 			long long GetPlaylistID() const { return isConnected && itsCurrentStatus ? itsCurrentStatus->playlist : -1; }
 			long long GetOldPlaylistID() const { return isConnected && itsOldStatus ? itsOldStatus->playlist : -1; }
 			int GetElapsedTime() const { return isConnected && itsCurrentStatus ? itsCurrentStatus->elapsedTime : -1; }
-		
+			
 			size_t GetMaxPlaylistLength() const { return itsMaxPlaylistLength; }
 			size_t GetPlaylistLength() const { return isConnected && itsCurrentStatus ? itsCurrentStatus->playlistLength : 0; }
 			void GetPlaylistChanges(long long, SongList &) const;
-		
+			
 			const std::string & GetErrorMessage() const { return itsErrorMessage; }
 			int GetErrorCode() const { return itsErrorCode; }
-		
+			
 			Song GetCurrentSong() const;
 			int GetCurrentSongPos() const;
 			Song GetSong(const std::string &) const;
 			void GetPlaylistContent(const std::string &, SongList &) const;
-		
+			
 			void SetRepeat(bool) const;
 			void SetRandom(bool) const;
 			void SetVolume(int) const;
 			void SetCrossfade(int) const;
-		
+			
 			int AddSong(const std::string &); // returns id of added song
 			int AddSong(const Song &); // returns id of added song
 			void QueueAddSong(const std::string &);
@@ -152,7 +154,7 @@ namespace MPD
 			void QueueMove(const std::string &, int, int);
 			void QueueDeleteFromPlaylist(const std::string &, int);
 			bool CommitQueue();
-		
+			
 			void DeletePlaylist(const std::string &) const;
 			bool SavePlaylist(const std::string &) const;
 			void ClearPlaylist(const std::string &) const;
@@ -160,13 +162,13 @@ namespace MPD
 			void AddToPlaylist(const std::string &, const std::string &) const;
 			void Move(const std::string &, int, int) const;
 			void Rename(const std::string &, const std::string &) const;
-		
+			
 			void StartSearch(bool) const;
 			void StartFieldSearch(mpd_TagItems);
 			void AddSearch(mpd_TagItems, const std::string &) const;
 			void CommitSearch(SongList &) const;
 			void CommitSearch(TagList &) const;
-		
+			
 			void GetPlaylists(TagList &) const;
 			void GetList(TagList &, mpd_TagItems) const;
 			void GetArtists(TagList &) const;
@@ -175,23 +177,23 @@ namespace MPD
 			void GetDirectoryRecursive(const std::string &, SongList &) const;
 			void GetSongs(const std::string &, SongList &) const;
 			void GetDirectories(const std::string &, TagList &) const;
-		
+			
 		private:
 			void ClearQueue();
 			int CheckForErrors();
-		
+			
 			mpd_Connection *itsConnection;
 			bool isConnected;
-		
+			
 			std::string itsErrorMessage;
 			int itsErrorCode;
 			size_t itsMaxPlaylistLength;
-		
+			
 			std::string itsHost;
 			int itsPort;
 			int itsTimeout;
 			std::string itsPassword;
-		
+			
 			mpd_Stats *itsOldStats;
 			mpd_Stats *itsCurrentStats;
 			mpd_Status *itsCurrentStatus;
@@ -203,7 +205,7 @@ namespace MPD
 			void *itsStatusUpdaterUserdata;
 			ErrorHandler itsErrorHandler;
 			void *itsErrorHandlerUserdata;
-		
+			
 			mpd_TagItems itsSearchedField;
 			std::vector<QueueCommand *> itsQueue;
 	};
