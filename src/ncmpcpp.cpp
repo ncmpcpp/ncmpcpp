@@ -2251,7 +2251,7 @@ int main(int argc, char *argv[])
 		}
 		else if (Keypressed(input, Key.MvSongUp))
 		{
-			if (current_screen == csPlaylist)
+			if (current_screen == csPlaylist && !mPlaylist->Empty())
 			{
 				block_playlist_update = 1;
 				mPlaylist->SetTimeout(50);
@@ -2304,7 +2304,7 @@ int main(int argc, char *argv[])
 				}
 				mPlaylist->SetTimeout(ncmpcpp_window_timeout);
 			}
-			else if (wCurrent == mPlaylistEditor)
+			else if (wCurrent == mPlaylistEditor && !mPlaylistEditor->Empty())
 			{
 				mPlaylistEditor->SetTimeout(50);
 				if (mPlaylistEditor->hasSelected())
@@ -2354,7 +2354,7 @@ int main(int argc, char *argv[])
 		}
 		else if (Keypressed(input, Key.MvSongDown))
 		{
-			if (current_screen == csPlaylist)
+			if (current_screen == csPlaylist && !mPlaylist->Empty())
 			{
 				block_playlist_update = 1;
 				mPlaylist->SetTimeout(50);
@@ -2408,7 +2408,7 @@ int main(int argc, char *argv[])
 				mPlaylist->SetTimeout(ncmpcpp_window_timeout);
 				
 			}
-			else if (wCurrent == mPlaylistEditor)
+			else if (wCurrent == mPlaylistEditor && !mPlaylistEditor->Empty())
 			{
 				mPlaylistEditor->SetTimeout(50);
 				if (mPlaylistEditor->hasSelected())
