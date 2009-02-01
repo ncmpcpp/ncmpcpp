@@ -143,7 +143,12 @@ void DisplayItem(const Item &item, void *, Menu<Item> *menu)
 			return;
 		}
 		case itSong:
-			DisplaySong(*item.song, &Config.song_list_format, reinterpret_cast<Menu<Song> *>(menu));
+			!Config.columns_in_browser
+			?
+				DisplaySong(*item.song, &Config.song_list_format, reinterpret_cast<Menu<Song> *>(menu))
+			:
+				DisplaySongInColumns(*item.song, &Config.song_columns_list_format, reinterpret_cast<Menu<Song> *>(menu))
+			;
 			return;
 		case itPlaylist:
 			*menu << Config.browser_playlist_prefix << item.name;

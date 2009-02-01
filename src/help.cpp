@@ -143,6 +143,7 @@ void GetKeybindings(Scrollpad &help)
 	help << DisplayKeys(Key.NextFoundPosition) << "Go to next found position\n";
 	help << DisplayKeys(Key.ToggleFindMode) << "Toggle find mode (normal/wrapped)\n";
 	help << DisplayKeys(Key.GoToContainingDir) << "Go to directory containing current item\n";
+	help << DisplayKeys(Key.ToggleDisplayMode) << "Toggle display mode\n";
 #	ifdef HAVE_TAGLIB_H
 	help << DisplayKeys(Key.EditTags) << "Edit song's tags/playlist's name\n";
 #	endif // HAVE_TAGLIB_H
@@ -166,7 +167,6 @@ void GetKeybindings(Scrollpad &help)
 	help << DisplayKeys(Key.Add) << "Add url/file/directory to playlist\n";
 	help << DisplayKeys(Key.SavePlaylist) << "Save playlist\n";
 	help << DisplayKeys(Key.GoToNowPlaying) << "Go to currently playing position\n";
-	help << DisplayKeys(Key.TogglePlaylistDisplayMode) << "Toggle playlist display mode\n";
 	help << DisplayKeys(Key.ToggleAutoCenter) << "Toggle auto center mode\n\n\n";
 	
 	help << "   " << fmtBold << "Keys - Browse screen\n -----------------------------------------\n" << fmtBoldEnd;

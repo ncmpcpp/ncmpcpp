@@ -159,7 +159,7 @@ void DefaultKeys(ncmpcpp_keys &keys)
 	keys.GoToContainingDir[0] = 'G';
 	keys.StartSearching[0] = 'y';
 	keys.ToggleAutoCenter[0] = 'U';
-	keys.TogglePlaylistDisplayMode[0] = 'p';
+	keys.ToggleDisplayMode[0] = 'p';
 	keys.GoToParentDir[0] = 263;
 	keys.SwitchTagTypeList[0] = '`';
 	keys.Quit[0] = 'q';
@@ -222,7 +222,7 @@ void DefaultKeys(ncmpcpp_keys &keys)
 	keys.GoToContainingDir[1] = null_key;
 	keys.StartSearching[1] = null_key;
 	keys.ToggleAutoCenter[1] = null_key;
-	keys.TogglePlaylistDisplayMode[1] = null_key;
+	keys.ToggleDisplayMode[1] = null_key;
 	keys.GoToParentDir[1] = 127;
 	keys.SwitchTagTypeList[1] = null_key;
 	keys.Quit[1] = 'Q';
@@ -261,6 +261,8 @@ void DefaultConfiguration(ncmpcpp_config &conf)
 	conf.colors_enabled = true;
 	conf.fancy_scrolling = true;
 	conf.columns_in_playlist = false;
+	conf.columns_in_browser = false;
+	conf.columns_in_search_engine = false;
 	conf.header_visibility = true;
 	conf.statusbar_visibility = true;
 	conf.autocenter_mode = false;
@@ -476,8 +478,8 @@ void ReadKeys(ncmpcpp_keys &keys)
 				GetKeys(key, keys.GoToNowPlaying);
 			else if (key.find("key_toggle_auto_center ") != string::npos)
 				GetKeys(key, keys.ToggleAutoCenter);
-			else if (key.find("key_toggle_playlist_display_mode ") != string::npos)
-				GetKeys(key, keys.TogglePlaylistDisplayMode);
+			else if (key.find("key_toggle_display_mode ") != string::npos)
+				GetKeys(key, keys.ToggleDisplayMode);
 			else if (key.find("key_go_to_containing_directory ") != string::npos)
 				GetKeys(key, keys.GoToContainingDir);
 			else if (key.find("key_start_searching ") != string::npos)
@@ -627,6 +629,14 @@ void ReadConfiguration(ncmpcpp_config &conf)
 			else if (cl.find("playlist_display_mode") != string::npos)
 			{
 				conf.columns_in_playlist = v == "columns";
+			}
+			else if (cl.find("browser_display_mode") != string::npos)
+			{
+				conf.columns_in_browser = v == "columns";
+			}
+			else if (cl.find("search_engine_display_mode") != string::npos)
+			{
+				conf.columns_in_search_engine = v == "columns";
 			}
 			else if (cl.find("header_visibility") != string::npos)
 			{

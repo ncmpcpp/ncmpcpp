@@ -87,7 +87,7 @@ struct ncmpcpp_keys
 	int GoToContainingDir[2];
 	int StartSearching[2];
 	int ToggleAutoCenter[2];
-	int TogglePlaylistDisplayMode[2];
+	int ToggleDisplayMode[2];
 	int GoToParentDir[2];
 	int SwitchTagTypeList[2];
 	int Quit[2];
@@ -133,6 +133,8 @@ struct ncmpcpp_config
 	bool colors_enabled;
 	bool fancy_scrolling;
 	bool columns_in_playlist;
+	bool columns_in_browser;
+	bool columns_in_search_engine;
 	bool set_window_title;
 	bool header_visibility;
 	bool statusbar_visibility;

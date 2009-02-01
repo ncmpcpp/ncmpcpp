@@ -106,6 +106,10 @@
 #
 #playlist_display_mode = "classic" (classic/columns)
 #
+#browser_display_mode = "classic" (classic/columns)
+#
+#search_engine_display_mode = "classic" (classic/columns)
+#
 #incremental_seeking = "yes"
 #
 #seek_time = "1"

@@ -20,6 +20,7 @@
 
 #include "helpers.h"
 #include "search_engine.h"
+#include "settings.h"
 
 using namespace MPD;
 
@@ -36,7 +37,15 @@ const char *search_mode_strict = "Match only if both values are the same";
 void SearchEngineDisplayer(const std::pair<Buffer *, Song *> &pair, void *, Menu< std::pair<Buffer *, Song *> > *menu)
 {
 	if (pair.second)
-		DisplaySong(*pair.second, &Config.song_list_format, reinterpret_cast<Menu<Song> *>(menu));
+	{
+		!Config.columns_in_search_engine
+		?
+			DisplaySong(*pair.second, &Config.song_list_format, reinterpret_cast<Menu<Song> *>(menu))
+		:
+			DisplaySongInColumns(*pair.second, &Config.song_columns_list_format, reinterpret_cast<Menu<Song> *>(menu))
+		;
+	}
+	
 	else
 		*menu << *pair.first;
 }
@@ -72,6 +81,7 @@ void PrepareSearchEngine(Song &s)
 	}
 	
 	s.Clear();
+	mSearcher->SetTitle("");
 	mSearcher->Clear();
 	mSearcher->Reset();
 	mSearcher->ResizeBuffer(16);

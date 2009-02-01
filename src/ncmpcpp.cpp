@@ -826,10 +826,7 @@ int main(int argc, char *argv[])
 		}
 #		endif
 		
-		if (Config.columns_in_playlist && wCurrent == mPlaylist)
-			wCurrent->Display();
-		else
-			wCurrent->Refresh();
+		wCurrent->Display();
 //		redraw_screen = 0;
 		
 		wCurrent->ReadKey(input);
@@ -1362,6 +1359,8 @@ int main(int argc, char *argv[])
 							Search(s);
 							if (!mSearcher->Back().first)
 							{
+								if (Config.columns_in_search_engine)
+									mSearcher->SetTitle(DisplayColumns(Config.song_columns_list_format));
 								size_t found = mSearcher->Size()-search_engine_static_options;
 								found += 3; // don't count options inserted below
 								mSearcher->InsertSeparator(16);
@@ -2538,13 +2537,29 @@ int main(int argc, char *argv[])
 			block_progressbar_update = 0;
 			UnlockStatusbar();
 		}
-		else if (Keypressed(input, Key.TogglePlaylistDisplayMode) && wCurrent == mPlaylist)
+		else if (Keypressed(input, Key.ToggleDisplayMode))
 		{
-			Config.columns_in_playlist = !Config.columns_in_playlist;
-			ShowMessage("Playlist display mode: %s", Config.columns_in_playlist ? "Columns" : "Classic");
-			mPlaylist->SetItemDisplayer(Config.columns_in_playlist ? DisplaySongInColumns : DisplaySong);
-			mPlaylist->SetItemDisplayerUserData(Config.columns_in_playlist ? &Config.song_columns_list_format : &Config.song_list_format);
-			mPlaylist->SetTitle(Config.columns_in_playlist ? DisplayColumns(Config.song_columns_list_format) : "");
+			if (wCurrent == mPlaylist)
+			{
+				Config.columns_in_playlist = !Config.columns_in_playlist;
+				ShowMessage("Playlist display mode: %s", Config.columns_in_playlist ? "Columns" : "Classic");
+				mPlaylist->SetItemDisplayer(Config.columns_in_playlist ? DisplaySongInColumns : DisplaySong);
+				mPlaylist->SetItemDisplayerUserData(Config.columns_in_playlist ? &Config.song_columns_list_format : &Config.song_list_format);
+				mPlaylist->SetTitle(Config.columns_in_playlist ? DisplayColumns(Config.song_columns_list_format) : "");
+			}
+			else if (wCurrent == mBrowser)
+			{
+				Config.columns_in_browser = !Config.columns_in_browser;
+				ShowMessage("Browser display mode: %s", Config.columns_in_browser ? "Columns" : "Classic");
+				mBrowser->SetTitle(Config.columns_in_browser ? DisplayColumns(Config.song_columns_list_format) : "");
+			}
+			else if (wCurrent == mSearcher)
+			{
+				Config.columns_in_search_engine = !Config.columns_in_search_engine;
+				ShowMessage("Search engine display mode: %s", Config.columns_in_search_engine ? "Columns" : "Classic");
+				if (mSearcher->Size() > search_engine_static_options)
+					mSearcher->SetTitle(Config.columns_in_search_engine ? DisplayColumns(Config.song_columns_list_format) : "");
+			}
 //			redraw_screen = 1;
 		}
 		else if (Keypressed(input, Key.ToggleAutoCenter))
