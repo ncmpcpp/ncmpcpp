@@ -517,7 +517,12 @@ void ReadConfiguration(ncmpcpp_config &conf)
 			else if (cl.find("mpd_music_dir") != string::npos)
 			{
 				if (!v.empty())
+				{
+					 // if ~ is used at the beginning, replace it with user's home folder
+					if (v[0] == '~')
+						v.replace(0, 1, home_folder);
 					conf.mpd_music_dir = v + "/";
+				}
 			}
 			else if (cl.find("mpd_port") != string::npos)
 			{
