@@ -3114,7 +3114,7 @@ int main(int argc, char *argv[])
 				}
 				// if mpd deletes now playing song deletion will be sluggishly slow
 				// then so we have to assure it will be deleted at the very end.
-				if (!mPlaylist->isSelected(now_playing))
+				if (now_playing >= 0 && !mPlaylist->isSelected(now_playing))
 					Mpd->QueueDeleteSongId(mPlaylist->at(now_playing).GetID());
 				
 				ShowMessage("Deleting all items but selected...");
