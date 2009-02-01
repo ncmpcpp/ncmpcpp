@@ -1279,35 +1279,35 @@ int main(int argc, char *argv[])
 						{
 							Statusbar() << fmtBold << "Artist: " << fmtBoldEnd;
 							s.SetArtist(wFooter->GetString(s.GetArtist()));
-							*mSearcher->Current().first << fmtBold << "Artist:" << fmtBoldEnd << ' ' << ShowTag(s.GetArtist());
+							*mSearcher->Current().first << fmtBold << "Artist:   " << fmtBoldEnd << ' ' << ShowTag(s.GetArtist());
 							break;
 						}
 						case 2:
 						{
 							Statusbar() << fmtBold << "Title: " << fmtBoldEnd;
 							s.SetTitle(wFooter->GetString(s.GetTitle()));
-							*mSearcher->Current().first << fmtBold << "Title:" << fmtBoldEnd << ' ' << ShowTag(s.GetTitle());
+							*mSearcher->Current().first << fmtBold << "Title:    " << fmtBoldEnd << ' ' << ShowTag(s.GetTitle());
 							break;
 						}
 						case 3:
 						{
 							Statusbar() << fmtBold << "Album: " << fmtBoldEnd;
 							s.SetAlbum(wFooter->GetString(s.GetAlbum()));
-							*mSearcher->Current().first << fmtBold << "Album:" << fmtBoldEnd << ' ' << ShowTag(s.GetAlbum());
+							*mSearcher->Current().first << fmtBold << "Album:    " << fmtBoldEnd << ' ' << ShowTag(s.GetAlbum());
 							break;
 						}
 						case 4:
 						{
 							Statusbar() << fmtBold << "Filename: " << fmtBoldEnd;
 							s.SetFile(wFooter->GetString(s.GetFile()));
-							*mSearcher->Current().first << fmtBold << "Filename:" << fmtBoldEnd << ' ' << ShowTag(s.GetFile());
+							*mSearcher->Current().first << fmtBold << "Filename: " << fmtBoldEnd << ' ' << ShowTag(s.GetFile());
 							break;
 						}
 						case 5:
 						{
 							Statusbar() << fmtBold << "Composer: " << fmtBoldEnd;
 							s.SetComposer(wFooter->GetString(s.GetComposer()));
-							*mSearcher->Current().first << fmtBold << "Composer:" << fmtBoldEnd << ' ' << ShowTag(s.GetComposer());
+							*mSearcher->Current().first << fmtBold << "Composer: " << fmtBoldEnd << ' ' << ShowTag(s.GetComposer());
 							break;
 						}
 						case 6:
@@ -1321,21 +1321,21 @@ int main(int argc, char *argv[])
 						{
 							Statusbar() << fmtBold << "Genre: " << fmtBoldEnd;
 							s.SetGenre(wFooter->GetString(s.GetGenre()));
-							*mSearcher->Current().first << fmtBold << "Genre:" << fmtBoldEnd << ' ' << ShowTag(s.GetGenre());
+							*mSearcher->Current().first << fmtBold << "Genre:    " << fmtBoldEnd << ' ' << ShowTag(s.GetGenre());
 							break;
 						}
 						case 8:
 						{
 							Statusbar() << fmtBold << "Year: " << fmtBoldEnd;
 							s.SetYear(wFooter->GetString(s.GetYear(), 4));
-							*mSearcher->Current().first << fmtBold << "Year:" << fmtBoldEnd << ' ' << ShowTag(s.GetYear());
+							*mSearcher->Current().first << fmtBold << "Year:     " << fmtBoldEnd << ' ' << ShowTag(s.GetYear());
 							break;
 						}
 						case 9:
 						{
 							Statusbar() << fmtBold << "Comment: " << fmtBoldEnd;
 							s.SetComment(wFooter->GetString(s.GetComment()));
-							*mSearcher->Current().first << fmtBold << "Comment:" << fmtBoldEnd << ' ' << ShowTag(s.GetComment());
+							*mSearcher->Current().first << fmtBold << "Comment:  " << fmtBoldEnd << ' ' << ShowTag(s.GetComment());
 							break;
 						}
 						case 11:

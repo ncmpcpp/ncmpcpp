@@ -88,15 +88,15 @@ void PrepareSearchEngine(Song &s)
 		catch (List::InvalidItem) { }
 	}
 	
-	*mSearcher->at(0).first << fmtBold << "Artist:" << fmtBoldEnd << ' ' << ShowTag(s.GetArtist());
-	*mSearcher->at(1).first << fmtBold << "Title:" << fmtBoldEnd << ' ' << ShowTag(s.GetTitle());
-	*mSearcher->at(2).first << fmtBold << "Album:" << fmtBoldEnd << ' ' << ShowTag(s.GetAlbum());
-	*mSearcher->at(3).first << fmtBold << "Filename:" << fmtBoldEnd << ' ' << ShowTag(s.GetName());
-	*mSearcher->at(4).first << fmtBold << "Composer:" << fmtBoldEnd << ' ' << ShowTag(s.GetComposer());
+	*mSearcher->at(0).first << fmtBold << "Artist:   " << fmtBoldEnd << ' ' << ShowTag(s.GetArtist());
+	*mSearcher->at(1).first << fmtBold << "Title:    " << fmtBoldEnd << ' ' << ShowTag(s.GetTitle());
+	*mSearcher->at(2).first << fmtBold << "Album:    " << fmtBoldEnd << ' ' << ShowTag(s.GetAlbum());
+	*mSearcher->at(3).first << fmtBold << "Filename: " << fmtBoldEnd << ' ' << ShowTag(s.GetName());
+	*mSearcher->at(4).first << fmtBold << "Composer: " << fmtBoldEnd << ' ' << ShowTag(s.GetComposer());
 	*mSearcher->at(5).first << fmtBold << "Performer:" << fmtBoldEnd << ' ' << ShowTag(s.GetPerformer());
-	*mSearcher->at(6).first << fmtBold << "Genre:" << fmtBoldEnd << ' ' << ShowTag(s.GetGenre());
-	*mSearcher->at(7).first << fmtBold << "Year:" << fmtBoldEnd << ' ' << ShowTag(s.GetYear());
-	*mSearcher->at(8).first << fmtBold << "Comment:" << fmtBoldEnd << ' ' << ShowTag(s.GetComment());
+	*mSearcher->at(6).first << fmtBold << "Genre:    " << fmtBoldEnd << ' ' << ShowTag(s.GetGenre());
+	*mSearcher->at(7).first << fmtBold << "Year:     " << fmtBoldEnd << ' ' << ShowTag(s.GetYear());
+	*mSearcher->at(8).first << fmtBold << "Comment:  " << fmtBoldEnd << ' ' << ShowTag(s.GetComment());
 	
 	*mSearcher->at(10).first << fmtBold << "Search in:" << fmtBoldEnd << ' ' << (Config.search_in_db ? "Database" : "Current playlist");
 	*mSearcher->at(11).first << fmtBold << "Search mode:" << fmtBoldEnd << ' ' << (search_match_to_pattern ? search_mode_normal : search_mode_strict);
