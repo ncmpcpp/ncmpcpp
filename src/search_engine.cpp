@@ -136,21 +136,29 @@ void Search(Song &s)
 	if (!search_case_sensitive)
 	{
 		string t;
-		t = s.GetFile();
+		t = s.GetArtist();
 		ToLower(t);
-		s.SetFile(t);
+		s.SetArtist(t);
 		
 		t = s.GetTitle();
 		ToLower(t);
 		s.SetTitle(t);
 		
-		t = s.GetArtist();
-		ToLower(t);
-		s.SetArtist(t);
-		
 		t = s.GetAlbum();
 		ToLower(t);
 		s.SetAlbum(t);
+		
+		t = s.GetFile();
+		ToLower(t);
+		s.SetFile(t);
+		
+		t = s.GetComposer();
+		ToLower(t);
+		s.SetComposer(t);
+		
+		t = s.GetPerformer();
+		ToLower(t);
+		s.SetPerformer(t);
 		
 		t = s.GetGenre();
 		ToLower(t);
@@ -168,21 +176,29 @@ void Search(Song &s)
 		if (!search_case_sensitive)
 		{
 			string t;
-			t = copy.GetName();
+			t = copy.GetArtist();
 			ToLower(t);
-			copy.SetFile(t);
+			copy.SetArtist(t);
 			
 			t = copy.GetTitle();
 			ToLower(t);
 			copy.SetTitle(t);
 			
-			t = copy.GetArtist();
-			ToLower(t);
-			copy.SetArtist(t);
-			
 			t = copy.GetAlbum();
 			ToLower(t);
 			copy.SetAlbum(t);
+			
+			t = copy.GetName();
+			ToLower(t);
+			copy.SetFile(t);
+			
+			t = copy.GetComposer();
+			ToLower(t);
+			copy.SetComposer(t);
+			
+			t = copy.GetPerformer();
+			ToLower(t);
+			copy.SetPerformer(t);
 			
 			t = copy.GetGenre();
 			ToLower(t);
@@ -197,39 +213,43 @@ void Search(Song &s)
 		
 		if (search_match_to_pattern)
 		{
-			if (found && !s.GetFile().empty())
-				found = copy.GetFile().find(s.GetFile()) != string::npos;
-			if (found && !s.GetTitle().empty())
-				found = copy.GetTitle().find(s.GetTitle()) != string::npos;
 			if (found && !s.GetArtist().empty())
 				found = copy.GetArtist().find(s.GetArtist()) != string::npos;
+			if (found && !s.GetTitle().empty())
+				found = copy.GetTitle().find(s.GetTitle()) != string::npos;
 			if (found && !s.GetAlbum().empty())
 				found = copy.GetAlbum().find(s.GetAlbum()) != string::npos;
-			if (found && !s.GetYear().empty())
-				found = StrToInt(copy.GetYear()) == StrToInt(s.GetYear()) && StrToInt(s.GetYear());
-			if (found && !s.GetTrack().empty())
-				found = StrToInt(copy.GetTrack()) == StrToInt(s.GetTrack()) && StrToInt(s.GetTrack());
+			if (found && !s.GetFile().empty())
+				found = copy.GetFile().find(s.GetFile()) != string::npos;
+			if (found && !s.GetComposer().empty())
+				found = copy.GetComposer().find(s.GetComposer()) != string::npos;
+			if (found && !s.GetPerformer().empty())
+				found = copy.GetPerformer().find(s.GetPerformer()) != string::npos;
 			if (found && !s.GetGenre().empty())
 				found = copy.GetGenre().find(s.GetGenre()) != string::npos;
+			if (found && !s.GetYear().empty())
+				found = StrToInt(copy.GetYear()) == StrToInt(s.GetYear()) && StrToInt(s.GetYear());
 			if (found && !s.GetComment().empty())
 				found = copy.GetComment().find(s.GetComment()) != string::npos;
 		}
 		else
 		{
-			if (found && !s.GetFile().empty())
-				found = copy.GetFile() == s.GetFile();
-			if (found && !s.GetTitle().empty())
-				found = copy.GetTitle() == s.GetTitle();
 			if (found && !s.GetArtist().empty())
 				found = copy.GetArtist() == s.GetArtist();
+			if (found && !s.GetTitle().empty())
+				found = copy.GetTitle() == s.GetTitle();
 			if (found && !s.GetAlbum().empty())
 				found = copy.GetAlbum() == s.GetAlbum();
-			if (found && !s.GetYear().empty())
-				found = StrToInt(copy.GetYear()) == StrToInt(s.GetYear()) && StrToInt(s.GetYear());
-			if (found && !s.GetTrack().empty())
-				found = StrToInt(copy.GetTrack()) == StrToInt(s.GetTrack()) && StrToInt(s.GetTrack());
+			if (found && !s.GetFile().empty())
+				found = copy.GetFile() == s.GetFile();
+			if (found && !s.GetComposer().empty())
+				found = copy.GetComposer() == s.GetComposer();
+			if (found && !s.GetPerformer().empty())
+				found = copy.GetPerformer() == s.GetPerformer();
 			if (found && !s.GetGenre().empty())
 				found = copy.GetGenre() == s.GetGenre();
+			if (found && !s.GetYear().empty())
+				found = StrToInt(copy.GetYear()) == StrToInt(s.GetYear()) && StrToInt(s.GetYear());
 			if (found && !s.GetComment().empty())
 				found = copy.GetComment() == s.GetComment();
 		}
