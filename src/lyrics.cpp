@@ -31,8 +31,8 @@ extern Window *wCurrent;
 extern Scrollpad *sLyrics;
 extern Scrollpad *sInfo;
 
-const string artists_folder = home_folder + "/" + ".ncmpcpp/artists";
-const string lyrics_folder = home_folder + "/" + ".lyrics";
+const string artists_folder = home_folder + "/.ncmpcpp/artists";
+const string lyrics_folder = home_folder + "/.lyrics";
 
 #ifdef HAVE_CURL_CURL_H
 extern pthread_t lyrics_downloader;
@@ -40,7 +40,6 @@ extern pthread_t artist_info_downloader;
 extern bool lyrics_ready;
 extern bool artist_info_ready;
 pthread_mutex_t curl = PTHREAD_MUTEX_INITIALIZER;
-#endif
 
 namespace
 {
@@ -101,7 +100,6 @@ namespace
 	}
 }
 
-#ifdef HAVE_CURL_CURL_H
 void * GetArtistInfo(void *ptr)
 {
 	string *strptr = static_cast<string *>(ptr);
@@ -253,6 +251,54 @@ void * GetArtistInfo(void *ptr)
 	artist_info_ready = 1;
 	pthread_exit(NULL);
 }
+
+namespace
+{
+	bool lyricwiki_not_found(const string &s)
+	{
+		return s == "Not found";
+	}
+	
+	bool lyricsplugin_not_found(const string &s)
+	{
+		if  (s.empty())
+			return true;
+		for (string::const_iterator it = s.begin(); it != s.end(); it++)
+			if (isprint(*it))
+				return false;
+		return true;
+	}
+	
+	const LyricsPlugin lyricwiki =
+	{
+		"http://lyricwiki.org/api.php?artist=%artist%&song=%title%&fmt=xml",
+		"<lyrics>",
+		"</lyrics>",
+		lyricwiki_not_found
+	};
+	
+	const LyricsPlugin lyricsplugin =
+	{
+		"http://www.lyricsplugin.com/winamp03/plugin/?artist=%artist%&title=%title%",
+		"<div id=\"lyrics\">",
+		"</div>",
+		lyricsplugin_not_found
+	};
+	
+	const LyricsPlugin *ChooseLyricsPlugin(int i)
+	{
+		switch (i)
+		{
+			case 1:
+				return &lyricwiki;
+			case 2:
+				return &lyricsplugin;
+			default:
+				return &lyricwiki;
+		}
+	}
+}
+
 #endif // HAVE_CURL_CURL_H
 
 void *GetLyrics(void *song)
@@ -289,16 +335,16 @@ void *GetLyrics(void *song)
 #	ifdef HAVE_CURL_CURL_H
 	CURLcode code;
 	
+	const LyricsPlugin *my_lyrics = ChooseLyricsPlugin(Config.lyrics_db);
+	
 	string result;
 	
 	char *c_artist = curl_easy_escape(0, artist.c_str(), artist.length());
 	char *c_title = curl_easy_escape(0, title.c_str(), title.length());
 	
-	string url = "http://lyricwiki.org/api.php?artist=";
-	url += c_artist;
-	url += "&song=";
-	url += c_title;
-	url += "&fmt=xml";
+	string url = my_lyrics->url;
+	url.replace(url.find("%artist%"), 8, c_artist);
+	url.replace(url.find("%title%"), 7, c_title);
 	
 	pthread_mutex_lock(&curl);
 	CURL *lyrics = curl_easy_init();
@@ -322,13 +368,13 @@ void *GetLyrics(void *song)
 	}
 	
 	size_t a, b;
-	a = result.find("<lyrics>")+8;
-	b = result.find("</lyrics>");
+	a = result.find(my_lyrics->tag_open)+strlen(my_lyrics->tag_open);
+	b = result.find(my_lyrics->tag_close, a);
 	result = result.substr(a, b-a);
 	
-	if (result == "Not found")
+	if (my_lyrics->not_found(result))
 	{
-		*sLyrics << result;
+		*sLyrics << "Not found";
 		lyrics_ready = 1;
 		pthread_exit(NULL);
 	}
@@ -339,6 +385,7 @@ void *GetLyrics(void *song)
 		result.replace(i, 4, ">");
 	
 	EscapeHtml(result);
+	Trim(result);
 	
 	*sLyrics << utf_to_locale_cpy(result);
 	

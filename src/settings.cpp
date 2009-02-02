@@ -284,6 +284,7 @@ void DefaultConfiguration(ncmpcpp_config &conf)
 	conf.seek_time = 1;
 	conf.playlist_disable_highlight_delay = 5;
 	conf.message_delay_time = 4;
+	conf.lyrics_db = 1;
 }
 
 string GetLineValue(string &line, char a, char b, bool once)
@@ -698,6 +699,11 @@ void ReadConfiguration(ncmpcpp_config &conf)
 			else if (cl.find("enable_window_title") != string::npos)
 			{
 				conf.set_window_title = v == "yes";
+			}
+			else if (cl.find("lyrics_database") != string::npos)
+			{
+				if (!v.empty())
+					conf.lyrics_db = StrToInt(v);
 			}
 			else if (cl.find("song_window_title_format") != string::npos)
 			{

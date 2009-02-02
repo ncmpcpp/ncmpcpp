@@ -146,6 +146,16 @@
 #
 #enable_window_title = "yes"
 #
+##### lyrics support #####
+##
+## supported lyrics databases:
+##
+## - 1 - lyricwiki.org
+## - 2 - lyricsplugin.com
+##
+#
+#lyrics_database = "1"
+#
 ##### colors definitions #####
 #
 #colors_enabled = "yes"

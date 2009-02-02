@@ -27,6 +27,15 @@
 # include <pthread.h>
 # include "curl/curl.h"
 void * GetArtistInfo(void *);
+
+struct LyricsPlugin
+{
+	const char *url;
+	const char *tag_open;
+	const char *tag_close;
+	bool (*not_found)(const string &);
+};
+
 #endif
 
 void * GetLyrics(void *);
