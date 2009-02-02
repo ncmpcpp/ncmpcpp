@@ -51,19 +51,53 @@ namespace
 		return result;
 	}
 
-	void EscapeHtml(string &str)
+	void EscapeHtml(string &s)
 	{
-		for (size_t i = str.find("<"); i != string::npos; i = str.find("<"))
+		bool erase = 0;
+		for (size_t i = s.find("<"); i != string::npos; i = s.find("<"))
 		{
-			int j = str.find(">")+1;
-			str.replace(i, j-i, "");
+			size_t j = s.find(">")+1;
+			s.replace(i, j-i, "");
 		}
-		for (size_t i = str.find("&#039;"); i != string::npos; i = str.find("&#039;"))
-			str.replace(i, 6, "'");
-		for (size_t i = str.find("&quot;"); i != string::npos; i = str.find("&quot;"))
-			str.replace(i, 6, "\"");
-		for (size_t i = str.find("&amp;"); i != string::npos; i = str.find("&amp;"))
-			str.replace(i, 5, "&");
+		for (size_t i = s.find("&#039;"); i != string::npos; i = s.find("&#039;"))
+			s.replace(i, 6, "'");
+		for (size_t i = s.find("&quot;"); i != string::npos; i = s.find("&quot;"))
+			s.replace(i, 6, "\"");
+		for (size_t i = s.find("&amp;"); i != string::npos; i = s.find("&amp;"))
+			s.replace(i, 5, "&");
+		for (size_t i = 0; i < s.length(); i++)
+		{
+			if (erase)
+			{
+				s.erase(s.begin()+i);
+				erase = 0;
+			}
+			if (s[i] == 13) // ascii code for windows line ending, get rid of this shit
+			{
+				s[i] = '\n';
+				erase = 1;
+			}
+			else if (s[i] == '\t')
+				s[i] = ' ';
+		}
+	}
+	
+	void Trim(string &s)
+	{
+		if (s.empty())
+			return;
+		
+		size_t b = 0;
+		size_t e = s.length()-1;
+		
+		while (!isprint(s[b]))
+			b++;
+		while (!isprint(s[e]))
+			e--;
+		e++;
+		
+		if (b != 0 || e != s.length()-1)
+			s = s.substr(b, e-b);
 	}
 }
 
@@ -105,10 +139,6 @@ void * GetArtistInfo(void *ptr)
 		pthread_exit(NULL);
 	}
 	
-	for (string::iterator it = artist.begin(); it != artist.end(); it++)
-		if (*it == ' ')
-			*it = '+';
-	
 	CURLcode code;
 	
 	char *c_artist = curl_easy_escape(0, artist.c_str(), artist.length());
@@ -138,7 +168,6 @@ void * GetArtistInfo(void *ptr)
 	}
 	
 	size_t a, b;
-	bool erase = 0;
 	bool save = 1;
 	
 	a = result.find("status=\"failed\"");
@@ -187,28 +216,7 @@ void * GetArtistInfo(void *ptr)
 	}
 	
 	EscapeHtml(result);
-	for (size_t i = 0; i < result.length(); i++)
-	{
-		if (erase)
-		{
-			result.erase(result.begin()+i);
-			erase = 0;
-		}
-		if (result[i] == 13)
-		{
-			result[i] = '\n';
-			erase = 1;
-		}
-		else if (result[i] == '\t')
-			result[i] = ' ';
-	}
-	
-	int i = result.length();
-	if (!isgraph(result[i-1]))
-	{
-		while (!isgraph(result[--i])) { }
-		result = result.substr(0, i+1);
-	}
+	Trim(result);
 	
 	Buffer filebuffer;
 	if (save)
@@ -255,8 +263,8 @@ void *GetLyrics(void *song)
 	locale_to_utf(artist);
 	locale_to_utf(title);
 	
-	string filename = artist + " - " + title + ".txt";
-	const string fullpath = lyrics_folder + "/" + filename;
+	const string fullpath = lyrics_folder + "/" + artist + " - " + title + ".txt";
+	
 	mkdir(lyrics_folder.c_str(), 0755);
 	
 	std::ifstream input(fullpath.c_str());
@@ -279,14 +287,6 @@ void *GetLyrics(void *song)
 #		endif
 	}
 #	ifdef HAVE_CURL_CURL_H
-	for (string::iterator it = artist.begin(); it != artist.end(); it++)
-		if (*it == ' ')
-			*it = '+';
-
-	for (string::iterator it = title.begin(); it != title.end(); it++)
-		if (*it == ' ')
-			*it = '+';
-	
 	CURLcode code;
 	
 	string result;
@@ -321,10 +321,9 @@ void *GetLyrics(void *song)
 		pthread_exit(NULL);
 	}
 	
-	int a, b;
+	size_t a, b;
 	a = result.find("<lyrics>")+8;
 	b = result.find("</lyrics>");
-	
 	result = result.substr(a, b-a);
 	
 	if (result == "Not found")
@@ -341,9 +340,7 @@ void *GetLyrics(void *song)
 	
 	EscapeHtml(result);
 	
-	string localized_result = result;
-	utf_to_locale(localized_result);
-	*sLyrics << localized_result;
+	*sLyrics << utf_to_locale_cpy(result);
 	
 	std::ofstream output(fullpath.c_str());
 	if (output.is_open())
