@@ -160,6 +160,7 @@ void DefaultKeys(ncmpcpp_keys &keys)
 	keys.StartSearching[0] = 'y';
 	keys.ToggleAutoCenter[0] = 'U';
 	keys.ToggleDisplayMode[0] = 'p';
+	keys.ToggleLyricsDB[0] = 'L';
 	keys.GoToParentDir[0] = 263;
 	keys.SwitchTagTypeList[0] = '`';
 	keys.Quit[0] = 'q';
@@ -223,6 +224,7 @@ void DefaultKeys(ncmpcpp_keys &keys)
 	keys.StartSearching[1] = null_key;
 	keys.ToggleAutoCenter[1] = null_key;
 	keys.ToggleDisplayMode[1] = null_key;
+	keys.ToggleLyricsDB[1] = null_key;
 	keys.GoToParentDir[1] = 127;
 	keys.SwitchTagTypeList[1] = null_key;
 	keys.Quit[1] = 'Q';
@@ -284,7 +286,7 @@ void DefaultConfiguration(ncmpcpp_config &conf)
 	conf.seek_time = 1;
 	conf.playlist_disable_highlight_delay = 5;
 	conf.message_delay_time = 4;
-	conf.lyrics_db = 1;
+	conf.lyrics_db = 0;
 }
 
 string GetLineValue(string &line, char a, char b, bool once)
@@ -481,6 +483,8 @@ void ReadKeys(ncmpcpp_keys &keys)
 				GetKeys(key, keys.ToggleAutoCenter);
 			else if (key.find("key_toggle_display_mode ") != string::npos)
 				GetKeys(key, keys.ToggleDisplayMode);
+			else if (key.find("key_toggle_lyrics_db ") != string::npos)
+				GetKeys(key, keys.ToggleLyricsDB);
 			else if (key.find("key_go_to_containing_directory ") != string::npos)
 				GetKeys(key, keys.GoToContainingDir);
 			else if (key.find("key_start_searching ") != string::npos)
@@ -703,7 +707,7 @@ void ReadConfiguration(ncmpcpp_config &conf)
 			else if (cl.find("lyrics_database") != string::npos)
 			{
 				if (!v.empty())
-					conf.lyrics_db = StrToInt(v);
+					conf.lyrics_db = StrToInt(v)-1;
 			}
 			else if (cl.find("song_window_title_format") != string::npos)
 			{

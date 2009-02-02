@@ -2562,6 +2562,17 @@ int main(int argc, char *argv[])
 			}
 //			redraw_screen = 1;
 		}
+#		ifdef HAVE_CURL_CURL_H
+		else if (Keypressed(input, Key.ToggleLyricsDB))
+		{
+			const char *current_lyrics_plugin = GetLyricsPluginName(++Config.lyrics_db);
+			if (!current_lyrics_plugin)
+			{
+				current_lyrics_plugin = GetLyricsPluginName(Config.lyrics_db = 0);
+			}
+			ShowMessage("Using lyrics database: %s", current_lyrics_plugin);
+		}
+#		endif // HAVE_CURL_CURL_H
 		else if (Keypressed(input, Key.ToggleAutoCenter))
 		{
 			Config.autocenter_mode = !Config.autocenter_mode;

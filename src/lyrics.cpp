@@ -285,18 +285,30 @@ namespace
 		lyricsplugin_not_found
 	};
 	
+	const char *lyricsplugins_list[] =
+	{
+		"lyricwiki.org",
+		"lyricsplugin.com",
+		0
+	};
+	
 	const LyricsPlugin *ChooseLyricsPlugin(int i)
 	{
 		switch (i)
 		{
-			case 1:
+			case 0:
 				return &lyricwiki;
-			case 2:
+			case 1:
 				return &lyricsplugin;
 			default:
 				return &lyricwiki;
 		}
 	}
+}
+
+const char *GetLyricsPluginName(int offset)
+{
+	return lyricsplugins_list[offset];
 }
 
 #endif // HAVE_CURL_CURL_H

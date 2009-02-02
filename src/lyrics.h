@@ -36,6 +36,8 @@ struct LyricsPlugin
 	bool (*not_found)(const string &);
 };
 
+const char *GetLyricsPluginName(int);
+
 #endif
 
 void * GetLyrics(void *);

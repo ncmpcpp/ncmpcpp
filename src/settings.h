@@ -88,6 +88,7 @@ struct ncmpcpp_keys
 	int StartSearching[2];
 	int ToggleAutoCenter[2];
 	int ToggleDisplayMode[2];
+	int ToggleLyricsDB[2];
 	int GoToParentDir[2];
 	int SwitchTagTypeList[2];
 	int Quit[2];

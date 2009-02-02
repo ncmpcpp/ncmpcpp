@@ -151,6 +151,7 @@ void GetKeybindings(Scrollpad &help)
 	help << DisplayKeys(Key.SongInfo) << "Show song's info\n";
 #	ifdef HAVE_CURL_CURL_H
 	help << DisplayKeys(Key.ArtistInfo) << "Show artist's info\n";
+	help << DisplayKeys(Key.ToggleLyricsDB) << "Toggle lyrics database\n";
 #	endif // HAVE_CURL_CURL_H
 	help << DisplayKeys(Key.Lyrics) << "Show/hide song's lyrics\n\n";
 	
