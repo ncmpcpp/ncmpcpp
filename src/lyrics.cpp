@@ -309,7 +309,9 @@ void *GetLyrics(void *song)
 	locale_to_utf(artist);
 	locale_to_utf(title);
 	
-	const string fullpath = lyrics_folder + "/" + artist + " - " + title + ".txt";
+	string filename = artist + " - " + title + ".txt";
+	EscapeUnallowedChars(filename);
+	const string fullpath = lyrics_folder + "/" + filename;
 	
 	mkdir(lyrics_folder.c_str(), 0755);
 	
