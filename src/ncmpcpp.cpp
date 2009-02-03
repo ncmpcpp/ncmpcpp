@@ -625,6 +625,7 @@ int main(int argc, char *argv[])
 				mPlaylistEditor->Clear(0);
 				TagList list;
 				Mpd->GetPlaylists(list);
+				sort(list.begin(), list.end(), CaseInsensitiveSorting());
 				for (TagList::iterator it = list.begin(); it != list.end(); it++)
 				{
 					utf_to_locale(*it);
