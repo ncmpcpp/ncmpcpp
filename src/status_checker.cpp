@@ -189,8 +189,18 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 				mPlaylist->Reserve(playlist_length);
 				for (SongList::const_iterator it = list.begin(); it != list.end(); it++)
 				{
-					mPlaylist->AddOption(**it, now_playing == (*it)->GetPosition());
-					mPlaylist->Back().CopyPtr(0);
+					int pos = (*it)->GetPosition();
+					if (pos < int(mPlaylist->Size()))
+					{
+						 // if song's already in playlist, replace it with a new one
+						mPlaylist->at(pos) = **it;
+					}
+					else
+					{
+						// otherwise just add it to playlist
+						mPlaylist->AddOption(**it, now_playing == pos);
+					}
+					mPlaylist->at(pos).CopyPtr(0);
 					(*it)->NullMe();
 				}
 				
