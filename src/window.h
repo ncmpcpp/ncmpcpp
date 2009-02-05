@@ -97,8 +97,8 @@ class Window
 		const std::string &GetTitle() const;
 		Color GetColor() const;
 		Border GetBorder() const;
-		std::string GetString(const std::string &, size_t = -1, size_t = 0) const;
-		string GetString(unsigned int length = -1, int width = 0) const { return GetString("", length, width); }
+		std::string GetString(const std::string &, size_t = -1, size_t = 0, bool = 0) const;
+		string GetString(size_t length = -1, size_t width = 0, bool encrypted = 0) const { return GetString("", length, width, encrypted); }
 		void GetXY(int &, int &);
 		void GotoXY(int, int);
 		const int &X() const;

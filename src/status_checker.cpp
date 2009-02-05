@@ -139,7 +139,7 @@ void NcmpcppErrorCallback(Connection *Mpd, int errorid, const char *msg, void *)
 	{
 		wFooter->SetGetStringHelper(NULL);
 		Statusbar() << "Password: ";
-		string password = wFooter->GetString();
+		string password = wFooter->GetString(-1, 0, 1);
 		Mpd->SetPassword(password);
 		Mpd->SendPassword();
 		Mpd->UpdateStatus();
