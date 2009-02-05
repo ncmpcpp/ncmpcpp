@@ -279,6 +279,7 @@ void DefaultConfiguration(ncmpcpp_config &conf)
 	conf.search_in_db = true;
 	conf.display_screens_numbers_on_start = true;
 	conf.clock_display_seconds = false;
+	conf.ignore_leading_the = false;
 	conf.set_window_title = true;
 	conf.mpd_port = 6600;
 	conf.mpd_connection_timeout = 15;
@@ -699,6 +700,10 @@ void ReadConfiguration(ncmpcpp_config &conf)
 			else if (cl.find("clock_display_seconds") != string::npos)
 			{
 				conf.clock_display_seconds = v == "yes";
+			}
+			else if (cl.find("ignore_leading_the") != string::npos)
+			{
+				conf.ignore_leading_the = v == "yes";
 			}
 			else if (cl.find("enable_window_title") != string::npos)
 			{

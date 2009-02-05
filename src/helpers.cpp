@@ -40,6 +40,22 @@ extern bool search_match_to_pattern;
 
 const string term_type = getenv("TERM") ? getenv("TERM") : "";
 
+namespace
+{
+	inline void remove_the_word(string &s)
+	{
+		size_t the_pos = s.find("the ");
+		if (the_pos == 0 && the_pos != string::npos)
+			s = s.substr(4);
+	}
+	
+	inline string extract_top_directory(const string &s)
+	{
+		size_t slash = s.rfind("/");
+		return slash != string::npos ? s.substr(++slash) : s;
+	}
+}
+
 bool ConnectToMPD()
 {
 	if (!Mpd->Connect())
@@ -169,6 +185,11 @@ bool CaseInsensitiveSorting::operator()(string a, string b)
 {
 	ToLower(a);
 	ToLower(b);
+	if (Config.ignore_leading_the)
+	{
+		remove_the_word(a);
+		remove_the_word(b);
+	}
 	return a < b;
 }
 
@@ -178,6 +199,11 @@ bool CaseInsensitiveSorting::operator()(Song *sa, Song *sb)
 	string b = sb->GetName();
 	ToLower(a);
 	ToLower(b);
+	if (Config.ignore_leading_the)
+	{
+		remove_the_word(a);
+		remove_the_word(b);
+	}
 	return a < b;
 }
 
@@ -185,11 +211,17 @@ bool CaseInsensitiveSorting::operator()(const Item &a, const Item &b)
 {
 	if (a.type == b.type)
 	{
-		string sa = a.type == itSong ? a.song->GetName() : a.name;
-		string sb = b.type == itSong ? b.song->GetName() : b.name;
-		ToLower(sa);
-		ToLower(sb);
-		return sa < sb;
+		switch (a.type)
+		{
+			case itDirectory:
+				return operator()(extract_top_directory(a.name), extract_top_directory(b.name));
+			case itPlaylist:
+				return operator()(a.name, b.name);
+			case itSong:
+				return operator()(a.song, b.song);
+			default: // there's no other type, just silence compiler.
+				return 0;
+		}
 	}
 	else
 		return a.type < b.type;

@@ -151,6 +151,7 @@ struct ncmpcpp_config
 	bool search_in_db;
 	bool display_screens_numbers_on_start;
 	bool clock_display_seconds;
+	bool ignore_leading_the;
 	
 	int mpd_port;
 	int mpd_connection_timeout;

@@ -144,6 +144,13 @@
 #
 #clock_display_seconds = "no"
 #
+##
+## Note: If below is enabled, ncmpcpp will ignore leading
+## "The" word while sorting items in browser, tags in
+## media library, etc.
+##
+#ignore_leading_the = "no"
+#
 #enable_window_title = "yes"
 #
 ##### lyrics support #####
