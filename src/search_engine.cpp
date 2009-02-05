@@ -117,7 +117,7 @@ void PrepareSearchEngine(SearchPattern &s)
 	*mSearcher->at(16).first << "Reset";
 }
 
-void Search(SearchPattern &s)
+void Search(SearchPattern s)
 {
 	if (s.Empty())
 		return;

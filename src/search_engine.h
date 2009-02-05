@@ -44,7 +44,7 @@ const size_t search_engine_reset_button = 16;
 void SearchEngineDisplayer(const std::pair<Buffer *, Song *> &, void *, Menu< std::pair<Buffer *, Song *> > *);
 void UpdateFoundList();
 void PrepareSearchEngine(SearchPattern &s);
-void Search(SearchPattern &);
+void Search(SearchPattern);
 
 #endif
 
