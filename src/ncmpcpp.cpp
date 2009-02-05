@@ -122,7 +122,7 @@ Scrollpad *sInfo;
 Window *wHeader;
 Window *wFooter;
 #ifdef ENABLE_CLOCK
-Window *wClock;
+Scrollpad *wClock;
 #endif
 
 Connection *Mpd;
@@ -3833,9 +3833,8 @@ int main(int argc, char *argv[])
 			{
 				if (!wClock)
 				{
-					wClock = new Window((COLS-clock_width)/2, (LINES-clock_height)/2, clock_width, clock_height-1, "", Config.main_color, Border(Config.main_color));
+					wClock = new Scrollpad((COLS-clock_width)/2, (LINES-clock_height)/2, clock_width, clock_height-1, "", Config.main_color, Border(Config.main_color));
 					wClock->SetTimeout(ncmpcpp_window_timeout);
-					wClock->Reverse(1);
 				}
 				
 				CLEAR_FIND_HISTORY;
