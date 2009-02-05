@@ -2886,7 +2886,7 @@ int main(int argc, char *argv[])
 		{
 			if (wCurrent == mSearcher)
 			{
-				mSearcher->Highlight(seach_engine_search_button);
+				mSearcher->Highlight(search_engine_search_button);
 				mSearcher->Highlighting(0);
 				mSearcher->Refresh();
 				mSearcher->Highlighting(1);
@@ -2922,7 +2922,7 @@ int main(int argc, char *argv[])
 				if (wCurrent == mBrowser && browsed_dir != "/")
 					mList->Select(0, 0); // [..] cannot be selected, uhm.
 				if (wCurrent == mSearcher)
-					mList->Select(seach_engine_reset_button, 0); // 'Reset' cannot be selected, omgplz.
+					mList->Select(search_engine_reset_button, 0); // 'Reset' cannot be selected, omgplz.
 				// hacking shit ends.
 				ShowMessage("Selection reversed!");
 			}
