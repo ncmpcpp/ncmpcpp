@@ -415,7 +415,7 @@ string Window::GetString(const string &base, size_t length, size_t width, bool e
 		
 		mvwhline(itsWindow, y, minx, 32, width+1);
 		
-		if (encrypted)
+		if (!encrypted)
 			mvwprintw(itsWindow, y, minx, "%ls", tmp.substr(beginning, width+1).c_str());
 		else
 			mvwhline(itsWindow, y, minx, '*', maxx-minx);
