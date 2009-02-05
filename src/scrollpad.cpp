@@ -124,6 +124,13 @@ void Scrollpad::MoveTo(size_t x, size_t y)
 {
 	itsStartX = x;
 	itsStartY = y;
+	if (itsBorder != brNone)
+	{
+		itsStartX++;
+		itsStartY++;
+	}
+	if (!itsTitle.empty())
+		itsStartY += 2;
 }
 
 void Scrollpad::Resize(size_t width, size_t height)
