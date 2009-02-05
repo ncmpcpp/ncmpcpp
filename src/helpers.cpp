@@ -364,7 +364,7 @@ string FindSharedDir(const string &one, const string &two)
 	while (one.substr(0, i) == two.substr(0, i))
 		i++;
 	result = one.substr(0, i);
-	i = result.find_last_of("/");
+	i = result.rfind("/");
 	return i != string::npos ? result.substr(0, i) : "/";
 }
 

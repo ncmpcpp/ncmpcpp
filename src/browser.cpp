@@ -51,7 +51,7 @@ namespace
 	
 	bool hasSupportedExtension(const string &file)
 	{
-		unsigned int last_dot = file.find_last_of(".");
+		size_t last_dot = file.rfind(".");
 		if (last_dot > file.length())
 			return false;
 		
@@ -138,7 +138,7 @@ void DisplayItem(const Item &item, void *, Menu<Item> *menu)
 				*menu << "[..]";
 				return;
 			}
-			size_t slash = item.name.find_last_of("/");
+			size_t slash = item.name.rfind("/");
 			*menu << "[" << (slash != string::npos ? item.name.substr(slash+1) : item.name) << "]";
 			return;
 		}
@@ -180,7 +180,7 @@ void GetDirectory(string dir, string subdir)
 	if (dir != "/")
 	{
 		Item parent;
-		size_t slash = dir.find_last_of("/");
+		size_t slash = dir.rfind("/");
 		parent.song = (Song *) 1; // in that way we assume that's really parent dir
 		parent.name = slash != string::npos ? dir.substr(0, slash) : "/";
 		parent.type = itDirectory;

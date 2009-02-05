@@ -716,7 +716,7 @@ int main(int argc, char *argv[])
 					sort(list.begin(), list.end(), CaseInsensitiveSorting());
 					if (editor_browsed_dir != "/")
 					{
-						size_t slash = editor_browsed_dir.find_last_of("/");
+						size_t slash = editor_browsed_dir.rfind("/");
 						string parent = slash != string::npos ? editor_browsed_dir.substr(0, slash) : "/";
 						mEditorDirs->AddOption(make_pair("[..]", parent));
 					}
@@ -726,7 +726,7 @@ int main(int argc, char *argv[])
 					}
 					for (TagList::const_iterator it = list.begin(); it != list.end(); it++)
 					{
-						size_t slash = it->find_last_of("/");
+						size_t slash = it->rfind("/");
 						string to_display = slash != string::npos ? it->substr(slash+1) : *it;
 						utf_to_locale(to_display);
 						mEditorDirs->AddOption(make_pair(to_display, *it));
@@ -1203,7 +1203,7 @@ int main(int argc, char *argv[])
 						{
 							Statusbar() << fmtBold << "Filename: " << fmtBoldEnd;
 							string filename = s.GetNewName().empty() ? s.GetName() : s.GetNewName();
-							int dot = filename.find_last_of(".");
+							size_t dot = filename.rfind(".");
 							string extension = filename.substr(dot);
 							filename = filename.substr(0, dot);
 							string new_name = wFooter->GetString(filename);
@@ -1732,7 +1732,7 @@ int main(int argc, char *argv[])
 							{
 								Song &s = mEditorTags->Current();
 								string old_name = s.GetNewName().empty() ? s.GetName() : s.GetNewName();
-								int last_dot = old_name.find_last_of(".");
+								size_t last_dot = old_name.rfind(".");
 								string extension = old_name.substr(last_dot);
 								old_name = old_name.substr(0, last_dot);
 								LockStatusbar();

@@ -118,7 +118,7 @@ namespace
 		std::stringstream result;
 		vector<string> separators;
 		vector< std::pair<char, string> > tags;
-		string file = s.GetName().substr(0, s.GetName().find_last_of("."));
+		string file = s.GetName().substr(0, s.GetName().rfind("."));
 		
 		try
 		{
@@ -231,7 +231,7 @@ string FindSharedDir(const SongList &v)
 				i++;
 			result = result.substr(0, i);
 		}
-		size_t slash = result.find_last_of("/");
+		size_t slash = result.rfind("/");
 		result = slash != string::npos ? result.substr(0, slash) : "/";
 	}
 	return result;
@@ -332,7 +332,7 @@ bool GetSongTags(Song &s)
 	s.SetComment(f.tag()->comment().to8Bit(1));
 	
 	string ext = s.GetFile();
-	ext = ext.substr(ext.find_last_of(".")+1);
+	ext = ext.substr(ext.rfind(".")+1);
 	ToLower(ext);
 	
 	mTagEditor->Clear();
@@ -401,7 +401,7 @@ bool WriteTags(Song &s)
 			return false;
 		
 		string ext = s.GetFile();
-		ext = ext.substr(ext.find_last_of(".")+1);
+		ext = ext.substr(ext.rfind(".")+1);
 		ToLower(ext);
 		if (ext == "mp3")
 		{
@@ -613,7 +613,7 @@ void __deal_with_filenames(SongList &v)
 							else
 							{
 								const string &file = s.GetName();
-								int last_dot = file.find_last_of(".");
+								size_t last_dot = file.rfind(".");
 								string extension = file.substr(last_dot);
 								basic_buffer<my_char_t> new_file;
 								new_file << TO_WSTRING(GenerateFilename(s, Config.pattern));
