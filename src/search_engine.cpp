@@ -286,7 +286,8 @@ void Search(SearchPattern s)
 		
 		if (found && any_found)
 		{
-			mSearcher->AddOption(make_pair((Buffer *)0, *it));
+			Song *ss = Config.search_in_db ? *it : new Song(**it);
+			mSearcher->AddOption(make_pair((Buffer *)0, ss));
 			list[it-list.begin()] = 0;
 		}
 		found = 1;
