@@ -362,7 +362,7 @@ int main(int argc, char *argv[])
 	
 	Song lyrics_song;
 	Song edited_song;
-	Song sought_pattern;
+	SearchPattern sought_pattern;
 	
 	bool main_exit = 0;
 	bool title_allowed = !Config.display_screens_numbers_on_start;
@@ -1266,13 +1266,20 @@ int main(int argc, char *argv[])
 					
 					size_t option = mSearcher->Choice();
 					LockStatusbar();
-					Song &s = sought_pattern;
+					SearchPattern &s = sought_pattern;
 					
 					if (option <= 12)
 						mSearcher->Current().first->Clear();
 					
-					switch (option+1)
+					switch (option)
 					{
+						case 0:
+						{
+							Statusbar() << fmtBold << "Any: " << fmtBoldEnd;
+							s.Any(wFooter->GetString(s.Any()));
+							*mSearcher->Current().first << fmtBold << "Any:      " << fmtBoldEnd << ' ' << ShowTag(s.Any());
+							break;
+						}
 						case 1:
 						{
 							Statusbar() << fmtBold << "Artist: " << fmtBoldEnd;
@@ -1364,11 +1371,11 @@ int main(int argc, char *argv[])
 									mSearcher->SetTitle(DisplayColumns(Config.song_columns_list_format));
 								size_t found = mSearcher->Size()-search_engine_static_options;
 								found += 3; // don't count options inserted below
-								mSearcher->InsertSeparator(16);
-								mSearcher->InsertOption(17, make_pair((Buffer *)0, (Song *)0), 1, 1);
-								mSearcher->at(17).first = new Buffer();
-								*mSearcher->at(17).first << Config.color1 << "Search results: " << Config.color2 << "Found " << found  << (found > 1 ? " songs" : " song") << clDefault;
-								mSearcher->InsertSeparator(18);
+								mSearcher->InsertSeparator(search_engine_reset_button+1);
+								mSearcher->InsertOption(search_engine_reset_button+2, make_pair((Buffer *)0, (Song *)0), 1, 1);
+								mSearcher->at(search_engine_reset_button+2).first = new Buffer();
+								*mSearcher->at(search_engine_reset_button+2).first << Config.color1 << "Search results: " << Config.color2 << "Found " << found  << (found > 1 ? " songs" : " song") << clDefault;
+								mSearcher->InsertSeparator(search_engine_reset_button+3);
 								UpdateFoundList();
 								ShowMessage("Searching finished!");
 								for (size_t i = 0; i < search_engine_static_options-4; i++)

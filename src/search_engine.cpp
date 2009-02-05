@@ -68,7 +68,7 @@ void UpdateFoundList()
 	}
 }
 
-void PrepareSearchEngine(Song &s)
+void PrepareSearchEngine(SearchPattern &s)
 {
 	for (size_t i = 0; i < mSearcher->Size(); i++)
 	{
@@ -84,12 +84,12 @@ void PrepareSearchEngine(Song &s)
 	mSearcher->SetTitle("");
 	mSearcher->Clear();
 	mSearcher->Reset();
-	mSearcher->ResizeBuffer(16);
+	mSearcher->ResizeBuffer(17);
 	
-	mSearcher->IntoSeparator(9);
-	mSearcher->IntoSeparator(13);
+	mSearcher->IntoSeparator(10);
+	mSearcher->IntoSeparator(14);
 	
-	for (size_t i = 0; i < 16; i++)
+	for (size_t i = 0; i < 17; i++)
 	{
 		try
 		{
@@ -98,25 +98,26 @@ void PrepareSearchEngine(Song &s)
 		catch (List::InvalidItem) { }
 	}
 	
-	*mSearcher->at(0).first << fmtBold << "Artist:   " << fmtBoldEnd << ' ' << ShowTag(s.GetArtist());
-	*mSearcher->at(1).first << fmtBold << "Title:    " << fmtBoldEnd << ' ' << ShowTag(s.GetTitle());
-	*mSearcher->at(2).first << fmtBold << "Album:    " << fmtBoldEnd << ' ' << ShowTag(s.GetAlbum());
-	*mSearcher->at(3).first << fmtBold << "Filename: " << fmtBoldEnd << ' ' << ShowTag(s.GetName());
-	*mSearcher->at(4).first << fmtBold << "Composer: " << fmtBoldEnd << ' ' << ShowTag(s.GetComposer());
-	*mSearcher->at(5).first << fmtBold << "Performer:" << fmtBoldEnd << ' ' << ShowTag(s.GetPerformer());
-	*mSearcher->at(6).first << fmtBold << "Genre:    " << fmtBoldEnd << ' ' << ShowTag(s.GetGenre());
-	*mSearcher->at(7).first << fmtBold << "Year:     " << fmtBoldEnd << ' ' << ShowTag(s.GetYear());
-	*mSearcher->at(8).first << fmtBold << "Comment:  " << fmtBoldEnd << ' ' << ShowTag(s.GetComment());
+	*mSearcher->at(0).first << fmtBold << "Any:      " << fmtBoldEnd << ' ' << ShowTag(s.Any());
+	*mSearcher->at(1).first << fmtBold << "Artist:   " << fmtBoldEnd << ' ' << ShowTag(s.GetArtist());
+	*mSearcher->at(2).first << fmtBold << "Title:    " << fmtBoldEnd << ' ' << ShowTag(s.GetTitle());
+	*mSearcher->at(3).first << fmtBold << "Album:    " << fmtBoldEnd << ' ' << ShowTag(s.GetAlbum());
+	*mSearcher->at(4).first << fmtBold << "Filename: " << fmtBoldEnd << ' ' << ShowTag(s.GetName());
+	*mSearcher->at(5).first << fmtBold << "Composer: " << fmtBoldEnd << ' ' << ShowTag(s.GetComposer());
+	*mSearcher->at(6).first << fmtBold << "Performer:" << fmtBoldEnd << ' ' << ShowTag(s.GetPerformer());
+	*mSearcher->at(7).first << fmtBold << "Genre:    " << fmtBoldEnd << ' ' << ShowTag(s.GetGenre());
+	*mSearcher->at(8).first << fmtBold << "Year:     " << fmtBoldEnd << ' ' << ShowTag(s.GetYear());
+	*mSearcher->at(9).first << fmtBold << "Comment:  " << fmtBoldEnd << ' ' << ShowTag(s.GetComment());
 	
-	*mSearcher->at(10).first << fmtBold << "Search in:" << fmtBoldEnd << ' ' << (Config.search_in_db ? "Database" : "Current playlist");
-	*mSearcher->at(11).first << fmtBold << "Search mode:" << fmtBoldEnd << ' ' << (search_match_to_pattern ? search_mode_normal : search_mode_strict);
-	*mSearcher->at(12).first << fmtBold << "Case sensitive:" << fmtBoldEnd << ' ' << (search_case_sensitive ? "Yes" : "No");
+	*mSearcher->at(11).first << fmtBold << "Search in:" << fmtBoldEnd << ' ' << (Config.search_in_db ? "Database" : "Current playlist");
+	*mSearcher->at(12).first << fmtBold << "Search mode:" << fmtBoldEnd << ' ' << (search_match_to_pattern ? search_mode_normal : search_mode_strict);
+	*mSearcher->at(13).first << fmtBold << "Case sensitive:" << fmtBoldEnd << ' ' << (search_case_sensitive ? "Yes" : "No");
 	
-	*mSearcher->at(14).first << "Search";
-	*mSearcher->at(15).first << "Reset";
+	*mSearcher->at(15).first << "Search";
+	*mSearcher->at(16).first << "Reset";
 }
 
-void Search(Song &s)
+void Search(SearchPattern &s)
 {
 	if (s.Empty())
 		return;
@@ -131,11 +132,16 @@ void Search(Song &s)
 			list.push_back(&(*mPlaylist)[i]);
 	}
 	
+	bool any_found = 1;
 	bool found = 1;
 	
 	if (!search_case_sensitive)
 	{
 		string t;
+		t = s.Any();
+		ToLower(t);
+		s.Any(t);
+		
 		t = s.GetArtist();
 		ToLower(t);
 		s.SetArtist(t);
@@ -213,6 +219,18 @@ void Search(Song &s)
 		
 		if (search_match_to_pattern)
 		{
+			if (!s.Any().empty())
+				any_found =
+					copy.GetArtist().find(s.Any()) != string::npos
+				||	copy.GetTitle().find(s.Any()) != string::npos
+				||	copy.GetAlbum().find(s.Any()) != string::npos
+				||	copy.GetFile().find(s.Any()) != string::npos
+				||	copy.GetComposer().find(s.Any()) != string::npos
+				||	copy.GetPerformer().find(s.Any()) != string::npos
+				||	copy.GetGenre().find(s.Any()) != string::npos
+				||	copy.GetYear().find(s.Any()) != string::npos
+				||	copy.GetComment().find(s.Any()) != string::npos;
+			
 			if (found && !s.GetArtist().empty())
 				found = copy.GetArtist().find(s.GetArtist()) != string::npos;
 			if (found && !s.GetTitle().empty())
@@ -228,12 +246,24 @@ void Search(Song &s)
 			if (found && !s.GetGenre().empty())
 				found = copy.GetGenre().find(s.GetGenre()) != string::npos;
 			if (found && !s.GetYear().empty())
-				found = StrToInt(copy.GetYear()) == StrToInt(s.GetYear()) && StrToInt(s.GetYear());
+				found = copy.GetYear().find(s.GetYear()) != string::npos;
 			if (found && !s.GetComment().empty())
 				found = copy.GetComment().find(s.GetComment()) != string::npos;
 		}
 		else
 		{
+			if (!s.Any().empty())
+				any_found =
+					copy.GetArtist() == s.Any()
+				||	copy.GetTitle() == s.Any()
+				||	copy.GetAlbum() == s.Any()
+				||	copy.GetFile() == s.Any()
+				||	copy.GetComposer() == s.Any()
+				||	copy.GetPerformer() == s.Any()
+				||	copy.GetGenre() == s.Any()
+				||	copy.GetYear() == s.Any()
+				||	copy.GetComment() == s.Any();
+			
 			if (found && !s.GetArtist().empty())
 				found = copy.GetArtist() == s.GetArtist();
 			if (found && !s.GetTitle().empty())
@@ -249,17 +279,18 @@ void Search(Song &s)
 			if (found && !s.GetGenre().empty())
 				found = copy.GetGenre() == s.GetGenre();
 			if (found && !s.GetYear().empty())
-				found = StrToInt(copy.GetYear()) == StrToInt(s.GetYear()) && StrToInt(s.GetYear());
+				found = copy.GetYear() == s.GetYear();
 			if (found && !s.GetComment().empty())
 				found = copy.GetComment() == s.GetComment();
 		}
 		
-		if (found)
+		if (found && any_found)
 		{
 			mSearcher->AddOption(make_pair((Buffer *)0, *it));
 			list[it-list.begin()] = 0;
 		}
 		found = 1;
+		any_found = 1;
 	}
 	if (Config.search_in_db) // free song list only if it's database
 		FreeSongList(list);

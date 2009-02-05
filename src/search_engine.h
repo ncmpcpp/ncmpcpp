@@ -24,14 +24,27 @@
 #include "mpdpp.h"
 #include "ncmpcpp.h"
 
-const size_t search_engine_static_options = 19;
-const size_t search_engine_search_button = 14;
-const size_t search_engine_reset_button = 15;
+class SearchPattern : public Song
+{
+	public:
+		const string &Any() { return itsAnyField; }
+		const string &Any(const string &s) { itsAnyField = s; return itsAnyField; }
+		
+		void Clear() { Song::Clear(); itsAnyField.clear(); }
+		bool Empty() { return Song::Empty() && itsAnyField.empty(); }
+	
+	protected:
+		string itsAnyField;
+};
+
+const size_t search_engine_static_options = 20;
+const size_t search_engine_search_button = 15;
+const size_t search_engine_reset_button = 16;
 
 void SearchEngineDisplayer(const std::pair<Buffer *, Song *> &, void *, Menu< std::pair<Buffer *, Song *> > *);
 void UpdateFoundList();
-void PrepareSearchEngine(Song &s);
-void Search(Song &);
+void PrepareSearchEngine(SearchPattern &s);
+void Search(SearchPattern &);
 
 #endif
 
