@@ -98,11 +98,13 @@ Menu<Song> *mPlaylist;
 Menu<Item> *mBrowser;
 Menu< std::pair<Buffer *, Song *> > *mSearcher;
 
+Window *wLibActiveCol;
 Menu<string> *mLibArtists;
 Menu<StringPair> *mLibAlbums;
 Menu<Song> *mLibSongs;
 
 #ifdef HAVE_TAGLIB_H
+Window *wTagEditorActiveCol;
 Menu<Buffer> *mTagEditor;
 Menu<StringPair> *mEditorAlbums;
 Menu<StringPair> *mEditorDirs;
@@ -112,6 +114,7 @@ Menu<StringPair> *mEditorLeftCol;
 Menu<string> *mEditorTagTypes;
 Menu<Song> *mEditorTags;
 
+Window *wPlaylistEditorActiveCol;
 Menu<string> *mPlaylistList;
 Menu<Song> *mPlaylistEditor;
 
@@ -247,7 +250,7 @@ int main(int argc, char *argv[])
 	size_t right_col_startx = left_col_width+middle_col_width+2;
 	
 	mLibArtists = new Menu<string>(0, main_start_y, left_col_width, main_height, IntoStr(Config.media_lib_primary_tag) + "s", Config.main_color, brNone);
-	mLibArtists->HighlightColor(Config.main_highlight_color);
+	mLibArtists->HighlightColor(Config.active_column_color);
 	mLibArtists->SetTimeout(ncmpcpp_window_timeout);
 	mLibArtists->SetItemDisplayer(GenericDisplayer);
 	
@@ -277,12 +280,12 @@ int main(int argc, char *argv[])
 	size_t tagedit_right_col_startx = tagedit_left_col_width+tagedit_middle_col_width+2;
 	
 	mEditorAlbums = new Menu<StringPair>(0, main_start_y, tagedit_left_col_width, main_height, "Albums", Config.main_color, brNone);
-	mEditorAlbums->HighlightColor(Config.main_highlight_color);
+	mEditorAlbums->HighlightColor(Config.active_column_color);
 	mEditorAlbums->SetTimeout(ncmpcpp_window_timeout);
 	mEditorAlbums->SetItemDisplayer(DisplayStringPair);
 	
 	mEditorDirs = new Menu<StringPair>(0, main_start_y, tagedit_left_col_width, main_height, "Directories", Config.main_color, brNone);
-	mEditorDirs->HighlightColor(Config.main_highlight_color);
+	mEditorDirs->HighlightColor(Config.active_column_color);
 	mEditorDirs->SetTimeout(ncmpcpp_window_timeout);
 	mEditorDirs->SetItemDisplayer(DisplayStringPair);
 	mEditorLeftCol = Config.albums_in_tag_editor ? mEditorAlbums : mEditorDirs;
@@ -302,7 +305,7 @@ int main(int argc, char *argv[])
 #	endif // HAVE_TAGLIB_H
 	
 	mPlaylistList = new Menu<string>(0, main_start_y, left_col_width, main_height, "Playlists", Config.main_color, brNone);
-	mPlaylistList->HighlightColor(Config.main_highlight_color);
+	mPlaylistList->HighlightColor(Config.active_column_color);
 	mPlaylistList->SetTimeout(ncmpcpp_window_timeout);
 	mPlaylistList->SetItemDisplayer(GenericDisplayer);
 	
@@ -313,6 +316,13 @@ int main(int argc, char *argv[])
 	mPlaylistEditor->SetSelectSuffix(&Config.selected_item_suffix);
 	mPlaylistEditor->SetItemDisplayer(DisplaySong);
 	mPlaylistEditor->SetItemDisplayerUserData(&Config.song_list_format);
+	
+	// set default active columns
+	wLibActiveCol = mLibArtists;
+	wPlaylistEditorActiveCol = mPlaylistList;
+#	ifdef HAVE_TAGLIB_H
+	wTagEditorActiveCol = mEditorLeftCol;
+#	endif // HAVE_TAGLIB_H
 	
 #	ifdef ENABLE_CLOCK
 	size_t clock_width = Config.clock_display_seconds ? 60 : 40;
@@ -574,7 +584,7 @@ int main(int argc, char *argv[])
 			{
 				mLibAlbums->HighlightColor(Config.main_highlight_color);
 				mLibArtists->HighlightColor(Config.active_column_color);
-				wCurrent = mLibArtists;
+				wCurrent = wLibActiveCol = mLibArtists;
 			}
 			
 			if (!mLibArtists->Empty() && mLibSongs->Empty())
@@ -667,7 +677,7 @@ int main(int argc, char *argv[])
 			{
 				mPlaylistEditor->HighlightColor(Config.main_highlight_color);
 				mPlaylistList->HighlightColor(Config.active_column_color);
-				wCurrent = mPlaylistList;
+				wCurrent = wPlaylistEditorActiveCol = mPlaylistList;
 			}
 			
 			if (mPlaylistEditor->Empty())
@@ -1959,8 +1969,7 @@ int main(int argc, char *argv[])
 				else if (wCurrent == mEditorLeftCol)
 				{
 					Config.albums_in_tag_editor = !Config.albums_in_tag_editor;
-					mEditorLeftCol = Config.albums_in_tag_editor ? mEditorAlbums : mEditorDirs;
-					wCurrent = mEditorLeftCol;
+					wCurrent = wTagEditorActiveCol = mEditorLeftCol = Config.albums_in_tag_editor ? mEditorAlbums : mEditorDirs;
 					ShowMessage("Switched to %s view", Config.albums_in_tag_editor ? "albums" : "directories");
 					mEditorLeftCol->Display();
 					mEditorTags->Clear(0);
@@ -1985,7 +1994,7 @@ int main(int argc, char *argv[])
 						continue;
 					mLibArtists->HighlightColor(Config.main_highlight_color);
 					wCurrent->Refresh();
-					wCurrent = mLibAlbums;
+					wCurrent = wLibActiveCol = mLibAlbums;
 					mLibAlbums->HighlightColor(Config.active_column_color);
 					if (!mLibAlbums->Empty())
 						continue;
@@ -1994,7 +2003,7 @@ int main(int argc, char *argv[])
 				{
 					mLibAlbums->HighlightColor(Config.main_highlight_color);
 					wCurrent->Refresh();
-					wCurrent = mLibSongs;
+					wCurrent = wLibActiveCol = mLibSongs;
 					mLibSongs->HighlightColor(Config.active_column_color);
 				}
 			}
@@ -2005,7 +2014,7 @@ int main(int argc, char *argv[])
 					CLEAR_FIND_HISTORY;
 					mPlaylistList->HighlightColor(Config.main_highlight_color);
 					wCurrent->Refresh();
-					wCurrent = mPlaylistEditor;
+					wCurrent = wPlaylistEditorActiveCol = mPlaylistEditor;
 					mPlaylistEditor->HighlightColor(Config.active_column_color);
 				}
 			}
@@ -2017,14 +2026,14 @@ int main(int argc, char *argv[])
 				{
 					mEditorLeftCol->HighlightColor(Config.main_highlight_color);
 					wCurrent->Refresh();
-					wCurrent = mEditorTagTypes;
+					wCurrent = wTagEditorActiveCol = mEditorTagTypes;
 					mEditorTagTypes->HighlightColor(Config.active_column_color);
 				}
 				else if (wCurrent == mEditorTagTypes && mEditorTagTypes->Choice() < 12 && !mEditorTags->Empty())
 				{
 					mEditorTagTypes->HighlightColor(Config.main_highlight_color);
 					wCurrent->Refresh();
-					wCurrent = mEditorTags;
+					wCurrent = wTagEditorActiveCol = mEditorTags;
 					mEditorTags->HighlightColor(Config.active_column_color);
 				}
 			}
@@ -2041,7 +2050,7 @@ int main(int argc, char *argv[])
 				{
 					mLibSongs->HighlightColor(Config.main_highlight_color);
 					wCurrent->Refresh();
-					wCurrent = mLibAlbums;
+					wCurrent = wLibActiveCol = mLibAlbums;
 					mLibAlbums->HighlightColor(Config.active_column_color);
 					if (!mLibAlbums->Empty())
 						continue;
@@ -2050,7 +2059,7 @@ int main(int argc, char *argv[])
 				{
 					mLibAlbums->HighlightColor(Config.main_highlight_color);
 					wCurrent->Refresh();
-					wCurrent = mLibArtists;
+					wCurrent = wLibActiveCol = mLibArtists;
 					mLibArtists->HighlightColor(Config.active_column_color);
 				}
 			}
@@ -2061,7 +2070,7 @@ int main(int argc, char *argv[])
 					CLEAR_FIND_HISTORY;
 					mPlaylistEditor->HighlightColor(Config.main_highlight_color);
 					wCurrent->Refresh();
-					wCurrent = mPlaylistList;
+					wCurrent = wPlaylistEditorActiveCol = mPlaylistList;
 					mPlaylistList->HighlightColor(Config.active_column_color);
 				}
 			}
@@ -2073,14 +2082,14 @@ int main(int argc, char *argv[])
 				{
 					mEditorTags->HighlightColor(Config.main_highlight_color);
 					wCurrent->Refresh();
-					wCurrent = mEditorTagTypes;
+					wCurrent = wTagEditorActiveCol = mEditorTagTypes;
 					mEditorTagTypes->HighlightColor(Config.active_column_color);
 				}
 				else if (wCurrent == mEditorTagTypes)
 				{
 					mEditorTagTypes->HighlightColor(Config.main_highlight_color);
 					wCurrent->Refresh();
-					wCurrent = mEditorLeftCol;
+					wCurrent = wTagEditorActiveCol = mEditorLeftCol;
 					mEditorLeftCol->HighlightColor(Config.active_column_color);
 				}
 			}
@@ -3737,17 +3746,13 @@ int main(int argc, char *argv[])
 			{
 				CLEAR_FIND_HISTORY;
 				
-				mLibArtists->HighlightColor(Config.active_column_color);
-				mLibAlbums->HighlightColor(Config.main_highlight_color);
-				mLibSongs->HighlightColor(Config.main_highlight_color);
-				
 				mPlaylist->Hide(); // hack, should be wCurrent, but it doesn't always have 100% width
 				
 //				redraw_screen = 1;
 				redraw_header = 1;
 				REFRESH_MEDIA_LIBRARY_SCREEN;
 				
-				wCurrent = mLibArtists;
+				wCurrent = wLibActiveCol;
 				current_screen = csLibrary;
 				
 				UpdateSongList(mLibSongs);
@@ -3759,16 +3764,13 @@ int main(int argc, char *argv[])
 			{
 				CLEAR_FIND_HISTORY;
 				
-				mPlaylistList->HighlightColor(Config.active_column_color);
-				mPlaylistEditor->HighlightColor(Config.main_highlight_color);
-				
 				mPlaylist->Hide(); // hack, should be wCurrent, but it doesn't always have 100% width
 				
 //				redraw_screen = 1;
 				redraw_header = 1;
 				REFRESH_PLAYLIST_EDITOR_SCREEN;
 				
-				wCurrent = mPlaylistList;
+				wCurrent = wPlaylistEditorActiveCol;
 				current_screen = csPlaylistEditor;
 				
 				UpdateSongList(mPlaylistEditor);
@@ -3781,11 +3783,6 @@ int main(int argc, char *argv[])
 			if (current_screen != csTagEditor && current_screen != csTinyTagEditor)
 			{
 				CLEAR_FIND_HISTORY;
-				
-				mEditorAlbums->HighlightColor(Config.active_column_color);
-				mEditorDirs->HighlightColor(Config.active_column_color);
-				mEditorTagTypes->HighlightColor(Config.main_highlight_color);
-				mEditorTags->HighlightColor(Config.main_highlight_color);
 				
 				mPlaylist->Hide(); // hack, should be wCurrent, but it doesn't always have 100% width
 				
@@ -3817,7 +3814,7 @@ int main(int argc, char *argv[])
 					mEditorTagTypes->AddOption("lower all letters");
 				}
 				
-				wCurrent = mEditorLeftCol;
+				wCurrent = wTagEditorActiveCol;
 				current_screen = csTagEditor;
 			}
 		}
