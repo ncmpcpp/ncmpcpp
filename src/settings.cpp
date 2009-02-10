@@ -23,10 +23,11 @@
 
 #include "settings.h"
 
+using std::ifstream;
+using std::string;
+
 const string config_file = config_dir + "config";
 const string keys_config_file = config_dir + "keys";
-
-using std::ifstream;
 
 namespace
 {

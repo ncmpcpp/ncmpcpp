@@ -18,8 +18,8 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
-#ifndef HAVE_HELPERS_H
-#define HAVE_HELPERS_H
+#ifndef _HELPERS_H
+#define _HELPERS_H
 
 #include "mpdpp.h"
 #include "ncmpcpp.h"
@@ -31,7 +31,7 @@ void ParseArgv(int, char **);
 class CaseInsensitiveSorting
 {
 	public:
-		bool operator()(string, string);
+		bool operator()(std::string, std::string);
 		bool operator()(Song *, Song *);
 		bool operator()(const MPD::Item &, const MPD::Item &);
 };
@@ -47,26 +47,26 @@ void UpdateSongList(Menu<Song> *);
 
 bool Keypressed(int, const int *);
 
-void WindowTitle(const string &);
-void EscapeUnallowedChars(string &);
+void WindowTitle(const std::string &);
+void EscapeUnallowedChars(std::string &);
 
 Window &operator<<(Window &, mpd_TagItems);
 
-string IntoStr(mpd_TagItems);
-string FindSharedDir(const string &, const string &);
+std::string IntoStr(mpd_TagItems);
+std::string FindSharedDir(const std::string &, const std::string &);
 void DisplayTotalPlaylistLength(Window &);
 void DisplayStringPair(const StringPair &, void *, Menu<StringPair> *);
-string DisplayColumns(string);
+std::string DisplayColumns(std::string);
 void DisplaySongInColumns(const Song &, void *, Menu<Song> *);
 void DisplaySong(const Song &, void * = &Config.song_list_format, Menu<Song> * = NULL);
 void GetInfo(Song &, Scrollpad &);
 
 Window &Statusbar();
 
-const Buffer &ShowTag(const string &);
-const basic_buffer<my_char_t> &ShowTagInInfoScreen(const string &);
+const Buffer &ShowTag(const std::string &);
+const basic_buffer<my_char_t> &ShowTagInInfoScreen(const std::string &);
 
-void Scroller(Window &, const string &, size_t, size_t &);
+void Scroller(Window &, const std::string &, size_t, size_t &);
 
 #endif
 

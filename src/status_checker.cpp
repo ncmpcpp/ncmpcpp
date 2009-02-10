@@ -18,6 +18,8 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
+#include <stdexcept>
+
 #include "browser.h"
 #include "charset.h"
 #include "helpers.h"
@@ -26,6 +28,7 @@
 #include "status_checker.h"
 
 using namespace MPD;
+using std::string;
 
 extern Connection *Mpd;
 

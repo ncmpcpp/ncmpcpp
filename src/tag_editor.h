@@ -22,8 +22,8 @@
 
 #ifdef HAVE_TAGLIB_H
 
-#ifndef HAVE_TAG_EDITOR_H
-#define HAVE_TAG_EDITOR_H
+#ifndef _TAG_EDITOR_H
+#define _TAG_EDITOR_H
 
 // taglib headers
 #include "fileref.h"
@@ -32,11 +32,11 @@
 #include "mpdpp.h"
 #include "settings.h"
 
-typedef void (Song::*SongSetFunction)(const string &);
-typedef string (Song::*SongGetFunction)() const;
+typedef void (Song::*SongSetFunction)(const std::string &);
+typedef std::string (Song::*SongGetFunction)() const;
 
-string FindSharedDir(Menu<Song> *);
-string FindSharedDir(const MPD::SongList &);
+std::string FindSharedDir(Menu<Song> *);
+std::string FindSharedDir(const MPD::SongList &);
 void DisplayTag(const Song &, void *, Menu<Song> *);
 
 SongSetFunction IntoSetFunction(mpd_TagItems);

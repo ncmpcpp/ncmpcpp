@@ -18,8 +18,8 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
-#ifndef HAVE_BROWSER_H
-#define HAVE_BROWSER_H
+#ifndef _BROWSER_H
+#define _BROWSER_H
 
 #include "mpdpp.h"
 #include "ncmpcpp.h"
@@ -28,7 +28,7 @@ void UpdateItemList(Menu<MPD::Item> *);
 
 void DisplayItem(const MPD::Item &, void *, Menu<MPD::Item> *);
 
-void GetDirectory(string, string = "/");
+void GetDirectory(std::string, std::string = "/");
 
 #endif
 

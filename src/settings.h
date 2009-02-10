@@ -18,13 +18,13 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
-#ifndef HAVE_SETTINGS_H
-#define HAVE_SETTINGS_H
+#ifndef _SETTINGS_H
+#define _SETTINGS_H
 
 #include "libmpdclient.h"
 #include "ncmpcpp.h"
 
-const string config_dir = home_folder + "/.ncmpcpp/";
+const std::string config_dir = home_folder + "/.ncmpcpp/";
 const int null_key = 0x0fffffff;
 
 struct ncmpcpp_keys
@@ -96,18 +96,18 @@ struct ncmpcpp_keys
 
 struct ncmpcpp_config
 {
-	string mpd_host;
-	string mpd_music_dir;
-	string empty_tag;
-	string song_list_format;
-	string song_columns_list_format;
-	string song_status_format;
-	string song_window_title_format;
-	string song_library_format;
-	string media_lib_album_format;
-	string tag_editor_album_format;
+	std::string mpd_host;
+	std::string mpd_music_dir;
+	std::string empty_tag;
+	std::string song_list_format;
+	std::string song_columns_list_format;
+	std::string song_status_format;
+	std::string song_window_title_format;
+	std::string song_library_format;
+	std::string media_lib_album_format;
+	std::string tag_editor_album_format;
 	
-	string pattern;
+	std::string pattern;
 	
 	Buffer browser_playlist_prefix;
 	Buffer selected_item_prefix;
@@ -170,10 +170,10 @@ void DefaultConfiguration(ncmpcpp_config &);
 void ReadKeys(ncmpcpp_keys &);
 void ReadConfiguration(ncmpcpp_config &);
 
-Color IntoColor(const string &);
-string IntoStr(Color);
+Color IntoColor(const std::string &);
+std::string IntoStr(Color);
 mpd_TagItems IntoTagItem(char);
-string GetLineValue(string &, char = '"', char = '"', bool = 0);
+std::string GetLineValue(std::string &, char = '"', char = '"', bool = 0);
 
 #endif
 

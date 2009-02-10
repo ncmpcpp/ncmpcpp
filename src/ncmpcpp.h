@@ -18,16 +18,15 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
-#ifndef HAVE_NCMPCPP_H
-#define HAVE_NCMPCPP_H
+#ifndef _NCMPCPP_H
+#define _NCMPCPP_H
 
 #include "window.h"
 #include "menu.h"
 #include "scrollpad.h"
 #include "misc.h"
 
-typedef std::pair<string, string> StringPair;
-using std::make_pair;
+typedef std::pair<std::string, std::string> StringPair;
 
 enum NcmpcppScreen
 {
@@ -47,7 +46,7 @@ enum NcmpcppScreen
 
 const int ncmpcpp_window_timeout = 500;
 
-const string home_folder = getenv("HOME") ? getenv("HOME") : "";
+const std::string home_folder = getenv("HOME") ? getenv("HOME") : "";
 
 #endif
 

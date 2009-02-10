@@ -20,6 +20,8 @@
 
 #include "scrollpad.h"
 
+using std::string;
+
 Scrollpad::Scrollpad(size_t startx,
 			size_t starty,
 			size_t width,

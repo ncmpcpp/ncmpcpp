@@ -25,6 +25,7 @@
 #include <iostream>
 #include <fstream>
 #include <map>
+#include <stdexcept>
 
 #include "mpdpp.h"
 #include "ncmpcpp.h"
@@ -87,6 +88,10 @@
 			} while (0)
 
 using namespace MPD;
+
+using std::make_pair;
+using std::string;
+using std::vector;
 
 ncmpcpp_config Config;
 ncmpcpp_keys Key;

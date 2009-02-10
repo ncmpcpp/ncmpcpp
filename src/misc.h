@@ -18,23 +18,18 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
-#ifndef HAVE_MISC_H
-#define HAVE_MISC_H
+#ifndef _MISC_H
+#define _MISC_H
 
-#include <cstdlib>
-#include <sstream>
-#include <iomanip>
 #include <string>
-
-using std::string;
 
 //int Abs(int);
 
-void ToLower(string &);
+void ToLower(std::string &);
 
-int StrToInt(string);
+int StrToInt(std::string);
 
-string IntoStr(int);
+std::string IntoStr(int);
 //string IntoStr(double, int);
 
 #endif

@@ -18,63 +18,58 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
-#ifndef HAVE_SONG_H
-#define HAVE_SONG_H
+#ifndef _SONG_H
+#define _SONG_H
 
-#include <cstdlib>
 #include <string>
-#include <sstream>
-#include <stdexcept>
 
 #include "misc.h"
 #include "libmpdclient.h"
 
-using std::string;
-
 class Song
 {
 	public:
-		Song() : itsSlash(string::npos), itsHash(0), copyPtr(0), isStream(0), isLocalised(0) { itsSong = mpd_newSong(); }
+		Song() : itsSlash(std::string::npos), itsHash(0), copyPtr(0), isStream(0), isLocalised(0) { itsSong = mpd_newSong(); }
 		Song(mpd_Song *, bool = 0);
 		Song(const Song &);
 		~Song();
 		
-		string GetFile() const;
-		string GetName() const;
-		string GetDirectory() const;
-		string GetArtist() const;
-		string GetTitle() const;
-		string GetAlbum() const;
-		string GetTrack() const;
-		string GetYear() const;
-		string GetGenre() const;
-		string GetComposer() const;
-		string GetPerformer() const;
-		string GetDisc() const;
-		string GetComment() const;
-		string GetLength() const;
+		std::string GetFile() const;
+		std::string GetName() const;
+		std::string GetDirectory() const;
+		std::string GetArtist() const;
+		std::string GetTitle() const;
+		std::string GetAlbum() const;
+		std::string GetTrack() const;
+		std::string GetYear() const;
+		std::string GetGenre() const;
+		std::string GetComposer() const;
+		std::string GetPerformer() const;
+		std::string GetDisc() const;
+		std::string GetComment() const;
+		std::string GetLength() const;
 		const long long &GetHash() const { return itsHash; }
 		int GetTotalLength() const { return itsSong->time < 0 ? 0 : itsSong->time; }
 		int GetPosition() const { return itsSong->pos; }
 		int GetID() const { return itsSong->id; }
 		
-		void SetFile(const string &);
-		void SetArtist(const string &);
-		void SetTitle(const string &);
-		void SetAlbum(const string &);
-		void SetTrack(const string &);
+		void SetFile(const std::string &);
+		void SetArtist(const std::string &);
+		void SetTitle(const std::string &);
+		void SetAlbum(const std::string &);
+		void SetTrack(const std::string &);
 		void SetTrack(int);
-		void SetYear(const string &);
+		void SetYear(const std::string &);
 		void SetYear(int);
-		void SetGenre(const string &);
-		void SetComposer(const string &);
-		void SetPerformer(const string &);
-		void SetDisc(const string &);
-		void SetComment(const string &);
+		void SetGenre(const std::string &);
+		void SetComposer(const std::string &);
+		void SetPerformer(const std::string &);
+		void SetDisc(const std::string &);
+		void SetComment(const std::string &);
 		void SetPosition(int);
 		
-		void SetNewName(const string &name) { itsNewName = name == GetName() ? "" : name; }
-		string GetNewName() const { return itsNewName; }
+		void SetNewName(const std::string &name) { itsNewName = name == GetName() ? "" : name; }
+		std::string GetNewName() const { return itsNewName; }
 		
 		std::string toString(const std::string &) const;
 		
@@ -95,12 +90,12 @@ class Song
 		bool operator!=(const Song &) const;
 		bool operator<(const Song &rhs) const;
 		
-		static string ShowTime(int);
+		static std::string ShowTime(int);
 	private:
 		void __Count_Last_Slash_Position();
 		
 		mpd_Song *itsSong;
-		string itsNewName;
+		std::string itsNewName;
 		size_t itsSlash;
 		long long itsHash;
 		bool copyPtr;

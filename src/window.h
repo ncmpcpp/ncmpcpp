@@ -18,8 +18,8 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
-#ifndef HAVE_WINDOW_H
-#define HAVE_WINDOW_H
+#ifndef _WINDOW_H
+#define _WINDOW_H
 
 #ifdef HAVE_CONFIG_H
 #include <config.h>
@@ -46,10 +46,6 @@
 # define TO_STRING(x) x
 # define TO_WSTRING(x) x
 #endif
-
-using std::string;
-using std::wstring;
-using std::vector;
 
 enum Color { clDefault, clBlack, clRed, clGreen, clYellow, clBlue, clMagenta, clCyan, clWhite, clEnd };
 enum Format { fmtNone = 100, fmtBold, fmtBoldEnd, fmtReverse, fmtReverseEnd, fmtAltCharset, fmtAltCharsetEnd };
@@ -98,7 +94,7 @@ class Window
 		Color GetColor() const;
 		Border GetBorder() const;
 		std::string GetString(const std::string &, size_t = -1, size_t = 0, bool = 0) const;
-		string GetString(size_t length = -1, size_t width = 0, bool encrypted = 0) const { return GetString("", length, width, encrypted); }
+		std::string GetString(size_t length = -1, size_t width = 0, bool encrypted = 0) const { return GetString("", length, width, encrypted); }
 		void GetXY(int &, int &);
 		void GotoXY(int, int);
 		const int &X() const;
@@ -109,7 +105,7 @@ class Window
 		void SetBaseColor(Color, Color = clDefault);
 		void SetBorder(Border);
 		void SetTimeout(int);
-		void SetTitle(const string &);
+		void SetTitle(const std::string &);
 		
 		void Hide(char = 32) const;
 		void Bold(bool) const;
@@ -150,7 +146,7 @@ class Window
 		virtual Window *Clone() const { return new Window(*this); }
 		virtual Window *EmptyClone() const;
 		
-		static size_t Length(const wstring &);
+		static size_t Length(const std::wstring &);
 		
 	protected:
 		
@@ -173,7 +169,7 @@ class Window
 		int itsX;
 		int itsY;
 		
-		string itsTitle;
+		std::string itsTitle;
 		std::stack<Colors> itsColors;
 		
 		Color itsColor;

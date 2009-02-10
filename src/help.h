@@ -18,8 +18,8 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
-#ifndef HAVE_HELP_H
-#define HAVE_HELP_H
+#ifndef _HELP_H
+#define _HELP_H
 
 #include "ncmpcpp.h"
 

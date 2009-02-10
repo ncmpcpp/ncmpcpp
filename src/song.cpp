@@ -22,9 +22,14 @@
 #include <config.h>
 #endif
 
+#include <cstring>
+#include <iomanip>
+#include <sstream>
+
 #include "charset.h"
 #include "song.h"
-#include "settings.h"
+
+using std::string;
 
 Song::Song(mpd_Song *s, bool copy_ptr) : itsSong(s ? s : mpd_newSong()),
 					 itsSlash(string::npos),

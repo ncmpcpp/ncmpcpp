@@ -23,6 +23,8 @@
 #include "help.h"
 #include "settings.h"
 
+using std::string;
+
 extern MPD::Connection *Mpd;
 
 extern ncmpcpp_keys Key;

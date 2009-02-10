@@ -18,15 +18,11 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
-#ifndef HAVE_MENU_H
-#define HAVE_MENU_H
+#ifndef _MENU_H
+#define _MENU_H
 
 #include "window.h"
 #include "strbuffer.h"
-
-//include <stdexcept>
-
-//enum Location { lLeft, lCenter, lRight };
 
 class List
 {

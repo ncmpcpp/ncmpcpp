@@ -18,8 +18,8 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
-#ifndef HAVE_SEARCH_ENGINE_H
-#define HAVE_SEARCH_ENGINE_H
+#ifndef _SEARCH_ENGINE_H
+#define _SEARCH_ENGINE_H
 
 #include "mpdpp.h"
 #include "ncmpcpp.h"
@@ -27,14 +27,14 @@
 class SearchPattern : public Song
 {
 	public:
-		const string &Any() { return itsAnyField; }
-		const string &Any(const string &s) { itsAnyField = s; return itsAnyField; }
+		const std::string &Any() { return itsAnyField; }
+		const std::string &Any(const std::string &s) { itsAnyField = s; return itsAnyField; }
 		
 		void Clear() { Song::Clear(); itsAnyField.clear(); }
 		bool Empty() { return Song::Empty() && itsAnyField.empty(); }
 	
 	protected:
-		string itsAnyField;
+		std::string itsAnyField;
 };
 
 const size_t search_engine_static_options = 20;

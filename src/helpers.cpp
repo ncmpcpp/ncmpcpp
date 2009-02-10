@@ -26,6 +26,7 @@
 #include "tag_editor.h"
 
 using namespace MPD;
+using std::string;
 
 extern Connection *Mpd;
 

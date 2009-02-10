@@ -20,6 +20,9 @@
 
 #include "window.h"
 
+using std::string;
+using std::wstring;
+
 void InitScreen(bool enable_colors)
 {
 	setlocale(LC_ALL, "");

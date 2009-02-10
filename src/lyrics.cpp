@@ -27,6 +27,9 @@
 #include "settings.h"
 #include "song.h"
 
+using std::vector;
+using std::string;
+
 extern Window *wCurrent;
 extern Scrollpad *sLyrics;
 extern Scrollpad *sInfo;

@@ -31,6 +31,7 @@
 #endif // HAVE_TAGLIB_H
 
 using namespace MPD;
+using std::string;
 
 extern Connection *Mpd;
 

@@ -18,8 +18,8 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
-#ifndef HAVE_STATUS_CHECKER_H
-#define HAVE_STATUS_CHECKER_H
+#ifndef _STATUS_CHECKER_H
+#define _STATUS_CHECKER_H
 
 #include "mpdpp.h"
 #include "ncmpcpp.h"

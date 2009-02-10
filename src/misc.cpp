@@ -19,6 +19,8 @@
  ***************************************************************************/
 
 #include <algorithm>
+#include <sstream>
+
 #include "misc.h"
 
 /*int Abs(int num)
@@ -26,17 +28,17 @@
 	return (num < 0 ? -num : num);
 }*/
 
-void ToLower(string &s)
+void ToLower(std::string &s)
 {
 	transform(s.begin(), s.end(), s.begin(), tolower);
 }
 
-int StrToInt(string str)
+int StrToInt(std::string str)
 {
 	return atoi(str.c_str());
 }
 
-string IntoStr(int l)
+std::string IntoStr(int l)
 {
 	std::stringstream ss;
 	ss << l;

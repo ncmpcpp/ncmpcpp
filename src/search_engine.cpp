@@ -23,6 +23,7 @@
 #include "settings.h"
 
 using namespace MPD;
+using std::string;
 
 extern Connection *Mpd;
 extern Menu<Song> *mPlaylist;
@@ -287,7 +288,7 @@ void Search(SearchPattern s)
 		if (found && any_found)
 		{
 			Song *ss = Config.search_in_db ? *it : new Song(**it);
-			mSearcher->AddOption(make_pair((Buffer *)0, ss));
+			mSearcher->AddOption(std::make_pair((Buffer *)0, ss));
 			list[it-list.begin()] = 0;
 		}
 		found = 1;

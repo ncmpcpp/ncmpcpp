@@ -18,8 +18,8 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
-#ifndef HAVE_LYRICS_H
-#define HAVE_LYRICS_H
+#ifndef _LYRICS_H
+#define _LYRICS_H
 
 #include "ncmpcpp.h"
 
@@ -33,7 +33,7 @@ struct LyricsPlugin
 	const char *url;
 	const char *tag_open;
 	const char *tag_close;
-	bool (*not_found)(const string &);
+	bool (*not_found)(const std::string &);
 };
 
 const char *GetLyricsPluginName(int);
