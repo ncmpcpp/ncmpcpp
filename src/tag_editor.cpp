@@ -116,7 +116,7 @@ namespace
 
 	string ParseFilename(Song &s, string mask, bool preview)
 	{
-		std::stringstream result;
+		std::ostringstream result;
 		vector<string> separators;
 		vector< std::pair<char, string> > tags;
 		string file = s.GetName().substr(0, s.GetName().rfind("."));

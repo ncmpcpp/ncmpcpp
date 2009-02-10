@@ -540,7 +540,7 @@ bool Song::operator<(const Song &s) const
 
 string Song::ShowTime(int length)
 {
-	std::stringstream ss;
+	std::ostringstream ss;
 	
 	int hours = length/3600;
 	length -= hours*3600;

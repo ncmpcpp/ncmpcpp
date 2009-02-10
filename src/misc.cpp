@@ -40,7 +40,7 @@ int StrToInt(std::string str)
 
 std::string IntoStr(int l)
 {
-	std::stringstream ss;
+	std::ostringstream ss;
 	ss << l;
 	return ss.str();
 }
