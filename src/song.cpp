@@ -29,6 +29,7 @@
 #include "charset.h"
 #include "song.h"
 
+using MPD::Song;
 using std::string;
 
 Song::Song(mpd_Song *s, bool copy_ptr) : itsSong(s ? s : mpd_newSong()),

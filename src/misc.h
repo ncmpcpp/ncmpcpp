@@ -23,14 +23,24 @@
 
 #include <string>
 
-//int Abs(int);
+#include "window.h"
+#include "libmpdclient.h"
 
 void ToLower(std::string &);
 
-int StrToInt(std::string);
+int StrToInt(const std::string &);
 
 std::string IntoStr(int);
-//string IntoStr(double, int);
+
+std::string IntoStr(mpd_TagItems);
+
+std::string IntoStr(Color);
+
+Color IntoColor(const std::string &);
+
+mpd_TagItems IntoTagItem(char);
+
+void EscapeUnallowedChars(std::string &);
 
 #endif
 

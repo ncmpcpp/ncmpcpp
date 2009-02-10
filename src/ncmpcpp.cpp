@@ -33,6 +33,7 @@
 #include "browser.h"
 #include "charset.h"
 #include "clock.h"
+#include "display.h"
 #include "help.h"
 #include "helpers.h"
 #include "lyrics.h"
@@ -105,17 +106,17 @@ Menu< std::pair<Buffer *, Song *> > *mSearcher;
 
 Window *wLibActiveCol;
 Menu<string> *mLibArtists;
-Menu<StringPair> *mLibAlbums;
+Menu<string_pair> *mLibAlbums;
 Menu<Song> *mLibSongs;
 
 #ifdef HAVE_TAGLIB_H
 Window *wTagEditorActiveCol;
 Menu<Buffer> *mTagEditor;
-Menu<StringPair> *mEditorAlbums;
-Menu<StringPair> *mEditorDirs;
+Menu<string_pair> *mEditorAlbums;
+Menu<string_pair> *mEditorDirs;
 #endif // HAVE_TAGLIB_H
 // blah, I use below in conditionals.
-Menu<StringPair> *mEditorLeftCol;
+Menu<string_pair> *mEditorLeftCol;
 Menu<string> *mEditorTagTypes;
 Menu<Song> *mEditorTags;
 
@@ -226,12 +227,12 @@ int main(int argc, char *argv[])
 	if (!Config.statusbar_visibility)
 		main_height++;
 	
-	mPlaylist = new Menu<Song>(0, main_start_y, COLS, main_height, Config.columns_in_playlist ? DisplayColumns(Config.song_columns_list_format) : "", Config.main_color, brNone);
+	mPlaylist = new Menu<Song>(0, main_start_y, COLS, main_height, Config.columns_in_playlist ? Display::Columns(Config.song_columns_list_format) : "", Config.main_color, brNone);
 	mPlaylist->SetTimeout(ncmpcpp_window_timeout);
 	mPlaylist->HighlightColor(Config.main_highlight_color);
 	mPlaylist->SetSelectPrefix(&Config.selected_item_prefix);
 	mPlaylist->SetSelectSuffix(&Config.selected_item_suffix);
-	mPlaylist->SetItemDisplayer(Config.columns_in_playlist ? DisplaySongInColumns : DisplaySong);
+	mPlaylist->SetItemDisplayer(Config.columns_in_playlist ? Display::SongsInColumns : Display::Songs);
 	mPlaylist->SetItemDisplayerUserData(Config.columns_in_playlist ? &Config.song_columns_list_format : &Config.song_list_format);
 	
 	mBrowser = new Menu<Item>(0, main_start_y, COLS, main_height, "", Config.main_color, brNone);
@@ -239,12 +240,12 @@ int main(int argc, char *argv[])
 	mBrowser->SetTimeout(ncmpcpp_window_timeout);
 	mBrowser->SetSelectPrefix(&Config.selected_item_prefix);
 	mBrowser->SetSelectSuffix(&Config.selected_item_suffix);
-	mBrowser->SetItemDisplayer(DisplayItem);
+	mBrowser->SetItemDisplayer(Display::Items);
 	
 	mSearcher = new Menu< std::pair<Buffer *, Song *> >(0, main_start_y, COLS, main_height, "", Config.main_color, brNone);
 	mSearcher->HighlightColor(Config.main_highlight_color);
 	mSearcher->SetTimeout(ncmpcpp_window_timeout);
-	mSearcher->SetItemDisplayer(SearchEngineDisplayer);
+	mSearcher->SetItemDisplayer(Display::SearchEngine);
 	mSearcher->SetSelectPrefix(&Config.selected_item_prefix);
 	mSearcher->SetSelectSuffix(&Config.selected_item_suffix);
 	
@@ -257,26 +258,26 @@ int main(int argc, char *argv[])
 	mLibArtists = new Menu<string>(0, main_start_y, left_col_width, main_height, IntoStr(Config.media_lib_primary_tag) + "s", Config.main_color, brNone);
 	mLibArtists->HighlightColor(Config.active_column_color);
 	mLibArtists->SetTimeout(ncmpcpp_window_timeout);
-	mLibArtists->SetItemDisplayer(GenericDisplayer);
+	mLibArtists->SetItemDisplayer(Display::Generic);
 	
-	mLibAlbums = new Menu<StringPair>(middle_col_startx, main_start_y, middle_col_width, main_height, "Albums", Config.main_color, brNone);
+	mLibAlbums = new Menu<string_pair>(middle_col_startx, main_start_y, middle_col_width, main_height, "Albums", Config.main_color, brNone);
 	mLibAlbums->HighlightColor(Config.main_highlight_color);
 	mLibAlbums->SetTimeout(ncmpcpp_window_timeout);
-	mLibAlbums->SetItemDisplayer(DisplayStringPair);
+	mLibAlbums->SetItemDisplayer(Display::StringPairs);
 	
 	mLibSongs = new Menu<Song>(right_col_startx, main_start_y, right_col_width, main_height, "Songs", Config.main_color, brNone);
 	mLibSongs->HighlightColor(Config.main_highlight_color);
 	mLibSongs->SetTimeout(ncmpcpp_window_timeout);
 	mLibSongs->SetSelectPrefix(&Config.selected_item_prefix);
 	mLibSongs->SetSelectSuffix(&Config.selected_item_suffix);
-	mLibSongs->SetItemDisplayer(DisplaySong);
+	mLibSongs->SetItemDisplayer(Display::Songs);
 	mLibSongs->SetItemDisplayerUserData(&Config.song_library_format);
 	
 #	ifdef HAVE_TAGLIB_H
 	mTagEditor = new Menu<Buffer>(0, main_start_y, COLS, main_height, "", Config.main_color, brNone);
 	mTagEditor->HighlightColor(Config.main_highlight_color);
 	mTagEditor->SetTimeout(ncmpcpp_window_timeout);
-	mTagEditor->SetItemDisplayer(GenericDisplayer);
+	mTagEditor->SetItemDisplayer(Display::Generic);
 	
 	size_t tagedit_middle_col_width = 26;
 	size_t tagedit_left_col_width = COLS/2-tagedit_middle_col_width/2;
@@ -284,42 +285,42 @@ int main(int argc, char *argv[])
 	size_t tagedit_right_col_width = COLS-tagedit_left_col_width-tagedit_middle_col_width-2;
 	size_t tagedit_right_col_startx = tagedit_left_col_width+tagedit_middle_col_width+2;
 	
-	mEditorAlbums = new Menu<StringPair>(0, main_start_y, tagedit_left_col_width, main_height, "Albums", Config.main_color, brNone);
+	mEditorAlbums = new Menu<string_pair>(0, main_start_y, tagedit_left_col_width, main_height, "Albums", Config.main_color, brNone);
 	mEditorAlbums->HighlightColor(Config.active_column_color);
 	mEditorAlbums->SetTimeout(ncmpcpp_window_timeout);
-	mEditorAlbums->SetItemDisplayer(DisplayStringPair);
+	mEditorAlbums->SetItemDisplayer(Display::StringPairs);
 	
-	mEditorDirs = new Menu<StringPair>(0, main_start_y, tagedit_left_col_width, main_height, "Directories", Config.main_color, brNone);
+	mEditorDirs = new Menu<string_pair>(0, main_start_y, tagedit_left_col_width, main_height, "Directories", Config.main_color, brNone);
 	mEditorDirs->HighlightColor(Config.active_column_color);
 	mEditorDirs->SetTimeout(ncmpcpp_window_timeout);
-	mEditorDirs->SetItemDisplayer(DisplayStringPair);
+	mEditorDirs->SetItemDisplayer(Display::StringPairs);
 	mEditorLeftCol = Config.albums_in_tag_editor ? mEditorAlbums : mEditorDirs;
 	
 	mEditorTagTypes = new Menu<string>(tagedit_middle_col_startx, main_start_y, tagedit_middle_col_width, main_height, "Tag types", Config.main_color, brNone);
 	mEditorTagTypes->HighlightColor(Config.main_highlight_color);
 	mEditorTagTypes->SetTimeout(ncmpcpp_window_timeout);
-	mEditorTagTypes->SetItemDisplayer(GenericDisplayer);
+	mEditorTagTypes->SetItemDisplayer(Display::Generic);
 	
 	mEditorTags = new Menu<Song>(tagedit_right_col_startx, main_start_y, tagedit_right_col_width, main_height, "Tags", Config.main_color, brNone);
 	mEditorTags->HighlightColor(Config.main_highlight_color);
 	mEditorTags->SetTimeout(ncmpcpp_window_timeout);
 	mEditorTags->SetSelectPrefix(&Config.selected_item_prefix);
 	mEditorTags->SetSelectSuffix(&Config.selected_item_suffix);
-	mEditorTags->SetItemDisplayer(DisplayTag);
+	mEditorTags->SetItemDisplayer(Display::Tags);
 	mEditorTags->SetItemDisplayerUserData(mEditorTagTypes);
 #	endif // HAVE_TAGLIB_H
 	
 	mPlaylistList = new Menu<string>(0, main_start_y, left_col_width, main_height, "Playlists", Config.main_color, brNone);
 	mPlaylistList->HighlightColor(Config.active_column_color);
 	mPlaylistList->SetTimeout(ncmpcpp_window_timeout);
-	mPlaylistList->SetItemDisplayer(GenericDisplayer);
+	mPlaylistList->SetItemDisplayer(Display::Generic);
 	
 	mPlaylistEditor = new Menu<Song>(middle_col_startx, main_start_y, middle_col_width+right_col_width+1, main_height, "Playlist's content", Config.main_color, brNone);
 	mPlaylistEditor->HighlightColor(Config.main_highlight_color);
 	mPlaylistEditor->SetTimeout(ncmpcpp_window_timeout);
 	mPlaylistEditor->SetSelectPrefix(&Config.selected_item_prefix);
 	mPlaylistEditor->SetSelectSuffix(&Config.selected_item_suffix);
-	mPlaylistEditor->SetItemDisplayer(DisplaySong);
+	mPlaylistEditor->SetItemDisplayer(Display::Songs);
 	mPlaylistEditor->SetItemDisplayerUserData(&Config.song_list_format);
 	
 	// set default active columns
@@ -466,7 +467,7 @@ int main(int argc, char *argv[])
 				
 				if (current_screen == csPlaylist)
 				{
-					DisplayTotalPlaylistLength(*wHeader);
+					Display::TotalPlaylistLength(*wHeader);
 				}
 				else if (current_screen == csBrowser)
 				{
@@ -805,7 +806,7 @@ int main(int argc, char *argv[])
 				time_t rawtime;
 				time(&rawtime);
 				tm *t = localtime(&rawtime);
-				DisplayClock(*wClock, t);
+				Display::Clock(*wClock, t);
 			}
 			else
 			{
@@ -964,7 +965,7 @@ int main(int argc, char *argv[])
 			
 			sHelp->Resize(COLS, main_height);
 			mPlaylist->Resize(COLS, main_height);
-			mPlaylist->SetTitle(Config.columns_in_playlist ? DisplayColumns(Config.song_columns_list_format) : "");
+			mPlaylist->SetTitle(Config.columns_in_playlist ? Display::Columns(Config.song_columns_list_format) : "");
 			mBrowser->Resize(COLS, main_height);
 			mSearcher->Resize(COLS, main_height);
 			sInfo->Resize(COLS, main_height);
@@ -1383,7 +1384,7 @@ int main(int argc, char *argv[])
 							if (!mSearcher->Back().first)
 							{
 								if (Config.columns_in_search_engine)
-									mSearcher->SetTitle(DisplayColumns(Config.song_columns_list_format));
+									mSearcher->SetTitle(Display::Columns(Config.song_columns_list_format));
 								size_t found = mSearcher->Size()-search_engine_static_options;
 								found += 3; // don't count options inserted below
 								mSearcher->InsertSeparator(search_engine_reset_button+1);
@@ -2565,22 +2566,22 @@ int main(int argc, char *argv[])
 			{
 				Config.columns_in_playlist = !Config.columns_in_playlist;
 				ShowMessage("Playlist display mode: %s", Config.columns_in_playlist ? "Columns" : "Classic");
-				mPlaylist->SetItemDisplayer(Config.columns_in_playlist ? DisplaySongInColumns : DisplaySong);
+				mPlaylist->SetItemDisplayer(Config.columns_in_playlist ? Display::SongsInColumns : Display::Songs);
 				mPlaylist->SetItemDisplayerUserData(Config.columns_in_playlist ? &Config.song_columns_list_format : &Config.song_list_format);
-				mPlaylist->SetTitle(Config.columns_in_playlist ? DisplayColumns(Config.song_columns_list_format) : "");
+				mPlaylist->SetTitle(Config.columns_in_playlist ? Display::Columns(Config.song_columns_list_format) : "");
 			}
 			else if (wCurrent == mBrowser)
 			{
 				Config.columns_in_browser = !Config.columns_in_browser;
 				ShowMessage("Browser display mode: %s", Config.columns_in_browser ? "Columns" : "Classic");
-				mBrowser->SetTitle(Config.columns_in_browser ? DisplayColumns(Config.song_columns_list_format) : "");
+				mBrowser->SetTitle(Config.columns_in_browser ? Display::Columns(Config.song_columns_list_format) : "");
 			}
 			else if (wCurrent == mSearcher)
 			{
 				Config.columns_in_search_engine = !Config.columns_in_search_engine;
 				ShowMessage("Search engine display mode: %s", Config.columns_in_search_engine ? "Columns" : "Classic");
 				if (mSearcher->Size() > search_engine_static_options)
-					mSearcher->SetTitle(Config.columns_in_search_engine ? DisplayColumns(Config.song_columns_list_format) : "");
+					mSearcher->SetTitle(Config.columns_in_search_engine ? Display::Columns(Config.song_columns_list_format) : "");
 			}
 //			redraw_screen = 1;
 		}
@@ -3041,7 +3042,7 @@ int main(int argc, char *argv[])
 			size_t dialog_height = LINES*0.6;
 			Menu<string> *mDialog = new Menu<string>((COLS-dialog_width)/2, (LINES-dialog_height)/2, dialog_width, dialog_height, "Add selected items to...", Config.main_color, Config.window_border);
 			mDialog->SetTimeout(ncmpcpp_window_timeout);
-			mDialog->SetItemDisplayer(GenericDisplayer);
+			mDialog->SetItemDisplayer(Display::Generic);
 			
 			bool playlists_not_active = current_screen == csBrowser && Config.local_browser;
 			

@@ -33,8 +33,6 @@
 
 void InitClock();
 
-void DisplayClock(Window &, const tm *);
-
 #endif // ENABLE_CLOCK
 
 #endif

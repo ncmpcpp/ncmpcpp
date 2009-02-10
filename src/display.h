@@ -18,32 +18,38 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
-#ifndef _SEARCH_ENGINE_H
-#define _SEARCH_ENGINE_H
+#ifndef _DISPLAY_H
+#define _DISPLAY_H
 
-#include "mpdpp.h"
 #include "ncmpcpp.h"
+#include "menu.h"
+#include "mpdpp.h"
 
-class SearchPattern : public MPD::Song
+namespace Display
 {
-	public:
-		const std::string &Any() { return itsAnyField; }
-		const std::string &Any(const std::string &s) { itsAnyField = s; return itsAnyField; }
-		
-		void Clear() { Song::Clear(); itsAnyField.clear(); }
-		bool Empty() { return Song::Empty() && itsAnyField.empty(); }
+	std::string Columns(std::string);
 	
-	protected:
-		std::string itsAnyField;
-};
-
-const size_t search_engine_static_options = 20;
-const size_t search_engine_search_button = 15;
-const size_t search_engine_reset_button = 16;
-
-void UpdateFoundList();
-void PrepareSearchEngine(SearchPattern &s);
-void Search(SearchPattern);
+	template <class T> void Generic(const T &t, void *, Menu<T> *menu)
+	{
+		*menu << t;
+	}
+	
+	void TotalPlaylistLength(Window &);
+	
+	void StringPairs(const string_pair &, void *, Menu<string_pair> *);
+	
+	void SongsInColumns(const MPD::Song &, void *, Menu<MPD::Song> *);
+	
+	void Songs(const MPD::Song &, void *, Menu<MPD::Song> *);
+	
+	void Tags(const MPD::Song &, void *, Menu<MPD::Song> *);
+	
+	void SearchEngine(const std::pair<Buffer *, MPD::Song *> &, void *, Menu< std::pair<Buffer *, MPD::Song *> > *);
+	
+	void Items(const MPD::Item &, void *, Menu<MPD::Item> *);
+	
+	void Clock(Window &, const tm *);
+}
 
 #endif
 

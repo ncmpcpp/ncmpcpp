@@ -170,10 +170,5 @@ void DefaultConfiguration(ncmpcpp_config &);
 void ReadKeys(ncmpcpp_keys &);
 void ReadConfiguration(ncmpcpp_config &);
 
-Color IntoColor(const std::string &);
-std::string IntoStr(Color);
-mpd_TagItems IntoTagItem(char);
-std::string GetLineValue(std::string &, char = '"', char = '"', bool = 0);
-
 #endif
 

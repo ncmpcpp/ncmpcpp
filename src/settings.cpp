@@ -21,6 +21,7 @@
 #include <sys/stat.h>
 #include <fstream>
 
+#include "helpers.h"
 #include "settings.h"
 
 using std::ifstream;
@@ -69,30 +70,6 @@ namespace
 	{
 		return (Border) IntoColor(color);
 	}
-}
-
-Color IntoColor(const string &color)
-{
-	Color result = clDefault;
-	
-	if (color == "black")
-		result = clBlack;
-	else if (color == "red")
-		result = clRed;
-	else if (color == "green")
-		result = clGreen;
-	else if (color == "yellow")
-		result = clYellow;
-	else if (color == "blue")
-		result = clBlue;
-	else if (color == "magenta")
-		result = clMagenta;
-	else if (color == "cyan")
-		result = clCyan;
-	else if (color == "white")
-		result = clWhite;
-	
-	return result;
 }
 
 void CreateConfigDir()
@@ -289,73 +266,6 @@ void DefaultConfiguration(ncmpcpp_config &conf)
 	conf.playlist_disable_highlight_delay = 5;
 	conf.message_delay_time = 4;
 	conf.lyrics_db = 0;
-}
-
-string GetLineValue(string &line, char a, char b, bool once)
-{
-	int i = 0;
-	int begin = -1, end = -1;
-	for (string::iterator it = line.begin(); it != line.end() && (begin == -1 || end == -1); i++, it++)
-	{
-		if (*it == a || *it == b)
-		{
-			if (once)
-				*it = 0;
-			if (begin < 0)
-				begin = i+1;
-			else
-				end = i;
-		}
-	}
-	if (begin >= 0 && end >= 0)
-		return line.substr(begin, end-begin);
-	else
-		return "";
-}
-
-string IntoStr(Color color)
-{
-	string result;
-	
-	if (color == clDefault)
-		result = "default";
-	else if (color == clBlack)
-		result = "black";
-	else if (color == clRed)
-		result = "red";
-	else if (color == clGreen)
-		result = "green";
-	else if (color == clYellow)
-		result = "yellow";
-	else if (color == clBlue)
-		result = "blue";
-	else if (color == clMagenta)
-		result = "magenta";
-	else if (color == clCyan)
-		result = "cyan";
-	else if (color == clWhite)
-		result = "white";
-	
-	return result;
-}
-
-mpd_TagItems IntoTagItem(char c)
-{
-	switch (c)
-	{
-		case 'a':
-			return MPD_TAG_ITEM_ARTIST;
-		case 'y':
-			return MPD_TAG_ITEM_DATE;
-		case 'g':
-			return MPD_TAG_ITEM_GENRE;
-		case 'c':
-			return MPD_TAG_ITEM_COMPOSER;
-		case 'p':
-			return MPD_TAG_ITEM_PERFORMER;
-		default:
-			return MPD_TAG_ITEM_ARTIST;
-	}
 }
 
 void ReadKeys(ncmpcpp_keys &keys)

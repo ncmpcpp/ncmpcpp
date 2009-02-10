@@ -18,6 +18,7 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
+#include "display.h"
 #include "helpers.h"
 #include "search_engine.h"
 #include "settings.h"
@@ -34,22 +35,6 @@ bool search_case_sensitive = 0;
 
 const char *search_mode_normal = "Match if tag contains searched phrase";
 const char *search_mode_strict = "Match only if both values are the same";
-
-void SearchEngineDisplayer(const std::pair<Buffer *, Song *> &pair, void *, Menu< std::pair<Buffer *, Song *> > *menu)
-{
-	if (pair.second)
-	{
-		!Config.columns_in_search_engine
-		?
-			DisplaySong(*pair.second, &Config.song_list_format, reinterpret_cast<Menu<Song> *>(menu))
-		:
-			DisplaySongInColumns(*pair.second, &Config.song_columns_list_format, reinterpret_cast<Menu<Song> *>(menu))
-		;
-	}
-	
-	else
-		*menu << *pair.first;
-}
 
 void UpdateFoundList()
 {

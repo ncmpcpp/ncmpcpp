@@ -21,6 +21,7 @@
 /// NOTICE: Major part of this code is ported from ncmpc's clock screen
 
 #include "clock.h"
+#include "display.h"
 
 #ifdef ENABLE_CLOCK
 
@@ -56,7 +57,7 @@ void InitClock()
 		older[i] = newer[i] = next[i] = 0;
 }
 
-void DisplayClock(Window &w, const tm *time)
+void Display::Clock(Window &w, const tm *time)
 {
 	mask = 0;
 	set(time->tm_sec % 10, 0);

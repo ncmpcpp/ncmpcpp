@@ -30,6 +30,7 @@
 #include "mpegfile.h"
 
 #include "charset.h"
+#include "display.h"
 #include "helpers.h"
 #include "status_checker.h"
 
@@ -238,51 +239,6 @@ string FindSharedDir(const SongList &v)
 	return result;
 }
 
-void DisplayTag(const Song &s, void *data, Menu<Song> *menu)
-{
-	switch (static_cast<Menu<string> *>(data)->Choice())
-	{
-		case 0:
-			*menu << ShowTag(s.GetTitle());
-			return;
-		case 1:
-			*menu << ShowTag(s.GetArtist());
-			return;
-		case 2:
-			*menu << ShowTag(s.GetAlbum());
-			return;
-		case 3:
-			*menu << ShowTag(s.GetYear());
-			return;
-		case 4:
-			*menu << ShowTag(s.GetTrack());
-			return;
-		case 5:
-			*menu << ShowTag(s.GetGenre());
-			return;
-		case 6:
-			*menu << ShowTag(s.GetComposer());
-			return;
-		case 7:
-			*menu << ShowTag(s.GetPerformer());
-			return;
-		case 8:
-			*menu << ShowTag(s.GetDisc());
-			return;
-		case 9:
-			*menu << ShowTag(s.GetComment());
-			return;
-		case 11:
-			if (s.GetNewName().empty())
-				*menu << s.GetName();
-			else
-				*menu << s.GetName() << Config.color2 << " -> " << clEnd << s.GetNewName();
-			return;
-		default:
-			return;
-	}
-}
-
 void ReadTagsFromFile(mpd_Song *s)
 {
 	TagLib::FileRef f(s->file);
@@ -469,7 +425,7 @@ void __deal_with_filenames(SongList &v)
 	
 	Menu<string> *Main = new Menu<string>((COLS-width)/2, (LINES-height)/2, width, height, "", Config.main_color, Config.window_border);
 	Main->SetTimeout(ncmpcpp_window_timeout);
-	Main->SetItemDisplayer(GenericDisplayer);
+	Main->SetItemDisplayer(Display::Generic);
 	Main->AddOption("Get tags from filename");
 	Main->AddOption("Rename files");
 	Main->AddSeparator();
@@ -529,7 +485,7 @@ void __deal_with_filenames(SongList &v)
 		
 		Main = new Menu<string>((COLS-width)/2, (LINES-height)/2, one_width, height, "", Config.main_color, Config.active_window_border);
 		Main->SetTimeout(ncmpcpp_window_timeout);
-		Main->SetItemDisplayer(GenericDisplayer);
+		Main->SetItemDisplayer(Display::Generic);
 		
 		if (!patterns_list.empty())
 			Config.pattern = patterns_list.front();

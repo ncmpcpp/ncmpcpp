@@ -26,7 +26,7 @@
 #include "scrollpad.h"
 #include "misc.h"
 
-typedef std::pair<std::string, std::string> StringPair;
+typedef std::pair<std::string, std::string> string_pair;
 
 enum NcmpcppScreen
 {

@@ -32,23 +32,22 @@
 #include "mpdpp.h"
 #include "settings.h"
 
-typedef void (Song::*SongSetFunction)(const std::string &);
-typedef std::string (Song::*SongGetFunction)() const;
+typedef void (MPD::Song::*SongSetFunction)(const std::string &);
+typedef std::string (MPD::Song::*SongGetFunction)() const;
 
-std::string FindSharedDir(Menu<Song> *);
+std::string FindSharedDir(Menu<MPD::Song> *);
 std::string FindSharedDir(const MPD::SongList &);
-void DisplayTag(const Song &, void *, Menu<Song> *);
 
 SongSetFunction IntoSetFunction(mpd_TagItems);
 
 void ReadTagsFromFile(mpd_Song *);
-bool GetSongTags(Song &);
-bool WriteTags(Song &);
+bool GetSongTags(MPD::Song &);
+bool WriteTags(MPD::Song &);
 
 void __deal_with_filenames(MPD::SongList &);
 
-void CapitalizeFirstLetters(Song &);
-void LowerAllLetters(Song &);
+void CapitalizeFirstLetters(MPD::Song &);
+void LowerAllLetters(MPD::Song &);
 
 #endif
 

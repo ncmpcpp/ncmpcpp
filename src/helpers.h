@@ -32,34 +32,25 @@ class CaseInsensitiveSorting
 {
 	public:
 		bool operator()(std::string, std::string);
-		bool operator()(Song *, Song *);
+		bool operator()(MPD::Song *, MPD::Song *);
 		bool operator()(const MPD::Item &, const MPD::Item &);
 };
 
-template <class T> void GenericDisplayer(const T &t, void *, Menu<T> *menu)
-{
-	*menu << t;
-}
+bool SortSongsByTrack(MPD::Song *, MPD::Song *);
 
-bool SortSongsByTrack(Song *, Song *);
-
-void UpdateSongList(Menu<Song> *);
+void UpdateSongList(Menu<MPD::Song> *);
 
 bool Keypressed(int, const int *);
 
 void WindowTitle(const std::string &);
-void EscapeUnallowedChars(std::string &);
 
 Window &operator<<(Window &, mpd_TagItems);
 
-std::string IntoStr(mpd_TagItems);
 std::string FindSharedDir(const std::string &, const std::string &);
-void DisplayTotalPlaylistLength(Window &);
-void DisplayStringPair(const StringPair &, void *, Menu<StringPair> *);
-std::string DisplayColumns(std::string);
-void DisplaySongInColumns(const Song &, void *, Menu<Song> *);
-void DisplaySong(const Song &, void * = &Config.song_list_format, Menu<Song> * = NULL);
-void GetInfo(Song &, Scrollpad &);
+
+void GetInfo(MPD::Song &, Scrollpad &);
+
+std::string GetLineValue(std::string &, char = '"', char = '"', bool = 0);
 
 Window &Statusbar();
 

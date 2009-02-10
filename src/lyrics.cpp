@@ -318,8 +318,8 @@ const char *GetLyricsPluginName(int offset)
 
 void *GetLyrics(void *song)
 {
-	string artist = static_cast<Song *>(song)->GetArtist();
-	string title = static_cast<Song *>(song)->GetTitle();
+	string artist = static_cast<MPD::Song *>(song)->GetArtist();
+	string title = static_cast<MPD::Song *>(song)->GetTitle();
 	
 	locale_to_utf(artist);
 	locale_to_utf(title);

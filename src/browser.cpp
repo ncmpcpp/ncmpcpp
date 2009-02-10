@@ -24,6 +24,7 @@
 
 #include "browser.h"
 #include "charset.h"
+#include "display.h"
 #include "helpers.h"
 #include "settings.h"
 #ifdef HAVE_TAGLIB_H
@@ -126,37 +127,6 @@ void UpdateItemList(Menu<Item> *menu)
 		}
 	}
 	menu->Refresh();
-}
-
-void DisplayItem(const Item &item, void *, Menu<Item> *menu)
-{
-	switch (item.type)
-	{
-		case itDirectory:
-		{
-			if (item.song)
-			{
-				*menu << "[..]";
-				return;
-			}
-			size_t slash = item.name.rfind("/");
-			*menu << "[" << (slash != string::npos ? item.name.substr(slash+1) : item.name) << "]";
-			return;
-		}
-		case itSong:
-			!Config.columns_in_browser
-			?
-				DisplaySong(*item.song, &Config.song_list_format, reinterpret_cast<Menu<Song> *>(menu))
-			:
-				DisplaySongInColumns(*item.song, &Config.song_columns_list_format, reinterpret_cast<Menu<Song> *>(menu))
-			;
-			return;
-		case itPlaylist:
-			*menu << Config.browser_playlist_prefix << item.name;
-			return;
-		default:
-			return;
-	}
 }
 
 void GetDirectory(string dir, string subdir)
