@@ -34,6 +34,7 @@
 #include "charset.h"
 #include "clock.h"
 #include "display.h"
+#include "global.h"
 #include "help.h"
 #include "helpers.h"
 #include "lyrics.h"
@@ -88,93 +89,84 @@
 				vFoundPositions.clear(); \
 			} while (0)
 
+using namespace Global;
 using namespace MPD;
 
 using std::make_pair;
 using std::string;
 using std::vector;
 
-ncmpcpp_config Config;
-ncmpcpp_keys Key;
+ncmpcpp_config Global::Config;
+ncmpcpp_keys Global::Key;
 
-Window *wCurrent;
-Window *wPrev;
+Window *Global::wCurrent;
+Window *Global::wPrev;
 
-Menu<Song> *mPlaylist;
-Menu<Item> *mBrowser;
-Menu< std::pair<Buffer *, Song *> > *mSearcher;
+Menu<Song> *Global::mPlaylist;
+Menu<Item> *Global::mBrowser;
+Menu< std::pair<Buffer *, Song *> > *Global::mSearcher;
 
-Window *wLibActiveCol;
-Menu<string> *mLibArtists;
-Menu<string_pair> *mLibAlbums;
-Menu<Song> *mLibSongs;
+Window *Global::wLibActiveCol;
+Menu<string> *Global::mLibArtists;
+Menu<string_pair> *Global::mLibAlbums;
+Menu<Song> *Global::mLibSongs;
 
 #ifdef HAVE_TAGLIB_H
-Window *wTagEditorActiveCol;
-Menu<Buffer> *mTagEditor;
-Menu<string_pair> *mEditorAlbums;
-Menu<string_pair> *mEditorDirs;
+Window *Global::wTagEditorActiveCol;
+Menu<Buffer> *Global::mTagEditor;
+Menu<string_pair> *Global::mEditorAlbums;
+Menu<string_pair> *Global::mEditorDirs;
 #endif // HAVE_TAGLIB_H
 // blah, I use below in conditionals.
-Menu<string_pair> *mEditorLeftCol;
-Menu<string> *mEditorTagTypes;
-Menu<Song> *mEditorTags;
+Menu<string_pair> *Global::mEditorLeftCol;
+Menu<string> *Global::mEditorTagTypes;
+Menu<Song> *Global::mEditorTags;
 
-Window *wPlaylistEditorActiveCol;
-Menu<string> *mPlaylistList;
-Menu<Song> *mPlaylistEditor;
+Window *Global::wPlaylistEditorActiveCol;
+Menu<string> *Global::mPlaylistList;
+Menu<Song> *Global::mPlaylistEditor;
 
-Scrollpad *sHelp;
-Scrollpad *sLyrics;
-Scrollpad *sInfo;
+Scrollpad *Global::sHelp;
+Scrollpad *Global::sLyrics;
+Scrollpad *Global::sInfo;
 
-Window *wHeader;
-Window *wFooter;
+Window *Global::wHeader;
+Window *Global::wFooter;
 #ifdef ENABLE_CLOCK
-Scrollpad *wClock;
+Scrollpad *Global::wClock;
 #endif
 
-Connection *Mpd;
+Connection *Global::Mpd;
 
-int now_playing = -1;
-int lock_statusbar_delay = -1;
+int Global::now_playing = -1;
+int Global::lock_statusbar_delay = -1;
 
-size_t browsed_dir_scroll_begin = 0;
+size_t Global::browsed_dir_scroll_begin = 0;
 
-time_t timer;
+time_t Global::timer;
 
-string browsed_dir = "/";
-string editor_browsed_dir = "/";
-string editor_highlighted_dir;
+string Global::browsed_dir = "/";
+string Global::editor_browsed_dir = "/";
+string Global::editor_highlighted_dir;
 
-NcmpcppScreen current_screen;
-NcmpcppScreen prev_screen;
+NcmpcppScreen Global::current_screen;
+NcmpcppScreen Global::prev_screen;
 
 #ifdef HAVE_CURL_CURL_H
-pthread_t lyrics_downloader;
-pthread_t artist_info_downloader;
-bool lyrics_ready = 0;
-bool artist_info_ready = 0;
+pthread_t Global::lyrics_downloader;
+pthread_t Global::artist_info_downloader;
+bool Global::lyrics_ready = 0;
+bool Global::artist_info_ready = 0;
 #endif
 
-bool dont_change_now_playing = 0;
-bool block_progressbar_update = 0;
-bool block_playlist_update = 0;
-bool block_item_list_update = 0;
+bool Global::dont_change_now_playing = 0;
+bool Global::block_progressbar_update = 0;
+bool Global::block_playlist_update = 0;
+bool Global::block_item_list_update = 0;
 
-bool messages_allowed = 0;
-//bool redraw_screen = 0;
-bool redraw_header = 1;
-bool reload_lyrics = 0;
-
-extern bool header_update_status;
-extern bool search_case_sensitive;
-extern bool search_match_to_pattern;
-
-extern string volume_state;
-
-extern const char *search_mode_normal;
-extern const char *search_mode_strict;
+bool Global::messages_allowed = 0;
+bool Global::redraw_header = 1;
+bool Global::reload_lyrics = 0;
 
 const char *message_part_of_songs_added = "Only part of requested songs' list added to playlist!";
 

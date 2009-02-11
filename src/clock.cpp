@@ -22,6 +22,7 @@
 
 #include "clock.h"
 #include "display.h"
+#include "global.h"
 
 #ifdef ENABLE_CLOCK
 
@@ -71,9 +72,9 @@ void Display::Clock(Window &w, const tm *time)
 	
 	char buf[54];
 	strftime(buf, 64, "%x", time);
-	attron(COLOR_PAIR(Config.main_color));
+	attron(COLOR_PAIR(Global::Config.main_color));
 	mvprintw(w.GetStartY()+w.GetHeight(), w.GetStartX()+(w.GetWidth()-strlen(buf))/2, "%s", buf);
-	attroff(COLOR_PAIR(Config.main_color));
+	attroff(COLOR_PAIR(Global::Config.main_color));
 	refresh();
 	
 	for (int k = 0; k < 6; k++)
@@ -97,7 +98,7 @@ void Display::Clock(Window &w, const tm *time)
 							{
 								w.GotoXY(2*j+2, i);
 							}
-							if (Config.clock_display_seconds || j < 18)
+							if (Global::Config.clock_display_seconds || j < 18)
 								w << "  ";
 						}
 					}

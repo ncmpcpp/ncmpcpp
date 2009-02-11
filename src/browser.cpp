@@ -25,27 +25,16 @@
 #include "browser.h"
 #include "charset.h"
 #include "display.h"
+#include "global.h"
 #include "helpers.h"
 #include "settings.h"
 #ifdef HAVE_TAGLIB_H
 # include "tag_editor.h"
 #endif // HAVE_TAGLIB_H
 
+using namespace Global;
 using namespace MPD;
 using std::string;
-
-extern Connection *Mpd;
-
-extern ncmpcpp_config Config;
-
-extern Menu<Song> *mPlaylist;
-extern Menu<Item> *mBrowser;
-
-extern NcmpcppScreen current_screen;
-
-extern string browsed_dir;
-
-extern int browsed_dir_scroll_begin;
 
 namespace
 {

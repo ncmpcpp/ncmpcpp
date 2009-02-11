@@ -19,22 +19,20 @@
  ***************************************************************************/
 
 #include "display.h"
+#include "global.h"
 #include "helpers.h"
 #include "search_engine.h"
 #include "settings.h"
 
 using namespace MPD;
+using namespace Global;
 using std::string;
 
-extern Connection *Mpd;
-extern Menu<Song> *mPlaylist;
-extern Menu< std::pair<Buffer *, Song *> > *mSearcher;
+bool Global::search_match_to_pattern = 1;
+bool Global::search_case_sensitive = 0;
 
-bool search_match_to_pattern = 1;
-bool search_case_sensitive = 0;
-
-const char *search_mode_normal = "Match if tag contains searched phrase";
-const char *search_mode_strict = "Match only if both values are the same";
+const char *Global::search_mode_normal = "Match if tag contains searched phrase";
+const char *Global::search_mode_strict = "Match only if both values are the same";
 
 void UpdateFoundList()
 {

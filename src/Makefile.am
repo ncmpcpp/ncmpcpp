@@ -9,6 +9,6 @@ INCLUDES= $(all_includes)
 
 # the library search path.
 ncmpcpp_LDFLAGS = $(all_libraries)
-noinst_HEADERS = browser.h charset.h clock.h display.h help.h helpers.h \
-	lyrics.h menu.h mpdpp.h scrollpad.h search_engine.h settings.h song.h \
+noinst_HEADERS = browser.h charset.h clock.h display.h global.h help.h \
+	helpers.h lyrics.h menu.h mpdpp.h scrollpad.h search_engine.h settings.h song.h \
 	status_checker.h tag_editor.h window.h

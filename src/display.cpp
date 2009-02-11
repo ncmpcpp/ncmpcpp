@@ -19,8 +19,11 @@
  ***************************************************************************/
 
 #include "display.h"
+#include "global.h"
 #include "helpers.h"
 
+using Global::Config;
+using Global::mPlaylist;
 using MPD::Song;
 using std::string;
 
@@ -90,8 +93,6 @@ string Display::Columns(string st)
 
 void Display::TotalPlaylistLength(Window &w)
 {
-	extern Menu<MPD::Song> *mPlaylist;
-	
 	const int MINUTE = 60;
 	const int HOUR = 60*MINUTE;
 	const int DAY = 24*HOUR;

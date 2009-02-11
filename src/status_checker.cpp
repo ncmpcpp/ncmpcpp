@@ -23,52 +23,19 @@
 
 #include "browser.h"
 #include "charset.h"
+#include "global.h"
 #include "helpers.h"
 #include "search_engine.h"
 #include "settings.h"
 #include "status_checker.h"
 
+using namespace Global;
 using namespace MPD;
 using std::string;
 
-extern Connection *Mpd;
+string Global::volume_state;
 
-extern Menu<Song> *mPlaylist;
-extern Menu<Item> *mBrowser;
-extern Menu<string> *mLibArtists;
-extern Menu<Song> *mLibSongs;
-extern Menu<Song> *mPlaylistEditor;
-
-#ifdef HAVE_TAGLIB_H
-extern Menu<string> *mEditorAlbums;
-extern Menu<string> *mEditorDirs;
-#endif // HAVE_TAGLIB_H
-
-extern Window *wHeader;
-extern Window *wFooter;
-
-extern time_t timer;
-
-extern int now_playing;
-extern int lock_statusbar_delay;
-
-extern string browsed_dir;
-
-extern NcmpcppScreen current_screen;
-extern NcmpcppScreen prev_screen;
-
-extern bool dont_change_now_playing;
-extern bool block_progressbar_update;
-extern bool block_playlist_update;
-extern bool block_item_list_update;
-
-extern bool messages_allowed;
-extern bool redraw_header;
-extern bool reload_lyrics;
-
-string volume_state;
-
-bool header_update_status = 0;
+bool Global::header_update_status = 0;
 
 namespace
 {

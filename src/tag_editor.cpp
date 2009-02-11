@@ -31,19 +31,12 @@
 
 #include "charset.h"
 #include "display.h"
+#include "global.h"
 #include "helpers.h"
 #include "status_checker.h"
 
+using namespace Global;
 using namespace MPD;
-
-extern ncmpcpp_keys Key;
-
-extern Connection *Mpd;
-extern Menu<Song> *mPlaylist;
-
-extern Menu<Buffer> *mTagEditor;
-extern Window *wFooter;
-extern Window *wPrev;
 
 namespace
 {

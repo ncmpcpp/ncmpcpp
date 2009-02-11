@@ -22,30 +22,25 @@
 #include <fstream>
 
 #include "charset.h"
+#include "global.h"
 #include "helpers.h"
 #include "lyrics.h"
 #include "settings.h"
 #include "song.h"
 
+using namespace Global;
 using std::vector;
 using std::string;
-
-extern Window *wCurrent;
-extern Scrollpad *sLyrics;
-extern Scrollpad *sInfo;
 
 const string artists_folder = home_folder + "/.ncmpcpp/artists";
 const string lyrics_folder = home_folder + "/.lyrics";
 
 #ifdef HAVE_CURL_CURL_H
-extern pthread_t lyrics_downloader;
-extern pthread_t artist_info_downloader;
-extern bool lyrics_ready;
-extern bool artist_info_ready;
-pthread_mutex_t curl = PTHREAD_MUTEX_INITIALIZER;
 
 namespace
 {
+	pthread_mutex_t curl = PTHREAD_MUTEX_INITIALIZER;
+	
 	size_t write_data(char *buffer, size_t size, size_t nmemb, string data)
 	{
 		size_t result = size * nmemb;

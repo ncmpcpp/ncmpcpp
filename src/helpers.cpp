@@ -22,22 +22,16 @@
 #include <iostream>
 
 #include "charset.h"
+#include "global.h"
 #include "helpers.h"
 #include "tag_editor.h"
 
 using namespace MPD;
+using Global::Config;
+using Global::Mpd;
+using Global::mPlaylist;
+using Global::wFooter;
 using std::string;
-
-extern Connection *Mpd;
-
-extern Menu<Song> *mPlaylist;
-extern Menu<MPD::Item> *mBrowser;
-extern Window *wFooter;
-
-extern NcmpcppScreen current_screen;
-
-extern bool search_case_sensitive;
-extern bool search_match_to_pattern;
 
 namespace
 {

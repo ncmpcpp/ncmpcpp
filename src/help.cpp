@@ -20,14 +20,13 @@
 
 #include "mpdpp.h"
 
+#include "global.h"
 #include "help.h"
 #include "settings.h"
 
+using Global::Key;
+using Global::Mpd;
 using std::string;
-
-extern MPD::Connection *Mpd;
-
-extern ncmpcpp_keys Key;
 
 namespace
 {
