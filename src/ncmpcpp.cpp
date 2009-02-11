@@ -413,7 +413,7 @@ int main(int argc, char *argv[])
 		gettimeofday(&past, 0);
 		const size_t max_allowed_title_length = wHeader ? wHeader->GetWidth()-volume_state.length()-screen_title.length() : 0;
 		if (((past.tv_sec == now.tv_sec && past.tv_usec >= now.tv_usec+500000)
-		||    past.tv_sec >= now.tv_sec+1)
+		||    past.tv_sec > now.tv_sec)
 		&&  ((current_screen == csBrowser && browsed_dir.length() > max_allowed_title_length)
 		||    current_screen == csLyrics))
 		{
@@ -2658,7 +2658,7 @@ int main(int argc, char *argv[])
 			if (wCurrent == mLibArtists)
 			{
 				LockStatusbar();
-				Statusbar() << fmtBold << Config.media_lib_primary_tag << fmtBoldEnd << ": ";
+				Statusbar() << fmtBold << IntoStr(Config.media_lib_primary_tag) << fmtBoldEnd << ": ";
 				string new_tag = wFooter->GetString(mLibArtists->Current());
 				UnlockStatusbar();
 				if (!new_tag.empty() && new_tag != mLibArtists->Current())

@@ -26,7 +26,7 @@
 #ifdef HAVE_CURL_CURL_H
 # include <pthread.h>
 # include "curl/curl.h"
-void * GetArtistInfo(void *);
+void *GetArtistInfo(void *);
 
 struct LyricsPlugin
 {
@@ -40,7 +40,7 @@ const char *GetLyricsPluginName(int);
 
 #endif
 
-void * GetLyrics(void *);
+void *GetLyrics(void *);
 
 #endif
 

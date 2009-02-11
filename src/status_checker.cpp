@@ -18,6 +18,7 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
+#include <iostream>
 #include <stdexcept>
 
 #include "browser.h"
@@ -65,17 +66,30 @@ extern bool messages_allowed;
 extern bool redraw_header;
 extern bool reload_lyrics;
 
-int old_playing;
-
-time_t time_of_statusbar_lock;
-
 string volume_state;
-string switch_state;
 
-bool block_statusbar_update = 0;
-bool allow_statusbar_unlock = 1;
 bool header_update_status = 0;
-bool repeat_one_allowed = 0;
+
+namespace
+{
+	time_t time_of_statusbar_lock;
+	
+	int old_playing;
+	
+	string switch_state;
+	
+	bool block_statusbar_update = 0;
+	bool allow_statusbar_unlock = 1;
+	bool repeat_one_allowed = 0;
+	
+	const string term_type = getenv("TERM") ? getenv("TERM") : "";
+	
+	void WindowTitle(const string &status)
+	{
+		if (term_type != "linux" && Config.set_window_title)
+			std::cout << "\033]0;" << status << "\7";
+	}
+}
 
 void LockStatusbar()
 {

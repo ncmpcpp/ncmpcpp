@@ -103,7 +103,7 @@ namespace
 	}
 }
 
-void * GetArtistInfo(void *ptr)
+void *GetArtistInfo(void *ptr)
 {
 	string *strptr = static_cast<string *>(ptr);
 	string artist = *strptr;

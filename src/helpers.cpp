@@ -39,8 +39,6 @@ extern NcmpcppScreen current_screen;
 extern bool search_case_sensitive;
 extern bool search_match_to_pattern;
 
-const string term_type = getenv("TERM") ? getenv("TERM") : "";
-
 namespace
 {
 	inline void remove_the_word(string &s)
@@ -258,55 +256,6 @@ bool SortSongsByTrack(Song *a, Song *b)
 		return StrToInt(a->GetTrack()) < StrToInt(b->GetTrack());
 	else
 		return StrToInt(a->GetDisc()) < StrToInt(b->GetDisc());
-}
-
-void WindowTitle(const string &status)
-{
-	if (term_type != "linux" && Config.set_window_title)
-		std::cout << "\033]0;" << status << "\7";
-}
-
-Window &operator<<(Window &w, mpd_TagItems tag)
-{
-	switch (tag)
-	{
-		case MPD_TAG_ITEM_ARTIST:
-			w << "Artist";
-			break;
-		case MPD_TAG_ITEM_ALBUM:
-			w << "Album";
-			break;
-		case MPD_TAG_ITEM_TITLE:
-			w << "Title";
-			break;
-		case MPD_TAG_ITEM_TRACK:
-			w << "Track";
-			break;
-		case MPD_TAG_ITEM_GENRE:
-			w << "Genre";
-			break;
-		case MPD_TAG_ITEM_DATE:
-			w << "Year";
-			break;
-		case MPD_TAG_ITEM_COMPOSER:
-			w << "Composer";
-			break;
-		case MPD_TAG_ITEM_PERFORMER:
-			w << "Performer";
-			break;
-		case MPD_TAG_ITEM_COMMENT:
-			w << "Comment";
-			break;
-		case MPD_TAG_ITEM_DISC:
-			w << "Disc";
-			break;
-		case MPD_TAG_ITEM_FILENAME:
-			w << "Filename";
-			break;
-		default:
-			break;
-	}
-	return w;
 }
 
 string FindSharedDir(const string &one, const string &two)

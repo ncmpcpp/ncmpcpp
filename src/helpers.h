@@ -42,10 +42,6 @@ void UpdateSongList(Menu<MPD::Song> *);
 
 bool Keypressed(int, const int *);
 
-void WindowTitle(const std::string &);
-
-Window &operator<<(Window &, mpd_TagItems);
-
 std::string FindSharedDir(const std::string &, const std::string &);
 
 void GetInfo(MPD::Song &, Scrollpad &);
