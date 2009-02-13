@@ -21,12 +21,17 @@
 /// NOTICE: Major part of this code is ported from ncmpc's clock screen
 
 #include "clock.h"
-#include "display.h"
-#include "global.h"
 
 #ifdef ENABLE_CLOCK
 
+#include "display.h"
+#include "global.h"
 #include "settings.h"
+#include "status_checker.h"
+
+using namespace Global;
+
+Scrollpad *Global::wClock;
 
 namespace
 {
@@ -52,14 +57,47 @@ namespace
 	}
 }
 
-void InitClock()
+namespace Clock
+{
+	const size_t width = Config.clock_display_seconds ? 60 : 40;
+	const size_t height = 8;
+}
+
+void Clock::Init()
+{
+	wClock = new Scrollpad((COLS-width)/2, (LINES-height)/2, width, height-1, "", Config.main_color, Border(Config.main_color));
+	wClock->SetTimeout(ncmpcpp_window_timeout);
+}
+
+void Clock::Resize()
+{
+	if (width <= size_t(COLS) && height <= main_height)
+	{
+		wClock->MoveTo((COLS-width)/2, (LINES-height)/2);
+		if (current_screen == csClock)
+		{
+			mPlaylist->Hide();
+			Prepare();
+			wClock->Display();
+		}
+	}
+}
+
+void Clock::Prepare()
 {
 	for (int i = 0; i < 5; i++)
 		older[i] = newer[i] = next[i] = 0;
 }
 
-void Display::Clock(Window &w, const tm *time)
+void Clock::Update()
 {
+	if (width > size_t(COLS) || height > main_height)
+		return;
+	
+	time_t rawtime;
+	time(&rawtime);
+	tm *time = localtime(&rawtime);
+	
 	mask = 0;
 	set(time->tm_sec % 10, 0);
 	set(time->tm_sec / 10, 4);
@@ -72,9 +110,9 @@ void Display::Clock(Window &w, const tm *time)
 	
 	char buf[54];
 	strftime(buf, 64, "%x", time);
-	attron(COLOR_PAIR(Global::Config.main_color));
-	mvprintw(w.GetStartY()+w.GetHeight(), w.GetStartX()+(w.GetWidth()-strlen(buf))/2, "%s", buf);
-	attroff(COLOR_PAIR(Global::Config.main_color));
+	attron(COLOR_PAIR(Config.main_color));
+	mvprintw(wCurrent->GetStartY()+wCurrent->GetHeight(), wCurrent->GetStartX()+(wCurrent->GetWidth()-strlen(buf))/2, "%s", buf);
+	attroff(COLOR_PAIR(Config.main_color));
 	refresh();
 	
 	for (int k = 0; k < 6; k++)
@@ -83,7 +121,7 @@ void Display::Clock(Window &w, const tm *time)
 		next[k] = 0;
 		for (int s = 1; s >= 0; s--)
 		{
-			w.Reverse(s);
+			wCurrent->Reverse(s);
 			for (int i = 0; i < 6; i++)
 			{
 				long a = (newer[i] ^ older[i]) & (s ? newer : older)[i];
@@ -96,10 +134,10 @@ void Display::Clock(Window &w, const tm *time)
 						{
 							if (!(a & (t << 1)))
 							{
-								w.GotoXY(2*j+2, i);
+								wCurrent->GotoXY(2*j+2, i);
 							}
 							if (Global::Config.clock_display_seconds || j < 18)
-								w << "  ";
+								*wCurrent << "  ";
 						}
 					}
 				}
@@ -108,11 +146,30 @@ void Display::Clock(Window &w, const tm *time)
 					older[i] = newer[i];
 				}
 			}
-			if (!s)
-			{
-				w.Refresh();
-			}
 		}
+	}
+}
+
+void Clock::SwitchTo()
+{
+	if (width > size_t(COLS) || height > main_height)
+	{
+		ShowMessage("Screen is too small to display clock!");
+	}
+	else if (
+	   current_screen != csClock
+#	ifdef HAVE_TAGLIB_H
+	&& current_screen != csTinyTagEditor
+#	endif // HAVE_TAGLIB_H
+		)
+	{
+		CLEAR_FIND_HISTORY;
+		wCurrent = wClock;
+		mPlaylist->Hide();
+		current_screen = csClock;
+		redraw_header = 1;
+		Clock::Prepare();
+		wCurrent->Display();
 	}
 }
 

@@ -42,5 +42,9 @@ mpd_TagItems IntoTagItem(char);
 
 void EscapeUnallowedChars(std::string &);
 
+void EscapeHtml(std::string &s);
+
+void Trim(std::string &s);
+
 #endif
 

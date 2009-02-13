@@ -26,7 +26,16 @@
 #ifdef HAVE_CURL_CURL_H
 # include <pthread.h>
 # include "curl/curl.h"
-void *GetArtistInfo(void *);
+
+namespace Lyrics
+{
+	void Init();
+	void Resize();
+	void Update();
+	
+	bool Ready();
+	void Get();
+}
 
 struct LyricsPlugin
 {
@@ -39,8 +48,6 @@ struct LyricsPlugin
 const char *GetLyricsPluginName(int);
 
 #endif
-
-void *GetLyrics(void *);
 
 #endif
 

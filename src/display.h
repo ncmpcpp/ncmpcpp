@@ -51,5 +51,16 @@ namespace Display
 	void Clock(Window &, const tm *);
 }
 
+namespace Refresh
+{
+	void MediaLibrary();
+	
+	void PlaylistEditor();
+	
+#	ifdef HAVE_TAGLIB_H
+	void TagEditor();
+#	endif
+}
+
 #endif
 

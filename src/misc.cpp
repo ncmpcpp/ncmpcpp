@@ -160,3 +160,52 @@ void EscapeUnallowedChars(std::string &s)
 	}
 }
 
+void EscapeHtml(std::string &s)
+{
+	bool erase = 0;
+	for (size_t i = s.find("<"); i != std::string::npos; i = s.find("<"))
+	{
+		size_t j = s.find(">")+1;
+		s.replace(i, j-i, "");
+	}
+	for (size_t i = s.find("&#039;"); i != std::string::npos; i = s.find("&#039;"))
+		s.replace(i, 6, "'");
+	for (size_t i = s.find("&quot;"); i != std::string::npos; i = s.find("&quot;"))
+		s.replace(i, 6, "\"");
+	for (size_t i = s.find("&amp;"); i != std::string::npos; i = s.find("&amp;"))
+		s.replace(i, 5, "&");
+	for (size_t i = 0; i < s.length(); i++)
+	{
+		if (erase)
+		{
+			s.erase(s.begin()+i);
+			erase = 0;
+		}
+		if (s[i] == 13) // ascii code for windows line ending, get rid of this shit
+		{
+			s[i] = '\n';
+			erase = 1;
+		}
+		else if (s[i] == '\t')
+			s[i] = ' ';
+	}
+}
+
+void Trim(std::string &s)
+{
+	if (s.empty())
+		return;
+	
+	size_t b = 0;
+	size_t e = s.length()-1;
+	
+	while (!isprint(s[b]))
+		b++;
+	while (!isprint(s[e]))
+		e--;
+	e++;
+	
+	if (b != 0 || e != s.length()-1)
+		s = s.substr(b, e-b);
+}
+

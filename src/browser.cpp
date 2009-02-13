@@ -28,6 +28,7 @@
 #include "global.h"
 #include "helpers.h"
 #include "settings.h"
+#include "status_checker.h"
 #ifdef HAVE_TAGLIB_H
 # include "tag_editor.h"
 #endif // HAVE_TAGLIB_H
@@ -35,6 +36,190 @@
 using namespace Global;
 using namespace MPD;
 using std::string;
+
+Menu<Item> *Global::mBrowser;
+
+void Browser::Init()
+{
+	mBrowser = new Menu<Item>(0, main_start_y, COLS, main_height, "", Config.main_color, brNone);
+	mBrowser->HighlightColor(Config.main_highlight_color);
+	mBrowser->SetTimeout(ncmpcpp_window_timeout);
+	mBrowser->SetSelectPrefix(&Config.selected_item_prefix);
+	mBrowser->SetSelectSuffix(&Config.selected_item_suffix);
+	mBrowser->SetItemDisplayer(Display::Items);
+}
+
+void Browser::Resize()
+{
+	mBrowser->Resize(COLS, main_height);
+}
+
+void Browser::SwitchTo()
+{
+	if (current_screen != csBrowser
+#	ifdef HAVE_TAGLIB_H
+	&&  current_screen != csTinyTagEditor
+#	endif // HAVE_TAGLIB_H
+	   )
+	{
+		CLEAR_FIND_HISTORY;
+		mBrowser->Empty() ? GetDirectory(browsed_dir) : UpdateItemList(mBrowser);
+		wCurrent = mBrowser;
+		wCurrent->Hide();
+		current_screen = csBrowser;
+//		redraw_screen = 1;
+		redraw_header = 1;
+	}
+}
+
+void Browser::EnterPressed()
+{
+	if (mBrowser->Empty())
+		return;
+	
+	const Item &item = mBrowser->Current();
+	switch (item.type)
+	{
+		case itDirectory:
+		{
+			CLEAR_FIND_HISTORY;
+			GetDirectory(item.name, browsed_dir);
+			redraw_header = 1;
+			break;
+		}
+		case itSong:
+		{
+			block_item_list_update = 1;
+			if (Config.ncmpc_like_songs_adding && mBrowser->isBold())
+			{
+				bool found = 0;
+				long long hash = mBrowser->Current().song->GetHash();
+				for (size_t i = 0; i < mPlaylist->Size(); i++)
+				{
+					if (mPlaylist->at(i).GetHash() == hash)
+					{
+						Mpd->Play(i);
+						found = 1;
+						break;
+					}
+				}
+				if (found)
+					break;
+			}
+			Song &s = *item.song;
+			int id = Mpd->AddSong(s);
+			if (id >= 0)
+			{
+				Mpd->PlayID(id);
+				ShowMessage("Added to playlist: %s", s.toString(Config.song_status_format).c_str());
+				mBrowser->BoldOption(mBrowser->Choice(), 1);
+			}
+			break;
+		}
+		case itPlaylist:
+		{
+			SongList list;
+			Mpd->GetPlaylistContent(locale_to_utf_cpy(item.name), list);
+			for (SongList::const_iterator it = list.begin(); it != list.end(); it++)
+				Mpd->QueueAddSong(**it);
+			if (Mpd->CommitQueue())
+			{
+				ShowMessage("Loading and playing playlist %s...", item.name.c_str());
+				Song *s = &mPlaylist->at(mPlaylist->Size()-list.size());
+				if (s->GetHash() == list[0]->GetHash())
+					Mpd->PlayID(s->GetID());
+				else
+					ShowMessage("%s", message_part_of_songs_added);
+			}
+			FreeSongList(list);
+			break;
+		}
+	}
+}
+
+void Browser::SpacePressed()
+{
+	if (mBrowser->Empty())
+		return;
+	
+	const Item &item = mBrowser->Current();
+	switch (item.type)
+	{
+		case itDirectory:
+		{
+			if (browsed_dir != "/" && !mBrowser->Choice())
+				break; // do not let add parent dir.
+			
+			if (Config.local_browser)
+			{
+				ShowMessage("Adding whole directories from local browser is not supported!");
+				break;
+			}
+			
+			SongList list;
+			Mpd->GetDirectoryRecursive(locale_to_utf_cpy(item.name), list);
+			
+			for (SongList::const_iterator it = list.begin(); it != list.end(); it++)
+				Mpd->QueueAddSong(**it);
+			if (Mpd->CommitQueue())
+			{
+				ShowMessage("Added folder: %s", item.name.c_str());
+				Song &s = mPlaylist->at(mPlaylist->Size()-list.size());
+				if (s.GetHash() != list[0]->GetHash())
+					ShowMessage("%s", message_part_of_songs_added);
+			}
+			FreeSongList(list);
+			break;
+		}
+		case itSong:
+		{
+			block_item_list_update = 1;
+			if (Config.ncmpc_like_songs_adding && mBrowser->isBold())
+			{
+				block_playlist_update = 1;
+				long long hash = mBrowser->Current().song->GetHash();
+				for (size_t i = 0; i < mPlaylist->Size(); i++)
+				{
+					if (mPlaylist->at(i).GetHash() == hash)
+					{
+						Mpd->QueueDeleteSong(i);
+						mPlaylist->DeleteOption(i);
+						i--;
+					}
+				}
+				Mpd->CommitQueue();
+				mBrowser->BoldOption(mBrowser->Choice(), 0);
+			}
+			else
+			{
+				Song &s = *item.song;
+				if (Mpd->AddSong(s) != -1)
+				{
+					ShowMessage("Added to playlist: %s", s.toString(Config.song_status_format).c_str());
+					mBrowser->BoldOption(mBrowser->Choice(), 1);
+				}
+			}
+			break;
+		}
+		case itPlaylist:
+		{
+			SongList list;
+			Mpd->GetPlaylistContent(locale_to_utf_cpy(item.name), list);
+			for (SongList::const_iterator it = list.begin(); it != list.end(); it++)
+				Mpd->QueueAddSong(**it);
+			if (Mpd->CommitQueue())
+			{
+				ShowMessage("Loading playlist %s...", item.name.c_str());
+				Song &s = mPlaylist->at(mPlaylist->Size()-list.size());
+				if (s.GetHash() != list[0]->GetHash())
+					ShowMessage("%s", message_part_of_songs_added);
+			}
+			FreeSongList(list);
+			break;
+		}
+	}
+	mBrowser->Scroll(wDown);
+}
 
 namespace
 {

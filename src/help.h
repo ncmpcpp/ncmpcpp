@@ -23,7 +23,12 @@
 
 #include "ncmpcpp.h"
 
-void GetKeybindings(Scrollpad &);
+namespace Help
+{
+	void Init();
+	void Resize();
+	void SwitchTo();
+}
 
 #endif
 

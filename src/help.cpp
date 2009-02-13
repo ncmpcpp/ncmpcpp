@@ -24,69 +24,102 @@
 #include "help.h"
 #include "settings.h"
 
-using Global::Key;
-using Global::Mpd;
+using namespace Global;
 using std::string;
+
+Scrollpad *Global::sHelp;
 
 namespace
 {
-	string DisplayKeys(int *key, int size = 2)
+	void GetKeybindings(Scrollpad &help);
+}
+
+void Help::Init()
+{
+	sHelp = new Scrollpad(0, main_start_y, COLS, main_height, "", Config.main_color, brNone);
+	sHelp->SetTimeout(ncmpcpp_window_timeout);
+	GetKeybindings(*sHelp);
+	sHelp->Flush();
+}
+
+void Help::Resize()
+{
+	sHelp->Resize(COLS, main_height);
+}
+
+void Help::SwitchTo()
+{
+	if (current_screen != csHelp
+#	ifdef HAVE_TAGLIB_H
+	&& current_screen != csTinyTagEditor
+#	endif // HAVE_TAGLIB_H
+	   )
 	{
-		bool backspace = 1;
-		string result = "\t";
-		for (int i = 0; i < size; i++)
-		{
-			if (key[i] == null_key);
-			else if (key[i] == 259)
-				result += "Up";
-			else if (key[i] == 258)
-				result += "Down";
-			else if (key[i] == 339)
-				result += "Page Up";
-			else if (key[i] == 338)
-				result += "Page Down";
-			else if (key[i] == 262)
-				result += "Home";
-			else if (key[i] == 360)
-				result += "End";
-			else if (key[i] == 32)
-				result += "Space";
-			else if (key[i] == 10)
-				result += "Enter";
-			else if (key[i] == 330)
-				result += "Delete";
-			else if (key[i] == 261)
-				result += "Right";
-			else if (key[i] == 260)
-				result += "Left";
-			else if (key[i] == 9)
-				result += "Tab";
-			else if (key[i] >= 1 && key[i] <= 26)
-			{
-				result += "Ctrl-";
-				result += key[i]+64;
-			}
-			else if (key[i] >= 265 && key[i] <= 276)
-			{
-				result += "F";
-				result += IntoStr(key[i]-264);
-			}
-			else if ((key[i] == 263 || key[i] == 127) && !backspace);
-			else if ((key[i] == 263 || key[i] == 127) && backspace)
-			{
-				result += "Backspace";
-				backspace = 0;
-			}
-			else
-				result += key[i];
-			result += " ";
-		}
-		if (result.length() > 12)
-			result = result.substr(0, 12);
-		for (size_t i = result.length(); i <= 12; result += " ", i++) { }
-		result += ": ";
-		return result;
+		wCurrent = sHelp;
+		wCurrent->Hide();
+		current_screen = csHelp;
+		redraw_header = 1;
 	}
+}
+
+namespace {
+
+string DisplayKeys(int *key, int size = 2)
+{
+	bool backspace = 1;
+	string result = "\t";
+	for (int i = 0; i < size; i++)
+	{
+		if (key[i] == null_key);
+		else if (key[i] == 259)
+			result += "Up";
+		else if (key[i] == 258)
+			result += "Down";
+		else if (key[i] == 339)
+			result += "Page Up";
+		else if (key[i] == 338)
+			result += "Page Down";
+		else if (key[i] == 262)
+			result += "Home";
+		else if (key[i] == 360)
+			result += "End";
+		else if (key[i] == 32)
+			result += "Space";
+		else if (key[i] == 10)
+			result += "Enter";
+		else if (key[i] == 330)
+			result += "Delete";
+		else if (key[i] == 261)
+			result += "Right";
+		else if (key[i] == 260)
+			result += "Left";
+		else if (key[i] == 9)
+			result += "Tab";
+		else if (key[i] >= 1 && key[i] <= 26)
+		{
+			result += "Ctrl-";
+			result += key[i]+64;
+		}
+		else if (key[i] >= 265 && key[i] <= 276)
+		{
+			result += "F";
+			result += IntoStr(key[i]-264);
+		}
+		else if ((key[i] == 263 || key[i] == 127) && !backspace);
+		else if ((key[i] == 263 || key[i] == 127) && backspace)
+		{
+			result += "Backspace";
+			backspace = 0;
+		}
+		else
+			result += key[i];
+		result += " ";
+	}
+	if (result.length() > 12)
+		result = result.substr(0, 12);
+	for (size_t i = result.length(); i <= 12; result += " ", i++) { }
+	result += ": ";
+	return result;
 }
 
 void GetKeybindings(Scrollpad &help)
@@ -193,7 +226,7 @@ void GetKeybindings(Scrollpad &help)
 	help << DisplayKeys(Key.Space) << "Add to playlist song/album/artist's songs\n";
 	help << DisplayKeys(Key.SwitchTagTypeList) << "Tag type list switcher (left column)\n\n\n";
 	
-	help << "   " << fmtBold << "Keys - Playlist Editorz\n -----------------------------------------\n" << fmtBoldEnd;
+	help << "   " << fmtBold << "Keys - Playlist Editor\n -----------------------------------------\n" << fmtBoldEnd;
 	help << DisplayKeys(&Key.VolumeDown[0], 1) << "Previous column\n";
 	help << DisplayKeys(&Key.VolumeUp[0], 1) << "Next column\n";
 	help << DisplayKeys(Key.Enter) << "Add item to playlist and play\n";
@@ -218,3 +251,4 @@ void GetKeybindings(Scrollpad &help)
 #	endif // HAVE_TAGLIB_H
 }
 
+}

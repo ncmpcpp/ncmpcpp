@@ -24,6 +24,16 @@
 #include "mpdpp.h"
 #include "ncmpcpp.h"
 
+namespace SearchEngine
+{
+	void Init();
+	void Resize();
+	void SwitchTo();
+	
+	void EnterPressed();
+	void SpacePressed();
+}
+
 class SearchPattern : public MPD::Song
 {
 	public:
@@ -42,8 +52,8 @@ const size_t search_engine_search_button = 15;
 const size_t search_engine_reset_button = 16;
 
 void UpdateFoundList();
-void PrepareSearchEngine(SearchPattern &s);
-void Search(SearchPattern);
+void PrepareSearchEngine();
+void Search();
 
 #endif
 

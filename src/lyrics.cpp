@@ -25,230 +25,177 @@
 #include "global.h"
 #include "helpers.h"
 #include "lyrics.h"
+#include "media_library.h"
+#include "playlist_editor.h"
 #include "settings.h"
 #include "song.h"
+#include "status_checker.h"
+#include "tag_editor.h"
 
 using namespace Global;
 using std::vector;
 using std::string;
 
-const string artists_folder = home_folder + "/.ncmpcpp/artists";
+Scrollpad *Global::sLyrics;
+
+MPD::Song Global::lyrics_song;
+
 const string lyrics_folder = home_folder + "/.lyrics";
 
 #ifdef HAVE_CURL_CURL_H
+pthread_mutex_t Global::curl = PTHREAD_MUTEX_INITIALIZER;
+#endif
 
 namespace
 {
-	pthread_mutex_t curl = PTHREAD_MUTEX_INITIALIZER;
+	pthread_t lyrics_downloader;
+	bool lyrics_ready;
 	
-	size_t write_data(char *buffer, size_t size, size_t nmemb, string data)
-	{
-		size_t result = size * nmemb;
-		data.append(buffer, result);
-		return result;
-	}
-
-	void EscapeHtml(string &s)
-	{
-		bool erase = 0;
-		for (size_t i = s.find("<"); i != string::npos; i = s.find("<"))
-		{
-			size_t j = s.find(">")+1;
-			s.replace(i, j-i, "");
-		}
-		for (size_t i = s.find("&#039;"); i != string::npos; i = s.find("&#039;"))
-			s.replace(i, 6, "'");
-		for (size_t i = s.find("&quot;"); i != string::npos; i = s.find("&quot;"))
-			s.replace(i, 6, "\"");
-		for (size_t i = s.find("&amp;"); i != string::npos; i = s.find("&amp;"))
-			s.replace(i, 5, "&");
-		for (size_t i = 0; i < s.length(); i++)
-		{
-			if (erase)
-			{
-				s.erase(s.begin()+i);
-				erase = 0;
-			}
-			if (s[i] == 13) // ascii code for windows line ending, get rid of this shit
-			{
-				s[i] = '\n';
-				erase = 1;
-			}
-			else if (s[i] == '\t')
-				s[i] = ' ';
-		}
-	}
-	
-	void Trim(string &s)
-	{
-		if (s.empty())
-			return;
-		
-		size_t b = 0;
-		size_t e = s.length()-1;
-		
-		while (!isprint(s[b]))
-			b++;
-		while (!isprint(s[e]))
-			e--;
-		e++;
-		
-		if (b != 0 || e != s.length()-1)
-			s = s.substr(b, e-b);
-	}
+	void *GetLyrics(void *);
 }
 
-void *GetArtistInfo(void *ptr)
+void Lyrics::Init()
 {
-	string *strptr = static_cast<string *>(ptr);
-	string artist = *strptr;
-	delete strptr;
-	
-	locale_to_utf(artist);
-	
-	string filename = artist + ".txt";
-	ToLower(filename);
-	EscapeUnallowedChars(filename);
-	
-	const string fullpath = artists_folder + "/" + filename;
-	mkdir(artists_folder.c_str(), 0755);
-	
-	string result;
-	std::ifstream input(fullpath.c_str());
-	
-	if (input.is_open())
-	{
-		bool first = 1;
-		string line;
-		while (getline(input, line))
-		{
-			if (!first)
-				*sInfo << "\n";
-			utf_to_locale(line);
-			*sInfo << line;
-			first = 0;
-		}
-		input.close();
-		sInfo->SetFormatting(fmtBold, "\n\nSimilar artists:\n", fmtBoldEnd, 0);
-		sInfo->SetFormatting(Config.color2, "\n * ", clEnd);
-		artist_info_ready = 1;
-		pthread_exit(NULL);
-	}
-	
-	CURLcode code;
-	
-	char *c_artist = curl_easy_escape(0, artist.c_str(), artist.length());
-	
-	string url = "http://ws.audioscrobbler.com/2.0/?method=artist.getinfo&artist=";
-	url += c_artist;
-	url += "&api_key=d94e5b6e26469a2d1ffae8ef20131b79";
-	
-	pthread_mutex_lock(&curl);
-	CURL *info = curl_easy_init();
-	curl_easy_setopt(info, CURLOPT_URL, url.c_str());
-	curl_easy_setopt(info, CURLOPT_WRITEFUNCTION, write_data);
-	curl_easy_setopt(info, CURLOPT_WRITEDATA, &result);
-	curl_easy_setopt(info, CURLOPT_CONNECTTIMEOUT, 10);
-	curl_easy_setopt(info, CURLOPT_NOSIGNAL, 1);
-	code = curl_easy_perform(info);
-	curl_easy_cleanup(info);
-	pthread_mutex_unlock(&curl);
-	
-	curl_free(c_artist);
-	
-	if (code != CURLE_OK)
-	{
-		*sInfo << "Error while fetching artist's info: " << curl_easy_strerror(code);
-		artist_info_ready = 1;
-		pthread_exit(NULL);
-	}
-	
-	size_t a, b;
-	bool save = 1;
-	
-	a = result.find("status=\"failed\"");
-	
-	if (a != string::npos)
-	{
-		EscapeHtml(result);
-		*sInfo << "Last.fm returned an error message: " << result;
-		artist_info_ready = 1;
-		pthread_exit(NULL);
-	}
-	
-	vector<string> similar;
-	for (size_t i = result.find("<name>"); i != string::npos; i = result.find("<name>"))
-	{
-		result[i] = '.';
-		size_t j = result.find("</name>");
-		result[j] = '.';
-		i += 6;
-		similar.push_back(result.substr(i, j-i));
-		EscapeHtml(similar.back());
-	}
-	vector<string> urls;
-	for (size_t i = result.find("<url>"); i != string::npos; i = result.find("<url>"))
-	{
-		result[i] = '.';
-		size_t j = result.find("</url>");
-		result[j] = '.';
-		i += 5;
-		urls.push_back(result.substr(i, j-i));
-	}
-	
-	a = result.find("<content>")+9;
-	b = result.find("</content>");
-	
-	if (a == b)
-	{
-		result = "No description available for this artist.";
-		save = 0;
-	}
-	else
-	{
-		a += 9; // for <![CDATA[
-		b -= 3; // for ]]>
-		result = result.substr(a, b-a);
-	}
-	
-	EscapeHtml(result);
-	Trim(result);
-	
-	Buffer filebuffer;
-	if (save)
-		filebuffer << result;
-	utf_to_locale(result);
-	*sInfo << result;
-	
-	if (save)
-		filebuffer << "\n\nSimilar artists:\n";
-	*sInfo << fmtBold << "\n\nSimilar artists:\n" << fmtBoldEnd;
-	for (size_t i = 1; i < similar.size(); i++)
-	{
-		if (save)
-			filebuffer << "\n * " << similar[i] << " (" << urls[i] << ")";
-		utf_to_locale(similar[i]);
-		utf_to_locale(urls[i]);
-		*sInfo << "\n" << Config.color2 << " * " << clEnd << similar[i] << " (" << urls[i] << ")";
-	}
-	
-	if (save)
-		filebuffer << "\n\n" << urls.front();
-	utf_to_locale(urls.front());
-	*sInfo << "\n\n" << urls.front();
-	
-	if (save)
-	{
-		std::ofstream output(fullpath.c_str());
-		if (output.is_open())
-		{
-			output << filebuffer.Str();
-			output.close();
-		}
-	}
-	artist_info_ready = 1;
-	pthread_exit(NULL);
+	sLyrics = new Scrollpad(0, main_start_y, COLS, main_height, "", Config.main_color, brNone);
+	sLyrics->SetTimeout(ncmpcpp_window_timeout);
 }
+
+void Lyrics::Resize()
+{
+	sLyrics->Resize(COLS, main_height);
+}
+
+void Lyrics::Update()
+{
+	if (!reload_lyrics)
+		return;
+	
+	const MPD::Song &s = mPlaylist->at(now_playing);
+	if (!s.GetArtist().empty() && !s.GetTitle().empty())
+		Get();
+	else
+		reload_lyrics = 0;
+}
+
+bool Lyrics::Ready()
+{
+	if (!lyrics_ready)
+		return false;
+	pthread_join(lyrics_downloader, NULL);
+	sLyrics->Flush();
+	lyrics_downloader = 0;
+	lyrics_ready = 0;
+	return true;
+}
+
+void Lyrics::Get()
+{
+	if (wCurrent == sLyrics && !reload_lyrics)
+	{
+		wCurrent->Hide();
+		current_screen = prev_screen;
+		wCurrent = wPrev;
+//		redraw_screen = 1;
+		redraw_header = 1;
+		if (current_screen == csLibrary)
+		{
+			MediaLibrary::Refresh();
+		}
+		else if (current_screen == csPlaylistEditor)
+		{
+			PlaylistEditor::Refresh();
+		}
+#		ifdef HAVE_TAGLIB_H
+		else if (current_screen == csTagEditor)
+		{
+			TagEditor::Refresh();
+		}
+#		endif // HAVE_TAGLIB_H
+	}
+	else if (
+	    reload_lyrics
+	||  (wCurrent == mPlaylist && !mPlaylist->Empty())
+	||  (wCurrent == mBrowser && mBrowser->Current().type == MPD::itSong)
+	||  (wCurrent == mSearcher && !mSearcher->Current().first)
+	||  (wCurrent == mLibSongs && !mLibSongs->Empty())
+	||  (wCurrent == mPlaylistEditor && !mPlaylistEditor->Empty())
+#	ifdef HAVE_TAGLIB_H
+	||  (wCurrent == mEditorTags && !mEditorTags->Empty())
+#	endif // HAVE_TAGLIB_H
+		)
+	{
+#		ifdef HAVE_CURL_CURL_H
+		if (lyrics_downloader)
+		{
+			ShowMessage("Lyrics are being downloaded...");
+			return;
+		}
+#		endif
+		
+		MPD::Song *s = 0;
+		int id;
+		
+		if (reload_lyrics)
+		{
+			current_screen = csPlaylist;
+			wCurrent = mPlaylist;
+			reload_lyrics = 0;
+			id = now_playing;
+		}
+		else
+			id = ((Menu<MPD::Song> *)wCurrent)->Choice();
+		
+		switch (current_screen)
+		{
+			case csPlaylist:
+				s = &mPlaylist->at(id);
+				break;
+			case csBrowser:
+				s = mBrowser->at(id).song;
+				break;
+			case csSearcher:
+				s = mSearcher->at(id).second;
+				break;
+			case csLibrary:
+				s = &mLibSongs->at(id);
+				break;
+			case csPlaylistEditor:
+				s = &mPlaylistEditor->at(id);
+				break;
+#				ifdef HAVE_TAGLIB_H
+			case csTagEditor:
+				s = &mEditorTags->at(id);
+				break;
+#				endif // HAVE_TAGLIB_H
+			default:
+				break;
+		}
+		if (!s->GetArtist().empty() && !s->GetTitle().empty())
+		{
+			lyrics_scroll_begin = 0;
+			lyrics_song = *s;
+			wPrev = wCurrent;
+			prev_screen = current_screen;
+			wCurrent = sLyrics;
+			current_screen = csLyrics;
+			redraw_header = 1;
+			sLyrics->Clear();
+			sLyrics->WriteXY(0, 0, 0, "Fetching lyrics...");
+			sLyrics->Refresh();
+#			ifdef HAVE_CURL_CURL_H
+			if (!lyrics_downloader)
+			{
+				pthread_create(&lyrics_downloader, NULL, GetLyrics, s);
+			}
+#			else
+			GetLyrics(s);
+			sLyrics->Flush();
+#			endif
+		}
+	}
+}
+
+#ifdef HAVE_CURL_CURL_H
 
 namespace
 {
@@ -311,6 +258,7 @@ const char *GetLyricsPluginName(int offset)
 
 #endif // HAVE_CURL_CURL_H
 
+namespace {
 void *GetLyrics(void *song)
 {
 	string artist = static_cast<MPD::Song *>(song)->GetArtist();
@@ -415,4 +363,4 @@ void *GetLyrics(void *song)
 	return NULL;
 #	endif
 }
-
+}

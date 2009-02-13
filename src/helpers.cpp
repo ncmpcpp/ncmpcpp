@@ -265,43 +265,6 @@ string FindSharedDir(const string &one, const string &two)
 	return i != string::npos ? result.substr(0, i) : "/";
 }
 
-void GetInfo(Song &s, Scrollpad &info)
-{
-#	ifdef HAVE_TAGLIB_H
-	string path_to_file;
-	if (s.IsFromDB())
-		path_to_file += Config.mpd_music_dir;
-	path_to_file += s.GetFile();
-	TagLib::FileRef f(path_to_file.c_str());
-	if (!f.isNull())
-		s.SetComment(f.tag()->comment().to8Bit(1));
-#	endif // HAVE_TAGLIB_H
-	
-	info << fmtBold << Config.color1 << "Filename: " << fmtBoldEnd << Config.color2 << s.GetName() << "\n" << clEnd;
-	info << fmtBold << "Directory: " << fmtBoldEnd << Config.color2 << ShowTagInInfoScreen(s.GetDirectory()) << "\n\n" << clEnd;
-	info << fmtBold << "Length: " << fmtBoldEnd << Config.color2 << s.GetLength() << "\n" << clEnd;
-#	ifdef HAVE_TAGLIB_H
-	if (!f.isNull())
-	{
-		info << fmtBold << "Bitrate: " << fmtBoldEnd << Config.color2 << f.audioProperties()->bitrate() << " kbps\n" << clEnd;
-		info << fmtBold << "Sample rate: " << fmtBoldEnd << Config.color2 << f.audioProperties()->sampleRate() << " Hz\n" << clEnd;
-		info << fmtBold << "Channels: " << fmtBoldEnd << Config.color2 << (f.audioProperties()->channels() == 1 ? "Mono" : "Stereo") << "\n" << clDefault;
-	}
-	else
-		info << clDefault;
-#	endif // HAVE_TAGLIB_H
-	info << fmtBold << "\nTitle: " << fmtBoldEnd << ShowTagInInfoScreen(s.GetTitle());
-	info << fmtBold << "\nArtist: " << fmtBoldEnd << ShowTagInInfoScreen(s.GetArtist());
-	info << fmtBold << "\nAlbum: " << fmtBoldEnd << ShowTagInInfoScreen(s.GetAlbum());
-	info << fmtBold << "\nYear: " << fmtBoldEnd << ShowTagInInfoScreen(s.GetYear());
-	info << fmtBold << "\nTrack: " << fmtBoldEnd << ShowTagInInfoScreen(s.GetTrack());
-	info << fmtBold << "\nGenre: " << fmtBoldEnd << ShowTagInInfoScreen(s.GetGenre());
-	info << fmtBold << "\nComposer: " << fmtBoldEnd << ShowTagInInfoScreen(s.GetComposer());
-	info << fmtBold << "\nPerformer: " << fmtBoldEnd << ShowTagInInfoScreen(s.GetPerformer());
-	info << fmtBold << "\nDisc: " << fmtBoldEnd << ShowTagInInfoScreen(s.GetDisc());
-	info << fmtBold << "\nComment: " << fmtBoldEnd << ShowTagInInfoScreen(s.GetComment());
-}
-
 string GetLineValue(string &line, char a, char b, bool once)
 {
 	int i = 0;
@@ -340,21 +303,6 @@ const Buffer &ShowTag(const string &tag)
 	else
 		result << tag;
 	return result;
-}
-
-const basic_buffer<my_char_t> &ShowTagInInfoScreen(const string &tag)
-{
-#	ifdef _UTF8
-	static WBuffer result;
-	result.Clear();
-	if (tag.empty())
-		result << Config.empty_tags_color << ToWString(Config.empty_tag) << clEnd;
-	else
-		result << ToWString(tag);
-	return result;
-#	else
-	return ShowTag(tag);
-#	endif
 }
 
 void Scroller(Window &w, const string &string, size_t width, size_t &pos)
@@ -400,4 +348,13 @@ void Scroller(Window &w, const string &string, size_t width, size_t &pos)
 	else
 		w << s;
 }
+
+#ifdef HAVE_CURL_CURL_H
+size_t write_data(char *buffer, size_t size, size_t nmemb, string data)
+{
+	size_t result = size * nmemb;
+	data.append(buffer, result);
+	return result;
+}
+#endif // HAVE_CURL_CURL_H
 

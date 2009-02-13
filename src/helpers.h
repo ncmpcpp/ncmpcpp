@@ -44,16 +44,17 @@ bool Keypressed(int, const int *);
 
 std::string FindSharedDir(const std::string &, const std::string &);
 
-void GetInfo(MPD::Song &, Scrollpad &);
-
 std::string GetLineValue(std::string &, char = '"', char = '"', bool = 0);
 
 Window &Statusbar();
 
 const Buffer &ShowTag(const std::string &);
-const basic_buffer<my_char_t> &ShowTagInInfoScreen(const std::string &);
 
 void Scroller(Window &, const std::string &, size_t, size_t &);
+
+#ifdef HAVE_CURL_CURL_H
+size_t write_data(char *, size_t, size_t, std::string);
+#endif
 
 #endif
 

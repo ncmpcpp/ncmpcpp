@@ -24,6 +24,16 @@
 #include "mpdpp.h"
 #include "ncmpcpp.h"
 
+namespace Browser
+{
+	void Init();
+	void Resize();
+	void SwitchTo();
+	
+	void EnterPressed();
+	void SpacePressed();
+}
+
 void UpdateItemList(Menu<MPD::Item> *);
 
 void GetDirectory(std::string, std::string = "/");

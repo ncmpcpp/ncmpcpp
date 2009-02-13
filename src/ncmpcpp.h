@@ -26,6 +26,12 @@
 #include "scrollpad.h"
 #include "misc.h"
 
+#define CLEAR_FIND_HISTORY \
+			do { \
+				found_pos = -1; \
+				vFoundPositions.clear(); \
+			} while (0)
+
 typedef std::pair<std::string, std::string> string_pair;
 
 enum NcmpcppScreen
@@ -33,20 +39,28 @@ enum NcmpcppScreen
 	csHelp,
 	csPlaylist,
 	csBrowser,
+#	ifdef HAVE_TAGLIB_H
 	csTinyTagEditor,
+#	endif // HAVE_TAGLIB_H
 	csInfo,
 	csSearcher,
 	csLibrary,
 	csLyrics,
 	csPlaylistEditor,
+#	ifdef HAVE_TAGLIB_H	
 	csTagEditor,
+#	endif // HAVE_TAGLIB_H
+#	ifdef ENABLE_CLOCK
 	csClock,
+#	endif // ENABLE_CLOCK
 	csOther
 };
 
 const int ncmpcpp_window_timeout = 500;
 
 const std::string home_folder = getenv("HOME") ? getenv("HOME") : "";
+
+const char * const message_part_of_songs_added = "Only part of requested songs' list added to playlist!";
 
 #endif
 

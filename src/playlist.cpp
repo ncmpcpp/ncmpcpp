@@ -18,57 +18,47 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
-#include "ncmpcpp.h"
+#include "display.h"
+#include "global.h"
+#include "menu.h"
+#include "playlist.h"
+#include "song.h"
 
-#ifdef HAVE_TAGLIB_H
+using namespace Global;
 
-#ifndef _TAG_EDITOR_H
-#define _TAG_EDITOR_H
+Menu<MPD::Song> *Global::mPlaylist;
 
-// taglib headers
-#include "fileref.h"
-#include "tag.h"
-
-#include "mpdpp.h"
-#include "settings.h"
-
-namespace TinyTagEditor
+void Playlist::Init()
 {
-	void Init();
-	
-	void EnterPressed(MPD::Song &);
+	mPlaylist = new Menu<MPD::Song>(0, main_start_y, COLS, main_height, Config.columns_in_playlist ? Display::Columns(Config.song_columns_list_format) : "", Config.main_color, brNone);
+	mPlaylist->SetTimeout(ncmpcpp_window_timeout);
+	mPlaylist->HighlightColor(Config.main_highlight_color);
+	mPlaylist->SetSelectPrefix(&Config.selected_item_prefix);
+	mPlaylist->SetSelectSuffix(&Config.selected_item_suffix);
+	mPlaylist->SetItemDisplayer(Config.columns_in_playlist ? Display::SongsInColumns : Display::Songs);
+	mPlaylist->SetItemDisplayerUserData(Config.columns_in_playlist ? &Config.song_columns_list_format : &Config.song_list_format);
 }
 
-namespace TagEditor
+void Playlist::Resize()
 {
-	void Init();
-	void Resize();
-	void Refresh();
-	void SwitchTo();
-	
-	void Update();
-	
-	void EnterPressed();
+	mPlaylist->Resize(COLS, main_height);
+	mPlaylist->SetTitle(Config.columns_in_playlist ? Display::Columns(Config.song_columns_list_format) : "");
 }
 
-typedef void (MPD::Song::*SongSetFunction)(const std::string &);
-typedef std::string (MPD::Song::*SongGetFunction)() const;
-
-std::string FindSharedDir(Menu<MPD::Song> *);
-std::string FindSharedDir(const MPD::SongList &);
-
-SongSetFunction IntoSetFunction(mpd_TagItems);
-
-void ReadTagsFromFile(mpd_Song *);
-bool GetSongTags(MPD::Song &);
-bool WriteTags(MPD::Song &);
-
-void __deal_with_filenames(MPD::SongList &);
-
-void CapitalizeFirstLetters(MPD::Song &);
-void LowerAllLetters(MPD::Song &);
-
-#endif
-
-#endif
+void Playlist::SwitchTo()
+{
+	if (current_screen != csPlaylist
+#	ifdef HAVE_TAGLIB_H
+	&&  current_screen != csTinyTagEditor
+#	endif // HAVE_TAGLIB_H
+	   )
+	{
+		CLEAR_FIND_HISTORY;
+		wCurrent = mPlaylist;
+		wCurrent->Hide();
+		current_screen = csPlaylist;
+//		redraw_screen = 1;
+		redraw_header = 1;
+	}
+}
 

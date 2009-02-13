@@ -27,11 +27,19 @@
 
 #ifdef ENABLE_CLOCK
 
-#include <ctime>
-
 #include "window.h"
 
-void InitClock();
+namespace Clock
+{
+	void Init();
+	void Resize();
+	void SwitchTo();
+	
+	void Update();
+	void Prepare();
+}
+
+#include <ctime>
 
 #endif // ENABLE_CLOCK
 

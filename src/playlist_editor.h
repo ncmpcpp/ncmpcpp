@@ -18,57 +18,27 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
+#ifndef _PLAYLIST_EDITOR_H
+#define _PLAYLIST_EDITOR_H
+
 #include "ncmpcpp.h"
 
-#ifdef HAVE_TAGLIB_H
-
-#ifndef _TAG_EDITOR_H
-#define _TAG_EDITOR_H
-
-// taglib headers
-#include "fileref.h"
-#include "tag.h"
-
-#include "mpdpp.h"
-#include "settings.h"
-
-namespace TinyTagEditor
-{
-	void Init();
-	
-	void EnterPressed(MPD::Song &);
-}
-
-namespace TagEditor
+namespace PlaylistEditor
 {
 	void Init();
 	void Resize();
 	void Refresh();
 	void SwitchTo();
-	
 	void Update();
 	
-	void EnterPressed();
+	void EnterPressed(bool = 1);
+	inline void SpacePressed();
 }
 
-typedef void (MPD::Song::*SongSetFunction)(const std::string &);
-typedef std::string (MPD::Song::*SongGetFunction)() const;
-
-std::string FindSharedDir(Menu<MPD::Song> *);
-std::string FindSharedDir(const MPD::SongList &);
-
-SongSetFunction IntoSetFunction(mpd_TagItems);
-
-void ReadTagsFromFile(mpd_Song *);
-bool GetSongTags(MPD::Song &);
-bool WriteTags(MPD::Song &);
-
-void __deal_with_filenames(MPD::SongList &);
-
-void CapitalizeFirstLetters(MPD::Song &);
-void LowerAllLetters(MPD::Song &);
-
-#endif
+void PlaylistEditor::SpacePressed()
+{
+	EnterPressed(0);
+}
 
 #endif
 

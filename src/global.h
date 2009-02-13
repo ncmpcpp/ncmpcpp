@@ -49,11 +49,10 @@ namespace Global
 	extern Menu<Buffer> *mTagEditor;
 	extern Menu<string_pair> *mEditorAlbums;
 	extern Menu<string_pair> *mEditorDirs;
-#	endif // HAVE_TAGLIB_H
-	// blah, I use below in conditionals.
 	extern Menu<string_pair> *mEditorLeftCol;
 	extern Menu<std::string> *mEditorTagTypes;
 	extern Menu<MPD::Song> *mEditorTags;
+#	endif // HAVE_TAGLIB_H
 	
 	extern Window *wPlaylistEditorActiveCol;
 	extern Menu<std::string> *mPlaylistList;
@@ -75,21 +74,22 @@ namespace Global
 	extern int lock_statusbar_delay;
 
 	extern size_t browsed_dir_scroll_begin;
+	extern size_t main_start_y;
+	extern size_t main_height;
+	extern size_t lyrics_scroll_begin;
 
 	extern time_t timer;
 
 	extern std::string browsed_dir;
 	extern std::string editor_browsed_dir;
 	extern std::string editor_highlighted_dir;
+	extern std::string info_title;
 
 	extern NcmpcppScreen current_screen;
 	extern NcmpcppScreen prev_screen;
 
 #	ifdef HAVE_CURL_CURL_H
-	extern pthread_t lyrics_downloader;
-	extern pthread_t artist_info_downloader;
-	extern bool lyrics_ready;
-	extern bool artist_info_ready;
+	extern pthread_mutex_t curl;
 #	endif
 
 	extern bool dont_change_now_playing;
@@ -113,6 +113,11 @@ namespace Global
 
 	extern const char *search_mode_normal;
 	extern const char *search_mode_strict;
+	
+	extern std::vector<int> vFoundPositions;
+	extern int found_pos;
+	
+	extern MPD::Song lyrics_song;
 }
 
 #endif

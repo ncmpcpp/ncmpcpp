@@ -33,10 +33,582 @@
 #include "display.h"
 #include "global.h"
 #include "helpers.h"
+#include "media_library.h"
+#include "playlist_editor.h"
 #include "status_checker.h"
 
 using namespace Global;
 using namespace MPD;
+
+Menu<Buffer> *Global::mTagEditor;
+
+Window *Global::wTagEditorActiveCol;
+Menu<string_pair> *Global::mEditorAlbums;
+Menu<string_pair> *Global::mEditorDirs;
+Menu<string_pair> *Global::mEditorLeftCol;
+Menu<string> *Global::mEditorTagTypes;
+Menu<Song> *Global::mEditorTags;
+
+void TinyTagEditor::Init()
+{
+	mTagEditor = new Menu<Buffer>(0, main_start_y, COLS, main_height, "", Config.main_color, brNone);
+	mTagEditor->HighlightColor(Config.main_highlight_color);
+	mTagEditor->SetTimeout(ncmpcpp_window_timeout);
+	mTagEditor->SetItemDisplayer(Display::Generic);
+}
+
+void TinyTagEditor::EnterPressed(Song &s)
+{
+	size_t option = mTagEditor->Choice();
+	LockStatusbar();
+	
+	if (option >= 8 && option <= 20)
+		mTagEditor->at(option).Clear();
+	
+	switch (option-7)
+	{
+		case 1:
+		{
+			Statusbar() << fmtBold << "Title: " << fmtBoldEnd;
+			s.SetTitle(wFooter->GetString(s.GetTitle()));
+			mTagEditor->at(option) << fmtBold << "Title:" << fmtBoldEnd << ' ' << ShowTag(s.GetTitle());
+			break;
+		}
+		case 2:
+		{
+			Statusbar() << fmtBold << "Artist: " << fmtBoldEnd;
+			s.SetArtist(wFooter->GetString(s.GetArtist()));
+			mTagEditor->at(option) << fmtBold << "Artist:" << fmtBoldEnd << ' ' << ShowTag(s.GetArtist());
+			break;
+		}
+		case 3:
+		{
+			Statusbar() << fmtBold << "Album: " << fmtBoldEnd;
+			s.SetAlbum(wFooter->GetString(s.GetAlbum()));
+			mTagEditor->at(option) << fmtBold << "Album:" << fmtBoldEnd << ' ' << ShowTag(s.GetAlbum());
+			break;
+		}
+		case 4:
+		{
+			Statusbar() << fmtBold << "Year: " << fmtBoldEnd;
+			s.SetYear(wFooter->GetString(s.GetYear(), 4));
+			mTagEditor->at(option) << fmtBold << "Year:" << fmtBoldEnd << ' ' << ShowTag(s.GetYear());
+			break;
+		}
+		case 5:
+		{
+			Statusbar() << fmtBold << "Track: " << fmtBoldEnd;
+			s.SetTrack(wFooter->GetString(s.GetTrack(), 3));
+			mTagEditor->at(option) << fmtBold << "Track:" << fmtBoldEnd << ' ' << ShowTag(s.GetTrack());
+			break;
+		}
+		case 6:
+		{
+			Statusbar() << fmtBold << "Genre: " << fmtBoldEnd;
+			s.SetGenre(wFooter->GetString(s.GetGenre()));
+			mTagEditor->at(option) << fmtBold << "Genre:" << fmtBoldEnd << ' ' << ShowTag(s.GetGenre());
+			break;
+		}
+		case 7:
+		{
+			Statusbar() << fmtBold << "Composer: " << fmtBoldEnd;
+			s.SetComposer(wFooter->GetString(s.GetComposer()));
+			mTagEditor->at(option) << fmtBold << "Composer:" << fmtBoldEnd << ' ' << ShowTag(s.GetComposer());
+			break;
+		}
+		case 8:
+		{
+			Statusbar() << fmtBold << "Performer: " << fmtBoldEnd;
+			s.SetPerformer(wFooter->GetString(s.GetPerformer()));
+			mTagEditor->at(option) << fmtBold << "Performer:" << fmtBoldEnd << ' ' << ShowTag(s.GetPerformer());
+			break;
+		}
+		case 9:
+		{
+			Statusbar() << fmtBold << "Disc: " << fmtBoldEnd;
+			s.SetDisc(wFooter->GetString(s.GetDisc()));
+			mTagEditor->at(option) << fmtBold << "Disc:" << fmtBoldEnd << ' ' << ShowTag(s.GetDisc());
+			break;
+		}
+		case 10:
+		{
+			Statusbar() << fmtBold << "Comment: " << fmtBoldEnd;
+			s.SetComment(wFooter->GetString(s.GetComment()));
+			mTagEditor->at(option) << fmtBold << "Comment:" << fmtBoldEnd << ' ' << ShowTag(s.GetComment());
+			break;
+		}
+		case 12:
+		{
+			Statusbar() << fmtBold << "Filename: " << fmtBoldEnd;
+			string filename = s.GetNewName().empty() ? s.GetName() : s.GetNewName();
+			size_t dot = filename.rfind(".");
+			string extension = filename.substr(dot);
+			filename = filename.substr(0, dot);
+			string new_name = wFooter->GetString(filename);
+			s.SetNewName(new_name + extension);
+			mTagEditor->at(option) << fmtBold << "Filename:" << fmtBoldEnd << ' ' << (s.GetNewName().empty() ? s.GetName() : s.GetNewName());
+			break;
+		}
+		case 14:
+		{
+			ShowMessage("Updating tags...");
+			if (WriteTags(s))
+			{
+				ShowMessage("Tags updated!");
+				if (s.IsFromDB())
+				{
+					Mpd->UpdateDirectory(locale_to_utf_cpy(s.GetDirectory()));
+					if (prev_screen == csSearcher)
+						*mSearcher->Current().second = s;
+				}
+				else
+				{
+					if (wPrev == mPlaylist)
+						mPlaylist->Current() = s;
+					else if (wPrev == mBrowser)
+						*mBrowser->Current().song = s;
+				}
+			}
+			else
+				ShowMessage("Error writing tags!");
+		}
+		case 15:
+		{
+			wCurrent->Clear();
+			wCurrent = wPrev;
+			current_screen = prev_screen;
+			redraw_header = 1;
+			if (current_screen == csLibrary)
+			{
+				MediaLibrary::Refresh();
+			}
+			else if (current_screen == csPlaylistEditor)
+			{
+				PlaylistEditor::Refresh();
+			}
+			else if (current_screen == csTagEditor)
+			{
+				TagEditor::Refresh();
+			}
+			break;
+		}
+	}
+	UnlockStatusbar();
+}
+
+namespace TagEditor
+{
+	const size_t middle_col_width = 26;
+	size_t left_col_width;
+	size_t middle_col_startx;
+	size_t right_col_width;
+	size_t right_col_startx;
+}
+
+void TagEditor::Init()
+{
+	left_col_width = COLS/2-middle_col_width/2;
+	middle_col_startx = left_col_width+1;
+	right_col_width = COLS-left_col_width-middle_col_width-2;
+	right_col_startx = left_col_width+middle_col_width+2;
+	
+	mEditorAlbums = new Menu<string_pair>(0, main_start_y, left_col_width, main_height, "Albums", Config.main_color, brNone);
+	mEditorAlbums->HighlightColor(Config.active_column_color);
+	mEditorAlbums->SetTimeout(ncmpcpp_window_timeout);
+	mEditorAlbums->SetItemDisplayer(Display::StringPairs);
+	
+	mEditorDirs = new Menu<string_pair>(0, main_start_y, left_col_width, main_height, "Directories", Config.main_color, brNone);
+	mEditorDirs->HighlightColor(Config.active_column_color);
+	mEditorDirs->SetTimeout(ncmpcpp_window_timeout);
+	mEditorDirs->SetItemDisplayer(Display::StringPairs);
+	mEditorLeftCol = Config.albums_in_tag_editor ? mEditorAlbums : mEditorDirs;
+	
+	mEditorTagTypes = new Menu<string>(middle_col_startx, main_start_y, middle_col_width, main_height, "Tag types", Config.main_color, brNone);
+	mEditorTagTypes->HighlightColor(Config.main_highlight_color);
+	mEditorTagTypes->SetTimeout(ncmpcpp_window_timeout);
+	mEditorTagTypes->SetItemDisplayer(Display::Generic);
+	
+	mEditorTags = new Menu<Song>(right_col_startx, main_start_y, right_col_width, main_height, "Tags", Config.main_color, brNone);
+	mEditorTags->HighlightColor(Config.main_highlight_color);
+	mEditorTags->SetTimeout(ncmpcpp_window_timeout);
+	mEditorTags->SetSelectPrefix(&Config.selected_item_prefix);
+	mEditorTags->SetSelectSuffix(&Config.selected_item_suffix);
+	mEditorTags->SetItemDisplayer(Display::Tags);
+	mEditorTags->SetItemDisplayerUserData(mEditorTagTypes);
+	
+	wTagEditorActiveCol = mEditorLeftCol;
+}
+
+void TagEditor::Resize()
+{
+	left_col_width = COLS/2-middle_col_width/2;
+	middle_col_startx = left_col_width+1;
+	right_col_width = COLS-left_col_width-middle_col_width-2;
+	right_col_startx = left_col_width+middle_col_width+2;
+	
+	mEditorAlbums->Resize(left_col_width, main_height);
+	mEditorDirs->Resize(left_col_width, main_height);
+	mEditorTagTypes->Resize(middle_col_width, main_height);
+	mEditorTags->Resize(right_col_width, main_height);
+	
+	mEditorTagTypes->MoveTo(middle_col_startx, main_start_y);
+	mEditorTags->MoveTo(right_col_startx, main_start_y);
+}
+
+void TagEditor::Refresh()
+{
+	mEditorLeftCol->Display();
+	mvvline(main_start_y, middle_col_startx-1, 0, main_height);
+	mEditorTagTypes->Display();
+	mvvline(main_start_y, right_col_startx-1, 0, main_height);
+	mEditorTags->Display();
+}
+
+void TagEditor::SwitchTo()
+{
+	if (current_screen != csTagEditor && current_screen != csTinyTagEditor)
+	{
+		CLEAR_FIND_HISTORY;
+		
+		mPlaylist->Hide(); // hack, should be wCurrent, but it doesn't always have 100% width
+		
+//		redraw_screen = 1;
+		redraw_header = 1;
+		TagEditor::Refresh();
+		
+		if (mEditorTagTypes->Empty())
+		{
+			mEditorTagTypes->AddOption("Title");
+			mEditorTagTypes->AddOption("Artist");
+			mEditorTagTypes->AddOption("Album");
+			mEditorTagTypes->AddOption("Year");
+			mEditorTagTypes->AddOption("Track");
+			mEditorTagTypes->AddOption("Genre");
+			mEditorTagTypes->AddOption("Composer");
+			mEditorTagTypes->AddOption("Performer");
+			mEditorTagTypes->AddOption("Disc");
+			mEditorTagTypes->AddOption("Comment");
+			mEditorTagTypes->AddSeparator();
+			mEditorTagTypes->AddOption("Filename");
+			mEditorTagTypes->AddSeparator();
+			mEditorTagTypes->AddOption("Options", 1, 1, 0);
+			mEditorTagTypes->AddSeparator();
+			mEditorTagTypes->AddOption("Reset");
+			mEditorTagTypes->AddOption("Save");
+			mEditorTagTypes->AddSeparator();
+			mEditorTagTypes->AddOption("Capitalize First Letters");
+			mEditorTagTypes->AddOption("lower all letters");
+		}
+		
+		wCurrent = wTagEditorActiveCol;
+		current_screen = csTagEditor;
+	}
+}
+
+void TagEditor::Update()
+{
+	if (mEditorLeftCol->Empty())
+	{
+		CLEAR_FIND_HISTORY;
+		mEditorLeftCol->Window::Clear();
+		mEditorTags->Clear();
+		TagList list;
+		if (Config.albums_in_tag_editor)
+		{
+			std::map<string, string, CaseInsensitiveSorting> maplist;
+			mEditorAlbums->WriteXY(0, 0, 0, "Fetching albums' list...");
+			Mpd->GetAlbums("", list);
+			for (TagList::const_iterator it = list.begin(); it != list.end(); it++)
+			{
+				SongList l;
+				Mpd->StartSearch(1);
+				Mpd->AddSearch(MPD_TAG_ITEM_ALBUM, *it);
+				Mpd->CommitSearch(l);
+				if (!l.empty())
+				{
+					l[0]->Localize();
+					maplist[l[0]->toString(Config.tag_editor_album_format)] = *it;
+				}
+				FreeSongList(l);
+			}
+			for (std::map<string, string>::const_iterator it = maplist.begin(); it != maplist.end(); it++)
+				mEditorAlbums->AddOption(make_pair(it->first, it->second));
+		}
+		else
+		{
+			int highlightme = -1;
+			Mpd->GetDirectories(editor_browsed_dir, list);
+			sort(list.begin(), list.end(), CaseInsensitiveSorting());
+			if (editor_browsed_dir != "/")
+			{
+				size_t slash = editor_browsed_dir.rfind("/");
+				string parent = slash != string::npos ? editor_browsed_dir.substr(0, slash) : "/";
+				mEditorDirs->AddOption(make_pair("[..]", parent));
+			}
+			else
+			{
+				mEditorDirs->AddOption(make_pair(".", "/"));
+			}
+			for (TagList::const_iterator it = list.begin(); it != list.end(); it++)
+			{
+				size_t slash = it->rfind("/");
+				string to_display = slash != string::npos ? it->substr(slash+1) : *it;
+				utf_to_locale(to_display);
+				mEditorDirs->AddOption(make_pair(to_display, *it));
+				if (*it == editor_highlighted_dir)
+					highlightme = mEditorDirs->Size()-1;
+			}
+			if (highlightme != -1)
+				mEditorDirs->Highlight(highlightme);
+		}
+		mEditorLeftCol->Display();
+		mEditorTagTypes->Refresh();
+	}
+	
+	if (mEditorTags->Empty())
+	{
+		mEditorTags->Reset();
+		SongList list;
+		if (Config.albums_in_tag_editor)
+		{
+			Mpd->StartSearch(1);
+			Mpd->AddSearch(MPD_TAG_ITEM_ALBUM, mEditorAlbums->Current().second);
+			Mpd->CommitSearch(list);
+			sort(list.begin(), list.end(), CaseInsensitiveSorting());
+			for (SongList::iterator it = list.begin(); it != list.end(); it++)
+			{
+				(*it)->Localize();
+				mEditorTags->AddOption(**it);
+			}
+		}
+		else
+		{
+			Mpd->GetSongs(mEditorDirs->Current().second, list);
+			sort(list.begin(), list.end(), CaseInsensitiveSorting());
+			for (SongList::const_iterator it = list.begin(); it != list.end(); it++)
+			{
+				(*it)->Localize();
+				mEditorTags->AddOption(**it);
+			}
+		}
+		FreeSongList(list);
+		mEditorTags->Window::Clear();
+		mEditorTags->Refresh();
+	}
+	
+	if (/*redraw_screen && */wCurrent == mEditorTagTypes && mEditorTagTypes->Choice() < 13)
+	{
+		mEditorTags->Refresh();
+//		redraw_screen = 0;
+	}
+	else if (mEditorTagTypes->Choice() >= 13)
+		mEditorTags->Window::Clear();
+}
+
+void TagEditor::EnterPressed()
+{
+	if (wCurrent == mEditorDirs)
+	{
+		TagList test;
+		Mpd->GetDirectories(mEditorLeftCol->Current().second, test);
+		if (!test.empty())
+		{
+			editor_highlighted_dir = editor_browsed_dir;
+			editor_browsed_dir = mEditorLeftCol->Current().second;
+			mEditorLeftCol->Clear(0);
+			mEditorLeftCol->Reset();
+		}
+		else
+			ShowMessage("No subdirs found");
+		return;
+	}
+	
+	if (mEditorTags->Empty()) // we need songs to deal with, don't we?
+		return;
+	
+	// if there are selected songs, perform operations only on them
+	SongList list;
+	if (mEditorTags->hasSelected())
+	{
+		vector<size_t> selected;
+		mEditorTags->GetSelected(selected);
+		for (vector<size_t>::const_iterator it = selected.begin(); it != selected.end(); it++)
+			list.push_back(&mEditorTags->at(*it));
+	}
+	else
+		for (size_t i = 0; i < mEditorTags->Size(); i++)
+			list.push_back(&mEditorTags->at(i));
+	
+	SongGetFunction get = 0;
+	SongSetFunction set = 0;
+	
+	size_t id = mEditorTagTypes->RealChoice();
+	switch (id)
+	{
+		case 0:
+			get = &Song::GetTitle;
+			set = &Song::SetTitle;
+			break;
+		case 1:
+			get = &Song::GetArtist;
+			set = &Song::SetArtist;
+			break;
+		case 2:
+			get = &Song::GetAlbum;
+			set = &Song::SetAlbum;
+			break;
+		case 3:
+			get = &Song::GetYear;
+			set = &Song::SetYear;
+			break;
+		case 4:
+			get = &Song::GetTrack;
+			set = &Song::SetTrack;
+			if (wCurrent == mEditorTagTypes)
+			{
+				LockStatusbar();
+				Statusbar() << "Number tracks? [y/n] ";
+				curs_set(1);
+				int in = 0;
+				do
+				{
+					TraceMpdStatus();
+					wFooter->ReadKey(in);
+				}
+				while (in != 'y' && in != 'n');
+				if (in == 'y')
+				{
+					int i = 1;
+					for (SongList::iterator it = list.begin(); it != list.end(); it++, i++)
+						(*it)->SetTrack(i);
+					ShowMessage("Tracks numbered!");
+				}
+				else
+					ShowMessage("Aborted!");
+				curs_set(0);
+				UnlockStatusbar();
+			}
+			break;
+		case 5:
+			get = &Song::GetGenre;
+			set = &Song::SetGenre;
+			break;
+		case 6:
+			get = &Song::GetComposer;
+			set = &Song::SetComposer;
+			break;
+		case 7:
+			get = &Song::GetPerformer;
+			set = &Song::SetPerformer;
+			break;
+		case 8:
+			get = &Song::GetDisc;
+			set = &Song::SetDisc;
+			break;
+		case 9:
+			get = &Song::GetComment;
+			set = &Song::SetComment;
+			break;
+		case 10:
+		{
+			if (wCurrent == mEditorTagTypes)
+			{
+				current_screen = csOther;
+				__deal_with_filenames(list);
+				current_screen = csTagEditor;
+				TagEditor::Refresh();
+			}
+			else if (wCurrent == mEditorTags)
+			{
+				Song &s = mEditorTags->Current();
+				string old_name = s.GetNewName().empty() ? s.GetName() : s.GetNewName();
+				size_t last_dot = old_name.rfind(".");
+				string extension = old_name.substr(last_dot);
+				old_name = old_name.substr(0, last_dot);
+				LockStatusbar();
+				Statusbar() << fmtBold << "New filename: " << fmtBoldEnd;
+				string new_name = wFooter->GetString(old_name);
+				UnlockStatusbar();
+				if (!new_name.empty() && new_name != old_name)
+					s.SetNewName(new_name + extension);
+				mEditorTags->Scroll(wDown);
+			}
+			return;
+		}
+		case 11: // reset
+		{
+			mEditorTags->Clear(0);
+			ShowMessage("Changes reset");
+			return;
+		}
+		case 12: // save
+		{
+			bool success = 1;
+			ShowMessage("Writing changes...");
+			for (SongList::iterator it = list.begin(); it != list.end(); it++)
+			{
+				ShowMessage("Writing tags in '%s'...", (*it)->GetName().c_str());
+				if (!WriteTags(**it))
+				{
+					ShowMessage("Error writing tags in '%s'!", (*it)->GetFile().c_str());
+					success = 0;
+					break;
+				}
+			}
+			if (success)
+			{
+				ShowMessage("Tags updated!");
+				mEditorTagTypes->HighlightColor(Config.main_highlight_color);
+				mEditorTagTypes->Reset();
+				wCurrent->Refresh();
+				wCurrent = mEditorLeftCol;
+				mEditorLeftCol->HighlightColor(Config.active_column_color);
+				Mpd->UpdateDirectory(FindSharedDir(mEditorTags));
+			}
+			else
+				mEditorTags->Clear(0);
+			return;
+		}
+		case 13: // capitalize first letters
+		{
+			ShowMessage("Processing...");
+			for (SongList::iterator it = list.begin(); it != list.end(); it++)
+				CapitalizeFirstLetters(**it);
+			ShowMessage("Done!");
+			break;
+		}
+		case 14: // lower all letters
+		{
+			ShowMessage("Processing...");
+			for (SongList::iterator it = list.begin(); it != list.end(); it++)
+				LowerAllLetters(**it);
+			ShowMessage("Done!");
+			break;
+		}
+		default:
+			break;
+	}
+	
+	if (wCurrent == mEditorTagTypes && id != 0 && id != 4 && set != NULL)
+	{
+		LockStatusbar();
+		Statusbar() << fmtBold << mEditorTagTypes->Current() << fmtBoldEnd << ": ";
+		string new_tag = wFooter->GetString((mEditorTags->Current().*get)());
+		UnlockStatusbar();
+		for (SongList::iterator it = list.begin(); it != list.end(); it++)
+			(**it.*set)(new_tag);
+	}
+	else if (wCurrent == mEditorTags && set != NULL)
+	{
+		LockStatusbar();
+		Statusbar() << fmtBold << mEditorTagTypes->Current() << fmtBoldEnd << ": ";
+		string new_tag = wFooter->GetString((mEditorTags->Current().*get)());
+		UnlockStatusbar();
+		if (new_tag != (mEditorTags->Current().*get)())
+			(mEditorTags->Current().*set)(new_tag);
+		mEditorTags->Scroll(wDown);
+	}
+}
 
 namespace
 {
