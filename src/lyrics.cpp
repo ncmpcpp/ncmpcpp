@@ -48,8 +48,10 @@ pthread_mutex_t Global::curl = PTHREAD_MUTEX_INITIALIZER;
 
 namespace
 {
+#	ifdef HAVE_CURL_CURL_H
 	pthread_t lyrics_downloader;
 	bool lyrics_ready;
+#	endif
 	
 	void *GetLyrics(void *);
 }
@@ -75,17 +77,6 @@ void Lyrics::Update()
 		Get();
 	else
 		reload_lyrics = 0;
-}
-
-bool Lyrics::Ready()
-{
-	if (!lyrics_ready)
-		return false;
-	pthread_join(lyrics_downloader, NULL);
-	sLyrics->Flush();
-	lyrics_downloader = 0;
-	lyrics_ready = 0;
-	return true;
 }
 
 void Lyrics::Get()
@@ -196,6 +187,16 @@ void Lyrics::Get()
 }
 
 #ifdef HAVE_CURL_CURL_H
+bool Lyrics::Ready()
+{
+	if (!lyrics_ready)
+		return false;
+	pthread_join(lyrics_downloader, NULL);
+	sLyrics->Flush();
+	lyrics_downloader = 0;
+	lyrics_ready = 0;
+	return true;
+}
 
 namespace
 {

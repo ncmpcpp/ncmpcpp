@@ -29,10 +29,9 @@ namespace Info
 	void Init();
 	void Resize();
 	
-	bool Ready();
-	
 	void GetSong();
 #	ifdef HAVE_CURL_CURL_H
+	bool Ready();
 	void GetArtist();
 #	endif
 }

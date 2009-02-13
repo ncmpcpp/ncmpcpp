@@ -23,19 +23,21 @@
 
 #include "ncmpcpp.h"
 
-#ifdef HAVE_CURL_CURL_H
-# include <pthread.h>
-# include "curl/curl.h"
-
 namespace Lyrics
 {
 	void Init();
 	void Resize();
 	void Update();
 	
-	bool Ready();
 	void Get();
+#	ifdef HAVE_CURL_CURL_H
+	bool Ready();
+#	endif // HAVE_CURL_CURL_H
 }
+
+#ifdef HAVE_CURL_CURL_H
+# include <pthread.h>
+# include "curl/curl.h"
 
 struct LyricsPlugin
 {
@@ -47,7 +49,7 @@ struct LyricsPlugin
 
 const char *GetLyricsPluginName(int);
 
-#endif
+#endif // HAVE_CURL_CURL_H
 
 #endif
 

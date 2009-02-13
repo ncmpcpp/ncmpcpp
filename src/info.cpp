@@ -45,12 +45,13 @@ const string artists_folder = home_folder + "/.ncmpcpp/artists";
 
 namespace
 {
+#	ifdef HAVE_CURL_CURL_H
 	pthread_t artist_info_downloader;
 	bool artist_info_ready = 0;
 	
-#	ifdef HAVE_CURL_CURL_H
 	void *GetArtistInfo(void *);
 #	endif
+	
 	void GetSongInfo(MPD::Song &, Scrollpad &);
 	const basic_buffer<my_char_t> &ShowTagInInfoScreen(const string &);
 }
@@ -64,17 +65,6 @@ void Info::Init()
 void Info::Resize()
 {
 	sInfo->Resize(COLS, main_height);
-}
-
-bool Info::Ready()
-{
-	if (!artist_info_ready)
-		return false;
-	pthread_join(artist_info_downloader, NULL);
-	sInfo->Flush();
-	artist_info_downloader = 0;
-	artist_info_ready = 0;
-	return true;
 }
 
 void Info::GetSong()
@@ -150,6 +140,18 @@ void Info::GetSong()
 		sInfo->Flush();
 		sInfo->Hide();
 	}
+}
+
+#ifdef HAVE_CURL_CURL_H
+bool Info::Ready()
+{
+	if (!artist_info_ready)
+		return false;
+	pthread_join(artist_info_downloader, NULL);
+	sInfo->Flush();
+	artist_info_downloader = 0;
+	artist_info_ready = 0;
+	return true;
 }
 
 void Info::GetArtist()
@@ -241,6 +243,7 @@ void Info::GetArtist()
 			delete artist;
 	}
 }
+#endif // HVAE_CURL_CURL_H
 
 namespace {
 #ifdef HAVE_CURL_CURL_H
