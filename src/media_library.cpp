@@ -27,6 +27,7 @@
 #include "global.h"
 #include "media_library.h"
 #include "mpdpp.h"
+#include "playlist.h"
 #include "status_checker.h"
 
 using namespace MPD;
@@ -116,7 +117,7 @@ void MediaLibrary::SwitchTo()
 	{
 		CLEAR_FIND_HISTORY;
 		
-		mPlaylist->Hide(); // hack, should be wCurrent, but it doesn't always have 100% width
+		myPlaylist->Main()->Hide(); // hack, should be wCurrent, but it doesn't always have 100% width
 		
 //		redraw_screen = 1;
 		redraw_header = 1;
@@ -231,9 +232,9 @@ void MediaLibrary::Update()
 		
 		for (SongList::const_iterator it = list.begin(); it != list.end(); it++)
 		{
-			for (size_t j = 0; j < mPlaylist->Size(); j++)
+			for (size_t j = 0; j < myPlaylist->Main()->Size(); j++)
 			{
-				if ((*it)->GetHash() == mPlaylist->at(j).GetHash())
+				if ((*it)->GetHash() == myPlaylist->Main()->at(j).GetHash())
 				{
 					bold = 1;
 					break;
@@ -264,7 +265,7 @@ void MediaLibrary::EnterPressed(bool add_n_play)
 			string tag_type = IntoStr(Config.media_lib_primary_tag);
 			ToLower(tag_type);
 			ShowMessage("Adding songs of %s \"%s\"", tag_type.c_str(), mLibArtists->Current().c_str());
-			Song *s = &mPlaylist->at(mPlaylist->Size()-list.size());
+			Song *s = &myPlaylist->Main()->at(myPlaylist->Main()->Size()-list.size());
 			if (s->GetHash() == list[0]->GetHash())
 			{
 				if (add_n_play)
@@ -281,7 +282,7 @@ void MediaLibrary::EnterPressed(bool add_n_play)
 		if (Mpd->CommitQueue())
 		{
 			ShowMessage("Adding songs from album \"%s\"", mLibAlbums->Current().second.c_str());
-			Song *s = &mPlaylist->at(mPlaylist->Size()-mLibSongs->Size());
+			Song *s = &myPlaylist->Main()->at(myPlaylist->Main()->Size()-mLibSongs->Size());
 			if (s->GetHash() == mLibSongs->at(0).GetHash())
 			{
 				if (add_n_play)
@@ -301,9 +302,9 @@ void MediaLibrary::EnterPressed(bool add_n_play)
 				long long hash = mLibSongs->Current().GetHash();
 				if (add_n_play)
 				{
-					for (size_t i = 0; i < mPlaylist->Size(); i++)
+					for (size_t i = 0; i < myPlaylist->Main()->Size(); i++)
 					{
-						if (mPlaylist->at(i).GetHash() == hash)
+						if (myPlaylist->Main()->at(i).GetHash() == hash)
 						{
 							Mpd->Play(i);
 							break;
@@ -313,12 +314,12 @@ void MediaLibrary::EnterPressed(bool add_n_play)
 				else
 				{
 					block_playlist_update = 1;
-					for (size_t i = 0; i < mPlaylist->Size(); i++)
+					for (size_t i = 0; i < myPlaylist->Main()->Size(); i++)
 					{
-						if (mPlaylist->at(i).GetHash() == hash)
+						if (myPlaylist->Main()->at(i).GetHash() == hash)
 						{
 							Mpd->QueueDeleteSong(i);
-							mPlaylist->DeleteOption(i);
+							myPlaylist->Main()->DeleteOption(i);
 							i--;
 						}
 					}

@@ -21,6 +21,7 @@
 #include "display.h"
 #include "global.h"
 #include "helpers.h"
+#include "playlist.h"
 #include "search_engine.h"
 #include "settings.h"
 #include "status_checker.h"
@@ -219,9 +220,9 @@ void SearchEngine::EnterPressed()
 			if (Config.ncmpc_like_songs_adding && mSearcher->isBold())
 			{
 				long long hash = mSearcher->Current().second->GetHash();
-				for (size_t i = 0; i < mPlaylist->Size(); i++)
+				for (size_t i = 0; i < myPlaylist->Main()->Size(); i++)
 				{
-					if (mPlaylist->at(i).GetHash() == hash)
+					if (myPlaylist->Main()->at(i).GetHash() == hash)
 					{
 						Mpd->Play(i);
 						break;
@@ -255,12 +256,12 @@ void SearchEngine::SpacePressed()
 	{
 		block_playlist_update = 1;
 		long long hash = mSearcher->Current().second->GetHash();
-		for (size_t i = 0; i < mPlaylist->Size(); i++)
+		for (size_t i = 0; i < myPlaylist->Main()->Size(); i++)
 		{
-			if (mPlaylist->at(i).GetHash() == hash)
+			if (myPlaylist->Main()->at(i).GetHash() == hash)
 			{
 				Mpd->QueueDeleteSong(i);
-				mPlaylist->DeleteOption(i);
+				myPlaylist->Main()->DeleteOption(i);
 				i--;
 			}
 		}
@@ -284,9 +285,9 @@ void UpdateFoundList()
 	bool bold = 0;
 	for (size_t i = search_engine_static_options; i < mSearcher->Size(); i++)
 	{
-		for (size_t j = 0; j < mPlaylist->Size(); j++)
+		for (size_t j = 0; j < myPlaylist->Main()->Size(); j++)
 		{
-			if (mPlaylist->at(j).GetHash() == mSearcher->at(i).second->GetHash())
+			if (myPlaylist->Main()->at(j).GetHash() == mSearcher->at(i).second->GetHash())
 			{
 				bold = 1;
 				break;
@@ -360,9 +361,9 @@ void Search()
 		Mpd->GetDirectoryRecursive("/", list);
 	else
 	{
-		list.reserve(mPlaylist->Size());
-		for (size_t i = 0; i < mPlaylist->Size(); i++)
-			list.push_back(&(*mPlaylist)[i]);
+		list.reserve(myPlaylist->Main()->Size());
+		for (size_t i = 0; i < myPlaylist->Main()->Size(); i++)
+			list.push_back(&(*myPlaylist->Main())[i]);
 	}
 	
 	bool any_found = 1;

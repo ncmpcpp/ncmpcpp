@@ -24,6 +24,7 @@
 #include "display.h"
 #include "global.h"
 #include "helpers.h"
+#include "playlist.h"
 #include "playlist_editor.h"
 #include "mpdpp.h"
 #include "status_checker.h"
@@ -94,7 +95,7 @@ void PlaylistEditor::SwitchTo()
 	{
 		CLEAR_FIND_HISTORY;
 		
-		mPlaylist->Hide(); // hack, should be wCurrent, but it doesn't always have 100% width
+		myPlaylist->Main()->Hide(); // hack, should be wCurrent, but it doesn't always have 100% width
 		
 //		redraw_screen = 1;
 		redraw_header = 1;
@@ -136,9 +137,9 @@ void PlaylistEditor::Update()
 		bool bold = 0;
 		for (SongList::const_iterator it = list.begin(); it != list.end(); it++)
 		{
-			for (size_t j = 0; j < mPlaylist->Size(); j++)
+			for (size_t j = 0; j < myPlaylist->Main()->Size(); j++)
 			{
-				if ((*it)->GetHash() == mPlaylist->at(j).GetHash())
+				if ((*it)->GetHash() == myPlaylist->Main()->at(j).GetHash())
 				{
 					bold = 1;
 					break;
@@ -178,7 +179,7 @@ void PlaylistEditor::EnterPressed(bool add_n_play)
 		if (Mpd->CommitQueue())
 		{
 			ShowMessage("Loading playlist %s...", mPlaylistList->Current().c_str());
-			Song &s = mPlaylist->at(mPlaylist->Size()-list.size());
+			Song &s = myPlaylist->Main()->at(myPlaylist->Main()->Size()-list.size());
 			if (s.GetHash() == list[0]->GetHash())
 			{
 				if (add_n_play)
@@ -198,9 +199,9 @@ void PlaylistEditor::EnterPressed(bool add_n_play)
 				long long hash = mPlaylistEditor->Current().GetHash();
 				if (add_n_play)
 				{
-					for (size_t i = 0; i < mPlaylist->Size(); i++)
+					for (size_t i = 0; i < myPlaylist->Main()->Size(); i++)
 					{
-						if (mPlaylist->at(i).GetHash() == hash)
+						if (myPlaylist->Main()->at(i).GetHash() == hash)
 						{
 							Mpd->Play(i);
 							break;
@@ -210,12 +211,12 @@ void PlaylistEditor::EnterPressed(bool add_n_play)
 				else
 				{
 					block_playlist_update = 1;
-					for (size_t i = 0; i < mPlaylist->Size(); i++)
+					for (size_t i = 0; i < myPlaylist->Main()->Size(); i++)
 					{
-						if (mPlaylist->at(i).GetHash() == hash)
+						if (myPlaylist->Main()->at(i).GetHash() == hash)
 						{
 							Mpd->QueueDeleteSong(i);
-							mPlaylist->DeleteOption(i);
+							myPlaylist->Main()->DeleteOption(i);
 							i--;
 						}
 					}

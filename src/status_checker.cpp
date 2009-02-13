@@ -25,6 +25,7 @@
 #include "charset.h"
 #include "global.h"
 #include "helpers.h"
+#include "playlist.h"
 #include "search_engine.h"
 #include "settings.h"
 #include "status_checker.h"
@@ -86,7 +87,7 @@ void TraceMpdStatus()
 	time_t now = time(NULL);
 	
 	if (current_screen == csPlaylist && now == timer+Config.playlist_disable_highlight_delay)
-		mPlaylist->Highlighting(!Config.playlist_disable_highlight_delay);
+		myPlaylist->Main()->Highlighting(!Config.playlist_disable_highlight_delay);
 	
 	if (lock_statusbar_delay > 0)
 	{
@@ -148,8 +149,8 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 		now_playing = Mpd->GetCurrentSongPos();
 		try
 		{
-			mPlaylist->BoldOption(old_playing, 0);
-			mPlaylist->BoldOption(now_playing, 1);
+			myPlaylist->Main()->BoldOption(old_playing, 0);
+			myPlaylist->Main()->BoldOption(now_playing, 1);
 		}
 		catch (std::out_of_range) { }
 	}
@@ -160,51 +161,51 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 		{
 			SongList list;
 			size_t playlist_length = Mpd->GetPlaylistLength();
-			if (playlist_length != mPlaylist->Size())
+			if (playlist_length != myPlaylist->Main()->Size())
 			{
-				if (playlist_length < mPlaylist->Size())
+				if (playlist_length < myPlaylist->Main()->Size())
 				{
-					mPlaylist->Clear(playlist_length < mPlaylist->GetHeight() && current_screen == csPlaylist);
+					myPlaylist->Main()->Clear(playlist_length < myPlaylist->Main()->GetHeight() && current_screen == csPlaylist);
 					Mpd->GetPlaylistChanges(-1, list);
 				}
 				else
 					Mpd->GetPlaylistChanges(Mpd->GetOldPlaylistID(), list);
 				
-				mPlaylist->Reserve(playlist_length);
+				myPlaylist->Main()->Reserve(playlist_length);
 				for (SongList::const_iterator it = list.begin(); it != list.end(); it++)
 				{
 					int pos = (*it)->GetPosition();
-					if (pos < int(mPlaylist->Size()))
+					if (pos < int(myPlaylist->Main()->Size()))
 					{
 						 // if song's already in playlist, replace it with a new one
-						mPlaylist->at(pos) = **it;
+						myPlaylist->Main()->at(pos) = **it;
 					}
 					else
 					{
 						// otherwise just add it to playlist
-						mPlaylist->AddOption(**it, now_playing == pos);
+						myPlaylist->Main()->AddOption(**it, now_playing == pos);
 					}
-					mPlaylist->at(pos).CopyPtr(0);
+					myPlaylist->Main()->at(pos).CopyPtr(0);
 					(*it)->NullMe();
 				}
 				
 				if (current_screen == csPlaylist)
 				{
-					if (!playlist_length || mPlaylist->Size() < mPlaylist->GetHeight())
-						mPlaylist->Window::Clear();
-					mPlaylist->Refresh();
+					if (!playlist_length || myPlaylist->Main()->Size() < myPlaylist->Main()->GetHeight())
+						myPlaylist->Main()->Window::Clear();
+					myPlaylist->Main()->Refresh();
 				}
 			}
 			else
 			{
 				Mpd->GetPlaylistChanges(-1, list);
 				
-				for (size_t i = 0; i < mPlaylist->Size(); i++)
+				for (size_t i = 0; i < myPlaylist->Main()->Size(); i++)
 				{
-					if (*list[i] != mPlaylist->at(i))
+					if (*list[i] != myPlaylist->Main()->at(i))
 					{
-						mPlaylist->at(i) = *list[i];
-						mPlaylist->at(i).CopyPtr(0);
+						myPlaylist->Main()->at(i) = *list[i];
+						myPlaylist->Main()->at(i).CopyPtr(0);
 						list[i]->NullMe();
 					}
 				}
@@ -215,9 +216,9 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 		if (current_screen == csPlaylist)
 			redraw_header = 1;
 		
-		if (mPlaylist->Empty())
+		if (myPlaylist->Main()->Empty())
 		{
-			mPlaylist->Reset();
+			myPlaylist->Main()->Reset();
 			ShowMessage("Cleared playlist!");
 		}
 		
@@ -264,7 +265,7 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 			case psPlay:
 			{
 				player_state = "Playing: ";
-				mPlaylist->BoldOption(now_playing, 1);
+				myPlaylist->Main()->BoldOption(now_playing, 1);
 				changed.ElapsedTime = 1;
 				break;
 			}
@@ -281,7 +282,7 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 				wFooter->SetColor(Config.statusbar_color);
 				try
 				{
-					mPlaylist->BoldOption(old_playing, 0);
+					myPlaylist->Main()->BoldOption(old_playing, 0);
 				}
 				catch (std::out_of_range) { }
 				now_playing = -1;
@@ -294,7 +295,7 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 	}
 	if (changed.SongID)
 	{
-		if (!mPlaylist->Empty() && now_playing >= 0)
+		if (!myPlaylist->Main()->Empty() && now_playing >= 0)
 		{
 			if (Config.repeat_one_mode && repeat_one_allowed)
 			{
@@ -303,12 +304,12 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 			}
 			try
 			{
-				mPlaylist->BoldOption(old_playing, 0);
+				myPlaylist->Main()->BoldOption(old_playing, 0);
 			}
 			catch (std::out_of_range &) { }
-			mPlaylist->BoldOption(now_playing, 1);
+			myPlaylist->Main()->BoldOption(now_playing, 1);
 			if (Config.autocenter_mode)
-				mPlaylist->Highlight(now_playing);
+				myPlaylist->Main()->Highlight(now_playing);
 			repeat_one_allowed = 0;
 			
 			if (!Mpd->GetElapsedTime())
@@ -453,7 +454,7 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 		wHeader->Refresh();
 	}
 	if (current_screen == csPlaylist)
-		mPlaylist->Refresh();
+		myPlaylist->Main()->Refresh();
 	wFooter->Bold(0);
 	wFooter->GotoXY(sx, sy);
 	wFooter->Refresh();

@@ -26,6 +26,7 @@
 
 #include "display.h"
 #include "global.h"
+#include "playlist.h"
 #include "settings.h"
 #include "status_checker.h"
 
@@ -76,7 +77,7 @@ void Clock::Resize()
 		wClock->MoveTo((COLS-width)/2, (LINES-height)/2);
 		if (current_screen == csClock)
 		{
-			mPlaylist->Hide();
+			myPlaylist->Main()->Hide();
 			Prepare();
 			wClock->Display();
 		}
@@ -165,7 +166,7 @@ void Clock::SwitchTo()
 	{
 		CLEAR_FIND_HISTORY;
 		wCurrent = wClock;
-		mPlaylist->Hide();
+		myPlaylist->Main()->Hide();
 		current_screen = csClock;
 		redraw_header = 1;
 		Clock::Prepare();

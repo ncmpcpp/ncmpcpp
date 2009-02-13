@@ -24,12 +24,12 @@
 #include "charset.h"
 #include "global.h"
 #include "helpers.h"
+#include "playlist.h"
 #include "tag_editor.h"
 
 using namespace MPD;
 using Global::Config;
 using Global::Mpd;
-using Global::mPlaylist;
 using Global::wFooter;
 using std::string;
 
@@ -225,9 +225,9 @@ void UpdateSongList(Menu<Song> *menu)
 	bool bold = 0;
 	for (size_t i = 0; i < menu->Size(); i++)
 	{
-		for (size_t j = 0; j < mPlaylist->Size(); j++)
+		for (size_t j = 0; j < myPlaylist->Main()->Size(); j++)
 		{
-			if (mPlaylist->at(j).GetHash() == menu->at(i).GetHash())
+			if (myPlaylist->Main()->at(j).GetHash() == menu->at(i).GetHash())
 			{
 				bold = 1;
 				break;

@@ -27,6 +27,7 @@
 #include "display.h"
 #include "global.h"
 #include "helpers.h"
+#include "playlist.h"
 #include "settings.h"
 #include "status_checker.h"
 #ifdef HAVE_TAGLIB_H
@@ -94,9 +95,9 @@ void Browser::EnterPressed()
 			{
 				bool found = 0;
 				long long hash = mBrowser->Current().song->GetHash();
-				for (size_t i = 0; i < mPlaylist->Size(); i++)
+				for (size_t i = 0; i < myPlaylist->Main()->Size(); i++)
 				{
-					if (mPlaylist->at(i).GetHash() == hash)
+					if (myPlaylist->Main()->at(i).GetHash() == hash)
 					{
 						Mpd->Play(i);
 						found = 1;
@@ -125,7 +126,7 @@ void Browser::EnterPressed()
 			if (Mpd->CommitQueue())
 			{
 				ShowMessage("Loading and playing playlist %s...", item.name.c_str());
-				Song *s = &mPlaylist->at(mPlaylist->Size()-list.size());
+				Song *s = &myPlaylist->Main()->at(myPlaylist->Main()->Size()-list.size());
 				if (s->GetHash() == list[0]->GetHash())
 					Mpd->PlayID(s->GetID());
 				else
@@ -164,7 +165,7 @@ void Browser::SpacePressed()
 			if (Mpd->CommitQueue())
 			{
 				ShowMessage("Added folder: %s", item.name.c_str());
-				Song &s = mPlaylist->at(mPlaylist->Size()-list.size());
+				Song &s = myPlaylist->Main()->at(myPlaylist->Main()->Size()-list.size());
 				if (s.GetHash() != list[0]->GetHash())
 					ShowMessage("%s", message_part_of_songs_added);
 			}
@@ -178,12 +179,12 @@ void Browser::SpacePressed()
 			{
 				block_playlist_update = 1;
 				long long hash = mBrowser->Current().song->GetHash();
-				for (size_t i = 0; i < mPlaylist->Size(); i++)
+				for (size_t i = 0; i < myPlaylist->Main()->Size(); i++)
 				{
-					if (mPlaylist->at(i).GetHash() == hash)
+					if (myPlaylist->Main()->at(i).GetHash() == hash)
 					{
 						Mpd->QueueDeleteSong(i);
-						mPlaylist->DeleteOption(i);
+						myPlaylist->Main()->DeleteOption(i);
 						i--;
 					}
 				}
@@ -210,7 +211,7 @@ void Browser::SpacePressed()
 			if (Mpd->CommitQueue())
 			{
 				ShowMessage("Loading playlist %s...", item.name.c_str());
-				Song &s = mPlaylist->at(mPlaylist->Size()-list.size());
+				Song &s = myPlaylist->Main()->at(myPlaylist->Main()->Size()-list.size());
 				if (s.GetHash() != list[0]->GetHash())
 					ShowMessage("%s", message_part_of_songs_added);
 			}
@@ -288,9 +289,9 @@ void UpdateItemList(Menu<Item> *menu)
 	{
 		if (menu->at(i).type == itSong)
 		{
-			for (size_t j = 0; j < mPlaylist->Size(); j++)
+			for (size_t j = 0; j < myPlaylist->Main()->Size(); j++)
 			{
-				if (mPlaylist->at(j).GetHash() == menu->at(i).song->GetHash())
+				if (myPlaylist->Main()->at(j).GetHash() == menu->at(i).song->GetHash())
 				{
 					bold = 1;
 					break;
@@ -357,9 +358,9 @@ void GetDirectory(string dir, string subdir)
 			case itSong:
 			{
 				bool bold = 0;
-				for (size_t i = 0; i < mPlaylist->Size(); i++)
+				for (size_t i = 0; i < myPlaylist->Main()->Size(); i++)
 				{
-					if (mPlaylist->at(i).GetHash() == it->song->GetHash())
+					if (myPlaylist->Main()->at(i).GetHash() == it->song->GetHash())
 					{
 						bold = 1;
 						break;

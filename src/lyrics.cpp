@@ -26,6 +26,7 @@
 #include "helpers.h"
 #include "lyrics.h"
 #include "media_library.h"
+#include "playlist.h"
 #include "playlist_editor.h"
 #include "settings.h"
 #include "song.h"
@@ -72,7 +73,7 @@ void Lyrics::Update()
 	if (!reload_lyrics)
 		return;
 	
-	const MPD::Song &s = mPlaylist->at(now_playing);
+	const MPD::Song &s = myPlaylist->Main()->at(now_playing);
 	if (!s.GetArtist().empty() && !s.GetTitle().empty())
 		Get();
 	else
@@ -105,7 +106,7 @@ void Lyrics::Get()
 	}
 	else if (
 	    reload_lyrics
-	||  (wCurrent == mPlaylist && !mPlaylist->Empty())
+	||  (wCurrent == myPlaylist->Main() && !myPlaylist->Main()->Empty())
 	||  (wCurrent == mBrowser && mBrowser->Current().type == MPD::itSong)
 	||  (wCurrent == mSearcher && !mSearcher->Current().first)
 	||  (wCurrent == mLibSongs && !mLibSongs->Empty())
@@ -129,7 +130,7 @@ void Lyrics::Get()
 		if (reload_lyrics)
 		{
 			current_screen = csPlaylist;
-			wCurrent = mPlaylist;
+			wCurrent = myPlaylist->Main();
 			reload_lyrics = 0;
 			id = now_playing;
 		}
@@ -139,7 +140,7 @@ void Lyrics::Get()
 		switch (current_screen)
 		{
 			case csPlaylist:
-				s = &mPlaylist->at(id);
+				s = &myPlaylist->Main()->at(id);
 				break;
 			case csBrowser:
 				s = mBrowser->at(id).song;

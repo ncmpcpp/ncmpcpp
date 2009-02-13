@@ -21,12 +21,24 @@
 #ifndef _PLAYLIST_H
 #define _PLAYLIST_H
 
-namespace Playlist
+#include "ncmpcpp.h"
+#include "screen.h"
+#include "song.h"
+
+class Playlist : public Screen< Menu<MPD::Song> >
 {
-	void Init();
-	void Resize();
-	void SwitchTo();
-}
+	public:
+		virtual void Init();
+		virtual void SwitchTo();
+		virtual void Resize();
+		
+		virtual const char *Title();
+		
+		virtual void EnterPressed();
+		virtual void SpacePressed();
+};
+
+extern Playlist *myPlaylist;
 
 #endif
 

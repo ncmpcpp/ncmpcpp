@@ -31,6 +31,7 @@
 #include "charset.h"
 #include "global.h"
 #include "media_library.h"
+#include "playlist.h"
 #include "playlist_editor.h"
 #include "status_checker.h"
 #include "tag_editor.h"
@@ -92,7 +93,7 @@ void Info::GetSong()
 #		endif // HAVE_TAGLIB_H
 	}
 	else if (
-	    (wCurrent == mPlaylist && !mPlaylist->Empty())
+	    (wCurrent == myPlaylist->Main() && !myPlaylist->Main()->Empty())
 	||  (wCurrent == mBrowser && mBrowser->Current().type == MPD::itSong)
 	||  (wCurrent == mSearcher && !mSearcher->Current().first)
 	||  (wCurrent == mLibSongs && !mLibSongs->Empty())
@@ -107,7 +108,7 @@ void Info::GetSong()
 		switch (current_screen)
 		{
 			case csPlaylist:
-				s = &mPlaylist->at(id);
+				s = &myPlaylist->Main()->at(id);
 				break;
 			case csBrowser:
 				s = mBrowser->at(id).song;
@@ -179,7 +180,7 @@ void Info::GetArtist()
 #		endif // HAVE_TAGLIB_H
 	}
 	else if (
-	    (wCurrent == mPlaylist && !mPlaylist->Empty())
+	    (wCurrent == myPlaylist->Main() && !myPlaylist->Main()->Empty())
 	||  (wCurrent == mBrowser && mBrowser->Current().type == MPD::itSong)
 	||  (wCurrent == mSearcher && !mSearcher->Current().first)
 	||  (wCurrent == mLibArtists && !mLibArtists->Empty())
@@ -201,7 +202,7 @@ void Info::GetArtist()
 		switch (current_screen)
 		{
 			case csPlaylist:
-				*artist = mPlaylist->at(id).GetArtist();
+				*artist = myPlaylist->Main()->at(id).GetArtist();
 				break;
 			case csBrowser:
 				*artist = mBrowser->at(id).song->GetArtist();

@@ -35,7 +35,7 @@ namespace Global
 	extern Window *wCurrent;
 	extern Window *wPrev;
 	
-	extern Menu<MPD::Song> *mPlaylist;
+//	extern Menu<MPD::Song> *myPlaylist->Main();
 	extern Menu<MPD::Item> *mBrowser;
 	extern Menu< std::pair<Buffer *, MPD::Song *> > *mSearcher;
 	

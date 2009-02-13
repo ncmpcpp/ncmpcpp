@@ -21,9 +21,9 @@
 #include "display.h"
 #include "global.h"
 #include "helpers.h"
+#include "playlist.h"
 
 using Global::Config;
-using Global::mPlaylist;
 using MPD::Song;
 using std::string;
 
@@ -99,10 +99,10 @@ void Display::TotalPlaylistLength(Window &w)
 	const int YEAR = 365*DAY;
 	int length = 0;
 	
-	for (size_t i = 0; i < mPlaylist->Size(); i++)
-		length += mPlaylist->at(i).GetTotalLength();
+	for (size_t i = 0; i < myPlaylist->Main()->Size(); i++)
+		length += myPlaylist->Main()->at(i).GetTotalLength();
 	
-	w << '(' << mPlaylist->Size() << (mPlaylist->Size() == 1 ? " item" : " items");
+	w << '(' << myPlaylist->Main()->Size() << (myPlaylist->Main()->Size() == 1 ? " item" : " items");
 	
 	if (length)
 	{

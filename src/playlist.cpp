@@ -26,23 +26,17 @@
 
 using namespace Global;
 
-Menu<MPD::Song> *Global::mPlaylist;
+Playlist *myPlaylist = new Playlist;
 
 void Playlist::Init()
 {
-	mPlaylist = new Menu<MPD::Song>(0, main_start_y, COLS, main_height, Config.columns_in_playlist ? Display::Columns(Config.song_columns_list_format) : "", Config.main_color, brNone);
-	mPlaylist->SetTimeout(ncmpcpp_window_timeout);
-	mPlaylist->HighlightColor(Config.main_highlight_color);
-	mPlaylist->SetSelectPrefix(&Config.selected_item_prefix);
-	mPlaylist->SetSelectSuffix(&Config.selected_item_suffix);
-	mPlaylist->SetItemDisplayer(Config.columns_in_playlist ? Display::SongsInColumns : Display::Songs);
-	mPlaylist->SetItemDisplayerUserData(Config.columns_in_playlist ? &Config.song_columns_list_format : &Config.song_list_format);
-}
-
-void Playlist::Resize()
-{
-	mPlaylist->Resize(COLS, main_height);
-	mPlaylist->SetTitle(Config.columns_in_playlist ? Display::Columns(Config.song_columns_list_format) : "");
+	w = new Menu<MPD::Song>(0, main_start_y, COLS, main_height, Config.columns_in_playlist ? Display::Columns(Config.song_columns_list_format) : "", Config.main_color, brNone);
+	w->SetTimeout(ncmpcpp_window_timeout);
+	w->HighlightColor(Config.main_highlight_color);
+	w->SetSelectPrefix(&Config.selected_item_prefix);
+	w->SetSelectSuffix(&Config.selected_item_suffix);
+	w->SetItemDisplayer(Config.columns_in_playlist ? Display::SongsInColumns : Display::Songs);
+	w->SetItemDisplayerUserData(Config.columns_in_playlist ? &Config.song_columns_list_format : &Config.song_list_format);
 }
 
 void Playlist::SwitchTo()
@@ -54,11 +48,37 @@ void Playlist::SwitchTo()
 	   )
 	{
 		CLEAR_FIND_HISTORY;
-		wCurrent = mPlaylist;
+		wCurrent = w;
 		wCurrent->Hide();
 		current_screen = csPlaylist;
 //		redraw_screen = 1;
 		redraw_header = 1;
 	}
+}
+
+void Playlist::Resize()
+{
+	w->Resize(COLS, main_height);
+	w->SetTitle(Config.columns_in_playlist ? Display::Columns(Config.song_columns_list_format) : "");
+}
+
+const char *Playlist::Title()
+{
+	return "Playlist ";
+}
+
+void Playlist::SpacePressed()
+{
+	if (w->Empty())
+		return;
+	size_t i = w->Choice();
+	w->Select(i, !w->isSelected(i));
+	w->Scroll(wDown);
+}
+
+void Playlist::EnterPressed()
+{
+	if (!w->Empty())
+		Mpd->PlayID(w->Current().GetID());
 }
 

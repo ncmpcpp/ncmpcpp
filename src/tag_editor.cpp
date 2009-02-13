@@ -34,6 +34,7 @@
 #include "global.h"
 #include "helpers.h"
 #include "media_library.h"
+#include "playlist.h"
 #include "playlist_editor.h"
 #include "status_checker.h"
 
@@ -163,8 +164,8 @@ void TinyTagEditor::EnterPressed(Song &s)
 				}
 				else
 				{
-					if (wPrev == mPlaylist)
-						mPlaylist->Current() = s;
+					if (wPrev == myPlaylist->Main())
+						myPlaylist->Main()->Current() = s;
 					else if (wPrev == mBrowser)
 						*mBrowser->Current().song = s;
 				}
@@ -270,7 +271,7 @@ void TagEditor::SwitchTo()
 	{
 		CLEAR_FIND_HISTORY;
 		
-		mPlaylist->Hide(); // hack, should be wCurrent, but it doesn't always have 100% width
+		myPlaylist->Main()->Hide(); // hack, should be wCurrent, but it doesn't always have 100% width
 		
 //		redraw_screen = 1;
 		redraw_header = 1;
@@ -957,17 +958,17 @@ bool WriteTags(Song &s)
 			locale_to_utf(new_name);
 			if (rename(path_to_file.c_str(), new_name.c_str()) == 0 && !file_is_from_db)
 			{
-				if (wPrev == mPlaylist)
+				if (wPrev == myPlaylist->Main())
 				{
 					// if we rename local file, it won't get updated
 					// so just remove it from playlist and add again
-					size_t pos = mPlaylist->Choice();
+					size_t pos = myPlaylist->Main()->Choice();
 					Mpd->QueueDeleteSong(pos);
 					Mpd->CommitQueue();
 					int id = Mpd->AddSong("file://" + new_name);
 					if (id >= 0)
 					{
-						s = mPlaylist->Back();
+						s = myPlaylist->Main()->Back();
 						Mpd->Move(s.GetPosition(), pos);
 					}
 				}
