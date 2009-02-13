@@ -62,9 +62,11 @@ void Playlist::Resize()
 	w->SetTitle(Config.columns_in_playlist ? Display::Columns(Config.song_columns_list_format) : "");
 }
 
-const char *Playlist::Title()
+std::string Playlist::Title()
 {
-	return "Playlist ";
+	std::string result = "Playlist ";
+	result += TotalLength();
+	return result;
 }
 
 void Playlist::SpacePressed()
@@ -80,5 +82,62 @@ void Playlist::EnterPressed()
 {
 	if (!w->Empty())
 		Mpd->PlayID(w->Current().GetID());
+}
+
+std::string Playlist::TotalLength()
+{
+	std::ostringstream result;
+	
+	const int MINUTE = 60;
+	const int HOUR = 60*MINUTE;
+	const int DAY = 24*HOUR;
+	const int YEAR = 365*DAY;
+	int length = 0;
+	
+	for (size_t i = 0; i < w->Size(); i++)
+		length += w->at(i).GetTotalLength();
+	
+	result << '(' << w->Size() << (w->Size() == 1 ? " item" : " items");
+	
+	if (length)
+	{
+		result << ", length: ";
+		int years = length/YEAR;
+		if (years)
+		{
+			result << years << (years == 1 ? " year" : " years");
+			length -= years*YEAR;
+			if (length)
+				result << ", ";
+		}
+		int days = length/DAY;
+		if (days)
+		{
+			result << days << (days == 1 ? " day" : " days");
+			length -= days*DAY;
+			if (length)
+				result << ", ";
+		}
+		int hours = length/HOUR;
+		if (hours)
+		{
+			result << hours << (hours == 1 ? " hour" : " hours");
+			length -= hours*HOUR;
+			if (length)
+				result << ", ";
+		}
+		int minutes = length/MINUTE;
+		if (minutes)
+		{
+			result << minutes << (minutes == 1 ? " minute" : " minutes");
+			length -= minutes*MINUTE;
+			if (length)
+				result << ", ";
+		}
+		if (length)
+			result << length << (length == 1 ? " second" : " seconds");
+	}
+	result << ')';
+	return result.str();
 }
 

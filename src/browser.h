@@ -23,20 +23,35 @@
 
 #include "mpdpp.h"
 #include "ncmpcpp.h"
+#include "screen.h"
 
-namespace Browser
+class Browser : public Screen< Menu<MPD::Item> >
 {
-	void Init();
-	void Resize();
-	void SwitchTo();
+	public:
+		Browser() : itsScrollBeginning(0), itsBrowsedDir("/") { }
+		
+		virtual void Init();
+		virtual void Resize();
+		virtual void SwitchTo();
+		
+		virtual std::string Title();
+		
+		virtual void EnterPressed();
+		virtual void SpacePressed();
+		
+		const std::string &CurrentDir() { return itsBrowsedDir; }
+		
+		void GetDirectory(std::string, std::string = "/");
+		void ChangeBrowseMode();
+		void UpdateItemList();
 	
-	void EnterPressed();
-	void SpacePressed();
-}
+	protected:
+		size_t itsScrollBeginning;
+		
+		std::string itsBrowsedDir;
+};
 
-void UpdateItemList(Menu<MPD::Item> *);
-
-void GetDirectory(std::string, std::string = "/");
+extern Browser *myBrowser;
 
 #endif
 

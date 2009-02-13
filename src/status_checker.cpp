@@ -226,7 +226,7 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 		{
 			if (current_screen == csBrowser)
 			{
-				UpdateItemList(mBrowser);
+				myBrowser->UpdateItemList();
 			}
 			else if (current_screen == csSearcher)
 			{
@@ -244,7 +244,7 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 	}
 	if (changed.Database)
 	{
-		GetDirectory(browsed_dir);
+		myBrowser->GetDirectory(myBrowser->CurrentDir());
 #		ifdef HAVE_TAGLIB_H
 		mEditorAlbums->Clear(0);
 		mEditorDirs->Clear(0);
@@ -357,7 +357,7 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 				}
 				wFooter->WriteXY(0, 1, 1, "%s", player_state.c_str());
 				wFooter->Bold(0);
-				Scroller(*wFooter, utf_to_locale_cpy(s.toString(Config.song_status_format)), wFooter->GetWidth()-player_state.length()-tracklength.length(), playing_song_scroll_begin);
+				*wFooter << Scroller(utf_to_locale_cpy(s.toString(Config.song_status_format)), wFooter->GetWidth()-player_state.length()-tracklength.length(), playing_song_scroll_begin);
 				wFooter->Bold(1);
 				
 				wFooter->WriteXY(wFooter->GetWidth()-tracklength.length(), 1, 1, "%s", tracklength.c_str());

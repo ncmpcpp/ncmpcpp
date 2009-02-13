@@ -34,7 +34,7 @@ namespace Display
 		*menu << t;
 	}
 	
-	void TotalPlaylistLength(Window &);
+	//void TotalPlaylistLength(Window &);
 	
 	void StringPairs(const string_pair &, void *, Menu<string_pair> *);
 	

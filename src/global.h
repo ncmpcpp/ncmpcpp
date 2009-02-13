@@ -36,7 +36,7 @@ namespace Global
 	extern Window *wPrev;
 	
 //	extern Menu<MPD::Song> *myPlaylist->Main();
-	extern Menu<MPD::Item> *mBrowser;
+//	extern Menu<MPD::Item> *myBrowser->Main();
 	extern Menu< std::pair<Buffer *, MPD::Song *> > *mSearcher;
 	
 	extern Window *wLibActiveCol;
@@ -73,14 +73,14 @@ namespace Global
 	extern int now_playing;
 	extern int lock_statusbar_delay;
 
-	extern size_t browsed_dir_scroll_begin;
+//	extern size_t browsed_dir_scroll_begin;
 	extern size_t main_start_y;
 	extern size_t main_height;
 	extern size_t lyrics_scroll_begin;
 
 	extern time_t timer;
 
-	extern std::string browsed_dir;
+//	extern std::string browsed_dir;
 	extern std::string editor_browsed_dir;
 	extern std::string editor_highlighted_dir;
 	extern std::string info_title;

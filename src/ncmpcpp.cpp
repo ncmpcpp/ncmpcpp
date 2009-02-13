@@ -74,14 +74,12 @@ Connection *Global::Mpd;
 int Global::now_playing = -1;
 int Global::lock_statusbar_delay = -1;
 
-size_t Global::browsed_dir_scroll_begin = 0;
 size_t Global::main_start_y;
 size_t Global::main_height;
 size_t Global::lyrics_scroll_begin = 0;
 
 time_t Global::timer;
 
-string Global::browsed_dir = "/";
 string Global::editor_browsed_dir = "/";
 string Global::editor_highlighted_dir;
 string Global::info_title;
@@ -151,7 +149,7 @@ int main(int argc, char *argv[])
 		main_height++;
 	
 	myPlaylist->Init();
-	Browser::Init();
+	myBrowser->Init();
 	SearchEngine::Init();
 	MediaLibrary::Init();
 	PlaylistEditor::Init();
@@ -226,10 +224,10 @@ int main(int argc, char *argv[])
 		
 		// header stuff
 		gettimeofday(&past, 0);
-		const size_t max_allowed_title_length = wHeader ? wHeader->GetWidth()-volume_state.length()-screen_title.length() : 0;
+		const size_t max_allowed_title_length = wHeader ? wHeader->GetWidth()-volume_state.length() : 0;
 		if (((past.tv_sec == now.tv_sec && past.tv_usec >= now.tv_usec+500000)
 		||    past.tv_sec > now.tv_sec)
-		&&  ((current_screen == csBrowser && browsed_dir.length() > max_allowed_title_length)
+		&&  ((current_screen == csBrowser && myBrowser->CurrentDir().length() > max_allowed_title_length)
 		||    current_screen == csLyrics))
 		{
 			redraw_header = 1;
@@ -246,7 +244,7 @@ int main(int argc, char *argv[])
 					screen_title = myPlaylist->Title();
 					break;
 				case csBrowser:
-					screen_title = "Browse: ";
+					screen_title = myBrowser->Title();
 					break;
 #				ifdef HAVE_TAGLIB_H
 				case csTinyTagEditor:
@@ -284,21 +282,11 @@ int main(int argc, char *argv[])
 				wHeader->WriteXY(0, 0, 1, "%s", screen_title.c_str());
 				wHeader->Bold(0);
 				
-				if (current_screen == csPlaylist)
-				{
-					Display::TotalPlaylistLength(*wHeader);
-				}
-				else if (current_screen == csBrowser)
-				{
-					wHeader->Bold(1);
-					Scroller(*wHeader, browsed_dir, max_allowed_title_length, browsed_dir_scroll_begin);
-					wHeader->Bold(0);
-				}
-				else if (current_screen == csLyrics)
+				if (current_screen == csLyrics)
 				{
 					
 					wHeader->Bold(1);
-					Scroller(*wHeader, lyrics_song.toString("%a - %t"), max_allowed_title_length, lyrics_scroll_begin);
+					*wHeader << Scroller(lyrics_song.toString("%a - %t"), max_allowed_title_length, lyrics_scroll_begin);
 					wHeader->Bold(0);
 				}
 			}
@@ -520,7 +508,7 @@ int main(int argc, char *argv[])
 			
 			Help::Resize();
 			myPlaylist->Resize();
-			Browser::Resize();
+			myBrowser->Resize();
 			SearchEngine::Resize();
 			MediaLibrary::Resize();
 			PlaylistEditor::Resize();
@@ -570,10 +558,10 @@ int main(int argc, char *argv[])
 		}
 		else if (Keypressed(input, Key.GoToParentDir))
 		{
-			if (wCurrent == mBrowser && browsed_dir != "/")
+			if (wCurrent == myBrowser->Main() && myBrowser->CurrentDir() != "/")
 			{
-				mBrowser->Reset();
-				Browser::EnterPressed();
+				myBrowser->Main()->Reset();
+				myBrowser->EnterPressed();
 			}
 		}
 		else if (Keypressed(input, Key.Enter))
@@ -588,7 +576,7 @@ int main(int argc, char *argv[])
 				}
 				case csBrowser:
 				{
-					Browser::EnterPressed();
+					myBrowser->EnterPressed();
 					break;
 				}
 #				ifdef HAVE_TAGLIB_H
@@ -637,7 +625,7 @@ int main(int argc, char *argv[])
 #				ifdef HAVE_TAGLIB_H
 				||  wCurrent == mEditorTags
 #				endif // HAVE_TAGLIB_H
-				|| (wCurrent == mBrowser && ((Menu<Song> *)wCurrent)->Choice() >= (browsed_dir != "/" ? 1 : 0)) || (wCurrent == mSearcher && !mSearcher->Current().first)
+				|| (wCurrent == myBrowser->Main() && ((Menu<Song> *)wCurrent)->Choice() >= (myBrowser->CurrentDir() != "/" ? 1 : 0)) || (wCurrent == mSearcher && !mSearcher->Current().first)
 				|| wCurrent == mLibSongs
 				|| wCurrent == mPlaylistEditor)
 				{
@@ -653,7 +641,7 @@ int main(int argc, char *argv[])
 			{
 				if (current_screen == csBrowser)
 				{
-					Browser::SpacePressed();
+					myBrowser->SpacePressed();
 				}
 				else if (current_screen == csSearcher)
 				{
@@ -840,8 +828,8 @@ int main(int argc, char *argv[])
 			else if (current_screen == csBrowser || wCurrent == mPlaylistList)
 			{
 				LockStatusbar();
-				string name = wCurrent == mBrowser ? mBrowser->Current().name : mPlaylistList->Current();
-				if (current_screen != csBrowser || mBrowser->Current().type == itPlaylist)
+				string name = wCurrent == myBrowser->Main() ? myBrowser->Main()->Current().name : mPlaylistList->Current();
+				if (current_screen != csBrowser || myBrowser->Main()->Current().type == itPlaylist)
 				{
 					Statusbar() << "Delete playlist " << name << " ? [y/n] ";
 					curs_set(1);
@@ -857,7 +845,7 @@ int main(int argc, char *argv[])
 						Mpd->DeletePlaylist(locale_to_utf_cpy(name));
 						ShowMessage("Playlist %s deleted!", name.c_str());
 						if (!Config.local_browser)
-							GetDirectory("/");
+							myBrowser->GetDirectory("/");
 					}
 					else
 						ShowMessage("Aborted!");
@@ -960,8 +948,8 @@ int main(int argc, char *argv[])
 					UnlockStatusbar();
 				}
 			}
-			if (!Config.local_browser && browsed_dir == "/" && !mBrowser->Empty())
-				GetDirectory(browsed_dir);
+			if (!Config.local_browser && myBrowser->CurrentDir() == "/" && !myBrowser->Main()->Empty())
+				myBrowser->GetDirectory(myBrowser->CurrentDir());
 		}
 		else if (Keypressed(input, Key.Stop))
 		{
@@ -1266,11 +1254,11 @@ int main(int argc, char *argv[])
 				myPlaylist->Main()->SetItemDisplayerUserData(Config.columns_in_playlist ? &Config.song_columns_list_format : &Config.song_list_format);
 				myPlaylist->Main()->SetTitle(Config.columns_in_playlist ? Display::Columns(Config.song_columns_list_format) : "");
 			}
-			else if (wCurrent == mBrowser)
+			else if (wCurrent == myBrowser->Main())
 			{
 				Config.columns_in_browser = !Config.columns_in_browser;
 				ShowMessage("Browser display mode: %s", Config.columns_in_browser ? "Columns" : "Classic");
-				mBrowser->SetTitle(Config.columns_in_browser ? Display::Columns(Config.song_columns_list_format) : "");
+				myBrowser->Main()->SetTitle(Config.columns_in_browser ? Display::Columns(Config.song_columns_list_format) : "");
 			}
 			else if (wCurrent == mSearcher)
 			{
@@ -1302,7 +1290,7 @@ int main(int argc, char *argv[])
 		else if (Keypressed(input, Key.UpdateDB))
 		{
 			if (current_screen == csBrowser)
-				Mpd->UpdateDirectory(browsed_dir);
+				Mpd->UpdateDirectory(myBrowser->CurrentDir());
 #			ifdef HAVE_TAGLIB_H
 			else if (current_screen == csTagEditor && !Config.albums_in_tag_editor)
 				Mpd->UpdateDirectory(editor_browsed_dir);
@@ -1430,7 +1418,7 @@ int main(int argc, char *argv[])
 			}
 			else if (
 			    (wCurrent == myPlaylist->Main() && !myPlaylist->Main()->Empty())
-			||  (wCurrent == mBrowser && mBrowser->Current().type == itSong)
+			||  (wCurrent == myBrowser->Main() && myBrowser->Main()->Current().type == itSong)
 			||  (wCurrent == mSearcher && !mSearcher->Current().first)
 			||  (wCurrent == mLibSongs && !mLibSongs->Empty())
 			||  (wCurrent == mPlaylistEditor && !mPlaylistEditor->Empty())
@@ -1444,7 +1432,7 @@ int main(int argc, char *argv[])
 						edited_song = myPlaylist->Main()->at(id);
 						break;
 					case csBrowser:
-						edited_song = *mBrowser->at(id).song;
+						edited_song = *myBrowser->Main()->at(id).song;
 						break;
 					case csSearcher:
 						edited_song = *mSearcher->at(id).second;
@@ -1506,9 +1494,9 @@ int main(int argc, char *argv[])
 			}
 			else
 #			endif // HAVE_TAGLIB_H
-			if (wCurrent == mBrowser && mBrowser->Current().type == itDirectory)
+			if (wCurrent == myBrowser->Main() && myBrowser->Main()->Current().type == itDirectory)
 			{
-				string old_dir = mBrowser->Current().name;
+				string old_dir = myBrowser->Main()->Current().name;
 				LockStatusbar();
 				Statusbar() << fmtBold << "Directory: " << fmtBoldEnd;
 				string new_dir = wFooter->GetString(old_dir);
@@ -1529,15 +1517,15 @@ int main(int argc, char *argv[])
 						ShowMessage("'%s' renamed to '%s'", old_dir.c_str(), new_dir.c_str());
 						if (!Config.local_browser)
 							Mpd->UpdateDirectory(FindSharedDir(old_dir, new_dir));
-						GetDirectory(browsed_dir);
+						myBrowser->GetDirectory(myBrowser->CurrentDir());
 					}
 					else
 						ShowMessage("Cannot rename '%s' to '%s'!", old_dir.c_str(), new_dir.c_str());
 				}
 			}
-			else if (wCurrent == mPlaylistList || (wCurrent == mBrowser && mBrowser->Current().type == itPlaylist))
+			else if (wCurrent == mPlaylistList || (wCurrent == myBrowser->Main() && myBrowser->Main()->Current().type == itPlaylist))
 			{
-				string old_name = wCurrent == mPlaylistList ? mPlaylistList->Current() : mBrowser->Current().name;
+				string old_name = wCurrent == mPlaylistList ? mPlaylistList->Current() : myBrowser->Main()->Current().name;
 				LockStatusbar();
 				Statusbar() << fmtBold << "Playlist: " << fmtBoldEnd;
 				string new_name = wFooter->GetString(old_name);
@@ -1547,7 +1535,7 @@ int main(int argc, char *argv[])
 					Mpd->Rename(locale_to_utf_cpy(old_name), locale_to_utf_cpy(new_name));
 					ShowMessage("Playlist '%s' renamed to '%s'", old_name.c_str(), new_name.c_str());
 					if (!Config.local_browser)
-						GetDirectory("/");
+						myBrowser->GetDirectory("/");
 					mPlaylistList->Clear(0);
 				}
 			}
@@ -1595,16 +1583,16 @@ int main(int argc, char *argv[])
 				
 				string option = s->toString(Config.song_status_format);
 				locale_to_utf(option);
-				GetDirectory(s->GetDirectory());
-				for (size_t i = 0; i < mBrowser->Size(); i++)
+				myBrowser->GetDirectory(s->GetDirectory());
+				for (size_t i = 0; i < myBrowser->Main()->Size(); i++)
 				{
-					if (mBrowser->at(i).type == itSong && option == mBrowser->at(i).song->toString(Config.song_status_format))
+					if (myBrowser->Main()->at(i).type == itSong && option == myBrowser->Main()->at(i).song->toString(Config.song_status_format))
 					{
-						mBrowser->Highlight(i);
+						myBrowser->Main()->Highlight(i);
 						break;
 					}
 				}
-				Browser::SwitchTo();
+				myBrowser->SwitchTo();
 			}
 		}
 		else if (Keypressed(input, Key.StartSearching))
@@ -1638,7 +1626,7 @@ int main(int argc, char *argv[])
 		else if (Keypressed(input, Key.ReverseSelection))
 		{
 			if (wCurrent == myPlaylist->Main()
-			||  wCurrent == mBrowser
+			||  wCurrent == myBrowser->Main()
 			||  (wCurrent == mSearcher && !mSearcher->Current().first)
 			||  wCurrent == mLibSongs
 			||  wCurrent == mPlaylistEditor
@@ -1652,7 +1640,7 @@ int main(int argc, char *argv[])
 				for (size_t i = 0; i < mList->Size(); i++)
 					mList->Select(i, !mList->isSelected(i) && !mList->isStatic(i));
 				// hackish shit begins
-				if (wCurrent == mBrowser && browsed_dir != "/")
+				if (wCurrent == myBrowser->Main() && myBrowser->CurrentDir() != "/")
 					mList->Select(0, 0); // [..] cannot be selected, uhm.
 				if (wCurrent == mSearcher)
 					mList->Select(search_engine_reset_button, 0); // 'Reset' cannot be selected, omgplz.
@@ -1663,7 +1651,7 @@ int main(int argc, char *argv[])
 		else if (Keypressed(input, Key.DeselectAll))
 		{
 			if (wCurrent == myPlaylist->Main()
-			||  wCurrent == mBrowser
+			||  wCurrent == myBrowser->Main()
 			||  wCurrent == mSearcher
 			||  wCurrent == mLibSongs
 			||  wCurrent == mPlaylistEditor
@@ -1684,7 +1672,7 @@ int main(int argc, char *argv[])
 		else if (Keypressed(input, Key.AddSelected))
 		{
 			if (wCurrent != myPlaylist->Main()
-			&&  wCurrent != mBrowser
+			&&  wCurrent != myBrowser->Main()
 			&&  wCurrent != mSearcher
 			&&  wCurrent != mLibSongs
 			&&  wCurrent != mPlaylistEditor)
@@ -1712,7 +1700,7 @@ int main(int argc, char *argv[])
 					}
 					case csBrowser:
 					{
-						const Item &item = mBrowser->at(*it);
+						const Item &item = myBrowser->Main()->at(*it);
 						switch (item.type)
 						{
 							case itDirectory:
@@ -1863,8 +1851,8 @@ int main(int argc, char *argv[])
 			if (id != mDialog->Size()-1)
 			{
 				// refresh playlist's lists
-				if (!Config.local_browser && browsed_dir == "/")
-					GetDirectory("/");
+				if (!Config.local_browser && myBrowser->CurrentDir() == "/")
+					myBrowser->GetDirectory("/");
 				mPlaylistList->Clear(0); // make playlist editor update itself
 			}
 			timer = time(NULL);
@@ -1948,17 +1936,17 @@ int main(int argc, char *argv[])
 						name = myPlaylist->Main()->at(i).toString(Config.song_list_format);
 						break;
 					case csBrowser:
-						switch (mBrowser->at(i).type)
+						switch (myBrowser->Main()->at(i).type)
 						{
 							case itDirectory:
-								name = mBrowser->at(i).name;
+								name = myBrowser->Main()->at(i).name;
 								break;
 							case itSong:
-								name = mBrowser->at(i).song->toString(Config.song_list_format);
+								name = myBrowser->Main()->at(i).song->toString(Config.song_list_format);
 								break;
 							case itPlaylist:
 								name = Config.browser_playlist_prefix.Str();
-								name += mBrowser->at(i).name;
+								name += myBrowser->Main()->at(i).name;
 								break;
 						}
 						break;
@@ -2114,14 +2102,9 @@ int main(int argc, char *argv[])
 		}
 		else if (Keypressed(input, Key.SwitchTagTypeList))
 		{
-			if (wCurrent == mBrowser && Mpd->GetHostname()[0] == '/')
+			if (wCurrent == myBrowser->Main())
 			{
-				Config.local_browser = !Config.local_browser;
-				ShowMessage("Browse mode: %s", Config.local_browser ? "Local filesystem" : "MPD music dir");
-				browsed_dir = Config.local_browser ? home_folder : "/";
-				mBrowser->Reset();
-				GetDirectory(browsed_dir);
-				redraw_header = 1;
+				myBrowser->ChangeBrowseMode();
 			}
 			else if (wCurrent == mLibArtists)
 			{
@@ -2172,7 +2155,7 @@ int main(int argc, char *argv[])
 		else if (Keypressed(input, Key.ScreenSwitcher))
 		{
 			if (current_screen == csPlaylist)
-				Browser::SwitchTo();
+				myBrowser->SwitchTo();
 			else
 				myPlaylist->SwitchTo();
 		}
@@ -2182,7 +2165,7 @@ int main(int argc, char *argv[])
 		}
 		else if (Keypressed(input, Key.Browser))
 		{
-			Browser::SwitchTo();
+			myBrowser->SwitchTo();
 		}
 		else if (Keypressed(input, Key.SearchEngine))
 		{

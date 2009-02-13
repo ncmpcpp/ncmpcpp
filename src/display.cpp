@@ -91,61 +91,6 @@ string Display::Columns(string st)
 	return result;
 }
 
-void Display::TotalPlaylistLength(Window &w)
-{
-	const int MINUTE = 60;
-	const int HOUR = 60*MINUTE;
-	const int DAY = 24*HOUR;
-	const int YEAR = 365*DAY;
-	int length = 0;
-	
-	for (size_t i = 0; i < myPlaylist->Main()->Size(); i++)
-		length += myPlaylist->Main()->at(i).GetTotalLength();
-	
-	w << '(' << myPlaylist->Main()->Size() << (myPlaylist->Main()->Size() == 1 ? " item" : " items");
-	
-	if (length)
-	{
-		w << ", length: ";
-		int years = length/YEAR;
-		if (years)
-		{
-			w << years << (years == 1 ? " year" : " years");
-			length -= years*YEAR;
-			if (length)
-				w << ", ";
-		}
-		int days = length/DAY;
-		if (days)
-		{
-			w << days << (days == 1 ? " day" : " days");
-			length -= days*DAY;
-			if (length)
-				w << ", ";
-		}
-		int hours = length/HOUR;
-		if (hours)
-		{
-			w << hours << (hours == 1 ? " hour" : " hours");
-			length -= hours*HOUR;
-			if (length)
-				w << ", ";
-		}
-		int minutes = length/MINUTE;
-		if (minutes)
-		{
-			w << minutes << (minutes == 1 ? " minute" : " minutes");
-			length -= minutes*MINUTE;
-			if (length)
-				w << ", ";
-		}
-		if (length)
-			w << length << (length == 1 ? " second" : " seconds");
-	}
-	w << ')';
-	w.Refresh();
-}
-
 void Display::StringPairs(const string_pair &pair, void *, Menu<string_pair> *menu)
 {
 	*menu << pair.first;

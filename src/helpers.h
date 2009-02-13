@@ -50,7 +50,7 @@ Window &Statusbar();
 
 const Buffer &ShowTag(const std::string &);
 
-void Scroller(Window &, const std::string &, size_t, size_t &);
+const std::basic_string<my_char_t> &Scroller(const std::string &, size_t, size_t &);
 
 #ifdef HAVE_CURL_CURL_H
 size_t write_data(char *, size_t, size_t, std::string);

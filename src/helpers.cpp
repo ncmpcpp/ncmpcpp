@@ -305,8 +305,10 @@ const Buffer &ShowTag(const string &tag)
 	return result;
 }
 
-void Scroller(Window &w, const string &string, size_t width, size_t &pos)
+const std::basic_string<my_char_t> &Scroller(const string &string, size_t width, size_t &pos)
 {
+	static std::basic_string<my_char_t> result;
+	result.clear();
 	std::basic_string<my_char_t> s = TO_WSTRING(string);
 	size_t len;
 #	ifdef _UTF8
@@ -331,7 +333,7 @@ void Scroller(Window &w, const string &string, size_t width, size_t &pos)
 #			else
 			len++;
 #			endif
-			w << *it;
+			result += *it;
 		}
 		if (++pos >= s.length())
 			pos = 0;
@@ -342,11 +344,12 @@ void Scroller(Window &w, const string &string, size_t width, size_t &pos)
 #			else
 			len++;
 #			endif
-			w << *b;
+			result += *b;
 		}
 	}
 	else
-		w << s;
+		result = s;
+	return result;
 }
 
 #ifdef HAVE_CURL_CURL_H

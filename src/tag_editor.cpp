@@ -29,6 +29,7 @@
 #include "textidentificationframe.h"
 #include "mpegfile.h"
 
+#include "browser.h"
 #include "charset.h"
 #include "display.h"
 #include "global.h"
@@ -166,8 +167,8 @@ void TinyTagEditor::EnterPressed(Song &s)
 				{
 					if (wPrev == myPlaylist->Main())
 						myPlaylist->Main()->Current() = s;
-					else if (wPrev == mBrowser)
-						*mBrowser->Current().song = s;
+					else if (wPrev == myBrowser->Main())
+						*myBrowser->Main()->Current().song = s;
 				}
 			}
 			else
@@ -972,7 +973,7 @@ bool WriteTags(Song &s)
 						Mpd->Move(s.GetPosition(), pos);
 					}
 				}
-				else // only mBrowser
+				else // only myBrowser->Main()
 					s.SetFile(new_name);
 			}
 		}

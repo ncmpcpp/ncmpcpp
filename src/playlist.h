@@ -32,10 +32,13 @@ class Playlist : public Screen< Menu<MPD::Song> >
 		virtual void SwitchTo();
 		virtual void Resize();
 		
-		virtual const char *Title();
+		virtual std::string Title();
 		
 		virtual void EnterPressed();
 		virtual void SpacePressed();
+		
+	protected:
+		std::string TotalLength();
 };
 
 extern Playlist *myPlaylist;

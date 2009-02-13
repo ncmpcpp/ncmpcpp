@@ -21,6 +21,7 @@
 #include <sys/stat.h>
 #include <fstream>
 
+#include "browser.h"
 #include "charset.h"
 #include "global.h"
 #include "helpers.h"
@@ -107,7 +108,7 @@ void Lyrics::Get()
 	else if (
 	    reload_lyrics
 	||  (wCurrent == myPlaylist->Main() && !myPlaylist->Main()->Empty())
-	||  (wCurrent == mBrowser && mBrowser->Current().type == MPD::itSong)
+	||  (wCurrent == myBrowser->Main() && myBrowser->Main()->Current().type == MPD::itSong)
 	||  (wCurrent == mSearcher && !mSearcher->Current().first)
 	||  (wCurrent == mLibSongs && !mLibSongs->Empty())
 	||  (wCurrent == mPlaylistEditor && !mPlaylistEditor->Empty())
@@ -143,7 +144,7 @@ void Lyrics::Get()
 				s = &myPlaylist->Main()->at(id);
 				break;
 			case csBrowser:
-				s = mBrowser->at(id).song;
+				s = myBrowser->Main()->at(id).song;
 				break;
 			case csSearcher:
 				s = mSearcher->at(id).second;

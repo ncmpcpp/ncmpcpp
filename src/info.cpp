@@ -28,6 +28,7 @@
 # include "helpers.h"
 #endif
 
+#include "browser.h"
 #include "charset.h"
 #include "global.h"
 #include "media_library.h"
@@ -94,7 +95,7 @@ void Info::GetSong()
 	}
 	else if (
 	    (wCurrent == myPlaylist->Main() && !myPlaylist->Main()->Empty())
-	||  (wCurrent == mBrowser && mBrowser->Current().type == MPD::itSong)
+	||  (wCurrent == myBrowser->Main() && myBrowser->Main()->Current().type == MPD::itSong)
 	||  (wCurrent == mSearcher && !mSearcher->Current().first)
 	||  (wCurrent == mLibSongs && !mLibSongs->Empty())
 	||  (wCurrent == mPlaylistEditor && !mPlaylistEditor->Empty())
@@ -111,7 +112,7 @@ void Info::GetSong()
 				s = &myPlaylist->Main()->at(id);
 				break;
 			case csBrowser:
-				s = mBrowser->at(id).song;
+				s = myBrowser->Main()->at(id).song;
 				break;
 			case csSearcher:
 				s = mSearcher->at(id).second;
@@ -181,7 +182,7 @@ void Info::GetArtist()
 	}
 	else if (
 	    (wCurrent == myPlaylist->Main() && !myPlaylist->Main()->Empty())
-	||  (wCurrent == mBrowser && mBrowser->Current().type == MPD::itSong)
+	||  (wCurrent == myBrowser->Main() && myBrowser->Main()->Current().type == MPD::itSong)
 	||  (wCurrent == mSearcher && !mSearcher->Current().first)
 	||  (wCurrent == mLibArtists && !mLibArtists->Empty())
 	||  (wCurrent == mLibSongs && !mLibSongs->Empty())
@@ -205,7 +206,7 @@ void Info::GetArtist()
 				*artist = myPlaylist->Main()->at(id).GetArtist();
 				break;
 			case csBrowser:
-				*artist = mBrowser->at(id).song->GetArtist();
+				*artist = myBrowser->Main()->at(id).song->GetArtist();
 				break;
 			case csSearcher:
 				*artist = mSearcher->at(id).second->GetArtist();
