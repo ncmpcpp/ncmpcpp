@@ -42,8 +42,6 @@ namespace
 {
 	time_t time_of_statusbar_lock;
 	
-	int old_playing;
-	
 	string switch_state;
 	
 	bool block_statusbar_update = 0;
@@ -143,14 +141,14 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 	wFooter->Bold(1);
 	wFooter->GetXY(sx, sy);
 	
-	if ((now_playing != Mpd->GetCurrentSongPos() || changed.SongID) && !dont_change_now_playing)
+	if ((myPlaylist->NowPlaying != Mpd->GetCurrentSongPos() || changed.SongID) && !dont_change_now_playing)
 	{
-		old_playing = now_playing;
-		now_playing = Mpd->GetCurrentSongPos();
+		myPlaylist->OldPlaying = myPlaylist->NowPlaying;
+		myPlaylist->NowPlaying = Mpd->GetCurrentSongPos();
 		try
 		{
-			myPlaylist->Main()->BoldOption(old_playing, 0);
-			myPlaylist->Main()->BoldOption(now_playing, 1);
+			myPlaylist->Main()->BoldOption(myPlaylist->OldPlaying, 0);
+			myPlaylist->Main()->BoldOption(myPlaylist->NowPlaying, 1);
 		}
 		catch (std::out_of_range) { }
 	}
@@ -183,7 +181,7 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 					else
 					{
 						// otherwise just add it to playlist
-						myPlaylist->Main()->AddOption(**it, now_playing == pos);
+						myPlaylist->Main()->AddOption(**it, myPlaylist->NowPlaying == pos);
 					}
 					myPlaylist->Main()->at(pos).CopyPtr(0);
 					(*it)->NullMe();
@@ -265,7 +263,7 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 			case psPlay:
 			{
 				player_state = "Playing: ";
-				myPlaylist->Main()->BoldOption(now_playing, 1);
+				myPlaylist->Main()->BoldOption(myPlaylist->NowPlaying, 1);
 				changed.ElapsedTime = 1;
 				break;
 			}
@@ -282,10 +280,10 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 				wFooter->SetColor(Config.statusbar_color);
 				try
 				{
-					myPlaylist->Main()->BoldOption(old_playing, 0);
+					myPlaylist->Main()->BoldOption(myPlaylist->OldPlaying, 0);
 				}
 				catch (std::out_of_range) { }
-				now_playing = -1;
+				myPlaylist->NowPlaying = -1;
 				player_state.clear();
 				break;
 			}
@@ -295,21 +293,21 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 	}
 	if (changed.SongID)
 	{
-		if (!myPlaylist->Main()->Empty() && now_playing >= 0)
+		if (myPlaylist->isPlaying())
 		{
 			if (Config.repeat_one_mode && repeat_one_allowed)
 			{
-				std::swap(now_playing, old_playing);
-				Mpd->Play(now_playing);
+				std::swap(myPlaylist->NowPlaying, myPlaylist->OldPlaying);
+				Mpd->Play(myPlaylist->NowPlaying);
 			}
 			try
 			{
-				myPlaylist->Main()->BoldOption(old_playing, 0);
+				myPlaylist->Main()->BoldOption(myPlaylist->OldPlaying, 0);
 			}
 			catch (std::out_of_range &) { }
-			myPlaylist->Main()->BoldOption(now_playing, 1);
+			myPlaylist->Main()->BoldOption(myPlaylist->NowPlaying, 1);
 			if (Config.autocenter_mode)
-				myPlaylist->Main()->Highlight(now_playing);
+				myPlaylist->Main()->Highlight(myPlaylist->NowPlaying);
 			repeat_one_allowed = 0;
 			
 			if (!Mpd->GetElapsedTime())

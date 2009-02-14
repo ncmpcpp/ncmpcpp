@@ -20,11 +20,14 @@
 
 #include "display.h"
 #include "global.h"
+#include "helpers.h"
 #include "menu.h"
 #include "playlist.h"
 #include "song.h"
+#include "status_checker.h"
 
 using namespace Global;
+using std::vector;
 
 Playlist *myPlaylist = new Playlist;
 
@@ -141,3 +144,8 @@ std::string Playlist::TotalLength()
 	return result.str();
 }
 
+const MPD::Song &Playlist::NowPlayingSong()
+{
+	static MPD::Song null;
+	return isPlaying() ? w->at(NowPlaying) : null;
+}

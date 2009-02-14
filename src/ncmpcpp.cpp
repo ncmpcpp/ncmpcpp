@@ -71,7 +71,6 @@ Window *Global::wFooter;
 
 Connection *Global::Mpd;
 
-int Global::now_playing = -1;
 int Global::lock_statusbar_delay = -1;
 
 size_t Global::main_start_y;
@@ -813,8 +812,8 @@ int main(int argc, char *argv[])
 						size_t id = myPlaylist->Main()->Choice();
 						TraceMpdStatus();
 						timer = time(NULL);
-						if (size_t(now_playing) > id)  // needed for keeping proper
-							now_playing--; // position of now playing song.
+						if (size_t(myPlaylist->NowPlaying) > id)  // needed for keeping proper
+							myPlaylist->NowPlaying--; // position of now playing song.
 						Mpd->QueueDeleteSong(id);
 						myPlaylist->Main()->DeleteOption(id);
 						myPlaylist->Main()->Refresh();
@@ -967,8 +966,8 @@ int main(int argc, char *argv[])
 					myPlaylist->Main()->GetSelected(list);
 					
 					for (vector<size_t>::iterator it = list.begin(); it != list.end(); it++)
-						if (*it == size_t(now_playing) && list.front() > 0)
-							myPlaylist->Main()->BoldOption(now_playing, 0);
+						if (*it == size_t(myPlaylist->NowPlaying) && list.front() > 0)
+							myPlaylist->Main()->BoldOption(myPlaylist->NowPlaying, 0);
 					
 					vector<size_t> origs(list);
 					
@@ -994,8 +993,8 @@ int main(int argc, char *argv[])
 					size_t from, to;
 					from = to = myPlaylist->Main()->Choice();
 					// unbold now playing as if song changes during move, this won't be unbolded.
-					if (to == size_t(now_playing) && to > 0)
-						myPlaylist->Main()->BoldOption(now_playing, 0);
+					if (to == size_t(myPlaylist->NowPlaying) && to > 0)
+						myPlaylist->Main()->BoldOption(myPlaylist->NowPlaying, 0);
 					while (Keypressed(input, Key.MvSongUp) && to > 0)
 					{
 						TraceMpdStatus();
@@ -1070,8 +1069,8 @@ int main(int argc, char *argv[])
 					myPlaylist->Main()->GetSelected(list);
 					
 					for (vector<size_t>::iterator it = list.begin(); it != list.end(); it++)
-						if (*it == size_t(now_playing) && list.back() < myPlaylist->Main()->Size()-1)
-							myPlaylist->Main()->BoldOption(now_playing, 0);
+						if (*it == size_t(myPlaylist->NowPlaying) && list.back() < myPlaylist->Main()->Size()-1)
+							myPlaylist->Main()->BoldOption(myPlaylist->NowPlaying, 0);
 					
 					vector<size_t> origs(list);
 					
@@ -1097,8 +1096,8 @@ int main(int argc, char *argv[])
 					size_t from, to;
 					from = to = myPlaylist->Main()->Choice();
 					// unbold now playing as if song changes during move, this won't be unbolded.
-					if (to == size_t(now_playing) && to < myPlaylist->Main()->Size()-1)
-						myPlaylist->Main()->BoldOption(now_playing, 0);
+					if (to == size_t(myPlaylist->NowPlaying) && to < myPlaylist->Main()->Size()-1)
+						myPlaylist->Main()->BoldOption(myPlaylist->NowPlaying, 0);
 					while (Keypressed(input, Key.MvSongDown) && to < myPlaylist->Main()->Size()-1)
 					{
 						TraceMpdStatus();
@@ -1190,9 +1189,9 @@ int main(int argc, char *argv[])
 		}
 		else if (Keypressed(input, Key.SeekForward) || Keypressed(input, Key.SeekBackward))
 		{
-			if (now_playing < 0)
+			if (!myPlaylist->isPlaying())
 				continue;
-			if (!myPlaylist->Main()->at(now_playing).GetTotalLength())
+			if (!myPlaylist->NowPlayingSong().GetTotalLength())
 			{
 				ShowMessage("Unknown item length!");
 				continue;
@@ -1204,7 +1203,7 @@ int main(int argc, char *argv[])
 			time_t t = time(NULL);
 			
 			songpos = Mpd->GetElapsedTime();
-			Song &s = myPlaylist->Main()->at(now_playing);
+			const Song &s = myPlaylist->NowPlayingSong();
 			
 			while (Keypressed(input, Key.SeekForward) || Keypressed(input, Key.SeekBackward))
 			{
@@ -1284,8 +1283,8 @@ int main(int argc, char *argv[])
 		{
 			Config.autocenter_mode = !Config.autocenter_mode;
 			ShowMessage("Auto center mode: %s", Config.autocenter_mode ? "On" : "Off");
-			if (Config.autocenter_mode && now_playing >= 0)
-				myPlaylist->Main()->Highlight(now_playing);
+			if (Config.autocenter_mode && myPlaylist->isPlaying())
+				myPlaylist->Main()->Highlight(myPlaylist->NowPlaying);
 		}
 		else if (Keypressed(input, Key.UpdateDB))
 		{
@@ -1300,8 +1299,8 @@ int main(int argc, char *argv[])
 		}
 		else if (Keypressed(input, Key.GoToNowPlaying))
 		{
-			if (current_screen == csPlaylist && now_playing >= 0)
-				myPlaylist->Main()->Highlight(now_playing);
+			if (current_screen == csPlaylist && myPlaylist->isPlaying())
+				myPlaylist->Main()->Highlight(myPlaylist->NowPlaying);
 		}
 		else if (Keypressed(input, Key.ToggleRepeat))
 		{
@@ -1608,9 +1607,9 @@ int main(int argc, char *argv[])
 		}
 		else if (Keypressed(input, Key.GoToPosition))
 		{
-			if (now_playing < 0)
+			if (!myPlaylist->isPlaying())
 				continue;
-			if (!myPlaylist->Main()->at(now_playing).GetTotalLength())
+			if (!myPlaylist->NowPlayingSong().GetTotalLength())
 			{
 				ShowMessage("Unknown item length!");
 				continue;
@@ -1620,7 +1619,7 @@ int main(int argc, char *argv[])
 			string position = wFooter->GetString(3);
 			int newpos = StrToInt(position);
 			if (newpos > 0 && newpos < 100 && !position.empty())
-				Mpd->Seek(myPlaylist->Main()->at(now_playing).GetTotalLength()*newpos/100.0);
+				Mpd->Seek(myPlaylist->NowPlayingSong().GetTotalLength()*newpos/100.0);
 			UnlockStatusbar();
 		}
 		else if (Keypressed(input, Key.ReverseSelection))
@@ -1865,13 +1864,13 @@ int main(int argc, char *argv[])
 			{
 				for (size_t i = 0; i < myPlaylist->Main()->Size(); i++)
 				{
-					if (!myPlaylist->Main()->isSelected(i) && i != size_t(now_playing))
+					if (!myPlaylist->Main()->isSelected(i) && i != size_t(myPlaylist->NowPlaying))
 						Mpd->QueueDeleteSongId(myPlaylist->Main()->at(i).GetID());
 				}
 				// if mpd deletes now playing song deletion will be sluggishly slow
 				// then so we have to assure it will be deleted at the very end.
-				if (now_playing >= 0 && !myPlaylist->Main()->isSelected(now_playing))
-					Mpd->QueueDeleteSongId(myPlaylist->Main()->at(now_playing).GetID());
+				if (myPlaylist->isPlaying() && !myPlaylist->Main()->isSelected(myPlaylist->NowPlaying))
+					Mpd->QueueDeleteSongId(myPlaylist->NowPlayingSong().GetID());
 				
 				ShowMessage("Deleting all items but selected...");
 				Mpd->CommitQueue();
@@ -1879,14 +1878,14 @@ int main(int argc, char *argv[])
 			}
 			else
 			{
-				if (now_playing < 0)
+				if (!myPlaylist->isPlaying())
 				{
 					ShowMessage("Nothing is playing now!");
 					continue;
 				}
-				for (int i = 0; i < now_playing; i++)
+				for (int i = 0; i < myPlaylist->NowPlaying; i++)
 					Mpd->QueueDeleteSongId(myPlaylist->Main()->at(i).GetID());
-				for (size_t i = now_playing+1; i < myPlaylist->Main()->Size(); i++)
+				for (size_t i = myPlaylist->NowPlaying+1; i < myPlaylist->Main()->Size(); i++)
 					Mpd->QueueDeleteSongId(myPlaylist->Main()->at(i).GetID());
 				ShowMessage("Deleting all items except now playing one...");
 				Mpd->CommitQueue();

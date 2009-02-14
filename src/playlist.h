@@ -28,6 +28,9 @@
 class Playlist : public Screen< Menu<MPD::Song> >
 {
 	public:
+		Playlist() : NowPlaying(-1), OldPlaying(-1) { }
+		~Playlist() { }
+		
 		virtual void Init();
 		virtual void SwitchTo();
 		virtual void Resize();
@@ -36,6 +39,12 @@ class Playlist : public Screen< Menu<MPD::Song> >
 		
 		virtual void EnterPressed();
 		virtual void SpacePressed();
+		
+		bool isPlaying() { return NowPlaying >= 0 && !w->Empty(); }
+		const MPD::Song &NowPlayingSong();
+		
+		int NowPlaying;
+		int OldPlaying;
 		
 	protected:
 		std::string TotalLength();

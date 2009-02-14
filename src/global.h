@@ -70,7 +70,7 @@ namespace Global
 	
 	extern MPD::Connection *Mpd;
 	
-	extern int now_playing;
+//	extern int now_playing;
 	extern int lock_statusbar_delay;
 
 //	extern size_t browsed_dir_scroll_begin;

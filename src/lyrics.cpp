@@ -74,7 +74,7 @@ void Lyrics::Update()
 	if (!reload_lyrics)
 		return;
 	
-	const MPD::Song &s = myPlaylist->Main()->at(now_playing);
+	const MPD::Song &s = myPlaylist->NowPlayingSong();
 	if (!s.GetArtist().empty() && !s.GetTitle().empty())
 		Get();
 	else
@@ -133,7 +133,7 @@ void Lyrics::Get()
 			current_screen = csPlaylist;
 			wCurrent = myPlaylist->Main();
 			reload_lyrics = 0;
-			id = now_playing;
+			id = myPlaylist->NowPlaying;
 		}
 		else
 			id = ((Menu<MPD::Song> *)wCurrent)->Choice();
