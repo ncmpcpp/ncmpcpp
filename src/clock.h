@@ -28,18 +28,31 @@
 #ifdef ENABLE_CLOCK
 
 #include "window.h"
+#include "screen.h"
 
-namespace Clock
+class Clock : public Screen<Window>
 {
-	void Init();
-	void Resize();
-	void SwitchTo();
+	public:
+		virtual void Init();
+		virtual void Resize();
+		virtual void SwitchTo();
+		
+		virtual std::string Title();
+		
+		virtual void Update();
 	
-	void Update();
-	void Prepare();
-}
+	protected:
+		static void Prepare();
+		static void Set(int, int);
+		
+		static short disp[11];
+		static long older[6], next[6], newer[6], mask;
+		
+		static const size_t Width;
+		static const size_t Height;
+};
 
-#include <ctime>
+extern Clock *myClock;
 
 #endif // ENABLE_CLOCK
 

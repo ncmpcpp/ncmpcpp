@@ -64,9 +64,9 @@ namespace Global
 	
 	extern Window *wHeader;
 	extern Window *wFooter;
-#	ifdef ENABLE_CLOCK
-	extern Scrollpad *wClock;
-#	endif
+//#	ifdef ENABLE_CLOCK
+//	extern Scrollpad *wClock;
+//#	endif
 	
 	extern MPD::Connection *Mpd;
 	
@@ -108,8 +108,6 @@ namespace Global
 	extern bool header_update_status;
 //	extern bool search_case_sensitive;
 //	extern bool search_match_to_pattern;
-
-	extern std::string volume_state;
 
 //	extern const char *search_mode_normal;
 //	extern const char *search_mode_strict;

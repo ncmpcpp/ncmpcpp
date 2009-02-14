@@ -157,7 +157,7 @@ int main(int argc, char *argv[])
 #	endif // HAVE_TAGLIB_H
 	
 #	ifdef ENABLE_CLOCK
-	Clock::Init();
+	myClock->Init();
 #	endif // ENABLE_CLOCK
 	
 	myHelp->Init();
@@ -264,7 +264,7 @@ int main(int argc, char *argv[])
 					break;
 #				ifdef ENABLE_CLOCK
 				case csClock:
-					screen_title = "Clock";
+					screen_title = myClock->Title();
 					break;
 #				endif // ENABLE_CLOCK
 				default:
@@ -324,7 +324,7 @@ int main(int argc, char *argv[])
 #		ifdef ENABLE_CLOCK
 		if (current_screen == csClock)
 		{
-			Clock::Update();
+			myClock->Update();
 		}
 		else
 #		endif
@@ -508,7 +508,7 @@ int main(int argc, char *argv[])
 #			endif // HAVE_TAGLIB_H
 			
 #			ifdef ENABLE_CLOCK
-			Clock::Resize();
+			myClock->Resize();
 #			endif // ENABLE_CLOCK
 			
 			if (Config.header_visibility)
@@ -2049,7 +2049,7 @@ int main(int argc, char *argv[])
 #		ifdef ENABLE_CLOCK
 		else if (Keypressed(input, Key.Clock))
 		{
-			Clock::SwitchTo();
+			myClock->SwitchTo();
 		}
 #		endif // ENABLE_CLOCK
 		else if (Keypressed(input, Key.Quit))

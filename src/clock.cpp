@@ -32,67 +32,71 @@
 
 using namespace Global;
 
-Scrollpad *Global::wClock;
+Clock *myClock = new Clock;
 
-namespace
+short Clock::disp[11] =
 {
-	short disp[11] =
-	{
-		075557, 011111, 071747, 071717,
-		055711, 074717, 074757, 071111,
-		075757, 075717, 002020
-	};
-	
-	long older[6], next[6], newer[6], mask;
-	
-	void set(int t, int n)
-	{
-		int m = 7 << n;
-		for (int i = 0; i < 5; i++)
-		{
-			next[i] |= ((disp[t] >> ((4 - i) * 3)) & 07) << n;
-			mask |= (next[i] ^ older[i]) & m;
-		}
-		if (mask & m)
-			mask |= m;
-	}
-}
+	075557, 011111, 071747, 071717,
+	055711, 074717, 074757, 071111,
+	075757, 075717, 002020
+};
 
-namespace Clock
-{
-	const size_t width = Config.clock_display_seconds ? 60 : 40;
-	const size_t height = 8;
-}
+long Clock::older[6], Clock::next[6], Clock::newer[6], Clock::mask;
+
+const size_t Clock::Width = Config.clock_display_seconds ? 60 : 40;
+const size_t Clock::Height = 8;
 
 void Clock::Init()
 {
-	wClock = new Scrollpad((COLS-width)/2, (LINES-height)/2, width, height-1, "", Config.main_color, Border(Config.main_color));
-	wClock->SetTimeout(ncmpcpp_window_timeout);
+	w = new Scrollpad((COLS-Width)/2, (LINES-Height)/2, Width, Height-1, "", Config.main_color, Border(Config.main_color));
+	w->SetTimeout(ncmpcpp_window_timeout);
 }
 
 void Clock::Resize()
 {
-	if (width <= size_t(COLS) && height <= main_height)
+	if (Width <= size_t(COLS) && Height <= main_height)
 	{
-		wClock->MoveTo((COLS-width)/2, (LINES-height)/2);
+		w->MoveTo((COLS-Width)/2, (LINES-Height)/2);
 		if (current_screen == csClock)
 		{
 			myPlaylist->Main()->Hide();
 			Prepare();
-			wClock->Display();
+			w->Display();
 		}
 	}
 }
 
-void Clock::Prepare()
+void Clock::SwitchTo()
 {
-	for (int i = 0; i < 5; i++)
-		older[i] = newer[i] = next[i] = 0;
+	if (Width > size_t(COLS) || Height > main_height)
+	{
+		ShowMessage("Screen is too small to display clock!");
+	}
+	else if (
+	   current_screen != csClock
+#	ifdef HAVE_TAGLIB_H
+	&& current_screen != csTinyTagEditor
+#	endif // HAVE_TAGLIB_H
+		)
+	{
+		CLEAR_FIND_HISTORY;
+		wCurrent = w;
+		myPlaylist->Main()->Hide();
+		current_screen = csClock;
+		redraw_header = 1;
+		Clock::Prepare();
+		w->Display();
+	}
+}
+
+std::string Clock::Title()
+{
+	return "Clock";
 }
 
 void Clock::Update()
 {
-	if (width > size_t(COLS) || height > main_height)
+	if (Width > size_t(COLS) || Height > main_height)
 		return;
 	
 	time_t rawtime;
@@ -100,19 +104,19 @@ void Clock::Update()
 	tm *time = localtime(&rawtime);
 	
 	mask = 0;
-	set(time->tm_sec % 10, 0);
-	set(time->tm_sec / 10, 4);
-	set(time->tm_min % 10, 10);
-	set(time->tm_min / 10, 14);
-	set(time->tm_hour % 10, 20);
-	set(time->tm_hour / 10, 24);
-	set(10, 7);
-	set(10, 17);
+	Set(time->tm_sec % 10, 0);
+	Set(time->tm_sec / 10, 4);
+	Set(time->tm_min % 10, 10);
+	Set(time->tm_min / 10, 14);
+	Set(time->tm_hour % 10, 20);
+	Set(time->tm_hour / 10, 24);
+	Set(10, 7);
+	Set(10, 17);
 	
 	char buf[54];
 	strftime(buf, 64, "%x", time);
 	attron(COLOR_PAIR(Config.main_color));
-	mvprintw(wCurrent->GetStartY()+wCurrent->GetHeight(), wCurrent->GetStartX()+(wCurrent->GetWidth()-strlen(buf))/2, "%s", buf);
+	mvprintw(w->GetStartY()+w->GetHeight(), w->GetStartX()+(w->GetWidth()-strlen(buf))/2, "%s", buf);
 	attroff(COLOR_PAIR(Config.main_color));
 	refresh();
 	
@@ -122,7 +126,7 @@ void Clock::Update()
 		next[k] = 0;
 		for (int s = 1; s >= 0; s--)
 		{
-			wCurrent->Reverse(s);
+			w->Reverse(s);
 			for (int i = 0; i < 6; i++)
 			{
 				long a = (newer[i] ^ older[i]) & (s ? newer : older)[i];
@@ -135,10 +139,10 @@ void Clock::Update()
 						{
 							if (!(a & (t << 1)))
 							{
-								wCurrent->GotoXY(2*j+2, i);
+								w->GotoXY(2*j+2, i);
 							}
 							if (Global::Config.clock_display_seconds || j < 18)
-								*wCurrent << "  ";
+								*w << "  ";
 						}
 					}
 				}
@@ -151,27 +155,22 @@ void Clock::Update()
 	}
 }
 
-void Clock::SwitchTo()
+void Clock::Prepare()
 {
-	if (width > size_t(COLS) || height > main_height)
+	for (int i = 0; i < 5; i++)
+		older[i] = newer[i] = next[i] = 0;
+}
+
+void Clock::Set(int t, int n)
+{
+	int m = 7 << n;
+	for (int i = 0; i < 5; i++)
 	{
-		ShowMessage("Screen is too small to display clock!");
+		next[i] |= ((disp[t] >> ((4 - i) * 3)) & 07) << n;
+		mask |= (next[i] ^ older[i]) & m;
 	}
-	else if (
-	   current_screen != csClock
-#	ifdef HAVE_TAGLIB_H
-	&& current_screen != csTinyTagEditor
-#	endif // HAVE_TAGLIB_H
-		)
-	{
-		CLEAR_FIND_HISTORY;
-		wCurrent = wClock;
-		myPlaylist->Main()->Hide();
-		current_screen = csClock;
-		redraw_header = 1;
-		Clock::Prepare();
-		wCurrent->Display();
-	}
+	if (mask & m)
+		mask |= m;
 }
 
 #endif // ENABLE_CLOCK
