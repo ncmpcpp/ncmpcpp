@@ -151,7 +151,7 @@ int main(int argc, char *argv[])
 	myBrowser->Init();
 	mySearcher->Init();
 	myLibrary->Init();
-	PlaylistEditor::Init();
+	myPlaylistEditor->Init();
 	
 #	ifdef HAVE_TAGLIB_H
 	TinyTagEditor::Init();
@@ -264,7 +264,7 @@ int main(int argc, char *argv[])
 					screen_title = "Lyrics: ";
 					break;
 				case csPlaylistEditor:
-					screen_title = "Playlist editor";
+					screen_title = myPlaylistEditor->Title();
 					break;
 #				ifdef ENABLE_CLOCK
 				case csClock:
@@ -323,7 +323,7 @@ int main(int argc, char *argv[])
 		}
 		else if (current_screen == csPlaylistEditor)
 		{
-			PlaylistEditor::Update();
+			myPlaylistEditor->Update();
 		}
 		else
 #		ifdef HAVE_TAGLIB_H
@@ -383,9 +383,9 @@ int main(int argc, char *argv[])
 					{
 						myLibrary->Songs->Clear(0);
 					}
-					else if (wCurrent == mPlaylistList)
+					else if (wCurrent == myPlaylistEditor->List)
 					{
-						mPlaylistEditor->Clear(0);
+						myPlaylistEditor->Content->Clear(0);
 					}
 #					ifdef HAVE_TAGLIB_H
 					else if (wCurrent == mEditorLeftCol)
@@ -413,7 +413,7 @@ int main(int argc, char *argv[])
 		{
 			if (!Config.fancy_scrolling
 			&&  (wCurrent == myLibrary->Artists
-			||   wCurrent == mPlaylistList
+			||   wCurrent == myPlaylistEditor->List
 #			ifdef HAVE_TAGLIB_H
 			||   wCurrent == mEditorLeftCol
 #			endif // HAVE_TAGLIB_H
@@ -441,7 +441,7 @@ int main(int argc, char *argv[])
 		{
 			if (!Config.fancy_scrolling
 			&&  (wCurrent == myLibrary->Artists
-			||   wCurrent == mPlaylistList
+			||   wCurrent == myPlaylistEditor->List
 #			ifdef HAVE_TAGLIB_H
 			|| wCurrent == mEditorLeftCol
 #			endif // HAVE_TAGLIB_H
@@ -510,7 +510,7 @@ int main(int argc, char *argv[])
 			myBrowser->Resize();
 			mySearcher->Resize();
 			myLibrary->Resize();
-			PlaylistEditor::Resize();
+			myPlaylistEditor->Resize();
 			Info::Resize();
 			Lyrics::Resize();
 			
@@ -543,7 +543,7 @@ int main(int argc, char *argv[])
 #			endif // HAVE_TAGLIB_H
 			if (current_screen == csPlaylistEditor)
 			{
-				PlaylistEditor::Refresh();
+				myPlaylistEditor->Refresh();
 			}
 			header_update_status = 1;
 			PlayerState mpd_state = Mpd->GetState();
@@ -597,7 +597,7 @@ int main(int argc, char *argv[])
 				}
 				case csPlaylistEditor:
 				{
-					PlaylistEditor::EnterPressed();
+					myPlaylistEditor->EnterPressed();
 					break;
 				}
 #				ifdef HAVE_TAGLIB_H
@@ -626,7 +626,7 @@ int main(int argc, char *argv[])
 #				endif // HAVE_TAGLIB_H
 				|| (wCurrent == myBrowser->Main() && ((Menu<Song> *)wCurrent)->Choice() >= (myBrowser->CurrentDir() != "/" ? 1 : 0)) || (wCurrent == mySearcher->Main() && !mySearcher->Main()->Current().first)
 				|| wCurrent == myLibrary->Songs
-				|| wCurrent == mPlaylistEditor)
+				|| wCurrent == myPlaylistEditor->Content)
 				{
 					List *mList = (Menu<Song> *)wCurrent;
 					if (mList->Empty())
@@ -652,7 +652,7 @@ int main(int argc, char *argv[])
 				}
 				else if (current_screen == csPlaylistEditor)
 				{
-					PlaylistEditor::SpacePressed();
+					myPlaylistEditor->SpacePressed();
 				}
 #				ifdef HAVE_TAGLIB_H
 				else if (wCurrent == mEditorLeftCol)
@@ -680,14 +680,7 @@ int main(int argc, char *argv[])
 			}
 			else if (current_screen == csPlaylistEditor && input == Key.VolumeUp[0])
 			{
-				if (wCurrent == mPlaylistList)
-				{
-					CLEAR_FIND_HISTORY;
-					mPlaylistList->HighlightColor(Config.main_highlight_color);
-					wCurrent->Refresh();
-					wCurrent = wPlaylistEditorActiveCol = mPlaylistEditor;
-					mPlaylistEditor->HighlightColor(Config.active_column_color);
-				}
+				myPlaylistEditor->NextColumn();
 			}
 #			ifdef HAVE_TAGLIB_H
 			else if (current_screen == csTagEditor && input == Key.VolumeUp[0])
@@ -720,14 +713,7 @@ int main(int argc, char *argv[])
 			}
 			else if (current_screen == csPlaylistEditor && input == Key.VolumeDown[0])
 			{
-				if (wCurrent == mPlaylistEditor)
-				{
-					CLEAR_FIND_HISTORY;
-					mPlaylistEditor->HighlightColor(Config.main_highlight_color);
-					wCurrent->Refresh();
-					wCurrent = wPlaylistEditorActiveCol = mPlaylistList;
-					mPlaylistList->HighlightColor(Config.active_column_color);
-				}
+				myPlaylistEditor->PrevColumn();
 			}
 #			ifdef HAVE_TAGLIB_H
 			else if (current_screen == csTagEditor && input == Key.VolumeDown[0])
@@ -790,10 +776,10 @@ int main(int argc, char *argv[])
 				}
 				Mpd->CommitQueue();
 			}
-			else if (current_screen == csBrowser || wCurrent == mPlaylistList)
+			else if (current_screen == csBrowser || wCurrent == myPlaylistEditor->List)
 			{
 				LockStatusbar();
-				string name = wCurrent == myBrowser->Main() ? myBrowser->Main()->Current().name : mPlaylistList->Current();
+				string name = wCurrent == myBrowser->Main() ? myBrowser->Main()->Current().name : myPlaylistEditor->List->Current();
 				if (current_screen != csBrowser || myBrowser->Main()->Current().type == itPlaylist)
 				{
 					Statusbar() << "Delete playlist " << name << " ? [y/n] ";
@@ -815,41 +801,41 @@ int main(int argc, char *argv[])
 					else
 						ShowMessage("Aborted!");
 					curs_set(0);
-					mPlaylistList->Clear(0); // make playlists list update itself
+					myPlaylistEditor->List->Clear(0); // make playlists list update itself
 				}
 				UnlockStatusbar();
 			}
-			else if (wCurrent == mPlaylistEditor && !mPlaylistEditor->Empty())
+			else if (wCurrent == myPlaylistEditor->Content && !myPlaylistEditor->Content->Empty())
 			{
-				if (mPlaylistEditor->hasSelected())
+				if (myPlaylistEditor->Content->hasSelected())
 				{
 					vector<size_t> list;
-					mPlaylistEditor->GetSelected(list);
-					locale_to_utf(mPlaylistList->Current());
+					myPlaylistEditor->Content->GetSelected(list);
+					locale_to_utf(myPlaylistEditor->List->Current());
 					for (vector<size_t>::const_reverse_iterator it = list.rbegin(); it != ((const vector<size_t> &)list).rend(); it++)
 					{
-						Mpd->QueueDeleteFromPlaylist(mPlaylistList->Current(), *it);
-						mPlaylistEditor->DeleteOption(*it);
+						Mpd->QueueDeleteFromPlaylist(myPlaylistEditor->List->Current(), *it);
+						myPlaylistEditor->Content->DeleteOption(*it);
 					}
-					utf_to_locale(mPlaylistList->Current());
-					ShowMessage("Selected items deleted from playlist '%s'!", mPlaylistList->Current().c_str());
+					utf_to_locale(myPlaylistEditor->List->Current());
+					ShowMessage("Selected items deleted from playlist '%s'!", myPlaylistEditor->List->Current().c_str());
 //					redraw_screen = 1;
 				}
 				else
 				{
-					mPlaylistEditor->SetTimeout(50);
-					locale_to_utf(mPlaylistList->Current());
-					while (!mPlaylistEditor->Empty() && Keypressed(input, Key.Delete))
+					myPlaylistEditor->Content->SetTimeout(50);
+					locale_to_utf(myPlaylistEditor->List->Current());
+					while (!myPlaylistEditor->Content->Empty() && Keypressed(input, Key.Delete))
 					{
 						TraceMpdStatus();
 						timer = time(NULL);
-						Mpd->QueueDeleteFromPlaylist(mPlaylistList->Current(), mPlaylistEditor->Choice());
-						mPlaylistEditor->DeleteOption(mPlaylistEditor->Choice());
-						mPlaylistEditor->Refresh();
-						mPlaylistEditor->ReadKey(input);
+						Mpd->QueueDeleteFromPlaylist(myPlaylistEditor->List->Current(), myPlaylistEditor->Content->Choice());
+						myPlaylistEditor->Content->DeleteOption(myPlaylistEditor->Content->Choice());
+						myPlaylistEditor->Content->Refresh();
+						myPlaylistEditor->Content->ReadKey(input);
 					}
-					utf_to_locale(mPlaylistList->Current());
-					mPlaylistEditor->SetTimeout(ncmpcpp_window_timeout);
+					utf_to_locale(myPlaylistEditor->List->Current());
+					myPlaylistEditor->Content->SetTimeout(ncmpcpp_window_timeout);
 				}
 				Mpd->CommitQueue();
 			}
@@ -884,7 +870,7 @@ int main(int argc, char *argv[])
 				if (Mpd->SavePlaylist(real_playlist_name))
 				{
 					ShowMessage("Playlist saved as: %s", playlist_name.c_str());
-					mPlaylistList->Clear(0); // make playlist's list update itself
+					myPlaylistEditor->List->Clear(0); // make playlist's list update itself
 				}
 				else
 				{
@@ -909,7 +895,7 @@ int main(int argc, char *argv[])
 					else
 						ShowMessage("Aborted!");
 					curs_set(0);
-					mPlaylistList->Clear(0); // make playlist's list update itself
+					myPlaylistEditor->List->Clear(0); // make playlist's list update itself
 					UnlockStatusbar();
 				}
 			}
@@ -975,13 +961,13 @@ int main(int argc, char *argv[])
 				}
 				myPlaylist->Main()->SetTimeout(ncmpcpp_window_timeout);
 			}
-			else if (wCurrent == mPlaylistEditor && !mPlaylistEditor->Empty())
+			else if (wCurrent == myPlaylistEditor->Content && !myPlaylistEditor->Content->Empty())
 			{
-				mPlaylistEditor->SetTimeout(50);
-				if (mPlaylistEditor->hasSelected())
+				myPlaylistEditor->Content->SetTimeout(50);
+				if (myPlaylistEditor->Content->hasSelected())
 				{
 					vector<size_t> list;
-					mPlaylistEditor->GetSelected(list);
+					myPlaylistEditor->Content->GetSelected(list);
 					
 					vector<size_t> origs(list);
 					
@@ -992,35 +978,35 @@ int main(int argc, char *argv[])
 						for (vector<size_t>::iterator it = list.begin(); it != list.end(); it++)
 						{
 							(*it)--;
-							mPlaylistEditor->Swap(*it, (*it)+1);
+							myPlaylistEditor->Content->Swap(*it, (*it)+1);
 						}
-						mPlaylistEditor->Highlight(list[(list.size()-1)/2]);
-						mPlaylistEditor->Refresh();
-						mPlaylistEditor->ReadKey(input);
+						myPlaylistEditor->Content->Highlight(list[(list.size()-1)/2]);
+						myPlaylistEditor->Content->Refresh();
+						myPlaylistEditor->Content->ReadKey(input);
 					}
 					for (size_t i = 0; i < list.size(); i++)
 						if (origs[i] != list[i])
-							Mpd->QueueMove(mPlaylistList->Current(), origs[i], list[i]);
+							Mpd->QueueMove(myPlaylistEditor->List->Current(), origs[i], list[i]);
 					Mpd->CommitQueue();
 				}
 				else
 				{
 					size_t from, to;
-					from = to = mPlaylistEditor->Choice();
+					from = to = myPlaylistEditor->Content->Choice();
 					while (Keypressed(input, Key.MvSongUp) && to > 0)
 					{
 						TraceMpdStatus();
 						timer = time(NULL);
 						to--;
-						mPlaylistEditor->Swap(to, to+1);
-						mPlaylistEditor->Scroll(wUp);
-						mPlaylistEditor->Refresh();
-						mPlaylistEditor->ReadKey(input);
+						myPlaylistEditor->Content->Swap(to, to+1);
+						myPlaylistEditor->Content->Scroll(wUp);
+						myPlaylistEditor->Content->Refresh();
+						myPlaylistEditor->Content->ReadKey(input);
 					}
 					if (from != to)
-						Mpd->Move(mPlaylistList->Current(), from, to);
+						Mpd->Move(myPlaylistEditor->List->Current(), from, to);
 				}
-				mPlaylistEditor->SetTimeout(ncmpcpp_window_timeout);
+				myPlaylistEditor->Content->SetTimeout(ncmpcpp_window_timeout);
 			}
 		}
 		else if (Keypressed(input, Key.MvSongDown))
@@ -1079,52 +1065,52 @@ int main(int argc, char *argv[])
 				myPlaylist->Main()->SetTimeout(ncmpcpp_window_timeout);
 				
 			}
-			else if (wCurrent == mPlaylistEditor && !mPlaylistEditor->Empty())
+			else if (wCurrent == myPlaylistEditor->Content && !myPlaylistEditor->Content->Empty())
 			{
-				mPlaylistEditor->SetTimeout(50);
-				if (mPlaylistEditor->hasSelected())
+				myPlaylistEditor->Content->SetTimeout(50);
+				if (myPlaylistEditor->Content->hasSelected())
 				{
 					vector<size_t> list;
-					mPlaylistEditor->GetSelected(list);
+					myPlaylistEditor->Content->GetSelected(list);
 					
 					vector<size_t> origs(list);
 					
-					while (Keypressed(input, Key.MvSongDown) && list.back() < mPlaylistEditor->Size()-1)
+					while (Keypressed(input, Key.MvSongDown) && list.back() < myPlaylistEditor->Content->Size()-1)
 					{
 						TraceMpdStatus();
 						timer = time(NULL);
 						for (vector<size_t>::reverse_iterator it = list.rbegin(); it != list.rend(); it++)
 						{
 							(*it)++;
-							mPlaylistEditor->Swap(*it, (*it)-1);
+							myPlaylistEditor->Content->Swap(*it, (*it)-1);
 						}
-						mPlaylistEditor->Highlight(list[(list.size()-1)/2]);
-						mPlaylistEditor->Refresh();
-						mPlaylistEditor->ReadKey(input);
+						myPlaylistEditor->Content->Highlight(list[(list.size()-1)/2]);
+						myPlaylistEditor->Content->Refresh();
+						myPlaylistEditor->Content->ReadKey(input);
 					}
 					for (int i = list.size()-1; i >= 0; i--)
 						if (origs[i] != list[i])
-							Mpd->QueueMove(mPlaylistList->Current(), origs[i], list[i]);
+							Mpd->QueueMove(myPlaylistEditor->List->Current(), origs[i], list[i]);
 					Mpd->CommitQueue();
 				}
 				else
 				{
 					size_t from, to;
-					from = to = mPlaylistEditor->Choice();
-					while (Keypressed(input, Key.MvSongDown) && to < mPlaylistEditor->Size()-1)
+					from = to = myPlaylistEditor->Content->Choice();
+					while (Keypressed(input, Key.MvSongDown) && to < myPlaylistEditor->Content->Size()-1)
 					{
 						TraceMpdStatus();
 						timer = time(NULL);
 						to++;
-						mPlaylistEditor->Swap(to, to-1);
-						mPlaylistEditor->Scroll(wDown);
-						mPlaylistEditor->Refresh();
-						mPlaylistEditor->ReadKey(input);
+						myPlaylistEditor->Content->Swap(to, to-1);
+						myPlaylistEditor->Content->Scroll(wDown);
+						myPlaylistEditor->Content->Refresh();
+						myPlaylistEditor->Content->ReadKey(input);
 					}
 					if (from != to)
-						Mpd->Move(mPlaylistList->Current(), from, to);
+						Mpd->Move(myPlaylistEditor->List->Current(), from, to);
 				}
-				mPlaylistEditor->SetTimeout(ncmpcpp_window_timeout);
+				myPlaylistEditor->Content->SetTimeout(ncmpcpp_window_timeout);
 			}
 		}
 		else if (Keypressed(input, Key.Add))
@@ -1386,7 +1372,7 @@ int main(int argc, char *argv[])
 			||  (wCurrent == myBrowser->Main() && myBrowser->Main()->Current().type == itSong)
 			||  (wCurrent == mySearcher->Main() && !mySearcher->Main()->Current().first)
 			||  (wCurrent == myLibrary->Songs && !myLibrary->Songs->Empty())
-			||  (wCurrent == mPlaylistEditor && !mPlaylistEditor->Empty())
+			||  (wCurrent == myPlaylistEditor->Content && !myPlaylistEditor->Content->Empty())
 			||  (wCurrent == mEditorTags && !mEditorTags->Empty()))
 			{
 				List *mList = reinterpret_cast<Menu<Song> *>(wCurrent);
@@ -1406,7 +1392,7 @@ int main(int argc, char *argv[])
 						edited_song = myLibrary->Songs->at(id);
 						break;
 					case csPlaylistEditor:
-						edited_song = mPlaylistEditor->at(id);
+						edited_song = myPlaylistEditor->Content->at(id);
 						break;
 					case csTagEditor:
 						edited_song = mEditorTags->at(id);
@@ -1488,9 +1474,9 @@ int main(int argc, char *argv[])
 						ShowMessage("Cannot rename '%s' to '%s'!", old_dir.c_str(), new_dir.c_str());
 				}
 			}
-			else if (wCurrent == mPlaylistList || (wCurrent == myBrowser->Main() && myBrowser->Main()->Current().type == itPlaylist))
+			else if (wCurrent == myPlaylistEditor->List || (wCurrent == myBrowser->Main() && myBrowser->Main()->Current().type == itPlaylist))
 			{
-				string old_name = wCurrent == mPlaylistList ? mPlaylistList->Current() : myBrowser->Main()->Current().name;
+				string old_name = wCurrent == myPlaylistEditor->List ? myPlaylistEditor->List->Current() : myBrowser->Main()->Current().name;
 				LockStatusbar();
 				Statusbar() << fmtBold << "Playlist: " << fmtBoldEnd;
 				string new_name = wFooter->GetString(old_name);
@@ -1501,7 +1487,7 @@ int main(int argc, char *argv[])
 					ShowMessage("Playlist '%s' renamed to '%s'", old_name.c_str(), new_name.c_str());
 					if (!Config.local_browser)
 						myBrowser->GetDirectory("/");
-					mPlaylistList->Clear(0);
+					myPlaylistEditor->List->Clear(0);
 				}
 			}
 		}
@@ -1510,7 +1496,7 @@ int main(int argc, char *argv[])
 			if ((wCurrent == myPlaylist->Main() && !myPlaylist->Main()->Empty())
 			||  (wCurrent == mySearcher->Main() && !mySearcher->Main()->Current().first)
 			||  (wCurrent == myLibrary->Songs && !myLibrary->Songs->Empty())
-			||  (wCurrent == mPlaylistEditor && !mPlaylistEditor->Empty())
+			||  (wCurrent == myPlaylistEditor->Content && !myPlaylistEditor->Content->Empty())
 #			ifdef HAVE_TAGLIB_H
 			||  (wCurrent == mEditorTags && !mEditorTags->Empty())
 #			endif // HAVE_TAGLIB_H
@@ -1530,7 +1516,7 @@ int main(int argc, char *argv[])
 						s = &myLibrary->Songs->at(id);
 						break;
 					case csPlaylistEditor:
-						s = &mPlaylistEditor->at(id);
+						s = &myPlaylistEditor->Content->at(id);
 						break;
 #					ifdef HAVE_TAGLIB_H
 					case csTagEditor:
@@ -1594,7 +1580,7 @@ int main(int argc, char *argv[])
 			||  wCurrent == myBrowser->Main()
 			||  (wCurrent == mySearcher->Main() && !mySearcher->Main()->Current().first)
 			||  wCurrent == myLibrary->Songs
-			||  wCurrent == mPlaylistEditor
+			||  wCurrent == myPlaylistEditor->Content
 #			ifdef HAVE_TAGLIB_H
 			||  wCurrent == mEditorTags
 #			endif // HAVE_TAGLIB_H
@@ -1619,7 +1605,7 @@ int main(int argc, char *argv[])
 			||  wCurrent == myBrowser->Main()
 			||  wCurrent == mySearcher->Main()
 			||  wCurrent == myLibrary->Songs
-			||  wCurrent == mPlaylistEditor
+			||  wCurrent == myPlaylistEditor->Content
 #			ifdef HAVE_TAGLIB_H
 			||  wCurrent == mEditorTags
 #			endif // HAVE_TAGLIB_H
@@ -1640,7 +1626,7 @@ int main(int argc, char *argv[])
 			&&  wCurrent != myBrowser->Main()
 			&&  wCurrent != mySearcher->Main()
 			&&  wCurrent != myLibrary->Songs
-			&&  wCurrent != mPlaylistEditor)
+			&&  wCurrent != myPlaylistEditor->Content)
 				continue;
 			
 			List *mList = reinterpret_cast<Menu<Song> *>(wCurrent);
@@ -1701,7 +1687,7 @@ int main(int argc, char *argv[])
 					}
 					case csPlaylistEditor:
 					{
-						Song *s = new Song(mPlaylistEditor->at(*it));
+						Song *s = new Song(myPlaylistEditor->Content->at(*it));
 						result.push_back(s);
 						break;
 					}
@@ -1770,7 +1756,7 @@ int main(int argc, char *argv[])
 			}
 			else if (current_screen == csPlaylistEditor)
 			{
-				PlaylistEditor::Refresh();
+				myPlaylistEditor->Refresh();
 			}
 			else
 				wCurrent->Refresh();
@@ -1818,7 +1804,7 @@ int main(int argc, char *argv[])
 				// refresh playlist's lists
 				if (!Config.local_browser && myBrowser->CurrentDir() == "/")
 					myBrowser->GetDirectory("/");
-				mPlaylistList->Clear(0); // make playlist editor update itself
+				myPlaylistEditor->List->Clear(0); // make playlist editor update itself
 			}
 			timer = time(NULL);
 			delete mDialog;
@@ -1927,10 +1913,10 @@ int main(int argc, char *argv[])
 							name = myLibrary->Songs->at(i).toString(Config.song_library_format);
 						break;
 					case csPlaylistEditor:
-						if (wCurrent == mPlaylistList)
-							name = mPlaylistList->at(i);
+						if (wCurrent == myPlaylistEditor->List)
+							name = myPlaylistEditor->List->at(i);
 						else
-							name = mPlaylistEditor->at(i).toString(Config.song_list_format);
+							name = myPlaylistEditor->Content->at(i).toString(Config.song_list_format);
 						break;
 #					ifdef HAVE_TAGLIB_H
 					case csTagEditor:
@@ -2142,7 +2128,7 @@ int main(int argc, char *argv[])
 		}
 		else if (Keypressed(input, Key.PlaylistEditor))
 		{
-			PlaylistEditor::SwitchTo();
+			myPlaylistEditor->SwitchTo();
 		}
 #		ifdef HAVE_TAGLIB_H
 		else if (Keypressed(input, Key.TagEditor))

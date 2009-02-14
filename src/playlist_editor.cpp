@@ -33,56 +33,60 @@ using namespace Global;
 using namespace MPD;
 using std::string;
 
-Window *Global::wPlaylistEditorActiveCol;
-Menu<string> *Global::mPlaylistList;
-Menu<Song> *Global::mPlaylistEditor;
+//Window *Global::wPlaylistEditorActiveCol;
+//Menu<string> *Global::List;
+//Menu<Song> *Global::Content;
 
-namespace PlaylistEditor
-{
-	size_t left_col_width;
-	size_t right_col_startx;
-	size_t right_col_width;
-}
+PlaylistEditor *myPlaylistEditor = new PlaylistEditor;
+
+size_t PlaylistEditor::LeftColumnWidth;
+size_t PlaylistEditor::RightColumnStartX;
+size_t PlaylistEditor::RightColumnWidth;
 
 void PlaylistEditor::Init()
 {
-	left_col_width = COLS/3-1;
-	right_col_startx = left_col_width+1;
-	right_col_width = COLS-left_col_width-1;
+	LeftColumnWidth = COLS/3-1;
+	RightColumnStartX = LeftColumnWidth+1;
+	RightColumnWidth = COLS-LeftColumnWidth-1;
 	
-	mPlaylistList = new Menu<string>(0, main_start_y, left_col_width, main_height, "Playlists", Config.main_color, brNone);
-	mPlaylistList->HighlightColor(Config.active_column_color);
-	mPlaylistList->SetTimeout(ncmpcpp_window_timeout);
-	mPlaylistList->SetItemDisplayer(Display::Generic);
+	List = new Menu<string>(0, main_start_y, LeftColumnWidth, main_height, "Playlists", Config.main_color, brNone);
+	List->HighlightColor(Config.active_column_color);
+	List->SetTimeout(ncmpcpp_window_timeout);
+	List->SetItemDisplayer(Display::Generic);
 	
-	mPlaylistEditor = new Menu<Song>(right_col_startx, main_start_y, right_col_width, main_height, "Playlist's content", Config.main_color, brNone);
-	mPlaylistEditor->HighlightColor(Config.main_highlight_color);
-	mPlaylistEditor->SetTimeout(ncmpcpp_window_timeout);
-	mPlaylistEditor->SetSelectPrefix(&Config.selected_item_prefix);
-	mPlaylistEditor->SetSelectSuffix(&Config.selected_item_suffix);
-	mPlaylistEditor->SetItemDisplayer(Display::Songs);
-	mPlaylistEditor->SetItemDisplayerUserData(&Config.song_list_format);
+	Content = new Menu<Song>(RightColumnStartX, main_start_y, RightColumnWidth, main_height, "Playlist's content", Config.main_color, brNone);
+	Content->HighlightColor(Config.main_highlight_color);
+	Content->SetTimeout(ncmpcpp_window_timeout);
+	Content->SetSelectPrefix(&Config.selected_item_prefix);
+	Content->SetSelectSuffix(&Config.selected_item_suffix);
+	Content->SetItemDisplayer(Display::Songs);
+	Content->SetItemDisplayerUserData(&Config.song_list_format);
 	
-	wPlaylistEditorActiveCol = mPlaylistList;
+	w = List;
 }
 
 void PlaylistEditor::Resize()
 {
-	left_col_width = COLS/3-1;
-	right_col_startx = left_col_width+1;
-	right_col_width = COLS-left_col_width-1;
+	LeftColumnWidth = COLS/3-1;
+	RightColumnStartX = LeftColumnWidth+1;
+	RightColumnWidth = COLS-LeftColumnWidth-1;
 	
-	mPlaylistList->Resize(left_col_width, main_height);
-	mPlaylistEditor->Resize(right_col_width, main_height);
+	List->Resize(LeftColumnWidth, main_height);
+	Content->Resize(RightColumnWidth, main_height);
 	
-	mPlaylistEditor->MoveTo(right_col_startx, main_start_y);
+	Content->MoveTo(RightColumnStartX, main_start_y);
+}
+
+std::string PlaylistEditor::Title()
+{
+	return "Playlist editor";
 }
 
 void PlaylistEditor::Refresh()
 {
-	mPlaylistList->Display();
-	mvvline(main_start_y, right_col_startx-1, 0, main_height);
-	mPlaylistEditor->Display();
+	List->Display();
+	mvvline(main_start_y, RightColumnStartX-1, 0, main_height);
+	Content->Display();
 }
 
 void PlaylistEditor::SwitchTo()
@@ -101,39 +105,39 @@ void PlaylistEditor::SwitchTo()
 		redraw_header = 1;
 		PlaylistEditor::Refresh();
 		
-		wCurrent = wPlaylistEditorActiveCol;
+		wCurrent = w;
 		current_screen = csPlaylistEditor;
 		
-		UpdateSongList(mPlaylistEditor);
+		UpdateSongList(Content);
 	}
 }
 
 void PlaylistEditor::Update()
 {
-	if (mPlaylistList->Empty())
+	if (List->Empty())
 	{
-		mPlaylistEditor->Clear(0);
+		Content->Clear(0);
 		TagList list;
 		Mpd->GetPlaylists(list);
 		sort(list.begin(), list.end(), CaseInsensitiveSorting());
 		for (TagList::iterator it = list.begin(); it != list.end(); it++)
 		{
 			utf_to_locale(*it);
-			mPlaylistList->AddOption(*it);
+			List->AddOption(*it);
 		}
-		mPlaylistList->Window::Clear();
-		mPlaylistList->Refresh();
+		List->Window::Clear();
+		List->Refresh();
 	}
 	
-	if (!mPlaylistList->Empty() && mPlaylistEditor->Empty())
+	if (!List->Empty() && Content->Empty())
 	{
-		mPlaylistEditor->Reset();
+		Content->Reset();
 		SongList list;
-		Mpd->GetPlaylistContent(locale_to_utf_cpy(mPlaylistList->Current()), list);
+		Mpd->GetPlaylistContent(locale_to_utf_cpy(List->Current()), list);
 		if (!list.empty())
-			mPlaylistEditor->SetTitle("Playlist's content (" + IntoStr(list.size()) + " item" + (list.size() == 1 ? ")" : "s)"));
+			Content->SetTitle("Playlist's content (" + IntoStr(list.size()) + " item" + (list.size() == 1 ? ")" : "s)"));
 		else
-			mPlaylistEditor->SetTitle("Playlist's content");
+			Content->SetTitle("Playlist's content");
 		bool bold = 0;
 		for (SongList::const_iterator it = list.begin(); it != list.end(); it++)
 		{
@@ -145,40 +149,64 @@ void PlaylistEditor::Update()
 					break;
 				}
 			}
-			mPlaylistEditor->AddOption(**it, bold);
+			Content->AddOption(**it, bold);
 			bold = 0;
 		}
 		FreeSongList(list);
-		mPlaylistEditor->Window::Clear();
-		mPlaylistEditor->Display();
+		Content->Window::Clear();
+		Content->Display();
 	}
 	
-	if (wCurrent == mPlaylistEditor && mPlaylistEditor->Empty())
+	if (wCurrent == Content && Content->Empty())
 	{
-		mPlaylistEditor->HighlightColor(Config.main_highlight_color);
-		mPlaylistList->HighlightColor(Config.active_column_color);
-		wCurrent = wPlaylistEditorActiveCol = mPlaylistList;
+		Content->HighlightColor(Config.main_highlight_color);
+		List->HighlightColor(Config.active_column_color);
+		wCurrent = w = List;
 	}
 	
-	if (mPlaylistEditor->Empty())
+	if (Content->Empty())
 	{
-		mPlaylistEditor->WriteXY(0, 0, 0, "Playlist is empty.");
-		mPlaylistEditor->Refresh();
+		Content->WriteXY(0, 0, 0, "Playlist is empty.");
+		Content->Refresh();
 	}
 }
 
-void PlaylistEditor::EnterPressed(bool add_n_play)
+void PlaylistEditor::NextColumn()
+{
+	if (w == List)
+	{
+		CLEAR_FIND_HISTORY;
+		List->HighlightColor(Config.main_highlight_color);
+		w->Refresh();
+		wCurrent = w = Content;
+		Content->HighlightColor(Config.active_column_color);
+	}
+}
+
+void PlaylistEditor::PrevColumn()
+{
+	if (w == Content)
+	{
+		CLEAR_FIND_HISTORY;
+		Content->HighlightColor(Config.main_highlight_color);
+		w->Refresh();
+		wCurrent = w = List;
+		List->HighlightColor(Config.active_column_color);
+	}
+}
+
+void PlaylistEditor::AddToPlaylist(bool add_n_play)
 {
 	SongList list;
 	
-	if (wCurrent == mPlaylistList && !mPlaylistList->Empty())
+	if (wCurrent == List && !List->Empty())
 	{
-		Mpd->GetPlaylistContent(locale_to_utf_cpy(mPlaylistList->Current()), list);
+		Mpd->GetPlaylistContent(locale_to_utf_cpy(List->Current()), list);
 		for (SongList::const_iterator it = list.begin(); it != list.end(); it++)
 			Mpd->QueueAddSong(**it);
 		if (Mpd->CommitQueue())
 		{
-			ShowMessage("Loading playlist %s...", mPlaylistList->Current().c_str());
+			ShowMessage("Loading playlist %s...", List->Current().c_str());
 			Song &s = myPlaylist->Main()->at(myPlaylist->Main()->Size()-list.size());
 			if (s.GetHash() == list[0]->GetHash())
 			{
@@ -189,14 +217,14 @@ void PlaylistEditor::EnterPressed(bool add_n_play)
 				ShowMessage("%s", message_part_of_songs_added);
 		}
 	}
-	else if (wCurrent == mPlaylistEditor)
+	else if (wCurrent == Content)
 	{
-		if (!mPlaylistEditor->Empty())
+		if (!Content->Empty())
 		{
 			block_item_list_update = 1;
-			if (Config.ncmpc_like_songs_adding && mPlaylistEditor->isBold())
+			if (Config.ncmpc_like_songs_adding && Content->isBold())
 			{
-				long long hash = mPlaylistEditor->Current().GetHash();
+				long long hash = Content->Current().GetHash();
 				if (add_n_play)
 				{
 					for (size_t i = 0; i < myPlaylist->Main()->Size(); i++)
@@ -221,19 +249,19 @@ void PlaylistEditor::EnterPressed(bool add_n_play)
 						}
 					}
 					Mpd->CommitQueue();
-					mPlaylistEditor->BoldOption(mPlaylistEditor->Choice(), 0);
+					Content->BoldOption(Content->Choice(), 0);
 				}
 			}
 			else
 			{
-				Song &s = mPlaylistEditor->at(mPlaylistEditor->Choice());
+				Song &s = Content->at(Content->Choice());
 				int id = Mpd->AddSong(s);
 				if (id >= 0)
 				{
 					ShowMessage("Added to playlist: %s", s.toString(Config.song_status_format).c_str());
 					if (add_n_play)
 						Mpd->PlayID(id);
-					mPlaylistEditor->BoldOption(mPlaylistEditor->Choice(), 1);
+					Content->BoldOption(Content->Choice(), 1);
 				}
 			}
 		}

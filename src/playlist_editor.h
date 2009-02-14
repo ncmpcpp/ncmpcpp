@@ -23,22 +23,36 @@
 
 #include "ncmpcpp.h"
 
-namespace PlaylistEditor
+class PlaylistEditor : public Screen<Window>
 {
-	void Init();
-	void Resize();
-	void Refresh();
-	void SwitchTo();
-	void Update();
+	public:
+		virtual void Init();
+		virtual void SwitchTo();
+		virtual void Resize();
+		
+		virtual std::string Title();
+		
+		virtual void Refresh();
+		virtual void Update();
+		
+		virtual void EnterPressed() { AddToPlaylist(1); }
+		virtual void SpacePressed() { AddToPlaylist(0); }
+		
+		void NextColumn();
+		void PrevColumn();
+		
+		Menu<std::string> *List;
+		Menu<MPD::Song> *Content;
 	
-	void EnterPressed(bool = 1);
-	inline void SpacePressed();
-}
+	protected:
+		void AddToPlaylist(bool);
+		
+		static size_t LeftColumnWidth;
+		static size_t RightColumnStartX;
+		static size_t RightColumnWidth;
+};
 
-void PlaylistEditor::SpacePressed()
-{
-	EnterPressed(0);
-}
+extern PlaylistEditor *myPlaylistEditor;
 
 #endif
 

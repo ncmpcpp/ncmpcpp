@@ -27,6 +27,7 @@
 #include "helpers.h"
 #include "media_library.h"
 #include "playlist.h"
+#include "playlist_editor.h"
 #include "search_engine.h"
 #include "settings.h"
 #include "status_checker.h"
@@ -237,7 +238,7 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 			}
 			else if (current_screen == csPlaylistEditor)
 			{
-				UpdateSongList(mPlaylistEditor);
+				UpdateSongList(myPlaylistEditor->Content);
 			}
 		}
 	}
@@ -249,7 +250,7 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 		mEditorDirs->Clear(0);
 #		endif // HAVE_TAGLIB_H
 		myLibrary->Artists->Clear(0);
-		mPlaylistEditor->Clear(0);
+		myPlaylistEditor->Content->Clear(0);
 	}
 	if (changed.PlayerState)
 	{

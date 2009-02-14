@@ -54,9 +54,9 @@ namespace Global
 	extern Menu<MPD::Song> *mEditorTags;
 #	endif // HAVE_TAGLIB_H
 	
-	extern Window *wPlaylistEditorActiveCol;
-	extern Menu<std::string> *mPlaylistList;
-	extern Menu<MPD::Song> *mPlaylistEditor;
+//	extern Window *wPlaylistEditorActiveCol;
+//	extern Menu<std::string> *mPlaylistList;
+//	extern Menu<MPD::Song> *myPlaylistEditor->Content;
 	
 	extern Scrollpad *sHelp;
 	extern Scrollpad *sLyrics;

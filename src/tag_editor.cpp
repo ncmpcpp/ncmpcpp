@@ -187,7 +187,7 @@ void TinyTagEditor::EnterPressed(Song &s)
 			}
 			else if (current_screen == csPlaylistEditor)
 			{
-				PlaylistEditor::Refresh();
+				myPlaylistEditor->Refresh();
 			}
 			else if (current_screen == csTagEditor)
 			{

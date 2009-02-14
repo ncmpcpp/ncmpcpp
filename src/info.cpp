@@ -85,7 +85,7 @@ void Info::GetSong()
 		}
 		else if (current_screen == csPlaylistEditor)
 		{
-			PlaylistEditor::Refresh();
+			myPlaylistEditor->Refresh();
 		}
 #		ifdef HAVE_TAGLIB_H
 		else if (current_screen == csTagEditor)
@@ -99,7 +99,7 @@ void Info::GetSong()
 	||  (wCurrent == myBrowser->Main() && myBrowser->Main()->Current().type == MPD::itSong)
 	||  (wCurrent == mySearcher->Main() && !mySearcher->Main()->Current().first)
 	||  (wCurrent == myLibrary->Songs && !myLibrary->Songs->Empty())
-	||  (wCurrent == mPlaylistEditor && !mPlaylistEditor->Empty())
+	||  (wCurrent == myPlaylistEditor->Content && !myPlaylistEditor->Content->Empty())
 #	ifdef HAVE_TAGLIB_H
 	||  (wCurrent == mEditorTags && !mEditorTags->Empty())
 #	endif // HAVE_TAGLIB_H
@@ -122,7 +122,7 @@ void Info::GetSong()
 				s = &myLibrary->Songs->at(id);
 				break;
 			case csPlaylistEditor:
-				s = &mPlaylistEditor->at(id);
+				s = &myPlaylistEditor->Content->at(id);
 				break;
 #			ifdef HAVE_TAGLIB_H
 			case csTagEditor:
@@ -172,7 +172,7 @@ void Info::GetArtist()
 		}
 		else if (current_screen == csPlaylistEditor)
 		{
-			PlaylistEditor::Refresh();
+			myPlaylistEditor->Refresh();
 		}
 #		ifdef HAVE_TAGLIB_H
 		else if (current_screen == csTagEditor)
@@ -187,7 +187,7 @@ void Info::GetArtist()
 	||  (wCurrent == mySearcher->Main() && !mySearcher->Main()->Current().first)
 	||  (wCurrent == myLibrary->Artists && !myLibrary->Artists->Empty())
 	||  (wCurrent == myLibrary->Songs && !myLibrary->Songs->Empty())
-	||  (wCurrent == mPlaylistEditor && !mPlaylistEditor->Empty())
+	||  (wCurrent == myPlaylistEditor->Content && !myPlaylistEditor->Content->Empty())
 #	ifdef HAVE_TAGLIB_H
 	||  (wCurrent == mEditorTags && !mEditorTags->Empty())
 #	endif // HAVE_TAGLIB_H
@@ -216,7 +216,7 @@ void Info::GetArtist()
 				*artist = myLibrary->Artists->at(id);
 				break;
 			case csPlaylistEditor:
-				*artist = mPlaylistEditor->at(id).GetArtist();
+				*artist = myPlaylistEditor->Content->at(id).GetArtist();
 				break;
 #					ifdef HAVE_TAGLIB_H
 			case csTagEditor:

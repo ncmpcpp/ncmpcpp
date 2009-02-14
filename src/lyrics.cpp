@@ -97,7 +97,7 @@ void Lyrics::Get()
 		}
 		else if (current_screen == csPlaylistEditor)
 		{
-			PlaylistEditor::Refresh();
+			myPlaylistEditor->Refresh();
 		}
 #		ifdef HAVE_TAGLIB_H
 		else if (current_screen == csTagEditor)
@@ -112,7 +112,7 @@ void Lyrics::Get()
 	||  (wCurrent == myBrowser->Main() && myBrowser->Main()->Current().type == MPD::itSong)
 	||  (wCurrent == mySearcher->Main() && !mySearcher->Main()->Current().first)
 	||  (wCurrent == myLibrary->Songs && !myLibrary->Songs->Empty())
-	||  (wCurrent == mPlaylistEditor && !mPlaylistEditor->Empty())
+	||  (wCurrent == myPlaylistEditor->Content && !myPlaylistEditor->Content->Empty())
 #	ifdef HAVE_TAGLIB_H
 	||  (wCurrent == mEditorTags && !mEditorTags->Empty())
 #	endif // HAVE_TAGLIB_H
@@ -154,7 +154,7 @@ void Lyrics::Get()
 				s = &myLibrary->Songs->at(id);
 				break;
 			case csPlaylistEditor:
-				s = &mPlaylistEditor->at(id);
+				s = &myPlaylistEditor->Content->at(id);
 				break;
 #				ifdef HAVE_TAGLIB_H
 			case csTagEditor:
