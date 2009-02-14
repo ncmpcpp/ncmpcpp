@@ -29,6 +29,7 @@
 #include "media_library.h"
 #include "playlist.h"
 #include "playlist_editor.h"
+#include "search_engine.h"
 #include "settings.h"
 #include "song.h"
 #include "status_checker.h"
@@ -109,7 +110,7 @@ void Lyrics::Get()
 	    reload_lyrics
 	||  (wCurrent == myPlaylist->Main() && !myPlaylist->Main()->Empty())
 	||  (wCurrent == myBrowser->Main() && myBrowser->Main()->Current().type == MPD::itSong)
-	||  (wCurrent == mSearcher && !mSearcher->Current().first)
+	||  (wCurrent == mySearcher->Main() && !mySearcher->Main()->Current().first)
 	||  (wCurrent == mLibSongs && !mLibSongs->Empty())
 	||  (wCurrent == mPlaylistEditor && !mPlaylistEditor->Empty())
 #	ifdef HAVE_TAGLIB_H
@@ -147,7 +148,7 @@ void Lyrics::Get()
 				s = myBrowser->Main()->at(id).song;
 				break;
 			case csSearcher:
-				s = mSearcher->at(id).second;
+				s = mySearcher->Main()->at(id).second;
 				break;
 			case csLibrary:
 				s = &mLibSongs->at(id);

@@ -37,7 +37,7 @@ namespace Global
 	
 //	extern Menu<MPD::Song> *myPlaylist->Main();
 //	extern Menu<MPD::Item> *myBrowser->Main();
-	extern Menu< std::pair<Buffer *, MPD::Song *> > *mSearcher;
+//	extern Menu< std::pair<Buffer *, MPD::Song *> > *mSearcher;
 	
 	extern Window *wLibActiveCol;
 	extern Menu<std::string> *mLibArtists;
@@ -106,13 +106,13 @@ namespace Global
 	extern bool header_update_status;
 	
 	extern bool header_update_status;
-	extern bool search_case_sensitive;
-	extern bool search_match_to_pattern;
+//	extern bool search_case_sensitive;
+//	extern bool search_match_to_pattern;
 
 	extern std::string volume_state;
 
-	extern const char *search_mode_normal;
-	extern const char *search_mode_strict;
+//	extern const char *search_mode_normal;
+//	extern const char *search_mode_strict;
 	
 	extern std::vector<int> vFoundPositions;
 	extern int found_pos;

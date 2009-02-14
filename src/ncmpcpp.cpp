@@ -149,7 +149,7 @@ int main(int argc, char *argv[])
 	
 	myPlaylist->Init();
 	myBrowser->Init();
-	SearchEngine::Init();
+	mySearcher->Init();
 	MediaLibrary::Init();
 	PlaylistEditor::Init();
 	
@@ -255,7 +255,7 @@ int main(int argc, char *argv[])
 					screen_title = info_title;
 					break;
 				case csSearcher:
-					screen_title = "Search engine";
+					screen_title = mySearcher->Title();
 					break;
 				case csLibrary:
 					screen_title = "Media library";
@@ -508,7 +508,7 @@ int main(int argc, char *argv[])
 			Help::Resize();
 			myPlaylist->Resize();
 			myBrowser->Resize();
-			SearchEngine::Resize();
+			mySearcher->Resize();
 			MediaLibrary::Resize();
 			PlaylistEditor::Resize();
 			Info::Resize();
@@ -587,7 +587,7 @@ int main(int argc, char *argv[])
 #				endif // HAVE_TAGLIB_H
 				case csSearcher:
 				{
-					SearchEngine::EnterPressed();
+					mySearcher->EnterPressed();
 					break;
 				}
 				case csLibrary:
@@ -624,7 +624,7 @@ int main(int argc, char *argv[])
 #				ifdef HAVE_TAGLIB_H
 				||  wCurrent == mEditorTags
 #				endif // HAVE_TAGLIB_H
-				|| (wCurrent == myBrowser->Main() && ((Menu<Song> *)wCurrent)->Choice() >= (myBrowser->CurrentDir() != "/" ? 1 : 0)) || (wCurrent == mSearcher && !mSearcher->Current().first)
+				|| (wCurrent == myBrowser->Main() && ((Menu<Song> *)wCurrent)->Choice() >= (myBrowser->CurrentDir() != "/" ? 1 : 0)) || (wCurrent == mySearcher->Main() && !mySearcher->Main()->Current().first)
 				|| wCurrent == mLibSongs
 				|| wCurrent == mPlaylistEditor)
 				{
@@ -644,7 +644,7 @@ int main(int argc, char *argv[])
 				}
 				else if (current_screen == csSearcher)
 				{
-					SearchEngine::SpacePressed();
+					mySearcher->SpacePressed();
 				}
 				else if (current_screen == csLibrary)
 				{
@@ -1259,12 +1259,12 @@ int main(int argc, char *argv[])
 				ShowMessage("Browser display mode: %s", Config.columns_in_browser ? "Columns" : "Classic");
 				myBrowser->Main()->SetTitle(Config.columns_in_browser ? Display::Columns(Config.song_columns_list_format) : "");
 			}
-			else if (wCurrent == mSearcher)
+			else if (wCurrent == mySearcher->Main())
 			{
 				Config.columns_in_search_engine = !Config.columns_in_search_engine;
 				ShowMessage("Search engine display mode: %s", Config.columns_in_search_engine ? "Columns" : "Classic");
-				if (mSearcher->Size() > search_engine_static_options)
-					mSearcher->SetTitle(Config.columns_in_search_engine ? Display::Columns(Config.song_columns_list_format) : "");
+				if (mySearcher->Main()->Size() > SearchEngine::StaticOptions)
+					mySearcher->Main()->SetTitle(Config.columns_in_search_engine ? Display::Columns(Config.song_columns_list_format) : "");
 			}
 //			redraw_screen = 1;
 		}
@@ -1418,7 +1418,7 @@ int main(int argc, char *argv[])
 			else if (
 			    (wCurrent == myPlaylist->Main() && !myPlaylist->Main()->Empty())
 			||  (wCurrent == myBrowser->Main() && myBrowser->Main()->Current().type == itSong)
-			||  (wCurrent == mSearcher && !mSearcher->Current().first)
+			||  (wCurrent == mySearcher->Main() && !mySearcher->Main()->Current().first)
 			||  (wCurrent == mLibSongs && !mLibSongs->Empty())
 			||  (wCurrent == mPlaylistEditor && !mPlaylistEditor->Empty())
 			||  (wCurrent == mEditorTags && !mEditorTags->Empty()))
@@ -1434,7 +1434,7 @@ int main(int argc, char *argv[])
 						edited_song = *myBrowser->Main()->at(id).song;
 						break;
 					case csSearcher:
-						edited_song = *mSearcher->at(id).second;
+						edited_song = *mySearcher->Main()->at(id).second;
 						break;
 					case csLibrary:
 						edited_song = mLibSongs->at(id);
@@ -1542,7 +1542,7 @@ int main(int argc, char *argv[])
 		else if (Keypressed(input, Key.GoToContainingDir))
 		{
 			if ((wCurrent == myPlaylist->Main() && !myPlaylist->Main()->Empty())
-			||  (wCurrent == mSearcher && !mSearcher->Current().first)
+			||  (wCurrent == mySearcher->Main() && !mySearcher->Main()->Current().first)
 			||  (wCurrent == mLibSongs && !mLibSongs->Empty())
 			||  (wCurrent == mPlaylistEditor && !mPlaylistEditor->Empty())
 #			ifdef HAVE_TAGLIB_H
@@ -1558,7 +1558,7 @@ int main(int argc, char *argv[])
 						s = &myPlaylist->Main()->at(id);
 						break;
 					case csSearcher:
-						s = mSearcher->at(id).second;
+						s = mySearcher->Main()->at(id).second;
 						break;
 					case csLibrary:
 						s = &mLibSongs->at(id);
@@ -1596,13 +1596,13 @@ int main(int argc, char *argv[])
 		}
 		else if (Keypressed(input, Key.StartSearching))
 		{
-			if (wCurrent == mSearcher)
+			if (wCurrent == mySearcher->Main())
 			{
-				mSearcher->Highlight(search_engine_search_button);
-				mSearcher->Highlighting(0);
-				mSearcher->Refresh();
-				mSearcher->Highlighting(1);
-				SearchEngine::EnterPressed();
+				mySearcher->Main()->Highlight(SearchEngine::SearchButton);
+				mySearcher->Main()->Highlighting(0);
+				mySearcher->Main()->Refresh();
+				mySearcher->Main()->Highlighting(1);
+				mySearcher->EnterPressed();
 			}
 		}
 		else if (Keypressed(input, Key.GoToPosition))
@@ -1626,7 +1626,7 @@ int main(int argc, char *argv[])
 		{
 			if (wCurrent == myPlaylist->Main()
 			||  wCurrent == myBrowser->Main()
-			||  (wCurrent == mSearcher && !mSearcher->Current().first)
+			||  (wCurrent == mySearcher->Main() && !mySearcher->Main()->Current().first)
 			||  wCurrent == mLibSongs
 			||  wCurrent == mPlaylistEditor
 #			ifdef HAVE_TAGLIB_H
@@ -1641,8 +1641,8 @@ int main(int argc, char *argv[])
 				// hackish shit begins
 				if (wCurrent == myBrowser->Main() && myBrowser->CurrentDir() != "/")
 					mList->Select(0, 0); // [..] cannot be selected, uhm.
-				if (wCurrent == mSearcher)
-					mList->Select(search_engine_reset_button, 0); // 'Reset' cannot be selected, omgplz.
+				if (wCurrent == mySearcher->Main())
+					mList->Select(SearchEngine::ResetButton, 0); // 'Reset' cannot be selected, omgplz.
 				// hacking shit ends.
 				ShowMessage("Selection reversed!");
 			}
@@ -1651,7 +1651,7 @@ int main(int argc, char *argv[])
 		{
 			if (wCurrent == myPlaylist->Main()
 			||  wCurrent == myBrowser->Main()
-			||  wCurrent == mSearcher
+			||  wCurrent == mySearcher->Main()
 			||  wCurrent == mLibSongs
 			||  wCurrent == mPlaylistEditor
 #			ifdef HAVE_TAGLIB_H
@@ -1672,7 +1672,7 @@ int main(int argc, char *argv[])
 		{
 			if (wCurrent != myPlaylist->Main()
 			&&  wCurrent != myBrowser->Main()
-			&&  wCurrent != mSearcher
+			&&  wCurrent != mySearcher->Main()
 			&&  wCurrent != mLibSongs
 			&&  wCurrent != mPlaylistEditor)
 				continue;
@@ -1723,7 +1723,7 @@ int main(int argc, char *argv[])
 					}
 					case csSearcher:
 					{
-						Song *s = new Song(*mSearcher->at(*it).second);
+						Song *s = new Song(*mySearcher->Main()->at(*it).second);
 						result.push_back(s);
 						break;
 					}
@@ -1908,7 +1908,7 @@ int main(int argc, char *argv[])
 #			endif // HAVE_TAGLIB_H
 			    )
 			&&  (current_screen != csSearcher
-			||   mSearcher->Current().first)
+			||   mySearcher->Main()->Current().first)
 			   )
 				continue;
 			
@@ -1926,7 +1926,7 @@ int main(int argc, char *argv[])
 			
 			ShowMessage("Searching...");
 			List *mList = reinterpret_cast<Menu<Song> *>(wCurrent);
-			for (size_t i = (wCurrent == mSearcher ? search_engine_static_options : 0); i < mList->Size(); i++)
+			for (size_t i = (wCurrent == mySearcher->Main() ? SearchEngine::StaticOptions : 0); i < mList->Size(); i++)
 			{
 				string name;
 				switch (current_screen)
@@ -1950,7 +1950,7 @@ int main(int argc, char *argv[])
 						}
 						break;
 					case csSearcher:
-						name = mSearcher->at(i).second->toString(Config.song_list_format);
+						name = mySearcher->Main()->at(i).second->toString(Config.song_list_format);
 						break;
 					case csLibrary:
 						if (wCurrent == mLibArtists)
@@ -2168,7 +2168,7 @@ int main(int argc, char *argv[])
 		}
 		else if (Keypressed(input, Key.SearchEngine))
 		{
-			SearchEngine::SwitchTo();
+			mySearcher->SwitchTo();
 		}
 		else if (Keypressed(input, Key.MediaLibrary))
 		{

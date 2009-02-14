@@ -37,6 +37,7 @@
 #include "media_library.h"
 #include "playlist.h"
 #include "playlist_editor.h"
+#include "search_engine.h"
 #include "status_checker.h"
 
 using namespace Global;
@@ -161,7 +162,7 @@ void TinyTagEditor::EnterPressed(Song &s)
 				{
 					Mpd->UpdateDirectory(locale_to_utf_cpy(s.GetDirectory()));
 					if (prev_screen == csSearcher)
-						*mSearcher->Current().second = s;
+						*mySearcher->Main()->Current().second = s;
 				}
 				else
 				{

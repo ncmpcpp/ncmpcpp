@@ -228,7 +228,7 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 			}
 			else if (current_screen == csSearcher)
 			{
-				UpdateFoundList();
+				mySearcher->UpdateFoundList();
 			}
 			else if (current_screen == csLibrary)
 			{

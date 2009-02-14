@@ -30,32 +30,31 @@ using namespace MPD;
 using namespace Global;
 using std::string;
 
-Menu< std::pair<Buffer *, Song *> > *Global::mSearcher;
+SearchEngine *mySearcher = new SearchEngine;
 
-bool Global::search_match_to_pattern = 1;
-bool Global::search_case_sensitive = 0;
+const char *SearchEngine::NormalMode = "Match if tag contains searched phrase";
+const char *SearchEngine::StrictMode = "Match only if both values are the same";
 
-const char *Global::search_mode_normal = "Match if tag contains searched phrase";
-const char *Global::search_mode_strict = "Match only if both values are the same";
+size_t SearchEngine::StaticOptions = 20;
+size_t SearchEngine::SearchButton = 15;
+size_t SearchEngine::ResetButton = 16;
 
-namespace
-{
-	SearchPattern sought;
-}
+bool SearchEngine::MatchToPattern = 1;
+bool SearchEngine::CaseSensitive = 0;
 
 void SearchEngine::Init()
 {
-	mSearcher = new Menu< std::pair<Buffer *, Song *> >(0, main_start_y, COLS, main_height, "", Config.main_color, brNone);
-	mSearcher->HighlightColor(Config.main_highlight_color);
-	mSearcher->SetTimeout(ncmpcpp_window_timeout);
-	mSearcher->SetItemDisplayer(Display::SearchEngine);
-	mSearcher->SetSelectPrefix(&Config.selected_item_prefix);
-	mSearcher->SetSelectSuffix(&Config.selected_item_suffix);
+	w = new Menu< std::pair<Buffer *, Song *> >(0, main_start_y, COLS, main_height, "", Config.main_color, brNone);
+	w->HighlightColor(Config.main_highlight_color);
+	w->SetTimeout(ncmpcpp_window_timeout);
+	w->SetItemDisplayer(Display::SearchEngine);
+	w->SetSelectPrefix(&Config.selected_item_prefix);
+	w->SetSelectSuffix(&Config.selected_item_suffix);
 }
 
 void SearchEngine::Resize()
 {
-	mSearcher->Resize(COLS, main_height);
+	w->Resize(COLS, main_height);
 }
 
 void SearchEngine::SwitchTo()
@@ -67,14 +66,14 @@ void SearchEngine::SwitchTo()
 	   )
 	{
 		CLEAR_FIND_HISTORY;
-		if (mSearcher->Empty())
-			PrepareSearchEngine();
-		wCurrent = mSearcher;
+		if (w->Empty())
+			Prepare();
+		wCurrent = w;
 		wCurrent->Hide();
 		current_screen = csSearcher;
 //		redraw_screen = 1;
 		redraw_header = 1;
-		if (!mSearcher->Back().first)
+		if (!w->Back().first)
 		{
 			wCurrent->WriteXY(0, 0, 0, "Updating list...");
 			UpdateFoundList();
@@ -82,126 +81,130 @@ void SearchEngine::SwitchTo()
 	}
 }
 
+std::string SearchEngine::Title()
+{
+	return "Search engine";
+}
+
 void SearchEngine::EnterPressed()
 {
-	size_t option = mSearcher->Choice();
+	size_t option = w->Choice();
 	LockStatusbar();
-	SearchPattern &s = sought;
 	
-	if (option <= 12)
-		mSearcher->Current().first->Clear();
+	if (option < SearchButton)
+		w->Current().first->Clear();
 	
 	switch (option)
 	{
 		case 0:
 		{
 			Statusbar() << fmtBold << "Any: " << fmtBoldEnd;
-			s.Any(wFooter->GetString(s.Any()));
-			*mSearcher->Current().first << fmtBold << "Any:      " << fmtBoldEnd << ' ' << ShowTag(s.Any());
+			itsPattern.Any(wFooter->GetString(itsPattern.Any()));
+			*w->Current().first << fmtBold << "Any:      " << fmtBoldEnd << ' ' << ShowTag(itsPattern.Any());
 			break;
 		}
 		case 1:
 		{
 			Statusbar() << fmtBold << "Artist: " << fmtBoldEnd;
-			s.SetArtist(wFooter->GetString(s.GetArtist()));
-			*mSearcher->Current().first << fmtBold << "Artist:   " << fmtBoldEnd << ' ' << ShowTag(s.GetArtist());
+			itsPattern.SetArtist(wFooter->GetString(itsPattern.GetArtist()));
+			*w->Current().first << fmtBold << "Artist:   " << fmtBoldEnd << ' ' << ShowTag(itsPattern.GetArtist());
 			break;
 		}
 		case 2:
 		{
 			Statusbar() << fmtBold << "Title: " << fmtBoldEnd;
-			s.SetTitle(wFooter->GetString(s.GetTitle()));
-			*mSearcher->Current().first << fmtBold << "Title:    " << fmtBoldEnd << ' ' << ShowTag(s.GetTitle());
+			itsPattern.SetTitle(wFooter->GetString(itsPattern.GetTitle()));
+			*w->Current().first << fmtBold << "Title:    " << fmtBoldEnd << ' ' << ShowTag(itsPattern.GetTitle());
 			break;
 		}
 		case 3:
 		{
 			Statusbar() << fmtBold << "Album: " << fmtBoldEnd;
-			s.SetAlbum(wFooter->GetString(s.GetAlbum()));
-			*mSearcher->Current().first << fmtBold << "Album:    " << fmtBoldEnd << ' ' << ShowTag(s.GetAlbum());
+			itsPattern.SetAlbum(wFooter->GetString(itsPattern.GetAlbum()));
+			*w->Current().first << fmtBold << "Album:    " << fmtBoldEnd << ' ' << ShowTag(itsPattern.GetAlbum());
 			break;
 		}
 		case 4:
 		{
 			Statusbar() << fmtBold << "Filename: " << fmtBoldEnd;
-			s.SetFile(wFooter->GetString(s.GetFile()));
-			*mSearcher->Current().first << fmtBold << "Filename: " << fmtBoldEnd << ' ' << ShowTag(s.GetFile());
+			itsPattern.SetFile(wFooter->GetString(itsPattern.GetFile()));
+			*w->Current().first << fmtBold << "Filename: " << fmtBoldEnd << ' ' << ShowTag(itsPattern.GetFile());
 			break;
 		}
 		case 5:
 		{
 			Statusbar() << fmtBold << "Composer: " << fmtBoldEnd;
-			s.SetComposer(wFooter->GetString(s.GetComposer()));
-			*mSearcher->Current().first << fmtBold << "Composer: " << fmtBoldEnd << ' ' << ShowTag(s.GetComposer());
+			itsPattern.SetComposer(wFooter->GetString(itsPattern.GetComposer()));
+			*w->Current().first << fmtBold << "Composer: " << fmtBoldEnd << ' ' << ShowTag(itsPattern.GetComposer());
 			break;
 		}
 		case 6:
 		{
 			Statusbar() << fmtBold << "Performer: " << fmtBoldEnd;
-			s.SetPerformer(wFooter->GetString(s.GetPerformer()));
-			*mSearcher->Current().first << fmtBold << "Performer:" << fmtBoldEnd << ' ' << ShowTag(s.GetPerformer());
+			itsPattern.SetPerformer(wFooter->GetString(itsPattern.GetPerformer()));
+			*w->Current().first << fmtBold << "Performer:" << fmtBoldEnd << ' ' << ShowTag(itsPattern.GetPerformer());
 			break;
 		}
 		case 7:
 		{
 			Statusbar() << fmtBold << "Genre: " << fmtBoldEnd;
-			s.SetGenre(wFooter->GetString(s.GetGenre()));
-			*mSearcher->Current().first << fmtBold << "Genre:    " << fmtBoldEnd << ' ' << ShowTag(s.GetGenre());
+			itsPattern.SetGenre(wFooter->GetString(itsPattern.GetGenre()));
+			*w->Current().first << fmtBold << "Genre:    " << fmtBoldEnd << ' ' << ShowTag(itsPattern.GetGenre());
 			break;
 		}
 		case 8:
 		{
 			Statusbar() << fmtBold << "Year: " << fmtBoldEnd;
-			s.SetYear(wFooter->GetString(s.GetYear(), 4));
-			*mSearcher->Current().first << fmtBold << "Year:     " << fmtBoldEnd << ' ' << ShowTag(s.GetYear());
+			itsPattern.SetYear(wFooter->GetString(itsPattern.GetYear(), 4));
+			*w->Current().first << fmtBold << "Year:     " << fmtBoldEnd << ' ' << ShowTag(itsPattern.GetYear());
 			break;
 		}
 		case 9:
 		{
 			Statusbar() << fmtBold << "Comment: " << fmtBoldEnd;
-			s.SetComment(wFooter->GetString(s.GetComment()));
-			*mSearcher->Current().first << fmtBold << "Comment:  " << fmtBoldEnd << ' ' << ShowTag(s.GetComment());
+			itsPattern.SetComment(wFooter->GetString(itsPattern.GetComment()));
+			*w->Current().first << fmtBold << "Comment:  " << fmtBoldEnd << ' ' << ShowTag(itsPattern.GetComment());
 			break;
 		}
 		case 11:
 		{
 			Config.search_in_db = !Config.search_in_db;
-			*mSearcher->Current().first << fmtBold << "Search in:" << fmtBoldEnd << ' ' << (Config.search_in_db ? "Database" : "Current playlist");
+			*w->Current().first << fmtBold << "Search in:" << fmtBoldEnd << ' ' << (Config.search_in_db ? "Database" : "Current playlist");
 			break;
 		}
 		case 12:
 		{
-			search_match_to_pattern = !search_match_to_pattern;
-			*mSearcher->Current().first << fmtBold << "Search mode:" << fmtBoldEnd << ' ' << (search_match_to_pattern ? search_mode_normal : search_mode_strict);
+			MatchToPattern = !MatchToPattern;
+			*w->Current().first << fmtBold << "Search mode:" << fmtBoldEnd << ' ' << (MatchToPattern ? NormalMode : StrictMode);
 			break;
 		}
 		case 13:
 		{
-			search_case_sensitive = !search_case_sensitive;
-			*mSearcher->Current().first << fmtBold << "Case sensitive:" << fmtBoldEnd << ' ' << (search_case_sensitive ? "Yes" : "No");
+			CaseSensitive = !CaseSensitive;
+			*w->Current().first << fmtBold << "Case sensitive:" << fmtBoldEnd << ' ' << (CaseSensitive ? "Yes" : "No");
 			break;
 		}
 		case 15:
 		{
 			ShowMessage("Searching...");
 			Search();
-			if (!mSearcher->Back().first)
+			if (!w->Back().first)
 			{
 				if (Config.columns_in_search_engine)
-					mSearcher->SetTitle(Display::Columns(Config.song_columns_list_format));
-				size_t found = mSearcher->Size()-search_engine_static_options;
+					w->SetTitle(Display::Columns(Config.song_columns_list_format));
+				size_t found = w->Size()-SearchEngine::StaticOptions;
 				found += 3; // don't count options inserted below
-				mSearcher->InsertSeparator(search_engine_reset_button+1);
-				mSearcher->InsertOption(search_engine_reset_button+2, std::make_pair((Buffer *)0, (Song *)0), 1, 1);
-				mSearcher->at(search_engine_reset_button+2).first = new Buffer();
-				*mSearcher->at(search_engine_reset_button+2).first << Config.color1 << "Search results: " << Config.color2 << "Found " << found  << (found > 1 ? " songs" : " song") << clDefault;
-				mSearcher->InsertSeparator(search_engine_reset_button+3);
+				w->InsertSeparator(ResetButton+1);
+				w->InsertOption(ResetButton+2, std::make_pair((Buffer *)0, (Song *)0), 1, 1);
+				w->at(ResetButton+2).first = new Buffer();
+				*w->at(ResetButton+2).first << Config.color1 << "Search results: " << Config.color2 << "Found " << found  << (found > 1 ? " songs" : " song") << clDefault;
+				w->InsertSeparator(ResetButton+3);
 				UpdateFoundList();
 				ShowMessage("Searching finished!");
-				for (size_t i = 0; i < search_engine_static_options-4; i++)
-					mSearcher->Static(i, 1);
-				mSearcher->Scroll(wDown);
-				mSearcher->Scroll(wDown);
+				for (size_t i = 0; i < StaticOptions-4; i++)
+					w->Static(i, 1);
+				w->Scroll(wDown);
+				w->Scroll(wDown);
 			}
 			else
 				ShowMessage("No results found");
@@ -210,16 +213,16 @@ void SearchEngine::EnterPressed()
 		case 16:
 		{
 			CLEAR_FIND_HISTORY;
-			PrepareSearchEngine();
+			Prepare();
 			ShowMessage("Search state reset");
 			break;
 		}
 		default:
 		{
 			block_item_list_update = 1;
-			if (Config.ncmpc_like_songs_adding && mSearcher->isBold())
+			if (Config.ncmpc_like_songs_adding && w->isBold())
 			{
-				long long hash = mSearcher->Current().second->GetHash();
+				long long hash = w->Current().second->GetHash();
 				for (size_t i = 0; i < myPlaylist->Main()->Size(); i++)
 				{
 					if (myPlaylist->Main()->at(i).GetHash() == hash)
@@ -231,13 +234,13 @@ void SearchEngine::EnterPressed()
 			}
 			else
 			{
-				const Song &s = *mSearcher->Current().second;
+				const Song &s = *w->Current().second;
 				int id = Mpd->AddSong(s);
 				if (id >= 0)
 				{
 					Mpd->PlayID(id);
 					ShowMessage("Added to playlist: %s", s.toString(Config.song_status_format).c_str());
-					mSearcher->BoldOption(mSearcher->Choice(), 1);
+					w->BoldOption(w->Choice(), 1);
 				}
 			}
 			break;
@@ -248,14 +251,14 @@ void SearchEngine::EnterPressed()
 
 void SearchEngine::SpacePressed()
 {
-	if (mSearcher->Current().first)
+	if (w->Current().first)
 		return;
 	
 	block_item_list_update = 1;
-	if (Config.ncmpc_like_songs_adding && mSearcher->isBold())
+	if (Config.ncmpc_like_songs_adding && w->isBold())
 	{
 		block_playlist_update = 1;
-		long long hash = mSearcher->Current().second->GetHash();
+		long long hash = w->Current().second->GetHash();
 		for (size_t i = 0; i < myPlaylist->Main()->Size(); i++)
 		{
 			if (myPlaylist->Main()->at(i).GetHash() == hash)
@@ -266,95 +269,93 @@ void SearchEngine::SpacePressed()
 			}
 		}
 		Mpd->CommitQueue();
-		mSearcher->BoldOption(mSearcher->Choice(), 0);
+		w->BoldOption(w->Choice(), 0);
 	}
 	else
 	{
-		const Song &s = *mSearcher->Current().second;
+		const Song &s = *w->Current().second;
 		if (Mpd->AddSong(s) != -1)
 		{
 			ShowMessage("Added to playlist: %s", s.toString(Config.song_status_format).c_str());
-			mSearcher->BoldOption(mSearcher->Choice(), 1);
+			w->BoldOption(w->Choice(), 1);
 		}
 	}
-	mSearcher->Scroll(wDown);
+	w->Scroll(wDown);
 }
 
-void UpdateFoundList()
+void SearchEngine::UpdateFoundList()
 {
 	bool bold = 0;
-	for (size_t i = search_engine_static_options; i < mSearcher->Size(); i++)
+	for (size_t i = StaticOptions; i < w->Size(); i++)
 	{
 		for (size_t j = 0; j < myPlaylist->Main()->Size(); j++)
 		{
-			if (myPlaylist->Main()->at(j).GetHash() == mSearcher->at(i).second->GetHash())
+			if (myPlaylist->Main()->at(j).GetHash() == w->at(i).second->GetHash())
 			{
 				bold = 1;
 				break;
 			}
 		}
-		mSearcher->BoldOption(i, bold);
+		w->BoldOption(i, bold);
 		bold = 0;
 	}
 }
 
-void PrepareSearchEngine()
+void SearchEngine::Prepare()
 {
-	SearchPattern &s = sought;
-	
-	for (size_t i = 0; i < mSearcher->Size(); i++)
+	for (size_t i = 0; i < w->Size(); i++)
 	{
 		try
 		{
-			delete (*mSearcher)[i].first;
-			delete (*mSearcher)[i].second;
+			delete (*w)[i].first;
+			delete (*w)[i].second;
 		}
 		catch (List::InvalidItem) { }
 	}
 	
-	s.Clear();
-	mSearcher->SetTitle("");
-	mSearcher->Clear();
-	mSearcher->Reset();
-	mSearcher->ResizeBuffer(17);
+	itsPattern.Clear();
+	w->SetTitle("");
+	w->Clear();
+	w->Reset();
+	w->ResizeBuffer(17);
 	
-	mSearcher->IntoSeparator(10);
-	mSearcher->IntoSeparator(14);
+	w->IntoSeparator(10);
+	w->IntoSeparator(14);
 	
 	for (size_t i = 0; i < 17; i++)
 	{
 		try
 		{
-			mSearcher->at(i).first = new Buffer();
+			w->at(i).first = new Buffer();
 		}
 		catch (List::InvalidItem) { }
 	}
 	
-	*mSearcher->at(0).first << fmtBold << "Any:      " << fmtBoldEnd << ' ' << ShowTag(s.Any());
-	*mSearcher->at(1).first << fmtBold << "Artist:   " << fmtBoldEnd << ' ' << ShowTag(s.GetArtist());
-	*mSearcher->at(2).first << fmtBold << "Title:    " << fmtBoldEnd << ' ' << ShowTag(s.GetTitle());
-	*mSearcher->at(3).first << fmtBold << "Album:    " << fmtBoldEnd << ' ' << ShowTag(s.GetAlbum());
-	*mSearcher->at(4).first << fmtBold << "Filename: " << fmtBoldEnd << ' ' << ShowTag(s.GetName());
-	*mSearcher->at(5).first << fmtBold << "Composer: " << fmtBoldEnd << ' ' << ShowTag(s.GetComposer());
-	*mSearcher->at(6).first << fmtBold << "Performer:" << fmtBoldEnd << ' ' << ShowTag(s.GetPerformer());
-	*mSearcher->at(7).first << fmtBold << "Genre:    " << fmtBoldEnd << ' ' << ShowTag(s.GetGenre());
-	*mSearcher->at(8).first << fmtBold << "Year:     " << fmtBoldEnd << ' ' << ShowTag(s.GetYear());
-	*mSearcher->at(9).first << fmtBold << "Comment:  " << fmtBoldEnd << ' ' << ShowTag(s.GetComment());
+	*w->at(0).first << fmtBold << "Any:      " << fmtBoldEnd << ' ' << ShowTag(itsPattern.Any());
+	*w->at(1).first << fmtBold << "Artist:   " << fmtBoldEnd << ' ' << ShowTag(itsPattern.GetArtist());
+	*w->at(2).first << fmtBold << "Title:    " << fmtBoldEnd << ' ' << ShowTag(itsPattern.GetTitle());
+	*w->at(3).first << fmtBold << "Album:    " << fmtBoldEnd << ' ' << ShowTag(itsPattern.GetAlbum());
+	*w->at(4).first << fmtBold << "Filename: " << fmtBoldEnd << ' ' << ShowTag(itsPattern.GetName());
+	*w->at(5).first << fmtBold << "Composer: " << fmtBoldEnd << ' ' << ShowTag(itsPattern.GetComposer());
+	*w->at(6).first << fmtBold << "Performer:" << fmtBoldEnd << ' ' << ShowTag(itsPattern.GetPerformer());
+	*w->at(7).first << fmtBold << "Genre:    " << fmtBoldEnd << ' ' << ShowTag(itsPattern.GetGenre());
+	*w->at(8).first << fmtBold << "Year:     " << fmtBoldEnd << ' ' << ShowTag(itsPattern.GetYear());
+	*w->at(9).first << fmtBold << "Comment:  " << fmtBoldEnd << ' ' << ShowTag(itsPattern.GetComment());
 	
-	*mSearcher->at(11).first << fmtBold << "Search in:" << fmtBoldEnd << ' ' << (Config.search_in_db ? "Database" : "Current playlist");
-	*mSearcher->at(12).first << fmtBold << "Search mode:" << fmtBoldEnd << ' ' << (search_match_to_pattern ? search_mode_normal : search_mode_strict);
-	*mSearcher->at(13).first << fmtBold << "Case sensitive:" << fmtBoldEnd << ' ' << (search_case_sensitive ? "Yes" : "No");
+	*w->at(11).first << fmtBold << "Search in:" << fmtBoldEnd << ' ' << (Config.search_in_db ? "Database" : "Current playlist");
+	*w->at(12).first << fmtBold << "Search mode:" << fmtBoldEnd << ' ' << (MatchToPattern ? NormalMode : StrictMode);
+	*w->at(13).first << fmtBold << "Case sensitive:" << fmtBoldEnd << ' ' << (CaseSensitive ? "Yes" : "No");
 	
-	*mSearcher->at(15).first << "Search";
-	*mSearcher->at(16).first << "Reset";
+	*w->at(15).first << "Search";
+	*w->at(16).first << "Reset";
 }
 
-void Search()
+void SearchEngine::Search()
 {
-	if (sought.Empty())
+	if (itsPattern.Empty())
 		return;
 	
-	SearchPattern s = sought;
+	SearchPattern s = itsPattern;
 	
 	SongList list;
 	if (Config.search_in_db)
@@ -369,7 +370,7 @@ void Search()
 	bool any_found = 1;
 	bool found = 1;
 	
-	if (!search_case_sensitive)
+	if (!CaseSensitive)
 	{
 		string t;
 		t = s.Any();
@@ -413,7 +414,7 @@ void Search()
 	{
 		Song copy = **it;
 		
-		if (!search_case_sensitive)
+		if (!CaseSensitive)
 		{
 			string t;
 			t = copy.GetArtist();
@@ -451,7 +452,7 @@ void Search()
 		else
 			copy.SetFile(copy.GetName());
 		
-		if (search_match_to_pattern)
+		if (MatchToPattern)
 		{
 			if (!s.Any().empty())
 				any_found =
@@ -521,7 +522,7 @@ void Search()
 		if (found && any_found)
 		{
 			Song *ss = Config.search_in_db ? *it : new Song(**it);
-			mSearcher->AddOption(std::make_pair((Buffer *)0, ss));
+			w->AddOption(std::make_pair((Buffer *)0, ss));
 			list[it-list.begin()] = 0;
 		}
 		found = 1;

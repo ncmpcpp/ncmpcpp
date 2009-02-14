@@ -24,36 +24,51 @@
 #include "mpdpp.h"
 #include "ncmpcpp.h"
 
-namespace SearchEngine
+class SearchEngine : public Screen < Menu< std::pair<Buffer *, MPD::Song *> > >
 {
-	void Init();
-	void Resize();
-	void SwitchTo();
+	class SearchPattern : public MPD::Song
+	{
+		public:
+			const std::string &Any() { return itsAnyField; }
+			const std::string &Any(const std::string &s) { itsAnyField = s; return itsAnyField; }
+			
+			void Clear() { Song::Clear(); itsAnyField.clear(); }
+			bool Empty() { return Song::Empty() && itsAnyField.empty(); }
+			
+		protected:
+			std::string itsAnyField;
+	};
 	
-	void EnterPressed();
-	void SpacePressed();
-}
-
-class SearchPattern : public MPD::Song
-{
 	public:
-		const std::string &Any() { return itsAnyField; }
-		const std::string &Any(const std::string &s) { itsAnyField = s; return itsAnyField; }
+		virtual void Init();
+		virtual void Resize();
+		virtual void SwitchTo();
 		
-		void Clear() { Song::Clear(); itsAnyField.clear(); }
-		bool Empty() { return Song::Empty() && itsAnyField.empty(); }
-	
+		virtual std::string Title();
+		
+		virtual void EnterPressed();
+		virtual void SpacePressed();
+		
+		void UpdateFoundList();
+		
+		static size_t StaticOptions;
+		static size_t SearchButton;
+		static size_t ResetButton;
+		
+		static const char *NormalMode;
+		static const char *StrictMode;
+		
 	protected:
-		std::string itsAnyField;
+		void Prepare();
+		void Search();
+		
+		SearchPattern itsPattern;
+		
+		static bool MatchToPattern;
+		static bool CaseSensitive;
 };
 
-const size_t search_engine_static_options = 20;
-const size_t search_engine_search_button = 15;
-const size_t search_engine_reset_button = 16;
-
-void UpdateFoundList();
-void PrepareSearchEngine();
-void Search();
+extern SearchEngine *mySearcher;
 
 #endif
 
