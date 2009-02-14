@@ -150,7 +150,7 @@ int main(int argc, char *argv[])
 	myPlaylist->Init();
 	myBrowser->Init();
 	mySearcher->Init();
-	MediaLibrary::Init();
+	myLibrary->Init();
 	PlaylistEditor::Init();
 	
 #	ifdef HAVE_TAGLIB_H
@@ -258,7 +258,7 @@ int main(int argc, char *argv[])
 					screen_title = mySearcher->Title();
 					break;
 				case csLibrary:
-					screen_title = "Media library";
+					screen_title = myLibrary->Title();
 					break;
 				case csLyrics:
 					screen_title = "Lyrics: ";
@@ -319,7 +319,7 @@ int main(int argc, char *argv[])
 		||  current_screen == csBrowser);
 		else if (current_screen == csLibrary)
 		{
-			MediaLibrary::Update();
+			myLibrary->Update();
 		}
 		else if (current_screen == csPlaylistEditor)
 		{
@@ -374,14 +374,14 @@ int main(int argc, char *argv[])
 			{
 				if (Keypressed(input, Key.Up) || Keypressed(input, Key.Down) || Keypressed(input, Key.PageUp) || Keypressed(input, Key.PageDown) || Keypressed(input, Key.Home) || Keypressed(input, Key.End) || Keypressed(input, Key.FindForward) || Keypressed(input, Key.FindBackward) || Keypressed(input, Key.NextFoundPosition) || Keypressed(input, Key.PrevFoundPosition))
 				{
-					if (wCurrent == mLibArtists)
+					if (wCurrent == myLibrary->Artists)
 					{
-						mLibAlbums->Clear(0);
-						mLibSongs->Clear(0);
+						myLibrary->Albums->Clear(0);
+						myLibrary->Songs->Clear(0);
 					}
-					else if (wCurrent == mLibAlbums)
+					else if (wCurrent == myLibrary->Albums)
 					{
-						mLibSongs->Clear(0);
+						myLibrary->Songs->Clear(0);
 					}
 					else if (wCurrent == mPlaylistList)
 					{
@@ -412,7 +412,7 @@ int main(int argc, char *argv[])
 		   )
 		{
 			if (!Config.fancy_scrolling
-			&&  (wCurrent == mLibArtists
+			&&  (wCurrent == myLibrary->Artists
 			||   wCurrent == mPlaylistList
 #			ifdef HAVE_TAGLIB_H
 			||   wCurrent == mEditorLeftCol
@@ -440,7 +440,7 @@ int main(int argc, char *argv[])
 			)
 		{
 			if (!Config.fancy_scrolling
-			&&  (wCurrent == mLibArtists
+			&&  (wCurrent == myLibrary->Artists
 			||   wCurrent == mPlaylistList
 #			ifdef HAVE_TAGLIB_H
 			|| wCurrent == mEditorLeftCol
@@ -509,7 +509,7 @@ int main(int argc, char *argv[])
 			myPlaylist->Resize();
 			myBrowser->Resize();
 			mySearcher->Resize();
-			MediaLibrary::Resize();
+			myLibrary->Resize();
 			PlaylistEditor::Resize();
 			Info::Resize();
 			Lyrics::Resize();
@@ -533,7 +533,7 @@ int main(int argc, char *argv[])
 #			ifdef HAVE_TAGLIB_H
 			if (current_screen == csLibrary)
 			{
-				MediaLibrary::Refresh();
+				myLibrary->Refresh();
 			}
 			else if (current_screen == csTagEditor)
 			{
@@ -592,7 +592,7 @@ int main(int argc, char *argv[])
 				}
 				case csLibrary:
 				{
-					MediaLibrary::EnterPressed();
+					myLibrary->EnterPressed();
 					break;
 				}
 				case csPlaylistEditor:
@@ -625,7 +625,7 @@ int main(int argc, char *argv[])
 				||  wCurrent == mEditorTags
 #				endif // HAVE_TAGLIB_H
 				|| (wCurrent == myBrowser->Main() && ((Menu<Song> *)wCurrent)->Choice() >= (myBrowser->CurrentDir() != "/" ? 1 : 0)) || (wCurrent == mySearcher->Main() && !mySearcher->Main()->Current().first)
-				|| wCurrent == mLibSongs
+				|| wCurrent == myLibrary->Songs
 				|| wCurrent == mPlaylistEditor)
 				{
 					List *mList = (Menu<Song> *)wCurrent;
@@ -648,7 +648,7 @@ int main(int argc, char *argv[])
 				}
 				else if (current_screen == csLibrary)
 				{
-					MediaLibrary::SpacePressed();
+					myLibrary->SpacePressed();
 				}
 				else if (current_screen == csPlaylistEditor)
 				{
@@ -676,25 +676,7 @@ int main(int argc, char *argv[])
 		{
 			if (current_screen == csLibrary && input == Key.VolumeUp[0])
 			{
-				CLEAR_FIND_HISTORY;
-				if (wCurrent == mLibArtists)
-				{
-					if (mLibSongs->Empty())
-						continue;
-					mLibArtists->HighlightColor(Config.main_highlight_color);
-					wCurrent->Refresh();
-					wCurrent = wLibActiveCol = mLibAlbums;
-					mLibAlbums->HighlightColor(Config.active_column_color);
-					if (!mLibAlbums->Empty())
-						continue;
-				}
-				if (wCurrent == mLibAlbums && !mLibSongs->Empty())
-				{
-					mLibAlbums->HighlightColor(Config.main_highlight_color);
-					wCurrent->Refresh();
-					wCurrent = wLibActiveCol = mLibSongs;
-					mLibSongs->HighlightColor(Config.active_column_color);
-				}
+				myLibrary->NextColumn();
 			}
 			else if (current_screen == csPlaylistEditor && input == Key.VolumeUp[0])
 			{
@@ -734,23 +716,7 @@ int main(int argc, char *argv[])
 		{
 			if (current_screen == csLibrary && input == Key.VolumeDown[0])
 			{
-				CLEAR_FIND_HISTORY;
-				if (wCurrent == mLibSongs)
-				{
-					mLibSongs->HighlightColor(Config.main_highlight_color);
-					wCurrent->Refresh();
-					wCurrent = wLibActiveCol = mLibAlbums;
-					mLibAlbums->HighlightColor(Config.active_column_color);
-					if (!mLibAlbums->Empty())
-						continue;
-				}
-				if (wCurrent == mLibAlbums)
-				{
-					mLibAlbums->HighlightColor(Config.main_highlight_color);
-					wCurrent->Refresh();
-					wCurrent = wLibActiveCol = mLibArtists;
-					mLibArtists->HighlightColor(Config.active_column_color);
-				}
+				myLibrary->PrevColumn();
 			}
 			else if (current_screen == csPlaylistEditor && input == Key.VolumeDown[0])
 			{
@@ -1340,19 +1306,19 @@ int main(int argc, char *argv[])
 		{
 			CHECK_MPD_MUSIC_DIR;
 #			ifdef HAVE_TAGLIB_H
-			if (wCurrent == mLibArtists)
+			if (wCurrent == myLibrary->Artists)
 			{
 				LockStatusbar();
 				Statusbar() << fmtBold << IntoStr(Config.media_lib_primary_tag) << fmtBoldEnd << ": ";
-				string new_tag = wFooter->GetString(mLibArtists->Current());
+				string new_tag = wFooter->GetString(myLibrary->Artists->Current());
 				UnlockStatusbar();
-				if (!new_tag.empty() && new_tag != mLibArtists->Current())
+				if (!new_tag.empty() && new_tag != myLibrary->Artists->Current())
 				{
 					bool success = 1;
 					SongList list;
 					ShowMessage("Updating tags...");
 					Mpd->StartSearch(1);
-					Mpd->AddSearch(Config.media_lib_primary_tag, locale_to_utf_cpy(mLibArtists->Current()));
+					Mpd->AddSearch(Config.media_lib_primary_tag, locale_to_utf_cpy(myLibrary->Artists->Current()));
 					Mpd->CommitSearch(list);
 					SongSetFunction set = IntoSetFunction(Config.media_lib_primary_tag);
 					if (!set)
@@ -1378,39 +1344,39 @@ int main(int argc, char *argv[])
 					FreeSongList(list);
 				}
 			}
-			else if (wCurrent == mLibAlbums)
+			else if (wCurrent == myLibrary->Albums)
 			{
 				LockStatusbar();
 				Statusbar() << fmtBold << "Album: " << fmtBoldEnd;
-				string new_album = wFooter->GetString(mLibAlbums->Current().second);
+				string new_album = wFooter->GetString(myLibrary->Albums->Current().second);
 				UnlockStatusbar();
-				if (!new_album.empty() && new_album != mLibAlbums->Current().second)
+				if (!new_album.empty() && new_album != myLibrary->Albums->Current().second)
 				{
 					bool success = 1;
 					ShowMessage("Updating tags...");
-					for (size_t i = 0;  i < mLibSongs->Size(); i++)
+					for (size_t i = 0;  i < myLibrary->Songs->Size(); i++)
 					{
-						(*mLibSongs)[i].Localize();
-						ShowMessage("Updating tags in '%s'...", (*mLibSongs)[i].GetName().c_str());
-						string path = Config.mpd_music_dir + (*mLibSongs)[i].GetFile();
+						(*myLibrary->Songs)[i].Localize();
+						ShowMessage("Updating tags in '%s'...", (*myLibrary->Songs)[i].GetName().c_str());
+						string path = Config.mpd_music_dir + (*myLibrary->Songs)[i].GetFile();
 						TagLib::FileRef f(path.c_str());
 						if (f.isNull())
 						{
-							ShowMessage("Error opening file '%s'!", (*mLibSongs)[i].GetFile().c_str());
+							ShowMessage("Error opening file '%s'!", (*myLibrary->Songs)[i].GetFile().c_str());
 							success = 0;
 							break;
 						}
 						f.tag()->setAlbum(ToWString(new_album));
 						if (!f.save())
 						{
-							ShowMessage("Error writing tags in '%s'!", (*mLibSongs)[i].GetFile().c_str());
+							ShowMessage("Error writing tags in '%s'!", (*myLibrary->Songs)[i].GetFile().c_str());
 							success = 0;
 							break;
 						}
 					}
 					if (success)
 					{
-						Mpd->UpdateDirectory(FindSharedDir(mLibSongs));
+						Mpd->UpdateDirectory(FindSharedDir(myLibrary->Songs));
 						ShowMessage("Tags updated succesfully!");
 					}
 				}
@@ -1419,7 +1385,7 @@ int main(int argc, char *argv[])
 			    (wCurrent == myPlaylist->Main() && !myPlaylist->Main()->Empty())
 			||  (wCurrent == myBrowser->Main() && myBrowser->Main()->Current().type == itSong)
 			||  (wCurrent == mySearcher->Main() && !mySearcher->Main()->Current().first)
-			||  (wCurrent == mLibSongs && !mLibSongs->Empty())
+			||  (wCurrent == myLibrary->Songs && !myLibrary->Songs->Empty())
 			||  (wCurrent == mPlaylistEditor && !mPlaylistEditor->Empty())
 			||  (wCurrent == mEditorTags && !mEditorTags->Empty()))
 			{
@@ -1437,7 +1403,7 @@ int main(int argc, char *argv[])
 						edited_song = *mySearcher->Main()->at(id).second;
 						break;
 					case csLibrary:
-						edited_song = mLibSongs->at(id);
+						edited_song = myLibrary->Songs->at(id);
 						break;
 					case csPlaylistEditor:
 						edited_song = mPlaylistEditor->at(id);
@@ -1543,7 +1509,7 @@ int main(int argc, char *argv[])
 		{
 			if ((wCurrent == myPlaylist->Main() && !myPlaylist->Main()->Empty())
 			||  (wCurrent == mySearcher->Main() && !mySearcher->Main()->Current().first)
-			||  (wCurrent == mLibSongs && !mLibSongs->Empty())
+			||  (wCurrent == myLibrary->Songs && !myLibrary->Songs->Empty())
 			||  (wCurrent == mPlaylistEditor && !mPlaylistEditor->Empty())
 #			ifdef HAVE_TAGLIB_H
 			||  (wCurrent == mEditorTags && !mEditorTags->Empty())
@@ -1561,7 +1527,7 @@ int main(int argc, char *argv[])
 						s = mySearcher->Main()->at(id).second;
 						break;
 					case csLibrary:
-						s = &mLibSongs->at(id);
+						s = &myLibrary->Songs->at(id);
 						break;
 					case csPlaylistEditor:
 						s = &mPlaylistEditor->at(id);
@@ -1627,7 +1593,7 @@ int main(int argc, char *argv[])
 			if (wCurrent == myPlaylist->Main()
 			||  wCurrent == myBrowser->Main()
 			||  (wCurrent == mySearcher->Main() && !mySearcher->Main()->Current().first)
-			||  wCurrent == mLibSongs
+			||  wCurrent == myLibrary->Songs
 			||  wCurrent == mPlaylistEditor
 #			ifdef HAVE_TAGLIB_H
 			||  wCurrent == mEditorTags
@@ -1652,7 +1618,7 @@ int main(int argc, char *argv[])
 			if (wCurrent == myPlaylist->Main()
 			||  wCurrent == myBrowser->Main()
 			||  wCurrent == mySearcher->Main()
-			||  wCurrent == mLibSongs
+			||  wCurrent == myLibrary->Songs
 			||  wCurrent == mPlaylistEditor
 #			ifdef HAVE_TAGLIB_H
 			||  wCurrent == mEditorTags
@@ -1673,7 +1639,7 @@ int main(int argc, char *argv[])
 			if (wCurrent != myPlaylist->Main()
 			&&  wCurrent != myBrowser->Main()
 			&&  wCurrent != mySearcher->Main()
-			&&  wCurrent != mLibSongs
+			&&  wCurrent != myLibrary->Songs
 			&&  wCurrent != mPlaylistEditor)
 				continue;
 			
@@ -1729,7 +1695,7 @@ int main(int argc, char *argv[])
 					}
 					case csLibrary:
 					{
-						Song *s = new Song(mLibSongs->at(*it));
+						Song *s = new Song(myLibrary->Songs->at(*it));
 						result.push_back(s);
 						break;
 					}
@@ -1800,7 +1766,7 @@ int main(int argc, char *argv[])
 //			redraw_screen = 1;
 			if (current_screen == csLibrary)
 			{
-				MediaLibrary::Refresh();
+				myLibrary->Refresh();
 			}
 			else if (current_screen == csPlaylistEditor)
 			{
@@ -1953,12 +1919,12 @@ int main(int argc, char *argv[])
 						name = mySearcher->Main()->at(i).second->toString(Config.song_list_format);
 						break;
 					case csLibrary:
-						if (wCurrent == mLibArtists)
-							name = mLibArtists->at(i);
-						else if (wCurrent == mLibAlbums)
-							name = mLibAlbums->at(i).first;
+						if (wCurrent == myLibrary->Artists)
+							name = myLibrary->Artists->at(i);
+						else if (wCurrent == myLibrary->Albums)
+							name = myLibrary->Albums->at(i).first;
 						else
-							name = mLibSongs->at(i).toString(Config.song_library_format);
+							name = myLibrary->Songs->at(i).toString(Config.song_library_format);
 						break;
 					case csPlaylistEditor:
 						if (wCurrent == mPlaylistList)
@@ -2105,7 +2071,7 @@ int main(int argc, char *argv[])
 			{
 				myBrowser->ChangeBrowseMode();
 			}
-			else if (wCurrent == mLibArtists)
+			else if (wCurrent == myLibrary->Artists)
 			{
 				LockStatusbar();
 				Statusbar() << "Tag type ? [" << fmtBold << 'a' << fmtBoldEnd << "rtist/" << fmtBold << 'y' << fmtBoldEnd << "ear/" << fmtBold << 'g' << fmtBoldEnd << "enre/" << fmtBold << 'c' << fmtBoldEnd << "omposer/" << fmtBold << 'p' << fmtBoldEnd << "erformer] ";
@@ -2124,10 +2090,10 @@ int main(int argc, char *argv[])
 				{
 					Config.media_lib_primary_tag = new_tagitem;
 					string item_type = IntoStr(Config.media_lib_primary_tag);
-					mLibArtists->SetTitle(item_type + "s");
-					mLibArtists->Reset();
-					mLibArtists->Clear(0);
-					mLibArtists->Display();
+					myLibrary->Artists->SetTitle(item_type + "s");
+					myLibrary->Artists->Reset();
+					myLibrary->Artists->Clear(0);
+					myLibrary->Artists->Display();
 					ToLower(item_type);
 					ShowMessage("Switched to list of %s tag", item_type.c_str());
 				}
@@ -2172,7 +2138,7 @@ int main(int argc, char *argv[])
 		}
 		else if (Keypressed(input, Key.MediaLibrary))
 		{
-			MediaLibrary::SwitchTo();
+			myLibrary->SwitchTo();
 		}
 		else if (Keypressed(input, Key.PlaylistEditor))
 		{

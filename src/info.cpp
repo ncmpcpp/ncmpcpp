@@ -81,7 +81,7 @@ void Info::GetSong()
 		redraw_header = 1;
 		if (current_screen == csLibrary)
 		{
-			MediaLibrary::Refresh();
+			myLibrary->Refresh();
 		}
 		else if (current_screen == csPlaylistEditor)
 		{
@@ -98,7 +98,7 @@ void Info::GetSong()
 	    (wCurrent == myPlaylist->Main() && !myPlaylist->Main()->Empty())
 	||  (wCurrent == myBrowser->Main() && myBrowser->Main()->Current().type == MPD::itSong)
 	||  (wCurrent == mySearcher->Main() && !mySearcher->Main()->Current().first)
-	||  (wCurrent == mLibSongs && !mLibSongs->Empty())
+	||  (wCurrent == myLibrary->Songs && !myLibrary->Songs->Empty())
 	||  (wCurrent == mPlaylistEditor && !mPlaylistEditor->Empty())
 #	ifdef HAVE_TAGLIB_H
 	||  (wCurrent == mEditorTags && !mEditorTags->Empty())
@@ -119,7 +119,7 @@ void Info::GetSong()
 				s = mySearcher->Main()->at(id).second;
 				break;
 			case csLibrary:
-				s = &mLibSongs->at(id);
+				s = &myLibrary->Songs->at(id);
 				break;
 			case csPlaylistEditor:
 				s = &mPlaylistEditor->at(id);
@@ -168,7 +168,7 @@ void Info::GetArtist()
 		redraw_header = 1;
 		if (current_screen == csLibrary)
 		{
-			MediaLibrary::Refresh();
+			myLibrary->Refresh();
 		}
 		else if (current_screen == csPlaylistEditor)
 		{
@@ -185,8 +185,8 @@ void Info::GetArtist()
 	    (wCurrent == myPlaylist->Main() && !myPlaylist->Main()->Empty())
 	||  (wCurrent == myBrowser->Main() && myBrowser->Main()->Current().type == MPD::itSong)
 	||  (wCurrent == mySearcher->Main() && !mySearcher->Main()->Current().first)
-	||  (wCurrent == mLibArtists && !mLibArtists->Empty())
-	||  (wCurrent == mLibSongs && !mLibSongs->Empty())
+	||  (wCurrent == myLibrary->Artists && !myLibrary->Artists->Empty())
+	||  (wCurrent == myLibrary->Songs && !myLibrary->Songs->Empty())
 	||  (wCurrent == mPlaylistEditor && !mPlaylistEditor->Empty())
 #	ifdef HAVE_TAGLIB_H
 	||  (wCurrent == mEditorTags && !mEditorTags->Empty())
@@ -213,7 +213,7 @@ void Info::GetArtist()
 				*artist = mySearcher->Main()->at(id).second->GetArtist();
 				break;
 			case csLibrary:
-				*artist = mLibArtists->at(id);
+				*artist = myLibrary->Artists->at(id);
 				break;
 			case csPlaylistEditor:
 				*artist = mPlaylistEditor->at(id).GetArtist();

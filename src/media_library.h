@@ -22,23 +22,41 @@
 #define _H_MEDIA_LIBRARY
 
 #include "ncmpcpp.h"
+#include "screen.h"
 
-namespace MediaLibrary
+class MediaLibrary : public Screen<Window>
 {
-	void Init();
-	void Resize();
-	void Refresh();
-	void SwitchTo();
-	void Update();
-	
-	void EnterPressed(bool = 1);
-	inline void SpacePressed();
-}
+	public:
+		virtual void Init();
+		virtual void SwitchTo();
+		virtual void Resize();
+		
+		virtual std::string Title();
+		
+		virtual void Refresh();
+		virtual void Update();
+		
+		virtual void EnterPressed() { AddToPlaylist(1); }
+		virtual void SpacePressed() { AddToPlaylist(0); }
+		
+		void NextColumn();
+		void PrevColumn();
+		
+		Menu<std::string> *Artists;
+		Menu<string_pair> *Albums;
+		Menu<MPD::Song> *Songs;
+		
+	protected:
+		void AddToPlaylist(bool);
+		
+		static size_t itsLeftColWidth;
+		static size_t itsMiddleColWidth;
+		static size_t itsMiddleColStartX;
+		static size_t itsRightColWidth;
+		static size_t itsRightColStartX;
+};
 
-void MediaLibrary::SpacePressed()
-{
-	EnterPressed(0);
-}
+extern MediaLibrary *myLibrary;
 
 #endif
 

@@ -39,10 +39,10 @@ namespace Global
 //	extern Menu<MPD::Item> *myBrowser->Main();
 //	extern Menu< std::pair<Buffer *, MPD::Song *> > *mSearcher;
 	
-	extern Window *wLibActiveCol;
-	extern Menu<std::string> *mLibArtists;
-	extern Menu<string_pair> *mLibAlbums;
-	extern Menu<MPD::Song> *mLibSongs;
+//	extern Window *wLibActiveCol;
+//	extern Menu<std::string> *myLibrary->Artists;
+//	extern Menu<string_pair> *myLibrary->Albums;
+//	extern Menu<MPD::Song> *myLibrary->Songs;
 	
 #	ifdef HAVE_TAGLIB_H
 	extern Window *wTagEditorActiveCol;

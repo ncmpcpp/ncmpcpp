@@ -34,76 +34,70 @@ using namespace MPD;
 using namespace Global;
 using std::string;
 
-Window *Global::wLibActiveCol;
-Menu<string> *Global::mLibArtists;
-Menu<string_pair> *Global::mLibAlbums;
-Menu<Song> *Global::mLibSongs;
+MediaLibrary *myLibrary = new MediaLibrary;
 
-namespace MediaLibrary
-{
-	size_t left_col_width;
-	size_t middle_col_width;
-	size_t middle_col_startx;
-	size_t right_col_width;
-	size_t right_col_startx;
-}
+size_t MediaLibrary::itsLeftColWidth;
+size_t MediaLibrary::itsMiddleColWidth;
+size_t MediaLibrary::itsMiddleColStartX;
+size_t MediaLibrary::itsRightColWidth;
+size_t MediaLibrary::itsRightColStartX;
 
 void MediaLibrary::Init()
 {
-	left_col_width = COLS/3-1;
-	middle_col_width = COLS/3;
-	middle_col_startx = left_col_width+1;
-	right_col_width = COLS-COLS/3*2-1;
-	right_col_startx = left_col_width+middle_col_width+2;
+	itsLeftColWidth = COLS/3-1;
+	itsMiddleColWidth = COLS/3;
+	itsMiddleColStartX = itsLeftColWidth+1;
+	itsRightColWidth = COLS-COLS/3*2-1;
+	itsRightColStartX = itsLeftColWidth+itsMiddleColWidth+2;
 	
-	mLibArtists = new Menu<string>(0, main_start_y, left_col_width, main_height, IntoStr(Config.media_lib_primary_tag) + "s", Config.main_color, brNone);
-	mLibArtists->HighlightColor(Config.active_column_color);
-	mLibArtists->SetTimeout(ncmpcpp_window_timeout);
-	mLibArtists->SetItemDisplayer(Display::Generic);
+	Artists = new Menu<string>(0, main_start_y, itsLeftColWidth, main_height, IntoStr(Config.media_lib_primary_tag) + "s", Config.main_color, brNone);
+	Artists->HighlightColor(Config.active_column_color);
+	Artists->SetTimeout(ncmpcpp_window_timeout);
+	Artists->SetItemDisplayer(Display::Generic);
 	
-	mLibAlbums = new Menu<string_pair>(middle_col_startx, main_start_y, middle_col_width, main_height, "Albums", Config.main_color, brNone);
-	mLibAlbums->HighlightColor(Config.main_highlight_color);
-	mLibAlbums->SetTimeout(ncmpcpp_window_timeout);
-	mLibAlbums->SetItemDisplayer(Display::StringPairs);
+	Albums = new Menu<string_pair>(itsMiddleColStartX, main_start_y, itsMiddleColWidth, main_height, "Albums", Config.main_color, brNone);
+	Albums->HighlightColor(Config.main_highlight_color);
+	Albums->SetTimeout(ncmpcpp_window_timeout);
+	Albums->SetItemDisplayer(Display::StringPairs);
 	
-	mLibSongs = new Menu<Song>(right_col_startx, main_start_y, right_col_width, main_height, "Songs", Config.main_color, brNone);
-	mLibSongs->HighlightColor(Config.main_highlight_color);
-	mLibSongs->SetTimeout(ncmpcpp_window_timeout);
-	mLibSongs->SetSelectPrefix(&Config.selected_item_prefix);
-	mLibSongs->SetSelectSuffix(&Config.selected_item_suffix);
-	mLibSongs->SetItemDisplayer(Display::Songs);
-	mLibSongs->SetItemDisplayerUserData(&Config.song_library_format);
+	Songs = new Menu<Song>(itsRightColStartX, main_start_y, itsRightColWidth, main_height, "Songs", Config.main_color, brNone);
+	Songs->HighlightColor(Config.main_highlight_color);
+	Songs->SetTimeout(ncmpcpp_window_timeout);
+	Songs->SetSelectPrefix(&Config.selected_item_prefix);
+	Songs->SetSelectSuffix(&Config.selected_item_suffix);
+	Songs->SetItemDisplayer(Display::Songs);
+	Songs->SetItemDisplayerUserData(&Config.song_library_format);
 	
-	wLibActiveCol = mLibArtists;
+	w = Artists;
 }
 
 void MediaLibrary::Resize()
 {
-	left_col_width = COLS/3-1;
-	middle_col_startx = left_col_width+1;
-	middle_col_width = COLS/3;
-	right_col_startx = left_col_width+middle_col_width+2;
-	right_col_width = COLS-COLS/3*2-1;
+	itsLeftColWidth = COLS/3-1;
+	itsMiddleColStartX = itsLeftColWidth+1;
+	itsMiddleColWidth = COLS/3;
+	itsRightColStartX = itsLeftColWidth+itsMiddleColWidth+2;
+	itsRightColWidth = COLS-COLS/3*2-1;
 	
-	mLibArtists->Resize(left_col_width, main_height);
-	mLibAlbums->Resize(middle_col_width, main_height);
-	mLibSongs->Resize(right_col_width, main_height);
+	Artists->Resize(itsLeftColWidth, main_height);
+	Albums->Resize(itsMiddleColWidth, main_height);
+	Songs->Resize(itsRightColWidth, main_height);
 	
-	mLibAlbums->MoveTo(middle_col_startx, main_start_y);
-	mLibSongs->MoveTo(right_col_startx, main_start_y);
+	Albums->MoveTo(itsMiddleColStartX, main_start_y);
+	Songs->MoveTo(itsRightColStartX, main_start_y);
 }
 
 void MediaLibrary::Refresh()
 {
-	mLibArtists->Display();
-	mvvline(main_start_y, middle_col_startx-1, 0, main_height);
-	mLibAlbums->Display();
-	mvvline(main_start_y, right_col_startx-1, 0, main_height);
-	mLibSongs->Display();
-	if (mLibAlbums->Empty())
+	Artists->Display();
+	mvvline(main_start_y, itsMiddleColStartX-1, 0, main_height);
+	Albums->Display();
+	mvvline(main_start_y, itsRightColStartX-1, 0, main_height);
+	Songs->Display();
+	if (Albums->Empty())
 	{
-		mLibAlbums->WriteXY(0, 0, 0, "No albums found.");
-		mLibAlbums->Refresh();
+		Albums->WriteXY(0, 0, 0, "No albums found.");
+		Albums->Refresh();
 	}
 }
 
@@ -122,22 +116,27 @@ void MediaLibrary::SwitchTo()
 //		redraw_screen = 1;
 		redraw_header = 1;
 		MediaLibrary::Refresh();
-				
-		wCurrent = wLibActiveCol;
+		
+		wCurrent = w;
 		current_screen = csLibrary;
-				
-		UpdateSongList(mLibSongs);
+		
+		UpdateSongList(Songs);
 	}
+}
+
+std::string MediaLibrary::Title()
+{
+	return "Media library";
 }
 
 void MediaLibrary::Update()
 {
-	if (mLibArtists->Empty())
+	if (Artists->Empty())
 	{
 		CLEAR_FIND_HISTORY;
 		TagList list;
-		mLibAlbums->Clear(0);
-		mLibSongs->Clear(0);
+		Albums->Clear(0);
+		Songs->Clear(0);
 		Mpd->GetList(list, Config.media_lib_primary_tag);
 		sort(list.begin(), list.end(), CaseInsensitiveSorting());
 		for (TagList::iterator it = list.begin(); it != list.end(); it++)
@@ -145,25 +144,25 @@ void MediaLibrary::Update()
 			if (!it->empty())
 			{
 				utf_to_locale(*it);
-				mLibArtists->AddOption(*it);
+				Artists->AddOption(*it);
 			}
 		}
-		mLibArtists->Window::Clear();
-		mLibArtists->Refresh();
+		Artists->Window::Clear();
+		Artists->Refresh();
 	}
 	
-	if (!mLibArtists->Empty() && mLibAlbums->Empty() && mLibSongs->Empty())
+	if (!Artists->Empty() && Albums->Empty() && Songs->Empty())
 	{
-		mLibAlbums->Reset();
+		Albums->Reset();
 		TagList list;
 		std::map<string, string, CaseInsensitiveSorting> maplist;
-		locale_to_utf(mLibArtists->Current());
+		locale_to_utf(Artists->Current());
 		if (Config.media_lib_primary_tag == MPD_TAG_ITEM_ARTIST)
-			Mpd->GetAlbums(mLibArtists->Current(), list);
+			Mpd->GetAlbums(Artists->Current(), list);
 		else
 		{
 			Mpd->StartSearch(1);
-			Mpd->AddSearch(Config.media_lib_primary_tag, mLibArtists->Current());
+			Mpd->AddSearch(Config.media_lib_primary_tag, Artists->Current());
 			Mpd->StartFieldSearch(MPD_TAG_ITEM_ALBUM);
 			Mpd->CommitSearch(list);
 		}
@@ -173,11 +172,11 @@ void MediaLibrary::Update()
 		{
 			SongList noalbum_list;
 			Mpd->StartSearch(1);
-			Mpd->AddSearch(Config.media_lib_primary_tag, mLibArtists->Current());
+			Mpd->AddSearch(Config.media_lib_primary_tag, Artists->Current());
 			Mpd->AddSearch(MPD_TAG_ITEM_ALBUM, "");
 			Mpd->CommitSearch(noalbum_list);
 			if (!noalbum_list.empty())
-				mLibAlbums->AddOption(std::make_pair("<no album>", ""));
+				Albums->AddOption(std::make_pair("<no album>", ""));
 			FreeSongList(noalbum_list);
 		}
 		
@@ -185,7 +184,7 @@ void MediaLibrary::Update()
 		{
 			SongList l;
 			Mpd->StartSearch(1);
-			Mpd->AddSearch(Config.media_lib_primary_tag, mLibArtists->Current());
+			Mpd->AddSearch(Config.media_lib_primary_tag, Artists->Current());
 			Mpd->AddSearch(MPD_TAG_ITEM_ALBUM, *it);
 			Mpd->CommitSearch(l);
 			if (!l.empty() && !l[0]->GetAlbum().empty())
@@ -196,35 +195,35 @@ void MediaLibrary::Update()
 			}
 			FreeSongList(l);
 		}
-		utf_to_locale(mLibArtists->Current());
+		utf_to_locale(Artists->Current());
 		for (std::map<string, string>::const_iterator it = maplist.begin(); it != maplist.end(); it++)
-			mLibAlbums->AddOption(make_pair(it->first, it->second));
-		mLibAlbums->Window::Clear();
-		mLibAlbums->Refresh();
+			Albums->AddOption(make_pair(it->first, it->second));
+		Albums->Window::Clear();
+		Albums->Refresh();
 	}
 	
-	if (!mLibArtists->Empty() && wCurrent == mLibAlbums && mLibAlbums->Empty())
+	if (!Artists->Empty() && wCurrent == Albums && Albums->Empty())
 	{
-		mLibAlbums->HighlightColor(Config.main_highlight_color);
-		mLibArtists->HighlightColor(Config.active_column_color);
-		wCurrent = wLibActiveCol = mLibArtists;
+		Albums->HighlightColor(Config.main_highlight_color);
+		Artists->HighlightColor(Config.active_column_color);
+		wCurrent = w = Artists;
 	}
 	
-	if (!mLibArtists->Empty() && mLibSongs->Empty())
+	if (!Artists->Empty() && Songs->Empty())
 	{
-		mLibSongs->Reset();
+		Songs->Reset();
 		SongList list;
 		
-		mLibSongs->Clear(0);
+		Songs->Clear(0);
 		Mpd->StartSearch(1);
-		Mpd->AddSearch(Config.media_lib_primary_tag, locale_to_utf_cpy(mLibArtists->Current()));
-		if (mLibAlbums->Empty()) // left for compatibility with <mpd-0.14
+		Mpd->AddSearch(Config.media_lib_primary_tag, locale_to_utf_cpy(Artists->Current()));
+		if (Albums->Empty()) // left for compatibility with <mpd-0.14
 		{
-			mLibAlbums->WriteXY(0, 0, 0, "No albums found.");
-			mLibAlbums->Refresh();
+			Albums->WriteXY(0, 0, 0, "No albums found.");
+			Albums->Refresh();
 		}
 		else
-			Mpd->AddSearch(MPD_TAG_ITEM_ALBUM, locale_to_utf_cpy(mLibAlbums->Current().second));
+			Mpd->AddSearch(MPD_TAG_ITEM_ALBUM, locale_to_utf_cpy(Albums->Current().second));
 		Mpd->CommitSearch(list);
 		
 		sort(list.begin(), list.end(), SortSongsByTrack);
@@ -240,23 +239,67 @@ void MediaLibrary::Update()
 					break;
 				}
 			}
-			mLibSongs->AddOption(**it, bold);
+			Songs->AddOption(**it, bold);
 			bold = 0;
 		}
 		FreeSongList(list);
-		mLibSongs->Window::Clear();
-		mLibSongs->Refresh();
+		Songs->Window::Clear();
+		Songs->Refresh();
 	}
 }
 
-void MediaLibrary::EnterPressed(bool add_n_play)
+void MediaLibrary::NextColumn()
+{
+	CLEAR_FIND_HISTORY;
+	if (w == Artists)
+	{
+		if (Songs->Empty())
+			return;
+		Artists->HighlightColor(Config.main_highlight_color);
+		w->Refresh();
+		wCurrent = w = Albums;
+		Albums->HighlightColor(Config.active_column_color);
+		if (!Albums->Empty())
+			return;
+	}
+	if (w == Albums && !Songs->Empty())
+	{
+		Albums->HighlightColor(Config.main_highlight_color);
+		w->Refresh();
+		wCurrent = w = Songs;
+		Songs->HighlightColor(Config.active_column_color);
+	}
+}
+
+void MediaLibrary::PrevColumn()
+{
+	CLEAR_FIND_HISTORY;
+	if (w == Songs)
+	{
+		Songs->HighlightColor(Config.main_highlight_color);
+		w->Refresh();
+		wCurrent = w = Albums;
+		Albums->HighlightColor(Config.active_column_color);
+		if (!Albums->Empty())
+			return;
+	}
+	if (w == Albums)
+	{
+		Albums->HighlightColor(Config.main_highlight_color);
+		w->Refresh();
+		wCurrent = w = Artists;
+		Artists->HighlightColor(Config.active_column_color);
+	}
+}
+
+void MediaLibrary::AddToPlaylist(bool add_n_play)
 {
 	SongList list;
 	
-	if (!mLibArtists->Empty() && wCurrent == mLibArtists)
+	if (!Artists->Empty() && wCurrent == Artists)
 	{
 		Mpd->StartSearch(1);
-		Mpd->AddSearch(Config.media_lib_primary_tag, locale_to_utf_cpy(mLibArtists->Current()));
+		Mpd->AddSearch(Config.media_lib_primary_tag, locale_to_utf_cpy(Artists->Current()));
 		Mpd->CommitSearch(list);
 		for (SongList::const_iterator it = list.begin(); it != list.end(); it++)
 			Mpd->QueueAddSong(**it);
@@ -264,7 +307,7 @@ void MediaLibrary::EnterPressed(bool add_n_play)
 		{
 			string tag_type = IntoStr(Config.media_lib_primary_tag);
 			ToLower(tag_type);
-			ShowMessage("Adding songs of %s \"%s\"", tag_type.c_str(), mLibArtists->Current().c_str());
+			ShowMessage("Adding songs of %s \"%s\"", tag_type.c_str(), Artists->Current().c_str());
 			Song *s = &myPlaylist->Main()->at(myPlaylist->Main()->Size()-list.size());
 			if (s->GetHash() == list[0]->GetHash())
 			{
@@ -275,15 +318,15 @@ void MediaLibrary::EnterPressed(bool add_n_play)
 				ShowMessage("%s", message_part_of_songs_added);
 		}
 	}
-	else if (wCurrent == mLibAlbums)
+	else if (wCurrent == Albums)
 	{
-		for (size_t i = 0; i < mLibSongs->Size(); i++)
-			Mpd->QueueAddSong(mLibSongs->at(i));
+		for (size_t i = 0; i < Songs->Size(); i++)
+			Mpd->QueueAddSong(Songs->at(i));
 		if (Mpd->CommitQueue())
 		{
-			ShowMessage("Adding songs from album \"%s\"", mLibAlbums->Current().second.c_str());
-			Song *s = &myPlaylist->Main()->at(myPlaylist->Main()->Size()-mLibSongs->Size());
-			if (s->GetHash() == mLibSongs->at(0).GetHash())
+			ShowMessage("Adding songs from album \"%s\"", Albums->Current().second.c_str());
+			Song *s = &myPlaylist->Main()->at(myPlaylist->Main()->Size()-Songs->Size());
+			if (s->GetHash() == Songs->at(0).GetHash())
 			{
 				if (add_n_play)
 					Mpd->PlayID(s->GetID());
@@ -292,14 +335,14 @@ void MediaLibrary::EnterPressed(bool add_n_play)
 				ShowMessage("%s", message_part_of_songs_added);
 		}
 	}
-	else if (wCurrent == mLibSongs)
+	else if (wCurrent == Songs)
 	{
-		if (!mLibSongs->Empty())
+		if (!Songs->Empty())
 		{
 			block_item_list_update = 1;
-			if (Config.ncmpc_like_songs_adding && mLibSongs->isBold())
+			if (Config.ncmpc_like_songs_adding && Songs->isBold())
 			{
-				long long hash = mLibSongs->Current().GetHash();
+				long long hash = Songs->Current().GetHash();
 				if (add_n_play)
 				{
 					for (size_t i = 0; i < myPlaylist->Main()->Size(); i++)
@@ -324,19 +367,19 @@ void MediaLibrary::EnterPressed(bool add_n_play)
 						}
 					}
 					Mpd->CommitQueue();
-					mLibSongs->BoldOption(mLibSongs->Choice(), 0);
+					Songs->BoldOption(Songs->Choice(), 0);
 				}
 			}
 			else
 			{
-				Song &s = mLibSongs->Current();
+				Song &s = Songs->Current();
 				int id = Mpd->AddSong(s);
 				if (id >= 0)
 				{
 					ShowMessage("Added to playlist: %s", s.toString(Config.song_status_format).c_str());
 					if (add_n_play)
 						Mpd->PlayID(id);
-					mLibSongs->BoldOption(mLibSongs->Choice(), 1);
+					Songs->BoldOption(Songs->Choice(), 1);
 				}
 			}
 		}
@@ -345,13 +388,13 @@ void MediaLibrary::EnterPressed(bool add_n_play)
 	if (!add_n_play)
 	{
 		wCurrent->Scroll(wDown);
-		if (wCurrent == mLibArtists)
+		if (wCurrent == Artists)
 		{
-			mLibAlbums->Clear(0);
-			mLibSongs->Clear(0);
+			Albums->Clear(0);
+			Songs->Clear(0);
 		}
-		else if (wCurrent == mLibAlbums)
-			mLibSongs->Clear(0);
+		else if (wCurrent == Albums)
+			Songs->Clear(0);
 	}
 }
 

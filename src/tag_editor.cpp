@@ -183,7 +183,7 @@ void TinyTagEditor::EnterPressed(Song &s)
 			redraw_header = 1;
 			if (current_screen == csLibrary)
 			{
-				MediaLibrary::Refresh();
+				myLibrary->Refresh();
 			}
 			else if (current_screen == csPlaylistEditor)
 			{

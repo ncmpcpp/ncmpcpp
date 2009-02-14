@@ -93,7 +93,7 @@ void Lyrics::Get()
 		redraw_header = 1;
 		if (current_screen == csLibrary)
 		{
-			MediaLibrary::Refresh();
+			myLibrary->Refresh();
 		}
 		else if (current_screen == csPlaylistEditor)
 		{
@@ -111,7 +111,7 @@ void Lyrics::Get()
 	||  (wCurrent == myPlaylist->Main() && !myPlaylist->Main()->Empty())
 	||  (wCurrent == myBrowser->Main() && myBrowser->Main()->Current().type == MPD::itSong)
 	||  (wCurrent == mySearcher->Main() && !mySearcher->Main()->Current().first)
-	||  (wCurrent == mLibSongs && !mLibSongs->Empty())
+	||  (wCurrent == myLibrary->Songs && !myLibrary->Songs->Empty())
 	||  (wCurrent == mPlaylistEditor && !mPlaylistEditor->Empty())
 #	ifdef HAVE_TAGLIB_H
 	||  (wCurrent == mEditorTags && !mEditorTags->Empty())
@@ -151,7 +151,7 @@ void Lyrics::Get()
 				s = mySearcher->Main()->at(id).second;
 				break;
 			case csLibrary:
-				s = &mLibSongs->at(id);
+				s = &myLibrary->Songs->at(id);
 				break;
 			case csPlaylistEditor:
 				s = &mPlaylistEditor->at(id);
