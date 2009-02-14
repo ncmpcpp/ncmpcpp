@@ -58,7 +58,7 @@ namespace Global
 //	extern Menu<std::string> *mPlaylistList;
 //	extern Menu<MPD::Song> *myPlaylistEditor->Content;
 	
-	extern Scrollpad *sHelp;
+//	extern Scrollpad *sHelp;
 	extern Scrollpad *sLyrics;
 	extern Scrollpad *sInfo;
 	

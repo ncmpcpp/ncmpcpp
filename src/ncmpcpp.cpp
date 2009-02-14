@@ -162,7 +162,7 @@ int main(int argc, char *argv[])
 	Clock::Init();
 #	endif // ENABLE_CLOCK
 	
-	Help::Init();
+	myHelp->Init();
 	Info::Init();
 	Lyrics::Init();
 	
@@ -235,7 +235,7 @@ int main(int argc, char *argv[])
 			switch (current_screen)
 			{
 				case csHelp:
-					screen_title = "Help";
+					screen_title = myHelp->Title();
 					break;
 				case csPlaylist:
 					screen_title = myPlaylist->Title();
@@ -503,7 +503,7 @@ int main(int argc, char *argv[])
 			if (!Config.statusbar_visibility)
 				main_height++;
 			
-			Help::Resize();
+			myHelp->Resize();
 			myPlaylist->Resize();
 			myBrowser->Resize();
 			mySearcher->Resize();
@@ -2020,7 +2020,7 @@ int main(int argc, char *argv[])
 		}
 		else if (Keypressed(input, Key.Help))
 		{
-			Help::SwitchTo();
+			myHelp->SwitchTo();
 		}
 		else if (Keypressed(input, Key.ScreenSwitcher))
 		{

@@ -25,26 +25,20 @@
 #include "settings.h"
 
 using namespace Global;
-using std::string;
 
-Scrollpad *Global::sHelp;
-
-namespace
-{
-	void GetKeybindings(Scrollpad &help);
-}
+Help *myHelp = new Help;
 
 void Help::Init()
 {
-	sHelp = new Scrollpad(0, main_start_y, COLS, main_height, "", Config.main_color, brNone);
-	sHelp->SetTimeout(ncmpcpp_window_timeout);
-	GetKeybindings(*sHelp);
-	sHelp->Flush();
+	w = new Scrollpad(0, main_start_y, COLS, main_height, "", Config.main_color, brNone);
+	w->SetTimeout(ncmpcpp_window_timeout);
+	GetKeybindings();
+	w->Flush();
 }
 
 void Help::Resize()
 {
-	sHelp->Resize(COLS, main_height);
+	w->Resize(COLS, main_height);
 }
 
 void Help::SwitchTo()
@@ -55,19 +49,22 @@ void Help::SwitchTo()
 #	endif // HAVE_TAGLIB_H
 	   )
 	{
-		wCurrent = sHelp;
+		wCurrent = w;
 		wCurrent->Hide();
 		current_screen = csHelp;
 		redraw_header = 1;
 	}
 }
 
-namespace {
+std::string Help::Title()
+{
+	return "Help";
+}
 
-string DisplayKeys(int *key, int size = 2)
+std::string Help::DisplayKeys(int *key, int size)
 {
 	bool backspace = 1;
-	string result = "\t";
+	std::string result = "\t";
 	for (int i = 0; i < size; i++)
 	{
 		if (key[i] == null_key);
@@ -122,133 +119,132 @@ string DisplayKeys(int *key, int size = 2)
 	return result;
 }
 
-void GetKeybindings(Scrollpad &help)
+void Help::GetKeybindings()
 {
-	help << "   " << fmtBold << "Keys - Movement\n -----------------------------------------\n" << fmtBoldEnd;
-	help << DisplayKeys(Key.Up) << "Move Cursor up\n";
-	help << DisplayKeys(Key.Down) << "Move Cursor down\n";
-	help << DisplayKeys(Key.PageUp) << "Page up\n";
-	help << DisplayKeys(Key.PageDown) << "Page down\n";
-	help << DisplayKeys(Key.Home) << "Home\n";
-	help << DisplayKeys(Key.End) << "End\n\n";
+	*w << "   " << fmtBold << "Keys - Movement\n -----------------------------------------\n" << fmtBoldEnd;
+	*w << DisplayKeys(Key.Up) << "Move Cursor up\n";
+	*w << DisplayKeys(Key.Down) << "Move Cursor down\n";
+	*w << DisplayKeys(Key.PageUp) << "Page up\n";
+	*w << DisplayKeys(Key.PageDown) << "Page down\n";
+	*w << DisplayKeys(Key.Home) << "Home\n";
+	*w << DisplayKeys(Key.End) << "End\n\n";
 	
-	help << DisplayKeys(Key.ScreenSwitcher) << "Switch between playlist and browser\n";
-	help << DisplayKeys(Key.Help) << "Help screen\n";
-	help << DisplayKeys(Key.Playlist) << "Playlist screen\n";
-	help << DisplayKeys(Key.Browser) << "Browse screen\n";
-	help << DisplayKeys(Key.SearchEngine) << "Search engine\n";
-	help << DisplayKeys(Key.MediaLibrary) << "Media library\n";
-	help << DisplayKeys(Key.PlaylistEditor) << "Playlist editor\n";
+	*w << DisplayKeys(Key.ScreenSwitcher) << "Switch between playlist and browser\n";
+	*w << DisplayKeys(Key.Help) << "Help screen\n";
+	*w << DisplayKeys(Key.Playlist) << "Playlist screen\n";
+	*w << DisplayKeys(Key.Browser) << "Browse screen\n";
+	*w << DisplayKeys(Key.SearchEngine) << "Search engine\n";
+	*w << DisplayKeys(Key.MediaLibrary) << "Media library\n";
+	*w << DisplayKeys(Key.PlaylistEditor) << "Playlist editor\n";
 #	ifdef HAVE_TAGLIB_H
-	help << DisplayKeys(Key.TagEditor) << "Tag editor\n";
+	*w << DisplayKeys(Key.TagEditor) << "Tag editor\n";
 #	endif // HAVE_TAGLIB_H
 #	ifdef ENABLE_CLOCK
-	help << DisplayKeys(Key.Clock) << "Clock screen\n";
+	*w << DisplayKeys(Key.Clock) << "Clock screen\n";
 #	endif // ENABLE_CLOCK
-	help << "\n\n";
+	*w << "\n\n";
 	
-	help << "   " << fmtBold << "Keys - Global\n -----------------------------------------\n" << fmtBoldEnd;
-	help << DisplayKeys(Key.Stop) << "Stop\n";
-	help << DisplayKeys(Key.Pause) << "Pause\n";
-	help << DisplayKeys(Key.Next) << "Next track\n";
-	help << DisplayKeys(Key.Prev) << "Previous track\n";
-	help << DisplayKeys(Key.SeekForward) << "Seek forward\n";
-	help << DisplayKeys(Key.SeekBackward) << "Seek backward\n";
-	help << DisplayKeys(Key.VolumeDown) << "Decrease volume\n";
-	help << DisplayKeys(Key.VolumeUp) << "Increase volume\n\n";
+	*w << "   " << fmtBold << "Keys - Global\n -----------------------------------------\n" << fmtBoldEnd;
+	*w << DisplayKeys(Key.Stop) << "Stop\n";
+	*w << DisplayKeys(Key.Pause) << "Pause\n";
+	*w << DisplayKeys(Key.Next) << "Next track\n";
+	*w << DisplayKeys(Key.Prev) << "Previous track\n";
+	*w << DisplayKeys(Key.SeekForward) << "Seek forward\n";
+	*w << DisplayKeys(Key.SeekBackward) << "Seek backward\n";
+	*w << DisplayKeys(Key.VolumeDown) << "Decrease volume\n";
+	*w << DisplayKeys(Key.VolumeUp) << "Increase volume\n\n";
 	
-	help << DisplayKeys(Key.ToggleSpaceMode) << "Toggle space mode (select/add)\n";
-	help << DisplayKeys(Key.ToggleAddMode) << "Toggle add mode\n";
-	help << DisplayKeys(Key.ReverseSelection) << "Reverse selection\n";
-	help << DisplayKeys(Key.DeselectAll) << "Deselect all items\n";
-	help << DisplayKeys(Key.AddSelected) << "Add selected items to playlist/m3u file\n\n";
+	*w << DisplayKeys(Key.ToggleSpaceMode) << "Toggle space mode (select/add)\n";
+	*w << DisplayKeys(Key.ToggleAddMode) << "Toggle add mode\n";
+	*w << DisplayKeys(Key.ReverseSelection) << "Reverse selection\n";
+	*w << DisplayKeys(Key.DeselectAll) << "Deselect all items\n";
+	*w << DisplayKeys(Key.AddSelected) << "Add selected items to playlist/m3u file\n\n";
 	
-	help << DisplayKeys(Key.ToggleRepeat) << "Toggle repeat mode\n";
-	help << DisplayKeys(Key.ToggleRepeatOne) << "Toggle \"repeat one\" mode\n";
-	help << DisplayKeys(Key.ToggleRandom) << "Toggle random mode\n";
-	help << DisplayKeys(Key.Shuffle) << "Shuffle playlist\n";
-	help << DisplayKeys(Key.ToggleCrossfade) << "Toggle crossfade mode\n";
-	help << DisplayKeys(Key.SetCrossfade) << "Set crossfade\n";
-	help << DisplayKeys(Key.UpdateDB) << "Start a music database update\n\n";
+	*w << DisplayKeys(Key.ToggleRepeat) << "Toggle repeat mode\n";
+	*w << DisplayKeys(Key.ToggleRepeatOne) << "Toggle \"repeat one\" mode\n";
+	*w << DisplayKeys(Key.ToggleRandom) << "Toggle random mode\n";
+	*w << DisplayKeys(Key.Shuffle) << "Shuffle playlist\n";
+	*w << DisplayKeys(Key.ToggleCrossfade) << "Toggle crossfade mode\n";
+	*w << DisplayKeys(Key.SetCrossfade) << "Set crossfade\n";
+	*w << DisplayKeys(Key.UpdateDB) << "Start a music database update\n\n";
 	
-	help << DisplayKeys(Key.FindForward) << "Forward find\n";
-	help << DisplayKeys(Key.FindBackward) << "Backward find\n";
-	help << DisplayKeys(Key.PrevFoundPosition) << "Go to previous found position\n";
-	help << DisplayKeys(Key.NextFoundPosition) << "Go to next found position\n";
-	help << DisplayKeys(Key.ToggleFindMode) << "Toggle find mode (normal/wrapped)\n";
-	help << DisplayKeys(Key.GoToContainingDir) << "Go to directory containing current item\n";
-	help << DisplayKeys(Key.ToggleDisplayMode) << "Toggle display mode\n";
+	*w << DisplayKeys(Key.FindForward) << "Forward find\n";
+	*w << DisplayKeys(Key.FindBackward) << "Backward find\n";
+	*w << DisplayKeys(Key.PrevFoundPosition) << "Go to previous found position\n";
+	*w << DisplayKeys(Key.NextFoundPosition) << "Go to next found position\n";
+	*w << DisplayKeys(Key.ToggleFindMode) << "Toggle find mode (normal/wrapped)\n";
+	*w << DisplayKeys(Key.GoToContainingDir) << "Go to directory containing current item\n";
+	*w << DisplayKeys(Key.ToggleDisplayMode) << "Toggle display mode\n";
 #	ifdef HAVE_TAGLIB_H
-	help << DisplayKeys(Key.EditTags) << "Edit song's tags/playlist's name\n";
+	*w << DisplayKeys(Key.EditTags) << "Edit song's tags/playlist's name\n";
 #	endif // HAVE_TAGLIB_H
-	help << DisplayKeys(Key.GoToPosition) << "Go to chosen position in current song\n";
-	help << DisplayKeys(Key.SongInfo) << "Show song's info\n";
+	*w << DisplayKeys(Key.GoToPosition) << "Go to chosen position in current song\n";
+	*w << DisplayKeys(Key.SongInfo) << "Show song's info\n";
 #	ifdef HAVE_CURL_CURL_H
-	help << DisplayKeys(Key.ArtistInfo) << "Show artist's info\n";
-	help << DisplayKeys(Key.ToggleLyricsDB) << "Toggle lyrics database\n";
+	*w << DisplayKeys(Key.ArtistInfo) << "Show artist's info\n";
+	*w << DisplayKeys(Key.ToggleLyricsDB) << "Toggle lyrics database\n";
 #	endif // HAVE_CURL_CURL_H
-	help << DisplayKeys(Key.Lyrics) << "Show/hide song's lyrics\n\n";
+	*w << DisplayKeys(Key.Lyrics) << "Show/hide song's lyrics\n\n";
 	
-	help << DisplayKeys(Key.Quit) << "Quit\n\n\n";
+	*w << DisplayKeys(Key.Quit) << "Quit\n\n\n";
 	
 	
-	help << "   " << fmtBold << "Keys - Playlist screen\n -----------------------------------------\n" << fmtBoldEnd;
-	help << DisplayKeys(Key.Enter) << "Play\n";
-	help << DisplayKeys(Key.Delete) << "Delete item/selected items from playlist\n";
-	help << DisplayKeys(Key.Clear) << "Clear playlist\n";
-	help << DisplayKeys(Key.Crop) << "Clear playlist but hold currently playing/selected items\n";
-	help << DisplayKeys(Key.MvSongUp) << "Move item/group of items up\n";
-	help << DisplayKeys(Key.MvSongDown) << "Move item/group of items down\n";
-	help << DisplayKeys(Key.Add) << "Add url/file/directory to playlist\n";
-	help << DisplayKeys(Key.SavePlaylist) << "Save playlist\n";
-	help << DisplayKeys(Key.GoToNowPlaying) << "Go to currently playing position\n";
-	help << DisplayKeys(Key.ToggleAutoCenter) << "Toggle auto center mode\n\n\n";
+	*w << "   " << fmtBold << "Keys - Playlist screen\n -----------------------------------------\n" << fmtBoldEnd;
+	*w << DisplayKeys(Key.Enter) << "Play\n";
+	*w << DisplayKeys(Key.Delete) << "Delete item/selected items from playlist\n";
+	*w << DisplayKeys(Key.Clear) << "Clear playlist\n";
+	*w << DisplayKeys(Key.Crop) << "Clear playlist but hold currently playing/selected items\n";
+	*w << DisplayKeys(Key.MvSongUp) << "Move item/group of items up\n";
+	*w << DisplayKeys(Key.MvSongDown) << "Move item/group of items down\n";
+	*w << DisplayKeys(Key.Add) << "Add url/file/directory to playlist\n";
+	*w << DisplayKeys(Key.SavePlaylist) << "Save playlist\n";
+	*w << DisplayKeys(Key.GoToNowPlaying) << "Go to currently playing position\n";
+	*w << DisplayKeys(Key.ToggleAutoCenter) << "Toggle auto center mode\n\n\n";
 	
-	help << "   " << fmtBold << "Keys - Browse screen\n -----------------------------------------\n" << fmtBoldEnd;
-	help << DisplayKeys(Key.Enter) << "Enter directory/Add item to playlist and play\n";
-	help << DisplayKeys(Key.Space) << "Add item to playlist\n";
+	*w << "   " << fmtBold << "Keys - Browse screen\n -----------------------------------------\n" << fmtBoldEnd;
+	*w << DisplayKeys(Key.Enter) << "Enter directory/Add item to playlist and play\n";
+	*w << DisplayKeys(Key.Space) << "Add item to playlist\n";
 	if (Mpd->GetHostname()[0] == '/') // are we connected to unix socket?
-		help << DisplayKeys(Key.SwitchTagTypeList) << "Browse MPD database/local filesystem\n";
-	help << DisplayKeys(Key.GoToParentDir) << "Go to parent directory\n";
-	help << DisplayKeys(Key.Delete) << "Delete playlist\n\n\n";
+		*w << DisplayKeys(Key.SwitchTagTypeList) << "Browse MPD database/local filesystem\n";
+	*w << DisplayKeys(Key.GoToParentDir) << "Go to parent directory\n";
+	*w << DisplayKeys(Key.Delete) << "Delete playlist\n\n\n";
 	
 	
-	help << "   " << fmtBold << "Keys - Search engine\n -----------------------------------------\n" << fmtBoldEnd;
-	help << DisplayKeys(Key.Enter) << "Add item to playlist and play/change option\n";
-	help << DisplayKeys(Key.Space) << "Add item to playlist\n";
-	help << DisplayKeys(Key.StartSearching) << "Start searching immediately\n\n\n";
+	*w << "   " << fmtBold << "Keys - Search engine\n -----------------------------------------\n" << fmtBoldEnd;
+	*w << DisplayKeys(Key.Enter) << "Add item to playlist and play/change option\n";
+	*w << DisplayKeys(Key.Space) << "Add item to playlist\n";
+	*w << DisplayKeys(Key.StartSearching) << "Start searching immediately\n\n\n";
 	
 	
-	help << "   " << fmtBold << "Keys - Media library\n -----------------------------------------\n" << fmtBoldEnd;
-	help << DisplayKeys(&Key.VolumeDown[0], 1) << "Previous column\n";
-	help << DisplayKeys(&Key.VolumeUp[0], 1) << "Next column\n";
-	help << DisplayKeys(Key.Enter) << "Add to playlist and play song/album/artist's songs\n";
-	help << DisplayKeys(Key.Space) << "Add to playlist song/album/artist's songs\n";
-	help << DisplayKeys(Key.SwitchTagTypeList) << "Tag type list switcher (left column)\n\n\n";
+	*w << "   " << fmtBold << "Keys - Media library\n -----------------------------------------\n" << fmtBoldEnd;
+	*w << DisplayKeys(&Key.VolumeDown[0], 1) << "Previous column\n";
+	*w << DisplayKeys(&Key.VolumeUp[0], 1) << "Next column\n";
+	*w << DisplayKeys(Key.Enter) << "Add to playlist and play song/album/artist's songs\n";
+	*w << DisplayKeys(Key.Space) << "Add to playlist song/album/artist's songs\n";
+	*w << DisplayKeys(Key.SwitchTagTypeList) << "Tag type list switcher (left column)\n\n\n";
 	
-	help << "   " << fmtBold << "Keys - Playlist Editor\n -----------------------------------------\n" << fmtBoldEnd;
-	help << DisplayKeys(&Key.VolumeDown[0], 1) << "Previous column\n";
-	help << DisplayKeys(&Key.VolumeUp[0], 1) << "Next column\n";
-	help << DisplayKeys(Key.Enter) << "Add item to playlist and play\n";
-	help << DisplayKeys(Key.Space) << "Add to playlist/select item\n";
+	*w << "   " << fmtBold << "Keys - Playlist Editor\n -----------------------------------------\n" << fmtBoldEnd;
+	*w << DisplayKeys(&Key.VolumeDown[0], 1) << "Previous column\n";
+	*w << DisplayKeys(&Key.VolumeUp[0], 1) << "Next column\n";
+	*w << DisplayKeys(Key.Enter) << "Add item to playlist and play\n";
+	*w << DisplayKeys(Key.Space) << "Add to playlist/select item\n";
 #	ifndef HAVE_TAGLIB_H
-	help << DisplayKeys(Key.EditTags) << "Edit playlist's name\n";
+	*w << DisplayKeys(Key.EditTags) << "Edit playlist's name\n";
 #	endif // ! HAVE_TAGLIB_H
-	help << DisplayKeys(Key.MvSongUp) << "Move item/group of items up\n";
-	help << DisplayKeys(Key.MvSongDown) << "Move item/group of items down\n";
+	*w << DisplayKeys(Key.MvSongUp) << "Move item/group of items up\n";
+	*w << DisplayKeys(Key.MvSongDown) << "Move item/group of items down\n";
 	
-	help << "\n\n   " << fmtBold << "Keys - Lyrics\n -----------------------------------------\n" << fmtBoldEnd;
-	help << DisplayKeys(Key.Space) << "Switch for following lyrics of now playing song\n";
+	*w << "\n\n   " << fmtBold << "Keys - Lyrics\n -----------------------------------------\n" << fmtBoldEnd;
+	*w << DisplayKeys(Key.Space) << "Switch for following lyrics of now playing song\n";
 	
 #	ifdef HAVE_TAGLIB_H
-	help << "\n\n   " << fmtBold << "Keys - Tag editor\n -----------------------------------------\n" << fmtBoldEnd;
-	help << DisplayKeys(Key.Enter) << "Change tag/filename for one song (left column)\n";
-	help << DisplayKeys(Key.Enter) << "Perform operation on all/selected songs (middle column)\n";
-	help << DisplayKeys(Key.Space) << "Switch to albums/directories view (left column)\n";
-	help << DisplayKeys(Key.Space) << "Select/deselect song (right column)\n";
-	help << DisplayKeys(&Key.VolumeDown[0], 1) << "Previous column\n";
-	help << DisplayKeys(&Key.VolumeUp[0], 1) << "Next column\n";
+	*w << "\n\n   " << fmtBold << "Keys - Tag editor\n -----------------------------------------\n" << fmtBoldEnd;
+	*w << DisplayKeys(Key.Enter) << "Change tag/filename for one song (left column)\n";
+	*w << DisplayKeys(Key.Enter) << "Perform operation on all/selected songs (middle column)\n";
+	*w << DisplayKeys(Key.Space) << "Switch to albums/directories view (left column)\n";
+	*w << DisplayKeys(Key.Space) << "Select/deselect song (right column)\n";
+	*w << DisplayKeys(&Key.VolumeDown[0], 1) << "Previous column\n";
+	*w << DisplayKeys(&Key.VolumeUp[0], 1) << "Next column\n";
 #	endif // HAVE_TAGLIB_H
 }
 
-}

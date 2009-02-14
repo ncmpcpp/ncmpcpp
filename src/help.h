@@ -22,13 +22,23 @@
 #define _HELP_H
 
 #include "ncmpcpp.h"
+#include "screen.h"
 
-namespace Help
+class Help : public Screen<Scrollpad>
 {
-	void Init();
-	void Resize();
-	void SwitchTo();
-}
+	public:
+		virtual void Init();
+		virtual void Resize();
+		virtual void SwitchTo();
+		
+		virtual std::string Title();
+		
+	protected:
+		std::string DisplayKeys(int *, int = 2);
+		void GetKeybindings();
+};
+
+extern Help *myHelp;
 
 #endif
 
