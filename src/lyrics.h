@@ -22,34 +22,67 @@
 #define _LYRICS_H
 
 #include "ncmpcpp.h"
-
-namespace Lyrics
-{
-	void Init();
-	void Resize();
-	void Update();
-	
-	void Get();
-#	ifdef HAVE_CURL_CURL_H
-	bool Ready();
-#	endif // HAVE_CURL_CURL_H
-}
+#include "mpdpp.h"
+#include "screen.h"
 
 #ifdef HAVE_CURL_CURL_H
 # include <pthread.h>
 # include "curl/curl.h"
+#endif
 
-struct LyricsPlugin
+class Lyrics : public Screen<Scrollpad>
 {
-	const char *url;
-	const char *tag_open;
-	const char *tag_close;
-	bool (*not_found)(const std::string &);
+	struct Plugin
+	{
+		const char *url;
+		const char *tag_open;
+		const char *tag_close;
+		bool (*not_found)(const std::string &);
+	};
+	
+	public:
+		Lyrics() : itsScrollBegin(0) { }
+		~Lyrics() { }
+		
+		virtual void Init();
+		virtual void Resize();
+		virtual void SwitchTo();
+		
+		virtual std::string Title();
+		
+		virtual void Update();
+		
+		static bool Reload;
+		
+#		ifdef HAVE_CURL_CURL_H
+		static const char *GetPluginName(int offset);
+#		endif // HAVE_CURL_CURL_H
+		
+	protected:
+		static void *Get(void *);
+		
+		static const std::string Folder;
+		
+#		ifdef HAVE_CURL_CURL_H
+		void Take();
+		
+		static const Plugin *ChoosePlugin(int);
+		static bool LyricWiki_NotFound(const std::string &);
+		static bool LyricsPlugin_NotFound(const std::string &);
+		
+		static bool Ready;
+		static pthread_t Downloader;
+		
+		static const char *PluginsList[];
+		static const Plugin LyricWiki;
+		static const Plugin LyricsPlugin;
+#		endif // HAVE_CURL_CURL_H
+		
+		size_t itsScrollBegin;
+		MPD::Song itsSong;
 };
 
-const char *GetLyricsPluginName(int);
-
-#endif // HAVE_CURL_CURL_H
+extern Lyrics *myLyrics;
 
 #endif
 

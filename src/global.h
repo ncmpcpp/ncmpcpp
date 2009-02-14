@@ -59,7 +59,7 @@ namespace Global
 //	extern Menu<MPD::Song> *myPlaylistEditor->Content;
 	
 //	extern Scrollpad *sHelp;
-	extern Scrollpad *sLyrics;
+//	extern Scrollpad *sLyrics;
 	extern Scrollpad *sInfo;
 	
 	extern Window *wHeader;
@@ -76,7 +76,7 @@ namespace Global
 //	extern size_t browsed_dir_scroll_begin;
 	extern size_t main_start_y;
 	extern size_t main_height;
-	extern size_t lyrics_scroll_begin;
+//	extern size_t lyrics_scroll_begin;
 
 	extern time_t timer;
 
@@ -99,7 +99,7 @@ namespace Global
 
 	extern bool messages_allowed;
 	extern bool redraw_header;
-	extern bool reload_lyrics;
+//	extern bool reload_lyrics;
 	
 	extern std::string volume_state;
 
@@ -117,7 +117,7 @@ namespace Global
 	extern std::vector<int> vFoundPositions;
 	extern int found_pos;
 	
-	extern MPD::Song lyrics_song;
+//	extern MPD::Song lyrics_song;
 }
 
 #endif

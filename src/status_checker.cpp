@@ -25,6 +25,7 @@
 #include "charset.h"
 #include "global.h"
 #include "helpers.h"
+#include "lyrics.h"
 #include "media_library.h"
 #include "playlist.h"
 #include "playlist_editor.h"
@@ -317,7 +318,7 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 				mvwhline(wFooter->Raw(), 0, 0, 0, wFooter->GetWidth());
 			
 			if (Config.now_playing_lyrics && !Config.repeat_one_mode && current_screen == csLyrics && prev_screen == csPlaylist)
-				reload_lyrics = 1;
+				Lyrics::Reload = 1;
 		}
 		playing_song_scroll_begin = 0;
 		

@@ -21,11 +21,13 @@
 #include <sys/stat.h>
 #include <fstream>
 
+#include "lyrics.h"
+
 #include "browser.h"
 #include "charset.h"
 #include "global.h"
 #include "helpers.h"
-#include "lyrics.h"
+
 #include "media_library.h"
 #include "playlist.h"
 #include "playlist_editor.h"
@@ -39,52 +41,50 @@ using namespace Global;
 using std::vector;
 using std::string;
 
-Scrollpad *Global::sLyrics;
+const std::string Lyrics::Folder = home_folder + "/.lyrics";
 
-MPD::Song Global::lyrics_song;
-
-const string lyrics_folder = home_folder + "/.lyrics";
+bool Lyrics::Reload = 0;
 
 #ifdef HAVE_CURL_CURL_H
 pthread_mutex_t Global::curl = PTHREAD_MUTEX_INITIALIZER;
+
+bool Lyrics::Ready = 0;
+pthread_t Lyrics::Downloader = 0;
 #endif
 
-namespace
-{
-#	ifdef HAVE_CURL_CURL_H
-	pthread_t lyrics_downloader;
-	bool lyrics_ready;
-#	endif
-	
-	void *GetLyrics(void *);
-}
+Lyrics *myLyrics = new Lyrics;
 
 void Lyrics::Init()
 {
-	sLyrics = new Scrollpad(0, main_start_y, COLS, main_height, "", Config.main_color, brNone);
-	sLyrics->SetTimeout(ncmpcpp_window_timeout);
+	w = new Scrollpad(0, main_start_y, COLS, main_height, "", Config.main_color, brNone);
+	w->SetTimeout(ncmpcpp_window_timeout);
 }
 
 void Lyrics::Resize()
 {
-	sLyrics->Resize(COLS, main_height);
+	w->Resize(COLS, main_height);
 }
 
 void Lyrics::Update()
 {
-	if (!reload_lyrics)
+#	ifdef HAVE_CURL_CURL_H
+	if (myLyrics->Ready)
+		myLyrics->Take();
+#	endif // HAVE_CURL_CURL_H
+	
+	if (!Reload)
 		return;
 	
 	const MPD::Song &s = myPlaylist->NowPlayingSong();
 	if (!s.GetArtist().empty() && !s.GetTitle().empty())
-		Get();
+		SwitchTo();
 	else
-		reload_lyrics = 0;
+		Reload = 0;
 }
 
-void Lyrics::Get()
+void Lyrics::SwitchTo()
 {
-	if (wCurrent == sLyrics && !reload_lyrics)
+	if (wCurrent == w && !Reload)
 	{
 		wCurrent->Hide();
 		current_screen = prev_screen;
@@ -107,7 +107,7 @@ void Lyrics::Get()
 #		endif // HAVE_TAGLIB_H
 	}
 	else if (
-	    reload_lyrics
+	    Reload
 	||  (wCurrent == myPlaylist->Main() && !myPlaylist->Main()->Empty())
 	||  (wCurrent == myBrowser->Main() && myBrowser->Main()->Current().type == MPD::itSong)
 	||  (wCurrent == mySearcher->Main() && !mySearcher->Main()->Current().first)
@@ -119,9 +119,14 @@ void Lyrics::Get()
 		)
 	{
 #		ifdef HAVE_CURL_CURL_H
-		if (lyrics_downloader)
+		if (Downloader && !Ready)
 		{
 			ShowMessage("Lyrics are being downloaded...");
+			return;
+		}
+		else if (Ready)
+		{
+			Take();
 			return;
 		}
 #		endif
@@ -129,11 +134,11 @@ void Lyrics::Get()
 		MPD::Song *s = 0;
 		int id;
 		
-		if (reload_lyrics)
+		if (Reload)
 		{
 			current_screen = csPlaylist;
 			wCurrent = myPlaylist->Main();
-			reload_lyrics = 0;
+			Reload = 0;
 			id = myPlaylist->NowPlaying;
 		}
 		else
@@ -166,104 +171,37 @@ void Lyrics::Get()
 		}
 		if (!s->GetArtist().empty() && !s->GetTitle().empty())
 		{
-			lyrics_scroll_begin = 0;
-			lyrics_song = *s;
+			itsScrollBegin = 0;
+			itsSong = *s;
 			wPrev = wCurrent;
 			prev_screen = current_screen;
-			wCurrent = sLyrics;
+			wCurrent = w;
 			current_screen = csLyrics;
 			redraw_header = 1;
-			sLyrics->Clear();
-			sLyrics->WriteXY(0, 0, 0, "Fetching lyrics...");
-			sLyrics->Refresh();
+			w->Clear();
+			w->WriteXY(0, 0, 0, "Fetching lyrics...");
+			w->Refresh();
 #			ifdef HAVE_CURL_CURL_H
-			if (!lyrics_downloader)
+			if (!Downloader)
 			{
-				pthread_create(&lyrics_downloader, NULL, GetLyrics, s);
+				pthread_create(&Downloader, NULL, Get, &itsSong);
 			}
 #			else
-			GetLyrics(s);
-			sLyrics->Flush();
+			Get(s);
+			w->Flush();
 #			endif
 		}
 	}
 }
 
-#ifdef HAVE_CURL_CURL_H
-bool Lyrics::Ready()
+std::string Lyrics::Title()
 {
-	if (!lyrics_ready)
-		return false;
-	pthread_join(lyrics_downloader, NULL);
-	sLyrics->Flush();
-	lyrics_downloader = 0;
-	lyrics_ready = 0;
-	return true;
+	string result = "Lyrics: ";
+	result += TO_STRING(Scroller(itsSong.toString("%a - %t"), COLS-result.length()-volume_state.length(), itsScrollBegin));
+	return result;
 }
 
-namespace
-{
-	bool lyricwiki_not_found(const string &s)
-	{
-		return s == "Not found";
-	}
-	
-	bool lyricsplugin_not_found(const string &s)
-	{
-		if  (s.empty())
-			return true;
-		for (string::const_iterator it = s.begin(); it != s.end(); it++)
-			if (isprint(*it))
-				return false;
-		return true;
-	}
-	
-	const LyricsPlugin lyricwiki =
-	{
-		"http://lyricwiki.org/api.php?artist=%artist%&song=%title%&fmt=xml",
-		"<lyrics>",
-		"</lyrics>",
-		lyricwiki_not_found
-	};
-	
-	const LyricsPlugin lyricsplugin =
-	{
-		"http://www.lyricsplugin.com/winamp03/plugin/?artist=%artist%&title=%title%",
-		"<div id=\"lyrics\">",
-		"</div>",
-		lyricsplugin_not_found
-	};
-	
-	const char *lyricsplugins_list[] =
-	{
-		"lyricwiki.org",
-		"lyricsplugin.com",
-		0
-	};
-	
-	const LyricsPlugin *ChooseLyricsPlugin(int i)
-	{
-		switch (i)
-		{
-			case 0:
-				return &lyricwiki;
-			case 1:
-				return &lyricsplugin;
-			default:
-				return &lyricwiki;
-		}
-	}
-}
-
-const char *GetLyricsPluginName(int offset)
-{
-	return lyricsplugins_list[offset];
-}
-
-#endif // HAVE_CURL_CURL_H
-
-namespace {
-void *GetLyrics(void *song)
+void *Lyrics::Get(void *song)
 {
 	string artist = static_cast<MPD::Song *>(song)->GetArtist();
 	string title = static_cast<MPD::Song *>(song)->GetTitle();
@@ -273,9 +211,9 @@ void *GetLyrics(void *song)
 	
 	string filename = artist + " - " + title + ".txt";
 	EscapeUnallowedChars(filename);
-	const string fullpath = lyrics_folder + "/" + filename;
+	const string fullpath = Folder + "/" + filename;
 	
-	mkdir(lyrics_folder.c_str(), 0755);
+	mkdir(Folder.c_str(), 0755);
 	
 	std::ifstream input(fullpath.c_str());
 	
@@ -286,20 +224,20 @@ void *GetLyrics(void *song)
 		while (getline(input, line))
 		{
 			if (!first)
-				*sLyrics << "\n";
+				*myLyrics->Main() << "\n";
 			utf_to_locale(line);
-			*sLyrics << line;
+			*myLyrics->Main() << line;
 			first = 0;
 		}
 #		ifdef HAVE_CURL_CURL_H
-		lyrics_ready = 1;
+		Ready = 1;
 		pthread_exit(NULL);
 #		endif
 	}
 #	ifdef HAVE_CURL_CURL_H
 	CURLcode code;
 	
-	const LyricsPlugin *my_lyrics = ChooseLyricsPlugin(Config.lyrics_db);
+	const Plugin *my_lyrics = ChoosePlugin(Config.lyrics_db);
 	
 	string result;
 	
@@ -326,8 +264,8 @@ void *GetLyrics(void *song)
 	
 	if (code != CURLE_OK)
 	{
-		*sLyrics << "Error while fetching lyrics: " << curl_easy_strerror(code);
-		lyrics_ready = 1;
+		*myLyrics->Main() << "Error while fetching lyrics: " << curl_easy_strerror(code);
+		Ready = 1;
 		pthread_exit(NULL);
 	}
 	
@@ -338,8 +276,8 @@ void *GetLyrics(void *song)
 	
 	if (my_lyrics->not_found(result))
 	{
-		*sLyrics << "Not found";
-		lyrics_ready = 1;
+		*myLyrics->Main() << "Not found";
+		Ready = 1;
 		pthread_exit(NULL);
 	}
 	
@@ -351,7 +289,7 @@ void *GetLyrics(void *song)
 	EscapeHtml(result);
 	Trim(result);
 	
-	*sLyrics << utf_to_locale_cpy(result);
+	*myLyrics->Main() << utf_to_locale_cpy(result);
 	
 	std::ofstream output(fullpath.c_str());
 	if (output.is_open())
@@ -359,12 +297,82 @@ void *GetLyrics(void *song)
 		output << result;
 		output.close();
 	}
-	lyrics_ready = 1;
+	Ready = 1;
 	pthread_exit(NULL);
 #	else
 	else
-		*sLyrics << "Local lyrics not found. As ncmpcpp has been compiled without curl support, you can put appropriate lyrics into ~/.lyrics directory (file syntax is \"ARTIST - TITLE.txt\") or recompile ncmpcpp with curl support.";
+		*myLyrics->Main() << "Local lyrics not found. As ncmpcpp has been compiled without curl support, you can put appropriate lyrics into ~/.lyrics directory (file syntax is \"ARTIST - TITLE.txt\") or recompile ncmpcpp with curl support.";
 	return NULL;
 #	endif
 }
+
+#ifdef HAVE_CURL_CURL_H
+
+void Lyrics::Take()
+{
+	if (!Ready)
+		return;
+	pthread_join(Downloader, NULL);
+	w->Flush();
+	Downloader = 0;
+	Ready = 0;
 }
+
+const char *Lyrics::GetPluginName(int offset)
+{
+	return PluginsList[offset];
+}
+
+bool Lyrics::LyricWiki_NotFound(const string &s)
+{
+	return s == "Not found";
+}
+
+bool Lyrics::LyricsPlugin_NotFound(const string &s)
+{
+	if  (s.empty())
+		return true;
+	for (string::const_iterator it = s.begin(); it != s.end(); it++)
+		if (isprint(*it))
+			return false;
+	return true;
+}
+
+const Lyrics::Plugin Lyrics::LyricWiki =
+{
+	"http://lyricwiki.org/api.php?artist=%artist%&song=%title%&fmt=xml",
+	"<lyrics>",
+	"</lyrics>",
+	LyricWiki_NotFound
+};
+
+const Lyrics::Plugin Lyrics::LyricsPlugin =
+{
+	"http://www.lyricsplugin.com/winamp03/plugin/?artist=%artist%&title=%title%",
+	"<div id=\"lyrics\">",
+	"</div>",
+	LyricsPlugin_NotFound
+};
+
+const char *Lyrics::PluginsList[] =
+{
+	"lyricwiki.org",
+	"lyricsplugin.com",
+	0
+};
+
+const Lyrics::Plugin *Lyrics::ChoosePlugin(int i)
+{
+	switch (i)
+	{
+		case 0:
+			return &LyricWiki;
+		case 1:
+			return &LyricsPlugin;
+		default:
+			return &LyricWiki;
+	}
+}
+
+#endif // HAVE_CURL_CURL_H
+

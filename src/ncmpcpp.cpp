@@ -75,7 +75,7 @@ int Global::lock_statusbar_delay = -1;
 
 size_t Global::main_start_y;
 size_t Global::main_height;
-size_t Global::lyrics_scroll_begin = 0;
+//size_t Global::lyrics_scroll_begin = 0;
 
 time_t Global::timer;
 
@@ -93,7 +93,6 @@ bool Global::block_item_list_update = 0;
 
 bool Global::messages_allowed = 0;
 bool Global::redraw_header = 1;
-bool Global::reload_lyrics = 0;
 
 vector<int> Global::vFoundPositions;
 int Global::found_pos = 0;
@@ -164,7 +163,7 @@ int main(int argc, char *argv[])
 	
 	myHelp->Init();
 	Info::Init();
-	Lyrics::Init();
+	myLyrics->Init();
 	
 	if (Config.header_visibility)
 	{
@@ -259,7 +258,7 @@ int main(int argc, char *argv[])
 					screen_title = myLibrary->Title();
 					break;
 				case csLyrics:
-					screen_title = "Lyrics: ";
+					screen_title = myLyrics->Title();
 					break;
 				case csPlaylistEditor:
 					screen_title = myPlaylistEditor->Title();
@@ -278,14 +277,6 @@ int main(int argc, char *argv[])
 				wHeader->Bold(1);
 				wHeader->WriteXY(0, 0, 1, "%s", screen_title.c_str());
 				wHeader->Bold(0);
-				
-				if (current_screen == csLyrics)
-				{
-					
-					wHeader->Bold(1);
-					*wHeader << Scroller(lyrics_song.toString("%a - %t"), max_allowed_title_length, lyrics_scroll_begin);
-					wHeader->Bold(0);
-				}
 			}
 			else
 			{
@@ -340,11 +331,10 @@ int main(int argc, char *argv[])
 #		endif
 		if (current_screen == csLyrics)
 		{
-			Lyrics::Update();
+			myLyrics->Update();
 		}
 #		ifdef HAVE_CURL_CURL_H
-		if (!Info::Ready())
-			Lyrics::Ready();
+		Info::Ready();
 #		endif
 		
 		wCurrent->Display();
@@ -510,7 +500,7 @@ int main(int argc, char *argv[])
 			myLibrary->Resize();
 			myPlaylistEditor->Resize();
 			Info::Resize();
-			Lyrics::Resize();
+			myLyrics->Resize();
 			
 #			ifdef HAVE_TAGLIB_H
 			myTinyTagEditor->Resize();
@@ -1187,10 +1177,10 @@ int main(int argc, char *argv[])
 #		ifdef HAVE_CURL_CURL_H
 		else if (Keypressed(input, Key.ToggleLyricsDB))
 		{
-			const char *current_lyrics_plugin = GetLyricsPluginName(++Config.lyrics_db);
+			const char *current_lyrics_plugin = Lyrics::GetPluginName(++Config.lyrics_db);
 			if (!current_lyrics_plugin)
 			{
-				current_lyrics_plugin = GetLyricsPluginName(Config.lyrics_db = 0);
+				current_lyrics_plugin = Lyrics::GetPluginName(Config.lyrics_db = 0);
 			}
 			ShowMessage("Using lyrics database: %s", current_lyrics_plugin);
 		}
@@ -2016,7 +2006,7 @@ int main(int argc, char *argv[])
 #		endif // HAVE_CURL_CURL_H
 		else if (Keypressed(input, Key.Lyrics))
 		{
-			Lyrics::Get();
+			myLyrics->SwitchTo();
 		}
 		else if (Keypressed(input, Key.Help))
 		{

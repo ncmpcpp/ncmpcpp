@@ -76,7 +76,7 @@ void Browser::SwitchTo()
 std::string Browser::Title()
 {
 	string result = "Browse: ";
-	result += TO_STRING(Scroller(itsBrowsedDir, COLS-volume_state.length(), itsScrollBeginning));
+	result += TO_STRING(Scroller(itsBrowsedDir, COLS-result.length()-volume_state.length(), itsScrollBeginning));
 	return result;
 }
 
