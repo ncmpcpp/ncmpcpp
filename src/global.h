@@ -46,7 +46,7 @@ namespace Global
 	
 #	ifdef HAVE_TAGLIB_H
 	extern Window *wTagEditorActiveCol;
-	extern Menu<Buffer> *mTagEditor;
+//	extern Menu<Buffer> *mTagEditor;
 	extern Menu<string_pair> *mEditorAlbums;
 	extern Menu<string_pair> *mEditorDirs;
 	extern Menu<string_pair> *mEditorLeftCol;

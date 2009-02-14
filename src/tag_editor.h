@@ -30,14 +30,26 @@
 #include "tag.h"
 
 #include "mpdpp.h"
+#include "screen.h"
 #include "settings.h"
 
-namespace TinyTagEditor
+class TinyTagEditor : public Screen< Menu<Buffer> >
 {
-	void Init();
-	
-	void EnterPressed(MPD::Song &);
-}
+	public:
+		virtual void Init();
+		virtual void Resize();
+		virtual void SwitchTo();
+		
+		virtual std::string Title();
+		
+		void EnterPressed();
+		
+	protected:
+		bool GetTags();
+		MPD::Song itsEdited;
+};
+
+extern TinyTagEditor *myTinyTagEditor;
 
 namespace TagEditor
 {
@@ -60,7 +72,7 @@ std::string FindSharedDir(const MPD::SongList &);
 SongSetFunction IntoSetFunction(mpd_TagItems);
 
 void ReadTagsFromFile(mpd_Song *);
-bool GetSongTags(MPD::Song &);
+//bool GetSongTags(MPD::Song &);
 bool WriteTags(MPD::Song &);
 
 void __deal_with_filenames(MPD::SongList &);

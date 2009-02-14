@@ -43,30 +43,85 @@
 using namespace Global;
 using namespace MPD;
 
-Menu<Buffer> *Global::mTagEditor;
-
-Window *Global::wTagEditorActiveCol;
-Menu<string_pair> *Global::mEditorAlbums;
-Menu<string_pair> *Global::mEditorDirs;
-Menu<string_pair> *Global::mEditorLeftCol;
-Menu<string> *Global::mEditorTagTypes;
-Menu<Song> *Global::mEditorTags;
+TinyTagEditor *myTinyTagEditor = new TinyTagEditor;
 
 void TinyTagEditor::Init()
 {
-	mTagEditor = new Menu<Buffer>(0, main_start_y, COLS, main_height, "", Config.main_color, brNone);
-	mTagEditor->HighlightColor(Config.main_highlight_color);
-	mTagEditor->SetTimeout(ncmpcpp_window_timeout);
-	mTagEditor->SetItemDisplayer(Display::Generic);
+	w = new Menu<Buffer>(0, main_start_y, COLS, main_height, "", Config.main_color, brNone);
+	w->HighlightColor(Config.main_highlight_color);
+	w->SetTimeout(ncmpcpp_window_timeout);
+	w->SetItemDisplayer(Display::Generic);
 }
 
-void TinyTagEditor::EnterPressed(Song &s)
+void TinyTagEditor::Resize()
 {
-	size_t option = mTagEditor->Choice();
+	w->Resize(COLS, main_height);
+}
+
+void TinyTagEditor::SwitchTo()
+{
+	List *mList = reinterpret_cast<Menu<Song> *>(wCurrent);
+	size_t id = mList->Choice();
+	switch (current_screen)
+	{
+		case csPlaylist:
+			itsEdited = myPlaylist->Main()->at(id);
+			break;
+		case csBrowser:
+			itsEdited = *myBrowser->Main()->at(id).song;
+			break;
+		case csSearcher:
+			itsEdited = *mySearcher->Main()->at(id).second;
+			break;
+		case csLibrary:
+			itsEdited = myLibrary->Songs->at(id);
+			break;
+		case csPlaylistEditor:
+			itsEdited = myPlaylistEditor->Content->at(id);
+			break;
+		case csTagEditor:
+			itsEdited = mEditorTags->at(id);
+			break;
+		default:
+			break;
+	}
+	if (itsEdited.IsStream())
+	{
+		ShowMessage("Cannot edit streams!");
+	}
+	else if (GetTags())
+	{
+		wPrev = wCurrent;
+		wCurrent = w;
+		prev_screen = current_screen;
+		current_screen = csTinyTagEditor;
+		redraw_header = 1;
+	}
+	else
+	{
+		string message = "Cannot read file '";
+		if (itsEdited.IsFromDB())
+			message += Config.mpd_music_dir;
+		message += itsEdited.GetFile();
+		message += "'!";
+		ShowMessage("%s", message.c_str());
+	}
+}
+
+std::string TinyTagEditor::Title()
+{
+	return "Tag editor";
+}
+
+void TinyTagEditor::EnterPressed()
+{
+	size_t option = w->Choice();
 	LockStatusbar();
 	
 	if (option >= 8 && option <= 20)
-		mTagEditor->at(option).Clear();
+		w->at(option).Clear();
+	
+	Song &s = itsEdited;
 	
 	switch (option-7)
 	{
@@ -74,70 +129,70 @@ void TinyTagEditor::EnterPressed(Song &s)
 		{
 			Statusbar() << fmtBold << "Title: " << fmtBoldEnd;
 			s.SetTitle(wFooter->GetString(s.GetTitle()));
-			mTagEditor->at(option) << fmtBold << "Title:" << fmtBoldEnd << ' ' << ShowTag(s.GetTitle());
+			w->at(option) << fmtBold << "Title:" << fmtBoldEnd << ' ' << ShowTag(s.GetTitle());
 			break;
 		}
 		case 2:
 		{
 			Statusbar() << fmtBold << "Artist: " << fmtBoldEnd;
 			s.SetArtist(wFooter->GetString(s.GetArtist()));
-			mTagEditor->at(option) << fmtBold << "Artist:" << fmtBoldEnd << ' ' << ShowTag(s.GetArtist());
+			w->at(option) << fmtBold << "Artist:" << fmtBoldEnd << ' ' << ShowTag(s.GetArtist());
 			break;
 		}
 		case 3:
 		{
 			Statusbar() << fmtBold << "Album: " << fmtBoldEnd;
 			s.SetAlbum(wFooter->GetString(s.GetAlbum()));
-			mTagEditor->at(option) << fmtBold << "Album:" << fmtBoldEnd << ' ' << ShowTag(s.GetAlbum());
+			w->at(option) << fmtBold << "Album:" << fmtBoldEnd << ' ' << ShowTag(s.GetAlbum());
 			break;
 		}
 		case 4:
 		{
 			Statusbar() << fmtBold << "Year: " << fmtBoldEnd;
 			s.SetYear(wFooter->GetString(s.GetYear(), 4));
-			mTagEditor->at(option) << fmtBold << "Year:" << fmtBoldEnd << ' ' << ShowTag(s.GetYear());
+			w->at(option) << fmtBold << "Year:" << fmtBoldEnd << ' ' << ShowTag(s.GetYear());
 			break;
 		}
 		case 5:
 		{
 			Statusbar() << fmtBold << "Track: " << fmtBoldEnd;
 			s.SetTrack(wFooter->GetString(s.GetTrack(), 3));
-			mTagEditor->at(option) << fmtBold << "Track:" << fmtBoldEnd << ' ' << ShowTag(s.GetTrack());
+			w->at(option) << fmtBold << "Track:" << fmtBoldEnd << ' ' << ShowTag(s.GetTrack());
 			break;
 		}
 		case 6:
 		{
 			Statusbar() << fmtBold << "Genre: " << fmtBoldEnd;
 			s.SetGenre(wFooter->GetString(s.GetGenre()));
-			mTagEditor->at(option) << fmtBold << "Genre:" << fmtBoldEnd << ' ' << ShowTag(s.GetGenre());
+			w->at(option) << fmtBold << "Genre:" << fmtBoldEnd << ' ' << ShowTag(s.GetGenre());
 			break;
 		}
 		case 7:
 		{
 			Statusbar() << fmtBold << "Composer: " << fmtBoldEnd;
 			s.SetComposer(wFooter->GetString(s.GetComposer()));
-			mTagEditor->at(option) << fmtBold << "Composer:" << fmtBoldEnd << ' ' << ShowTag(s.GetComposer());
+			w->at(option) << fmtBold << "Composer:" << fmtBoldEnd << ' ' << ShowTag(s.GetComposer());
 			break;
 		}
 		case 8:
 		{
 			Statusbar() << fmtBold << "Performer: " << fmtBoldEnd;
 			s.SetPerformer(wFooter->GetString(s.GetPerformer()));
-			mTagEditor->at(option) << fmtBold << "Performer:" << fmtBoldEnd << ' ' << ShowTag(s.GetPerformer());
+			w->at(option) << fmtBold << "Performer:" << fmtBoldEnd << ' ' << ShowTag(s.GetPerformer());
 			break;
 		}
 		case 9:
 		{
 			Statusbar() << fmtBold << "Disc: " << fmtBoldEnd;
 			s.SetDisc(wFooter->GetString(s.GetDisc()));
-			mTagEditor->at(option) << fmtBold << "Disc:" << fmtBoldEnd << ' ' << ShowTag(s.GetDisc());
+			w->at(option) << fmtBold << "Disc:" << fmtBoldEnd << ' ' << ShowTag(s.GetDisc());
 			break;
 		}
 		case 10:
 		{
 			Statusbar() << fmtBold << "Comment: " << fmtBoldEnd;
 			s.SetComment(wFooter->GetString(s.GetComment()));
-			mTagEditor->at(option) << fmtBold << "Comment:" << fmtBoldEnd << ' ' << ShowTag(s.GetComment());
+			w->at(option) << fmtBold << "Comment:" << fmtBoldEnd << ' ' << ShowTag(s.GetComment());
 			break;
 		}
 		case 12:
@@ -149,7 +204,7 @@ void TinyTagEditor::EnterPressed(Song &s)
 			filename = filename.substr(0, dot);
 			string new_name = wFooter->GetString(filename);
 			s.SetNewName(new_name + extension);
-			mTagEditor->at(option) << fmtBold << "Filename:" << fmtBoldEnd << ' ' << (s.GetNewName().empty() ? s.GetName() : s.GetNewName());
+			w->at(option) << fmtBold << "Filename:" << fmtBoldEnd << ' ' << (s.GetNewName().empty() ? s.GetName() : s.GetNewName());
 			break;
 		}
 		case 14:
@@ -198,6 +253,75 @@ void TinyTagEditor::EnterPressed(Song &s)
 	}
 	UnlockStatusbar();
 }
+
+bool TinyTagEditor::GetTags()
+{
+	Song &s = itsEdited;
+	
+	string path_to_file;
+	if (s.IsFromDB())
+		path_to_file += Config.mpd_music_dir;
+	path_to_file += s.GetFile();
+	locale_to_utf(path_to_file);
+	
+	TagLib::FileRef f(path_to_file.c_str());
+	if (f.isNull())
+		return false;
+	s.SetComment(f.tag()->comment().to8Bit(1));
+	
+	string ext = s.GetFile();
+	ext = ext.substr(ext.rfind(".")+1);
+	ToLower(ext);
+	
+	w->Clear();
+	w->Reset();
+	
+	w->ResizeBuffer(23);
+	
+	for (size_t i = 0; i < 7; i++)
+		w->Static(i, 1);
+	
+	w->IntoSeparator(7);
+	w->IntoSeparator(18);
+	w->IntoSeparator(20);
+	
+	if (ext != "mp3")
+		for (size_t i = 14; i <= 16; i++)
+			w->Static(i, 1);
+	
+	w->Highlight(8);
+	
+	w->at(0) << fmtBold << Config.color1 << "Song name: " << fmtBoldEnd << Config.color2 << s.GetName() << clEnd;
+	w->at(1) << fmtBold << Config.color1 << "Location in DB: " << fmtBoldEnd << Config.color2 << ShowTag(s.GetDirectory()) << clEnd;
+	w->at(3) << fmtBold << Config.color1 << "Length: " << fmtBoldEnd << Config.color2 << s.GetLength() << clEnd;
+	w->at(4) << fmtBold << Config.color1 << "Bitrate: " << fmtBoldEnd << Config.color2 << f.audioProperties()->bitrate() << " kbps" << clEnd;
+	w->at(5) << fmtBold << Config.color1 << "Sample rate: " << fmtBoldEnd << Config.color2 << f.audioProperties()->sampleRate() << " Hz" << clEnd;
+	w->at(6) << fmtBold << Config.color1 << "Channels: " << fmtBoldEnd << Config.color2 << (f.audioProperties()->channels() == 1 ? "Mono" : "Stereo") << clDefault;
+	
+	w->at(8) << fmtBold << "Title:" << fmtBoldEnd << ' ' << ShowTag(s.GetTitle());
+	w->at(9) << fmtBold << "Artist:" << fmtBoldEnd << ' ' << ShowTag(s.GetArtist());
+	w->at(10) << fmtBold << "Album:" << fmtBoldEnd << ' ' << ShowTag(s.GetAlbum());
+	w->at(11) << fmtBold << "Year:" << fmtBoldEnd << ' ' << ShowTag(s.GetYear());
+	w->at(12) << fmtBold << "Track:" << fmtBoldEnd << ' ' << ShowTag(s.GetTrack());
+	w->at(13) << fmtBold << "Genre:" << fmtBoldEnd << ' ' << ShowTag(s.GetGenre());
+	w->at(14) << fmtBold << "Composer:" << fmtBoldEnd << ' ' << ShowTag(s.GetComposer());
+	w->at(15) << fmtBold << "Performer:" << fmtBoldEnd << ' ' << ShowTag(s.GetPerformer());
+	w->at(16) << fmtBold << "Disc:" << fmtBoldEnd << ' ' << ShowTag(s.GetDisc());
+	w->at(17) << fmtBold << "Comment:" << fmtBoldEnd << ' ' << ShowTag(s.GetComment());
+
+	w->at(19) << fmtBold << "Filename:" << fmtBoldEnd << ' ' << s.GetName();
+
+	w->at(21) << "Save";
+	w->at(22) << "Cancel";
+	return true;
+}
+
+Window *Global::wTagEditorActiveCol;
+Menu<string_pair> *Global::mEditorAlbums;
+Menu<string_pair> *Global::mEditorDirs;
+Menu<string_pair> *Global::mEditorLeftCol;
+Menu<string> *Global::mEditorTagTypes;
+Menu<Song> *Global::mEditorTags;
 
 namespace TagEditor
 {
@@ -841,66 +965,6 @@ void ReadTagsFromFile(mpd_Song *s)
 	}
 	s->comment = !f.tag()->comment().isEmpty() ? str_pool_get(f.tag()->comment().toCString(1)) : 0;
 	s->time = f.audioProperties()->length();
-}
-
-bool GetSongTags(Song &s)
-{
-	string path_to_file;
-	if (s.IsFromDB())
-		path_to_file += Config.mpd_music_dir;
-	path_to_file += s.GetFile();
-	locale_to_utf(path_to_file);
-	
-	TagLib::FileRef f(path_to_file.c_str());
-	if (f.isNull())
-		return false;
-	s.SetComment(f.tag()->comment().to8Bit(1));
-	
-	string ext = s.GetFile();
-	ext = ext.substr(ext.rfind(".")+1);
-	ToLower(ext);
-	
-	mTagEditor->Clear();
-	mTagEditor->Reset();
-	
-	mTagEditor->ResizeBuffer(23);
-	
-	for (size_t i = 0; i < 7; i++)
-		mTagEditor->Static(i, 1);
-	
-	mTagEditor->IntoSeparator(7);
-	mTagEditor->IntoSeparator(18);
-	mTagEditor->IntoSeparator(20);
-	
-	if (ext != "mp3")
-		for (size_t i = 14; i <= 16; i++)
-			mTagEditor->Static(i, 1);
-	
-	mTagEditor->Highlight(8);
-	
-	mTagEditor->at(0) << fmtBold << Config.color1 << "Song name: " << fmtBoldEnd << Config.color2 << s.GetName() << clEnd;
-	mTagEditor->at(1) << fmtBold << Config.color1 << "Location in DB: " << fmtBoldEnd << Config.color2 << ShowTag(s.GetDirectory()) << clEnd;
-	mTagEditor->at(3) << fmtBold << Config.color1 << "Length: " << fmtBoldEnd << Config.color2 << s.GetLength() << clEnd;
-	mTagEditor->at(4) << fmtBold << Config.color1 << "Bitrate: " << fmtBoldEnd << Config.color2 << f.audioProperties()->bitrate() << " kbps" << clEnd;
-	mTagEditor->at(5) << fmtBold << Config.color1 << "Sample rate: " << fmtBoldEnd << Config.color2 << f.audioProperties()->sampleRate() << " Hz" << clEnd;
-	mTagEditor->at(6) << fmtBold << Config.color1 << "Channels: " << fmtBoldEnd << Config.color2 << (f.audioProperties()->channels() == 1 ? "Mono" : "Stereo") << clDefault;
-	
-	mTagEditor->at(8) << fmtBold << "Title:" << fmtBoldEnd << ' ' << ShowTag(s.GetTitle());
-	mTagEditor->at(9) << fmtBold << "Artist:" << fmtBoldEnd << ' ' << ShowTag(s.GetArtist());
-	mTagEditor->at(10) << fmtBold << "Album:" << fmtBoldEnd << ' ' << ShowTag(s.GetAlbum());
-	mTagEditor->at(11) << fmtBold << "Year:" << fmtBoldEnd << ' ' << ShowTag(s.GetYear());
-	mTagEditor->at(12) << fmtBold << "Track:" << fmtBoldEnd << ' ' << ShowTag(s.GetTrack());
-	mTagEditor->at(13) << fmtBold << "Genre:" << fmtBoldEnd << ' ' << ShowTag(s.GetGenre());
-	mTagEditor->at(14) << fmtBold << "Composer:" << fmtBoldEnd << ' ' << ShowTag(s.GetComposer());
-	mTagEditor->at(15) << fmtBold << "Performer:" << fmtBoldEnd << ' ' << ShowTag(s.GetPerformer());
-	mTagEditor->at(16) << fmtBold << "Disc:" << fmtBoldEnd << ' ' << ShowTag(s.GetDisc());
-	mTagEditor->at(17) << fmtBold << "Comment:" << fmtBoldEnd << ' ' << ShowTag(s.GetComment());
-
-	mTagEditor->at(19) << fmtBold << "Filename:" << fmtBoldEnd << ' ' << s.GetName();
-
-	mTagEditor->at(21) << "Save";
-	mTagEditor->at(22) << "Cancel";
-	return true;
 }
 
 bool WriteTags(Song &s)

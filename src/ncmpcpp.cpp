@@ -154,7 +154,7 @@ int main(int argc, char *argv[])
 	myPlaylistEditor->Init();
 	
 #	ifdef HAVE_TAGLIB_H
-	TinyTagEditor::Init();
+	myTinyTagEditor->Init();
 	TagEditor::Init();
 #	endif // HAVE_TAGLIB_H
 	
@@ -190,8 +190,6 @@ int main(int argc, char *argv[])
 	
 	// local variables
 	int input;
-	
-	Song edited_song;
 	
 	bool main_exit = 0;
 	bool title_allowed = !Config.display_screens_numbers_on_start;
@@ -515,7 +513,7 @@ int main(int argc, char *argv[])
 			Lyrics::Resize();
 			
 #			ifdef HAVE_TAGLIB_H
-			mTagEditor->Resize(COLS, main_height);
+			myTinyTagEditor->Resize();
 			TagEditor::Resize();
 #			endif // HAVE_TAGLIB_H
 			
@@ -581,7 +579,7 @@ int main(int argc, char *argv[])
 #				ifdef HAVE_TAGLIB_H
 				case csTinyTagEditor:
 				{
-					TinyTagEditor::EnterPressed(edited_song);
+					myTinyTagEditor->EnterPressed();
 					break;
 				}
 #				endif // HAVE_TAGLIB_H
@@ -1375,52 +1373,7 @@ int main(int argc, char *argv[])
 			||  (wCurrent == myPlaylistEditor->Content && !myPlaylistEditor->Content->Empty())
 			||  (wCurrent == mEditorTags && !mEditorTags->Empty()))
 			{
-				List *mList = reinterpret_cast<Menu<Song> *>(wCurrent);
-				size_t id = mList->Choice();
-				switch (current_screen)
-				{
-					case csPlaylist:
-						edited_song = myPlaylist->Main()->at(id);
-						break;
-					case csBrowser:
-						edited_song = *myBrowser->Main()->at(id).song;
-						break;
-					case csSearcher:
-						edited_song = *mySearcher->Main()->at(id).second;
-						break;
-					case csLibrary:
-						edited_song = myLibrary->Songs->at(id);
-						break;
-					case csPlaylistEditor:
-						edited_song = myPlaylistEditor->Content->at(id);
-						break;
-					case csTagEditor:
-						edited_song = mEditorTags->at(id);
-						break;
-					default:
-						break;
-				}
-				if (edited_song.IsStream())
-				{
-					ShowMessage("Cannot edit streams!");
-				}
-				else if (GetSongTags(edited_song))
-				{
-					wPrev = wCurrent;
-					wCurrent = mTagEditor;
-					prev_screen = current_screen;
-					current_screen = csTinyTagEditor;
-					redraw_header = 1;
-				}
-				else
-				{
-					string message = "Cannot read file '";
-					if (edited_song.IsFromDB())
-						message += Config.mpd_music_dir;
-					message += edited_song.GetFile();
-					message += "'!";
-					ShowMessage("%s", message.c_str());
-				}
+				myTinyTagEditor->SwitchTo();
 			}
 			else if (wCurrent == mEditorDirs)
 			{
