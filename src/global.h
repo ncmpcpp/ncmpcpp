@@ -60,7 +60,7 @@ namespace Global
 	
 //	extern Scrollpad *sHelp;
 //	extern Scrollpad *sLyrics;
-	extern Scrollpad *sInfo;
+//	extern Scrollpad *sInfo;
 	
 	extern Window *wHeader;
 	extern Window *wFooter;
@@ -83,7 +83,7 @@ namespace Global
 //	extern std::string browsed_dir;
 	extern std::string editor_browsed_dir;
 	extern std::string editor_highlighted_dir;
-	extern std::string info_title;
+//	extern std::string info_title;
 
 	extern NcmpcppScreen current_screen;
 	extern NcmpcppScreen prev_screen;

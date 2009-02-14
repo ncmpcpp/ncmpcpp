@@ -81,7 +81,6 @@ time_t Global::timer;
 
 string Global::editor_browsed_dir = "/";
 string Global::editor_highlighted_dir;
-string Global::info_title;
 
 NcmpcppScreen Global::current_screen;
 NcmpcppScreen Global::prev_screen;
@@ -162,7 +161,7 @@ int main(int argc, char *argv[])
 #	endif // ENABLE_CLOCK
 	
 	myHelp->Init();
-	Info::Init();
+	myInfo->Init();
 	myLyrics->Init();
 	
 	if (Config.header_visibility)
@@ -249,7 +248,7 @@ int main(int argc, char *argv[])
 					break;
 #				endif // HAVE_TAGLIB_H
 				case csInfo:
-					screen_title = info_title;
+					screen_title = myInfo->Title();
 					break;
 				case csSearcher:
 					screen_title = mySearcher->Title();
@@ -333,9 +332,10 @@ int main(int argc, char *argv[])
 		{
 			myLyrics->Update();
 		}
-#		ifdef HAVE_CURL_CURL_H
-		Info::Ready();
-#		endif
+		else if (current_screen == csInfo)
+		{
+			myInfo->Update();
+		}
 		
 		wCurrent->Display();
 //		redraw_screen = 0;
@@ -499,7 +499,7 @@ int main(int argc, char *argv[])
 			mySearcher->Resize();
 			myLibrary->Resize();
 			myPlaylistEditor->Resize();
-			Info::Resize();
+			myInfo->Resize();
 			myLyrics->Resize();
 			
 #			ifdef HAVE_TAGLIB_H
@@ -1996,12 +1996,12 @@ int main(int argc, char *argv[])
 		}
 		else if (Keypressed(input, Key.SongInfo))
 		{
-			Info::GetSong();
+			myInfo->GetSong();
 		}
 #		ifdef HAVE_CURL_CURL_H
 		else if (Keypressed(input, Key.ArtistInfo))
 		{
-			Info::GetArtist();
+			myInfo->GetArtist();
 		}
 #		endif // HAVE_CURL_CURL_H
 		else if (Keypressed(input, Key.Lyrics))

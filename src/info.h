@@ -23,18 +23,40 @@
 
 #include "ncmpcpp.h"
 #include "mpdpp.h"
+#include "screen.h"
 
-namespace Info
+class Info : public Screen<Scrollpad>
 {
-	void Init();
-	void Resize();
-	
-	void GetSong();
-#	ifdef HAVE_CURL_CURL_H
-	bool Ready();
-	void GetArtist();
-#	endif
-}
+	public:
+		virtual void Init();
+		virtual void SwitchTo() { }
+		virtual void Resize();
+		
+		virtual std::string Title();
+		
+		virtual void Update();
+		
+		void GetSong();
+#		ifdef HAVE_CURL_CURL_H
+		void GetArtist();
+#		endif // HAVE_CURL_CURL_H
+		
+	protected:
+		void PrepareSong(MPD::Song &);
+		static const basic_buffer<my_char_t> &ShowTag(const std::string &);
+		
+#		ifdef HAVE_CURL_CURL_H
+		static void *PrepareArtist(void *);
+		
+		static const std::string Folder;
+		static bool ArtistReady;
+		static pthread_t Downloader;
+#		endif // HAVE_CURL_CURL_H
+		
+		std::string itsTitle;
+};
+
+extern Info *myInfo;
 
 #endif
 

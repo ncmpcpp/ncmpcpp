@@ -42,37 +42,46 @@ using namespace Global;
 using std::string;
 using std::vector;
 
-Scrollpad *Global::sInfo;
+#ifdef HAVE_CURL_CURL_H
+const std::string Info::Folder = home_folder + "/.ncmpcpp/artists";
+bool Info::ArtistReady = 0;
+pthread_t Info::Downloader = 0;
+#endif
 
-const string artists_folder = home_folder + "/.ncmpcpp/artists";
-
-namespace
-{
-#	ifdef HAVE_CURL_CURL_H
-	pthread_t artist_info_downloader;
-	bool artist_info_ready = 0;
-	
-	void *GetArtistInfo(void *);
-#	endif
-	
-	void GetSongInfo(MPD::Song &, Scrollpad &);
-	const basic_buffer<my_char_t> &ShowTagInInfoScreen(const string &);
-}
+Info *myInfo = new Info;
 
 void Info::Init()
 {
-	sInfo = new Scrollpad(0, main_start_y, COLS, main_height, "", Config.main_color, brNone);
-	sInfo->SetTimeout(ncmpcpp_window_timeout);
+	w = new Scrollpad(0, main_start_y, COLS, main_height, "", Config.main_color, brNone);
+	w->SetTimeout(ncmpcpp_window_timeout);
 }
 
 void Info::Resize()
 {
-	sInfo->Resize(COLS, main_height);
+	w->Resize(COLS, main_height);
+}
+
+std::string Info::Title()
+{
+	return itsTitle;
+}
+
+void Info::Update()
+{
+#	ifdef HAVE_CURL_CURL_H
+	if (!ArtistReady)
+		return;
+	
+	pthread_join(Downloader, NULL);
+	w->Flush();
+	Downloader = 0;
+	ArtistReady = 0;
+#	endif // HAVE_CURL_CURL_H
 }
 
 void Info::GetSong()
 {
-	if (wCurrent == sInfo)
+	if (wCurrent == w)
 	{
 		wCurrent->Hide();
 		current_screen = prev_screen;
@@ -133,33 +142,23 @@ void Info::GetSong()
 				break;
 		}
 		wPrev = wCurrent;
-		wCurrent = sInfo;
+		wCurrent = w;
 		prev_screen = current_screen;
 		current_screen = csInfo;
 		redraw_header = 1;
-		info_title = "Song info";
-		sInfo->Clear();
-		GetSongInfo(*s, *sInfo);
-		sInfo->Flush();
-		sInfo->Hide();
+		itsTitle = "Song info";
+		w->Clear();
+		PrepareSong(*s);
+		w->Flush();
+		w->Hide();
 	}
 }
 
 #ifdef HAVE_CURL_CURL_H
-bool Info::Ready()
-{
-	if (!artist_info_ready)
-		return false;
-	pthread_join(artist_info_downloader, NULL);
-	sInfo->Flush();
-	artist_info_downloader = 0;
-	artist_info_ready = 0;
-	return true;
-}
 
 void Info::GetArtist()
 {
-	if (wCurrent == sInfo)
+	if (wCurrent == w)
 	{
 		wCurrent->Hide();
 		current_screen = prev_screen;
@@ -193,11 +192,13 @@ void Info::GetArtist()
 #	endif // HAVE_TAGLIB_H
 		)
 	{
-		if (artist_info_downloader)
+		if (Downloader && !ArtistReady)
 		{
 			ShowMessage("Artist's info is being downloaded...");
 			return;
 		}
+		else if (ArtistReady)
+			Update();
 		
 		string *artist = new string();
 		int id = ((Menu<MPD::Song> *)wCurrent)->Choice();
@@ -229,28 +230,25 @@ void Info::GetArtist()
 		if (!artist->empty())
 		{
 			wPrev = wCurrent;
-			wCurrent = sInfo;
+			wCurrent = w;
 			prev_screen = current_screen;
 			current_screen = csInfo;
 			redraw_header = 1;
-			info_title = "Artist's info - " + *artist;
-			sInfo->Clear();
-			sInfo->WriteXY(0, 0, 0, "Fetching artist's info...");
-			sInfo->Refresh();
-			if (!artist_info_downloader)
+			itsTitle = "Artist's info - " + *artist;
+			w->Clear();
+			w->WriteXY(0, 0, 0, "Fetching artist's info...");
+			w->Refresh();
+			if (!Downloader)
 			{
-				pthread_create(&artist_info_downloader, NULL, GetArtistInfo, artist);
+				pthread_create(&Downloader, NULL, PrepareArtist, artist);
 			}
 		}
 		else
 			delete artist;
 	}
 }
-#endif // HVAE_CURL_CURL_H
 
-namespace {
-#ifdef HAVE_CURL_CURL_H
-void *GetArtistInfo(void *ptr)
+void *Info::PrepareArtist(void *ptr)
 {
 	string *strptr = static_cast<string *>(ptr);
 	string artist = *strptr;
@@ -262,8 +260,8 @@ void *GetArtistInfo(void *ptr)
 	ToLower(filename);
 	EscapeUnallowedChars(filename);
 	
-	const string fullpath = artists_folder + "/" + filename;
-	mkdir(artists_folder.c_str(), 0755);
+	const string fullpath = Folder + "/" + filename;
+	mkdir(Folder.c_str(), 0755);
 	
 	string result;
 	std::ifstream input(fullpath.c_str());
@@ -275,15 +273,15 @@ void *GetArtistInfo(void *ptr)
 		while (getline(input, line))
 		{
 			if (!first)
-				*sInfo << "\n";
+				*myInfo->Main() << "\n";
 			utf_to_locale(line);
-			*sInfo << line;
+			*myInfo->Main() << line;
 			first = 0;
 		}
 		input.close();
-		sInfo->SetFormatting(fmtBold, "\n\nSimilar artists:\n", fmtBoldEnd, 0);
-		sInfo->SetFormatting(Config.color2, "\n * ", clEnd);
-		artist_info_ready = 1;
+		myInfo->Main()->SetFormatting(fmtBold, "\n\nSimilar artists:\n", fmtBoldEnd, 0);
+		myInfo->Main()->SetFormatting(Config.color2, "\n * ", clEnd);
+		ArtistReady = 1;
 		pthread_exit(NULL);
 	}
 	
@@ -310,8 +308,8 @@ void *GetArtistInfo(void *ptr)
 	
 	if (code != CURLE_OK)
 	{
-		*sInfo << "Error while fetching artist's info: " << curl_easy_strerror(code);
-		artist_info_ready = 1;
+		*myInfo->Main() << "Error while fetching artist's info: " << curl_easy_strerror(code);
+		ArtistReady = 1;
 		pthread_exit(NULL);
 	}
 	
@@ -323,8 +321,8 @@ void *GetArtistInfo(void *ptr)
 	if (a != string::npos)
 	{
 		EscapeHtml(result);
-		*sInfo << "Last.fm returned an error message: " << result;
-		artist_info_ready = 1;
+		*myInfo->Main() << "Last.fm returned an error message: " << result;
+		ArtistReady = 1;
 		pthread_exit(NULL);
 	}
 	
@@ -370,24 +368,24 @@ void *GetArtistInfo(void *ptr)
 	if (save)
 		filebuffer << result;
 	utf_to_locale(result);
-	*sInfo << result;
+	*myInfo->Main() << result;
 	
 	if (save)
 		filebuffer << "\n\nSimilar artists:\n";
-	*sInfo << fmtBold << "\n\nSimilar artists:\n" << fmtBoldEnd;
+	*myInfo->Main() << fmtBold << "\n\nSimilar artists:\n" << fmtBoldEnd;
 	for (size_t i = 1; i < similar.size(); i++)
 	{
 		if (save)
 			filebuffer << "\n * " << similar[i] << " (" << urls[i] << ")";
 		utf_to_locale(similar[i]);
 		utf_to_locale(urls[i]);
-		*sInfo << "\n" << Config.color2 << " * " << clEnd << similar[i] << " (" << urls[i] << ")";
+		*myInfo->Main() << "\n" << Config.color2 << " * " << clEnd << similar[i] << " (" << urls[i] << ")";
 	}
 	
 	if (save)
 		filebuffer << "\n\n" << urls.front();
 	utf_to_locale(urls.front());
-	*sInfo << "\n\n" << urls.front();
+	*myInfo->Main() << "\n\n" << urls.front();
 	
 	if (save)
 	{
@@ -398,12 +396,12 @@ void *GetArtistInfo(void *ptr)
 			output.close();
 		}
 	}
-	artist_info_ready = 1;
+	ArtistReady = 1;
 	pthread_exit(NULL);
 }
 #endif // HVAE_CURL_CURL_H
 
-void GetSongInfo(MPD::Song &s, Scrollpad &info)
+void Info::PrepareSong(MPD::Song &s)
 {
 #	ifdef HAVE_TAGLIB_H
 	string path_to_file;
@@ -415,32 +413,32 @@ void GetSongInfo(MPD::Song &s, Scrollpad &info)
 		s.SetComment(f.tag()->comment().to8Bit(1));
 #	endif // HAVE_TAGLIB_H
 	
-	info << fmtBold << Config.color1 << "Filename: " << fmtBoldEnd << Config.color2 << s.GetName() << "\n" << clEnd;
-	info << fmtBold << "Directory: " << fmtBoldEnd << Config.color2 << ShowTagInInfoScreen(s.GetDirectory()) << "\n\n" << clEnd;
-	info << fmtBold << "Length: " << fmtBoldEnd << Config.color2 << s.GetLength() << "\n" << clEnd;
+	*w << fmtBold << Config.color1 << "Filename: " << fmtBoldEnd << Config.color2 << s.GetName() << "\n" << clEnd;
+	*w << fmtBold << "Directory: " << fmtBoldEnd << Config.color2 << ShowTag(s.GetDirectory()) << "\n\n" << clEnd;
+	*w << fmtBold << "Length: " << fmtBoldEnd << Config.color2 << s.GetLength() << "\n" << clEnd;
 #	ifdef HAVE_TAGLIB_H
 	if (!f.isNull())
 	{
-		info << fmtBold << "Bitrate: " << fmtBoldEnd << Config.color2 << f.audioProperties()->bitrate() << " kbps\n" << clEnd;
-		info << fmtBold << "Sample rate: " << fmtBoldEnd << Config.color2 << f.audioProperties()->sampleRate() << " Hz\n" << clEnd;
-		info << fmtBold << "Channels: " << fmtBoldEnd << Config.color2 << (f.audioProperties()->channels() == 1 ? "Mono" : "Stereo") << "\n" << clDefault;
+		*w << fmtBold << "Bitrate: " << fmtBoldEnd << Config.color2 << f.audioProperties()->bitrate() << " kbps\n" << clEnd;
+		*w << fmtBold << "Sample rate: " << fmtBoldEnd << Config.color2 << f.audioProperties()->sampleRate() << " Hz\n" << clEnd;
+		*w << fmtBold << "Channels: " << fmtBoldEnd << Config.color2 << (f.audioProperties()->channels() == 1 ? "Mono" : "Stereo") << "\n" << clDefault;
 	}
 	else
-		info << clDefault;
+		*w << clDefault;
 #	endif // HAVE_TAGLIB_H
-	info << fmtBold << "\nTitle: " << fmtBoldEnd << ShowTagInInfoScreen(s.GetTitle());
-	info << fmtBold << "\nArtist: " << fmtBoldEnd << ShowTagInInfoScreen(s.GetArtist());
-	info << fmtBold << "\nAlbum: " << fmtBoldEnd << ShowTagInInfoScreen(s.GetAlbum());
-	info << fmtBold << "\nYear: " << fmtBoldEnd << ShowTagInInfoScreen(s.GetYear());
-	info << fmtBold << "\nTrack: " << fmtBoldEnd << ShowTagInInfoScreen(s.GetTrack());
-	info << fmtBold << "\nGenre: " << fmtBoldEnd << ShowTagInInfoScreen(s.GetGenre());
-	info << fmtBold << "\nComposer: " << fmtBoldEnd << ShowTagInInfoScreen(s.GetComposer());
-	info << fmtBold << "\nPerformer: " << fmtBoldEnd << ShowTagInInfoScreen(s.GetPerformer());
-	info << fmtBold << "\nDisc: " << fmtBoldEnd << ShowTagInInfoScreen(s.GetDisc());
-	info << fmtBold << "\nComment: " << fmtBoldEnd << ShowTagInInfoScreen(s.GetComment());
+	*w << fmtBold << "\nTitle: " << fmtBoldEnd << ShowTag(s.GetTitle());
+	*w << fmtBold << "\nArtist: " << fmtBoldEnd << ShowTag(s.GetArtist());
+	*w << fmtBold << "\nAlbum: " << fmtBoldEnd << ShowTag(s.GetAlbum());
+	*w << fmtBold << "\nYear: " << fmtBoldEnd << ShowTag(s.GetYear());
+	*w << fmtBold << "\nTrack: " << fmtBoldEnd << ShowTag(s.GetTrack());
+	*w << fmtBold << "\nGenre: " << fmtBoldEnd << ShowTag(s.GetGenre());
+	*w << fmtBold << "\nComposer: " << fmtBoldEnd << ShowTag(s.GetComposer());
+	*w << fmtBold << "\nPerformer: " << fmtBoldEnd << ShowTag(s.GetPerformer());
+	*w << fmtBold << "\nDisc: " << fmtBoldEnd << ShowTag(s.GetDisc());
+	*w << fmtBold << "\nComment: " << fmtBoldEnd << ShowTag(s.GetComment());
 }
 
-const basic_buffer<my_char_t> &ShowTagInInfoScreen(const string &tag)
+const basic_buffer<my_char_t> &Info::ShowTag(const string &tag)
 {
 #	ifdef _UTF8
 	static WBuffer result;
@@ -451,7 +449,7 @@ const basic_buffer<my_char_t> &ShowTagInInfoScreen(const string &tag)
 		result << ToWString(tag);
 	return result;
 #	else
-	return ShowTag(tag);
+	return ::ShowTag(tag);
 #	endif
 }
-}
+
