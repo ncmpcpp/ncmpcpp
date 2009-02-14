@@ -31,6 +31,7 @@
 #include "search_engine.h"
 #include "settings.h"
 #include "status_checker.h"
+#include "tag_editor.h"
 
 using namespace Global;
 using namespace MPD;
@@ -246,8 +247,8 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 	{
 		myBrowser->GetDirectory(myBrowser->CurrentDir());
 #		ifdef HAVE_TAGLIB_H
-		mEditorAlbums->Clear(0);
-		mEditorDirs->Clear(0);
+		myTagEditor->Albums->Clear(0);
+		myTagEditor->Dirs->Clear(0);
 #		endif // HAVE_TAGLIB_H
 		myLibrary->Artists->Clear(0);
 		myPlaylistEditor->Content->Clear(0);

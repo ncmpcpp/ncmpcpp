@@ -278,7 +278,7 @@ namespace
 				mpd_Song *s = mpd_newSong();
 				s->file = str_pool_get(full_path.c_str());
 #				ifdef HAVE_TAGLIB_H
-				ReadTagsFromFile(s);
+				TagEditor::ReadTags(s);
 #				endif // HAVE_TAGLIB_H
 				new_item.song = new Song(s);
 				v.push_back(new_item);

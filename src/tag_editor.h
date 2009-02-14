@@ -42,7 +42,7 @@ class TinyTagEditor : public Screen< Menu<Buffer> >
 		
 		virtual std::string Title();
 		
-		void EnterPressed();
+		virtual void EnterPressed();
 		
 	protected:
 		bool GetTags();
@@ -51,17 +51,46 @@ class TinyTagEditor : public Screen< Menu<Buffer> >
 
 extern TinyTagEditor *myTinyTagEditor;
 
-namespace TagEditor
+class TagEditor : public Screen<Window>
 {
-	void Init();
-	void Resize();
-	void Refresh();
-	void SwitchTo();
-	
-	void Update();
-	
-	void EnterPressed();
-}
+	public:
+		virtual void Init();
+		virtual void Resize();
+		virtual void SwitchTo();
+		
+		virtual std::string Title();
+		
+		virtual void Refresh();
+		virtual void Update();
+		
+		virtual void EnterPressed();
+		virtual void SpacePressed();
+		
+		void NextColumn();
+		void PrevColumn();
+		
+		Menu<string_pair> *LeftColumn;
+		Menu<string_pair> *Albums;
+		Menu<string_pair> *Dirs;
+		Menu<std::string> *TagTypes;
+		Menu<MPD::Song> *Tags;
+		
+		static void ReadTags(mpd_Song *);
+		static bool WriteTags(MPD::Song &);
+		
+	protected:
+		static std::string CapitalizeFirstLetters(const std::string &);
+		static void CapitalizeFirstLetters(MPD::Song &);
+		static void LowerAllLetters(MPD::Song &);
+		
+		static const size_t MiddleColumnWidth;
+		static size_t LeftColumnWidth;
+		static size_t MiddleColumnStartX;
+		static size_t RightColumnWidth;
+		static size_t RightColumnStartX;
+};
+
+extern TagEditor *myTagEditor;
 
 typedef void (MPD::Song::*SongSetFunction)(const std::string &);
 typedef std::string (MPD::Song::*SongGetFunction)() const;
@@ -71,14 +100,7 @@ std::string FindSharedDir(const MPD::SongList &);
 
 SongSetFunction IntoSetFunction(mpd_TagItems);
 
-void ReadTagsFromFile(mpd_Song *);
-//bool GetSongTags(MPD::Song &);
-bool WriteTags(MPD::Song &);
-
-void __deal_with_filenames(MPD::SongList &);
-
-void CapitalizeFirstLetters(MPD::Song &);
-void LowerAllLetters(MPD::Song &);
+void DealWithFilenames(MPD::SongList &);
 
 #endif
 

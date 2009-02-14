@@ -155,7 +155,7 @@ int main(int argc, char *argv[])
 	
 #	ifdef HAVE_TAGLIB_H
 	myTinyTagEditor->Init();
-	TagEditor::Init();
+	myTagEditor->Init();
 #	endif // HAVE_TAGLIB_H
 	
 #	ifdef ENABLE_CLOCK
@@ -246,7 +246,7 @@ int main(int argc, char *argv[])
 #				ifdef HAVE_TAGLIB_H
 				case csTinyTagEditor:
 				case csTagEditor:
-					screen_title = "Tag editor";
+					screen_title = myTagEditor->Title();
 					break;
 #				endif // HAVE_TAGLIB_H
 				case csInfo:
@@ -327,7 +327,7 @@ int main(int argc, char *argv[])
 #		ifdef HAVE_TAGLIB_H
 		if (current_screen == csTagEditor)
 		{
-			TagEditor::Update();
+			myTagEditor->Update();
 		}
 		else
 #		endif // HAVE_TAGLIB_H
@@ -386,12 +386,12 @@ int main(int argc, char *argv[])
 						myPlaylistEditor->Content->Clear(0);
 					}
 #					ifdef HAVE_TAGLIB_H
-					else if (wCurrent == mEditorLeftCol)
+					else if (wCurrent == myTagEditor->LeftColumn)
 					{
-						mEditorTags->Clear(0);
-						mEditorTagTypes->Refresh();
+						myTagEditor->Tags->Clear(0);
+						myTagEditor->TagTypes->Refresh();
 					}
-//					else if (wCurrent == mEditorTagTypes)
+//					else if (wCurrent == myTagEditor->TagTypes)
 //						redraw_screen = 1;
 #					endif // HAVE_TAGLIB_H
 				}
@@ -413,7 +413,7 @@ int main(int argc, char *argv[])
 			&&  (wCurrent == myLibrary->Artists
 			||   wCurrent == myPlaylistEditor->List
 #			ifdef HAVE_TAGLIB_H
-			||   wCurrent == mEditorLeftCol
+			||   wCurrent == myTagEditor->LeftColumn
 #			endif // HAVE_TAGLIB_H
 			    )
 			   )
@@ -441,7 +441,7 @@ int main(int argc, char *argv[])
 			&&  (wCurrent == myLibrary->Artists
 			||   wCurrent == myPlaylistEditor->List
 #			ifdef HAVE_TAGLIB_H
-			|| wCurrent == mEditorLeftCol
+			|| wCurrent == myTagEditor->LeftColumn
 #			endif // HAVE_TAGLIB_H
 			    )
 			   )
@@ -514,7 +514,7 @@ int main(int argc, char *argv[])
 			
 #			ifdef HAVE_TAGLIB_H
 			myTinyTagEditor->Resize();
-			TagEditor::Resize();
+			myTagEditor->Resize();
 #			endif // HAVE_TAGLIB_H
 			
 #			ifdef ENABLE_CLOCK
@@ -535,7 +535,7 @@ int main(int argc, char *argv[])
 			}
 			else if (current_screen == csTagEditor)
 			{
-				TagEditor::Refresh();
+				myTagEditor->Refresh();
 			}
 			else
 #			endif // HAVE_TAGLIB_H
@@ -567,8 +567,7 @@ int main(int argc, char *argv[])
 			{
 				case csPlaylist:
 				{
-					if (!myPlaylist->Main()->Empty())
-						Mpd->PlayID(myPlaylist->Main()->Current().GetID());
+					myPlaylist->EnterPressed();
 					break;
 				}
 				case csBrowser:
@@ -601,7 +600,7 @@ int main(int argc, char *argv[])
 #				ifdef HAVE_TAGLIB_H
 				case csTagEditor:
 				{
-					TagEditor::EnterPressed();
+					myTagEditor->EnterPressed();
 					break;
 				}
 #				endif // HAVE_TAGLIB_H
@@ -614,13 +613,13 @@ int main(int argc, char *argv[])
 			if (Config.space_selects
 			||  wCurrent == myPlaylist->Main()
 #			ifdef HAVE_TAGLIB_H
-			||  wCurrent == mEditorTags
+			||  wCurrent == myTagEditor->Tags
 #			endif // HAVE_TAGLIB_H
 			   )
 			{
 				if (wCurrent == myPlaylist->Main()
 #				ifdef HAVE_TAGLIB_H
-				||  wCurrent == mEditorTags
+				||  wCurrent == myTagEditor->Tags
 #				endif // HAVE_TAGLIB_H
 				|| (wCurrent == myBrowser->Main() && ((Menu<Song> *)wCurrent)->Choice() >= (myBrowser->CurrentDir() != "/" ? 1 : 0)) || (wCurrent == mySearcher->Main() && !mySearcher->Main()->Current().first)
 				|| wCurrent == myLibrary->Songs
@@ -653,14 +652,9 @@ int main(int argc, char *argv[])
 					myPlaylistEditor->SpacePressed();
 				}
 #				ifdef HAVE_TAGLIB_H
-				else if (wCurrent == mEditorLeftCol)
+				else if (current_screen == csTagEditor)
 				{
-					Config.albums_in_tag_editor = !Config.albums_in_tag_editor;
-					wCurrent = wTagEditorActiveCol = mEditorLeftCol = Config.albums_in_tag_editor ? mEditorAlbums : mEditorDirs;
-					ShowMessage("Switched to %s view", Config.albums_in_tag_editor ? "albums" : "directories");
-					mEditorLeftCol->Display();
-					mEditorTags->Clear(0);
-//					redraw_screen = 1;
+					myTagEditor->SpacePressed();
 				}
 #				endif // HAVE_TAGLIB_H
 				else if (current_screen == csLyrics)
@@ -683,21 +677,7 @@ int main(int argc, char *argv[])
 #			ifdef HAVE_TAGLIB_H
 			else if (current_screen == csTagEditor && input == Key.VolumeUp[0])
 			{
-				CLEAR_FIND_HISTORY;
-				if (wCurrent == mEditorLeftCol)
-				{
-					mEditorLeftCol->HighlightColor(Config.main_highlight_color);
-					wCurrent->Refresh();
-					wCurrent = wTagEditorActiveCol = mEditorTagTypes;
-					mEditorTagTypes->HighlightColor(Config.active_column_color);
-				}
-				else if (wCurrent == mEditorTagTypes && mEditorTagTypes->Choice() < 12 && !mEditorTags->Empty())
-				{
-					mEditorTagTypes->HighlightColor(Config.main_highlight_color);
-					wCurrent->Refresh();
-					wCurrent = wTagEditorActiveCol = mEditorTags;
-					mEditorTags->HighlightColor(Config.active_column_color);
-				}
+				myTagEditor->NextColumn();
 			}
 #			endif // HAVE_TAGLIB_H
 			else
@@ -716,21 +696,7 @@ int main(int argc, char *argv[])
 #			ifdef HAVE_TAGLIB_H
 			else if (current_screen == csTagEditor && input == Key.VolumeDown[0])
 			{
-				CLEAR_FIND_HISTORY;
-				if (wCurrent == mEditorTags)
-				{
-					mEditorTags->HighlightColor(Config.main_highlight_color);
-					wCurrent->Refresh();
-					wCurrent = wTagEditorActiveCol = mEditorTagTypes;
-					mEditorTagTypes->HighlightColor(Config.active_column_color);
-				}
-				else if (wCurrent == mEditorTagTypes)
-				{
-					mEditorTagTypes->HighlightColor(Config.main_highlight_color);
-					wCurrent->Refresh();
-					wCurrent = wTagEditorActiveCol = mEditorLeftCol;
-					mEditorLeftCol->HighlightColor(Config.active_column_color);
-				}
+				myTagEditor->PrevColumn();
 			}
 #			endif // HAVE_TAGLIB_H
 			else
@@ -1313,7 +1279,7 @@ int main(int argc, char *argv[])
 						((*it)->*set)(new_tag);
 						ShowMessage("Updating tags in '%s'...", (*it)->GetName().c_str());
 						string path = Config.mpd_music_dir + (*it)->GetFile();
-						if (!WriteTags(**it))
+						if (!TagEditor::WriteTags(**it))
 						{
 							ShowMessage("Error updating tags in '%s'!", (*it)->GetFile().c_str());
 							success = 0;
@@ -1371,13 +1337,13 @@ int main(int argc, char *argv[])
 			||  (wCurrent == mySearcher->Main() && !mySearcher->Main()->Current().first)
 			||  (wCurrent == myLibrary->Songs && !myLibrary->Songs->Empty())
 			||  (wCurrent == myPlaylistEditor->Content && !myPlaylistEditor->Content->Empty())
-			||  (wCurrent == mEditorTags && !mEditorTags->Empty()))
+			||  (wCurrent == myTagEditor->Tags && !myTagEditor->Tags->Empty()))
 			{
 				myTinyTagEditor->SwitchTo();
 			}
-			else if (wCurrent == mEditorDirs)
+			else if (wCurrent == myTagEditor->Dirs)
 			{
-				string old_dir = mEditorDirs->Current().first;
+				string old_dir = myTagEditor->Dirs->Current().first;
 				LockStatusbar();
 				Statusbar() << fmtBold << "Directory: " << fmtBoldEnd;
 				string new_dir = wFooter->GetString(old_dir);
@@ -1451,7 +1417,7 @@ int main(int argc, char *argv[])
 			||  (wCurrent == myLibrary->Songs && !myLibrary->Songs->Empty())
 			||  (wCurrent == myPlaylistEditor->Content && !myPlaylistEditor->Content->Empty())
 #			ifdef HAVE_TAGLIB_H
-			||  (wCurrent == mEditorTags && !mEditorTags->Empty())
+			||  (wCurrent == myTagEditor->Tags && !myTagEditor->Tags->Empty())
 #			endif // HAVE_TAGLIB_H
 			   )
 			{
@@ -1473,7 +1439,7 @@ int main(int argc, char *argv[])
 						break;
 #					ifdef HAVE_TAGLIB_H
 					case csTagEditor:
-						s = &mEditorTags->at(id);
+						s = &myTagEditor->Tags->at(id);
 						break;
 #					endif // HAVE_TAGLIB_H
 					default:
@@ -1535,7 +1501,7 @@ int main(int argc, char *argv[])
 			||  wCurrent == myLibrary->Songs
 			||  wCurrent == myPlaylistEditor->Content
 #			ifdef HAVE_TAGLIB_H
-			||  wCurrent == mEditorTags
+			||  wCurrent == myTagEditor->Tags
 #			endif // HAVE_TAGLIB_H
 			   )
 			{
@@ -1560,7 +1526,7 @@ int main(int argc, char *argv[])
 			||  wCurrent == myLibrary->Songs
 			||  wCurrent == myPlaylistEditor->Content
 #			ifdef HAVE_TAGLIB_H
-			||  wCurrent == mEditorTags
+			||  wCurrent == myTagEditor->Tags
 #			endif // HAVE_TAGLIB_H
 			   )
 			{
@@ -1809,7 +1775,7 @@ int main(int argc, char *argv[])
 			||   current_screen == csSearcher
 #			ifdef HAVE_TAGLIB_H
 			||   current_screen == csTinyTagEditor
-			||   wCurrent == mEditorTagTypes
+			||   wCurrent == myTagEditor->TagTypes
 #			endif // HAVE_TAGLIB_H
 			    )
 			&&  (current_screen != csSearcher
@@ -1873,12 +1839,12 @@ int main(int argc, char *argv[])
 						break;
 #					ifdef HAVE_TAGLIB_H
 					case csTagEditor:
-						if (wCurrent == mEditorLeftCol)
-							name = mEditorLeftCol->at(i).first;
+						if (wCurrent == myTagEditor->LeftColumn)
+							name = myTagEditor->LeftColumn->at(i).first;
 						else
 						{
-							const Song &s = mEditorTags->at(i);
-							switch (mEditorTagTypes->Choice())
+							const Song &s = myTagEditor->Tags->at(i);
+							switch (myTagEditor->TagTypes->Choice())
 							{
 								case 0:
 									name = s.GetTitle();
@@ -2087,7 +2053,7 @@ int main(int argc, char *argv[])
 		else if (Keypressed(input, Key.TagEditor))
 		{
 			CHECK_MPD_MUSIC_DIR;
-			TagEditor::SwitchTo();
+			myTagEditor->SwitchTo();
 		}
 #		endif // HAVE_TAGLIB_H
 #		ifdef ENABLE_CLOCK

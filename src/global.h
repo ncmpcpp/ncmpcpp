@@ -45,13 +45,13 @@ namespace Global
 //	extern Menu<MPD::Song> *myLibrary->Songs;
 	
 #	ifdef HAVE_TAGLIB_H
-	extern Window *wTagEditorActiveCol;
+//	extern Window *wTagEditorActiveCol;
 //	extern Menu<Buffer> *mTagEditor;
-	extern Menu<string_pair> *mEditorAlbums;
-	extern Menu<string_pair> *mEditorDirs;
-	extern Menu<string_pair> *mEditorLeftCol;
-	extern Menu<std::string> *mEditorTagTypes;
-	extern Menu<MPD::Song> *mEditorTags;
+//	extern Menu<string_pair> *mEditorAlbums;
+//	extern Menu<string_pair> *myTagEditor->Dirs;
+//	extern Menu<string_pair> *mEditorLeftCol;
+//	extern Menu<std::string> *myTagEditor->TagTypes;
+//	extern Menu<MPD::Song> *myTagEditor->Tags;
 #	endif // HAVE_TAGLIB_H
 	
 //	extern Window *wPlaylistEditorActiveCol;

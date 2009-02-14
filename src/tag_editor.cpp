@@ -80,7 +80,7 @@ void TinyTagEditor::SwitchTo()
 			itsEdited = myPlaylistEditor->Content->at(id);
 			break;
 		case csTagEditor:
-			itsEdited = mEditorTags->at(id);
+			itsEdited = myTagEditor->Tags->at(id);
 			break;
 		default:
 			break;
@@ -110,7 +110,7 @@ void TinyTagEditor::SwitchTo()
 
 std::string TinyTagEditor::Title()
 {
-	return "Tag editor";
+	return "Tiny tag editor";
 }
 
 void TinyTagEditor::EnterPressed()
@@ -210,7 +210,7 @@ void TinyTagEditor::EnterPressed()
 		case 14:
 		{
 			ShowMessage("Updating tags...");
-			if (WriteTags(s))
+			if (TagEditor::WriteTags(s))
 			{
 				ShowMessage("Tags updated!");
 				if (s.IsFromDB())
@@ -246,7 +246,7 @@ void TinyTagEditor::EnterPressed()
 			}
 			else if (current_screen == csTagEditor)
 			{
-				TagEditor::Refresh();
+				myTagEditor->Refresh();
 			}
 			break;
 		}
@@ -316,79 +316,74 @@ bool TinyTagEditor::GetTags()
 	return true;
 }
 
-Window *Global::wTagEditorActiveCol;
-Menu<string_pair> *Global::mEditorAlbums;
-Menu<string_pair> *Global::mEditorDirs;
-Menu<string_pair> *Global::mEditorLeftCol;
-Menu<string> *Global::mEditorTagTypes;
-Menu<Song> *Global::mEditorTags;
+//Window *Global::wTagEditorActiveCol;
+/*Menu<string_pair> *Global::Albums;
+Menu<string_pair> *Global::Dirs;
+Menu<string_pair> *Global::LeftColumn;
+Menu<string> *Global::TagTypes;
+Menu<Song> *Global::Tags;*/
 
-namespace TagEditor
-{
-	const size_t middle_col_width = 26;
-	size_t left_col_width;
-	size_t middle_col_startx;
-	size_t right_col_width;
-	size_t right_col_startx;
-}
+TagEditor *myTagEditor = new TagEditor;
+
+const size_t TagEditor::MiddleColumnWidth = 26;
+size_t TagEditor::LeftColumnWidth;
+size_t TagEditor::MiddleColumnStartX;
+size_t TagEditor::RightColumnWidth;
+size_t TagEditor::RightColumnStartX;
 
 void TagEditor::Init()
 {
-	left_col_width = COLS/2-middle_col_width/2;
-	middle_col_startx = left_col_width+1;
-	right_col_width = COLS-left_col_width-middle_col_width-2;
-	right_col_startx = left_col_width+middle_col_width+2;
+	LeftColumnWidth = COLS/2-MiddleColumnWidth/2;
+	MiddleColumnStartX = LeftColumnWidth+1;
+	RightColumnWidth = COLS-LeftColumnWidth-MiddleColumnWidth-2;
+	RightColumnStartX = LeftColumnWidth+MiddleColumnWidth+2;
 	
-	mEditorAlbums = new Menu<string_pair>(0, main_start_y, left_col_width, main_height, "Albums", Config.main_color, brNone);
-	mEditorAlbums->HighlightColor(Config.active_column_color);
-	mEditorAlbums->SetTimeout(ncmpcpp_window_timeout);
-	mEditorAlbums->SetItemDisplayer(Display::StringPairs);
+	Albums = new Menu<string_pair>(0, main_start_y, LeftColumnWidth, main_height, "Albums", Config.main_color, brNone);
+	Albums->HighlightColor(Config.active_column_color);
+	Albums->SetTimeout(ncmpcpp_window_timeout);
+	Albums->SetItemDisplayer(Display::StringPairs);
 	
-	mEditorDirs = new Menu<string_pair>(0, main_start_y, left_col_width, main_height, "Directories", Config.main_color, brNone);
-	mEditorDirs->HighlightColor(Config.active_column_color);
-	mEditorDirs->SetTimeout(ncmpcpp_window_timeout);
-	mEditorDirs->SetItemDisplayer(Display::StringPairs);
-	mEditorLeftCol = Config.albums_in_tag_editor ? mEditorAlbums : mEditorDirs;
+	Dirs = new Menu<string_pair>(0, main_start_y, LeftColumnWidth, main_height, "Directories", Config.main_color, brNone);
+	Dirs->HighlightColor(Config.active_column_color);
+	Dirs->SetTimeout(ncmpcpp_window_timeout);
+	Dirs->SetItemDisplayer(Display::StringPairs);
+	LeftColumn = Config.albums_in_tag_editor ? Albums : Dirs;
 	
-	mEditorTagTypes = new Menu<string>(middle_col_startx, main_start_y, middle_col_width, main_height, "Tag types", Config.main_color, brNone);
-	mEditorTagTypes->HighlightColor(Config.main_highlight_color);
-	mEditorTagTypes->SetTimeout(ncmpcpp_window_timeout);
-	mEditorTagTypes->SetItemDisplayer(Display::Generic);
+	TagTypes = new Menu<string>(MiddleColumnStartX, main_start_y, MiddleColumnWidth, main_height, "Tag types", Config.main_color, brNone);
+	TagTypes->HighlightColor(Config.main_highlight_color);
+	TagTypes->SetTimeout(ncmpcpp_window_timeout);
+	TagTypes->SetItemDisplayer(Display::Generic);
 	
-	mEditorTags = new Menu<Song>(right_col_startx, main_start_y, right_col_width, main_height, "Tags", Config.main_color, brNone);
-	mEditorTags->HighlightColor(Config.main_highlight_color);
-	mEditorTags->SetTimeout(ncmpcpp_window_timeout);
-	mEditorTags->SetSelectPrefix(&Config.selected_item_prefix);
-	mEditorTags->SetSelectSuffix(&Config.selected_item_suffix);
-	mEditorTags->SetItemDisplayer(Display::Tags);
-	mEditorTags->SetItemDisplayerUserData(mEditorTagTypes);
+	Tags = new Menu<Song>(RightColumnStartX, main_start_y, RightColumnWidth, main_height, "Tags", Config.main_color, brNone);
+	Tags->HighlightColor(Config.main_highlight_color);
+	Tags->SetTimeout(ncmpcpp_window_timeout);
+	Tags->SetSelectPrefix(&Config.selected_item_prefix);
+	Tags->SetSelectSuffix(&Config.selected_item_suffix);
+	Tags->SetItemDisplayer(Display::Tags);
+	Tags->SetItemDisplayerUserData(TagTypes);
 	
-	wTagEditorActiveCol = mEditorLeftCol;
+	w = LeftColumn;
 }
 
 void TagEditor::Resize()
 {
-	left_col_width = COLS/2-middle_col_width/2;
-	middle_col_startx = left_col_width+1;
-	right_col_width = COLS-left_col_width-middle_col_width-2;
-	right_col_startx = left_col_width+middle_col_width+2;
+	LeftColumnWidth = COLS/2-MiddleColumnWidth/2;
+	MiddleColumnStartX = LeftColumnWidth+1;
+	RightColumnWidth = COLS-LeftColumnWidth-MiddleColumnWidth-2;
+	RightColumnStartX = LeftColumnWidth+MiddleColumnWidth+2;
 	
-	mEditorAlbums->Resize(left_col_width, main_height);
-	mEditorDirs->Resize(left_col_width, main_height);
-	mEditorTagTypes->Resize(middle_col_width, main_height);
-	mEditorTags->Resize(right_col_width, main_height);
+	Albums->Resize(LeftColumnWidth, main_height);
+	Dirs->Resize(LeftColumnWidth, main_height);
+	TagTypes->Resize(MiddleColumnWidth, main_height);
+	Tags->Resize(RightColumnWidth, main_height);
 	
-	mEditorTagTypes->MoveTo(middle_col_startx, main_start_y);
-	mEditorTags->MoveTo(right_col_startx, main_start_y);
+	TagTypes->MoveTo(MiddleColumnStartX, main_start_y);
+	Tags->MoveTo(RightColumnStartX, main_start_y);
 }
 
-void TagEditor::Refresh()
+std::string TagEditor::Title()
 {
-	mEditorLeftCol->Display();
-	mvvline(main_start_y, middle_col_startx-1, 0, main_height);
-	mEditorTagTypes->Display();
-	mvvline(main_start_y, right_col_startx-1, 0, main_height);
-	mEditorTags->Display();
+	return "Tag editor";
 }
 
 void TagEditor::SwitchTo()
@@ -403,47 +398,56 @@ void TagEditor::SwitchTo()
 		redraw_header = 1;
 		TagEditor::Refresh();
 		
-		if (mEditorTagTypes->Empty())
+		if (TagTypes->Empty())
 		{
-			mEditorTagTypes->AddOption("Title");
-			mEditorTagTypes->AddOption("Artist");
-			mEditorTagTypes->AddOption("Album");
-			mEditorTagTypes->AddOption("Year");
-			mEditorTagTypes->AddOption("Track");
-			mEditorTagTypes->AddOption("Genre");
-			mEditorTagTypes->AddOption("Composer");
-			mEditorTagTypes->AddOption("Performer");
-			mEditorTagTypes->AddOption("Disc");
-			mEditorTagTypes->AddOption("Comment");
-			mEditorTagTypes->AddSeparator();
-			mEditorTagTypes->AddOption("Filename");
-			mEditorTagTypes->AddSeparator();
-			mEditorTagTypes->AddOption("Options", 1, 1, 0);
-			mEditorTagTypes->AddSeparator();
-			mEditorTagTypes->AddOption("Reset");
-			mEditorTagTypes->AddOption("Save");
-			mEditorTagTypes->AddSeparator();
-			mEditorTagTypes->AddOption("Capitalize First Letters");
-			mEditorTagTypes->AddOption("lower all letters");
+			TagTypes->AddOption("Title");
+			TagTypes->AddOption("Artist");
+			TagTypes->AddOption("Album");
+			TagTypes->AddOption("Year");
+			TagTypes->AddOption("Track");
+			TagTypes->AddOption("Genre");
+			TagTypes->AddOption("Composer");
+			TagTypes->AddOption("Performer");
+			TagTypes->AddOption("Disc");
+			TagTypes->AddOption("Comment");
+			TagTypes->AddSeparator();
+			TagTypes->AddOption("Filename");
+			TagTypes->AddSeparator();
+			TagTypes->AddOption("Options", 1, 1, 0);
+			TagTypes->AddSeparator();
+			TagTypes->AddOption("Reset");
+			TagTypes->AddOption("Save");
+			TagTypes->AddSeparator();
+			TagTypes->AddOption("Capitalize First Letters");
+			TagTypes->AddOption("lower all letters");
 		}
 		
-		wCurrent = wTagEditorActiveCol;
+		wCurrent = w;
 		current_screen = csTagEditor;
 	}
 }
 
+void TagEditor::Refresh()
+{
+	LeftColumn->Display();
+	mvvline(main_start_y, MiddleColumnStartX-1, 0, main_height);
+	TagTypes->Display();
+	mvvline(main_start_y, RightColumnStartX-1, 0, main_height);
+	Tags->Display();
+}
+
 void TagEditor::Update()
 {
-	if (mEditorLeftCol->Empty())
+	if (LeftColumn->Empty())
 	{
 		CLEAR_FIND_HISTORY;
-		mEditorLeftCol->Window::Clear();
-		mEditorTags->Clear();
+		LeftColumn->Window::Clear();
+		Tags->Clear();
 		TagList list;
 		if (Config.albums_in_tag_editor)
 		{
 			std::map<string, string, CaseInsensitiveSorting> maplist;
-			mEditorAlbums->WriteXY(0, 0, 0, "Fetching albums' list...");
+			Albums->WriteXY(0, 0, 0, "Fetching albums' list...");
 			Mpd->GetAlbums("", list);
 			for (TagList::const_iterator it = list.begin(); it != list.end(); it++)
 			{
@@ -459,7 +463,7 @@ void TagEditor::Update()
 				FreeSongList(l);
 			}
 			for (std::map<string, string>::const_iterator it = maplist.begin(); it != maplist.end(); it++)
-				mEditorAlbums->AddOption(make_pair(it->first, it->second));
+				Albums->AddOption(make_pair(it->first, it->second));
 		}
 		else
 		{
@@ -470,106 +474,106 @@ void TagEditor::Update()
 			{
 				size_t slash = editor_browsed_dir.rfind("/");
 				string parent = slash != string::npos ? editor_browsed_dir.substr(0, slash) : "/";
-				mEditorDirs->AddOption(make_pair("[..]", parent));
+				Dirs->AddOption(make_pair("[..]", parent));
 			}
 			else
 			{
-				mEditorDirs->AddOption(make_pair(".", "/"));
+				Dirs->AddOption(make_pair(".", "/"));
 			}
 			for (TagList::const_iterator it = list.begin(); it != list.end(); it++)
 			{
 				size_t slash = it->rfind("/");
 				string to_display = slash != string::npos ? it->substr(slash+1) : *it;
 				utf_to_locale(to_display);
-				mEditorDirs->AddOption(make_pair(to_display, *it));
+				Dirs->AddOption(make_pair(to_display, *it));
 				if (*it == editor_highlighted_dir)
-					highlightme = mEditorDirs->Size()-1;
+					highlightme = Dirs->Size()-1;
 			}
 			if (highlightme != -1)
-				mEditorDirs->Highlight(highlightme);
+				Dirs->Highlight(highlightme);
 		}
-		mEditorLeftCol->Display();
-		mEditorTagTypes->Refresh();
+		LeftColumn->Display();
+		TagTypes->Refresh();
 	}
 	
-	if (mEditorTags->Empty())
+	if (Tags->Empty())
 	{
-		mEditorTags->Reset();
+		Tags->Reset();
 		SongList list;
 		if (Config.albums_in_tag_editor)
 		{
 			Mpd->StartSearch(1);
-			Mpd->AddSearch(MPD_TAG_ITEM_ALBUM, mEditorAlbums->Current().second);
+			Mpd->AddSearch(MPD_TAG_ITEM_ALBUM, Albums->Current().second);
 			Mpd->CommitSearch(list);
 			sort(list.begin(), list.end(), CaseInsensitiveSorting());
 			for (SongList::iterator it = list.begin(); it != list.end(); it++)
 			{
 				(*it)->Localize();
-				mEditorTags->AddOption(**it);
+				Tags->AddOption(**it);
 			}
 		}
 		else
 		{
-			Mpd->GetSongs(mEditorDirs->Current().second, list);
+			Mpd->GetSongs(Dirs->Current().second, list);
 			sort(list.begin(), list.end(), CaseInsensitiveSorting());
 			for (SongList::const_iterator it = list.begin(); it != list.end(); it++)
 			{
 				(*it)->Localize();
-				mEditorTags->AddOption(**it);
+				Tags->AddOption(**it);
 			}
 		}
 		FreeSongList(list);
-		mEditorTags->Window::Clear();
-		mEditorTags->Refresh();
+		Tags->Window::Clear();
+		Tags->Refresh();
 	}
 	
-	if (/*redraw_screen && */wCurrent == mEditorTagTypes && mEditorTagTypes->Choice() < 13)
+	if (/*redraw_screen && */wCurrent == TagTypes && TagTypes->Choice() < 13)
 	{
-		mEditorTags->Refresh();
+		Tags->Refresh();
 //		redraw_screen = 0;
 	}
-	else if (mEditorTagTypes->Choice() >= 13)
-		mEditorTags->Window::Clear();
+	else if (TagTypes->Choice() >= 13)
+		Tags->Window::Clear();
 }
 
 void TagEditor::EnterPressed()
 {
-	if (wCurrent == mEditorDirs)
+	if (wCurrent == Dirs)
 	{
 		TagList test;
-		Mpd->GetDirectories(mEditorLeftCol->Current().second, test);
+		Mpd->GetDirectories(LeftColumn->Current().second, test);
 		if (!test.empty())
 		{
 			editor_highlighted_dir = editor_browsed_dir;
-			editor_browsed_dir = mEditorLeftCol->Current().second;
-			mEditorLeftCol->Clear(0);
-			mEditorLeftCol->Reset();
+			editor_browsed_dir = LeftColumn->Current().second;
+			LeftColumn->Clear(0);
+			LeftColumn->Reset();
 		}
 		else
 			ShowMessage("No subdirs found");
 		return;
 	}
 	
-	if (mEditorTags->Empty()) // we need songs to deal with, don't we?
+	if (Tags->Empty()) // we need songs to deal with, don't we?
 		return;
 	
 	// if there are selected songs, perform operations only on them
 	SongList list;
-	if (mEditorTags->hasSelected())
+	if (Tags->hasSelected())
 	{
 		vector<size_t> selected;
-		mEditorTags->GetSelected(selected);
+		Tags->GetSelected(selected);
 		for (vector<size_t>::const_iterator it = selected.begin(); it != selected.end(); it++)
-			list.push_back(&mEditorTags->at(*it));
+			list.push_back(&Tags->at(*it));
 	}
 	else
-		for (size_t i = 0; i < mEditorTags->Size(); i++)
-			list.push_back(&mEditorTags->at(i));
+		for (size_t i = 0; i < Tags->Size(); i++)
+			list.push_back(&Tags->at(i));
 	
 	SongGetFunction get = 0;
 	SongSetFunction set = 0;
 	
-	size_t id = mEditorTagTypes->RealChoice();
+	size_t id = TagTypes->RealChoice();
 	switch (id)
 	{
 		case 0:
@@ -591,7 +595,7 @@ void TagEditor::EnterPressed()
 		case 4:
 			get = &Song::GetTrack;
 			set = &Song::SetTrack;
-			if (wCurrent == mEditorTagTypes)
+			if (wCurrent == TagTypes)
 			{
 				LockStatusbar();
 				Statusbar() << "Number tracks? [y/n] ";
@@ -638,16 +642,16 @@ void TagEditor::EnterPressed()
 			break;
 		case 10:
 		{
-			if (wCurrent == mEditorTagTypes)
+			if (wCurrent == TagTypes)
 			{
 				current_screen = csOther;
-				__deal_with_filenames(list);
+				DealWithFilenames(list);
 				current_screen = csTagEditor;
 				TagEditor::Refresh();
 			}
-			else if (wCurrent == mEditorTags)
+			else if (wCurrent == Tags)
 			{
-				Song &s = mEditorTags->Current();
+				Song &s = Tags->Current();
 				string old_name = s.GetNewName().empty() ? s.GetName() : s.GetNewName();
 				size_t last_dot = old_name.rfind(".");
 				string extension = old_name.substr(last_dot);
@@ -658,13 +662,13 @@ void TagEditor::EnterPressed()
 				UnlockStatusbar();
 				if (!new_name.empty() && new_name != old_name)
 					s.SetNewName(new_name + extension);
-				mEditorTags->Scroll(wDown);
+				Tags->Scroll(wDown);
 			}
 			return;
 		}
 		case 11: // reset
 		{
-			mEditorTags->Clear(0);
+			Tags->Clear(0);
 			ShowMessage("Changes reset");
 			return;
 		}
@@ -685,15 +689,15 @@ void TagEditor::EnterPressed()
 			if (success)
 			{
 				ShowMessage("Tags updated!");
-				mEditorTagTypes->HighlightColor(Config.main_highlight_color);
-				mEditorTagTypes->Reset();
+				TagTypes->HighlightColor(Config.main_highlight_color);
+				TagTypes->Reset();
 				wCurrent->Refresh();
-				wCurrent = mEditorLeftCol;
-				mEditorLeftCol->HighlightColor(Config.active_column_color);
-				Mpd->UpdateDirectory(FindSharedDir(mEditorTags));
+				wCurrent = LeftColumn;
+				LeftColumn->HighlightColor(Config.active_column_color);
+				Mpd->UpdateDirectory(FindSharedDir(Tags));
 			}
 			else
-				mEditorTags->Clear(0);
+				Tags->Clear(0);
 			return;
 		}
 		case 13: // capitalize first letters
@@ -716,25 +720,254 @@ void TagEditor::EnterPressed()
 			break;
 	}
 	
-	if (wCurrent == mEditorTagTypes && id != 0 && id != 4 && set != NULL)
+	if (wCurrent == TagTypes && id != 0 && id != 4 && set != NULL)
 	{
 		LockStatusbar();
-		Statusbar() << fmtBold << mEditorTagTypes->Current() << fmtBoldEnd << ": ";
-		string new_tag = wFooter->GetString((mEditorTags->Current().*get)());
+		Statusbar() << fmtBold << TagTypes->Current() << fmtBoldEnd << ": ";
+		string new_tag = wFooter->GetString((Tags->Current().*get)());
 		UnlockStatusbar();
 		for (SongList::iterator it = list.begin(); it != list.end(); it++)
 			(**it.*set)(new_tag);
 	}
-	else if (wCurrent == mEditorTags && set != NULL)
+	else if (wCurrent == Tags && set != NULL)
 	{
 		LockStatusbar();
-		Statusbar() << fmtBold << mEditorTagTypes->Current() << fmtBoldEnd << ": ";
-		string new_tag = wFooter->GetString((mEditorTags->Current().*get)());
+		Statusbar() << fmtBold << TagTypes->Current() << fmtBoldEnd << ": ";
+		string new_tag = wFooter->GetString((Tags->Current().*get)());
 		UnlockStatusbar();
-		if (new_tag != (mEditorTags->Current().*get)())
-			(mEditorTags->Current().*set)(new_tag);
-		mEditorTags->Scroll(wDown);
+		if (new_tag != (Tags->Current().*get)())
+			(Tags->Current().*set)(new_tag);
+		Tags->Scroll(wDown);
 	}
+}
+
+void TagEditor::SpacePressed()
+{
+	if (wCurrent != LeftColumn)
+		return;
+	
+	Config.albums_in_tag_editor = !Config.albums_in_tag_editor;
+	wCurrent = w = LeftColumn = Config.albums_in_tag_editor ? Albums : Dirs;
+	ShowMessage("Switched to %s view", Config.albums_in_tag_editor ? "albums" : "directories");
+	LeftColumn->Display();
+	Tags->Clear(0);
+}
+
+void TagEditor::NextColumn()
+{
+	CLEAR_FIND_HISTORY;
+	if (wCurrent == LeftColumn)
+	{
+		LeftColumn->HighlightColor(Config.main_highlight_color);
+		w->Refresh();
+		wCurrent = w = TagTypes;
+		TagTypes->HighlightColor(Config.active_column_color);
+	}
+	else if (wCurrent == TagTypes && TagTypes->Choice() < 12 && !Tags->Empty())
+	{
+		TagTypes->HighlightColor(Config.main_highlight_color);
+		w->Refresh();
+		wCurrent = w = myTagEditor->Tags;
+		Tags->HighlightColor(Config.active_column_color);
+	}
+}
+
+void TagEditor::PrevColumn()
+{
+	CLEAR_FIND_HISTORY;
+	if (wCurrent == Tags)
+	{
+		Tags->HighlightColor(Config.main_highlight_color);
+		w->Refresh();
+		wCurrent = w = TagTypes;
+		TagTypes->HighlightColor(Config.active_column_color);
+	}
+	else if (wCurrent == TagTypes)
+	{
+		TagTypes->HighlightColor(Config.main_highlight_color);
+		w->Refresh();
+		wCurrent = w = LeftColumn;
+		LeftColumn->HighlightColor(Config.active_column_color);
+	}
+}
+
+void TagEditor::ReadTags(mpd_Song *s)
+{
+	TagLib::FileRef f(s->file);
+	if (f.isNull())
+		return;
+	
+	TagLib::MPEG::File *mpegf = dynamic_cast<TagLib::MPEG::File *>(f.file());
+
+	s->artist = !f.tag()->artist().isEmpty() ? str_pool_get(f.tag()->artist().toCString(1)) : 0;
+	s->title = !f.tag()->title().isEmpty() ? str_pool_get(f.tag()->title().toCString(1)) : 0;
+	s->album = !f.tag()->album().isEmpty() ? str_pool_get(f.tag()->album().toCString(1)) : 0;
+	s->track = f.tag()->track() ? str_pool_get(IntoStr(f.tag()->track()).c_str()) : 0;
+	s->date = f.tag()->year() ? str_pool_get(IntoStr(f.tag()->year()).c_str()) : 0;
+	s->genre = !f.tag()->genre().isEmpty() ? str_pool_get(f.tag()->genre().toCString(1)) : 0;
+	if (mpegf)
+	{
+		s->composer = !mpegf->ID3v2Tag()->frameListMap()["TCOM"].isEmpty()
+		? (!mpegf->ID3v2Tag()->frameListMap()["TCOM"].front()->toString().isEmpty()
+		   ? str_pool_get(mpegf->ID3v2Tag()->frameListMap()["TCOM"].front()->toString().toCString(1))
+		   : 0)
+		: 0;
+		s->performer = !mpegf->ID3v2Tag()->frameListMap()["TOPE"].isEmpty()
+		? (!mpegf->ID3v2Tag()->frameListMap()["TOPE"].front()->toString().isEmpty()
+		   ? str_pool_get(mpegf->ID3v2Tag()->frameListMap()["TOPE"].front()->toString().toCString(1))
+		   : 0)
+		: 0;
+		s->disc = !mpegf->ID3v2Tag()->frameListMap()["TPOS"].isEmpty()
+		? (!mpegf->ID3v2Tag()->frameListMap()["TPOS"].front()->toString().isEmpty()
+		   ? str_pool_get(mpegf->ID3v2Tag()->frameListMap()["TPOS"].front()->toString().toCString(1))
+		   : 0)
+		: 0;
+	}
+	s->comment = !f.tag()->comment().isEmpty() ? str_pool_get(f.tag()->comment().toCString(1)) : 0;
+	s->time = f.audioProperties()->length();
+}
+
+bool TagEditor::WriteTags(Song &s)
+{
+	using namespace TagLib;
+	string path_to_file;
+	bool file_is_from_db = s.IsFromDB();
+	if (file_is_from_db)
+		path_to_file += Config.mpd_music_dir;
+	path_to_file += s.GetFile();
+	locale_to_utf(path_to_file);
+	FileRef f(path_to_file.c_str());
+	if (!f.isNull())
+	{
+		f.tag()->setTitle(ToWString(s.GetTitle()));
+		f.tag()->setArtist(ToWString(s.GetArtist()));
+		f.tag()->setAlbum(ToWString(s.GetAlbum()));
+		f.tag()->setYear(StrToInt(s.GetYear()));
+		f.tag()->setTrack(StrToInt(s.GetTrack()));
+		f.tag()->setGenre(ToWString(s.GetGenre()));
+		f.tag()->setComment(ToWString(s.GetComment()));
+		if (!f.save())
+			return false;
+		
+		string ext = s.GetFile();
+		ext = ext.substr(ext.rfind(".")+1);
+		ToLower(ext);
+		if (ext == "mp3")
+		{
+			MPEG::File file(path_to_file.c_str());
+			ID3v2::Tag *tag = file.ID3v2Tag();
+			String::Type encoding = String::UTF8;
+			ByteVector Composer("TCOM");
+			ByteVector Performer("TOPE");
+			ByteVector Disc("TPOS");
+			ID3v2::Frame *ComposerFrame = new ID3v2::TextIdentificationFrame(Composer, encoding);
+			ID3v2::Frame *PerformerFrame = new ID3v2::TextIdentificationFrame(Performer, encoding);
+			ID3v2::Frame *DiscFrame = new ID3v2::TextIdentificationFrame(Disc, encoding);
+			ComposerFrame->setText(ToWString(s.GetComposer()));
+			PerformerFrame->setText(ToWString(s.GetPerformer()));
+			DiscFrame->setText(ToWString(s.GetDisc()));
+			tag->removeFrames(Composer);
+			tag->addFrame(ComposerFrame);
+			tag->removeFrames(Performer);
+			tag->addFrame(PerformerFrame);
+			tag->removeFrames(Disc);
+			tag->addFrame(DiscFrame);
+			if (!file.save())
+				return false;
+		}
+		if (!s.GetNewName().empty())
+		{
+			string new_name;
+			if (file_is_from_db)
+				new_name += Config.mpd_music_dir;
+			new_name += s.GetDirectory() + "/" + s.GetNewName();
+			locale_to_utf(new_name);
+			if (rename(path_to_file.c_str(), new_name.c_str()) == 0 && !file_is_from_db)
+			{
+				if (wPrev == myPlaylist->Main())
+				{
+					// if we rename local file, it won't get updated
+					// so just remove it from playlist and add again
+					size_t pos = myPlaylist->Main()->Choice();
+					Mpd->QueueDeleteSong(pos);
+					Mpd->CommitQueue();
+					int id = Mpd->AddSong("file://" + new_name);
+					if (id >= 0)
+					{
+						s = myPlaylist->Main()->Back();
+						Mpd->Move(s.GetPosition(), pos);
+					}
+				}
+				else // only myBrowser->Main()
+					s.SetFile(new_name);
+			}
+		}
+		return true;
+	}
+	else
+		return false;
+}
+
+std::string TagEditor::CapitalizeFirstLetters(const string &s)
+{
+	if (s.empty())
+		return "";
+	string result = s;
+	if (isalpha(result[0]))
+		result[0] = toupper(result[0]);
+	for (string::iterator it = result.begin()+1; it != result.end(); it++)
+	{
+		if (isalpha(*it) && !isalpha(*(it-1)))
+			*it = toupper(*it);
+	}
+	return result;
+}
+
+void TagEditor::CapitalizeFirstLetters(Song &s)
+{
+	s.SetTitle(CapitalizeFirstLetters(s.GetTitle()));
+	s.SetArtist(CapitalizeFirstLetters(s.GetArtist()));
+	s.SetAlbum(CapitalizeFirstLetters(s.GetAlbum()));
+	s.SetGenre(CapitalizeFirstLetters(s.GetGenre()));
+	s.SetComposer(CapitalizeFirstLetters(s.GetComposer()));
+	s.SetPerformer(CapitalizeFirstLetters(s.GetPerformer()));
+	s.SetDisc(CapitalizeFirstLetters(s.GetDisc()));
+	s.SetComment(CapitalizeFirstLetters(s.GetComment()));
+}
+
+void TagEditor::LowerAllLetters(Song &s)
+{
+	string conv = s.GetTitle();
+	ToLower(conv);
+	s.SetTitle(conv);
+	
+	conv = s.GetArtist();
+	ToLower(conv);
+	s.SetArtist(conv);
+	
+	conv = s.GetAlbum();
+	ToLower(conv);
+	s.SetAlbum(conv);
+	
+	conv = s.GetGenre();
+	ToLower(conv);
+	s.SetGenre(conv);
+	
+	conv = s.GetComposer();
+	ToLower(conv);
+	s.SetComposer(conv);
+	
+	conv = s.GetPerformer();
+	ToLower(conv);
+	s.SetPerformer(conv);
+	
+	conv = s.GetDisc();
+	ToLower(conv);
+	s.SetDisc(conv);
+	
+	conv = s.GetComment();
+	ToLower(conv);
+	s.SetComment(conv);
 }
 
 namespace
@@ -856,21 +1089,6 @@ namespace
 		}
 		return result.str();
 	}
-	
-	string tag_capitalize_first_letters(const string &s)
-	{
-		if (s.empty())
-			return "";
-		string result = s;
-		if (isalpha(result[0]))
-			result[0] = toupper(result[0]);
-		for (string::iterator it = result.begin()+1; it != result.end(); it++)
-		{
-			if (isalpha(*it) && !isalpha(*(it-1)))
-				*it = toupper(*it);
-		}
-		return result;
-	}
 }
 
 SongSetFunction IntoSetFunction(mpd_TagItems tag)
@@ -931,124 +1149,7 @@ string FindSharedDir(const SongList &v)
 	return result;
 }
 
-void ReadTagsFromFile(mpd_Song *s)
-{
-	TagLib::FileRef f(s->file);
-	if (f.isNull())
-		return;
-	
-	TagLib::MPEG::File *mpegf = dynamic_cast<TagLib::MPEG::File *>(f.file());
-
-	s->artist = !f.tag()->artist().isEmpty() ? str_pool_get(f.tag()->artist().toCString(1)) : 0;
-	s->title = !f.tag()->title().isEmpty() ? str_pool_get(f.tag()->title().toCString(1)) : 0;
-	s->album = !f.tag()->album().isEmpty() ? str_pool_get(f.tag()->album().toCString(1)) : 0;
-	s->track = f.tag()->track() ? str_pool_get(IntoStr(f.tag()->track()).c_str()) : 0;
-	s->date = f.tag()->year() ? str_pool_get(IntoStr(f.tag()->year()).c_str()) : 0;
-	s->genre = !f.tag()->genre().isEmpty() ? str_pool_get(f.tag()->genre().toCString(1)) : 0;
-	if (mpegf)
-	{
-		s->composer = !mpegf->ID3v2Tag()->frameListMap()["TCOM"].isEmpty()
-		? (!mpegf->ID3v2Tag()->frameListMap()["TCOM"].front()->toString().isEmpty()
-		   ? str_pool_get(mpegf->ID3v2Tag()->frameListMap()["TCOM"].front()->toString().toCString(1))
-		   : 0)
-		: 0;
-		s->performer = !mpegf->ID3v2Tag()->frameListMap()["TOPE"].isEmpty()
-		? (!mpegf->ID3v2Tag()->frameListMap()["TOPE"].front()->toString().isEmpty()
-		   ? str_pool_get(mpegf->ID3v2Tag()->frameListMap()["TOPE"].front()->toString().toCString(1))
-		   : 0)
-		: 0;
-		s->disc = !mpegf->ID3v2Tag()->frameListMap()["TPOS"].isEmpty()
-		? (!mpegf->ID3v2Tag()->frameListMap()["TPOS"].front()->toString().isEmpty()
-		   ? str_pool_get(mpegf->ID3v2Tag()->frameListMap()["TPOS"].front()->toString().toCString(1))
-		   : 0)
-		: 0;
-	}
-	s->comment = !f.tag()->comment().isEmpty() ? str_pool_get(f.tag()->comment().toCString(1)) : 0;
-	s->time = f.audioProperties()->length();
-}
-
-bool WriteTags(Song &s)
-{
-	using namespace TagLib;
-	string path_to_file;
-	bool file_is_from_db = s.IsFromDB();
-	if (file_is_from_db)
-		path_to_file += Config.mpd_music_dir;
-	path_to_file += s.GetFile();
-	locale_to_utf(path_to_file);
-	FileRef f(path_to_file.c_str());
-	if (!f.isNull())
-	{
-		f.tag()->setTitle(ToWString(s.GetTitle()));
-		f.tag()->setArtist(ToWString(s.GetArtist()));
-		f.tag()->setAlbum(ToWString(s.GetAlbum()));
-		f.tag()->setYear(StrToInt(s.GetYear()));
-		f.tag()->setTrack(StrToInt(s.GetTrack()));
-		f.tag()->setGenre(ToWString(s.GetGenre()));
-		f.tag()->setComment(ToWString(s.GetComment()));
-		if (!f.save())
-			return false;
-		
-		string ext = s.GetFile();
-		ext = ext.substr(ext.rfind(".")+1);
-		ToLower(ext);
-		if (ext == "mp3")
-		{
-			MPEG::File file(path_to_file.c_str());
-			ID3v2::Tag *tag = file.ID3v2Tag();
-			String::Type encoding = String::UTF8;
-			ByteVector Composer("TCOM");
-			ByteVector Performer("TOPE");
-			ByteVector Disc("TPOS");
-			ID3v2::Frame *ComposerFrame = new ID3v2::TextIdentificationFrame(Composer, encoding);
-			ID3v2::Frame *PerformerFrame = new ID3v2::TextIdentificationFrame(Performer, encoding);
-			ID3v2::Frame *DiscFrame = new ID3v2::TextIdentificationFrame(Disc, encoding);
-			ComposerFrame->setText(ToWString(s.GetComposer()));
-			PerformerFrame->setText(ToWString(s.GetPerformer()));
-			DiscFrame->setText(ToWString(s.GetDisc()));
-			tag->removeFrames(Composer);
-			tag->addFrame(ComposerFrame);
-			tag->removeFrames(Performer);
-			tag->addFrame(PerformerFrame);
-			tag->removeFrames(Disc);
-			tag->addFrame(DiscFrame);
-			if (!file.save())
-				return false;
-		}
-		if (!s.GetNewName().empty())
-		{
-			string new_name;
-			if (file_is_from_db)
-				new_name += Config.mpd_music_dir;
-			new_name += s.GetDirectory() + "/" + s.GetNewName();
-			locale_to_utf(new_name);
-			if (rename(path_to_file.c_str(), new_name.c_str()) == 0 && !file_is_from_db)
-			{
-				if (wPrev == myPlaylist->Main())
-				{
-					// if we rename local file, it won't get updated
-					// so just remove it from playlist and add again
-					size_t pos = myPlaylist->Main()->Choice();
-					Mpd->QueueDeleteSong(pos);
-					Mpd->CommitQueue();
-					int id = Mpd->AddSong("file://" + new_name);
-					if (id >= 0)
-					{
-						s = myPlaylist->Main()->Back();
-						Mpd->Move(s.GetPosition(), pos);
-					}
-				}
-				else // only myBrowser->Main()
-					s.SetFile(new_name);
-			}
-		}
-		return true;
-	}
-	else
-		return false;
-}
-
-void __deal_with_filenames(SongList &v)
+void DealWithFilenames(SongList &v)
 {
 	int width = 30;
 	int height = 6;
@@ -1288,53 +1389,6 @@ void __deal_with_filenames(SongList &v)
 	delete Main;
 	delete Legend;
 	delete Preview;
-}
-
-void CapitalizeFirstLetters(Song &s)
-{
-	s.SetTitle(tag_capitalize_first_letters(s.GetTitle()));
-	s.SetArtist(tag_capitalize_first_letters(s.GetArtist()));
-	s.SetAlbum(tag_capitalize_first_letters(s.GetAlbum()));
-	s.SetGenre(tag_capitalize_first_letters(s.GetGenre()));
-	s.SetComposer(tag_capitalize_first_letters(s.GetComposer()));
-	s.SetPerformer(tag_capitalize_first_letters(s.GetPerformer()));
-	s.SetDisc(tag_capitalize_first_letters(s.GetDisc()));
-	s.SetComment(tag_capitalize_first_letters(s.GetComment()));
-}
-
-void LowerAllLetters(Song &s)
-{
-	string conv = s.GetTitle();
-	ToLower(conv);
-	s.SetTitle(conv);
-	
-	conv = s.GetArtist();
-	ToLower(conv);
-	s.SetArtist(conv);
-	
-	conv = s.GetAlbum();
-	ToLower(conv);
-	s.SetAlbum(conv);
-	
-	conv = s.GetGenre();
-	ToLower(conv);
-	s.SetGenre(conv);
-	
-	conv = s.GetComposer();
-	ToLower(conv);
-	s.SetComposer(conv);
-	
-	conv = s.GetPerformer();
-	ToLower(conv);
-	s.SetPerformer(conv);
-	
-	conv = s.GetDisc();
-	ToLower(conv);
-	s.SetDisc(conv);
-	
-	conv = s.GetComment();
-	ToLower(conv);
-	s.SetComment(conv);
 }
 
 #endif
