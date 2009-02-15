@@ -103,28 +103,6 @@ void Song::Localize()
 #	endif // SUPPORTED_LOCALES && HAVE_ICONV_H
 }
 
-/*void Song::Delocalize()
-{
-#	if !defined(_UTF8) && defined(HAVE_ICONV_H)
-	if (!isLocalised)
-		return;
-	str_pool_locale_to_utf(itsSong->file);
-	__Count_Last_Slash_Position();
-	str_pool_locale_to_utf(itsSong->artist);
-	str_pool_locale_to_utf(itsSong->title);
-	str_pool_locale_to_utf(itsSong->album);
-	str_pool_locale_to_utf(itsSong->track);
-	str_pool_locale_to_utf(itsSong->name);
-	str_pool_locale_to_utf(itsSong->date);
-	str_pool_locale_to_utf(itsSong->genre);
-	str_pool_locale_to_utf(itsSong->composer);
-	str_pool_locale_to_utf(itsSong->performer);
-	str_pool_locale_to_utf(itsSong->disc);
-	str_pool_locale_to_utf(itsSong->comment);
-	isLocalised = 0;
-#	endif // !_UTF8 && HAVE_ICONV_H
-}*/
-
 void Song::Clear()
 {
 	if (itsSong)

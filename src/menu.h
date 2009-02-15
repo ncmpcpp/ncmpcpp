@@ -119,8 +119,6 @@ template <class T> class Menu : public Window, public List
 		virtual Menu<T> *Clone() const { return new Menu<T>(*this); }
 		virtual Menu<T> *EmptyClone() const;
 		
-		//virtual string GetOption(int i = -1) const;
-		
 	protected:
 		ItemDisplayer itsItemDisplayer;
 		void *itsItemDisplayerUserdata;
@@ -195,8 +193,6 @@ template <class T> void Menu<T>::AddOption(const T &item, bool is_bold, bool is_
 	o.haveSeparator = have_separator;
 	itsOptions.push_back(o);
 }
-
-//template <> void Menu<Buffer>::AddOption(const Buffer &buf, bool is_bold, bool is_static, bool have_separator);
 
 template <class T> void Menu<T>::AddSeparator()
 {

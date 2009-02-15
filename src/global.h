@@ -21,7 +21,6 @@
 #ifndef _GLOBAL_H
 #define _GLOBAL_H
 
-#include "settings.h"
 #include "ncmpcpp.h"
 #include "mpdpp.h"
 #include "screen.h"
@@ -33,85 +32,34 @@ namespace Global
 	extern BasicScreen *myScreen;
 	extern BasicScreen *myOldScreen;
 	
-//	extern Menu<MPD::Song> *myPlaylist->Main();
-//	extern Menu<MPD::Item> *myBrowser->Main();
-//	extern Menu< std::pair<Buffer *, MPD::Song *> > *mSearcher;
-	
-//	extern Window *wLibActiveCol;
-//	extern Menu<std::string> *myLibrary->Artists;
-//	extern Menu<string_pair> *myLibrary->Albums;
-//	extern Menu<MPD::Song> *myLibrary->Songs;
-	
-#	ifdef HAVE_TAGLIB_H
-//	extern Window *wTagEditorActiveCol;
-//	extern Menu<Buffer> *mTagEditor;
-//	extern Menu<string_pair> *mEditorAlbums;
-//	extern Menu<string_pair> *myTagEditor->Dirs;
-//	extern Menu<string_pair> *mEditorLeftCol;
-//	extern Menu<std::string> *myTagEditor->TagTypes;
-//	extern Menu<MPD::Song> *myTagEditor->Tags;
-#	endif // HAVE_TAGLIB_H
-	
-//	extern Window *wPlaylistEditorActiveCol;
-//	extern Menu<std::string> *mPlaylistList;
-//	extern Menu<MPD::Song> *myPlaylistEditor->Content;
-	
-//	extern Scrollpad *sHelp;
-//	extern Scrollpad *sLyrics;
-//	extern Scrollpad *sInfo;
-	
 	extern Window *wHeader;
 	extern Window *wFooter;
-//#	ifdef ENABLE_CLOCK
-//	extern Scrollpad *wClock;
-//#	endif
 	
 	extern MPD::Connection *Mpd;
 	
-//	extern int now_playing;
-//	extern int lock_statusbar_delay;
-
-//	extern size_t browsed_dir_scroll_begin;
 	extern size_t main_start_y;
 	extern size_t main_height;
-//	extern size_t lyrics_scroll_begin;
-
+	
 	extern time_t timer;
-
-//	extern std::string browsed_dir;
-//	extern std::string editor_browsed_dir;
-//	extern std::string editor_highlighted_dir;
-//	extern std::string info_title;
-
-//	extern BasicScreen myScreen;
-//	extern NcmpcppScreen myOldScreen;
-
+	
 #	ifdef HAVE_CURL_CURL_H
 	extern pthread_mutex_t curl;
 #	endif
-
+	
 	extern bool dont_change_now_playing;
 	extern bool block_progressbar_update;
 	extern bool block_playlist_update;
 	extern bool block_item_list_update;
-
+	
 	extern bool messages_allowed;
 	extern bool redraw_header;
-//	extern bool reload_lyrics;
 	
 	extern std::string volume_state;
-
+	
 	extern bool header_update_status;
-//	extern bool search_case_sensitive;
-//	extern bool search_match_to_pattern;
-
-//	extern const char *search_mode_normal;
-//	extern const char *search_mode_strict;
 	
 	extern std::vector<int> vFoundPositions;
 	extern int found_pos;
-	
-//	extern MPD::Song lyrics_song;
 }
 
 #endif

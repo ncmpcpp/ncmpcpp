@@ -73,9 +73,6 @@ size_t Global::main_height;
 
 time_t Global::timer;
 
-//string Global::myTagEditor->CurrentDir() = "/";
-//string Global::editor_highlighted_dir;
-
 bool Global::dont_change_now_playing = 0;
 bool Global::block_progressbar_update = 0;
 bool Global::block_playlist_update = 0;
@@ -993,7 +990,11 @@ int main(int argc, char *argv[])
 		{
 			CHECK_MPD_MUSIC_DIR;
 #			ifdef HAVE_TAGLIB_H
-			if (myScreen->Cmp() == myLibrary->Artists)
+			if (myTinyTagEditor->SetEdited(myScreen->CurrentSong()))
+			{
+				myTinyTagEditor->SwitchTo();
+			}
+			else if (myScreen->Cmp() == myLibrary->Artists)
 			{
 				LockStatusbar();
 				Statusbar() << fmtBold << IntoStr(Config.media_lib_primary_tag) << fmtBoldEnd << ": ";
@@ -1067,10 +1068,6 @@ int main(int argc, char *argv[])
 						ShowMessage("Tags updated succesfully!");
 					}
 				}
-			}
-			else if (myTinyTagEditor->SetEdited(myScreen->CurrentSong()))
-			{
-				myTinyTagEditor->SwitchTo();
 			}
 			else if (myScreen->Cmp() == myTagEditor->Dirs)
 			{
@@ -1203,7 +1200,6 @@ int main(int argc, char *argv[])
 #			endif // HAVE_TAGLIB_H
 			   )
 			{
-				
 				List *mList = reinterpret_cast<Menu<Song> *>(myWindow->Main());
 				for (size_t i = 0; i < mList->Size(); i++)
 					mList->Select(i, !mList->isSelected(i) && !mList->isStatic(i));

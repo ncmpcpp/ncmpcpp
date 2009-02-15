@@ -78,9 +78,7 @@ namespace MPD
 			void NullMe() { itsSong = 0; }
 			void CopyPtr(bool copy) { copyPtr = copy; }
 			
-			//void GetEmptyFields(bool get) { itsGetEmptyFields = get; }
 			void Localize();
-			//void Delocalize();
 			void Clear();
 			bool Empty() const;
 			bool IsFromDB() const;
@@ -103,7 +101,6 @@ namespace MPD
 			bool copyPtr;
 			bool isStream;
 			bool isLocalised;
-		//bool itsGetEmptyFields;
 	};
 }
 
