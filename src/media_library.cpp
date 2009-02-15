@@ -103,25 +103,15 @@ void MediaLibrary::Refresh()
 
 void MediaLibrary::SwitchTo()
 {
-	if (current_screen != csLibrary
-#	ifdef HAVE_TAGLIB_H
-	&&  current_screen != csTinyTagEditor
-#	endif // HAVE_TAGLIB_H
-	   )
-	{
-		CLEAR_FIND_HISTORY;
-		
-		myPlaylist->Main()->Hide(); // hack, should be myScreen, but it doesn't always have 100% width
-		
-//		redraw_screen = 1;
-		redraw_header = 1;
-		MediaLibrary::Refresh();
-		
-		myScreen = this;
-		current_screen = csLibrary;
-		
-		UpdateSongList(Songs);
-	}
+	if (myScreen == this)
+		return;
+	
+	CLEAR_FIND_HISTORY;
+	myScreen = this;
+	myPlaylist->Main()->Hide(); // hack, should be myScreen, but it doesn't always have 100% width
+	redraw_header = 1;
+	Refresh();
+	UpdateSongList(Songs);
 }
 
 std::string MediaLibrary::Title()
@@ -246,6 +236,22 @@ void MediaLibrary::Update()
 		Songs->Window::Clear();
 		Songs->Refresh();
 	}
+}
+
+void MediaLibrary::SpacePressed()
+{
+	if (Config.space_selects && w == Songs)
+	{
+		Select(Songs);
+		w->Scroll(wDown);
+		return;
+	}
+	AddToPlaylist(0);
+}
+
+MPD::Song *MediaLibrary::CurrentSong()
+{
+	return w == Songs && !Songs->Empty() ? &Songs->Current() : 0;
 }
 
 void MediaLibrary::NextColumn()

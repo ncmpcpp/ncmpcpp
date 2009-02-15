@@ -86,8 +86,8 @@ namespace Global
 	extern std::string editor_highlighted_dir;
 //	extern std::string info_title;
 
-	extern NcmpcppScreen current_screen;
-	extern NcmpcppScreen prev_screen;
+//	extern BasicScreen myScreen;
+//	extern NcmpcppScreen myOldScreen;
 
 #	ifdef HAVE_CURL_CURL_H
 	extern pthread_mutex_t curl;

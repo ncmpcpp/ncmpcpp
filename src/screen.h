@@ -22,6 +22,8 @@
 #define _SCREEN_H
 
 #include "window.h"
+#include "menu.h"
+#include "mpdpp.h"
 
 class BasicScreen
 {
@@ -42,6 +44,11 @@ class BasicScreen
 		
 		virtual void EnterPressed() { }
 		virtual void SpacePressed() { }
+		
+		virtual MPD::Song *CurrentSong() { return 0; }
+		
+	protected:
+		void Select(List *);
 };
 
 template <class WindowType> class Screen : public BasicScreen

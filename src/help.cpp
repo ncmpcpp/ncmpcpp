@@ -23,6 +23,7 @@
 #include "global.h"
 #include "help.h"
 #include "settings.h"
+#include "tag_editor.h"
 
 using namespace Global;
 
@@ -43,15 +44,14 @@ void Help::Resize()
 
 void Help::SwitchTo()
 {
-	if (current_screen != csHelp
+	if (myScreen != myHelp
 #	ifdef HAVE_TAGLIB_H
-	&& current_screen != csTinyTagEditor
+	&& myScreen != myTinyTagEditor
 #	endif // HAVE_TAGLIB_H
 	   )
 	{
 		myScreen = this;
 		w->Hide();
-		current_screen = csHelp;
 		redraw_header = 1;
 	}
 }

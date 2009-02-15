@@ -87,36 +87,11 @@ void Lyrics::SwitchTo()
 	if (myScreen == this && !Reload)
 	{
 		w->Hide();
-		current_screen = prev_screen;
 		myScreen = myOldScreen;
-//		redraw_screen = 1;
 		redraw_header = 1;
-		if (current_screen == csLibrary)
-		{
-			myLibrary->Refresh();
-		}
-		else if (current_screen == csPlaylistEditor)
-		{
-			myPlaylistEditor->Refresh();
-		}
-#		ifdef HAVE_TAGLIB_H
-		else if (current_screen == csTagEditor)
-		{
-			myTagEditor->Refresh();
-		}
-#		endif // HAVE_TAGLIB_H
+		myScreen->Refresh();
 	}
-	else if (
-	    Reload
-	||  (myScreen == myPlaylist && !myPlaylist->Main()->Empty())
-	||  (myScreen == myBrowser && myBrowser->Main()->Current().type == MPD::itSong)
-	||  (myScreen == mySearcher && !mySearcher->Main()->Current().first)
-	||  (myScreen->Cmp() == myLibrary->Songs && !myLibrary->Songs->Empty())
-	||  (myScreen->Cmp() == myPlaylistEditor->Content && !myPlaylistEditor->Content->Empty())
-#	ifdef HAVE_TAGLIB_H
-	||  (myScreen->Cmp() == myTagEditor->Tags && !myTagEditor->Tags->Empty())
-#	endif // HAVE_TAGLIB_H
-		)
+	else
 	{
 #		ifdef HAVE_CURL_CURL_H
 		if (Downloader && !Ready)
@@ -131,52 +106,18 @@ void Lyrics::SwitchTo()
 		}
 #		endif
 		
-		MPD::Song *s = 0;
-		int id;
+		MPD::Song *s = Reload ? myPlaylist->CurrentSong() : myScreen->CurrentSong();
+		Reload = 0;
 		
-		if (Reload)
-		{
-			current_screen = csPlaylist;
-			myScreen = myPlaylist;
-			Reload = 0;
-			id = myPlaylist->NowPlaying;
-		}
-		else
-			id = reinterpret_cast<Menu<MPD::Song> *>(((Screen<Window> *)myScreen)->Main())->Choice();
+		if (!s)
+			return;
 		
-		switch (current_screen)
-		{
-			case csPlaylist:
-				s = &myPlaylist->Main()->at(id);
-				break;
-			case csBrowser:
-				s = myBrowser->Main()->at(id).song;
-				break;
-			case csSearcher:
-				s = mySearcher->Main()->at(id).second;
-				break;
-			case csLibrary:
-				s = &myLibrary->Songs->at(id);
-				break;
-			case csPlaylistEditor:
-				s = &myPlaylistEditor->Content->at(id);
-				break;
-#				ifdef HAVE_TAGLIB_H
-			case csTagEditor:
-				s = &myTagEditor->Tags->at(id);
-				break;
-#				endif // HAVE_TAGLIB_H
-			default:
-				break;
-		}
 		if (!s->GetArtist().empty() && !s->GetTitle().empty())
 		{
 			itsScrollBegin = 0;
 			itsSong = *s;
 			myOldScreen = myScreen;
-			prev_screen = current_screen;
 			myScreen = this;
-			current_screen = csLyrics;
 			redraw_header = 1;
 			w->Clear();
 			w->WriteXY(0, 0, 0, "Fetching lyrics...");
@@ -199,6 +140,12 @@ std::string Lyrics::Title()
 	string result = "Lyrics: ";
 	result += TO_STRING(Scroller(itsSong.toString("%a - %t"), COLS-result.length()-volume_state.length(), itsScrollBegin));
 	return result;
+}
+
+void Lyrics::SpacePressed()
+{
+	Config.now_playing_lyrics = !Config.now_playing_lyrics;
+	ShowMessage("Reload lyrics if song changes: %s", Config.now_playing_lyrics ? "On" : "Off");
 }
 
 void *Lyrics::Get(void *song)

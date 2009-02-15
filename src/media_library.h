@@ -37,7 +37,9 @@ class MediaLibrary : public Screen<Window>
 		virtual void Update();
 		
 		virtual void EnterPressed() { AddToPlaylist(1); }
-		virtual void SpacePressed() { AddToPlaylist(0); }
+		virtual void SpacePressed();
+		
+		virtual MPD::Song *CurrentSong();
 		
 		void NextColumn();
 		void PrevColumn();

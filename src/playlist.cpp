@@ -25,6 +25,7 @@
 #include "playlist.h"
 #include "song.h"
 #include "status_checker.h"
+#include "tag_editor.h"
 
 using namespace Global;
 using std::vector;
@@ -44,19 +45,13 @@ void Playlist::Init()
 
 void Playlist::SwitchTo()
 {
-	if (current_screen != csPlaylist
-#	ifdef HAVE_TAGLIB_H
-	&&  current_screen != csTinyTagEditor
-#	endif // HAVE_TAGLIB_H
-	   )
-	{
-		CLEAR_FIND_HISTORY;
-		myScreen = this;
-		w->Hide();
-		current_screen = csPlaylist;
-//		redraw_screen = 1;
-		redraw_header = 1;
-	}
+	if (myScreen == this)
+		return;
+
+	CLEAR_FIND_HISTORY;
+	myScreen = this;
+	w->Hide();
+	redraw_header = 1;
 }
 
 void Playlist::Resize()
@@ -72,19 +67,21 @@ std::string Playlist::Title()
 	return result;
 }
 
-void Playlist::SpacePressed()
-{
-	if (w->Empty())
-		return;
-	size_t i = w->Choice();
-	w->Select(i, !w->isSelected(i));
-	w->Scroll(wDown);
-}
-
 void Playlist::EnterPressed()
 {
 	if (!w->Empty())
 		Mpd->PlayID(w->Current().GetID());
+}
+
+void Playlist::SpacePressed()
+{
+	Select(w);
+	w->Scroll(wDown);
+}
+
+MPD::Song *Playlist::CurrentSong()
+{
+	return !w->Empty() ? &w->Current() : 0;
 }
 
 std::string Playlist::TotalLength()

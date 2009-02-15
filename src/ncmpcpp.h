@@ -34,27 +34,27 @@
 
 typedef std::pair<std::string, std::string> string_pair;
 
-enum NcmpcppScreen
+/*enum NcmpcppScreen
 {
-	csHelp,
-	csPlaylist,
-	csBrowser,
+	myHelp,
+	myPlaylist,
+	myBrowser,
 #	ifdef HAVE_TAGLIB_H
-	csTinyTagEditor,
+	myTinyTagEditor,
 #	endif // HAVE_TAGLIB_H
-	csInfo,
-	csSearcher,
-	csLibrary,
-	csLyrics,
-	csPlaylistEditor,
+	myInfo,
+	mySearcher,
+	myLibrary,
+	myLyrics,
+	myPlaylistEditor,
 #	ifdef HAVE_TAGLIB_H	
-	csTagEditor,
+	myTagEditor,
 #	endif // HAVE_TAGLIB_H
 #	ifdef ENABLE_CLOCK
-	csClock,
+	myClock,
 #	endif // ENABLE_CLOCK
 	csOther
-};
+};*/
 
 const int ncmpcpp_window_timeout = 500;
 

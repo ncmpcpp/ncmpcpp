@@ -49,6 +49,8 @@ class SearchEngine : public Screen < Menu< std::pair<Buffer *, MPD::Song *> > >
 		virtual void EnterPressed();
 		virtual void SpacePressed();
 		
+		virtual MPD::Song *CurrentSong();
+		
 		void UpdateFoundList();
 		
 		static size_t StaticOptions;

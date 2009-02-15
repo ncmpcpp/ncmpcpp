@@ -44,6 +44,8 @@ class TinyTagEditor : public Screen< Menu<Buffer> >
 		
 		virtual void EnterPressed();
 		
+		bool SetEdited(MPD::Song *);
+		
 	protected:
 		bool GetTags();
 		MPD::Song itsEdited;
@@ -65,6 +67,8 @@ class TagEditor : public Screen<Window>
 		
 		virtual void EnterPressed();
 		virtual void SpacePressed();
+		
+		virtual MPD::Song *CurrentSong();
 		
 		void NextColumn();
 		void PrevColumn();

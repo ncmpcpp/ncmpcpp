@@ -60,31 +60,6 @@ void TinyTagEditor::Resize()
 
 void TinyTagEditor::SwitchTo()
 {
-	List *mList = reinterpret_cast<Menu<Song> *>(((Screen<Window> *)myScreen)->Main());
-	size_t id = mList->Choice();
-	switch (current_screen)
-	{
-		case csPlaylist:
-			itsEdited = myPlaylist->Main()->at(id);
-			break;
-		case csBrowser:
-			itsEdited = *myBrowser->Main()->at(id).song;
-			break;
-		case csSearcher:
-			itsEdited = *mySearcher->Main()->at(id).second;
-			break;
-		case csLibrary:
-			itsEdited = myLibrary->Songs->at(id);
-			break;
-		case csPlaylistEditor:
-			itsEdited = myPlaylistEditor->Content->at(id);
-			break;
-		case csTagEditor:
-			itsEdited = myTagEditor->Tags->at(id);
-			break;
-		default:
-			break;
-	}
 	if (itsEdited.IsStream())
 	{
 		ShowMessage("Cannot edit streams!");
@@ -93,8 +68,6 @@ void TinyTagEditor::SwitchTo()
 	{
 		myOldScreen = myScreen;
 		myScreen = this;
-		prev_screen = current_screen;
-		current_screen = csTinyTagEditor;
 		redraw_header = 1;
 	}
 	else
@@ -216,7 +189,7 @@ void TinyTagEditor::EnterPressed()
 				if (s.IsFromDB())
 				{
 					Mpd->UpdateDirectory(locale_to_utf_cpy(s.GetDirectory()));
-					if (prev_screen == csSearcher)
+					if (myOldScreen == mySearcher)
 						*mySearcher->Main()->Current().second = s;
 				}
 				else
@@ -234,17 +207,16 @@ void TinyTagEditor::EnterPressed()
 		{
 			w->Clear();
 			myScreen = myOldScreen;
-			current_screen = prev_screen;
 			redraw_header = 1;
-			if (current_screen == csLibrary)
+			if (myScreen == myLibrary)
 			{
 				myLibrary->Refresh();
 			}
-			else if (current_screen == csPlaylistEditor)
+			else if (myScreen == myPlaylistEditor)
 			{
 				myPlaylistEditor->Refresh();
 			}
-			else if (current_screen == csTagEditor)
+			else if (myScreen == myTagEditor)
 			{
 				myTagEditor->Refresh();
 			}
@@ -252,6 +224,14 @@ void TinyTagEditor::EnterPressed()
 		}
 	}
 	UnlockStatusbar();
+}
+
+bool TinyTagEditor::SetEdited(MPD::Song *s)
+{
+	if (!s)
+		return false;
+	itsEdited = *s;
+	return true;
 }
 
 bool TinyTagEditor::GetTags()
@@ -315,13 +295,6 @@ bool TinyTagEditor::GetTags()
 	w->at(22) << "Cancel";
 	return true;
 }
-
-//Window *Global::wTagEditorActiveCol;
-/*Menu<string_pair> *Global::Albums;
-Menu<string_pair> *Global::Dirs;
-Menu<string_pair> *Global::LeftColumn;
-Menu<string> *Global::TagTypes;
-Menu<Song> *Global::Tags;*/
 
 TagEditor *myTagEditor = new TagEditor;
 
@@ -388,42 +361,38 @@ std::string TagEditor::Title()
 
 void TagEditor::SwitchTo()
 {
-	if (current_screen != csTagEditor && current_screen != csTinyTagEditor)
+	if (myScreen == this)
+		return;
+	
+	CLEAR_FIND_HISTORY;
+	
+	myScreen = this;
+	myPlaylist->Main()->Hide(); // hack, should be myScreen, but it doesn't always have 100% width
+	redraw_header = 1;
+	Refresh();
+	
+	if (TagTypes->Empty())
 	{
-		CLEAR_FIND_HISTORY;
-		
-		myPlaylist->Main()->Hide(); // hack, should be myScreen, but it doesn't always have 100% width
-		
-//		redraw_screen = 1;
-		redraw_header = 1;
-		TagEditor::Refresh();
-		
-		if (TagTypes->Empty())
-		{
-			TagTypes->AddOption("Title");
-			TagTypes->AddOption("Artist");
-			TagTypes->AddOption("Album");
-			TagTypes->AddOption("Year");
-			TagTypes->AddOption("Track");
-			TagTypes->AddOption("Genre");
-			TagTypes->AddOption("Composer");
-			TagTypes->AddOption("Performer");
-			TagTypes->AddOption("Disc");
-			TagTypes->AddOption("Comment");
-			TagTypes->AddSeparator();
-			TagTypes->AddOption("Filename");
-			TagTypes->AddSeparator();
-			TagTypes->AddOption("Options", 1, 1, 0);
-			TagTypes->AddSeparator();
-			TagTypes->AddOption("Reset");
-			TagTypes->AddOption("Save");
-			TagTypes->AddSeparator();
-			TagTypes->AddOption("Capitalize First Letters");
-			TagTypes->AddOption("lower all letters");
-		}
-		
-		myScreen = this;
-		current_screen = csTagEditor;
+		TagTypes->AddOption("Title");
+		TagTypes->AddOption("Artist");
+		TagTypes->AddOption("Album");
+		TagTypes->AddOption("Year");
+		TagTypes->AddOption("Track");
+		TagTypes->AddOption("Genre");
+		TagTypes->AddOption("Composer");
+		TagTypes->AddOption("Performer");
+		TagTypes->AddOption("Disc");
+		TagTypes->AddOption("Comment");
+		TagTypes->AddSeparator();
+		TagTypes->AddOption("Filename");
+		TagTypes->AddSeparator();
+		TagTypes->AddOption("Options", 1, 1, 0);
+		TagTypes->AddSeparator();
+		TagTypes->AddOption("Reset");
+		TagTypes->AddOption("Save");
+		TagTypes->AddSeparator();
+		TagTypes->AddOption("Capitalize First Letters");
+		TagTypes->AddOption("lower all letters");
 	}
 }
 
@@ -644,10 +613,8 @@ void TagEditor::EnterPressed()
 		{
 			if (w == TagTypes)
 			{
-				current_screen = csOther;
 				DealWithFilenames(list);
-				current_screen = csTagEditor;
-				TagEditor::Refresh();
+				Refresh();
 			}
 			else if (w == Tags)
 			{
@@ -743,6 +710,12 @@ void TagEditor::EnterPressed()
 
 void TagEditor::SpacePressed()
 {
+	if (w == Tags)
+	{
+		Select(Tags);
+		w->Scroll(wDown);
+		return;
+	}
 	if (w != LeftColumn)
 		return;
 	
@@ -751,6 +724,11 @@ void TagEditor::SpacePressed()
 	ShowMessage("Switched to %s view", Config.albums_in_tag_editor ? "albums" : "directories");
 	LeftColumn->Display();
 	Tags->Clear(0);
+}
+
+MPD::Song *TagEditor::CurrentSong()
+{
+	return w == Tags && !Tags->Empty() ? &Tags->Current() : 0;
 }
 
 void TagEditor::NextColumn()

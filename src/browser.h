@@ -21,7 +21,6 @@
 #ifndef _BROWSER_H
 #define _BROWSER_H
 
-#include "mpdpp.h"
 #include "ncmpcpp.h"
 #include "screen.h"
 
@@ -38,6 +37,8 @@ class Browser : public Screen< Menu<MPD::Item> >
 		
 		virtual void EnterPressed();
 		virtual void SpacePressed();
+		
+		virtual MPD::Song *CurrentSong();
 		
 		const std::string &CurrentDir() { return itsBrowsedDir; }
 		

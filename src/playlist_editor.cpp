@@ -28,6 +28,7 @@
 #include "playlist_editor.h"
 #include "mpdpp.h"
 #include "status_checker.h"
+#include "tag_editor.h"
 
 using namespace Global;
 using namespace MPD;
@@ -91,25 +92,15 @@ void PlaylistEditor::Refresh()
 
 void PlaylistEditor::SwitchTo()
 {
-	if (current_screen != csPlaylistEditor
-#	ifdef HAVE_TAGLIB_H
-	&&  current_screen != csTinyTagEditor
-#	endif // HAVE_TAGLIB_H
-	   )
-	{
-		CLEAR_FIND_HISTORY;
-		
-		myPlaylist->Main()->Hide(); // hack, should be myScreen, but it doesn't always have 100% width
-		
-//		redraw_screen = 1;
-		redraw_header = 1;
-		Refresh();
-		
-		myScreen = this;
-		current_screen = csPlaylistEditor;
-		
-		UpdateSongList(Content);
-	}
+	if (myScreen == this)
+		return;
+	
+	CLEAR_FIND_HISTORY;
+	myScreen = this;
+	myPlaylist->Main()->Hide(); // hack, should be myScreen, but it doesn't always have 100% width
+	redraw_header = 1;
+	Refresh();
+	UpdateSongList(Content);
 }
 
 void PlaylistEditor::Update()
@@ -269,5 +260,21 @@ void PlaylistEditor::AddToPlaylist(bool add_n_play)
 	FreeSongList(list);
 	if (!add_n_play)
 		w->Scroll(wDown);
+}
+
+void PlaylistEditor::SpacePressed()
+{
+	if (Config.space_selects && w == Content)
+	{
+		Select(Content);
+		w->Scroll(wDown);
+		return;
+	}
+	AddToPlaylist(0);
+}
+
+MPD::Song *PlaylistEditor::CurrentSong()
+{
+	return w == Content && !Content->Empty() ? &Content->Current() : 0;
 }
 

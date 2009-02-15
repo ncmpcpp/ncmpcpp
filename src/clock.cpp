@@ -57,7 +57,7 @@ void Clock::Resize()
 	if (Width <= size_t(COLS) && Height <= main_height)
 	{
 		w->MoveTo((COLS-Width)/2, (LINES-Height)/2);
-		if (current_screen == csClock)
+		if (myScreen == myClock)
 		{
 			myPlaylist->Main()->Hide();
 			Prepare();
@@ -71,22 +71,17 @@ void Clock::SwitchTo()
 	if (Width > size_t(COLS) || Height > main_height)
 	{
 		ShowMessage("Screen is too small to display clock!");
+		return;
 	}
-	else if (
-	   current_screen != csClock
-#	ifdef HAVE_TAGLIB_H
-	&& current_screen != csTinyTagEditor
-#	endif // HAVE_TAGLIB_H
-		)
-	{
-		CLEAR_FIND_HISTORY;
-		myScreen = this;
-		myPlaylist->Main()->Hide();
-		current_screen = csClock;
-		redraw_header = 1;
-		Clock::Prepare();
-		w->Display();
-	}
+	if (myScreen == this)
+		return;
+	
+	CLEAR_FIND_HISTORY;
+	myScreen = this;
+	myPlaylist->Main()->Hide();
+	redraw_header = 1;
+	Prepare();
+	w->Display();
 }
 
 std::string Clock::Title()

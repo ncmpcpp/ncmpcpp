@@ -40,6 +40,8 @@ class Playlist : public Screen< Menu<MPD::Song> >
 		virtual void EnterPressed();
 		virtual void SpacePressed();
 		
+		virtual MPD::Song *CurrentSong();
+		
 		bool isPlaying() { return NowPlaying >= 0 && !w->Empty(); }
 		const MPD::Song &NowPlayingSong();
 		

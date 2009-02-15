@@ -57,20 +57,14 @@ void Browser::Resize()
 
 void Browser::SwitchTo()
 {
-	if (current_screen != csBrowser
-#	ifdef HAVE_TAGLIB_H
-	&&  current_screen != csTinyTagEditor
-#	endif // HAVE_TAGLIB_H
-	   )
-	{
-		CLEAR_FIND_HISTORY;
-		w->Empty() ? myBrowser->GetDirectory(itsBrowsedDir) : myBrowser->UpdateItemList();
-		myScreen = this;
-		w->Hide();
-		current_screen = csBrowser;
-//		redraw_screen = 1;
-		redraw_header = 1;
-	}
+	if (myScreen == this)
+		return;
+	
+	CLEAR_FIND_HISTORY;
+	w->Empty() ? myBrowser->GetDirectory(itsBrowsedDir) : myBrowser->UpdateItemList();
+	myScreen = this;
+	w->Hide();
+	redraw_header = 1;
 }
 
 std::string Browser::Title()
@@ -147,6 +141,13 @@ void Browser::EnterPressed()
 
 void Browser::SpacePressed()
 {
+	if (Config.space_selects && w->Choice() >= (itsBrowsedDir != "/" ? 1 : 0))
+	{
+		Select(w);
+		w->Scroll(wDown);
+		return;
+	}
+	
 	if (w->Empty())
 		return;
 	
@@ -227,6 +228,11 @@ void Browser::SpacePressed()
 		}
 	}
 	w->Scroll(wDown);
+}
+
+MPD::Song *Browser::CurrentSong()
+{
+	return !w->Empty() && w->Current().type == itSong ? w->Current().song : 0;
 }
 
 namespace
@@ -358,7 +364,7 @@ void Browser::GetDirectory(string dir, string subdir)
 	}
 	if (highlightme >= 0)
 		w->Highlight(highlightme);
-	if (current_screen == csBrowser)
+	if (myScreen == myBrowser)
 		w->Hide();
 }
 

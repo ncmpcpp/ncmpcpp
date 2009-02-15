@@ -88,7 +88,7 @@ void TraceMpdStatus()
 		Mpd->UpdateStatus();
 	time_t now = time(NULL);
 	
-	if (current_screen == csPlaylist && now == timer+Config.playlist_disable_highlight_delay)
+	if (myScreen == myPlaylist && now == timer+Config.playlist_disable_highlight_delay)
 		myPlaylist->Main()->Highlighting(!Config.playlist_disable_highlight_delay);
 	
 	if (lock_statusbar_delay > 0)
@@ -167,7 +167,7 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 			{
 				if (playlist_length < myPlaylist->Main()->Size())
 				{
-					myPlaylist->Main()->Clear(playlist_length < myPlaylist->Main()->GetHeight() && current_screen == csPlaylist);
+					myPlaylist->Main()->Clear(playlist_length < myPlaylist->Main()->GetHeight() && myScreen == myPlaylist);
 					Mpd->GetPlaylistChanges(-1, list);
 				}
 				else
@@ -191,7 +191,7 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 					(*it)->NullMe();
 				}
 				
-				if (current_screen == csPlaylist)
+				if (myScreen == myPlaylist)
 				{
 					if (!playlist_length || myPlaylist->Main()->Size() < myPlaylist->Main()->GetHeight())
 						myPlaylist->Main()->Window::Clear();
@@ -215,7 +215,7 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 			FreeSongList(list);
 		}
 		
-		if (current_screen == csPlaylist)
+		if (myScreen == myPlaylist)
 			redraw_header = 1;
 		
 		if (myPlaylist->Main()->Empty())
@@ -226,19 +226,19 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 		
 		if (!block_item_list_update)
 		{
-			if (current_screen == csBrowser)
+			if (myScreen == myBrowser)
 			{
 				myBrowser->UpdateItemList();
 			}
-			else if (current_screen == csSearcher)
+			else if (myScreen == mySearcher)
 			{
 				mySearcher->UpdateFoundList();
 			}
-			else if (current_screen == csLibrary)
+			else if (myScreen == myLibrary)
 			{
 				UpdateSongList(myLibrary->Songs);
 			}
-			else if (current_screen == csPlaylistEditor)
+			else if (myScreen == myPlaylistEditor)
 			{
 				UpdateSongList(myPlaylistEditor->Content);
 			}
@@ -317,7 +317,7 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 			if (!Mpd->GetElapsedTime())
 				mvwhline(wFooter->Raw(), 0, 0, 0, wFooter->GetWidth());
 			
-			if (Config.now_playing_lyrics && !Config.repeat_one_mode && current_screen == csLyrics && prev_screen == csPlaylist)
+			if (Config.now_playing_lyrics && !Config.repeat_one_mode && myScreen == myLyrics && myOldScreen == myPlaylist)
 				Lyrics::Reload = 1;
 		}
 		playing_song_scroll_begin = 0;
@@ -455,7 +455,7 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 		wHeader->SetColor(Config.header_color);
 		wHeader->Refresh();
 	}
-	if (current_screen == csPlaylist)
+	if (myScreen == myPlaylist)
 		myPlaylist->Main()->Refresh();
 	wFooter->Bold(0);
 	wFooter->GotoXY(sx, sy);

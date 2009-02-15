@@ -59,25 +59,20 @@ void SearchEngine::Resize()
 
 void SearchEngine::SwitchTo()
 {
-	if (current_screen != csSearcher
-#	ifdef HAVE_TAGLIB_H
-	&&  current_screen != csTinyTagEditor
-#	endif // HAVE_TAGLIB_H
-	   )
+	if (myScreen == this)
+		return;
+	
+	CLEAR_FIND_HISTORY;
+	if (w->Empty())
+		Prepare();
+	myScreen = this;
+	w->Hide();
+	redraw_header = 1;
+	
+	if (!w->Back().first)
 	{
-		CLEAR_FIND_HISTORY;
-		if (w->Empty())
-			Prepare();
-		myScreen = this;
-		w->Hide();
-		current_screen = csSearcher;
-//		redraw_screen = 1;
-		redraw_header = 1;
-		if (!w->Back().first)
-		{
-			w->WriteXY(0, 0, 0, "Updating list...");
-			UpdateFoundList();
-		}
+		w->WriteXY(0, 0, 0, "Updating list...");
+		UpdateFoundList();
 	}
 }
 
@@ -254,6 +249,13 @@ void SearchEngine::SpacePressed()
 	if (w->Current().first)
 		return;
 	
+	if (Config.space_selects)
+	{
+		Select(w);
+		w->Scroll(wDown);
+		return;
+	}
+	
 	block_item_list_update = 1;
 	if (Config.ncmpc_like_songs_adding && w->isBold())
 	{
@@ -281,6 +283,11 @@ void SearchEngine::SpacePressed()
 		}
 	}
 	w->Scroll(wDown);
+}
+
+MPD::Song *SearchEngine::CurrentSong()
+{
+	return !w->Empty() ? w->Current().second : 0;
 }
 
 void SearchEngine::UpdateFoundList()
