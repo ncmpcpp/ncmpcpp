@@ -111,13 +111,13 @@ void MediaLibrary::SwitchTo()
 	{
 		CLEAR_FIND_HISTORY;
 		
-		myPlaylist->Main()->Hide(); // hack, should be wCurrent, but it doesn't always have 100% width
+		myPlaylist->Main()->Hide(); // hack, should be myScreen, but it doesn't always have 100% width
 		
 //		redraw_screen = 1;
 		redraw_header = 1;
 		MediaLibrary::Refresh();
 		
-		wCurrent = w;
+		myScreen = this;
 		current_screen = csLibrary;
 		
 		UpdateSongList(Songs);
@@ -202,11 +202,11 @@ void MediaLibrary::Update()
 		Albums->Refresh();
 	}
 	
-	if (!Artists->Empty() && wCurrent == Albums && Albums->Empty())
+	if (!Artists->Empty() && myScreen->Cmp() == Albums && Albums->Empty())
 	{
 		Albums->HighlightColor(Config.main_highlight_color);
 		Artists->HighlightColor(Config.active_column_color);
-		wCurrent = w = Artists;
+		w = Artists;
 	}
 	
 	if (!Artists->Empty() && Songs->Empty())
@@ -257,7 +257,7 @@ void MediaLibrary::NextColumn()
 			return;
 		Artists->HighlightColor(Config.main_highlight_color);
 		w->Refresh();
-		wCurrent = w = Albums;
+		w = Albums;
 		Albums->HighlightColor(Config.active_column_color);
 		if (!Albums->Empty())
 			return;
@@ -266,7 +266,7 @@ void MediaLibrary::NextColumn()
 	{
 		Albums->HighlightColor(Config.main_highlight_color);
 		w->Refresh();
-		wCurrent = w = Songs;
+		w = Songs;
 		Songs->HighlightColor(Config.active_column_color);
 	}
 }
@@ -278,7 +278,7 @@ void MediaLibrary::PrevColumn()
 	{
 		Songs->HighlightColor(Config.main_highlight_color);
 		w->Refresh();
-		wCurrent = w = Albums;
+		w = Albums;
 		Albums->HighlightColor(Config.active_column_color);
 		if (!Albums->Empty())
 			return;
@@ -287,7 +287,7 @@ void MediaLibrary::PrevColumn()
 	{
 		Albums->HighlightColor(Config.main_highlight_color);
 		w->Refresh();
-		wCurrent = w = Artists;
+		w = Artists;
 		Artists->HighlightColor(Config.active_column_color);
 	}
 }
@@ -296,7 +296,7 @@ void MediaLibrary::AddToPlaylist(bool add_n_play)
 {
 	SongList list;
 	
-	if (!Artists->Empty() && wCurrent == Artists)
+	if (!Artists->Empty() && w == Artists)
 	{
 		Mpd->StartSearch(1);
 		Mpd->AddSearch(Config.media_lib_primary_tag, locale_to_utf_cpy(Artists->Current()));
@@ -318,7 +318,7 @@ void MediaLibrary::AddToPlaylist(bool add_n_play)
 				ShowMessage("%s", message_part_of_songs_added);
 		}
 	}
-	else if (wCurrent == Albums)
+	else if (w == Albums)
 	{
 		for (size_t i = 0; i < Songs->Size(); i++)
 			Mpd->QueueAddSong(Songs->at(i));
@@ -335,7 +335,7 @@ void MediaLibrary::AddToPlaylist(bool add_n_play)
 				ShowMessage("%s", message_part_of_songs_added);
 		}
 	}
-	else if (wCurrent == Songs)
+	else if (w == Songs)
 	{
 		if (!Songs->Empty())
 		{
@@ -387,13 +387,13 @@ void MediaLibrary::AddToPlaylist(bool add_n_play)
 	FreeSongList(list);
 	if (!add_n_play)
 	{
-		wCurrent->Scroll(wDown);
-		if (wCurrent == Artists)
+		w->Scroll(wDown);
+		if (w == Artists)
 		{
 			Albums->Clear(0);
 			Songs->Clear(0);
 		}
-		else if (wCurrent == Albums)
+		else if (w == Albums)
 			Songs->Clear(0);
 	}
 }

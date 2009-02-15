@@ -80,7 +80,7 @@ void Clock::SwitchTo()
 		)
 	{
 		CLEAR_FIND_HISTORY;
-		wCurrent = w;
+		myScreen = this;
 		myPlaylist->Main()->Hide();
 		current_screen = csClock;
 		redraw_header = 1;
@@ -97,7 +97,7 @@ std::string Clock::Title()
 void Clock::Update()
 {
 	if (Width > size_t(COLS) || Height > main_height)
-		return;
+		myPlaylist->SwitchTo();
 	
 	time_t rawtime;
 	time(&rawtime);

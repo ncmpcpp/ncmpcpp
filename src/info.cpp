@@ -81,11 +81,11 @@ void Info::Update()
 
 void Info::GetSong()
 {
-	if (wCurrent == w)
+	if (myScreen == this)
 	{
-		wCurrent->Hide();
+		w->Hide();
 		current_screen = prev_screen;
-		wCurrent = wPrev;
+		myScreen = myOldScreen;
 //		redraw_screen = 1;
 		redraw_header = 1;
 		if (current_screen == csLibrary)
@@ -104,18 +104,18 @@ void Info::GetSong()
 #		endif // HAVE_TAGLIB_H
 	}
 	else if (
-	    (wCurrent == myPlaylist->Main() && !myPlaylist->Main()->Empty())
-	||  (wCurrent == myBrowser->Main() && myBrowser->Main()->Current().type == MPD::itSong)
-	||  (wCurrent == mySearcher->Main() && !mySearcher->Main()->Current().first)
-	||  (wCurrent == myLibrary->Songs && !myLibrary->Songs->Empty())
-	||  (wCurrent == myPlaylistEditor->Content && !myPlaylistEditor->Content->Empty())
+	    (myScreen == myPlaylist && !myPlaylist->Main()->Empty())
+	||  (myScreen == myBrowser && myBrowser->Main()->Current().type == MPD::itSong)
+	||  (myScreen == mySearcher && !mySearcher->Main()->Current().first)
+	||  (myScreen->Cmp() == myLibrary->Songs && !myLibrary->Songs->Empty())
+	||  (myScreen->Cmp() == myPlaylistEditor->Content && !myPlaylistEditor->Content->Empty())
 #	ifdef HAVE_TAGLIB_H
-	||  (wCurrent == myTagEditor->Tags && !myTagEditor->Tags->Empty())
+	||  (myScreen->Cmp() == myTagEditor->Tags && !myTagEditor->Tags->Empty())
 #	endif // HAVE_TAGLIB_H
 		)
 	{
 		MPD::Song *s = 0;
-		size_t id = ((Menu<MPD::Song> *)wCurrent)->Choice();
+		size_t id = reinterpret_cast<Menu<MPD::Song> *>(((Screen<Window> *)myScreen)->Main())->Choice();
 		switch (current_screen)
 		{
 			case csPlaylist:
@@ -141,8 +141,8 @@ void Info::GetSong()
 			default:
 				break;
 		}
-		wPrev = wCurrent;
-		wCurrent = w;
+		myOldScreen = myScreen;
+		myScreen = this;
 		prev_screen = current_screen;
 		current_screen = csInfo;
 		redraw_header = 1;
@@ -158,11 +158,11 @@ void Info::GetSong()
 
 void Info::GetArtist()
 {
-	if (wCurrent == w)
+	if (myScreen == this)
 	{
-		wCurrent->Hide();
+		w->Hide();
 		current_screen = prev_screen;
-		wCurrent = wPrev;
+		myScreen = myOldScreen;
 //		redraw_screen = 1;
 		redraw_header = 1;
 		if (current_screen == csLibrary)
@@ -181,14 +181,14 @@ void Info::GetArtist()
 #		endif // HAVE_TAGLIB_H
 	}
 	else if (
-	    (wCurrent == myPlaylist->Main() && !myPlaylist->Main()->Empty())
-	||  (wCurrent == myBrowser->Main() && myBrowser->Main()->Current().type == MPD::itSong)
-	||  (wCurrent == mySearcher->Main() && !mySearcher->Main()->Current().first)
-	||  (wCurrent == myLibrary->Artists && !myLibrary->Artists->Empty())
-	||  (wCurrent == myLibrary->Songs && !myLibrary->Songs->Empty())
-	||  (wCurrent == myPlaylistEditor->Content && !myPlaylistEditor->Content->Empty())
+	    (myScreen == myPlaylist && !myPlaylist->Main()->Empty())
+	||  (myScreen == myBrowser && myBrowser->Main()->Current().type == MPD::itSong)
+	||  (myScreen == mySearcher && !mySearcher->Main()->Current().first)
+	||  (myScreen->Cmp() == myLibrary->Artists && !myLibrary->Artists->Empty())
+	||  (myScreen->Cmp() == myLibrary->Songs && !myLibrary->Songs->Empty())
+	||  (myScreen->Cmp() == myPlaylistEditor->Content && !myPlaylistEditor->Content->Empty())
 #	ifdef HAVE_TAGLIB_H
-	||  (wCurrent == myTagEditor->Tags && !myTagEditor->Tags->Empty())
+	||  (myScreen->Cmp() == myTagEditor->Tags && !myTagEditor->Tags->Empty())
 #	endif // HAVE_TAGLIB_H
 		)
 	{
@@ -201,7 +201,7 @@ void Info::GetArtist()
 			Update();
 		
 		string *artist = new string();
-		int id = ((Menu<MPD::Song> *)wCurrent)->Choice();
+		size_t id = reinterpret_cast<Menu<MPD::Song> *>(((Screen<Window> *)myScreen)->Main())->Choice();
 		switch (current_screen)
 		{
 			case csPlaylist:
@@ -219,18 +219,18 @@ void Info::GetArtist()
 			case csPlaylistEditor:
 				*artist = myPlaylistEditor->Content->at(id).GetArtist();
 				break;
-#					ifdef HAVE_TAGLIB_H
+#			ifdef HAVE_TAGLIB_H
 			case csTagEditor:
 				*artist = myTagEditor->Tags->at(id).GetArtist();
 				break;
-#					endif // HAVE_TAGLIB_H
+#			endif // HAVE_TAGLIB_H
 			default:
 				break;
 		}
 		if (!artist->empty())
 		{
-			wPrev = wCurrent;
-			wCurrent = w;
+			myOldScreen = myScreen;
+			myScreen = this;
 			prev_screen = current_screen;
 			current_screen = csInfo;
 			redraw_header = 1;

@@ -49,8 +49,8 @@ void Help::SwitchTo()
 #	endif // HAVE_TAGLIB_H
 	   )
 	{
-		wCurrent = w;
-		wCurrent->Hide();
+		myScreen = this;
+		w->Hide();
 		current_screen = csHelp;
 		redraw_header = 1;
 	}

@@ -68,14 +68,14 @@ void SearchEngine::SwitchTo()
 		CLEAR_FIND_HISTORY;
 		if (w->Empty())
 			Prepare();
-		wCurrent = w;
-		wCurrent->Hide();
+		myScreen = this;
+		w->Hide();
 		current_screen = csSearcher;
 //		redraw_screen = 1;
 		redraw_header = 1;
 		if (!w->Back().first)
 		{
-			wCurrent->WriteXY(0, 0, 0, "Updating list...");
+			w->WriteXY(0, 0, 0, "Updating list...");
 			UpdateFoundList();
 		}
 	}

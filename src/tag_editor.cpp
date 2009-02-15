@@ -60,7 +60,7 @@ void TinyTagEditor::Resize()
 
 void TinyTagEditor::SwitchTo()
 {
-	List *mList = reinterpret_cast<Menu<Song> *>(wCurrent);
+	List *mList = reinterpret_cast<Menu<Song> *>(((Screen<Window> *)myScreen)->Main());
 	size_t id = mList->Choice();
 	switch (current_screen)
 	{
@@ -91,8 +91,8 @@ void TinyTagEditor::SwitchTo()
 	}
 	else if (GetTags())
 	{
-		wPrev = wCurrent;
-		wCurrent = w;
+		myOldScreen = myScreen;
+		myScreen = this;
 		prev_screen = current_screen;
 		current_screen = csTinyTagEditor;
 		redraw_header = 1;
@@ -221,9 +221,9 @@ void TinyTagEditor::EnterPressed()
 				}
 				else
 				{
-					if (wPrev == myPlaylist->Main())
+					if (myOldScreen == myPlaylist)
 						myPlaylist->Main()->Current() = s;
-					else if (wPrev == myBrowser->Main())
+					else if (myOldScreen == myBrowser)
 						*myBrowser->Main()->Current().song = s;
 				}
 			}
@@ -232,8 +232,8 @@ void TinyTagEditor::EnterPressed()
 		}
 		case 15:
 		{
-			wCurrent->Clear();
-			wCurrent = wPrev;
+			w->Clear();
+			myScreen = myOldScreen;
 			current_screen = prev_screen;
 			redraw_header = 1;
 			if (current_screen == csLibrary)
@@ -392,7 +392,7 @@ void TagEditor::SwitchTo()
 	{
 		CLEAR_FIND_HISTORY;
 		
-		myPlaylist->Main()->Hide(); // hack, should be wCurrent, but it doesn't always have 100% width
+		myPlaylist->Main()->Hide(); // hack, should be myScreen, but it doesn't always have 100% width
 		
 //		redraw_screen = 1;
 		redraw_header = 1;
@@ -422,7 +422,7 @@ void TagEditor::SwitchTo()
 			TagTypes->AddOption("lower all letters");
 		}
 		
-		wCurrent = w;
+		myScreen = this;
 		current_screen = csTagEditor;
 	}
 }
@@ -527,7 +527,7 @@ void TagEditor::Update()
 		Tags->Refresh();
 	}
 	
-	if (/*redraw_screen && */wCurrent == TagTypes && TagTypes->Choice() < 13)
+	if (/*redraw_screen && */w == TagTypes && TagTypes->Choice() < 13)
 	{
 		Tags->Refresh();
 //		redraw_screen = 0;
@@ -538,7 +538,7 @@ void TagEditor::Update()
 
 void TagEditor::EnterPressed()
 {
-	if (wCurrent == Dirs)
+	if (w == Dirs)
 	{
 		TagList test;
 		Mpd->GetDirectories(LeftColumn->Current().second, test);
@@ -595,7 +595,7 @@ void TagEditor::EnterPressed()
 		case 4:
 			get = &Song::GetTrack;
 			set = &Song::SetTrack;
-			if (wCurrent == TagTypes)
+			if (w == TagTypes)
 			{
 				LockStatusbar();
 				Statusbar() << "Number tracks? [y/n] ";
@@ -642,14 +642,14 @@ void TagEditor::EnterPressed()
 			break;
 		case 10:
 		{
-			if (wCurrent == TagTypes)
+			if (w == TagTypes)
 			{
 				current_screen = csOther;
 				DealWithFilenames(list);
 				current_screen = csTagEditor;
 				TagEditor::Refresh();
 			}
-			else if (wCurrent == Tags)
+			else if (w == Tags)
 			{
 				Song &s = Tags->Current();
 				string old_name = s.GetNewName().empty() ? s.GetName() : s.GetNewName();
@@ -691,8 +691,8 @@ void TagEditor::EnterPressed()
 				ShowMessage("Tags updated!");
 				TagTypes->HighlightColor(Config.main_highlight_color);
 				TagTypes->Reset();
-				wCurrent->Refresh();
-				wCurrent = LeftColumn;
+				w->Refresh();
+				w = LeftColumn;
 				LeftColumn->HighlightColor(Config.active_column_color);
 				Mpd->UpdateDirectory(FindSharedDir(Tags));
 			}
@@ -720,7 +720,7 @@ void TagEditor::EnterPressed()
 			break;
 	}
 	
-	if (wCurrent == TagTypes && id != 0 && id != 4 && set != NULL)
+	if (w == TagTypes && id != 0 && id != 4 && set != NULL)
 	{
 		LockStatusbar();
 		Statusbar() << fmtBold << TagTypes->Current() << fmtBoldEnd << ": ";
@@ -729,7 +729,7 @@ void TagEditor::EnterPressed()
 		for (SongList::iterator it = list.begin(); it != list.end(); it++)
 			(**it.*set)(new_tag);
 	}
-	else if (wCurrent == Tags && set != NULL)
+	else if (w == Tags && set != NULL)
 	{
 		LockStatusbar();
 		Statusbar() << fmtBold << TagTypes->Current() << fmtBoldEnd << ": ";
@@ -743,11 +743,11 @@ void TagEditor::EnterPressed()
 
 void TagEditor::SpacePressed()
 {
-	if (wCurrent != LeftColumn)
+	if (w != LeftColumn)
 		return;
 	
 	Config.albums_in_tag_editor = !Config.albums_in_tag_editor;
-	wCurrent = w = LeftColumn = Config.albums_in_tag_editor ? Albums : Dirs;
+	w = LeftColumn = Config.albums_in_tag_editor ? Albums : Dirs;
 	ShowMessage("Switched to %s view", Config.albums_in_tag_editor ? "albums" : "directories");
 	LeftColumn->Display();
 	Tags->Clear(0);
@@ -756,18 +756,18 @@ void TagEditor::SpacePressed()
 void TagEditor::NextColumn()
 {
 	CLEAR_FIND_HISTORY;
-	if (wCurrent == LeftColumn)
+	if (w == LeftColumn)
 	{
 		LeftColumn->HighlightColor(Config.main_highlight_color);
 		w->Refresh();
-		wCurrent = w = TagTypes;
+		w = TagTypes;
 		TagTypes->HighlightColor(Config.active_column_color);
 	}
-	else if (wCurrent == TagTypes && TagTypes->Choice() < 12 && !Tags->Empty())
+	else if (w == TagTypes && TagTypes->Choice() < 12 && !Tags->Empty())
 	{
 		TagTypes->HighlightColor(Config.main_highlight_color);
 		w->Refresh();
-		wCurrent = w = myTagEditor->Tags;
+		w = myTagEditor->Tags;
 		Tags->HighlightColor(Config.active_column_color);
 	}
 }
@@ -775,18 +775,18 @@ void TagEditor::NextColumn()
 void TagEditor::PrevColumn()
 {
 	CLEAR_FIND_HISTORY;
-	if (wCurrent == Tags)
+	if (w == Tags)
 	{
 		Tags->HighlightColor(Config.main_highlight_color);
 		w->Refresh();
-		wCurrent = w = TagTypes;
+		w = TagTypes;
 		TagTypes->HighlightColor(Config.active_column_color);
 	}
-	else if (wCurrent == TagTypes)
+	else if (w == TagTypes)
 	{
 		TagTypes->HighlightColor(Config.main_highlight_color);
 		w->Refresh();
-		wCurrent = w = LeftColumn;
+		w = LeftColumn;
 		LeftColumn->HighlightColor(Config.active_column_color);
 	}
 }
@@ -884,7 +884,7 @@ bool TagEditor::WriteTags(Song &s)
 			locale_to_utf(new_name);
 			if (rename(path_to_file.c_str(), new_name.c_str()) == 0 && !file_is_from_db)
 			{
-				if (wPrev == myPlaylist->Main())
+				if (myOldScreen == myPlaylist)
 				{
 					// if we rename local file, it won't get updated
 					// so just remove it from playlist and add again

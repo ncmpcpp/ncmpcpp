@@ -99,13 +99,13 @@ void PlaylistEditor::SwitchTo()
 	{
 		CLEAR_FIND_HISTORY;
 		
-		myPlaylist->Main()->Hide(); // hack, should be wCurrent, but it doesn't always have 100% width
+		myPlaylist->Main()->Hide(); // hack, should be myScreen, but it doesn't always have 100% width
 		
 //		redraw_screen = 1;
 		redraw_header = 1;
-		PlaylistEditor::Refresh();
+		Refresh();
 		
-		wCurrent = w;
+		myScreen = this;
 		current_screen = csPlaylistEditor;
 		
 		UpdateSongList(Content);
@@ -157,11 +157,11 @@ void PlaylistEditor::Update()
 		Content->Display();
 	}
 	
-	if (wCurrent == Content && Content->Empty())
+	if (w == Content && Content->Empty())
 	{
 		Content->HighlightColor(Config.main_highlight_color);
 		List->HighlightColor(Config.active_column_color);
-		wCurrent = w = List;
+		w = List;
 	}
 	
 	if (Content->Empty())
@@ -178,7 +178,7 @@ void PlaylistEditor::NextColumn()
 		CLEAR_FIND_HISTORY;
 		List->HighlightColor(Config.main_highlight_color);
 		w->Refresh();
-		wCurrent = w = Content;
+		w = Content;
 		Content->HighlightColor(Config.active_column_color);
 	}
 }
@@ -190,7 +190,7 @@ void PlaylistEditor::PrevColumn()
 		CLEAR_FIND_HISTORY;
 		Content->HighlightColor(Config.main_highlight_color);
 		w->Refresh();
-		wCurrent = w = List;
+		w = List;
 		List->HighlightColor(Config.active_column_color);
 	}
 }
@@ -199,7 +199,7 @@ void PlaylistEditor::AddToPlaylist(bool add_n_play)
 {
 	SongList list;
 	
-	if (wCurrent == List && !List->Empty())
+	if (w == List && !List->Empty())
 	{
 		Mpd->GetPlaylistContent(locale_to_utf_cpy(List->Current()), list);
 		for (SongList::const_iterator it = list.begin(); it != list.end(); it++)
@@ -217,7 +217,7 @@ void PlaylistEditor::AddToPlaylist(bool add_n_play)
 				ShowMessage("%s", message_part_of_songs_added);
 		}
 	}
-	else if (wCurrent == Content)
+	else if (w == Content)
 	{
 		if (!Content->Empty())
 		{
@@ -254,7 +254,7 @@ void PlaylistEditor::AddToPlaylist(bool add_n_play)
 			}
 			else
 			{
-				Song &s = Content->at(Content->Choice());
+				const Song &s = Content->Current();
 				int id = Mpd->AddSong(s);
 				if (id >= 0)
 				{
@@ -268,6 +268,6 @@ void PlaylistEditor::AddToPlaylist(bool add_n_play)
 	}
 	FreeSongList(list);
 	if (!add_n_play)
-		wCurrent->Scroll(wDown);
+		w->Scroll(wDown);
 }
 

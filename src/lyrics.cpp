@@ -84,11 +84,11 @@ void Lyrics::Update()
 
 void Lyrics::SwitchTo()
 {
-	if (wCurrent == w && !Reload)
+	if (myScreen == this && !Reload)
 	{
-		wCurrent->Hide();
+		w->Hide();
 		current_screen = prev_screen;
-		wCurrent = wPrev;
+		myScreen = myOldScreen;
 //		redraw_screen = 1;
 		redraw_header = 1;
 		if (current_screen == csLibrary)
@@ -108,13 +108,13 @@ void Lyrics::SwitchTo()
 	}
 	else if (
 	    Reload
-	||  (wCurrent == myPlaylist->Main() && !myPlaylist->Main()->Empty())
-	||  (wCurrent == myBrowser->Main() && myBrowser->Main()->Current().type == MPD::itSong)
-	||  (wCurrent == mySearcher->Main() && !mySearcher->Main()->Current().first)
-	||  (wCurrent == myLibrary->Songs && !myLibrary->Songs->Empty())
-	||  (wCurrent == myPlaylistEditor->Content && !myPlaylistEditor->Content->Empty())
+	||  (myScreen == myPlaylist && !myPlaylist->Main()->Empty())
+	||  (myScreen == myBrowser && myBrowser->Main()->Current().type == MPD::itSong)
+	||  (myScreen == mySearcher && !mySearcher->Main()->Current().first)
+	||  (myScreen->Cmp() == myLibrary->Songs && !myLibrary->Songs->Empty())
+	||  (myScreen->Cmp() == myPlaylistEditor->Content && !myPlaylistEditor->Content->Empty())
 #	ifdef HAVE_TAGLIB_H
-	||  (wCurrent == myTagEditor->Tags && !myTagEditor->Tags->Empty())
+	||  (myScreen->Cmp() == myTagEditor->Tags && !myTagEditor->Tags->Empty())
 #	endif // HAVE_TAGLIB_H
 		)
 	{
@@ -137,12 +137,12 @@ void Lyrics::SwitchTo()
 		if (Reload)
 		{
 			current_screen = csPlaylist;
-			wCurrent = myPlaylist->Main();
+			myScreen = myPlaylist;
 			Reload = 0;
 			id = myPlaylist->NowPlaying;
 		}
 		else
-			id = ((Menu<MPD::Song> *)wCurrent)->Choice();
+			id = reinterpret_cast<Menu<MPD::Song> *>(((Screen<Window> *)myScreen)->Main())->Choice();
 		
 		switch (current_screen)
 		{
@@ -173,9 +173,9 @@ void Lyrics::SwitchTo()
 		{
 			itsScrollBegin = 0;
 			itsSong = *s;
-			wPrev = wCurrent;
+			myOldScreen = myScreen;
 			prev_screen = current_screen;
-			wCurrent = w;
+			myScreen = this;
 			current_screen = csLyrics;
 			redraw_header = 1;
 			w->Clear();

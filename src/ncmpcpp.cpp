@@ -63,8 +63,8 @@ using std::vector;
 ncmpcpp_config Global::Config;
 ncmpcpp_keys Global::Key;
 
-Window *Global::wCurrent;
-Window *Global::wPrev;
+BasicScreen *Global::myScreen;
+BasicScreen *Global::myOldScreen;
 
 Window *Global::wHeader;
 Window *Global::wFooter;
@@ -178,7 +178,7 @@ int main(int argc, char *argv[])
 	wFooter->SetGetStringHelper(TraceMpdStatus);
 	wFooter->Display();
 	
-	wCurrent = myPlaylist->Main();
+	myScreen = myPlaylist;
 	current_screen = csPlaylist;
 	
 	timer = time(NULL);
@@ -200,6 +200,9 @@ int main(int argc, char *argv[])
 	signal(SIGPIPE, SIG_IGN);
 	
 	gettimeofday(&now, 0);
+	
+	// this type of casting is absolutely hillarious lol
+	Screen<Window> *&myWindow = *(Screen<Window> **)(void *)&myScreen;
 	
 	while (!main_exit)
 	{
@@ -337,10 +340,10 @@ int main(int argc, char *argv[])
 			myInfo->Update();
 		}
 		
-		wCurrent->Display();
+		myWindow->Main()->Display();
 //		redraw_screen = 0;
 		
-		wCurrent->ReadKey(input);
+		myWindow->Main()->ReadKey(input);
 		if (input == ERR)
 			continue;
 		
@@ -362,26 +365,26 @@ int main(int argc, char *argv[])
 			{
 				if (Keypressed(input, Key.Up) || Keypressed(input, Key.Down) || Keypressed(input, Key.PageUp) || Keypressed(input, Key.PageDown) || Keypressed(input, Key.Home) || Keypressed(input, Key.End) || Keypressed(input, Key.FindForward) || Keypressed(input, Key.FindBackward) || Keypressed(input, Key.NextFoundPosition) || Keypressed(input, Key.PrevFoundPosition))
 				{
-					if (wCurrent == myLibrary->Artists)
+					if (myScreen->Cmp() == myLibrary->Artists)
 					{
 						myLibrary->Albums->Clear(0);
 						myLibrary->Songs->Clear(0);
 					}
-					else if (wCurrent == myLibrary->Albums)
+					else if (myScreen->Cmp() == myLibrary->Albums)
 					{
 						myLibrary->Songs->Clear(0);
 					}
-					else if (wCurrent == myPlaylistEditor->List)
+					else if (myScreen->Cmp() == myPlaylistEditor->List)
 					{
 						myPlaylistEditor->Content->Clear(0);
 					}
 #					ifdef HAVE_TAGLIB_H
-					else if (wCurrent == myTagEditor->LeftColumn)
+					else if (myScreen->Cmp() == myTagEditor->LeftColumn)
 					{
 						myTagEditor->Tags->Clear(0);
 						myTagEditor->TagTypes->Refresh();
 					}
-//					else if (wCurrent == myTagEditor->TagTypes)
+//					else if (myScreen == myTagEditor->TagTypes)
 //						redraw_screen = 1;
 #					endif // HAVE_TAGLIB_H
 				}
@@ -400,25 +403,25 @@ int main(int argc, char *argv[])
 		   )
 		{
 			if (!Config.fancy_scrolling
-			&&  (wCurrent == myLibrary->Artists
-			||   wCurrent == myPlaylistEditor->List
+			&&  (myScreen->Cmp() == myLibrary->Artists
+			||   myScreen->Cmp() == myPlaylistEditor->List
 #			ifdef HAVE_TAGLIB_H
-			||   wCurrent == myTagEditor->LeftColumn
+			||   myScreen->Cmp() == myTagEditor->LeftColumn
 #			endif // HAVE_TAGLIB_H
 			    )
 			   )
 			{
-				wCurrent->SetTimeout(50);
+				myWindow->Main()->SetTimeout(50);
 				while (Keypressed(input, Key.Up))
 				{
-					wCurrent->Scroll(wUp);
-					wCurrent->Refresh();
-					wCurrent->ReadKey(input);
+					myWindow->Main()->Scroll(wUp);
+					myWindow->Main()->Refresh();
+					myWindow->Main()->ReadKey(input);
 				}
-				wCurrent->SetTimeout(ncmpcpp_window_timeout);
+				myWindow->Main()->SetTimeout(ncmpcpp_window_timeout);
 			}
 			else
-				wCurrent->Scroll(wUp);
+				myWindow->Main()->Scroll(wUp);
 		}
 		else if (
 		   Keypressed(input, Key.Down)
@@ -428,25 +431,25 @@ int main(int argc, char *argv[])
 			)
 		{
 			if (!Config.fancy_scrolling
-			&&  (wCurrent == myLibrary->Artists
-			||   wCurrent == myPlaylistEditor->List
+			&&  (myScreen->Cmp() == myLibrary->Artists
+			||   myScreen->Cmp() == myPlaylistEditor->List
 #			ifdef HAVE_TAGLIB_H
-			|| wCurrent == myTagEditor->LeftColumn
+			|| myScreen->Cmp() == myTagEditor->LeftColumn
 #			endif // HAVE_TAGLIB_H
 			    )
 			   )
 			{
-				wCurrent->SetTimeout(50);
+				myWindow->Main()->SetTimeout(50);
 				while (Keypressed(input, Key.Down))
 				{
-					wCurrent->Scroll(wDown);
-					wCurrent->Refresh();
-					wCurrent->ReadKey(input);
+					myWindow->Main()->Scroll(wDown);
+					myWindow->Main()->Refresh();
+					myWindow->Main()->ReadKey(input);
 				}
-				wCurrent->SetTimeout(ncmpcpp_window_timeout);
+				myWindow->Main()->SetTimeout(ncmpcpp_window_timeout);
 			}
 			else
-				wCurrent->Scroll(wDown);
+				myWindow->Main()->Scroll(wDown);
 		}
 		else if (
 		   Keypressed(input, Key.PageUp)
@@ -455,7 +458,7 @@ int main(int argc, char *argv[])
 #		endif // ENABLE_CLOCK
 			)
 		{
-			wCurrent->Scroll(wPageUp);
+			myWindow->Main()->Scroll(wPageUp);
 		}
 		else if (
 		   Keypressed(input, Key.PageDown)
@@ -464,15 +467,15 @@ int main(int argc, char *argv[])
 #		endif // ENABLE_CLOCK
 			)
 		{
-			wCurrent->Scroll(wPageDown);
+			myWindow->Main()->Scroll(wPageDown);
 		}
 		else if (Keypressed(input, Key.Home))
 		{
-			wCurrent->Scroll(wHome);
+			myWindow->Main()->Scroll(wHome);
 		}
 		else if (Keypressed(input, Key.End))
 		{
-			wCurrent->Scroll(wEnd);
+			myWindow->Main()->Scroll(wEnd);
 		}
 		else if (input == KEY_RESIZE)
 		{
@@ -545,7 +548,7 @@ int main(int argc, char *argv[])
 		}
 		else if (Keypressed(input, Key.GoToParentDir))
 		{
-			if (wCurrent == myBrowser->Main() && myBrowser->CurrentDir() != "/")
+			if (myScreen == myBrowser && myBrowser->CurrentDir() != "/")
 			{
 				myBrowser->Main()->Reset();
 				myBrowser->EnterPressed();
@@ -601,26 +604,26 @@ int main(int argc, char *argv[])
 		else if (Keypressed(input, Key.Space))
 		{
 			if (Config.space_selects
-			||  wCurrent == myPlaylist->Main()
+			||  myScreen == myPlaylist
 #			ifdef HAVE_TAGLIB_H
-			||  wCurrent == myTagEditor->Tags
+			||  myScreen->Cmp() == myTagEditor->Tags
 #			endif // HAVE_TAGLIB_H
 			   )
 			{
-				if (wCurrent == myPlaylist->Main()
+				if (myScreen == myPlaylist
 #				ifdef HAVE_TAGLIB_H
-				||  wCurrent == myTagEditor->Tags
+				||  myScreen->Cmp() == myTagEditor->Tags
 #				endif // HAVE_TAGLIB_H
-				|| (wCurrent == myBrowser->Main() && ((Menu<Song> *)wCurrent)->Choice() >= (myBrowser->CurrentDir() != "/" ? 1 : 0)) || (wCurrent == mySearcher->Main() && !mySearcher->Main()->Current().first)
-				|| wCurrent == myLibrary->Songs
-				|| wCurrent == myPlaylistEditor->Content)
+				|| (myScreen == myBrowser && ((Menu<Song> *)myWindow->Main())->Choice() >= (myBrowser->CurrentDir() != "/" ? 1 : 0)) || (myScreen == mySearcher && !mySearcher->Main()->Current().first)
+				|| myScreen->Cmp() == myLibrary->Songs
+				|| myScreen->Cmp() == myPlaylistEditor->Content)
 				{
-					List *mList = (Menu<Song> *)wCurrent;
+					List *mList = (Menu<Song> *)myWindow->Main();
 					if (mList->Empty())
 						continue;
 					size_t i = mList->Choice();
 					mList->Select(i, !mList->isSelected(i));
-					wCurrent->Scroll(wDown);
+					myWindow->Main()->Scroll(wDown);
 				}
 			}
 			else
@@ -730,10 +733,10 @@ int main(int argc, char *argv[])
 				}
 				Mpd->CommitQueue();
 			}
-			else if (current_screen == csBrowser || wCurrent == myPlaylistEditor->List)
+			else if (current_screen == csBrowser || myScreen->Cmp() == myPlaylistEditor->List)
 			{
 				LockStatusbar();
-				string name = wCurrent == myBrowser->Main() ? myBrowser->Main()->Current().name : myPlaylistEditor->List->Current();
+				string name = myScreen == myBrowser ? myBrowser->Main()->Current().name : myPlaylistEditor->List->Current();
 				if (current_screen != csBrowser || myBrowser->Main()->Current().type == itPlaylist)
 				{
 					Statusbar() << "Delete playlist " << name << " ? [y/n] ";
@@ -759,7 +762,7 @@ int main(int argc, char *argv[])
 				}
 				UnlockStatusbar();
 			}
-			else if (wCurrent == myPlaylistEditor->Content && !myPlaylistEditor->Content->Empty())
+			else if (myScreen->Cmp() == myPlaylistEditor->Content && !myPlaylistEditor->Content->Empty())
 			{
 				if (myPlaylistEditor->Content->hasSelected())
 				{
@@ -915,7 +918,7 @@ int main(int argc, char *argv[])
 				}
 				myPlaylist->Main()->SetTimeout(ncmpcpp_window_timeout);
 			}
-			else if (wCurrent == myPlaylistEditor->Content && !myPlaylistEditor->Content->Empty())
+			else if (myScreen->Cmp() == myPlaylistEditor->Content && !myPlaylistEditor->Content->Empty())
 			{
 				myPlaylistEditor->Content->SetTimeout(50);
 				if (myPlaylistEditor->Content->hasSelected())
@@ -1019,7 +1022,7 @@ int main(int argc, char *argv[])
 				myPlaylist->Main()->SetTimeout(ncmpcpp_window_timeout);
 				
 			}
-			else if (wCurrent == myPlaylistEditor->Content && !myPlaylistEditor->Content->Empty())
+			else if (myScreen->Cmp() == myPlaylistEditor->Content && !myPlaylistEditor->Content->Empty())
 			{
 				myPlaylistEditor->Content->SetTimeout(50);
 				if (myPlaylistEditor->Content->hasSelected())
@@ -1151,7 +1154,7 @@ int main(int argc, char *argv[])
 		}
 		else if (Keypressed(input, Key.ToggleDisplayMode))
 		{
-			if (wCurrent == myPlaylist->Main())
+			if (myScreen == myPlaylist)
 			{
 				Config.columns_in_playlist = !Config.columns_in_playlist;
 				ShowMessage("Playlist display mode: %s", Config.columns_in_playlist ? "Columns" : "Classic");
@@ -1159,13 +1162,13 @@ int main(int argc, char *argv[])
 				myPlaylist->Main()->SetItemDisplayerUserData(Config.columns_in_playlist ? &Config.song_columns_list_format : &Config.song_list_format);
 				myPlaylist->Main()->SetTitle(Config.columns_in_playlist ? Display::Columns(Config.song_columns_list_format) : "");
 			}
-			else if (wCurrent == myBrowser->Main())
+			else if (myScreen == myBrowser)
 			{
 				Config.columns_in_browser = !Config.columns_in_browser;
 				ShowMessage("Browser display mode: %s", Config.columns_in_browser ? "Columns" : "Classic");
 				myBrowser->Main()->SetTitle(Config.columns_in_browser ? Display::Columns(Config.song_columns_list_format) : "");
 			}
-			else if (wCurrent == mySearcher->Main())
+			else if (myScreen == mySearcher)
 			{
 				Config.columns_in_search_engine = !Config.columns_in_search_engine;
 				ShowMessage("Search engine display mode: %s", Config.columns_in_search_engine ? "Columns" : "Classic");
@@ -1246,7 +1249,7 @@ int main(int argc, char *argv[])
 		{
 			CHECK_MPD_MUSIC_DIR;
 #			ifdef HAVE_TAGLIB_H
-			if (wCurrent == myLibrary->Artists)
+			if (myScreen->Cmp() == myLibrary->Artists)
 			{
 				LockStatusbar();
 				Statusbar() << fmtBold << IntoStr(Config.media_lib_primary_tag) << fmtBoldEnd << ": ";
@@ -1284,7 +1287,7 @@ int main(int argc, char *argv[])
 					FreeSongList(list);
 				}
 			}
-			else if (wCurrent == myLibrary->Albums)
+			else if (myScreen->Cmp() == myLibrary->Albums)
 			{
 				LockStatusbar();
 				Statusbar() << fmtBold << "Album: " << fmtBoldEnd;
@@ -1322,16 +1325,16 @@ int main(int argc, char *argv[])
 				}
 			}
 			else if (
-			    (wCurrent == myPlaylist->Main() && !myPlaylist->Main()->Empty())
-			||  (wCurrent == myBrowser->Main() && myBrowser->Main()->Current().type == itSong)
-			||  (wCurrent == mySearcher->Main() && !mySearcher->Main()->Current().first)
-			||  (wCurrent == myLibrary->Songs && !myLibrary->Songs->Empty())
-			||  (wCurrent == myPlaylistEditor->Content && !myPlaylistEditor->Content->Empty())
-			||  (wCurrent == myTagEditor->Tags && !myTagEditor->Tags->Empty()))
+			    (myScreen == myPlaylist && !myPlaylist->Main()->Empty())
+			||  (myScreen == myBrowser && myBrowser->Main()->Current().type == itSong)
+			||  (myScreen == mySearcher && !mySearcher->Main()->Current().first)
+			||  (myScreen->Cmp() == myLibrary->Songs && !myLibrary->Songs->Empty())
+			||  (myScreen->Cmp() == myPlaylistEditor->Content && !myPlaylistEditor->Content->Empty())
+			||  (myScreen->Cmp() == myTagEditor->Tags && !myTagEditor->Tags->Empty()))
 			{
 				myTinyTagEditor->SwitchTo();
 			}
-			else if (wCurrent == myTagEditor->Dirs)
+			else if (myScreen->Cmp() == myTagEditor->Dirs)
 			{
 				string old_dir = myTagEditor->Dirs->Current().first;
 				LockStatusbar();
@@ -1354,7 +1357,7 @@ int main(int argc, char *argv[])
 			}
 			else
 #			endif // HAVE_TAGLIB_H
-			if (wCurrent == myBrowser->Main() && myBrowser->Main()->Current().type == itDirectory)
+			if (myScreen == myBrowser && myBrowser->Main()->Current().type == itDirectory)
 			{
 				string old_dir = myBrowser->Main()->Current().name;
 				LockStatusbar();
@@ -1383,9 +1386,9 @@ int main(int argc, char *argv[])
 						ShowMessage("Cannot rename '%s' to '%s'!", old_dir.c_str(), new_dir.c_str());
 				}
 			}
-			else if (wCurrent == myPlaylistEditor->List || (wCurrent == myBrowser->Main() && myBrowser->Main()->Current().type == itPlaylist))
+			else if (myScreen->Cmp() == myPlaylistEditor->List || (myScreen == myBrowser && myBrowser->Main()->Current().type == itPlaylist))
 			{
-				string old_name = wCurrent == myPlaylistEditor->List ? myPlaylistEditor->List->Current() : myBrowser->Main()->Current().name;
+				string old_name = myScreen->Cmp() == myPlaylistEditor->List ? myPlaylistEditor->List->Current() : myBrowser->Main()->Current().name;
 				LockStatusbar();
 				Statusbar() << fmtBold << "Playlist: " << fmtBoldEnd;
 				string new_name = wFooter->GetString(old_name);
@@ -1402,16 +1405,16 @@ int main(int argc, char *argv[])
 		}
 		else if (Keypressed(input, Key.GoToContainingDir))
 		{
-			if ((wCurrent == myPlaylist->Main() && !myPlaylist->Main()->Empty())
-			||  (wCurrent == mySearcher->Main() && !mySearcher->Main()->Current().first)
-			||  (wCurrent == myLibrary->Songs && !myLibrary->Songs->Empty())
-			||  (wCurrent == myPlaylistEditor->Content && !myPlaylistEditor->Content->Empty())
+			if ((myScreen == myPlaylist && !myPlaylist->Main()->Empty())
+			||  (myScreen == mySearcher && !mySearcher->Main()->Current().first)
+			||  (myScreen->Cmp() == myLibrary->Songs && !myLibrary->Songs->Empty())
+			||  (myScreen->Cmp() == myPlaylistEditor->Content && !myPlaylistEditor->Content->Empty())
 #			ifdef HAVE_TAGLIB_H
-			||  (wCurrent == myTagEditor->Tags && !myTagEditor->Tags->Empty())
+			||  (myScreen->Cmp() == myTagEditor->Tags && !myTagEditor->Tags->Empty())
 #			endif // HAVE_TAGLIB_H
 			   )
 			{
-				size_t id = ((Menu<Song> *)wCurrent)->Choice();
+				size_t id = ((Menu<Song> *)myScreen)->Choice();
 				Song *s = 0;
 				switch (current_screen)
 				{
@@ -1457,7 +1460,7 @@ int main(int argc, char *argv[])
 		}
 		else if (Keypressed(input, Key.StartSearching))
 		{
-			if (wCurrent == mySearcher->Main())
+			if (myScreen == mySearcher)
 			{
 				mySearcher->Main()->Highlight(SearchEngine::SearchButton);
 				mySearcher->Main()->Highlighting(0);
@@ -1485,24 +1488,24 @@ int main(int argc, char *argv[])
 		}
 		else if (Keypressed(input, Key.ReverseSelection))
 		{
-			if (wCurrent == myPlaylist->Main()
-			||  wCurrent == myBrowser->Main()
-			||  (wCurrent == mySearcher->Main() && !mySearcher->Main()->Current().first)
-			||  wCurrent == myLibrary->Songs
-			||  wCurrent == myPlaylistEditor->Content
+			if (myScreen == myPlaylist
+			||  myScreen == myBrowser
+			||  (myScreen == mySearcher && !mySearcher->Main()->Current().first)
+			||  myScreen->Cmp() == myLibrary->Songs
+			||  myScreen->Cmp() == myPlaylistEditor->Content
 #			ifdef HAVE_TAGLIB_H
-			||  wCurrent == myTagEditor->Tags
+			||  myScreen->Cmp() == myTagEditor->Tags
 #			endif // HAVE_TAGLIB_H
 			   )
 			{
 				
-				List *mList = reinterpret_cast<Menu<Song> *>(wCurrent);
+				List *mList = reinterpret_cast<Menu<Song> *>(myWindow->Main());
 				for (size_t i = 0; i < mList->Size(); i++)
 					mList->Select(i, !mList->isSelected(i) && !mList->isStatic(i));
 				// hackish shit begins
-				if (wCurrent == myBrowser->Main() && myBrowser->CurrentDir() != "/")
+				if (myScreen == myBrowser && myBrowser->CurrentDir() != "/")
 					mList->Select(0, 0); // [..] cannot be selected, uhm.
-				if (wCurrent == mySearcher->Main())
+				if (myScreen == mySearcher)
 					mList->Select(SearchEngine::ResetButton, 0); // 'Reset' cannot be selected, omgplz.
 				// hacking shit ends.
 				ShowMessage("Selection reversed!");
@@ -1510,17 +1513,17 @@ int main(int argc, char *argv[])
 		}
 		else if (Keypressed(input, Key.DeselectAll))
 		{
-			if (wCurrent == myPlaylist->Main()
-			||  wCurrent == myBrowser->Main()
-			||  wCurrent == mySearcher->Main()
-			||  wCurrent == myLibrary->Songs
-			||  wCurrent == myPlaylistEditor->Content
+			if (myScreen == myPlaylist
+			||  myScreen == myBrowser
+			||  myScreen == mySearcher
+			||  myScreen->Cmp() == myLibrary->Songs
+			||  myScreen->Cmp() == myPlaylistEditor->Content
 #			ifdef HAVE_TAGLIB_H
-			||  wCurrent == myTagEditor->Tags
+			||  myScreen->Cmp() == myTagEditor->Tags
 #			endif // HAVE_TAGLIB_H
 			   )
 			{
-				List *mList = reinterpret_cast<Menu<Song> *>(wCurrent);
+				List *mList = reinterpret_cast<Menu<Song> *>(myWindow->Main());
 				if (mList->hasSelected())
 				{
 					for (size_t i = 0; i < mList->Size(); i++)
@@ -1531,14 +1534,14 @@ int main(int argc, char *argv[])
 		}
 		else if (Keypressed(input, Key.AddSelected))
 		{
-			if (wCurrent != myPlaylist->Main()
-			&&  wCurrent != myBrowser->Main()
-			&&  wCurrent != mySearcher->Main()
-			&&  wCurrent != myLibrary->Songs
-			&&  wCurrent != myPlaylistEditor->Content)
+			if (myScreen != myPlaylist
+			&&  myScreen != myBrowser
+			&&  myScreen != mySearcher
+			&&  myScreen->Cmp() != myLibrary->Songs
+			&&  myScreen->Cmp() != myPlaylistEditor->Content)
 				continue;
 			
-			List *mList = reinterpret_cast<Menu<Song> *>(wCurrent);
+			List *mList = reinterpret_cast<Menu<Song> *>(myWindow->Main());
 			if (!mList->hasSelected())
 			{
 				ShowMessage("No selected items!");
@@ -1668,7 +1671,7 @@ int main(int argc, char *argv[])
 				myPlaylistEditor->Refresh();
 			}
 			else
-				wCurrent->Refresh();
+				myScreen->Refresh();
 			
 			if (id == 0)
 			{
@@ -1765,7 +1768,7 @@ int main(int argc, char *argv[])
 			||   current_screen == csSearcher
 #			ifdef HAVE_TAGLIB_H
 			||   current_screen == csTinyTagEditor
-			||   wCurrent == myTagEditor->TagTypes
+			||   myScreen->Cmp() == myTagEditor->TagTypes
 #			endif // HAVE_TAGLIB_H
 			    )
 			&&  (current_screen != csSearcher
@@ -1786,8 +1789,8 @@ int main(int argc, char *argv[])
 			CLEAR_FIND_HISTORY;
 			
 			ShowMessage("Searching...");
-			List *mList = reinterpret_cast<Menu<Song> *>(wCurrent);
-			for (size_t i = (wCurrent == mySearcher->Main() ? SearchEngine::StaticOptions : 0); i < mList->Size(); i++)
+			List *mList = reinterpret_cast<Menu<Song> *>(myWindow->Main());
+			for (size_t i = (myScreen == mySearcher ? SearchEngine::StaticOptions : 0); i < mList->Size(); i++)
 			{
 				string name;
 				switch (current_screen)
@@ -1814,22 +1817,22 @@ int main(int argc, char *argv[])
 						name = mySearcher->Main()->at(i).second->toString(Config.song_list_format);
 						break;
 					case csLibrary:
-						if (wCurrent == myLibrary->Artists)
+						if (myScreen->Cmp() == myLibrary->Artists)
 							name = myLibrary->Artists->at(i);
-						else if (wCurrent == myLibrary->Albums)
+						else if (myScreen->Cmp() == myLibrary->Albums)
 							name = myLibrary->Albums->at(i).first;
 						else
 							name = myLibrary->Songs->at(i).toString(Config.song_library_format);
 						break;
 					case csPlaylistEditor:
-						if (wCurrent == myPlaylistEditor->List)
+						if (myScreen->Cmp() == myPlaylistEditor->List)
 							name = myPlaylistEditor->List->at(i);
 						else
 							name = myPlaylistEditor->Content->at(i).toString(Config.song_list_format);
 						break;
 #					ifdef HAVE_TAGLIB_H
 					case csTagEditor:
-						if (wCurrent == myTagEditor->LeftColumn)
+						if (myScreen->Cmp() == myTagEditor->LeftColumn)
 							name = myTagEditor->LeftColumn->at(i).first;
 						else
 						{
@@ -1908,7 +1911,7 @@ int main(int argc, char *argv[])
 			else
 			{
 				mList->Highlight(vFoundPositions[found_pos < 0 ? 0 : found_pos]);
-				if (wCurrent == myPlaylist->Main())
+				if (myScreen == myPlaylist)
 				{
 					timer = time(NULL);
 					myPlaylist->Main()->Highlighting(1);
@@ -1919,7 +1922,7 @@ int main(int argc, char *argv[])
 		{
 			if (!vFoundPositions.empty())
 			{
-				List *mList = reinterpret_cast<Menu<Song> *>(wCurrent);
+				List *mList = reinterpret_cast<Menu<Song> *>(myWindow->Main());
 				try
 				{
 					mList->Highlight(vFoundPositions.at(Keypressed(input, Key.NextFoundPosition) ? ++found_pos : --found_pos));
@@ -1962,11 +1965,11 @@ int main(int argc, char *argv[])
 		}
 		else if (Keypressed(input, Key.SwitchTagTypeList))
 		{
-			if (wCurrent == myBrowser->Main())
+			if (myScreen == myBrowser)
 			{
 				myBrowser->ChangeBrowseMode();
 			}
-			else if (wCurrent == myLibrary->Artists)
+			else if (myScreen->Cmp() == myLibrary->Artists)
 			{
 				LockStatusbar();
 				Statusbar() << "Tag type ? [" << fmtBold << 'a' << fmtBoldEnd << "rtist/" << fmtBold << 'y' << fmtBoldEnd << "ear/" << fmtBold << 'g' << fmtBoldEnd << "enre/" << fmtBold << 'c' << fmtBoldEnd << "omposer/" << fmtBold << 'p' << fmtBoldEnd << "erformer] ";

@@ -24,6 +24,7 @@
 #include "settings.h"
 #include "ncmpcpp.h"
 #include "mpdpp.h"
+#include "screen.h"
 
 /// FIXME: this is absolutely shitty, I need to get rid of this.
 
@@ -32,8 +33,8 @@ namespace Global
 	extern ncmpcpp_config Config;
 	extern ncmpcpp_keys Key;
 	
-	extern Window *wCurrent;
-	extern Window *wPrev;
+	extern BasicScreen *myScreen;
+	extern BasicScreen *myOldScreen;
 	
 //	extern Menu<MPD::Song> *myPlaylist->Main();
 //	extern Menu<MPD::Item> *myBrowser->Main();

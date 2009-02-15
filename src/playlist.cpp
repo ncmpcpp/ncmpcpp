@@ -51,8 +51,8 @@ void Playlist::SwitchTo()
 	   )
 	{
 		CLEAR_FIND_HISTORY;
-		wCurrent = w;
-		wCurrent->Hide();
+		myScreen = this;
+		w->Hide();
 		current_screen = csPlaylist;
 //		redraw_screen = 1;
 		redraw_header = 1;
