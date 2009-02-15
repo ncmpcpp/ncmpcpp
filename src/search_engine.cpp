@@ -24,7 +24,7 @@
 #include "playlist.h"
 #include "search_engine.h"
 #include "settings.h"
-#include "status_checker.h"
+#include "status.h"
 
 using namespace MPD;
 using namespace Global;

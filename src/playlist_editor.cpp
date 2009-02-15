@@ -27,7 +27,7 @@
 #include "playlist.h"
 #include "playlist_editor.h"
 #include "mpdpp.h"
-#include "status_checker.h"
+#include "status.h"
 #include "tag_editor.h"
 
 using namespace Global;

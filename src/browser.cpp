@@ -29,7 +29,7 @@
 #include "helpers.h"
 #include "playlist.h"
 #include "settings.h"
-#include "status_checker.h"
+#include "status.h"
 #ifdef HAVE_TAGLIB_H
 # include "tag_editor.h"
 #endif // HAVE_TAGLIB_H

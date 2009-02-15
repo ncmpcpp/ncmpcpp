@@ -34,7 +34,7 @@
 #include "search_engine.h"
 #include "settings.h"
 #include "song.h"
-#include "status_checker.h"
+#include "status.h"
 #include "tag_editor.h"
 
 using namespace Global;

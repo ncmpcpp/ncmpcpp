@@ -38,7 +38,7 @@
 #include "playlist.h"
 #include "playlist_editor.h"
 #include "search_engine.h"
-#include "status_checker.h"
+#include "status.h"
 
 using namespace Global;
 using namespace MPD;
@@ -496,10 +496,9 @@ void TagEditor::Update()
 		Tags->Refresh();
 	}
 	
-	if (/*redraw_screen && */w == TagTypes && TagTypes->Choice() < 13)
+	if (w == TagTypes && TagTypes->Choice() < 13)
 	{
 		Tags->Refresh();
-//		redraw_screen = 0;
 	}
 	else if (TagTypes->Choice() >= 13)
 		Tags->Window::Clear();

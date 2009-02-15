@@ -28,7 +28,7 @@
 #include "media_library.h"
 #include "mpdpp.h"
 #include "playlist.h"
-#include "status_checker.h"
+#include "status.h"
 
 using namespace MPD;
 using namespace Global;

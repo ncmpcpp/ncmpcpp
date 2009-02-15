@@ -25,7 +25,7 @@
 #include "menu.h"
 #include "mpdpp.h"
 #include "helpers.h"
-#include "status_checker.h"
+#include "status.h"
 
 class BasicScreen
 {

@@ -35,7 +35,7 @@
 #include "playlist.h"
 #include "playlist_editor.h"
 #include "search_engine.h"
-#include "status_checker.h"
+#include "status.h"
 #include "tag_editor.h"
 
 using namespace Global;

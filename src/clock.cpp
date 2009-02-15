@@ -27,7 +27,7 @@
 #include "global.h"
 #include "playlist.h"
 #include "settings.h"
-#include "status_checker.h"
+#include "status.h"
 
 using namespace Global;
 

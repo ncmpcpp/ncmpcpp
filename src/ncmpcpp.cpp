@@ -43,7 +43,7 @@
 #include "settings.h"
 #include "song.h"
 #include "info.h"
-#include "status_checker.h"
+#include "status.h"
 #include "tag_editor.h"
 
 #define CHECK_MPD_MUSIC_DIR \
@@ -209,11 +209,9 @@ int main(int argc, char *argv[])
 		
 		// header stuff
 		gettimeofday(&past, 0);
-		const size_t max_allowed_title_length = wHeader ? wHeader->GetWidth()-volume_state.length() : 0;
-		if (((past.tv_sec == now.tv_sec && past.tv_usec >= now.tv_usec+500000)
-		||    past.tv_sec > now.tv_sec)
-		&&  ((myScreen == myBrowser && myBrowser->CurrentDir().length() > max_allowed_title_length)
-		||    myScreen == myLyrics))
+		if (((past.tv_sec == now.tv_sec && past.tv_usec >= now.tv_usec+500000) || past.tv_sec > now.tv_sec)
+		&&   (myScreen == myBrowser || myScreen == myLyrics)
+		   )
 		{
 			redraw_header = 1;
 			gettimeofday(&now, 0);
@@ -329,7 +327,6 @@ int main(int argc, char *argv[])
 		}
 		else if (input == KEY_RESIZE)
 		{
-//			redraw_screen = 1;
 			redraw_header = 1;
 			
 			if (COLS < 20 || LINES < 5)
@@ -451,7 +448,6 @@ int main(int argc, char *argv[])
 						myPlaylist->Main()->DeleteOption(*it);
 					}
 					ShowMessage("Selected items deleted!");
-//					redraw_screen = 1;
 				}
 				else
 				{
@@ -517,7 +513,6 @@ int main(int argc, char *argv[])
 					}
 					utf_to_locale(myPlaylistEditor->List->Current());
 					ShowMessage("Selected items deleted from playlist '%s'!", myPlaylistEditor->List->Current().c_str());
-//					redraw_screen = 1;
 				}
 				else
 				{
@@ -916,7 +911,6 @@ int main(int argc, char *argv[])
 				if (mySearcher->Main()->Size() > SearchEngine::StaticOptions)
 					mySearcher->Main()->SetTitle(Config.columns_in_search_engine ? Display::Columns(Config.song_columns_list_format) : "");
 			}
-//			redraw_screen = 1;
 		}
 #		ifdef HAVE_CURL_CURL_H
 		else if (Keypressed(input, Key.ToggleLyricsDB))
@@ -1348,7 +1342,6 @@ int main(int argc, char *argv[])
 			
 			size_t id = mDialog->Choice();
 			
-//			redraw_screen = 1;
 			if (myScreen == myLibrary)
 			{
 				myLibrary->Refresh();

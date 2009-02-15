@@ -24,7 +24,7 @@
 #include "menu.h"
 #include "playlist.h"
 #include "song.h"
-#include "status_checker.h"
+#include "status.h"
 #include "tag_editor.h"
 
 using namespace Global;

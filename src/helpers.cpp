@@ -25,7 +25,7 @@
 #include "global.h"
 #include "helpers.h"
 #include "playlist.h"
-#include "status_checker.h"
+#include "status.h"
 #include "tag_editor.h"
 
 using namespace MPD;
