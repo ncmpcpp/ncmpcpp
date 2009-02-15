@@ -46,6 +46,8 @@ namespace
 {
 	time_t time_of_statusbar_lock;
 	
+	int lock_statusbar_delay = -1;
+	
 	string switch_state;
 	
 	bool block_statusbar_update = 0;

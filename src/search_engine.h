@@ -24,7 +24,7 @@
 #include "mpdpp.h"
 #include "ncmpcpp.h"
 
-class SearchEngine : public Screen < Menu< std::pair<Buffer *, MPD::Song *> > >
+class SearchEngine : public Screen< Menu< std::pair<Buffer *, MPD::Song *> > >
 {
 	class SearchPattern : public MPD::Song
 	{

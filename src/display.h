@@ -34,8 +34,6 @@ namespace Display
 		*menu << t;
 	}
 	
-	//void TotalPlaylistLength(Window &);
-	
 	void StringPairs(const string_pair &, void *, Menu<string_pair> *);
 	
 	void SongsInColumns(const MPD::Song &, void *, Menu<MPD::Song> *);
@@ -49,17 +47,6 @@ namespace Display
 	void Items(const MPD::Item &, void *, Menu<MPD::Item> *);
 	
 	void Clock(Window &, const tm *);
-}
-
-namespace Refresh
-{
-	void MediaLibrary();
-	
-	void PlaylistEditor();
-	
-#	ifdef HAVE_TAGLIB_H
-	void TagEditor();
-#	endif
 }
 
 #endif

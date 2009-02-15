@@ -437,12 +437,12 @@ void TagEditor::Update()
 		else
 		{
 			int highlightme = -1;
-			Mpd->GetDirectories(editor_browsed_dir, list);
+			Mpd->GetDirectories(itsBrowsedDir, list);
 			sort(list.begin(), list.end(), CaseInsensitiveSorting());
-			if (editor_browsed_dir != "/")
+			if (itsBrowsedDir != "/")
 			{
-				size_t slash = editor_browsed_dir.rfind("/");
-				string parent = slash != string::npos ? editor_browsed_dir.substr(0, slash) : "/";
+				size_t slash = itsBrowsedDir.rfind("/");
+				string parent = slash != string::npos ? itsBrowsedDir.substr(0, slash) : "/";
 				Dirs->AddOption(make_pair("[..]", parent));
 			}
 			else
@@ -455,7 +455,7 @@ void TagEditor::Update()
 				string to_display = slash != string::npos ? it->substr(slash+1) : *it;
 				utf_to_locale(to_display);
 				Dirs->AddOption(make_pair(to_display, *it));
-				if (*it == editor_highlighted_dir)
+				if (*it == itsHighlightedDir)
 					highlightme = Dirs->Size()-1;
 			}
 			if (highlightme != -1)
@@ -513,8 +513,8 @@ void TagEditor::EnterPressed()
 		Mpd->GetDirectories(LeftColumn->Current().second, test);
 		if (!test.empty())
 		{
-			editor_highlighted_dir = editor_browsed_dir;
-			editor_browsed_dir = LeftColumn->Current().second;
+			itsHighlightedDir = itsBrowsedDir;
+			itsBrowsedDir = LeftColumn->Current().second;
 			LeftColumn->Clear(0);
 			LeftColumn->Reset();
 		}

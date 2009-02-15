@@ -79,6 +79,8 @@ class TagEditor : public Screen<Window>
 		Menu<std::string> *TagTypes;
 		Menu<MPD::Song> *Tags;
 		
+		const std::string &CurrentDir() { return itsBrowsedDir; }
+		
 		static void ReadTags(mpd_Song *);
 		static bool WriteTags(MPD::Song &);
 		
@@ -86,6 +88,9 @@ class TagEditor : public Screen<Window>
 		static std::string CapitalizeFirstLetters(const std::string &);
 		static void CapitalizeFirstLetters(MPD::Song &);
 		static void LowerAllLetters(MPD::Song &);
+		
+		std::string itsBrowsedDir;
+		std::string itsHighlightedDir;
 		
 		static const size_t MiddleColumnWidth;
 		static size_t LeftColumnWidth;

@@ -68,15 +68,13 @@ Window *Global::wFooter;
 
 Connection *Global::Mpd;
 
-int Global::lock_statusbar_delay = -1;
-
 size_t Global::main_start_y;
 size_t Global::main_height;
 
 time_t Global::timer;
 
-string Global::editor_browsed_dir = "/";
-string Global::editor_highlighted_dir;
+//string Global::myTagEditor->CurrentDir() = "/";
+//string Global::editor_highlighted_dir;
 
 bool Global::dont_change_now_playing = 0;
 bool Global::block_progressbar_update = 0;
@@ -947,7 +945,7 @@ int main(int argc, char *argv[])
 				Mpd->UpdateDirectory(myBrowser->CurrentDir());
 #			ifdef HAVE_TAGLIB_H
 			else if (myScreen == myTagEditor && !Config.albums_in_tag_editor)
-				Mpd->UpdateDirectory(editor_browsed_dir);
+				Mpd->UpdateDirectory(myTagEditor->CurrentDir());
 #			endif // HAVE_TAGLIB_H
 			else
 				Mpd->UpdateDirectory("/");
@@ -1083,11 +1081,11 @@ int main(int argc, char *argv[])
 				UnlockStatusbar();
 				if (!new_dir.empty() && new_dir != old_dir)
 				{
-					string full_old_dir = Config.mpd_music_dir + editor_browsed_dir + "/" + locale_to_utf_cpy(old_dir);
-					string full_new_dir = Config.mpd_music_dir + editor_browsed_dir + "/" + locale_to_utf_cpy(new_dir);
+					string full_old_dir = Config.mpd_music_dir + myTagEditor->CurrentDir() + "/" + locale_to_utf_cpy(old_dir);
+					string full_new_dir = Config.mpd_music_dir + myTagEditor->CurrentDir() + "/" + locale_to_utf_cpy(new_dir);
 					if (rename(full_old_dir.c_str(), full_new_dir.c_str()) == 0)
 					{
-						Mpd->UpdateDirectory(editor_browsed_dir);
+						Mpd->UpdateDirectory(myTagEditor->CurrentDir());
 					}
 					else
 					{

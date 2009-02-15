@@ -69,7 +69,7 @@ namespace Global
 	extern MPD::Connection *Mpd;
 	
 //	extern int now_playing;
-	extern int lock_statusbar_delay;
+//	extern int lock_statusbar_delay;
 
 //	extern size_t browsed_dir_scroll_begin;
 	extern size_t main_start_y;
@@ -79,8 +79,8 @@ namespace Global
 	extern time_t timer;
 
 //	extern std::string browsed_dir;
-	extern std::string editor_browsed_dir;
-	extern std::string editor_highlighted_dir;
+//	extern std::string editor_browsed_dir;
+//	extern std::string editor_highlighted_dir;
 //	extern std::string info_title;
 
 //	extern BasicScreen myScreen;
@@ -101,8 +101,6 @@ namespace Global
 	
 	extern std::string volume_state;
 
-	extern bool header_update_status;
-	
 	extern bool header_update_status;
 //	extern bool search_case_sensitive;
 //	extern bool search_match_to_pattern;
