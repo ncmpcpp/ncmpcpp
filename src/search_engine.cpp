@@ -259,7 +259,7 @@ void SearchEngine::SpacePressed()
 	block_item_list_update = 1;
 	if (Config.ncmpc_like_songs_adding && w->isBold())
 	{
-		block_playlist_update = 1;
+		Playlist::BlockUpdate = 1;
 		long long hash = w->Current().second->GetHash();
 		for (size_t i = 0; i < myPlaylist->Main()->Size(); i++)
 		{

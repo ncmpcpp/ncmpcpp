@@ -73,9 +73,7 @@ size_t Global::main_height;
 
 time_t Global::timer;
 
-bool Global::dont_change_now_playing = 0;
 bool Global::block_progressbar_update = 0;
-bool Global::block_playlist_update = 0;
 bool Global::block_item_list_update = 0;
 
 bool Global::messages_allowed = 0;
@@ -204,7 +202,7 @@ int main(int argc, char *argv[])
 		TraceMpdStatus();
 		
 		block_item_list_update = 0;
-		block_playlist_update = 0;
+		Playlist::BlockUpdate = 0;
 		messages_allowed = 1;
 		
 		// header stuff
@@ -437,7 +435,7 @@ int main(int argc, char *argv[])
 		{
 			if (!myPlaylist->Main()->Empty() && myScreen == myPlaylist)
 			{
-				block_playlist_update = 1;
+				Playlist::BlockUpdate = 1;
 				if (myPlaylist->Main()->hasSelected())
 				{
 					vector<size_t> list;
@@ -451,7 +449,7 @@ int main(int argc, char *argv[])
 				}
 				else
 				{
-					dont_change_now_playing = 1;
+					Playlist::BlockNowPlayingUpdate = 1;
 					myPlaylist->Main()->SetTimeout(50);
 					while (!myPlaylist->Main()->Empty() && Keypressed(input, Key.Delete))
 					{
@@ -466,7 +464,7 @@ int main(int argc, char *argv[])
 						myPlaylist->Main()->ReadKey(input);
 					}
 					myPlaylist->Main()->SetTimeout(ncmpcpp_window_timeout);
-					dont_change_now_playing = 0;
+					Playlist::BlockNowPlayingUpdate = 0;
 				}
 				Mpd->CommitQueue();
 			}
@@ -603,7 +601,7 @@ int main(int argc, char *argv[])
 		{
 			if (myScreen == myPlaylist && !myPlaylist->Main()->Empty())
 			{
-				block_playlist_update = 1;
+				Playlist::BlockUpdate = 1;
 				myPlaylist->Main()->SetTimeout(50);
 				if (myPlaylist->Main()->hasSelected())
 				{
@@ -706,7 +704,7 @@ int main(int argc, char *argv[])
 		{
 			if (myScreen == myPlaylist && !myPlaylist->Main()->Empty())
 			{
-				block_playlist_update = 1;
+				Playlist::BlockUpdate = 1;
 				myPlaylist->Main()->SetTimeout(50);
 				if (myPlaylist->Main()->hasSelected())
 				{

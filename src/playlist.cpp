@@ -32,6 +32,9 @@ using std::vector;
 
 Playlist *myPlaylist = new Playlist;
 
+bool Playlist::BlockNowPlayingUpdate = 0;
+bool Playlist::BlockUpdate = 0;
+
 void Playlist::Init()
 {
 	w = new Menu<MPD::Song>(0, main_start_y, COLS, main_height, Config.columns_in_playlist ? Display::Columns(Config.song_columns_list_format) : "", Config.main_color, brNone);

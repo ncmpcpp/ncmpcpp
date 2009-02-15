@@ -147,7 +147,7 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 	wFooter->Bold(1);
 	wFooter->GetXY(sx, sy);
 	
-	if ((myPlaylist->NowPlaying != Mpd->GetCurrentSongPos() || changed.SongID) && !dont_change_now_playing)
+	if ((myPlaylist->NowPlaying != Mpd->GetCurrentSongPos() || changed.SongID) && !Playlist::BlockNowPlayingUpdate)
 	{
 		myPlaylist->OldPlaying = myPlaylist->NowPlaying;
 		myPlaylist->NowPlaying = Mpd->GetCurrentSongPos();
@@ -161,7 +161,7 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 	
 	if (changed.Playlist)
 	{
-		if (!block_playlist_update)
+		if (!Playlist::BlockUpdate)
 		{
 			SongList list;
 			size_t playlist_length = Mpd->GetPlaylistLength();

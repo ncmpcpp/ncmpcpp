@@ -48,6 +48,9 @@ class Playlist : public Screen< Menu<MPD::Song> >
 		int NowPlaying;
 		int OldPlaying;
 		
+		static bool BlockNowPlayingUpdate;
+		static bool BlockUpdate;
+		
 	protected:
 		std::string TotalLength();
 };

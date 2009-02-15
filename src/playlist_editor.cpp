@@ -229,7 +229,7 @@ void PlaylistEditor::AddToPlaylist(bool add_n_play)
 				}
 				else
 				{
-					block_playlist_update = 1;
+					Playlist::BlockUpdate = 1;
 					for (size_t i = 0; i < myPlaylist->Main()->Size(); i++)
 					{
 						if (myPlaylist->Main()->at(i).GetHash() == hash)

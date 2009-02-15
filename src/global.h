@@ -46,17 +46,14 @@ namespace Global
 	extern pthread_mutex_t curl;
 #	endif
 	
-	extern bool dont_change_now_playing;
 	extern bool block_progressbar_update;
-	extern bool block_playlist_update;
 	extern bool block_item_list_update;
 	
+	extern bool header_update_status;
 	extern bool messages_allowed;
 	extern bool redraw_header;
 	
 	extern std::string volume_state;
-	
-	extern bool header_update_status;
 	
 	extern std::vector<int> vFoundPositions;
 	extern int found_pos;
