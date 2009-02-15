@@ -60,9 +60,6 @@ using std::make_pair;
 using std::string;
 using std::vector;
 
-ncmpcpp_config Global::Config;
-ncmpcpp_keys Global::Key;
-
 BasicScreen *Global::myScreen;
 BasicScreen *Global::myOldScreen;
 
@@ -311,83 +308,25 @@ int main(int argc, char *argv[])
 		
 		// key mapping beginning
 		
-		if (
-		    Keypressed(input, Key.Up)
-#ifdef		ENABLE_CLOCK
-		&&  myScreen != myClock
-#		endif // ENABLE_CLOCK
-		   )
+		if (Keypressed(input, Key.Up))
 		{
-			if (!Config.fancy_scrolling
-			&&  (myScreen->Cmp() == myLibrary->Artists
-			||   myScreen->Cmp() == myPlaylistEditor->List
-#			ifdef HAVE_TAGLIB_H
-			||   myScreen->Cmp() == myTagEditor->LeftColumn
-#			endif // HAVE_TAGLIB_H
-			    )
-			   )
-			{
-				myWindow->Main()->SetTimeout(50);
-				while (Keypressed(input, Key.Up))
-				{
-					myWindow->Main()->Scroll(wUp);
-					myWindow->Main()->Refresh();
-					myWindow->Main()->ReadKey(input);
-				}
-				myWindow->Main()->SetTimeout(ncmpcpp_window_timeout);
-			}
-			else
-				myWindow->Main()->Scroll(wUp);
+			myScreen->Scroll(wUp, Key.Up);
 		}
-		else if (
-		   Keypressed(input, Key.Down)
-#ifdef		ENABLE_CLOCK
-		&& myScreen != myClock
-#		endif // ENABLE_CLOCK
-			)
+		else if (Keypressed(input, Key.Down))
 		{
-			if (!Config.fancy_scrolling
-			&&  (myScreen->Cmp() == myLibrary->Artists
-			||   myScreen->Cmp() == myPlaylistEditor->List
-#			ifdef HAVE_TAGLIB_H
-			|| myScreen->Cmp() == myTagEditor->LeftColumn
-#			endif // HAVE_TAGLIB_H
-			    )
-			   )
-			{
-				myWindow->Main()->SetTimeout(50);
-				while (Keypressed(input, Key.Down))
-				{
-					myWindow->Main()->Scroll(wDown);
-					myWindow->Main()->Refresh();
-					myWindow->Main()->ReadKey(input);
-				}
-				myWindow->Main()->SetTimeout(ncmpcpp_window_timeout);
-			}
-			else
-				myWindow->Main()->Scroll(wDown);
+			myScreen->Scroll(wDown, Key.Down);
 		}
-		else if (
-		   Keypressed(input, Key.PageUp)
-#ifdef		ENABLE_CLOCK
-		&& myScreen != myClock
-#		endif // ENABLE_CLOCK
-			)
+		else if (Keypressed(input, Key.PageUp))
 		{
-			myWindow->Main()->Scroll(wPageUp);
+			myScreen->Scroll(wPageUp, Key.PageUp);
 		}
-		else if (
-		   Keypressed(input, Key.PageDown)
-#ifdef		ENABLE_CLOCK
-		&& myScreen != myClock
-#		endif // ENABLE_CLOCK
-			)
+		else if (Keypressed(input, Key.PageDown))
 		{
-			myWindow->Main()->Scroll(wPageDown);
+			myScreen->Scroll(wPageDown, Key.PageDown);
 		}
 		else if (Keypressed(input, Key.Home))
 		{
-			myWindow->Main()->Scroll(wHome);
+			myScreen->Scroll(wHome);
 		}
 		else if (Keypressed(input, Key.End))
 		{
@@ -437,21 +376,7 @@ int main(int argc, char *argv[])
 			wFooter->MoveTo(0, footer_start_y);
 			wFooter->Resize(COLS, wFooter->GetHeight());
 			
-#			ifdef HAVE_TAGLIB_H
-			if (myScreen == myLibrary)
-			{
-				myLibrary->Refresh();
-			}
-			else if (myScreen == myTagEditor)
-			{
-				myTagEditor->Refresh();
-			}
-			else
-#			endif // HAVE_TAGLIB_H
-			if (myScreen == myPlaylistEditor)
-			{
-				myPlaylistEditor->Refresh();
-			}
+			myScreen->Refresh();
 			header_update_status = 1;
 			PlayerState mpd_state = Mpd->GetState();
 			StatusChanges changes;

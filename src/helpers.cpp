@@ -25,10 +25,10 @@
 #include "global.h"
 #include "helpers.h"
 #include "playlist.h"
+#include "status_checker.h"
 #include "tag_editor.h"
 
 using namespace MPD;
-using Global::Config;
 using Global::Mpd;
 using Global::wFooter;
 using std::string;

@@ -40,6 +40,7 @@ class Clock : public Screen<Window>
 		virtual std::string Title();
 		
 		virtual void Update();
+		virtual void Scroll() { }
 	
 	protected:
 		static void Prepare();

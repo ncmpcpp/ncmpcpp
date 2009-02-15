@@ -162,6 +162,9 @@ struct ncmpcpp_config
 	int lyrics_db;
 };
 
+extern ncmpcpp_config Config;
+extern ncmpcpp_keys Key;
+
 void CreateConfigDir();
 void DefaultKeys(ncmpcpp_keys &);
 void DefaultConfiguration(ncmpcpp_config &);

@@ -23,7 +23,6 @@
 #include "helpers.h"
 #include "playlist.h"
 
-using Global::Config;
 using MPD::Song;
 using std::string;
 

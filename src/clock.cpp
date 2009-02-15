@@ -24,7 +24,6 @@
 
 #ifdef ENABLE_CLOCK
 
-#include "display.h"
 #include "global.h"
 #include "playlist.h"
 #include "settings.h"
@@ -136,7 +135,7 @@ void Clock::Update()
 							{
 								w->GotoXY(2*j+2, i);
 							}
-							if (Global::Config.clock_display_seconds || j < 18)
+							if (Config.clock_display_seconds || j < 18)
 								*w << "  ";
 						}
 					}

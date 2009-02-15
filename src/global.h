@@ -30,9 +30,6 @@
 
 namespace Global
 {
-	extern ncmpcpp_config Config;
-	extern ncmpcpp_keys Key;
-	
 	extern BasicScreen *myScreen;
 	extern BasicScreen *myOldScreen;
 	

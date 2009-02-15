@@ -30,6 +30,9 @@ using std::string;
 const string config_file = config_dir + "config";
 const string keys_config_file = config_dir + "keys";
 
+ncmpcpp_config Config;
+ncmpcpp_keys Key;
+
 namespace
 {
 	void GetKeys(string &line, int *key)

@@ -24,6 +24,8 @@
 #include "window.h"
 #include "menu.h"
 #include "mpdpp.h"
+#include "helpers.h"
+#include "status_checker.h"
 
 class BasicScreen
 {
@@ -41,6 +43,7 @@ class BasicScreen
 		
 		virtual void Update() { }
 		virtual void Refresh() = 0;
+		virtual void Scroll(Where, const int * = 0) = 0;
 		
 		virtual void EnterPressed() { }
 		virtual void SpacePressed() { }
@@ -62,6 +65,7 @@ template <class WindowType> class Screen : public BasicScreen
 		WindowType *&Main();
 		
 		virtual void Refresh();
+		virtual void Scroll(Where where, const int *);
 		
 	protected:
 		WindowType *w;
@@ -81,6 +85,25 @@ template <class WindowType> WindowType *&Screen<WindowType>::Main()
 template <class WindowType> void Screen<WindowType>::Refresh()
 {
 	w->Display();
+}
+
+template <class WindowType> void Screen<WindowType>::Scroll(Where where, const int *key)
+{
+	if (!Config.fancy_scrolling && key)
+	{
+		int in = key[0];
+		w->SetTimeout(ncmpcpp_window_timeout/10);
+		while (Keypressed(in, key))
+		{
+			TraceMpdStatus();
+			w->Scroll(where);
+			w->Refresh();
+			w->ReadKey(in);
+		}
+		w->SetTimeout(ncmpcpp_window_timeout);
+	}
+	else
+		w->Scroll(where);
 }
 
 #endif
