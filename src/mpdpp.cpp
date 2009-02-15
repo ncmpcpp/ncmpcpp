@@ -181,6 +181,7 @@ void Connection::UpdateStatus()
 			itsChanges.Random = 1;
 			itsChanges.Repeat = 1;
 			itsChanges.PlayerState = 1;
+			itsChanges.StatusFlags = 1;
 		}
 		else
 		{
@@ -194,6 +195,7 @@ void Connection::UpdateStatus()
 			itsChanges.Random = itsOldStatus->random != itsCurrentStatus->random;
 			itsChanges.Repeat = itsOldStatus->repeat != itsCurrentStatus->repeat;
 			itsChanges.PlayerState = itsOldStatus->state != itsCurrentStatus->state;
+			itsChanges.StatusFlags = itsChanges.Repeat || itsChanges.Random || itsChanges.Crossfade || itsChanges.DBUpdating;
 		}
 		itsUpdater(this, itsChanges, itsErrorHandlerUserdata);
 	}

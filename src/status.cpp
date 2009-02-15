@@ -40,8 +40,6 @@ using std::string;
 
 string Global::volume_state;
 
-bool Global::header_update_status = 0;
-
 namespace
 {
 	time_t time_of_statusbar_lock;
@@ -396,29 +394,24 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 	{
 		mpd_repeat = Mpd->GetRepeat() ? 'r' : 0;
 		ShowMessage("Repeat is %s", !mpd_repeat ? "off" : "on");
-		header_update_status = 1;
-
 	}
 	if (changed.Random)
 	{
 		mpd_random = Mpd->GetRandom() ? 'z' : 0;
 		ShowMessage("Random is %s", !mpd_random ? "off" : "on");
-		header_update_status = 1;
 	}
 	if (changed.Crossfade)
 	{
 		int crossfade = Mpd->GetCrossfade();
 		mpd_crossfade = crossfade ? 'x' : 0;
 		ShowMessage("Crossfade set to %d seconds", crossfade);
-		header_update_status = 1;
 	}
 	if (changed.DBUpdating)
 	{
 		mpd_db_updating = Mpd->GetDBIsUpdating() ? 'U' : 0;
 		ShowMessage(!mpd_db_updating ? "Database update finished!" : "Database update started!");
-		header_update_status = 1;
 	}
-	if (header_update_status && Config.header_visibility)
+	if (changed.StatusFlags && Config.header_visibility)
 	{
 		switch_state.clear();
 		if (mpd_repeat)
@@ -445,7 +438,6 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 		}
 		attroff(A_BOLD|COLOR_PAIR(Config.state_line_color));
 		refresh();
-		header_update_status = 0;
 	}
 	if (changed.Volume && Config.header_visibility)
 	{

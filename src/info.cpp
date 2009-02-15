@@ -59,6 +59,7 @@ void Info::Init()
 void Info::Resize()
 {
 	w->Resize(COLS, main_height);
+	hasToBeResized = 0;
 }
 
 std::string Info::Title()
@@ -83,10 +84,7 @@ void Info::GetSong()
 {
 	if (myScreen == this)
 	{
-		w->Hide();
-		myScreen = myOldScreen;
-		redraw_header = 1;
-		myScreen->Refresh();
+		myOldScreen->SwitchTo();
 	}
 	else
 	{
@@ -94,6 +92,9 @@ void Info::GetSong()
 		
 		if (!s)
 			return;
+		
+		if (hasToBeResized)
+			Resize();
 		
 		myOldScreen = myScreen;
 		myScreen = this;
@@ -112,10 +113,7 @@ void Info::GetArtist()
 {
 	if (myScreen == this)
 	{
-		w->Hide();
-		myScreen = myOldScreen;
-		redraw_header = 1;
-		myScreen->Refresh();
+		myOldScreen->SwitchTo();
 	}
 	else
 	{
@@ -138,6 +136,8 @@ void Info::GetArtist()
 		
 		if (!artist->empty())
 		{
+			if (hasToBeResized)
+				Resize();
 			myOldScreen = myScreen;
 			myScreen = this;
 			redraw_header = 1;

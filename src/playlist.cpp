@@ -50,7 +50,10 @@ void Playlist::SwitchTo()
 {
 	if (myScreen == this)
 		return;
-
+	
+	if (hasToBeResized)
+		Resize();
+	
 	CLEAR_FIND_HISTORY;
 	myScreen = this;
 	w->Hide();
@@ -61,6 +64,7 @@ void Playlist::Resize()
 {
 	w->Resize(COLS, main_height);
 	w->SetTitle(Config.columns_in_playlist ? Display::Columns(Config.song_columns_list_format) : "");
+	hasToBeResized = 0;
 }
 
 std::string Playlist::Title()

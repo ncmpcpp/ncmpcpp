@@ -85,6 +85,8 @@ void MediaLibrary::Resize()
 	
 	Albums->MoveTo(itsMiddleColStartX, main_start_y);
 	Songs->MoveTo(itsRightColStartX, main_start_y);
+	
+	hasToBeResized = 0;
 }
 
 void MediaLibrary::Refresh()
@@ -105,6 +107,9 @@ void MediaLibrary::SwitchTo()
 {
 	if (myScreen == this)
 		return;
+	
+	if (hasToBeResized)
+		Resize();
 	
 	CLEAR_FIND_HISTORY;
 	myScreen = this;

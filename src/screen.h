@@ -30,7 +30,7 @@
 class BasicScreen
 {
 	public:
-		BasicScreen() { }
+		BasicScreen() : hasToBeResized(0) { }
 		virtual ~BasicScreen() { }
 		
 		virtual void *&Cmp() = 0;
@@ -49,6 +49,8 @@ class BasicScreen
 		virtual void SpacePressed() { }
 		
 		virtual MPD::Song *CurrentSong() { return 0; }
+		
+		bool hasToBeResized;
 		
 	protected:
 		void Select(List *);

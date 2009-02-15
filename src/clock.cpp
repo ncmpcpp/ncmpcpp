@@ -56,10 +56,9 @@ void Clock::Resize()
 	if (Width <= size_t(COLS) && Height <= main_height)
 	{
 		w->MoveTo((COLS-Width)/2, (LINES-Height)/2);
-		if (myScreen == myClock)
+		if (myScreen == this)
 		{
 			myPlaylist->Main()->Hide();
-			Prepare();
 			w->Display();
 		}
 	}
@@ -74,6 +73,9 @@ void Clock::SwitchTo()
 	}
 	if (myScreen == this)
 		return;
+	
+	if (hasToBeResized)
+		Resize();
 	
 	CLEAR_FIND_HISTORY;
 	myScreen = this;

@@ -341,23 +341,25 @@ int main(int argc, char *argv[])
 			if (!Config.statusbar_visibility)
 				main_height++;
 			
-			myHelp->Resize();
-			myPlaylist->Resize();
-			myBrowser->Resize();
-			mySearcher->Resize();
-			myLibrary->Resize();
-			myPlaylistEditor->Resize();
-			myInfo->Resize();
-			myLyrics->Resize();
+			myHelp->hasToBeResized = 1;
+			myPlaylist->hasToBeResized = 1;
+			myBrowser->hasToBeResized = 1;
+			mySearcher->hasToBeResized = 1;
+			myLibrary->hasToBeResized = 1;
+			myPlaylistEditor->hasToBeResized = 1;
+			myInfo->hasToBeResized = 1;
+			myLyrics->hasToBeResized = 1;
 			
 #			ifdef HAVE_TAGLIB_H
-			myTinyTagEditor->Resize();
-			myTagEditor->Resize();
+			myTinyTagEditor->hasToBeResized = 1;
+			myTagEditor->hasToBeResized = 1;
 #			endif // HAVE_TAGLIB_H
 			
 #			ifdef ENABLE_CLOCK
-			myClock->Resize();
+			myClock->hasToBeResized = 1;
 #			endif // ENABLE_CLOCK
+			
+			myScreen->Resize();
 			
 			if (Config.header_visibility)
 				wHeader->Resize(COLS, wHeader->GetHeight());
@@ -367,9 +369,9 @@ int main(int argc, char *argv[])
 			wFooter->Resize(COLS, wFooter->GetHeight());
 			
 			myScreen->Refresh();
-			header_update_status = 1;
 			PlayerState mpd_state = Mpd->GetState();
 			StatusChanges changes;
+			changes.StatusFlags = 1; // force status update
 			if (mpd_state == psPlay || mpd_state == psPause)
 				changes.ElapsedTime = 1; // restore status
 			else
@@ -1340,16 +1342,7 @@ int main(int argc, char *argv[])
 			
 			size_t id = mDialog->Choice();
 			
-			if (myScreen == myLibrary)
-			{
-				myLibrary->Refresh();
-			}
-			else if (myScreen == myPlaylistEditor)
-			{
-				myPlaylistEditor->Refresh();
-			}
-			else
-				myScreen->Refresh();
+			myScreen->Refresh();
 			
 			if (id == 0)
 			{

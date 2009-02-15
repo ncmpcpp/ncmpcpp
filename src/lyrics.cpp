@@ -63,6 +63,7 @@ void Lyrics::Init()
 void Lyrics::Resize()
 {
 	w->Resize(COLS, main_height);
+	hasToBeResized = 0;
 }
 
 void Lyrics::Update()
@@ -86,10 +87,7 @@ void Lyrics::SwitchTo()
 {
 	if (myScreen == this && !Reload)
 	{
-		w->Hide();
-		myScreen = myOldScreen;
-		redraw_header = 1;
-		myScreen->Refresh();
+		myOldScreen->SwitchTo();
 	}
 	else
 	{
@@ -114,6 +112,8 @@ void Lyrics::SwitchTo()
 		
 		if (!s->GetArtist().empty() && !s->GetTitle().empty())
 		{
+			if (hasToBeResized)
+				Resize();
 			itsScrollBegin = 0;
 			itsSong = *s;
 			myOldScreen = myScreen;

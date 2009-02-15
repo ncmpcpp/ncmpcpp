@@ -53,12 +53,16 @@ void Browser::Init()
 void Browser::Resize()
 {
 	w->Resize(COLS, main_height);
+	hasToBeResized = 0;
 }
 
 void Browser::SwitchTo()
 {
 	if (myScreen == this)
 		return;
+	
+	if (hasToBeResized)
+		Resize();
 	
 	CLEAR_FIND_HISTORY;
 	w->Empty() ? myBrowser->GetDirectory(itsBrowsedDir) : myBrowser->UpdateItemList();

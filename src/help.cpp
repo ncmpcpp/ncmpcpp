@@ -40,20 +40,21 @@ void Help::Init()
 void Help::Resize()
 {
 	w->Resize(COLS, main_height);
+	hasToBeResized = 0;
 }
 
 void Help::SwitchTo()
 {
-	if (myScreen != myHelp
-#	ifdef HAVE_TAGLIB_H
-	&& myScreen != myTinyTagEditor
-#	endif // HAVE_TAGLIB_H
-	   )
-	{
-		myScreen = this;
-		w->Hide();
-		redraw_header = 1;
-	}
+	if (myScreen == this)
+		return;
+	
+	if (hasToBeResized)
+		Resize();
+	
+	myScreen = this;
+	w->Hide();
+	redraw_header = 1;
+
 }
 
 std::string Help::Title()

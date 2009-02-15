@@ -49,7 +49,6 @@ namespace Global
 	extern bool block_progressbar_update;
 	extern bool block_item_list_update;
 	
-	extern bool header_update_status;
 	extern bool messages_allowed;
 	extern bool redraw_header;
 	

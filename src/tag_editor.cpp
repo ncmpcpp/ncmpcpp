@@ -56,6 +56,7 @@ void TinyTagEditor::Init()
 void TinyTagEditor::Resize()
 {
 	w->Resize(COLS, main_height);
+	hasToBeResized = 0;
 }
 
 void TinyTagEditor::SwitchTo()
@@ -66,6 +67,8 @@ void TinyTagEditor::SwitchTo()
 	}
 	else if (GetTags())
 	{
+		if (hasToBeResized)
+			Resize();
 		myOldScreen = myScreen;
 		myScreen = this;
 		redraw_header = 1;
@@ -205,21 +208,7 @@ void TinyTagEditor::EnterPressed()
 		}
 		case 15:
 		{
-			w->Clear();
-			myScreen = myOldScreen;
-			redraw_header = 1;
-			if (myScreen == myLibrary)
-			{
-				myLibrary->Refresh();
-			}
-			else if (myScreen == myPlaylistEditor)
-			{
-				myPlaylistEditor->Refresh();
-			}
-			else if (myScreen == myTagEditor)
-			{
-				myTagEditor->Refresh();
-			}
+			myOldScreen->SwitchTo();
 			break;
 		}
 	}
@@ -352,6 +341,8 @@ void TagEditor::Resize()
 	
 	TagTypes->MoveTo(MiddleColumnStartX, main_start_y);
 	Tags->MoveTo(RightColumnStartX, main_start_y);
+	
+	hasToBeResized = 0;
 }
 
 std::string TagEditor::Title()
@@ -363,6 +354,9 @@ void TagEditor::SwitchTo()
 {
 	if (myScreen == this)
 		return;
+	
+	if (hasToBeResized)
+		Resize();
 	
 	CLEAR_FIND_HISTORY;
 	

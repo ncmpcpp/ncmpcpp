@@ -55,12 +55,16 @@ void SearchEngine::Init()
 void SearchEngine::Resize()
 {
 	w->Resize(COLS, main_height);
+	hasToBeResized = 0;
 }
 
 void SearchEngine::SwitchTo()
 {
 	if (myScreen == this)
 		return;
+	
+	if (hasToBeResized)
+		Resize();
 	
 	CLEAR_FIND_HISTORY;
 	if (w->Empty())

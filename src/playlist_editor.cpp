@@ -34,10 +34,6 @@ using namespace Global;
 using namespace MPD;
 using std::string;
 
-//Window *Global::wPlaylistEditorActiveCol;
-//Menu<string> *Global::List;
-//Menu<Song> *Global::Content;
-
 PlaylistEditor *myPlaylistEditor = new PlaylistEditor;
 
 size_t PlaylistEditor::LeftColumnWidth;
@@ -76,6 +72,8 @@ void PlaylistEditor::Resize()
 	Content->Resize(RightColumnWidth, main_height);
 	
 	Content->MoveTo(RightColumnStartX, main_start_y);
+	
+	hasToBeResized = 0;
 }
 
 std::string PlaylistEditor::Title()
@@ -94,6 +92,9 @@ void PlaylistEditor::SwitchTo()
 {
 	if (myScreen == this)
 		return;
+	
+	if (hasToBeResized)
+		Resize();
 	
 	CLEAR_FIND_HISTORY;
 	myScreen = this;
