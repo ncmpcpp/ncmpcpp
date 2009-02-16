@@ -328,9 +328,9 @@ void Info::PrepareSong(MPD::Song &s)
 		*w << fmtBold << "Sample rate: " << fmtBoldEnd << Config.color2 << f.audioProperties()->sampleRate() << " Hz\n" << clEnd;
 		*w << fmtBold << "Channels: " << fmtBoldEnd << Config.color2 << (f.audioProperties()->channels() == 1 ? "Mono" : "Stereo") << "\n" << clDefault;
 	}
-	else
-		*w << clDefault;
 #	endif // HAVE_TAGLIB_H
+	*w << clDefault;
+	
 	*w << fmtBold << "\nTitle: " << fmtBoldEnd << ShowTag(s.GetTitle());
 	*w << fmtBold << "\nArtist: " << fmtBoldEnd << ShowTag(s.GetArtist());
 	*w << fmtBold << "\nAlbum: " << fmtBoldEnd << ShowTag(s.GetAlbum());
