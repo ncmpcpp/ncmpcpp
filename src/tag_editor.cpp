@@ -409,7 +409,7 @@ void TagEditor::Update()
 		if (Config.albums_in_tag_editor)
 		{
 			std::map<string, string, CaseInsensitiveSorting> maplist;
-			Albums->WriteXY(0, 0, 0, "Fetching albums' list...");
+			*Albums << XY(0, 0) << "Fetching albums' list...";
 			Mpd->GetAlbums("", list);
 			for (TagList::const_iterator it = list.begin(); it != list.end(); it++)
 			{

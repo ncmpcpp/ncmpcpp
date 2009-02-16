@@ -31,6 +31,7 @@ void TraceMpdStatus();
 void NcmpcppStatusChanged(MPD::Connection *, MPD::StatusChanges, void *);
 void NcmpcppErrorCallback(MPD::Connection *, int, const char *, void *);
 
+Window &Statusbar();
 void ShowMessage(const char *, ...);
 
 #endif

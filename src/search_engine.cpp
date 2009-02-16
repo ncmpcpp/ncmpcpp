@@ -74,7 +74,7 @@ void SearchEngine::SwitchTo()
 	
 	if (!w->Back().first)
 	{
-		w->WriteXY(0, 0, 0, "Updating list...");
+		*w << XY(0, 0) << "Updating list...";
 		UpdateFoundList();
 	}
 }

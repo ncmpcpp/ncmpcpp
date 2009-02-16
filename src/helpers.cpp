@@ -287,13 +287,6 @@ string GetLineValue(string &line, char a, char b, bool once)
 		return "";
 }
 
-Window &Statusbar()
-{
-	wFooter->GotoXY(0, Config.statusbar_visibility);
-	wclrtoeol(wFooter->Raw());
-	return *wFooter;
-}
-
 const Buffer &ShowTag(const string &tag)
 {
 	static Buffer result;

@@ -293,7 +293,13 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 			}
 		}
 		if (!block_statusbar_update && Config.statusbar_visibility)
-			wFooter->WriteXY(0, 1, player_state.empty(), "%s", player_state.c_str());
+		{
+			*wFooter << XY(0, 1);
+			if (player_state.empty())
+				*wFooter << wclrtoeol;
+			else
+				*wFooter << player_state;
+		}
 	}
 	if (changed.SongID)
 	{
@@ -357,12 +363,11 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 					tracklength += Song::ShowTime(elapsed);
 					tracklength += "]";
 				}
-				wFooter->WriteXY(0, 1, 1, "%s", player_state.c_str());
-				wFooter->Bold(0);
-				*wFooter << Scroller(utf_to_locale_cpy(s.toString(Config.song_status_format)), wFooter->GetWidth()-player_state.length()-tracklength.length(), playing_song_scroll_begin);
-				wFooter->Bold(1);
-				
-				wFooter->WriteXY(wFooter->GetWidth()-tracklength.length(), 1, 1, "%s", tracklength.c_str());
+				*wFooter << XY(0, 1) << wclrtoeol << player_state
+				<< fmtBoldEnd
+				<< Scroller(utf_to_locale_cpy(s.toString(Config.song_status_format)), wFooter->GetWidth()-player_state.length()-tracklength.length(), playing_song_scroll_begin)
+				<< fmtBold
+				<< XY(wFooter->GetWidth()-tracklength.length(), 1) << tracklength;
 			}
 			if (!block_progressbar_update)
 			{
@@ -381,7 +386,7 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 		else
 		{
 			if (!block_statusbar_update && Config.statusbar_visibility)
-				wFooter->WriteXY(0, 1, 1, "");
+				*wFooter << XY(0, 1) << wclrtoeol;
 		}
 	}
 	
@@ -445,7 +450,7 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 		volume_state += IntoStr(Mpd->GetVolume());
 		volume_state += "%";
 		wHeader->SetColor(Config.volume_color);
-		wHeader->WriteXY(wHeader->GetWidth()-volume_state.length(), 0, 1, "%s", volume_state.c_str());
+		*wHeader << XY(wHeader->GetWidth()-volume_state.length(), 0) << volume_state;
 		wHeader->SetColor(Config.header_color);
 		wHeader->Refresh();
 	}
@@ -454,6 +459,12 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 	wFooter->Bold(0);
 	wFooter->GotoXY(sx, sy);
 	wFooter->Refresh();
+}
+
+Window &Statusbar()
+{
+	*wFooter << XY(0, Config.statusbar_visibility) << wclrtoeol;
+	return *wFooter;
 }
 
 void ShowMessage(const char *format, ...)

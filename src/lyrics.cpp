@@ -121,7 +121,7 @@ void Lyrics::SwitchTo()
 			redraw_header = 1;
 			w->Clear();
 #			ifdef HAVE_CURL_CURL_H
-			w->WriteXY(0, 0, 0, "Fetching lyrics...");
+			static_cast<Window &>(*w) << "Fetching lyrics...";
 			if (!Downloader)
 			{
 				pthread_create(&Downloader, NULL, Get, &itsSong);

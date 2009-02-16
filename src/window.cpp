@@ -332,7 +332,7 @@ void Window::ReadKey() const
 	wgetch(itsWindow);
 }
 
-void Window::Write(bool cte, const char *format, ...) const
+/*void Window::Write(bool cte, const char *format, ...) const
 {
 	va_list list;
 	va_start(list, format);
@@ -351,7 +351,7 @@ void Window::WriteXY(int x, int y, bool cte, const char *format, ...) const
 	va_end(list);
 	if (cte)
 		wclrtoeol(itsWindow);
-}
+}*/
 
 string Window::GetString(const string &base, size_t length, size_t width, bool encrypted) const
 {
@@ -700,6 +700,12 @@ Window &Window::operator<<(const Format &format)
 			AltCharset(0);
 			break;
 	}
+	return *this;
+}
+
+Window &Window::operator<<(int (*f)(WINDOW *))
+{
+	f(itsWindow);
 	return *this;
 }
 

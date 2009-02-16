@@ -98,8 +98,7 @@ void MediaLibrary::Refresh()
 	Songs->Display();
 	if (Albums->Empty())
 	{
-		Albums->WriteXY(0, 0, 0, "No albums found.");
-		Albums->Refresh();
+		*Albums << XY(0, 0) << "No albums found." << wrefresh;
 	}
 }
 
@@ -213,8 +212,7 @@ void MediaLibrary::Update()
 		Mpd->AddSearch(Config.media_lib_primary_tag, locale_to_utf_cpy(Artists->Current()));
 		if (Albums->Empty()) // left for compatibility with <mpd-0.14
 		{
-			Albums->WriteXY(0, 0, 0, "No albums found.");
-			Albums->Refresh();
+			*Albums << XY(0, 0) << "No albums found." << wrefresh;
 		}
 		else
 			Mpd->AddSearch(MPD_TAG_ITEM_ALBUM, locale_to_utf_cpy(Albums->Current().second));

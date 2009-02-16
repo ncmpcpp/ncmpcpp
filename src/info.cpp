@@ -142,7 +142,7 @@ void Info::GetArtist()
 			redraw_header = 1;
 			itsTitle = "Artist's info - " + *artist;
 			w->Clear();
-			w->WriteXY(0, 0, 0, "Fetching artist's info...");
+			static_cast<Window &>(*w) << "Fetching artist's info...";
 			if (!Downloader)
 			{
 				pthread_create(&Downloader, NULL, PrepareArtist, artist);

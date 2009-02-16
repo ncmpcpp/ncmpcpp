@@ -157,8 +157,7 @@ void PlaylistEditor::Update()
 	
 	if (Content->Empty())
 	{
-		Content->WriteXY(0, 0, 0, "Playlist is empty.");
-		Content->Refresh();
+		*Content << XY(0, 0) << "Playlist is empty." << wrefresh;
 	}
 }
 

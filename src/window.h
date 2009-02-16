@@ -122,12 +122,13 @@ class Window
 		void ReadKey(int &) const;
 		void ReadKey() const;
 		
-		void Write(bool, const char *, ...) const;
-		void WriteXY(int, int, bool, const char *, ...) const;
+		//void Write(bool, const char *, ...) const;
+		//void WriteXY(int, int, bool, const char *, ...) const;
 		
 		void Scrollable(bool) const;
 		virtual void Scroll(Where);
 		
+		Window &operator<<(int (*)(WINDOW *));
 		Window &operator<<(const Colors &);
 		Window &operator<<(const Color &);
 		Window &operator<<(const Format &);

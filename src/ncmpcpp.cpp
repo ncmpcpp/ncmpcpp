@@ -218,9 +218,7 @@ int main(int argc, char *argv[])
 		{
 			if (title_allowed)
 			{
-				wHeader->Bold(1);
-				wHeader->WriteXY(0, 0, 1, "%s", myScreen->Title().c_str());
-				wHeader->Bold(0);
+				*wHeader << XY(0, 0) << wclrtoeol << fmtBold << myScreen->Title() << fmtBoldEnd;
 			}
 			else
 			{
@@ -240,7 +238,7 @@ int main(int argc, char *argv[])
 			}
 			
 			wHeader->SetColor(Config.volume_color);
-			wHeader->WriteXY(wHeader->GetWidth()-volume_state.length(), 0, 0, "%s", volume_state.c_str());
+			*wHeader << XY(wHeader->GetWidth()-volume_state.length(), 0) << volume_state;
 			wHeader->SetColor(Config.header_color);
 			wHeader->Refresh();
 			redraw_header = 0;
@@ -873,7 +871,7 @@ int main(int argc, char *argv[])
 				
 				wFooter->Bold(1);
 				string tracklength = "[" + Song::ShowTime(songpos) + "/" + s.GetLength() + "]";
-				wFooter->WriteXY(wFooter->GetWidth()-tracklength.length(), 1, 0, "%s", tracklength.c_str());
+				*wFooter << XY(wFooter->GetWidth()-tracklength.length(), 1) << tracklength;
 				double progressbar_size = (double)songpos/(s.GetTotalLength());
 				int howlong = wFooter->GetWidth()*progressbar_size;
 				
