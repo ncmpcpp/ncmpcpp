@@ -1402,10 +1402,10 @@ int main(int argc, char *argv[])
 		{
 			if (myPlaylist->Main()->hasSelected())
 			{
-				for (size_t i = 0; i < myPlaylist->Main()->Size(); i++)
+				for (int i = myPlaylist->Main()->Size()-1; i >= 0; i--)
 				{
-					if (!myPlaylist->Main()->isSelected(i) && i != size_t(myPlaylist->NowPlaying))
-						Mpd->QueueDeleteSongId(myPlaylist->Main()->at(i).GetID());
+					if (!myPlaylist->Main()->isSelected(i) && i != myPlaylist->NowPlaying)
+						Mpd->QueueDeleteSong(i);
 				}
 				// if mpd deletes now playing song deletion will be sluggishly slow
 				// then so we have to assure it will be deleted at the very end.
@@ -1423,10 +1423,9 @@ int main(int argc, char *argv[])
 					ShowMessage("Nothing is playing now!");
 					continue;
 				}
-				for (int i = 0; i < myPlaylist->NowPlaying; i++)
-					Mpd->QueueDeleteSongId(myPlaylist->Main()->at(i).GetID());
-				for (size_t i = myPlaylist->NowPlaying+1; i < myPlaylist->Main()->Size(); i++)
-					Mpd->QueueDeleteSongId(myPlaylist->Main()->at(i).GetID());
+				for (int i = myPlaylist->Main()->Size()-1; i >= 0; i--)
+					if (i != myPlaylist->NowPlaying)
+						Mpd->QueueDeleteSong(i);
 				ShowMessage("Deleting all items except now playing one...");
 				Mpd->CommitQueue();
 				ShowMessage("Items deleted!");
