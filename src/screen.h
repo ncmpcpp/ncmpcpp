@@ -77,7 +77,7 @@ template <class WindowType> class Screen : public BasicScreen
 
 template <class WindowType> void *&Screen<WindowType>::Cmp()
 {
-	return reinterpret_cast<void *&>(w);
+	return *(void **)(void *)&w;
 }
 
 template <class WindowType> WindowType *&Screen<WindowType>::Main()
