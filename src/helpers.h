@@ -32,6 +32,7 @@ class CaseInsensitiveSorting
 {
 	public:
 		bool operator()(std::string, std::string);
+		bool operator()(const string_pair &, const string_pair &);
 		bool operator()(MPD::Song *, MPD::Song *);
 		bool operator()(const MPD::Item &, const MPD::Item &);
 };

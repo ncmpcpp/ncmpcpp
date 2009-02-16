@@ -19,7 +19,6 @@
  ***************************************************************************/
 
 #include <algorithm>
-#include <map>
 
 #include "charset.h"
 #include "display.h"
@@ -148,7 +147,7 @@ void MediaLibrary::Update()
 	{
 		Albums->Reset();
 		TagList list;
-		std::map<string, string, CaseInsensitiveSorting> maplist;
+		std::vector<string_pair> maplist;
 		locale_to_utf(Artists->Current());
 		if (Config.media_lib_primary_tag == MPD_TAG_ITEM_ARTIST)
 			Mpd->GetAlbums(Artists->Current(), list);
@@ -184,13 +183,14 @@ void MediaLibrary::Update()
 			{
 				utf_to_locale(*it);
 				l[0]->Localize();
-				maplist[l[0]->toString(Config.media_lib_album_format)] = *it;
+				maplist.push_back(make_pair(l[0]->toString(Config.media_lib_album_format), *it));
 			}
 			FreeSongList(l);
 		}
 		utf_to_locale(Artists->Current());
-		for (std::map<string, string>::const_iterator it = maplist.begin(); it != maplist.end(); it++)
-			Albums->AddOption(make_pair(it->first, it->second));
+		sort(maplist.begin(), maplist.end(), CaseInsensitiveSorting());
+		for (std::vector<string_pair>::const_iterator it = maplist.begin(); it != maplist.end(); it++)
+			Albums->AddOption(*it);
 		Albums->Window::Clear();
 		Albums->Refresh();
 	}
