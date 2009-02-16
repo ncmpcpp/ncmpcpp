@@ -187,7 +187,7 @@ int main(int argc, char *argv[])
 	gettimeofday(&now, 0);
 	
 	// this type of casting is absolutely hillarious lol
-	Screen<Window> *&myWindow = *(Screen<Window> **)(void *)&myScreen;
+	Screen<Window> *&myWindow = reinterpret_cast<Screen<Window> *&>(myScreen);
 	
 	while (!main_exit)
 	{
