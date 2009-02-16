@@ -321,7 +321,7 @@ int main(int argc, char *argv[])
 		}
 		else if (Keypressed(input, Key.End))
 		{
-			myWindow->Main()->Scroll(wEnd);
+			myScreen->Scroll(wEnd);
 		}
 		else if (input == KEY_RESIZE)
 		{
@@ -1320,6 +1320,9 @@ int main(int argc, char *argv[])
 			
 			mDialog->Display();
 			
+			myOldScreen = myScreen;
+			myScreen = myHelp; // temp hack, prevent playlist from updating
+			
 			while (!Keypressed(input, Key.Enter))
 			{
 				TraceMpdStatus();
@@ -1339,6 +1342,8 @@ int main(int argc, char *argv[])
 				else if (Keypressed(input, Key.End))
 					mDialog->Scroll(wEnd);
 			}
+			
+			myScreen = myOldScreen;
 			
 			size_t id = mDialog->Choice();
 			
