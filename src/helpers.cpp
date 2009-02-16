@@ -41,12 +41,6 @@ namespace
 		if (the_pos == 0 && the_pos != string::npos)
 			s = s.substr(4);
 	}
-	
-	inline string extract_top_directory(const string &s)
-	{
-		size_t slash = s.rfind("/");
-		return slash != string::npos ? s.substr(++slash) : s;
-	}
 }
 
 bool ConnectToMPD()
@@ -207,7 +201,7 @@ bool CaseInsensitiveSorting::operator()(const Item &a, const Item &b)
 		switch (a.type)
 		{
 			case itDirectory:
-				return operator()(extract_top_directory(a.name), extract_top_directory(b.name));
+				return operator()(ExtractTopDirectory(a.name), ExtractTopDirectory(b.name));
 			case itPlaylist:
 				return operator()(a.name, b.name);
 			case itSong:
@@ -285,6 +279,12 @@ string GetLineValue(string &line, char a, char b, bool once)
 		return line.substr(begin, end-begin);
 	else
 		return "";
+}
+
+std::string ExtractTopDirectory(const std::string &s)
+{
+	size_t slash = s.rfind("/");
+	return slash != string::npos ? s.substr(++slash) : s;
 }
 
 const Buffer &ShowTag(const string &tag)

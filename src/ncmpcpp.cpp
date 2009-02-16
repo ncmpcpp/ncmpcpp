@@ -1212,8 +1212,9 @@ int main(int argc, char *argv[])
 				continue;
 			}
 			
-			size_t dialog_width = COLS*0.8;
-			size_t dialog_height = LINES*0.6;
+			const size_t dialog_width = COLS*0.8;
+			const size_t dialog_height = LINES*0.6;
+			
 			Menu<string> *mDialog = new Menu<string>((COLS-dialog_width)/2, (LINES-dialog_height)/2, dialog_width, dialog_height, "Add selected items to...", Config.main_color, Config.window_border);
 			mDialog->SetTimeout(ncmpcpp_window_timeout);
 			mDialog->SetItemDisplayer(Display::Generic);
@@ -1397,7 +1398,7 @@ int main(int argc, char *argv[])
 					switch (myBrowser->Main()->at(i).type)
 					{
 						case itDirectory:
-							name = myBrowser->Main()->at(i).name;
+							name = ExtractTopDirectory(myBrowser->Main()->at(i).name);
 							break;
 						case itSong:
 							name = myBrowser->Main()->at(i).song->toString(Config.song_list_format);

@@ -459,8 +459,7 @@ void Display::Items(const MPD::Item &item, void *, Menu<MPD::Item> *menu)
 				*menu << "[..]";
 				return;
 			}
-			size_t slash = item.name.rfind("/");
-			*menu << "[" << (slash != string::npos ? item.name.substr(slash+1) : item.name) << "]";
+			*menu << "[" << ExtractTopDirectory(item.name) << "]";
 			return;
 		}
 		case MPD::itSong:

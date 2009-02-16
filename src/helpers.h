@@ -46,6 +46,8 @@ std::string FindSharedDir(const std::string &, const std::string &);
 
 std::string GetLineValue(std::string &, char = '"', char = '"', bool = 0);
 
+std::string ExtractTopDirectory(const std::string &);
+
 const Buffer &ShowTag(const std::string &);
 
 const std::basic_string<my_char_t> &Scroller(const std::string &, size_t, size_t &);
