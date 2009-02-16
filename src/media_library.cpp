@@ -113,7 +113,6 @@ void MediaLibrary::SwitchTo()
 	
 	CLEAR_FIND_HISTORY;
 	myScreen = this;
-	myPlaylist->Main()->Hide(); // hack, should be myScreen, but it doesn't always have 100% width
 	redraw_header = 1;
 	Refresh();
 	UpdateSongList(Songs);

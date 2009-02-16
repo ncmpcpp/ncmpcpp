@@ -52,7 +52,6 @@ void Help::SwitchTo()
 		Resize();
 	
 	myScreen = this;
-	w->Hide();
 	redraw_header = 1;
 
 }

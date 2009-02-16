@@ -58,6 +58,8 @@ void Clock::Resize()
 		w->MoveTo((COLS-Width)/2, (LINES-Height)/2);
 		if (myScreen == this)
 		{
+			if (myPlaylist->hasToBeResized)
+				myPlaylist->Resize();
 			myPlaylist->Main()->Hide();
 			w->Display();
 		}

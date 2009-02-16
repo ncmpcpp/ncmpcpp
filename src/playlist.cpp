@@ -56,7 +56,6 @@ void Playlist::SwitchTo()
 	
 	CLEAR_FIND_HISTORY;
 	myScreen = this;
-	w->Hide();
 	redraw_header = 1;
 }
 

@@ -120,9 +120,8 @@ void Lyrics::SwitchTo()
 			myScreen = this;
 			redraw_header = 1;
 			w->Clear();
-			w->WriteXY(0, 0, 0, "Fetching lyrics...");
-			w->Refresh();
 #			ifdef HAVE_CURL_CURL_H
+			w->WriteXY(0, 0, 0, "Fetching lyrics...");
 			if (!Downloader)
 			{
 				pthread_create(&Downloader, NULL, Get, &itsSong);

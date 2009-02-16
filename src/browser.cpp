@@ -67,7 +67,6 @@ void Browser::SwitchTo()
 	CLEAR_FIND_HISTORY;
 	w->Empty() ? myBrowser->GetDirectory(itsBrowsedDir) : myBrowser->UpdateItemList();
 	myScreen = this;
-	w->Hide();
 	redraw_header = 1;
 }
 
@@ -368,8 +367,6 @@ void Browser::GetDirectory(string dir, string subdir)
 	}
 	if (highlightme >= 0)
 		w->Highlight(highlightme);
-	if (myScreen == myBrowser)
-		w->Hide();
 }
 
 void Browser::ChangeBrowseMode()

@@ -103,7 +103,6 @@ void Info::GetSong()
 		w->Clear();
 		PrepareSong(*s);
 		w->Flush();
-		w->Hide();
 	}
 }
 
@@ -144,7 +143,6 @@ void Info::GetArtist()
 			itsTitle = "Artist's info - " + *artist;
 			w->Clear();
 			w->WriteXY(0, 0, 0, "Fetching artist's info...");
-			w->Refresh();
 			if (!Downloader)
 			{
 				pthread_create(&Downloader, NULL, PrepareArtist, artist);

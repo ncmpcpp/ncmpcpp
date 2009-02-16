@@ -218,7 +218,7 @@ void Scrollpad::Clear(bool clrscr)
 	SetColor(itsColor, itsBgColor);
 	keypad(itsWindow, 1);
 	if (clrscr)
-		Window::Clear();
+		Refresh();
 }
 
 Scrollpad &Scrollpad::operator<<(std::ostream &(*os)(std::ostream&))

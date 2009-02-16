@@ -70,7 +70,6 @@ void SearchEngine::SwitchTo()
 	if (w->Empty())
 		Prepare();
 	myScreen = this;
-	w->Hide();
 	redraw_header = 1;
 	
 	if (!w->Back().first)
