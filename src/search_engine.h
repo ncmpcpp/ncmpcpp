@@ -51,6 +51,11 @@ class SearchEngine : public Screen< Menu< std::pair<Buffer *, MPD::Song *> > >
 		
 		virtual MPD::Song *CurrentSong();
 		
+		virtual bool allowsSelection() { return w->Choice() >= StaticOptions; }
+		virtual void ReverseSelection() { w->ReverseSelection(StaticOptions); }
+		virtual bool Deselect() { return w->Deselect(); }
+		virtual void GetSelectedSongs(MPD::SongList &);
+		
 		void UpdateFoundList();
 		
 		static size_t StaticOptions;

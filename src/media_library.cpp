@@ -246,7 +246,7 @@ void MediaLibrary::SpacePressed()
 {
 	if (Config.space_selects && w == Songs)
 	{
-		Select(Songs);
+		Songs->SelectCurrent();
 		w->Scroll(wDown);
 		return;
 	}
@@ -256,6 +256,16 @@ void MediaLibrary::SpacePressed()
 MPD::Song *MediaLibrary::CurrentSong()
 {
 	return w == Songs && !Songs->Empty() ? &Songs->Current() : 0;
+}
+
+void MediaLibrary::GetSelectedSongs(MPD::SongList &v)
+{
+	std::vector<size_t> selected;
+	Songs->GetSelected(selected);
+	for (std::vector<size_t>::const_iterator it = selected.begin(); it != selected.end(); it++)
+	{
+		v.push_back(new MPD::Song(Songs->at(*it)));
+	}
 }
 
 void MediaLibrary::NextColumn()

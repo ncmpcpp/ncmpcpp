@@ -50,10 +50,12 @@ class BasicScreen
 		
 		virtual MPD::Song *CurrentSong() { return 0; }
 		
-		bool hasToBeResized;
+		virtual bool allowsSelection() = 0;
+		virtual void ReverseSelection() { }
+		virtual bool Deselect() { return false; }
+		virtual void GetSelectedSongs(MPD::SongList &) { }
 		
-	protected:
-		void Select(List *);
+		bool hasToBeResized;
 };
 
 template <class WindowType> class Screen : public BasicScreen
@@ -77,7 +79,6 @@ template <class WindowType> void *&Screen<WindowType>::Cmp()
 {
 	return *(void **)(void *)&w;
 }
-
 
 template <class WindowType> WindowType *&Screen<WindowType>::Main()
 {

@@ -146,7 +146,7 @@ void Browser::SpacePressed()
 {
 	if (Config.space_selects && w->Choice() >= (itsBrowsedDir != "/" ? 1 : 0))
 	{
-		Select(w);
+		w->SelectCurrent();
 		w->Scroll(wDown);
 		return;
 	}
@@ -236,6 +236,39 @@ void Browser::SpacePressed()
 MPD::Song *Browser::CurrentSong()
 {
 	return !w->Empty() && w->Current().type == itSong ? w->Current().song : 0;
+}
+
+void Browser::ReverseSelection()
+{
+	w->ReverseSelection(itsBrowsedDir == "/" ? 0 : 1);
+}
+
+void Browser::GetSelectedSongs(MPD::SongList &v)
+{
+	std::vector<size_t> selected;
+	w->GetSelected(selected);
+	for (std::vector<size_t>::const_iterator it = selected.begin(); it != selected.end(); it++)
+	{
+		const Item &item = w->at(*it);
+		switch (item.type)
+		{
+			case itDirectory:
+			{
+				Mpd->GetDirectoryRecursive(locale_to_utf_cpy(item.name), v);
+				break;
+			}
+			case itSong:
+			{
+				v.push_back(new Song(*item.song));
+				break;
+			}
+			case itPlaylist:
+			{
+				Mpd->GetPlaylistContent(locale_to_utf_cpy(item.name), v);
+				break;
+			}
+		}
+	}
 }
 
 namespace

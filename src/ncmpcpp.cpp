@@ -1184,114 +1184,36 @@ int main(int argc, char *argv[])
 		}
 		else if (Keypressed(input, Key.ReverseSelection))
 		{
-			if (myScreen == myPlaylist
-			||  myScreen == myBrowser
-			||  (myScreen == mySearcher && !mySearcher->Main()->Current().first)
-			||  myScreen->Cmp() == myLibrary->Songs
-			||  myScreen->Cmp() == myPlaylistEditor->Content
-#			ifdef HAVE_TAGLIB_H
-			||  myScreen->Cmp() == myTagEditor->Tags
-#			endif // HAVE_TAGLIB_H
-			   )
+			if (myScreen->allowsSelection())
 			{
-				List *mList = reinterpret_cast<Menu<Song> *>(myWindow->Main());
-				for (size_t i = 0; i < mList->Size(); i++)
-					mList->Select(i, !mList->isSelected(i) && !mList->isStatic(i));
-				// hackish shit begins
-				if (myScreen == myBrowser && myBrowser->CurrentDir() != "/")
-					mList->Select(0, 0); // [..] cannot be selected, uhm.
-				if (myScreen == mySearcher)
-					mList->Select(SearchEngine::ResetButton, 0); // 'Reset' cannot be selected, omgplz.
-				// hacking shit ends.
+				myScreen->ReverseSelection();
 				ShowMessage("Selection reversed!");
 			}
 		}
 		else if (Keypressed(input, Key.DeselectAll))
 		{
-			if (myScreen == myPlaylist
-			||  myScreen == myBrowser
-			||  myScreen == mySearcher
-			||  myScreen->Cmp() == myLibrary->Songs
-			||  myScreen->Cmp() == myPlaylistEditor->Content
-#			ifdef HAVE_TAGLIB_H
-			||  myScreen->Cmp() == myTagEditor->Tags
-#			endif // HAVE_TAGLIB_H
-			   )
+			if (myScreen->allowsSelection())
 			{
-				List *mList = reinterpret_cast<Menu<Song> *>(myWindow->Main());
-				if (mList->hasSelected())
+				if (myScreen->Deselect())
 				{
-					for (size_t i = 0; i < mList->Size(); i++)
-						mList->Select(i, 0);
 					ShowMessage("Items deselected!");
 				}
 			}
 		}
 		else if (Keypressed(input, Key.AddSelected))
 		{
-			if (myScreen != myPlaylist
-			&&  myScreen != myBrowser
-			&&  myScreen != mySearcher
-			&&  myScreen->Cmp() != myLibrary->Songs
-			&&  myScreen->Cmp() != myPlaylistEditor->Content)
+			if (!myScreen->allowsSelection())
 				continue;
 			
-			List *mList = reinterpret_cast<Menu<Song> *>(myWindow->Main());
-			if (!mList->hasSelected())
+			SongList result;
+			myScreen->GetSelectedSongs(result);
+			
+			if (result.empty())
 			{
 				ShowMessage("No selected items!");
 				continue;
 			}
 			
-			vector<size_t> list;
-			mList->GetSelected(list);
-			SongList result;
-			for (vector<size_t>::const_iterator it = list.begin(); it != list.end(); it++)
-			{
-				if (myScreen == myPlaylist)
-				{
-					Song *s = new Song(myPlaylist->Main()->at(*it));
-					result.push_back(s);
-				}
-				else if (myScreen == myBrowser)
-				{
-					const Item &item = myBrowser->Main()->at(*it);
-					switch (item.type)
-					{
-						case itDirectory:
-						{
-							Mpd->GetDirectoryRecursive(locale_to_utf_cpy(item.name), result);
-							break;
-						}
-						case itSong:
-						{
-							Song *s = new Song(*item.song);
-							result.push_back(s);
-							break;
-						}
-						case itPlaylist:
-						{
-							Mpd->GetPlaylistContent(locale_to_utf_cpy(item.name), result);
-							break;
-						}
-					}
-				}
-				else if (myScreen == mySearcher)
-				{
-					Song *s = new Song(*mySearcher->Main()->at(*it).second);
-					result.push_back(s);
-				}
-				else if (myScreen == myLibrary)
-				{
-					Song *s = new Song(myLibrary->Songs->at(*it));
-					result.push_back(s);
-				}
-				else if (myScreen == myPlaylistEditor)
-				{
-					Song *s = new Song(myPlaylistEditor->Content->at(*it));
-					result.push_back(s);
-				}
-			}
 			size_t dialog_width = COLS*0.8;
 			size_t dialog_height = LINES*0.6;
 			Menu<string> *mDialog = new Menu<string>((COLS-dialog_width)/2, (LINES-dialog_height)/2, dialog_width, dialog_height, "Add selected items to...", Config.main_color, Config.window_border);

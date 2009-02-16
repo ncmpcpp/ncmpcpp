@@ -254,7 +254,7 @@ void SearchEngine::SpacePressed()
 	
 	if (Config.space_selects)
 	{
-		Select(w);
+		w->SelectCurrent();
 		w->Scroll(wDown);
 		return;
 	}
@@ -291,6 +291,16 @@ void SearchEngine::SpacePressed()
 MPD::Song *SearchEngine::CurrentSong()
 {
 	return !w->Empty() ? w->Current().second : 0;
+}
+
+void SearchEngine::GetSelectedSongs(MPD::SongList &v)
+{
+	std::vector<size_t> selected;
+	w->GetSelected(selected);
+	for (std::vector<size_t>::const_iterator it = selected.begin(); it != selected.end(); it++)
+	{
+		v.push_back(new MPD::Song(*w->at(*it).second));
+	}
 }
 
 void SearchEngine::UpdateFoundList()

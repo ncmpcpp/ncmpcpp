@@ -40,6 +40,11 @@ class PlaylistEditor : public Screen<Window>
 		
 		virtual MPD::Song *CurrentSong();
 		
+		virtual bool allowsSelection() { return w == Content; }
+		virtual void ReverseSelection() { Content->ReverseSelection(); }
+		virtual bool Deselect() { return Content->Deselect(); }
+		virtual void GetSelectedSongs(MPD::SongList &);
+		
 		void NextColumn();
 		void PrevColumn();
 		

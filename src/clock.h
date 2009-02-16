@@ -41,7 +41,9 @@ class Clock : public Screen<Window>
 		
 		virtual void Update();
 		virtual void Scroll() { }
-	
+		
+		virtual bool allowsSelection() { return false; }
+		
 	protected:
 		static void Prepare();
 		static void Set(int, int);

@@ -36,6 +36,8 @@ class Info : public Screen<Scrollpad>
 		
 		virtual void Update();
 		
+		virtual bool allowsSelection() { return false; }
+		
 		void GetSong();
 #		ifdef HAVE_CURL_CURL_H
 		void GetArtist();

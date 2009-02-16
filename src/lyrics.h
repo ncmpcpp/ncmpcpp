@@ -54,6 +54,8 @@ class Lyrics : public Screen<Scrollpad>
 		
 		virtual void SpacePressed();
 		
+		virtual bool allowsSelection() { return false; }
+		
 		static bool Reload;
 		
 #		ifdef HAVE_CURL_CURL_H

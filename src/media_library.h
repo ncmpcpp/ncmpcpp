@@ -41,6 +41,11 @@ class MediaLibrary : public Screen<Window>
 		
 		virtual MPD::Song *CurrentSong();
 		
+		virtual bool allowsSelection() { return w == Songs; }
+		virtual void ReverseSelection() { Songs->ReverseSelection(); }
+		virtual bool Deselect() { return Songs->Deselect(); }
+		virtual void GetSelectedSongs(MPD::SongList &);
+		
 		void NextColumn();
 		void PrevColumn();
 		

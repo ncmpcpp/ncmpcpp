@@ -18,13 +18,28 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
-#include "screen.h"
+#include "menu.h"
 
-void BasicScreen::Select(List *l)
+void List::SelectCurrent()
 {
-	if (l->Empty())
+	if (Empty())
 		return;
-	size_t i = l->Choice();
-	l->Select(i, !l->isSelected(i));
+	size_t i = Choice();
+	Select(i, !isSelected(i));
+}
+
+void List::ReverseSelection(size_t beginning)
+{
+	for (size_t i = beginning; i < Size(); i++)
+		Select(i, !isSelected(i) && !isStatic(i));
+}
+
+bool List::Deselect()
+{
+	if (!hasSelected())
+		return false;
+	for (size_t i = 0; i < Size(); i++)
+		Select(i, 0);
+	return true;
 }
 

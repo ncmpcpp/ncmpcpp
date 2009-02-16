@@ -704,7 +704,7 @@ void TagEditor::SpacePressed()
 {
 	if (w == Tags)
 	{
-		Select(Tags);
+		Tags->SelectCurrent();
 		w->Scroll(wDown);
 		return;
 	}
@@ -721,6 +721,16 @@ void TagEditor::SpacePressed()
 MPD::Song *TagEditor::CurrentSong()
 {
 	return w == Tags && !Tags->Empty() ? &Tags->Current() : 0;
+}
+
+void TagEditor::GetSelectedSongs(MPD::SongList &v)
+{
+	std::vector<size_t> selected;
+	Tags->GetSelected(selected);
+	for (std::vector<size_t>::const_iterator it = selected.begin(); it != selected.end(); it++)
+	{
+		v.push_back(new MPD::Song(Tags->at(*it)));
+	}
 }
 
 void TagEditor::NextColumn()

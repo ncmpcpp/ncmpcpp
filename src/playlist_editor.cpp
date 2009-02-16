@@ -266,7 +266,7 @@ void PlaylistEditor::SpacePressed()
 {
 	if (Config.space_selects && w == Content)
 	{
-		Select(Content);
+		Content->SelectCurrent();
 		w->Scroll(wDown);
 		return;
 	}
@@ -276,5 +276,15 @@ void PlaylistEditor::SpacePressed()
 MPD::Song *PlaylistEditor::CurrentSong()
 {
 	return w == Content && !Content->Empty() ? &Content->Current() : 0;
+}
+
+void PlaylistEditor::GetSelectedSongs(MPD::SongList &v)
+{
+	std::vector<size_t> selected;
+	Content->GetSelected(selected);
+	for (std::vector<size_t>::const_iterator it = selected.begin(); it != selected.end(); it++)
+	{
+		v.push_back(new MPD::Song(Content->at(*it)));
+	}
 }
 

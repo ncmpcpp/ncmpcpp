@@ -81,13 +81,23 @@ void Playlist::EnterPressed()
 
 void Playlist::SpacePressed()
 {
-	Select(w);
+	w->SelectCurrent();
 	w->Scroll(wDown);
 }
 
 MPD::Song *Playlist::CurrentSong()
 {
 	return !w->Empty() ? &w->Current() : 0;
+}
+
+void Playlist::GetSelectedSongs(MPD::SongList &v)
+{
+	vector<size_t> selected;
+	w->GetSelected(selected);
+	for (vector<size_t>::const_iterator it = selected.begin(); it != selected.end(); it++)
+	{
+		v.push_back(new MPD::Song(w->at(*it)));
+	}
 }
 
 std::string Playlist::TotalLength()

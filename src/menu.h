@@ -31,7 +31,8 @@ class List
 		class InvalidItem { };
 		
 		List() { }
-		virtual ~List() { };
+		virtual ~List() { }
+		
 		virtual void Select(int, bool) = 0;
 		virtual void Static(int, bool) = 0;
 		virtual bool Empty() const = 0;
@@ -43,6 +44,10 @@ class List
 		virtual size_t Size() const = 0;
 		virtual size_t Choice() const = 0;
 		virtual size_t RealChoice() const = 0;
+		
+		void SelectCurrent();
+		void ReverseSelection(size_t = 0);
+		bool Deselect();
 };
 
 template <class T> class Menu : public Window, public List

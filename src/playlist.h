@@ -42,6 +42,11 @@ class Playlist : public Screen< Menu<MPD::Song> >
 		
 		virtual MPD::Song *CurrentSong();
 		
+		virtual bool allowsSelection() { return true; }
+		virtual void ReverseSelection() { w->ReverseSelection(); }
+		virtual bool Deselect() { return w->Deselect(); }
+		virtual void GetSelectedSongs(MPD::SongList &);
+		
 		bool isPlaying() { return NowPlaying >= 0 && !w->Empty(); }
 		const MPD::Song &NowPlayingSong();
 		

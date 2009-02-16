@@ -33,6 +33,8 @@ class Help : public Screen<Scrollpad>
 		
 		virtual std::string Title();
 		
+		virtual bool allowsSelection() { return false; }
+		
 	protected:
 		std::string DisplayKeys(int *, int = 2);
 		void GetKeybindings();
