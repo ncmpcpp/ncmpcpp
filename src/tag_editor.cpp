@@ -734,6 +734,16 @@ void TagEditor::GetSelectedSongs(MPD::SongList &v)
 	}
 }
 
+List *TagEditor::GetList()
+{
+	if (w == LeftColumn)
+		return LeftColumn;
+	else if (w == Tags)
+		return Tags;
+	else
+		return 0;
+}
+
 void TagEditor::NextColumn()
 {
 	CLEAR_FIND_HISTORY;

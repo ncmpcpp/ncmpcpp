@@ -46,10 +46,10 @@ void PlaylistEditor::Init()
 	RightColumnStartX = LeftColumnWidth+1;
 	RightColumnWidth = COLS-LeftColumnWidth-1;
 	
-	List = new Menu<string>(0, main_start_y, LeftColumnWidth, main_height, "Playlists", Config.main_color, brNone);
-	List->HighlightColor(Config.active_column_color);
-	List->SetTimeout(ncmpcpp_window_timeout);
-	List->SetItemDisplayer(Display::Generic);
+	Playlists = new Menu<string>(0, main_start_y, LeftColumnWidth, main_height, "Playlists", Config.main_color, brNone);
+	Playlists->HighlightColor(Config.active_column_color);
+	Playlists->SetTimeout(ncmpcpp_window_timeout);
+	Playlists->SetItemDisplayer(Display::Generic);
 	
 	Content = new Menu<Song>(RightColumnStartX, main_start_y, RightColumnWidth, main_height, "Playlist's content", Config.main_color, brNone);
 	Content->HighlightColor(Config.main_highlight_color);
@@ -59,7 +59,7 @@ void PlaylistEditor::Init()
 	Content->SetItemDisplayer(Display::Songs);
 	Content->SetItemDisplayerUserData(&Config.song_list_format);
 	
-	w = List;
+	w = Playlists;
 }
 
 void PlaylistEditor::Resize()
@@ -68,7 +68,7 @@ void PlaylistEditor::Resize()
 	RightColumnStartX = LeftColumnWidth+1;
 	RightColumnWidth = COLS-LeftColumnWidth-1;
 	
-	List->Resize(LeftColumnWidth, main_height);
+	Playlists->Resize(LeftColumnWidth, main_height);
 	Content->Resize(RightColumnWidth, main_height);
 	
 	Content->MoveTo(RightColumnStartX, main_start_y);
@@ -83,7 +83,7 @@ std::string PlaylistEditor::Title()
 
 void PlaylistEditor::Refresh()
 {
-	List->Display();
+	Playlists->Display();
 	mvvline(main_start_y, RightColumnStartX-1, 0, main_height);
 	Content->Display();
 }
@@ -105,7 +105,7 @@ void PlaylistEditor::SwitchTo()
 
 void PlaylistEditor::Update()
 {
-	if (List->Empty())
+	if (Playlists->Empty())
 	{
 		Content->Clear(0);
 		TagList list;
@@ -114,17 +114,17 @@ void PlaylistEditor::Update()
 		for (TagList::iterator it = list.begin(); it != list.end(); it++)
 		{
 			utf_to_locale(*it);
-			List->AddOption(*it);
+			Playlists->AddOption(*it);
 		}
-		List->Window::Clear();
-		List->Refresh();
+		Playlists->Window::Clear();
+		Playlists->Refresh();
 	}
 	
-	if (!List->Empty() && Content->Empty())
+	if (!Playlists->Empty() && Content->Empty())
 	{
 		Content->Reset();
 		SongList list;
-		Mpd->GetPlaylistContent(locale_to_utf_cpy(List->Current()), list);
+		Mpd->GetPlaylistContent(locale_to_utf_cpy(Playlists->Current()), list);
 		if (!list.empty())
 			Content->SetTitle("Playlist's content (" + IntoStr(list.size()) + " item" + (list.size() == 1 ? ")" : "s)"));
 		else
@@ -151,8 +151,8 @@ void PlaylistEditor::Update()
 	if (w == Content && Content->Empty())
 	{
 		Content->HighlightColor(Config.main_highlight_color);
-		List->HighlightColor(Config.active_column_color);
-		w = List;
+		Playlists->HighlightColor(Config.active_column_color);
+		w = Playlists;
 	}
 	
 	if (Content->Empty())
@@ -163,10 +163,10 @@ void PlaylistEditor::Update()
 
 void PlaylistEditor::NextColumn()
 {
-	if (w == List)
+	if (w == Playlists)
 	{
 		CLEAR_FIND_HISTORY;
-		List->HighlightColor(Config.main_highlight_color);
+		Playlists->HighlightColor(Config.main_highlight_color);
 		w->Refresh();
 		w = Content;
 		Content->HighlightColor(Config.active_column_color);
@@ -180,8 +180,8 @@ void PlaylistEditor::PrevColumn()
 		CLEAR_FIND_HISTORY;
 		Content->HighlightColor(Config.main_highlight_color);
 		w->Refresh();
-		w = List;
-		List->HighlightColor(Config.active_column_color);
+		w = Playlists;
+		Playlists->HighlightColor(Config.active_column_color);
 	}
 }
 
@@ -189,14 +189,14 @@ void PlaylistEditor::AddToPlaylist(bool add_n_play)
 {
 	SongList list;
 	
-	if (w == List && !List->Empty())
+	if (w == Playlists && !Playlists->Empty())
 	{
-		Mpd->GetPlaylistContent(locale_to_utf_cpy(List->Current()), list);
+		Mpd->GetPlaylistContent(locale_to_utf_cpy(Playlists->Current()), list);
 		for (SongList::const_iterator it = list.begin(); it != list.end(); it++)
 			Mpd->QueueAddSong(**it);
 		if (Mpd->CommitQueue())
 		{
-			ShowMessage("Loading playlist %s...", List->Current().c_str());
+			ShowMessage("Loading playlist %s...", Playlists->Current().c_str());
 			Song &s = myPlaylist->Main()->at(myPlaylist->Main()->Size()-list.size());
 			if (s.GetHash() == list[0]->GetHash())
 			{
@@ -285,5 +285,15 @@ void PlaylistEditor::GetSelectedSongs(MPD::SongList &v)
 	{
 		v.push_back(new MPD::Song(Content->at(*it)));
 	}
+}
+
+List *PlaylistEditor::GetList()
+{
+	if (w == Playlists)
+		return Playlists;
+	else if (w == Content)
+		return Content;
+	else // silence compiler
+		return 0;
 }
 

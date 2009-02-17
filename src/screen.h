@@ -52,8 +52,9 @@ class BasicScreen
 		
 		virtual bool allowsSelection() = 0;
 		virtual void ReverseSelection() { }
-		virtual bool Deselect() { return false; }
 		virtual void GetSelectedSongs(MPD::SongList &) { }
+		
+		virtual List *GetList() = 0;
 		
 		bool hasToBeResized;
 };

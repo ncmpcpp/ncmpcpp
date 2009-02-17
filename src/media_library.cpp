@@ -256,6 +256,18 @@ MPD::Song *MediaLibrary::CurrentSong()
 	return w == Songs && !Songs->Empty() ? &Songs->Current() : 0;
 }
 
+List *MediaLibrary::GetList()
+{
+	if (w == Artists)
+		return Artists;
+	else if (w == Albums)
+		return Albums;
+	else if (w == Songs)
+		return Songs;
+	else // silence compiler
+		return 0;
+}
+
 void MediaLibrary::GetSelectedSongs(MPD::SongList &v)
 {
 	std::vector<size_t> selected;

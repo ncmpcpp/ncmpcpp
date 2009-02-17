@@ -44,6 +44,8 @@ class Clock : public Screen<Window>
 		
 		virtual bool allowsSelection() { return false; }
 		
+		virtual List *GetList() { return 0; }
+		
 	protected:
 		static void Prepare();
 		static void Set(int, int);

@@ -46,6 +46,8 @@ class TinyTagEditor : public Screen< Menu<Buffer> >
 		
 		virtual bool allowsSelection() { return false; }
 		
+		virtual List *GetList() { return w; }
+		
 		bool SetEdited(MPD::Song *);
 		
 	protected:
@@ -74,8 +76,9 @@ class TagEditor : public Screen<Window>
 		
 		virtual bool allowsSelection() { return w == Tags; }
 		virtual void ReverseSelection() { Tags->ReverseSelection(); }
-		virtual bool Deselect() { return Tags->Deselect(); }
 		virtual void GetSelectedSongs(MPD::SongList &);
+		
+		virtual List *GetList();
 		
 		void NextColumn();
 		void PrevColumn();

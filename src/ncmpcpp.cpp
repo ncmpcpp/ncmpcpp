@@ -281,7 +281,7 @@ int main(int argc, char *argv[])
 				{
 					myLibrary->Songs->Clear(0);
 				}
-				else if (myScreen->Cmp() == myPlaylistEditor->List)
+				else if (myScreen->Cmp() == myPlaylistEditor->Playlists)
 				{
 					myPlaylistEditor->Content->Clear(0);
 				}
@@ -468,10 +468,10 @@ int main(int argc, char *argv[])
 				}
 				Mpd->CommitQueue();
 			}
-			else if (myScreen == myBrowser || myScreen->Cmp() == myPlaylistEditor->List)
+			else if (myScreen == myBrowser || myScreen->Cmp() == myPlaylistEditor->Playlists)
 			{
 				LockStatusbar();
-				string name = myScreen == myBrowser ? myBrowser->Main()->Current().name : myPlaylistEditor->List->Current();
+				string name = myScreen == myBrowser ? myBrowser->Main()->Current().name : myPlaylistEditor->Playlists->Current();
 				if (myScreen != myBrowser || myBrowser->Main()->Current().type == itPlaylist)
 				{
 					Statusbar() << "Delete playlist " << name << " ? [y/n] ";
@@ -493,7 +493,7 @@ int main(int argc, char *argv[])
 					else
 						ShowMessage("Aborted!");
 					curs_set(0);
-					myPlaylistEditor->List->Clear(0); // make playlists list update itself
+					myPlaylistEditor->Playlists->Clear(0); // make playlists list update itself
 				}
 				UnlockStatusbar();
 			}
@@ -503,29 +503,29 @@ int main(int argc, char *argv[])
 				{
 					vector<size_t> list;
 					myPlaylistEditor->Content->GetSelected(list);
-					locale_to_utf(myPlaylistEditor->List->Current());
+					locale_to_utf(myPlaylistEditor->Playlists->Current());
 					for (vector<size_t>::const_reverse_iterator it = list.rbegin(); it != ((const vector<size_t> &)list).rend(); it++)
 					{
-						Mpd->QueueDeleteFromPlaylist(myPlaylistEditor->List->Current(), *it);
+						Mpd->QueueDeleteFromPlaylist(myPlaylistEditor->Playlists->Current(), *it);
 						myPlaylistEditor->Content->DeleteOption(*it);
 					}
-					utf_to_locale(myPlaylistEditor->List->Current());
-					ShowMessage("Selected items deleted from playlist '%s'!", myPlaylistEditor->List->Current().c_str());
+					utf_to_locale(myPlaylistEditor->Playlists->Current());
+					ShowMessage("Selected items deleted from playlist '%s'!", myPlaylistEditor->Playlists->Current().c_str());
 				}
 				else
 				{
 					myPlaylistEditor->Content->SetTimeout(50);
-					locale_to_utf(myPlaylistEditor->List->Current());
+					locale_to_utf(myPlaylistEditor->Playlists->Current());
 					while (!myPlaylistEditor->Content->Empty() && Keypressed(input, Key.Delete))
 					{
 						TraceMpdStatus();
 						timer = time(NULL);
-						Mpd->QueueDeleteFromPlaylist(myPlaylistEditor->List->Current(), myPlaylistEditor->Content->Choice());
+						Mpd->QueueDeleteFromPlaylist(myPlaylistEditor->Playlists->Current(), myPlaylistEditor->Content->Choice());
 						myPlaylistEditor->Content->DeleteOption(myPlaylistEditor->Content->Choice());
 						myPlaylistEditor->Content->Refresh();
 						myPlaylistEditor->Content->ReadKey(input);
 					}
-					utf_to_locale(myPlaylistEditor->List->Current());
+					utf_to_locale(myPlaylistEditor->Playlists->Current());
 					myPlaylistEditor->Content->SetTimeout(ncmpcpp_window_timeout);
 				}
 				Mpd->CommitQueue();
@@ -561,7 +561,7 @@ int main(int argc, char *argv[])
 				if (Mpd->SavePlaylist(real_playlist_name))
 				{
 					ShowMessage("Playlist saved as: %s", playlist_name.c_str());
-					myPlaylistEditor->List->Clear(0); // make playlist's list update itself
+					myPlaylistEditor->Playlists->Clear(0); // make playlist's list update itself
 				}
 				else
 				{
@@ -586,7 +586,7 @@ int main(int argc, char *argv[])
 					else
 						ShowMessage("Aborted!");
 					curs_set(0);
-					myPlaylistEditor->List->Clear(0); // make playlist's list update itself
+					myPlaylistEditor->Playlists->Clear(0); // make playlist's list update itself
 					UnlockStatusbar();
 				}
 			}
@@ -677,7 +677,7 @@ int main(int argc, char *argv[])
 					}
 					for (size_t i = 0; i < list.size(); i++)
 						if (origs[i] != list[i])
-							Mpd->QueueMove(myPlaylistEditor->List->Current(), origs[i], list[i]);
+							Mpd->QueueMove(myPlaylistEditor->Playlists->Current(), origs[i], list[i]);
 					Mpd->CommitQueue();
 				}
 				else
@@ -695,7 +695,7 @@ int main(int argc, char *argv[])
 						myPlaylistEditor->Content->ReadKey(input);
 					}
 					if (from != to)
-						Mpd->Move(myPlaylistEditor->List->Current(), from, to);
+						Mpd->Move(myPlaylistEditor->Playlists->Current(), from, to);
 				}
 				myPlaylistEditor->Content->SetTimeout(ncmpcpp_window_timeout);
 			}
@@ -781,7 +781,7 @@ int main(int argc, char *argv[])
 					}
 					for (int i = list.size()-1; i >= 0; i--)
 						if (origs[i] != list[i])
-							Mpd->QueueMove(myPlaylistEditor->List->Current(), origs[i], list[i]);
+							Mpd->QueueMove(myPlaylistEditor->Playlists->Current(), origs[i], list[i]);
 					Mpd->CommitQueue();
 				}
 				else
@@ -799,7 +799,7 @@ int main(int argc, char *argv[])
 						myPlaylistEditor->Content->ReadKey(input);
 					}
 					if (from != to)
-						Mpd->Move(myPlaylistEditor->List->Current(), from, to);
+						Mpd->Move(myPlaylistEditor->Playlists->Current(), from, to);
 				}
 				myPlaylistEditor->Content->SetTimeout(ncmpcpp_window_timeout);
 			}
@@ -1113,9 +1113,9 @@ int main(int argc, char *argv[])
 						ShowMessage("Cannot rename '%s' to '%s'!", old_dir.c_str(), new_dir.c_str());
 				}
 			}
-			else if (myScreen->Cmp() == myPlaylistEditor->List || (myScreen == myBrowser && myBrowser->Main()->Current().type == itPlaylist))
+			else if (myScreen->Cmp() == myPlaylistEditor->Playlists || (myScreen == myBrowser && myBrowser->Main()->Current().type == itPlaylist))
 			{
-				string old_name = myScreen->Cmp() == myPlaylistEditor->List ? myPlaylistEditor->List->Current() : myBrowser->Main()->Current().name;
+				string old_name = myScreen->Cmp() == myPlaylistEditor->Playlists ? myPlaylistEditor->Playlists->Current() : myBrowser->Main()->Current().name;
 				LockStatusbar();
 				Statusbar() << fmtBold << "Playlist: " << fmtBoldEnd;
 				string new_name = wFooter->GetString(old_name);
@@ -1126,7 +1126,7 @@ int main(int argc, char *argv[])
 					ShowMessage("Playlist '%s' renamed to '%s'", old_name.c_str(), new_name.c_str());
 					if (!Config.local_browser)
 						myBrowser->GetDirectory("/");
-					myPlaylistEditor->List->Clear(0);
+					myPlaylistEditor->Playlists->Clear(0);
 				}
 			}
 		}
@@ -1192,7 +1192,7 @@ int main(int argc, char *argv[])
 		{
 			if (myScreen->allowsSelection())
 			{
-				if (myScreen->Deselect())
+				if (myScreen->GetList()->Deselect())
 				{
 					ShowMessage("Items deselected!");
 				}
@@ -1313,7 +1313,7 @@ int main(int argc, char *argv[])
 				// refresh playlist's lists
 				if (!Config.local_browser && myBrowser->CurrentDir() == "/")
 					myBrowser->GetDirectory("/");
-				myPlaylistEditor->List->Clear(0); // make playlist editor update itself
+				myPlaylistEditor->Playlists->Clear(0); // make playlist editor update itself
 			}
 			timer = time(NULL);
 			delete mDialog;
@@ -1360,16 +1360,9 @@ int main(int argc, char *argv[])
 		}
 		else if (Keypressed(input, Key.FindForward) || Keypressed(input, Key.FindBackward))
 		{
-			if ((myScreen == myHelp
-			||   myScreen == mySearcher
-#			ifdef HAVE_TAGLIB_H
-			||   myScreen == myTinyTagEditor
-			||   myScreen->Cmp() == myTagEditor->TagTypes
-#			endif // HAVE_TAGLIB_H
-			    )
-			&&  (myScreen != mySearcher
-			||   mySearcher->Main()->Current().first)
-			   )
+			List *mList = myScreen->GetList();
+			
+			if (!mList)
 				continue;
 			
 			string how = Keypressed(input, Key.FindForward) ? "forward" : "backward";
@@ -1385,7 +1378,6 @@ int main(int argc, char *argv[])
 			CLEAR_FIND_HISTORY;
 			
 			ShowMessage("Searching...");
-			List *mList = reinterpret_cast<Menu<Song> *>(myWindow->Main());
 			for (size_t i = (myScreen == mySearcher ? SearchEngine::StaticOptions : 0); i < mList->Size(); i++)
 			{
 				string name;
@@ -1424,8 +1416,8 @@ int main(int argc, char *argv[])
 				}
 				else if (myScreen == myPlaylistEditor)
 				{
-					if (myScreen->Cmp() == myPlaylistEditor->List)
-						name = myPlaylistEditor->List->at(i);
+					if (myScreen->Cmp() == myPlaylistEditor->Playlists)
+						name = myPlaylistEditor->Playlists->at(i);
 					else
 						name = myPlaylistEditor->Content->at(i).toString(Config.song_list_format);
 				}
@@ -1517,32 +1509,34 @@ int main(int argc, char *argv[])
 		}
 		else if (Keypressed(input, Key.NextFoundPosition) || Keypressed(input, Key.PrevFoundPosition))
 		{
-			if (!vFoundPositions.empty())
+			List *mList = myScreen->GetList();
+			
+			if (!mList || vFoundPositions.empty())
+				continue;
+			
+			bool next = Keypressed(input, Key.NextFoundPosition);
+			
+			try
 			{
-				List *mList = reinterpret_cast<Menu<Song> *>(myWindow->Main());
-				try
+				mList->Highlight(vFoundPositions.at(next ? ++found_pos : --found_pos));
+			}
+			catch (std::out_of_range)
+			{
+				if (Config.wrapped_search)
 				{
-					mList->Highlight(vFoundPositions.at(Keypressed(input, Key.NextFoundPosition) ? ++found_pos : --found_pos));
-				}
-				catch (std::out_of_range)
-				{
-					if (Config.wrapped_search)
+					if (next)
 					{
-						
-						if (Keypressed(input, Key.NextFoundPosition))
-						{
-							mList->Highlight(vFoundPositions.front());
-							found_pos = 0;
-						}
-						else
-						{
-							mList->Highlight(vFoundPositions.back());
-							found_pos = vFoundPositions.size()-1;
-						}
+						mList->Highlight(vFoundPositions.front());
+						found_pos = 0;
 					}
-					else
-						found_pos = Keypressed(input, Key.NextFoundPosition) ? vFoundPositions.size()-1 : 0;
+					else // prev
+					{
+						mList->Highlight(vFoundPositions.back());
+						found_pos = vFoundPositions.size()-1;
+					}
 				}
+				else
+					found_pos = next ? vFoundPositions.size()-1 : 0;
 			}
 		}
 		else if (Keypressed(input, Key.ToggleFindMode))

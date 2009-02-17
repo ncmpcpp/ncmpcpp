@@ -42,13 +42,14 @@ class PlaylistEditor : public Screen<Window>
 		
 		virtual bool allowsSelection() { return w == Content; }
 		virtual void ReverseSelection() { Content->ReverseSelection(); }
-		virtual bool Deselect() { return Content->Deselect(); }
 		virtual void GetSelectedSongs(MPD::SongList &);
+		
+		virtual List *GetList();
 		
 		void NextColumn();
 		void PrevColumn();
 		
-		Menu<std::string> *List;
+		Menu<std::string> *Playlists;
 		Menu<MPD::Song> *Content;
 	
 	protected:

@@ -42,8 +42,9 @@ class Browser : public Screen< Menu<MPD::Item> >
 		
 		virtual bool allowsSelection() { return true; }
 		virtual void ReverseSelection();
-		virtual bool Deselect() { return w->Deselect(); }
 		virtual void GetSelectedSongs(MPD::SongList &);
+		
+		virtual List *GetList() { return w; }
 		
 		const std::string &CurrentDir() { return itsBrowsedDir; }
 		

@@ -35,6 +35,8 @@ class Help : public Screen<Scrollpad>
 		
 		virtual bool allowsSelection() { return false; }
 		
+		virtual List *GetList() { return 0; }
+		
 	protected:
 		std::string DisplayKeys(int *, int = 2);
 		void GetKeybindings();
