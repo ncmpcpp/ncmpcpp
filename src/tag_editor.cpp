@@ -379,7 +379,7 @@ void TagEditor::SwitchTo()
 		TagTypes->AddSeparator();
 		TagTypes->AddOption("Filename");
 		TagTypes->AddSeparator();
-		TagTypes->AddOption("Options", 1, 1, 0);
+		TagTypes->AddOption("Options", 1, 1);
 		TagTypes->AddSeparator();
 		TagTypes->AddOption("Reset");
 		TagTypes->AddOption("Save");
@@ -1222,7 +1222,7 @@ void DealWithFilenames(SongList &v)
 		if (!patterns_list.empty())
 		{
 			Main->AddSeparator();
-			Main->AddOption("Recent patterns", 1, 1, 0);
+			Main->AddOption("Recent patterns", 1, 1);
 			Main->AddSeparator();
 			for (vector<string>::const_iterator it = patterns_list.begin(); it != patterns_list.end(); it++)
 				Main->AddOption(*it);

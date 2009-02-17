@@ -56,16 +56,18 @@ template <class T> class Menu : public Window, public List
 	
 	struct Option
 	{
-		Option() : Item(0), isBold(0), isSelected(0), isStatic(0), haveSeparator(0) { }
-		T *Item;
+		Option() : isBold(0), isSelected(0), isStatic(0) { }
+		Option(const T &t, bool is_bold, bool is_static) :
+		Item(t), isBold(is_bold), isSelected(0), isStatic(is_static) { }
+		
+		T Item;
 		bool isBold;
 		bool isSelected;
 		bool isStatic;
-		bool haveSeparator;
 	};
 	
-	typedef typename std::vector<Option>::iterator option_iterator;
-	typedef typename std::vector<Option>::const_iterator option_const_iterator;
+	typedef typename std::vector<Option *>::iterator option_iterator;
+	typedef typename std::vector<Option *>::const_iterator option_const_iterator;
 	
 	public:
 		Menu(size_t, size_t, size_t, size_t, const std::string &, Color, Border);
@@ -77,9 +79,9 @@ template <class T> class Menu : public Window, public List
 		
 		void Reserve(size_t size);
 		void ResizeBuffer(size_t size);
-		void AddOption(const T &item = T(), bool is_bold = 0, bool is_static = 0, bool have_separator = 0);
+		void AddOption(const T &item, bool is_bold = 0, bool is_static = 0);
 		void AddSeparator();
-		void InsertOption(size_t pos, const T &Item = T(), bool is_bold = 0, bool is_static = 0, bool have_separator = 0);
+		void InsertOption(size_t pos, const T &Item, bool is_bold = 0, bool is_static = 0);
 		void InsertSeparator(size_t pos);
 		void DeleteOption(size_t pos);
 		void IntoSeparator(size_t pos);
@@ -128,7 +130,7 @@ template <class T> class Menu : public Window, public List
 		ItemDisplayer itsItemDisplayer;
 		void *itsItemDisplayerUserdata;
 		
-		std::vector<Option> itsOptions;
+		std::vector<Option *> itsOptions;
 		
 		int itsBeginning;
 		int itsHighlight;
@@ -173,7 +175,7 @@ template <class T> Menu<T>::Menu(const Menu &m) : Window(m)
 template <class T> Menu<T>::~Menu()
 {
 	for (option_iterator it = itsOptions.begin(); it != itsOptions.end(); it++)
-		delete it->Item;
+		delete *it;
 }
 
 template <class T> void Menu<T>::Reserve(size_t size)
@@ -185,51 +187,35 @@ template <class T> void Menu<T>::ResizeBuffer(size_t size)
 {
 	itsOptions.resize(size);
 	for (size_t i = 0; i < size; i++)
-		if (!itsOptions[i].Item)
-			itsOptions[i].Item = new T();
+		if (!itsOptions[i])
+			itsOptions[i] = new Option();
 }
 
-template <class T> void Menu<T>::AddOption(const T &item, bool is_bold, bool is_static, bool have_separator)
+template <class T> void Menu<T>::AddOption(const T &item, bool is_bold, bool is_static)
 {
-	Option o;
-	o.Item = new T(item);
-	o.isBold = is_bold;
-	o.isStatic = is_static;
-	o.haveSeparator = have_separator;
-	itsOptions.push_back(o);
+	itsOptions.push_back(new Option(item, is_bold, is_static));
 }
 
 template <class T> void Menu<T>::AddSeparator()
 {
-	Option o;
-	o.isStatic = true;
-	o.haveSeparator = true;
-	itsOptions.push_back(o);
+	itsOptions.push_back(0);
 }
 
-template <class T> void Menu<T>::InsertOption(size_t pos, const T &item, bool is_bold, bool is_static, bool have_separator)
+template <class T> void Menu<T>::InsertOption(size_t pos, const T &item, bool is_bold, bool is_static)
 {
-	Option o;
-	o.Item = new T(item);
-	o.isBold = is_bold;
-	o.isStatic = is_static;
-	o.haveSeparator = have_separator;
-	itsOptions.insert(itsOptions.begin()+pos, o);
+	itsOptions.insert(itsOptions.begin()+pos, new Option(item, is_bold, is_static));
 }
 
 template <class T> void Menu<T>::InsertSeparator(size_t pos)
 {
-	Option o;
-	o.isStatic = true;
-	o.haveSeparator = true;
-	itsOptions.insert(itsOptions.begin()+pos, o);
+	itsOptions.insert(itsOptions.begin()+pos, 0);
 }
 
 template <class T> void Menu<T>::DeleteOption(size_t pos)
 {
 	if (itsOptions.empty())
 		return;
-	delete itsOptions.at(pos).Item;
+	delete itsOptions.at(pos);
 	itsOptions.erase(itsOptions.begin()+pos);
 	if (itsOptions.empty())
 		Window::Clear();
@@ -237,18 +223,15 @@ template <class T> void Menu<T>::DeleteOption(size_t pos)
 
 template <class T> void Menu<T>::IntoSeparator(size_t pos)
 {
-	if (itsOptions.at(pos).Item)
-		delete itsOptions[pos].Item;
-	itsOptions[pos].Item = 0;
-	itsOptions[pos].isBold = false;
-	itsOptions[pos].isSelected = false;
-	itsOptions[pos].isStatic = true;
-	itsOptions[pos].haveSeparator = true;
+	delete itsOptions.at(pos);
+	itsOptions[pos] = 0;
 }
 
 template <class T> void Menu<T>::BoldOption(int index, bool bold)
 {
-	itsOptions.at(index).isBold = bold;
+	if (!itsOptions.at(index))
+		return;
+	itsOptions[index]->isBold = bold;
 }
 
 template <class T>
@@ -283,26 +266,31 @@ template <class T> void Menu<T>::Refresh()
 				mvwhline(itsWindow, line, 0, 32, itsWidth);
 			break;
 		}
-		if (itsOptions[i].isBold)
+		if (!itsOptions[i]) // separator
+		{
+			mvwhline(itsWindow, line++, 0, 0, itsWidth);
+			continue;
+		}
+		if (itsOptions[i]->isBold)
 			Bold(1);
 		if (highlightEnabled && int(i) == itsHighlight)
 		{
 			Reverse(1);
 			*this << itsHighlightColor;
 		}
-		mvwhline(itsWindow, line, 0, !itsOptions[i].haveSeparator*32, itsWidth);
-		if (itsOptions[i].isSelected && itsSelectedPrefix)
+		mvwhline(itsWindow, line, 0, 32, itsWidth);
+		if (itsOptions[i]->isSelected && itsSelectedPrefix)
 			*this << *itsSelectedPrefix;
-		if (itsItemDisplayer && itsOptions[i].Item)
-			itsItemDisplayer(*itsOptions[i].Item, itsItemDisplayerUserdata, this);
-		if (itsOptions[i].isSelected && itsSelectedSuffix)
+		if (itsItemDisplayer)
+			itsItemDisplayer(itsOptions[i]->Item, itsItemDisplayerUserdata, this);
+		if (itsOptions[i]->isSelected && itsSelectedSuffix)
 			*this << *itsSelectedSuffix;
 		if (highlightEnabled && int(i) == itsHighlight)
 		{
 			*this << clEnd;
 			Reverse(0);
 		}
-		if (itsOptions[i].isBold)
+		if (itsOptions[i]->isBold)
 			Bold(0);
 		line++;
 	}
@@ -333,7 +321,7 @@ template <class T> void Menu<T>::Scroll(Where where)
 			{
 				itsHighlight--;
 			}
-			if (itsOptions[itsHighlight].isStatic)
+			if (!itsOptions[itsHighlight] || itsOptions[itsHighlight]->isStatic)
 			{
 				Scroll(itsHighlight == 0 ? wDown : wUp);
 			}
@@ -354,7 +342,7 @@ template <class T> void Menu<T>::Scroll(Where where)
 			{
 				itsHighlight++;
 			}
-			if (itsOptions[itsHighlight].isStatic)
+			if (!itsOptions[itsHighlight] || itsOptions[itsHighlight]->isStatic)
 			{
 				Scroll(itsHighlight == MaxHighlight ? wUp : wDown);
 			}
@@ -370,7 +358,7 @@ template <class T> void Menu<T>::Scroll(Where where)
 				if (itsHighlight < 0)
 					itsHighlight = 0;
 			}
-			if (itsOptions[itsHighlight].isStatic)
+			if (!itsOptions[itsHighlight] || itsOptions[itsHighlight]->isStatic)
 			{
 				Scroll(itsHighlight == 0 ? wDown: wUp);
 			}
@@ -386,7 +374,7 @@ template <class T> void Menu<T>::Scroll(Where where)
 				if (itsHighlight > MaxHighlight)
 					itsHighlight = MaxHighlight;
 			}
-			if (itsOptions[itsHighlight].isStatic)
+			if (!itsOptions[itsHighlight] || itsOptions[itsHighlight]->isStatic)
 			{
 				Scroll(itsHighlight == MaxHighlight ? wUp : wDown);
 			}
@@ -396,7 +384,7 @@ template <class T> void Menu<T>::Scroll(Where where)
 		{
 			itsHighlight = 0;
 			itsBeginning = 0;
-			if (itsOptions[itsHighlight].isStatic)
+			if (!itsOptions[itsHighlight] || itsOptions[itsHighlight]->isStatic)
 			{
 				Scroll(itsHighlight == 0 ? wDown : wUp);
 			}
@@ -406,7 +394,7 @@ template <class T> void Menu<T>::Scroll(Where where)
 		{
 			itsHighlight = MaxHighlight;
 			itsBeginning = MaxBeginning;
-			if (itsOptions[itsHighlight].isStatic)
+			if (!itsOptions[itsHighlight] || itsOptions[itsHighlight]->isStatic)
 			{
 				Scroll(itsHighlight == MaxHighlight ? wUp : wDown);
 			}
@@ -424,7 +412,7 @@ template <class T> void Menu<T>::Reset()
 template <class T> void Menu<T>::Clear(bool clrscr)
 {
 	for (option_iterator it = itsOptions.begin(); it != itsOptions.end(); it++)
-		delete it->Item;
+		delete *it;
 	itsOptions.clear();
 	if (clrscr)
 		Window::Clear();
@@ -432,33 +420,41 @@ template <class T> void Menu<T>::Clear(bool clrscr)
 
 template <class T> bool Menu<T>::isBold(int id)
 {
-	return itsOptions.at(id == -1 ? itsHighlight : id).isBold;
+	return itsOptions.at(id == -1 ? itsHighlight : id)->isBold;
 }
 
 template <class T> void Menu<T>::Select(int id, bool value)
 {
-	itsOptions.at(id).isSelected = value;
+	if (!itsOptions.at(id))
+		return;
+	itsOptions[id]->isSelected = value;
 }
 
 template <class T> void Menu<T>::Static(int id, bool value)
 {
-	itsOptions.at(id).isStatic = value;
+	if (!itsOptions.at(id))
+		return;
+	itsOptions[id]->isStatic = value;
 }
 
 template <class T> bool Menu<T>::isSelected(int id) const
 {
-	return itsOptions.at(id == -1 ? itsHighlight : id).isSelected;
+	if (!itsOptions.at(id == -1 ? itsHighlight : id))
+		return 0;
+	return itsOptions[id == -1 ? itsHighlight : id]->isSelected;
 }
 
 template <class T> bool Menu<T>::isStatic(int id) const
 {
-	return itsOptions.at(id == -1 ? itsHighlight : id).isStatic;
+	if (!itsOptions.at(id == -1 ? itsHighlight : id))
+		return 1;
+	return itsOptions[id == -1 ? itsHighlight : id]->isStatic;
 }
 
 template <class T> bool Menu<T>::hasSelected() const
 {
 	for (option_const_iterator it = itsOptions.begin(); it != itsOptions.end(); it++)
-		if (it->isSelected)
+		if (*it && (*it)->isSelected)
 			return true;
 	return false;
 }
@@ -466,7 +462,7 @@ template <class T> bool Menu<T>::hasSelected() const
 template <class T> void Menu<T>::GetSelected(std::vector<size_t> &v) const
 {
 	for (size_t i = 0; i < itsOptions.size(); i++)
-		if (itsOptions[i].isSelected)
+		if (itsOptions[i]->isSelected)
 			v.push_back(i);
 }
 
@@ -490,73 +486,65 @@ template <class T> size_t Menu<T>::RealChoice() const
 {
 	size_t result = 0;
 	for (option_const_iterator it = itsOptions.begin(); it != itsOptions.begin()+itsHighlight; it++)
-		if (!it->isStatic)
+		if (*it && !(*it)->isStatic)
 			result++;
 	return result;
 }
 
 template <class T> T &Menu<T>::Back()
 {
-	if (itsOptions.back().Item)
-		return *itsOptions.back().Item;
-	else
+	if (!itsOptions.back())
 		throw InvalidItem();
+	return itsOptions.back()->Item;
 }
 
 template <class T> const T &Menu<T>::Back() const
 {
-	if (itsOptions.back().Item)
-		return *itsOptions.back().Item;
-	else
+	if (!itsOptions.back())
 		throw InvalidItem();
+	return itsOptions.back()->Item;
 }
 
 template <class T> T &Menu<T>::Current()
 {
-	if (itsOptions.at(itsHighlight).Item)
-		return *itsOptions.at(itsHighlight).Item;
-	else
+	if (!itsOptions.at(itsHighlight))
 		throw InvalidItem();
+	return itsOptions[itsHighlight]->Item;
 }
 
 template <class T> const T &Menu<T>::Current() const
 {
-	if (itsOptions.at(itsHighlight).Item)
-		return *itsOptions.at(itsHighlight).Item;
-	else
+	if (!itsOptions.at(itsHighlight))
 		throw InvalidItem();
+	return itsOptions[itsHighlight]->Item;
 }
 
 template <class T> T &Menu<T>::at(size_t i)
 {
-	if (itsOptions.at(i).Item)
-		return *itsOptions.at(i).Item;
-	else
+	if (!itsOptions.at(i))
 		throw InvalidItem();
+	return itsOptions[i]->Item;
 }
 
 template <class T> const T &Menu<T>::at(size_t i) const
 {
-	if (itsOptions.at(i).Item)
-		return *itsOptions.at(i).Item;
-	else
+	if (!itsOptions.at(i))
 		throw InvalidItem();
+	return itsOptions.at(i)->Item;
 }
 
 template <class T> const T &Menu<T>::operator[](size_t i) const
 {
-	if (itsOptions[i].Item)
-		return *itsOptions[i].Item;
-	else
+	if (!itsOptions[i])
 		throw InvalidItem();
+	return itsOptions[i]->Item;
 }
 
 template <class T> T &Menu<T>::operator[](size_t i)
 {
-	if (itsOptions[i].Item)
-		return *itsOptions[i].Item;
-	else
+	if (!itsOptions[i])
 		throw InvalidItem();
+	return itsOptions[i]->Item;
 }
 
 template <class T> Menu<T> *Menu<T>::EmptyClone() const
