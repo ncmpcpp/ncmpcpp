@@ -27,6 +27,7 @@ using std::string;
 
 const char *MPD::Message::PartOfSongsAdded = "Only part of requested songs' list added to playlist!";
 const char *MPD::Message::FullPlaylist = "Playlist is full!";
+const char *MPD::Message::FunctionDisabledFilteringEnabled = "Function disabled due to enabled filtering in playlist";
 
 Connection::Connection() : isConnected(0),
 				 itsErrorCode(0),

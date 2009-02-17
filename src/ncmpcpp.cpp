@@ -161,7 +161,7 @@ int main(int argc, char *argv[])
 	
 	wFooter = new Window(0, footer_start_y, COLS, footer_height, "", Config.statusbar_color, brNone);
 	wFooter->SetTimeout(ncmpcpp_window_timeout);
-	wFooter->SetGetStringHelper(TraceMpdStatus);
+	wFooter->SetGetStringHelper(StatusbarGetStringHelper);
 	wFooter->Display();
 	
 	myScreen = myPlaylist;
@@ -180,6 +180,7 @@ int main(int argc, char *argv[])
 	string screen_title;
 	
 	timeval now, past;
+	
 	// local variables end
 	
 	signal(SIGPIPE, SIG_IGN);
@@ -266,7 +267,17 @@ int main(int argc, char *argv[])
 #		endif // HAVE_TAGLIB_H
 			)
 		{
-			if (Keypressed(input, Key.Up) || Keypressed(input, Key.Down) || Keypressed(input, Key.PageUp) || Keypressed(input, Key.PageDown) || Keypressed(input, Key.Home) || Keypressed(input, Key.End) || Keypressed(input, Key.FindForward) || Keypressed(input, Key.FindBackward) || Keypressed(input, Key.NextFoundPosition) || Keypressed(input, Key.PrevFoundPosition))
+			if (Keypressed(input, Key.Up)
+			||  Keypressed(input, Key.Down)
+			||  Keypressed(input, Key.PageUp)
+			||  Keypressed(input, Key.PageDown)
+			||  Keypressed(input, Key.Home)
+			||  Keypressed(input, Key.End)
+			||  Keypressed(input, Key.ApplyFilter)
+			||  Keypressed(input, Key.FindForward)
+			||  Keypressed(input, Key.FindBackward)
+			||  Keypressed(input, Key.NextFoundPosition)
+			||  Keypressed(input, Key.PrevFoundPosition))
 			{
 				if (myScreen->Cmp() == myLibrary->Artists)
 				{
@@ -438,7 +449,7 @@ int main(int argc, char *argv[])
 					myPlaylist->Main()->GetSelected(list);
 					for (vector<size_t>::const_reverse_iterator it = list.rbegin(); it != ((const vector<size_t> &)list).rend(); it++)
 					{
-						Mpd->QueueDeleteSong(*it);
+						Mpd->QueueDeleteSongId((*myPlaylist->Main())[*it].GetID());
 						myPlaylist->Main()->DeleteOption(*it);
 					}
 					ShowMessage("Selected items deleted!");
@@ -452,9 +463,9 @@ int main(int argc, char *argv[])
 						size_t id = myPlaylist->Main()->Choice();
 						TraceMpdStatus();
 						timer = time(NULL);
-						if (size_t(myPlaylist->NowPlaying) > id)  // needed for keeping proper
+						if (myPlaylist->NowPlaying > myPlaylist->CurrentSong()->GetPosition())  // needed for keeping proper
 							myPlaylist->NowPlaying--; // position of now playing song.
-						Mpd->QueueDeleteSong(id);
+						Mpd->QueueDeleteSongId(myPlaylist->CurrentSong()->GetID());
 						myPlaylist->Main()->DeleteOption(id);
 						myPlaylist->Main()->Refresh();
 						myPlaylist->Main()->ReadKey(input);
@@ -597,6 +608,12 @@ int main(int argc, char *argv[])
 		{
 			if (myScreen == myPlaylist && !myPlaylist->Main()->Empty())
 			{
+				if (myPlaylist->Main()->isFiltered())
+				{
+					ShowMessage("%s", MPD::Message::FunctionDisabledFilteringEnabled);
+					continue;
+				}
+				
 				Playlist::BlockUpdate = 1;
 				myPlaylist->Main()->SetTimeout(50);
 				if (myPlaylist->Main()->hasSelected())
@@ -700,6 +717,12 @@ int main(int argc, char *argv[])
 		{
 			if (myScreen == myPlaylist && !myPlaylist->Main()->Empty())
 			{
+				if (myPlaylist->Main()->isFiltered())
+				{
+					ShowMessage("%s", MPD::Message::FunctionDisabledFilteringEnabled);
+					continue;
+				}
+				
 				Playlist::BlockUpdate = 1;
 				myPlaylist->Main()->SetTimeout(50);
 				if (myPlaylist->Main()->hasSelected())
@@ -830,7 +853,10 @@ int main(int argc, char *argv[])
 		{
 			if (!myPlaylist->isPlaying())
 				continue;
-			if (!myPlaylist->NowPlayingSong().GetTotalLength())
+			
+			const Song &s = Mpd->GetCurrentSong();
+			
+			if (!s.GetTotalLength())
 			{
 				ShowMessage("Unknown item length!");
 				continue;
@@ -842,7 +868,6 @@ int main(int argc, char *argv[])
 			time_t t = time(NULL);
 			
 			songpos = Mpd->GetElapsedTime();
-			const Song &s = myPlaylist->NowPlayingSong();
 			
 			while (Keypressed(input, Key.SeekForward) || Keypressed(input, Key.SeekBackward))
 			{
@@ -888,15 +913,30 @@ int main(int argc, char *argv[])
 			{
 				Config.columns_in_playlist = !Config.columns_in_playlist;
 				ShowMessage("Playlist display mode: %s", Config.columns_in_playlist ? "Columns" : "Classic");
-				myPlaylist->Main()->SetItemDisplayer(Config.columns_in_playlist ? Display::SongsInColumns : Display::Songs);
-				myPlaylist->Main()->SetItemDisplayerUserData(Config.columns_in_playlist ? &Config.song_columns_list_format : &Config.song_list_format);
-				myPlaylist->Main()->SetTitle(Config.columns_in_playlist ? Display::Columns(Config.song_columns_list_format) : "");
+				
+				if (Config.columns_in_playlist)
+				{
+					myPlaylist->Main()->SetItemDisplayer(Display::SongsInColumns);
+					myPlaylist->Main()->SetItemDisplayerUserData(&Config.song_columns_list_format);
+					myPlaylist->Main()->SetTitle(Display::Columns(Config.song_columns_list_format));
+					myPlaylist->Main()->SetGetStringFunction(Playlist::SongInColumnsToString);
+					myPlaylist->Main()->SetGetStringFunctionUserData(&Config.song_columns_list_format);
+				}
+				else
+				{
+					myPlaylist->Main()->SetItemDisplayer(Display::Songs);
+					myPlaylist->Main()->SetItemDisplayerUserData(&Config.song_list_format);
+					myPlaylist->Main()->SetTitle("");
+					myPlaylist->Main()->SetGetStringFunction(Playlist::SongToString);
+					myPlaylist->Main()->SetGetStringFunctionUserData(&Config.song_list_format);
+				}
 			}
 			else if (myScreen == myBrowser)
 			{
 				Config.columns_in_browser = !Config.columns_in_browser;
 				ShowMessage("Browser display mode: %s", Config.columns_in_browser ? "Columns" : "Classic");
 				myBrowser->Main()->SetTitle(Config.columns_in_browser ? Display::Columns(Config.song_columns_list_format) : "");
+				
 			}
 			else if (myScreen == mySearcher)
 			{
@@ -921,7 +961,7 @@ int main(int argc, char *argv[])
 		{
 			Config.autocenter_mode = !Config.autocenter_mode;
 			ShowMessage("Auto center mode: %s", Config.autocenter_mode ? "On" : "Off");
-			if (Config.autocenter_mode && myPlaylist->isPlaying())
+			if (Config.autocenter_mode && myPlaylist->isPlaying() && !myPlaylist->Main()->isFiltered())
 				myPlaylist->Main()->Highlight(myPlaylist->NowPlaying);
 		}
 		else if (Keypressed(input, Key.UpdateDB))
@@ -937,8 +977,14 @@ int main(int argc, char *argv[])
 		}
 		else if (Keypressed(input, Key.GoToNowPlaying))
 		{
-			if (myScreen == myPlaylist && myPlaylist->isPlaying())
-				myPlaylist->Main()->Highlight(myPlaylist->NowPlaying);
+			if (myScreen != myPlaylist || !myPlaylist->isPlaying())
+				continue;
+			if (myPlaylist->Main()->isFiltered())
+			{
+				ShowMessage("%s", MPD::Message::FunctionDisabledFilteringEnabled);
+				continue;
+			}
+			myPlaylist->Main()->Highlight(myPlaylist->NowPlaying);
 		}
 		else if (Keypressed(input, Key.ToggleRepeat))
 		{
@@ -1163,7 +1209,10 @@ int main(int argc, char *argv[])
 		{
 			if (!myPlaylist->isPlaying())
 				continue;
-			if (!myPlaylist->NowPlayingSong().GetTotalLength())
+			
+			const Song &s = Mpd->GetCurrentSong();
+			
+			if (!s.GetTotalLength())
 			{
 				ShowMessage("Unknown item length!");
 				continue;
@@ -1173,7 +1222,7 @@ int main(int argc, char *argv[])
 			string position = wFooter->GetString(3);
 			int newpos = StrToInt(position);
 			if (newpos > 0 && newpos < 100 && !position.empty())
-				Mpd->Seek(myPlaylist->NowPlayingSong().GetTotalLength()*newpos/100.0);
+				Mpd->Seek(s.GetTotalLength()*newpos/100.0);
 			UnlockStatusbar();
 		}
 		else if (Keypressed(input, Key.ReverseSelection))
@@ -1317,6 +1366,11 @@ int main(int argc, char *argv[])
 		}
 		else if (Keypressed(input, Key.Crop))
 		{
+			if (myPlaylist->Main()->isFiltered())
+			{
+				ShowMessage("%s", MPD::Message::FunctionDisabledFilteringEnabled);
+				continue;
+			}
 			if (myPlaylist->Main()->hasSelected())
 			{
 				for (int i = myPlaylist->Main()->Size()-1; i >= 0; i--)
@@ -1354,6 +1408,34 @@ int main(int argc, char *argv[])
 			Mpd->ClearPlaylist();
 			ShowMessage("Cleared playlist!");
 		}
+		else if (Keypressed(input, Key.ApplyFilter))
+		{
+			List *mList = myScreen->GetList();
+			
+			if (!mList)
+				continue;
+			
+			CLEAR_FIND_HISTORY;
+			
+			LockStatusbar();
+			Statusbar() << fmtBold << "Apply filter: " << fmtBoldEnd;
+			wFooter->SetGetStringHelper(StatusbarApplyFilterImmediately);
+			wFooter->GetString(mList->GetFilter());
+			wFooter->SetGetStringHelper(StatusbarGetStringHelper);
+			UnlockStatusbar();
+			
+			if (mList->isFiltered())
+				ShowMessage("Using filter '%s'", mList->GetFilter().c_str());
+			else
+				ShowMessage("Filtering disabled");
+			
+			if (myScreen == myPlaylist)
+			{
+				timer = time(NULL);
+				myPlaylist->Main()->Highlighting(1);
+				redraw_header = 1;
+			}
+		}
 		else if (Keypressed(input, Key.FindForward) || Keypressed(input, Key.FindBackward))
 		{
 			List *mList = myScreen->GetList();
@@ -1376,103 +1458,7 @@ int main(int argc, char *argv[])
 			ShowMessage("Searching...");
 			for (size_t i = (myScreen == mySearcher ? SearchEngine::StaticOptions : 0); i < mList->Size(); i++)
 			{
-				string name;
-				if (myScreen == myPlaylist)
-				{
-					name = myPlaylist->Main()->at(i).toString(Config.song_list_format);
-				}
-				else if (myScreen == myBrowser)
-				{
-					switch (myBrowser->Main()->at(i).type)
-					{
-						case itDirectory:
-							name = ExtractTopDirectory(myBrowser->Main()->at(i).name);
-							break;
-						case itSong:
-							name = myBrowser->Main()->at(i).song->toString(Config.song_list_format);
-							break;
-						case itPlaylist:
-							name = Config.browser_playlist_prefix.Str();
-							name += myBrowser->Main()->at(i).name;
-							break;
-					}
-				}
-				else if (myScreen == mySearcher)
-				{
-					name = mySearcher->Main()->at(i).second->toString(Config.song_list_format);
-				}
-				else if (myScreen == myLibrary)
-				{
-					if (myScreen->Cmp() == myLibrary->Artists)
-						name = myLibrary->Artists->at(i);
-					else if (myScreen->Cmp() == myLibrary->Albums)
-						name = myLibrary->Albums->at(i).first;
-					else
-						name = myLibrary->Songs->at(i).toString(Config.song_library_format);
-				}
-				else if (myScreen == myPlaylistEditor)
-				{
-					if (myScreen->Cmp() == myPlaylistEditor->Playlists)
-						name = myPlaylistEditor->Playlists->at(i);
-					else
-						name = myPlaylistEditor->Content->at(i).toString(Config.song_list_format);
-				}
-#				ifdef HAVE_TAGLIB_H
-				else if (myScreen == myTagEditor)
-				{
-					if (myScreen->Cmp() == myTagEditor->LeftColumn)
-						name = myTagEditor->LeftColumn->at(i).first;
-					else
-					{
-						const Song &s = myTagEditor->Tags->at(i);
-						switch (myTagEditor->TagTypes->Choice())
-						{
-							case 0:
-								name = s.GetTitle();
-								break;
-							case 1:
-								name = s.GetArtist();
-								break;
-							case 2:
-								name = s.GetAlbum();
-								break;
-							case 3:
-								name = s.GetYear();
-								break;
-							case 4:
-								name = s.GetTrack();
-								break;
-							case 5:
-								name = s.GetGenre();
-								break;
-							case 6:
-								name = s.GetComposer();
-								break;
-							case 7:
-								name = s.GetPerformer();
-								break;
-							case 8:
-								name = s.GetDisc();
-								break;
-							case 9:
-								name = s.GetComment();
-								break;
-							case 11:
-								if (s.GetNewName().empty())
-									name = s.GetName();
-								else
-								{
-									name = s.GetName();
-									name += " -> ";
-									name += s.GetNewName();
-								}
-								break;
-							default:
-								break;
-						}
-					}
-				}
-#				endif // HAVE_TAGLIB_H
+				string name = mList->GetOption(i);
 				ToLower(name);
 				if (name.find(findme) != string::npos && !mList->isStatic(i))
 				{

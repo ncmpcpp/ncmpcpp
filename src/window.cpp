@@ -424,7 +424,7 @@ string Window::GetString(const string &base, size_t length, size_t width, bool e
 			mvwhline(itsWindow, y, minx, '*', maxx-minx);
 		
 		if (itsGetStringHelper)
-			itsGetStringHelper();
+			itsGetStringHelper(tmp);
 		
 		wmove(itsWindow, y, x);
 		input = wgetch(itsWindow);

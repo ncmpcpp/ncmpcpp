@@ -60,6 +60,8 @@ extern TinyTagEditor *myTinyTagEditor;
 class TagEditor : public Screen<Window>
 {
 	public:
+		TagEditor() : itsBrowsedDir("/") { }
+		
 		virtual void Init();
 		virtual void Resize();
 		virtual void SwitchTo();
@@ -77,6 +79,8 @@ class TagEditor : public Screen<Window>
 		virtual bool allowsSelection() { return w == Tags; }
 		virtual void ReverseSelection() { Tags->ReverseSelection(); }
 		virtual void GetSelectedSongs(MPD::SongList &);
+		
+		virtual void ApplyFilter(const std::string &);
 		
 		virtual List *GetList();
 		
@@ -98,6 +102,8 @@ class TagEditor : public Screen<Window>
 		static std::string CapitalizeFirstLetters(const std::string &);
 		static void CapitalizeFirstLetters(MPD::Song &);
 		static void LowerAllLetters(MPD::Song &);
+		
+		static std::string TagToString(const MPD::Song &, void *);
 		
 		std::string itsBrowsedDir;
 		std::string itsHighlightedDir;

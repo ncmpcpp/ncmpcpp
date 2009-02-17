@@ -117,6 +117,7 @@ void DefaultKeys(ncmpcpp_keys &keys)
 	keys.ToggleCrossfade[0] = 'x';
 	keys.SetCrossfade[0] = 'X';
 	keys.UpdateDB[0] = 'u';
+	keys.ApplyFilter[0] = 6;
 	keys.FindForward[0] = '/';
 	keys.FindBackward[0] = '?';
 	keys.NextFoundPosition[0] = '.';
@@ -181,6 +182,7 @@ void DefaultKeys(ncmpcpp_keys &keys)
 	keys.ToggleCrossfade[1] = null_key;
 	keys.SetCrossfade[1] = null_key;
 	keys.UpdateDB[1] = null_key;
+	keys.ApplyFilter[1] = null_key;
 	keys.FindForward[1] = null_key;
 	keys.FindBackward[1] = null_key;
 	keys.NextFoundPosition[1] = null_key;
@@ -354,6 +356,8 @@ void ReadKeys(ncmpcpp_keys &keys)
 				GetKeys(key, keys.SetCrossfade);
 			else if (key.find("key_update_db ") != string::npos)
 				GetKeys(key, keys.UpdateDB);
+			else if (key.find("key_apply_filter ") != string::npos)
+				GetKeys(key, keys.ApplyFilter);
 			else if (key.find("key_find_forward ") != string::npos)
 				GetKeys(key, keys.FindForward);
 			else if (key.find("key_find_backward ") != string::npos)

@@ -46,10 +46,15 @@ class Playlist : public Screen< Menu<MPD::Song> >
 		virtual void ReverseSelection() { w->ReverseSelection(); }
 		virtual void GetSelectedSongs(MPD::SongList &);
 		
+		virtual void ApplyFilter(const std::string &s) { w->ApplyFilter(s); }
+		
 		virtual List *GetList() { return w; }
 		
 		bool isPlaying() { return NowPlaying >= 0 && !w->Empty(); }
 		const MPD::Song &NowPlayingSong();
+		
+		static std::string SongToString(const MPD::Song &, void *);
+		static std::string SongInColumnsToString(const MPD::Song &, void *);
 		
 		int NowPlaying;
 		int OldPlaying;

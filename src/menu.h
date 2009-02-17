@@ -23,6 +23,7 @@
 
 #include "window.h"
 #include "strbuffer.h"
+#include "misc.h"
 
 class List
 {
@@ -48,11 +49,21 @@ class List
 		void SelectCurrent();
 		void ReverseSelection(size_t = 0);
 		bool Deselect();
+		
+		virtual void ApplyFilter(const std::string &, size_t = 0, bool = 0) = 0;
+		virtual const std::string &GetFilter() = 0;
+		virtual std::string GetOption(size_t) = 0;
+		
+		virtual bool isFiltered() = 0;
+		//virtual void ShowAll() = 0;
+		//virtual void ShowFiltered() = 0;
+
 };
 
 template <class T> class Menu : public Window, public List
 {
 	typedef void (*ItemDisplayer) (const T &, void *, Menu<T> *);
+	typedef std::string (*GetStringFunction) (const T &, void *);
 	
 	struct Option
 	{
@@ -76,6 +87,9 @@ template <class T> class Menu : public Window, public List
 		
 		void SetItemDisplayer(ItemDisplayer ptr) { itsItemDisplayer = ptr; }
 		void SetItemDisplayerUserData(void *data) { itsItemDisplayerUserdata = data; }
+		
+		void SetGetStringFunction(GetStringFunction f) { itsGetStringFunction = f; }
+		void SetGetStringFunctionUserData(void *data) { itsGetStringFunctionUserData = data; }
 		
 		void Reserve(size_t size);
 		void ResizeBuffer(size_t size);
@@ -101,6 +115,15 @@ template <class T> class Menu : public Window, public List
 		virtual size_t Choice() const;
 		virtual size_t RealChoice() const;
 		
+		virtual void ApplyFilter(const std::string &filter, size_t beginning = 0, bool case_sensitive = 0);
+		virtual const std::string &GetFilter();
+		virtual std::string GetOption(size_t pos);
+		
+		virtual bool isFiltered() { return itsOptionsPtr == &itsFilteredOptions; }
+		
+		void ShowAll() { itsOptionsPtr = &itsOptions; }
+		void ShowFiltered() { itsOptionsPtr = &itsFilteredOptions; }
+		
 		virtual void Refresh();
 		virtual void Scroll(Where);
 		virtual void Reset();
@@ -112,7 +135,7 @@ template <class T> class Menu : public Window, public List
 		void HighlightColor(Color col) { itsHighlightColor = col; }
 		void Highlighting(bool hl) { highlightEnabled = hl; }
 		
-		virtual bool Empty() const { return itsOptions.empty(); }
+		virtual bool Empty() const { return itsOptionsPtr->empty(); }
 		
 		T &Back();
 		const T &Back() const;
@@ -129,8 +152,15 @@ template <class T> class Menu : public Window, public List
 	protected:
 		ItemDisplayer itsItemDisplayer;
 		void *itsItemDisplayerUserdata;
+		GetStringFunction itsGetStringFunction;
+		void *itsGetStringFunctionUserData;
 		
+		std::string itsFilter;
+		
+		std::vector<Option *> *itsOptionsPtr;
 		std::vector<Option *> itsOptions;
+		std::vector<Option *> itsFilteredOptions;
+		std::vector<size_t> itsFilteredRealPositions;
 		
 		int itsBeginning;
 		int itsHighlight;
@@ -152,6 +182,9 @@ template <class T> Menu<T>::Menu(size_t startx,
 				 : Window(startx, starty, width, height, title, color, border),
 				 itsItemDisplayer(0),
 				 itsItemDisplayerUserdata(0),
+				 itsGetStringFunction(0),
+				 itsGetStringFunctionUserData(0),
+				 itsOptionsPtr(&itsOptions),
 				 itsBeginning(0),
 				 itsHighlight(0),
 				 itsHighlightColor(itsBaseColor),
@@ -215,9 +248,21 @@ template <class T> void Menu<T>::DeleteOption(size_t pos)
 {
 	if (itsOptions.empty())
 		return;
-	delete itsOptions.at(pos);
-	itsOptions.erase(itsOptions.begin()+pos);
-	if (itsOptions.empty())
+	if (itsOptionsPtr == &itsFilteredOptions)
+	{
+		delete itsOptions.at(itsFilteredRealPositions[pos]);
+		itsOptions.erase(itsOptions.begin()+itsFilteredRealPositions[pos]);
+		itsFilteredOptions.erase(itsFilteredOptions.begin()+pos);
+		itsFilteredRealPositions.erase(itsFilteredRealPositions.begin()+pos);
+		for (size_t i = pos; i < itsFilteredRealPositions.size(); i++)
+			itsFilteredRealPositions[i]--;
+	}
+	else
+	{
+		delete itsOptions.at(pos);
+		itsOptions.erase(itsOptions.begin()+pos);
+	}
+	if (itsOptionsPtr->empty())
 		Window::Clear();
 }
 
@@ -242,36 +287,42 @@ void Menu<T>::Swap(size_t one, size_t two)
 
 template <class T> void Menu<T>::Refresh()
 {
-	if (itsOptions.empty())
+	if (itsOptionsPtr->empty())
 	{
 		Window::Refresh();
 		return;
 	}
-	int MaxBeginning = itsOptions.size() < itsHeight ? 0 : itsOptions.size()-itsHeight;
+	int MaxBeginning = itsOptionsPtr->size() < itsHeight ? 0 : itsOptionsPtr->size()-itsHeight;
 	if (itsHighlight > itsBeginning+int(itsHeight)-1)
 		itsBeginning = itsHighlight-itsHeight+1;
 	if (itsBeginning < 0)
 		itsBeginning = 0;
 	else if (itsBeginning > MaxBeginning)
 		itsBeginning = MaxBeginning;
-	if (!itsOptions.empty() && itsHighlight > int(itsOptions.size())-1)
-		itsHighlight = itsOptions.size()-1;
+	if (!itsOptionsPtr->empty() && itsHighlight > int(itsOptionsPtr->size())-1)
+		itsHighlight = itsOptionsPtr->size()-1;
+	if (!(*itsOptionsPtr)[itsHighlight]) // it shouldn't be on separator.
+	{
+		Scroll(wUp);
+		if (!(*itsOptionsPtr)[itsHighlight]) // if it's still on separator, move in other direction.
+			Scroll(wDown);
+	}
 	size_t line = 0;
 	for (size_t i = itsBeginning; i < itsBeginning+itsHeight; i++)
 	{
 		GotoXY(0, line);
-		if (i >= itsOptions.size())
+		if (i >= itsOptionsPtr->size())
 		{
 			for (; line < itsHeight; line++)
 				mvwhline(itsWindow, line, 0, 32, itsWidth);
 			break;
 		}
-		if (!itsOptions[i]) // separator
+		if (!(*itsOptionsPtr)[i]) // separator
 		{
 			mvwhline(itsWindow, line++, 0, 0, itsWidth);
 			continue;
 		}
-		if (itsOptions[i]->isBold)
+		if ((*itsOptionsPtr)[i]->isBold)
 			Bold(1);
 		if (highlightEnabled && int(i) == itsHighlight)
 		{
@@ -279,18 +330,18 @@ template <class T> void Menu<T>::Refresh()
 			*this << itsHighlightColor;
 		}
 		mvwhline(itsWindow, line, 0, 32, itsWidth);
-		if (itsOptions[i]->isSelected && itsSelectedPrefix)
+		if ((*itsOptionsPtr)[i]->isSelected && itsSelectedPrefix)
 			*this << *itsSelectedPrefix;
 		if (itsItemDisplayer)
-			itsItemDisplayer(itsOptions[i]->Item, itsItemDisplayerUserdata, this);
-		if (itsOptions[i]->isSelected && itsSelectedSuffix)
+			itsItemDisplayer((*itsOptionsPtr)[i]->Item, itsItemDisplayerUserdata, this);
+		if ((*itsOptionsPtr)[i]->isSelected && itsSelectedSuffix)
 			*this << *itsSelectedSuffix;
 		if (highlightEnabled && int(i) == itsHighlight)
 		{
 			*this << clEnd;
 			Reverse(0);
 		}
-		if (itsOptions[i]->isBold)
+		if ((*itsOptionsPtr)[i]->isBold)
 			Bold(0);
 		line++;
 	}
@@ -299,10 +350,10 @@ template <class T> void Menu<T>::Refresh()
 
 template <class T> void Menu<T>::Scroll(Where where)
 {
-	if (itsOptions.empty())
+	if (itsOptionsPtr->empty())
 		return;
-	int MaxHighlight = itsOptions.size()-1;
-	int MaxBeginning = itsOptions.size() < itsHeight ? 0 : itsOptions.size()-itsHeight;
+	int MaxHighlight = itsOptionsPtr->size()-1;
+	int MaxBeginning = itsOptionsPtr->size() < itsHeight ? 0 : itsOptionsPtr->size()-itsHeight;
 	int MaxCurrentHighlight = itsBeginning+itsHeight-1;
 	switch (where)
 	{
@@ -321,7 +372,7 @@ template <class T> void Menu<T>::Scroll(Where where)
 			{
 				itsHighlight--;
 			}
-			if (!itsOptions[itsHighlight] || itsOptions[itsHighlight]->isStatic)
+			if (!(*itsOptionsPtr)[itsHighlight] || (*itsOptionsPtr)[itsHighlight]->isStatic)
 			{
 				Scroll(itsHighlight == 0 ? wDown : wUp);
 			}
@@ -342,7 +393,7 @@ template <class T> void Menu<T>::Scroll(Where where)
 			{
 				itsHighlight++;
 			}
-			if (!itsOptions[itsHighlight] || itsOptions[itsHighlight]->isStatic)
+			if (!(*itsOptionsPtr)[itsHighlight] || (*itsOptionsPtr)[itsHighlight]->isStatic)
 			{
 				Scroll(itsHighlight == MaxHighlight ? wUp : wDown);
 			}
@@ -358,7 +409,7 @@ template <class T> void Menu<T>::Scroll(Where where)
 				if (itsHighlight < 0)
 					itsHighlight = 0;
 			}
-			if (!itsOptions[itsHighlight] || itsOptions[itsHighlight]->isStatic)
+			if (!(*itsOptionsPtr)[itsHighlight] || (*itsOptionsPtr)[itsHighlight]->isStatic)
 			{
 				Scroll(itsHighlight == 0 ? wDown: wUp);
 			}
@@ -374,7 +425,7 @@ template <class T> void Menu<T>::Scroll(Where where)
 				if (itsHighlight > MaxHighlight)
 					itsHighlight = MaxHighlight;
 			}
-			if (!itsOptions[itsHighlight] || itsOptions[itsHighlight]->isStatic)
+			if (!(*itsOptionsPtr)[itsHighlight] || (*itsOptionsPtr)[itsHighlight]->isStatic)
 			{
 				Scroll(itsHighlight == MaxHighlight ? wUp : wDown);
 			}
@@ -384,7 +435,7 @@ template <class T> void Menu<T>::Scroll(Where where)
 		{
 			itsHighlight = 0;
 			itsBeginning = 0;
-			if (!itsOptions[itsHighlight] || itsOptions[itsHighlight]->isStatic)
+			if (!(*itsOptionsPtr)[itsHighlight] || (*itsOptionsPtr)[itsHighlight]->isStatic)
 			{
 				Scroll(itsHighlight == 0 ? wDown : wUp);
 			}
@@ -394,7 +445,7 @@ template <class T> void Menu<T>::Scroll(Where where)
 		{
 			itsHighlight = MaxHighlight;
 			itsBeginning = MaxBeginning;
-			if (!itsOptions[itsHighlight] || itsOptions[itsHighlight]->isStatic)
+			if (!(*itsOptionsPtr)[itsHighlight] || (*itsOptionsPtr)[itsHighlight]->isStatic)
 			{
 				Scroll(itsHighlight == MaxHighlight ? wUp : wDown);
 			}
@@ -414,46 +465,55 @@ template <class T> void Menu<T>::Clear(bool clrscr)
 	for (option_iterator it = itsOptions.begin(); it != itsOptions.end(); it++)
 		delete *it;
 	itsOptions.clear();
+	itsFilteredOptions.clear();
+	itsFilteredRealPositions.clear();
+	itsFilter.clear();
+	itsOptionsPtr = &itsOptions;
 	if (clrscr)
 		Window::Clear();
 }
 
 template <class T> bool Menu<T>::isBold(int id)
 {
-	return itsOptions.at(id == -1 ? itsHighlight : id)->isBold;
+	id = id == -1 ? itsHighlight : id;
+	if (!itsOptionsPtr->at(id))
+		return 0;
+	return (*itsOptionsPtr)[id]->isBold;
 }
 
 template <class T> void Menu<T>::Select(int id, bool value)
 {
-	if (!itsOptions.at(id))
+	if (!itsOptionsPtr->at(id))
 		return;
-	itsOptions[id]->isSelected = value;
+	(*itsOptionsPtr)[id]->isSelected = value;
 }
 
 template <class T> void Menu<T>::Static(int id, bool value)
 {
-	if (!itsOptions.at(id))
+	if (!itsOptionsPtr->at(id))
 		return;
-	itsOptions[id]->isStatic = value;
+	(*itsOptionsPtr)[id]->isStatic = value;
 }
 
 template <class T> bool Menu<T>::isSelected(int id) const
 {
-	if (!itsOptions.at(id == -1 ? itsHighlight : id))
+	id = id == -1 ? itsHighlight : id;
+	if (!itsOptionsPtr->at(id))
 		return 0;
-	return itsOptions[id == -1 ? itsHighlight : id]->isSelected;
+	return (*itsOptionsPtr)[id]->isSelected;
 }
 
 template <class T> bool Menu<T>::isStatic(int id) const
 {
-	if (!itsOptions.at(id == -1 ? itsHighlight : id))
+	id = id == -1 ? itsHighlight : id;
+	if (!itsOptionsPtr->at(id))
 		return 1;
-	return itsOptions[id == -1 ? itsHighlight : id]->isStatic;
+	return (*itsOptionsPtr)[id]->isStatic;
 }
 
 template <class T> bool Menu<T>::hasSelected() const
 {
-	for (option_const_iterator it = itsOptions.begin(); it != itsOptions.end(); it++)
+	for (option_const_iterator it = itsOptionsPtr->begin(); it != itsOptionsPtr->end(); it++)
 		if (*it && (*it)->isSelected)
 			return true;
 	return false;
@@ -461,8 +521,8 @@ template <class T> bool Menu<T>::hasSelected() const
 
 template <class T> void Menu<T>::GetSelected(std::vector<size_t> &v) const
 {
-	for (size_t i = 0; i < itsOptions.size(); i++)
-		if (itsOptions[i]->isSelected)
+	for (size_t i = 0; i < itsOptionsPtr->size(); i++)
+		if ((*itsOptionsPtr)[i]->isSelected)
 			v.push_back(i);
 }
 
@@ -474,7 +534,7 @@ template <class T> void Menu<T>::Highlight(size_t pos)
 
 template <class T> size_t Menu<T>::Size() const
 {
-	return itsOptions.size();
+	return itsOptionsPtr->size();
 }
 
 template <class T> size_t Menu<T>::Choice() const
@@ -485,66 +545,113 @@ template <class T> size_t Menu<T>::Choice() const
 template <class T> size_t Menu<T>::RealChoice() const
 {
 	size_t result = 0;
-	for (option_const_iterator it = itsOptions.begin(); it != itsOptions.begin()+itsHighlight; it++)
+	for (option_const_iterator it = itsOptionsPtr->begin(); it != itsOptionsPtr->begin()+itsHighlight; it++)
 		if (*it && !(*it)->isStatic)
 			result++;
 	return result;
 }
 
+template <class T> void Menu<T>::ApplyFilter(const std::string &filter, size_t beginning, bool case_sensitive)
+{
+	itsFilter = filter;
+	if (!case_sensitive)
+		ToLower(itsFilter);
+	itsFilteredRealPositions.clear();
+	itsFilteredOptions.clear();
+	itsOptionsPtr = &itsOptions;
+	if (itsFilter.empty())
+		return;
+	for (size_t i = 0; i < beginning; i++)
+	{
+		itsFilteredRealPositions.push_back(i);
+		itsFilteredOptions.push_back(itsOptions[i]);
+	}
+	std::string option;
+	for (size_t i = beginning; i < itsOptions.size(); i++)
+	{
+		option = GetOption(i);
+		if (!case_sensitive)
+			ToLower(option);
+		if (option.find(itsFilter) != std::string::npos)
+		{
+			itsFilteredRealPositions.push_back(i);
+			itsFilteredOptions.push_back(itsOptions[i]);
+		}
+	}
+	itsOptionsPtr = &itsFilteredOptions;
+	if (itsOptionsPtr->empty()) // oops, we didn't find anything
+		Window::Clear();
+}
+
+template <class T> const std::string &Menu<T>::GetFilter()
+{
+	return itsFilter;
+}
+
+template <class T> std::string Menu<T>::GetOption(size_t pos)
+{
+	if (itsOptionsPtr->at(pos) && itsGetStringFunction)
+		return itsGetStringFunction((*itsOptionsPtr)[pos]->Item, itsGetStringFunctionUserData);
+	else
+		return "";
+}
+
+template <> std::string Menu<std::string>::GetOption(size_t pos);
+
 template <class T> T &Menu<T>::Back()
 {
-	if (!itsOptions.back())
+	if (!itsOptionsPtr->back())
 		throw InvalidItem();
-	return itsOptions.back()->Item;
+	return itsOptionsPtr->back()->Item;
 }
 
 template <class T> const T &Menu<T>::Back() const
 {
-	if (!itsOptions.back())
+	if (!itsOptionsPtr->back())
 		throw InvalidItem();
-	return itsOptions.back()->Item;
+	return itsOptionsPtr->back()->Item;
 }
 
 template <class T> T &Menu<T>::Current()
 {
-	if (!itsOptions.at(itsHighlight))
+	if (!itsOptionsPtr->at(itsHighlight))
 		throw InvalidItem();
-	return itsOptions[itsHighlight]->Item;
+	return (*itsOptionsPtr)[itsHighlight]->Item;
 }
 
 template <class T> const T &Menu<T>::Current() const
 {
-	if (!itsOptions.at(itsHighlight))
+	if (!itsOptionsPtr->at(itsHighlight))
 		throw InvalidItem();
-	return itsOptions[itsHighlight]->Item;
+	return (*itsOptionsPtr)[itsHighlight]->Item;
 }
 
 template <class T> T &Menu<T>::at(size_t i)
 {
-	if (!itsOptions.at(i))
+	if (!itsOptionsPtr->at(i))
 		throw InvalidItem();
-	return itsOptions[i]->Item;
+	return (*itsOptionsPtr)[i]->Item;
 }
 
 template <class T> const T &Menu<T>::at(size_t i) const
 {
-	if (!itsOptions.at(i))
+	if (!itsOptions->at(i))
 		throw InvalidItem();
-	return itsOptions.at(i)->Item;
+	return (*itsOptionsPtr)[i]->Item;
 }
 
 template <class T> const T &Menu<T>::operator[](size_t i) const
 {
-	if (!itsOptions[i])
+	if (!(*itsOptionsPtr)[i])
 		throw InvalidItem();
-	return itsOptions[i]->Item;
+	return (*itsOptionsPtr)[i]->Item;
 }
 
 template <class T> T &Menu<T>::operator[](size_t i)
 {
-	if (!itsOptions[i])
+	if (!(*itsOptionsPtr)[i])
 		throw InvalidItem();
-	return itsOptions[i]->Item;
+	return (*itsOptionsPtr)[i]->Item;
 }
 
 template <class T> Menu<T> *Menu<T>::EmptyClone() const

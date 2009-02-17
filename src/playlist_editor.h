@@ -44,6 +44,8 @@ class PlaylistEditor : public Screen<Window>
 		virtual void ReverseSelection() { Content->ReverseSelection(); }
 		virtual void GetSelectedSongs(MPD::SongList &);
 		
+		virtual void ApplyFilter(const std::string &s) { GetList()->ApplyFilter(s); }
+		
 		virtual List *GetList();
 		
 		void NextColumn();

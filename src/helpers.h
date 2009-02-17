@@ -24,6 +24,7 @@
 #include "mpdpp.h"
 #include "ncmpcpp.h"
 #include "settings.h"
+#include "status.h"
 
 bool ConnectToMPD();
 void ParseArgv(int, char **);

@@ -43,3 +43,7 @@ bool List::Deselect()
 	return true;
 }
 
+template <> std::string Menu<std::string>::GetOption(size_t pos)
+{
+	return itsOptionsPtr->at(pos) ? (*itsOptionsPtr)[pos]->Item : "";
+}

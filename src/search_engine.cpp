@@ -50,6 +50,7 @@ void SearchEngine::Init()
 	w->SetItemDisplayer(Display::SearchEngine);
 	w->SetSelectPrefix(&Config.selected_item_prefix);
 	w->SetSelectSuffix(&Config.selected_item_suffix);
+	w->SetGetStringFunction(SearchEngineOptionToString);
 }
 
 void SearchEngine::Resize()
@@ -550,5 +551,13 @@ void SearchEngine::Search()
 	}
 	if (Config.search_in_db) // free song list only if it's database
 		FreeSongList(list);
+}
+
+std::string SearchEngine::SearchEngineOptionToString(const std::pair<Buffer *, MPD::Song *> &pair, void *)
+{
+	if (!Config.columns_in_search_engine)
+		return pair.second->toString(Config.song_list_format);
+	else
+		return Playlist::SongInColumnsToString(*pair.second, &Config.song_columns_list_format);
 }
 

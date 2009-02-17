@@ -32,6 +32,7 @@ namespace MPD
 	{
 		extern const char *PartOfSongsAdded;
 		extern const char *FullPlaylist;
+		extern const char *FunctionDisabledFilteringEnabled;
 	}
 	
 	enum QueueCommandType { qctAdd, qctAddToPlaylist, qctDelete, qctDeleteID, qctMove, qctPlaylistMove, qctDeleteFromPlaylist };

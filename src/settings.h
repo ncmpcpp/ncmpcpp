@@ -66,6 +66,7 @@ struct ncmpcpp_keys
 	int ToggleCrossfade[2];
 	int SetCrossfade[2];
 	int UpdateDB[2];
+	int ApplyFilter[2];
 	int FindForward[2];
 	int FindBackward[2];
 	int NextFoundPosition[2];

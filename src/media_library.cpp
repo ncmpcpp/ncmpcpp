@@ -58,6 +58,7 @@ void MediaLibrary::Init()
 	Albums->HighlightColor(Config.main_highlight_color);
 	Albums->SetTimeout(ncmpcpp_window_timeout);
 	Albums->SetItemDisplayer(Display::StringPairs);
+	Albums->SetGetStringFunction(StringPairToString);
 	
 	Songs = new Menu<Song>(itsRightColStartX, main_start_y, itsRightColWidth, main_height, "Songs", Config.main_color, brNone);
 	Songs->HighlightColor(Config.main_highlight_color);
@@ -66,6 +67,7 @@ void MediaLibrary::Init()
 	Songs->SetSelectSuffix(&Config.selected_item_suffix);
 	Songs->SetItemDisplayer(Display::Songs);
 	Songs->SetItemDisplayerUserData(&Config.song_library_format);
+	Songs->SetGetStringFunction(SongToString);
 	
 	w = Artists;
 }
@@ -426,6 +428,16 @@ void MediaLibrary::AddToPlaylist(bool add_n_play)
 		else if (w == Albums)
 			Songs->Clear(0);
 	}
+}
+
+std::string MediaLibrary::StringPairToString(const string_pair &pair, void *)
+{
+	return pair.first;
+}
+
+std::string MediaLibrary::SongToString(const MPD::Song &s, void *)
+{
+	return s.toString(Config.song_library_format);
 }
 
 bool MediaLibrary::SortSongsByTrack(Song *a, Song *b)

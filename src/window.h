@@ -52,7 +52,7 @@ enum Format { fmtNone = 100, fmtBold, fmtBoldEnd, fmtReverse, fmtReverseEnd, fmt
 enum Border { brNone, brBlack, brRed, brGreen, brYellow, brBlue, brMagenta, brCyan, brWhite };
 enum Where { wUp, wDown, wPageUp, wPageDown, wHome, wEnd };
 
-typedef void (*GetStringHelper)();
+typedef void (*GetStringHelper)(const std::wstring &);
 
 void InitScreen(bool);
 void DestroyScreen();

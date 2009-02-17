@@ -61,6 +61,18 @@ namespace
 	}
 }
 
+void StatusbarGetStringHelper(const std::wstring &)
+{
+	TraceMpdStatus();
+}
+
+void StatusbarApplyFilterImmediately(const std::wstring &ws)
+{
+	myScreen->ApplyFilter(ToString(ws));
+	myScreen->RefreshWindow();
+	TraceMpdStatus();
+}
+
 void LockStatusbar()
 {
 	if (Config.statusbar_visibility)
@@ -130,7 +142,7 @@ void NcmpcppErrorCallback(Connection *Mpd, int errorid, const char *msg, void *)
 		Mpd->SetPassword(password);
 		Mpd->SendPassword();
 		Mpd->UpdateStatus();
-		wFooter->SetGetStringHelper(TraceMpdStatus);
+		wFooter->SetGetStringHelper(StatusbarGetStringHelper);
 	}
 	else
 		ShowMessage("%s", msg);
@@ -161,6 +173,8 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 	{
 		if (!Playlist::BlockUpdate)
 		{
+			bool was_filtered = myPlaylist->Main()->isFiltered();
+			myPlaylist->Main()->ShowAll();
 			SongList list;
 			size_t playlist_length = Mpd->GetPlaylistLength();
 			if (playlist_length != myPlaylist->Main()->Size())
@@ -212,6 +226,8 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 					}
 				}
 			}
+			if (was_filtered)
+				myPlaylist->ApplyFilter(myPlaylist->Main()->GetFilter());
 			FreeSongList(list);
 		}
 		
@@ -316,7 +332,7 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 			}
 			catch (std::out_of_range &) { }
 			myPlaylist->Main()->BoldOption(myPlaylist->NowPlaying, 1);
-			if (Config.autocenter_mode)
+			if (Config.autocenter_mode && !myPlaylist->Main()->isFiltered())
 				myPlaylist->Main()->Highlight(myPlaylist->NowPlaying);
 			repeat_one_allowed = 0;
 			

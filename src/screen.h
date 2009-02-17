@@ -56,6 +56,8 @@ class BasicScreen
 		virtual void ReverseSelection() { }
 		virtual void GetSelectedSongs(MPD::SongList &) { }
 		
+		virtual void ApplyFilter(const std::string &) { }
+		
 		virtual List *GetList() = 0;
 		
 		bool hasToBeResized;

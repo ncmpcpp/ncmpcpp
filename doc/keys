@@ -82,6 +82,8 @@
 #
 #key_update_db = 'u'
 #
+#key_apply_filter = 6
+#
 #key_find_forward = '/'
 #
 #key_find_backward = '?'

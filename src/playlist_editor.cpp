@@ -58,6 +58,8 @@ void PlaylistEditor::Init()
 	Content->SetSelectSuffix(&Config.selected_item_suffix);
 	Content->SetItemDisplayer(Display::Songs);
 	Content->SetItemDisplayerUserData(&Config.song_list_format);
+	Content->SetGetStringFunction(Playlist::SongToString);
+	Content->SetGetStringFunctionUserData(&Config.song_list_format);
 	
 	w = Playlists;
 }

@@ -304,11 +304,14 @@ void TagEditor::Init()
 	Albums->HighlightColor(Config.active_column_color);
 	Albums->SetTimeout(ncmpcpp_window_timeout);
 	Albums->SetItemDisplayer(Display::StringPairs);
+	Albums->SetGetStringFunction(MediaLibrary::StringPairToString);
 	
 	Dirs = new Menu<string_pair>(0, main_start_y, LeftColumnWidth, main_height, "Directories", Config.main_color, brNone);
 	Dirs->HighlightColor(Config.active_column_color);
 	Dirs->SetTimeout(ncmpcpp_window_timeout);
 	Dirs->SetItemDisplayer(Display::StringPairs);
+	Dirs->SetGetStringFunction(MediaLibrary::StringPairToString);
+	
 	LeftColumn = Config.albums_in_tag_editor ? Albums : Dirs;
 	
 	TagTypes = new Menu<string>(MiddleColumnStartX, main_start_y, MiddleColumnWidth, main_height, "Tag types", Config.main_color, brNone);
@@ -323,6 +326,8 @@ void TagEditor::Init()
 	Tags->SetSelectSuffix(&Config.selected_item_suffix);
 	Tags->SetItemDisplayer(Display::Tags);
 	Tags->SetItemDisplayerUserData(TagTypes);
+	Tags->SetGetStringFunction(TagToString);
+	Tags->SetGetStringFunctionUserData(TagTypes);
 	
 	w = LeftColumn;
 }
@@ -734,6 +739,16 @@ void TagEditor::GetSelectedSongs(MPD::SongList &v)
 	}
 }
 
+void TagEditor::ApplyFilter(const std::string &s)
+{
+	if (w == Dirs)
+		Dirs->ApplyFilter(s, 1);
+	else if (w == Albums)
+		Albums->ApplyFilter(s);
+	else if (w == Tags)
+		Tags->ApplyFilter(s);
+}
+
 List *TagEditor::GetList()
 {
 	if (w == LeftColumn)
@@ -959,6 +974,53 @@ void TagEditor::LowerAllLetters(Song &s)
 	conv = s.GetComment();
 	ToLower(conv);
 	s.SetComment(conv);
+}
+
+std::string TagEditor::TagToString(const MPD::Song &s, void *data)
+{
+	std::string result;
+	switch (static_cast<Menu<string> *>(data)->Choice())
+	{
+		case 0:
+			result = s.GetTitle();
+			break;
+		case 1:
+			result = s.GetArtist();
+			break;
+		case 2:
+			result = s.GetAlbum();
+			break;
+		case 3:
+			result = s.GetYear();
+			break;
+		case 4:
+			result = s.GetTrack();
+			break;
+		case 5:
+			result = s.GetGenre();
+			break;
+		case 6:
+			result = s.GetComposer();
+			break;
+		case 7:
+			result = s.GetPerformer();
+			break;
+		case 8:
+			result = s.GetDisc();
+			break;
+		case 9:
+			result = s.GetComment();
+			break;
+		case 11:
+			if (s.GetNewName().empty())
+				result = s.GetName();
+			else
+				result = s.GetName() + " -> " + s.GetNewName();
+			break;
+		default:
+			break;
+	}
+	return result.empty() ? Config.empty_tag : result;
 }
 
 namespace

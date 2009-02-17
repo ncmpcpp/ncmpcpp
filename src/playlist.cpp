@@ -44,6 +44,8 @@ void Playlist::Init()
 	w->SetSelectSuffix(&Config.selected_item_suffix);
 	w->SetItemDisplayer(Config.columns_in_playlist ? Display::SongsInColumns : Display::Songs);
 	w->SetItemDisplayerUserData(Config.columns_in_playlist ? &Config.song_columns_list_format : &Config.song_list_format);
+	w->SetGetStringFunction(Config.columns_in_playlist ? SongInColumnsToString : SongToString);
+	w->SetGetStringFunctionUserData(Config.columns_in_playlist ? &Config.song_columns_list_format : &Config.song_list_format);
 }
 
 void Playlist::SwitchTo()
@@ -56,6 +58,7 @@ void Playlist::SwitchTo()
 	
 	CLEAR_FIND_HISTORY;
 	myScreen = this;
+	w->Window::Clear();
 	redraw_header = 1;
 }
 
@@ -115,6 +118,15 @@ std::string Playlist::TotalLength()
 	
 	result << '(' << w->Size() << (w->Size() == 1 ? " item" : " items");
 	
+	if (w->isFiltered())
+	{
+		w->ShowAll();
+		size_t real_size = w->Size();
+		w->ShowFiltered();
+		if (w->Size() != real_size)
+			result << " (out of " << Mpd->GetPlaylistLength() << ")";
+	}
+	
 	if (length)
 	{
 		result << ", length: ";
@@ -162,3 +174,22 @@ const MPD::Song &Playlist::NowPlayingSong()
 	static MPD::Song null;
 	return isPlaying() ? w->at(NowPlaying) : null;
 }
+
+std::string Playlist::SongToString(const MPD::Song &s, void *data)
+{
+	return s.toString(*static_cast<std::string *>(data));
+}
+
+std::string Playlist::SongInColumnsToString(const MPD::Song &s, void *data)
+{
+	std::string result;
+	std::string fmt = *static_cast<std::string *>(data);
+	for (std::string i = GetLineValue(fmt, '{', '}', 1); !i.empty(); i = GetLineValue(fmt, '{', '}', 1))
+	{
+		result += "%";
+		result += i;
+		result += " ";
+	}
+	return s.toString(result);
+}
+

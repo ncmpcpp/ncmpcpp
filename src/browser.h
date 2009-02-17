@@ -44,6 +44,8 @@ class Browser : public Screen< Menu<MPD::Item> >
 		virtual void ReverseSelection();
 		virtual void GetSelectedSongs(MPD::SongList &);
 		
+		virtual void ApplyFilter(const std::string &s) { w->ApplyFilter(s, itsBrowsedDir == "/" ? 0 : 1); }
+		
 		virtual List *GetList() { return w; }
 		
 		const std::string &CurrentDir() { return itsBrowsedDir; }
@@ -53,6 +55,8 @@ class Browser : public Screen< Menu<MPD::Item> >
 		void UpdateItemList();
 	
 	protected:
+		static std::string ItemToString(const MPD::Item &, void *);
+		
 		size_t itsScrollBeginning;
 		
 		std::string itsBrowsedDir;

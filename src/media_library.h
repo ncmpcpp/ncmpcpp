@@ -45,10 +45,14 @@ class MediaLibrary : public Screen<Window>
 		virtual void ReverseSelection() { Songs->ReverseSelection(); }
 		virtual void GetSelectedSongs(MPD::SongList &);
 		
+		virtual void ApplyFilter(const std::string &s) { GetList()->ApplyFilter(s); }
+		
 		virtual List *GetList();
 		
 		void NextColumn();
 		void PrevColumn();
+		
+		static std::string StringPairToString(const string_pair &pair, void *);
 		
 		Menu<std::string> *Artists;
 		Menu<string_pair> *Albums;
@@ -56,6 +60,8 @@ class MediaLibrary : public Screen<Window>
 		
 	protected:
 		void AddToPlaylist(bool);
+		
+		static std::string SongToString(const MPD::Song &s, void *);
 		
 		static bool SortSongsByTrack(MPD::Song *, MPD::Song *);
 		

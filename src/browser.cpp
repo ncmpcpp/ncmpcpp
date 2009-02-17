@@ -48,6 +48,7 @@ void Browser::Init()
 	w->SetSelectPrefix(&Config.selected_item_prefix);
 	w->SetSelectSuffix(&Config.selected_item_suffix);
 	w->SetItemDisplayer(Display::Items);
+	w->SetGetStringFunction(ItemToString);
 }
 
 void Browser::Resize()
@@ -435,5 +436,33 @@ void Browser::UpdateItemList()
 		}
 	}
 	w->Refresh();
+}
+
+std::string Browser::ItemToString(const MPD::Item &item, void *)
+{
+	switch (item.type)
+	{
+		case MPD::itDirectory:
+		{
+			if (item.song)
+				return "[..]";
+			return "[" + ExtractTopDirectory(item.name) + "]";
+		}
+		case MPD::itSong:
+		{
+			if (!Config.columns_in_browser)
+				return item.song->toString(Config.song_list_format);
+			else
+				return Playlist::SongInColumnsToString(*item.song, &Config.song_columns_list_format);
+		}
+		case MPD::itPlaylist:
+		{
+			return Config.browser_playlist_prefix.Str() + item.name;
+		}
+		default:
+		{
+			return "";
+		}
+	}
 }
 
