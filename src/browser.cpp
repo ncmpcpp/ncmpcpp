@@ -134,7 +134,7 @@ void Browser::EnterPressed()
 				if (s->GetHash() == list[0]->GetHash())
 					Mpd->PlayID(s->GetID());
 				else
-					ShowMessage("%s", message_part_of_songs_added);
+					ShowMessage("%s", MPD::Message::PartOfSongsAdded);
 			}
 			FreeSongList(list);
 			break;
@@ -178,7 +178,7 @@ void Browser::SpacePressed()
 				ShowMessage("Added folder: %s", item.name.c_str());
 				Song &s = myPlaylist->Main()->at(myPlaylist->Main()->Size()-list.size());
 				if (s.GetHash() != list[0]->GetHash())
-					ShowMessage("%s", message_part_of_songs_added);
+					ShowMessage("%s", MPD::Message::PartOfSongsAdded);
 			}
 			FreeSongList(list);
 			break;
@@ -224,7 +224,7 @@ void Browser::SpacePressed()
 				ShowMessage("Loading playlist %s...", item.name.c_str());
 				Song &s = myPlaylist->Main()->at(myPlaylist->Main()->Size()-list.size());
 				if (s.GetHash() != list[0]->GetHash())
-					ShowMessage("%s", message_part_of_songs_added);
+					ShowMessage("%s", MPD::Message::PartOfSongsAdded);
 			}
 			FreeSongList(list);
 			break;

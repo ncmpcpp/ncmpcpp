@@ -204,7 +204,7 @@ void PlaylistEditor::AddToPlaylist(bool add_n_play)
 					Mpd->PlayID(s.GetID());
 			}
 			else
-				ShowMessage("%s", message_part_of_songs_added);
+				ShowMessage("%s", MPD::Message::PartOfSongsAdded);
 		}
 	}
 	else if (w == Content)

@@ -25,7 +25,8 @@ using namespace MPD;
 
 using std::string;
 
-const char *playlist_max_message = "playlist is at the max size";
+const char *MPD::Message::PartOfSongsAdded = "Only part of requested songs' list added to playlist!";
+const char *MPD::Message::FullPlaylist = "Playlist is full!";
 
 Connection::Connection() : isConnected(0),
 				 itsErrorCode(0),
@@ -486,7 +487,7 @@ int Connection::AddSong(const string &path)
 		}
 		else
 			if (itsErrorHandler)
-				itsErrorHandler(this, MPD_ACK_ERROR_PLAYLIST_MAX, playlist_max_message, NULL);
+				itsErrorHandler(this, MPD_ACK_ERROR_PLAYLIST_MAX, Message::FullPlaylist, NULL);
 	}
 	return id;
 }
@@ -627,7 +628,7 @@ bool Connection::CommitQueue()
 		mpd_finishCommand(itsConnection);
 		UpdateStatus();
 		if (GetPlaylistLength() == itsMaxPlaylistLength && itsErrorHandler)
-			itsErrorHandler(this, MPD_ACK_ERROR_PLAYLIST_MAX, playlist_max_message, NULL);
+			itsErrorHandler(this, MPD_ACK_ERROR_PLAYLIST_MAX, Message::FullPlaylist, NULL);
 		retval = !itsQueue.empty();
 	}
 	ClearQueue();

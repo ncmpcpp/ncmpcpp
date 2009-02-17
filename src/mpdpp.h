@@ -28,6 +28,12 @@
 
 namespace MPD
 {
+	namespace Message
+	{
+		extern const char *PartOfSongsAdded;
+		extern const char *FullPlaylist;
+	}
+	
 	enum QueueCommandType { qctAdd, qctAddToPlaylist, qctDelete, qctDeleteID, qctMove, qctPlaylistMove, qctDeleteFromPlaylist };
 	enum ItemType { itDirectory, itSong, itPlaylist };
 	enum PlayerState { psUnknown, psStop, psPlay, psPause };

@@ -24,7 +24,6 @@
 #include "window.h"
 #include "menu.h"
 #include "scrollpad.h"
-#include "misc.h"
 
 #define CLEAR_FIND_HISTORY \
 			do { \
@@ -34,33 +33,9 @@
 
 typedef std::pair<std::string, std::string> string_pair;
 
-/*enum NcmpcppScreen
-{
-	myHelp,
-	myPlaylist,
-	myBrowser,
-#	ifdef HAVE_TAGLIB_H
-	myTinyTagEditor,
-#	endif // HAVE_TAGLIB_H
-	myInfo,
-	mySearcher,
-	myLibrary,
-	myLyrics,
-	myPlaylistEditor,
-#	ifdef HAVE_TAGLIB_H	
-	myTagEditor,
-#	endif // HAVE_TAGLIB_H
-#	ifdef ENABLE_CLOCK
-	myClock,
-#	endif // ENABLE_CLOCK
-	csOther
-};*/
-
 const int ncmpcpp_window_timeout = 500;
 
 const std::string home_folder = getenv("HOME") ? getenv("HOME") : "";
-
-const char * const message_part_of_songs_added = "Only part of requested songs' list added to playlist!";
 
 #endif
 

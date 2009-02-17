@@ -57,6 +57,8 @@ class MediaLibrary : public Screen<Window>
 	protected:
 		void AddToPlaylist(bool);
 		
+		static bool SortSongsByTrack(MPD::Song *, MPD::Song *);
+		
 		static size_t itsLeftColWidth;
 		static size_t itsMiddleColWidth;
 		static size_t itsMiddleColStartX;

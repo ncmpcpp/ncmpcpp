@@ -345,7 +345,7 @@ void MediaLibrary::AddToPlaylist(bool add_n_play)
 					Mpd->PlayID(s->GetID());
 			}
 			else
-				ShowMessage("%s", message_part_of_songs_added);
+				ShowMessage("%s", MPD::Message::PartOfSongsAdded);
 		}
 	}
 	else if (w == Albums)
@@ -362,7 +362,7 @@ void MediaLibrary::AddToPlaylist(bool add_n_play)
 					Mpd->PlayID(s->GetID());
 			}
 			else
-				ShowMessage("%s", message_part_of_songs_added);
+				ShowMessage("%s", MPD::Message::PartOfSongsAdded);
 		}
 	}
 	else if (w == Songs)
@@ -426,5 +426,13 @@ void MediaLibrary::AddToPlaylist(bool add_n_play)
 		else if (w == Albums)
 			Songs->Clear(0);
 	}
+}
+
+bool MediaLibrary::SortSongsByTrack(Song *a, Song *b)
+{
+	if (a->GetDisc() == b->GetDisc())
+		return StrToInt(a->GetTrack()) < StrToInt(b->GetTrack());
+	else
+		return StrToInt(a->GetDisc()) < StrToInt(b->GetDisc());
 }
 

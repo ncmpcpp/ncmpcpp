@@ -21,11 +21,13 @@
 #ifndef _SETTINGS_H
 #define _SETTINGS_H
 
+#include <limits>
+
 #include "libmpdclient.h"
 #include "ncmpcpp.h"
 
 const std::string config_dir = home_folder + "/.ncmpcpp/";
-const int null_key = 0x0fffffff;
+const int null_key = std::numeric_limits<int>::max();
 
 struct ncmpcpp_keys
 {

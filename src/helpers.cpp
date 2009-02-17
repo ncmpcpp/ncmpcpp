@@ -247,14 +247,6 @@ bool Keypressed(int in, const int *key)
 	return in == key[0] || in == key[1];
 }
 
-bool SortSongsByTrack(Song *a, Song *b)
-{
-	if (a->GetDisc() == b->GetDisc())
-		return StrToInt(a->GetTrack()) < StrToInt(b->GetTrack());
-	else
-		return StrToInt(a->GetDisc()) < StrToInt(b->GetDisc());
-}
-
 string FindSharedDir(const string &one, const string &two)
 {
 	if (one == two)

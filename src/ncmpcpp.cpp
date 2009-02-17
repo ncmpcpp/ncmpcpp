@@ -818,7 +818,7 @@ int main(int argc, char *argv[])
 					{
 						Song &s = myPlaylist->Main()->at(myPlaylist->Main()->Size()-list.size());
 						if (s.GetHash() != list[0]->GetHash())
-							ShowMessage("%s", message_part_of_songs_added);
+							ShowMessage("%s", MPD::Message::PartOfSongsAdded);
 					}
 				}
 				else
@@ -1275,7 +1275,7 @@ int main(int argc, char *argv[])
 					ShowMessage("Selected items added!");
 					Song &s = myPlaylist->Main()->at(myPlaylist->Main()->Size()-result.size());
 					if (s.GetHash() != result[0]->GetHash())
-						ShowMessage("%s", message_part_of_songs_added);
+						ShowMessage("%s", MPD::Message::PartOfSongsAdded);
 				}
 			}
 			else if (id == 1)

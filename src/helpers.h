@@ -37,8 +37,6 @@ class CaseInsensitiveSorting
 		bool operator()(const MPD::Item &, const MPD::Item &);
 };
 
-bool SortSongsByTrack(MPD::Song *, MPD::Song *);
-
 void UpdateSongList(Menu<MPD::Song> *);
 
 bool Keypressed(int, const int *);
