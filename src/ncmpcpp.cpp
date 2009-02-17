@@ -186,9 +186,6 @@ int main(int argc, char *argv[])
 	
 	gettimeofday(&now, 0);
 	
-	// this type of casting is absolutely hillarious lol
-	Screen<Window> *&myWindow = *(Screen<Window> **)(void *)&myScreen;
-	
 	while (!main_exit)
 	{
 		if (!Mpd->Connected())
@@ -246,10 +243,9 @@ int main(int argc, char *argv[])
 		// header stuff end
 		
 		myScreen->Update();
+		myScreen->RefreshWindow();
+		myScreen->ReadKey(input);
 		
-		myWindow->Main()->Display();
-		
-		myWindow->Main()->ReadKey(input);
 		if (input == ERR)
 			continue;
 		

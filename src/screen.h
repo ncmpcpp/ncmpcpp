@@ -43,6 +43,8 @@ class BasicScreen
 		
 		virtual void Update() { }
 		virtual void Refresh() = 0;
+		virtual void RefreshWindow() = 0;
+		virtual void ReadKey(int &) = 0;
 		virtual void Scroll(Where, const int * = 0) = 0;
 		
 		virtual void EnterPressed() { }
@@ -70,6 +72,8 @@ template <class WindowType> class Screen : public BasicScreen
 		WindowType *&Main();
 		
 		virtual void Refresh();
+		virtual void RefreshWindow();
+		virtual void ReadKey(int &input);
 		virtual void Scroll(Where where, const int *);
 		
 	protected:
@@ -89,6 +93,16 @@ template <class WindowType> WindowType *&Screen<WindowType>::Main()
 template <class WindowType> void Screen<WindowType>::Refresh()
 {
 	w->Display();
+}
+
+template <class WindowType> void Screen<WindowType>::RefreshWindow()
+{
+	w->Display();
+}
+
+template <class WindowType> void Screen<WindowType>::ReadKey(int &input)
+{
+	w->ReadKey(input);
 }
 
 template <class WindowType> void Screen<WindowType>::Scroll(Where where, const int *key)
