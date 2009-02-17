@@ -46,7 +46,7 @@ class TinyTagEditor : public Screen< Menu<Buffer> >
 		
 		virtual bool allowsSelection() { return false; }
 		
-		virtual List *GetList() { return w; }
+		virtual List *GetList() { return 0; }
 		
 		bool SetEdited(MPD::Song *);
 		
