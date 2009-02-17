@@ -508,6 +508,11 @@ void ReadConfiguration(ncmpcpp_config &conf)
 				if (!v.empty())
 					conf.tag_editor_album_format = v;
 			}
+			else if (cl.find("external_editor") != string::npos)
+			{
+				if (!v.empty())
+					conf.external_editor = v;
+			}
 			else if (cl.find("browser_playlist_prefix") != string::npos)
 			{
 				if (!v.empty())

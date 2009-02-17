@@ -45,6 +45,8 @@ const std::string Lyrics::Folder = home_folder + "/.lyrics";
 
 bool Lyrics::Reload = 0;
 
+std::string Lyrics::Filename;
+
 #ifdef HAVE_CURL_CURL_H
 pthread_mutex_t Global::curl = PTHREAD_MUTEX_INITIALIZER;
 
@@ -157,11 +159,11 @@ void *Lyrics::Get(void *song)
 	
 	string filename = artist + " - " + title + ".txt";
 	EscapeUnallowedChars(filename);
-	const string fullpath = Folder + "/" + filename;
+	Filename = Folder + "/" + filename;
 	
 	mkdir(Folder.c_str(), 0755);
 	
-	std::ifstream input(fullpath.c_str());
+	std::ifstream input(Filename.c_str());
 	
 	if (input.is_open())
 	{
@@ -237,7 +239,7 @@ void *Lyrics::Get(void *song)
 	
 	*myLyrics->Main() << utf_to_locale_cpy(result);
 	
-	std::ofstream output(fullpath.c_str());
+	std::ofstream output(Filename.c_str());
 	if (output.is_open())
 	{
 		output << result;
@@ -250,6 +252,21 @@ void *Lyrics::Get(void *song)
 		*myLyrics->Main() << "Local lyrics not found. As ncmpcpp has been compiled without curl support, you can put appropriate lyrics into ~/.lyrics directory (file syntax is \"ARTIST - TITLE.txt\") or recompile ncmpcpp with curl support.";
 	return NULL;
 #	endif
+}
+
+void Lyrics::Edit()
+{
+	if (myScreen != this)
+		return;
+	
+	if (Config.external_editor.empty())
+	{
+		ShowMessage("External editor is not set!");
+		return;
+	}
+	
+	ShowMessage("Opening lyrics in external editor...");
+	system(("nohup " + Config.external_editor + " \"" + Filename + "\" > /dev/null 2>&1 &").c_str());
 }
 
 #ifdef HAVE_CURL_CURL_H

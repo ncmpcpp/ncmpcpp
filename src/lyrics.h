@@ -58,6 +58,8 @@ class Lyrics : public Screen<Scrollpad>
 		
 		virtual List *GetList() { return 0; }
 		
+		void Edit();
+		
 		static bool Reload;
 		
 #		ifdef HAVE_CURL_CURL_H
@@ -67,6 +69,7 @@ class Lyrics : public Screen<Scrollpad>
 	protected:
 		static void *Get(void *);
 		
+		static std::string Filename;
 		static const std::string Folder;
 		
 #		ifdef HAVE_CURL_CURL_H

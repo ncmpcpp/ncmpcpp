@@ -163,6 +163,8 @@
 #
 #lyrics_database = "1"
 #
+#external_editor = ""
+#
 ##### colors definitions #####
 #
 #colors_enabled = "yes"

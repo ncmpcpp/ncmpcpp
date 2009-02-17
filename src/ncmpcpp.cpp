@@ -1126,6 +1126,10 @@ int main(int argc, char *argv[])
 			}
 			else
 #			endif // HAVE_TAGLIB_H
+			if (myScreen == myLyrics)
+			{
+				myLyrics->Edit();
+			}
 			if (myScreen == myBrowser && myBrowser->Main()->Current().type == itDirectory)
 			{
 				string old_dir = myBrowser->Main()->Current().name;
