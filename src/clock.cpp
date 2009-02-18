@@ -24,6 +24,8 @@
 
 #ifdef ENABLE_CLOCK
 
+#include <cstring>
+
 #include "global.h"
 #include "playlist.h"
 #include "settings.h"
@@ -42,12 +44,14 @@ short Clock::disp[11] =
 
 long Clock::older[6], Clock::next[6], Clock::newer[6], Clock::mask;
 
-const size_t Clock::Width = Config.clock_display_seconds ? 60 : 40;
+size_t Clock::Width;
 const size_t Clock::Height = 8;
 
 void Clock::Init()
 {
-	w = new Scrollpad((COLS-Width)/2, (LINES-Height)/2, Width, Height-1, "", Config.main_color, Border(Config.main_color));
+	Width = Config.clock_display_seconds ? 60 : 40;
+	
+	w = new Window((COLS-Width)/2, (LINES-Height)/2, Width, Height-1, "", Config.main_color, Border(Config.main_color));
 	w->SetTimeout(ncmpcpp_window_timeout);
 }
 
@@ -111,7 +115,7 @@ void Clock::Update()
 	Set(10, 7);
 	Set(10, 17);
 	
-	char buf[54];
+	char buf[64];
 	strftime(buf, 64, "%x", time);
 	attron(COLOR_PAIR(Config.main_color));
 	mvprintw(w->GetStartY()+w->GetHeight(), w->GetStartX()+(w->GetWidth()-strlen(buf))/2, "%s", buf);

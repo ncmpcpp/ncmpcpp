@@ -53,7 +53,7 @@ class Clock : public Screen<Window>
 		static short disp[11];
 		static long older[6], next[6], newer[6], mask;
 		
-		static const size_t Width;
+		static size_t Width;
 		static const size_t Height;
 };
 

@@ -21,6 +21,8 @@
 #ifndef _NCMPCPP_H
 #define _NCMPCPP_H
 
+#include <cstdlib>
+
 #include "window.h"
 #include "menu.h"
 #include "scrollpad.h"

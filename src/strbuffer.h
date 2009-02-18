@@ -155,7 +155,7 @@ template <class C> Window &operator<<(Window &w, const basic_buffer<C> &buf)
 					w << tmp;
 					tmp.clear();
 				}
-				if (b->Value < 100)
+				if (b->Value < fmtNone)
 					w << Color(b->Value);
 				else
 					w << Format(b->Value);
