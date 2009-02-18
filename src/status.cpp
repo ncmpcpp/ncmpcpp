@@ -351,26 +351,26 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 	}
 	if (changed.ElapsedTime)
 	{
-		const Song &s = Mpd->GetCurrentSong();
-		if (!player_state.empty() && !s.Empty())
+		const Song *s = myPlaylist->NowPlayingSong();
+		if (s)
 		{
 			int elapsed = Mpd->GetElapsedTime();
 			
 			// 'repeat one' mode check - be sure that we deal with item with known length
-			if (s.GetTotalLength() && elapsed == s.GetTotalLength()-1)
+			if (s->GetTotalLength() && elapsed == s->GetTotalLength()-1)
 				repeat_one_allowed = 1;
 			
-			WindowTitle(utf_to_locale_cpy(s.toString(Config.song_window_title_format)));
+			WindowTitle(utf_to_locale_cpy(s->toString(Config.song_window_title_format)));
 			
 			if (!block_statusbar_update && Config.statusbar_visibility)
 			{
 				string tracklength;
-				if (s.GetTotalLength())
+				if (s->GetTotalLength())
 				{
 					tracklength = " [";
 					tracklength += Song::ShowTime(elapsed);
 					tracklength += "/";
-					tracklength += s.GetLength();
+					tracklength += s->GetLength();
 					tracklength += "]";
 				}
 				else
@@ -381,17 +381,17 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 				}
 				*wFooter << XY(0, 1) << wclrtoeol << player_state
 				<< fmtBoldEnd
-				<< Scroller(utf_to_locale_cpy(s.toString(Config.song_status_format)), wFooter->GetWidth()-player_state.length()-tracklength.length(), playing_song_scroll_begin)
+				<< Scroller(utf_to_locale_cpy(s->toString(Config.song_status_format)), wFooter->GetWidth()-player_state.length()-tracklength.length(), playing_song_scroll_begin)
 				<< fmtBold
 				<< XY(wFooter->GetWidth()-tracklength.length(), 1) << tracklength;
 			}
 			if (!block_progressbar_update)
 			{
-				double progressbar_size = (double)elapsed/(s.GetTotalLength());
+				double progressbar_size = (double)elapsed/(s->GetTotalLength());
 				int howlong = wFooter->GetWidth()*progressbar_size;
 				wFooter->SetColor(Config.progressbar_color);
 				mvwhline(wFooter->Raw(), 0, 0, 0, wFooter->GetWidth());
-				if (s.GetTotalLength())
+				if (s->GetTotalLength())
 				{
 					mvwhline(wFooter->Raw(), 0, 0, '=',howlong);
 					mvwaddch(wFooter->Raw(), 0, howlong, '>');

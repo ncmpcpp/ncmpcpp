@@ -51,7 +51,7 @@ class Playlist : public Screen< Menu<MPD::Song> >
 		virtual List *GetList() { return w; }
 		
 		bool isPlaying() { return NowPlaying >= 0 && !w->Empty(); }
-		const MPD::Song &NowPlayingSong();
+		const MPD::Song *NowPlayingSong();
 		
 		void Sort();
 		

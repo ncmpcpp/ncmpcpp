@@ -327,10 +327,14 @@ std::string Playlist::TotalLength()
 	return result.str();
 }
 
-const MPD::Song &Playlist::NowPlayingSong()
+const MPD::Song *Playlist::NowPlayingSong()
 {
-	static MPD::Song null;
-	return isPlaying() ? w->at(NowPlaying) : null;
+	bool was_filtered = w->isFiltered();
+	w->ShowAll();
+	const MPD::Song *s = isPlaying() ? &w->at(NowPlaying) : 0;
+	if (was_filtered)
+		w->ShowFiltered();
+	return s;
 }
 
 std::string Playlist::SongToString(const MPD::Song &s, void *data)

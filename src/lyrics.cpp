@@ -78,8 +78,8 @@ void Lyrics::Update()
 	if (!Reload)
 		return;
 	
-	const MPD::Song &s = myPlaylist->NowPlayingSong();
-	if (!s.GetArtist().empty() && !s.GetTitle().empty())
+	const MPD::Song *s = myPlaylist->NowPlayingSong();
+	if (s && !s->GetArtist().empty() && !s->GetTitle().empty())
 		SwitchTo();
 	else
 		Reload = 0;
@@ -106,7 +106,7 @@ void Lyrics::SwitchTo()
 		}
 #		endif
 		
-		const MPD::Song *s = Reload ? &myPlaylist->NowPlayingSong() : myScreen->CurrentSong();
+		const MPD::Song *s = Reload ? myPlaylist->NowPlayingSong() : myScreen->CurrentSong();
 		
 		if (!s)
 			return;
@@ -117,6 +117,7 @@ void Lyrics::SwitchTo()
 				Resize();
 			itsScrollBegin = 0;
 			itsSong = *s;
+			itsSong.Localize();
 			if (!Reload)
 			{
 				myOldScreen = myScreen;

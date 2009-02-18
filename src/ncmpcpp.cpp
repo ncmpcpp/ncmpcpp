@@ -851,12 +851,12 @@ int main(int argc, char *argv[])
 		}
 		else if (Keypressed(input, Key.SeekForward) || Keypressed(input, Key.SeekBackward))
 		{
-			if (!myPlaylist->isPlaying())
+			const Song *s = myPlaylist->NowPlayingSong();
+			
+			if (!s)
 				continue;
 			
-			const Song &s = Mpd->GetCurrentSong();
-			
-			if (!s.GetTotalLength())
+			if (!s->GetTotalLength())
 			{
 				ShowMessage("Unknown item length!");
 				continue;
@@ -877,13 +877,13 @@ int main(int argc, char *argv[])
 				
 				int howmuch = Config.incremental_seeking ? (timer-t)/2+Config.seek_time : Config.seek_time;
 				
-				if (songpos < s.GetTotalLength() && Keypressed(input, Key.SeekForward))
+				if (songpos < s->GetTotalLength() && Keypressed(input, Key.SeekForward))
 				{
 					songpos += howmuch;
-					if (songpos > s.GetTotalLength())
-						songpos = s.GetTotalLength();
+					if (songpos > s->GetTotalLength())
+						songpos = s->GetTotalLength();
 				}
-				if (songpos < s.GetTotalLength() && songpos > 0 && Keypressed(input, Key.SeekBackward))
+				if (songpos < s->GetTotalLength() && songpos > 0 && Keypressed(input, Key.SeekBackward))
 				{
 					songpos -= howmuch;
 					if (songpos < 0)
@@ -891,9 +891,9 @@ int main(int argc, char *argv[])
 				}
 				
 				wFooter->Bold(1);
-				string tracklength = "[" + Song::ShowTime(songpos) + "/" + s.GetLength() + "]";
+				string tracklength = "[" + Song::ShowTime(songpos) + "/" + s->GetLength() + "]";
 				*wFooter << XY(wFooter->GetWidth()-tracklength.length(), 1) << tracklength;
-				double progressbar_size = (double)songpos/(s.GetTotalLength());
+				double progressbar_size = (double)songpos/(s->GetTotalLength());
 				int howlong = wFooter->GetWidth()*progressbar_size;
 				
 				mvwhline(wFooter->Raw(), 0, 0, 0, wFooter->GetWidth());
@@ -1211,12 +1211,12 @@ int main(int argc, char *argv[])
 		}
 		else if (Keypressed(input, Key.GoToPosition))
 		{
-			if (!myPlaylist->isPlaying())
+			const Song *s = myPlaylist->NowPlayingSong();
+			
+			if (!s)
 				continue;
 			
-			const Song &s = Mpd->GetCurrentSong();
-			
-			if (!s.GetTotalLength())
+			if (!s->GetTotalLength())
 			{
 				ShowMessage("Unknown item length!");
 				continue;
@@ -1226,7 +1226,7 @@ int main(int argc, char *argv[])
 			string position = wFooter->GetString(3);
 			int newpos = StrToInt(position);
 			if (newpos > 0 && newpos < 100 && !position.empty())
-				Mpd->Seek(s.GetTotalLength()*newpos/100.0);
+				Mpd->Seek(s->GetTotalLength()*newpos/100.0);
 			UnlockStatusbar();
 		}
 		else if (Keypressed(input, Key.ReverseSelection))
@@ -1382,7 +1382,7 @@ int main(int argc, char *argv[])
 				// if mpd deletes now playing song deletion will be sluggishly slow
 				// then so we have to assure it will be deleted at the very end.
 				if (myPlaylist->isPlaying() && !myPlaylist->Main()->isSelected(myPlaylist->NowPlaying))
-					Mpd->QueueDeleteSongId(myPlaylist->NowPlayingSong().GetID());
+					Mpd->QueueDeleteSongId(myPlaylist->NowPlayingSong()->GetID());
 				
 				ShowMessage("Deleting all items but selected...");
 				Mpd->CommitQueue();
