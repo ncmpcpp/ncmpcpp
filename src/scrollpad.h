@@ -38,7 +38,6 @@ class Scrollpad: public Window
 		virtual void Refresh();
 		virtual void Scroll(Where);
 		
-		virtual void MoveTo(size_t, size_t);
 		virtual void Resize(size_t, size_t);
 		virtual void Clear(bool = 1);
 		

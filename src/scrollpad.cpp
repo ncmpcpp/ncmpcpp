@@ -33,10 +33,6 @@ Scrollpad::Scrollpad(size_t startx,
 			itsBeginning(0),
 			itsRealHeight(1)
 {
-	delwin(itsWindow);
-	itsWindow = newpad(itsHeight, itsWidth);
-	SetColor(itsColor);
-	keypad(itsWindow, 1);
 }
 
 Scrollpad::Scrollpad(const Scrollpad &s) : Window(s)
@@ -119,43 +115,12 @@ void Scrollpad::Recreate()
 
 void Scrollpad::Refresh()
 {
-	prefresh(itsWindow, itsBeginning, 0, itsStartY, itsStartX, itsStartY+itsHeight-1, itsStartX+itsWidth);
-}
-
-void Scrollpad::MoveTo(size_t x, size_t y)
-{
-	itsStartX = x;
-	itsStartY = y;
-	if (itsBorder != brNone)
-	{
-		itsStartX++;
-		itsStartY++;
-	}
-	if (!itsTitle.empty())
-		itsStartY += 2;
+	prefresh(itsWindow, itsBeginning, 0, itsStartY, itsStartX, itsStartY+itsHeight-1, itsStartX+itsWidth-1);
 }
 
 void Scrollpad::Resize(size_t width, size_t height)
 {
-	/*if (width+itsStartX > size_t(COLS)
-	||  height+itsStartY > size_t(LINES))
-		throw BadSize();*/
-	
-	if (itsBorder != brNone)
-	{
-		delwin(itsWinBorder);
-		itsWinBorder = newpad(height, width);
-		wattron(itsWinBorder, COLOR_PAIR(itsBorder));
-		box(itsWinBorder, 0, 0);
-		width -= 2;
-		height -= 2;
-	}
-	if (!itsTitle.empty())
-		width -= 2;
-	
-	itsHeight = height;
-	itsWidth = width;
-	
+	AdjustDimensions(width, height);
 	itsBeginning = 0;
 	itsRealHeight = itsHeight;
 	Flush();

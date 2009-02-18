@@ -153,8 +153,10 @@ class Window
 		
 		class BadSize { };
 		
+		void ShowBorder() const;
+		void AdjustDimensions(size_t &, size_t &);
+		
 		virtual void Recreate();
-		virtual void ShowBorder() const;
 		
 		WINDOW *itsWindow;
 		WINDOW *itsWinBorder;

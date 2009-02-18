@@ -345,7 +345,7 @@ template <class T> void Menu<T>::Refresh()
 			Bold(0);
 		line++;
 	}
-	wrefresh(itsWindow);
+	Window::Refresh();
 }
 
 template <class T> void Menu<T>::Scroll(Where where)

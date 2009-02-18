@@ -414,7 +414,8 @@ void TagEditor::Update()
 		if (Config.albums_in_tag_editor)
 		{
 			std::vector<string_pair> maplist;
-			*Albums << XY(0, 0) << "Fetching albums' list..." << wrefresh;
+			*Albums << XY(0, 0) << "Fetching albums' list...";
+			Albums->Window::Refresh();
 			Mpd->GetAlbums("", list);
 			for (TagList::const_iterator it = list.begin(); it != list.end(); it++)
 			{

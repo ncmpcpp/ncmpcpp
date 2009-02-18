@@ -93,7 +93,7 @@ Window::Window(size_t startx,
 		itsHeight -= 2;
 	}
 	
-	itsWindow = newwin(itsHeight, itsWidth, itsStartY, itsStartX);
+	itsWindow = newpad(itsHeight, itsWidth);
 	
 	SetColor(itsColor);
 	keypad(itsWindow, 1);
@@ -201,7 +201,7 @@ void Window::SetTitle(const string &newtitle)
 void Window::Recreate()
 {
 	delwin(itsWindow);
-	itsWindow = newwin(itsHeight, itsWidth, itsStartY, itsStartX);
+	itsWindow = newpad(itsHeight, itsWidth);
 	SetTimeout(itsWindowTimeout);
 	SetColor(itsColor, itsBgColor);
 	keypad(itsWindow, 1);
@@ -209,15 +209,6 @@ void Window::Recreate()
 
 void Window::MoveTo(size_t newx, size_t newy)
 {
-	if (newx == itsStartX && newy == itsStartY)
-		return;
-	
-	/*if (newx > size_t(COLS)
-	||  newy > size_t(LINES)
-	||  itsWidth+newx > size_t(COLS)
-	||  itsHeight+newy > size_t(LINES))
-		throw BadSize();*/
-	
 	itsStartX = newx;
 	itsStartY = newy;
 	if (itsBorder != brNone)
@@ -227,15 +218,10 @@ void Window::MoveTo(size_t newx, size_t newy)
 	}
 	if (!itsTitle.empty())
 		itsStartY += 2;
-	mvwin(itsWindow, itsStartY, itsStartX);
 }
 
-void Window::Resize(size_t width, size_t height)
+void Window::AdjustDimensions(size_t &width, size_t &height)
 {
-	/*if (width+itsStartX > size_t(COLS)
-	||  height+itsStartY > size_t(LINES))
-		throw BadSize();*/
-	
 	if (itsBorder != brNone)
 	{
 		delwin(itsWinBorder);
@@ -247,12 +233,14 @@ void Window::Resize(size_t width, size_t height)
 	}
 	if (!itsTitle.empty())
 		height -= 2;
-	
-	if (wresize(itsWindow, height, width) == OK)
-	{
-		itsHeight = height;
-		itsWidth = width;
-	}
+	itsHeight = height;
+	itsWidth = width;
+}
+
+void Window::Resize(size_t width, size_t height)
+{
+	AdjustDimensions(width, height);
+	Recreate();
 }
 
 void Window::ShowBorder() const
@@ -285,13 +273,13 @@ void Window::Display()
 
 void Window::Refresh()
 {
-	wrefresh(itsWindow);
+	prefresh(itsWindow, 0, 0, itsStartY, itsStartX, itsStartY+itsHeight-1, itsStartX+itsWidth-1);
 }
 
 void Window::Clear(bool)
 {
 	werase(itsWindow);
-	wrefresh(itsWindow);
+	Refresh();
 }
 
 void Window::Hide(char x) const
