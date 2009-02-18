@@ -279,7 +279,7 @@ void Window::Refresh()
 void Window::Clear(bool)
 {
 	werase(itsWindow);
-	Refresh();
+	Window::Refresh();
 }
 
 void Window::Hide(char x) const
