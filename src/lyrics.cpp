@@ -106,8 +106,7 @@ void Lyrics::SwitchTo()
 		}
 #		endif
 		
-		MPD::Song *s = Reload ? myPlaylist->CurrentSong() : myScreen->CurrentSong();
-		Reload = 0;
+		const MPD::Song *s = Reload ? &myPlaylist->NowPlayingSong() : myScreen->CurrentSong();
 		
 		if (!s)
 			return;
@@ -118,8 +117,11 @@ void Lyrics::SwitchTo()
 				Resize();
 			itsScrollBegin = 0;
 			itsSong = *s;
-			myOldScreen = myScreen;
-			myScreen = this;
+			if (!Reload)
+			{
+				myOldScreen = myScreen;
+				myScreen = this;
+			}
 			redraw_header = 1;
 			w->Clear();
 #			ifdef HAVE_CURL_CURL_H
@@ -133,6 +135,7 @@ void Lyrics::SwitchTo()
 			w->Flush();
 #			endif
 		}
+		Reload = 0;
 	}
 }
 
