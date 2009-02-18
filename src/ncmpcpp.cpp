@@ -166,7 +166,7 @@ int main(int argc, char *argv[])
 	
 	myScreen = myPlaylist;
 	
-	timer = time(NULL);
+	time(&timer);
 	
 	Mpd->SetStatusUpdater(NcmpcppStatusChanged, NULL);
 	Mpd->SetErrorHandler(NcmpcppErrorCallback, NULL);
@@ -253,7 +253,7 @@ int main(int argc, char *argv[])
 		if (!title_allowed)
 			redraw_header = 1;
 		title_allowed = 1;
-		timer = time(NULL);
+		time(&timer);
 		
 		if (myScreen == myPlaylist)
 		{
@@ -462,7 +462,7 @@ int main(int argc, char *argv[])
 					{
 						size_t id = myPlaylist->Main()->Choice();
 						TraceMpdStatus();
-						timer = time(NULL);
+						time(&timer);
 						if (myPlaylist->NowPlaying > myPlaylist->CurrentSong()->GetPosition())  // needed for keeping proper
 							myPlaylist->NowPlaying--; // position of now playing song.
 						Mpd->QueueDeleteSongId(myPlaylist->CurrentSong()->GetID());
@@ -526,7 +526,7 @@ int main(int argc, char *argv[])
 					while (!myPlaylistEditor->Content->Empty() && Keypressed(input, Key.Delete))
 					{
 						TraceMpdStatus();
-						timer = time(NULL);
+						time(&timer);
 						Mpd->QueueDeleteFromPlaylist(myPlaylistEditor->Playlists->Current(), myPlaylistEditor->Content->Choice());
 						myPlaylistEditor->Content->DeleteOption(myPlaylistEditor->Content->Choice());
 						myPlaylistEditor->Content->Refresh();
@@ -630,7 +630,7 @@ int main(int argc, char *argv[])
 					while (Keypressed(input, Key.MvSongUp) && list.front() > 0)
 					{
 						TraceMpdStatus();
-						timer = time(NULL);
+						time(&timer);
 						for (vector<size_t>::iterator it = list.begin(); it != list.end(); it++)
 						{
 							(*it)--;
@@ -654,7 +654,7 @@ int main(int argc, char *argv[])
 					while (Keypressed(input, Key.MvSongUp) && to > 0)
 					{
 						TraceMpdStatus();
-						timer = time(NULL);
+						time(&timer);
 						to--;
 						myPlaylist->Main()->Swap(to, to+1);
 						myPlaylist->Main()->Scroll(wUp);
@@ -678,7 +678,7 @@ int main(int argc, char *argv[])
 					while (Keypressed(input, Key.MvSongUp) && list.front() > 0)
 					{
 						TraceMpdStatus();
-						timer = time(NULL);
+						time(&timer);
 						for (vector<size_t>::iterator it = list.begin(); it != list.end(); it++)
 						{
 							(*it)--;
@@ -700,7 +700,7 @@ int main(int argc, char *argv[])
 					while (Keypressed(input, Key.MvSongUp) && to > 0)
 					{
 						TraceMpdStatus();
-						timer = time(NULL);
+						time(&timer);
 						to--;
 						myPlaylistEditor->Content->Swap(to, to+1);
 						myPlaylistEditor->Content->Scroll(wUp);
@@ -739,7 +739,7 @@ int main(int argc, char *argv[])
 					while (Keypressed(input, Key.MvSongDown) && list.back() < myPlaylist->Main()->Size()-1)
 					{
 						TraceMpdStatus();
-						timer = time(NULL);
+						time(&timer);
 						for (vector<size_t>::reverse_iterator it = list.rbegin(); it != list.rend(); it++)
 						{
 							(*it)++;
@@ -763,7 +763,7 @@ int main(int argc, char *argv[])
 					while (Keypressed(input, Key.MvSongDown) && to < myPlaylist->Main()->Size()-1)
 					{
 						TraceMpdStatus();
-						timer = time(NULL);
+						time(&timer);
 						to++;
 						myPlaylist->Main()->Swap(to, to-1);
 						myPlaylist->Main()->Scroll(wDown);
@@ -788,7 +788,7 @@ int main(int argc, char *argv[])
 					while (Keypressed(input, Key.MvSongDown) && list.back() < myPlaylistEditor->Content->Size()-1)
 					{
 						TraceMpdStatus();
-						timer = time(NULL);
+						time(&timer);
 						for (vector<size_t>::reverse_iterator it = list.rbegin(); it != list.rend(); it++)
 						{
 							(*it)++;
@@ -810,7 +810,7 @@ int main(int argc, char *argv[])
 					while (Keypressed(input, Key.MvSongDown) && to < myPlaylistEditor->Content->Size()-1)
 					{
 						TraceMpdStatus();
-						timer = time(NULL);
+						time(&timer);
 						to++;
 						myPlaylistEditor->Content->Swap(to, to-1);
 						myPlaylistEditor->Content->Scroll(wDown);
@@ -872,7 +872,7 @@ int main(int argc, char *argv[])
 			while (Keypressed(input, Key.SeekForward) || Keypressed(input, Key.SeekBackward))
 			{
 				TraceMpdStatus();
-				timer = time(NULL);
+				time(&timer);
 				myPlaylist->Main()->ReadKey(input);
 				
 				int howmuch = Config.incremental_seeking ? (timer-t)/2+Config.seek_time : Config.seek_time;
@@ -1361,7 +1361,7 @@ int main(int argc, char *argv[])
 					myBrowser->GetDirectory("/");
 				myPlaylistEditor->Playlists->Clear(0); // make playlist editor update itself
 			}
-			timer = time(NULL);
+			time(&timer);
 			delete mDialog;
 			FreeSongList(result);
 		}
@@ -1438,7 +1438,7 @@ int main(int argc, char *argv[])
 			
 			if (myScreen == myPlaylist)
 			{
-				timer = time(NULL);
+				time(&timer);
 				myPlaylist->Main()->Highlighting(1);
 				redraw_header = 1;
 			}
@@ -1455,7 +1455,7 @@ int main(int argc, char *argv[])
 			Statusbar() << "Find " << how << ": ";
 			string findme = wFooter->GetString();
 			UnlockStatusbar();
-			timer = time(NULL);
+			time(&timer);
 			if (findme.empty())
 				continue;
 			ToLower(findme);
@@ -1491,7 +1491,7 @@ int main(int argc, char *argv[])
 				mList->Highlight(vFoundPositions[found_pos < 0 ? 0 : found_pos]);
 				if (myScreen == myPlaylist)
 				{
-					timer = time(NULL);
+					time(&timer);
 					myPlaylist->Main()->Highlighting(1);
 				}
 			}

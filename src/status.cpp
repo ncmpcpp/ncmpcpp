@@ -487,7 +487,7 @@ void ShowMessage(const char *format, ...)
 {
 	if (messages_allowed)
 	{
-		time_of_statusbar_lock = time(NULL);
+		time(&time_of_statusbar_lock);
 		lock_statusbar_delay = Config.message_delay_time;
 		if (Config.statusbar_visibility)
 			block_statusbar_update = 1;
