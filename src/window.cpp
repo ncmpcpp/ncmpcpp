@@ -291,17 +291,17 @@ void Window::Hide(char x) const
 
 void Window::Bold(bool bold) const
 {
-	bold ? wattron(itsWindow, A_BOLD) : wattroff(itsWindow, A_BOLD);
+	(bold ? wattron : wattroff)(itsWindow, A_BOLD);
 }
 
 void Window::Reverse(bool reverse) const
 {
-	reverse ? wattron(itsWindow, A_REVERSE) : wattroff(itsWindow, A_REVERSE);
+	(reverse ? wattron : wattroff)(itsWindow, A_REVERSE);
 }
 
 void Window::AltCharset(bool alt) const
 {
-	alt ? wattron(itsWindow, A_ALTCHARSET) : wattroff(itsWindow, A_ALTCHARSET);
+	(alt ? wattron : wattroff)(itsWindow, A_ALTCHARSET);
 }
 
 void Window::SetTimeout(int timeout)
