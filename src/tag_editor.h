@@ -117,13 +117,10 @@ class TagEditor : public Screen<Window>
 
 extern TagEditor *myTagEditor;
 
-typedef void (MPD::Song::*SongSetFunction)(const std::string &);
-typedef std::string (MPD::Song::*SongGetFunction)() const;
-
 std::string FindSharedDir(Menu<MPD::Song> *);
 std::string FindSharedDir(const MPD::SongList &);
 
-SongSetFunction IntoSetFunction(mpd_TagItems);
+MPD::Song::SetFunction IntoSetFunction(mpd_TagItems);
 
 void DealWithFilenames(MPD::SongList &);
 

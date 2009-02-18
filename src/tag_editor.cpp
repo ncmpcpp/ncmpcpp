@@ -303,13 +303,13 @@ void TagEditor::Init()
 	Albums = new Menu<string_pair>(0, main_start_y, LeftColumnWidth, main_height, "Albums", Config.main_color, brNone);
 	Albums->HighlightColor(Config.active_column_color);
 	Albums->SetTimeout(ncmpcpp_window_timeout);
-	Albums->SetItemDisplayer(Display::StringPairs);
+	Albums->SetItemDisplayer(Display::Pairs);
 	Albums->SetGetStringFunction(MediaLibrary::StringPairToString);
 	
 	Dirs = new Menu<string_pair>(0, main_start_y, LeftColumnWidth, main_height, "Directories", Config.main_color, brNone);
 	Dirs->HighlightColor(Config.active_column_color);
 	Dirs->SetTimeout(ncmpcpp_window_timeout);
-	Dirs->SetItemDisplayer(Display::StringPairs);
+	Dirs->SetItemDisplayer(Display::Pairs);
 	Dirs->SetGetStringFunction(MediaLibrary::StringPairToString);
 	
 	LeftColumn = Config.albums_in_tag_editor ? Albums : Dirs;
@@ -537,8 +537,8 @@ void TagEditor::EnterPressed()
 		for (size_t i = 0; i < Tags->Size(); i++)
 			list.push_back(&Tags->at(i));
 	
-	SongGetFunction get = 0;
-	SongSetFunction set = 0;
+	Song::GetFunction get = 0;
+	Song::SetFunction set = 0;
 	
 	size_t id = TagTypes->RealChoice();
 	switch (id)
@@ -1057,7 +1057,7 @@ namespace
 		}
 	}
 	
-	SongSetFunction IntoSetFunction(char c)
+	Song::SetFunction IntoSetFunction(char c)
 	{
 		switch (c)
 		{
@@ -1133,7 +1133,7 @@ namespace
 			
 			if (!preview)
 			{
-				SongSetFunction set = IntoSetFunction(it->first);
+				Song::SetFunction set = IntoSetFunction(it->first);
 				if (set)
 					(s.*set)(it->second);
 			}
@@ -1144,7 +1144,7 @@ namespace
 	}
 }
 
-SongSetFunction IntoSetFunction(mpd_TagItems tag)
+Song::SetFunction IntoSetFunction(mpd_TagItems tag)
 {
 	switch (tag)
 	{

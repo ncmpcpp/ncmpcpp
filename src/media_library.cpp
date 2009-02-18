@@ -57,7 +57,7 @@ void MediaLibrary::Init()
 	Albums = new Menu<string_pair>(itsMiddleColStartX, main_start_y, itsMiddleColWidth, main_height, "Albums", Config.main_color, brNone);
 	Albums->HighlightColor(Config.main_highlight_color);
 	Albums->SetTimeout(ncmpcpp_window_timeout);
-	Albums->SetItemDisplayer(Display::StringPairs);
+	Albums->SetItemDisplayer(Display::Pairs);
 	Albums->SetGetStringFunction(StringPairToString);
 	
 	Songs = new Menu<Song>(itsRightColStartX, main_start_y, itsRightColWidth, main_height, "Songs", Config.main_color, brNone);

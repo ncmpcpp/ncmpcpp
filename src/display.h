@@ -34,7 +34,10 @@ namespace Display
 		*menu << t;
 	}
 	
-	void StringPairs(const string_pair &, void *, Menu<string_pair> *);
+	template <class A, class B> void Pairs(const std::pair<A, B> &pair, void *, Menu< std::pair<A, B> > *menu)
+	{
+		*menu << pair.first;
+	}
 	
 	void SongsInColumns(const MPD::Song &, void *, Menu<MPD::Song> *);
 	
@@ -45,8 +48,6 @@ namespace Display
 	void SearchEngine(const std::pair<Buffer *, MPD::Song *> &, void *, Menu< std::pair<Buffer *, MPD::Song *> > *);
 	
 	void Items(const MPD::Item &, void *, Menu<MPD::Item> *);
-	
-	void Clock(Window &, const tm *);
 }
 
 #endif

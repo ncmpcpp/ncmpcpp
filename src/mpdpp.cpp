@@ -290,6 +290,15 @@ void Connection::Move(int from, int to) const
 	}
 }
 
+void Connection::Swap(int from, int to) const
+{
+	if (isConnected)
+	{
+		mpd_sendSwapCommand(itsConnection, from, to);
+		mpd_finishCommand(itsConnection);
+	}
+}
+
 void Connection::Seek(int where) const
 {
 	if (isConnected)

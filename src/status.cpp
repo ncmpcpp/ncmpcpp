@@ -470,7 +470,7 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 		wHeader->SetColor(Config.header_color);
 		wHeader->Refresh();
 	}
-	if (myScreen == myPlaylist)
+	if (myScreen == myPlaylist && !Playlist::BlockRefreshing)
 		myPlaylist->Main()->Refresh();
 	wFooter->Bold(0);
 	wFooter->GotoXY(sx, sy);

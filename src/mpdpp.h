@@ -119,6 +119,7 @@ namespace MPD
 			void Next() const;
 			void Prev() const;
 			void Move(int, int) const;
+			void Swap(int, int) const;
 			void Seek(int) const;
 			void Shuffle() const;
 			void ClearPlaylist() const;

@@ -31,6 +31,10 @@ namespace MPD
 	class Song
 	{
 		public:
+			
+			typedef void (Song::*SetFunction)(const std::string &);
+			typedef std::string (Song::*GetFunction)() const;
+			
 			Song() : itsSlash(std::string::npos), itsHash(0), copyPtr(0), isStream(0), isLocalised(0) { itsSong = mpd_newSong(); }
 			Song(mpd_Song *, bool = 0);
 			Song(const Song &);

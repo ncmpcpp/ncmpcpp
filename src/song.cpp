@@ -299,7 +299,7 @@ string Song::toString(const std::string &format) const
 		if (*it == '{')
 		{
 			prev_pos = it;
-			string (Song::*get)() const = 0;
+			GetFunction get = 0;
 			for (; *it != '}'; it++)
 			{
 				if (*it == '%')

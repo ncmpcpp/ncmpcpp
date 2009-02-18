@@ -1042,7 +1042,7 @@ int main(int argc, char *argv[])
 					Mpd->StartSearch(1);
 					Mpd->AddSearch(Config.media_lib_primary_tag, locale_to_utf_cpy(myLibrary->Artists->Current()));
 					Mpd->CommitSearch(list);
-					SongSetFunction set = IntoSetFunction(Config.media_lib_primary_tag);
+					Song::SetFunction set = IntoSetFunction(Config.media_lib_primary_tag);
 					if (!set)
 						continue;
 					for (SongList::iterator it = list.begin(); it != list.end(); it++)
@@ -1290,9 +1290,7 @@ int main(int argc, char *argv[])
 			
 			mDialog->Display();
 			
-			myOldScreen = myScreen;
-			myScreen = myHelp; // temp hack, prevent playlist from updating
-			
+			Playlist::BlockRefreshing = 1;
 			while (!Keypressed(input, Key.Enter))
 			{
 				TraceMpdStatus();
@@ -1312,8 +1310,7 @@ int main(int argc, char *argv[])
 				else if (Keypressed(input, Key.End))
 					mDialog->Scroll(wEnd);
 			}
-			
-			myScreen = myOldScreen;
+			Playlist::BlockRefreshing = 0;
 			
 			size_t id = mDialog->Choice();
 			
@@ -1411,6 +1408,12 @@ int main(int argc, char *argv[])
 			ShowMessage("Clearing playlist...");
 			Mpd->ClearPlaylist();
 			ShowMessage("Cleared playlist!");
+		}
+		else if (Keypressed(input, Key.SortPlaylist) && myScreen == myPlaylist)
+		{
+			myPlaylist->Sort();
+			myPlaylist->Main()->Highlighting(1);
+			time(&timer);
 		}
 		else if (Keypressed(input, Key.ApplyFilter))
 		{

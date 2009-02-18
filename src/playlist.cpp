@@ -34,6 +34,14 @@ Playlist *myPlaylist = new Playlist;
 
 bool Playlist::BlockNowPlayingUpdate = 0;
 bool Playlist::BlockUpdate = 0;
+bool Playlist::BlockRefreshing = 0;
+
+Menu< std::pair<std::string, MPD::Song::GetFunction> > *Playlist::SortDialog;
+
+const size_t Playlist::SortOptions = 10;
+
+const size_t Playlist::SortDialogWidth = 30;
+const size_t Playlist::SortDialogHeight = 17;
 
 void Playlist::Init()
 {
@@ -46,6 +54,24 @@ void Playlist::Init()
 	w->SetItemDisplayerUserData(Config.columns_in_playlist ? &Config.song_columns_list_format : &Config.song_list_format);
 	w->SetGetStringFunction(Config.columns_in_playlist ? SongInColumnsToString : SongToString);
 	w->SetGetStringFunctionUserData(Config.columns_in_playlist ? &Config.song_columns_list_format : &Config.song_list_format);
+	
+	SortDialog = new Menu< std::pair<std::string, MPD::Song::GetFunction> >((COLS-SortDialogWidth)/2, (LINES-SortDialogHeight)/2, SortDialogWidth, SortDialogHeight, "Sort songs by...", Config.main_color, Config.window_border);
+	SortDialog->SetTimeout(ncmpcpp_window_timeout);
+	SortDialog->SetItemDisplayer(Display::Pairs);
+	
+	SortDialog->AddOption(std::make_pair("Artist", &MPD::Song::GetArtist));
+	SortDialog->AddOption(std::make_pair("Album", &MPD::Song::GetAlbum));
+	SortDialog->AddOption(std::make_pair("Disc", &MPD::Song::GetDisc));
+	SortDialog->AddOption(std::make_pair("Track", &MPD::Song::GetTrack));
+	SortDialog->AddOption(std::make_pair("Genre", &MPD::Song::GetGenre));
+	SortDialog->AddOption(std::make_pair("Year", &MPD::Song::GetYear));
+	SortDialog->AddOption(std::make_pair("Composer", &MPD::Song::GetComposer));
+	SortDialog->AddOption(std::make_pair("Performer", &MPD::Song::GetPerformer));
+	SortDialog->AddOption(std::make_pair("Title", &MPD::Song::GetTitle));
+	SortDialog->AddOption(std::make_pair("Filename", &MPD::Song::GetFile));
+	SortDialog->AddSeparator();
+	SortDialog->AddOption(std::make_pair("Sort", (MPD::Song::GetFunction)0));
+	SortDialog->AddOption(std::make_pair("Cancel", (MPD::Song::GetFunction)0));
 }
 
 void Playlist::SwitchTo()
@@ -66,6 +92,7 @@ void Playlist::Resize()
 {
 	w->Resize(COLS, main_height);
 	w->SetTitle(Config.columns_in_playlist ? Display::Columns(Config.song_columns_list_format) : "");
+	SortDialog->MoveTo((COLS-SortDialogWidth)/2, (LINES-SortDialogHeight)/2);
 	hasToBeResized = 0;
 }
 
@@ -101,6 +128,135 @@ void Playlist::GetSelectedSongs(MPD::SongList &v)
 	{
 		v.push_back(new MPD::Song(w->at(*it)));
 	}
+}
+
+void Playlist::Sort()
+{
+	if (w->GetWidth() < SortDialogWidth || w->GetHeight() < SortDialogHeight)
+	{
+		ShowMessage("Screen is too small to display dialog window!");
+		return;
+	}
+	
+	int input;
+	
+	SortDialog->Reset();
+	SortDialog->Display();
+	
+	BlockRefreshing = 1;
+	while (1)
+	{
+		TraceMpdStatus();
+		SortDialog->Refresh();
+		SortDialog->ReadKey(input);
+		
+		if (Keypressed(input, Key.Up))
+		{
+			SortDialog->Scroll(wUp);
+		}
+		else if (Keypressed(input, Key.Down))
+		{
+			SortDialog->Scroll(wDown);
+		}
+		else if (Keypressed(input, Key.PageUp))
+		{
+			SortDialog->Scroll(wPageUp);
+		}
+		else if (Keypressed(input, Key.PageDown))
+		{
+			SortDialog->Scroll(wPageDown);
+		}
+		else if (Keypressed(input, Key.Home))
+		{
+			SortDialog->Scroll(wHome);
+		}
+		else if (Keypressed(input, Key.End))
+		{
+			SortDialog->Scroll(wEnd);
+		}
+		else if (Keypressed(input, Key.MvSongUp))
+		{
+			size_t pos = SortDialog->Choice();
+			if (pos > 0 && pos < SortOptions)
+			{
+				SortDialog->Swap(pos, pos-1);
+				SortDialog->Scroll(wUp);
+			}
+		}
+		else if (Keypressed(input, Key.MvSongDown))
+		{
+			size_t pos = SortDialog->Choice();
+			if (pos < SortOptions-1)
+			{
+				SortDialog->Swap(pos, pos+1);
+				SortDialog->Scroll(wDown);
+			}
+		}
+		else if (Keypressed(input, Key.Enter))
+		{
+			size_t pos = SortDialog->Choice();
+			if (pos > SortOptions)
+			{
+				BlockRefreshing = 0;
+				if (pos == SortOptions+1) // sort
+					break;
+				else if (pos == SortOptions+2) //  cancel
+					return;
+			}
+			else
+			{
+				ShowMessage("Move tag types up and down to adjust sort order");
+			}
+		}
+	}
+	
+	MPD::SongList playlist, cmp;
+	
+	playlist.reserve(w->Size());
+	
+	for (size_t i = 0; i < w->Size(); i++)
+	{
+		(*w)[i].SetPosition(i);
+		playlist.push_back(&(*w)[i]);
+	}
+	
+	cmp = playlist;
+	sort(playlist.begin(), playlist.end(), Playlist::Sorting);
+	
+	if (playlist == cmp)
+	{
+		ShowMessage("Playlist is already sorted");
+		return;
+	}
+	
+	ShowMessage("Sorting playlist...");
+	do
+	{
+		for (size_t i = 0; i < playlist.size(); i++)
+		{
+			if (playlist[i]->GetPosition() > int(i))
+			{
+				Mpd->Swap(playlist[i]->GetPosition(), i);
+				std::swap(cmp[playlist[i]->GetPosition()], cmp[i]);
+			}
+			cmp[i]->SetPosition(i);
+		}
+	}
+	while (playlist != cmp);
+	ShowMessage("Playlist sorted!");
+}
+
+bool Playlist::Sorting(MPD::Song *a, MPD::Song *b)
+{
+	for (size_t i = 0; i < SortOptions; i++)
+	{
+		MPD::Song::GetFunction get = (*SortDialog)[i].second;
+		if ((a->*get)() != (b->*get)())
+		{
+			return (a->*get)() < (b->*get)();
+		}
+	}
+	return a->GetPosition() < b->GetPosition();
 }
 
 std::string Playlist::TotalLength()

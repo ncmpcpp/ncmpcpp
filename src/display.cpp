@@ -90,11 +90,6 @@ string Display::Columns(string st)
 	return result;
 }
 
-void Display::StringPairs(const string_pair &pair, void *, Menu<string_pair> *menu)
-{
-	*menu << pair.first;
-}
-
 void Display::SongsInColumns(const MPD::Song &s, void *s_template, Menu<MPD::Song> *menu)
 {
 	string st = s_template ? *static_cast<string *>(s_template) : "";
@@ -115,7 +110,7 @@ void Display::SongsInColumns(const MPD::Song &s, void *s_template, Menu<MPD::Son
 		color = IntoColor(GetLineValue(st, '[', ']', 1));
 		char type = GetLineValue(st, '{', '}', 1)[0];
 		
-		string (Song::*get)() const = 0;
+		Song::GetFunction get = 0;
 		
 		switch (type)
 		{
@@ -195,7 +190,7 @@ void Display::Songs(const MPD::Song &s, void *data, Menu<MPD::Song> *menu)
 		if (*it == '{')
 		{
 			prev_pos = it;
-			string (Song::*get)() const = 0;
+			Song::GetFunction get = 0;
 			for (; *it != '}'; it++)
 			{
 				if (*it == '%')

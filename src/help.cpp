@@ -199,6 +199,7 @@ void Help::GetKeybindings()
 	*w << DisplayKeys(Key.MvSongDown) << "Move item/group of items down\n";
 	*w << DisplayKeys(Key.Add) << "Add url/file/directory to playlist\n";
 	*w << DisplayKeys(Key.SavePlaylist) << "Save playlist\n";
+	*w << DisplayKeys(Key.SortPlaylist) << "Sort playlist\n";
 	*w << DisplayKeys(Key.GoToNowPlaying) << "Go to currently playing position\n";
 	*w << DisplayKeys(Key.ToggleAutoCenter) << "Toggle auto center mode\n\n\n";
 	

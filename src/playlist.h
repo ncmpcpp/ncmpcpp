@@ -53,6 +53,8 @@ class Playlist : public Screen< Menu<MPD::Song> >
 		bool isPlaying() { return NowPlaying >= 0 && !w->Empty(); }
 		const MPD::Song &NowPlayingSong();
 		
+		void Sort();
+		
 		static std::string SongToString(const MPD::Song &, void *);
 		static std::string SongInColumnsToString(const MPD::Song &, void *);
 		
@@ -61,9 +63,18 @@ class Playlist : public Screen< Menu<MPD::Song> >
 		
 		static bool BlockNowPlayingUpdate;
 		static bool BlockUpdate;
+		static bool BlockRefreshing;
 		
 	protected:
 		std::string TotalLength();
+		
+		static bool Sorting(MPD::Song *a, MPD::Song *b);
+		
+		static Menu< std::pair<std::string, MPD::Song::GetFunction> > *SortDialog;
+		
+		static const size_t SortOptions;
+		static const size_t SortDialogWidth;
+		static const size_t SortDialogHeight;
 };
 
 extern Playlist *myPlaylist;
