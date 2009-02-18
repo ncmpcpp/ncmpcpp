@@ -1405,9 +1405,20 @@ int main(int argc, char *argv[])
 		}
 		else if (Keypressed(input, Key.Clear))
 		{
-			ShowMessage("Clearing playlist...");
-			Mpd->ClearPlaylist();
-			ShowMessage("Cleared playlist!");
+			if (myPlaylist->Main()->isFiltered())
+			{
+				ShowMessage("Deleting filtered items...");
+				for (int i = myPlaylist->Main()->Size()-1; i >= 0; i--)
+					Mpd->QueueDeleteSong((*myPlaylist->Main())[i].GetPosition());
+				Mpd->CommitQueue();
+				ShowMessage("Filtered items deleted!");
+			}
+			else
+			{
+				ShowMessage("Clearing playlist...");
+				Mpd->ClearPlaylist();
+				ShowMessage("Cleared playlist!");
+			}
 		}
 		else if (Keypressed(input, Key.SortPlaylist) && myScreen == myPlaylist)
 		{
