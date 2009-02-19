@@ -418,6 +418,7 @@ string Window::GetString(const string &base, size_t length, size_t width, bool e
 			itsGetStringHelper(tmp);
 		
 		wmove(itsWindow, y, x);
+		prefresh(itsWindow, 0, 0, itsStartY, itsStartX, itsStartY+itsHeight-1, itsStartX+itsWidth-1);
 		input = wgetch(itsWindow);
 		
 		switch (input)
