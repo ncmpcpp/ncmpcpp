@@ -252,11 +252,12 @@ bool Playlist::Sorting(MPD::Song *a, MPD::Song *b)
 {
 	for (size_t i = 0; i < SortOptions; i++)
 	{
-		MPD::Song::GetFunction get = (*SortDialog)[i].second;
-		if ((a->*get)() != (b->*get)())
-		{
-			return (a->*get)() < (b->*get)();
-		}
+		std::string sa = (a->*(*SortDialog)[i].second)();
+		std::string sb = (b->*(*SortDialog)[i].second)();
+		ToLower(sa);
+		ToLower(sb);
+		if (sa != sb)
+			return sa < sb;
 	}
 	return a->GetPosition() < b->GetPosition();
 }
