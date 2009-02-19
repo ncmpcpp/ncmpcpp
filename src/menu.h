@@ -553,6 +553,8 @@ template <class T> size_t Menu<T>::RealChoice() const
 
 template <class T> void Menu<T>::ApplyFilter(const std::string &filter, size_t beginning, bool case_sensitive)
 {
+	if (filter == itsFilter)
+		return;
 	itsFilter = filter;
 	if (!case_sensitive)
 		ToLower(itsFilter);
