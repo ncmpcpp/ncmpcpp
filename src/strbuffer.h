@@ -26,19 +26,19 @@
 #include <sstream>
 #include <list>
 
-struct FormatPos
-{
-	size_t Position;
-	short Value;
-	
-	bool operator<(const FormatPos &f)
-	{
-		return Position < f.Position;
-	}
-};
-
 template <class C> class basic_buffer
 {
+	struct FormatPos
+	{
+		size_t Position;
+		short Value;
+	
+		bool operator<(const FormatPos &f)
+		{
+			return Position < f.Position;
+		}
+	};
+	
 	std::basic_ostringstream<C> itsString;
 	std::list<FormatPos> itsFormat;
 	std::basic_string<C> *itsTempString;
@@ -129,7 +129,7 @@ template <class C> basic_buffer<C> &basic_buffer<C>::operator<<(const basic_buff
 	itsString << buf.itsString.str();
 	std::list<FormatPos> tmp = buf.itsFormat;
 	if (len)
-		for (std::list<FormatPos>::iterator it = tmp.begin(); it != tmp.end(); it++)
+		for (typename std::list<typename basic_buffer<C>::FormatPos>::iterator it = tmp.begin(); it != tmp.end(); it++)
 			it->Position += len;
 	itsFormat.merge(tmp);
 	return *this;
@@ -145,7 +145,8 @@ template <class C> Window &operator<<(Window &w, const basic_buffer<C> &buf)
 	else
 	{
 		std::basic_string<C> tmp;
-		std::list<FormatPos>::const_iterator b = buf.itsFormat.begin(), e = buf.itsFormat.end();
+		typename std::list<typename basic_buffer<C>::FormatPos>::const_iterator b = buf.itsFormat.begin();
+		typename std::list<typename basic_buffer<C>::FormatPos>::const_iterator e = buf.itsFormat.end();
 		for (size_t i = 0; i < s.length() || b != e; i++)
 		{
 			while (b != e && i == b->Position)
