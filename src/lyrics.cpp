@@ -132,7 +132,7 @@ void Lyrics::SwitchTo()
 				pthread_create(&Downloader, NULL, Get, &itsSong);
 			}
 #			else
-			Get(s);
+			Get(&itsSong);
 			w->Flush();
 #			endif
 		}
