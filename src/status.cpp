@@ -231,6 +231,9 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 			FreeSongList(list);
 		}
 		
+		Playlist::ReloadTotalLength = 1;
+		Playlist::ReloadRemaining = 1;
+		
 		if (myScreen == myPlaylist)
 			redraw_header = 1;
 		
@@ -284,6 +287,7 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 			{
 				player_state = "Playing: ";
 				myPlaylist->Main()->BoldOption(myPlaylist->NowPlaying, 1);
+				Playlist::ReloadRemaining = 1;
 				changed.ElapsedTime = 1;
 				break;
 			}
@@ -303,6 +307,7 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 					myPlaylist->Main()->BoldOption(myPlaylist->OldPlaying, 0);
 				}
 				catch (std::out_of_range) { }
+				Playlist::ReloadRemaining = 1;
 				myPlaylist->NowPlaying = -1;
 				player_state.clear();
 				break;
@@ -342,6 +347,8 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 			if (Config.now_playing_lyrics && !Config.repeat_one_mode && myScreen == myLyrics && myOldScreen == myPlaylist)
 				Lyrics::Reload = 1;
 		}
+		Playlist::ReloadRemaining = 1;
+		
 		playing_song_scroll_begin = 0;
 		
 		if (Mpd->GetState() == psPlay)

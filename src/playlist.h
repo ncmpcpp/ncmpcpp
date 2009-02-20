@@ -21,6 +21,8 @@
 #ifndef _PLAYLIST_H
 #define _PLAYLIST_H
 
+#include <sstream>
+
 #include "ncmpcpp.h"
 #include "screen.h"
 #include "song.h"
@@ -28,7 +30,7 @@
 class Playlist : public Screen< Menu<MPD::Song> >
 {
 	public:
-		Playlist() : NowPlaying(-1), OldPlaying(-1) { }
+		Playlist() : NowPlaying(-1), OldPlaying(-1), itsTotalLength(0), itsRemainingTime(0), itsScrollBegin(0) { }
 		~Playlist() { }
 		
 		virtual void Init();
@@ -61,6 +63,9 @@ class Playlist : public Screen< Menu<MPD::Song> >
 		int NowPlaying;
 		int OldPlaying;
 		
+		static bool ReloadTotalLength;
+		static bool ReloadRemaining;
+		
 		static bool BlockNowPlayingUpdate;
 		static bool BlockUpdate;
 		static bool BlockRefreshing;
@@ -68,6 +73,13 @@ class Playlist : public Screen< Menu<MPD::Song> >
 	protected:
 		std::string TotalLength();
 		
+		std::string itsBufferedStats;
+		
+		size_t itsTotalLength;
+		size_t itsRemainingTime;
+		size_t itsScrollBegin;
+		
+		static void ShowTime(std::ostringstream &, size_t);
 		static bool Sorting(MPD::Song *a, MPD::Song *b);
 		
 		static Menu< std::pair<std::string, MPD::Song::GetFunction> > *SortDialog;

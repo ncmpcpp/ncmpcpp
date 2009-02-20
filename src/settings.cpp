@@ -247,6 +247,7 @@ void DefaultConfiguration(ncmpcpp_config &conf)
 	conf.media_lib_primary_tag = MPD_TAG_ITEM_ARTIST;
 	conf.colors_enabled = true;
 	conf.fancy_scrolling = true;
+	conf.playlist_show_remaining_time = false;
 	conf.columns_in_playlist = false;
 	conf.columns_in_browser = false;
 	conf.columns_in_search_engine = false;
@@ -563,6 +564,10 @@ void ReadConfiguration(ncmpcpp_config &conf)
 			else if (cl.find("fancy_scrolling") != string::npos)
 			{
 				conf.fancy_scrolling = v == "yes";
+			}
+			else if (cl.find("playlist_show_remaining_time") != string::npos)
+			{
+				conf.playlist_show_remaining_time = v == "yes";
 			}
 			else if (cl.find("playlist_display_mode") != string::npos)
 			{

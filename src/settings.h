@@ -138,6 +138,7 @@ struct ncmpcpp_config
 	
 	bool colors_enabled;
 	bool fancy_scrolling;
+	bool playlist_show_remaining_time;
 	bool columns_in_playlist;
 	bool columns_in_browser;
 	bool columns_in_search_engine;

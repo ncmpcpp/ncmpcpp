@@ -34,6 +34,9 @@ using std::vector;
 
 Playlist *myPlaylist = new Playlist;
 
+bool Playlist::ReloadTotalLength = 0;
+bool Playlist::ReloadRemaining = 0;
+
 bool Playlist::BlockNowPlayingUpdate = 0;
 bool Playlist::BlockUpdate = 0;
 bool Playlist::BlockRefreshing = 0;
@@ -81,6 +84,8 @@ void Playlist::SwitchTo()
 	if (myScreen == this)
 		return;
 	
+	itsScrollBegin = 0;
+	
 	if (hasToBeResized)
 		Resize();
 	
@@ -101,7 +106,9 @@ void Playlist::Resize()
 std::string Playlist::Title()
 {
 	std::string result = "Playlist ";
-	result += TotalLength();
+	if (ReloadTotalLength || ReloadRemaining)
+		itsBufferedStats = TotalLength();
+	result += TO_STRING(Scroller(itsBufferedStats, w->GetWidth()-result.length()-volume_state.length(), itsScrollBegin));
 	return result;
 }
 
@@ -266,14 +273,20 @@ std::string Playlist::TotalLength()
 {
 	std::ostringstream result;
 	
-	const int MINUTE = 60;
-	const int HOUR = 60*MINUTE;
-	const int DAY = 24*HOUR;
-	const int YEAR = 365*DAY;
-	int length = 0;
-	
-	for (size_t i = 0; i < w->Size(); i++)
-		length += w->at(i).GetTotalLength();
+	if (ReloadTotalLength)
+	{
+		itsTotalLength = 0;
+		for (size_t i = 0; i < w->Size(); i++)
+			itsTotalLength += (*w)[i].GetTotalLength();
+		ReloadTotalLength = 0;
+	}
+	if (Config.playlist_show_remaining_time && ReloadRemaining && !w->isFiltered())
+	{
+		itsRemainingTime = 0;
+		for (size_t i = NowPlaying; i < w->Size(); i++)
+			itsRemainingTime += (*w)[i].GetTotalLength();
+		ReloadRemaining = 0;
+	}
 	
 	result << '(' << w->Size() << (w->Size() == 1 ? " item" : " items");
 	
@@ -286,46 +299,61 @@ std::string Playlist::TotalLength()
 			result << " (out of " << Mpd->GetPlaylistLength() << ")";
 	}
 	
-	if (length)
+	if (itsTotalLength)
 	{
 		result << ", length: ";
-		int years = length/YEAR;
-		if (years)
-		{
-			result << years << (years == 1 ? " year" : " years");
-			length -= years*YEAR;
-			if (length)
-				result << ", ";
-		}
-		int days = length/DAY;
-		if (days)
-		{
-			result << days << (days == 1 ? " day" : " days");
-			length -= days*DAY;
-			if (length)
-				result << ", ";
-		}
-		int hours = length/HOUR;
-		if (hours)
-		{
-			result << hours << (hours == 1 ? " hour" : " hours");
-			length -= hours*HOUR;
-			if (length)
-				result << ", ";
-		}
-		int minutes = length/MINUTE;
-		if (minutes)
-		{
-			result << minutes << (minutes == 1 ? " minute" : " minutes");
-			length -= minutes*MINUTE;
-			if (length)
-				result << ", ";
-		}
-		if (length)
-			result << length << (length == 1 ? " second" : " seconds");
+		ShowTime(result, itsTotalLength);
+	}
+	if (Config.playlist_show_remaining_time && itsRemainingTime && !w->isFiltered() && w->Size() > 1)
+	{
+		result << " :: remaining: ";
+		ShowTime(result, itsRemainingTime);
 	}
 	result << ')';
 	return result.str();
+}
+
+void Playlist::ShowTime(std::ostringstream &result, size_t length)
+{
+	const int MINUTE = 60;
+	const int HOUR = 60*MINUTE;
+	const int DAY = 24*HOUR;
+	const int YEAR = 365*DAY;
+	
+	int years = length/YEAR;
+	if (years)
+	{
+		result << years << (years == 1 ? " year" : " years");
+		length -= years*YEAR;
+		if (length)
+			result << ", ";
+	}
+	int days = length/DAY;
+	if (days)
+	{
+		result << days << (days == 1 ? " day" : " days");
+		length -= days*DAY;
+		if (length)
+			result << ", ";
+	}
+	int hours = length/HOUR;
+	if (hours)
+	{
+		result << hours << (hours == 1 ? " hour" : " hours");
+		length -= hours*HOUR;
+		if (length)
+			result << ", ";
+	}
+	int minutes = length/MINUTE;
+	if (minutes)
+	{
+		result << minutes << (minutes == 1 ? " minute" : " minutes");
+		length -= minutes*MINUTE;
+		if (length)
+			result << ", ";
+	}
+	if (length)
+		result << length << (length == 1 ? " second" : " seconds");
 }
 
 const MPD::Song *Playlist::NowPlayingSong()

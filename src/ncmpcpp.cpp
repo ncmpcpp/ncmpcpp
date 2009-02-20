@@ -206,7 +206,7 @@ int main(int argc, char *argv[])
 		// header stuff
 		gettimeofday(&past, 0);
 		if (((past.tv_sec == now.tv_sec && past.tv_usec >= now.tv_usec+500000) || past.tv_sec > now.tv_sec)
-		&&   (myScreen == myBrowser || myScreen == myLyrics)
+		&&   (myScreen == myPlaylist || myScreen == myBrowser || myScreen == myLyrics)
 		   )
 		{
 			redraw_header = 1;
@@ -1451,6 +1451,7 @@ int main(int argc, char *argv[])
 			{
 				time(&timer);
 				myPlaylist->Main()->Highlighting(1);
+				Playlist::ReloadTotalLength = 1;
 				redraw_header = 1;
 			}
 		}
