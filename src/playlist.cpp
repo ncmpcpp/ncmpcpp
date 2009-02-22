@@ -255,6 +255,18 @@ void Playlist::Sort()
 	ShowMessage("Playlist sorted!");
 }
 
+void Playlist::FixPositions(size_t beginning)
+{
+	bool was_filtered = w->isFiltered();
+	w->ShowAll();
+	for (size_t i = beginning; i < w->Size(); i++)
+	{
+		(*w)[i].SetPosition(i);
+	}
+	if (was_filtered)
+		w->ShowFiltered();
+}
+
 bool Playlist::Sorting(MPD::Song *a, MPD::Song *b)
 {
 	for (size_t i = 0; i < SortOptions; i++)

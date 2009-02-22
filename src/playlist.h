@@ -56,6 +56,7 @@ class Playlist : public Screen< Menu<MPD::Song> >
 		const MPD::Song *NowPlayingSong();
 		
 		void Sort();
+		void FixPositions(size_t = 0);
 		
 		static std::string SongToString(const MPD::Song &, void *);
 		static std::string SongInColumnsToString(const MPD::Song &, void *);

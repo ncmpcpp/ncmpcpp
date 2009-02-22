@@ -452,6 +452,7 @@ int main(int argc, char *argv[])
 						Mpd->QueueDeleteSongId((*myPlaylist->Main())[*it].GetID());
 						myPlaylist->Main()->DeleteOption(*it);
 					}
+					myPlaylist->FixPositions(list.front());
 					ShowMessage("Selected items deleted!");
 				}
 				else
@@ -470,6 +471,7 @@ int main(int argc, char *argv[])
 						myPlaylist->Main()->Refresh();
 						myPlaylist->Main()->ReadKey(input);
 					}
+					myPlaylist->FixPositions(myPlaylist->Main()->Choice());
 					myPlaylist->Main()->SetTimeout(ncmpcpp_window_timeout);
 					Playlist::BlockNowPlayingUpdate = 0;
 				}
@@ -634,6 +636,8 @@ int main(int argc, char *argv[])
 						for (vector<size_t>::iterator it = list.begin(); it != list.end(); it++)
 						{
 							(*it)--;
+							myPlaylist->Main()->at((*it)+1).SetPosition(*it);
+							myPlaylist->Main()->at(*it).SetPosition((*it)+1);
 							myPlaylist->Main()->Swap(*it, (*it)+1);
 						}
 						myPlaylist->Main()->Highlight(list[(list.size()-1)/2]);
@@ -656,6 +660,8 @@ int main(int argc, char *argv[])
 						TraceMpdStatus();
 						time(&timer);
 						to--;
+						myPlaylist->Main()->at(from).SetPosition(to);
+						myPlaylist->Main()->at(to).SetPosition(from);
 						myPlaylist->Main()->Swap(to, to+1);
 						myPlaylist->Main()->Scroll(wUp);
 						myPlaylist->Main()->Refresh();
@@ -743,6 +749,8 @@ int main(int argc, char *argv[])
 						for (vector<size_t>::reverse_iterator it = list.rbegin(); it != list.rend(); it++)
 						{
 							(*it)++;
+							myPlaylist->Main()->at((*it)-1).SetPosition(*it);
+							myPlaylist->Main()->at(*it).SetPosition((*it)-1);
 							myPlaylist->Main()->Swap(*it, (*it)-1);
 						}
 						myPlaylist->Main()->Highlight(list[(list.size()-1)/2]);
@@ -765,6 +773,8 @@ int main(int argc, char *argv[])
 						TraceMpdStatus();
 						time(&timer);
 						to++;
+						myPlaylist->Main()->at(from).SetPosition(to);
+						myPlaylist->Main()->at(to).SetPosition(from);
 						myPlaylist->Main()->Swap(to, to-1);
 						myPlaylist->Main()->Scroll(wDown);
 						myPlaylist->Main()->Refresh();
