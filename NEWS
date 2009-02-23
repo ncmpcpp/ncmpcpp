@@ -1,3 +1,15 @@
+ncmpcpp-0.3.1
+
+ + support for columns in browser and search engine
+ + support for lyricsplugin database
+ + support for any tag in search engine
+ + support for ignoring leading "the" word while sorting (optional)
+ + new feature: apply filter to screen (Ctrl-F by default)
+ + new feature: playlist sorting (Ctrl-V by default)
+ + new feature: open lyrics in external editor
+ + other minor improvements and bugfixes
+
+
 ncmpcpp-0.3
 
  + general core rewrite
