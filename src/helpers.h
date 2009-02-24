@@ -33,10 +33,23 @@ class CaseInsensitiveSorting
 {
 	public:
 		bool operator()(std::string, std::string);
-		bool operator()(const string_pair &, const string_pair &);
 		bool operator()(MPD::Song *, MPD::Song *);
 		bool operator()(const MPD::Item &, const MPD::Item &);
+		
+		template <class A, class B> bool operator()(const std::pair<A, B> &a, const std::pair<A, B> &b)
+		{
+			std::string aa = a.first;
+			std::string bb = b.first;
+			ToLower(aa);
+			ToLower(bb);
+			return aa < bb;
+		}
 };
+
+template <class A, class B> std::string StringPairToString(const std::pair<A, B> &pair, void *)
+{
+	return pair.first;
+}
 
 void UpdateSongList(Menu<MPD::Song> *);
 

@@ -181,15 +181,6 @@ bool CaseInsensitiveSorting::operator()(string a, string b)
 	return a < b;
 }
 
-bool CaseInsensitiveSorting::operator()(const string_pair &a, const string_pair &b)
-{
-	string aa = a.first;
-	string bb = b.first;
-	ToLower(aa);
-	ToLower(bb);
-	return aa < bb;
-}
-
 bool CaseInsensitiveSorting::operator()(Song *sa, Song *sb)
 {
 	string a = sa->GetName();

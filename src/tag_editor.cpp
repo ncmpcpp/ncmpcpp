@@ -304,13 +304,13 @@ void TagEditor::Init()
 	Albums->HighlightColor(Config.active_column_color);
 	Albums->SetTimeout(ncmpcpp_window_timeout);
 	Albums->SetItemDisplayer(Display::Pairs);
-	Albums->SetGetStringFunction(MediaLibrary::StringPairToString);
+	Albums->SetGetStringFunction(StringPairToString);
 	
 	Dirs = new Menu<string_pair>(0, main_start_y, LeftColumnWidth, main_height, "Directories", Config.main_color, brNone);
 	Dirs->HighlightColor(Config.active_column_color);
 	Dirs->SetTimeout(ncmpcpp_window_timeout);
 	Dirs->SetItemDisplayer(Display::Pairs);
-	Dirs->SetGetStringFunction(MediaLibrary::StringPairToString);
+	Dirs->SetGetStringFunction(StringPairToString);
 	
 	LeftColumn = Config.albums_in_tag_editor ? Albums : Dirs;
 	

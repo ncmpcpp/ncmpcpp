@@ -54,7 +54,7 @@ void MediaLibrary::Init()
 	Artists->SetTimeout(ncmpcpp_window_timeout);
 	Artists->SetItemDisplayer(Display::Generic);
 	
-	Albums = new Menu<string_pair>(itsMiddleColStartX, main_start_y, itsMiddleColWidth, main_height, "Albums", Config.main_color, brNone);
+	Albums = new Menu< std::pair<std::string, SearchConstraints> >(itsMiddleColStartX, main_start_y, itsMiddleColWidth, main_height, "Albums", Config.main_color, brNone);
 	Albums->HighlightColor(Config.main_highlight_color);
 	Albums->SetTimeout(ncmpcpp_window_timeout);
 	Albums->SetItemDisplayer(Display::Pairs);
@@ -150,7 +150,7 @@ void MediaLibrary::Update()
 	{
 		Albums->Reset();
 		TagList list;
-		std::vector<string_pair> maplist;
+		std::vector< std::pair<std::string, SearchConstraints> > maplist;
 		locale_to_utf(Artists->Current());
 		if (Config.media_lib_primary_tag == MPD_TAG_ITEM_ARTIST)
 			Mpd->GetAlbums(Artists->Current(), list);
@@ -171,7 +171,7 @@ void MediaLibrary::Update()
 			Mpd->AddSearch(MPD_TAG_ITEM_ALBUM, "");
 			Mpd->CommitSearch(noalbum_list);
 			if (!noalbum_list.empty())
-				Albums->AddOption(std::make_pair("<no album>", ""));
+				Albums->AddOption(std::make_pair("<no album>", SearchConstraints("", "")));
 			FreeSongList(noalbum_list);
 		}
 		
@@ -182,17 +182,21 @@ void MediaLibrary::Update()
 			Mpd->AddSearch(Config.media_lib_primary_tag, Artists->Current());
 			Mpd->AddSearch(MPD_TAG_ITEM_ALBUM, *it);
 			Mpd->CommitSearch(l);
-			if (!l.empty() && !l[0]->GetAlbum().empty())
+			sort(l.begin(), l.end(), SortSongsByYear);
+			for (SongList::const_iterator j = l.begin(); j != l.end(); j++)
 			{
-				utf_to_locale(*it);
-				l[0]->Localize();
-				maplist.push_back(make_pair(l[0]->toString(Config.media_lib_album_format), *it));
+				if (!(*j)->GetAlbum().empty() && (maplist.empty() || (*j)->GetYear() != maplist.back().second.Year))
+				{
+					utf_to_locale(*it);
+					(*j)->Localize();
+					maplist.push_back(make_pair((*j)->toString(Config.media_lib_album_format), SearchConstraints(*it, (*j)->GetYear())));
+				}
 			}
 			FreeSongList(l);
 		}
 		utf_to_locale(Artists->Current());
 		sort(maplist.begin(), maplist.end(), CaseInsensitiveSorting());
-		for (std::vector<string_pair>::const_iterator it = maplist.begin(); it != maplist.end(); it++)
+		for (std::vector< std::pair<std::string, SearchConstraints> >::const_iterator it = maplist.begin(); it != maplist.end(); it++)
 			Albums->AddOption(*it);
 		Albums->Window::Clear();
 		Albums->Refresh();
@@ -219,7 +223,11 @@ void MediaLibrary::Update()
 			Albums->Window::Refresh();
 		}
 		else
-			Mpd->AddSearch(MPD_TAG_ITEM_ALBUM, locale_to_utf_cpy(Albums->Current().second));
+		{
+			Mpd->AddSearch(MPD_TAG_ITEM_ALBUM, locale_to_utf_cpy(Albums->Current().second.Album));
+			if (!Albums->Current().second.Album.empty()) // for <no album>
+				Mpd->AddSearch(MPD_TAG_ITEM_DATE, locale_to_utf_cpy(Albums->Current().second.Year));
+		}
 		Mpd->CommitSearch(list);
 		
 		sort(list.begin(), list.end(), SortSongsByTrack);
@@ -358,7 +366,7 @@ void MediaLibrary::AddToPlaylist(bool add_n_play)
 			Mpd->QueueAddSong(Songs->at(i));
 		if (Mpd->CommitQueue())
 		{
-			ShowMessage("Adding songs from album \"%s\"", Albums->Current().second.c_str());
+			ShowMessage("Adding songs from album \"%s\"", Albums->Current().second.Album.c_str());
 			Song *s = &myPlaylist->Main()->at(myPlaylist->Main()->Size()-Songs->Size());
 			if (s->GetHash() == Songs->at(0).GetHash())
 			{
@@ -432,14 +440,14 @@ void MediaLibrary::AddToPlaylist(bool add_n_play)
 	}
 }
 
-std::string MediaLibrary::StringPairToString(const string_pair &pair, void *)
-{
-	return pair.first;
-}
-
 std::string MediaLibrary::SongToString(const MPD::Song &s, void *)
 {
 	return s.toString(Config.song_library_format);
+}
+
+bool MediaLibrary::SortSongsByYear(Song *a, Song *b)
+{
+	return a->GetYear() < b->GetYear();
 }
 
 bool MediaLibrary::SortSongsByTrack(Song *a, Song *b)

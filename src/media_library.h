@@ -26,6 +26,14 @@
 
 class MediaLibrary : public Screen<Window>
 {
+	struct SearchConstraints
+	{
+		SearchConstraints(const std::string &album, const std::string &year) : Album(album), Year(year) { }
+		
+		std::string Album;
+		std::string Year;
+	};
+	
 	public:
 		virtual void Init();
 		virtual void SwitchTo();
@@ -52,10 +60,8 @@ class MediaLibrary : public Screen<Window>
 		void NextColumn();
 		void PrevColumn();
 		
-		static std::string StringPairToString(const string_pair &pair, void *);
-		
 		Menu<std::string> *Artists;
-		Menu<string_pair> *Albums;
+		Menu< std::pair<std::string, SearchConstraints> > *Albums;
 		Menu<MPD::Song> *Songs;
 		
 	protected:
@@ -64,6 +70,7 @@ class MediaLibrary : public Screen<Window>
 		static std::string SongToString(const MPD::Song &s, void *);
 		
 		static bool SortSongsByTrack(MPD::Song *, MPD::Song *);
+		static bool SortSongsByYear(MPD::Song *, MPD::Song *);
 		
 		static size_t itsLeftColWidth;
 		static size_t itsMiddleColWidth;
