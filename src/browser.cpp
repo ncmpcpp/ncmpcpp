@@ -333,6 +333,28 @@ namespace
 	}
 }
 
+void Browser::LocateSong(const MPD::Song &s)
+{
+	if (s.GetDirectory().empty())
+		return;
+	
+	Config.local_browser = !s.IsFromDB();
+	
+	string option = s.toString(Config.song_status_format);
+	locale_to_utf(option);
+	if (itsBrowsedDir != s.GetDirectory())
+		GetDirectory(s.GetDirectory());
+	for (size_t i = 0; i < w->Size(); i++)
+	{
+		if (w->at(i).type == itSong && option == w->at(i).song->toString(Config.song_status_format))
+		{
+			w->Highlight(i);
+			break;
+		}
+	}
+	SwitchTo();
+}
+
 void Browser::GetDirectory(string dir, string subdir)
 {
 	if (dir.empty())

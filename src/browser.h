@@ -50,6 +50,7 @@ class Browser : public Screen< Menu<MPD::Item> >
 		
 		const std::string &CurrentDir() { return itsBrowsedDir; }
 		
+		void LocateSong(const MPD::Song &);
 		void GetDirectory(std::string, std::string = "/");
 		void ChangeBrowseMode();
 		void UpdateItemList();

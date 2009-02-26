@@ -987,14 +987,21 @@ int main(int argc, char *argv[])
 		}
 		else if (Keypressed(input, Key.GoToNowPlaying))
 		{
-			if (myScreen != myPlaylist || !myPlaylist->isPlaying())
-				continue;
-			if (myPlaylist->Main()->isFiltered())
+			if (myScreen == myPlaylist && myPlaylist->isPlaying())
 			{
-				ShowMessage("%s", MPD::Message::FunctionDisabledFilteringEnabled);
-				continue;
+				if (myPlaylist->Main()->isFiltered())
+				{
+					ShowMessage("%s", MPD::Message::FunctionDisabledFilteringEnabled);
+					continue;
+				}
+				myPlaylist->Main()->Highlight(myPlaylist->NowPlaying);
 			}
-			myPlaylist->Main()->Highlight(myPlaylist->NowPlaying);
+			else if (myScreen == myBrowser)
+			{
+				const Song *s = myPlaylist->NowPlayingSong();
+				if (s)
+					myBrowser->LocateSong(*s);
+			}
 		}
 		else if (Keypressed(input, Key.ToggleRepeat))
 		{
@@ -1189,24 +1196,8 @@ int main(int argc, char *argv[])
 		else if (Keypressed(input, Key.GoToContainingDir))
 		{
 			Song *s = myScreen->CurrentSong();
-			
-			if (!s || s->GetDirectory().empty())
-				continue;
-			
-			Config.local_browser = !s->IsFromDB();
-			
-			string option = s->toString(Config.song_status_format);
-			locale_to_utf(option);
-			myBrowser->GetDirectory(s->GetDirectory());
-			for (size_t i = 0; i < myBrowser->Main()->Size(); i++)
-			{
-				if (myBrowser->Main()->at(i).type == itSong && option == myBrowser->Main()->at(i).song->toString(Config.song_status_format))
-				{
-					myBrowser->Main()->Highlight(i);
-					break;
-				}
-			}
-			myBrowser->SwitchTo();
+			if (s)
+				myBrowser->LocateSong(*s);
 		}
 		else if (Keypressed(input, Key.StartSearching))
 		{

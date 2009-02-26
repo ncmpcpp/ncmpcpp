@@ -174,7 +174,7 @@ void Help::GetKeybindings()
 	*w << DisplayKeys(Key.PrevFoundPosition) << "Go to previous found position\n";
 	*w << DisplayKeys(Key.NextFoundPosition) << "Go to next found position\n";
 	*w << DisplayKeys(Key.ToggleFindMode) << "Toggle find mode (normal/wrapped)\n";
-	*w << DisplayKeys(Key.GoToContainingDir) << "Go to directory containing current item\n";
+	*w << DisplayKeys(Key.GoToContainingDir) << "Locate song in browser\n";
 	*w << DisplayKeys(Key.ToggleDisplayMode) << "Toggle display mode\n";
 #	ifdef HAVE_TAGLIB_H
 	*w << DisplayKeys(Key.EditTags) << "Edit song's tags/playlist's name\n";
@@ -208,6 +208,7 @@ void Help::GetKeybindings()
 	*w << DisplayKeys(Key.Space) << "Add item to playlist\n";
 	if (Mpd->GetHostname()[0] == '/') // are we connected to unix socket?
 		*w << DisplayKeys(Key.SwitchTagTypeList) << "Browse MPD database/local filesystem\n";
+	*w << DisplayKeys(Key.GoToNowPlaying) << "Locate currently playing song\n";
 	*w << DisplayKeys(Key.GoToParentDir) << "Go to parent directory\n";
 	*w << DisplayKeys(Key.Delete) << "Delete playlist\n\n\n";
 	
