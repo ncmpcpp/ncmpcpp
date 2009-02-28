@@ -41,6 +41,14 @@ using std::string;
 
 Browser *myBrowser = new Browser;
 
+const char *Browser::SupportedExtensions[] =
+{
+	"wma", "asf", "rm", "mp1", "mp2", "mp3",
+	"mp4", "m4a", "flac", "ogg", "wav", "au",
+	"aiff", "aif", "ac3", "aac", "mpc", "it",
+	"mod", "s3m", "xm", "wv", 0
+};
+
 void Browser::Init()
 {
 	w = new Menu<Item>(0, main_start_y, COLS, main_height, "", Config.main_color, brNone);
@@ -273,64 +281,60 @@ void Browser::GetSelectedSongs(MPD::SongList &v)
 	}
 }
 
-namespace
+bool Browser::hasSupportedExtension(const string &file)
 {
-	const char *supported_extensions[] = { "wma", "asf", "rm", "mp1", "mp2", "mp3", "mp4", "m4a", "flac", "ogg", "wav", "au", "aiff", "aif", "ac3", "aac", "mpc", "it", "mod", "s3m", "xm", "wv", 0 };
-	
-	bool hasSupportedExtension(const string &file)
-	{
-		size_t last_dot = file.rfind(".");
-		if (last_dot > file.length())
-			return false;
-		
-		string ext = file.substr(last_dot+1);
-		ToLower(ext);
-		for (int i = 0; supported_extensions[i]; i++)
-			if (strcmp(ext.c_str(), supported_extensions[i]) == 0)
-				return true;
-		
+	size_t last_dot = file.rfind(".");
+	if (last_dot > file.length())
 		return false;
-	}
+	
+	string ext = file.substr(last_dot+1);
+	ToLower(ext);
+	for (int i = 0; SupportedExtensions[i]; i++)
+		if (strcmp(ext.c_str(), SupportedExtensions[i]) == 0)
+			return true;
+	
+	return false;
+}
 
-	void GetLocalDirectory(const string &dir, ItemList &v)
+void Browser::GetLocalDirectory(ItemList &v)
+{
+	dirent **list;
+	int n = scandir(itsBrowsedDir.c_str(), &list, NULL, alphasort);
+	
+	if (n < 0)
+		return;
+	
+	struct stat file_stat;
+	string full_path;
+	
+	for (int i = 2; i < n; i++)
 	{
-		dirent **list;
-		int n = scandir(dir.c_str(), &list, NULL, alphasort);
-		
-		if (n < 0)
-			return;
-		
-		struct stat file_stat;
-		string full_path;
-		for (int i = 2; i < n; i++)
+		Item new_item;
+		full_path = itsBrowsedDir;
+		if (itsBrowsedDir != "/")
+			full_path += "/";
+		full_path += list[i]->d_name;
+		stat(full_path.c_str(), &file_stat);
+		if (S_ISDIR(file_stat.st_mode))
 		{
-			Item new_item;
-			full_path = dir;
-			if (dir != "/")
-				full_path += "/";
-			full_path += list[i]->d_name;
-			stat(full_path.c_str(), &file_stat);
-			if (S_ISDIR(file_stat.st_mode))
-			{
-				new_item.type = itDirectory;
-				new_item.name = full_path;
-				v.push_back(new_item);
-			}
-			else if (hasSupportedExtension(list[i]->d_name))
-			{
-				new_item.type = itSong;
-				mpd_Song *s = mpd_newSong();
-				s->file = str_pool_get(full_path.c_str());
-#				ifdef HAVE_TAGLIB_H
-				TagEditor::ReadTags(s);
-#				endif // HAVE_TAGLIB_H
-				new_item.song = new Song(s);
-				v.push_back(new_item);
-			}
-			delete list[i];
+			new_item.type = itDirectory;
+			new_item.name = full_path;
+			v.push_back(new_item);
 		}
-		delete list;
+		else if (hasSupportedExtension(list[i]->d_name))
+		{
+			new_item.type = itSong;
+			mpd_Song *s = mpd_newSong();
+			s->file = str_pool_get(full_path.c_str());
+#			ifdef HAVE_TAGLIB_H
+			TagEditor::ReadTags(s);
+#			endif // HAVE_TAGLIB_H
+			new_item.song = new Song(s);
+			v.push_back(new_item);
+		}
+		delete list[i];
 	}
+	delete list;
 }
 
 void Browser::LocateSong(const MPD::Song &s)
@@ -385,7 +389,7 @@ void Browser::GetDirectory(string dir, string subdir)
 	}
 	
 	ItemList list;
-	Config.local_browser ? GetLocalDirectory(dir, list) : Mpd->GetDirectory(dir, list);
+	Config.local_browser ? GetLocalDirectory(list) : Mpd->GetDirectory(dir, list);
 	sort(list.begin(), list.end(), CaseInsensitiveSorting());
 	
 	for (ItemList::iterator it = list.begin(); it != list.end(); it++)

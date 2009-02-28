@@ -56,10 +56,14 @@ class Browser : public Screen< Menu<MPD::Item> >
 		void UpdateItemList();
 	
 	protected:
+		void GetLocalDirectory(MPD::ItemList &);
+		
+		static bool hasSupportedExtension(const std::string &);
 		static std::string ItemToString(const MPD::Item &, void *);
 		
-		size_t itsScrollBeginning;
+		static const char *SupportedExtensions[];
 		
+		size_t itsScrollBeginning;
 		std::string itsBrowsedDir;
 };
 
