@@ -185,7 +185,7 @@ void MediaLibrary::Update()
 			sort(l.begin(), l.end(), SortSongsByYear);
 			for (SongList::const_iterator j = l.begin(); j != l.end(); j++)
 			{
-				if (!(*j)->GetAlbum().empty() && (maplist.empty() || (*j)->GetYear() != maplist.back().second.Year))
+				if (!(*j)->GetAlbum().empty() && (maplist.empty() || (*j)->GetYear() != maplist.back().second.Year || (*j)->GetAlbum() != maplist.back().second.Album))
 				{
 					utf_to_locale(*it);
 					(*j)->Localize();
