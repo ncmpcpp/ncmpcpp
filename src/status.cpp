@@ -309,6 +309,7 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 				catch (std::out_of_range) { }
 				Playlist::ReloadRemaining = 1;
 				myPlaylist->NowPlaying = -1;
+				Config.stop_after_current_song = 0;
 				player_state.clear();
 				break;
 			}
@@ -350,6 +351,12 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 		Playlist::ReloadRemaining = 1;
 		
 		playing_song_scroll_begin = 0;
+		
+		if (Config.stop_after_current_song)
+		{
+			Mpd->Stop();
+			Config.stop_after_current_song = 0;
+		}
 		
 		if (Mpd->GetState() == psPlay)
 		{

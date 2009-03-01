@@ -266,6 +266,7 @@ void DefaultConfiguration(ncmpcpp_config &conf)
 	conf.display_screens_numbers_on_start = true;
 	conf.clock_display_seconds = false;
 	conf.ignore_leading_the = false;
+	conf.stop_after_current_song = false;
 	conf.set_window_title = true;
 	conf.mpd_port = 6600;
 	conf.mpd_connection_timeout = 15;

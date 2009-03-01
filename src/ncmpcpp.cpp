@@ -1201,7 +1201,12 @@ int main(int argc, char *argv[])
 		}
 		else if (Keypressed(input, Key.StartSearching))
 		{
-			if (myScreen == mySearcher)
+			if (myScreen == myPlaylist && myPlaylist->isPlaying())
+			{
+				Config.stop_after_current_song = !Config.stop_after_current_song;
+				ShowMessage("Stop playing after current song: %s", Config.stop_after_current_song ? "on" : "off");
+			}
+			else if (myScreen == mySearcher)
 			{
 				mySearcher->Main()->Highlight(SearchEngine::SearchButton);
 				mySearcher->Main()->Highlighting(0);

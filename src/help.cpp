@@ -201,6 +201,7 @@ void Help::GetKeybindings()
 	*w << DisplayKeys(Key.SavePlaylist) << "Save playlist\n";
 	*w << DisplayKeys(Key.SortPlaylist) << "Sort playlist\n";
 	*w << DisplayKeys(Key.GoToNowPlaying) << "Go to currently playing position\n";
+	*w << DisplayKeys(Key.StartSearching) << "Toggle \"stop playing after current song\" option\n";
 	*w << DisplayKeys(Key.ToggleAutoCenter) << "Toggle auto center mode\n\n\n";
 	
 	*w << "   " << fmtBold << "Keys - Browse screen\n -----------------------------------------\n" << fmtBoldEnd;
