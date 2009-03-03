@@ -47,8 +47,8 @@ class BasicScreen
 		virtual void ReadKey(int &) = 0;
 		virtual void Scroll(Where, const int * = 0) = 0;
 		
-		virtual void EnterPressed() { }
-		virtual void SpacePressed() { }
+		virtual void EnterPressed() = 0;
+		virtual void SpacePressed() = 0;
 		
 		virtual MPD::Song *CurrentSong() { return 0; }
 		

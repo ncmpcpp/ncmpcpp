@@ -33,6 +33,9 @@ class Help : public Screen<Scrollpad>
 		
 		virtual std::string Title();
 		
+		virtual void EnterPressed() { }
+		virtual void SpacePressed() { }
+		
 		virtual bool allowsSelection() { return false; }
 		
 		virtual List *GetList() { return 0; }

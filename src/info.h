@@ -36,6 +36,9 @@ class Info : public Screen<Scrollpad>
 		
 		virtual void Update();
 		
+		virtual void EnterPressed() { }
+		virtual void SpacePressed() { }
+		
 		virtual bool allowsSelection() { return false; }
 		
 		virtual List *GetList() { return 0; }

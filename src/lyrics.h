@@ -52,6 +52,7 @@ class Lyrics : public Screen<Scrollpad>
 		
 		virtual void Update();
 		
+		virtual void EnterPressed() { }
 		virtual void SpacePressed();
 		
 		virtual bool allowsSelection() { return false; }

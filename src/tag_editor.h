@@ -43,6 +43,7 @@ class TinyTagEditor : public Screen< Menu<Buffer> >
 		virtual std::string Title();
 		
 		virtual void EnterPressed();
+		virtual void SpacePressed() { }
 		
 		virtual bool allowsSelection() { return false; }
 		
