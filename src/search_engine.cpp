@@ -186,6 +186,8 @@ void SearchEngine::EnterPressed()
 		case 15:
 		{
 			ShowMessage("Searching...");
+			if (w->Size() > StaticOptions)
+				Prepare();
 			Search();
 			if (!w->Back().first)
 			{
@@ -200,8 +202,9 @@ void SearchEngine::EnterPressed()
 				w->InsertSeparator(ResetButton+3);
 				UpdateFoundList();
 				ShowMessage("Searching finished!");
-				for (size_t i = 0; i < StaticOptions-4; i++)
-					w->Static(i, 1);
+				if (Config.block_search_constraints_change)
+					for (size_t i = 0; i < StaticOptions-4; i++)
+						w->Static(i, 1);
 				w->Scroll(wDown);
 				w->Scroll(wDown);
 			}
@@ -212,6 +215,8 @@ void SearchEngine::EnterPressed()
 		case 16:
 		{
 			CLEAR_FIND_HISTORY;
+			itsPattern.Clear();
+			w->Reset();
 			Prepare();
 			ShowMessage("Search state reset");
 			break;
@@ -334,10 +339,8 @@ void SearchEngine::Prepare()
 		catch (List::InvalidItem) { }
 	}
 	
-	itsPattern.Clear();
 	w->SetTitle("");
-	w->Clear();
-	w->Reset();
+	w->Clear(0);
 	w->ResizeBuffer(17);
 	
 	w->IntoSeparator(10);

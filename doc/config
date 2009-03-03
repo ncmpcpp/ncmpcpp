@@ -153,6 +153,8 @@
 ##
 #ignore_leading_the = "no"
 #
+#block_search_constraints_change_if_items_found = "yes"
+#
 #enable_window_title = "yes"
 #
 ##### lyrics support #####
