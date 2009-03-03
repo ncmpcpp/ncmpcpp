@@ -54,7 +54,7 @@ class PlaylistEditor : public Screen<Window>
 		Menu<std::string> *Playlists;
 		Menu<MPD::Song> *Content;
 	
-	protected:
+	private:
 		void AddToPlaylist(bool);
 		
 		static size_t LeftColumnWidth;

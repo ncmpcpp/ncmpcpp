@@ -46,7 +46,7 @@ class Clock : public Screen<Window>
 		
 		virtual List *GetList() { return 0; }
 		
-	protected:
+	private:
 		static void Prepare();
 		static void Set(int, int);
 		

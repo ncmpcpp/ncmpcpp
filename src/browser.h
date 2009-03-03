@@ -55,7 +55,7 @@ class Browser : public Screen< Menu<MPD::Item> >
 		void ChangeBrowseMode();
 		void UpdateItemList();
 	
-	protected:
+	private:
 		void GetLocalDirectory(MPD::ItemList &);
 		
 		static bool hasSupportedExtension(const std::string &);

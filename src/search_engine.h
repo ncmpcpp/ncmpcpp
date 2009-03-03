@@ -68,7 +68,7 @@ class SearchEngine : public Screen< Menu< std::pair<Buffer *, MPD::Song *> > >
 		static const char *NormalMode;
 		static const char *StrictMode;
 		
-	protected:
+	private:
 		void Prepare();
 		void Search();
 		

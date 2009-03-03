@@ -45,7 +45,7 @@ class Info : public Screen<Scrollpad>
 		void GetArtist();
 #		endif // HAVE_CURL_CURL_H
 		
-	protected:
+	private:
 		void PrepareSong(MPD::Song &);
 		static const basic_buffer<my_char_t> &ShowTag(const std::string &);
 		

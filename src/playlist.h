@@ -71,7 +71,7 @@ class Playlist : public Screen< Menu<MPD::Song> >
 		static bool BlockUpdate;
 		static bool BlockRefreshing;
 		
-	protected:
+	private:
 		std::string TotalLength();
 		
 		std::string itsBufferedStats;

@@ -37,7 +37,7 @@ class Help : public Screen<Scrollpad>
 		
 		virtual List *GetList() { return 0; }
 		
-	protected:
+	private:
 		std::string DisplayKeys(int *, int = 2);
 		void GetKeybindings();
 };

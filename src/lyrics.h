@@ -66,7 +66,7 @@ class Lyrics : public Screen<Scrollpad>
 		static const char *GetPluginName(int offset);
 #		endif // HAVE_CURL_CURL_H
 		
-	protected:
+	private:
 		static void *Get(void *);
 		
 		static std::string Filename;

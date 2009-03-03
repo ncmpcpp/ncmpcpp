@@ -64,7 +64,7 @@ class MediaLibrary : public Screen<Window>
 		Menu< std::pair<std::string, SearchConstraints> > *Albums;
 		Menu<MPD::Song> *Songs;
 		
-	protected:
+	private:
 		void AddToPlaylist(bool);
 		
 		static std::string SongToString(const MPD::Song &s, void *);

@@ -50,7 +50,7 @@ class TinyTagEditor : public Screen< Menu<Buffer> >
 		
 		bool SetEdited(MPD::Song *);
 		
-	protected:
+	private:
 		bool GetTags();
 		MPD::Song itsEdited;
 };
@@ -98,7 +98,7 @@ class TagEditor : public Screen<Window>
 		static void ReadTags(mpd_Song *);
 		static bool WriteTags(MPD::Song &);
 		
-	protected:
+	private:
 		static std::string CapitalizeFirstLetters(const std::string &);
 		static void CapitalizeFirstLetters(MPD::Song &);
 		static void LowerAllLetters(MPD::Song &);
