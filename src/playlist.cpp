@@ -389,8 +389,15 @@ std::string Playlist::SongInColumnsToString(const MPD::Song &s, void *data)
 	std::string fmt = *static_cast<std::string *>(data);
 	for (std::string i = GetLineValue(fmt, '{', '}', 1); !i.empty(); i = GetLineValue(fmt, '{', '}', 1))
 	{
-		result += "%";
-		result += i;
+		if (i == "t")
+		{
+			result += "{%t}|{%f}";
+		}
+		else
+		{
+			result += "%";
+			result += i;
+		}
 		result += " ";
 	}
 	return s.toString(result);
