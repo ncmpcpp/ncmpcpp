@@ -271,7 +271,23 @@ void Lyrics::Edit()
 	}
 	
 	ShowMessage("Opening lyrics in external editor...");
-	system(("nohup " + Config.external_editor + " \"" + Filename + "\" > /dev/null 2>&1 &").c_str());
+	
+	if (Config.use_console_editor)
+	{
+		system(("/bin/sh -c \"" + Config.external_editor + " \\\"" + Filename + "\\\"\"").c_str());
+		// below is needed as screen gets cleared, but apparently
+		// ncurses doesn't know about it, so we need to clear it
+		// for real and then restore it
+		clear();
+		curs_set(1);
+		curs_set(0);
+		myScreen->Refresh();
+		MPD::StatusChanges ch;
+		ch.StatusFlags = 1;
+		NcmpcppStatusChanged(Mpd, ch, 0);
+	}
+	else
+		system(("nohup " + Config.external_editor + " \"" + Filename + "\" > /dev/null 2>&1 &").c_str());
 }
 
 #ifdef HAVE_CURL_CURL_H

@@ -268,6 +268,7 @@ void DefaultConfiguration(ncmpcpp_config &conf)
 	conf.ignore_leading_the = false;
 	conf.stop_after_current_song = false;
 	conf.block_search_constraints_change = true;
+	conf.use_console_editor = false;
 	conf.set_window_title = true;
 	conf.mpd_port = 6600;
 	conf.mpd_connection_timeout = 15;
@@ -638,6 +639,10 @@ void ReadConfiguration(ncmpcpp_config &conf)
 			else if (cl.find("ignore_leading_the") != string::npos)
 			{
 				conf.ignore_leading_the = v == "yes";
+			}
+			else if (cl.find("use_console_editor") != string::npos)
+			{
+				conf.use_console_editor = v == "yes";
 			}
 			else if (cl.find("block_search_constraints_change_if_items_found") != string::npos)
 			{

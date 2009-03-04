@@ -160,6 +160,7 @@ struct ncmpcpp_config
 	bool ignore_leading_the;
 	bool stop_after_current_song;
 	bool block_search_constraints_change;
+	bool use_console_editor;
 	
 	int mpd_port;
 	int mpd_connection_timeout;

@@ -169,6 +169,8 @@
 #
 #external_editor = ""
 #
+#use_console_editor = "no" (set to yes, if your editor is console app)
+#
 ##### colors definitions #####
 #
 #colors_enabled = "yes"
