@@ -1243,17 +1243,35 @@ mpd_InfoEntity * mpd_getNextInfoEntity(mpd_Connection * connection) {
 					strcmp(re->name, "Genre") == 0) {
 				entity->info.song->genre = str_pool_dup(re->value);
 			}
-			else if(!entity->info.song->composer &&
-					strcmp(re->name, "Composer") == 0) {
-				entity->info.song->composer = str_pool_dup(re->value);
+			else if(strcmp(re->name, "Composer") == 0) {
+				char *tmp = 0;
+				if (entity->info.song->composer) {
+					tmp = malloc(strlen(entity->info.song->composer) + strlen(re->value) + 3);
+					sprintf(tmp, "%s, %s", entity->info.song->composer, re->value);
+					str_pool_put(entity->info.song->composer);
+				}
+				entity->info.song->composer = tmp ? str_pool_get(tmp) : str_pool_dup(re->value);
+				free(tmp);
 			}
-			else if(!entity->info.song->performer &&
-					strcmp(re->name, "Performer") == 0) {
-				entity->info.song->performer = str_pool_dup(re->value);
+			else if(strcmp(re->name, "Performer") == 0) {
+				char *tmp = 0;
+				if (entity->info.song->performer) {
+					tmp = malloc(strlen(entity->info.song->performer) + strlen(re->value) + 3);
+					sprintf(tmp, "%s, %s", entity->info.song->performer, re->value);
+					str_pool_put(entity->info.song->performer);
+				}
+				entity->info.song->performer = tmp ? str_pool_get(tmp) : str_pool_dup(re->value);
+				free(tmp);
 			}
-			else if(!entity->info.song->disc &&
-					strcmp(re->name, "Disc") == 0) {
-				entity->info.song->disc = str_pool_dup(re->value);
+			else if(strcmp(re->name, "Disc") == 0) {
+				char *tmp = 0;
+				if (entity->info.song->disc) {
+					tmp = malloc(strlen(entity->info.song->disc) + strlen(re->value) + 3);
+					sprintf(tmp, "%s, %s", entity->info.song->disc, re->value);
+					str_pool_put(entity->info.song->disc);
+				}
+				entity->info.song->disc = tmp ? str_pool_get(tmp) : str_pool_dup(re->value);
+				free(tmp);
 			}
 			else if(!entity->info.song->comment &&
 					strcmp(re->name, "Comment") == 0) {

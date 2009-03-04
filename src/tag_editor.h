@@ -103,6 +103,7 @@ class TagEditor : public Screen<Window>
 		static std::string CapitalizeFirstLetters(const std::string &);
 		static void CapitalizeFirstLetters(MPD::Song &);
 		static void LowerAllLetters(MPD::Song &);
+		static void GetTagList(TagLib::StringList &, const std::string &);
 		
 		static std::string TagToString(const MPD::Song &, void *);
 		

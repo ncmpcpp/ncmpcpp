@@ -864,21 +864,31 @@ bool TagEditor::WriteTags(Song &s)
 			MPEG::File file(path_to_file.c_str());
 			ID3v2::Tag *tag = file.ID3v2Tag();
 			String::Type encoding = String::UTF8;
+			
 			ByteVector Composer("TCOM");
 			ByteVector Performer("TOPE");
 			ByteVector Disc("TPOS");
-			ID3v2::Frame *ComposerFrame = new ID3v2::TextIdentificationFrame(Composer, encoding);
-			ID3v2::Frame *PerformerFrame = new ID3v2::TextIdentificationFrame(Performer, encoding);
-			ID3v2::Frame *DiscFrame = new ID3v2::TextIdentificationFrame(Disc, encoding);
-			ComposerFrame->setText(ToWString(s.GetComposer()));
-			PerformerFrame->setText(ToWString(s.GetPerformer()));
-			DiscFrame->setText(ToWString(s.GetDisc()));
+			
+			TagLib::StringList list;
+			
+			GetTagList(list, s.GetComposer());
 			tag->removeFrames(Composer);
+			ID3v2::TextIdentificationFrame *ComposerFrame = new ID3v2::TextIdentificationFrame(Composer, encoding);
+			ComposerFrame->setText(list);
 			tag->addFrame(ComposerFrame);
+			
+			GetTagList(list, s.GetPerformer());
 			tag->removeFrames(Performer);
+			ID3v2::TextIdentificationFrame *PerformerFrame = new ID3v2::TextIdentificationFrame(Performer, encoding);
+			PerformerFrame->setText(list);
 			tag->addFrame(PerformerFrame);
+			
+			GetTagList(list, s.GetDisc());
 			tag->removeFrames(Disc);
+			ID3v2::TextIdentificationFrame *DiscFrame = new ID3v2::TextIdentificationFrame(Disc, encoding);
+			DiscFrame->setText(list);
 			tag->addFrame(DiscFrame);
+			
 			if (!file.save())
 				return false;
 		}
@@ -975,6 +985,18 @@ void TagEditor::LowerAllLetters(Song &s)
 	conv = s.GetComment();
 	ToLower(conv);
 	s.SetComment(conv);
+}
+
+void TagEditor::GetTagList(TagLib::StringList &list, const std::string &s)
+{
+	list.clear();
+	for (size_t i = 0; i != string::npos; i = s.find(",", i))
+	{
+		if (i)
+			i++;
+		size_t j = s.find(",", i);
+		list.append(s.substr(i, j-i));
+	}
 }
 
 std::string TagEditor::TagToString(const MPD::Song &s, void *data)
