@@ -276,15 +276,9 @@ void Lyrics::Edit()
 	{
 		system(("/bin/sh -c \"" + Config.external_editor + " \\\"" + Filename + "\\\"\"").c_str());
 		// below is needed as screen gets cleared, but apparently
-		// ncurses doesn't know about it, so we need to clear it
-		// for real and then restore it
-		clear();
-		curs_set(1);
-		curs_set(0);
-		myScreen->Refresh();
-		MPD::StatusChanges ch;
-		ch.StatusFlags = 1;
-		NcmpcppStatusChanged(Mpd, ch, 0);
+		// ncurses doesn't know about it, so we need to reload main screen
+		endwin();
+		initscr();
 	}
 	else
 		system(("nohup " + Config.external_editor + " \"" + Filename + "\" > /dev/null 2>&1 &").c_str());
