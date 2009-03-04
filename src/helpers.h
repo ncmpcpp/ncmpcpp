@@ -55,6 +55,10 @@ void UpdateSongList(Menu<MPD::Song> *);
 
 bool Keypressed(int, const int *);
 
+#ifdef HAVE_TAGLIB_H
+std::string FindSharedDir(Menu<MPD::Song> *);
+std::string FindSharedDir(const MPD::SongList &);
+#endif // HAVE_TAGLIB_H
 std::string FindSharedDir(const std::string &, const std::string &);
 
 std::string GetLineValue(std::string &, char = '"', char = '"', bool = 0);

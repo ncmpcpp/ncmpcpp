@@ -145,6 +145,39 @@ mpd_TagItems IntoTagItem(char c)
 	}
 }
 
+#ifdef HAVE_TAGLIB_H
+MPD::Song::SetFunction IntoSetFunction(mpd_TagItems tag)
+{
+	switch (tag)
+	{
+		case MPD_TAG_ITEM_ARTIST:
+			return &MPD::Song::SetArtist;
+		case MPD_TAG_ITEM_ALBUM:
+			return &MPD::Song::SetAlbum;
+		case MPD_TAG_ITEM_TITLE:
+			return &MPD::Song::SetTitle;
+		case MPD_TAG_ITEM_TRACK:
+			return &MPD::Song::SetTrack;
+		case MPD_TAG_ITEM_GENRE:
+			return &MPD::Song::SetGenre;
+		case MPD_TAG_ITEM_DATE:
+			return &MPD::Song::SetYear;
+		case MPD_TAG_ITEM_COMPOSER:
+			return &MPD::Song::SetComposer;
+		case MPD_TAG_ITEM_PERFORMER:
+			return &MPD::Song::SetPerformer;
+		case MPD_TAG_ITEM_COMMENT:
+			return &MPD::Song::SetComment;
+		case MPD_TAG_ITEM_DISC:
+			return &MPD::Song::SetDisc;
+		case MPD_TAG_ITEM_FILENAME:
+			return &MPD::Song::SetNewName;
+		default:
+			return 0;
+	}
+}
+#endif // HAVE_TAGLIB_H
+
 void EscapeUnallowedChars(std::string &s)
 {
 	for (std::string::const_iterator it = unallowed_chars.begin(); it != unallowed_chars.end(); it++)

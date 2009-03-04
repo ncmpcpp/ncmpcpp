@@ -23,7 +23,6 @@
 
 #include <string>
 
-#include "misc.h"
 #include "libmpdclient.h"
 
 namespace MPD

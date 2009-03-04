@@ -27,6 +27,7 @@
 #include <sstream>
 
 #include "charset.h"
+#include "misc.h"
 #include "song.h"
 
 using MPD::Song;

@@ -24,7 +24,7 @@
 #include <string>
 
 #include "window.h"
-#include "libmpdclient.h"
+#include "song.h"
 
 void ToLower(std::string &);
 
@@ -39,6 +39,10 @@ std::string IntoStr(Color);
 Color IntoColor(const std::string &);
 
 mpd_TagItems IntoTagItem(char);
+
+#ifdef HAVE_TAGLIB_H
+MPD::Song::SetFunction IntoSetFunction(mpd_TagItems);
+#endif // HAVE_TAGLIB_H
 
 void EscapeUnallowedChars(std::string &);
 

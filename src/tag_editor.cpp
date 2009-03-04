@@ -287,6 +287,9 @@ bool TinyTagEditor::GetTags()
 
 TagEditor *myTagEditor = new TagEditor;
 
+const string TagEditor::PatternsFile = config_dir + "patterns.list";
+vector<string> TagEditor::Patterns;
+
 const size_t TagEditor::MiddleColumnWidth = 26;
 size_t TagEditor::LeftColumnWidth;
 size_t TagEditor::MiddleColumnStartX;
@@ -1046,186 +1049,122 @@ std::string TagEditor::TagToString(const MPD::Song &s, void *data)
 	return result.empty() ? Config.empty_tag : result;
 }
 
-namespace
+void TagEditor::GetPatternList()
 {
-	const string patterns_list_file = config_dir + "patterns.list";
-	vector<string> patterns_list;
-	
-	void GetPatternList()
+	if (Patterns.empty())
 	{
-		if (patterns_list.empty())
+		std::ifstream input(PatternsFile.c_str());
+		if (input.is_open())
 		{
-			std::ifstream input(patterns_list_file.c_str());
-			if (input.is_open())
+			string line;
+			while (getline(input, line))
 			{
-				string line;
-				while (getline(input, line))
-				{
-					if (!line.empty())
-						patterns_list.push_back(line);
-				}
-				input.close();
+				if (!line.empty())
+					Patterns.push_back(line);
 			}
+			input.close();
 		}
-	}
-	
-	void SavePatternList()
-	{
-		std::ofstream output(patterns_list_file.c_str());
-		if (output.is_open())
-		{
-			for (vector<string>::const_iterator it = patterns_list.begin(); it != patterns_list.end() && it != patterns_list.begin()+30; it++)
-				output << *it << std::endl;
-			output.close();
-		}
-	}
-	
-	Song::SetFunction IntoSetFunction(char c)
-	{
-		switch (c)
-		{
-			case 'a':
-				return &Song::SetArtist;
-			case 't':
-				return &Song::SetTitle;
-			case 'b':
-				return &Song::SetAlbum;
-			case 'y':
-				return &Song::SetYear;
-			case 'n':
-				return &Song::SetTrack;
-			case 'g':
-				return &Song::SetGenre;
-			case 'c':
-				return &Song::SetComposer;
-			case 'p':
-				return &Song::SetPerformer;
-			case 'd':
-				return &Song::SetDisc;
-			case 'C':
-				return &Song::SetComment;
-			default:
-				return NULL;
-		}
-	}
-
-	string GenerateFilename(const Song &s, string &pattern)
-	{
-		string result = s.toString(pattern);
-		EscapeUnallowedChars(result);
-		return result;
-	}
-
-	string ParseFilename(Song &s, string mask, bool preview)
-	{
-		std::ostringstream result;
-		vector<string> separators;
-		vector< std::pair<char, string> > tags;
-		string file = s.GetName().substr(0, s.GetName().rfind("."));
-		
-		try
-		{
-			for (size_t i = mask.find("%"); i != string::npos; i = mask.find("%"))
-			{
-				tags.push_back(make_pair(mask.at(i+1), ""));
-				mask = mask.substr(i+2);
-				i = mask.find("%");
-				if (!mask.empty())
-					separators.push_back(mask.substr(0, i));
-			}
-			int i = 0;
-			for (vector<string>::const_iterator it = separators.begin(); it != separators.end(); it++, i++)
-			{
-				int j = file.find(*it);
-				tags.at(i).second = file.substr(0, j);
-				file = file.substr(j+it->length());
-			}
-			if (!file.empty())
-				tags.at(i).second = file;
-		}
-		catch (std::out_of_range)
-		{
-			return "Error while parsing filename!";
-		}
-		
-		for (vector< std::pair<char, string> >::iterator it = tags.begin(); it != tags.end(); it++)
-		{
-			for (string::iterator j = it->second.begin(); j != it->second.end(); j++)
-				if (*j == '_')
-					*j = ' ';
-			
-			if (!preview)
-			{
-				Song::SetFunction set = IntoSetFunction(it->first);
-				if (set)
-					(s.*set)(it->second);
-			}
-			else
-				result << "%" << it->first << ": " << it->second << "\n";
-		}
-		return result.str();
 	}
 }
 
-Song::SetFunction IntoSetFunction(mpd_TagItems tag)
+void TagEditor::SavePatternList()
 {
-	switch (tag)
+	std::ofstream output(PatternsFile.c_str());
+	if (output.is_open())
 	{
-		case MPD_TAG_ITEM_ARTIST:
+		for (vector<string>::const_iterator it = Patterns.begin(); it != Patterns.end() && it != Patterns.begin()+30; it++)
+			output << *it << std::endl;
+		output.close();
+	}
+}
+
+Song::SetFunction TagEditor::IntoSetFunction(char c)
+{
+	switch (c)
+	{
+		case 'a':
 			return &Song::SetArtist;
-		case MPD_TAG_ITEM_ALBUM:
-			return &Song::SetAlbum;
-		case MPD_TAG_ITEM_TITLE:
+		case 't':
 			return &Song::SetTitle;
-		case MPD_TAG_ITEM_TRACK:
-			return &Song::SetTrack;
-		case MPD_TAG_ITEM_GENRE:
-			return &Song::SetGenre;
-		case MPD_TAG_ITEM_DATE:
+		case 'b':
+			return &Song::SetAlbum;
+		case 'y':
 			return &Song::SetYear;
-		case MPD_TAG_ITEM_COMPOSER:
+		case 'n':
+			return &Song::SetTrack;
+		case 'g':
+			return &Song::SetGenre;
+		case 'c':
 			return &Song::SetComposer;
-		case MPD_TAG_ITEM_PERFORMER:
+		case 'p':
 			return &Song::SetPerformer;
-		case MPD_TAG_ITEM_COMMENT:
-			return &Song::SetComment;
-		case MPD_TAG_ITEM_DISC:
+		case 'd':
 			return &Song::SetDisc;
-		case MPD_TAG_ITEM_FILENAME:
-			return &Song::SetNewName;
+		case 'C':
+			return &Song::SetComment;
 		default:
 			return NULL;
 	}
 }
 
-string FindSharedDir(Menu<Song> *menu)
+string TagEditor::GenerateFilename(const Song &s, string &pattern)
 {
-	SongList list;
-	for (size_t i = 0; i < menu->Size(); i++)
-		list.push_back(&menu->at(i));
-	return FindSharedDir(list);
-}
-
-string FindSharedDir(const SongList &v)
-{
-	string result;
-	if (!v.empty())
-	{
-		result = v.front()->GetFile();
-		for (SongList::const_iterator it = v.begin()+1; it != v.end(); it++)
-		{
-			int i = 1;
-			while (result.substr(0, i) == (*it)->GetFile().substr(0, i))
-				i++;
-			result = result.substr(0, i);
-		}
-		size_t slash = result.rfind("/");
-		result = slash != string::npos ? result.substr(0, slash) : "/";
-	}
+	string result = s.toString(pattern);
+	EscapeUnallowedChars(result);
 	return result;
 }
 
-void DealWithFilenames(SongList &v)
+string TagEditor::ParseFilename(Song &s, string mask, bool preview)
+{
+	std::ostringstream result;
+	vector<string> separators;
+	vector< std::pair<char, string> > tags;
+	string file = s.GetName().substr(0, s.GetName().rfind("."));
+	
+	try
+	{
+		for (size_t i = mask.find("%"); i != string::npos; i = mask.find("%"))
+		{
+			tags.push_back(make_pair(mask.at(i+1), ""));
+			mask = mask.substr(i+2);
+			i = mask.find("%");
+			if (!mask.empty())
+				separators.push_back(mask.substr(0, i));
+		}
+		int i = 0;
+		for (vector<string>::const_iterator it = separators.begin(); it != separators.end(); it++, i++)
+		{
+			int j = file.find(*it);
+			tags.at(i).second = file.substr(0, j);
+			file = file.substr(j+it->length());
+		}
+		if (!file.empty())
+			tags.at(i).second = file;
+	}
+	catch (std::out_of_range)
+	{
+		return "Error while parsing filename!";
+	}
+	
+	for (vector< std::pair<char, string> >::iterator it = tags.begin(); it != tags.end(); it++)
+	{
+		for (string::iterator j = it->second.begin(); j != it->second.end(); j++)
+			if (*j == '_')
+				*j = ' ';
+			
+		if (!preview)
+		{
+			Song::SetFunction set = IntoSetFunction(it->first);
+			if (set)
+				(s.*set)(it->second);
+		}
+		else
+			result << "%" << it->first << ": " << it->second << "\n";
+	}
+	return result.str();
+}
+
+void TagEditor::DealWithFilenames(SongList &v)
 {
 	int width = 30;
 	int height = 6;
@@ -1296,20 +1235,20 @@ void DealWithFilenames(SongList &v)
 		Main->SetTimeout(ncmpcpp_window_timeout);
 		Main->SetItemDisplayer(Display::Generic);
 		
-		if (!patterns_list.empty())
-			Config.pattern = patterns_list.front();
+		if (!Patterns.empty())
+			Config.pattern = Patterns.front();
 		Main->AddOption("Pattern: " + Config.pattern);
 		Main->AddOption("Preview");
 		Main->AddOption("Legend");
 		Main->AddSeparator();
 		Main->AddOption("Proceed");
 		Main->AddOption("Cancel");
-		if (!patterns_list.empty())
+		if (!Patterns.empty())
 		{
 			Main->AddSeparator();
 			Main->AddOption("Recent patterns", 1, 1);
 			Main->AddSeparator();
-			for (vector<string>::const_iterator it = patterns_list.begin(); it != patterns_list.end(); it++)
+			for (vector<string>::const_iterator it = Patterns.begin(); it != Patterns.end(); it++)
 				Main->AddOption(*it);
 		}
 		
@@ -1406,15 +1345,15 @@ void DealWithFilenames(SongList &v)
 						}
 						else
 						{
-							for (size_t i = 0; i < patterns_list.size(); i++)
+							for (size_t i = 0; i < Patterns.size(); i++)
 							{
-								if (patterns_list[i] == Config.pattern)
+								if (Patterns[i] == Config.pattern)
 								{
-									patterns_list.erase(patterns_list.begin()+i);
+									Patterns.erase(Patterns.begin()+i);
 									i--;
 								}
 							}
-							patterns_list.insert(patterns_list.begin(), Config.pattern);
+							Patterns.insert(Patterns.begin(), Config.pattern);
 						}
 						ShowMessage("Operation finished!");
 						if (preview)

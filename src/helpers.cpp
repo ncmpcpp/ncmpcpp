@@ -239,6 +239,35 @@ bool Keypressed(int in, const int *key)
 	return in == key[0] || in == key[1];
 }
 
+#ifdef HAVE_TAGLIB_H
+string FindSharedDir(Menu<Song> *menu)
+{
+	SongList list;
+	for (size_t i = 0; i < menu->Size(); i++)
+		list.push_back(&menu->at(i));
+	return FindSharedDir(list);
+}
+
+string FindSharedDir(const SongList &v)
+{
+	string result;
+	if (!v.empty())
+	{
+		result = v.front()->GetFile();
+		for (SongList::const_iterator it = v.begin()+1; it != v.end(); it++)
+		{
+			int i = 1;
+			while (result.substr(0, i) == (*it)->GetFile().substr(0, i))
+				i++;
+			result = result.substr(0, i);
+		}
+		size_t slash = result.rfind("/");
+		result = slash != string::npos ? result.substr(0, slash) : "/";
+	}
+	return result;
+}
+#endif // HAVE_TAGLIB_H
+
 string FindSharedDir(const string &one, const string &two)
 {
 	if (one == two)

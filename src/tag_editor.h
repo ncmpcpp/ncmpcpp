@@ -105,10 +105,21 @@ class TagEditor : public Screen<Window>
 		static void LowerAllLetters(MPD::Song &);
 		static void GetTagList(TagLib::StringList &, const std::string &);
 		
+		static void GetPatternList();
+		static void SavePatternList();
+		static MPD::Song::SetFunction IntoSetFunction(char);
+		static std::string GenerateFilename(const MPD::Song &, std::string &);
+		static std::string ParseFilename(MPD::Song &, std::string, bool);
+		
+		static void DealWithFilenames(MPD::SongList &);
+		
 		static std::string TagToString(const MPD::Song &, void *);
 		
 		std::string itsBrowsedDir;
 		std::string itsHighlightedDir;
+		
+		static const std::string PatternsFile;
+		static std::vector<std::string> Patterns;
 		
 		static const size_t MiddleColumnWidth;
 		static size_t LeftColumnWidth;
@@ -118,13 +129,6 @@ class TagEditor : public Screen<Window>
 };
 
 extern TagEditor *myTagEditor;
-
-std::string FindSharedDir(Menu<MPD::Song> *);
-std::string FindSharedDir(const MPD::SongList &);
-
-MPD::Song::SetFunction IntoSetFunction(mpd_TagItems);
-
-void DealWithFilenames(MPD::SongList &);
 
 #endif
 
