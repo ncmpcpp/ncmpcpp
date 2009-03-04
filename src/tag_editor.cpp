@@ -995,7 +995,7 @@ void TagEditor::GetTagList(TagLib::StringList &list, const std::string &s)
 		if (i)
 			i++;
 		size_t j = s.find(",", i);
-		list.append(s.substr(i, j-i));
+		list.append(TagLib::String(s.substr(i, j-i), TagLib::String::UTF8));
 	}
 }
 
