@@ -1270,9 +1270,9 @@ int main(int argc, char *argv[])
 			const size_t dialog_width = COLS*0.8;
 			const size_t dialog_height = LINES*0.6;
 			
-			Menu<string> *mDialog = new Menu<string>((COLS-dialog_width)/2, (LINES-dialog_height)/2, dialog_width, dialog_height, "Add selected items to...", Config.main_color, Config.window_border);
-			mDialog->SetTimeout(ncmpcpp_window_timeout);
-			mDialog->SetItemDisplayer(Display::Generic);
+			Menu<string> mDialog((COLS-dialog_width)/2, (LINES-dialog_height)/2, dialog_width, dialog_height, "Add selected items to...", Config.main_color, Config.window_border);
+			mDialog.SetTimeout(ncmpcpp_window_timeout);
+			mDialog.SetItemDisplayer(Display::Generic);
 			
 			bool playlists_not_active = myScreen == myBrowser && Config.local_browser;
 			
@@ -1281,44 +1281,44 @@ int main(int argc, char *argv[])
 				ShowMessage("Local items cannot be added to m3u playlist!");
 			}
 			
-			mDialog->AddOption("Current MPD playlist");
-			mDialog->AddOption("Create new playlist (m3u file)", 0, playlists_not_active);
-			mDialog->AddSeparator();
+			mDialog.AddOption("Current MPD playlist");
+			mDialog.AddOption("Create new playlist (m3u file)", 0, playlists_not_active);
+			mDialog.AddSeparator();
 			TagList playlists;
 			Mpd->GetPlaylists(playlists);
 			for (TagList::iterator it = playlists.begin(); it != playlists.end(); it++)
 			{
 				utf_to_locale(*it);
-				mDialog->AddOption("'" + *it + "' playlist", 0, playlists_not_active);
+				mDialog.AddOption("'" + *it + "' playlist", 0, playlists_not_active);
 			}
-			mDialog->AddSeparator();
-			mDialog->AddOption("Cancel");
+			mDialog.AddSeparator();
+			mDialog.AddOption("Cancel");
 			
-			mDialog->Display();
+			mDialog.Display();
 			
 			Playlist::BlockRefreshing = 1;
 			while (!Keypressed(input, Key.Enter))
 			{
 				TraceMpdStatus();
-				mDialog->Refresh();
-				mDialog->ReadKey(input);
+				mDialog.Refresh();
+				mDialog.ReadKey(input);
 				
 				if (Keypressed(input, Key.Up))
-					mDialog->Scroll(wUp);
+					mDialog.Scroll(wUp);
 				else if (Keypressed(input, Key.Down))
-					mDialog->Scroll(wDown);
+					mDialog.Scroll(wDown);
 				else if (Keypressed(input, Key.PageUp))
-					mDialog->Scroll(wPageUp);
+					mDialog.Scroll(wPageUp);
 				else if (Keypressed(input, Key.PageDown))
-					mDialog->Scroll(wPageDown);
+					mDialog.Scroll(wPageDown);
 				else if (Keypressed(input, Key.Home))
-					mDialog->Scroll(wHome);
+					mDialog.Scroll(wHome);
 				else if (Keypressed(input, Key.End))
-					mDialog->Scroll(wEnd);
+					mDialog.Scroll(wEnd);
 			}
 			Playlist::BlockRefreshing = 0;
 			
-			size_t id = mDialog->Choice();
+			size_t id = mDialog.Choice();
 			
 			myScreen->Refresh();
 			
@@ -1350,7 +1350,7 @@ int main(int argc, char *argv[])
 					ShowMessage("Selected items added to playlist '%s'!", playlist.c_str());
 				}
 			}
-			else if (id > 1 && id < mDialog->Size()-1)
+			else if (id > 1 && id < mDialog.Size()-1)
 			{
 				locale_to_utf(playlists[id-3]);
 				for (SongList::const_iterator it = result.begin(); it != result.end(); it++)
@@ -1360,7 +1360,7 @@ int main(int argc, char *argv[])
 				ShowMessage("Selected items added to playlist '%s'!", playlists[id-3].c_str());
 			}
 			
-			if (id != mDialog->Size()-1)
+			if (id != mDialog.Size()-1)
 			{
 				// refresh playlist's lists
 				if (!Config.local_browser && myBrowser->CurrentDir() == "/")
@@ -1368,7 +1368,6 @@ int main(int argc, char *argv[])
 				myPlaylistEditor->Playlists->Clear(0); // make playlist editor update itself
 			}
 			time(&timer);
-			delete mDialog;
 			FreeSongList(result);
 		}
 		else if (Keypressed(input, Key.Crop))
