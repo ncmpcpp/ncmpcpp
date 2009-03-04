@@ -95,7 +95,7 @@ void Scrollpad::Flush()
 	}
 	Recreate();
 	itsBuffer.SetTemp(&s);
-	reinterpret_cast<Window &>(*this) << itsBuffer;
+	static_cast<Window &>(*this) << itsBuffer;
 	itsBuffer.SetTemp(0);
 }
 
