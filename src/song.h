@@ -95,7 +95,7 @@ namespace MPD
 			
 			static std::string ShowTime(int);
 		private:
-			void __Count_Last_Slash_Position();
+			void CountLastSlashPosition();
 			
 			mpd_Song *itsSong;
 			std::string itsNewName;

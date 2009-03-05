@@ -44,7 +44,7 @@ Song::Song(mpd_Song *s, bool copy_ptr) : itsSong(s ? s : mpd_newSong()),
 	
 	if (itsSong->file)
 	{
-		__Count_Last_Slash_Position();
+		CountLastSlashPosition();
 		if (strncmp(itsSong->file, "http://", 7) == 0)
 			isStream = 1;
 	}
@@ -88,7 +88,7 @@ void Song::Localize()
 	if (isLocalised)
 		return;
 	str_pool_utf_to_locale(itsSong->file);
-	__Count_Last_Slash_Position();
+	CountLastSlashPosition();
 	str_pool_utf_to_locale(itsSong->artist);
 	str_pool_utf_to_locale(itsSong->title);
 	str_pool_utf_to_locale(itsSong->album);
@@ -542,7 +542,7 @@ string Song::ShowTime(int length)
 	return ss.str();
 }
 
-void Song::__Count_Last_Slash_Position()
+void Song::CountLastSlashPosition()
 {
 	char *tmp = strrchr(itsSong->file, '/');
 	if (tmp)
