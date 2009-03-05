@@ -279,6 +279,7 @@ void Lyrics::Edit()
 		// ncurses doesn't know about it, so we need to reload main screen
 		endwin();
 		initscr();
+		curs_set(0);
 	}
 	else
 		system(("nohup " + Config.external_editor + " \"" + Filename + "\" > /dev/null 2>&1 &").c_str());
