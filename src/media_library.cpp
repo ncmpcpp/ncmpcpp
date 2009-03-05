@@ -19,6 +19,7 @@
  ***************************************************************************/
 
 #include <algorithm>
+#include <map>
 
 #include "charset.h"
 #include "display.h"
@@ -150,7 +151,7 @@ void MediaLibrary::Update()
 	{
 		Albums->Reset();
 		TagList list;
-		std::vector< std::pair<std::string, SearchConstraints> > maplist;
+		std::map<std::string, SearchConstraints, CaseInsensitiveSorting> maplist;
 		locale_to_utf(Artists->Current());
 		if (Config.media_lib_primary_tag == MPD_TAG_ITEM_ARTIST)
 			Mpd->GetAlbums(Artists->Current(), list);
@@ -177,6 +178,8 @@ void MediaLibrary::Update()
 		
 		for (TagList::iterator it = list.begin(); it != list.end(); it++)
 		{
+			if (it->empty())
+				continue;
 			SongList l;
 			Mpd->StartSearch(1);
 			Mpd->AddSearch(Config.media_lib_primary_tag, Artists->Current());
@@ -185,24 +188,20 @@ void MediaLibrary::Update()
 			sort(l.begin(), l.end(), SortSongsByYear);
 			for (SongList::const_iterator j = l.begin(); j != l.end(); j++)
 			{
-				if (!(*j)->GetAlbum().empty() && (maplist.empty() || (*j)->GetYear() != maplist.back().second.Year || (*j)->GetAlbum() != maplist.back().second.Album))
-				{
-					utf_to_locale(*it);
-					(*j)->Localize();
-					maplist.push_back(make_pair((*j)->toString(Config.media_lib_album_format), SearchConstraints(*it, (*j)->GetYear())));
-				}
+				utf_to_locale(*it);
+				(*j)->Localize();
+				maplist[(*j)->toString(Config.media_lib_album_format)] = SearchConstraints(*it, (*j)->GetYear());
 			}
 			FreeSongList(l);
 		}
 		utf_to_locale(Artists->Current());
-		sort(maplist.begin(), maplist.end(), CaseInsensitiveSorting());
-		for (std::vector< std::pair<std::string, SearchConstraints> >::const_iterator it = maplist.begin(); it != maplist.end(); it++)
-			Albums->AddOption(*it);
+		for (std::map<std::string, SearchConstraints>::const_iterator it = maplist.begin(); it != maplist.end(); it++)
+			Albums->AddOption(make_pair(it->first, it->second));
 		Albums->Window::Clear();
 		Albums->Refresh();
 	}
 	
-	if (!Artists->Empty() && myScreen->Cmp() == Albums && Albums->Empty())
+	if (!Artists->Empty() && w == Albums && Albums->Empty())
 	{
 		Albums->HighlightColor(Config.main_highlight_color);
 		Artists->HighlightColor(Config.active_column_color);

@@ -28,6 +28,7 @@ class MediaLibrary : public Screen<Window>
 {
 	struct SearchConstraints
 	{
+		SearchConstraints() { }
 		SearchConstraints(const std::string &album, const std::string &year) : Album(album), Year(year) { }
 		
 		std::string Album;
