@@ -76,52 +76,52 @@ std::string IntoStr(mpd_TagItems tag) // this is only for left column's title in
 	}
 }
 
-std::string IntoStr(Color color)
+std::string IntoStr(NCurses::Color color)
 {
 	std::string result;
 	
-	if (color == clDefault)
+	if (color == NCurses::clDefault)
 		result = "default";
-	else if (color == clBlack)
+	else if (color == NCurses::clBlack)
 		result = "black";
-	else if (color == clRed)
+	else if (color == NCurses::clRed)
 		result = "red";
-	else if (color == clGreen)
+	else if (color == NCurses::clGreen)
 		result = "green";
-	else if (color == clYellow)
+	else if (color == NCurses::clYellow)
 		result = "yellow";
-	else if (color == clBlue)
+	else if (color == NCurses::clBlue)
 		result = "blue";
-	else if (color == clMagenta)
+	else if (color == NCurses::clMagenta)
 		result = "magenta";
-	else if (color == clCyan)
+	else if (color == NCurses::clCyan)
 		result = "cyan";
-	else if (color == clWhite)
+	else if (color == NCurses::clWhite)
 		result = "white";
 	
 	return result;
 }
 
-Color IntoColor(const std::string &color)
+NCurses::Color IntoColor(const std::string &color)
 {
-	Color result = clDefault;
+	NCurses::Color result = NCurses::clDefault;
 	
 	if (color == "black")
-		result = clBlack;
+		result = NCurses::clBlack;
 	else if (color == "red")
-		result = clRed;
+		result = NCurses::clRed;
 	else if (color == "green")
-		result = clGreen;
+		result = NCurses::clGreen;
 	else if (color == "yellow")
-		result = clYellow;
+		result = NCurses::clYellow;
 	else if (color == "blue")
-		result = clBlue;
+		result = NCurses::clBlue;
 	else if (color == "magenta")
-		result = clMagenta;
+		result = NCurses::clMagenta;
 	else if (color == "cyan")
-		result = clCyan;
+		result = NCurses::clCyan;
 	else if (color == "white")
-		result = clWhite;
+		result = NCurses::clWhite;
 	
 	return result;
 }

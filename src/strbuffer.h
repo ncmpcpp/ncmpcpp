@@ -26,54 +26,57 @@
 #include <sstream>
 #include <list>
 
-template <class C> class basic_buffer
+namespace NCurses
 {
-	struct FormatPos
+	template <class C> class basic_buffer
 	{
-		size_t Position;
-		short Value;
-	
-		bool operator<(const FormatPos &f)
+		struct FormatPos
 		{
-			return Position < f.Position;
-		}
+			size_t Position;
+			short Value;
+			
+			bool operator<(const FormatPos &f)
+			{
+				return Position < f.Position;
+			}
+		};
+		
+		std::basic_ostringstream<C> itsString;
+		std::list<FormatPos> itsFormat;
+		std::basic_string<C> *itsTempString;
+		
+		public:
+			basic_buffer() : itsTempString(0) { }
+			
+			std::basic_string<C> Str() const;
+			void SetFormatting(short vb, const std::basic_string<C> &s, short ve, bool for_each = 1);
+			void SetTemp(std::basic_string<C> *);
+			void Clear();
+			
+			template <class T> basic_buffer<C> &operator<<(const T &t)
+			{
+				itsString << t;
+				return *this;
+			}
+			
+			basic_buffer<C> &operator<<(std::ostream &(*os)(std::ostream &));
+			basic_buffer<C> &operator<<(const Color &color);
+			basic_buffer<C> &operator<<(const Format &f);
+			basic_buffer<C> &operator<<(const basic_buffer<C> &buf);
+			
+			friend Window &operator<< <>(Window &, const basic_buffer<C> &);
 	};
 	
-	std::basic_ostringstream<C> itsString;
-	std::list<FormatPos> itsFormat;
-	std::basic_string<C> *itsTempString;
-	
-	public:
-		basic_buffer() : itsTempString(0) { }
-		
-		std::basic_string<C> Str() const;
-		void SetFormatting(short vb, const std::basic_string<C> &s, short ve, bool for_each = 1);
-		void SetTemp(std::basic_string<C> *);
-		void Clear();
-		
-		template <class T> basic_buffer<C> &operator<<(const T &t)
-		{
-			itsString << t;
-			return *this;
-		}
-		
-		basic_buffer<C> &operator<<(std::ostream &(*os)(std::ostream &));
-		basic_buffer<C> &operator<<(const Color &color);
-		basic_buffer<C> &operator<<(const Format &f);
-		basic_buffer<C> &operator<<(const basic_buffer<C> &buf);
-		
-		friend Window &operator<< <>(Window &, const basic_buffer<C> &);
-};
+	typedef basic_buffer<char> Buffer;
+	typedef basic_buffer<wchar_t> WBuffer;
+}
 
-typedef basic_buffer<char> Buffer;
-typedef basic_buffer<wchar_t> WBuffer;
-
-template <class C> std::basic_string<C> basic_buffer<C>::Str() const
+template <class C> std::basic_string<C> NCurses::basic_buffer<C>::Str() const
 {
 	return itsString.str();
 }
 
-template <class C> void basic_buffer<C>::SetFormatting(short vb, const std::basic_string<C> &s, short ve, bool for_each)
+template <class C> void NCurses::basic_buffer<C>::SetFormatting(short vb, const std::basic_string<C> &s, short ve, bool for_each)
 {
 	std::basic_string<C> base = itsString.str();
 	FormatPos fp;
@@ -92,24 +95,24 @@ template <class C> void basic_buffer<C>::SetFormatting(short vb, const std::basi
 	}
 }
 
-template <class C> void basic_buffer<C>::SetTemp(std::basic_string<C> *tmp)
+template <class C> void NCurses::basic_buffer<C>::SetTemp(std::basic_string<C> *tmp)
 {
 	itsTempString = tmp;
 }
 
-template <class C> void basic_buffer<C>::Clear()
+template <class C> void NCurses::basic_buffer<C>::Clear()
 {
 	itsString.str(std::basic_string<C>());
 	itsFormat.clear();
 }
 
-template <class C> basic_buffer<C> &basic_buffer<C>::operator<<(std::ostream &(*os)(std::ostream&))
+template <class C> NCurses::basic_buffer<C> &NCurses::basic_buffer<C>::operator<<(std::ostream &(*os)(std::ostream&))
 {
 	itsString << os;
 	return *this;
 }
 
-template <class C> basic_buffer<C> &basic_buffer<C>::operator<<(const Color &color)
+template <class C> NCurses::basic_buffer<C> &NCurses::basic_buffer<C>::operator<<(const Color &color)
 {
 	FormatPos f;
 	f.Position = itsString.str().length();
@@ -118,24 +121,24 @@ template <class C> basic_buffer<C> &basic_buffer<C>::operator<<(const Color &col
 	return *this;
 }
 
-template <class C> basic_buffer<C> &basic_buffer<C>::operator<<(const Format &f)
+template <class C> NCurses::basic_buffer<C> &NCurses::basic_buffer<C>::operator<<(const Format &f)
 {
 	return operator<<(Color(f));
 }
 
-template <class C> basic_buffer<C> &basic_buffer<C>::operator<<(const basic_buffer<C> &buf)
+template <class C> NCurses::basic_buffer<C> &NCurses::basic_buffer<C>::operator<<(const NCurses::basic_buffer<C> &buf)
 {
 	size_t len = itsString.str().length();
 	itsString << buf.itsString.str();
 	std::list<FormatPos> tmp = buf.itsFormat;
 	if (len)
-		for (typename std::list<typename basic_buffer<C>::FormatPos>::iterator it = tmp.begin(); it != tmp.end(); it++)
+		for (typename std::list<typename NCurses::basic_buffer<C>::FormatPos>::iterator it = tmp.begin(); it != tmp.end(); it++)
 			it->Position += len;
 	itsFormat.merge(tmp);
 	return *this;
 }
 
-template <class C> Window &operator<<(Window &w, const basic_buffer<C> &buf)
+template <class C> NCurses::Window &operator<<(NCurses::Window &w, const NCurses::basic_buffer<C> &buf)
 {
 	const std::basic_string<C> &s = buf.itsTempString ? *buf.itsTempString : buf.itsString.str();
 	if (buf.itsFormat.empty())
@@ -145,8 +148,8 @@ template <class C> Window &operator<<(Window &w, const basic_buffer<C> &buf)
 	else
 	{
 		std::basic_string<C> tmp;
-		typename std::list<typename basic_buffer<C>::FormatPos>::const_iterator b = buf.itsFormat.begin();
-		typename std::list<typename basic_buffer<C>::FormatPos>::const_iterator e = buf.itsFormat.end();
+		typename std::list<typename NCurses::basic_buffer<C>::FormatPos>::const_iterator b = buf.itsFormat.begin();
+		typename std::list<typename NCurses::basic_buffer<C>::FormatPos>::const_iterator e = buf.itsFormat.end();
 		for (size_t i = 0; i < s.length() || b != e; i++)
 		{
 			while (b != e && i == b->Position)
@@ -156,10 +159,10 @@ template <class C> Window &operator<<(Window &w, const basic_buffer<C> &buf)
 					w << tmp;
 					tmp.clear();
 				}
-				if (b->Value < fmtNone)
-					w << Color(b->Value);
+				if (b->Value < NCurses::fmtNone)
+					w << NCurses::Color(b->Value);
 				else
-					w << Format(b->Value);
+					w << NCurses::Format(b->Value);
 				b++;
 			}
 			if (i < s.length())

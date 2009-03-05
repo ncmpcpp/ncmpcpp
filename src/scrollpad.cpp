@@ -20,6 +20,7 @@
 
 #include "scrollpad.h"
 
+using namespace NCurses;
 using std::string;
 
 Scrollpad::Scrollpad(size_t startx,

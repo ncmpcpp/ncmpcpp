@@ -34,9 +34,9 @@ std::string IntoStr(int);
 
 std::string IntoStr(mpd_TagItems);
 
-std::string IntoStr(Color);
+std::string IntoStr(NCurses::Color);
 
-Color IntoColor(const std::string &);
+NCurses::Color IntoColor(const std::string &);
 
 mpd_TagItems IntoTagItem(char);
 

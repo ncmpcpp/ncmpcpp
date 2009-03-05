@@ -24,49 +24,52 @@
 #include "window.h"
 #include "strbuffer.h"
 
-class Scrollpad: public Window
+namespace NCurses
 {
-	public:
-		Scrollpad(size_t, size_t, size_t, size_t, const std::string &, Color, Border);
-		Scrollpad(const Scrollpad &);
-		virtual ~Scrollpad() { }
-		
-		void Flush();
-		void SetFormatting(short, const std::basic_string<my_char_t> &, short, bool for_each = 1);
-		std::basic_string<my_char_t> Content() { return itsBuffer.Str(); }
-		
-		virtual void Refresh();
-		virtual void Scroll(Where);
-		
-		virtual void Resize(size_t, size_t);
-		virtual void Clear(bool = 1);
-		
-		template <class T> Scrollpad &operator<<(const T &t)
-		{
-			itsBuffer << t;
-			return *this;
-		}
-		
-		Scrollpad &operator<<(std::ostream &(*os)(std::ostream &));
-		
-#		ifdef _UTF8
-		void SetFormatting(short vb, const std::string &s, short ve, bool for_each = 1) { SetFormatting(vb, ToWString(s), ve, for_each); }
-		Scrollpad &operator<<(const char *s);
-		Scrollpad &operator<<(const std::string &s);
-#		endif // _UTF8
-		
-		virtual Scrollpad *Clone() const { return new Scrollpad(*this); }
-		virtual Scrollpad *EmptyClone() const;
-		
-	protected:
-		virtual void Recreate();
-		
-		basic_buffer<my_char_t> itsBuffer;
-		
-		int itsBeginning;
-		
-		size_t itsRealHeight;
-};
+	class Scrollpad: public Window
+	{
+		public:
+			Scrollpad(size_t, size_t, size_t, size_t, const std::string &, Color, Border);
+			Scrollpad(const Scrollpad &);
+			virtual ~Scrollpad() { }
+			
+			void Flush();
+			void SetFormatting(short, const std::basic_string<my_char_t> &, short, bool for_each = 1);
+			std::basic_string<my_char_t> Content() { return itsBuffer.Str(); }
+			
+			virtual void Refresh();
+			virtual void Scroll(Where);
+			
+			virtual void Resize(size_t, size_t);
+			virtual void Clear(bool = 1);
+			
+			template <class T> Scrollpad &operator<<(const T &t)
+			{
+				itsBuffer << t;
+				return *this;
+			}
+			
+			Scrollpad &operator<<(std::ostream &(*os)(std::ostream &));
+			
+#			ifdef _UTF8
+			void SetFormatting(short vb, const std::string &s, short ve, bool for_each = 1) { SetFormatting(vb, ToWString(s), ve, for_each); }
+			Scrollpad &operator<<(const char *s);
+			Scrollpad &operator<<(const std::string &s);
+#			endif // _UTF8
+			
+			virtual Scrollpad *Clone() const { return new Scrollpad(*this); }
+			virtual Scrollpad *EmptyClone() const;
+			
+		protected:
+			virtual void Recreate();
+			
+			basic_buffer<my_char_t> itsBuffer;
+			
+			int itsBeginning;
+			
+			size_t itsRealHeight;
+	};
+}
 
 #endif
 

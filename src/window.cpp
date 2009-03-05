@@ -23,10 +23,12 @@
 
 #include "window.h"
 
+using namespace NCurses;
+
 using std::string;
 using std::wstring;
 
-void InitScreen(bool enable_colors)
+void NCurses::InitScreen(bool enable_colors)
 {
 	setlocale(LC_ALL, "");
 	initscr();
@@ -44,7 +46,7 @@ void InitScreen(bool enable_colors)
 	curs_set(0);
 }
 
-void DestroyScreen()
+void NCurses::DestroyScreen()
 {
 	curs_set(1);
 	endwin();

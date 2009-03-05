@@ -20,6 +20,8 @@
 
 #include "menu.h"
 
+using namespace NCurses;
+
 void List::SelectCurrent()
 {
 	if (Empty())
