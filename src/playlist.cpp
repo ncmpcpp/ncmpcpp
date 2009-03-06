@@ -275,6 +275,11 @@ bool Playlist::Sorting(MPD::Song *a, MPD::Song *b)
 		std::string sb = (b->*(*SortDialog)[i].second)();
 		ToLower(sa);
 		ToLower(sb);
+		if (Config.ignore_leading_the)
+		{
+			RemoveTheWord(sa);
+			RemoveTheWord(sb);
+		}
 		if (sa != sb)
 			return sa < sb;
 	}

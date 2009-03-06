@@ -63,6 +63,7 @@ std::string FindSharedDir(const std::string &, const std::string &);
 
 std::string GetLineValue(std::string &, char = '"', char = '"', bool = 0);
 
+void RemoveTheWord(std::string &s);
 std::string ExtractTopDirectory(const std::string &);
 
 const Buffer &ShowTag(const std::string &);

@@ -34,16 +34,6 @@ using Global::Mpd;
 using Global::wFooter;
 using std::string;
 
-namespace
-{
-	inline void remove_the_word(string &s)
-	{
-		size_t the_pos = s.find("the ");
-		if (the_pos == 0 && the_pos != string::npos)
-			s = s.substr(4);
-	}
-}
-
 bool ConnectToMPD()
 {
 	if (!Mpd->Connect())
@@ -175,8 +165,8 @@ bool CaseInsensitiveSorting::operator()(string a, string b)
 	ToLower(b);
 	if (Config.ignore_leading_the)
 	{
-		remove_the_word(a);
-		remove_the_word(b);
+		RemoveTheWord(a);
+		RemoveTheWord(b);
 	}
 	return a < b;
 }
@@ -189,8 +179,8 @@ bool CaseInsensitiveSorting::operator()(Song *sa, Song *sb)
 	ToLower(b);
 	if (Config.ignore_leading_the)
 	{
-		remove_the_word(a);
-		remove_the_word(b);
+		RemoveTheWord(a);
+		RemoveTheWord(b);
 	}
 	return a < b;
 }
@@ -301,6 +291,13 @@ string GetLineValue(string &line, char a, char b, bool once)
 		return line.substr(begin, end-begin);
 	else
 		return "";
+}
+
+void RemoveTheWord(string &s)
+{
+	size_t the_pos = s.find("the ");
+	if (the_pos == 0 && the_pos != string::npos)
+		s = s.substr(4);
 }
 
 std::string ExtractTopDirectory(const std::string &s)
