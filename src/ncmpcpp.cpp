@@ -1228,12 +1228,36 @@ int main(int argc, char *argv[])
 				continue;
 			}
 			LockStatusbar();
-			Statusbar() << "Position to go (in %): ";
-			string position = wFooter->GetString(3);
-			int newpos = StrToInt(position);
-			if (newpos > 0 && newpos < 100 && !position.empty())
-				Mpd->Seek(s->GetTotalLength()*newpos/100.0);
+			Statusbar() << "Position to go (in %/mm:ss/seconds): ";
+			string position = wFooter->GetString();
 			UnlockStatusbar();
+			
+			if (position.empty())
+				continue;
+			
+			int newpos = 0;
+			if (position.find(':') != string::npos) // probably time in mm:ss
+			{
+				try
+				{
+					newpos = StrToInt(position)*60 + StrToInt(position.substr(position.find(':')+1));
+				}
+				catch (std::out_of_range) { }
+				if (newpos > 0 && newpos < s->GetTotalLength())
+					Mpd->Seek(newpos);
+			}
+			else if (position.find('%') != string::npos) // probably position in %
+			{
+				newpos = StrToInt(position);
+				if (newpos > 0 && newpos < 100)
+					Mpd->Seek(s->GetTotalLength()*newpos/100.0);
+			}
+			else
+			{
+				newpos = StrToInt(position);
+				if (newpos > 0 && newpos < s->GetTotalLength())
+					Mpd->Seek(newpos);
+			}
 		}
 		else if (Keypressed(input, Key.ReverseSelection))
 		{
