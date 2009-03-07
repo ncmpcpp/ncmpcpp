@@ -416,7 +416,6 @@ void TagEditor::Update()
 		TagList list;
 		if (Config.albums_in_tag_editor)
 		{
-			std::map<string, string, CaseInsensitiveSorting> maplist;
 			*Albums << XY(0, 0) << "Fetching albums' list...";
 			Albums->Window::Refresh();
 			Mpd->GetAlbums("", list);
@@ -430,12 +429,11 @@ void TagEditor::Update()
 				if (!l.empty())
 				{
 					l[0]->Localize();
-					maplist[l[0]->toString(Config.tag_editor_album_format)] = *it;
+					Albums->AddOption(std::make_pair(l[0]->toString(Config.tag_editor_album_format), *it));
 				}
 				FreeSongList(l);
 			}
-			for (std::map<string, string>::const_iterator it = maplist.begin(); it != maplist.end(); it++)
-				Albums->AddOption(make_pair(it->first, it->second));
+			Albums->Sort<CaseInsensitiveSorting>();
 		}
 		else
 		{
