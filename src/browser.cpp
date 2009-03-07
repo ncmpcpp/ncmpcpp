@@ -74,7 +74,6 @@ void Browser::SwitchTo()
 	if (hasToBeResized)
 		Resize();
 	
-	CLEAR_FIND_HISTORY;
 	w->Empty() ? myBrowser->GetDirectory(itsBrowsedDir) : myBrowser->UpdateItemList();
 	myScreen = this;
 	redraw_header = 1;
@@ -97,7 +96,6 @@ void Browser::EnterPressed()
 	{
 		case itDirectory:
 		{
-			CLEAR_FIND_HISTORY;
 			GetDirectory(item.name, itsBrowsedDir);
 			redraw_header = 1;
 			break;

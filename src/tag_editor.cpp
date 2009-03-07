@@ -366,8 +366,6 @@ void TagEditor::SwitchTo()
 	if (hasToBeResized)
 		Resize();
 	
-	CLEAR_FIND_HISTORY;
-	
 	myScreen = this;
 	redraw_header = 1;
 	Refresh();
@@ -410,7 +408,6 @@ void TagEditor::Update()
 {
 	if (LeftColumn->Empty())
 	{
-		CLEAR_FIND_HISTORY;
 		LeftColumn->Window::Clear();
 		Tags->Clear();
 		TagList list;
@@ -763,7 +760,6 @@ List *TagEditor::GetList()
 
 void TagEditor::NextColumn()
 {
-	CLEAR_FIND_HISTORY;
 	if (w == LeftColumn)
 	{
 		LeftColumn->HighlightColor(Config.main_highlight_color);
@@ -782,7 +778,6 @@ void TagEditor::NextColumn()
 
 void TagEditor::PrevColumn()
 {
-	CLEAR_FIND_HISTORY;
 	if (w == Tags)
 	{
 		Tags->HighlightColor(Config.main_highlight_color);

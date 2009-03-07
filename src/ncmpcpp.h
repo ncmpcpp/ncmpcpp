@@ -27,12 +27,6 @@
 #include "menu.h"
 #include "scrollpad.h"
 
-#define CLEAR_FIND_HISTORY \
-			do { \
-				found_pos = -1; \
-				vFoundPositions.clear(); \
-			} while (0)
-
 using namespace NCurses;
 
 typedef std::pair<std::string, std::string> string_pair;

@@ -79,9 +79,6 @@ bool Global::block_item_list_update = 0;
 bool Global::messages_allowed = 0;
 bool Global::redraw_header = 1;
 
-vector<int> Global::vFoundPositions;
-int Global::found_pos = 0;
-
 int main(int argc, char *argv[])
 {
 	CreateConfigDir();
@@ -1462,8 +1459,6 @@ int main(int argc, char *argv[])
 			if (!mList)
 				continue;
 			
-			CLEAR_FIND_HISTORY;
-			
 			LockStatusbar();
 			Statusbar() << fmtBold << "Apply filter: " << fmtBoldEnd;
 			wFooter->SetGetStringHelper(StatusbarApplyFilterImmediately);
@@ -1491,83 +1486,36 @@ int main(int argc, char *argv[])
 			if (!mList)
 				continue;
 			
-			string how = Keypressed(input, Key.FindForward) ? "forward" : "backward";
 			LockStatusbar();
-			Statusbar() << "Find " << how << ": ";
-			string findme = wFooter->GetString();
+			Statusbar() << "Find " << (Keypressed(input, Key.FindForward) ? "forward" : "backward") << ": ";
+			string findme = wFooter->GetString(mList->GetSearchConstraint());
 			UnlockStatusbar();
 			time(&timer);
 			if (findme.empty())
 				continue;
-			ToLower(findme);
-			
-			CLEAR_FIND_HISTORY;
 			
 			ShowMessage("Searching...");
-			for (size_t i = (myScreen == mySearcher ? SearchEngine::StaticOptions : 0); i < mList->Size(); i++)
-			{
-				string name = mList->GetOption(i);
-				ToLower(name);
-				if (name.find(findme) != string::npos && !mList->isStatic(i))
-				{
-					vFoundPositions.push_back(i);
-					if (Keypressed(input, Key.FindForward)) // forward
-					{
-						if (found_pos < 0 && i >= mList->Choice())
-							found_pos = vFoundPositions.size()-1;
-					}
-					else // backward
-					{
-						if (i <= mList->Choice())
-							found_pos = vFoundPositions.size()-1;
-					}
-				}
-			}
-			ShowMessage("Searching finished!");
-			
-			if (Config.wrapped_search ? vFoundPositions.empty() : found_pos < 0)
-				ShowMessage("Unable to find \"%s\"", findme.c_str());
+			if (mList->Search(findme, myScreen == mySearcher ? SearchEngine::StaticOptions : 0))
+				ShowMessage("Searching finished!");
 			else
-			{
-				mList->Highlight(vFoundPositions[found_pos < 0 ? 0 : found_pos]);
-				if (myScreen == myPlaylist)
-				{
-					time(&timer);
-					myPlaylist->Main()->Highlighting(1);
-				}
-			}
+				ShowMessage("Unable to find \"%s\"", findme.c_str());
+			
+			if (Keypressed(input, Key.FindForward))
+				mList->NextFound(Config.wrapped_search);
+			else
+				mList->PrevFound(Config.wrapped_search);
 		}
 		else if (Keypressed(input, Key.NextFoundPosition) || Keypressed(input, Key.PrevFoundPosition))
 		{
 			List *mList = myScreen->GetList();
 			
-			if (!mList || vFoundPositions.empty())
+			if (!mList)
 				continue;
 			
-			bool next = Keypressed(input, Key.NextFoundPosition);
-			
-			try
-			{
-				mList->Highlight(vFoundPositions.at(next ? ++found_pos : --found_pos));
-			}
-			catch (std::out_of_range)
-			{
-				if (Config.wrapped_search)
-				{
-					if (next)
-					{
-						mList->Highlight(vFoundPositions.front());
-						found_pos = 0;
-					}
-					else // prev
-					{
-						mList->Highlight(vFoundPositions.back());
-						found_pos = vFoundPositions.size()-1;
-					}
-				}
-				else
-					found_pos = next ? vFoundPositions.size()-1 : 0;
-			}
+			if (Keypressed(input, Key.NextFoundPosition))
+				mList->NextFound(Config.wrapped_search);
+			else
+				mList->PrevFound(Config.wrapped_search);
 		}
 		else if (Keypressed(input, Key.ToggleFindMode))
 		{

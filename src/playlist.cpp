@@ -89,7 +89,6 @@ void Playlist::SwitchTo()
 	if (hasToBeResized)
 		Resize();
 	
-	CLEAR_FIND_HISTORY;
 	myScreen = this;
 	w->Window::Clear();
 	redraw_header = 1;

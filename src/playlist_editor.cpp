@@ -98,7 +98,6 @@ void PlaylistEditor::SwitchTo()
 	if (hasToBeResized)
 		Resize();
 	
-	CLEAR_FIND_HISTORY;
 	myScreen = this;
 	redraw_header = 1;
 	Refresh();
@@ -168,7 +167,6 @@ void PlaylistEditor::NextColumn()
 {
 	if (w == Playlists)
 	{
-		CLEAR_FIND_HISTORY;
 		Playlists->HighlightColor(Config.main_highlight_color);
 		w->Refresh();
 		w = Content;
@@ -180,7 +178,6 @@ void PlaylistEditor::PrevColumn()
 {
 	if (w == Content)
 	{
-		CLEAR_FIND_HISTORY;
 		Content->HighlightColor(Config.main_highlight_color);
 		w->Refresh();
 		w = Playlists;

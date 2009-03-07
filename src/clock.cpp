@@ -83,7 +83,6 @@ void Clock::SwitchTo()
 	if (hasToBeResized)
 		Resize();
 	
-	CLEAR_FIND_HISTORY;
 	myScreen = this;
 	myPlaylist->Main()->Hide();
 	redraw_header = 1;

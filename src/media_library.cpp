@@ -112,7 +112,6 @@ void MediaLibrary::SwitchTo()
 	if (hasToBeResized)
 		Resize();
 	
-	CLEAR_FIND_HISTORY;
 	myScreen = this;
 	redraw_header = 1;
 	Refresh();
@@ -128,7 +127,6 @@ void MediaLibrary::Update()
 {
 	if (Artists->Empty())
 	{
-		CLEAR_FIND_HISTORY;
 		TagList list;
 		Albums->Clear(0);
 		Songs->Clear(0);
@@ -284,7 +282,6 @@ void MediaLibrary::GetSelectedSongs(MPD::SongList &v)
 
 void MediaLibrary::NextColumn()
 {
-	CLEAR_FIND_HISTORY;
 	if (w == Artists)
 	{
 		if (Songs->Empty())
@@ -307,7 +304,6 @@ void MediaLibrary::NextColumn()
 
 void MediaLibrary::PrevColumn()
 {
-	CLEAR_FIND_HISTORY;
 	if (w == Songs)
 	{
 		Songs->HighlightColor(Config.main_highlight_color);

@@ -67,7 +67,6 @@ void SearchEngine::SwitchTo()
 	if (hasToBeResized)
 		Resize();
 	
-	CLEAR_FIND_HISTORY;
 	if (w->Empty())
 		Prepare();
 	myScreen = this;
@@ -214,7 +213,6 @@ void SearchEngine::EnterPressed()
 		}
 		case 16:
 		{
-			CLEAR_FIND_HISTORY;
 			itsPattern.Clear();
 			w->Reset();
 			Prepare();

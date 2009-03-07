@@ -21,6 +21,8 @@
 #ifndef _MENU_H
 #define _MENU_H
 
+#include <set>
+
 #include "window.h"
 #include "strbuffer.h"
 #include "misc.h"
@@ -51,6 +53,11 @@ namespace NCurses
 			void SelectCurrent();
 			void ReverseSelection(size_t = 0);
 			bool Deselect();
+			
+			virtual bool Search(const std::string &, size_t = 0, bool = 0) = 0;
+			virtual const std::string &GetSearchConstraint() = 0;
+			virtual void NextFound(bool) = 0;
+			virtual void PrevFound(bool) = 0;
 			
 			virtual void ApplyFilter(const std::string &, size_t = 0, bool = 0) = 0;
 			virtual const std::string &GetFilter() = 0;
@@ -119,6 +126,11 @@ namespace NCurses
 			virtual size_t Choice() const;
 			virtual size_t RealChoice() const;
 			
+			virtual bool Search(const std::string &constraint, size_t beginning = 0, bool case_sensitive = 0);
+			virtual const std::string &GetSearchConstraint() { return itsSearchConstraint; }
+			virtual void NextFound(bool wrap);
+			virtual void PrevFound(bool wrap);
+			
 			virtual void ApplyFilter(const std::string &filter, size_t beginning = 0, bool case_sensitive = 0);
 			virtual const std::string &GetFilter();
 			virtual std::string GetOption(size_t pos);
@@ -170,11 +182,13 @@ namespace NCurses
 			void *itsGetStringFunctionUserData;
 			
 			std::string itsFilter;
+			std::string itsSearchConstraint;
 			
 			std::vector<Option *> *itsOptionsPtr;
 			std::vector<Option *> itsOptions;
 			std::vector<Option *> itsFilteredOptions;
 			std::vector<size_t> itsFilteredRealPositions;
+			std::set<size_t> itsFound;
 			
 			int itsBeginning;
 			int itsHighlight;
@@ -279,6 +293,7 @@ template <class T> void NCurses::Menu<T>::DeleteOption(size_t pos)
 		delete itsOptions.at(pos);
 		itsOptions.erase(itsOptions.begin()+pos);
 	}
+	itsFound.clear();
 	if (itsOptionsPtr->empty())
 		Window::Clear();
 }
@@ -490,6 +505,7 @@ template <class T> void NCurses::Menu<T>::Clear(bool clrscr)
 	for (option_iterator it = itsOptions.begin(); it != itsOptions.end(); it++)
 		delete *it;
 	itsOptions.clear();
+	itsFound.clear();
 	ClearFiltered();
 	itsOptionsPtr = &itsOptions;
 	if (clrscr)
@@ -574,10 +590,55 @@ template <class T> size_t NCurses::Menu<T>::RealChoice() const
 	return result;
 }
 
+template <class T> bool NCurses::Menu<T>::Search(const std::string &constraint, size_t beginning, bool case_sensitive)
+{
+	itsFound.clear();
+	if (constraint.empty())
+		return false;
+	itsSearchConstraint = constraint;
+	std::string option;
+	for (size_t i = beginning; i < itsOptionsPtr->size(); i++)
+	{
+		option = GetOption(i);
+		if (!case_sensitive)
+			ToLower(option);
+		if (option.find(itsSearchConstraint) != std::string::npos)
+			itsFound.insert(i);
+	}
+	return !itsFound.empty();
+}
+
+template <class T> void NCurses::Menu<T>::NextFound(bool wrap)
+{
+	if (itsFound.empty())
+		return;
+	std::set<size_t>::iterator next = itsFound.upper_bound(itsHighlight);
+	if (next != itsFound.end())
+		Highlight(*next);
+	else if (wrap)
+		Highlight(*itsFound.begin());
+}
+
+template <class T> void NCurses::Menu<T>::PrevFound(bool wrap)
+{
+	if (itsFound.empty())
+		return;
+	std::set<size_t>::iterator prev = itsFound.lower_bound(itsHighlight);
+	if (prev != itsFound.begin())
+	{
+		if (*prev == size_t(itsHighlight))
+			prev--;
+		Highlight(*prev);
+	}
+	else if (wrap)
+		Highlight(*itsFound.rbegin());
+}
+
 template <class T> void NCurses::Menu<T>::ApplyFilter(const std::string &filter, size_t beginning, bool case_sensitive)
 {
 	if (filter == itsFilter)
 		return;
+	itsFound.clear();
 	ClearFiltered();
 	itsFilter = filter;
 	if (!case_sensitive)

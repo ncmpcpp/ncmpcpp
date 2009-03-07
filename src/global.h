@@ -53,9 +53,6 @@ namespace Global
 	extern bool redraw_header;
 	
 	extern std::string volume_state;
-	
-	extern std::vector<int> vFoundPositions;
-	extern int found_pos;
 }
 
 #endif
