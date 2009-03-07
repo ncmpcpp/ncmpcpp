@@ -76,6 +76,11 @@ namespace NCurses
 			bool isStatic;
 		};
 		
+		template <class ComparisonClass> static bool InternalSorting(Option *a, Option *b)
+		{
+			return ComparisonClass()(a->Item, b->Item);
+		}
+		
 		typedef typename std::vector<Option *>::iterator option_iterator;
 		typedef typename std::vector<Option *>::const_iterator option_const_iterator;
 		
@@ -128,6 +133,14 @@ namespace NCurses
 			virtual void Reset();
 			virtual void Clear(bool clrscr = 1);
 			
+			template <class Compare> void Sort(size_t beginning = 0)
+			{
+				if (itsOptions.empty())
+					return;
+				sort(itsOptions.begin()+beginning, itsOptions.end(), InternalSorting<Compare>);
+				ClearFiltered();
+			}
+			
 			void SetSelectPrefix(Buffer *b) { itsSelectedPrefix = b; }
 			void SetSelectSuffix(Buffer *b) { itsSelectedSuffix = b; }
 			
@@ -149,6 +162,8 @@ namespace NCurses
 			virtual Menu<T> *EmptyClone() const;
 		
 		protected:
+			void ClearFiltered();
+			
 			ItemDisplayer itsItemDisplayer;
 			void *itsItemDisplayerUserdata;
 			GetStringFunction itsGetStringFunction;
@@ -462,14 +477,20 @@ template <class T> void NCurses::Menu<T>::Reset()
 	itsBeginning = 0;
 }
 
+template <class T> void NCurses::Menu<T>::ClearFiltered()
+{
+	itsFilteredOptions.clear();
+	itsFilteredRealPositions.clear();
+	itsFilter.clear();
+	itsOptionsPtr = &itsOptions;
+}
+
 template <class T> void NCurses::Menu<T>::Clear(bool clrscr)
 {
 	for (option_iterator it = itsOptions.begin(); it != itsOptions.end(); it++)
 		delete *it;
 	itsOptions.clear();
-	itsFilteredOptions.clear();
-	itsFilteredRealPositions.clear();
-	itsFilter.clear();
+	ClearFiltered();
 	itsOptionsPtr = &itsOptions;
 	if (clrscr)
 		Window::Clear();
@@ -557,12 +578,10 @@ template <class T> void NCurses::Menu<T>::ApplyFilter(const std::string &filter,
 {
 	if (filter == itsFilter)
 		return;
+	ClearFiltered();
 	itsFilter = filter;
 	if (!case_sensitive)
 		ToLower(itsFilter);
-	itsFilteredRealPositions.clear();
-	itsFilteredOptions.clear();
-	itsOptionsPtr = &itsOptions;
 	if (itsFilter.empty())
 		return;
 	for (size_t i = 0; i < beginning; i++)

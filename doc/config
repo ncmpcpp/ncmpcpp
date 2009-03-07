@@ -73,8 +73,6 @@
 #
 #song_library_format = "{%n - }{%t}|{%f}"
 #
-#media_library_album_format = "{(%y) }%b"
-#
 #tag_editor_album_format = "{(%y) }%b"
 #
 #browser_playlist_prefix = "$2playlist$9 "

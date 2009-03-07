@@ -19,7 +19,6 @@
  ***************************************************************************/
 
 #include <algorithm>
-#include <map>
 
 #include "charset.h"
 #include "display.h"
@@ -151,52 +150,46 @@ void MediaLibrary::Update()
 	{
 		Albums->Reset();
 		TagList list;
-		std::map<std::string, SearchConstraints, CaseInsensitiveSorting> maplist;
 		locale_to_utf(Artists->Current());
 		if (Config.media_lib_primary_tag == MPD_TAG_ITEM_ARTIST)
 			Mpd->GetAlbums(Artists->Current(), list);
 		else
 		{
-			Mpd->StartSearch(1);
-			Mpd->AddSearch(Config.media_lib_primary_tag, Artists->Current());
 			Mpd->StartFieldSearch(MPD_TAG_ITEM_ALBUM);
+			Mpd->AddSearch(Config.media_lib_primary_tag, Artists->Current());
 			Mpd->CommitSearch(list);
 		}
 		
 		// <mpd-0.14 doesn't support searching for empty tag
 		if (Mpd->Version() > 13)
 		{
-			SongList noalbum_list;
-			Mpd->StartSearch(1);
+			TagList noalbum_list;
+			Mpd->StartFieldSearch(MPD_TAG_ITEM_FILENAME);
 			Mpd->AddSearch(Config.media_lib_primary_tag, Artists->Current());
 			Mpd->AddSearch(MPD_TAG_ITEM_ALBUM, "");
 			Mpd->CommitSearch(noalbum_list);
 			if (!noalbum_list.empty())
 				Albums->AddOption(std::make_pair("<no album>", SearchConstraints("", "")));
-			FreeSongList(noalbum_list);
 		}
 		
 		for (TagList::iterator it = list.begin(); it != list.end(); it++)
 		{
-			if (it->empty())
-				continue;
-			SongList l;
-			Mpd->StartSearch(1);
+			TagList l;
+			Mpd->StartFieldSearch(MPD_TAG_ITEM_DATE);
 			Mpd->AddSearch(Config.media_lib_primary_tag, Artists->Current());
 			Mpd->AddSearch(MPD_TAG_ITEM_ALBUM, *it);
 			Mpd->CommitSearch(l);
-			sort(l.begin(), l.end(), SortSongsByYear);
-			for (SongList::const_iterator j = l.begin(); j != l.end(); j++)
+			utf_to_locale(*it);
+			if (l.empty())
 			{
-				utf_to_locale(*it);
-				(*j)->Localize();
-				maplist[(*j)->toString(Config.media_lib_album_format)] = SearchConstraints(*it, (*j)->GetYear());
+				Albums->AddOption(std::make_pair(*it, SearchConstraints(*it, "")));
+				continue;
 			}
-			FreeSongList(l);
+			for (TagList::const_iterator j = l.begin(); j != l.end(); j++)
+				Albums->AddOption(std::make_pair("(" + *j + ") " + *it, SearchConstraints(*it, *j)));
 		}
 		utf_to_locale(Artists->Current());
-		for (std::map<std::string, SearchConstraints>::const_iterator it = maplist.begin(); it != maplist.end(); it++)
-			Albums->AddOption(make_pair(it->first, it->second));
+		Albums->Sort<CaseInsensitiveSorting>((*Albums)[0].first == "<no album>");
 		Albums->Window::Clear();
 		Albums->Refresh();
 	}

@@ -180,8 +180,7 @@ namespace MPD
 			
 			void GetPlaylists(TagList &) const;
 			void GetList(TagList &, mpd_TagItems) const;
-			void GetArtists(TagList &) const;
-			void GetAlbums(std::string, TagList &) const;
+			void GetAlbums(const std::string &, TagList &) const;
 			void GetDirectory(const std::string &, ItemList &) const;
 			void GetDirectoryRecursive(const std::string &, SongList &) const;
 			void GetSongs(const std::string &, SongList &) const;

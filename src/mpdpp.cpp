@@ -689,29 +689,15 @@ void Connection::GetList(TagList &v, mpd_TagItems type) const
 		char *item;
 		while ((item = mpd_getNextTag(itsConnection, type)) != NULL)
 		{
-			v.push_back(item);
+			if (item[0] != 0) // do not push empty item
+				v.push_back(item);
 			delete [] item;
 		}
 		mpd_finishCommand(itsConnection);
 	}
 }
 
-void Connection::GetArtists(TagList &v) const
-{
-	if (isConnected)
-	{
-		mpd_sendListCommand(itsConnection, MPD_TABLE_ARTIST, NULL);
-		char *item;
-		while ((item = mpd_getNextArtist(itsConnection)) != NULL)
-		{
-			v.push_back(item);
-			delete [] item;
-		}
-		mpd_finishCommand(itsConnection);
-	}
-}
-
-void Connection::GetAlbums(string artist, TagList &v) const
+void Connection::GetAlbums(const string &artist, TagList &v) const
 {
 	if (isConnected)
 	{
@@ -719,7 +705,8 @@ void Connection::GetAlbums(string artist, TagList &v) const
 		char *item;
 		while ((item = mpd_getNextAlbum(itsConnection)) != NULL)
 		{
-			v.push_back(item);
+			if (item[0] != 0) // do not push empty item
+				v.push_back(item);
 			delete [] item;
 		}
 		mpd_finishCommand(itsConnection);
@@ -775,9 +762,8 @@ void Connection::CommitSearch(TagList &v) const
 		char *tag = NULL;
 		while ((tag = mpd_getNextTag(itsConnection, itsSearchedField)) != NULL)
 		{
-			string s_tag = tag;
-			if (v.empty() || v.back() != s_tag)
-				v.push_back(s_tag);
+			if (tag[0] != 0) // do not push empty item
+				v.push_back(tag);
 			delete [] tag;
 		}
 		mpd_finishCommand(itsConnection);

@@ -224,7 +224,6 @@ void DefaultConfiguration(ncmpcpp_config &conf)
 	conf.song_status_format = "{(%l) }{%a - }{%t}|{%f}";
 	conf.song_window_title_format = "{%a - }{%t}|{%f}";
 	conf.song_library_format = "{%n - }{%t}|{%f}";
-	conf.media_lib_album_format = "{(%y) }%b";
 	conf.tag_editor_album_format = "{(%y) }%b";
 	conf.browser_playlist_prefix << clRed << "(playlist)" << clEnd << ' ';
 	conf.pattern = "%n - %t";
@@ -505,11 +504,6 @@ void ReadConfiguration(ncmpcpp_config &conf)
 			{
 				if (!v.empty())
 					conf.song_library_format = v;
-			}
-			else if (cl.find("media_library_album_format") != string::npos)
-			{
-				if (!v.empty())
-					conf.media_lib_album_format = v;
 			}
 			else if (cl.find("tag_editor_album_format") != string::npos)
 			{
