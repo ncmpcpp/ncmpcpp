@@ -422,6 +422,7 @@ void TagEditor::Update()
 			Mpd->GetAlbums("", list);
 			for (TagList::const_iterator it = list.begin(); it != list.end(); it++)
 			{
+				
 				SongList l;
 				Mpd->StartSearch(1);
 				Mpd->AddSearch(MPD_TAG_ITEM_ALBUM, *it);
@@ -662,7 +663,7 @@ void TagEditor::EnterPressed()
 				w->Refresh();
 				w = LeftColumn;
 				LeftColumn->HighlightColor(Config.active_column_color);
-				Mpd->UpdateDirectory(FindSharedDir(Tags));
+				Mpd->UpdateDirectory(locale_to_utf_cpy(FindSharedDir(Tags)));
 			}
 			else
 				Tags->Clear(0);

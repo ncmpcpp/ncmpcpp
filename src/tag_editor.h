@@ -94,6 +94,7 @@ class TagEditor : public Screen<Window>
 		Menu<std::string> *TagTypes;
 		Menu<MPD::Song> *Tags;
 		
+		/// NOTICE: this string is always in utf8, no need to convert it
 		const std::string &CurrentDir() { return itsBrowsedDir; }
 		
 		static void ReadTags(mpd_Song *);

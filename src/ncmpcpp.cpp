@@ -977,7 +977,7 @@ int main(int argc, char *argv[])
 		else if (Keypressed(input, Key.UpdateDB))
 		{
 			if (myScreen == myBrowser)
-				Mpd->UpdateDirectory(myBrowser->CurrentDir());
+				Mpd->UpdateDirectory(locale_to_utf_cpy(myBrowser->CurrentDir()));
 #			ifdef HAVE_TAGLIB_H
 			else if (myScreen == myTagEditor && !Config.albums_in_tag_editor)
 				Mpd->UpdateDirectory(myTagEditor->CurrentDir());
@@ -1077,7 +1077,7 @@ int main(int argc, char *argv[])
 					}
 					if (success)
 					{
-						Mpd->UpdateDirectory(FindSharedDir(list));
+						Mpd->UpdateDirectory(locale_to_utf_cpy(FindSharedDir(list)));
 						ShowMessage("Tags updated succesfully!");
 					}
 					FreeSongList(list);
@@ -1098,7 +1098,7 @@ int main(int argc, char *argv[])
 						(*myLibrary->Songs)[i].Localize();
 						ShowMessage("Updating tags in '%s'...", (*myLibrary->Songs)[i].GetName().c_str());
 						string path = Config.mpd_music_dir + (*myLibrary->Songs)[i].GetFile();
-						TagLib::FileRef f(path.c_str());
+						TagLib::FileRef f(locale_to_utf_cpy(path).c_str());
 						if (f.isNull())
 						{
 							ShowMessage("Error opening file '%s'!", (*myLibrary->Songs)[i].GetFile().c_str());
@@ -1115,7 +1115,7 @@ int main(int argc, char *argv[])
 					}
 					if (success)
 					{
-						Mpd->UpdateDirectory(FindSharedDir(myLibrary->Songs));
+						Mpd->UpdateDirectory(locale_to_utf_cpy(FindSharedDir(myLibrary->Songs)));
 						ShowMessage("Tags updated succesfully!");
 					}
 				}
@@ -1169,7 +1169,7 @@ int main(int argc, char *argv[])
 					{
 						ShowMessage("'%s' renamed to '%s'", old_dir.c_str(), new_dir.c_str());
 						if (!Config.local_browser)
-							Mpd->UpdateDirectory(FindSharedDir(old_dir, new_dir));
+							Mpd->UpdateDirectory(locale_to_utf_cpy(FindSharedDir(old_dir, new_dir)));
 						myBrowser->GetDirectory(myBrowser->CurrentDir());
 					}
 					else

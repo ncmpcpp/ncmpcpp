@@ -385,6 +385,7 @@ void Browser::GetDirectory(string dir, string subdir)
 		parent.song = (Song *) 1; // in that way we assume that's really parent dir
 		parent.name = slash != string::npos ? dir.substr(0, slash) : "/";
 		parent.type = itDirectory;
+		utf_to_locale(parent.name);
 		w->AddOption(parent);
 	}
 	
