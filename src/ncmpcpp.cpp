@@ -1489,14 +1489,16 @@ int main(int argc, char *argv[])
 			string findme = wFooter->GetString(mList->GetSearchConstraint());
 			UnlockStatusbar();
 			time(&Timer);
+			
+			if (!findme.empty())
+				ShowMessage("Searching...");
+			
+			bool success = mList->Search(findme, myScreen == mySearcher ? SearchEngine::StaticOptions : 0);
+			
 			if (findme.empty())
 				continue;
 			
-			ShowMessage("Searching...");
-			if (mList->Search(findme, myScreen == mySearcher ? SearchEngine::StaticOptions : 0))
-				ShowMessage("Searching finished!");
-			else
-				ShowMessage("Unable to find \"%s\"", findme.c_str());
+			success ? ShowMessage("Searching finished!") : ShowMessage("Unable to find \"%s\"", findme.c_str());
 			
 			if (Keypressed(input, Key.FindForward))
 				mList->NextFound(Config.wrapped_search);

@@ -599,6 +599,7 @@ template <class T> size_t NCurses::Menu<T>::RealChoice() const
 template <class T> bool NCurses::Menu<T>::Search(const std::string &constraint, size_t beginning, bool case_sensitive)
 {
 	itsFound.clear();
+	itsSearchConstraint.clear();
 	if (constraint.empty())
 		return false;
 	itsSearchConstraint = constraint;
@@ -631,11 +632,7 @@ template <class T> void NCurses::Menu<T>::PrevFound(bool wrap)
 		return;
 	std::set<size_t>::iterator prev = itsFound.lower_bound(itsHighlight);
 	if (prev != itsFound.begin())
-	{
-		if (*prev == size_t(itsHighlight))
-			prev--;
-		Highlight(*prev);
-	}
+		Highlight(*--prev);
 	else if (wrap)
 		Highlight(*itsFound.rbegin());
 }
