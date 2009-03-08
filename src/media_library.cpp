@@ -49,18 +49,18 @@ void MediaLibrary::Init()
 	itsRightColWidth = COLS-COLS/3*2-1;
 	itsRightColStartX = itsLeftColWidth+itsMiddleColWidth+2;
 	
-	Artists = new Menu<string>(0, main_start_y, itsLeftColWidth, main_height, IntoStr(Config.media_lib_primary_tag) + "s", Config.main_color, brNone);
+	Artists = new Menu<string>(0, MainStartY, itsLeftColWidth, MainHeight, IntoStr(Config.media_lib_primary_tag) + "s", Config.main_color, brNone);
 	Artists->HighlightColor(Config.active_column_color);
 	Artists->SetTimeout(ncmpcpp_window_timeout);
 	Artists->SetItemDisplayer(Display::Generic);
 	
-	Albums = new Menu< std::pair<std::string, SearchConstraints> >(itsMiddleColStartX, main_start_y, itsMiddleColWidth, main_height, "Albums", Config.main_color, brNone);
+	Albums = new Menu< std::pair<std::string, SearchConstraints> >(itsMiddleColStartX, MainStartY, itsMiddleColWidth, MainHeight, "Albums", Config.main_color, brNone);
 	Albums->HighlightColor(Config.main_highlight_color);
 	Albums->SetTimeout(ncmpcpp_window_timeout);
 	Albums->SetItemDisplayer(Display::Pairs);
 	Albums->SetGetStringFunction(StringPairToString);
 	
-	Songs = new Menu<Song>(itsRightColStartX, main_start_y, itsRightColWidth, main_height, "Songs", Config.main_color, brNone);
+	Songs = new Menu<Song>(itsRightColStartX, MainStartY, itsRightColWidth, MainHeight, "Songs", Config.main_color, brNone);
 	Songs->HighlightColor(Config.main_highlight_color);
 	Songs->SetTimeout(ncmpcpp_window_timeout);
 	Songs->SetSelectPrefix(&Config.selected_item_prefix);
@@ -80,12 +80,12 @@ void MediaLibrary::Resize()
 	itsRightColStartX = itsLeftColWidth+itsMiddleColWidth+2;
 	itsRightColWidth = COLS-COLS/3*2-1;
 	
-	Artists->Resize(itsLeftColWidth, main_height);
-	Albums->Resize(itsMiddleColWidth, main_height);
-	Songs->Resize(itsRightColWidth, main_height);
+	Artists->Resize(itsLeftColWidth, MainHeight);
+	Albums->Resize(itsMiddleColWidth, MainHeight);
+	Songs->Resize(itsRightColWidth, MainHeight);
 	
-	Albums->MoveTo(itsMiddleColStartX, main_start_y);
-	Songs->MoveTo(itsRightColStartX, main_start_y);
+	Albums->MoveTo(itsMiddleColStartX, MainStartY);
+	Songs->MoveTo(itsRightColStartX, MainStartY);
 	
 	hasToBeResized = 0;
 }
@@ -93,9 +93,9 @@ void MediaLibrary::Resize()
 void MediaLibrary::Refresh()
 {
 	Artists->Display();
-	mvvline(main_start_y, itsMiddleColStartX-1, 0, main_height);
+	mvvline(MainStartY, itsMiddleColStartX-1, 0, MainHeight);
 	Albums->Display();
-	mvvline(main_start_y, itsRightColStartX-1, 0, main_height);
+	mvvline(MainStartY, itsRightColStartX-1, 0, MainHeight);
 	Songs->Display();
 	if (Albums->Empty())
 	{
@@ -113,7 +113,7 @@ void MediaLibrary::SwitchTo()
 		Resize();
 	
 	myScreen = this;
-	redraw_header = 1;
+	RedrawHeader = 1;
 	Refresh();
 	UpdateSongList(Songs);
 }
@@ -369,7 +369,7 @@ void MediaLibrary::AddToPlaylist(bool add_n_play)
 	{
 		if (!Songs->Empty())
 		{
-			block_item_list_update = 1;
+			BlockItemListUpdate = 1;
 			if (Config.ncmpc_like_songs_adding && Songs->isBold())
 			{
 				long long hash = Songs->Current().GetHash();

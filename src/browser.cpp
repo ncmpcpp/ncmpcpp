@@ -51,7 +51,7 @@ const char *Browser::SupportedExtensions[] =
 
 void Browser::Init()
 {
-	w = new Menu<Item>(0, main_start_y, COLS, main_height, "", Config.main_color, brNone);
+	w = new Menu<Item>(0, MainStartY, COLS, MainHeight, "", Config.main_color, brNone);
 	w->HighlightColor(Config.main_highlight_color);
 	w->SetTimeout(ncmpcpp_window_timeout);
 	w->SetSelectPrefix(&Config.selected_item_prefix);
@@ -62,7 +62,7 @@ void Browser::Init()
 
 void Browser::Resize()
 {
-	w->Resize(COLS, main_height);
+	w->Resize(COLS, MainHeight);
 	hasToBeResized = 0;
 }
 
@@ -76,13 +76,13 @@ void Browser::SwitchTo()
 	
 	w->Empty() ? myBrowser->GetDirectory(itsBrowsedDir) : myBrowser->UpdateItemList();
 	myScreen = this;
-	redraw_header = 1;
+	RedrawHeader = 1;
 }
 
 std::string Browser::Title()
 {
 	string result = "Browse: ";
-	result += TO_STRING(Scroller(itsBrowsedDir, COLS-result.length()-volume_state.length(), itsScrollBeginning));
+	result += TO_STRING(Scroller(itsBrowsedDir, COLS-result.length()-VolumeState.length(), itsScrollBeginning));
 	return result;
 }
 
@@ -97,12 +97,12 @@ void Browser::EnterPressed()
 		case itDirectory:
 		{
 			GetDirectory(item.name, itsBrowsedDir);
-			redraw_header = 1;
+			RedrawHeader = 1;
 			break;
 		}
 		case itSong:
 		{
-			block_item_list_update = 1;
+			BlockItemListUpdate = 1;
 			if (Config.ncmpc_like_songs_adding && w->isBold())
 			{
 				bool found = 0;
@@ -193,7 +193,7 @@ void Browser::SpacePressed()
 		}
 		case itSong:
 		{
-			block_item_list_update = 1;
+			BlockItemListUpdate = 1;
 			if (Config.ncmpc_like_songs_adding && w->isBold())
 			{
 				Playlist::BlockUpdate = 1;
@@ -439,7 +439,7 @@ void Browser::ChangeBrowseMode()
 	itsBrowsedDir = Config.local_browser ? home_folder : "/";
 	w->Reset();
 	GetDirectory(itsBrowsedDir);
-	redraw_header = 1;
+	RedrawHeader = 1;
 }
 
 void Browser::UpdateItemList()

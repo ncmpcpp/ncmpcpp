@@ -57,7 +57,7 @@ void Clock::Init()
 
 void Clock::Resize()
 {
-	if (Width <= size_t(COLS) && Height <= main_height)
+	if (Width <= size_t(COLS) && Height <= MainHeight)
 	{
 		w->MoveTo((COLS-Width)/2, (LINES-Height)/2);
 		if (myScreen == this)
@@ -72,7 +72,7 @@ void Clock::Resize()
 
 void Clock::SwitchTo()
 {
-	if (Width > size_t(COLS) || Height > main_height)
+	if (Width > size_t(COLS) || Height > MainHeight)
 	{
 		ShowMessage("Screen is too small to display clock!");
 		return;
@@ -85,7 +85,7 @@ void Clock::SwitchTo()
 	
 	myScreen = this;
 	myPlaylist->Main()->Hide();
-	redraw_header = 1;
+	RedrawHeader = 1;
 	Prepare();
 	w->Display();
 }
@@ -97,7 +97,7 @@ std::string Clock::Title()
 
 void Clock::Update()
 {
-	if (Width > size_t(COLS) || Height > main_height)
+	if (Width > size_t(COLS) || Height > MainHeight)
 		myPlaylist->SwitchTo();
 	
 	time_t rawtime;

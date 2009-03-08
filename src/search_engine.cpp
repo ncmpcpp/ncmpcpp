@@ -44,7 +44,7 @@ bool SearchEngine::CaseSensitive = 0;
 
 void SearchEngine::Init()
 {
-	w = new Menu< std::pair<Buffer *, Song *> >(0, main_start_y, COLS, main_height, "", Config.main_color, brNone);
+	w = new Menu< std::pair<Buffer *, Song *> >(0, MainStartY, COLS, MainHeight, "", Config.main_color, brNone);
 	w->HighlightColor(Config.main_highlight_color);
 	w->SetTimeout(ncmpcpp_window_timeout);
 	w->SetItemDisplayer(Display::SearchEngine);
@@ -55,7 +55,7 @@ void SearchEngine::Init()
 
 void SearchEngine::Resize()
 {
-	w->Resize(COLS, main_height);
+	w->Resize(COLS, MainHeight);
 	hasToBeResized = 0;
 }
 
@@ -70,7 +70,7 @@ void SearchEngine::SwitchTo()
 	if (w->Empty())
 		Prepare();
 	myScreen = this;
-	redraw_header = 1;
+	RedrawHeader = 1;
 	
 	if (!w->Back().first)
 	{
@@ -221,7 +221,7 @@ void SearchEngine::EnterPressed()
 		}
 		default:
 		{
-			block_item_list_update = 1;
+			BlockItemListUpdate = 1;
 			if (Config.ncmpc_like_songs_adding && w->isBold())
 			{
 				long long hash = w->Current().second->GetHash();
@@ -263,7 +263,7 @@ void SearchEngine::SpacePressed()
 		return;
 	}
 	
-	block_item_list_update = 1;
+	BlockItemListUpdate = 1;
 	if (Config.ncmpc_like_songs_adding && w->isBold())
 	{
 		Playlist::BlockUpdate = 1;

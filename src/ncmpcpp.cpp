@@ -56,7 +56,6 @@
 using namespace Global;
 using namespace MPD;
 
-using std::make_pair;
 using std::string;
 using std::vector;
 
@@ -68,16 +67,15 @@ Window *Global::wFooter;
 
 Connection *Global::Mpd;
 
-size_t Global::main_start_y;
-size_t Global::main_height;
+size_t Global::MainStartY;
+size_t Global::MainHeight;
 
-time_t Global::timer;
+time_t Global::Timer;
 
-bool Global::block_progressbar_update = 0;
-bool Global::block_item_list_update = 0;
+bool Global::BlockItemListUpdate = 0;
 
-bool Global::messages_allowed = 0;
-bool Global::redraw_header = 1;
+bool Global::MessagesAllowed = 0;
+bool Global::RedrawHeader = 1;
 
 int main(int argc, char *argv[])
 {
@@ -117,16 +115,16 @@ int main(int argc, char *argv[])
 	InitScreen(Config.colors_enabled);
 	init_current_locale();
 	
-	main_start_y = 2;
-	main_height = LINES-4;
+	MainStartY = 2;
+	MainHeight = LINES-4;
 	
 	if (!Config.header_visibility)
 	{
-		main_start_y -= 2;
-		main_height += 2;
+		MainStartY -= 2;
+		MainHeight += 2;
 	}
 	if (!Config.statusbar_visibility)
-		main_height++;
+		MainHeight++;
 	
 	myPlaylist->Init();
 	myBrowser->Init();
@@ -163,7 +161,7 @@ int main(int argc, char *argv[])
 	
 	myScreen = myPlaylist;
 	
-	time(&timer);
+	time(&Timer);
 	
 	Mpd->SetStatusUpdater(NcmpcppStatusChanged, NULL);
 	Mpd->SetErrorHandler(NcmpcppErrorCallback, NULL);
@@ -191,14 +189,14 @@ int main(int argc, char *argv[])
 			ShowMessage("Attempting to reconnect...");
 			if (Mpd->Connect())
 				ShowMessage("Connected!");
-			messages_allowed = 0;
+			MessagesAllowed = 0;
 		}
 		
 		TraceMpdStatus();
 		
-		block_item_list_update = 0;
+		BlockItemListUpdate = 0;
 		Playlist::BlockUpdate = 0;
-		messages_allowed = 1;
+		MessagesAllowed = 1;
 		
 		// header stuff
 		gettimeofday(&past, 0);
@@ -206,10 +204,10 @@ int main(int argc, char *argv[])
 		&&   (myScreen == myPlaylist || myScreen == myBrowser || myScreen == myLyrics)
 		   )
 		{
-			redraw_header = 1;
+			RedrawHeader = 1;
 			gettimeofday(&now, 0);
 		}
-		if (Config.header_visibility && redraw_header)
+		if (Config.header_visibility && RedrawHeader)
 		{
 			if (title_allowed)
 			{
@@ -233,10 +231,10 @@ int main(int argc, char *argv[])
 			}
 			
 			wHeader->SetColor(Config.volume_color);
-			*wHeader << XY(wHeader->GetWidth()-volume_state.length(), 0) << volume_state;
+			*wHeader << XY(wHeader->GetWidth()-VolumeState.length(), 0) << VolumeState;
 			wHeader->SetColor(Config.header_color);
 			wHeader->Refresh();
-			redraw_header = 0;
+			RedrawHeader = 0;
 		}
 		// header stuff end
 		
@@ -248,9 +246,9 @@ int main(int argc, char *argv[])
 			continue;
 		
 		if (!title_allowed)
-			redraw_header = 1;
+			RedrawHeader = 1;
 		title_allowed = 1;
-		time(&timer);
+		time(&Timer);
 		
 		if (myScreen == myPlaylist)
 		{
@@ -327,7 +325,7 @@ int main(int argc, char *argv[])
 		}
 		else if (input == KEY_RESIZE)
 		{
-			redraw_header = 1;
+			RedrawHeader = 1;
 			
 			if (COLS < 20 || LINES < 5)
 			{
@@ -336,12 +334,12 @@ int main(int argc, char *argv[])
 				return 1;
 			}
 			
-			main_height = LINES-4;
+			MainHeight = LINES-4;
 			
 			if (!Config.header_visibility)
-				main_height += 2;
+				MainHeight += 2;
 			if (!Config.statusbar_visibility)
-				main_height++;
+				MainHeight++;
 			
 			myHelp->hasToBeResized = 1;
 			myPlaylist->hasToBeResized = 1;
@@ -460,7 +458,7 @@ int main(int argc, char *argv[])
 					{
 						size_t id = myPlaylist->Main()->Choice();
 						TraceMpdStatus();
-						time(&timer);
+						time(&Timer);
 						if (myPlaylist->NowPlaying > myPlaylist->CurrentSong()->GetPosition())  // needed for keeping proper
 							myPlaylist->NowPlaying--; // position of now playing song.
 						Mpd->QueueDeleteSongId(myPlaylist->CurrentSong()->GetID());
@@ -525,7 +523,7 @@ int main(int argc, char *argv[])
 					while (!myPlaylistEditor->Content->Empty() && Keypressed(input, Key.Delete))
 					{
 						TraceMpdStatus();
-						time(&timer);
+						time(&Timer);
 						Mpd->QueueDeleteFromPlaylist(myPlaylistEditor->Playlists->Current(), myPlaylistEditor->Content->Choice());
 						myPlaylistEditor->Content->DeleteOption(myPlaylistEditor->Content->Choice());
 						myPlaylistEditor->Content->Refresh();
@@ -575,13 +573,13 @@ int main(int argc, char *argv[])
 					Statusbar() << "Playlist already exists, overwrite: " << playlist_name << " ? [y/n] ";
 					curs_set(1);
 					int in = 0;
-					messages_allowed = 0;
+					MessagesAllowed = 0;
 					while (in != 'y' && in != 'n')
 					{
 						Mpd->UpdateStatus();
 						wFooter->ReadKey(in);
 					}
-					messages_allowed = 1;
+					MessagesAllowed = 1;
 					
 					if (in == 'y')
 					{
@@ -629,7 +627,7 @@ int main(int argc, char *argv[])
 					while (Keypressed(input, Key.MvSongUp) && list.front() > 0)
 					{
 						TraceMpdStatus();
-						time(&timer);
+						time(&Timer);
 						for (vector<size_t>::iterator it = list.begin(); it != list.end(); it++)
 						{
 							(*it)--;
@@ -655,7 +653,7 @@ int main(int argc, char *argv[])
 					while (Keypressed(input, Key.MvSongUp) && to > 0)
 					{
 						TraceMpdStatus();
-						time(&timer);
+						time(&Timer);
 						to--;
 						myPlaylist->Main()->at(from).SetPosition(to);
 						myPlaylist->Main()->at(to).SetPosition(from);
@@ -681,7 +679,7 @@ int main(int argc, char *argv[])
 					while (Keypressed(input, Key.MvSongUp) && list.front() > 0)
 					{
 						TraceMpdStatus();
-						time(&timer);
+						time(&Timer);
 						for (vector<size_t>::iterator it = list.begin(); it != list.end(); it++)
 						{
 							(*it)--;
@@ -703,7 +701,7 @@ int main(int argc, char *argv[])
 					while (Keypressed(input, Key.MvSongUp) && to > 0)
 					{
 						TraceMpdStatus();
-						time(&timer);
+						time(&Timer);
 						to--;
 						myPlaylistEditor->Content->Swap(to, to+1);
 						myPlaylistEditor->Content->Scroll(wUp);
@@ -742,7 +740,7 @@ int main(int argc, char *argv[])
 					while (Keypressed(input, Key.MvSongDown) && list.back() < myPlaylist->Main()->Size()-1)
 					{
 						TraceMpdStatus();
-						time(&timer);
+						time(&Timer);
 						for (vector<size_t>::reverse_iterator it = list.rbegin(); it != list.rend(); it++)
 						{
 							(*it)++;
@@ -768,7 +766,7 @@ int main(int argc, char *argv[])
 					while (Keypressed(input, Key.MvSongDown) && to < myPlaylist->Main()->Size()-1)
 					{
 						TraceMpdStatus();
-						time(&timer);
+						time(&Timer);
 						to++;
 						myPlaylist->Main()->at(from).SetPosition(to);
 						myPlaylist->Main()->at(to).SetPosition(from);
@@ -795,7 +793,7 @@ int main(int argc, char *argv[])
 					while (Keypressed(input, Key.MvSongDown) && list.back() < myPlaylistEditor->Content->Size()-1)
 					{
 						TraceMpdStatus();
-						time(&timer);
+						time(&Timer);
 						for (vector<size_t>::reverse_iterator it = list.rbegin(); it != list.rend(); it++)
 						{
 							(*it)++;
@@ -817,7 +815,7 @@ int main(int argc, char *argv[])
 					while (Keypressed(input, Key.MvSongDown) && to < myPlaylistEditor->Content->Size()-1)
 					{
 						TraceMpdStatus();
-						time(&timer);
+						time(&Timer);
 						to++;
 						myPlaylistEditor->Content->Swap(to, to-1);
 						myPlaylistEditor->Content->Scroll(wDown);
@@ -868,7 +866,7 @@ int main(int argc, char *argv[])
 				ShowMessage("Unknown item length!");
 				continue;
 			}
-			block_progressbar_update = 1;
+			LockProgressbar();
 			LockStatusbar();
 			
 			int songpos;
@@ -879,10 +877,10 @@ int main(int argc, char *argv[])
 			while (Keypressed(input, Key.SeekForward) || Keypressed(input, Key.SeekBackward))
 			{
 				TraceMpdStatus();
-				time(&timer);
+				time(&Timer);
 				myPlaylist->Main()->ReadKey(input);
 				
-				int howmuch = Config.incremental_seeking ? (timer-t)/2+Config.seek_time : Config.seek_time;
+				int howmuch = Config.incremental_seeking ? (Timer-t)/2+Config.seek_time : Config.seek_time;
 				
 				if (songpos < s->GetTotalLength() && Keypressed(input, Key.SeekForward))
 				{
@@ -911,7 +909,7 @@ int main(int argc, char *argv[])
 			}
 			Mpd->Seek(songpos);
 			
-			block_progressbar_update = 0;
+			UnlockProgressbar();
 			UnlockStatusbar();
 		}
 		else if (Keypressed(input, Key.ToggleDisplayMode))
@@ -1388,7 +1386,7 @@ int main(int argc, char *argv[])
 					myBrowser->GetDirectory("/");
 				myPlaylistEditor->Playlists->Clear(0); // make playlist editor update itself
 			}
-			time(&timer);
+			time(&Timer);
 			FreeSongList(result);
 		}
 		else if (Keypressed(input, Key.Crop))
@@ -1450,7 +1448,7 @@ int main(int argc, char *argv[])
 		{
 			myPlaylist->Sort();
 			myPlaylist->Main()->Highlighting(1);
-			time(&timer);
+			time(&Timer);
 		}
 		else if (Keypressed(input, Key.ApplyFilter))
 		{
@@ -1473,10 +1471,10 @@ int main(int argc, char *argv[])
 			
 			if (myScreen == myPlaylist)
 			{
-				time(&timer);
+				time(&Timer);
 				myPlaylist->Main()->Highlighting(1);
 				Playlist::ReloadTotalLength = 1;
-				redraw_header = 1;
+				RedrawHeader = 1;
 			}
 		}
 		else if (Keypressed(input, Key.FindForward) || Keypressed(input, Key.FindBackward))
@@ -1490,7 +1488,7 @@ int main(int argc, char *argv[])
 			Statusbar() << "Find " << (Keypressed(input, Key.FindForward) ? "forward" : "backward") << ": ";
 			string findme = wFooter->GetString(mList->GetSearchConstraint());
 			UnlockStatusbar();
-			time(&timer);
+			time(&Timer);
 			if (findme.empty())
 				continue;
 			

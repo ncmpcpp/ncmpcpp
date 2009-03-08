@@ -47,7 +47,7 @@ TinyTagEditor *myTinyTagEditor = new TinyTagEditor;
 
 void TinyTagEditor::Init()
 {
-	w = new Menu<Buffer>(0, main_start_y, COLS, main_height, "", Config.main_color, brNone);
+	w = new Menu<Buffer>(0, MainStartY, COLS, MainHeight, "", Config.main_color, brNone);
 	w->HighlightColor(Config.main_highlight_color);
 	w->SetTimeout(ncmpcpp_window_timeout);
 	w->SetItemDisplayer(Display::Generic);
@@ -55,7 +55,7 @@ void TinyTagEditor::Init()
 
 void TinyTagEditor::Resize()
 {
-	w->Resize(COLS, main_height);
+	w->Resize(COLS, MainHeight);
 	hasToBeResized = 0;
 }
 
@@ -71,7 +71,7 @@ void TinyTagEditor::SwitchTo()
 			Resize();
 		myOldScreen = myScreen;
 		myScreen = this;
-		redraw_header = 1;
+		RedrawHeader = 1;
 	}
 	else
 	{
@@ -303,13 +303,13 @@ void TagEditor::Init()
 	RightColumnWidth = COLS-LeftColumnWidth-MiddleColumnWidth-2;
 	RightColumnStartX = LeftColumnWidth+MiddleColumnWidth+2;
 	
-	Albums = new Menu<string_pair>(0, main_start_y, LeftColumnWidth, main_height, "Albums", Config.main_color, brNone);
+	Albums = new Menu<string_pair>(0, MainStartY, LeftColumnWidth, MainHeight, "Albums", Config.main_color, brNone);
 	Albums->HighlightColor(Config.active_column_color);
 	Albums->SetTimeout(ncmpcpp_window_timeout);
 	Albums->SetItemDisplayer(Display::Pairs);
 	Albums->SetGetStringFunction(StringPairToString);
 	
-	Dirs = new Menu<string_pair>(0, main_start_y, LeftColumnWidth, main_height, "Directories", Config.main_color, brNone);
+	Dirs = new Menu<string_pair>(0, MainStartY, LeftColumnWidth, MainHeight, "Directories", Config.main_color, brNone);
 	Dirs->HighlightColor(Config.active_column_color);
 	Dirs->SetTimeout(ncmpcpp_window_timeout);
 	Dirs->SetItemDisplayer(Display::Pairs);
@@ -317,12 +317,12 @@ void TagEditor::Init()
 	
 	LeftColumn = Config.albums_in_tag_editor ? Albums : Dirs;
 	
-	TagTypes = new Menu<string>(MiddleColumnStartX, main_start_y, MiddleColumnWidth, main_height, "Tag types", Config.main_color, brNone);
+	TagTypes = new Menu<string>(MiddleColumnStartX, MainStartY, MiddleColumnWidth, MainHeight, "Tag types", Config.main_color, brNone);
 	TagTypes->HighlightColor(Config.main_highlight_color);
 	TagTypes->SetTimeout(ncmpcpp_window_timeout);
 	TagTypes->SetItemDisplayer(Display::Generic);
 	
-	Tags = new Menu<Song>(RightColumnStartX, main_start_y, RightColumnWidth, main_height, "Tags", Config.main_color, brNone);
+	Tags = new Menu<Song>(RightColumnStartX, MainStartY, RightColumnWidth, MainHeight, "Tags", Config.main_color, brNone);
 	Tags->HighlightColor(Config.main_highlight_color);
 	Tags->SetTimeout(ncmpcpp_window_timeout);
 	Tags->SetSelectPrefix(&Config.selected_item_prefix);
@@ -342,13 +342,13 @@ void TagEditor::Resize()
 	RightColumnWidth = COLS-LeftColumnWidth-MiddleColumnWidth-2;
 	RightColumnStartX = LeftColumnWidth+MiddleColumnWidth+2;
 	
-	Albums->Resize(LeftColumnWidth, main_height);
-	Dirs->Resize(LeftColumnWidth, main_height);
-	TagTypes->Resize(MiddleColumnWidth, main_height);
-	Tags->Resize(RightColumnWidth, main_height);
+	Albums->Resize(LeftColumnWidth, MainHeight);
+	Dirs->Resize(LeftColumnWidth, MainHeight);
+	TagTypes->Resize(MiddleColumnWidth, MainHeight);
+	Tags->Resize(RightColumnWidth, MainHeight);
 	
-	TagTypes->MoveTo(MiddleColumnStartX, main_start_y);
-	Tags->MoveTo(RightColumnStartX, main_start_y);
+	TagTypes->MoveTo(MiddleColumnStartX, MainStartY);
+	Tags->MoveTo(RightColumnStartX, MainStartY);
 	
 	hasToBeResized = 0;
 }
@@ -367,7 +367,7 @@ void TagEditor::SwitchTo()
 		Resize();
 	
 	myScreen = this;
-	redraw_header = 1;
+	RedrawHeader = 1;
 	Refresh();
 	
 	if (TagTypes->Empty())
@@ -398,9 +398,9 @@ void TagEditor::SwitchTo()
 void TagEditor::Refresh()
 {
 	LeftColumn->Display();
-	mvvline(main_start_y, MiddleColumnStartX-1, 0, main_height);
+	mvvline(MainStartY, MiddleColumnStartX-1, 0, MainHeight);
 	TagTypes->Display();
-	mvvline(main_start_y, RightColumnStartX-1, 0, main_height);
+	mvvline(MainStartY, RightColumnStartX-1, 0, MainHeight);
 	Tags->Display();
 }
 

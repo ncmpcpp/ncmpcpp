@@ -46,12 +46,12 @@ void PlaylistEditor::Init()
 	RightColumnStartX = LeftColumnWidth+1;
 	RightColumnWidth = COLS-LeftColumnWidth-1;
 	
-	Playlists = new Menu<string>(0, main_start_y, LeftColumnWidth, main_height, "Playlists", Config.main_color, brNone);
+	Playlists = new Menu<string>(0, MainStartY, LeftColumnWidth, MainHeight, "Playlists", Config.main_color, brNone);
 	Playlists->HighlightColor(Config.active_column_color);
 	Playlists->SetTimeout(ncmpcpp_window_timeout);
 	Playlists->SetItemDisplayer(Display::Generic);
 	
-	Content = new Menu<Song>(RightColumnStartX, main_start_y, RightColumnWidth, main_height, "Playlist's content", Config.main_color, brNone);
+	Content = new Menu<Song>(RightColumnStartX, MainStartY, RightColumnWidth, MainHeight, "Playlist's content", Config.main_color, brNone);
 	Content->HighlightColor(Config.main_highlight_color);
 	Content->SetTimeout(ncmpcpp_window_timeout);
 	Content->SetSelectPrefix(&Config.selected_item_prefix);
@@ -70,10 +70,10 @@ void PlaylistEditor::Resize()
 	RightColumnStartX = LeftColumnWidth+1;
 	RightColumnWidth = COLS-LeftColumnWidth-1;
 	
-	Playlists->Resize(LeftColumnWidth, main_height);
-	Content->Resize(RightColumnWidth, main_height);
+	Playlists->Resize(LeftColumnWidth, MainHeight);
+	Content->Resize(RightColumnWidth, MainHeight);
 	
-	Content->MoveTo(RightColumnStartX, main_start_y);
+	Content->MoveTo(RightColumnStartX, MainStartY);
 	
 	hasToBeResized = 0;
 }
@@ -86,7 +86,7 @@ std::string PlaylistEditor::Title()
 void PlaylistEditor::Refresh()
 {
 	Playlists->Display();
-	mvvline(main_start_y, RightColumnStartX-1, 0, main_height);
+	mvvline(MainStartY, RightColumnStartX-1, 0, MainHeight);
 	Content->Display();
 }
 
@@ -99,7 +99,7 @@ void PlaylistEditor::SwitchTo()
 		Resize();
 	
 	myScreen = this;
-	redraw_header = 1;
+	RedrawHeader = 1;
 	Refresh();
 	UpdateSongList(Content);
 }
@@ -211,7 +211,7 @@ void PlaylistEditor::AddToPlaylist(bool add_n_play)
 	{
 		if (!Content->Empty())
 		{
-			block_item_list_update = 1;
+			BlockItemListUpdate = 1;
 			if (Config.ncmpc_like_songs_adding && Content->isBold())
 			{
 				long long hash = Content->Current().GetHash();

@@ -50,7 +50,7 @@ const size_t Playlist::SortDialogHeight = 17;
 
 void Playlist::Init()
 {
-	w = new Menu<MPD::Song>(0, main_start_y, COLS, main_height, Config.columns_in_playlist ? Display::Columns(Config.song_columns_list_format) : "", Config.main_color, brNone);
+	w = new Menu<MPD::Song>(0, MainStartY, COLS, MainHeight, Config.columns_in_playlist ? Display::Columns(Config.song_columns_list_format) : "", Config.main_color, brNone);
 	w->SetTimeout(ncmpcpp_window_timeout);
 	w->HighlightColor(Config.main_highlight_color);
 	w->SetSelectPrefix(&Config.selected_item_prefix);
@@ -91,12 +91,12 @@ void Playlist::SwitchTo()
 	
 	myScreen = this;
 	w->Window::Clear();
-	redraw_header = 1;
+	RedrawHeader = 1;
 }
 
 void Playlist::Resize()
 {
-	w->Resize(COLS, main_height);
+	w->Resize(COLS, MainHeight);
 	w->SetTitle(Config.columns_in_playlist ? Display::Columns(Config.song_columns_list_format) : "");
 	SortDialog->MoveTo((COLS-SortDialogWidth)/2, (LINES-SortDialogHeight)/2);
 	hasToBeResized = 0;
@@ -107,7 +107,7 @@ std::string Playlist::Title()
 	std::string result = "Playlist ";
 	if (ReloadTotalLength || ReloadRemaining)
 		itsBufferedStats = TotalLength();
-	result += TO_STRING(Scroller(itsBufferedStats, w->GetWidth()-result.length()-volume_state.length(), itsScrollBegin));
+	result += TO_STRING(Scroller(itsBufferedStats, w->GetWidth()-result.length()-VolumeState.length(), itsScrollBegin));
 	return result;
 }
 

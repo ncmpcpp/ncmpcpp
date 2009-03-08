@@ -24,6 +24,9 @@
 #include "mpdpp.h"
 #include "ncmpcpp.h"
 
+void LockProgressbar();
+void UnlockProgressbar();
+
 void LockStatusbar();
 void UnlockStatusbar();
 

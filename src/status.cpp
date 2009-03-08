@@ -38,24 +38,21 @@ using namespace Global;
 using namespace MPD;
 using std::string;
 
-string Global::volume_state;
+string Global::VolumeState;
 
 namespace
 {
 	time_t time_of_statusbar_lock;
-	
 	int lock_statusbar_delay = -1;
 	
-	string switch_state;
-	
 	bool block_statusbar_update = 0;
+	bool block_progressbar_update = 0;
 	bool allow_statusbar_unlock = 1;
-	bool repeat_one_allowed = 0;
-	
-	const string term_type = getenv("TERM") ? getenv("TERM") : "";
 	
 	void WindowTitle(const string &status)
 	{
+		static const string term_type = getenv("TERM") ? getenv("TERM") : "";
+		
 		if (term_type != "linux" && Config.set_window_title)
 			std::cout << "\033]0;" << status << "\7";
 	}
@@ -71,6 +68,16 @@ void StatusbarApplyFilterImmediately(const std::wstring &ws)
 	myScreen->ApplyFilter(ToString(ws));
 	myScreen->RefreshWindow();
 	TraceMpdStatus();
+}
+
+void LockProgressbar()
+{
+	block_progressbar_update = 1;
+}
+
+void UnlockProgressbar()
+{
+	block_progressbar_update = 0;
 }
 
 void LockStatusbar()
@@ -100,7 +107,7 @@ void TraceMpdStatus()
 		Mpd->UpdateStatus();
 	time_t now = time(NULL);
 	
-	if (myScreen == myPlaylist && now == timer+Config.playlist_disable_highlight_delay)
+	if (myScreen == myPlaylist && now == Timer+Config.playlist_disable_highlight_delay)
 		myPlaylist->Main()->Highlighting(!Config.playlist_disable_highlight_delay);
 	
 	if (lock_statusbar_delay > 0)
@@ -151,6 +158,7 @@ void NcmpcppErrorCallback(Connection *Mpd, int errorid, const char *msg, void *)
 void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 {
 	static size_t playing_song_scroll_begin = 0;
+	static bool repeat_one_allowed = 0;
 	static string player_state;
 	
 	int sx, sy;
@@ -235,7 +243,7 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 		Playlist::ReloadRemaining = 1;
 		
 		if (myScreen == myPlaylist)
-			redraw_header = 1;
+			RedrawHeader = 1;
 		
 		if (myPlaylist->Main()->Empty())
 		{
@@ -243,7 +251,7 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 			ShowMessage("Cleared playlist!");
 		}
 		
-		if (!block_item_list_update)
+		if (!BlockItemListUpdate)
 		{
 			if (myScreen == myBrowser)
 			{
@@ -448,6 +456,8 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 	}
 	if (changed.StatusFlags && Config.header_visibility)
 	{
+		static string switch_state;
+		
 		switch_state.clear();
 		if (mpd_repeat)
 			switch_state += mpd_repeat;
@@ -476,11 +486,11 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 	}
 	if (changed.Volume && Config.header_visibility)
 	{
-		volume_state = " Volume: ";
-		volume_state += IntoStr(Mpd->GetVolume());
-		volume_state += "%";
+		VolumeState = " Volume: ";
+		VolumeState += IntoStr(Mpd->GetVolume());
+		VolumeState += "%";
 		wHeader->SetColor(Config.volume_color);
-		*wHeader << XY(wHeader->GetWidth()-volume_state.length(), 0) << volume_state;
+		*wHeader << XY(wHeader->GetWidth()-VolumeState.length(), 0) << VolumeState;
 		wHeader->SetColor(Config.header_color);
 		wHeader->Refresh();
 	}
@@ -499,7 +509,7 @@ Window &Statusbar()
 
 void ShowMessage(const char *format, ...)
 {
-	if (messages_allowed)
+	if (MessagesAllowed)
 	{
 		time(&time_of_statusbar_lock);
 		lock_statusbar_delay = Config.message_delay_time;
@@ -519,4 +529,3 @@ void ShowMessage(const char *format, ...)
 		wFooter->Refresh();
 	}
 }
-

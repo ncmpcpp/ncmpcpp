@@ -31,7 +31,7 @@ Help *myHelp = new Help;
 
 void Help::Init()
 {
-	w = new Scrollpad(0, main_start_y, COLS, main_height, "", Config.main_color, brNone);
+	w = new Scrollpad(0, MainStartY, COLS, MainHeight, "", Config.main_color, brNone);
 	w->SetTimeout(ncmpcpp_window_timeout);
 	GetKeybindings();
 	w->Flush();
@@ -39,7 +39,7 @@ void Help::Init()
 
 void Help::Resize()
 {
-	w->Resize(COLS, main_height);
+	w->Resize(COLS, MainHeight);
 	hasToBeResized = 0;
 }
 
@@ -52,7 +52,7 @@ void Help::SwitchTo()
 		Resize();
 	
 	myScreen = this;
-	redraw_header = 1;
+	RedrawHeader = 1;
 
 }
 

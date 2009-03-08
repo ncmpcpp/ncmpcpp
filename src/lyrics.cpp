@@ -49,23 +49,23 @@ bool Lyrics::Reload = 0;
 std::string Lyrics::Filename;
 
 #ifdef HAVE_CURL_CURL_H
-pthread_mutex_t Global::curl = PTHREAD_MUTEX_INITIALIZER;
+pthread_t Lyrics::Downloader = 0;
+pthread_mutex_t Global::CurlLock = PTHREAD_MUTEX_INITIALIZER;
 
 bool Lyrics::Ready = 0;
-pthread_t Lyrics::Downloader = 0;
 #endif
 
 Lyrics *myLyrics = new Lyrics;
 
 void Lyrics::Init()
 {
-	w = new Scrollpad(0, main_start_y, COLS, main_height, "", Config.main_color, brNone);
+	w = new Scrollpad(0, MainStartY, COLS, MainHeight, "", Config.main_color, brNone);
 	w->SetTimeout(ncmpcpp_window_timeout);
 }
 
 void Lyrics::Resize()
 {
-	w->Resize(COLS, main_height);
+	w->Resize(COLS, MainHeight);
 	hasToBeResized = 0;
 }
 
@@ -124,7 +124,7 @@ void Lyrics::SwitchTo()
 				myOldScreen = myScreen;
 				myScreen = this;
 			}
-			redraw_header = 1;
+			RedrawHeader = 1;
 			w->Clear();
 #			ifdef HAVE_CURL_CURL_H
 			static_cast<Window &>(*w) << "Fetching lyrics...";
@@ -144,7 +144,7 @@ void Lyrics::SwitchTo()
 std::string Lyrics::Title()
 {
 	string result = "Lyrics: ";
-	result += TO_STRING(Scroller(itsSong.toString("%a - %t"), COLS-result.length()-volume_state.length(), itsScrollBegin));
+	result += TO_STRING(Scroller(itsSong.toString("%a - %t"), COLS-result.length()-VolumeState.length(), itsScrollBegin));
 	return result;
 }
 
@@ -201,7 +201,7 @@ void *Lyrics::Get(void *song)
 	url.replace(url.find("%artist%"), 8, c_artist);
 	url.replace(url.find("%title%"), 7, c_title);
 	
-	pthread_mutex_lock(&curl);
+	pthread_mutex_lock(&CurlLock);
 	CURL *lyrics = curl_easy_init();
 	curl_easy_setopt(lyrics, CURLOPT_URL, url.c_str());
 	curl_easy_setopt(lyrics, CURLOPT_WRITEFUNCTION, write_data);
@@ -210,7 +210,7 @@ void *Lyrics::Get(void *song)
 	curl_easy_setopt(lyrics, CURLOPT_NOSIGNAL, 1);
 	code = curl_easy_perform(lyrics);
 	curl_easy_cleanup(lyrics);
-	pthread_mutex_unlock(&curl);
+	pthread_mutex_unlock(&CurlLock);
 	
 	curl_free(c_artist);
 	curl_free(c_title);

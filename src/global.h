@@ -25,8 +25,6 @@
 #include "mpdpp.h"
 #include "screen.h"
 
-/// FIXME: this is absolutely shitty, I need to get rid of this.
-
 namespace Global
 {
 	extern BasicScreen *myScreen;
@@ -37,22 +35,21 @@ namespace Global
 	
 	extern MPD::Connection *Mpd;
 	
-	extern size_t main_start_y;
-	extern size_t main_height;
+	extern size_t MainStartY;
+	extern size_t MainHeight;
 	
-	extern time_t timer;
+	extern time_t Timer;
 	
 #	ifdef HAVE_CURL_CURL_H
-	extern pthread_mutex_t curl;
+	extern pthread_mutex_t CurlLock;
 #	endif
 	
-	extern bool block_progressbar_update;
-	extern bool block_item_list_update;
+	extern bool BlockItemListUpdate;
 	
-	extern bool messages_allowed;
-	extern bool redraw_header;
+	extern bool MessagesAllowed;
+	extern bool RedrawHeader;
 	
-	extern std::string volume_state;
+	extern std::string VolumeState;
 }
 
 #endif

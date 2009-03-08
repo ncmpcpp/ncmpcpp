@@ -52,13 +52,13 @@ Info *myInfo = new Info;
 
 void Info::Init()
 {
-	w = new Scrollpad(0, main_start_y, COLS, main_height, "", Config.main_color, brNone);
+	w = new Scrollpad(0, MainStartY, COLS, MainHeight, "", Config.main_color, brNone);
 	w->SetTimeout(ncmpcpp_window_timeout);
 }
 
 void Info::Resize()
 {
-	w->Resize(COLS, main_height);
+	w->Resize(COLS, MainHeight);
 	hasToBeResized = 0;
 }
 
@@ -98,7 +98,7 @@ void Info::GetSong()
 		
 		myOldScreen = myScreen;
 		myScreen = this;
-		redraw_header = 1;
+		RedrawHeader = 1;
 		itsTitle = "Song info";
 		w->Clear();
 		PrepareSong(*s);
@@ -139,7 +139,7 @@ void Info::GetArtist()
 				Resize();
 			myOldScreen = myScreen;
 			myScreen = this;
-			redraw_header = 1;
+			RedrawHeader = 1;
 			itsTitle = "Artist's info - " + *artist;
 			w->Clear();
 			static_cast<Window &>(*w) << "Fetching artist's info...";
@@ -198,7 +198,7 @@ void *Info::PrepareArtist(void *ptr)
 	url += c_artist;
 	url += "&api_key=d94e5b6e26469a2d1ffae8ef20131b79";
 	
-	pthread_mutex_lock(&curl);
+	pthread_mutex_lock(&CurlLock);
 	CURL *info = curl_easy_init();
 	curl_easy_setopt(info, CURLOPT_URL, url.c_str());
 	curl_easy_setopt(info, CURLOPT_WRITEFUNCTION, write_data);
@@ -207,7 +207,7 @@ void *Info::PrepareArtist(void *ptr)
 	curl_easy_setopt(info, CURLOPT_NOSIGNAL, 1);
 	code = curl_easy_perform(info);
 	curl_easy_cleanup(info);
-	pthread_mutex_unlock(&curl);
+	pthread_mutex_unlock(&CurlLock);
 	
 	curl_free(c_artist);
 	
