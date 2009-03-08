@@ -23,11 +23,6 @@
 
 #include "misc.h"
 
-namespace
-{
-	const std::string unallowed_chars = "\"*/:<>?\\|";
-}
-
 void ToLower(std::string &s)
 {
 	transform(s.begin(), s.end(), s.begin(), tolower);
@@ -180,6 +175,8 @@ MPD::Song::SetFunction IntoSetFunction(mpd_TagItems tag)
 
 void EscapeUnallowedChars(std::string &s)
 {
+	static const std::string unallowed_chars = "\"*/:<>?\\|";
+	
 	for (std::string::const_iterator it = unallowed_chars.begin(); it != unallowed_chars.end(); it++)
 	{
 		for (size_t i = 0; i < s.length(); i++)
