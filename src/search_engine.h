@@ -55,7 +55,7 @@ class SearchEngine : public Screen< Menu< std::pair<Buffer *, MPD::Song *> > >
 		virtual void ReverseSelection() { w->ReverseSelection(StaticOptions); }
 		virtual void GetSelectedSongs(MPD::SongList &);
 		
-		virtual void ApplyFilter(const std::string &s) { w->ApplyFilter(s, StaticOptions); }
+		virtual void ApplyFilter(const std::string &);
 		
 		virtual List *GetList() { return w->Size() >= StaticOptions ? w : 0; }
 		

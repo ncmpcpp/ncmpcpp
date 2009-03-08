@@ -138,6 +138,11 @@ void Playlist::GetSelectedSongs(MPD::SongList &v)
 	}
 }
 
+void Playlist::ApplyFilter(const std::string &s)
+{
+	w->ApplyFilter(s, 0, REG_ICASE | Config.regex_type);
+}
+
 void Playlist::Sort()
 {
 	if (w->GetWidth() < SortDialogWidth || w->GetHeight() < SortDialogHeight)

@@ -280,6 +280,11 @@ void MediaLibrary::GetSelectedSongs(MPD::SongList &v)
 	}
 }
 
+void MediaLibrary::ApplyFilter(const std::string &s)
+{
+	GetList()->ApplyFilter(s, 0, REG_ICASE | Config.regex_type);
+}
+
 void MediaLibrary::NextColumn()
 {
 	if (w == Artists)

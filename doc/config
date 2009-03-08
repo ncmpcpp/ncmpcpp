@@ -144,6 +144,8 @@
 #
 #clock_display_seconds = "no"
 #
+#regular_expressions = "basic" (basic/extended)
+#
 ##
 ## Note: If below is enabled, ncmpcpp will ignore leading
 ## "The" word while sorting items in browser, tags in

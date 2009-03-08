@@ -276,6 +276,7 @@ void DefaultConfiguration(ncmpcpp_config &conf)
 	conf.playlist_disable_highlight_delay = 5;
 	conf.message_delay_time = 4;
 	conf.lyrics_db = 0;
+	conf.regex_type = 0;
 }
 
 void ReadKeys(ncmpcpp_keys &keys)
@@ -645,6 +646,10 @@ void ReadConfiguration(ncmpcpp_config &conf)
 			else if (cl.find("enable_window_title") != string::npos)
 			{
 				conf.set_window_title = v == "yes";
+			}
+			else if (cl.find("regular_expressions") != string::npos)
+			{
+				conf.regex_type = REG_EXTENDED * (v != "basic");
 			}
 			else if (cl.find("lyrics_database") != string::npos)
 			{

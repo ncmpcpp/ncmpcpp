@@ -198,6 +198,7 @@ void Song::SetFile(const string &str)
 	if (itsSong->file)
 		str_pool_put(itsSong->file);
 	itsSong->file = str.empty() ? 0 : str_pool_get(str.c_str());
+	CountLastSlashPosition();
 }
 
 void Song::SetArtist(const string &str)
@@ -544,8 +545,9 @@ string Song::ShowTime(int length)
 
 void Song::CountLastSlashPosition()
 {
+	if (!itsSong->file)
+		return;
 	char *tmp = strrchr(itsSong->file, '/');
-	if (tmp)
-		itsSlash = tmp-itsSong->file;
+	itsSlash = tmp ? tmp-itsSong->file : string::npos;
 }
 

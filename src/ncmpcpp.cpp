@@ -1493,7 +1493,7 @@ int main(int argc, char *argv[])
 			if (!findme.empty())
 				ShowMessage("Searching...");
 			
-			bool success = mList->Search(findme, myScreen == mySearcher ? SearchEngine::StaticOptions : 0);
+			bool success = mList->Search(findme, myScreen == mySearcher ? SearchEngine::StaticOptions : 0, REG_ICASE | Config.regex_type);
 			
 			if (findme.empty())
 				continue;

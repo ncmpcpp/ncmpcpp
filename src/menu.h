@@ -21,6 +21,7 @@
 #ifndef _MENU_H
 #define _MENU_H
 
+#include <regex.h>
 #include <set>
 
 #include "window.h"
@@ -54,12 +55,12 @@ namespace NCurses
 			void ReverseSelection(size_t = 0);
 			bool Deselect();
 			
-			virtual bool Search(const std::string &, size_t = 0, bool = 0) = 0;
+			virtual bool Search(const std::string &, size_t = 0, int = 0) = 0;
 			virtual const std::string &GetSearchConstraint() = 0;
 			virtual void NextFound(bool) = 0;
 			virtual void PrevFound(bool) = 0;
 			
-			virtual void ApplyFilter(const std::string &, size_t = 0, bool = 0) = 0;
+			virtual void ApplyFilter(const std::string &, size_t = 0, int = 0) = 0;
 			virtual const std::string &GetFilter() = 0;
 			virtual std::string GetOption(size_t) = 0;
 			
@@ -132,12 +133,12 @@ namespace NCurses
 			virtual size_t Choice() const;
 			virtual size_t RealChoice() const;
 			
-			virtual bool Search(const std::string &constraint, size_t beginning = 0, bool case_sensitive = 0);
+			virtual bool Search(const std::string &constraint, size_t beginning = 0, int flags = 0);
 			virtual const std::string &GetSearchConstraint() { return itsSearchConstraint; }
 			virtual void NextFound(bool wrap);
 			virtual void PrevFound(bool wrap);
 			
-			virtual void ApplyFilter(const std::string &filter, size_t beginning = 0, bool case_sensitive = 0);
+			virtual void ApplyFilter(const std::string &filter, size_t beginning = 0, int flags = 0);
 			virtual const std::string &GetFilter();
 			virtual std::string GetOption(size_t pos);
 			
@@ -596,22 +597,23 @@ template <class T> size_t NCurses::Menu<T>::RealChoice() const
 	return result;
 }
 
-template <class T> bool NCurses::Menu<T>::Search(const std::string &constraint, size_t beginning, bool case_sensitive)
+template <class T> bool NCurses::Menu<T>::Search(const std::string &constraint, size_t beginning, int flags)
 {
 	itsFound.clear();
 	itsSearchConstraint.clear();
 	if (constraint.empty())
 		return false;
 	itsSearchConstraint = constraint;
-	std::string option;
-	for (size_t i = beginning; i < itsOptionsPtr->size(); i++)
+	regex_t rx;
+	if (regcomp(&rx, itsSearchConstraint.c_str(), flags) == 0)
 	{
-		option = GetOption(i);
-		if (!case_sensitive)
-			ToLower(option);
-		if (option.find(itsSearchConstraint) != std::string::npos)
-			itsFound.insert(i);
+		for (size_t i = beginning; i < itsOptionsPtr->size(); i++)
+		{
+			if (regexec(&rx, GetOption(i).c_str(), 0, 0, 0) == 0)
+				itsFound.insert(i);
+		}
 	}
+	regfree(&rx);
 	return !itsFound.empty();
 }
 
@@ -637,15 +639,13 @@ template <class T> void NCurses::Menu<T>::PrevFound(bool wrap)
 		Highlight(*itsFound.rbegin());
 }
 
-template <class T> void NCurses::Menu<T>::ApplyFilter(const std::string &filter, size_t beginning, bool case_sensitive)
+template <class T> void NCurses::Menu<T>::ApplyFilter(const std::string &filter, size_t beginning, int flags)
 {
 	if (filter == itsFilter)
 		return;
 	itsFound.clear();
 	ClearFiltered();
 	itsFilter = filter;
-	if (!case_sensitive)
-		ToLower(itsFilter);
 	if (itsFilter.empty())
 		return;
 	for (size_t i = 0; i < beginning; i++)
@@ -653,18 +653,19 @@ template <class T> void NCurses::Menu<T>::ApplyFilter(const std::string &filter,
 		itsFilteredRealPositions.push_back(i);
 		itsFilteredOptions.push_back(itsOptions[i]);
 	}
-	std::string option;
-	for (size_t i = beginning; i < itsOptions.size(); i++)
+	regex_t rx;
+	if (regcomp(&rx, itsFilter.c_str(), flags) == 0)
 	{
-		option = GetOption(i);
-		if (!case_sensitive)
-			ToLower(option);
-		if (option.find(itsFilter) != std::string::npos)
+		for (size_t i = beginning; i < itsOptions.size(); i++)
 		{
-			itsFilteredRealPositions.push_back(i);
-			itsFilteredOptions.push_back(itsOptions[i]);
+			if (regexec(&rx, GetOption(i).c_str(), 0, 0, 0) == 0)
+			{
+				itsFilteredRealPositions.push_back(i);
+				itsFilteredOptions.push_back(itsOptions[i]);
+			}
 		}
 	}
+	regfree(&rx);
 	itsOptionsPtr = &itsFilteredOptions;
 	if (itsOptionsPtr->empty()) // oops, we didn't find anything
 		Window::Clear();

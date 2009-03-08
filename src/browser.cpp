@@ -279,6 +279,11 @@ void Browser::GetSelectedSongs(MPD::SongList &v)
 	}
 }
 
+void Browser::ApplyFilter(const std::string &s)
+{
+	w->ApplyFilter(s, itsBrowsedDir == "/" ? 0 : 1, REG_ICASE | Config.regex_type);
+}
+
 bool Browser::hasSupportedExtension(const string &file)
 {
 	size_t last_dot = file.rfind(".");

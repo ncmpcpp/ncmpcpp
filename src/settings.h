@@ -168,6 +168,7 @@ struct ncmpcpp_config
 	int playlist_disable_highlight_delay;
 	int message_delay_time;
 	int lyrics_db;
+	int regex_type;
 };
 
 extern ncmpcpp_config Config;

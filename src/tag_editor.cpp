@@ -741,11 +741,11 @@ void TagEditor::GetSelectedSongs(MPD::SongList &v)
 void TagEditor::ApplyFilter(const std::string &s)
 {
 	if (w == Dirs)
-		Dirs->ApplyFilter(s, 1);
+		Dirs->ApplyFilter(s, 1, REG_ICASE | Config.regex_type);
 	else if (w == Albums)
-		Albums->ApplyFilter(s);
+		Albums->ApplyFilter(s, 0, REG_ICASE | Config.regex_type);
 	else if (w == Tags)
-		Tags->ApplyFilter(s);
+		Tags->ApplyFilter(s, 0, REG_ICASE | Config.regex_type);
 }
 
 List *TagEditor::GetList()

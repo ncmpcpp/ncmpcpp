@@ -48,7 +48,7 @@ class Playlist : public Screen< Menu<MPD::Song> >
 		virtual void ReverseSelection() { w->ReverseSelection(); }
 		virtual void GetSelectedSongs(MPD::SongList &);
 		
-		virtual void ApplyFilter(const std::string &s) { w->ApplyFilter(s); }
+		virtual void ApplyFilter(const std::string &);
 		
 		virtual List *GetList() { return w; }
 		

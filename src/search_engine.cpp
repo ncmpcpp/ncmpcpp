@@ -32,7 +32,7 @@ using std::string;
 
 SearchEngine *mySearcher = new SearchEngine;
 
-const char *SearchEngine::NormalMode = "Match if tag contains searched phrase";
+const char *SearchEngine::NormalMode = "Match if tag contains searched phrase (regexes supported)";
 const char *SearchEngine::StrictMode = "Match only if both values are the same";
 
 size_t SearchEngine::StaticOptions = 20;
@@ -307,6 +307,11 @@ void SearchEngine::GetSelectedSongs(MPD::SongList &v)
 	}
 }
 
+void SearchEngine::ApplyFilter(const std::string &s)
+{
+	w->ApplyFilter(s, StaticOptions, REG_ICASE | Config.regex_type);
+}
+
 void SearchEngine::UpdateFoundList()
 {
 	bool bold = 0;
@@ -392,7 +397,7 @@ void SearchEngine::Search()
 	bool any_found = 1;
 	bool found = 1;
 	
-	if (!CaseSensitive)
+	if (!CaseSensitive && !MatchToPattern)
 	{
 		string t;
 		t = s.Any();
@@ -434,9 +439,10 @@ void SearchEngine::Search()
 	
 	for (SongList::const_iterator it = list.begin(); it != list.end(); it++)
 	{
+		(*it)->CopyPtr(CaseSensitive || MatchToPattern);
 		Song copy = **it;
 		
-		if (!CaseSensitive)
+		if (!CaseSensitive && !MatchToPattern)
 		{
 			string t;
 			t = copy.GetArtist();
@@ -471,41 +477,83 @@ void SearchEngine::Search()
 			ToLower(t);
 			copy.SetComment(t);
 		}
-		else
-			copy.SetFile(copy.GetName());
 		
 		if (MatchToPattern)
 		{
+			regex_t rx;
+			
 			if (!s.Any().empty())
-				any_found =
-					copy.GetArtist().find(s.Any()) != string::npos
-				||	copy.GetTitle().find(s.Any()) != string::npos
-				||	copy.GetAlbum().find(s.Any()) != string::npos
-				||	copy.GetFile().find(s.Any()) != string::npos
-				||	copy.GetComposer().find(s.Any()) != string::npos
-				||	copy.GetPerformer().find(s.Any()) != string::npos
-				||	copy.GetGenre().find(s.Any()) != string::npos
-				||	copy.GetYear().find(s.Any()) != string::npos
-				||	copy.GetComment().find(s.Any()) != string::npos;
+			{
+				if (regcomp(&rx, s.Any().c_str(), ((CaseSensitive ? 0 : REG_ICASE) | Config.regex_type) | Config.regex_type) == 0)
+				{
+					any_found =
+						regexec(&rx, copy.GetArtist().c_str(), 0, 0, 0) == 0
+					||	regexec(&rx, copy.GetTitle().c_str(), 0, 0, 0) == 0
+					||	regexec(&rx, copy.GetAlbum().c_str(), 0, 0, 0) == 0
+					||	regexec(&rx, copy.GetName().c_str(), 0, 0, 0) == 0
+					||	regexec(&rx, copy.GetComposer().c_str(), 0, 0, 0) == 0
+					||	regexec(&rx, copy.GetPerformer().c_str(), 0, 0, 0) == 0
+					||	regexec(&rx, copy.GetGenre().c_str(), 0, 0, 0) == 0
+					||	regexec(&rx, copy.GetYear().c_str(), 0, 0, 0) == 0
+					||	regexec(&rx, copy.GetComment().c_str(), 0, 0, 0) == 0;
+				}
+				regfree(&rx);
+			}
 			
 			if (found && !s.GetArtist().empty())
-				found = copy.GetArtist().find(s.GetArtist()) != string::npos;
+			{
+				if (regcomp(&rx, s.GetArtist().c_str(), (CaseSensitive ? 0 : REG_ICASE) | Config.regex_type) == 0)
+					found = regexec(&rx, copy.GetArtist().c_str(), 0, 0, 0) == 0;
+				regfree(&rx);
+			}
 			if (found && !s.GetTitle().empty())
-				found = copy.GetTitle().find(s.GetTitle()) != string::npos;
+			{
+				if (regcomp(&rx, s.GetTitle().c_str(), (CaseSensitive ? 0 : REG_ICASE) | Config.regex_type) == 0)
+					found = regexec(&rx, copy.GetTitle().c_str(), 0, 0, 0) == 0;
+				regfree(&rx);
+			}
 			if (found && !s.GetAlbum().empty())
-				found = copy.GetAlbum().find(s.GetAlbum()) != string::npos;
+			{
+				if (regcomp(&rx, s.GetAlbum().c_str(), (CaseSensitive ? 0 : REG_ICASE) | Config.regex_type) == 0)
+					found = regexec(&rx, copy.GetAlbum().c_str(), 0, 0, 0) == 0;
+				regfree(&rx);
+			}
 			if (found && !s.GetFile().empty())
-				found = copy.GetFile().find(s.GetFile()) != string::npos;
+			{
+				if (regcomp(&rx, s.GetFile().c_str(), (CaseSensitive ? 0 : REG_ICASE) | Config.regex_type) == 0)
+					found = regexec(&rx, copy.GetName().c_str(), 0, 0, 0) == 0;
+				regfree(&rx);
+			}
 			if (found && !s.GetComposer().empty())
-				found = copy.GetComposer().find(s.GetComposer()) != string::npos;
+			{
+				if (regcomp(&rx, s.GetComposer().c_str(), (CaseSensitive ? 0 : REG_ICASE) | Config.regex_type) == 0)
+					found = regexec(&rx, copy.GetComposer().c_str(), 0, 0, 0) == 0;
+				regfree(&rx);
+			}
 			if (found && !s.GetPerformer().empty())
-				found = copy.GetPerformer().find(s.GetPerformer()) != string::npos;
+			{
+				if (regcomp(&rx, s.GetPerformer().c_str(), (CaseSensitive ? 0 : REG_ICASE) | Config.regex_type) == 0)
+					found = regexec(&rx, copy.GetPerformer().c_str(), 0, 0, 0) == 0;
+				regfree(&rx);
+			}
 			if (found && !s.GetGenre().empty())
-				found = copy.GetGenre().find(s.GetGenre()) != string::npos;
+			{
+				if (regcomp(&rx, s.GetGenre().c_str(), (CaseSensitive ? 0 : REG_ICASE) | Config.regex_type) == 0)
+					found = regexec(&rx, copy.GetGenre().c_str(), 0, 0, 0) == 0;
+				regfree(&rx);
+			}
 			if (found && !s.GetYear().empty())
-				found = copy.GetYear().find(s.GetYear()) != string::npos;
+			{
+				if (regcomp(&rx, s.GetYear().c_str(), (CaseSensitive ? 0 : REG_ICASE) | Config.regex_type) == 0)
+					found = regexec(&rx, copy.GetYear().c_str(), 0, 0, 0) == 0;
+				regfree(&rx);
+			}
 			if (found && !s.GetComment().empty())
-				found = copy.GetComment().find(s.GetComment()) != string::npos;
+			{
+				if (regcomp(&rx, s.GetComment().c_str(), (CaseSensitive ? 0 : REG_ICASE) | Config.regex_type) == 0)
+					found = regexec(&rx, copy.GetComment().c_str(), 0, 0, 0) == 0;
+				regfree(&rx);
+			}
 		}
 		else
 		{
@@ -514,7 +562,7 @@ void SearchEngine::Search()
 					copy.GetArtist() == s.Any()
 				||	copy.GetTitle() == s.Any()
 				||	copy.GetAlbum() == s.Any()
-				||	copy.GetFile() == s.Any()
+				||	copy.GetName() == s.Any()
 				||	copy.GetComposer() == s.Any()
 				||	copy.GetPerformer() == s.Any()
 				||	copy.GetGenre() == s.Any()
@@ -528,7 +576,7 @@ void SearchEngine::Search()
 			if (found && !s.GetAlbum().empty())
 				found = copy.GetAlbum() == s.GetAlbum();
 			if (found && !s.GetFile().empty())
-				found = copy.GetFile() == s.GetFile();
+				found = copy.GetName() == s.GetFile();
 			if (found && !s.GetComposer().empty())
 				found = copy.GetComposer() == s.GetComposer();
 			if (found && !s.GetPerformer().empty())
@@ -540,6 +588,9 @@ void SearchEngine::Search()
 			if (found && !s.GetComment().empty())
 				found = copy.GetComment() == s.GetComment();
 		}
+		
+		copy.NullMe();
+		(*it)->CopyPtr(0);
 		
 		if (found && any_found)
 		{

@@ -287,6 +287,11 @@ void PlaylistEditor::GetSelectedSongs(MPD::SongList &v)
 	}
 }
 
+void PlaylistEditor::ApplyFilter(const std::string &s)
+{
+	GetList()->ApplyFilter(s, 0, REG_ICASE | Config.regex_type);
+}
+
 List *PlaylistEditor::GetList()
 {
 	if (w == Playlists)
