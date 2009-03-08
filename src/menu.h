@@ -83,10 +83,16 @@ namespace NCurses
 			bool isStatic;
 		};
 		
-		template <class ComparisonClass> static bool InternalSorting(Option *a, Option *b)
+		template <class Comparison> class InternalSorting
 		{
-			return ComparisonClass()(a->Item, b->Item);
-		}
+			Comparison cmp;
+			
+			public:
+				bool operator()(Option *a, Option *b)
+				{
+					return cmp(a->Item, b->Item);
+				}
+		};
 		
 		typedef typename std::vector<Option *>::iterator option_iterator;
 		typedef typename std::vector<Option *>::const_iterator option_const_iterator;
@@ -145,11 +151,11 @@ namespace NCurses
 			virtual void Reset();
 			virtual void Clear(bool clrscr = 1);
 			
-			template <class Compare> void Sort(size_t beginning = 0)
+			template <class Comparison> void Sort(size_t beginning = 0)
 			{
 				if (itsOptions.empty())
 					return;
-				sort(itsOptions.begin()+beginning, itsOptions.end(), InternalSorting<Compare>);
+				sort(itsOptions.begin()+beginning, itsOptions.end(), InternalSorting<Comparison>());
 				ClearFiltered();
 			}
 			
