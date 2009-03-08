@@ -91,6 +91,8 @@ namespace
 
 void init_current_locale()
 {
+	if (!setlocale(LC_CTYPE, ""))
+		return;
 	std::string envlocale = setlocale(LC_CTYPE, "");
 	if (envlocale.empty() || envlocale == "C")
 		return;
