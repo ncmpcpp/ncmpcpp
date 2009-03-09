@@ -589,7 +589,8 @@ void SearchEngine::Search()
 				found = copy.GetComment() == s.GetComment();
 		}
 		
-		copy.NullMe();
+		if (CaseSensitive || MatchToPattern)
+			copy.NullMe();
 		(*it)->CopyPtr(0);
 		
 		if (found && any_found)
