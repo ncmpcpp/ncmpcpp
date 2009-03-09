@@ -40,7 +40,7 @@ size_t SearchEngine::SearchButton = 15;
 size_t SearchEngine::ResetButton = 16;
 
 bool SearchEngine::MatchToPattern = 1;
-bool SearchEngine::CaseSensitive = 0;
+int SearchEngine::CaseSensitive = REG_ICASE;
 
 void SearchEngine::Init()
 {
@@ -178,8 +178,8 @@ void SearchEngine::EnterPressed()
 		}
 		case 13:
 		{
-			CaseSensitive = !CaseSensitive;
-			*w->Current().first << fmtBold << "Case sensitive:" << fmtBoldEnd << ' ' << (CaseSensitive ? "Yes" : "No");
+			CaseSensitive = !CaseSensitive * REG_ICASE;
+			*w->Current().first << fmtBold << "Case sensitive:" << fmtBoldEnd << ' ' << (!CaseSensitive ? "Yes" : "No");
 			break;
 		}
 		case 15:
@@ -371,7 +371,7 @@ void SearchEngine::Prepare()
 	
 	*w->at(11).first << fmtBold << "Search in:" << fmtBoldEnd << ' ' << (Config.search_in_db ? "Database" : "Current playlist");
 	*w->at(12).first << fmtBold << "Search mode:" << fmtBoldEnd << ' ' << (MatchToPattern ? NormalMode : StrictMode);
-	*w->at(13).first << fmtBold << "Case sensitive:" << fmtBoldEnd << ' ' << (CaseSensitive ? "Yes" : "No");
+	*w->at(13).first << fmtBold << "Case sensitive:" << fmtBoldEnd << ' ' << (!CaseSensitive ? "Yes" : "No");
 	
 	*w->at(15).first << "Search";
 	*w->at(16).first << "Reset";
@@ -484,7 +484,7 @@ void SearchEngine::Search()
 			
 			if (!s.Any().empty())
 			{
-				if (regcomp(&rx, s.Any().c_str(), ((CaseSensitive ? 0 : REG_ICASE) | Config.regex_type) | Config.regex_type) == 0)
+				if (regcomp(&rx, s.Any().c_str(), CaseSensitive | Config.regex_type) == 0)
 				{
 					any_found =
 						regexec(&rx, copy.GetArtist().c_str(), 0, 0, 0) == 0
@@ -502,55 +502,55 @@ void SearchEngine::Search()
 			
 			if (found && !s.GetArtist().empty())
 			{
-				if (regcomp(&rx, s.GetArtist().c_str(), (CaseSensitive ? 0 : REG_ICASE) | Config.regex_type) == 0)
+				if (regcomp(&rx, s.GetArtist().c_str(), CaseSensitive | Config.regex_type) == 0)
 					found = regexec(&rx, copy.GetArtist().c_str(), 0, 0, 0) == 0;
 				regfree(&rx);
 			}
 			if (found && !s.GetTitle().empty())
 			{
-				if (regcomp(&rx, s.GetTitle().c_str(), (CaseSensitive ? 0 : REG_ICASE) | Config.regex_type) == 0)
+				if (regcomp(&rx, s.GetTitle().c_str(), CaseSensitive | Config.regex_type) == 0)
 					found = regexec(&rx, copy.GetTitle().c_str(), 0, 0, 0) == 0;
 				regfree(&rx);
 			}
 			if (found && !s.GetAlbum().empty())
 			{
-				if (regcomp(&rx, s.GetAlbum().c_str(), (CaseSensitive ? 0 : REG_ICASE) | Config.regex_type) == 0)
+				if (regcomp(&rx, s.GetAlbum().c_str(), CaseSensitive | Config.regex_type) == 0)
 					found = regexec(&rx, copy.GetAlbum().c_str(), 0, 0, 0) == 0;
 				regfree(&rx);
 			}
 			if (found && !s.GetFile().empty())
 			{
-				if (regcomp(&rx, s.GetFile().c_str(), (CaseSensitive ? 0 : REG_ICASE) | Config.regex_type) == 0)
+				if (regcomp(&rx, s.GetFile().c_str(), CaseSensitive | Config.regex_type) == 0)
 					found = regexec(&rx, copy.GetName().c_str(), 0, 0, 0) == 0;
 				regfree(&rx);
 			}
 			if (found && !s.GetComposer().empty())
 			{
-				if (regcomp(&rx, s.GetComposer().c_str(), (CaseSensitive ? 0 : REG_ICASE) | Config.regex_type) == 0)
+				if (regcomp(&rx, s.GetComposer().c_str(), CaseSensitive | Config.regex_type) == 0)
 					found = regexec(&rx, copy.GetComposer().c_str(), 0, 0, 0) == 0;
 				regfree(&rx);
 			}
 			if (found && !s.GetPerformer().empty())
 			{
-				if (regcomp(&rx, s.GetPerformer().c_str(), (CaseSensitive ? 0 : REG_ICASE) | Config.regex_type) == 0)
+				if (regcomp(&rx, s.GetPerformer().c_str(), CaseSensitive | Config.regex_type) == 0)
 					found = regexec(&rx, copy.GetPerformer().c_str(), 0, 0, 0) == 0;
 				regfree(&rx);
 			}
 			if (found && !s.GetGenre().empty())
 			{
-				if (regcomp(&rx, s.GetGenre().c_str(), (CaseSensitive ? 0 : REG_ICASE) | Config.regex_type) == 0)
+				if (regcomp(&rx, s.GetGenre().c_str(), CaseSensitive | Config.regex_type) == 0)
 					found = regexec(&rx, copy.GetGenre().c_str(), 0, 0, 0) == 0;
 				regfree(&rx);
 			}
 			if (found && !s.GetYear().empty())
 			{
-				if (regcomp(&rx, s.GetYear().c_str(), (CaseSensitive ? 0 : REG_ICASE) | Config.regex_type) == 0)
+				if (regcomp(&rx, s.GetYear().c_str(), CaseSensitive | Config.regex_type) == 0)
 					found = regexec(&rx, copy.GetYear().c_str(), 0, 0, 0) == 0;
 				regfree(&rx);
 			}
 			if (found && !s.GetComment().empty())
 			{
-				if (regcomp(&rx, s.GetComment().c_str(), (CaseSensitive ? 0 : REG_ICASE) | Config.regex_type) == 0)
+				if (regcomp(&rx, s.GetComment().c_str(), CaseSensitive | Config.regex_type) == 0)
 					found = regexec(&rx, copy.GetComment().c_str(), 0, 0, 0) == 0;
 				regfree(&rx);
 			}

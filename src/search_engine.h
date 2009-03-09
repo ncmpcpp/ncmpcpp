@@ -77,7 +77,7 @@ class SearchEngine : public Screen< Menu< std::pair<Buffer *, MPD::Song *> > >
 		SearchPattern itsPattern;
 		
 		static bool MatchToPattern;
-		static bool CaseSensitive;
+		static int CaseSensitive;
 };
 
 extern SearchEngine *mySearcher;
