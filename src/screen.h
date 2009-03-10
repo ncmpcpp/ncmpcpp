@@ -33,7 +33,7 @@ class BasicScreen
 		BasicScreen() : hasToBeResized(0) { }
 		virtual ~BasicScreen() { }
 		
-		virtual void *&Cmp() = 0;
+		virtual void *Cmp() = 0;
 		
 		virtual void Init() = 0;
 		virtual void SwitchTo() = 0;
@@ -69,9 +69,9 @@ template <class WindowType> class Screen : public BasicScreen
 		Screen() : w(0) { }
 		virtual ~Screen() { }
 		
-		virtual void *&Cmp();
+		virtual void *Cmp();
 		
-		WindowType *&Main();
+		WindowType *Main();
 		
 		virtual void Refresh();
 		virtual void RefreshWindow();
@@ -82,12 +82,12 @@ template <class WindowType> class Screen : public BasicScreen
 		WindowType *w;
 };
 
-template <class WindowType> void *&Screen<WindowType>::Cmp()
+template <class WindowType> void *Screen<WindowType>::Cmp()
 {
-	return *(void **)(void *)&w;
+	return w;
 }
 
-template <class WindowType> WindowType *&Screen<WindowType>::Main()
+template <class WindowType> WindowType *Screen<WindowType>::Main()
 {
 	return w;
 }

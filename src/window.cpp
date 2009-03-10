@@ -540,12 +540,12 @@ void Window::GotoXY(int x, int y)
 	itsY = y;
 }
 
-const int &Window::X() const
+ int Window::X() const
 {
 	return itsX;
 }
 
-const int &Window::Y() const
+int Window::Y() const
 {
 	return itsY;
 }

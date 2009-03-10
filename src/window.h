@@ -93,8 +93,8 @@ namespace NCurses
 			std::string GetString(size_t length = -1, size_t width = 0, bool encrypted = 0) const { return GetString("", length, width, encrypted); }
 			void GetXY(int &, int &);
 			void GotoXY(int, int);
-			const int &X() const;
-			const int &Y() const;
+			int X() const;
+			int Y() const;
 			
 			void SetGetStringHelper(GetStringHelper helper) { itsGetStringHelper = helper; }
 			void SetColor(Color, Color = clDefault);
