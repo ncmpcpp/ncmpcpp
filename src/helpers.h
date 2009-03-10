@@ -21,6 +21,7 @@
 #ifndef _HELPERS_H
 #define _HELPERS_H
 
+#include "misc.h"
 #include "mpdpp.h"
 #include "ncmpcpp.h"
 #include "settings.h"

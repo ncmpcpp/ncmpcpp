@@ -26,7 +26,6 @@
 
 #include "window.h"
 #include "strbuffer.h"
-#include "misc.h"
 
 namespace NCurses
 {
