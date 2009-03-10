@@ -43,7 +43,7 @@ namespace NCurses
 			virtual void Resize(size_t, size_t);
 			virtual void Clear(bool = 1);
 			
-			template <class T> Scrollpad &operator<<(const T &t)
+			template <typename T> Scrollpad &operator<<(const T &t)
 			{
 				itsBuffer << t;
 				return *this;

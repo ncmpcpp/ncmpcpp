@@ -63,7 +63,7 @@ class BasicScreen
 		bool hasToBeResized;
 };
 
-template <class WindowType> class Screen : public BasicScreen
+template <typename WindowType> class Screen : public BasicScreen
 {
 	public:
 		Screen() : w(0) { }
@@ -82,32 +82,32 @@ template <class WindowType> class Screen : public BasicScreen
 		WindowType *w;
 };
 
-template <class WindowType> void *Screen<WindowType>::Cmp()
+template <typename WindowType> void *Screen<WindowType>::Cmp()
 {
 	return w;
 }
 
-template <class WindowType> WindowType *Screen<WindowType>::Main()
+template <typename WindowType> WindowType *Screen<WindowType>::Main()
 {
 	return w;
 }
 
-template <class WindowType> void Screen<WindowType>::Refresh()
+template <typename WindowType> void Screen<WindowType>::Refresh()
 {
 	w->Display();
 }
 
-template <class WindowType> void Screen<WindowType>::RefreshWindow()
+template <typename WindowType> void Screen<WindowType>::RefreshWindow()
 {
 	w->Display();
 }
 
-template <class WindowType> void Screen<WindowType>::ReadKey(int &input)
+template <typename WindowType> void Screen<WindowType>::ReadKey(int &input)
 {
 	w->ReadKey(input);
 }
 
-template <class WindowType> void Screen<WindowType>::Scroll(Where where, const int *key)
+template <typename WindowType> void Screen<WindowType>::Scroll(Where where, const int *key)
 {
 	if (!Config.fancy_scrolling && key)
 	{

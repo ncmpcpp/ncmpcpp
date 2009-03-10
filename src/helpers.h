@@ -37,7 +37,7 @@ class CaseInsensitiveSorting
 		bool operator()(MPD::Song *, MPD::Song *);
 		bool operator()(const MPD::Item &, const MPD::Item &);
 		
-		template <class A, class B> bool operator()(const std::pair<A, B> &a, const std::pair<A, B> &b)
+		template <typename A, typename B> bool operator()(const std::pair<A, B> &a, const std::pair<A, B> &b)
 		{
 			std::string aa = a.first;
 			std::string bb = b.first;
@@ -47,7 +47,7 @@ class CaseInsensitiveSorting
 		}
 };
 
-template <class A, class B> std::string StringPairToString(const std::pair<A, B> &pair, void *)
+template <typename A, typename B> std::string StringPairToString(const std::pair<A, B> &pair, void *)
 {
 	return pair.first;
 }

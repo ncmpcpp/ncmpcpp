@@ -66,7 +66,7 @@ namespace NCurses
 			virtual bool isFiltered() = 0;
 	};
 	
-	template <class T> class Menu : public Window, public List
+	template <typename T> class Menu : public Window, public List
 	{
 		typedef void (*ItemDisplayer) (const T &, void *, Menu<T> *);
 		typedef std::string (*GetStringFunction) (const T &, void *);
@@ -83,7 +83,7 @@ namespace NCurses
 			bool isStatic;
 		};
 		
-		template <class Comparison> class InternalSorting
+		template <typename Comparison> class InternalSorting
 		{
 			Comparison cmp;
 			
@@ -151,7 +151,7 @@ namespace NCurses
 			virtual void Reset();
 			virtual void Clear(bool clrscr = 1);
 			
-			template <class Comparison> void Sort(size_t beginning = 0)
+			template <typename Comparison> void Sort(size_t beginning = 0)
 			{
 				if (itsOptions.empty())
 					return;
@@ -209,7 +209,7 @@ namespace NCurses
 	template <> std::string Menu<std::string>::GetOption(size_t pos);
 }
 
-template <class T> NCurses::Menu<T>::Menu(size_t startx,
+template <typename T> NCurses::Menu<T>::Menu(size_t startx,
 				 size_t starty,
 				 size_t width,
 				 size_t height,
@@ -231,7 +231,7 @@ template <class T> NCurses::Menu<T>::Menu(size_t startx,
 {
 }
 
-template <class T> NCurses::Menu<T>::Menu(const Menu &m) : Window(m)
+template <typename T> NCurses::Menu<T>::Menu(const Menu &m) : Window(m)
 {
 	itsOptions = m.itsOptions;
 	itsItemDisplayer = m.itsItemDisplayer;
@@ -242,18 +242,18 @@ template <class T> NCurses::Menu<T>::Menu(const Menu &m) : Window(m)
 	highlightEnabled = m.highlightEnabled;
 }
 
-template <class T> NCurses::Menu<T>::~Menu()
+template <typename T> NCurses::Menu<T>::~Menu()
 {
 	for (option_iterator it = itsOptions.begin(); it != itsOptions.end(); it++)
 		delete *it;
 }
 
-template <class T> void NCurses::Menu<T>::Reserve(size_t size)
+template <typename T> void NCurses::Menu<T>::Reserve(size_t size)
 {
 	itsOptions.reserve(size);
 }
 
-template <class T> void NCurses::Menu<T>::ResizeBuffer(size_t size)
+template <typename T> void NCurses::Menu<T>::ResizeBuffer(size_t size)
 {
 	itsOptions.resize(size);
 	for (size_t i = 0; i < size; i++)
@@ -261,27 +261,27 @@ template <class T> void NCurses::Menu<T>::ResizeBuffer(size_t size)
 			itsOptions[i] = new Option();
 }
 
-template <class T> void NCurses::Menu<T>::AddOption(const T &item, bool is_bold, bool is_static)
+template <typename T> void NCurses::Menu<T>::AddOption(const T &item, bool is_bold, bool is_static)
 {
 	itsOptions.push_back(new Option(item, is_bold, is_static));
 }
 
-template <class T> void NCurses::Menu<T>::AddSeparator()
+template <typename T> void NCurses::Menu<T>::AddSeparator()
 {
 	itsOptions.push_back(0);
 }
 
-template <class T> void NCurses::Menu<T>::InsertOption(size_t pos, const T &item, bool is_bold, bool is_static)
+template <typename T> void NCurses::Menu<T>::InsertOption(size_t pos, const T &item, bool is_bold, bool is_static)
 {
 	itsOptions.insert(itsOptions.begin()+pos, new Option(item, is_bold, is_static));
 }
 
-template <class T> void NCurses::Menu<T>::InsertSeparator(size_t pos)
+template <typename T> void NCurses::Menu<T>::InsertSeparator(size_t pos)
 {
 	itsOptions.insert(itsOptions.begin()+pos, 0);
 }
 
-template <class T> void NCurses::Menu<T>::DeleteOption(size_t pos)
+template <typename T> void NCurses::Menu<T>::DeleteOption(size_t pos)
 {
 	if (itsOptions.empty())
 		return;
@@ -304,26 +304,26 @@ template <class T> void NCurses::Menu<T>::DeleteOption(size_t pos)
 		Window::Clear();
 }
 
-template <class T> void NCurses::Menu<T>::IntoSeparator(size_t pos)
+template <typename T> void NCurses::Menu<T>::IntoSeparator(size_t pos)
 {
 	delete itsOptions.at(pos);
 	itsOptions[pos] = 0;
 }
 
-template <class T> void NCurses::Menu<T>::BoldOption(int index, bool bold)
+template <typename T> void NCurses::Menu<T>::BoldOption(int index, bool bold)
 {
 	if (!itsOptions.at(index))
 		return;
 	itsOptions[index]->isBold = bold;
 }
 
-template <class T>
+template <typename T>
 void NCurses::Menu<T>::Swap(size_t one, size_t two)
 {
 	std::swap(itsOptions.at(one), itsOptions.at(two));
 }
 
-template <class T> void NCurses::Menu<T>::Refresh()
+template <typename T> void NCurses::Menu<T>::Refresh()
 {
 	if (itsOptionsPtr->empty())
 	{
@@ -386,7 +386,7 @@ template <class T> void NCurses::Menu<T>::Refresh()
 	Window::Refresh();
 }
 
-template <class T> void NCurses::Menu<T>::Scroll(Where where)
+template <typename T> void NCurses::Menu<T>::Scroll(Where where)
 {
 	if (itsOptionsPtr->empty())
 		return;
@@ -492,13 +492,13 @@ template <class T> void NCurses::Menu<T>::Scroll(Where where)
 	}
 }
 
-template <class T> void NCurses::Menu<T>::Reset()
+template <typename T> void NCurses::Menu<T>::Reset()
 {
 	itsHighlight = 0;
 	itsBeginning = 0;
 }
 
-template <class T> void NCurses::Menu<T>::ClearFiltered()
+template <typename T> void NCurses::Menu<T>::ClearFiltered()
 {
 	itsFilteredOptions.clear();
 	itsFilteredRealPositions.clear();
@@ -506,7 +506,7 @@ template <class T> void NCurses::Menu<T>::ClearFiltered()
 	itsOptionsPtr = &itsOptions;
 }
 
-template <class T> void NCurses::Menu<T>::Clear(bool clrscr)
+template <typename T> void NCurses::Menu<T>::Clear(bool clrscr)
 {
 	for (option_iterator it = itsOptions.begin(); it != itsOptions.end(); it++)
 		delete *it;
@@ -518,7 +518,7 @@ template <class T> void NCurses::Menu<T>::Clear(bool clrscr)
 		Window::Clear();
 }
 
-template <class T> bool NCurses::Menu<T>::isBold(int id)
+template <typename T> bool NCurses::Menu<T>::isBold(int id)
 {
 	id = id == -1 ? itsHighlight : id;
 	if (!itsOptionsPtr->at(id))
@@ -526,21 +526,21 @@ template <class T> bool NCurses::Menu<T>::isBold(int id)
 	return (*itsOptionsPtr)[id]->isBold;
 }
 
-template <class T> void NCurses::Menu<T>::Select(int id, bool value)
+template <typename T> void NCurses::Menu<T>::Select(int id, bool value)
 {
 	if (!itsOptionsPtr->at(id))
 		return;
 	(*itsOptionsPtr)[id]->isSelected = value;
 }
 
-template <class T> void NCurses::Menu<T>::Static(int id, bool value)
+template <typename T> void NCurses::Menu<T>::Static(int id, bool value)
 {
 	if (!itsOptionsPtr->at(id))
 		return;
 	(*itsOptionsPtr)[id]->isStatic = value;
 }
 
-template <class T> bool NCurses::Menu<T>::isSelected(int id) const
+template <typename T> bool NCurses::Menu<T>::isSelected(int id) const
 {
 	id = id == -1 ? itsHighlight : id;
 	if (!itsOptionsPtr->at(id))
@@ -548,7 +548,7 @@ template <class T> bool NCurses::Menu<T>::isSelected(int id) const
 	return (*itsOptionsPtr)[id]->isSelected;
 }
 
-template <class T> bool NCurses::Menu<T>::isStatic(int id) const
+template <typename T> bool NCurses::Menu<T>::isStatic(int id) const
 {
 	id = id == -1 ? itsHighlight : id;
 	if (!itsOptionsPtr->at(id))
@@ -556,7 +556,7 @@ template <class T> bool NCurses::Menu<T>::isStatic(int id) const
 	return (*itsOptionsPtr)[id]->isStatic;
 }
 
-template <class T> bool NCurses::Menu<T>::hasSelected() const
+template <typename T> bool NCurses::Menu<T>::hasSelected() const
 {
 	for (option_const_iterator it = itsOptionsPtr->begin(); it != itsOptionsPtr->end(); it++)
 		if (*it && (*it)->isSelected)
@@ -564,30 +564,30 @@ template <class T> bool NCurses::Menu<T>::hasSelected() const
 	return false;
 }
 
-template <class T> void NCurses::Menu<T>::GetSelected(std::vector<size_t> &v) const
+template <typename T> void NCurses::Menu<T>::GetSelected(std::vector<size_t> &v) const
 {
 	for (size_t i = 0; i < itsOptionsPtr->size(); i++)
 		if ((*itsOptionsPtr)[i]->isSelected)
 			v.push_back(i);
 }
 
-template <class T> void NCurses::Menu<T>::Highlight(size_t pos)
+template <typename T> void NCurses::Menu<T>::Highlight(size_t pos)
 {
 	itsHighlight = pos;
 	itsBeginning = pos-itsHeight/2;
 }
 
-template <class T> size_t NCurses::Menu<T>::Size() const
+template <typename T> size_t NCurses::Menu<T>::Size() const
 {
 	return itsOptionsPtr->size();
 }
 
-template <class T> size_t NCurses::Menu<T>::Choice() const
+template <typename T> size_t NCurses::Menu<T>::Choice() const
 {
 	return itsHighlight;
 }
 
-template <class T> size_t NCurses::Menu<T>::RealChoice() const
+template <typename T> size_t NCurses::Menu<T>::RealChoice() const
 {
 	size_t result = 0;
 	for (option_const_iterator it = itsOptionsPtr->begin(); it != itsOptionsPtr->begin()+itsHighlight; it++)
@@ -596,7 +596,7 @@ template <class T> size_t NCurses::Menu<T>::RealChoice() const
 	return result;
 }
 
-template <class T> bool NCurses::Menu<T>::Search(const std::string &constraint, size_t beginning, int flags)
+template <typename T> bool NCurses::Menu<T>::Search(const std::string &constraint, size_t beginning, int flags)
 {
 	itsFound.clear();
 	itsSearchConstraint.clear();
@@ -616,7 +616,7 @@ template <class T> bool NCurses::Menu<T>::Search(const std::string &constraint, 
 	return !itsFound.empty();
 }
 
-template <class T> void NCurses::Menu<T>::NextFound(bool wrap)
+template <typename T> void NCurses::Menu<T>::NextFound(bool wrap)
 {
 	if (itsFound.empty())
 		return;
@@ -627,7 +627,7 @@ template <class T> void NCurses::Menu<T>::NextFound(bool wrap)
 		Highlight(*itsFound.begin());
 }
 
-template <class T> void NCurses::Menu<T>::PrevFound(bool wrap)
+template <typename T> void NCurses::Menu<T>::PrevFound(bool wrap)
 {
 	if (itsFound.empty())
 		return;
@@ -638,7 +638,7 @@ template <class T> void NCurses::Menu<T>::PrevFound(bool wrap)
 		Highlight(*itsFound.rbegin());
 }
 
-template <class T> void NCurses::Menu<T>::ApplyFilter(const std::string &filter, size_t beginning, int flags)
+template <typename T> void NCurses::Menu<T>::ApplyFilter(const std::string &filter, size_t beginning, int flags)
 {
 	if (filter == itsFilter)
 		return;
@@ -670,12 +670,12 @@ template <class T> void NCurses::Menu<T>::ApplyFilter(const std::string &filter,
 		Window::Clear();
 }
 
-template <class T> const std::string &NCurses::Menu<T>::GetFilter()
+template <typename T> const std::string &NCurses::Menu<T>::GetFilter()
 {
 	return itsFilter;
 }
 
-template <class T> std::string NCurses::Menu<T>::GetOption(size_t pos)
+template <typename T> std::string NCurses::Menu<T>::GetOption(size_t pos)
 {
 	if (itsOptionsPtr->at(pos) && itsGetStringFunction)
 		return itsGetStringFunction((*itsOptionsPtr)[pos]->Item, itsGetStringFunctionUserData);
@@ -683,63 +683,63 @@ template <class T> std::string NCurses::Menu<T>::GetOption(size_t pos)
 		return "";
 }
 
-template <class T> T &NCurses::Menu<T>::Back()
+template <typename T> T &NCurses::Menu<T>::Back()
 {
 	if (!itsOptionsPtr->back())
 		throw InvalidItem();
 	return itsOptionsPtr->back()->Item;
 }
 
-template <class T> const T &NCurses::Menu<T>::Back() const
+template <typename T> const T &NCurses::Menu<T>::Back() const
 {
 	if (!itsOptionsPtr->back())
 		throw InvalidItem();
 	return itsOptionsPtr->back()->Item;
 }
 
-template <class T> T &NCurses::Menu<T>::Current()
+template <typename T> T &NCurses::Menu<T>::Current()
 {
 	if (!itsOptionsPtr->at(itsHighlight))
 		throw InvalidItem();
 	return (*itsOptionsPtr)[itsHighlight]->Item;
 }
 
-template <class T> const T &NCurses::Menu<T>::Current() const
+template <typename T> const T &NCurses::Menu<T>::Current() const
 {
 	if (!itsOptionsPtr->at(itsHighlight))
 		throw InvalidItem();
 	return (*itsOptionsPtr)[itsHighlight]->Item;
 }
 
-template <class T> T &NCurses::Menu<T>::at(size_t i)
+template <typename T> T &NCurses::Menu<T>::at(size_t i)
 {
 	if (!itsOptionsPtr->at(i))
 		throw InvalidItem();
 	return (*itsOptionsPtr)[i]->Item;
 }
 
-template <class T> const T &NCurses::Menu<T>::at(size_t i) const
+template <typename T> const T &NCurses::Menu<T>::at(size_t i) const
 {
 	if (!itsOptions->at(i))
 		throw InvalidItem();
 	return (*itsOptionsPtr)[i]->Item;
 }
 
-template <class T> const T &NCurses::Menu<T>::operator[](size_t i) const
+template <typename T> const T &NCurses::Menu<T>::operator[](size_t i) const
 {
 	if (!(*itsOptionsPtr)[i])
 		throw InvalidItem();
 	return (*itsOptionsPtr)[i]->Item;
 }
 
-template <class T> T &NCurses::Menu<T>::operator[](size_t i)
+template <typename T> T &NCurses::Menu<T>::operator[](size_t i)
 {
 	if (!(*itsOptionsPtr)[i])
 		throw InvalidItem();
 	return (*itsOptionsPtr)[i]->Item;
 }
 
-template <class T> NCurses::Menu<T> *NCurses::Menu<T>::EmptyClone() const
+template <typename T> NCurses::Menu<T> *NCurses::Menu<T>::EmptyClone() const
 {
 	return new NCurses::Menu<T>(GetStartX(), GetStartY(), GetWidth(), GetHeight(), itsTitle, itsBaseColor, itsBorder);
 }
