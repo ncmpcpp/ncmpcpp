@@ -1,0 +1,274 @@
+.TH "ncmpcpp" "1"
+.SH "NAME"
+ncmpcpp \- An ncurses Music Player Daemon (MPD) client.
+.SH "SYNOPSIS"
+.B ncmpcpp
+[options]
+.SH "DESCRIPTION"
+ncmpcpp is an ncurses client for MPD (Music Player Daemon), inspired by ncmpc.
+
+Read more about MPD at http://www.musicpd.org
+.SH "OPTIONS"
+.B \-?, \-\-help
+Display help.
+.TP
+.B \-v, \-\-version
+Display version information.
+.TP
+.B play
+Start playing and exit.
+.TP
+.B pause
+Pause and exit.
+.TP
+.B toggle
+Toggle playing and exit.
+.TP
+.B stop
+Stop playing and exit.
+.TP
+.B next
+Switch to next song and exit.
+.TP
+.B prev
+Switch to previous song and exit.
+.TP
+.B volume [+-]<number>
+Raise/lower volume by given number of percents and exit.
+.TP
+.SH "CONFIGURATION"
+When ncmpcpp starts, it tries to read user's settings from the ~/.ncmpcpp/config file. If no user's configuration is found, ncmpcpp uses its default configuration. An example configuration file containing all default values is provided with ncmpcpp and can be found usually in /usr/share/doc/ncmpcpp (exact location may depend on used distribution/OS/configure prefix).
+
+Note: Each config option value must be enclosed in quotation marks (var = "example").
+
+Note: COLOR has to be the name (not a number) of one of colors 1-8 from SONG FORMAT section.
+
+Supported configuration options:
+.TP 
+.B mpd_host = HOST
+Connect to MPD running on specified host/unix socket.
+.TP 
+.B mpd_music_dir = PATH
+Search for files in specified directory. This is needed for tag editor to work.
+.TP 
+.B mpd_port = PORT
+Connect to MPD on the specified port.
+.TP 
+.B mpd_connection_timeout = SECONDS
+Set connection timeout to MPD to given value.
+.TP 
+.B mpd_crossfade_time = SECONDS
+Default number of seconds to crossfade, if enabled by ncmpcpp.
+.TP
+.B seek_time = SECONDS
+Base seek time to begin with.
+.TP 
+.B playlist_disable_highlight_delay = SECONDS
+Delay for highlighting playlist since the last key was pressed. If set to 0, highlighting never fades away.
+.TP 
+.B message_delay_time = SECONDS
+Delay for displayed messages to remain visible.
+.TP
+.B song_list_format
+Format for songs' list.
+.TP
+.B song_columns_list_format
+Format for songs' list displayed in columns.
+.TP
+.B song_status_format
+Song's format for statusbar.
+.TP
+.B song_library_format
+Format for songs in Media library.
+.TP 
+.B tag_editor_album_format
+Format for albums' list in Tag editor.
+.TP 
+.B song_window_title_format
+Song format for window title.
+.TP 
+.B external_editor = PATH
+Path to external editor used to edit lyrics.
+.TP
+.B browser_playlist_prefix = TEXT
+Prefix for playlists in Browser.
+.TP
+.B default_tag_editor_pattern = TEXT
+Deafult pattern used by Tag editor's parser.
+.TP 
+.B selected_item_prefix = TEXT
+Prefix for selected items.
+.TP 
+.B selected_item_suffix = TEXT
+Suffix for selected items.
+.TP 
+.B color1 = COLOR
+One of colors used in Song info, Tiny tag editor and Search engine.
+.TP 
+.B color2 = COLOR
+One of colors used in Song info, Tiny tag editor and Search engine.
+.TP 
+.B colors_enabled = yes/no
+No need to describe it, huh?
+.TP 
+.B fancy_scrolling = yes/no
+If enabled, content of other columns will be updated immediately while scrolling, otherwise only after you stop scrolling.
+.TP 
+.B playlist_show_remaining_time = yes/no
+If enabled, time remaining to end of playlist will be shown after playlist's statistics.
+.TP 
+.B playlist_display_mode = classic/columns
+Default display mode for Playlist.
+.TP 
+.B browser_display_mode = classic/columns
+Default display mode for Browser.
+.TP 
+.B search_engine_display_mode = classic/columns
+Default display mode for Search engine.
+.TP 
+.B header_visibility = yes/no
+If enabled, header window will be displayed, otherwise hidden.
+.TP 
+.B statusbar_visibility = yes/no
+If enabled, statusbar will be displayed, otherwise hidden.
+.TP 
+.B autocenter_mode = yes/no
+Default state for autocenter mode at start.
+.TP 
+.B repeat_one_mode = yes/no
+Default state for "repeat one" mode at start.
+.TP 
+.B default_find_mode = wrapped/normal
+If set to "wrapped", going from last found position to next will take you to the first one (same goes for the first position and going to previous one), otherwise no actions will be performed.
+.TP 
+.B default_space_mode = select/add
+If set to "select", space will select items instead of adding them to playlist (although selecting by space is default and the only one action for space in Playlist).
+.TP 
+.B default_tag_editor_left_col = albums/dirs
+If set to "albums", tag editor will display list of all albums from database, otherwise it'll allow you to browse the database.
+.TP 
+.B incremental_seeking = yes/no
+If enabled, seek time will increment by one each second of seeking.
+.TP 
+.B follow_now_playing_lyrics = yes/no
+If enabled, lyrics will be switched at song's change to currently playing one's (Note: this works only if you are viewing lyrics of item from Playlist).
+.TP
+.B ncmpc_like_songs_adding = yes/no
+If enabled, pressing space on item, which is already in playlist will remove it, otherwise add it again.
+.TP 
+.B default_place_to_search_in = database/playlist
+If set to "playlist", Search engine will perform searching in current MPD playlist rather than in music database.
+.TP 
+.B display_screens_numbers_on_start = yes/no
+If enabled, screens' names and their keybindings will be shown in header window until key is pressed, otherwise they won't be displayed at all.
+.TP 
+.B clock_display_seconds = yes/no
+If enabled, clock will display time in format hh:mm:ss, otherwise hh:mm.
+.TP 
+.B ignore_leading_the = yes/no
+If enabled, word "the" at the beginning of tags/filenames will be ignored while sorting items.
+.TP 
+.B use_console_editor = yes/no
+If your external editor is console application, you need to enable it.
+.TP 
+.B block_search_constraints_change_if_items_found = yes/no
+If enabled, fields in Search engine above "Reset" button will be blocked after succesful searching, otherwise they won't.
+.TP 
+.B enable_window_title = yes/no
+If enabled, ncmpcpp will override current window title with its own one.
+.TP
+.B regular_expressions = basic/extended
+Type of currently used regular expressions.
+.TP 
+.B lyrics_database = NUMBER
+Number of lyrics database in use. Currently supported DBs are:
+ 1 - lyricwiki.org
+ 2 - lyricsplugin.com
+.TP
+.B media_library_left_column = a/y/g/c/p
+Default tag type for left column in media library. Legend for possible letters is in  SONG FORMAT section.
+.TP 
+.B empty_tag_color = COLOR
+Color of empty tag marker.
+.TP 
+.B header_window_color = COLOR
+Color of header window.
+.TP 
+.B volume_color = COLOR
+Color of volume state.
+.TP 
+.B state_line_color = COLOR
+Color of lines separating header and statusbar from main window.
+.TP 
+.B state_flags_color = COLOR
+Color of MPD status flags.
+.TP 
+.B main_window_color = COLOR
+Color of main window.
+.TP 
+.B main_window_highlight_color = COLOR
+Color of main window's highlight.
+.TP 
+.B progressbar_color = COLOR
+Color of progressbar.
+.TP 
+.B statusbar_color = COLOR
+Color of statusbar.
+.TP 
+.B active_column_color = COLOR
+Color of active column's highlight.
+.TP 
+.B active_window_border = COLOR
+Color of active window's border.
+.TP 
+.SH "KEYS"
+When ncmpcpp starts, it tries to read user's keybindings from ~/.ncmpcpp/keys file. If no user's keybindings is found, ncmpcpp uses its default keybindings. An example keybindings file containing all default values is provided with ncmpcpp and can be found usually in /usr/share/doc/ncmpcpp (exact location may depend on used distribution/OS/configure prefix).
+
+You can view current ncmpcpp's keybindings by pressing '1' (Help).
+.SH "SONG FORMAT"
+
+For song format you can use:
+
+ %l - length
+ %f - filename
+ %F - full path
+ %a - artist
+ %t - title
+ %b - album
+ %y - year
+ %n - track number
+ %g - genre
+ %c - composer
+ %p - performer
+ %d - disc
+ %C - comment
+ %r - begin right alignment
+
+You can also put them in { } and then they will be displayed only if all requested values are available and/or define alternate value with { }|{ } e.g. {%a - %t}|{%f} will check if artist and title tags are available and if they are, display them. Otherwise it'll display filename.
+
+Text can have different color than the main window, e.g. if you want length to be green, write $3%l$9.
+
+Available values for colors:
+
+ - 0 - default window color
+ - 1 - black
+ - 2 - red
+ - 3 - green
+ - 4 - yellow
+ - 5 - blue
+ - 6 - magenta
+ - 7 - cyan
+ - 8 - white
+ - 9 - end of current color
+
+\fBNote\fR: colors can be nested, so if you write $2some$5text$9, it'll disable only usage of blue color and make red the current one.
+
+.SH "BUGS"
+Report bugs on http://www.musicpd.org/mantis/
+.SH "NOTE"
+Since MPD uses UTF\-8, ncmpcpp needs to convert characters to the charset used by the local system. If you get character conversion errors while you are running ncmpcpp, you probably need to set up your locale. This is done by setting LANG and LC_ALL/LC_CTYPE enviroment variables (LC_CTYPE only affects character handling).
+.SH "HOMEPAGE"
+-> http://unkart.ovh.org/ncmpcpp
+
+.SH "SEE ALSO"
+mpc(1), mpd(1)
