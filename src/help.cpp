@@ -197,7 +197,7 @@ void Help::GetKeybindings()
 	*w << DisplayKeys(Key.Crop) << "Clear playlist but hold currently playing/selected items\n";
 	*w << DisplayKeys(Key.MvSongUp) << "Move item(s) up\n";
 	*w << DisplayKeys(Key.MvSongDown) << "Move item(s) down\n";
-	*w << DisplayKeys(Key.MoveTo) << "Move item(s) to given position\n";
+	*w << DisplayKeys(Key.MoveTo) << "Move selected item(s) to cursor position\n";
 	*w << DisplayKeys(Key.Add) << "Add url/file/directory to playlist\n";
 	*w << DisplayKeys(Key.SavePlaylist) << "Save playlist\n";
 	*w << DisplayKeys(Key.SortPlaylist) << "Sort playlist\n";

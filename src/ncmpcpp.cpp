@@ -835,57 +835,40 @@ int main(int argc, char *argv[])
 				ShowMessage("%s", MPD::Message::FunctionDisabledFilteringEnabled);
 				continue;
 			}
-			
-			LockStatusbar();
-			Statusbar() << "Move item(s) to given position: ";
-			string strpos = wFooter->GetString(10);
-			UnlockStatusbar();
-			
-			if (strpos.empty())
+			if (!myPlaylist->Main()->hasSelected())
+			{
+				ShowMessage("No selected items to move!");
 				continue;
-			
-			int pos = StrToInt(strpos);
-			
-			if (pos < 0)
-				continue;
-			
+			}
 			Playlist::BlockUpdate = 1;
-			if (myPlaylist->Main()->hasSelected())
+			size_t pos = myPlaylist->Main()->Choice();
+			 // if cursor is at the last item, break convention and move at the end of playlist
+			if (pos == myPlaylist->Main()->Size()-1)
+				pos++;
+			vector<size_t> list;
+			myPlaylist->Main()->GetSelected(list);
+			if (pos >= list.front() && pos <= list.back())
+				continue;
+			int diff = pos-list.front();
+			if (diff > 0)
 			{
-				vector<size_t> list;
-				myPlaylist->Main()->GetSelected(list);
-				if (pos+list.back()-list.front() > myPlaylist->Main()->Size())
-					pos = myPlaylist->Main()->Size()+list.front()-list.back()-1;
-				int diff = pos-list.front();
-				if (diff > 0)
+				diff -= list.size();
+				for (vector<size_t>::reverse_iterator it = list.rbegin(); it != list.rend(); it++)
 				{
-					for (vector<size_t>::reverse_iterator it = list.rbegin(); it != list.rend(); it++)
-					{
-						Mpd->QueueMove(*it, *it+diff);
-						myPlaylist->Main()->Move(*it, *it+diff);
-					}
-				}
-				else if (diff < 0)
-				{
-					for (vector<size_t>::const_iterator it = list.begin(); it != list.end(); it++)
-					{
-						Mpd->QueueMove(*it, *it+diff);
-						myPlaylist->Main()->Move(*it, *it+diff);
-					}
-				}
-				myPlaylist->Main()->Highlight(list.front()+diff);
-				Mpd->CommitQueue();
-			}
-			else
-			{
-				int current_pos = myPlaylist->Main()->Choice();
-				int diff = pos-current_pos;
-				if (diff)
-				{
-					Mpd->Move(current_pos, current_pos+diff);
-					myPlaylist->Main()->Highlight(current_pos+diff);
+					Mpd->QueueMove(*it, *it+diff);
+					myPlaylist->Main()->Move(*it, *it+diff);
 				}
 			}
+			else if (diff < 0)
+			{
+				for (vector<size_t>::const_iterator it = list.begin(); it != list.end(); it++)
+				{
+					Mpd->QueueMove(*it, *it+diff);
+					myPlaylist->Main()->Move(*it, *it+diff);
+				}
+			}
+			myPlaylist->Main()->Highlight(list.front()+diff);
+			Mpd->CommitQueue();
 			myPlaylist->FixPositions();
 		}
 		else if (Keypressed(input, Key.Add))
