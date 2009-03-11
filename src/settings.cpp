@@ -136,6 +136,7 @@ void DefaultKeys(ncmpcpp_keys &keys)
 	keys.Crop[0] = 'C';
 	keys.MvSongUp[0] = 'm';
 	keys.MvSongDown[0] = 'n';
+	keys.MoveTo[0] = 'M';
 	keys.Add[0] = 'a';
 	keys.SavePlaylist[0] = 'S';
 	keys.GoToNowPlaying[0] = 'o';
@@ -202,6 +203,7 @@ void DefaultKeys(ncmpcpp_keys &keys)
 	keys.Crop[1] = null_key;
 	keys.MvSongUp[1] = null_key;
 	keys.MvSongDown[1] = null_key;
+	keys.MoveTo[1] = null_key;
 	keys.Add[1] = null_key;
 	keys.SavePlaylist[1] = null_key;
 	keys.GoToNowPlaying[1] = null_key;
@@ -400,6 +402,8 @@ void ReadKeys(ncmpcpp_keys &keys)
 				GetKeys(key, keys.MvSongUp);
 			else if (key.find("key_move_song_down ") != string::npos)
 				GetKeys(key, keys.MvSongDown);
+			else if (key.find("key_move_to ") != string::npos)
+				GetKeys(key, keys.MoveTo);
 			else if (key.find("key_add ") != string::npos)
 				GetKeys(key, keys.Add);
 			else if (key.find("key_save_playlist ") != string::npos)

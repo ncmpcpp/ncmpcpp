@@ -120,6 +120,8 @@
 #
 #key_move_song_down = 'n'
 #
+#key_move_to = 'M'
+#
 #key_add = 'a'
 #
 #key_save_playlist = 'S'

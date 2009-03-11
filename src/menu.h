@@ -116,7 +116,8 @@ namespace NCurses
 			void InsertSeparator(size_t pos);
 			void DeleteOption(size_t pos);
 			void IntoSeparator(size_t pos);
-			void Swap(size_t, size_t);
+			void Swap(size_t one, size_t two);
+			void Move(size_t from, size_t to);
 			
 			bool isBold(int id = -1);
 			void BoldOption(int, bool);
@@ -317,10 +318,24 @@ template <typename T> void NCurses::Menu<T>::BoldOption(int index, bool bold)
 	itsOptions[index]->isBold = bold;
 }
 
-template <typename T>
-void NCurses::Menu<T>::Swap(size_t one, size_t two)
+template <typename T> void NCurses::Menu<T>::Swap(size_t one, size_t two)
 {
 	std::swap(itsOptions.at(one), itsOptions.at(two));
+}
+
+template <typename T> void NCurses::Menu<T>::Move(size_t from, size_t to)
+{
+	int diff = from-to;
+	if (diff > 0)
+	{
+		for (size_t i = from; i > to; i--)
+			std::swap(itsOptions.at(i), itsOptions.at(i-1));
+	}
+	else if (diff < 0)
+	{
+		for (size_t i = from; i < to; i++)
+			std::swap(itsOptions.at(i), itsOptions.at(i+1));
+	}
 }
 
 template <typename T> void NCurses::Menu<T>::Refresh()

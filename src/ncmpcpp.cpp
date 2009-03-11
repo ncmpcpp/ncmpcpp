@@ -828,6 +828,66 @@ int main(int argc, char *argv[])
 				myPlaylistEditor->Content->SetTimeout(ncmpcpp_window_timeout);
 			}
 		}
+		else if (Keypressed(input, Key.MoveTo) && myScreen == myPlaylist)
+		{
+			if (myPlaylist->Main()->isFiltered())
+			{
+				ShowMessage("%s", MPD::Message::FunctionDisabledFilteringEnabled);
+				continue;
+			}
+			
+			LockStatusbar();
+			Statusbar() << "Move item(s) to given position: ";
+			string strpos = wFooter->GetString(10);
+			UnlockStatusbar();
+			
+			if (strpos.empty())
+				continue;
+			
+			int pos = StrToInt(strpos);
+			
+			if (pos < 0)
+				continue;
+			
+			Playlist::BlockUpdate = 1;
+			if (myPlaylist->Main()->hasSelected())
+			{
+				vector<size_t> list;
+				myPlaylist->Main()->GetSelected(list);
+				if (pos+list.back()-list.front() > myPlaylist->Main()->Size())
+					pos = myPlaylist->Main()->Size()+list.front()-list.back()-1;
+				int diff = pos-list.front();
+				if (diff > 0)
+				{
+					for (vector<size_t>::reverse_iterator it = list.rbegin(); it != list.rend(); it++)
+					{
+						Mpd->QueueMove(*it, *it+diff);
+						myPlaylist->Main()->Move(*it, *it+diff);
+					}
+				}
+				else if (diff < 0)
+				{
+					for (vector<size_t>::const_iterator it = list.begin(); it != list.end(); it++)
+					{
+						Mpd->QueueMove(*it, *it+diff);
+						myPlaylist->Main()->Move(*it, *it+diff);
+					}
+				}
+				myPlaylist->Main()->Highlight(list.front()+diff);
+				Mpd->CommitQueue();
+			}
+			else
+			{
+				int current_pos = myPlaylist->Main()->Choice();
+				int diff = pos-current_pos;
+				if (diff)
+				{
+					Mpd->Move(current_pos, current_pos+diff);
+					myPlaylist->Main()->Highlight(current_pos+diff);
+				}
+			}
+			myPlaylist->FixPositions();
+		}
 		else if (Keypressed(input, Key.Add))
 		{
 			LockStatusbar();

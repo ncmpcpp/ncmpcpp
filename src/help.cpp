@@ -195,8 +195,9 @@ void Help::GetKeybindings()
 	*w << DisplayKeys(Key.Delete) << "Delete item/selected items from playlist\n";
 	*w << DisplayKeys(Key.Clear) << "Clear playlist\n";
 	*w << DisplayKeys(Key.Crop) << "Clear playlist but hold currently playing/selected items\n";
-	*w << DisplayKeys(Key.MvSongUp) << "Move item/group of items up\n";
-	*w << DisplayKeys(Key.MvSongDown) << "Move item/group of items down\n";
+	*w << DisplayKeys(Key.MvSongUp) << "Move item(s) up\n";
+	*w << DisplayKeys(Key.MvSongDown) << "Move item(s) down\n";
+	*w << DisplayKeys(Key.MoveTo) << "Move item(s) to given position\n";
 	*w << DisplayKeys(Key.Add) << "Add url/file/directory to playlist\n";
 	*w << DisplayKeys(Key.SavePlaylist) << "Save playlist\n";
 	*w << DisplayKeys(Key.SortPlaylist) << "Sort playlist\n";
@@ -235,8 +236,8 @@ void Help::GetKeybindings()
 #	ifndef HAVE_TAGLIB_H
 	*w << DisplayKeys(Key.EditTags) << "Edit playlist's name\n";
 #	endif // ! HAVE_TAGLIB_H
-	*w << DisplayKeys(Key.MvSongUp) << "Move item/group of items up\n";
-	*w << DisplayKeys(Key.MvSongDown) << "Move item/group of items down\n";
+	*w << DisplayKeys(Key.MvSongUp) << "Move item(s) up\n";
+	*w << DisplayKeys(Key.MvSongDown) << "Move item(s) down\n";
 	
 	*w << "\n\n   " << fmtBold << "Keys - Lyrics\n -----------------------------------------\n" << fmtBoldEnd;
 	*w << DisplayKeys(Key.Space) << "Switch for following lyrics of now playing song\n";
