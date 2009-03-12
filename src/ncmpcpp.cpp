@@ -852,23 +852,25 @@ int main(int argc, char *argv[])
 			int diff = pos-list.front();
 			if (diff > 0)
 			{
-				diff -= list.size();
-				for (vector<size_t>::reverse_iterator it = list.rbegin(); it != list.rend(); it++)
+				pos -= list.size();
+				size_t i = list.size()-1;
+				for (vector<size_t>::reverse_iterator it = list.rbegin(); it != list.rend(); it++, i--)
 				{
-					Mpd->QueueMove(*it, *it+diff);
-					myPlaylist->Main()->Move(*it, *it+diff);
+					Mpd->QueueMove(*it, pos+i);
+					myPlaylist->Main()->Move(*it, pos+i);
 				}
 			}
 			else if (diff < 0)
 			{
-				for (vector<size_t>::const_iterator it = list.begin(); it != list.end(); it++)
+				size_t i = 0;
+				for (vector<size_t>::const_iterator it = list.begin(); it != list.end(); it++, i++)
 				{
-					Mpd->QueueMove(*it, *it+diff);
-					myPlaylist->Main()->Move(*it, *it+diff);
+					Mpd->QueueMove(*it, pos+i);
+					myPlaylist->Main()->Move(*it, pos+i);
 				}
 			}
-			myPlaylist->Main()->Highlight(list.front()+diff);
 			Mpd->CommitQueue();
+			myPlaylist->Main()->Highlight(pos);
 			myPlaylist->FixPositions();
 		}
 		else if (Keypressed(input, Key.Add))
