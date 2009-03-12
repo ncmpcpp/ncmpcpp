@@ -90,6 +90,7 @@ void Playlist::SwitchTo()
 	
 	myScreen = this;
 	w->Window::Clear();
+	EnableHighlighting();
 	RedrawHeader = 1;
 }
 
@@ -272,6 +273,12 @@ void Playlist::FixPositions(size_t beginning)
 	}
 	if (was_filtered)
 		w->ShowFiltered();
+}
+
+void Playlist::EnableHighlighting()
+{
+	w->Highlighting(1);
+	UpdateTimer();
 }
 
 bool Playlist::Sorting(MPD::Song *a, MPD::Song *b)

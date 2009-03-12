@@ -103,11 +103,13 @@ void UnlockStatusbar()
 
 void TraceMpdStatus()
 {
+	static time_t now;
+	
 	if (Mpd->Connected())
 		Mpd->UpdateStatus();
-	time_t now = time(NULL);
 	
-	if (myScreen == myPlaylist && now == Timer+Config.playlist_disable_highlight_delay)
+	time(&now);
+	if (myScreen == myPlaylist && now == myPlaylist->Timer()+Config.playlist_disable_highlight_delay)
 		myPlaylist->Main()->Highlighting(!Config.playlist_disable_highlight_delay);
 	
 	if (lock_statusbar_delay > 0)

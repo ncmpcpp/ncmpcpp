@@ -38,8 +38,6 @@ namespace Global
 	extern size_t MainStartY;
 	extern size_t MainHeight;
 	
-	extern time_t Timer;
-	
 #	ifdef HAVE_CURL_CURL_H
 	extern pthread_mutex_t CurlLock;
 #	endif

@@ -58,6 +58,10 @@ class Playlist : public Screen< Menu<MPD::Song> >
 		void Sort();
 		void FixPositions(size_t = 0);
 		
+		void EnableHighlighting();
+		void UpdateTimer() { time(&itsTimer); }
+		time_t Timer() const { return itsTimer; }
+		
 		static std::string SongToString(const MPD::Song &, void *);
 		static std::string SongInColumnsToString(const MPD::Song &, void *);
 		
@@ -79,6 +83,8 @@ class Playlist : public Screen< Menu<MPD::Song> >
 		size_t itsTotalLength;
 		size_t itsRemainingTime;
 		size_t itsScrollBegin;
+		
+		time_t itsTimer;
 		
 		static void ShowTime(std::ostringstream &, size_t);
 		static bool Sorting(MPD::Song *a, MPD::Song *b);
