@@ -190,54 +190,38 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 			myPlaylist->Main()->ShowAll();
 			SongList list;
 			size_t playlist_length = Mpd->GetPlaylistLength();
-			if (playlist_length != myPlaylist->Main()->Size())
+			
+			if (playlist_length < myPlaylist->Main()->Size())
 			{
-				if (playlist_length < myPlaylist->Main()->Size())
-				{
-					myPlaylist->Main()->Clear(playlist_length < myPlaylist->Main()->GetHeight() && myScreen == myPlaylist);
-					Mpd->GetPlaylistChanges(-1, list);
-				}
-				else
-					Mpd->GetPlaylistChanges(Mpd->GetOldPlaylistID(), list);
-				
-				myPlaylist->Main()->Reserve(playlist_length);
-				for (SongList::const_iterator it = list.begin(); it != list.end(); it++)
-				{
-					int pos = (*it)->GetPosition();
-					if (pos < int(myPlaylist->Main()->Size()))
-					{
-						 // if song's already in playlist, replace it with a new one
-						myPlaylist->Main()->at(pos) = **it;
-					}
-					else
-					{
-						// otherwise just add it to playlist
-						myPlaylist->Main()->AddOption(**it, myPlaylist->NowPlaying == pos);
-					}
-					myPlaylist->Main()->at(pos).CopyPtr(0);
-					(*it)->NullMe();
-				}
-				
-				if (myScreen == myPlaylist)
-				{
-					if (!playlist_length || myPlaylist->Main()->Size() < myPlaylist->Main()->GetHeight())
-						myPlaylist->Main()->Window::Clear();
-					myPlaylist->Main()->Refresh();
-				}
+				myPlaylist->Main()->Clear(playlist_length < myPlaylist->Main()->GetHeight() && myScreen == myPlaylist);
+				Mpd->GetPlaylistChanges(-1, list);
 			}
 			else
+				Mpd->GetPlaylistChanges(Mpd->GetOldPlaylistID(), list);
+			
+			myPlaylist->Main()->Reserve(playlist_length);
+			for (SongList::const_iterator it = list.begin(); it != list.end(); it++)
 			{
-				Mpd->GetPlaylistChanges(-1, list);
-				
-				for (size_t i = 0; i < myPlaylist->Main()->Size(); i++)
+				int pos = (*it)->GetPosition();
+				if (pos < int(myPlaylist->Main()->Size()))
 				{
-					if (*list[i] != myPlaylist->Main()->at(i))
-					{
-						myPlaylist->Main()->at(i) = *list[i];
-						myPlaylist->Main()->at(i).CopyPtr(0);
-						list[i]->NullMe();
-					}
+					// if song's already in playlist, replace it with a new one
+					myPlaylist->Main()->at(pos) = **it;
 				}
+				else
+				{
+					// otherwise just add it to playlist
+					myPlaylist->Main()->AddOption(**it, myPlaylist->NowPlaying == pos);
+				}
+				myPlaylist->Main()->at(pos).CopyPtr(0);
+				(*it)->NullMe();
+			}
+			
+			if (myScreen == myPlaylist)
+			{
+				if (!playlist_length || myPlaylist->Main()->Size() < myPlaylist->Main()->GetHeight())
+					myPlaylist->Main()->Window::Clear();
+				myPlaylist->Main()->Refresh();
 			}
 			if (was_filtered)
 				myPlaylist->ApplyFilter(myPlaylist->Main()->GetFilter());
