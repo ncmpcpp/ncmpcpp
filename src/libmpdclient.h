@@ -527,7 +527,7 @@ void mpd_sendVolumeCommand(mpd_Connection * connection, int volumeChange);
 
 void mpd_sendCrossfadeCommand(mpd_Connection * connection, int seconds);
 
-void mpd_sendUpdateCommand(mpd_Connection * connection, char * path);
+void mpd_sendUpdateCommand(mpd_Connection * connection, const char * path);
 
 /* returns the update job id, call this after a update command*/
 int mpd_getUpdateId(mpd_Connection * connection);
@@ -605,7 +605,7 @@ char *mpd_getNextTagType(mpd_Connection * connection);
  * List the content, with full metadata, of a stored playlist.
  *
  */
-void mpd_sendListPlaylistInfoCommand(mpd_Connection *connection, char *path);
+void mpd_sendListPlaylistInfoCommand(mpd_Connection *connection, const char *path);
 
 /**
  * @param connection a MpdConnection
@@ -667,10 +667,10 @@ void mpd_startStatsSearch(mpd_Connection *connection);
 void mpd_sendPlaylistClearCommand(mpd_Connection *connection, char *path);
 
 void mpd_sendPlaylistAddCommand(mpd_Connection *connection,
-                                char *playlist, char *path);
+                                const char *playlist, const char *path);
 
 void mpd_sendPlaylistMoveCommand(mpd_Connection *connection,
-                                 char *playlist, int from, int to);
+                                 const char *playlist, int from, int to);
 
 void mpd_sendPlaylistDeleteCommand(mpd_Connection *connection,
                                    const char *playlist, int pos);

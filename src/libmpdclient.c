@@ -1649,7 +1649,7 @@ void mpd_sendSeekIdCommand(mpd_Connection * connection, int id, int time) {
 	free(string);
 }
 
-void mpd_sendUpdateCommand(mpd_Connection * connection, char * path) {
+void mpd_sendUpdateCommand(mpd_Connection * connection, const char * path) {
 	char * sPath = mpd_sanitizeArg(path);
 	int len = strlen("update")+2+strlen(sPath)+3;
 	char *string = malloc(len);
@@ -1997,7 +1997,7 @@ void mpd_commitSearch(mpd_Connection *connection)
  * List the content, with full metadata, of a stored playlist.
  *
  */
-void mpd_sendListPlaylistInfoCommand(mpd_Connection *connection, char *path)
+void mpd_sendListPlaylistInfoCommand(mpd_Connection *connection, const char *path)
 {
 	char *arg = mpd_sanitizeArg(path);
 	int len = strlen("listplaylistinfo")+2+strlen(arg)+3;
@@ -2038,7 +2038,7 @@ void mpd_sendPlaylistClearCommand(mpd_Connection *connection, char *path)
 }
 
 void mpd_sendPlaylistAddCommand(mpd_Connection *connection,
-                                char *playlist, char *path)
+                                const char *playlist, const char *path)
 {
 	char *sPlaylist = mpd_sanitizeArg(playlist);
 	char *sPath = mpd_sanitizeArg(path);
@@ -2052,7 +2052,7 @@ void mpd_sendPlaylistAddCommand(mpd_Connection *connection,
 }
 
 void mpd_sendPlaylistMoveCommand(mpd_Connection *connection,
-                                 char *playlist, int from, int to)
+                                 const char *playlist, int from, int to)
 {
 	char *sPlaylist = mpd_sanitizeArg(playlist);
 	int len = strlen("playlistmove")+

@@ -207,7 +207,7 @@ void Connection::UpdateDirectory(const string &path) const
 {
 	if (isConnected)
 	{
-		mpd_sendUpdateCommand(itsConnection, (char *) path.c_str());
+		mpd_sendUpdateCommand(itsConnection, path.c_str());
 		mpd_finishCommand(itsConnection);
 	}
 }
@@ -348,7 +348,7 @@ void Connection::AddToPlaylist(const string &path, const string &file) const
 {
 	if (isConnected)
 	{
-		mpd_sendPlaylistAddCommand(itsConnection, (char *) path.c_str(), (char *) file.c_str());
+		mpd_sendPlaylistAddCommand(itsConnection, path.c_str(), file.c_str());
 		if (!isCommandsListEnabled)
 			mpd_finishCommand(itsConnection);
 	}
@@ -358,7 +358,7 @@ void Connection::Move(const string &path, int from, int to) const
 {
 	if (isConnected)
 	{
-		mpd_sendPlaylistMoveCommand(itsConnection, (char *) path.c_str(), from, to);
+		mpd_sendPlaylistMoveCommand(itsConnection, path.c_str(), from, to);
 		if (!isCommandsListEnabled)
 			mpd_finishCommand(itsConnection);
 	}
@@ -447,7 +447,7 @@ void Connection::GetPlaylistContent(const string &path, SongList &v) const
 {
 	if (isConnected)
 	{
-		mpd_sendListPlaylistInfoCommand(itsConnection, (char *) path.c_str());
+		mpd_sendListPlaylistInfoCommand(itsConnection, path.c_str());
 		mpd_InfoEntity *item = NULL;
 		while ((item = mpd_getNextInfoEntity(itsConnection)) != NULL)
 		{
