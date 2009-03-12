@@ -52,9 +52,12 @@ template <typename A, typename B> std::string StringPairToString(const std::pair
 	return pair.first;
 }
 
-void UpdateSongList(Menu<MPD::Song> *);
+inline bool Keypressed(int in, const int *key)
+{
+	return in == key[0] || in == key[1];
+}
 
-bool Keypressed(int, const int *);
+void UpdateSongList(Menu<MPD::Song> *);
 
 #ifdef HAVE_TAGLIB_H
 std::string FindSharedDir(Menu<MPD::Song> *);

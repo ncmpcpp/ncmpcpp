@@ -224,11 +224,6 @@ void UpdateSongList(Menu<Song> *menu)
 	menu->Refresh();
 }
 
-bool Keypressed(int in, const int *key)
-{
-	return in == key[0] || in == key[1];
-}
-
 #ifdef HAVE_TAGLIB_H
 string FindSharedDir(Menu<Song> *menu)
 {
