@@ -27,7 +27,6 @@
 #include "playlist.h"
 #include "song.h"
 #include "status.h"
-#include "tag_editor.h"
 
 using namespace Global;
 using std::vector;
@@ -242,6 +241,7 @@ void Playlist::Sort()
 		return;
 	}
 	
+	BlockUpdate = 1;
 	ShowMessage("Sorting playlist...");
 	do
 	{
@@ -251,6 +251,7 @@ void Playlist::Sort()
 			{
 				Mpd->Swap(playlist[i]->GetPosition(), i);
 				std::swap(cmp[playlist[i]->GetPosition()], cmp[i]);
+				w->Swap(playlist[i]->GetPosition(), i);
 			}
 			cmp[i]->SetPosition(i);
 		}
