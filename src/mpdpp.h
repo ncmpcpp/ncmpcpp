@@ -35,7 +35,6 @@ namespace MPD
 		extern const char *FunctionDisabledFilteringEnabled;
 	}
 	
-	enum QueueCommandType { qctAdd, qctAddToPlaylist, qctDelete, qctDeleteID, qctMove, qctPlaylistMove, qctDeleteFromPlaylist };
 	enum ItemType { itDirectory, itSong, itPlaylist };
 	enum PlayerState { psUnknown, psStop, psPlay, psPause };
 
@@ -72,16 +71,6 @@ namespace MPD
 
 	class Connection
 	{
-		struct QueueCommand
-		{
-			QueueCommand() : id(0), id2(0) { }
-			QueueCommandType type;
-			std::string playlist_path;
-			std::string item_path;
-			int id;
-			int id2;
-		};
-		
 		typedef void (*StatusUpdater) (Connection *, StatusChanges, void *);
 		typedef void (*ErrorHandler) (Connection *, int, const char *, void *);
 		
@@ -153,16 +142,11 @@ namespace MPD
 			
 			int AddSong(const std::string &); // returns id of added song
 			int AddSong(const Song &); // returns id of added song
-			void QueueAddSong(const std::string &);
-			void QueueAddSong(const Song &);
-			void QueueAddToPlaylist(const std::string &, const std::string &);
-			void QueueAddToPlaylist(const std::string &, const Song &);
-			void QueueDeleteSong(int);
-			void QueueDeleteSongId(int);
-			void QueueMove(int, int);
-			void QueueMove(const std::string &, int, int);
-			void QueueDeleteFromPlaylist(const std::string &, int);
-			bool CommitQueue();
+			void Delete(int) const;
+			void DeleteID(int) const;
+			void Delete(const std::string &, int) const;
+			void StartCommandsList();
+			void CommitCommandsList();
 			
 			void DeletePlaylist(const std::string &) const;
 			bool SavePlaylist(const std::string &) const;
@@ -187,11 +171,11 @@ namespace MPD
 			void GetDirectories(const std::string &, TagList &) const;
 			
 		private:
-			void ClearQueue();
 			int CheckForErrors();
 			
 			mpd_Connection *itsConnection;
 			bool isConnected;
+			bool isCommandsListEnabled;
 			
 			std::string itsErrorMessage;
 			int itsErrorCode;
@@ -215,7 +199,6 @@ namespace MPD
 			void *itsErrorHandlerUserdata;
 			
 			mpd_TagItems itsSearchedField;
-			std::vector<QueueCommand *> itsQueue;
 	};
 }
 

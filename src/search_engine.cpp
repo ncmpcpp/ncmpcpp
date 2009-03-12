@@ -268,16 +268,17 @@ void SearchEngine::SpacePressed()
 	{
 		Playlist::BlockUpdate = 1;
 		long long hash = w->Current().second->GetHash();
+		Mpd->StartCommandsList();
 		for (size_t i = 0; i < myPlaylist->Main()->Size(); i++)
 		{
 			if (myPlaylist->Main()->at(i).GetHash() == hash)
 			{
-				Mpd->QueueDeleteSong(i);
+				Mpd->Delete(i);
 				myPlaylist->Main()->DeleteOption(i);
 				i--;
 			}
 		}
-		Mpd->CommitQueue();
+		Mpd->CommitCommandsList();
 		w->BoldOption(w->Choice(), 0);
 	}
 	else

@@ -336,9 +336,14 @@ void MediaLibrary::AddToPlaylist(bool add_n_play)
 		Mpd->StartSearch(1);
 		Mpd->AddSearch(Config.media_lib_primary_tag, locale_to_utf_cpy(Artists->Current()));
 		Mpd->CommitSearch(list);
-		for (SongList::const_iterator it = list.begin(); it != list.end(); it++)
-			Mpd->QueueAddSong(**it);
-		if (Mpd->CommitQueue())
+		Mpd->StartCommandsList();
+		SongList::const_iterator it = list.begin();
+		for (; it != list.end(); it++)
+			if (Mpd->AddSong(**it) < 0)
+				break;
+		Mpd->CommitCommandsList();
+		
+		if (it != list.begin())
 		{
 			string tag_type = IntoStr(Config.media_lib_primary_tag);
 			ToLower(tag_type);
@@ -355,9 +360,14 @@ void MediaLibrary::AddToPlaylist(bool add_n_play)
 	}
 	else if (w == Albums)
 	{
-		for (size_t i = 0; i < Songs->Size(); i++)
-			Mpd->QueueAddSong(Songs->at(i));
-		if (Mpd->CommitQueue())
+		Mpd->StartCommandsList();
+		size_t i = 0;
+		for (; i < Songs->Size(); i++)
+			if (Mpd->AddSong(Songs->at(i)) < 0)
+				break;
+		Mpd->CommitCommandsList();
+		
+		if (i)
 		{
 			ShowMessage("Adding songs from album \"%s\"", Albums->Current().second.Album.c_str());
 			Song *s = &myPlaylist->Main()->at(myPlaylist->Main()->Size()-Songs->Size());
@@ -392,16 +402,17 @@ void MediaLibrary::AddToPlaylist(bool add_n_play)
 				else
 				{
 					Playlist::BlockUpdate = 1;
+					Mpd->StartCommandsList();
 					for (size_t i = 0; i < myPlaylist->Main()->Size(); i++)
 					{
 						if (myPlaylist->Main()->at(i).GetHash() == hash)
 						{
-							Mpd->QueueDeleteSong(i);
+							Mpd->Delete(i);
 							myPlaylist->Main()->DeleteOption(i);
 							i--;
 						}
 					}
-					Mpd->CommitQueue();
+					Mpd->CommitCommandsList();
 					Songs->BoldOption(Songs->Choice(), 0);
 				}
 			}

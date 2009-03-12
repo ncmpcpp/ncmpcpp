@@ -442,11 +442,13 @@ int main(int argc, char *argv[])
 				{
 					vector<size_t> list;
 					myPlaylist->Main()->GetSelected(list);
-					for (vector<size_t>::const_reverse_iterator it = list.rbegin(); it != ((const vector<size_t> &)list).rend(); it++)
+					Mpd->StartCommandsList();
+					for (vector<size_t>::reverse_iterator it = list.rbegin(); it != list.rend(); it++)
 					{
-						Mpd->QueueDeleteSongId((*myPlaylist->Main())[*it].GetID());
+						Mpd->DeleteID((*myPlaylist->Main())[*it].GetID());
 						myPlaylist->Main()->DeleteOption(*it);
 					}
+					Mpd->CommitCommandsList();
 					myPlaylist->FixPositions(list.front());
 					ShowMessage("Selected items deleted!");
 				}
@@ -461,7 +463,7 @@ int main(int argc, char *argv[])
 						time(&Timer);
 						if (myPlaylist->NowPlaying > myPlaylist->CurrentSong()->GetPosition())  // needed for keeping proper
 							myPlaylist->NowPlaying--; // position of now playing song.
-						Mpd->QueueDeleteSongId(myPlaylist->CurrentSong()->GetID());
+						Mpd->DeleteID(myPlaylist->CurrentSong()->GetID());
 						myPlaylist->Main()->DeleteOption(id);
 						myPlaylist->Main()->Refresh();
 						myPlaylist->Main()->ReadKey(input);
@@ -470,7 +472,6 @@ int main(int argc, char *argv[])
 					myPlaylist->Main()->SetTimeout(ncmpcpp_window_timeout);
 					Playlist::BlockNowPlayingUpdate = 0;
 				}
-				Mpd->CommitQueue();
 			}
 			else if (myScreen == myBrowser || myScreen->Cmp() == myPlaylistEditor->Playlists)
 			{
@@ -508,11 +509,13 @@ int main(int argc, char *argv[])
 					vector<size_t> list;
 					myPlaylistEditor->Content->GetSelected(list);
 					locale_to_utf(myPlaylistEditor->Playlists->Current());
-					for (vector<size_t>::const_reverse_iterator it = list.rbegin(); it != ((const vector<size_t> &)list).rend(); it++)
+					Mpd->StartCommandsList();
+					for (vector<size_t>::reverse_iterator it = list.rbegin(); it != list.rend(); it++)
 					{
-						Mpd->QueueDeleteFromPlaylist(myPlaylistEditor->Playlists->Current(), *it);
+						Mpd->Delete(myPlaylistEditor->Playlists->Current(), *it);
 						myPlaylistEditor->Content->DeleteOption(*it);
 					}
+					Mpd->CommitCommandsList();
 					utf_to_locale(myPlaylistEditor->Playlists->Current());
 					ShowMessage("Selected items deleted from playlist '%s'!", myPlaylistEditor->Playlists->Current().c_str());
 				}
@@ -524,7 +527,7 @@ int main(int argc, char *argv[])
 					{
 						TraceMpdStatus();
 						time(&Timer);
-						Mpd->QueueDeleteFromPlaylist(myPlaylistEditor->Playlists->Current(), myPlaylistEditor->Content->Choice());
+						Mpd->Delete(myPlaylistEditor->Playlists->Current(), myPlaylistEditor->Content->Choice());
 						myPlaylistEditor->Content->DeleteOption(myPlaylistEditor->Content->Choice());
 						myPlaylistEditor->Content->Refresh();
 						myPlaylistEditor->Content->ReadKey(input);
@@ -532,7 +535,6 @@ int main(int argc, char *argv[])
 					utf_to_locale(myPlaylistEditor->Playlists->Current());
 					myPlaylistEditor->Content->SetTimeout(ncmpcpp_window_timeout);
 				}
-				Mpd->CommitQueue();
 			}
 		}
 		else if (Keypressed(input, Key.Prev))
@@ -639,9 +641,10 @@ int main(int argc, char *argv[])
 						myPlaylist->Main()->Refresh();
 						myPlaylist->Main()->ReadKey(input);
 					}
+					Mpd->StartCommandsList();
 					for (size_t i = 0; i < list.size(); i++)
-						Mpd->QueueMove(origs[i], list[i]);
-					Mpd->CommitQueue();
+						Mpd->Move(origs[i], list[i]);
+					Mpd->CommitCommandsList();
 				}
 				else
 				{
@@ -689,10 +692,11 @@ int main(int argc, char *argv[])
 						myPlaylistEditor->Content->Refresh();
 						myPlaylistEditor->Content->ReadKey(input);
 					}
+					Mpd->StartCommandsList();
 					for (size_t i = 0; i < list.size(); i++)
 						if (origs[i] != list[i])
-							Mpd->QueueMove(myPlaylistEditor->Playlists->Current(), origs[i], list[i]);
-					Mpd->CommitQueue();
+							Mpd->Move(myPlaylistEditor->Playlists->Current(), origs[i], list[i]);
+					Mpd->CommitCommandsList();
 				}
 				else
 				{
@@ -752,9 +756,10 @@ int main(int argc, char *argv[])
 						myPlaylist->Main()->Refresh();
 						myPlaylist->Main()->ReadKey(input);
 					}
+					Mpd->StartCommandsList();
 					for (int i = list.size()-1; i >= 0; i--)
-						Mpd->QueueMove(origs[i], list[i]);
-					Mpd->CommitQueue();
+						Mpd->Move(origs[i], list[i]);
+					Mpd->CommitCommandsList();
 				}
 				else
 				{
@@ -803,10 +808,11 @@ int main(int argc, char *argv[])
 						myPlaylistEditor->Content->Refresh();
 						myPlaylistEditor->Content->ReadKey(input);
 					}
+					Mpd->StartCommandsList();
 					for (int i = list.size()-1; i >= 0; i--)
 						if (origs[i] != list[i])
-							Mpd->QueueMove(myPlaylistEditor->Playlists->Current(), origs[i], list[i]);
-					Mpd->CommitQueue();
+							Mpd->Move(myPlaylistEditor->Playlists->Current(), origs[i], list[i]);
+					Mpd->CommitCommandsList();
 				}
 				else
 				{
@@ -850,13 +856,14 @@ int main(int argc, char *argv[])
 			if (pos >= list.front() && pos <= list.back())
 				continue;
 			int diff = pos-list.front();
+			Mpd->StartCommandsList();
 			if (diff > 0)
 			{
 				pos -= list.size();
 				size_t i = list.size()-1;
 				for (vector<size_t>::reverse_iterator it = list.rbegin(); it != list.rend(); it++, i--)
 				{
-					Mpd->QueueMove(*it, pos+i);
+					Mpd->Move(*it, pos+i);
 					myPlaylist->Main()->Move(*it, pos+i);
 				}
 			}
@@ -865,11 +872,11 @@ int main(int argc, char *argv[])
 				size_t i = 0;
 				for (vector<size_t>::const_iterator it = list.begin(); it != list.end(); it++, i++)
 				{
-					Mpd->QueueMove(*it, pos+i);
+					Mpd->Move(*it, pos+i);
 					myPlaylist->Main()->Move(*it, pos+i);
 				}
 			}
-			Mpd->CommitQueue();
+			Mpd->CommitCommandsList();
 			myPlaylist->Main()->Highlight(pos);
 			myPlaylist->FixPositions();
 		}
@@ -885,9 +892,14 @@ int main(int argc, char *argv[])
 				Mpd->GetDirectoryRecursive(path, list);
 				if (!list.empty())
 				{
-					for (SongList::const_iterator it = list.begin(); it != list.end(); it++)
-						Mpd->QueueAddSong(**it);
-					if (Mpd->CommitQueue())
+					Mpd->StartCommandsList();
+					SongList::const_iterator it = list.begin();
+					for (; it != list.end(); it++)
+						if (Mpd->AddSong(**it) < 0)
+							break;
+					Mpd->CommitCommandsList();
+					
+					if (it != list.begin())
 					{
 						Song &s = myPlaylist->Main()->at(myPlaylist->Main()->Size()-list.size());
 						if (s.GetHash() != list[0]->GetHash())
@@ -1388,9 +1400,14 @@ int main(int argc, char *argv[])
 			
 			if (id == 0)
 			{
-				for (SongList::const_iterator it = result.begin(); it != result.end(); it++)
-					Mpd->QueueAddSong(**it);
-				if (Mpd->CommitQueue())
+				Mpd->StartCommandsList();
+				SongList::const_iterator it = result.begin();
+				for (; it != result.end(); it++)
+					if (Mpd->AddSong(**it) < 0)
+						break;
+				Mpd->CommitCommandsList();
+				
+				if (it != result.begin())
 				{
 					ShowMessage("Selected items added!");
 					Song &s = myPlaylist->Main()->at(myPlaylist->Main()->Size()-result.size());
@@ -1408,18 +1425,20 @@ int main(int argc, char *argv[])
 				UnlockStatusbar();
 				if (!playlist.empty())
 				{
+					Mpd->StartCommandsList();
 					for (SongList::const_iterator it = result.begin(); it != result.end(); it++)
-						Mpd->QueueAddToPlaylist(real_playlist, **it);
-					Mpd->CommitQueue();
+						Mpd->AddToPlaylist(real_playlist, **it);
+					Mpd->CommitCommandsList();
 					ShowMessage("Selected items added to playlist '%s'!", playlist.c_str());
 				}
 			}
 			else if (id > 1 && id < mDialog.Size()-1)
 			{
 				locale_to_utf(playlists[id-3]);
+				Mpd->StartCommandsList();
 				for (SongList::const_iterator it = result.begin(); it != result.end(); it++)
-					Mpd->QueueAddToPlaylist(playlists[id-3], **it);
-				Mpd->CommitQueue();
+					Mpd->AddToPlaylist(playlists[id-3], **it);
+				Mpd->CommitCommandsList();
 				utf_to_locale(playlists[id-3]);
 				ShowMessage("Selected items added to playlist '%s'!", playlists[id-3].c_str());
 			}
@@ -1443,18 +1462,19 @@ int main(int argc, char *argv[])
 			}
 			if (myPlaylist->Main()->hasSelected())
 			{
+				Mpd->StartCommandsList();
 				for (int i = myPlaylist->Main()->Size()-1; i >= 0; i--)
 				{
 					if (!myPlaylist->Main()->isSelected(i) && i != myPlaylist->NowPlaying)
-						Mpd->QueueDeleteSong(i);
+						Mpd->Delete(i);
 				}
 				// if mpd deletes now playing song deletion will be sluggishly slow
 				// then so we have to assure it will be deleted at the very end.
 				if (myPlaylist->isPlaying() && !myPlaylist->Main()->isSelected(myPlaylist->NowPlaying))
-					Mpd->QueueDeleteSongId(myPlaylist->NowPlayingSong()->GetID());
+					Mpd->DeleteID(myPlaylist->NowPlayingSong()->GetID());
 				
 				ShowMessage("Deleting all items but selected...");
-				Mpd->CommitQueue();
+				Mpd->CommitCommandsList();
 				ShowMessage("Items deleted!");
 			}
 			else
@@ -1464,11 +1484,12 @@ int main(int argc, char *argv[])
 					ShowMessage("Nothing is playing now!");
 					continue;
 				}
+				Mpd->StartCommandsList();
 				for (int i = myPlaylist->Main()->Size()-1; i >= 0; i--)
 					if (i != myPlaylist->NowPlaying)
-						Mpd->QueueDeleteSong(i);
+						Mpd->Delete(i);
 				ShowMessage("Deleting all items except now playing one...");
-				Mpd->CommitQueue();
+				Mpd->CommitCommandsList();
 				ShowMessage("Items deleted!");
 			}
 		}
@@ -1477,9 +1498,10 @@ int main(int argc, char *argv[])
 			if (myPlaylist->Main()->isFiltered())
 			{
 				ShowMessage("Deleting filtered items...");
+				Mpd->StartCommandsList();
 				for (int i = myPlaylist->Main()->Size()-1; i >= 0; i--)
-					Mpd->QueueDeleteSong((*myPlaylist->Main())[i].GetPosition());
-				Mpd->CommitQueue();
+					Mpd->Delete((*myPlaylist->Main())[i].GetPosition());
+				Mpd->CommitCommandsList();
 				ShowMessage("Filtered items deleted!");
 			}
 			else

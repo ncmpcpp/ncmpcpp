@@ -133,9 +133,14 @@ void Browser::EnterPressed()
 		{
 			SongList list;
 			Mpd->GetPlaylistContent(locale_to_utf_cpy(item.name), list);
-			for (SongList::const_iterator it = list.begin(); it != list.end(); it++)
-				Mpd->QueueAddSong(**it);
-			if (Mpd->CommitQueue())
+			Mpd->StartCommandsList();
+			SongList::const_iterator it = list.begin();
+			for (; it != list.end(); it++)
+				if (Mpd->AddSong(**it) < 0)
+					break;
+			Mpd->CommitCommandsList();
+			
+			if (it != list.begin())
 			{
 				ShowMessage("Loading and playing playlist %s...", item.name.c_str());
 				Song *s = &myPlaylist->Main()->at(myPlaylist->Main()->Size()-list.size());
@@ -179,9 +184,14 @@ void Browser::SpacePressed()
 			SongList list;
 			Mpd->GetDirectoryRecursive(locale_to_utf_cpy(item.name), list);
 			
-			for (SongList::const_iterator it = list.begin(); it != list.end(); it++)
-				Mpd->QueueAddSong(**it);
-			if (Mpd->CommitQueue())
+			Mpd->StartCommandsList();
+			SongList::const_iterator it = list.begin();
+			for (; it != list.end(); it++)
+				if (Mpd->AddSong(**it) < 0)
+					break;
+			Mpd->CommitCommandsList();
+			
+			if (it != list.begin())
 			{
 				ShowMessage("Added folder: %s", item.name.c_str());
 				Song &s = myPlaylist->Main()->at(myPlaylist->Main()->Size()-list.size());
@@ -198,16 +208,17 @@ void Browser::SpacePressed()
 			{
 				Playlist::BlockUpdate = 1;
 				long long hash = w->Current().song->GetHash();
+				Mpd->StartCommandsList();
 				for (size_t i = 0; i < myPlaylist->Main()->Size(); i++)
 				{
 					if (myPlaylist->Main()->at(i).GetHash() == hash)
 					{
-						Mpd->QueueDeleteSong(i);
+						Mpd->Delete(i);
 						myPlaylist->Main()->DeleteOption(i);
 						i--;
 					}
 				}
-				Mpd->CommitQueue();
+				Mpd->CommitCommandsList();
 				w->BoldOption(w->Choice(), 0);
 			}
 			else
@@ -225,9 +236,14 @@ void Browser::SpacePressed()
 		{
 			SongList list;
 			Mpd->GetPlaylistContent(locale_to_utf_cpy(item.name), list);
-			for (SongList::const_iterator it = list.begin(); it != list.end(); it++)
-				Mpd->QueueAddSong(**it);
-			if (Mpd->CommitQueue())
+			Mpd->StartCommandsList();
+			SongList::const_iterator it = list.begin();
+			for (; it != list.end(); it++)
+				if (Mpd->AddSong(**it) < 0)
+					break;
+			Mpd->CommitCommandsList();
+			
+			if (it != list.begin())
 			{
 				ShowMessage("Loading playlist %s...", item.name.c_str());
 				Song &s = myPlaylist->Main()->at(myPlaylist->Main()->Size()-list.size());

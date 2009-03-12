@@ -192,9 +192,14 @@ void PlaylistEditor::AddToPlaylist(bool add_n_play)
 	if (w == Playlists && !Playlists->Empty())
 	{
 		Mpd->GetPlaylistContent(locale_to_utf_cpy(Playlists->Current()), list);
-		for (SongList::const_iterator it = list.begin(); it != list.end(); it++)
-			Mpd->QueueAddSong(**it);
-		if (Mpd->CommitQueue())
+		Mpd->StartCommandsList();
+		SongList::const_iterator it = list.begin();
+		for (; it != list.end(); it++)
+			if (Mpd->AddSong(**it) < 0)
+				break;
+		Mpd->CommitCommandsList();
+		
+		if (it != list.begin())
 		{
 			ShowMessage("Loading playlist %s...", Playlists->Current().c_str());
 			Song &s = myPlaylist->Main()->at(myPlaylist->Main()->Size()-list.size());
@@ -229,16 +234,17 @@ void PlaylistEditor::AddToPlaylist(bool add_n_play)
 				else
 				{
 					Playlist::BlockUpdate = 1;
+					Mpd->StartCommandsList();
 					for (size_t i = 0; i < myPlaylist->Main()->Size(); i++)
 					{
 						if (myPlaylist->Main()->at(i).GetHash() == hash)
 						{
-							Mpd->QueueDeleteSong(i);
+							Mpd->Delete(i);
 							myPlaylist->Main()->DeleteOption(i);
 							i--;
 						}
 					}
-					Mpd->CommitQueue();
+					Mpd->CommitCommandsList();
 					Content->BoldOption(Content->Choice(), 0);
 				}
 			}

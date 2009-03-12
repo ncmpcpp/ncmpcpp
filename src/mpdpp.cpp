@@ -30,6 +30,7 @@ const char *MPD::Message::FullPlaylist = "Playlist is full!";
 const char *MPD::Message::FunctionDisabledFilteringEnabled = "Function disabled due to enabled filtering in playlist";
 
 Connection::Connection() : isConnected(0),
+				 isCommandsListEnabled(0),
 				 itsErrorCode(0),
 				 itsMaxPlaylistLength(-1),
 				 itsHost("localhost"),
@@ -57,7 +58,6 @@ Connection::~Connection()
 		mpd_freeStatus(itsOldStatus);
 	if (itsCurrentStatus)
 		mpd_freeStatus(itsCurrentStatus);
-	ClearQueue();
 }
 
 bool Connection::Connect()
@@ -99,8 +99,8 @@ void Connection::Disconnect()
 	itsCurrentStatus = 0;
 	itsOldStatus = 0;
 	isConnected = 0;
+	isCommandsListEnabled = 0;
 	itsMaxPlaylistLength = -1;
-	ClearQueue();
 }
 
 float Connection::Version() const
@@ -217,7 +217,8 @@ void Connection::Execute(const string &command) const
 	if (isConnected)
 	{
 		mpd_executeCommand(itsConnection, command.c_str());
-		mpd_finishCommand(itsConnection);
+		if (!isCommandsListEnabled)
+			mpd_finishCommand(itsConnection);
 	}
 }
 
@@ -232,7 +233,8 @@ void Connection::Play(int pos) const
 	if (isConnected)
 	{
 		mpd_sendPlayCommand(itsConnection, pos);
-		mpd_finishCommand(itsConnection);
+		if (!isCommandsListEnabled)
+			mpd_finishCommand(itsConnection);
 	}
 }
 
@@ -241,7 +243,8 @@ void Connection::PlayID(int id) const
 	if (isConnected)
 	{
 		mpd_sendPlayIdCommand(itsConnection, id);
-		mpd_finishCommand(itsConnection);
+		if (!isCommandsListEnabled)
+			mpd_finishCommand(itsConnection);
 	}
 }
 
@@ -250,7 +253,8 @@ void Connection::Pause() const
 	if (isConnected)
 	{
 		mpd_sendPauseCommand(itsConnection, itsCurrentStatus->state != psPause);
-		mpd_finishCommand(itsConnection);
+		if (!isCommandsListEnabled)
+			mpd_finishCommand(itsConnection);
 	}
 }
 
@@ -259,7 +263,8 @@ void Connection::Stop() const
 	if (isConnected)
 	{
 		mpd_sendStopCommand(itsConnection);
-		mpd_finishCommand(itsConnection);
+		if (!isCommandsListEnabled)
+			mpd_finishCommand(itsConnection);
 	}
 }
 
@@ -268,7 +273,8 @@ void Connection::Next() const
 	if (isConnected)
 	{
 		mpd_sendNextCommand(itsConnection);
-		mpd_finishCommand(itsConnection);
+		if (!isCommandsListEnabled)
+			mpd_finishCommand(itsConnection);
 	}
 }
 
@@ -277,7 +283,8 @@ void Connection::Prev() const
 	if (isConnected)
 	{
 		mpd_sendPrevCommand(itsConnection);
-		mpd_finishCommand(itsConnection);
+		if (!isCommandsListEnabled)
+			mpd_finishCommand(itsConnection);
 	}
 }
 
@@ -286,7 +293,8 @@ void Connection::Move(int from, int to) const
 	if (isConnected)
 	{
 		mpd_sendMoveCommand(itsConnection, from, to);
-		mpd_finishCommand(itsConnection);
+		if (!isCommandsListEnabled)
+			mpd_finishCommand(itsConnection);
 	}
 }
 
@@ -295,7 +303,8 @@ void Connection::Swap(int from, int to) const
 	if (isConnected)
 	{
 		mpd_sendSwapCommand(itsConnection, from, to);
-		mpd_finishCommand(itsConnection);
+		if (!isCommandsListEnabled)
+			mpd_finishCommand(itsConnection);
 	}
 }
 
@@ -304,7 +313,8 @@ void Connection::Seek(int where) const
 	if (isConnected)
 	{
 		mpd_sendSeekCommand(itsConnection, itsCurrentStatus->song, where);
-		mpd_finishCommand(itsConnection);
+		if (!isCommandsListEnabled)
+			mpd_finishCommand(itsConnection);
 	}
 }
 
@@ -313,7 +323,8 @@ void Connection::Shuffle() const
 	if (isConnected)
 	{
 		mpd_sendShuffleCommand(itsConnection);
-		mpd_finishCommand(itsConnection);
+		if (!isCommandsListEnabled)
+			mpd_finishCommand(itsConnection);
 	}
 }
 
@@ -322,7 +333,8 @@ void Connection::ClearPlaylist() const
 	if (isConnected)
 	{
 		mpd_sendClearCommand(itsConnection);
-		mpd_finishCommand(itsConnection);
+		if (!isCommandsListEnabled)
+			mpd_finishCommand(itsConnection);
 	}
 }
 
@@ -337,7 +349,8 @@ void Connection::AddToPlaylist(const string &path, const string &file) const
 	if (isConnected)
 	{
 		mpd_sendPlaylistAddCommand(itsConnection, (char *) path.c_str(), (char *) file.c_str());
-		mpd_finishCommand(itsConnection);
+		if (!isCommandsListEnabled)
+			mpd_finishCommand(itsConnection);
 	}
 }
 
@@ -346,7 +359,8 @@ void Connection::Move(const string &path, int from, int to) const
 	if (isConnected)
 	{
 		mpd_sendPlaylistMoveCommand(itsConnection, (char *) path.c_str(), from, to);
-		mpd_finishCommand(itsConnection);
+		if (!isCommandsListEnabled)
+			mpd_finishCommand(itsConnection);
 	}
 }
 
@@ -355,7 +369,8 @@ void Connection::Rename(const string &from, const string &to) const
 	if (isConnected)
 	{
 		mpd_sendRenameCommand(itsConnection, from.c_str(), to.c_str());
-		mpd_finishCommand(itsConnection);
+		if (!isCommandsListEnabled)
+			mpd_finishCommand(itsConnection);
 	}
 }
 
@@ -453,7 +468,8 @@ void Connection::SetRepeat(bool mode) const
 	if (isConnected)
 	{
 		mpd_sendRepeatCommand(itsConnection, mode);
-		mpd_finishCommand(itsConnection);
+		if (!isCommandsListEnabled)
+			mpd_finishCommand(itsConnection);
 	}
 }
 
@@ -462,7 +478,8 @@ void Connection::SetRandom(bool mode) const
 	if (isConnected)
 	{
 		mpd_sendRandomCommand(itsConnection, mode);
-		mpd_finishCommand(itsConnection);
+		if (!isCommandsListEnabled)
+			mpd_finishCommand(itsConnection);
 	}
 }
 
@@ -471,7 +488,8 @@ void Connection::SetVolume(int vol) const
 	if (isConnected)
 	{
 		mpd_sendSetvolCommand(itsConnection, vol);
-		mpd_finishCommand(itsConnection);
+		if (!isCommandsListEnabled)
+			mpd_finishCommand(itsConnection);
 	}
 }
 
@@ -480,7 +498,8 @@ void Connection::SetCrossfade(int crossfade) const
 	if (isConnected)
 	{
 		mpd_sendCrossfadeCommand(itsConnection, crossfade);
-		mpd_finishCommand(itsConnection);
+		if (!isCommandsListEnabled)
+			mpd_finishCommand(itsConnection);
 	}
 }
 
@@ -492,11 +511,15 @@ int Connection::AddSong(const string &path)
 		if (GetPlaylistLength() < itsMaxPlaylistLength)
 		{
 			id = mpd_sendAddIdCommand(itsConnection, path.c_str());
-			mpd_finishCommand(itsConnection);
-			UpdateStatus();
+			if (!isCommandsListEnabled)
+			{
+				mpd_finishCommand(itsConnection);
+				UpdateStatus();
+			}
+			else
+				id = 0;
 		}
-		else
-			if (itsErrorHandler)
+		else if (itsErrorHandler)
 				itsErrorHandler(this, MPD_ACK_ERROR_PLAYLIST_MAX, Message::FullPlaylist, NULL);
 	}
 	return id;
@@ -507,142 +530,57 @@ int Connection::AddSong(const Song &s)
 	return !s.Empty() ? (AddSong((!s.IsFromDB() ? "file://" : "") + (s.Localized() ? locale_to_utf_cpy(s.GetFile()) : s.GetFile()))) : -1;
 }
 
-void Connection::QueueAddSong(const string &path)
-{
-	if (isConnected && GetPlaylistLength() < itsMaxPlaylistLength)
-	{
-		QueueCommand *q = new QueueCommand;
-		q->type = qctAdd;
-		q->item_path = path;
-		itsQueue.push_back(q);
-	}
-}
-
-void Connection::QueueAddSong(const Song &s)
-{
-	if (!s.Empty())
-		QueueAddSong((!s.IsFromDB() ? "file://" : "") + (s.Localized() ? locale_to_utf_cpy(s.GetFile()) : s.GetFile()));
-}
-
-void Connection::QueueAddToPlaylist(const string &playlist, const string &path)
+void Connection::Delete(int pos) const
 {
 	if (isConnected)
 	{
-		QueueCommand *q = new QueueCommand;
-		q->type = qctAddToPlaylist;
-		q->playlist_path = playlist;
-		q->item_path = path;
-		itsQueue.push_back(q);
+		mpd_sendDeleteCommand(itsConnection, pos);
+		if (!isCommandsListEnabled)
+			mpd_finishCommand(itsConnection);
 	}
 }
 
-void Connection::QueueAddToPlaylist(const string &playlist, const Song &s)
-{
-	if (!s.Empty())
-		QueueAddToPlaylist(playlist, s.Localized() ? locale_to_utf_cpy(s.GetFile()) : s.GetFile());
-}
-
-void Connection::QueueDeleteSong(int id)
+void Connection::DeleteID(int id) const
 {
 	if (isConnected)
 	{
-		QueueCommand *q = new QueueCommand;
-		q->type = qctDelete;
-		q->id = id;
-		itsQueue.push_back(q);
+		mpd_sendDeleteIdCommand(itsConnection, id);
+		if (!isCommandsListEnabled)
+			mpd_finishCommand(itsConnection);
 	}
 }
 
-void Connection::QueueDeleteSongId(int id)
+void Connection::Delete(const string &playlist, int pos) const
 {
 	if (isConnected)
 	{
-		QueueCommand *q = new QueueCommand;
-		q->type = qctDeleteID;
-		q->id = id;
-		itsQueue.push_back(q);
+		mpd_sendPlaylistDeleteCommand(itsConnection, playlist.c_str(), pos);
+		if (!isCommandsListEnabled)
+			mpd_finishCommand(itsConnection);
 	}
 }
 
-void Connection::QueueMove(int from, int to)
+void Connection::StartCommandsList()
 {
-	if (isConnected)
-	{
-		QueueCommand *q = new QueueCommand;
-		q->type = qctMove;
-		q->id = from;
-		q->id2 = to;
-		itsQueue.push_back(q);
-	}
-}
-
-void Connection::QueueMove(const string &playlist, int from, int to)
-{
-	if (isConnected)
-	{
-		QueueCommand *q = new QueueCommand;
-		q->type = qctPlaylistMove;
-		q->playlist_path = playlist;
-		q->id = from;
-		q->id2 = to;
-		itsQueue.push_back(q);
-	}
-}
-
-void Connection::QueueDeleteFromPlaylist(const string &playlist, int pos)
-{
-	if (isConnected)
-	{
-		QueueCommand *q = new QueueCommand;
-		q->type = qctDeleteFromPlaylist;
-		q->playlist_path = playlist;
-		q->id = pos;
-		itsQueue.push_back(q);
-	}
-}
-
-bool Connection::CommitQueue()
-{
-	bool retval = false;
 	if (isConnected)
 	{
 		mpd_sendCommandListBegin(itsConnection);
-		for (std::vector<QueueCommand *>::const_iterator it = itsQueue.begin(); it != itsQueue.end(); it++)
-		{
-			switch ((*it)->type)
-			{
-				case qctAdd:
-					mpd_sendAddCommand(itsConnection, (*it)->item_path.c_str());
-					break;
-				case qctAddToPlaylist:
-					mpd_sendPlaylistAddCommand(itsConnection, (char *) (*it)->playlist_path.c_str(), (char *) (*it)->item_path.c_str());
-					break;
-				case qctDelete:
-					mpd_sendDeleteCommand(itsConnection, (*it)->id);
-					break;
-				case qctDeleteID:
-					mpd_sendDeleteIdCommand(itsConnection, (*it)->id);
-					break;
-				case qctMove:
-					mpd_sendMoveCommand(itsConnection, (*it)->id, (*it)->id2);
-					break;
-				case qctPlaylistMove:
-					mpd_sendPlaylistMoveCommand(itsConnection, (char *) (*it)->playlist_path.c_str(), (*it)->id, (*it)->id2);
-					break;
-				case qctDeleteFromPlaylist:
-					mpd_sendPlaylistDeleteCommand(itsConnection, (char *) (*it)->playlist_path.c_str(), (*it)->id);
-					break;
-			}
-		}
+		isCommandsListEnabled = 1;
+	}
+	
+}
+
+void Connection::CommitCommandsList()
+{
+	if (isConnected)
+	{
 		mpd_sendCommandListEnd(itsConnection);
 		mpd_finishCommand(itsConnection);
 		UpdateStatus();
 		if (GetPlaylistLength() == itsMaxPlaylistLength && itsErrorHandler)
 			itsErrorHandler(this, MPD_ACK_ERROR_PLAYLIST_MAX, Message::FullPlaylist, NULL);
-		retval = !itsQueue.empty();
+		isCommandsListEnabled = 0;
 	}
-	ClearQueue();
-	return retval;
 }
 
 void Connection::DeletePlaylist(const string &name) const
@@ -650,7 +588,8 @@ void Connection::DeletePlaylist(const string &name) const
 	if (isConnected)
 	{
 		mpd_sendRmCommand(itsConnection, name.c_str());
-		mpd_finishCommand(itsConnection);
+		if (!isCommandsListEnabled)
+			mpd_finishCommand(itsConnection);
 	}
 }
 
@@ -886,13 +825,6 @@ int Connection::CheckForErrors()
 			mpd_clearError(itsConnection);
 	}
 	return itsErrorCode;
-}
-
-void Connection::ClearQueue()
-{
-	for (std::vector<QueueCommand *>::iterator it = itsQueue.begin(); it != itsQueue.end(); it++)
-		delete *it;
-	itsQueue.clear();
 }
 
 void MPD::FreeSongList(SongList &l)

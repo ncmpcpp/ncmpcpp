@@ -902,8 +902,7 @@ bool TagEditor::WriteTags(Song &s)
 					// if we rename local file, it won't get updated
 					// so just remove it from playlist and add again
 					size_t pos = myPlaylist->Main()->Choice();
-					Mpd->QueueDeleteSong(pos);
-					Mpd->CommitQueue();
+					Mpd->Delete(pos);
 					int id = Mpd->AddSong("file://" + new_name);
 					if (id >= 0)
 					{

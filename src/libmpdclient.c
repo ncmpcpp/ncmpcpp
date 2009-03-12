@@ -2066,7 +2066,7 @@ void mpd_sendPlaylistMoveCommand(mpd_Connection *connection,
 }
 
 void mpd_sendPlaylistDeleteCommand(mpd_Connection *connection,
-                                   char *playlist, int pos)
+                                   const char *playlist, int pos)
 {
 	char *sPlaylist = mpd_sanitizeArg(playlist);
 	int len = strlen("playlistdelete")+2+strlen(sPlaylist)+3+INTLEN+3;

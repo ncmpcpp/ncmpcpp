@@ -673,7 +673,7 @@ void mpd_sendPlaylistMoveCommand(mpd_Connection *connection,
                                  char *playlist, int from, int to);
 
 void mpd_sendPlaylistDeleteCommand(mpd_Connection *connection,
-                                   char *playlist, int pos);
+                                   const char *playlist, int pos);
 #ifdef __cplusplus
 }
 #endif

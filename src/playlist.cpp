@@ -243,6 +243,7 @@ void Playlist::Sort()
 	
 	BlockUpdate = 1;
 	ShowMessage("Sorting playlist...");
+	Mpd->StartCommandsList();
 	do
 	{
 		for (size_t i = 0; i < playlist.size(); i++)
@@ -257,6 +258,7 @@ void Playlist::Sort()
 		}
 	}
 	while (playlist != cmp);
+	Mpd->CommitCommandsList();
 	ShowMessage("Playlist sorted!");
 }
 
