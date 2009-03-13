@@ -47,6 +47,7 @@ namespace NCurses
 		
 		public:
 			basic_buffer() : itsTempString(0) { }
+			basic_buffer(const basic_buffer &b);
 			
 			std::basic_string<C> Str() const;
 			void SetFormatting(short vb, const std::basic_string<C> &s, short ve, bool for_each = 1);
@@ -69,6 +70,12 @@ namespace NCurses
 	
 	typedef basic_buffer<char> Buffer;
 	typedef basic_buffer<wchar_t> WBuffer;
+}
+
+template <typename C> NCurses::basic_buffer<C>::basic_buffer(const basic_buffer &b) : itsFormat(b.itsFormat),
+										itsTempString(b.itsTempString)
+{
+	itsString << b.itsString.str();
 }
 
 template <typename C> std::basic_string<C> NCurses::basic_buffer<C>::Str() const

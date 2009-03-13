@@ -211,36 +211,43 @@ namespace NCurses
 }
 
 template <typename T> NCurses::Menu<T>::Menu(size_t startx,
-				 size_t starty,
-				 size_t width,
-				 size_t height,
-				 const std::string &title,
-				 Color color,
-				 Border border)
-				 : Window(startx, starty, width, height, title, color, border),
-				 itsItemDisplayer(0),
-				 itsItemDisplayerUserdata(0),
-				 itsGetStringFunction(0),
-				 itsGetStringFunctionUserData(0),
-				 itsOptionsPtr(&itsOptions),
-				 itsBeginning(0),
-				 itsHighlight(0),
-				 itsHighlightColor(itsBaseColor),
-				 highlightEnabled(1),
-				 itsSelectedPrefix(0),
-				 itsSelectedSuffix(0)
+					size_t starty,
+					size_t width,
+					size_t height,
+					const std::string &title,
+					Color color,
+					Border border)
+					: Window(startx, starty, width, height, title, color, border),
+					itsItemDisplayer(0),
+					itsItemDisplayerUserdata(0),
+					itsGetStringFunction(0),
+					itsGetStringFunctionUserData(0),
+					itsOptionsPtr(&itsOptions),
+					itsBeginning(0),
+					itsHighlight(0),
+					itsHighlightColor(itsBaseColor),
+					highlightEnabled(1),
+					itsSelectedPrefix(0),
+					itsSelectedSuffix(0)
 {
 }
 
-template <typename T> NCurses::Menu<T>::Menu(const Menu &m) : Window(m)
+template <typename T> NCurses::Menu<T>::Menu(const Menu &m) : Window(m),
+					itsItemDisplayer(m.itsItemDisplayer),
+					itsItemDisplayerUserdata(m.itsItemDisplayerUserdata),
+					itsGetStringFunction(m.itsGetStringFunction),
+					itsGetStringFunctionUserData(m.itsGetStringFunctionUserData),
+					itsOptionsPtr(m.itsOptionsPtr),
+					itsBeginning(m.itsBeginning),
+					itsHighlight(m.itsHighlight),
+					itsHighlightColor(m.itsHighlightColor),
+					highlightEnabled(m.highlightEnabled),
+					itsSelectedPrefix(m.itsSelectedPrefix),
+					itsSelectedSuffix(m.itsSelectedSuffix)
 {
-	itsOptions = m.itsOptions;
-	itsItemDisplayer = m.itsItemDisplayer;
-	itsItemDisplayerUserdata = m.itsItemDisplayerUserdata;
-	itsBeginning = m.itsBeginning;
-	itsHighlight = m.itsHighlight;
-	itsHighlightColor = m.itsHighlightColor;
-	highlightEnabled = m.highlightEnabled;
+	itsOptions.reserve(m.itsOptions.size());
+	for (option_const_iterator it = m.itsOptions.begin(); it != m.itsOptions.end(); it++)
+		itsOptions.push_back(new Option(**it));
 }
 
 template <typename T> NCurses::Menu<T>::~Menu()
