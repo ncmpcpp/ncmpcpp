@@ -45,7 +45,7 @@ Menu< std::pair<std::string, MPD::Song::GetFunction> > *Playlist::SortDialog;
 const size_t Playlist::SortOptions = 10;
 
 const size_t Playlist::SortDialogWidth = 30;
-const size_t Playlist::SortDialogHeight = 17;
+const size_t Playlist::SortDialogHeight = 18;
 
 void Playlist::Init()
 {
@@ -75,6 +75,7 @@ void Playlist::Init()
 	SortDialog->AddOption(std::make_pair("Filename", &MPD::Song::GetFile));
 	SortDialog->AddSeparator();
 	SortDialog->AddOption(std::make_pair("Sort", (MPD::Song::GetFunction)0));
+	SortDialog->AddOption(std::make_pair("Reverse", (MPD::Song::GetFunction)0));
 	SortDialog->AddOption(std::make_pair("Cancel", (MPD::Song::GetFunction)0));
 }
 
@@ -213,7 +214,21 @@ void Playlist::Sort()
 				BlockRefreshing = 0;
 				if (pos == SortOptions+1) // sort
 					break;
-				else if (pos == SortOptions+2) //  cancel
+				else if (pos == SortOptions+2) // reverse
+				{
+					BlockUpdate = 1;
+					ShowMessage("Reversing playlist order...");
+					Mpd->StartCommandsList();
+					for (size_t i = 0, j = w->Size()-1; i < w->Size()/2; i++, j--)
+					{
+						Mpd->Swap(i, j);
+						w->Swap(i, j);
+					}
+					Mpd->CommitCommandsList();
+					ShowMessage("Playlist reversed!");
+					return;
+				}
+				else if (pos == SortOptions+3) // cancel
 					return;
 			}
 			else
