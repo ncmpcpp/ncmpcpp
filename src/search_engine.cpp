@@ -345,7 +345,7 @@ void SearchEngine::Prepare()
 	
 	w->SetTitle("");
 	w->Clear(0);
-	w->ResizeBuffer(17);
+	w->ResizeList(17);
 	
 	w->IntoSeparator(10);
 	w->IntoSeparator(14);

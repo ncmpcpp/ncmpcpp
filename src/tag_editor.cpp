@@ -245,7 +245,7 @@ bool TinyTagEditor::GetTags()
 	w->Clear();
 	w->Reset();
 	
-	w->ResizeBuffer(23);
+	w->ResizeList(23);
 	
 	for (size_t i = 0; i < 7; i++)
 		w->Static(i, 1);

@@ -109,7 +109,7 @@ namespace NCurses
 			void SetGetStringFunctionUserData(void *data) { itsGetStringFunctionUserData = data; }
 			
 			void Reserve(size_t size);
-			void ResizeBuffer(size_t size);
+			void ResizeList(size_t size);
 			void AddOption(const T &item, bool is_bold = 0, bool is_static = 0);
 			void AddSeparator();
 			void InsertOption(size_t pos, const T &Item, bool is_bold = 0, bool is_static = 0);
@@ -254,12 +254,21 @@ template <typename T> void NCurses::Menu<T>::Reserve(size_t size)
 	itsOptions.reserve(size);
 }
 
-template <typename T> void NCurses::Menu<T>::ResizeBuffer(size_t size)
+template <typename T> void NCurses::Menu<T>::ResizeList(size_t size)
 {
-	itsOptions.resize(size);
-	for (size_t i = 0; i < size; i++)
-		if (!itsOptions[i])
-			itsOptions[i] = new Option();
+	if (size > itsOptions.size())
+	{
+		itsOptions.resize(size);
+		for (size_t i = 0; i < size; i++)
+			if (!itsOptions[i])
+				itsOptions[i] = new Option();
+	}
+	else if (size < itsOptions.size())
+	{
+		for (size_t i = size; i < itsOptions.size(); i++)
+			delete itsOptions[i];
+		itsOptions.resize(size);
+	}
 }
 
 template <typename T> void NCurses::Menu<T>::AddOption(const T &item, bool is_bold, bool is_static)

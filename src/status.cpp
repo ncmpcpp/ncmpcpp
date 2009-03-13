@@ -189,16 +189,12 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 			bool was_filtered = myPlaylist->Main()->isFiltered();
 			myPlaylist->Main()->ShowAll();
 			SongList list;
+			
 			size_t playlist_length = Mpd->GetPlaylistLength();
-			
 			if (playlist_length < myPlaylist->Main()->Size())
-			{
-				myPlaylist->Main()->Clear(playlist_length < myPlaylist->Main()->GetHeight() && myScreen == myPlaylist);
-				Mpd->GetPlaylistChanges(-1, list);
-			}
-			else
-				Mpd->GetPlaylistChanges(Mpd->GetOldPlaylistID(), list);
+				myPlaylist->Main()->ResizeList(playlist_length);
 			
+			Mpd->GetPlaylistChanges(Mpd->GetOldPlaylistID(), list);
 			myPlaylist->Main()->Reserve(playlist_length);
 			for (SongList::const_iterator it = list.begin(); it != list.end(); it++)
 			{
