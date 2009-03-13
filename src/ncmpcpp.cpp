@@ -46,6 +46,13 @@
 #include "status.h"
 #include "tag_editor.h"
 
+#define CHECK_PLAYLIST_FOR_FILTERING \
+			if (myPlaylist->Main()->isFiltered()) \
+			{ \
+				ShowMessage("%s", MPD::Message::FunctionDisabledFilteringEnabled); \
+				continue; \
+			}
+
 #define CHECK_MPD_MUSIC_DIR \
 			if (Config.mpd_music_dir.empty()) \
 			{ \
@@ -602,12 +609,7 @@ int main(int argc, char *argv[])
 		{
 			if (myScreen == myPlaylist && !myPlaylist->Main()->Empty())
 			{
-				if (myPlaylist->Main()->isFiltered())
-				{
-					ShowMessage("%s", MPD::Message::FunctionDisabledFilteringEnabled);
-					continue;
-				}
-				
+				CHECK_PLAYLIST_FOR_FILTERING;
 				Playlist::BlockUpdate = 1;
 				myPlaylist->Main()->SetTimeout(50);
 				if (myPlaylist->Main()->hasSelected())
@@ -717,12 +719,7 @@ int main(int argc, char *argv[])
 		{
 			if (myScreen == myPlaylist && !myPlaylist->Main()->Empty())
 			{
-				if (myPlaylist->Main()->isFiltered())
-				{
-					ShowMessage("%s", MPD::Message::FunctionDisabledFilteringEnabled);
-					continue;
-				}
-				
+				CHECK_PLAYLIST_FOR_FILTERING;
 				Playlist::BlockUpdate = 1;
 				myPlaylist->Main()->SetTimeout(50);
 				if (myPlaylist->Main()->hasSelected())
@@ -831,11 +828,7 @@ int main(int argc, char *argv[])
 		}
 		else if (Keypressed(input, Key.MoveTo) && myScreen == myPlaylist)
 		{
-			if (myPlaylist->Main()->isFiltered())
-			{
-				ShowMessage("%s", MPD::Message::FunctionDisabledFilteringEnabled);
-				continue;
-			}
+			CHECK_PLAYLIST_FOR_FILTERING;
 			if (!myPlaylist->Main()->hasSelected())
 			{
 				ShowMessage("No selected items to move!");
@@ -1036,11 +1029,7 @@ int main(int argc, char *argv[])
 		{
 			if (myScreen == myPlaylist && myPlaylist->isPlaying())
 			{
-				if (myPlaylist->Main()->isFiltered())
-				{
-					ShowMessage("%s", MPD::Message::FunctionDisabledFilteringEnabled);
-					continue;
-				}
+				CHECK_PLAYLIST_FOR_FILTERING;
 				myPlaylist->Main()->Highlight(myPlaylist->NowPlaying);
 			}
 			else if (myScreen == myBrowser)
@@ -1450,11 +1439,7 @@ int main(int argc, char *argv[])
 		}
 		else if (Keypressed(input, Key.Crop))
 		{
-			if (myPlaylist->Main()->isFiltered())
-			{
-				ShowMessage("%s", MPD::Message::FunctionDisabledFilteringEnabled);
-				continue;
-			}
+			CHECK_PLAYLIST_FOR_FILTERING;
 			if (myPlaylist->Main()->hasSelected())
 			{
 				Mpd->StartCommandsList();
@@ -1508,6 +1493,7 @@ int main(int argc, char *argv[])
 		}
 		else if (Keypressed(input, Key.SortPlaylist) && myScreen == myPlaylist)
 		{
+			CHECK_PLAYLIST_FOR_FILTERING;
 			myPlaylist->Sort();
 			myPlaylist->EnableHighlighting();
 		}
