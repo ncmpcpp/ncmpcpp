@@ -361,7 +361,7 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 	}
 	if (changed.ElapsedTime)
 	{
-		if (!np.Empty())
+		if (!np.Empty() && !player_state.empty())
 		{
 			int elapsed = Mpd->GetElapsedTime();
 			
