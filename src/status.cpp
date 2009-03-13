@@ -185,6 +185,7 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 		if (!Playlist::BlockUpdate)
 		{
 			np = Mpd->GetCurrentSong();
+			WindowTitle(utf_to_locale_cpy(np.toString(Config.song_window_title_format)));
 			
 			bool was_filtered = myPlaylist->Main()->isFiltered();
 			myPlaylist->Main()->ShowAll();
@@ -331,6 +332,7 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 			}
 			catch (std::out_of_range &) { }
 			np = Mpd->GetCurrentSong();
+			WindowTitle(utf_to_locale_cpy(np.toString(Config.song_window_title_format)));
 			myPlaylist->Main()->BoldOption(myPlaylist->NowPlaying, 1);
 			if (Config.autocenter_mode && !myPlaylist->Main()->isFiltered())
 				myPlaylist->Main()->Highlight(myPlaylist->NowPlaying);
@@ -366,8 +368,6 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 			// 'repeat one' mode check - be sure that we deal with item with known length
 			if (np.GetTotalLength() && elapsed == np.GetTotalLength()-1)
 				repeat_one_allowed = 1;
-			
-			WindowTitle(utf_to_locale_cpy(np.toString(Config.song_window_title_format)));
 			
 			if (!block_statusbar_update && Config.statusbar_visibility)
 			{
