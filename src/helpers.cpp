@@ -360,10 +360,10 @@ const std::basic_string<my_char_t> &Scroller(const string &string, size_t width,
 }
 
 #ifdef HAVE_CURL_CURL_H
-size_t write_data(char *buffer, size_t size, size_t nmemb, string data)
+size_t write_data(char *buffer, size_t size, size_t nmemb, void *data)
 {
-	size_t result = size * nmemb;
-	data.append(buffer, result);
+	size_t result = size*nmemb;
+	static_cast<std::string *>(data)->append(buffer, result);
 	return result;
 }
 #endif // HAVE_CURL_CURL_H
