@@ -120,7 +120,7 @@ namespace NCurses
 			void Move(size_t from, size_t to);
 			
 			bool isBold(int id = -1);
-			void BoldOption(int, bool);
+			void BoldOption(int index, bool bold);
 			
 			virtual void Select(int id, bool value);
 			virtual void Static(int id, bool value);
@@ -300,7 +300,7 @@ template <typename T> void NCurses::Menu<T>::InsertSeparator(size_t pos)
 
 template <typename T> void NCurses::Menu<T>::DeleteOption(size_t pos)
 {
-	if (itsOptions.empty())
+	if (itsOptionsPtr->empty())
 		return;
 	if (itsOptionsPtr == &itsFilteredOptions)
 	{
@@ -323,15 +323,15 @@ template <typename T> void NCurses::Menu<T>::DeleteOption(size_t pos)
 
 template <typename T> void NCurses::Menu<T>::IntoSeparator(size_t pos)
 {
-	delete itsOptions.at(pos);
-	itsOptions[pos] = 0;
+	delete itsOptionsPtr->at(pos);
+	(*itsOptionsPtr)[pos] = 0;
 }
 
 template <typename T> void NCurses::Menu<T>::BoldOption(int index, bool bold)
 {
-	if (!itsOptions.at(index))
+	if (!itsOptionsPtr->at(index))
 		return;
-	itsOptions[index]->isBold = bold;
+	(*itsOptionsPtr)[index]->isBold = bold;
 }
 
 template <typename T> void NCurses::Menu<T>::Swap(size_t one, size_t two)
