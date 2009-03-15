@@ -172,12 +172,20 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 	{
 		myPlaylist->OldPlaying = myPlaylist->NowPlaying;
 		myPlaylist->NowPlaying = Mpd->GetCurrentSongPos();
+		bool was_filtered = myPlaylist->Main()->isFiltered();
+		myPlaylist->Main()->ShowAll();
 		try
 		{
 			myPlaylist->Main()->BoldOption(myPlaylist->OldPlaying, 0);
+		}
+		catch (std::out_of_range) { }
+		try
+		{
 			myPlaylist->Main()->BoldOption(myPlaylist->NowPlaying, 1);
 		}
 		catch (std::out_of_range) { }
+		if (was_filtered)
+			myPlaylist->Main()->ShowFiltered();
 	}
 	
 	if (changed.Playlist)
@@ -280,7 +288,6 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 			case psPlay:
 			{
 				player_state = "Playing: ";
-				myPlaylist->Main()->BoldOption(myPlaylist->NowPlaying, 1);
 				Playlist::ReloadRemaining = 1;
 				changed.ElapsedTime = 1;
 				break;
@@ -296,11 +303,6 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 				wFooter->SetColor(Config.progressbar_color);
 				mvwhline(wFooter->Raw(), 0, 0, 0, wFooter->GetWidth());
 				wFooter->SetColor(Config.statusbar_color);
-				try
-				{
-					myPlaylist->Main()->BoldOption(myPlaylist->OldPlaying, 0);
-				}
-				catch (std::out_of_range) { }
 				Playlist::ReloadRemaining = 1;
 				myPlaylist->NowPlaying = -1;
 				Config.stop_after_current_song = 0;
@@ -326,14 +328,8 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 				std::swap(myPlaylist->NowPlaying, myPlaylist->OldPlaying);
 				Mpd->Play(myPlaylist->NowPlaying);
 			}
-			try
-			{
-				myPlaylist->Main()->BoldOption(myPlaylist->OldPlaying, 0);
-			}
-			catch (std::out_of_range &) { }
 			np = Mpd->GetCurrentSong();
 			WindowTitle(utf_to_locale_cpy(np.toString(Config.song_window_title_format)));
-			myPlaylist->Main()->BoldOption(myPlaylist->NowPlaying, 1);
 			if (Config.autocenter_mode && !myPlaylist->Main()->isFiltered())
 				myPlaylist->Main()->Highlight(myPlaylist->NowPlaying);
 			repeat_one_allowed = 0;

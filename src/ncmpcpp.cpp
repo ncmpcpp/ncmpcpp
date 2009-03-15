@@ -458,17 +458,20 @@ int main(int argc, char *argv[])
 				{
 					Playlist::BlockNowPlayingUpdate = 1;
 					myPlaylist->Main()->SetTimeout(50);
+					int del_counter = 0;
 					while (!myPlaylist->Main()->Empty() && Keypressed(input, Key.Delete))
 					{
 						size_t id = myPlaylist->Main()->Choice();
 						TraceMpdStatus();
 						myPlaylist->UpdateTimer();
-						if (myPlaylist->NowPlaying > myPlaylist->CurrentSong()->GetPosition())  // needed for keeping proper
-							myPlaylist->NowPlaying--; // position of now playing song.
+						// needed for keeping proper position of now playing song.
+						if (myPlaylist->NowPlaying > myPlaylist->CurrentSong()->GetPosition()-del_counter)
+							myPlaylist->NowPlaying--;
 						Mpd->DeleteID(myPlaylist->CurrentSong()->GetID());
 						myPlaylist->Main()->DeleteOption(id);
 						myPlaylist->Main()->Refresh();
 						myPlaylist->Main()->ReadKey(input);
+						del_counter++;
 					}
 					myPlaylist->FixPositions(myPlaylist->Main()->Choice());
 					myPlaylist->Main()->SetTimeout(ncmpcpp_window_timeout);
