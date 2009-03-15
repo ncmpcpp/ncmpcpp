@@ -92,6 +92,9 @@ string Display::Columns(string st)
 
 void Display::SongsInColumns(const MPD::Song &s, void *s_template, Menu<MPD::Song> *menu)
 {
+	if (!s.Localized())
+		const_cast<MPD::Song *>(&s)->Localize();
+	
 	string st = s_template ? *static_cast<string *>(s_template) : "";
 	size_t where = 0;
 	Color color;
