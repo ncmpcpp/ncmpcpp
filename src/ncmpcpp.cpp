@@ -875,8 +875,10 @@ int main(int argc, char *argv[])
 		}
 		else if (Keypressed(input, Key.Add))
 		{
+			if (myScreen == myPlaylistEditor && myPlaylistEditor->Playlists->Empty())
+				continue;
 			LockStatusbar();
-			Statusbar() << "Add: ";
+			Statusbar() << (myScreen == myPlaylistEditor ? "Add to playlist: " : "Add: ");
 			string path = wFooter->GetString();
 			UnlockStatusbar();
 			if (!path.empty())
@@ -887,12 +889,20 @@ int main(int argc, char *argv[])
 				{
 					Mpd->StartCommandsList();
 					SongList::const_iterator it = list.begin();
-					for (; it != list.end(); it++)
-						if (Mpd->AddSong(**it) < 0)
-							break;
+					if (myScreen == myPlaylistEditor)
+					{
+						for (; it != list.end(); it++)
+							Mpd->AddToPlaylist(myPlaylistEditor->Playlists->Current(), **it);
+					}
+					else
+					{
+						for (; it != list.end(); it++)
+							if (Mpd->AddSong(**it) < 0)
+								break;
+					}
 					Mpd->CommitCommandsList();
 					
-					if (it != list.begin())
+					if (it != list.begin() && myScreen != myPlaylistEditor)
 					{
 						Song &s = myPlaylist->Main()->at(myPlaylist->Main()->Size()-list.size());
 						if (s.GetHash() != list[0]->GetHash())
@@ -900,7 +910,18 @@ int main(int argc, char *argv[])
 					}
 				}
 				else
-					Mpd->AddSong(path);
+				{
+					if (myScreen == myPlaylistEditor)
+					{
+						Mpd->AddToPlaylist(myPlaylistEditor->Playlists->Current(), path);
+					}
+					else
+					{
+						Mpd->AddSong(path);
+					}
+				}
+				if (myScreen == myPlaylistEditor)
+					myPlaylistEditor->Content->Clear(0); // make it refetch content of playlist
 				FreeSongList(list);
 			}
 		}
