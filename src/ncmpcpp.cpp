@@ -583,7 +583,7 @@ int main(int argc, char *argv[])
 					MessagesAllowed = 0;
 					while (in != 'y' && in != 'n')
 					{
-						Mpd->UpdateStatus();
+						TraceMpdStatus();
 						wFooter->ReadKey(in);
 					}
 					MessagesAllowed = 1;
@@ -599,6 +599,8 @@ int main(int argc, char *argv[])
 					curs_set(0);
 					myPlaylistEditor->Playlists->Clear(0); // make playlist's list update itself
 					UnlockStatusbar();
+					if (myScreen == myPlaylist)
+						myPlaylist->EnableHighlighting();
 				}
 			}
 			if (!Config.local_browser && myBrowser->CurrentDir() == "/" && !myBrowser->Main()->Empty())
