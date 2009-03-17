@@ -513,15 +513,15 @@ int main(int argc, char *argv[])
 				{
 					vector<size_t> list;
 					myPlaylistEditor->Content->GetSelected(list);
-					locale_to_utf(myPlaylistEditor->Playlists->Current());
+					string playlist = locale_to_utf_cpy(myPlaylistEditor->Playlists->Current());
+					ShowMessage("Deleting selected items...");
 					Mpd->StartCommandsList();
 					for (vector<size_t>::reverse_iterator it = list.rbegin(); it != list.rend(); it++)
 					{
-						Mpd->Delete(myPlaylistEditor->Playlists->Current(), *it);
+						Mpd->Delete(playlist, *it);
 						myPlaylistEditor->Content->DeleteOption(*it);
 					}
 					Mpd->CommitCommandsList();
-					utf_to_locale(myPlaylistEditor->Playlists->Current());
 					ShowMessage("Selected items deleted from playlist '%s'!", myPlaylistEditor->Playlists->Current().c_str());
 				}
 				else
