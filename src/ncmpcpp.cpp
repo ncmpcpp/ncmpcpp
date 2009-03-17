@@ -1368,14 +1368,14 @@ int main(int argc, char *argv[])
 			}
 			
 			mDialog.AddOption("Current MPD playlist");
-			mDialog.AddOption("Create new playlist (m3u file)", 0, playlists_not_active);
+			mDialog.AddOption("Create new playlist", 0, playlists_not_active);
 			mDialog.AddSeparator();
 			TagList playlists;
 			Mpd->GetPlaylists(playlists);
 			for (TagList::iterator it = playlists.begin(); it != playlists.end(); it++)
 			{
 				utf_to_locale(*it);
-				mDialog.AddOption("'" + *it + "' playlist", 0, playlists_not_active);
+				mDialog.AddOption(*it, 0, playlists_not_active);
 			}
 			mDialog.AddSeparator();
 			mDialog.AddOption("Cancel");
@@ -1444,13 +1444,12 @@ int main(int argc, char *argv[])
 			}
 			else if (id > 1 && id < mDialog.Size()-1)
 			{
-				locale_to_utf(playlists[id-3]);
+				string playlist = locale_to_utf_cpy(mDialog.Current());
 				Mpd->StartCommandsList();
 				for (SongList::const_iterator it = result.begin(); it != result.end(); it++)
-					Mpd->AddToPlaylist(playlists[id-3], **it);
+					Mpd->AddToPlaylist(playlist, **it);
 				Mpd->CommitCommandsList();
-				utf_to_locale(playlists[id-3]);
-				ShowMessage("Selected items added to playlist '%s'!", playlists[id-3].c_str());
+				ShowMessage("Selected items added to playlist '%s'!", mDialog.Current().c_str());
 			}
 			
 			if (id != mDialog.Size()-1)
@@ -1460,7 +1459,8 @@ int main(int argc, char *argv[])
 					myBrowser->GetDirectory("/");
 				myPlaylistEditor->Playlists->Clear(0); // make playlist editor update itself
 			}
-			myPlaylist->UpdateTimer();
+			if (myScreen == myPlaylist)
+				myPlaylist->EnableHighlighting();
 			FreeSongList(result);
 		}
 		else if (Keypressed(input, Key.Crop))
