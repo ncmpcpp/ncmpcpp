@@ -55,7 +55,7 @@
 ##
 ## available values:
 ##
-## - 0 - default window color
+## - 0 - default window color (discards all other colors)
 ## - 1 - black
 ## - 2 - red
 ## - 3 - green
