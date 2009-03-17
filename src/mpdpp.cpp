@@ -338,6 +338,16 @@ void Connection::ClearPlaylist() const
 	}
 }
 
+void Connection::ClearPlaylist(const string &playlist) const
+{
+	if (isConnected)
+	{
+		mpd_sendPlaylistClearCommand(itsConnection, playlist.c_str());
+		if (!isCommandsListEnabled)
+			mpd_finishCommand(itsConnection);
+	}
+}
+
 void Connection::AddToPlaylist(const string &path, const Song &s) const
 {
 	if (!s.Empty())

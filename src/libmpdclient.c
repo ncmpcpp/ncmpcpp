@@ -2026,7 +2026,7 @@ void mpd_sendListPlaylistCommand(mpd_Connection *connection, char *path)
 	free(query);
 }
 
-void mpd_sendPlaylistClearCommand(mpd_Connection *connection, char *path)
+void mpd_sendPlaylistClearCommand(mpd_Connection *connection, const char *path)
 {
 	char *sPath = mpd_sanitizeArg(path);
 	int len = strlen("playlistclear")+2+strlen(sPath)+3;

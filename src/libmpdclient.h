@@ -664,7 +664,7 @@ void mpd_startPlaylistSearch(mpd_Connection *connection, int exact);
 
 void mpd_startStatsSearch(mpd_Connection *connection);
 
-void mpd_sendPlaylistClearCommand(mpd_Connection *connection, char *path);
+void mpd_sendPlaylistClearCommand(mpd_Connection *connection, const char *path);
 
 void mpd_sendPlaylistAddCommand(mpd_Connection *connection,
                                 const char *playlist, const char *path);

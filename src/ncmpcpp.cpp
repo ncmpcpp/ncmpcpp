@@ -1512,8 +1512,18 @@ int main(int argc, char *argv[])
 			}
 			else
 			{
+				if (myScreen == myPlaylistEditor && myPlaylistEditor->Playlists->Empty())
+					continue;
 				ShowMessage("Clearing playlist...");
-				Mpd->ClearPlaylist();
+				if (myScreen == myPlaylistEditor)
+				{
+					Mpd->ClearPlaylist(locale_to_utf_cpy(myPlaylistEditor->Playlists->Current()));
+					myPlaylistEditor->Content->Clear(0);
+				}
+				else
+				{
+					Mpd->ClearPlaylist();
+				}
 				ShowMessage("Cleared playlist!");
 			}
 		}

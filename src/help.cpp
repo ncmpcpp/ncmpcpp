@@ -238,6 +238,7 @@ void Help::GetKeybindings()
 #	endif // ! HAVE_TAGLIB_H
 	*w << DisplayKeys(Key.MvSongUp) << "Move item(s) up\n";
 	*w << DisplayKeys(Key.MvSongDown) << "Move item(s) down\n";
+	*w << DisplayKeys(Key.Clear) << "Clear current playlist\n";
 	
 	*w << "\n\n   " << fmtBold << "Keys - Lyrics\n -----------------------------------------\n" << fmtBoldEnd;
 	*w << DisplayKeys(Key.Space) << "Switch for following lyrics of now playing song\n";
