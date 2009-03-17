@@ -598,7 +598,7 @@ template <typename T> bool NCurses::Menu<T>::hasSelected() const
 template <typename T> void NCurses::Menu<T>::GetSelected(std::vector<size_t> &v) const
 {
 	for (size_t i = 0; i < itsOptionsPtr->size(); i++)
-		if ((*itsOptionsPtr)[i]->isSelected)
+		if ((*itsOptionsPtr)[i] && (*itsOptionsPtr)[i]->isSelected)
 			v.push_back(i);
 }
 
