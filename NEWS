@@ -1,3 +1,17 @@
+ncmpcpp-0.3.2
+
+ + new feature: locate currently playing song in browser
+ + new feature: stop playing after current song
+ + new feature: move item(s) in playlist to actual cursor's position
+ + new feature: reverse playlist's order
+ + support for external console editor
+ + support for multiple composer, performer and disc tags
+ + support for basic and extended regular expressions
+ + make blocking search constraints after succesful searching optional
+ + improved searching in screens
+ + minor improvements and bugfixes
+
+
 ncmpcpp-0.3.1
 
  + support for columns in browser and search engine
