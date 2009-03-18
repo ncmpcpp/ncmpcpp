@@ -51,7 +51,7 @@ const char *Browser::SupportedExtensions[] =
 
 void Browser::Init()
 {
-	w = new Menu<Item>(0, MainStartY, COLS, MainHeight, "", Config.main_color, brNone);
+	w = new Menu<Item>(0, MainStartY, COLS, MainHeight, Config.columns_in_browser ? Display::Columns(Config.song_columns_list_format) : "", Config.main_color, brNone);
 	w->HighlightColor(Config.main_highlight_color);
 	w->SetTimeout(ncmpcpp_window_timeout);
 	w->SetSelectPrefix(&Config.selected_item_prefix);
