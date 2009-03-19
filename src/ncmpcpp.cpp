@@ -1463,7 +1463,7 @@ int main(int argc, char *argv[])
 				myPlaylist->EnableHighlighting();
 			FreeSongList(result);
 		}
-		else if (Keypressed(input, Key.Crop) && myScreen == myPlaylist)
+		else if (Keypressed(input, Key.Crop))
 		{
 			CHECK_PLAYLIST_FOR_FILTERING;
 			if (myPlaylist->Main()->hasSelected())
@@ -1501,8 +1501,6 @@ int main(int argc, char *argv[])
 		}
 		else if (Keypressed(input, Key.Clear))
 		{
-			if (myScreen != myPlaylist && myScreen != myPlaylistEditor)
-				continue;
 			if (myPlaylist->Main()->isFiltered())
 			{
 				ShowMessage("Deleting filtered items...");
