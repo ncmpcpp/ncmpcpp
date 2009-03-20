@@ -1307,18 +1307,24 @@ int main(int argc, char *argv[])
 				catch (std::out_of_range) { }
 				if (newpos > 0 && newpos < s->GetTotalLength())
 					Mpd->Seek(newpos);
+				else
+					ShowMessage("Out of bounds, 0:00-%s possible mm:ss, %d given.", s->GetLength().c_str(), newpos);
 			}
 			else if (position.find('s') != string::npos) // probably position in seconds
 			{
 				newpos = StrToInt(position);
 				if (newpos > 0 && newpos < s->GetTotalLength())
 					Mpd->Seek(newpos);
+				else
+					ShowMessage("Out of bounds, 1-%d possible for seconds, %d given.", s->GetTotalLength(), newpos);
 			}
 			else
 			{
 				newpos = StrToInt(position);
 				if (newpos > 0 && newpos < 100)
 					Mpd->Seek(s->GetTotalLength()*newpos/100.0);
+				else
+					ShowMessage("Out of bounds, 1-99 possible for %, %d given.", newpos);
 			}
 		}
 		else if (Keypressed(input, Key.ReverseSelection))
