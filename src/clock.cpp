@@ -87,6 +87,8 @@ void Clock::SwitchTo()
 	myPlaylist->Main()->Hide();
 	RedrawHeader = 1;
 	Prepare();
+	// clearing screen apparently fixes the problem with last digits being misrendered
+	w->Clear();
 	w->Display();
 }
 
