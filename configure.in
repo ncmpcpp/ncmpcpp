@@ -21,10 +21,12 @@ fi
 dnl ======================
 dnl = checking for iconv =
 dnl ======================
-AC_CHECK_FILE([/usr/share/i18n/SUPPORTED], AC_DEFINE([SUPPORTED_LOCALES], ["/usr/share/i18n/SUPPORTED"], [ ]),
-	AC_CHECK_FILE([/etc/locale.gen], AC_DEFINE([SUPPORTED_LOCALES], ["/etc/locale.gen"], [ ]),
-	AC_MSG_NOTICE(cannot find list of supported locales, iconv support will be disabled))
-)
+if test "$prefix" = "NONE"; then
+	encodings_file="${ac_default_prefix}"
+else
+	encodings_file="${prefix}"
+fi
+AC_DEFINE_UNQUOTED([ENCODINGS], ["${encodings_file}/share/ncmpcpp/encodings"], [defines path for encodings file])
 AC_CHECK_HEADERS([iconv.h], , AC_MSG_NOTICE(cannot find iconv.h header, iconv support will be disabled))
 
 dnl ========================
@@ -78,5 +80,5 @@ if test "$taglib" = "yes" ; then
 	fi
 fi
 
-AC_CONFIG_FILES([Makefile src/Makefile doc/Makefile])
+AC_CONFIG_FILES([Makefile src/Makefile data/Makefile doc/Makefile])
 AC_OUTPUT

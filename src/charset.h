@@ -25,7 +25,7 @@
 #include <config.h>
 #endif
 
-#if defined(SUPPORTED_LOCALES) && defined(HAVE_ICONV_H)
+#ifdef HAVE_ICONV_H
 
 #include <string>
 
@@ -53,7 +53,7 @@ void str_pool_locale_to_utf(char *&);
 #define str_pool_utf_to_locale(x);
 #define str_pool_locale_to_utf(x);
 
-#endif // SUPPORTED_LOCALES && HAVE_ICONV_H
+#endif // HAVE_ICONV_H
 
 #endif
 

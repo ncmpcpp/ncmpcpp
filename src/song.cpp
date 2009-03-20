@@ -84,7 +84,7 @@ string Song::GetLength() const
 
 void Song::Localize()
 {
-#	if defined(SUPPORTED_LOCALES) && defined(HAVE_ICONV_H)
+#	ifdef HAVE_ICONV_H
 	if (isLocalised)
 		return;
 	str_pool_utf_to_locale(itsSong->file);
@@ -101,7 +101,7 @@ void Song::Localize()
 	str_pool_utf_to_locale(itsSong->disc);
 	str_pool_utf_to_locale(itsSong->comment);
 	isLocalised = 1;
-#	endif // SUPPORTED_LOCALES && HAVE_ICONV_H
+#	endif // HAVE_ICONV_H
 }
 
 void Song::Clear()
