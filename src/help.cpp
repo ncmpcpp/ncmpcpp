@@ -179,7 +179,7 @@ void Help::GetKeybindings()
 #	ifdef HAVE_TAGLIB_H
 	*w << DisplayKeys(Key.EditTags) << "Edit song's tags/playlist's name\n";
 #	endif // HAVE_TAGLIB_H
-	*w << DisplayKeys(Key.GoToPosition) << "Go to chosen position in current song\n";
+	*w << DisplayKeys(Key.GoToPosition) << "Go to given position in current song (in % by default)\n";
 	*w << DisplayKeys(Key.SongInfo) << "Show song's info\n";
 #	ifdef HAVE_CURL_CURL_H
 	*w << DisplayKeys(Key.ArtistInfo) << "Show artist's info\n";
