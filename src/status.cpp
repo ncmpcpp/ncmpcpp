@@ -324,10 +324,7 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 		if (myPlaylist->isPlaying())
 		{
 			if (Config.repeat_one_mode && repeat_one_allowed)
-			{
-				std::swap(myPlaylist->NowPlaying, myPlaylist->OldPlaying);
-				Mpd->Play(myPlaylist->NowPlaying);
-			}
+				Mpd->Play(myPlaylist->OldPlaying);
 			np = Mpd->GetCurrentSong();
 			WindowTitle(utf_to_locale_cpy(np.toString(Config.song_window_title_format)));
 			if (Config.autocenter_mode && !myPlaylist->Main()->isFiltered())
