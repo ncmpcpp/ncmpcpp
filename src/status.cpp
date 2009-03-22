@@ -103,18 +103,24 @@ void UnlockStatusbar()
 
 void TraceMpdStatus()
 {
-	static time_t now;
+	static timeval past, now;
 	
-	if (Mpd->Connected())
+	gettimeofday(&now, 0);
+	if (Mpd->Connected()
+	&&  ((now.tv_sec == past.tv_sec && now.tv_usec >= past.tv_usec+500000) || now.tv_sec > past.tv_sec)
+	   )
+	{
 		Mpd->UpdateStatus();
+		gettimeofday(&past, 0);
+	}
+	wFooter->Refresh();
 	
-	time(&now);
-	if (myScreen == myPlaylist && now == myPlaylist->Timer()+Config.playlist_disable_highlight_delay)
+	if (myScreen == myPlaylist && now.tv_sec == myPlaylist->Timer()+Config.playlist_disable_highlight_delay)
 		myPlaylist->Main()->Highlighting(!Config.playlist_disable_highlight_delay);
 	
 	if (lock_statusbar_delay > 0)
 	{
-		if (now >= time_of_statusbar_lock+lock_statusbar_delay)
+		if (now.tv_sec >= time_of_statusbar_lock+lock_statusbar_delay)
 		{
 			lock_statusbar_delay = -1;
 			

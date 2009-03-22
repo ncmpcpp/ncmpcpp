@@ -115,7 +115,10 @@ std::string Playlist::Title()
 void Playlist::EnterPressed()
 {
 	if (!w->Empty())
+	{
 		Mpd->PlayID(w->Current().GetID());
+		Mpd->UpdateStatus();
+	}
 }
 
 void Playlist::SpacePressed()

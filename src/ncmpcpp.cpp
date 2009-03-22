@@ -414,7 +414,10 @@ int main(int argc, char *argv[])
 			}
 #			endif // HAVE_TAGLIB_H
 			else
+			{
 				Mpd->SetVolume(Mpd->GetVolume()+1);
+				Mpd->UpdateStatus();
+			}
 		}
 		else if (Keypressed(input, Key.VolumeDown))
 		{
@@ -433,7 +436,10 @@ int main(int argc, char *argv[])
 			}
 #			endif // HAVE_TAGLIB_H
 			else
+			{
 				Mpd->SetVolume(Mpd->GetVolume()-1);
+				Mpd->UpdateStatus();
+			}
 		}
 		else if (Keypressed(input, Key.Delete))
 		{
@@ -545,14 +551,17 @@ int main(int argc, char *argv[])
 		else if (Keypressed(input, Key.Prev))
 		{
 			Mpd->Prev();
+			Mpd->UpdateStatus();
 		}
 		else if (Keypressed(input, Key.Next))
 		{
 			Mpd->Next();
+			Mpd->UpdateStatus();
 		}
 		else if (Keypressed(input, Key.Pause))
 		{
 			Mpd->Pause();
+			Mpd->UpdateStatus();
 		}
 		else if (Keypressed(input, Key.SavePlaylist))
 		{
@@ -609,6 +618,7 @@ int main(int argc, char *argv[])
 		else if (Keypressed(input, Key.Stop))
 		{
 			Mpd->Stop();
+			Mpd->UpdateStatus();
 		}
 		else if (Keypressed(input, Key.MvSongUp))
 		{
@@ -979,6 +989,7 @@ int main(int argc, char *argv[])
 				wFooter->Refresh();
 			}
 			Mpd->Seek(songpos);
+			Mpd->UpdateStatus();
 			
 			UnlockProgressbar();
 			UnlockStatusbar();
@@ -1068,6 +1079,7 @@ int main(int argc, char *argv[])
 		else if (Keypressed(input, Key.ToggleRepeat))
 		{
 			Mpd->SetRepeat(!Mpd->GetRepeat());
+			Mpd->UpdateStatus();
 		}
 		else if (Keypressed(input, Key.ToggleRepeatOne))
 		{
@@ -1077,14 +1089,17 @@ int main(int argc, char *argv[])
 		else if (Keypressed(input, Key.Shuffle))
 		{
 			Mpd->Shuffle();
+			Mpd->UpdateStatus();
 		}
 		else if (Keypressed(input, Key.ToggleRandom))
 		{
 			Mpd->SetRandom(!Mpd->GetRandom());
+			Mpd->UpdateStatus();
 		}
 		else if (Keypressed(input, Key.ToggleCrossfade))
 		{
 			Mpd->SetCrossfade(Mpd->GetCrossfade() ? 0 : Config.crossfade_time);
+			Mpd->UpdateStatus();
 		}
 		else if (Keypressed(input, Key.SetCrossfade))
 		{
@@ -1097,6 +1112,7 @@ int main(int argc, char *argv[])
 			{
 				Config.crossfade_time = cf;
 				Mpd->SetCrossfade(cf);
+				Mpd->UpdateStatus();
 			}
 		}
 		else if (Keypressed(input, Key.EditTags))
@@ -1326,6 +1342,7 @@ int main(int argc, char *argv[])
 				else
 					ShowMessage("Out of bounds, 1-99 possible for %, %d given.", newpos);
 			}
+			Mpd->UpdateStatus();
 		}
 		else if (Keypressed(input, Key.ReverseSelection))
 		{
@@ -1530,6 +1547,7 @@ int main(int argc, char *argv[])
 				{
 					Mpd->ClearPlaylist();
 				}
+				Mpd->UpdateStatus();
 				ShowMessage("Cleared playlist!");
 			}
 		}
