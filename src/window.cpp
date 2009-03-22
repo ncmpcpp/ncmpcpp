@@ -423,6 +423,10 @@ string Window::GetString(const string &base, size_t length, size_t width, bool e
 		prefresh(itsWindow, 0, 0, itsStartY, itsStartX, itsStartY+itsHeight-1, itsStartX+itsWidth-1);
 		input = wgetch(itsWindow);
 		
+		// these key codes are special and should be ignored
+		if (input < 10 || (input > 10 && input < 32))
+			continue;
+		
 		switch (input)
 		{
 			case ERR:
