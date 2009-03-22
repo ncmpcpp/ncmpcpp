@@ -106,9 +106,7 @@ void TraceMpdStatus()
 	static timeval past, now;
 	
 	gettimeofday(&now, 0);
-	if (Mpd->Connected()
-	&&  ((now.tv_sec == past.tv_sec && now.tv_usec >= past.tv_usec+500000) || now.tv_sec > past.tv_sec)
-	   )
+	if (Mpd->Connected() && now.tv_sec > past.tv_sec)
 	{
 		Mpd->UpdateStatus();
 		gettimeofday(&past, 0);
