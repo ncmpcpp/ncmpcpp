@@ -191,7 +191,7 @@ void Connection::UpdateDirectory(const string &path)
 	{
 		mpd_sendUpdateCommand(itsConnection, path.c_str());
 		mpd_finishCommand(itsConnection);
-		if (!itsConnection->error)
+		if (!itsConnection->error && itsUpdater)
 		{
 			itsCurrentStatus->updatingDb = 1;
 			StatusChanges ch;
