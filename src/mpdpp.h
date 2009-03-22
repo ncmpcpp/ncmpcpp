@@ -96,7 +96,7 @@ namespace MPD
 			void SetStatusUpdater(StatusUpdater, void *);
 			void SetErrorHandler(ErrorHandler, void *);
 			void UpdateStatus();
-			void UpdateDirectory(const std::string &) const;
+			void UpdateDirectory(const std::string &);
 			
 			void Execute(const std::string &) const;
 			
@@ -186,8 +186,6 @@ namespace MPD
 			int itsTimeout;
 			std::string itsPassword;
 			
-			mpd_Stats *itsOldStats;
-			mpd_Stats *itsCurrentStats;
 			mpd_Status *itsCurrentStatus;
 			mpd_Status *itsOldStatus;
 			

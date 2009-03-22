@@ -29,31 +29,25 @@ const char *MPD::Message::PartOfSongsAdded = "Only part of requested songs' list
 const char *MPD::Message::FullPlaylist = "Playlist is full!";
 const char *MPD::Message::FunctionDisabledFilteringEnabled = "Function disabled due to enabled filtering in playlist";
 
-Connection::Connection() : isConnected(0),
-				 isCommandsListEnabled(0),
-				 itsErrorCode(0),
-				 itsMaxPlaylistLength(-1),
-				 itsHost("localhost"),
-				 itsPort(6600),
-				 itsTimeout(15),
-				 itsUpdater(0),
-				 itsErrorHandler(0)
+Connection::Connection() : itsConnection(0),
+			   isConnected(0),
+			   isCommandsListEnabled(0),
+			   itsErrorCode(0),
+			   itsMaxPlaylistLength(-1),
+			   itsHost("localhost"),
+			   itsPort(6600),
+			   itsTimeout(15),
+			   itsCurrentStatus(0),
+			   itsOldStatus(0),
+			   itsUpdater(0),
+			   itsErrorHandler(0)
 {
-	itsConnection = 0;
-	itsCurrentStats = 0;
-	itsOldStats = 0;
-	itsCurrentStatus = 0;
-	itsOldStatus = 0;
 }
 
 Connection::~Connection()
 {
 	if (itsConnection)
 		mpd_closeConnection(itsConnection);
-	if (itsOldStats)
-		mpd_freeStats(itsOldStats);
-	if (itsCurrentStats)
-		mpd_freeStats(itsCurrentStats);
 	if (itsOldStatus)
 		mpd_freeStatus(itsOldStatus);
 	if (itsCurrentStatus)
@@ -85,17 +79,11 @@ void Connection::Disconnect()
 {
 	if (itsConnection)
 		mpd_closeConnection(itsConnection);
-	if (itsOldStats)
-		mpd_freeStats(itsOldStats);
-	if (itsCurrentStats)
-		mpd_freeStats(itsCurrentStats);
 	if (itsOldStatus)
 		mpd_freeStatus(itsOldStatus);
 	if (itsCurrentStatus)
 		mpd_freeStatus(itsCurrentStatus);
 	itsConnection = 0;
-	itsCurrentStats = 0;
-	itsOldStats = 0;
 	itsCurrentStatus = 0;
 	itsOldStatus = 0;
 	isConnected = 0;
@@ -163,15 +151,9 @@ void Connection::UpdateStatus()
 	if (CheckForErrors())
 		return;
 	
-	if (itsOldStats)
-		mpd_freeStats(itsOldStats);
-	itsOldStats = itsCurrentStats;
-	mpd_sendStatsCommand(itsConnection);
-	itsCurrentStats = mpd_getStats(itsConnection);
-	
-	if (itsCurrentStatus && itsCurrentStats && itsUpdater)
+	if (itsCurrentStatus && itsUpdater)
 	{
-		if (itsOldStatus == NULL || itsOldStats == NULL)
+		if (!itsOldStatus)
 		{
 			itsChanges.Playlist = 1;
 			itsChanges.SongID = 1;
@@ -189,7 +171,7 @@ void Connection::UpdateStatus()
 		{
 			itsChanges.Playlist = itsOldStatus->playlist != itsCurrentStatus->playlist;
 			itsChanges.SongID = itsOldStatus->songid != itsCurrentStatus->songid;
-			itsChanges.Database = itsOldStats->dbUpdateTime != itsCurrentStats->dbUpdateTime;
+			itsChanges.Database = itsOldStatus->updatingDb && !itsCurrentStatus->updatingDb;
 			itsChanges.DBUpdating = itsOldStatus->updatingDb != itsCurrentStatus->updatingDb;
 			itsChanges.Volume = itsOldStatus->volume != itsCurrentStatus->volume;
 			itsChanges.ElapsedTime = itsOldStatus->elapsedTime != itsCurrentStatus->elapsedTime;
@@ -203,12 +185,14 @@ void Connection::UpdateStatus()
 	}
 }
 
-void Connection::UpdateDirectory(const string &path) const
+void Connection::UpdateDirectory(const string &path)
 {
 	if (isConnected)
 	{
 		mpd_sendUpdateCommand(itsConnection, path.c_str());
 		mpd_finishCommand(itsConnection);
+		if (!itsConnection->error)
+			itsCurrentStatus->updatingDb = 1;
 	}
 }
 
