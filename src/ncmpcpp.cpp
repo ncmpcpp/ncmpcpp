@@ -1061,7 +1061,6 @@ int main(int argc, char *argv[])
 #			endif // HAVE_TAGLIB_H
 			else
 				Mpd->UpdateDirectory("/");
-			Mpd->UpdateStatus();
 		}
 		else if (Keypressed(input, Key.GoToNowPlaying))
 		{
