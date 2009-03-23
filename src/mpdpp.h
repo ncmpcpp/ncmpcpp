@@ -137,8 +137,8 @@ namespace MPD
 			
 			void SetRepeat(bool) const;
 			void SetRandom(bool) const;
-			void SetVolume(int) const;
 			void SetCrossfade(int) const;
+			void SetVolume(int);
 			
 			int AddSong(const std::string &); // returns id of added song
 			int AddSong(const Song &); // returns id of added song

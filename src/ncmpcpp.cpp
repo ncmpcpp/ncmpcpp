@@ -414,10 +414,7 @@ int main(int argc, char *argv[])
 			}
 #			endif // HAVE_TAGLIB_H
 			else
-			{
 				Mpd->SetVolume(Mpd->GetVolume()+1);
-				Mpd->UpdateStatus();
-			}
 		}
 		else if (Keypressed(input, Key.VolumeDown))
 		{
@@ -436,10 +433,7 @@ int main(int argc, char *argv[])
 			}
 #			endif // HAVE_TAGLIB_H
 			else
-			{
 				Mpd->SetVolume(Mpd->GetVolume()-1);
-				Mpd->UpdateStatus();
-			}
 		}
 		else if (Keypressed(input, Key.Delete))
 		{

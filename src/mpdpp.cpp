@@ -482,13 +482,19 @@ void Connection::SetRandom(bool mode) const
 	}
 }
 
-void Connection::SetVolume(int vol) const
+void Connection::SetVolume(int vol)
 {
 	if (isConnected)
 	{
 		mpd_sendSetvolCommand(itsConnection, vol);
-		if (!isCommandsListEnabled)
-			mpd_finishCommand(itsConnection);
+		mpd_finishCommand(itsConnection);
+		if (!itsConnection->error && itsUpdater)
+		{
+			itsCurrentStatus->volume = vol;
+			StatusChanges ch;
+			ch.Volume = 1;
+			itsUpdater(this, ch, itsStatusUpdaterUserdata);
+		}
 	}
 }
 
