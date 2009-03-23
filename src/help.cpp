@@ -242,6 +242,7 @@ void Help::GetKeybindings()
 	
 	*w << "\n\n   " << fmtBold << "Keys - Lyrics\n -----------------------------------------\n" << fmtBoldEnd;
 	*w << DisplayKeys(Key.Space) << "Switch for following lyrics of now playing song\n";
+	*w << DisplayKeys(Key.EditTags) << "Open lyrics in external editor\n";
 	
 #	ifdef HAVE_TAGLIB_H
 	*w << "\n\n   " << fmtBold << "Keys - Tag editor\n -----------------------------------------\n" << fmtBoldEnd;
