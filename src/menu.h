@@ -671,8 +671,6 @@ template <typename T> void NCurses::Menu<T>::PrevFound(bool wrap)
 
 template <typename T> void NCurses::Menu<T>::ApplyFilter(const std::string &filter, size_t beginning, int flags)
 {
-	if (filter == itsFilter)
-		return;
 	itsFound.clear();
 	ClearFiltered();
 	itsFilter = filter;

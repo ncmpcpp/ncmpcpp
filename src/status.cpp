@@ -65,7 +65,12 @@ void StatusbarGetStringHelper(const std::wstring &)
 
 void StatusbarApplyFilterImmediately(const std::wstring &ws)
 {
-	myScreen->ApplyFilter(ToString(ws));
+	static std::wstring cmp;
+	if (cmp != ws)
+	{
+		myScreen->ApplyFilter(ToString(ws));
+		cmp = ws;
+	}
 	myScreen->RefreshWindow();
 	TraceMpdStatus();
 }
