@@ -199,8 +199,6 @@ int main(int argc, char *argv[])
 		
 		TraceMpdStatus();
 		
-		BlockItemListUpdate = 0;
-		Playlist::BlockUpdate = 0;
 		MessagesAllowed = 1;
 		
 		// header stuff
@@ -463,6 +461,7 @@ int main(int argc, char *argv[])
 					{
 						size_t id = myPlaylist->Main()->Choice();
 						TraceMpdStatus();
+						Playlist::BlockUpdate = 1;
 						myPlaylist->UpdateTimer();
 						// needed for keeping proper position of now playing song.
 						if (myPlaylist->NowPlaying > myPlaylist->CurrentSong()->GetPosition()-del_counter)
@@ -619,7 +618,6 @@ int main(int argc, char *argv[])
 			if (myScreen == myPlaylist && !myPlaylist->Main()->Empty())
 			{
 				CHECK_PLAYLIST_FOR_FILTERING;
-				Playlist::BlockUpdate = 1;
 				myPlaylist->Main()->SetTimeout(50);
 				if (myPlaylist->Main()->hasSelected())
 				{
@@ -635,6 +633,7 @@ int main(int argc, char *argv[])
 					while (Keypressed(input, Key.MvSongUp) && list.front() > 0)
 					{
 						TraceMpdStatus();
+						Playlist::BlockUpdate = 1;
 						myPlaylist->UpdateTimer();
 						for (vector<size_t>::iterator it = list.begin(); it != list.end(); it++)
 						{
@@ -662,6 +661,7 @@ int main(int argc, char *argv[])
 					while (Keypressed(input, Key.MvSongUp) && to > 0)
 					{
 						TraceMpdStatus();
+						Playlist::BlockUpdate = 1;
 						myPlaylist->UpdateTimer();
 						to--;
 						myPlaylist->Main()->at(from).SetPosition(to);
@@ -729,7 +729,6 @@ int main(int argc, char *argv[])
 			if (myScreen == myPlaylist && !myPlaylist->Main()->Empty())
 			{
 				CHECK_PLAYLIST_FOR_FILTERING;
-				Playlist::BlockUpdate = 1;
 				myPlaylist->Main()->SetTimeout(50);
 				if (myPlaylist->Main()->hasSelected())
 				{
@@ -745,6 +744,7 @@ int main(int argc, char *argv[])
 					while (Keypressed(input, Key.MvSongDown) && list.back() < myPlaylist->Main()->Size()-1)
 					{
 						TraceMpdStatus();
+						Playlist::BlockUpdate = 1;
 						myPlaylist->UpdateTimer();
 						for (vector<size_t>::reverse_iterator it = list.rbegin(); it != list.rend(); it++)
 						{
@@ -772,6 +772,7 @@ int main(int argc, char *argv[])
 					while (Keypressed(input, Key.MvSongDown) && to < myPlaylist->Main()->Size()-1)
 					{
 						TraceMpdStatus();
+						Playlist::BlockUpdate = 1;
 						myPlaylist->UpdateTimer();
 						to++;
 						myPlaylist->Main()->at(from).SetPosition(to);

@@ -109,6 +109,8 @@ void TraceMpdStatus()
 	if (Mpd->Connected() && now.tv_sec > past.tv_sec)
 	{
 		Mpd->UpdateStatus();
+		BlockItemListUpdate = 0;
+		Playlist::BlockUpdate = 0;
 		gettimeofday(&past, 0);
 	}
 	wFooter->Refresh();
