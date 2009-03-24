@@ -240,7 +240,11 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 				myPlaylist->Main()->Refresh();
 			}
 			if (was_filtered)
+			{
 				myPlaylist->ApplyFilter(myPlaylist->Main()->GetFilter());
+				if (myPlaylist->Main()->Empty())
+					myPlaylist->Main()->ShowAll();
+			}
 			FreeSongList(list);
 		}
 		

@@ -157,7 +157,8 @@ namespace NCurses
 				if (itsOptions.empty())
 					return;
 				sort(itsOptions.begin()+beginning, itsOptions.end(), InternalSorting<Comparison>());
-				ClearFiltered();
+				if (isFiltered())
+					ApplyFilter(itsFilter);
 			}
 			
 			void SetSelectPrefix(Buffer *b) { itsSelectedPrefix = b; }
@@ -533,7 +534,6 @@ template <typename T> void NCurses::Menu<T>::ClearFiltered()
 {
 	itsFilteredOptions.clear();
 	itsFilteredRealPositions.clear();
-	itsFilter.clear();
 	itsOptionsPtr = &itsOptions;
 }
 
@@ -543,6 +543,7 @@ template <typename T> void NCurses::Menu<T>::Clear(bool clrscr)
 		delete *it;
 	itsOptions.clear();
 	itsFound.clear();
+	itsFilter.clear();
 	ClearFiltered();
 	itsOptionsPtr = &itsOptions;
 	if (clrscr)
