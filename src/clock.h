@@ -40,7 +40,7 @@ class Clock : public Screen<Window>
 		virtual std::string Title();
 		
 		virtual void Update();
-		virtual void Scroll() { }
+		virtual void Scroll(Where, const int *) { }
 		
 		virtual void EnterPressed() { }
 		virtual void SpacePressed() { }
