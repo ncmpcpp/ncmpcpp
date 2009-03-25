@@ -49,15 +49,14 @@ using std::string;
 const std::string Lyrics::Folder = home_folder + "/.lyrics";
 
 bool Lyrics::Reload = 0;
+bool Lyrics::Ready = 0;
 
 std::string Lyrics::Filename;
 
-#ifdef HAVE_CURL_CURL_H
+#ifdef HAVE_PTHREAD_H
 pthread_t Lyrics::Downloader = 0;
 pthread_mutex_t Global::CurlLock = PTHREAD_MUTEX_INITIALIZER;
-
-bool Lyrics::Ready = 0;
-#endif
+#endif // HAVE_PTHREAD_H
 
 Lyrics *myLyrics = new Lyrics;
 
@@ -75,10 +74,10 @@ void Lyrics::Resize()
 
 void Lyrics::Update()
 {
-#	ifdef HAVE_CURL_CURL_H
+#	ifdef HAVE_PTHREAD_H
 	if (myLyrics->Ready)
 		myLyrics->Take();
-#	endif // HAVE_CURL_CURL_H
+#	endif // HAVE_PTHREAD_H
 	
 	if (!Reload)
 		return;
@@ -98,7 +97,7 @@ void Lyrics::SwitchTo()
 	}
 	else
 	{
-#		ifdef HAVE_CURL_CURL_H
+#		ifdef HAVE_PTHREAD_H
 		if (Downloader && !Ready)
 		{
 			ShowMessage("Lyrics are being downloaded...");
@@ -109,7 +108,7 @@ void Lyrics::SwitchTo()
 			Take();
 			return;
 		}
-#		endif
+#		endif // HAVE_PTHREAD_H
 		
 		const MPD::Song *s = Reload ? myPlaylist->NowPlayingSong() : myScreen->CurrentSong();
 		
@@ -132,14 +131,14 @@ void Lyrics::SwitchTo()
 			w->Clear();
 #			ifdef HAVE_CURL_CURL_H
 			static_cast<Window &>(*w) << "Fetching lyrics...";
+#			endif // HAVE_CURL_CURL_H
+#			ifdef HAVE_PTHREAD_H
 			if (!Downloader)
-			{
 				pthread_create(&Downloader, NULL, Get, &itsSong);
-			}
 #			else
 			Get(&itsSong);
 			w->Flush();
-#			endif
+#			endif // HAVE_PTHREAD_H
 		}
 		Reload = 0;
 	}
@@ -190,10 +189,8 @@ void *Lyrics::Get(void *song)
 			*myLyrics->Main() << line;
 			first = 0;
 		}
-#		ifdef HAVE_CURL_CURL_H
 		Ready = 1;
 		pthread_exit(NULL);
-#		endif
 	}
 #	ifdef HAVE_CURL_CURL_H
 	CURLcode code;
@@ -295,6 +292,7 @@ void Lyrics::Edit()
 
 #ifdef HAVE_CURL_CURL_H
 
+#ifdef HAVE_PTHREAD_H
 void Lyrics::Take()
 {
 	if (!Ready)
@@ -304,6 +302,7 @@ void Lyrics::Take()
 	Downloader = 0;
 	Ready = 0;
 }
+#endif // HAVE_PTHREAD_H
 
 const char *Lyrics::GetPluginName(int offset)
 {

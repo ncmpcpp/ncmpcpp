@@ -38,9 +38,9 @@ namespace Global
 	extern size_t MainStartY;
 	extern size_t MainHeight;
 	
-#	ifdef HAVE_CURL_CURL_H
+#	ifdef HAVE_PTHREAD_H
 	extern pthread_mutex_t CurlLock;
-#	endif
+#	endif // HAVE_PTHREAD_H
 	
 	extern bool BlockItemListUpdate;
 	

@@ -27,6 +27,12 @@
 #include "menu.h"
 #include "scrollpad.h"
 
+#ifndef HAVE_PTHREAD_H
+# define pthread_mutex_lock(x);
+# define pthread_mutex_unlock(x);
+# define pthread_exit(x) return 0;
+#endif
+
 using namespace NCurses;
 
 typedef std::pair<std::string, std::string> string_pair;

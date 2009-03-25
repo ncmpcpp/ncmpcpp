@@ -27,7 +27,9 @@
 # else
 #  include <sys/stat.h>
 # endif // WIN32
-# include <pthread.h>
+# ifdef HAVE_PTHREAD_H
+#  include <pthread.h>
+# endif
 # include "curl/curl.h"
 # include "helpers.h"
 #endif
@@ -49,8 +51,12 @@ using std::vector;
 #ifdef HAVE_CURL_CURL_H
 const std::string Info::Folder = home_folder + "/.ncmpcpp/artists";
 bool Info::ArtistReady = 0;
+
+#ifdef HAVE_PTHREAD_H
 pthread_t Info::Downloader = 0;
-#endif
+#endif // HAVE_PTHREAD_H
+
+#endif // HAVE_CURL_CURL_H
 
 Info *myInfo = new Info;
 
@@ -71,9 +77,9 @@ std::string Info::Title()
 	return itsTitle;
 }
 
+#ifdef HAVE_PTHREAD_H
 void Info::Update()
 {
-#	ifdef HAVE_CURL_CURL_H
 	if (!ArtistReady)
 		return;
 	
@@ -81,8 +87,8 @@ void Info::Update()
 	w->Flush();
 	Downloader = 0;
 	ArtistReady = 0;
-#	endif // HAVE_CURL_CURL_H
 }
+#endif // HAVE_PTHREAD_H
 
 void Info::GetSong()
 {
@@ -121,6 +127,7 @@ void Info::GetArtist()
 	}
 	else
 	{
+#		ifdef HAVE_PTHREAD_H
 		if (Downloader && !ArtistReady)
 		{
 			ShowMessage("Artist's info is being downloaded...");
@@ -128,6 +135,7 @@ void Info::GetArtist()
 		}
 		else if (ArtistReady)
 			Update();
+#		endif // HAVE_PTHREAD_H
 		
 		string *artist = new string();
 		
@@ -148,10 +156,13 @@ void Info::GetArtist()
 			itsTitle = "Artist's info - " + *artist;
 			w->Clear();
 			static_cast<Window &>(*w) << "Fetching artist's info...";
+#			ifdef HAVE_PTHREAD_H
 			if (!Downloader)
-			{
 				pthread_create(&Downloader, NULL, PrepareArtist, artist);
-			}
+#			else
+			PrepareArtist(&artist);
+			w->Flush();
+#			endif // HAVE_PTHREAD_H
 		}
 		else
 			delete artist;

@@ -34,7 +34,9 @@ class Info : public Screen<Scrollpad>
 		
 		virtual std::string Title();
 		
+#		ifdef HAVE_PTHREAD_H
 		virtual void Update();
+#		endif // HAVE_PTHREAD_H
 		
 		virtual void EnterPressed() { }
 		virtual void SpacePressed() { }
@@ -57,7 +59,11 @@ class Info : public Screen<Scrollpad>
 		
 		static const std::string Folder;
 		static bool ArtistReady;
+		
+#		ifdef HAVE_PTHREAD_H
 		static pthread_t Downloader;
+#		endif // HAVE_PTHREAD_H
+		
 #		endif // HAVE_CURL_CURL_H
 		
 		std::string itsTitle;

@@ -26,7 +26,9 @@
 #include "screen.h"
 
 #ifdef HAVE_CURL_CURL_H
-# include <pthread.h>
+# ifdef HAVE_PTHREAD_H
+#  include <pthread.h>
+# endif
 # include "curl/curl.h"
 #endif
 
@@ -74,14 +76,20 @@ class Lyrics : public Screen<Scrollpad>
 		static const std::string Folder;
 		
 #		ifdef HAVE_CURL_CURL_H
+
+#		ifdef HAVE_PTHREAD_H
 		void Take();
+#		endif // HAVE_PTHREAD_H
 		
 		static const Plugin *ChoosePlugin(int);
 		static bool LyricWiki_NotFound(const std::string &);
 		static bool LyricsPlugin_NotFound(const std::string &);
 		
 		static bool Ready;
+		
+#		ifdef HAVE_PTHREAD_H
 		static pthread_t Downloader;
+#		endif // HAVE_PTHREAD_H
 		
 		static const char *PluginsList[];
 		static const Plugin LyricWiki;
