@@ -117,7 +117,7 @@ int main(int argc, char *argv[])
 	std::streambuf *cerr_buffer = std::cerr.rdbuf();
 	std::cerr.rdbuf(errorlog.rdbuf());
 	
-	InitScreen(Config.colors_enabled);
+	InitScreen("ncmpc++ ver. "VERSION, Config.colors_enabled);
 	init_current_locale();
 	
 	MainStartY = 2;
@@ -325,6 +325,10 @@ int main(int argc, char *argv[])
 		}
 		else if (input == KEY_RESIZE)
 		{
+#			ifdef USE_PDCURSES
+			resize_term(0, 0);
+#			endif // USE_PDCURSES
+			
 			RedrawHeader = 1;
 			
 			if (COLS < 20 || LINES < 5)

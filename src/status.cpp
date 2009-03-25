@@ -51,10 +51,14 @@ namespace
 	
 	void WindowTitle(const string &status)
 	{
+#		ifndef USE_PDCURSES
 		static const string term_type = getenv("TERM") ? getenv("TERM") : "";
 		
 		if (term_type != "linux" && Config.set_window_title)
 			std::cout << "\033]0;" << status << "\7";
+#		else
+		(void)status;
+#		endif // USE_PDCURSES
 	}
 }
 

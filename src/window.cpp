@@ -28,18 +28,33 @@ using namespace NCurses;
 using std::string;
 using std::wstring;
 
-void NCurses::InitScreen(bool enable_colors)
+void NCurses::InitScreen(const char *window_title, bool enable_colors)
 {
+	const int ColorsTable[] =
+	{
+		COLOR_BLACK, COLOR_RED, COLOR_GREEN, COLOR_YELLOW,
+		COLOR_BLUE, COLOR_MAGENTA, COLOR_CYAN, COLOR_WHITE
+	};
 	setlocale(LC_ALL, "");
+#	if defined(USE_PDCURSES) && defined(XCURSES)
+	Xinitscr(1, const_cast<char **>(&window_title));
+#	else
+	window_title = 0; // silence compiler
 	initscr();
+#	endif // USE_PDCURSES && XCURSES
 	if (has_colors() && enable_colors)
 	{
 		start_color();
 		use_default_colors();
 		int num = 1;
-		for (int i = -1; i < 8; i++)
+#		ifdef USE_PDCURSES
+		int i = 0;
+#		else
+		int i = -1;
+#		endif // USE_PDCURSES
+		for (; i < 8; i++)
 			for (int j = 0; j < 8; j++)
-				init_pair(num++, j, i);
+				init_pair(num++, ColorsTable[j], i < 0 ? i : ColorsTable[i]);
 	}
 	noecho();
 	cbreak();
@@ -424,7 +439,12 @@ string Window::GetString(const string &base, size_t length, size_t width, bool e
 		input = wgetch(itsWindow);
 		
 		// these key codes are special and should be ignored
-		if (input < 10 || (input > 10 && input < 32))
+		if ((input < 10 || (input > 10 && input < 32))
+#		ifdef USE_PDCURSES
+		&&   input != 8) // backspace key in pdcurses
+#		else
+		)
+#		endif // USE_PDCURSES
 			continue;
 		
 		switch (input)
@@ -445,6 +465,9 @@ string Window::GetString(const string &base, size_t length, size_t width, bool e
 				break;
 			}
 			case KEY_BACKSPACE: case 127:
+#			ifdef USE_PDCURSES
+			case 8: // backspace key in pdcurses
+#			endif // USE_PDCURSES
 			{
 				if (x <= minx && !beginning)
 					break;
@@ -458,7 +481,11 @@ string Window::GetString(const string &base, size_t length, size_t width, bool e
 				}
 				else if (beginning > 0)
 					beginning--;
-				if (input != KEY_BACKSPACE && input != 127)
+				if (input != KEY_BACKSPACE && input != 127
+#				ifdef USE_PDCURSES
+				&&  input != 8 // backspace key in pdcurses
+#				endif // USE_PDCURSES
+				   )
 					break; // backspace = left & delete.
 			}
 			case KEY_DC:

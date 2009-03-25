@@ -25,7 +25,11 @@
 #include <config.h>
 #endif
 
-#include "ncurses.h"
+#ifdef USE_PDCURSES
+# define XCURSES
+#endif
+
+#include "curses.h"
 
 #include <stack>
 #include <vector>
@@ -55,7 +59,7 @@ namespace NCurses
 	
 	typedef void (*GetStringHelper)(const std::wstring &);
 	
-	void InitScreen(bool);
+	void InitScreen(const char *, bool);
 	void DestroyScreen();
 	
 	struct Colors

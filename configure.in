@@ -13,6 +13,7 @@ AC_ARG_ENABLE(clock, AS_HELP_STRING([--enable-clock], [Enable clock screen]), [c
 AC_ARG_ENABLE(unicode, AS_HELP_STRING([--enable-unicode], [Enable utf8 support]), [unicode=$enableval], [unicode=yes])
 AC_ARG_WITH(taglib, AS_HELP_STRING([--with-taglib], [Enable tag editor]), [taglib=$withval], [taglib=no])
 AC_ARG_WITH(curl, AS_HELP_STRING([--with-curl], [Enable fetching lyrics from the Internet]), [curl=$withval], [curl=no])
+AC_ARG_WITH(pdcurses, AS_HELP_STRING([--with-pdcurses], [Link against pdcurses instead of ncurses]), [pdcurses=$withval], [pdcurses=no])
 
 if test "$clock" = "yes"; then
 	AC_DEFINE([ENABLE_CLOCK], [1], [enables clock screen])
@@ -32,23 +33,29 @@ AC_CHECK_HEADERS([iconv.h], , AC_MSG_NOTICE(cannot find iconv.h header, iconv su
 dnl ========================
 dnl = checking for ncurses =
 dnl ========================
-if test "$unicode" = "yes" ; then
-	ncurses_config_bin=ncursesw5-config
-	ncurses_lib=ncursesw
-	CPPFLAGS="$CPPFLAGS -D_UTF8"
+if test "$pdcurses" = "no" ; then
+	if test "$unicode" = "yes" ; then
+		curses_config_bin=ncursesw5-config
+		curses_lib=ncursesw
+		AC_DEFINE([_UTF8], [1], [enables unicode support])
+	else
+		curses_config_bin=ncurses5-config
+		curses_lib=ncurses
+	fi
 else
-	ncurses_config_bin=ncurses5-config
-	ncurses_lib=ncurses
+	curses_config_bin=xcurses-config
+	curses_lib=XCurses
+	AC_DEFINE([USE_PDCURSES], [1], [enables pdcurses support])
 fi
-AC_PATH_PROG(NCURSES_CONFIG, $ncurses_config_bin)
-if test "$NCURSES_CONFIG" != "" ; then
-	CPPFLAGS="$CPPFLAGS `$NCURSES_CONFIG --cflags`"
-	LDFLAGS="$LDFLAGS `$NCURSES_CONFIG --libs`"
-	AC_CHECK_LIB($ncurses_lib, initscr, , AC_MSG_ERROR([$ncurses_lib library is required]))
+AC_PATH_PROG(CURSES_CONFIG, $curses_config_bin)
+if test "$CURSES_CONFIG" != "" ; then
+	CPPFLAGS="$CPPFLAGS `$CURSES_CONFIG --cflags`"
+	LDFLAGS="$LDFLAGS `$CURSES_CONFIG --libs`"
+	AC_CHECK_LIB($curses_lib, initscr, , AC_MSG_ERROR([$curses_lib library is required]))
 else
-	AC_CHECK_LIB($ncurses_lib, initscr, LDFLAGS="$LDFLAGS -l$ncurses_lib", AC_MSG_ERROR([$ncurses_lib library is required]))
+	AC_CHECK_LIB($curses_lib, initscr, LDFLAGS="$LDFLAGS -l$curses_lib", AC_MSG_ERROR([$ncurses_lib library is required]))
 fi
-AC_CHECK_HEADERS([ncurses.h], , AC_MSG_ERROR([missing ncurses.h header]))
+AC_CHECK_HEADERS([curses.h], , AC_MSG_ERROR([missing ncurses.h header]))
 
 dnl =================================
 dnl = checking for curl and pthread =
