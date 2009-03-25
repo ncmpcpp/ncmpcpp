@@ -18,7 +18,11 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
-#include <sys/stat.h>
+#ifdef WIN32
+# include <io.h>
+#else
+# include <sys/stat.h>
+#endif // WIN32
 #include <fstream>
 
 #include "helpers.h"
@@ -77,7 +81,11 @@ namespace
 
 void CreateConfigDir()
 {
-	mkdir(config_dir.c_str(), 0755);
+	mkdir(config_dir.c_str()
+#	ifndef WIN32
+	, 0755
+#	endif // !WIN32
+	);
 }
 
 void DefaultKeys(ncmpcpp_keys &keys)

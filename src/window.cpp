@@ -23,6 +23,11 @@
 
 #include "window.h"
 
+/// FIXME: dirty workaround.
+#ifdef WIN32
+# define wcwidth(x) 1
+#endif // WIN32
+
 using namespace NCurses;
 
 using std::string;

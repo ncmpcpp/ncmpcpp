@@ -19,7 +19,11 @@
  ***************************************************************************/
 
 #include <cstring>
-#include <sys/stat.h>
+#ifdef WIN32
+# include <io.h>
+#else
+# include <sys/stat.h>
+#endif // WIN32
 #include <fstream>
 
 #include "lyrics.h"
@@ -166,7 +170,11 @@ void *Lyrics::Get(void *song)
 	EscapeUnallowedChars(filename);
 	Filename = Folder + "/" + filename;
 	
-	mkdir(Folder.c_str(), 0755);
+	mkdir(Folder.c_str()
+#	ifndef WIN32
+	, 0755
+#	endif // !WIN32
+	);
 	
 	std::ifstream input(Filename.c_str());
 	

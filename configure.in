@@ -19,6 +19,17 @@ if test "$clock" = "yes"; then
 	AC_DEFINE([ENABLE_CLOCK], [1], [enables clock screen])
 fi
 
+dnl ====================================
+dnl = checking for win32 related stuff =
+dnl ====================================
+AC_CHECK_LIB(ws2_32, _head_libws2_32_a, LDFLAGS="$LDFLAGS -lws2_32", )
+AC_CHECK_LIB(regex, regcomp, LDFLAGS="$LDFLAGS -lregex", )
+
+dnl ================================
+dnl = checking for various headers =
+dnl ================================
+AC_CHECK_HEADERS([dirent.h regex.h], , AC_MSG_ERROR(vital headers missing))
+
 dnl ======================
 dnl = checking for iconv =
 dnl ======================
@@ -51,7 +62,7 @@ else
 	AC_DEFINE([USE_PDCURSES], [1], [enables pdcurses support])
 fi
 AC_PATH_PROG(CURSES_CONFIG, $curses_config_bin)
-if test "$CURSES_CONFIG" != "" ; then
+if test "$pdcurses" = "XCurses" && test "$CURSES_CONFIG" != "" ; then
 	CPPFLAGS="$CPPFLAGS `$CURSES_CONFIG --cflags`"
 	LDFLAGS="$LDFLAGS `$CURSES_CONFIG --libs`"
 	AC_CHECK_LIB($curses_lib, initscr, , AC_MSG_ERROR([$curses_lib library is required]))

@@ -180,10 +180,11 @@ int main(int argc, char *argv[])
 	string screen_title;
 	
 	timeval now, past;
-	
 	// local variables end
 	
+#	ifndef WIN32
 	signal(SIGPIPE, SIG_IGN);
+#	endif // !WIN32
 	
 	gettimeofday(&now, 0);
 	

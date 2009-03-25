@@ -22,7 +22,11 @@
 
 #ifdef HAVE_CURL_CURL_H
 # include <fstream>
-# include <sys/stat.h>
+# ifdef WIN32
+#  include <io.h>
+# else
+#  include <sys/stat.h>
+# endif // WIN32
 # include <pthread.h>
 # include "curl/curl.h"
 # include "helpers.h"
@@ -167,7 +171,11 @@ void *Info::PrepareArtist(void *ptr)
 	EscapeUnallowedChars(filename);
 	
 	const string fullpath = Folder + "/" + filename;
-	mkdir(Folder.c_str(), 0755);
+	mkdir(Folder.c_str()
+#	ifndef WIN32
+	, 0755
+#	endif // !WIN32
+	);
 	
 	string result;
 	std::ifstream input(fullpath.c_str());
