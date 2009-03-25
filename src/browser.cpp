@@ -317,22 +317,34 @@ bool Browser::hasSupportedExtension(const string &file)
 
 void Browser::GetLocalDirectory(ItemList &v)
 {
-	dirent **list;
-	int n = scandir(itsBrowsedDir.c_str(), &list, NULL, alphasort);
+	DIR *dir = opendir(itsBrowsedDir.c_str());
 	
-	if (n < 0)
+	if (!dir)
 		return;
+	
+	dirent *file;
 	
 	struct stat file_stat;
 	string full_path;
 	
-	for (int i = 2; i < n; i++)
+	// omit . and ..
+	for (int i = 0; i < 2; i++)
+	{
+		file = readdir(dir);
+		if (!file)
+		{
+			closedir(dir);
+			return;
+		}
+	}
+	
+	while ((file = readdir(dir)))
 	{
 		Item new_item;
 		full_path = itsBrowsedDir;
 		if (itsBrowsedDir != "/")
 			full_path += "/";
-		full_path += list[i]->d_name;
+		full_path += file->d_name;
 		stat(full_path.c_str(), &file_stat);
 		if (S_ISDIR(file_stat.st_mode))
 		{
@@ -340,7 +352,7 @@ void Browser::GetLocalDirectory(ItemList &v)
 			new_item.name = full_path;
 			v.push_back(new_item);
 		}
-		else if (hasSupportedExtension(list[i]->d_name))
+		else if (hasSupportedExtension(file->d_name))
 		{
 			new_item.type = itSong;
 			mpd_Song *s = mpd_newSong();
@@ -351,9 +363,8 @@ void Browser::GetLocalDirectory(ItemList &v)
 			new_item.song = new Song(s);
 			v.push_back(new_item);
 		}
-		delete list[i];
 	}
-	delete list;
+	closedir(dir);
 }
 
 void Browser::LocateSong(const MPD::Song &s)
