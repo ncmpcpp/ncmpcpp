@@ -13,7 +13,7 @@ AC_ARG_ENABLE(clock, AS_HELP_STRING([--enable-clock], [Enable clock screen]), [c
 AC_ARG_ENABLE(unicode, AS_HELP_STRING([--enable-unicode], [Enable utf8 support]), [unicode=$enableval], [unicode=yes])
 AC_ARG_WITH(taglib, AS_HELP_STRING([--with-taglib], [Enable tag editor]), [taglib=$withval], [taglib=no])
 AC_ARG_WITH(curl, AS_HELP_STRING([--with-curl], [Enable fetching lyrics from the Internet]), [curl=$withval], [curl=no])
-AC_ARG_WITH(pdcurses, AS_HELP_STRING([--with-pdcurses], [Link against pdcurses instead of ncurses]), [pdcurses=$withval], [pdcurses=no])
+AC_ARG_WITH(pdcurses, AS_HELP_STRING([--with-pdcurses[=LIBNAME]], [Link against pdcurses instead of ncurses @<:@default=XCurses@:>@]), [pdcurses=$withval], [pdcurses=no])
 
 if test "$clock" = "yes"; then
 	AC_DEFINE([ENABLE_CLOCK], [1], [enables clock screen])
@@ -43,8 +43,11 @@ if test "$pdcurses" = "no" ; then
 		curses_lib=ncurses
 	fi
 else
+	if test "$pdcurses" = "yes" ; then
+		pdcurses=XCurses
+	fi
 	curses_config_bin=xcurses-config
-	curses_lib=XCurses
+	curses_lib=$pdcurses
 	AC_DEFINE([USE_PDCURSES], [1], [enables pdcurses support])
 fi
 AC_PATH_PROG(CURSES_CONFIG, $curses_config_bin)
