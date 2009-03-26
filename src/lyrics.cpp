@@ -42,11 +42,17 @@
 #include "status.h"
 #include "tag_editor.h"
 
+#ifdef WIN32
+# define LYRICS_FOLDER HOME_FOLDER"\\lyrics\\"
+#else
+# define LYRICS_FOLDER "/.lyrics"
+#endif // WIN32
+
 using namespace Global;
 using std::vector;
 using std::string;
 
-const std::string Lyrics::Folder = home_folder + "/.lyrics";
+const std::string Lyrics::Folder = home_path + LYRICS_FOLDER;
 
 bool Lyrics::Reload = 0;
 

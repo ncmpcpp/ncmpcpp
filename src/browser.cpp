@@ -468,7 +468,7 @@ void Browser::ChangeBrowseMode()
 	
 	Config.local_browser = !Config.local_browser;
 	ShowMessage("Browse mode: %s", Config.local_browser ? "Local filesystem" : "MPD music dir");
-	itsBrowsedDir = Config.local_browser ? home_folder : "/";
+	itsBrowsedDir = Config.local_browser ? home_path : "/";
 	w->Reset();
 	GetDirectory(itsBrowsedDir);
 	RedrawHeader = 1;

@@ -26,7 +26,13 @@
 #include "libmpdclient.h"
 #include "ncmpcpp.h"
 
-const std::string config_dir = home_folder + "/.ncmpcpp/";
+#ifdef WIN32
+# define HOME_FOLDER "\\ncmpcpp\\"
+#else
+# define HOME_FOLDER "/.ncmpcpp/"
+#endif // WIN32
+
+const std::string config_dir = home_path + HOME_FOLDER;
 const int null_key = std::numeric_limits<int>::max();
 
 struct ncmpcpp_keys

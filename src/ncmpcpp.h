@@ -27,6 +27,12 @@
 #include "menu.h"
 #include "scrollpad.h"
 
+#ifdef WIN32
+# define HOME_ENV "USERPROFILE"
+#else
+# define HOME_ENV "HOME"
+#endif // WIN32
+
 #ifdef HAVE_PTHREAD_H
 # include <pthread.h>
 #else
@@ -41,7 +47,9 @@ typedef std::pair<std::string, std::string> string_pair;
 
 const int ncmpcpp_window_timeout = 250;
 
-const std::string home_folder = getenv("HOME") ? getenv("HOME") : "";
+const std::string home_path = getenv(HOME_ENV) ? getenv(HOME_ENV) : "";
+
+#undef HOME_ENV
 
 #endif
 

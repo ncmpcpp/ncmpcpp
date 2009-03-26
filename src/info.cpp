@@ -46,7 +46,7 @@ using std::string;
 using std::vector;
 
 #ifdef HAVE_CURL_CURL_H
-const std::string Info::Folder = home_folder + "/.ncmpcpp/artists";
+const std::string Info::Folder = home_path + HOME_FOLDER"artists";
 bool Info::ArtistReady = 0;
 
 #ifdef HAVE_PTHREAD_H

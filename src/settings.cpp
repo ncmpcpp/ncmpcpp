@@ -464,7 +464,7 @@ void ReadConfiguration(ncmpcpp_config &conf)
 				{
 					 // if ~ is used at the beginning, replace it with user's home folder
 					if (v[0] == '~')
-						v.replace(0, 1, home_folder);
+						v.replace(0, 1, home_path);
 					conf.mpd_music_dir = v + "/";
 				}
 			}
