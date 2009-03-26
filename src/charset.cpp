@@ -73,7 +73,7 @@ namespace
 		char *outstart = outbuf;
 		char *instart = inbuf;
 		
-		if (iconv(cd, &inbuf, &len, &outbuf, &buflen) == (size_t)-1)
+		if (iconv(cd, const_cast<ICONV_CONST char **>(&inbuf), &len, &outbuf, &buflen) == (size_t)-1)
 		{
 			delete [] outstart;
 			iconv_close(cd);
