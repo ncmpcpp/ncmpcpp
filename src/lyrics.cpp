@@ -49,7 +49,10 @@ using std::string;
 const std::string Lyrics::Folder = home_folder + "/.lyrics";
 
 bool Lyrics::Reload = 0;
+
+#ifdef HAVE_CURL_CURL_H
 bool Lyrics::Ready = 0;
+#endif // HAVE_CURL_CURL_H
 
 std::string Lyrics::Filename;
 
@@ -193,7 +196,9 @@ void *Lyrics::Get(void *song)
 			*myLyrics->Main() << line;
 			first = 0;
 		}
+#		ifdef HAVE_CURL_CURL_H
 		Ready = 1;
+#		endif // HAVE_CURL_CURL_H
 		pthread_exit(NULL);
 	}
 #	ifdef HAVE_CURL_CURL_H
