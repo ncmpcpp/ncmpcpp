@@ -443,7 +443,7 @@ string Window::GetString(const string &base, size_t length, size_t width, bool e
 		// these key codes are special and should be ignored
 		if ((input < 10 || (input > 10 && input < 32))
 #		ifdef USE_PDCURSES
-		&&   input != 8) // backspace key in pdcurses
+		&&   input != KEY_BACKSPACE)
 #		else
 		)
 #		endif // USE_PDCURSES
@@ -467,9 +467,6 @@ string Window::GetString(const string &base, size_t length, size_t width, bool e
 				break;
 			}
 			case KEY_BACKSPACE: case 127:
-#			ifdef USE_PDCURSES
-			case 8: // backspace key in pdcurses
-#			endif // USE_PDCURSES
 			{
 				if (x <= minx && !beginning)
 					break;
@@ -483,11 +480,7 @@ string Window::GetString(const string &base, size_t length, size_t width, bool e
 				}
 				else if (beginning > 0)
 					beginning--;
-				if (input != KEY_BACKSPACE && input != 127
-#				ifdef USE_PDCURSES
-				&&  input != 8 // backspace key in pdcurses
-#				endif // USE_PDCURSES
-				   )
+				if (input != KEY_BACKSPACE && input != 127)
 					break; // backspace = left & delete.
 			}
 			case KEY_DC:

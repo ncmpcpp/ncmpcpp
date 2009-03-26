@@ -31,6 +31,10 @@
 #include <vector>
 #include <string>
 
+// this points to nothing, so redefine it
+#undef KEY_BACKSPACE
+#define KEY_BACKSPACE 8
+
 #ifdef _UTF8
 # define my_char_t wchar_t
 # define TO_STRING(x) ToString(x)

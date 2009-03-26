@@ -153,7 +153,7 @@ void DefaultKeys(ncmpcpp_keys &keys)
 	keys.ToggleAutoCenter[0] = 'U';
 	keys.ToggleDisplayMode[0] = 'p';
 	keys.ToggleLyricsDB[0] = 'L';
-	keys.GoToParentDir[0] = 263;
+	keys.GoToParentDir[0] = KEY_BACKSPACE;
 	keys.SwitchTagTypeList[0] = '`';
 	keys.Quit[0] = 'q';
 	
