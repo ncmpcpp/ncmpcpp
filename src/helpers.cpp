@@ -53,7 +53,21 @@ void ParseArgv(int argc, char **argv)
 	
 	for (int i = 1; i < argc; i++)
 	{
-		if (strcmp(argv[i], "-v") == 0 || strcmp(argv[i], "--version") == 0)
+		if (strcmp(argv[i], "-h") == 0)
+		{
+			if (++i >= argc)
+				exit(0);
+			Mpd->SetHostname(argv[i]);
+			continue;
+		}
+		if (strcmp(argv[i], "-p") == 0)
+		{
+			if (++i >= argc)
+				exit(0);
+			Mpd->SetPort(atoi(argv[i]));
+			continue;
+		}
+		else if (strcmp(argv[i], "-v") == 0 || strcmp(argv[i], "--version") == 0)
 		{
 			cout << "ncmpcpp version: " << VERSION << endl
 			<< "built with support for:"
@@ -73,6 +87,8 @@ void ParseArgv(int argc, char **argv)
 		{
 			cout
 			<< "Usage: ncmpcpp [OPTION]...\n"
+			<< "  -h                        connect to server at host [localhost]\n"
+			<< "  -p                        connect to server at port [6600]\n"
 			<< "  -?, --help                show this help message\n"
 			<< "  -v, --version             display version information\n\n"
 			<< "  play                      start playing\n"
