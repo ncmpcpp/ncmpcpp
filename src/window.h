@@ -45,8 +45,6 @@
 # define TO_WSTRING(x) x
 #endif
 
-char *ToString(const wchar_t *);
-wchar_t *ToWString(const char *);
 std::string ToString(const std::wstring &);
 std::wstring ToWString(const std::string &);
 

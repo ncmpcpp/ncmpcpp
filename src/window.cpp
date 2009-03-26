@@ -386,9 +386,6 @@ string Window::GetString(const string &base, size_t length, size_t width, bool e
 	bool gotoend = 1;
 	bool block_scrolling = 0;
 	
-	mbstate_t state;
-	memset(&state, 0, sizeof(state));
-	
 	// disable scrolling if wide chars are used
 	for (wstring::const_iterator it = tmp.begin(); it != tmp.end(); it++)
 		if (wcwidth(*it) > 1)
@@ -524,7 +521,7 @@ string Window::GetString(const string &base, size_t length, size_t width, bool e
 					break;
 				
 				tmp_in += input;
-				if ((int)mbrtowc(&wc_in, tmp_in.c_str(), MB_CUR_MAX, &state) < 0)
+				if ((int)mbrtowc(&wc_in, tmp_in.c_str(), MB_CUR_MAX, 0) < 0)
 					break;
 				
 				if (wcwidth(wc_in) > 1)
@@ -806,57 +803,29 @@ Window * Window::EmptyClone() const
 	return new Window(GetStartX(), GetStartY(), GetWidth(), GetHeight(), itsTitle, itsBaseColor, itsBorder);
 }
 
-char *ToString(const wchar_t *ws)
-{
-	mbstate_t mbs;
-	memset(&mbs, 0, sizeof(mbs));
-	size_t len = wcsrtombs(NULL, &ws, 0, &mbs);
-	
-	if (len == size_t(-1))
-		return 0;
-	
-	char *s = new char[len+1]();
-	wcsrtombs(s, &ws, len, &mbs);
-	s[len] = 0;
-	return s;
-}
-
-wchar_t *ToWString(const char *s)
-{
-	mbstate_t mbs;
-	memset(&mbs, 0, sizeof(mbs));
-	size_t len = mbsrtowcs(NULL, &s, 0, &mbs);
-	
-	if (len == size_t(-1))
-		return 0;
-	
-	wchar_t *ws = new wchar_t[len+1]();
-	mbsrtowcs(ws, &s, len, &mbs);
-	ws[len] = 0;
-	return ws;
-}
-
 string ToString(const wstring &ws)
 {
 	string result;
-	char *s = ToString(ws.c_str());
-	if (s)
+	char *s = new char[MB_CUR_MAX];
+	for (size_t i = 0; i < ws.length(); i++)
 	{
-		result = s;
-		delete [] s;
+		int n = wcrtomb(s, ws[i], 0);
+		if (n > 0)
+			result.append(s, n);
 	}
+	delete [] s;
 	return result;
 }
 
 wstring ToWString(const string &s)
 {
 	wstring result;
-	wchar_t *ws = ToWString(s.c_str());
-	if (ws)
-	{
-		result = ws;
-		delete [] ws;
-	}
+	wchar_t *ws = new wchar_t[s.length()];
+	const char *c_s = s.c_str();
+	int n = mbsrtowcs(ws, &c_s, s.length(), 0);
+	if (n > 0)
+		result.append(ws, n);
+	delete [] ws;
 	return result;
 }
 

@@ -194,17 +194,10 @@ Scrollpad &Scrollpad::operator<<(std::ostream &(*os)(std::ostream&))
 }
 
 #ifdef _UTF8
-Scrollpad &Scrollpad::operator<<(const char *s)
-{
-	wchar_t *ws = ToWString(s);
-	itsBuffer << ws;
-	delete [] ws;
-	return *this;
-}
-
 Scrollpad &Scrollpad::operator<<(const std::string &s)
 {
-	return operator<<(s.c_str());
+	itsBuffer << ToWString(s);
+	return *this;
 }
 #endif // _UTF8
 
