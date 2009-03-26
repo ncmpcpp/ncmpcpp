@@ -69,6 +69,9 @@ if test "$pdcurses" = "XCurses" && test "$CURSES_CONFIG" != "" ; then
 else
 	AC_CHECK_LIB($curses_lib, initscr, LDFLAGS="$LDFLAGS -l$curses_lib", AC_MSG_ERROR([$ncurses_lib library is required]))
 fi
+if test "$pdcurses" != "no" ; then
+	AC_CHECK_LIB($curses_lib, Xinitscr, AC_DEFINE([XCURSES], [1], [x11 pdcurses available]), )
+fi
 AC_CHECK_HEADERS([curses.h], , AC_MSG_ERROR([missing ncurses.h header]))
 
 dnl =================================

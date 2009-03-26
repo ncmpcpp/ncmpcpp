@@ -41,12 +41,12 @@ void NCurses::InitScreen(const char *window_title, bool enable_colors)
 		COLOR_BLUE, COLOR_MAGENTA, COLOR_CYAN, COLOR_WHITE
 	};
 	setlocale(LC_ALL, "");
-#	if defined(USE_PDCURSES) && defined(XCURSES)
+#	ifdef XCURSES
 	Xinitscr(1, const_cast<char **>(&window_title));
 #	else
 	window_title = 0; // silence compiler
 	initscr();
-#	endif // USE_PDCURSES && XCURSES
+#	endif // XCURSES
 	if (has_colors() && enable_colors)
 	{
 		start_color();

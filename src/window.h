@@ -25,10 +25,6 @@
 #include <config.h>
 #endif
 
-#if !defined(WIN32) && defined(USE_PDCURSES)
-# define XCURSES
-#endif // !WIND32 && USE_PDCURSES
-
 #include "curses.h"
 
 #include <stack>
