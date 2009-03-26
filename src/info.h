@@ -61,7 +61,7 @@ class Info : public Screen<Scrollpad>
 		static bool ArtistReady;
 		
 #		ifdef HAVE_PTHREAD_H
-		static pthread_t Downloader;
+		static pthread_t *Downloader;
 #		endif // HAVE_PTHREAD_H
 		
 #		endif // HAVE_CURL_CURL_H

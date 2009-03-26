@@ -27,11 +27,13 @@
 #include "menu.h"
 #include "scrollpad.h"
 
-#ifndef HAVE_PTHREAD_H
+#ifdef HAVE_PTHREAD_H
+# include <pthread.h>
+#else
 # define pthread_mutex_lock(x);
 # define pthread_mutex_unlock(x);
 # define pthread_exit(x) return 0;
-#endif
+#endif // HAVE_PTHREAD_H
 
 using namespace NCurses;
 

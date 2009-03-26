@@ -54,7 +54,7 @@ bool Lyrics::Ready = 0;
 std::string Lyrics::Filename;
 
 #ifdef HAVE_PTHREAD_H
-pthread_t Lyrics::Downloader = 0;
+pthread_t *Lyrics::Downloader = 0;
 pthread_mutex_t Global::CurlLock = PTHREAD_MUTEX_INITIALIZER;
 #endif // HAVE_PTHREAD_H
 
@@ -134,8 +134,12 @@ void Lyrics::SwitchTo()
 #			endif // HAVE_CURL_CURL_H
 #			ifdef HAVE_PTHREAD_H
 			if (!Downloader)
-				pthread_create(&Downloader, NULL, Get, &itsSong);
+			{
+				Downloader = new pthread_t;
+				pthread_create(Downloader, NULL, Get, &itsSong);
+			}
 #			else
+			w->Window::Refresh();
 			Get(&itsSong);
 			w->Flush();
 #			endif // HAVE_PTHREAD_H
@@ -297,8 +301,9 @@ void Lyrics::Take()
 {
 	if (!Ready)
 		return;
-	pthread_join(Downloader, NULL);
+	pthread_join(*Downloader, NULL);
 	w->Flush();
+	delete Downloader;
 	Downloader = 0;
 	Ready = 0;
 }

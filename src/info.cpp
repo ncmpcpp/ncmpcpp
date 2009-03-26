@@ -27,9 +27,6 @@
 # else
 #  include <sys/stat.h>
 # endif // WIN32
-# ifdef HAVE_PTHREAD_H
-#  include <pthread.h>
-# endif
 # include "curl/curl.h"
 # include "helpers.h"
 #endif
@@ -53,7 +50,7 @@ const std::string Info::Folder = home_folder + "/.ncmpcpp/artists";
 bool Info::ArtistReady = 0;
 
 #ifdef HAVE_PTHREAD_H
-pthread_t Info::Downloader = 0;
+pthread_t *Info::Downloader = 0;
 #endif // HAVE_PTHREAD_H
 
 #endif // HAVE_CURL_CURL_H
@@ -83,8 +80,9 @@ void Info::Update()
 	if (!ArtistReady)
 		return;
 	
-	pthread_join(Downloader, NULL);
+	pthread_join(*Downloader, NULL);
 	w->Flush();
+	delete Downloader;
 	Downloader = 0;
 	ArtistReady = 0;
 }
@@ -158,8 +156,12 @@ void Info::GetArtist()
 			static_cast<Window &>(*w) << "Fetching artist's info...";
 #			ifdef HAVE_PTHREAD_H
 			if (!Downloader)
-				pthread_create(&Downloader, NULL, PrepareArtist, artist);
+			{
+				Downloader = new pthread_t;
+				pthread_create(Downloader, NULL, PrepareArtist, artist);
+			}
 #			else
+			w->Window::Refresh();
 			PrepareArtist(&artist);
 			w->Flush();
 #			endif // HAVE_PTHREAD_H
