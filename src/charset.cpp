@@ -92,7 +92,7 @@ void utf_to_locale(std::string &s)
 	if (s.empty() || Config.system_encoding.empty() || !has_non_ascii_chars(s))
 		return;
 	char *tmp = str_pool_get(s.c_str());
-	charset_convert("utf8", Config.system_encoding.c_str(), tmp, s.length());
+	charset_convert("utf-8", Config.system_encoding.c_str(), tmp, s.length());
 	s = tmp;
 	str_pool_put(tmp);
 }
@@ -109,7 +109,7 @@ void locale_to_utf(std::string &s)
 	if (s.empty() || Config.system_encoding.empty() || !has_non_ascii_chars(s))
 		return;
 	char *tmp = str_pool_get(s.c_str());
-	charset_convert(Config.system_encoding.c_str(), "utf8", tmp, s.length());
+	charset_convert(Config.system_encoding.c_str(), "utf-8", tmp, s.length());
 	s = tmp;
 	str_pool_put(tmp);
 }
@@ -125,14 +125,14 @@ void str_pool_utf_to_locale(char *&s)
 {
 	if (!s || Config.system_encoding.empty() || !has_non_ascii_chars(s))
 		return;
-	charset_convert("utf8", Config.system_encoding.c_str(), s);
+	charset_convert("utf-8", Config.system_encoding.c_str(), s);
 }
 
 void str_pool_locale_to_utf(char *&s)
 {
 	if (!s || Config.system_encoding.empty() || !has_non_ascii_chars(s))
 		return;
-	charset_convert(Config.system_encoding.c_str(), "utf8", s);
+	charset_convert(Config.system_encoding.c_str(), "utf-8", s);
 }
 
 #endif // HAVE_ICONV_H
