@@ -41,8 +41,8 @@
 # define TO_WSTRING(x) ToWString(x)
 #else
 # define my_char_t char
-# define TO_STRING(x) x
-# define TO_WSTRING(x) x
+# define TO_STRING(x) (x)
+# define TO_WSTRING(x) (x)
 #endif
 
 std::string ToString(const std::wstring &);
