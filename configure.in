@@ -38,7 +38,6 @@ if test "$prefix" = "NONE"; then
 else
 	encodings_file="${prefix}"
 fi
-AC_DEFINE_UNQUOTED([ENCODINGS], ["${encodings_file}/share/ncmpcpp/encodings"], [defines path for encodings file])
 AC_CHECK_HEADERS([iconv.h], , AC_MSG_NOTICE(cannot find iconv.h header, iconv support will be disabled))
 
 dnl ========================
@@ -103,5 +102,5 @@ if test "$taglib" = "yes" ; then
 	fi
 fi
 
-AC_CONFIG_FILES([Makefile src/Makefile data/Makefile doc/Makefile])
+AC_CONFIG_FILES([Makefile src/Makefile doc/Makefile])
 AC_OUTPUT

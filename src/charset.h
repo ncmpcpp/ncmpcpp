@@ -29,8 +29,6 @@
 
 #include <string>
 
-void init_current_locale();
-
 void utf_to_locale(std::string &);
 void locale_to_utf(std::string &);
 
@@ -41,8 +39,6 @@ void str_pool_utf_to_locale(char *&);
 void str_pool_locale_to_utf(char *&);
 
 #else
-
-#define init_current_locale();
 
 #define utf_to_locale(x);
 #define locale_to_utf(x);

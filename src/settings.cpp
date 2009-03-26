@@ -528,6 +528,11 @@ void ReadConfiguration(ncmpcpp_config &conf)
 				if (!v.empty())
 					conf.external_editor = v;
 			}
+			else if (cl.find("system_encoding") != string::npos)
+			{
+				if (!v.empty())
+					conf.system_encoding = v + "//TRANSLIT";
+			}
 			else if (cl.find("browser_playlist_prefix") != string::npos)
 			{
 				if (!v.empty())

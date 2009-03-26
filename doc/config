@@ -17,6 +17,14 @@
 #
 #mpd_crossfade_time = "5"
 #
+##### system encoding #####
+##
+## if you use encoding other than utf8, set it in
+## order to handle utf8 encoded strings properly.
+##
+#
+#system_encoding = ""
+#
 ##### delays #####
 #
 ## delay after playlist highlighting will be disabled (0 = don't disable)

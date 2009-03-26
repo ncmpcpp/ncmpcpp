@@ -29,13 +29,11 @@
 #include <iostream>
 #include <stdexcept>
 
-#include "locale.h"
+#include "settings.h"
 #include "str_pool.h"
 
 namespace
 {
-	char *locale_charset = 0;
-
 	inline bool char_non_ascii(char ch)
 	{
 		return (ch & 0x80) != 0;
@@ -89,55 +87,12 @@ namespace
 	}
 }
 
-void init_current_locale()
-{
-	if (!setlocale(LC_CTYPE, ""))
-		return;
-	std::string envlocale = setlocale(LC_CTYPE, "");
-	if (envlocale.empty() || envlocale == "C")
-		return;
-	std::ifstream f(ENCODINGS);
-	if (!f.is_open())
-	{
-		std::cerr << "ncmpcpp: cannot open file "ENCODINGS"!\n";
-		return;
-	}
-	envlocale += " ";
-	std::string line;
-	while (!f.eof())
-	{
-		getline(f, line);
-		if (line.find(envlocale) != std::string::npos)
-		{
-			try
-			{
-				std::string charset = line.substr(line.find(" ")+1);
-				if (charset == "UTF-8"
-				||  charset == "utf-8"
-				||  charset == "utf8")
-				{
-					f.close();
-					return;
-				}
-				locale_charset = strdup((charset + "//TRANSLIT").c_str());
-			}
-			catch (std::out_of_range)
-			{
-				f.close();
-				return;
-			}
-			break;
-		}
-	}
-	f.close();
-}
-
 void utf_to_locale(std::string &s)
 {
-	if (s.empty() || !locale_charset || !has_non_ascii_chars(s))
+	if (s.empty() || Config.system_encoding.empty() || !has_non_ascii_chars(s))
 		return;
 	char *tmp = str_pool_get(s.c_str());
-	charset_convert("utf8", locale_charset, tmp, s.length());
+	charset_convert("utf8", Config.system_encoding.c_str(), tmp, s.length());
 	s = tmp;
 	str_pool_put(tmp);
 }
@@ -151,10 +106,10 @@ std::string utf_to_locale_cpy(const std::string &s)
 
 void locale_to_utf(std::string &s)
 {
-	if (s.empty() || !locale_charset || !has_non_ascii_chars(s))
+	if (s.empty() || Config.system_encoding.empty() || !has_non_ascii_chars(s))
 		return;
 	char *tmp = str_pool_get(s.c_str());
-	charset_convert(locale_charset, "utf8", tmp, s.length());
+	charset_convert(Config.system_encoding.c_str(), "utf8", tmp, s.length());
 	s = tmp;
 	str_pool_put(tmp);
 }
@@ -168,16 +123,16 @@ std::string locale_to_utf_cpy(const std::string &s)
 
 void str_pool_utf_to_locale(char *&s)
 {
-	if (!s || !locale_charset || !has_non_ascii_chars(s))
+	if (!s || Config.system_encoding.empty() || !has_non_ascii_chars(s))
 		return;
-	charset_convert("utf8", locale_charset, s);
+	charset_convert("utf8", Config.system_encoding.c_str(), s);
 }
 
 void str_pool_locale_to_utf(char *&s)
 {
-	if (!s || !locale_charset || !has_non_ascii_chars(s))
+	if (!s || Config.system_encoding.empty() || !has_non_ascii_chars(s))
 		return;
-	charset_convert(locale_charset, "utf8", s);
+	charset_convert(Config.system_encoding.c_str(), "utf8", s);
 }
 
 #endif // HAVE_ICONV_H

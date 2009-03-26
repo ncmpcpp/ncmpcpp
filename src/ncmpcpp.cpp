@@ -118,7 +118,6 @@ int main(int argc, char *argv[])
 	std::cerr.rdbuf(errorlog.rdbuf());
 	
 	InitScreen("ncmpc++ ver. "VERSION, Config.colors_enabled);
-	init_current_locale();
 	
 	MainStartY = 2;
 	MainHeight = LINES-4;
