@@ -67,7 +67,8 @@ class Lyrics : public Screen<Scrollpad>
 #		endif // HAVE_CURL_CURL_H
 		
 	private:
-		static std::string FilenamePath;
+		std::string itsFilenamePath;
+		
 		static const std::string Folder;
 		
 #		ifdef HAVE_CURL_CURL_H

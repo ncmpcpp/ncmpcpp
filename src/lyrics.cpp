@@ -60,8 +60,6 @@ bool Lyrics::Reload = 0;
 bool Lyrics::Ready = 0;
 #endif // HAVE_CURL_CURL_H
 
-std::string Lyrics::FilenamePath;
-
 #ifdef HAVE_PTHREAD_H
 pthread_t *Lyrics::Downloader = 0;
 pthread_mutex_t Global::CurlLock = PTHREAD_MUTEX_INITIALIZER;
@@ -148,7 +146,7 @@ void Lyrics::SwitchTo()
 			{
 				string file = locale_to_utf_cpy(itsSong.GetArtist()) + " - " + locale_to_utf_cpy(itsSong.GetTitle()) + ".txt";
 				EscapeUnallowedChars(file);
-				FilenamePath = Folder + "/" + file;
+				itsFilenamePath = Folder + "/" + file;
 				
 				mkdir(Folder.c_str()
 #				ifndef WIN32
@@ -156,7 +154,7 @@ void Lyrics::SwitchTo()
 #				endif // !WIN32
 				);
 				
-				std::ifstream input(FilenamePath.c_str());
+				std::ifstream input(itsFilenamePath.c_str());
 				if (input.is_open())
 				{
 					bool first = 1;
@@ -264,7 +262,7 @@ void *Lyrics::Get(void *screen_void_ptr)
 	
 	*screen->w << utf_to_locale_cpy(result);
 	
-	std::ofstream output(FilenamePath.c_str());
+	std::ofstream output(screen->itsFilenamePath.c_str());
 	if (output.is_open())
 	{
 		output << result;
@@ -290,7 +288,7 @@ void Lyrics::Edit()
 	
 	if (Config.use_console_editor)
 	{
-		system(("/bin/sh -c \"" + Config.external_editor + " \\\"" + FilenamePath + "\\\"\"").c_str());
+		system(("/bin/sh -c \"" + Config.external_editor + " \\\"" + itsFilenamePath + "\\\"\"").c_str());
 		// below is needed as screen gets cleared, but apparently
 		// ncurses doesn't know about it, so we need to reload main screen
 		endwin();
@@ -298,7 +296,7 @@ void Lyrics::Edit()
 		curs_set(0);
 	}
 	else
-		system(("nohup " + Config.external_editor + " \"" + FilenamePath + "\" > /dev/null 2>&1 &").c_str());
+		system(("nohup " + Config.external_editor + " \"" + itsFilenamePath + "\" > /dev/null 2>&1 &").c_str());
 }
 
 #ifdef HAVE_CURL_CURL_H
