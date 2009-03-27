@@ -198,6 +198,7 @@ void Connection::UpdateDirectory(const string &path)
 			itsCurrentStatus->updatingDb = 1;
 			StatusChanges ch;
 			ch.DBUpdating = 1;
+			ch.StatusFlags = 1;
 			itsUpdater(this, ch, itsErrorHandlerUserdata);
 		}
 	}
