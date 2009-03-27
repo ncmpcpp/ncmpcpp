@@ -111,10 +111,7 @@ void Lyrics::SwitchTo()
 			return;
 		}
 		else if (Ready)
-		{
 			Take();
-			return;
-		}
 #		endif // HAVE_PTHREAD_H
 		
 		const MPD::Song *s = Reload ? myPlaylist->NowPlayingSong() : myScreen->CurrentSong();
