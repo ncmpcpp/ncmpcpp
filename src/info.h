@@ -51,6 +51,10 @@ class Info : public Screen<Scrollpad>
 #		endif // HAVE_CURL_CURL_H
 		
 	private:
+		std::string itsArtist;
+		std::string itsTitle;
+		std::string itsFilenamePath;
+		
 		void PrepareSong(MPD::Song &);
 		static const basic_buffer<my_char_t> &ShowTag(const std::string &);
 		
@@ -65,8 +69,6 @@ class Info : public Screen<Scrollpad>
 #		endif // HAVE_PTHREAD_H
 		
 #		endif // HAVE_CURL_CURL_H
-		
-		std::string itsTitle;
 };
 
 extern Info *myInfo;

@@ -135,90 +135,86 @@ void Info::GetArtist()
 			Update();
 #		endif // HAVE_PTHREAD_H
 		
-		string *artist = new string();
-		
 		MPD::Song *s = myScreen->CurrentSong();
 		
 		if (!s && myScreen->Cmp() != myLibrary->Artists)
 			return;
 		
-		*artist = !s ? myLibrary->Artists->Current() : s->GetArtist();
+		itsArtist = !s ? myLibrary->Artists->Current() : s->GetArtist();
 		
-		if (!artist->empty())
+		if (itsArtist.empty())
+			return;
+		
+		if (hasToBeResized)
+			Resize();
+		myOldScreen = myScreen;
+		myScreen = this;
+		RedrawHeader = 1;
+		itsTitle = "Artist's info - " + itsArtist;
+		w->Clear();
+		static_cast<Window &>(*w) << "Fetching artist's info...";
+		w->Window::Refresh();
+#		ifdef HAVE_PTHREAD_H
+		if (!Downloader)
+#		endif // HAVE_PTHREAD_H
 		{
-			if (hasToBeResized)
-				Resize();
-			myOldScreen = myScreen;
-			myScreen = this;
-			RedrawHeader = 1;
-			itsTitle = "Artist's info - " + *artist;
-			w->Clear();
-			static_cast<Window &>(*w) << "Fetching artist's info...";
-#			ifdef HAVE_PTHREAD_H
-			if (!Downloader)
+			locale_to_utf(itsArtist);
+			
+			string file = itsArtist + ".txt";
+			ToLower(file);
+			EscapeUnallowedChars(file);
+			
+			itsFilenamePath = Folder + "/" + file;
+			
+			mkdir(Folder.c_str()
+#			ifndef WIN32
+			, 0755
+#			endif // !WIN32
+			);
+			
+			std::ifstream input(itsFilenamePath.c_str());
+			if (input.is_open())
 			{
-				Downloader = new pthread_t;
-				pthread_create(Downloader, NULL, PrepareArtist, artist);
+				bool first = 1;
+				string line;
+				while (getline(input, line))
+				{
+					if (!first)
+						*w << "\n";
+					utf_to_locale(line);
+					*w << line;
+					first = 0;
+				}
+				input.close();
+				w->SetFormatting(fmtBold, "\n\nSimilar artists:\n", fmtBoldEnd, 0);
+				w->SetFormatting(Config.color2, "\n * ", clEnd);
+				w->Flush();
 			}
-#			else
-			w->Window::Refresh();
-			PrepareArtist(&artist);
-			w->Flush();
-#			endif // HAVE_PTHREAD_H
+			else
+			{
+#				ifdef HAVE_PTHREAD_H
+				Downloader = new pthread_t;
+				pthread_create(Downloader, 0, PrepareArtist, this);
+#				else
+				PrepareArtist(this);
+				w->Flush();
+#				endif // HAVE_PTHREAD_H
+			}
 		}
-		else
-			delete artist;
 	}
 }
 
-void *Info::PrepareArtist(void *ptr)
+void *Info::PrepareArtist(void *screen_void_ptr)
 {
-	string *strptr = static_cast<string *>(ptr);
-	string artist = *strptr;
-	delete strptr;
+	Info *screen = static_cast<Info *>(screen_void_ptr);
 	
-	locale_to_utf(artist);
-	
-	string filename = artist + ".txt";
-	ToLower(filename);
-	EscapeUnallowedChars(filename);
-	
-	const string fullpath = Folder + "/" + filename;
-	mkdir(Folder.c_str()
-#	ifndef WIN32
-	, 0755
-#	endif // !WIN32
-	);
-	
-	string result;
-	std::ifstream input(fullpath.c_str());
-	
-	if (input.is_open())
-	{
-		bool first = 1;
-		string line;
-		while (getline(input, line))
-		{
-			if (!first)
-				*myInfo->Main() << "\n";
-			utf_to_locale(line);
-			*myInfo->Main() << line;
-			first = 0;
-		}
-		input.close();
-		myInfo->Main()->SetFormatting(fmtBold, "\n\nSimilar artists:\n", fmtBoldEnd, 0);
-		myInfo->Main()->SetFormatting(Config.color2, "\n * ", clEnd);
-		ArtistReady = 1;
-		pthread_exit(NULL);
-	}
-	
-	CURLcode code;
-	
-	char *c_artist = curl_easy_escape(0, artist.c_str(), artist.length());
-	
+	char *c_artist = curl_easy_escape(0, screen->itsArtist.c_str(), screen->itsArtist.length());
 	string url = "http://ws.audioscrobbler.com/2.0/?method=artist.getinfo&artist=";
 	url += c_artist;
 	url += "&api_key=d94e5b6e26469a2d1ffae8ef20131b79";
+	
+	string result;
+	CURLcode code;
 	
 	pthread_mutex_lock(&CurlLock);
 	CURL *info = curl_easy_init();
@@ -235,9 +231,9 @@ void *Info::PrepareArtist(void *ptr)
 	
 	if (code != CURLE_OK)
 	{
-		*myInfo->Main() << "Error while fetching artist's info: " << curl_easy_strerror(code);
+		*screen->w << "Error while fetching artist's info: " << curl_easy_strerror(code);
 		ArtistReady = 1;
-		pthread_exit(NULL);
+		pthread_exit(0);
 	}
 	
 	size_t a, b;
@@ -248,9 +244,9 @@ void *Info::PrepareArtist(void *ptr)
 	if (a != string::npos)
 	{
 		EscapeHtml(result);
-		*myInfo->Main() << "Last.fm returned an error message: " << result;
+		*screen->w << "Last.fm returned an error message: " << result;
 		ArtistReady = 1;
-		pthread_exit(NULL);
+		pthread_exit(0);
 	}
 	
 	vector<string> similar;
@@ -291,40 +287,40 @@ void *Info::PrepareArtist(void *ptr)
 	EscapeHtml(result);
 	Trim(result);
 	
-	Buffer filebuffer;
+	std::ostringstream filebuffer;
 	if (save)
 		filebuffer << result;
 	utf_to_locale(result);
-	*myInfo->Main() << result;
+	*screen->w << result;
 	
 	if (save)
 		filebuffer << "\n\nSimilar artists:\n";
-	*myInfo->Main() << fmtBold << "\n\nSimilar artists:\n" << fmtBoldEnd;
+	*screen->w << fmtBold << "\n\nSimilar artists:\n" << fmtBoldEnd;
 	for (size_t i = 1; i < similar.size(); i++)
 	{
 		if (save)
 			filebuffer << "\n * " << similar[i] << " (" << urls[i] << ")";
 		utf_to_locale(similar[i]);
 		utf_to_locale(urls[i]);
-		*myInfo->Main() << "\n" << Config.color2 << " * " << clEnd << similar[i] << " (" << urls[i] << ")";
+		*screen->w << "\n" << Config.color2 << " * " << clEnd << similar[i] << " (" << urls[i] << ")";
 	}
 	
 	if (save)
 		filebuffer << "\n\n" << urls.front();
 	utf_to_locale(urls.front());
-	*myInfo->Main() << "\n\n" << urls.front();
+	*screen->w << "\n\n" << urls.front();
 	
 	if (save)
 	{
-		std::ofstream output(fullpath.c_str());
+		std::ofstream output(screen->itsFilenamePath.c_str());
 		if (output.is_open())
 		{
-			output << filebuffer.Str();
+			output << filebuffer.str();
 			output.close();
 		}
 	}
 	ArtistReady = 1;
-	pthread_exit(NULL);
+	pthread_exit(0);
 }
 #endif // HVAE_CURL_CURL_H
 
