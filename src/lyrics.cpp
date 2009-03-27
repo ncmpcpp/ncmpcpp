@@ -177,7 +177,7 @@ void Lyrics::SwitchTo()
 					Downloader = new pthread_t;
 					pthread_create(Downloader, 0, Get, this);
 #					elif defined(HAVE_CURL_CURL_H)
-					Get(&itsSong);
+					Get(this);
 					w->Flush();
 #					else
 					*w << "Local lyrics not found. As ncmpcpp has been compiled without curl support, you can put appropriate lyrics into " << Folder << " directory (file syntax is \"$ARTIST - $TITLE.txt\") or recompile ncmpcpp with curl support.";
