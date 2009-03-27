@@ -69,7 +69,6 @@ namespace
 			len = strlen(inbuf);
 		size_t buflen = len*6+1;
 		char *outbuf = new char[buflen];
-		memset(outbuf, 0, sizeof(char)*buflen);
 		char *outstart = outbuf;
 		char *instart = inbuf;
 		
@@ -80,7 +79,7 @@ namespace
 			return;
 		}
 		iconv_close(cd);
-		
+		*outbuf = 0;
 		str_pool_put(instart);
 		inbuf = str_pool_get(outstart);
 		delete [] outstart;
