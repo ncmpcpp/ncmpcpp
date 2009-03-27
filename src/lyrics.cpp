@@ -60,7 +60,7 @@ bool Lyrics::Reload = 0;
 bool Lyrics::Ready = 0;
 #endif // HAVE_CURL_CURL_H
 
-std::string Lyrics::Filename;
+std::string Lyrics::FilenamePath;
 
 #ifdef HAVE_PTHREAD_H
 pthread_t *Lyrics::Downloader = 0;
@@ -140,18 +140,51 @@ void Lyrics::SwitchTo()
 			w->Clear();
 #			ifdef HAVE_CURL_CURL_H
 			static_cast<Window &>(*w) << "Fetching lyrics...";
+			w->Window::Refresh();
 #			endif // HAVE_CURL_CURL_H
 #			ifdef HAVE_PTHREAD_H
 			if (!Downloader)
-			{
-				Downloader = new pthread_t;
-				pthread_create(Downloader, NULL, Get, &itsSong);
-			}
-#			else
-			w->Window::Refresh();
-			Get(&itsSong);
-			w->Flush();
 #			endif // HAVE_PTHREAD_H
+			{
+				string file = locale_to_utf_cpy(itsSong.GetArtist()) + " - " + locale_to_utf_cpy(itsSong.GetTitle()) + ".txt";
+				EscapeUnallowedChars(file);
+				FilenamePath = Folder + "/" + file;
+				
+				mkdir(Folder.c_str()
+#				ifndef WIN32
+				, 0755
+#				endif // !WIN32
+				);
+				
+				std::ifstream input(FilenamePath.c_str());
+				if (input.is_open())
+				{
+					bool first = 1;
+					string line;
+					while (getline(input, line))
+					{
+						if (!first)
+							*w << "\n";
+						utf_to_locale(line);
+						*w << line;
+						first = 0;
+					}
+					w->Flush();
+				}
+				else
+				{
+#					ifdef HAVE_PTHREAD_H
+					Downloader = new pthread_t;
+					pthread_create(Downloader, 0, Get, this);
+#					elif defined(HAVE_CURL_CURL_H)
+					Get(&itsSong);
+					w->Flush();
+#					else
+					*w << "Local lyrics not found. As ncmpcpp has been compiled without curl support, you can put appropriate lyrics into " << Folder << " directory (file syntax is \"$ARTIST - $TITLE.txt\") or recompile ncmpcpp with curl support.";
+					w->Flush();
+#					endif
+				}
+			}
 		}
 		Reload = 0;
 	}
@@ -170,49 +203,15 @@ void Lyrics::SpacePressed()
 	ShowMessage("Reload lyrics if song changes: %s", Config.now_playing_lyrics ? "On" : "Off");
 }
 
-void *Lyrics::Get(void *song)
+#ifdef HAVE_CURL_CURL_H
+void *Lyrics::Get(void *screen_void_ptr)
 {
-	string artist = static_cast<MPD::Song *>(song)->GetArtist();
-	string title = static_cast<MPD::Song *>(song)->GetTitle();
-	
-	locale_to_utf(artist);
-	locale_to_utf(title);
-	
-	string filename = artist + " - " + title + ".txt";
-	EscapeUnallowedChars(filename);
-	Filename = Folder + "/" + filename;
-	
-	mkdir(Folder.c_str()
-#	ifndef WIN32
-	, 0755
-#	endif // !WIN32
-	);
-	
-	std::ifstream input(Filename.c_str());
-	
-	if (input.is_open())
-	{
-		bool first = 1;
-		string line;
-		while (getline(input, line))
-		{
-			if (!first)
-				*myLyrics->Main() << "\n";
-			utf_to_locale(line);
-			*myLyrics->Main() << line;
-			first = 0;
-		}
-#		ifdef HAVE_CURL_CURL_H
-		Ready = 1;
-#		endif // HAVE_CURL_CURL_H
-		pthread_exit(NULL);
-	}
-#	ifdef HAVE_CURL_CURL_H
-	CURLcode code;
-	
+	Lyrics *screen = static_cast<Lyrics *>(screen_void_ptr);
 	const Plugin *my_lyrics = ChoosePlugin(Config.lyrics_db);
 	
 	string result;
+	string artist = locale_to_utf_cpy(screen->itsSong.GetArtist());
+	string title = locale_to_utf_cpy(screen->itsSong.GetTitle());
 	
 	char *c_artist = curl_easy_escape(0, artist.c_str(), artist.length());
 	char *c_title = curl_easy_escape(0, title.c_str(), title.length());
@@ -221,6 +220,7 @@ void *Lyrics::Get(void *song)
 	url.replace(url.find("%artist%"), 8, c_artist);
 	url.replace(url.find("%title%"), 7, c_title);
 	
+	CURLcode code;
 	pthread_mutex_lock(&CurlLock);
 	CURL *lyrics = curl_easy_init();
 	curl_easy_setopt(lyrics, CURLOPT_URL, url.c_str());
@@ -237,9 +237,9 @@ void *Lyrics::Get(void *song)
 	
 	if (code != CURLE_OK)
 	{
-		*myLyrics->Main() << "Error while fetching lyrics: " << curl_easy_strerror(code);
+		*screen->w << "Error while fetching lyrics: " << curl_easy_strerror(code);
 		Ready = 1;
-		pthread_exit(NULL);
+		pthread_exit(0);
 	}
 	
 	size_t a, b;
@@ -249,9 +249,9 @@ void *Lyrics::Get(void *song)
 	
 	if (my_lyrics->not_found(result))
 	{
-		*myLyrics->Main() << "Not found";
+		*screen->w << "Not found";
 		Ready = 1;
-		pthread_exit(NULL);
+		pthread_exit(0);
 	}
 	
 	for (size_t i = result.find("&lt;"); i != string::npos; i = result.find("&lt;"))
@@ -262,22 +262,18 @@ void *Lyrics::Get(void *song)
 	EscapeHtml(result);
 	Trim(result);
 	
-	*myLyrics->Main() << utf_to_locale_cpy(result);
+	*screen->w << utf_to_locale_cpy(result);
 	
-	std::ofstream output(Filename.c_str());
+	std::ofstream output(FilenamePath.c_str());
 	if (output.is_open())
 	{
 		output << result;
 		output.close();
 	}
 	Ready = 1;
-	pthread_exit(NULL);
-#	else
-	else
-		*myLyrics->Main() << "Local lyrics not found. As ncmpcpp has been compiled without curl support, you can put appropriate lyrics into ~/.lyrics directory (file syntax is \"ARTIST - TITLE.txt\") or recompile ncmpcpp with curl support.";
-	return NULL;
-#	endif
+	pthread_exit(0);
 }
+#endif // HAVE_CURL_CURL_H
 
 void Lyrics::Edit()
 {
@@ -294,7 +290,7 @@ void Lyrics::Edit()
 	
 	if (Config.use_console_editor)
 	{
-		system(("/bin/sh -c \"" + Config.external_editor + " \\\"" + Filename + "\\\"\"").c_str());
+		system(("/bin/sh -c \"" + Config.external_editor + " \\\"" + FilenamePath + "\\\"\"").c_str());
 		// below is needed as screen gets cleared, but apparently
 		// ncurses doesn't know about it, so we need to reload main screen
 		endwin();
@@ -302,7 +298,7 @@ void Lyrics::Edit()
 		curs_set(0);
 	}
 	else
-		system(("nohup " + Config.external_editor + " \"" + Filename + "\" > /dev/null 2>&1 &").c_str());
+		system(("nohup " + Config.external_editor + " \"" + FilenamePath + "\" > /dev/null 2>&1 &").c_str());
 }
 
 #ifdef HAVE_CURL_CURL_H

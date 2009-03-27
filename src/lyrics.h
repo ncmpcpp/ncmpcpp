@@ -67,13 +67,12 @@ class Lyrics : public Screen<Scrollpad>
 #		endif // HAVE_CURL_CURL_H
 		
 	private:
-		static void *Get(void *);
-		
-		static std::string Filename;
+		static std::string FilenamePath;
 		static const std::string Folder;
 		
 #		ifdef HAVE_CURL_CURL_H
-
+		static void *Get(void *);
+		
 #		ifdef HAVE_PTHREAD_H
 		void Take();
 #		endif // HAVE_PTHREAD_H
