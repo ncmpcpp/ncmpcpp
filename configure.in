@@ -45,6 +45,7 @@ dnl ========================
 dnl = checking for ncurses =
 dnl ========================
 if test "$pdcurses" = "no" ; then
+	pdcurses=XCurses
 	if test "$unicode" = "yes" ; then
 		curses_config_bin=ncursesw5-config
 		curses_lib=ncursesw
@@ -67,7 +68,7 @@ if test "$pdcurses" = "XCurses" && test "$CURSES_CONFIG" != "" ; then
 	LDFLAGS="$LDFLAGS `$CURSES_CONFIG --libs`"
 	AC_CHECK_LIB($curses_lib, initscr, , AC_MSG_ERROR([$curses_lib library is required]))
 else
-	AC_CHECK_LIB($curses_lib, initscr, LDFLAGS="$LDFLAGS -l$curses_lib", AC_MSG_ERROR([$ncurses_lib library is required]))
+	AC_CHECK_LIB($curses_lib, initscr, LDFLAGS="$LDFLAGS -l$curses_lib", AC_MSG_ERROR([$curses_lib library is required]))
 fi
 if test "$pdcurses" != "no" ; then
 	AC_CHECK_LIB($curses_lib, Xinitscr, AC_DEFINE([XCURSES], [1], [x11 pdcurses available]), )
