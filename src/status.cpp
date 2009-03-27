@@ -175,7 +175,6 @@ void NcmpcppErrorCallback(Connection *Mpd, int errorid, const char *msg, void *)
 void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 {
 	static size_t playing_song_scroll_begin = 0;
-	static bool repeat_one_allowed = 0;
 	static string player_state;
 	static MPD::Song np;
 	
@@ -324,7 +323,6 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 				wFooter->SetColor(Config.statusbar_color);
 				Playlist::ReloadRemaining = 1;
 				myPlaylist->NowPlaying = -1;
-				Config.stop_after_current_song = 0;
 				player_state.clear();
 				break;
 			}
@@ -342,29 +340,20 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 	{
 		if (myPlaylist->isPlaying())
 		{
-			if (Config.repeat_one_mode && repeat_one_allowed)
-				Mpd->Play(myPlaylist->OldPlaying);
 			np = Mpd->GetCurrentSong();
 			WindowTitle(utf_to_locale_cpy(np.toString(Config.song_window_title_format)));
 			if (Config.autocenter_mode && !myPlaylist->Main()->isFiltered())
 				myPlaylist->Main()->Highlight(myPlaylist->NowPlaying);
-			repeat_one_allowed = 0;
 			
 			if (!Mpd->GetElapsedTime())
 				mvwhline(wFooter->Raw(), 0, 0, 0, wFooter->GetWidth());
 			
-			if (Config.now_playing_lyrics && !Config.repeat_one_mode && myScreen == myLyrics && myOldScreen == myPlaylist)
+			if (Config.now_playing_lyrics && !Mpd->GetSingle() && myScreen == myLyrics && myOldScreen == myPlaylist)
 				Lyrics::Reload = 1;
 		}
 		Playlist::ReloadRemaining = 1;
 		
 		playing_song_scroll_begin = 0;
-		
-		if (Config.stop_after_current_song)
-		{
-			Mpd->Stop();
-			Config.stop_after_current_song = 0;
-		}
 		
 		if (Mpd->GetState() == psPlay)
 		{
@@ -376,10 +365,6 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 		if (!np.Empty() && !player_state.empty())
 		{
 			int elapsed = Mpd->GetElapsedTime();
-			
-			// 'repeat one' mode check - be sure that we deal with item with known length
-			if (np.GetTotalLength() && elapsed == np.GetTotalLength()-1)
-				repeat_one_allowed = 1;
 			
 			if (!block_statusbar_update && Config.statusbar_visibility)
 			{
@@ -427,6 +412,7 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 	
 	static char mpd_repeat;
 	static char mpd_random;
+	static char mpd_single;
 	static char mpd_crossfade;
 	static char mpd_db_updating;
 	
@@ -439,6 +425,11 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 	{
 		mpd_random = Mpd->GetRandom() ? 'z' : 0;
 		ShowMessage("Random is %s", !mpd_random ? "off" : "on");
+	}
+	if (changed.Single)
+	{
+		mpd_single = Mpd->GetSingle() ? 's' : 0;
+		ShowMessage("Single is %s", !mpd_single ? "off" : "on");
 	}
 	if (changed.Crossfade)
 	{
@@ -460,6 +451,8 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 			switch_state += mpd_repeat;
 		if (mpd_random)
 			switch_state += mpd_random;
+		if (mpd_single)
+			switch_state += mpd_single;
 		if (mpd_crossfade)
 			switch_state += mpd_crossfade;
 		if (mpd_db_updating)

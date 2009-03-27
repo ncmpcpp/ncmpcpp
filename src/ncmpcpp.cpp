@@ -1080,11 +1080,6 @@ int main(int argc, char *argv[])
 			Mpd->SetRepeat(!Mpd->GetRepeat());
 			Mpd->UpdateStatus();
 		}
-		else if (Keypressed(input, Key.ToggleRepeatOne))
-		{
-			Config.repeat_one_mode = !Config.repeat_one_mode;
-			ShowMessage("'Repeat one' mode: %s", Config.repeat_one_mode ? "On" : "Off");
-		}
 		else if (Keypressed(input, Key.Shuffle))
 		{
 			Mpd->Shuffle();
@@ -1094,6 +1089,22 @@ int main(int argc, char *argv[])
 		{
 			Mpd->SetRandom(!Mpd->GetRandom());
 			Mpd->UpdateStatus();
+		}
+		else if (Keypressed(input, Key.ToggleSingle))
+		{
+			if (myScreen == mySearcher && !mySearcher->Main()->isStatic(0))
+			{
+				mySearcher->Main()->Highlight(SearchEngine::SearchButton);
+				mySearcher->Main()->Highlighting(0);
+				mySearcher->Main()->Refresh();
+				mySearcher->Main()->Highlighting(1);
+				mySearcher->EnterPressed();
+			}
+			else
+			{
+				Mpd->SetSingle(!Mpd->GetSingle());
+				Mpd->UpdateStatus();
+			}
 		}
 		else if (Keypressed(input, Key.ToggleCrossfade))
 		{
@@ -1275,22 +1286,6 @@ int main(int argc, char *argv[])
 			Song *s = myScreen->CurrentSong();
 			if (s)
 				myBrowser->LocateSong(*s);
-		}
-		else if (Keypressed(input, Key.StartSearching))
-		{
-			if (myScreen == myPlaylist && myPlaylist->isPlaying())
-			{
-				Config.stop_after_current_song = !Config.stop_after_current_song;
-				ShowMessage("Stop playing after current song: %s", Config.stop_after_current_song ? "on" : "off");
-			}
-			else if (myScreen == mySearcher && !mySearcher->Main()->isStatic(0))
-			{
-				mySearcher->Main()->Highlight(SearchEngine::SearchButton);
-				mySearcher->Main()->Highlighting(0);
-				mySearcher->Main()->Refresh();
-				mySearcher->Main()->Highlighting(1);
-				mySearcher->EnterPressed();
-			}
 		}
 		else if (Keypressed(input, Key.GoToPosition))
 		{

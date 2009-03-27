@@ -64,8 +64,8 @@ struct ncmpcpp_keys
 	int SeekForward[2];
 	int SeekBackward[2];
 	int ToggleRepeat[2];
-	int ToggleRepeatOne[2];
 	int ToggleRandom[2];
+	int ToggleSingle[2];
 	int ToggleSpaceMode[2];
 	int ToggleAddMode[2];
 	int Shuffle[2];
@@ -96,7 +96,6 @@ struct ncmpcpp_keys
 	int SavePlaylist[2];
 	int GoToNowPlaying[2];
 	int GoToContainingDir[2];
-	int StartSearching[2];
 	int ToggleAutoCenter[2];
 	int ToggleDisplayMode[2];
 	int ToggleLyricsDB[2];
@@ -153,7 +152,6 @@ struct ncmpcpp_config
 	bool header_visibility;
 	bool statusbar_visibility;
 	bool autocenter_mode;
-	bool repeat_one_mode;
 	bool wrapped_search;
 	bool space_selects;
 	bool ncmpc_like_songs_adding;
@@ -165,7 +163,6 @@ struct ncmpcpp_config
 	bool display_screens_numbers_on_start;
 	bool clock_display_seconds;
 	bool ignore_leading_the;
-	bool stop_after_current_song;
 	bool block_search_constraints_change;
 	bool use_console_editor;
 	

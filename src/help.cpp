@@ -161,8 +161,8 @@ void Help::GetKeybindings()
 	*w << DisplayKeys(Key.AddSelected) << "Add selected items to playlist/m3u file\n\n";
 	
 	*w << DisplayKeys(Key.ToggleRepeat) << "Toggle repeat mode\n";
-	*w << DisplayKeys(Key.ToggleRepeatOne) << "Toggle \"repeat one\" mode\n";
 	*w << DisplayKeys(Key.ToggleRandom) << "Toggle random mode\n";
+	*w << DisplayKeys(Key.ToggleSingle) << "Toggle single mode\n";
 	*w << DisplayKeys(Key.Shuffle) << "Shuffle playlist\n";
 	*w << DisplayKeys(Key.ToggleCrossfade) << "Toggle crossfade mode\n";
 	*w << DisplayKeys(Key.SetCrossfade) << "Set crossfade\n";
@@ -202,7 +202,6 @@ void Help::GetKeybindings()
 	*w << DisplayKeys(Key.SavePlaylist) << "Save playlist\n";
 	*w << DisplayKeys(Key.SortPlaylist) << "Sort/reverse playlist\n";
 	*w << DisplayKeys(Key.GoToNowPlaying) << "Go to currently playing position\n";
-	*w << DisplayKeys(Key.StartSearching) << "Toggle \"stop playing after current song\" option\n";
 	*w << DisplayKeys(Key.ToggleAutoCenter) << "Toggle auto center mode\n\n\n";
 	
 	*w << "   " << fmtBold << "Keys - Browse screen\n -----------------------------------------\n" << fmtBoldEnd;
@@ -218,7 +217,7 @@ void Help::GetKeybindings()
 	*w << "   " << fmtBold << "Keys - Search engine\n -----------------------------------------\n" << fmtBoldEnd;
 	*w << DisplayKeys(Key.Enter) << "Add item to playlist and play/change option\n";
 	*w << DisplayKeys(Key.Space) << "Add item to playlist\n";
-	*w << DisplayKeys(Key.StartSearching) << "Start searching immediately\n\n\n";
+	*w << DisplayKeys(Key.ToggleSingle) << "Start searching immediately\n\n\n";
 	
 	
 	*w << "   " << fmtBold << "Keys - Media library\n -----------------------------------------\n" << fmtBoldEnd;

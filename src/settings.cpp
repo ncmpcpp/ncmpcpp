@@ -117,8 +117,8 @@ void DefaultKeys(ncmpcpp_keys &keys)
 	keys.SeekForward[0] = 'f';
 	keys.SeekBackward[0] = 'b';
 	keys.ToggleRepeat[0] = 'r';
-	keys.ToggleRepeatOne[0] = 'R';
 	keys.ToggleRandom[0] = 'z';
+	keys.ToggleSingle[0] = 'y';
 	keys.ToggleSpaceMode[0] = 't';
 	keys.ToggleAddMode[0] = 'T';
 	keys.Shuffle[0] = 'Z';
@@ -149,7 +149,6 @@ void DefaultKeys(ncmpcpp_keys &keys)
 	keys.SavePlaylist[0] = 'S';
 	keys.GoToNowPlaying[0] = 'o';
 	keys.GoToContainingDir[0] = 'G';
-	keys.StartSearching[0] = 'y';
 	keys.ToggleAutoCenter[0] = 'U';
 	keys.ToggleDisplayMode[0] = 'p';
 	keys.ToggleLyricsDB[0] = 'L';
@@ -184,8 +183,8 @@ void DefaultKeys(ncmpcpp_keys &keys)
 	keys.SeekForward[1] = null_key;
 	keys.SeekBackward[1] = null_key;
 	keys.ToggleRepeat[1] = null_key;
-	keys.ToggleRepeatOne[1] = null_key;
 	keys.ToggleRandom[1] = null_key;
+	keys.ToggleSingle[1] = null_key;
 	keys.ToggleSpaceMode[1] = null_key;
 	keys.ToggleAddMode[1] = null_key;
 	keys.Shuffle[1] = null_key;
@@ -216,7 +215,6 @@ void DefaultKeys(ncmpcpp_keys &keys)
 	keys.SavePlaylist[1] = null_key;
 	keys.GoToNowPlaying[1] = null_key;
 	keys.GoToContainingDir[1] = null_key;
-	keys.StartSearching[1] = null_key;
 	keys.ToggleAutoCenter[1] = null_key;
 	keys.ToggleDisplayMode[1] = null_key;
 	keys.ToggleLyricsDB[1] = null_key;
@@ -263,7 +261,6 @@ void DefaultConfiguration(ncmpcpp_config &conf)
 	conf.header_visibility = true;
 	conf.statusbar_visibility = true;
 	conf.autocenter_mode = false;
-	conf.repeat_one_mode = false;
 	conf.wrapped_search = true;
 	conf.space_selects = false;
 	conf.ncmpc_like_songs_adding = false;
@@ -275,7 +272,6 @@ void DefaultConfiguration(ncmpcpp_config &conf)
 	conf.display_screens_numbers_on_start = true;
 	conf.clock_display_seconds = false;
 	conf.ignore_leading_the = false;
-	conf.stop_after_current_song = false;
 	conf.block_search_constraints_change = true;
 	conf.use_console_editor = false;
 	conf.set_window_title = true;
@@ -356,10 +352,10 @@ void ReadKeys(ncmpcpp_keys &keys)
 				GetKeys(key, keys.SeekBackward);
 			else if (key.find("key_toggle_repeat ") != string::npos)
 				GetKeys(key, keys.ToggleRepeat);
-			else if (key.find("key_toggle_repeat_one ") != string::npos)
-				GetKeys(key, keys.ToggleRepeatOne);
 			else if (key.find("key_toggle_random ") != string::npos)
 				GetKeys(key, keys.ToggleRandom);
+			else if (key.find("key_toggle_single ") != string::npos)
+				GetKeys(key, keys.ToggleSingle);
 			else if (key.find("key_toggle_space_mode ") != string::npos)
 				GetKeys(key, keys.ToggleSpaceMode);
 			else if (key.find("key_toggle_add_mode ") != string::npos)
@@ -426,8 +422,6 @@ void ReadKeys(ncmpcpp_keys &keys)
 				GetKeys(key, keys.ToggleLyricsDB);
 			else if (key.find("key_go_to_containing_directory ") != string::npos)
 				GetKeys(key, keys.GoToContainingDir);
-			else if (key.find("key_start_searching ") != string::npos)
-				GetKeys(key, keys.StartSearching);
 			else if (key.find("key_go_to_parent_dir ") != string::npos)
 				GetKeys(key, keys.GoToParentDir);
 			else if (key.find("key_switch_tag_type_list ") != string::npos)
@@ -607,10 +601,6 @@ void ReadConfiguration(ncmpcpp_config &conf)
 			else if (cl.find("autocenter_mode") != string::npos)
 			{
 				conf.autocenter_mode = v == "yes";
-			}
-			else if (cl.find("repeat_one_mode") != string::npos)
-			{
-				conf.repeat_one_mode = v == "yes";
 			}
 			else if (cl.find("default_find_mode") != string::npos)
 			{

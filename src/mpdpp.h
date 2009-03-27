@@ -48,7 +48,7 @@ namespace MPD
 	
 	struct StatusChanges
 	{
-		StatusChanges() : Playlist(0), SongID(0), Database(0), DBUpdating(0), Volume(0), ElapsedTime(0), Crossfade(0), Random(0), Repeat(0), PlayerState(0), StatusFlags(0) { }
+		StatusChanges() : Playlist(0), SongID(0), Database(0), DBUpdating(0), Volume(0), ElapsedTime(0), Crossfade(0), Random(0), Repeat(0), Single(0), PlayerState(0), StatusFlags(0) { }
 		bool Playlist:1;
 		bool SongID:1;
 		bool Database:1;
@@ -58,6 +58,7 @@ namespace MPD
 		bool Crossfade:1;
 		bool Random:1;
 		bool Repeat:1;
+		bool Single:1;
 		bool PlayerState:1;
 		bool StatusFlags:1;
 	};
@@ -116,6 +117,7 @@ namespace MPD
 			PlayerState GetState() const { return isConnected && itsCurrentStatus ? (PlayerState)itsCurrentStatus->state : psUnknown; }
 			bool GetRepeat() const { return isConnected && itsCurrentStatus ? itsCurrentStatus->repeat : 0; }
 			bool GetRandom() const { return isConnected && itsCurrentStatus ? itsCurrentStatus->random : 0; }
+			bool GetSingle() const { return isConnected && itsCurrentStatus ? itsCurrentStatus->single : 0; }
 			bool GetDBIsUpdating() const { return isConnected && itsCurrentStatus ? itsCurrentStatus->updatingDb : 0; }
 			int GetVolume() const { return isConnected && itsCurrentStatus ? itsCurrentStatus->volume : -1; }
 			int GetCrossfade() const { return isConnected && itsCurrentStatus ? itsCurrentStatus->crossfade : -1; }
@@ -137,6 +139,7 @@ namespace MPD
 			
 			void SetRepeat(bool) const;
 			void SetRandom(bool) const;
+			void SetSingle(bool) const;
 			void SetCrossfade(int) const;
 			void SetVolume(int);
 			

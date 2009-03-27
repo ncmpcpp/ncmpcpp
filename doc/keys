@@ -70,9 +70,9 @@
 #
 #key_toggle_repeat = 'r'
 #
-#key_toggle_repeat_one = 'R'
-#
 #key_toggle_random = 'z'
+#
+#key_toggle_single = 'y'
 #
 #key_shuffle = 'Z'
 #
@@ -135,8 +135,6 @@
 #key_toggle_lyrics_db = 'L'
 #
 #key_go_to_containing_directory = 'G'
-#
-#key_start_searching = 'y'
 #
 #key_go_to_parent_dir = 263 127
 #

@@ -739,6 +739,7 @@ mpd_Status * mpd_getStatus(mpd_Connection * connection) {
 	status->volume = -1;
 	status->repeat = 0;
 	status->random = 0;
+	status->single = 0;
 	status->playlist = -1;
 	status->playlistLength = -1;
 	status->state = -1;
@@ -768,6 +769,9 @@ mpd_Status * mpd_getStatus(mpd_Connection * connection) {
 		}
 		else if(strcmp(re->name,"random")==0) {
 			status->random = atoi(re->value);
+		}
+		else if(strcmp(re->name,"single")==0) {
+			status->single = atoi(re->value);
 		}
 		else if(strcmp(re->name,"playlist")==0) {
 			status->playlist = strtol(re->value,NULL,10);
@@ -1688,6 +1692,14 @@ void mpd_sendRandomCommand(mpd_Connection * connection, int randomMode) {
 	int len = strlen("random")+2+INTLEN+3;
 	char *string = malloc(len);
 	snprintf(string, len, "random \"%i\"\n", randomMode);
+	mpd_executeCommand(connection,string);
+	free(string);
+}
+
+void mpd_sendSingleCommand(mpd_Connection * connection, int singleMode) {
+	int len = strlen("single")+2+INTLEN+3;
+	char *string = malloc(len);
+	snprintf(string, len, "single \"%i\"\n", singleMode);
 	mpd_executeCommand(connection,string);
 	free(string);
 }
