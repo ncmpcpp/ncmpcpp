@@ -1376,6 +1376,7 @@ int main(int argc, char *argv[])
 			
 			Menu<string> mDialog((COLS-dialog_width)/2, (LINES-dialog_height)/2, dialog_width, dialog_height, "Add selected items to...", Config.main_color, Config.window_border);
 			mDialog.SetTimeout(ncmpcpp_window_timeout);
+			mDialog.CyclicScrolling(Config.use_cyclic_scrolling);
 			mDialog.SetItemDisplayer(Display::Generic);
 			
 			bool playlists_not_active = myScreen == myBrowser && Config.local_browser;

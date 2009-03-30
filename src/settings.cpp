@@ -274,6 +274,7 @@ void DefaultConfiguration(ncmpcpp_config &conf)
 	conf.ignore_leading_the = false;
 	conf.block_search_constraints_change = true;
 	conf.use_console_editor = false;
+	conf.use_cyclic_scrolling = false;
 	conf.set_window_title = true;
 	conf.mpd_port = 6600;
 	conf.mpd_connection_timeout = 15;
@@ -573,6 +574,10 @@ void ReadConfiguration(ncmpcpp_config &conf)
 			else if (cl.find("fancy_scrolling") != string::npos)
 			{
 				conf.fancy_scrolling = v == "yes";
+			}
+			else if (cl.find("cyclic_scrolling") != string::npos)
+			{
+				conf.use_cyclic_scrolling = v == "yes";
 			}
 			else if (cl.find("playlist_show_remaining_time") != string::npos)
 			{

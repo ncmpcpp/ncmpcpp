@@ -148,7 +148,7 @@ namespace NCurses
 			void ShowFiltered() { itsOptionsPtr = &itsFilteredOptions; }
 			
 			virtual void Refresh();
-			virtual void Scroll(Where);
+			virtual void Scroll(Where where);
 			virtual void Reset();
 			virtual void Clear(bool clrscr = 1);
 			
@@ -166,6 +166,7 @@ namespace NCurses
 			
 			void HighlightColor(Color col) { itsHighlightColor = col; }
 			void Highlighting(bool hl) { highlightEnabled = hl; }
+			void CyclicScrolling(bool cs) { useCyclicScrolling = cs; }
 			
 			virtual bool Empty() const { return itsOptionsPtr->empty(); }
 			
@@ -203,6 +204,7 @@ namespace NCurses
 			
 			Color itsHighlightColor;
 			bool highlightEnabled;
+			bool useCyclicScrolling;
 			
 			Buffer *itsSelectedPrefix;
 			Buffer *itsSelectedSuffix;
@@ -228,6 +230,7 @@ template <typename T> NCurses::Menu<T>::Menu(size_t startx,
 					itsHighlight(0),
 					itsHighlightColor(itsBaseColor),
 					highlightEnabled(1),
+					useCyclicScrolling(0),
 					itsSelectedPrefix(0),
 					itsSelectedSuffix(0)
 {
@@ -432,10 +435,11 @@ template <typename T> void NCurses::Menu<T>::Scroll(Where where)
 			if (itsHighlight <= itsBeginning && itsHighlight > 0)
 			{
 				itsBeginning--;
-				//Window::Scroll(wUp);
 			}
 			if (itsHighlight == 0)
 			{
+				if (useCyclicScrolling)
+					return Scroll(wEnd);
 				break;
 			}
 			else
@@ -444,7 +448,7 @@ template <typename T> void NCurses::Menu<T>::Scroll(Where where)
 			}
 			if (!(*itsOptionsPtr)[itsHighlight] || (*itsOptionsPtr)[itsHighlight]->isStatic)
 			{
-				Scroll(itsHighlight == 0 ? wDown : wUp);
+				Scroll(itsHighlight == 0 && !useCyclicScrolling ? wDown : wUp);
 			}
 			break;
 		}
@@ -453,10 +457,11 @@ template <typename T> void NCurses::Menu<T>::Scroll(Where where)
 			if (itsHighlight >= MaxCurrentHighlight && itsHighlight < MaxHighlight)
 			{
 				itsBeginning++;
-				//Window::Scroll(wDown);
 			}
 			if (itsHighlight == MaxHighlight)
 			{
+				if (useCyclicScrolling)
+					return Scroll(wHome);
 				break;
 			}
 			else
@@ -465,12 +470,14 @@ template <typename T> void NCurses::Menu<T>::Scroll(Where where)
 			}
 			if (!(*itsOptionsPtr)[itsHighlight] || (*itsOptionsPtr)[itsHighlight]->isStatic)
 			{
-				Scroll(itsHighlight == MaxHighlight ? wUp : wDown);
+				Scroll(itsHighlight == MaxHighlight && !useCyclicScrolling ? wUp : wDown);
 			}
 			break;
 		}
 		case wPageUp:
 		{
+			if (useCyclicScrolling && itsHighlight == 0)
+				return Scroll(wEnd);
 			itsHighlight -= itsHeight;
 			itsBeginning -= itsHeight;
 			if (itsBeginning < 0)
@@ -481,12 +488,14 @@ template <typename T> void NCurses::Menu<T>::Scroll(Where where)
 			}
 			if (!(*itsOptionsPtr)[itsHighlight] || (*itsOptionsPtr)[itsHighlight]->isStatic)
 			{
-				Scroll(itsHighlight == 0 ? wDown: wUp);
+				Scroll(itsHighlight == 0 && !useCyclicScrolling ? wDown : wUp);
 			}
 			break;
 		}
 		case wPageDown:
 		{
+			if (useCyclicScrolling && itsHighlight == MaxHighlight)
+				return Scroll(wHome);
 			itsHighlight += itsHeight;
 			itsBeginning += itsHeight;
 			if (itsBeginning > MaxBeginning)
@@ -497,7 +506,7 @@ template <typename T> void NCurses::Menu<T>::Scroll(Where where)
 			}
 			if (!(*itsOptionsPtr)[itsHighlight] || (*itsOptionsPtr)[itsHighlight]->isStatic)
 			{
-				Scroll(itsHighlight == MaxHighlight ? wUp : wDown);
+				Scroll(itsHighlight == MaxHighlight && !useCyclicScrolling ? wUp : wDown);
 			}
 			break;
 		}

@@ -142,6 +142,8 @@
 #
 #fancy_scrolling = "yes"
 #
+#cyclic_scrolling = "no"
+#
 #follow_now_playing_lyrics = "no"
 #
 #ncmpc_like_songs_adding = "no" (enabled - add/remove, disabled - always add)

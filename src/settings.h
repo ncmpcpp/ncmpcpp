@@ -165,6 +165,7 @@ struct ncmpcpp_config
 	bool ignore_leading_the;
 	bool block_search_constraints_change;
 	bool use_console_editor;
+	bool use_cyclic_scrolling;
 	
 	int mpd_port;
 	int mpd_connection_timeout;

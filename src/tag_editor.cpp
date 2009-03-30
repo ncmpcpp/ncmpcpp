@@ -50,6 +50,7 @@ void TinyTagEditor::Init()
 	w = new Menu<Buffer>(0, MainStartY, COLS, MainHeight, "", Config.main_color, brNone);
 	w->HighlightColor(Config.main_highlight_color);
 	w->SetTimeout(ncmpcpp_window_timeout);
+	w->CyclicScrolling(Config.use_cyclic_scrolling);
 	w->SetItemDisplayer(Display::Generic);
 }
 
@@ -306,12 +307,14 @@ void TagEditor::Init()
 	Albums = new Menu<string_pair>(0, MainStartY, LeftColumnWidth, MainHeight, "Albums", Config.main_color, brNone);
 	Albums->HighlightColor(Config.active_column_color);
 	Albums->SetTimeout(ncmpcpp_window_timeout);
+	Albums->CyclicScrolling(Config.use_cyclic_scrolling);
 	Albums->SetItemDisplayer(Display::Pairs);
 	Albums->SetGetStringFunction(StringPairToString);
 	
 	Dirs = new Menu<string_pair>(0, MainStartY, LeftColumnWidth, MainHeight, "Directories", Config.main_color, brNone);
 	Dirs->HighlightColor(Config.active_column_color);
 	Dirs->SetTimeout(ncmpcpp_window_timeout);
+	Dirs->CyclicScrolling(Config.use_cyclic_scrolling);
 	Dirs->SetItemDisplayer(Display::Pairs);
 	Dirs->SetGetStringFunction(StringPairToString);
 	
@@ -320,11 +323,13 @@ void TagEditor::Init()
 	TagTypes = new Menu<string>(MiddleColumnStartX, MainStartY, MiddleColumnWidth, MainHeight, "Tag types", Config.main_color, brNone);
 	TagTypes->HighlightColor(Config.main_highlight_color);
 	TagTypes->SetTimeout(ncmpcpp_window_timeout);
+	TagTypes->CyclicScrolling(Config.use_cyclic_scrolling);
 	TagTypes->SetItemDisplayer(Display::Generic);
 	
 	Tags = new Menu<Song>(RightColumnStartX, MainStartY, RightColumnWidth, MainHeight, "Tags", Config.main_color, brNone);
 	Tags->HighlightColor(Config.main_highlight_color);
 	Tags->SetTimeout(ncmpcpp_window_timeout);
+	Tags->CyclicScrolling(Config.use_cyclic_scrolling);
 	Tags->SetSelectPrefix(&Config.selected_item_prefix);
 	Tags->SetSelectSuffix(&Config.selected_item_suffix);
 	Tags->SetItemDisplayer(Display::Tags);
@@ -1165,6 +1170,7 @@ void TagEditor::DealWithFilenames(SongList &v)
 	
 	Menu<string> *Main = new Menu<string>((COLS-width)/2, (LINES-height)/2, width, height, "", Config.main_color, Config.window_border);
 	Main->SetTimeout(ncmpcpp_window_timeout);
+	Main->CyclicScrolling(Config.use_cyclic_scrolling);
 	Main->SetItemDisplayer(Display::Generic);
 	Main->AddOption("Get tags from filename");
 	Main->AddOption("Rename files");
@@ -1225,6 +1231,7 @@ void TagEditor::DealWithFilenames(SongList &v)
 		
 		Main = new Menu<string>((COLS-width)/2, (LINES-height)/2, one_width, height, "", Config.main_color, Config.active_window_border);
 		Main->SetTimeout(ncmpcpp_window_timeout);
+		Main->CyclicScrolling(Config.use_cyclic_scrolling);
 		Main->SetItemDisplayer(Display::Generic);
 		
 		if (!Patterns.empty())
