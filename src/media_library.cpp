@@ -187,7 +187,8 @@ void MediaLibrary::Update()
 				Albums->AddOption(std::make_pair("(" + *j + ") " + *it, SearchConstraints(*it, *j)));
 		}
 		utf_to_locale(Artists->Current());
-		Albums->Sort<CaseInsensitiveSorting>((*Albums)[0].first == "<no album>");
+		if (!Albums->Empty())
+			Albums->Sort<CaseInsensitiveSorting>((*Albums)[0].first == "<no album>");
 		Albums->Window::Clear();
 		Albums->Refresh();
 	}
