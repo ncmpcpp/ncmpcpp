@@ -907,6 +907,7 @@ bool TagEditor::WriteTags(Song &s)
 					// if we rename local file, it won't get updated
 					// so just remove it from playlist and add again
 					size_t pos = myPlaylist->Main()->Choice();
+					Mpd->StartCommandsList();
 					Mpd->Delete(pos);
 					int id = Mpd->AddSong("file://" + new_name);
 					if (id >= 0)
@@ -914,6 +915,7 @@ bool TagEditor::WriteTags(Song &s)
 						s = myPlaylist->Main()->Back();
 						Mpd->Move(s.GetPosition(), pos);
 					}
+					Mpd->CommitCommandsList();
 				}
 				else // only myBrowser->Main()
 					s.SetFile(new_name);
