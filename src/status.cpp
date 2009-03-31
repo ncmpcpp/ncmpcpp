@@ -307,6 +307,7 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 			}
 			case psPlay:
 			{
+				WindowTitle(utf_to_locale_cpy(np.toString(Config.song_window_title_format)));
 				player_state = "Playing: ";
 				Playlist::ReloadRemaining = 1;
 				changed.ElapsedTime = 1;
