@@ -193,8 +193,11 @@ int main(int argc, char *argv[])
 		{
 			ShowMessage("Attempting to reconnect...");
 			if (Mpd->Connect())
-				ShowMessage("Connected!");
-			MessagesAllowed = 0;
+			{
+				ShowMessage("Connected to %s!", Mpd->GetHostname().c_str());
+				MessagesAllowed = 0;
+				Mpd->UpdateStatus();
+			}
 		}
 		
 		TraceMpdStatus();
