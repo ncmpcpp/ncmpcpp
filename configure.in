@@ -12,6 +12,8 @@ AM_PROG_LIBTOOL
 AC_ARG_ENABLE(clock, AS_HELP_STRING([--enable-clock], [Enable clock screen]), [clock=$enableval], [clock=no])
 AC_ARG_ENABLE(unicode, AS_HELP_STRING([--enable-unicode], [Enable utf8 support]), [unicode=$enableval], [unicode=yes])
 AC_ARG_WITH(taglib, AS_HELP_STRING([--with-taglib], [Enable tag editor]), [taglib=$withval], [taglib=auto])
+AC_ARG_WITH(pthreads, AS_HELP_STRING([--with-pthreads], [Enable threading support using posix threads]), [pthreads=$withval], [pthreads=auto])
+AC_ARG_WITH(iconv, AS_HELP_STRING([--with-iconv], [Enable iconv support (Note: if you use utf-8 system wide, you can disable this)]), [iconv=$withval], [iconv=auto])
 AC_ARG_WITH(curl, AS_HELP_STRING([--with-curl], [Enable fetching lyrics from the Internet]), [curl=$withval], [curl=auto])
 AC_ARG_WITH(pdcurses, AS_HELP_STRING([--with-pdcurses[=LIBNAME]], [Link against pdcurses instead of ncurses @<:@default=XCurses@:>@]), [pdcurses=$withval], [pdcurses=no])
 
@@ -33,13 +35,19 @@ AC_CHECK_HEADERS([dirent.h regex.h], , AC_MSG_ERROR(vital headers missing))
 dnl ======================
 dnl = checking for iconv =
 dnl ======================
-AC_CHECK_HEADERS([iconv.h],
-	AC_MSG_CHECKING([whether iconv takes const char **])
-	AC_COMPILE_IFELSE(AC_LANG_PROGRAM([[#include <iconv.h>]], [[iconv(0, (const char **)0, 0, 0, 0);]]),
-		AC_MSG_RESULT([yes]) AC_DEFINE([ICONV_CONST], [const], [pass const pointer to iconv]),
-		AC_MSG_RESULT([no]) AC_DEFINE([ICONV_CONST], [], [pass non-const pointer to iconv]))
-	AC_CHECK_LIB(iconv, libiconv, LDFLAGS="$LDFLAGS -liconv", )
-, )
+if test "$iconv" != "no" ; then
+	AC_CHECK_HEADERS([iconv.h],
+		AC_MSG_CHECKING([whether iconv takes const char **])
+		AC_COMPILE_IFELSE(AC_LANG_PROGRAM([[#include <iconv.h>]], [[iconv(0, (const char **)0, 0, 0, 0);]]),
+			AC_MSG_RESULT([yes]) AC_DEFINE([ICONV_CONST], [const], [pass const pointer to iconv]),
+			AC_MSG_RESULT([no]) AC_DEFINE([ICONV_CONST], [], [pass non-const pointer to iconv]))
+		AC_CHECK_LIB(iconv, libiconv, LDFLAGS="$LDFLAGS -liconv", )
+	,
+	if test "$iconv" = "yes"; then
+		AC_MSG_ERROR([iconv.h header is required])
+	fi
+	)
+fi
 
 dnl ========================
 dnl = checking for ncurses =
@@ -79,7 +87,13 @@ dnl =================================
 dnl = checking for curl and pthread =
 dnl =================================
 if test "$curl" != "no" ; then
-	AC_CHECK_HEADERS([pthread.h], AC_CHECK_LIB(pthread, pthread_create, LDFLAGS="$LDFLAGS -lpthread", AC_MSG_ERROR([pthread.h found but there is no pthread library to make use of])), )
+	if test "$pthreads" != "no" ; then
+		AC_CHECK_HEADERS([pthread.h], AC_CHECK_LIB(pthread, pthread_create, LDFLAGS="$LDFLAGS -lpthread",
+			if test "$pthreads" = "yes" ; then
+				AC_MSG_ERROR([pthread.h found but there is no pthread library to make use of])
+			fi
+		), )
+	fi
 	AC_PATH_PROG(CURL_CONFIG, curl-config)
 	if test "$CURL_CONFIG" != "" ; then
 		CPPFLAGS="$CPPFLAGS `$CURL_CONFIG --cflags`"
