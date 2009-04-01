@@ -298,6 +298,7 @@ void Playlist::FixPositions(size_t beginning)
 void Playlist::EnableHighlighting()
 {
 	w->Highlighting(1);
+	w->Refresh();
 	UpdateTimer();
 }
 
