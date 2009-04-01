@@ -44,6 +44,7 @@ namespace Global
 	
 	extern bool BlockItemListUpdate;
 	
+	extern bool UpdateStatusImmediately;
 	extern bool MessagesAllowed;
 	extern bool RedrawHeader;
 	

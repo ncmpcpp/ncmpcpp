@@ -119,7 +119,7 @@ void Playlist::EnterPressed()
 	if (!w->Empty())
 	{
 		Mpd->PlayID(w->Current().GetID());
-		Mpd->UpdateStatus();
+		UpdateStatusImmediately = 1;
 	}
 }
 

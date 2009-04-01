@@ -40,6 +40,8 @@ using std::string;
 
 string Global::VolumeState;
 
+bool Global::UpdateStatusImmediately = 0;
+
 namespace
 {
 	time_t time_of_statusbar_lock;
@@ -115,13 +117,15 @@ void TraceMpdStatus()
 	static timeval past, now;
 	
 	gettimeofday(&now, 0);
-	if (Mpd->Connected()
-	&&  ((now.tv_sec == past.tv_sec && now.tv_usec >= past.tv_usec+500000) || now.tv_sec > past.tv_sec)
+	if ((Mpd->Connected()
+	&&   ((now.tv_sec == past.tv_sec && now.tv_usec >= past.tv_usec+500000) || now.tv_sec > past.tv_sec))
+	||  UpdateStatusImmediately
 	   )
 	{
 		Mpd->UpdateStatus();
 		BlockItemListUpdate = 0;
 		Playlist::BlockUpdate = 0;
+		UpdateStatusImmediately = 0;
 		gettimeofday(&past, 0);
 	}
 	wFooter->Refresh();
