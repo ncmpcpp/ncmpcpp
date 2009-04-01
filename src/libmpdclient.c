@@ -740,6 +740,7 @@ mpd_Status * mpd_getStatus(mpd_Connection * connection) {
 	status->repeat = 0;
 	status->random = 0;
 	status->single = 0;
+	status->consume = 0;
 	status->playlist = -1;
 	status->playlistLength = -1;
 	status->state = -1;
@@ -772,6 +773,9 @@ mpd_Status * mpd_getStatus(mpd_Connection * connection) {
 		}
 		else if(strcmp(re->name,"single")==0) {
 			status->single = atoi(re->value);
+		}
+		else if(strcmp(re->name,"consume")==0) {
+			status->consume = atoi(re->value);
 		}
 		else if(strcmp(re->name,"playlist")==0) {
 			status->playlist = strtol(re->value,NULL,10);
@@ -1700,6 +1704,14 @@ void mpd_sendSingleCommand(mpd_Connection * connection, int singleMode) {
 	int len = strlen("single")+2+INTLEN+3;
 	char *string = malloc(len);
 	snprintf(string, len, "single \"%i\"\n", singleMode);
+	mpd_executeCommand(connection,string);
+	free(string);
+}
+
+void mpd_sendConsumeCommand(mpd_Connection * connection, int consumeMode) {
+	int len = strlen("consume")+2+INTLEN+3;
+	char *string = malloc(len);
+	snprintf(string, len, "consume \"%i\"\n", consumeMode);
 	mpd_executeCommand(connection,string);
 	free(string);
 }

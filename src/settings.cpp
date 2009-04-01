@@ -119,6 +119,7 @@ void DefaultKeys(ncmpcpp_keys &keys)
 	keys.ToggleRepeat[0] = 'r';
 	keys.ToggleRandom[0] = 'z';
 	keys.ToggleSingle[0] = 'y';
+	keys.ToggleConsume[0] = 'R';
 	keys.ToggleSpaceMode[0] = 't';
 	keys.ToggleAddMode[0] = 'T';
 	keys.Shuffle[0] = 'Z';
@@ -185,6 +186,7 @@ void DefaultKeys(ncmpcpp_keys &keys)
 	keys.ToggleRepeat[1] = null_key;
 	keys.ToggleRandom[1] = null_key;
 	keys.ToggleSingle[1] = null_key;
+	keys.ToggleConsume[1] = null_key;
 	keys.ToggleSpaceMode[1] = null_key;
 	keys.ToggleAddMode[1] = null_key;
 	keys.Shuffle[1] = null_key;
@@ -357,6 +359,8 @@ void ReadKeys(ncmpcpp_keys &keys)
 				GetKeys(key, keys.ToggleRandom);
 			else if (key.find("key_toggle_single ") != string::npos)
 				GetKeys(key, keys.ToggleSingle);
+			else if (key.find("key_toggle_consume ") != string::npos)
+				GetKeys(key, keys.ToggleConsume);
 			else if (key.find("key_toggle_space_mode ") != string::npos)
 				GetKeys(key, keys.ToggleSpaceMode);
 			else if (key.find("key_toggle_add_mode ") != string::npos)

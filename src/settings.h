@@ -66,6 +66,7 @@ struct ncmpcpp_keys
 	int ToggleRepeat[2];
 	int ToggleRandom[2];
 	int ToggleSingle[2];
+	int ToggleConsume[2];
 	int ToggleSpaceMode[2];
 	int ToggleAddMode[2];
 	int Shuffle[2];

@@ -175,6 +175,8 @@ typedef struct mpd_Status {
 	int random;
 	/* 1 if single mode is on, 0 otherwise */
 	int single;
+	/* 1 if consume mode is on, 0 otherwise */
+	int consume;
 	/* playlist length */
 	int playlistLength;
 	/* playlist, use this to determine when the playlist has changed */
@@ -523,6 +525,8 @@ void mpd_sendRepeatCommand(mpd_Connection * connection, int repeatMode);
 void mpd_sendRandomCommand(mpd_Connection * connection, int randomMode);
 
 void mpd_sendSingleCommand(mpd_Connection * connection, int singleMode);
+
+void mpd_sendConsumeCommand(mpd_Connection * connection, int consumeMode);
 
 void mpd_sendSetvolCommand(mpd_Connection * connection, int volumeChange);
 

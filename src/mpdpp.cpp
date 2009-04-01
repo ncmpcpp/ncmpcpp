@@ -165,6 +165,7 @@ void Connection::UpdateStatus()
 			itsChanges.Random = 1;
 			itsChanges.Repeat = 1;
 			itsChanges.Single = 1;
+			itsChanges.Consume = 1;
 			itsChanges.PlayerState = 1;
 			itsChanges.StatusFlags = 1;
 		}
@@ -180,8 +181,9 @@ void Connection::UpdateStatus()
 			itsChanges.Random = itsOldStatus->random != itsCurrentStatus->random;
 			itsChanges.Repeat = itsOldStatus->repeat != itsCurrentStatus->repeat;
 			itsChanges.Single = itsOldStatus->single != itsCurrentStatus->single;
+			itsChanges.Consume = itsOldStatus->consume != itsCurrentStatus->consume;
 			itsChanges.PlayerState = itsOldStatus->state != itsCurrentStatus->state;
-			itsChanges.StatusFlags = itsChanges.Repeat || itsChanges.Random || itsChanges.Single || itsChanges.Crossfade || itsChanges.DBUpdating;
+			itsChanges.StatusFlags = itsChanges.Repeat || itsChanges.Random || itsChanges.Single || itsChanges.Consume || itsChanges.Crossfade || itsChanges.DBUpdating;
 		}
 		itsUpdater(this, itsChanges, itsErrorHandlerUserdata);
 	}
@@ -490,6 +492,16 @@ void Connection::SetSingle(bool mode) const
 	if (isConnected)
 	{
 		mpd_sendSingleCommand(itsConnection, mode);
+		if (!isCommandsListEnabled)
+			mpd_finishCommand(itsConnection);
+	}
+}
+
+void Connection::SetConsume(bool mode) const
+{
+	if (isConnected)
+	{
+		mpd_sendConsumeCommand(itsConnection, mode);
 		if (!isCommandsListEnabled)
 			mpd_finishCommand(itsConnection);
 	}

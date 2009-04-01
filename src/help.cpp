@@ -163,6 +163,7 @@ void Help::GetKeybindings()
 	*w << DisplayKeys(Key.ToggleRepeat) << "Toggle repeat mode\n";
 	*w << DisplayKeys(Key.ToggleRandom) << "Toggle random mode\n";
 	*w << DisplayKeys(Key.ToggleSingle) << "Toggle single mode\n";
+	*w << DisplayKeys(Key.ToggleConsume) << "Toggle consume mode\n";
 	*w << DisplayKeys(Key.Shuffle) << "Shuffle playlist\n";
 	*w << DisplayKeys(Key.ToggleCrossfade) << "Toggle crossfade mode\n";
 	*w << DisplayKeys(Key.SetCrossfade) << "Set crossfade\n";

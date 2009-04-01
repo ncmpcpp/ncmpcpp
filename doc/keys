@@ -74,6 +74,8 @@
 #
 #key_toggle_single = 'y'
 #
+#key_toggle_consume = 'R'
+#
 #key_shuffle = 'Z'
 #
 #key_toggle_crossfade = 'x'

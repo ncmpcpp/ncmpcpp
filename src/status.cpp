@@ -416,6 +416,7 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 	static char mpd_repeat;
 	static char mpd_random;
 	static char mpd_single;
+	static char mpd_consume;
 	static char mpd_crossfade;
 	static char mpd_db_updating;
 	
@@ -433,6 +434,11 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 	{
 		mpd_single = Mpd->GetSingle() ? 's' : 0;
 		ShowMessage("Single mode is %s", !mpd_single ? "off" : "on");
+	}
+	if (changed.Consume)
+	{
+		mpd_consume = Mpd->GetConsume() ? 'c' : 0;
+		ShowMessage("Consume mode is %s", !mpd_consume ? "off" : "on");
 	}
 	if (changed.Crossfade)
 	{
@@ -456,6 +462,8 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 			switch_state += mpd_random;
 		if (mpd_single)
 			switch_state += mpd_single;
+		if (mpd_consume)
+			switch_state += mpd_consume;
 		if (mpd_crossfade)
 			switch_state += mpd_crossfade;
 		if (mpd_db_updating)

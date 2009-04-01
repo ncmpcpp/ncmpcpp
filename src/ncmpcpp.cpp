@@ -1109,6 +1109,11 @@ int main(int argc, char *argv[])
 				Mpd->UpdateStatus();
 			}
 		}
+		else if (Keypressed(input, Key.ToggleConsume))
+		{
+			Mpd->SetConsume(!Mpd->GetConsume());
+			Mpd->UpdateStatus();
+		}
 		else if (Keypressed(input, Key.ToggleCrossfade))
 		{
 			Mpd->SetCrossfade(Mpd->GetCrossfade() ? 0 : Config.crossfade_time);
