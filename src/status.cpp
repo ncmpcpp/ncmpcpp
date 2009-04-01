@@ -422,17 +422,17 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 	if (changed.Repeat)
 	{
 		mpd_repeat = Mpd->GetRepeat() ? 'r' : 0;
-		ShowMessage("Repeat is %s", !mpd_repeat ? "off" : "on");
+		ShowMessage("Repeat mode is %s", !mpd_repeat ? "off" : "on");
 	}
 	if (changed.Random)
 	{
 		mpd_random = Mpd->GetRandom() ? 'z' : 0;
-		ShowMessage("Random is %s", !mpd_random ? "off" : "on");
+		ShowMessage("Random mode is %s", !mpd_random ? "off" : "on");
 	}
 	if (changed.Single)
 	{
 		mpd_single = Mpd->GetSingle() ? 's' : 0;
-		ShowMessage("Single is %s", !mpd_single ? "off" : "on");
+		ShowMessage("Single mode is %s", !mpd_single ? "off" : "on");
 	}
 	if (changed.Crossfade)
 	{
