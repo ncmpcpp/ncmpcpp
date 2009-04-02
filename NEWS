@@ -1,3 +1,13 @@
+ncmpcpp-0.3.3
+
++ new feature: cyclic scrolling
++ support for single mode (requires >=mpd-0.15_alpha*)
++ support for consume mode (requires >=mpd-0.15_alpha*)
++ support for pdcurses library
++ support for WIN32
++ improvements and bugfixes
+
+
 ncmpcpp-0.3.2
 
  + new feature: locate currently playing song in browser
