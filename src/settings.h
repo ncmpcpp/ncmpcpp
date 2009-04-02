@@ -23,6 +23,7 @@
 
 #include <limits>
 
+#include "home.h"
 #include "libmpdclient.h"
 #include "ncmpcpp.h"
 

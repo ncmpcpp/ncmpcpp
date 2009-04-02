@@ -18,26 +18,30 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
-#ifndef _NCMPCPP_H
-#define _NCMPCPP_H
+#ifndef _HOME_H
+#define _HOME_H
 
-#include "window.h"
-#include "menu.h"
-#include "scrollpad.h"
+#include <cstdlib>
+#include <string>
 
-#ifdef HAVE_PTHREAD_H
-# include <pthread.h>
+#ifdef WIN32
+# define _WIN32_IE 0x0400
+# include <shlobj.h>
+
+inline std::string _GetHomeFolder()
+{
+	char path[300];
+	return SHGetSpecialFolderPath(0, path, CSIDL_PERSONAL, 0) ? path : "";
+}
+
+# define GET_HOME_FOLDER _GetHomeFolder()
 #else
-# define pthread_mutex_lock(x);
-# define pthread_mutex_unlock(x);
-# define pthread_exit(x) return (x)
-#endif // HAVE_PTHREAD_H
+# define GET_HOME_FOLDER getenv("HOME") ? getenv("HOME") : "";
+#endif // WIN32
 
-using namespace NCurses;
+const std::string home_path = GET_HOME_FOLDER;
 
-typedef std::pair<std::string, std::string> string_pair;
-
-const int ncmpcpp_window_timeout = 250;
+#undef GET_HOME_FOLDER
 
 #endif
 
