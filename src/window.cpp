@@ -659,7 +659,7 @@ void Window::Scroll(Where where)
 }
 
 
-Window &Window::operator<<(const Colors &colors)
+Window &Window::operator<<(Colors colors)
 {
 	if (colors.fg == clEnd || colors.bg == clEnd)
 		return *this;
@@ -668,7 +668,7 @@ Window &Window::operator<<(const Colors &colors)
 	return *this;
 }
 
-Window &Window::operator<<(const Color &color)
+Window &Window::operator<<(Color color)
 {
 	switch (color)
 	{
@@ -692,7 +692,7 @@ Window &Window::operator<<(const Color &color)
 	return *this;
 }
 
-Window &Window::operator<<(const Format &format)
+Window &Window::operator<<(Format format)
 {
 	switch (format)
 	{
@@ -729,7 +729,7 @@ Window &Window::operator<<(int (*f)(WINDOW *))
 	return *this;
 }
 
-Window &Window::operator<<(const XY &coords)
+Window &Window::operator<<(XY coords)
 {
 	GotoXY(coords.x, coords.y);
 	return *this;
@@ -741,7 +741,7 @@ Window &Window::operator<<(const char *s)
 	return *this;
 }
 
-Window &Window::operator<<(const char &c)
+Window &Window::operator<<(char c)
 {
 	wprintw(itsWindow, "%c", c);
 	return *this;
@@ -753,19 +753,19 @@ Window &Window::operator<<(const wchar_t *ws)
 	return *this;
 }
 
-Window &Window::operator<<(const wchar_t &wc)
+Window &Window::operator<<(wchar_t wc)
 {
 	wprintw(itsWindow, "%lc", wc);
 	return *this;
 }
 
-Window &Window::operator<<(const int &i)
+Window &Window::operator<<(int i)
 {
 	wprintw(itsWindow, "%d", i);
 	return *this;
 }
 
-Window &Window::operator<<(const double &d)
+Window &Window::operator<<(double d)
 {
 	wprintw(itsWindow, "%f", d);
 	return *this;
@@ -785,7 +785,7 @@ Window &Window::operator<<(const wstring &ws)
 	return *this;
 }
 
-Window &Window::operator<<(const size_t &s)
+Window &Window::operator<<(size_t s)
 {
 	wprintw(itsWindow, "%u", s);
 	return *this;

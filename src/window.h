@@ -128,17 +128,17 @@ namespace NCurses
 			virtual void Scroll(Where);
 			
 			Window &operator<<(int (*)(WINDOW *));
-			Window &operator<<(const Colors &);
-			Window &operator<<(const Color &);
-			Window &operator<<(const Format &);
-			Window &operator<<(const XY &);
+			Window &operator<<(Colors);
+			Window &operator<<(Color);
+			Window &operator<<(Format);
+			Window &operator<<(XY);
 			Window &operator<<(const char *);
-			Window &operator<<(const char &);
+			Window &operator<<(char);
 			Window &operator<<(const wchar_t *);
-			Window &operator<<(const wchar_t &);
-			Window &operator<<(const int &);
-			Window &operator<<(const double &);
-			Window &operator<<(const size_t &);
+			Window &operator<<(wchar_t);
+			Window &operator<<(int);
+			Window &operator<<(double);
+			Window &operator<<(size_t);
 			
 			Window &operator<<(const std::string &);
 			Window &operator<<(const std::wstring &);
