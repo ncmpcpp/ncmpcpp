@@ -46,18 +46,18 @@
 #include "status.h"
 #include "tag_editor.h"
 
-#define CHECK_PLAYLIST_FOR_FILTERING \
-			if (myPlaylist->Main()->isFiltered()) \
-			{ \
-				ShowMessage("%s", MPD::Message::FunctionDisabledFilteringEnabled); \
-				continue; \
+#define CHECK_PLAYLIST_FOR_FILTERING									\
+			if (myPlaylist->Main()->isFiltered())						\
+			{										\
+				ShowMessage("%s", MPD::Message::FunctionDisabledFilteringEnabled);	\
+				continue;								\
 			}
 
-#define CHECK_MPD_MUSIC_DIR \
-			if (Config.mpd_music_dir.empty()) \
-			{ \
-				ShowMessage("configuration variable mpd_music_dir is not set!"); \
-				continue; \
+#define CHECK_MPD_MUSIC_DIR										\
+			if (Config.mpd_music_dir.empty())						\
+			{										\
+				ShowMessage("configuration variable mpd_music_dir is not set!");	\
+				continue;								\
 			}
 
 using namespace Global;
