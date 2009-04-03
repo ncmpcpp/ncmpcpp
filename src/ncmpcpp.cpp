@@ -528,7 +528,7 @@ int main(int argc, char *argv[])
 						myPlaylistEditor->Content->DeleteOption(*it);
 					}
 					Mpd->CommitCommandsList();
-					ShowMessage("Selected items deleted from playlist '%s'!", myPlaylistEditor->Playlists->Current().c_str());
+					ShowMessage("Selected items deleted from playlist \"%s\"!", myPlaylistEditor->Playlists->Current().c_str());
 				}
 				else
 				{
@@ -1163,11 +1163,11 @@ int main(int argc, char *argv[])
 					{
 						(*it)->Localize();
 						((*it)->*set)(new_tag);
-						ShowMessage("Updating tags in '%s'...", (*it)->GetName().c_str());
+						ShowMessage("Updating tags in \"%s\"...", (*it)->GetName().c_str());
 						string path = Config.mpd_music_dir + (*it)->GetFile();
 						if (!TagEditor::WriteTags(**it))
 						{
-							ShowMessage("Error updating tags in '%s'!", (*it)->GetFile().c_str());
+							ShowMessage("Error updating tags in \"%s\"!", (*it)->GetFile().c_str());
 							success = 0;
 							break;
 						}
@@ -1193,19 +1193,19 @@ int main(int argc, char *argv[])
 					for (size_t i = 0;  i < myLibrary->Songs->Size(); i++)
 					{
 						(*myLibrary->Songs)[i].Localize();
-						ShowMessage("Updating tags in '%s'...", (*myLibrary->Songs)[i].GetName().c_str());
+						ShowMessage("Updating tags in \"%s\"...", (*myLibrary->Songs)[i].GetName().c_str());
 						string path = Config.mpd_music_dir + (*myLibrary->Songs)[i].GetFile();
 						TagLib::FileRef f(locale_to_utf_cpy(path).c_str());
 						if (f.isNull())
 						{
-							ShowMessage("Error opening file '%s'!", (*myLibrary->Songs)[i].GetFile().c_str());
+							ShowMessage("Error opening file \"%s\"!", (*myLibrary->Songs)[i].GetFile().c_str());
 							success = 0;
 							break;
 						}
 						f.tag()->setAlbum(ToWString(new_album));
 						if (!f.save())
 						{
-							ShowMessage("Error writing tags in '%s'!", (*myLibrary->Songs)[i].GetFile().c_str());
+							ShowMessage("Error writing tags in \"%s\"!", (*myLibrary->Songs)[i].GetFile().c_str());
 							success = 0;
 							break;
 						}
@@ -1234,7 +1234,7 @@ int main(int argc, char *argv[])
 					}
 					else
 					{
-						ShowMessage("Cannot rename '%s' to '%s'!", old_dir.c_str(), new_dir.c_str());
+						ShowMessage("Cannot rename \"%s\" to \"%s\"!", old_dir.c_str(), new_dir.c_str());
 					}
 				}
 			}
@@ -1264,13 +1264,13 @@ int main(int argc, char *argv[])
 					int rename_result = rename(full_old_dir.c_str(), full_new_dir.c_str());
 					if (rename_result == 0)
 					{
-						ShowMessage("'%s' renamed to '%s'", old_dir.c_str(), new_dir.c_str());
+						ShowMessage("\"%s\" renamed to \"%s\"", old_dir.c_str(), new_dir.c_str());
 						if (!Config.local_browser)
 							Mpd->UpdateDirectory(locale_to_utf_cpy(FindSharedDir(old_dir, new_dir)));
 						myBrowser->GetDirectory(myBrowser->CurrentDir());
 					}
 					else
-						ShowMessage("Cannot rename '%s' to '%s'!", old_dir.c_str(), new_dir.c_str());
+						ShowMessage("Cannot rename \"%s\" to \"%s\"!", old_dir.c_str(), new_dir.c_str());
 				}
 			}
 			else if (myScreen->Cmp() == myPlaylistEditor->Playlists || (myScreen == myBrowser && myBrowser->Main()->Current().type == itPlaylist))
@@ -1283,7 +1283,7 @@ int main(int argc, char *argv[])
 				if (!new_name.empty() && new_name != old_name)
 				{
 					Mpd->Rename(locale_to_utf_cpy(old_name), locale_to_utf_cpy(new_name));
-					ShowMessage("Playlist '%s' renamed to '%s'", old_name.c_str(), new_name.c_str());
+					ShowMessage("Playlist \"%s\" renamed to \"%s\"", old_name.c_str(), new_name.c_str());
 					if (!Config.local_browser)
 						myBrowser->GetDirectory("/");
 					myPlaylistEditor->Playlists->Clear(0);
@@ -1466,7 +1466,7 @@ int main(int argc, char *argv[])
 					for (SongList::const_iterator it = result.begin(); it != result.end(); it++)
 						Mpd->AddToPlaylist(real_playlist, **it);
 					Mpd->CommitCommandsList();
-					ShowMessage("Selected items added to playlist '%s'!", playlist.c_str());
+					ShowMessage("Selected items added to playlist \"%s\"!", playlist.c_str());
 				}
 			}
 			else if (id > 1 && id < mDialog.Size()-1)
@@ -1476,7 +1476,7 @@ int main(int argc, char *argv[])
 				for (SongList::const_iterator it = result.begin(); it != result.end(); it++)
 					Mpd->AddToPlaylist(playlist, **it);
 				Mpd->CommitCommandsList();
-				ShowMessage("Selected items added to playlist '%s'!", mDialog.Current().c_str());
+				ShowMessage("Selected items added to playlist \"%s\"!", mDialog.Current().c_str());
 			}
 			
 			if (id != mDialog.Size()-1)
@@ -1575,7 +1575,7 @@ int main(int argc, char *argv[])
 			UnlockStatusbar();
 			
 			if (mList->isFiltered())
-				ShowMessage("Using filter '%s'", mList->GetFilter().c_str());
+				ShowMessage("Using filter \"%s\"", mList->GetFilter().c_str());
 			else
 				ShowMessage("Filtering disabled");
 			

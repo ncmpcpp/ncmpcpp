@@ -647,10 +647,10 @@ void TagEditor::EnterPressed()
 			ShowMessage("Writing changes...");
 			for (SongList::iterator it = list.begin(); it != list.end(); it++)
 			{
-				ShowMessage("Writing tags in '%s'...", (*it)->GetName().c_str());
+				ShowMessage("Writing tags in \"%s\"...", (*it)->GetName().c_str());
 				if (!WriteTags(**it))
 				{
-					ShowMessage("Error writing tags in '%s'!", (*it)->GetFile().c_str());
+					ShowMessage("Error writing tags in \"%s\"!", (*it)->GetFile().c_str());
 					success = 0;
 					break;
 				}
@@ -1329,7 +1329,7 @@ void TagEditor::DealWithFilenames(SongList &v)
 										new_file << clRed << "!EMPTY!" << clEnd;
 									else
 									{
-										ShowMessage("File '%s' would have an empty name!", s.GetName().c_str());
+										ShowMessage("File \"%s\" would have an empty name!", s.GetName().c_str());
 										success = 0;
 										break;
 									}
