@@ -137,7 +137,7 @@ void Info::GetArtist()
 		
 		MPD::Song *s = myScreen->CurrentSong();
 		
-		if (!s && myScreen->Cmp() != myLibrary->Artists)
+		if (!s && myScreen->ActiveWindow() != myLibrary->Artists)
 			return;
 		
 		itsArtist = !s ? myLibrary->Artists->Current() : s->GetArtist();

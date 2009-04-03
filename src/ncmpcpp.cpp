@@ -277,21 +277,21 @@ int main(int argc, char *argv[])
 			||  Keypressed(input, Key.NextFoundPosition)
 			||  Keypressed(input, Key.PrevFoundPosition))
 			{
-				if (myScreen->Cmp() == myLibrary->Artists)
+				if (myScreen->ActiveWindow() == myLibrary->Artists)
 				{
 					myLibrary->Albums->Clear(0);
 					myLibrary->Songs->Clear(0);
 				}
-				else if (myScreen->Cmp() == myLibrary->Albums)
+				else if (myScreen->ActiveWindow() == myLibrary->Albums)
 				{
 					myLibrary->Songs->Clear(0);
 				}
-				else if (myScreen->Cmp() == myPlaylistEditor->Playlists)
+				else if (myScreen->ActiveWindow() == myPlaylistEditor->Playlists)
 				{
 					myPlaylistEditor->Content->Clear(0);
 				}
 #				ifdef HAVE_TAGLIB_H
-				else if (myScreen->Cmp() == myTagEditor->LeftColumn)
+				else if (myScreen->ActiveWindow() == myTagEditor->LeftColumn)
 				{
 					myTagEditor->Tags->Clear(0);
 					myTagEditor->TagTypes->Refresh();
@@ -484,7 +484,7 @@ int main(int argc, char *argv[])
 					Playlist::BlockNowPlayingUpdate = 0;
 				}
 			}
-			else if (myScreen == myBrowser || myScreen->Cmp() == myPlaylistEditor->Playlists)
+			else if (myScreen == myBrowser || myScreen->ActiveWindow() == myPlaylistEditor->Playlists)
 			{
 				LockStatusbar();
 				string name = myScreen == myBrowser ? myBrowser->Main()->Current().name : myPlaylistEditor->Playlists->Current();
@@ -513,7 +513,7 @@ int main(int argc, char *argv[])
 				}
 				UnlockStatusbar();
 			}
-			else if (myScreen->Cmp() == myPlaylistEditor->Content && !myPlaylistEditor->Content->Empty())
+			else if (myScreen->ActiveWindow() == myPlaylistEditor->Content && !myPlaylistEditor->Content->Empty())
 			{
 				if (myPlaylistEditor->Content->hasSelected())
 				{
@@ -682,7 +682,7 @@ int main(int argc, char *argv[])
 				}
 				myPlaylist->Main()->SetTimeout(ncmpcpp_window_timeout);
 			}
-			else if (myScreen->Cmp() == myPlaylistEditor->Content && !myPlaylistEditor->Content->Empty())
+			else if (myScreen->ActiveWindow() == myPlaylistEditor->Content && !myPlaylistEditor->Content->Empty())
 			{
 				myPlaylistEditor->Content->SetTimeout(50);
 				if (myPlaylistEditor->Content->hasSelected())
@@ -794,7 +794,7 @@ int main(int argc, char *argv[])
 				myPlaylist->Main()->SetTimeout(ncmpcpp_window_timeout);
 				
 			}
-			else if (myScreen->Cmp() == myPlaylistEditor->Content && !myPlaylistEditor->Content->Empty())
+			else if (myScreen->ActiveWindow() == myPlaylistEditor->Content && !myPlaylistEditor->Content->Empty())
 			{
 				myPlaylistEditor->Content->SetTimeout(50);
 				if (myPlaylistEditor->Content->hasSelected())
@@ -1142,7 +1142,7 @@ int main(int argc, char *argv[])
 			{
 				myTinyTagEditor->SwitchTo();
 			}
-			else if (myScreen->Cmp() == myLibrary->Artists)
+			else if (myScreen->ActiveWindow() == myLibrary->Artists)
 			{
 				LockStatusbar();
 				Statusbar() << fmtBold << IntoStr(Config.media_lib_primary_tag) << fmtBoldEnd << ": ";
@@ -1180,7 +1180,7 @@ int main(int argc, char *argv[])
 					FreeSongList(list);
 				}
 			}
-			else if (myScreen->Cmp() == myLibrary->Albums)
+			else if (myScreen->ActiveWindow() == myLibrary->Albums)
 			{
 				LockStatusbar();
 				Statusbar() << fmtBold << "Album: " << fmtBoldEnd;
@@ -1217,7 +1217,7 @@ int main(int argc, char *argv[])
 					}
 				}
 			}
-			else if (myScreen->Cmp() == myTagEditor->Dirs)
+			else if (myScreen->ActiveWindow() == myTagEditor->Dirs)
 			{
 				string old_dir = myTagEditor->Dirs->Current().first;
 				LockStatusbar();
@@ -1273,9 +1273,9 @@ int main(int argc, char *argv[])
 						ShowMessage("Cannot rename \"%s\" to \"%s\"!", old_dir.c_str(), new_dir.c_str());
 				}
 			}
-			else if (myScreen->Cmp() == myPlaylistEditor->Playlists || (myScreen == myBrowser && myBrowser->Main()->Current().type == itPlaylist))
+			else if (myScreen->ActiveWindow() == myPlaylistEditor->Playlists || (myScreen == myBrowser && myBrowser->Main()->Current().type == itPlaylist))
 			{
-				string old_name = myScreen->Cmp() == myPlaylistEditor->Playlists ? myPlaylistEditor->Playlists->Current() : myBrowser->Main()->Current().name;
+				string old_name = myScreen->ActiveWindow() == myPlaylistEditor->Playlists ? myPlaylistEditor->Playlists->Current() : myBrowser->Main()->Current().name;
 				LockStatusbar();
 				Statusbar() << fmtBold << "Playlist: " << fmtBoldEnd;
 				string new_name = wFooter->GetString(old_name);
@@ -1650,7 +1650,7 @@ int main(int argc, char *argv[])
 			{
 				myBrowser->ChangeBrowseMode();
 			}
-			else if (myScreen->Cmp() == myLibrary->Artists)
+			else if (myScreen->ActiveWindow() == myLibrary->Artists)
 			{
 				LockStatusbar();
 				Statusbar() << "Tag type ? [" << fmtBold << 'a' << fmtBoldEnd << "rtist/" << fmtBold << 'y' << fmtBoldEnd << "ear/" << fmtBold << 'g' << fmtBoldEnd << "enre/" << fmtBold << 'c' << fmtBoldEnd << "omposer/" << fmtBold << 'p' << fmtBoldEnd << "erformer] ";
