@@ -369,6 +369,11 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 	}
 	if (changed.ElapsedTime)
 	{
+		if (np.Empty())
+		{
+			np = Mpd->GetCurrentSong();
+			WindowTitle(utf_to_locale_cpy(np.toString(Config.song_window_title_format)));
+		}
 		if (!np.Empty() && !player_state.empty())
 		{
 			int elapsed = Mpd->GetElapsedTime();
