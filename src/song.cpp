@@ -240,7 +240,7 @@ void Song::SetYear(const string &str)
 {
 	if (itsSong->date)
 		str_pool_put(itsSong->date);
-	itsSong->date = str.empty() ? 0 : str_pool_get(IntoStr(StrToInt(str)).c_str());
+	itsSong->date = str.empty() ? 0 : str_pool_get(str.c_str());
 }
 
 void Song::SetYear(int year)

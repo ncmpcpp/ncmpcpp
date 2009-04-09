@@ -154,7 +154,7 @@ void SearchEngine::EnterPressed()
 		case 8:
 		{
 			Statusbar() << fmtBold << "Year: " << fmtBoldEnd;
-			itsPattern.SetYear(wFooter->GetString(itsPattern.GetYear(), 4));
+			itsPattern.SetYear(wFooter->GetString(itsPattern.GetYear()));
 			*w->Current().first << fmtBold << "Year:     " << fmtBoldEnd << ' ' << ShowTag(itsPattern.GetYear());
 			break;
 		}
