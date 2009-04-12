@@ -182,6 +182,7 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 {
 	static size_t playing_song_scroll_begin = 0;
 	static string player_state;
+	static int elapsed;
 	static MPD::Song np;
 	
 	int sx, sy;
@@ -367,8 +368,11 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 			changed.ElapsedTime = 1;
 		}
 	}
-	if (changed.ElapsedTime)
+	static time_t now, past = 0;
+	time(&now);
+	if ((now > past && Mpd->GetState() == psPlay) || changed.SongID)
 	{
+		time(&past);
 		if (np.Empty())
 		{
 			np = Mpd->GetCurrentSong();
@@ -376,7 +380,11 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 		}
 		if (!np.Empty() && !player_state.empty())
 		{
-			int elapsed = Mpd->GetElapsedTime();
+			int mpd_elapsed = Mpd->GetElapsedTime();
+			if (elapsed < mpd_elapsed-2 || elapsed+1 > mpd_elapsed)
+				elapsed = mpd_elapsed;
+			else
+				elapsed++;
 			
 			if (!block_statusbar_update && Config.statusbar_visibility)
 			{
