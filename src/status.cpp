@@ -214,7 +214,8 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 		if (!Playlist::BlockUpdate)
 		{
 			np = Mpd->GetCurrentSong();
-			WindowTitle(utf_to_locale_cpy(np.toString(Config.song_window_title_format)));
+			if (Mpd->GetState() > psStop)
+				WindowTitle(utf_to_locale_cpy(np.toString(Config.song_window_title_format)));
 			
 			bool was_filtered = myPlaylist->Main()->isFiltered();
 			myPlaylist->Main()->ShowAll();
@@ -350,7 +351,8 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 		if (myPlaylist->isPlaying())
 		{
 			np = Mpd->GetCurrentSong();
-			WindowTitle(utf_to_locale_cpy(np.toString(Config.song_window_title_format)));
+			if (Mpd->GetState() > psStop)
+				WindowTitle(utf_to_locale_cpy(np.toString(Config.song_window_title_format)));
 			if (Config.autocenter_mode && !myPlaylist->Main()->isFiltered())
 				myPlaylist->Main()->Highlight(myPlaylist->NowPlaying);
 			
@@ -371,7 +373,7 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 	}
 	static time_t now, past = 0;
 	time(&now);
-	if ((now > past && Mpd->GetState() == psPlay) || changed.SongID)
+	if ((now > past || changed.SongID) && Mpd->GetState() == psPlay)
 	{
 		time(&past);
 		if (np.Empty())
