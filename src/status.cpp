@@ -233,13 +233,14 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 				{
 					// if song's already in playlist, replace it with a new one
 					myPlaylist->Main()->at(pos) = **it;
+					myPlaylist->Main()->at(pos).CopyPtr(0);
 				}
 				else
 				{
 					// otherwise just add it to playlist
 					myPlaylist->Main()->AddOption(**it, myPlaylist->NowPlaying == pos);
+					myPlaylist->Main()->Back().CopyPtr(0);
 				}
-				myPlaylist->Main()->at(pos).CopyPtr(0);
 				(*it)->NullMe();
 			}
 			
