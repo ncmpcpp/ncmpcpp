@@ -281,6 +281,7 @@ void SearchEngine::SpacePressed()
 		}
 		Mpd->CommitCommandsList();
 		w->BoldOption(w->Choice(), 0);
+		Playlist::BlockUpdate = 0;
 	}
 	else
 	{

@@ -248,6 +248,7 @@ void PlaylistEditor::AddToPlaylist(bool add_n_play)
 					}
 					Mpd->CommitCommandsList();
 					Content->BoldOption(Content->Choice(), 0);
+					Playlist::BlockUpdate = 0;
 				}
 			}
 			else

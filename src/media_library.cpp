@@ -418,6 +418,7 @@ void MediaLibrary::AddToPlaylist(bool add_n_play)
 					}
 					Mpd->CommitCommandsList();
 					Songs->BoldOption(Songs->Choice(), 0);
+					Playlist::BlockUpdate = 0;
 				}
 			}
 			else
