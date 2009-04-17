@@ -484,34 +484,38 @@ int main(int argc, char *argv[])
 					Playlist::BlockNowPlayingUpdate = 0;
 				}
 			}
-			else if (myScreen == myBrowser || myScreen->ActiveWindow() == myPlaylistEditor->Playlists)
+			else if (
+				 (myScreen == myBrowser && !myBrowser->Main()->Empty() && myBrowser->Main()->Current().type == itPlaylist)
+			||       (myScreen->ActiveWindow() == myPlaylistEditor->Playlists)
+				)
 			{
 				LockStatusbar();
 				string name = myScreen == myBrowser ? myBrowser->Main()->Current().name : myPlaylistEditor->Playlists->Current();
-				if (myScreen != myBrowser || myBrowser->Main()->Current().type == itPlaylist)
+				Statusbar() << "Delete playlist " << name << " ? [y/n] ";
+				curs_set(1);
+				int in = 0;
+				do
 				{
-					Statusbar() << "Delete playlist " << name << " ? [y/n] ";
-					curs_set(1);
-					int in = 0;
-					do
-					{
-						TraceMpdStatus();
-						wFooter->ReadKey(in);
-					}
-					while (in != 'y' && in != 'n');
-					if (in == 'y')
-					{
-						Mpd->DeletePlaylist(locale_to_utf_cpy(name));
-						ShowMessage("Playlist %s deleted!", name.c_str());
-						if (!Config.local_browser)
-							myBrowser->GetDirectory("/");
-					}
-					else
-						ShowMessage("Aborted!");
-					curs_set(0);
-					myPlaylistEditor->Playlists->Clear(0); // make playlists list update itself
+					TraceMpdStatus();
+					wFooter->ReadKey(in);
 				}
+				while (in != 'y' && in != 'n');
+				if (in == 'y')
+				{
+					Mpd->DeletePlaylist(locale_to_utf_cpy(name));
+					ShowMessage("Playlist %s deleted!", name.c_str());
+					if (!Config.local_browser)
+						myBrowser->GetDirectory("/");
+				}
+				else
+					ShowMessage("Aborted!");
+				curs_set(0);
+				myPlaylistEditor->Playlists->Clear(0); // make playlists list update itself
 				UnlockStatusbar();
+			}
+			else if (myScreen == myBrowser && !myBrowser->Main()->Empty() && myBrowser->Main()->Current().type != itPlaylist)
+			{
+				// delete song/dir implementation here
 			}
 			else if (myScreen->ActiveWindow() == myPlaylistEditor->Content && !myPlaylistEditor->Content->Empty())
 			{
