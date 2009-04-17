@@ -679,6 +679,7 @@ int main(int argc, char *argv[])
 						myPlaylist->Main()->ReadKey(input);
 					}
 					Mpd->Move(from, to);
+					UpdateStatusImmediately = 1;
 				}
 				myPlaylist->Main()->SetTimeout(ncmpcpp_window_timeout);
 			}
@@ -790,6 +791,7 @@ int main(int argc, char *argv[])
 						myPlaylist->Main()->ReadKey(input);
 					}
 					Mpd->Move(from, to);
+					UpdateStatusImmediately = 1;
 				}
 				myPlaylist->Main()->SetTimeout(ncmpcpp_window_timeout);
 				
