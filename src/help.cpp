@@ -144,6 +144,7 @@ void Help::GetKeybindings()
 #	endif // ENABLE_CLOCK
 	*w << "\n\n";
 	
+	
 	*w << "   " << fmtBold << "Keys - Global\n -----------------------------------------\n" << fmtBoldEnd;
 	*w << DisplayKeys(Key.Stop) << "Stop\n";
 	*w << DisplayKeys(Key.Pause) << "Pause\n";
@@ -177,9 +178,6 @@ void Help::GetKeybindings()
 	*w << DisplayKeys(Key.ToggleFindMode) << "Toggle find mode (normal/wrapped)\n";
 	*w << DisplayKeys(Key.GoToContainingDir) << "Locate song in browser\n";
 	*w << DisplayKeys(Key.ToggleDisplayMode) << "Toggle display mode\n";
-#	ifdef HAVE_TAGLIB_H
-	*w << DisplayKeys(Key.EditTags) << "Edit song's tags/playlist's name\n";
-#	endif // HAVE_TAGLIB_H
 	*w << DisplayKeys(Key.GoToPosition) << "Go to given position in current song (in % by default)\n";
 	*w << DisplayKeys(Key.SongInfo) << "Show song's info\n";
 #	ifdef HAVE_CURL_CURL_H
@@ -200,14 +198,23 @@ void Help::GetKeybindings()
 	*w << DisplayKeys(Key.MvSongDown) << "Move item(s) down\n";
 	*w << DisplayKeys(Key.MoveTo) << "Move selected item(s) to cursor position\n";
 	*w << DisplayKeys(Key.Add) << "Add url/file/directory to playlist\n";
+#	ifdef HAVE_TAGLIB_H
+	*w << DisplayKeys(Key.EditTags) << "Edit song's tags\n";
+#	endif // HAVE_TAGLIB_H
 	*w << DisplayKeys(Key.SavePlaylist) << "Save playlist\n";
 	*w << DisplayKeys(Key.SortPlaylist) << "Sort/reverse playlist\n";
 	*w << DisplayKeys(Key.GoToNowPlaying) << "Go to currently playing position\n";
 	*w << DisplayKeys(Key.ToggleAutoCenter) << "Toggle auto center mode\n\n\n";
 	
+	
 	*w << "   " << fmtBold << "Keys - Browse screen\n -----------------------------------------\n" << fmtBoldEnd;
 	*w << DisplayKeys(Key.Enter) << "Enter directory/Add item to playlist and play\n";
 	*w << DisplayKeys(Key.Space) << "Add item to playlist\n";
+#	ifdef HAVE_TAGLIB_H
+	*w << DisplayKeys(Key.EditTags) << "Edit song's tags/Rename playlist/directory\n";
+#	else
+	*w << DisplayKeys(Key.EditTags) << "Rename playlist/directory\n";
+#	endif // HAVE_TAGLIB_H
 	if (Mpd->GetHostname()[0] == '/') // are we connected to unix socket?
 		*w << DisplayKeys(Key.SwitchTagTypeList) << "Browse MPD database/local filesystem\n";
 	*w << DisplayKeys(Key.GoToNowPlaying) << "Locate currently playing song\n";
@@ -218,6 +225,9 @@ void Help::GetKeybindings()
 	*w << "   " << fmtBold << "Keys - Search engine\n -----------------------------------------\n" << fmtBoldEnd;
 	*w << DisplayKeys(Key.Enter) << "Add item to playlist and play/change option\n";
 	*w << DisplayKeys(Key.Space) << "Add item to playlist\n";
+#	ifdef HAVE_TAGLIB_H
+	*w << DisplayKeys(Key.EditTags) << "Edit song's tags\n";
+#	endif // HAVE_TAGLIB_H
 	*w << DisplayKeys(Key.ToggleSingle) << "Start searching immediately\n\n\n";
 	
 	
@@ -226,23 +236,31 @@ void Help::GetKeybindings()
 	*w << DisplayKeys(&Key.VolumeUp[0], 1) << "Next column\n";
 	*w << DisplayKeys(Key.Enter) << "Add to playlist and play song/album/artist's songs\n";
 	*w << DisplayKeys(Key.Space) << "Add to playlist song/album/artist's songs\n";
+#	ifdef HAVE_TAGLIB_H
+	*w << DisplayKeys(Key.EditTags) << "Edit main tag/album/song's tags\n";
+#	endif // HAVE_TAGLIB_H
 	*w << DisplayKeys(Key.SwitchTagTypeList) << "Tag type list switcher (left column)\n\n\n";
+	
 	
 	*w << "   " << fmtBold << "Keys - Playlist Editor\n -----------------------------------------\n" << fmtBoldEnd;
 	*w << DisplayKeys(&Key.VolumeDown[0], 1) << "Previous column\n";
 	*w << DisplayKeys(&Key.VolumeUp[0], 1) << "Next column\n";
 	*w << DisplayKeys(Key.Enter) << "Add item to playlist and play\n";
 	*w << DisplayKeys(Key.Space) << "Add to playlist/select item\n";
-#	ifndef HAVE_TAGLIB_H
+#	ifdef HAVE_TAGLIB_H
+	*w << DisplayKeys(Key.EditTags) << "Edit playlist's name/song's tags\n";
+#	else
 	*w << DisplayKeys(Key.EditTags) << "Edit playlist's name\n";
-#	endif // ! HAVE_TAGLIB_H
+#	endif // HAVE_TAGLIB_H
 	*w << DisplayKeys(Key.MvSongUp) << "Move item(s) up\n";
 	*w << DisplayKeys(Key.MvSongDown) << "Move item(s) down\n";
 	*w << DisplayKeys(Key.Clear) << "Clear current playlist\n";
 	
+	
 	*w << "\n\n   " << fmtBold << "Keys - Lyrics\n -----------------------------------------\n" << fmtBoldEnd;
 	*w << DisplayKeys(Key.Space) << "Switch for following lyrics of now playing song\n";
 	*w << DisplayKeys(Key.EditTags) << "Open lyrics in external editor\n";
+	
 	
 #	ifdef HAVE_TAGLIB_H
 	*w << "\n\n   " << fmtBold << "Keys - Tag editor\n -----------------------------------------\n" << fmtBoldEnd;
