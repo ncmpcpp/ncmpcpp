@@ -289,7 +289,7 @@ template <typename T> void NCurses::Menu<T>::AddOption(const T &item, bool is_bo
 
 template <typename T> void NCurses::Menu<T>::AddSeparator()
 {
-	itsOptions.push_back(0);
+	itsOptions.push_back(static_cast<Option *>(0));
 }
 
 template <typename T> void NCurses::Menu<T>::InsertOption(size_t pos, const T &item, bool is_bold, bool is_static)
