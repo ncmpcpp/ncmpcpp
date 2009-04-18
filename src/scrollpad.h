@@ -34,7 +34,8 @@ namespace NCurses
 			virtual ~Scrollpad() { }
 			
 			void Flush();
-			void SetFormatting(short, const std::basic_string<my_char_t> &, short, bool for_each = 1);
+			bool SetFormatting(short, const std::basic_string<my_char_t> &, short, bool for_each = 1);
+			void RemoveFormatting(short value) { itsBuffer.RemoveFormatting(value); }
 			std::basic_string<my_char_t> Content() { return itsBuffer.Str(); }
 			
 			virtual void Refresh();
@@ -52,7 +53,7 @@ namespace NCurses
 			Scrollpad &operator<<(std::ostream &(*os)(std::ostream &));
 			
 #			ifdef _UTF8
-			void SetFormatting(short vb, const std::string &s, short ve, bool for_each = 1) { SetFormatting(vb, ToWString(s), ve, for_each); }
+			bool SetFormatting(short vb, const std::string &s, short ve, bool for_each = 1) { return SetFormatting(vb, ToWString(s), ve, for_each); }
 			Scrollpad &operator<<(const std::string &s);
 #			endif // _UTF8
 			

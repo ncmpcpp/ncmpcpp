@@ -1596,32 +1596,46 @@ int main(int argc, char *argv[])
 		{
 			List *mList = myScreen->GetList();
 			
-			if (!mList)
-				continue;
-			
-			LockStatusbar();
-			Statusbar() << "Find " << (Keypressed(input, Key.FindForward) ? "forward" : "backward") << ": ";
-			string findme = wFooter->GetString(mList->GetSearchConstraint());
-			UnlockStatusbar();
-			myPlaylist->UpdateTimer();
-			
-			if (!findme.empty())
+			if (mList)
+			{
+				LockStatusbar();
+				Statusbar() << "Find " << (Keypressed(input, Key.FindForward) ? "forward" : "backward") << ": ";
+				string findme = wFooter->GetString(mList->GetSearchConstraint());
+				UnlockStatusbar();
+				myPlaylist->UpdateTimer();
+				
+				if (!findme.empty())
+					ShowMessage("Searching...");
+				
+				bool success = mList->Search(findme, myScreen == mySearcher ? SearchEngine::StaticOptions : 0, REG_ICASE | Config.regex_type);
+				
+				if (findme.empty())
+					continue;
+				
+				success ? ShowMessage("Searching finished!") : ShowMessage("Unable to find \"%s\"", findme.c_str());
+				
+				if (Keypressed(input, Key.FindForward))
+					mList->NextFound(Config.wrapped_search);
+				else
+					mList->PrevFound(Config.wrapped_search);
+				
+				if (myScreen == myPlaylist)
+					myPlaylist->EnableHighlighting();
+			}
+			else if (myScreen == myHelp || myScreen == myLyrics || myScreen == myInfo)
+			{
+				LockStatusbar();
+				Statusbar() << "Find: ";
+				string findme = wFooter->GetString();
+				UnlockStatusbar();
+				
 				ShowMessage("Searching...");
-			
-			bool success = mList->Search(findme, myScreen == mySearcher ? SearchEngine::StaticOptions : 0, REG_ICASE | Config.regex_type);
-			
-			if (findme.empty())
-				continue;
-			
-			success ? ShowMessage("Searching finished!") : ShowMessage("Unable to find \"%s\"", findme.c_str());
-			
-			if (Keypressed(input, Key.FindForward))
-				mList->NextFound(Config.wrapped_search);
-			else
-				mList->PrevFound(Config.wrapped_search);
-			
-			if (myScreen == myPlaylist)
-				myPlaylist->EnableHighlighting();
+				Screen<Scrollpad> *s = static_cast<Screen<Scrollpad> *>(myScreen);
+				s->Main()->RemoveFormatting(fmtReverse);
+				s->Main()->RemoveFormatting(fmtReverseEnd);
+				ShowMessage("%s", s->Main()->SetFormatting(fmtReverse, findme, fmtReverseEnd) || findme.empty() ? "Done!" : "No matching patterns found");
+				s->Main()->Flush();
+			}
 		}
 		else if (Keypressed(input, Key.NextFoundPosition) || Keypressed(input, Key.PrevFoundPosition))
 		{
