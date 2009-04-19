@@ -40,18 +40,10 @@ namespace NCurses
 				return Position < f.Position;
 			}
 			
-			struct hasValue
+			bool operator==(const FormatPos &f)
 			{
-				hasValue(short value) : itsValue(value) { }
-				
-				bool operator()(const FormatPos &fp)
-				{
-					return fp.Value == itsValue;
-				}
-				
-				private:
-					short itsValue;
-			};
+				return Position == f.Position && Value == f.Value;
+			}
 		};
 		
 		std::basic_ostringstream<C> itsString;
@@ -64,7 +56,7 @@ namespace NCurses
 			
 			std::basic_string<C> Str() const;
 			bool SetFormatting(short vb, const std::basic_string<C> &s, short ve, bool for_each = 1);
-			void RemoveFormatting(short value);
+			void RemoveFormatting(short vb, const std::basic_string<C> &s, short ve, bool for_each = 1);
 			void SetTemp(std::basic_string<C> *);
 			void Clear();
 			
@@ -122,9 +114,25 @@ template <typename C> bool NCurses::basic_buffer<C>::SetFormatting(short vb, con
 	return result;
 }
 
-template <typename C> void NCurses::basic_buffer<C>::RemoveFormatting(short value)
+template <typename C> void NCurses::basic_buffer<C>::RemoveFormatting(short vb, const std::basic_string<C> &s, short ve, bool for_each)
 {
-	itsFormat.remove_if(typename FormatPos::hasValue(value));
+	if (s.empty())
+		return;
+	std::basic_string<C> base = itsString.str();
+	FormatPos fp;
+	
+	for (size_t i = base.find(s); i != std::basic_string<C>::npos; i = base.find(s, i))
+	{
+		fp.Value = vb;
+		fp.Position = i;
+		itsFormat.remove(fp);
+		i += s.length();
+		fp.Value = ve;
+		fp.Position = i;
+		itsFormat.remove(fp);
+		if (!for_each)
+			break;
+	}
 }
 
 template <typename C> void NCurses::basic_buffer<C>::SetTemp(std::basic_string<C> *tmp)

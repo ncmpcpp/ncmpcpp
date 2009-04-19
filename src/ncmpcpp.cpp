@@ -1631,8 +1631,7 @@ int main(int argc, char *argv[])
 				
 				ShowMessage("Searching...");
 				Screen<Scrollpad> *s = static_cast<Screen<Scrollpad> *>(myScreen);
-				s->Main()->RemoveFormatting(fmtReverse);
-				s->Main()->RemoveFormatting(fmtReverseEnd);
+				s->Main()->RemoveFormatting();
 				ShowMessage("%s", s->Main()->SetFormatting(fmtReverse, findme, fmtReverseEnd) || findme.empty() ? "Done!" : "No matching patterns found");
 				s->Main()->Flush();
 			}

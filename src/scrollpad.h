@@ -35,7 +35,7 @@ namespace NCurses
 			
 			void Flush();
 			bool SetFormatting(short, const std::basic_string<my_char_t> &, short, bool for_each = 1);
-			void RemoveFormatting(short value) { itsBuffer.RemoveFormatting(value); }
+			void RemoveFormatting();
 			std::basic_string<my_char_t> Content() { return itsBuffer.Str(); }
 			
 			virtual void Refresh();
@@ -66,6 +66,11 @@ namespace NCurses
 			basic_buffer<my_char_t> itsBuffer;
 			
 			int itsBeginning;
+			
+			bool itsFoundForEach;
+			short itsFoundValueBegin;
+			short itsFoundValueEnd;
+			std::basic_string<my_char_t> itsFoundPattern;
 			
 			size_t itsRealHeight;
 	};

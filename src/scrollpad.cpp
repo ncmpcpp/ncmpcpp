@@ -32,6 +32,9 @@ Scrollpad::Scrollpad(size_t startx,
 			Border border)
 			: Window(startx, starty, width, height, title, color, border),
 			itsBeginning(0),
+			itsFoundForEach(0),
+			itsFoundValueBegin(0),
+			itsFoundValueEnd(0),
 			itsRealHeight(1)
 {
 }
@@ -102,7 +105,27 @@ void Scrollpad::Flush()
 
 bool Scrollpad::SetFormatting(short vb, const std::basic_string<my_char_t> &s, short ve, bool for_each)
 {
-	return itsBuffer.SetFormatting(vb, s, ve, for_each);
+	bool result = itsBuffer.SetFormatting(vb, s, ve, for_each);
+	if (result)
+	{
+		itsFoundForEach = for_each;
+		itsFoundValueBegin = vb;
+		itsFoundValueEnd = ve;
+		itsFoundPattern = s;
+	}
+	else
+	{
+		itsFoundForEach = 0;
+		itsFoundValueBegin = 0;
+		itsFoundValueEnd = 0;
+		itsFoundPattern.clear();
+	}
+	return result;
+}
+
+void Scrollpad::RemoveFormatting()
+{
+	itsBuffer.RemoveFormatting(itsFoundValueBegin, itsFoundPattern, itsFoundValueEnd, itsFoundForEach);
 }
 
 void Scrollpad::Recreate()

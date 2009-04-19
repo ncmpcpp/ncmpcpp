@@ -472,9 +472,8 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 	}
 	if (changed.StatusFlags && Config.header_visibility)
 	{
-		static string switch_state;
+		string switch_state;
 		
-		switch_state.clear();
 		if (mpd_repeat)
 			switch_state += mpd_repeat;
 		if (mpd_random)
