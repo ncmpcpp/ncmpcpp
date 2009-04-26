@@ -144,20 +144,8 @@ void TraceMpdStatus()
 			else
 				block_progressbar_update = !allow_statusbar_unlock;
 			
-			StatusChanges changes;
-			switch (Mpd->GetState())
-			{
-				case psStop:
-					changes.PlayerState = 1;
-					NcmpcppStatusChanged(Mpd, changes, NULL);
-					break;
-				case psPause:
-					changes.ElapsedTime = 1; // restore status
-					NcmpcppStatusChanged(Mpd, changes, NULL);
-					break;
-				default:
-					break;
-			}
+			if (Mpd->GetState() < psPlay)
+				Statusbar() << wclrtoeol;
 		}
 	}
 }
@@ -372,7 +360,7 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 	}
 	static time_t now, past = 0;
 	time(&now);
-	if ((now > past || changed.SongID) && Mpd->GetState() == psPlay)
+	if ((now > past || changed.SongID) && Mpd->GetState() > psStop)
 	{
 		time(&past);
 		if (np.Empty())
@@ -385,7 +373,7 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 			int mpd_elapsed = Mpd->GetElapsedTime();
 			if (elapsed < mpd_elapsed-2 || elapsed+1 > mpd_elapsed)
 				elapsed = mpd_elapsed;
-			else
+			else if (Mpd->GetState() == psPlay)
 				elapsed++;
 			
 			if (!block_statusbar_update && Config.statusbar_visibility)
