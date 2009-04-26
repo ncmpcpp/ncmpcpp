@@ -694,30 +694,38 @@ Window &Window::operator<<(Color color)
 
 Window &Window::operator<<(Format format)
 {
+	static int bold_num = 0, reverse_num = 0, altcharset_num = 0;
+	
 	switch (format)
 	{
 		case fmtNone:
-			Bold(0);
-			Reverse(0);
-			AltCharset(0);
+			Bold((bold_num = 0));
+			Reverse((reverse_num = 0));
+			AltCharset((altcharset_num = 0));
 			break;
 		case fmtBold:
-			Bold(1);
+			Bold(++bold_num);
 			break;
 		case fmtBoldEnd:
-			Bold(0);
+			// FIXME: No idea why this needs to de disabled at 1 :X
+			// Probably a mistake somewhere in the code, but for now
+			// I was not able to find it
+			if (--bold_num <= 1)
+				Bold((bold_num = 0));
 			break;
 		case fmtReverse:
-			Reverse(1);
+			Reverse(++reverse_num);
 			break;
 		case fmtReverseEnd:
-			Reverse(0);
+			if (--reverse_num <= 0)
+				Reverse((reverse_num = 0));
 			break;
 		case fmtAltCharset:
-			AltCharset(1);
+			AltCharset(++altcharset_num);
 			break;
 		case fmtAltCharsetEnd:
-			AltCharset(0);
+			if (--altcharset_num <= 0)
+				AltCharset((altcharset_num = 0));
 			break;
 	}
 	return *this;
