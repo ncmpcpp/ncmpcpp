@@ -77,9 +77,9 @@ void Playlist::Init()
 	SortDialog->AddOption(std::make_pair("Title", &MPD::Song::GetTitle));
 	SortDialog->AddOption(std::make_pair("Filename", &MPD::Song::GetFile));
 	SortDialog->AddSeparator();
-	SortDialog->AddOption(std::make_pair("Sort", (MPD::Song::GetFunction)0));
-	SortDialog->AddOption(std::make_pair("Reverse", (MPD::Song::GetFunction)0));
-	SortDialog->AddOption(std::make_pair("Cancel", (MPD::Song::GetFunction)0));
+	SortDialog->AddOption(std::make_pair("Sort", static_cast<MPD::Song::GetFunction>(0)));
+	SortDialog->AddOption(std::make_pair("Reverse", static_cast<MPD::Song::GetFunction>(0)));
+	SortDialog->AddOption(std::make_pair("Cancel", static_cast<MPD::Song::GetFunction>(0)));
 }
 
 void Playlist::SwitchTo()
