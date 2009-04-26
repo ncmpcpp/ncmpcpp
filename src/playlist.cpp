@@ -43,9 +43,8 @@ bool Playlist::BlockRefreshing = 0;
 Menu< std::pair<std::string, MPD::Song::GetFunction> > *Playlist::SortDialog;
 
 const size_t Playlist::SortOptions = 10;
-
 const size_t Playlist::SortDialogWidth = 30;
-const size_t Playlist::SortDialogHeight = 18;
+size_t Playlist::SortDialogHeight;
 
 void Playlist::Init()
 {
@@ -59,6 +58,8 @@ void Playlist::Init()
 	w->SetItemDisplayerUserData(Config.columns_in_playlist ? &Config.song_columns_list_format : &Config.song_list_format);
 	w->SetGetStringFunction(Config.columns_in_playlist ? SongInColumnsToString : SongToString);
 	w->SetGetStringFunctionUserData(Config.columns_in_playlist ? &Config.song_columns_list_format : &Config.song_list_format);
+	
+	SortDialogHeight = std::min(int(MainHeight-2), 18);
 	
 	SortDialog = new Menu< std::pair<std::string, MPD::Song::GetFunction> >((COLS-SortDialogWidth)/2, (LINES-SortDialogHeight)/2, SortDialogWidth, SortDialogHeight, "Sort songs by...", Config.main_color, Config.window_border);
 	SortDialog->SetTimeout(ncmpcpp_window_timeout);
@@ -101,6 +102,9 @@ void Playlist::Resize()
 {
 	w->Resize(COLS, MainHeight);
 	w->SetTitle(Config.columns_in_playlist ? Display::Columns(Config.song_columns_list_format) : "");
+	SortDialogHeight = std::min(int(MainHeight-2), 18);
+	if (MainHeight > 6)
+		SortDialog->Resize(SortDialogWidth, SortDialogHeight);
 	SortDialog->MoveTo((COLS-SortDialogWidth)/2, (LINES-SortDialogHeight)/2);
 	hasToBeResized = 0;
 }
@@ -151,7 +155,7 @@ void Playlist::ApplyFilter(const std::string &s)
 
 void Playlist::Sort()
 {
-	if (w->GetWidth() < SortDialogWidth || w->GetHeight() < SortDialogHeight)
+	if (w->GetWidth() < SortDialogWidth || MainHeight <= 6)
 	{
 		ShowMessage("Screen is too small to display dialog window!");
 		return;

@@ -93,7 +93,7 @@ class Playlist : public Screen< Menu<MPD::Song> >
 		
 		static const size_t SortOptions;
 		static const size_t SortDialogWidth;
-		static const size_t SortDialogHeight;
+		static size_t SortDialogHeight;
 };
 
 extern Playlist *myPlaylist;
