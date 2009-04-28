@@ -376,14 +376,9 @@ int main(int argc, char *argv[])
 			wFooter->Resize(COLS, wFooter->GetHeight());
 			
 			myScreen->Refresh();
-			PlayerState mpd_state = Mpd->GetState();
+			RedrawStatusbar = 1;
 			StatusChanges changes;
 			changes.StatusFlags = 1; // force status update
-			if (mpd_state == psPlay || mpd_state == psPause)
-				changes.ElapsedTime = 1; // restore status
-			else
-				changes.PlayerState = 1;
-			
 			NcmpcppStatusChanged(Mpd, changes, NULL);
 		}
 		else if (Keypressed(input, Key.GoToParentDir))

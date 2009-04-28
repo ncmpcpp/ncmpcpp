@@ -41,6 +41,7 @@ using std::string;
 string Global::VolumeState;
 
 bool Global::UpdateStatusImmediately = 0;
+bool Global::RedrawStatusbar = 0;
 
 namespace
 {
@@ -360,7 +361,7 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 	}
 	static time_t now, past = 0;
 	time(&now);
-	if ((now > past || changed.SongID) && Mpd->GetState() > psStop)
+	if (((now > past || changed.SongID) && Mpd->GetState() > psStop) || RedrawStatusbar)
 	{
 		time(&past);
 		if (np.Empty())
@@ -373,7 +374,7 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 			int mpd_elapsed = Mpd->GetElapsedTime();
 			if (elapsed < mpd_elapsed-2 || elapsed+1 > mpd_elapsed)
 				elapsed = mpd_elapsed;
-			else if (Mpd->GetState() == psPlay)
+			else if (Mpd->GetState() == psPlay && !RedrawStatusbar)
 				elapsed++;
 			
 			if (!block_statusbar_update && Config.statusbar_visibility)
@@ -412,6 +413,7 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 				}
 				wFooter->SetColor(Config.statusbar_color);
 			}
+			RedrawStatusbar = 0;
 		}
 		else
 		{

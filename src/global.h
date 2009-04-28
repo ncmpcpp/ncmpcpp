@@ -47,6 +47,7 @@ namespace Global
 	extern bool UpdateStatusImmediately;
 	extern bool MessagesAllowed;
 	extern bool RedrawHeader;
+	extern bool RedrawStatusbar;
 	
 	extern std::string VolumeState;
 }
