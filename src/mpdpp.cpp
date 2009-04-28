@@ -699,6 +699,9 @@ void Connection::StartFieldSearch(mpd_TagItems item)
 
 void Connection::AddSearch(mpd_TagItems item, const string &str) const
 {
+	// mpd version < 0.14.* doesn't support empty search constraints
+	if (Version() < 14 && str.empty())
+		return;
 	if (isConnected)
 		mpd_addConstraintSearch(itsConnection, item, str.c_str());
 }
