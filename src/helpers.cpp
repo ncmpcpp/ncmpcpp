@@ -284,24 +284,16 @@ string FindSharedDir(const string &one, const string &two)
 
 string GetLineValue(string &line, char a, char b, bool once)
 {
-	int i = 0;
-	int begin = -1, end = -1;
-	for (string::iterator it = line.begin(); it != line.end() && (begin == -1 || end == -1); i++, it++)
+	int pos[2] = { -1, -1 };
+	size_t i;
+	for (i = line.find(a); i != string::npos && pos[1] < 0; i = line.find(b, i))
 	{
-		if (*it == a || *it == b)
-		{
-			if (once)
-				*it = 0;
-			if (begin < 0)
-				begin = i+1;
-			else
-				end = i;
-		}
+		if (once)
+			line[i] = 0;
+		pos[pos[0] >= 0] = i++;
 	}
-	if (begin >= 0 && end >= 0)
-		return line.substr(begin, end-begin);
-	else
-		return "";
+	pos[0]++;
+	return pos[0] >= 0 && pos[1] >= 0 ? line.substr(pos[0], pos[1]-pos[0]) : "";
 }
 
 void RemoveTheWord(string &s)
