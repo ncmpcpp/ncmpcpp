@@ -35,6 +35,7 @@ using std::string;
 
 MediaLibrary *myLibrary = new MediaLibrary;
 
+bool MediaLibrary::hasTwoColumns;
 size_t MediaLibrary::itsLeftColWidth;
 size_t MediaLibrary::itsMiddleColWidth;
 size_t MediaLibrary::itsMiddleColStartX;
@@ -43,6 +44,7 @@ size_t MediaLibrary::itsRightColStartX;
 
 void MediaLibrary::Init()
 {
+	hasTwoColumns = 0;
 	itsLeftColWidth = COLS/3-1;
 	itsMiddleColWidth = COLS/3;
 	itsMiddleColStartX = itsLeftColWidth+1;
@@ -77,11 +79,21 @@ void MediaLibrary::Init()
 
 void MediaLibrary::Resize()
 {
-	itsLeftColWidth = COLS/3-1;
-	itsMiddleColStartX = itsLeftColWidth+1;
-	itsMiddleColWidth = COLS/3;
-	itsRightColStartX = itsLeftColWidth+itsMiddleColWidth+2;
-	itsRightColWidth = COLS-COLS/3*2-1;
+	if (!hasTwoColumns)
+	{
+		itsLeftColWidth = COLS/3-1;
+		itsMiddleColStartX = itsLeftColWidth+1;
+		itsMiddleColWidth = COLS/3;
+		itsRightColStartX = itsLeftColWidth+itsMiddleColWidth+2;
+		itsRightColWidth = COLS-COLS/3*2-1;
+	}
+	else
+	{
+		itsMiddleColStartX = 0;
+		itsMiddleColWidth = COLS/2;
+		itsRightColStartX = itsMiddleColWidth+1;
+		itsRightColWidth = COLS-itsMiddleColWidth-1;
+	}
 	
 	Artists->Resize(itsLeftColWidth, MainHeight);
 	Albums->Resize(itsMiddleColWidth, MainHeight);
@@ -110,7 +122,24 @@ void MediaLibrary::Refresh()
 void MediaLibrary::SwitchTo()
 {
 	if (myScreen == this)
-		return;
+	{
+		hasTwoColumns = !hasTwoColumns;
+		hasToBeResized = 1;
+		Artists->Clear(0);
+		Albums->Clear(0);
+		Albums->Reset();
+		Songs->Clear(0);
+		if (hasTwoColumns)
+		{
+			if (w == Artists)
+				NextColumn();
+			string item_type = IntoStr(Config.media_lib_primary_tag);
+			ToLower(item_type);
+			Albums->SetTitle("Albums (sorted by " + item_type + ")");
+		}
+		else
+			Albums->SetTitle("Albums");
+	}
 	
 	if (hasToBeResized)
 		Resize();
@@ -128,7 +157,7 @@ std::string MediaLibrary::Title()
 
 void MediaLibrary::Update()
 {
-	if (Artists->Empty())
+	if (!hasTwoColumns && Artists->Empty())
 	{
 		TagList list;
 		Albums->Clear(0);
@@ -147,7 +176,7 @@ void MediaLibrary::Update()
 		Artists->Refresh();
 	}
 	
-	if (!Artists->Empty() && Albums->Empty() && Songs->Empty())
+	if (!hasTwoColumns && !Artists->Empty() && Albums->Empty() && Songs->Empty())
 	{
 		Albums->Reset();
 		TagList list;
@@ -173,14 +202,13 @@ void MediaLibrary::Update()
 				Albums->AddOption(std::make_pair("<no album>", SearchConstraints("", "")));
 		}
 		
-		for (TagList::iterator it = list.begin(); it != list.end(); it++)
+		for (TagList::const_iterator it = list.begin(); it != list.end(); it++)
 		{
 			TagList l;
 			Mpd->StartFieldSearch(MPD_TAG_ITEM_DATE);
 			Mpd->AddSearch(Config.media_lib_primary_tag, Artists->Current());
 			Mpd->AddSearch(MPD_TAG_ITEM_ALBUM, *it);
 			Mpd->CommitSearch(l);
-			utf_to_locale(*it);
 			if (l.empty())
 			{
 				Albums->AddOption(std::make_pair(*it, SearchConstraints(*it, "")));
@@ -190,27 +218,69 @@ void MediaLibrary::Update()
 				Albums->AddOption(std::make_pair("(" + *j + ") " + *it, SearchConstraints(*it, *j)));
 		}
 		utf_to_locale(Artists->Current());
+		for (size_t i = 0; i < Albums->Size(); i++)
+			utf_to_locale((*Albums)[i].first);
 		if (!Albums->Empty())
 			Albums->Sort<CaseInsensitiveSorting>((*Albums)[0].first == "<no album>");
-		Albums->Window::Clear();
+		Albums->Refresh();
+	}
+	else if (hasTwoColumns && Albums->Empty() && Songs->Empty())
+	{
+		TagList artists;
+		*Albums << XY(0, 0) << "Fetching albums' list...";
+		Albums->Window::Refresh();
+		Mpd->GetList(artists, Config.media_lib_primary_tag);
+		for (TagList::const_iterator i = artists.begin(); i != artists.end(); i++)
+		{
+			TagList albums;
+			Mpd->StartFieldSearch(MPD_TAG_ITEM_ALBUM);
+			Mpd->AddSearch(Config.media_lib_primary_tag, *i);
+			Mpd->CommitSearch(albums);
+			for (TagList::const_iterator j = albums.begin(); j != albums.end(); j++)
+			{
+				if (Config.media_lib_primary_tag != MPD_TAG_ITEM_DATE)
+				{
+					TagList years;
+					Mpd->StartFieldSearch(MPD_TAG_ITEM_DATE);
+					Mpd->AddSearch(Config.media_lib_primary_tag, *i);
+					Mpd->AddSearch(MPD_TAG_ITEM_ALBUM, *j);
+					Mpd->CommitSearch(years);
+					if (!years.empty())
+					{
+						for (TagList::const_iterator k = years.begin(); k != years.end(); k++)
+						{
+							Albums->AddOption(std::make_pair(*i + " - (" + *k + ") " + *j, SearchConstraints(*i, *j, *k)));
+						}
+					}
+					else
+						Albums->AddOption(std::make_pair(*i + " - " + *j, SearchConstraints(*i, *j, "")));
+				}
+				else
+					Albums->AddOption(std::make_pair(*i + " - " + *j, SearchConstraints(*i, *j, *i)));
+			}
+		}
+		for (size_t i = 0; i < Albums->Size(); i++)
+			utf_to_locale((*Albums)[i].first);
+		if (!Albums->Empty())
+			Albums->Sort<CaseInsensitiveSorting>();
 		Albums->Refresh();
 	}
 	
-	if (!Artists->Empty() && w == Albums && Albums->Empty())
+	if (!hasTwoColumns && !Artists->Empty() && w == Albums && Albums->Empty())
 	{
 		Albums->HighlightColor(Config.main_highlight_color);
 		Artists->HighlightColor(Config.active_column_color);
 		w = Artists;
 	}
 	
-	if (!Artists->Empty() && Songs->Empty())
+	if ((hasTwoColumns || !Artists->Empty()) && Songs->Empty())
 	{
 		Songs->Reset();
 		SongList list;
 		
 		Songs->Clear(0);
 		Mpd->StartSearch(1);
-		Mpd->AddSearch(Config.media_lib_primary_tag, locale_to_utf_cpy(Artists->Current()));
+		Mpd->AddSearch(Config.media_lib_primary_tag, hasTwoColumns ? Albums->Current().second.Artist : locale_to_utf_cpy(Artists->Current()));
 		if (Albums->Empty()) // left for compatibility with <mpd-0.14
 		{
 			*Albums << XY(0, 0) << "No albums found.";
@@ -218,9 +288,9 @@ void MediaLibrary::Update()
 		}
 		else
 		{
-			Mpd->AddSearch(MPD_TAG_ITEM_ALBUM, locale_to_utf_cpy(Albums->Current().second.Album));
+			Mpd->AddSearch(MPD_TAG_ITEM_ALBUM, Albums->Current().second.Album);
 			if (!Albums->Current().second.Album.empty()) // for <no album>
-				Mpd->AddSearch(MPD_TAG_ITEM_DATE, locale_to_utf_cpy(Albums->Current().second.Year));
+				Mpd->AddSearch(MPD_TAG_ITEM_DATE, Albums->Current().second.Year);
 		}
 		Mpd->CommitSearch(list);
 		
@@ -293,7 +363,7 @@ void MediaLibrary::NextColumn()
 {
 	if (w == Artists)
 	{
-		if (Songs->Empty())
+		if (!hasTwoColumns && Songs->Empty())
 			return;
 		Artists->HighlightColor(Config.main_highlight_color);
 		w->Refresh();
@@ -322,7 +392,7 @@ void MediaLibrary::PrevColumn()
 		if (!Albums->Empty())
 			return;
 	}
-	if (w == Albums)
+	if (w == Albums && !hasTwoColumns)
 	{
 		Albums->HighlightColor(Config.main_highlight_color);
 		w->Refresh();

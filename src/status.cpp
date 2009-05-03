@@ -287,7 +287,13 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 		myTagEditor->Albums->Clear(0);
 		myTagEditor->Dirs->Clear(0);
 #		endif // HAVE_TAGLIB_H
-		myLibrary->Artists->Clear(0);
+		if (myLibrary->Columns() == 2)
+		{
+			myLibrary->Albums->Clear();
+			myLibrary->Songs->Clear(0);
+		}
+		else
+			myLibrary->Artists->Clear(0);
 		myPlaylistEditor->Content->Clear(0);
 	}
 	if (changed.PlayerState)

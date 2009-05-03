@@ -28,8 +28,10 @@ class MediaLibrary : public Screen<Window>
 {
 	struct SearchConstraints
 	{
+		SearchConstraints(const std::string &artist, const std::string &album, const std::string &year) : Artist(artist), Album(album), Year(year) { }
 		SearchConstraints(const std::string &album, const std::string &year) : Album(album), Year(year) { }
 		
+		std::string Artist;
 		std::string Album;
 		std::string Year;
 	};
@@ -57,6 +59,7 @@ class MediaLibrary : public Screen<Window>
 		
 		virtual List *GetList();
 		
+		int Columns() { return hasTwoColumns ? 2 : 3; }
 		void NextColumn();
 		void PrevColumn();
 		
@@ -72,6 +75,7 @@ class MediaLibrary : public Screen<Window>
 		static bool SortSongsByTrack(MPD::Song *, MPD::Song *);
 		static bool SortSongsByYear(MPD::Song *, MPD::Song *);
 		
+		static bool hasTwoColumns;
 		static size_t itsLeftColWidth;
 		static size_t itsMiddleColWidth;
 		static size_t itsMiddleColStartX;

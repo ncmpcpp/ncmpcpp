@@ -1664,7 +1664,8 @@ int main(int argc, char *argv[])
 			{
 				myBrowser->ChangeBrowseMode();
 			}
-			else if (myScreen->ActiveWindow() == myLibrary->Artists)
+			else if (myScreen->ActiveWindow() == myLibrary->Artists
+			||	 (myLibrary->Columns() == 2 && myScreen->ActiveWindow() == myLibrary->Albums))
 			{
 				LockStatusbar();
 				Statusbar() << "Tag type ? [" << fmtBold << 'a' << fmtBoldEnd << "rtist/" << fmtBold << 'y' << fmtBoldEnd << "ear/" << fmtBold << 'g' << fmtBoldEnd << "enre/" << fmtBold << 'c' << fmtBoldEnd << "omposer/" << fmtBold << 'p' << fmtBoldEnd << "erformer] ";
@@ -1685,9 +1686,20 @@ int main(int argc, char *argv[])
 					string item_type = IntoStr(Config.media_lib_primary_tag);
 					myLibrary->Artists->SetTitle(item_type + "s");
 					myLibrary->Artists->Reset();
-					myLibrary->Artists->Clear(0);
-					myLibrary->Artists->Display();
 					ToLower(item_type);
+					if (myLibrary->Columns() == 2)
+					{
+						myLibrary->Songs->Clear(0);
+						myLibrary->Albums->Reset();
+						myLibrary->Albums->Clear();
+						myLibrary->Albums->SetTitle("Albums (sorted by " + item_type + ")");
+						myLibrary->Albums->Display();
+					}
+					else
+					{
+						myLibrary->Artists->Clear(0);
+						myLibrary->Artists->Display();
+					}
 					ShowMessage("Switched to list of %s tag", item_type.c_str());
 				}
 			}
