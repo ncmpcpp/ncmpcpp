@@ -74,7 +74,7 @@ std::string Info::Title()
 	return itsTitle;
 }
 
-#ifdef HAVE_PTHREAD_H
+#if defined(HAVE_CURL_CURL_H) && defined(HAVE_PTHREAD_H)
 void Info::Update()
 {
 	if (!ArtistReady)
@@ -86,7 +86,7 @@ void Info::Update()
 	Downloader = 0;
 	ArtistReady = 0;
 }
-#endif // HAVE_PTHREAD_H
+#endif // HAVE_CURL_CURL_H && HAVE_PTHREAD_H
 
 void Info::GetSong()
 {

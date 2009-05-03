@@ -58,12 +58,12 @@ bool Lyrics::Reload = 0;
 
 #ifdef HAVE_CURL_CURL_H
 bool Lyrics::Ready = 0;
-#endif // HAVE_CURL_CURL_H
 
 #ifdef HAVE_PTHREAD_H
 pthread_t *Lyrics::Downloader = 0;
 pthread_mutex_t Global::CurlLock = PTHREAD_MUTEX_INITIALIZER;
 #endif // HAVE_PTHREAD_H
+#endif // HAVE_CURL_CURL_H
 
 Lyrics *myLyrics = new Lyrics;
 
@@ -81,10 +81,10 @@ void Lyrics::Resize()
 
 void Lyrics::Update()
 {
-#	ifdef HAVE_PTHREAD_H
+#	if defined(HAVE_CURL_CURL_H) && defined(HAVE_PTHREAD_H)
 	if (myLyrics->Ready)
 		myLyrics->Take();
-#	endif // HAVE_PTHREAD_H
+#	endif // HAVE_CURL_CURL_H && HAVE_PTHREAD_H
 	
 	if (!Reload)
 		return;
@@ -104,7 +104,7 @@ void Lyrics::SwitchTo()
 	}
 	else
 	{
-#		ifdef HAVE_PTHREAD_H
+#		if defined(HAVE_CURL_CURL_H) && defined(HAVE_PTHREAD_H)
 		if (Downloader && !Ready)
 		{
 			ShowMessage("Lyrics are being downloaded...");
@@ -112,7 +112,7 @@ void Lyrics::SwitchTo()
 		}
 		else if (Ready)
 			Take();
-#		endif // HAVE_PTHREAD_H
+#		endif // HAVE_CURL_CURL_H && HAVE_PTHREAD_H
 		
 		const MPD::Song *s = Reload ? myPlaylist->NowPlayingSong() : myScreen->CurrentSong();
 		
@@ -136,10 +136,10 @@ void Lyrics::SwitchTo()
 #			ifdef HAVE_CURL_CURL_H
 			static_cast<Window &>(*w) << "Fetching lyrics...";
 			w->Window::Refresh();
-#			endif // HAVE_CURL_CURL_H
 #			ifdef HAVE_PTHREAD_H
 			if (!Downloader)
 #			endif // HAVE_PTHREAD_H
+#			endif // HAVE_CURL_CURL_H
 			{
 				string file = locale_to_utf_cpy(itsSong.GetArtist()) + " - " + locale_to_utf_cpy(itsSong.GetTitle()) + ".txt";
 				EscapeUnallowedChars(file);
@@ -168,7 +168,7 @@ void Lyrics::SwitchTo()
 				}
 				else
 				{
-#					ifdef HAVE_PTHREAD_H
+#					if defined(HAVE_CURL_CURL_H) && defined(HAVE_PTHREAD_H)
 					Downloader = new pthread_t;
 					pthread_create(Downloader, 0, Get, this);
 #					elif defined(HAVE_CURL_CURL_H)
