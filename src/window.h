@@ -31,6 +31,14 @@
 #include <vector>
 #include <string>
 
+#if defined(__GNUC__) && __GNUC__ >= 3
+# define GNUC_UNUSED __attribute__((unused))
+# define GNUC_PRINTF(a, b) __attribute__((format(printf, a, b)))
+#else
+# define GNUC_UNUSED
+# define GNUC_PRINTF(a, b)
+#endif
+
 #ifdef USE_PDCURSES
 # undef KEY_BACKSPACE
 # define KEY_BACKSPACE 8

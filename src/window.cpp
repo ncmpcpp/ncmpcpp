@@ -33,7 +33,7 @@ using namespace NCurses;
 using std::string;
 using std::wstring;
 
-void NCurses::InitScreen(const char *window_title, bool enable_colors)
+void NCurses::InitScreen(GNUC_UNUSED const char *window_title, bool enable_colors)
 {
 	const int ColorsTable[] =
 	{
@@ -44,7 +44,6 @@ void NCurses::InitScreen(const char *window_title, bool enable_colors)
 #	ifdef XCURSES
 	Xinitscr(1, const_cast<char **>(&window_title));
 #	else
-	window_title = 0; // silence compiler
 	initscr();
 #	endif // XCURSES
 	if (has_colors() && enable_colors)

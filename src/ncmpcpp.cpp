@@ -1344,7 +1344,7 @@ int main(int argc, char *argv[])
 				if (newpos > 0 && newpos < 100)
 					Mpd->Seek(s->GetTotalLength()*newpos/100.0);
 				else
-					ShowMessage("Out of bounds, 1-99 possible for %, %d given.", newpos);
+					ShowMessage("Out of bounds, 1-99 possible for %%, %d given.", newpos);
 			}
 			UpdateStatusImmediately = 1;
 		}

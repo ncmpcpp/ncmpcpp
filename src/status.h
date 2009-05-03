@@ -35,7 +35,7 @@ void NcmpcppStatusChanged(MPD::Connection *, MPD::StatusChanges, void *);
 void NcmpcppErrorCallback(MPD::Connection *, int, const char *, void *);
 
 Window &Statusbar();
-void ShowMessage(const char *, ...);
+void ShowMessage(const char *, ...) GNUC_PRINTF(1, 2);
 
 void StatusbarGetStringHelper(const std::wstring &);
 void StatusbarApplyFilterImmediately(const std::wstring &);
