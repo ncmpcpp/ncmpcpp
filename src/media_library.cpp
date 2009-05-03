@@ -227,7 +227,7 @@ void MediaLibrary::Update()
 	else if (hasTwoColumns && Albums->Empty() && Songs->Empty())
 	{
 		TagList artists;
-		*Albums << XY(0, 0) << "Fetching albums' list...";
+		*Albums << XY(0, 0) << "Fetching albums...";
 		Albums->Window::Refresh();
 		Mpd->GetList(artists, Config.media_lib_primary_tag);
 		for (TagList::const_iterator i = artists.begin(); i != artists.end(); i++)

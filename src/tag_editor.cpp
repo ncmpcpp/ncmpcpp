@@ -418,7 +418,7 @@ void TagEditor::Update()
 		TagList list;
 		if (Config.albums_in_tag_editor)
 		{
-			*Albums << XY(0, 0) << "Fetching albums' list...";
+			*Albums << XY(0, 0) << "Fetching albums...";
 			Albums->Window::Refresh();
 			Mpd->GetAlbums("", list);
 			for (TagList::const_iterator it = list.begin(); it != list.end(); it++)
