@@ -440,7 +440,7 @@ string Window::GetString(const string &base, size_t length, size_t width, bool e
 		input = wgetch(itsWindow);
 		
 		// these key codes are special and should be ignored
-		if ((input < 10 || (input > 10 && input < 32))
+		if ((input < 10 || (input > 10 && input != 21 && input < 32))
 #		ifdef USE_PDCURSES
 		&&   input != KEY_BACKSPACE)
 #		else
@@ -506,6 +506,11 @@ string Window::GetString(const string &base, size_t length, size_t width, bool e
 				break;
 			}
 			case 10:
+				break;
+			case 21: // CTRL+U
+				tmp.clear();
+				real_maxx = maxx = real_x = x = minx;
+				maxbeginning = beginning = 0;
 				break;
 			default:
 			{
