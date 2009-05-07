@@ -270,6 +270,7 @@ void DefaultConfiguration(ncmpcpp_config &conf)
 	conf.incremental_seeking = true;
 	conf.now_playing_lyrics = false;
 	conf.local_browser = false;
+	conf.local_browser_show_hidden_files = false;
 	conf.search_in_db = true;
 	conf.display_screens_numbers_on_start = true;
 	conf.clock_display_seconds = false;
@@ -626,6 +627,10 @@ void ReadConfiguration(ncmpcpp_config &conf)
 			else if (cl.find("incremental_seeking") != string::npos)
 			{
 				conf.incremental_seeking = v == "yes";
+			}
+			else if (cl.find("show_hidden_files_in_local_browser") != string::npos)
+			{
+				conf.local_browser_show_hidden_files = v == "yes";
 			}
 			else if (cl.find("follow_now_playing_lyrics") != string::npos)
 			{

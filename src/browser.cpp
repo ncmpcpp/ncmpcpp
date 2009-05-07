@@ -342,6 +342,8 @@ void Browser::GetLocalDirectory(ItemList &v)
 	
 	while ((file = readdir(dir)))
 	{
+		if (!Config.local_browser_show_hidden_files && file->d_name[0] == '.')
+			continue;
 		Item new_item;
 		full_path = itsBrowsedDir;
 		if (itsBrowsedDir != "/")

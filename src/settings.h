@@ -161,6 +161,7 @@ struct ncmpcpp_config
 	bool incremental_seeking;
 	bool now_playing_lyrics;
 	bool local_browser;
+	bool local_browser_show_hidden_files;
 	bool search_in_db;
 	bool display_screens_numbers_on_start;
 	bool clock_display_seconds;
