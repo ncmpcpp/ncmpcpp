@@ -552,7 +552,6 @@ template <typename T> void NCurses::Menu<T>::Clear(bool clrscr)
 		delete *it;
 	itsOptions.clear();
 	itsFound.clear();
-	itsFilter.clear();
 	ClearFiltered();
 	itsOptionsPtr = &itsOptions;
 	if (clrscr)
