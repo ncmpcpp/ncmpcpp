@@ -1596,7 +1596,7 @@ int main(int argc, char *argv[])
 			{
 				LockStatusbar();
 				Statusbar() << "Find " << (Keypressed(input, Key.FindForward) ? "forward" : "backward") << ": ";
-				string findme = wFooter->GetString(mList->GetSearchConstraint());
+				string findme = wFooter->GetString();
 				UnlockStatusbar();
 				myPlaylist->UpdateTimer();
 				
