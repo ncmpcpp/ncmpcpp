@@ -161,6 +161,7 @@ int main(int argc, char *argv[])
 	wFooter = new Window(0, footer_start_y, COLS, footer_height, "", Config.statusbar_color, brNone);
 	wFooter->SetTimeout(ncmpcpp_window_timeout);
 	wFooter->SetGetStringHelper(StatusbarGetStringHelper);
+	wFooter->CreateHistory();
 	*wFooter << fmtBold; // bold by default
 	
 	myScreen = myPlaylist;

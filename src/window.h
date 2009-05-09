@@ -27,6 +27,7 @@
 
 #include "curses.h"
 
+#include <deque>
 #include <stack>
 #include <vector>
 #include <string>
@@ -113,6 +114,8 @@ namespace NCurses
 			void SetBorder(Border);
 			void SetTimeout(int);
 			void SetTitle(const std::string &);
+			void CreateHistory();
+			void DeleteHistory();
 			
 			void Hide(char = 32) const;
 			void Bold(bool) const;
@@ -188,6 +191,9 @@ namespace NCurses
 			Color itsBaseBgColor;
 			
 			Border itsBorder;
+			
+		private:
+			std::deque<std::wstring> *itsHistory;
 	};
 }
 

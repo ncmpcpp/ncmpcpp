@@ -93,7 +93,8 @@ Window::Window(size_t startx,
 		itsBaseColor(color),
 		itsBgColor(clDefault),
 		itsBaseBgColor(clDefault),
-		itsBorder(border)
+		itsBorder(border),
+		itsHistory(0)
 {
 	if (itsStartX > size_t(COLS)
 	||  itsStartY > size_t(LINES)
@@ -150,6 +151,7 @@ Window::~Window()
 {
 	delwin(itsWindow);
 	delwin(itsWinBorder);
+	delete itsHistory;
 }
 
 void Window::SetColor(Color col, Color background)
@@ -220,6 +222,18 @@ void Window::SetTitle(const string &newtitle)
 		Recreate();
 	}
 	itsTitle = newtitle;
+}
+
+void Window::CreateHistory()
+{
+	if (!itsHistory)
+		itsHistory = new std::deque<std::wstring>;
+}
+
+void Window::DeleteHistory()
+{
+	delete itsHistory;
+	itsHistory = 0;
 }
 
 void Window::Recreate()
@@ -378,7 +392,10 @@ string Window::GetString(const string &base, size_t length, size_t width, bool e
 		width = itsWidth-x-1;
 	
 	curs_set(1);
-	std::wstring tmp = ToWString(base);
+	
+	std::wstring wbase = ToWString(base);
+	std::wstring *tmp = &wbase;
+	size_t history_offset = itsHistory ? itsHistory->size() : -1;
 	
 	string tmp_in;
 	wchar_t wc_in;
@@ -386,7 +403,7 @@ string Window::GetString(const string &base, size_t length, size_t width, bool e
 	bool block_scrolling = 0;
 	
 	// disable scrolling if wide chars are used
-	for (wstring::const_iterator it = tmp.begin(); it != tmp.end(); it++)
+	for (wstring::const_iterator it = tmp->begin(); it != tmp->end(); it++)
 		if (wcwidth(*it) > 1)
 			block_scrolling = 1;
 	
@@ -394,13 +411,13 @@ string Window::GetString(const string &base, size_t length, size_t width, bool e
 	
 	do
 	{
-		if (tmp.empty())
+		if (tmp->empty())
 			block_scrolling = 0;
 		
-		maxbeginning = block_scrolling ? 0 : (tmp.length() < width ? 0 : tmp.length()-width);
-		maxx = minx + (Length(tmp) < width ? Length(tmp) : width);
+		maxbeginning = block_scrolling ? 0 : (tmp->length() < width ? 0 : tmp->length()-width);
+		maxx = minx + (Length(*tmp) < width ? Length(*tmp) : width);
 		
-		real_maxx = minx + (tmp.length() < width ? tmp.length() : width);
+		real_maxx = minx + (tmp->length() < width ? tmp->length() : width);
 		
 		if (beginning > maxbeginning)
 			beginning = maxbeginning;
@@ -413,7 +430,7 @@ string Window::GetString(const string &base, size_t length, size_t width, bool e
 			if (block_scrolling && maxx >= biggest_x)
 			{
 				size_t i = 0;
-				for (wstring::const_iterator it = tmp.begin(); i < width; it++, real_real_maxx++)
+				for (wstring::const_iterator it = tmp->begin(); i < width; it++, real_real_maxx++)
 					i += wcwidth(*it);
 			}
 			else
@@ -428,12 +445,12 @@ string Window::GetString(const string &base, size_t length, size_t width, bool e
 		mvwhline(itsWindow, y, minx, 32, width+1);
 		
 		if (!encrypted)
-			mvwprintw(itsWindow, y, minx, "%ls", tmp.substr(beginning, width+1).c_str());
+			mvwprintw(itsWindow, y, minx, "%ls", tmp->substr(beginning, width+1).c_str());
 		else
 			mvwhline(itsWindow, y, minx, '*', maxx-minx);
 		
 		if (itsGetStringHelper)
-			itsGetStringHelper(tmp);
+			itsGetStringHelper(*tmp);
 		
 		wmove(itsWindow, y, x);
 		prefresh(itsWindow, 0, 0, itsStartY, itsStartX, itsStartY+itsHeight-1, itsStartX+itsWidth-1);
@@ -452,14 +469,37 @@ string Window::GetString(const string &base, size_t length, size_t width, bool e
 		{
 			case ERR:
 			case KEY_UP:
+				if (itsHistory && history_offset > 0)
+				{
+					do
+						tmp = &(*itsHistory)[--history_offset];
+					while (tmp->empty() && history_offset);
+					gotoend = 1;
+				}
+				break;
 			case KEY_DOWN:
+				if (itsHistory && itsHistory->size() > 0)
+				{
+					if (history_offset < itsHistory->size()-1)
+					{
+						do
+							tmp = &(*itsHistory)[++history_offset];
+						while (tmp->empty() && history_offset < itsHistory->size()-1);
+					}
+					else if (history_offset == itsHistory->size()-1)
+					{
+						tmp = &wbase;
+						history_offset++;
+					}
+					gotoend = 1;
+				}
 				break;
 			case KEY_RIGHT:
 			{
 				if (x < maxx)
 				{
 					real_x++;
-					x += wcwidth(tmp[beginning+real_x-minx-1]);
+					x += wcwidth((*tmp)[beginning+real_x-minx-1]);
 				}
 				else if (beginning < maxbeginning)
 					beginning++;
@@ -475,7 +515,7 @@ string Window::GetString(const string &base, size_t length, size_t width, bool e
 				if (x > minx)
 				{
 					real_x--;
-					x -= wcwidth(tmp[beginning+real_x-minx]);
+					x -= wcwidth((*tmp)[beginning+real_x-minx]);
 				}
 				else if (beginning > 0)
 					beginning--;
@@ -484,9 +524,9 @@ string Window::GetString(const string &base, size_t length, size_t width, bool e
 			}
 			case KEY_DC:
 			{
-				if ((real_x-minx)+beginning == tmp.length())
+				if ((real_x-minx)+beginning == tmp->length())
 					break;
-				tmp.erase(tmp.begin()+(real_x-minx)+beginning);
+				tmp->erase(tmp->begin()+(real_x-minx)+beginning);
 				if (beginning && beginning == maxbeginning && real_x < maxx)
 				{
 					real_x++;
@@ -508,13 +548,13 @@ string Window::GetString(const string &base, size_t length, size_t width, bool e
 			case 10:
 				break;
 			case 21: // CTRL+U
-				tmp.clear();
+				tmp->clear();
 				real_maxx = maxx = real_x = x = minx;
 				maxbeginning = beginning = 0;
 				break;
 			default:
 			{
-				if (tmp.length() >= length)
+				if (tmp->length() >= length)
 					break;
 				
 				tmp_in += input;
@@ -524,9 +564,9 @@ string Window::GetString(const string &base, size_t length, size_t width, bool e
 				if (wcwidth(wc_in) > 1)
 					block_scrolling = 1;
 				
-				if ((real_x-minx)+beginning >= tmp.length())
+				if ((real_x-minx)+beginning >= tmp->length())
 				{
-					tmp.push_back(wc_in);
+					tmp->push_back(wc_in);
 					if (!beginning)
 					{
 						real_x++;
@@ -537,7 +577,7 @@ string Window::GetString(const string &base, size_t length, size_t width, bool e
 				}
 				else
 				{
-					tmp.insert(tmp.begin()+(real_x-minx)+beginning, wc_in);
+					tmp->insert(tmp->begin()+(real_x-minx)+beginning, wc_in);
 					if (x < maxx)
 					{
 						real_x++;
@@ -553,7 +593,21 @@ string Window::GetString(const string &base, size_t length, size_t width, bool e
 	while (input != 10);
 	curs_set(0);
 	
-	return ToString(tmp);
+	if (itsHistory)
+	{
+		size_t old_size = itsHistory->size();
+		if (!tmp->empty() && (itsHistory->empty() || itsHistory->back() != *tmp))
+			itsHistory->push_back(*tmp);
+		if (old_size > 1 && history_offset < old_size)
+		{
+			std::deque<std::wstring>::iterator it = itsHistory->begin()+history_offset;
+			wbase = *it;
+			tmp = &wbase;
+			itsHistory->erase(it);
+		}
+	}
+	
+	return ToString(*tmp);
 }
 
 void Window::GetXY(int &x, int &y)
