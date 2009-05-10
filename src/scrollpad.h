@@ -35,6 +35,7 @@ namespace NCurses
 			
 			void Flush();
 			bool SetFormatting(short, const std::basic_string<my_char_t> &, short, bool for_each = 1);
+			void ForgetFormatting();
 			void RemoveFormatting();
 			std::basic_string<my_char_t> Content() { return itsBuffer.Str(); }
 			

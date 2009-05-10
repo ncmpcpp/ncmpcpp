@@ -188,6 +188,8 @@ void Info::GetArtist()
 				input.close();
 				w->SetFormatting(fmtBold, "\n\nSimilar artists:\n", fmtBoldEnd, 0);
 				w->SetFormatting(Config.color2, "\n * ", clEnd);
+				// below is used so format won't be removed using RemoveFormatting() by accident.
+				w->ForgetFormatting();
 				w->Flush();
 			}
 			else

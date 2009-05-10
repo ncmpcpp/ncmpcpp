@@ -33,8 +33,8 @@ Scrollpad::Scrollpad(size_t startx,
 			: Window(startx, starty, width, height, title, color, border),
 			itsBeginning(0),
 			itsFoundForEach(0),
-			itsFoundValueBegin(0),
-			itsFoundValueEnd(0),
+			itsFoundValueBegin(-1),
+			itsFoundValueEnd(-1),
 			itsRealHeight(1)
 {
 }
@@ -114,18 +114,22 @@ bool Scrollpad::SetFormatting(short vb, const std::basic_string<my_char_t> &s, s
 		itsFoundPattern = s;
 	}
 	else
-	{
-		itsFoundForEach = 0;
-		itsFoundValueBegin = 0;
-		itsFoundValueEnd = 0;
-		itsFoundPattern.clear();
-	}
+		ForgetFormatting();
 	return result;
+}
+
+void Scrollpad::ForgetFormatting()
+{
+	itsFoundForEach = 0;
+	itsFoundValueBegin = -1;
+	itsFoundValueEnd = -1;
+	itsFoundPattern.clear();
 }
 
 void Scrollpad::RemoveFormatting()
 {
-	itsBuffer.RemoveFormatting(itsFoundValueBegin, itsFoundPattern, itsFoundValueEnd, itsFoundForEach);
+	if (itsFoundValueBegin >= 0 && itsFoundValueEnd >= 0)
+		itsBuffer.RemoveFormatting(itsFoundValueBegin, itsFoundPattern, itsFoundValueEnd, itsFoundForEach);
 }
 
 void Scrollpad::Recreate()
@@ -205,6 +209,7 @@ void Scrollpad::Clear(bool clrscr)
 	itsWindow = newpad(itsHeight, itsWidth);
 	SetTimeout(itsWindowTimeout);
 	SetColor(itsColor, itsBgColor);
+	ForgetFormatting();
 	keypad(itsWindow, 1);
 	if (clrscr)
 		Refresh();
