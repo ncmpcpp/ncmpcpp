@@ -145,7 +145,7 @@ void TraceMpdStatus()
 			else
 				block_progressbar_update = !allow_statusbar_unlock;
 			
-			if (Mpd->GetState() < psPlay)
+			if (Mpd->GetState() < psPlay && !block_statusbar_update)
 				Statusbar() << wclrtoeol;
 		}
 	}
