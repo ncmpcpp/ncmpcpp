@@ -395,7 +395,7 @@ string Window::GetString(const string &base, size_t length, size_t width, bool e
 	
 	std::wstring wbase = ToWString(base);
 	std::wstring *tmp = &wbase;
-	size_t history_offset = itsHistory ? itsHistory->size() : -1;
+	size_t history_offset = itsHistory && !encrypted ? itsHistory->size() : -1;
 	
 	string tmp_in;
 	wchar_t wc_in;
@@ -469,7 +469,7 @@ string Window::GetString(const string &base, size_t length, size_t width, bool e
 		{
 			case ERR:
 			case KEY_UP:
-				if (itsHistory && history_offset > 0)
+				if (itsHistory && !encrypted && history_offset > 0)
 				{
 					do
 						tmp = &(*itsHistory)[--history_offset];
@@ -478,7 +478,7 @@ string Window::GetString(const string &base, size_t length, size_t width, bool e
 				}
 				break;
 			case KEY_DOWN:
-				if (itsHistory && itsHistory->size() > 0)
+				if (itsHistory && !encrypted && itsHistory->size() > 0)
 				{
 					if (history_offset < itsHistory->size()-1)
 					{
@@ -593,7 +593,7 @@ string Window::GetString(const string &base, size_t length, size_t width, bool e
 	while (input != 10);
 	curs_set(0);
 	
-	if (itsHistory)
+	if (itsHistory && !encrypted)
 	{
 		size_t old_size = itsHistory->size();
 		if (!tmp->empty() && (itsHistory->empty() || itsHistory->back() != *tmp))
