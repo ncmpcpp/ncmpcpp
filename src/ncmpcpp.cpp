@@ -379,6 +379,8 @@ int main(int argc, char *argv[])
 			myScreen->Refresh();
 			RedrawStatusbar = 1;
 			StatusChanges changes;
+			if (Mpd->GetState() < psPlay)
+				changes.PlayerState = 1;
 			changes.StatusFlags = 1; // force status update
 			NcmpcppStatusChanged(Mpd, changes, NULL);
 		}
