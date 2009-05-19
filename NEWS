@@ -1,3 +1,12 @@
+ncmpcpp-0.3.4
+
+ + new feature: search in help, lyrics and info screen
+ + new feature: two columns view in media library
+ + new feature: input box history
+ + make displaying hidden files in local browser optional
+ + bugfixes
+
+
 ncmpcpp-0.3.3
 
 + new feature: cyclic scrolling
