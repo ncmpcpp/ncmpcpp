@@ -533,6 +533,11 @@ void ReadConfiguration(ncmpcpp_config &conf)
 				if (!v.empty())
 					conf.system_encoding = v + "//TRANSLIT";
 			}
+			else if (cl.find("execute_on_song_change") != string::npos)
+			{
+				if (!v.empty())
+					conf.execute_on_song_change = v;
+			}
 			else if (cl.find("browser_playlist_prefix") != string::npos)
 			{
 				if (!v.empty())

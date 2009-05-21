@@ -119,6 +119,7 @@ struct ncmpcpp_config
 	std::string tag_editor_album_format;
 	std::string external_editor;
 	std::string system_encoding;
+	std::string execute_on_song_change;
 	
 	std::string pattern;
 	

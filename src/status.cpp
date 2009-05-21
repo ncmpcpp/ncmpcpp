@@ -343,6 +343,8 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 		if (myPlaylist->isPlaying())
 		{
 			np = Mpd->GetCurrentSong();
+			if (!Config.execute_on_song_change.empty())
+				system(np.toString(Config.execute_on_song_change).c_str());
 			if (Mpd->GetState() > psStop)
 				WindowTitle(utf_to_locale_cpy(np.toString(Config.song_window_title_format)));
 			if (Config.autocenter_mode && !myPlaylist->Main()->isFiltered())
