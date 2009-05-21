@@ -196,7 +196,7 @@ void SearchEngine::EnterPressed()
 				size_t found = w->Size()-SearchEngine::StaticOptions;
 				found += 3; // don't count options inserted below
 				w->InsertSeparator(ResetButton+1);
-				w->InsertOption(ResetButton+2, std::make_pair((Buffer *)0, (Song *)0), 1, 1);
+				w->InsertOption(ResetButton+2, std::make_pair(static_cast<Buffer *>(0), static_cast<Song *>(0)), 1, 1);
 				w->at(ResetButton+2).first = new Buffer();
 				*w->at(ResetButton+2).first << Config.color1 << "Search results: " << Config.color2 << "Found " << found  << (found > 1 ? " songs" : " song") << clDefault;
 				w->InsertSeparator(ResetButton+3);
@@ -599,7 +599,7 @@ void SearchEngine::Search()
 		if (found && any_found)
 		{
 			Song *ss = Config.search_in_db ? *it : new Song(**it);
-			w->AddOption(std::make_pair((Buffer *)0, ss));
+			w->AddOption(std::make_pair(static_cast<Buffer *>(0), ss));
 			list[it-list.begin()] = 0;
 		}
 		found = 1;

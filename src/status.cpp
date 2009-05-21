@@ -408,7 +408,7 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 			}
 			if (!block_progressbar_update)
 			{
-				double progressbar_size = (double)elapsed/(np.GetTotalLength());
+				double progressbar_size = elapsed/double(np.GetTotalLength());
 				int howlong = wFooter->GetWidth()*progressbar_size;
 				wFooter->SetColor(Config.progressbar_color);
 				mvwhline(wFooter->Raw(), 0, 0, 0, wFooter->GetWidth());

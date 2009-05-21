@@ -62,7 +62,7 @@ namespace
 		
 		iconv_t cd = iconv_open(to, from);
 		
-		if (cd == (iconv_t)-1)
+		if (cd == iconv_t(-1))
 			return;
 		
 		if (!len)
@@ -72,7 +72,7 @@ namespace
 		char *outstart = outbuf;
 		char *instart = inbuf;
 		
-		if (iconv(cd, const_cast<ICONV_CONST char **>(&inbuf), &len, &outbuf, &buflen) == (size_t)-1)
+		if (iconv(cd, const_cast<ICONV_CONST char **>(&inbuf), &len, &outbuf, &buflen) == size_t(-1))
 		{
 			delete [] outstart;
 			iconv_close(cd);

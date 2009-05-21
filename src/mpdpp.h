@@ -115,7 +115,7 @@ namespace MPD
 			void Shuffle() const;
 			void ClearPlaylist() const;
 			
-			PlayerState GetState() const { return isConnected && itsCurrentStatus ? (PlayerState)itsCurrentStatus->state : psUnknown; }
+			PlayerState GetState() const { return isConnected && itsCurrentStatus ? PlayerState(itsCurrentStatus->state) : psUnknown; }
 			bool GetRepeat() const { return isConnected && itsCurrentStatus ? itsCurrentStatus->repeat : 0; }
 			bool GetRandom() const { return isConnected && itsCurrentStatus ? itsCurrentStatus->random : 0; }
 			bool GetSingle() const { return isConnected && itsCurrentStatus ? itsCurrentStatus->single : 0; }

@@ -223,17 +223,17 @@ int main(int argc, char *argv[])
 			else
 			{
 				*wHeader << XY(0, 0)
-				<< fmtBold << (char)Key.Help[0] << fmtBoldEnd << ":Help  "
-				<< fmtBold << (char)Key.Playlist[0] << fmtBoldEnd << ":Playlist  "
-				<< fmtBold << (char)Key.Browser[0] << fmtBoldEnd << ":Browse  "
-				<< fmtBold << (char)Key.SearchEngine[0] << fmtBoldEnd << ":Search  "
-				<< fmtBold << (char)Key.MediaLibrary[0] << fmtBoldEnd << ":Library  "
-				<< fmtBold << (char)Key.PlaylistEditor[0] << fmtBoldEnd << ":Playlist editor";
+				<< fmtBold << char(Key.Help[0]) << fmtBoldEnd << ":Help  "
+				<< fmtBold << char(Key.Playlist[0]) << fmtBoldEnd << ":Playlist  "
+				<< fmtBold << char(Key.Browser[0]) << fmtBoldEnd << ":Browse  "
+				<< fmtBold << char(Key.SearchEngine[0]) << fmtBoldEnd << ":Search  "
+				<< fmtBold << char(Key.MediaLibrary[0]) << fmtBoldEnd << ":Library  "
+				<< fmtBold << char(Key.PlaylistEditor[0]) << fmtBoldEnd << ":Playlist editor";
 #				ifdef HAVE_TAGLIB_H
-				*wHeader << "  " << fmtBold << (char)Key.TagEditor[0] << fmtBoldEnd << ":Tag editor";
+				*wHeader << "  " << fmtBold << char(Key.TagEditor[0]) << fmtBoldEnd << ":Tag editor";
 #				endif // HAVE_TAGLIB_H
 #				ifdef ENABLE_CLOCK
-				*wHeader << "  " << fmtBold << (char)Key.Clock[0] << fmtBoldEnd << ":Clock";
+				*wHeader << "  " << fmtBold << char(Key.Clock[0]) << fmtBoldEnd << ":Clock";
 #				endif // ENABLE_CLOCK
 			}
 			
@@ -985,7 +985,7 @@ int main(int argc, char *argv[])
 				wFooter->Bold(1);
 				string tracklength = "[" + Song::ShowTime(songpos) + "/" + s->GetLength() + "]";
 				*wFooter << XY(wFooter->GetWidth()-tracklength.length(), 1) << tracklength;
-				double progressbar_size = (double)songpos/(s->GetTotalLength());
+				double progressbar_size = songpos/double(s->GetTotalLength());
 				int howlong = wFooter->GetWidth()*progressbar_size;
 				
 				mvwhline(wFooter->Raw(), 0, 0, 0, wFooter->GetWidth());

@@ -416,7 +416,7 @@ void Browser::GetDirectory(string dir, string subdir)
 	{
 		Item parent;
 		size_t slash = dir.rfind("/");
-		parent.song = (Song *) 1; // in that way we assume that's really parent dir
+		parent.song = reinterpret_cast<Song *>(1); // in that way we assume that's really parent dir
 		parent.name = slash != string::npos ? dir.substr(0, slash) : "/";
 		parent.type = itDirectory;
 		utf_to_locale(parent.name);

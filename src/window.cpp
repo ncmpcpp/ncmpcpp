@@ -558,7 +558,7 @@ string Window::GetString(const string &base, size_t length, size_t width, bool e
 					break;
 				
 				tmp_in += input;
-				if ((int)mbrtowc(&wc_in, tmp_in.c_str(), MB_CUR_MAX, 0) < 0)
+				if (int(mbrtowc(&wc_in, tmp_in.c_str(), MB_CUR_MAX, 0)) < 0)
 					break;
 				
 				if (wcwidth(wc_in) > 1)

@@ -75,7 +75,7 @@ namespace
 	
 	Border IntoBorder(const string &color)
 	{
-		return (Border) IntoColor(color);
+		return Border(IntoColor(color));
 	}
 }
 
