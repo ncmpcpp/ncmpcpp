@@ -288,12 +288,20 @@ string GetLineValue(string &line, char a, char b, bool once)
 	size_t i;
 	for (i = line.find(a); i != string::npos && pos[1] < 0; i = line.find(b, i))
 	{
+		if (i && line[i-1] == '\\')
+		{
+			i++;
+			continue;
+		}
 		if (once)
 			line[i] = 0;
 		pos[pos[0] >= 0] = i++;
 	}
 	pos[0]++;
-	return pos[0] >= 0 && pos[1] >= 0 ? line.substr(pos[0], pos[1]-pos[0]) : "";
+	string result = pos[0] >= 0 && pos[1] >= 0 ? line.substr(pos[0], pos[1]-pos[0]) : "";
+	for (i = result.find("\\\""); i != string::npos; i = result.find("\\\""))
+		result.replace(i, 2, "\"");
+	return result;
 }
 
 void RemoveTheWord(string &s)
