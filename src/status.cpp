@@ -51,19 +51,17 @@ namespace
 	bool block_statusbar_update = 0;
 	bool block_progressbar_update = 0;
 	bool allow_statusbar_unlock = 1;
-	
-#	ifndef USE_PDCURSES
-	void WindowTitle(const string &status)
-	{
-		static const string term_type = getenv("TERM") ? getenv("TERM") : "";
-		
-		if (term_type != "linux" && Config.set_window_title)
-			std::cout << "\033]0;" << status << "\7";
-	}
-#	else
-#	 define WindowTitle(x);
-#	endif // USE_PDCURSES
 }
+
+#ifndef USE_PDCURSES
+void WindowTitle(const string &status)
+{
+	static const string term_type = getenv("TERM") ? getenv("TERM") : "";
+	
+	if (term_type != "linux" && Config.set_window_title)
+		std::cout << "\033]0;" << status << "\7";
+}
+#endif // !USE_PDCURSES
 
 void StatusbarGetStringHelper(const std::wstring &)
 {

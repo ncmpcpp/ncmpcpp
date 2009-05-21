@@ -24,6 +24,12 @@
 #include "mpdpp.h"
 #include "ncmpcpp.h"
 
+#ifndef USE_PDCURSES
+ void WindowTitle(const std::string &);
+#else
+# define WindowTitle(x);
+#endif // USE_PDCURSES
+
 void LockProgressbar();
 void UnlockProgressbar();
 

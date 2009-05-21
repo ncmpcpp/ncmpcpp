@@ -1782,6 +1782,7 @@ int main(int argc, char *argv[])
 	errorlog.close();
 	Mpd->Disconnect();
 	DestroyScreen();
+	WindowTitle("");
 	return 0;
 }
 
