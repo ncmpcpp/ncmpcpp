@@ -219,7 +219,7 @@ void Help::GetKeybindings()
 		*w << DisplayKeys(Key.SwitchTagTypeList)<< "Browse MPD database/local filesystem\n";
 	*w << DisplayKeys(Key.GoToNowPlaying)		<< "Locate currently playing song\n";
 	*w << DisplayKeys(Key.GoToParentDir)		<< "Go to parent directory\n";
-	*w << DisplayKeys(Key.Delete)			<< "Delete playlist\n\n\n";
+	*w << DisplayKeys(Key.Delete)			<< "Delete playlist/file/directory\n\n\n";
 	
 	
 	*w << "   " << fmtBold << "Keys - Search engine\n -----------------------------------------\n" << fmtBoldEnd;
