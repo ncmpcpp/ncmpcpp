@@ -490,7 +490,7 @@ int main(int argc, char *argv[])
 			{
 				LockStatusbar();
 				string name = myScreen == myBrowser ? myBrowser->Main()->Current().name : myPlaylistEditor->Playlists->Current();
-				Statusbar() << "Delete playlist " << name << " ? [y/n] ";
+				Statusbar() << "Delete playlist \"" << name << "\" ? [y/n] ";
 				curs_set(1);
 				int in = 0;
 				do
@@ -502,7 +502,7 @@ int main(int argc, char *argv[])
 				if (in == 'y')
 				{
 					Mpd->DeletePlaylist(locale_to_utf_cpy(name));
-					ShowMessage("Playlist %s deleted!", name.c_str());
+					ShowMessage("Playlist \"%s\" deleted!", name.c_str());
 					if (!Config.local_browser)
 						myBrowser->GetDirectory("/");
 				}
@@ -528,7 +528,7 @@ int main(int argc, char *argv[])
 				}
 				
 				LockStatusbar();
-				Statusbar() << "Delete " << (item.type == itSong ? "file" : "directory") << ' ' << (item.type == itSong ? item.song->GetName() : item.name) << " ? [y/n] ";
+				Statusbar() << "Delete " << (item.type == itSong ? "file" : "directory") << " \"" << (item.type == itSong ? item.song->GetName() : item.name) << "\" ? [y/n] ";
 				curs_set(1);
 				int in = 0;
 				do
