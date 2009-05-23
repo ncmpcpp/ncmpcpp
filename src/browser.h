@@ -52,6 +52,7 @@ class Browser : public Screen< Menu<MPD::Item> >
 		
 		void LocateSong(const MPD::Song &);
 		void GetDirectory(std::string, std::string = "/");
+		void ClearDirectory(const std::string &) const;
 		void ChangeBrowseMode();
 		void UpdateItemList();
 	

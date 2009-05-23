@@ -18,6 +18,7 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
+#include <cerrno>
 #include <clocale>
 #include <csignal>
 
@@ -513,7 +514,56 @@ int main(int argc, char *argv[])
 			}
 			else if (myScreen == myBrowser && !myBrowser->Main()->Empty() && myBrowser->Main()->Current().type != itPlaylist)
 			{
-				// delete song/dir implementation here
+				MPD::Item &item = myBrowser->Main()->Current();
+				
+				if (item.type == itSong && !Config.allow_physical_files_deletion)
+				{
+					ShowMessage("Deleting files is disabled by default, see man page for more details");
+					continue;
+				}
+				if (item.type == itDirectory && (item.song || !Config.allow_physical_directories_deletion)) // [..]
+				{
+					ShowMessage("Deleting directories is disabled by default, see man page for more details");
+					continue;
+				}
+				
+				LockStatusbar();
+				Statusbar() << "Delete " << (item.type == itSong ? "file" : "directory") << ' ' << (item.type == itSong ? item.song->GetName() : item.name) << " ? [y/n] ";
+				curs_set(1);
+				int in = 0;
+				do
+				{
+					TraceMpdStatus();
+					wFooter->ReadKey(in);
+				}
+				while (in != 'y' && in != 'n');
+				if (in == 'y')
+				{
+					ShowMessage("Deleting...");
+					
+					string path;
+					if (!Config.local_browser)
+						path = Config.mpd_music_dir;
+					path += item.type == itSong ? item.song->GetFile() : item.name;
+					
+					if (item.type == itDirectory)
+						myBrowser->ClearDirectory(path);
+					
+					if (remove(path.c_str()) == 0)
+					{
+						ShowMessage("%s has been deleted!", item.type == itSong ? "File" : "Directory");
+						if (!Config.local_browser)
+							Mpd->UpdateDirectory(myBrowser->CurrentDir());
+						else
+							myBrowser->GetDirectory(myBrowser->CurrentDir());
+					}
+					else
+						ShowMessage("Deletion failed: %s", strerror(errno));
+				}
+				else
+					ShowMessage("Aborted!");
+				curs_set(0);
+				UnlockStatusbar();
 			}
 			else if (myScreen->ActiveWindow() == myPlaylistEditor->Content && !myPlaylistEditor->Content->Empty())
 			{

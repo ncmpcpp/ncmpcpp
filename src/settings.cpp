@@ -278,6 +278,8 @@ void DefaultConfiguration(ncmpcpp_config &conf)
 	conf.block_search_constraints_change = true;
 	conf.use_console_editor = false;
 	conf.use_cyclic_scrolling = false;
+	conf.allow_physical_files_deletion = false;
+	conf.allow_physical_directories_deletion = false;
 	conf.set_window_title = true;
 	conf.mpd_port = 6600;
 	conf.mpd_connection_timeout = 15;
@@ -668,6 +670,14 @@ void ReadConfiguration(ncmpcpp_config &conf)
 			else if (cl.find("block_search_constraints_change_if_items_found") != string::npos)
 			{
 				conf.block_search_constraints_change = v == "yes";
+			}
+			else if (cl.find("allow_physical_files_deletion") != string::npos)
+			{
+				conf.allow_physical_files_deletion = v == "yes";
+			}
+			else if (cl.find("allow_physical_directories_deletion") != string::npos)
+			{
+				conf.allow_physical_directories_deletion = v == "yes";
 			}
 			else if (cl.find("enable_window_title") != string::npos)
 			{

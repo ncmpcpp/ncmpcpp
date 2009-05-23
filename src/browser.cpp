@@ -465,6 +465,41 @@ void Browser::GetDirectory(string dir, string subdir)
 		w->Highlight(highlightme);
 }
 
+void Browser::ClearDirectory(const std::string &path) const
+{
+	DIR *dir = opendir(path.c_str());
+	if (!dir)
+		return;
+	
+	dirent *file;
+	struct stat file_stat;
+	string full_path;
+	
+	// omit . and ..
+	for (int i = 0; i < 2; i++)
+	{
+		file = readdir(dir);
+		if (!file)
+		{
+			closedir(dir);
+			return;
+		}
+	}
+	
+	while ((file = readdir(dir)))
+	{
+		full_path = path;
+		if (*full_path.rbegin() != '/')
+			full_path += '/';
+		full_path += file->d_name;
+		lstat(full_path.c_str(), &file_stat);
+		if (S_ISDIR(file_stat.st_mode))
+			ClearDirectory(full_path);
+		remove(full_path.c_str());
+	}
+	closedir(dir);
+}
+
 void Browser::ChangeBrowseMode()
 {
 	if (Mpd->GetHostname()[0] != '/')

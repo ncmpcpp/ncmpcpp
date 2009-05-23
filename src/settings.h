@@ -170,6 +170,8 @@ struct ncmpcpp_config
 	bool block_search_constraints_change;
 	bool use_console_editor;
 	bool use_cyclic_scrolling;
+	bool allow_physical_files_deletion;
+	bool allow_physical_directories_deletion;
 	
 	int mpd_port;
 	int mpd_connection_timeout;
