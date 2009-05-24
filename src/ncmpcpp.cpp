@@ -522,11 +522,13 @@ int main(int argc, char *argv[])
 					ShowMessage("Deleting files is disabled by default, see man page for more details");
 					continue;
 				}
-				if (item.type == itDirectory && (item.song || !Config.allow_physical_directories_deletion)) // [..]
+				if (item.type == itDirectory && !Config.allow_physical_directories_deletion)
 				{
 					ShowMessage("Deleting directories is disabled by default, see man page for more details");
 					continue;
 				}
+				if (item.type == itDirectory && item.song) // parent dir
+					continue;
 				
 				LockStatusbar();
 				Statusbar() << "Delete " << (item.type == itSong ? "file" : "directory") << " \"" << (item.type == itSong ? item.song->GetName() : item.name) << "\" ? [y/n] ";
