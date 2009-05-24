@@ -33,6 +33,11 @@ int StrToInt(const std::string &str)
 	return atoi(str.c_str());
 }
 
+long StrToLong(const std::string &str)
+{
+	return atol(str.c_str());
+}
+
 std::string IntoStr(int l)
 {
 	std::ostringstream ss;

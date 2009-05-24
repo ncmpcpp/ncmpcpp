@@ -191,6 +191,7 @@ void Help::GetKeybindings()
 	
 	*w << "   " << fmtBold << "Keys - Playlist screen\n -----------------------------------------\n" << fmtBoldEnd;
 	*w << DisplayKeys(Key.Enter)			<< "Play\n";
+	*w << DisplayKeys(Key.SwitchTagTypeList)	<< "Add random songs to playlist\n";
 	*w << DisplayKeys(Key.Delete)			<< "Delete item/selected items from playlist\n";
 	*w << DisplayKeys(Key.Clear)			<< "Clear playlist\n";
 	*w << DisplayKeys(Key.Crop)			<< "Clear playlist but hold currently playing/selected items\n";

@@ -29,6 +29,7 @@
 void ToLower(std::string &);
 
 int StrToInt(const std::string &);
+long StrToLong(const std::string &);
 
 std::string IntoStr(int);
 

@@ -18,6 +18,9 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
+#include <cstdlib>
+#include <algorithm>
+
 #include "charset.h"
 #include "mpdpp.h"
 
@@ -558,6 +561,40 @@ int Connection::AddSong(const string &path)
 int Connection::AddSong(const Song &s)
 {
 	return !s.Empty() ? (AddSong((!s.IsFromDB() ? "file://" : "") + (s.Localized() ? locale_to_utf_cpy(s.GetFile()) : s.GetFile()))) : -1;
+}
+
+bool Connection::AddRandomSongs(size_t number)
+{
+	if (!isConnected && !number)
+		return false;
+	
+	TagList files;
+	
+	mpd_sendListallCommand(itsConnection, "/");
+	while (char *file = mpd_getNextTag(itsConnection, MPD_TAG_ITEM_FILENAME))
+	{
+		files.push_back(file);
+		delete [] file;
+	}
+	mpd_finishCommand(itsConnection);
+	
+	if (number > files.size())
+	{
+		if (itsErrorHandler)
+			itsErrorHandler(this, 0, "Requested number of random songs is bigger than size of your library!", itsErrorHandlerUserdata);
+		return false;
+	}
+	else
+	{
+		srand(time(0));
+		std::random_shuffle(files.begin(), files.end());
+		StartCommandsList();
+		TagList::const_iterator it = files.begin()+rand()%(files.size()-number);
+		for (size_t i = 0; i < number && it != files.end(); i++)
+			AddSong(*it++);
+		CommitCommandsList();
+	}
+	return true;
 }
 
 void Connection::Delete(int pos) const

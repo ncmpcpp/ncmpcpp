@@ -309,6 +309,10 @@ int main(int argc, char *argv[])
 		{
 			myScreen->Scroll(wUp, Key.Up);
 		}
+		else if (input == 'v')
+		{
+			Mpd->AddRandomSongs(10);
+		}
 		else if (Keypressed(input, Key.Down))
 		{
 			myScreen->Scroll(wDown, Key.Down);
@@ -1716,7 +1720,16 @@ int main(int argc, char *argv[])
 		}
 		else if (Keypressed(input, Key.SwitchTagTypeList))
 		{
-			if (myScreen == myBrowser)
+			if (myScreen == myPlaylist)
+			{
+				LockStatusbar();
+				Statusbar() << "Number of random songs: ";
+				size_t number = StrToLong(wFooter->GetString());
+				UnlockStatusbar();
+				if (number && Mpd->AddRandomSongs(number))
+					ShowMessage("%lu random song%s added to playlist!", number, number == 1 ? "" : "s");
+			}
+			else if (myScreen == myBrowser)
 			{
 				myBrowser->ChangeBrowseMode();
 			}
