@@ -21,6 +21,7 @@
 #include <cerrno>
 #include <clocale>
 #include <csignal>
+#include <cstring>
 
 #include <iostream>
 #include <fstream>
