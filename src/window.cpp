@@ -468,6 +468,8 @@ string Window::GetString(const string &base, size_t length, size_t width, bool e
 		switch (input)
 		{
 			case ERR:
+			case KEY_MOUSE:
+				break;
 			case KEY_UP:
 				if (itsHistory && !encrypted && history_offset > 0)
 				{
@@ -632,6 +634,11 @@ void Window::GotoXY(int x, int y)
 int Window::Y() const
 {
 	return itsY;
+}
+
+bool Window::hasCoords(int &x, int &y)
+{
+	return wmouse_trafo(itsWindow, &y, &x, 0);
 }
 
 void Window::Scrollable(bool scrollable) const

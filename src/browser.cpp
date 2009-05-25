@@ -259,6 +259,47 @@ void Browser::SpacePressed()
 	w->Scroll(wDown);
 }
 
+void Browser::MouseButtonPressed(MEVENT me)
+{
+	if (w->Empty() || !w->hasCoords(me.x, me.y) || size_t(me.y) >= w->Size())
+		return;
+	if (me.bstate & BUTTON1_PRESSED || me.bstate & BUTTON3_PRESSED)
+	{
+		w->Goto(me.y);
+		switch (w->Current().type)
+		{
+			case itDirectory:
+				if (me.bstate & BUTTON1_PRESSED)
+				{
+					GetDirectory(w->Current().name);
+					RedrawHeader = 1;
+				}
+				else
+				{
+					size_t pos = w->GetPosition();
+					SpacePressed();
+					if (pos < w->Size()-1)
+						w->Scroll(wUp);
+				}
+				break;
+			case itPlaylist:
+			case itSong:
+				if (me.bstate & BUTTON1_PRESSED)
+				{
+					size_t pos = w->GetPosition();
+					SpacePressed();
+					if (pos < w->Size()-1)
+						w->Scroll(wUp);
+				}
+				else
+					EnterPressed();
+				break;
+		}
+	}
+	else
+		Screen< Menu<MPD::Item> >::MouseButtonPressed(me);
+}
+
 MPD::Song *Browser::CurrentSong()
 {
 	return !w->Empty() && w->Current().type == itSong ? w->Current().song : 0;

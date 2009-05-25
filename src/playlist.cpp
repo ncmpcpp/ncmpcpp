@@ -133,6 +133,20 @@ void Playlist::SpacePressed()
 	w->Scroll(wDown);
 }
 
+void Playlist::MouseButtonPressed(MEVENT me)
+{
+	if (w->Empty() || !w->hasCoords(me.x, me.y) || size_t(me.y) >= w->Size())
+		return;
+	if (me.bstate & BUTTON1_PRESSED)
+	{
+		w->Goto(me.y);
+		Mpd->Play(w->Current().GetPosition());
+		UpdateStatusImmediately = 1;
+	}
+	else
+		Screen< Menu<MPD::Song> >::MouseButtonPressed(me);
+}
+
 MPD::Song *Playlist::CurrentSong()
 {
 	return !w->Empty() ? &w->Current() : 0;

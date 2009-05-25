@@ -172,6 +172,7 @@ struct ncmpcpp_config
 	bool use_cyclic_scrolling;
 	bool allow_physical_files_deletion;
 	bool allow_physical_directories_deletion;
+	bool mouse_support;
 	
 	int mpd_port;
 	int mpd_connection_timeout;

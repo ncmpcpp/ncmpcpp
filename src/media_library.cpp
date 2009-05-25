@@ -327,6 +327,65 @@ void MediaLibrary::SpacePressed()
 	AddToPlaylist(0);
 }
 
+void MediaLibrary::MouseButtonPressed(MEVENT me)
+{
+	if (!Artists->Empty() && Artists->hasCoords(me.x, me.y))
+	{
+		if (w != Artists)
+		{
+			PrevColumn();
+			PrevColumn();
+		}
+		if (size_t(me.y) < Artists->Size() && (me.bstate & BUTTON1_PRESSED || me.bstate & BUTTON3_PRESSED))
+		{
+			Artists->Goto(me.y);
+			if (me.bstate & BUTTON3_PRESSED)
+				EnterPressed();
+		}
+		else
+			Screen<Window>::MouseButtonPressed(me);
+		Albums->Clear(0);
+		Songs->Clear(0);
+	}
+	else if (!Albums->Empty() && Albums->hasCoords(me.x, me.y))
+	{
+		if (w != Albums)
+			w == Artists ? NextColumn() : PrevColumn();
+		if (size_t(me.y) < Albums->Size() && (me.bstate & BUTTON1_PRESSED || me.bstate & BUTTON3_PRESSED))
+		{
+			Albums->Goto(me.y);
+			if (me.bstate & BUTTON3_PRESSED)
+				EnterPressed();
+		}
+		else
+			Screen<Window>::MouseButtonPressed(me);
+		Songs->Clear(0);
+	}
+	else if (!Songs->Empty() && Songs->hasCoords(me.x, me.y))
+	{
+		if (w != Songs)
+		{
+			NextColumn();
+			NextColumn();
+		}
+		if (size_t(me.y) < Songs->Size() && (me.bstate & BUTTON1_PRESSED || me.bstate & BUTTON3_PRESSED))
+		{
+			Songs->Goto(me.y);
+			if (me.bstate & BUTTON1_PRESSED)
+			{
+				size_t pos = Songs->GetPosition();
+				SpacePressed();
+				if (pos < Songs->Size()-1)
+					Songs->Scroll(wUp);
+			}
+			else
+				EnterPressed();
+		}
+		else
+			Screen<Window>::MouseButtonPressed(me);
+	}
+}
+
 MPD::Song *MediaLibrary::CurrentSong()
 {
 	return w == Songs && !Songs->Empty() ? &Songs->Current() : 0;

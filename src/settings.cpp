@@ -280,6 +280,7 @@ void DefaultConfiguration(ncmpcpp_config &conf)
 	conf.use_cyclic_scrolling = false;
 	conf.allow_physical_files_deletion = false;
 	conf.allow_physical_directories_deletion = false;
+	conf.mouse_support = true;
 	conf.set_window_title = true;
 	conf.mpd_port = 6600;
 	conf.mpd_connection_timeout = 15;
@@ -678,6 +679,10 @@ void ReadConfiguration(ncmpcpp_config &conf)
 			else if (cl.find("allow_physical_directories_deletion") != string::npos)
 			{
 				conf.allow_physical_directories_deletion = v == "yes";
+			}
+			else if (cl.find("mouse_support") != string::npos)
+			{
+				conf.mouse_support = v == "yes";
 			}
 			else if (cl.find("enable_window_title") != string::npos)
 			{

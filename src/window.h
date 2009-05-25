@@ -107,6 +107,7 @@ namespace NCurses
 			void GotoXY(int, int);
 			int X() const;
 			int Y() const;
+			bool hasCoords(int &, int &);
 			
 			void SetGetStringHelper(GetStringHelper helper) { itsGetStringHelper = helper; }
 			void SetColor(Color, Color = clDefault);

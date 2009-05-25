@@ -216,6 +216,21 @@ void TinyTagEditor::EnterPressed()
 	UnlockStatusbar();
 }
 
+void TinyTagEditor::MouseButtonPressed(MEVENT me)
+{
+	if (w->Empty() || !w->hasCoords(me.x, me.y) || size_t(me.y) >= w->Size())
+		return;
+	if (me.bstate & BUTTON1_PRESSED)
+	{
+		if (!w->Goto(me.y))
+			return;
+		w->Refresh();
+		EnterPressed();
+	}
+	else
+		Screen< Menu<Buffer> >::MouseButtonPressed(me);
+}
+
 bool TinyTagEditor::SetEdited(MPD::Song *s)
 {
 	if (!s)
@@ -726,6 +741,62 @@ void TagEditor::SpacePressed()
 	ShowMessage("Switched to %s view", Config.albums_in_tag_editor ? "albums" : "directories");
 	LeftColumn->Display();
 	Tags->Clear(0);
+}
+
+void TagEditor::MouseButtonPressed(MEVENT me)
+{
+	if (!LeftColumn->Empty() && LeftColumn->hasCoords(me.x, me.y))
+	{
+		if (w != LeftColumn)
+		{
+			PrevColumn();
+			PrevColumn();
+		}
+		if (size_t(me.y) < LeftColumn->Size() && (me.bstate & BUTTON1_PRESSED || me.bstate & BUTTON3_PRESSED))
+		{
+			LeftColumn->Goto(me.y);
+			if (me.bstate & BUTTON1_PRESSED)
+				EnterPressed();
+			else
+				SpacePressed();
+		}
+		else
+			Screen<Window>::MouseButtonPressed(me);
+		Tags->Clear(0);
+	}
+	else if (!TagTypes->Empty() && TagTypes->hasCoords(me.x, me.y))
+	{
+		if (w != TagTypes)
+			w == LeftColumn ? NextColumn() : PrevColumn();
+		if (size_t(me.y) < TagTypes->Size() && (me.bstate & BUTTON1_PRESSED || me.bstate & BUTTON3_PRESSED))
+		{
+			if (!TagTypes->Goto(me.y))
+				return;
+			TagTypes->Refresh();
+			Tags->Refresh();
+			if (me.bstate & BUTTON3_PRESSED)
+				EnterPressed();
+		}
+		else
+			Screen<Window>::MouseButtonPressed(me);
+	}
+	else if (!Tags->Empty() && Tags->hasCoords(me.x, me.y))
+	{
+		if (w != Tags)
+		{
+			NextColumn();
+			NextColumn();
+		}
+		if (size_t(me.y) < Tags->Size() && (me.bstate & BUTTON1_PRESSED || me.bstate & BUTTON3_PRESSED))
+		{
+			Tags->Goto(me.y);
+			Tags->Refresh();
+			if (me.bstate & BUTTON3_PRESSED)
+				EnterPressed();
+		}
+		else
+			Screen<Window>::MouseButtonPressed(me);
+	}
 }
 
 MPD::Song *TagEditor::CurrentSong()

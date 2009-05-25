@@ -295,6 +295,34 @@ void SearchEngine::SpacePressed()
 	w->Scroll(wDown);
 }
 
+void SearchEngine::MouseButtonPressed(MEVENT me)
+{
+	if (w->Empty() || !w->hasCoords(me.x, me.y) || size_t(me.y) >= w->Size())
+		return;
+	if (me.bstate & BUTTON1_PRESSED || me.bstate & BUTTON3_PRESSED)
+	{
+		if (!w->Goto(me.y))
+			return;
+		w->Refresh();
+		if ((me.bstate & BUTTON3_PRESSED || w->GetPosition() > 10) && w->GetPosition() < StaticOptions)
+			EnterPressed();
+		else if (w->GetPosition() >= StaticOptions)
+		{
+			if (me.bstate & BUTTON1_PRESSED)
+			{
+				size_t pos = w->GetPosition();
+				SpacePressed();
+				if (pos < w->Size()-1)
+					w->Scroll(wUp);
+			}
+			else
+				EnterPressed();
+		}
+	}
+	else
+		Screen< Menu< std::pair<Buffer *, MPD::Song *> > >::MouseButtonPressed(me);
+}
+
 MPD::Song *SearchEngine::CurrentSong()
 {
 	return !w->Empty() ? w->Current().second : 0;

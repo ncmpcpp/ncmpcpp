@@ -172,6 +172,8 @@
 #
 #block_search_constraints_change_if_items_found = "yes"
 #
+#mouse_support = "yes"
+#
 #enable_window_title = "yes"
 #
 ##

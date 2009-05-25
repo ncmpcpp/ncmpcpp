@@ -48,6 +48,7 @@ class MediaLibrary : public Screen<Window>
 		
 		virtual void EnterPressed() { AddToPlaylist(1); }
 		virtual void SpacePressed();
+		virtual void MouseButtonPressed(MEVENT);
 		
 		virtual MPD::Song *CurrentSong();
 		

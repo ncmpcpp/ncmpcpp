@@ -49,6 +49,7 @@ class BasicScreen
 		
 		virtual void EnterPressed() = 0;
 		virtual void SpacePressed() = 0;
+		virtual void MouseButtonPressed(MEVENT) { }
 		
 		virtual MPD::Song *CurrentSong() { return 0; }
 		
@@ -76,7 +77,9 @@ template <typename WindowType> class Screen : public BasicScreen
 		virtual void Refresh();
 		virtual void RefreshWindow();
 		virtual void ReadKey(int &input);
-		virtual void Scroll(Where where, const int *);
+		virtual void Scroll(Where where, const int * = 0);
+		
+		virtual void MouseButtonPressed(MEVENT me);
 		
 	protected:
 		WindowType *w;
@@ -124,6 +127,32 @@ template <typename WindowType> void Screen<WindowType>::Scroll(Where where, cons
 	}
 	else
 		w->Scroll(where);
+}
+
+template <typename WindowType> void Screen<WindowType>::MouseButtonPressed(MEVENT me)
+{
+	if (me.bstate & BUTTON2_PRESSED)
+	{
+		Scroll(wPageDown);
+	}
+	else if (me.bstate & BUTTON4_PRESSED)
+	{
+		Scroll(wPageUp);
+	}
+}
+
+template <> inline void Screen<Scrollpad>::MouseButtonPressed(MEVENT me)
+{
+	if (me.bstate & BUTTON2_PRESSED)
+	{
+		for (size_t i = 0; i < 2; i++)
+			Scroll(wDown);
+	}
+	else if (me.bstate & BUTTON4_PRESSED)
+	{
+		for (size_t i = 0; i < 2; i++)
+			Scroll(wUp);
+	}
 }
 
 #endif

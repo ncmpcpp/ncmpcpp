@@ -118,6 +118,9 @@ namespace NCurses
 			void IntoSeparator(size_t pos);
 			void Swap(size_t one, size_t two);
 			void Move(size_t from, size_t to);
+			bool Goto(size_t y);
+			
+			size_t GetPosition() const { return itsHighlight; }
 			
 			bool isBold(int id = -1);
 			void BoldOption(int index, bool bold);
@@ -356,6 +359,19 @@ template <typename T> void NCurses::Menu<T>::Move(size_t from, size_t to)
 		for (size_t i = from; i < to; i++)
 			std::swap(itsOptions.at(i), itsOptions.at(i+1));
 	}
+}
+
+template <typename T> bool NCurses::Menu<T>::Goto(size_t y)
+{
+	if (!itsOptionsPtr->at(itsBeginning+y) || itsOptionsPtr->at(itsBeginning+y)->isStatic)
+		return false;
+	size_t cur_pos = itsHighlight-itsBeginning;
+	while (itsHighlight-itsBeginning != int(y) && (y < cur_pos || size_t(itsHighlight) < itsOptions.size()-1))
+	{
+		Scroll(y < cur_pos ? wUp : wDown);
+		y < cur_pos ? cur_pos-- : cur_pos++;
+	}
+	return true;
 }
 
 template <typename T> void NCurses::Menu<T>::Refresh()

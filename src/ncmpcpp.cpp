@@ -190,6 +190,13 @@ int main(int argc, char *argv[])
 	
 	gettimeofday(&now, 0);
 	
+	MEVENT mouse_event;
+	if (Config.mouse_support)
+	{
+		mousemask(ALL_MOUSE_EVENTS, 0);
+		mouseinterval(0);
+	}
+	
 	while (!main_exit)
 	{
 		if (!Mpd->Connected())
@@ -332,6 +339,45 @@ int main(int argc, char *argv[])
 		else if (Keypressed(input, Key.End))
 		{
 			myScreen->Scroll(wEnd);
+		}
+		else if (Config.mouse_support && input == KEY_MOUSE)
+		{
+#			ifdef USE_PDCURSES
+			nc_getmouse(&mouse_event);
+#			else
+			getmouse(&mouse_event);
+#			endif // USE_PDCURSES
+			if (mouse_event.bstate & BUTTON1_PRESSED
+			&&  mouse_event.y == LINES-(Config.statusbar_visibility ? 2 : 1)
+			   ) // progressbar
+			{
+				const Song *s = myPlaylist->NowPlayingSong();
+				if (!s)
+					continue;
+				Mpd->Seek(s->GetTotalLength()*mouse_event.x/double(COLS));
+				UpdateStatusImmediately = 1;
+			}
+			else if (mouse_event.bstate & BUTTON1_PRESSED
+			     &&	 Config.statusbar_visibility
+			     &&	 Mpd->GetState() > psStop
+			     &&	 mouse_event.y == LINES-1 && mouse_event.x < 9
+				) // playing/paused
+			{
+				Mpd->Pause();
+				UpdateStatusImmediately = 1;
+			}
+			else if ((mouse_event.bstate & BUTTON2_PRESSED || mouse_event.bstate & BUTTON4_PRESSED)
+			     &&	 Config.header_visibility
+			     &&	 mouse_event.y == 0 && size_t(mouse_event.x) > COLS-VolumeState.length()
+				) // volume
+			{
+				if (mouse_event.bstate & BUTTON2_PRESSED)
+					Mpd->SetVolume(Mpd->GetVolume()-2);
+				else
+					Mpd->SetVolume(Mpd->GetVolume()+2);
+			}
+			else
+				myScreen->MouseButtonPressed(mouse_event);
 		}
 		else if (input == KEY_RESIZE)
 		{

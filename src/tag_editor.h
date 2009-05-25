@@ -44,6 +44,7 @@ class TinyTagEditor : public Screen< Menu<Buffer> >
 		
 		virtual void EnterPressed();
 		virtual void SpacePressed() { }
+		virtual void MouseButtonPressed(MEVENT);
 		
 		virtual bool allowsSelection() { return false; }
 		
@@ -74,6 +75,7 @@ class TagEditor : public Screen<Window>
 		
 		virtual void EnterPressed();
 		virtual void SpacePressed();
+		virtual void MouseButtonPressed(MEVENT);
 		
 		virtual MPD::Song *CurrentSong();
 		

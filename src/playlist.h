@@ -41,6 +41,7 @@ class Playlist : public Screen< Menu<MPD::Song> >
 		
 		virtual void EnterPressed();
 		virtual void SpacePressed();
+		virtual void MouseButtonPressed(MEVENT);
 		
 		virtual MPD::Song *CurrentSong();
 		

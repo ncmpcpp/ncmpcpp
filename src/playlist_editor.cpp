@@ -281,6 +281,44 @@ void PlaylistEditor::SpacePressed()
 	AddToPlaylist(0);
 }
 
+void PlaylistEditor::MouseButtonPressed(MEVENT me)
+{
+	if (!Playlists->Empty() && Playlists->hasCoords(me.x, me.y))
+	{
+		if (w != Playlists)
+			PrevColumn();
+		if (size_t(me.y) < Playlists->Size() && (me.bstate & BUTTON1_PRESSED || me.bstate & BUTTON3_PRESSED))
+		{
+			Playlists->Goto(me.y);
+			if (me.bstate & BUTTON3_PRESSED)
+				EnterPressed();
+		}
+		else
+			Screen<Window>::MouseButtonPressed(me);
+		Content->Clear(0);
+	}
+	else if (!Content->Empty() && Content->hasCoords(me.x, me.y))
+	{
+		if (w != Content)
+			NextColumn();
+		if (size_t(me.y) < Content->Size() && (me.bstate & BUTTON1_PRESSED || me.bstate & BUTTON3_PRESSED))
+		{
+			Content->Goto(me.y);
+			if (me.bstate & BUTTON1_PRESSED)
+			{
+				size_t pos = Content->GetPosition();
+				SpacePressed();
+				if (pos < Content->Size()-1)
+					Content->Scroll(wUp);
+			}
+			else
+				EnterPressed();
+		}
+		else
+			Screen<Window>::MouseButtonPressed(me);
+	}
+}
+
 MPD::Song *PlaylistEditor::CurrentSong()
 {
 	return w == Content && !Content->Empty() ? &Content->Current() : 0;
