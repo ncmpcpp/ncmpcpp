@@ -70,16 +70,20 @@ void Outputs::EnterPressed()
 	if (w->Current().second)
 	{
 		if (Mpd->DisableOutput(w->Choice()))
+		{
 			ShowMessage("Output \"%s\" disabled", w->Current().first.c_str());
-		w->Current().second = 0;
-		w->BoldOption(w->Choice(), 0);
+			w->Current().second = 0;
+			w->BoldOption(w->Choice(), 0);
+		}
 	}
 	else
 	{
 		if (Mpd->EnableOutput(w->Choice()))
+		{
 			ShowMessage("Output \"%s\" enabled", w->Current().first.c_str());
-		w->Current().second = 1;
-		w->BoldOption(w->Choice(), 1);
+			w->Current().second = 1;
+			w->BoldOption(w->Choice(), 1);
+		}
 	}
 	
 }
