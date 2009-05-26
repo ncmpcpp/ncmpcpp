@@ -304,13 +304,13 @@ void SearchEngine::MouseButtonPressed(MEVENT me)
 		if (!w->Goto(me.y))
 			return;
 		w->Refresh();
-		if ((me.bstate & BUTTON3_PRESSED || w->GetPosition() > 10) && w->GetPosition() < StaticOptions)
+		if ((me.bstate & BUTTON3_PRESSED || w->Choice() > 10) && w->Choice() < StaticOptions)
 			EnterPressed();
-		else if (w->GetPosition() >= StaticOptions)
+		else if (w->Choice() >= StaticOptions)
 		{
 			if (me.bstate & BUTTON1_PRESSED)
 			{
-				size_t pos = w->GetPosition();
+				size_t pos = w->Choice();
 				SpacePressed();
 				if (pos < w->Size()-1)
 					w->Scroll(wUp);

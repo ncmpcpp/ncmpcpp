@@ -276,7 +276,7 @@ void Browser::MouseButtonPressed(MEVENT me)
 				}
 				else
 				{
-					size_t pos = w->GetPosition();
+					size_t pos = w->Choice();
 					SpacePressed();
 					if (pos < w->Size()-1)
 						w->Scroll(wUp);
@@ -286,7 +286,7 @@ void Browser::MouseButtonPressed(MEVENT me)
 			case itSong:
 				if (me.bstate & BUTTON1_PRESSED)
 				{
-					size_t pos = w->GetPosition();
+					size_t pos = w->Choice();
 					SpacePressed();
 					if (pos < w->Size()-1)
 						w->Scroll(wUp);

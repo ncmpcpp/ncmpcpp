@@ -306,7 +306,7 @@ void PlaylistEditor::MouseButtonPressed(MEVENT me)
 			Content->Goto(me.y);
 			if (me.bstate & BUTTON1_PRESSED)
 			{
-				size_t pos = Content->GetPosition();
+				size_t pos = Content->Choice();
 				SpacePressed();
 				if (pos < Content->Size()-1)
 					Content->Scroll(wUp);

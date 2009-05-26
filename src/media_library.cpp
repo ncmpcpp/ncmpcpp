@@ -373,7 +373,7 @@ void MediaLibrary::MouseButtonPressed(MEVENT me)
 			Songs->Goto(me.y);
 			if (me.bstate & BUTTON1_PRESSED)
 			{
-				size_t pos = Songs->GetPosition();
+				size_t pos = Songs->Choice();
 				SpacePressed();
 				if (pos < Songs->Size()-1)
 					Songs->Scroll(wUp);

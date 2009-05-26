@@ -120,8 +120,6 @@ namespace NCurses
 			void Move(size_t from, size_t to);
 			bool Goto(size_t y);
 			
-			size_t GetPosition() const { return itsHighlight; }
-			
 			bool isBold(int id = -1);
 			void BoldOption(int index, bool bold);
 			
