@@ -9,6 +9,7 @@ AC_LANG_CPLUSPLUS
 AC_PROG_CXX
 AM_PROG_LIBTOOL
 
+AC_ARG_ENABLE(outputs, AS_HELP_STRING([--enable-outputs], [Enable outputs screen @<:@default=no@:>@]), [outputs=$enableval], [outputs=no])
 AC_ARG_ENABLE(clock, AS_HELP_STRING([--enable-clock], [Enable clock screen @<:@default=no@:>@]), [clock=$enableval], [clock=no])
 AC_ARG_ENABLE(unicode, AS_HELP_STRING([--enable-unicode], [Enable utf8 support @<:@default=yes@:>@]), [unicode=$enableval], [unicode=yes])
 AC_ARG_WITH(curl, AS_HELP_STRING([--with-curl], [Enable fetching lyrics from the Internet @<:@default=auto@:>@]), [curl=$withval], [curl=auto])
@@ -16,6 +17,10 @@ AC_ARG_WITH(iconv, AS_HELP_STRING([--with-iconv], [Enable iconv support (Note: i
 AC_ARG_WITH(pdcurses, AS_HELP_STRING([--with-pdcurses[=LIBNAME]], [Link against pdcurses instead of ncurses @<:@default=XCurses@:>@]), [pdcurses=$withval], [pdcurses=no])
 AC_ARG_WITH(threads, AS_HELP_STRING([--with-threads], [Enable threading support using posix threads @<:@default=auto@:>@]), [threads=$withval], [threads=auto])
 AC_ARG_WITH(taglib, AS_HELP_STRING([--with-taglib], [Enable tag editor @<:@default=auto@:>@]), [taglib=$withval], [taglib=auto])
+
+if test "$outputs" = "yes"; then
+	AC_DEFINE([ENABLE_OUTPUTS], [1], [enables outputs screen])
+fi
 
 if test "$clock" = "yes"; then
 	AC_DEFINE([ENABLE_CLOCK], [1], [enables clock screen])

@@ -45,6 +45,7 @@
 #include "settings.h"
 #include "song.h"
 #include "info.h"
+#include "outputs.h"
 #include "status.h"
 #include "tag_editor.h"
 
@@ -142,7 +143,9 @@ int main(int argc, char *argv[])
 	myTinyTagEditor->Init();
 	myTagEditor->Init();
 #	endif // HAVE_TAGLIB_H
-	
+#	ifdef ENABLE_OUTPUTS
+	myOutputs->Init();
+#	endif // ENABLE_OUTPUTS
 #	ifdef ENABLE_CLOCK
 	myClock->Init();
 #	endif // ENABLE_CLOCK
@@ -207,6 +210,9 @@ int main(int argc, char *argv[])
 				ShowMessage("Connected to %s!", Mpd->GetHostname().c_str());
 				MessagesAllowed = 0;
 				UpdateStatusImmediately = 1;
+#				ifdef ENABLE_OUTPUTS
+				myOutputs->FetchList();
+#				endif // ENABLE_OUTPUTS
 			}
 		}
 		
@@ -1881,6 +1887,12 @@ int main(int argc, char *argv[])
 			myTagEditor->SwitchTo();
 		}
 #		endif // HAVE_TAGLIB_H
+#		ifdef ENABLE_OUTPUTS
+		else if (Keypressed(input, Key.Outputs))
+		{
+			myOutputs->SwitchTo();
+		}
+#		endif // ENABLE_OUTPUTS
 #		ifdef ENABLE_CLOCK
 		else if (Keypressed(input, Key.Clock))
 		{

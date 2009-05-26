@@ -139,6 +139,9 @@ void Help::GetKeybindings()
 #	ifdef HAVE_TAGLIB_H
 	*w << DisplayKeys(Key.TagEditor)		<< "Tag editor\n";
 #	endif // HAVE_TAGLIB_H
+#	ifdef ENABLE_OUTPUTS
+	*w << DisplayKeys(Key.Outputs)			<< "Outputs\n";
+#	endif // ENABLE_OUTPUTS
 #	ifdef ENABLE_CLOCK
 	*w << DisplayKeys(Key.Clock)			<< "Clock screen\n";
 #	endif // ENABLE_CLOCK
@@ -273,5 +276,11 @@ void Help::GetKeybindings()
 	*w << DisplayKeys(&Key.VolumeDown[0], 1)	<< "Previous column\n";
 	*w << DisplayKeys(&Key.VolumeUp[0], 1)		<< "Next column\n";
 #	endif // HAVE_TAGLIB_H
+	
+	
+#	ifdef ENABLE_OUTPUTS
+	*w << "\n\n   " << fmtBold << "Keys - Outputs\n -----------------------------------------\n" << fmtBoldEnd;
+	*w << DisplayKeys(Key.Enter)			<< "Enable/disable output\n";
+#	endif // ENABLE_OUTPUTS
 }
 

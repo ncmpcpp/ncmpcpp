@@ -64,9 +64,12 @@ namespace MPD
 		bool StatusFlags:1;
 	};
 	
+	typedef std::pair<std::string, bool> Output;
+	
 	typedef std::vector<Item> ItemList;
 	typedef std::vector<Song *> SongList;
 	typedef std::vector<std::string> TagList;
+	typedef std::vector<Output> OutputList;
 
 	void FreeSongList(SongList &);
 	void FreeItemList(ItemList &);
@@ -176,6 +179,10 @@ namespace MPD
 			void GetDirectoryRecursive(const std::string &, SongList &) const;
 			void GetSongs(const std::string &, SongList &) const;
 			void GetDirectories(const std::string &, TagList &) const;
+			
+			void GetOutputs(OutputList &) const;
+			bool EnableOutput(int);
+			bool DisableOutput(int);
 			
 		private:
 			int CheckForErrors();

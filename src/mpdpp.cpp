@@ -867,6 +867,37 @@ void Connection::GetDirectories(const string &path, TagList &v) const
 	}
 }
 
+void Connection::GetOutputs(OutputList &v) const
+{
+	if (!isConnected)
+		return;
+	mpd_sendOutputsCommand(itsConnection);
+	while (mpd_OutputEntity *output = mpd_getNextOutput(itsConnection))
+	{
+		v.push_back(std::make_pair(output->name, output->enabled));
+		mpd_freeOutputElement(output);
+	}
+	mpd_finishCommand(itsConnection);
+}
+
+bool Connection::EnableOutput(int id)
+{
+	if (!isConnected)
+		return false;
+	mpd_sendEnableOutputCommand(itsConnection, id);
+	mpd_finishCommand(itsConnection);
+	return !CheckForErrors();
+}
+
+bool Connection::DisableOutput(int id)
+{
+	if (!isConnected)
+		return false;
+	mpd_sendDisableOutputCommand(itsConnection, id);
+	mpd_finishCommand(itsConnection);
+	return !CheckForErrors();
+}
+
 int Connection::CheckForErrors()
 {
 	itsErrorCode = 0;

@@ -109,6 +109,7 @@ void DefaultKeys(ncmpcpp_keys &keys)
 	keys.MediaLibrary[0] = '5';
 	keys.PlaylistEditor[0] = '6';
 	keys.TagEditor[0] = '7';
+	keys.Outputs[0] = '8';
 	keys.Clock[0] = '0';
 	keys.Stop[0] = 's';
 	keys.Pause[0] = 'P';
@@ -176,6 +177,7 @@ void DefaultKeys(ncmpcpp_keys &keys)
 	keys.MediaLibrary[1] = 269;
 	keys.PlaylistEditor[1] = 270;
 	keys.TagEditor[1] = 271;
+	keys.Outputs[1] = 272;
 	keys.Clock[1] = 274;
 	keys.Stop[1] = null_key;
 	keys.Pause[1] = null_key;
@@ -343,6 +345,8 @@ void ReadKeys(ncmpcpp_keys &keys)
 				GetKeys(key, keys.PlaylistEditor);
 			else if (key.find("key_tag_editor ") != string::npos)
 				GetKeys(key, keys.TagEditor);
+			else if (key.find("key_outputs ") != string::npos)
+				GetKeys(key, keys.Outputs);
 			else if (key.find("key_clock ") != string::npos)
 				GetKeys(key, keys.Clock);
 			else if (key.find("key_stop ") != string::npos)

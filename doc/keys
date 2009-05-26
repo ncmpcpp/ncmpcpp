@@ -54,6 +54,8 @@
 #
 #key_tag_editor = '7' 271
 #
+#key_outputs = '8' 272
+#
 #key_clock = '0' 274
 #
 #key_stop = 's'
