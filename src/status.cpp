@@ -502,8 +502,14 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 	if (changed.Volume && Config.header_visibility)
 	{
 		VolumeState = " Volume: ";
-		VolumeState += IntoStr(Mpd->GetVolume());
-		VolumeState += "%";
+		int volume = Mpd->GetVolume();
+		if (volume < 0)
+			VolumeState += "n/a";
+		else
+		{
+			VolumeState += IntoStr(volume);
+			VolumeState += "%";
+		}
 		wHeader->SetColor(Config.volume_color);
 		*wHeader << XY(wHeader->GetWidth()-VolumeState.length(), 0) << VolumeState;
 		wHeader->SetColor(Config.header_color);
