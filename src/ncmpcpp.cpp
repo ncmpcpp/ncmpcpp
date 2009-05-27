@@ -322,10 +322,6 @@ int main(int argc, char *argv[])
 		{
 			myScreen->Scroll(wUp, Key.Up);
 		}
-		else if (input == 'v')
-		{
-			Mpd->AddRandomSongs(10);
-		}
 		else if (Keypressed(input, Key.Down))
 		{
 			myScreen->Scroll(wDown, Key.Down);
