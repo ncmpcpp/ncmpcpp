@@ -328,11 +328,11 @@ const Buffer &ShowTag(const string &tag)
 	return result;
 }
 
-const std::basic_string<my_char_t> &Scroller(const string &string, size_t width, size_t &pos)
+const std::basic_string<my_char_t> &Scroller(const string &str, size_t width, size_t &pos)
 {
 	static std::basic_string<my_char_t> result;
 	result.clear();
-	std::basic_string<my_char_t> s = TO_WSTRING(string);
+	std::basic_string<my_char_t> s = TO_WSTRING(str);
 	size_t len;
 #	ifdef _UTF8
 	len = Window::Length(s);
