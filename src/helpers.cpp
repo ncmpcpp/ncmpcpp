@@ -317,10 +317,9 @@ std::string ExtractTopDirectory(const std::string &s)
 	return slash != string::npos ? s.substr(++slash) : s;
 }
 
-const Buffer &ShowTag(const string &tag)
+Buffer ShowTag(const string &tag)
 {
-	static Buffer result;
-	result.Clear();
+	Buffer result;
 	if (tag.empty())
 		result << Config.empty_tags_color << Config.empty_tag << clEnd;
 	else
@@ -328,13 +327,12 @@ const Buffer &ShowTag(const string &tag)
 	return result;
 }
 
-const std::basic_string<my_char_t> &Scroller(const string &str, size_t width, size_t &pos)
+std::basic_string<my_char_t> Scroller(const string &str, size_t width, size_t &pos)
 {
-	static std::basic_string<my_char_t> result;
-	result.clear();
 	std::basic_string<my_char_t> s = TO_WSTRING(str);
 	if (!Config.header_text_scrolling)
-		return (result = s);
+		return s;
+	std::basic_string<my_char_t> result;
 	size_t len;
 #	ifdef _UTF8
 	len = Window::Length(s);

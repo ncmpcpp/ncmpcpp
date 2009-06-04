@@ -70,9 +70,9 @@ std::string GetLineValue(std::string &, char = '"', char = '"', bool = 0);
 void RemoveTheWord(std::string &s);
 std::string ExtractTopDirectory(const std::string &);
 
-const Buffer &ShowTag(const std::string &);
+Buffer ShowTag(const std::string &);
 
-const std::basic_string<my_char_t> &Scroller(const std::string &, size_t, size_t &);
+std::basic_string<my_char_t> Scroller(const std::string &, size_t, size_t &);
 
 #ifdef HAVE_CURL_CURL_H
 size_t write_data(char *, size_t, size_t, void *);

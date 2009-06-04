@@ -363,11 +363,10 @@ void Info::PrepareSong(MPD::Song &s)
 	*w << fmtBold << "\nComment: " << fmtBoldEnd << ShowTag(s.GetComment());
 }
 
-const basic_buffer<my_char_t> &Info::ShowTag(const string &tag)
+basic_buffer<my_char_t> Info::ShowTag(const string &tag)
 {
 #	ifdef _UTF8
-	static WBuffer result;
-	result.Clear();
+	WBuffer result;
 	if (tag.empty())
 		result << Config.empty_tags_color << ToWString(Config.empty_tag) << clEnd;
 	else
