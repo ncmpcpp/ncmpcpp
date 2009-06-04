@@ -263,6 +263,7 @@ void DefaultConfiguration(ncmpcpp_config &conf)
 	conf.columns_in_browser = false;
 	conf.columns_in_search_engine = false;
 	conf.header_visibility = true;
+	conf.header_text_scrolling = true;
 	conf.statusbar_visibility = true;
 	conf.autocenter_mode = false;
 	conf.wrapped_search = true;
@@ -615,6 +616,10 @@ void ReadConfiguration(ncmpcpp_config &conf)
 			else if (cl.find("header_visibility") != string::npos)
 			{
 				conf.header_visibility = v == "yes";
+			}
+			else if (cl.find("header_text_scrolling") != string::npos)
+			{
+				conf.header_text_scrolling = v == "yes";
 			}
 			else if (cl.find("statusbar_visibility") != string::npos)
 			{

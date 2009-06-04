@@ -154,6 +154,7 @@ struct ncmpcpp_config
 	bool columns_in_search_engine;
 	bool set_window_title;
 	bool header_visibility;
+	bool header_text_scrolling;
 	bool statusbar_visibility;
 	bool autocenter_mode;
 	bool wrapped_search;

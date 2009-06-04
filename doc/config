@@ -147,6 +147,8 @@
 #
 #statusbar_visibility = "yes"
 #
+#header_text_scrolling = "yes"
+#
 #fancy_scrolling = "yes"
 #
 #cyclic_scrolling = "no"
