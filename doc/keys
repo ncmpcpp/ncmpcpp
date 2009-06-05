@@ -38,6 +38,8 @@
 #
 #key_toggle_add_mode = 'T'
 #
+#key_toggle_mouse = '|'
+#
 #key_screen_switcher = 9
 #
 #key_help = '1' 265

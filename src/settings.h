@@ -71,6 +71,7 @@ struct ncmpcpp_keys
 	int ToggleConsume[2];
 	int ToggleSpaceMode[2];
 	int ToggleAddMode[2];
+	int ToggleMouse[2];
 	int Shuffle[2];
 	int ToggleCrossfade[2];
 	int SetCrossfade[2];

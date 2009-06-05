@@ -194,11 +194,9 @@ int main(int argc, char *argv[])
 	gettimeofday(&now, 0);
 	
 	MEVENT mouse_event;
+	mouseinterval(0);
 	if (Config.mouse_support)
-	{
 		mousemask(ALL_MOUSE_EVENTS, 0);
-		mouseinterval(0);
-	}
 	
 	while (!main_exit)
 	{
@@ -1765,6 +1763,12 @@ int main(int argc, char *argv[])
 		{
 			Config.ncmpc_like_songs_adding = !Config.ncmpc_like_songs_adding;
 			ShowMessage("Add mode: %s", Config.ncmpc_like_songs_adding ? "Add item to playlist, remove if already added" : "Always add item to playlist");
+		}
+		else if (Keypressed(input, Key.ToggleMouse))
+		{
+			Config.mouse_support = !Config.mouse_support;
+			mousemask(Config.mouse_support ? ALL_MOUSE_EVENTS : 0, 0);
+			ShowMessage("Mouse support %s", Config.mouse_support ? "enabled" : "disabled");
 		}
 		else if (Keypressed(input, Key.SwitchTagTypeList))
 		{

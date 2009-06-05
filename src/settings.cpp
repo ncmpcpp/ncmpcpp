@@ -123,6 +123,7 @@ void DefaultKeys(ncmpcpp_keys &keys)
 	keys.ToggleConsume[0] = 'R';
 	keys.ToggleSpaceMode[0] = 't';
 	keys.ToggleAddMode[0] = 'T';
+	keys.ToggleMouse[0] = '|';
 	keys.Shuffle[0] = 'Z';
 	keys.ToggleCrossfade[0] = 'x';
 	keys.SetCrossfade[0] = 'X';
@@ -191,6 +192,7 @@ void DefaultKeys(ncmpcpp_keys &keys)
 	keys.ToggleConsume[1] = null_key;
 	keys.ToggleSpaceMode[1] = null_key;
 	keys.ToggleAddMode[1] = null_key;
+	keys.ToggleMouse[1] = null_key;
 	keys.Shuffle[1] = null_key;
 	keys.ToggleCrossfade[1] = null_key;
 	keys.SetCrossfade[1] = null_key;
@@ -374,6 +376,8 @@ void ReadKeys(ncmpcpp_keys &keys)
 				GetKeys(key, keys.ToggleSpaceMode);
 			else if (key.find("key_toggle_add_mode ") != string::npos)
 				GetKeys(key, keys.ToggleAddMode);
+			else if (key.find("key_toggle_mouse ") != string::npos)
+				GetKeys(key, keys.ToggleMouse);
 			else if (key.find("key_shuffle ") != string::npos)
 				GetKeys(key, keys.Shuffle);
 			else if (key.find("key_toggle_crossfade ") != string::npos)
