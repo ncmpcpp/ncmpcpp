@@ -565,6 +565,9 @@ int main(int argc, char *argv[])
 			}
 			else if (myScreen == myBrowser && !myBrowser->Main()->Empty() && myBrowser->Main()->Current().type != itPlaylist)
 			{
+				if (!Config.local_browser)
+					CHECK_MPD_MUSIC_DIR;
+				
 				MPD::Item &item = myBrowser->Main()->Current();
 				
 				if (item.type == itSong && !Config.allow_physical_files_deletion)
