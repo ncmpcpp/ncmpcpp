@@ -20,6 +20,7 @@
 
 #include <dirent.h>
 #include <sys/stat.h>
+#include <cerrno>
 #include <cstring>
 #include <algorithm>
 
@@ -536,7 +537,10 @@ void Browser::ClearDirectory(const std::string &path) const
 		lstat(full_path.c_str(), &file_stat);
 		if (S_ISDIR(file_stat.st_mode))
 			ClearDirectory(full_path);
-		remove(full_path.c_str());
+		if (remove(full_path.c_str()) == 0)
+			ShowMessage("Deleting \"%s\"...", full_path.c_str());
+		else
+			ShowMessage("Couldn't remove \"%s\": %s", full_path.c_str(), strerror(errno));
 	}
 	closedir(dir);
 }

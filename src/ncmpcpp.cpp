@@ -584,7 +584,8 @@ int main(int argc, char *argv[])
 					continue;
 				
 				LockStatusbar();
-				Statusbar() << "Delete " << (item.type == itSong ? "file" : "directory") << " \"" << (item.type == itSong ? item.song->GetName() : item.name) << "\" ? [y/n] ";
+				string name = item.type == itSong ? item.song->GetName() : item.name;
+				Statusbar() << "Delete " << (item.type == itSong ? "file" : "directory") << " \"" << name << "\" ? [y/n] ";
 				curs_set(1);
 				int in = 0;
 				do
@@ -595,8 +596,6 @@ int main(int argc, char *argv[])
 				while (in != 'y' && in != 'n');
 				if (in == 'y')
 				{
-					ShowMessage("Deleting...");
-					
 					string path;
 					if (!Config.local_browser)
 						path = Config.mpd_music_dir;
@@ -607,14 +606,14 @@ int main(int argc, char *argv[])
 					
 					if (remove(path.c_str()) == 0)
 					{
-						ShowMessage("%s has been deleted!", item.type == itSong ? "File" : "Directory");
+						ShowMessage("\"%s\" has been successfuly deleted!", name.c_str());
 						if (!Config.local_browser)
 							Mpd->UpdateDirectory(myBrowser->CurrentDir());
 						else
 							myBrowser->GetDirectory(myBrowser->CurrentDir());
 					}
 					else
-						ShowMessage("Deletion failed: %s", strerror(errno));
+						ShowMessage("Couldn't remove \"%s\": %s", name.c_str(), strerror(errno));
 				}
 				else
 					ShowMessage("Aborted!");
