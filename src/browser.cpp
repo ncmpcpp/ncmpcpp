@@ -284,6 +284,14 @@ void Browser::MouseButtonPressed(MEVENT me)
 				}
 				break;
 			case itPlaylist:
+				if (me.bstate & BUTTON3_PRESSED)
+				{
+					size_t pos = w->Choice();
+					SpacePressed();
+					if (pos < w->Size()-1)
+						w->Scroll(wUp);
+				}
+				break;
 			case itSong:
 				if (me.bstate & BUTTON1_PRESSED)
 				{
