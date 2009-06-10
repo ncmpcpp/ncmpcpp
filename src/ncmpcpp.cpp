@@ -1662,6 +1662,7 @@ int main(int argc, char *argv[])
 				}
 				ShowMessage("Cleared playlist!");
 			}
+			UpdateStatusImmediately = 1;
 		}
 		else if (Keypressed(input, Key.SortPlaylist) && myScreen == myPlaylist)
 		{
