@@ -1650,17 +1650,36 @@ int main(int argc, char *argv[])
 			{
 				if (myScreen == myPlaylistEditor && myPlaylistEditor->Playlists->Empty())
 					continue;
-				ShowMessage("Clearing playlist...");
+				int in = 0;
 				if (myScreen == myPlaylistEditor)
 				{
-					Mpd->ClearPlaylist(locale_to_utf_cpy(myPlaylistEditor->Playlists->Current()));
-					myPlaylistEditor->Content->Clear(0);
+					LockStatusbar();
+					Statusbar() << "Do you really want to clear playlist \"" << myPlaylistEditor->Playlists->Current() << "\" ? [y/n] ";
+					curs_set(1);
+					do
+					{
+						TraceMpdStatus();
+						wFooter->ReadKey(in);
+					}
+					while (in != 'y' && in != 'n');
+					curs_set(0);
+					UnlockStatusbar();
+					
+					if (in == 'y')
+					{
+						Mpd->ClearPlaylist(locale_to_utf_cpy(myPlaylistEditor->Playlists->Current()));
+						myPlaylistEditor->Content->Clear(0);
+					}
+					else
+						ShowMessage("Aborted!");
 				}
 				else
 				{
+					ShowMessage("Clearing playlist...");
 					Mpd->ClearPlaylist();
 				}
-				ShowMessage("Cleared playlist!");
+				if (myScreen != myPlaylistEditor || in == 'y')
+					ShowMessage("Playlist cleared!");
 			}
 			// if playlist is cleared, items list have to be updated, but this
 			// can be blocked if new song was added to playlist less than one
