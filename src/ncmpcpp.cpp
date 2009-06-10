@@ -1662,6 +1662,10 @@ int main(int argc, char *argv[])
 				}
 				ShowMessage("Cleared playlist!");
 			}
+			// if playlist is cleared, items list have to be updated, but this
+			// can be blocked if new song was added to playlist less than one
+			// second ago, so we need to assume it's unlocked.
+			BlockItemListUpdate = 0;
 			UpdateStatusImmediately = 1;
 		}
 		else if (Keypressed(input, Key.SortPlaylist) && myScreen == myPlaylist)
