@@ -53,13 +53,12 @@ class Browser : public Screen< Menu<MPD::Item> >
 		
 		void LocateSong(const MPD::Song &);
 		void GetDirectory(std::string, std::string = "/");
+		void GetLocalDirectory(MPD::ItemList &, const std::string & = "", bool = 0) const;
 		void ClearDirectory(const std::string &) const;
 		void ChangeBrowseMode();
 		void UpdateItemList();
 	
 	private:
-		void GetLocalDirectory(MPD::ItemList &);
-		
 		static bool hasSupportedExtension(const std::string &);
 		static std::string ItemToString(const MPD::Item &, void *);
 		

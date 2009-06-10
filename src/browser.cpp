@@ -177,30 +177,43 @@ void Browser::SpacePressed()
 			if (itsBrowsedDir != "/" && !w->Choice())
 				break; // do not let add parent dir.
 			
+			bool everything_was_added = 1;
 			if (Config.local_browser)
 			{
-				ShowMessage("Adding whole directories from local browser is not supported!");
-				break;
+				ItemList list;
+				
+				ShowMessage("Scanning \"%s\"...", item.name.c_str());
+				myBrowser->GetLocalDirectory(list, item.name, 1);
+				
+				Mpd->StartCommandsList();
+				for (ItemList::const_iterator it = list.begin(); it != list.end(); ++it)
+				{
+					if (everything_was_added && Mpd->AddSong(*it->song) < 0)
+						everything_was_added = 0;
+					delete it->song;
+				}
+				Mpd->CommitCommandsList();
 			}
-			
-			SongList list;
-			Mpd->GetDirectoryRecursive(locale_to_utf_cpy(item.name), list);
-			
-			Mpd->StartCommandsList();
-			SongList::const_iterator it = list.begin();
-			for (; it != list.end(); it++)
-				if (Mpd->AddSong(**it) < 0)
-					break;
-			Mpd->CommitCommandsList();
-			
-			if (it != list.begin())
+			else
 			{
-				ShowMessage("Added folder: %s", item.name.c_str());
-				Song &s = myPlaylist->Main()->at(myPlaylist->Main()->Size()-list.size());
-				if (s.GetHash() != list[0]->GetHash())
-					ShowMessage("%s", MPD::Message::PartOfSongsAdded);
+				SongList list;
+				Mpd->GetDirectoryRecursive(locale_to_utf_cpy(item.name), list);
+				Mpd->StartCommandsList();
+				for (SongList::const_iterator it = list.begin(); it != list.end(); it++)
+				{
+					if (Mpd->AddSong(**it) < 0)
+					{
+						everything_was_added = 0;
+						break;
+					}
+				}
+				Mpd->CommitCommandsList();
+				FreeSongList(list);
 			}
-			FreeSongList(list);
+			
+			if (everything_was_added)
+				ShowMessage("Added folder: %s", item.name.c_str());
+			
 			break;
 		}
 		case itSong:
@@ -367,9 +380,9 @@ bool Browser::hasSupportedExtension(const string &file)
 	return false;
 }
 
-void Browser::GetLocalDirectory(ItemList &v)
+void Browser::GetLocalDirectory(ItemList &v, const std::string &directory, bool recursively) const
 {
-	DIR *dir = opendir(itsBrowsedDir.c_str());
+	DIR *dir = opendir((directory.empty() ? itsBrowsedDir : directory).c_str());
 	
 	if (!dir)
 		return;
@@ -395,16 +408,21 @@ void Browser::GetLocalDirectory(ItemList &v)
 		if (!Config.local_browser_show_hidden_files && file->d_name[0] == '.')
 			continue;
 		Item new_item;
-		full_path = itsBrowsedDir;
+		full_path = directory.empty() ? itsBrowsedDir : directory;
 		if (itsBrowsedDir != "/")
 			full_path += "/";
 		full_path += file->d_name;
 		stat(full_path.c_str(), &file_stat);
 		if (S_ISDIR(file_stat.st_mode))
 		{
-			new_item.type = itDirectory;
-			new_item.name = full_path;
-			v.push_back(new_item);
+			if (recursively)
+				GetLocalDirectory(v, full_path, 1);
+			else
+			{
+				new_item.type = itDirectory;
+				new_item.name = full_path;
+				v.push_back(new_item);
+			}
 		}
 		else if (hasSupportedExtension(file->d_name))
 		{
@@ -412,7 +430,8 @@ void Browser::GetLocalDirectory(ItemList &v)
 			mpd_Song *s = mpd_newSong();
 			s->file = str_pool_get(full_path.c_str());
 #			ifdef HAVE_TAGLIB_H
-			TagEditor::ReadTags(s);
+			if (!recursively)
+				TagEditor::ReadTags(s);
 #			endif // HAVE_TAGLIB_H
 			new_item.song = new Song(s);
 			v.push_back(new_item);
