@@ -1,3 +1,15 @@
+ncmpcpp-0.3.5
+
+ + new feature: custom command execution on song change
+ + new feature: allow for physical files and directories deletion
+ + new feature: add local directories recursively
+ + new feature: add random songs to playlist
+ + new feature: mouse support
+ + new screen: outputs
+ + text scrolling in header was made optional
+ + some bugfixes
+
+
 ncmpcpp-0.3.4
 
  + new feature: search in help, lyrics and info screen
