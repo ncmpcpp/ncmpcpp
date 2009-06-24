@@ -53,7 +53,8 @@ namespace MPD
 			std::string GetDisc() const;
 			std::string GetComment() const;
 			std::string GetLength() const;
-			const long long &GetHash() const { return itsHash; }
+			
+			long long GetHash() const { return itsHash; }
 			int GetTotalLength() const { return itsSong->time < 0 ? 0 : itsSong->time; }
 			int GetPosition() const { return itsSong->pos; }
 			int GetID() const { return itsSong->id; }
