@@ -26,7 +26,6 @@
 class PlaylistEditor : public Screen<Window>
 {
 	public:
-		virtual void Init();
 		virtual void SwitchTo();
 		virtual void Resize();
 		
@@ -54,7 +53,10 @@ class PlaylistEditor : public Screen<Window>
 		
 		Menu<std::string> *Playlists;
 		Menu<MPD::Song> *Content;
-	
+		
+	protected:
+		virtual void Init();
+		
 	private:
 		void AddToPlaylist(bool);
 		

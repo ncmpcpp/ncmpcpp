@@ -71,6 +71,7 @@ void Lyrics::Init()
 {
 	w = new Scrollpad(0, MainStartY, COLS, MainHeight, "", Config.main_color, brNone);
 	w->SetTimeout(ncmpcpp_window_timeout);
+	isInitialized = 1;
 }
 
 void Lyrics::Resize()
@@ -104,6 +105,9 @@ void Lyrics::SwitchTo()
 	}
 	else
 	{
+		if (!isInitialized)
+			Init();
+		
 #		if defined(HAVE_CURL_CURL_H) && defined(HAVE_PTHREAD_H)
 		if (Downloader && !Ready)
 		{

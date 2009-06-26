@@ -75,6 +75,7 @@ void MediaLibrary::Init()
 	Songs->SetGetStringFunction(SongToString);
 	
 	w = Artists;
+	isInitialized = 1;
 }
 
 void MediaLibrary::Resize()
@@ -140,6 +141,9 @@ void MediaLibrary::SwitchTo()
 		else
 			Albums->SetTitle("Albums");
 	}
+	
+	if (!isInitialized)
+		Init();
 	
 	if (hasToBeResized)
 		Resize();

@@ -60,6 +60,7 @@ void Browser::Init()
 	w->SetSelectSuffix(&Config.selected_item_suffix);
 	w->SetItemDisplayer(Display::Items);
 	w->SetGetStringFunction(ItemToString);
+	isInitialized = 1;
 }
 
 void Browser::Resize()
@@ -72,6 +73,9 @@ void Browser::SwitchTo()
 {
 	if (myScreen == this)
 		return;
+	
+	if (!isInitialized)
+		Init();
 	
 	if (hasToBeResized)
 		Resize();

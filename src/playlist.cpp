@@ -80,12 +80,17 @@ void Playlist::Init()
 	SortDialog->AddOption(std::make_pair("Sort", static_cast<MPD::Song::GetFunction>(0)));
 	SortDialog->AddOption(std::make_pair("Reverse", static_cast<MPD::Song::GetFunction>(0)));
 	SortDialog->AddOption(std::make_pair("Cancel", static_cast<MPD::Song::GetFunction>(0)));
+	
+	isInitialized = 1;
 }
 
 void Playlist::SwitchTo()
 {
 	if (myScreen == this)
 		return;
+	
+	if (!isInitialized)
+		Init();
 	
 	itsScrollBegin = 0;
 	

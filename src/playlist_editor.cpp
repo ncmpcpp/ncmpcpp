@@ -64,6 +64,7 @@ void PlaylistEditor::Init()
 	Content->SetGetStringFunctionUserData(&Config.song_list_format);
 	
 	w = Playlists;
+	isInitialized = 1;
 }
 
 void PlaylistEditor::Resize()
@@ -96,6 +97,9 @@ void PlaylistEditor::SwitchTo()
 {
 	if (myScreen == this)
 		return;
+	
+	if (!isInitialized)
+		Init();
 	
 	if (hasToBeResized)
 		Resize();

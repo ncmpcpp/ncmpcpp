@@ -27,7 +27,6 @@
 class Help : public Screen<Scrollpad>
 {
 	public:
-		virtual void Init();
 		virtual void Resize();
 		virtual void SwitchTo();
 		
@@ -39,6 +38,9 @@ class Help : public Screen<Scrollpad>
 		virtual bool allowsSelection() { return false; }
 		
 		virtual List *GetList() { return 0; }
+		
+	protected:
+		virtual void Init();
 		
 	private:
 		std::string DisplayKeys(int *, int = 2);

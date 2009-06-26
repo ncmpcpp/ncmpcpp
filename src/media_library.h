@@ -37,7 +37,6 @@ class MediaLibrary : public Screen<Window>
 	};
 	
 	public:
-		virtual void Init();
 		virtual void SwitchTo();
 		virtual void Resize();
 		
@@ -67,6 +66,9 @@ class MediaLibrary : public Screen<Window>
 		Menu<std::string> *Artists;
 		Menu< std::pair<std::string, SearchConstraints> > *Albums;
 		Menu<MPD::Song> *Songs;
+		
+	protected:
+		virtual void Init();
 		
 	private:
 		void AddToPlaylist(bool);

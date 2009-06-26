@@ -160,7 +160,7 @@ void Connection::UpdateStatus()
 		{
 			itsChanges.Playlist = 1;
 			itsChanges.SongID = 1;
-			itsChanges.Database = 1;
+			itsChanges.Database = 0;
 			itsChanges.DBUpdating = 1;
 			itsChanges.Volume = 1;
 			itsChanges.ElapsedTime = 1;

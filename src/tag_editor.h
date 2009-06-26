@@ -36,7 +36,6 @@
 class TinyTagEditor : public Screen< Menu<Buffer> >
 {
 	public:
-		virtual void Init();
 		virtual void Resize();
 		virtual void SwitchTo();
 		
@@ -52,6 +51,9 @@ class TinyTagEditor : public Screen< Menu<Buffer> >
 		
 		bool SetEdited(MPD::Song *);
 		
+	protected:
+		virtual void Init();
+		
 	private:
 		bool GetTags();
 		MPD::Song itsEdited;
@@ -64,7 +66,6 @@ class TagEditor : public Screen<Window>
 	public:
 		TagEditor() : itsBrowsedDir("/") { }
 		
-		virtual void Init();
 		virtual void Resize();
 		virtual void SwitchTo();
 		
@@ -101,6 +102,9 @@ class TagEditor : public Screen<Window>
 		
 		static void ReadTags(mpd_Song *);
 		static bool WriteTags(MPD::Song &);
+		
+	protected:
+		virtual void Init();
 		
 	private:
 		static std::string CapitalizeFirstLetters(const std::string &);

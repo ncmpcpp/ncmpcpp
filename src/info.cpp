@@ -61,6 +61,7 @@ void Info::Init()
 {
 	w = new Scrollpad(0, MainStartY, COLS, MainHeight, "", Config.main_color, brNone);
 	w->SetTimeout(ncmpcpp_window_timeout);
+	isInitialized = 1;
 }
 
 void Info::Resize()
@@ -96,6 +97,9 @@ void Info::GetSong()
 	}
 	else
 	{
+		if (!isInitialized)
+			Init();
+		
 		MPD::Song *s = myScreen->CurrentSong();
 		
 		if (!s)
@@ -125,6 +129,9 @@ void Info::GetArtist()
 	}
 	else
 	{
+		if (!isInitialized)
+			Init();
+		
 #		ifdef HAVE_PTHREAD_H
 		if (Downloader && !ArtistReady)
 		{

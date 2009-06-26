@@ -43,7 +43,6 @@ class Lyrics : public Screen<Scrollpad>
 		Lyrics() : itsScrollBegin(0) { }
 		~Lyrics() { }
 		
-		virtual void Init();
 		virtual void Resize();
 		virtual void SwitchTo();
 		
@@ -65,6 +64,9 @@ class Lyrics : public Screen<Scrollpad>
 #		ifdef HAVE_CURL_CURL_H
 		static const char *GetPluginName(int offset);
 #		endif // HAVE_CURL_CURL_H
+		
+	protected:
+		virtual void Init();
 		
 	private:
 		std::string itsFilenamePath;

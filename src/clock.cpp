@@ -53,6 +53,7 @@ void Clock::Init()
 	
 	w = new Window((COLS-Width)/2, (LINES-Height)/2, Width, Height-1, "", Config.main_color, Border(Config.main_color));
 	w->SetTimeout(ncmpcpp_window_timeout);
+	isInitialized = 1;
 }
 
 void Clock::Resize()
@@ -79,6 +80,9 @@ void Clock::SwitchTo()
 	}
 	if (myScreen == this)
 		return;
+	
+	if (!isInitialized)
+		Init();
 	
 	if (hasToBeResized)
 		Resize();

@@ -38,12 +38,16 @@ void Outputs::Init()
 	w->SetItemDisplayer(Display::Pairs);
 	
 	FetchList();
+	isInitialized = 1;
 }
 
 void Outputs::SwitchTo()
 {
 	if (myScreen == this)
 		return;
+	
+	if (!isInitialized)
+		Init();
 	
 	if (hasToBeResized)
 		Resize();

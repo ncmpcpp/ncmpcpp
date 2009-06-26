@@ -52,6 +52,7 @@ void SearchEngine::Init()
 	w->SetSelectPrefix(&Config.selected_item_prefix);
 	w->SetSelectSuffix(&Config.selected_item_suffix);
 	w->SetGetStringFunction(SearchEngineOptionToString);
+	isInitialized = 1;
 }
 
 void SearchEngine::Resize()
@@ -64,6 +65,9 @@ void SearchEngine::SwitchTo()
 {
 	if (myScreen == this)
 		return;
+	
+	if (!isInitialized)
+		Init();
 	
 	if (hasToBeResized)
 		Resize();

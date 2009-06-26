@@ -35,6 +35,7 @@ void Help::Init()
 	w->SetTimeout(ncmpcpp_window_timeout);
 	GetKeybindings();
 	w->Flush();
+	isInitialized = 1;
 }
 
 void Help::Resize()
@@ -47,6 +48,9 @@ void Help::SwitchTo()
 {
 	if (myScreen == this)
 		return;
+	
+	if (!isInitialized)
+		Init();
 	
 	if (hasToBeResized)
 		Resize();

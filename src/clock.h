@@ -33,7 +33,6 @@
 class Clock : public Screen<Window>
 {
 	public:
-		virtual void Init();
 		virtual void Resize();
 		virtual void SwitchTo();
 		
@@ -49,6 +48,9 @@ class Clock : public Screen<Window>
 		virtual bool allowsSelection() { return false; }
 		
 		virtual List *GetList() { return 0; }
+		
+	protected:
+		virtual void Init();
 		
 	private:
 		static void Prepare();

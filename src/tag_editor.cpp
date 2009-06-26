@@ -52,6 +52,7 @@ void TinyTagEditor::Init()
 	w->SetTimeout(ncmpcpp_window_timeout);
 	w->CyclicScrolling(Config.use_cyclic_scrolling);
 	w->SetItemDisplayer(Display::Generic);
+	isInitialized = 1;
 }
 
 void TinyTagEditor::Resize()
@@ -258,6 +259,9 @@ bool TinyTagEditor::GetTags()
 	ext = ext.substr(ext.rfind(".")+1);
 	ToLower(ext);
 	
+	if (!isInitialized)
+		Init();
+	
 	w->Clear();
 	w->Reset();
 	
@@ -353,6 +357,7 @@ void TagEditor::Init()
 	Tags->SetGetStringFunctionUserData(TagTypes);
 	
 	w = LeftColumn;
+	isInitialized = 1;
 }
 
 void TagEditor::Resize()
@@ -382,6 +387,9 @@ void TagEditor::SwitchTo()
 {
 	if (myScreen == this)
 		return;
+	
+	if (!isInitialized)
+		Init();
 	
 	if (hasToBeResized)
 		Resize();

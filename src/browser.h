@@ -29,7 +29,6 @@ class Browser : public Screen< Menu<MPD::Item> >
 	public:
 		Browser() : itsScrollBeginning(0), itsBrowsedDir("/") { }
 		
-		virtual void Init();
 		virtual void Resize();
 		virtual void SwitchTo();
 		
@@ -57,7 +56,10 @@ class Browser : public Screen< Menu<MPD::Item> >
 		void ClearDirectory(const std::string &) const;
 		void ChangeBrowseMode();
 		void UpdateItemList();
-	
+		
+	protected:
+		virtual void Init();
+		
 	private:
 		static bool hasSupportedExtension(const std::string &);
 		static std::string ItemToString(const MPD::Item &, void *);

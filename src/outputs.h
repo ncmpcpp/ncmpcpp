@@ -34,7 +34,6 @@
 class Outputs : public Screen< Menu<MPD::Output> >
 {
 	public:
-		virtual void Init();
 		virtual void SwitchTo();
 		virtual void Resize();
 		
@@ -49,6 +48,9 @@ class Outputs : public Screen< Menu<MPD::Output> >
 		virtual List *GetList() { return w; }
 		
 		void FetchList();
+		
+	protected:
+		virtual void Init();
 };
 
 extern Outputs *myOutputs;

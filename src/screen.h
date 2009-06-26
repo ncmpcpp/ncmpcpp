@@ -30,12 +30,11 @@
 class BasicScreen
 {
 	public:
-		BasicScreen() : hasToBeResized(0) { }
+		BasicScreen() : hasToBeResized(0), isInitialized(0) { }
 		virtual ~BasicScreen() { }
 		
 		virtual void *ActiveWindow() = 0;
 		
-		virtual void Init() = 0;
 		virtual void SwitchTo() = 0;
 		virtual void Resize() = 0;
 		
@@ -62,6 +61,11 @@ class BasicScreen
 		virtual List *GetList() = 0;
 		
 		bool hasToBeResized;
+		
+	protected:
+		virtual void Init() = 0;
+		
+		bool isInitialized;
 };
 
 template <typename WindowType> class Screen : public BasicScreen

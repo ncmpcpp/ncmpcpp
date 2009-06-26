@@ -133,27 +133,6 @@ int main(int argc, char *argv[])
 	if (!Config.statusbar_visibility)
 		MainHeight++;
 	
-	myPlaylist->Init();
-	myBrowser->Init();
-	mySearcher->Init();
-	myLibrary->Init();
-	myPlaylistEditor->Init();
-	
-#	ifdef HAVE_TAGLIB_H
-	myTinyTagEditor->Init();
-	myTagEditor->Init();
-#	endif // HAVE_TAGLIB_H
-#	ifdef ENABLE_OUTPUTS
-	myOutputs->Init();
-#	endif // ENABLE_OUTPUTS
-#	ifdef ENABLE_CLOCK
-	myClock->Init();
-#	endif // ENABLE_CLOCK
-	
-	myHelp->Init();
-	myInfo->Init();
-	myLyrics->Init();
-	
 	if (Config.header_visibility)
 	{
 		wHeader = new Window(0, 0, COLS, 1, "", Config.header_color, brNone);
@@ -169,8 +148,7 @@ int main(int argc, char *argv[])
 	wFooter->CreateHistory();
 	*wFooter << fmtBold; // bold by default
 	
-	myScreen = myPlaylist;
-	
+	myPlaylist->SwitchTo();
 	myPlaylist->UpdateTimer();
 	
 	Mpd->SetStatusUpdater(NcmpcppStatusChanged, NULL);

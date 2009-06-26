@@ -40,7 +40,6 @@ class SearchEngine : public Screen< Menu< std::pair<Buffer *, MPD::Song *> > >
 	};
 	
 	public:
-		virtual void Init();
 		virtual void Resize();
 		virtual void SwitchTo();
 		
@@ -68,6 +67,9 @@ class SearchEngine : public Screen< Menu< std::pair<Buffer *, MPD::Song *> > >
 		
 		static const char *NormalMode;
 		static const char *StrictMode;
+		
+	protected:
+		virtual void Init();
 		
 	private:
 		void Prepare();

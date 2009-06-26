@@ -33,7 +33,6 @@ class Playlist : public Screen< Menu<MPD::Song> >
 		Playlist() : NowPlaying(-1), OldPlaying(-1), itsTotalLength(0), itsRemainingTime(0), itsScrollBegin(0) { }
 		~Playlist() { }
 		
-		virtual void Init();
 		virtual void SwitchTo();
 		virtual void Resize();
 		
@@ -75,6 +74,9 @@ class Playlist : public Screen< Menu<MPD::Song> >
 		static bool BlockNowPlayingUpdate;
 		static bool BlockUpdate;
 		static bool BlockRefreshing;
+		
+	protected:
+		virtual void Init();
 		
 	private:
 		std::string TotalLength();
