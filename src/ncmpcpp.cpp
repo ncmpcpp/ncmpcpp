@@ -1414,7 +1414,7 @@ int main(int argc, char *argv[])
 				if (newpos > 0 && newpos < s->GetTotalLength())
 					Mpd->Seek(newpos);
 				else
-					ShowMessage("Out of bounds, 0:00-%s possible mm:ss, %d given.", s->GetLength().c_str(), newpos);
+					ShowMessage("Out of bounds, 0:00-%s possible for mm:ss, %d given.", s->GetLength().c_str(), newpos);
 			}
 			else if (position.find('s') != string::npos) // probably position in seconds
 			{
