@@ -451,6 +451,8 @@ void Browser::LocateSong(const MPD::Song &s)
 	
 	Config.local_browser = !s.IsFromDB();
 	
+	SwitchTo();
+	
 	string option = s.toString(Config.song_status_format);
 	locale_to_utf(option);
 	if (itsBrowsedDir != s.GetDirectory())
@@ -463,7 +465,6 @@ void Browser::LocateSong(const MPD::Song &s)
 			break;
 		}
 	}
-	SwitchTo();
 }
 
 void Browser::GetDirectory(string dir, string subdir)
