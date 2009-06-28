@@ -532,13 +532,14 @@ int main(int argc, char *argv[])
 				{
 					Mpd->DeletePlaylist(locale_to_utf_cpy(name));
 					ShowMessage("Playlist \"%s\" deleted!", name.c_str());
-					if (!Config.local_browser)
+					if (!Config.local_browser && myBrowser->Main())
 						myBrowser->GetDirectory("/");
 				}
 				else
 					ShowMessage("Aborted!");
 				curs_set(0);
-				myPlaylistEditor->Playlists->Clear(0); // make playlists list update itself
+				if (myPlaylistEditor->Main()) // check if initialized
+					myPlaylistEditor->Playlists->Clear(0); // make playlists list update itself
 				UnlockStatusbar();
 			}
 			else if (myScreen == myBrowser && !myBrowser->Main()->Empty() && myBrowser->Main()->Current().type != itPlaylist)
@@ -666,7 +667,8 @@ int main(int argc, char *argv[])
 				if (Mpd->SavePlaylist(real_playlist_name))
 				{
 					ShowMessage("Playlist saved as: %s", playlist_name.c_str());
-					myPlaylistEditor->Playlists->Clear(0); // make playlist's list update itself
+					if (myPlaylistEditor->Main()) // check if initialized
+						myPlaylistEditor->Playlists->Clear(0); // make playlist's list update itself
 				}
 				else
 				{
@@ -691,13 +693,17 @@ int main(int argc, char *argv[])
 					else
 						ShowMessage("Aborted!");
 					curs_set(0);
-					myPlaylistEditor->Playlists->Clear(0); // make playlist's list update itself
+					if (myPlaylistEditor->Main()) // check if initialized
+						myPlaylistEditor->Playlists->Clear(0); // make playlist's list update itself
 					UnlockStatusbar();
 					if (myScreen == myPlaylist)
 						myPlaylist->EnableHighlighting();
 				}
 			}
-			if (!Config.local_browser && myBrowser->CurrentDir() == "/" && !myBrowser->Main()->Empty())
+			if (!Config.local_browser
+			&&  myBrowser->Main()
+			&&  myBrowser->CurrentDir() == "/"
+			&&  !myBrowser->Main()->Empty())
 				myBrowser->GetDirectory(myBrowser->CurrentDir());
 		}
 		else if (Keypressed(input, Key.Stop))
