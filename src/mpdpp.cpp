@@ -512,7 +512,7 @@ void Connection::SetConsume(bool mode) const
 
 void Connection::SetVolume(int vol)
 {
-	if (isConnected)
+	if (isConnected && vol >= 0 && vol <= 100)
 	{
 		mpd_sendSetvolCommand(itsConnection, vol);
 		mpd_finishCommand(itsConnection);
