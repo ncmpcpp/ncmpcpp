@@ -97,7 +97,7 @@ void Display::SongsInColumns(const MPD::Song &s, void *s_template, Menu<MPD::Son
 	
 	string st = s_template ? *static_cast<string *>(s_template) : "";
 	size_t where = 0;
-	Color color;
+	Color color = clDefault;
 	
 	for (int width = StrToInt(GetLineValue(st, '(', ')', 1)); width; width = StrToInt(GetLineValue(st, '(', ')', 1)))
 	{
