@@ -1789,7 +1789,7 @@ int main(int argc, char *argv[])
 				size_t number = StrToLong(wFooter->GetString());
 				UnlockStatusbar();
 				if (number && Mpd->AddRandomSongs(number))
-					ShowMessage("%lu random song%s added to playlist!", number, number == 1 ? "" : "s");
+					ShowMessage(SIZE_T_FORMAT " random song%s added to playlist!", number, number == 1 ? "" : "s");
 			}
 			else if (myScreen == myBrowser)
 			{

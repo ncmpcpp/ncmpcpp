@@ -860,7 +860,7 @@ Window &Window::operator<<(const wstring &ws)
 
 Window &Window::operator<<(size_t s)
 {
-	wprintw(itsWindow, "%u", s);
+	wprintw(itsWindow, SIZE_T_FORMAT, s);
 	return *this;
 }
 
