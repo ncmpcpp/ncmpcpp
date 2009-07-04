@@ -234,7 +234,7 @@ void SearchEngine::EnterPressed()
 				{
 					if (myPlaylist->Main()->at(i).GetHash() == hash)
 					{
-						Mpd->Play(i);
+						Mpd.Play(i);
 						break;
 					}
 				}
@@ -242,10 +242,10 @@ void SearchEngine::EnterPressed()
 			else
 			{
 				const Song &s = *w->Current().second;
-				int id = Mpd->AddSong(s);
+				int id = Mpd.AddSong(s);
 				if (id >= 0)
 				{
-					Mpd->PlayID(id);
+					Mpd.PlayID(id);
 					ShowMessage("Added to playlist: %s", s.toString(Config.song_status_format).c_str());
 					w->BoldOption(w->Choice(), 1);
 				}
@@ -273,24 +273,24 @@ void SearchEngine::SpacePressed()
 	{
 		Playlist::BlockUpdate = 1;
 		long long hash = w->Current().second->GetHash();
-		Mpd->StartCommandsList();
+		Mpd.StartCommandsList();
 		for (size_t i = 0; i < myPlaylist->Main()->Size(); i++)
 		{
 			if (myPlaylist->Main()->at(i).GetHash() == hash)
 			{
-				Mpd->Delete(i);
+				Mpd.Delete(i);
 				myPlaylist->Main()->DeleteOption(i);
 				i--;
 			}
 		}
-		Mpd->CommitCommandsList();
+		Mpd.CommitCommandsList();
 		w->BoldOption(w->Choice(), 0);
 		Playlist::BlockUpdate = 0;
 	}
 	else
 	{
 		const Song &s = *w->Current().second;
-		if (Mpd->AddSong(s) != -1)
+		if (Mpd.AddSong(s) != -1)
 		{
 			ShowMessage("Added to playlist: %s", s.toString(Config.song_status_format).c_str());
 			w->BoldOption(w->Choice(), 1);
@@ -421,7 +421,7 @@ void SearchEngine::Search()
 	
 	SongList list;
 	if (Config.search_in_db)
-		Mpd->GetDirectoryRecursive("/", list);
+		Mpd.GetDirectoryRecursive("/", list);
 	else
 	{
 		list.reserve(myPlaylist->Main()->Size());

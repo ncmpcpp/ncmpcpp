@@ -166,7 +166,7 @@ void MediaLibrary::Update()
 		TagList list;
 		Albums->Clear(0);
 		Songs->Clear(0);
-		Mpd->GetList(list, Config.media_lib_primary_tag);
+		Mpd.GetList(list, Config.media_lib_primary_tag);
 		sort(list.begin(), list.end(), CaseInsensitiveSorting());
 		for (TagList::iterator it = list.begin(); it != list.end(); it++)
 		{
@@ -186,22 +186,22 @@ void MediaLibrary::Update()
 		TagList list;
 		locale_to_utf(Artists->Current());
 		if (Config.media_lib_primary_tag == MPD_TAG_ITEM_ARTIST)
-			Mpd->GetAlbums(Artists->Current(), list);
+			Mpd.GetAlbums(Artists->Current(), list);
 		else
 		{
-			Mpd->StartFieldSearch(MPD_TAG_ITEM_ALBUM);
-			Mpd->AddSearch(Config.media_lib_primary_tag, Artists->Current());
-			Mpd->CommitSearch(list);
+			Mpd.StartFieldSearch(MPD_TAG_ITEM_ALBUM);
+			Mpd.AddSearch(Config.media_lib_primary_tag, Artists->Current());
+			Mpd.CommitSearch(list);
 		}
 		
 		// <mpd-0.14 doesn't support searching for empty tag
-		if (Mpd->Version() > 13)
+		if (Mpd.Version() > 13)
 		{
 			TagList noalbum_list;
-			Mpd->StartFieldSearch(MPD_TAG_ITEM_FILENAME);
-			Mpd->AddSearch(Config.media_lib_primary_tag, Artists->Current());
-			Mpd->AddSearch(MPD_TAG_ITEM_ALBUM, "");
-			Mpd->CommitSearch(noalbum_list);
+			Mpd.StartFieldSearch(MPD_TAG_ITEM_FILENAME);
+			Mpd.AddSearch(Config.media_lib_primary_tag, Artists->Current());
+			Mpd.AddSearch(MPD_TAG_ITEM_ALBUM, "");
+			Mpd.CommitSearch(noalbum_list);
 			if (!noalbum_list.empty())
 				Albums->AddOption(std::make_pair("<no album>", SearchConstraints("", "")));
 		}
@@ -209,10 +209,10 @@ void MediaLibrary::Update()
 		for (TagList::const_iterator it = list.begin(); it != list.end(); it++)
 		{
 			TagList l;
-			Mpd->StartFieldSearch(MPD_TAG_ITEM_DATE);
-			Mpd->AddSearch(Config.media_lib_primary_tag, Artists->Current());
-			Mpd->AddSearch(MPD_TAG_ITEM_ALBUM, *it);
-			Mpd->CommitSearch(l);
+			Mpd.StartFieldSearch(MPD_TAG_ITEM_DATE);
+			Mpd.AddSearch(Config.media_lib_primary_tag, Artists->Current());
+			Mpd.AddSearch(MPD_TAG_ITEM_ALBUM, *it);
+			Mpd.CommitSearch(l);
 			if (l.empty())
 			{
 				Albums->AddOption(std::make_pair(*it, SearchConstraints(*it, "")));
@@ -233,22 +233,22 @@ void MediaLibrary::Update()
 		TagList artists;
 		*Albums << XY(0, 0) << "Fetching albums...";
 		Albums->Window::Refresh();
-		Mpd->GetList(artists, Config.media_lib_primary_tag);
+		Mpd.GetList(artists, Config.media_lib_primary_tag);
 		for (TagList::const_iterator i = artists.begin(); i != artists.end(); i++)
 		{
 			TagList albums;
-			Mpd->StartFieldSearch(MPD_TAG_ITEM_ALBUM);
-			Mpd->AddSearch(Config.media_lib_primary_tag, *i);
-			Mpd->CommitSearch(albums);
+			Mpd.StartFieldSearch(MPD_TAG_ITEM_ALBUM);
+			Mpd.AddSearch(Config.media_lib_primary_tag, *i);
+			Mpd.CommitSearch(albums);
 			for (TagList::const_iterator j = albums.begin(); j != albums.end(); j++)
 			{
 				if (Config.media_lib_primary_tag != MPD_TAG_ITEM_DATE)
 				{
 					TagList years;
-					Mpd->StartFieldSearch(MPD_TAG_ITEM_DATE);
-					Mpd->AddSearch(Config.media_lib_primary_tag, *i);
-					Mpd->AddSearch(MPD_TAG_ITEM_ALBUM, *j);
-					Mpd->CommitSearch(years);
+					Mpd.StartFieldSearch(MPD_TAG_ITEM_DATE);
+					Mpd.AddSearch(Config.media_lib_primary_tag, *i);
+					Mpd.AddSearch(MPD_TAG_ITEM_ALBUM, *j);
+					Mpd.CommitSearch(years);
 					if (!years.empty())
 					{
 						for (TagList::const_iterator k = years.begin(); k != years.end(); k++)
@@ -283,8 +283,8 @@ void MediaLibrary::Update()
 		SongList list;
 		
 		Songs->Clear(0);
-		Mpd->StartSearch(1);
-		Mpd->AddSearch(Config.media_lib_primary_tag, hasTwoColumns ? Albums->Current().second.Artist : locale_to_utf_cpy(Artists->Current()));
+		Mpd.StartSearch(1);
+		Mpd.AddSearch(Config.media_lib_primary_tag, hasTwoColumns ? Albums->Current().second.Artist : locale_to_utf_cpy(Artists->Current()));
 		if (Albums->Empty()) // left for compatibility with <mpd-0.14
 		{
 			*Albums << XY(0, 0) << "No albums found.";
@@ -292,11 +292,11 @@ void MediaLibrary::Update()
 		}
 		else
 		{
-			Mpd->AddSearch(MPD_TAG_ITEM_ALBUM, Albums->Current().second.Album);
+			Mpd.AddSearch(MPD_TAG_ITEM_ALBUM, Albums->Current().second.Album);
 			if (!Albums->Current().second.Album.empty()) // for <no album>
-				Mpd->AddSearch(MPD_TAG_ITEM_DATE, Albums->Current().second.Year);
+				Mpd.AddSearch(MPD_TAG_ITEM_DATE, Albums->Current().second.Year);
 		}
-		Mpd->CommitSearch(list);
+		Mpd.CommitSearch(list);
 		
 		sort(list.begin(), list.end(), SortSongsByTrack);
 		bool bold = 0;
@@ -470,15 +470,15 @@ void MediaLibrary::AddToPlaylist(bool add_n_play)
 	
 	if (!Artists->Empty() && w == Artists)
 	{
-		Mpd->StartSearch(1);
-		Mpd->AddSearch(Config.media_lib_primary_tag, locale_to_utf_cpy(Artists->Current()));
-		Mpd->CommitSearch(list);
-		Mpd->StartCommandsList();
+		Mpd.StartSearch(1);
+		Mpd.AddSearch(Config.media_lib_primary_tag, locale_to_utf_cpy(Artists->Current()));
+		Mpd.CommitSearch(list);
+		Mpd.StartCommandsList();
 		SongList::const_iterator it = list.begin();
 		for (; it != list.end(); it++)
-			if (Mpd->AddSong(**it) < 0)
+			if (Mpd.AddSong(**it) < 0)
 				break;
-		Mpd->CommitCommandsList();
+		Mpd.CommitCommandsList();
 		
 		if (it != list.begin())
 		{
@@ -489,7 +489,7 @@ void MediaLibrary::AddToPlaylist(bool add_n_play)
 			if (s->GetHash() == list[0]->GetHash())
 			{
 				if (add_n_play)
-					Mpd->PlayID(s->GetID());
+					Mpd.PlayID(s->GetID());
 			}
 			else
 				ShowMessage("%s", MPD::Message::PartOfSongsAdded);
@@ -497,12 +497,12 @@ void MediaLibrary::AddToPlaylist(bool add_n_play)
 	}
 	else if (w == Albums)
 	{
-		Mpd->StartCommandsList();
+		Mpd.StartCommandsList();
 		size_t i = 0;
 		for (; i < Songs->Size(); i++)
-			if (Mpd->AddSong(Songs->at(i)) < 0)
+			if (Mpd.AddSong(Songs->at(i)) < 0)
 				break;
-		Mpd->CommitCommandsList();
+		Mpd.CommitCommandsList();
 		
 		if (i)
 		{
@@ -511,7 +511,7 @@ void MediaLibrary::AddToPlaylist(bool add_n_play)
 			if (s->GetHash() == Songs->at(0).GetHash())
 			{
 				if (add_n_play)
-					Mpd->PlayID(s->GetID());
+					Mpd.PlayID(s->GetID());
 			}
 			else
 				ShowMessage("%s", MPD::Message::PartOfSongsAdded);
@@ -531,7 +531,7 @@ void MediaLibrary::AddToPlaylist(bool add_n_play)
 					{
 						if (myPlaylist->Main()->at(i).GetHash() == hash)
 						{
-							Mpd->Play(i);
+							Mpd.Play(i);
 							break;
 						}
 					}
@@ -539,17 +539,17 @@ void MediaLibrary::AddToPlaylist(bool add_n_play)
 				else
 				{
 					Playlist::BlockUpdate = 1;
-					Mpd->StartCommandsList();
+					Mpd.StartCommandsList();
 					for (size_t i = 0; i < myPlaylist->Main()->Size(); i++)
 					{
 						if (myPlaylist->Main()->at(i).GetHash() == hash)
 						{
-							Mpd->Delete(i);
+							Mpd.Delete(i);
 							myPlaylist->Main()->DeleteOption(i);
 							i--;
 						}
 					}
-					Mpd->CommitCommandsList();
+					Mpd.CommitCommandsList();
 					Songs->BoldOption(Songs->Choice(), 0);
 					Playlist::BlockUpdate = 0;
 				}
@@ -557,12 +557,12 @@ void MediaLibrary::AddToPlaylist(bool add_n_play)
 			else
 			{
 				Song &s = Songs->Current();
-				int id = Mpd->AddSong(s);
+				int id = Mpd.AddSong(s);
 				if (id >= 0)
 				{
 					ShowMessage("Added to playlist: %s", s.toString(Config.song_status_format).c_str());
 					if (add_n_play)
-						Mpd->PlayID(id);
+						Mpd.PlayID(id);
 					Songs->BoldOption(Songs->Choice(), 1);
 				}
 			}

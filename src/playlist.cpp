@@ -127,7 +127,7 @@ void Playlist::EnterPressed()
 {
 	if (!w->Empty())
 	{
-		Mpd->PlayID(w->Current().GetID());
+		Mpd.PlayID(w->Current().GetID());
 		UpdateStatusImmediately = 1;
 	}
 }
@@ -147,7 +147,7 @@ void Playlist::MouseButtonPressed(MEVENT me)
 		w->Goto(me.y);
 		if (me.bstate & BUTTON3_PRESSED)
 		{
-			Mpd->Play(w->Current().GetPosition());
+			Mpd.Play(w->Current().GetPosition());
 			UpdateStatusImmediately = 1;
 		}
 	}
@@ -249,13 +249,13 @@ void Playlist::Sort()
 				{
 					BlockUpdate = 1;
 					ShowMessage("Reversing playlist order...");
-					Mpd->StartCommandsList();
+					Mpd.StartCommandsList();
 					for (size_t i = 0, j = w->Size()-1; i < w->Size()/2; i++, j--)
 					{
-						Mpd->Swap(i, j);
+						Mpd.Swap(i, j);
 						w->Swap(i, j);
 					}
-					Mpd->CommitCommandsList();
+					Mpd.CommitCommandsList();
 					ShowMessage("Playlist reversed!");
 					return;
 				}
@@ -290,14 +290,14 @@ void Playlist::Sort()
 	
 	BlockUpdate = 1;
 	ShowMessage("Sorting playlist...");
-	Mpd->StartCommandsList();
+	Mpd.StartCommandsList();
 	do
 	{
 		for (size_t i = 0; i < playlist.size(); i++)
 		{
 			if (playlist[i]->GetPosition() > int(i))
 			{
-				Mpd->Swap(playlist[i]->GetPosition(), i);
+				Mpd.Swap(playlist[i]->GetPosition(), i);
 				std::swap(cmp[playlist[i]->GetPosition()], cmp[i]);
 				w->Swap(playlist[i]->GetPosition(), i);
 			}
@@ -305,7 +305,7 @@ void Playlist::Sort()
 		}
 	}
 	while (playlist != cmp);
-	Mpd->CommitCommandsList();
+	Mpd.CommitCommandsList();
 	ShowMessage("Playlist sorted!");
 }
 
@@ -374,7 +374,7 @@ std::string Playlist::TotalLength()
 		size_t real_size = w->Size();
 		w->ShowFiltered();
 		if (w->Size() != real_size)
-			result << " (out of " << Mpd->GetPlaylistLength() << ")";
+			result << " (out of " << Mpd.GetPlaylistLength() << ")";
 	}
 	
 	if (itsTotalLength)

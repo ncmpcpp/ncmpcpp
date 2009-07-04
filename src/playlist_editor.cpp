@@ -116,7 +116,7 @@ void PlaylistEditor::Update()
 	{
 		Content->Clear(0);
 		TagList list;
-		Mpd->GetPlaylists(list);
+		Mpd.GetPlaylists(list);
 		sort(list.begin(), list.end(), CaseInsensitiveSorting());
 		for (TagList::iterator it = list.begin(); it != list.end(); it++)
 		{
@@ -131,7 +131,7 @@ void PlaylistEditor::Update()
 	{
 		Content->Reset();
 		SongList list;
-		Mpd->GetPlaylistContent(locale_to_utf_cpy(Playlists->Current()), list);
+		Mpd.GetPlaylistContent(locale_to_utf_cpy(Playlists->Current()), list);
 		if (!list.empty())
 			Content->SetTitle("Playlist's content (" + IntoStr(list.size()) + " item" + (list.size() == 1 ? ")" : "s)"));
 		else
@@ -197,13 +197,13 @@ void PlaylistEditor::AddToPlaylist(bool add_n_play)
 	
 	if (w == Playlists && !Playlists->Empty())
 	{
-		Mpd->GetPlaylistContent(locale_to_utf_cpy(Playlists->Current()), list);
-		Mpd->StartCommandsList();
+		Mpd.GetPlaylistContent(locale_to_utf_cpy(Playlists->Current()), list);
+		Mpd.StartCommandsList();
 		SongList::const_iterator it = list.begin();
 		for (; it != list.end(); it++)
-			if (Mpd->AddSong(**it) < 0)
+			if (Mpd.AddSong(**it) < 0)
 				break;
-		Mpd->CommitCommandsList();
+		Mpd.CommitCommandsList();
 		
 		if (it != list.begin())
 		{
@@ -212,7 +212,7 @@ void PlaylistEditor::AddToPlaylist(bool add_n_play)
 			if (s.GetHash() == list[0]->GetHash())
 			{
 				if (add_n_play)
-					Mpd->PlayID(s.GetID());
+					Mpd.PlayID(s.GetID());
 			}
 			else
 				ShowMessage("%s", MPD::Message::PartOfSongsAdded);
@@ -232,7 +232,7 @@ void PlaylistEditor::AddToPlaylist(bool add_n_play)
 					{
 						if (myPlaylist->Main()->at(i).GetHash() == hash)
 						{
-							Mpd->Play(i);
+							Mpd.Play(i);
 							break;
 						}
 					}
@@ -240,17 +240,17 @@ void PlaylistEditor::AddToPlaylist(bool add_n_play)
 				else
 				{
 					Playlist::BlockUpdate = 1;
-					Mpd->StartCommandsList();
+					Mpd.StartCommandsList();
 					for (size_t i = 0; i < myPlaylist->Main()->Size(); i++)
 					{
 						if (myPlaylist->Main()->at(i).GetHash() == hash)
 						{
-							Mpd->Delete(i);
+							Mpd.Delete(i);
 							myPlaylist->Main()->DeleteOption(i);
 							i--;
 						}
 					}
-					Mpd->CommitCommandsList();
+					Mpd.CommitCommandsList();
 					Content->BoldOption(Content->Choice(), 0);
 					Playlist::BlockUpdate = 0;
 				}
@@ -258,12 +258,12 @@ void PlaylistEditor::AddToPlaylist(bool add_n_play)
 			else
 			{
 				const Song &s = Content->Current();
-				int id = Mpd->AddSong(s);
+				int id = Mpd.AddSong(s);
 				if (id >= 0)
 				{
 					ShowMessage("Added to playlist: %s", s.toString(Config.song_status_format).c_str());
 					if (add_n_play)
-						Mpd->PlayID(id);
+						Mpd.PlayID(id);
 					Content->BoldOption(Content->Choice(), 1);
 				}
 			}

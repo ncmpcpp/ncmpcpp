@@ -193,7 +193,7 @@ void TinyTagEditor::EnterPressed()
 				ShowMessage("Tags updated!");
 				if (s.IsFromDB())
 				{
-					Mpd->UpdateDirectory(locale_to_utf_cpy(s.GetDirectory()));
+					Mpd.UpdateDirectory(locale_to_utf_cpy(s.GetDirectory()));
 					if (myOldScreen == mySearcher)
 						*mySearcher->Main()->Current().second = s;
 				}
@@ -443,14 +443,14 @@ void TagEditor::Update()
 		{
 			*Albums << XY(0, 0) << "Fetching albums...";
 			Albums->Window::Refresh();
-			Mpd->GetAlbums("", list);
+			Mpd.GetAlbums("", list);
 			for (TagList::const_iterator it = list.begin(); it != list.end(); it++)
 			{
 				
 				SongList l;
-				Mpd->StartSearch(1);
-				Mpd->AddSearch(MPD_TAG_ITEM_ALBUM, *it);
-				Mpd->CommitSearch(l);
+				Mpd.StartSearch(1);
+				Mpd.AddSearch(MPD_TAG_ITEM_ALBUM, *it);
+				Mpd.CommitSearch(l);
 				if (!l.empty())
 				{
 					l[0]->Localize();
@@ -463,7 +463,7 @@ void TagEditor::Update()
 		else
 		{
 			int highlightme = -1;
-			Mpd->GetDirectories(itsBrowsedDir, list);
+			Mpd.GetDirectories(itsBrowsedDir, list);
 			sort(list.begin(), list.end(), CaseInsensitiveSorting());
 			if (itsBrowsedDir != "/")
 			{
@@ -497,9 +497,9 @@ void TagEditor::Update()
 		SongList list;
 		if (Config.albums_in_tag_editor)
 		{
-			Mpd->StartSearch(1);
-			Mpd->AddSearch(MPD_TAG_ITEM_ALBUM, Albums->Current().second);
-			Mpd->CommitSearch(list);
+			Mpd.StartSearch(1);
+			Mpd.AddSearch(MPD_TAG_ITEM_ALBUM, Albums->Current().second);
+			Mpd.CommitSearch(list);
 			sort(list.begin(), list.end(), CaseInsensitiveSorting());
 			for (SongList::iterator it = list.begin(); it != list.end(); it++)
 			{
@@ -509,7 +509,7 @@ void TagEditor::Update()
 		}
 		else
 		{
-			Mpd->GetSongs(Dirs->Current().second, list);
+			Mpd.GetSongs(Dirs->Current().second, list);
 			sort(list.begin(), list.end(), CaseInsensitiveSorting());
 			for (SongList::const_iterator it = list.begin(); it != list.end(); it++)
 			{
@@ -535,7 +535,7 @@ void TagEditor::EnterPressed()
 	if (w == Dirs)
 	{
 		TagList test;
-		Mpd->GetDirectories(LeftColumn->Current().second, test);
+		Mpd.GetDirectories(LeftColumn->Current().second, test);
 		if (!test.empty())
 		{
 			itsHighlightedDir = itsBrowsedDir;
@@ -686,7 +686,7 @@ void TagEditor::EnterPressed()
 				w->Refresh();
 				w = LeftColumn;
 				LeftColumn->HighlightColor(Config.active_column_color);
-				Mpd->UpdateDirectory(locale_to_utf_cpy(FindSharedDir(Tags)));
+				Mpd.UpdateDirectory(locale_to_utf_cpy(FindSharedDir(Tags)));
 			}
 			else
 				Tags->Clear(0);
@@ -986,15 +986,15 @@ bool TagEditor::WriteTags(Song &s)
 					// if we rename local file, it won't get updated
 					// so just remove it from playlist and add again
 					size_t pos = myPlaylist->Main()->Choice();
-					Mpd->StartCommandsList();
-					Mpd->Delete(pos);
-					int id = Mpd->AddSong("file://" + new_name);
+					Mpd.StartCommandsList();
+					Mpd.Delete(pos);
+					int id = Mpd.AddSong("file://" + new_name);
 					if (id >= 0)
 					{
 						s = myPlaylist->Main()->Back();
-						Mpd->Move(s.GetPosition(), pos);
+						Mpd.Move(s.GetPosition(), pos);
 					}
-					Mpd->CommitCommandsList();
+					Mpd.CommitCommandsList();
 				}
 				else // only myBrowser->Main()
 					s.SetFile(new_name);

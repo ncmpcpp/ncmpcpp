@@ -214,5 +214,7 @@ namespace MPD
 	};
 }
 
+extern MPD::Connection Mpd;
+
 #endif
 

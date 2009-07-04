@@ -109,7 +109,7 @@ void UnlockStatusbar()
 		else
 			block_progressbar_update = 0;
 	}
-	if (Mpd->GetState() < psPlay)
+	if (Mpd.GetState() < psPlay)
 		Statusbar() << wclrtoeol;
 }
 
@@ -118,12 +118,12 @@ void TraceMpdStatus()
 	static timeval past, now;
 	
 	gettimeofday(&now, 0);
-	if ((Mpd->Connected()
+	if ((Mpd.Connected()
 	&&   (/*(now.tv_sec == past.tv_sec && now.tv_usec >= past.tv_usec+500000) || */now.tv_sec > past.tv_sec))
 	||  UpdateStatusImmediately
 	   )
 	{
-		Mpd->UpdateStatus();
+		Mpd.UpdateStatus();
 		BlockItemListUpdate = 0;
 		Playlist::BlockUpdate = 0;
 		UpdateStatusImmediately = 0;
@@ -145,29 +145,29 @@ void TraceMpdStatus()
 			else
 				block_progressbar_update = !allow_statusbar_unlock;
 			
-			if (Mpd->GetState() < psPlay && !block_statusbar_update)
+			if (Mpd.GetState() < psPlay && !block_statusbar_update)
 				Statusbar() << wclrtoeol;
 		}
 	}
 }
 
-void NcmpcppErrorCallback(Connection *Mpd, int errorid, const char *msg, void *)
+void NcmpcppErrorCallback(Connection *, int errorid, const char *msg, void *)
 {
 	if (errorid == MPD_ACK_ERROR_PERMISSION)
 	{
 		wFooter->SetGetStringHelper(NULL);
 		Statusbar() << "Password: ";
 		string password = wFooter->GetString(-1, 0, 1);
-		Mpd->SetPassword(password);
-		Mpd->SendPassword();
-		Mpd->UpdateStatus();
+		Mpd.SetPassword(password);
+		Mpd.SendPassword();
+		Mpd.UpdateStatus();
 		wFooter->SetGetStringHelper(StatusbarGetStringHelper);
 	}
 	else
 		ShowMessage("%s", msg);
 }
 
-void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
+void NcmpcppStatusChanged(Connection *, StatusChanges changed, void *)
 {
 	static size_t playing_song_scroll_begin = 0;
 	static string player_state;
@@ -178,10 +178,10 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 	wFooter->Bold(1);
 	wFooter->GetXY(sx, sy);
 	
-	if ((myPlaylist->NowPlaying != Mpd->GetCurrentSongPos() || changed.SongID) && !Playlist::BlockNowPlayingUpdate)
+	if ((myPlaylist->NowPlaying != Mpd.GetCurrentSongPos() || changed.SongID) && !Playlist::BlockNowPlayingUpdate)
 	{
 		myPlaylist->OldPlaying = myPlaylist->NowPlaying;
-		myPlaylist->NowPlaying = Mpd->GetCurrentSongPos();
+		myPlaylist->NowPlaying = Mpd.GetCurrentSongPos();
 		bool was_filtered = myPlaylist->Main()->isFiltered();
 		myPlaylist->Main()->ShowAll();
 		try
@@ -202,19 +202,19 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 	{
 		if (!Playlist::BlockUpdate)
 		{
-			np = Mpd->GetCurrentSong();
-			if (Mpd->GetState() > psStop)
+			np = Mpd.GetCurrentSong();
+			if (Mpd.GetState() > psStop)
 				WindowTitle(utf_to_locale_cpy(np.toString(Config.song_window_title_format)));
 			
 			bool was_filtered = myPlaylist->Main()->isFiltered();
 			myPlaylist->Main()->ShowAll();
 			SongList list;
 			
-			size_t playlist_length = Mpd->GetPlaylistLength();
+			size_t playlist_length = Mpd.GetPlaylistLength();
 			if (playlist_length < myPlaylist->Main()->Size())
 				myPlaylist->Main()->ResizeList(playlist_length);
 			
-			Mpd->GetPlaylistChanges(Mpd->GetOldPlaylistID(), list);
+			Mpd.GetPlaylistChanges(Mpd.GetOldPlaylistID(), list);
 			myPlaylist->Main()->Reserve(playlist_length);
 			for (SongList::const_iterator it = list.begin(); it != list.end(); it++)
 			{
@@ -306,7 +306,7 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 	}
 	if (changed.PlayerState)
 	{
-		PlayerState mpd_state = Mpd->GetState();
+		PlayerState mpd_state = Mpd.GetState();
 		switch (mpd_state)
 		{
 			case psUnknown:
@@ -352,45 +352,45 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 	{
 		if (myPlaylist->isPlaying())
 		{
-			np = Mpd->GetCurrentSong();
+			np = Mpd.GetCurrentSong();
 			if (!Config.execute_on_song_change.empty())
 				system(np.toString(Config.execute_on_song_change).c_str());
-			if (Mpd->GetState() > psStop)
+			if (Mpd.GetState() > psStop)
 				WindowTitle(utf_to_locale_cpy(np.toString(Config.song_window_title_format)));
 			if (Config.autocenter_mode && !myPlaylist->Main()->isFiltered())
 				myPlaylist->Main()->Highlight(myPlaylist->NowPlaying);
 			
-			if (!Mpd->GetElapsedTime())
+			if (!Mpd.GetElapsedTime())
 				mvwhline(wFooter->Raw(), 0, 0, 0, wFooter->GetWidth());
 			
-			if (Config.now_playing_lyrics && !Mpd->GetSingle() && myScreen == myLyrics && myOldScreen == myPlaylist)
+			if (Config.now_playing_lyrics && !Mpd.GetSingle() && myScreen == myLyrics && myOldScreen == myPlaylist)
 				Lyrics::Reload = 1;
 		}
 		Playlist::ReloadRemaining = 1;
 		
 		playing_song_scroll_begin = 0;
 		
-		if (Mpd->GetState() == psPlay)
+		if (Mpd.GetState() == psPlay)
 		{
 			changed.ElapsedTime = 1;
 		}
 	}
 	static time_t now, past = 0;
 	time(&now);
-	if (((now > past || changed.SongID) && Mpd->GetState() > psStop) || RedrawStatusbar)
+	if (((now > past || changed.SongID) && Mpd.GetState() > psStop) || RedrawStatusbar)
 	{
 		time(&past);
 		if (np.Empty())
 		{
-			np = Mpd->GetCurrentSong();
+			np = Mpd.GetCurrentSong();
 			WindowTitle(utf_to_locale_cpy(np.toString(Config.song_window_title_format)));
 		}
 		if (!np.Empty() && !player_state.empty())
 		{
-			int mpd_elapsed = Mpd->GetElapsedTime();
+			int mpd_elapsed = Mpd.GetElapsedTime();
 			if (elapsed < mpd_elapsed-2 || elapsed+1 > mpd_elapsed)
 				elapsed = mpd_elapsed;
-			else if (Mpd->GetState() == psPlay && !RedrawStatusbar)
+			else if (Mpd.GetState() == psPlay && !RedrawStatusbar)
 				elapsed++;
 			
 			if (!block_statusbar_update && Config.statusbar_visibility)
@@ -447,33 +447,33 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 	
 	if (changed.Repeat)
 	{
-		mpd_repeat = Mpd->GetRepeat() ? 'r' : 0;
+		mpd_repeat = Mpd.GetRepeat() ? 'r' : 0;
 		ShowMessage("Repeat mode is %s", !mpd_repeat ? "off" : "on");
 	}
 	if (changed.Random)
 	{
-		mpd_random = Mpd->GetRandom() ? 'z' : 0;
+		mpd_random = Mpd.GetRandom() ? 'z' : 0;
 		ShowMessage("Random mode is %s", !mpd_random ? "off" : "on");
 	}
 	if (changed.Single)
 	{
-		mpd_single = Mpd->GetSingle() ? 's' : 0;
+		mpd_single = Mpd.GetSingle() ? 's' : 0;
 		ShowMessage("Single mode is %s", !mpd_single ? "off" : "on");
 	}
 	if (changed.Consume)
 	{
-		mpd_consume = Mpd->GetConsume() ? 'c' : 0;
+		mpd_consume = Mpd.GetConsume() ? 'c' : 0;
 		ShowMessage("Consume mode is %s", !mpd_consume ? "off" : "on");
 	}
 	if (changed.Crossfade)
 	{
-		int crossfade = Mpd->GetCrossfade();
+		int crossfade = Mpd.GetCrossfade();
 		mpd_crossfade = crossfade ? 'x' : 0;
 		ShowMessage("Crossfade set to %d seconds", crossfade);
 	}
 	if (changed.DBUpdating)
 	{
-		mpd_db_updating = Mpd->GetDBIsUpdating() ? 'U' : 0;
+		mpd_db_updating = Mpd.GetDBIsUpdating() ? 'U' : 0;
 		ShowMessage(!mpd_db_updating ? "Database update finished!" : "Database update started!");
 	}
 	if (changed.StatusFlags && Config.header_visibility)
@@ -512,7 +512,7 @@ void NcmpcppStatusChanged(Connection *Mpd, StatusChanges changed, void *)
 	if (changed.Volume && Config.header_visibility)
 	{
 		VolumeState = " Volume: ";
-		int volume = Mpd->GetVolume();
+		int volume = Mpd.GetVolume();
 		if (volume < 0)
 			VolumeState += "n/a";
 		else

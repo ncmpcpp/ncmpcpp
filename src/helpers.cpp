@@ -30,15 +30,14 @@
 #include "tag_editor.h"
 
 using namespace MPD;
-using Global::Mpd;
 using Global::wFooter;
 using std::string;
 
 bool ConnectToMPD()
 {
-	if (!Mpd->Connect())
+	if (!Mpd.Connect())
 	{
-		std::cout << "Cannot connect to mpd: " << Mpd->GetErrorMessage() << std::endl;
+		std::cout << "Cannot connect to mpd: " << Mpd.GetErrorMessage() << std::endl;
 		return false;
 	}
 	return true;
@@ -57,14 +56,14 @@ void ParseArgv(int argc, char **argv)
 		{
 			if (++i >= argc)
 				exit(0);
-			Mpd->SetHostname(argv[i]);
+			Mpd.SetHostname(argv[i]);
 			continue;
 		}
 		if (strcmp(argv[i], "-p") == 0)
 		{
 			if (++i >= argc)
 				exit(0);
-			Mpd->SetPort(atoi(argv[i]));
+			Mpd.SetPort(atoi(argv[i]));
 			continue;
 		}
 		else if (strcmp(argv[i], "-v") == 0 || strcmp(argv[i], "--version") == 0)
@@ -107,25 +106,25 @@ void ParseArgv(int argc, char **argv)
 		
 		if (strcmp(argv[i], "play") == 0)
 		{
-			Mpd->Play();
+			Mpd.Play();
 			quit = 1;
 		}
 		else if (strcmp(argv[i], "pause") == 0)
 		{
-			Mpd->Execute("pause \"1\"\n");
+			Mpd.Execute("pause \"1\"\n");
 			quit = 1;
 		}
 		else if (strcmp(argv[i], "toggle") == 0)
 		{
-			Mpd->UpdateStatus();
-			switch (Mpd->GetState())
+			Mpd.UpdateStatus();
+			switch (Mpd.GetState())
 			{
 				case psPause:
 				case psPlay:
-					Mpd->Pause();
+					Mpd.Pause();
 					break;
 				case psStop:
-					Mpd->Play();
+					Mpd.Play();
 					break;
 				default:
 					break;
@@ -134,30 +133,30 @@ void ParseArgv(int argc, char **argv)
 		}
 		else if (strcmp(argv[i], "stop") == 0)
 		{
-			Mpd->Stop();
+			Mpd.Stop();
 			quit = 1;
 		}
 		else if (strcmp(argv[i], "next") == 0)
 		{
-			Mpd->Next();
+			Mpd.Next();
 			quit = 1;
 		}
 		else if (strcmp(argv[i], "prev") == 0)
 		{
-			Mpd->Prev();
+			Mpd.Prev();
 			quit = 1;
 		}
 		else if (strcmp(argv[i], "volume") == 0)
 		{
 			i++;
-			Mpd->UpdateStatus();
-			if (!Mpd->GetErrorMessage().empty())
+			Mpd.UpdateStatus();
+			if (!Mpd.GetErrorMessage().empty())
 			{
-				cout << "Error: " << Mpd->GetErrorMessage() << endl;
+				cout << "Error: " << Mpd.GetErrorMessage() << endl;
 				exit(0);
 			}
 			if (i != argc)
-				Mpd->SetVolume(Mpd->GetVolume()+atoi(argv[i]));
+				Mpd.SetVolume(Mpd.GetVolume()+atoi(argv[i]));
 			quit = 1;
 		}
 		else
@@ -165,9 +164,9 @@ void ParseArgv(int argc, char **argv)
 			cout << "ncmpcpp: invalid option: " << argv[i] << endl;
 			exit(0);
 		}
-		if (!Mpd->GetErrorMessage().empty())
+		if (!Mpd.GetErrorMessage().empty())
 		{
-			cout << "Error: " << Mpd->GetErrorMessage() << endl;
+			cout << "Error: " << Mpd.GetErrorMessage() << endl;
 			exit(0);
 		}
 	}

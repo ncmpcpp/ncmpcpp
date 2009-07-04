@@ -33,8 +33,6 @@ namespace Global
 	extern Window *wHeader;
 	extern Window *wFooter;
 	
-	extern MPD::Connection *Mpd;
-	
 	extern size_t MainStartY;
 	extern size_t MainHeight;
 	

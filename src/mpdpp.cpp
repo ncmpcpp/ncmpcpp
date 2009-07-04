@@ -28,6 +28,8 @@ using namespace MPD;
 
 using std::string;
 
+MPD::Connection Mpd;
+
 const char *MPD::Message::PartOfSongsAdded = "Only part of requested songs' list added to playlist!";
 const char *MPD::Message::FullPlaylist = "Playlist is full!";
 const char *MPD::Message::FunctionDisabledFilteringEnabled = "Function disabled due to enabled filtering in playlist";

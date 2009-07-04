@@ -117,7 +117,7 @@ void Browser::EnterPressed()
 				{
 					if (myPlaylist->Main()->at(i).GetHash() == hash)
 					{
-						Mpd->Play(i);
+						Mpd.Play(i);
 						found = 1;
 						break;
 					}
@@ -126,10 +126,10 @@ void Browser::EnterPressed()
 					break;
 			}
 			Song &s = *item.song;
-			int id = Mpd->AddSong(s);
+			int id = Mpd.AddSong(s);
 			if (id >= 0)
 			{
-				Mpd->PlayID(id);
+				Mpd.PlayID(id);
 				ShowMessage("Added to playlist: %s", s.toString(Config.song_status_format).c_str());
 				w->BoldOption(w->Choice(), 1);
 			}
@@ -138,20 +138,20 @@ void Browser::EnterPressed()
 		case itPlaylist:
 		{
 			SongList list;
-			Mpd->GetPlaylistContent(locale_to_utf_cpy(item.name), list);
-			Mpd->StartCommandsList();
+			Mpd.GetPlaylistContent(locale_to_utf_cpy(item.name), list);
+			Mpd.StartCommandsList();
 			SongList::const_iterator it = list.begin();
 			for (; it != list.end(); it++)
-				if (Mpd->AddSong(**it) < 0)
+				if (Mpd.AddSong(**it) < 0)
 					break;
-			Mpd->CommitCommandsList();
+			Mpd.CommitCommandsList();
 			
 			if (it != list.begin())
 			{
 				ShowMessage("Loading and playing playlist %s...", item.name.c_str());
 				Song *s = &myPlaylist->Main()->at(myPlaylist->Main()->Size()-list.size());
 				if (s->GetHash() == list[0]->GetHash())
-					Mpd->PlayID(s->GetID());
+					Mpd.PlayID(s->GetID());
 				else
 					ShowMessage("%s", MPD::Message::PartOfSongsAdded);
 			}
@@ -189,29 +189,29 @@ void Browser::SpacePressed()
 				ShowMessage("Scanning \"%s\"...", item.name.c_str());
 				myBrowser->GetLocalDirectory(list, item.name, 1);
 				
-				Mpd->StartCommandsList();
+				Mpd.StartCommandsList();
 				for (ItemList::const_iterator it = list.begin(); it != list.end(); ++it)
 				{
-					if (everything_was_added && Mpd->AddSong(*it->song) < 0)
+					if (everything_was_added && Mpd.AddSong(*it->song) < 0)
 						everything_was_added = 0;
 					delete it->song;
 				}
-				Mpd->CommitCommandsList();
+				Mpd.CommitCommandsList();
 			}
 			else
 			{
 				SongList list;
-				Mpd->GetDirectoryRecursive(locale_to_utf_cpy(item.name), list);
-				Mpd->StartCommandsList();
+				Mpd.GetDirectoryRecursive(locale_to_utf_cpy(item.name), list);
+				Mpd.StartCommandsList();
 				for (SongList::const_iterator it = list.begin(); it != list.end(); it++)
 				{
-					if (Mpd->AddSong(**it) < 0)
+					if (Mpd.AddSong(**it) < 0)
 					{
 						everything_was_added = 0;
 						break;
 					}
 				}
-				Mpd->CommitCommandsList();
+				Mpd.CommitCommandsList();
 				FreeSongList(list);
 			}
 			
@@ -227,24 +227,24 @@ void Browser::SpacePressed()
 			{
 				Playlist::BlockUpdate = 1;
 				long long hash = w->Current().song->GetHash();
-				Mpd->StartCommandsList();
+				Mpd.StartCommandsList();
 				for (size_t i = 0; i < myPlaylist->Main()->Size(); i++)
 				{
 					if (myPlaylist->Main()->at(i).GetHash() == hash)
 					{
-						Mpd->Delete(i);
+						Mpd.Delete(i);
 						myPlaylist->Main()->DeleteOption(i);
 						i--;
 					}
 				}
-				Mpd->CommitCommandsList();
+				Mpd.CommitCommandsList();
 				w->BoldOption(w->Choice(), 0);
 				Playlist::BlockUpdate = 0;
 			}
 			else
 			{
 				Song &s = *item.song;
-				if (Mpd->AddSong(s) != -1)
+				if (Mpd.AddSong(s) != -1)
 				{
 					ShowMessage("Added to playlist: %s", s.toString(Config.song_status_format).c_str());
 					w->BoldOption(w->Choice(), 1);
@@ -255,13 +255,13 @@ void Browser::SpacePressed()
 		case itPlaylist:
 		{
 			SongList list;
-			Mpd->GetPlaylistContent(locale_to_utf_cpy(item.name), list);
-			Mpd->StartCommandsList();
+			Mpd.GetPlaylistContent(locale_to_utf_cpy(item.name), list);
+			Mpd.StartCommandsList();
 			SongList::const_iterator it = list.begin();
 			for (; it != list.end(); it++)
-				if (Mpd->AddSong(**it) < 0)
+				if (Mpd.AddSong(**it) < 0)
 					break;
-			Mpd->CommitCommandsList();
+			Mpd.CommitCommandsList();
 			
 			if (it != list.begin())
 			{
@@ -347,7 +347,7 @@ void Browser::GetSelectedSongs(MPD::SongList &v)
 		{
 			case itDirectory:
 			{
-				Mpd->GetDirectoryRecursive(locale_to_utf_cpy(item.name), v);
+				Mpd.GetDirectoryRecursive(locale_to_utf_cpy(item.name), v);
 				break;
 			}
 			case itSong:
@@ -357,7 +357,7 @@ void Browser::GetSelectedSongs(MPD::SongList &v)
 			}
 			case itPlaylist:
 			{
-				Mpd->GetPlaylistContent(locale_to_utf_cpy(item.name), v);
+				Mpd.GetPlaylistContent(locale_to_utf_cpy(item.name), v);
 				break;
 			}
 		}
@@ -498,7 +498,7 @@ void Browser::GetDirectory(string dir, string subdir)
 	}
 	
 	ItemList list;
-	Config.local_browser ? GetLocalDirectory(list) : Mpd->GetDirectory(dir, list);
+	Config.local_browser ? GetLocalDirectory(list) : Mpd.GetDirectory(dir, list);
 	sort(list.begin(), list.end(), CaseInsensitiveSorting());
 	
 	for (ItemList::iterator it = list.begin(); it != list.end(); it++)
@@ -579,7 +579,7 @@ void Browser::ClearDirectory(const std::string &path) const
 
 void Browser::ChangeBrowseMode()
 {
-	if (Mpd->GetHostname()[0] != '/')
+	if (Mpd.GetHostname()[0] != '/')
 		return;
 	
 	Config.local_browser = !Config.local_browser;
