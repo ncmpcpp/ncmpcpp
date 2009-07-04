@@ -650,8 +650,7 @@ int main(int argc, char *argv[])
 			LockStatusbar();
 			Statusbar() << "Save playlist as: ";
 			string playlist_name = wFooter->GetString();
-			string real_playlist_name = playlist_name;
-			locale_to_utf(real_playlist_name);
+			string real_playlist_name = locale_to_utf_cpy(playlist_name);
 			UnlockStatusbar();
 			if (playlist_name.find("/") != string::npos)
 			{
@@ -660,7 +659,16 @@ int main(int argc, char *argv[])
 			}
 			if (!playlist_name.empty())
 			{
-				if (Mpd.SavePlaylist(real_playlist_name))
+				if (myPlaylist->Main()->isFiltered())
+				{
+					Mpd.StartCommandsList();
+					for (size_t i = 0; i < myPlaylist->Main()->Size(); ++i)
+						Mpd.AddToPlaylist(real_playlist_name, (*myPlaylist->Main())[i]);
+					Mpd.CommitCommandsList();
+					if (Mpd.GetErrorMessage().empty())
+						ShowMessage("Filtered items added to playlist \"%s\"", playlist_name.c_str());
+				}
+				else if (Mpd.SavePlaylist(real_playlist_name))
 				{
 					ShowMessage("Playlist saved as: %s", playlist_name.c_str());
 					if (myPlaylistEditor->Main()) // check if initialized
