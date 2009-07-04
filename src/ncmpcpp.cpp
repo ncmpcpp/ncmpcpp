@@ -1192,6 +1192,13 @@ int main(int argc, char *argv[])
 				mySearcher->Main()->Highlighting(1);
 				mySearcher->EnterPressed();
 			}
+#			ifdef HAVE_TAGLIB_H
+			else if (myScreen == myTinyTagEditor)
+			{
+				myTinyTagEditor->Main()->Highlight(myTinyTagEditor->Main()->Size()-2); // Save
+				myTinyTagEditor->EnterPressed();
+			}
+#			endif // HAVE_TAGLIB_H
 			else
 			{
 				Mpd.SetSingle(!Mpd.GetSingle());

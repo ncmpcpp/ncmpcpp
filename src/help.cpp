@@ -273,6 +273,11 @@ void Help::GetKeybindings()
 	
 	
 #	ifdef HAVE_TAGLIB_H
+	*w << "\n\n   " << fmtBold << "Keys - Tiny tag editor\n -----------------------------------------\n" << fmtBoldEnd;
+	*w << DisplayKeys(Key.Enter)			<< "Edit tag\n";
+	*w << DisplayKeys(Key.ToggleSingle)		<< "Save\n";
+	
+	
 	*w << "\n\n   " << fmtBold << "Keys - Tag editor\n -----------------------------------------\n" << fmtBoldEnd;
 	*w << DisplayKeys(Key.Enter)			<< "Change tag/filename for one song (left column)\n";
 	*w << DisplayKeys(Key.Enter)			<< "Perform operation on all/selected songs (middle column)\n";
