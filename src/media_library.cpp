@@ -168,7 +168,7 @@ void MediaLibrary::Update()
 		Songs->Clear(0);
 		Mpd.GetList(list, Config.media_lib_primary_tag);
 		sort(list.begin(), list.end(), CaseInsensitiveSorting());
-		for (TagList::iterator it = list.begin(); it != list.end(); it++)
+		for (TagList::iterator it = list.begin(); it != list.end(); ++it)
 		{
 			if (!it->empty())
 			{
@@ -206,7 +206,7 @@ void MediaLibrary::Update()
 				Albums->AddOption(std::make_pair("<no album>", SearchConstraints("", "")));
 		}
 		
-		for (TagList::const_iterator it = list.begin(); it != list.end(); it++)
+		for (TagList::const_iterator it = list.begin(); it != list.end(); ++it)
 		{
 			TagList l;
 			Mpd.StartFieldSearch(MPD_TAG_ITEM_DATE);
@@ -218,11 +218,11 @@ void MediaLibrary::Update()
 				Albums->AddOption(std::make_pair(*it, SearchConstraints(*it, "")));
 				continue;
 			}
-			for (TagList::const_iterator j = l.begin(); j != l.end(); j++)
+			for (TagList::const_iterator j = l.begin(); j != l.end(); ++j)
 				Albums->AddOption(std::make_pair("(" + *j + ") " + *it, SearchConstraints(*it, *j)));
 		}
 		utf_to_locale(Artists->Current());
-		for (size_t i = 0; i < Albums->Size(); i++)
+		for (size_t i = 0; i < Albums->Size(); ++i)
 			utf_to_locale((*Albums)[i].first);
 		if (!Albums->Empty())
 			Albums->Sort<CaseInsensitiveSorting>((*Albums)[0].first == "<no album>");
@@ -234,13 +234,13 @@ void MediaLibrary::Update()
 		*Albums << XY(0, 0) << "Fetching albums...";
 		Albums->Window::Refresh();
 		Mpd.GetList(artists, Config.media_lib_primary_tag);
-		for (TagList::const_iterator i = artists.begin(); i != artists.end(); i++)
+		for (TagList::const_iterator i = artists.begin(); i != artists.end(); ++i)
 		{
 			TagList albums;
 			Mpd.StartFieldSearch(MPD_TAG_ITEM_ALBUM);
 			Mpd.AddSearch(Config.media_lib_primary_tag, *i);
 			Mpd.CommitSearch(albums);
-			for (TagList::const_iterator j = albums.begin(); j != albums.end(); j++)
+			for (TagList::const_iterator j = albums.begin(); j != albums.end(); ++j)
 			{
 				if (Config.media_lib_primary_tag != MPD_TAG_ITEM_DATE)
 				{
@@ -251,7 +251,7 @@ void MediaLibrary::Update()
 					Mpd.CommitSearch(years);
 					if (!years.empty())
 					{
-						for (TagList::const_iterator k = years.begin(); k != years.end(); k++)
+						for (TagList::const_iterator k = years.begin(); k != years.end(); ++k)
 						{
 							Albums->AddOption(std::make_pair(*i + " - (" + *k + ") " + *j, SearchConstraints(*i, *j, *k)));
 						}
@@ -263,7 +263,7 @@ void MediaLibrary::Update()
 					Albums->AddOption(std::make_pair(*i + " - " + *j, SearchConstraints(*i, *j, *i)));
 			}
 		}
-		for (size_t i = 0; i < Albums->Size(); i++)
+		for (size_t i = 0; i < Albums->Size(); ++i)
 			utf_to_locale((*Albums)[i].first);
 		if (!Albums->Empty())
 			Albums->Sort<CaseInsensitiveSorting>();
@@ -301,9 +301,9 @@ void MediaLibrary::Update()
 		sort(list.begin(), list.end(), SortSongsByTrack);
 		bool bold = 0;
 		
-		for (SongList::const_iterator it = list.begin(); it != list.end(); it++)
+		for (SongList::const_iterator it = list.begin(); it != list.end(); ++it)
 		{
-			for (size_t j = 0; j < myPlaylist->Main()->Size(); j++)
+			for (size_t j = 0; j < myPlaylist->Main()->Size(); ++j)
 			{
 				if ((*it)->GetHash() == myPlaylist->Main()->at(j).GetHash())
 				{
@@ -411,7 +411,7 @@ void MediaLibrary::GetSelectedSongs(MPD::SongList &v)
 {
 	std::vector<size_t> selected;
 	Songs->GetSelected(selected);
-	for (std::vector<size_t>::const_iterator it = selected.begin(); it != selected.end(); it++)
+	for (std::vector<size_t>::const_iterator it = selected.begin(); it != selected.end(); ++it)
 	{
 		v.push_back(new MPD::Song(Songs->at(*it)));
 	}
@@ -475,7 +475,7 @@ void MediaLibrary::AddToPlaylist(bool add_n_play)
 		Mpd.CommitSearch(list);
 		Mpd.StartCommandsList();
 		SongList::const_iterator it = list.begin();
-		for (; it != list.end(); it++)
+		for (; it != list.end(); ++it)
 			if (Mpd.AddSong(**it) < 0)
 				break;
 		Mpd.CommitCommandsList();
@@ -499,7 +499,7 @@ void MediaLibrary::AddToPlaylist(bool add_n_play)
 	{
 		Mpd.StartCommandsList();
 		size_t i = 0;
-		for (; i < Songs->Size(); i++)
+		for (; i < Songs->Size(); ++i)
 			if (Mpd.AddSong(Songs->at(i)) < 0)
 				break;
 		Mpd.CommitCommandsList();
@@ -527,7 +527,7 @@ void MediaLibrary::AddToPlaylist(bool add_n_play)
 				long long hash = Songs->Current().GetHash();
 				if (add_n_play)
 				{
-					for (size_t i = 0; i < myPlaylist->Main()->Size(); i++)
+					for (size_t i = 0; i < myPlaylist->Main()->Size(); ++i)
 					{
 						if (myPlaylist->Main()->at(i).GetHash() == hash)
 						{
@@ -540,7 +540,7 @@ void MediaLibrary::AddToPlaylist(bool add_n_play)
 				{
 					Playlist::BlockUpdate = 1;
 					Mpd.StartCommandsList();
-					for (size_t i = 0; i < myPlaylist->Main()->Size(); i++)
+					for (size_t i = 0; i < myPlaylist->Main()->Size(); ++i)
 					{
 						if (myPlaylist->Main()->at(i).GetHash() == hash)
 						{

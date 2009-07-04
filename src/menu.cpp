@@ -32,7 +32,7 @@ void List::SelectCurrent()
 
 void List::ReverseSelection(size_t beginning)
 {
-	for (size_t i = beginning; i < Size(); i++)
+	for (size_t i = beginning; i < Size(); ++i)
 		Select(i, !isSelected(i) && !isStatic(i));
 }
 
@@ -40,7 +40,7 @@ bool List::Deselect()
 {
 	if (!hasSelected())
 		return false;
-	for (size_t i = 0; i < Size(); i++)
+	for (size_t i = 0; i < Size(); ++i)
 		Select(i, 0);
 	return true;
 }

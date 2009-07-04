@@ -127,20 +127,20 @@ void Clock::Update()
 	attroff(COLOR_PAIR(Config.main_color));
 	refresh();
 	
-	for (int k = 0; k < 6; k++)
+	for (int k = 0; k < 6; ++k)
 	{
 		newer[k] = (newer[k] & ~mask) | (next[k] & mask);
 		next[k] = 0;
-		for (int s = 1; s >= 0; s--)
+		for (int s = 1; s >= 0; --s)
 		{
 			w->Reverse(s);
-			for (int i = 0; i < 6; i++)
+			for (int i = 0; i < 6; ++i)
 			{
 				long a = (newer[i] ^ older[i]) & (s ? newer : older)[i];
 				if (a != 0)
 				{
 					long t = 1 << 26;
-					for (int j = 0; t; t >>= 1, j++)
+					for (int j = 0; t; t >>= 1, ++j)
 					{
 						if (a & t)
 						{
@@ -164,14 +164,14 @@ void Clock::Update()
 
 void Clock::Prepare()
 {
-	for (int i = 0; i < 5; i++)
+	for (int i = 0; i < 5; ++i)
 		older[i] = newer[i] = next[i] = 0;
 }
 
 void Clock::Set(int t, int n)
 {
 	int m = 7 << n;
-	for (int i = 0; i < 5; i++)
+	for (int i = 0; i < 5; ++i)
 	{
 		next[i] |= ((disp[t] >> ((4 - i) * 3)) & 07) << n;
 		mask |= (next[i] ^ older[i]) & m;

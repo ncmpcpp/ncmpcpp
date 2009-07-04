@@ -474,7 +474,7 @@ int main(int argc, char *argv[])
 					vector<size_t> list;
 					myPlaylist->Main()->GetSelected(list);
 					Mpd.StartCommandsList();
-					for (vector<size_t>::reverse_iterator it = list.rbegin(); it != list.rend(); it++)
+					for (vector<size_t>::reverse_iterator it = list.rbegin(); it != list.rend(); ++it)
 					{
 						Mpd.DeleteID((*myPlaylist->Main())[*it].GetID());
 						myPlaylist->Main()->DeleteOption(*it);
@@ -604,7 +604,7 @@ int main(int argc, char *argv[])
 					string playlist = locale_to_utf_cpy(myPlaylistEditor->Playlists->Current());
 					ShowMessage("Deleting selected items...");
 					Mpd.StartCommandsList();
-					for (vector<size_t>::reverse_iterator it = list.rbegin(); it != list.rend(); it++)
+					for (vector<size_t>::reverse_iterator it = list.rbegin(); it != list.rend(); ++it)
 					{
 						Mpd.Delete(playlist, *it);
 						myPlaylistEditor->Content->DeleteOption(*it);
@@ -718,7 +718,7 @@ int main(int argc, char *argv[])
 					vector<size_t> list;
 					myPlaylist->Main()->GetSelected(list);
 					
-					for (vector<size_t>::iterator it = list.begin(); it != list.end(); it++)
+					for (vector<size_t>::iterator it = list.begin(); it != list.end(); ++it)
 						if (*it == size_t(myPlaylist->NowPlaying) && list.front() > 0)
 							myPlaylist->Main()->BoldOption(myPlaylist->NowPlaying, 0);
 					
@@ -729,7 +729,7 @@ int main(int argc, char *argv[])
 						TraceMpdStatus();
 						Playlist::BlockUpdate = 1;
 						myPlaylist->UpdateTimer();
-						for (vector<size_t>::iterator it = list.begin(); it != list.end(); it++)
+						for (vector<size_t>::iterator it = list.begin(); it != list.end(); ++it)
 						{
 							(*it)--;
 							myPlaylist->Main()->at((*it)+1).SetPosition(*it);
@@ -741,7 +741,7 @@ int main(int argc, char *argv[])
 						myPlaylist->Main()->ReadKey(input);
 					}
 					Mpd.StartCommandsList();
-					for (size_t i = 0; i < list.size(); i++)
+					for (size_t i = 0; i < list.size(); ++i)
 						Mpd.Move(origs[i], list[i]);
 					Mpd.CommitCommandsList();
 				}
@@ -784,7 +784,7 @@ int main(int argc, char *argv[])
 					{
 						TraceMpdStatus();
 						myPlaylist->UpdateTimer();
-						for (vector<size_t>::iterator it = list.begin(); it != list.end(); it++)
+						for (vector<size_t>::iterator it = list.begin(); it != list.end(); ++it)
 						{
 							(*it)--;
 							myPlaylistEditor->Content->Swap(*it, (*it)+1);
@@ -794,7 +794,7 @@ int main(int argc, char *argv[])
 						myPlaylistEditor->Content->ReadKey(input);
 					}
 					Mpd.StartCommandsList();
-					for (size_t i = 0; i < list.size(); i++)
+					for (size_t i = 0; i < list.size(); ++i)
 						if (origs[i] != list[i])
 							Mpd.Move(myPlaylistEditor->Playlists->Current(), origs[i], list[i]);
 					Mpd.CommitCommandsList();
@@ -830,7 +830,7 @@ int main(int argc, char *argv[])
 					vector<size_t> list;
 					myPlaylist->Main()->GetSelected(list);
 					
-					for (vector<size_t>::iterator it = list.begin(); it != list.end(); it++)
+					for (vector<size_t>::iterator it = list.begin(); it != list.end(); ++it)
 						if (*it == size_t(myPlaylist->NowPlaying) && list.back() < myPlaylist->Main()->Size()-1)
 							myPlaylist->Main()->BoldOption(myPlaylist->NowPlaying, 0);
 					
@@ -841,7 +841,7 @@ int main(int argc, char *argv[])
 						TraceMpdStatus();
 						Playlist::BlockUpdate = 1;
 						myPlaylist->UpdateTimer();
-						for (vector<size_t>::reverse_iterator it = list.rbegin(); it != list.rend(); it++)
+						for (vector<size_t>::reverse_iterator it = list.rbegin(); it != list.rend(); ++it)
 						{
 							(*it)++;
 							myPlaylist->Main()->at((*it)-1).SetPosition(*it);
@@ -853,7 +853,7 @@ int main(int argc, char *argv[])
 						myPlaylist->Main()->ReadKey(input);
 					}
 					Mpd.StartCommandsList();
-					for (int i = list.size()-1; i >= 0; i--)
+					for (int i = list.size()-1; i >= 0; --i)
 						Mpd.Move(origs[i], list[i]);
 					Mpd.CommitCommandsList();
 				}
@@ -897,7 +897,7 @@ int main(int argc, char *argv[])
 					{
 						TraceMpdStatus();
 						myPlaylist->UpdateTimer();
-						for (vector<size_t>::reverse_iterator it = list.rbegin(); it != list.rend(); it++)
+						for (vector<size_t>::reverse_iterator it = list.rbegin(); it != list.rend(); ++it)
 						{
 							(*it)++;
 							myPlaylistEditor->Content->Swap(*it, (*it)-1);
@@ -907,7 +907,7 @@ int main(int argc, char *argv[])
 						myPlaylistEditor->Content->ReadKey(input);
 					}
 					Mpd.StartCommandsList();
-					for (int i = list.size()-1; i >= 0; i--)
+					for (int i = list.size()-1; i >= 0; --i)
 						if (origs[i] != list[i])
 							Mpd.Move(myPlaylistEditor->Playlists->Current(), origs[i], list[i]);
 					Mpd.CommitCommandsList();
@@ -955,7 +955,7 @@ int main(int argc, char *argv[])
 			{
 				pos -= list.size();
 				size_t i = list.size()-1;
-				for (vector<size_t>::reverse_iterator it = list.rbegin(); it != list.rend(); it++, i--)
+				for (vector<size_t>::reverse_iterator it = list.rbegin(); it != list.rend(); ++it, --i)
 				{
 					Mpd.Move(*it, pos+i);
 					myPlaylist->Main()->Move(*it, pos+i);
@@ -964,7 +964,7 @@ int main(int argc, char *argv[])
 			else if (diff < 0)
 			{
 				size_t i = 0;
-				for (vector<size_t>::const_iterator it = list.begin(); it != list.end(); it++, i++)
+				for (vector<size_t>::const_iterator it = list.begin(); it != list.end(); ++it, ++i)
 				{
 					Mpd.Move(*it, pos+i);
 					myPlaylist->Main()->Move(*it, pos+i);
@@ -992,12 +992,12 @@ int main(int argc, char *argv[])
 					SongList::const_iterator it = list.begin();
 					if (myScreen == myPlaylistEditor)
 					{
-						for (; it != list.end(); it++)
+						for (; it != list.end(); ++it)
 							Mpd.AddToPlaylist(myPlaylistEditor->Playlists->Current(), **it);
 					}
 					else
 					{
-						for (; it != list.end(); it++)
+						for (; it != list.end(); ++it)
 							if (Mpd.AddSong(**it) < 0)
 								break;
 					}
@@ -1248,7 +1248,7 @@ int main(int argc, char *argv[])
 					Song::SetFunction set = IntoSetFunction(Config.media_lib_primary_tag);
 					if (!set)
 						continue;
-					for (SongList::iterator it = list.begin(); it != list.end(); it++)
+					for (SongList::iterator it = list.begin(); it != list.end(); ++it)
 					{
 						(*it)->Localize();
 						((*it)->*set)(new_tag);
@@ -1279,7 +1279,7 @@ int main(int argc, char *argv[])
 				{
 					bool success = 1;
 					ShowMessage("Updating tags...");
-					for (size_t i = 0;  i < myLibrary->Songs->Size(); i++)
+					for (size_t i = 0;  i < myLibrary->Songs->Size(); ++i)
 					{
 						(*myLibrary->Songs)[i].Localize();
 						ShowMessage("Updating tags in \"%s\"...", (*myLibrary->Songs)[i].GetName().c_str());
@@ -1488,7 +1488,7 @@ int main(int argc, char *argv[])
 			mDialog.AddSeparator();
 			TagList playlists;
 			Mpd.GetPlaylists(playlists);
-			for (TagList::iterator it = playlists.begin(); it != playlists.end(); it++)
+			for (TagList::iterator it = playlists.begin(); it != playlists.end(); ++it)
 			{
 				utf_to_locale(*it);
 				mDialog.AddOption(*it, 0, playlists_not_active);
@@ -1528,7 +1528,7 @@ int main(int argc, char *argv[])
 			{
 				Mpd.StartCommandsList();
 				SongList::const_iterator it = result.begin();
-				for (; it != result.end(); it++)
+				for (; it != result.end(); ++it)
 					if (Mpd.AddSong(**it) < 0)
 						break;
 				Mpd.CommitCommandsList();
@@ -1552,7 +1552,7 @@ int main(int argc, char *argv[])
 				if (!playlist.empty())
 				{
 					Mpd.StartCommandsList();
-					for (SongList::const_iterator it = result.begin(); it != result.end(); it++)
+					for (SongList::const_iterator it = result.begin(); it != result.end(); ++it)
 						Mpd.AddToPlaylist(real_playlist, **it);
 					Mpd.CommitCommandsList();
 					ShowMessage("Selected items added to playlist \"%s\"!", playlist.c_str());
@@ -1562,7 +1562,7 @@ int main(int argc, char *argv[])
 			{
 				string playlist = locale_to_utf_cpy(mDialog.Current());
 				Mpd.StartCommandsList();
-				for (SongList::const_iterator it = result.begin(); it != result.end(); it++)
+				for (SongList::const_iterator it = result.begin(); it != result.end(); ++it)
 					Mpd.AddToPlaylist(playlist, **it);
 				Mpd.CommitCommandsList();
 				ShowMessage("Selected items added to playlist \"%s\"!", mDialog.Current().c_str());
@@ -1585,7 +1585,7 @@ int main(int argc, char *argv[])
 			if (myPlaylist->Main()->hasSelected())
 			{
 				Mpd.StartCommandsList();
-				for (int i = myPlaylist->Main()->Size()-1; i >= 0; i--)
+				for (int i = myPlaylist->Main()->Size()-1; i >= 0; --i)
 				{
 					if (!myPlaylist->Main()->isSelected(i) && i != myPlaylist->NowPlaying)
 						Mpd.Delete(i);
@@ -1607,7 +1607,7 @@ int main(int argc, char *argv[])
 					continue;
 				}
 				Mpd.StartCommandsList();
-				for (int i = myPlaylist->Main()->Size()-1; i >= 0; i--)
+				for (int i = myPlaylist->Main()->Size()-1; i >= 0; --i)
 					if (i != myPlaylist->NowPlaying)
 						Mpd.Delete(i);
 				ShowMessage("Deleting all items except now playing one...");
@@ -1621,7 +1621,7 @@ int main(int argc, char *argv[])
 			{
 				ShowMessage("Deleting filtered items...");
 				Mpd.StartCommandsList();
-				for (int i = myPlaylist->Main()->Size()-1; i >= 0; i--)
+				for (int i = myPlaylist->Main()->Size()-1; i >= 0; --i)
 					Mpd.Delete((*myPlaylist->Main())[i].GetPosition());
 				Mpd.CommitCommandsList();
 				ShowMessage("Filtered items deleted!");

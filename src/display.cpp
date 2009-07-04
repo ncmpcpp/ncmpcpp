@@ -85,7 +85,7 @@ string Display::Columns(string st)
 		if (result.length() > where)
 			result = result.substr(0, where);
 		else
-			for (size_t i = result.length(); i <= where && i < size_t(COLS); i++, result += ' ') { }
+			for (size_t i = result.length(); i <= where && i < size_t(COLS); ++i, result += ' ') { }
 	}
 	return result;
 }
@@ -187,14 +187,14 @@ void Display::Songs(const MPD::Song &s, void *data, Menu<MPD::Song> *menu)
 	
 	string::const_iterator goto_pos, prev_pos;
 	
-	for (string::const_iterator it = song_template.begin(); it != song_template.end(); it++)
+	for (string::const_iterator it = song_template.begin(); it != song_template.end(); ++it)
 	{
 		CHECK_LINKED_TAGS:;
 		if (*it == '{')
 		{
 			prev_pos = it;
 			Song::GetFunction get = 0;
-			for (; *it != '}'; it++)
+			for (; *it != '}'; ++it)
 			{
 				if (*it == '%')
 				{
@@ -260,21 +260,21 @@ void Display::Songs(const MPD::Song &s, void *data, Menu<MPD::Song> *menu)
 				{
 					if (*it == '}' && *(it+1) != '|')
 						break;
-					it++;
+					++it;
 				}
 				goto_pos = ++it;
 				it = ++prev_pos;
 			}
 			else
 			{
-				for (; *it != '}'; it++) { }
-				it++;
+				for (; *it != '}'; ++it) { }
+				++it;
 				if (it == song_template.end())
 					break;
 				if (*it == '{' || *it == '|')
 				{
 					if (*it == '|')
-						it++;
+						++it;
 					goto CHECK_LINKED_TAGS;
 				}
 			}
@@ -387,7 +387,7 @@ void Display::Songs(const MPD::Song &s, void *data, Menu<MPD::Song> *menu)
 		}
 		else
 		{
-			it++;
+			++it;
 			if (!right)
 				*menu << Color(*it-'0');
 			else

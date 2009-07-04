@@ -111,7 +111,7 @@ void Outputs::FetchList()
 	MPD::OutputList ol;
 	Mpd.GetOutputs(ol);
 	w->Clear();
-	for (MPD::OutputList::const_iterator it = ol.begin(); it != ol.end(); it++)
+	for (MPD::OutputList::const_iterator it = ol.begin(); it != ol.end(); ++it)
 		w->AddOption(*it, it->second);
 }
 

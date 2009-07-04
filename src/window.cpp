@@ -56,8 +56,8 @@ void NCurses::InitScreen(GNUC_UNUSED const char *window_title, bool enable_color
 #		else
 		int i = -1;
 #		endif // USE_PDCURSES
-		for (; i < 8; i++)
-			for (int j = 0; j < 8; j++)
+		for (; i < 8; ++i)
+			for (int j = 0; j < 8; ++j)
 				init_pair(num++, ColorsTable[j], i < 0 ? i : ColorsTable[i]);
 	}
 	noecho();
@@ -322,7 +322,7 @@ void Window::Clear(bool)
 
 void Window::Hide(char x) const
 {
-	for (size_t i = 0; i < GetHeight(); i++)
+	for (size_t i = 0; i < GetHeight(); ++i)
 		mvhline(i+GetStartY(), GetStartX(), x, GetWidth());
 	refresh();
 }
@@ -403,7 +403,7 @@ string Window::GetString(const string &base, size_t length, size_t width, bool e
 	bool block_scrolling = 0;
 	
 	// disable scrolling if wide chars are used
-	for (wstring::const_iterator it = tmp->begin(); it != tmp->end(); it++)
+	for (wstring::const_iterator it = tmp->begin(); it != tmp->end(); ++it)
 		if (wcwidth(*it) > 1)
 			block_scrolling = 1;
 	
@@ -430,7 +430,7 @@ string Window::GetString(const string &base, size_t length, size_t width, bool e
 			if (block_scrolling && maxx >= biggest_x)
 			{
 				size_t i = 0;
-				for (wstring::const_iterator it = tmp->begin(); i < width; it++, real_real_maxx++)
+				for (wstring::const_iterator it = tmp->begin(); i < width; ++it, ++real_real_maxx)
 					i += wcwidth(*it);
 			}
 			else
@@ -846,14 +846,14 @@ Window &Window::operator<<(double d)
 
 Window &Window::operator<<(const string &s)
 {
-	for (string::const_iterator it = s.begin(); it != s.end(); it++)
+	for (string::const_iterator it = s.begin(); it != s.end(); ++it)
 		wprintw(itsWindow, "%c", *it);
 	return *this;
 }
 
 Window &Window::operator<<(const wstring &ws)
 {
-	for (wstring::const_iterator it = ws.begin(); it != ws.end(); it++)
+	for (wstring::const_iterator it = ws.begin(); it != ws.end(); ++it)
 		wprintw(itsWindow, "%lc", *it);
 	return *this;
 }
@@ -873,7 +873,7 @@ string ToString(const wstring &ws)
 {
 	string result;
 	char *s = new char[MB_CUR_MAX];
-	for (size_t i = 0; i < ws.length(); i++)
+	for (size_t i = 0; i < ws.length(); ++i)
 	{
 		int n = wcrtomb(s, ws[i], 0);
 		if (n > 0)
@@ -898,7 +898,7 @@ wstring ToWString(const string &s)
 size_t Window::Length(const wstring &ws)
 {
 	size_t length = 0;
-	for (wstring::const_iterator it = ws.begin(); it != ws.end(); it++)
+	for (wstring::const_iterator it = ws.begin(); it != ws.end(); ++it)
 		length += wcwidth(*it);
 	return length;
 }

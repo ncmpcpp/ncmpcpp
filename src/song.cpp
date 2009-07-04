@@ -50,7 +50,7 @@ Song::Song(mpd_Song *s, bool copy_ptr) : itsSong(s ? s : mpd_newSong()),
 	}
 	
 	// generate pseudo-hash
-	for (size_t i = 0; i < file_len; i++)
+	for (size_t i = 0; i < file_len; ++i)
 	{
 		itsHash += itsSong->file[i];
 		if (i%3)
@@ -295,14 +295,14 @@ string Song::toString(const std::string &format) const
 	string result;
 	string::const_iterator goto_pos, prev_pos;
 	
-	for (string::const_iterator it = format.begin(); it != format.end(); it++)
+	for (string::const_iterator it = format.begin(); it != format.end(); ++it)
 	{
 		CHECK_LINKED_TAGS:;
 		if (*it == '{')
 		{
 			prev_pos = it;
 			GetFunction get = 0;
-			for (; *it != '}'; it++)
+			for (; *it != '}'; ++it)
 			{
 				if (*it == '%')
 				{
@@ -368,21 +368,21 @@ string Song::toString(const std::string &format) const
 				{
 					if (*it == '}' && *(it+1) != '|')
 						break;
-					it++;
+					++it;
 				}
 				goto_pos = ++it;
 				it = ++prev_pos;
 			}
 			else
 			{
-				for (; *it != '}'; it++) { }
-				it++;
+				for (; *it != '}'; ++it) { }
+				++it;
 				if (it == format.end())
 					break;
 				if (*it == '{' || *it == '|')
 				{
 					if (*it == '|')
-						it++;
+						++it;
 					goto CHECK_LINKED_TAGS;
 				}
 			}

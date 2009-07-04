@@ -58,7 +58,7 @@ void Scrollpad::Flush()
 	int space_pos = 0;
 	int tab_size = 0;
 	
-	for (size_t i = 0; i < s.length(); i++)
+	for (size_t i = 0; i < s.length(); ++i)
 	{
 		tab_size = 8-x%8;
 		

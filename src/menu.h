@@ -251,13 +251,13 @@ template <typename T> NCurses::Menu<T>::Menu(const Menu &m) : Window(m),
 					itsSelectedSuffix(m.itsSelectedSuffix)
 {
 	itsOptions.reserve(m.itsOptions.size());
-	for (option_const_iterator it = m.itsOptions.begin(); it != m.itsOptions.end(); it++)
+	for (option_const_iterator it = m.itsOptions.begin(); it != m.itsOptions.end(); ++it)
 		itsOptions.push_back(new Option(**it));
 }
 
 template <typename T> NCurses::Menu<T>::~Menu()
 {
-	for (option_iterator it = itsOptions.begin(); it != itsOptions.end(); it++)
+	for (option_iterator it = itsOptions.begin(); it != itsOptions.end(); ++it)
 		delete *it;
 }
 
@@ -271,13 +271,13 @@ template <typename T> void NCurses::Menu<T>::ResizeList(size_t size)
 	if (size > itsOptions.size())
 	{
 		itsOptions.resize(size);
-		for (size_t i = 0; i < size; i++)
+		for (size_t i = 0; i < size; ++i)
 			if (!itsOptions[i])
 				itsOptions[i] = new Option();
 	}
 	else if (size < itsOptions.size())
 	{
-		for (size_t i = size; i < itsOptions.size(); i++)
+		for (size_t i = size; i < itsOptions.size(); ++i)
 			delete itsOptions[i];
 		itsOptions.resize(size);
 	}
@@ -313,7 +313,7 @@ template <typename T> void NCurses::Menu<T>::DeleteOption(size_t pos)
 		itsOptions.erase(itsOptions.begin()+itsFilteredRealPositions[pos]);
 		itsFilteredOptions.erase(itsFilteredOptions.begin()+pos);
 		itsFilteredRealPositions.erase(itsFilteredRealPositions.begin()+pos);
-		for (size_t i = pos; i < itsFilteredRealPositions.size(); i++)
+		for (size_t i = pos; i < itsFilteredRealPositions.size(); ++i)
 			itsFilteredRealPositions[i]--;
 	}
 	else
@@ -349,12 +349,12 @@ template <typename T> void NCurses::Menu<T>::Move(size_t from, size_t to)
 	int diff = from-to;
 	if (diff > 0)
 	{
-		for (size_t i = from; i > to; i--)
+		for (size_t i = from; i > to; --i)
 			std::swap(itsOptions.at(i), itsOptions.at(i-1));
 	}
 	else if (diff < 0)
 	{
-		for (size_t i = from; i < to; i++)
+		for (size_t i = from; i < to; ++i)
 			std::swap(itsOptions.at(i), itsOptions.at(i+1));
 	}
 }
@@ -395,12 +395,12 @@ template <typename T> void NCurses::Menu<T>::Refresh()
 			Scroll(wDown);
 	}
 	size_t line = 0;
-	for (size_t i = itsBeginning; i < itsBeginning+itsHeight; i++)
+	for (size_t i = itsBeginning; i < itsBeginning+itsHeight; ++i)
 	{
 		GotoXY(0, line);
 		if (i >= itsOptionsPtr->size())
 		{
-			for (; line < itsHeight; line++)
+			for (; line < itsHeight; ++line)
 				mvwhline(itsWindow, line, 0, 32, itsWidth);
 			break;
 		}
@@ -562,7 +562,7 @@ template <typename T> void NCurses::Menu<T>::ClearFiltered()
 
 template <typename T> void NCurses::Menu<T>::Clear(bool clrscr)
 {
-	for (option_iterator it = itsOptions.begin(); it != itsOptions.end(); it++)
+	for (option_iterator it = itsOptions.begin(); it != itsOptions.end(); ++it)
 		delete *it;
 	itsOptions.clear();
 	itsFound.clear();
@@ -612,7 +612,7 @@ template <typename T> bool NCurses::Menu<T>::isStatic(int id) const
 
 template <typename T> bool NCurses::Menu<T>::hasSelected() const
 {
-	for (option_const_iterator it = itsOptionsPtr->begin(); it != itsOptionsPtr->end(); it++)
+	for (option_const_iterator it = itsOptionsPtr->begin(); it != itsOptionsPtr->end(); ++it)
 		if (*it && (*it)->isSelected)
 			return true;
 	return false;
@@ -620,7 +620,7 @@ template <typename T> bool NCurses::Menu<T>::hasSelected() const
 
 template <typename T> void NCurses::Menu<T>::GetSelected(std::vector<size_t> &v) const
 {
-	for (size_t i = 0; i < itsOptionsPtr->size(); i++)
+	for (size_t i = 0; i < itsOptionsPtr->size(); ++i)
 		if ((*itsOptionsPtr)[i] && (*itsOptionsPtr)[i]->isSelected)
 			v.push_back(i);
 }
@@ -644,7 +644,7 @@ template <typename T> size_t NCurses::Menu<T>::Choice() const
 template <typename T> size_t NCurses::Menu<T>::RealChoice() const
 {
 	size_t result = 0;
-	for (option_const_iterator it = itsOptionsPtr->begin(); it != itsOptionsPtr->begin()+itsHighlight; it++)
+	for (option_const_iterator it = itsOptionsPtr->begin(); it != itsOptionsPtr->begin()+itsHighlight; ++it)
 		if (*it && !(*it)->isStatic)
 			result++;
 	return result;
@@ -660,7 +660,7 @@ template <typename T> bool NCurses::Menu<T>::Search(const std::string &constrain
 	regex_t rx;
 	if (regcomp(&rx, itsSearchConstraint.c_str(), flags) == 0)
 	{
-		for (size_t i = beginning; i < itsOptionsPtr->size(); i++)
+		for (size_t i = beginning; i < itsOptionsPtr->size(); ++i)
 		{
 			if (regexec(&rx, GetOption(i).c_str(), 0, 0, 0) == 0)
 				itsFound.insert(i);
@@ -699,7 +699,7 @@ template <typename T> void NCurses::Menu<T>::ApplyFilter(const std::string &filt
 	itsFilter = filter;
 	if (itsFilter.empty())
 		return;
-	for (size_t i = 0; i < beginning; i++)
+	for (size_t i = 0; i < beginning; ++i)
 	{
 		itsFilteredRealPositions.push_back(i);
 		itsFilteredOptions.push_back(itsOptions[i]);
@@ -707,7 +707,7 @@ template <typename T> void NCurses::Menu<T>::ApplyFilter(const std::string &filt
 	regex_t rx;
 	if (regcomp(&rx, itsFilter.c_str(), flags) == 0)
 	{
-		for (size_t i = beginning; i < itsOptions.size(); i++)
+		for (size_t i = beginning; i < itsOptions.size(); ++i)
 		{
 			if (regexec(&rx, GetOption(i).c_str(), 0, 0, 0) == 0)
 			{

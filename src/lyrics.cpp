@@ -329,7 +329,7 @@ bool Lyrics::LyricsPlugin_NotFound(const string &s)
 {
 	if  (s.empty())
 		return true;
-	for (string::const_iterator it = s.begin(); it != s.end(); it++)
+	for (string::const_iterator it = s.begin(); it != s.end(); ++it)
 		if (isprint(*it))
 			return false;
 	return true;

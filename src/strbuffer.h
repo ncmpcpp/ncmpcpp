@@ -172,7 +172,7 @@ template <typename C> NCurses::basic_buffer<C> &NCurses::basic_buffer<C>::operat
 	itsString << buf.itsString.str();
 	std::list<FormatPos> tmp = buf.itsFormat;
 	if (len)
-		for (typename std::list<typename NCurses::basic_buffer<C>::FormatPos>::iterator it = tmp.begin(); it != tmp.end(); it++)
+		for (typename std::list<typename NCurses::basic_buffer<C>::FormatPos>::iterator it = tmp.begin(); it != tmp.end(); ++it)
 			it->Position += len;
 	itsFormat.merge(tmp);
 	return *this;
@@ -190,7 +190,7 @@ template <typename C> NCurses::Window &operator<<(NCurses::Window &w, const NCur
 		std::basic_string<C> tmp;
 		typename std::list<typename NCurses::basic_buffer<C>::FormatPos>::const_iterator b = buf.itsFormat.begin();
 		typename std::list<typename NCurses::basic_buffer<C>::FormatPos>::const_iterator e = buf.itsFormat.end();
-		for (size_t i = 0; i < s.length() || b != e; i++)
+		for (size_t i = 0; i < s.length() || b != e; ++i)
 		{
 			while (b != e && i == b->Position)
 			{

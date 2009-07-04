@@ -305,7 +305,7 @@ void *Info::PrepareArtist(void *screen_void_ptr)
 	if (save)
 		filebuffer << "\n\nSimilar artists:\n";
 	*screen->w << fmtBold << "\n\nSimilar artists:\n" << fmtBoldEnd;
-	for (size_t i = 1; i < similar.size(); i++)
+	for (size_t i = 1; i < similar.size(); ++i)
 	{
 		if (save)
 			filebuffer << "\n * " << similar[i] << " (" << urls[i] << ")";

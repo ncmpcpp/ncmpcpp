@@ -267,7 +267,7 @@ bool TinyTagEditor::GetTags()
 	
 	w->ResizeList(23);
 	
-	for (size_t i = 0; i < 7; i++)
+	for (size_t i = 0; i < 7; ++i)
 		w->Static(i, 1);
 	
 	w->IntoSeparator(7);
@@ -275,7 +275,7 @@ bool TinyTagEditor::GetTags()
 	w->IntoSeparator(20);
 	
 	if (ext != "mp3")
-		for (size_t i = 14; i <= 16; i++)
+		for (size_t i = 14; i <= 16; ++i)
 			w->Static(i, 1);
 	
 	w->Highlight(8);
@@ -444,7 +444,7 @@ void TagEditor::Update()
 			*Albums << XY(0, 0) << "Fetching albums...";
 			Albums->Window::Refresh();
 			Mpd.GetAlbums("", list);
-			for (TagList::const_iterator it = list.begin(); it != list.end(); it++)
+			for (TagList::const_iterator it = list.begin(); it != list.end(); ++it)
 			{
 				
 				SongList l;
@@ -475,7 +475,7 @@ void TagEditor::Update()
 			{
 				Dirs->AddOption(make_pair(".", "/"));
 			}
-			for (TagList::const_iterator it = list.begin(); it != list.end(); it++)
+			for (TagList::const_iterator it = list.begin(); it != list.end(); ++it)
 			{
 				size_t slash = it->rfind("/");
 				string to_display = slash != string::npos ? it->substr(slash+1) : *it;
@@ -501,7 +501,7 @@ void TagEditor::Update()
 			Mpd.AddSearch(MPD_TAG_ITEM_ALBUM, Albums->Current().second);
 			Mpd.CommitSearch(list);
 			sort(list.begin(), list.end(), CaseInsensitiveSorting());
-			for (SongList::iterator it = list.begin(); it != list.end(); it++)
+			for (SongList::iterator it = list.begin(); it != list.end(); ++it)
 			{
 				(*it)->Localize();
 				Tags->AddOption(**it);
@@ -511,7 +511,7 @@ void TagEditor::Update()
 		{
 			Mpd.GetSongs(Dirs->Current().second, list);
 			sort(list.begin(), list.end(), CaseInsensitiveSorting());
-			for (SongList::const_iterator it = list.begin(); it != list.end(); it++)
+			for (SongList::const_iterator it = list.begin(); it != list.end(); ++it)
 			{
 				(*it)->Localize();
 				Tags->AddOption(**it);
@@ -557,11 +557,11 @@ void TagEditor::EnterPressed()
 	{
 		vector<size_t> selected;
 		Tags->GetSelected(selected);
-		for (vector<size_t>::const_iterator it = selected.begin(); it != selected.end(); it++)
+		for (vector<size_t>::const_iterator it = selected.begin(); it != selected.end(); ++it)
 			list.push_back(&Tags->at(*it));
 	}
 	else
-		for (size_t i = 0; i < Tags->Size(); i++)
+		for (size_t i = 0; i < Tags->Size(); ++i)
 			list.push_back(&Tags->at(i));
 	
 	Song::GetFunction get = 0;
@@ -604,7 +604,7 @@ void TagEditor::EnterPressed()
 				if (in == 'y')
 				{
 					int i = 1;
-					for (SongList::iterator it = list.begin(); it != list.end(); it++, i++)
+					for (SongList::iterator it = list.begin(); it != list.end(); ++it, ++i)
 						(*it)->SetTrack(i);
 					ShowMessage("Tracks numbered!");
 				}
@@ -668,7 +668,7 @@ void TagEditor::EnterPressed()
 		{
 			bool success = 1;
 			ShowMessage("Writing changes...");
-			for (SongList::iterator it = list.begin(); it != list.end(); it++)
+			for (SongList::iterator it = list.begin(); it != list.end(); ++it)
 			{
 				ShowMessage("Writing tags in \"%s\"...", (*it)->GetName().c_str());
 				if (!WriteTags(**it))
@@ -695,7 +695,7 @@ void TagEditor::EnterPressed()
 		case 13: // capitalize first letters
 		{
 			ShowMessage("Processing...");
-			for (SongList::iterator it = list.begin(); it != list.end(); it++)
+			for (SongList::iterator it = list.begin(); it != list.end(); ++it)
 				CapitalizeFirstLetters(**it);
 			ShowMessage("Done!");
 			break;
@@ -703,7 +703,7 @@ void TagEditor::EnterPressed()
 		case 14: // lower all letters
 		{
 			ShowMessage("Processing...");
-			for (SongList::iterator it = list.begin(); it != list.end(); it++)
+			for (SongList::iterator it = list.begin(); it != list.end(); ++it)
 				LowerAllLetters(**it);
 			ShowMessage("Done!");
 			break;
@@ -718,7 +718,7 @@ void TagEditor::EnterPressed()
 		Statusbar() << fmtBold << TagTypes->Current() << fmtBoldEnd << ": ";
 		string new_tag = wFooter->GetString((Tags->Current().*get)());
 		UnlockStatusbar();
-		for (SongList::iterator it = list.begin(); it != list.end(); it++)
+		for (SongList::iterator it = list.begin(); it != list.end(); ++it)
 			(**it.*set)(new_tag);
 	}
 	else if (w == Tags && set != NULL)
@@ -816,7 +816,7 @@ void TagEditor::GetSelectedSongs(MPD::SongList &v)
 {
 	std::vector<size_t> selected;
 	Tags->GetSelected(selected);
-	for (std::vector<size_t>::const_iterator it = selected.begin(); it != selected.end(); it++)
+	for (std::vector<size_t>::const_iterator it = selected.begin(); it != selected.end(); ++it)
 	{
 		v.push_back(new MPD::Song(Tags->at(*it)));
 	}
@@ -1013,7 +1013,7 @@ std::string TagEditor::CapitalizeFirstLetters(const string &s)
 	string result = s;
 	if (isalpha(result[0]))
 		result[0] = toupper(result[0]);
-	for (string::iterator it = result.begin()+1; it != result.end(); it++)
+	for (string::iterator it = result.begin()+1; it != result.end(); ++it)
 	{
 		if (isalpha(*it) && !isalpha(*(it-1)) && *(it-1) != '\'')
 			*it = toupper(*it);
@@ -1150,7 +1150,7 @@ void TagEditor::SavePatternList()
 	std::ofstream output(PatternsFile.c_str());
 	if (output.is_open())
 	{
-		for (vector<string>::const_iterator it = Patterns.begin(); it != Patterns.end() && it != Patterns.begin()+30; it++)
+		for (vector<string>::const_iterator it = Patterns.begin(); it != Patterns.end() && it != Patterns.begin()+30; ++it)
 			output << *it << std::endl;
 		output.close();
 	}
@@ -1210,7 +1210,7 @@ string TagEditor::ParseFilename(Song &s, string mask, bool preview)
 				separators.push_back(mask.substr(0, i));
 		}
 		int i = 0;
-		for (vector<string>::const_iterator it = separators.begin(); it != separators.end(); it++, i++)
+		for (vector<string>::const_iterator it = separators.begin(); it != separators.end(); ++it, ++i)
 		{
 			int j = file.find(*it);
 			tags.at(i).second = file.substr(0, j);
@@ -1224,9 +1224,9 @@ string TagEditor::ParseFilename(Song &s, string mask, bool preview)
 		return "Error while parsing filename!";
 	}
 	
-	for (vector< std::pair<char, string> >::iterator it = tags.begin(); it != tags.end(); it++)
+	for (vector< std::pair<char, string> >::iterator it = tags.begin(); it != tags.end(); ++it)
 	{
-		for (string::iterator j = it->second.begin(); j != it->second.end(); j++)
+		for (string::iterator j = it->second.begin(); j != it->second.end(); ++j)
 			if (*j == '_')
 				*j = ' ';
 			
@@ -1302,7 +1302,7 @@ void TagEditor::DealWithFilenames(SongList &v)
 		*Legend << "%d - disc\n";
 		*Legend << "%C - comment\n\n";
 		*Legend << fmtBold << "Files:\n" << fmtBoldEnd;
-		for (SongList::const_iterator it = v.begin(); it != v.end(); it++)
+		for (SongList::const_iterator it = v.begin(); it != v.end(); ++it)
 			*Legend << Config.color2 << " * " << clEnd << (*it)->GetName() << "\n";
 		Legend->Flush();
 		
@@ -1328,7 +1328,7 @@ void TagEditor::DealWithFilenames(SongList &v)
 			Main->AddSeparator();
 			Main->AddOption("Recent patterns", 1, 1);
 			Main->AddSeparator();
-			for (vector<string>::const_iterator it = Patterns.begin(); it != Patterns.end(); it++)
+			for (vector<string>::const_iterator it = Patterns.begin(); it != Patterns.end(); ++it)
 				Main->AddOption(*it);
 		}
 		
@@ -1382,7 +1382,7 @@ void TagEditor::DealWithFilenames(SongList &v)
 						bool success = 1;
 						ShowMessage("Parsing...");
 						Preview->Clear();
-						for (SongList::iterator it = v.begin(); it != v.end(); it++)
+						for (SongList::iterator it = v.begin(); it != v.end(); ++it)
 						{
 							Song &s = **it;
 							if (!choice)
@@ -1425,7 +1425,7 @@ void TagEditor::DealWithFilenames(SongList &v)
 						}
 						else
 						{
-							for (size_t i = 0; i < Patterns.size(); i++)
+							for (size_t i = 0; i < Patterns.size(); ++i)
 							{
 								if (Patterns[i] == Config.pattern)
 								{

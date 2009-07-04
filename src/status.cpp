@@ -216,7 +216,7 @@ void NcmpcppStatusChanged(Connection *, StatusChanges changed, void *)
 			
 			Mpd.GetPlaylistChanges(Mpd.GetOldPlaylistID(), list);
 			myPlaylist->Main()->Reserve(playlist_length);
-			for (SongList::const_iterator it = list.begin(); it != list.end(); it++)
+			for (SongList::const_iterator it = list.begin(); it != list.end(); ++it)
 			{
 				int pos = (*it)->GetPosition();
 				if (pos < int(myPlaylist->Main()->Size()))

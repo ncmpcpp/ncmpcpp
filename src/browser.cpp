@@ -113,7 +113,7 @@ void Browser::EnterPressed()
 			{
 				bool found = 0;
 				long long hash = w->Current().song->GetHash();
-				for (size_t i = 0; i < myPlaylist->Main()->Size(); i++)
+				for (size_t i = 0; i < myPlaylist->Main()->Size(); ++i)
 				{
 					if (myPlaylist->Main()->at(i).GetHash() == hash)
 					{
@@ -141,7 +141,7 @@ void Browser::EnterPressed()
 			Mpd.GetPlaylistContent(locale_to_utf_cpy(item.name), list);
 			Mpd.StartCommandsList();
 			SongList::const_iterator it = list.begin();
-			for (; it != list.end(); it++)
+			for (; it != list.end(); ++it)
 				if (Mpd.AddSong(**it) < 0)
 					break;
 			Mpd.CommitCommandsList();
@@ -203,7 +203,7 @@ void Browser::SpacePressed()
 				SongList list;
 				Mpd.GetDirectoryRecursive(locale_to_utf_cpy(item.name), list);
 				Mpd.StartCommandsList();
-				for (SongList::const_iterator it = list.begin(); it != list.end(); it++)
+				for (SongList::const_iterator it = list.begin(); it != list.end(); ++it)
 				{
 					if (Mpd.AddSong(**it) < 0)
 					{
@@ -228,7 +228,7 @@ void Browser::SpacePressed()
 				Playlist::BlockUpdate = 1;
 				long long hash = w->Current().song->GetHash();
 				Mpd.StartCommandsList();
-				for (size_t i = 0; i < myPlaylist->Main()->Size(); i++)
+				for (size_t i = 0; i < myPlaylist->Main()->Size(); ++i)
 				{
 					if (myPlaylist->Main()->at(i).GetHash() == hash)
 					{
@@ -258,7 +258,7 @@ void Browser::SpacePressed()
 			Mpd.GetPlaylistContent(locale_to_utf_cpy(item.name), list);
 			Mpd.StartCommandsList();
 			SongList::const_iterator it = list.begin();
-			for (; it != list.end(); it++)
+			for (; it != list.end(); ++it)
 				if (Mpd.AddSong(**it) < 0)
 					break;
 			Mpd.CommitCommandsList();
@@ -340,7 +340,7 @@ void Browser::GetSelectedSongs(MPD::SongList &v)
 {
 	std::vector<size_t> selected;
 	w->GetSelected(selected);
-	for (std::vector<size_t>::const_iterator it = selected.begin(); it != selected.end(); it++)
+	for (std::vector<size_t>::const_iterator it = selected.begin(); it != selected.end(); ++it)
 	{
 		const Item &item = w->at(*it);
 		switch (item.type)
@@ -377,7 +377,7 @@ bool Browser::hasSupportedExtension(const string &file)
 	
 	string ext = file.substr(last_dot+1);
 	ToLower(ext);
-	for (int i = 0; SupportedExtensions[i]; i++)
+	for (int i = 0; SupportedExtensions[i]; ++i)
 		if (strcmp(ext.c_str(), SupportedExtensions[i]) == 0)
 			return true;
 	
@@ -397,7 +397,7 @@ void Browser::GetLocalDirectory(ItemList &v, const std::string &directory, bool 
 	string full_path;
 	
 	// omit . and ..
-	for (int i = 0; i < 2; i++)
+	for (int i = 0; i < 2; ++i)
 	{
 		file = readdir(dir);
 		if (!file)
@@ -457,7 +457,7 @@ void Browser::LocateSong(const MPD::Song &s)
 	locale_to_utf(option);
 	if (itsBrowsedDir != s.GetDirectory())
 		GetDirectory(s.GetDirectory());
-	for (size_t i = 0; i < w->Size(); i++)
+	for (size_t i = 0; i < w->Size(); ++i)
 	{
 		if (w->at(i).type == itSong && option == w->at(i).song->toString(Config.song_status_format))
 		{
@@ -480,7 +480,7 @@ void Browser::GetDirectory(string dir, string subdir)
 	
 	locale_to_utf(dir);
 	
-	for (size_t i = 0; i < w->Size(); i++)
+	for (size_t i = 0; i < w->Size(); ++i)
 		if (w->at(i).type == itSong)
 			delete w->at(i).song;
 	
@@ -501,7 +501,7 @@ void Browser::GetDirectory(string dir, string subdir)
 	Config.local_browser ? GetLocalDirectory(list) : Mpd.GetDirectory(dir, list);
 	sort(list.begin(), list.end(), CaseInsensitiveSorting());
 	
-	for (ItemList::iterator it = list.begin(); it != list.end(); it++)
+	for (ItemList::iterator it = list.begin(); it != list.end(); ++it)
 	{
 		switch (it->type)
 		{
@@ -522,7 +522,7 @@ void Browser::GetDirectory(string dir, string subdir)
 			case itSong:
 			{
 				bool bold = 0;
-				for (size_t i = 0; i < myPlaylist->Main()->Size(); i++)
+				for (size_t i = 0; i < myPlaylist->Main()->Size(); ++i)
 				{
 					if (myPlaylist->Main()->at(i).GetHash() == it->song->GetHash())
 					{
@@ -550,7 +550,7 @@ void Browser::ClearDirectory(const std::string &path) const
 	string full_path;
 	
 	// omit . and ..
-	for (int i = 0; i < 2; i++)
+	for (int i = 0; i < 2; ++i)
 	{
 		file = readdir(dir);
 		if (!file)
@@ -593,11 +593,11 @@ void Browser::ChangeBrowseMode()
 void Browser::UpdateItemList()
 {
 	bool bold = 0;
-	for (size_t i = 0; i < w->Size(); i++)
+	for (size_t i = 0; i < w->Size(); ++i)
 	{
 		if (w->at(i).type == itSong)
 		{
-			for (size_t j = 0; j < myPlaylist->Main()->Size(); j++)
+			for (size_t j = 0; j < myPlaylist->Main()->Size(); ++j)
 			{
 				if (myPlaylist->Main()->at(j).GetHash() == w->at(i).song->GetHash())
 				{

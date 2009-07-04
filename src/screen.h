@@ -149,12 +149,12 @@ template <> inline void Screen<Scrollpad>::MouseButtonPressed(MEVENT me)
 {
 	if (me.bstate & BUTTON2_PRESSED)
 	{
-		for (size_t i = 0; i < 2; i++)
+		for (size_t i = 0; i < 2; ++i)
 			Scroll(wDown);
 	}
 	else if (me.bstate & BUTTON4_PRESSED)
 	{
-		for (size_t i = 0; i < 2; i++)
+		for (size_t i = 0; i < 2; ++i)
 			Scroll(wUp);
 	}
 }

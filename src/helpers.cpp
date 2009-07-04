@@ -50,7 +50,7 @@ void ParseArgv(int argc, char **argv)
 	
 	bool quit = 0;
 	
-	for (int i = 1; i < argc; i++)
+	for (int i = 1; i < argc; ++i)
 	{
 		if (strcmp(argv[i], "-h") == 0)
 		{
@@ -223,9 +223,9 @@ bool CaseInsensitiveSorting::operator()(const Item &a, const Item &b)
 void UpdateSongList(Menu<Song> *menu)
 {
 	bool bold = 0;
-	for (size_t i = 0; i < menu->Size(); i++)
+	for (size_t i = 0; i < menu->Size(); ++i)
 	{
-		for (size_t j = 0; j < myPlaylist->Main()->Size(); j++)
+		for (size_t j = 0; j < myPlaylist->Main()->Size(); ++j)
 		{
 			if (myPlaylist->Main()->at(j).GetHash() == menu->at(i).GetHash())
 			{
@@ -243,7 +243,7 @@ void UpdateSongList(Menu<Song> *menu)
 string FindSharedDir(Menu<Song> *menu)
 {
 	SongList list;
-	for (size_t i = 0; i < menu->Size(); i++)
+	for (size_t i = 0; i < menu->Size(); ++i)
 		list.push_back(&menu->at(i));
 	return FindSharedDir(list);
 }
@@ -254,7 +254,7 @@ string FindSharedDir(const SongList &v)
 	if (!v.empty())
 	{
 		result = v.front()->GetFile();
-		for (SongList::const_iterator it = v.begin()+1; it != v.end(); it++)
+		for (SongList::const_iterator it = v.begin()+1; it != v.end(); ++it)
 		{
 			int i = 1;
 			while (result.substr(0, i) == (*it)->GetFile().substr(0, i))
@@ -348,7 +348,7 @@ std::basic_string<my_char_t> Scroller(const string &str, size_t width, size_t &p
 #		endif
 		len = 0;
 		std::basic_string<my_char_t>::const_iterator b = s.begin(), e = s.end();
-		for (std::basic_string<my_char_t>::const_iterator it = b+pos; it < e && len < width; it++)
+		for (std::basic_string<my_char_t>::const_iterator it = b+pos; it < e && len < width; ++it)
 		{
 #			ifdef _UTF8
 			len += wcwidth(*it);
@@ -359,7 +359,7 @@ std::basic_string<my_char_t> Scroller(const string &str, size_t width, size_t &p
 		}
 		if (++pos >= s.length())
 			pos = 0;
-		for (; len < width; b++)
+		for (; len < width; ++b)
 		{
 #			ifdef _UTF8
 			len += wcwidth(*b);

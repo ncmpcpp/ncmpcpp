@@ -164,7 +164,7 @@ void Playlist::GetSelectedSongs(MPD::SongList &v)
 {
 	vector<size_t> selected;
 	w->GetSelected(selected);
-	for (vector<size_t>::const_iterator it = selected.begin(); it != selected.end(); it++)
+	for (vector<size_t>::const_iterator it = selected.begin(); it != selected.end(); ++it)
 	{
 		v.push_back(new MPD::Song(w->at(*it)));
 	}
@@ -250,7 +250,7 @@ void Playlist::Sort()
 					BlockUpdate = 1;
 					ShowMessage("Reversing playlist order...");
 					Mpd.StartCommandsList();
-					for (size_t i = 0, j = w->Size()-1; i < w->Size()/2; i++, j--)
+					for (size_t i = 0, j = w->Size()-1; i < w->Size()/2; ++i, --j)
 					{
 						Mpd.Swap(i, j);
 						w->Swap(i, j);
@@ -273,7 +273,7 @@ void Playlist::Sort()
 	
 	playlist.reserve(w->Size());
 	
-	for (size_t i = 0; i < w->Size(); i++)
+	for (size_t i = 0; i < w->Size(); ++i)
 	{
 		(*w)[i].SetPosition(i);
 		playlist.push_back(&(*w)[i]);
@@ -293,7 +293,7 @@ void Playlist::Sort()
 	Mpd.StartCommandsList();
 	do
 	{
-		for (size_t i = 0; i < playlist.size(); i++)
+		for (size_t i = 0; i < playlist.size(); ++i)
 		{
 			if (playlist[i]->GetPosition() > int(i))
 			{
@@ -313,7 +313,7 @@ void Playlist::FixPositions(size_t beginning)
 {
 	bool was_filtered = w->isFiltered();
 	w->ShowAll();
-	for (size_t i = beginning; i < w->Size(); i++)
+	for (size_t i = beginning; i < w->Size(); ++i)
 	{
 		(*w)[i].SetPosition(i);
 	}
@@ -330,7 +330,7 @@ void Playlist::EnableHighlighting()
 
 bool Playlist::Sorting(MPD::Song *a, MPD::Song *b)
 {
-	for (size_t i = 0; i < SortOptions; i++)
+	for (size_t i = 0; i < SortOptions; ++i)
 	{
 		std::string sa = (a->*(*SortDialog)[i].second)();
 		std::string sb = (b->*(*SortDialog)[i].second)();
@@ -354,14 +354,14 @@ std::string Playlist::TotalLength()
 	if (ReloadTotalLength)
 	{
 		itsTotalLength = 0;
-		for (size_t i = 0; i < w->Size(); i++)
+		for (size_t i = 0; i < w->Size(); ++i)
 			itsTotalLength += (*w)[i].GetTotalLength();
 		ReloadTotalLength = 0;
 	}
 	if (Config.playlist_show_remaining_time && ReloadRemaining && !w->isFiltered())
 	{
 		itsRemainingTime = 0;
-		for (size_t i = NowPlaying; i < w->Size(); i++)
+		for (size_t i = NowPlaying; i < w->Size(); ++i)
 			itsRemainingTime += (*w)[i].GetTotalLength();
 		ReloadRemaining = 0;
 	}

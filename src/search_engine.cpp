@@ -207,7 +207,7 @@ void SearchEngine::EnterPressed()
 				UpdateFoundList();
 				ShowMessage("Searching finished!");
 				if (Config.block_search_constraints_change)
-					for (size_t i = 0; i < StaticOptions-4; i++)
+					for (size_t i = 0; i < StaticOptions-4; ++i)
 						w->Static(i, 1);
 				w->Scroll(wDown);
 				w->Scroll(wDown);
@@ -230,7 +230,7 @@ void SearchEngine::EnterPressed()
 			if (Config.ncmpc_like_songs_adding && w->isBold())
 			{
 				long long hash = w->Current().second->GetHash();
-				for (size_t i = 0; i < myPlaylist->Main()->Size(); i++)
+				for (size_t i = 0; i < myPlaylist->Main()->Size(); ++i)
 				{
 					if (myPlaylist->Main()->at(i).GetHash() == hash)
 					{
@@ -274,7 +274,7 @@ void SearchEngine::SpacePressed()
 		Playlist::BlockUpdate = 1;
 		long long hash = w->Current().second->GetHash();
 		Mpd.StartCommandsList();
-		for (size_t i = 0; i < myPlaylist->Main()->Size(); i++)
+		for (size_t i = 0; i < myPlaylist->Main()->Size(); ++i)
 		{
 			if (myPlaylist->Main()->at(i).GetHash() == hash)
 			{
@@ -336,7 +336,7 @@ void SearchEngine::GetSelectedSongs(MPD::SongList &v)
 {
 	std::vector<size_t> selected;
 	w->GetSelected(selected);
-	for (std::vector<size_t>::const_iterator it = selected.begin(); it != selected.end(); it++)
+	for (std::vector<size_t>::const_iterator it = selected.begin(); it != selected.end(); ++it)
 	{
 		v.push_back(new MPD::Song(*w->at(*it).second));
 	}
@@ -350,9 +350,9 @@ void SearchEngine::ApplyFilter(const std::string &s)
 void SearchEngine::UpdateFoundList()
 {
 	bool bold = 0;
-	for (size_t i = StaticOptions; i < w->Size(); i++)
+	for (size_t i = StaticOptions; i < w->Size(); ++i)
 	{
-		for (size_t j = 0; j < myPlaylist->Main()->Size(); j++)
+		for (size_t j = 0; j < myPlaylist->Main()->Size(); ++j)
 		{
 			if (myPlaylist->Main()->at(j).GetHash() == w->at(i).second->GetHash())
 			{
@@ -367,7 +367,7 @@ void SearchEngine::UpdateFoundList()
 
 void SearchEngine::Prepare()
 {
-	for (size_t i = 0; i < w->Size(); i++)
+	for (size_t i = 0; i < w->Size(); ++i)
 	{
 		try
 		{
@@ -384,7 +384,7 @@ void SearchEngine::Prepare()
 	w->IntoSeparator(10);
 	w->IntoSeparator(14);
 	
-	for (size_t i = 0; i < 17; i++)
+	for (size_t i = 0; i < 17; ++i)
 	{
 		try
 		{
@@ -425,7 +425,7 @@ void SearchEngine::Search()
 	else
 	{
 		list.reserve(myPlaylist->Main()->Size());
-		for (size_t i = 0; i < myPlaylist->Main()->Size(); i++)
+		for (size_t i = 0; i < myPlaylist->Main()->Size(); ++i)
 			list.push_back(&(*myPlaylist->Main())[i]);
 	}
 	
@@ -472,7 +472,7 @@ void SearchEngine::Search()
 		s.SetComment(t);
 	}
 	
-	for (SongList::const_iterator it = list.begin(); it != list.end(); it++)
+	for (SongList::const_iterator it = list.begin(); it != list.end(); ++it)
 	{
 		(*it)->CopyPtr(CaseSensitive || MatchToPattern);
 		Song copy = **it;

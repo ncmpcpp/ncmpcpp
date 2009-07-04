@@ -592,7 +592,7 @@ bool Connection::AddRandomSongs(size_t number)
 		std::random_shuffle(files.begin(), files.end());
 		StartCommandsList();
 		TagList::const_iterator it = files.begin()+rand()%(files.size()-number);
-		for (size_t i = 0; i < number && it != files.end(); i++)
+		for (size_t i = 0; i < number && it != files.end(); ++i)
 			AddSong(*it++);
 		CommitCommandsList();
 	}
@@ -680,7 +680,7 @@ void Connection::GetPlaylists(TagList &v) const
 	{
 		ItemList list;
 		GetDirectory("/", list);
-		for (ItemList::const_iterator it = list.begin(); it != list.end(); it++)
+		for (ItemList::const_iterator it = list.begin(); it != list.end(); ++it)
 		{
 			if (it->type == itPlaylist)
 				v.push_back(it->name);
@@ -932,14 +932,14 @@ int Connection::CheckForErrors()
 
 void MPD::FreeSongList(SongList &l)
 {
-	for (SongList::iterator i = l.begin(); i != l.end(); i++)
+	for (SongList::iterator i = l.begin(); i != l.end(); ++i)
 		delete *i;
 	l.clear();
 }
 
 void MPD::FreeItemList(ItemList &l)
 {
-	for (ItemList::iterator i = l.begin(); i != l.end(); i++)
+	for (ItemList::iterator i = l.begin(); i != l.end(); ++i)
 		delete i->song;
 	l.clear();
 }

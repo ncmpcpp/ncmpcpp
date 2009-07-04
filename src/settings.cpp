@@ -64,7 +64,7 @@ namespace
 	
 	void String2Buffer(const string &s, Buffer &buf)
 	{
-		for (string::const_iterator it = s.begin(); it != s.end(); it++)
+		for (string::const_iterator it = s.begin(); it != s.end(); ++it)
 		{
 			if (*it != '$')
 				buf << *it;

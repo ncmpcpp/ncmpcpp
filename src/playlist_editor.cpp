@@ -118,7 +118,7 @@ void PlaylistEditor::Update()
 		TagList list;
 		Mpd.GetPlaylists(list);
 		sort(list.begin(), list.end(), CaseInsensitiveSorting());
-		for (TagList::iterator it = list.begin(); it != list.end(); it++)
+		for (TagList::iterator it = list.begin(); it != list.end(); ++it)
 		{
 			utf_to_locale(*it);
 			Playlists->AddOption(*it);
@@ -137,9 +137,9 @@ void PlaylistEditor::Update()
 		else
 			Content->SetTitle("Playlist's content");
 		bool bold = 0;
-		for (SongList::const_iterator it = list.begin(); it != list.end(); it++)
+		for (SongList::const_iterator it = list.begin(); it != list.end(); ++it)
 		{
-			for (size_t j = 0; j < myPlaylist->Main()->Size(); j++)
+			for (size_t j = 0; j < myPlaylist->Main()->Size(); ++j)
 			{
 				if ((*it)->GetHash() == myPlaylist->Main()->at(j).GetHash())
 				{
@@ -200,7 +200,7 @@ void PlaylistEditor::AddToPlaylist(bool add_n_play)
 		Mpd.GetPlaylistContent(locale_to_utf_cpy(Playlists->Current()), list);
 		Mpd.StartCommandsList();
 		SongList::const_iterator it = list.begin();
-		for (; it != list.end(); it++)
+		for (; it != list.end(); ++it)
 			if (Mpd.AddSong(**it) < 0)
 				break;
 		Mpd.CommitCommandsList();
@@ -228,7 +228,7 @@ void PlaylistEditor::AddToPlaylist(bool add_n_play)
 				long long hash = Content->Current().GetHash();
 				if (add_n_play)
 				{
-					for (size_t i = 0; i < myPlaylist->Main()->Size(); i++)
+					for (size_t i = 0; i < myPlaylist->Main()->Size(); ++i)
 					{
 						if (myPlaylist->Main()->at(i).GetHash() == hash)
 						{
@@ -241,7 +241,7 @@ void PlaylistEditor::AddToPlaylist(bool add_n_play)
 				{
 					Playlist::BlockUpdate = 1;
 					Mpd.StartCommandsList();
-					for (size_t i = 0; i < myPlaylist->Main()->Size(); i++)
+					for (size_t i = 0; i < myPlaylist->Main()->Size(); ++i)
 					{
 						if (myPlaylist->Main()->at(i).GetHash() == hash)
 						{
@@ -332,7 +332,7 @@ void PlaylistEditor::GetSelectedSongs(MPD::SongList &v)
 {
 	std::vector<size_t> selected;
 	Content->GetSelected(selected);
-	for (std::vector<size_t>::const_iterator it = selected.begin(); it != selected.end(); it++)
+	for (std::vector<size_t>::const_iterator it = selected.begin(); it != selected.end(); ++it)
 	{
 		v.push_back(new MPD::Song(Content->at(*it)));
 	}

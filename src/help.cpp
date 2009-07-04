@@ -118,7 +118,7 @@ std::string Help::DisplayKeys(int *key, int size)
 	}
 	if (result.length() > 12)
 		result = result.substr(0, 12);
-	for (size_t i = result.length(); i <= 12; result += " ", i++) { }
+	for (size_t i = result.length(); i <= 12; result += " ", ++i) { }
 	result += ": ";
 	return result;
 }

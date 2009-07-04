@@ -182,9 +182,9 @@ void EscapeUnallowedChars(std::string &s)
 {
 	static const std::string unallowed_chars = "\"*/:<>?\\|";
 	
-	for (std::string::const_iterator it = unallowed_chars.begin(); it != unallowed_chars.end(); it++)
+	for (std::string::const_iterator it = unallowed_chars.begin(); it != unallowed_chars.end(); ++it)
 	{
-		for (size_t i = 0; i < s.length(); i++)
+		for (size_t i = 0; i < s.length(); ++i)
 		{
 			if (s[i] == *it)
 			{
@@ -209,7 +209,7 @@ void EscapeHtml(std::string &s)
 		s.replace(i, 6, "\"");
 	for (size_t i = s.find("&amp;"); i != std::string::npos; i = s.find("&amp;"))
 		s.replace(i, 5, "&");
-	for (size_t i = 0; i < s.length(); i++)
+	for (size_t i = 0; i < s.length(); ++i)
 	{
 		if (erase)
 		{
