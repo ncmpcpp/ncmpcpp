@@ -130,7 +130,7 @@ void Display::SongsInColumns(const MPD::Song &s, void *s_template, Menu<MPD::Son
 				get = &MPD::Song::GetAlbum;
 				break;
 			case 'y':
-				get = &MPD::Song::GetYear;
+				get = &MPD::Song::GetDate;
 				break;
 			case 'n':
 				get = &MPD::Song::GetTrack;
@@ -213,7 +213,7 @@ void Display::Songs(const MPD::Song &s, void *data, Menu<MPD::Song> *menu)
 							get = &MPD::Song::GetAlbum;
 							break;
 						case 'y':
-							get = &MPD::Song::GetYear;
+							get = &MPD::Song::GetDate;
 							break;
 						case 'n':
 							get = &MPD::Song::GetTrack;
@@ -329,9 +329,9 @@ void Display::Songs(const MPD::Song &s, void *data, Menu<MPD::Song> *menu)
 					break;
 				case 'y':
 					if (!right)
-						*menu << s.GetYear();
+						*menu << s.GetDate();
 					else
-						buf << TO_WSTRING(s.GetYear());
+						buf << TO_WSTRING(s.GetDate());
 					break;
 				case 'n':
 					if (!right)
@@ -412,7 +412,7 @@ void Display::Tags(const MPD::Song &s, void *data, Menu<MPD::Song> *menu)
 			*menu << ShowTag(s.GetAlbum());
 			return;
 		case 3:
-			*menu << ShowTag(s.GetYear());
+			*menu << ShowTag(s.GetDate());
 			return;
 		case 4:
 			*menu << ShowTag(s.GetTrack());

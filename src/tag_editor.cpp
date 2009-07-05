@@ -127,8 +127,8 @@ void TinyTagEditor::EnterPressed()
 		case 4:
 		{
 			Statusbar() << fmtBold << "Year: " << fmtBoldEnd;
-			s.SetYear(wFooter->GetString(s.GetYear(), 4));
-			w->at(option) << fmtBold << "Year:" << fmtBoldEnd << ' ' << ShowTag(s.GetYear());
+			s.SetDate(wFooter->GetString(s.GetDate(), 4));
+			w->at(option) << fmtBold << "Year:" << fmtBoldEnd << ' ' << ShowTag(s.GetDate());
 			break;
 		}
 		case 5:
@@ -290,7 +290,7 @@ bool TinyTagEditor::GetTags()
 	w->at(8) << fmtBold << "Title:" << fmtBoldEnd << ' ' << ShowTag(s.GetTitle());
 	w->at(9) << fmtBold << "Artist:" << fmtBoldEnd << ' ' << ShowTag(s.GetArtist());
 	w->at(10) << fmtBold << "Album:" << fmtBoldEnd << ' ' << ShowTag(s.GetAlbum());
-	w->at(11) << fmtBold << "Year:" << fmtBoldEnd << ' ' << ShowTag(s.GetYear());
+	w->at(11) << fmtBold << "Year:" << fmtBoldEnd << ' ' << ShowTag(s.GetDate());
 	w->at(12) << fmtBold << "Track:" << fmtBoldEnd << ' ' << ShowTag(s.GetTrack());
 	w->at(13) << fmtBold << "Genre:" << fmtBoldEnd << ' ' << ShowTag(s.GetGenre());
 	w->at(14) << fmtBold << "Composer:" << fmtBoldEnd << ' ' << ShowTag(s.GetComposer());
@@ -583,8 +583,8 @@ void TagEditor::EnterPressed()
 			set = &Song::SetAlbum;
 			break;
 		case 3:
-			get = &Song::GetYear;
-			set = &Song::SetYear;
+			get = &Song::GetDate;
+			set = &Song::SetDate;
 			break;
 		case 4:
 			get = &Song::GetTrack;
@@ -929,7 +929,7 @@ bool TagEditor::WriteTags(Song &s)
 		f.tag()->setTitle(ToWString(s.GetTitle()));
 		f.tag()->setArtist(ToWString(s.GetArtist()));
 		f.tag()->setAlbum(ToWString(s.GetAlbum()));
-		f.tag()->setYear(StrToInt(s.GetYear()));
+		f.tag()->setYear(StrToInt(s.GetDate()));
 		f.tag()->setTrack(StrToInt(s.GetTrack()));
 		f.tag()->setGenre(ToWString(s.GetGenre()));
 		f.tag()->setComment(ToWString(s.GetComment()));
@@ -1095,7 +1095,7 @@ std::string TagEditor::TagToString(const MPD::Song &s, void *data)
 			result = s.GetAlbum();
 			break;
 		case 3:
-			result = s.GetYear();
+			result = s.GetDate();
 			break;
 		case 4:
 			result = s.GetTrack();
@@ -1167,7 +1167,7 @@ Song::SetFunction TagEditor::IntoSetFunction(char c)
 		case 'b':
 			return &Song::SetAlbum;
 		case 'y':
-			return &Song::SetYear;
+			return &Song::SetDate;
 		case 'n':
 			return &Song::SetTrack;
 		case 'g':

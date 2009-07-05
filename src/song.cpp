@@ -162,7 +162,7 @@ std::string MPD::Song::GetTrack() const
 		return itsSong->track;
 }
 
-std::string MPD::Song::GetYear() const
+std::string MPD::Song::GetDate() const
 {
 	return !itsSong->date ? "" : itsSong->date;
 }
@@ -235,14 +235,14 @@ void MPD::Song::SetTrack(int track)
 	itsSong->track = str_pool_get(IntoStr(track).c_str());
 }
 
-void MPD::Song::SetYear(const std::string &str)
+void MPD::Song::SetDate(const std::string &str)
 {
 	if (itsSong->date)
 		str_pool_put(itsSong->date);
 	itsSong->date = str.empty() ? 0 : str_pool_get(str.c_str());
 }
 
-void MPD::Song::SetYear(int year)
+void MPD::Song::SetDate(int year)
 {
 	if (itsSong->date)
 		str_pool_put(itsSong->date);
@@ -323,7 +323,7 @@ std::string MPD::Song::toString(const std::string &format) const
 							get = &Song::GetAlbum;
 							break;
 						case 'y':
-							get = &Song::GetYear;
+							get = &Song::GetDate;
 							break;
 						case 'n':
 							get = &Song::GetTrack;
@@ -420,7 +420,7 @@ std::string MPD::Song::toString(const std::string &format) const
 					result += GetAlbum();
 					break;
 				case 'y':
-					result += GetYear();
+					result += GetDate();
 					break;
 				case 'n':
 					result += GetTrack();

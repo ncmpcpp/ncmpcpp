@@ -359,7 +359,7 @@ void Info::PrepareSong(MPD::Song &s)
 	*w << fmtBold << "\nTitle: " << fmtBoldEnd << ShowTag(s.GetTitle());
 	*w << fmtBold << "\nArtist: " << fmtBoldEnd << ShowTag(s.GetArtist());
 	*w << fmtBold << "\nAlbum: " << fmtBoldEnd << ShowTag(s.GetAlbum());
-	*w << fmtBold << "\nYear: " << fmtBoldEnd << ShowTag(s.GetYear());
+	*w << fmtBold << "\nYear: " << fmtBoldEnd << ShowTag(s.GetDate());
 	*w << fmtBold << "\nTrack: " << fmtBoldEnd << ShowTag(s.GetTrack());
 	*w << fmtBold << "\nGenre: " << fmtBoldEnd << ShowTag(s.GetGenre());
 	*w << fmtBold << "\nComposer: " << fmtBoldEnd << ShowTag(s.GetComposer());

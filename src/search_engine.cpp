@@ -157,8 +157,8 @@ void SearchEngine::EnterPressed()
 		case 8:
 		{
 			Statusbar() << fmtBold << "Year: " << fmtBoldEnd;
-			itsPattern.SetYear(wFooter->GetString(itsPattern.GetYear()));
-			*w->Current().first << fmtBold << "Year:     " << fmtBoldEnd << ' ' << ShowTag(itsPattern.GetYear());
+			itsPattern.SetDate(wFooter->GetString(itsPattern.GetDate()));
+			*w->Current().first << fmtBold << "Year:     " << fmtBoldEnd << ' ' << ShowTag(itsPattern.GetDate());
 			break;
 		}
 		case 9:
@@ -400,7 +400,7 @@ void SearchEngine::Prepare()
 	*w->at(5).first << fmtBold << "Composer: " << fmtBoldEnd << ' ' << ShowTag(itsPattern.GetComposer());
 	*w->at(6).first << fmtBold << "Performer:" << fmtBoldEnd << ' ' << ShowTag(itsPattern.GetPerformer());
 	*w->at(7).first << fmtBold << "Genre:    " << fmtBoldEnd << ' ' << ShowTag(itsPattern.GetGenre());
-	*w->at(8).first << fmtBold << "Year:     " << fmtBoldEnd << ' ' << ShowTag(itsPattern.GetYear());
+	*w->at(8).first << fmtBold << "Year:     " << fmtBoldEnd << ' ' << ShowTag(itsPattern.GetDate());
 	*w->at(9).first << fmtBold << "Comment:  " << fmtBoldEnd << ' ' << ShowTag(itsPattern.GetComment());
 	
 	*w->at(11).first << fmtBold << "Search in:" << fmtBoldEnd << ' ' << (Config.search_in_db ? "Database" : "Current playlist");
@@ -528,7 +528,7 @@ void SearchEngine::Search()
 					||	regexec(&rx, copy.GetComposer().c_str(), 0, 0, 0) == 0
 					||	regexec(&rx, copy.GetPerformer().c_str(), 0, 0, 0) == 0
 					||	regexec(&rx, copy.GetGenre().c_str(), 0, 0, 0) == 0
-					||	regexec(&rx, copy.GetYear().c_str(), 0, 0, 0) == 0
+					||	regexec(&rx, copy.GetDate().c_str(), 0, 0, 0) == 0
 					||	regexec(&rx, copy.GetComment().c_str(), 0, 0, 0) == 0;
 				}
 				regfree(&rx);
@@ -576,10 +576,10 @@ void SearchEngine::Search()
 					found = regexec(&rx, copy.GetGenre().c_str(), 0, 0, 0) == 0;
 				regfree(&rx);
 			}
-			if (found && !s.GetYear().empty())
+			if (found && !s.GetDate().empty())
 			{
-				if (regcomp(&rx, s.GetYear().c_str(), CaseSensitive | Config.regex_type) == 0)
-					found = regexec(&rx, copy.GetYear().c_str(), 0, 0, 0) == 0;
+				if (regcomp(&rx, s.GetDate().c_str(), CaseSensitive | Config.regex_type) == 0)
+					found = regexec(&rx, copy.GetDate().c_str(), 0, 0, 0) == 0;
 				regfree(&rx);
 			}
 			if (found && !s.GetComment().empty())
@@ -600,7 +600,7 @@ void SearchEngine::Search()
 				||	copy.GetComposer() == s.Any()
 				||	copy.GetPerformer() == s.Any()
 				||	copy.GetGenre() == s.Any()
-				||	copy.GetYear() == s.Any()
+				||	copy.GetDate() == s.Any()
 				||	copy.GetComment() == s.Any();
 			
 			if (found && !s.GetArtist().empty())
@@ -617,8 +617,8 @@ void SearchEngine::Search()
 				found = copy.GetPerformer() == s.GetPerformer();
 			if (found && !s.GetGenre().empty())
 				found = copy.GetGenre() == s.GetGenre();
-			if (found && !s.GetYear().empty())
-				found = copy.GetYear() == s.GetYear();
+			if (found && !s.GetDate().empty())
+				found = copy.GetDate() == s.GetDate();
 			if (found && !s.GetComment().empty())
 				found = copy.GetComment() == s.GetComment();
 		}

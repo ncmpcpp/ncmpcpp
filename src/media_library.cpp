@@ -588,7 +588,7 @@ std::string MediaLibrary::SongToString(const MPD::Song &s, void *)
 
 bool MediaLibrary::SortSongsByYear(Song *a, Song *b)
 {
-	return a->GetYear() < b->GetYear();
+	return a->GetDate() < b->GetDate();
 }
 
 bool MediaLibrary::SortSongsByTrack(Song *a, Song *b)

@@ -161,7 +161,7 @@ MPD::Song::SetFunction IntoSetFunction(mpd_TagItems tag)
 		case MPD_TAG_ITEM_GENRE:
 			return &MPD::Song::SetGenre;
 		case MPD_TAG_ITEM_DATE:
-			return &MPD::Song::SetYear;
+			return &MPD::Song::SetDate;
 		case MPD_TAG_ITEM_COMPOSER:
 			return &MPD::Song::SetComposer;
 		case MPD_TAG_ITEM_PERFORMER:

@@ -46,7 +46,7 @@ namespace MPD
 			std::string GetTitle() const;
 			std::string GetAlbum() const;
 			std::string GetTrack() const;
-			std::string GetYear() const;
+			std::string GetDate() const;
 			std::string GetGenre() const;
 			std::string GetComposer() const;
 			std::string GetPerformer() const;
@@ -65,8 +65,8 @@ namespace MPD
 			void SetAlbum(const std::string &);
 			void SetTrack(const std::string &);
 			void SetTrack(int);
-			void SetYear(const std::string &);
-			void SetYear(int);
+			void SetDate(const std::string &);
+			void SetDate(int);
 			void SetGenre(const std::string &);
 			void SetComposer(const std::string &);
 			void SetPerformer(const std::string &);
