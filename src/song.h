@@ -34,7 +34,7 @@ namespace MPD
 			typedef void (Song::*SetFunction)(const std::string &);
 			typedef std::string (Song::*GetFunction)() const;
 			
-			Song() : itsSlash(std::string::npos), itsHash(0), copyPtr(0), isStream(0), isLocalised(0) { itsSong = mpd_newSong(); }
+			Song() : itsSlash(std::string::npos), itsHash(0), copyPtr(0), isLocalised(0) { itsSong = mpd_newSong(); }
 			Song(mpd_Song *, bool = 0);
 			Song(const Song &);
 			~Song();
@@ -54,7 +54,7 @@ namespace MPD
 			std::string GetComment() const;
 			std::string GetLength() const;
 			
-			long long GetHash() const { return itsHash; }
+			unsigned GetHash() const { return itsHash; }
 			int GetTotalLength() const { return itsSong->time < 0 ? 0 : itsSong->time; }
 			int GetPosition() const { return itsSong->pos; }
 			int GetID() const { return itsSong->id; }
@@ -85,25 +85,24 @@ namespace MPD
 			void Localize();
 			void Clear();
 			bool Empty() const;
-			bool IsFromDB() const;
-			bool IsStream() const { return isStream; }
+			bool isFromDB() const;
+			bool isStream() const;
 			bool Localized() const { return isLocalised; }
 			
-			Song & operator=(const Song &);
+			Song &operator=(const Song &);
 			bool operator==(const Song &) const;
 			bool operator!=(const Song &) const;
 			bool operator<(const Song &rhs) const;
 			
 			static std::string ShowTime(int);
 		private:
-			void CountLastSlashPosition();
+			void SetHashAndSlash();
 			
 			mpd_Song *itsSong;
 			std::string itsNewName;
 			size_t itsSlash;
-			long long itsHash;
+			unsigned itsHash;
 			bool copyPtr;
-			bool isStream;
 			bool isLocalised;
 	};
 }

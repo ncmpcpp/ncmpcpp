@@ -335,7 +335,7 @@ void Info::PrepareSong(MPD::Song &s)
 {
 #	ifdef HAVE_TAGLIB_H
 	std::string path_to_file;
-	if (s.IsFromDB())
+	if (s.isFromDB())
 		path_to_file += Config.mpd_music_dir;
 	path_to_file += s.GetFile();
 	TagLib::FileRef f(path_to_file.c_str());

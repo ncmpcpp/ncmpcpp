@@ -63,7 +63,7 @@ void TinyTagEditor::Resize()
 
 void TinyTagEditor::SwitchTo()
 {
-	if (itsEdited.IsStream())
+	if (itsEdited.isStream())
 	{
 		ShowMessage("Cannot edit streams!");
 	}
@@ -78,7 +78,7 @@ void TinyTagEditor::SwitchTo()
 	else
 	{
 		string message = "Cannot read file '";
-		if (itsEdited.IsFromDB())
+		if (itsEdited.isFromDB())
 			message += Config.mpd_music_dir;
 		message += itsEdited.GetFile();
 		message += "'!";
@@ -191,7 +191,7 @@ void TinyTagEditor::EnterPressed()
 			if (TagEditor::WriteTags(s))
 			{
 				ShowMessage("Tags updated!");
-				if (s.IsFromDB())
+				if (s.isFromDB())
 				{
 					Mpd.UpdateDirectory(locale_to_utf_cpy(s.GetDirectory()));
 					if (myOldScreen == mySearcher)
@@ -245,7 +245,7 @@ bool TinyTagEditor::GetTags()
 	Song &s = itsEdited;
 	
 	string path_to_file;
-	if (s.IsFromDB())
+	if (s.isFromDB())
 		path_to_file += Config.mpd_music_dir;
 	path_to_file += s.GetFile();
 	locale_to_utf(path_to_file);
@@ -918,7 +918,7 @@ bool TagEditor::WriteTags(Song &s)
 {
 	using namespace TagLib;
 	string path_to_file;
-	bool file_is_from_db = s.IsFromDB();
+	bool file_is_from_db = s.isFromDB();
 	if (file_is_from_db)
 		path_to_file += Config.mpd_music_dir;
 	path_to_file += s.GetFile();

@@ -523,7 +523,7 @@ void MediaLibrary::AddToPlaylist(bool add_n_play)
 			BlockItemListUpdate = 1;
 			if (Config.ncmpc_like_songs_adding && Songs->isBold())
 			{
-				long long hash = Songs->Current().GetHash();
+				unsigned hash = Songs->Current().GetHash();
 				if (add_n_play)
 				{
 					for (size_t i = 0; i < myPlaylist->Main()->Size(); ++i)

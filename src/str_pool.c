@@ -33,7 +33,7 @@ struct slot {
 
 struct slot *slots[NUM_SLOTS];
 
-static inline unsigned
+inline unsigned
 calc_hash(const char *p)
 {
 	unsigned hash = 5381;

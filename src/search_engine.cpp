@@ -228,7 +228,7 @@ void SearchEngine::EnterPressed()
 			BlockItemListUpdate = 1;
 			if (Config.ncmpc_like_songs_adding && w->isBold())
 			{
-				long long hash = w->Current().second->GetHash();
+				unsigned hash = w->Current().second->GetHash();
 				for (size_t i = 0; i < myPlaylist->Main()->Size(); ++i)
 				{
 					if (myPlaylist->Main()->at(i).GetHash() == hash)
@@ -271,7 +271,7 @@ void SearchEngine::SpacePressed()
 	if (Config.ncmpc_like_songs_adding && w->isBold())
 	{
 		Playlist::BlockUpdate = 1;
-		long long hash = w->Current().second->GetHash();
+		unsigned hash = w->Current().second->GetHash();
 		Mpd.StartCommandsList();
 		for (size_t i = 0; i < myPlaylist->Main()->Size(); ++i)
 		{

@@ -34,34 +34,18 @@ MPD::Song::Song(mpd_Song *s, bool copy_ptr) : 	itsSong(s ? s : mpd_newSong()),
 						itsSlash(std::string::npos),
 						itsHash(0),
 						copyPtr(copy_ptr),
-						isStream(0),
 						isLocalised(0)
 {
-	size_t file_len = itsSong->file ? strlen(itsSong->file) : 0;
-	
 	if (itsSong->file)
-	{
-		CountLastSlashPosition();
-		if (strncmp(itsSong->file, "http://", 7) == 0)
-			isStream = 1;
-	}
-	
-	// generate pseudo-hash
-	for (size_t i = 0; i < file_len; ++i)
-	{
-		itsHash += itsSong->file[i];
-		if (i%3)
-			itsHash *= itsSong->file[i];
-	}
+		SetHashAndSlash();
 }
 
 MPD::Song::Song(const Song &s) : itsSong(0),
-			    itsNewName(s.itsNewName),
-			    itsSlash(s.itsSlash),
-			    itsHash(s.itsHash),
-			    copyPtr(s.copyPtr),
-			    isStream(s.isStream),
-			    isLocalised(s.isLocalised)
+				itsNewName(s.itsNewName),
+				itsSlash(s.itsSlash),
+				itsHash(s.itsHash),
+				copyPtr(s.copyPtr),
+				isLocalised(s.isLocalised)
 {
 	itsSong = s.copyPtr ? s.itsSong : mpd_songDup(s.itsSong);
 }
@@ -74,9 +58,7 @@ MPD::Song::~Song()
 
 std::string MPD::Song::GetLength() const
 {
-	if (itsSong->time <= 0)
-		return "-:--";
-	return ShowTime(itsSong->time);
+	return itsSong->time <= 0 ? "-:--" : ShowTime(itsSong->time);
 }
 
 void MPD::Song::Localize()
@@ -85,7 +67,7 @@ void MPD::Song::Localize()
 	if (isLocalised)
 		return;
 	str_pool_utf_to_locale(itsSong->file);
-	CountLastSlashPosition();
+	SetHashAndSlash();
 	str_pool_utf_to_locale(itsSong->artist);
 	str_pool_utf_to_locale(itsSong->title);
 	str_pool_utf_to_locale(itsSong->album);
@@ -107,9 +89,8 @@ void MPD::Song::Clear()
 		mpd_freeSong(itsSong);
 	itsSong = mpd_newSong();
 	itsNewName.clear();
-	itsSlash = 0;
+	itsSlash = std::string::npos;
 	itsHash = 0;
-	isStream = 0;
 	isLocalised = 0;
 	copyPtr = 0;
 }
@@ -119,10 +100,14 @@ bool MPD::Song::Empty() const
 	return !itsSong || (!itsSong->file && !itsSong->title && !itsSong->artist && !itsSong->album && !itsSong->date && !itsSong->track && !itsSong->genre && !itsSong->composer && !itsSong->performer && !itsSong->disc && !itsSong->comment);
 }
 
-bool MPD::Song::IsFromDB() const
+bool MPD::Song::isFromDB() const
 {
-	const std::string &dir = GetDirectory();
-	return dir[0] != '/' || dir == "/";
+	return (itsSong->file && itsSong->file[0] != '/') || itsSlash == std::string::npos;
+}
+
+bool MPD::Song::isStream() const
+{
+	return !strncmp(itsSong->file, "http://", 7);
 }
 
 std::string MPD::Song::GetFile() const
@@ -132,12 +117,24 @@ std::string MPD::Song::GetFile() const
 
 std::string MPD::Song::GetName() const
 {
-	return !itsSong->file ? "" : (itsSlash != std::string::npos && !isStream ? itsSong->file+itsSlash+1 : (isStream && itsSong->name ? itsSong->name : itsSong->file));
+	if (itsSong->name)
+		return itsSong->name;
+	else if (!itsSong->file)
+		return "";
+	else if (itsSlash != std::string::npos)
+		return itsSong->file+itsSlash+1;
+	else
+		return itsSong->file;
 }
 
 std::string MPD::Song::GetDirectory() const
 {
-	return !itsSong->file || isStream ? "" : itsSlash != std::string::npos ? std::string(itsSong->file).substr(0, itsSlash) : "/";
+	if (!itsSong->file || isStream())
+		return "";
+	else if (itsSlash == std::string::npos)
+		return "/";
+	else
+		return std::string(itsSong->file, itsSlash);
 }
 
 std::string MPD::Song::GetArtist() const
@@ -157,7 +154,12 @@ std::string MPD::Song::GetAlbum() const
 
 std::string MPD::Song::GetTrack() const
 {
-	return !itsSong->track ? "" : (StrToInt(itsSong->track) < 10 && itsSong->track[0] != '0' ? "0"+std::string(itsSong->track) : itsSong->track);
+	if (!itsSong->track)
+		return "";
+	else if (itsSong->track[0] != '0' && !itsSong->track[1])
+		return "0"+std::string(itsSong->track);
+	else
+		return itsSong->track;
 }
 
 std::string MPD::Song::GetYear() const
@@ -195,7 +197,7 @@ void MPD::Song::SetFile(const std::string &str)
 	if (itsSong->file)
 		str_pool_put(itsSong->file);
 	itsSong->file = str.empty() ? 0 : str_pool_get(str.c_str());
-	CountLastSlashPosition();
+	SetHashAndSlash();
 }
 
 void MPD::Song::SetArtist(const std::string &str)
@@ -449,7 +451,7 @@ std::string MPD::Song::toString(const std::string &format) const
 	return result;
 }
 
-MPD::Song & MPD::Song::operator=(const MPD::Song &s)
+MPD::Song &MPD::Song::operator=(const MPD::Song &s)
 {
 	if (this == &s)
 		return *this;
@@ -460,7 +462,6 @@ MPD::Song & MPD::Song::operator=(const MPD::Song &s)
 	itsSlash = s.itsSlash;
 	itsHash = s.itsHash;
 	copyPtr = s.copyPtr;
-	isStream = s.isStream;
 	isLocalised = s.isLocalised;
 	return *this;
 }
@@ -540,11 +541,12 @@ std::string MPD::Song::ShowTime(int length)
 	return ss.str();
 }
 
-void MPD::Song::CountLastSlashPosition()
+void MPD::Song::SetHashAndSlash()
 {
 	if (!itsSong->file)
 		return;
 	char *tmp = strrchr(itsSong->file, '/');
-	itsSlash = tmp ? tmp-itsSong->file : std::string::npos;
+	itsSlash = tmp && *(tmp-1) != '/' /* no http:// */ ? tmp-itsSong->file : std::string::npos;
+	itsHash = calc_hash(itsSong->file);
 }
 

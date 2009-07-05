@@ -560,7 +560,7 @@ int Connection::AddSong(const std::string &path)
 
 int Connection::AddSong(const Song &s)
 {
-	return !s.Empty() ? (AddSong((!s.IsFromDB() ? "file://" : "") + (s.Localized() ? locale_to_utf_cpy(s.GetFile()) : s.GetFile()))) : -1;
+	return !s.Empty() ? (AddSong((!s.isFromDB() ? "file://" : "") + (s.Localized() ? locale_to_utf_cpy(s.GetFile()) : s.GetFile()))) : -1;
 }
 
 bool Connection::AddRandomSongs(size_t number)

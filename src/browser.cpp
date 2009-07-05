@@ -111,7 +111,7 @@ void Browser::EnterPressed()
 			if (Config.ncmpc_like_songs_adding && w->isBold())
 			{
 				bool found = 0;
-				long long hash = w->Current().song->GetHash();
+				unsigned hash = w->Current().song->GetHash();
 				for (size_t i = 0; i < myPlaylist->Main()->Size(); ++i)
 				{
 					if (myPlaylist->Main()->at(i).GetHash() == hash)
@@ -225,7 +225,7 @@ void Browser::SpacePressed()
 			if (Config.ncmpc_like_songs_adding && w->isBold())
 			{
 				Playlist::BlockUpdate = 1;
-				long long hash = w->Current().song->GetHash();
+				unsigned hash = w->Current().song->GetHash();
 				Mpd.StartCommandsList();
 				for (size_t i = 0; i < myPlaylist->Main()->Size(); ++i)
 				{
@@ -448,7 +448,7 @@ void Browser::LocateSong(const MPD::Song &s)
 	if (s.GetDirectory().empty())
 		return;
 	
-	Config.local_browser = !s.IsFromDB();
+	Config.local_browser = !s.isFromDB();
 	
 	SwitchTo();
 	

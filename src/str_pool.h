@@ -23,6 +23,8 @@
 extern "C" {
 #endif
 
+unsigned calc_hash(const char *p);
+
 char *str_pool_get(const char *value);
 
 char *str_pool_dup(const char *value);

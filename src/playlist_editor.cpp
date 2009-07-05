@@ -224,7 +224,7 @@ void PlaylistEditor::AddToPlaylist(bool add_n_play)
 			BlockItemListUpdate = 1;
 			if (Config.ncmpc_like_songs_adding && Content->isBold())
 			{
-				long long hash = Content->Current().GetHash();
+				unsigned hash = Content->Current().GetHash();
 				if (add_n_play)
 				{
 					for (size_t i = 0; i < myPlaylist->Main()->Size(); ++i)
