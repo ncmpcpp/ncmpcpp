@@ -31,7 +31,6 @@
 
 using namespace MPD;
 using namespace Global;
-using std::string;
 
 MediaLibrary *myLibrary = new MediaLibrary;
 
@@ -51,7 +50,7 @@ void MediaLibrary::Init()
 	itsRightColWidth = COLS-COLS/3*2-1;
 	itsRightColStartX = itsLeftColWidth+itsMiddleColWidth+2;
 	
-	Artists = new Menu<string>(0, MainStartY, itsLeftColWidth, MainHeight, IntoStr(Config.media_lib_primary_tag) + "s", Config.main_color, brNone);
+	Artists = new Menu<std::string>(0, MainStartY, itsLeftColWidth, MainHeight, IntoStr(Config.media_lib_primary_tag) + "s", Config.main_color, brNone);
 	Artists->HighlightColor(Config.active_column_color);
 	Artists->SetTimeout(ncmpcpp_window_timeout);
 	Artists->CyclicScrolling(Config.use_cyclic_scrolling);
@@ -134,7 +133,7 @@ void MediaLibrary::SwitchTo()
 		{
 			if (w == Artists)
 				NextColumn();
-			string item_type = IntoStr(Config.media_lib_primary_tag);
+			std::string item_type = IntoStr(Config.media_lib_primary_tag);
 			ToLower(item_type);
 			Albums->SetTitle("Albums (sorted by " + item_type + ")");
 		}
@@ -482,7 +481,7 @@ void MediaLibrary::AddToPlaylist(bool add_n_play)
 		
 		if (it != list.begin())
 		{
-			string tag_type = IntoStr(Config.media_lib_primary_tag);
+			std::string tag_type = IntoStr(Config.media_lib_primary_tag);
 			ToLower(tag_type);
 			ShowMessage("Adding songs of %s \"%s\"", tag_type.c_str(), Artists->Current().c_str());
 			Song *s = &myPlaylist->Main()->at(myPlaylist->Main()->Size()-list.size());

@@ -21,13 +21,12 @@
 #include "scrollpad.h"
 
 using namespace NCurses;
-using std::string;
 
 Scrollpad::Scrollpad(size_t startx,
 			size_t starty,
 			size_t width,
 			size_t height,
-			const string &title,
+			const std::string &title,
 			Color color,
 			Border border)
 			: Window(startx, starty, width, height, title, color, border),

@@ -42,8 +42,6 @@
 #include "tag_editor.h"
 
 using namespace Global;
-using std::string;
-using std::vector;
 
 #ifdef HAVE_CURL_CURL_H
 const std::string Info::Folder = home_path + HOME_FOLDER"artists";
@@ -167,7 +165,7 @@ void Info::GetArtist()
 		{
 			locale_to_utf(itsArtist);
 			
-			string file = itsArtist + ".txt";
+			std::string file = itsArtist + ".txt";
 			ToLower(file);
 			EscapeUnallowedChars(file);
 			
@@ -183,7 +181,7 @@ void Info::GetArtist()
 			if (input.is_open())
 			{
 				bool first = 1;
-				string line;
+				std::string line;
 				while (getline(input, line))
 				{
 					if (!first)
@@ -218,11 +216,11 @@ void *Info::PrepareArtist(void *screen_void_ptr)
 	Info *screen = static_cast<Info *>(screen_void_ptr);
 	
 	char *c_artist = curl_easy_escape(0, screen->itsArtist.c_str(), screen->itsArtist.length());
-	string url = "http://ws.audioscrobbler.com/2.0/?method=artist.getinfo&artist=";
+	std::string url = "http://ws.audioscrobbler.com/2.0/?method=artist.getinfo&artist=";
 	url += c_artist;
 	url += "&api_key=d94e5b6e26469a2d1ffae8ef20131b79";
 	
-	string result;
+	std::string result;
 	CURLcode code;
 	
 	pthread_mutex_lock(&CurlLock);
@@ -250,7 +248,7 @@ void *Info::PrepareArtist(void *screen_void_ptr)
 	
 	a = result.find("status=\"failed\"");
 	
-	if (a != string::npos)
+	if (a != std::string::npos)
 	{
 		EscapeHtml(result);
 		*screen->w << "Last.fm returned an error message: " << result;
@@ -258,8 +256,8 @@ void *Info::PrepareArtist(void *screen_void_ptr)
 		pthread_exit(0);
 	}
 	
-	vector<string> similar;
-	for (size_t i = result.find("<name>"); i != string::npos; i = result.find("<name>"))
+	std::vector<std::string> similar;
+	for (size_t i = result.find("<name>"); i != std::string::npos; i = result.find("<name>"))
 	{
 		result[i] = '.';
 		size_t j = result.find("</name>");
@@ -268,8 +266,8 @@ void *Info::PrepareArtist(void *screen_void_ptr)
 		similar.push_back(result.substr(i, j-i));
 		EscapeHtml(similar.back());
 	}
-	vector<string> urls;
-	for (size_t i = result.find("<url>"); i != string::npos; i = result.find("<url>"))
+	std::vector<std::string> urls;
+	for (size_t i = result.find("<url>"); i != std::string::npos; i = result.find("<url>"))
 	{
 		result[i] = '.';
 		size_t j = result.find("</url>");
@@ -336,7 +334,7 @@ void *Info::PrepareArtist(void *screen_void_ptr)
 void Info::PrepareSong(MPD::Song &s)
 {
 #	ifdef HAVE_TAGLIB_H
-	string path_to_file;
+	std::string path_to_file;
 	if (s.IsFromDB())
 		path_to_file += Config.mpd_music_dir;
 	path_to_file += s.GetFile();
@@ -370,7 +368,7 @@ void Info::PrepareSong(MPD::Song &s)
 	*w << fmtBold << "\nComment: " << fmtBoldEnd << ShowTag(s.GetComment());
 }
 
-basic_buffer<my_char_t> Info::ShowTag(const string &tag)
+basic_buffer<my_char_t> Info::ShowTag(const std::string &tag)
 {
 #	ifdef _UTF8
 	WBuffer result;

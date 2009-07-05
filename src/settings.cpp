@@ -28,18 +28,15 @@
 #include "helpers.h"
 #include "settings.h"
 
-using std::ifstream;
-using std::string;
-
-const string config_file = config_dir + "config";
-const string keys_config_file = config_dir + "keys";
+const std::string config_file = config_dir + "config";
+const std::string keys_config_file = config_dir + "keys";
 
 ncmpcpp_config Config;
 ncmpcpp_keys Key;
 
 namespace
 {
-	void GetKeys(string &line, int *key)
+	void GetKeys(std::string &line, int *key)
 	{
 		size_t i = line.find("=")+1;
 		line = line.substr(i, line.length()-i);
@@ -48,9 +45,9 @@ namespace
 			while (line[++i] == ' ') { }
 		line = line.substr(i, line.length()-i);
 		i = line.find(" ");
-		string one;
-		string two;
-		if (i != string::npos)
+		std::string one;
+		std::string two;
+		if (i != std::string::npos)
 		{
 			one = line.substr(0, i);
 			i++;
@@ -62,9 +59,9 @@ namespace
 		key[1] = !two.empty() && two[0] == '\'' ? two[1] : (atoi(two.c_str()) == 0 ? null_key : atoi(two.c_str()));
 	}
 	
-	void String2Buffer(const string &s, Buffer &buf)
+	void String2Buffer(const std::string &s, Buffer &buf)
 	{
-		for (string::const_iterator it = s.begin(); it != s.end(); ++it)
+		for (std::string::const_iterator it = s.begin(); it != s.end(); ++it)
 		{
 			if (*it != '$')
 				buf << *it;
@@ -73,7 +70,7 @@ namespace
 		}
 	}
 	
-	Border IntoBorder(const string &color)
+	Border IntoBorder(const std::string &color)
 	{
 		return Border(IntoColor(color));
 	}
@@ -299,8 +296,8 @@ void DefaultConfiguration(ncmpcpp_config &conf)
 
 void ReadKeys(ncmpcpp_keys &keys)
 {
-	ifstream f(keys_config_file.c_str());
-	string key;
+	std::ifstream f(keys_config_file.c_str());
+	std::string key;
 	
 	if (!f.is_open())
 		return;
@@ -310,141 +307,141 @@ void ReadKeys(ncmpcpp_keys &keys)
 		getline(f, key);
 		if (!key.empty() && key[0] != '#')
 		{
-			if (key.find("key_up ") != string::npos)
+			if (key.find("key_up ") != std::string::npos)
 				GetKeys(key, keys.Up);
-			else if (key.find("key_down ") != string::npos)
+			else if (key.find("key_down ") != std::string::npos)
 				GetKeys(key, keys.Down);
-			else if (key.find("key_page_up ") != string::npos)
+			else if (key.find("key_page_up ") != std::string::npos)
 				GetKeys(key, keys.PageUp);
-			else if (key.find("key_page_down ") != string::npos)
+			else if (key.find("key_page_down ") != std::string::npos)
 				GetKeys(key, keys.PageDown);
-			else if (key.find("key_home ") != string::npos)
+			else if (key.find("key_home ") != std::string::npos)
 				GetKeys(key, keys.Home);
-			else if (key.find("key_end ") != string::npos)
+			else if (key.find("key_end ") != std::string::npos)
 				GetKeys(key, keys.End);
-			else if (key.find("key_space ") != string::npos)
+			else if (key.find("key_space ") != std::string::npos)
 				GetKeys(key, keys.Space);
-			else if (key.find("key_enter ") != string::npos)
+			else if (key.find("key_enter ") != std::string::npos)
 				GetKeys(key, keys.Enter);
-			else if (key.find("key_delete ") != string::npos)
+			else if (key.find("key_delete ") != std::string::npos)
 				GetKeys(key, keys.Delete);
-			else if (key.find("key_volume_up ") != string::npos)
+			else if (key.find("key_volume_up ") != std::string::npos)
 				GetKeys(key, keys.VolumeUp);
-			else if (key.find("key_volume_down ") != string::npos)
+			else if (key.find("key_volume_down ") != std::string::npos)
 				GetKeys(key, keys.VolumeDown);
-			else if (key.find("key_screen_switcher ") != string::npos)
+			else if (key.find("key_screen_switcher ") != std::string::npos)
 				GetKeys(key, keys.ScreenSwitcher);
-			else if (key.find("key_help ") != string::npos)
+			else if (key.find("key_help ") != std::string::npos)
 				GetKeys(key, keys.Help);
-			else if (key.find("key_playlist ") != string::npos)
+			else if (key.find("key_playlist ") != std::string::npos)
 				GetKeys(key, keys.Playlist);
-			else if (key.find("key_browser ") != string::npos)
+			else if (key.find("key_browser ") != std::string::npos)
 				GetKeys(key, keys.Browser);
-			else if (key.find("key_search_engine ") != string::npos)
+			else if (key.find("key_search_engine ") != std::string::npos)
 				GetKeys(key, keys.SearchEngine);
-			else if (key.find("key_media_library ") != string::npos)
+			else if (key.find("key_media_library ") != std::string::npos)
 				GetKeys(key, keys.MediaLibrary);
-			else if (key.find("key_playlist_editor ") != string::npos)
+			else if (key.find("key_playlist_editor ") != std::string::npos)
 				GetKeys(key, keys.PlaylistEditor);
-			else if (key.find("key_tag_editor ") != string::npos)
+			else if (key.find("key_tag_editor ") != std::string::npos)
 				GetKeys(key, keys.TagEditor);
-			else if (key.find("key_outputs ") != string::npos)
+			else if (key.find("key_outputs ") != std::string::npos)
 				GetKeys(key, keys.Outputs);
-			else if (key.find("key_clock ") != string::npos)
+			else if (key.find("key_clock ") != std::string::npos)
 				GetKeys(key, keys.Clock);
-			else if (key.find("key_stop ") != string::npos)
+			else if (key.find("key_stop ") != std::string::npos)
 				GetKeys(key, keys.Stop);
-			else if (key.find("key_pause ") != string::npos)
+			else if (key.find("key_pause ") != std::string::npos)
 				GetKeys(key, keys.Pause);
-			else if (key.find("key_next ") != string::npos)
+			else if (key.find("key_next ") != std::string::npos)
 				GetKeys(key, keys.Next);
-			else if (key.find("key_prev ") != string::npos)
+			else if (key.find("key_prev ") != std::string::npos)
 				GetKeys(key, keys.Prev);
-			else if (key.find("key_seek_forward ") != string::npos)
+			else if (key.find("key_seek_forward ") != std::string::npos)
 				GetKeys(key, keys.SeekForward);
-			else if (key.find("key_seek_backward ") != string::npos)
+			else if (key.find("key_seek_backward ") != std::string::npos)
 				GetKeys(key, keys.SeekBackward);
-			else if (key.find("key_toggle_repeat ") != string::npos)
+			else if (key.find("key_toggle_repeat ") != std::string::npos)
 				GetKeys(key, keys.ToggleRepeat);
-			else if (key.find("key_toggle_random ") != string::npos)
+			else if (key.find("key_toggle_random ") != std::string::npos)
 				GetKeys(key, keys.ToggleRandom);
-			else if (key.find("key_toggle_single ") != string::npos)
+			else if (key.find("key_toggle_single ") != std::string::npos)
 				GetKeys(key, keys.ToggleSingle);
-			else if (key.find("key_toggle_consume ") != string::npos)
+			else if (key.find("key_toggle_consume ") != std::string::npos)
 				GetKeys(key, keys.ToggleConsume);
-			else if (key.find("key_toggle_space_mode ") != string::npos)
+			else if (key.find("key_toggle_space_mode ") != std::string::npos)
 				GetKeys(key, keys.ToggleSpaceMode);
-			else if (key.find("key_toggle_add_mode ") != string::npos)
+			else if (key.find("key_toggle_add_mode ") != std::string::npos)
 				GetKeys(key, keys.ToggleAddMode);
-			else if (key.find("key_toggle_mouse ") != string::npos)
+			else if (key.find("key_toggle_mouse ") != std::string::npos)
 				GetKeys(key, keys.ToggleMouse);
-			else if (key.find("key_shuffle ") != string::npos)
+			else if (key.find("key_shuffle ") != std::string::npos)
 				GetKeys(key, keys.Shuffle);
-			else if (key.find("key_toggle_crossfade ") != string::npos)
+			else if (key.find("key_toggle_crossfade ") != std::string::npos)
 				GetKeys(key, keys.ToggleCrossfade);
-			else if (key.find("key_set_crossfade ") != string::npos)
+			else if (key.find("key_set_crossfade ") != std::string::npos)
 				GetKeys(key, keys.SetCrossfade);
-			else if (key.find("key_update_db ") != string::npos)
+			else if (key.find("key_update_db ") != std::string::npos)
 				GetKeys(key, keys.UpdateDB);
-			else if (key.find("key_sort_playlist ") != string::npos)
+			else if (key.find("key_sort_playlist ") != std::string::npos)
 				GetKeys(key, keys.SortPlaylist);
-			else if (key.find("key_apply_filter ") != string::npos)
+			else if (key.find("key_apply_filter ") != std::string::npos)
 				GetKeys(key, keys.ApplyFilter);
-			else if (key.find("key_find_forward ") != string::npos)
+			else if (key.find("key_find_forward ") != std::string::npos)
 				GetKeys(key, keys.FindForward);
-			else if (key.find("key_find_backward ") != string::npos)
+			else if (key.find("key_find_backward ") != std::string::npos)
 				GetKeys(key, keys.FindBackward);
-			else if (key.find("key_next_found_position ") != string::npos)
+			else if (key.find("key_next_found_position ") != std::string::npos)
 				GetKeys(key, keys.NextFoundPosition);
-			else if (key.find("key_prev_found_position ") != string::npos)
+			else if (key.find("key_prev_found_position ") != std::string::npos)
 				GetKeys(key, keys.PrevFoundPosition);
-			else if (key.find("key_toggle_find_mode ") != string::npos)
+			else if (key.find("key_toggle_find_mode ") != std::string::npos)
 				GetKeys(key, keys.ToggleFindMode);
-			else if (key.find("key_edit_tags ") != string::npos)
+			else if (key.find("key_edit_tags ") != std::string::npos)
 				GetKeys(key, keys.EditTags);
-			else if (key.find("key_go_to_position ") != string::npos)
+			else if (key.find("key_go_to_position ") != std::string::npos)
 				GetKeys(key, keys.GoToPosition);
-			else if (key.find("key_song_info ") != string::npos)
+			else if (key.find("key_song_info ") != std::string::npos)
 				GetKeys(key, keys.SongInfo);
-			else if (key.find("key_artist_info ") != string::npos)
+			else if (key.find("key_artist_info ") != std::string::npos)
 				GetKeys(key, keys.ArtistInfo);
-			else if (key.find("key_lyrics ") != string::npos)
+			else if (key.find("key_lyrics ") != std::string::npos)
 				GetKeys(key, keys.Lyrics);
-			else if (key.find("key_reverse_selection ") != string::npos)
+			else if (key.find("key_reverse_selection ") != std::string::npos)
 				GetKeys(key, keys.ReverseSelection);
-			else if (key.find("key_deselect_all ") != string::npos)
+			else if (key.find("key_deselect_all ") != std::string::npos)
 				GetKeys(key, keys.DeselectAll);
-			else if (key.find("key_add_selected_items ") != string::npos)
+			else if (key.find("key_add_selected_items ") != std::string::npos)
 				GetKeys(key, keys.AddSelected);
-			else if (key.find("key_clear ") != string::npos)
+			else if (key.find("key_clear ") != std::string::npos)
 				GetKeys(key, keys.Clear);
-			else if (key.find("key_crop ") != string::npos)
+			else if (key.find("key_crop ") != std::string::npos)
 				GetKeys(key, keys.Crop);
-			else if (key.find("key_move_song_up ") != string::npos)
+			else if (key.find("key_move_song_up ") != std::string::npos)
 				GetKeys(key, keys.MvSongUp);
-			else if (key.find("key_move_song_down ") != string::npos)
+			else if (key.find("key_move_song_down ") != std::string::npos)
 				GetKeys(key, keys.MvSongDown);
-			else if (key.find("key_move_to ") != string::npos)
+			else if (key.find("key_move_to ") != std::string::npos)
 				GetKeys(key, keys.MoveTo);
-			else if (key.find("key_add ") != string::npos)
+			else if (key.find("key_add ") != std::string::npos)
 				GetKeys(key, keys.Add);
-			else if (key.find("key_save_playlist ") != string::npos)
+			else if (key.find("key_save_playlist ") != std::string::npos)
 				GetKeys(key, keys.SavePlaylist);
-			else if (key.find("key_go_to_now_playing ") != string::npos)
+			else if (key.find("key_go_to_now_playing ") != std::string::npos)
 				GetKeys(key, keys.GoToNowPlaying);
-			else if (key.find("key_toggle_auto_center ") != string::npos)
+			else if (key.find("key_toggle_auto_center ") != std::string::npos)
 				GetKeys(key, keys.ToggleAutoCenter);
-			else if (key.find("key_toggle_display_mode ") != string::npos)
+			else if (key.find("key_toggle_display_mode ") != std::string::npos)
 				GetKeys(key, keys.ToggleDisplayMode);
-			else if (key.find("key_toggle_lyrics_db ") != string::npos)
+			else if (key.find("key_toggle_lyrics_db ") != std::string::npos)
 				GetKeys(key, keys.ToggleLyricsDB);
-			else if (key.find("key_go_to_containing_directory ") != string::npos)
+			else if (key.find("key_go_to_containing_directory ") != std::string::npos)
 				GetKeys(key, keys.GoToContainingDir);
-			else if (key.find("key_go_to_parent_dir ") != string::npos)
+			else if (key.find("key_go_to_parent_dir ") != std::string::npos)
 				GetKeys(key, keys.GoToParentDir);
-			else if (key.find("key_switch_tag_type_list ") != string::npos)
+			else if (key.find("key_switch_tag_type_list ") != std::string::npos)
 				GetKeys(key, keys.SwitchTagTypeList);
-			else if (key.find("key_quit ") != string::npos)
+			else if (key.find("key_quit ") != std::string::npos)
 				GetKeys(key, keys.Quit);
 		}
 	}
@@ -453,8 +450,8 @@ void ReadKeys(ncmpcpp_keys &keys)
 
 void ReadConfiguration(ncmpcpp_config &conf)
 {
-	ifstream f(config_file.c_str());
-	string cl, v;
+	std::ifstream f(config_file.c_str());
+	std::string cl, v;
 	
 	if (!f.is_open())
 		return;
@@ -465,12 +462,12 @@ void ReadConfiguration(ncmpcpp_config &conf)
 		if (!cl.empty() && cl[0] != '#')
 		{
 			v = GetLineValue(cl);
-			if (cl.find("mpd_host") != string::npos)
+			if (cl.find("mpd_host") != std::string::npos)
 			{
 				if (!v.empty())
 					conf.mpd_host = v;
 			}
-			else if (cl.find("mpd_music_dir") != string::npos)
+			else if (cl.find("mpd_music_dir") != std::string::npos)
 			{
 				if (!v.empty())
 				{
@@ -480,77 +477,77 @@ void ReadConfiguration(ncmpcpp_config &conf)
 					conf.mpd_music_dir = v + "/";
 				}
 			}
-			else if (cl.find("mpd_port") != string::npos)
+			else if (cl.find("mpd_port") != std::string::npos)
 			{
 				if (StrToInt(v))
 					conf.mpd_port = StrToInt(v);
 			}
-			else if (cl.find("mpd_connection_timeout") != string::npos)
+			else if (cl.find("mpd_connection_timeout") != std::string::npos)
 			{
 				if (StrToInt(v))
 					conf.mpd_connection_timeout = StrToInt(v);
 			}
-			else if (cl.find("mpd_crossfade_time") != string::npos)
+			else if (cl.find("mpd_crossfade_time") != std::string::npos)
 			{
 				if (StrToInt(v) > 0)
 					conf.crossfade_time = StrToInt(v);
 			}
-			else if (cl.find("seek_time") != string::npos)
+			else if (cl.find("seek_time") != std::string::npos)
 			{
 				if (StrToInt(v) > 0)
 					conf.seek_time = StrToInt(v);
 			}
-			else if (cl.find("playlist_disable_highlight_delay") != string::npos)
+			else if (cl.find("playlist_disable_highlight_delay") != std::string::npos)
 			{
 				if (StrToInt(v) >= 0)
 					conf.playlist_disable_highlight_delay = StrToInt(v);
 			}
-			else if (cl.find("message_delay_time") != string::npos)
+			else if (cl.find("message_delay_time") != std::string::npos)
 			{
 				if (StrToInt(v) > 0)
 					conf.message_delay_time = StrToInt(v);
 			}
-			else if (cl.find("song_list_format") != string::npos)
+			else if (cl.find("song_list_format") != std::string::npos)
 			{
 				if (!v.empty())
 					conf.song_list_format = v;
 			}
-			else if (cl.find("song_columns_list_format") != string::npos)
+			else if (cl.find("song_columns_list_format") != std::string::npos)
 			{
 				if (!v.empty())
 					conf.song_columns_list_format = v;
 			}
-			else if (cl.find("song_status_format") != string::npos)
+			else if (cl.find("song_status_format") != std::string::npos)
 			{
 				if (!v.empty())
 					conf.song_status_format = v;
 			}
-			else if (cl.find("song_library_format") != string::npos)
+			else if (cl.find("song_library_format") != std::string::npos)
 			{
 				if (!v.empty())
 					conf.song_library_format = v;
 			}
-			else if (cl.find("tag_editor_album_format") != string::npos)
+			else if (cl.find("tag_editor_album_format") != std::string::npos)
 			{
 				if (!v.empty())
 					conf.tag_editor_album_format = v;
 			}
-			else if (cl.find("external_editor") != string::npos)
+			else if (cl.find("external_editor") != std::string::npos)
 			{
 				if (!v.empty())
 					conf.external_editor = v;
 			}
-			else if (cl.find("system_encoding") != string::npos)
+			else if (cl.find("system_encoding") != std::string::npos)
 			{
 				if (!v.empty())
 					conf.system_encoding = v + "//TRANSLIT";
 			}
-			else if (cl.find("execute_on_song_change") != string::npos)
+			else if (cl.find("execute_on_song_change") != std::string::npos)
 			{
 				if (!v.empty())
 					conf.execute_on_song_change = v;
 			}
-			else if (cl.find("browser_playlist_prefix") != string::npos)
+			else if (cl.find("browser_playlist_prefix") != std::string::npos)
 			{
 				if (!v.empty())
 				{
@@ -558,12 +555,12 @@ void ReadConfiguration(ncmpcpp_config &conf)
 					String2Buffer(v, conf.browser_playlist_prefix);
 				}
 			}
-			else if (cl.find("default_tag_editor_pattern") != string::npos)
+			else if (cl.find("default_tag_editor_pattern") != std::string::npos)
 			{
 				if (!v.empty())
 					conf.pattern = v;
 			}
-			else if (cl.find("selected_item_prefix") != string::npos)
+			else if (cl.find("selected_item_prefix") != std::string::npos)
 			{
 				if (!v.empty())
 				{
@@ -571,7 +568,7 @@ void ReadConfiguration(ncmpcpp_config &conf)
 					String2Buffer(v, conf.selected_item_prefix);
 				}
 			}
-			else if (cl.find("selected_item_suffix") != string::npos)
+			else if (cl.find("selected_item_suffix") != std::string::npos)
 			{
 				if (!v.empty())
 				{
@@ -579,203 +576,203 @@ void ReadConfiguration(ncmpcpp_config &conf)
 					String2Buffer(v, conf.selected_item_suffix);
 				}
 			}
-			else if (cl.find("color1") != string::npos)
+			else if (cl.find("color1") != std::string::npos)
 			{
 				if (!v.empty())
 					conf.color1 = IntoColor(v);
 			}
-			else if (cl.find("color2") != string::npos)
+			else if (cl.find("color2") != std::string::npos)
 			{
 				if (!v.empty())
 					conf.color2 = IntoColor(v);
 			}
-			else if (cl.find("colors_enabled") != string::npos)
+			else if (cl.find("colors_enabled") != std::string::npos)
 			{
 				conf.colors_enabled = v == "yes";
 			}
-			else if (cl.find("fancy_scrolling") != string::npos)
+			else if (cl.find("fancy_scrolling") != std::string::npos)
 			{
 				conf.fancy_scrolling = v == "yes";
 			}
-			else if (cl.find("cyclic_scrolling") != string::npos)
+			else if (cl.find("cyclic_scrolling") != std::string::npos)
 			{
 				conf.use_cyclic_scrolling = v == "yes";
 			}
-			else if (cl.find("playlist_show_remaining_time") != string::npos)
+			else if (cl.find("playlist_show_remaining_time") != std::string::npos)
 			{
 				conf.playlist_show_remaining_time = v == "yes";
 			}
-			else if (cl.find("playlist_display_mode") != string::npos)
+			else if (cl.find("playlist_display_mode") != std::string::npos)
 			{
 				conf.columns_in_playlist = v == "columns";
 			}
-			else if (cl.find("browser_display_mode") != string::npos)
+			else if (cl.find("browser_display_mode") != std::string::npos)
 			{
 				conf.columns_in_browser = v == "columns";
 			}
-			else if (cl.find("search_engine_display_mode") != string::npos)
+			else if (cl.find("search_engine_display_mode") != std::string::npos)
 			{
 				conf.columns_in_search_engine = v == "columns";
 			}
-			else if (cl.find("header_visibility") != string::npos)
+			else if (cl.find("header_visibility") != std::string::npos)
 			{
 				conf.header_visibility = v == "yes";
 			}
-			else if (cl.find("header_text_scrolling") != string::npos)
+			else if (cl.find("header_text_scrolling") != std::string::npos)
 			{
 				conf.header_text_scrolling = v == "yes";
 			}
-			else if (cl.find("statusbar_visibility") != string::npos)
+			else if (cl.find("statusbar_visibility") != std::string::npos)
 			{
 				conf.statusbar_visibility = v == "yes";
 			}
-			else if (cl.find("autocenter_mode") != string::npos)
+			else if (cl.find("autocenter_mode") != std::string::npos)
 			{
 				conf.autocenter_mode = v == "yes";
 			}
-			else if (cl.find("default_find_mode") != string::npos)
+			else if (cl.find("default_find_mode") != std::string::npos)
 			{
 				conf.wrapped_search = v == "wrapped";
 			}
-			else if (cl.find("default_space_mode") != string::npos)
+			else if (cl.find("default_space_mode") != std::string::npos)
 			{
 				conf.space_selects = v == "select";
 			}
-			else if (cl.find("default_tag_editor_left_col") != string::npos)
+			else if (cl.find("default_tag_editor_left_col") != std::string::npos)
 			{
 				conf.albums_in_tag_editor = v == "albums";
 			}
-			else if (cl.find("incremental_seeking") != string::npos)
+			else if (cl.find("incremental_seeking") != std::string::npos)
 			{
 				conf.incremental_seeking = v == "yes";
 			}
-			else if (cl.find("show_hidden_files_in_local_browser") != string::npos)
+			else if (cl.find("show_hidden_files_in_local_browser") != std::string::npos)
 			{
 				conf.local_browser_show_hidden_files = v == "yes";
 			}
-			else if (cl.find("follow_now_playing_lyrics") != string::npos)
+			else if (cl.find("follow_now_playing_lyrics") != std::string::npos)
 			{
 				conf.now_playing_lyrics = v == "yes";
 			}
-			else if (cl.find("ncmpc_like_songs_adding") != string::npos)
+			else if (cl.find("ncmpc_like_songs_adding") != std::string::npos)
 			{
 				conf.ncmpc_like_songs_adding = v == "yes";
 			}
-			else if (cl.find("default_place_to_search_in") != string::npos)
+			else if (cl.find("default_place_to_search_in") != std::string::npos)
 			{
 				conf.search_in_db = v == "database";
 			}
-			else if (cl.find("display_screens_numbers_on_start") != string::npos)
+			else if (cl.find("display_screens_numbers_on_start") != std::string::npos)
 			{
 				conf.display_screens_numbers_on_start = v == "yes";
 			}
-			else if (cl.find("clock_display_seconds") != string::npos)
+			else if (cl.find("clock_display_seconds") != std::string::npos)
 			{
 				conf.clock_display_seconds = v == "yes";
 			}
-			else if (cl.find("ignore_leading_the") != string::npos)
+			else if (cl.find("ignore_leading_the") != std::string::npos)
 			{
 				conf.ignore_leading_the = v == "yes";
 			}
-			else if (cl.find("use_console_editor") != string::npos)
+			else if (cl.find("use_console_editor") != std::string::npos)
 			{
 				conf.use_console_editor = v == "yes";
 			}
-			else if (cl.find("block_search_constraints_change_if_items_found") != string::npos)
+			else if (cl.find("block_search_constraints_change_if_items_found") != std::string::npos)
 			{
 				conf.block_search_constraints_change = v == "yes";
 			}
-			else if (cl.find("allow_physical_files_deletion") != string::npos)
+			else if (cl.find("allow_physical_files_deletion") != std::string::npos)
 			{
 				conf.allow_physical_files_deletion = v == "yes";
 			}
-			else if (cl.find("allow_physical_directories_deletion") != string::npos)
+			else if (cl.find("allow_physical_directories_deletion") != std::string::npos)
 			{
 				conf.allow_physical_directories_deletion = v == "yes";
 			}
-			else if (cl.find("mouse_support") != string::npos)
+			else if (cl.find("mouse_support") != std::string::npos)
 			{
 				conf.mouse_support = v == "yes";
 			}
-			else if (cl.find("enable_window_title") != string::npos)
+			else if (cl.find("enable_window_title") != std::string::npos)
 			{
 				conf.set_window_title = v == "yes";
 			}
-			else if (cl.find("regular_expressions") != string::npos)
+			else if (cl.find("regular_expressions") != std::string::npos)
 			{
 				conf.regex_type = REG_EXTENDED * (v != "basic");
 			}
-			else if (cl.find("lyrics_database") != string::npos)
+			else if (cl.find("lyrics_database") != std::string::npos)
 			{
 				if (!v.empty())
 					conf.lyrics_db = StrToInt(v)-1;
 			}
-			else if (cl.find("song_window_title_format") != string::npos)
+			else if (cl.find("song_window_title_format") != std::string::npos)
 			{
 				if (!v.empty())
 					conf.song_window_title_format = v;
 			}
-			else if (cl.find("empty_tag_color") != string::npos)
+			else if (cl.find("empty_tag_color") != std::string::npos)
 			{
 				if (!v.empty())
 					conf.empty_tags_color = IntoColor(v);
 			}
-			else if (cl.find("header_window_color") != string::npos)
+			else if (cl.find("header_window_color") != std::string::npos)
 			{
 				if (!v.empty())
 					conf.header_color = IntoColor(v);
 			}
-			else if (cl.find("volume_color") != string::npos)
+			else if (cl.find("volume_color") != std::string::npos)
 			{
 				if (!v.empty())
 					conf.volume_color = IntoColor(v);
 			}
-			else if (cl.find("state_line_color") != string::npos)
+			else if (cl.find("state_line_color") != std::string::npos)
 			{
 				if (!v.empty())
 					conf.state_line_color = IntoColor(v);
 			}
-			else if (cl.find("state_flags_color") != string::npos)
+			else if (cl.find("state_flags_color") != std::string::npos)
 			{
 				if (!v.empty())
 					conf.state_flags_color = IntoColor(v);
 			}
-			else if (cl.find("main_window_color") != string::npos)
+			else if (cl.find("main_window_color") != std::string::npos)
 			{
 				if (!v.empty())
 					conf.main_color = IntoColor(v);
 			}
-			else if (cl.find("main_window_highlight_color") != string::npos)
+			else if (cl.find("main_window_highlight_color") != std::string::npos)
 			{
 				if (!v.empty())
 					conf.main_highlight_color = IntoColor(v);
 			}
-			else if (cl.find("progressbar_color") != string::npos)
+			else if (cl.find("progressbar_color") != std::string::npos)
 			{
 				if (!v.empty())
 					conf.progressbar_color = IntoColor(v);
 			}
-			else if (cl.find("statusbar_color") != string::npos)
+			else if (cl.find("statusbar_color") != std::string::npos)
 			{
 				if (!v.empty())
 					conf.statusbar_color = IntoColor(v);
 			}
-			else if (cl.find("active_column_color") != string::npos)
+			else if (cl.find("active_column_color") != std::string::npos)
 			{
 				if (!v.empty())
 					conf.active_column_color = IntoColor(v);
 			}
-			else if (cl.find("window_border_color ") != string::npos)
+			else if (cl.find("window_border_color ") != std::string::npos)
 			{
 				if (!v.empty())
 					conf.window_border = IntoBorder(v);
 			}
-			else if (cl.find("active_window_border") != string::npos)
+			else if (cl.find("active_window_border") != std::string::npos)
 			{
 				if (!v.empty())
 					conf.active_window_border = IntoBorder(v);
 			}
-			else if (cl.find("media_library_left_column") != string::npos)
+			else if (cl.find("media_library_left_column") != std::string::npos)
 			{
 				if (!v.empty())
 					conf.media_lib_primary_tag = IntoTagItem(v[0]);

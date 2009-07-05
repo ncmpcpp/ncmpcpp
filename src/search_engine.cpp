@@ -28,7 +28,6 @@
 
 using namespace MPD;
 using namespace Global;
-using std::string;
 
 SearchEngine *mySearcher = new SearchEngine;
 
@@ -434,7 +433,7 @@ void SearchEngine::Search()
 	
 	if (!CaseSensitive && !MatchToPattern)
 	{
-		string t;
+		std::string t;
 		t = s.Any();
 		ToLower(t);
 		s.Any(t);
@@ -479,7 +478,7 @@ void SearchEngine::Search()
 		
 		if (!CaseSensitive && !MatchToPattern)
 		{
-			string t;
+			std::string t;
 			t = copy.GetArtist();
 			ToLower(t);
 			copy.SetArtist(t);

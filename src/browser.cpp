@@ -38,7 +38,6 @@
 
 using namespace Global;
 using namespace MPD;
-using std::string;
 
 Browser *myBrowser = new Browser;
 
@@ -87,7 +86,7 @@ void Browser::SwitchTo()
 
 std::string Browser::Title()
 {
-	string result = "Browse: ";
+	std::string result = "Browse: ";
 	result += TO_STRING(Scroller(itsBrowsedDir, COLS-result.length()-VolumeState.length(), itsScrollBeginning));
 	return result;
 }
@@ -369,13 +368,13 @@ void Browser::ApplyFilter(const std::string &s)
 	w->ApplyFilter(s, itsBrowsedDir == "/" ? 0 : 1, REG_ICASE | Config.regex_type);
 }
 
-bool Browser::hasSupportedExtension(const string &file)
+bool Browser::hasSupportedExtension(const std::string &file)
 {
 	size_t last_dot = file.rfind(".");
 	if (last_dot > file.length())
 		return false;
 	
-	string ext = file.substr(last_dot+1);
+	std::string ext = file.substr(last_dot+1);
 	ToLower(ext);
 	for (int i = 0; SupportedExtensions[i]; ++i)
 		if (strcmp(ext.c_str(), SupportedExtensions[i]) == 0)
@@ -394,7 +393,7 @@ void Browser::GetLocalDirectory(ItemList &v, const std::string &directory, bool 
 	dirent *file;
 	
 	struct stat file_stat;
-	string full_path;
+	std::string full_path;
 	
 	// omit . and ..
 	for (int i = 0; i < 2; ++i)
@@ -453,7 +452,7 @@ void Browser::LocateSong(const MPD::Song &s)
 	
 	SwitchTo();
 	
-	string option = s.toString(Config.song_status_format);
+	std::string option = s.toString(Config.song_status_format);
 	locale_to_utf(option);
 	if (itsBrowsedDir != s.GetDirectory())
 		GetDirectory(s.GetDirectory());
@@ -467,7 +466,7 @@ void Browser::LocateSong(const MPD::Song &s)
 	}
 }
 
-void Browser::GetDirectory(string dir, string subdir)
+void Browser::GetDirectory(std::string dir, std::string subdir)
 {
 	if (dir.empty())
 		dir = "/";
@@ -491,7 +490,7 @@ void Browser::GetDirectory(string dir, string subdir)
 		Item parent;
 		size_t slash = dir.rfind("/");
 		parent.song = reinterpret_cast<Song *>(1); // in that way we assume that's really parent dir
-		parent.name = slash != string::npos ? dir.substr(0, slash) : "/";
+		parent.name = slash != std::string::npos ? dir.substr(0, slash) : "/";
 		parent.type = itDirectory;
 		utf_to_locale(parent.name);
 		w->AddOption(parent);
@@ -547,7 +546,7 @@ void Browser::ClearDirectory(const std::string &path) const
 	
 	dirent *file;
 	struct stat file_stat;
-	string full_path;
+	std::string full_path;
 	
 	// omit . and ..
 	for (int i = 0; i < 2; ++i)

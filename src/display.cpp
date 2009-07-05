@@ -23,12 +23,9 @@
 #include "helpers.h"
 #include "playlist.h"
 
-using MPD::Song;
-using std::string;
-
-string Display::Columns(string st)
+std::string Display::Columns(std::string st)
 {
-	string result;
+	std::string result;
 	size_t where = 0;
 	
 	for (int width = StrToInt(GetLineValue(st, '(', ')', 1)); width; width = StrToInt(GetLineValue(st, '(', ')', 1)))
@@ -95,7 +92,7 @@ void Display::SongsInColumns(const MPD::Song &s, void *s_template, Menu<MPD::Son
 	if (!s.Localized())
 		const_cast<MPD::Song *>(&s)->Localize();
 	
-	string st = s_template ? *static_cast<string *>(s_template) : "";
+	std::string st = s_template ? *static_cast<std::string *>(s_template) : "";
 	size_t where = 0;
 	Color color = clDefault;
 	
@@ -113,51 +110,51 @@ void Display::SongsInColumns(const MPD::Song &s, void *s_template, Menu<MPD::Son
 		color = IntoColor(GetLineValue(st, '[', ']', 1));
 		char type = GetLineValue(st, '{', '}', 1)[0];
 		
-		Song::GetFunction get = 0;
+		MPD::Song::GetFunction get = 0;
 		
 		switch (type)
 		{
 			case 'l':
-				get = &Song::GetLength;
+				get = &MPD::Song::GetLength;
 				break;
 			case 'F':
-				get = &Song::GetFile;
+				get = &MPD::Song::GetFile;
 				break;
 			case 'f':
-				get = &Song::GetName;
+				get = &MPD::Song::GetName;
 				break;
 			case 'a':
-				get = &Song::GetArtist;
+				get = &MPD::Song::GetArtist;
 				break;
 			case 'b':
-				get = &Song::GetAlbum;
+				get = &MPD::Song::GetAlbum;
 				break;
 			case 'y':
-				get = &Song::GetYear;
+				get = &MPD::Song::GetYear;
 				break;
 			case 'n':
-				get = &Song::GetTrack;
+				get = &MPD::Song::GetTrack;
 				break;
 			case 'g':
-				get = &Song::GetGenre;
+				get = &MPD::Song::GetGenre;
 				break;
 			case 'c':
-				get = &Song::GetComposer;
+				get = &MPD::Song::GetComposer;
 				break;
 			case 'p':
-				get = &Song::GetPerformer;
+				get = &MPD::Song::GetPerformer;
 				break;
 			case 'd':
-				get = &Song::GetDisc;
+				get = &MPD::Song::GetDisc;
 				break;
 			case 'C':
-				get = &Song::GetComment;
+				get = &MPD::Song::GetComment;
 				break;
 			case 't':
 				if (!s.GetTitle().empty())
-					get = &Song::GetTitle;
+					get = &MPD::Song::GetTitle;
 				else
-					get = &Song::GetName;
+					get = &MPD::Song::GetName;
 				break;
 			default:
 				break;
@@ -165,7 +162,7 @@ void Display::SongsInColumns(const MPD::Song &s, void *s_template, Menu<MPD::Son
 		if (color != clDefault)
 			*menu << color;
 		whline(menu->Raw(), 32, menu->GetWidth()-where);
-		string tag = (s.*get)();
+		std::string tag = (s.*get)();
 		if (!tag.empty())
 			*menu << tag;
 		else
@@ -181,19 +178,19 @@ void Display::Songs(const MPD::Song &s, void *data, Menu<MPD::Song> *menu)
 	if (!s.Localized())
 		const_cast<MPD::Song *>(&s)->Localize();
 	
-	const string &song_template = data ? *static_cast<string *>(data) : "";
+	const std::string &song_template = data ? *static_cast<std::string *>(data) : "";
 	basic_buffer<my_char_t> buf;
 	bool right = 0;
 	
-	string::const_iterator goto_pos, prev_pos;
+	std::string::const_iterator goto_pos, prev_pos;
 	
-	for (string::const_iterator it = song_template.begin(); it != song_template.end(); ++it)
+	for (std::string::const_iterator it = song_template.begin(); it != song_template.end(); ++it)
 	{
 		CHECK_LINKED_TAGS:;
 		if (*it == '{')
 		{
 			prev_pos = it;
-			Song::GetFunction get = 0;
+			MPD::Song::GetFunction get = 0;
 			for (; *it != '}'; ++it)
 			{
 				if (*it == '%')
@@ -201,48 +198,48 @@ void Display::Songs(const MPD::Song &s, void *data, Menu<MPD::Song> *menu)
 					switch (*++it)
 					{
 						case 'l':
-							get = &Song::GetLength;
+							get = &MPD::Song::GetLength;
 							break;
 						case 'F':
-							get = &Song::GetFile;
+							get = &MPD::Song::GetFile;
 							break;
 						case 'f':
-							get = &Song::GetName;
+							get = &MPD::Song::GetName;
 							break;
 						case 'a':
-							get = &Song::GetArtist;
+							get = &MPD::Song::GetArtist;
 							break;
 						case 'b':
-							get = &Song::GetAlbum;
+							get = &MPD::Song::GetAlbum;
 							break;
 						case 'y':
-							get = &Song::GetYear;
+							get = &MPD::Song::GetYear;
 							break;
 						case 'n':
-							get = &Song::GetTrack;
+							get = &MPD::Song::GetTrack;
 							break;
 						case 'g':
-							get = &Song::GetGenre;
+							get = &MPD::Song::GetGenre;
 							break;
 						case 'c':
-							get = &Song::GetComposer;
+							get = &MPD::Song::GetComposer;
 							break;
 						case 'p':
-							get = &Song::GetPerformer;
+							get = &MPD::Song::GetPerformer;
 							break;
 						case 'd':
-							get = &Song::GetDisc;
+							get = &MPD::Song::GetDisc;
 							break;
 						case 'C':
-							get = &Song::GetComment;
+							get = &MPD::Song::GetComment;
 							break;
 						case 't':
-							get = &Song::GetTitle;
+							get = &MPD::Song::GetTitle;
 							break;
 						default:
 							break;
 					}
-					if (get == &Song::GetLength)
+					if (get == &MPD::Song::GetLength)
 					{
 						if  (!s.GetTotalLength())
 							break;
@@ -403,7 +400,7 @@ void Display::Songs(const MPD::Song &s, void *data, Menu<MPD::Song> *menu)
 
 void Display::Tags(const MPD::Song &s, void *data, Menu<MPD::Song> *menu)
 {
-	switch (static_cast<Menu<string> *>(data)->Choice())
+	switch (static_cast<Menu<std::string> *>(data)->Choice())
 	{
 		case 0:
 			*menu << ShowTag(s.GetTitle());
@@ -474,14 +471,14 @@ void Display::Items(const MPD::Item &item, void *, Menu<MPD::Item> *menu)
 	}
 }
 
-void Display::SearchEngine(const std::pair<Buffer *, Song *> &pair, void *, Menu< std::pair<Buffer *, Song *> > *menu)
+void Display::SearchEngine(const std::pair<Buffer *, MPD::Song *> &pair, void *, Menu< std::pair<Buffer *, MPD::Song *> > *menu)
 {
 	if (pair.second)
 	{
 		if (!Config.columns_in_search_engine)
-			Display::Songs(*pair.second, &Config.song_list_format, reinterpret_cast<Menu<Song> *>(menu));
+			Display::Songs(*pair.second, &Config.song_list_format, reinterpret_cast<Menu<MPD::Song> *>(menu));
 		else
-			Display::SongsInColumns(*pair.second, &Config.song_columns_list_format, reinterpret_cast<Menu<Song> *>(menu));
+			Display::SongsInColumns(*pair.second, &Config.song_columns_list_format, reinterpret_cast<Menu<MPD::Song> *>(menu));
 	}
 	
 	else

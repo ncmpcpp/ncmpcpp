@@ -29,7 +29,6 @@
 #include "status.h"
 
 using namespace Global;
-using std::vector;
 
 Playlist *myPlaylist = new Playlist;
 
@@ -162,9 +161,9 @@ MPD::Song *Playlist::CurrentSong()
 
 void Playlist::GetSelectedSongs(MPD::SongList &v)
 {
-	vector<size_t> selected;
+	std::vector<size_t> selected;
 	w->GetSelected(selected);
-	for (vector<size_t>::const_iterator it = selected.begin(); it != selected.end(); ++it)
+	for (std::vector<size_t>::const_iterator it = selected.begin(); it != selected.end(); ++it)
 	{
 		v.push_back(new MPD::Song(w->at(*it)));
 	}

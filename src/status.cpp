@@ -36,9 +36,8 @@
 
 using namespace Global;
 using namespace MPD;
-using std::string;
 
-string Global::VolumeState;
+std::string Global::VolumeState;
 
 bool Global::UpdateStatusImmediately = 0;
 bool Global::RedrawStatusbar = 0;
@@ -54,11 +53,9 @@ namespace
 }
 
 #ifndef USE_PDCURSES
-void WindowTitle(const string &status)
+void WindowTitle(const std::string &status)
 {
-	static const string term_type = getenv("TERM") ? getenv("TERM") : "";
-	
-	if (term_type != "linux" && Config.set_window_title)
+	if (strcmp(getenv("TERM"), "linux") && Config.set_window_title)
 		std::cout << "\033]0;" << status << "\7";
 }
 #endif // !USE_PDCURSES
@@ -157,7 +154,7 @@ void NcmpcppErrorCallback(Connection *, int errorid, const char *msg, void *)
 	{
 		wFooter->SetGetStringHelper(NULL);
 		Statusbar() << "Password: ";
-		string password = wFooter->GetString(-1, 0, 1);
+		std::string password = wFooter->GetString(-1, 0, 1);
 		Mpd.SetPassword(password);
 		Mpd.SendPassword();
 		Mpd.UpdateStatus();
@@ -170,7 +167,7 @@ void NcmpcppErrorCallback(Connection *, int errorid, const char *msg, void *)
 void NcmpcppStatusChanged(Connection *, StatusChanges changed, void *)
 {
 	static size_t playing_song_scroll_begin = 0;
-	static string player_state;
+	static std::string player_state;
 	static int elapsed;
 	static MPD::Song np;
 	
@@ -395,7 +392,7 @@ void NcmpcppStatusChanged(Connection *, StatusChanges changed, void *)
 			
 			if (!block_statusbar_update && Config.statusbar_visibility)
 			{
-				string tracklength;
+				std::string tracklength;
 				if (np.GetTotalLength())
 				{
 					tracklength = " [";
@@ -478,7 +475,7 @@ void NcmpcppStatusChanged(Connection *, StatusChanges changed, void *)
 	}
 	if (changed.StatusFlags && Config.header_visibility)
 	{
-		string switch_state;
+		std::string switch_state;
 		
 		if (mpd_repeat)
 			switch_state += mpd_repeat;

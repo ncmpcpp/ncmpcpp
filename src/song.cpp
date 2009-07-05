@@ -30,15 +30,12 @@
 #include "misc.h"
 #include "song.h"
 
-using MPD::Song;
-using std::string;
-
-Song::Song(mpd_Song *s, bool copy_ptr) : itsSong(s ? s : mpd_newSong()),
-					 itsSlash(string::npos),
-					 itsHash(0),
-					 copyPtr(copy_ptr),
-					 isStream(0),
-					 isLocalised(0)
+MPD::Song::Song(mpd_Song *s, bool copy_ptr) : 	itsSong(s ? s : mpd_newSong()),
+						itsSlash(std::string::npos),
+						itsHash(0),
+						copyPtr(copy_ptr),
+						isStream(0),
+						isLocalised(0)
 {
 	size_t file_len = itsSong->file ? strlen(itsSong->file) : 0;
 	
@@ -58,7 +55,7 @@ Song::Song(mpd_Song *s, bool copy_ptr) : itsSong(s ? s : mpd_newSong()),
 	}
 }
 
-Song::Song(const Song &s) : itsSong(0),
+MPD::Song::Song(const Song &s) : itsSong(0),
 			    itsNewName(s.itsNewName),
 			    itsSlash(s.itsSlash),
 			    itsHash(s.itsHash),
@@ -69,20 +66,20 @@ Song::Song(const Song &s) : itsSong(0),
 	itsSong = s.copyPtr ? s.itsSong : mpd_songDup(s.itsSong);
 }
 
-Song::~Song()
+MPD::Song::~Song()
 {
 	if (itsSong)
 		mpd_freeSong(itsSong);
 }
 
-string Song::GetLength() const
+std::string MPD::Song::GetLength() const
 {
 	if (itsSong->time <= 0)
 		return "-:--";
 	return ShowTime(itsSong->time);
 }
 
-void Song::Localize()
+void MPD::Song::Localize()
 {
 #	ifdef HAVE_ICONV_H
 	if (isLocalised)
@@ -104,7 +101,7 @@ void Song::Localize()
 #	endif // HAVE_ICONV_H
 }
 
-void Song::Clear()
+void MPD::Song::Clear()
 {
 	if (itsSong)
 		mpd_freeSong(itsSong);
@@ -117,83 +114,83 @@ void Song::Clear()
 	copyPtr = 0;
 }
 
-bool Song::Empty() const
+bool MPD::Song::Empty() const
 {
 	return !itsSong || (!itsSong->file && !itsSong->title && !itsSong->artist && !itsSong->album && !itsSong->date && !itsSong->track && !itsSong->genre && !itsSong->composer && !itsSong->performer && !itsSong->disc && !itsSong->comment);
 }
 
-bool Song::IsFromDB() const
+bool MPD::Song::IsFromDB() const
 {
-	const string &dir = GetDirectory();
+	const std::string &dir = GetDirectory();
 	return dir[0] != '/' || dir == "/";
 }
 
-string Song::GetFile() const
+std::string MPD::Song::GetFile() const
 {
 	return !itsSong->file ? "" : itsSong->file;
 }
 
-string Song::GetName() const
+std::string MPD::Song::GetName() const
 {
-	return !itsSong->file ? "" : (itsSlash != string::npos && !isStream ? itsSong->file+itsSlash+1 : (isStream && itsSong->name ? itsSong->name : itsSong->file));
+	return !itsSong->file ? "" : (itsSlash != std::string::npos && !isStream ? itsSong->file+itsSlash+1 : (isStream && itsSong->name ? itsSong->name : itsSong->file));
 }
 
-string Song::GetDirectory() const
+std::string MPD::Song::GetDirectory() const
 {
-	return !itsSong->file || isStream ? "" : itsSlash != string::npos ? string(itsSong->file).substr(0, itsSlash) : "/";
+	return !itsSong->file || isStream ? "" : itsSlash != std::string::npos ? std::string(itsSong->file).substr(0, itsSlash) : "/";
 }
 
-string Song::GetArtist() const
+std::string MPD::Song::GetArtist() const
 {
 	return !itsSong->artist ? "" : itsSong->artist;
 }
 
-string Song::GetTitle() const
+std::string MPD::Song::GetTitle() const
 {
 	return !itsSong->title ? "" : itsSong->title;
 }
 
-string Song::GetAlbum() const
+std::string MPD::Song::GetAlbum() const
 {
 	return !itsSong->album ? "" : itsSong->album;
 }
 
-string Song::GetTrack() const
+std::string MPD::Song::GetTrack() const
 {
-	return !itsSong->track ? "" : (StrToInt(itsSong->track) < 10 && itsSong->track[0] != '0' ? "0"+string(itsSong->track) : itsSong->track);
+	return !itsSong->track ? "" : (StrToInt(itsSong->track) < 10 && itsSong->track[0] != '0' ? "0"+std::string(itsSong->track) : itsSong->track);
 }
 
-string Song::GetYear() const
+std::string MPD::Song::GetYear() const
 {
 	return !itsSong->date ? "" : itsSong->date;
 }
 
-string Song::GetGenre() const
+std::string MPD::Song::GetGenre() const
 {
 	return !itsSong->genre ? "" : itsSong->genre;
 }
 
-string Song::GetComposer() const
+std::string MPD::Song::GetComposer() const
 {
 	return !itsSong->composer ? "" : itsSong->composer;
 }
 
-string Song::GetPerformer() const
+std::string MPD::Song::GetPerformer() const
 {
 	return !itsSong->performer ? "" : itsSong->performer;
 }
 
-string Song::GetDisc() const
+std::string MPD::Song::GetDisc() const
 {
 	return !itsSong->disc ? "" : itsSong->disc;
 }
 
-string Song::GetComment() const
+std::string MPD::Song::GetComment() const
 {
 	return !itsSong->comment ? "" : itsSong->comment;
 }
 
-void Song::SetFile(const string &str)
+void MPD::Song::SetFile(const std::string &str)
 {
 	if (itsSong->file)
 		str_pool_put(itsSong->file);
@@ -201,101 +198,101 @@ void Song::SetFile(const string &str)
 	CountLastSlashPosition();
 }
 
-void Song::SetArtist(const string &str)
+void MPD::Song::SetArtist(const std::string &str)
 {
 	if (itsSong->artist)
 		str_pool_put(itsSong->artist);
 	itsSong->artist = str.empty() ? 0 : str_pool_get(str.c_str());
 }
 
-void Song::SetTitle(const string &str)
+void MPD::Song::SetTitle(const std::string &str)
 {
 	if (itsSong->title)
 		str_pool_put(itsSong->title);
 	itsSong->title = str.empty() ? 0 : str_pool_get(str.c_str());
 }
 
-void Song::SetAlbum(const string &str)
+void MPD::Song::SetAlbum(const std::string &str)
 {
 	if (itsSong->album)
 		str_pool_put(itsSong->album);
 	itsSong->album = str.empty() ? 0 : str_pool_get(str.c_str());
 }
 
-void Song::SetTrack(const string &str)
+void MPD::Song::SetTrack(const std::string &str)
 {
 	if (itsSong->track)
 		str_pool_put(itsSong->track);
 	itsSong->track = str.empty() ? 0 : str_pool_get(IntoStr(StrToInt(str)).c_str());
 }
 
-void Song::SetTrack(int track)
+void MPD::Song::SetTrack(int track)
 {
 	if (itsSong->track)
 		str_pool_put(itsSong->track);
 	itsSong->track = str_pool_get(IntoStr(track).c_str());
 }
 
-void Song::SetYear(const string &str)
+void MPD::Song::SetYear(const std::string &str)
 {
 	if (itsSong->date)
 		str_pool_put(itsSong->date);
 	itsSong->date = str.empty() ? 0 : str_pool_get(str.c_str());
 }
 
-void Song::SetYear(int year)
+void MPD::Song::SetYear(int year)
 {
 	if (itsSong->date)
 		str_pool_put(itsSong->date);
 	itsSong->date = str_pool_get(IntoStr(year).c_str());
 }
 
-void Song::SetGenre(const string &str)
+void MPD::Song::SetGenre(const std::string &str)
 {
 	if (itsSong->genre)
 		str_pool_put(itsSong->genre);
 	itsSong->genre = str.empty() ? 0 : str_pool_get(str.c_str());
 }
 
-void Song::SetComposer(const string &str)
+void MPD::Song::SetComposer(const std::string &str)
 {
 	if (itsSong->composer)
 		str_pool_put(itsSong->composer);
 	itsSong->composer = str.empty() ? 0 : str_pool_get(str.c_str());
 }
 
-void Song::SetPerformer(const string &str)
+void MPD::Song::SetPerformer(const std::string &str)
 {
 	if (itsSong->performer)
 		str_pool_put(itsSong->performer);
 	itsSong->performer = str.empty() ? 0 : str_pool_get(str.c_str());
 }
 
-void Song::SetDisc(const string &str)
+void MPD::Song::SetDisc(const std::string &str)
 {
 	if (itsSong->disc)
 		str_pool_put(itsSong->disc);
 	itsSong->disc = str.empty() ? 0 : str_pool_get(str.c_str());
 }
 
-void Song::SetComment(const string &str)
+void MPD::Song::SetComment(const std::string &str)
 {
 	if (itsSong->comment)
 		str_pool_put(itsSong->comment);
 	itsSong->comment = str.empty() ? 0 : str_pool_get(str.c_str());
 }
 
-void Song::SetPosition(int pos)
+void MPD::Song::SetPosition(int pos)
 {
 	itsSong->pos = pos;
 }
 
-string Song::toString(const std::string &format) const
+std::string MPD::Song::toString(const std::string &format) const
 {
-	string result;
-	string::const_iterator goto_pos, prev_pos;
+	std::string result;
+	std::string::const_iterator goto_pos, prev_pos;
 	
-	for (string::const_iterator it = format.begin(); it != format.end(); ++it)
+	for (std::string::const_iterator it = format.begin(); it != format.end(); ++it)
 	{
 		CHECK_LINKED_TAGS:;
 		if (*it == '{')
@@ -452,7 +449,7 @@ string Song::toString(const std::string &format) const
 	return result;
 }
 
-Song & Song::operator=(const Song &s)
+MPD::Song & MPD::Song::operator=(const MPD::Song &s)
 {
 	if (this == &s)
 		return *this;
@@ -468,7 +465,7 @@ Song & Song::operator=(const Song &s)
 	return *this;
 }
 
-bool Song::operator==(const Song &s) const
+bool MPD::Song::operator==(const Song &s) const
 {
 	return  (itsSong->file && s.itsSong->file
 			? strcmp(itsSong->file, s.itsSong->file) == 0
@@ -509,17 +506,17 @@ bool Song::operator==(const Song &s) const
 	&&	itsHash == s.itsHash;
 }
 
-bool Song::operator!=(const Song &s) const
+bool MPD::Song::operator!=(const Song &s) const
 {
 	return !operator==(s);
 }
 
-bool Song::operator<(const Song &s) const
+bool MPD::Song::operator<(const Song &s) const
 {
 	return itsSong->pos < s.itsSong->pos;
 }
 
-string Song::ShowTime(int length)
+std::string MPD::Song::ShowTime(int length)
 {
 	std::ostringstream ss;
 	
@@ -543,11 +540,11 @@ string Song::ShowTime(int length)
 	return ss.str();
 }
 
-void Song::CountLastSlashPosition()
+void MPD::Song::CountLastSlashPosition()
 {
 	if (!itsSong->file)
 		return;
 	char *tmp = strrchr(itsSong->file, '/');
-	itsSlash = tmp ? tmp-itsSong->file : string::npos;
+	itsSlash = tmp ? tmp-itsSong->file : std::string::npos;
 }
 

@@ -32,7 +32,6 @@
 
 using namespace Global;
 using namespace MPD;
-using std::string;
 
 PlaylistEditor *myPlaylistEditor = new PlaylistEditor;
 
@@ -46,7 +45,7 @@ void PlaylistEditor::Init()
 	RightColumnStartX = LeftColumnWidth+1;
 	RightColumnWidth = COLS-LeftColumnWidth-1;
 	
-	Playlists = new Menu<string>(0, MainStartY, LeftColumnWidth, MainHeight, "Playlists", Config.main_color, brNone);
+	Playlists = new Menu<std::string>(0, MainStartY, LeftColumnWidth, MainHeight, "Playlists", Config.main_color, brNone);
 	Playlists->HighlightColor(Config.active_column_color);
 	Playlists->SetTimeout(ncmpcpp_window_timeout);
 	Playlists->CyclicScrolling(Config.use_cyclic_scrolling);

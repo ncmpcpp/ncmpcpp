@@ -66,9 +66,6 @@
 using namespace Global;
 using namespace MPD;
 
-using std::string;
-using std::vector;
-
 BasicScreen *Global::myScreen;
 BasicScreen *Global::myOldScreen;
 
@@ -156,7 +153,7 @@ int main(int argc, char *argv[])
 	bool main_exit = 0;
 	bool title_allowed = !Config.display_screens_numbers_on_start;
 	
-	string screen_title;
+	std::string screen_title;
 	
 	timeval now, past;
 	// local variables end
@@ -471,10 +468,10 @@ int main(int argc, char *argv[])
 				Playlist::BlockUpdate = 1;
 				if (myPlaylist->Main()->hasSelected())
 				{
-					vector<size_t> list;
+					std::vector<size_t> list;
 					myPlaylist->Main()->GetSelected(list);
 					Mpd.StartCommandsList();
-					for (vector<size_t>::reverse_iterator it = list.rbegin(); it != list.rend(); ++it)
+					for (std::vector<size_t>::reverse_iterator it = list.rbegin(); it != list.rend(); ++it)
 					{
 						Mpd.DeleteID((*myPlaylist->Main())[*it].GetID());
 						myPlaylist->Main()->DeleteOption(*it);
@@ -514,7 +511,7 @@ int main(int argc, char *argv[])
 				)
 			{
 				LockStatusbar();
-				string name = myScreen == myBrowser ? myBrowser->Main()->Current().name : myPlaylistEditor->Playlists->Current();
+				std::string name = myScreen == myBrowser ? myBrowser->Main()->Current().name : myPlaylistEditor->Playlists->Current();
 				Statusbar() << "Delete playlist \"" << name << "\" ? [y/n] ";
 				curs_set(1);
 				int in = 0;
@@ -559,7 +556,7 @@ int main(int argc, char *argv[])
 					continue;
 				
 				LockStatusbar();
-				string name = item.type == itSong ? item.song->GetName() : item.name;
+				std::string name = item.type == itSong ? item.song->GetName() : item.name;
 				Statusbar() << "Delete " << (item.type == itSong ? "file" : "directory") << " \"" << name << "\" ? [y/n] ";
 				curs_set(1);
 				int in = 0;
@@ -571,7 +568,7 @@ int main(int argc, char *argv[])
 				while (in != 'y' && in != 'n');
 				if (in == 'y')
 				{
-					string path;
+					std::string path;
 					if (!Config.local_browser)
 						path = Config.mpd_music_dir;
 					path += item.type == itSong ? item.song->GetFile() : item.name;
@@ -599,12 +596,12 @@ int main(int argc, char *argv[])
 			{
 				if (myPlaylistEditor->Content->hasSelected())
 				{
-					vector<size_t> list;
+					std::vector<size_t> list;
 					myPlaylistEditor->Content->GetSelected(list);
-					string playlist = locale_to_utf_cpy(myPlaylistEditor->Playlists->Current());
+					std::string playlist = locale_to_utf_cpy(myPlaylistEditor->Playlists->Current());
 					ShowMessage("Deleting selected items...");
 					Mpd.StartCommandsList();
-					for (vector<size_t>::reverse_iterator it = list.rbegin(); it != list.rend(); ++it)
+					for (std::vector<size_t>::reverse_iterator it = list.rbegin(); it != list.rend(); ++it)
 					{
 						Mpd.Delete(playlist, *it);
 						myPlaylistEditor->Content->DeleteOption(*it);
@@ -649,10 +646,10 @@ int main(int argc, char *argv[])
 		{
 			LockStatusbar();
 			Statusbar() << "Save playlist as: ";
-			string playlist_name = wFooter->GetString();
-			string real_playlist_name = locale_to_utf_cpy(playlist_name);
+			std::string playlist_name = wFooter->GetString();
+			std::string real_playlist_name = locale_to_utf_cpy(playlist_name);
 			UnlockStatusbar();
-			if (playlist_name.find("/") != string::npos)
+			if (playlist_name.find("/") != std::string::npos)
 			{
 				ShowMessage("Playlist name cannot contain slashes!");
 				continue;
@@ -723,21 +720,21 @@ int main(int argc, char *argv[])
 				myPlaylist->Main()->SetTimeout(50);
 				if (myPlaylist->Main()->hasSelected())
 				{
-					vector<size_t> list;
+					std::vector<size_t> list;
 					myPlaylist->Main()->GetSelected(list);
 					
-					for (vector<size_t>::iterator it = list.begin(); it != list.end(); ++it)
+					for (std::vector<size_t>::iterator it = list.begin(); it != list.end(); ++it)
 						if (*it == size_t(myPlaylist->NowPlaying) && list.front() > 0)
 							myPlaylist->Main()->BoldOption(myPlaylist->NowPlaying, 0);
 					
-					vector<size_t> origs(list);
+					std::vector<size_t> origs(list);
 					
 					while (Keypressed(input, Key.MvSongUp) && list.front() > 0)
 					{
 						TraceMpdStatus();
 						Playlist::BlockUpdate = 1;
 						myPlaylist->UpdateTimer();
-						for (vector<size_t>::iterator it = list.begin(); it != list.end(); ++it)
+						for (std::vector<size_t>::iterator it = list.begin(); it != list.end(); ++it)
 						{
 							(*it)--;
 							myPlaylist->Main()->at((*it)+1).SetPosition(*it);
@@ -783,16 +780,16 @@ int main(int argc, char *argv[])
 				myPlaylistEditor->Content->SetTimeout(50);
 				if (myPlaylistEditor->Content->hasSelected())
 				{
-					vector<size_t> list;
+					std::vector<size_t> list;
 					myPlaylistEditor->Content->GetSelected(list);
 					
-					vector<size_t> origs(list);
+					std::vector<size_t> origs(list);
 					
 					while (Keypressed(input, Key.MvSongUp) && list.front() > 0)
 					{
 						TraceMpdStatus();
 						myPlaylist->UpdateTimer();
-						for (vector<size_t>::iterator it = list.begin(); it != list.end(); ++it)
+						for (std::vector<size_t>::iterator it = list.begin(); it != list.end(); ++it)
 						{
 							(*it)--;
 							myPlaylistEditor->Content->Swap(*it, (*it)+1);
@@ -835,21 +832,21 @@ int main(int argc, char *argv[])
 				myPlaylist->Main()->SetTimeout(50);
 				if (myPlaylist->Main()->hasSelected())
 				{
-					vector<size_t> list;
+					std::vector<size_t> list;
 					myPlaylist->Main()->GetSelected(list);
 					
-					for (vector<size_t>::iterator it = list.begin(); it != list.end(); ++it)
+					for (std::vector<size_t>::iterator it = list.begin(); it != list.end(); ++it)
 						if (*it == size_t(myPlaylist->NowPlaying) && list.back() < myPlaylist->Main()->Size()-1)
 							myPlaylist->Main()->BoldOption(myPlaylist->NowPlaying, 0);
 					
-					vector<size_t> origs(list);
+					std::vector<size_t> origs(list);
 					
 					while (Keypressed(input, Key.MvSongDown) && list.back() < myPlaylist->Main()->Size()-1)
 					{
 						TraceMpdStatus();
 						Playlist::BlockUpdate = 1;
 						myPlaylist->UpdateTimer();
-						for (vector<size_t>::reverse_iterator it = list.rbegin(); it != list.rend(); ++it)
+						for (std::vector<size_t>::reverse_iterator it = list.rbegin(); it != list.rend(); ++it)
 						{
 							(*it)++;
 							myPlaylist->Main()->at((*it)-1).SetPosition(*it);
@@ -896,16 +893,16 @@ int main(int argc, char *argv[])
 				myPlaylistEditor->Content->SetTimeout(50);
 				if (myPlaylistEditor->Content->hasSelected())
 				{
-					vector<size_t> list;
+					std::vector<size_t> list;
 					myPlaylistEditor->Content->GetSelected(list);
 					
-					vector<size_t> origs(list);
+					std::vector<size_t> origs(list);
 					
 					while (Keypressed(input, Key.MvSongDown) && list.back() < myPlaylistEditor->Content->Size()-1)
 					{
 						TraceMpdStatus();
 						myPlaylist->UpdateTimer();
-						for (vector<size_t>::reverse_iterator it = list.rbegin(); it != list.rend(); ++it)
+						for (std::vector<size_t>::reverse_iterator it = list.rbegin(); it != list.rend(); ++it)
 						{
 							(*it)++;
 							myPlaylistEditor->Content->Swap(*it, (*it)-1);
@@ -953,7 +950,7 @@ int main(int argc, char *argv[])
 			 // if cursor is at the last item, break convention and move at the end of playlist
 			if (pos == myPlaylist->Main()->Size()-1)
 				pos++;
-			vector<size_t> list;
+			std::vector<size_t> list;
 			myPlaylist->Main()->GetSelected(list);
 			if (pos >= list.front() && pos <= list.back())
 				continue;
@@ -963,7 +960,7 @@ int main(int argc, char *argv[])
 			{
 				pos -= list.size();
 				size_t i = list.size()-1;
-				for (vector<size_t>::reverse_iterator it = list.rbegin(); it != list.rend(); ++it, --i)
+				for (std::vector<size_t>::reverse_iterator it = list.rbegin(); it != list.rend(); ++it, --i)
 				{
 					Mpd.Move(*it, pos+i);
 					myPlaylist->Main()->Move(*it, pos+i);
@@ -972,7 +969,7 @@ int main(int argc, char *argv[])
 			else if (diff < 0)
 			{
 				size_t i = 0;
-				for (vector<size_t>::const_iterator it = list.begin(); it != list.end(); ++it, ++i)
+				for (std::vector<size_t>::const_iterator it = list.begin(); it != list.end(); ++it, ++i)
 				{
 					Mpd.Move(*it, pos+i);
 					myPlaylist->Main()->Move(*it, pos+i);
@@ -988,7 +985,7 @@ int main(int argc, char *argv[])
 				continue;
 			LockStatusbar();
 			Statusbar() << (myScreen == myPlaylistEditor ? "Add to playlist: " : "Add: ");
-			string path = wFooter->GetString();
+			std::string path = wFooter->GetString();
 			UnlockStatusbar();
 			if (!path.empty())
 			{
@@ -1076,7 +1073,7 @@ int main(int argc, char *argv[])
 				}
 				
 				wFooter->Bold(1);
-				string tracklength = "[" + Song::ShowTime(songpos) + "/" + s->GetLength() + "]";
+				std::string tracklength = "[" + Song::ShowTime(songpos) + "/" + s->GetLength() + "]";
 				*wFooter << XY(wFooter->GetWidth()-tracklength.length(), 1) << tracklength;
 				double progressbar_size = songpos/double(s->GetTotalLength());
 				int howlong = wFooter->GetWidth()*progressbar_size;
@@ -1227,7 +1224,7 @@ int main(int argc, char *argv[])
 		{
 			LockStatusbar();
 			Statusbar() << "Set crossfade to: ";
-			string crossfade = wFooter->GetString(3);
+			std::string crossfade = wFooter->GetString(3);
 			UnlockStatusbar();
 			int cf = StrToInt(crossfade);
 			if (cf > 0)
@@ -1250,7 +1247,7 @@ int main(int argc, char *argv[])
 			{
 				LockStatusbar();
 				Statusbar() << fmtBold << IntoStr(Config.media_lib_primary_tag) << fmtBoldEnd << ": ";
-				string new_tag = wFooter->GetString(myLibrary->Artists->Current());
+				std::string new_tag = wFooter->GetString(myLibrary->Artists->Current());
 				UnlockStatusbar();
 				if (!new_tag.empty() && new_tag != myLibrary->Artists->Current())
 				{
@@ -1268,7 +1265,7 @@ int main(int argc, char *argv[])
 						(*it)->Localize();
 						((*it)->*set)(new_tag);
 						ShowMessage("Updating tags in \"%s\"...", (*it)->GetName().c_str());
-						string path = Config.mpd_music_dir + (*it)->GetFile();
+						std::string path = Config.mpd_music_dir + (*it)->GetFile();
 						if (!TagEditor::WriteTags(**it))
 						{
 							ShowMessage("Error updating tags in \"%s\"!", (*it)->GetFile().c_str());
@@ -1288,7 +1285,7 @@ int main(int argc, char *argv[])
 			{
 				LockStatusbar();
 				Statusbar() << fmtBold << "Album: " << fmtBoldEnd;
-				string new_album = wFooter->GetString(myLibrary->Albums->Current().second.Album);
+				std::string new_album = wFooter->GetString(myLibrary->Albums->Current().second.Album);
 				UnlockStatusbar();
 				if (!new_album.empty() && new_album != myLibrary->Albums->Current().second.Album)
 				{
@@ -1298,7 +1295,7 @@ int main(int argc, char *argv[])
 					{
 						(*myLibrary->Songs)[i].Localize();
 						ShowMessage("Updating tags in \"%s\"...", (*myLibrary->Songs)[i].GetName().c_str());
-						string path = Config.mpd_music_dir + (*myLibrary->Songs)[i].GetFile();
+						std::string path = Config.mpd_music_dir + (*myLibrary->Songs)[i].GetFile();
 						TagLib::FileRef f(locale_to_utf_cpy(path).c_str());
 						if (f.isNull())
 						{
@@ -1323,15 +1320,15 @@ int main(int argc, char *argv[])
 			}
 			else if (myScreen->ActiveWindow() == myTagEditor->Dirs)
 			{
-				string old_dir = myTagEditor->Dirs->Current().first;
+				std::string old_dir = myTagEditor->Dirs->Current().first;
 				LockStatusbar();
 				Statusbar() << fmtBold << "Directory: " << fmtBoldEnd;
-				string new_dir = wFooter->GetString(old_dir);
+				std::string new_dir = wFooter->GetString(old_dir);
 				UnlockStatusbar();
 				if (!new_dir.empty() && new_dir != old_dir)
 				{
-					string full_old_dir = Config.mpd_music_dir + myTagEditor->CurrentDir() + "/" + locale_to_utf_cpy(old_dir);
-					string full_new_dir = Config.mpd_music_dir + myTagEditor->CurrentDir() + "/" + locale_to_utf_cpy(new_dir);
+					std::string full_old_dir = Config.mpd_music_dir + myTagEditor->CurrentDir() + "/" + locale_to_utf_cpy(old_dir);
+					std::string full_new_dir = Config.mpd_music_dir + myTagEditor->CurrentDir() + "/" + locale_to_utf_cpy(new_dir);
 					if (rename(full_old_dir.c_str(), full_new_dir.c_str()) == 0)
 					{
 						Mpd.UpdateDirectory(myTagEditor->CurrentDir());
@@ -1350,18 +1347,18 @@ int main(int argc, char *argv[])
 			}
 			if (myScreen == myBrowser && myBrowser->Main()->Current().type == itDirectory)
 			{
-				string old_dir = myBrowser->Main()->Current().name;
+				std::string old_dir = myBrowser->Main()->Current().name;
 				LockStatusbar();
 				Statusbar() << fmtBold << "Directory: " << fmtBoldEnd;
-				string new_dir = wFooter->GetString(old_dir);
+				std::string new_dir = wFooter->GetString(old_dir);
 				UnlockStatusbar();
 				if (!new_dir.empty() && new_dir != old_dir)
 				{
-					string full_old_dir;
+					std::string full_old_dir;
 					if (!Config.local_browser)
 						full_old_dir += Config.mpd_music_dir;
 					full_old_dir += locale_to_utf_cpy(old_dir);
-					string full_new_dir;
+					std::string full_new_dir;
 					if (!Config.local_browser)
 						full_new_dir += Config.mpd_music_dir;
 					full_new_dir += locale_to_utf_cpy(new_dir);
@@ -1379,10 +1376,10 @@ int main(int argc, char *argv[])
 			}
 			else if (myScreen->ActiveWindow() == myPlaylistEditor->Playlists || (myScreen == myBrowser && myBrowser->Main()->Current().type == itPlaylist))
 			{
-				string old_name = myScreen->ActiveWindow() == myPlaylistEditor->Playlists ? myPlaylistEditor->Playlists->Current() : myBrowser->Main()->Current().name;
+				std::string old_name = myScreen->ActiveWindow() == myPlaylistEditor->Playlists ? myPlaylistEditor->Playlists->Current() : myBrowser->Main()->Current().name;
 				LockStatusbar();
 				Statusbar() << fmtBold << "Playlist: " << fmtBoldEnd;
-				string new_name = wFooter->GetString(old_name);
+				std::string new_name = wFooter->GetString(old_name);
 				UnlockStatusbar();
 				if (!new_name.empty() && new_name != old_name)
 				{
@@ -1414,14 +1411,14 @@ int main(int argc, char *argv[])
 			}
 			LockStatusbar();
 			Statusbar() << "Position to go (in %/mm:ss/seconds(s)): ";
-			string position = wFooter->GetString();
+			std::string position = wFooter->GetString();
 			UnlockStatusbar();
 			
 			if (position.empty())
 				continue;
 			
 			int newpos = 0;
-			if (position.find(':') != string::npos) // probably time in mm:ss
+			if (position.find(':') != std::string::npos) // probably time in mm:ss
 			{
 				try
 				{
@@ -1433,7 +1430,7 @@ int main(int argc, char *argv[])
 				else
 					ShowMessage("Out of bounds, 0:00-%s possible for mm:ss, %d given.", s->GetLength().c_str(), newpos);
 			}
-			else if (position.find('s') != string::npos) // probably position in seconds
+			else if (position.find('s') != std::string::npos) // probably position in seconds
 			{
 				newpos = StrToInt(position);
 				if (newpos > 0 && newpos < s->GetTotalLength())
@@ -1486,7 +1483,7 @@ int main(int argc, char *argv[])
 			const size_t dialog_width = COLS*0.8;
 			const size_t dialog_height = LINES*0.6;
 			
-			Menu<string> mDialog((COLS-dialog_width)/2, (LINES-dialog_height)/2, dialog_width, dialog_height, "Add selected items to...", Config.main_color, Config.window_border);
+			Menu<std::string> mDialog((COLS-dialog_width)/2, (LINES-dialog_height)/2, dialog_width, dialog_height, "Add selected items to...", Config.main_color, Config.window_border);
 			mDialog.SetTimeout(ncmpcpp_window_timeout);
 			mDialog.CyclicScrolling(Config.use_cyclic_scrolling);
 			mDialog.SetItemDisplayer(Display::Generic);
@@ -1560,8 +1557,8 @@ int main(int argc, char *argv[])
 			{
 				LockStatusbar();
 				Statusbar() << "Save playlist as: ";
-				string playlist = wFooter->GetString();
-				string real_playlist = playlist;
+				std::string playlist = wFooter->GetString();
+				std::string real_playlist = playlist;
 				locale_to_utf(real_playlist);
 				UnlockStatusbar();
 				if (!playlist.empty())
@@ -1575,7 +1572,7 @@ int main(int argc, char *argv[])
 			}
 			else if (id > 1 && id < mDialog.Size()-1)
 			{
-				string playlist = locale_to_utf_cpy(mDialog.Current());
+				std::string playlist = locale_to_utf_cpy(mDialog.Current());
 				Mpd.StartCommandsList();
 				for (SongList::const_iterator it = result.begin(); it != result.end(); ++it)
 					Mpd.AddToPlaylist(playlist, **it);
@@ -1722,7 +1719,7 @@ int main(int argc, char *argv[])
 			{
 				LockStatusbar();
 				Statusbar() << "Find " << (Keypressed(input, Key.FindForward) ? "forward" : "backward") << ": ";
-				string findme = wFooter->GetString();
+				std::string findme = wFooter->GetString();
 				UnlockStatusbar();
 				myPlaylist->UpdateTimer();
 				
@@ -1748,7 +1745,7 @@ int main(int argc, char *argv[])
 			{
 				LockStatusbar();
 				Statusbar() << "Find: ";
-				string findme = wFooter->GetString();
+				std::string findme = wFooter->GetString();
 				UnlockStatusbar();
 				
 				ShowMessage("Searching...");
@@ -1825,7 +1822,7 @@ int main(int argc, char *argv[])
 				if (new_tagitem != Config.media_lib_primary_tag)
 				{
 					Config.media_lib_primary_tag = new_tagitem;
-					string item_type = IntoStr(Config.media_lib_primary_tag);
+					std::string item_type = IntoStr(Config.media_lib_primary_tag);
 					myLibrary->Artists->SetTitle(item_type + "s");
 					myLibrary->Artists->Reset();
 					ToLower(item_type);

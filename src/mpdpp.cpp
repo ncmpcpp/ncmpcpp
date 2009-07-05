@@ -26,8 +26,6 @@
 
 using namespace MPD;
 
-using std::string;
-
 MPD::Connection Mpd;
 
 const char *MPD::Message::PartOfSongsAdded = "Only part of requested songs' list added to playlist!";
@@ -101,10 +99,10 @@ float Connection::Version() const
 	return itsConnection ? itsConnection->version[1] + itsConnection->version[2]*0.1 : 0;
 }
 
-void Connection::SetHostname(const string &host)
+void Connection::SetHostname(const std::string &host)
 {
 	size_t at = host.find("@");
-	if (at != string::npos)
+	if (at != std::string::npos)
 	{
 		itsPassword = host.substr(0, at);
 		itsHost = host.substr(at+1);
@@ -194,7 +192,7 @@ void Connection::UpdateStatus()
 	}
 }
 
-void Connection::UpdateDirectory(const string &path)
+void Connection::UpdateDirectory(const std::string &path)
 {
 	if (isConnected)
 	{
@@ -211,7 +209,7 @@ void Connection::UpdateDirectory(const string &path)
 	}
 }
 
-void Connection::Execute(const string &command) const
+void Connection::Execute(const std::string &command) const
 {
 	if (isConnected)
 	{
@@ -337,7 +335,7 @@ void Connection::ClearPlaylist() const
 	}
 }
 
-void Connection::ClearPlaylist(const string &playlist) const
+void Connection::ClearPlaylist(const std::string &playlist) const
 {
 	if (isConnected)
 	{
@@ -347,13 +345,13 @@ void Connection::ClearPlaylist(const string &playlist) const
 	}
 }
 
-void Connection::AddToPlaylist(const string &path, const Song &s) const
+void Connection::AddToPlaylist(const std::string &path, const Song &s) const
 {
 	if (!s.Empty())
 		AddToPlaylist(path, s.GetFile());
 }
 
-void Connection::AddToPlaylist(const string &path, const string &file) const
+void Connection::AddToPlaylist(const std::string &path, const std::string &file) const
 {
 	if (isConnected)
 	{
@@ -363,7 +361,7 @@ void Connection::AddToPlaylist(const string &path, const string &file) const
 	}
 }
 
-void Connection::Move(const string &path, int from, int to) const
+void Connection::Move(const std::string &path, int from, int to) const
 {
 	if (isConnected)
 	{
@@ -373,7 +371,7 @@ void Connection::Move(const string &path, int from, int to) const
 	}
 }
 
-void Connection::Rename(const string &from, const string &to) const
+void Connection::Rename(const std::string &from, const std::string &to) const
 {
 	if (isConnected)
 	{
@@ -408,7 +406,7 @@ void Connection::GetPlaylistChanges(long long id, SongList &v) const
 	}
 }
 
-Song Connection::GetSong(const string &path) const
+Song Connection::GetSong(const std::string &path) const
 {
 	if (isConnected)
 	{
@@ -452,7 +450,7 @@ Song Connection::GetCurrentSong() const
 		return Song();
 }
 
-void Connection::GetPlaylistContent(const string &path, SongList &v) const
+void Connection::GetPlaylistContent(const std::string &path, SongList &v) const
 {
 	if (isConnected)
 	{
@@ -538,7 +536,7 @@ void Connection::SetCrossfade(int crossfade) const
 	}
 }
 
-int Connection::AddSong(const string &path)
+int Connection::AddSong(const std::string &path)
 {
 	int id = -1;
 	if (isConnected)
@@ -619,7 +617,7 @@ void Connection::DeleteID(int id) const
 	}
 }
 
-void Connection::Delete(const string &playlist, int pos) const
+void Connection::Delete(const std::string &playlist, int pos) const
 {
 	if (isConnected)
 	{
@@ -652,7 +650,7 @@ void Connection::CommitCommandsList()
 	}
 }
 
-void Connection::DeletePlaylist(const string &name) const
+void Connection::DeletePlaylist(const std::string &name) const
 {
 	if (isConnected)
 	{
@@ -662,7 +660,7 @@ void Connection::DeletePlaylist(const string &name) const
 	}
 }
 
-bool Connection::SavePlaylist(const string &name) const
+bool Connection::SavePlaylist(const std::string &name) const
 {
 	if (isConnected)
 	{
@@ -705,7 +703,7 @@ void Connection::GetList(TagList &v, mpd_TagItems type) const
 	}
 }
 
-void Connection::GetAlbums(const string &artist, TagList &v) const
+void Connection::GetAlbums(const std::string &artist, TagList &v) const
 {
 	if (isConnected)
 	{
@@ -736,7 +734,7 @@ void Connection::StartFieldSearch(mpd_TagItems item)
 	}
 }
 
-void Connection::AddSearch(mpd_TagItems item, const string &str) const
+void Connection::AddSearch(mpd_TagItems item, const std::string &str) const
 {
 	// mpd version < 0.14.* doesn't support empty search constraints
 	if (Version() < 14 && str.empty())
@@ -781,7 +779,7 @@ void Connection::CommitSearch(TagList &v) const
 	}
 }
 
-void Connection::GetDirectory(const string &path, ItemList &v) const
+void Connection::GetDirectory(const std::string &path, ItemList &v) const
 {
 	if (isConnected)
 	{
@@ -813,7 +811,7 @@ void Connection::GetDirectory(const string &path, ItemList &v) const
 	}
 }
 
-void Connection::GetDirectoryRecursive(const string &path, SongList &v) const
+void Connection::GetDirectoryRecursive(const std::string &path, SongList &v) const
 {
 	if (isConnected)
 	{
@@ -833,7 +831,7 @@ void Connection::GetDirectoryRecursive(const string &path, SongList &v) const
 	}
 }
 
-void Connection::GetSongs(const string &path, SongList &v) const
+void Connection::GetSongs(const std::string &path, SongList &v) const
 {
 	if (isConnected)
 	{
@@ -853,7 +851,7 @@ void Connection::GetSongs(const string &path, SongList &v) const
 	}
 }
 
-void Connection::GetDirectories(const string &path, TagList &v) const
+void Connection::GetDirectories(const std::string &path, TagList &v) const
 {
 	if (isConnected)
 	{

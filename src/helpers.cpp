@@ -30,8 +30,6 @@
 #include "tag_editor.h"
 
 using namespace MPD;
-using Global::wFooter;
-using std::string;
 
 bool ConnectToMPD()
 {
@@ -45,9 +43,6 @@ bool ConnectToMPD()
 
 void ParseArgv(int argc, char **argv)
 {
-	using std::cout;
-	using std::endl;
-	
 	bool quit = 0;
 	
 	for (int i = 1; i < argc; ++i)
@@ -68,7 +63,7 @@ void ParseArgv(int argc, char **argv)
 		}
 		else if (strcmp(argv[i], "-v") == 0 || strcmp(argv[i], "--version") == 0)
 		{
-			cout << "ncmpcpp version: " << VERSION << endl
+			std::cout << "ncmpcpp version: " << VERSION << std::endl
 			<< "built with support for:"
 #			ifdef HAVE_CURL_CURL_H
 			<< " curl"
@@ -79,12 +74,12 @@ void ParseArgv(int argc, char **argv)
 #			ifdef _UTF8
 			<< " unicode"
 #			endif
-			<< endl;
+			<< std::endl;
 			exit(0);
 		}
 		else if (strcmp(argv[i], "-?") == 0 || strcmp(argv[i], "--help") == 0)
 		{
-			cout
+			std::cout
 			<< "Usage: ncmpcpp [OPTION]...\n"
 			<< "  -h                        connect to server at host [localhost]\n"
 			<< "  -p                        connect to server at port [6600]\n"
@@ -152,7 +147,7 @@ void ParseArgv(int argc, char **argv)
 			Mpd.UpdateStatus();
 			if (!Mpd.GetErrorMessage().empty())
 			{
-				cout << "Error: " << Mpd.GetErrorMessage() << endl;
+				std::cout << "Error: " << Mpd.GetErrorMessage() << std::endl;
 				exit(0);
 			}
 			if (i != argc)
@@ -161,12 +156,12 @@ void ParseArgv(int argc, char **argv)
 		}
 		else
 		{
-			cout << "ncmpcpp: invalid option: " << argv[i] << endl;
+			std::cout << "ncmpcpp: invalid option: " << argv[i] << std::endl;
 			exit(0);
 		}
 		if (!Mpd.GetErrorMessage().empty())
 		{
-			cout << "Error: " << Mpd.GetErrorMessage() << endl;
+			std::cout << "Error: " << Mpd.GetErrorMessage() << std::endl;
 			exit(0);
 		}
 	}
@@ -174,7 +169,7 @@ void ParseArgv(int argc, char **argv)
 		exit(0);
 }
 
-bool CaseInsensitiveSorting::operator()(string a, string b)
+bool CaseInsensitiveSorting::operator()(std::string a, std::string b)
 {
 	ToLower(a);
 	ToLower(b);
@@ -188,8 +183,8 @@ bool CaseInsensitiveSorting::operator()(string a, string b)
 
 bool CaseInsensitiveSorting::operator()(Song *sa, Song *sb)
 {
-	string a = sa->GetName();
-	string b = sb->GetName();
+	std::string a = sa->GetName();
+	std::string b = sb->GetName();
 	ToLower(a);
 	ToLower(b);
 	if (Config.ignore_leading_the)
@@ -240,7 +235,7 @@ void UpdateSongList(Menu<Song> *menu)
 }
 
 #ifdef HAVE_TAGLIB_H
-string FindSharedDir(Menu<Song> *menu)
+std::string FindSharedDir(Menu<Song> *menu)
 {
 	SongList list;
 	for (size_t i = 0; i < menu->Size(); ++i)
@@ -248,9 +243,9 @@ string FindSharedDir(Menu<Song> *menu)
 	return FindSharedDir(list);
 }
 
-string FindSharedDir(const SongList &v)
+std::string FindSharedDir(const SongList &v)
 {
-	string result;
+	std::string result;
 	if (!v.empty())
 	{
 		result = v.front()->GetFile();
@@ -262,30 +257,30 @@ string FindSharedDir(const SongList &v)
 			result = result.substr(0, i);
 		}
 		size_t slash = result.rfind("/");
-		result = slash != string::npos ? result.substr(0, slash) : "/";
+		result = slash != std::string::npos ? result.substr(0, slash) : "/";
 	}
 	return result;
 }
 #endif // HAVE_TAGLIB_H
 
-string FindSharedDir(const string &one, const string &two)
+std::string FindSharedDir(const std::string &one, const std::string &two)
 {
 	if (one == two)
 		return one;
-	string result;
+	std::string result;
 	size_t i = 1;
 	while (one.substr(0, i) == two.substr(0, i))
 		i++;
 	result = one.substr(0, i);
 	i = result.rfind("/");
-	return i != string::npos ? result.substr(0, i) : "/";
+	return i != std::string::npos ? result.substr(0, i) : "/";
 }
 
-string GetLineValue(string &line, char a, char b, bool once)
+std::string GetLineValue(std::string &line, char a, char b, bool once)
 {
 	int pos[2] = { -1, -1 };
 	size_t i;
-	for (i = line.find(a); i != string::npos && pos[1] < 0; i = line.find(b, i))
+	for (i = line.find(a); i != std::string::npos && pos[1] < 0; i = line.find(b, i))
 	{
 		if (i && line[i-1] == '\\')
 		{
@@ -297,26 +292,26 @@ string GetLineValue(string &line, char a, char b, bool once)
 		pos[pos[0] >= 0] = i++;
 	}
 	pos[0]++;
-	string result = pos[0] >= 0 && pos[1] >= 0 ? line.substr(pos[0], pos[1]-pos[0]) : "";
-	for (i = result.find("\\\""); i != string::npos; i = result.find("\\\""))
+	std::string result = pos[0] >= 0 && pos[1] >= 0 ? line.substr(pos[0], pos[1]-pos[0]) : "";
+	for (i = result.find("\\\""); i != std::string::npos; i = result.find("\\\""))
 		result.replace(i, 2, "\"");
 	return result;
 }
 
-void RemoveTheWord(string &s)
+void RemoveTheWord(std::string &s)
 {
 	size_t the_pos = s.find("the ");
-	if (the_pos == 0 && the_pos != string::npos)
+	if (the_pos == 0 && the_pos != std::string::npos)
 		s = s.substr(4);
 }
 
 std::string ExtractTopDirectory(const std::string &s)
 {
 	size_t slash = s.rfind("/");
-	return slash != string::npos ? s.substr(++slash) : s;
+	return slash != std::string::npos ? s.substr(++slash) : s;
 }
 
-Buffer ShowTag(const string &tag)
+Buffer ShowTag(const std::string &tag)
 {
 	Buffer result;
 	if (tag.empty())
@@ -326,7 +321,7 @@ Buffer ShowTag(const string &tag)
 	return result;
 }
 
-std::basic_string<my_char_t> Scroller(const string &str, size_t width, size_t &pos)
+std::basic_string<my_char_t> Scroller(const std::string &str, size_t width, size_t &pos)
 {
 	std::basic_string<my_char_t> s = TO_WSTRING(str);
 	if (!Config.header_text_scrolling)

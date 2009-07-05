@@ -30,9 +30,6 @@
 
 using namespace NCurses;
 
-using std::string;
-using std::wstring;
-
 void NCurses::InitScreen(GNUC_UNUSED const char *window_title, bool enable_colors)
 {
 	const int ColorsTable[] =
@@ -75,7 +72,7 @@ Window::Window(size_t startx,
 		size_t starty,
 		size_t width,
 		size_t height,
-		const string &title,
+		const std::string &title,
 		Color color,
 		Border border)
 		: itsWindow(0),
@@ -203,7 +200,7 @@ void Window::SetBorder(Border border)
 	itsBorder = border;
 }
 
-void Window::SetTitle(const string &newtitle)
+void Window::SetTitle(const std::string &newtitle)
 {
 	if (itsTitle == newtitle)
 	{
@@ -379,7 +376,7 @@ void Window::WriteXY(int x, int y, bool cte, const char *format, ...) const
 		wclrtoeol(itsWindow);
 }*/
 
-string Window::GetString(const string &base, size_t length, size_t width, bool encrypted) const
+std::string Window::GetString(const std::string &base, size_t length, size_t width, bool encrypted) const
 {
 	int input;
 	size_t beginning, maxbeginning, minx, x, real_x, y, maxx, real_maxx;
@@ -397,13 +394,13 @@ string Window::GetString(const string &base, size_t length, size_t width, bool e
 	std::wstring *tmp = &wbase;
 	size_t history_offset = itsHistory && !encrypted ? itsHistory->size() : -1;
 	
-	string tmp_in;
+	std::string tmp_in;
 	wchar_t wc_in;
 	bool gotoend = 1;
 	bool block_scrolling = 0;
 	
 	// disable scrolling if wide chars are used
-	for (wstring::const_iterator it = tmp->begin(); it != tmp->end(); ++it)
+	for (std::wstring::const_iterator it = tmp->begin(); it != tmp->end(); ++it)
 		if (wcwidth(*it) > 1)
 			block_scrolling = 1;
 	
@@ -430,7 +427,7 @@ string Window::GetString(const string &base, size_t length, size_t width, bool e
 			if (block_scrolling && maxx >= biggest_x)
 			{
 				size_t i = 0;
-				for (wstring::const_iterator it = tmp->begin(); i < width; ++it, ++real_real_maxx)
+				for (std::wstring::const_iterator it = tmp->begin(); i < width; ++it, ++real_real_maxx)
 					i += wcwidth(*it);
 			}
 			else
@@ -683,7 +680,7 @@ size_t Window::GetStartY() const
 	return starty;
 }
 
-const string &Window::GetTitle() const
+const std::string &Window::GetTitle() const
 {
 	return itsTitle;
 }
@@ -844,16 +841,16 @@ Window &Window::operator<<(double d)
 	return *this;
 }
 
-Window &Window::operator<<(const string &s)
+Window &Window::operator<<(const std::string &s)
 {
-	for (string::const_iterator it = s.begin(); it != s.end(); ++it)
+	for (std::string::const_iterator it = s.begin(); it != s.end(); ++it)
 		wprintw(itsWindow, "%c", *it);
 	return *this;
 }
 
-Window &Window::operator<<(const wstring &ws)
+Window &Window::operator<<(const std::wstring &ws)
 {
-	for (wstring::const_iterator it = ws.begin(); it != ws.end(); ++it)
+	for (std::wstring::const_iterator it = ws.begin(); it != ws.end(); ++it)
 		wprintw(itsWindow, "%lc", *it);
 	return *this;
 }
@@ -869,9 +866,9 @@ Window * Window::EmptyClone() const
 	return new Window(GetStartX(), GetStartY(), GetWidth(), GetHeight(), itsTitle, itsBaseColor, itsBorder);
 }
 
-string ToString(const wstring &ws)
+std::string ToString(const std::wstring &ws)
 {
-	string result;
+	std::string result;
 	char *s = new char[MB_CUR_MAX];
 	for (size_t i = 0; i < ws.length(); ++i)
 	{
@@ -883,9 +880,9 @@ string ToString(const wstring &ws)
 	return result;
 }
 
-wstring ToWString(const string &s)
+std::wstring ToWString(const std::string &s)
 {
-	wstring result;
+	std::wstring result;
 	wchar_t *ws = new wchar_t[s.length()];
 	const char *c_s = s.c_str();
 	int n = mbsrtowcs(ws, &c_s, s.length(), 0);
@@ -895,10 +892,10 @@ wstring ToWString(const string &s)
 	return result;
 }
 
-size_t Window::Length(const wstring &ws)
+size_t Window::Length(const std::wstring &ws)
 {
 	size_t length = 0;
-	for (wstring::const_iterator it = ws.begin(); it != ws.end(); ++it)
+	for (std::wstring::const_iterator it = ws.begin(); it != ws.end(); ++it)
 		length += wcwidth(*it);
 	return length;
 }

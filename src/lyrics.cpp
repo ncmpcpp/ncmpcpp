@@ -49,8 +49,6 @@
 #endif // WIN32
 
 using namespace Global;
-using std::vector;
-using std::string;
 
 const std::string Lyrics::Folder = home_path + LYRICS_FOLDER;
 
@@ -145,7 +143,7 @@ void Lyrics::SwitchTo()
 #			endif // HAVE_PTHREAD_H
 #			endif // HAVE_CURL_CURL_H
 			{
-				string file = locale_to_utf_cpy(itsSong.GetArtist()) + " - " + locale_to_utf_cpy(itsSong.GetTitle()) + ".txt";
+				std::string file = locale_to_utf_cpy(itsSong.GetArtist()) + " - " + locale_to_utf_cpy(itsSong.GetTitle()) + ".txt";
 				EscapeUnallowedChars(file);
 				itsFilenamePath = Folder + "/" + file;
 				
@@ -159,7 +157,7 @@ void Lyrics::SwitchTo()
 				if (input.is_open())
 				{
 					bool first = 1;
-					string line;
+					std::string line;
 					while (getline(input, line))
 					{
 						if (!first)
@@ -191,7 +189,7 @@ void Lyrics::SwitchTo()
 
 std::string Lyrics::Title()
 {
-	string result = "Lyrics: ";
+	std::string result = "Lyrics: ";
 	result += TO_STRING(Scroller(itsSong.toString("%a - %t"), COLS-result.length()-VolumeState.length(), itsScrollBegin));
 	return result;
 }
@@ -208,14 +206,14 @@ void *Lyrics::Get(void *screen_void_ptr)
 	Lyrics *screen = static_cast<Lyrics *>(screen_void_ptr);
 	const Plugin *my_lyrics = ChoosePlugin(Config.lyrics_db);
 	
-	string result;
-	string artist = locale_to_utf_cpy(screen->itsSong.GetArtist());
-	string title = locale_to_utf_cpy(screen->itsSong.GetTitle());
+	std::string result;
+	std::string artist = locale_to_utf_cpy(screen->itsSong.GetArtist());
+	std::string title = locale_to_utf_cpy(screen->itsSong.GetTitle());
 	
 	char *c_artist = curl_easy_escape(0, artist.c_str(), artist.length());
 	char *c_title = curl_easy_escape(0, title.c_str(), title.length());
 	
-	string url = my_lyrics->url;
+	std::string url = my_lyrics->url;
 	url.replace(url.find("%artist%"), 8, c_artist);
 	url.replace(url.find("%title%"), 7, c_title);
 	
@@ -253,9 +251,9 @@ void *Lyrics::Get(void *screen_void_ptr)
 		pthread_exit(0);
 	}
 	
-	for (size_t i = result.find("&lt;"); i != string::npos; i = result.find("&lt;"))
+	for (size_t i = result.find("&lt;"); i != std::string::npos; i = result.find("&lt;"))
 		result.replace(i, 4, "<");
-	for (size_t i = result.find("&gt;"); i != string::npos; i = result.find("&gt;"))
+	for (size_t i = result.find("&gt;"); i != std::string::npos; i = result.find("&gt;"))
 		result.replace(i, 4, ">");
 	
 	EscapeHtml(result);
@@ -320,16 +318,16 @@ const char *Lyrics::GetPluginName(int offset)
 	return PluginsList[offset];
 }
 
-bool Lyrics::LyricWiki_NotFound(const string &s)
+bool Lyrics::LyricWiki_NotFound(const std::string &s)
 {
 	return s == "Not found";
 }
 
-bool Lyrics::LyricsPlugin_NotFound(const string &s)
+bool Lyrics::LyricsPlugin_NotFound(const std::string &s)
 {
 	if  (s.empty())
 		return true;
-	for (string::const_iterator it = s.begin(); it != s.end(); ++it)
+	for (std::string::const_iterator it = s.begin(); it != s.end(); ++it)
 		if (isprint(*it))
 			return false;
 	return true;
