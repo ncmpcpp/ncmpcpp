@@ -466,57 +466,6 @@ MPD::Song &MPD::Song::operator=(const MPD::Song &s)
 	return *this;
 }
 
-bool MPD::Song::operator==(const Song &s) const
-{
-	return  (itsSong->file && s.itsSong->file
-			? strcmp(itsSong->file, s.itsSong->file) == 0
-			: !(itsSong->file || s.itsSong->file))
-	&&	(itsSong->title && s.itsSong->title
-			? strcmp(itsSong->title, s.itsSong->title) == 0
-			: !(itsSong->title || s.itsSong->title))
-	&&	(itsSong->artist && s.itsSong->artist
-			? strcmp(itsSong->artist, s.itsSong->artist) == 0
-			: !(itsSong->artist || s.itsSong->artist))
-	&&	(itsSong->album && s.itsSong->album
-			? strcmp(itsSong->album, s.itsSong->album) == 0
-			: !(itsSong->album || s.itsSong->album))
-	&&	(itsSong->track && s.itsSong->track
-			? strcmp(itsSong->track, s.itsSong->track) == 0
-			: !(itsSong->track || s.itsSong->track))
-	&&	(itsSong->date && s.itsSong->date
-			? strcmp(itsSong->date, s.itsSong->date) == 0
-			: !(itsSong->date || s.itsSong->date))
-	&&	(itsSong->genre && s.itsSong->genre
-			? strcmp(itsSong->genre, s.itsSong->genre) == 0
-			: !(itsSong->genre || s.itsSong->genre))
-	&&	(itsSong->composer && s.itsSong->composer
-			? strcmp(itsSong->composer, s.itsSong->composer) == 0
-			: !(itsSong->composer || s.itsSong->composer))
-	&&	(itsSong->performer && s.itsSong->performer
-			? strcmp(itsSong->performer, s.itsSong->performer) == 0
-			: !(itsSong->performer || s.itsSong->performer))
-	&&	(itsSong->disc && s.itsSong->disc
-			? strcmp(itsSong->disc, s.itsSong->disc) == 0
-			: !(itsSong->disc || s.itsSong->disc))
-	&&	(itsSong->comment && s.itsSong->comment
-			? strcmp(itsSong->comment, s.itsSong->comment) == 0
-			: !(itsSong->comment || s.itsSong->comment))
-	&&	itsSong->time == s.itsSong->time
-	&&	itsSong->pos == s.itsSong->pos
-	&&	itsSong->id == s.itsSong->id
-	&&	itsHash == s.itsHash;
-}
-
-bool MPD::Song::operator!=(const Song &s) const
-{
-	return !operator==(s);
-}
-
-bool MPD::Song::operator<(const Song &s) const
-{
-	return itsSong->pos < s.itsSong->pos;
-}
-
 std::string MPD::Song::ShowTime(int length)
 {
 	std::ostringstream ss;

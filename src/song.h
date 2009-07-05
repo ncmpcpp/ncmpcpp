@@ -90,9 +90,6 @@ namespace MPD
 			bool Localized() const { return isLocalised; }
 			
 			Song &operator=(const Song &);
-			bool operator==(const Song &) const;
-			bool operator!=(const Song &) const;
-			bool operator<(const Song &rhs) const;
 			
 			static std::string ShowTime(int);
 		private:
