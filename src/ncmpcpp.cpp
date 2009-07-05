@@ -1385,7 +1385,7 @@ int main(int argc, char *argv[])
 				{
 					Mpd.Rename(locale_to_utf_cpy(old_name), locale_to_utf_cpy(new_name));
 					ShowMessage("Playlist \"%s\" renamed to \"%s\"", old_name.c_str(), new_name.c_str());
-					if (!Config.local_browser)
+					if (!Config.local_browser && myBrowser->Main())
 						myBrowser->GetDirectory("/");
 					myPlaylistEditor->Playlists->Clear(0);
 				}
@@ -1583,9 +1583,10 @@ int main(int argc, char *argv[])
 			if (id != mDialog.Size()-1)
 			{
 				// refresh playlist's lists
-				if (!Config.local_browser && myBrowser->CurrentDir() == "/")
+				if (!Config.local_browser && myBrowser->Main() && myBrowser->CurrentDir() == "/")
 					myBrowser->GetDirectory("/");
-				myPlaylistEditor->Playlists->Clear(0); // make playlist editor update itself
+				if (myPlaylistEditor->Main())
+					myPlaylistEditor->Playlists->Clear(0); // make playlist editor update itself
 			}
 			if (myScreen == myPlaylist)
 				myPlaylist->EnableHighlighting();
