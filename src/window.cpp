@@ -857,7 +857,7 @@ Window &Window::operator<<(const std::wstring &ws)
 
 Window &Window::operator<<(size_t s)
 {
-	wprintw(itsWindow, SIZE_T_FORMAT, s);
+	wprintw(itsWindow, "%zu", s);
 	return *this;
 }
 

@@ -32,12 +32,6 @@
 #include <vector>
 #include <string>
 
-# if defined(__WORDSIZE) && __WORDSIZE == 64
-# define SIZE_T_FORMAT "%lu"
-#else
-# define SIZE_T_FORMAT "%u"
-#endif
-
 #if defined(__GNUC__) && __GNUC__ >= 3
 # define GNUC_UNUSED __attribute__((unused))
 # define GNUC_PRINTF(a, b) __attribute__((format(printf, a, b)))
