@@ -98,8 +98,8 @@ extern char * mpdTagItemKeys[MPD_TAG_NUM_OF_ITEM_TYPES];
 
 /* internal stuff don't touch this struct */
 typedef struct _mpd_ReturnElement {
-	char * name;
-	char * value;
+	const char * name;
+	const char * value;
 } mpd_ReturnElement;
 
 /* mpd_Connection
@@ -261,32 +261,32 @@ void mpd_freeSearchStats(mpd_SearchStats * stats);
  */
 typedef struct _mpd_Song {
 	/* filename of song */
-	char * file;
+	const char * file;
 	/* artist, maybe NULL if there is no tag */
-	char * artist;
+	const char * artist;
 	/* title, maybe NULL if there is no tag */
-	char * title;
+	const char * title;
 	/* album, maybe NULL if there is no tag */
-	char * album;
+	const char * album;
 	/* track, maybe NULL if there is no tag */
-	char * track;
+	const char * track;
 	/* name, maybe NULL if there is no tag; it's the name of the current
 	 * song, f.e. the icyName of the stream */
-	char * name;
+	const char * name;
 	/* date */
-	char *date;
+	const char *date;
 
 	/* added by qball */
 	/* Genre */
-	char *genre;
+	const char *genre;
 	/* Composer */
-	char *composer;
+	const char *composer;
 	/* Performer */
-	char *performer;
+	const char *performer;
 	/* Disc */
-	char *disc;
+	const char *disc;
 	/* Comment */
-	char *comment;
+	const char *comment;
 
 	/* length of song in seconds, check that it is not MPD_SONG_NO_TIME  */
 	int time;
@@ -324,7 +324,7 @@ mpd_Song * mpd_songDup(mpd_Song * song);
  * used to store info fro directory (right now that just the path)
  */
 typedef struct _mpd_Directory {
-	char * path;
+	const char * path;
 } mpd_Directory;
 
 /* mpd_newDirectory
@@ -350,7 +350,7 @@ mpd_Directory * mpd_directoryDup(mpd_Directory * directory);
  * stores info about playlist file returned by lsinfo
  */
 typedef struct _mpd_PlaylistFile {
-	char * path;
+	const char * path;
 } mpd_PlaylistFile;
 
 /* mpd_newPlaylistFile

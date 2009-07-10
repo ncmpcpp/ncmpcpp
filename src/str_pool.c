@@ -65,7 +65,7 @@ static struct slot *slot_alloc(struct slot *next, const char *value)
 	return slot;
 }
 
-char *str_pool_get(const char *value)
+const char *str_pool_get(const char *value)
 {
 	struct slot **slot_p, *slot;
 
@@ -83,7 +83,7 @@ char *str_pool_get(const char *value)
 	return slot->value;
 }
 
-char *str_pool_dup(const char *value)
+const char *str_pool_dup(const char *value)
 {
 	struct slot *slot = value_to_slot(value);
 
@@ -91,7 +91,7 @@ char *str_pool_dup(const char *value)
 
 	if (slot->ref < 0xff) {
 		++slot->ref;
-		return (char *) value;
+		return value;
 	} else {
 		/* the reference counter overflows above 0xff;
 		   duplicate the value, and start with 1 */
@@ -103,7 +103,7 @@ char *str_pool_dup(const char *value)
 	}
 }
 
-void str_pool_put(char *value)
+void str_pool_put(const char *value)
 {
 	struct slot **slot_p, *slot;
 

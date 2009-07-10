@@ -35,8 +35,8 @@ void locale_to_utf(std::string &);
 std::string utf_to_locale_cpy(const std::string &s);
 std::string locale_to_utf_cpy(const std::string &s);
 
-void str_pool_utf_to_locale(char *&);
-void str_pool_locale_to_utf(char *&);
+void str_pool_utf_to_locale(const char *&);
+void str_pool_locale_to_utf(const char *&);
 
 #else
 

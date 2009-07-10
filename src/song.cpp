@@ -494,7 +494,7 @@ void MPD::Song::SetHashAndSlash()
 {
 	if (!itsSong->file)
 		return;
-	char *tmp = strrchr(itsSong->file, '/');
+	const char *tmp = strrchr(itsSong->file, '/');
 	itsSlash = tmp && *(tmp-1) != '/' /* no http:// */ ? tmp-itsSong->file : std::string::npos;
 	itsHash = calc_hash(itsSong->file);
 }
