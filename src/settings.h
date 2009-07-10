@@ -22,6 +22,7 @@
 #define _SETTINGS_H
 
 #include <limits>
+#include <vector>
 
 #include "home.h"
 #include "libmpdclient.h"
@@ -35,6 +36,14 @@
 
 const std::string config_dir = home_path + HOME_FOLDER;
 const int null_key = std::numeric_limits<int>::max();
+
+struct Column
+{
+	unsigned width;
+	Color color;
+	char type;
+	bool fixed;
+};
 
 struct ncmpcpp_keys
 {
@@ -113,8 +122,8 @@ struct ncmpcpp_config
 	std::string mpd_host;
 	std::string mpd_music_dir;
 	std::string empty_tag;
+	std::string song_list_columns_format;
 	std::string song_list_format;
-	std::string song_columns_list_format;
 	std::string song_status_format;
 	std::string song_window_title_format;
 	std::string song_library_format;
@@ -124,6 +133,8 @@ struct ncmpcpp_config
 	std::string execute_on_song_change;
 	
 	std::string pattern;
+	
+	std::vector<Column> columns;
 	
 	Buffer browser_playlist_prefix;
 	Buffer selected_item_prefix;

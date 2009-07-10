@@ -101,12 +101,18 @@
 ##
 ## - syntax for each column is:
 ##
-## (width of column in %)[column's color]{displayed tag}
+## (width of column)[column's color]{displayed tag}
+##
+## Note: Width is by default in %, if you want a column to
+## have fixed size, add 'f' after the value, e.g. (10)[white]{a}
+## will be the column that take 10% of screen (so the real column's
+## width will depend on actual screen size), whereas (10f)[white]{a}
+## will take 10 terminal cells, no matter how wide the screen is.
 ##
 ## - color is optional (if you want the default one, type [])
 ##
 #
-#song_columns_list_format = "(7)[green]{l} (28)[cyan]{a} (28)[]{b} (50)[red]{t}"
+#song_columns_list_format = "(7f)[green]{l} (25)[cyan]{a} (40)[]{t} (30)[red]{b}"
 #
 ##### various settings #####
 #

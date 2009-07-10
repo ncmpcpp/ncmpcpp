@@ -195,7 +195,7 @@ void SearchEngine::EnterPressed()
 			if (!w->Back().first)
 			{
 				if (Config.columns_in_search_engine)
-					w->SetTitle(Display::Columns(Config.song_columns_list_format));
+					w->SetTitle(Display::Columns());
 				size_t found = w->Size()-SearchEngine::StaticOptions;
 				found += 3; // don't count options inserted below
 				w->InsertSeparator(ResetButton+1);
@@ -645,6 +645,6 @@ std::string SearchEngine::SearchEngineOptionToString(const std::pair<Buffer *, M
 	if (!Config.columns_in_search_engine)
 		return pair.second->toString(Config.song_list_format);
 	else
-		return Playlist::SongInColumnsToString(*pair.second, &Config.song_columns_list_format);
+		return Playlist::SongInColumnsToString(*pair.second, 0);
 }
 

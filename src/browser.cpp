@@ -51,7 +51,7 @@ const char *Browser::SupportedExtensions[] =
 
 void Browser::Init()
 {
-	w = new Menu<Item>(0, MainStartY, COLS, MainHeight, Config.columns_in_browser ? Display::Columns(Config.song_columns_list_format) : "", Config.main_color, brNone);
+	w = new Menu<Item>(0, MainStartY, COLS, MainHeight, Config.columns_in_browser ? Display::Columns() : "", Config.main_color, brNone);
 	w->HighlightColor(Config.main_highlight_color);
 	w->SetTimeout(ncmpcpp_window_timeout);
 	w->CyclicScrolling(Config.use_cyclic_scrolling);
@@ -626,7 +626,7 @@ std::string Browser::ItemToString(const MPD::Item &item, void *)
 			if (!Config.columns_in_browser)
 				return item.song->toString(Config.song_list_format);
 			else
-				return Playlist::SongInColumnsToString(*item.song, &Config.song_columns_list_format);
+				return Playlist::SongInColumnsToString(*item.song, 0);
 		}
 		case MPD::itPlaylist:
 		{

@@ -1100,25 +1100,21 @@ int main(int argc, char *argv[])
 				if (Config.columns_in_playlist)
 				{
 					myPlaylist->Main()->SetItemDisplayer(Display::SongsInColumns);
-					myPlaylist->Main()->SetItemDisplayerUserData(&Config.song_columns_list_format);
-					myPlaylist->Main()->SetTitle(Display::Columns(Config.song_columns_list_format));
+					myPlaylist->Main()->SetTitle(Display::Columns());
 					myPlaylist->Main()->SetGetStringFunction(Playlist::SongInColumnsToString);
-					myPlaylist->Main()->SetGetStringFunctionUserData(&Config.song_columns_list_format);
 				}
 				else
 				{
 					myPlaylist->Main()->SetItemDisplayer(Display::Songs);
-					myPlaylist->Main()->SetItemDisplayerUserData(&Config.song_list_format);
 					myPlaylist->Main()->SetTitle("");
 					myPlaylist->Main()->SetGetStringFunction(Playlist::SongToString);
-					myPlaylist->Main()->SetGetStringFunctionUserData(&Config.song_list_format);
 				}
 			}
 			else if (myScreen == myBrowser)
 			{
 				Config.columns_in_browser = !Config.columns_in_browser;
 				ShowMessage("Browser display mode: %s", Config.columns_in_browser ? "Columns" : "Classic");
-				myBrowser->Main()->SetTitle(Config.columns_in_browser ? Display::Columns(Config.song_columns_list_format) : "");
+				myBrowser->Main()->SetTitle(Config.columns_in_browser ? Display::Columns() : "");
 				
 			}
 			else if (myScreen == mySearcher)
@@ -1126,7 +1122,7 @@ int main(int argc, char *argv[])
 				Config.columns_in_search_engine = !Config.columns_in_search_engine;
 				ShowMessage("Search engine display mode: %s", Config.columns_in_search_engine ? "Columns" : "Classic");
 				if (mySearcher->Main()->Size() > SearchEngine::StaticOptions)
-					mySearcher->Main()->SetTitle(Config.columns_in_search_engine ? Display::Columns(Config.song_columns_list_format) : "");
+					mySearcher->Main()->SetTitle(Config.columns_in_search_engine ? Display::Columns() : "");
 			}
 		}
 #		ifdef HAVE_CURL_CURL_H

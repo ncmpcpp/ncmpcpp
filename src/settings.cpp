@@ -230,8 +230,8 @@ void DefaultConfiguration(ncmpcpp_config &conf)
 {
 	conf.mpd_host = "localhost";
 	conf.empty_tag = "<empty>";
+	conf.song_list_columns_format = "(7f)[green]{l} (25)[cyan]{a} (40)[]{t} (30)[red]{b}";
 	conf.song_list_format = "{%a - }{%t}|{$8%f$9}%r{$3(%l)$9}";
-	conf.song_columns_list_format = "(7)[green]{l} (25)[cyan]{a} (40)[]{t} (30)[red]{b}";
 	conf.song_status_format = "{(%l) }{%a - }{%t}|{%f}";
 	conf.song_window_title_format = "{%a - }{%t}|{%f}";
 	conf.song_library_format = "{%n - }{%t}|{%f}";
@@ -453,10 +453,7 @@ void ReadConfiguration(ncmpcpp_config &conf)
 	std::ifstream f(config_file.c_str());
 	std::string cl, v;
 	
-	if (!f.is_open())
-		return;
-
-	while (!f.eof())
+	while (f.is_open() && !f.eof())
 	{
 		getline(f, cl);
 		if (!cl.empty() && cl[0] != '#')
@@ -515,7 +512,7 @@ void ReadConfiguration(ncmpcpp_config &conf)
 			else if (cl.find("song_columns_list_format") != std::string::npos)
 			{
 				if (!v.empty())
-					conf.song_columns_list_format = v;
+					conf.song_list_columns_format = v;
 			}
 			else if (cl.find("song_status_format") != std::string::npos)
 			{
@@ -784,6 +781,15 @@ void ReadConfiguration(ncmpcpp_config &conf)
 		}
 	}
 	f.close();
+	
+	for (std::string width = GetLineValue(conf.song_list_columns_format, '(', ')', 1); !width.empty(); width = GetLineValue(conf.song_list_columns_format, '(', ')', 1))
+	{
+		Column col;
+		col.color = IntoColor(GetLineValue(conf.song_list_columns_format, '[', ']', 1));
+		col.type = GetLineValue(conf.song_list_columns_format, '{', '}', 1)[0];
+		col.fixed = *width.rbegin() == 'f';
+		col.width = StrToInt(width);
+		conf.columns.push_back(col);
+	}
 }
-
 

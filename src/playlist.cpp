@@ -47,16 +47,16 @@ size_t Playlist::SortDialogHeight;
 
 void Playlist::Init()
 {
-	w = new Menu<MPD::Song>(0, MainStartY, COLS, MainHeight, Config.columns_in_playlist ? Display::Columns(Config.song_columns_list_format) : "", Config.main_color, brNone);
+	w = new Menu<MPD::Song>(0, MainStartY, COLS, MainHeight, Config.columns_in_playlist ? Display::Columns() : "", Config.main_color, brNone);
 	w->SetTimeout(ncmpcpp_window_timeout);
 	w->CyclicScrolling(Config.use_cyclic_scrolling);
 	w->HighlightColor(Config.main_highlight_color);
 	w->SetSelectPrefix(&Config.selected_item_prefix);
 	w->SetSelectSuffix(&Config.selected_item_suffix);
 	w->SetItemDisplayer(Config.columns_in_playlist ? Display::SongsInColumns : Display::Songs);
-	w->SetItemDisplayerUserData(Config.columns_in_playlist ? &Config.song_columns_list_format : &Config.song_list_format);
+	w->SetItemDisplayerUserData(&Config.song_list_format);
 	w->SetGetStringFunction(Config.columns_in_playlist ? SongInColumnsToString : SongToString);
-	w->SetGetStringFunctionUserData(Config.columns_in_playlist ? &Config.song_columns_list_format : &Config.song_list_format);
+	w->SetGetStringFunctionUserData(&Config.song_list_format);
 	
 	SortDialogHeight = std::min(int(MainHeight-2), 18);
 	
@@ -105,7 +105,7 @@ void Playlist::SwitchTo()
 void Playlist::Resize()
 {
 	w->Resize(COLS, MainHeight);
-	w->SetTitle(Config.columns_in_playlist ? Display::Columns(Config.song_columns_list_format) : "");
+	w->SetTitle(Config.columns_in_playlist ? Display::Columns() : "");
 	SortDialogHeight = std::min(int(MainHeight-2), 18);
 	if (MainHeight > 6)
 		SortDialog->Resize(SortDialogWidth, SortDialogHeight);
@@ -448,20 +448,19 @@ std::string Playlist::SongToString(const MPD::Song &s, void *data)
 	return s.toString(*static_cast<std::string *>(data));
 }
 
-std::string Playlist::SongInColumnsToString(const MPD::Song &s, void *data)
+std::string Playlist::SongInColumnsToString(const MPD::Song &s, void *)
 {
 	std::string result;
-	std::string fmt = *static_cast<std::string *>(data);
-	for (std::string i = GetLineValue(fmt, '{', '}', 1); !i.empty(); i = GetLineValue(fmt, '{', '}', 1))
+	for (std::vector<Column>::const_iterator it = Config.columns.begin(); it != Config.columns.end(); ++it)
 	{
-		if (i == "t")
+		if (it->type == 't')
 		{
 			result += "{%t}|{%f}";
 		}
 		else
 		{
 			result += "%";
-			result += i;
+			result += it->type;
 		}
 		result += " ";
 	}

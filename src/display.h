@@ -27,7 +27,7 @@
 
 namespace Display
 {
-	std::string Columns(std::string);
+	std::string Columns();
 	
 	template <typename T> void Generic(const T &t, void *, Menu<T> *menu)
 	{

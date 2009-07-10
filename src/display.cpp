@@ -23,17 +23,25 @@
 #include "helpers.h"
 #include "playlist.h"
 
-std::string Display::Columns(std::string st)
+std::string Display::Columns()
 {
+	if (Config.columns.empty())
+		return "";
+	
 	std::string result;
 	size_t where = 0;
+	int width;
 	
-	for (int width = StrToInt(GetLineValue(st, '(', ')', 1)); width; width = StrToInt(GetLineValue(st, '(', ')', 1)))
+	std::vector<Column>::const_iterator next2last;
+	bool last_fixed = Config.columns.back().fixed;
+	if (Config.columns.size() > 1)
+		next2last = Config.columns.end()-2;
+	
+	for (std::vector<Column>::const_iterator it = Config.columns.begin(); it != Config.columns.end(); ++it)
 	{
-		width *= COLS/100.0;
-		char type = GetLineValue(st, '{', '}', 1)[0];
+		width = it->width*(it->fixed ? 1 : COLS/100.0);
 		
-		switch (type)
+		switch (it->type)
 		{
 			case 'l':
 				result += "Time";
@@ -77,7 +85,10 @@ std::string Display::Columns(std::string st)
 			default:
 				break;
 		}
-		where += width;
+		if (last_fixed && it == next2last)
+			where = COLS-(++next2last)->width;
+		else
+			where += width;
 		
 		if (result.length() > where)
 			result = result.substr(0, where);
@@ -87,32 +98,36 @@ std::string Display::Columns(std::string st)
 	return result;
 }
 
-void Display::SongsInColumns(const MPD::Song &s, void *s_template, Menu<MPD::Song> *menu)
+void Display::SongsInColumns(const MPD::Song &s, void *, Menu<MPD::Song> *menu)
 {
 	if (!s.Localized())
 		const_cast<MPD::Song *>(&s)->Localize();
 	
-	std::string st = s_template ? *static_cast<std::string *>(s_template) : "";
-	size_t where = 0;
-	Color color = clDefault;
+	if (Config.columns.empty())
+		return;
 	
-	for (int width = StrToInt(GetLineValue(st, '(', ')', 1)); width; width = StrToInt(GetLineValue(st, '(', ')', 1)))
+	std::vector<Column>::const_iterator next2last, it;
+	size_t where = 0;
+	int width;
+	
+	bool last_fixed = Config.columns.back().fixed;
+	if (Config.columns.size() > 1)
+		next2last = Config.columns.end()-2;
+	
+	for (it = Config.columns.begin(); it != Config.columns.end(); ++it)
 	{
 		if (where)
 		{
 			menu->GotoXY(where, menu->Y());
 			*menu << ' ';
-			if (color != clDefault)
+			if ((it-1)->color != clDefault)
 				*menu << clEnd;
 		}
 		
-		width *= COLS/100.0;
-		color = IntoColor(GetLineValue(st, '[', ']', 1));
-		char type = GetLineValue(st, '{', '}', 1)[0];
-		
+		width = it->width*(it->fixed ? 1 : COLS/100.0);
 		MPD::Song::GetFunction get = 0;
 		
-		switch (type)
+		switch (it->type)
 		{
 			case 'l':
 				get = &MPD::Song::GetLength;
@@ -159,17 +174,20 @@ void Display::SongsInColumns(const MPD::Song &s, void *s_template, Menu<MPD::Son
 			default:
 				break;
 		}
-		if (color != clDefault)
-			*menu << color;
+		if (it->color != clDefault)
+			*menu << it->color;
 		whline(menu->Raw(), 32, menu->GetWidth()-where);
 		std::string tag = (s.*get)();
 		if (!tag.empty())
 			*menu << tag;
 		else
 			*menu << Config.empty_tag;
-		where += width;
+		if (last_fixed && it == next2last)
+			where = COLS-(++next2last)->width;
+		else
+			where += width;
 	}
-	if (color != clDefault)
+	if ((--it)->color != clDefault)
 		*menu << clEnd;
 }
 
@@ -461,7 +479,7 @@ void Display::Items(const MPD::Item &item, void *, Menu<MPD::Item> *menu)
 			if (!Config.columns_in_browser)
 				Display::Songs(*item.song, &Config.song_list_format, reinterpret_cast<Menu<MPD::Song> *>(menu));
 			else
-				Display::SongsInColumns(*item.song, &Config.song_columns_list_format, reinterpret_cast<Menu<MPD::Song> *>(menu));
+				Display::SongsInColumns(*item.song, 0, reinterpret_cast<Menu<MPD::Song> *>(menu));
 			return;
 		case MPD::itPlaylist:
 			*menu << Config.browser_playlist_prefix << item.name;
@@ -478,7 +496,7 @@ void Display::SearchEngine(const std::pair<Buffer *, MPD::Song *> &pair, void *,
 		if (!Config.columns_in_search_engine)
 			Display::Songs(*pair.second, &Config.song_list_format, reinterpret_cast<Menu<MPD::Song> *>(menu));
 		else
-			Display::SongsInColumns(*pair.second, &Config.song_columns_list_format, reinterpret_cast<Menu<MPD::Song> *>(menu));
+			Display::SongsInColumns(*pair.second, 0, reinterpret_cast<Menu<MPD::Song> *>(menu));
 	}
 	
 	else
