@@ -712,6 +712,10 @@ void ReadConfiguration(ncmpcpp_config &conf)
 				if (!v.empty())
 					conf.song_window_title_format = v;
 			}
+			else if (cl.find("empty_tag") != std::string::npos)
+			{
+				conf.empty_tag = v; // is this case empty string is allowed
+			}
 			else if (cl.find("empty_tag_color") != std::string::npos)
 			{
 				if (!v.empty())

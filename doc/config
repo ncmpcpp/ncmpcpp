@@ -176,6 +176,8 @@
 #
 #mouse_support = "yes"
 #
+#empty_tag = "<empty>"
+#
 #enable_window_title = "yes"
 #
 ##
