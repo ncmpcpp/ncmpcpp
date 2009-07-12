@@ -139,7 +139,6 @@ int main(int argc, char *argv[])
 	wFooter->SetTimeout(ncmpcpp_window_timeout);
 	wFooter->SetGetStringHelper(StatusbarGetStringHelper);
 	wFooter->CreateHistory();
-	*wFooter << fmtBold; // bold by default
 	
 	myPlaylist->SwitchTo();
 	myPlaylist->UpdateTimer();
@@ -1072,7 +1071,7 @@ int main(int argc, char *argv[])
 						songpos = 0;
 				}
 				
-				wFooter->Bold(1);
+				*wFooter << fmtBold;
 				std::string tracklength = "[" + Song::ShowTime(songpos) + "/" + s->GetLength() + "]";
 				*wFooter << XY(wFooter->GetWidth()-tracklength.length(), 1) << tracklength;
 				double progressbar_size = songpos/double(s->GetTotalLength());
@@ -1081,7 +1080,7 @@ int main(int argc, char *argv[])
 				mvwhline(wFooter->Raw(), 0, 0, 0, wFooter->GetWidth());
 				mvwhline(wFooter->Raw(), 0, 0, '=',howlong);
 				mvwaddch(wFooter->Raw(), 0, howlong, '>');
-				wFooter->Bold(0);
+				*wFooter << fmtBoldEnd;
 				wFooter->Refresh();
 			}
 			Mpd.Seek(songpos);

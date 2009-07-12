@@ -173,7 +173,7 @@ void NcmpcppStatusChanged(Connection *, StatusChanges changed, void *)
 	static MPD::Song np;
 	
 	int sx, sy;
-	wFooter->Bold(1);
+	*wFooter << fmtBold;
 	wFooter->GetXY(sx, sy);
 	
 	if ((myPlaylist->NowPlaying != Mpd.GetCurrentSongPos() || changed.SongID) && !Playlist::BlockNowPlayingUpdate)
@@ -525,7 +525,7 @@ void NcmpcppStatusChanged(Connection *, StatusChanges changed, void *)
 	}
 	if (myScreen == myPlaylist && !Playlist::BlockRefreshing)
 		myPlaylist->Main()->Refresh();
-	wFooter->Bold(0);
+	*wFooter << fmtBoldEnd;
 	wFooter->GotoXY(sx, sy);
 	wFooter->Refresh();
 }
@@ -547,14 +547,13 @@ void ShowMessage(const char *format, ...)
 		else
 			block_progressbar_update = 1;
 		wFooter->GotoXY(0, Config.statusbar_visibility);
-		wFooter->Bold(0);
+		*wFooter << fmtBoldEnd;
 		va_list list;
 		va_start(list, format);
 		wmove(wFooter->Raw(), Config.statusbar_visibility, 0);
 		vw_printw(wFooter->Raw(), format, list);
 		wclrtoeol(wFooter->Raw());
 		va_end(list);
-		wFooter->Bold(1);
 		wFooter->Refresh();
 	}
 }

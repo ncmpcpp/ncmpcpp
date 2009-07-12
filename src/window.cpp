@@ -91,7 +91,10 @@ Window::Window(size_t startx,
 		itsBgColor(clDefault),
 		itsBaseBgColor(clDefault),
 		itsBorder(border),
-		itsHistory(0)
+		itsHistory(0),
+		itsBoldCounter(0),
+		itsReverseCounter(0),
+		itsAltCharsetCounter(0)
 {
 	if (itsStartX > size_t(COLS)
 	||  itsStartY > size_t(LINES)
@@ -756,38 +759,33 @@ Window &Window::operator<<(Color color)
 
 Window &Window::operator<<(Format format)
 {
-	static int bold_num = 0, reverse_num = 0, altcharset_num = 0;
-	
 	switch (format)
 	{
 		case fmtNone:
-			Bold((bold_num = 0));
-			Reverse((reverse_num = 0));
-			AltCharset((altcharset_num = 0));
+			Bold((itsBoldCounter = 0));
+			Reverse((itsReverseCounter = 0));
+			AltCharset((itsAltCharsetCounter = 0));
 			break;
 		case fmtBold:
-			Bold(++bold_num);
+			Bold(++itsBoldCounter);
 			break;
 		case fmtBoldEnd:
-			// FIXME: No idea why this needs to de disabled at 1 :X
-			// Probably a mistake somewhere in the code, but for now
-			// I was not able to find it
-			if (--bold_num <= 1)
-				Bold((bold_num = 0));
+			if (--itsBoldCounter <= 0)
+				Bold((itsBoldCounter = 0));
 			break;
 		case fmtReverse:
-			Reverse(++reverse_num);
+			Reverse(++itsReverseCounter);
 			break;
 		case fmtReverseEnd:
-			if (--reverse_num <= 0)
-				Reverse((reverse_num = 0));
+			if (--itsReverseCounter <= 0)
+				Reverse((itsReverseCounter = 0));
 			break;
 		case fmtAltCharset:
-			AltCharset(++altcharset_num);
+			AltCharset(++itsAltCharsetCounter);
 			break;
 		case fmtAltCharsetEnd:
-			if (--altcharset_num <= 0)
-				AltCharset((altcharset_num = 0));
+			if (--itsAltCharsetCounter <= 0)
+				AltCharset((itsAltCharsetCounter = 0));
 			break;
 	}
 	return *this;

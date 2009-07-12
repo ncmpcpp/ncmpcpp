@@ -195,6 +195,10 @@ namespace NCurses
 			
 		private:
 			std::deque<std::wstring> *itsHistory;
+			
+			int itsBoldCounter;
+			int itsReverseCounter;
+			int itsAltCharsetCounter;
 	};
 }
 
