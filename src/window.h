@@ -119,9 +119,6 @@ namespace NCurses
 			void DeleteHistory();
 			
 			void Hide(char = 32) const;
-			void Bold(bool) const;
-			void Reverse(bool) const;
-			void AltCharset(bool) const;
 			
 			void Display();
 			virtual void Refresh();
@@ -163,6 +160,10 @@ namespace NCurses
 		protected:
 			
 			class BadSize { };
+			
+			void Bold(bool) const;
+			void Reverse(bool) const;
+			void AltCharset(bool) const;
 			
 			void ShowBorder() const;
 			void AdjustDimensions(size_t &, size_t &);

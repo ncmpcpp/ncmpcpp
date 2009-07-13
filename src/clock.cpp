@@ -133,7 +133,7 @@ void Clock::Update()
 		next[k] = 0;
 		for (int s = 1; s >= 0; --s)
 		{
-			w->Reverse(s);
+			*w << (s ? fmtReverse : fmtReverseEnd);
 			for (int i = 0; i < 6; ++i)
 			{
 				long a = (newer[i] ^ older[i]) & (s ? newer : older)[i];
