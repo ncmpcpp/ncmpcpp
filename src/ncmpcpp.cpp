@@ -1162,9 +1162,11 @@ int main(int argc, char *argv[])
 			}
 			else if (myScreen == myBrowser)
 			{
-				const Song *s = myPlaylist->NowPlayingSong();
-				if (s)
+				if (const Song *s = myPlaylist->NowPlayingSong())
+				{
 					myBrowser->LocateSong(*s);
+					RedrawHeader = 1;
+				}
 			}
 		}
 		else if (Keypressed(input, Key.ToggleRepeat))
