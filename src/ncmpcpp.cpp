@@ -735,7 +735,7 @@ int main(int argc, char *argv[])
 						myPlaylist->UpdateTimer();
 						for (std::vector<size_t>::iterator it = list.begin(); it != list.end(); ++it)
 						{
-							(*it)--;
+							--*it;
 							myPlaylist->Main()->at((*it)+1).SetPosition(*it);
 							myPlaylist->Main()->at(*it).SetPosition((*it)+1);
 							myPlaylist->Main()->Swap(*it, (*it)+1);
@@ -761,7 +761,7 @@ int main(int argc, char *argv[])
 						TraceMpdStatus();
 						Playlist::BlockUpdate = 1;
 						myPlaylist->UpdateTimer();
-						to--;
+						--to;
 						myPlaylist->Main()->at(from).SetPosition(to);
 						myPlaylist->Main()->at(to).SetPosition(from);
 						myPlaylist->Main()->Swap(to, to+1);
@@ -790,7 +790,7 @@ int main(int argc, char *argv[])
 						myPlaylist->UpdateTimer();
 						for (std::vector<size_t>::iterator it = list.begin(); it != list.end(); ++it)
 						{
-							(*it)--;
+							--*it;
 							myPlaylistEditor->Content->Swap(*it, (*it)+1);
 						}
 						myPlaylistEditor->Content->Highlight(list[(list.size()-1)/2]);
@@ -811,7 +811,7 @@ int main(int argc, char *argv[])
 					{
 						TraceMpdStatus();
 						myPlaylist->UpdateTimer();
-						to--;
+						--to;
 						myPlaylistEditor->Content->Swap(to, to+1);
 						myPlaylistEditor->Content->Scroll(wUp);
 						myPlaylistEditor->Content->Refresh();
@@ -847,7 +847,7 @@ int main(int argc, char *argv[])
 						myPlaylist->UpdateTimer();
 						for (std::vector<size_t>::reverse_iterator it = list.rbegin(); it != list.rend(); ++it)
 						{
-							(*it)++;
+							++*it;
 							myPlaylist->Main()->at((*it)-1).SetPosition(*it);
 							myPlaylist->Main()->at(*it).SetPosition((*it)-1);
 							myPlaylist->Main()->Swap(*it, (*it)-1);
@@ -873,7 +873,7 @@ int main(int argc, char *argv[])
 						TraceMpdStatus();
 						Playlist::BlockUpdate = 1;
 						myPlaylist->UpdateTimer();
-						to++;
+						++to;
 						myPlaylist->Main()->at(from).SetPosition(to);
 						myPlaylist->Main()->at(to).SetPosition(from);
 						myPlaylist->Main()->Swap(to, to-1);
@@ -903,7 +903,7 @@ int main(int argc, char *argv[])
 						myPlaylist->UpdateTimer();
 						for (std::vector<size_t>::reverse_iterator it = list.rbegin(); it != list.rend(); ++it)
 						{
-							(*it)++;
+							++*it;
 							myPlaylistEditor->Content->Swap(*it, (*it)-1);
 						}
 						myPlaylistEditor->Content->Highlight(list[(list.size()-1)/2]);
@@ -924,7 +924,7 @@ int main(int argc, char *argv[])
 					{
 						TraceMpdStatus();
 						myPlaylist->UpdateTimer();
-						to++;
+						++to;
 						myPlaylistEditor->Content->Swap(to, to-1);
 						myPlaylistEditor->Content->Scroll(wDown);
 						myPlaylistEditor->Content->Refresh();
