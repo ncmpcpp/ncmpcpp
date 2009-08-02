@@ -1384,7 +1384,8 @@ int main(int argc, char *argv[])
 					ShowMessage("Playlist \"%s\" renamed to \"%s\"", old_name.c_str(), new_name.c_str());
 					if (!Config.local_browser && myBrowser->Main())
 						myBrowser->GetDirectory("/");
-					myPlaylistEditor->Playlists->Clear(0);
+					if (myPlaylistEditor->Main())
+						myPlaylistEditor->Playlists->Clear(0);
 				}
 			}
 		}
