@@ -538,7 +538,7 @@ Window &Statusbar()
 
 void ShowMessage(const char *format, ...)
 {
-	if (MessagesAllowed)
+	if (MessagesAllowed && allow_statusbar_unlock)
 	{
 		time(&time_of_statusbar_lock);
 		lock_statusbar_delay = Config.message_delay_time;
