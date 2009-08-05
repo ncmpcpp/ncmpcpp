@@ -63,6 +63,8 @@ class Lyrics : public Screen<Scrollpad>
 		
 #		ifdef HAVE_CURL_CURL_H
 		static const char *GetPluginName(int offset);
+		
+		static const unsigned DBs;
 #		endif // HAVE_CURL_CURL_H
 		
 	protected:
@@ -81,7 +83,6 @@ class Lyrics : public Screen<Scrollpad>
 #		endif // HAVE_PTHREAD_H
 		
 		static const Plugin *ChoosePlugin(int);
-		static bool LyricWiki_NotFound(const std::string &);
 		static bool LyricsPlugin_NotFound(const std::string &);
 		
 		static bool Ready;
@@ -91,7 +92,6 @@ class Lyrics : public Screen<Scrollpad>
 #		endif // HAVE_PTHREAD_H
 		
 		static const char *PluginsList[];
-		static const Plugin LyricWiki;
 		static const Plugin LyricsPlugin;
 #		endif // HAVE_CURL_CURL_H
 		

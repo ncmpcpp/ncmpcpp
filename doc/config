@@ -200,8 +200,7 @@
 ##
 ## supported lyrics databases:
 ##
-## - 1 - lyricwiki.org
-## - 2 - lyricsplugin.com
+## - 1 - lyricsplugin.com
 ##
 #
 #lyrics_database = "1"

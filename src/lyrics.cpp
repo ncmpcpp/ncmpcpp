@@ -313,14 +313,17 @@ void Lyrics::Take()
 }
 #endif // HAVE_PTHREAD_H
 
+const unsigned Lyrics::DBs = 1; // number of currently supported lyrics databases
+
+const char *Lyrics::PluginsList[] =
+{
+	"lyricsplugin.com",
+	0
+};
+
 const char *Lyrics::GetPluginName(int offset)
 {
 	return PluginsList[offset];
-}
-
-bool Lyrics::LyricWiki_NotFound(const std::string &s)
-{
-	return s == "Not found";
 }
 
 bool Lyrics::LyricsPlugin_NotFound(const std::string &s)
@@ -333,14 +336,6 @@ bool Lyrics::LyricsPlugin_NotFound(const std::string &s)
 	return true;
 }
 
-const Lyrics::Plugin Lyrics::LyricWiki =
-{
-	"http://lyricwiki.org/api.php?artist=%artist%&song=%title%&fmt=xml",
-	"<lyrics>",
-	"</lyrics>",
-	LyricWiki_NotFound
-};
-
 const Lyrics::Plugin Lyrics::LyricsPlugin =
 {
 	"http://www.lyricsplugin.com/winamp03/plugin/?artist=%artist%&title=%title%",
@@ -349,23 +344,14 @@ const Lyrics::Plugin Lyrics::LyricsPlugin =
 	LyricsPlugin_NotFound
 };
 
-const char *Lyrics::PluginsList[] =
-{
-	"lyricwiki.org",
-	"lyricsplugin.com",
-	0
-};
-
 const Lyrics::Plugin *Lyrics::ChoosePlugin(int i)
 {
 	switch (i)
 	{
 		case 0:
-			return &LyricWiki;
-		case 1:
 			return &LyricsPlugin;
 		default:
-			return &LyricWiki;
+			return &LyricsPlugin;
 	}
 }
 

@@ -26,6 +26,7 @@
 #include <fstream>
 
 #include "helpers.h"
+#include "lyrics.h"
 #include "settings.h"
 
 const std::string config_file = config_dir + "config";
@@ -702,7 +703,10 @@ void ReadConfiguration(ncmpcpp_config &conf)
 			else if (cl.find("lyrics_database") != std::string::npos)
 			{
 				if (!v.empty())
-					conf.lyrics_db = StrToInt(v)-1;
+				{
+					unsigned n = StrToInt(v)-1;
+					conf.lyrics_db = n < Lyrics::DBs ? n : 0;
+				}
 			}
 			else if (cl.find("song_window_title_format") != std::string::npos)
 			{
