@@ -131,8 +131,8 @@ void Help::GetKeybindings()
 	*w << DisplayKeys(Key.PageUp)			<< "Page up\n";
 	*w << DisplayKeys(Key.PageDown)			<< "Page down\n";
 	*w << DisplayKeys(Key.Home)			<< "Home\n";
-	*w << DisplayKeys(Key.End)			<< "End\n\n";
-	
+	*w << DisplayKeys(Key.End)			<< "End\n";
+	*w << "\n";
 	*w << DisplayKeys(Key.ScreenSwitcher)		<< "Switch between playlist and browser\n";
 	*w << DisplayKeys(Key.Help)			<< "Help screen\n";
 	*w << DisplayKeys(Key.Playlist)			<< "Playlist screen\n";
@@ -149,10 +149,9 @@ void Help::GetKeybindings()
 #	ifdef ENABLE_CLOCK
 	*w << DisplayKeys(Key.Clock)			<< "Clock screen\n";
 #	endif // ENABLE_CLOCK
-	*w << "\n\n";
 	
 	
-	*w << "   " << fmtBold << "Keys - Global\n -----------------------------------------\n" << fmtBoldEnd;
+	*w << "\n\n   " << fmtBold << "Keys - Global\n -----------------------------------------\n" << fmtBoldEnd;
 	*w << DisplayKeys(Key.Stop)			<< "Stop\n";
 	*w << DisplayKeys(Key.Pause)			<< "Pause\n";
 	*w << DisplayKeys(Key.Next)			<< "Next track\n";
@@ -160,15 +159,15 @@ void Help::GetKeybindings()
 	*w << DisplayKeys(Key.SeekForward)		<< "Seek forward\n";
 	*w << DisplayKeys(Key.SeekBackward)		<< "Seek backward\n";
 	*w << DisplayKeys(Key.VolumeDown)		<< "Decrease volume\n";
-	*w << DisplayKeys(Key.VolumeUp)			<< "Increase volume\n\n";
-	
+	*w << DisplayKeys(Key.VolumeUp)			<< "Increase volume\n";
+	*w << "\n";
 	*w << DisplayKeys(Key.ToggleSpaceMode)		<< "Toggle space mode (select/add)\n";
 	*w << DisplayKeys(Key.ToggleAddMode)		<< "Toggle add mode\n";
 	*w << DisplayKeys(Key.ToggleMouse)		<< "Toggle mouse support\n";
 	*w << DisplayKeys(Key.ReverseSelection)		<< "Reverse selection\n";
 	*w << DisplayKeys(Key.DeselectAll)		<< "Deselect all items\n";
-	*w << DisplayKeys(Key.AddSelected)		<< "Add selected items to playlist/m3u file\n\n";
-	
+	*w << DisplayKeys(Key.AddSelected)		<< "Add selected items to playlist/m3u file\n";
+	*w << "\n";
 	*w << DisplayKeys(Key.ToggleRepeat)		<< "Toggle repeat mode\n";
 	*w << DisplayKeys(Key.ToggleRandom)		<< "Toggle random mode\n";
 	*w << DisplayKeys(Key.ToggleSingle)		<< "Toggle single mode\n";
@@ -176,8 +175,8 @@ void Help::GetKeybindings()
 	*w << DisplayKeys(Key.Shuffle)			<< "Shuffle playlist\n";
 	*w << DisplayKeys(Key.ToggleCrossfade)		<< "Toggle crossfade mode\n";
 	*w << DisplayKeys(Key.SetCrossfade)		<< "Set crossfade\n";
-	*w << DisplayKeys(Key.UpdateDB)			<< "Start a music database update\n\n";
-	
+	*w << DisplayKeys(Key.UpdateDB)			<< "Start a music database update\n";
+	*w << "\n";
 	*w << DisplayKeys(Key.ApplyFilter)		<< "Apply filter\n";
 	*w << DisplayKeys(Key.FindForward)		<< "Forward find\n";
 	*w << DisplayKeys(Key.FindBackward)		<< "Backward find\n";
@@ -192,12 +191,12 @@ void Help::GetKeybindings()
 	*w << DisplayKeys(Key.ArtistInfo)		<< "Show artist's info\n";
 	*w << DisplayKeys(Key.ToggleLyricsDB)		<< "Toggle lyrics database\n";
 #	endif // HAVE_CURL_CURL_H
-	*w << DisplayKeys(Key.Lyrics)			<< "Show/hide song's lyrics\n\n";
+	*w << DisplayKeys(Key.Lyrics)			<< "Show/hide song's lyrics\n";
+	*w << "\n";
+	*w << DisplayKeys(Key.Quit)			<< "Quit\n";
 	
-	*w << DisplayKeys(Key.Quit)			<< "Quit\n\n\n";
 	
-	
-	*w << "   " << fmtBold << "Keys - Playlist screen\n -----------------------------------------\n" << fmtBoldEnd;
+	*w << "\n\n   " << fmtBold << "Keys - Playlist\n -----------------------------------------\n" << fmtBoldEnd;
 	*w << DisplayKeys(Key.Enter)			<< "Play\n";
 	*w << DisplayKeys(Key.SwitchTagTypeList)	<< "Add random songs to playlist\n";
 	*w << DisplayKeys(Key.Delete)			<< "Delete item/selected items from playlist\n";
@@ -213,10 +212,10 @@ void Help::GetKeybindings()
 	*w << DisplayKeys(Key.SavePlaylist)		<< "Save playlist\n";
 	*w << DisplayKeys(Key.SortPlaylist)		<< "Sort/reverse playlist\n";
 	*w << DisplayKeys(Key.GoToNowPlaying)		<< "Go to currently playing position\n";
-	*w << DisplayKeys(Key.ToggleAutoCenter)		<< "Toggle auto center mode\n\n\n";
+	*w << DisplayKeys(Key.ToggleAutoCenter)		<< "Toggle auto center mode\n";
 	
 	
-	*w << "   " << fmtBold << "Keys - Browse screen\n -----------------------------------------\n" << fmtBoldEnd;
+	*w << "\n\n   " << fmtBold << "Keys - Browser\n -----------------------------------------\n" << fmtBoldEnd;
 	*w << DisplayKeys(Key.Enter)			<< "Enter directory/Add item to playlist and play\n";
 	*w << DisplayKeys(Key.Space)			<< "Add item to playlist\n";
 #	ifdef HAVE_TAGLIB_H
@@ -228,19 +227,19 @@ void Help::GetKeybindings()
 		*w << DisplayKeys(Key.SwitchTagTypeList)<< "Browse MPD database/local filesystem\n";
 	*w << DisplayKeys(Key.GoToNowPlaying)		<< "Locate currently playing song\n";
 	*w << DisplayKeys(Key.GoToParentDir)		<< "Go to parent directory\n";
-	*w << DisplayKeys(Key.Delete)			<< "Delete playlist/file/directory\n\n\n";
+	*w << DisplayKeys(Key.Delete)			<< "Delete playlist/file/directory\n";
 	
 	
-	*w << "   " << fmtBold << "Keys - Search engine\n -----------------------------------------\n" << fmtBoldEnd;
+	*w << "\n\n   " << fmtBold << "Keys - Search engine\n -----------------------------------------\n" << fmtBoldEnd;
 	*w << DisplayKeys(Key.Enter)			<< "Add item to playlist and play/change option\n";
 	*w << DisplayKeys(Key.Space)			<< "Add item to playlist\n";
 #	ifdef HAVE_TAGLIB_H
 	*w << DisplayKeys(Key.EditTags)			<< "Edit song's tags\n";
 #	endif // HAVE_TAGLIB_H
-	*w << DisplayKeys(Key.ToggleSingle)		<< "Start searching immediately\n\n\n";
+	*w << DisplayKeys(Key.ToggleSingle)		<< "Start searching immediately\n";
 	
 	
-	*w << "   " << fmtBold << "Keys - Media library\n -----------------------------------------\n" << fmtBoldEnd;
+	*w << "\n\n   " << fmtBold << "Keys - Media library\n -----------------------------------------\n" << fmtBoldEnd;
 	*w << DisplayKeys(Key.MediaLibrary)		<< "Switch between two/three columns\n";
 	*w << DisplayKeys(&Key.VolumeDown[0], 1)	<< "Previous column\n";
 	*w << DisplayKeys(&Key.VolumeUp[0], 1)		<< "Next column\n";
@@ -249,10 +248,10 @@ void Help::GetKeybindings()
 #	ifdef HAVE_TAGLIB_H
 	*w << DisplayKeys(Key.EditTags)			<< "Edit main tag/album/song's tags\n";
 #	endif // HAVE_TAGLIB_H
-	*w << DisplayKeys(Key.SwitchTagTypeList)	<< "Tag type list switcher (left column)\n\n\n";
+	*w << DisplayKeys(Key.SwitchTagTypeList)	<< "Tag type list switcher (left column)\n";
 	
 	
-	*w << "   " << fmtBold << "Keys - Playlist Editor\n -----------------------------------------\n" << fmtBoldEnd;
+	*w << "\n\n   " << fmtBold << "Keys - Playlist Editor\n -----------------------------------------\n" << fmtBoldEnd;
 	*w << DisplayKeys(&Key.VolumeDown[0], 1)	<< "Previous column\n";
 	*w << DisplayKeys(&Key.VolumeUp[0], 1)		<< "Next column\n";
 	*w << DisplayKeys(Key.Enter)			<< "Add item to playlist and play\n";
@@ -291,6 +290,80 @@ void Help::GetKeybindings()
 #	ifdef ENABLE_OUTPUTS
 	*w << "\n\n   " << fmtBold << "Keys - Outputs\n -----------------------------------------\n" << fmtBoldEnd;
 	*w << DisplayKeys(Key.Enter)			<< "Enable/disable output\n";
+#	endif // ENABLE_OUTPUTS
+	
+	
+	*w << "\n\n   " << fmtBold << "Mouse - Global\n -----------------------------------------\n" << fmtBoldEnd;
+	*w << "\tLeft click on \"Playing/Paused\"	"	<< ": Play/pause\n";
+	*w << "\tLeft click on progressbar	"		<< ": Go to chosen position in played track\n";
+	*w << "\n";
+	*w << "\tMouse wheel on \"Volume: xx\"	"		<< ": Change volume\n";
+	*w << "\tMouse wheel on main window	"		<< ": Scroll\n";
+	
+	
+	*w << "\n\n   " << fmtBold << "Mouse - Playlist\n -----------------------------------------\n" << fmtBoldEnd;
+	*w << "\tLeft click			"		<< ": Highlight\n";
+	*w << "\tRight click			"		<< ": Play\n";
+	
+	
+	*w << "\n\n   " << fmtBold << "Mouse - Browser\n -----------------------------------------\n" << fmtBoldEnd;
+	*w << "\tLeft click on directory		"	<< ": Enter directory\n";
+	*w << "\tRight click on directory	"		<< ": Add to playlist\n";
+	*w << "\n";
+	*w << "\tLeft click on song/playlist	"		<< ": Add to playlist\n";
+	*w << "\tRight click on song/playlist	"		<< ": Add to playlist and play\n";
+	
+	
+	*w << "\n\n   " << fmtBold << "Mouse - Search engine\n -----------------------------------------\n" << fmtBoldEnd;
+	*w << "\tLeft click			"		<< ": Highlight/switch value\n";
+	*w << "\tRight click			"		<< ": Change value\n";
+	
+	
+	*w << "\n\n   " << fmtBold << "Mouse - Media library\n -----------------------------------------\n" << fmtBoldEnd;
+	*w << fmtBold << "\tLeft/middle column:\n" << fmtBoldEnd;
+	*w << "\t\tLeft Click		"			<< ": Highlight\n";
+	*w << "\t\tRight Click		"			<< ": Add to playlist\n";
+	*w << "\n";
+	*w << fmtBold << "\tRight column:\n" << fmtBoldEnd;
+	*w << "\t\tLeft Click		"			<< ": Add to playlist\n";
+	*w << "\t\tRight Click		"			<< ": Add to playlist and play\n";
+	
+	
+	*w << "\n\n   " << fmtBold << "Mouse - Playlist editor\n -----------------------------------------\n" << fmtBoldEnd;
+	*w << fmtBold << "\tLeft column:\n" << fmtBoldEnd;
+	*w << "\t\tLeft Click		"			<< ": Highlight\n";
+	*w << "\t\tRight Click		"			<< ": Add to playlist\n";
+	*w << "\n";
+	*w << fmtBold << "\tRight column:\n" << fmtBoldEnd;
+	*w << "\t\tLeft Click		"			<< ": Add to playlist\n";
+	*w << "\t\tRight Click		"			<< ": Add to playlist and play\n";
+	
+	
+#	ifdef HAVE_TAGLIB_H
+	*w << "\n\n   " << fmtBold << "Mouse - Tiny tag editor\n -----------------------------------------\n" << fmtBoldEnd;
+	*w << "\tLeft click			"		<< ": Highlight\n";
+	*w << "\tRight click			"		<< ": Change value/execute command\n";
+	
+	
+	*w << "\n\n   " << fmtBold << "Mouse - Tag editor\n -----------------------------------------\n" << fmtBoldEnd;
+	*w << fmtBold << "\tLeft column:\n" << fmtBoldEnd;
+	*w << "\t\tLeft Click		"			<< ": Enter directory/highlight album\n";
+	*w << "\t\tRight Click		"			<< ": Switch to directories/albums view\n";
+	*w << "\n";
+	*w << fmtBold << "\tMiddle column:\n" << fmtBoldEnd;
+	*w << "\t\tLeft Click		"			<< ": Highlight\n";
+	*w << "\t\tRight Click		"			<< ": Change value/execute command\n";
+	*w << "\n";
+	*w << fmtBold << "\tRight column:\n" << fmtBoldEnd;
+	*w << "\t\tLeft Click		"			<< ": Highlight\n";
+	*w << "\t\tRight Click		"			<< ": Change value\n";
+#	endif // HAVE_TAGLIB_H
+	
+	
+#	ifdef ENABLE_OUTPUTS
+	*w << "\n\n   " << fmtBold << "Mouse - Outputs\n -----------------------------------------\n" << fmtBoldEnd;
+	*w << "\tLeft click			"		<< ": Highlight\n";
+	*w << "\tRight click			"		<< ": Enable/disable output\n";
 #	endif // ENABLE_OUTPUTS
 }
 

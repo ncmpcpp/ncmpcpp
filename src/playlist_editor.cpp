@@ -290,11 +290,16 @@ void PlaylistEditor::MouseButtonPressed(MEVENT me)
 	{
 		if (w != Playlists)
 			PrevColumn();
-		if (size_t(me.y) < Playlists->Size() && (me.bstate & BUTTON1_PRESSED || me.bstate & BUTTON3_PRESSED))
+		if (size_t(me.y) < Playlists->Size() && (me.bstate & (BUTTON1_PRESSED | BUTTON3_PRESSED)))
 		{
 			Playlists->Goto(me.y);
 			if (me.bstate & BUTTON3_PRESSED)
-				EnterPressed();
+			{
+				size_t pos = Playlists->Choice();
+				SpacePressed();
+				if (pos < Playlists->Size()-1)
+					Playlists->Scroll(wUp);
+			}
 		}
 		else
 			Screen<Window>::MouseButtonPressed(me);
@@ -304,7 +309,7 @@ void PlaylistEditor::MouseButtonPressed(MEVENT me)
 	{
 		if (w != Content)
 			NextColumn();
-		if (size_t(me.y) < Content->Size() && (me.bstate & BUTTON1_PRESSED || me.bstate & BUTTON3_PRESSED))
+		if (size_t(me.y) < Content->Size() && (me.bstate & (BUTTON1_PRESSED | BUTTON3_PRESSED)))
 		{
 			Content->Goto(me.y);
 			if (me.bstate & BUTTON1_PRESSED)

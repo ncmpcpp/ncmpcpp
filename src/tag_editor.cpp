@@ -221,12 +221,15 @@ void TinyTagEditor::MouseButtonPressed(MEVENT me)
 {
 	if (w->Empty() || !w->hasCoords(me.x, me.y) || size_t(me.y) >= w->Size())
 		return;
-	if (me.bstate & BUTTON1_PRESSED)
+	if (me.bstate & (BUTTON1_PRESSED | BUTTON3_PRESSED))
 	{
 		if (!w->Goto(me.y))
 			return;
-		w->Refresh();
-		EnterPressed();
+		if (me.bstate & BUTTON3_PRESSED)
+		{
+			w->Refresh();
+			EnterPressed();
+		}
 	}
 	else
 		Screen< Menu<Buffer> >::MouseButtonPressed(me);
@@ -760,7 +763,7 @@ void TagEditor::MouseButtonPressed(MEVENT me)
 			PrevColumn();
 			PrevColumn();
 		}
-		if (size_t(me.y) < LeftColumn->Size() && (me.bstate & BUTTON1_PRESSED || me.bstate & BUTTON3_PRESSED))
+		if (size_t(me.y) < LeftColumn->Size() && (me.bstate & (BUTTON1_PRESSED | BUTTON3_PRESSED)))
 		{
 			LeftColumn->Goto(me.y);
 			if (me.bstate & BUTTON1_PRESSED)
@@ -776,7 +779,7 @@ void TagEditor::MouseButtonPressed(MEVENT me)
 	{
 		if (w != TagTypes)
 			w == LeftColumn ? NextColumn() : PrevColumn();
-		if (size_t(me.y) < TagTypes->Size() && (me.bstate & BUTTON1_PRESSED || me.bstate & BUTTON3_PRESSED))
+		if (size_t(me.y) < TagTypes->Size() && (me.bstate & (BUTTON1_PRESSED | BUTTON3_PRESSED)))
 		{
 			if (!TagTypes->Goto(me.y))
 				return;
@@ -795,7 +798,7 @@ void TagEditor::MouseButtonPressed(MEVENT me)
 			NextColumn();
 			NextColumn();
 		}
-		if (size_t(me.y) < Tags->Size() && (me.bstate & BUTTON1_PRESSED || me.bstate & BUTTON3_PRESSED))
+		if (size_t(me.y) < Tags->Size() && (me.bstate & (BUTTON1_PRESSED | BUTTON3_PRESSED)))
 		{
 			Tags->Goto(me.y);
 			Tags->Refresh();

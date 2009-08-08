@@ -302,7 +302,7 @@ void SearchEngine::MouseButtonPressed(MEVENT me)
 {
 	if (w->Empty() || !w->hasCoords(me.x, me.y) || size_t(me.y) >= w->Size())
 		return;
-	if (me.bstate & BUTTON1_PRESSED || me.bstate & BUTTON3_PRESSED)
+	if (me.bstate & (BUTTON1_PRESSED | BUTTON3_PRESSED))
 	{
 		if (!w->Goto(me.y))
 			return;

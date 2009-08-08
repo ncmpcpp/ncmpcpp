@@ -339,11 +339,16 @@ void MediaLibrary::MouseButtonPressed(MEVENT me)
 			PrevColumn();
 			PrevColumn();
 		}
-		if (size_t(me.y) < Artists->Size() && (me.bstate & BUTTON1_PRESSED || me.bstate & BUTTON3_PRESSED))
+		if (size_t(me.y) < Artists->Size() && (me.bstate & (BUTTON1_PRESSED | BUTTON3_PRESSED)))
 		{
 			Artists->Goto(me.y);
 			if (me.bstate & BUTTON3_PRESSED)
-				EnterPressed();
+			{
+				size_t pos = Artists->Choice();
+				SpacePressed();
+				if (pos < Artists->Size()-1)
+					Artists->Scroll(wUp);
+			}
 		}
 		else
 			Screen<Window>::MouseButtonPressed(me);
@@ -354,11 +359,16 @@ void MediaLibrary::MouseButtonPressed(MEVENT me)
 	{
 		if (w != Albums)
 			w == Artists ? NextColumn() : PrevColumn();
-		if (size_t(me.y) < Albums->Size() && (me.bstate & BUTTON1_PRESSED || me.bstate & BUTTON3_PRESSED))
+		if (size_t(me.y) < Albums->Size() && (me.bstate & (BUTTON1_PRESSED | BUTTON3_PRESSED)))
 		{
 			Albums->Goto(me.y);
 			if (me.bstate & BUTTON3_PRESSED)
-				EnterPressed();
+			{
+				size_t pos = Albums->Choice();
+				SpacePressed();
+				if (pos < Albums->Size()-1)
+					Albums->Scroll(wUp);
+			}
 		}
 		else
 			Screen<Window>::MouseButtonPressed(me);
@@ -371,7 +381,7 @@ void MediaLibrary::MouseButtonPressed(MEVENT me)
 			NextColumn();
 			NextColumn();
 		}
-		if (size_t(me.y) < Songs->Size() && (me.bstate & BUTTON1_PRESSED || me.bstate & BUTTON3_PRESSED))
+		if (size_t(me.y) < Songs->Size() && (me.bstate & (BUTTON1_PRESSED | BUTTON3_PRESSED)))
 		{
 			Songs->Goto(me.y);
 			if (me.bstate & BUTTON1_PRESSED)
