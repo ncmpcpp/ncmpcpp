@@ -293,6 +293,7 @@ void DefaultConfiguration(ncmpcpp_config &conf)
 	conf.message_delay_time = 4;
 	conf.lyrics_db = 0;
 	conf.regex_type = 0;
+	conf.lines_scrolled = 2;
 }
 
 void ReadKeys(ncmpcpp_keys &keys)
@@ -707,6 +708,11 @@ void ReadConfiguration(ncmpcpp_config &conf)
 					unsigned n = StrToInt(v)-1;
 					conf.lyrics_db = n < Lyrics::DBs ? n : 0;
 				}
+			}
+			else if (cl.find("lines_scrolled") != std::string::npos)
+			{
+				if (!v.empty())
+					conf.lines_scrolled = StrToInt(v);
 			}
 			else if (cl.find("song_window_title_format") != std::string::npos)
 			{

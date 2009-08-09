@@ -196,6 +196,8 @@ struct ncmpcpp_config
 	int message_delay_time;
 	int lyrics_db;
 	int regex_type;
+	
+	unsigned lines_scrolled;
 };
 
 extern ncmpcpp_config Config;
