@@ -482,101 +482,26 @@ void MediaLibrary::AddToPlaylist(bool add_n_play)
 		Mpd.StartSearch(1);
 		Mpd.AddSearch(Config.media_lib_primary_tag, locale_to_utf_cpy(Artists->Current()));
 		Mpd.CommitSearch(list);
-		Mpd.StartCommandsList();
-		SongList::const_iterator it = list.begin();
-		for (; it != list.end(); ++it)
-			if (Mpd.AddSong(**it) < 0)
-				break;
-		Mpd.CommitCommandsList();
 		
-		if (it != list.begin())
+		if (myPlaylist->Add(list, add_n_play))
 		{
 			std::string tag_type = IntoStr(Config.media_lib_primary_tag);
 			ToLower(tag_type);
 			ShowMessage("Adding songs of %s \"%s\"", tag_type.c_str(), Artists->Current().c_str());
-			Song *s = &myPlaylist->Main()->at(myPlaylist->Main()->Size()-list.size());
-			if (s->GetHash() == list[0]->GetHash())
-			{
-				if (add_n_play)
-					Mpd.PlayID(s->GetID());
-			}
-			else
-				ShowMessage("%s", MPD::Message::PartOfSongsAdded);
 		}
 	}
 	else if (w == Albums)
 	{
-		Mpd.StartCommandsList();
-		size_t i = 0;
-		for (; i < Songs->Size(); ++i)
-			if (Mpd.AddSong(Songs->at(i)) < 0)
-				break;
-		Mpd.CommitCommandsList();
+		MPD::SongList l;
+		l.reserve(Songs->Size());
+		for (size_t i = 0; i < Songs->Size(); ++i)
+			l.push_back(&(*Songs)[i]);
 		
-		if (i)
-		{
+		if (myPlaylist->Add(l, add_n_play))
 			ShowMessage("Adding songs from album \"%s\"", Albums->Current().second.Album.c_str());
-			Song *s = &myPlaylist->Main()->at(myPlaylist->Main()->Size()-Songs->Size());
-			if (s->GetHash() == Songs->at(0).GetHash())
-			{
-				if (add_n_play)
-					Mpd.PlayID(s->GetID());
-			}
-			else
-				ShowMessage("%s", MPD::Message::PartOfSongsAdded);
-		}
 	}
-	else if (w == Songs)
-	{
-		if (!Songs->Empty())
-		{
-			BlockItemListUpdate = 1;
-			if (Config.ncmpc_like_songs_adding && Songs->isBold())
-			{
-				unsigned hash = Songs->Current().GetHash();
-				if (add_n_play)
-				{
-					for (size_t i = 0; i < myPlaylist->Main()->Size(); ++i)
-					{
-						if (myPlaylist->Main()->at(i).GetHash() == hash)
-						{
-							Mpd.Play(i);
-							break;
-						}
-					}
-				}
-				else
-				{
-					Playlist::BlockUpdate = 1;
-					Mpd.StartCommandsList();
-					for (size_t i = 0; i < myPlaylist->Main()->Size(); ++i)
-					{
-						if (myPlaylist->Main()->at(i).GetHash() == hash)
-						{
-							Mpd.Delete(i);
-							myPlaylist->Main()->DeleteOption(i);
-							i--;
-						}
-					}
-					Mpd.CommitCommandsList();
-					Songs->BoldOption(Songs->Choice(), 0);
-					Playlist::BlockUpdate = 0;
-				}
-			}
-			else
-			{
-				Song &s = Songs->Current();
-				int id = Mpd.AddSong(s);
-				if (id >= 0)
-				{
-					ShowMessage("Added to playlist: %s", s.toString(Config.song_status_format).c_str());
-					if (add_n_play)
-						Mpd.PlayID(id);
-					Songs->BoldOption(Songs->Choice(), 1);
-				}
-			}
-		}
-	}
+	else if (w == Songs && !Songs->Empty())
+		Songs->BoldOption(Songs->Choice(), myPlaylist->Add(Songs->Current(), Songs->isBold(), add_n_play));
 	FreeSongList(list);
 	if (!add_n_play)
 	{

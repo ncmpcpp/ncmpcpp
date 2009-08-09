@@ -467,3 +467,81 @@ std::string Playlist::SongInColumnsToString(const MPD::Song &s, void *)
 	return s.toString(result);
 }
 
+bool Playlist::Add(const MPD::Song &s, bool in_playlist, bool play)
+{
+	BlockItemListUpdate = 1;
+	if (Config.ncmpc_like_songs_adding && in_playlist)
+	{
+		unsigned hash = s.GetHash();
+		if (play)
+		{
+			for (size_t i = 0; i < w->Size(); ++i)
+			{
+				if (w->at(i).GetHash() == hash)
+				{
+					Mpd.Play(i);
+					break;
+				}
+			}
+			return true;
+		}
+		else
+		{
+			Playlist::BlockUpdate = 1;
+			Mpd.StartCommandsList();
+			for (size_t i = 0; i < w->Size(); ++i)
+			{
+				if ((*w)[i].GetHash() == hash)
+				{
+					Mpd.Delete(i);
+					w->DeleteOption(i);
+					i--;
+				}
+			}
+			Mpd.CommitCommandsList();
+			Playlist::BlockUpdate = 0;
+			return false;
+		}
+	}
+	else
+	{
+		int id = Mpd.AddSong(s);
+		if (id >= 0)
+		{
+			ShowMessage("Added to playlist: %s", s.toString(Config.song_status_format).c_str());
+			if (play)
+				Mpd.PlayID(id);
+			return true;
+		}
+		else
+			return false;
+	}
+}
+
+bool Playlist::Add(const MPD::SongList &l, bool play)
+{
+	if (l.empty())
+		return false;
+	
+	size_t old_playlist_size = w->Size();
+	
+	Mpd.StartCommandsList();
+	MPD::SongList::const_iterator it = l.begin();
+	for (; it != l.end(); ++it)
+		if (Mpd.AddSong(**it) < 0)
+			break;
+	Mpd.CommitCommandsList();
+	
+	if (play && old_playlist_size < w->Size())
+		Mpd.Play(old_playlist_size);
+	
+	if (w->Back().GetHash() != l.back()->GetHash())
+	{
+		if (it != l.begin())
+			ShowMessage("%s", MPD::Message::PartOfSongsAdded);
+		return false;
+	}
+	else
+		return true;
+}
+

@@ -225,30 +225,7 @@ void SearchEngine::EnterPressed()
 		}
 		default:
 		{
-			BlockItemListUpdate = 1;
-			if (Config.ncmpc_like_songs_adding && w->isBold())
-			{
-				unsigned hash = w->Current().second->GetHash();
-				for (size_t i = 0; i < myPlaylist->Main()->Size(); ++i)
-				{
-					if (myPlaylist->Main()->at(i).GetHash() == hash)
-					{
-						Mpd.Play(i);
-						break;
-					}
-				}
-			}
-			else
-			{
-				const Song &s = *w->Current().second;
-				int id = Mpd.AddSong(s);
-				if (id >= 0)
-				{
-					Mpd.PlayID(id);
-					ShowMessage("Added to playlist: %s", s.toString(Config.song_status_format).c_str());
-					w->BoldOption(w->Choice(), 1);
-				}
-			}
+			w->BoldOption(w->Choice(), myPlaylist->Add(*w->Current().second, w->isBold(), 1));
 			break;
 		}
 	}
@@ -268,34 +245,7 @@ void SearchEngine::SpacePressed()
 		return;
 	}
 	
-	BlockItemListUpdate = 1;
-	if (Config.ncmpc_like_songs_adding && w->isBold())
-	{
-		Playlist::BlockUpdate = 1;
-		unsigned hash = w->Current().second->GetHash();
-		Mpd.StartCommandsList();
-		for (size_t i = 0; i < myPlaylist->Main()->Size(); ++i)
-		{
-			if (myPlaylist->Main()->at(i).GetHash() == hash)
-			{
-				Mpd.Delete(i);
-				myPlaylist->Main()->DeleteOption(i);
-				i--;
-			}
-		}
-		Mpd.CommitCommandsList();
-		w->BoldOption(w->Choice(), 0);
-		Playlist::BlockUpdate = 0;
-	}
-	else
-	{
-		const Song &s = *w->Current().second;
-		if (Mpd.AddSong(s) != -1)
-		{
-			ShowMessage("Added to playlist: %s", s.toString(Config.song_status_format).c_str());
-			w->BoldOption(w->Choice(), 1);
-		}
-	}
+	w->BoldOption(w->Choice(), myPlaylist->Add(*w->Current().second, w->isBold(), 0));
 	w->Scroll(wDown);
 }
 

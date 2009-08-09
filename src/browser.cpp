@@ -107,53 +107,15 @@ void Browser::EnterPressed()
 		}
 		case itSong:
 		{
-			BlockItemListUpdate = 1;
-			if (Config.ncmpc_like_songs_adding && w->isBold())
-			{
-				bool found = 0;
-				unsigned hash = w->Current().song->GetHash();
-				for (size_t i = 0; i < myPlaylist->Main()->Size(); ++i)
-				{
-					if (myPlaylist->Main()->at(i).GetHash() == hash)
-					{
-						Mpd.Play(i);
-						found = 1;
-						break;
-					}
-				}
-				if (found)
-					break;
-			}
-			Song &s = *item.song;
-			int id = Mpd.AddSong(s);
-			if (id >= 0)
-			{
-				Mpd.PlayID(id);
-				ShowMessage("Added to playlist: %s", s.toString(Config.song_status_format).c_str());
-				w->BoldOption(w->Choice(), 1);
-			}
+			w->BoldOption(w->Choice(), myPlaylist->Add(*item.song, w->isBold(), 1));
 			break;
 		}
 		case itPlaylist:
 		{
 			SongList list;
 			Mpd.GetPlaylistContent(locale_to_utf_cpy(item.name), list);
-			Mpd.StartCommandsList();
-			SongList::const_iterator it = list.begin();
-			for (; it != list.end(); ++it)
-				if (Mpd.AddSong(**it) < 0)
-					break;
-			Mpd.CommitCommandsList();
-			
-			if (it != list.begin())
-			{
+			if (myPlaylist->Add(list, 1))
 				ShowMessage("Loading and playing playlist %s...", item.name.c_str());
-				Song *s = &myPlaylist->Main()->at(myPlaylist->Main()->Size()-list.size());
-				if (s->GetHash() == list[0]->GetHash())
-					Mpd.PlayID(s->GetID());
-				else
-					ShowMessage("%s", MPD::Message::PartOfSongsAdded);
-			}
 			FreeSongList(list);
 			break;
 		}
@@ -180,95 +142,36 @@ void Browser::SpacePressed()
 			if (itsBrowsedDir != "/" && !w->Choice())
 				break; // do not let add parent dir.
 			
-			bool everything_was_added = 1;
+			SongList list;
 			if (Config.local_browser)
 			{
-				ItemList list;
-				
+				ItemList items;
 				ShowMessage("Scanning \"%s\"...", item.name.c_str());
-				myBrowser->GetLocalDirectory(list, item.name, 1);
-				
-				Mpd.StartCommandsList();
-				for (ItemList::const_iterator it = list.begin(); it != list.end(); ++it)
-				{
-					if (everything_was_added && Mpd.AddSong(*it->song) < 0)
-						everything_was_added = 0;
-					delete it->song;
-				}
-				Mpd.CommitCommandsList();
+				myBrowser->GetLocalDirectory(items, item.name, 1);
+				list.reserve(items.size());
+				for (MPD::ItemList::const_iterator it = items.begin(); it != items.end(); ++it)
+					list.push_back(it->song);
 			}
 			else
-			{
-				SongList list;
 				Mpd.GetDirectoryRecursive(locale_to_utf_cpy(item.name), list);
-				Mpd.StartCommandsList();
-				for (SongList::const_iterator it = list.begin(); it != list.end(); ++it)
-				{
-					if (Mpd.AddSong(**it) < 0)
-					{
-						everything_was_added = 0;
-						break;
-					}
-				}
-				Mpd.CommitCommandsList();
-				FreeSongList(list);
-			}
 			
-			if (everything_was_added)
+			if (myPlaylist->Add(list, 0))
 				ShowMessage("Added folder: %s", item.name.c_str());
 			
+			FreeSongList(list);
 			break;
 		}
 		case itSong:
 		{
-			BlockItemListUpdate = 1;
-			if (Config.ncmpc_like_songs_adding && w->isBold())
-			{
-				Playlist::BlockUpdate = 1;
-				unsigned hash = w->Current().song->GetHash();
-				Mpd.StartCommandsList();
-				for (size_t i = 0; i < myPlaylist->Main()->Size(); ++i)
-				{
-					if (myPlaylist->Main()->at(i).GetHash() == hash)
-					{
-						Mpd.Delete(i);
-						myPlaylist->Main()->DeleteOption(i);
-						i--;
-					}
-				}
-				Mpd.CommitCommandsList();
-				w->BoldOption(w->Choice(), 0);
-				Playlist::BlockUpdate = 0;
-			}
-			else
-			{
-				Song &s = *item.song;
-				if (Mpd.AddSong(s) != -1)
-				{
-					ShowMessage("Added to playlist: %s", s.toString(Config.song_status_format).c_str());
-					w->BoldOption(w->Choice(), 1);
-				}
-			}
+			w->BoldOption(w->Choice(), myPlaylist->Add(*item.song, w->isBold(), 0));
 			break;
 		}
 		case itPlaylist:
 		{
 			SongList list;
 			Mpd.GetPlaylistContent(locale_to_utf_cpy(item.name), list);
-			Mpd.StartCommandsList();
-			SongList::const_iterator it = list.begin();
-			for (; it != list.end(); ++it)
-				if (Mpd.AddSong(**it) < 0)
-					break;
-			Mpd.CommitCommandsList();
-			
-			if (it != list.begin())
-			{
+			if (myPlaylist->Add(list, 0))
 				ShowMessage("Loading playlist %s...", item.name.c_str());
-				Song &s = myPlaylist->Main()->at(myPlaylist->Main()->Size()-list.size());
-				if (s.GetHash() != list[0]->GetHash())
-					ShowMessage("%s", MPD::Message::PartOfSongsAdded);
-			}
 			FreeSongList(list);
 			break;
 		}

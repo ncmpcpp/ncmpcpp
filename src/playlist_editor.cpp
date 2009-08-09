@@ -197,77 +197,12 @@ void PlaylistEditor::AddToPlaylist(bool add_n_play)
 	if (w == Playlists && !Playlists->Empty())
 	{
 		Mpd.GetPlaylistContent(locale_to_utf_cpy(Playlists->Current()), list);
-		Mpd.StartCommandsList();
-		SongList::const_iterator it = list.begin();
-		for (; it != list.end(); ++it)
-			if (Mpd.AddSong(**it) < 0)
-				break;
-		Mpd.CommitCommandsList();
-		
-		if (it != list.begin())
-		{
+		if (myPlaylist->Add(list, add_n_play))
 			ShowMessage("Loading playlist %s...", Playlists->Current().c_str());
-			Song &s = myPlaylist->Main()->at(myPlaylist->Main()->Size()-list.size());
-			if (s.GetHash() == list[0]->GetHash())
-			{
-				if (add_n_play)
-					Mpd.PlayID(s.GetID());
-			}
-			else
-				ShowMessage("%s", MPD::Message::PartOfSongsAdded);
-		}
 	}
-	else if (w == Content)
-	{
-		if (!Content->Empty())
-		{
-			BlockItemListUpdate = 1;
-			if (Config.ncmpc_like_songs_adding && Content->isBold())
-			{
-				unsigned hash = Content->Current().GetHash();
-				if (add_n_play)
-				{
-					for (size_t i = 0; i < myPlaylist->Main()->Size(); ++i)
-					{
-						if (myPlaylist->Main()->at(i).GetHash() == hash)
-						{
-							Mpd.Play(i);
-							break;
-						}
-					}
-				}
-				else
-				{
-					Playlist::BlockUpdate = 1;
-					Mpd.StartCommandsList();
-					for (size_t i = 0; i < myPlaylist->Main()->Size(); ++i)
-					{
-						if (myPlaylist->Main()->at(i).GetHash() == hash)
-						{
-							Mpd.Delete(i);
-							myPlaylist->Main()->DeleteOption(i);
-							i--;
-						}
-					}
-					Mpd.CommitCommandsList();
-					Content->BoldOption(Content->Choice(), 0);
-					Playlist::BlockUpdate = 0;
-				}
-			}
-			else
-			{
-				const Song &s = Content->Current();
-				int id = Mpd.AddSong(s);
-				if (id >= 0)
-				{
-					ShowMessage("Added to playlist: %s", s.toString(Config.song_status_format).c_str());
-					if (add_n_play)
-						Mpd.PlayID(id);
-					Content->BoldOption(Content->Choice(), 1);
-				}
-			}
-		}
-	}
+	else if (w == Content && !Content->Empty())
+		Content->BoldOption(Content->Choice(), myPlaylist->Add(Content->Current(), Content->isBold(), add_n_play));
+	
 	FreeSongList(list);
 	if (!add_n_play)
 		w->Scroll(wDown);
