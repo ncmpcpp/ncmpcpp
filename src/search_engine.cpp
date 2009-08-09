@@ -91,10 +91,10 @@ std::string SearchEngine::Title()
 void SearchEngine::EnterPressed()
 {
 	size_t option = w->Choice();
-	LockStatusbar();
-	
 	if (option < SearchButton)
 		w->Current().first->Clear();
+	if (option < 15)
+		LockStatusbar();
 	
 	switch (option)
 	{
@@ -252,7 +252,8 @@ void SearchEngine::EnterPressed()
 			break;
 		}
 	}
-	UnlockStatusbar();
+	if (option < 15)
+		UnlockStatusbar();
 }
 
 void SearchEngine::SpacePressed()
