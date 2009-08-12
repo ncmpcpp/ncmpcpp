@@ -65,12 +65,13 @@ void Info::Init()
 void Info::Resize()
 {
 	w->Resize(COLS, MainHeight);
+	w->MoveTo(0, MainStartY);
 	hasToBeResized = 0;
 }
 
-std::string Info::Title()
+std::basic_string<my_char_t> Info::Title()
 {
-	return itsTitle;
+	return TO_WSTRING(itsTitle);
 }
 
 #if defined(HAVE_CURL_CURL_H) && defined(HAVE_PTHREAD_H)

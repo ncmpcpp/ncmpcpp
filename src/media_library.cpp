@@ -99,6 +99,7 @@ void MediaLibrary::Resize()
 	Albums->Resize(itsMiddleColWidth, MainHeight);
 	Songs->Resize(itsRightColWidth, MainHeight);
 	
+	Artists->MoveTo(0, MainStartY);
 	Albums->MoveTo(itsMiddleColStartX, MainStartY);
 	Songs->MoveTo(itsRightColStartX, MainStartY);
 	
@@ -153,9 +154,9 @@ void MediaLibrary::SwitchTo()
 	UpdateSongList(Songs);
 }
 
-std::string MediaLibrary::Title()
+std::basic_string<my_char_t> MediaLibrary::Title()
 {
-	return "Media library";
+	return U("Media library");
 }
 
 void MediaLibrary::Update()

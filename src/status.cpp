@@ -168,6 +168,8 @@ void NcmpcppErrorCallback(Connection *, int errorid, const char *msg, void *)
 void NcmpcppStatusChanged(Connection *, StatusChanges changed, void *)
 {
 	static size_t playing_song_scroll_begin = 0;
+	static size_t first_line_scroll_begin = 0;
+	static size_t second_line_scroll_begin = 0;
 	static std::string player_state;
 	static int elapsed;
 	static MPD::Song np;
@@ -315,14 +317,14 @@ void NcmpcppStatusChanged(Connection *, StatusChanges changed, void *)
 			case psPlay:
 			{
 				WindowTitle(utf_to_locale_cpy(np.toString(Config.song_window_title_format)));
-				player_state = "Playing: ";
+				player_state = Config.new_design ? "[playing]" : "Playing: ";
 				Playlist::ReloadRemaining = 1;
 				changed.ElapsedTime = 1;
 				break;
 			}
 			case psPause:
 			{
-				player_state = "[Paused] ";
+				player_state = Config.new_design ? "[paused] " : "[Paused] ";
 				break;
 			}
 			case psStop:
@@ -333,11 +335,24 @@ void NcmpcppStatusChanged(Connection *, StatusChanges changed, void *)
 				wFooter->SetColor(Config.statusbar_color);
 				Playlist::ReloadRemaining = 1;
 				myPlaylist->NowPlaying = -1;
-				player_state.clear();
+				if (Config.new_design)
+				{
+					*wHeader << XY(0, 0) << wclrtoeol << XY(0, 1) << wclrtoeol;
+					player_state = "[stopped]";
+					changed.Volume = 1;
+					changed.StatusFlags = 1;
+				}
+				else
+					player_state.clear();
 				break;
 			}
 		}
-		if (!block_statusbar_update && Config.statusbar_visibility)
+		if (Config.new_design)
+		{
+			*wHeader << XY(0, 1) << fmtBold << player_state << fmtBoldEnd;
+			wHeader->Refresh();
+		}
+		else if (!block_statusbar_update && Config.statusbar_visibility)
 		{
 			*wFooter << XY(0, 1);
 			if (player_state.empty())
@@ -351,6 +366,7 @@ void NcmpcppStatusChanged(Connection *, StatusChanges changed, void *)
 		if (myPlaylist->isPlaying())
 		{
 			np = Mpd.GetCurrentSong();
+			
 			if (!Config.execute_on_song_change.empty())
 				system(np.toString(Config.execute_on_song_change).c_str());
 			if (Mpd.GetState() > psStop)
@@ -367,11 +383,11 @@ void NcmpcppStatusChanged(Connection *, StatusChanges changed, void *)
 		Playlist::ReloadRemaining = 1;
 		
 		playing_song_scroll_begin = 0;
+		first_line_scroll_begin = 0;
+		second_line_scroll_begin = 0;
 		
 		if (Mpd.GetState() == psPlay)
-		{
 			changed.ElapsedTime = 1;
-		}
 	}
 	static time_t now, past = 0;
 	time(&now);
@@ -383,7 +399,7 @@ void NcmpcppStatusChanged(Connection *, StatusChanges changed, void *)
 			np = Mpd.GetCurrentSong();
 			WindowTitle(utf_to_locale_cpy(np.toString(Config.song_window_title_format)));
 		}
-		if (!np.Empty() && !player_state.empty())
+		if (!np.Empty() && Mpd.GetState() > psStop)
 		{
 			int mpd_elapsed = Mpd.GetElapsedTime();
 			if (elapsed < mpd_elapsed-2 || elapsed+1 > mpd_elapsed)
@@ -391,9 +407,43 @@ void NcmpcppStatusChanged(Connection *, StatusChanges changed, void *)
 			else if (Mpd.GetState() == psPlay && !RedrawStatusbar)
 				elapsed++;
 			
-			if (!block_statusbar_update && Config.statusbar_visibility)
+			std::string tracklength;
+			if (Config.new_design)
 			{
-				std::string tracklength;
+				tracklength = Song::ShowTime(elapsed);
+				if (np.GetTotalLength())
+				{
+					tracklength += "/";
+					tracklength += np.GetLength();
+				}
+				
+				basic_buffer<my_char_t> first, second;
+				String2Buffer(TO_WSTRING(np.toString(Config.new_header_first_line)), first);
+				String2Buffer(TO_WSTRING(np.toString(Config.new_header_second_line)), second);
+				
+				size_t first_len = Window::Length(first.Str());
+				size_t first_margin = (std::max(tracklength.length()+1, VolumeState.length()))*2;
+				size_t first_start = first_len < COLS-first_margin ? (COLS-first_len)/2 : tracklength.length()+1;
+				
+				size_t second_len = Window::Length(second.Str());
+				size_t second_margin = (std::max(player_state.length(), size_t(8))+1)*2;
+				size_t second_start = second_len < COLS-second_margin ? (COLS-second_len)/2 : player_state.length()+1;
+				
+				if (!block_progressbar_update) // if blocked, seeking in progress
+					*wHeader << XY(0, 0) << wclrtoeol << tracklength;
+				*wHeader << XY(first_start, 0);
+				first.Write(*wHeader, first_line_scroll_begin, COLS-tracklength.length()-VolumeState.length()-1, U(" ** "));
+				
+				*wHeader << XY(0, 1) << wclrtoeol << fmtBold << player_state << fmtBoldEnd;
+				*wHeader << XY(second_start, 1);
+				second.Write(*wHeader, second_line_scroll_begin, COLS-player_state.length()-8-2, U(" ** "));
+				
+				*wHeader << XY(wHeader->GetWidth()-VolumeState.length(), 0) << Config.volume_color << VolumeState << clEnd;
+				
+				changed.StatusFlags = 1;
+			}
+			else if (!block_statusbar_update && Config.statusbar_visibility)
+			{
 				if (np.GetTotalLength())
 				{
 					tracklength = " [";
@@ -478,38 +528,54 @@ void NcmpcppStatusChanged(Connection *, StatusChanges changed, void *)
 	{
 		std::string switch_state;
 		
-		if (mpd_repeat)
-			switch_state += mpd_repeat;
-		if (mpd_random)
-			switch_state += mpd_random;
-		if (mpd_single)
-			switch_state += mpd_single;
-		if (mpd_consume)
-			switch_state += mpd_consume;
-		if (mpd_crossfade)
-			switch_state += mpd_crossfade;
-		if (mpd_db_updating)
-			switch_state += mpd_db_updating;
-		
-		// this is done by raw ncurses because creating another
-		// window only for handling this is quite silly
-		attrset(A_BOLD|COLOR_PAIR(Config.state_line_color));
-		mvhline(1, 0, 0, COLS);
-		if (!switch_state.empty())
+		if (Config.new_design)
 		{
-			
-			mvprintw(1, COLS-switch_state.length()-3, "[");
-			attron(COLOR_PAIR(Config.state_flags_color));
-			mvprintw(1, COLS-switch_state.length()-2, "%s", switch_state.c_str());
-			attron(COLOR_PAIR(Config.state_line_color));
-			mvprintw(1, COLS-2, "]");
+			switch_state += '[';
+			switch_state += mpd_repeat ? mpd_repeat : '-';
+			switch_state += mpd_random ? mpd_random : '-';
+			switch_state += mpd_single ? mpd_single : '-';
+			switch_state += mpd_consume ? mpd_consume : '-';
+			switch_state += mpd_crossfade ? mpd_crossfade : '-';
+			switch_state += mpd_db_updating ? mpd_db_updating : '-';
+			switch_state += ']';
+			*wHeader << XY(COLS-switch_state.length(), 1) << fmtBold << Config.state_flags_color << switch_state << clEnd << fmtBoldEnd;
+			wHeader->Refresh();
 		}
-		attroff(A_BOLD|COLOR_PAIR(Config.state_line_color));
-		refresh();
+		else
+		{
+			if (mpd_repeat)
+				switch_state += mpd_repeat;
+			if (mpd_random)
+				switch_state += mpd_random;
+			if (mpd_single)
+				switch_state += mpd_single;
+			if (mpd_consume)
+				switch_state += mpd_consume;
+			if (mpd_crossfade)
+				switch_state += mpd_crossfade;
+			if (mpd_db_updating)
+				switch_state += mpd_db_updating;
+			
+			// this is done by raw ncurses because creating another
+			// window only for handling this is quite silly
+			attrset(A_BOLD|COLOR_PAIR(Config.state_line_color));
+			mvhline(1, 0, 0, COLS);
+			if (!switch_state.empty())
+			{
+				mvprintw(1, COLS-switch_state.length()-3, "[");
+				attron(COLOR_PAIR(Config.state_flags_color));
+				mvprintw(1, COLS-switch_state.length()-2, "%s", switch_state.c_str());
+				attroff(COLOR_PAIR(Config.state_flags_color));
+				attron(COLOR_PAIR(Config.state_line_color));
+				mvprintw(1, COLS-2, "]");
+			}
+			attroff(A_BOLD|COLOR_PAIR(Config.state_line_color));
+			refresh();
+		}
 	}
 	if (changed.Volume && Config.header_visibility)
 	{
-		VolumeState = " Volume: ";
+		VolumeState = Config.new_design ? " Vol: " : " Volume: ";
 		int volume = Mpd.GetVolume();
 		if (volume < 0)
 			VolumeState += "n/a";

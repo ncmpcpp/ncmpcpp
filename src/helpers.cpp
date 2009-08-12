@@ -321,26 +321,24 @@ Buffer ShowTag(const std::string &tag)
 	return result;
 }
 
+#ifdef _UTF8
 std::basic_string<my_char_t> Scroller(const std::string &str, size_t width, size_t &pos)
 {
-	std::basic_string<my_char_t> s = TO_WSTRING(str);
+	return Scroller(TO_WSTRING(str), width, pos);
+}
+#endif // _UTF8
+
+std::basic_string<my_char_t> Scroller(const std::basic_string<my_char_t> &str, size_t width, size_t &pos)
+{
+	std::basic_string<my_char_t> s(str);
 	if (!Config.header_text_scrolling)
 		return s;
 	std::basic_string<my_char_t> result;
-	size_t len;
-#	ifdef _UTF8
-	len = Window::Length(s);
-#	else
-	len = s.length();
-#	endif
+	size_t len = Window::Length(s);
 	
 	if (len > width)
 	{
-#		ifdef _UTF8
-		s += L" ** ";
-#		else
-		s += " ** ";
-#		endif
+		s += U(" ** ");
 		len = 0;
 		std::basic_string<my_char_t>::const_iterator b = s.begin(), e = s.end();
 		for (std::basic_string<my_char_t>::const_iterator it = b+pos; it < e && len < width; ++it)

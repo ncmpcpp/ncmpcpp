@@ -111,6 +111,7 @@ struct ncmpcpp_keys
 	int GoToContainingDir[2];
 	int ToggleAutoCenter[2];
 	int ToggleDisplayMode[2];
+	int ToggleInterface[2];
 	int ToggleLyricsDB[2];
 	int GoToParentDir[2];
 	int SwitchTagTypeList[2];
@@ -131,6 +132,8 @@ struct ncmpcpp_config
 	std::string external_editor;
 	std::string system_encoding;
 	std::string execute_on_song_change;
+	std::string new_header_first_line;
+	std::string new_header_second_line;
 	
 	std::string pattern;
 	
@@ -187,6 +190,7 @@ struct ncmpcpp_config
 	bool allow_physical_files_deletion;
 	bool allow_physical_directories_deletion;
 	bool mouse_support;
+	bool new_design;
 	
 	int mpd_port;
 	int mpd_connection_timeout;
@@ -204,6 +208,7 @@ extern ncmpcpp_config Config;
 extern ncmpcpp_keys Key;
 
 void CreateConfigDir();
+void SetWindowsDimensions(size_t &header_height, size_t &footer_start_y, size_t &footer_height);
 void DefaultKeys(ncmpcpp_keys &);
 void DefaultConfiguration(ncmpcpp_config &);
 void ReadKeys(ncmpcpp_keys &);

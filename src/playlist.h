@@ -36,7 +36,7 @@ class Playlist : public Screen< Menu<MPD::Song> >
 		virtual void SwitchTo();
 		virtual void Resize();
 		
-		virtual std::string Title();
+		virtual std::basic_string<my_char_t> Title();
 		
 		virtual void EnterPressed();
 		virtual void SpacePressed();

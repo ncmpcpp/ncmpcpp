@@ -47,10 +47,12 @@
 
 #ifdef _UTF8
 # define my_char_t wchar_t
+# define U(x) L##x
 # define TO_STRING(x) ToString(x)
 # define TO_WSTRING(x) ToWString(x)
 #else
 # define my_char_t char
+# define U(x) x
 # define TO_STRING(x) (x)
 # define TO_WSTRING(x) (x)
 #endif
@@ -155,6 +157,7 @@ namespace NCurses
 			virtual Window *Clone() const { return new Window(*this); }
 			virtual Window *EmptyClone() const;
 			
+			static size_t Length(const std::string &s) { return s.length(); }
 			static size_t Length(const std::wstring &);
 			
 		protected:

@@ -51,7 +51,7 @@ void Clock::Init()
 {
 	Width = Config.clock_display_seconds ? 60 : 40;
 	
-	w = new Window((COLS-Width)/2, (LINES-Height)/2, Width, Height-1, "", Config.main_color, Border(Config.main_color));
+	w = new Window((COLS-Width)/2, (MainHeight-Height)/2+MainStartY, Width, Height-1, "", Config.main_color, Border(Config.main_color));
 	w->SetTimeout(ncmpcpp_window_timeout);
 	isInitialized = 1;
 }
@@ -60,7 +60,7 @@ void Clock::Resize()
 {
 	if (Width <= size_t(COLS) && Height <= MainHeight)
 	{
-		w->MoveTo((COLS-Width)/2, (LINES-Height)/2);
+		w->MoveTo((COLS-Width)/2, (MainHeight-Height)/2+MainStartY);
 		if (myScreen == this)
 		{
 			if (myPlaylist->hasToBeResized)
@@ -96,9 +96,9 @@ void Clock::SwitchTo()
 	w->Display();
 }
 
-std::string Clock::Title()
+std::basic_string<my_char_t> Clock::Title()
 {
-	return "Clock";
+	return U("Clock");
 }
 
 void Clock::Update()

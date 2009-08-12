@@ -39,7 +39,7 @@ class TinyTagEditor : public Screen< Menu<Buffer> >
 		virtual void Resize();
 		virtual void SwitchTo();
 		
-		virtual std::string Title();
+		virtual std::basic_string<my_char_t> Title();
 		
 		virtual void EnterPressed();
 		virtual void SpacePressed() { }
@@ -69,7 +69,7 @@ class TagEditor : public Screen<Window>
 		virtual void Resize();
 		virtual void SwitchTo();
 		
-		virtual std::string Title();
+		virtual std::basic_string<my_char_t> Title();
 		
 		virtual void Refresh();
 		virtual void Update();

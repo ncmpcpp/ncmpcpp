@@ -58,6 +58,7 @@ namespace NCurses
 			bool SetFormatting(short vb, const std::basic_string<C> &s, short ve, bool for_each = 1);
 			void RemoveFormatting(short vb, const std::basic_string<C> &s, short ve, bool for_each = 1);
 			void SetTemp(std::basic_string<C> *);
+			void Write(Window &w, size_t &pos, size_t width, const std::basic_string<C> &sep);
 			void Clear();
 			
 			template <typename T> basic_buffer<C> &operator<<(const T &t)
@@ -72,6 +73,9 @@ namespace NCurses
 			basic_buffer<C> &operator<<(const basic_buffer<C> &buf);
 			
 			friend Window &operator<< <>(Window &, const basic_buffer<C> &);
+			
+		private:
+			void LoadAttribute(Window &w, short value) const;
 	};
 	
 	typedef basic_buffer<char> Buffer;
@@ -140,10 +144,69 @@ template <typename C> void NCurses::basic_buffer<C>::SetTemp(std::basic_string<C
 	itsTempString = tmp;
 }
 
+template <typename C> void NCurses::basic_buffer<C>::Write(Window &w, size_t &pos, size_t width, const std::basic_string<C> &sep)
+{
+	std::basic_string<C> s = itsString.str();
+	size_t len = Window::Length(s);
+	
+	if (len > width)
+	{
+		s += sep;
+		len = 0;
+		
+		typename std::list<typename NCurses::basic_buffer<C>::FormatPos>::const_iterator lb = itsFormat.begin();
+		if (itsFormat.back().Position > pos) // if there is no attributes from current position, don't load them
+		{
+			// load all attributes that are before start position
+			for (; lb->Position < pos; ++lb)
+				LoadAttribute(w, lb->Value);
+		}
+		
+		for (size_t i = pos; i < s.length() && len < width; ++i)
+		{
+			while (i == lb->Position && lb != itsFormat.end())
+			{
+				LoadAttribute(w, lb->Value);
+				++lb;
+			}
+			len += wcwidth(s[i]);
+			w << s[i];
+		}
+		if (++pos >= s.length())
+			pos = 0;
+		
+		if (len < width)
+			lb = itsFormat.begin();
+		for (size_t i = 0; len < width; ++i)
+		{
+			while (i == lb->Position && lb != itsFormat.end())
+			{
+				LoadAttribute(w, lb->Value);
+				++lb;
+			}
+			len += wcwidth(s[i]);
+			w << s[i];
+		}
+		// load all remained attributes to clean up
+		for (; lb != itsFormat.end(); ++lb)
+			LoadAttribute(w, lb->Value);
+	}
+	else
+		w << *this;
+}
+
 template <typename C> void NCurses::basic_buffer<C>::Clear()
 {
 	itsString.str(std::basic_string<C>());
 	itsFormat.clear();
+}
+
+template <typename C> void NCurses::basic_buffer<C>::LoadAttribute(Window &w, short value) const
+{
+	if (value < NCurses::fmtNone)
+		w << NCurses::Color(value);
+	else
+		w << NCurses::Format(value);
 }
 
 template <typename C> NCurses::basic_buffer<C> &NCurses::basic_buffer<C>::operator<<(std::ostream &(*os)(std::ostream&))
@@ -199,10 +262,7 @@ template <typename C> NCurses::Window &operator<<(NCurses::Window &w, const NCur
 					w << tmp;
 					tmp.clear();
 				}
-				if (b->Value < NCurses::fmtNone)
-					w << NCurses::Color(b->Value);
-				else
-					w << NCurses::Format(b->Value);
+				buf.LoadAttribute(w, b->Value);
 				b++;
 			}
 			if (i < s.length())

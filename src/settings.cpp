@@ -25,6 +25,7 @@
 #endif // WIN32
 #include <fstream>
 
+#include "global.h"
 #include "helpers.h"
 #include "lyrics.h"
 #include "settings.h"
@@ -60,17 +61,6 @@ namespace
 		key[1] = !two.empty() && two[0] == '\'' ? two[1] : (atoi(two.c_str()) == 0 ? null_key : atoi(two.c_str()));
 	}
 	
-	void String2Buffer(const std::string &s, Buffer &buf)
-	{
-		for (std::string::const_iterator it = s.begin(); it != s.end(); ++it)
-		{
-			if (*it != '$')
-				buf << *it;
-			else
-				buf << Color(*++it-'0');
-		}
-	}
-	
 	Border IntoBorder(const std::string &color)
 	{
 		return Border(IntoColor(color));
@@ -84,6 +74,24 @@ void CreateConfigDir()
 	, 0755
 #	endif // !WIN32
 	);
+}
+
+void SetWindowsDimensions(size_t &header_height, size_t &footer_start_y, size_t &footer_height)
+{
+	Global::MainStartY = Config.new_design ? 5 : 2;
+	Global::MainHeight = LINES-(Config.new_design ? 7 : 4);
+	
+	if (!Config.header_visibility)
+	{
+		Global::MainStartY -= 2;
+		Global::MainHeight += 2;
+	}
+	if (!Config.statusbar_visibility)
+		Global::MainHeight++;
+	
+	header_height = Config.new_design ? 5 : 1;
+	footer_start_y = LINES-(Config.statusbar_visibility ? 2 : 1);
+	footer_height = Config.statusbar_visibility ? 2 : 1;
 }
 
 void DefaultKeys(ncmpcpp_keys &keys)
@@ -152,6 +160,7 @@ void DefaultKeys(ncmpcpp_keys &keys)
 	keys.GoToContainingDir[0] = 'G';
 	keys.ToggleAutoCenter[0] = 'U';
 	keys.ToggleDisplayMode[0] = 'p';
+	keys.ToggleInterface[0] = '\\';
 	keys.ToggleLyricsDB[0] = 'L';
 	keys.GoToParentDir[0] = KEY_BACKSPACE;
 	keys.SwitchTagTypeList[0] = '`';
@@ -221,6 +230,7 @@ void DefaultKeys(ncmpcpp_keys &keys)
 	keys.GoToContainingDir[1] = null_key;
 	keys.ToggleAutoCenter[1] = null_key;
 	keys.ToggleDisplayMode[1] = null_key;
+	keys.ToggleInterface[1] = null_key;
 	keys.ToggleLyricsDB[1] = null_key;
 	keys.GoToParentDir[1] = 127;
 	keys.SwitchTagTypeList[1] = null_key;
@@ -237,6 +247,8 @@ void DefaultConfiguration(ncmpcpp_config &conf)
 	conf.song_window_title_format = "{%a - }{%t}|{%f}";
 	conf.song_library_format = "{%n - }{%t}|{%f}";
 	conf.tag_editor_album_format = "{(%y) }%b";
+	conf.new_header_first_line = "$b$1$aqqu$/a$9 {%t}|{%f} $1$atqq$/a$9$/b";
+	conf.new_header_second_line = "{$4$b%a$/b$9}{ - $7%b$9}{ ($4%y$9)}";
 	conf.browser_playlist_prefix << clRed << "(playlist)" << clEnd << ' ';
 	conf.pattern = "%n - %t";
 	conf.selected_item_prefix << clMagenta;
@@ -284,6 +296,7 @@ void DefaultConfiguration(ncmpcpp_config &conf)
 	conf.allow_physical_files_deletion = false;
 	conf.allow_physical_directories_deletion = false;
 	conf.mouse_support = true;
+	conf.new_design = false;
 	conf.set_window_title = true;
 	conf.mpd_port = 6600;
 	conf.mpd_connection_timeout = 15;
@@ -546,6 +559,16 @@ void ReadConfiguration(ncmpcpp_config &conf)
 				if (!v.empty())
 					conf.execute_on_song_change = v;
 			}
+			else if (cl.find("alternative_header_first_line_format") != std::string::npos)
+			{
+				if (!v.empty())
+					conf.new_header_first_line = v;
+			}
+			else if (cl.find("alternative_header_second_line_format") != std::string::npos)
+			{
+				if (!v.empty())
+					conf.new_header_second_line = v;
+			}
 			else if (cl.find("browser_playlist_prefix") != std::string::npos)
 			{
 				if (!v.empty())
@@ -692,6 +715,10 @@ void ReadConfiguration(ncmpcpp_config &conf)
 			else if (cl.find("mouse_support") != std::string::npos)
 			{
 				conf.mouse_support = v == "yes";
+			}
+			else if (cl.find("user_interface") != std::string::npos)
+			{
+				conf.new_design = v == "alternative";
 			}
 			else if (cl.find("enable_window_title") != std::string::npos)
 			{

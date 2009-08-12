@@ -115,25 +115,23 @@ int main(int argc, char *argv[])
 	
 	InitScreen("ncmpc++ ver. "VERSION, Config.colors_enabled);
 	
-	MainStartY = 2;
-	MainHeight = LINES-4;
+	bool real_header_visibility = Config.header_visibility;
+	bool real_statusbar_visibility = Config.statusbar_visibility;
 	
-	if (!Config.header_visibility)
+	if (Config.new_design)
 	{
-		MainStartY -= 2;
-		MainHeight += 2;
+		Config.header_visibility = 1;
+		Config.statusbar_visibility = 0;
 	}
-	if (!Config.statusbar_visibility)
-		MainHeight++;
+	
+	size_t header_height, footer_start_y, footer_height;
+	SetWindowsDimensions(header_height, footer_start_y, footer_height);
 	
 	if (Config.header_visibility)
 	{
-		wHeader = new Window(0, 0, COLS, 1, "", Config.header_color, brNone);
+		wHeader = new Window(0, 0, COLS, header_height, "", Config.header_color, brNone);
 		wHeader->Display();
 	}
-	
-	size_t footer_start_y = LINES-(Config.statusbar_visibility ? 2 : 1);
-	size_t footer_height = Config.statusbar_visibility ? 2 : 1;
 	
 	wFooter = new Window(0, footer_start_y, COLS, footer_height, "", Config.statusbar_color, brNone);
 	wFooter->SetTimeout(ncmpcpp_window_timeout);
@@ -150,6 +148,7 @@ int main(int argc, char *argv[])
 	int input;
 	
 	bool main_exit = 0;
+	bool design_changed = 0;
 	bool title_allowed = !Config.display_screens_numbers_on_start;
 	
 	std::string screen_title;
@@ -201,7 +200,19 @@ int main(int argc, char *argv[])
 		{
 			if (title_allowed)
 			{
-				*wHeader << XY(0, 0) << wclrtoeol << fmtBold << myScreen->Title() << fmtBoldEnd;
+				if (Config.new_design)
+				{
+					std::basic_string<my_char_t> title = myScreen->Title();
+					*wHeader << XY(0, 3) << wclrtoeol;
+					*wHeader << fmtBold << clBlack;
+					mvwhline(wHeader->Raw(), 2, 0, 0, COLS);
+					mvwhline(wHeader->Raw(), 4, 0, 0, COLS);
+					*wHeader << XY((COLS-Window::Length(title))/2, 3);
+					*wHeader << Config.statusbar_color << title << clEnd;
+					*wHeader << clEnd << fmtBoldEnd;
+				}
+				else
+					*wHeader << XY(0, 0) << wclrtoeol << fmtBold << myScreen->Title() << fmtBoldEnd;
 			}
 			else
 			{
@@ -286,6 +297,24 @@ int main(int argc, char *argv[])
 		
 		// key mapping beginning
 		
+		if (Keypressed(input, Key.ToggleInterface))
+		{
+			Config.new_design = !Config.new_design;
+			if (Config.new_design)
+			{
+				Config.header_visibility = 1;
+				Config.statusbar_visibility = 0;
+			}
+			else
+			{
+				Config.header_visibility = real_header_visibility;
+				Config.statusbar_visibility = real_statusbar_visibility;
+			}
+			SetWindowsDimensions(header_height, footer_start_y, footer_height);
+			UnlockProgressbar();
+			UnlockStatusbar();
+			design_changed = 1;
+		}
 		if (Keypressed(input, Key.Up))
 		{
 			myScreen->Scroll(wUp, Key.Up);
@@ -328,9 +357,9 @@ int main(int argc, char *argv[])
 				UpdateStatusImmediately = 1;
 			}
 			else if (mouse_event.bstate & BUTTON1_PRESSED
-			     &&	 Config.statusbar_visibility
+			     &&	 (Config.statusbar_visibility || Config.new_design)
 			     &&	 Mpd.GetState() > psStop
-			     &&	 mouse_event.y == LINES-1 && mouse_event.x < 9
+			     &&	 mouse_event.y == (Config.new_design ? 1 : LINES-1) && mouse_event.x < 9
 				) // playing/paused
 			{
 				Mpd.Pause();
@@ -349,7 +378,7 @@ int main(int argc, char *argv[])
 			else
 				myScreen->MouseButtonPressed(mouse_event);
 		}
-		else if (input == KEY_RESIZE)
+		else if (input == KEY_RESIZE || design_changed)
 		{
 #			ifdef USE_PDCURSES
 			resize_term(0, 0);
@@ -364,7 +393,7 @@ int main(int argc, char *argv[])
 				return 1;
 			}
 			
-			MainHeight = LINES-4;
+			MainHeight = LINES-(Config.new_design ? 7 : 4);
 			
 			if (!Config.header_visibility)
 				MainHeight += 2;
@@ -392,19 +421,30 @@ int main(int argc, char *argv[])
 			myScreen->Resize();
 			
 			if (Config.header_visibility)
-				wHeader->Resize(COLS, wHeader->GetHeight());
+				wHeader->Resize(COLS, header_height);
 			
 			footer_start_y = LINES-(Config.statusbar_visibility ? 2 : 1);
 			wFooter->MoveTo(0, footer_start_y);
-			wFooter->Resize(COLS, wFooter->GetHeight());
+			wFooter->Resize(COLS, Config.statusbar_visibility ? 2 : 1);
 			
 			myScreen->Refresh();
 			RedrawStatusbar = 1;
 			StatusChanges changes;
-			if (Mpd.GetState() < psPlay)
+			if (Mpd.GetState() < psPlay || design_changed)
+			{
 				changes.PlayerState = 1;
+				if (design_changed)
+					changes.Volume = 1;
+			}
 			changes.StatusFlags = 1; // force status update
-			NcmpcppStatusChanged(&Mpd, changes, NULL);
+			NcmpcppStatusChanged(&Mpd, changes, 0);
+			if (design_changed)
+			{
+				RedrawStatusbar = 1;
+				NcmpcppStatusChanged(&Mpd, StatusChanges(), 0);
+				design_changed = 0;
+				ShowMessage("User interface: %s", Config.new_design ? "Alternative" : "Classic");
+			}
 		}
 		else if (Keypressed(input, Key.GoToParentDir))
 		{
@@ -1071,9 +1111,21 @@ int main(int argc, char *argv[])
 						songpos = 0;
 				}
 				
+				std::string tracklength;
 				*wFooter << fmtBold;
-				std::string tracklength = "[" + Song::ShowTime(songpos) + "/" + s->GetLength() + "]";
-				*wFooter << XY(wFooter->GetWidth()-tracklength.length(), 1) << tracklength;
+				if (Config.new_design)
+				{
+					tracklength = Song::ShowTime(songpos);
+					tracklength += "/";
+					tracklength += s->GetLength();
+					*wHeader << XY(0, 0) << tracklength << " ";
+					wHeader->Refresh();
+				}
+				else
+				{
+					tracklength = "[" + Song::ShowTime(songpos) + "/" + s->GetLength() + "]";
+					*wFooter << XY(wFooter->GetWidth()-tracklength.length(), 1) << tracklength;
+				}
 				double progressbar_size = songpos/double(s->GetTotalLength());
 				int howlong = wFooter->GetWidth()*progressbar_size;
 				

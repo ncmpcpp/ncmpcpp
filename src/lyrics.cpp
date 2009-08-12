@@ -75,6 +75,7 @@ void Lyrics::Init()
 void Lyrics::Resize()
 {
 	w->Resize(COLS, MainHeight);
+	w->MoveTo(0, MainStartY);
 	hasToBeResized = 0;
 }
 
@@ -187,10 +188,10 @@ void Lyrics::SwitchTo()
 	}
 }
 
-std::string Lyrics::Title()
+std::basic_string<my_char_t> Lyrics::Title()
 {
-	std::string result = "Lyrics: ";
-	result += TO_STRING(Scroller(itsSong.toString("%a - %t"), COLS-result.length()-VolumeState.length(), itsScrollBegin));
+	std::basic_string<my_char_t> result = U("Lyrics: ");
+	result += Scroller(itsSong.toString("%a - %t"), COLS-result.length()-(Config.new_design ? 2 : VolumeState.length()), itsScrollBegin);
 	return result;
 }
 

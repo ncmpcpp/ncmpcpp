@@ -31,7 +31,7 @@ class Info : public Screen<Scrollpad>
 		virtual void SwitchTo() { }
 		virtual void Resize();
 		
-		virtual std::string Title();
+		virtual std::basic_string<my_char_t> Title();
 		
 #		if defined(HAVE_CURL_CURL_H) && defined(HAVE_PTHREAD_H)
 		virtual void Update();

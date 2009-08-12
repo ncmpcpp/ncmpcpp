@@ -57,6 +57,7 @@ void SearchEngine::Init()
 void SearchEngine::Resize()
 {
 	w->Resize(COLS, MainHeight);
+	w->MoveTo(0, MainStartY);
 	hasToBeResized = 0;
 }
 
@@ -83,9 +84,9 @@ void SearchEngine::SwitchTo()
 	}
 }
 
-std::string SearchEngine::Title()
+std::basic_string<my_char_t> SearchEngine::Title()
 {
-	return "Search engine";
+	return U("Search engine");
 }
 
 void SearchEngine::EnterPressed()

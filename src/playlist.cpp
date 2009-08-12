@@ -105,6 +105,7 @@ void Playlist::SwitchTo()
 void Playlist::Resize()
 {
 	w->Resize(COLS, MainHeight);
+	w->MoveTo(0, MainStartY);
 	w->SetTitle(Config.columns_in_playlist ? Display::Columns() : "");
 	SortDialogHeight = std::min(int(MainHeight-2), 18);
 	if (MainHeight > 6)
@@ -113,12 +114,12 @@ void Playlist::Resize()
 	hasToBeResized = 0;
 }
 
-std::string Playlist::Title()
+std::basic_string<my_char_t> Playlist::Title()
 {
-	std::string result = "Playlist ";
+	std::basic_string<my_char_t> result = U("Playlist ");
 	if (ReloadTotalLength || ReloadRemaining)
 		itsBufferedStats = TotalLength();
-	result += TO_STRING(Scroller(itsBufferedStats, w->GetWidth()-result.length()-VolumeState.length(), itsScrollBegin));
+	result += Scroller(itsBufferedStats, w->GetWidth()-result.length()-(Config.new_design ? 2 : VolumeState.length()), itsScrollBegin);
 	return result;
 }
 

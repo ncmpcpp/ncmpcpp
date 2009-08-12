@@ -61,12 +61,13 @@ void Outputs::SwitchTo()
 void Outputs::Resize()
 {
 	w->Resize(COLS, MainHeight);
+	w->MoveTo(0, MainStartY);
 	hasToBeResized = 0;
 }
 
-std::string Outputs::Title()
+std::basic_string<my_char_t> Outputs::Title()
 {
-	return "Outputs";
+	return U("Outputs");
 }
 
 void Outputs::EnterPressed()

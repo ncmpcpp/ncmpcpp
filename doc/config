@@ -89,6 +89,26 @@
 #
 #selected_item_suffix = "$9"
 #
+##
+## Note: Below variables are for alternative version of user's interface.
+## Their syntax supports all tags and colors listed above plus some extra
+## markers used for text attributes. They are followed by character '$'.
+## After that you can put:
+##
+## - b - bold text
+## - r - reverse colors
+## - a - use alternative character set
+##
+## If you don't want to use an attribute anymore, just put it again, but
+## this time insert character '/' between '$' and attribute character,
+## e.g. {$b%t$/b}|{$r%f$/r} will display bolded title tag or filename
+## with reversed colors.
+##
+#
+#alternative_header_first_line_format = "$b$1$aqqu$/a$9 {%t}|{%f} $1$atqq$/a$9$/b"
+#
+#alternative_header_second_line_format = "{$4$b%a$/b$9}{ - $7%b$9}{ ($4%y$9)}"
+#
 ## colors are not supported for below veriables
 #
 #song_status_format = "{(%l) }{%a - }{%t}|{%f}"
@@ -138,6 +158,8 @@
 #autocenter_mode = "no"
 #
 #default_place_to_search_in = "database" (database/playlist)
+#
+#user_interface = "classic" (classic/alternative)
 #
 #media_library_left_column = "a" (possible values: a,y,g,c,p, legend above)
 #

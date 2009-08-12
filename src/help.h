@@ -30,7 +30,7 @@ class Help : public Screen<Scrollpad>
 		virtual void Resize();
 		virtual void SwitchTo();
 		
-		virtual std::string Title();
+		virtual std::basic_string<my_char_t> Title();
 		
 		virtual void EnterPressed() { }
 		virtual void SpacePressed() { }

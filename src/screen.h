@@ -39,7 +39,7 @@ class BasicScreen
 		virtual void SwitchTo() = 0;
 		virtual void Resize() = 0;
 		
-		virtual std::string Title() = 0;
+		virtual std::basic_string<my_char_t> Title() = 0;
 		
 		virtual void Update() { }
 		virtual void Refresh() = 0;

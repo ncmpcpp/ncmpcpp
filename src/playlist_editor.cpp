@@ -75,14 +75,15 @@ void PlaylistEditor::Resize()
 	Playlists->Resize(LeftColumnWidth, MainHeight);
 	Content->Resize(RightColumnWidth, MainHeight);
 	
+	Playlists->MoveTo(0, MainStartY);
 	Content->MoveTo(RightColumnStartX, MainStartY);
 	
 	hasToBeResized = 0;
 }
 
-std::string PlaylistEditor::Title()
+std::basic_string<my_char_t> PlaylistEditor::Title()
 {
-	return "Playlist editor";
+	return U("Playlist editor");
 }
 
 void PlaylistEditor::Refresh()

@@ -29,7 +29,7 @@ class PlaylistEditor : public Screen<Window>
 		virtual void SwitchTo();
 		virtual void Resize();
 		
-		virtual std::string Title();
+		virtual std::basic_string<my_char_t> Title();
 		
 		virtual void Refresh();
 		virtual void Update();

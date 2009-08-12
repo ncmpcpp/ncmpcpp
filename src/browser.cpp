@@ -65,6 +65,7 @@ void Browser::Init()
 void Browser::Resize()
 {
 	w->Resize(COLS, MainHeight);
+	w->MoveTo(0, MainStartY);
 	hasToBeResized = 0;
 }
 
@@ -84,10 +85,10 @@ void Browser::SwitchTo()
 	RedrawHeader = 1;
 }
 
-std::string Browser::Title()
+std::basic_string<my_char_t> Browser::Title()
 {
-	std::string result = "Browse: ";
-	result += TO_STRING(Scroller(itsBrowsedDir, COLS-result.length()-VolumeState.length(), itsScrollBeginning));
+	std::basic_string<my_char_t> result = U("Browse: ");
+	result += Scroller(itsBrowsedDir, COLS-result.length()-(Config.new_design ? 2 : VolumeState.length()), itsScrollBeginning);
 	return result;
 }
 

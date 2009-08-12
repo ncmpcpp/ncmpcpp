@@ -58,6 +58,7 @@ void TinyTagEditor::Init()
 void TinyTagEditor::Resize()
 {
 	w->Resize(COLS, MainHeight);
+	w->MoveTo(0, MainStartY);
 	hasToBeResized = 0;
 }
 
@@ -86,9 +87,9 @@ void TinyTagEditor::SwitchTo()
 	}
 }
 
-std::string TinyTagEditor::Title()
+std::basic_string<my_char_t> TinyTagEditor::Title()
 {
-	return "Tiny tag editor";
+	return U("Tiny tag editor");
 }
 
 void TinyTagEditor::EnterPressed()
@@ -375,15 +376,17 @@ void TagEditor::Resize()
 	TagTypes->Resize(MiddleColumnWidth, MainHeight);
 	Tags->Resize(RightColumnWidth, MainHeight);
 	
+	Albums->MoveTo(0, MainStartY);
+	Dirs->MoveTo(0, MainStartY);
 	TagTypes->MoveTo(MiddleColumnStartX, MainStartY);
 	Tags->MoveTo(RightColumnStartX, MainStartY);
 	
 	hasToBeResized = 0;
 }
 
-std::string TagEditor::Title()
+std::basic_string<my_char_t> TagEditor::Title()
 {
-	return "Tag editor";
+	return U("Tag editor");
 }
 
 void TagEditor::SwitchTo()

@@ -41,6 +41,7 @@ void Help::Init()
 void Help::Resize()
 {
 	w->Resize(COLS, MainHeight);
+	w->MoveTo(0, MainStartY);
 	hasToBeResized = 0;
 }
 
@@ -60,9 +61,9 @@ void Help::SwitchTo()
 
 }
 
-std::string Help::Title()
+std::basic_string<my_char_t> Help::Title()
 {
-	return "Help";
+	return U("Help");
 }
 
 std::string Help::DisplayKeys(int *key, int size)
@@ -185,6 +186,7 @@ void Help::GetKeybindings()
 	*w << DisplayKeys(Key.ToggleFindMode)		<< "Toggle find mode (normal/wrapped)\n";
 	*w << DisplayKeys(Key.GoToContainingDir)	<< "Locate song in browser\n";
 	*w << DisplayKeys(Key.ToggleDisplayMode)	<< "Toggle display mode\n";
+	*w << DisplayKeys(Key.ToggleInterface)		<< "Toggle user interface\n";
 	*w << DisplayKeys(Key.GoToPosition)		<< "Go to given position in current song (in % by default)\n";
 	*w << DisplayKeys(Key.SongInfo)			<< "Show song's info\n";
 #	ifdef HAVE_CURL_CURL_H
