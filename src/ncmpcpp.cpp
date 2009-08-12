@@ -216,7 +216,7 @@ int main(int argc, char *argv[])
 			}
 			else
 			{
-				*wHeader << XY(0, 0)
+				*wHeader << XY(0, Config.new_design ? 3 : 0)
 				<< fmtBold << char(Key.Help[0]) << fmtBoldEnd << ":Help  "
 				<< fmtBold << char(Key.Playlist[0]) << fmtBoldEnd << ":Playlist  "
 				<< fmtBold << char(Key.Browser[0]) << fmtBoldEnd << ":Browse  "
@@ -229,6 +229,13 @@ int main(int argc, char *argv[])
 #				ifdef ENABLE_CLOCK
 				*wHeader << "  " << fmtBold << char(Key.Clock[0]) << fmtBoldEnd << ":Clock";
 #				endif // ENABLE_CLOCK
+				if (Config.new_design)
+				{
+					*wHeader << fmtBold << clBlack;
+					mvwhline(wHeader->Raw(), 2, 0, 0, COLS);
+					mvwhline(wHeader->Raw(), 4, 0, 0, COLS);
+					*wHeader << clEnd << fmtBoldEnd;
+				}
 			}
 			
 			wHeader->SetColor(Config.volume_color);
