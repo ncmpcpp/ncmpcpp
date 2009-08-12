@@ -1538,11 +1538,16 @@ int main(int argc, char *argv[])
 				ShowMessage("No selected items!");
 				continue;
 			}
+			if (MainHeight < 5)
+			{
+				ShowMessage("Screen is too small to display this window!");
+				continue;
+			}
 			
 			const size_t dialog_width = COLS*0.8;
-			const size_t dialog_height = LINES*0.6;
+			const size_t dialog_height = std::min(size_t(LINES*0.6), MainHeight);
 			
-			Menu<std::string> mDialog((COLS-dialog_width)/2, (LINES-dialog_height)/2, dialog_width, dialog_height, "Add selected items to...", Config.main_color, Config.window_border);
+			Menu<std::string> mDialog((COLS-dialog_width)/2, (MainHeight-dialog_height)/2+MainStartY, dialog_width, dialog_height, "Add selected items to...", Config.main_color, Config.window_border);
 			mDialog.SetTimeout(ncmpcpp_window_timeout);
 			mDialog.CyclicScrolling(Config.use_cyclic_scrolling);
 			mDialog.SetItemDisplayer(Display::Generic);

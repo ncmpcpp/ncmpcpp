@@ -60,7 +60,7 @@ void Playlist::Init()
 	
 	SortDialogHeight = std::min(int(MainHeight-2), 18);
 	
-	SortDialog = new Menu< std::pair<std::string, MPD::Song::GetFunction> >((COLS-SortDialogWidth)/2, (LINES-SortDialogHeight)/2, SortDialogWidth, SortDialogHeight, "Sort songs by...", Config.main_color, Config.window_border);
+	SortDialog = new Menu< std::pair<std::string, MPD::Song::GetFunction> >((COLS-SortDialogWidth)/2, (MainHeight-SortDialogHeight)/2+MainStartY, SortDialogWidth, SortDialogHeight, "Sort songs by...", Config.main_color, Config.window_border);
 	SortDialog->SetTimeout(ncmpcpp_window_timeout);
 	SortDialog->CyclicScrolling(Config.use_cyclic_scrolling);
 	SortDialog->SetItemDisplayer(Display::Pairs);
@@ -107,10 +107,10 @@ void Playlist::Resize()
 	w->Resize(COLS, MainHeight);
 	w->MoveTo(0, MainStartY);
 	w->SetTitle(Config.columns_in_playlist ? Display::Columns() : "");
-	SortDialogHeight = std::min(int(MainHeight-2), 18);
-	if (MainHeight > 6)
+	SortDialogHeight = std::min(int(MainHeight), 18);
+	if (MainHeight > 5)
 		SortDialog->Resize(SortDialogWidth, SortDialogHeight);
-	SortDialog->MoveTo((COLS-SortDialogWidth)/2, (LINES-SortDialogHeight)/2);
+	SortDialog->MoveTo((COLS-SortDialogWidth)/2, (MainHeight-SortDialogHeight)/2+MainStartY);
 	hasToBeResized = 0;
 }
 

@@ -1250,12 +1250,18 @@ string TagEditor::ParseFilename(Song &s, string mask, bool preview)
 
 void TagEditor::DealWithFilenames(SongList &v)
 {
-	int width = 30;
-	int height = 6;
+	size_t width = 30;
+	size_t height = 6;
+	
+	if (size_t(COLS) < width || MainHeight < height)
+	{
+		ShowMessage("Screen is too small to display additional windows!");
+		return;
+	}
 	
 	GetPatternList();
 	
-	Menu<string> *Main = new Menu<string>((COLS-width)/2, (LINES-height)/2, width, height, "", Config.main_color, Config.window_border);
+	Menu<string> *Main = new Menu<string>((COLS-width)/2, (MainHeight-height)/2+MainStartY, width, height, "", Config.main_color, Config.window_border);
 	Main->SetTimeout(ncmpcpp_window_timeout);
 	Main->CyclicScrolling(Config.use_cyclic_scrolling);
 	Main->SetItemDisplayer(Display::Generic);
@@ -1278,7 +1284,7 @@ void TagEditor::DealWithFilenames(SongList &v)
 	}
 	
 	width = COLS*0.9;
-	height = LINES*0.8;
+	height = std::min(size_t(LINES*0.8), MainHeight);
 	bool exit = 0;
 	bool preview = 1;
 	size_t choice = Main->Choice();
@@ -1295,7 +1301,7 @@ void TagEditor::DealWithFilenames(SongList &v)
 	
 	if (choice != 3)
 	{
-		Legend = new Scrollpad((COLS-width)/2+one_width, (LINES-height)/2, two_width, height, "Legend", Config.main_color, Config.window_border);
+		Legend = new Scrollpad((COLS-width)/2+one_width, (MainHeight-height)/2+MainStartY, two_width, height, "Legend", Config.main_color, Config.window_border);
 		Legend->SetTimeout(ncmpcpp_window_timeout);
 		*Legend << "%a - artist\n";
 		*Legend << "%t - title\n";
@@ -1316,7 +1322,7 @@ void TagEditor::DealWithFilenames(SongList &v)
 		Preview->SetTitle("Preview");
 		Preview->SetTimeout(ncmpcpp_window_timeout);
 		
-		Main = new Menu<string>((COLS-width)/2, (LINES-height)/2, one_width, height, "", Config.main_color, Config.active_window_border);
+		Main = new Menu<string>((COLS-width)/2, (MainHeight-height)/2+MainStartY, one_width, height, "", Config.main_color, Config.active_window_border);
 		Main->SetTimeout(ncmpcpp_window_timeout);
 		Main->CyclicScrolling(Config.use_cyclic_scrolling);
 		Main->SetItemDisplayer(Display::Generic);
