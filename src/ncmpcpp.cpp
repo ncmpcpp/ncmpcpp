@@ -1484,26 +1484,26 @@ int main(int argc, char *argv[])
 					newpos = StrToInt(position)*60 + StrToInt(position.substr(position.find(':')+1));
 				}
 				catch (std::out_of_range) { }
-				if (newpos > 0 && newpos < s->GetTotalLength())
+				if (newpos >= 0 && newpos <= s->GetTotalLength())
 					Mpd.Seek(newpos);
 				else
-					ShowMessage("Out of bounds, 0:00-%s possible for mm:ss, %d given.", s->GetLength().c_str(), newpos);
+					ShowMessage("Out of bounds, 0:00-%s possible for mm:ss, %s given.", s->GetLength().c_str(), MPD::Song::ShowTime(newpos).c_str());
 			}
 			else if (position.find('s') != std::string::npos) // probably position in seconds
 			{
 				newpos = StrToInt(position);
-				if (newpos > 0 && newpos < s->GetTotalLength())
+				if (newpos >= 0 && newpos <= s->GetTotalLength())
 					Mpd.Seek(newpos);
 				else
-					ShowMessage("Out of bounds, 1-%d possible for seconds, %d given.", s->GetTotalLength(), newpos);
+					ShowMessage("Out of bounds, 0-%d possible for seconds, %d given.", s->GetTotalLength(), newpos);
 			}
 			else
 			{
 				newpos = StrToInt(position);
-				if (newpos > 0 && newpos < 100)
+				if (newpos >= 0 && newpos <= 100)
 					Mpd.Seek(s->GetTotalLength()*newpos/100.0);
 				else
-					ShowMessage("Out of bounds, 1-99 possible for %%, %d given.", newpos);
+					ShowMessage("Out of bounds, 0-100 possible for %%, %d given.", newpos);
 			}
 			UpdateStatusImmediately = 1;
 		}
