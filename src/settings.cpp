@@ -823,8 +823,10 @@ void ReadConfiguration(ncmpcpp_config &conf)
 	{
 		Column col;
 		col.color = IntoColor(GetLineValue(conf.song_list_columns_format, '[', ']', 1));
-		col.type = GetLineValue(conf.song_list_columns_format, '{', '}', 1)[0];
+		std::string tag_type = GetLineValue(conf.song_list_columns_format, '{', '}', 1);
+		col.type = tag_type.at(0);
 		col.fixed = *width.rbegin() == 'f';
+		col.right_alignment = tag_type.length() > 1 && tag_type[1] == 'r';
 		col.width = StrToInt(width);
 		conf.columns.push_back(col);
 	}

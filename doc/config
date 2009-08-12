@@ -131,6 +131,10 @@
 ##
 ## - color is optional (if you want the default one, type [])
 ##
+## Note: If you want a column to be right aligned, put 'r' character
+## after displayed tag character, e.g. {lr} will give you right aligned
+## column of lengths.
+##
 #
 #song_columns_list_format = "(7f)[green]{l} (25)[cyan]{a} (40)[]{t} (30)[red]{b}"
 #

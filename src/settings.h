@@ -43,6 +43,7 @@ struct Column
 	Color color;
 	char type;
 	bool fixed;
+	bool right_alignment;
 };
 
 struct ncmpcpp_keys
