@@ -78,7 +78,7 @@ void TinyTagEditor::SwitchTo()
 	}
 	else
 	{
-		string message = "Cannot read file '";
+		std::string message = "Cannot read file '";
 		if (itsEdited.isFromDB())
 			message += Config.mpd_music_dir;
 		message += itsEdited.GetFile();
@@ -177,11 +177,11 @@ void TinyTagEditor::EnterPressed()
 		case 12:
 		{
 			Statusbar() << fmtBold << "Filename: " << fmtBoldEnd;
-			string filename = s.GetNewName().empty() ? s.GetName() : s.GetNewName();
+			std::string filename = s.GetNewName().empty() ? s.GetName() : s.GetNewName();
 			size_t dot = filename.rfind(".");
-			string extension = filename.substr(dot);
+			std::string extension = filename.substr(dot);
 			filename = filename.substr(0, dot);
-			string new_name = wFooter->GetString(filename);
+			std::string new_name = wFooter->GetString(filename);
 			s.SetNewName(new_name + extension);
 			w->at(option) << fmtBold << "Filename:" << fmtBoldEnd << ' ' << (s.GetNewName().empty() ? s.GetName() : s.GetNewName());
 			break;
@@ -248,7 +248,7 @@ bool TinyTagEditor::GetTags()
 {
 	Song &s = itsEdited;
 	
-	string path_to_file;
+	std::string path_to_file;
 	if (s.isFromDB())
 		path_to_file += Config.mpd_music_dir;
 	path_to_file += s.GetFile();
@@ -259,7 +259,7 @@ bool TinyTagEditor::GetTags()
 		return false;
 	s.SetComment(f.tag()->comment().to8Bit(1));
 	
-	string ext = s.GetFile();
+	std::string ext = s.GetFile();
 	ext = ext.substr(ext.rfind(".")+1);
 	ToLower(ext);
 	
@@ -311,8 +311,8 @@ bool TinyTagEditor::GetTags()
 
 TagEditor *myTagEditor = new TagEditor;
 
-const string TagEditor::PatternsFile = config_dir + "patterns.list";
-vector<string> TagEditor::Patterns;
+const std::string TagEditor::PatternsFile = config_dir + "patterns.list";
+std::vector<std::string> TagEditor::Patterns;
 
 const size_t TagEditor::MiddleColumnWidth = 26;
 size_t TagEditor::LeftColumnWidth;
@@ -343,7 +343,7 @@ void TagEditor::Init()
 	
 	LeftColumn = Config.albums_in_tag_editor ? Albums : Dirs;
 	
-	TagTypes = new Menu<string>(MiddleColumnStartX, MainStartY, MiddleColumnWidth, MainHeight, "Tag types", Config.main_color, brNone);
+	TagTypes = new Menu<std::string>(MiddleColumnStartX, MainStartY, MiddleColumnWidth, MainHeight, "Tag types", Config.main_color, brNone);
 	TagTypes->HighlightColor(Config.main_highlight_color);
 	TagTypes->SetTimeout(ncmpcpp_window_timeout);
 	TagTypes->CyclicScrolling(Config.use_cyclic_scrolling);
@@ -474,17 +474,17 @@ void TagEditor::Update()
 			if (itsBrowsedDir != "/")
 			{
 				size_t slash = itsBrowsedDir.rfind("/");
-				string parent = slash != string::npos ? itsBrowsedDir.substr(0, slash) : "/";
+				std::string parent = slash != std::string::npos ? itsBrowsedDir.substr(0, slash) : "/";
 				Dirs->AddOption(make_pair("[..]", parent));
 			}
 			else
 			{
-				Dirs->AddOption(make_pair(".", "/"));
+				Dirs->AddOption(std::make_pair(".", "/"));
 			}
 			for (TagList::const_iterator it = list.begin(); it != list.end(); ++it)
 			{
 				size_t slash = it->rfind("/");
-				string to_display = slash != string::npos ? it->substr(slash+1) : *it;
+				std::string to_display = slash != std::string::npos ? it->substr(slash+1) : *it;
 				utf_to_locale(to_display);
 				Dirs->AddOption(make_pair(to_display, *it));
 				if (*it == itsHighlightedDir)
@@ -561,9 +561,9 @@ void TagEditor::EnterPressed()
 	SongList list;
 	if (Tags->hasSelected())
 	{
-		vector<size_t> selected;
+		std::vector<size_t> selected;
 		Tags->GetSelected(selected);
-		for (vector<size_t>::const_iterator it = selected.begin(); it != selected.end(); ++it)
+		for (std::vector<size_t>::const_iterator it = selected.begin(); it != selected.end(); ++it)
 			list.push_back(&Tags->at(*it));
 	}
 	else
@@ -650,13 +650,13 @@ void TagEditor::EnterPressed()
 			else if (w == Tags)
 			{
 				Song &s = Tags->Current();
-				string old_name = s.GetNewName().empty() ? s.GetName() : s.GetNewName();
+				std::string old_name = s.GetNewName().empty() ? s.GetName() : s.GetNewName();
 				size_t last_dot = old_name.rfind(".");
-				string extension = old_name.substr(last_dot);
+				std::string extension = old_name.substr(last_dot);
 				old_name = old_name.substr(0, last_dot);
 				LockStatusbar();
 				Statusbar() << fmtBold << "New filename: " << fmtBoldEnd;
-				string new_name = wFooter->GetString(old_name);
+				std::string new_name = wFooter->GetString(old_name);
 				UnlockStatusbar();
 				if (!new_name.empty() && new_name != old_name)
 					s.SetNewName(new_name + extension);
@@ -722,7 +722,7 @@ void TagEditor::EnterPressed()
 	{
 		LockStatusbar();
 		Statusbar() << fmtBold << TagTypes->Current() << fmtBoldEnd << ": ";
-		string new_tag = wFooter->GetString((Tags->Current().*get)());
+		std::string new_tag = wFooter->GetString((Tags->Current().*get)());
 		UnlockStatusbar();
 		for (SongList::iterator it = list.begin(); it != list.end(); ++it)
 			(**it.*set)(new_tag);
@@ -731,7 +731,7 @@ void TagEditor::EnterPressed()
 	{
 		LockStatusbar();
 		Statusbar() << fmtBold << TagTypes->Current() << fmtBoldEnd << ": ";
-		string new_tag = wFooter->GetString((Tags->Current().*get)());
+		std::string new_tag = wFooter->GetString((Tags->Current().*get)());
 		UnlockStatusbar();
 		if (new_tag != (Tags->Current().*get)())
 			(Tags->Current().*set)(new_tag);
@@ -923,7 +923,7 @@ void TagEditor::ReadTags(mpd_Song *s)
 bool TagEditor::WriteTags(Song &s)
 {
 	using namespace TagLib;
-	string path_to_file;
+	std::string path_to_file;
 	bool file_is_from_db = s.isFromDB();
 	if (file_is_from_db)
 		path_to_file += Config.mpd_music_dir;
@@ -942,7 +942,7 @@ bool TagEditor::WriteTags(Song &s)
 		if (!f.save())
 			return false;
 		
-		string ext = s.GetFile();
+		std::string ext = s.GetFile();
 		ext = ext.substr(ext.rfind(".")+1);
 		ToLower(ext);
 		if (ext == "mp3")
@@ -980,7 +980,7 @@ bool TagEditor::WriteTags(Song &s)
 		}
 		if (!s.GetNewName().empty())
 		{
-			string new_name;
+			std::string new_name;
 			if (file_is_from_db)
 				new_name += Config.mpd_music_dir;
 			new_name += s.GetDirectory() + "/" + s.GetNewName();
@@ -1012,14 +1012,14 @@ bool TagEditor::WriteTags(Song &s)
 		return false;
 }
 
-std::string TagEditor::CapitalizeFirstLetters(const string &s)
+std::string TagEditor::CapitalizeFirstLetters(const std::string &s)
 {
 	if (s.empty())
 		return "";
-	string result = s;
+	std::string result = s;
 	if (isalpha(result[0]))
 		result[0] = toupper(result[0]);
-	for (string::iterator it = result.begin()+1; it != result.end(); ++it)
+	for (std::string::iterator it = result.begin()+1; it != result.end(); ++it)
 	{
 		if (isalpha(*it) && !isalpha(*(it-1)) && *(it-1) != '\'')
 			*it = toupper(*it);
@@ -1041,7 +1041,7 @@ void TagEditor::CapitalizeFirstLetters(Song &s)
 
 void TagEditor::LowerAllLetters(Song &s)
 {
-	string conv = s.GetTitle();
+	std::string conv = s.GetTitle();
 	ToLower(conv);
 	s.SetTitle(conv);
 	
@@ -1077,7 +1077,7 @@ void TagEditor::LowerAllLetters(Song &s)
 void TagEditor::GetTagList(TagLib::StringList &list, const std::string &s)
 {
 	list.clear();
-	for (size_t i = 0; i != string::npos; i = s.find(",", i))
+	for (size_t i = 0; i != std::string::npos; i = s.find(",", i))
 	{
 		if (i)
 			i++;
@@ -1089,7 +1089,7 @@ void TagEditor::GetTagList(TagLib::StringList &list, const std::string &s)
 std::string TagEditor::TagToString(const MPD::Song &s, void *data)
 {
 	std::string result;
-	switch (static_cast<Menu<string> *>(data)->Choice())
+	switch (static_cast<Menu<std::string> *>(data)->Choice())
 	{
 		case 0:
 			result = s.GetTitle();
@@ -1140,7 +1140,7 @@ void TagEditor::GetPatternList()
 		std::ifstream input(PatternsFile.c_str());
 		if (input.is_open())
 		{
-			string line;
+			std::string line;
 			while (getline(input, line))
 			{
 				if (!line.empty())
@@ -1156,7 +1156,7 @@ void TagEditor::SavePatternList()
 	std::ofstream output(PatternsFile.c_str());
 	if (output.is_open())
 	{
-		for (vector<string>::const_iterator it = Patterns.begin(); it != Patterns.end() && it != Patterns.begin()+30; ++it)
+		for (std::vector<std::string>::const_iterator it = Patterns.begin(); it != Patterns.end() && it != Patterns.begin()+30; ++it)
 			output << *it << std::endl;
 		output.close();
 	}
@@ -1191,32 +1191,32 @@ Song::SetFunction TagEditor::IntoSetFunction(char c)
 	}
 }
 
-string TagEditor::GenerateFilename(const Song &s, string &pattern)
+std::string TagEditor::GenerateFilename(const Song &s, std::string &pattern)
 {
-	string result = s.toString(pattern);
+	std::string result = s.toString(pattern);
 	EscapeUnallowedChars(result);
 	return result;
 }
 
-string TagEditor::ParseFilename(Song &s, string mask, bool preview)
+std::string TagEditor::ParseFilename(Song &s, std::string mask, bool preview)
 {
 	std::ostringstream result;
-	vector<string> separators;
-	vector< std::pair<char, string> > tags;
-	string file = s.GetName().substr(0, s.GetName().rfind("."));
+	std::vector<std::string> separators;
+	std::vector< std::pair<char, std::string> > tags;
+	std::string file = s.GetName().substr(0, s.GetName().rfind("."));
 	
 	try
 	{
-		for (size_t i = mask.find("%"); i != string::npos; i = mask.find("%"))
+		for (size_t i = mask.find("%"); i != std::string::npos; i = mask.find("%"))
 		{
-			tags.push_back(make_pair(mask.at(i+1), ""));
+			tags.push_back(std::make_pair(mask.at(i+1), ""));
 			mask = mask.substr(i+2);
 			i = mask.find("%");
 			if (!mask.empty())
 				separators.push_back(mask.substr(0, i));
 		}
 		int i = 0;
-		for (vector<string>::const_iterator it = separators.begin(); it != separators.end(); ++it, ++i)
+		for (std::vector<std::string>::const_iterator it = separators.begin(); it != separators.end(); ++it, ++i)
 		{
 			int j = file.find(*it);
 			tags.at(i).second = file.substr(0, j);
@@ -1230,12 +1230,12 @@ string TagEditor::ParseFilename(Song &s, string mask, bool preview)
 		return "Error while parsing filename!";
 	}
 	
-	for (vector< std::pair<char, string> >::iterator it = tags.begin(); it != tags.end(); ++it)
+	for (std::vector< std::pair<char, std::string> >::iterator it = tags.begin(); it != tags.end(); ++it)
 	{
-		for (string::iterator j = it->second.begin(); j != it->second.end(); ++j)
+		for (std::string::iterator j = it->second.begin(); j != it->second.end(); ++j)
 			if (*j == '_')
 				*j = ' ';
-			
+		
 		if (!preview)
 		{
 			Song::SetFunction set = IntoSetFunction(it->first);
@@ -1261,7 +1261,7 @@ void TagEditor::DealWithFilenames(SongList &v)
 	
 	GetPatternList();
 	
-	Menu<string> *Main = new Menu<string>((COLS-width)/2, (MainHeight-height)/2+MainStartY, width, height, "", Config.main_color, Config.window_border);
+	Menu<std::string> *Main = new Menu<std::string>((COLS-width)/2, (MainHeight-height)/2+MainStartY, width, height, "", Config.main_color, Config.window_border);
 	Main->SetTimeout(ncmpcpp_window_timeout);
 	Main->CyclicScrolling(Config.use_cyclic_scrolling);
 	Main->SetItemDisplayer(Display::Generic);
@@ -1322,7 +1322,7 @@ void TagEditor::DealWithFilenames(SongList &v)
 		Preview->SetTitle("Preview");
 		Preview->SetTimeout(ncmpcpp_window_timeout);
 		
-		Main = new Menu<string>((COLS-width)/2, (MainHeight-height)/2+MainStartY, one_width, height, "", Config.main_color, Config.active_window_border);
+		Main = new Menu<std::string>((COLS-width)/2, (MainHeight-height)/2+MainStartY, one_width, height, "", Config.main_color, Config.active_window_border);
 		Main->SetTimeout(ncmpcpp_window_timeout);
 		Main->CyclicScrolling(Config.use_cyclic_scrolling);
 		Main->SetItemDisplayer(Display::Generic);
@@ -1340,7 +1340,7 @@ void TagEditor::DealWithFilenames(SongList &v)
 			Main->AddSeparator();
 			Main->AddOption("Recent patterns", 1, 1);
 			Main->AddSeparator();
-			for (vector<string>::const_iterator it = Patterns.begin(); it != Patterns.end(); ++it)
+			for (std::vector<std::string>::const_iterator it = Patterns.begin(); it != Patterns.end(); ++it)
 				Main->AddOption(*it);
 		}
 		
@@ -1377,7 +1377,7 @@ void TagEditor::DealWithFilenames(SongList &v)
 					{
 						LockStatusbar();
 						Statusbar() << "Pattern: ";
-						string new_pattern = wFooter->GetString(Config.pattern);
+						std::string new_pattern = wFooter->GetString(Config.pattern);
 						UnlockStatusbar();
 						if (!new_pattern.empty())
 						{
@@ -1409,9 +1409,9 @@ void TagEditor::DealWithFilenames(SongList &v)
 							}
 							else
 							{
-								const string &file = s.GetName();
+								const std::string &file = s.GetName();
 								size_t last_dot = file.rfind(".");
-								string extension = file.substr(last_dot);
+								std::string extension = file.substr(last_dot);
 								basic_buffer<my_char_t> new_file;
 								new_file << TO_WSTRING(GenerateFilename(s, Config.pattern));
 								if (new_file.Str().empty())
