@@ -37,8 +37,8 @@ void Outputs::Init()
 	w->HighlightColor(Config.main_highlight_color);
 	w->SetItemDisplayer(Display::Pairs);
 	
-	FetchList();
 	isInitialized = 1;
+	FetchList();
 }
 
 void Outputs::SwitchTo()
@@ -109,6 +109,8 @@ void Outputs::MouseButtonPressed(MEVENT me)
 
 void Outputs::FetchList()
 {
+	if (!isInitialized)
+		return;
 	MPD::OutputList ol;
 	Mpd.GetOutputs(ol);
 	w->Clear();
