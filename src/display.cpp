@@ -23,6 +23,20 @@
 #include "helpers.h"
 #include "playlist.h"
 
+namespace
+{
+	template <typename C, typename T> void ParseColors(const std::basic_string<C> &s, T &buf)
+	{
+		for (typename std::basic_string<C>::const_iterator it = s.begin(); it != s.end(); ++it)
+		{
+			if (*it == '$')
+				buf << Color(*++it-'0');
+			else
+				buf << *it;
+		}
+	}
+}
+
 std::string Display::Columns()
 {
 	if (Config.columns.empty())
@@ -208,109 +222,18 @@ void Display::Songs(const MPD::Song &s, void *data, Menu<MPD::Song> *menu)
 	basic_buffer<my_char_t> buf;
 	bool right = 0;
 	
-	std::string::const_iterator goto_pos, prev_pos;
-	
 	for (std::string::const_iterator it = song_template.begin(); it != song_template.end(); ++it)
 	{
-		CHECK_LINKED_TAGS:;
-		if (*it == '{')
+		while (*it == '{')
 		{
-			prev_pos = it;
-			MPD::Song::GetFunction get = 0;
-			for (; *it != '}'; ++it)
-			{
-				if (*it == '%')
-				{
-					switch (*++it)
-					{
-						case 'l':
-							get = &MPD::Song::GetLength;
-							break;
-						case 'F':
-							get = &MPD::Song::GetFile;
-							break;
-						case 'f':
-							get = &MPD::Song::GetName;
-							break;
-						case 'a':
-							get = &MPD::Song::GetArtist;
-							break;
-						case 'b':
-							get = &MPD::Song::GetAlbum;
-							break;
-						case 'y':
-							get = &MPD::Song::GetDate;
-							break;
-						case 'n':
-							get = &MPD::Song::GetTrack;
-							break;
-						case 'g':
-							get = &MPD::Song::GetGenre;
-							break;
-						case 'c':
-							get = &MPD::Song::GetComposer;
-							break;
-						case 'p':
-							get = &MPD::Song::GetPerformer;
-							break;
-						case 'd':
-							get = &MPD::Song::GetDisc;
-							break;
-						case 'C':
-							get = &MPD::Song::GetComment;
-							break;
-						case 't':
-							get = &MPD::Song::GetTitle;
-							break;
-						default:
-							break;
-					}
-					if (get == &MPD::Song::GetLength)
-					{
-						if  (!s.GetTotalLength())
-							break;
-					}
-					else if (get)
-					{
-						if ((s.*get)().empty())
-							break;
-					}
-				}
-			}
-			if (*it == '}')
-			{
-				while (1)
-				{
-					if (*it == '}' && *(it+1) != '|')
-						break;
-					++it;
-				}
-				goto_pos = ++it;
-				it = ++prev_pos;
-			}
+			std::string tags = s.Format_ParseBraces(it, song_template.end());
+			if (!right)
+				ParseColors(tags, *menu);
 			else
-			{
-				for (; *it != '}'; ++it) { }
-				++it;
-				if (it == song_template.end())
-					break;
-				if (*it == '{' || *it == '|')
-				{
-					if (*it == '|')
-						++it;
-					goto CHECK_LINKED_TAGS;
-				}
-			}
+				ParseColors(TO_WSTRING(tags), buf);
 		}
-		
-		if (*it == '}')
-		{
-			if (goto_pos == song_template.end())
-				break;
-			it = goto_pos;
-			if (*it == '{')
-				goto CHECK_LINKED_TAGS;
-		}
+		if (it == song_template.end())
+			break;
 		
 		if (*it != '%' && *it != '$')
 		{
@@ -416,6 +339,7 @@ void Display::Songs(const MPD::Song &s, void *data, Menu<MPD::Song> *menu)
 			else
 				buf << Color(*it-'0');
 		}
+		
 	}
 	if (right)
 	{

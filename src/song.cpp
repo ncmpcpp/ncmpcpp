@@ -289,118 +289,115 @@ void MPD::Song::SetPosition(int pos)
 	itsSong->pos = pos;
 }
 
+std::string MPD::Song::Format_ParseBraces(std::string::const_iterator &it, std::string::const_iterator end_it) const
+{
+	std::string result;
+	bool has_some_tags = 0;
+	MPD::Song::GetFunction get = 0;
+	while (*++it != '}')
+	{
+		while (*it == '{')
+		{
+			std::string tags = Format_ParseBraces(it, end_it);
+			if (!tags.empty())
+			{
+				has_some_tags = 1;
+				result += tags;
+			}
+		}
+		if (*it == '}')
+			break;
+		else if (it == end_it)
+			return "";
+		
+		if (*it == '%')
+		{
+			switch (*++it)
+			{
+				case 'l':
+					get = &MPD::Song::GetLength;
+					break;
+				case 'F':
+					get = &MPD::Song::GetFile;
+					break;
+				case 'f':
+					get = &MPD::Song::GetName;
+					break;
+				case 'a':
+					get = &MPD::Song::GetArtist;
+					break;
+				case 'b':
+					get = &MPD::Song::GetAlbum;
+					break;
+				case 'y':
+					get = &MPD::Song::GetDate;
+					break;
+				case 'n':
+					get = &MPD::Song::GetTrack;
+					break;
+				case 'g':
+					get = &MPD::Song::GetGenre;
+					break;
+				case 'c':
+					get = &MPD::Song::GetComposer;
+					break;
+				case 'p':
+					get = &MPD::Song::GetPerformer;
+					break;
+				case 'd':
+					get = &MPD::Song::GetDisc;
+					break;
+				case 'C':
+					get = &MPD::Song::GetComment;
+					break;
+				case 't':
+					get = &MPD::Song::GetTitle;
+					break;
+				default:
+					break;
+			}
+			if (get)
+			{
+				std::string tag = (this->*get)();
+				if (!tag.empty() && (get != &MPD::Song::GetLength || GetTotalLength()))
+				{
+					has_some_tags = 1;
+					result += tag;
+				}
+				else
+					break;
+			}
+		}
+		else
+			result += *it;
+	}
+	if (*it != '}' || !has_some_tags)
+	{
+		for (; *it != '}'; ++it) { }
+		if (*++it == '|')
+			return Format_ParseBraces(++it, end_it);
+		else
+			return "";
+	}
+	else
+	{
+		if (*++it == '|')
+			for (; *it != '}' || *++it == '|'; ++it) { }
+		return result;
+	}
+}
+
 std::string MPD::Song::toString(const std::string &format) const
 {
 	std::string result;
-	std::string::const_iterator goto_pos, prev_pos;
-	
 	for (std::string::const_iterator it = format.begin(); it != format.end(); ++it)
 	{
-		CHECK_LINKED_TAGS:;
-		if (*it == '{')
-		{
-			prev_pos = it;
-			GetFunction get = 0;
-			for (; *it != '}'; ++it)
-			{
-				if (*it == '%')
-				{
-					switch (*++it)
-					{
-						case 'l':
-							get = &Song::GetLength;
-							break;
-						case 'F':
-							get = &Song::GetFile;
-							break;
-						case 'f':
-							get = &Song::GetName;
-							break;
-						case 'a':
-							get = &Song::GetArtist;
-							break;
-						case 'b':
-							get = &Song::GetAlbum;
-							break;
-						case 'y':
-							get = &Song::GetDate;
-							break;
-						case 'n':
-							get = &Song::GetTrack;
-							break;
-						case 'g':
-							get = &Song::GetGenre;
-							break;
-						case 'c':
-							get = &Song::GetComposer;
-							break;
-						case 'p':
-							get = &Song::GetPerformer;
-							break;
-						case 'd':
-							get = &Song::GetDisc;
-							break;
-						case 'C':
-							get = &Song::GetComment;
-							break;
-						case 't':
-							get = &Song::GetTitle;
-							break;
-						default:
-							break;
-					}
-					if (get == &Song::GetLength)
-					{
-						if  (!GetTotalLength())
-							break;
-					}
-					else if (get)
-					{
-						if ((this->*get)().empty())
-							break;
-					}
-				}
-			}
-			if (*it == '}')
-			{
-				while (1)
-				{
-					if (*it == '}' && *(it+1) != '|')
-						break;
-					++it;
-				}
-				goto_pos = ++it;
-				it = ++prev_pos;
-			}
-			else
-			{
-				for (; *it != '}'; ++it) { }
-				++it;
-				if (it == format.end())
-					break;
-				if (*it == '{' || *it == '|')
-				{
-					if (*it == '|')
-						++it;
-					goto CHECK_LINKED_TAGS;
-				}
-			}
-		}
+		while (*it == '{')
+			result += Format_ParseBraces(it, format.end());
+		if (it == format.end())
+			break;
 		
-		if (*it == '}')
-		{
-			if (goto_pos == format.end())
-				break;
-			it = goto_pos;
-			if (*it == '{')
-				goto CHECK_LINKED_TAGS;
-		}
-		
-		if (*it != '%')
-		{
-			result += *it;
-		}
-		else if (*it == '%')
+		if (*it == '%')
 		{
 			switch (*++it)
 			{
@@ -447,6 +444,8 @@ std::string MPD::Song::toString(const std::string &format) const
 					break;
 			}
 		}
+		else
+			result += *it;
 	}
 	return result;
 }

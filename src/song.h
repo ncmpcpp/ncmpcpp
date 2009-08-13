@@ -92,6 +92,7 @@ namespace MPD
 			Song &operator=(const Song &);
 			
 			static std::string ShowTime(int);
+			std::string Format_ParseBraces(std::string::const_iterator &it, std::string::const_iterator end_it) const;
 		private:
 			void SetHashAndSlash();
 			
