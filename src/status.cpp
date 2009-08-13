@@ -458,11 +458,11 @@ void NcmpcppStatusChanged(Connection *, StatusChanges changed, void *)
 					tracklength += Song::ShowTime(elapsed);
 					tracklength += "]";
 				}
-				*wFooter << XY(0, 1) << wclrtoeol << player_state
-				<< fmtBoldEnd
-				<< Scroller(utf_to_locale_cpy(np.toString(Config.song_status_format)), wFooter->GetWidth()-player_state.length()-tracklength.length(), playing_song_scroll_begin)
-				<< fmtBold
-				<< XY(wFooter->GetWidth()-tracklength.length(), 1) << tracklength;
+				basic_buffer<my_char_t> np_song;
+				String2Buffer(TO_WSTRING(utf_to_locale_cpy(np.toString(Config.song_status_format))), np_song);
+				*wFooter << XY(0, 1) << wclrtoeol << player_state << fmtBoldEnd;
+				np_song.Write(*wFooter, playing_song_scroll_begin, wFooter->GetWidth()-player_state.length()-tracklength.length(), U(" ** "));
+				*wFooter << fmtBold << XY(wFooter->GetWidth()-tracklength.length(), 1) << tracklength;
 			}
 			if (!block_progressbar_update)
 			{

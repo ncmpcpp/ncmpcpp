@@ -79,6 +79,8 @@
 #
 #song_list_format = "{%a - }{%t}|{$8%f$9}%r{$3(%l)$9}"
 #
+#song_status_format = "{(%l) }{%a - }{%t}|{%f}"
+#
 #song_library_format = "{%n - }{%t}|{%f}"
 #
 #tag_editor_album_format = "{(%y) }%b"
@@ -109,9 +111,7 @@
 #
 #alternative_header_second_line_format = "{$4$b%a$/b$9}{ - $7%b$9}{ ($4%y$9)}"
 #
-## colors are not supported for below veriables
-#
-#song_status_format = "{(%l) }{%a - }{%t}|{%f}"
+## colors are not supported for below variable
 #
 #song_window_title_format = "{%a - }{%t}|{%f}"
 #
