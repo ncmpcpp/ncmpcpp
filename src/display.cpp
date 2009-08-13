@@ -63,8 +63,8 @@ std::string Display::Columns()
 			case 'f':
 				tag = "Filename";
 				break;
-			case 'F':
-				tag = "Full filename";
+			case 'D':
+				tag = "Directory";
 				break;
 			case 'a':
 				tag = "Artist";
@@ -147,8 +147,8 @@ void Display::SongsInColumns(const MPD::Song &s, void *, Menu<MPD::Song> *menu)
 			case 'l':
 				get = &MPD::Song::GetLength;
 				break;
-			case 'F':
-				get = &MPD::Song::GetFile;
+			case 'D':
+				get = &MPD::Song::GetDirectory;
 				break;
 			case 'f':
 				get = &MPD::Song::GetName;
@@ -252,11 +252,11 @@ void Display::Songs(const MPD::Song &s, void *data, Menu<MPD::Song> *menu)
 					else
 						buf << TO_WSTRING(s.GetLength());
 					break;
-				case 'F':
+				case 'D':
 					if (!right)
-						*menu << s.GetFile();
+						*menu << s.GetDirectory();
 					else
-						buf << TO_WSTRING(s.GetFile());
+						buf << TO_WSTRING(s.GetDirectory());
 					break;
 				case 'f':
 					if (!right)

@@ -317,8 +317,8 @@ std::string MPD::Song::Format_ParseBraces(std::string::const_iterator &it, std::
 				case 'l':
 					get = &MPD::Song::GetLength;
 					break;
-				case 'F':
-					get = &MPD::Song::GetFile;
+				case 'D':
+					get = &MPD::Song::GetDirectory;
 					break;
 				case 'f':
 					get = &MPD::Song::GetName;
@@ -404,8 +404,8 @@ std::string MPD::Song::toString(const std::string &format) const
 				case 'l':
 					result += GetLength();
 					break;
-				case 'F':
-					result += GetFile();
+				case 'D':
+					result += GetDirectory();
 					break;
 				case 'f':
 					result += GetName();

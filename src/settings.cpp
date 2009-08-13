@@ -248,7 +248,7 @@ void DefaultConfiguration(ncmpcpp_config &conf)
 	conf.song_library_format = "{%n - }{%t}|{%f}";
 	conf.tag_editor_album_format = "{(%y) }%b";
 	conf.new_header_first_line = "$b$1$aqqu$/a$9 {%t}|{%f} $1$atqq$/a$9$/b";
-	conf.new_header_second_line = "{$4$b%a$/b$9}{ - $7%b$9}{ ($4%y$9)}";
+	conf.new_header_second_line = "{{$4$b%a$/b$9}{ - $7%b$9}{ ($4%y$9)}}|{%D}";
 	conf.browser_playlist_prefix << clRed << "(playlist)" << clEnd << ' ';
 	conf.pattern = "%n - %t";
 	conf.selected_item_prefix << clMagenta;

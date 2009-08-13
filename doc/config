@@ -40,8 +40,8 @@
 ## for song format you can use:
 ##
 ## %l - length
-## %f - short filename
-## %F - full filename
+## %f - filename
+## %D - directory
 ## %a - artist
 ## %t - title
 ## %b - album
@@ -109,7 +109,7 @@
 #
 #alternative_header_first_line_format = "$b$1$aqqu$/a$9 {%t}|{%f} $1$atqq$/a$9$/b"
 #
-#alternative_header_second_line_format = "{$4$b%a$/b$9}{ - $7%b$9}{ ($4%y$9)}"
+#alternative_header_second_line_format = "{{$4$b%a$/b$9}{ - $7%b$9}{ ($4%y$9)}}|{%D}"
 #
 ## colors are not supported for below variable
 #
