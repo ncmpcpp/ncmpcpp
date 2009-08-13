@@ -418,8 +418,8 @@ void NcmpcppStatusChanged(Connection *, StatusChanges changed, void *)
 				}
 				
 				basic_buffer<my_char_t> first, second;
-				String2Buffer(TO_WSTRING(np.toString(Config.new_header_first_line)), first);
-				String2Buffer(TO_WSTRING(np.toString(Config.new_header_second_line)), second);
+				String2Buffer(TO_WSTRING(utf_to_locale_cpy(np.toString(Config.new_header_first_line))), first);
+				String2Buffer(TO_WSTRING(utf_to_locale_cpy(np.toString(Config.new_header_second_line))), second);
 				
 				size_t first_len = Window::Length(first.Str());
 				size_t first_margin = (std::max(tracklength.length()+1, VolumeState.length()))*2;
