@@ -23,20 +23,6 @@
 #include "helpers.h"
 #include "playlist.h"
 
-namespace
-{
-	template <typename C, typename T> void ParseColors(const std::basic_string<C> &s, T &buf)
-	{
-		for (typename std::basic_string<C>::const_iterator it = s.begin(); it != s.end(); ++it)
-		{
-			if (*it == '$')
-				buf << Color(*++it-'0');
-			else
-				buf << *it;
-		}
-	}
-}
-
 std::string Display::Columns()
 {
 	if (Config.columns.empty())
@@ -218,133 +204,28 @@ void Display::Songs(const MPD::Song &s, void *data, Menu<MPD::Song> *menu)
 	if (!s.Localized())
 		const_cast<MPD::Song *>(&s)->Localize();
 	
-	const std::string &song_template = data ? *static_cast<std::string *>(data) : "";
-	basic_buffer<my_char_t> buf;
-	bool right = 0;
-	
-	for (std::string::const_iterator it = song_template.begin(); it != song_template.end(); ++it)
+	std::string line = s.toString(*static_cast<std::string *>(data));
+	for (std::string::const_iterator it = line.begin(); it != line.end(); ++it)
 	{
-		while (*it == '{')
+		if (*it == '$')
 		{
-			std::string tags = s.Format_ParseBraces(it, song_template.end());
-			if (!right)
-				ParseColors(tags, *menu);
-			else
-				ParseColors(TO_WSTRING(tags), buf);
-		}
-		if (it == song_template.end())
-			break;
-		
-		if (*it != '%' && *it != '$')
-		{
-			if (!right)
-				*menu << *it;
-			else
-				buf << *it;
-		}
-		else if (*it == '%')
-		{
-			switch (*++it)
+			if (isdigit(*++it))
 			{
-				case 'l':
-					if (!right)
-						*menu << s.GetLength();
-					else
-						buf << TO_WSTRING(s.GetLength());
-					break;
-				case 'D':
-					if (!right)
-						*menu << s.GetDirectory();
-					else
-						buf << TO_WSTRING(s.GetDirectory());
-					break;
-				case 'f':
-					if (!right)
-						*menu << s.GetName();
-					else
-						buf << TO_WSTRING(s.GetName());
-					break;
-				case 'a':
-					if (!right)
-						*menu << s.GetArtist();
-					else
-						buf << TO_WSTRING(s.GetArtist());
-					break;
-				case 'b':
-					if (!right)
-						*menu << s.GetAlbum();
-					else
-						buf << TO_WSTRING(s.GetAlbum());
-					break;
-				case 'y':
-					if (!right)
-						*menu << s.GetDate();
-					else
-						buf << TO_WSTRING(s.GetDate());
-					break;
-				case 'n':
-					if (!right)
-						*menu << s.GetTrack();
-					else
-						buf << TO_WSTRING(s.GetTrack());
-					break;
-				case 'g':
-					if (!right)
-						*menu << s.GetGenre();
-					else
-						buf << TO_WSTRING(s.GetGenre());
-					break;
-				case 'c':
-					if (!right)
-						*menu << s.GetComposer();
-					else
-						buf << TO_WSTRING(s.GetComposer());
-					break;
-				case 'p':
-					if (!right)
-						*menu << s.GetPerformer();
-					else
-						buf << TO_WSTRING(s.GetPerformer());
-					break;
-				case 'd':
-					if (!right)
-						*menu << s.GetDisc();
-					else
-						buf << TO_WSTRING(s.GetDisc());
-					break;
-				case 'C':
-					if (!right)
-						*menu << s.GetComment();
-					else
-						buf << TO_WSTRING(s.GetComment());
-					break;
-				case 't':
-					if (!right)
-						*menu << s.GetTitle();
-					else
-						buf << TO_WSTRING(s.GetTitle());
-					break;
-				case 'r':
-					right = 1;
-					break;
-				default:
-					break;
+				*menu << Color(*it-'0');
 			}
+			else if (*it == 'R') // right align
+			{
+				basic_buffer<my_char_t> buf;
+				buf << U(" ");
+				String2Buffer(TO_WSTRING(line.substr(it-line.begin()+1)), buf);
+				*menu << XY(COLS-buf.Str().length(), menu->Y()) << buf;
+				break;
+			}
+			else
+				*menu << *it;
 		}
 		else
-		{
-			++it;
-			if (!right)
-				*menu << Color(*it-'0');
-			else
-				buf << Color(*it-'0');
-		}
-		
-	}
-	if (right)
-	{
-		menu->GotoXY(menu->GetWidth()-buf.Str().length(), menu->Y());
-		*menu << buf;
+			*menu << *it;
 	}
 }
 

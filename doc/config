@@ -52,7 +52,7 @@
 ## %p - performer
 ## %d - disc
 ## %C - comment
-## %r - begin right align
+## $R - begin right alignment
 ##
 ## you can also put them in { } and then it will be displayed
 ## only if all requested values are available and/or define alternate
@@ -77,7 +77,7 @@
 ## Note: colors can be nested.
 ##
 #
-#song_list_format = "{%a - }{%t}|{$8%f$9}%r{$3(%l)$9}"
+#song_list_format = "{%a - }{%t}|{$8%f$9}$R{$3(%l)$9}"
 #
 #song_status_format = "{(%l) }{%a - }{%t}|{%f}"
 #

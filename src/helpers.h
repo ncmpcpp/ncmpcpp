@@ -64,9 +64,6 @@ template <typename C> void String2Buffer(const std::basic_string<C> &s, basic_bu
 		{
 			switch (*it)
 			{
-				case '$':
-					buf << *it;
-					break;
 				case 'b':
 					buf << fmtBold;
 					break;
@@ -89,6 +86,9 @@ template <typename C> void String2Buffer(const std::basic_string<C> &s, basic_bu
 							buf << fmtReverseEnd;
 							break;
 					}
+					break;
+				default:
+					buf << *it;
 					break;
 			}
 		}

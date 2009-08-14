@@ -289,7 +289,7 @@ void MPD::Song::SetPosition(int pos)
 	itsSong->pos = pos;
 }
 
-std::string MPD::Song::Format_ParseBraces(std::string::const_iterator &it, std::string::const_iterator end_it) const
+std::string MPD::Song::ParseFormat(std::string::const_iterator &it) const
 {
 	std::string result;
 	bool has_some_tags = 0;
@@ -298,7 +298,7 @@ std::string MPD::Song::Format_ParseBraces(std::string::const_iterator &it, std::
 	{
 		while (*it == '{')
 		{
-			std::string tags = Format_ParseBraces(it, end_it);
+			std::string tags = ParseFormat(it);
 			if (!tags.empty())
 			{
 				has_some_tags = 1;
@@ -307,8 +307,6 @@ std::string MPD::Song::Format_ParseBraces(std::string::const_iterator &it, std::
 		}
 		if (*it == '}')
 			break;
-		else if (it == end_it)
-			return "";
 		
 		if (*it == '%')
 		{
@@ -382,7 +380,7 @@ std::string MPD::Song::Format_ParseBraces(std::string::const_iterator &it, std::
 				--brace_counter;
 		}
 		if (*++it == '|')
-			return Format_ParseBraces(++it, end_it);
+			return ParseFormat(++it);
 		else
 			return "";
 	}
@@ -405,65 +403,8 @@ std::string MPD::Song::Format_ParseBraces(std::string::const_iterator &it, std::
 
 std::string MPD::Song::toString(const std::string &format) const
 {
-	std::string result;
-	for (std::string::const_iterator it = format.begin(); it != format.end(); ++it)
-	{
-		while (*it == '{')
-			result += Format_ParseBraces(it, format.end());
-		if (it == format.end())
-			break;
-		
-		if (*it == '%')
-		{
-			switch (*++it)
-			{
-				case 'l':
-					result += GetLength();
-					break;
-				case 'D':
-					result += GetDirectory();
-					break;
-				case 'f':
-					result += GetName();
-					break;
-				case 'a':
-					result += GetArtist();
-					break;
-				case 'b':
-					result += GetAlbum();
-					break;
-				case 'y':
-					result += GetDate();
-					break;
-				case 'n':
-					result += GetTrack();
-					break;
-				case 'g':
-					result += GetGenre();
-					break;
-				case 'c':
-					result += GetComposer();
-					break;
-				case 'p':
-					result += GetPerformer();
-					break;
-				case 'd':
-					result += GetDisc();
-					break;
-				case 'C':
-					result += GetComment();
-					break;
-				case 't':
-					result += GetTitle();
-					break;
-				default:
-					break;
-			}
-		}
-		else
-			result += *it;
-	}
-	return result;
+	std::string::const_iterator it = format.begin();
+	return ParseFormat(it);
 }
 
 MPD::Song &MPD::Song::operator=(const MPD::Song &s)
