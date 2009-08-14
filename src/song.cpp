@@ -453,7 +453,7 @@ void MPD::Song::SetHashAndSlash()
 	if (!isStream())
 	{
 		const char *tmp = strrchr(itsSong->file, '/');
-		itsSlash = tmp && *(tmp-1) != '/' /* no http:// */ ? tmp-itsSong->file : std::string::npos;
+		itsSlash = tmp ? tmp-itsSong->file : std::string::npos;
 	}
 	itsHash = calc_hash(itsSong->file);
 }
