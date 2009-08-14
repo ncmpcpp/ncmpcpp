@@ -371,9 +371,16 @@ std::string MPD::Song::Format_ParseBraces(std::string::const_iterator &it, std::
 		else
 			result += *it;
 	}
+	int brace_counter = 0;
 	if (*it != '}' || !has_some_tags)
 	{
-		for (; *it != '}'; ++it) { }
+		for (; *it != '}' || brace_counter; ++it)
+		{
+			if (*it == '{')
+				++brace_counter;
+			else if (*it == '}')
+				--brace_counter;
+		}
 		if (*++it == '|')
 			return Format_ParseBraces(++it, end_it);
 		else
@@ -381,8 +388,17 @@ std::string MPD::Song::Format_ParseBraces(std::string::const_iterator &it, std::
 	}
 	else
 	{
-		if (*++it == '|')
-			for (; *it != '}' || *++it == '|'; ++it) { }
+		if (*(it+1) == '|')
+		{
+			for (; *it != '}' || *(it+1) == '|' || brace_counter; ++it)
+			{
+				if (*it == '{')
+					++brace_counter;
+				else if (*it == '}')
+					--brace_counter;
+			}
+		}
+		++it;
 		return result;
 	}
 }
