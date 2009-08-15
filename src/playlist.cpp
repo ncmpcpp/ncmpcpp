@@ -451,7 +451,7 @@ std::string Playlist::SongToString(const MPD::Song &s, void *data)
 
 std::string Playlist::SongInColumnsToString(const MPD::Song &s, void *)
 {
-	std::string result;
+	std::string result = "{";
 	for (std::vector<Column>::const_iterator it = Config.columns.begin(); it != Config.columns.end(); ++it)
 	{
 		if (it->type == 't')
@@ -465,6 +465,7 @@ std::string Playlist::SongInColumnsToString(const MPD::Song &s, void *)
 		}
 		result += " ";
 	}
+	result += "}";
 	return s.toString(result);
 }
 
