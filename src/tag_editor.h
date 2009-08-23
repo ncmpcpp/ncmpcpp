@@ -115,7 +115,7 @@ class TagEditor : public Screen<Window>
 		static void GetPatternList();
 		static void SavePatternList();
 		static MPD::Song::SetFunction IntoSetFunction(char);
-		static std::string GenerateFilename(const MPD::Song &, std::string &);
+		static std::string GenerateFilename(const MPD::Song &, const std::string &);
 		static std::string ParseFilename(MPD::Song &, std::string, bool);
 		
 		static void DealWithFilenames(MPD::SongList &);

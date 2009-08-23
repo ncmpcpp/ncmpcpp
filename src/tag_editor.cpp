@@ -1191,7 +1191,7 @@ Song::SetFunction TagEditor::IntoSetFunction(char c)
 	}
 }
 
-std::string TagEditor::GenerateFilename(const Song &s, std::string &pattern)
+std::string TagEditor::GenerateFilename(const Song &s, const std::string &pattern)
 {
 	std::string result = s.toString(pattern);
 	EscapeUnallowedChars(result);
@@ -1409,11 +1409,11 @@ void TagEditor::DealWithFilenames(SongList &v)
 							}
 							else
 							{
-								const std::string &file = s.GetName();
+								std::string file = s.GetName();
 								size_t last_dot = file.rfind(".");
 								std::string extension = file.substr(last_dot);
 								basic_buffer<my_char_t> new_file;
-								new_file << TO_WSTRING(GenerateFilename(s, Config.pattern));
+								new_file << TO_WSTRING(GenerateFilename(s, "{" + Config.pattern + "}"));
 								if (new_file.Str().empty())
 								{
 									if (preview)
