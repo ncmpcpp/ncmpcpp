@@ -141,9 +141,11 @@
 ##### various settings #####
 #
 ##
-## Note: Custom command that will be executed each time song changes.
-## It uses the same syntax as song format (for now playing song).
-## Useful for notifications etc.
+## Note: Custom command that will be executed each
+## time song changes. Useful for notifications etc.
+##
+## Attention: It doesn't support song format anymore.
+## Use `ncmpcpp --now-playing SONG_FORMAT` instead.
 ##
 #execute_on_song_change = ""
 #
