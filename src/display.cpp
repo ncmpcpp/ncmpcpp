@@ -218,7 +218,7 @@ void Display::Songs(const MPD::Song &s, void *data, Menu<MPD::Song> *menu)
 				basic_buffer<my_char_t> buf;
 				buf << U(" ");
 				String2Buffer(TO_WSTRING(line.substr(it-line.begin()+1)), buf);
-				*menu << XY(COLS-buf.Str().length(), menu->Y()) << buf;
+				*menu << XY(menu->GetWidth()-buf.Str().length(), menu->Y()) << buf;
 				break;
 			}
 			else
