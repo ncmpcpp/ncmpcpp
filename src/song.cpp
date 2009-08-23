@@ -25,6 +25,7 @@
 #include <cstring>
 #include <iomanip>
 #include <sstream>
+#include <stdexcept>
 
 #include "charset.h"
 #include "misc.h"
@@ -444,6 +445,20 @@ std::string MPD::Song::ShowTime(int length)
 		<< std::setw(2) << std::setfill('0') << seconds;
 	}
 	return ss.str();
+}
+
+void MPD::Song::ValidateFormat(const std::string &type, const std::string &s)
+{
+	int braces = 0;
+	for (std::string::const_iterator it = s.begin(); it != s.end(); ++it)
+	{
+		if (*it == '{')
+			++braces;
+		else if (*it == '}')
+			--braces;
+	}
+	if (braces)
+		throw std::runtime_error(type + ": number of opening and closing braces does not equal!");
 }
 
 void MPD::Song::SetHashAndSlash()

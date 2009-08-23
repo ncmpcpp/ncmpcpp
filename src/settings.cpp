@@ -24,7 +24,6 @@
 # include <sys/stat.h>
 #endif // WIN32
 #include <fstream>
-#include <stdexcept>
 
 #include "global.h"
 #include "helpers.h"
@@ -60,20 +59,6 @@ namespace
 			one = line;
 		key[0] = !one.empty() && one[0] == '\'' ? one[1] : (atoi(one.c_str()) == 0 ? null_key : atoi(one.c_str()));
 		key[1] = !two.empty() && two[0] == '\'' ? two[1] : (atoi(two.c_str()) == 0 ? null_key : atoi(two.c_str()));
-	}
-	
-	void ValidateSongFormat(const std::string &type, const std::string &s)
-	{
-		int braces = 0;
-		for (std::string::const_iterator it = s.begin(); it != s.end(); ++it)
-		{
-			if (*it == '{')
-				++braces;
-			else if (*it == '}')
-				--braces;
-		}
-		if (braces)
-			throw std::runtime_error(type + ": number of opening and closing braces does not equal!");
 	}
 	
 	Border IntoBorder(const std::string &color)
@@ -538,7 +523,7 @@ void ReadConfiguration(ncmpcpp_config &conf)
 			{
 				if (!v.empty())
 				{
-					ValidateSongFormat("song_list_format", v);
+					MPD::Song::ValidateFormat("song_list_format", v);
 					conf.song_list_format = '{';
 					conf.song_list_format += v;
 					conf.song_list_format += '}';
@@ -553,7 +538,7 @@ void ReadConfiguration(ncmpcpp_config &conf)
 			{
 				if (!v.empty())
 				{
-					ValidateSongFormat("song_status_format", v);
+					MPD::Song::ValidateFormat("song_status_format", v);
 					conf.song_status_format = '{';
 					conf.song_status_format += v;
 					conf.song_status_format += '}';
@@ -563,7 +548,7 @@ void ReadConfiguration(ncmpcpp_config &conf)
 			{
 				if (!v.empty())
 				{
-					ValidateSongFormat("song_library_format", v);
+					MPD::Song::ValidateFormat("song_library_format", v);
 					conf.song_library_format = '{';
 					conf.song_library_format += v;
 					conf.song_library_format += '}';
@@ -573,7 +558,7 @@ void ReadConfiguration(ncmpcpp_config &conf)
 			{
 				if (!v.empty())
 				{
-					ValidateSongFormat("tag_editor_album_format", v);
+					MPD::Song::ValidateFormat("tag_editor_album_format", v);
 					conf.tag_editor_album_format = '{';
 					conf.tag_editor_album_format += v;
 					conf.tag_editor_album_format += '}';
@@ -598,7 +583,7 @@ void ReadConfiguration(ncmpcpp_config &conf)
 			{
 				if (!v.empty())
 				{
-					ValidateSongFormat("alternative_header_first_line_format", v);
+					MPD::Song::ValidateFormat("alternative_header_first_line_format", v);
 					conf.new_header_first_line = '{';
 					conf.new_header_first_line += v;
 					conf.new_header_first_line += '}';
@@ -608,7 +593,7 @@ void ReadConfiguration(ncmpcpp_config &conf)
 			{
 				if (!v.empty())
 				{
-					ValidateSongFormat("alternative_header_second_line_format", v);
+					MPD::Song::ValidateFormat("alternative_header_second_line_format", v);
 					conf.new_header_second_line = '{';
 					conf.new_header_second_line += v;
 					conf.new_header_second_line += '}';
@@ -790,7 +775,7 @@ void ReadConfiguration(ncmpcpp_config &conf)
 			{
 				if (!v.empty())
 				{
-					ValidateSongFormat("song_window_title_format", v);
+					MPD::Song::ValidateFormat("song_window_title_format", v);
 					conf.song_window_title_format = '{';
 					conf.song_window_title_format += v;
 					conf.song_window_title_format += '}';

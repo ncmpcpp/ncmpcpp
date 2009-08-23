@@ -92,6 +92,8 @@ namespace MPD
 			Song &operator=(const Song &);
 			
 			static std::string ShowTime(int);
+			static void ValidateFormat(const std::string &type, const std::string &format);
+			
 		private:
 			void SetHashAndSlash();
 			std::string ParseFormat(std::string::const_iterator &it) const;

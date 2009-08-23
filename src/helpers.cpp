@@ -44,6 +44,7 @@ bool ConnectToMPD()
 void ParseArgv(int argc, char **argv)
 {
 	bool quit = 0;
+	std::string now_playing_format = "{{(%l) }{{%a - }%t}}|{%f}}";
 	
 	for (int i = 1; i < argc; ++i)
 	{
@@ -85,6 +86,8 @@ void ParseArgv(int argc, char **argv)
 			<< "  -p, --port                connect to server at port [6600]\n"
 			<< "  -?, --help                show this help message\n"
 			<< "  -v, --version             display version information\n\n"
+			<< "  --now-playing             display now playing song [" << now_playing_format << "\n"
+			<< "\n"
 			<< "  play                      start playing\n"
 			<< "  pause                     pause the currently playing song\n"
 			<< "  toggle                    toggle play/pause mode\n"
@@ -99,7 +102,24 @@ void ParseArgv(int argc, char **argv)
 		if (!ConnectToMPD())
 			exit(0);
 		
-		if (!strcmp(argv[i], "play"))
+		if (!strcmp(argv[i], "--now-playing"))
+		{
+			Mpd.UpdateStatus();
+			if (Mpd.GetState() > psStop)
+			{
+				if (argc > ++i)
+				{
+					// apply additional pair of braces
+					now_playing_format = "{";
+					now_playing_format += argv[i];
+					now_playing_format += "}";
+					MPD::Song::ValidateFormat("now-playing format", now_playing_format);
+				}
+				std::cout << Mpd.GetCurrentSong().toString(now_playing_format) << "\n";
+			}
+			quit = 1;
+		}
+		else if (!strcmp(argv[i], "play"))
 		{
 			Mpd.Play();
 			quit = 1;
