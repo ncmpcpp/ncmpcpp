@@ -1694,6 +1694,35 @@ int main(int argc, char *argv[])
 		}
 		else if (Keypressed(input, Key.Clear))
 		{
+			if (myScreen == myPlaylistEditor && myPlaylistEditor->Playlists->Empty())
+				continue;
+			
+			if (myScreen->ActiveWindow() == myPlaylistEditor->Content
+			||  Config.ask_before_clearing_main_playlist)
+			{
+				int in = 0;
+				LockStatusbar();
+				Statusbar() << "Do you really want to clear playlist";
+				if (myScreen->ActiveWindow() == myPlaylistEditor->Content)
+					*wFooter << " \"" << myPlaylistEditor->Playlists->Current() << "\"";
+				*wFooter << " ? [y/n] ";
+				curs_set(1);
+				do
+				{
+					TraceMpdStatus();
+					wFooter->ReadKey(in);
+				}
+				while (in != 'y' && in != 'n');
+				curs_set(0);
+				UnlockStatusbar();
+				
+				if (in != 'y')
+				{
+					ShowMessage("Aborted!");
+					continue;
+				}
+			}
+			
 			if (myPlaylist->Main()->isFiltered())
 			{
 				ShowMessage("Deleting filtered items...");
@@ -1705,38 +1734,16 @@ int main(int argc, char *argv[])
 			}
 			else
 			{
-				if (myScreen == myPlaylistEditor && myPlaylistEditor->Playlists->Empty())
-					continue;
-				int in = 0;
-				if (myScreen == myPlaylistEditor)
+				if (myScreen->ActiveWindow() == myPlaylistEditor->Content)
 				{
-					LockStatusbar();
-					Statusbar() << "Do you really want to clear playlist \"" << myPlaylistEditor->Playlists->Current() << "\" ? [y/n] ";
-					curs_set(1);
-					do
-					{
-						TraceMpdStatus();
-						wFooter->ReadKey(in);
-					}
-					while (in != 'y' && in != 'n');
-					curs_set(0);
-					UnlockStatusbar();
-					
-					if (in == 'y')
-					{
-						Mpd.ClearPlaylist(locale_to_utf_cpy(myPlaylistEditor->Playlists->Current()));
-						myPlaylistEditor->Content->Clear(0);
-					}
-					else
-						ShowMessage("Aborted!");
+					Mpd.ClearPlaylist(locale_to_utf_cpy(myPlaylistEditor->Playlists->Current()));
+					myPlaylistEditor->Content->Clear(0);
 				}
 				else
 				{
 					ShowMessage("Clearing playlist...");
 					Mpd.ClearPlaylist();
 				}
-				if (myScreen != myPlaylistEditor || in == 'y')
-					ShowMessage("Playlist cleared!");
 			}
 			// if playlist is cleared, items list have to be updated, but this
 			// can be blocked if new song was added to playlist less than one

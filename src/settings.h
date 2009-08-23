@@ -190,6 +190,7 @@ struct ncmpcpp_config
 	bool use_cyclic_scrolling;
 	bool allow_physical_files_deletion;
 	bool allow_physical_directories_deletion;
+	bool ask_before_clearing_main_playlist;
 	bool mouse_support;
 	bool new_design;
 	

@@ -295,6 +295,7 @@ void DefaultConfiguration(ncmpcpp_config &conf)
 	conf.use_cyclic_scrolling = false;
 	conf.allow_physical_files_deletion = false;
 	conf.allow_physical_directories_deletion = false;
+	conf.ask_before_clearing_main_playlist = false;
 	conf.mouse_support = true;
 	conf.new_design = false;
 	conf.set_window_title = true;
@@ -741,6 +742,10 @@ void ReadConfiguration(ncmpcpp_config &conf)
 			else if (cl.find("allow_physical_directories_deletion") != std::string::npos)
 			{
 				conf.allow_physical_directories_deletion = v == "yes";
+			}
+			else if (cl.find("ask_before_clearing_main_playlist") != std::string::npos)
+			{
+				conf.ask_before_clearing_main_playlist = v == "yes";
 			}
 			else if (cl.find("mouse_support") != std::string::npos)
 			{

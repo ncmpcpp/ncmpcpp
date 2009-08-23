@@ -197,6 +197,8 @@
 #
 #display_screens_numbers_on_start = "yes"
 #
+#ask_before_clearing_main_playlist = "no"
+#
 #clock_display_seconds = "no"
 #
 #regular_expressions = "basic" (basic/extended)
