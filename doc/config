@@ -201,6 +201,8 @@
 #
 #clock_display_seconds = "no"
 #
+#display_bitrate = "no"
+#
 #regular_expressions = "basic" (basic/extended)
 #
 ##

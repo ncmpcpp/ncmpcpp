@@ -421,6 +421,13 @@ void NcmpcppStatusChanged(Connection *, StatusChanges changed, void *)
 					tracklength += "/";
 					tracklength += np.GetLength();
 				}
+				// bitrate here doesn't look good, but it can be moved somewhere else later
+				if (Config.display_bitrate && Mpd.GetBitrate())
+				{
+					tracklength += " ";
+					tracklength += IntoStr(Mpd.GetBitrate());
+					tracklength += " kbps";
+				}
 				
 				basic_buffer<my_char_t> first, second;
 				String2Buffer(TO_WSTRING(utf_to_locale_cpy(np.toString(Config.new_header_first_line))), first);
@@ -449,9 +456,15 @@ void NcmpcppStatusChanged(Connection *, StatusChanges changed, void *)
 			}
 			else if (!block_statusbar_update && Config.statusbar_visibility)
 			{
+				if (Config.display_bitrate && Mpd.GetBitrate())
+				{
+					tracklength += " [";
+					tracklength += IntoStr(Mpd.GetBitrate());
+					tracklength += " kbps]";
+				}
+				tracklength += " [";
 				if (np.GetTotalLength())
 				{
-					tracklength = " [";
 					tracklength += Song::ShowTime(elapsed);
 					tracklength += "/";
 					tracklength += np.GetLength();
@@ -459,7 +472,6 @@ void NcmpcppStatusChanged(Connection *, StatusChanges changed, void *)
 				}
 				else
 				{
-					tracklength = " [";
 					tracklength += Song::ShowTime(elapsed);
 					tracklength += "]";
 				}

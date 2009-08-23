@@ -289,6 +289,7 @@ void DefaultConfiguration(ncmpcpp_config &conf)
 	conf.search_in_db = true;
 	conf.display_screens_numbers_on_start = true;
 	conf.clock_display_seconds = false;
+	conf.display_bitrate = false;
 	conf.ignore_leading_the = false;
 	conf.block_search_constraints_change = true;
 	conf.use_console_editor = false;
@@ -722,6 +723,10 @@ void ReadConfiguration(ncmpcpp_config &conf)
 			else if (cl.find("clock_display_seconds") != std::string::npos)
 			{
 				conf.clock_display_seconds = v == "yes";
+			}
+			else if (cl.find("display_bitrate") != std::string::npos)
+			{
+				conf.display_bitrate = v == "yes";
 			}
 			else if (cl.find("ignore_leading_the") != std::string::npos)
 			{

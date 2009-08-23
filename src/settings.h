@@ -184,6 +184,7 @@ struct ncmpcpp_config
 	bool search_in_db;
 	bool display_screens_numbers_on_start;
 	bool clock_display_seconds;
+	bool display_bitrate;
 	bool ignore_leading_the;
 	bool block_search_constraints_change;
 	bool use_console_editor;
