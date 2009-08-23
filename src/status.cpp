@@ -144,7 +144,12 @@ void TraceMpdStatus()
 				block_progressbar_update = !allow_statusbar_unlock;
 			
 			if (Mpd.GetState() < psPlay && !block_statusbar_update)
-				Statusbar() << wclrtoeol;
+			{
+				if (Config.new_design)
+					mvwhline(wFooter->Raw(), 0, 0, 0, wFooter->GetWidth());
+				else
+					Statusbar() << wclrtoeol;
+			}
 		}
 	}
 }
