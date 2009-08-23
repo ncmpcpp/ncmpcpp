@@ -47,21 +47,21 @@ void ParseArgv(int argc, char **argv)
 	
 	for (int i = 1; i < argc; ++i)
 	{
-		if (strcmp(argv[i], "-h") == 0)
+		if (!strcmp(argv[i], "-h") || !strcmp(argv[i], "--host"))
 		{
 			if (++i >= argc)
 				exit(0);
 			Mpd.SetHostname(argv[i]);
 			continue;
 		}
-		if (strcmp(argv[i], "-p") == 0)
+		if (!strcmp(argv[i], "-p") || !strcmp(argv[i], "--port"))
 		{
 			if (++i >= argc)
 				exit(0);
 			Mpd.SetPort(atoi(argv[i]));
 			continue;
 		}
-		else if (strcmp(argv[i], "-v") == 0 || strcmp(argv[i], "--version") == 0)
+		else if (!strcmp(argv[i], "-v") || !strcmp(argv[i], "--version"))
 		{
 			std::cout << "ncmpcpp version: " << VERSION << std::endl
 			<< "built with support for:"
@@ -77,12 +77,12 @@ void ParseArgv(int argc, char **argv)
 			<< std::endl;
 			exit(0);
 		}
-		else if (strcmp(argv[i], "-?") == 0 || strcmp(argv[i], "--help") == 0)
+		else if (!strcmp(argv[i], "-?") || !strcmp(argv[i], "--help"))
 		{
 			std::cout
 			<< "Usage: ncmpcpp [OPTION]...\n"
-			<< "  -h                        connect to server at host [localhost]\n"
-			<< "  -p                        connect to server at port [6600]\n"
+			<< "  -h, --host                connect to server at host [localhost]\n"
+			<< "  -p, --port                connect to server at port [6600]\n"
 			<< "  -?, --help                show this help message\n"
 			<< "  -v, --version             display version information\n\n"
 			<< "  play                      start playing\n"
@@ -99,17 +99,17 @@ void ParseArgv(int argc, char **argv)
 		if (!ConnectToMPD())
 			exit(0);
 		
-		if (strcmp(argv[i], "play") == 0)
+		if (!strcmp(argv[i], "play"))
 		{
 			Mpd.Play();
 			quit = 1;
 		}
-		else if (strcmp(argv[i], "pause") == 0)
+		else if (!strcmp(argv[i], "pause"))
 		{
 			Mpd.Execute("pause \"1\"\n");
 			quit = 1;
 		}
-		else if (strcmp(argv[i], "toggle") == 0)
+		else if (!strcmp(argv[i], "toggle"))
 		{
 			Mpd.UpdateStatus();
 			switch (Mpd.GetState())
@@ -126,22 +126,22 @@ void ParseArgv(int argc, char **argv)
 			}
 			quit = 1;
 		}
-		else if (strcmp(argv[i], "stop") == 0)
+		else if (!strcmp(argv[i], "stop"))
 		{
 			Mpd.Stop();
 			quit = 1;
 		}
-		else if (strcmp(argv[i], "next") == 0)
+		else if (!strcmp(argv[i], "next"))
 		{
 			Mpd.Next();
 			quit = 1;
 		}
-		else if (strcmp(argv[i], "prev") == 0)
+		else if (!strcmp(argv[i], "prev"))
 		{
 			Mpd.Prev();
 			quit = 1;
 		}
-		else if (strcmp(argv[i], "volume") == 0)
+		else if (!strcmp(argv[i], "volume"))
 		{
 			i++;
 			Mpd.UpdateStatus();
