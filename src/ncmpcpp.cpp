@@ -80,6 +80,22 @@ bool Global::BlockItemListUpdate = 0;
 bool Global::MessagesAllowed = 0;
 bool Global::RedrawHeader = 1;
 
+namespace
+{
+	std::ofstream errorlog;
+	std::streambuf *cerr_buffer;
+	
+	void do_at_exit()
+	{
+		// restore old cerr buffer
+		std::cerr.rdbuf(cerr_buffer);
+		errorlog.close();
+		Mpd.Disconnect();
+		DestroyScreen();
+		WindowTitle("");
+	}
+}
+
 int main(int argc, char *argv[])
 {
 	CreateConfigDir();
@@ -106,9 +122,12 @@ int main(int argc, char *argv[])
 	if (!ConnectToMPD())
 		return -1;
 	
+	// always execute these commands, even if ncmpcpp use exit function
+	atexit(do_at_exit);
+	
 	// redirect std::cerr output to ~/.ncmpcpp/error.log file
-	std::ofstream errorlog((config_dir + "error.log").c_str(), std::ios::app);
-	std::streambuf *cerr_buffer = std::cerr.rdbuf();
+	errorlog.open((config_dir + "error.log").c_str(), std::ios::app);
+	cerr_buffer = std::cerr.rdbuf();
 	std::cerr.rdbuf(errorlog.rdbuf());
 	
 	InitScreen("ncmpc++ ver. "VERSION, Config.colors_enabled);
@@ -1996,12 +2015,6 @@ int main(int argc, char *argv[])
 #		endif // ENABLE_CLOCK
 		// key mapping end
 	}
-	// restore old cerr buffer
-	std::cerr.rdbuf(cerr_buffer);
-	errorlog.close();
-	Mpd.Disconnect();
-	DestroyScreen();
-	WindowTitle("");
 	return 0;
 }
 
