@@ -243,7 +243,7 @@ void DefaultConfiguration(ncmpcpp_config &conf)
 	conf.empty_tag = "<empty>";
 	conf.song_list_columns_format = "(7f)[green]{l} (25)[cyan]{a} (40)[]{t} (30)[red]{b}";
 	conf.song_list_format = "{{%a - }{%t}|{$8%f$9}$R{$3(%l)$9}}";
-	conf.song_status_format = "{{(%l) }{%a - }{%t}|{%f}}";
+	conf.song_status_format = "{{{%a{ \"%b\"{ (%y)}} - }{%t}}|{%f}}";
 	conf.song_window_title_format = "{{%a - }{%t}|{%f}}";
 	conf.song_library_format = "{{%n - }{%t}|{%f}}";
 	conf.tag_editor_album_format = "{{(%y) }%b}";
