@@ -441,7 +441,8 @@ void NcmpcppStatusChanged(Connection *, StatusChanges changed, void *)
 				size_t second_margin = (std::max(player_state.length(), size_t(8))+1)*2;
 				size_t second_start = second_len < COLS-second_margin ? (COLS-second_len)/2 : player_state.length()+1;
 				
-				if (!block_progressbar_update) // if blocked, seeking in progress
+				if (!block_progressbar_update  // if blocked, seeking in progress
+				||  lock_statusbar_delay >= 0) // do not block it if message is displayed
 					*wHeader << XY(0, 0) << wclrtoeol << tracklength;
 				*wHeader << XY(first_start, 0);
 				first.Write(*wHeader, first_line_scroll_begin, COLS-tracklength.length()-VolumeState.length()-1, U(" ** "));
