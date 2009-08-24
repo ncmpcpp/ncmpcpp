@@ -101,9 +101,7 @@ int main(int argc, char *argv[])
 	Mpd.SetTimeout(Config.mpd_connection_timeout);
 	
 	if (argc > 1)
-	{
 		ParseArgv(argc, argv);
-	}
 	
 	if (!ConnectToMPD())
 		return -1;
