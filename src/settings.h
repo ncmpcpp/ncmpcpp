@@ -39,11 +39,14 @@ const int null_key = std::numeric_limits<int>::max();
 
 struct Column
 {
+	Column() : right_alignment(0), display_empty_tag(1) { }
+	
 	unsigned width;
 	Color color;
 	char type;
 	bool fixed;
 	bool right_alignment;
+	bool display_empty_tag;
 };
 
 struct ncmpcpp_keys

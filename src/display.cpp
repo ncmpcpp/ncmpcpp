@@ -181,16 +181,19 @@ void Display::SongsInColumns(const MPD::Song &s, void *, Menu<MPD::Song> *menu)
 		std::string tag = (s.*get)();
 		if (it->right_alignment)
 		{
-			int x, y;
-			menu->GetXY(x, y);
-			std::basic_string<my_char_t> wtag = TO_WSTRING(tag.empty() ? Config.empty_tag : tag).substr(0, width-!!x);
-			*menu << XY(x+width-Window::Length(wtag)-!!x, y) << wtag;
+			if (!tag.empty() || it->display_empty_tag)
+			{
+				int x, y;
+				menu->GetXY(x, y);
+				std::basic_string<my_char_t> wtag = TO_WSTRING(tag.empty() ? Config.empty_tag : tag).substr(0, width-!!x);
+				*menu << XY(x+width-Window::Length(wtag)-!!x, y) << wtag;
+			}
 		}
 		else
 		{
 			if (!tag.empty())
 				*menu << tag;
-			else
+			else if (it->display_empty_tag)
 				*menu << Config.empty_tag;
 		}
 		where += width;

@@ -881,7 +881,18 @@ void ReadConfiguration(ncmpcpp_config &conf)
 		std::string tag_type = GetLineValue(conf.song_list_columns_format, '{', '}', 1);
 		col.type = tag_type.at(0);
 		col.fixed = *width.rbegin() == 'f';
-		col.right_alignment = tag_type.length() > 1 && tag_type[1] == 'r';
+		for (std::string::const_iterator it = ++tag_type.begin(); it != tag_type.end(); ++it)
+		{
+			switch (*it)
+			{
+				case 'r':
+					col.right_alignment = 1;
+					break;
+				case 'E':
+					col.display_empty_tag = 0;
+					break;
+			}
+		}
 		col.width = StrToInt(width);
 		conf.columns.push_back(col);
 	}
