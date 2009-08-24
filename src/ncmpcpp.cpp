@@ -1064,39 +1064,13 @@ int main(int argc, char *argv[])
 				SongList list;
 				Mpd.GetDirectoryRecursive(path, list);
 				if (!list.empty())
-				{
-					Mpd.StartCommandsList();
-					SongList::const_iterator it = list.begin();
-					if (myScreen == myPlaylistEditor)
-					{
-						for (; it != list.end(); ++it)
-							Mpd.AddToPlaylist(myPlaylistEditor->Playlists->Current(), **it);
-					}
-					else
-					{
-						for (; it != list.end(); ++it)
-							if (Mpd.AddSong(**it) < 0)
-								break;
-					}
-					Mpd.CommitCommandsList();
-					
-					if (it != list.begin() && myScreen != myPlaylistEditor)
-					{
-						Song &s = myPlaylist->Main()->at(myPlaylist->Main()->Size()-list.size());
-						if (s.GetHash() != list[0]->GetHash())
-							ShowMessage("%s", MPD::Message::PartOfSongsAdded);
-					}
-				}
+					myPlaylist->Add(list, 0);
 				else
 				{
 					if (myScreen == myPlaylistEditor)
-					{
 						Mpd.AddToPlaylist(myPlaylistEditor->Playlists->Current(), path);
-					}
 					else
-					{
 						Mpd.AddSong(path);
-					}
 				}
 				if (myScreen == myPlaylistEditor)
 					myPlaylistEditor->Content->Clear(0); // make it refetch content of playlist
