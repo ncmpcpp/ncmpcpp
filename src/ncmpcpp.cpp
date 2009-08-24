@@ -167,6 +167,13 @@ int main(int argc, char *argv[])
 	if (Config.mouse_support)
 		mousemask(ALL_MOUSE_EVENTS, 0);
 	
+	if (Config.jump_to_now_playing_song_at_start)
+	{
+		TraceMpdStatus();
+		if (myPlaylist->isPlaying())
+			myPlaylist->Main()->Highlight(myPlaylist->NowPlaying);
+	}
+	
 	while (!main_exit)
 	{
 		if (!Mpd.Connected())

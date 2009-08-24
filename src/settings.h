@@ -187,6 +187,7 @@ struct ncmpcpp_config
 	bool local_browser_show_hidden_files;
 	bool search_in_db;
 	bool display_screens_numbers_on_start;
+	bool jump_to_now_playing_song_at_start;
 	bool clock_display_seconds;
 	bool display_bitrate;
 	bool ignore_leading_the;

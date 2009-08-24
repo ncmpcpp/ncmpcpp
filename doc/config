@@ -201,6 +201,8 @@
 #
 #display_screens_numbers_on_start = "yes"
 #
+#jump_to_now_playing_song_at_start = "yes"
+#
 #ask_before_clearing_main_playlist = "no"
 #
 #clock_display_seconds = "no"

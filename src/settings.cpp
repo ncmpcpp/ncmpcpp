@@ -289,6 +289,7 @@ void DefaultConfiguration(ncmpcpp_config &conf)
 	conf.local_browser_show_hidden_files = false;
 	conf.search_in_db = true;
 	conf.display_screens_numbers_on_start = true;
+	conf.jump_to_now_playing_song_at_start = true;
 	conf.clock_display_seconds = false;
 	conf.display_bitrate = false;
 	conf.ignore_leading_the = false;
@@ -729,6 +730,10 @@ void ReadConfiguration(ncmpcpp_config &conf)
 			else if (cl.find("display_screens_numbers_on_start") != std::string::npos)
 			{
 				conf.display_screens_numbers_on_start = v == "yes";
+			}
+			else if (cl.find("jump_to_now_playing_song_at_start") != std::string::npos)
+			{
+				conf.jump_to_now_playing_song_at_start = v == "yes";
 			}
 			else if (cl.find("clock_display_seconds") != std::string::npos)
 			{
