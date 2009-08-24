@@ -510,7 +510,7 @@ bool Playlist::Add(const MPD::Song &s, bool in_playlist, bool play)
 		int id = Mpd.AddSong(s);
 		if (id >= 0)
 		{
-			ShowMessage("Added to playlist: %s", s.toString(Config.song_status_format).c_str());
+			ShowMessage("Added to playlist: %s", s.toString(Config.song_status_format_no_colors).c_str());
 			if (play)
 				Mpd.PlayID(id);
 			return true;

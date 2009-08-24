@@ -244,6 +244,7 @@ void DefaultConfiguration(ncmpcpp_config &conf)
 	conf.song_list_columns_format = "(7f)[green]{l} (25)[cyan]{a} (40)[]{t} (30)[red]{b}";
 	conf.song_list_format = "{{%a - }{%t}|{$8%f$9}$R{$3(%l)$9}}";
 	conf.song_status_format = "{{{%a{ \"%b\"{ (%y)}} - }{%t}}|{%f}}";
+	conf.song_status_format_no_colors = conf.song_status_format;
 	conf.song_window_title_format = "{{%a - }{%t}|{%f}}";
 	conf.song_library_format = "{{%n - }{%t}|{%f}}";
 	conf.tag_editor_album_format = "{{(%y) }%b}";
@@ -544,6 +545,15 @@ void ReadConfiguration(ncmpcpp_config &conf)
 					conf.song_status_format = '{';
 					conf.song_status_format += v;
 					conf.song_status_format += '}';
+					// make version without colors
+					if (conf.song_status_format.find("$") != std::string::npos)
+					{
+						Buffer status_no_colors;
+						String2Buffer(conf.song_status_format, status_no_colors);
+						conf.song_status_format_no_colors = status_no_colors.Str();
+					}
+					else
+						conf.song_status_format_no_colors = conf.song_status_format;
 				}
 			}
 			else if (cl.find("song_library_format") != std::string::npos)

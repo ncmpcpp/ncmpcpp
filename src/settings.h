@@ -127,6 +127,7 @@ struct ncmpcpp_config
 	std::string song_list_columns_format;
 	std::string song_list_format;
 	std::string song_status_format;
+	std::string song_status_format_no_colors;
 	std::string song_window_title_format;
 	std::string song_library_format;
 	std::string tag_editor_album_format;
