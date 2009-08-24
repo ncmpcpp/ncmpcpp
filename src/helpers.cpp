@@ -85,8 +85,8 @@ void ParseArgv(int argc, char **argv)
 			<< "  -h, --host                connect to server at host [localhost]\n"
 			<< "  -p, --port                connect to server at port [6600]\n"
 			<< "  -?, --help                show this help message\n"
-			<< "  -v, --version             display version information\n\n"
-			<< "  --now-playing             display now playing song [" << now_playing_format << "\n"
+			<< "  -v, --version             display version information\n"
+			<< "  --now-playing             display now playing song [" << now_playing_format << "]\n"
 			<< "\n"
 			<< "  play                      start playing\n"
 			<< "  pause                     pause the currently playing song\n"
@@ -105,6 +105,11 @@ void ParseArgv(int argc, char **argv)
 		if (!strcmp(argv[i], "--now-playing"))
 		{
 			Mpd.UpdateStatus();
+			if (!Mpd.GetErrorMessage().empty())
+			{
+				std::cout << "Error: " << Mpd.GetErrorMessage() << std::endl;
+				exit(1);
+			}
 			if (Mpd.GetState() > psStop)
 			{
 				if (argc > ++i)
@@ -117,7 +122,7 @@ void ParseArgv(int argc, char **argv)
 				}
 				std::cout << Mpd.GetCurrentSong().toString(now_playing_format) << "\n";
 			}
-			quit = 1;
+			exit(0);
 		}
 		else if (!strcmp(argv[i], "play"))
 		{
@@ -168,7 +173,7 @@ void ParseArgv(int argc, char **argv)
 			if (!Mpd.GetErrorMessage().empty())
 			{
 				std::cout << "Error: " << Mpd.GetErrorMessage() << std::endl;
-				exit(0);
+				exit(1);
 			}
 			if (i != argc)
 				Mpd.SetVolume(Mpd.GetVolume()+atoi(argv[i]));
