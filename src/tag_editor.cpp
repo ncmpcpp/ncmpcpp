@@ -128,14 +128,14 @@ void TinyTagEditor::EnterPressed()
 		case 4:
 		{
 			Statusbar() << fmtBold << "Year: " << fmtBoldEnd;
-			s.SetDate(wFooter->GetString(s.GetDate(), 4));
+			s.SetDate(wFooter->GetString(s.GetDate()));
 			w->at(option) << fmtBold << "Year:" << fmtBoldEnd << ' ' << ShowTag(s.GetDate());
 			break;
 		}
 		case 5:
 		{
 			Statusbar() << fmtBold << "Track: " << fmtBoldEnd;
-			s.SetTrack(wFooter->GetString(s.GetTrack(), 3));
+			s.SetTrack(wFooter->GetString(s.GetTrack()));
 			w->at(option) << fmtBold << "Track:" << fmtBoldEnd << ' ' << ShowTag(s.GetTrack());
 			break;
 		}
@@ -920,64 +920,73 @@ void TagEditor::ReadTags(mpd_Song *s)
 	s->time = f.audioProperties()->length();
 }
 
+namespace
+{
+	template <typename T> void WriteID3v2(const TagLib::ByteVector &type, TagLib::ID3v2::Tag *tag, const T &list)
+	{
+		using TagLib::ID3v2::TextIdentificationFrame;
+		tag->removeFrames(type);
+		TextIdentificationFrame *frame = new TextIdentificationFrame(type, TagLib::String::UTF8);
+		frame->setText(list);
+		tag->addFrame(frame);
+	}
+}
+
 bool TagEditor::WriteTags(Song &s)
 {
-	using namespace TagLib;
 	std::string path_to_file;
 	bool file_is_from_db = s.isFromDB();
 	if (file_is_from_db)
 		path_to_file += Config.mpd_music_dir;
 	path_to_file += s.GetFile();
 	locale_to_utf(path_to_file);
-	FileRef f(path_to_file.c_str());
+	TagLib::FileRef f(path_to_file.c_str());
 	if (!f.isNull())
 	{
-		f.tag()->setTitle(ToWString(s.GetTitle()));
-		f.tag()->setArtist(ToWString(s.GetArtist()));
-		f.tag()->setAlbum(ToWString(s.GetAlbum()));
-		f.tag()->setYear(StrToInt(s.GetDate()));
-		f.tag()->setTrack(StrToInt(s.GetTrack()));
-		f.tag()->setGenre(ToWString(s.GetGenre()));
+		std::string ext = s.GetFile();
+		ext = ext.substr(ext.rfind(".")+1);
+		ToLower(ext);
+		
+		if (ext != "mp3")
+		{
+			f.tag()->setTitle(ToWString(s.GetTitle()));
+			f.tag()->setArtist(ToWString(s.GetArtist()));
+			f.tag()->setAlbum(ToWString(s.GetAlbum()));
+			f.tag()->setYear(StrToInt(s.GetDate()));
+			f.tag()->setTrack(StrToInt(s.GetTrack()));
+			f.tag()->setGenre(ToWString(s.GetGenre()));
+		}
+		
+		// it seems that writing COMM frame to mp3 files crashes taglib
+		// so the comment has to be written before we write ID3v2 tags
 		f.tag()->setComment(ToWString(s.GetComment()));
 		if (!f.save())
 			return false;
 		
-		std::string ext = s.GetFile();
-		ext = ext.substr(ext.rfind(".")+1);
-		ToLower(ext);
 		if (ext == "mp3")
 		{
-			MPEG::File file(path_to_file.c_str());
-			ID3v2::Tag *tag = file.ID3v2Tag();
-			String::Type encoding = String::UTF8;
-			
-			ByteVector Composer("TCOM");
-			ByteVector Performer("TOPE");
-			ByteVector Disc("TPOS");
-			
+			TagLib::MPEG::File file(path_to_file.c_str());
+			TagLib::ID3v2::Tag *tag = file.ID3v2Tag();
 			TagLib::StringList list;
 			
+			WriteID3v2("TIT2", tag, ToWString(s.GetTitle()));  // title
+			WriteID3v2("TPE1", tag, ToWString(s.GetArtist())); // artist
+			WriteID3v2("TALB", tag, ToWString(s.GetAlbum()));  // album
+			WriteID3v2("TDRC", tag, ToWString(s.GetDate()));   // date
+			WriteID3v2("TRCK", tag, ToWString(s.GetTrack()));  // track
+			WriteID3v2("TCON", tag, ToWString(s.GetGenre()));  // genre
+			WriteID3v2("TPOS", tag, ToWString(s.GetDisc()));    // disc
+			
 			GetTagList(list, s.GetComposer());
-			tag->removeFrames(Composer);
-			ID3v2::TextIdentificationFrame *ComposerFrame = new ID3v2::TextIdentificationFrame(Composer, encoding);
-			ComposerFrame->setText(list);
-			tag->addFrame(ComposerFrame);
+			WriteID3v2("TCOM", tag, list); // composer
 			
 			GetTagList(list, s.GetPerformer());
-			tag->removeFrames(Performer);
-			ID3v2::TextIdentificationFrame *PerformerFrame = new ID3v2::TextIdentificationFrame(Performer, encoding);
-			PerformerFrame->setText(list);
-			tag->addFrame(PerformerFrame);
-			
-			GetTagList(list, s.GetDisc());
-			tag->removeFrames(Disc);
-			ID3v2::TextIdentificationFrame *DiscFrame = new ID3v2::TextIdentificationFrame(Disc, encoding);
-			DiscFrame->setText(list);
-			tag->addFrame(DiscFrame);
+			WriteID3v2("TOPE", tag, list); // performer
 			
 			if (!file.save())
 				return false;
 		}
+		
 		if (!s.GetNewName().empty())
 		{
 			std::string new_name;

@@ -226,7 +226,7 @@ void MPD::Song::SetTrack(const std::string &str)
 {
 	if (itsSong->track)
 		str_pool_put(itsSong->track);
-	itsSong->track = str.empty() ? 0 : str_pool_get(IntoStr(StrToInt(str)).c_str());
+	itsSong->track = str.empty() ? 0 : str_pool_get(str.c_str());
 }
 
 void MPD::Song::SetTrack(int track)
