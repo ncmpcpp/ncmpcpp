@@ -153,6 +153,7 @@ namespace MPD
 			int AddSong(const std::string &); // returns id of added song
 			int AddSong(const Song &); // returns id of added song
 			bool AddRandomSongs(size_t);
+			void Add(const std::string &path) const;
 			void Delete(int) const;
 			void DeleteID(int) const;
 			void Delete(const std::string &, int) const;

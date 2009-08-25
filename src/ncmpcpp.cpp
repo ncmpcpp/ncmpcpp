@@ -1061,20 +1061,14 @@ int main(int argc, char *argv[])
 			UnlockStatusbar();
 			if (!path.empty())
 			{
-				SongList list;
-				Mpd.GetDirectoryRecursive(path, list);
-				if (!list.empty())
-					myPlaylist->Add(list, 0);
-				else
-				{
-					if (myScreen == myPlaylistEditor)
-						Mpd.AddToPlaylist(myPlaylistEditor->Playlists->Current(), path);
-					else
-						Mpd.AddSong(path);
-				}
 				if (myScreen == myPlaylistEditor)
+				{
+					Mpd.AddToPlaylist(myPlaylistEditor->Playlists->Current(), path);
 					myPlaylistEditor->Content->Clear(0); // make it refetch content of playlist
-				FreeSongList(list);
+				}
+				else
+					Mpd.Add(path);
+				UpdateStatusImmediately = 1;
 			}
 		}
 		else if (Keypressed(input, Key.SeekForward) || Keypressed(input, Key.SeekBackward))

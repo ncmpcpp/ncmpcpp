@@ -563,6 +563,14 @@ int Connection::AddSong(const Song &s)
 	return !s.Empty() ? (AddSong((!s.isFromDB() ? "file://" : "") + (s.Localized() ? locale_to_utf_cpy(s.GetFile()) : s.GetFile()))) : -1;
 }
 
+void Connection::Add(const std::string &path) const
+{
+	if (!isConnected)
+		return;
+	mpd_sendAddCommand(itsConnection, path.c_str());
+	mpd_finishCommand(itsConnection);
+}
+
 bool Connection::AddRandomSongs(size_t number)
 {
 	if (!isConnected && !number)
