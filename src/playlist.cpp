@@ -460,8 +460,11 @@ std::string Playlist::SongInColumnsToString(const MPD::Song &s, void *)
 		}
 		else
 		{
-			result += "%";
+			// tags should be put in additional braces as if they are not, the
+			// tag that is not present within 'main' braces discards them all.
+			result += "{%";
 			result += it->type;
+			result += "}";
 		}
 		result += " ";
 	}
