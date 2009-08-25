@@ -418,15 +418,14 @@ int main(int argc, char *argv[])
 #			endif // USE_PDCURSES
 			
 			RedrawHeader = 1;
-			
-			if (COLS < 20 || LINES < 5)
-			{
-				endwin();
-				std::cout << "Screen too small!\n";
-				return 1;
-			}
-			
 			MainHeight = LINES-(Config.new_design ? 7 : 4);
+			
+			if (COLS < 20 || MainHeight < 3)
+			{
+				DestroyScreen();
+				std::cout << "Screen is too small!\n";
+				exit(1);
+			}
 			
 			if (!Config.header_visibility)
 				MainHeight += 2;
