@@ -251,6 +251,7 @@ void DefaultConfiguration(ncmpcpp_config &conf)
 	conf.new_header_first_line = "{$b$1$aqqu$/a$9 {%t}|{%f} $1$atqq$/a$9$/b}";
 	conf.new_header_second_line = "{{{$4$b%a$/b$9}{ - $7%b$9}{ ($4%y$9)}}|{%D}}";
 	conf.browser_playlist_prefix << clRed << "(playlist)" << clEnd << ' ';
+	conf.progressbar = "=>";
 	conf.pattern = "%n - %t";
 	conf.selected_item_prefix << clMagenta;
 	conf.selected_item_suffix << clEnd;
@@ -620,6 +621,11 @@ void ReadConfiguration(ncmpcpp_config &conf)
 					conf.browser_playlist_prefix.Clear();
 					String2Buffer(v, conf.browser_playlist_prefix);
 				}
+			}
+			else if (cl.find("progressbar_look") != std::string::npos)
+			{
+				if (v.length() == 2)
+					conf.progressbar = v;
 			}
 			else if (cl.find("default_tag_editor_pattern") != std::string::npos)
 			{

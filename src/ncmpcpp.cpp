@@ -1146,8 +1146,8 @@ int main(int argc, char *argv[])
 				int howlong = wFooter->GetWidth()*progressbar_size;
 				
 				mvwhline(wFooter->Raw(), 0, 0, 0, wFooter->GetWidth());
-				mvwhline(wFooter->Raw(), 0, 0, '=',howlong);
-				mvwaddch(wFooter->Raw(), 0, howlong, '>');
+				mvwhline(wFooter->Raw(), 0, 0, Config.progressbar[0], howlong);
+				mvwaddch(wFooter->Raw(), 0, howlong, Config.progressbar[1]);
 				*wFooter << fmtBoldEnd;
 				wFooter->Refresh();
 			}

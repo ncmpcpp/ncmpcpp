@@ -167,6 +167,8 @@
 #
 #autocenter_mode = "no"
 #
+#progressbar_look = "=>"
+#
 #default_place_to_search_in = "database" (database/playlist)
 #
 #user_interface = "classic" (classic/alternative)

@@ -502,8 +502,8 @@ void NcmpcppStatusChanged(Connection *, StatusChanges changed, void *)
 				mvwhline(wFooter->Raw(), 0, 0, 0, wFooter->GetWidth());
 				if (np.GetTotalLength())
 				{
-					mvwhline(wFooter->Raw(), 0, 0, '=',howlong);
-					mvwaddch(wFooter->Raw(), 0, howlong, '>');
+					mvwhline(wFooter->Raw(), 0, 0, Config.progressbar[0], howlong);
+					mvwaddch(wFooter->Raw(), 0, howlong, Config.progressbar[1]);
 				}
 				wFooter->SetColor(Config.statusbar_color);
 			}
