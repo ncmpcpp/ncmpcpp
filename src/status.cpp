@@ -554,7 +554,7 @@ void NcmpcppStatusChanged(Connection *, StatusChanges changed, void *)
 		mpd_db_updating = Mpd.GetDBIsUpdating() ? 'U' : 0;
 		ShowMessage(!mpd_db_updating ? "Database update finished!" : "Database update started!");
 	}
-	if (changed.StatusFlags && Config.header_visibility)
+	if (changed.StatusFlags && (Config.header_visibility || Config.new_design))
 	{
 		std::string switch_state;
 		
@@ -569,6 +569,12 @@ void NcmpcppStatusChanged(Connection *, StatusChanges changed, void *)
 			switch_state += mpd_db_updating ? mpd_db_updating : '-';
 			switch_state += ']';
 			*wHeader << XY(COLS-switch_state.length(), 1) << fmtBold << Config.state_flags_color << switch_state << clEnd << fmtBoldEnd;
+			if (Config.new_design && !Config.header_visibility) // in this case also draw separator
+			{
+				*wHeader << fmtBold << clBlack;
+				mvwhline(wHeader->Raw(), 2, 0, 0, COLS);
+				*wHeader << clEnd << fmtBoldEnd;
+			}
 			wHeader->Refresh();
 		}
 		else
@@ -603,7 +609,7 @@ void NcmpcppStatusChanged(Connection *, StatusChanges changed, void *)
 			refresh();
 		}
 	}
-	if (changed.Volume && Config.header_visibility)
+	if (changed.Volume && (Config.header_visibility || Config.new_design))
 	{
 		VolumeState = Config.new_design ? " Vol: " : " Volume: ";
 		int volume = Mpd.GetVolume();

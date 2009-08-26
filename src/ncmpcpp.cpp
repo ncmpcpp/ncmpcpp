@@ -132,19 +132,15 @@ int main(int argc, char *argv[])
 	
 	InitScreen("ncmpc++ ver. "VERSION, Config.colors_enabled);
 	
-	bool real_header_visibility = Config.header_visibility;
 	bool real_statusbar_visibility = Config.statusbar_visibility;
 	
 	if (Config.new_design)
-	{
-		Config.header_visibility = 1;
 		Config.statusbar_visibility = 0;
-	}
 	
 	size_t header_height, footer_start_y, footer_height;
 	SetWindowsDimensions(header_height, footer_start_y, footer_height);
 	
-	if (Config.header_visibility)
+	if (Config.header_visibility || Config.new_design)
 	{
 		wHeader = new Window(0, 0, COLS, header_height, "", Config.header_color, brNone);
 		wHeader->Display();
@@ -333,16 +329,7 @@ int main(int argc, char *argv[])
 		if (Keypressed(input, Key.ToggleInterface))
 		{
 			Config.new_design = !Config.new_design;
-			if (Config.new_design)
-			{
-				Config.header_visibility = 1;
-				Config.statusbar_visibility = 0;
-			}
-			else
-			{
-				Config.header_visibility = real_header_visibility;
-				Config.statusbar_visibility = real_statusbar_visibility;
-			}
+			Config.statusbar_visibility = Config.new_design ? 0 : real_statusbar_visibility;
 			SetWindowsDimensions(header_height, footer_start_y, footer_height);
 			UnlockProgressbar();
 			UnlockStatusbar();
@@ -452,7 +439,7 @@ int main(int argc, char *argv[])
 			
 			myScreen->Resize();
 			
-			if (Config.header_visibility)
+			if (Config.header_visibility || Config.new_design)
 				wHeader->Resize(COLS, header_height);
 			
 			footer_start_y = LINES-(Config.statusbar_visibility ? 2 : 1);
@@ -468,6 +455,9 @@ int main(int argc, char *argv[])
 				if (design_changed)
 					changes.Volume = 1;
 			}
+			// Note: routines for drawing separator if alternative user
+			// interface is active and header is hidden are placed in
+			// NcmpcppStatusChanges.StatusFlags
 			changes.StatusFlags = 1; // force status update
 			NcmpcppStatusChanged(&Mpd, changes, 0);
 			if (design_changed)
