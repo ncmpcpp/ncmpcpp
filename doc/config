@@ -226,7 +226,7 @@
 #
 #mouse_support = "yes"
 #
-#empty_tag = "<empty>"
+#empty_tag_marker = "<empty>"
 #
 #enable_window_title = "yes"
 #

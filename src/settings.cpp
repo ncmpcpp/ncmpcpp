@@ -817,7 +817,7 @@ void ReadConfiguration(ncmpcpp_config &conf)
 					conf.song_window_title_format += '}';
 				}
 			}
-			else if (cl.find("empty_tag") != std::string::npos)
+			else if (cl.find("empty_tag_marker") != std::string::npos)
 			{
 				conf.empty_tag = v; // is this case empty string is allowed
 			}
