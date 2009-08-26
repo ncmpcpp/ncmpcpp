@@ -119,7 +119,7 @@ std::basic_string<my_char_t> Playlist::Title()
 	std::basic_string<my_char_t> result = U("Playlist ");
 	if (ReloadTotalLength || ReloadRemaining)
 		itsBufferedStats = TotalLength();
-	result += Scroller(itsBufferedStats, w->GetWidth()-result.length()-(Config.new_design ? 2 : VolumeState.length()), itsScrollBegin);
+	result += Scroller(itsBufferedStats, itsScrollBegin, w->GetWidth()-result.length()-(Config.new_design ? 2 : VolumeState.length()));
 	return result;
 }
 

@@ -347,13 +347,13 @@ Buffer ShowTag(const std::string &tag)
 }
 
 #ifdef _UTF8
-std::basic_string<my_char_t> Scroller(const std::string &str, size_t width, size_t &pos)
+std::basic_string<my_char_t> Scroller(const std::string &str, size_t &pos, size_t width)
 {
-	return Scroller(TO_WSTRING(str), width, pos);
+	return Scroller(TO_WSTRING(str), pos, width);
 }
 #endif // _UTF8
 
-std::basic_string<my_char_t> Scroller(const std::basic_string<my_char_t> &str, size_t width, size_t &pos)
+std::basic_string<my_char_t> Scroller(const std::basic_string<my_char_t> &str, size_t &pos, size_t width)
 {
 	std::basic_string<my_char_t> s(str);
 	if (!Config.header_text_scrolling)

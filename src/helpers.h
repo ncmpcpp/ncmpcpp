@@ -116,9 +116,9 @@ std::string ExtractTopDirectory(const std::string &);
 Buffer ShowTag(const std::string &);
 
 #ifdef _UTF8
-std::basic_string<my_char_t> Scroller(const std::string &, size_t, size_t &);
+std::basic_string<my_char_t> Scroller(const std::string &str, size_t &pos, size_t width);
 #endif // _UTF8
-std::basic_string<my_char_t> Scroller(const std::basic_string<my_char_t> &, size_t, size_t &);
+std::basic_string<my_char_t> Scroller(const std::basic_string<my_char_t> &str, size_t &pos, size_t width);
 
 #ifdef HAVE_CURL_CURL_H
 size_t write_data(char *, size_t, size_t, void *);
