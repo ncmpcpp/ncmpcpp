@@ -89,7 +89,7 @@ void SetWindowsDimensions(size_t &header_height, size_t &footer_start_y, size_t 
 	if (!Config.statusbar_visibility)
 		Global::MainHeight++;
 	
-	header_height = Config.new_design ? 5 : 1;
+	header_height = Config.new_design ? (Config.header_visibility ? 5 : 3) : 1;
 	footer_start_y = LINES-(Config.statusbar_visibility ? 2 : 1);
 	footer_height = Config.statusbar_visibility ? 2 : 1;
 }
