@@ -190,6 +190,7 @@ struct ncmpcpp_config
 	bool jump_to_now_playing_song_at_start;
 	bool clock_display_seconds;
 	bool display_bitrate;
+	bool display_remaining_time;
 	bool ignore_leading_the;
 	bool block_search_constraints_change;
 	bool use_console_editor;

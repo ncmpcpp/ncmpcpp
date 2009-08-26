@@ -1115,7 +1115,13 @@ int main(int argc, char *argv[])
 				*wFooter << fmtBold;
 				if (Config.new_design)
 				{
-					tracklength = Song::ShowTime(songpos);
+					if (Config.display_remaining_time)
+					{
+						tracklength = "-";
+						tracklength += Song::ShowTime(s->GetTotalLength()-songpos);
+					}
+					else
+						tracklength = Song::ShowTime(songpos);
 					tracklength += "/";
 					tracklength += s->GetLength();
 					*wHeader << XY(0, 0) << tracklength << " ";
@@ -1123,7 +1129,17 @@ int main(int argc, char *argv[])
 				}
 				else
 				{
-					tracklength = "[" + Song::ShowTime(songpos) + "/" + s->GetLength() + "]";
+					tracklength = "[";
+					if (Config.display_remaining_time)
+					{
+						tracklength += "-";
+						tracklength += Song::ShowTime(s->GetTotalLength()-songpos);
+					}
+					else
+						tracklength = Song::ShowTime(songpos);
+					tracklength += "/";
+					tracklength += s->GetLength();
+					tracklength += "]";
 					*wFooter << XY(wFooter->GetWidth()-tracklength.length(), 1) << tracklength;
 				}
 				double progressbar_size = songpos/double(s->GetTotalLength());

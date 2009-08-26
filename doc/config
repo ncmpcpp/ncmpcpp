@@ -209,6 +209,8 @@
 #
 #display_bitrate = "no"
 #
+#display_remaining_time = "no"
+#
 #regular_expressions = "basic" (basic/extended)
 #
 ##

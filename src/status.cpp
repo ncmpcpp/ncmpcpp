@@ -415,7 +415,13 @@ void NcmpcppStatusChanged(Connection *, StatusChanges changed, void *)
 			std::string tracklength;
 			if (Config.new_design)
 			{
-				tracklength = Song::ShowTime(elapsed);
+				if (Config.display_remaining_time)
+				{
+					tracklength = "-";
+					tracklength += Song::ShowTime(np.GetTotalLength()-elapsed);
+				}
+				else
+					tracklength = Song::ShowTime(elapsed);
 				if (np.GetTotalLength())
 				{
 					tracklength += "/";
@@ -466,7 +472,13 @@ void NcmpcppStatusChanged(Connection *, StatusChanges changed, void *)
 				tracklength += " [";
 				if (np.GetTotalLength())
 				{
-					tracklength += Song::ShowTime(elapsed);
+					if (Config.display_remaining_time)
+					{
+						tracklength += "-";
+						tracklength += Song::ShowTime(np.GetTotalLength()-elapsed);
+					}
+					else
+						tracklength += Song::ShowTime(elapsed);
 					tracklength += "/";
 					tracklength += np.GetLength();
 					tracklength += "]";

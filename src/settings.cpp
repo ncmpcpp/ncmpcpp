@@ -292,6 +292,7 @@ void DefaultConfiguration(ncmpcpp_config &conf)
 	conf.jump_to_now_playing_song_at_start = true;
 	conf.clock_display_seconds = false;
 	conf.display_bitrate = false;
+	conf.display_remaining_time = false;
 	conf.ignore_leading_the = false;
 	conf.block_search_constraints_change = true;
 	conf.use_console_editor = false;
@@ -742,6 +743,10 @@ void ReadConfiguration(ncmpcpp_config &conf)
 			else if (cl.find("display_bitrate") != std::string::npos)
 			{
 				conf.display_bitrate = v == "yes";
+			}
+			else if (cl.find("display_remaining_time") != std::string::npos)
+			{
+				conf.display_remaining_time = v == "yes";
 			}
 			else if (cl.find("ignore_leading_the") != std::string::npos)
 			{
