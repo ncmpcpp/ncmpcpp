@@ -139,7 +139,7 @@ struct ncmpcpp_config
 	std::string execute_on_song_change;
 	std::string new_header_first_line;
 	std::string new_header_second_line;
-	std::string progressbar;
+	std::basic_string<my_char_t> progressbar;
 	
 	std::string pattern;
 	

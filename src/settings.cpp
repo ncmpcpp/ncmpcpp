@@ -24,6 +24,7 @@
 # include <sys/stat.h>
 #endif // WIN32
 #include <fstream>
+#include <stdexcept>
 
 #include "global.h"
 #include "helpers.h"
@@ -251,7 +252,7 @@ void DefaultConfiguration(ncmpcpp_config &conf)
 	conf.new_header_first_line = "{$b$1$aqqu$/a$9 {%t}|{%f} $1$atqq$/a$9$/b}";
 	conf.new_header_second_line = "{{{$4$b%a$/b$9}{ - $7%b$9}{ ($4%y$9)}}|{%D}}";
 	conf.browser_playlist_prefix << clRed << "(playlist)" << clEnd << ' ';
-	conf.progressbar = "=>";
+	conf.progressbar = U("=>");
 	conf.pattern = "%n - %t";
 	conf.selected_item_prefix << clMagenta;
 	conf.selected_item_suffix << clEnd;
@@ -624,8 +625,9 @@ void ReadConfiguration(ncmpcpp_config &conf)
 			}
 			else if (cl.find("progressbar_look") != std::string::npos)
 			{
-				if (v.length() == 2)
-					conf.progressbar = v;
+				conf.progressbar = TO_WSTRING(v);
+				if (conf.progressbar.length() != 2)
+					throw std::runtime_error("the length of progressbar_look is not two characters long!");
 			}
 			else if (cl.find("default_tag_editor_pattern") != std::string::npos)
 			{

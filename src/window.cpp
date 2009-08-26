@@ -37,7 +37,6 @@ void NCurses::InitScreen(GNUC_UNUSED const char *window_title, bool enable_color
 		COLOR_BLACK, COLOR_RED, COLOR_GREEN, COLOR_YELLOW,
 		COLOR_BLUE, COLOR_MAGENTA, COLOR_CYAN, COLOR_WHITE
 	};
-	setlocale(LC_ALL, "");
 #	ifdef XCURSES
 	Xinitscr(1, const_cast<char **>(&window_title));
 #	else

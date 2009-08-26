@@ -98,6 +98,8 @@ namespace
 
 int main(int argc, char *argv[])
 {
+	setlocale(LC_ALL, "");
+	
 	CreateConfigDir();
 	DefaultConfiguration(Config);
 	DefaultKeys(Key);
@@ -1136,8 +1138,9 @@ int main(int argc, char *argv[])
 				int howlong = wFooter->GetWidth()*progressbar_size;
 				
 				mvwhline(wFooter->Raw(), 0, 0, 0, wFooter->GetWidth());
-				mvwhline(wFooter->Raw(), 0, 0, Config.progressbar[0], howlong);
-				mvwaddch(wFooter->Raw(), 0, howlong, Config.progressbar[1]);
+				for (int i = 0; i < howlong; ++i)
+					*wFooter << Config.progressbar[0];
+				*wFooter << Config.progressbar[1];
 				*wFooter << fmtBoldEnd;
 				wFooter->Refresh();
 			}
