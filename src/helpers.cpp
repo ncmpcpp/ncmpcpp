@@ -368,22 +368,16 @@ std::basic_string<my_char_t> Scroller(const std::basic_string<my_char_t> &str, s
 		std::basic_string<my_char_t>::const_iterator b = s.begin(), e = s.end();
 		for (std::basic_string<my_char_t>::const_iterator it = b+pos; it < e && len < width; ++it)
 		{
-#			ifdef _UTF8
-			len += wcwidth(*it);
-#			else
-			len++;
-#			endif
+			if ((len += wcwidth(*it)) > width)
+				break;
 			result += *it;
 		}
 		if (++pos >= s.length())
 			pos = 0;
 		for (; len < width; ++b)
 		{
-#			ifdef _UTF8
-			len += wcwidth(*b);
-#			else
-			len++;
-#			endif
+			if ((len += wcwidth(*b)) > width)
+				break;
 			result += *b;
 		}
 	}

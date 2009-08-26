@@ -169,7 +169,8 @@ template <typename C> void NCurses::basic_buffer<C>::Write(Window &w, size_t &po
 				LoadAttribute(w, lb->Value);
 				++lb;
 			}
-			len += wcwidth(s[i]);
+			if ((len += wcwidth(s[i])) > width)
+				break;
 			w << s[i];
 		}
 		if (++pos >= s.length())
@@ -184,7 +185,8 @@ template <typename C> void NCurses::basic_buffer<C>::Write(Window &w, size_t &po
 				LoadAttribute(w, lb->Value);
 				++lb;
 			}
-			len += wcwidth(s[i]);
+			if ((len += wcwidth(s[i])) > width)
+				break;
 			w << s[i];
 		}
 		// load all remained attributes to clean up
