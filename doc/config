@@ -17,6 +17,23 @@
 #
 #mpd_crossfade_time = "5"
 #
+##### music visualizer #####
+##
+## Note: In order to make music visualizer work you'll
+## need to use mpd fifo output, whose format parameter
+## has to be set to 44100:16:1. Example configuration:
+## (it has to be put into mpd.conf)
+##
+## audio_output {
+##        type            "fifo"
+##        name            "My FIFO"
+##        path            "/tmp/mpd.fifo"
+##        format          "44100:16:1"
+## }
+##
+#
+#visualizer_fifo_path = ""
+#
 ##### system encoding #####
 ##
 ## if you use encoding other than utf8, set it in

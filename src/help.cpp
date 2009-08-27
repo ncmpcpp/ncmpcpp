@@ -147,6 +147,9 @@ void Help::GetKeybindings()
 #	ifdef ENABLE_OUTPUTS
 	*w << DisplayKeys(Key.Outputs)			<< "Outputs\n";
 #	endif // ENABLE_OUTPUTS
+#	ifdef ENABLE_VISUALIZER
+	*w << DisplayKeys(Key.Visualizer)		<< "Music visualizer\n";
+#	endif // ENABLE_VISUALIZER
 #	ifdef ENABLE_CLOCK
 	*w << DisplayKeys(Key.Clock)			<< "Clock screen\n";
 #	endif // ENABLE_CLOCK

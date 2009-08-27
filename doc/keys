@@ -58,6 +58,8 @@
 #
 #key_outputs = '8' 272
 #
+#key_music_visualizer = '9' 273
+#
 #key_clock = '0' 274
 #
 #key_stop = 's'

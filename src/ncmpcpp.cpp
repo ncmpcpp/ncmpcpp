@@ -48,6 +48,7 @@
 #include "outputs.h"
 #include "status.h"
 #include "tag_editor.h"
+#include "visualizer.h"
 
 #define CHECK_PLAYLIST_FOR_FILTERING									\
 			if (myPlaylist->Main()->isFiltered())						\
@@ -248,6 +249,9 @@ int main(int argc, char *argv[])
 #				ifdef HAVE_TAGLIB_H
 				*wHeader << "  " << fmtBold << char(Key.TagEditor[0]) << fmtBoldEnd << ":Tag editor";
 #				endif // HAVE_TAGLIB_H
+#				ifdef ENABLE_VISUALIZER
+				*wHeader << "  " << fmtBold << char(Key.Visualizer[0]) << fmtBoldEnd << ":Music visualizer";
+#				endif // ENABLE_VISUALIZER
 #				ifdef ENABLE_CLOCK
 				*wHeader << "  " << fmtBold << char(Key.Clock[0]) << fmtBoldEnd << ":Clock";
 #				endif // ENABLE_CLOCK
@@ -434,6 +438,14 @@ int main(int argc, char *argv[])
 			myTinyTagEditor->hasToBeResized = 1;
 			myTagEditor->hasToBeResized = 1;
 #			endif // HAVE_TAGLIB_H
+			
+#			ifdef ENABLE_VISUALIZER
+			myVisualizer->hasToBeResized = 1;
+#			endif // ENABLE_VISUALIZER
+			
+#			ifdef ENABLE_OUTPUTS
+			myOutputs->hasToBeResized = 1;
+#			endif // ENABLE_OUTPUTS
 			
 #			ifdef ENABLE_CLOCK
 			myClock->hasToBeResized = 1;
@@ -1983,6 +1995,12 @@ int main(int argc, char *argv[])
 			myOutputs->SwitchTo();
 		}
 #		endif // ENABLE_OUTPUTS
+#		ifdef ENABLE_VISUALIZER
+		else if (Keypressed(input, Key.Visualizer))
+		{
+			myVisualizer->SwitchTo();
+		}
+#		endif // ENABLE_VISUALIZER
 #		ifdef ENABLE_CLOCK
 		else if (Keypressed(input, Key.Clock))
 		{
