@@ -805,6 +805,7 @@ void ReadConfiguration(ncmpcpp_config &conf)
 			{
 				conf.regex_type = REG_EXTENDED * (v != "basic");
 			}
+#			ifdef HAVE_CURL_CURL_H
 			else if (cl.find("lyrics_database") != std::string::npos)
 			{
 				if (!v.empty())
@@ -813,6 +814,7 @@ void ReadConfiguration(ncmpcpp_config &conf)
 					conf.lyrics_db = n < Lyrics::DBs ? n : 0;
 				}
 			}
+#			endif // HAVE_CURL_CURL_H
 			else if (cl.find("lines_scrolled") != std::string::npos)
 			{
 				if (!v.empty())
