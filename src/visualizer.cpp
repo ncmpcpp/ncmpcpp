@@ -44,7 +44,7 @@ void Visualizer::Init()
 	w = new Window(0, MainStartY, COLS, MainHeight, "", Config.main_color, brNone);
 	w->SetTimeout(Config.visualizer_fifo_path.empty() ? ncmpcpp_window_timeout : 40 /* this gives us 25 fps */);
 	
-	itsFifo = -1;
+	ResetFD();
 	itsFreqsMagnitude = new unsigned[FFTResults];
 	itsInput = static_cast<double *>(fftw_malloc(sizeof(double)*Samples));
 	itsOutput = static_cast<fftw_complex *>(fftw_malloc(sizeof(fftw_complex)*FFTResults));
@@ -67,8 +67,7 @@ void Visualizer::SwitchTo()
 	myScreen = this;
 	w->Clear();
 	
-	if (itsFifo < 0 && (itsFifo = open(Config.visualizer_fifo_path.c_str(), O_RDONLY | O_NONBLOCK)) < 0)
-		ShowMessage("Couldn't open fifo for reading PCM data: %s", strerror(errno));
+	SetFD();
 	
 	Global::RedrawHeader = 1;
 }
@@ -125,6 +124,17 @@ void Visualizer::Update()
 		mvwvline(w->Raw(), Global::MainHeight-bar_height, i, 0, bar_height);
 	}
 	w->Refresh();
+}
+
+void Visualizer::SetFD()
+{
+	if (itsFifo < 0 && (itsFifo = open(Config.visualizer_fifo_path.c_str(), O_RDONLY | O_NONBLOCK)) < 0)
+		ShowMessage("Couldn't open fifo for reading PCM data: %s", strerror(errno));
+}
+
+void Visualizer::ResetFD()
+{
+	itsFifo = -1;
 }
 
 #endif // ENABLE_VISUALIZER

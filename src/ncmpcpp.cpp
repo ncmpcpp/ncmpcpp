@@ -203,6 +203,11 @@ int main(int argc, char *argv[])
 #				ifdef ENABLE_OUTPUTS
 				myOutputs->FetchList();
 #				endif // ENABLE_OUTPUTS
+#				ifdef ENABLE_VISUALIZER
+				myVisualizer->ResetFD();
+				if (myScreen == myVisualizer)
+					myVisualizer->SetFD();
+#				endif // ENABLE_VISUALIZER
 			}
 		}
 		

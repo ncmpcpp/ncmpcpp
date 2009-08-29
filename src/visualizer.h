@@ -51,6 +51,9 @@ class Visualizer : public Screen<Window>
 		
 		virtual bool allowsSelection() { return false; }
 		
+		void SetFD();
+		void ResetFD();
+		
 	protected:
 		virtual void Init();
 		
