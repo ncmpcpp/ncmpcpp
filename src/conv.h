@@ -18,8 +18,8 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
-#ifndef _MISC_H
-#define _MISC_H
+#ifndef _CONV_H
+#define _CONV_H
 
 #include <string>
 
