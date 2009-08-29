@@ -497,14 +497,15 @@ void NcmpcppStatusChanged(Connection *, StatusChanges changed, void *)
 			if (!block_progressbar_update)
 			{
 				double progressbar_size = elapsed/double(np.GetTotalLength());
-				int howlong = wFooter->GetWidth()*progressbar_size;
+				unsigned howlong = wFooter->GetWidth()*progressbar_size;
 				wFooter->SetColor(Config.progressbar_color);
 				mvwhline(wFooter->Raw(), 0, 0, 0, wFooter->GetWidth());
 				if (np.GetTotalLength())
 				{
-					for (int i = 0; i < howlong; ++i)
+					for (unsigned i = 0; i < howlong; ++i)
 						*wFooter << Config.progressbar[0];
-					*wFooter << Config.progressbar[1];
+					if (howlong < wFooter->GetWidth())
+						*wFooter << Config.progressbar[1];
 				}
 				wFooter->SetColor(Config.statusbar_color);
 			}

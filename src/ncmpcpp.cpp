@@ -1152,12 +1152,13 @@ int main(int argc, char *argv[])
 					*wFooter << XY(wFooter->GetWidth()-tracklength.length(), 1) << tracklength;
 				}
 				double progressbar_size = songpos/double(s->GetTotalLength());
-				int howlong = wFooter->GetWidth()*progressbar_size;
+				unsigned howlong = wFooter->GetWidth()*progressbar_size;
 				
 				mvwhline(wFooter->Raw(), 0, 0, 0, wFooter->GetWidth());
-				for (int i = 0; i < howlong; ++i)
+				for (unsigned i = 0; i < howlong; ++i)
 					*wFooter << Config.progressbar[0];
-				*wFooter << Config.progressbar[1];
+				if (howlong < wFooter->GetWidth())
+					*wFooter << Config.progressbar[1];
 				*wFooter << fmtBoldEnd;
 				wFooter->Refresh();
 			}
