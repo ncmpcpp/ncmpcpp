@@ -46,8 +46,8 @@ class SelectedItemsAdder : public Screen< Menu<std::string> >
 	private:
 		void SetDimensions();
 		
-		size_t Width;
-		size_t Height;
+		size_t itsWidth;
+		size_t itsHeight;
 };
 
 extern SelectedItemsAdder *mySelectedItemsAdder;

@@ -37,7 +37,7 @@ SelectedItemsAdder *mySelectedItemsAdder = new SelectedItemsAdder;
 void SelectedItemsAdder::Init()
 {
 	SetDimensions();
-	w = new Menu<std::string>((COLS-Width)/2, (MainHeight-Height)/2+MainStartY, Width, Height, "Add selected items to...", Config.main_color, Config.window_border);
+	w = new Menu<std::string>((COLS-itsWidth)/2, (MainHeight-itsHeight)/2+MainStartY, itsWidth, itsHeight, "Add selected items to...", Config.main_color, Config.window_border);
 	w->SetTimeout(ncmpcpp_window_timeout);
 	w->CyclicScrolling(Config.use_cyclic_scrolling);
 	w->HighlightColor(Config.main_highlight_color);
@@ -101,10 +101,10 @@ void SelectedItemsAdder::SwitchTo()
 void SelectedItemsAdder::Resize()
 {
 	SetDimensions();
-	if (Height < 5) // screen to low to display this window
+	if (itsHeight < 5) // screen too low to display this window
 		return myOldScreen->SwitchTo();
-	w->Resize(Width, Height);
-	w->MoveTo((COLS-Width)/2, (MainHeight-Height)/2+MainStartY);
+	w->Resize(itsWidth, itsHeight);
+	w->MoveTo((COLS-itsWidth)/2, (MainHeight-itsHeight)/2+MainStartY);
 	if (myOldScreen && myOldScreen->hasToBeResized) // resize background window
 	{
 		myOldScreen->Resize();
@@ -184,7 +184,7 @@ void SelectedItemsAdder::MouseButtonPressed(MEVENT me)
 
 void SelectedItemsAdder::SetDimensions()
 {
-	Width = COLS*0.6;
-	Height = std::min(size_t(LINES*0.6), MainHeight);
+	itsWidth = COLS*0.6;
+	itsHeight = std::min(size_t(LINES*0.6), MainHeight);
 }
 
