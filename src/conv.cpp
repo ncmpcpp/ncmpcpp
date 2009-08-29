@@ -21,7 +21,7 @@
 #include <algorithm>
 #include <sstream>
 
-#include "misc.h"
+#include "conv.h"
 
 void ToLower(std::string &s)
 {

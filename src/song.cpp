@@ -28,7 +28,7 @@
 #include <stdexcept>
 
 #include "charset.h"
-#include "misc.h"
+#include "conv.h"
 #include "song.h"
 
 MPD::Song::Song(mpd_Song *s, bool copy_ptr) : 	itsSong(s ? s : mpd_newSong()),
