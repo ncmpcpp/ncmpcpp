@@ -132,7 +132,7 @@ void Browser::SpacePressed()
 		return;
 	}
 	
-	if (w->Empty())
+	if (w->Empty() || (itsBrowsedDir != "/" && w->Choice() == 0 /* parent dir */))
 		return;
 	
 	const Item &item = w->Current();
