@@ -158,7 +158,7 @@ namespace MPD
 			void DeleteID(int) const;
 			void Delete(const std::string &, int) const;
 			void StartCommandsList();
-			void CommitCommandsList();
+			bool CommitCommandsList();
 			
 			void DeletePlaylist(const std::string &) const;
 			bool SavePlaylist(const std::string &) const;

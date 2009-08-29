@@ -38,6 +38,7 @@
 #include "help.h"
 #include "helpers.h"
 #include "media_library.h"
+#include "misc.h"
 #include "lyrics.h"
 #include "playlist.h"
 #include "playlist_editor.h"
@@ -438,6 +439,7 @@ int main(int argc, char *argv[])
 			myPlaylistEditor->hasToBeResized = 1;
 			myInfo->hasToBeResized = 1;
 			myLyrics->hasToBeResized = 1;
+			mySelectedItemsAdder->hasToBeResized = 1;
 			
 #			ifdef HAVE_TAGLIB_H
 			myTinyTagEditor->hasToBeResized = 1;
@@ -1545,134 +1547,7 @@ int main(int argc, char *argv[])
 		}
 		else if (Keypressed(input, Key.AddSelected))
 		{
-			if (!myScreen->allowsSelection())
-				continue;
-			
-			SongList result;
-			myScreen->GetSelectedSongs(result);
-			
-			if (result.empty())
-			{
-				ShowMessage("No selected items!");
-				continue;
-			}
-			if (MainHeight < 5)
-			{
-				ShowMessage("Screen is too small to display this window!");
-				continue;
-			}
-			
-			const size_t dialog_width = COLS*0.8;
-			const size_t dialog_height = std::min(size_t(LINES*0.6), MainHeight);
-			
-			Menu<std::string> mDialog((COLS-dialog_width)/2, (MainHeight-dialog_height)/2+MainStartY, dialog_width, dialog_height, "Add selected items to...", Config.main_color, Config.window_border);
-			mDialog.SetTimeout(ncmpcpp_window_timeout);
-			mDialog.CyclicScrolling(Config.use_cyclic_scrolling);
-			mDialog.SetItemDisplayer(Display::Generic);
-			
-			bool playlists_not_active = myScreen == myBrowser && Config.local_browser;
-			
-			if (playlists_not_active)
-			{
-				ShowMessage("Local items cannot be added to m3u playlist!");
-			}
-			
-			mDialog.AddOption("Current MPD playlist");
-			mDialog.AddOption("Create new playlist", 0, playlists_not_active);
-			mDialog.AddSeparator();
-			TagList playlists;
-			Mpd.GetPlaylists(playlists);
-			for (TagList::iterator it = playlists.begin(); it != playlists.end(); ++it)
-			{
-				utf_to_locale(*it);
-				mDialog.AddOption(*it, 0, playlists_not_active);
-			}
-			mDialog.AddSeparator();
-			mDialog.AddOption("Cancel");
-			
-			mDialog.Display();
-			
-			Playlist::BlockRefreshing = 1;
-			while (!Keypressed(input, Key.Enter))
-			{
-				TraceMpdStatus();
-				mDialog.Refresh();
-				mDialog.ReadKey(input);
-				
-				if (Keypressed(input, Key.Up))
-					mDialog.Scroll(wUp);
-				else if (Keypressed(input, Key.Down))
-					mDialog.Scroll(wDown);
-				else if (Keypressed(input, Key.PageUp))
-					mDialog.Scroll(wPageUp);
-				else if (Keypressed(input, Key.PageDown))
-					mDialog.Scroll(wPageDown);
-				else if (Keypressed(input, Key.Home))
-					mDialog.Scroll(wHome);
-				else if (Keypressed(input, Key.End))
-					mDialog.Scroll(wEnd);
-			}
-			Playlist::BlockRefreshing = 0;
-			
-			size_t id = mDialog.Choice();
-			
-			myScreen->Refresh();
-			
-			if (id == 0)
-			{
-				Mpd.StartCommandsList();
-				SongList::const_iterator it = result.begin();
-				for (; it != result.end(); ++it)
-					if (Mpd.AddSong(**it) < 0)
-						break;
-				Mpd.CommitCommandsList();
-				
-				if (it != result.begin())
-				{
-					ShowMessage("Selected items added!");
-					Song &s = myPlaylist->Main()->at(myPlaylist->Main()->Size()-result.size());
-					if (s.GetHash() != result[0]->GetHash())
-						ShowMessage("%s", MPD::Message::PartOfSongsAdded);
-				}
-			}
-			else if (id == 1)
-			{
-				LockStatusbar();
-				Statusbar() << "Save playlist as: ";
-				std::string playlist = wFooter->GetString();
-				std::string real_playlist = playlist;
-				locale_to_utf(real_playlist);
-				UnlockStatusbar();
-				if (!playlist.empty())
-				{
-					Mpd.StartCommandsList();
-					for (SongList::const_iterator it = result.begin(); it != result.end(); ++it)
-						Mpd.AddToPlaylist(real_playlist, **it);
-					Mpd.CommitCommandsList();
-					ShowMessage("Selected items added to playlist \"%s\"!", playlist.c_str());
-				}
-			}
-			else if (id > 1 && id < mDialog.Size()-1)
-			{
-				std::string playlist = locale_to_utf_cpy(mDialog.Current());
-				Mpd.StartCommandsList();
-				for (SongList::const_iterator it = result.begin(); it != result.end(); ++it)
-					Mpd.AddToPlaylist(playlist, **it);
-				Mpd.CommitCommandsList();
-				ShowMessage("Selected items added to playlist \"%s\"!", mDialog.Current().c_str());
-			}
-			
-			if (id != mDialog.Size()-1)
-			{
-				// refresh playlist's lists
-				if (!Config.local_browser && myBrowser->Main() && myBrowser->CurrentDir() == "/")
-					myBrowser->GetDirectory("/");
-				if (myPlaylistEditor->Main())
-					myPlaylistEditor->Playlists->Clear(0); // make playlist editor update itself
-			}
-			if (myScreen == myPlaylist)
-				myPlaylist->EnableHighlighting();
-			FreeSongList(result);
+			mySelectedItemsAdder->SwitchTo();
 		}
 		else if (Keypressed(input, Key.Crop))
 		{

@@ -645,7 +645,7 @@ void Connection::StartCommandsList()
 	
 }
 
-void Connection::CommitCommandsList()
+bool Connection::CommitCommandsList()
 {
 	if (isConnected)
 	{
@@ -656,6 +656,7 @@ void Connection::CommitCommandsList()
 			itsErrorHandler(this, MPD_ACK_ERROR_PLAYLIST_MAX, Message::FullPlaylist, NULL);
 		isCommandsListEnabled = 0;
 	}
+	return !CheckForErrors();
 }
 
 void Connection::DeletePlaylist(const std::string &name) const
