@@ -158,7 +158,7 @@ void NcmpcppErrorCallback(Connection *, int errorid, const char *msg, void *)
 {
 	if (errorid == MPD_ACK_ERROR_PERMISSION)
 	{
-		wFooter->SetGetStringHelper(NULL);
+		wFooter->SetGetStringHelper(0);
 		Statusbar() << "Password: ";
 		std::string password = wFooter->GetString(-1, 0, 1);
 		Mpd.SetPassword(password);

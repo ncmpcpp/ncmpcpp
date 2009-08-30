@@ -306,7 +306,7 @@ void Lyrics::Take()
 {
 	if (!Ready)
 		return;
-	pthread_join(*Downloader, NULL);
+	pthread_join(*Downloader, 0);
 	w->Flush();
 	delete Downloader;
 	Downloader = 0;

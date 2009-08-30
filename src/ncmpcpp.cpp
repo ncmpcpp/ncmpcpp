@@ -162,8 +162,8 @@ int main(int argc, char *argv[])
 	myPlaylist->SwitchTo();
 	myPlaylist->UpdateTimer();
 	
-	Mpd.SetStatusUpdater(NcmpcppStatusChanged, NULL);
-	Mpd.SetErrorHandler(NcmpcppErrorCallback, NULL);
+	Mpd.SetStatusUpdater(NcmpcppStatusChanged, 0);
+	Mpd.SetErrorHandler(NcmpcppErrorCallback, 0);
 	
 	// local variables
 	int input;
@@ -1105,7 +1105,7 @@ int main(int argc, char *argv[])
 			LockStatusbar();
 			
 			int songpos;
-			time_t t = time(NULL);
+			time_t t = time(0);
 			
 			songpos = Mpd.GetElapsedTime();
 			

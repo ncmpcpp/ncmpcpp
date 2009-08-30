@@ -391,8 +391,7 @@ void Connection::GetPlaylistChanges(long long id, SongList &v) const
 			v.reserve(GetPlaylistLength());
 		}
 		mpd_sendPlChangesCommand(itsConnection, id);
-		mpd_InfoEntity *item = NULL;
-		while ((item = mpd_getNextInfoEntity(itsConnection)) != NULL)
+		while (mpd_InfoEntity *item = mpd_getNextInfoEntity(itsConnection))
 		{
 			if (item->type == MPD_INFO_ENTITY_TYPE_SONG)
 			{
@@ -411,8 +410,7 @@ Song Connection::GetSong(const std::string &path) const
 	if (isConnected)
 	{
 		mpd_sendListallInfoCommand(itsConnection, path.c_str());
-		mpd_InfoEntity *item = NULL;
-		item = mpd_getNextInfoEntity(itsConnection);
+		mpd_InfoEntity *item = mpd_getNextInfoEntity(itsConnection);
 		Song result = item->info.song;
 		item->info.song = 0;
 		mpd_freeInfoEntity(item);
@@ -433,9 +431,7 @@ Song Connection::GetCurrentSong() const
 	if (isConnected && (GetState() == psPlay || GetState() == psPause))
 	{
 		mpd_sendCurrentSongCommand(itsConnection);
-		mpd_InfoEntity *item = NULL;
-		item = mpd_getNextInfoEntity(itsConnection);
-		if (item)
+		if (mpd_InfoEntity *item = mpd_getNextInfoEntity(itsConnection))
 		{
 			Song result = item->info.song;
 			item->info.song = 0;
@@ -455,8 +451,7 @@ void Connection::GetPlaylistContent(const std::string &path, SongList &v) const
 	if (isConnected)
 	{
 		mpd_sendListPlaylistInfoCommand(itsConnection, path.c_str());
-		mpd_InfoEntity *item = NULL;
-		while ((item = mpd_getNextInfoEntity(itsConnection)) != NULL)
+		while (mpd_InfoEntity *item = mpd_getNextInfoEntity(itsConnection))
 		{
 			if (item->type == MPD_INFO_ENTITY_TYPE_SONG)
 			{
@@ -553,7 +548,7 @@ int Connection::AddSong(const std::string &path)
 				id = 0;
 		}
 		else if (itsErrorHandler)
-				itsErrorHandler(this, MPD_ACK_ERROR_PLAYLIST_MAX, Message::FullPlaylist, NULL);
+				itsErrorHandler(this, MPD_ACK_ERROR_PLAYLIST_MAX, Message::FullPlaylist, itsErrorHandlerUserdata);
 	}
 	return id;
 }
@@ -653,7 +648,7 @@ bool Connection::CommitCommandsList()
 		mpd_finishCommand(itsConnection);
 		UpdateStatus();
 		if (GetPlaylistLength() == itsMaxPlaylistLength && itsErrorHandler)
-			itsErrorHandler(this, MPD_ACK_ERROR_PLAYLIST_MAX, Message::FullPlaylist, NULL);
+			itsErrorHandler(this, MPD_ACK_ERROR_PLAYLIST_MAX, Message::FullPlaylist, itsErrorHandlerUserdata);
 		isCommandsListEnabled = 0;
 	}
 	return !CheckForErrors();
@@ -700,9 +695,8 @@ void Connection::GetList(TagList &v, mpd_TagItems type) const
 {
 	if (isConnected)
 	{
-		mpd_sendListCommand(itsConnection, type, NULL);
-		char *item;
-		while ((item = mpd_getNextTag(itsConnection, type)) != NULL)
+		mpd_sendListCommand(itsConnection, type, 0);
+		while (char *item = mpd_getNextTag(itsConnection, type))
 		{
 			if (item[0] != 0) // do not push empty item
 				v.push_back(item);
@@ -716,9 +710,9 @@ void Connection::GetAlbums(const std::string &artist, TagList &v) const
 {
 	if (isConnected)
 	{
-		mpd_sendListCommand(itsConnection, MPD_TABLE_ALBUM, artist.empty() ? NULL : artist.c_str());
-		char *item;
-		while ((item = mpd_getNextAlbum(itsConnection)) != NULL)
+		mpd_sendListCommand(itsConnection, MPD_TABLE_ALBUM, artist.empty() ? 0 : artist.c_str());
+		
+		while (char *item = mpd_getNextAlbum(itsConnection))
 		{
 			if (item[0] != 0) // do not push empty item
 				v.push_back(item);
@@ -757,8 +751,7 @@ void Connection::CommitSearch(SongList &v) const
 	if (isConnected)
 	{
 		mpd_commitSearch(itsConnection);
-		mpd_InfoEntity *item = NULL;
-		while ((item = mpd_getNextInfoEntity(itsConnection)) != NULL)
+		while (mpd_InfoEntity *item = mpd_getNextInfoEntity(itsConnection))
 		{
 			if (item->type == MPD_INFO_ENTITY_TYPE_SONG)
 			{
@@ -777,8 +770,7 @@ void Connection::CommitSearch(TagList &v) const
 	if (isConnected)
 	{
 		mpd_commitSearch(itsConnection);
-		char *tag = NULL;
-		while ((tag = mpd_getNextTag(itsConnection, itsSearchedField)) != NULL)
+		while (char *tag = mpd_getNextTag(itsConnection, itsSearchedField))
 		{
 			if (tag[0] != 0) // do not push empty item
 				v.push_back(tag);
@@ -792,9 +784,8 @@ void Connection::GetDirectory(const std::string &path, ItemList &v) const
 {
 	if (isConnected)
 	{
-		mpd_InfoEntity *item = NULL;
 		mpd_sendLsInfoCommand(itsConnection, path.c_str());
-		while ((item = mpd_getNextInfoEntity(itsConnection)) != NULL)
+		while (mpd_InfoEntity *item = mpd_getNextInfoEntity(itsConnection))
 		{
 			Item i;
 			switch (item->type)
@@ -824,9 +815,8 @@ void Connection::GetDirectoryRecursive(const std::string &path, SongList &v) con
 {
 	if (isConnected)
 	{
-		mpd_InfoEntity *item = NULL;
 		mpd_sendListallInfoCommand(itsConnection, path.c_str());
-		while ((item = mpd_getNextInfoEntity(itsConnection)) != NULL)
+		while (mpd_InfoEntity *item = mpd_getNextInfoEntity(itsConnection))
 		{
 			if (item->type == MPD_INFO_ENTITY_TYPE_SONG)
 			{
@@ -844,9 +834,8 @@ void Connection::GetSongs(const std::string &path, SongList &v) const
 {
 	if (isConnected)
 	{
-		mpd_InfoEntity *item = NULL;
 		mpd_sendLsInfoCommand(itsConnection, path.c_str());
-		while ((item = mpd_getNextInfoEntity(itsConnection)) != NULL)
+		while (mpd_InfoEntity *item = mpd_getNextInfoEntity(itsConnection))
 		{
 			if (item->type == MPD_INFO_ENTITY_TYPE_SONG)
 			{
@@ -864,9 +853,8 @@ void Connection::GetDirectories(const std::string &path, TagList &v) const
 {
 	if (isConnected)
 	{
-		mpd_InfoEntity *item = NULL;
 		mpd_sendLsInfoCommand(itsConnection, path.c_str());
-		while ((item = mpd_getNextInfoEntity(itsConnection)) != NULL)
+		while (mpd_InfoEntity *item = mpd_getNextInfoEntity(itsConnection))
 		{
 			if (item->type == MPD_INFO_ENTITY_TYPE_DIRECTORY)
 				v.push_back(item->info.directory->path);
