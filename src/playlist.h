@@ -27,7 +27,7 @@
 #include "screen.h"
 #include "song.h"
 
-class Playlist : public Screen< Menu<MPD::Song> >
+class Playlist : public Screen<Window>
 {
 	public:
 		Playlist() : NowPlaying(-1), OldPlaying(-1), itsTotalLength(0), itsRemainingTime(0), itsScrollBegin(0) { }
@@ -44,18 +44,20 @@ class Playlist : public Screen< Menu<MPD::Song> >
 		
 		virtual MPD::Song *CurrentSong();
 		
-		virtual bool allowsSelection() { return true; }
-		virtual void ReverseSelection() { w->ReverseSelection(); }
+		virtual bool allowsSelection() { return w == Items; }
+		virtual void ReverseSelection() { Items->ReverseSelection(); }
 		virtual void GetSelectedSongs(MPD::SongList &);
 		
 		virtual void ApplyFilter(const std::string &);
 		
-		virtual List *GetList() { return w; }
+		virtual List *GetList() { return w == Items ? Items : 0; }
 		
-		bool isPlaying() { return NowPlaying >= 0 && !w->Empty(); }
+		bool isPlaying() { return NowPlaying >= 0 && !Items->Empty(); }
 		const MPD::Song *NowPlayingSong();
 		
 		void Sort();
+		void AdjustSortOrder(int key);
+		bool SortingInProgress() { return w == SortDialog; }
 		void FixPositions(size_t = 0);
 		
 		void EnableHighlighting();
@@ -68,6 +70,8 @@ class Playlist : public Screen< Menu<MPD::Song> >
 		static std::string SongToString(const MPD::Song &, void *);
 		static std::string SongInColumnsToString(const MPD::Song &, void *);
 		
+		Menu< MPD::Song > *Items;
+		
 		int NowPlaying;
 		int OldPlaying;
 		
@@ -76,7 +80,6 @@ class Playlist : public Screen< Menu<MPD::Song> >
 		
 		static bool BlockNowPlayingUpdate;
 		static bool BlockUpdate;
-		static bool BlockRefreshing;
 		
 	protected:
 		virtual void Init();
@@ -96,7 +99,6 @@ class Playlist : public Screen< Menu<MPD::Song> >
 		static bool Sorting(MPD::Song *a, MPD::Song *b);
 		
 		static Menu< std::pair<std::string, MPD::Song::GetFunction> > *SortDialog;
-		
 		static const size_t SortOptions;
 		static const size_t SortDialogWidth;
 		static size_t SortDialogHeight;

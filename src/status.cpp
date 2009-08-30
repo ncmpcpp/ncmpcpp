@@ -130,7 +130,7 @@ void TraceMpdStatus()
 	wFooter->Refresh();
 	
 	if (myScreen == myPlaylist && now.tv_sec == myPlaylist->Timer()+Config.playlist_disable_highlight_delay)
-		myPlaylist->Main()->Highlighting(!Config.playlist_disable_highlight_delay);
+		myPlaylist->Items->Highlighting(!Config.playlist_disable_highlight_delay);
 	
 	if (lock_statusbar_delay > 0)
 	{
@@ -187,20 +187,20 @@ void NcmpcppStatusChanged(Connection *, StatusChanges changed, void *)
 	{
 		myPlaylist->OldPlaying = myPlaylist->NowPlaying;
 		myPlaylist->NowPlaying = Mpd.GetCurrentSongPos();
-		bool was_filtered = myPlaylist->Main()->isFiltered();
-		myPlaylist->Main()->ShowAll();
+		bool was_filtered = myPlaylist->Items->isFiltered();
+		myPlaylist->Items->ShowAll();
 		try
 		{
-			myPlaylist->Main()->BoldOption(myPlaylist->OldPlaying, 0);
+			myPlaylist->Items->BoldOption(myPlaylist->OldPlaying, 0);
 		}
 		catch (std::out_of_range) { }
 		try
 		{
-			myPlaylist->Main()->BoldOption(myPlaylist->NowPlaying, 1);
+			myPlaylist->Items->BoldOption(myPlaylist->NowPlaying, 1);
 		}
 		catch (std::out_of_range) { }
 		if (was_filtered)
-			myPlaylist->Main()->ShowFiltered();
+			myPlaylist->Items->ShowFiltered();
 	}
 	
 	if (changed.Playlist)
@@ -211,44 +211,44 @@ void NcmpcppStatusChanged(Connection *, StatusChanges changed, void *)
 			if (Mpd.GetState() > psStop)
 				WindowTitle(utf_to_locale_cpy(np.toString(Config.song_window_title_format)));
 			
-			bool was_filtered = myPlaylist->Main()->isFiltered();
-			myPlaylist->Main()->ShowAll();
+			bool was_filtered = myPlaylist->Items->isFiltered();
+			myPlaylist->Items->ShowAll();
 			SongList list;
 			
 			size_t playlist_length = Mpd.GetPlaylistLength();
-			if (playlist_length < myPlaylist->Main()->Size())
-				myPlaylist->Main()->ResizeList(playlist_length);
+			if (playlist_length < myPlaylist->Items->Size())
+				myPlaylist->Items->ResizeList(playlist_length);
 			
 			Mpd.GetPlaylistChanges(Mpd.GetOldPlaylistID(), list);
-			myPlaylist->Main()->Reserve(playlist_length);
+			myPlaylist->Items->Reserve(playlist_length);
 			for (SongList::const_iterator it = list.begin(); it != list.end(); ++it)
 			{
 				int pos = (*it)->GetPosition();
-				if (pos < int(myPlaylist->Main()->Size()))
+				if (pos < int(myPlaylist->Items->Size()))
 				{
 					// if song's already in playlist, replace it with a new one
-					myPlaylist->Main()->at(pos) = **it;
+					myPlaylist->Items->at(pos) = **it;
 				}
 				else
 				{
 					// otherwise just add it to playlist
-					myPlaylist->Main()->AddOption(**it, myPlaylist->NowPlaying == pos);
+					myPlaylist->Items->AddOption(**it, myPlaylist->NowPlaying == pos);
 				}
-				myPlaylist->Main()->at(pos).CopyPtr(0);
+				myPlaylist->Items->at(pos).CopyPtr(0);
 				(*it)->NullMe();
 			}
 			
 			if (myScreen == myPlaylist)
 			{
-				if (!playlist_length || myPlaylist->Main()->Size() < myPlaylist->Main()->GetHeight())
-					myPlaylist->Main()->Window::Clear();
-				myPlaylist->Main()->Refresh();
+				if (!playlist_length || myPlaylist->Items->Size() < myPlaylist->Items->GetHeight())
+					myPlaylist->Items->Window::Clear();
+				myPlaylist->Items->Refresh();
 			}
 			if (was_filtered)
 			{
-				myPlaylist->ApplyFilter(myPlaylist->Main()->GetFilter());
-				if (myPlaylist->Main()->Empty())
-					myPlaylist->Main()->ShowAll();
+				myPlaylist->ApplyFilter(myPlaylist->Items->GetFilter());
+				if (myPlaylist->Items->Empty())
+					myPlaylist->Items->ShowAll();
 			}
 			FreeSongList(list);
 		}
@@ -259,9 +259,9 @@ void NcmpcppStatusChanged(Connection *, StatusChanges changed, void *)
 		if (myScreen == myPlaylist)
 			RedrawHeader = 1;
 		
-		if (myPlaylist->Main()->Empty())
+		if (myPlaylist->Items->Empty())
 		{
-			myPlaylist->Main()->Reset();
+			myPlaylist->Items->Reset();
 			ShowMessage("Cleared playlist!");
 		}
 		
@@ -376,8 +376,8 @@ void NcmpcppStatusChanged(Connection *, StatusChanges changed, void *)
 				system(Config.execute_on_song_change.c_str());
 			if (Mpd.GetState() > psStop)
 				WindowTitle(utf_to_locale_cpy(np.toString(Config.song_window_title_format)));
-			if (Config.autocenter_mode && !myPlaylist->Main()->isFiltered())
-				myPlaylist->Main()->Highlight(myPlaylist->NowPlaying);
+			if (Config.autocenter_mode && !myPlaylist->Items->isFiltered())
+				myPlaylist->Items->Highlight(myPlaylist->NowPlaying);
 			
 			if (!Mpd.GetElapsedTime())
 				mvwhline(wFooter->Raw(), 0, 0, 0, wFooter->GetWidth());
@@ -627,8 +627,8 @@ void NcmpcppStatusChanged(Connection *, StatusChanges changed, void *)
 		wHeader->SetColor(Config.header_color);
 		wHeader->Refresh();
 	}
-	if (myScreen == myPlaylist && !Playlist::BlockRefreshing)
-		myPlaylist->Main()->Refresh();
+	if (myScreen->ActiveWindow() == myPlaylist->Items)
+		myPlaylist->Items->Refresh();
 	*wFooter << fmtBoldEnd;
 	wFooter->GotoXY(sx, sy);
 	wFooter->Refresh();

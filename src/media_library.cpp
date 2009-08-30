@@ -303,9 +303,9 @@ void MediaLibrary::Update()
 		
 		for (SongList::const_iterator it = list.begin(); it != list.end(); ++it)
 		{
-			for (size_t j = 0; j < myPlaylist->Main()->Size(); ++j)
+			for (size_t j = 0; j < myPlaylist->Items->Size(); ++j)
 			{
-				if ((*it)->GetHash() == myPlaylist->Main()->at(j).GetHash())
+				if ((*it)->GetHash() == myPlaylist->Items->at(j).GetHash())
 				{
 					bold = 1;
 					break;

@@ -52,7 +52,7 @@
 #include "visualizer.h"
 
 #define CHECK_PLAYLIST_FOR_FILTERING									\
-			if (myPlaylist->Main()->isFiltered())						\
+			if (myPlaylist->Items->isFiltered())						\
 			{										\
 				ShowMessage("%s", MPD::Message::FunctionDisabledFilteringEnabled);	\
 				continue;								\
@@ -188,7 +188,7 @@ int main(int argc, char *argv[])
 	{
 		TraceMpdStatus();
 		if (myPlaylist->isPlaying())
-			myPlaylist->Main()->Highlight(myPlaylist->NowPlaying);
+			myPlaylist->Items->Highlight(myPlaylist->NowPlaying);
 	}
 	
 	while (!main_exit)
@@ -545,18 +545,18 @@ int main(int argc, char *argv[])
 		}
 		else if (Keypressed(input, Key.Delete))
 		{
-			if (!myPlaylist->Main()->Empty() && myScreen == myPlaylist)
+			if (!myPlaylist->Items->Empty() && myScreen == myPlaylist)
 			{
 				Playlist::BlockUpdate = 1;
-				if (myPlaylist->Main()->hasSelected())
+				if (myPlaylist->Items->hasSelected())
 				{
 					std::vector<size_t> list;
-					myPlaylist->Main()->GetSelected(list);
+					myPlaylist->Items->GetSelected(list);
 					Mpd.StartCommandsList();
 					for (std::vector<size_t>::reverse_iterator it = list.rbegin(); it != list.rend(); ++it)
 					{
-						Mpd.DeleteID((*myPlaylist->Main())[*it].GetID());
-						myPlaylist->Main()->DeleteOption(*it);
+						Mpd.DeleteID((*myPlaylist->Items)[*it].GetID());
+						myPlaylist->Items->DeleteOption(*it);
 					}
 					Mpd.CommitCommandsList();
 					myPlaylist->FixPositions(list.front());
@@ -565,11 +565,11 @@ int main(int argc, char *argv[])
 				else
 				{
 					Playlist::BlockNowPlayingUpdate = 1;
-					myPlaylist->Main()->SetTimeout(50);
+					myPlaylist->Items->SetTimeout(50);
 					int del_counter = 0;
-					while (!myPlaylist->Main()->Empty() && Keypressed(input, Key.Delete))
+					while (!myPlaylist->Items->Empty() && Keypressed(input, Key.Delete))
 					{
-						size_t id = myPlaylist->Main()->Choice();
+						size_t id = myPlaylist->Items->Choice();
 						TraceMpdStatus();
 						Playlist::BlockUpdate = 1;
 						myPlaylist->UpdateTimer();
@@ -577,13 +577,13 @@ int main(int argc, char *argv[])
 						if (myPlaylist->NowPlaying > myPlaylist->CurrentSong()->GetPosition()-del_counter)
 							myPlaylist->NowPlaying--;
 						Mpd.DeleteID(myPlaylist->CurrentSong()->GetID());
-						myPlaylist->Main()->DeleteOption(id);
-						myPlaylist->Main()->Refresh();
-						myPlaylist->Main()->ReadKey(input);
+						myPlaylist->Items->DeleteOption(id);
+						myPlaylist->Items->Refresh();
+						myPlaylist->Items->ReadKey(input);
 						del_counter++;
 					}
-					myPlaylist->FixPositions(myPlaylist->Main()->Choice());
-					myPlaylist->Main()->SetTimeout(ncmpcpp_window_timeout);
+					myPlaylist->FixPositions(myPlaylist->Items->Choice());
+					myPlaylist->Items->SetTimeout(ncmpcpp_window_timeout);
 					Playlist::BlockNowPlayingUpdate = 0;
 				}
 			}
@@ -738,11 +738,11 @@ int main(int argc, char *argv[])
 			}
 			if (!playlist_name.empty())
 			{
-				if (myPlaylist->Main()->isFiltered())
+				if (myPlaylist->Items->isFiltered())
 				{
 					Mpd.StartCommandsList();
-					for (size_t i = 0; i < myPlaylist->Main()->Size(); ++i)
-						Mpd.AddToPlaylist(real_playlist_name, (*myPlaylist->Main())[i]);
+					for (size_t i = 0; i < myPlaylist->Items->Size(); ++i)
+						Mpd.AddToPlaylist(real_playlist_name, (*myPlaylist->Items)[i]);
 					Mpd.CommitCommandsList();
 					if (Mpd.GetErrorMessage().empty())
 						ShowMessage("Filtered items added to playlist \"%s\"", playlist_name.c_str());
@@ -796,18 +796,20 @@ int main(int argc, char *argv[])
 		}
 		else if (Keypressed(input, Key.MvSongUp))
 		{
-			if (myScreen == myPlaylist && !myPlaylist->Main()->Empty())
+			if (myScreen == myPlaylist && myPlaylist->SortingInProgress())
+				myPlaylist->AdjustSortOrder(input);
+			else if (myScreen == myPlaylist && !myPlaylist->Items->Empty())
 			{
 				CHECK_PLAYLIST_FOR_FILTERING;
-				myPlaylist->Main()->SetTimeout(50);
-				if (myPlaylist->Main()->hasSelected())
+				myPlaylist->Items->SetTimeout(50);
+				if (myPlaylist->Items->hasSelected())
 				{
 					std::vector<size_t> list;
-					myPlaylist->Main()->GetSelected(list);
+					myPlaylist->Items->GetSelected(list);
 					
 					for (std::vector<size_t>::iterator it = list.begin(); it != list.end(); ++it)
 						if (*it == size_t(myPlaylist->NowPlaying) && list.front() > 0)
-							myPlaylist->Main()->BoldOption(myPlaylist->NowPlaying, 0);
+							myPlaylist->Items->BoldOption(myPlaylist->NowPlaying, 0);
 					
 					std::vector<size_t> origs(list);
 					
@@ -819,13 +821,13 @@ int main(int argc, char *argv[])
 						for (std::vector<size_t>::iterator it = list.begin(); it != list.end(); ++it)
 						{
 							--*it;
-							myPlaylist->Main()->at((*it)+1).SetPosition(*it);
-							myPlaylist->Main()->at(*it).SetPosition((*it)+1);
-							myPlaylist->Main()->Swap(*it, (*it)+1);
+							myPlaylist->Items->at((*it)+1).SetPosition(*it);
+							myPlaylist->Items->at(*it).SetPosition((*it)+1);
+							myPlaylist->Items->Swap(*it, (*it)+1);
 						}
-						myPlaylist->Main()->Highlight(list[(list.size()-1)/2]);
-						myPlaylist->Main()->Refresh();
-						myPlaylist->Main()->ReadKey(input);
+						myPlaylist->Items->Highlight(list[(list.size()-1)/2]);
+						myPlaylist->Items->Refresh();
+						myPlaylist->Items->ReadKey(input);
 					}
 					Mpd.StartCommandsList();
 					for (size_t i = 0; i < list.size(); ++i)
@@ -835,27 +837,27 @@ int main(int argc, char *argv[])
 				else
 				{
 					size_t from, to;
-					from = to = myPlaylist->Main()->Choice();
+					from = to = myPlaylist->Items->Choice();
 					// unbold now playing as if song changes during move, this won't be unbolded.
 					if (to == size_t(myPlaylist->NowPlaying) && to > 0)
-						myPlaylist->Main()->BoldOption(myPlaylist->NowPlaying, 0);
+						myPlaylist->Items->BoldOption(myPlaylist->NowPlaying, 0);
 					while (Keypressed(input, Key.MvSongUp) && to > 0)
 					{
 						TraceMpdStatus();
 						Playlist::BlockUpdate = 1;
 						myPlaylist->UpdateTimer();
 						--to;
-						myPlaylist->Main()->at(from).SetPosition(to);
-						myPlaylist->Main()->at(to).SetPosition(from);
-						myPlaylist->Main()->Swap(to, to+1);
-						myPlaylist->Main()->Scroll(wUp);
-						myPlaylist->Main()->Refresh();
-						myPlaylist->Main()->ReadKey(input);
+						myPlaylist->Items->at(from).SetPosition(to);
+						myPlaylist->Items->at(to).SetPosition(from);
+						myPlaylist->Items->Swap(to, to+1);
+						myPlaylist->Items->Scroll(wUp);
+						myPlaylist->Items->Refresh();
+						myPlaylist->Items->ReadKey(input);
 					}
 					Mpd.Move(from, to);
 					UpdateStatusImmediately = 1;
 				}
-				myPlaylist->Main()->SetTimeout(ncmpcpp_window_timeout);
+				myPlaylist->Items->SetTimeout(ncmpcpp_window_timeout);
 			}
 			else if (myScreen->ActiveWindow() == myPlaylistEditor->Content && !myPlaylistEditor->Content->Empty())
 			{
@@ -908,22 +910,24 @@ int main(int argc, char *argv[])
 		}
 		else if (Keypressed(input, Key.MvSongDown))
 		{
-			if (myScreen == myPlaylist && !myPlaylist->Main()->Empty())
+			if (myScreen == myPlaylist && myPlaylist->SortingInProgress())
+				myPlaylist->AdjustSortOrder(input);
+			else if (myScreen == myPlaylist && !myPlaylist->Items->Empty())
 			{
 				CHECK_PLAYLIST_FOR_FILTERING;
-				myPlaylist->Main()->SetTimeout(50);
-				if (myPlaylist->Main()->hasSelected())
+				myPlaylist->Items->SetTimeout(50);
+				if (myPlaylist->Items->hasSelected())
 				{
 					std::vector<size_t> list;
-					myPlaylist->Main()->GetSelected(list);
+					myPlaylist->Items->GetSelected(list);
 					
 					for (std::vector<size_t>::iterator it = list.begin(); it != list.end(); ++it)
-						if (*it == size_t(myPlaylist->NowPlaying) && list.back() < myPlaylist->Main()->Size()-1)
-							myPlaylist->Main()->BoldOption(myPlaylist->NowPlaying, 0);
+						if (*it == size_t(myPlaylist->NowPlaying) && list.back() < myPlaylist->Items->Size()-1)
+							myPlaylist->Items->BoldOption(myPlaylist->NowPlaying, 0);
 					
 					std::vector<size_t> origs(list);
 					
-					while (Keypressed(input, Key.MvSongDown) && list.back() < myPlaylist->Main()->Size()-1)
+					while (Keypressed(input, Key.MvSongDown) && list.back() < myPlaylist->Items->Size()-1)
 					{
 						TraceMpdStatus();
 						Playlist::BlockUpdate = 1;
@@ -931,13 +935,13 @@ int main(int argc, char *argv[])
 						for (std::vector<size_t>::reverse_iterator it = list.rbegin(); it != list.rend(); ++it)
 						{
 							++*it;
-							myPlaylist->Main()->at((*it)-1).SetPosition(*it);
-							myPlaylist->Main()->at(*it).SetPosition((*it)-1);
-							myPlaylist->Main()->Swap(*it, (*it)-1);
+							myPlaylist->Items->at((*it)-1).SetPosition(*it);
+							myPlaylist->Items->at(*it).SetPosition((*it)-1);
+							myPlaylist->Items->Swap(*it, (*it)-1);
 						}
-						myPlaylist->Main()->Highlight(list[(list.size()-1)/2]);
-						myPlaylist->Main()->Refresh();
-						myPlaylist->Main()->ReadKey(input);
+						myPlaylist->Items->Highlight(list[(list.size()-1)/2]);
+						myPlaylist->Items->Refresh();
+						myPlaylist->Items->ReadKey(input);
 					}
 					Mpd.StartCommandsList();
 					for (int i = list.size()-1; i >= 0; --i)
@@ -947,27 +951,27 @@ int main(int argc, char *argv[])
 				else
 				{
 					size_t from, to;
-					from = to = myPlaylist->Main()->Choice();
+					from = to = myPlaylist->Items->Choice();
 					// unbold now playing as if song changes during move, this won't be unbolded.
-					if (to == size_t(myPlaylist->NowPlaying) && to < myPlaylist->Main()->Size()-1)
-						myPlaylist->Main()->BoldOption(myPlaylist->NowPlaying, 0);
-					while (Keypressed(input, Key.MvSongDown) && to < myPlaylist->Main()->Size()-1)
+					if (to == size_t(myPlaylist->NowPlaying) && to < myPlaylist->Items->Size()-1)
+						myPlaylist->Items->BoldOption(myPlaylist->NowPlaying, 0);
+					while (Keypressed(input, Key.MvSongDown) && to < myPlaylist->Items->Size()-1)
 					{
 						TraceMpdStatus();
 						Playlist::BlockUpdate = 1;
 						myPlaylist->UpdateTimer();
 						++to;
-						myPlaylist->Main()->at(from).SetPosition(to);
-						myPlaylist->Main()->at(to).SetPosition(from);
-						myPlaylist->Main()->Swap(to, to-1);
-						myPlaylist->Main()->Scroll(wDown);
-						myPlaylist->Main()->Refresh();
-						myPlaylist->Main()->ReadKey(input);
+						myPlaylist->Items->at(from).SetPosition(to);
+						myPlaylist->Items->at(to).SetPosition(from);
+						myPlaylist->Items->Swap(to, to-1);
+						myPlaylist->Items->Scroll(wDown);
+						myPlaylist->Items->Refresh();
+						myPlaylist->Items->ReadKey(input);
 					}
 					Mpd.Move(from, to);
 					UpdateStatusImmediately = 1;
 				}
-				myPlaylist->Main()->SetTimeout(ncmpcpp_window_timeout);
+				myPlaylist->Items->SetTimeout(ncmpcpp_window_timeout);
 				
 			}
 			else if (myScreen->ActiveWindow() == myPlaylistEditor->Content && !myPlaylistEditor->Content->Empty())
@@ -1022,18 +1026,18 @@ int main(int argc, char *argv[])
 		else if (Keypressed(input, Key.MoveTo) && myScreen == myPlaylist)
 		{
 			CHECK_PLAYLIST_FOR_FILTERING;
-			if (!myPlaylist->Main()->hasSelected())
+			if (!myPlaylist->Items->hasSelected())
 			{
 				ShowMessage("No selected items to move!");
 				continue;
 			}
 			Playlist::BlockUpdate = 1;
-			size_t pos = myPlaylist->Main()->Choice();
+			size_t pos = myPlaylist->Items->Choice();
 			 // if cursor is at the last item, break convention and move at the end of playlist
-			if (pos == myPlaylist->Main()->Size()-1)
+			if (pos == myPlaylist->Items->Size()-1)
 				pos++;
 			std::vector<size_t> list;
-			myPlaylist->Main()->GetSelected(list);
+			myPlaylist->Items->GetSelected(list);
 			if (pos >= list.front() && pos <= list.back())
 				continue;
 			int diff = pos-list.front();
@@ -1045,7 +1049,7 @@ int main(int argc, char *argv[])
 				for (std::vector<size_t>::reverse_iterator it = list.rbegin(); it != list.rend(); ++it, --i)
 				{
 					Mpd.Move(*it, pos+i);
-					myPlaylist->Main()->Move(*it, pos+i);
+					myPlaylist->Items->Move(*it, pos+i);
 				}
 			}
 			else if (diff < 0)
@@ -1054,11 +1058,11 @@ int main(int argc, char *argv[])
 				for (std::vector<size_t>::const_iterator it = list.begin(); it != list.end(); ++it, ++i)
 				{
 					Mpd.Move(*it, pos+i);
-					myPlaylist->Main()->Move(*it, pos+i);
+					myPlaylist->Items->Move(*it, pos+i);
 				}
 			}
 			Mpd.CommitCommandsList();
-			myPlaylist->Main()->Highlight(pos);
+			myPlaylist->Items->Highlight(pos);
 			myPlaylist->FixPositions();
 		}
 		else if (Keypressed(input, Key.Add))
@@ -1105,7 +1109,7 @@ int main(int argc, char *argv[])
 			{
 				TraceMpdStatus();
 				myPlaylist->UpdateTimer();
-				myPlaylist->Main()->ReadKey(input);
+				myPlaylist->Items->ReadKey(input);
 				
 				int howmuch = Config.incremental_seeking ? (myPlaylist->Timer()-t)/2+Config.seek_time : Config.seek_time;
 				
@@ -1179,15 +1183,15 @@ int main(int argc, char *argv[])
 				
 				if (Config.columns_in_playlist)
 				{
-					myPlaylist->Main()->SetItemDisplayer(Display::SongsInColumns);
-					myPlaylist->Main()->SetTitle(Display::Columns());
-					myPlaylist->Main()->SetGetStringFunction(Playlist::SongInColumnsToString);
+					myPlaylist->Items->SetItemDisplayer(Display::SongsInColumns);
+					myPlaylist->Items->SetTitle(Display::Columns());
+					myPlaylist->Items->SetGetStringFunction(Playlist::SongInColumnsToString);
 				}
 				else
 				{
-					myPlaylist->Main()->SetItemDisplayer(Display::Songs);
-					myPlaylist->Main()->SetTitle("");
-					myPlaylist->Main()->SetGetStringFunction(Playlist::SongToString);
+					myPlaylist->Items->SetItemDisplayer(Display::Songs);
+					myPlaylist->Items->SetTitle("");
+					myPlaylist->Items->SetGetStringFunction(Playlist::SongToString);
 				}
 			}
 			else if (myScreen == myBrowser)
@@ -1220,8 +1224,8 @@ int main(int argc, char *argv[])
 		{
 			Config.autocenter_mode = !Config.autocenter_mode;
 			ShowMessage("Auto center mode: %s", Config.autocenter_mode ? "On" : "Off");
-			if (Config.autocenter_mode && myPlaylist->isPlaying() && !myPlaylist->Main()->isFiltered())
-				myPlaylist->Main()->Highlight(myPlaylist->NowPlaying);
+			if (Config.autocenter_mode && myPlaylist->isPlaying() && !myPlaylist->Items->isFiltered())
+				myPlaylist->Items->Highlight(myPlaylist->NowPlaying);
 		}
 		else if (Keypressed(input, Key.UpdateDB))
 		{
@@ -1239,7 +1243,7 @@ int main(int argc, char *argv[])
 			if (myScreen == myPlaylist && myPlaylist->isPlaying())
 			{
 				CHECK_PLAYLIST_FOR_FILTERING;
-				myPlaylist->Main()->Highlight(myPlaylist->NowPlaying);
+				myPlaylist->Items->Highlight(myPlaylist->NowPlaying);
 			}
 			else if (myScreen == myBrowser)
 			{
@@ -1552,17 +1556,17 @@ int main(int argc, char *argv[])
 		else if (Keypressed(input, Key.Crop))
 		{
 			CHECK_PLAYLIST_FOR_FILTERING;
-			if (myPlaylist->Main()->hasSelected())
+			if (myPlaylist->Items->hasSelected())
 			{
 				Mpd.StartCommandsList();
-				for (int i = myPlaylist->Main()->Size()-1; i >= 0; --i)
+				for (int i = myPlaylist->Items->Size()-1; i >= 0; --i)
 				{
-					if (!myPlaylist->Main()->isSelected(i) && i != myPlaylist->NowPlaying)
+					if (!myPlaylist->Items->isSelected(i) && i != myPlaylist->NowPlaying)
 						Mpd.Delete(i);
 				}
 				// if mpd deletes now playing song deletion will be sluggishly slow
 				// then so we have to assure it will be deleted at the very end.
-				if (myPlaylist->isPlaying() && !myPlaylist->Main()->isSelected(myPlaylist->NowPlaying))
+				if (myPlaylist->isPlaying() && !myPlaylist->Items->isSelected(myPlaylist->NowPlaying))
 					Mpd.DeleteID(myPlaylist->NowPlayingSong()->GetID());
 				
 				ShowMessage("Deleting all items but selected...");
@@ -1577,7 +1581,7 @@ int main(int argc, char *argv[])
 					continue;
 				}
 				Mpd.StartCommandsList();
-				for (int i = myPlaylist->Main()->Size()-1; i >= 0; --i)
+				for (int i = myPlaylist->Items->Size()-1; i >= 0; --i)
 					if (i != myPlaylist->NowPlaying)
 						Mpd.Delete(i);
 				ShowMessage("Deleting all items except now playing one...");
@@ -1616,12 +1620,12 @@ int main(int argc, char *argv[])
 				}
 			}
 			
-			if (myPlaylist->Main()->isFiltered())
+			if (myPlaylist->Items->isFiltered())
 			{
 				ShowMessage("Deleting filtered items...");
 				Mpd.StartCommandsList();
-				for (int i = myPlaylist->Main()->Size()-1; i >= 0; --i)
-					Mpd.Delete((*myPlaylist->Main())[i].GetPosition());
+				for (int i = myPlaylist->Items->Size()-1; i >= 0; --i)
+					Mpd.Delete((*myPlaylist->Items)[i].GetPosition());
 				Mpd.CommitCommandsList();
 				ShowMessage("Filtered items deleted!");
 			}

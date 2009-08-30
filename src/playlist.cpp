@@ -37,49 +37,52 @@ bool Playlist::ReloadRemaining = 0;
 
 bool Playlist::BlockNowPlayingUpdate = 0;
 bool Playlist::BlockUpdate = 0;
-bool Playlist::BlockRefreshing = 0;
-
-Menu< std::pair<std::string, MPD::Song::GetFunction> > *Playlist::SortDialog;
 
 const size_t Playlist::SortOptions = 10;
 const size_t Playlist::SortDialogWidth = 30;
 size_t Playlist::SortDialogHeight;
 
+Menu< std::pair<std::string, MPD::Song::GetFunction> > *Playlist::SortDialog = 0;
+
 void Playlist::Init()
 {
-	w = new Menu<MPD::Song>(0, MainStartY, COLS, MainHeight, Config.columns_in_playlist ? Display::Columns() : "", Config.main_color, brNone);
-	w->SetTimeout(ncmpcpp_window_timeout);
-	w->CyclicScrolling(Config.use_cyclic_scrolling);
-	w->HighlightColor(Config.main_highlight_color);
-	w->SetSelectPrefix(&Config.selected_item_prefix);
-	w->SetSelectSuffix(&Config.selected_item_suffix);
-	w->SetItemDisplayer(Config.columns_in_playlist ? Display::SongsInColumns : Display::Songs);
-	w->SetItemDisplayerUserData(&Config.song_list_format);
-	w->SetGetStringFunction(Config.columns_in_playlist ? SongInColumnsToString : SongToString);
-	w->SetGetStringFunctionUserData(&Config.song_list_format);
+	Items = new Menu<MPD::Song>(0, MainStartY, COLS, MainHeight, Config.columns_in_playlist ? Display::Columns() : "", Config.main_color, brNone);
+	Items->SetTimeout(ncmpcpp_window_timeout);
+	Items->CyclicScrolling(Config.use_cyclic_scrolling);
+	Items->HighlightColor(Config.main_highlight_color);
+	Items->SetSelectPrefix(&Config.selected_item_prefix);
+	Items->SetSelectSuffix(&Config.selected_item_suffix);
+	Items->SetItemDisplayer(Config.columns_in_playlist ? Display::SongsInColumns : Display::Songs);
+	Items->SetItemDisplayerUserData(&Config.song_list_format);
+	Items->SetGetStringFunction(Config.columns_in_playlist ? SongInColumnsToString : SongToString);
+	Items->SetGetStringFunctionUserData(&Config.song_list_format);
 	
-	SortDialogHeight = std::min(int(MainHeight-2), 18);
+	if (!SortDialog)
+	{
+		SortDialogHeight = std::min(int(MainHeight), 18);
+		
+		SortDialog = new Menu< std::pair<std::string, MPD::Song::GetFunction> >((COLS-SortDialogWidth)/2, (MainHeight-SortDialogHeight)/2+MainStartY, SortDialogWidth, SortDialogHeight, "Sort songs by...", Config.main_color, Config.window_border);
+		SortDialog->SetTimeout(ncmpcpp_window_timeout);
+		SortDialog->CyclicScrolling(Config.use_cyclic_scrolling);
+		SortDialog->SetItemDisplayer(Display::Pairs);
+		
+		SortDialog->AddOption(std::make_pair("Artist", &MPD::Song::GetArtist));
+		SortDialog->AddOption(std::make_pair("Album", &MPD::Song::GetAlbum));
+		SortDialog->AddOption(std::make_pair("Disc", &MPD::Song::GetDisc));
+		SortDialog->AddOption(std::make_pair("Track", &MPD::Song::GetTrack));
+		SortDialog->AddOption(std::make_pair("Genre", &MPD::Song::GetGenre));
+		SortDialog->AddOption(std::make_pair("Year", &MPD::Song::GetDate));
+		SortDialog->AddOption(std::make_pair("Composer", &MPD::Song::GetComposer));
+		SortDialog->AddOption(std::make_pair("Performer", &MPD::Song::GetPerformer));
+		SortDialog->AddOption(std::make_pair("Title", &MPD::Song::GetTitle));
+		SortDialog->AddOption(std::make_pair("Filename", &MPD::Song::GetFile));
+		SortDialog->AddSeparator();
+		SortDialog->AddOption(std::make_pair("Sort", static_cast<MPD::Song::GetFunction>(0)));
+		SortDialog->AddOption(std::make_pair("Reverse", static_cast<MPD::Song::GetFunction>(0)));
+		SortDialog->AddOption(std::make_pair("Cancel", static_cast<MPD::Song::GetFunction>(0)));
+	}
 	
-	SortDialog = new Menu< std::pair<std::string, MPD::Song::GetFunction> >((COLS-SortDialogWidth)/2, (MainHeight-SortDialogHeight)/2+MainStartY, SortDialogWidth, SortDialogHeight, "Sort songs by...", Config.main_color, Config.window_border);
-	SortDialog->SetTimeout(ncmpcpp_window_timeout);
-	SortDialog->CyclicScrolling(Config.use_cyclic_scrolling);
-	SortDialog->SetItemDisplayer(Display::Pairs);
-	
-	SortDialog->AddOption(std::make_pair("Artist", &MPD::Song::GetArtist));
-	SortDialog->AddOption(std::make_pair("Album", &MPD::Song::GetAlbum));
-	SortDialog->AddOption(std::make_pair("Disc", &MPD::Song::GetDisc));
-	SortDialog->AddOption(std::make_pair("Track", &MPD::Song::GetTrack));
-	SortDialog->AddOption(std::make_pair("Genre", &MPD::Song::GetGenre));
-	SortDialog->AddOption(std::make_pair("Year", &MPD::Song::GetDate));
-	SortDialog->AddOption(std::make_pair("Composer", &MPD::Song::GetComposer));
-	SortDialog->AddOption(std::make_pair("Performer", &MPD::Song::GetPerformer));
-	SortDialog->AddOption(std::make_pair("Title", &MPD::Song::GetTitle));
-	SortDialog->AddOption(std::make_pair("Filename", &MPD::Song::GetFile));
-	SortDialog->AddSeparator();
-	SortDialog->AddOption(std::make_pair("Sort", static_cast<MPD::Song::GetFunction>(0)));
-	SortDialog->AddOption(std::make_pair("Reverse", static_cast<MPD::Song::GetFunction>(0)));
-	SortDialog->AddOption(std::make_pair("Cancel", static_cast<MPD::Song::GetFunction>(0)));
-	
+	w = Items;
 	isInitialized = 1;
 }
 
@@ -97,20 +100,30 @@ void Playlist::SwitchTo()
 		Resize();
 	
 	myScreen = this;
-	w->Window::Clear();
+	Items->Window::Clear();
 	EnableHighlighting();
+	if (w != Items) // even if sorting window is active, background has to be refreshed anyway
+		Items->Display();
 	RedrawHeader = 1;
 }
 
 void Playlist::Resize()
 {
-	w->Resize(COLS, MainHeight);
-	w->MoveTo(0, MainStartY);
-	w->SetTitle(Config.columns_in_playlist ? Display::Columns() : "");
+	Items->Resize(COLS, MainHeight);
+	Items->MoveTo(0, MainStartY);
+	Items->SetTitle(Config.columns_in_playlist ? Display::Columns() : "");
+	if (w == SortDialog) // if sorting window is active, playlist needs refreshing
+		Items->Display();
+	
 	SortDialogHeight = std::min(int(MainHeight), 18);
-	if (MainHeight > 5)
+	if (Items->GetWidth() >= SortDialogWidth && MainHeight >= 5)
+	{
 		SortDialog->Resize(SortDialogWidth, SortDialogHeight);
-	SortDialog->MoveTo((COLS-SortDialogWidth)/2, (MainHeight-SortDialogHeight)/2+MainStartY);
+		SortDialog->MoveTo((COLS-SortDialogWidth)/2, (MainHeight-SortDialogHeight)/2+MainStartY);
+	}
+	else // if screen is too low to display sorting window, fall back to items list
+		w = Items;
+	
 	hasToBeResized = 0;
 }
 
@@ -119,212 +132,192 @@ std::basic_string<my_char_t> Playlist::Title()
 	std::basic_string<my_char_t> result = U("Playlist ");
 	if (ReloadTotalLength || ReloadRemaining)
 		itsBufferedStats = TotalLength();
-	result += Scroller(itsBufferedStats, itsScrollBegin, w->GetWidth()-result.length()-(Config.new_design ? 2 : VolumeState.length()));
+	result += Scroller(itsBufferedStats, itsScrollBegin, Items->GetWidth()-result.length()-(Config.new_design ? 2 : VolumeState.length()));
 	return result;
 }
 
 void Playlist::EnterPressed()
 {
-	if (!w->Empty())
+	if (w == Items)
 	{
-		Mpd.PlayID(w->Current().GetID());
-		UpdateStatusImmediately = 1;
+		if (!Items->Empty())
+		{
+			Mpd.PlayID(Items->Current().GetID());
+			UpdateStatusImmediately = 1;
+		}
+	}
+	else if (w == SortDialog)
+	{
+		size_t pos = SortDialog->Choice();
+		if (pos > SortOptions)
+		{
+			if (pos == SortOptions+2) // reverse
+			{
+				BlockUpdate = 1;
+				ShowMessage("Reversing playlist order...");
+				Mpd.StartCommandsList();
+				for (size_t i = 0, j = Items->Size()-1; i < Items->Size()/2; ++i, --j)
+				{
+					Mpd.Swap(i, j);
+					Items->Swap(i, j);
+				}
+				ShowMessage(Mpd.CommitCommandsList() ? "Playlist reversed!" : "Error while reversing playlist!");
+				w = Items;
+				return;
+			}
+			else if (pos == SortOptions+3) // cancel
+			{
+				w = Items;
+				return;
+			}
+		}
+		else
+		{
+			ShowMessage("Move tag types up and down to adjust sort order");
+			return;
+		}
+		
+		MPD::SongList playlist, cmp;
+		
+		playlist.reserve(Items->Size());
+		for (size_t i = 0; i < Items->Size(); ++i)
+		{
+			(*Items)[i].SetPosition(i);
+			playlist.push_back(&(*Items)[i]);
+		}
+		cmp = playlist;
+		sort(playlist.begin(), playlist.end(), Playlist::Sorting);
+		
+		if (playlist == cmp)
+		{
+			ShowMessage("Playlist is already sorted");
+			return;
+		}
+		
+		BlockUpdate = 1;
+		ShowMessage("Sorting playlist...");
+		Mpd.StartCommandsList();
+		do
+		{
+			for (size_t i = 0; i < playlist.size(); ++i)
+			{
+				if (playlist[i]->GetPosition() > int(i))
+				{
+					Mpd.Swap(playlist[i]->GetPosition(), i);
+					std::swap(cmp[playlist[i]->GetPosition()], cmp[i]);
+					Items->Swap(playlist[i]->GetPosition(), i);
+				}
+				cmp[i]->SetPosition(i);
+			}
+		}
+		while (playlist != cmp);
+		ShowMessage(Mpd.CommitCommandsList() ? "Playlist sorted!" : "Error while sorting playlist!");
+		w = Items;
 	}
 }
 
 void Playlist::SpacePressed()
 {
-	w->SelectCurrent();
-	w->Scroll(wDown);
+	if (w == Items)
+	{
+		Items->SelectCurrent();
+		Items->Scroll(wDown);
+	}
 }
 
 void Playlist::MouseButtonPressed(MEVENT me)
 {
-	if (w->Empty() || !w->hasCoords(me.x, me.y) || size_t(me.y) >= w->Size())
-		return;
-	if (me.bstate & (BUTTON1_PRESSED | BUTTON3_PRESSED))
+	if (w == Items && !Items->Empty() && Items->hasCoords(me.x, me.y))
 	{
-		w->Goto(me.y);
-		if (me.bstate & BUTTON3_PRESSED)
+		if (size_t(me.y) < Items->Size() && (me.bstate & (BUTTON1_PRESSED | BUTTON3_PRESSED)))
 		{
-			Mpd.Play(w->Current().GetPosition());
-			UpdateStatusImmediately = 1;
+			Items->Goto(me.y);
+			if (me.bstate & BUTTON3_PRESSED)
+				EnterPressed();
 		}
+		else
+			Screen<Window>::MouseButtonPressed(me);
 	}
-	else
-		Screen< Menu<MPD::Song> >::MouseButtonPressed(me);
+	else if (w == SortDialog && SortDialog->hasCoords(me.x, me.y))
+	{
+		if (me.bstate & (BUTTON1_PRESSED | BUTTON3_PRESSED))
+		{
+			SortDialog->Goto(me.y);
+			if (me.bstate & BUTTON3_PRESSED)
+				EnterPressed();
+		}
+		else
+			Screen<Window>::MouseButtonPressed(me);
+	}
 }
 
 MPD::Song *Playlist::CurrentSong()
 {
-	return !w->Empty() ? &w->Current() : 0;
+	return !Items->Empty() ? &Items->Current() : 0;
 }
 
 void Playlist::GetSelectedSongs(MPD::SongList &v)
 {
 	std::vector<size_t> selected;
-	w->GetSelected(selected);
+	Items->GetSelected(selected);
 	for (std::vector<size_t>::const_iterator it = selected.begin(); it != selected.end(); ++it)
-	{
-		v.push_back(new MPD::Song(w->at(*it)));
-	}
+		v.push_back(new MPD::Song(Items->at(*it)));
 }
 
 void Playlist::ApplyFilter(const std::string &s)
 {
-	w->ApplyFilter(s, 0, REG_ICASE | Config.regex_type);
+	if (w == Items)
+		Items->ApplyFilter(s, 0, REG_ICASE | Config.regex_type);
 }
 
 void Playlist::Sort()
 {
-	if (w->GetWidth() < SortDialogWidth || MainHeight <= 6)
-	{
+	if (Items->GetWidth() < SortDialogWidth || MainHeight < 5)
 		ShowMessage("Screen is too small to display dialog window!");
-		return;
-	}
-	
-	int input;
-	
-	SortDialog->Reset();
-	SortDialog->Display();
-	
-	BlockRefreshing = 1;
-	while (1)
+	else
 	{
-		TraceMpdStatus();
-		SortDialog->Refresh();
-		SortDialog->ReadKey(input);
-		
-		if (Keypressed(input, Key.Up))
+		SortDialog->Reset();
+		w = SortDialog;
+	}
+}
+
+void Playlist::AdjustSortOrder(int key)
+{
+	if (Keypressed(key, Key.MvSongUp))
+	{
+		size_t pos = SortDialog->Choice();
+		if (pos > 0 && pos < SortOptions)
 		{
+			SortDialog->Swap(pos, pos-1);
 			SortDialog->Scroll(wUp);
 		}
-		else if (Keypressed(input, Key.Down))
+	}
+	else if (Keypressed(key, Key.MvSongDown))
+	{
+		size_t pos = SortDialog->Choice();
+		if (pos < SortOptions-1)
 		{
+			SortDialog->Swap(pos, pos+1);
 			SortDialog->Scroll(wDown);
 		}
-		else if (Keypressed(input, Key.PageUp))
-		{
-			SortDialog->Scroll(wPageUp);
-		}
-		else if (Keypressed(input, Key.PageDown))
-		{
-			SortDialog->Scroll(wPageDown);
-		}
-		else if (Keypressed(input, Key.Home))
-		{
-			SortDialog->Scroll(wHome);
-		}
-		else if (Keypressed(input, Key.End))
-		{
-			SortDialog->Scroll(wEnd);
-		}
-		else if (Keypressed(input, Key.MvSongUp))
-		{
-			size_t pos = SortDialog->Choice();
-			if (pos > 0 && pos < SortOptions)
-			{
-				SortDialog->Swap(pos, pos-1);
-				SortDialog->Scroll(wUp);
-			}
-		}
-		else if (Keypressed(input, Key.MvSongDown))
-		{
-			size_t pos = SortDialog->Choice();
-			if (pos < SortOptions-1)
-			{
-				SortDialog->Swap(pos, pos+1);
-				SortDialog->Scroll(wDown);
-			}
-		}
-		else if (Keypressed(input, Key.Enter))
-		{
-			size_t pos = SortDialog->Choice();
-			if (pos > SortOptions)
-			{
-				BlockRefreshing = 0;
-				if (pos == SortOptions+1) // sort
-					break;
-				else if (pos == SortOptions+2) // reverse
-				{
-					BlockUpdate = 1;
-					ShowMessage("Reversing playlist order...");
-					Mpd.StartCommandsList();
-					for (size_t i = 0, j = w->Size()-1; i < w->Size()/2; ++i, --j)
-					{
-						Mpd.Swap(i, j);
-						w->Swap(i, j);
-					}
-					Mpd.CommitCommandsList();
-					ShowMessage("Playlist reversed!");
-					return;
-				}
-				else if (pos == SortOptions+3) // cancel
-					return;
-			}
-			else
-			{
-				ShowMessage("Move tag types up and down to adjust sort order");
-			}
-		}
 	}
-	
-	MPD::SongList playlist, cmp;
-	
-	playlist.reserve(w->Size());
-	
-	for (size_t i = 0; i < w->Size(); ++i)
-	{
-		(*w)[i].SetPosition(i);
-		playlist.push_back(&(*w)[i]);
-	}
-	
-	cmp = playlist;
-	sort(playlist.begin(), playlist.end(), Playlist::Sorting);
-	
-	if (playlist == cmp)
-	{
-		ShowMessage("Playlist is already sorted");
-		return;
-	}
-	
-	BlockUpdate = 1;
-	ShowMessage("Sorting playlist...");
-	Mpd.StartCommandsList();
-	do
-	{
-		for (size_t i = 0; i < playlist.size(); ++i)
-		{
-			if (playlist[i]->GetPosition() > int(i))
-			{
-				Mpd.Swap(playlist[i]->GetPosition(), i);
-				std::swap(cmp[playlist[i]->GetPosition()], cmp[i]);
-				w->Swap(playlist[i]->GetPosition(), i);
-			}
-			cmp[i]->SetPosition(i);
-		}
-	}
-	while (playlist != cmp);
-	Mpd.CommitCommandsList();
-	ShowMessage("Playlist sorted!");
 }
 
 void Playlist::FixPositions(size_t beginning)
 {
-	bool was_filtered = w->isFiltered();
-	w->ShowAll();
-	for (size_t i = beginning; i < w->Size(); ++i)
-	{
-		(*w)[i].SetPosition(i);
-	}
+	bool was_filtered = Items->isFiltered();
+	Items->ShowAll();
+	for (size_t i = beginning; i < Items->Size(); ++i)
+		(*Items)[i].SetPosition(i);
 	if (was_filtered)
-		w->ShowFiltered();
+		Items->ShowFiltered();
 }
 
 void Playlist::EnableHighlighting()
 {
-	w->Highlighting(1);
-	w->Refresh();
+	Items->Highlighting(1);
+	if (w == Items)
+		Items->Refresh();
 	UpdateTimer();
 }
 
@@ -354,26 +347,26 @@ std::string Playlist::TotalLength()
 	if (ReloadTotalLength)
 	{
 		itsTotalLength = 0;
-		for (size_t i = 0; i < w->Size(); ++i)
-			itsTotalLength += (*w)[i].GetTotalLength();
+		for (size_t i = 0; i < Items->Size(); ++i)
+			itsTotalLength += (*Items)[i].GetTotalLength();
 		ReloadTotalLength = 0;
 	}
-	if (Config.playlist_show_remaining_time && ReloadRemaining && !w->isFiltered())
+	if (Config.playlist_show_remaining_time && ReloadRemaining && !Items->isFiltered())
 	{
 		itsRemainingTime = 0;
-		for (size_t i = NowPlaying; i < w->Size(); ++i)
-			itsRemainingTime += (*w)[i].GetTotalLength();
+		for (size_t i = NowPlaying; i < Items->Size(); ++i)
+			itsRemainingTime += (*Items)[i].GetTotalLength();
 		ReloadRemaining = 0;
 	}
 	
-	result << '(' << w->Size() << (w->Size() == 1 ? " item" : " items");
+	result << '(' << Items->Size() << (Items->Size() == 1 ? " item" : " items");
 	
-	if (w->isFiltered())
+	if (Items->isFiltered())
 	{
-		w->ShowAll();
-		size_t real_size = w->Size();
-		w->ShowFiltered();
-		if (w->Size() != real_size)
+		Items->ShowAll();
+		size_t real_size = Items->Size();
+		Items->ShowFiltered();
+		if (Items->Size() != real_size)
 			result << " (out of " << Mpd.GetPlaylistLength() << ")";
 	}
 	
@@ -382,7 +375,7 @@ std::string Playlist::TotalLength()
 		result << ", length: ";
 		ShowTime(result, itsTotalLength);
 	}
-	if (Config.playlist_show_remaining_time && itsRemainingTime && !w->isFiltered() && w->Size() > 1)
+	if (Config.playlist_show_remaining_time && itsRemainingTime && !Items->isFiltered() && Items->Size() > 1)
 	{
 		result << " :: remaining: ";
 		ShowTime(result, itsRemainingTime);
@@ -436,11 +429,11 @@ void Playlist::ShowTime(std::ostringstream &result, size_t length)
 
 const MPD::Song *Playlist::NowPlayingSong()
 {
-	bool was_filtered = w->isFiltered();
-	w->ShowAll();
-	const MPD::Song *s = isPlaying() ? &w->at(NowPlaying) : 0;
+	bool was_filtered = Items->isFiltered();
+	Items->ShowAll();
+	const MPD::Song *s = isPlaying() ? &Items->at(NowPlaying) : 0;
 	if (was_filtered)
-		w->ShowFiltered();
+		Items->ShowFiltered();
 	return s;
 }
 
@@ -480,9 +473,9 @@ bool Playlist::Add(const MPD::Song &s, bool in_playlist, bool play)
 		unsigned hash = s.GetHash();
 		if (play)
 		{
-			for (size_t i = 0; i < w->Size(); ++i)
+			for (size_t i = 0; i < Items->Size(); ++i)
 			{
-				if (w->at(i).GetHash() == hash)
+				if (Items->at(i).GetHash() == hash)
 				{
 					Mpd.Play(i);
 					break;
@@ -494,12 +487,12 @@ bool Playlist::Add(const MPD::Song &s, bool in_playlist, bool play)
 		{
 			Playlist::BlockUpdate = 1;
 			Mpd.StartCommandsList();
-			for (size_t i = 0; i < w->Size(); ++i)
+			for (size_t i = 0; i < Items->Size(); ++i)
 			{
-				if ((*w)[i].GetHash() == hash)
+				if ((*Items)[i].GetHash() == hash)
 				{
 					Mpd.Delete(i);
-					w->DeleteOption(i);
+					Items->DeleteOption(i);
 					i--;
 				}
 			}
@@ -528,7 +521,7 @@ bool Playlist::Add(const MPD::SongList &l, bool play)
 	if (l.empty())
 		return false;
 	
-	size_t old_playlist_size = w->Size();
+	size_t old_playlist_size = Items->Size();
 	
 	Mpd.StartCommandsList();
 	MPD::SongList::const_iterator it = l.begin();
@@ -537,10 +530,10 @@ bool Playlist::Add(const MPD::SongList &l, bool play)
 			break;
 	Mpd.CommitCommandsList();
 	
-	if (play && old_playlist_size < w->Size())
+	if (play && old_playlist_size < Items->Size())
 		Mpd.Play(old_playlist_size);
 	
-	if (w->Back().GetHash() != l.back()->GetHash())
+	if (Items->Back().GetHash() != l.back()->GetHash())
 	{
 		if (it != l.begin())
 			ShowMessage("%s", MPD::Message::PartOfSongsAdded);

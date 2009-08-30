@@ -201,7 +201,7 @@ void TinyTagEditor::EnterPressed()
 				else
 				{
 					if (myOldScreen == myPlaylist)
-						myPlaylist->Main()->Current() = s;
+						myPlaylist->Items->Current() = s;
 					else if (myOldScreen == myBrowser)
 						*myBrowser->Main()->Current().song = s;
 				}
@@ -1000,13 +1000,13 @@ bool TagEditor::WriteTags(Song &s)
 				{
 					// if we rename local file, it won't get updated
 					// so just remove it from playlist and add again
-					size_t pos = myPlaylist->Main()->Choice();
+					size_t pos = myPlaylist->Items->Choice();
 					Mpd.StartCommandsList();
 					Mpd.Delete(pos);
 					int id = Mpd.AddSong("file://" + new_name);
 					if (id >= 0)
 					{
-						s = myPlaylist->Main()->Back();
+						s = myPlaylist->Items->Back();
 						Mpd.Move(s.GetPosition(), pos);
 					}
 					Mpd.CommitCommandsList();

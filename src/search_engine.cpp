@@ -303,9 +303,9 @@ void SearchEngine::UpdateFoundList()
 	bool bold = 0;
 	for (size_t i = StaticOptions; i < w->Size(); ++i)
 	{
-		for (size_t j = 0; j < myPlaylist->Main()->Size(); ++j)
+		for (size_t j = 0; j < myPlaylist->Items->Size(); ++j)
 		{
-			if (myPlaylist->Main()->at(j).GetHash() == w->at(i).second->GetHash())
+			if (myPlaylist->Items->at(j).GetHash() == w->at(i).second->GetHash())
 			{
 				bold = 1;
 				break;
@@ -375,9 +375,9 @@ void SearchEngine::Search()
 		Mpd.GetDirectoryRecursive("/", list);
 	else
 	{
-		list.reserve(myPlaylist->Main()->Size());
-		for (size_t i = 0; i < myPlaylist->Main()->Size(); ++i)
-			list.push_back(&(*myPlaylist->Main())[i]);
+		list.reserve(myPlaylist->Items->Size());
+		for (size_t i = 0; i < myPlaylist->Items->Size(); ++i)
+			list.push_back(&(*myPlaylist->Items)[i]);
 	}
 	
 	bool any_found = 1;

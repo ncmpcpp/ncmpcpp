@@ -65,7 +65,7 @@ void Clock::Resize()
 		{
 			if (myPlaylist->hasToBeResized)
 				myPlaylist->Resize();
-			myPlaylist->Main()->Hide();
+			myPlaylist->Items->Hide();
 			w->Display();
 		}
 	}
@@ -88,7 +88,7 @@ void Clock::SwitchTo()
 		Resize();
 	
 	myScreen = this;
-	myPlaylist->Main()->Hide();
+	myPlaylist->Items->Hide();
 	RedrawHeader = 1;
 	Prepare();
 	// clearing screen apparently fixes the problem with last digits being misrendered

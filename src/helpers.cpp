@@ -245,9 +245,9 @@ void UpdateSongList(Menu<Song> *menu)
 	bool bold = 0;
 	for (size_t i = 0; i < menu->Size(); ++i)
 	{
-		for (size_t j = 0; j < myPlaylist->Main()->Size(); ++j)
+		for (size_t j = 0; j < myPlaylist->Items->Size(); ++j)
 		{
-			if (myPlaylist->Main()->at(j).GetHash() == menu->at(i).GetHash())
+			if (myPlaylist->Items->at(j).GetHash() == menu->at(i).GetHash())
 			{
 				bold = 1;
 				break;
