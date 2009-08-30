@@ -81,6 +81,7 @@ size_t Global::MainHeight;
 bool Global::BlockItemListUpdate = 0;
 
 bool Global::MessagesAllowed = 0;
+bool Global::SeekingInProgress = 0;
 bool Global::RedrawHeader = 1;
 
 namespace
@@ -1108,6 +1109,7 @@ int main(int argc, char *argv[])
 			
 			songpos = Mpd.GetElapsedTime();
 			
+			SeekingInProgress = 1;
 			while (Keypressed(input, Key.SeekForward) || Keypressed(input, Key.SeekBackward))
 			{
 				TraceMpdStatus();
@@ -1172,6 +1174,7 @@ int main(int argc, char *argv[])
 				wFooter->Refresh();
 			}
 			Mpd.Seek(songpos);
+			SeekingInProgress = 0;
 			UpdateStatusImmediately = 1;
 			
 			UnlockProgressbar();

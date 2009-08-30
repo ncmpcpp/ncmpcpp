@@ -44,6 +44,7 @@ namespace Global
 	
 	extern bool UpdateStatusImmediately;
 	extern bool MessagesAllowed;
+	extern bool SeekingInProgress;
 	extern bool RedrawHeader;
 	extern bool RedrawStatusbar;
 	
