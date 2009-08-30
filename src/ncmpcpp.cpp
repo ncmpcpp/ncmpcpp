@@ -49,6 +49,7 @@
 #include "outputs.h"
 #include "status.h"
 #include "tag_editor.h"
+#include "tiny_tag_editor.h"
 #include "visualizer.h"
 
 #define CHECK_PLAYLIST_FOR_FILTERING									\

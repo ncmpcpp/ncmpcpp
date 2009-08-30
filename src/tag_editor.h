@@ -18,12 +18,14 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
-#include "ncmpcpp.h"
-
-#ifdef HAVE_TAGLIB_H
-
 #ifndef _TAG_EDITOR_H
 #define _TAG_EDITOR_H
+
+#ifdef HAVE_CONFIG_H
+# include <config.h>
+#endif
+
+#ifdef HAVE_TAGLIB_H
 
 // taglib headers
 #include "fileref.h"
@@ -31,35 +33,6 @@
 
 #include "mpdpp.h"
 #include "screen.h"
-#include "settings.h"
-
-class TinyTagEditor : public Screen< Menu<Buffer> >
-{
-	public:
-		virtual void Resize();
-		virtual void SwitchTo();
-		
-		virtual std::basic_string<my_char_t> Title();
-		
-		virtual void EnterPressed();
-		virtual void SpacePressed() { }
-		virtual void MouseButtonPressed(MEVENT);
-		
-		virtual bool allowsSelection() { return false; }
-		
-		virtual List *GetList() { return 0; }
-		
-		bool SetEdited(MPD::Song *);
-		
-	protected:
-		virtual void Init();
-		
-	private:
-		bool GetTags();
-		MPD::Song itsEdited;
-};
-
-extern TinyTagEditor *myTinyTagEditor;
 
 class TagEditor : public Screen<Window>
 {
