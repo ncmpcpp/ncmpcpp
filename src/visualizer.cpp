@@ -118,6 +118,7 @@ void Visualizer::DrawSoundWave(int16_t *buf, ssize_t data)
 	const int samples_per_col = data/sizeof(int16_t)/COLS;
 	const int half_height = MainHeight/2;
 	*w << fmtAltCharset;
+	double prev_point_pos;
 	for (int i = 0; i < COLS; ++i)
 	{
 		double point_pos = 0;
@@ -127,6 +128,16 @@ void Visualizer::DrawSoundWave(int16_t *buf, ssize_t data)
 		point_pos /= std::numeric_limits<int16_t>::max();
 		point_pos *= half_height;
 		*w << XY(i, half_height+point_pos) << '`';
+		if (i && abs(prev_point_pos-point_pos) > 2)
+		{
+			// if gap is too big. intermediate values are needed
+			// since without them all we see are blinking points
+			const int breakpoint = std::max(prev_point_pos, point_pos);
+			const int half = (prev_point_pos+point_pos)/2;
+			for (int k = std::min(prev_point_pos, point_pos)+1; k < breakpoint; k += 2)
+					*w << XY(i-(k < half), half_height+k) << '`';
+		}
+		prev_point_pos = point_pos;
 	}
 	*w << fmtAltCharsetEnd;
 }
