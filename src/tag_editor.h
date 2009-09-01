@@ -27,6 +27,8 @@
 
 #ifdef HAVE_TAGLIB_H
 
+#include <deque>
+
 // taglib headers
 #include "fileref.h"
 #include "tag.h"
@@ -37,7 +39,7 @@
 class TagEditor : public Screen<Window>
 {
 	public:
-		TagEditor() : itsBrowsedDir("/") { }
+		TagEditor() : FParser(0), FParserHelper(0), FParserLegend(0), FParserPreview(0), itsBrowsedDir("/") { }
 		
 		virtual void Resize();
 		virtual void SwitchTo();
@@ -80,6 +82,16 @@ class TagEditor : public Screen<Window>
 		virtual void Init();
 		
 	private:
+		void SetDimensions();
+		
+		MPD::SongList EditedSongs;
+		Menu<std::string> *FParserDialog;
+		Menu<std::string> *FParser;
+		Scrollpad *FParserHelper;
+		Scrollpad *FParserLegend;
+		Scrollpad *FParserPreview;
+		bool FParserUsePreview;
+		
 		static std::string CapitalizeFirstLetters(const std::string &);
 		static void CapitalizeFirstLetters(MPD::Song &);
 		static void LowerAllLetters(MPD::Song &);
@@ -91,21 +103,26 @@ class TagEditor : public Screen<Window>
 		static std::string GenerateFilename(const MPD::Song &, const std::string &);
 		static std::string ParseFilename(MPD::Song &, std::string, bool);
 		
-		static void DealWithFilenames(MPD::SongList &);
-		
 		static std::string TagToString(const MPD::Song &, void *);
 		
 		std::string itsBrowsedDir;
 		std::string itsHighlightedDir;
 		
 		static const std::string PatternsFile;
-		static std::vector<std::string> Patterns;
+		static std::deque<std::string> Patterns;
 		
 		static const size_t MiddleColumnWidth;
 		static size_t LeftColumnWidth;
 		static size_t MiddleColumnStartX;
 		static size_t RightColumnWidth;
 		static size_t RightColumnStartX;
+		
+		static const size_t FParserDialogWidth;
+		static const size_t FParserDialogHeight;
+		static size_t FParserWidth;
+		static size_t FParserWidthOne;
+		static size_t FParserWidthTwo;
+		static size_t FParserHeight;
 };
 
 extern TagEditor *myTagEditor;
