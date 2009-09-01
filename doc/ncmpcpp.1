@@ -66,8 +66,11 @@ Set connection timeout to MPD to given value.
 .B mpd_crossfade_time = SECONDS
 Default number of seconds to crossfade, if enabled by ncmpcpp.
 .TP
-.B fifo_visualizer_path = PATH
+.B visualizer_fifo_path = PATH
 Path to mpd fifo output. This is needed to make music visualizer work (note that output sound format of this fifo has to be 44100:16:1)
+.TP
+.B visualizer_type = spectrum/wave
+Defines default visualizer type.
 .TP
 .B system_encoding = ENCODING
 If you use encoding other than utf8, set it in order to handle utf8 encoded strings properly.

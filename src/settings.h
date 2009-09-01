@@ -203,6 +203,7 @@ struct ncmpcpp_config
 	bool ask_before_clearing_main_playlist;
 	bool mouse_support;
 	bool new_design;
+	bool visualizer_use_wave;
 	
 	int mpd_port;
 	int mpd_connection_timeout;

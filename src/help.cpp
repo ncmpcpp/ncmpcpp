@@ -298,6 +298,12 @@ void Help::GetKeybindings()
 #	endif // ENABLE_OUTPUTS
 	
 	
+#	ifdef ENABLE_VISUALIZER
+	*w << "\n\n   " << fmtBold << "Keys - Music visualizer\n -----------------------------------------\n" << fmtBoldEnd;
+	*w << DisplayKeys(Key.Space)			<< "Toggle visualization type\n";
+#	endif // ENABLE_VISUALIZER
+	
+	
 	*w << "\n\n   " << fmtBold << "Mouse - Global\n -----------------------------------------\n" << fmtBoldEnd;
 	*w << "\tLeft click on \"Playing/Paused\"	"	<< ": Play/pause\n";
 	*w << "\tLeft click on progressbar	"		<< ": Go to chosen position in played track\n";

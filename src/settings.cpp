@@ -306,6 +306,7 @@ void DefaultConfiguration(ncmpcpp_config &conf)
 	conf.ask_before_clearing_main_playlist = false;
 	conf.mouse_support = true;
 	conf.new_design = false;
+	conf.visualizer_use_wave = false;
 	conf.set_window_title = true;
 	conf.mpd_port = 6600;
 	conf.mpd_connection_timeout = 15;
@@ -788,6 +789,10 @@ void ReadConfiguration(ncmpcpp_config &conf)
 			else if (cl.find("ask_before_clearing_main_playlist") != std::string::npos)
 			{
 				conf.ask_before_clearing_main_playlist = v == "yes";
+			}
+			else if (cl.find("visualizer_type") != std::string::npos)
+			{
+				conf.visualizer_use_wave = v == "wave";
 			}
 			else if (cl.find("mouse_support") != std::string::npos)
 			{

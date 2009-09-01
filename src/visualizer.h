@@ -44,7 +44,7 @@ class Visualizer : public Screen<Window>
 		virtual void Scroll(Where, const int *) { }
 		
 		virtual void EnterPressed() { }
-		virtual void SpacePressed() { }
+		virtual void SpacePressed();
 		virtual void MouseButtonPressed(MEVENT) { }
 		
 		virtual NCurses::List *GetList() { return 0; }
@@ -58,6 +58,9 @@ class Visualizer : public Screen<Window>
 		virtual void Init();
 		
 	private:
+		void DrawSoundWave(int16_t *, ssize_t);
+		void DrawFrequencySpectrum(int16_t *, ssize_t);
+		
 		int itsFifo;
 		unsigned *itsFreqsMagnitude;
 		double *itsInput;

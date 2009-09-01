@@ -102,6 +102,37 @@ void Visualizer::Update()
 	if (data < 0) // no data available in fifo
 		return;
 	
+	w->Clear(0);
+	Config.visualizer_use_wave ? DrawSoundWave(buf, data) : DrawFrequencySpectrum(buf, data);
+	w->Refresh();
+}
+
+void Visualizer::SpacePressed()
+{
+	Config.visualizer_use_wave = !Config.visualizer_use_wave;
+	ShowMessage("Visualization type: %s", Config.visualizer_use_wave ? "Sound wave" : "Frequency spectrum");
+}
+
+void Visualizer::DrawSoundWave(int16_t *buf, ssize_t data)
+{
+	const int samples_per_col = data/sizeof(int16_t)/COLS;
+	const int half_height = MainHeight/2;
+	*w << fmtAltCharset;
+	for (int i = 0; i < COLS; ++i)
+	{
+		double point_pos = 0;
+		for (int j = 0; j < samples_per_col; ++j)
+			point_pos += buf[i*samples_per_col+j];
+		point_pos /= samples_per_col;
+		point_pos /= std::numeric_limits<int16_t>::max();
+		point_pos *= half_height;
+		*w << XY(i, half_height+point_pos) << '`';
+	}
+	*w << fmtAltCharsetEnd;
+}
+
+void Visualizer::DrawFrequencySpectrum(int16_t *buf, ssize_t data)
+{
 	// zero old values
 	std::fill(buf+data/sizeof(int16_t), buf+Samples, 0);
 	for (unsigned i = 0; i < Samples; ++i)
@@ -113,17 +144,15 @@ void Visualizer::Update()
 	for (unsigned i = 0; i < FFTResults; ++i)
 		itsFreqsMagnitude[i] = sqrt(itsOutput[i][0]*itsOutput[i][0] + itsOutput[i][1]*itsOutput[i][1])/1e5*LINES/5;
 	
-	w->Clear(0);
 	const int freqs_per_col = FFTResults/COLS /* cut bandwidth a little to achieve better look */ * 4/5;
 	for (int i = 0; i < COLS; ++i)
 	{
 		size_t bar_height = 0;
 		for (int j = 0; j < freqs_per_col; ++j)
 			bar_height += itsFreqsMagnitude[i*freqs_per_col+j];
-		bar_height = std::min(bar_height/freqs_per_col, Global::MainHeight);
-		mvwvline(w->Raw(), Global::MainHeight-bar_height, i, 0, bar_height);
+		bar_height = std::min(bar_height/freqs_per_col, MainHeight);
+		mvwvline(w->Raw(), MainHeight-bar_height, i, 0, bar_height);
 	}
-	w->Refresh();
 }
 
 void Visualizer::SetFD()

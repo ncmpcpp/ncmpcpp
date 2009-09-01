@@ -34,6 +34,8 @@
 #
 #visualizer_fifo_path = ""
 #
+#visualizer_type = "spectrum" (spectrum/wave)
+#
 ##### system encoding #####
 ##
 ## if you use encoding other than utf8, set it in
