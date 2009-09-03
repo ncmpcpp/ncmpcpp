@@ -69,8 +69,22 @@ void ParseArgv(int argc, char **argv)
 #			ifdef HAVE_CURL_CURL_H
 			<< " curl"
 #			endif
+#			ifdef HAVE_ICONV_H
+			<< " iconv"
+#			endif
+#			ifdef HAVE_FFTW3_H
+			<< " fftw"
+#			endif
+#			ifdef USE_PDCURSES
+			<< " pdcurses"
+#			else
+			<< " ncurses"
+#			endif
 #			ifdef HAVE_TAGLIB_H
 			<< " taglib"
+#			endif
+#			ifdef HAVE_PTHREAD_H
+			<< " threads"
 #			endif
 #			ifdef _UTF8
 			<< " unicode"
