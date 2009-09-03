@@ -34,7 +34,12 @@
 #
 #visualizer_fifo_path = ""
 #
-#visualizer_type = "spectrum" (spectrum/wave)
+##
+## Note: To enable spectrum frequency visualization
+## you need to compile ncmpcpp with fftw3 support.
+##
+#
+#visualizer_type = "wave" (spectrum/wave)
 #
 ##### system encoding #####
 ##

@@ -37,7 +37,9 @@ using Global::MainHeight;
 Visualizer *myVisualizer = new Visualizer;
 
 const unsigned Visualizer::Samples = 2048;
+#ifdef HAVE_FFTW3_H
 const unsigned Visualizer::FFTResults = Samples/2+1;
+#endif // HAVE_FFTW3_H
 
 void Visualizer::Init()
 {
@@ -45,10 +47,12 @@ void Visualizer::Init()
 	w->SetTimeout(Config.visualizer_fifo_path.empty() ? ncmpcpp_window_timeout : 40 /* this gives us 25 fps */);
 	
 	ResetFD();
+#	ifdef HAVE_FFTW3_H
 	itsFreqsMagnitude = new unsigned[FFTResults];
 	itsInput = static_cast<double *>(fftw_malloc(sizeof(double)*Samples));
 	itsOutput = static_cast<fftw_complex *>(fftw_malloc(sizeof(fftw_complex)*FFTResults));
 	itsPlan = fftw_plan_dft_r2c_1d(Samples, itsInput, itsOutput, FFTW_ESTIMATE);
+#	endif // HAVE_FFTW3_H
 	
 	isInitialized = 1;
 }
@@ -103,14 +107,20 @@ void Visualizer::Update()
 		return;
 	
 	w->Clear(0);
+#	ifdef HAVE_FFTW3_H
 	Config.visualizer_use_wave ? DrawSoundWave(buf, data) : DrawFrequencySpectrum(buf, data);
+#	else
+	DrawSoundWave(buf, data);
+#	endif // HAVE_FFTW3_H
 	w->Refresh();
 }
 
 void Visualizer::SpacePressed()
 {
+#	ifdef HAVE_FFTW3_H
 	Config.visualizer_use_wave = !Config.visualizer_use_wave;
 	ShowMessage("Visualization type: %s", Config.visualizer_use_wave ? "Sound wave" : "Frequency spectrum");
+#	endif // HAVE_FFTW3_H
 }
 
 void Visualizer::DrawSoundWave(int16_t *buf, ssize_t data)
@@ -142,6 +152,7 @@ void Visualizer::DrawSoundWave(int16_t *buf, ssize_t data)
 	*w << fmtAltCharsetEnd;
 }
 
+#ifdef HAVE_FFTW3_H
 void Visualizer::DrawFrequencySpectrum(int16_t *buf, ssize_t data)
 {
 	// zero old values
@@ -165,6 +176,7 @@ void Visualizer::DrawFrequencySpectrum(int16_t *buf, ssize_t data)
 		mvwvline(w->Raw(), MainHeight-bar_height, i, 0, bar_height);
 	}
 }
+#endif // HAVE_FFTW3_H
 
 void Visualizer::SetFD()
 {

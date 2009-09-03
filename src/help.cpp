@@ -298,10 +298,10 @@ void Help::GetKeybindings()
 #	endif // ENABLE_OUTPUTS
 	
 	
-#	ifdef ENABLE_VISUALIZER
+#	if defined(ENABLE_VISUALIZER) && defined(HAVE_FFTW3_H)
 	*w << "\n\n   " << fmtBold << "Keys - Music visualizer\n -----------------------------------------\n" << fmtBoldEnd;
 	*w << DisplayKeys(Key.Space)			<< "Toggle visualization type\n";
-#	endif // ENABLE_VISUALIZER
+#	endif // ENABLE_VISUALIZER && HAVE_FFTW3_H
 	
 	
 	*w << "\n\n   " << fmtBold << "Mouse - Global\n -----------------------------------------\n" << fmtBoldEnd;

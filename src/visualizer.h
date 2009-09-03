@@ -59,16 +59,23 @@ class Visualizer : public Screen<Window>
 		
 	private:
 		void DrawSoundWave(int16_t *, ssize_t);
+#		ifdef HAVE_FFTW3_H
 		void DrawFrequencySpectrum(int16_t *, ssize_t);
+#		endif // HAVE_FFTW3_H
 		
 		int itsFifo;
+#		ifdef HAVE_FFTW3_H
 		unsigned *itsFreqsMagnitude;
 		double *itsInput;
 		fftw_complex *itsOutput;
 		fftw_plan itsPlan;
+#		endif // HAVE_FFTW3_H
 		
 		static const unsigned Samples;
+#		ifdef HAVE_FFTW3_H
 		static const unsigned FFTResults;
+#		endif // HAVE_FFTW3_H
+		
 };
 
 extern Visualizer *myVisualizer;
