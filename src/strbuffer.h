@@ -58,7 +58,7 @@ namespace NCurses
 			bool SetFormatting(short vb, const std::basic_string<C> &s, short ve, bool for_each = 1);
 			void RemoveFormatting(short vb, const std::basic_string<C> &s, short ve, bool for_each = 1);
 			void SetTemp(std::basic_string<C> *);
-			void Write(Window &w, size_t &pos, size_t width, const std::basic_string<C> &sep);
+			void Write(Window &w, size_t &pos, size_t width, const std::basic_string<C> &sep) const;
 			void Clear();
 			
 			template <typename T> basic_buffer<C> &operator<<(const T &t)
@@ -144,7 +144,7 @@ template <typename C> void NCurses::basic_buffer<C>::SetTemp(std::basic_string<C
 	itsTempString = tmp;
 }
 
-template <typename C> void NCurses::basic_buffer<C>::Write(Window &w, size_t &pos, size_t width, const std::basic_string<C> &sep)
+template <typename C> void NCurses::basic_buffer<C>::Write(Window &w, size_t &pos, size_t width, const std::basic_string<C> &sep) const
 {
 	std::basic_string<C> s = itsString.str();
 	size_t len = Window::Length(s);
