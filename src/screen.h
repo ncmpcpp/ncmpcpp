@@ -120,7 +120,7 @@ template <typename WindowType> void Screen<WindowType>::Scroll(Where where, cons
 	if (!Config.fancy_scrolling && key)
 	{
 		int in = key[0];
-		w->SetTimeout(ncmpcpp_window_timeout/10);
+		w->SetTimeout(50);
 		while (Keypressed(in, key))
 		{
 			TraceMpdStatus();
