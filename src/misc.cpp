@@ -80,7 +80,7 @@ void SelectedItemsAdder::SwitchTo()
 	
 	w->Clear();
 	w->Reset();
-	w->AddOption("Current MPD playlist");
+	w->AddOption("Current MPD playlist", 0, myOldScreen == myPlaylist);
 	w->AddOption("Create new playlist", 0, playlists_not_active);
 	w->AddSeparator();
 	

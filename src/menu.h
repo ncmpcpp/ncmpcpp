@@ -394,6 +394,12 @@ template <typename T> void NCurses::Menu<T>::Refresh()
 		if (!(*itsOptionsPtr)[itsHighlight]) // if it's still on separator, move in other direction.
 			Scroll(wDown);
 	}
+	else if ((*itsOptionsPtr)[itsHighlight]->isStatic) // static option can't be chosen
+	{
+		Scroll(wUp);
+		if ((*itsOptionsPtr)[itsHighlight]->isStatic) // if it's still chosen, scroll in other direction
+			Scroll(wDown);
+	}
 	size_t line = 0;
 	for (size_t i = itsBeginning; i < itsBeginning+itsHeight; ++i)
 	{
