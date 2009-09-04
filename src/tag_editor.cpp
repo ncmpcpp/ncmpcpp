@@ -45,15 +45,14 @@ TagEditor *myTagEditor = new TagEditor;
 const std::string TagEditor::PatternsFile = config_dir + "patterns.list";
 std::deque<std::string> TagEditor::Patterns;
 
-const size_t TagEditor::MiddleColumnWidth = 26;
 size_t TagEditor::LeftColumnWidth;
+size_t TagEditor::MiddleColumnWidth;
 size_t TagEditor::MiddleColumnStartX;
 size_t TagEditor::RightColumnWidth;
 size_t TagEditor::RightColumnStartX;
 
-const size_t TagEditor::FParserDialogWidth = 30;
-const size_t TagEditor::FParserDialogHeight = 6;
-
+size_t TagEditor::FParserDialogWidth;
+size_t TagEditor::FParserDialogHeight;
 size_t TagEditor::FParserWidth;
 size_t TagEditor::FParserWidthOne;
 size_t TagEditor::FParserWidthTwo;
@@ -143,11 +142,14 @@ void TagEditor::Init()
 
 void TagEditor::SetDimensions()
 {
-	LeftColumnWidth = COLS/2-MiddleColumnWidth/2;
+	MiddleColumnWidth = std::min(26, COLS-2);
+	LeftColumnWidth = (COLS-MiddleColumnWidth)/2;
 	MiddleColumnStartX = LeftColumnWidth+1;
 	RightColumnWidth = COLS-LeftColumnWidth-MiddleColumnWidth-2;
 	RightColumnStartX = LeftColumnWidth+MiddleColumnWidth+2;
 	
+	FParserDialogWidth = std::min(30, COLS);
+	FParserDialogHeight = std::min(size_t(6), MainHeight);
 	FParserWidth = COLS*0.9;
 	FParserHeight = std::min(size_t(LINES*0.8), MainHeight);
 	FParserWidthOne = FParserWidth/2;
@@ -162,6 +164,7 @@ void TagEditor::Resize()
 	Dirs->Resize(LeftColumnWidth, MainHeight);
 	TagTypes->Resize(MiddleColumnWidth, MainHeight);
 	Tags->Resize(RightColumnWidth, MainHeight);
+	FParserDialog->Resize(FParserDialogWidth, FParserDialogHeight);
 	FParser->Resize(FParserWidthOne, FParserHeight);
 	FParserLegend->Resize(FParserWidthTwo, FParserHeight);
 	FParserPreview->Resize(FParserWidthTwo, FParserHeight);
@@ -175,6 +178,9 @@ void TagEditor::Resize()
 	FParser->MoveTo((COLS-FParserWidth)/2, (MainHeight-FParserHeight)/2+MainStartY);
 	FParserLegend->MoveTo((COLS-FParserWidth)/2+FParserWidthOne, (MainHeight-FParserHeight)/2+MainStartY);
 	FParserPreview->MoveTo((COLS-FParserWidth)/2+FParserWidthOne, (MainHeight-FParserHeight)/2+MainStartY);
+	
+	if (MainHeight < 5 && (w == FParserDialog || w == FParser || w == FParserHelper)) // screen too low
+		w = TagTypes; // fall back to main columns
 	
 	hasToBeResized = 0;
 }

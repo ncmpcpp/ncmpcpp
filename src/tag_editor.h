@@ -111,14 +111,14 @@ class TagEditor : public Screen<Window>
 		static const std::string PatternsFile;
 		static std::deque<std::string> Patterns;
 		
-		static const size_t MiddleColumnWidth;
+		static size_t MiddleColumnWidth;
 		static size_t LeftColumnWidth;
 		static size_t MiddleColumnStartX;
 		static size_t RightColumnWidth;
 		static size_t RightColumnStartX;
 		
-		static const size_t FParserDialogWidth;
-		static const size_t FParserDialogHeight;
+		static size_t FParserDialogWidth;
+		static size_t FParserDialogHeight;
 		static size_t FParserWidth;
 		static size_t FParserWidthOne;
 		static size_t FParserWidthTwo;
