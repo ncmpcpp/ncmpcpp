@@ -64,8 +64,25 @@ void ParseArgv(int argc, char **argv)
 		}
 		else if (!strcmp(argv[i], "-v") || !strcmp(argv[i], "--version"))
 		{
-			std::cout << "ncmpcpp version: " << VERSION << std::endl
-			<< "built with support for:"
+			std::cout << "ncmpcpp version: " << VERSION << "\n\n"
+			<< "optional screens compiled-in:\n"
+#			ifdef HAVE_TAGLIB_H
+			<< " - tag editor\n"
+			<< " - tiny tag editor\n"
+#			endif
+#			ifdef HAVE_CURL_CURL_H
+			<< " - artist info\n"
+#			endif
+#			ifdef ENABLE_OUTPUTS
+			<< " - outputs\n"
+#			endif
+#			ifdef ENABLE_VISUALIZER
+			<< " - visualizer\n"
+#			endif
+#			ifdef ENABLE_CLOCK
+			<< " - clock\n"
+#			endif
+			<< "\nbuilt with support for:"
 #			ifdef HAVE_CURL_CURL_H
 			<< " curl"
 #			endif
