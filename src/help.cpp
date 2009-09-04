@@ -191,9 +191,9 @@ void Help::GetKeybindings()
 	*w << DisplayKeys(Key.ToggleDisplayMode)	<< "Toggle display mode\n";
 	*w << DisplayKeys(Key.ToggleInterface)		<< "Toggle user interface\n";
 	*w << DisplayKeys(Key.GoToPosition)		<< "Go to given position in current song (in % by default)\n";
-	*w << DisplayKeys(Key.SongInfo)			<< "Show song's info\n";
+	*w << DisplayKeys(Key.SongInfo)			<< "Show song info\n";
 #	ifdef HAVE_CURL_CURL_H
-	*w << DisplayKeys(Key.ArtistInfo)		<< "Show artist's info\n";
+	*w << DisplayKeys(Key.ArtistInfo)		<< "Show artist info\n";
 	*w << DisplayKeys(Key.ToggleLyricsDB)		<< "Toggle lyrics database\n";
 #	endif // HAVE_CURL_CURL_H
 	*w << DisplayKeys(Key.Lyrics)			<< "Show/hide song's lyrics\n";

@@ -156,9 +156,9 @@ void Info::GetArtist()
 		myOldScreen = myScreen;
 		myScreen = this;
 		RedrawHeader = 1;
-		itsTitle = "Artist's info - " + itsArtist;
+		itsTitle = "Artist info - " + itsArtist;
 		w->Clear();
-		static_cast<Window &>(*w) << "Fetching artist's info...";
+		static_cast<Window &>(*w) << "Fetching artist info...";
 		w->Window::Refresh();
 #		ifdef HAVE_PTHREAD_H
 		if (!Downloader)
