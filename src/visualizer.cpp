@@ -181,7 +181,7 @@ void Visualizer::DrawFrequencySpectrum(int16_t *buf, ssize_t data)
 void Visualizer::SetFD()
 {
 	if (itsFifo < 0 && (itsFifo = open(Config.visualizer_fifo_path.c_str(), O_RDONLY | O_NONBLOCK)) < 0)
-		ShowMessage("Couldn't open fifo for reading PCM data: %s", strerror(errno));
+		ShowMessage("Couldn't open \"%s\" for reading PCM data: %s", Config.visualizer_fifo_path.c_str(), strerror(errno));
 }
 
 void Visualizer::ResetFD()
