@@ -128,7 +128,7 @@ void Visualizer::DrawSoundWave(int16_t *buf, ssize_t data)
 	const int samples_per_col = data/sizeof(int16_t)/COLS;
 	const int half_height = MainHeight/2;
 	*w << fmtAltCharset;
-	double prev_point_pos;
+	double prev_point_pos = 0;
 	for (int i = 0; i < COLS; ++i)
 	{
 		double point_pos = 0;
