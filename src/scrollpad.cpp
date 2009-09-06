@@ -52,25 +52,12 @@ void Scrollpad::Flush()
 	std::basic_string<my_char_t> s = itsBuffer.Str();
 	
 	size_t x = 0;
-	
 	int x_pos = 0;
 	int space_pos = 0;
-	int tab_size = 0;
 	
 	for (size_t i = 0; i < s.length(); ++i)
 	{
-		tab_size = 8-x%8;
-		
-		if (s[i] != '\t')
-		{
-#			ifdef _UTF8
-			x += wcwidth(s[i]);
-#			else
-			x++;
-#			endif
-		}
-		else
-			x += tab_size;
+		x += s[i] != '\t' ? wcwidth(s[i]) : 8-x%8; // tab size
 		
 		if (s[i] == ' ') // if space, remember its position;
 		{
