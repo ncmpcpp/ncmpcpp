@@ -241,7 +241,7 @@ int main(int argc, char *argv[])
 					mvwhline(wHeader->Raw(), 2, 0, 0, COLS);
 					mvwhline(wHeader->Raw(), 4, 0, 0, COLS);
 					*wHeader << XY((COLS-Window::Length(title))/2, 3);
-					*wHeader << Config.statusbar_color << title << clEnd;
+					*wHeader << Config.header_color << title << clEnd;
 					*wHeader << clEnd << fmtBoldEnd;
 				}
 				else

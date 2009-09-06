@@ -600,6 +600,7 @@ void NcmpcppStatusChanged(Connection *, StatusChanges changed, void *)
 			if (!switch_state.empty())
 			{
 				mvprintw(1, COLS-switch_state.length()-3, "[");
+				attroff(COLOR_PAIR(Config.state_line_color));
 				attron(COLOR_PAIR(Config.state_flags_color));
 				mvprintw(1, COLS-switch_state.length()-2, "%s", switch_state.c_str());
 				attroff(COLOR_PAIR(Config.state_flags_color));
