@@ -91,7 +91,8 @@ void SelectedItemsAdder::SwitchTo()
 	
 	w->Clear();
 	w->Reset();
-	w->AddOption("Current MPD playlist", 0, myOldScreen == myPlaylist);
+	if (myOldScreen != myPlaylist)
+		w->AddOption("Current MPD playlist", 0, 0);
 	w->AddOption("New playlist", 0, playlists_not_active);
 	w->AddSeparator();
 	
@@ -148,6 +149,10 @@ std::basic_string<my_char_t> SelectedItemsAdder::Title()
 void SelectedItemsAdder::EnterPressed()
 {
 	size_t pos = w->Choice();
+
+	// adding to current playlist is disabled when playlist is active
+	if (w == itsPlaylistSelector && myOldScreen == myPlaylist && pos == 0)
+		pos++;
 	
 	MPD::SongList list;
 	if ((w != itsPlaylistSelector || pos != 0) && pos != w->Size()-1)
