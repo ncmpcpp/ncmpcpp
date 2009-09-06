@@ -725,7 +725,7 @@ void TagEditor::MouseButtonPressed(MEVENT me)
 		{
 			if (w != FParser)
 				PrevColumn();
-			if (me.bstate & (BUTTON1_PRESSED | BUTTON3_PRESSED))
+			if (size_t(me.y) < FParser->Size() && (me.bstate & (BUTTON1_PRESSED | BUTTON3_PRESSED)))
 			{
 				FParser->Goto(me.y);
 				if (me.bstate & BUTTON3_PRESSED)
