@@ -275,9 +275,9 @@ int main(int argc, char *argv[])
 			}
 			if (!Config.new_design)
 			{
-				wHeader->SetColor(Config.volume_color);
+				*wHeader << Config.volume_color;
 				*wHeader << XY(wHeader->GetWidth()-VolumeState.length(), 0) << VolumeState;
-				wHeader->SetColor(Config.header_color);
+				*wHeader << clEnd;
 			}
 			wHeader->Refresh();
 			RedrawHeader = 0;

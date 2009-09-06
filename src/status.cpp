@@ -335,9 +335,9 @@ void NcmpcppStatusChanged(Connection *, StatusChanges changed, void *)
 			case psStop:
 			{
 				WindowTitle("ncmpc++ ver. "VERSION);
-				wFooter->SetColor(Config.progressbar_color);
+				*wFooter << Config.progressbar_color;
 				mvwhline(wFooter->Raw(), 0, 0, 0, wFooter->GetWidth());
-				wFooter->SetColor(Config.statusbar_color);
+				*wFooter << clEnd;
 				Playlist::ReloadRemaining = 1;
 				myPlaylist->NowPlaying = -1;
 				if (Config.new_design)
@@ -497,7 +497,7 @@ void NcmpcppStatusChanged(Connection *, StatusChanges changed, void *)
 			{
 				double progressbar_size = elapsed/double(np.GetTotalLength());
 				unsigned howlong = wFooter->GetWidth()*progressbar_size;
-				wFooter->SetColor(Config.progressbar_color);
+				*wFooter << Config.progressbar_color;
 				mvwhline(wFooter->Raw(), 0, 0, 0, wFooter->GetWidth());
 				if (np.GetTotalLength())
 				{
@@ -506,7 +506,7 @@ void NcmpcppStatusChanged(Connection *, StatusChanges changed, void *)
 					if (howlong < wFooter->GetWidth())
 						*wFooter << Config.progressbar[1];
 				}
-				wFooter->SetColor(Config.statusbar_color);
+				*wFooter << Config.statusbar_color;
 			}
 			RedrawStatusbar = 0;
 		}
@@ -621,9 +621,9 @@ void NcmpcppStatusChanged(Connection *, StatusChanges changed, void *)
 			VolumeState += IntoStr(volume);
 			VolumeState += "%";
 		}
-		wHeader->SetColor(Config.volume_color);
+		*wHeader << Config.volume_color;
 		*wHeader << XY(wHeader->GetWidth()-VolumeState.length(), 0) << VolumeState;
-		wHeader->SetColor(Config.header_color);
+		*wHeader << clEnd;
 		wHeader->Refresh();
 	}
 	if (myScreen->ActiveWindow() == myPlaylist->Items)

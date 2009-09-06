@@ -117,7 +117,6 @@ namespace NCurses
 			bool hasCoords(int &, int &);
 			
 			void SetGetStringHelper(GetStringHelper helper) { itsGetStringHelper = helper; }
-			void SetColor(Color, Color = clDefault);
 			void SetBaseColor(Color, Color = clDefault);
 			void SetBorder(Border);
 			void SetTimeout(int);
@@ -172,6 +171,7 @@ namespace NCurses
 			void Bold(bool) const;
 			void Reverse(bool) const;
 			void AltCharset(bool) const;
+			void SetColor(Color, Color = clDefault);
 			
 			void ShowBorder() const;
 			void AdjustDimensions(size_t &, size_t &);
