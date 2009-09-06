@@ -121,7 +121,7 @@ void Scrollpad::RemoveFormatting()
 void Scrollpad::Recreate()
 {
 	delwin(itsWindow);
-	itsWindow = newpad(itsRealHeight, itsWidth);
+	itsWindow = newpad(std::max(itsHeight, itsRealHeight), itsWidth);
 	SetTimeout(itsWindowTimeout);
 	SetColor(itsBaseColor, itsBgColor);
 	keypad(itsWindow, 1);
