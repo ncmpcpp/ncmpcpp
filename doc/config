@@ -304,6 +304,8 @@
 #
 #statusbar_color = "default"
 #
+#alternative_ui_separator_color = "black"
+#
 #active_column_color = "red"
 #
 #window_border_color = "green"

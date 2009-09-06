@@ -237,7 +237,7 @@ int main(int argc, char *argv[])
 				{
 					std::basic_string<my_char_t> title = myScreen->Title();
 					*wHeader << XY(0, 3) << wclrtoeol;
-					*wHeader << fmtBold << clBlack;
+					*wHeader << fmtBold << Config.alternative_ui_separator_color;
 					mvwhline(wHeader->Raw(), 2, 0, 0, COLS);
 					mvwhline(wHeader->Raw(), 4, 0, 0, COLS);
 					*wHeader << XY((COLS-Window::Length(title))/2, 3);
@@ -267,7 +267,7 @@ int main(int argc, char *argv[])
 #				endif // ENABLE_CLOCK
 				if (Config.new_design)
 				{
-					*wHeader << fmtBold << clBlack;
+					*wHeader << fmtBold << Config.alternative_ui_separator_color;
 					mvwhline(wHeader->Raw(), 2, 0, 0, COLS);
 					mvwhline(wHeader->Raw(), 4, 0, 0, COLS);
 					*wHeader << clEnd << fmtBoldEnd;

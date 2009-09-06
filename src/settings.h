@@ -162,6 +162,7 @@ struct ncmpcpp_config
 	Color main_highlight_color;
 	Color progressbar_color;
 	Color statusbar_color;
+	Color alternative_ui_separator_color;
 	Color active_column_color;
 	
 	Border window_border;

@@ -269,6 +269,7 @@ void DefaultConfiguration(ncmpcpp_config &conf)
 	conf.main_highlight_color = conf.main_color;
 	conf.progressbar_color = clDefault;
 	conf.statusbar_color = clDefault;
+	conf.alternative_ui_separator_color = clBlack;
 	conf.active_column_color = clRed;
 	conf.window_border = brGreen;
 	conf.active_window_border = brRed;
@@ -883,6 +884,11 @@ void ReadConfiguration(ncmpcpp_config &conf)
 			{
 				if (!v.empty())
 					conf.statusbar_color = IntoColor(v);
+			}
+			else if (cl.find("alternative_ui_separator_color") != std::string::npos)
+			{
+				if (!v.empty())
+					conf.alternative_ui_separator_color = IntoColor(v);
 			}
 			else if (cl.find("active_column_color") != std::string::npos)
 			{
