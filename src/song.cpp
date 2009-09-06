@@ -163,6 +163,20 @@ std::string MPD::Song::GetTrack() const
 		return itsSong->track;
 }
 
+std::string MPD::Song::GetTrackNumber() const
+{
+	if (!itsSong->track)
+		return "";
+	const char *slash = strrchr(itsSong->track, '/');
+	if (slash)
+	{
+		std::string result(itsSong->track, slash-itsSong->track);
+		return result[0] != '0' && result.length() == 1 ? "0"+result : result;
+	}
+	else
+		return GetTrack();
+}
+
 std::string MPD::Song::GetDate() const
 {
 	return !itsSong->date ? "" : itsSong->date;
@@ -332,6 +346,9 @@ std::string MPD::Song::ParseFormat(std::string::const_iterator &it) const
 					get = &MPD::Song::GetDate;
 					break;
 				case 'n':
+					get = &MPD::Song::GetTrackNumber;
+					break;
+				case 'N':
 					get = &MPD::Song::GetTrack;
 					break;
 				case 'g':

@@ -46,6 +46,7 @@ namespace MPD
 			std::string GetTitle() const;
 			std::string GetAlbum() const;
 			std::string GetTrack() const;
+			std::string GetTrackNumber() const;
 			std::string GetDate() const;
 			std::string GetGenre() const;
 			std::string GetComposer() const;

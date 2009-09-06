@@ -70,7 +70,8 @@
 ## %t - title
 ## %b - album
 ## %y - year
-## %n - track number
+## %n - track number (01/12 -> 01)
+## %N - full track info (01/12 -> 01/12)
 ## %g - genre
 ## %c - composer
 ## %p - performer

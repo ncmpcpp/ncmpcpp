@@ -65,6 +65,7 @@ std::string Display::Columns()
 				tag = "Year";
 				break;
 			case 'n':
+			case 'N':
 				tag = "Track";
 				break;
 			case 'g':
@@ -149,6 +150,9 @@ void Display::SongsInColumns(const MPD::Song &s, void *, Menu<MPD::Song> *menu)
 				get = &MPD::Song::GetDate;
 				break;
 			case 'n':
+				get = &MPD::Song::GetTrackNumber;
+				break;
+			case 'N':
 				get = &MPD::Song::GetTrack;
 				break;
 			case 'g':
