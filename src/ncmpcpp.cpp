@@ -1658,7 +1658,6 @@ int main(int argc, char *argv[])
 		{
 			CHECK_PLAYLIST_FOR_FILTERING;
 			myPlaylist->Sort();
-			myPlaylist->EnableHighlighting();
 		}
 		else if (Keypressed(input, Key.ApplyFilter))
 		{
