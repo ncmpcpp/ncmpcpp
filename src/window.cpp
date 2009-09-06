@@ -866,14 +866,13 @@ Window * Window::EmptyClone() const
 std::string ToString(const std::wstring &ws)
 {
 	std::string result;
-	char *s = new char[MB_CUR_MAX];
+	char s[MB_CUR_MAX];
 	for (size_t i = 0; i < ws.length(); ++i)
 	{
 		int n = wcrtomb(s, ws[i], 0);
 		if (n > 0)
 			result.append(s, n);
 	}
-	delete [] s;
 	return result;
 }
 
