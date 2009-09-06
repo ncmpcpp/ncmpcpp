@@ -393,10 +393,7 @@ void TagEditor::EnterPressed()
 		size_t pos = FParser->RealChoice();
 		
 		if (pos == 3) // save
-		{
-			pos = 1; // "preview without preview"
 			FParserUsePreview = 0;
-		}
 		
 		if (pos == 0) // change pattern
 		{
@@ -411,7 +408,7 @@ void TagEditor::EnterPressed()
 				FParser->at(0) += Config.pattern;
 			}
 		}
-		else if (pos == 1) // preview or proceed (see above if for pos == 3)
+		else if (pos == 1 || pos == 3) // preview or proceed
 		{
 			bool success = 1;
 			ShowMessage("Parsing...");
@@ -470,9 +467,10 @@ void TagEditor::EnterPressed()
 					}
 				}
 				Patterns.insert(Patterns.begin(), Config.pattern);
-				ShowMessage("Operation finished!");
 				quit = 1;
 			}
+			if (pos != 3 || success)
+				ShowMessage("Operation finished!");
 		}
 		else if (pos == 2) // show legend
 		{
