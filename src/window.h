@@ -57,6 +57,11 @@
 # define TO_WSTRING(x) (x)
 #endif
 
+// workaraund for win32
+#ifdef WIN32
+# define wcwidth(x) 1
+#endif
+
 std::string ToString(const std::wstring &);
 std::wstring ToWString(const std::string &);
 
