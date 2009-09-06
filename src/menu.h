@@ -380,26 +380,25 @@ template <typename T> void NCurses::Menu<T>::Refresh()
 		return;
 	}
 	int MaxBeginning = itsOptionsPtr->size() < itsHeight ? 0 : itsOptionsPtr->size()-itsHeight;
-	if (itsHighlight > itsBeginning+int(itsHeight)-1)
+	
+	if (itsBeginning < itsHighlight-int(itsHeight)+1) // highlighted position is off the screen
 		itsBeginning = itsHighlight-itsHeight+1;
+	
 	if (itsBeginning < 0)
 		itsBeginning = 0;
 	else if (itsBeginning > MaxBeginning)
 		itsBeginning = MaxBeginning;
+	
 	if (!itsOptionsPtr->empty() && itsHighlight > int(itsOptionsPtr->size())-1)
 		itsHighlight = itsOptionsPtr->size()-1;
-	if (!(*itsOptionsPtr)[itsHighlight]) // it shouldn't be on separator.
+	
+	if (!(*itsOptionsPtr)[itsHighlight] || (*itsOptionsPtr)[itsHighlight]->isStatic) // it shouldn't be here
 	{
 		Scroll(wUp);
-		if (!(*itsOptionsPtr)[itsHighlight]) // if it's still on separator, move in other direction.
+		if (!(*itsOptionsPtr)[itsHighlight] || (*itsOptionsPtr)[itsHighlight]->isStatic)
 			Scroll(wDown);
 	}
-	else if ((*itsOptionsPtr)[itsHighlight]->isStatic) // static option can't be chosen
-	{
-		Scroll(wUp);
-		if ((*itsOptionsPtr)[itsHighlight]->isStatic) // if it's still chosen, scroll in other direction
-			Scroll(wDown);
-	}
+	
 	size_t line = 0;
 	for (size_t i = itsBeginning; i < itsBeginning+itsHeight; ++i)
 	{
