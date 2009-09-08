@@ -70,10 +70,7 @@ void StatusbarApplyFilterImmediately(const std::wstring &ws)
 {
 	static std::wstring cmp;
 	if (cmp != ws)
-	{
-		myScreen->ApplyFilter(ToString(ws));
-		cmp = ws;
-	}
+		myScreen->ApplyFilter(ToString((cmp = ws)));
 	myScreen->RefreshWindow();
 	TraceMpdStatus();
 }
