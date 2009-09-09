@@ -9,10 +9,10 @@ ncmpcpp is an ncurses client for MPD (Music Player Daemon), inspired by ncmpc.
 
 Read more about MPD at http://www.musicpd.org
 .SH "OPTIONS"
-.B \-h
+.B \-h, \-\-host
 Connect to server at host [localhost]
 .TP
-.B \-?, \-\-help
+.B \-p, \-\-port
 Connect to server at port [6600]
 .TP
 .B \-?, \-\-help
@@ -20,6 +20,9 @@ Display help.
 .TP
 .B \-v, \-\-version
 Display version information.
+.TP
+.B \-\-now\-playing
+Display now playing song [{{(%l) }{{%a - }%t}}|{%f}}]
 .TP
 .B play
 Start playing and exit.
