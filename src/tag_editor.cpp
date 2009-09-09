@@ -458,9 +458,13 @@ void TagEditor::EnterPressed()
 			}
 			else if (success)
 			{
-				for (std::list<std::string>::iterator it = Patterns.begin(); it != Patterns.end(); ++it)
+				for (std::list<std::string>::iterator it = Patterns.begin(); ; ++it)
+				{
 					if (*it == Config.pattern)
 						it = Patterns.erase(it);
+					if (it == Patterns.end())
+						break;
+				}
 				Patterns.insert(Patterns.begin(), Config.pattern);
 				quit = 1;
 			}
