@@ -129,6 +129,7 @@ namespace MPD
 			long long GetPlaylistID() const { return isConnected && itsCurrentStatus ? itsCurrentStatus->playlist : -1; }
 			long long GetOldPlaylistID() const { return isConnected && itsOldStatus ? itsOldStatus->playlist : -1; }
 			int GetElapsedTime() const { return isConnected && itsCurrentStatus ? itsCurrentStatus->elapsedTime : -1; }
+			int GetTotalTime() const { return isConnected && itsCurrentStatus ? itsCurrentStatus->totalTime : 0; }
 			unsigned GetBitrate() const { return isConnected && itsCurrentStatus ? itsCurrentStatus->bitRate : 0; }
 			
 			size_t GetMaxPlaylistLength() const { return itsMaxPlaylistLength; }

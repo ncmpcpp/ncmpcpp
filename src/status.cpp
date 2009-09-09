@@ -415,14 +415,14 @@ void NcmpcppStatusChanged(Connection *, StatusChanges changed, void *)
 				if (Config.display_remaining_time)
 				{
 					tracklength = "-";
-					tracklength += Song::ShowTime(np.GetTotalLength()-elapsed);
+					tracklength += Song::ShowTime(Mpd.GetTotalTime()-elapsed);
 				}
 				else
 					tracklength = Song::ShowTime(elapsed);
-				if (np.GetTotalLength())
+				if (Mpd.GetTotalTime())
 				{
 					tracklength += "/";
-					tracklength += np.GetLength();
+					tracklength += MPD::Song::ShowTime(Mpd.GetTotalTime());
 				}
 				// bitrate here doesn't look good, but it can be moved somewhere else later
 				if (Config.display_bitrate && Mpd.GetBitrate())
@@ -466,17 +466,17 @@ void NcmpcppStatusChanged(Connection *, StatusChanges changed, void *)
 					tracklength += " kbps]";
 				}
 				tracklength += " [";
-				if (np.GetTotalLength())
+				if (Mpd.GetTotalTime())
 				{
 					if (Config.display_remaining_time)
 					{
 						tracklength += "-";
-						tracklength += Song::ShowTime(np.GetTotalLength()-elapsed);
+						tracklength += Song::ShowTime(Mpd.GetTotalTime()-elapsed);
 					}
 					else
 						tracklength += Song::ShowTime(elapsed);
 					tracklength += "/";
-					tracklength += np.GetLength();
+					tracklength += MPD::Song::ShowTime(Mpd.GetTotalTime());
 					tracklength += "]";
 				}
 				else
@@ -492,11 +492,11 @@ void NcmpcppStatusChanged(Connection *, StatusChanges changed, void *)
 			}
 			if (!block_progressbar_update)
 			{
-				double progressbar_size = elapsed/double(np.GetTotalLength());
+				double progressbar_size = elapsed/double(Mpd.GetTotalTime());
 				unsigned howlong = wFooter->GetWidth()*progressbar_size;
 				*wFooter << Config.progressbar_color;
 				mvwhline(wFooter->Raw(), 0, 0, 0, wFooter->GetWidth());
-				if (np.GetTotalLength())
+				if (Mpd.GetTotalTime())
 				{
 					for (unsigned i = 0; i < howlong; ++i)
 						*wFooter << Config.progressbar[0];

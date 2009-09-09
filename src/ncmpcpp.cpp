@@ -386,10 +386,9 @@ int main(int argc, char *argv[])
 			&&  mouse_event.y == LINES-(Config.statusbar_visibility ? 2 : 1)
 			   ) // progressbar
 			{
-				const Song *s = myPlaylist->NowPlayingSong();
-				if (!s)
+				if (!myPlaylist->isPlaying())
 					continue;
-				Mpd.Seek(s->GetTotalLength()*mouse_event.x/double(COLS));
+				Mpd.Seek(Mpd.GetTotalTime()*mouse_event.x/double(COLS));
 				UpdateStatusImmediately = 1;
 			}
 			else if (mouse_event.bstate & BUTTON1_PRESSED
@@ -1091,16 +1090,16 @@ int main(int argc, char *argv[])
 		}
 		else if (Keypressed(input, Key.SeekForward) || Keypressed(input, Key.SeekBackward))
 		{
-			const Song *s = myPlaylist->NowPlayingSong();
-			
-			if (!s)
-				continue;
-			
-			if (!s->GetTotalLength())
+			if (!Mpd.GetTotalTime())
 			{
 				ShowMessage("Unknown item length!");
 				continue;
 			}
+			
+			const Song *s = myPlaylist->NowPlayingSong();
+			if (!s)
+				continue;
+			
 			LockProgressbar();
 			LockStatusbar();
 			
@@ -1118,13 +1117,13 @@ int main(int argc, char *argv[])
 				
 				int howmuch = Config.incremental_seeking ? (myPlaylist->Timer()-t)/2+Config.seek_time : Config.seek_time;
 				
-				if (songpos < s->GetTotalLength() && Keypressed(input, Key.SeekForward))
+				if (Keypressed(input, Key.SeekForward) && songpos < Mpd.GetTotalTime())
 				{
 					songpos += howmuch;
-					if (songpos > s->GetTotalLength())
-						songpos = s->GetTotalLength();
+					if (songpos > Mpd.GetTotalTime())
+						songpos = Mpd.GetTotalTime();
 				}
-				if (songpos < s->GetTotalLength() && songpos > 0 && Keypressed(input, Key.SeekBackward))
+				else if (Keypressed(input, Key.SeekBackward) && songpos > 0)
 				{
 					songpos -= howmuch;
 					if (songpos < 0)
@@ -1138,12 +1137,12 @@ int main(int argc, char *argv[])
 					if (Config.display_remaining_time)
 					{
 						tracklength = "-";
-						tracklength += Song::ShowTime(s->GetTotalLength()-songpos);
+						tracklength += Song::ShowTime(Mpd.GetTotalTime()-songpos);
 					}
 					else
 						tracklength = Song::ShowTime(songpos);
 					tracklength += "/";
-					tracklength += s->GetLength();
+					tracklength += MPD::Song::ShowTime(Mpd.GetTotalTime());
 					*wHeader << XY(0, 0) << tracklength << " ";
 					wHeader->Refresh();
 				}
@@ -1153,16 +1152,16 @@ int main(int argc, char *argv[])
 					if (Config.display_remaining_time)
 					{
 						tracklength += "-";
-						tracklength += Song::ShowTime(s->GetTotalLength()-songpos);
+						tracklength += Song::ShowTime(Mpd.GetTotalTime()-songpos);
 					}
 					else
 						tracklength = Song::ShowTime(songpos);
 					tracklength += "/";
-					tracklength += s->GetLength();
+					tracklength += MPD::Song::ShowTime(Mpd.GetTotalTime());
 					tracklength += "]";
 					*wFooter << XY(wFooter->GetWidth()-tracklength.length(), 1) << tracklength;
 				}
-				double progressbar_size = songpos/double(s->GetTotalLength());
+				double progressbar_size = songpos/double(Mpd.GetTotalTime());
 				unsigned howlong = wFooter->GetWidth()*progressbar_size;
 				
 				mvwhline(wFooter->Raw(), 0, 0, 0, wFooter->GetWidth());
@@ -1488,16 +1487,16 @@ int main(int argc, char *argv[])
 		}
 		else if (Keypressed(input, Key.GoToPosition))
 		{
-			const Song *s = myPlaylist->NowPlayingSong();
-			
-			if (!s)
-				continue;
-			
-			if (!s->GetTotalLength())
+			if (!Mpd.GetTotalTime())
 			{
 				ShowMessage("Unknown item length!");
 				continue;
 			}
+			
+			const Song *s = myPlaylist->NowPlayingSong();
+			if (!s)
+				continue;
+			
 			LockStatusbar();
 			Statusbar() << "Position to go (in %/mm:ss/seconds(s)): ";
 			std::string position = wFooter->GetString();
@@ -1514,7 +1513,7 @@ int main(int argc, char *argv[])
 					newpos = StrToInt(position)*60 + StrToInt(position.substr(position.find(':')+1));
 				}
 				catch (std::out_of_range) { }
-				if (newpos >= 0 && newpos <= s->GetTotalLength())
+				if (newpos >= 0 && newpos <= Mpd.GetTotalTime())
 					Mpd.Seek(newpos);
 				else
 					ShowMessage("Out of bounds, 0:00-%s possible for mm:ss, %s given.", s->GetLength().c_str(), MPD::Song::ShowTime(newpos).c_str());
@@ -1522,7 +1521,7 @@ int main(int argc, char *argv[])
 			else if (position.find('s') != std::string::npos) // probably position in seconds
 			{
 				newpos = StrToInt(position);
-				if (newpos >= 0 && newpos <= s->GetTotalLength())
+				if (newpos >= 0 && newpos <= Mpd.GetTotalTime())
 					Mpd.Seek(newpos);
 				else
 					ShowMessage("Out of bounds, 0-%d possible for seconds, %d given.", s->GetTotalLength(), newpos);
@@ -1531,7 +1530,7 @@ int main(int argc, char *argv[])
 			{
 				newpos = StrToInt(position);
 				if (newpos >= 0 && newpos <= 100)
-					Mpd.Seek(s->GetTotalLength()*newpos/100.0);
+					Mpd.Seek(Mpd.GetTotalTime()*newpos/100.0);
 				else
 					ShowMessage("Out of bounds, 0-100 possible for %%, %d given.", newpos);
 			}
