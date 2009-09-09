@@ -369,8 +369,9 @@ std::string MPD::Song::ParseFormat(std::string::const_iterator &it) const
 				case 't':
 					get = &MPD::Song::GetTitle;
 					break;
+				case '%':
+					result += *it; // no break here
 				default:
-					result += *it;
 					get = 0;
 					break;
 			}
