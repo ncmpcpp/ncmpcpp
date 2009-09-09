@@ -919,9 +919,15 @@ void ReadConfiguration(ncmpcpp_config &conf)
 		Column col;
 		col.color = IntoColor(GetLineValue(conf.song_list_columns_format, '[', ']', 1));
 		std::string tag_type = GetLineValue(conf.song_list_columns_format, '{', '}', 1);
-		col.type = tag_type.at(0);
+		if (tag_type.length() > 0) // at least tag type was specified
+			col.type = tag_type[0];
+		else
+		{
+			col.type = 0;
+			col.display_empty_tag = 0;
+		}
 		col.fixed = *width.rbegin() == 'f';
-		for (std::string::const_iterator it = ++tag_type.begin(); it != tag_type.end(); ++it)
+		for (std::string::const_iterator it = tag_type.begin()+(tag_type.length() > 0); it != tag_type.end(); ++it)
 		{
 			switch (*it)
 			{

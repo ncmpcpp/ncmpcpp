@@ -84,6 +84,7 @@ std::string Display::Columns()
 				tag = "Comment";
 				break;
 			default:
+				tag.clear();
 				break;
 		}
 		if (it->right_alignment)
@@ -182,7 +183,7 @@ void Display::SongsInColumns(const MPD::Song &s, void *, Menu<MPD::Song> *menu)
 		if (it->color != clDefault)
 			*menu << it->color;
 		whline(menu->Raw(), 32, menu->GetWidth()-where);
-		std::string tag = (s.*get)();
+		std::string tag = get ? (s.*get)() : "";
 		if (it->right_alignment)
 		{
 			if (!tag.empty() || it->display_empty_tag)
