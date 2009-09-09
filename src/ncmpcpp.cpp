@@ -410,7 +410,7 @@ int main(int argc, char *argv[])
 				else
 					Mpd.SetVolume(Mpd.GetVolume()+2);
 			}
-			else
+			else if (mouse_event.bstate & (BUTTON1_PRESSED | BUTTON2_PRESSED | BUTTON3_PRESSED | BUTTON4_PRESSED))
 				myScreen->MouseButtonPressed(mouse_event);
 		}
 		else if (input == KEY_RESIZE || design_changed)
