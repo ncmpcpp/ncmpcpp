@@ -370,6 +370,8 @@ std::string MPD::Song::ParseFormat(std::string::const_iterator &it) const
 					get = &MPD::Song::GetTitle;
 					break;
 				default:
+					result += *it;
+					get = 0;
 					break;
 			}
 			if (get)
