@@ -43,7 +43,7 @@ using Global::wFooter;
 TagEditor *myTagEditor = new TagEditor;
 
 const std::string TagEditor::PatternsFile = config_dir + "patterns.list";
-std::deque<std::string> TagEditor::Patterns;
+std::list<std::string> TagEditor::Patterns;
 
 size_t TagEditor::LeftColumnWidth;
 size_t TagEditor::MiddleColumnWidth;
@@ -377,7 +377,7 @@ void TagEditor::EnterPressed()
 			FParser->AddSeparator();
 			FParser->AddOption("Recent patterns", 1, 1);
 			FParser->AddSeparator();
-			for (std::deque<std::string>::const_iterator it = Patterns.begin(); it != Patterns.end(); ++it)
+			for (std::list<std::string>::const_iterator it = Patterns.begin(); it != Patterns.end(); ++it)
 				FParser->AddOption(*it);
 		}
 		
@@ -458,14 +458,9 @@ void TagEditor::EnterPressed()
 			}
 			else if (success)
 			{
-				for (size_t i = 0; i < Patterns.size(); ++i)
-				{
-					if (Patterns[i] == Config.pattern)
-					{
-						Patterns.erase(Patterns.begin()+i);
-						i--;
-					}
-				}
+				for (std::list<std::string>::iterator it = Patterns.begin(); it != Patterns.end(); ++it)
+					if (*it == Config.pattern)
+						it = Patterns.erase(it);
 				Patterns.insert(Patterns.begin(), Config.pattern);
 				quit = 1;
 			}
@@ -1156,7 +1151,8 @@ void TagEditor::SavePatternList()
 	std::ofstream output(PatternsFile.c_str());
 	if (output.is_open())
 	{
-		for (std::deque<std::string>::const_iterator it = Patterns.begin(); it != Patterns.end() && it != Patterns.begin()+30; ++it)
+		std::list<std::string>::const_iterator it = Patterns.begin();
+		for (unsigned i = 30; it != Patterns.end() && i; ++it, --i)
 			output << *it << std::endl;
 		output.close();
 	}

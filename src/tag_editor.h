@@ -27,7 +27,7 @@
 
 #ifdef HAVE_TAGLIB_H
 
-#include <deque>
+#include <list>
 
 // taglib headers
 #include "fileref.h"
@@ -109,7 +109,7 @@ class TagEditor : public Screen<Window>
 		std::string itsHighlightedDir;
 		
 		static const std::string PatternsFile;
-		static std::deque<std::string> Patterns;
+		static std::list<std::string> Patterns;
 		
 		static size_t MiddleColumnWidth;
 		static size_t LeftColumnWidth;
