@@ -1,3 +1,23 @@
+ncmpcpp-0.4
+
+ + new screen: music visualizer with sound wave/frequency spectrum modes
+ + new feature: alternative user interface
+ + new feature: command line switch for displaying now playing song
+ + new feature: support for fixed size and/or right aligned columns
+ + new feature: display bitrate of current song in statusbar (optional)
+ + new feature: display remaining time of current song instead of elapsed (optional)
+ + new feature: jump to now playing song at start (enabled by default)
+ + new feature: additional attributes for columns
+ + song format: support for nested braces
+ + support for colors in song_status_format
+ + customizable progressbar look
+ + mouse support for additional windows
+ + optional user prompting before clearing main playlist
+ + track and year tag are not limited to numbers anymore if mp3 files are edited
+ + marker for full filename (F) has been replaced with directory (D)
+ + a lot of other minor improvements and bugfixes
+
+
 ncmpcpp-0.3.5
 
  + new feature: custom command execution on song change
