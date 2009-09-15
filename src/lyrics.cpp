@@ -191,7 +191,7 @@ void Lyrics::SwitchTo()
 std::basic_string<my_char_t> Lyrics::Title()
 {
 	std::basic_string<my_char_t> result = U("Lyrics: ");
-	result += Scroller(itsSong.toString("{%a - %t}"), itsScrollBegin, w->GetWidth()-result.length()-(Config.new_design ? 2 : VolumeState.length()));
+	result += Scroller(TO_WSTRING(itsSong.toString("{%a - %t}")), itsScrollBegin, w->GetWidth()-result.length()-(Config.new_design ? 2 : VolumeState.length()));
 	return result;
 }
 

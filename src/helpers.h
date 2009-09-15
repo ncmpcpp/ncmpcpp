@@ -155,9 +155,6 @@ std::string ExtractTopDirectory(const std::string &);
 
 std::string GetLineValue(std::string &, char = '"', char = '"', bool = 0);
 
-#ifdef _UTF8
-std::basic_string<my_char_t> Scroller(const std::string &str, size_t &pos, size_t width);
-#endif // _UTF8
 std::basic_string<my_char_t> Scroller(const std::basic_string<my_char_t> &str, size_t &pos, size_t width);
 
 #ifdef HAVE_CURL_CURL_H

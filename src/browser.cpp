@@ -88,7 +88,7 @@ void Browser::SwitchTo()
 std::basic_string<my_char_t> Browser::Title()
 {
 	std::basic_string<my_char_t> result = U("Browse: ");
-	result += Scroller(itsBrowsedDir, itsScrollBeginning, w->GetWidth()-result.length()-(Config.new_design ? 2 : VolumeState.length()));
+	result += Scroller(TO_WSTRING(itsBrowsedDir), itsScrollBeginning, w->GetWidth()-result.length()-(Config.new_design ? 2 : VolumeState.length()));
 	return result;
 }
 
