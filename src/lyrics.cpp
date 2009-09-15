@@ -86,14 +86,8 @@ void Lyrics::Update()
 		myLyrics->Take();
 #	endif // HAVE_CURL_CURL_H && HAVE_PTHREAD_H
 	
-	if (!Reload)
-		return;
-	
-	const MPD::Song *s = myPlaylist->NowPlayingSong();
-	if (s && !s->GetArtist().empty() && !s->GetTitle().empty())
+	if (Reload)
 		SwitchTo();
-	else
-		Reload = 0;
 }
 
 void Lyrics::SwitchTo()
