@@ -225,32 +225,6 @@ void ParseArgv(int argc, char **argv)
 		exit(0);
 }
 
-bool CaseInsensitiveSorting::operator()(std::string a, std::string b)
-{
-	ToLower(a);
-	ToLower(b);
-	if (Config.ignore_leading_the)
-	{
-		RemoveTheWord(a);
-		RemoveTheWord(b);
-	}
-	return a < b;
-}
-
-bool CaseInsensitiveSorting::operator()(Song *sa, Song *sb)
-{
-	std::string a = sa->GetName();
-	std::string b = sb->GetName();
-	ToLower(a);
-	ToLower(b);
-	if (Config.ignore_leading_the)
-	{
-		RemoveTheWord(a);
-		RemoveTheWord(b);
-	}
-	return a < b;
-}
-
 bool CaseInsensitiveSorting::operator()(const Item &a, const Item &b)
 {
 	if (a.type == b.type)
@@ -258,9 +232,9 @@ bool CaseInsensitiveSorting::operator()(const Item &a, const Item &b)
 		switch (a.type)
 		{
 			case itDirectory:
-				return operator()(ExtractTopDirectory(a.name), ExtractTopDirectory(b.name));
+				return cmp(ExtractTopDirectory(a.name), ExtractTopDirectory(b.name)) < 0;
 			case itPlaylist:
-				return operator()(a.name, b.name);
+				return cmp(a.name, b.name) < 0;
 			case itSong:
 				return operator()(a.song, b.song);
 			default: // there's no other type, just silence compiler.
@@ -352,13 +326,6 @@ std::string GetLineValue(std::string &line, char a, char b, bool once)
 	for (i = result.find("\\\""); i != std::string::npos; i = result.find("\\\""))
 		result.replace(i, 2, "\"");
 	return result;
-}
-
-void RemoveTheWord(std::string &s)
-{
-	size_t the_pos = s.find("the ");
-	if (the_pos == 0 && the_pos != std::string::npos)
-		s = s.substr(4);
 }
 
 std::string ExtractTopDirectory(const std::string &s)

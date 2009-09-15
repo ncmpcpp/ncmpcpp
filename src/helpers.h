@@ -30,21 +30,57 @@
 bool ConnectToMPD();
 void ParseArgv(int, char **);
 
+class CaseInsensitiveStringComparison
+{
+	bool hasTheWord(const std::string &s)
+	{
+		return  (s.length() > 3)
+		&&	(s[0] == 't' || s[0] == 'T')
+		&&	(s[1] == 'h' || s[1] == 'H')
+		&&	(s[2] == 'e' || s[2] == 'E')
+		&&	(s[3] == ' ');
+	}
+	
+	public:
+		int operator()(const std::string &a, const std::string &b)
+		{
+			const char *i = a.c_str();
+			const char *j = b.c_str();
+			if (Config.ignore_leading_the)
+			{
+				if (hasTheWord(a))
+					i += 4;
+				if (hasTheWord(b))
+					j += 4;
+			}
+			int dist;
+			while (!(dist = tolower(*i)-tolower(*j)) && *j)
+				++i, ++j;
+			return dist;
+		}
+};
+
 class CaseInsensitiveSorting
 {
+	CaseInsensitiveStringComparison cmp;
+	
 	public:
-		bool operator()(std::string, std::string);
-		bool operator()(MPD::Song *, MPD::Song *);
-		bool operator()(const MPD::Item &, const MPD::Item &);
+		bool operator()(const std::string &a, const std::string &b)
+		{
+			return cmp(a, b) < 0;
+		}
+		
+		bool operator()(MPD::Song *a, MPD::Song *b)
+		{
+			return cmp(a->GetName(), b->GetName()) < 0;
+		}
 		
 		template <typename A, typename B> bool operator()(const std::pair<A, B> &a, const std::pair<A, B> &b)
 		{
-			std::string aa = a.first;
-			std::string bb = b.first;
-			ToLower(aa);
-			ToLower(bb);
-			return aa < bb;
+			return cmp(a.first, b.first) < 0;
 		}
+		
+		bool operator()(const MPD::Item &, const MPD::Item &);
 };
 
 template <typename A, typename B> std::string StringPairToString(const std::pair<A, B> &pair, void *)
@@ -115,11 +151,9 @@ std::string FindSharedDir(Menu<MPD::Song> *);
 std::string FindSharedDir(const MPD::SongList &);
 #endif // HAVE_TAGLIB_H
 std::string FindSharedDir(const std::string &, const std::string &);
+std::string ExtractTopDirectory(const std::string &);
 
 std::string GetLineValue(std::string &, char = '"', char = '"', bool = 0);
-
-void RemoveTheWord(std::string &s);
-std::string ExtractTopDirectory(const std::string &);
 
 #ifdef _UTF8
 std::basic_string<my_char_t> Scroller(const std::string &str, size_t &pos, size_t width);

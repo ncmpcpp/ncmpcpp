@@ -323,20 +323,10 @@ void Playlist::EnableHighlighting()
 
 bool Playlist::Sorting(MPD::Song *a, MPD::Song *b)
 {
+	CaseInsensitiveStringComparison cmp;
 	for (size_t i = 0; i < SortOptions; ++i)
-	{
-		std::string sa = (a->*(*SortDialog)[i].second)();
-		std::string sb = (b->*(*SortDialog)[i].second)();
-		ToLower(sa);
-		ToLower(sb);
-		if (Config.ignore_leading_the)
-		{
-			RemoveTheWord(sa);
-			RemoveTheWord(sb);
-		}
-		if (sa != sb)
-			return sa < sb;
-	}
+		if (int ret = cmp((a->*(*SortDialog)[i].second)(), (b->*(*SortDialog)[i].second)()))
+			return ret < 0;
 	return a->GetPosition() < b->GetPosition();
 }
 
