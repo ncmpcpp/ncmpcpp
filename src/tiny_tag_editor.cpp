@@ -101,70 +101,80 @@ void TinyTagEditor::EnterPressed()
 		{
 			Statusbar() << fmtBold << "Title: " << fmtBoldEnd;
 			s.SetTitle(wFooter->GetString(s.GetTitle()));
-			w->at(option) << fmtBold << "Title:" << fmtBoldEnd << ' ' << ShowTag(s.GetTitle());
+			w->at(option) << fmtBold << "Title:" << fmtBoldEnd << ' ';
+			ShowTag(w->at(option), s.GetTitle());
 			break;
 		}
 		case 2:
 		{
 			Statusbar() << fmtBold << "Artist: " << fmtBoldEnd;
 			s.SetArtist(wFooter->GetString(s.GetArtist()));
-			w->at(option) << fmtBold << "Artist:" << fmtBoldEnd << ' ' << ShowTag(s.GetArtist());
+			w->at(option) << fmtBold << "Artist:" << fmtBoldEnd << ' ';
+			ShowTag(w->at(option), s.GetArtist());
 			break;
 		}
 		case 3:
 		{
 			Statusbar() << fmtBold << "Album: " << fmtBoldEnd;
 			s.SetAlbum(wFooter->GetString(s.GetAlbum()));
-			w->at(option) << fmtBold << "Album:" << fmtBoldEnd << ' ' << ShowTag(s.GetAlbum());
+			w->at(option) << fmtBold << "Album:" << fmtBoldEnd << ' ';
+			ShowTag(w->at(option), s.GetAlbum());
 			break;
 		}
 		case 4:
 		{
 			Statusbar() << fmtBold << "Year: " << fmtBoldEnd;
 			s.SetDate(wFooter->GetString(s.GetDate()));
-			w->at(option) << fmtBold << "Year:" << fmtBoldEnd << ' ' << ShowTag(s.GetDate());
+			w->at(option) << fmtBold << "Year:" << fmtBoldEnd << ' ';
+			ShowTag(w->at(option), s.GetDate());
 			break;
 		}
 		case 5:
 		{
 			Statusbar() << fmtBold << "Track: " << fmtBoldEnd;
 			s.SetTrack(wFooter->GetString(s.GetTrack()));
-			w->at(option) << fmtBold << "Track:" << fmtBoldEnd << ' ' << ShowTag(s.GetTrack());
+			w->at(option) << fmtBold << "Track:" << fmtBoldEnd << ' ';
+			ShowTag(w->at(option), s.GetTrack());
 			break;
 		}
 		case 6:
 		{
 			Statusbar() << fmtBold << "Genre: " << fmtBoldEnd;
 			s.SetGenre(wFooter->GetString(s.GetGenre()));
-			w->at(option) << fmtBold << "Genre:" << fmtBoldEnd << ' ' << ShowTag(s.GetGenre());
+			w->at(option) << fmtBold << "Genre:" << fmtBoldEnd << ' ';
+			ShowTag(w->at(option), s.GetGenre());
 			break;
 		}
 		case 7:
 		{
 			Statusbar() << fmtBold << "Composer: " << fmtBoldEnd;
 			s.SetComposer(wFooter->GetString(s.GetComposer()));
-			w->at(option) << fmtBold << "Composer:" << fmtBoldEnd << ' ' << ShowTag(s.GetComposer());
+			w->at(option) << fmtBold << "Composer:" << fmtBoldEnd << ' ';
+			ShowTag(w->at(option), s.GetComposer());
 			break;
 		}
 		case 8:
 		{
 			Statusbar() << fmtBold << "Performer: " << fmtBoldEnd;
 			s.SetPerformer(wFooter->GetString(s.GetPerformer()));
-			w->at(option) << fmtBold << "Performer:" << fmtBoldEnd << ' ' << ShowTag(s.GetPerformer());
+			w->at(option) << fmtBold << "Performer:" << fmtBoldEnd << ' ';
+			ShowTag(w->at(option), s.GetPerformer());
 			break;
 		}
 		case 9:
 		{
 			Statusbar() << fmtBold << "Disc: " << fmtBoldEnd;
 			s.SetDisc(wFooter->GetString(s.GetDisc()));
-			w->at(option) << fmtBold << "Disc:" << fmtBoldEnd << ' ' << ShowTag(s.GetDisc());
+			w->at(option) << fmtBold << "Disc:" << fmtBoldEnd << ' ';
+			ShowTag(w->at(option), s.GetDisc());
 			break;
 		}
 		case 10:
 		{
 			Statusbar() << fmtBold << "Comment: " << fmtBoldEnd;
 			s.SetComment(wFooter->GetString(s.GetComment()));
-			w->at(option) << fmtBold << "Comment:" << fmtBoldEnd << ' ' << ShowTag(s.GetComment());
+			w->at(option) << fmtBold << "Comment:" << fmtBoldEnd << ' ';
+			ShowTag(w->at(option), s.GetComment());
 			break;
 		}
 		case 12:
@@ -278,22 +288,34 @@ bool TinyTagEditor::GetTags()
 	w->Highlight(8);
 	
 	w->at(0) << fmtBold << Config.color1 << "Song name: " << fmtBoldEnd << Config.color2 << s.GetName() << clEnd;
-	w->at(1) << fmtBold << Config.color1 << "Location in DB: " << fmtBoldEnd << Config.color2 << ShowTag(s.GetDirectory()) << clEnd;
+	w->at(1) << fmtBold << Config.color1 << "Location in DB: " << fmtBoldEnd << Config.color2;
+	ShowTag(w->at(1), s.GetDirectory());
+	w->at(1) << clEnd;
 	w->at(3) << fmtBold << Config.color1 << "Length: " << fmtBoldEnd << Config.color2 << s.GetLength() << clEnd;
 	w->at(4) << fmtBold << Config.color1 << "Bitrate: " << fmtBoldEnd << Config.color2 << f.audioProperties()->bitrate() << " kbps" << clEnd;
 	w->at(5) << fmtBold << Config.color1 << "Sample rate: " << fmtBoldEnd << Config.color2 << f.audioProperties()->sampleRate() << " Hz" << clEnd;
 	w->at(6) << fmtBold << Config.color1 << "Channels: " << fmtBoldEnd << Config.color2 << (f.audioProperties()->channels() == 1 ? "Mono" : "Stereo") << clDefault;
 	
-	w->at(8) << fmtBold << "Title:" << fmtBoldEnd << ' ' << ShowTag(s.GetTitle());
-	w->at(9) << fmtBold << "Artist:" << fmtBoldEnd << ' ' << ShowTag(s.GetArtist());
-	w->at(10) << fmtBold << "Album:" << fmtBoldEnd << ' ' << ShowTag(s.GetAlbum());
-	w->at(11) << fmtBold << "Year:" << fmtBoldEnd << ' ' << ShowTag(s.GetDate());
-	w->at(12) << fmtBold << "Track:" << fmtBoldEnd << ' ' << ShowTag(s.GetTrack());
-	w->at(13) << fmtBold << "Genre:" << fmtBoldEnd << ' ' << ShowTag(s.GetGenre());
-	w->at(14) << fmtBold << "Composer:" << fmtBoldEnd << ' ' << ShowTag(s.GetComposer());
-	w->at(15) << fmtBold << "Performer:" << fmtBoldEnd << ' ' << ShowTag(s.GetPerformer());
-	w->at(16) << fmtBold << "Disc:" << fmtBoldEnd << ' ' << ShowTag(s.GetDisc());
-	w->at(17) << fmtBold << "Comment:" << fmtBoldEnd << ' ' << ShowTag(s.GetComment());
+	w->at(8) << fmtBold << "Title:" << fmtBoldEnd << ' ';
+	ShowTag(w->at(8), s.GetTitle());
+	w->at(9) << fmtBold << "Artist:" << fmtBoldEnd << ' ';
+	ShowTag(w->at(9), s.GetArtist());
+	w->at(10) << fmtBold << "Album:" << fmtBoldEnd << ' ';
+	ShowTag(w->at(10), s.GetAlbum());
+	w->at(11) << fmtBold << "Year:" << fmtBoldEnd << ' ';
+	ShowTag(w->at(11), s.GetDate());
+	w->at(12) << fmtBold << "Track:" << fmtBoldEnd << ' ';
+	ShowTag(w->at(12), s.GetTrack());
+	w->at(13) << fmtBold << "Genre:" << fmtBoldEnd << ' ';
+	ShowTag(w->at(13), s.GetGenre());
+	w->at(14) << fmtBold << "Composer:" << fmtBoldEnd << ' ';
+	ShowTag(w->at(14), s.GetComposer());
+	w->at(15) << fmtBold << "Performer:" << fmtBoldEnd << ' ';
+	ShowTag(w->at(15), s.GetPerformer());
+	w->at(16) << fmtBold << "Disc:" << fmtBoldEnd << ' ';
+	ShowTag(w->at(16), s.GetDisc());
+	w->at(17) << fmtBold << "Comment:" << fmtBoldEnd << ' ';
+	ShowTag(w->at(17), s.GetComment());
 
 	w->at(19) << fmtBold << "Filename:" << fmtBoldEnd << ' ' << s.GetName();
 

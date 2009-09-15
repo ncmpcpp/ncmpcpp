@@ -242,34 +242,34 @@ void Display::Tags(const MPD::Song &s, void *data, Menu<MPD::Song> *menu)
 	switch (static_cast<Menu<std::string> *>(data)->Choice())
 	{
 		case 0:
-			*menu << ShowTag(s.GetTitle());
+			ShowTag(*menu, s.GetTitle());
 			return;
 		case 1:
-			*menu << ShowTag(s.GetArtist());
+			ShowTag(*menu, s.GetArtist());
 			return;
 		case 2:
-			*menu << ShowTag(s.GetAlbum());
+			ShowTag(*menu, s.GetAlbum());
 			return;
 		case 3:
-			*menu << ShowTag(s.GetDate());
+			ShowTag(*menu, s.GetDate());
 			return;
 		case 4:
-			*menu << ShowTag(s.GetTrack());
+			ShowTag(*menu, s.GetTrack());
 			return;
 		case 5:
-			*menu << ShowTag(s.GetGenre());
+			ShowTag(*menu, s.GetGenre());
 			return;
 		case 6:
-			*menu << ShowTag(s.GetComposer());
+			ShowTag(*menu, s.GetComposer());
 			return;
 		case 7:
-			*menu << ShowTag(s.GetPerformer());
+			ShowTag(*menu, s.GetPerformer());
 			return;
 		case 8:
-			*menu << ShowTag(s.GetDisc());
+			ShowTag(*menu, s.GetDisc());
 			return;
 		case 9:
-			*menu << ShowTag(s.GetComment());
+			ShowTag(*menu, s.GetComment());
 			return;
 		case 11:
 			if (s.GetNewName().empty())

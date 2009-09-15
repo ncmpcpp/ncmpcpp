@@ -345,7 +345,9 @@ void Info::PrepareSong(MPD::Song &s)
 #	endif // HAVE_TAGLIB_H
 	
 	*w << fmtBold << Config.color1 << "Filename: " << fmtBoldEnd << Config.color2 << s.GetName() << "\n" << clEnd;
-	*w << fmtBold << "Directory: " << fmtBoldEnd << Config.color2 << ShowTag(s.GetDirectory()) << "\n\n" << clEnd;
+	*w << fmtBold << "Directory: " << fmtBoldEnd << Config.color2;
+	ShowTag(*w, s.GetDirectory());
+	*w << "\n\n" << clEnd;
 	*w << fmtBold << "Length: " << fmtBoldEnd << Config.color2 << s.GetLength() << "\n" << clEnd;
 #	ifdef HAVE_TAGLIB_H
 	if (!f.isNull())
@@ -357,29 +359,25 @@ void Info::PrepareSong(MPD::Song &s)
 #	endif // HAVE_TAGLIB_H
 	*w << clDefault;
 	
-	*w << fmtBold << "\nTitle: " << fmtBoldEnd << ShowTag(s.GetTitle());
-	*w << fmtBold << "\nArtist: " << fmtBoldEnd << ShowTag(s.GetArtist());
-	*w << fmtBold << "\nAlbum: " << fmtBoldEnd << ShowTag(s.GetAlbum());
-	*w << fmtBold << "\nYear: " << fmtBoldEnd << ShowTag(s.GetDate());
-	*w << fmtBold << "\nTrack: " << fmtBoldEnd << ShowTag(s.GetTrack());
-	*w << fmtBold << "\nGenre: " << fmtBoldEnd << ShowTag(s.GetGenre());
-	*w << fmtBold << "\nComposer: " << fmtBoldEnd << ShowTag(s.GetComposer());
-	*w << fmtBold << "\nPerformer: " << fmtBoldEnd << ShowTag(s.GetPerformer());
-	*w << fmtBold << "\nDisc: " << fmtBoldEnd << ShowTag(s.GetDisc());
-	*w << fmtBold << "\nComment: " << fmtBoldEnd << ShowTag(s.GetComment());
-}
-
-basic_buffer<my_char_t> Info::ShowTag(const std::string &tag)
-{
-#	ifdef _UTF8
-	WBuffer result;
-	if (tag.empty())
-		result << Config.empty_tags_color << ToWString(Config.empty_tag) << clEnd;
-	else
-		result << ToWString(tag);
-	return result;
-#	else
-	return ::ShowTag(tag);
-#	endif
+	*w << fmtBold << "\nTitle: " << fmtBoldEnd;
+	ShowTag(*w, s.GetTitle());
+	*w << fmtBold << "\nArtist: " << fmtBoldEnd;
+	ShowTag(*w, s.GetArtist());
+	*w << fmtBold << "\nAlbum: " << fmtBoldEnd;
+	ShowTag(*w, s.GetAlbum());
+	*w << fmtBold << "\nYear: " << fmtBoldEnd;
+	ShowTag(*w, s.GetDate());
+	*w << fmtBold << "\nTrack: " << fmtBoldEnd;
+	ShowTag(*w, s.GetTrack());
+	*w << fmtBold << "\nGenre: " << fmtBoldEnd;
+	ShowTag(*w, s.GetGenre());
+	*w << fmtBold << "\nComposer: " << fmtBoldEnd;
+	ShowTag(*w, s.GetComposer());
+	*w << fmtBold << "\nPerformer: " << fmtBoldEnd;
+	ShowTag(*w, s.GetPerformer());
+	*w << fmtBold << "\nDisc: " << fmtBoldEnd;
+	ShowTag(*w, s.GetDisc());
+	*w << fmtBold << "\nComment: " << fmtBoldEnd;
+	ShowTag(*w, s.GetComment());
 }
 

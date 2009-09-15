@@ -367,16 +367,6 @@ std::string ExtractTopDirectory(const std::string &s)
 	return slash != std::string::npos ? s.substr(++slash) : s;
 }
 
-Buffer ShowTag(const std::string &tag)
-{
-	Buffer result;
-	if (tag.empty())
-		result << Config.empty_tags_color << Config.empty_tag << clEnd;
-	else
-		result << tag;
-	return result;
-}
-
 #ifdef _UTF8
 std::basic_string<my_char_t> Scroller(const std::string &str, size_t &pos, size_t width)
 {

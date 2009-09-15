@@ -95,6 +95,14 @@ template <typename C> void String2Buffer(const std::basic_string<C> &s, basic_bu
 	}
 }
 
+template <typename T> void ShowTag(T &buf, const std::string &tag)
+{
+	if (tag.empty())
+		buf << Config.empty_tags_color << Config.empty_tag << clEnd;
+	else
+		buf << tag;
+}
+
 inline bool Keypressed(int in, const int *key)
 {
 	return in == key[0] || in == key[1];
@@ -112,8 +120,6 @@ std::string GetLineValue(std::string &, char = '"', char = '"', bool = 0);
 
 void RemoveTheWord(std::string &s);
 std::string ExtractTopDirectory(const std::string &);
-
-Buffer ShowTag(const std::string &);
 
 #ifdef _UTF8
 std::basic_string<my_char_t> Scroller(const std::string &str, size_t &pos, size_t width);

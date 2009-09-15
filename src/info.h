@@ -58,7 +58,6 @@ class Info : public Screen<Scrollpad>
 		std::string itsFilenamePath;
 		
 		void PrepareSong(MPD::Song &);
-		static basic_buffer<my_char_t> ShowTag(const std::string &);
 		
 #		ifdef HAVE_CURL_CURL_H
 		static void *PrepareArtist(void *);

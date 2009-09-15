@@ -103,70 +103,80 @@ void SearchEngine::EnterPressed()
 		{
 			Statusbar() << fmtBold << "Any: " << fmtBoldEnd;
 			itsPattern.Any(wFooter->GetString(itsPattern.Any()));
-			*w->Current().first << fmtBold << "Any:      " << fmtBoldEnd << ' ' << ShowTag(itsPattern.Any());
+			*w->Current().first << fmtBold << "Any:      " << fmtBoldEnd << ' ';
+			ShowTag(*w->Current().first, itsPattern.Any());
 			break;
 		}
 		case 1:
 		{
 			Statusbar() << fmtBold << "Artist: " << fmtBoldEnd;
 			itsPattern.SetArtist(wFooter->GetString(itsPattern.GetArtist()));
-			*w->Current().first << fmtBold << "Artist:   " << fmtBoldEnd << ' ' << ShowTag(itsPattern.GetArtist());
+			*w->Current().first << fmtBold << "Artist:   " << fmtBoldEnd << ' ';
+			ShowTag(*w->Current().first, itsPattern.GetArtist());
 			break;
 		}
 		case 2:
 		{
 			Statusbar() << fmtBold << "Title: " << fmtBoldEnd;
 			itsPattern.SetTitle(wFooter->GetString(itsPattern.GetTitle()));
-			*w->Current().first << fmtBold << "Title:    " << fmtBoldEnd << ' ' << ShowTag(itsPattern.GetTitle());
+			*w->Current().first << fmtBold << "Title:    " << fmtBoldEnd << ' ';
+			ShowTag(*w->Current().first, itsPattern.GetTitle());
 			break;
 		}
 		case 3:
 		{
 			Statusbar() << fmtBold << "Album: " << fmtBoldEnd;
 			itsPattern.SetAlbum(wFooter->GetString(itsPattern.GetAlbum()));
-			*w->Current().first << fmtBold << "Album:    " << fmtBoldEnd << ' ' << ShowTag(itsPattern.GetAlbum());
+			*w->Current().first << fmtBold << "Album:    " << fmtBoldEnd << ' ';
+			ShowTag(*w->Current().first, itsPattern.GetAlbum());
 			break;
 		}
 		case 4:
 		{
 			Statusbar() << fmtBold << "Filename: " << fmtBoldEnd;
 			itsPattern.SetFile(wFooter->GetString(itsPattern.GetFile()));
-			*w->Current().first << fmtBold << "Filename: " << fmtBoldEnd << ' ' << ShowTag(itsPattern.GetFile());
+			*w->Current().first << fmtBold << "Filename: " << fmtBoldEnd << ' ';
+			ShowTag(*w->Current().first, itsPattern.GetFile());
 			break;
 		}
 		case 5:
 		{
 			Statusbar() << fmtBold << "Composer: " << fmtBoldEnd;
 			itsPattern.SetComposer(wFooter->GetString(itsPattern.GetComposer()));
-			*w->Current().first << fmtBold << "Composer: " << fmtBoldEnd << ' ' << ShowTag(itsPattern.GetComposer());
+			*w->Current().first << fmtBold << "Composer: " << fmtBoldEnd << ' ';
+			ShowTag(*w->Current().first, itsPattern.GetComposer());
 			break;
 		}
 		case 6:
 		{
 			Statusbar() << fmtBold << "Performer: " << fmtBoldEnd;
 			itsPattern.SetPerformer(wFooter->GetString(itsPattern.GetPerformer()));
-			*w->Current().first << fmtBold << "Performer:" << fmtBoldEnd << ' ' << ShowTag(itsPattern.GetPerformer());
+			*w->Current().first << fmtBold << "Performer:" << fmtBoldEnd << ' ';
+			ShowTag(*w->Current().first, itsPattern.GetPerformer());
 			break;
 		}
 		case 7:
 		{
 			Statusbar() << fmtBold << "Genre: " << fmtBoldEnd;
 			itsPattern.SetGenre(wFooter->GetString(itsPattern.GetGenre()));
-			*w->Current().first << fmtBold << "Genre:    " << fmtBoldEnd << ' ' << ShowTag(itsPattern.GetGenre());
+			*w->Current().first << fmtBold << "Genre:    " << fmtBoldEnd << ' ';
+			ShowTag(*w->Current().first, itsPattern.GetGenre());
 			break;
 		}
 		case 8:
 		{
 			Statusbar() << fmtBold << "Year: " << fmtBoldEnd;
 			itsPattern.SetDate(wFooter->GetString(itsPattern.GetDate()));
-			*w->Current().first << fmtBold << "Year:     " << fmtBoldEnd << ' ' << ShowTag(itsPattern.GetDate());
+			*w->Current().first << fmtBold << "Year:     " << fmtBoldEnd << ' ';
+			ShowTag(*w->Current().first, itsPattern.GetDate());
 			break;
 		}
 		case 9:
 		{
 			Statusbar() << fmtBold << "Comment: " << fmtBoldEnd;
 			itsPattern.SetComment(wFooter->GetString(itsPattern.GetComment()));
-			*w->Current().first << fmtBold << "Comment:  " << fmtBoldEnd << ' ' << ShowTag(itsPattern.GetComment());
+			*w->Current().first << fmtBold << "Comment:  " << fmtBoldEnd << ' ';
+			ShowTag(*w->Current().first, itsPattern.GetComment());
 			break;
 		}
 		case 11:
@@ -344,16 +354,35 @@ void SearchEngine::Prepare()
 		catch (List::InvalidItem) { }
 	}
 	
-	*w->at(0).first << fmtBold << "Any:      " << fmtBoldEnd << ' ' << ShowTag(itsPattern.Any());
-	*w->at(1).first << fmtBold << "Artist:   " << fmtBoldEnd << ' ' << ShowTag(itsPattern.GetArtist());
-	*w->at(2).first << fmtBold << "Title:    " << fmtBoldEnd << ' ' << ShowTag(itsPattern.GetTitle());
-	*w->at(3).first << fmtBold << "Album:    " << fmtBoldEnd << ' ' << ShowTag(itsPattern.GetAlbum());
-	*w->at(4).first << fmtBold << "Filename: " << fmtBoldEnd << ' ' << ShowTag(itsPattern.GetName());
-	*w->at(5).first << fmtBold << "Composer: " << fmtBoldEnd << ' ' << ShowTag(itsPattern.GetComposer());
-	*w->at(6).first << fmtBold << "Performer:" << fmtBoldEnd << ' ' << ShowTag(itsPattern.GetPerformer());
-	*w->at(7).first << fmtBold << "Genre:    " << fmtBoldEnd << ' ' << ShowTag(itsPattern.GetGenre());
-	*w->at(8).first << fmtBold << "Year:     " << fmtBoldEnd << ' ' << ShowTag(itsPattern.GetDate());
-	*w->at(9).first << fmtBold << "Comment:  " << fmtBoldEnd << ' ' << ShowTag(itsPattern.GetComment());
+	*w->at(0).first << fmtBold << "Any:      " << fmtBoldEnd << ' ';
+	ShowTag(*w->at(0).first, itsPattern.Any());
+	
+	*w->at(1).first << fmtBold << "Artist:   " << fmtBoldEnd << ' ';
+	ShowTag(*w->at(1).first, itsPattern.GetArtist());
+	
+	*w->at(2).first << fmtBold << "Title:    " << fmtBoldEnd << ' ';
+	ShowTag(*w->at(2).first, itsPattern.GetTitle());
+	
+	*w->at(3).first << fmtBold << "Album:    " << fmtBoldEnd << ' ';
+	ShowTag(*w->at(3).first, itsPattern.GetAlbum());
+	
+	*w->at(4).first << fmtBold << "Filename: " << fmtBoldEnd << ' ';
+	ShowTag(*w->at(4).first, itsPattern.GetName());
+	
+	*w->at(5).first << fmtBold << "Composer: " << fmtBoldEnd << ' ';
+	ShowTag(*w->at(5).first, itsPattern.GetComposer());
+	
+	*w->at(6).first << fmtBold << "Performer:" << fmtBoldEnd << ' ';
+	ShowTag(*w->at(6).first, itsPattern.GetPerformer());
+	
+	*w->at(7).first << fmtBold << "Genre:    " << fmtBoldEnd << ' ';
+	ShowTag(*w->at(7).first, itsPattern.GetGenre());
+	
+	*w->at(8).first << fmtBold << "Year:     " << fmtBoldEnd << ' ';
+	ShowTag(*w->at(8).first, itsPattern.GetDate());
+	
+	*w->at(9).first << fmtBold << "Comment:  " << fmtBoldEnd << ' ';
+	ShowTag(*w->at(9).first, itsPattern.GetComment());
 	
 	*w->at(11).first << fmtBold << "Search in:" << fmtBoldEnd << ' ' << (Config.search_in_db ? "Database" : "Current playlist");
 	*w->at(12).first << fmtBold << "Search mode:" << fmtBoldEnd << ' ' << (MatchToPattern ? NormalMode : StrictMode);
