@@ -204,11 +204,11 @@ void EscapeHtml(std::string &s)
 		s.replace(i, j-i, "");
 	}
 	for (size_t i = s.find("&#039;"); i != std::string::npos; i = s.find("&#039;"))
-		s.replace(i, 6, "'");
+		s.replace(i, static_strlen("&#039;"), "'");
 	for (size_t i = s.find("&quot;"); i != std::string::npos; i = s.find("&quot;"))
-		s.replace(i, 6, "\"");
+		s.replace(i, static_strlen("&quot;"), "\"");
 	for (size_t i = s.find("&amp;"); i != std::string::npos; i = s.find("&amp;"))
-		s.replace(i, 5, "&");
+		s.replace(i, static_strlen("&amp;"), "&");
 	for (size_t i = 0; i < s.length(); ++i)
 	{
 		if (erase)

@@ -134,7 +134,7 @@ void Info::GetArtist()
 #		ifdef HAVE_PTHREAD_H
 		if (Downloader && !ArtistReady)
 		{
-			ShowMessage("Artist's info is being downloaded...");
+			ShowMessage("Artist info is being downloaded...");
 			return;
 		}
 		else if (ArtistReady)
@@ -263,7 +263,7 @@ void *Info::PrepareArtist(void *screen_void_ptr)
 		result[i] = '.';
 		size_t j = result.find("</name>");
 		result[j] = '.';
-		i += 6;
+		i += static_strlen("<name>");
 		similar.push_back(result.substr(i, j-i));
 		EscapeHtml(similar.back());
 	}
@@ -273,11 +273,11 @@ void *Info::PrepareArtist(void *screen_void_ptr)
 		result[i] = '.';
 		size_t j = result.find("</url>");
 		result[j] = '.';
-		i += 5;
+		i += static_strlen("<url>");
 		urls.push_back(result.substr(i, j-i));
 	}
 	
-	a = result.find("<content>")+9;
+	a = result.find("<content>")+static_strlen("<content>");
 	b = result.find("</content>");
 	
 	if (a == b)
@@ -287,8 +287,8 @@ void *Info::PrepareArtist(void *screen_void_ptr)
 	}
 	else
 	{
-		a += 9; // for <![CDATA[
-		b -= 3; // for ]]>
+		a += static_strlen("<![CDATA[");
+		b -= static_strlen("]]>");
 		result = result.substr(a, b-a);
 	}
 	

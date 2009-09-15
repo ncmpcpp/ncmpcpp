@@ -26,6 +26,11 @@
 #include "window.h"
 #include "song.h"
 
+template <size_t N> inline size_t static_strlen(const char (&)[N])
+{
+	return N-1;
+}
+
 void ToLower(std::string &);
 
 int StrToInt(const std::string &);

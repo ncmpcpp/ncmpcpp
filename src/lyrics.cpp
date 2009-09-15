@@ -209,8 +209,8 @@ void *Lyrics::Get(void *screen_void_ptr)
 	char *c_title = curl_easy_escape(0, title.c_str(), title.length());
 	
 	std::string url = my_lyrics->url;
-	url.replace(url.find("%artist%"), 8, c_artist);
-	url.replace(url.find("%title%"), 7, c_title);
+	url.replace(url.find("%artist%"), static_strlen("%artist%"), c_artist);
+	url.replace(url.find("%title%"), static_strlen("%title%"), c_title);
 	
 	CURLcode code;
 	pthread_mutex_lock(&CurlLock);
@@ -247,9 +247,9 @@ void *Lyrics::Get(void *screen_void_ptr)
 	}
 	
 	for (size_t i = result.find("&lt;"); i != std::string::npos; i = result.find("&lt;"))
-		result.replace(i, 4, "<");
+		result.replace(i, static_strlen("&lt;"), "<");
 	for (size_t i = result.find("&gt;"); i != std::string::npos; i = result.find("&gt;"))
-		result.replace(i, 4, ">");
+		result.replace(i, static_strlen("&gt;"), ">");
 	
 	EscapeHtml(result);
 	Trim(result);
