@@ -21,6 +21,7 @@
 #include <cstring>
 #include <algorithm>
 #include <iostream>
+#include <stdexcept>
 
 #include "charset.h"
 #include "global.h"
@@ -269,27 +270,26 @@ std::string FindSharedDir(Menu<Song> *menu)
 {
 	SongList list;
 	for (size_t i = 0; i < menu->Size(); ++i)
-		list.push_back(&menu->at(i));
+		list.push_back(&(*menu)[i]);
 	return FindSharedDir(list);
 }
 
 std::string FindSharedDir(const SongList &v)
 {
-	std::string result;
-	if (!v.empty())
+	if (v.empty()) // this should never happen, but in case...
+		throw std::runtime_error("empty SongList passed to FindSharedDir(const SongList &)!");
+	size_t i = -1;
+	std::string first = v.front()->GetDirectory();
+	for (SongList::const_iterator it = ++v.begin(); it != v.end(); ++it)
 	{
-		result = v.front()->GetFile();
-		for (SongList::const_iterator it = v.begin()+1; it != v.end(); ++it)
-		{
-			int i = 1;
-			while (result.substr(0, i) == (*it)->GetFile().substr(0, i))
-				i++;
-			result = result.substr(0, i);
-		}
-		size_t slash = result.rfind("/");
-		result = slash != std::string::npos ? result.substr(0, slash) : "/";
+		size_t j = 0;
+		std::string dir = (*it)->GetDirectory();
+		size_t length = std::min(first.length(), dir.length());
+		while (!first.compare(j, 1, dir, j, 1) && j < length && j < i)
+			++j;
+		i = j;
 	}
-	return result;
+	return i ? first.substr(0, i) : "/";
 }
 #endif // HAVE_TAGLIB_H
 
@@ -297,13 +297,11 @@ std::string FindSharedDir(const std::string &one, const std::string &two)
 {
 	if (one == two)
 		return one;
-	std::string result;
-	size_t i = 1;
-	while (one.substr(0, i) == two.substr(0, i))
-		i++;
-	result = one.substr(0, i);
-	i = result.rfind("/");
-	return i != std::string::npos ? result.substr(0, i) : "/";
+	size_t i = 0;
+	while (!one.compare(i, 1, two, i, 1))
+		++i;
+	i = one.rfind("/", i);
+	return i != std::string::npos ? one.substr(0, i) : "/";
 }
 
 std::string GetLineValue(std::string &line, char a, char b, bool once)
