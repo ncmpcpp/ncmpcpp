@@ -115,9 +115,7 @@ namespace NCurses
 				itsBuffer << obj;
 				return *this;
 			}
-			
 #			ifdef _UTF8
-			bool SetFormatting(short vb, const std::string &s, short ve, bool for_each = 1) { return SetFormatting(vb, ToWString(s), ve, for_each); }
 			Scrollpad &operator<<(const std::string &s);
 #			endif // _UTF8
 			
