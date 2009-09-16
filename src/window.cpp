@@ -309,7 +309,7 @@ void Window::Refresh()
 	prefresh(itsWindow, 0, 0, itsStartY, itsStartX, itsStartY+itsHeight-1, itsStartX+itsWidth-1);
 }
 
-void Window::Clear(GNUC_UNUSED bool refresh)
+void Window::Clear(bool refresh)
 {
 	werase(itsWindow);
 	if (refresh)
