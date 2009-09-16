@@ -26,28 +26,93 @@
 
 namespace NCurses
 {
+	/// Scrollpad is specialized window that can hold large portion of text and
+	/// supports scrolling if the amount of it is bigger than the window area.
+	///
 	class Scrollpad: public Window
 	{
 		public:
-			Scrollpad(size_t, size_t, size_t, size_t, const std::string &, Color, Border);
-			Scrollpad(const Scrollpad &);
-			virtual ~Scrollpad() { }
+			/// Constructs an empty scrollpad with given parameters
+			/// @param startx X position of left upper corner of constructed window
+			/// @param starty Y position of left upper corner of constructed window
+			/// @param width width of constructed window
+			/// @param height height of constructed window
+			/// @param title title of constructed window
+			/// @param color base color of constructed window
+			/// @param border border of constructed window
+			///
+			Scrollpad(size_t startx, size_t starty, size_t width, size_t height,
+				  const std::string &title, Color color, Border border);
 			
+			/// Copies the scrollpad
+			/// @param s copied scrollpad
+			///
+			Scrollpad(const Scrollpad &s);
+			
+			/// Prints the text stored in internal buffer to window. Note that
+			/// all changes that has been made for text stored in scrollpad won't
+			/// be visible until one invokes this function
+			///
 			void Flush();
-			bool SetFormatting(short, const std::basic_string<my_char_t> &, short, bool for_each = 1);
+			
+			/// Searches for given string in text and sets format/color at the
+			/// beginning and end of it using val_b and val_e flags accordingly
+			/// @param val_b flag set at the beginning of found occurence of string
+			/// @param s string that function seaches for
+			/// @param val_e flag set at the end of found occurence of string
+			/// @param for_each indicates whether function searches through whole text and sets
+			/// given format for all occurences of given string or stops after first occurence
+			/// @return true if at least one occurence of the string was found, false otherwise
+			///
+			bool SetFormatting(short val_b, const std::basic_string<my_char_t> &s,
+					   short val_e, bool for_each = 1);
+			
+			/// Removes all format flags and colors from stored text
+			///
 			void ForgetFormatting();
+			
+			/// Removes all format flags and colors that was applied
+			/// by the most recent call to SetFormatting() function
+			/// @see SetFormatting()
+			///
 			void RemoveFormatting();
+			
+			/// @return text stored in internal buffer
+			///
 			std::basic_string<my_char_t> Content() { return itsBuffer.Str(); }
 			
+			/// Refreshes the window
+			/// @see Window::Refresh()
+			///
 			virtual void Refresh();
-			virtual void Scroll(Where);
 			
-			virtual void Resize(size_t, size_t);
-			virtual void Clear(bool = 1);
+			/// Scrolls by given amount of lines
+			/// @param where indicates where exactly one wants to go
+			/// @see Window::Scroll()
+			///
+			virtual void Scroll(Where where);
 			
-			template <typename T> Scrollpad &operator<<(const T &t)
+			/// Resizes the window
+			/// @param new_width new window's width
+			/// @param new_height new window's height
+			/// @see Window::Resize()
+			///
+			virtual void Resize(size_t new_width, size_t new_height);
+			
+			/// Cleares the content of scrollpad
+			/// @param clear_screen indicates whether window has to be cleared imediately or not
+			/// @see Window::Clear()
+			///
+			virtual void Clear(bool clear_screen = 1);
+			
+			/// Template function that redirects all data passed
+			/// to the scrollpad window to its internal buffer
+			/// @param obj any object that has ostream &operator<<() defined
+			/// @return reference to itself
+			///
+			template <typename T> Scrollpad &operator<<(const T &obj)
 			{
-				itsBuffer << t;
+				itsBuffer << obj;
 				return *this;
 			}
 			
