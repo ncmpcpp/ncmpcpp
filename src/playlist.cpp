@@ -177,6 +177,7 @@ void Playlist::EnterPressed()
 			return;
 		}
 		
+		ShowMessage("Sorting playlist...");
 		MPD::SongList playlist, cmp;
 		
 		playlist.reserve(Items->Size());
@@ -195,7 +196,6 @@ void Playlist::EnterPressed()
 		}
 		
 		BlockUpdate = 1;
-		ShowMessage("Sorting playlist...");
 		Mpd.StartCommandsList();
 		do
 		{
