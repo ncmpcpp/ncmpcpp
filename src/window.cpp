@@ -118,27 +118,28 @@ Window::Window(size_t startx,
 	keypad(itsWindow, 1);
 }
 
-Window::Window(const Window &w)
+Window::Window(const Window &w) : itsWindow(dupwin(w.itsWindow)),
+				itsWinBorder(dupwin(w.itsWinBorder)),
+				itsGetStringHelper(w.itsGetStringHelper),
+				itsStartX(w.itsStartX),
+				itsStartY(w.itsStartY),
+				itsWidth(w.itsWidth),
+				itsHeight(w.itsHeight),
+				itsWindowTimeout(w.itsWindowTimeout),
+				itsX(w.itsX),
+				itsY(w.itsY),
+				itsTitle(w.itsTitle),
+				itsColors(w.itsColors),
+				itsColor(w.itsColor),
+				itsBgColor(w.itsBgColor),
+				itsBaseColor(w.itsBaseColor),
+				itsBaseBgColor(w.itsBaseBgColor),
+				itsBorder(w.itsBorder),
+				itsHistory(w.itsHistory),
+				itsBoldCounter(w.itsBoldCounter),
+				itsReverseCounter(w.itsReverseCounter),
+				itsAltCharsetCounter(w.itsAltCharsetCounter)
 {
-	itsWindow = dupwin(w.itsWindow);
-	itsWinBorder = dupwin(w.itsWinBorder);
-	itsGetStringHelper = w.itsGetStringHelper;
-	itsWindowTimeout = w.itsWindowTimeout;
-	itsX = w.itsX;
-	itsY = w.itsY;
-	itsStartX = w.itsStartX;
-	itsStartY = w.itsStartY;
-	itsWidth = w.itsWidth;
-	itsHeight = w.itsHeight;
-	itsTitle = w.itsTitle;
-	itsColors = w.itsColors;
-	itsColor = w.itsColor;
-	itsBaseColor = w.itsBaseColor;
-	itsBgColor = w.itsBgColor;
-	itsBaseBgColor = w.itsBaseBgColor;
-	itsBorder = w.itsBorder;
-	SetColor(itsColor, itsBgColor);
-	keypad(itsWindow, 1);
 }
 
 Window::~Window()
