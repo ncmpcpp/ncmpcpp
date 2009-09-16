@@ -201,12 +201,6 @@ void Scrollpad::Clear(bool clear_screen)
 		Refresh();
 }
 
-Scrollpad &Scrollpad::operator<<(std::ostream &(*os)(std::ostream&))
-{
-	itsBuffer << os;
-	return *this;
-}
-
 #ifdef _UTF8
 Scrollpad &Scrollpad::operator<<(const std::string &s)
 {
