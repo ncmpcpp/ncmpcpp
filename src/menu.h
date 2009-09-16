@@ -712,12 +712,7 @@ template <typename T> bool NCurses::Menu<T>::Goto(size_t y)
 {
 	if (!itsOptionsPtr->at(itsBeginning+y) || itsOptionsPtr->at(itsBeginning+y)->isStatic)
 		return false;
-	size_t cur_pos = itsHighlight-itsBeginning;
-	while (itsHighlight-itsBeginning != int(y) && (y < cur_pos || size_t(itsHighlight) < itsOptions.size()-1))
-	{
-		Scroll(y < cur_pos ? wUp : wDown);
-		y < cur_pos ? cur_pos-- : cur_pos++;
-	}
+	itsHighlight = itsBeginning+y;
 	return true;
 }
 
