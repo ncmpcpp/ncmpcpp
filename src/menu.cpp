@@ -47,5 +47,14 @@ bool List::Deselect()
 
 template <> std::string Menu<std::string>::GetOption(size_t pos)
 {
-	return itsOptionsPtr->at(pos) ? (*itsOptionsPtr)[pos]->Item : "";
+	if (itsOptionsPtr->at(pos))
+	{
+		if (itsGetStringFunction)
+			return itsGetStringFunction((*itsOptionsPtr)[pos]->Item, itsGetStringFunctionUserData);
+		else
+			return (*itsOptionsPtr)[pos]->Item;
+	}
+	else
+		return "";
 }
+
