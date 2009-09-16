@@ -696,7 +696,10 @@ void Window::Scroll(Where where)
 Window &Window::operator<<(Colors colors)
 {
 	if (colors.fg == clEnd || colors.bg == clEnd)
+	{
+		*this << clEnd;
 		return *this;
+	}
 	itsColors.push(colors);
 	SetColor(colors.fg, colors.bg);
 	return *this;
