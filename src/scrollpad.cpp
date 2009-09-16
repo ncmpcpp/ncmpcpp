@@ -215,8 +215,3 @@ Scrollpad &Scrollpad::operator<<(const std::string &s)
 }
 #endif // _UTF8
 
-Scrollpad *Scrollpad::EmptyClone() const
-{
-	return new Scrollpad(GetStartX(), GetStartY(), GetWidth(), GetHeight(), itsTitle, itsBaseColor, itsBorder);
-}
-

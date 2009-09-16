@@ -827,11 +827,6 @@ Window &Window::operator<<(size_t s)
 	return *this;
 }
 
-Window * Window::EmptyClone() const
-{
-	return new Window(GetStartX(), GetStartY(), GetWidth(), GetHeight(), itsTitle, itsBaseColor, itsBorder);
-}
-
 std::string ToString(const std::wstring &ws)
 {
 	std::string result;

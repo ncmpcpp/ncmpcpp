@@ -58,9 +58,6 @@ namespace NCurses
 			Scrollpad &operator<<(const std::string &s);
 #			endif // _UTF8
 			
-			virtual Scrollpad *Clone() const { return new Scrollpad(*this); }
-			virtual Scrollpad *EmptyClone() const;
-			
 		protected:
 			virtual void Recreate();
 			

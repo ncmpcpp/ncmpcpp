@@ -179,9 +179,6 @@ namespace NCurses
 			const T &at(size_t i) const;
 			const T &operator[](size_t i) const;
 			T &operator[](size_t i);
-			
-			virtual Menu<T> *Clone() const { return new Menu<T>(*this); }
-			virtual Menu<T> *EmptyClone() const;
 		
 		protected:
 			void ClearFiltered();
@@ -795,11 +792,6 @@ template <typename T> T &NCurses::Menu<T>::operator[](size_t i)
 	if (!(*itsOptionsPtr)[i])
 		throw InvalidItem();
 	return (*itsOptionsPtr)[i]->Item;
-}
-
-template <typename T> NCurses::Menu<T> *NCurses::Menu<T>::EmptyClone() const
-{
-	return new NCurses::Menu<T>(GetStartX(), GetStartY(), GetWidth(), GetHeight(), itsTitle, itsBaseColor, itsBorder);
 }
 
 #endif

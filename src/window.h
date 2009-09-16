@@ -434,9 +434,6 @@ namespace NCurses
 			///
 			Window &operator<<(const std::wstring &ws);
 			
-			virtual Window *Clone() const { return new Window(*this); }
-			virtual Window *EmptyClone() const;
-			
 			/// Fallback for Length() for wide strings used if unicode support is disabled
 			/// @param s string that real length has to be measured
 			/// @return standard std::string::length() result since it's only fallback
