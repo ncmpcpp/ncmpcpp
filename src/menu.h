@@ -29,48 +29,133 @@
 
 namespace NCurses
 {
+	/// List class is an interface for Menu class
+	///
 	class List
 	{
 		public:
 			
+			/// Exception class, thrown by various functions
+			/// that return references to items on the list
+			/// if requested item is separator
+			/// @see Menu::Back()
+			/// @see Menu::Current()
+			/// @see Menu::at()
+			/// @see Menu::operator[]
+			///
 			class InvalidItem { };
 			
-			List() { }
-			virtual ~List() { }
+			/// @see Menu::Select()
+			///
+			virtual void Select(int pos, bool state) = 0;
 			
-			virtual void Select(int, bool) = 0;
-			virtual void Static(int, bool) = 0;
+			/// @see Menu::Static()
+			///
+			virtual void Static(int pos, bool state) = 0;
+			
+			/// @see Menu::Empty()
+			///
 			virtual bool Empty() const = 0;
-			virtual bool isSelected(int = -1) const = 0;
-			virtual bool isStatic(int = -1) const = 0;
+			
+			/// @see Menu::isSelected()
+			///
+			virtual bool isSelected(int pos = -1) const = 0;
+			
+			/// @see Menu::isStatic()
+			///
+			virtual bool isStatic(int pos = -1) const = 0;
+			
+			/// @see Menu::hasSelected()
+			///
 			virtual bool hasSelected() const = 0;
-			virtual void GetSelected(std::vector<size_t> &) const = 0;
-			virtual void Highlight(size_t) = 0;
+			
+			/// @see Menu::GetSelected()
+			///
+			virtual void GetSelected(std::vector<size_t> &v) const = 0;
+			
+			/// @see Menu::Highlight()
+			///
+			virtual void Highlight(size_t pos) = 0;
+			
+			/// @see Menu::Size()
+			///
 			virtual size_t Size() const = 0;
+			
+			/// @see Menu::Choice()
+			///
 			virtual size_t Choice() const = 0;
+			
+			/// @see Menu::RealChoice()
+			///
 			virtual size_t RealChoice() const = 0;
 			
+			/// Selects current position
+			///
 			void SelectCurrent();
-			void ReverseSelection(size_t = 0);
+			
+			/// Reverses selection of all items in list
+			/// @param beginning beginning of range that has to be reversed
+			///
+			void ReverseSelection(size_t beginning = 0);
+			
+			/// Deselects all items in list
+			/// @return true if there was at least one selected items, false otherwise
+			///
 			bool Deselect();
 			
-			virtual bool Search(const std::string &, size_t = 0, int = 0) = 0;
+			/// @see Menu::Search()
+			///
+			virtual bool Search(const std::string &constraint, size_t beginning = 0, int flags = 0) = 0;
+			
+			/// @see Menu::GetSearchConstraint()
+			///
 			virtual const std::string &GetSearchConstraint() = 0;
-			virtual void NextFound(bool) = 0;
-			virtual void PrevFound(bool) = 0;
 			
-			virtual void ApplyFilter(const std::string &, size_t = 0, int = 0) = 0;
+			/// @see Menu::NextFound()
+			///
+			virtual void NextFound(bool wrap) = 0;
+			
+			/// @see Menu::PrevFound()
+			///
+			virtual void PrevFound(bool wrap) = 0;
+			
+			/// @see Menu::ApplyFilter()
+			///
+			virtual void ApplyFilter(const std::string &filter, size_t beginning = 0, int flags = 0) = 0;
+			
+			/// @see Menu::GetFilter()
+			///
 			virtual const std::string &GetFilter() = 0;
-			virtual std::string GetOption(size_t) = 0;
 			
+			/// @see Menu::GetOption()
+			///
+			virtual std::string GetOption(size_t pos) = 0;
+			
+			/// @see Menu::isFiltered()
+			///
 			virtual bool isFiltered() = 0;
 	};
 	
+	/// This template class is generic menu, that has holds
+	/// any values that are std::vector compatible.
+	///
 	template <typename T> class Menu : public Window, public List
 	{
-		typedef void (*ItemDisplayer) (const T &, void *, Menu<T> *);
-		typedef std::string (*GetStringFunction) (const T &, void *);
+		/// Function helper prototype used to display each option on the screen.
+		/// If not set by SetItemDisplayer(), menu won't display anything.
+		/// @see SetItemDisplayer()
+		///
+		typedef void (*ItemDisplayer)(const T &, void *, Menu<T> *);
 		
+		/// Function helper prototype used for converting items to strings.
+		/// If not set by SetGetStringFunction(), searching and filtering
+		/// won't work (note that Menu<std::string> doesn't need this)
+		/// @see SetGetStringFunction()
+		///
+		typedef std::string (*GetStringFunction)(const T &, void *);
+		
+		/// Struct that holds each item in the list and its attributes
+		///
 		struct Option
 		{
 			Option() : isBold(0), isSelected(0), isStatic(0) { }
@@ -83,6 +168,9 @@ namespace NCurses
 			bool isStatic;
 		};
 		
+		/// Functor that wraps around the functor passed to Sort()
+		/// to fit to internal container structure
+		///
 		template <typename Comparison> class InternalSorting
 		{
 			Comparison cmp;
@@ -98,61 +186,260 @@ namespace NCurses
 		typedef typename std::vector<Option *>::const_iterator option_const_iterator;
 		
 		public:
-			Menu(size_t, size_t, size_t, size_t, const std::string &, Color, Border);
-			Menu(const Menu &);
+			
+			/// Constructs an empty menu with given parameters
+			/// @param startx X position of left upper corner of constructed menu
+			/// @param starty Y position of left upper corner of constructed menu
+			/// @param width width of constructed menu
+			/// @param height height of constructed menu
+			/// @param title title of constructed menu
+			/// @param color base color of constructed menu
+			/// @param border border of constructed menu
+			///
+			Menu(size_t startx, size_t starty, size_t width, size_t height,
+			     const std::string &title, Color color, Border border);
+			
+			/// Copies the menu
+			/// @param m copied menu
+			///
+			Menu(const Menu &m);
+			
+			/// Destroys the object and frees memory
+			///
 			virtual ~Menu();
 			
+			/// Sets helper function that is responsible for displaying items
+			/// @param ptr function pointer that matches the ItemDisplayer prototype
+			///
 			void SetItemDisplayer(ItemDisplayer ptr) { itsItemDisplayer = ptr; }
+			
+			/// Sets optional user data, that is passed to
+			/// ItemDisplayer function each time it's invoked
+			/// @param data void pointer to userdata
+			///
 			void SetItemDisplayerUserData(void *data) { itsItemDisplayerUserdata = data; }
 			
+			/// Sets helper function that is responsible for converting items to strings
+			/// @param f function pointer that matches the GetStringFunction prototype
+			///
 			void SetGetStringFunction(GetStringFunction f) { itsGetStringFunction = f; }
+			
+			/// Sets optional user data, that is passed to
+			/// GetStringFunction function each time it's invoked
+			/// @param data void pointer to user data
+			///
 			void SetGetStringFunctionUserData(void *data) { itsGetStringFunctionUserData = data; }
 			
+			/// Reserves the size for internal container (this just calls std::vector::reserve())
+			/// @param size requested size
+			///
 			void Reserve(size_t size);
+			
+			/// Resizes the list to given size (adequate to std::vector::resize())
+			/// @param size requested size
+			///
 			void ResizeList(size_t size);
+			
+			/// Adds new option to list
+			/// @param item object that has to be added
+			/// @param is_bold defines the initial state of bold attribute
+			/// @param is_static defines the initial state of static attribute
+			///
 			void AddOption(const T &item, bool is_bold = 0, bool is_static = 0);
+			
+			/// Adds separator to list
+			///
 			void AddSeparator();
+			
+			/// Inserts new option to list at given position
+			/// @param pos initial position of inserted item
+			/// @param item object that has to be inserted
+			/// @param is_bold defines the initial state of bold attribute
+			/// @param is_static defines the initial state of static attribute
+			///
 			void InsertOption(size_t pos, const T &Item, bool is_bold = 0, bool is_static = 0);
+			
+			/// Inserts separator to list at given position
+			/// @param pos initial position of inserted separator
+			///
 			void InsertSeparator(size_t pos);
+			
+			/// Deletes item from given position
+			/// @param pos given position of item to be deleted
+			///
 			void DeleteOption(size_t pos);
+			
+			/// Converts the option into separator
+			/// @param pos position of item to be converted
+			///
 			void IntoSeparator(size_t pos);
+			
+			/// Swaps the content of two items
+			/// @param one position of first item
+			/// @param two position of second item
+			///
 			void Swap(size_t one, size_t two);
+			
+			/// Moves requested item from one position to another
+			/// @param from the position of item that has to be moved
+			/// @param to the position that indicates where the object has to be moved
+			///
 			void Move(size_t from, size_t to);
+			
+			/// Moves the highlighted position to the given line of window
+			/// @param y Y position of menu window to be highlighted
+			/// @return true if the position is reachable, false otherwise
+			///
 			bool Goto(size_t y);
 			
-			bool isBold(int id = -1);
-			void BoldOption(int index, bool bold);
+			/// Checks if the given position has bold attribute set.
+			/// @param pos position to be checked. -1 = currently highlighted position
+			/// @return true if the bold is set, false otherwise
+			///
+			bool isBold(int pos = -1);
 			
-			virtual void Select(int id, bool value);
-			virtual void Static(int id, bool value);
-			virtual bool isSelected(int id = -1) const;
-			virtual bool isStatic(int id = -1) const;
+			/// Sets bols attribute for given position
+			/// @param pos position of item to be bolded/unbolded
+			/// @param state state of bold attribute
+			///
+			void BoldOption(int pos, bool state);
+			
+			/// Selects/deselects given position
+			/// @param pos position in list
+			/// @param state state of selection
+			///
+			virtual void Select(int pos, bool state);
+			
+			/// Makes given position static/active.
+			/// Static positions cannot be highlighted.
+			/// @param pos position in list
+			/// @param state state of activity
+			///
+			virtual void Static(int pos, bool state);
+			
+			/// Checks if given position is selected
+			/// @param pos position to be checked, -1 checks currently highlighted position
+			/// @return true if position is selected, false otherwise
+			///
+			virtual bool isSelected(int pos = -1) const;
+			
+			/// Checks whether given position is static or active
+			/// @param pos position to be checked, -1 checks currently highlighted position
+			/// @return true if position is static, false otherwise
+			///
+			virtual bool isStatic(int pos = -1) const;
+			
+			/// Checks whether list contains selected positions
+			/// @return true if it contains them, false otherwise
+			///
 			virtual bool hasSelected() const;
+			
+			/// Gets positions of items that are selected
+			/// @param v vector to be filled with selected positions numbers
+			///
 			virtual void GetSelected(std::vector<size_t> &v) const;
-			virtual void Highlight(size_t);
+			
+			/// Highlights given position
+			/// @param pos position to be highlighted
+			///
+			virtual void Highlight(size_t pos);
+			
+			/// @return size of the list
+			///
 			virtual size_t Size() const;
+			
+			/// @return currently highlighted position
+			///
 			virtual size_t Choice() const;
+			
+			/// @return real current positions, i.e it doesn't
+			/// count positions that are static or separators
+			///
 			virtual size_t RealChoice() const;
 			
+			/// Searches the list for a given contraint. It uses GetStringFunction to convert stored items
+			/// into strings and then performs pattern matching. Note that this supports regular expressions.
+			/// @param constraint a search constraint to be used
+			/// @param beginning beginning of range that has to be searched through
+			/// @param flags regex flags (REG_EXTENDED, REG_ICASE, REG_NOSUB, REG_NEWLINE)
+			/// @return true if at least one item matched the given pattern, false otherwise
+			///
 			virtual bool Search(const std::string &constraint, size_t beginning = 0, int flags = 0);
+			
+			/// @return const reference to currently used search constraint
+			///
 			virtual const std::string &GetSearchConstraint() { return itsSearchConstraint; }
+			
+			/// Moves current position in the list to the next found one
+			/// @param wrap if true, this function will go to the first
+			/// found pos after the last one, otherwise it'll do nothing.
+			///
 			virtual void NextFound(bool wrap);
+			
+			/// Moves current position in the list to the previous found one
+			/// @param wrap if true, this function will go to the last
+			/// found pos after the first one, otherwise it'll do nothing.
+			///
 			virtual void PrevFound(bool wrap);
 			
+			/// Filters the list, showing only the items that matches the pattern. It uses
+			/// GetStringFunction to convert stored items into strings and then performs
+			/// pattern matching. Note that this supports regular expressions.
+			/// @param filter a pattern to be used in pattern matching
+			/// @param beginning beginning of range that has to be filtered
+			/// @param flags regex flags (REG_EXTENDED, REG_ICASE, REG_NOSUB, REG_NEWLINE)
+			///
 			virtual void ApplyFilter(const std::string &filter, size_t beginning = 0, int flags = 0);
+			
+			/// @return const reference to currently used filter
+			///
 			virtual const std::string &GetFilter();
+			
+			/// Converts given position in list to string using GetStringFunction
+			/// if specified and an empty string otherwise
+			/// @param pos position to be converted
+			/// @return item converted to string
+			/// @see SetItemDisplayer()
+			///
 			virtual std::string GetOption(size_t pos);
 			
+			/// @return true if list is currently filtered, false otherwise
+			///
 			virtual bool isFiltered() { return itsOptionsPtr == &itsFilteredOptions; }
 			
+			/// Turns off filtering
+			///
 			void ShowAll() { itsOptionsPtr = &itsOptions; }
+			
+			/// Turns on filtering
+			///
 			void ShowFiltered() { itsOptionsPtr = &itsFilteredOptions; }
 			
+			/// Refreshes the menu window
+			/// @see Window::Refresh()
+			///
 			virtual void Refresh();
-			virtual void Scroll(Where where);
-			virtual void Reset();
-			virtual void Clear(bool clrscr = 1);
 			
+			/// Scrolls by given amount of lines
+			/// @param where indicated where exactly one wants to go
+			/// @see Window::Scroll()
+			///
+			virtual void Scroll(Where where);
+			
+			/// Cleares all options, used filters etc. It doesn't reset highlighted position though.
+			/// @param clear_screen indicates whether window has to be cleared imediately or not
+			/// @see Window::Clear()
+			/// @see Reset()
+			///
+			virtual void Clear(bool clear_screen = 1);
+			
+			/// Sets the highlighted position to 0
+			///
+			void Reset();
+			
+			/// Sorts all items using Comparison object with defined operator()
+			/// @param beginning beginning of range that has to be sorted
+			///
 			template <typename Comparison> void Sort(size_t beginning = 0)
 			{
 				if (itsOptions.empty())
@@ -162,25 +449,87 @@ namespace NCurses
 					ApplyFilter(itsFilter);
 			}
 			
+			/// Sets prefix, that is put before each selected item to indicate its selection
+			/// Note that the passed variable is not deleted along with menu object.
+			/// @param b pointer to buffer that contains the prefix
+			///
 			void SetSelectPrefix(Buffer *b) { itsSelectedPrefix = b; }
+			
+			/// Sets suffix, that is put after each selected item to indicate its selection
+			/// Note that the passed variable is not deleted along with menu object.
+			/// @param b pointer to buffer that contains the suffix
+			///
 			void SetSelectSuffix(Buffer *b) { itsSelectedSuffix = b; }
 			
-			void HighlightColor(Color col) { itsHighlightColor = col; }
-			void Highlighting(bool hl) { highlightEnabled = hl; }
-			void CyclicScrolling(bool cs) { useCyclicScrolling = cs; }
+			/// Sets custom color of highlighted position
+			/// @param col custom color
+			///
+			void HighlightColor(Color color) { itsHighlightColor = color; }
 			
+			/// Turns on/off highlighting
+			/// @param state state of hihglighting
+			///
+			void Highlighting(bool state) { highlightEnabled = state; }
+			
+			/// Turns on/off cyclic scrolling
+			/// @param state state of cyclic scrolling
+			///
+			void CyclicScrolling(bool state) { useCyclicScrolling = state; }
+			
+			/// Checks if list is empty
+			/// @return true if list is empty, false otherwise
+			///
 			virtual bool Empty() const { return itsOptionsPtr->empty(); }
 			
+			/// @return reference to last item on the list
+			/// @throw List::InvalidItem if requested item is separator
+			///
 			T &Back();
+			
+			/// @return const reference to last item on the list
+			/// @throw List::InvalidItem if requested item is separator
+			///
 			const T &Back() const;
+			
+			/// @return reference to curently highlighted object
+			/// @throw List::InvalidItem if requested item is separator
+			///
 			T &Current();
+			
+			/// @return const reference to curently highlighted object
+			/// @throw List::InvalidItem if requested item is separator
+			///
 			const T &Current() const;
-			T &at(size_t i);
-			const T &at(size_t i) const;
-			const T &operator[](size_t i) const;
-			T &operator[](size_t i);
+			
+			/// @param pos requested position
+			/// @return reference to item at given position
+			/// @throw std::out_of_range if given position is out of range
+			/// @throw List::InvalidItem if requested item is separator
+			///
+			T &at(size_t pos);
+			
+			/// @param pos requested position
+			/// @return const reference to item at given position
+			/// @throw std::out_of_range if given position is out of range
+			/// @throw List::InvalidItem if requested item is separator
+			///
+			const T &at(size_t pos) const;
+			
+			/// @param pos requested position
+			/// @return const reference to item at given position
+			/// @throw List::InvalidItem if requested item is separator
+			///
+			const T &operator[](size_t pos) const;
+			
+			/// @param pos requested position
+			/// @return const reference to item at given position
+			/// @throw List::InvalidItem if requested item is separator
+			///
+			T &operator[](size_t pos);
 		
 		protected:
+			/// Clears filter, filtered data etc.
+			///
 			void ClearFiltered();
 			
 			ItemDisplayer itsItemDisplayer;
@@ -208,6 +557,9 @@ namespace NCurses
 			Buffer *itsSelectedSuffix;
 	};
 	
+	/// Specialization of Menu<T>::GetOption for T = std::string, it's obvious
+	/// that if strings are stored, we don't need extra function to convert
+	/// them to strings by default
 	template <> std::string Menu<std::string>::GetOption(size_t pos);
 }
 
@@ -329,11 +681,11 @@ template <typename T> void NCurses::Menu<T>::IntoSeparator(size_t pos)
 	(*itsOptionsPtr)[pos] = 0;
 }
 
-template <typename T> void NCurses::Menu<T>::BoldOption(int index, bool bold)
+template <typename T> void NCurses::Menu<T>::BoldOption(int pos, bool state)
 {
-	if (!itsOptionsPtr->at(index))
+	if (!itsOptionsPtr->at(pos))
 		return;
-	(*itsOptionsPtr)[index]->isBold = bold;
+	(*itsOptionsPtr)[pos]->isBold = state;
 }
 
 template <typename T> void NCurses::Menu<T>::Swap(size_t one, size_t two)
@@ -562,7 +914,7 @@ template <typename T> void NCurses::Menu<T>::ClearFiltered()
 	itsOptionsPtr = &itsOptions;
 }
 
-template <typename T> void NCurses::Menu<T>::Clear(bool clrscr)
+template <typename T> void NCurses::Menu<T>::Clear(bool clear_screen)
 {
 	for (option_iterator it = itsOptions.begin(); it != itsOptions.end(); ++it)
 		delete *it;
@@ -571,46 +923,46 @@ template <typename T> void NCurses::Menu<T>::Clear(bool clrscr)
 	itsFilter.clear();
 	ClearFiltered();
 	itsOptionsPtr = &itsOptions;
-	if (clrscr)
+	if (clear_screen)
 		Window::Clear();
 }
 
-template <typename T> bool NCurses::Menu<T>::isBold(int id)
+template <typename T> bool NCurses::Menu<T>::isBold(int pos)
 {
-	id = id == -1 ? itsHighlight : id;
-	if (!itsOptionsPtr->at(id))
+	pos = pos == -1 ? itsHighlight : pos;
+	if (!itsOptionsPtr->at(pos))
 		return 0;
-	return (*itsOptionsPtr)[id]->isBold;
+	return (*itsOptionsPtr)[pos]->isBold;
 }
 
-template <typename T> void NCurses::Menu<T>::Select(int id, bool value)
+template <typename T> void NCurses::Menu<T>::Select(int pos, bool state)
 {
-	if (!itsOptionsPtr->at(id))
+	if (!itsOptionsPtr->at(pos))
 		return;
-	(*itsOptionsPtr)[id]->isSelected = value;
+	(*itsOptionsPtr)[pos]->isSelected = state;
 }
 
-template <typename T> void NCurses::Menu<T>::Static(int id, bool value)
+template <typename T> void NCurses::Menu<T>::Static(int pos, bool state)
 {
-	if (!itsOptionsPtr->at(id))
+	if (!itsOptionsPtr->at(pos))
 		return;
-	(*itsOptionsPtr)[id]->isStatic = value;
+	(*itsOptionsPtr)[pos]->isStatic = state;
 }
 
-template <typename T> bool NCurses::Menu<T>::isSelected(int id) const
+template <typename T> bool NCurses::Menu<T>::isSelected(int pos) const
 {
-	id = id == -1 ? itsHighlight : id;
-	if (!itsOptionsPtr->at(id))
+	pos = pos == -1 ? itsHighlight : pos;
+	if (!itsOptionsPtr->at(pos))
 		return 0;
-	return (*itsOptionsPtr)[id]->isSelected;
+	return (*itsOptionsPtr)[pos]->isSelected;
 }
 
-template <typename T> bool NCurses::Menu<T>::isStatic(int id) const
+template <typename T> bool NCurses::Menu<T>::isStatic(int pos) const
 {
-	id = id == -1 ? itsHighlight : id;
-	if (!itsOptionsPtr->at(id))
+	pos = pos == -1 ? itsHighlight : pos;
+	if (!itsOptionsPtr->at(pos))
 		return 1;
-	return (*itsOptionsPtr)[id]->isStatic;
+	return (*itsOptionsPtr)[pos]->isStatic;
 }
 
 template <typename T> bool NCurses::Menu<T>::hasSelected() const
@@ -766,32 +1118,32 @@ template <typename T> const T &NCurses::Menu<T>::Current() const
 	return (*itsOptionsPtr)[itsHighlight]->Item;
 }
 
-template <typename T> T &NCurses::Menu<T>::at(size_t i)
+template <typename T> T &NCurses::Menu<T>::at(size_t pos)
 {
-	if (!itsOptionsPtr->at(i))
+	if (!itsOptionsPtr->at(pos))
 		throw InvalidItem();
-	return (*itsOptionsPtr)[i]->Item;
+	return (*itsOptionsPtr)[pos]->Item;
 }
 
-template <typename T> const T &NCurses::Menu<T>::at(size_t i) const
+template <typename T> const T &NCurses::Menu<T>::at(size_t pos) const
 {
-	if (!itsOptions->at(i))
+	if (!itsOptions->at(pos))
 		throw InvalidItem();
-	return (*itsOptionsPtr)[i]->Item;
+	return (*itsOptionsPtr)[pos]->Item;
 }
 
-template <typename T> const T &NCurses::Menu<T>::operator[](size_t i) const
+template <typename T> const T &NCurses::Menu<T>::operator[](size_t pos) const
 {
-	if (!(*itsOptionsPtr)[i])
+	if (!(*itsOptionsPtr)[pos])
 		throw InvalidItem();
-	return (*itsOptionsPtr)[i]->Item;
+	return (*itsOptionsPtr)[pos]->Item;
 }
 
-template <typename T> T &NCurses::Menu<T>::operator[](size_t i)
+template <typename T> T &NCurses::Menu<T>::operator[](size_t pos)
 {
-	if (!(*itsOptionsPtr)[i])
+	if (!(*itsOptionsPtr)[pos])
 		throw InvalidItem();
-	return (*itsOptionsPtr)[i]->Item;
+	return (*itsOptionsPtr)[pos]->Item;
 }
 
 #endif
