@@ -62,21 +62,58 @@
 # define wcwidth(x) 1
 #endif
 
-std::string ToString(const std::wstring &);
-std::wstring ToWString(const std::string &);
+/// Converts wide string to narrow string
+/// @param ws wide string
+/// @return narrow string
+///
+std::string ToString(const std::wstring &ws);
 
+/// Converts narrow string to wide string
+/// @param s narrow string
+/// @return wide string
+///
+std::wstring ToWString(const std::string &s);
+
+/// NCurses namespace provides set of easy-to-use
+/// wrappers over original curses library
+///
 namespace NCurses
 {
+	/// Colors used by NCurses
+	///
 	enum Color { clDefault, clBlack, clRed, clGreen, clYellow, clBlue, clMagenta, clCyan, clWhite, clEnd };
+	
+	/// Format flags used by NCurses
+	///
 	enum Format { fmtNone = 100, fmtBold, fmtBoldEnd, fmtReverse, fmtReverseEnd, fmtAltCharset, fmtAltCharsetEnd };
+	
+	/// Available border colors for window
+	///
 	enum Border { brNone, brBlack, brRed, brGreen, brYellow, brBlue, brMagenta, brCyan, brWhite };
+	
+	/// This indicates how much the window has to be scrolled
+	///
 	enum Where { wUp, wDown, wPageUp, wPageDown, wHome, wEnd };
 	
+	/// Helper function that is invoked each time one will want
+	/// to obtain string from Window::GetString() function
+	/// @see Window::GetString()
+	///
 	typedef void (*GetStringHelper)(const std::wstring &);
 	
-	void InitScreen(const char *, bool);
+	/// Initializes curses screen and sets some additional attributes
+	/// @param window_title title of the window (has an effect only if pdcurses lib is used)
+	/// @param enable_colors enables colors
+	///
+	void InitScreen(const char *window_title, bool enable_colors);
+	
+	/// Destroys the screen
+	///
 	void DestroyScreen();
 	
+	/// Struct used to set color of both foreground and background of window
+	/// @see Window::operator<<()
+	///
 	struct Colors
 	{
 		Colors(Color one, Color two = clDefault) : fg(one), bg(two) { }
@@ -84,6 +121,9 @@ namespace NCurses
 		Color bg;
 	};
 	
+	/// Struct used for going to given coordinates
+	/// @see Window::operator<<()
+	///
 	struct XY
 	{
 		XY(int xx, int yy) : x(xx), y(yy) { }
@@ -91,120 +131,420 @@ namespace NCurses
 		int y;
 	};
 	
+	/// Main class of NCurses namespace, used as base for other specialized windows
+	///
 	class Window
 	{
 		public:
-			Window(size_t, size_t, size_t, size_t, const std::string &, Color, Border);
-			Window(const Window &);
+			/// Constructs an empty window with given parameters
+			/// @param startx X position of left upper corner of constructed window
+			/// @param starty Y position of left upper corner of constructed window
+			/// @param width width of constructed window
+			/// @param height height of constructed window
+			/// @param title title of constructed window
+			/// @param color base color of constructed window
+			/// @param border border of constructed window
+			///
+			Window(size_t startx, size_t starty, size_t width, size_t height,
+			       const std::string &title, Color color, Border border);
+			
+			/// Copies thw window
+			/// @param w copied window
+			///
+			Window(const Window &w);
+			
+			/// Destroys the window and frees memory
+			///
 			virtual ~Window();
 			
+			/// Allows for direct access to internal WINDOW pointer in case there
+			/// is no wrapper for a function from curses library one may want to use
+			/// @return internal WINDOW pointer
+			///
 			WINDOW *Raw() const { return itsWindow; }
 			
+			/// @return window's width
+			///
 			size_t GetWidth() const;
+			
+			/// @return window's height
+			///
 			size_t GetHeight() const;
+			
+			/// @return X position of left upper window's corner
+			///
 			size_t GetStartX() const;
+			
+			/// @return Y position of left upper window's corner
+			///
 			size_t GetStartY() const;
 			
+			/// @return window's title
+			///
 			const std::string &GetTitle() const;
-			Color GetColor() const;
-			Border GetBorder() const;
-			std::string GetString(const std::string &, size_t = -1, size_t = 0, bool = 0) const;
-			std::string GetString(size_t length = -1, size_t width = 0, bool encrypted = 0) const { return GetString("", length, width, encrypted); }
-			void GetXY(int &, int &);
-			void GotoXY(int, int);
-			int X() const;
-			int Y() const;
-			bool hasCoords(int &, int &);
 			
+			/// @return current window's color
+			///
+			Color GetColor() const;
+			
+			/// @return current window's border
+			///
+			Border GetBorder() const;
+			
+			/// Reads the string from standard input. Note that this is much more complex
+			/// function than getstr() from curses library. It allows for moving through
+			/// letters with arrows, supports scrolling if string's length is bigger than
+			/// given area, supports history of previous strings and each time it receives
+			/// an input from the keyboard or the timeout is reached, it calls helper function
+			/// (if it's set) that takes as an argument currently edited string.
+			/// @param base base string that has to be edited
+			/// @param length max length of string, unlimited by default
+			/// @param width width of area that entry field can take. if it's reached, string
+			/// will be scrolled. if value is 0, field will be from cursor position to the end
+			/// of current line wide.
+			/// @param encrypted if set to true, '*' characters will be displayed instead of
+			/// actual text.
+			/// @return edited string
+			///
+			/// @see SetGetStringHelper()
+			/// @see SetTimeout()
+			/// @see CreateHistory()
+			///
+			std::string GetString(const std::string &base, size_t length = -1,
+					      size_t width = 0, bool encrypted = 0) const;
+			
+			/// Wrapper for above function that doesn't take base string (it will be empty).
+			/// Taken parameters are the same as for above.
+			///
+			std::string GetString(size_t length = -1, size_t width = 0, bool encrypted = 0) const
+			{
+				return GetString("", length, width, encrypted);
+			}
+			
+			/// Gets present position of cursor's coordinates
+			/// @param x variable that will be set to current X position
+			/// @param y variable that will be set to current Y position
+			///
+			void GetXY(int &x, int &y);
+			
+			/// Moves cursor to given coordinates
+			/// @param x given X position
+			/// @param y given Y position
+			///
+			void GotoXY(int x, int y);
+			
+			/// @return last X position that was set with GetXY(). Note that it most
+			/// likely won't report correct position unless called after GetXY() and
+			/// before any function that can print anything to window.
+			/// @see GetXY()
+			///
+			int X() const;
+			
+			/// @return last Y position that was set with GetXY(). Since Y position
+			/// doesn't change so frequently as X does, it can be called (with some
+			/// caution) after something was printed to window and still may report
+			/// correct position, but if you're not sure, obtain Y pos with GetXY()
+			/// instead.
+			/// @see GetXY()
+			///
+			int Y() const;
+			
+			/// Used to indicate whether given coordinates of main screen lies within
+			/// window area or not and if they do, transform them into in-window coords.
+			/// Otherwise function doesn't modify its arguments.
+			/// @param x X position of main screen to be checked
+			/// @param y Y position of main screen to be checked
+			/// @return true if it transformed variables, false otherwise
+			///
+			bool hasCoords(int &x, int &y);
+			
+			/// Sets helper function used in GetString()
+			/// @param helper pointer to function that matches GetStringHelper prototype
+			/// @see GetString()
+			///
 			void SetGetStringHelper(GetStringHelper helper) { itsGetStringHelper = helper; }
-			void SetBaseColor(Color, Color = clDefault);
-			void SetBorder(Border);
-			void SetTimeout(int);
-			void SetTitle(const std::string &);
+			
+			/// Sets window's base color
+			/// @param fg foregound base color
+			/// @param bg background base color
+			///
+			void SetBaseColor(Color fg, Color bg = clDefault);
+			
+			/// Sets window's border
+			/// @param border new window's border
+			///
+			void SetBorder(Border border);
+			
+			/// Sets window's timeout
+			/// @param timeout window's timeout
+			///
+			void SetTimeout(int timeout);
+			
+			/// Sets window's title
+			/// @param new_title new title for window
+			///
+			void SetTitle(const std::string &new_title);
+			
+			/// Creates internal container that stores all previous
+			/// strings that were edited using this window.
+			///
 			void CreateHistory();
+			
+			/// Deletes container with all previous history entries
+			///
 			void DeleteHistory();
 			
-			void Hide(char = 32) const;
+			/// "Hides" the window by filling its area with given character
+			/// @param ch character to fill the area
+			/// @see Clear()
+			///
+			void Hide(char ch = 32) const;
 			
+			/// Refreshed whole window and its border
+			/// @see Refresh()
+			///
 			void Display();
+			
+			/// Refreshes whole window, but not the border
+			/// @see Display()
+			///
 			virtual void Refresh();
 			
-			virtual void MoveTo(size_t, size_t);
-			virtual void Resize(size_t, size_t);
-			virtual void Clear(bool = 1);
+			/// Moves the window to new coordinates
+			/// @param new_x new X position of left upper corner of window
+			/// @param new_y new Y position of left upper corner of window
+			///
+			virtual void MoveTo(size_t new_x, size_t new_y);
 			
-			void ReadKey(int &) const;
+			/// Resizes the window
+			/// @param new_width new window's width
+			/// @param new_height new window's height
+			///
+			virtual void Resize(size_t new_width, size_t new_height);
+			
+			/// Cleares the window
+			/// @param refresh indicates whether window has to be refreshed immediately or not
+			///
+			virtual void Clear(bool refresh = 1);
+			
+			/// Reads key from standard input and writes it into read_key variable
+			/// @param read_key variable for read key to be written into it
+			///
+			void ReadKey(int &read_key) const;
+			
+			/// Waits until user press a key.
+			///
 			void ReadKey() const;
 			
-			//void Write(bool, const char *, ...) const;
-			//void WriteXY(int, int, bool, const char *, ...) const;
+			/// Scrolls the window by amount of lines given in its parameter
+			/// @param where indicates how many lines it has to scroll
+			///
+			virtual void Scroll(Where where);
 			
-			void Scrollable(bool) const;
-			virtual void Scroll(Where);
+			/// Applies function of compatible prototype to internal WINDOW pointer
+			/// The mostly used function in this case seem to be wclrtoeol(), which
+			/// clears the window from current cursor position to the end of line.
+			/// Note that delwin() also matches that prototype, but I wouldn't
+			/// recommend anyone passing this pointer here ;)
+			/// @param f pointer to function to call with internal WINDOW pointer
+			/// @return reference to itself
+			///
+			Window &operator<<(int (*f)(WINDOW *));
 			
-			Window &operator<<(int (*)(WINDOW *));
-			Window &operator<<(Colors);
-			Window &operator<<(Color);
-			Window &operator<<(Format);
-			Window &operator<<(XY);
-			Window &operator<<(const char *);
-			Window &operator<<(char);
-			Window &operator<<(const wchar_t *);
-			Window &operator<<(wchar_t);
-			Window &operator<<(int);
-			Window &operator<<(double);
-			Window &operator<<(size_t);
+			/// Applies foreground and background colors to window
+			/// @param colors struct that holds new colors information
+			/// @return reference to itself
+			///
+			Window &operator<<(Colors colors);
 			
-			Window &operator<<(const std::string &);
-			Window &operator<<(const std::wstring &);
+			/// Applies foregound color to window. Note that colors applied
+			/// that way are stacked, i.e if you applied clRed, then clGreen
+			/// and clEnd, current color would be clRed. If you want to discard
+			/// all colors and fall back to base one, pass clDefault.
+			/// @param color new color value
+			/// @return reference to itself
+			///
+			Window &operator<<(Color color);
+			
+			/// Applies format flag to window. Note that these attributes are
+			/// also stacked, so if you applied fmtBold twice, to get rid of
+			/// it you have to pass fmtBoldEnd also twice.
+			/// @param format format flag
+			/// @return reference to itself
+			///
+			Window &operator<<(Format format);
+			
+			/// Moves current cursor position to given coordinates.
+			/// @param coords struct that holds information about new coordinations
+			/// @return reference to itself
+			///
+			Window &operator<<(XY coords);
+			
+			/// Prints string to window
+			/// @param s const pointer to char array to be printed
+			/// @return reference to itself
+			///
+			Window &operator<<(const char *s);
+			
+			/// Prints single character to window
+			/// @param c character to be printed
+			/// @return reference to itself
+			///
+			Window &operator<<(char c);
+			
+			/// Prints wide string to window
+			/// @param ws const pointer to wchar_t array to be printed
+			/// @return reference to itself
+			///
+			Window &operator<<(const wchar_t *ws);
+			
+			/// Prints single wide character to window
+			/// @param wc wide character to be printed
+			/// @return reference to itself
+			///
+			Window &operator<<(wchar_t wc);
+			
+			/// Prints int to window
+			/// @param i integer value to be printed
+			/// @return reference to itself
+			///
+			Window &operator<<(int i);
+			
+			/// Prints double to window
+			/// @param d double value to be printed
+			/// @return reference to itself
+			///
+			Window &operator<<(double d);
+			
+			/// Prints size_t to window
+			/// @param s size value to be printed
+			/// @return reference to itself
+			///
+			Window &operator<<(size_t s);
+			
+			/// Prints std::string to window
+			/// @param s string to be printed
+			/// @return reference to itself
+			///
+			Window &operator<<(const std::string &s);
+			
+			/// Prints std::wstring to window
+			/// @param ws wide string to be printed
+			/// @return reference to itself
+			///
+			Window &operator<<(const std::wstring &ws);
 			
 			virtual Window *Clone() const { return new Window(*this); }
 			virtual Window *EmptyClone() const;
 			
+			/// Fallback for Length() for wide strings used if unicode support is disabled
+			/// @param s string that real length has to be measured
+			/// @return standard std::string::length() result since it's only fallback
+			///
 			static size_t Length(const std::string &s) { return s.length(); }
-			static size_t Length(const std::wstring &);
+			
+			/// Measures real length of wide string (required if e.g. asian characters are used)
+			/// @param ws wide string that real length has to be measured
+			/// @return real length of wide string
+			///
+			static size_t Length(const std::wstring &ws);
 			
 		protected:
 			
+			/// Exception class that is thrown if constructed
+			/// window has size bigger than actual screen size.
+			///
 			class BadSize { };
 			
-			void Bold(bool) const;
-			void Reverse(bool) const;
-			void AltCharset(bool) const;
-			void SetColor(Color, Color = clDefault);
+			/// Sets state of bold attribute (internal use only)
+			/// @param bold_state state of bold attribute
+			///
+			void Bold(bool bold_state) const;
 			
+			/// Sets state of reverse attribute (internal use only)
+			/// @param reverse_state state of reverse attribute
+			///
+			void Reverse(bool reverse_state) const;
+			
+			/// Sets state of altcharset attribute (internal use only)
+			/// @param altcharset_state state of altcharset attribute
+			///
+			void AltCharset(bool altcharset_state) const;
+			
+			/// Sets colors of window (interal use only)
+			/// @param fg foregound color
+			/// @param bg background color
+			///
+			void SetColor(Color fg, Color bg = clDefault);
+			
+			/// Refreshes window's border
+			///
 			void ShowBorder() const;
-			void AdjustDimensions(size_t &, size_t &);
 			
+			/// Changes dimensions of window, called from Resize()
+			/// @param width new window's width
+			/// @param height new window's height
+			/// @see Resize()
+			///
+			void AdjustDimensions(size_t width, size_t height);
+			
+			/// Deletes old window and creates new. It's called by Resize(),
+			/// SetBorder() or SetTitle() since internally windows are
+			/// handled as curses pads and change in size requires to delete
+			/// them and create again, there is no way to change size of pad.
+			/// @see SetBorder()
+			/// @see SetTitle()
+			/// @see Resize()
+			///
 			virtual void Recreate();
 			
+			/// internal WINDOW pointers
 			WINDOW *itsWindow;
 			WINDOW *itsWinBorder;
 			
+			/// pointer to helper function used by GetString()
+			/// @see GetString()
+			///
 			GetStringHelper itsGetStringHelper;
 			
+			/// start points and dimensions
 			size_t itsStartX;
 			size_t itsStartY;
 			size_t itsWidth;
 			size_t itsHeight;
 			
+			/// window timeout
 			int itsWindowTimeout;
+			
+			/// temporary coordinates
+			/// @see X()
+			/// @see Y()
+			///
 			int itsX;
 			int itsY;
 			
+			/// window's title
 			std::string itsTitle;
+			
+			/// stack of colors
 			std::stack<Colors> itsColors;
 			
+			/// current colors
 			Color itsColor;
-			Color itsBaseColor;
 			Color itsBgColor;
+			
+			/// base colors
+			Color itsBaseColor;
 			Color itsBaseBgColor;
 			
+			/// current border
 			Border itsBorder;
 			
 		private:
+			/// pointer to container used as history
 			std::deque<std::wstring> *itsHistory;
 			
+			/// counters for format flags
 			int itsBoldCounter;
 			int itsReverseCounter;
 			int itsAltCharsetCounter;

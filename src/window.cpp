@@ -81,8 +81,8 @@ Window::Window(size_t startx,
 		itsY(0),
 		itsTitle(title),
 		itsColor(color),
-		itsBaseColor(color),
 		itsBgColor(clDefault),
+		itsBaseColor(color),
 		itsBaseBgColor(clDefault),
 		itsBorder(border),
 		itsHistory(0),
@@ -148,23 +148,23 @@ Window::~Window()
 	delete itsHistory;
 }
 
-void Window::SetColor(Color col, Color background)
+void Window::SetColor(Color fg, Color bg)
 {
-	if (col == clDefault)
-		col = itsBaseColor;
+	if (fg == clDefault)
+		fg = itsBaseColor;
 	
-	if (col != clDefault)
-		wattron(itsWindow, COLOR_PAIR(background*8+col));
+	if (fg != clDefault)
+		wattron(itsWindow, COLOR_PAIR(bg*8+fg));
 	else
 		wattroff(itsWindow, COLOR_PAIR(itsColor));
-	itsColor = col;
-	itsBgColor = background;
+	itsColor = fg;
+	itsBgColor = bg;
 }
 
-void Window::SetBaseColor(Color col, Color background)
+void Window::SetBaseColor(Color fg, Color bg)
 {
-	itsBaseColor = col;
-	itsBaseBgColor = background;
+	itsBaseColor = fg;
+	itsBaseBgColor = bg;
 }
 
 void Window::SetBorder(Border border)
@@ -197,25 +197,25 @@ void Window::SetBorder(Border border)
 	itsBorder = border;
 }
 
-void Window::SetTitle(const std::string &newtitle)
+void Window::SetTitle(const std::string &new_title)
 {
-	if (itsTitle == newtitle)
+	if (itsTitle == new_title)
 	{
 		return;
 	}
-	else if (!newtitle.empty() && itsTitle.empty())
+	else if (!new_title.empty() && itsTitle.empty())
 	{
 		itsStartY += 2;
 		itsHeight -= 2;
 		Recreate();
 	}
-	else if (newtitle.empty() && !itsTitle.empty())
+	else if (new_title.empty() && !itsTitle.empty())
 	{
 		itsStartY -= 2;
 		itsHeight += 2;
 		Recreate();
 	}
-	itsTitle = newtitle;
+	itsTitle = new_title;
 }
 
 void Window::CreateHistory()
@@ -239,10 +239,10 @@ void Window::Recreate()
 	keypad(itsWindow, 1);
 }
 
-void Window::MoveTo(size_t newx, size_t newy)
+void Window::MoveTo(size_t new_x, size_t new_y)
 {
-	itsStartX = newx;
-	itsStartY = newy;
+	itsStartX = new_x;
+	itsStartY = new_y;
 	if (itsBorder != brNone)
 	{
 		itsStartX++;
@@ -252,7 +252,7 @@ void Window::MoveTo(size_t newx, size_t newy)
 		itsStartY += 2;
 }
 
-void Window::AdjustDimensions(size_t &width, size_t &height)
+void Window::AdjustDimensions(size_t width, size_t height)
 {
 	if (itsBorder != brNone)
 	{
@@ -269,9 +269,9 @@ void Window::AdjustDimensions(size_t &width, size_t &height)
 	itsWidth = width;
 }
 
-void Window::Resize(size_t width, size_t height)
+void Window::Resize(size_t new_width, size_t new_height)
 {
-	AdjustDimensions(width, height);
+	AdjustDimensions(new_width, new_height);
 	Recreate();
 }
 
@@ -308,32 +308,33 @@ void Window::Refresh()
 	prefresh(itsWindow, 0, 0, itsStartY, itsStartX, itsStartY+itsHeight-1, itsStartX+itsWidth-1);
 }
 
-void Window::Clear(bool)
+void Window::Clear(GNUC_UNUSED bool refresh)
 {
 	werase(itsWindow);
-	Window::Refresh();
+	if (refresh)
+		Window::Refresh();
 }
 
-void Window::Hide(char x) const
+void Window::Hide(char ch) const
 {
 	for (size_t i = 0; i < GetHeight(); ++i)
-		mvhline(i+GetStartY(), GetStartX(), x, GetWidth());
+		mvhline(i+GetStartY(), GetStartX(), ch, GetWidth());
 	refresh();
 }
 
-void Window::Bold(bool bold) const
+void Window::Bold(bool bold_state) const
 {
-	(bold ? wattron : wattroff)(itsWindow, A_BOLD);
+	(bold_state ? wattron : wattroff)(itsWindow, A_BOLD);
 }
 
-void Window::Reverse(bool reverse) const
+void Window::Reverse(bool reverse_state) const
 {
-	(reverse ? wattron : wattroff)(itsWindow, A_REVERSE);
+	(reverse_state ? wattron : wattroff)(itsWindow, A_REVERSE);
 }
 
-void Window::AltCharset(bool alt) const
+void Window::AltCharset(bool altcharset_state) const
 {
-	(alt ? wattron : wattroff)(itsWindow, A_ALTCHARSET);
+	(altcharset_state ? wattron : wattroff)(itsWindow, A_ALTCHARSET);
 }
 
 void Window::SetTimeout(int timeout)
@@ -342,36 +343,15 @@ void Window::SetTimeout(int timeout)
 	wtimeout(itsWindow, timeout);
 }
 
-void Window::ReadKey(int &input) const
+void Window::ReadKey(int &read_key) const
 {
-	input = wgetch(itsWindow);
+	read_key = wgetch(itsWindow);
 }
 
 void Window::ReadKey() const
 {
 	wgetch(itsWindow);
 }
-
-/*void Window::Write(bool cte, const char *format, ...) const
-{
-	va_list list;
-	va_start(list, format);
-	vw_printw(itsWindow, format, list);
-	va_end(list);
-	if (cte)
-		wclrtoeol(itsWindow);
-}
-
-void Window::WriteXY(int x, int y, bool cte, const char *format, ...) const
-{
-	va_list list;
-	va_start(list, format);
-	wmove(itsWindow, y, x);
-	vw_printw(itsWindow, format, list);
-	va_end(list);
-	if (cte)
-		wclrtoeol(itsWindow);
-}*/
 
 std::string Window::GetString(const std::string &base, size_t length, size_t width, bool encrypted) const
 {
@@ -633,12 +613,6 @@ int Window::Y() const
 bool Window::hasCoords(int &x, int &y)
 {
 	return wmouse_trafo(itsWindow, &y, &x, 0);
-}
-
-void Window::Scrollable(bool scrollable) const
-{
-	scrollok(itsWindow, scrollable);
-	idlok(itsWindow, scrollable);
 }
 
 size_t Window::GetWidth() const
