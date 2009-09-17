@@ -253,6 +253,7 @@ void NcmpcppStatusChanged(Connection *, StatusChanges changed, void *)
 		if (myPlaylist->Items->Empty())
 		{
 			myPlaylist->Items->Reset();
+			myPlaylist->Items->Window::Clear(0);
 			ShowMessage("Cleared playlist!");
 		}
 		
