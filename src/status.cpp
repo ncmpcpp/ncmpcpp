@@ -144,12 +144,13 @@ void TraceMpdStatus()
 			else
 				block_progressbar_update = !allow_statusbar_unlock;
 			
-			if (Mpd.GetState() < psPlay && !block_statusbar_update)
+			if (Mpd.GetState() < psPlay && !block_statusbar_update && !block_progressbar_update)
 			{
 				if (Config.new_design)
 					mvwhline(wFooter->Raw(), 0, 0, 0, wFooter->GetWidth());
 				else
 					Statusbar() << wclrtoeol;
+				wFooter->Refresh();
 			}
 		}
 	}
@@ -326,9 +327,12 @@ void NcmpcppStatusChanged(Connection *, StatusChanges changed, void *)
 			case psStop:
 			{
 				WindowTitle("ncmpc++ ver. "VERSION);
-				*wFooter << Config.progressbar_color;
-				mvwhline(wFooter->Raw(), 0, 0, 0, wFooter->GetWidth());
-				*wFooter << clEnd;
+				if (!block_progressbar_update)
+				{
+					*wFooter << Config.progressbar_color;
+					mvwhline(wFooter->Raw(), 0, 0, 0, wFooter->GetWidth());
+					*wFooter << clEnd;
+				}
 				Playlist::ReloadRemaining = 1;
 				myPlaylist->NowPlaying = -1;
 				if (Config.new_design)
