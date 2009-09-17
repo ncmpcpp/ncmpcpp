@@ -119,9 +119,7 @@ namespace NCurses
 			Scrollpad &operator<<(const std::string &s);
 #			endif // _UTF8
 			
-		protected:
-			virtual void Recreate();
-			
+		private:
 			basic_buffer<my_char_t> itsBuffer;
 			
 			int itsBeginning;

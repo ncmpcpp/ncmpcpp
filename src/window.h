@@ -493,7 +493,7 @@ namespace NCurses
 			/// @see SetTitle()
 			/// @see Resize()
 			///
-			virtual void Recreate();
+			virtual void Recreate(size_t width, size_t height);
 			
 			/// internal WINDOW pointers
 			WINDOW *itsWindow;

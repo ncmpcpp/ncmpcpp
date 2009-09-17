@@ -177,7 +177,7 @@ void Window::SetBorder(Border border)
 		itsStartY--;
 		itsHeight += 2;
 		itsWidth += 2;
-		Recreate();
+		Recreate(itsWidth, itsHeight);
 	}
 	else if (border != brNone && itsBorder == brNone)
 	{
@@ -188,7 +188,7 @@ void Window::SetBorder(Border border)
 		itsStartY++;
 		itsHeight -= 2;
 		itsWidth -= 2;
-		Recreate();
+		Recreate(itsWidth, itsHeight);
 	}
 	else
 	{
@@ -208,13 +208,13 @@ void Window::SetTitle(const std::string &new_title)
 	{
 		itsStartY += 2;
 		itsHeight -= 2;
-		Recreate();
+		Recreate(itsWidth, itsHeight);
 	}
 	else if (new_title.empty() && !itsTitle.empty())
 	{
 		itsStartY -= 2;
 		itsHeight += 2;
-		Recreate();
+		Recreate(itsWidth, itsHeight);
 	}
 	itsTitle = new_title;
 }
@@ -231,10 +231,10 @@ void Window::DeleteHistory()
 	itsHistory = 0;
 }
 
-void Window::Recreate()
+void Window::Recreate(size_t width, size_t height)
 {
 	delwin(itsWindow);
-	itsWindow = newpad(itsHeight, itsWidth);
+	itsWindow = newpad(height, width);
 	SetTimeout(itsWindowTimeout);
 	SetColor(itsColor, itsBgColor);
 	keypad(itsWindow, 1);
@@ -273,7 +273,7 @@ void Window::AdjustDimensions(size_t width, size_t height)
 void Window::Resize(size_t new_width, size_t new_height)
 {
 	AdjustDimensions(new_width, new_height);
-	Recreate();
+	Recreate(itsWidth, itsHeight);
 }
 
 void Window::ShowBorder() const

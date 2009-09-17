@@ -83,7 +83,7 @@ void Scrollpad::Flush()
 			space_pos = 0;
 		}
 	}
-	Recreate();
+	Recreate(itsWidth, std::max(itsHeight, itsRealHeight));
 	itsBuffer.SetTemp(&s);
 	static_cast<Window &>(*this) << itsBuffer;
 	itsBuffer.SetTemp(0);
@@ -116,15 +116,6 @@ void Scrollpad::RemoveFormatting()
 {
 	if (itsFoundValueBegin >= 0 && itsFoundValueEnd >= 0)
 		itsBuffer.RemoveFormatting(itsFoundValueBegin, itsFoundPattern, itsFoundValueEnd, itsFoundForEach);
-}
-
-void Scrollpad::Recreate()
-{
-	delwin(itsWindow);
-	itsWindow = newpad(std::max(itsHeight, itsRealHeight), itsWidth);
-	SetTimeout(itsWindowTimeout);
-	SetColor(itsBaseColor, itsBgColor);
-	keypad(itsWindow, 1);
 }
 
 void Scrollpad::Refresh()
