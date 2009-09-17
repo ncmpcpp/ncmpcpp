@@ -396,6 +396,8 @@ void NcmpcppStatusChanged(Connection *, StatusChanges changed, void *)
 		}
 		if (!np.Empty() && Mpd.GetState() > psStop)
 		{
+			changed.ElapsedTime = 1;
+			
 			int mpd_elapsed = Mpd.GetElapsedTime();
 			if (elapsed < mpd_elapsed-2 || elapsed+1 > mpd_elapsed)
 				elapsed = mpd_elapsed;
@@ -619,7 +621,8 @@ void NcmpcppStatusChanged(Connection *, StatusChanges changed, void *)
 	}
 	*wFooter << fmtBoldEnd;
 	wFooter->GotoXY(sx, sy);
-	wFooter->Refresh();
+	if (changed.PlayerState || (changed.ElapsedTime && (!Config.new_design || Mpd.GetState() == psPlay)))
+		wFooter->Refresh();
 	if (changed.Playlist || changed.Database || changed.PlayerState || changed.SongID)
 		myScreen->RefreshWindow();
 }
