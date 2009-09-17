@@ -70,8 +70,10 @@ void StatusbarApplyFilterImmediately(const std::wstring &ws)
 {
 	static std::wstring cmp;
 	if (cmp != ws)
+	{
 		myScreen->ApplyFilter(ToString((cmp = ws)));
-	myScreen->RefreshWindow();
+		myScreen->RefreshWindow();
+	}
 	TraceMpdStatus();
 }
 
@@ -113,10 +115,7 @@ void TraceMpdStatus()
 	static timeval past, now;
 	
 	gettimeofday(&now, 0);
-	if ((Mpd.Connected()
-	&&   (/*(now.tv_sec == past.tv_sec && now.tv_usec >= past.tv_usec+500000) || */now.tv_sec > past.tv_sec))
-	||  UpdateStatusImmediately
-	   )
+	if ((Mpd.Connected() && now.tv_sec > past.tv_sec) || UpdateStatusImmediately)
 	{
 		Mpd.UpdateStatus();
 		BlockItemListUpdate = 0;
@@ -124,10 +123,15 @@ void TraceMpdStatus()
 		UpdateStatusImmediately = 0;
 		gettimeofday(&past, 0);
 	}
-	wFooter->Refresh();
 	
-	if (myScreen == myPlaylist && now.tv_sec == myPlaylist->Timer()+Config.playlist_disable_highlight_delay)
-		myPlaylist->Items->Highlighting(!Config.playlist_disable_highlight_delay);
+	if (myScreen->ActiveWindow() == myPlaylist->Items
+	&&  now.tv_sec == myPlaylist->Timer()+Config.playlist_disable_highlight_delay
+	&&  myPlaylist->Items->isHighlighted()
+	&&  Config.playlist_disable_highlight_delay)
+	{
+		myPlaylist->Items->Highlighting(0);
+		myPlaylist->Items->Refresh();
+	}
 	
 	if (lock_statusbar_delay > 0)
 	{
@@ -234,13 +238,6 @@ void NcmpcppStatusChanged(Connection *, StatusChanges changed, void *)
 				myPlaylist->Items->at(pos).CopyPtr(0);
 				(*it)->NullMe();
 			}
-			
-			if (myScreen == myPlaylist)
-			{
-				if (!playlist_length || myPlaylist->Items->Size() < myPlaylist->Items->GetHeight())
-					myPlaylist->Items->Window::Clear();
-				myPlaylist->Items->Refresh();
-			}
 			if (was_filtered)
 			{
 				myPlaylist->ApplyFilter(myPlaylist->Items->GetFilter());
@@ -252,9 +249,6 @@ void NcmpcppStatusChanged(Connection *, StatusChanges changed, void *)
 		
 		Playlist::ReloadTotalLength = 1;
 		Playlist::ReloadRemaining = 1;
-		
-		if (myScreen == myPlaylist)
-			RedrawHeader = 1;
 		
 		if (myPlaylist->Items->Empty())
 		{
@@ -308,8 +302,7 @@ void NcmpcppStatusChanged(Connection *, StatusChanges changed, void *)
 	}
 	if (changed.PlayerState)
 	{
-		PlayerState mpd_state = Mpd.GetState();
-		switch (mpd_state)
+		switch (Mpd.GetState())
 		{
 			case psUnknown:
 			{
@@ -351,8 +344,11 @@ void NcmpcppStatusChanged(Connection *, StatusChanges changed, void *)
 		}
 		if (Config.new_design)
 		{
-			*wHeader << XY(0, 1) << fmtBold << player_state << fmtBoldEnd;
-			wHeader->Refresh();
+			if (!myPlaylist->isPlaying())
+			{
+				*wHeader << XY(0, 1) << fmtBold << player_state << fmtBoldEnd;
+				wHeader->Refresh();
+			}
 		}
 		else if (!block_statusbar_update && Config.statusbar_visibility)
 		{
@@ -387,9 +383,6 @@ void NcmpcppStatusChanged(Connection *, StatusChanges changed, void *)
 		playing_song_scroll_begin = 0;
 		first_line_scroll_begin = 0;
 		second_line_scroll_begin = 0;
-		
-		if (Mpd.GetState() == psPlay)
-			changed.ElapsedTime = 1;
 	}
 	static time_t now, past = 0;
 	time(&now);
@@ -624,11 +617,11 @@ void NcmpcppStatusChanged(Connection *, StatusChanges changed, void *)
 		*wHeader << clEnd;
 		wHeader->Refresh();
 	}
-	if (myScreen->ActiveWindow() == myPlaylist->Items)
-		myPlaylist->Items->Refresh();
 	*wFooter << fmtBoldEnd;
 	wFooter->GotoXY(sx, sy);
 	wFooter->Refresh();
+	if (changed.Playlist || changed.Database || changed.PlayerState || changed.SongID)
+		myScreen->RefreshWindow();
 }
 
 Window &Statusbar()

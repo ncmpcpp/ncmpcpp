@@ -106,9 +106,13 @@ void Clock::Update()
 	if (Width > size_t(COLS) || Height > MainHeight)
 		myPlaylist->SwitchTo();
 	
-	time_t rawtime;
-	time(&rawtime);
-	tm *time = localtime(&rawtime);
+	static time_t now = 0, past;
+	time(&past);
+	if (past <= now)
+		return;
+	time(&now);
+	
+	tm *time = localtime(&now);
 	
 	mask = 0;
 	Set(time->tm_sec % 10, 0);
@@ -160,6 +164,7 @@ void Clock::Update()
 			}
 		}
 	}
+	w->Refresh();
 }
 
 void Clock::Prepare()

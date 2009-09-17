@@ -316,8 +316,6 @@ void Playlist::FixPositions(size_t beginning)
 void Playlist::EnableHighlighting()
 {
 	Items->Highlighting(1);
-	if (w == Items)
-		Items->Refresh();
 	UpdateTimer();
 }
 

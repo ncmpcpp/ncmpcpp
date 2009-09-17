@@ -166,7 +166,7 @@ int main(int argc, char *argv[])
 	Mpd.SetErrorHandler(NcmpcppErrorCallback, 0);
 	
 	// local variables
-	int input;
+	int input = 0;
 	
 	bool main_exit = 0;
 	bool design_changed = 0;
@@ -285,7 +285,8 @@ int main(int argc, char *argv[])
 		// header stuff end
 		
 		myScreen->Update();
-		myScreen->RefreshWindow();
+		if (input != ERR)
+			myScreen->RefreshWindow();
 		myScreen->ReadKey(input);
 		
 		if (input == ERR)

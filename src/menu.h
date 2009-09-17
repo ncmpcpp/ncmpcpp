@@ -466,6 +466,10 @@ namespace NCurses
 			///
 			void HighlightColor(Color color) { itsHighlightColor = color; }
 			
+			/// @return state of highlighting
+			///
+			bool isHighlighted() { return highlightEnabled; }
+			
 			/// Turns on/off highlighting
 			/// @param state state of hihglighting
 			///
