@@ -22,29 +22,6 @@
 
 using namespace NCurses;
 
-void List::SelectCurrent()
-{
-	if (Empty())
-		return;
-	size_t i = Choice();
-	Select(i, !isSelected(i));
-}
-
-void List::ReverseSelection(size_t beginning)
-{
-	for (size_t i = beginning; i < Size(); ++i)
-		Select(i, !isSelected(i) && !isStatic(i));
-}
-
-bool List::Deselect()
-{
-	if (!hasSelected())
-		return false;
-	for (size_t i = 0; i < Size(); ++i)
-		Select(i, 0);
-	return true;
-}
-
 template <> std::string Menu<std::string>::GetOption(size_t pos)
 {
 	if (itsOptionsPtr->at(pos))

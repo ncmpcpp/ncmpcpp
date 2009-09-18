@@ -220,7 +220,7 @@ void Playlist::SpacePressed()
 {
 	if (w == Items)
 	{
-		Items->SelectCurrent();
+		Items->Select(Items->Choice(), !Items->isSelected());
 		Items->Scroll(wDown);
 	}
 }

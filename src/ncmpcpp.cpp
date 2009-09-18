@@ -1549,10 +1549,12 @@ int main(int argc, char *argv[])
 		{
 			if (myScreen->allowsSelection())
 			{
-				if (myScreen->GetList()->Deselect())
-				{
-					ShowMessage("Items deselected!");
-				}
+				List *mList = myScreen->GetList();
+				if (!mList->hasSelected())
+					continue;
+				for (size_t i = 0; i < mList->Size(); ++i)
+					mList->Select(i, 0);
+				ShowMessage("Items deselected!");
 			}
 		}
 		else if (Keypressed(input, Key.AddSelected))

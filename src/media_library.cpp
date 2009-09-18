@@ -324,11 +324,11 @@ void MediaLibrary::SpacePressed()
 {
 	if (Config.space_selects && w == Songs)
 	{
-		Songs->SelectCurrent();
+		Songs->Select(Songs->Choice(), !Songs->isSelected());
 		w->Scroll(wDown);
-		return;
 	}
-	AddToPlaylist(0);
+	else
+		AddToPlaylist(0);
 }
 
 void MediaLibrary::MouseButtonPressed(MEVENT me)

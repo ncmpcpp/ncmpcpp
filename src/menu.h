@@ -34,7 +34,6 @@ namespace NCurses
 	class List
 	{
 		public:
-			
 			/// Exception class, thrown by various functions
 			/// that return references to items on the list
 			/// if requested item is separator
@@ -49,21 +48,9 @@ namespace NCurses
 			///
 			virtual void Select(int pos, bool state) = 0;
 			
-			/// @see Menu::Static()
-			///
-			virtual void Static(int pos, bool state) = 0;
-			
-			/// @see Menu::Empty()
-			///
-			virtual bool Empty() const = 0;
-			
 			/// @see Menu::isSelected()
 			///
 			virtual bool isSelected(int pos = -1) const = 0;
-			
-			/// @see Menu::isStatic()
-			///
-			virtual bool isStatic(int pos = -1) const = 0;
 			
 			/// @see Menu::hasSelected()
 			///
@@ -73,35 +60,13 @@ namespace NCurses
 			///
 			virtual void GetSelected(std::vector<size_t> &v) const = 0;
 			
-			/// @see Menu::Highlight()
+			/// @see Menu::Empty()
 			///
-			virtual void Highlight(size_t pos) = 0;
+			virtual bool Empty() const = 0;
 			
 			/// @see Menu::Size()
 			///
 			virtual size_t Size() const = 0;
-			
-			/// @see Menu::Choice()
-			///
-			virtual size_t Choice() const = 0;
-			
-			/// @see Menu::RealChoice()
-			///
-			virtual size_t RealChoice() const = 0;
-			
-			/// Selects current position
-			///
-			void SelectCurrent();
-			
-			/// Reverses selection of all items in list
-			/// @param beginning beginning of range that has to be reversed
-			///
-			void ReverseSelection(size_t beginning = 0);
-			
-			/// Deselects all items in list
-			/// @return true if there was at least one selected items, false otherwise
-			///
-			bool Deselect();
 			
 			/// @see Menu::Search()
 			///
@@ -126,10 +91,6 @@ namespace NCurses
 			/// @see Menu::GetFilter()
 			///
 			virtual const std::string &GetFilter() = 0;
-			
-			/// @see Menu::GetOption()
-			///
-			virtual std::string GetOption(size_t pos) = 0;
 			
 			/// @see Menu::isFiltered()
 			///
@@ -304,30 +265,30 @@ namespace NCurses
 			///
 			void BoldOption(int pos, bool state);
 			
+			/// Makes given position static/active.
+			/// Static positions cannot be highlighted.
+			/// @param pos position in list
+			/// @param state state of activity
+			///
+			void Static(int pos, bool state);
+			
+			/// Checks whether given position is static or active
+			/// @param pos position to be checked, -1 checks currently highlighted position
+			/// @return true if position is static, false otherwise
+			///
+			bool isStatic(int pos = -1) const;
+			
 			/// Selects/deselects given position
 			/// @param pos position in list
 			/// @param state state of selection
 			///
 			virtual void Select(int pos, bool state);
 			
-			/// Makes given position static/active.
-			/// Static positions cannot be highlighted.
-			/// @param pos position in list
-			/// @param state state of activity
-			///
-			virtual void Static(int pos, bool state);
-			
 			/// Checks if given position is selected
 			/// @param pos position to be checked, -1 checks currently highlighted position
 			/// @return true if position is selected, false otherwise
 			///
 			virtual bool isSelected(int pos = -1) const;
-			
-			/// Checks whether given position is static or active
-			/// @param pos position to be checked, -1 checks currently highlighted position
-			/// @return true if position is static, false otherwise
-			///
-			virtual bool isStatic(int pos = -1) const;
 			
 			/// Checks whether list contains selected positions
 			/// @return true if it contains them, false otherwise
@@ -339,23 +300,24 @@ namespace NCurses
 			///
 			virtual void GetSelected(std::vector<size_t> &v) const;
 			
+			/// Reverses selection of all items in list
+			/// @param beginning beginning of range that has to be reversed
+			///
+			void ReverseSelection(size_t beginning = 0);
+			
 			/// Highlights given position
 			/// @param pos position to be highlighted
 			///
-			virtual void Highlight(size_t pos);
-			
-			/// @return size of the list
-			///
-			virtual size_t Size() const;
+			void Highlight(size_t pos);
 			
 			/// @return currently highlighted position
 			///
-			virtual size_t Choice() const;
+			size_t Choice() const;
 			
 			/// @return real current positions, i.e it doesn't
 			/// count positions that are static or separators
 			///
-			virtual size_t RealChoice() const;
+			size_t RealChoice() const;
 			
 			/// Searches the list for a given contraint. It uses GetStringFunction to convert stored items
 			/// into strings and then performs pattern matching. Note that this supports regular expressions.
@@ -395,14 +357,6 @@ namespace NCurses
 			///
 			virtual const std::string &GetFilter();
 			
-			/// Converts given position in list to string using GetStringFunction
-			/// if specified and an empty string otherwise
-			/// @param pos position to be converted
-			/// @return item converted to string
-			/// @see SetItemDisplayer()
-			///
-			virtual std::string GetOption(size_t pos);
-			
 			/// @return true if list is currently filtered, false otherwise
 			///
 			virtual bool isFiltered() { return itsOptionsPtr == &itsFilteredOptions; }
@@ -414,6 +368,14 @@ namespace NCurses
 			/// Turns on filtering
 			///
 			void ShowFiltered() { itsOptionsPtr = &itsFilteredOptions; }
+			
+			/// Converts given position in list to string using GetStringFunction
+			/// if specified and an empty string otherwise
+			/// @param pos position to be converted
+			/// @return item converted to string
+			/// @see SetItemDisplayer()
+			///
+			std::string GetOption(size_t pos);
 			
 			/// Refreshes the menu window
 			/// @see Window::Refresh()
@@ -484,6 +446,10 @@ namespace NCurses
 			/// @return true if list is empty, false otherwise
 			///
 			virtual bool Empty() const { return itsOptionsPtr->empty(); }
+			
+			/// @return size of the list
+			///
+			virtual size_t Size() const;
 			
 			/// @return reference to last item on the list
 			/// @throw List::InvalidItem if requested item is separator
@@ -1002,6 +968,13 @@ template <typename T> size_t NCurses::Menu<T>::RealChoice() const
 		if (*it && !(*it)->isStatic)
 			result++;
 	return result;
+}
+
+template <typename T> void NCurses::Menu<T>::ReverseSelection(size_t beginning)
+{
+	option_iterator it = itsOptionsPtr->begin()+beginning;
+	for (size_t i = beginning; i < Size(); ++i, ++it)
+		(*it)->isSelected = !(*it)->isSelected && !(*it)->isStatic;
 }
 
 template <typename T> bool NCurses::Menu<T>::Search(const std::string &constraint, size_t beginning, int flags)

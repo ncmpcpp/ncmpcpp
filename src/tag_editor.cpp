@@ -682,7 +682,7 @@ void TagEditor::SpacePressed()
 {
 	if (w == Tags)
 	{
-		Tags->SelectCurrent();
+		Tags->Select(Tags->Choice(), !Tags->isSelected());
 		w->Scroll(wDown);
 		return;
 	}

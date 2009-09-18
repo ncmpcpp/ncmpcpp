@@ -125,14 +125,17 @@ void Browser::EnterPressed()
 
 void Browser::SpacePressed()
 {
+	if (w->Empty())
+		return;
+	
 	if (Config.space_selects && w->Choice() >= (itsBrowsedDir != "/" ? 1 : 0))
 	{
-		w->SelectCurrent();
+		w->Select(w->Choice(), !w->isSelected());
 		w->Scroll(wDown);
 		return;
 	}
 	
-	if (w->Empty() || (itsBrowsedDir != "/" && w->Choice() == 0 /* parent dir */))
+	if (itsBrowsedDir != "/" && w->Choice() == 0 /* parent dir */)
 		return;
 	
 	const Item &item = w->Current();

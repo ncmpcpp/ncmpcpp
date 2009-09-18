@@ -251,7 +251,7 @@ void SearchEngine::SpacePressed()
 	
 	if (Config.space_selects)
 	{
-		w->SelectCurrent();
+		w->Select(w->Choice(), !w->isSelected());
 		w->Scroll(wDown);
 		return;
 	}

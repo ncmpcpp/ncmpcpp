@@ -213,11 +213,11 @@ void PlaylistEditor::SpacePressed()
 {
 	if (Config.space_selects && w == Content)
 	{
-		Content->SelectCurrent();
+		Content->Select(Content->Choice(), !Content->isSelected());
 		w->Scroll(wDown);
-		return;
 	}
-	AddToPlaylist(0);
+	else
+		AddToPlaylist(0);
 }
 
 void PlaylistEditor::MouseButtonPressed(MEVENT me)
