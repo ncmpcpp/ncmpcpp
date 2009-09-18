@@ -28,65 +28,168 @@
 #include "settings.h"
 #include "status.h"
 
+/// An interface for various instantiations of Screen template class. Since C++ doesn't like
+/// comparison of two different instantiations of the same template class we need the most
+/// basic class to be non-template to allow it.
+///
 class BasicScreen
 {
 	public:
+		/// Initializes all variables to zero
+		///
 		BasicScreen() : hasToBeResized(0), isInitialized(0) { }
+		
 		virtual ~BasicScreen() { }
 		
+		/// @see Screen::ActiveWindow()
+		///
 		virtual void *ActiveWindow() = 0;
 		
+		/// Method used for switching to screen
+		///
 		virtual void SwitchTo() = 0;
+		
+		/// Method that should resize screen
+		/// if requested by hasToBeResized
+		///
 		virtual void Resize() = 0;
 		
+		/// @return title of the screen
+		///
 		virtual std::basic_string<my_char_t> Title() = 0;
 		
+		/// If the screen contantly has to update itself
+		/// somehow, it should be called by this function.
+		///
 		virtual void Update() { }
-		virtual void Refresh() = 0;
-		virtual void RefreshWindow() = 0;
-		virtual void ReadKey(int &) = 0;
-		virtual void Scroll(Where, const int * = 0) = 0;
 		
+		/// @see Screen::Refresh()
+		///
+		virtual void Refresh() = 0;
+		
+		/// @see Screen::RefreshWindow()
+		///
+		virtual void RefreshWindow() = 0;
+		
+		/// see Screen::ReadKey()
+		///
+		virtual void ReadKey(int &key) = 0;
+		
+		/// @see Screen::Scroll()
+		///
+		virtual void Scroll(Where where, const int key[2] = 0) = 0;
+		
+		/// Invoked after Enter was pressed
+		///
 		virtual void EnterPressed() = 0;
+		
+		/// Invoked after Space was pressed
+		///
 		virtual void SpacePressed() = 0;
+		
+		/// @see Screen::MouseButtonPressed()
+		///
 		virtual void MouseButtonPressed(MEVENT) { }
 		
+		/// @return pointer to currently selected song in the screen
+		/// (if screen provides one) or null pointer otherwise.
+		///
 		virtual MPD::Song *CurrentSong() { return 0; }
 		
+		/// @return true if the screen allows selecting items, false otherwise
+		///
 		virtual bool allowsSelection() = 0;
+		
+		/// Reverses selection. Does nothing by default since pure
+		/// virtual allowsSelection() should remind of this function
+		/// to be defined
+		///
 		virtual void ReverseSelection() { }
-		virtual void GetSelectedSongs(MPD::SongList &) { }
 		
-		virtual void ApplyFilter(const std::string &) { }
+		/// Gets selected songs' positions from the screen
+		/// @param v vector to be filled with positions
+		///
+		virtual void GetSelectedSongs(GNUC_UNUSED MPD::SongList &v) { }
 		
+		/// Applies a filter to the screen
+		virtual void ApplyFilter(GNUC_UNUSED const std::string &filter) { }
+		
+		/// @return pointer to instantiation of Menu template class
+		/// cast to List if available or null pointer otherwise
+		///
 		virtual List *GetList() = 0;
 		
+		/// Should be set to true each time screen needs resize
+		///
 		bool hasToBeResized;
 		
 	protected:
+		/// Since screens initialization is lazy, we don't want to do
+		/// this in the constructor. This function should be invoked
+		/// only once and after that isInitialized flag has to be set
+		/// to true to somehow avoid next attempt of initialization.
+		///
 		virtual void Init() = 0;
 		
+		/// Flag that inditates whether the screen is initialized or not
+		///
 		bool isInitialized;
 };
 
+/// Class that all screens should derive from. It provides basic interface
+/// for the screen to be working properly and assumes that we didn't forget
+/// about anything vital.
+///
 template <typename WindowType> class Screen : public BasicScreen
 {
 	public:
 		Screen() : w(0) { }
 		virtual ~Screen() { }
 		
+		/// Since some screens contain more that one window
+		/// it's useful to determine the one that is being
+		/// active
+		/// @return address to window object cast to void *
+		///
 		virtual void *ActiveWindow();
 		
+		/// @return pointer to currently active window
+		///
 		WindowType *Main();
 		
+		/// Refreshes whole screen
+		///
 		virtual void Refresh();
-		virtual void RefreshWindow();
-		virtual void ReadKey(int &input);
-		virtual void Scroll(Where where, const int * = 0);
 		
+		/// Refreshes active window of the screen
+		///
+		virtual void RefreshWindow();
+		
+		/// Reads a key from the screen
+		///
+		virtual void ReadKey(int &key);
+		
+		/// Scrolls the screen by given amount of lines and
+		/// if fancy scrolling feature is disabled, enters the
+		/// loop that holds main loop until user releases the key
+		/// @param where indicates where one wants to scroll
+		/// @param key needed if fancy scrolling is disabled to
+		/// define the conditional for while loop
+		///
+		virtual void Scroll(Where where, const int key[2] = 0);
+		
+		/// Invoked after there was one of mouse buttons pressed
+		/// @param me struct that contains coords of where the click
+		/// had its place and button actions
+		///
 		virtual void MouseButtonPressed(MEVENT me);
 		
 	protected:
+		/// Template parameter that should indicate the main type
+		/// of window used by the screen. What is more, it should
+		/// always be assigned to the currently active window (if
+		/// acreen contains more that one)
+		///
 		WindowType *w;
 };
 
@@ -110,12 +213,12 @@ template <typename WindowType> void Screen<WindowType>::RefreshWindow()
 	w->Display();
 }
 
-template <typename WindowType> void Screen<WindowType>::ReadKey(int &input)
+template <typename WindowType> void Screen<WindowType>::ReadKey(int &key)
 {
-	w->ReadKey(input);
+	w->ReadKey(key);
 }
 
-template <typename WindowType> void Screen<WindowType>::Scroll(Where where, const int *key)
+template <typename WindowType> void Screen<WindowType>::Scroll(Where where, const int key[2])
 {
 	if (!Config.fancy_scrolling && key)
 	{
@@ -146,6 +249,10 @@ template <typename WindowType> void Screen<WindowType>::MouseButtonPressed(MEVEN
 	}
 }
 
+/// Specialization for Screen<Scrollpad>::MouseButtonPressed, that should
+/// not scroll whole page, but rather a few lines (the number of them is
+/// defined in the config)
+///
 template <> inline void Screen<Scrollpad>::MouseButtonPressed(MEVENT me)
 {
 	if (me.bstate & BUTTON2_PRESSED)
