@@ -394,7 +394,7 @@ int main(int argc, char *argv[])
 			}
 			else if (mouse_event.bstate & BUTTON1_PRESSED
 			     &&	 (Config.statusbar_visibility || Config.new_design)
-			     &&	 Mpd.GetState() > psStop
+			     &&	 Mpd.isPlaying()
 			     &&	 mouse_event.y == (Config.new_design ? 1 : LINES-1) && mouse_event.x < 9
 				) // playing/paused
 			{
@@ -474,7 +474,7 @@ int main(int argc, char *argv[])
 			myScreen->Refresh();
 			RedrawStatusbar = 1;
 			StatusChanges changes;
-			if (Mpd.GetState() < psPlay || design_changed)
+			if (!Mpd.isPlaying() || design_changed)
 			{
 				changes.PlayerState = 1;
 				if (design_changed)

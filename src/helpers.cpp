@@ -142,7 +142,7 @@ void ParseArgv(int argc, char **argv)
 				std::cout << "Error: " << Mpd.GetErrorMessage() << std::endl;
 				exit(1);
 			}
-			if (Mpd.GetState() > psStop)
+			if (Mpd.isPlaying())
 			{
 				if (argc > ++i)
 				{

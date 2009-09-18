@@ -106,7 +106,7 @@ void UnlockStatusbar()
 		else
 			block_progressbar_update = 0;
 	}
-	if (Mpd.GetState() < psPlay)
+	if (!Mpd.isPlaying())
 		Statusbar() << wclrtoeol;
 }
 
@@ -144,7 +144,7 @@ void TraceMpdStatus()
 			else
 				block_progressbar_update = !allow_statusbar_unlock;
 			
-			if (Mpd.GetState() < psPlay && !block_statusbar_update && !block_progressbar_update)
+			if (!Mpd.isPlaying() && !block_statusbar_update && !block_progressbar_update)
 			{
 				if (Config.new_design)
 					mvwhline(wFooter->Raw(), 0, 0, 0, wFooter->GetWidth());
@@ -210,7 +210,7 @@ void NcmpcppStatusChanged(Connection *, StatusChanges changed, void *)
 		if (!Playlist::BlockUpdate)
 		{
 			np = Mpd.GetCurrentSong();
-			if (Mpd.GetState() > psStop)
+			if (Mpd.isPlaying())
 				WindowTitle(utf_to_locale_cpy(np.toString(Config.song_window_title_format)));
 			
 			bool was_filtered = myPlaylist->Items->isFiltered();
@@ -372,7 +372,7 @@ void NcmpcppStatusChanged(Connection *, StatusChanges changed, void *)
 			
 			if (!Config.execute_on_song_change.empty())
 				system(Config.execute_on_song_change.c_str());
-			if (Mpd.GetState() > psStop)
+			if (Mpd.isPlaying())
 				WindowTitle(utf_to_locale_cpy(np.toString(Config.song_window_title_format)));
 			if (Config.autocenter_mode && !myPlaylist->Items->isFiltered())
 				myPlaylist->Items->Highlight(myPlaylist->NowPlaying);
@@ -391,7 +391,7 @@ void NcmpcppStatusChanged(Connection *, StatusChanges changed, void *)
 	}
 	static time_t now, past = 0;
 	time(&now);
-	if (((now > past || changed.SongID) && Mpd.GetState() > psStop) || RedrawStatusbar)
+	if (((now > past || changed.SongID) && Mpd.isPlaying()) || RedrawStatusbar)
 	{
 		time(&past);
 		if (np.Empty())
@@ -399,7 +399,7 @@ void NcmpcppStatusChanged(Connection *, StatusChanges changed, void *)
 			np = Mpd.GetCurrentSong();
 			WindowTitle(utf_to_locale_cpy(np.toString(Config.song_window_title_format)));
 		}
-		if (!np.Empty() && Mpd.GetState() > psStop)
+		if (!np.Empty() && Mpd.isPlaying())
 		{
 			changed.ElapsedTime = 1;
 			

@@ -94,7 +94,7 @@ void Visualizer::Update()
 		return;
 	
 	// if mpd is stopped, clear the screen
-	if (Mpd.GetState() < MPD::psPlay)
+	if (!Mpd.isPlaying())
 	{
 		w->Clear();
 		return;
