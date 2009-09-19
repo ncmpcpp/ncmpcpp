@@ -103,6 +103,9 @@ template <typename C> void String2Buffer(const std::basic_string<C> &s, basic_bu
 				case 'b':
 					buf << fmtBold;
 					break;
+				case 'u':
+					buf << fmtUnderline;
+					break;
 				case 'a':
 					buf << fmtAltCharset;
 					break;
@@ -114,6 +117,9 @@ template <typename C> void String2Buffer(const std::basic_string<C> &s, basic_bu
 					{
 						case 'b':
 							buf << fmtBoldEnd;
+							break;
+						case 'u':
+							buf << fmtUnderlineEnd;
 							break;
 						case 'a':
 							buf << fmtAltCharsetEnd;

@@ -85,7 +85,13 @@ namespace NCurses
 	
 	/// Format flags used by NCurses
 	///
-	enum Format { fmtNone = 100, fmtBold, fmtBoldEnd, fmtReverse, fmtReverseEnd, fmtAltCharset, fmtAltCharsetEnd };
+	enum Format {
+		fmtNone = clEnd+1,
+		fmtBold, fmtBoldEnd,
+		fmtUnderline, fmtUnderlineEnd,
+		fmtReverse, fmtReverseEnd,
+		fmtAltCharset, fmtAltCharsetEnd
+	};
 	
 	/// Available border colors for window
 	///
@@ -458,6 +464,11 @@ namespace NCurses
 			///
 			void Bold(bool bold_state) const;
 			
+			/// Sets state of underline attribute (internal use only)
+			/// @param underline_state state of underline attribute
+			///
+			void Underline(bool underline_state) const;
+			
 			/// Sets state of reverse attribute (internal use only)
 			/// @param reverse_state state of reverse attribute
 			///
@@ -543,6 +554,7 @@ namespace NCurses
 			
 			/// counters for format flags
 			int itsBoldCounter;
+			int itsUnderlineCounter;
 			int itsReverseCounter;
 			int itsAltCharsetCounter;
 	};

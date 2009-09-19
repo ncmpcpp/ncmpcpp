@@ -87,6 +87,7 @@ Window::Window(size_t startx,
 		itsBorder(border),
 		itsHistory(0),
 		itsBoldCounter(0),
+		itsUnderlineCounter(0),
 		itsReverseCounter(0),
 		itsAltCharsetCounter(0)
 {
@@ -137,6 +138,7 @@ Window::Window(const Window &w) : itsWindow(dupwin(w.itsWindow)),
 				itsBorder(w.itsBorder),
 				itsHistory(w.itsHistory),
 				itsBoldCounter(w.itsBoldCounter),
+				itsUnderlineCounter(w.itsUnderlineCounter),
 				itsReverseCounter(w.itsReverseCounter),
 				itsAltCharsetCounter(w.itsAltCharsetCounter)
 {
@@ -326,6 +328,11 @@ void Window::Hide(char ch) const
 void Window::Bold(bool bold_state) const
 {
 	(bold_state ? wattron : wattroff)(itsWindow, A_BOLD);
+}
+
+void Window::Underline(bool underline_state) const
+{
+	(underline_state ? wattron : wattroff)(itsWindow, A_UNDERLINE);
 }
 
 void Window::Reverse(bool reverse_state) const
@@ -744,6 +751,13 @@ Window &Window::operator<<(Format format)
 		case fmtBoldEnd:
 			if (--itsBoldCounter <= 0)
 				Bold((itsBoldCounter = 0));
+			break;
+		case fmtUnderline:
+			Underline(++itsUnderlineCounter);
+			break;
+		case fmtUnderlineEnd:
+			if (--itsUnderlineCounter <= 0)
+				Underline((itsUnderlineCounter = 0));
 			break;
 		case fmtReverse:
 			Reverse(++itsReverseCounter);
