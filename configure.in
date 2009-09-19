@@ -38,6 +38,7 @@ dnl ================================
 dnl = checking for various headers =
 dnl ================================
 AC_CHECK_HEADERS([dirent.h regex.h], , AC_MSG_ERROR(vital headers missing))
+AC_CHECK_HEADERS([langinfo.h], , AC_MSG_WARN(locale detection disabled))
 
 dnl ======================
 dnl = checking for iconv =

@@ -31,6 +31,10 @@
 #include "lyrics.h"
 #include "settings.h"
 
+#ifdef HAVE_LANGINFO_H
+# include <langinfo.h>
+#endif
+
 const std::string config_file = config_dir + "config";
 const std::string keys_config_file = config_dir + "keys";
 
@@ -318,6 +322,11 @@ void DefaultConfiguration(ncmpcpp_config &conf)
 	conf.lyrics_db = 0;
 	conf.regex_type = 0;
 	conf.lines_scrolled = 2;
+#	ifdef HAVE_LANGINFO_H
+	conf.system_encoding = nl_langinfo(CODESET);
+	if (conf.system_encoding == "UTF-8") // mpd uses utf-8 by default so no need to convert
+		conf.system_encoding.clear();
+#	endif // HAVE_LANGINFO_H
 }
 
 void ReadKeys(ncmpcpp_keys &keys)

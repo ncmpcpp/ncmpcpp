@@ -43,8 +43,13 @@
 #
 ##### system encoding #####
 ##
-## if you use encoding other than utf8, set it in
-## order to handle utf8 encoded strings properly.
+## ncmpcpp should detect your charset encoding
+## but if it failed to do so, you can specify
+## charset encoding you are using here.
+##
+## Note: Since MPD uses utf8 by default, setting
+## this option makes sense only if your encoding
+## is different.
 ##
 #
 #system_encoding = ""
