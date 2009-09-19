@@ -63,6 +63,7 @@ namespace NCurses
 			/// @param for_each indicates whether function searches through whole text and sets
 			/// given format for all occurences of given string or stops after first occurence
 			/// @return true if at least one occurence of the string was found, false otherwise
+			/// @see basic_buffer::SetFormatting()
 			///
 			bool SetFormatting(short val_b, const std::basic_string<my_char_t> &s,
 					   short val_e, bool for_each = 1);
@@ -74,6 +75,7 @@ namespace NCurses
 			/// Removes all format flags and colors that was applied
 			/// by the most recent call to SetFormatting() function
 			/// @see SetFormatting()
+			/// @see basic_buffer::RemoveFormatting()
 			///
 			void RemoveFormatting();
 			

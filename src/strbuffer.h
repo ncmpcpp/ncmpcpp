@@ -28,8 +28,15 @@
 
 namespace NCurses
 {
+	/// Buffer template class that can store text along with its
+	/// format attributes. The content can be easily printed to
+	/// window or taken as raw string at any time.
+	///
 	template <typename C> class basic_buffer
 	{
+		/// Struct used for storing information about
+		/// one color/format flag along with its position
+		///
 		struct FormatPos
 		{
 			size_t Position;
@@ -46,39 +53,125 @@ namespace NCurses
 			}
 		};
 		
+		/// Internal buffer for storing raw text
+		///
 		std::basic_ostringstream<C> itsString;
+		
+		/// List used for storing formatting informations
+		///
 		std::list<FormatPos> itsFormat;
+		
+		/// Pointer to temporary string
+		/// @see SetTemp()
+		///
 		std::basic_string<C> *itsTempString;
 		
 		public:
+			/// Constructs an empty buffer
+			///
 			basic_buffer() : itsTempString(0) { }
+			
+			/// Constructs a buffer from the existed one
+			/// @param b copied buffer
+			///
 			basic_buffer(const basic_buffer &b);
 			
+			/// @return raw content of the buffer without formatting informations
+			///
 			std::basic_string<C> Str() const;
-			bool SetFormatting(short vb, const std::basic_string<C> &s, short ve, bool for_each = 1);
-			void RemoveFormatting(short vb, const std::basic_string<C> &s, short ve, bool for_each = 1);
-			void SetTemp(std::basic_string<C> *);
-			void Write(Window &w, size_t &pos, size_t width, const std::basic_string<C> &sep) const;
+			
+			/// Searches for given string in buffer and sets format/color at the
+			/// beginning and end of it using val_b and val_e flags accordingly
+			/// @param val_b flag set at the beginning of found occurence of string
+			/// @param s string that function seaches for
+			/// @param val_e flag set at the end of found occurence of string
+			/// @param for_each indicates whether function searches through whole buffer and sets
+			/// the format for all occurences of given string or stops after the first one
+			/// @return true if at least one occurence of the string was found, false otherwise
+			///
+			bool SetFormatting(short val_b, const std::basic_string<C> &s,
+					   short val_e, bool for_each = 1);
+			
+			/// Searches for given string in buffer and removes given
+			/// format/color from the beginning and end of its occurence
+			/// @param val_b flag to be removed from the beginning of the string
+			/// @param s string that function seaches for
+			/// @param val_e flag to be removed from the end of the string
+			/// @param for_each indicates whether function searches through whole buffer and removes
+			/// given format from all occurences of given string or stops after the first one
+			///
+			void RemoveFormatting(short val_b, const std::basic_string<C> &s,
+					      short val_e, bool for_each = 1);
+			
+			/// Sets the pointer to string, that will be passed in operator<<() to window
+			/// object instead of the internal buffer. This is useful if you took the content
+			/// of the buffer, modified it somehow and want to print the modified version instead
+			/// of the original one, but with the original formatting informations. Note that after
+			/// you're done with the printing etc., this pointer has to be set to null.
+			/// @param tmp address of the temporary string
+			///
+			void SetTemp(std::basic_string<C> *tmp);
+			
+			/// Prints to window object given part of the string, loading all needed formatting info
+			/// and cleaning up after. The main goal of this function is to provide interface for
+			/// colorful scrollers.
+			/// @param w window object that we want to print to
+			/// @param start_pos reference to start position of the string. note that this variable is
+			/// incremented by one after each call or set to 0 if end of string is reached
+			/// @param width width of the string to be printed
+			/// @param separator additional text to be placed between the end and the beginning of
+			/// the string
+			///
+			void Write(Window &w, size_t &start_pos, size_t width,
+				   const std::basic_string<C> &separator) const;
+			
+			/// Clears the content of the buffer and its formatting informations
+			///
 			void Clear();
 			
+			/// @param t any object that has defined ostream &operator<<()
+			/// @return reference to itself
+			///
 			template <typename T> basic_buffer<C> &operator<<(const T &t)
 			{
 				itsString << t;
 				return *this;
 			}
 			
-			basic_buffer<C> &operator<<(std::ostream &(*os)(std::ostream &));
-			basic_buffer<C> &operator<<(const Color &color);
-			basic_buffer<C> &operator<<(const Format &f);
+			/// Handles colors
+			/// @return reference to itself
+			///
+			basic_buffer<C> &operator<<(Color color);
+			
+			/// Handles format flags
+			/// @return reference to itself
+			///
+			basic_buffer<C> &operator<<(Format f);
+			
+			/// Handles copying one buffer to another using operator<<()
+			/// @param buf buffer to be copied
+			/// @return reference to itself
+			///
 			basic_buffer<C> &operator<<(const basic_buffer<C> &buf);
 			
+			/// Friend operator, that handles printing
+			/// the content of buffer to window object
 			friend Window &operator<< <>(Window &, const basic_buffer<C> &);
 			
 		private:
+			/// Loads an attribute to given window object
+			/// @param w window object we want to load attribute to
+			/// @param value value of attribute to be loaded
+			///
 			void LoadAttribute(Window &w, short value) const;
 	};
 	
+	/// Standard buffer that uses narrow characters
+	///
 	typedef basic_buffer<char> Buffer;
+	
+	/// Standard buffer that uses wide characters
+	///
 	typedef basic_buffer<wchar_t> WBuffer;
 }
 
@@ -93,7 +186,11 @@ template <typename C> std::basic_string<C> NCurses::basic_buffer<C>::Str() const
 	return itsString.str();
 }
 
-template <typename C> bool NCurses::basic_buffer<C>::SetFormatting(short vb, const std::basic_string<C> &s, short ve, bool for_each)
+template <typename C> bool NCurses::basic_buffer<C>::SetFormatting(	short val_b,
+									const std::basic_string<C> &s,
+									short val_e,
+									bool for_each
+								  )
 {
 	if (s.empty())
 		return false;
@@ -104,11 +201,11 @@ template <typename C> bool NCurses::basic_buffer<C>::SetFormatting(short vb, con
 	for (size_t i = base.find(s); i != std::basic_string<C>::npos; i = base.find(s, i))
 	{
 		result = true;
-		fp.Value = vb;
+		fp.Value = val_b;
 		fp.Position = i;
 		itsFormat.push_back(fp);
 		i += s.length();
-		fp.Value = ve;
+		fp.Value = val_e;
 		fp.Position = i;
 		itsFormat.push_back(fp);
 		if (!for_each)
@@ -118,7 +215,11 @@ template <typename C> bool NCurses::basic_buffer<C>::SetFormatting(short vb, con
 	return result;
 }
 
-template <typename C> void NCurses::basic_buffer<C>::RemoveFormatting(short vb, const std::basic_string<C> &s, short ve, bool for_each)
+template <typename C> void NCurses::basic_buffer<C>::RemoveFormatting(	short val_b,
+									const std::basic_string<C> &s,
+									short val_e,
+									bool for_each
+								     )
 {
 	if (s.empty())
 		return;
@@ -127,11 +228,11 @@ template <typename C> void NCurses::basic_buffer<C>::RemoveFormatting(short vb, 
 	
 	for (size_t i = base.find(s); i != std::basic_string<C>::npos; i = base.find(s, i))
 	{
-		fp.Value = vb;
+		fp.Value = val_b;
 		fp.Position = i;
 		itsFormat.remove(fp);
 		i += s.length();
-		fp.Value = ve;
+		fp.Value = val_e;
 		fp.Position = i;
 		itsFormat.remove(fp);
 		if (!for_each)
@@ -144,25 +245,29 @@ template <typename C> void NCurses::basic_buffer<C>::SetTemp(std::basic_string<C
 	itsTempString = tmp;
 }
 
-template <typename C> void NCurses::basic_buffer<C>::Write(Window &w, size_t &pos, size_t width, const std::basic_string<C> &sep) const
+template <typename C> void NCurses::basic_buffer<C>::Write(	Window &w,
+								size_t &start_pos,
+								size_t width,
+								const std::basic_string<C> &separator
+							  ) const
 {
 	std::basic_string<C> s = itsString.str();
 	size_t len = Window::Length(s);
 	
 	if (len > width)
 	{
-		s += sep;
+		s += separator;
 		len = 0;
 		
 		typename std::list<typename NCurses::basic_buffer<C>::FormatPos>::const_iterator lb = itsFormat.begin();
-		if (itsFormat.back().Position > pos) // if there is no attributes from current position, don't load them
+		if (itsFormat.back().Position > start_pos) // if there is no attributes from current position, don't load them
 		{
 			// load all attributes that are before start position
-			for (; lb->Position < pos; ++lb)
+			for (; lb->Position < start_pos; ++lb)
 				LoadAttribute(w, lb->Value);
 		}
 		
-		for (size_t i = pos; i < s.length() && len < width; ++i)
+		for (size_t i = start_pos; i < s.length() && len < width; ++i)
 		{
 			while (i == lb->Position && lb != itsFormat.end())
 			{
@@ -173,8 +278,8 @@ template <typename C> void NCurses::basic_buffer<C>::Write(Window &w, size_t &po
 				break;
 			w << s[i];
 		}
-		if (++pos >= s.length())
-			pos = 0;
+		if (++start_pos >= s.length())
+			start_pos = 0;
 		
 		if (len < width)
 			lb = itsFormat.begin();
@@ -211,13 +316,7 @@ template <typename C> void NCurses::basic_buffer<C>::LoadAttribute(Window &w, sh
 		w << NCurses::Format(value);
 }
 
-template <typename C> NCurses::basic_buffer<C> &NCurses::basic_buffer<C>::operator<<(std::ostream &(*os)(std::ostream&))
-{
-	itsString << os;
-	return *this;
-}
-
-template <typename C> NCurses::basic_buffer<C> &NCurses::basic_buffer<C>::operator<<(const Color &color)
+template <typename C> NCurses::basic_buffer<C> &NCurses::basic_buffer<C>::operator<<(Color color)
 {
 	FormatPos f;
 	f.Position = itsString.str().length();
@@ -226,7 +325,7 @@ template <typename C> NCurses::basic_buffer<C> &NCurses::basic_buffer<C>::operat
 	return *this;
 }
 
-template <typename C> NCurses::basic_buffer<C> &NCurses::basic_buffer<C>::operator<<(const Format &f)
+template <typename C> NCurses::basic_buffer<C> &NCurses::basic_buffer<C>::operator<<(Format f)
 {
 	return operator<<(Color(f));
 }
