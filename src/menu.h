@@ -263,7 +263,7 @@ namespace NCurses
 			/// @param pos position of item to be bolded/unbolded
 			/// @param state state of bold attribute
 			///
-			void BoldOption(int pos, bool state);
+			void Bold(int pos, bool state);
 			
 			/// Makes given position static/active.
 			/// Static positions cannot be highlighted.
@@ -651,7 +651,7 @@ template <typename T> void NCurses::Menu<T>::IntoSeparator(size_t pos)
 	(*itsOptionsPtr)[pos] = 0;
 }
 
-template <typename T> void NCurses::Menu<T>::BoldOption(int pos, bool state)
+template <typename T> void NCurses::Menu<T>::Bold(int pos, bool state)
 {
 	if (!itsOptionsPtr->at(pos))
 		return;
@@ -729,7 +729,7 @@ template <typename T> void NCurses::Menu<T>::Refresh()
 			continue;
 		}
 		if ((*itsOptionsPtr)[i]->isBold)
-			Bold(1);
+			Window::Bold(1);
 		if (highlightEnabled && int(i) == itsHighlight)
 		{
 			Reverse(1);
@@ -748,7 +748,7 @@ template <typename T> void NCurses::Menu<T>::Refresh()
 			Reverse(0);
 		}
 		if ((*itsOptionsPtr)[i]->isBold)
-			Bold(0);
+			Window::Bold(0);
 		line++;
 	}
 	Window::Refresh();

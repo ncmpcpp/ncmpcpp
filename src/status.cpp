@@ -193,12 +193,12 @@ void NcmpcppStatusChanged(Connection *, StatusChanges changed, void *)
 		myPlaylist->Items->ShowAll();
 		try
 		{
-			myPlaylist->Items->BoldOption(myPlaylist->OldPlaying, 0);
+			myPlaylist->Items->Bold(myPlaylist->OldPlaying, 0);
 		}
 		catch (std::out_of_range) { }
 		try
 		{
-			myPlaylist->Items->BoldOption(myPlaylist->NowPlaying, 1);
+			myPlaylist->Items->Bold(myPlaylist->NowPlaying, 1);
 		}
 		catch (std::out_of_range) { }
 		if (was_filtered)

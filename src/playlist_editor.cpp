@@ -202,7 +202,7 @@ void PlaylistEditor::AddToPlaylist(bool add_n_play)
 			ShowMessage("Loading playlist %s...", Playlists->Current().c_str());
 	}
 	else if (w == Content && !Content->Empty())
-		Content->BoldOption(Content->Choice(), myPlaylist->Add(Content->Current(), Content->isBold(), add_n_play));
+		Content->Bold(Content->Choice(), myPlaylist->Add(Content->Current(), Content->isBold(), add_n_play));
 	
 	FreeSongList(list);
 	if (!add_n_play)

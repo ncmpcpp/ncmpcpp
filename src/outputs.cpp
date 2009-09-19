@@ -78,7 +78,7 @@ void Outputs::EnterPressed()
 		{
 			ShowMessage("Output \"%s\" disabled", w->Current().first.c_str());
 			w->Current().second = 0;
-			w->BoldOption(w->Choice(), 0);
+			w->Bold(w->Choice(), 0);
 		}
 	}
 	else
@@ -87,7 +87,7 @@ void Outputs::EnterPressed()
 		{
 			ShowMessage("Output \"%s\" enabled", w->Current().first.c_str());
 			w->Current().second = 1;
-			w->BoldOption(w->Choice(), 1);
+			w->Bold(w->Choice(), 1);
 		}
 	}
 	

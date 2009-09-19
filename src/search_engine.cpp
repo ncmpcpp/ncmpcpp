@@ -236,7 +236,7 @@ void SearchEngine::EnterPressed()
 		}
 		default:
 		{
-			w->BoldOption(w->Choice(), myPlaylist->Add(*w->Current().second, w->isBold(), 1));
+			w->Bold(w->Choice(), myPlaylist->Add(*w->Current().second, w->isBold(), 1));
 			break;
 		}
 	}
@@ -256,7 +256,7 @@ void SearchEngine::SpacePressed()
 		return;
 	}
 	
-	w->BoldOption(w->Choice(), myPlaylist->Add(*w->Current().second, w->isBold(), 0));
+	w->Bold(w->Choice(), myPlaylist->Add(*w->Current().second, w->isBold(), 0));
 	w->Scroll(wDown);
 }
 
@@ -321,7 +321,7 @@ void SearchEngine::UpdateFoundList()
 				break;
 			}
 		}
-		w->BoldOption(i, bold);
+		w->Bold(i, bold);
 		bold = 0;
 	}
 }

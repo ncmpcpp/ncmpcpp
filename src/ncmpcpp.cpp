@@ -813,7 +813,7 @@ int main(int argc, char *argv[])
 					
 					for (std::vector<size_t>::iterator it = list.begin(); it != list.end(); ++it)
 						if (*it == size_t(myPlaylist->NowPlaying) && list.front() > 0)
-							myPlaylist->Items->BoldOption(myPlaylist->NowPlaying, 0);
+							myPlaylist->Items->Bold(myPlaylist->NowPlaying, 0);
 					
 					std::vector<size_t> origs(list);
 					
@@ -844,7 +844,7 @@ int main(int argc, char *argv[])
 					from = to = myPlaylist->Items->Choice();
 					// unbold now playing as if song changes during move, this won't be unbolded.
 					if (to == size_t(myPlaylist->NowPlaying) && to > 0)
-						myPlaylist->Items->BoldOption(myPlaylist->NowPlaying, 0);
+						myPlaylist->Items->Bold(myPlaylist->NowPlaying, 0);
 					while (Keypressed(input, Key.MvSongUp) && to > 0)
 					{
 						TraceMpdStatus();
@@ -927,7 +927,7 @@ int main(int argc, char *argv[])
 					
 					for (std::vector<size_t>::iterator it = list.begin(); it != list.end(); ++it)
 						if (*it == size_t(myPlaylist->NowPlaying) && list.back() < myPlaylist->Items->Size()-1)
-							myPlaylist->Items->BoldOption(myPlaylist->NowPlaying, 0);
+							myPlaylist->Items->Bold(myPlaylist->NowPlaying, 0);
 					
 					std::vector<size_t> origs(list);
 					
@@ -958,7 +958,7 @@ int main(int argc, char *argv[])
 					from = to = myPlaylist->Items->Choice();
 					// unbold now playing as if song changes during move, this won't be unbolded.
 					if (to == size_t(myPlaylist->NowPlaying) && to < myPlaylist->Items->Size()-1)
-						myPlaylist->Items->BoldOption(myPlaylist->NowPlaying, 0);
+						myPlaylist->Items->Bold(myPlaylist->NowPlaying, 0);
 					while (Keypressed(input, Key.MvSongDown) && to < myPlaylist->Items->Size()-1)
 					{
 						TraceMpdStatus();

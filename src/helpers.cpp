@@ -259,7 +259,7 @@ void UpdateSongList(Menu<Song> *menu)
 				break;
 			}
 		}
-		menu->BoldOption(i, bold);
+		menu->Bold(i, bold);
 		bold = 0;
 	}
 	menu->Refresh();

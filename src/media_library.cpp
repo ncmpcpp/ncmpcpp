@@ -502,7 +502,7 @@ void MediaLibrary::AddToPlaylist(bool add_n_play)
 			ShowMessage("Adding songs from album \"%s\"", Albums->Current().second.Album.c_str());
 	}
 	else if (w == Songs && !Songs->Empty())
-		Songs->BoldOption(Songs->Choice(), myPlaylist->Add(Songs->Current(), Songs->isBold(), add_n_play));
+		Songs->Bold(Songs->Choice(), myPlaylist->Add(Songs->Current(), Songs->isBold(), add_n_play));
 	FreeSongList(list);
 	if (!add_n_play)
 	{

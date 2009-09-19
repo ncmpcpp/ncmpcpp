@@ -108,7 +108,7 @@ void Browser::EnterPressed()
 		}
 		case itSong:
 		{
-			w->BoldOption(w->Choice(), myPlaylist->Add(*item.song, w->isBold(), 1));
+			w->Bold(w->Choice(), myPlaylist->Add(*item.song, w->isBold(), 1));
 			break;
 		}
 		case itPlaylist:
@@ -167,7 +167,7 @@ void Browser::SpacePressed()
 		}
 		case itSong:
 		{
-			w->BoldOption(w->Choice(), myPlaylist->Add(*item.song, w->isBold(), 0));
+			w->Bold(w->Choice(), myPlaylist->Add(*item.song, w->isBold(), 0));
 			break;
 		}
 		case itPlaylist:
@@ -503,7 +503,7 @@ void Browser::UpdateItemList()
 					break;
 				}
 			}
-			w->BoldOption(i, bold);
+			w->Bold(i, bold);
 			bold = 0;
 		}
 	}
