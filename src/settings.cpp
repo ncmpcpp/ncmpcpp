@@ -262,6 +262,8 @@ void DefaultConfiguration(ncmpcpp_config &conf)
 	conf.pattern = "%n - %t";
 	conf.selected_item_prefix << clMagenta;
 	conf.selected_item_suffix << clEnd;
+	conf.now_playing_prefix << fmtBold;
+	conf.now_playing_suffix << fmtBoldEnd;
 	conf.color1 = clWhite;
 	conf.color2 = clGreen;
 	conf.empty_tags_color = clCyan;
@@ -668,6 +670,22 @@ void ReadConfiguration(ncmpcpp_config &conf)
 				{
 					conf.selected_item_suffix.Clear();
 					String2Buffer(v, conf.selected_item_suffix);
+				}
+			}
+			else if (cl.find("now_playing_prefix") != std::string::npos)
+			{
+				if (!v.empty())
+				{
+					conf.now_playing_prefix.Clear();
+					String2Buffer(v, conf.now_playing_prefix);
+				}
+			}
+			else if (cl.find("now_playing_suffix") != std::string::npos)
+			{
+				if (!v.empty())
+				{
+					conf.now_playing_suffix.Clear();
+					String2Buffer(TO_WSTRING(v), conf.now_playing_suffix);
 				}
 			}
 			else if (cl.find("color1") != std::string::npos)

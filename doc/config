@@ -115,12 +115,6 @@
 #
 #tag_editor_album_format = "{(%y) }%b"
 #
-#browser_playlist_prefix = "$2playlist$9 "
-#
-#selected_item_prefix = "$6"
-#
-#selected_item_suffix = "$9"
-#
 ##
 ## Note: Below variables are for alternative version of user's interface.
 ## Their syntax supports all tags and colors listed above plus some extra
@@ -128,7 +122,7 @@
 ## After that you can put:
 ##
 ## - b - bold text
-## - u - underlined text
+## - u - underline text
 ## - r - reverse colors
 ## - a - use alternative character set
 ##
@@ -141,6 +135,21 @@
 #alternative_header_first_line_format = "$b$1$aqqu$/a$9 {%t}|{%f} $1$atqq$/a$9$/b"
 #
 #alternative_header_second_line_format = "{{$4$b%a$/b$9}{ - $7%b$9}{ ($4%y$9)}}|{%D}"
+#
+##
+## Note: Below variables also supports
+## text attributes listed above.
+##
+#
+#now_playing_prefix = "$b"
+#
+#now_playing_suffix = "$/b"
+#
+#browser_playlist_prefix = "$2playlist$9 "
+#
+#selected_item_prefix = "$6"
+#
+#selected_item_suffix = "$9"
 #
 ## colors are not supported for below variable
 #

@@ -150,6 +150,8 @@ struct ncmpcpp_config
 	Buffer browser_playlist_prefix;
 	Buffer selected_item_prefix;
 	Buffer selected_item_suffix;
+	Buffer now_playing_prefix;
+	basic_buffer<my_char_t> now_playing_suffix;
 	
 	Color color1;
 	Color color2;

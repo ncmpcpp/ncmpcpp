@@ -107,7 +107,7 @@ void Display::SongsInColumns(const MPD::Song &s, void *, Menu<MPD::Song> *menu)
 	
 	bool is_now_playing = menu == myPlaylist->Items && menu->CurrentlyDrawedPosition() == myPlaylist->NowPlaying;
 	if (is_now_playing)
-		*menu << fmtBold;
+		*menu << Config.now_playing_prefix;
 	
 	if (Config.columns.empty())
 		return;
@@ -209,7 +209,7 @@ void Display::SongsInColumns(const MPD::Song &s, void *, Menu<MPD::Song> *menu)
 	if ((--it)->color != clDefault)
 		*menu << clEnd;
 	if (is_now_playing)
-		*menu << fmtBoldEnd;
+		*menu << Config.now_playing_suffix;
 }
 
 void Display::Songs(const MPD::Song &s, void *data, Menu<MPD::Song> *menu)
@@ -219,7 +219,7 @@ void Display::Songs(const MPD::Song &s, void *data, Menu<MPD::Song> *menu)
 	
 	bool is_now_playing = menu == myPlaylist->Items && menu->CurrentlyDrawedPosition() == myPlaylist->NowPlaying;
 	if (is_now_playing)
-		*menu << fmtBold;
+		*menu << Config.now_playing_prefix;
 	
 	std::string line = s.toString(*static_cast<std::string *>(data));
 	for (std::string::const_iterator it = line.begin(); it != line.end(); ++it)
@@ -235,8 +235,10 @@ void Display::Songs(const MPD::Song &s, void *data, Menu<MPD::Song> *menu)
 				basic_buffer<my_char_t> buf;
 				buf << U(" ");
 				String2Buffer(TO_WSTRING(line.substr(it-line.begin()+1)), buf);
+				if (is_now_playing)
+					buf << Config.now_playing_suffix;
 				*menu << XY(menu->GetWidth()-buf.Str().length(), menu->Y()) << buf;
-				break;
+				return;
 			}
 			else
 				*menu << *it;
@@ -245,7 +247,7 @@ void Display::Songs(const MPD::Song &s, void *data, Menu<MPD::Song> *menu)
 			*menu << *it;
 	}
 	if (is_now_playing)
-		*menu << fmtBoldEnd;
+		*menu << Config.now_playing_suffix;
 }
 
 void Display::Tags(const MPD::Song &s, void *data, Menu<MPD::Song> *menu)
