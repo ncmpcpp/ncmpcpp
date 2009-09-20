@@ -743,9 +743,9 @@ template <typename T> void NCurses::Menu<T>::Refresh()
 			Reverse(1);
 			*this << itsHighlightColor;
 		}
-		mvwhline(itsWindow, line, 0, 32, itsWidth);
 		if ((*itsOptionsPtr)[i]->isSelected && itsSelectedPrefix)
 			*this << *itsSelectedPrefix;
+		mvwhline(itsWindow, line, 0, 32, itsWidth);
 		if (itsItemDisplayer)
 			itsItemDisplayer((*itsOptionsPtr)[i]->Item, itsItemDisplayerUserdata, this);
 		if ((*itsOptionsPtr)[i]->isSelected && itsSelectedSuffix)
