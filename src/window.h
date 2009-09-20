@@ -469,26 +469,6 @@ namespace NCurses
 			///
 			class BadSize { };
 			
-			/// Sets state of bold attribute (internal use only)
-			/// @param bold_state state of bold attribute
-			///
-			void Bold(bool bold_state) const;
-			
-			/// Sets state of underline attribute (internal use only)
-			/// @param underline_state state of underline attribute
-			///
-			void Underline(bool underline_state) const;
-			
-			/// Sets state of reverse attribute (internal use only)
-			/// @param reverse_state state of reverse attribute
-			///
-			void Reverse(bool reverse_state) const;
-			
-			/// Sets state of altcharset attribute (internal use only)
-			/// @param altcharset_state state of altcharset attribute
-			///
-			void AltCharset(bool altcharset_state) const;
-			
 			/// Sets colors of window (interal use only)
 			/// @param fg foregound color
 			/// @param bg background color
@@ -559,6 +539,26 @@ namespace NCurses
 			Border itsBorder;
 			
 		private:
+			/// Sets state of bold attribute (internal use only)
+			/// @param bold_state state of bold attribute
+			///
+			void Bold(bool bold_state) const;
+			
+			/// Sets state of underline attribute (internal use only)
+			/// @param underline_state state of underline attribute
+			///
+			void Underline(bool underline_state) const;
+			
+			/// Sets state of reverse attribute (internal use only)
+			/// @param reverse_state state of reverse attribute
+			///
+			void Reverse(bool reverse_state) const;
+			
+			/// Sets state of altcharset attribute (internal use only)
+			/// @param altcharset_state state of altcharset attribute
+			///
+			void AltCharset(bool altcharset_state) const;
+			
 			/// pointer to container used as history
 			std::deque<std::wstring> *itsHistory;
 			

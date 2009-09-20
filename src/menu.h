@@ -737,10 +737,10 @@ template <typename T> void NCurses::Menu<T>::Refresh()
 			continue;
 		}
 		if ((*itsOptionsPtr)[i]->isBold)
-			Window::Bold(1);
+			*this << fmtBold;
 		if (highlightEnabled && int(i) == itsHighlight)
 		{
-			Reverse(1);
+			*this << fmtReverse;
 			*this << itsHighlightColor;
 		}
 		if ((*itsOptionsPtr)[i]->isSelected && itsSelectedPrefix)
@@ -753,10 +753,10 @@ template <typename T> void NCurses::Menu<T>::Refresh()
 		if (highlightEnabled && int(i) == itsHighlight)
 		{
 			*this << clEnd;
-			Reverse(0);
+			*this << fmtReverseEnd;
 		}
 		if ((*itsOptionsPtr)[i]->isBold)
-			Window::Bold(0);
+			*this << fmtBoldEnd;
 		line++;
 	}
 	Window::Refresh();
