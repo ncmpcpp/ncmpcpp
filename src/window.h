@@ -26,7 +26,7 @@
 #endif
 
 #ifdef USE_PDCURSES
-# define NCURSES_MOUSE_VERSION 2
+# define NCURSES_MOUSE_VERSION 1
 #endif
 
 #include "curses.h"
