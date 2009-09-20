@@ -451,6 +451,12 @@ namespace NCurses
 			///
 			virtual size_t Size() const;
 			
+			/// @return position of currently drawed item. The result is
+			/// defined only within drawing function that is called by Refresh()
+			/// @see Refresh()
+			///
+			size_t CurrentlyDrawedPosition() const { return itsCurrentlyDrawedPosition; }
+			
 			/// @return reference to last item on the list
 			/// @throw List::InvalidItem if requested item is separator
 			///
@@ -522,6 +528,8 @@ namespace NCurses
 			Color itsHighlightColor;
 			bool highlightEnabled;
 			bool useCyclicScrolling;
+			
+			size_t itsCurrentlyDrawedPosition;
 			
 			Buffer *itsSelectedPrefix;
 			Buffer *itsSelectedSuffix;
@@ -714,7 +722,7 @@ template <typename T> void NCurses::Menu<T>::Refresh()
 	}
 	
 	size_t line = 0;
-	for (size_t i = itsBeginning; i < itsBeginning+itsHeight; ++i)
+	for (size_t &i = (itsCurrentlyDrawedPosition = itsBeginning); i < itsBeginning+itsHeight; ++i)
 	{
 		GotoXY(0, line);
 		if (i >= itsOptionsPtr->size())
