@@ -152,7 +152,7 @@ void ParseArgv(int argc, char **argv)
 					now_playing_format += "}";
 					MPD::Song::ValidateFormat("now-playing format", now_playing_format);
 				}
-				std::cout << Mpd.GetCurrentSong().toString(now_playing_format) << "\n";
+				std::cout << utf_to_locale_cpy(Mpd.GetCurrentSong().toString(now_playing_format)) << "\n";
 			}
 			exit(0);
 		}
