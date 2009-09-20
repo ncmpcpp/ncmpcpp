@@ -500,11 +500,6 @@ namespace NCurses
 			WINDOW *itsWindow;
 			WINDOW *itsWinBorder;
 			
-			/// pointer to helper function used by GetString()
-			/// @see GetString()
-			///
-			GetStringHelper itsGetStringHelper;
-			
 			/// start points and dimensions
 			size_t itsStartX;
 			size_t itsStartY;
@@ -513,19 +508,6 @@ namespace NCurses
 			
 			/// window timeout
 			int itsWindowTimeout;
-			
-			/// temporary coordinates
-			/// @see X()
-			/// @see Y()
-			///
-			int itsX;
-			int itsY;
-			
-			/// window's title
-			std::string itsTitle;
-			
-			/// stack of colors
-			std::stack<Colors> itsColors;
 			
 			/// current colors
 			Color itsColor;
@@ -558,6 +540,24 @@ namespace NCurses
 			/// @param altcharset_state state of altcharset attribute
 			///
 			void AltCharset(bool altcharset_state) const;
+			
+			/// pointer to helper function used by GetString()
+			/// @see GetString()
+			///
+			GetStringHelper itsGetStringHelper;
+			
+			/// temporary coordinates
+			/// @see X()
+			/// @see Y()
+			///
+			int itsX;
+			int itsY;
+			
+			/// window's title
+			std::string itsTitle;
+			
+			/// stack of colors
+			std::stack<Colors> itsColors;
 			
 			/// pointer to container used as history
 			std::deque<std::wstring> *itsHistory;
