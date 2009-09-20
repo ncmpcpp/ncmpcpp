@@ -620,7 +620,19 @@ int Window::Y() const
 
 bool Window::hasCoords(int &x, int &y)
 {
+#	ifndef USE_PDCURSES
 	return wmouse_trafo(itsWindow, &y, &x, 0);
+#	else
+	// wmouse_trafo is broken in pdcurses, use our own implementation
+	if (x >= itsStartX && x < itsStartX+itsWidth
+	&&  y >= itsStartY && y < itsStartY+itsHeight)
+	{
+		x -= itsStartX;
+		y -= itsStartY;
+		return true;
+	}
+	return false;
+#	endif
 }
 
 size_t Window::GetWidth() const
