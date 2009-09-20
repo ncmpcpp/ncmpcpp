@@ -378,11 +378,7 @@ int main(int argc, char *argv[])
 		}
 		else if (Config.mouse_support && input == KEY_MOUSE)
 		{
-#			ifdef USE_PDCURSES
-			nc_getmouse(&mouse_event);
-#			else
 			getmouse(&mouse_event);
-#			endif // USE_PDCURSES
 			if (mouse_event.bstate & BUTTON1_PRESSED
 			&&  mouse_event.y == LINES-(Config.statusbar_visibility ? 2 : 1)
 			   ) // progressbar

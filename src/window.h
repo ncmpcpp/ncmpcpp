@@ -25,6 +25,10 @@
 #include <config.h>
 #endif
 
+#ifdef USE_PDCURSES
+# define NCURSES_MOUSE_VERSION 2
+#endif
+
 #include "curses.h"
 
 #include <deque>
