@@ -47,6 +47,12 @@
 #ifdef USE_PDCURSES
 # undef KEY_BACKSPACE
 # define KEY_BACKSPACE 8
+#else
+// NOTICE: redefine BUTTON2_PRESSED as it doesn't always work, I noticed
+// that it sometimes returns 134217728 instead of expected mask, so the
+// modified define does it right but is rather experimental.
+# undef BUTTON2_PRESSED
+# define BUTTON2_PRESSED (NCURSES_MOUSE_MASK(2, NCURSES_BUTTON_PRESSED) | 134217728U)
 #endif // USE_PDCURSES
 
 #ifdef _UTF8
