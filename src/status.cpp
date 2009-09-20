@@ -185,25 +185,8 @@ void NcmpcppStatusChanged(Connection *, StatusChanges changed, void *)
 	*wFooter << fmtBold;
 	wFooter->GetXY(sx, sy);
 	
-	if ((myPlaylist->NowPlaying != Mpd.GetCurrentSongPos() || changed.SongID) && !Playlist::BlockNowPlayingUpdate)
-	{
-		myPlaylist->OldPlaying = myPlaylist->NowPlaying;
+	if (!Playlist::BlockNowPlayingUpdate)
 		myPlaylist->NowPlaying = Mpd.GetCurrentSongPos();
-		bool was_filtered = myPlaylist->Items->isFiltered();
-		myPlaylist->Items->ShowAll();
-		try
-		{
-			myPlaylist->Items->Bold(myPlaylist->OldPlaying, 0);
-		}
-		catch (std::out_of_range) { }
-		try
-		{
-			myPlaylist->Items->Bold(myPlaylist->NowPlaying, 1);
-		}
-		catch (std::out_of_range) { }
-		if (was_filtered)
-			myPlaylist->Items->ShowFiltered();
-	}
 	
 	if (changed.Playlist)
 	{
@@ -234,7 +217,7 @@ void NcmpcppStatusChanged(Connection *, StatusChanges changed, void *)
 				else
 				{
 					// otherwise just add it to playlist
-					myPlaylist->Items->AddOption(**it, myPlaylist->NowPlaying == pos);
+					myPlaylist->Items->AddOption(**it);
 				}
 				myPlaylist->Items->at(pos).CopyPtr(0);
 				(*it)->NullMe();

@@ -30,7 +30,7 @@
 class Playlist : public Screen<Window>
 {
 	public:
-		Playlist() : NowPlaying(-1), OldPlaying(-1), itsTotalLength(0), itsRemainingTime(0), itsScrollBegin(0) { }
+		Playlist() : NowPlaying(-1), itsTotalLength(0), itsRemainingTime(0), itsScrollBegin(0) { }
 		~Playlist() { }
 		
 		virtual void SwitchTo();
@@ -73,7 +73,6 @@ class Playlist : public Screen<Window>
 		Menu< MPD::Song > *Items;
 		
 		int NowPlaying;
-		int OldPlaying;
 		
 		static bool ReloadTotalLength;
 		static bool ReloadRemaining;

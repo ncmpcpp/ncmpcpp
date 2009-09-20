@@ -19,7 +19,6 @@
  ***************************************************************************/
 
 #include "display.h"
-#include "global.h"
 #include "helpers.h"
 #include "playlist.h"
 
@@ -105,6 +104,10 @@ void Display::SongsInColumns(const MPD::Song &s, void *, Menu<MPD::Song> *menu)
 {
 	if (!s.Localized())
 		const_cast<MPD::Song *>(&s)->Localize();
+	
+	bool is_now_playing = menu == myPlaylist->Items && menu->CurrentlyDrawedPosition() == myPlaylist->NowPlaying;
+	if (is_now_playing)
+		*menu << fmtBold;
 	
 	if (Config.columns.empty())
 		return;
@@ -205,12 +208,18 @@ void Display::SongsInColumns(const MPD::Song &s, void *, Menu<MPD::Song> *menu)
 	}
 	if ((--it)->color != clDefault)
 		*menu << clEnd;
+	if (is_now_playing)
+		*menu << fmtBoldEnd;
 }
 
 void Display::Songs(const MPD::Song &s, void *data, Menu<MPD::Song> *menu)
 {
 	if (!s.Localized())
 		const_cast<MPD::Song *>(&s)->Localize();
+	
+	bool is_now_playing = menu == myPlaylist->Items && menu->CurrentlyDrawedPosition() == myPlaylist->NowPlaying;
+	if (is_now_playing)
+		*menu << fmtBold;
 	
 	std::string line = s.toString(*static_cast<std::string *>(data));
 	for (std::string::const_iterator it = line.begin(); it != line.end(); ++it)
@@ -235,6 +244,8 @@ void Display::Songs(const MPD::Song &s, void *data, Menu<MPD::Song> *menu)
 		else
 			*menu << *it;
 	}
+	if (is_now_playing)
+		*menu << fmtBoldEnd;
 }
 
 void Display::Tags(const MPD::Song &s, void *data, Menu<MPD::Song> *menu)

@@ -806,18 +806,32 @@ int main(int argc, char *argv[])
 				{
 					std::vector<size_t> list;
 					myPlaylist->Items->GetSelected(list);
-					
-					for (std::vector<size_t>::iterator it = list.begin(); it != list.end(); ++it)
-						if (*it == size_t(myPlaylist->NowPlaying) && list.front() > 0)
-							myPlaylist->Items->Bold(myPlaylist->NowPlaying, 0);
-					
 					std::vector<size_t> origs(list);
+					
+					// NOTICE: since ncmpcpp only pretends to move the songs until the key is
+					// released, mpd doesn't know about the change while the songs are moved
+					// so wee need to block playlist update for this time and also if one of
+					// the songs being moved is currently playing, now playing update to prevent
+					// mpd from 'updating' and thus showing wrong position
+					
+					bool modify_now_playing = 0;
+					for (std::vector<size_t>::iterator it = list.begin(); it != list.end(); ++it)
+					{
+						if (*it == size_t(myPlaylist->NowPlaying) && list.front() > 0)
+						{
+							modify_now_playing = 1;
+							Playlist::BlockNowPlayingUpdate = 1;
+							break;
+						}
+					}
 					
 					while (Keypressed(input, Key.MvSongUp) && list.front() > 0)
 					{
 						TraceMpdStatus();
 						Playlist::BlockUpdate = 1;
 						myPlaylist->UpdateTimer();
+						if (modify_now_playing)
+							--myPlaylist->NowPlaying;
 						for (std::vector<size_t>::iterator it = list.begin(); it != list.end(); ++it)
 						{
 							--*it;
@@ -829,6 +843,7 @@ int main(int argc, char *argv[])
 						myPlaylist->Items->Refresh();
 						myPlaylist->Items->ReadKey(input);
 					}
+					Playlist::BlockNowPlayingUpdate = 0;
 					Mpd.StartCommandsList();
 					for (size_t i = 0; i < list.size(); ++i)
 						Mpd.Move(origs[i], list[i]);
@@ -838,14 +853,16 @@ int main(int argc, char *argv[])
 				{
 					size_t from, to;
 					from = to = myPlaylist->Items->Choice();
-					// unbold now playing as if song changes during move, this won't be unbolded.
-					if (to == size_t(myPlaylist->NowPlaying) && to > 0)
-						myPlaylist->Items->Bold(myPlaylist->NowPlaying, 0);
+					bool modify_now_playing = from == size_t(myPlaylist->NowPlaying);
+					if (modify_now_playing)
+						Playlist::BlockNowPlayingUpdate = 1;
 					while (Keypressed(input, Key.MvSongUp) && to > 0)
 					{
 						TraceMpdStatus();
 						Playlist::BlockUpdate = 1;
 						myPlaylist->UpdateTimer();
+						if (modify_now_playing)
+							--myPlaylist->NowPlaying;
 						--to;
 						myPlaylist->Items->at(from).SetPosition(to);
 						myPlaylist->Items->at(to).SetPosition(from);
@@ -855,6 +872,7 @@ int main(int argc, char *argv[])
 						myPlaylist->Items->ReadKey(input);
 					}
 					Mpd.Move(from, to);
+					Playlist::BlockNowPlayingUpdate = 0;
 					UpdateStatusImmediately = 1;
 				}
 				myPlaylist->Items->SetTimeout(ncmpcpp_window_timeout);
@@ -920,18 +938,26 @@ int main(int argc, char *argv[])
 				{
 					std::vector<size_t> list;
 					myPlaylist->Items->GetSelected(list);
-					
-					for (std::vector<size_t>::iterator it = list.begin(); it != list.end(); ++it)
-						if (*it == size_t(myPlaylist->NowPlaying) && list.back() < myPlaylist->Items->Size()-1)
-							myPlaylist->Items->Bold(myPlaylist->NowPlaying, 0);
-					
 					std::vector<size_t> origs(list);
+					
+					bool modify_now_playing = 0;
+					for (std::vector<size_t>::iterator it = list.begin(); it != list.end(); ++it)
+					{
+						if (*it == size_t(myPlaylist->NowPlaying) && list.back() < myPlaylist->Items->Size()-1)
+						{
+							modify_now_playing = 1;
+							Playlist::BlockNowPlayingUpdate = 1;
+							break;
+						}
+					}
 					
 					while (Keypressed(input, Key.MvSongDown) && list.back() < myPlaylist->Items->Size()-1)
 					{
 						TraceMpdStatus();
 						Playlist::BlockUpdate = 1;
 						myPlaylist->UpdateTimer();
+						if (modify_now_playing)
+							++myPlaylist->NowPlaying;
 						for (std::vector<size_t>::reverse_iterator it = list.rbegin(); it != list.rend(); ++it)
 						{
 							++*it;
@@ -943,6 +969,7 @@ int main(int argc, char *argv[])
 						myPlaylist->Items->Refresh();
 						myPlaylist->Items->ReadKey(input);
 					}
+					Playlist::BlockNowPlayingUpdate = 0;
 					Mpd.StartCommandsList();
 					for (int i = list.size()-1; i >= 0; --i)
 						Mpd.Move(origs[i], list[i]);
@@ -952,14 +979,16 @@ int main(int argc, char *argv[])
 				{
 					size_t from, to;
 					from = to = myPlaylist->Items->Choice();
-					// unbold now playing as if song changes during move, this won't be unbolded.
-					if (to == size_t(myPlaylist->NowPlaying) && to < myPlaylist->Items->Size()-1)
-						myPlaylist->Items->Bold(myPlaylist->NowPlaying, 0);
+					bool modify_now_playing = from == size_t(myPlaylist->NowPlaying);
+					if (modify_now_playing)
+						Playlist::BlockNowPlayingUpdate = 1;
 					while (Keypressed(input, Key.MvSongDown) && to < myPlaylist->Items->Size()-1)
 					{
 						TraceMpdStatus();
 						Playlist::BlockUpdate = 1;
 						myPlaylist->UpdateTimer();
+						if (modify_now_playing)
+							++myPlaylist->NowPlaying;
 						++to;
 						myPlaylist->Items->at(from).SetPosition(to);
 						myPlaylist->Items->at(to).SetPosition(from);
@@ -969,6 +998,7 @@ int main(int argc, char *argv[])
 						myPlaylist->Items->ReadKey(input);
 					}
 					Mpd.Move(from, to);
+					Playlist::BlockNowPlayingUpdate = 0;
 					UpdateStatusImmediately = 1;
 				}
 				myPlaylist->Items->SetTimeout(ncmpcpp_window_timeout);
