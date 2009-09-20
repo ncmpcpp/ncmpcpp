@@ -30,7 +30,9 @@
 #include "window.h"
 #include "screen.h"
 
-#include <fftw3.h>
+#ifdef HAVE_FFTW3_H
+# include <fftw3.h>
+#endif
 
 class Visualizer : public Screen<Window>
 {
