@@ -18,6 +18,8 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
+#include <iomanip>
+
 #include "display.h"
 #include "global.h"
 #include "helpers.h"
@@ -30,6 +32,20 @@ using namespace MPD;
 using namespace Global;
 
 SearchEngine *mySearcher = new SearchEngine;
+
+const char *SearchEngine::ConstraintsNames[] =
+{
+	"Any:",
+	"Artist:",
+	"Title:",
+	"Album:",
+	"Filename:",
+	"Composer:",
+	"Performer:",
+	"Genre:",
+	"Year:",
+	"Comment:"
+};
 
 const char *SearchEngine::NormalMode = "Match if tag contains searched phrase (regexes supported)";
 const char *SearchEngine::StrictMode = "Match only if both values are the same";
@@ -97,149 +113,67 @@ void SearchEngine::EnterPressed()
 	if (option < 15)
 		LockStatusbar();
 	
-	switch (option)
+	if (option < 10)
 	{
-		case 0:
-		{
-			Statusbar() << fmtBold << "Any: " << fmtBoldEnd;
-			itsPattern.Any(wFooter->GetString(itsPattern.Any()));
-			*w->Current().first << fmtBold << "Any:      " << fmtBoldEnd << ' ';
-			ShowTag(*w->Current().first, itsPattern.Any());
-			break;
-		}
-		case 1:
-		{
-			Statusbar() << fmtBold << "Artist: " << fmtBoldEnd;
-			itsPattern.SetArtist(wFooter->GetString(itsPattern.GetArtist()));
-			*w->Current().first << fmtBold << "Artist:   " << fmtBoldEnd << ' ';
-			ShowTag(*w->Current().first, itsPattern.GetArtist());
-			break;
-		}
-		case 2:
-		{
-			Statusbar() << fmtBold << "Title: " << fmtBoldEnd;
-			itsPattern.SetTitle(wFooter->GetString(itsPattern.GetTitle()));
-			*w->Current().first << fmtBold << "Title:    " << fmtBoldEnd << ' ';
-			ShowTag(*w->Current().first, itsPattern.GetTitle());
-			break;
-		}
-		case 3:
-		{
-			Statusbar() << fmtBold << "Album: " << fmtBoldEnd;
-			itsPattern.SetAlbum(wFooter->GetString(itsPattern.GetAlbum()));
-			*w->Current().first << fmtBold << "Album:    " << fmtBoldEnd << ' ';
-			ShowTag(*w->Current().first, itsPattern.GetAlbum());
-			break;
-		}
-		case 4:
-		{
-			Statusbar() << fmtBold << "Filename: " << fmtBoldEnd;
-			itsPattern.SetFile(wFooter->GetString(itsPattern.GetFile()));
-			*w->Current().first << fmtBold << "Filename: " << fmtBoldEnd << ' ';
-			ShowTag(*w->Current().first, itsPattern.GetFile());
-			break;
-		}
-		case 5:
-		{
-			Statusbar() << fmtBold << "Composer: " << fmtBoldEnd;
-			itsPattern.SetComposer(wFooter->GetString(itsPattern.GetComposer()));
-			*w->Current().first << fmtBold << "Composer: " << fmtBoldEnd << ' ';
-			ShowTag(*w->Current().first, itsPattern.GetComposer());
-			break;
-		}
-		case 6:
-		{
-			Statusbar() << fmtBold << "Performer: " << fmtBoldEnd;
-			itsPattern.SetPerformer(wFooter->GetString(itsPattern.GetPerformer()));
-			*w->Current().first << fmtBold << "Performer:" << fmtBoldEnd << ' ';
-			ShowTag(*w->Current().first, itsPattern.GetPerformer());
-			break;
-		}
-		case 7:
-		{
-			Statusbar() << fmtBold << "Genre: " << fmtBoldEnd;
-			itsPattern.SetGenre(wFooter->GetString(itsPattern.GetGenre()));
-			*w->Current().first << fmtBold << "Genre:    " << fmtBoldEnd << ' ';
-			ShowTag(*w->Current().first, itsPattern.GetGenre());
-			break;
-		}
-		case 8:
-		{
-			Statusbar() << fmtBold << "Year: " << fmtBoldEnd;
-			itsPattern.SetDate(wFooter->GetString(itsPattern.GetDate()));
-			*w->Current().first << fmtBold << "Year:     " << fmtBoldEnd << ' ';
-			ShowTag(*w->Current().first, itsPattern.GetDate());
-			break;
-		}
-		case 9:
-		{
-			Statusbar() << fmtBold << "Comment: " << fmtBoldEnd;
-			itsPattern.SetComment(wFooter->GetString(itsPattern.GetComment()));
-			*w->Current().first << fmtBold << "Comment:  " << fmtBoldEnd << ' ';
-			ShowTag(*w->Current().first, itsPattern.GetComment());
-			break;
-		}
-		case 11:
-		{
-			Config.search_in_db = !Config.search_in_db;
-			*w->Current().first << fmtBold << "Search in:" << fmtBoldEnd << ' ' << (Config.search_in_db ? "Database" : "Current playlist");
-			break;
-		}
-		case 12:
-		{
-			MatchToPattern = !MatchToPattern;
-			*w->Current().first << fmtBold << "Search mode:" << fmtBoldEnd << ' ' << (MatchToPattern ? NormalMode : StrictMode);
-			break;
-		}
-		case 13:
-		{
-			CaseSensitive = !CaseSensitive * REG_ICASE;
-			*w->Current().first << fmtBold << "Case sensitive:" << fmtBoldEnd << ' ' << (!CaseSensitive ? "Yes" : "No");
-			break;
-		}
-		case 15:
-		{
-			ShowMessage("Searching...");
-			if (w->Size() > StaticOptions)
-				Prepare();
-			Search();
-			if (!w->Back().first)
-			{
-				if (Config.columns_in_search_engine)
-					w->SetTitle(Display::Columns());
-				size_t found = w->Size()-SearchEngine::StaticOptions;
-				found += 3; // don't count options inserted below
-				w->InsertSeparator(ResetButton+1);
-				w->InsertOption(ResetButton+2, std::make_pair(static_cast<Buffer *>(0), static_cast<Song *>(0)), 1, 1);
-				w->at(ResetButton+2).first = new Buffer();
-				*w->at(ResetButton+2).first << Config.color1 << "Search results: " << Config.color2 << "Found " << found  << (found > 1 ? " songs" : " song") << clDefault;
-				w->InsertSeparator(ResetButton+3);
-				UpdateFoundList();
-				ShowMessage("Searching finished!");
-				if (Config.block_search_constraints_change)
-					for (size_t i = 0; i < StaticOptions-4; ++i)
-						w->Static(i, 1);
-				w->Scroll(wDown);
-				w->Scroll(wDown);
-			}
-			else
-				ShowMessage("No results found");
-			break;
-		}
-		case 16:
-		{
-			itsPattern.Clear();
-			w->Reset();
-			Prepare();
-			ShowMessage("Search state reset");
-			break;
-		}
-		default:
-		{
-			w->Bold(w->Choice(), myPlaylist->Add(*w->Current().second, w->isBold(), 1));
-			break;
-		}
+		Statusbar() << fmtBold << ConstraintsNames[option] << fmtBoldEnd << ' ';
+		itsConstraints[option] = wFooter->GetString(itsConstraints[option]);
+		*w->Current().first << fmtBold << std::setw(10) << std::left << ConstraintsNames[option] << fmtBoldEnd << ' ';
+		ShowTag(*w->Current().first, itsConstraints[option]);
 	}
+	else if (option == 11)
+	{
+		Config.search_in_db = !Config.search_in_db;
+		*w->Current().first << fmtBold << "Search in:" << fmtBoldEnd << ' ' << (Config.search_in_db ? "Database" : "Current playlist");
+	}
+	else if (option == 12)
+	{
+		MatchToPattern = !MatchToPattern;
+		*w->Current().first << fmtBold << "Search mode:" << fmtBoldEnd << ' ' << (MatchToPattern ? NormalMode : StrictMode);
+	}
+	else if (option == 13)
+	{
+		CaseSensitive = !CaseSensitive * REG_ICASE;
+		*w->Current().first << fmtBold << "Case sensitive:" << fmtBoldEnd << ' ' << (!CaseSensitive ? "Yes" : "No");
+	}
+	else if (option == 15)
+	{
+		ShowMessage("Searching...");
+		if (w->Size() > StaticOptions)
+			Prepare();
+		Search();
+		if (!w->Back().first)
+		{
+			if (Config.columns_in_search_engine)
+				w->SetTitle(Display::Columns());
+			size_t found = w->Size()-SearchEngine::StaticOptions;
+			found += 3; // don't count options inserted below
+			w->InsertSeparator(ResetButton+1);
+			w->InsertOption(ResetButton+2, std::make_pair(static_cast<Buffer *>(0), static_cast<Song *>(0)), 1, 1);
+			w->at(ResetButton+2).first = new Buffer();
+			*w->at(ResetButton+2).first << Config.color1 << "Search results: " << Config.color2 << "Found " << found  << (found > 1 ? " songs" : " song") << clDefault;
+			w->InsertSeparator(ResetButton+3);
+			UpdateFoundList();
+			ShowMessage("Searching finished!");
+			if (Config.block_search_constraints_change)
+				for (size_t i = 0; i < StaticOptions-4; ++i)
+					w->Static(i, 1);
+			w->Scroll(wDown);
+			w->Scroll(wDown);
+		}
+		else
+			ShowMessage("No results found");
+	}
+	else if (option == 16)
+	{
+		for (size_t i = 0; i < ConstraintsNumber; ++i)
+			itsConstraints[i].clear();
+		w->Reset();
+		Prepare();
+		ShowMessage("Search state reset");
+	}
+	else
+		w->Bold(w->Choice(), myPlaylist->Add(*w->Current().second, w->isBold(), 1));
+	
 	if (option < 15)
 		UnlockStatusbar();
 }
@@ -298,9 +232,7 @@ void SearchEngine::GetSelectedSongs(MPD::SongList &v)
 	std::vector<size_t> selected;
 	w->GetSelected(selected);
 	for (std::vector<size_t>::const_iterator it = selected.begin(); it != selected.end(); ++it)
-	{
 		v.push_back(new MPD::Song(*w->at(*it).second));
-	}
 }
 
 void SearchEngine::ApplyFilter(const std::string &s)
@@ -350,35 +282,11 @@ void SearchEngine::Prepare()
 		(*w)[i].first = new Buffer();
 	}
 	
-	*w->at(0).first << fmtBold << "Any:      " << fmtBoldEnd << ' ';
-	ShowTag(*w->at(0).first, itsPattern.Any());
-	
-	*w->at(1).first << fmtBold << "Artist:   " << fmtBoldEnd << ' ';
-	ShowTag(*w->at(1).first, itsPattern.GetArtist());
-	
-	*w->at(2).first << fmtBold << "Title:    " << fmtBoldEnd << ' ';
-	ShowTag(*w->at(2).first, itsPattern.GetTitle());
-	
-	*w->at(3).first << fmtBold << "Album:    " << fmtBoldEnd << ' ';
-	ShowTag(*w->at(3).first, itsPattern.GetAlbum());
-	
-	*w->at(4).first << fmtBold << "Filename: " << fmtBoldEnd << ' ';
-	ShowTag(*w->at(4).first, itsPattern.GetName());
-	
-	*w->at(5).first << fmtBold << "Composer: " << fmtBoldEnd << ' ';
-	ShowTag(*w->at(5).first, itsPattern.GetComposer());
-	
-	*w->at(6).first << fmtBold << "Performer:" << fmtBoldEnd << ' ';
-	ShowTag(*w->at(6).first, itsPattern.GetPerformer());
-	
-	*w->at(7).first << fmtBold << "Genre:    " << fmtBoldEnd << ' ';
-	ShowTag(*w->at(7).first, itsPattern.GetGenre());
-	
-	*w->at(8).first << fmtBold << "Year:     " << fmtBoldEnd << ' ';
-	ShowTag(*w->at(8).first, itsPattern.GetDate());
-	
-	*w->at(9).first << fmtBold << "Comment:  " << fmtBoldEnd << ' ';
-	ShowTag(*w->at(9).first, itsPattern.GetComment());
+	for (size_t i = 0; i < ConstraintsNumber; ++i)
+	{
+		*(*w)[i].first << fmtBold << std::setw(10) << std::left << ConstraintsNames[i] << fmtBoldEnd << ' ';
+		ShowTag(*(*w)[i].first, itsConstraints[i]);
+	}
 	
 	*w->at(11).first << fmtBold << "Search in:" << fmtBoldEnd << ' ' << (Config.search_in_db ? "Database" : "Current playlist");
 	*w->at(12).first << fmtBold << "Search mode:" << fmtBoldEnd << ' ' << (MatchToPattern ? NormalMode : StrictMode);
@@ -390,10 +298,17 @@ void SearchEngine::Prepare()
 
 void SearchEngine::Search()
 {
-	if (itsPattern.Empty())
+	bool constraints_empty = 1;
+	for (size_t i = 0; i < ConstraintsNumber; ++i)
+	{
+		if (!itsConstraints[i].empty())
+		{
+			constraints_empty = 0;
+			break;
+		}
+	}
+	if (constraints_empty)
 		return;
-	
-	SearchPattern s = itsPattern;
 	
 	SongList list;
 	if (Config.search_in_db)
@@ -409,44 +324,8 @@ void SearchEngine::Search()
 	bool found = 1;
 	
 	if (!CaseSensitive && !MatchToPattern)
-	{
-		std::string t;
-		t = s.Any();
-		ToLower(t);
-		s.Any(t);
-		
-		t = s.GetArtist();
-		ToLower(t);
-		s.SetArtist(t);
-		
-		t = s.GetTitle();
-		ToLower(t);
-		s.SetTitle(t);
-		
-		t = s.GetAlbum();
-		ToLower(t);
-		s.SetAlbum(t);
-		
-		t = s.GetFile();
-		ToLower(t);
-		s.SetFile(t);
-		
-		t = s.GetComposer();
-		ToLower(t);
-		s.SetComposer(t);
-		
-		t = s.GetPerformer();
-		ToLower(t);
-		s.SetPerformer(t);
-		
-		t = s.GetGenre();
-		ToLower(t);
-		s.SetGenre(t);
-		
-		t = s.GetComment();
-		ToLower(t);
-		s.SetComment(t);
-	}
+		for (size_t i = 0; i < ConstraintsNumber; ++i)
+			ToLower(itsConstraints[i]);
 	
 	for (SongList::const_iterator it = list.begin(); it != list.end(); ++it)
 	{
@@ -493,111 +372,109 @@ void SearchEngine::Search()
 		{
 			regex_t rx;
 			
-			if (!s.Any().empty())
+			if (!itsConstraints[0].empty())
 			{
-				if (regcomp(&rx, s.Any().c_str(), CaseSensitive | Config.regex_type) == 0)
+				if (regcomp(&rx, itsConstraints[0].c_str(), CaseSensitive | Config.regex_type) == 0)
 				{
-					any_found =
-						regexec(&rx, copy.GetArtist().c_str(), 0, 0, 0) == 0
-					||	regexec(&rx, copy.GetTitle().c_str(), 0, 0, 0) == 0
-					||	regexec(&rx, copy.GetAlbum().c_str(), 0, 0, 0) == 0
-					||	regexec(&rx, copy.GetName().c_str(), 0, 0, 0) == 0
-					||	regexec(&rx, copy.GetComposer().c_str(), 0, 0, 0) == 0
-					||	regexec(&rx, copy.GetPerformer().c_str(), 0, 0, 0) == 0
-					||	regexec(&rx, copy.GetGenre().c_str(), 0, 0, 0) == 0
-					||	regexec(&rx, copy.GetDate().c_str(), 0, 0, 0) == 0
-					||	regexec(&rx, copy.GetComment().c_str(), 0, 0, 0) == 0;
+					any_found =	!regexec(&rx, copy.GetArtist().c_str(), 0, 0, 0)
+					||		!regexec(&rx, copy.GetTitle().c_str(), 0, 0, 0)
+					||		!regexec(&rx, copy.GetAlbum().c_str(), 0, 0, 0)
+					||		!regexec(&rx, copy.GetName().c_str(), 0, 0, 0)
+					||		!regexec(&rx, copy.GetComposer().c_str(), 0, 0, 0)
+					||		!regexec(&rx, copy.GetPerformer().c_str(), 0, 0, 0)
+					||		!regexec(&rx, copy.GetGenre().c_str(), 0, 0, 0)
+					||		!regexec(&rx, copy.GetDate().c_str(), 0, 0, 0)
+					||		!regexec(&rx, copy.GetComment().c_str(), 0, 0, 0);
 				}
 				regfree(&rx);
 			}
 			
-			if (found && !s.GetArtist().empty())
+			if (found && !itsConstraints[1].empty())
 			{
-				if (regcomp(&rx, s.GetArtist().c_str(), CaseSensitive | Config.regex_type) == 0)
-					found = regexec(&rx, copy.GetArtist().c_str(), 0, 0, 0) == 0;
+				if (!regcomp(&rx, itsConstraints[1].c_str(), CaseSensitive | Config.regex_type))
+					found = !regexec(&rx, copy.GetArtist().c_str(), 0, 0, 0);
 				regfree(&rx);
 			}
-			if (found && !s.GetTitle().empty())
+			if (found && !itsConstraints[2].empty())
 			{
-				if (regcomp(&rx, s.GetTitle().c_str(), CaseSensitive | Config.regex_type) == 0)
-					found = regexec(&rx, copy.GetTitle().c_str(), 0, 0, 0) == 0;
+				if (!regcomp(&rx, itsConstraints[2].c_str(), CaseSensitive | Config.regex_type))
+					found = !regexec(&rx, copy.GetTitle().c_str(), 0, 0, 0);
 				regfree(&rx);
 			}
-			if (found && !s.GetAlbum().empty())
+			if (found && !itsConstraints[3].empty())
 			{
-				if (regcomp(&rx, s.GetAlbum().c_str(), CaseSensitive | Config.regex_type) == 0)
-					found = regexec(&rx, copy.GetAlbum().c_str(), 0, 0, 0) == 0;
+				if (!regcomp(&rx, itsConstraints[3].c_str(), CaseSensitive | Config.regex_type))
+					found = !regexec(&rx, copy.GetAlbum().c_str(), 0, 0, 0);
 				regfree(&rx);
 			}
-			if (found && !s.GetFile().empty())
+			if (found && !itsConstraints[4].empty())
 			{
-				if (regcomp(&rx, s.GetFile().c_str(), CaseSensitive | Config.regex_type) == 0)
-					found = regexec(&rx, copy.GetName().c_str(), 0, 0, 0) == 0;
+				if (!regcomp(&rx, itsConstraints[4].c_str(), CaseSensitive | Config.regex_type))
+					found = !regexec(&rx, copy.GetName().c_str(), 0, 0, 0);
 				regfree(&rx);
 			}
-			if (found && !s.GetComposer().empty())
+			if (found && !itsConstraints[5].empty())
 			{
-				if (regcomp(&rx, s.GetComposer().c_str(), CaseSensitive | Config.regex_type) == 0)
-					found = regexec(&rx, copy.GetComposer().c_str(), 0, 0, 0) == 0;
+				if (!regcomp(&rx, itsConstraints[5].c_str(), CaseSensitive | Config.regex_type))
+					found = !regexec(&rx, copy.GetComposer().c_str(), 0, 0, 0);
 				regfree(&rx);
 			}
-			if (found && !s.GetPerformer().empty())
+			if (found && !itsConstraints[6].empty())
 			{
-				if (regcomp(&rx, s.GetPerformer().c_str(), CaseSensitive | Config.regex_type) == 0)
-					found = regexec(&rx, copy.GetPerformer().c_str(), 0, 0, 0) == 0;
+				if (!regcomp(&rx, itsConstraints[6].c_str(), CaseSensitive | Config.regex_type))
+					found = !regexec(&rx, copy.GetPerformer().c_str(), 0, 0, 0);
 				regfree(&rx);
 			}
-			if (found && !s.GetGenre().empty())
+			if (found && !itsConstraints[7].empty())
 			{
-				if (regcomp(&rx, s.GetGenre().c_str(), CaseSensitive | Config.regex_type) == 0)
-					found = regexec(&rx, copy.GetGenre().c_str(), 0, 0, 0) == 0;
+				if (!regcomp(&rx, itsConstraints[7].c_str(), CaseSensitive | Config.regex_type))
+					found = !regexec(&rx, copy.GetGenre().c_str(), 0, 0, 0);
 				regfree(&rx);
 			}
-			if (found && !s.GetDate().empty())
+			if (found && !itsConstraints[8].empty())
 			{
-				if (regcomp(&rx, s.GetDate().c_str(), CaseSensitive | Config.regex_type) == 0)
-					found = regexec(&rx, copy.GetDate().c_str(), 0, 0, 0) == 0;
+				if (!regcomp(&rx, itsConstraints[8].c_str(), CaseSensitive | Config.regex_type))
+					found = !regexec(&rx, copy.GetDate().c_str(), 0, 0, 0);
 				regfree(&rx);
 			}
-			if (found && !s.GetComment().empty())
+			if (found && !itsConstraints[9].empty())
 			{
-				if (regcomp(&rx, s.GetComment().c_str(), CaseSensitive | Config.regex_type) == 0)
-					found = regexec(&rx, copy.GetComment().c_str(), 0, 0, 0) == 0;
+				if (!regcomp(&rx, itsConstraints[9].c_str(), CaseSensitive | Config.regex_type))
+					found = !regexec(&rx, copy.GetComment().c_str(), 0, 0, 0);
 				regfree(&rx);
 			}
 		}
 		else
 		{
-			if (!s.Any().empty())
-				any_found =
-					copy.GetArtist() == s.Any()
-				||	copy.GetTitle() == s.Any()
-				||	copy.GetAlbum() == s.Any()
-				||	copy.GetName() == s.Any()
-				||	copy.GetComposer() == s.Any()
-				||	copy.GetPerformer() == s.Any()
-				||	copy.GetGenre() == s.Any()
-				||	copy.GetDate() == s.Any()
-				||	copy.GetComment() == s.Any();
+			if (!itsConstraints[0].empty())
+				any_found =	copy.GetArtist() == itsConstraints[0]
+				||		copy.GetTitle() == itsConstraints[0]
+				||		copy.GetAlbum() == itsConstraints[0]
+				||		copy.GetName() == itsConstraints[0]
+				||		copy.GetComposer() == itsConstraints[0]
+				||		copy.GetPerformer() == itsConstraints[0]
+				||		copy.GetGenre() == itsConstraints[0]
+				||		copy.GetDate() == itsConstraints[0]
+				||		copy.GetComment() == itsConstraints[0];
 			
-			if (found && !s.GetArtist().empty())
-				found = copy.GetArtist() == s.GetArtist();
-			if (found && !s.GetTitle().empty())
-				found = copy.GetTitle() == s.GetTitle();
-			if (found && !s.GetAlbum().empty())
-				found = copy.GetAlbum() == s.GetAlbum();
-			if (found && !s.GetFile().empty())
-				found = copy.GetName() == s.GetFile();
-			if (found && !s.GetComposer().empty())
-				found = copy.GetComposer() == s.GetComposer();
-			if (found && !s.GetPerformer().empty())
-				found = copy.GetPerformer() == s.GetPerformer();
-			if (found && !s.GetGenre().empty())
-				found = copy.GetGenre() == s.GetGenre();
-			if (found && !s.GetDate().empty())
-				found = copy.GetDate() == s.GetDate();
-			if (found && !s.GetComment().empty())
-				found = copy.GetComment() == s.GetComment();
+			if (found && !itsConstraints[1].empty())
+				found = copy.GetArtist() == itsConstraints[1];
+			if (found && !itsConstraints[2].empty())
+				found = copy.GetTitle() == itsConstraints[2];
+			if (found && !itsConstraints[3].empty())
+				found = copy.GetAlbum() == itsConstraints[3];
+			if (found && !itsConstraints[4].empty())
+				found = copy.GetName() == itsConstraints[4];
+			if (found && !itsConstraints[5].empty())
+				found = copy.GetComposer() == itsConstraints[5];
+			if (found && !itsConstraints[6].empty())
+				found = copy.GetPerformer() == itsConstraints[6];
+			if (found && !itsConstraints[7].empty())
+				found = copy.GetGenre() == itsConstraints[7];
+			if (found && !itsConstraints[8].empty())
+				found = copy.GetDate() == itsConstraints[8];
+			if (found && !itsConstraints[9].empty())
+				found = copy.GetComment() == itsConstraints[9];
 		}
 		
 		if (CaseSensitive || MatchToPattern)

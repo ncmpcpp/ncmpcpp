@@ -26,19 +26,6 @@
 
 class SearchEngine : public Screen< Menu< std::pair<Buffer *, MPD::Song *> > >
 {
-	class SearchPattern : public MPD::Song
-	{
-		public:
-			const std::string &Any() { return itsAnyField; }
-			const std::string &Any(const std::string &s) { itsAnyField = s; return itsAnyField; }
-			
-			void Clear() { Song::Clear(); itsAnyField.clear(); }
-			bool Empty() { return Song::Empty() && itsAnyField.empty(); }
-			
-		protected:
-			std::string itsAnyField;
-	};
-	
 	public:
 		virtual void Resize();
 		virtual void SwitchTo();
@@ -77,7 +64,9 @@ class SearchEngine : public Screen< Menu< std::pair<Buffer *, MPD::Song *> > >
 		
 		static std::string SearchEngineOptionToString(const std::pair<Buffer *, MPD::Song *> &, void *);
 		
-		SearchPattern itsPattern;
+		static const size_t ConstraintsNumber = 10;
+		static const char *ConstraintsNames[];
+		std::string itsConstraints[ConstraintsNumber];
 		
 		static bool MatchToPattern;
 		static int CaseSensitive;
