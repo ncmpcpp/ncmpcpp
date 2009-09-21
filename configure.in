@@ -28,6 +28,21 @@ if test "$clock" = "yes"; then
 	AC_DEFINE([ENABLE_CLOCK], [1], [enables clock screen])
 fi
 
+dnl =====================================
+dnl = checking for -fno-exceptions flag =
+dnl =====================================
+AC_MSG_CHECKING([whether compiler supports -fno-exceptions])
+old_CXXFLAGS="$CXXFLAGS"
+CXXFLAGS="-fno-exceptions"
+AC_COMPILE_IFELSE(AC_LANG_PROGRAM([[ ]]),
+	AC_MSG_RESULT([yes])
+	no_exceptions="-fno-exceptions"
+	,
+	AC_MSG_RESULT([no])
+)
+CXXFLAGS="$old_CXXFLAGS $no_exceptions"
+
+
 dnl ====================================
 dnl = checking for win32 related stuff =
 dnl ====================================
