@@ -323,68 +323,25 @@ void SearchEngine::Search()
 	bool any_found = 1;
 	bool found = 1;
 	
-	if (!CaseSensitive && !MatchToPattern)
-		for (size_t i = 0; i < ConstraintsNumber; ++i)
-			ToLower(itsConstraints[i]);
-	
 	for (SongList::const_iterator it = list.begin(); it != list.end(); ++it)
 	{
-		(*it)->CopyPtr(CaseSensitive || MatchToPattern);
-		Song copy = **it;
-		
-		if (!CaseSensitive && !MatchToPattern)
-		{
-			std::string t;
-			t = copy.GetArtist();
-			ToLower(t);
-			copy.SetArtist(t);
-			
-			t = copy.GetTitle();
-			ToLower(t);
-			copy.SetTitle(t);
-			
-			t = copy.GetAlbum();
-			ToLower(t);
-			copy.SetAlbum(t);
-			
-			t = copy.GetName();
-			ToLower(t);
-			copy.SetFile(t);
-			
-			t = copy.GetComposer();
-			ToLower(t);
-			copy.SetComposer(t);
-			
-			t = copy.GetPerformer();
-			ToLower(t);
-			copy.SetPerformer(t);
-			
-			t = copy.GetGenre();
-			ToLower(t);
-			copy.SetGenre(t);
-			
-			t = copy.GetComment();
-			ToLower(t);
-			copy.SetComment(t);
-		}
-		
 		if (MatchToPattern)
 		{
 			regex_t rx;
-			
 			if (!itsConstraints[0].empty())
 			{
 				if (regcomp(&rx, itsConstraints[0].c_str(), CaseSensitive | Config.regex_type) == 0)
 				{
-					any_found =	!regexec(&rx, copy.GetArtist().c_str(), 0, 0, 0)
-					||		!regexec(&rx, copy.GetTitle().c_str(), 0, 0, 0)
-					||		!regexec(&rx, copy.GetAlbum().c_str(), 0, 0, 0)
-					||		!regexec(&rx, copy.GetName().c_str(), 0, 0, 0)
-					||		!regexec(&rx, copy.GetComposer().c_str(), 0, 0, 0)
-					||		!regexec(&rx, copy.GetPerformer().c_str(), 0, 0, 0)
-					||		!regexec(&rx, copy.GetGenre().c_str(), 0, 0, 0)
-					||		!regexec(&rx, copy.GetDate().c_str(), 0, 0, 0)
-					||		!regexec(&rx, copy.GetComment().c_str(), 0, 0, 0);
+					any_found =
+						!regexec(&rx, (*it)->GetArtist().c_str(), 0, 0, 0)
+					||	!regexec(&rx, (*it)->GetTitle().c_str(), 0, 0, 0)
+					||	!regexec(&rx, (*it)->GetAlbum().c_str(), 0, 0, 0)
+					||	!regexec(&rx, (*it)->GetName().c_str(), 0, 0, 0)
+					||	!regexec(&rx, (*it)->GetComposer().c_str(), 0, 0, 0)
+					||	!regexec(&rx, (*it)->GetPerformer().c_str(), 0, 0, 0)
+					||	!regexec(&rx, (*it)->GetGenre().c_str(), 0, 0, 0)
+					||	!regexec(&rx, (*it)->GetDate().c_str(), 0, 0, 0)
+					||	!regexec(&rx, (*it)->GetComment().c_str(), 0, 0, 0);
 				}
 				regfree(&rx);
 			}
@@ -392,94 +349,91 @@ void SearchEngine::Search()
 			if (found && !itsConstraints[1].empty())
 			{
 				if (!regcomp(&rx, itsConstraints[1].c_str(), CaseSensitive | Config.regex_type))
-					found = !regexec(&rx, copy.GetArtist().c_str(), 0, 0, 0);
+					found = !regexec(&rx, (*it)->GetArtist().c_str(), 0, 0, 0);
 				regfree(&rx);
 			}
 			if (found && !itsConstraints[2].empty())
 			{
 				if (!regcomp(&rx, itsConstraints[2].c_str(), CaseSensitive | Config.regex_type))
-					found = !regexec(&rx, copy.GetTitle().c_str(), 0, 0, 0);
+					found = !regexec(&rx, (*it)->GetTitle().c_str(), 0, 0, 0);
 				regfree(&rx);
 			}
 			if (found && !itsConstraints[3].empty())
 			{
 				if (!regcomp(&rx, itsConstraints[3].c_str(), CaseSensitive | Config.regex_type))
-					found = !regexec(&rx, copy.GetAlbum().c_str(), 0, 0, 0);
+					found = !regexec(&rx, (*it)->GetAlbum().c_str(), 0, 0, 0);
 				regfree(&rx);
 			}
 			if (found && !itsConstraints[4].empty())
 			{
 				if (!regcomp(&rx, itsConstraints[4].c_str(), CaseSensitive | Config.regex_type))
-					found = !regexec(&rx, copy.GetName().c_str(), 0, 0, 0);
+					found = !regexec(&rx, (*it)->GetName().c_str(), 0, 0, 0);
 				regfree(&rx);
 			}
 			if (found && !itsConstraints[5].empty())
 			{
 				if (!regcomp(&rx, itsConstraints[5].c_str(), CaseSensitive | Config.regex_type))
-					found = !regexec(&rx, copy.GetComposer().c_str(), 0, 0, 0);
+					found = !regexec(&rx, (*it)->GetComposer().c_str(), 0, 0, 0);
 				regfree(&rx);
 			}
 			if (found && !itsConstraints[6].empty())
 			{
 				if (!regcomp(&rx, itsConstraints[6].c_str(), CaseSensitive | Config.regex_type))
-					found = !regexec(&rx, copy.GetPerformer().c_str(), 0, 0, 0);
+					found = !regexec(&rx, (*it)->GetPerformer().c_str(), 0, 0, 0);
 				regfree(&rx);
 			}
 			if (found && !itsConstraints[7].empty())
 			{
 				if (!regcomp(&rx, itsConstraints[7].c_str(), CaseSensitive | Config.regex_type))
-					found = !regexec(&rx, copy.GetGenre().c_str(), 0, 0, 0);
+					found = !regexec(&rx, (*it)->GetGenre().c_str(), 0, 0, 0);
 				regfree(&rx);
 			}
 			if (found && !itsConstraints[8].empty())
 			{
 				if (!regcomp(&rx, itsConstraints[8].c_str(), CaseSensitive | Config.regex_type))
-					found = !regexec(&rx, copy.GetDate().c_str(), 0, 0, 0);
+					found = !regexec(&rx, (*it)->GetDate().c_str(), 0, 0, 0);
 				regfree(&rx);
 			}
 			if (found && !itsConstraints[9].empty())
 			{
 				if (!regcomp(&rx, itsConstraints[9].c_str(), CaseSensitive | Config.regex_type))
-					found = !regexec(&rx, copy.GetComment().c_str(), 0, 0, 0);
+					found = !regexec(&rx, (*it)->GetComment().c_str(), 0, 0, 0);
 				regfree(&rx);
 			}
 		}
 		else
 		{
 			if (!itsConstraints[0].empty())
-				any_found =	copy.GetArtist() == itsConstraints[0]
-				||		copy.GetTitle() == itsConstraints[0]
-				||		copy.GetAlbum() == itsConstraints[0]
-				||		copy.GetName() == itsConstraints[0]
-				||		copy.GetComposer() == itsConstraints[0]
-				||		copy.GetPerformer() == itsConstraints[0]
-				||		copy.GetGenre() == itsConstraints[0]
-				||		copy.GetDate() == itsConstraints[0]
-				||		copy.GetComment() == itsConstraints[0];
+				any_found =
+					SEStringComparison((*it)->GetArtist(), itsConstraints[0], CaseSensitive)
+				||	SEStringComparison((*it)->GetTitle(), itsConstraints[0], CaseSensitive)
+				||	SEStringComparison((*it)->GetAlbum(), itsConstraints[0], CaseSensitive)
+				||	SEStringComparison((*it)->GetName(), itsConstraints[0], CaseSensitive)
+				||	SEStringComparison((*it)->GetComposer(), itsConstraints[0], CaseSensitive)
+				||	SEStringComparison((*it)->GetPerformer(), itsConstraints[0], CaseSensitive)
+				||	SEStringComparison((*it)->GetGenre(), itsConstraints[0], CaseSensitive)
+				||	SEStringComparison((*it)->GetDate(), itsConstraints[0], CaseSensitive)
+				||	SEStringComparison((*it)->GetComment(), itsConstraints[0], CaseSensitive);
 			
 			if (found && !itsConstraints[1].empty())
-				found = copy.GetArtist() == itsConstraints[1];
+				found = SEStringComparison((*it)->GetArtist(), itsConstraints[1], CaseSensitive);
 			if (found && !itsConstraints[2].empty())
-				found = copy.GetTitle() == itsConstraints[2];
+				found = SEStringComparison((*it)->GetTitle(), itsConstraints[2], CaseSensitive);
 			if (found && !itsConstraints[3].empty())
-				found = copy.GetAlbum() == itsConstraints[3];
+				found = SEStringComparison((*it)->GetAlbum(), itsConstraints[3], CaseSensitive);
 			if (found && !itsConstraints[4].empty())
-				found = copy.GetName() == itsConstraints[4];
+				found = SEStringComparison((*it)->GetName(), itsConstraints[4], CaseSensitive);
 			if (found && !itsConstraints[5].empty())
-				found = copy.GetComposer() == itsConstraints[5];
+				found = SEStringComparison((*it)->GetComposer(), itsConstraints[5], CaseSensitive);
 			if (found && !itsConstraints[6].empty())
-				found = copy.GetPerformer() == itsConstraints[6];
+				found = SEStringComparison((*it)->GetPerformer(), itsConstraints[6], CaseSensitive);
 			if (found && !itsConstraints[7].empty())
-				found = copy.GetGenre() == itsConstraints[7];
+				found = SEStringComparison((*it)->GetGenre(), itsConstraints[7], CaseSensitive);
 			if (found && !itsConstraints[8].empty())
-				found = copy.GetDate() == itsConstraints[8];
+				found = SEStringComparison((*it)->GetDate(), itsConstraints[8], CaseSensitive);
 			if (found && !itsConstraints[9].empty())
-				found = copy.GetComment() == itsConstraints[9];
+				found = SEStringComparison((*it)->GetComment(), itsConstraints[9], CaseSensitive);
 		}
-		
-		if (CaseSensitive || MatchToPattern)
-			copy.NullMe();
-		(*it)->CopyPtr(0);
 		
 		if (found && any_found)
 		{
@@ -492,6 +446,11 @@ void SearchEngine::Search()
 	}
 	if (Config.search_in_db) // free song list only if it's database
 		FreeSongList(list);
+}
+
+bool SearchEngine::SEStringComparison(const std::string &a, const std::string &b, bool case_sensitive)
+{
+	return case_sensitive ? a == b : !CaseInsensitiveStringComparison()(a, b);
 }
 
 std::string SearchEngine::SearchEngineOptionToString(const std::pair<Buffer *, MPD::Song *> &pair, void *)
