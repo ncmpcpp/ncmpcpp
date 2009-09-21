@@ -1535,11 +1535,7 @@ int main(int argc, char *argv[])
 			int newpos = 0;
 			if (position.find(':') != std::string::npos) // probably time in mm:ss
 			{
-				try
-				{
-					newpos = StrToInt(position)*60 + StrToInt(position.substr(position.find(':')+1));
-				}
-				catch (std::out_of_range) { }
+				newpos = StrToInt(position)*60 + StrToInt(position.substr(position.find(':')+1));
 				if (newpos >= 0 && newpos <= Mpd.GetTotalTime())
 					Mpd.Seek(newpos);
 				else

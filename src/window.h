@@ -463,12 +463,6 @@ namespace NCurses
 			static size_t Length(const std::wstring &ws);
 			
 		protected:
-			
-			/// Exception class that is thrown if constructed
-			/// window has size bigger than actual screen size.
-			///
-			class BadSize { };
-			
 			/// Sets colors of window (interal use only)
 			/// @param fg foregound color
 			/// @param bg background color

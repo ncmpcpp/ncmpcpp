@@ -29,6 +29,7 @@
 
 #include "charset.h"
 #include "conv.h"
+#include "error.h"
 #include "song.h"
 
 MPD::Song::Song(mpd_Song *s, bool copy_ptr) : 	itsSong(s ? s : mpd_newSong()),
@@ -478,7 +479,7 @@ void MPD::Song::ValidateFormat(const std::string &type, const std::string &s)
 			--braces;
 	}
 	if (braces)
-		throw std::runtime_error(type + ": number of opening and closing braces does not equal!");
+		FatalError(type + ": number of opening and closing braces does not equal!");
 }
 
 void MPD::Song::SetHashAndSlash()

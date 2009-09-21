@@ -24,6 +24,7 @@
 #include <regex.h>
 #include <set>
 
+#include "error.h"
 #include "window.h"
 #include "strbuffer.h"
 
@@ -34,16 +35,6 @@ namespace NCurses
 	class List
 	{
 		public:
-			/// Exception class, thrown by various functions
-			/// that return references to items on the list
-			/// if requested item is separator
-			/// @see Menu::Back()
-			/// @see Menu::Current()
-			/// @see Menu::at()
-			/// @see Menu::operator[]
-			///
-			class InvalidItem { };
-			
 			/// @see Menu::Select()
 			///
 			virtual void Select(int pos, bool state) = 0;
@@ -1073,56 +1064,56 @@ template <typename T> std::string NCurses::Menu<T>::GetOption(size_t pos)
 template <typename T> T &NCurses::Menu<T>::Back()
 {
 	if (!itsOptionsPtr->back())
-		throw InvalidItem();
+		FatalError("Menu::Back() has requested separator!");
 	return itsOptionsPtr->back()->Item;
 }
 
 template <typename T> const T &NCurses::Menu<T>::Back() const
 {
 	if (!itsOptionsPtr->back())
-		throw InvalidItem();
+		FatalError("Menu::Back() has requested separator!");
 	return itsOptionsPtr->back()->Item;
 }
 
 template <typename T> T &NCurses::Menu<T>::Current()
 {
 	if (!itsOptionsPtr->at(itsHighlight))
-		throw InvalidItem();
+		FatalError("Menu::Current() has requested separator!");
 	return (*itsOptionsPtr)[itsHighlight]->Item;
 }
 
 template <typename T> const T &NCurses::Menu<T>::Current() const
 {
 	if (!itsOptionsPtr->at(itsHighlight))
-		throw InvalidItem();
+		FatalError("Menu::Current() const has requested separator!");
 	return (*itsOptionsPtr)[itsHighlight]->Item;
 }
 
 template <typename T> T &NCurses::Menu<T>::at(size_t pos)
 {
 	if (!itsOptionsPtr->at(pos))
-		throw InvalidItem();
+		FatalError("Menu::at() has requested separator!");
 	return (*itsOptionsPtr)[pos]->Item;
 }
 
 template <typename T> const T &NCurses::Menu<T>::at(size_t pos) const
 {
 	if (!itsOptions->at(pos))
-		throw InvalidItem();
+		FatalError("Menu::at() const has requested separator!");
 	return (*itsOptionsPtr)[pos]->Item;
 }
 
 template <typename T> const T &NCurses::Menu<T>::operator[](size_t pos) const
 {
 	if (!(*itsOptionsPtr)[pos])
-		throw InvalidItem();
+		FatalError("Menu::operator[] const has requested separator!");
 	return (*itsOptionsPtr)[pos]->Item;
 }
 
 template <typename T> T &NCurses::Menu<T>::operator[](size_t pos)
 {
 	if (!(*itsOptionsPtr)[pos])
-		throw InvalidItem();
+		FatalError("Menu::operator[] has requested separator!");
 	return (*itsOptionsPtr)[pos]->Item;
 }
 

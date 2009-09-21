@@ -330,12 +330,10 @@ void SearchEngine::Prepare()
 {
 	for (size_t i = 0; i < w->Size(); ++i)
 	{
-		try
-		{
-			delete (*w)[i].first;
-			delete (*w)[i].second;
-		}
-		catch (List::InvalidItem) { }
+		if (i == 10 || i == 14 || i == ResetButton+1 || i == ResetButton+3) // separators
+			continue;
+		delete (*w)[i].first;
+		delete (*w)[i].second;
 	}
 	
 	w->SetTitle("");
@@ -347,11 +345,9 @@ void SearchEngine::Prepare()
 	
 	for (size_t i = 0; i < 17; ++i)
 	{
-		try
-		{
-			w->at(i).first = new Buffer();
-		}
-		catch (List::InvalidItem) { }
+		if (i == 10 || i == 14) // separators
+			continue;
+		(*w)[i].first = new Buffer();
 	}
 	
 	*w->at(0).first << fmtBold << "Any:      " << fmtBoldEnd << ' ';

@@ -277,7 +277,7 @@ std::string FindSharedDir(Menu<Song> *menu)
 std::string FindSharedDir(const SongList &v)
 {
 	if (v.empty()) // this should never happen, but in case...
-		throw std::runtime_error("empty SongList passed to FindSharedDir(const SongList &)!");
+		FatalError("empty SongList passed to FindSharedDir(const SongList &)!");
 	size_t i = -1;
 	std::string first = v.front()->GetDirectory();
 	for (SongList::const_iterator it = ++v.begin(); it != v.end(); ++it)

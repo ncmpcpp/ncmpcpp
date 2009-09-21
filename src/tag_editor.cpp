@@ -1199,29 +1199,34 @@ std::string TagEditor::ParseFilename(MPD::Song &s, std::string mask, bool previe
 	std::vector< std::pair<char, std::string> > tags;
 	std::string file = s.GetName().substr(0, s.GetName().rfind("."));
 	
-	try
+	for (size_t i = mask.find("%"); i != std::string::npos; i = mask.find("%"))
 	{
-		for (size_t i = mask.find("%"); i != std::string::npos; i = mask.find("%"))
-		{
-			tags.push_back(std::make_pair(mask.at(i+1), ""));
-			mask = mask.substr(i+2);
-			i = mask.find("%");
-			if (!mask.empty())
-				separators.push_back(mask.substr(0, i));
-		}
-		size_t i = 0;
-		for (std::vector<std::string>::const_iterator it = separators.begin(); it != separators.end(); ++it, ++i)
-		{
-			size_t j = file.find(*it);
-			tags.at(i).second = file.substr(0, j);
-			file = file.substr(j+it->length());
-		}
-		if (!file.empty())
-			tags.at(i).second = file;
+		tags.push_back(std::make_pair(mask.at(i+1), ""));
+		mask = mask.substr(i+2);
+		i = mask.find("%");
+		if (!mask.empty())
+			separators.push_back(mask.substr(0, i));
 	}
-	catch (std::out_of_range)
+	size_t i = 0;
+	for (std::vector<std::string>::const_iterator it = separators.begin(); it != separators.end(); ++it, ++i)
 	{
-		return "Error while parsing filename!";
+		size_t j = file.find(*it);
+		tags.at(i).second = file.substr(0, j);
+		if (j+it->length() > file.length())
+			goto PARSE_FAILED;
+		file = file.substr(j+it->length());
+	}
+	if (!file.empty())
+	{
+		if (i >= tags.size())
+			goto PARSE_FAILED;
+		tags.at(i).second = file;
+	}
+	
+	if (0) // tss...
+	{
+		PARSE_FAILED:
+		return "Error while parsing filename!\n";
 	}
 	
 	for (std::vector< std::pair<char, std::string> >::iterator it = tags.begin(); it != tags.end(); ++it)

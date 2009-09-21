@@ -649,7 +649,7 @@ void ReadConfiguration(ncmpcpp_config &conf)
 			{
 				conf.progressbar = TO_WSTRING(v);
 				if (conf.progressbar.length() != 2)
-					throw std::runtime_error("the length of progressbar_look is not two characters long!");
+					FatalError("the length of progressbar_look is not two characters long!");
 			}
 			else if (cl.find("default_tag_editor_pattern") != std::string::npos)
 			{

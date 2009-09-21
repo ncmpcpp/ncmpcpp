@@ -21,6 +21,7 @@
 #include <cstring>
 #include <cstdlib>
 
+#include "error.h"
 #include "window.h"
 
 using namespace NCurses;
@@ -95,7 +96,7 @@ Window::Window(size_t startx,
 	||  itsStartY > size_t(LINES)
 	||  itsWidth+itsStartX > size_t(COLS)
 	||  itsHeight+itsStartY > size_t(LINES))
-		throw BadSize();
+		FatalError("Constructed window is bigger than terminal size!");
 	
 	if (itsBorder != brNone)
 	{
