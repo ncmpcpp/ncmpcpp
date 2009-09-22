@@ -158,12 +158,11 @@ void TraceMpdStatus()
 
 void NcmpcppErrorCallback(Connection *, int errorid, const char *msg, void *)
 {
-	if (errorid == MPD_ACK_ERROR_PERMISSION)
+	if (errorid == MPD_SERVER_ERROR_PERMISSION)
 	{
 		wFooter->SetGetStringHelper(0);
 		Statusbar() << "Password: ";
-		std::string password = wFooter->GetString(-1, 0, 1);
-		Mpd.SetPassword(password);
+		Mpd.SetPassword(wFooter->GetString(-1, 0, 1));
 		Mpd.SendPassword();
 		Mpd.UpdateStatus();
 		wFooter->SetGetStringHelper(StatusbarGetStringHelper);

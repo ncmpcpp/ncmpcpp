@@ -55,6 +55,24 @@ dnl ================================
 AC_CHECK_HEADERS([dirent.h regex.h], , AC_MSG_ERROR(vital headers missing))
 AC_CHECK_HEADERS([langinfo.h], , AC_MSG_WARN(locale detection disabled))
 
+dnl ==============================
+dnl = checking for libmpdclient2 =
+dnl ==============================
+PKG_CHECK_MODULES([libmpdclient], [libmpdclient >= 2.0], [
+	AC_SUBST(libmpdclient_LIBS)
+	AC_SUBST(libmpdclient_CFLAGS)
+	CPPFLAGS="$CPPFLAGS $libmpdclient_CFLAGS"
+	AC_CHECK_HEADERS([mpd/client.h],
+		LDFLAGS="$LDFLAGS $libmpdclient_LIBS"
+	,
+		AC_MSG_ERROR([missing mpd/client.h header])
+	)
+],
+	if test "$fftw" = "yes" ; then
+		AC_MSG_ERROR([libmpdclient2 is required!])
+	fi
+)
+
 dnl ======================
 dnl = checking for iconv =
 dnl ======================

@@ -45,31 +45,31 @@ std::string IntoStr(int l)
 	return ss.str();
 }
 
-std::string IntoStr(mpd_TagItems tag) // this is only for left column's title in media library
+std::string IntoStr(mpd_tag_type tag) // this is only for left column's title in media library
 {
 	switch (tag)
 	{
-		case MPD_TAG_ITEM_ARTIST:
+		case MPD_TAG_ARTIST:
 			return "Artist";
-		case MPD_TAG_ITEM_ALBUM:
+		case MPD_TAG_ALBUM:
 			return "Album";
-		case MPD_TAG_ITEM_TITLE:
+		case MPD_TAG_TITLE:
 			return "Title";
-		case MPD_TAG_ITEM_TRACK:
+		case MPD_TAG_TRACK:
 			return "Track";
-		case MPD_TAG_ITEM_GENRE:
+		case MPD_TAG_GENRE:
 			return "Genre";
-		case MPD_TAG_ITEM_DATE:
+		case MPD_TAG_DATE:
 			return "Year";
-		case MPD_TAG_ITEM_COMPOSER:
+		case MPD_TAG_COMPOSER:
 			return "Composer";
-		case MPD_TAG_ITEM_PERFORMER:
+		case MPD_TAG_PERFORMER:
 			return "Performer";
-		case MPD_TAG_ITEM_COMMENT:
+		case MPD_TAG_COMMENT:
 			return "Comment";
-		case MPD_TAG_ITEM_DISC:
+		case MPD_TAG_DISC:
 			return "Disc";
-		case MPD_TAG_ITEM_FILENAME:
+		case MPD_TAG_FILE:
 			return "Filename";
 		default:
 			return "";
@@ -126,51 +126,51 @@ NCurses::Color IntoColor(const std::string &color)
 	return result;
 }
 
-mpd_TagItems IntoTagItem(char c)
+mpd_tag_type IntoTagItem(char c)
 {
 	switch (c)
 	{
 		case 'a':
-			return MPD_TAG_ITEM_ARTIST;
+			return MPD_TAG_ARTIST;
 		case 'y':
-			return MPD_TAG_ITEM_DATE;
+			return MPD_TAG_DATE;
 		case 'g':
-			return MPD_TAG_ITEM_GENRE;
+			return MPD_TAG_GENRE;
 		case 'c':
-			return MPD_TAG_ITEM_COMPOSER;
+			return MPD_TAG_COMPOSER;
 		case 'p':
-			return MPD_TAG_ITEM_PERFORMER;
+			return MPD_TAG_PERFORMER;
 		default:
-			return MPD_TAG_ITEM_ARTIST;
+			return MPD_TAG_ARTIST;
 	}
 }
 
 #ifdef HAVE_TAGLIB_H
-MPD::Song::SetFunction IntoSetFunction(mpd_TagItems tag)
+MPD::Song::SetFunction IntoSetFunction(mpd_tag_type tag)
 {
 	switch (tag)
 	{
-		case MPD_TAG_ITEM_ARTIST:
+		case MPD_TAG_ARTIST:
 			return &MPD::Song::SetArtist;
-		case MPD_TAG_ITEM_ALBUM:
+		case MPD_TAG_ALBUM:
 			return &MPD::Song::SetAlbum;
-		case MPD_TAG_ITEM_TITLE:
+		case MPD_TAG_TITLE:
 			return &MPD::Song::SetTitle;
-		case MPD_TAG_ITEM_TRACK:
+		case MPD_TAG_TRACK:
 			return &MPD::Song::SetTrack;
-		case MPD_TAG_ITEM_GENRE:
+		case MPD_TAG_GENRE:
 			return &MPD::Song::SetGenre;
-		case MPD_TAG_ITEM_DATE:
+		case MPD_TAG_DATE:
 			return &MPD::Song::SetDate;
-		case MPD_TAG_ITEM_COMPOSER:
+		case MPD_TAG_COMPOSER:
 			return &MPD::Song::SetComposer;
-		case MPD_TAG_ITEM_PERFORMER:
+		case MPD_TAG_PERFORMER:
 			return &MPD::Song::SetPerformer;
-		case MPD_TAG_ITEM_COMMENT:
+		case MPD_TAG_COMMENT:
 			return &MPD::Song::SetComment;
-		case MPD_TAG_ITEM_DISC:
+		case MPD_TAG_DISC:
 			return &MPD::Song::SetDisc;
-		case MPD_TAG_ITEM_FILENAME:
+		case MPD_TAG_FILE:
 			return &MPD::Song::SetNewName;
 		default:
 			return 0;

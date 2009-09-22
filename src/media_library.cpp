@@ -185,11 +185,11 @@ void MediaLibrary::Update()
 		Albums->Reset();
 		TagList list;
 		locale_to_utf(Artists->Current());
-		if (Config.media_lib_primary_tag == MPD_TAG_ITEM_ARTIST)
+		if (Config.media_lib_primary_tag == MPD_TAG_ARTIST)
 			Mpd.GetAlbums(Artists->Current(), list);
 		else
 		{
-			Mpd.StartFieldSearch(MPD_TAG_ITEM_ALBUM);
+			Mpd.StartFieldSearch(MPD_TAG_ALBUM);
 			Mpd.AddSearch(Config.media_lib_primary_tag, Artists->Current());
 			Mpd.CommitSearch(list);
 		}
@@ -198,9 +198,9 @@ void MediaLibrary::Update()
 		if (Mpd.Version() > 13)
 		{
 			TagList noalbum_list;
-			Mpd.StartFieldSearch(MPD_TAG_ITEM_FILENAME);
+			Mpd.StartFieldSearch(MPD_TAG_FILE);
 			Mpd.AddSearch(Config.media_lib_primary_tag, Artists->Current());
-			Mpd.AddSearch(MPD_TAG_ITEM_ALBUM, "");
+			Mpd.AddSearch(MPD_TAG_ALBUM, "");
 			Mpd.CommitSearch(noalbum_list);
 			if (!noalbum_list.empty())
 				Albums->AddOption(std::make_pair("<no album>", SearchConstraints("", "")));
@@ -209,9 +209,9 @@ void MediaLibrary::Update()
 		for (TagList::const_iterator it = list.begin(); it != list.end(); ++it)
 		{
 			TagList l;
-			Mpd.StartFieldSearch(MPD_TAG_ITEM_DATE);
+			Mpd.StartFieldSearch(MPD_TAG_DATE);
 			Mpd.AddSearch(Config.media_lib_primary_tag, Artists->Current());
-			Mpd.AddSearch(MPD_TAG_ITEM_ALBUM, *it);
+			Mpd.AddSearch(MPD_TAG_ALBUM, *it);
 			Mpd.CommitSearch(l);
 			if (l.empty())
 			{
@@ -237,17 +237,17 @@ void MediaLibrary::Update()
 		for (TagList::const_iterator i = artists.begin(); i != artists.end(); ++i)
 		{
 			TagList albums;
-			Mpd.StartFieldSearch(MPD_TAG_ITEM_ALBUM);
+			Mpd.StartFieldSearch(MPD_TAG_ALBUM);
 			Mpd.AddSearch(Config.media_lib_primary_tag, *i);
 			Mpd.CommitSearch(albums);
 			for (TagList::const_iterator j = albums.begin(); j != albums.end(); ++j)
 			{
-				if (Config.media_lib_primary_tag != MPD_TAG_ITEM_DATE)
+				if (Config.media_lib_primary_tag != MPD_TAG_DATE)
 				{
 					TagList years;
-					Mpd.StartFieldSearch(MPD_TAG_ITEM_DATE);
+					Mpd.StartFieldSearch(MPD_TAG_DATE);
 					Mpd.AddSearch(Config.media_lib_primary_tag, *i);
-					Mpd.AddSearch(MPD_TAG_ITEM_ALBUM, *j);
+					Mpd.AddSearch(MPD_TAG_ALBUM, *j);
 					Mpd.CommitSearch(years);
 					if (!years.empty())
 					{
@@ -292,9 +292,9 @@ void MediaLibrary::Update()
 		}
 		else
 		{
-			Mpd.AddSearch(MPD_TAG_ITEM_ALBUM, Albums->Current().second.Album);
+			Mpd.AddSearch(MPD_TAG_ALBUM, Albums->Current().second.Album);
 			if (!Albums->Current().second.Album.empty()) // for <no album>
-				Mpd.AddSearch(MPD_TAG_ITEM_DATE, Albums->Current().second.Year);
+				Mpd.AddSearch(MPD_TAG_DATE, Albums->Current().second.Year);
 		}
 		Mpd.CommitSearch(list);
 		

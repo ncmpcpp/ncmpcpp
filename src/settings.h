@@ -24,8 +24,9 @@
 #include <limits>
 #include <vector>
 
+#include <mpd/client.h>
+
 #include "home.h"
-#include "libmpdclient.h"
 #include "ncmpcpp.h"
 
 #ifdef WIN32
@@ -170,7 +171,7 @@ struct ncmpcpp_config
 	Border window_border;
 	Border active_window_border;
 	
-	mpd_TagItems media_lib_primary_tag;
+	mpd_tag_type media_lib_primary_tag;
 	
 	bool colors_enabled;
 	bool fancy_scrolling;

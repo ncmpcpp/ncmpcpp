@@ -236,7 +236,7 @@ void TagEditor::Update()
 			{
 				MPD::SongList l;
 				Mpd.StartSearch(1);
-				Mpd.AddSearch(MPD_TAG_ITEM_ALBUM, *it);
+				Mpd.AddSearch(MPD_TAG_ALBUM, *it);
 				Mpd.CommitSearch(l);
 				if (!l.empty())
 				{
@@ -285,7 +285,7 @@ void TagEditor::Update()
 		if (Config.albums_in_tag_editor)
 		{
 			Mpd.StartSearch(1);
-			Mpd.AddSearch(MPD_TAG_ITEM_ALBUM, Albums->Current().second);
+			Mpd.AddSearch(MPD_TAG_ALBUM, Albums->Current().second);
 			Mpd.CommitSearch(list);
 			sort(list.begin(), list.end(), CaseInsensitiveSorting());
 			for (MPD::SongList::iterator it = list.begin(); it != list.end(); ++it)

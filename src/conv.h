@@ -38,16 +38,16 @@ long StrToLong(const std::string &);
 
 std::string IntoStr(int);
 
-std::string IntoStr(mpd_TagItems);
+std::string IntoStr(mpd_tag_type);
 
 std::string IntoStr(NCurses::Color);
 
 NCurses::Color IntoColor(const std::string &);
 
-mpd_TagItems IntoTagItem(char);
+mpd_tag_type IntoTagItem(char);
 
 #ifdef HAVE_TAGLIB_H
-MPD::Song::SetFunction IntoSetFunction(mpd_TagItems);
+MPD::Song::SetFunction IntoSetFunction(mpd_tag_type);
 #endif // HAVE_TAGLIB_H
 
 void EscapeUnallowedChars(std::string &);

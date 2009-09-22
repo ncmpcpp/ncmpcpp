@@ -1816,7 +1816,7 @@ int main(int argc, char *argv[])
 				while (item != 'a' && item != 'y' && item != 'g' && item != 'c' && item != 'p');
 				curs_set(0);
 				UnlockStatusbar();
-				mpd_TagItems new_tagitem = IntoTagItem(item);
+				mpd_tag_type new_tagitem = IntoTagItem(item);
 				if (new_tagitem != Config.media_lib_primary_tag)
 				{
 					Config.media_lib_primary_tag = new_tagitem;
