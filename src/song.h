@@ -74,6 +74,7 @@ namespace MPD
 			void SetDisc(const std::string &);
 			void SetComment(const std::string &);
 			void SetPosition(unsigned);
+			void SetLength(unsigned);
 			
 			void SetNewName(const std::string &name) { itsNewName = name == GetName() ? "" : name; }
 			std::string GetNewName() const { return itsNewName; }

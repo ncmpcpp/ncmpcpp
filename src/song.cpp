@@ -344,6 +344,11 @@ void MPD::Song::SetPosition(unsigned pos)
 	mpd_song_set_pos(itsSong, pos);
 }
 
+void MPD::Song::SetLength(unsigned len)
+{
+	mpd_song_set_duration(itsSong, len);
+}
+
 std::string MPD::Song::ParseFormat(std::string::const_iterator &it) const
 {
 	std::string result;
