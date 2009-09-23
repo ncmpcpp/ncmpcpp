@@ -204,14 +204,6 @@ bool Connection::UpdateDirectory(const std::string &path)
 	return true;
 }
 
-bool Connection::Execute(const std::string &command) const
-{
-	if (!isConnected)
-		return false;
-	mpd_send_command(itsConnection, command.c_str());
-	return isCommandsListEnabled || mpd_response_finish(itsConnection);
-}
-
 void Connection::Play() const
 {
 	if (!isConnected)
@@ -233,7 +225,14 @@ void Connection::PlayID(int id) const
 	(isCommandsListEnabled ? mpd_send_play_id : mpd_run_play_id)(itsConnection, id);
 }
 
-void Connection::Pause() const
+void Connection::Pause(bool state) const
+{
+	if (!isConnected)
+		return;
+	(isCommandsListEnabled ? mpd_send_pause : mpd_run_pause)(itsConnection, state);
+}
+
+void Connection::Toggle() const
 {
 	if (!isConnected)
 		return;

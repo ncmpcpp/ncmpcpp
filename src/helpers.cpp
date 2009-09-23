@@ -163,24 +163,12 @@ void ParseArgv(int argc, char **argv)
 		}
 		else if (!strcmp(argv[i], "pause"))
 		{
-			Mpd.Execute("pause \"1\"\n");
+			Mpd.Pause(1);
 			quit = 1;
 		}
 		else if (!strcmp(argv[i], "toggle"))
 		{
-			Mpd.UpdateStatus();
-			switch (Mpd.GetState())
-			{
-				case psPause:
-				case psPlay:
-					Mpd.Pause();
-					break;
-				case psStop:
-					Mpd.Play();
-					break;
-				default:
-					break;
-			}
+			Mpd.Toggle();
 			quit = 1;
 		}
 		else if (!strcmp(argv[i], "stop"))

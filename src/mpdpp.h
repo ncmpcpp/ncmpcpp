@@ -103,12 +103,11 @@ namespace MPD
 			void UpdateStatus();
 			bool UpdateDirectory(const std::string &);
 			
-			bool Execute(const std::string &) const;
-			
 			void Play() const;
 			void Play(int) const;
 			void PlayID(int) const;
-			void Pause() const;
+			void Pause(bool) const;
+			void Toggle() const;
 			void Stop() const;
 			void Next() const;
 			void Prev() const;

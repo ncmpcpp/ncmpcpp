@@ -395,7 +395,7 @@ int main(int argc, char *argv[])
 			     &&	 mouse_event.y == (Config.new_design ? 1 : LINES-1) && mouse_event.x < 9
 				) // playing/paused
 			{
-				Mpd.Pause();
+				Mpd.Toggle();
 				UpdateStatusImmediately = 1;
 			}
 			else if ((mouse_event.bstate & BUTTON2_PRESSED || mouse_event.bstate & BUTTON4_PRESSED)
@@ -722,7 +722,7 @@ int main(int argc, char *argv[])
 		}
 		else if (Keypressed(input, Key.Pause))
 		{
-			Mpd.Pause();
+			Mpd.Toggle();
 			UpdateStatusImmediately = 1;
 		}
 		else if (Keypressed(input, Key.SavePlaylist))
