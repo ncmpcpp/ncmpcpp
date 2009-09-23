@@ -74,6 +74,7 @@ namespace
 		
 		if (iconv(cd, const_cast<ICONV_CONST char **>(&inbuf), &len, &outbuf, &buflen) == size_t(-1))
 		{
+			inbuf = instart;
 			delete [] outstart;
 			iconv_close(cd);
 			return;
