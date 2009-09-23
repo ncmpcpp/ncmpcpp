@@ -431,9 +431,10 @@ int Connection::AddSong(const std::string &path)
 	{
 		if (GetPlaylistLength() < itsMaxPlaylistLength)
 		{
-			id = mpd_send_add_id(itsConnection, path.c_str());
+			mpd_send_add_id(itsConnection, path.c_str());
 			if (!isCommandsListEnabled)
 			{
+				id = mpd_recv_song_id(itsConnection);
 				mpd_response_finish(itsConnection);
 				UpdateStatus();
 			}
