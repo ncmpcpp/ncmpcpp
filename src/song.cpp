@@ -122,7 +122,7 @@ void MPD::Song::Clear()
 
 bool MPD::Song::Empty() const
 {
-	return !itsSong;// || (!itsSong->file && !itsSong->title && !itsSong->artist && !itsSong->album && !itsSong->date && !itsSong->track && !itsSong->genre && !itsSong->composer && !itsSong->performer && !itsSong->disc && !itsSong->comment);
+	return !itsSong;
 }
 
 bool MPD::Song::isFromDB() const
@@ -482,7 +482,10 @@ MPD::Song &MPD::Song::operator=(const MPD::Song &s)
 		return *this;
 	if (itsSong)
 		mpd_song_free(itsSong);
+	if (itsFile)
+		delete [] itsFile;
 	itsSong = s.copyPtr ? s.itsSong : (s.itsSong ? mpd_song_dup(s.itsSong) : 0);
+	itsFile = s.itsFile ? strdup(s.itsFile) : 0;
 	itsNewName = s.itsNewName;
 	itsSlash = s.itsSlash;
 	itsHash = s.itsHash;

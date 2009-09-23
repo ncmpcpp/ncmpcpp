@@ -193,8 +193,7 @@ void NcmpcppStatusChanged(Connection *, StatusChanges changed, void *)
 	{
 		if (!Playlist::BlockUpdate)
 		{
-			np = Mpd.GetCurrentSong();
-			if (Mpd.isPlaying())
+			if (!(np = Mpd.GetCurrentSong()).Empty())
 				WindowTitle(utf_to_locale_cpy(np.toString(Config.song_window_title_format)));
 			
 			bool was_filtered = myPlaylist->Items->isFiltered();
@@ -297,7 +296,8 @@ void NcmpcppStatusChanged(Connection *, StatusChanges changed, void *)
 			}
 			case psPlay:
 			{
-				WindowTitle(utf_to_locale_cpy(np.toString(Config.song_window_title_format)));
+				if (!np.Empty())
+					WindowTitle(utf_to_locale_cpy(np.toString(Config.song_window_title_format)));
 				player_state = Config.new_design ? "[playing]" : "Playing: ";
 				Playlist::ReloadRemaining = 1;
 				changed.ElapsedTime = 1;
