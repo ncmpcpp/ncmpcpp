@@ -30,7 +30,6 @@
 #include <stdexcept>
 
 #include "settings.h"
-#include "str_pool.h"
 
 namespace
 {
@@ -55,7 +54,7 @@ namespace
 		return false;
 	}
 	
-	void charset_convert(const char *from, const char *to, const char *&inbuf, size_t len = 0)
+	void charset_convert(const char *from, const char *to, const char *&inbuf, bool delete_old, size_t len = 0)
 	{
 		if (!inbuf || !from || !to)
 			return;
@@ -74,14 +73,16 @@ namespace
 		
 		if (iconv(cd, const_cast<ICONV_CONST char **>(&inbuf), &len, &outbuf, &buflen) == size_t(-1))
 		{
+			inbuf = instart;
 			delete [] outstart;
 			iconv_close(cd);
 			return;
 		}
 		iconv_close(cd);
 		*outbuf = 0;
-		str_pool_put(instart);
-		inbuf = str_pool_get(outstart);
+		if (delete_old)
+			delete [] instart;
+		inbuf = strdup(outstart);
 		delete [] outstart;
 	}
 }
@@ -90,10 +91,10 @@ void utf_to_locale(std::string &s)
 {
 	if (s.empty() || Config.system_encoding.empty() || !has_non_ascii_chars(s))
 		return;
-	const char *tmp = str_pool_get(s.c_str());
-	charset_convert("utf-8", Config.system_encoding.c_str(), tmp, s.length());
+	const char *tmp = strdup(s.c_str());
+	charset_convert("utf-8", Config.system_encoding.c_str(), tmp, 1, s.length());
 	s = tmp;
-	str_pool_put(tmp);
+	delete [] tmp;
 }
 
 std::string utf_to_locale_cpy(const std::string &s)
@@ -107,10 +108,10 @@ void locale_to_utf(std::string &s)
 {
 	if (s.empty() || Config.system_encoding.empty() || !has_non_ascii_chars(s))
 		return;
-	const char *tmp = str_pool_get(s.c_str());
-	charset_convert(Config.system_encoding.c_str(), "utf-8", tmp, s.length());
+	const char *tmp = strdup(s.c_str());
+	charset_convert(Config.system_encoding.c_str(), "utf-8", tmp, 1, s.length());
 	s = tmp;
-	str_pool_put(tmp);
+	delete [] tmp;
 }
 
 std::string locale_to_utf_cpy(const std::string &s)
@@ -120,18 +121,18 @@ std::string locale_to_utf_cpy(const std::string &s)
 	return result;
 }
 
-void str_pool_utf_to_locale(const char *&s)
+void utf_to_locale(const char *&s, bool delete_old)
 {
 	if (!s || Config.system_encoding.empty() || !has_non_ascii_chars(s))
 		return;
-	charset_convert("utf-8", Config.system_encoding.c_str(), s);
+	charset_convert("utf-8", Config.system_encoding.c_str(), s, delete_old);
 }
 
-void str_pool_locale_to_utf(const char *&s)
+void locale_to_utf(const char *&s, bool delete_old)
 {
 	if (!s || Config.system_encoding.empty() || !has_non_ascii_chars(s))
 		return;
-	charset_convert(Config.system_encoding.c_str(), "utf-8", s);
+	charset_convert(Config.system_encoding.c_str(), "utf-8", s, delete_old);
 }
 
 #endif // HAVE_ICONV_H

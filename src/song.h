@@ -34,7 +34,7 @@ namespace MPD
 			typedef void (Song::*SetFunction)(const std::string &);
 			typedef std::string (Song::*GetFunction)() const;
 			
-			Song() : itsSong(0), itsSlash(std::string::npos), itsHash(0), copyPtr(0), isLocalised(0) { }
+			Song() : itsSong(0), itsFile(0), itsSlash(std::string::npos), itsHash(0), copyPtr(0), isLocalised(0) { }
 			Song(mpd_song *, bool = 0);
 			Song(const Song &);
 			~Song();
@@ -60,7 +60,6 @@ namespace MPD
 			unsigned GetPosition() const { return mpd_song_get_pos(itsSong); }
 			unsigned GetID() const { return mpd_song_get_id(itsSong); }
 			
-			//void SetFile(const std::string &);
 			void SetArtist(const std::string &);
 			void SetTitle(const std::string &);
 			void SetAlbum(const std::string &);
@@ -100,8 +99,21 @@ namespace MPD
 			void SetHashAndSlash();
 			std::string ParseFormat(std::string::const_iterator &it) const;
 			
+			/// Used internally for handling filename, since we don't have
+			/// write access to file string in mpd_song, manage our own if
+			/// localization was done and there is localized filename that
+			/// is different than the original one.
+			///
+			const char *MyFilename() const;
+			
+			/// internal mpd_song structure
 			mpd_song *itsSong;
+			
+			/// localized version of filename
+			const char *itsFile;
+			
 			std::string itsNewName;
+			
 			size_t itsSlash;
 			unsigned itsHash;
 			bool copyPtr;

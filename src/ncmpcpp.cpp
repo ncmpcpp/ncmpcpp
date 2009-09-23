@@ -574,13 +574,13 @@ int main(int argc, char *argv[])
 						Playlist::BlockUpdate = 1;
 						myPlaylist->UpdateTimer();
 						// needed for keeping proper position of now playing song.
-						if (myPlaylist->NowPlaying > myPlaylist->CurrentSong()->GetPosition()-del_counter)
-							myPlaylist->NowPlaying--;
+						if (myPlaylist->NowPlaying > int(myPlaylist->CurrentSong()->GetPosition())-del_counter)
+							--myPlaylist->NowPlaying;
 						Mpd.DeleteID(myPlaylist->CurrentSong()->GetID());
 						myPlaylist->Items->DeleteOption(id);
 						myPlaylist->Items->Refresh();
 						myPlaylist->Items->ReadKey(input);
-						del_counter++;
+						++del_counter;
 					}
 					myPlaylist->FixPositions(myPlaylist->Items->Choice());
 					myPlaylist->Items->SetTimeout(ncmpcpp_window_timeout);

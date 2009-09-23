@@ -2,8 +2,8 @@ bin_PROGRAMS = ncmpcpp
 ncmpcpp_SOURCES = browser.cpp charset.cpp clock.cpp conv.cpp display.cpp \
 	error.cpp help.cpp helpers.cpp info.cpp lyrics.cpp media_library.cpp menu.cpp \
 	misc.cpp mpdpp.cpp ncmpcpp.cpp outputs.cpp playlist.cpp playlist_editor.cpp \
-	scrollpad.cpp search_engine.cpp settings.cpp song.cpp status.cpp str_pool.c \
-	tag_editor.cpp tiny_tag_editor.cpp visualizer.cpp window.cpp
+	scrollpad.cpp search_engine.cpp settings.cpp song.cpp status.cpp tag_editor.cpp \
+	tiny_tag_editor.cpp visualizer.cpp window.cpp
 
 # set the include path found by configure
 INCLUDES= $(all_includes)

@@ -201,7 +201,7 @@ void Playlist::EnterPressed()
 		{
 			for (size_t i = 0; i < playlist.size(); ++i)
 			{
-				if (playlist[i]->GetPosition() > int(i))
+				if (playlist[i]->GetPosition() > i)
 				{
 					Mpd.Swap(playlist[i]->GetPosition(), i);
 					std::swap(cmp[playlist[i]->GetPosition()], cmp[i]);

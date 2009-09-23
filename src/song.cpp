@@ -44,6 +44,7 @@ namespace
 }
 
 MPD::Song::Song(mpd_song *s, bool copy_ptr) : 	itsSong(s),
+						itsFile(0),
 						itsSlash(std::string::npos),
 						itsHash(0),
 						copyPtr(copy_ptr),
@@ -54,6 +55,7 @@ MPD::Song::Song(mpd_song *s, bool copy_ptr) : 	itsSong(s),
 }
 
 MPD::Song::Song(const Song &s) : itsSong(0),
+				itsFile(s.itsFile ? strdup(s.itsFile) : 0),
 				itsNewName(s.itsNewName),
 				itsSlash(s.itsSlash),
 				itsHash(s.itsHash),
@@ -67,6 +69,7 @@ MPD::Song::~Song()
 {
 	if (itsSong)
 		mpd_song_free(itsSong);
+	delete [] itsFile;
 }
 
 std::string MPD::Song::GetLength() const
@@ -80,19 +83,25 @@ void MPD::Song::Localize()
 #	ifdef HAVE_ICONV_H
 	if (isLocalised)
 		return;
-	str_pool_utf_to_locale(itsSong->file);
-	SetHashAndSlash();
-	str_pool_utf_to_locale(itsSong->artist);
-	str_pool_utf_to_locale(itsSong->title);
-	str_pool_utf_to_locale(itsSong->album);
-	str_pool_utf_to_locale(itsSong->track);
-	str_pool_utf_to_locale(itsSong->name);
-	str_pool_utf_to_locale(itsSong->date);
-	str_pool_utf_to_locale(itsSong->genre);
-	str_pool_utf_to_locale(itsSong->composer);
-	str_pool_utf_to_locale(itsSong->performer);
-	str_pool_utf_to_locale(itsSong->disc);
-	str_pool_utf_to_locale(itsSong->comment);
+	const char *tag, *conv_tag;
+	conv_tag = tag = mpd_song_get_uri(itsSong);
+	utf_to_locale(conv_tag, 0);
+	if (tag != conv_tag) // file has been converted
+	{
+		itsFile = conv_tag;
+		SetHashAndSlash();
+	}
+	for (unsigned t = MPD_TAG_ARTIST; t <= MPD_TAG_DISC; ++t)
+	{
+		tag = conv_tag = mpd_song_get_tag(itsSong, mpd_tag_type(t), 0);
+		utf_to_locale(conv_tag, 0);
+		if (tag != conv_tag) // tag has been converted
+		{
+			mpd_song_clear_tag(itsSong, mpd_tag_type(t));
+			mpd_song_add_tag(itsSong, mpd_tag_type(t), conv_tag);
+			delete [] conv_tag;
+		}
+	}
 	isLocalised = 1;
 #	endif // HAVE_ICONV_H
 }
@@ -101,6 +110,8 @@ void MPD::Song::Clear()
 {
 	if (itsSong)
 		mpd_song_free(itsSong);
+	delete [] itsFile;
+	itsFile = 0;
 	itsSong = 0;
 	itsNewName.clear();
 	itsSlash = std::string::npos;
@@ -121,12 +132,12 @@ bool MPD::Song::isFromDB() const
 
 bool MPD::Song::isStream() const
 {
-	return !strncmp(mpd_song_get_uri(itsSong), "http://", 7);
+	return !strncmp(MyFilename(), "http://", 7);
 }
 
 std::string MPD::Song::GetFile() const
 {
-	return mpd_song_get_uri(itsSong);
+	return MyFilename();
 }
 
 std::string MPD::Song::GetName() const
@@ -134,9 +145,9 @@ std::string MPD::Song::GetName() const
 	if (const char *name = mpd_song_get_tag(itsSong, MPD_TAG_NAME, 0))
 		return name;
 	else if (itsSlash != std::string::npos)
-		return mpd_song_get_uri(itsSong)+itsSlash+1;
+		return MyFilename()+itsSlash+1;
 	else
-		return mpd_song_get_uri(itsSong);
+		return MyFilename();
 }
 
 std::string MPD::Song::GetDirectory() const
@@ -146,7 +157,7 @@ std::string MPD::Song::GetDirectory() const
 	else if (itsSlash == std::string::npos)
 		return "/";
 	else
-		return std::string(mpd_song_get_uri(itsSong), itsSlash);
+		return std::string(MyFilename(), itsSlash);
 }
 
 std::string MPD::Song::GetArtist() const
@@ -246,14 +257,6 @@ std::string MPD::Song::GetComment() const
 	else
 		return "";
 }
-
-/*void MPD::Song::SetFile(const std::string &str)
-{
-	if (itsSong->file)
-		str_pool_put(itsSong->file);
-	itsSong->file = str.empty() ? 0 : str_pool_get(str.c_str());
-	SetHashAndSlash();
-}*/
 
 void MPD::Song::SetArtist(const std::string &str)
 {
@@ -528,12 +531,18 @@ void MPD::Song::ValidateFormat(const std::string &type, const std::string &s)
 
 void MPD::Song::SetHashAndSlash()
 {
-	const char *filename = mpd_song_get_uri(itsSong);
+	const char *filename = MyFilename();
 	if (!isStream())
 	{
 		const char *tmp = strrchr(filename, '/');
 		itsSlash = tmp ? tmp-filename : std::string::npos;
 	}
-	itsHash = calc_hash(filename);
+	if (!itsFile)
+		itsHash = calc_hash(filename);
+}
+
+const char *MPD::Song::MyFilename() const
+{
+	return itsFile ? itsFile : mpd_song_get_uri(itsSong);
 }
 
