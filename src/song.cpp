@@ -127,7 +127,7 @@ bool MPD::Song::Empty() const
 
 bool MPD::Song::isFromDB() const
 {
-	return (mpd_song_get_uri(itsSong)[0] != '/') || itsSlash == std::string::npos;
+	return (MyFilename()[0] != '/') || itsSlash == std::string::npos;
 }
 
 bool MPD::Song::isStream() const
