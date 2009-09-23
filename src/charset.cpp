@@ -41,7 +41,7 @@ namespace
 	
 	bool has_non_ascii_chars(const char *s)
 	{
-		for (; s; ++s)
+		for (; *s; ++s)
 			if (char_non_ascii(*s))
 				return true;
 		return false;
