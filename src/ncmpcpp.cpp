@@ -22,6 +22,7 @@
 #include <clocale>
 #include <csignal>
 #include <cstring>
+#include <sys/time.h>
 
 #include <iostream>
 #include <fstream>

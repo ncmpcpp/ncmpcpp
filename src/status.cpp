@@ -19,6 +19,8 @@
  ***************************************************************************/
 
 #include <cstring>
+#include <sys/time.h>
+
 #include <iostream>
 #include <stdexcept>
 
