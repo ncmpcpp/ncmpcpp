@@ -76,35 +76,45 @@ dnl ========================
 dnl = checking for ncurses =
 dnl ========================
 if test "$pdcurses" = "no" ; then
-	pdcurses=XCurses
 	if test "$unicode" = "yes" ; then
 		curses_config_bin=ncursesw5-config
-		curses_lib=ncursesw
 		AC_DEFINE([_UTF8], [1], [enables unicode support])
 	else
 		curses_config_bin=ncurses5-config
-		curses_lib=ncurses
 	fi
 else
 	if test "$pdcurses" = "yes" ; then
-		pdcurses=XCurses
+		pdcurses_lib=XCurses
+		curses_config_bin=xcurses-config
+	else
+		pdcurses_lib=$pdcurses
 	fi
-	curses_config_bin=xcurses-config
-	curses_lib=$pdcurses
 	AC_DEFINE([USE_PDCURSES], [1], [enables pdcurses support])
 fi
 AC_PATH_PROG(CURSES_CONFIG, $curses_config_bin)
-if test "$pdcurses" = "XCurses" && test "$CURSES_CONFIG" != "" ; then
+if test "$CURSES_CONFIG" != "" ; then
 	CPPFLAGS="$CPPFLAGS `$CURSES_CONFIG --cflags`"
 	LDFLAGS="$LDFLAGS `$CURSES_CONFIG --libs`"
-	AC_CHECK_LIB($curses_lib, initscr, , AC_MSG_ERROR([$curses_lib library is required]))
-else
-	AC_CHECK_LIB($curses_lib, initscr, LDFLAGS="$LDFLAGS -l$curses_lib", AC_MSG_ERROR([$curses_lib library is required]))
 fi
+if test "$pdcurses" = "no" ; then
+	AC_CHECK_LIB(ncursesw, initscr,
+		curses_lib=ncursesw,
+		curses_lib=ncurses
+	)
+else
+	curses_lib=$pdcurses_lib
+fi
+AC_CHECK_LIB($curses_lib, initscr,
+	if test "$CURSES_CONFIG" = "" ; then
+		LDFLAGS="$LDFLAGS -l$curses_lib"
+	fi
+	,
+	AC_MSG_ERROR([$curses_lib library is required])
+	)
 if test "$pdcurses" != "no" ; then
 	AC_CHECK_LIB($curses_lib, Xinitscr, AC_DEFINE([XCURSES], [1], [x11 pdcurses available]), )
 fi
-AC_CHECK_HEADERS([curses.h], , AC_MSG_ERROR([missing ncurses.h header]))
+AC_CHECK_HEADERS([curses.h], , AC_MSG_ERROR([missing curses.h header]))
 
 dnl ======================
 dnl = checking for fftw3 =
