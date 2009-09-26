@@ -235,11 +235,20 @@ void *Lyrics::Get(void *screen_void_ptr)
 	}
 	
 	size_t a, b;
-	a = result.find(my_lyrics->tag_open)+strlen(my_lyrics->tag_open);
-	b = result.find(my_lyrics->tag_close, a);
-	result = result.substr(a, b-a);
+	bool parse_failed = 0;
 	
-	if (my_lyrics->not_found(result))
+	if ((a = result.find(my_lyrics->tag_open)) != std::string::npos)
+	{
+		a += strlen(my_lyrics->tag_open);
+		if ((b = result.find(my_lyrics->tag_close, a)) != std::string::npos)
+			result = result.substr(a, b-a);
+		else
+			parse_failed = 1;
+	}
+	else
+		parse_failed = 1;
+	
+	if (parse_failed || my_lyrics->not_found(result))
 	{
 		*screen->w << "Not found";
 		Ready = 1;
