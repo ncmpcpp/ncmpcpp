@@ -88,6 +88,10 @@
 ## only if all requested values are available and/or define alternate
 ## value with { }|{ } eg. {%a - %t}|{%f}
 ##
+## Note: Format that is similar to "%a - %t" (i.e. without any additional
+## braces) is equal to "{%a - %t}", so if one of the tags is missing,
+## you'll get nothing.
+##
 ## text can also have different color than the main window has,
 ## eg. if you want length to be green, write $3%l$9
 ##
