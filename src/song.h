@@ -78,7 +78,8 @@ namespace MPD
 			void SetNewName(const std::string &name) { itsNewName = name == GetName() ? "" : name; }
 			std::string GetNewName() const { return itsNewName; }
 			
-			std::string toString(const std::string &) const;
+			std::string toString(const std::string &, const char *escape_chars = 0) const;
+			static const char FormatEscapeCharacter = 1;
 			
 			void NullMe() { itsSong = 0; }
 			void CopyPtr(bool copy) { copyPtr = copy; }
@@ -97,7 +98,7 @@ namespace MPD
 			
 		private:
 			void SetHashAndSlash();
-			std::string ParseFormat(std::string::const_iterator &it) const;
+			std::string ParseFormat(std::string::const_iterator &it, const char *escape_chars) const;
 			
 			mpd_Song *itsSong;
 			std::string itsNewName;

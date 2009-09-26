@@ -92,48 +92,73 @@ template <typename C> void String2Buffer(const std::basic_string<C> &s, basic_bu
 {
 	for (typename std::basic_string<C>::const_iterator it = s.begin(); it != s.end(); ++it)
 	{
-		if (*it != '$')
-			buf << *it;
-		else if (isdigit(*++it))
-			buf << Color(*it-'0');
-		else
+		if (*it == '$')
 		{
-			switch (*it)
+			if (++it == s.end())
 			{
-				case 'b':
-					buf << fmtBold;
-					break;
-				case 'u':
-					buf << fmtUnderline;
-					break;
-				case 'a':
-					buf << fmtAltCharset;
-					break;
-				case 'r':
-					buf << fmtReverse;
-					break;
-				case '/':
-					switch (*++it)
-					{
-						case 'b':
-							buf << fmtBoldEnd;
+				buf << '$';
+				break;
+			}
+			else if (isdigit(*it))
+			{
+				buf << Color(*it-'0');
+			}
+			else
+			{
+				switch (*it)
+				{
+					case 'b':
+						buf << fmtBold;
+						break;
+					case 'u':
+						buf << fmtUnderline;
+						break;
+					case 'a':
+						buf << fmtAltCharset;
+						break;
+					case 'r':
+						buf << fmtReverse;
+						break;
+					case '/':
+						if (++it == s.end())
+						{
+							buf << "$/";
 							break;
-						case 'u':
-							buf << fmtUnderlineEnd;
-							break;
-						case 'a':
-							buf << fmtAltCharsetEnd;
-							break;
-						case 'r':
-							buf << fmtReverseEnd;
-							break;
-					}
-					break;
-				default:
-					buf << *it;
-					break;
+						}
+						switch (*it)
+						{
+							case 'b':
+								buf << fmtBoldEnd;
+								break;
+							case 'u':
+								buf << fmtUnderlineEnd;
+								break;
+							case 'a':
+								buf << fmtAltCharsetEnd;
+								break;
+							case 'r':
+								buf << fmtReverseEnd;
+								break;
+							default:
+								buf << '$' << *--it;
+								break;
+						}
+						break;
+					default:
+						buf << *--it;
+						break;
+				}
 			}
 		}
+		else if (*it == MPD::Song::FormatEscapeCharacter)
+		{
+			// treat '$' as a normal character if song format escape char is prepended to it
+			if (++it == s.end() || *it != '$')
+				--it;
+			buf << *it;
+		}
+		else
+			buf << *it;
 	}
 }
 

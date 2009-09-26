@@ -305,7 +305,7 @@ void MPD::Song::SetPosition(int pos)
 	itsSong->pos = pos;
 }
 
-std::string MPD::Song::ParseFormat(std::string::const_iterator &it) const
+std::string MPD::Song::ParseFormat(std::string::const_iterator &it, const char *escape_chars) const
 {
 	std::string result;
 	bool has_some_tags = 0;
@@ -314,7 +314,7 @@ std::string MPD::Song::ParseFormat(std::string::const_iterator &it) const
 	{
 		while (*it == '{')
 		{
-			std::string tags = ParseFormat(it);
+			std::string tags = ParseFormat(it, escape_chars);
 			if (!tags.empty())
 			{
 				has_some_tags = 1;
@@ -379,6 +379,10 @@ std::string MPD::Song::ParseFormat(std::string::const_iterator &it) const
 			if (get)
 			{
 				std::string tag = (this->*get)();
+				if (escape_chars) // prepend format escape character to all given chars to escape
+					for (const char *ch = escape_chars; *ch; ++ch)
+						for (size_t i = tag.find(*ch); i != std::string::npos; i = tag.find(*ch, i += 2))
+							tag.replace(i, 1, std::string(1, FormatEscapeCharacter) + ch);
 				if (!tag.empty() && (get != &MPD::Song::GetLength || GetTotalLength()))
 				{
 					has_some_tags = 1;
@@ -402,7 +406,7 @@ std::string MPD::Song::ParseFormat(std::string::const_iterator &it) const
 				--brace_counter;
 		}
 		if (*++it == '|')
-			return ParseFormat(++it);
+			return ParseFormat(++it, escape_chars);
 		else
 			return "";
 	}
@@ -423,10 +427,10 @@ std::string MPD::Song::ParseFormat(std::string::const_iterator &it) const
 	}
 }
 
-std::string MPD::Song::toString(const std::string &format) const
+std::string MPD::Song::toString(const std::string &format, const char *escape_chars) const
 {
 	std::string::const_iterator it = format.begin();
-	return ParseFormat(it);
+	return ParseFormat(it, escape_chars);
 }
 
 MPD::Song &MPD::Song::operator=(const MPD::Song &s)

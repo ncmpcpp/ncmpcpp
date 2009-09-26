@@ -221,12 +221,17 @@ void Display::Songs(const MPD::Song &s, void *data, Menu<MPD::Song> *menu)
 	if (is_now_playing)
 		*menu << Config.now_playing_prefix;
 	
-	std::string line = s.toString(*static_cast<std::string *>(data));
+	std::string line = s.toString(*static_cast<std::string *>(data), "$");
 	for (std::string::const_iterator it = line.begin(); it != line.end(); ++it)
 	{
 		if (*it == '$')
 		{
-			if (isdigit(*++it))
+			if (++it == line.end()) // end of format
+			{
+				*menu << '$';
+				break;
+			}
+			else if (isdigit(*it)) // color
 			{
 				*menu << Color(*it-'0');
 			}
@@ -240,8 +245,15 @@ void Display::Songs(const MPD::Song &s, void *data, Menu<MPD::Song> *menu)
 				*menu << XY(menu->GetWidth()-buf.Str().length(), menu->Y()) << buf;
 				return;
 			}
-			else
-				*menu << *it;
+			else // not a color nor right align, just a random character
+				*menu << *--it;
+		}
+		else if (*it == MPD::Song::FormatEscapeCharacter)
+		{
+			// treat '$' as a normal character if song format escape char is prepended to it
+			if (++it == line.end() || *it != '$')
+				--it;
+			*menu << *it;
 		}
 		else
 			*menu << *it;
