@@ -534,7 +534,6 @@ void TagEditor::EnterPressed()
 				LockStatusbar();
 				Statusbar() << "Number tracks? [y/n] ";
 				wFooter->Refresh();
-				curs_set(1);
 				int in = 0;
 				do
 				{
@@ -542,7 +541,6 @@ void TagEditor::EnterPressed()
 					wFooter->ReadKey(in);
 				}
 				while (in != 'y' && in != 'n');
-				curs_set(0);
 				UnlockStatusbar();
 				if (in == 'y')
 				{

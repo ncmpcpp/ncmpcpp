@@ -596,7 +596,6 @@ int main(int argc, char *argv[])
 				LockStatusbar();
 				Statusbar() << "Delete playlist \"" << name << "\" ? [y/n] ";
 				wFooter->Refresh();
-				curs_set(1);
 				input = 0;
 				do
 				{
@@ -604,7 +603,6 @@ int main(int argc, char *argv[])
 					wFooter->ReadKey(input);
 				}
 				while (input != 'y' && input != 'n');
-				curs_set(0);
 				UnlockStatusbar();
 				if (input == 'y')
 				{
@@ -642,7 +640,6 @@ int main(int argc, char *argv[])
 				LockStatusbar();
 				Statusbar() << "Delete " << (item.type == itSong ? "file" : "directory") << " \"" << name << "\" ? [y/n] ";
 				wFooter->Refresh();
-				curs_set(1);
 				input = 0;
 				do
 				{
@@ -650,7 +647,6 @@ int main(int argc, char *argv[])
 					wFooter->ReadKey(input);
 				}
 				while (input != 'y' && input != 'n');
-				curs_set(0);
 				UnlockStatusbar();
 				if (input == 'y')
 				{
@@ -761,14 +757,12 @@ int main(int argc, char *argv[])
 					LockStatusbar();
 					Statusbar() << "Playlist already exists, overwrite: " << playlist_name << " ? [y/n] ";
 					wFooter->Refresh();
-					curs_set(1);
 					input = 0;
 					while (input != 'y' && input != 'n')
 					{
 						TraceMpdStatus();
 						wFooter->ReadKey(input);
 					}
-					curs_set(0);
 					UnlockStatusbar();
 					
 					if (input == 'y')
@@ -1635,7 +1629,6 @@ int main(int argc, char *argv[])
 					*wFooter << " \"" << myPlaylistEditor->Playlists->Current() << "\"";
 				*wFooter << " ? [y/n] ";
 				wFooter->Refresh();
-				curs_set(1);
 				input = 0;
 				do
 				{
@@ -1643,9 +1636,7 @@ int main(int argc, char *argv[])
 					wFooter->ReadKey(input);
 				}
 				while (input != 'y' && input != 'n');
-				curs_set(0);
 				UnlockStatusbar();
-				
 				if (input != 'y')
 				{
 					ShowMessage("Aborted!");
@@ -1810,7 +1801,6 @@ int main(int argc, char *argv[])
 				LockStatusbar();
 				Statusbar() << "Tag type ? [" << fmtBold << 'a' << fmtBoldEnd << "rtist/" << fmtBold << 'y' << fmtBoldEnd << "ear/" << fmtBold << 'g' << fmtBoldEnd << "enre/" << fmtBold << 'c' << fmtBoldEnd << "omposer/" << fmtBold << 'p' << fmtBoldEnd << "erformer] ";
 				wFooter->Refresh();
-				curs_set(1);
 				input = 0;
 				do
 				{
@@ -1818,7 +1808,6 @@ int main(int argc, char *argv[])
 					wFooter->ReadKey(input);
 				}
 				while (input != 'a' && input != 'y' && input != 'g' && input != 'c' && input != 'p');
-				curs_set(0);
 				UnlockStatusbar();
 				mpd_TagItems new_tagitem = IntoTagItem(input);
 				if (new_tagitem != Config.media_lib_primary_tag)
