@@ -592,18 +592,21 @@ int main(int argc, char *argv[])
 			||       (myScreen->ActiveWindow() == myPlaylistEditor->Playlists)
 				)
 			{
-				LockStatusbar();
 				std::string name = myScreen == myBrowser ? myBrowser->Main()->Current().name : myPlaylistEditor->Playlists->Current();
+				LockStatusbar();
 				Statusbar() << "Delete playlist \"" << name << "\" ? [y/n] ";
+				wFooter->Refresh();
 				curs_set(1);
-				int in = 0;
+				input = 0;
 				do
 				{
 					TraceMpdStatus();
-					wFooter->ReadKey(in);
+					wFooter->ReadKey(input);
 				}
-				while (in != 'y' && in != 'n');
-				if (in == 'y')
+				while (input != 'y' && input != 'n');
+				curs_set(0);
+				UnlockStatusbar();
+				if (input == 'y')
 				{
 					Mpd.DeletePlaylist(locale_to_utf_cpy(name));
 					ShowMessage("Playlist \"%s\" deleted!", name.c_str());
@@ -612,10 +615,8 @@ int main(int argc, char *argv[])
 				}
 				else
 					ShowMessage("Aborted!");
-				curs_set(0);
 				if (myPlaylistEditor->Main()) // check if initialized
 					myPlaylistEditor->Playlists->Clear(0); // make playlists list update itself
-				UnlockStatusbar();
 			}
 			else if (myScreen == myBrowser && !myBrowser->Main()->Empty() && myBrowser->Main()->Current().type != itPlaylist)
 			{
@@ -637,18 +638,21 @@ int main(int argc, char *argv[])
 				if (item.type == itDirectory && item.song) // parent dir
 					continue;
 				
-				LockStatusbar();
 				std::string name = item.type == itSong ? item.song->GetName() : item.name;
+				LockStatusbar();
 				Statusbar() << "Delete " << (item.type == itSong ? "file" : "directory") << " \"" << name << "\" ? [y/n] ";
+				wFooter->Refresh();
 				curs_set(1);
-				int in = 0;
+				input = 0;
 				do
 				{
 					TraceMpdStatus();
-					wFooter->ReadKey(in);
+					wFooter->ReadKey(input);
 				}
-				while (in != 'y' && in != 'n');
-				if (in == 'y')
+				while (input != 'y' && input != 'n');
+				curs_set(0);
+				UnlockStatusbar();
+				if (input == 'y')
 				{
 					std::string path;
 					if (!Config.local_browser)
@@ -671,8 +675,7 @@ int main(int argc, char *argv[])
 				}
 				else
 					ShowMessage("Aborted!");
-				curs_set(0);
-				UnlockStatusbar();
+				
 			}
 			else if (myScreen->ActiveWindow() == myPlaylistEditor->Content && !myPlaylistEditor->Content->Empty())
 			{
@@ -757,17 +760,18 @@ int main(int argc, char *argv[])
 				{
 					LockStatusbar();
 					Statusbar() << "Playlist already exists, overwrite: " << playlist_name << " ? [y/n] ";
+					wFooter->Refresh();
 					curs_set(1);
-					int in = 0;
-					MessagesAllowed = 0;
-					while (in != 'y' && in != 'n')
+					input = 0;
+					while (input != 'y' && input != 'n')
 					{
 						TraceMpdStatus();
-						wFooter->ReadKey(in);
+						wFooter->ReadKey(input);
 					}
-					MessagesAllowed = 1;
+					curs_set(0);
+					UnlockStatusbar();
 					
-					if (in == 'y')
+					if (input == 'y')
 					{
 						Mpd.DeletePlaylist(real_playlist_name);
 						if (Mpd.SavePlaylist(real_playlist_name))
@@ -775,10 +779,8 @@ int main(int argc, char *argv[])
 					}
 					else
 						ShowMessage("Aborted!");
-					curs_set(0);
 					if (myPlaylistEditor->Main()) // check if initialized
 						myPlaylistEditor->Playlists->Clear(0); // make playlist's list update itself
-					UnlockStatusbar();
 					if (myScreen == myPlaylist)
 						myPlaylist->EnableHighlighting();
 				}
@@ -1627,23 +1629,24 @@ int main(int argc, char *argv[])
 			if (myScreen->ActiveWindow() == myPlaylistEditor->Content
 			||  Config.ask_before_clearing_main_playlist)
 			{
-				int in = 0;
 				LockStatusbar();
 				Statusbar() << "Do you really want to clear playlist";
 				if (myScreen->ActiveWindow() == myPlaylistEditor->Content)
 					*wFooter << " \"" << myPlaylistEditor->Playlists->Current() << "\"";
 				*wFooter << " ? [y/n] ";
+				wFooter->Refresh();
 				curs_set(1);
+				input = 0;
 				do
 				{
 					TraceMpdStatus();
-					wFooter->ReadKey(in);
+					wFooter->ReadKey(input);
 				}
-				while (in != 'y' && in != 'n');
+				while (input != 'y' && input != 'n');
 				curs_set(0);
 				UnlockStatusbar();
 				
-				if (in != 'y')
+				if (input != 'y')
 				{
 					ShowMessage("Aborted!");
 					continue;
@@ -1806,17 +1809,18 @@ int main(int argc, char *argv[])
 			{
 				LockStatusbar();
 				Statusbar() << "Tag type ? [" << fmtBold << 'a' << fmtBoldEnd << "rtist/" << fmtBold << 'y' << fmtBoldEnd << "ear/" << fmtBold << 'g' << fmtBoldEnd << "enre/" << fmtBold << 'c' << fmtBoldEnd << "omposer/" << fmtBold << 'p' << fmtBoldEnd << "erformer] ";
-				int item;
+				wFooter->Refresh();
 				curs_set(1);
+				input = 0;
 				do
 				{
 					TraceMpdStatus();
-					wFooter->ReadKey(item);
+					wFooter->ReadKey(input);
 				}
-				while (item != 'a' && item != 'y' && item != 'g' && item != 'c' && item != 'p');
+				while (input != 'a' && input != 'y' && input != 'g' && input != 'c' && input != 'p');
 				curs_set(0);
 				UnlockStatusbar();
-				mpd_TagItems new_tagitem = IntoTagItem(item);
+				mpd_TagItems new_tagitem = IntoTagItem(input);
 				if (new_tagitem != Config.media_lib_primary_tag)
 				{
 					Config.media_lib_primary_tag = new_tagitem;
