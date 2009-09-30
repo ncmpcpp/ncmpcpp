@@ -234,11 +234,11 @@ void Trim(std::string &s)
 	size_t b = 0;
 	size_t e = s.length()-1;
 	
-	while (!isprint(s[b]))
-		b++;
-	while (!isprint(s[e]))
-		e--;
-	e++;
+	while (s[b] == ' ' || s[b] == '\n')
+		++b;
+	while (s[e] == ' ' || s[e] == '\n')
+		--e;
+	++e;
 	
 	if (b != 0 || e != s.length()-1)
 		s = s.substr(b, e-b);
