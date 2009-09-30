@@ -594,7 +594,7 @@ int main(int argc, char *argv[])
 			{
 				std::string name = myScreen == myBrowser ? myBrowser->Main()->Current().name : myPlaylistEditor->Playlists->Current();
 				LockStatusbar();
-				Statusbar() << "Delete playlist \"" << name << "\" ? [y/n] ";
+				Statusbar() << "Delete playlist \"" << name << "\" ? [" << fmtBold << 'y' << fmtBoldEnd << '/' << fmtBold << 'n' << fmtBoldEnd << "] ";
 				wFooter->Refresh();
 				input = 0;
 				do
@@ -638,7 +638,7 @@ int main(int argc, char *argv[])
 				
 				std::string name = item.type == itSong ? item.song->GetName() : item.name;
 				LockStatusbar();
-				Statusbar() << "Delete " << (item.type == itSong ? "file" : "directory") << " \"" << name << "\" ? [y/n] ";
+				Statusbar() << "Delete " << (item.type == itSong ? "file" : "directory") << " \"" << name << "\" ? [" << fmtBold << 'y' << fmtBoldEnd << '/' << fmtBold << 'n' << fmtBoldEnd << "] ";
 				wFooter->Refresh();
 				input = 0;
 				do
@@ -755,7 +755,7 @@ int main(int argc, char *argv[])
 				else
 				{
 					LockStatusbar();
-					Statusbar() << "Playlist already exists, overwrite: " << playlist_name << " ? [y/n] ";
+					Statusbar() << "Playlist already exists, overwrite: " << playlist_name << " ? [" << fmtBold << 'y' << fmtBoldEnd << '/' << fmtBold << 'n' << fmtBoldEnd << "] ";
 					wFooter->Refresh();
 					input = 0;
 					while (input != 'y' && input != 'n')
@@ -1627,7 +1627,7 @@ int main(int argc, char *argv[])
 				Statusbar() << "Do you really want to clear playlist";
 				if (myScreen->ActiveWindow() == myPlaylistEditor->Content)
 					*wFooter << " \"" << myPlaylistEditor->Playlists->Current() << "\"";
-				*wFooter << " ? [y/n] ";
+				*wFooter << " ? [" << fmtBold << 'y' << fmtBoldEnd << '/' << fmtBold << 'n' << fmtBoldEnd << "] ";
 				wFooter->Refresh();
 				input = 0;
 				do

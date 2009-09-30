@@ -532,7 +532,7 @@ void TagEditor::EnterPressed()
 			if (w == TagTypes)
 			{
 				LockStatusbar();
-				Statusbar() << "Number tracks? [y/n] ";
+				Statusbar() << "Number tracks? [" << fmtBold << 'y' << fmtBoldEnd << '/' << fmtBold << 'n' << fmtBoldEnd << "] ";
 				wFooter->Refresh();
 				int in = 0;
 				do
