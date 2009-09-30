@@ -610,7 +610,8 @@ void DrawProgressbar(unsigned elapsed, unsigned time)
 	mvwhline(wFooter->Raw(), 0, 0, 0, wFooter->GetWidth());
 	if (time)
 	{
-		for (unsigned i = 0; i < howlong; ++i)
+		unsigned pb_width = std::min(size_t(howlong), wFooter->GetWidth());
+		for (unsigned i = 0; i < pb_width; ++i)
 			*wFooter << Config.progressbar[0];
 		if (howlong < wFooter->GetWidth())
 			*wFooter << Config.progressbar[1];
