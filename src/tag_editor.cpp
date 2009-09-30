@@ -935,18 +935,12 @@ bool TagEditor::WriteTags(MPD::Song &s)
 		ext = ext.substr(ext.rfind(".")+1);
 		ToLower(ext);
 		
-		if (ext != "mp3")
-		{
-			f.tag()->setTitle(ToWString(s.GetTitle()));
-			f.tag()->setArtist(ToWString(s.GetArtist()));
-			f.tag()->setAlbum(ToWString(s.GetAlbum()));
-			f.tag()->setYear(StrToInt(s.GetDate()));
-			f.tag()->setTrack(StrToInt(s.GetTrack()));
-			f.tag()->setGenre(ToWString(s.GetGenre()));
-		}
-		
-		// it seems that writing COMM frame to mp3 files crashes taglib
-		// so the comment has to be written before we write ID3v2 tags
+		f.tag()->setTitle(ToWString(s.GetTitle()));
+		f.tag()->setArtist(ToWString(s.GetArtist()));
+		f.tag()->setAlbum(ToWString(s.GetAlbum()));
+		f.tag()->setYear(StrToInt(s.GetDate()));
+		f.tag()->setTrack(StrToInt(s.GetTrack()));
+		f.tag()->setGenre(ToWString(s.GetGenre()));
 		f.tag()->setComment(ToWString(s.GetComment()));
 		if (!f.save())
 			return false;
