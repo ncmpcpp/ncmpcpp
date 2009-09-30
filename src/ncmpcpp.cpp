@@ -608,7 +608,7 @@ int main(int argc, char *argv[])
 				{
 					Mpd.DeletePlaylist(locale_to_utf_cpy(name));
 					ShowMessage("Playlist \"%s\" deleted!", name.c_str());
-					if (!Config.local_browser && myBrowser->Main())
+					if (myBrowser->Main() && !myBrowser->isLocal() && myBrowser->CurrentDir() == "/")
 						myBrowser->GetDirectory("/");
 				}
 				else
@@ -619,7 +619,7 @@ int main(int argc, char *argv[])
 #			ifndef WIN32
 			else if (myScreen == myBrowser && !myBrowser->Main()->Empty() && myBrowser->Main()->Current().type != itPlaylist)
 			{
-				if (!Config.local_browser)
+				if (!myBrowser->isLocal())
 					CHECK_MPD_MUSIC_DIR;
 				
 				MPD::Item &item = myBrowser->Main()->Current();
@@ -652,7 +652,7 @@ int main(int argc, char *argv[])
 				if (input == 'y')
 				{
 					std::string path;
-					if (!Config.local_browser)
+					if (!myBrowser->isLocal())
 						path = Config.mpd_music_dir;
 					path += item.type == itSong ? item.song->GetFile() : item.name;
 					
@@ -662,7 +662,7 @@ int main(int argc, char *argv[])
 					if (remove(path.c_str()) == 0)
 					{
 						ShowMessage("\"%s\" has been successfuly deleted!", name.c_str());
-						if (!Config.local_browser)
+						if (!myBrowser->isLocal())
 							Mpd.UpdateDirectory(myBrowser->CurrentDir());
 						else
 							myBrowser->GetDirectory(myBrowser->CurrentDir());
@@ -781,8 +781,8 @@ int main(int argc, char *argv[])
 						myPlaylist->EnableHighlighting();
 				}
 			}
-			if (!Config.local_browser
-			&&  myBrowser->Main()
+			if (myBrowser->Main()
+			&&  !myBrowser->isLocal()
 			&&  myBrowser->CurrentDir() == "/"
 			&&  !myBrowser->Main()->Empty())
 				myBrowser->GetDirectory(myBrowser->CurrentDir());
@@ -1341,7 +1341,7 @@ int main(int argc, char *argv[])
 		}
 		else if (Keypressed(input, Key.EditTags))
 		{
-			if (myScreen != myBrowser || !Config.local_browser)
+			if (myScreen != myBrowser || !myBrowser->isLocal())
 				CHECK_MPD_MUSIC_DIR;
 #			ifdef HAVE_TAGLIB_H
 			if (myTinyTagEditor->SetEdited(myScreen->CurrentSong()))
@@ -1460,18 +1460,18 @@ int main(int argc, char *argv[])
 				if (!new_dir.empty() && new_dir != old_dir)
 				{
 					std::string full_old_dir;
-					if (!Config.local_browser)
+					if (!myBrowser->isLocal())
 						full_old_dir += Config.mpd_music_dir;
 					full_old_dir += locale_to_utf_cpy(old_dir);
 					std::string full_new_dir;
-					if (!Config.local_browser)
+					if (!myBrowser->isLocal())
 						full_new_dir += Config.mpd_music_dir;
 					full_new_dir += locale_to_utf_cpy(new_dir);
 					int rename_result = rename(full_old_dir.c_str(), full_new_dir.c_str());
 					if (rename_result == 0)
 					{
 						ShowMessage("\"%s\" renamed to \"%s\"", old_dir.c_str(), new_dir.c_str());
-						if (!Config.local_browser)
+						if (!myBrowser->isLocal())
 							Mpd.UpdateDirectory(locale_to_utf_cpy(FindSharedDir(old_dir, new_dir)));
 						myBrowser->GetDirectory(myBrowser->CurrentDir());
 					}
@@ -1490,7 +1490,7 @@ int main(int argc, char *argv[])
 				{
 					Mpd.Rename(locale_to_utf_cpy(old_name), locale_to_utf_cpy(new_name));
 					ShowMessage("Playlist \"%s\" renamed to \"%s\"", old_name.c_str(), new_name.c_str());
-					if (!Config.local_browser && myBrowser->Main())
+					if (myBrowser->Main() && !myBrowser->isLocal())
 						myBrowser->GetDirectory("/");
 					if (myPlaylistEditor->Main())
 						myPlaylistEditor->Playlists->Clear(0);

@@ -148,7 +148,7 @@ void Browser::SpacePressed()
 			
 			SongList list;
 #			ifndef WIN32
-			if (Config.local_browser)
+			if (isLocal())
 			{
 				ItemList items;
 				ShowMessage("Scanning \"%s\"...", item.name.c_str());
@@ -289,7 +289,7 @@ void Browser::LocateSong(const MPD::Song &s)
 	if (s.GetDirectory().empty())
 		return;
 	
-	Config.local_browser = !s.isFromDB();
+	itsBrowseLocally = !s.isFromDB();
 	
 	SwitchTo();
 	
@@ -339,7 +339,7 @@ void Browser::GetDirectory(std::string dir, std::string subdir)
 	
 	ItemList list;
 #	ifndef WIN32
-	Config.local_browser ? GetLocalDirectory(list) : Mpd.GetDirectory(dir, list);
+	isLocal() ? GetLocalDirectory(list) : Mpd.GetDirectory(dir, list);
 #	else
 	Mpd.GetDirectory(dir, list);
 #	endif // !WIN32
@@ -487,9 +487,9 @@ void Browser::ChangeBrowseMode()
 	if (Mpd.GetHostname()[0] != '/')
 		return;
 	
-	Config.local_browser = !Config.local_browser;
-	ShowMessage("Browse mode: %s", Config.local_browser ? "Local filesystem" : "MPD music dir");
-	itsBrowsedDir = Config.local_browser ? home_path : "/";
+	itsBrowseLocally = !itsBrowseLocally;
+	ShowMessage("Browse mode: %s", itsBrowseLocally ? "Local filesystem" : "MPD music dir");
+	itsBrowsedDir = itsBrowseLocally ? home_path : "/";
 	w->Reset();
 	GetDirectory(itsBrowsedDir);
 	RedrawHeader = 1;

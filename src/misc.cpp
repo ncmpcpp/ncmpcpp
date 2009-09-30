@@ -74,7 +74,7 @@ void SelectedItemsAdder::SwitchTo()
 	if (hasToBeResized)
 		Resize();
 	
-	bool playlists_not_active = myScreen == myBrowser && Config.local_browser;
+	bool playlists_not_active = myScreen == myBrowser && myBrowser->isLocal();
 	if (playlists_not_active)
 		ShowMessage("Local items cannot be added to m3u playlist!");
 	
@@ -159,7 +159,7 @@ void SelectedItemsAdder::EnterPressed()
 	if (pos != w->Size()-1)
 	{
 		// refresh playlist's lists
-		if (!Config.local_browser && myBrowser->Main() && myBrowser->CurrentDir() == "/")
+		if (myBrowser->Main() && !myBrowser->isLocal() && myBrowser->CurrentDir() == "/")
 			myBrowser->GetDirectory("/");
 		if (myPlaylistEditor->Main())
 			myPlaylistEditor->Playlists->Clear(0); // make playlist editor update itself

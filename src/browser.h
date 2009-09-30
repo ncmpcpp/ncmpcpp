@@ -27,7 +27,7 @@
 class Browser : public Screen< Menu<MPD::Item> >
 {
 	public:
-		Browser() : itsScrollBeginning(0), itsBrowsedDir("/") { }
+		Browser() : itsBrowseLocally(0), itsScrollBeginning(0), itsBrowsedDir("/") { }
 		
 		virtual void Resize();
 		virtual void SwitchTo();
@@ -50,6 +50,7 @@ class Browser : public Screen< Menu<MPD::Item> >
 		
 		const std::string &CurrentDir() { return itsBrowsedDir; }
 		
+		bool isLocal() { return itsBrowseLocally; }
 		void LocateSong(const MPD::Song &);
 		void GetDirectory(std::string, std::string = "/");
 #		ifndef WIN32
@@ -68,6 +69,7 @@ class Browser : public Screen< Menu<MPD::Item> >
 		
 		static const char *SupportedExtensions[];
 		
+		bool itsBrowseLocally;
 		size_t itsScrollBeginning;
 		std::string itsBrowsedDir;
 };

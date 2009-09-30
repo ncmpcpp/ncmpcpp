@@ -296,7 +296,6 @@ void DefaultConfiguration(ncmpcpp_config &conf)
 	conf.albums_in_tag_editor = false;
 	conf.incremental_seeking = true;
 	conf.now_playing_lyrics = false;
-	conf.local_browser = false;
 	conf.local_browser_show_hidden_files = false;
 	conf.search_in_db = true;
 	conf.display_screens_numbers_on_start = true;
