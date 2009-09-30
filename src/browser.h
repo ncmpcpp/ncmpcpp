@@ -52,9 +52,11 @@ class Browser : public Screen< Menu<MPD::Item> >
 		
 		void LocateSong(const MPD::Song &);
 		void GetDirectory(std::string, std::string = "/");
+#		ifndef WIN32
 		void GetLocalDirectory(MPD::ItemList &, const std::string & = "", bool = 0) const;
 		void ClearDirectory(const std::string &) const;
 		void ChangeBrowseMode();
+#		endif // !WIN32
 		void UpdateItemList();
 		
 	protected:

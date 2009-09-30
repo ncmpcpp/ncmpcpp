@@ -147,6 +147,7 @@ void Browser::SpacePressed()
 				break; // do not let add parent dir.
 			
 			SongList list;
+#			ifndef WIN32
 			if (Config.local_browser)
 			{
 				ItemList items;
@@ -157,6 +158,7 @@ void Browser::SpacePressed()
 					list.push_back(it->song);
 			}
 			else
+#			endif // !WIN32
 				Mpd.GetDirectoryRecursive(locale_to_utf_cpy(item.name), list);
 			
 			if (myPlaylist->Add(list, 0))
@@ -282,6 +284,106 @@ bool Browser::hasSupportedExtension(const std::string &file)
 	return false;
 }
 
+void Browser::LocateSong(const MPD::Song &s)
+{
+	if (s.GetDirectory().empty())
+		return;
+	
+	Config.local_browser = !s.isFromDB();
+	
+	SwitchTo();
+	
+	std::string option = s.toString(Config.song_status_format);
+	locale_to_utf(option);
+	if (itsBrowsedDir != s.GetDirectory())
+		GetDirectory(s.GetDirectory());
+	for (size_t i = 0; i < w->Size(); ++i)
+	{
+		if (w->at(i).type == itSong && option == w->at(i).song->toString(Config.song_status_format))
+		{
+			w->Highlight(i);
+			break;
+		}
+	}
+}
+
+void Browser::GetDirectory(std::string dir, std::string subdir)
+{
+	if (dir.empty())
+		dir = "/";
+	
+	int highlightme = -1;
+	itsScrollBeginning = 0;
+	if (itsBrowsedDir != dir)
+		w->Reset();
+	itsBrowsedDir = dir;
+	
+	locale_to_utf(dir);
+	
+	for (size_t i = 0; i < w->Size(); ++i)
+		if (w->at(i).type == itSong)
+			delete w->at(i).song;
+	
+	w->Clear(0);
+	
+	if (dir != "/")
+	{
+		Item parent;
+		size_t slash = dir.rfind("/");
+		parent.song = reinterpret_cast<Song *>(1); // in that way we assume that's really parent dir
+		parent.name = slash != std::string::npos ? dir.substr(0, slash) : "/";
+		parent.type = itDirectory;
+		utf_to_locale(parent.name);
+		w->AddOption(parent);
+	}
+	
+	ItemList list;
+#	ifndef WIN32
+	Config.local_browser ? GetLocalDirectory(list) : Mpd.GetDirectory(dir, list);
+#	else
+	Mpd.GetDirectory(dir, list);
+#	endif // !WIN32
+	sort(list.begin(), list.end(), CaseInsensitiveSorting());
+	
+	for (ItemList::iterator it = list.begin(); it != list.end(); ++it)
+	{
+		switch (it->type)
+		{
+			case itPlaylist:
+			{
+				utf_to_locale(it->name);
+				w->AddOption(*it);
+				break;
+			}
+			case itDirectory:
+			{
+				utf_to_locale(it->name);
+				if (it->name == subdir)
+					highlightme = w->Size();
+				w->AddOption(*it);
+				break;
+			}
+			case itSong:
+			{
+				bool bold = 0;
+				for (size_t i = 0; i < myPlaylist->Items->Size(); ++i)
+				{
+					if (myPlaylist->Items->at(i).GetHash() == it->song->GetHash())
+					{
+						bold = 1;
+						break;
+					}
+				}
+				w->AddOption(*it, bold);
+				break;
+			}
+		}
+	}
+	if (highlightme >= 0)
+		w->Highlight(highlightme);
+}
+
+#ifndef WIN32
 void Browser::GetLocalDirectory(ItemList &v, const std::string &directory, bool recursively) const
 {
 	DIR *dir = opendir((directory.empty() ? itsBrowsedDir : directory).c_str());
@@ -342,101 +444,6 @@ void Browser::GetLocalDirectory(ItemList &v, const std::string &directory, bool 
 	closedir(dir);
 }
 
-void Browser::LocateSong(const MPD::Song &s)
-{
-	if (s.GetDirectory().empty())
-		return;
-	
-	Config.local_browser = !s.isFromDB();
-	
-	SwitchTo();
-	
-	std::string option = s.toString(Config.song_status_format);
-	locale_to_utf(option);
-	if (itsBrowsedDir != s.GetDirectory())
-		GetDirectory(s.GetDirectory());
-	for (size_t i = 0; i < w->Size(); ++i)
-	{
-		if (w->at(i).type == itSong && option == w->at(i).song->toString(Config.song_status_format))
-		{
-			w->Highlight(i);
-			break;
-		}
-	}
-}
-
-void Browser::GetDirectory(std::string dir, std::string subdir)
-{
-	if (dir.empty())
-		dir = "/";
-	
-	int highlightme = -1;
-	itsScrollBeginning = 0;
-	if (itsBrowsedDir != dir)
-		w->Reset();
-	itsBrowsedDir = dir;
-	
-	locale_to_utf(dir);
-	
-	for (size_t i = 0; i < w->Size(); ++i)
-		if (w->at(i).type == itSong)
-			delete w->at(i).song;
-	
-	w->Clear(0);
-	
-	if (dir != "/")
-	{
-		Item parent;
-		size_t slash = dir.rfind("/");
-		parent.song = reinterpret_cast<Song *>(1); // in that way we assume that's really parent dir
-		parent.name = slash != std::string::npos ? dir.substr(0, slash) : "/";
-		parent.type = itDirectory;
-		utf_to_locale(parent.name);
-		w->AddOption(parent);
-	}
-	
-	ItemList list;
-	Config.local_browser ? GetLocalDirectory(list) : Mpd.GetDirectory(dir, list);
-	sort(list.begin(), list.end(), CaseInsensitiveSorting());
-	
-	for (ItemList::iterator it = list.begin(); it != list.end(); ++it)
-	{
-		switch (it->type)
-		{
-			case itPlaylist:
-			{
-				utf_to_locale(it->name);
-				w->AddOption(*it);
-				break;
-			}
-			case itDirectory:
-			{
-				utf_to_locale(it->name);
-				if (it->name == subdir)
-					highlightme = w->Size();
-				w->AddOption(*it);
-				break;
-			}
-			case itSong:
-			{
-				bool bold = 0;
-				for (size_t i = 0; i < myPlaylist->Items->Size(); ++i)
-				{
-					if (myPlaylist->Items->at(i).GetHash() == it->song->GetHash())
-					{
-						bold = 1;
-						break;
-					}
-				}
-				w->AddOption(*it, bold);
-				break;
-			}
-		}
-	}
-	if (highlightme >= 0)
-		w->Highlight(highlightme);
-}
-
 void Browser::ClearDirectory(const std::string &path) const
 {
 	DIR *dir = opendir(path.c_str());
@@ -487,6 +494,7 @@ void Browser::ChangeBrowseMode()
 	GetDirectory(itsBrowsedDir);
 	RedrawHeader = 1;
 }
+#endif // !WIN32
 
 void Browser::UpdateItemList()
 {

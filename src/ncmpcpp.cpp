@@ -616,6 +616,7 @@ int main(int argc, char *argv[])
 				if (myPlaylistEditor->Main()) // check if initialized
 					myPlaylistEditor->Playlists->Clear(0); // make playlists list update itself
 			}
+#			ifndef WIN32
 			else if (myScreen == myBrowser && !myBrowser->Main()->Empty() && myBrowser->Main()->Current().type != itPlaylist)
 			{
 				if (!Config.local_browser)
@@ -673,6 +674,7 @@ int main(int argc, char *argv[])
 					ShowMessage("Aborted!");
 				
 			}
+#			endif // !WIN32
 			else if (myScreen->ActiveWindow() == myPlaylistEditor->Content && !myPlaylistEditor->Content->Empty())
 			{
 				if (myPlaylistEditor->Content->hasSelected())
@@ -1784,10 +1786,12 @@ int main(int argc, char *argv[])
 				if (number && Mpd.AddRandomSongs(number))
 					ShowMessage("%zu random song%s added to playlist!", number, number == 1 ? "" : "s");
 			}
+#			ifndef WIN32
 			else if (myScreen == myBrowser)
 			{
 				myBrowser->ChangeBrowseMode();
 			}
+#			endif // !WIN32
 			else if (myScreen->ActiveWindow() == myLibrary->Artists
 			||	 (myLibrary->Columns() == 2 && myScreen->ActiveWindow() == myLibrary->Albums))
 			{
