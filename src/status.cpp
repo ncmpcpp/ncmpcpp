@@ -51,6 +51,8 @@ namespace
 	bool block_statusbar_update = 0;
 	bool block_progressbar_update = 0;
 	bool allow_statusbar_unlock = 1;
+	
+	int local_elapsed;
 }
 
 #ifndef USE_PDCURSES
@@ -144,10 +146,10 @@ void TraceMpdStatus()
 			else
 				block_progressbar_update = !allow_statusbar_unlock;
 			
-			if (!Mpd.isPlaying() && !block_statusbar_update && !block_progressbar_update)
+			if (Mpd.GetState() != psPlay && !block_statusbar_update && !block_progressbar_update)
 			{
 				if (Config.new_design)
-					mvwhline(wFooter->Raw(), 0, 0, 0, wFooter->GetWidth());
+					DrawProgressbar(local_elapsed, Mpd.GetTotalTime());
 				else
 					Statusbar() << wclrtoeol;
 				wFooter->Refresh();
@@ -178,7 +180,6 @@ void NcmpcppStatusChanged(Connection *, StatusChanges changed, void *)
 	static size_t first_line_scroll_begin = 0;
 	static size_t second_line_scroll_begin = 0;
 	static std::string player_state;
-	static int elapsed;
 	static MPD::Song np;
 	
 	int sx, sy;
@@ -338,14 +339,8 @@ void NcmpcppStatusChanged(Connection *, StatusChanges changed, void *)
 				wHeader->Refresh();
 			}
 		}
-		else if (!block_statusbar_update && Config.statusbar_visibility)
-		{
-			*wFooter << XY(0, 1);
-			if (player_state.empty())
-				*wFooter << wclrtoeol;
-			else
-				*wFooter << player_state;
-		}
+		else if (!block_statusbar_update && Config.statusbar_visibility && player_state.empty())
+			*wFooter << XY(0, 1) << wclrtoeol;
 	}
 	if (changed.SongID)
 	{
@@ -387,10 +382,10 @@ void NcmpcppStatusChanged(Connection *, StatusChanges changed, void *)
 			changed.ElapsedTime = 1;
 			
 			int mpd_elapsed = Mpd.GetElapsedTime();
-			if (elapsed < mpd_elapsed-2 || elapsed+1 > mpd_elapsed)
-				elapsed = mpd_elapsed;
+			if (local_elapsed < mpd_elapsed-2 || local_elapsed+1 > mpd_elapsed)
+				local_elapsed = mpd_elapsed;
 			else if (Mpd.GetState() == psPlay && !RedrawStatusbar)
-				elapsed++;
+				++local_elapsed;
 			
 			std::string tracklength;
 			if (Config.new_design)
@@ -398,10 +393,10 @@ void NcmpcppStatusChanged(Connection *, StatusChanges changed, void *)
 				if (Config.display_remaining_time)
 				{
 					tracklength = "-";
-					tracklength += Song::ShowTime(Mpd.GetTotalTime()-elapsed);
+					tracklength += Song::ShowTime(Mpd.GetTotalTime()-local_elapsed);
 				}
 				else
-					tracklength = Song::ShowTime(elapsed);
+					tracklength = Song::ShowTime(local_elapsed);
 				if (Mpd.GetTotalTime())
 				{
 					tracklength += "/";
@@ -454,17 +449,17 @@ void NcmpcppStatusChanged(Connection *, StatusChanges changed, void *)
 					if (Config.display_remaining_time)
 					{
 						tracklength += "-";
-						tracklength += Song::ShowTime(Mpd.GetTotalTime()-elapsed);
+						tracklength += Song::ShowTime(Mpd.GetTotalTime()-local_elapsed);
 					}
 					else
-						tracklength += Song::ShowTime(elapsed);
+						tracklength += Song::ShowTime(local_elapsed);
 					tracklength += "/";
 					tracklength += MPD::Song::ShowTime(Mpd.GetTotalTime());
 					tracklength += "]";
 				}
 				else
 				{
-					tracklength += Song::ShowTime(elapsed);
+					tracklength += Song::ShowTime(local_elapsed);
 					tracklength += "]";
 				}
 				basic_buffer<my_char_t> np_song;
@@ -474,20 +469,7 @@ void NcmpcppStatusChanged(Connection *, StatusChanges changed, void *)
 				*wFooter << fmtBold << XY(wFooter->GetWidth()-tracklength.length(), 1) << tracklength;
 			}
 			if (!block_progressbar_update)
-			{
-				double progressbar_size = elapsed/double(Mpd.GetTotalTime());
-				unsigned howlong = wFooter->GetWidth()*progressbar_size;
-				*wFooter << Config.progressbar_color;
-				mvwhline(wFooter->Raw(), 0, 0, 0, wFooter->GetWidth());
-				if (Mpd.GetTotalTime())
-				{
-					for (unsigned i = 0; i < howlong; ++i)
-						*wFooter << Config.progressbar[0];
-					if (howlong < wFooter->GetWidth())
-						*wFooter << Config.progressbar[1];
-				}
-				*wFooter << Config.statusbar_color;
-			}
+				DrawProgressbar(local_elapsed, Mpd.GetTotalTime());
 			RedrawStatusbar = 0;
 		}
 		else
@@ -619,6 +601,21 @@ Window &Statusbar()
 {
 	*wFooter << XY(0, Config.statusbar_visibility) << wclrtoeol;
 	return *wFooter;
+}
+
+void DrawProgressbar(unsigned elapsed, unsigned time)
+{
+	unsigned howlong = time ? wFooter->GetWidth()*elapsed/time : 0;
+	*wFooter << fmtBold << Config.progressbar_color;
+	mvwhline(wFooter->Raw(), 0, 0, 0, wFooter->GetWidth());
+	if (time)
+	{
+		for (unsigned i = 0; i < howlong; ++i)
+			*wFooter << Config.progressbar[0];
+		if (howlong < wFooter->GetWidth())
+			*wFooter << Config.progressbar[1];
+	}
+	*wFooter << clEnd << fmtBoldEnd;
 }
 
 void ShowMessage(const char *format, ...)

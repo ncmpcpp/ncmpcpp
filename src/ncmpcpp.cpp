@@ -1132,6 +1132,7 @@ int main(int argc, char *argv[])
 			songpos = Mpd.GetElapsedTime();
 			
 			SeekingInProgress = 1;
+			*wFooter << fmtBold;
 			while (Keypressed(input, Key.SeekForward) || Keypressed(input, Key.SeekBackward))
 			{
 				TraceMpdStatus();
@@ -1154,7 +1155,6 @@ int main(int argc, char *argv[])
 				}
 				
 				std::string tracklength;
-				*wFooter << fmtBold;
 				if (Config.new_design)
 				{
 					if (Config.display_remaining_time)
@@ -1171,32 +1171,25 @@ int main(int argc, char *argv[])
 				}
 				else
 				{
-					tracklength = "[";
+					tracklength = " [";
 					if (Config.display_remaining_time)
 					{
 						tracklength += "-";
 						tracklength += Song::ShowTime(Mpd.GetTotalTime()-songpos);
 					}
 					else
-						tracklength = Song::ShowTime(songpos);
+						tracklength += Song::ShowTime(songpos);
 					tracklength += "/";
 					tracklength += MPD::Song::ShowTime(Mpd.GetTotalTime());
 					tracklength += "]";
 					*wFooter << XY(wFooter->GetWidth()-tracklength.length(), 1) << tracklength;
 				}
-				double progressbar_size = songpos/double(Mpd.GetTotalTime());
-				unsigned howlong = wFooter->GetWidth()*progressbar_size;
-				
-				mvwhline(wFooter->Raw(), 0, 0, 0, wFooter->GetWidth());
-				for (unsigned i = 0; i < howlong; ++i)
-					*wFooter << Config.progressbar[0];
-				if (howlong < wFooter->GetWidth())
-					*wFooter << Config.progressbar[1];
-				*wFooter << fmtBoldEnd;
+				DrawProgressbar(songpos, Mpd.GetTotalTime());
 				wFooter->Refresh();
 			}
-			Mpd.Seek(songpos);
+			*wFooter << fmtBoldEnd;
 			SeekingInProgress = 0;
+			Mpd.Seek(songpos);
 			UpdateStatusImmediately = 1;
 			
 			UnlockProgressbar();
