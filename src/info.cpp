@@ -277,8 +277,21 @@ void *Info::PrepareArtist(void *screen_void_ptr)
 		urls.push_back(result.substr(i, j-i));
 	}
 	
-	a = result.find("<content>")+static_strlen("<content>");
-	b = result.find("</content>");
+	bool parse_failed = 0;
+	if ((a = result.find("<content>")) != std::string::npos)
+	{
+		a += static_strlen("<content>");
+		if ((b = result.find("</content>")) == std::string::npos)
+			parse_failed = 1;
+	}
+	else
+		parse_failed = 1;
+	if (parse_failed)
+	{
+		*screen->w << "Error: Fetched data could not be parsed";
+		ArtistReady = 1;
+		pthread_exit(0);
+	}
 	
 	if (a == b)
 	{
