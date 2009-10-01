@@ -931,10 +931,6 @@ bool TagEditor::WriteTags(MPD::Song &s)
 	TagLib::FileRef f(path_to_file.c_str());
 	if (!f.isNull())
 	{
-		std::string ext = s.GetFile();
-		ext = ext.substr(ext.rfind(".")+1);
-		ToLower(ext);
-		
 		f.tag()->setTitle(ToWString(s.GetTitle()));
 		f.tag()->setArtist(ToWString(s.GetArtist()));
 		f.tag()->setAlbum(ToWString(s.GetAlbum()));
@@ -942,13 +938,9 @@ bool TagEditor::WriteTags(MPD::Song &s)
 		f.tag()->setTrack(StrToInt(s.GetTrack()));
 		f.tag()->setGenre(ToWString(s.GetGenre()));
 		f.tag()->setComment(ToWString(s.GetComment()));
-		if (!f.save())
-			return false;
-		
-		if (ext == "mp3")
+		if (TagLib::MPEG::File *file = dynamic_cast<TagLib::MPEG::File *>(f.file()))
 		{
-			TagLib::MPEG::File file(path_to_file.c_str());
-			TagLib::ID3v2::Tag *tag = file.ID3v2Tag();
+			TagLib::ID3v2::Tag *tag = file->ID3v2Tag();
 			TagLib::StringList list;
 			
 			WriteID3v2("TIT2", tag, ToWString(s.GetTitle()));  // title
@@ -964,10 +956,9 @@ bool TagEditor::WriteTags(MPD::Song &s)
 			
 			GetTagList(list, s.GetPerformer());
 			WriteID3v2("TOPE", tag, list); // performer
-			
-			if (!file.save())
-				return false;
 		}
+		if (!f.save())
+			return false;
 		
 		if (!s.GetNewName().empty())
 		{
