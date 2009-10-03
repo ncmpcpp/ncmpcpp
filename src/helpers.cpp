@@ -83,6 +83,12 @@ void ParseArgv(int argc, char **argv)
 #			ifdef ENABLE_CLOCK
 			<< " - clock\n"
 #			endif
+			<< "\nencoding detection: "
+#			ifdef HAVE_LANGINFO_H
+			<< "enabled"
+#			else
+			<< "disabled"
+#			endif // HAVE_LANGINFO_H
 			<< "\nbuilt with support for:"
 #			ifdef HAVE_CURL_CURL_H
 			<< " curl"
