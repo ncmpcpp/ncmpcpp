@@ -1097,7 +1097,7 @@ void TagEditor::GetTagList(TagLib::StringList &list, const std::string &s)
 		while (s[i] == ' ')
 			++i;
 		size_t j = s.find(",", i);
-		list.append(TagLib::String(s.substr(i, j-i), TagLib::String::UTF8));
+		list.append(ToWString(s.substr(i, j-i)));
 	}
 }
 
