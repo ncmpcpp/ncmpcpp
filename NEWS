@@ -1,3 +1,12 @@
+ncmpcpp-0.4.1
+
+ + support for writing performer, composer and disc tags into ogg and flac files
+ + support for custom prefix/suffix of now playing song
+ + support for system charset encoding autodetection
+ + support for underlined text
+ + optimizations and bugfixes
+
+
 ncmpcpp-0.4
 
  + new screen: music visualizer with sound wave/frequency spectrum modes
