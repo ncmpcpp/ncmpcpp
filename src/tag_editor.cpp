@@ -25,9 +25,12 @@
 #include <fstream>
 #include <stdexcept>
 
+// taglib includes
 #include "id3v2tag.h"
 #include "textidentificationframe.h"
 #include "mpegfile.h"
+#include "vorbisfile.h"
+#include "flacfile.h"
 
 #include "charset.h"
 #include "display.h"
@@ -920,6 +923,23 @@ namespace
 	}
 }
 
+void TagEditor::WriteXiphComments(const MPD::Song &s, TagLib::Ogg::XiphComment *tag)
+{
+	TagLib::StringList list;
+	
+	tag->addField("DISCNUMBER", ToWString(s.GetDisc())); // disc
+	
+	tag->removeField("COMPOSER"); // composer
+	GetTagList(list, s.GetComposer());
+	for (TagLib::StringList::ConstIterator it = list.begin(); it != list.end(); ++it)
+		tag->addField("COMPOSER", *it, 0);
+	
+	tag->removeField("PERFORMER"); // performer
+	GetTagList(list, s.GetPerformer());
+	for (TagLib::StringList::ConstIterator it = list.begin(); it != list.end(); ++it)
+		tag->addField("PERFORMER", *it, 0);
+}
+
 bool TagEditor::WriteTags(MPD::Song &s)
 {
 	std::string path_to_file;
@@ -938,9 +958,9 @@ bool TagEditor::WriteTags(MPD::Song &s)
 		f.tag()->setTrack(StrToInt(s.GetTrack()));
 		f.tag()->setGenre(ToWString(s.GetGenre()));
 		f.tag()->setComment(ToWString(s.GetComment()));
-		if (TagLib::MPEG::File *file = dynamic_cast<TagLib::MPEG::File *>(f.file()))
+		if (TagLib::MPEG::File *mp3_file = dynamic_cast<TagLib::MPEG::File *>(f.file()))
 		{
-			TagLib::ID3v2::Tag *tag = file->ID3v2Tag();
+			TagLib::ID3v2::Tag *tag = mp3_file->ID3v2Tag(1);
 			TagLib::StringList list;
 			
 			WriteID3v2("TIT2", tag, ToWString(s.GetTitle()));  // title
@@ -956,6 +976,14 @@ bool TagEditor::WriteTags(MPD::Song &s)
 			
 			GetTagList(list, s.GetPerformer());
 			WriteID3v2("TOPE", tag, list); // performer
+		}
+		else if (TagLib::Ogg::Vorbis::File *ogg_file = dynamic_cast<TagLib::Ogg::Vorbis::File *>(f.file()))
+		{
+			WriteXiphComments(s, ogg_file->tag());
+		}
+		else if (TagLib::FLAC::File *flac_file = dynamic_cast<TagLib::FLAC::File *>(f.file()))
+		{
+			WriteXiphComments(s, flac_file->xiphComment(1));
 		}
 		if (!f.save())
 			return false;
@@ -1062,7 +1090,9 @@ void TagEditor::GetTagList(TagLib::StringList &list, const std::string &s)
 	for (size_t i = 0; i != std::string::npos; i = s.find(",", i))
 	{
 		if (i)
-			i++;
+			++i;
+		while (s[i] == ' ')
+			++i;
 		size_t j = s.find(",", i);
 		list.append(TagLib::String(s.substr(i, j-i), TagLib::String::UTF8));
 	}

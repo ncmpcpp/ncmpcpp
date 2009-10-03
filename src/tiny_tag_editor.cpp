@@ -22,6 +22,11 @@
 
 #ifdef HAVE_TAGLIB_H
 
+// taglib includes
+#include "mpegfile.h"
+#include "vorbisfile.h"
+#include "flacfile.h"
+
 #include "browser.h"
 #include "charset.h"
 #include "display.h"
@@ -281,7 +286,7 @@ bool TinyTagEditor::GetTags()
 	w->IntoSeparator(18);
 	w->IntoSeparator(20);
 	
-	if (ext != "mp3")
+	if (!extendedTagsSupported(f.file()))
 		for (size_t i = 14; i <= 16; ++i)
 			w->Static(i, 1);
 	
@@ -322,6 +327,13 @@ bool TinyTagEditor::GetTags()
 	w->at(21) << "Save";
 	w->at(22) << "Cancel";
 	return true;
+}
+
+bool TinyTagEditor::extendedTagsSupported(TagLib::File *f)
+{
+	return	dynamic_cast<TagLib::MPEG::File *>(f)
+	||	dynamic_cast<TagLib::Ogg::Vorbis::File *>(f)
+	||	dynamic_cast<TagLib::FLAC::File *>(f);
 }
 
 #endif // HAVE_TAGLIB_H

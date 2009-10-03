@@ -30,6 +30,7 @@
 #include <list>
 
 // taglib headers
+#include "xiphcomment.h"
 #include "fileref.h"
 #include "tag.h"
 
@@ -96,6 +97,7 @@ class TagEditor : public Screen<Window>
 		static void CapitalizeFirstLetters(MPD::Song &);
 		static void LowerAllLetters(MPD::Song &);
 		static void GetTagList(TagLib::StringList &, const std::string &);
+		static void WriteXiphComments(const MPD::Song &, TagLib::Ogg::XiphComment *);
 		
 		static void GetPatternList();
 		static void SavePatternList();

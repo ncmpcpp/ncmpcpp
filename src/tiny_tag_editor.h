@@ -27,6 +27,9 @@
 
 #ifdef HAVE_TAGLIB_H
 
+// taglib includes
+#include "tfile.h"
+
 #include "screen.h"
 
 class TinyTagEditor : public Screen< Menu<Buffer> >
@@ -53,6 +56,8 @@ class TinyTagEditor : public Screen< Menu<Buffer> >
 	private:
 		bool GetTags();
 		MPD::Song itsEdited;
+		
+		static bool extendedTagsSupported(TagLib::File *);
 };
 
 extern TinyTagEditor *myTinyTagEditor;
