@@ -975,7 +975,10 @@ bool TagEditor::WriteTags(MPD::Song &s)
 			WriteID3v2("TCOM", tag, list); // composer
 			
 			GetTagList(list, s.GetPerformer());
-			WriteID3v2("TOPE", tag, list); // performer
+			// in >=mpd-0.16 treating TOPE frame as performer tag
+			// was dropped in favor of TPE3/TPE4 frames, so we have
+			// to write frame accurate to used mpd version
+			WriteID3v2(Mpd.Version() < 16 ? "TOPE" : "TPE3", tag, list); // performer
 		}
 		else if (TagLib::Ogg::Vorbis::File *ogg_file = dynamic_cast<TagLib::Ogg::Vorbis::File *>(f.file()))
 		{
