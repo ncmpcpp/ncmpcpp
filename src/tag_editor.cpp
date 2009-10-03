@@ -927,7 +927,7 @@ void TagEditor::WriteXiphComments(const MPD::Song &s, TagLib::Ogg::XiphComment *
 {
 	TagLib::StringList list;
 	
-	tag->addField("DISCNUMBER", ToWString(s.GetDisc())); // disc
+	tag->addField("DISCNUMBER", TagLib::String(s.GetDisc(), TagLib::String::UTF8)); // disc
 	
 	tag->removeField("COMPOSER"); // composer
 	GetTagList(list, s.GetComposer());
@@ -951,25 +951,25 @@ bool TagEditor::WriteTags(MPD::Song &s)
 	TagLib::FileRef f(path_to_file.c_str());
 	if (!f.isNull())
 	{
-		f.tag()->setTitle(ToWString(s.GetTitle()));
-		f.tag()->setArtist(ToWString(s.GetArtist()));
-		f.tag()->setAlbum(ToWString(s.GetAlbum()));
+		f.tag()->setTitle(TagLib::String(s.GetTitle(), TagLib::String::UTF8));
+		f.tag()->setArtist(TagLib::String(s.GetArtist(), TagLib::String::UTF8));
+		f.tag()->setAlbum(TagLib::String(s.GetAlbum(), TagLib::String::UTF8));
 		f.tag()->setYear(StrToInt(s.GetDate()));
 		f.tag()->setTrack(StrToInt(s.GetTrack()));
-		f.tag()->setGenre(ToWString(s.GetGenre()));
-		f.tag()->setComment(ToWString(s.GetComment()));
+		f.tag()->setGenre(TagLib::String(s.GetGenre(), TagLib::String::UTF8));
+		f.tag()->setComment(TagLib::String(s.GetComment(), TagLib::String::UTF8));
 		if (TagLib::MPEG::File *mp3_file = dynamic_cast<TagLib::MPEG::File *>(f.file()))
 		{
 			TagLib::ID3v2::Tag *tag = mp3_file->ID3v2Tag(1);
 			TagLib::StringList list;
 			
-			WriteID3v2("TIT2", tag, ToWString(s.GetTitle()));  // title
-			WriteID3v2("TPE1", tag, ToWString(s.GetArtist())); // artist
-			WriteID3v2("TALB", tag, ToWString(s.GetAlbum()));  // album
-			WriteID3v2("TDRC", tag, ToWString(s.GetDate()));   // date
-			WriteID3v2("TRCK", tag, ToWString(s.GetTrack()));  // track
-			WriteID3v2("TCON", tag, ToWString(s.GetGenre()));  // genre
-			WriteID3v2("TPOS", tag, ToWString(s.GetDisc()));   // disc
+			WriteID3v2("TIT2", tag, TagLib::String(s.GetTitle(), TagLib::String::UTF8));  // title
+			WriteID3v2("TPE1", tag, TagLib::String(s.GetArtist(), TagLib::String::UTF8)); // artist
+			WriteID3v2("TALB", tag, TagLib::String(s.GetAlbum(), TagLib::String::UTF8));  // album
+			WriteID3v2("TDRC", tag, TagLib::String(s.GetDate(), TagLib::String::UTF8));   // date
+			WriteID3v2("TRCK", tag, TagLib::String(s.GetTrack(), TagLib::String::UTF8));  // track
+			WriteID3v2("TCON", tag, TagLib::String(s.GetGenre(), TagLib::String::UTF8));  // genre
+			WriteID3v2("TPOS", tag, TagLib::String(s.GetDisc(), TagLib::String::UTF8));   // disc
 			
 			GetTagList(list, s.GetComposer());
 			WriteID3v2("TCOM", tag, list); // composer
