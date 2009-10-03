@@ -47,6 +47,10 @@
 ## but if it failed to do so, you can specify
 ## charset encoding you are using here.
 ##
+## Note: You can see whether your ncmpcpp build
+## supports charset detection by checking output
+## of `ncmpcpp --version`.
+##
 ## Note: Since MPD uses utf8 by default, setting
 ## this option makes sense only if your encoding
 ## is different.
