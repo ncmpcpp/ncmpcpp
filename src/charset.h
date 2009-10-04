@@ -35,8 +35,8 @@ void locale_to_utf(std::string &);
 std::string utf_to_locale_cpy(const std::string &s);
 std::string locale_to_utf_cpy(const std::string &s);
 
-void str_pool_utf_to_locale(const char *&);
-void str_pool_locale_to_utf(const char *&);
+void utf_to_locale(const char *&, bool);
+void locale_to_utf(const char *&, bool);
 
 #else
 
@@ -45,9 +45,6 @@ void str_pool_locale_to_utf(const char *&);
 
 #define utf_to_locale_cpy(x) (x)
 #define locale_to_utf_cpy(x) (x)
-
-#define str_pool_utf_to_locale(x);
-#define str_pool_locale_to_utf(x);
 
 #endif // HAVE_ICONV_H
 

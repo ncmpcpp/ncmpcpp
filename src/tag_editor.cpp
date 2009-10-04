@@ -32,6 +32,7 @@
 #include "vorbisfile.h"
 #include "flacfile.h"
 
+#include "browser.h"
 #include "charset.h"
 #include "display.h"
 #include "global.h"
@@ -239,7 +240,7 @@ void TagEditor::Update()
 			{
 				MPD::SongList l;
 				Mpd.StartSearch(1);
-				Mpd.AddSearch(MPD_TAG_ITEM_ALBUM, *it);
+				Mpd.AddSearch(MPD_TAG_ALBUM, *it);
 				Mpd.CommitSearch(l);
 				if (!l.empty())
 				{
@@ -288,7 +289,7 @@ void TagEditor::Update()
 		if (Config.albums_in_tag_editor)
 		{
 			Mpd.StartSearch(1);
-			Mpd.AddSearch(MPD_TAG_ITEM_ALBUM, Albums->Current().second);
+			Mpd.AddSearch(MPD_TAG_ALBUM, Albums->Current().second);
 			Mpd.CommitSearch(list);
 			sort(list.begin(), list.end(), CaseInsensitiveSorting());
 			for (MPD::SongList::iterator it = list.begin(); it != list.end(); ++it)
@@ -875,40 +876,27 @@ void TagEditor::PrevColumn()
 	}
 }
 
-void TagEditor::ReadTags(mpd_Song *s)
+void TagEditor::ReadTags(MPD::Song &s)
 {
-	TagLib::FileRef f(s->file);
+	TagLib::FileRef f(s.GetFile().c_str());
 	if (f.isNull())
 		return;
 	
 	TagLib::MPEG::File *mpegf = dynamic_cast<TagLib::MPEG::File *>(f.file());
 
-	s->artist = !f.tag()->artist().isEmpty() ? str_pool_get(f.tag()->artist().toCString(1)) : 0;
-	s->title = !f.tag()->title().isEmpty() ? str_pool_get(f.tag()->title().toCString(1)) : 0;
-	s->album = !f.tag()->album().isEmpty() ? str_pool_get(f.tag()->album().toCString(1)) : 0;
-	s->track = f.tag()->track() ? str_pool_get(IntoStr(f.tag()->track()).c_str()) : 0;
-	s->date = f.tag()->year() ? str_pool_get(IntoStr(f.tag()->year()).c_str()) : 0;
-	s->genre = !f.tag()->genre().isEmpty() ? str_pool_get(f.tag()->genre().toCString(1)) : 0;
+	s.SetArtist(f.tag()->artist().to8Bit(1));
+	s.SetTitle(f.tag()->title().to8Bit(1));
+	s.SetAlbum(f.tag()->album().to8Bit(1));
+	s.SetTrack(IntoStr(f.tag()->track()));
+	s.SetDate(IntoStr(f.tag()->year()));
+	s.SetGenre(f.tag()->genre().to8Bit(1));
 	if (mpegf)
 	{
-		s->composer = !mpegf->ID3v2Tag()->frameListMap()["TCOM"].isEmpty()
-		? (!mpegf->ID3v2Tag()->frameListMap()["TCOM"].front()->toString().isEmpty()
-		   ? str_pool_get(mpegf->ID3v2Tag()->frameListMap()["TCOM"].front()->toString().toCString(1))
-		   : 0)
-		: 0;
-		s->performer = !mpegf->ID3v2Tag()->frameListMap()["TOPE"].isEmpty()
-		? (!mpegf->ID3v2Tag()->frameListMap()["TOPE"].front()->toString().isEmpty()
-		   ? str_pool_get(mpegf->ID3v2Tag()->frameListMap()["TOPE"].front()->toString().toCString(1))
-		   : 0)
-		: 0;
-		s->disc = !mpegf->ID3v2Tag()->frameListMap()["TPOS"].isEmpty()
-		? (!mpegf->ID3v2Tag()->frameListMap()["TPOS"].front()->toString().isEmpty()
-		   ? str_pool_get(mpegf->ID3v2Tag()->frameListMap()["TPOS"].front()->toString().toCString(1))
-		   : 0)
-		: 0;
+		s.SetComposer(!mpegf->ID3v2Tag()->frameListMap()["TCOM"].isEmpty() ? mpegf->ID3v2Tag()->frameListMap()["TCOM"].front()->toString().to8Bit(1) : "");
+		s.SetPerformer(!mpegf->ID3v2Tag()->frameListMap()["TOPE"].isEmpty() ? mpegf->ID3v2Tag()->frameListMap()["TOPE"].front()->toString().to8Bit(1) : "");
+		s.SetDisc(!mpegf->ID3v2Tag()->frameListMap()["TPOS"].isEmpty() ? mpegf->ID3v2Tag()->frameListMap()["TPOS"].front()->toString().to8Bit(1) : "");
 	}
-	s->comment = !f.tag()->comment().isEmpty() ? str_pool_get(f.tag()->comment().toCString(1)) : 0;
-	s->time = f.audioProperties()->length();
+	s.SetComment(f.tag()->comment().to8Bit(1));
 }
 
 namespace
@@ -1016,7 +1004,7 @@ bool TagEditor::WriteTags(MPD::Song &s)
 					Mpd.CommitCommandsList();
 				}
 				else // only myBrowser->Main()
-					s.SetFile(new_name);
+					myBrowser->GetDirectory(myBrowser->CurrentDir());
 			}
 		}
 		return true;

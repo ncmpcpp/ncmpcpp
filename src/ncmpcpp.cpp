@@ -22,6 +22,7 @@
 #include <clocale>
 #include <csignal>
 #include <cstring>
+#include <sys/time.h>
 
 #include <iostream>
 #include <fstream>
@@ -394,7 +395,7 @@ int main(int argc, char *argv[])
 			     &&	 mouse_event.y == (Config.new_design ? 1 : LINES-1) && mouse_event.x < 9
 				) // playing/paused
 			{
-				Mpd.Pause();
+				Mpd.Toggle();
 				UpdateStatusImmediately = 1;
 			}
 			else if ((mouse_event.bstate & BUTTON2_PRESSED || mouse_event.bstate & BUTTON4_PRESSED)
@@ -574,13 +575,13 @@ int main(int argc, char *argv[])
 						Playlist::BlockUpdate = 1;
 						myPlaylist->UpdateTimer();
 						// needed for keeping proper position of now playing song.
-						if (myPlaylist->NowPlaying > myPlaylist->CurrentSong()->GetPosition()-del_counter)
-							myPlaylist->NowPlaying--;
+						if (myPlaylist->NowPlaying > int(myPlaylist->CurrentSong()->GetPosition())-del_counter)
+							--myPlaylist->NowPlaying;
 						Mpd.DeleteID(myPlaylist->CurrentSong()->GetID());
 						myPlaylist->Items->DeleteOption(id);
 						myPlaylist->Items->Refresh();
 						myPlaylist->Items->ReadKey(input);
-						del_counter++;
+						++del_counter;
 					}
 					myPlaylist->FixPositions(myPlaylist->Items->Choice());
 					myPlaylist->Items->SetTimeout(ncmpcpp_window_timeout);
@@ -722,7 +723,7 @@ int main(int argc, char *argv[])
 		}
 		else if (Keypressed(input, Key.Pause))
 		{
-			Mpd.Pause();
+			Mpd.Toggle();
 			UpdateStatusImmediately = 1;
 		}
 		else if (Keypressed(input, Key.SavePlaylist))
@@ -1806,7 +1807,7 @@ int main(int argc, char *argv[])
 				}
 				while (input != 'a' && input != 'y' && input != 'g' && input != 'c' && input != 'p');
 				UnlockStatusbar();
-				mpd_TagItems new_tagitem = IntoTagItem(input);
+				mpd_tag_type new_tagitem = IntoTagItem(input);
 				if (new_tagitem != Config.media_lib_primary_tag)
 				{
 					Config.media_lib_primary_tag = new_tagitem;

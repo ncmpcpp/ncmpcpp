@@ -76,7 +76,7 @@ class TagEditor : public Screen<Window>
 		/// NOTICE: this string is always in utf8, no need to convert it
 		const std::string &CurrentDir() { return itsBrowsedDir; }
 		
-		static void ReadTags(mpd_Song *);
+		static void ReadTags(MPD::Song &);
 		static bool WriteTags(MPD::Song &);
 		
 	protected:

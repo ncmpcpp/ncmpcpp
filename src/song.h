@@ -21,21 +21,23 @@
 #ifndef _SONG_H
 #define _SONG_H
 
+#include <map>
 #include <string>
 
-#include "libmpdclient.h"
+#include <mpd/client.h>
 
 namespace MPD
 {
 	class Song
 	{
+		typedef std::map<std::pair<mpd_tag_type, unsigned>, std::string> TagMap;
+		
 		public:
 			
 			typedef void (Song::*SetFunction)(const std::string &);
 			typedef std::string (Song::*GetFunction)() const;
 			
-			Song() : itsSlash(std::string::npos), itsHash(0), copyPtr(0), isLocalised(0) { itsSong = mpd_newSong(); }
-			Song(mpd_Song *, bool = 0);
+			Song(mpd_song * = 0, bool = 0);
 			Song(const Song &);
 			~Song();
 			
@@ -56,24 +58,23 @@ namespace MPD
 			std::string GetLength() const;
 			
 			unsigned GetHash() const { return itsHash; }
-			int GetTotalLength() const { return itsSong->time < 0 ? 0 : itsSong->time; }
-			int GetPosition() const { return itsSong->pos; }
-			int GetID() const { return itsSong->id; }
+			unsigned GetTotalLength() const { return mpd_song_get_duration(itsSong); }
+			unsigned GetPosition() const { return mpd_song_get_pos(itsSong); }
+			unsigned GetID() const { return mpd_song_get_id(itsSong); }
 			
-			void SetFile(const std::string &);
 			void SetArtist(const std::string &);
 			void SetTitle(const std::string &);
 			void SetAlbum(const std::string &);
 			void SetTrack(const std::string &);
-			void SetTrack(int);
+			void SetTrack(unsigned);
 			void SetDate(const std::string &);
-			void SetDate(int);
+			void SetDate(unsigned);
 			void SetGenre(const std::string &);
 			void SetComposer(const std::string &);
 			void SetPerformer(const std::string &);
 			void SetDisc(const std::string &);
 			void SetComment(const std::string &);
-			void SetPosition(int);
+			void SetPosition(unsigned);
 			
 			void SetNewName(const std::string &name) { itsNewName = name == GetName() ? "" : name; }
 			std::string GetNewName() const { return itsNewName; }
@@ -100,8 +101,27 @@ namespace MPD
 			void SetHashAndSlash();
 			std::string ParseFormat(std::string::const_iterator &it, const char *escape_chars) const;
 			
-			mpd_Song *itsSong;
+			void SetTag(mpd_tag_type, unsigned, const std::string &);
+			std::string GetTag(mpd_tag_type, unsigned) const;
+			
+			/// Used internally for handling filename, since we don't have
+			/// write access to file string in mpd_song, manage our own if
+			/// localization was done and there is localized filename that
+			/// is different than the original one.
+			///
+			const char *MyFilename() const;
+			
+			/// internal mpd_song structure
+			mpd_song *itsSong;
+			
+			/// localized version of filename
+			const char *itsFile;
+			
+			/// map that contains localized tags or these set by tag editor
+			TagMap *itsTags;
+			
 			std::string itsNewName;
+			
 			size_t itsSlash;
 			unsigned itsHash;
 			bool copyPtr;

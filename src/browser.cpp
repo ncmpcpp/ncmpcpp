@@ -431,13 +431,12 @@ void Browser::GetLocalDirectory(ItemList &v, const std::string &directory, bool 
 		else if (hasSupportedExtension(file->d_name))
 		{
 			new_item.type = itSong;
-			mpd_Song *s = mpd_newSong();
-			s->file = str_pool_get(full_path.c_str());
+			mpd_pair file_pair = { "file", full_path.c_str() };
+			new_item.song = new Song(mpd_song_begin(&file_pair));
 #			ifdef HAVE_TAGLIB_H
 			if (!recursively)
-				TagEditor::ReadTags(s);
+				TagEditor::ReadTags(*new_item.song);
 #			endif // HAVE_TAGLIB_H
-			new_item.song = new Song(s);
 			v.push_back(new_item);
 		}
 	}

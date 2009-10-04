@@ -19,6 +19,8 @@
  ***************************************************************************/
 
 #include <cstring>
+#include <sys/time.h>
+
 #include <iostream>
 #include <stdexcept>
 
@@ -160,12 +162,11 @@ void TraceMpdStatus()
 
 void NcmpcppErrorCallback(Connection *, int errorid, const char *msg, void *)
 {
-	if (errorid == MPD_ACK_ERROR_PERMISSION)
+	if (errorid == MPD_SERVER_ERROR_PERMISSION)
 	{
 		wFooter->SetGetStringHelper(0);
 		Statusbar() << "Password: ";
-		std::string password = wFooter->GetString(-1, 0, 1);
-		Mpd.SetPassword(password);
+		Mpd.SetPassword(wFooter->GetString(-1, 0, 1));
 		Mpd.SendPassword();
 		Mpd.UpdateStatus();
 		wFooter->SetGetStringHelper(StatusbarGetStringHelper);
@@ -193,8 +194,7 @@ void NcmpcppStatusChanged(Connection *, StatusChanges changed, void *)
 	{
 		if (!Playlist::BlockUpdate)
 		{
-			np = Mpd.GetCurrentSong();
-			if (Mpd.isPlaying())
+			if (!(np = Mpd.GetCurrentSong()).Empty())
 				WindowTitle(utf_to_locale_cpy(np.toString(Config.song_window_title_format)));
 			
 			bool was_filtered = myPlaylist->Items->isFiltered();
@@ -297,7 +297,8 @@ void NcmpcppStatusChanged(Connection *, StatusChanges changed, void *)
 			}
 			case psPlay:
 			{
-				WindowTitle(utf_to_locale_cpy(np.toString(Config.song_window_title_format)));
+				if (!np.Empty())
+					WindowTitle(utf_to_locale_cpy(np.toString(Config.song_window_title_format)));
 				player_state = Config.new_design ? "[playing]" : "Playing: ";
 				Playlist::ReloadRemaining = 1;
 				changed.ElapsedTime = 1;

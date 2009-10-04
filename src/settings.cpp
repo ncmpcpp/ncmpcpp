@@ -279,7 +279,7 @@ void DefaultConfiguration(ncmpcpp_config &conf)
 	conf.active_column_color = clRed;
 	conf.window_border = brGreen;
 	conf.active_window_border = brRed;
-	conf.media_lib_primary_tag = MPD_TAG_ITEM_ARTIST;
+	conf.media_lib_primary_tag = MPD_TAG_ARTIST;
 	conf.colors_enabled = true;
 	conf.fancy_scrolling = true;
 	conf.playlist_show_remaining_time = false;
