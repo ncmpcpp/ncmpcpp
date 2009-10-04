@@ -31,6 +31,7 @@
 #include "charset.h"
 #include "display.h"
 #include "global.h"
+#include "info.h"
 #include "playlist.h"
 #include "search_engine.h"
 #include "tag_editor.h"
@@ -93,137 +94,58 @@ std::basic_string<my_char_t> TinyTagEditor::Title()
 void TinyTagEditor::EnterPressed()
 {
 	size_t option = w->Choice();
-	LockStatusbar();
-	
-	if (option >= 8 && option <= 20)
-		w->at(option).Clear();
-	
 	MPD::Song &s = itsEdited;
 	
-	switch (option-7)
+	if (option < 20) // separator after filename
+		w->at(option).Clear();
+	
+	LockStatusbar();
+	if (option < 17) // separator after comment
 	{
-		case 1:
-		{
-			Statusbar() << fmtBold << "Title: " << fmtBoldEnd;
-			s.SetTitle(wFooter->GetString(s.GetTitle()));
-			w->at(option) << fmtBold << "Title:" << fmtBoldEnd << ' ';
-			ShowTag(w->at(option), s.GetTitle());
-			break;
-		}
-		case 2:
-		{
-			Statusbar() << fmtBold << "Artist: " << fmtBoldEnd;
-			s.SetArtist(wFooter->GetString(s.GetArtist()));
-			w->at(option) << fmtBold << "Artist:" << fmtBoldEnd << ' ';
-			ShowTag(w->at(option), s.GetArtist());
-			break;
-		}
-		case 3:
-		{
-			Statusbar() << fmtBold << "Album: " << fmtBoldEnd;
-			s.SetAlbum(wFooter->GetString(s.GetAlbum()));
-			w->at(option) << fmtBold << "Album:" << fmtBoldEnd << ' ';
-			ShowTag(w->at(option), s.GetAlbum());
-			break;
-		}
-		case 4:
-		{
-			Statusbar() << fmtBold << "Year: " << fmtBoldEnd;
-			s.SetDate(wFooter->GetString(s.GetDate()));
-			w->at(option) << fmtBold << "Year:" << fmtBoldEnd << ' ';
-			ShowTag(w->at(option), s.GetDate());
-			break;
-		}
-		case 5:
-		{
-			Statusbar() << fmtBold << "Track: " << fmtBoldEnd;
-			s.SetTrack(wFooter->GetString(s.GetTrack()));
-			w->at(option) << fmtBold << "Track:" << fmtBoldEnd << ' ';
-			ShowTag(w->at(option), s.GetTrack());
-			break;
-		}
-		case 6:
-		{
-			Statusbar() << fmtBold << "Genre: " << fmtBoldEnd;
-			s.SetGenre(wFooter->GetString(s.GetGenre()));
-			w->at(option) << fmtBold << "Genre:" << fmtBoldEnd << ' ';
-			ShowTag(w->at(option), s.GetGenre());
-			break;
-		}
-		case 7:
-		{
-			Statusbar() << fmtBold << "Composer: " << fmtBoldEnd;
-			s.SetComposer(wFooter->GetString(s.GetComposer()));
-			w->at(option) << fmtBold << "Composer:" << fmtBoldEnd << ' ';
-			ShowTag(w->at(option), s.GetComposer());
-			break;
-		}
-		case 8:
-		{
-			Statusbar() << fmtBold << "Performer: " << fmtBoldEnd;
-			s.SetPerformer(wFooter->GetString(s.GetPerformer()));
-			w->at(option) << fmtBold << "Performer:" << fmtBoldEnd << ' ';
-			ShowTag(w->at(option), s.GetPerformer());
-			break;
-		}
-		case 9:
-		{
-			Statusbar() << fmtBold << "Disc: " << fmtBoldEnd;
-			s.SetDisc(wFooter->GetString(s.GetDisc()));
-			w->at(option) << fmtBold << "Disc:" << fmtBoldEnd << ' ';
-			ShowTag(w->at(option), s.GetDisc());
-			break;
-		}
-		case 10:
-		{
-			Statusbar() << fmtBold << "Comment: " << fmtBoldEnd;
-			s.SetComment(wFooter->GetString(s.GetComment()));
-			w->at(option) << fmtBold << "Comment:" << fmtBoldEnd << ' ';
-			ShowTag(w->at(option), s.GetComment());
-			break;
-		}
-		case 12:
-		{
-			Statusbar() << fmtBold << "Filename: " << fmtBoldEnd;
-			std::string filename = s.GetNewName().empty() ? s.GetName() : s.GetNewName();
-			size_t dot = filename.rfind(".");
-			std::string extension = filename.substr(dot);
-			filename = filename.substr(0, dot);
-			std::string new_name = wFooter->GetString(filename);
-			s.SetNewName(new_name + extension);
-			w->at(option) << fmtBold << "Filename:" << fmtBoldEnd << ' ' << (s.GetNewName().empty() ? s.GetName() : s.GetNewName());
-			break;
-		}
-		case 14:
-		{
-			ShowMessage("Updating tags...");
-			if (TagEditor::WriteTags(s))
-			{
-				ShowMessage("Tags updated!");
-				if (s.isFromDB())
-				{
-					Mpd.UpdateDirectory(locale_to_utf_cpy(s.GetDirectory()));
-					if (myOldScreen == mySearcher) // songs from search engine are not updated automatically
-						*mySearcher->Main()->Current().second = s;
-				}
-				else
-				{
-					if (myOldScreen == myPlaylist)
-						myPlaylist->Items->Current() = s;
-					else if (myOldScreen == myBrowser)
-						*myBrowser->Main()->Current().song = s;
-				}
-			}
-			else
-				ShowMessage("Error writing tags!");
-		}
-		case 15:
-		{
-			myOldScreen->SwitchTo();
-			break;
-		}
+		size_t pos = option-8;
+		Statusbar() << fmtBold << Info::Tags[pos].Name << ": " << fmtBoldEnd;
+		s.SetTags(Info::Tags[pos].Set, wFooter->GetString(s.GetTags(Info::Tags[pos].Get)));
+		w->at(option) << fmtBold << Info::Tags[pos].Name << ':' << fmtBoldEnd << ' ';
+		ShowTag(w->at(option), s.GetTags(Info::Tags[pos].Get));
+	}
+	else if (option == 19)
+	{
+		Statusbar() << fmtBold << "Filename: " << fmtBoldEnd;
+		std::string filename = s.GetNewName().empty() ? s.GetName() : s.GetNewName();
+		size_t dot = filename.rfind(".");
+		std::string extension = filename.substr(dot);
+		filename = filename.substr(0, dot);
+		std::string new_name = wFooter->GetString(filename);
+		s.SetNewName(new_name + extension);
+		w->at(option) << fmtBold << "Filename:" << fmtBoldEnd << ' ' << (s.GetNewName().empty() ? s.GetName() : s.GetNewName());
 	}
 	UnlockStatusbar();
+	
+	if (option == 21)
+	{
+		ShowMessage("Updating tags...");
+		if (TagEditor::WriteTags(s))
+		{
+			ShowMessage("Tags updated!");
+			if (s.isFromDB())
+			{
+				Mpd.UpdateDirectory(locale_to_utf_cpy(s.GetDirectory()));
+				if (myOldScreen == mySearcher) // songs from search engine are not updated automatically
+					*mySearcher->Main()->Current().second = s;
+			}
+			else
+			{
+				if (myOldScreen == myPlaylist)
+					myPlaylist->Items->Current() = s;
+				else if (myOldScreen == myBrowser)
+					*myBrowser->Main()->Current().song = s;
+			}
+		}
+		else
+			ShowMessage("Error writing tags!");
+	}
+	if (option > 20)
+		myOldScreen->SwitchTo();
 }
 
 void TinyTagEditor::MouseButtonPressed(MEVENT me)
@@ -301,29 +223,15 @@ bool TinyTagEditor::GetTags()
 	w->at(5) << fmtBold << Config.color1 << "Sample rate: " << fmtBoldEnd << Config.color2 << f.audioProperties()->sampleRate() << " Hz" << clEnd;
 	w->at(6) << fmtBold << Config.color1 << "Channels: " << fmtBoldEnd << Config.color2 << (f.audioProperties()->channels() == 1 ? "Mono" : "Stereo") << clDefault;
 	
-	w->at(8) << fmtBold << "Title:" << fmtBoldEnd << ' ';
-	ShowTag(w->at(8), s.GetTitle());
-	w->at(9) << fmtBold << "Artist:" << fmtBoldEnd << ' ';
-	ShowTag(w->at(9), s.GetArtist());
-	w->at(10) << fmtBold << "Album:" << fmtBoldEnd << ' ';
-	ShowTag(w->at(10), s.GetAlbum());
-	w->at(11) << fmtBold << "Year:" << fmtBoldEnd << ' ';
-	ShowTag(w->at(11), s.GetDate());
-	w->at(12) << fmtBold << "Track:" << fmtBoldEnd << ' ';
-	ShowTag(w->at(12), s.GetTrack());
-	w->at(13) << fmtBold << "Genre:" << fmtBoldEnd << ' ';
-	ShowTag(w->at(13), s.GetGenre());
-	w->at(14) << fmtBold << "Composer:" << fmtBoldEnd << ' ';
-	ShowTag(w->at(14), s.GetComposer());
-	w->at(15) << fmtBold << "Performer:" << fmtBoldEnd << ' ';
-	ShowTag(w->at(15), s.GetPerformer());
-	w->at(16) << fmtBold << "Disc:" << fmtBoldEnd << ' ';
-	ShowTag(w->at(16), s.GetDisc());
-	w->at(17) << fmtBold << "Comment:" << fmtBoldEnd << ' ';
-	ShowTag(w->at(17), s.GetComment());
-
+	unsigned pos = 8;
+	for (const Info::Metadata *m = Info::Tags; m->Name; ++m, ++pos)
+	{
+		w->at(pos) << fmtBold << m->Name << ":" << fmtBoldEnd << ' ';
+		ShowTag(w->at(pos), s.GetTags(m->Get));
+	}
+	
 	w->at(19) << fmtBold << "Filename:" << fmtBoldEnd << ' ' << s.GetName();
-
+	
 	w->at(21) << "Save";
 	w->at(22) << "Cancel";
 	return true;

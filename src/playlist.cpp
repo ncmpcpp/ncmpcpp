@@ -323,7 +323,7 @@ bool Playlist::Sorting(MPD::Song *a, MPD::Song *b)
 {
 	CaseInsensitiveStringComparison cmp;
 	for (size_t i = 0; i < SortOptions; ++i)
-		if (int ret = cmp((a->*(*SortDialog)[i].second)(), (b->*(*SortDialog)[i].second)()))
+		if (int ret = cmp(a->GetTags((*SortDialog)[i].second), b->GetTags((*SortDialog)[i].second)))
 			return ret < 0;
 	return a->GetPosition() < b->GetPosition();
 }

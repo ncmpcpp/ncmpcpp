@@ -34,47 +34,51 @@ namespace MPD
 		
 		public:
 			
-			typedef void (Song::*SetFunction)(const std::string &);
-			typedef std::string (Song::*GetFunction)() const;
+			typedef void (Song::*SetFunction)(const std::string &, unsigned);
+			typedef std::string (Song::*GetFunction)(unsigned) const;
 			
 			Song(mpd_song * = 0, bool = 0);
 			Song(const Song &);
 			~Song();
 			
-			std::string GetFile() const;
-			std::string GetName() const;
-			std::string GetDirectory() const;
-			std::string GetArtist() const;
-			std::string GetTitle() const;
-			std::string GetAlbum() const;
-			std::string GetTrack() const;
-			std::string GetTrackNumber() const;
-			std::string GetDate() const;
-			std::string GetGenre() const;
-			std::string GetComposer() const;
-			std::string GetPerformer() const;
-			std::string GetDisc() const;
-			std::string GetComment() const;
-			std::string GetLength() const;
+			std::string GetFile(unsigned = 0) const;
+			std::string GetName(unsigned = 0) const;
+			std::string GetDirectory(unsigned = 0) const;
+			std::string GetArtist(unsigned = 0) const;
+			std::string GetTitle(unsigned = 0) const;
+			std::string GetAlbum(unsigned = 0) const;
+			std::string GetTrack(unsigned = 0) const;
+			std::string GetTrackNumber(unsigned = 0) const;
+			std::string GetDate(unsigned = 0) const;
+			std::string GetGenre(unsigned = 0) const;
+			std::string GetComposer(unsigned = 0) const;
+			std::string GetPerformer(unsigned = 0) const;
+			std::string GetDisc(unsigned = 0) const;
+			std::string GetComment(unsigned = 0) const;
+			std::string GetLength(unsigned = 0) const;
+			
+			std::string GetTags(GetFunction) const;
 			
 			unsigned GetHash() const { return itsHash; }
 			unsigned GetTotalLength() const { return mpd_song_get_duration(itsSong); }
 			unsigned GetPosition() const { return mpd_song_get_pos(itsSong); }
 			unsigned GetID() const { return mpd_song_get_id(itsSong); }
 			
-			void SetArtist(const std::string &);
-			void SetTitle(const std::string &);
-			void SetAlbum(const std::string &);
-			void SetTrack(const std::string &);
-			void SetTrack(unsigned);
-			void SetDate(const std::string &);
-			void SetDate(unsigned);
-			void SetGenre(const std::string &);
-			void SetComposer(const std::string &);
-			void SetPerformer(const std::string &);
-			void SetDisc(const std::string &);
-			void SetComment(const std::string &);
+			void SetArtist(const std::string &, unsigned = 0);
+			void SetTitle(const std::string &, unsigned = 0);
+			void SetAlbum(const std::string &, unsigned = 0);
+			void SetTrack(const std::string &, unsigned = 0);
+			void SetTrack(unsigned, unsigned = 0);
+			void SetDate(const std::string &, unsigned = 0);
+			void SetDate(unsigned, unsigned = 0);
+			void SetGenre(const std::string &, unsigned = 0);
+			void SetComposer(const std::string &, unsigned = 0);
+			void SetPerformer(const std::string &, unsigned = 0);
+			void SetDisc(const std::string &, unsigned = 0);
+			void SetComment(const std::string &, unsigned = 0);
 			void SetPosition(unsigned);
+			
+			void SetTags(SetFunction, const std::string &);
 			
 			void SetNewName(const std::string &name) { itsNewName = name == GetName() ? "" : name; }
 			std::string GetNewName() const { return itsNewName; }

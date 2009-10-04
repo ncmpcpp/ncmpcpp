@@ -664,19 +664,19 @@ void TagEditor::EnterPressed()
 	{
 		LockStatusbar();
 		Statusbar() << fmtBold << TagTypes->Current() << fmtBoldEnd << ": ";
-		std::string new_tag = wFooter->GetString((Tags->Current().*get)());
+		std::string new_tag = wFooter->GetString(Tags->Current().GetTags(get));
 		UnlockStatusbar();
 		for (MPD::SongList::iterator it = EditedSongs.begin(); it != EditedSongs.end(); ++it)
-			(**it.*set)(new_tag);
+			(*it)->SetTags(set, new_tag);
 	}
 	else if (w == Tags && set)
 	{
 		LockStatusbar();
 		Statusbar() << fmtBold << TagTypes->Current() << fmtBoldEnd << ": ";
-		std::string new_tag = wFooter->GetString((Tags->Current().*get)());
+		std::string new_tag = wFooter->GetString(Tags->Current().GetTags(get));
 		UnlockStatusbar();
-		if (new_tag != (Tags->Current().*get)())
-			(Tags->Current().*set)(new_tag);
+		if (new_tag != Tags->Current().GetTags(get))
+			Tags->Current().SetTags(set, new_tag);
 		Tags->Scroll(wDown);
 	}
 }
@@ -918,12 +918,12 @@ void TagEditor::WriteXiphComments(const MPD::Song &s, TagLib::Ogg::XiphComment *
 	tag->addField("DISCNUMBER", ToWString(s.GetDisc())); // disc
 	
 	tag->removeField("COMPOSER"); // composer
-	GetTagList(list, s.GetComposer());
+	GetTagList(list, s, &MPD::Song::GetComposer);
 	for (TagLib::StringList::ConstIterator it = list.begin(); it != list.end(); ++it)
 		tag->addField("COMPOSER", *it, 0);
 	
 	tag->removeField("PERFORMER"); // performer
-	GetTagList(list, s.GetPerformer());
+	GetTagList(list, s, &MPD::Song::GetPerformer);
 	for (TagLib::StringList::ConstIterator it = list.begin(); it != list.end(); ++it)
 		tag->addField("PERFORMER", *it, 0);
 }
@@ -959,10 +959,10 @@ bool TagEditor::WriteTags(MPD::Song &s)
 			WriteID3v2("TCON", tag, ToWString(s.GetGenre()));  // genre
 			WriteID3v2("TPOS", tag, ToWString(s.GetDisc()));   // disc
 			
-			GetTagList(list, s.GetComposer());
+			GetTagList(list, s, &MPD::Song::GetComposer);
 			WriteID3v2("TCOM", tag, list); // composer
 			
-			GetTagList(list, s.GetPerformer());
+			GetTagList(list, s, &MPD::Song::GetPerformer);
 			// in >=mpd-0.16 treating TOPE frame as performer tag
 			// was dropped in favor of TPE3/TPE4 frames, so we have
 			// to write frame accurate to used mpd version
@@ -1075,18 +1075,12 @@ void TagEditor::LowerAllLetters(MPD::Song &s)
 	s.SetComment(conv);
 }
 
-void TagEditor::GetTagList(TagLib::StringList &list, const std::string &s)
+void TagEditor::GetTagList(TagLib::StringList &list, const MPD::Song &s, MPD::Song::GetFunction f)
 {
 	list.clear();
-	for (size_t i = 0; i != std::string::npos; i = s.find(",", i))
-	{
-		if (i)
-			++i;
-		while (s[i] == ' ')
-			++i;
-		size_t j = s.find(",", i);
-		list.append(ToWString(s.substr(i, j-i)));
-	}
+	unsigned pos = 0;
+	for (std::string value; !(value = (s.*f)(pos)).empty(); ++pos)
+		list.append(ToWString(value));
 }
 
 std::string TagEditor::TagToString(const MPD::Song &s, void *data)
@@ -1244,7 +1238,7 @@ std::string TagEditor::ParseFilename(MPD::Song &s, std::string mask, bool previe
 		{
 			MPD::Song::SetFunction set = IntoSetFunction(it->first);
 			if (set)
-				(s.*set)(it->second);
+				s.SetTags(set, it->second);
 		}
 		else
 			result << "%" << it->first << ": " << it->second << "\n";

@@ -1369,7 +1369,7 @@ int main(int argc, char *argv[])
 					for (SongList::iterator it = list.begin(); it != list.end(); ++it)
 					{
 						(*it)->Localize();
-						((*it)->*set)(new_tag);
+						(*it)->SetTags(set, new_tag);
 						ShowMessage("Updating tags in \"%s\"...", (*it)->GetName().c_str());
 						std::string path = Config.mpd_music_dir + (*it)->GetFile();
 						if (!TagEditor::WriteTags(**it))

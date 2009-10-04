@@ -55,6 +55,21 @@ pthread_t *Info::Downloader = 0;
 
 Info *myInfo = new Info;
 
+const Info::Metadata Info::Tags[] =
+{
+	{ "Title",	&MPD::Song::GetTitle,	  &MPD::Song::SetTitle     },
+	{ "Artist",	&MPD::Song::GetArtist,	  &MPD::Song::SetArtist    },
+	{ "Album",	&MPD::Song::GetAlbum,	  &MPD::Song::SetAlbum     },
+	{ "Year",	&MPD::Song::GetDate,	  &MPD::Song::SetDate      },
+	{ "Track",	&MPD::Song::GetTrack,	  &MPD::Song::SetTrack     },
+	{ "Genre",	&MPD::Song::GetGenre,	  &MPD::Song::SetGenre     },
+	{ "Composer",	&MPD::Song::GetComposer,  &MPD::Song::SetComposer  },
+	{ "Performer",	&MPD::Song::GetPerformer, &MPD::Song::SetPerformer },
+	{ "Disc",	&MPD::Song::GetDisc,	  &MPD::Song::SetDisc      },
+	{ "Comment",	&MPD::Song::GetComment,	  &MPD::Song::SetComment   },
+	{ 0,		0,			  0			   }
+};
+
 void Info::Init()
 {
 	w = new Scrollpad(0, MainStartY, COLS, MainHeight, "", Config.main_color, brNone);
@@ -372,25 +387,10 @@ void Info::PrepareSong(MPD::Song &s)
 #	endif // HAVE_TAGLIB_H
 	*w << clDefault;
 	
-	*w << fmtBold << "\nTitle: " << fmtBoldEnd;
-	ShowTag(*w, s.GetTitle());
-	*w << fmtBold << "\nArtist: " << fmtBoldEnd;
-	ShowTag(*w, s.GetArtist());
-	*w << fmtBold << "\nAlbum: " << fmtBoldEnd;
-	ShowTag(*w, s.GetAlbum());
-	*w << fmtBold << "\nYear: " << fmtBoldEnd;
-	ShowTag(*w, s.GetDate());
-	*w << fmtBold << "\nTrack: " << fmtBoldEnd;
-	ShowTag(*w, s.GetTrack());
-	*w << fmtBold << "\nGenre: " << fmtBoldEnd;
-	ShowTag(*w, s.GetGenre());
-	*w << fmtBold << "\nComposer: " << fmtBoldEnd;
-	ShowTag(*w, s.GetComposer());
-	*w << fmtBold << "\nPerformer: " << fmtBoldEnd;
-	ShowTag(*w, s.GetPerformer());
-	*w << fmtBold << "\nDisc: " << fmtBoldEnd;
-	ShowTag(*w, s.GetDisc());
-	*w << fmtBold << "\nComment: " << fmtBoldEnd;
-	ShowTag(*w, s.GetComment());
+	for (const Metadata *m = Tags; m->Name; ++m)
+	{
+		*w << fmtBold << "\n" << m->Name << ": " << fmtBoldEnd;
+		ShowTag(*w, s.GetTags(m->Get));
+	}
 }
 

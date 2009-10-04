@@ -28,6 +28,13 @@
 class Info : public Screen<Scrollpad>
 {
 	public:
+		struct Metadata
+		{
+			const char *Name;
+			MPD::Song::GetFunction Get;
+			MPD::Song::SetFunction Set;
+		};
+		
 		virtual void SwitchTo() { }
 		virtual void Resize();
 		
@@ -48,6 +55,8 @@ class Info : public Screen<Scrollpad>
 #		ifdef HAVE_CURL_CURL_H
 		void GetArtist();
 #		endif // HAVE_CURL_CURL_H
+		
+		static const Metadata Tags[];
 		
 	protected:
 		virtual void Init();

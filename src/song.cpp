@@ -74,8 +74,10 @@ MPD::Song::~Song()
 	delete itsTags;
 }
 
-std::string MPD::Song::GetLength() const
+std::string MPD::Song::GetLength(unsigned pos) const
 {
+	if (pos > 0)
+		return "";
 	unsigned len = mpd_song_get_duration(itsSong);
 	return !len ? "-:--" : ShowTime(len);
 }
@@ -145,13 +147,15 @@ bool MPD::Song::isStream() const
 	return !strncmp(MyFilename(), "http://", 7);
 }
 
-std::string MPD::Song::GetFile() const
+std::string MPD::Song::GetFile(unsigned pos) const
 {
-	return MyFilename();
+	return pos > 0 ? "" : MyFilename();
 }
 
-std::string MPD::Song::GetName() const
+std::string MPD::Song::GetName(unsigned pos) const
 {
+	if (pos > 0)
+		return "";
 	std::string name = GetTag(MPD_TAG_NAME, 0);
 	if (!name.empty())
 		return name;
@@ -161,9 +165,9 @@ std::string MPD::Song::GetName() const
 		return MyFilename();
 }
 
-std::string MPD::Song::GetDirectory() const
+std::string MPD::Song::GetDirectory(unsigned pos) const
 {
-	if (isStream())
+	if (pos > 0 || isStream())
 		return "";
 	else if (itsSlash == std::string::npos)
 		return "/";
@@ -171,30 +175,30 @@ std::string MPD::Song::GetDirectory() const
 		return std::string(MyFilename(), itsSlash);
 }
 
-std::string MPD::Song::GetArtist() const
+std::string MPD::Song::GetArtist(unsigned pos) const
 {
-	return GetTag(MPD_TAG_ARTIST, 0);
+	return GetTag(MPD_TAG_ARTIST, pos);
 }
 
-std::string MPD::Song::GetTitle() const
+std::string MPD::Song::GetTitle(unsigned pos) const
 {
-	return GetTag(MPD_TAG_TITLE, 0);
+	return GetTag(MPD_TAG_TITLE, pos);
 }
 
-std::string MPD::Song::GetAlbum() const
+std::string MPD::Song::GetAlbum(unsigned pos) const
 {
-	return GetTag(MPD_TAG_ALBUM, 0);
+	return GetTag(MPD_TAG_ALBUM, pos);
 }
 
-std::string MPD::Song::GetTrack() const
+std::string MPD::Song::GetTrack(unsigned pos) const
 {
-	std::string track = GetTag(MPD_TAG_TRACK, 0);
+	std::string track = GetTag(MPD_TAG_TRACK, pos);
 	return track.length() == 1 && track[0] != '0' ? "0"+track : track;
 }
 
-std::string MPD::Song::GetTrackNumber() const
+std::string MPD::Song::GetTrackNumber(unsigned pos) const
 {
-	std::string track = GetTag(MPD_TAG_TRACK, 0);
+	std::string track = GetTag(MPD_TAG_TRACK, pos);
 	size_t slash = track.find('/');
 	if (slash != std::string::npos)
 	{
@@ -205,99 +209,138 @@ std::string MPD::Song::GetTrackNumber() const
 		return track;
 }
 
-std::string MPD::Song::GetDate() const
+std::string MPD::Song::GetDate(unsigned pos) const
 {
-	return GetTag(MPD_TAG_DATE, 0);
+	return GetTag(MPD_TAG_DATE, pos);
 }
 
-std::string MPD::Song::GetGenre() const
+std::string MPD::Song::GetGenre(unsigned pos) const
 {
-	return GetTag(MPD_TAG_GENRE, 0);
+	return GetTag(MPD_TAG_GENRE, pos);
 }
 
-std::string MPD::Song::GetComposer() const
+std::string MPD::Song::GetComposer(unsigned pos) const
 {
-	return GetTag(MPD_TAG_COMPOSER, 0);
+	return GetTag(MPD_TAG_COMPOSER, pos);
 }
 
-std::string MPD::Song::GetPerformer() const
+std::string MPD::Song::GetPerformer(unsigned pos) const
 {
-	return GetTag(MPD_TAG_PERFORMER, 0);
+	return GetTag(MPD_TAG_PERFORMER, pos);
 }
 
-std::string MPD::Song::GetDisc() const
+std::string MPD::Song::GetDisc(unsigned pos) const
 {
-	return GetTag(MPD_TAG_DISC, 0);
+	return GetTag(MPD_TAG_DISC, pos);
 }
 
-std::string MPD::Song::GetComment() const
+std::string MPD::Song::GetComment(unsigned pos) const
 {
-	return GetTag(MPD_TAG_COMMENT, 0);
+	return GetTag(MPD_TAG_COMMENT, pos);
 }
 
-void MPD::Song::SetArtist(const std::string &str)
+std::string MPD::Song::GetTags(GetFunction f) const
 {
-	SetTag(MPD_TAG_ARTIST, 0, str);
+	unsigned pos = 0;
+	std::string result;
+	for (std::string tag; !(tag = (this->*f)(pos)).empty(); ++pos)
+	{
+		if (!result.empty())
+			result += ", ";
+		result += tag;
+	}
+	return result;
 }
 
-void MPD::Song::SetTitle(const std::string &str)
+void MPD::Song::SetArtist(const std::string &str, unsigned pos)
 {
-	SetTag(MPD_TAG_TITLE, 0, str);
+	SetTag(MPD_TAG_ARTIST, pos, str);
 }
 
-void MPD::Song::SetAlbum(const std::string &str)
+void MPD::Song::SetTitle(const std::string &str, unsigned pos)
 {
-	SetTag(MPD_TAG_ALBUM, 0, str);
+	SetTag(MPD_TAG_TITLE, pos, str);
 }
 
-void MPD::Song::SetTrack(const std::string &str)
+void MPD::Song::SetAlbum(const std::string &str, unsigned pos)
 {
-	SetTag(MPD_TAG_TRACK, 0, str);
+	SetTag(MPD_TAG_ALBUM, pos, str);
 }
 
-void MPD::Song::SetTrack(unsigned track)
+void MPD::Song::SetTrack(const std::string &str, unsigned pos)
 {
-	SetTag(MPD_TAG_ARTIST, 0, IntoStr(track));
+	SetTag(MPD_TAG_TRACK, pos, str);
 }
 
-void MPD::Song::SetDate(const std::string &str)
+void MPD::Song::SetTrack(unsigned track, unsigned pos)
 {
-	SetTag(MPD_TAG_DATE, 0, str);
+	SetTag(MPD_TAG_ARTIST, pos, IntoStr(track));
 }
 
-void MPD::Song::SetDate(unsigned year)
+void MPD::Song::SetDate(const std::string &str, unsigned pos)
 {
-	SetTag(MPD_TAG_TRACK, 0, IntoStr(year));
+	SetTag(MPD_TAG_DATE, pos, str);
 }
 
-void MPD::Song::SetGenre(const std::string &str)
+void MPD::Song::SetDate(unsigned year, unsigned pos)
 {
-	SetTag(MPD_TAG_GENRE, 0, str);
+	SetTag(MPD_TAG_TRACK, pos, IntoStr(year));
 }
 
-void MPD::Song::SetComposer(const std::string &str)
+void MPD::Song::SetGenre(const std::string &str, unsigned pos)
 {
-	SetTag(MPD_TAG_COMPOSER, 0, str);
+	SetTag(MPD_TAG_GENRE, pos, str);
 }
 
-void MPD::Song::SetPerformer(const std::string &str)
+void MPD::Song::SetComposer(const std::string &str, unsigned pos)
 {
-	SetTag(MPD_TAG_PERFORMER, 0, str);
+	SetTag(MPD_TAG_COMPOSER, pos, str);
 }
 
-void MPD::Song::SetDisc(const std::string &str)
+void MPD::Song::SetPerformer(const std::string &str, unsigned pos)
 {
-	SetTag(MPD_TAG_DISC, 0, str);
+	SetTag(MPD_TAG_PERFORMER, pos, str);
 }
 
-void MPD::Song::SetComment(const std::string &str)
+void MPD::Song::SetDisc(const std::string &str, unsigned pos)
 {
-	SetTag(MPD_TAG_COMMENT, 0, str);
+	SetTag(MPD_TAG_DISC, pos, str);
+}
+
+void MPD::Song::SetComment(const std::string &str, unsigned pos)
+{
+	SetTag(MPD_TAG_COMMENT, pos, str);
 }
 
 void MPD::Song::SetPosition(unsigned pos)
 {
 	mpd_song_set_pos(itsSong, pos);
+}
+
+void MPD::Song::SetTags(SetFunction f, const std::string &value)
+{
+	unsigned pos = 0;
+	// tag editor can save multiple instances of performer and composer
+	// tag, so we need to split them and allow it to read them separately.
+	if (f == &Song::SetComposer || f == &Song::SetPerformer)
+	{
+		for (size_t i = 0; i != std::string::npos; i = value.find(",", i))
+		{
+			if (i)
+				++i;
+			while (value[i] == ' ')
+				++i;
+			size_t j = value.find(",", i);
+			(this->*f)(value.substr(i, j-i), pos++);
+		}
+	}
+	else
+		(this->*f)(value, pos++);
+	// there should be empty tag at the end since if we are
+	// reading them, original tag from mpd_song at the position
+	// after the last one locally set can be non-empty and in this
+	// case GetTags() would read it, which is undesirable.
+	(this->*f)("", pos);
 }
 
 std::string MPD::Song::ParseFormat(std::string::const_iterator &it, const char *escape_chars) const
@@ -373,7 +416,7 @@ std::string MPD::Song::ParseFormat(std::string::const_iterator &it, const char *
 			}
 			if (get)
 			{
-				std::string tag = (this->*get)();
+				std::string tag = GetTags(get);
 				if (escape_chars) // prepend format escape character to all given chars to escape
 					for (const char *ch = escape_chars; *ch; ++ch)
 						for (size_t i = tag.find(*ch); i != std::string::npos; i = tag.find(*ch, i += 2))

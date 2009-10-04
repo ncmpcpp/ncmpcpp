@@ -96,7 +96,7 @@ class TagEditor : public Screen<Window>
 		static std::string CapitalizeFirstLetters(const std::string &);
 		static void CapitalizeFirstLetters(MPD::Song &);
 		static void LowerAllLetters(MPD::Song &);
-		static void GetTagList(TagLib::StringList &, const std::string &);
+		static void GetTagList(TagLib::StringList &, const MPD::Song &, MPD::Song::GetFunction);
 		static void WriteXiphComments(const MPD::Song &, TagLib::Ogg::XiphComment *);
 		
 		static void GetPatternList();
