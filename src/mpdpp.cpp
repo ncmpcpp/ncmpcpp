@@ -720,7 +720,7 @@ void Connection::GetDirectories(const std::string &path, TagList &v) const
 {
 	if (isConnected)
 	{
-		mpd_send_list_all(itsConnection, path.c_str());
+		mpd_send_list_meta(itsConnection, path.c_str());
 		while (mpd_directory *dir = mpd_recv_directory(itsConnection))
 		{
 			v.push_back(mpd_directory_get_path(dir));
