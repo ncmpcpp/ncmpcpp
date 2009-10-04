@@ -504,8 +504,6 @@ const char *MPD::Song::MyFilename() const
 
 void MPD::Song::SetTag(mpd_tag_type type, unsigned pos, const std::string &value)
 {
-	if (value.empty())
-		return;
 	if (!itsTags)
 		itsTags = new TagMap;
 	(*itsTags)[std::make_pair(type, pos)] = value;
