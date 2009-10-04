@@ -69,8 +69,6 @@ std::string IntoStr(mpd_tag_type tag) // this is only for left column's title in
 			return "Comment";
 		case MPD_TAG_DISC:
 			return "Disc";
-		case MPD_TAG_FILE:
-			return "Filename";
 		default:
 			return "";
 	}
@@ -170,8 +168,6 @@ MPD::Song::SetFunction IntoSetFunction(mpd_tag_type tag)
 			return &MPD::Song::SetComment;
 		case MPD_TAG_DISC:
 			return &MPD::Song::SetDisc;
-		case MPD_TAG_FILE:
-			return &MPD::Song::SetNewName;
 		default:
 			return 0;
 	}

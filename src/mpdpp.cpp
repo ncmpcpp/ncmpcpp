@@ -467,7 +467,7 @@ bool Connection::AddRandomSongs(size_t number)
 	TagList files;
 	
 	mpd_send_list_all(itsConnection, "/");
-	while (mpd_pair *item = mpd_recv_pair_tag(itsConnection, MPD_TAG_FILE))
+	while (mpd_pair *item = mpd_recv_pair_named(itsConnection, "file"))
 	{
 		files.push_back(item->value);
 		mpd_return_pair(itsConnection, item);
@@ -598,7 +598,7 @@ void Connection::GetAlbums(const std::string &artist, TagList &v) const
 	{
 		mpd_search_db_tags(itsConnection, MPD_TAG_ALBUM);
 		if (!artist.empty())
-			mpd_search_add_constraint(itsConnection, MPD_TAG_ARTIST, artist.c_str());
+			mpd_search_add_tag_constraint(itsConnection, MPD_OPERATOR_DEFAULT, MPD_TAG_ARTIST, artist.c_str());
 		mpd_search_commit(itsConnection);
 		while (mpd_pair *item = mpd_recv_pair_tag(itsConnection, MPD_TAG_ALBUM))
 		{
@@ -631,7 +631,7 @@ void Connection::AddSearch(mpd_tag_type item, const std::string &str) const
 	if (Version() < 14 && str.empty())
 		return;
 	if (isConnected)
-		mpd_search_add_constraint(itsConnection, item, str.c_str());
+		mpd_search_add_tag_constraint(itsConnection, MPD_OPERATOR_DEFAULT, item, str.c_str());
 }
 
 void Connection::CommitSearch(SongList &v) const

@@ -895,7 +895,6 @@ void TagEditor::ReadTags(MPD::Song &s)
 		s.SetDisc(!mpegf->ID3v2Tag()->frameListMap()["TPOS"].isEmpty() ? mpegf->ID3v2Tag()->frameListMap()["TPOS"].front()->toString().to8Bit(1) : "");
 	}
 	s.SetComment(f.tag()->comment().to8Bit(1));
-	s.SetLength(f.audioProperties()->length());
 }
 
 namespace

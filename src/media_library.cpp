@@ -197,13 +197,14 @@ void MediaLibrary::Update()
 		// <mpd-0.14 doesn't support searching for empty tag
 		if (Mpd.Version() > 13)
 		{
-			TagList noalbum_list;
-			Mpd.StartFieldSearch(MPD_TAG_FILE);
+			SongList noalbum_list;
+			Mpd.StartSearch(1);
 			Mpd.AddSearch(Config.media_lib_primary_tag, Artists->Current());
 			Mpd.AddSearch(MPD_TAG_ALBUM, "");
 			Mpd.CommitSearch(noalbum_list);
 			if (!noalbum_list.empty())
 				Albums->AddOption(std::make_pair("<no album>", SearchConstraints("", "")));
+			FreeSongList(noalbum_list);
 		}
 		
 		for (TagList::const_iterator it = list.begin(); it != list.end(); ++it)

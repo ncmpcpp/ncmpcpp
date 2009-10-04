@@ -82,8 +82,7 @@ namespace
 		*outbuf = 0;
 		if (delete_old)
 			delete [] instart;
-		inbuf = strdup(outstart);
-		delete [] outstart;
+		inbuf = outstart;
 	}
 }
 
