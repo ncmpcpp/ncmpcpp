@@ -1342,7 +1342,8 @@ int main(int argc, char *argv[])
 		}
 		else if (Keypressed(input, Key.EditTags))
 		{
-			if (myScreen != myBrowser || !myBrowser->isLocal())
+			if ((myScreen != myBrowser || !myBrowser->isLocal())
+			&&  myScreen != myLyrics)
 				CHECK_MPD_MUSIC_DIR;
 #			ifdef HAVE_TAGLIB_H
 			if (myTinyTagEditor->SetEdited(myScreen->CurrentSong()))
