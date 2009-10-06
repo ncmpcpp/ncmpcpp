@@ -192,7 +192,6 @@ namespace MPD
 			int CheckForErrors();
 			
 			mpd_connection *itsConnection;
-			bool isConnected;
 			bool isCommandsListEnabled;
 			
 			std::string itsErrorMessage;
