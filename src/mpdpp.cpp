@@ -411,7 +411,7 @@ void Connection::SetCrossfade(unsigned crossfade) const
 
 int Connection::AddSong(const std::string &path)
 {
-	if (itsConnection)
+	if (!itsConnection)
 		return -1;
 	int id = -1;
 	if (GetPlaylistLength() < itsMaxPlaylistLength)
