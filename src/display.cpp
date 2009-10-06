@@ -105,7 +105,7 @@ void Display::SongsInColumns(const MPD::Song &s, void *, Menu<MPD::Song> *menu)
 	if (!s.Localized())
 		const_cast<MPD::Song *>(&s)->Localize();
 	
-	bool is_now_playing = menu == myPlaylist->Items && menu->CurrentlyDrawedPosition() == size_t(myPlaylist->NowPlaying);
+	bool is_now_playing = menu == myPlaylist->Items && (menu->isFiltered() ? s.GetPosition() : menu->CurrentlyDrawedPosition()) == size_t(myPlaylist->NowPlaying);
 	if (is_now_playing)
 		*menu << Config.now_playing_prefix;
 	
@@ -217,7 +217,7 @@ void Display::Songs(const MPD::Song &s, void *data, Menu<MPD::Song> *menu)
 	if (!s.Localized())
 		const_cast<MPD::Song *>(&s)->Localize();
 	
-	bool is_now_playing = menu == myPlaylist->Items && menu->CurrentlyDrawedPosition() == size_t(myPlaylist->NowPlaying);
+	bool is_now_playing = menu == myPlaylist->Items && (menu->isFiltered() ? s.GetPosition() : menu->CurrentlyDrawedPosition()) == size_t(myPlaylist->NowPlaying);
 	if (is_now_playing)
 		*menu << Config.now_playing_prefix;
 	
