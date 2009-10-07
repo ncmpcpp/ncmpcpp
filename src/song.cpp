@@ -201,12 +201,8 @@ std::string MPD::Song::GetTrackNumber(unsigned pos) const
 	std::string track = GetTag(MPD_TAG_TRACK, pos);
 	size_t slash = track.find('/');
 	if (slash != std::string::npos)
-	{
-		track = track.substr(slash+1);
-		return track.length() == 1 && track[0] != '0' ? "0"+track : track;
-	}
-	else
-		return track;
+		track.resize(slash);
+	return track.length() == 1 && track[0] != '0' ? "0"+track : track;
 }
 
 std::string MPD::Song::GetDate(unsigned pos) const
