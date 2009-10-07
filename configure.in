@@ -68,9 +68,7 @@ PKG_CHECK_MODULES([libmpdclient], [libmpdclient >= 2.0], [
 		AC_MSG_ERROR([missing mpd/client.h header])
 	)
 ],
-	if test "$fftw" = "yes" ; then
-		AC_MSG_ERROR([libmpdclient2 is required!])
-	fi
+	AC_MSG_ERROR([libmpdclient2 is required!])
 )
 
 dnl ======================
