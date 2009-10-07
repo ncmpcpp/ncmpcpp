@@ -274,7 +274,7 @@ void MPD::Song::SetTrack(const std::string &str, unsigned pos)
 
 void MPD::Song::SetTrack(unsigned track, unsigned pos)
 {
-	SetTag(MPD_TAG_ARTIST, pos, IntoStr(track));
+	SetTag(MPD_TAG_TRACK, pos, IntoStr(track));
 }
 
 void MPD::Song::SetDate(const std::string &str, unsigned pos)
@@ -284,7 +284,7 @@ void MPD::Song::SetDate(const std::string &str, unsigned pos)
 
 void MPD::Song::SetDate(unsigned year, unsigned pos)
 {
-	SetTag(MPD_TAG_TRACK, pos, IntoStr(year));
+	SetTag(MPD_TAG_DATE, pos, IntoStr(year));
 }
 
 void MPD::Song::SetGenre(const std::string &str, unsigned pos)
