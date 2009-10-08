@@ -171,8 +171,8 @@ void Connection::UpdateStatus()
 		{
 			itsChanges.Playlist = mpd_status_get_queue_version(itsOldStatus) != mpd_status_get_queue_version(itsCurrentStatus);
 			itsChanges.SongID = mpd_status_get_song_id(itsOldStatus) != mpd_status_get_song_id(itsCurrentStatus);
-			itsChanges.Database = mpd_status_get_update_id(itsOldStatus) != mpd_status_get_update_id(itsCurrentStatus);
-			itsChanges.DBUpdating = itsChanges.Database;
+			itsChanges.Database = mpd_status_get_update_id(itsOldStatus) && !mpd_status_get_update_id(itsCurrentStatus);
+			itsChanges.DBUpdating = mpd_status_get_update_id(itsOldStatus) != mpd_status_get_update_id(itsCurrentStatus);
 			itsChanges.Volume = mpd_status_get_volume(itsOldStatus) != mpd_status_get_volume(itsCurrentStatus);
 			itsChanges.ElapsedTime = mpd_status_get_elapsed_time(itsOldStatus) != mpd_status_get_elapsed_time(itsCurrentStatus);
 			itsChanges.Crossfade = mpd_status_get_crossfade(itsOldStatus) != mpd_status_get_crossfade(itsCurrentStatus);
