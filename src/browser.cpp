@@ -343,7 +343,8 @@ void Browser::GetDirectory(std::string dir, std::string subdir)
 #	else
 	Mpd.GetDirectory(dir, list);
 #	endif // !WIN32
-	sort(list.begin(), list.end(), CaseInsensitiveSorting());
+	if (!isLocal()) // local directory is already sorted
+		sort(list.begin(), list.end(), CaseInsensitiveSorting());
 	
 	for (ItemList::iterator it = list.begin(); it != list.end(); ++it)
 	{
@@ -407,6 +408,7 @@ void Browser::GetLocalDirectory(ItemList &v, const std::string &directory, bool 
 		}
 	}
 	
+	size_t old_size = v.size();
 	while ((file = readdir(dir)))
 	{
 		if (!Config.local_browser_show_hidden_files && file->d_name[0] == '.')
@@ -420,7 +422,10 @@ void Browser::GetLocalDirectory(ItemList &v, const std::string &directory, bool 
 		if (S_ISDIR(file_stat.st_mode))
 		{
 			if (recursively)
+			{
 				GetLocalDirectory(v, full_path, 1);
+				old_size = v.size();
+			}
 			else
 			{
 				new_item.type = itDirectory;
@@ -441,6 +446,7 @@ void Browser::GetLocalDirectory(ItemList &v, const std::string &directory, bool 
 		}
 	}
 	closedir(dir);
+	std::sort(v.begin()+old_size, v.end(), CaseInsensitiveSorting());
 }
 
 void Browser::ClearDirectory(const std::string &path) const
