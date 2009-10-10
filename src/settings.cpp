@@ -313,6 +313,7 @@ void DefaultConfiguration(ncmpcpp_config &conf)
 	conf.mouse_support = true;
 	conf.new_design = false;
 	conf.visualizer_use_wave = true;
+	conf.browser_sort_by_mtime = false;
 	conf.set_window_title = true;
 	conf.mpd_port = 6600;
 	conf.mpd_connection_timeout = 15;

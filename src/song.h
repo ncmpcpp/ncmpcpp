@@ -64,6 +64,8 @@ namespace MPD
 			unsigned GetPosition() const { return mpd_song_get_pos(itsSong); }
 			unsigned GetID() const { return mpd_song_get_id(itsSong); }
 			
+			time_t GetMTime() const { return mpd_song_get_last_modified(itsSong); }
+			
 			void SetArtist(const std::string &, unsigned = 0);
 			void SetTitle(const std::string &, unsigned = 0);
 			void SetAlbum(const std::string &, unsigned = 0);

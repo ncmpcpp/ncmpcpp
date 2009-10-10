@@ -1808,6 +1808,12 @@ int main(int argc, char *argv[])
 				if (number && Mpd.AddRandomSongs(number))
 					ShowMessage("%zu random song%s added to playlist!", number, number == 1 ? "" : "s");
 			}
+			else if (myScreen == myBrowser && !myBrowser->isLocal())
+			{
+				Config.browser_sort_by_mtime = !Config.browser_sort_by_mtime;
+				myBrowser->Main()->Sort<CaseInsensitiveSorting>(myBrowser->CurrentDir() != "/");
+				ShowMessage("Sort songs by: %s", Config.browser_sort_by_mtime ? "Modification time" : "Name");
+			}
 			else if (myScreen->ActiveWindow() == myLibrary->Artists
 			||	 (myLibrary->Columns() == 2 && myScreen->ActiveWindow() == myLibrary->Albums))
 			{

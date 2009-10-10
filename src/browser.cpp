@@ -76,7 +76,6 @@ void Browser::SwitchTo()
 #		ifndef WIN32
 		myBrowser->ChangeBrowseMode();
 #		endif // !WIN32
-		return;
 	}
 	
 	if (!isInitialized)
@@ -84,6 +83,9 @@ void Browser::SwitchTo()
 	
 	if (hasToBeResized)
 		Resize();
+	
+	if (isLocal()) // local browser doesn't support sorting by mtime
+		Config.browser_sort_by_mtime = 0;
 	
 	w->Empty() ? myBrowser->GetDirectory(itsBrowsedDir) : myBrowser->UpdateItemList();
 	myScreen = this;

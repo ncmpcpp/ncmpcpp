@@ -233,7 +233,9 @@ bool CaseInsensitiveSorting::operator()(const Item &a, const Item &b)
 			case itPlaylist:
 				return cmp(a.name, b.name) < 0;
 			case itSong:
-				return operator()(a.song, b.song);
+				return Config.browser_sort_by_mtime
+						? a.song->GetMTime() > b.song->GetMTime()
+						: operator()(a.song, b.song);
 			default: // there's no other type, just silence compiler.
 				return 0;
 		}

@@ -207,6 +207,7 @@ struct ncmpcpp_config
 	bool mouse_support;
 	bool new_design;
 	bool visualizer_use_wave;
+	bool browser_sort_by_mtime;
 	
 	int mpd_port;
 	int mpd_connection_timeout;
