@@ -621,7 +621,8 @@ void TagEditor::EnterPressed()
 				ShowMessage("Writing tags in \"%s\"...", (*it)->GetName().c_str());
 				if (!WriteTags(**it))
 				{
-					ShowMessage("Error writing tags in \"%s\"!", (*it)->GetFile().c_str());
+					static const char msg[] = "Error while writing tags in \"%s\"!";
+					ShowMessage(msg, Shorten(TO_WSTRING((*it)->GetFile()), COLS-static_strlen(msg)).c_str());
 					success = 0;
 					break;
 				}

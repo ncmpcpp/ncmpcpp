@@ -595,7 +595,7 @@ int main(int argc, char *argv[])
 			{
 				std::string name = myScreen == myBrowser ? myBrowser->Main()->Current().name : myPlaylistEditor->Playlists->Current();
 				LockStatusbar();
-				Statusbar() << "Delete playlist \"" << name << "\" ? [" << fmtBold << 'y' << fmtBoldEnd << '/' << fmtBold << 'n' << fmtBoldEnd << "] ";
+				Statusbar() << "Delete playlist \"" << Shorten(TO_WSTRING(name), COLS-28) << "\" ? [" << fmtBold << 'y' << fmtBoldEnd << '/' << fmtBold << 'n' << fmtBoldEnd << "]";
 				wFooter->Refresh();
 				input = 0;
 				do
@@ -607,10 +607,13 @@ int main(int argc, char *argv[])
 				UnlockStatusbar();
 				if (input == 'y')
 				{
-					Mpd.DeletePlaylist(locale_to_utf_cpy(name));
-					ShowMessage("Playlist \"%s\" deleted!", name.c_str());
-					if (myBrowser->Main() && !myBrowser->isLocal() && myBrowser->CurrentDir() == "/")
-						myBrowser->GetDirectory("/");
+					if (Mpd.DeletePlaylist(locale_to_utf_cpy(name)))
+					{
+						static const char msg[] = "Playlist \"%s\" deleted!";
+						ShowMessage(msg, Shorten(TO_WSTRING(name), COLS-static_strlen(msg)).c_str());
+						if (myBrowser->Main() && !myBrowser->isLocal() && myBrowser->CurrentDir() == "/")
+							myBrowser->GetDirectory("/");
+					}
 				}
 				else
 					ShowMessage("Aborted!");
@@ -640,7 +643,7 @@ int main(int argc, char *argv[])
 				
 				std::string name = item.type == itSong ? item.song->GetName() : item.name;
 				LockStatusbar();
-				Statusbar() << "Delete " << (item.type == itSong ? "file" : "directory") << " \"" << name << "\" ? [" << fmtBold << 'y' << fmtBoldEnd << '/' << fmtBold << 'n' << fmtBoldEnd << "] ";
+				Statusbar() << "Delete " << (item.type == itSong ? "file" : "directory") << " \"" << Shorten(TO_WSTRING(name), COLS-30) << "\" ? [" << fmtBold << 'y' << fmtBoldEnd << '/' << fmtBold << 'n' << fmtBoldEnd << "] ";
 				wFooter->Refresh();
 				input = 0;
 				do
@@ -662,14 +665,18 @@ int main(int argc, char *argv[])
 					
 					if (remove(path.c_str()) == 0)
 					{
-						ShowMessage("\"%s\" has been successfuly deleted!", name.c_str());
+						static const char msg[] = "\"%s\" deleted!";
+						ShowMessage(msg, Shorten(TO_WSTRING(name), COLS-static_strlen(msg)).c_str());
 						if (!myBrowser->isLocal())
 							Mpd.UpdateDirectory(myBrowser->CurrentDir());
 						else
 							myBrowser->GetDirectory(myBrowser->CurrentDir());
 					}
 					else
-						ShowMessage("Couldn't remove \"%s\": %s", name.c_str(), strerror(errno));
+					{
+						static const char msg[] = "Couldn't remove \"%s\": %s";
+						ShowMessage(msg, Shorten(TO_WSTRING(name), COLS-static_strlen(msg)-25).c_str(), strerror(errno));
+					}
 				}
 				else
 					ShowMessage("Aborted!");
@@ -1375,7 +1382,8 @@ int main(int argc, char *argv[])
 						std::string path = Config.mpd_music_dir + (*it)->GetFile();
 						if (!TagEditor::WriteTags(**it))
 						{
-							ShowMessage("Error updating tags in \"%s\"!", (*it)->GetFile().c_str());
+							static const char msg[] = "Error while updating tags in \"%s\"!";
+							ShowMessage(msg, Shorten(TO_WSTRING((*it)->GetFile()), COLS-static_strlen(msg)).c_str());
 							success = 0;
 							break;
 						}
@@ -1406,14 +1414,16 @@ int main(int argc, char *argv[])
 						TagLib::FileRef f(locale_to_utf_cpy(path).c_str());
 						if (f.isNull())
 						{
-							ShowMessage("Error opening file \"%s\"!", (*myLibrary->Songs)[i].GetFile().c_str());
+							static const char msg[] = "Error while opening file \"%s\"!";
+							ShowMessage(msg, Shorten(TO_WSTRING((*myLibrary->Songs)[i].GetFile()), COLS-static_strlen(msg)).c_str());
 							success = 0;
 							break;
 						}
 						f.tag()->setAlbum(ToWString(new_album));
 						if (!f.save())
 						{
-							ShowMessage("Error writing tags in \"%s\"!", (*myLibrary->Songs)[i].GetFile().c_str());
+							static const char msg[] = "Error while writing tags in \"%s\"!";
+							ShowMessage(msg, Shorten(TO_WSTRING((*myLibrary->Songs)[i].GetFile()), COLS-static_strlen(msg)).c_str());
 							success = 0;
 							break;
 						}
@@ -1438,11 +1448,14 @@ int main(int argc, char *argv[])
 					std::string full_new_dir = Config.mpd_music_dir + myTagEditor->CurrentDir() + "/" + locale_to_utf_cpy(new_dir);
 					if (rename(full_old_dir.c_str(), full_new_dir.c_str()) == 0)
 					{
+						static const char msg[] = "Directory renamed to \"%s\"";
+						ShowMessage(msg, Shorten(TO_WSTRING(new_dir), COLS-static_strlen(msg)).c_str());
 						Mpd.UpdateDirectory(myTagEditor->CurrentDir());
 					}
 					else
 					{
-						ShowMessage("Cannot rename \"%s\" to \"%s\"!", old_dir.c_str(), new_dir.c_str());
+						static const char msg[] = "Couldn't rename \"%s\": %s";
+						ShowMessage(msg, Shorten(TO_WSTRING(old_dir), COLS-static_strlen(msg)-25).c_str(), strerror(errno));
 					}
 				}
 			}
@@ -1472,13 +1485,17 @@ int main(int argc, char *argv[])
 					int rename_result = rename(full_old_dir.c_str(), full_new_dir.c_str());
 					if (rename_result == 0)
 					{
-						ShowMessage("\"%s\" renamed to \"%s\"", old_dir.c_str(), new_dir.c_str());
+						static const char msg[] = "Directory renamed to \"%s\"";
+						ShowMessage(msg, Shorten(TO_WSTRING(new_dir), COLS-static_strlen(msg)).c_str());
 						if (!myBrowser->isLocal())
 							Mpd.UpdateDirectory(locale_to_utf_cpy(FindSharedDir(old_dir, new_dir)));
 						myBrowser->GetDirectory(myBrowser->CurrentDir());
 					}
 					else
-						ShowMessage("Cannot rename \"%s\" to \"%s\"!", old_dir.c_str(), new_dir.c_str());
+					{
+						static const char msg[] = "Couldn't rename \"%s\": %s";
+						ShowMessage(msg, Shorten(TO_WSTRING(old_dir), COLS-static_strlen(msg)-25).c_str(), strerror(errno));
+					}
 				}
 			}
 			else if (myScreen->ActiveWindow() == myPlaylistEditor->Playlists || (myScreen == myBrowser && myBrowser->Main()->Current().type == itPlaylist))
@@ -1490,12 +1507,15 @@ int main(int argc, char *argv[])
 				UnlockStatusbar();
 				if (!new_name.empty() && new_name != old_name)
 				{
-					Mpd.Rename(locale_to_utf_cpy(old_name), locale_to_utf_cpy(new_name));
-					ShowMessage("Playlist \"%s\" renamed to \"%s\"", old_name.c_str(), new_name.c_str());
-					if (myBrowser->Main() && !myBrowser->isLocal())
-						myBrowser->GetDirectory("/");
-					if (myPlaylistEditor->Main())
-						myPlaylistEditor->Playlists->Clear(0);
+					if (Mpd.Rename(locale_to_utf_cpy(old_name), locale_to_utf_cpy(new_name)))
+					{
+						static const char msg[] = "Playlist renamed to \"%s\"";
+						ShowMessage(msg, Shorten(TO_WSTRING(new_name), COLS-static_strlen(msg)).c_str());
+						if (myBrowser->Main() && !myBrowser->isLocal())
+							myBrowser->GetDirectory("/");
+						if (myPlaylistEditor->Main())
+							myPlaylistEditor->Playlists->Clear(0);
+					}
 				}
 			}
 		}

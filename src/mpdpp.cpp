@@ -317,11 +317,11 @@ void Connection::Move(const std::string &path, int from, int to) const
 		mpd_response_finish(itsConnection);
 }
 
-void Connection::Rename(const std::string &from, const std::string &to) const
+bool Connection::Rename(const std::string &from, const std::string &to) const
 {
 	if (!itsConnection)
-		return;
-	(isCommandsListEnabled ? mpd_send_rename : mpd_run_rename)(itsConnection, from.c_str(), to.c_str());
+		return false;
+	return (isCommandsListEnabled ? mpd_send_rename : mpd_run_rename)(itsConnection, from.c_str(), to.c_str());
 }
 
 void Connection::GetPlaylistChanges(unsigned version, SongList &v) const
@@ -527,11 +527,11 @@ bool Connection::CommitCommandsList()
 	return !CheckForErrors();
 }
 
-void Connection::DeletePlaylist(const std::string &name) const
+bool Connection::DeletePlaylist(const std::string &name) const
 {
 	if (!itsConnection)
-		return;
-	(isCommandsListEnabled ? mpd_send_rm : mpd_run_rm)(itsConnection, name.c_str());
+		return false;
+	return (isCommandsListEnabled ? mpd_send_rm : mpd_run_rm)(itsConnection, name.c_str());
 }
 
 bool Connection::SavePlaylist(const std::string &name) const

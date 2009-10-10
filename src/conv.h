@@ -56,6 +56,8 @@ mpd_tag_type IntoTagItem(char);
 MPD::Song::SetFunction IntoSetFunction(mpd_tag_type);
 #endif // HAVE_TAGLIB_H
 
+std::string Shorten(const std::basic_string<my_char_t> &s, size_t max_length);
+
 void EscapeUnallowedChars(std::string &);
 
 void EscapeHtml(std::string &s);

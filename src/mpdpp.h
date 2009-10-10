@@ -162,13 +162,13 @@ namespace MPD
 			void StartCommandsList();
 			bool CommitCommandsList();
 			
-			void DeletePlaylist(const std::string &) const;
+			bool DeletePlaylist(const std::string &) const;
 			bool SavePlaylist(const std::string &) const;
 			void ClearPlaylist(const std::string &) const;
 			void AddToPlaylist(const std::string &, const Song &) const;
 			void AddToPlaylist(const std::string &, const std::string &) const;
 			void Move(const std::string &, int, int) const;
-			void Rename(const std::string &, const std::string &) const;
+			bool Rename(const std::string &, const std::string &) const;
 			
 			void StartSearch(bool) const;
 			void StartFieldSearch(mpd_tag_type);

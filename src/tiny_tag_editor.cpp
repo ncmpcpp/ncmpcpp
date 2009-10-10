@@ -65,7 +65,7 @@ void TinyTagEditor::SwitchTo()
 {
 	if (itsEdited.isStream())
 	{
-		ShowMessage("Cannot edit streams!");
+		ShowMessage("Streams cannot be edited!");
 	}
 	else if (GetTags())
 	{
@@ -77,11 +77,11 @@ void TinyTagEditor::SwitchTo()
 	}
 	else
 	{
-		std::string message = "Cannot read file '";
+		std::string message = "Couldn't read file \"";
 		if (itsEdited.isFromDB())
 			message += Config.mpd_music_dir;
-		message += itsEdited.GetFile();
-		message += "'!";
+		message += Shorten(TO_WSTRING(itsEdited.GetFile()), COLS-message.length()-3);
+		message += "\"!";
 		ShowMessage("%s", message.c_str());
 	}
 }
@@ -142,7 +142,7 @@ void TinyTagEditor::EnterPressed()
 			}
 		}
 		else
-			ShowMessage("Error writing tags!");
+			ShowMessage("Error while writing tags!");
 	}
 	if (option > 20)
 		myOldScreen->SwitchTo();

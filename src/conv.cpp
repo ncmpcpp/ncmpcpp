@@ -174,6 +174,18 @@ MPD::Song::SetFunction IntoSetFunction(mpd_tag_type tag)
 }
 #endif // HAVE_TAGLIB_H
 
+std::string Shorten(const std::basic_string<my_char_t> &s, size_t max_length)
+{
+	if (s.length() <= max_length)
+		return TO_STRING(s);
+	if (max_length < 2)
+		return "";
+	std::basic_string<my_char_t> result(s, 0, max_length/2-1);
+	result += U("..");
+	result += s.substr(s.length()-max_length/2+1);
+	return TO_STRING(result);
+}
+
 void EscapeUnallowedChars(std::string &s)
 {
 	static const std::string unallowed_chars = "\"*/:<>?\\|";
