@@ -156,6 +156,8 @@ void ParseArgv(int argc, char **argv)
 					now_playing_format = "{";
 					now_playing_format += argv[i];
 					now_playing_format += "}";
+					Replace(now_playing_format, "\\n", "\n");
+					Replace(now_playing_format, "\\t", "\t");
 					MPD::Song::ValidateFormat("now-playing format", now_playing_format);
 				}
 				std::cout << utf_to_locale_cpy(Mpd.GetCurrentSong().toString(now_playing_format)) << "\n";
