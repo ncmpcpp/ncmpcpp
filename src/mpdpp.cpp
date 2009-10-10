@@ -409,14 +409,17 @@ void Connection::SetCrossfade(unsigned crossfade) const
 	(isCommandsListEnabled ? mpd_send_crossfade : mpd_run_crossfade)(itsConnection, crossfade);
 }
 
-int Connection::AddSong(const std::string &path)
+int Connection::AddSong(const std::string &path, int pos)
 {
 	if (!itsConnection)
 		return -1;
 	int id = -1;
 	if (GetPlaylistLength() < itsMaxPlaylistLength)
 	{
-		mpd_send_add_id(itsConnection, path.c_str());
+		if (pos < 0)
+			mpd_send_add_id(itsConnection, path.c_str());
+		else
+			mpd_send_add_id_to(itsConnection, path.c_str(), pos);
 		if (!isCommandsListEnabled)
 		{
 			id = mpd_recv_song_id(itsConnection);
@@ -431,9 +434,9 @@ int Connection::AddSong(const std::string &path)
 	return id;
 }
 
-int Connection::AddSong(const Song &s)
+int Connection::AddSong(const Song &s, int pos)
 {
-	return !s.Empty() ? (AddSong((!s.isFromDB() ? "file://" : "") + (s.Localized() ? locale_to_utf_cpy(s.GetFile()) : s.GetFile()))) : -1;
+	return !s.Empty() ? (AddSong((!s.isFromDB() ? "file://" : "") + (s.Localized() ? locale_to_utf_cpy(s.GetFile()) : s.GetFile()), pos)) : -1;
 }
 
 void Connection::Add(const std::string &path) const

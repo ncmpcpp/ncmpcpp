@@ -152,8 +152,8 @@ namespace MPD
 			void SetCrossfade(unsigned) const;
 			void SetVolume(unsigned);
 			
-			int AddSong(const std::string &); // returns id of added song
-			int AddSong(const Song &); // returns id of added song
+			int AddSong(const std::string &, int = -1); // returns id of added song
+			int AddSong(const Song &, int = -1); // returns id of added song
 			bool AddRandomSongs(size_t);
 			void Add(const std::string &path) const;
 			void Delete(unsigned) const;
