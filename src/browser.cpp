@@ -72,7 +72,12 @@ void Browser::Resize()
 void Browser::SwitchTo()
 {
 	if (myScreen == this)
+	{
+#		ifndef WIN32
+		myBrowser->ChangeBrowseMode();
+#		endif // !WIN32
 		return;
+	}
 	
 	if (!isInitialized)
 		Init();

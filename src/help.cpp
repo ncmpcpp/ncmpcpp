@@ -229,7 +229,7 @@ void Help::GetKeybindings()
 	*w << DisplayKeys(Key.EditTags)			<< "Rename playlist/directory\n";
 #	endif // HAVE_TAGLIB_H
 	if (Mpd.GetHostname()[0] == '/') // are we connected to unix socket?
-		*w << DisplayKeys(Key.SwitchTagTypeList)<< "Browse MPD database/local filesystem\n";
+		*w << DisplayKeys(Key.Browser)		<< "Browse MPD database/local filesystem\n";
 	*w << DisplayKeys(Key.GoToNowPlaying)		<< "Locate currently playing song\n";
 	*w << DisplayKeys(Key.GoToParentDir)		<< "Go to parent directory\n";
 	*w << DisplayKeys(Key.Delete)			<< "Delete playlist/file/directory\n";

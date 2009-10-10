@@ -1808,12 +1808,6 @@ int main(int argc, char *argv[])
 				if (number && Mpd.AddRandomSongs(number))
 					ShowMessage("%zu random song%s added to playlist!", number, number == 1 ? "" : "s");
 			}
-#			ifndef WIN32
-			else if (myScreen == myBrowser)
-			{
-				myBrowser->ChangeBrowseMode();
-			}
-#			endif // !WIN32
 			else if (myScreen->ActiveWindow() == myLibrary->Artists
 			||	 (myLibrary->Columns() == 2 && myScreen->ActiveWindow() == myLibrary->Albums))
 			{
