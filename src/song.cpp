@@ -415,7 +415,7 @@ std::string MPD::Song::ParseFormat(std::string::const_iterator &it, const char *
 				std::string tag = GetTags(get);
 				if (escape_chars) // prepend format escape character to all given chars to escape
 					for (const char *ch = escape_chars; *ch; ++ch)
-						for (size_t i = 0; (i = tag.find(*ch), i) != std::string::npos; i += 2)
+						for (size_t i = 0; (i = tag.find(*ch, i)) != std::string::npos; i += 2)
 							tag.replace(i, 1, std::string(1, FormatEscapeCharacter) + ch);
 				if (!tag.empty() && (get != &MPD::Song::GetLength || GetTotalLength()))
 				{
