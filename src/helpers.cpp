@@ -315,8 +315,7 @@ std::string GetLineValue(std::string &line, char a, char b, bool once)
 	}
 	pos[0]++;
 	std::string result = pos[0] >= 0 && pos[1] >= 0 ? line.substr(pos[0], pos[1]-pos[0]) : "";
-	for (i = result.find("\\\""); i != std::string::npos; i = result.find("\\\""))
-		result.replace(i, 2, "\"");
+	Replace(result, "\\\"", "\"");
 	return result;
 }
 

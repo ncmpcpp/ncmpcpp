@@ -31,6 +31,12 @@ template <size_t N> inline size_t static_strlen(const char (&)[N])
 	return N-1;
 }
 
+template <size_t N> void Replace(std::string &s, const char (&from)[N], const char *to)
+{
+	for (size_t i = 0; (i = s.find(from, i)) != std::string::npos; i += N)
+		s.replace(i, N-1, to);
+}
+
 void ToLower(std::string &);
 
 int StrToInt(const std::string &);
