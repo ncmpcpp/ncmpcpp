@@ -347,11 +347,9 @@ void NcmpcppStatusChanged(Connection *, StatusChanges changed, void *)
 	{
 		if (myPlaylist->isPlaying())
 		{
-			np = Mpd.GetCurrentSong();
-			
 			if (!Config.execute_on_song_change.empty())
 				system(Config.execute_on_song_change.c_str());
-			if (Mpd.isPlaying())
+			if (Mpd.isPlaying() && !(np = Mpd.GetCurrentSong()).Empty())
 				WindowTitle(utf_to_locale_cpy(np.toString(Config.song_window_title_format)));
 			if (Config.autocenter_mode && !myPlaylist->Items->isFiltered())
 				myPlaylist->Items->Highlight(myPlaylist->NowPlaying);
@@ -373,11 +371,8 @@ void NcmpcppStatusChanged(Connection *, StatusChanges changed, void *)
 	if (((now > past || changed.SongID) && Mpd.isPlaying()) || RedrawStatusbar)
 	{
 		time(&past);
-		if (np.Empty())
-		{
-			np = Mpd.GetCurrentSong();
+		if (np.Empty() && !(np = Mpd.GetCurrentSong()).Empty())
 			WindowTitle(utf_to_locale_cpy(np.toString(Config.song_window_title_format)));
-		}
 		if (!np.Empty() && Mpd.isPlaying())
 		{
 			changed.ElapsedTime = 1;
