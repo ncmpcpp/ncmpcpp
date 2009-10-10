@@ -77,10 +77,13 @@ void TinyTagEditor::SwitchTo()
 	}
 	else
 	{
-		std::string message = "Couldn't read file \"";
+		std::string full_path;
 		if (itsEdited.isFromDB())
-			message += Config.mpd_music_dir;
-		message += Shorten(TO_WSTRING(itsEdited.GetFile()), COLS-message.length()-3);
+			full_path += Config.mpd_music_dir;
+		full_path += itsEdited.GetFile();
+		
+		std::string message = "Couldn't read file \"";
+		message += Shorten(TO_WSTRING(full_path), COLS-message.length()-3);
 		message += "\"!";
 		ShowMessage("%s", message.c_str());
 	}
