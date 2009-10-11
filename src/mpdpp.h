@@ -101,6 +101,7 @@ namespace MPD
 			void SetStatusUpdater(StatusUpdater, void *);
 			void SetErrorHandler(ErrorHandler, void *);
 			void UpdateStatus();
+			void UpdateStats();
 			bool UpdateDirectory(const std::string &);
 			
 			void Play() const;
@@ -132,6 +133,14 @@ namespace MPD
 			unsigned GetElapsedTime() const { return itsCurrentStatus ? mpd_status_get_elapsed_time(itsCurrentStatus) : 0; }
 			int GetTotalTime() const { return itsCurrentStatus ? mpd_status_get_total_time(itsCurrentStatus) : 0; }
 			unsigned GetBitrate() const { return itsCurrentStatus ? mpd_status_get_kbit_rate(itsCurrentStatus) : 0; }
+			
+			unsigned NumberOfArtists() const { return itsStats ? mpd_stats_get_number_of_artists(itsStats) : 0; }
+			unsigned NumberOfAlbums() const { return itsStats ? mpd_stats_get_number_of_albums(itsStats) : 0; }
+			unsigned NumberOfSongs() const { return itsStats ? mpd_stats_get_number_of_songs(itsStats) : 0; }
+			unsigned long Uptime() const { return itsStats ? mpd_stats_get_uptime(itsStats) : 0; }
+			unsigned long DBUpdateTime() const { return itsStats ? mpd_stats_get_db_update_time(itsStats) : 0; }
+			unsigned long PlayTime() const { return itsStats ? mpd_stats_get_play_time(itsStats) : 0; }
+			unsigned long DBPlayTime() const { return itsStats ? mpd_stats_get_db_play_time(itsStats) : 0; }
 			
 			size_t GetMaxPlaylistLength() const { return itsMaxPlaylistLength; }
 			size_t GetPlaylistLength() const { return itsCurrentStatus ? mpd_status_get_queue_length(itsCurrentStatus) : 0; }
@@ -188,6 +197,9 @@ namespace MPD
 			bool EnableOutput(int);
 			bool DisableOutput(int);
 			
+			void GetURLHandlers(TagList &v) const;
+			void GetTagTypes(TagList &v) const;
+			
 		private:
 			int CheckForErrors();
 			
@@ -205,6 +217,7 @@ namespace MPD
 			
 			mpd_status *itsCurrentStatus;
 			mpd_status *itsOldStatus;
+			mpd_stats *itsStats;
 			
 			StatusChanges itsChanges;
 			

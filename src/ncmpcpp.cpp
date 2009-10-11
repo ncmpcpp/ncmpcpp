@@ -40,6 +40,7 @@
 #include "helpers.h"
 #include "media_library.h"
 #include "misc.h"
+#include "server_info.h"
 #include "lyrics.h"
 #include "playlist.h"
 #include "playlist_editor.h"
@@ -1933,6 +1934,10 @@ int main(int argc, char *argv[])
 			myClock->SwitchTo();
 		}
 #		endif // ENABLE_CLOCK
+		else if (Keypressed(input, Key.ServerInfo))
+		{
+			myServerInfo->SwitchTo();
+		}
 		// key mapping end
 	}
 	return 0;

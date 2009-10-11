@@ -62,6 +62,8 @@
 #
 #key_clock = '0' 274
 #
+#key_server_info = '@'
+#
 #key_stop = 's'
 #
 #key_pause = 'P'

@@ -74,6 +74,7 @@ struct ncmpcpp_keys
 	int Outputs[2];
 	int Visualizer[2];
 	int Clock[2];
+	int ServerInfo[2];
 	int Stop[2];
 	int Pause[2];
 	int Next[2];

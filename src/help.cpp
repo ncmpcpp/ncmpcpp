@@ -153,7 +153,8 @@ void Help::GetKeybindings()
 #	ifdef ENABLE_CLOCK
 	*w << DisplayKeys(Key.Clock)			<< "Clock screen\n";
 #	endif // ENABLE_CLOCK
-	
+	*w << "\n";
+	*w << DisplayKeys(Key.ServerInfo)		<< "MPD server info\n";
 	
 	*w << "\n\n   " << fmtBold << "Keys - Global\n -----------------------------------------\n" << fmtBoldEnd;
 	*w << DisplayKeys(Key.Stop)			<< "Stop\n";

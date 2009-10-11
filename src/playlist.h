@@ -94,7 +94,6 @@ class Playlist : public Screen<Window>
 		
 		time_t itsTimer;
 		
-		static void ShowTime(std::ostringstream &, size_t);
 		static bool Sorting(MPD::Song *a, MPD::Song *b);
 		
 		static Menu< std::pair<std::string, MPD::Song::GetFunction> > *SortDialog;

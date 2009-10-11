@@ -244,6 +244,14 @@ bool CaseInsensitiveSorting::operator()(const Item &a, const Item &b)
 		return a.type < b.type;
 }
 
+std::string Timestamp(time_t t)
+{
+	char result[32];
+	tm info;
+	result[strftime(result, 31, "%x %X", localtime_r(&t, &info))] = 0;
+	return result;
+}
+
 void UpdateSongList(Menu<Song> *menu)
 {
 	bool bold = 0;

@@ -361,58 +361,15 @@ std::string Playlist::TotalLength()
 	if (itsTotalLength)
 	{
 		result << ", length: ";
-		ShowTime(result, itsTotalLength);
+		ShowTime(result, itsTotalLength, 0);
 	}
 	if (Config.playlist_show_remaining_time && itsRemainingTime && !Items->isFiltered() && Items->Size() > 1)
 	{
 		result << " :: remaining: ";
-		ShowTime(result, itsRemainingTime);
+		ShowTime(result, itsRemainingTime, 0);
 	}
 	result << ')';
 	return result.str();
-}
-
-void Playlist::ShowTime(std::ostringstream &result, size_t length)
-{
-	const int MINUTE = 60;
-	const int HOUR = 60*MINUTE;
-	const int DAY = 24*HOUR;
-	const int YEAR = 365*DAY;
-	
-	int years = length/YEAR;
-	if (years)
-	{
-		result << years << (years == 1 ? " year" : " years");
-		length -= years*YEAR;
-		if (length)
-			result << ", ";
-	}
-	int days = length/DAY;
-	if (days)
-	{
-		result << days << (days == 1 ? " day" : " days");
-		length -= days*DAY;
-		if (length)
-			result << ", ";
-	}
-	int hours = length/HOUR;
-	if (hours)
-	{
-		result << hours << (hours == 1 ? " hour" : " hours");
-		length -= hours*HOUR;
-		if (length)
-			result << ", ";
-	}
-	int minutes = length/MINUTE;
-	if (minutes)
-	{
-		result << minutes << (minutes == 1 ? " minute" : " minutes");
-		length -= minutes*MINUTE;
-		if (length)
-			result << ", ";
-	}
-	if (length)
-		result << length << (length == 1 ? " second" : " seconds");
 }
 
 const MPD::Song *Playlist::NowPlayingSong()

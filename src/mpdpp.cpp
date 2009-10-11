@@ -41,6 +41,7 @@ Connection::Connection() : itsConnection(0),
 			   itsTimeout(15),
 			   itsCurrentStatus(0),
 			   itsOldStatus(0),
+			   itsStats(0),
 			   itsUpdater(0),
 			   itsErrorHandler(0)
 {
@@ -50,6 +51,8 @@ Connection::~Connection()
 {
 	if (itsConnection)
 		mpd_connection_free(itsConnection);
+	if (itsStats)
+		mpd_stats_free(itsStats);
 	if (itsOldStatus)
 		mpd_status_free(itsOldStatus);
 	if (itsCurrentStatus)
@@ -77,6 +80,8 @@ void Connection::Disconnect()
 {
 	if (itsConnection)
 		mpd_connection_free(itsConnection);
+	if (itsStats)
+		mpd_stats_free(itsStats);
 	if (itsOldStatus)
 		mpd_status_free(itsOldStatus);
 	if (itsCurrentStatus)
@@ -84,6 +89,7 @@ void Connection::Disconnect()
 	itsConnection = 0;
 	itsCurrentStatus = 0;
 	itsOldStatus = 0;
+	itsStats = 0;
 	isCommandsListEnabled = 0;
 	itsMaxPlaylistLength = -1;
 }
@@ -185,6 +191,15 @@ void Connection::UpdateStatus()
 		}
 		itsUpdater(this, itsChanges, itsErrorHandlerUserdata);
 	}
+}
+
+void Connection::UpdateStats()
+{
+	if (!itsConnection)
+		return;
+	if (itsStats)
+		mpd_stats_free(itsStats);
+	itsStats = mpd_run_stats(itsConnection);
 }
 
 bool Connection::UpdateDirectory(const std::string &path)
@@ -727,6 +742,32 @@ bool Connection::DisableOutput(int id)
 	if (!itsConnection)
 		return false;
 	return mpd_run_disable_output(itsConnection, id);
+}
+
+void Connection::GetURLHandlers(TagList &v) const
+{
+	if (!itsConnection)
+		return;
+	mpd_send_list_url_schemes(itsConnection);
+	while (mpd_pair *handler = mpd_recv_pair_named(itsConnection, "handler"))
+	{
+		v.push_back(handler->value);
+		mpd_return_pair(itsConnection, handler);
+	}
+	mpd_response_finish(itsConnection);
+}
+
+void Connection::GetTagTypes(TagList &v) const
+{
+	if (!itsConnection)
+		return;
+	mpd_send_list_tag_types(itsConnection);
+	while (mpd_pair *tag_type = mpd_recv_pair_named(itsConnection, "tagtype"))
+	{
+		v.push_back(tag_type->value);
+		mpd_return_pair(itsConnection, tag_type);
+	}
+	mpd_response_finish(itsConnection);
 }
 
 int Connection::CheckForErrors()

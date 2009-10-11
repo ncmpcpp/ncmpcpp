@@ -123,6 +123,7 @@ void DefaultKeys(ncmpcpp_keys &keys)
 	keys.Outputs[0] = '8';
 	keys.Visualizer[0] = '9';
 	keys.Clock[0] = '0';
+	keys.ServerInfo[0] = '@';
 	keys.Stop[0] = 's';
 	keys.Pause[0] = 'P';
 	keys.Next[0] = '>';
@@ -194,6 +195,7 @@ void DefaultKeys(ncmpcpp_keys &keys)
 	keys.Outputs[1] = 272;
 	keys.Visualizer[1] = 273;
 	keys.Clock[1] = 274;
+	keys.ServerInfo[1] = null_key;
 	keys.Stop[1] = null_key;
 	keys.Pause[1] = null_key;
 	keys.Next[1] = null_key;
@@ -388,6 +390,8 @@ void ReadKeys(ncmpcpp_keys &keys)
 				GetKeys(key, keys.Visualizer);
 			else if (key.find("key_clock ") != std::string::npos)
 				GetKeys(key, keys.Clock);
+			else if (key.find("key_server_info ") != std::string::npos)
+				GetKeys(key, keys.ServerInfo);
 			else if (key.find("key_stop ") != std::string::npos)
 				GetKeys(key, keys.Stop);
 			else if (key.find("key_pause ") != std::string::npos)
