@@ -107,6 +107,10 @@ namespace NCurses
 			///
 			virtual void Clear(bool clear_screen = 1);
 			
+			/// Sets starting position to the beginning
+			///
+			void Reset();
+			
 			/// Template function that redirects all data passed
 			/// to the scrollpad window to its internal buffer
 			/// @param obj any object that has ostream &operator<<() defined

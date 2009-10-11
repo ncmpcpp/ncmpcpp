@@ -120,13 +120,15 @@ void Scrollpad::RemoveFormatting()
 
 void Scrollpad::Refresh()
 {
+	int MaxBeginning = itsRealHeight-itsHeight;
+	if (itsBeginning > MaxBeginning)
+		itsBeginning = MaxBeginning;
 	prefresh(itsWindow, itsBeginning, 0, itsStartY, itsStartX, itsStartY+itsHeight-1, itsStartX+itsWidth-1);
 }
 
 void Scrollpad::Resize(size_t new_width, size_t new_height)
 {
 	AdjustDimensions(new_width, new_height);
-	itsBeginning = 0;
 	itsRealHeight = itsHeight;
 	Flush();
 }
@@ -178,7 +180,6 @@ void Scrollpad::Scroll(Where where)
 
 void Scrollpad::Clear(bool clear_screen)
 {
-	itsBeginning = 0;
 	itsRealHeight = itsHeight;
 	itsBuffer.Clear();
 	wclear(itsWindow);
@@ -190,6 +191,11 @@ void Scrollpad::Clear(bool clear_screen)
 	keypad(itsWindow, 1);
 	if (clear_screen)
 		Refresh();
+}
+
+void Scrollpad::Reset()
+{
+	itsBeginning = 0;
 }
 
 #ifdef _UTF8
