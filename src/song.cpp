@@ -193,7 +193,7 @@ std::string MPD::Song::GetAlbum(unsigned pos) const
 std::string MPD::Song::GetTrack(unsigned pos) const
 {
 	std::string track = GetTag(MPD_TAG_TRACK, pos);
-	return track.length() == 1 && track[0] != '0' ? "0"+track : track;
+	return (track.length() == 1 && track[0] != '0') || (track.length() > 3 && track[1] == '/') ? "0"+track : track;
 }
 
 std::string MPD::Song::GetTrackNumber(unsigned pos) const
