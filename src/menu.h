@@ -22,6 +22,7 @@
 #define _MENU_H
 
 #include <regex.h>
+#include <algorithm>
 #include <set>
 
 #include "error.h"
