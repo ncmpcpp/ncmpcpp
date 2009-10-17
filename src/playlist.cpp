@@ -149,6 +149,17 @@ void Playlist::EnterPressed()
 	else if (w == SortDialog)
 	{
 		size_t pos = SortDialog->Choice();
+		
+		size_t beginning = 0;
+		size_t end = Items->Size();
+		if (Items->hasSelected())
+		{
+			std::vector<size_t> list;
+			Items->GetSelected(list);
+			beginning = *list.begin();
+			end = *list.rbegin()+1;
+		}
+		
 		if (pos > SortOptions)
 		{
 			if (pos == SortOptions+2) // reverse
@@ -156,7 +167,7 @@ void Playlist::EnterPressed()
 				BlockUpdate = 1;
 				ShowMessage("Reversing playlist order...");
 				Mpd.StartCommandsList();
-				for (size_t i = 0, j = Items->Size()-1; i < Items->Size()/2; ++i, --j)
+				for (size_t i = beginning, j = end-1; i < (beginning+end)/2; ++i, --j)
 				{
 					Mpd.Swap(i, j);
 					Items->Swap(i, j);
@@ -180,8 +191,8 @@ void Playlist::EnterPressed()
 		ShowMessage("Sorting playlist...");
 		MPD::SongList playlist, cmp;
 		
-		playlist.reserve(Items->Size());
-		for (size_t i = 0; i < Items->Size(); ++i)
+		playlist.reserve(end-beginning);
+		for (size_t i = beginning; i < end; ++i)
 		{
 			(*Items)[i].SetPosition(i);
 			playlist.push_back(&(*Items)[i]);
@@ -199,15 +210,15 @@ void Playlist::EnterPressed()
 		Mpd.StartCommandsList();
 		do
 		{
-			for (size_t i = 0; i < playlist.size(); ++i)
+			for (size_t i = 0, j = beginning; i < playlist.size(); ++i, ++j)
 			{
-				if (playlist[i]->GetPosition() > i)
+				if (playlist[i]->GetPosition() > j)
 				{
-					Mpd.Swap(playlist[i]->GetPosition(), i);
-					std::swap(cmp[playlist[i]->GetPosition()], cmp[i]);
-					Items->Swap(playlist[i]->GetPosition(), i);
+					Mpd.Swap(playlist[i]->GetPosition(), j);
+					std::swap(cmp[playlist[i]->GetPosition()-beginning], cmp[i]);
+					Items->Swap(playlist[i]->GetPosition(), j);
 				}
-				cmp[i]->SetPosition(i);
+				cmp[i]->SetPosition(j);
 			}
 		}
 		while (playlist != cmp);
