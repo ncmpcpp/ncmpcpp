@@ -394,11 +394,11 @@ namespace NCurses
 			/// Sorts all items using Comparison object with defined operator()
 			/// @param beginning beginning of range that has to be sorted
 			///
-			template <typename Comparison> void Sort(size_t beginning = 0)
+			template <typename Comparison> void Sort(size_t beginning = 0, size_t end = -1)
 			{
 				if (itsOptions.empty())
 					return;
-				sort(itsOptions.begin()+beginning, itsOptions.end(), InternalSorting<Comparison>());
+				sort(itsOptions.begin()+beginning, end == size_t(-1) ? itsOptions.end() : itsOptions.begin()+end, InternalSorting<Comparison>());
 				if (isFiltered())
 					ApplyFilter(itsFilter);
 			}
