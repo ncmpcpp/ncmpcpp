@@ -1853,6 +1853,10 @@ int main(int argc, char *argv[])
 					ShowMessage("Switched to list of %s tag", item_type.c_str());
 				}
 			}
+			else if (myScreen == myLyrics)
+			{
+				myLyrics->FetchAgain();
+			}
 		}
 		else if (Keypressed(input, Key.SongInfo))
 		{

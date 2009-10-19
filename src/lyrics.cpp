@@ -18,6 +18,7 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
+#include <cerrno>
 #include <cstring>
 #ifdef WIN32
 # include <io.h>
@@ -298,6 +299,21 @@ void Lyrics::Edit()
 	}
 	else
 		system(("nohup " + Config.external_editor + " \"" + itsFilenamePath + "\" > /dev/null 2>&1 &").c_str());
+}
+
+void Lyrics::FetchAgain()
+{
+	std::string path = Folder + "/" + locale_to_utf_cpy(itsSong.GetArtist()) + " - " + locale_to_utf_cpy(itsSong.GetTitle()) + ".txt";
+	if (!remove(path.c_str()))
+	{
+		myScreen = myOldScreen;
+		SwitchTo();
+	}
+	else
+	{
+		static const char msg[] = "Couldn't remove \"%s\": %s";
+		ShowMessage(msg, Shorten(TO_WSTRING(path), COLS-static_strlen(msg)-25).c_str(), strerror(errno));
+	}
 }
 
 #ifdef HAVE_CURL_CURL_H

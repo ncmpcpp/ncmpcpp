@@ -58,6 +58,7 @@ class Lyrics : public Screen<Scrollpad>
 		virtual List *GetList() { return 0; }
 		
 		void Edit();
+		void FetchAgain();
 		
 		static bool Reload;
 		
