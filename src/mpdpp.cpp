@@ -22,6 +22,7 @@
 #include <algorithm>
 
 #include "charset.h"
+#include "error.h"
 #include "mpdpp.h"
 
 using namespace MPD;
@@ -415,6 +416,47 @@ void Connection::SetVolume(unsigned vol)
 		return;
 	if (mpd_run_set_volume(itsConnection, vol) && itsUpdater)
 		UpdateStatus();
+}
+
+std::string Connection::GetReplayGainMode() const
+{
+	if (!itsConnection || !mpd_send_command(itsConnection, "replay_gain_status", NULL))
+		return "Unknown";
+	std::string result;
+	if (mpd_pair *pair = mpd_recv_pair_named(itsConnection, "replay_gain_mode"))
+	{
+		result = pair->value;
+		if (!result.empty())
+			result[0] = toupper(result[0]);
+		mpd_return_pair(itsConnection, pair);
+	}
+	mpd_response_finish(itsConnection);
+	return result;
+}
+
+void Connection::SetReplayGainMode(ReplayGainMode mode) const
+{
+	if (!itsConnection)
+		return;
+	const char *rg_mode;
+	switch (mode)
+	{
+		case rgmOff:
+			rg_mode = "off";
+			break;
+		case rgmTrack:
+			rg_mode = "track";
+			break;
+		case rgmAlbum:
+			rg_mode = "album";
+			break;
+		default:
+			FatalError("undefined value of ReplayGainMode!");
+	}
+	if (!mpd_send_command(itsConnection, "replay_gain_mode", rg_mode, NULL))
+		return;
+	if (!isCommandsListEnabled)
+		mpd_response_finish(itsConnection);
 }
 
 void Connection::SetCrossfade(unsigned crossfade) const

@@ -1782,6 +1782,22 @@ int main(int argc, char *argv[])
 			Config.wrapped_search = !Config.wrapped_search;
 			ShowMessage("Search mode: %s", Config.wrapped_search ? "Wrapped" : "Normal");
 		}
+		else if (Keypressed(input, Key.ToggleReplayGainMode) && Mpd.Version() >= 16)
+		{
+			LockStatusbar();
+			Statusbar() << "Replay gain mode ? [" << fmtBold << 'o' << fmtBoldEnd << "ff/" << fmtBold << 't' << fmtBoldEnd << "rack/" << fmtBold << 'a' << fmtBoldEnd << "lbum]";
+			wFooter->Refresh();
+			input = 0;
+			do
+			{
+				TraceMpdStatus();
+				wFooter->ReadKey(input);
+			}
+			while (input != 'o' && input != 't' && input != 'a');
+			UnlockStatusbar();
+			Mpd.SetReplayGainMode(input == 't' ? rgmTrack : (input == 'a' ? rgmAlbum : rgmOff));
+			ShowMessage("Replay gain mode: %s", Mpd.GetReplayGainMode().c_str());
+		}
 		else if (Keypressed(input, Key.ToggleSpaceMode))
 		{
 			Config.space_selects = !Config.space_selects;

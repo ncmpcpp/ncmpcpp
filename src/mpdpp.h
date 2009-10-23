@@ -37,7 +37,8 @@ namespace MPD
 	
 	enum ItemType { itDirectory, itSong, itPlaylist };
 	enum PlayerState { psUnknown, psStop, psPlay, psPause };
-
+	enum ReplayGainMode { rgmOff, rgmTrack, rgmAlbum };
+	
 	struct Item
 	{
 		Item() : song(0) { }
@@ -160,6 +161,9 @@ namespace MPD
 			void SetConsume(bool) const;
 			void SetCrossfade(unsigned) const;
 			void SetVolume(unsigned);
+			
+			std::string GetReplayGainMode() const;
+			void SetReplayGainMode(ReplayGainMode) const;
 			
 			int AddSong(const std::string &, int = -1); // returns id of added song
 			int AddSong(const Song &, int = -1); // returns id of added song

@@ -85,6 +85,7 @@ struct ncmpcpp_keys
 	int ToggleRandom[2];
 	int ToggleSingle[2];
 	int ToggleConsume[2];
+	int ToggleReplayGainMode[2];
 	int ToggleSpaceMode[2];
 	int ToggleAddMode[2];
 	int ToggleMouse[2];

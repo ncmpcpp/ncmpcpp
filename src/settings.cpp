@@ -134,6 +134,7 @@ void DefaultKeys(ncmpcpp_keys &keys)
 	keys.ToggleRandom[0] = 'z';
 	keys.ToggleSingle[0] = 'y';
 	keys.ToggleConsume[0] = 'R';
+	keys.ToggleReplayGainMode[0] = 'Y';
 	keys.ToggleSpaceMode[0] = 't';
 	keys.ToggleAddMode[0] = 'T';
 	keys.ToggleMouse[0] = '|';
@@ -206,6 +207,7 @@ void DefaultKeys(ncmpcpp_keys &keys)
 	keys.ToggleRandom[1] = null_key;
 	keys.ToggleSingle[1] = null_key;
 	keys.ToggleConsume[1] = null_key;
+	keys.ToggleReplayGainMode[1] = null_key;
 	keys.ToggleSpaceMode[1] = null_key;
 	keys.ToggleAddMode[1] = null_key;
 	keys.ToggleMouse[1] = null_key;
@@ -412,6 +414,8 @@ void ReadKeys(ncmpcpp_keys &keys)
 				GetKeys(key, keys.ToggleSingle);
 			else if (key.find("key_toggle_consume ") != std::string::npos)
 				GetKeys(key, keys.ToggleConsume);
+			else if (key.find("key_toggle_replay_gain_mode ") != std::string::npos)
+				GetKeys(key, keys.ToggleReplayGainMode);
 			else if (key.find("key_toggle_space_mode ") != std::string::npos)
 				GetKeys(key, keys.ToggleSpaceMode);
 			else if (key.find("key_toggle_add_mode ") != std::string::npos)

@@ -84,6 +84,8 @@
 #
 #key_toggle_consume = 'R'
 #
+#key_toggle_replay_gain_mode = 'Y'
+#
 #key_shuffle = 'Z'
 #
 #key_toggle_crossfade = 'x'
