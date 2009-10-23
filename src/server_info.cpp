@@ -108,9 +108,9 @@ void ServerInfo::Update()
 	*w << fmtBold << U("Total playtime: ") << fmtBoldEnd;
 	ShowTime(*w, Mpd.DBPlayTime(), 1);
 	*w << '\n';
-	*w << fmtBold << U("Number of artists: ") << fmtBoldEnd << Mpd.NumberOfArtists() << '\n';
-	*w << fmtBold << U("Number of albums: ") << fmtBoldEnd << Mpd.NumberOfAlbums() << '\n';
-	*w << fmtBold << U("Number of songs: ") << fmtBoldEnd << Mpd.NumberOfSongs() << '\n';
+	*w << fmtBold << U("Artist names: ") << fmtBoldEnd << Mpd.NumberOfArtists() << '\n';
+	*w << fmtBold << U("Album names: ") << fmtBoldEnd << Mpd.NumberOfAlbums() << '\n';
+	*w << fmtBold << U("Songs in database: ") << fmtBoldEnd << Mpd.NumberOfSongs() << '\n';
 	*w << '\n';
 	*w << fmtBold << U("Last DB update: ") << fmtBoldEnd << Timestamp(Mpd.DBUpdateTime()) << '\n';
 	*w << '\n';
