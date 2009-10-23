@@ -298,7 +298,8 @@ void Browser::LocateSong(const MPD::Song &s)
 	
 	itsBrowseLocally = !s.isFromDB();
 	
-	SwitchTo();
+	if (myScreen != this)
+		SwitchTo();
 	
 	std::string option = s.toString(Config.song_status_format);
 	locale_to_utf(option);
