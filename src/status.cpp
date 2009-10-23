@@ -111,7 +111,10 @@ void UnlockStatusbar()
 			block_progressbar_update = 0;
 	}
 	if (!Mpd.isPlaying())
+	{
 		Statusbar() << wclrtoeol;
+		wFooter->Refresh();
+	}
 }
 
 void TraceMpdStatus()
