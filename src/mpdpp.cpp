@@ -252,19 +252,59 @@ void Connection::UpdateStatus()
 		}
 		else
 		{
-			itsChanges.Playlist = mpd_status_get_queue_version(itsOldStatus) != mpd_status_get_queue_version(itsCurrentStatus);
-			itsChanges.SongID = mpd_status_get_song_id(itsOldStatus) != mpd_status_get_song_id(itsCurrentStatus);
-			itsChanges.Database = mpd_status_get_update_id(itsOldStatus) && !mpd_status_get_update_id(itsCurrentStatus);
-			itsChanges.DBUpdating = mpd_status_get_update_id(itsOldStatus) != mpd_status_get_update_id(itsCurrentStatus);
-			itsChanges.Volume = mpd_status_get_volume(itsOldStatus) != mpd_status_get_volume(itsCurrentStatus);
-			itsChanges.ElapsedTime = mpd_status_get_elapsed_time(itsOldStatus) != mpd_status_get_elapsed_time(itsCurrentStatus);
-			itsChanges.Crossfade = mpd_status_get_crossfade(itsOldStatus) != mpd_status_get_crossfade(itsCurrentStatus);
-			itsChanges.Random = mpd_status_get_random(itsOldStatus) != mpd_status_get_random(itsCurrentStatus);
-			itsChanges.Repeat = mpd_status_get_repeat(itsOldStatus) != mpd_status_get_repeat(itsCurrentStatus);
-			itsChanges.Single = mpd_status_get_single(itsOldStatus) != mpd_status_get_single(itsCurrentStatus);
-			itsChanges.Consume = mpd_status_get_consume(itsOldStatus) != mpd_status_get_consume(itsCurrentStatus);
-			itsChanges.PlayerState = mpd_status_get_state(itsOldStatus) != mpd_status_get_state(itsCurrentStatus);
-			itsChanges.StatusFlags = itsChanges.Repeat || itsChanges.Random || itsChanges.Single || itsChanges.Consume || itsChanges.Crossfade || itsChanges.DBUpdating;
+			if (idle_mask != 0)
+			{
+				itsChanges.Playlist = idle_mask & MPD_IDLE_QUEUE;
+				itsChanges.Database = idle_mask & MPD_IDLE_DATABASE;
+				itsChanges.DBUpdating = idle_mask & MPD_IDLE_UPDATE;
+				itsChanges.Volume = idle_mask & MPD_IDLE_MIXER;
+				itsChanges.StatusFlags = idle_mask & MPD_IDLE_OPTIONS;
+			}
+			else
+			{
+				itsChanges.Playlist = mpd_status_get_queue_version(itsOldStatus)
+						   != mpd_status_get_queue_version(itsCurrentStatus);
+				
+				itsChanges.Database = mpd_status_get_update_id(itsOldStatus)
+						 &&  !mpd_status_get_update_id(itsCurrentStatus);
+				
+				itsChanges.DBUpdating = mpd_status_get_update_id(itsOldStatus)
+						     != mpd_status_get_update_id(itsCurrentStatus);
+				
+				itsChanges.Volume = mpd_status_get_volume(itsOldStatus)
+						 != mpd_status_get_volume(itsCurrentStatus);
+				
+				itsChanges.StatusFlags = itsChanges.Repeat
+						||	 itsChanges.Random
+						||	 itsChanges.Single
+						||	 itsChanges.Consume
+						||	 itsChanges.Crossfade
+						||	 itsChanges.DBUpdating;
+			}
+			
+			itsChanges.SongID = mpd_status_get_song_id(itsOldStatus)
+					 != mpd_status_get_song_id(itsCurrentStatus);
+			
+			itsChanges.ElapsedTime = mpd_status_get_elapsed_time(itsOldStatus)
+					      != mpd_status_get_elapsed_time(itsCurrentStatus);
+			
+			itsChanges.Crossfade = mpd_status_get_crossfade(itsOldStatus)
+					    != mpd_status_get_crossfade(itsCurrentStatus);
+			
+			itsChanges.Random = mpd_status_get_random(itsOldStatus)
+					 != mpd_status_get_random(itsCurrentStatus);
+			
+			itsChanges.Repeat = mpd_status_get_repeat(itsOldStatus)
+					 != mpd_status_get_repeat(itsCurrentStatus);
+			
+			itsChanges.Single = mpd_status_get_single(itsOldStatus)
+					 != mpd_status_get_single(itsCurrentStatus);
+			
+			itsChanges.Consume = mpd_status_get_consume(itsOldStatus)
+					  != mpd_status_get_consume(itsCurrentStatus);
+			
+			itsChanges.PlayerState = mpd_status_get_state(itsOldStatus)
+					      != mpd_status_get_state(itsCurrentStatus);
 		}
 		itsUpdater(this, itsChanges, itsErrorHandlerUserdata);
 		// below conditionals are a hack to workaround mpd bug 2608/2612
