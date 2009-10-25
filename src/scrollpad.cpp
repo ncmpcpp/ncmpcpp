@@ -18,6 +18,8 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
+#include <cassert>
+
 #include "scrollpad.h"
 
 using namespace NCurses;
@@ -83,7 +85,8 @@ void Scrollpad::Flush()
 			space_pos = 0;
 		}
 	}
-	Recreate(itsWidth, std::max(itsHeight, itsRealHeight));
+	itsRealHeight = std::max(itsHeight, itsRealHeight);
+	Recreate(itsWidth, itsRealHeight);
 	itsBuffer.SetTemp(&s);
 	static_cast<Window &>(*this) << itsBuffer;
 	itsBuffer.SetTemp(0);
@@ -121,6 +124,7 @@ void Scrollpad::RemoveFormatting()
 void Scrollpad::Refresh()
 {
 	int MaxBeginning = itsRealHeight-itsHeight;
+	assert(MaxBeginning >= 0);
 	if (itsBeginning > MaxBeginning)
 		itsBeginning = MaxBeginning;
 	prefresh(itsWindow, itsBeginning, 0, itsStartY, itsStartX, itsStartY+itsHeight-1, itsStartX+itsWidth-1);
@@ -129,7 +133,6 @@ void Scrollpad::Refresh()
 void Scrollpad::Resize(size_t new_width, size_t new_height)
 {
 	AdjustDimensions(new_width, new_height);
-	itsRealHeight = itsHeight;
 	Flush();
 }
 
