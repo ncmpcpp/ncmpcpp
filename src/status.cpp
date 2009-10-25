@@ -53,8 +53,6 @@ namespace
 	bool block_statusbar_update = 0;
 	bool block_progressbar_update = 0;
 	bool allow_statusbar_unlock = 1;
-	
-	int local_elapsed;
 }
 
 #ifndef USE_PDCURSES
@@ -122,7 +120,7 @@ void TraceMpdStatus()
 	static timeval past, now;
 	
 	gettimeofday(&now, 0);
-	if ((Mpd.Connected() && now.tv_sec > past.tv_sec) || UpdateStatusImmediately)
+	if (Mpd.Connected() && (Mpd.SupportsIdle() || now.tv_sec > past.tv_sec || UpdateStatusImmediately))
 	{
 		Mpd.UpdateStatus();
 		BlockItemListUpdate = 0;
@@ -154,7 +152,7 @@ void TraceMpdStatus()
 			if (Mpd.GetState() != psPlay && !block_statusbar_update && !block_progressbar_update)
 			{
 				if (Config.new_design)
-					DrawProgressbar(local_elapsed, Mpd.GetTotalTime());
+					DrawProgressbar(Mpd.GetElapsedTime(), Mpd.GetTotalTime());
 				else
 					Statusbar() << wclrtoeol;
 				wFooter->Refresh();
@@ -167,12 +165,21 @@ void NcmpcppErrorCallback(Connection *, int errorid, const char *msg, void *)
 {
 	if (errorid == MPD_SERVER_ERROR_PERMISSION)
 	{
-		wFooter->SetGetStringHelper(0);
-		Statusbar() << "Password: ";
-		Mpd.SetPassword(wFooter->GetString(-1, 0, 1));
-		Mpd.SendPassword();
-		Mpd.UpdateStatus();
-		wFooter->SetGetStringHelper(StatusbarGetStringHelper);
+		Statusbar() << msg << ", enter password ? [" << fmtBold << 'y' << fmtBoldEnd << "/" << fmtBold << 'n' << fmtBoldEnd << "]";
+		wFooter->Refresh();
+		int answer = 0;
+		do
+			wFooter->ReadKey(answer);
+		while (answer != 'y' && answer != 'n');
+		if (answer == 'y')
+		{
+			wFooter->SetGetStringHelper(0);
+			Statusbar() << "Password: ";
+			Mpd.SetPassword(wFooter->GetString(-1, 0, 1));
+			if (Mpd.SendPassword())
+				ShowMessage("Password accepted!");
+			wFooter->SetGetStringHelper(StatusbarGetStringHelper);
+		}
 	}
 	else
 		ShowMessage("%s", msg);
@@ -310,6 +317,7 @@ void NcmpcppStatusChanged(Connection *, StatusChanges changed, void *)
 			case psPause:
 			{
 				player_state = Config.new_design ? "[paused] " : "[Paused] ";
+				changed.ElapsedTime = 1;
 				break;
 			}
 			case psStop:
@@ -364,38 +372,26 @@ void NcmpcppStatusChanged(Connection *, StatusChanges changed, void *)
 				Lyrics::Reload = 1;
 		}
 		Playlist::ReloadRemaining = 1;
-		
 		playing_song_scroll_begin = 0;
 		first_line_scroll_begin = 0;
 		second_line_scroll_begin = 0;
 	}
-	static time_t now, past = 0;
-	time(&now);
-	if (((now > past || changed.SongID) && Mpd.isPlaying()) || RedrawStatusbar)
+	if (changed.ElapsedTime || changed.SongID || RedrawStatusbar)
 	{
-		time(&past);
 		if (np.Empty() && !(np = Mpd.GetCurrentSong()).Empty())
 			WindowTitle(utf_to_locale_cpy(np.toString(Config.song_window_title_format)));
 		if (!np.Empty() && Mpd.isPlaying())
 		{
-			changed.ElapsedTime = 1;
-			
-			int mpd_elapsed = Mpd.GetElapsedTime();
-			if (local_elapsed < mpd_elapsed-2 || local_elapsed+1 > mpd_elapsed)
-				local_elapsed = mpd_elapsed;
-			else if (Mpd.GetState() == psPlay && !RedrawStatusbar)
-				++local_elapsed;
-			
 			std::string tracklength;
 			if (Config.new_design)
 			{
 				if (Config.display_remaining_time)
 				{
 					tracklength = "-";
-					tracklength += Song::ShowTime(Mpd.GetTotalTime()-local_elapsed);
+					tracklength += Song::ShowTime(Mpd.GetTotalTime()-Mpd.GetElapsedTime());
 				}
 				else
-					tracklength = Song::ShowTime(local_elapsed);
+					tracklength = Song::ShowTime(Mpd.GetElapsedTime());
 				if (Mpd.GetTotalTime())
 				{
 					tracklength += "/";
@@ -448,17 +444,17 @@ void NcmpcppStatusChanged(Connection *, StatusChanges changed, void *)
 					if (Config.display_remaining_time)
 					{
 						tracklength += "-";
-						tracklength += Song::ShowTime(Mpd.GetTotalTime()-local_elapsed);
+						tracklength += Song::ShowTime(Mpd.GetTotalTime()-Mpd.GetElapsedTime());
 					}
 					else
-						tracklength += Song::ShowTime(local_elapsed);
+						tracklength += Song::ShowTime(Mpd.GetElapsedTime());
 					tracklength += "/";
 					tracklength += MPD::Song::ShowTime(Mpd.GetTotalTime());
 					tracklength += "]";
 				}
 				else
 				{
-					tracklength += Song::ShowTime(local_elapsed);
+					tracklength += Song::ShowTime(Mpd.GetElapsedTime());
 					tracklength += "]";
 				}
 				basic_buffer<my_char_t> np_song;
@@ -468,7 +464,7 @@ void NcmpcppStatusChanged(Connection *, StatusChanges changed, void *)
 				*wFooter << fmtBold << XY(wFooter->GetWidth()-tracklength.length(), 1) << tracklength;
 			}
 			if (!block_progressbar_update)
-				DrawProgressbar(local_elapsed, Mpd.GetTotalTime());
+				DrawProgressbar(Mpd.GetElapsedTime(), Mpd.GetTotalTime());
 			RedrawStatusbar = 0;
 		}
 		else

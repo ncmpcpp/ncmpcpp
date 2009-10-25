@@ -37,7 +37,7 @@ using namespace NCurses;
 
 typedef std::pair<std::string, std::string> string_pair;
 
-const int ncmpcpp_window_timeout = 250;
+const int ncmpcpp_window_timeout = 100;
 
 #endif
 

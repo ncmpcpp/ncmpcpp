@@ -21,6 +21,7 @@
 #ifndef _MPDPP_H
 #define _MPDPP_H
 
+#include <poll.h>
 #include <vector>
 
 #include <mpd/client.h>
@@ -92,12 +93,13 @@ namespace MPD
 			int GetPort() { return itsPort; }
 			
 			float Version() const;
+			bool SupportsIdle() const { return supportsIdle; }
 			
 			void SetHostname(const std::string &);
 			void SetPort(int port) { itsPort = port; }
 			void SetTimeout(int timeout) { itsTimeout = timeout; }
 			void SetPassword(const std::string &password) { itsPassword = password; }
-			bool SendPassword() const;
+			bool SendPassword();
 			
 			void SetStatusUpdater(StatusUpdater, void *);
 			void SetErrorHandler(ErrorHandler, void *);
@@ -105,19 +107,19 @@ namespace MPD
 			void UpdateStats();
 			bool UpdateDirectory(const std::string &);
 			
-			void Play() const;
-			void Play(int) const;
-			void PlayID(int) const;
-			void Pause(bool) const;
-			void Toggle() const;
-			void Stop() const;
-			void Next() const;
-			void Prev() const;
-			void Move(unsigned, unsigned) const;
-			void Swap(unsigned, unsigned) const;
-			void Seek(unsigned) const;
-			void Shuffle() const;
-			void ClearPlaylist() const;
+			void Play();
+			void Play(int);
+			void PlayID(int);
+			void Pause(bool);
+			void Toggle();
+			void Stop();
+			void Next();
+			void Prev();
+			void Move(unsigned, unsigned);
+			void Swap(unsigned, unsigned);
+			void Seek(unsigned);
+			void Shuffle();
+			void ClearPlaylist();
 			
 			bool isPlaying() const { return GetState() > psStop; }
 			
@@ -131,7 +133,7 @@ namespace MPD
 			unsigned GetCrossfade() const { return itsCurrentStatus ? mpd_status_get_crossfade(itsCurrentStatus) : 0; }
 			unsigned GetPlaylistID() const { return itsCurrentStatus ? mpd_status_get_queue_version(itsCurrentStatus) : 0; }
 			unsigned GetOldPlaylistID() const { return itsOldStatus ? mpd_status_get_queue_version(itsOldStatus) : 0; }
-			unsigned GetElapsedTime() const { return itsCurrentStatus ? mpd_status_get_elapsed_time(itsCurrentStatus) : 0; }
+			unsigned GetElapsedTime() const { return itsCurrentStatus ? itsElapsed : 0; }
 			int GetTotalTime() const { return itsCurrentStatus ? mpd_status_get_total_time(itsCurrentStatus) : 0; }
 			unsigned GetBitrate() const { return itsCurrentStatus ? mpd_status_get_kbit_rate(itsCurrentStatus) : 0; }
 			
@@ -145,66 +147,69 @@ namespace MPD
 			
 			size_t GetMaxPlaylistLength() const { return itsMaxPlaylistLength; }
 			size_t GetPlaylistLength() const { return itsCurrentStatus ? mpd_status_get_queue_length(itsCurrentStatus) : 0; }
-			void GetPlaylistChanges(unsigned, SongList &) const;
+			void GetPlaylistChanges(unsigned, SongList &);
 			
 			const std::string & GetErrorMessage() const { return itsErrorMessage; }
 			int GetErrorCode() const { return itsErrorCode; }
 			
-			Song GetCurrentSong() const;
+			Song GetCurrentSong();
 			int GetCurrentSongPos() const;
-			Song GetSong(const std::string &) const;
-			void GetPlaylistContent(const std::string &, SongList &) const;
+			Song GetSong(const std::string &);
+			void GetPlaylistContent(const std::string &, SongList &);
 			
-			void SetRepeat(bool) const;
-			void SetRandom(bool) const;
-			void SetSingle(bool) const;
-			void SetConsume(bool) const;
-			void SetCrossfade(unsigned) const;
+			void SetRepeat(bool);
+			void SetRandom(bool);
+			void SetSingle(bool);
+			void SetConsume(bool);
+			void SetCrossfade(unsigned);
 			void SetVolume(unsigned);
 			
-			std::string GetReplayGainMode() const;
-			void SetReplayGainMode(ReplayGainMode) const;
+			std::string GetReplayGainMode();
+			void SetReplayGainMode(ReplayGainMode);
 			
 			int AddSong(const std::string &, int = -1); // returns id of added song
 			int AddSong(const Song &, int = -1); // returns id of added song
 			bool AddRandomSongs(size_t);
-			void Add(const std::string &path) const;
-			void Delete(unsigned) const;
-			void DeleteID(unsigned) const;
-			void Delete(const std::string &, unsigned) const;
+			void Add(const std::string &path);
+			void Delete(unsigned);
+			void DeleteID(unsigned);
+			void Delete(const std::string &, unsigned);
 			void StartCommandsList();
 			bool CommitCommandsList();
 			
-			bool DeletePlaylist(const std::string &) const;
-			bool SavePlaylist(const std::string &) const;
-			void ClearPlaylist(const std::string &) const;
-			void AddToPlaylist(const std::string &, const Song &) const;
-			void AddToPlaylist(const std::string &, const std::string &) const;
-			void Move(const std::string &, int, int) const;
-			bool Rename(const std::string &, const std::string &) const;
+			bool DeletePlaylist(const std::string &);
+			bool SavePlaylist(const std::string &);
+			void ClearPlaylist(const std::string &);
+			void AddToPlaylist(const std::string &, const Song &);
+			void AddToPlaylist(const std::string &, const std::string &);
+			void Move(const std::string &, int, int);
+			bool Rename(const std::string &, const std::string &);
 			
-			void StartSearch(bool) const;
+			void StartSearch(bool);
 			void StartFieldSearch(mpd_tag_type);
-			void AddSearch(mpd_tag_type, const std::string &) const;
-			void CommitSearch(SongList &) const;
-			void CommitSearch(TagList &) const;
+			void AddSearch(mpd_tag_type, const std::string &);
+			void CommitSearch(SongList &);
+			void CommitSearch(TagList &);
 			
-			void GetPlaylists(TagList &) const;
-			void GetList(TagList &, mpd_tag_type) const;
-			void GetAlbums(const std::string &, TagList &) const;
-			void GetDirectory(const std::string &, ItemList &) const;
-			void GetDirectoryRecursive(const std::string &, SongList &) const;
-			void GetSongs(const std::string &, SongList &) const;
-			void GetDirectories(const std::string &, TagList &) const;
+			void GetPlaylists(TagList &);
+			void GetList(TagList &, mpd_tag_type);
+			void GetAlbums(const std::string &, TagList &);
+			void GetDirectory(const std::string &, ItemList &);
+			void GetDirectoryRecursive(const std::string &, SongList &);
+			void GetSongs(const std::string &, SongList &);
+			void GetDirectories(const std::string &, TagList &);
 			
-			void GetOutputs(OutputList &) const;
+			void GetOutputs(OutputList &);
 			bool EnableOutput(int);
 			bool DisableOutput(int);
 			
-			void GetURLHandlers(TagList &v) const;
-			void GetTagTypes(TagList &v) const;
+			void GetURLHandlers(TagList &v);
+			void GetTagTypes(TagList &v);
 			
 		private:
+			void GoIdle();
+			mpd_idle GoBusy();
+			
 			int CheckForErrors();
 			
 			mpd_connection *itsConnection;
@@ -214,6 +219,10 @@ namespace MPD
 			int itsErrorCode;
 			size_t itsMaxPlaylistLength;
 			
+			pollfd itsPoll;
+			bool isIdle;
+			bool supportsIdle;
+			
 			std::string itsHost;
 			int itsPort;
 			int itsTimeout;
@@ -222,6 +231,9 @@ namespace MPD
 			mpd_status *itsCurrentStatus;
 			mpd_status *itsOldStatus;
 			mpd_stats *itsStats;
+			
+			unsigned itsElapsed;
+			time_t itsElapsedTimer[2];
 			
 			StatusChanges itsChanges;
 			
