@@ -400,7 +400,7 @@ void Window::ReadKey(int &read_key) const
 		FD_SET(it->first, &fdset);
 	}
 	
-	if (select(fd_max+1, &fdset, 0, 0, &timeout) > 0)
+	if (select(fd_max+1, &fdset, 0, 0, itsWindowTimeout < 0 ? 0 : &timeout) > 0)
 	{
 #		if !defined(USE_PDCURSES)
 		read_key = FD_ISSET(STDIN_FILENO, &fdset) ? wgetch(itsWindow) : ERR;
@@ -746,6 +746,11 @@ Color Window::GetColor() const
 Border Window::GetBorder() const
 {
 	return itsBorder;
+}
+
+int Window::GetTimeout() const
+{
+	return itsWindowTimeout;
 }
 
 void Window::Scroll(Where where)

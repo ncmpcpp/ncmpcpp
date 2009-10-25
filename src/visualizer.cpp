@@ -44,7 +44,6 @@ const unsigned Visualizer::FFTResults = Samples/2+1;
 void Visualizer::Init()
 {
 	w = new Window(0, MainStartY, COLS, MainHeight, "", Config.main_color, brNone);
-	w->SetTimeout(Config.visualizer_fifo_path.empty() ? ncmpcpp_window_timeout : 40 /* this gives us 25 fps */);
 	
 	ResetFD();
 #	ifdef HAVE_FFTW3_H
@@ -73,6 +72,8 @@ void Visualizer::SwitchTo()
 	
 	SetFD();
 	
+	if (itsFifo >= 0)
+		Global::wFooter->SetTimeout(1000/25);
 	Global::RedrawHeader = 1;
 }
 

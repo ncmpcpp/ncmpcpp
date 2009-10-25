@@ -207,6 +207,10 @@ namespace NCurses
 			///
 			Border GetBorder() const;
 			
+			/// @return current window's timeout
+			///
+			int GetTimeout() const;
+			
 			/// Reads the string from standard input. Note that this is much more complex
 			/// function than getstr() from curses library. It allows for moving through
 			/// letters with arrows, supports scrolling if string's length is bigger than

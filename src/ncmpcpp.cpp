@@ -1990,6 +1990,13 @@ int main(int argc, char *argv[])
 			myServerInfo->SwitchTo();
 		}
 		// key mapping end
+		
+#		ifdef ENABLE_VISUALIZER
+		// visualizer sets timmeout to 40ms, but since only it needs such small
+		// value, we should restore defalt one after switching to another screen.
+		if (wFooter->GetTimeout() < ncmpcpp_window_timeout && myScreen != myVisualizer)
+			wFooter->SetTimeout(ncmpcpp_window_timeout);
+#		endif // ENABLE_VISUALIZER
 	}
 	return 0;
 }
