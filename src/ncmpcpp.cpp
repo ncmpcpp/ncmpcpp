@@ -91,6 +91,108 @@ namespace
 	std::ofstream errorlog;
 	std::streambuf *cerr_buffer;
 	
+	bool design_changed = 0;
+	size_t header_height, footer_start_y, footer_height;
+	
+	void sighandler(GNUC_UNUSED int signal)
+	{
+#		if !defined(WIN32)
+		if (signal == SIGPIPE)
+		{
+			ShowMessage("Broken pipe signal caught!");
+			return;
+		}
+#		endif // !WIN32
+		
+#		if defined(USE_PDCURSES)
+		resize_term(0, 0);
+#		else
+		// update internal screen dimensions
+		if (!design_changed)
+		{
+			endwin();
+			refresh();
+			// get rid of KEY_RESIZE as it sometimes
+			// corrupts our new cool ReadKey() function
+			getch();
+		}
+#		endif
+		
+		RedrawHeader = 1;
+		MainHeight = LINES-(Config.new_design ? 7 : 4);
+		
+		if (COLS < 20 || MainHeight < 3)
+		{
+			DestroyScreen();
+			std::cout << "Screen is too small!\n";
+			exit(1);
+		}
+		
+		if (!Config.header_visibility)
+			MainHeight += 2;
+		if (!Config.statusbar_visibility)
+			MainHeight++;
+		
+		myHelp->hasToBeResized = 1;
+		myPlaylist->hasToBeResized = 1;
+		myBrowser->hasToBeResized = 1;
+		mySearcher->hasToBeResized = 1;
+		myLibrary->hasToBeResized = 1;
+		myPlaylistEditor->hasToBeResized = 1;
+		myInfo->hasToBeResized = 1;
+		myLyrics->hasToBeResized = 1;
+		mySelectedItemsAdder->hasToBeResized = 1;
+		
+#		ifdef HAVE_TAGLIB_H
+		myTinyTagEditor->hasToBeResized = 1;
+		myTagEditor->hasToBeResized = 1;
+#		endif // HAVE_TAGLIB_H
+		
+#		ifdef ENABLE_VISUALIZER
+		myVisualizer->hasToBeResized = 1;
+#		endif // ENABLE_VISUALIZER
+		
+#		ifdef ENABLE_OUTPUTS
+		myOutputs->hasToBeResized = 1;
+#		endif // ENABLE_OUTPUTS
+		
+#		ifdef ENABLE_CLOCK
+		myClock->hasToBeResized = 1;
+#		endif // ENABLE_CLOCK
+		
+		myScreen->Resize();
+		
+		if (Config.header_visibility || Config.new_design)
+			wHeader->Resize(COLS, header_height);
+		
+		footer_start_y = LINES-(Config.statusbar_visibility ? 2 : 1);
+		wFooter->MoveTo(0, footer_start_y);
+		wFooter->Resize(COLS, Config.statusbar_visibility ? 2 : 1);
+		
+		myScreen->Refresh();
+		RedrawStatusbar = 1;
+		StatusChanges changes;
+		if (!Mpd.isPlaying() || design_changed)
+		{
+			changes.PlayerState = 1;
+			if (design_changed)
+				changes.Volume = 1;
+		}
+		// Note: routines for drawing separator if alternative user
+		// interface is active and header is hidden are placed in
+		// NcmpcppStatusChanges.StatusFlags
+		changes.StatusFlags = 1; // force status update
+		NcmpcppStatusChanged(&Mpd, changes, 0);
+		if (design_changed)
+		{
+			RedrawStatusbar = 1;
+			NcmpcppStatusChanged(&Mpd, StatusChanges(), 0);
+			design_changed = 0;
+			ShowMessage("User interface: %s", Config.new_design ? "Alternative" : "Classic");
+		}
+		wFooter->Refresh();
+	}
+	
 	void do_at_exit()
 	{
 		// restore old cerr buffer
@@ -147,7 +249,6 @@ int main(int argc, char *argv[])
 	if (Config.new_design)
 		Config.statusbar_visibility = 0;
 	
-	size_t header_height, footer_start_y, footer_height;
 	SetWindowsDimensions(header_height, footer_start_y, footer_height);
 	
 	if (Config.header_visibility || Config.new_design)
@@ -172,7 +273,6 @@ int main(int argc, char *argv[])
 	int input = 0;
 	
 	bool main_exit = 0;
-	bool design_changed = 0;
 	bool title_allowed = !Config.display_screens_numbers_on_start;
 	
 	std::string screen_title;
@@ -181,7 +281,8 @@ int main(int argc, char *argv[])
 	// local variables end
 	
 #	ifndef WIN32
-	signal(SIGPIPE, SIG_IGN);
+	signal(SIGPIPE, sighandler);
+	signal(SIGWINCH, sighandler);
 #	endif // !WIN32
 	
 	gettimeofday(&now, 0);
@@ -349,15 +450,6 @@ int main(int argc, char *argv[])
 		
 		// key mapping beginning
 		
-		if (Keypressed(input, Key.ToggleInterface))
-		{
-			Config.new_design = !Config.new_design;
-			Config.statusbar_visibility = Config.new_design ? 0 : real_statusbar_visibility;
-			SetWindowsDimensions(header_height, footer_start_y, footer_height);
-			UnlockProgressbar();
-			UnlockStatusbar();
-			design_changed = 1;
-		}
 		if (Keypressed(input, Key.Up))
 		{
 			myScreen->Scroll(wUp, Key.Up);
@@ -416,84 +508,19 @@ int main(int argc, char *argv[])
 			else if (mouse_event.bstate & (BUTTON1_PRESSED | BUTTON2_PRESSED | BUTTON3_PRESSED | BUTTON4_PRESSED))
 				myScreen->MouseButtonPressed(mouse_event);
 		}
-		else if (input == KEY_RESIZE || design_changed)
+		if (Keypressed(input, Key.ToggleInterface))
 		{
-#			ifdef USE_PDCURSES
-			resize_term(0, 0);
-#			endif // USE_PDCURSES
-			
-			RedrawHeader = 1;
-			MainHeight = LINES-(Config.new_design ? 7 : 4);
-			
-			if (COLS < 20 || MainHeight < 3)
-			{
-				DestroyScreen();
-				std::cout << "Screen is too small!\n";
-				exit(1);
-			}
-			
-			if (!Config.header_visibility)
-				MainHeight += 2;
-			if (!Config.statusbar_visibility)
-				MainHeight++;
-			
-			myHelp->hasToBeResized = 1;
-			myPlaylist->hasToBeResized = 1;
-			myBrowser->hasToBeResized = 1;
-			mySearcher->hasToBeResized = 1;
-			myLibrary->hasToBeResized = 1;
-			myPlaylistEditor->hasToBeResized = 1;
-			myInfo->hasToBeResized = 1;
-			myLyrics->hasToBeResized = 1;
-			mySelectedItemsAdder->hasToBeResized = 1;
-			
-#			ifdef HAVE_TAGLIB_H
-			myTinyTagEditor->hasToBeResized = 1;
-			myTagEditor->hasToBeResized = 1;
-#			endif // HAVE_TAGLIB_H
-			
-#			ifdef ENABLE_VISUALIZER
-			myVisualizer->hasToBeResized = 1;
-#			endif // ENABLE_VISUALIZER
-			
-#			ifdef ENABLE_OUTPUTS
-			myOutputs->hasToBeResized = 1;
-#			endif // ENABLE_OUTPUTS
-			
-#			ifdef ENABLE_CLOCK
-			myClock->hasToBeResized = 1;
-#			endif // ENABLE_CLOCK
-			
-			myScreen->Resize();
-			
-			if (Config.header_visibility || Config.new_design)
-				wHeader->Resize(COLS, header_height);
-			
-			footer_start_y = LINES-(Config.statusbar_visibility ? 2 : 1);
-			wFooter->MoveTo(0, footer_start_y);
-			wFooter->Resize(COLS, Config.statusbar_visibility ? 2 : 1);
-			
-			myScreen->Refresh();
-			RedrawStatusbar = 1;
-			StatusChanges changes;
-			if (!Mpd.isPlaying() || design_changed)
-			{
-				changes.PlayerState = 1;
-				if (design_changed)
-					changes.Volume = 1;
-			}
-			// Note: routines for drawing separator if alternative user
-			// interface is active and header is hidden are placed in
-			// NcmpcppStatusChanges.StatusFlags
-			changes.StatusFlags = 1; // force status update
-			NcmpcppStatusChanged(&Mpd, changes, 0);
-			if (design_changed)
-			{
-				RedrawStatusbar = 1;
-				NcmpcppStatusChanged(&Mpd, StatusChanges(), 0);
-				design_changed = 0;
-				ShowMessage("User interface: %s", Config.new_design ? "Alternative" : "Classic");
-			}
+			Config.new_design = !Config.new_design;
+			Config.statusbar_visibility = Config.new_design ? 0 : real_statusbar_visibility;
+			SetWindowsDimensions(header_height, footer_start_y, footer_height);
+			UnlockProgressbar();
+			UnlockStatusbar();
+			design_changed = 1;
+#			if !defined(WIN32)
+			sighandler(SIGWINCH);
+#			else
+			sighandler(0);
+#			endif // !WIN23
 		}
 		else if (Keypressed(input, Key.GoToParentDir))
 		{
