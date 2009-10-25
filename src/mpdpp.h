@@ -21,7 +21,12 @@
 #ifndef _MPDPP_H
 #define _MPDPP_H
 
-#include <poll.h>
+#ifdef WIN32
+# include <winsock.h>
+#else
+# include <sys/select.h>
+#endif
+
 #include <vector>
 
 #include <mpd/client.h>
@@ -219,7 +224,8 @@ namespace MPD
 			int itsErrorCode;
 			size_t itsMaxPlaylistLength;
 			
-			pollfd itsPoll;
+			fd_set itsPoll;
+			int itsFD;
 			bool isIdle;
 			bool supportsIdle;
 			

@@ -72,8 +72,7 @@ bool Connection::Connect()
 		return false;
 	if (!itsPassword.empty())
 		SendPassword();
-	itsPoll.fd = mpd_connection_get_fd(itsConnection);
-	itsPoll.events = POLLIN;
+	itsFD = mpd_connection_get_fd(itsConnection);
 	supportsIdle = Version() > 13;
 	// in UpdateStatus() we compare it to itsElapsedTimer[0],
 	// and for the first time it has always evaluate to true
@@ -169,8 +168,10 @@ void Connection::UpdateStatus()
 	
 	if (isIdle)
 	{
-		poll(&itsPoll, 1, 10);
-		if (itsPoll.revents & POLLIN)
+		FD_ZERO(&itsPoll);
+		FD_SET(itsFD, &itsPoll);
+		timeval timeout = { 0, 0 };
+		if (select(itsFD+1, &itsPoll, 0, 0, &timeout) == 1)
 			GoBusy();
 		else
 		{
@@ -220,8 +221,10 @@ void Connection::UpdateStatus()
 			// time equal to 0 even if song has changed, it sometimes
 			// returns the last second, so we need to bypass it by zeroing
 			// it in this case.
-			if (itsElapsed == mpd_status_get_total_time(itsCurrentStatus))
-				itsElapsed = 0;
+			// NOTICE: it seems polling with select() instead of poll()
+			// fixes this, but that can just be more randomness.
+			//if (itsElapsed == mpd_status_get_total_time(itsCurrentStatus))
+			//	itsElapsed = 0;
 			time(&itsElapsedTimer[0]);
 		}
 		else
