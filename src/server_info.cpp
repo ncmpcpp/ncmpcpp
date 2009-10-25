@@ -34,7 +34,6 @@ void ServerInfo::Init()
 {
 	SetDimensions();
 	w = new Scrollpad((COLS-itsWidth)/2, (MainHeight-itsHeight)/2+MainStartY, itsWidth, itsHeight, "MPD server info", Config.main_color, Config.window_border);
-	w->SetTimeout(ncmpcpp_window_timeout);
 	
 	Mpd.GetURLHandlers(itsURLHandlers);
 	Mpd.GetTagTypes(itsTagTypes);

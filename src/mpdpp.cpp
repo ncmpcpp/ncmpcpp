@@ -151,14 +151,14 @@ void Connection::GoIdle()
 		isIdle = 1;
 }
 
-mpd_idle Connection::GoBusy()
+int Connection::GoBusy()
 {
 	if (isIdle && mpd_send_noidle(itsConnection))
 	{
 		isIdle = 0;
 		return mpd_recv_idle(itsConnection, 1);
 	}
-	return mpd_idle(0);
+	return 0;
 }
 
 void Connection::UpdateStatus()
@@ -166,13 +166,14 @@ void Connection::UpdateStatus()
 	if (!itsConnection)
 		return;
 	
+	int idle_mask = 0;
 	if (isIdle)
 	{
-		FD_ZERO(&itsPoll);
-		FD_SET(itsFD, &itsPoll);
-		timeval timeout = { 0, 0 };
-		if (select(itsFD+1, &itsPoll, 0, 0, &timeout) == 1)
-			GoBusy();
+		if (hasData)
+		{
+			idle_mask = GoBusy();
+			hasData = 0;
+		}
 		else
 		{
 			// count local elapsed time as we don't receive
@@ -217,14 +218,6 @@ void Connection::UpdateStatus()
 		{
 			// sync local elapsed time counter with mpd
 			itsElapsed = mpd_status_get_elapsed_time(itsCurrentStatus);
-			// little hack as it seems mpd doesn't always return elapsed
-			// time equal to 0 even if song has changed, it sometimes
-			// returns the last second, so we need to bypass it by zeroing
-			// it in this case.
-			// NOTICE: it seems polling with select() instead of poll()
-			// fixes this, but that can just be more randomness.
-			//if (itsElapsed == mpd_status_get_total_time(itsCurrentStatus))
-			//	itsElapsed = 0;
 			time(&itsElapsedTimer[0]);
 		}
 		else
@@ -274,7 +267,12 @@ void Connection::UpdateStatus()
 			itsChanges.StatusFlags = itsChanges.Repeat || itsChanges.Random || itsChanges.Single || itsChanges.Consume || itsChanges.Crossfade || itsChanges.DBUpdating;
 		}
 		itsUpdater(this, itsChanges, itsErrorHandlerUserdata);
-		GoIdle();
+		// below conditionals are a hack to workaround mpd bug 2608/2612
+		// by fetching another status with correct values after a while
+		if (!((idle_mask & MPD_IDLE_PLAYER) && !itsChanges.PlayerState))
+			GoIdle();
+		else if (supportsIdle && !isIdle)
+			OrderDataFetching();
 	}
 }
 

@@ -52,20 +52,17 @@ void MediaLibrary::Init()
 	
 	Artists = new Menu<std::string>(0, MainStartY, itsLeftColWidth, MainHeight, IntoStr(Config.media_lib_primary_tag) + "s", Config.main_color, brNone);
 	Artists->HighlightColor(Config.active_column_color);
-	Artists->SetTimeout(ncmpcpp_window_timeout);
 	Artists->CyclicScrolling(Config.use_cyclic_scrolling);
 	Artists->SetItemDisplayer(Display::Generic);
 	
 	Albums = new Menu< std::pair<std::string, SearchConstraints> >(itsMiddleColStartX, MainStartY, itsMiddleColWidth, MainHeight, "Albums", Config.main_color, brNone);
 	Albums->HighlightColor(Config.main_highlight_color);
-	Albums->SetTimeout(ncmpcpp_window_timeout);
 	Albums->CyclicScrolling(Config.use_cyclic_scrolling);
 	Albums->SetItemDisplayer(Display::Pairs);
 	Albums->SetGetStringFunction(StringPairToString);
 	
 	Songs = new Menu<Song>(itsRightColStartX, MainStartY, itsRightColWidth, MainHeight, "Songs", Config.main_color, brNone);
 	Songs->HighlightColor(Config.main_highlight_color);
-	Songs->SetTimeout(ncmpcpp_window_timeout);
 	Songs->CyclicScrolling(Config.use_cyclic_scrolling);
 	Songs->SetSelectPrefix(&Config.selected_item_prefix);
 	Songs->SetSelectSuffix(&Config.selected_item_suffix);

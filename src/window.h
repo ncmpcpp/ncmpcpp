@@ -343,6 +343,23 @@ namespace NCurses
 			///
 			virtual void Clear(bool refresh = 1);
 			
+			/// Adds given file descriptor to the list that will be polled in
+			/// ReadKey() along with stdin and callback that will be invoked
+			/// when there is data waiting for reading in it
+			/// @param fd file descriptor
+			/// @param callback callback
+			///
+			void AddFDCallback(int fd, void (*callback)());
+			
+			/// Clears list of file descriptors and their callbacks
+			///
+			void ClearFDCallbacksList();
+			
+			/// Checks if list of file descriptors is empty
+			/// @return true if list is empty, false otherwise
+			///
+			bool FDCallbacksListEmpty() const;
+			
 			/// Reads key from standard input and writes it into read_key variable
 			/// @param read_key variable for read key to be written into it
 			///
@@ -552,6 +569,12 @@ namespace NCurses
 			
 			/// stack of colors
 			std::stack<Colors> itsColors;
+			
+			/// containter used for additional file descriptors that have
+			/// to be polled in ReadKey() and correspondent callbacks that
+			/// are invoked if there is data available in them
+			typedef std::vector< std::pair<int, void (*)()> > FDCallbacks;
+			FDCallbacks itsFDs;
 			
 			/// pointer to container used as history
 			std::deque<std::wstring> *itsHistory;

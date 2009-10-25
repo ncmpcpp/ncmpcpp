@@ -32,7 +32,6 @@ Help *myHelp = new Help;
 void Help::Init()
 {
 	w = new Scrollpad(0, MainStartY, COLS, MainHeight, "", Config.main_color, brNone);
-	w->SetTimeout(ncmpcpp_window_timeout);
 	GetKeybindings();
 	w->Flush();
 	isInitialized = 1;

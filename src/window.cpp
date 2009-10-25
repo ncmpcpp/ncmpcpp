@@ -21,6 +21,12 @@
 #include <cstring>
 #include <cstdlib>
 
+#ifdef WIN32
+# include <winsock.h>
+#else
+# include <sys/select.h>
+#endif
+
 #include "error.h"
 #include "window.h"
 
@@ -352,9 +358,63 @@ void Window::SetTimeout(int timeout)
 	wtimeout(itsWindow, timeout);
 }
 
+void Window::AddFDCallback(int fd, void (*callback)())
+{
+	itsFDs.push_back(std::make_pair(fd, callback));
+}
+
+void Window::ClearFDCallbacksList()
+{
+	itsFDs.clear();
+}
+
+bool Window::FDCallbacksListEmpty() const
+{
+	return itsFDs.empty();
+}
+
 void Window::ReadKey(int &read_key) const
 {
+	// in pdcurses polling stdin doesn't work, so we can't poll
+	// both stdin and other file descriptors in one select. the
+	// workaround is to set the timeout of select to 0, poll
+	// other file descriptors and then wait for stdin input with
+	// the given timeout. unfortunately, this results in delays
+	// since ncmpcpp doesn't see that data arrived while waiting
+	// for input from stdin, but it seems there is no better option.
+	
+	fd_set fdset;
+	FD_ZERO(&fdset);
+#	if !defined(USE_PDCURSES)
+	FD_SET(STDIN_FILENO, &fdset);
+	timeval timeout = { itsWindowTimeout/1000, (itsWindowTimeout%1000)*1000 };
+#	else
+	timeval timeout = { 0, 0 };
+#	endif
+	
+	int fd_max = STDIN_FILENO;
+	for (FDCallbacks::const_iterator it = itsFDs.begin(); it != itsFDs.end(); ++it)
+	{
+		if (it->first > fd_max)
+			fd_max = it->first;
+		FD_SET(it->first, &fdset);
+	}
+	
+	if (select(fd_max+1, &fdset, 0, 0, &timeout) > 0)
+	{
+#		if !defined(USE_PDCURSES)
+		read_key = FD_ISSET(STDIN_FILENO, &fdset) ? wgetch(itsWindow) : ERR;
+#		endif // !USE_PDCURSES
+		for (FDCallbacks::const_iterator it = itsFDs.begin(); it != itsFDs.end(); ++it)
+			if (FD_ISSET(it->first, &fdset))
+				it->second();
+	}
+#	if !defined(USE_PDCURSES)
+	else
+		read_key = ERR;
+#	else
 	read_key = wgetch(itsWindow);
+#	endif
 }
 
 void Window::ReadKey() const
@@ -437,7 +497,7 @@ std::string Window::GetString(const std::string &base, size_t length, size_t wid
 		
 		wmove(itsWindow, y, x);
 		prefresh(itsWindow, 0, 0, itsStartY, itsStartX, itsStartY+itsHeight-1, itsStartX+itsWidth-1);
-		input = wgetch(itsWindow);
+		ReadKey(input);
 		
 		// these key codes are special and should be ignored
 		if ((input < 10 || (input > 10 && input != 21 && input < 32))

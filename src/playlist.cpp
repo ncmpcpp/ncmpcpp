@@ -47,7 +47,6 @@ Menu< std::pair<std::string, MPD::Song::GetFunction> > *Playlist::SortDialog = 0
 void Playlist::Init()
 {
 	Items = new Menu<MPD::Song>(0, MainStartY, COLS, MainHeight, Config.columns_in_playlist ? Display::Columns() : "", Config.main_color, brNone);
-	Items->SetTimeout(ncmpcpp_window_timeout);
 	Items->CyclicScrolling(Config.use_cyclic_scrolling);
 	Items->HighlightColor(Config.main_highlight_color);
 	Items->SetSelectPrefix(&Config.selected_item_prefix);
@@ -62,7 +61,6 @@ void Playlist::Init()
 		SortDialogHeight = std::min(int(MainHeight), 18);
 		
 		SortDialog = new Menu< std::pair<std::string, MPD::Song::GetFunction> >((COLS-SortDialogWidth)/2, (MainHeight-SortDialogHeight)/2+MainStartY, SortDialogWidth, SortDialogHeight, "Sort songs by...", Config.main_color, Config.window_border);
-		SortDialog->SetTimeout(ncmpcpp_window_timeout);
 		SortDialog->CyclicScrolling(Config.use_cyclic_scrolling);
 		SortDialog->SetItemDisplayer(Display::Pairs);
 		

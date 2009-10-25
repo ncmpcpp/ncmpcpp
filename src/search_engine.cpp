@@ -61,7 +61,6 @@ void SearchEngine::Init()
 {
 	w = new Menu< std::pair<Buffer *, Song *> >(0, MainStartY, COLS, MainHeight, "", Config.main_color, brNone);
 	w->HighlightColor(Config.main_highlight_color);
-	w->SetTimeout(ncmpcpp_window_timeout);
 	w->CyclicScrolling(Config.use_cyclic_scrolling);
 	w->SetItemDisplayer(Display::SearchEngine);
 	w->SetSelectPrefix(&Config.selected_item_prefix);

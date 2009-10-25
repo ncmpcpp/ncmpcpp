@@ -73,7 +73,6 @@ const Info::Metadata Info::Tags[] =
 void Info::Init()
 {
 	w = new Scrollpad(0, MainStartY, COLS, MainHeight, "", Config.main_color, brNone);
-	w->SetTimeout(ncmpcpp_window_timeout);
 	isInitialized = 1;
 }
 

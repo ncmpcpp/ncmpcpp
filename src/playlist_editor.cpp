@@ -47,13 +47,11 @@ void PlaylistEditor::Init()
 	
 	Playlists = new Menu<std::string>(0, MainStartY, LeftColumnWidth, MainHeight, "Playlists", Config.main_color, brNone);
 	Playlists->HighlightColor(Config.active_column_color);
-	Playlists->SetTimeout(ncmpcpp_window_timeout);
 	Playlists->CyclicScrolling(Config.use_cyclic_scrolling);
 	Playlists->SetItemDisplayer(Display::Generic);
 	
 	Content = new Menu<Song>(RightColumnStartX, MainStartY, RightColumnWidth, MainHeight, "Playlist's content", Config.main_color, brNone);
 	Content->HighlightColor(Config.main_highlight_color);
-	Content->SetTimeout(ncmpcpp_window_timeout);
 	Content->CyclicScrolling(Config.use_cyclic_scrolling);
 	Content->SetSelectPrefix(&Config.selected_item_prefix);
 	Content->SetSelectSuffix(&Config.selected_item_suffix);

@@ -21,12 +21,6 @@
 #ifndef _MPDPP_H
 #define _MPDPP_H
 
-#ifdef WIN32
-# include <winsock.h>
-#else
-# include <sys/select.h>
-#endif
-
 #include <vector>
 
 #include <mpd/client.h>
@@ -98,7 +92,10 @@ namespace MPD
 			int GetPort() { return itsPort; }
 			
 			float Version() const;
+			
 			bool SupportsIdle() const { return supportsIdle; }
+			void OrderDataFetching() { hasData = 1; }
+			int GetFD() const { return itsFD; }
 			
 			void SetHostname(const std::string &);
 			void SetPort(int port) { itsPort = port; }
@@ -213,7 +210,7 @@ namespace MPD
 			
 		private:
 			void GoIdle();
-			mpd_idle GoBusy();
+			int GoBusy();
 			
 			int CheckForErrors();
 			
@@ -224,10 +221,10 @@ namespace MPD
 			int itsErrorCode;
 			size_t itsMaxPlaylistLength;
 			
-			fd_set itsPoll;
 			int itsFD;
 			bool isIdle;
 			bool supportsIdle;
+			bool hasData;
 			
 			std::string itsHost;
 			int itsPort;

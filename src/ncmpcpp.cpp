@@ -159,6 +159,7 @@ int main(int argc, char *argv[])
 	wFooter = new Window(0, footer_start_y, COLS, footer_height, "", Config.statusbar_color, brNone);
 	wFooter->SetTimeout(ncmpcpp_window_timeout);
 	wFooter->SetGetStringHelper(StatusbarGetStringHelper);
+	wFooter->AddFDCallback(Mpd.GetFD(), StatusbarMPDCallback);
 	wFooter->CreateHistory();
 	
 	myPlaylist->SwitchTo();
@@ -201,10 +202,13 @@ int main(int argc, char *argv[])
 	{
 		if (!Mpd.Connected())
 		{
+			if (!wFooter->FDCallbacksListEmpty())
+				wFooter->ClearFDCallbacksList();
 			ShowMessage("Attempting to reconnect...");
 			if (Mpd.Connect())
 			{
 				ShowMessage("Connected to %s!", Mpd.GetHostname().c_str());
+				wFooter->AddFDCallback(Mpd.GetFD(), StatusbarMPDCallback);
 				MessagesAllowed = 0;
 				UpdateStatusImmediately = 1;
 #				ifdef ENABLE_OUTPUTS
@@ -289,7 +293,7 @@ int main(int argc, char *argv[])
 		myScreen->Update();
 		if (input != ERR)
 			myScreen->RefreshWindow();
-		myScreen->ReadKey(input);
+		wFooter->ReadKey(input);
 		
 		if (input == ERR)
 			continue;
@@ -567,7 +571,7 @@ int main(int argc, char *argv[])
 				else
 				{
 					Playlist::BlockNowPlayingUpdate = 1;
-					myPlaylist->Items->SetTimeout(50);
+					wFooter->SetTimeout(50);
 					int del_counter = 0;
 					while (!myPlaylist->Items->Empty() && Keypressed(input, Key.Delete))
 					{
@@ -581,11 +585,11 @@ int main(int argc, char *argv[])
 						Mpd.DeleteID(myPlaylist->CurrentSong()->GetID());
 						myPlaylist->Items->DeleteOption(id);
 						myPlaylist->Items->Refresh();
-						myPlaylist->Items->ReadKey(input);
+						wFooter->ReadKey(input);
 						++del_counter;
 					}
 					myPlaylist->FixPositions(myPlaylist->Items->Choice());
-					myPlaylist->Items->SetTimeout(ncmpcpp_window_timeout);
+					wFooter->SetTimeout(ncmpcpp_window_timeout);
 					Playlist::BlockNowPlayingUpdate = 0;
 				}
 			}
@@ -703,7 +707,7 @@ int main(int argc, char *argv[])
 				}
 				else
 				{
-					myPlaylistEditor->Content->SetTimeout(50);
+					wFooter->SetTimeout(50);
 					locale_to_utf(myPlaylistEditor->Playlists->Current());
 					while (!myPlaylistEditor->Content->Empty() && Keypressed(input, Key.Delete))
 					{
@@ -712,10 +716,10 @@ int main(int argc, char *argv[])
 						Mpd.Delete(myPlaylistEditor->Playlists->Current(), myPlaylistEditor->Content->Choice());
 						myPlaylistEditor->Content->DeleteOption(myPlaylistEditor->Content->Choice());
 						myPlaylistEditor->Content->Refresh();
-						myPlaylistEditor->Content->ReadKey(input);
+						wFooter->ReadKey(input);
 					}
 					utf_to_locale(myPlaylistEditor->Playlists->Current());
-					myPlaylistEditor->Content->SetTimeout(ncmpcpp_window_timeout);
+					wFooter->SetTimeout(ncmpcpp_window_timeout);
 				}
 			}
 		}
@@ -808,7 +812,7 @@ int main(int argc, char *argv[])
 			else if (myScreen == myPlaylist && !myPlaylist->Items->Empty())
 			{
 				CHECK_PLAYLIST_FOR_FILTERING;
-				myPlaylist->Items->SetTimeout(50);
+				wFooter->SetTimeout(50);
 				if (myPlaylist->Items->hasSelected())
 				{
 					std::vector<size_t> list;
@@ -848,7 +852,7 @@ int main(int argc, char *argv[])
 						}
 						myPlaylist->Items->Highlight(list[(list.size()-1)/2]);
 						myPlaylist->Items->Refresh();
-						myPlaylist->Items->ReadKey(input);
+						wFooter->ReadKey(input);
 					}
 					Playlist::BlockNowPlayingUpdate = 0;
 					Mpd.StartCommandsList();
@@ -876,17 +880,17 @@ int main(int argc, char *argv[])
 						myPlaylist->Items->Swap(to, to+1);
 						myPlaylist->Items->Scroll(wUp);
 						myPlaylist->Items->Refresh();
-						myPlaylist->Items->ReadKey(input);
+						wFooter->ReadKey(input);
 					}
 					Mpd.Move(from, to);
 					Playlist::BlockNowPlayingUpdate = 0;
 					UpdateStatusImmediately = 1;
 				}
-				myPlaylist->Items->SetTimeout(ncmpcpp_window_timeout);
+				wFooter->SetTimeout(ncmpcpp_window_timeout);
 			}
 			else if (myScreen->ActiveWindow() == myPlaylistEditor->Content && !myPlaylistEditor->Content->Empty())
 			{
-				myPlaylistEditor->Content->SetTimeout(50);
+				wFooter->SetTimeout(50);
 				if (myPlaylistEditor->Content->hasSelected())
 				{
 					std::vector<size_t> list;
@@ -905,7 +909,7 @@ int main(int argc, char *argv[])
 						}
 						myPlaylistEditor->Content->Highlight(list[(list.size()-1)/2]);
 						myPlaylistEditor->Content->Refresh();
-						myPlaylistEditor->Content->ReadKey(input);
+						wFooter->ReadKey(input);
 					}
 					Mpd.StartCommandsList();
 					for (size_t i = 0; i < list.size(); ++i)
@@ -925,12 +929,12 @@ int main(int argc, char *argv[])
 						myPlaylistEditor->Content->Swap(to, to+1);
 						myPlaylistEditor->Content->Scroll(wUp);
 						myPlaylistEditor->Content->Refresh();
-						myPlaylistEditor->Content->ReadKey(input);
+						wFooter->ReadKey(input);
 					}
 					if (from != to)
 						Mpd.Move(myPlaylistEditor->Playlists->Current(), from, to);
 				}
-				myPlaylistEditor->Content->SetTimeout(ncmpcpp_window_timeout);
+				wFooter->SetTimeout(ncmpcpp_window_timeout);
 			}
 		}
 		else if (Keypressed(input, Key.MvSongDown))
@@ -940,7 +944,7 @@ int main(int argc, char *argv[])
 			else if (myScreen == myPlaylist && !myPlaylist->Items->Empty())
 			{
 				CHECK_PLAYLIST_FOR_FILTERING;
-				myPlaylist->Items->SetTimeout(50);
+				wFooter->SetTimeout(50);
 				if (myPlaylist->Items->hasSelected())
 				{
 					std::vector<size_t> list;
@@ -974,7 +978,7 @@ int main(int argc, char *argv[])
 						}
 						myPlaylist->Items->Highlight(list[(list.size()-1)/2]);
 						myPlaylist->Items->Refresh();
-						myPlaylist->Items->ReadKey(input);
+						wFooter->ReadKey(input);
 					}
 					Playlist::BlockNowPlayingUpdate = 0;
 					Mpd.StartCommandsList();
@@ -1002,18 +1006,18 @@ int main(int argc, char *argv[])
 						myPlaylist->Items->Swap(to, to-1);
 						myPlaylist->Items->Scroll(wDown);
 						myPlaylist->Items->Refresh();
-						myPlaylist->Items->ReadKey(input);
+						wFooter->ReadKey(input);
 					}
 					Mpd.Move(from, to);
 					Playlist::BlockNowPlayingUpdate = 0;
 					UpdateStatusImmediately = 1;
 				}
-				myPlaylist->Items->SetTimeout(ncmpcpp_window_timeout);
+				wFooter->SetTimeout(ncmpcpp_window_timeout);
 				
 			}
 			else if (myScreen->ActiveWindow() == myPlaylistEditor->Content && !myPlaylistEditor->Content->Empty())
 			{
-				myPlaylistEditor->Content->SetTimeout(50);
+				wFooter->SetTimeout(50);
 				if (myPlaylistEditor->Content->hasSelected())
 				{
 					std::vector<size_t> list;
@@ -1032,7 +1036,7 @@ int main(int argc, char *argv[])
 						}
 						myPlaylistEditor->Content->Highlight(list[(list.size()-1)/2]);
 						myPlaylistEditor->Content->Refresh();
-						myPlaylistEditor->Content->ReadKey(input);
+						wFooter->ReadKey(input);
 					}
 					Mpd.StartCommandsList();
 					for (int i = list.size()-1; i >= 0; --i)
@@ -1052,12 +1056,12 @@ int main(int argc, char *argv[])
 						myPlaylistEditor->Content->Swap(to, to-1);
 						myPlaylistEditor->Content->Scroll(wDown);
 						myPlaylistEditor->Content->Refresh();
-						myPlaylistEditor->Content->ReadKey(input);
+						wFooter->ReadKey(input);
 					}
 					if (from != to)
 						Mpd.Move(myPlaylistEditor->Playlists->Current(), from, to);
 				}
-				myPlaylistEditor->Content->SetTimeout(ncmpcpp_window_timeout);
+				wFooter->SetTimeout(ncmpcpp_window_timeout);
 			}
 		}
 		else if (Keypressed(input, Key.MoveTo) && myScreen == myPlaylist)
@@ -1148,7 +1152,7 @@ int main(int argc, char *argv[])
 			{
 				TraceMpdStatus();
 				myPlaylist->UpdateTimer();
-				myPlaylist->Items->ReadKey(input);
+				wFooter->ReadKey(input);
 				
 				int howmuch = Config.incremental_seeking ? (myPlaylist->Timer()-t)/2+Config.seek_time : Config.seek_time;
 				

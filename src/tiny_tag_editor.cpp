@@ -48,7 +48,6 @@ void TinyTagEditor::Init()
 {
 	w = new Menu<Buffer>(0, MainStartY, COLS, MainHeight, "", Config.main_color, brNone);
 	w->HighlightColor(Config.main_highlight_color);
-	w->SetTimeout(ncmpcpp_window_timeout);
 	w->CyclicScrolling(Config.use_cyclic_scrolling);
 	w->SetItemDisplayer(Display::Generic);
 	isInitialized = 1;

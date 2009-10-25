@@ -32,7 +32,6 @@ Outputs *myOutputs = new Outputs;
 void Outputs::Init()
 {
 	w = new Menu<MPD::Output>(0, MainStartY, COLS, MainHeight, "", Config.main_color, brNone);
-	w->SetTimeout(ncmpcpp_window_timeout);
 	w->CyclicScrolling(Config.use_cyclic_scrolling);
 	w->HighlightColor(Config.main_highlight_color);
 	w->SetItemDisplayer(Display::Pairs);

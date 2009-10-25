@@ -52,7 +52,6 @@ void Clock::Init()
 	Width = Config.clock_display_seconds ? 60 : 40;
 	
 	w = new Window((COLS-Width)/2, (MainHeight-Height)/2+MainStartY, Width, Height-1, "", Config.main_color, Border(Config.main_color));
-	w->SetTimeout(ncmpcpp_window_timeout);
 	isInitialized = 1;
 }
 

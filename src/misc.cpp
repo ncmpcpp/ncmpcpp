@@ -38,7 +38,6 @@ void SelectedItemsAdder::Init()
 {
 	SetDimensions();
 	w = new Menu<std::string>((COLS-itsWidth)/2, (MainHeight-itsHeight)/2+MainStartY, itsWidth, itsHeight, "Add selected items to...", Config.main_color, Config.window_border);
-	w->SetTimeout(ncmpcpp_window_timeout);
 	w->CyclicScrolling(Config.use_cyclic_scrolling);
 	w->HighlightColor(Config.main_highlight_color);
 	w->SetItemDisplayer(Display::Generic);

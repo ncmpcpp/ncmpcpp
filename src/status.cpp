@@ -63,6 +63,11 @@ void WindowTitle(const std::string &status)
 }
 #endif // !USE_PDCURSES
 
+void StatusbarMPDCallback()
+{
+	Mpd.OrderDataFetching();
+}
+
 void StatusbarGetStringHelper(const std::wstring &)
 {
 	TraceMpdStatus();
