@@ -140,7 +140,7 @@ void TinyTagEditor::EnterPressed()
 				if (myOldScreen == myPlaylist)
 					myPlaylist->Items->Current() = s;
 				else if (myOldScreen == myBrowser)
-					*myBrowser->Main()->Current().song = s;
+					myBrowser->GetDirectory(myBrowser->CurrentDir());
 			}
 		}
 		else
