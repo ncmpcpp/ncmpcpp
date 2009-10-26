@@ -49,6 +49,8 @@ namespace Global
 	extern bool RedrawStatusbar;
 	
 	extern std::string VolumeState;
+	
+	extern timeval Timer;
 }
 
 #endif

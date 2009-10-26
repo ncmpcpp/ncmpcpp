@@ -25,6 +25,7 @@
 #ifdef ENABLE_CLOCK
 
 #include <cstring>
+#include <sys/time.h>
 
 #include "global.h"
 #include "playlist.h"
@@ -105,13 +106,12 @@ void Clock::Update()
 	if (Width > size_t(COLS) || Height > MainHeight)
 		myPlaylist->SwitchTo();
 	
-	static time_t now = 0, past;
-	time(&past);
-	if (past <= now)
+	static timeval past = { 0, 0 };
+	if (Timer.tv_sec <= past.tv_sec)
 		return;
-	time(&now);
+	gettimeofday(&past, 0);
 	
-	tm *time = localtime(&now);
+	tm *time = localtime(&past.tv_sec);
 	
 	mask = 0;
 	Set(time->tm_sec % 10, 0);

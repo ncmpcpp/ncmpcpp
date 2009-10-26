@@ -40,10 +40,12 @@
 using namespace Global;
 using namespace MPD;
 
-std::string Global::VolumeState;
-
 bool Global::UpdateStatusImmediately = 0;
 bool Global::RedrawStatusbar = 0;
+
+std::string Global::VolumeState;
+
+timeval Global::Timer;
 
 namespace
 {
@@ -122,10 +124,10 @@ void UnlockStatusbar()
 
 void TraceMpdStatus()
 {
-	static timeval past, now;
+	static timeval past = { 0, 0 };
 	
-	gettimeofday(&now, 0);
-	if (Mpd.Connected() && (Mpd.SupportsIdle() || now.tv_sec > past.tv_sec || UpdateStatusImmediately))
+	gettimeofday(&Global::Timer, 0);
+	if (Mpd.Connected() && (Mpd.SupportsIdle() || Timer.tv_sec > past.tv_sec || UpdateStatusImmediately))
 	{
 		Mpd.UpdateStatus();
 		BlockItemListUpdate = 0;
@@ -135,7 +137,7 @@ void TraceMpdStatus()
 	}
 	
 	if (myScreen->ActiveWindow() == myPlaylist->Items
-	&&  now.tv_sec == myPlaylist->Timer()+Config.playlist_disable_highlight_delay
+	&&  Timer.tv_sec == myPlaylist->Timer()+Config.playlist_disable_highlight_delay
 	&&  myPlaylist->Items->isHighlighted()
 	&&  Config.playlist_disable_highlight_delay)
 	{
@@ -145,7 +147,7 @@ void TraceMpdStatus()
 	
 	if (lock_statusbar_delay > 0)
 	{
-		if (now.tv_sec >= time_of_statusbar_lock+lock_statusbar_delay)
+		if (Timer.tv_sec >= time_of_statusbar_lock+lock_statusbar_delay)
 		{
 			lock_statusbar_delay = -1;
 			

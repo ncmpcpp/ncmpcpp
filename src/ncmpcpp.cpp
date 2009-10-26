@@ -277,15 +277,13 @@ int main(int argc, char *argv[])
 	
 	std::string screen_title;
 	
-	timeval now, past;
+	timeval past = { 0, 0 };
 	// local variables end
 	
 #	ifndef WIN32
 	signal(SIGPIPE, sighandler);
 	signal(SIGWINCH, sighandler);
 #	endif // !WIN32
-	
-	gettimeofday(&now, 0);
 	
 	MEVENT mouse_event;
 	mouseinterval(0);
@@ -328,13 +326,12 @@ int main(int argc, char *argv[])
 		MessagesAllowed = 1;
 		
 		// header stuff
-		gettimeofday(&past, 0);
-		if (((past.tv_sec == now.tv_sec && past.tv_usec >= now.tv_usec+500000) || past.tv_sec > now.tv_sec)
+		if (((Timer.tv_sec == past.tv_sec && Timer.tv_usec >= past.tv_usec+500000) || Timer.tv_sec > past.tv_sec)
 		&&   (myScreen == myPlaylist || myScreen == myBrowser || myScreen == myLyrics)
 		   )
 		{
 			RedrawHeader = 1;
-			gettimeofday(&now, 0);
+			gettimeofday(&past, 0);
 		}
 		if (Config.header_visibility && RedrawHeader)
 		{
