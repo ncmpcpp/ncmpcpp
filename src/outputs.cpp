@@ -74,22 +74,13 @@ void Outputs::EnterPressed()
 	if (w->Current().second)
 	{
 		if (Mpd.DisableOutput(w->Choice()))
-		{
 			ShowMessage("Output \"%s\" disabled", w->Current().first.c_str());
-			w->Current().second = 0;
-			w->Bold(w->Choice(), 0);
-		}
 	}
 	else
 	{
 		if (Mpd.EnableOutput(w->Choice()))
-		{
 			ShowMessage("Output \"%s\" enabled", w->Current().first.c_str());
-			w->Current().second = 1;
-			w->Bold(w->Choice(), 1);
-		}
 	}
-	
 }
 
 void Outputs::MouseButtonPressed(MEVENT me)
@@ -112,9 +103,11 @@ void Outputs::FetchList()
 		return;
 	MPD::OutputList ol;
 	Mpd.GetOutputs(ol);
-	w->Clear();
+	w->Clear(0);
 	for (MPD::OutputList::const_iterator it = ol.begin(); it != ol.end(); ++it)
 		w->AddOption(*it, it->second);
+	if (myScreen == this)
+		w->Refresh();
 }
 
 #endif // ENABLE_OUTPUTS

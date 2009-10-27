@@ -49,7 +49,7 @@ namespace MPD
 	
 	struct StatusChanges
 	{
-		StatusChanges() : Playlist(0), SongID(0), Database(0), DBUpdating(0), Volume(0), ElapsedTime(0), Crossfade(0), Random(0), Repeat(0), Single(0), Consume(0), PlayerState(0), StatusFlags(0) { }
+		StatusChanges() : Playlist(0), SongID(0), Database(0), DBUpdating(0), Volume(0), ElapsedTime(0), Crossfade(0), Random(0), Repeat(0), Single(0), Consume(0), PlayerState(0), StatusFlags(0), Outputs(0) { }
 		bool Playlist:1;
 		bool SongID:1;
 		bool Database:1;
@@ -63,6 +63,7 @@ namespace MPD
 		bool Consume:1;
 		bool PlayerState:1;
 		bool StatusFlags:1;
+		bool Outputs:1;
 	};
 	
 	typedef std::pair<std::string, bool> Output;

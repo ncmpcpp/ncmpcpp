@@ -55,6 +55,7 @@ class Visualizer : public Screen<Window>
 		
 		void SetFD();
 		void ResetFD();
+		void FindOutputID();
 		
 	protected:
 		virtual void Init();

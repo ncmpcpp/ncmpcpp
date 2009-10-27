@@ -249,6 +249,7 @@ void Connection::UpdateStatus()
 			itsChanges.Consume = 1;
 			itsChanges.PlayerState = 1;
 			itsChanges.StatusFlags = 1;
+			itsChanges.Outputs = 1;
 		}
 		else
 		{
@@ -259,6 +260,7 @@ void Connection::UpdateStatus()
 				itsChanges.DBUpdating = idle_mask & MPD_IDLE_UPDATE;
 				itsChanges.Volume = idle_mask & MPD_IDLE_MIXER;
 				itsChanges.StatusFlags = idle_mask & MPD_IDLE_OPTIONS;
+				itsChanges.Outputs = idle_mask & MPD_IDLE_OUTPUT;
 			}
 			else
 			{
@@ -280,6 +282,10 @@ void Connection::UpdateStatus()
 						||	 itsChanges.Consume
 						||	 itsChanges.Crossfade
 						||	 itsChanges.DBUpdating;
+				
+				// there is no way to determine if the output has changed or not
+				// from mpd status, it's possible only with idle notifications
+				itsChanges.Outputs = 0;
 			}
 			
 			itsChanges.SongID = mpd_status_get_song_id(itsOldStatus)

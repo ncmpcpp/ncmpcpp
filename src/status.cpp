@@ -30,6 +30,7 @@
 #include "helpers.h"
 #include "lyrics.h"
 #include "media_library.h"
+#include "outputs.h"
 #include "playlist.h"
 #include "playlist_editor.h"
 #include "search_engine.h"
@@ -590,6 +591,12 @@ void NcmpcppStatusChanged(Connection *, StatusChanges changed, void *)
 		*wHeader << XY(wHeader->GetWidth()-VolumeState.length(), 0) << VolumeState;
 		*wHeader << clEnd;
 		wHeader->Refresh();
+	}
+	if (changed.Outputs)
+	{
+#		ifdef ENABLE_OUTPUTS
+		myOutputs->FetchList();
+#		endif // ENABLE_OUTPUTS
 	}
 	*wFooter << fmtBoldEnd;
 	wFooter->GotoXY(sx, sy);

@@ -54,17 +54,7 @@ void Visualizer::Init()
 	itsPlan = fftw_plan_dft_r2c_1d(Samples, itsInput, itsOutput, FFTW_ESTIMATE);
 #	endif // HAVE_FFTW3_H
 	
-	itsOutputID = -1;
-	if (!Config.visualizer_output_name.empty())
-	{
-		MPD::OutputList outputs;
-		Mpd.GetOutputs(outputs);
-		for (unsigned i = 0; i < outputs.size(); ++i)
-			if (outputs[i].first == Config.visualizer_output_name)
-				itsOutputID = i;
-		if (itsOutputID == -1)
-			ShowMessage("There is no output named \"%s\"!", Config.visualizer_output_name.c_str());
-	}
+	FindOutputID();
 	
 	isInitialized = 1;
 }
@@ -211,6 +201,21 @@ void Visualizer::SetFD()
 void Visualizer::ResetFD()
 {
 	itsFifo = -1;
+}
+
+void Visualizer::FindOutputID()
+{
+	itsOutputID = -1;
+	if (!Config.visualizer_output_name.empty())
+	{
+		MPD::OutputList outputs;
+		Mpd.GetOutputs(outputs);
+		for (unsigned i = 0; i < outputs.size(); ++i)
+			if (outputs[i].first == Config.visualizer_output_name)
+				itsOutputID = i;
+		if (itsOutputID == -1)
+			ShowMessage("There is no output named \"%s\"!", Config.visualizer_output_name.c_str());
+	}
 }
 
 #endif // ENABLE_VISUALIZER

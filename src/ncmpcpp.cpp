@@ -310,13 +310,11 @@ int main(int argc, char *argv[])
 				wFooter->AddFDCallback(Mpd.GetFD(), StatusbarMPDCallback);
 				MessagesAllowed = 0;
 				UpdateStatusImmediately = 1;
-#				ifdef ENABLE_OUTPUTS
-				myOutputs->FetchList();
-#				endif // ENABLE_OUTPUTS
 #				ifdef ENABLE_VISUALIZER
 				myVisualizer->ResetFD();
 				if (myScreen == myVisualizer)
 					myVisualizer->SetFD();
+				myVisualizer->FindOutputID();
 #				endif // ENABLE_VISUALIZER
 			}
 		}
