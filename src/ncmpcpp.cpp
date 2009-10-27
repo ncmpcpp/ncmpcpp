@@ -1168,6 +1168,9 @@ int main(int argc, char *argv[])
 			
 			songpos = Mpd.GetElapsedTime();
 			
+			int old_timeout = wFooter->GetTimeout();
+			wFooter->SetTimeout(ncmpcpp_window_timeout);
+			
 			SeekingInProgress = 1;
 			*wFooter << fmtBold;
 			while (Keypressed(input, Key.SeekForward) || Keypressed(input, Key.SeekBackward))
@@ -1228,6 +1231,8 @@ int main(int argc, char *argv[])
 			SeekingInProgress = 0;
 			Mpd.Seek(songpos);
 			UpdateStatusImmediately = 1;
+			
+			wFooter->SetTimeout(old_timeout);
 			
 			UnlockProgressbar();
 			UnlockStatusbar();
