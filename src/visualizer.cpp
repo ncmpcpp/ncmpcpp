@@ -29,6 +29,7 @@
 #include <cstring>
 #include <fstream>
 #include <fcntl.h>
+#include <sys/time.h>
 
 using Global::myScreen;
 using Global::MainStartY;
@@ -53,6 +54,18 @@ void Visualizer::Init()
 	itsPlan = fftw_plan_dft_r2c_1d(Samples, itsInput, itsOutput, FFTW_ESTIMATE);
 #	endif // HAVE_FFTW3_H
 	
+	itsOutputID = -1;
+	if (!Config.visualizer_output_name.empty())
+	{
+		MPD::OutputList outputs;
+		Mpd.GetOutputs(outputs);
+		for (unsigned i = 0; i < outputs.size(); ++i)
+			if (outputs[i].first == Config.visualizer_output_name)
+				itsOutputID = i;
+		if (itsOutputID == -1)
+			ShowMessage("There is no output named \"%s\"!", Config.visualizer_output_name.c_str());
+	}
+	
 	isInitialized = 1;
 }
 
@@ -71,6 +84,9 @@ void Visualizer::SwitchTo()
 	w->Clear();
 	
 	SetFD();
+	
+	itsTimer.tv_sec = 0;
+	itsTimer.tv_usec = 0;
 	
 	if (itsFifo >= 0)
 		Global::wFooter->SetTimeout(1000/25);
@@ -99,6 +115,13 @@ void Visualizer::Update()
 	{
 		w->Clear();
 		return;
+	}
+	
+	if (itsOutputID != -1 && Global::Timer.tv_sec > itsTimer.tv_sec+5)
+	{
+		Mpd.DisableOutput(itsOutputID);
+		Mpd.EnableOutput(itsOutputID);
+		gettimeofday(&itsTimer, 0);
 	}
 	
 	// it supports only PCM in format 44100:16:1

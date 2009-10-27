@@ -131,6 +131,7 @@ struct ncmpcpp_config
 	std::string mpd_host;
 	std::string mpd_music_dir;
 	std::string visualizer_fifo_path;
+	std::string visualizer_output_name;
 	std::string empty_tag;
 	std::string song_list_columns_format;
 	std::string song_list_format;

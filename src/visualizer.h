@@ -65,6 +65,9 @@ class Visualizer : public Screen<Window>
 		void DrawFrequencySpectrum(int16_t *, ssize_t);
 #		endif // HAVE_FFTW3_H
 		
+		int itsOutputID;
+		timeval itsTimer;
+		
 		int itsFifo;
 #		ifdef HAVE_FFTW3_H
 		unsigned *itsFreqsMagnitude;

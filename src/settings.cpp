@@ -521,10 +521,15 @@ void ReadConfiguration(ncmpcpp_config &conf)
 					conf.mpd_music_dir = v + "/";
 				}
 			}
-			if (cl.find("visualizer_fifo_path") != std::string::npos)
+			else if (cl.find("visualizer_fifo_path") != std::string::npos)
 			{
 				if (!v.empty())
 					conf.visualizer_fifo_path = v;
+			}
+			else if (cl.find("visualizer_output_name") != std::string::npos)
+			{
+				if (!v.empty())
+					conf.visualizer_output_name = v;
 			}
 			else if (cl.find("mpd_port") != std::string::npos)
 			{

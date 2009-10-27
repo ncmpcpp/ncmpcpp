@@ -35,6 +35,16 @@
 #visualizer_fifo_path = ""
 #
 ##
+## Note: Below parameter is needed for ncmpcpp
+## to determine which output provides data for
+## visualizer and thus allow syncing between
+## visualization and sound as currently there
+## are some problems with it.
+##
+#
+#visualizer_output_name = ""
+#
+##
 ## Note: To enable spectrum frequency visualization
 ## you need to compile ncmpcpp with fftw3 support.
 ##
