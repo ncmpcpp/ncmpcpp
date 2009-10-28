@@ -402,7 +402,6 @@ int main(int argc, char *argv[])
 		}
 		// header stuff end
 		
-		myScreen->Update();
 		if (input != ERR)
 			myScreen->RefreshWindow();
 		wFooter->ReadKey(input);

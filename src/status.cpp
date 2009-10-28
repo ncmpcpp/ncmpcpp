@@ -137,6 +137,8 @@ void TraceMpdStatus()
 		gettimeofday(&past, 0);
 	}
 	
+	myScreen->Update();
+	
 	if (myScreen->ActiveWindow() == myPlaylist->Items
 	&&  Timer.tv_sec == myPlaylist->Timer()+Config.playlist_disable_highlight_delay
 	&&  myPlaylist->Items->isHighlighted()
