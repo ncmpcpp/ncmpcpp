@@ -92,17 +92,12 @@ namespace
 	std::streambuf *cerr_buffer;
 	
 	bool design_changed = 0;
+	bool order_resize = 0;
 	size_t header_height, footer_start_y, footer_height;
 	
-	void sighandler(GNUC_UNUSED int signal)
+	void resize_screen()
 	{
-#		if !defined(WIN32)
-		if (signal == SIGPIPE)
-		{
-			ShowMessage("Broken pipe signal caught!");
-			return;
-		}
-#		endif // !WIN32
+		order_resize = 0;
 		
 #		if defined(USE_PDCURSES)
 		resize_term(0, 0);
@@ -114,7 +109,11 @@ namespace
 			refresh();
 			// get rid of KEY_RESIZE as it sometimes
 			// corrupts our new cool ReadKey() function
+			// because KEY_RESIZE doesn't come from stdin
+			// and thus select cannot detect it
+			timeout(10);
 			getch();
+			timeout(-1);
 		}
 #		endif
 		
@@ -192,6 +191,20 @@ namespace
 		}
 		wFooter->Refresh();
 	}
+	
+#	if !defined(WIN32)
+	void sighandler(int signal)
+	{
+		if (signal == SIGPIPE)
+		{
+			ShowMessage("Broken pipe signal caught!");
+		}
+		else if (signal == SIGWINCH)
+		{
+			order_resize = 1;
+		}
+	}
+#	endif // !WIN32
 	
 	void do_at_exit()
 	{
@@ -322,6 +335,9 @@ int main(int argc, char *argv[])
 		TraceMpdStatus();
 		
 		MessagesAllowed = 1;
+		
+		if (order_resize)
+			resize_screen();
 		
 		// header stuff
 		if (((Timer.tv_sec == past.tv_sec && Timer.tv_usec >= past.tv_usec+500000) || Timer.tv_sec > past.tv_sec)
@@ -511,11 +527,7 @@ int main(int argc, char *argv[])
 			UnlockProgressbar();
 			UnlockStatusbar();
 			design_changed = 1;
-#			if !defined(WIN32)
-			sighandler(SIGWINCH);
-#			else
-			sighandler(0);
-#			endif // !WIN23
+			resize_screen();
 		}
 		else if (Keypressed(input, Key.GoToParentDir))
 		{
