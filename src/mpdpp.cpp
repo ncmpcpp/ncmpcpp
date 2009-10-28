@@ -857,12 +857,12 @@ void Connection::Add(const std::string &path)
 	if (!isCommandsListEnabled)
 	{
 		GoBusy();
-		mpd_send_add(itsConnection, path.c_str());
+		mpd_run_add(itsConnection, path.c_str());
 	}
 	else
 	{
 		assert(!isIdle);
-		mpd_run_add(itsConnection, path.c_str());
+		mpd_send_add(itsConnection, path.c_str());
 	}
 }
 
