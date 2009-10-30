@@ -107,7 +107,7 @@ void Visualizer::Update()
 		return;
 	}
 	
-	if (itsOutputID != -1 && Global::Timer.tv_sec > itsTimer.tv_sec+5)
+	if (itsOutputID != -1 && Global::Timer.tv_sec > itsTimer.tv_sec+120)
 	{
 		Mpd.DisableOutput(itsOutputID);
 		Mpd.EnableOutput(itsOutputID);
