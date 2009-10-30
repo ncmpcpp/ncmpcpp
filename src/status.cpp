@@ -321,13 +321,13 @@ void NcmpcppStatusChanged(Connection *, StatusChanges changed, void *)
 					WindowTitle(utf_to_locale_cpy(np.toString(Config.song_window_title_format)));
 				player_state = Config.new_design ? "[playing]" : "Playing: ";
 				Playlist::ReloadRemaining = 1;
-				changed.ElapsedTime = 1;
+				if (Mpd.GetOldState() == psStop) // show track info in status immediately
+					changed.ElapsedTime = 1;
 				break;
 			}
 			case psPause:
 			{
 				player_state = Config.new_design ? "[paused] " : "[Paused] ";
-				changed.ElapsedTime = 1;
 				break;
 			}
 			case psStop:
@@ -355,11 +355,8 @@ void NcmpcppStatusChanged(Connection *, StatusChanges changed, void *)
 		}
 		if (Config.new_design)
 		{
-			if (!myPlaylist->isPlaying())
-			{
-				*wHeader << XY(0, 1) << fmtBold << player_state << fmtBoldEnd;
-				wHeader->Refresh();
-			}
+			*wHeader << XY(0, 1) << fmtBold << player_state << fmtBoldEnd;
+			wHeader->Refresh();
 		}
 		else if (!block_statusbar_update && Config.statusbar_visibility && player_state.empty())
 			*wFooter << XY(0, 1) << wclrtoeol;

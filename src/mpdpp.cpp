@@ -217,22 +217,13 @@ void Connection::UpdateStatus()
 		if (supportsIdle)
 		{
 			// sync local elapsed time counter with mpd
+			unsigned old_elapsed = itsElapsed;
 			itsElapsed = mpd_status_get_elapsed_time(itsCurrentStatus);
+			itsChanges.ElapsedTime = itsElapsed != old_elapsed;
 			time(&itsElapsedTimer[0]);
 		}
 		else
-		{
-			time(&itsElapsedTimer[0]);
-			if (itsElapsedTimer[0] > itsElapsedTimer[1])
-			{
-				unsigned mpd_elapsed = mpd_status_get_elapsed_time(itsCurrentStatus);
-				if (itsElapsed < mpd_elapsed-2 || itsElapsed+1 > mpd_elapsed)
-					itsElapsed = mpd_elapsed;
-				else if (Mpd.GetState() == psPlay)
-					++itsElapsed;
-				time(&itsElapsedTimer[1]);
-			}
-		}
+			itsElapsed = mpd_status_get_elapsed_time(itsCurrentStatus);
 		
 		if (!itsOldStatus)
 		{
@@ -267,6 +258,9 @@ void Connection::UpdateStatus()
 				itsChanges.Playlist = mpd_status_get_queue_version(itsOldStatus)
 						   != mpd_status_get_queue_version(itsCurrentStatus);
 				
+				itsChanges.ElapsedTime = mpd_status_get_elapsed_time(itsOldStatus)
+						      != mpd_status_get_elapsed_time(itsCurrentStatus);
+				
 				itsChanges.Database = mpd_status_get_update_id(itsOldStatus)
 						 &&  !mpd_status_get_update_id(itsCurrentStatus);
 				
@@ -290,9 +284,6 @@ void Connection::UpdateStatus()
 			
 			itsChanges.SongID = mpd_status_get_song_id(itsOldStatus)
 					 != mpd_status_get_song_id(itsCurrentStatus);
-			
-			itsChanges.ElapsedTime = mpd_status_get_elapsed_time(itsOldStatus)
-					      != mpd_status_get_elapsed_time(itsCurrentStatus);
 			
 			itsChanges.Crossfade = mpd_status_get_crossfade(itsOldStatus)
 					    != mpd_status_get_crossfade(itsCurrentStatus);

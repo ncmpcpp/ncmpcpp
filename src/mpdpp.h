@@ -126,7 +126,8 @@ namespace MPD
 			
 			bool isPlaying() const { return GetState() > psStop; }
 			
-			PlayerState GetState() const{ return itsCurrentStatus ? PlayerState(mpd_status_get_state(itsCurrentStatus)) : psUnknown; }
+			PlayerState GetState() const { return itsCurrentStatus ? PlayerState(mpd_status_get_state(itsCurrentStatus)) : psUnknown; }
+			PlayerState GetOldState() const { return itsOldStatus ? PlayerState(mpd_status_get_state(itsOldStatus)) : psUnknown; }
 			bool GetRepeat() const { return itsCurrentStatus ? mpd_status_get_repeat(itsCurrentStatus) : 0; }
 			bool GetRandom() const { return itsCurrentStatus ? mpd_status_get_random(itsCurrentStatus) : 0; }
 			bool GetSingle() const { return itsCurrentStatus ? mpd_status_get_single(itsCurrentStatus) : 0; }
