@@ -250,7 +250,7 @@ void Connection::UpdateStatus()
 				itsChanges.Database = idle_mask & MPD_IDLE_DATABASE;
 				itsChanges.DBUpdating = idle_mask & MPD_IDLE_UPDATE;
 				itsChanges.Volume = idle_mask & MPD_IDLE_MIXER;
-				itsChanges.StatusFlags = idle_mask & MPD_IDLE_OPTIONS;
+				itsChanges.StatusFlags = idle_mask & (MPD_IDLE_OPTIONS | MPD_IDLE_UPDATE);
 				itsChanges.Outputs = idle_mask & MPD_IDLE_OUTPUT;
 			}
 			else
