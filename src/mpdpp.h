@@ -154,7 +154,6 @@ namespace MPD
 			void GetPlaylistChanges(unsigned, SongList &);
 			
 			const std::string & GetErrorMessage() const { return itsErrorMessage; }
-			int GetErrorCode() const { return itsErrorCode; }
 			
 			Song GetCurrentSong();
 			int GetCurrentSongPos() const;
@@ -175,9 +174,9 @@ namespace MPD
 			int AddSong(const Song &, int = -1); // returns id of added song
 			bool AddRandomSongs(size_t);
 			void Add(const std::string &path);
-			void Delete(unsigned);
-			void DeleteID(unsigned);
-			void Delete(const std::string &, unsigned);
+			bool Delete(unsigned);
+			bool DeleteID(unsigned);
+			bool Delete(const std::string &, unsigned);
 			void StartCommandsList();
 			bool CommitCommandsList();
 			
@@ -220,7 +219,6 @@ namespace MPD
 			bool isCommandsListEnabled;
 			
 			std::string itsErrorMessage;
-			int itsErrorCode;
 			size_t itsMaxPlaylistLength;
 			
 			int itsFD;

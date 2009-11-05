@@ -36,7 +36,6 @@ const char *MPD::Message::FunctionDisabledFilteringEnabled = "Function disabled 
 
 Connection::Connection() : itsConnection(0),
 			   isCommandsListEnabled(0),
-			   itsErrorCode(0),
 			   itsMaxPlaylistLength(-1),
 			   isIdle(0),
 			   supportsIdle(0),
@@ -893,45 +892,47 @@ bool Connection::AddRandomSongs(size_t number)
 	return true;
 }
 
-void Connection::Delete(unsigned pos)
+bool Connection::Delete(unsigned pos)
 {
 	if (!itsConnection)
-		return;
+		return false;
 	if (!isCommandsListEnabled)
 		GoBusy();
 	else
 		assert(!isIdle);
-	mpd_send_delete(itsConnection, pos);
+	bool result = mpd_send_delete(itsConnection, pos);
 	if (!isCommandsListEnabled)
-		mpd_response_finish(itsConnection);
+		result = mpd_response_finish(itsConnection);
+	return result;
 }
 
-void Connection::DeleteID(unsigned id)
+bool Connection::DeleteID(unsigned id)
 {
 	if (!itsConnection)
-		return;
+		return false;
 	if (!isCommandsListEnabled)
 		GoBusy();
 	else
 		assert(!isIdle);
-	mpd_send_delete_id(itsConnection, id);
+	bool result = mpd_send_delete_id(itsConnection, id);
 	if (!isCommandsListEnabled)
-		mpd_response_finish(itsConnection);
+		result = mpd_response_finish(itsConnection);
+	return result;
 }
 
-void Connection::Delete(const std::string &playlist, unsigned pos)
+bool Connection::Delete(const std::string &playlist, unsigned pos)
 {
 	if (!itsConnection)
-		return;
+		return false;
 	if (!isCommandsListEnabled)
 	{
 		GoBusy();
-		mpd_run_playlist_delete(itsConnection, playlist.c_str(), pos);
+		return mpd_run_playlist_delete(itsConnection, playlist.c_str(), pos);
 	}
 	else
 	{
 		assert(!isIdle);
-		mpd_send_playlist_delete(itsConnection, playlist.c_str(), pos);
+		return mpd_send_playlist_delete(itsConnection, playlist.c_str(), pos);
 	}
 }
 
@@ -956,8 +957,9 @@ bool Connection::CommitCommandsList()
 	if (GetPlaylistLength() == itsMaxPlaylistLength && itsErrorHandler)
 		itsErrorHandler(this, MPD_SERVER_ERROR_PLAYLIST_MAX, Message::FullPlaylist, itsErrorHandlerUserdata);
 	isCommandsListEnabled = 0;
+	bool result = !CheckForErrors();
 	UpdateStatus();
-	return !CheckForErrors();
+	return result;
 }
 
 bool Connection::DeletePlaylist(const std::string &name)
@@ -1241,23 +1243,24 @@ void Connection::GetTagTypes(TagList &v)
 
 int Connection::CheckForErrors()
 {
-	if ((itsErrorCode = mpd_connection_get_error(itsConnection)) != MPD_ERROR_SUCCESS)
+	int error_code = 0;
+	if ((error_code = mpd_connection_get_error(itsConnection)) != MPD_ERROR_SUCCESS)
 	{
 		itsErrorMessage = mpd_connection_get_error_message(itsConnection);
-		if (itsErrorCode == MPD_ERROR_SERVER)
+		if (error_code == MPD_ERROR_SERVER)
 		{
 			// this is to avoid setting too small max size as we check it before fetching current status
 			// setting real max playlist length is in UpdateStatus()
-			itsErrorCode = mpd_connection_get_server_error(itsConnection);
-			if (itsErrorCode == MPD_SERVER_ERROR_PLAYLIST_MAX && itsMaxPlaylistLength == size_t(-1))
+			error_code = mpd_connection_get_server_error(itsConnection);
+			if (error_code == MPD_SERVER_ERROR_PLAYLIST_MAX && itsMaxPlaylistLength == size_t(-1))
 				itsMaxPlaylistLength = 0;
 		}
 		if (!mpd_connection_clear_error(itsConnection))
 			Disconnect();
 		if (itsErrorHandler)
-			itsErrorHandler(this, itsErrorCode, itsErrorMessage.c_str(), itsErrorHandlerUserdata);
+			itsErrorHandler(this, error_code, itsErrorMessage.c_str(), itsErrorHandlerUserdata);
 	}
-	return itsErrorCode;
+	return error_code;
 }
 
 void MPD::FreeSongList(SongList &l)

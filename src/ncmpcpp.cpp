@@ -586,20 +586,20 @@ int main(int argc, char *argv[])
 		{
 			if (!myPlaylist->Items->Empty() && myScreen == myPlaylist)
 			{
-				Playlist::BlockUpdate = 1;
 				if (myPlaylist->Items->hasSelected())
 				{
 					std::vector<size_t> list;
 					myPlaylist->Items->GetSelected(list);
 					Mpd.StartCommandsList();
 					for (std::vector<size_t>::reverse_iterator it = list.rbegin(); it != list.rend(); ++it)
-					{
 						Mpd.DeleteID((*myPlaylist->Items)[*it].GetID());
-						myPlaylist->Items->DeleteOption(*it);
+					if (Mpd.CommitCommandsList())
+					{
+						for (size_t i = 0; i < myPlaylist->Items->Size(); ++i)
+							myPlaylist->Items->Select(i, 0);
+						myPlaylist->FixPositions(list.front());
+						ShowMessage("Selected items deleted!");
 					}
-					Mpd.CommitCommandsList();
-					myPlaylist->FixPositions(list.front());
-					ShowMessage("Selected items deleted!");
 				}
 				else
 				{
@@ -615,11 +615,15 @@ int main(int argc, char *argv[])
 						// needed for keeping proper position of now playing song.
 						if (myPlaylist->NowPlaying > int(myPlaylist->CurrentSong()->GetPosition())-del_counter)
 							--myPlaylist->NowPlaying;
-						Mpd.DeleteID(myPlaylist->CurrentSong()->GetID());
-						myPlaylist->Items->DeleteOption(id);
-						myPlaylist->Items->Refresh();
-						wFooter->ReadKey(input);
-						++del_counter;
+						if (Mpd.DeleteID(myPlaylist->CurrentSong()->GetID()))
+						{
+							myPlaylist->Items->DeleteOption(id);
+							myPlaylist->Items->Refresh();
+							wFooter->ReadKey(input);
+							++del_counter;
+						}
+						else
+							break;
 					}
 					myPlaylist->FixPositions(myPlaylist->Items->Choice());
 					wFooter->SetTimeout(ncmpcpp_window_timeout);
