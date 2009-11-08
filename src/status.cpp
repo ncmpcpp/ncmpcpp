@@ -175,21 +175,12 @@ void NcmpcppErrorCallback(Connection *, int errorid, const char *msg, void *)
 {
 	if (errorid == MPD_SERVER_ERROR_PERMISSION)
 	{
-		Statusbar() << msg << ", enter password ? [" << fmtBold << 'y' << fmtBoldEnd << "/" << fmtBold << 'n' << fmtBoldEnd << "]";
-		wFooter->Refresh();
-		int answer = 0;
-		do
-			wFooter->ReadKey(answer);
-		while (answer != 'y' && answer != 'n');
-		if (answer == 'y')
-		{
-			wFooter->SetGetStringHelper(0);
-			Statusbar() << "Password: ";
-			Mpd.SetPassword(wFooter->GetString(-1, 0, 1));
-			if (Mpd.SendPassword())
-				ShowMessage("Password accepted!");
-			wFooter->SetGetStringHelper(StatusbarGetStringHelper);
-		}
+		wFooter->SetGetStringHelper(0);
+		Statusbar() << "Password: ";
+		Mpd.SetPassword(wFooter->GetString(-1, 0, 1));
+		if (Mpd.SendPassword())
+			ShowMessage("Password accepted!");
+		wFooter->SetGetStringHelper(StatusbarGetStringHelper);
 	}
 	else
 		ShowMessage("%s", msg);
