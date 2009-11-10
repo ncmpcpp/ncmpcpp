@@ -225,6 +225,8 @@
 #
 #autocenter_mode = "no"
 #
+#centered_cursor = "no"
+#
 #progressbar_look = "=>"
 #
 #default_place_to_search_in = "database" (database/playlist)

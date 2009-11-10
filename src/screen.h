@@ -235,6 +235,8 @@ template <typename WindowType> void Screen<WindowType>::Scroll(Where where, cons
 	}
 	else
 		w->Scroll(where);
+	if (List *list = Config.centered_cursor ? dynamic_cast<List *>(w) : 0)
+		list->Highlight(list->Choice());
 }
 
 template <typename WindowType> void Screen<WindowType>::MouseButtonPressed(MEVENT me)

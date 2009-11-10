@@ -293,6 +293,7 @@ void DefaultConfiguration(ncmpcpp_config &conf)
 	conf.header_visibility = true;
 	conf.header_text_scrolling = true;
 	conf.statusbar_visibility = true;
+	conf.centered_cursor = false;
 	conf.autocenter_mode = false;
 	conf.wrapped_search = true;
 	conf.space_selects = false;
@@ -755,6 +756,10 @@ void ReadConfiguration(ncmpcpp_config &conf)
 			else if (cl.find("autocenter_mode") != std::string::npos)
 			{
 				conf.autocenter_mode = v == "yes";
+			}
+			else if (cl.find("centered_cursor") != std::string::npos)
+			{
+				conf.centered_cursor = v == "yes";
 			}
 			else if (cl.find("default_find_mode") != std::string::npos)
 			{
