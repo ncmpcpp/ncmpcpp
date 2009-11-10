@@ -208,6 +208,7 @@ struct ncmpcpp_config
 	bool allow_physical_directories_deletion;
 	bool ask_before_clearing_main_playlist;
 	bool mouse_support;
+	bool mouse_list_scroll_whole_page;
 	bool new_design;
 	bool visualizer_use_wave;
 	bool browser_sort_by_mtime;

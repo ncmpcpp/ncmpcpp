@@ -52,6 +52,15 @@ namespace NCurses
 			///
 			virtual void GetSelected(std::vector<size_t> &v) const = 0;
 			
+			/// Highlights given position
+			/// @param pos position to be highlighted
+			///
+			virtual void Highlight(size_t pos) = 0;
+			
+			/// @return currently highlighted position
+			///
+			virtual size_t Choice() const = 0;
+			
 			/// @see Menu::Empty()
 			///
 			virtual bool Empty() const = 0;

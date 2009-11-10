@@ -315,6 +315,7 @@ void DefaultConfiguration(ncmpcpp_config &conf)
 	conf.allow_physical_directories_deletion = false;
 	conf.ask_before_clearing_main_playlist = false;
 	conf.mouse_support = true;
+	conf.mouse_list_scroll_whole_page = true;
 	conf.new_design = false;
 	conf.visualizer_use_wave = true;
 	conf.browser_sort_by_mtime = false;
@@ -838,6 +839,10 @@ void ReadConfiguration(ncmpcpp_config &conf)
 			else if (cl.find("mouse_support") != std::string::npos)
 			{
 				conf.mouse_support = v == "yes";
+			}
+			else if (cl.find("mouse_list_scroll_whole_page") != std::string::npos)
+			{
+				conf.mouse_list_scroll_whole_page = v == "yes";
 			}
 			else if (cl.find("user_interface") != std::string::npos)
 			{

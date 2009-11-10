@@ -284,6 +284,8 @@
 #
 #mouse_support = "yes"
 #
+#mouse_list_scroll_whole_page = "yes"
+#
 #empty_tag_marker = "<empty>"
 #
 #enable_window_title = "yes"

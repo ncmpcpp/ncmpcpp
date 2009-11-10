@@ -239,13 +239,21 @@ template <typename WindowType> void Screen<WindowType>::Scroll(Where where, cons
 
 template <typename WindowType> void Screen<WindowType>::MouseButtonPressed(MEVENT me)
 {
+	List *list = Config.mouse_list_scroll_whole_page ? 0 : dynamic_cast<List *>(w);
+	
 	if (me.bstate & BUTTON2_PRESSED)
 	{
-		Scroll(wPageDown);
+		if (list)
+			list->Highlight(list->Choice()+Config.lines_scrolled);
+		else
+			Scroll(wPageDown);
 	}
 	else if (me.bstate & BUTTON4_PRESSED)
 	{
-		Scroll(wPageUp);
+		if (list)
+			list->Highlight(list->Choice() > Config.lines_scrolled ? list->Choice()-Config.lines_scrolled : 0);
+		else
+			Scroll(wPageUp);
 	}
 }
 
