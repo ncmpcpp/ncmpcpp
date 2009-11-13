@@ -303,6 +303,9 @@ void Connection::UpdateStatus()
 					      != mpd_status_get_state(itsCurrentStatus);
 		}
 		itsUpdater(this, itsChanges, itsErrorHandlerUserdata);
+		// status updater could invoke mpd commands that
+		// could fail se we need to check for errors
+		CheckForErrors();
 		// below conditionals are a hack to workaround mpd bug 2608/2612
 		// by fetching another status with correct values after a while
 		if (!((idle_mask & MPD_IDLE_PLAYER) && !itsChanges.PlayerState))
