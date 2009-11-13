@@ -210,10 +210,15 @@ void TagEditor::Refresh()
 	mvvline(MainStartY, RightColumnStartX-1, 0, MainHeight);
 	Tags->Display();
 	
-	if (w == FParser)
-		FParserHelper->Display();
-	else if (w == FParserHelper)
+	if (w == FParserDialog)
+	{
+		FParserDialog->Display();
+	}
+	else if (w == FParser || w == FParserHelper)
+	{
 		FParser->Display();
+		FParserHelper->Display();
+	}
 }
 
 void TagEditor::Update()
