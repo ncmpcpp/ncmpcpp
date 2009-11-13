@@ -292,10 +292,7 @@ void NcmpcppStatusChanged(Connection *, StatusChanges changed, void *)
 		if (myLibrary->Main())
 		{
 			if (myLibrary->Columns() == 2)
-			{
 				myLibrary->Albums->Clear();
-				myLibrary->Songs->Clear();
-			}
 			else
 				myLibrary->Artists->Clear();
 		}

@@ -162,7 +162,6 @@ void MediaLibrary::Update()
 	{
 		TagList list;
 		Albums->Clear();
-		Songs->Clear();
 		Mpd.GetList(list, Config.media_lib_primary_tag);
 		sort(list.begin(), list.end(), CaseInsensitiveSorting());
 		for (TagList::iterator it = list.begin(); it != list.end(); ++it)
@@ -177,8 +176,9 @@ void MediaLibrary::Update()
 		Artists->Refresh();
 	}
 	
-	if (!hasTwoColumns && !Artists->Empty() && Albums->Empty() && Songs->Empty())
+	if (!hasTwoColumns && !Artists->Empty() && Albums->Empty())
 	{
+		Songs->Clear();
 		Albums->Reset();
 		TagList list;
 		locale_to_utf(Artists->Current());
@@ -226,8 +226,9 @@ void MediaLibrary::Update()
 			Albums->Sort<CaseInsensitiveSorting>((*Albums)[0].first == "<no album>");
 		Albums->Refresh();
 	}
-	else if (hasTwoColumns && Albums->Empty() && Songs->Empty())
+	else if (hasTwoColumns && Albums->Empty())
 	{
+		Songs->Clear();
 		TagList artists;
 		*Albums << XY(0, 0) << "Fetching albums...";
 		Albums->Window::Refresh();
@@ -280,7 +281,6 @@ void MediaLibrary::Update()
 		Songs->Reset();
 		SongList list;
 		
-		Songs->Clear();
 		Mpd.StartSearch(1);
 		Mpd.AddSearch(Config.media_lib_primary_tag, hasTwoColumns ? Albums->Current().second.Artist : locale_to_utf_cpy(Artists->Current()));
 		if (Albums->Empty()) // left for compatibility with <mpd-0.14

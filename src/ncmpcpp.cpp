@@ -438,7 +438,6 @@ int main(int argc, char *argv[])
 				if (myScreen->ActiveWindow() == myLibrary->Artists)
 				{
 					myLibrary->Albums->Clear();
-					myLibrary->Songs->Clear();
 				}
 				else if (myScreen->ActiveWindow() == myLibrary->Albums)
 				{
@@ -452,7 +451,6 @@ int main(int argc, char *argv[])
 				else if (myScreen->ActiveWindow() == myTagEditor->LeftColumn)
 				{
 					myTagEditor->Tags->Clear();
-					myTagEditor->TagTypes->Refresh();
 				}
 #				endif // HAVE_TAGLIB_H
 			}
