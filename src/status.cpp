@@ -276,7 +276,12 @@ void NcmpcppStatusChanged(Connection *, StatusChanges changed, void *)
 	if (changed.Database)
 	{
 		if (myBrowser->Main())
-			myBrowser->GetDirectory(myBrowser->CurrentDir());
+		{
+			if (myScreen == myBrowser)
+				myBrowser->GetDirectory(myBrowser->CurrentDir());
+			else
+				myBrowser->Main()->Clear(0);
+		}
 #		ifdef HAVE_TAGLIB_H
 		if (myTagEditor->Main())
 		{
