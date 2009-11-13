@@ -390,11 +390,9 @@ namespace NCurses
 			virtual void Scroll(Where where);
 			
 			/// Cleares all options, used filters etc. It doesn't reset highlighted position though.
-			/// @param clear_screen indicates whether window has to be cleared imediately or not
-			/// @see Window::Clear()
 			/// @see Reset()
 			///
-			virtual void Clear(bool clear_screen = 1);
+			virtual void Clear();
 			
 			/// Sets the highlighted position to 0
 			///
@@ -888,7 +886,7 @@ template <typename T> void NCurses::Menu<T>::ClearFiltered()
 	itsOptionsPtr = &itsOptions;
 }
 
-template <typename T> void NCurses::Menu<T>::Clear(bool clear_screen)
+template <typename T> void NCurses::Menu<T>::Clear()
 {
 	for (option_iterator it = itsOptions.begin(); it != itsOptions.end(); ++it)
 		delete *it;
@@ -897,8 +895,7 @@ template <typename T> void NCurses::Menu<T>::Clear(bool clear_screen)
 	itsFilter.clear();
 	ClearFiltered();
 	itsOptionsPtr = &itsOptions;
-	if (clear_screen)
-		Window::Clear();
+	Window::Clear();
 }
 
 template <typename T> bool NCurses::Menu<T>::isBold(int pos)

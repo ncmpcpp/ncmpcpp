@@ -96,7 +96,7 @@ void ServerInfo::Update()
 	time(&now);
 	
 	Mpd.UpdateStats();
-	w->Clear(0);
+	w->Clear();
 	
 	*w << fmtBold << U("Version: ") << fmtBoldEnd << U("0.") << std::fixed << std::setprecision(1) << Mpd.Version() << '\n';
 	*w << fmtBold << U("Uptime: ") << fmtBoldEnd;

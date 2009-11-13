@@ -112,7 +112,7 @@ void PlaylistEditor::Update()
 {
 	if (Playlists->Empty())
 	{
-		Content->Clear(0);
+		Content->Clear();
 		TagList list;
 		Mpd.GetPlaylists(list);
 		sort(list.begin(), list.end(), CaseInsensitiveSorting());
@@ -237,7 +237,7 @@ void PlaylistEditor::MouseButtonPressed(MEVENT me)
 		}
 		else
 			Screen<Window>::MouseButtonPressed(me);
-		Content->Clear(0);
+		Content->Clear();
 	}
 	else if (!Content->Empty() && Content->hasCoords(me.x, me.y))
 	{

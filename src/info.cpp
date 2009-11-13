@@ -125,7 +125,7 @@ void Info::GetSong()
 		myScreen = this;
 		RedrawHeader = 1;
 		itsTitle = "Song info";
-		w->Clear(0);
+		w->Clear();
 		PrepareSong(*s);
 		w->Window::Clear();
 		w->Flush();

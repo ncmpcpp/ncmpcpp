@@ -103,7 +103,7 @@ void Outputs::FetchList()
 		return;
 	MPD::OutputList ol;
 	Mpd.GetOutputs(ol);
-	w->Clear(0);
+	w->Clear();
 	for (MPD::OutputList::const_iterator it = ol.begin(); it != ol.end(); ++it)
 		w->AddOption(*it, it->second);
 	if (myScreen == this)

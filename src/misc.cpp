@@ -161,7 +161,7 @@ void SelectedItemsAdder::EnterPressed()
 		if (myBrowser->Main() && !myBrowser->isLocal() && myBrowser->CurrentDir() == "/")
 			myBrowser->GetDirectory("/");
 		if (myPlaylistEditor->Main())
-			myPlaylistEditor->Playlists->Clear(0); // make playlist editor update itself
+			myPlaylistEditor->Playlists->Clear(); // make playlist editor update itself
 	}
 	MPD::FreeSongList(list);
 	SwitchTo();

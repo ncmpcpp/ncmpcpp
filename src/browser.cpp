@@ -331,7 +331,7 @@ void Browser::GetDirectory(std::string dir, std::string subdir)
 		if (w->at(i).type == itSong)
 			delete w->at(i).song;
 	
-	w->Clear(0);
+	w->Clear();
 	
 	if (dir != "/")
 	{

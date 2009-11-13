@@ -318,11 +318,9 @@ void Window::Refresh()
 	prefresh(itsWindow, 0, 0, itsStartY, itsStartX, itsStartY+itsHeight-1, itsStartX+itsWidth-1);
 }
 
-void Window::Clear(bool refresh)
+void Window::Clear()
 {
 	werase(itsWindow);
-	if (refresh)
-		Window::Refresh();
 }
 
 void Window::Hide(char ch) const

@@ -323,7 +323,7 @@ void TagEditor::EnterPressed()
 		{
 			itsHighlightedDir = itsBrowsedDir;
 			itsBrowsedDir = LeftColumn->Current().second;
-			LeftColumn->Clear(0);
+			LeftColumn->Clear();
 			LeftColumn->Reset();
 		}
 		else
@@ -600,7 +600,7 @@ void TagEditor::EnterPressed()
 		}
 		case 11: // reset
 		{
-			Tags->Clear(0);
+			Tags->Clear();
 			ShowMessage("Changes reset");
 			return;
 		}
@@ -630,7 +630,7 @@ void TagEditor::EnterPressed()
 				Mpd.UpdateDirectory(locale_to_utf_cpy(FindSharedDir(Tags)));
 			}
 			else
-				Tags->Clear(0);
+				Tags->Clear();
 			return;
 		}
 		case 13: // capitalize first letters
@@ -689,7 +689,7 @@ void TagEditor::SpacePressed()
 	w = LeftColumn = Config.albums_in_tag_editor ? Albums : Dirs;
 	ShowMessage("Switched to %s view", Config.albums_in_tag_editor ? "albums" : "directories");
 	LeftColumn->Display();
-	Tags->Clear(0);
+	Tags->Clear();
 }
 
 void TagEditor::MouseButtonPressed(MEVENT me)
@@ -747,7 +747,7 @@ void TagEditor::MouseButtonPressed(MEVENT me)
 		}
 		else
 			Screen<Window>::MouseButtonPressed(me);
-		Tags->Clear(0);
+		Tags->Clear();
 	}
 	else if (!TagTypes->Empty() && TagTypes->hasCoords(me.x, me.y))
 	{

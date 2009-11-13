@@ -120,7 +120,7 @@ void Visualizer::Update()
 	if (data < 0) // no data available in fifo
 		return;
 	
-	w->Clear(0);
+	w->Clear();
 #	ifdef HAVE_FFTW3_H
 	Config.visualizer_use_wave ? DrawSoundWave(buf, data) : DrawFrequencySpectrum(buf, data);
 #	else

@@ -181,7 +181,7 @@ void Scrollpad::Scroll(Where where)
 	}
 }
 
-void Scrollpad::Clear(bool clear_screen)
+void Scrollpad::Clear()
 {
 	itsRealHeight = itsHeight;
 	itsBuffer.Clear();
@@ -192,8 +192,6 @@ void Scrollpad::Clear(bool clear_screen)
 	SetColor(itsColor, itsBgColor);
 	ForgetFormatting();
 	keypad(itsWindow, 1);
-	if (clear_screen)
-		Refresh();
 }
 
 void Scrollpad::Reset()

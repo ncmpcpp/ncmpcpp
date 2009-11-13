@@ -102,10 +102,9 @@ namespace NCurses
 			virtual void Resize(size_t new_width, size_t new_height);
 			
 			/// Cleares the content of scrollpad
-			/// @param clear_screen indicates whether window has to be cleared imediately or not
 			/// @see Window::Clear()
 			///
-			virtual void Clear(bool clear_screen = 1);
+			virtual void Clear();
 			
 			/// Sets starting position to the beginning
 			///

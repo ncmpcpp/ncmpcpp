@@ -343,9 +343,8 @@ namespace NCurses
 			virtual void Resize(size_t new_width, size_t new_height);
 			
 			/// Cleares the window
-			/// @param refresh indicates whether window has to be refreshed immediately or not
 			///
-			virtual void Clear(bool refresh = 1);
+			virtual void Clear();
 			
 			/// Adds given file descriptor to the list that will be polled in
 			/// ReadKey() along with stdin and callback that will be invoked

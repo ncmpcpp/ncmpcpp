@@ -437,21 +437,21 @@ int main(int argc, char *argv[])
 			{
 				if (myScreen->ActiveWindow() == myLibrary->Artists)
 				{
-					myLibrary->Albums->Clear(0);
-					myLibrary->Songs->Clear(0);
+					myLibrary->Albums->Clear();
+					myLibrary->Songs->Clear();
 				}
 				else if (myScreen->ActiveWindow() == myLibrary->Albums)
 				{
-					myLibrary->Songs->Clear(0);
+					myLibrary->Songs->Clear();
 				}
 				else if (myScreen->ActiveWindow() == myPlaylistEditor->Playlists)
 				{
-					myPlaylistEditor->Content->Clear(0);
+					myPlaylistEditor->Content->Clear();
 				}
 #				ifdef HAVE_TAGLIB_H
 				else if (myScreen->ActiveWindow() == myTagEditor->LeftColumn)
 				{
-					myTagEditor->Tags->Clear(0);
+					myTagEditor->Tags->Clear();
 					myTagEditor->TagTypes->Refresh();
 				}
 #				endif // HAVE_TAGLIB_H
@@ -660,7 +660,7 @@ int main(int argc, char *argv[])
 				else
 					ShowMessage("Aborted!");
 				if (myPlaylistEditor->Main()) // check if initialized
-					myPlaylistEditor->Playlists->Clear(0); // make playlists list update itself
+					myPlaylistEditor->Playlists->Clear(); // make playlists list update itself
 			}
 #			ifndef WIN32
 			else if (myScreen == myBrowser && !myBrowser->Main()->Empty() && myBrowser->Main()->Current().type != itPlaylist)
@@ -802,7 +802,7 @@ int main(int argc, char *argv[])
 				{
 					ShowMessage("Playlist saved as: %s", playlist_name.c_str());
 					if (myPlaylistEditor->Main()) // check if initialized
-						myPlaylistEditor->Playlists->Clear(0); // make playlist's list update itself
+						myPlaylistEditor->Playlists->Clear(); // make playlist's list update itself
 				}
 				else
 				{
@@ -826,7 +826,7 @@ int main(int argc, char *argv[])
 					else
 						ShowMessage("Aborted!");
 					if (myPlaylistEditor->Main()) // check if initialized
-						myPlaylistEditor->Playlists->Clear(0); // make playlist's list update itself
+						myPlaylistEditor->Playlists->Clear(); // make playlist's list update itself
 					if (myScreen == myPlaylist)
 						myPlaylist->EnableHighlighting();
 				}
@@ -1156,7 +1156,7 @@ int main(int argc, char *argv[])
 				if (myScreen == myPlaylistEditor)
 				{
 					Mpd.AddToPlaylist(myPlaylistEditor->Playlists->Current(), path);
-					myPlaylistEditor->Content->Clear(0); // make it refetch content of playlist
+					myPlaylistEditor->Content->Clear(); // make it refetch content of playlist
 				}
 				else
 					Mpd.Add(path);
@@ -1561,7 +1561,7 @@ int main(int argc, char *argv[])
 						if (myBrowser->Main() && !myBrowser->isLocal())
 							myBrowser->GetDirectory("/");
 						if (myPlaylistEditor->Main())
-							myPlaylistEditor->Playlists->Clear(0);
+							myPlaylistEditor->Playlists->Clear();
 					}
 				}
 			}
@@ -1722,7 +1722,7 @@ int main(int argc, char *argv[])
 				if (myScreen->ActiveWindow() == myPlaylistEditor->Content)
 				{
 					Mpd.ClearPlaylist(locale_to_utf_cpy(myPlaylistEditor->Playlists->Current()));
-					myPlaylistEditor->Content->Clear(0);
+					myPlaylistEditor->Content->Clear();
 				}
 				else
 				{
@@ -1901,7 +1901,7 @@ int main(int argc, char *argv[])
 					ToLower(item_type);
 					if (myLibrary->Columns() == 2)
 					{
-						myLibrary->Songs->Clear(0);
+						myLibrary->Songs->Clear();
 						myLibrary->Albums->Reset();
 						myLibrary->Albums->Clear();
 						myLibrary->Albums->SetTitle("Albums (sorted by " + item_type + ")");
@@ -1909,7 +1909,7 @@ int main(int argc, char *argv[])
 					}
 					else
 					{
-						myLibrary->Artists->Clear(0);
+						myLibrary->Artists->Clear();
 						myLibrary->Artists->Display();
 					}
 					ShowMessage("Switched to list of %s tag", item_type.c_str());

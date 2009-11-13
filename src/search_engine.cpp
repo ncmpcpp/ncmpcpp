@@ -268,7 +268,7 @@ void SearchEngine::Prepare()
 	}
 	
 	w->SetTitle("");
-	w->Clear(0);
+	w->Clear();
 	w->ResizeList(17);
 	
 	w->IntoSeparator(10);

@@ -123,10 +123,10 @@ void MediaLibrary::SwitchTo()
 	{
 		hasTwoColumns = !hasTwoColumns;
 		hasToBeResized = 1;
-		Artists->Clear(0);
-		Albums->Clear(0);
+		Artists->Clear();
+		Albums->Clear();
 		Albums->Reset();
-		Songs->Clear(0);
+		Songs->Clear();
 		if (hasTwoColumns)
 		{
 			if (w == Artists)
@@ -161,8 +161,8 @@ void MediaLibrary::Update()
 	if (!hasTwoColumns && Artists->Empty())
 	{
 		TagList list;
-		Albums->Clear(0);
-		Songs->Clear(0);
+		Albums->Clear();
+		Songs->Clear();
 		Mpd.GetList(list, Config.media_lib_primary_tag);
 		sort(list.begin(), list.end(), CaseInsensitiveSorting());
 		for (TagList::iterator it = list.begin(); it != list.end(); ++it)
@@ -280,7 +280,7 @@ void MediaLibrary::Update()
 		Songs->Reset();
 		SongList list;
 		
-		Songs->Clear(0);
+		Songs->Clear();
 		Mpd.StartSearch(1);
 		Mpd.AddSearch(Config.media_lib_primary_tag, hasTwoColumns ? Albums->Current().second.Artist : locale_to_utf_cpy(Artists->Current()));
 		if (Albums->Empty()) // left for compatibility with <mpd-0.14
@@ -351,8 +351,8 @@ void MediaLibrary::MouseButtonPressed(MEVENT me)
 		}
 		else
 			Screen<Window>::MouseButtonPressed(me);
-		Albums->Clear(0);
-		Songs->Clear(0);
+		Albums->Clear();
+		Songs->Clear();
 	}
 	else if (!Albums->Empty() && Albums->hasCoords(me.x, me.y))
 	{
@@ -371,7 +371,7 @@ void MediaLibrary::MouseButtonPressed(MEVENT me)
 		}
 		else
 			Screen<Window>::MouseButtonPressed(me);
-		Songs->Clear(0);
+		Songs->Clear();
 	}
 	else if (!Songs->Empty() && Songs->hasCoords(me.x, me.y))
 	{
@@ -507,11 +507,11 @@ void MediaLibrary::AddToPlaylist(bool add_n_play)
 		w->Scroll(wDown);
 		if (w == Artists)
 		{
-			Albums->Clear(0);
-			Songs->Clear(0);
+			Albums->Clear();
+			Songs->Clear();
 		}
 		else if (w == Albums)
-			Songs->Clear(0);
+			Songs->Clear();
 	}
 }
 

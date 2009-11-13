@@ -249,7 +249,7 @@ void NcmpcppStatusChanged(Connection *, StatusChanges changed, void *)
 		if (myPlaylist->Items->Empty())
 		{
 			myPlaylist->Items->Reset();
-			myPlaylist->Items->Window::Clear(0);
+			myPlaylist->Items->Window::Clear();
 			ShowMessage("Cleared playlist!");
 		}
 		
@@ -280,13 +280,13 @@ void NcmpcppStatusChanged(Connection *, StatusChanges changed, void *)
 			if (myScreen == myBrowser)
 				myBrowser->GetDirectory(myBrowser->CurrentDir());
 			else
-				myBrowser->Main()->Clear(0);
+				myBrowser->Main()->Clear();
 		}
 #		ifdef HAVE_TAGLIB_H
 		if (myTagEditor->Main())
 		{
-			myTagEditor->Albums->Clear(0);
-			myTagEditor->Dirs->Clear(0);
+			myTagEditor->Albums->Clear();
+			myTagEditor->Dirs->Clear();
 		}
 #		endif // HAVE_TAGLIB_H
 		if (myLibrary->Main())
@@ -294,13 +294,13 @@ void NcmpcppStatusChanged(Connection *, StatusChanges changed, void *)
 			if (myLibrary->Columns() == 2)
 			{
 				myLibrary->Albums->Clear();
-				myLibrary->Songs->Clear(0);
+				myLibrary->Songs->Clear();
 			}
 			else
-				myLibrary->Artists->Clear(0);
+				myLibrary->Artists->Clear();
 		}
 		if (myPlaylistEditor->Main())
-			myPlaylistEditor->Content->Clear(0);
+			myPlaylistEditor->Content->Clear();
 	}
 	if (changed.PlayerState)
 	{
