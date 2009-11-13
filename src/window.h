@@ -31,7 +31,7 @@
 
 #include "curses.h"
 
-#include <deque>
+#include <list>
 #include <stack>
 #include <vector>
 #include <string>
@@ -580,7 +580,7 @@ namespace NCurses
 			FDCallbacks itsFDs;
 			
 			/// pointer to container used as history
-			std::deque<std::wstring> *itsHistory;
+			std::list<std::wstring> *itsHistory;
 			
 			/// counters for format flags
 			int itsBoldCounter;

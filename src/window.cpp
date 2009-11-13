@@ -155,7 +155,6 @@ Window::~Window()
 {
 	delwin(itsWindow);
 	delwin(itsWinBorder);
-	delete itsHistory;
 }
 
 void Window::SetColor(Color fg, Color bg)
@@ -231,7 +230,7 @@ void Window::SetTitle(const std::string &new_title)
 void Window::CreateHistory()
 {
 	if (!itsHistory)
-		itsHistory = new std::deque<std::wstring>;
+		itsHistory = new std::list<std::wstring>;
 }
 
 void Window::DeleteHistory()
@@ -436,7 +435,7 @@ std::string Window::GetString(const std::string &base, size_t length, size_t wid
 	
 	std::wstring wbase = ToWString(base);
 	std::wstring *tmp = &wbase;
-	size_t history_offset = itsHistory && !encrypted ? itsHistory->size() : -1;
+	std::list<std::wstring>::iterator history_it = itsHistory->end();
 	
 	std::string tmp_in;
 	wchar_t wc_in;
@@ -512,28 +511,22 @@ std::string Window::GetString(const std::string &base, size_t length, size_t wid
 			case KEY_MOUSE:
 				break;
 			case KEY_UP:
-				if (itsHistory && !encrypted && history_offset > 0)
+				if (itsHistory && !encrypted && history_it != itsHistory->begin())
 				{
-					do
-						tmp = &(*itsHistory)[--history_offset];
-					while (tmp->empty() && history_offset);
+					while (--history_it != itsHistory->begin())
+						if (!history_it->empty())
+							break;
+					tmp = &*history_it;
 					gotoend = 1;
 				}
 				break;
 			case KEY_DOWN:
-				if (itsHistory && !encrypted && itsHistory->size() > 0)
+				if (itsHistory && !encrypted && history_it != itsHistory->end())
 				{
-					if (history_offset < itsHistory->size()-1)
-					{
-						do
-							tmp = &(*itsHistory)[++history_offset];
-						while (tmp->empty() && history_offset < itsHistory->size()-1);
-					}
-					else if (history_offset == itsHistory->size()-1)
-					{
-						tmp = &wbase;
-						history_offset++;
-					}
+					while (++history_it != itsHistory->end())
+						if (!history_it->empty())
+							break;
+					tmp = &(history_it == itsHistory->end() ? wbase : *history_it);
 					gotoend = 1;
 				}
 				break;
@@ -638,16 +631,14 @@ std::string Window::GetString(const std::string &base, size_t length, size_t wid
 	
 	if (itsHistory && !encrypted)
 	{
-		size_t old_size = itsHistory->size();
-		if (!tmp->empty() && (itsHistory->empty() || itsHistory->back() != *tmp))
-			itsHistory->push_back(*tmp);
-		if (old_size > 1 && history_offset < old_size)
+		if (history_it != itsHistory->end())
 		{
-			std::deque<std::wstring>::iterator it = itsHistory->begin()+history_offset;
-			wbase = *it;
-			tmp = &wbase;
-			itsHistory->erase(it);
+			itsHistory->push_back(*history_it);
+			tmp = &itsHistory->back();
+			itsHistory->erase(history_it);
 		}
+		else
+			itsHistory->push_back(*tmp);
 	}
 	
 	return ToString(*tmp);
