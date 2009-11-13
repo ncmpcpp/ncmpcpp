@@ -98,15 +98,13 @@ void TinyTagEditor::EnterPressed()
 	size_t option = w->Choice();
 	MPD::Song &s = itsEdited;
 	
-	if (option < 20) // separator after filename
-		w->at(option).Clear();
-	
 	LockStatusbar();
 	if (option < 17) // separator after comment
 	{
 		size_t pos = option-8;
 		Statusbar() << fmtBold << Info::Tags[pos].Name << ": " << fmtBoldEnd;
 		s.SetTags(Info::Tags[pos].Set, wFooter->GetString(s.GetTags(Info::Tags[pos].Get)));
+		w->at(option).Clear();
 		w->at(option) << fmtBold << Info::Tags[pos].Name << ':' << fmtBoldEnd << ' ';
 		ShowTag(w->at(option), s.GetTags(Info::Tags[pos].Get));
 	}
@@ -119,6 +117,7 @@ void TinyTagEditor::EnterPressed()
 		filename = filename.substr(0, dot);
 		std::string new_name = wFooter->GetString(filename);
 		s.SetNewName(new_name + extension);
+		w->at(option).Clear();
 		w->at(option) << fmtBold << "Filename:" << fmtBoldEnd << ' ' << (s.GetNewName().empty() ? s.GetName() : s.GetNewName());
 	}
 	UnlockStatusbar();

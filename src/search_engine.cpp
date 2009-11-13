@@ -107,7 +107,7 @@ std::basic_string<my_char_t> SearchEngine::Title()
 void SearchEngine::EnterPressed()
 {
 	size_t option = w->Choice();
-	if (option < SearchButton)
+	if (option > 10 && option < SearchButton)
 		w->Current().first->Clear();
 	if (option < 15)
 		LockStatusbar();
@@ -116,6 +116,7 @@ void SearchEngine::EnterPressed()
 	{
 		Statusbar() << fmtBold << ConstraintsNames[option] << fmtBoldEnd << ' ';
 		itsConstraints[option] = wFooter->GetString(itsConstraints[option]);
+		w->Current().first->Clear();
 		*w->Current().first << fmtBold << std::setw(10) << std::left << ConstraintsNames[option] << fmtBoldEnd << ' ';
 		ShowTag(*w->Current().first, itsConstraints[option]);
 	}
