@@ -360,13 +360,12 @@ void NcmpcppStatusChanged(Connection *, StatusChanges changed, void *)
 		{
 			if (!Config.execute_on_song_change.empty())
 				system(Config.execute_on_song_change.c_str());
+			
 			if (Mpd.isPlaying() && !(np = Mpd.GetCurrentSong()).Empty())
 				WindowTitle(utf_to_locale_cpy(np.toString(Config.song_window_title_format)));
+			
 			if (Config.autocenter_mode && !myPlaylist->Items->isFiltered())
 				myPlaylist->Items->Highlight(myPlaylist->NowPlaying);
-			
-			if (!Mpd.GetElapsedTime())
-				mvwhline(wFooter->Raw(), 0, 0, 0, wFooter->GetWidth());
 			
 			if (Config.now_playing_lyrics && !Mpd.GetSingle() && myScreen == myLyrics && myOldScreen == myPlaylist)
 				Lyrics::Reload = 1;
