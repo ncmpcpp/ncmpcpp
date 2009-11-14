@@ -547,7 +547,12 @@ void TagEditor::EnterPressed()
 				{
 					MPD::SongList::iterator it = EditedSongs.begin();
 					for (unsigned i = 1; i <= EditedSongs.size(); ++i, ++it)
-						(*it)->SetTrack(i);
+					{
+						if (Config.tag_editor_extended_numeration)
+							(*it)->SetTrack(IntoStr(i) + "/" + IntoStr(EditedSongs.size()));
+						else
+							(*it)->SetTrack(i);
+					}
 					ShowMessage("Tracks numbered!");
 				}
 				else

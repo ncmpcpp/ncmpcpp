@@ -320,6 +320,7 @@ void DefaultConfiguration(ncmpcpp_config &conf)
 	conf.new_design = false;
 	conf.visualizer_use_wave = true;
 	conf.browser_sort_by_mtime = false;
+	conf.tag_editor_extended_numeration = false;
 	conf.set_window_title = true;
 	conf.mpd_port = 6600;
 	conf.mpd_connection_timeout = 15;
@@ -852,6 +853,10 @@ void ReadConfiguration(ncmpcpp_config &conf)
 			else if (cl.find("user_interface") != std::string::npos)
 			{
 				conf.new_design = v == "alternative";
+			}
+			else if (cl.find("tag_editor_extended_numeration") != std::string::npos)
+			{
+				conf.tag_editor_extended_numeration = v == "yes";
 			}
 			else if (cl.find("enable_window_title") != std::string::npos)
 			{

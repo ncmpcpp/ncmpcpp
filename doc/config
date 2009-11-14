@@ -290,6 +290,8 @@
 #
 #empty_tag_marker = "<empty>"
 #
+#tag_editor_extended_numeration = "no"
+#
 #enable_window_title = "yes"
 #
 ##
