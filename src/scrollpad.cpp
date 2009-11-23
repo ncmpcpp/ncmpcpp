@@ -33,7 +33,6 @@ Scrollpad::Scrollpad(size_t startx,
 			Border border)
 			: Window(startx, starty, width, height, title, color, border),
 			itsBeginning(0),
-			itsFoundForEach(0),
 			itsFoundValueBegin(-1),
 			itsFoundValueEnd(-1),
 			itsRealHeight(1)
@@ -92,12 +91,13 @@ void Scrollpad::Flush()
 	itsBuffer.SetTemp(0);
 }
 
-bool Scrollpad::SetFormatting(short val_b, const std::basic_string<my_char_t> &s, short val_e, bool for_each)
+bool Scrollpad::SetFormatting(short val_b, const std::basic_string<my_char_t> &s, short val_e, bool case_sensitive, bool for_each)
 {
-	bool result = itsBuffer.SetFormatting(val_b, s, val_e, for_each);
+	bool result = itsBuffer.SetFormatting(val_b, s, val_e, case_sensitive, for_each);
 	if (result)
 	{
 		itsFoundForEach = for_each;
+		itsFoundCaseSensitive = case_sensitive;
 		itsFoundValueBegin = val_b;
 		itsFoundValueEnd = val_e;
 		itsFoundPattern = s;
@@ -109,7 +109,6 @@ bool Scrollpad::SetFormatting(short val_b, const std::basic_string<my_char_t> &s
 
 void Scrollpad::ForgetFormatting()
 {
-	itsFoundForEach = 0;
 	itsFoundValueBegin = -1;
 	itsFoundValueEnd = -1;
 	itsFoundPattern.clear();
@@ -118,7 +117,7 @@ void Scrollpad::ForgetFormatting()
 void Scrollpad::RemoveFormatting()
 {
 	if (itsFoundValueBegin >= 0 && itsFoundValueEnd >= 0)
-		itsBuffer.RemoveFormatting(itsFoundValueBegin, itsFoundPattern, itsFoundValueEnd, itsFoundForEach);
+		itsBuffer.RemoveFormatting(itsFoundValueBegin, itsFoundPattern, itsFoundValueEnd, itsFoundCaseSensitive, itsFoundForEach);
 }
 
 void Scrollpad::Refresh()

@@ -23,11 +23,6 @@
 
 #include "conv.h"
 
-void ToLower(std::string &s)
-{
-	transform(s.begin(), s.end(), s.begin(), tolower);
-}
-
 int StrToInt(const std::string &str)
 {
 	return atoi(str.c_str());

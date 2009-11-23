@@ -1812,7 +1812,7 @@ int main(int argc, char *argv[])
 				ShowMessage("Searching...");
 				Screen<Scrollpad> *s = static_cast<Screen<Scrollpad> *>(myScreen);
 				s->Main()->RemoveFormatting();
-				ShowMessage("%s", findme.empty() || s->Main()->SetFormatting(fmtReverse, TO_WSTRING(findme), fmtReverseEnd) ? "Done!" : "No matching patterns found");
+				ShowMessage("%s", findme.empty() || s->Main()->SetFormatting(fmtReverse, TO_WSTRING(findme), fmtReverseEnd, 0) ? "Done!" : "No matching patterns found");
 				s->Main()->Flush();
 			}
 		}

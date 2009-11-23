@@ -37,8 +37,6 @@ template <size_t N> void Replace(std::string &s, const char (&from)[N], const ch
 		s.replace(i, N-1, to);
 }
 
-void ToLower(std::string &);
-
 int StrToInt(const std::string &);
 long StrToLong(const std::string &);
 

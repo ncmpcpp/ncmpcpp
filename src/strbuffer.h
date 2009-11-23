@@ -21,6 +21,7 @@
 #ifndef _STRBUFFER_H
 #define _STRBUFFER_H
 
+#include "tolower.h"
 #include "window.h"
 
 #include <sstream>
@@ -85,23 +86,25 @@ namespace NCurses
 			/// @param val_b flag set at the beginning of found occurence of string
 			/// @param s string that function seaches for
 			/// @param val_e flag set at the end of found occurence of string
+			/// @param case_sensitive indicates whether algorithm should care about case sensitivity
 			/// @param for_each indicates whether function searches through whole buffer and sets
 			/// the format for all occurences of given string or stops after the first one
 			/// @return true if at least one occurence of the string was found, false otherwise
 			///
-			bool SetFormatting(short val_b, const std::basic_string<C> &s,
-					   short val_e, bool for_each = 1);
+			bool SetFormatting(short val_b, std::basic_string<C> s, short val_e,
+					   bool case_sensitive, bool for_each = 1);
 			
 			/// Searches for given string in buffer and removes given
 			/// format/color from the beginning and end of its occurence
 			/// @param val_b flag to be removed from the beginning of the string
 			/// @param s string that function seaches for
 			/// @param val_e flag to be removed from the end of the string
+			/// @param case_sensitive indicates whether algorithm should care about case sensitivity
 			/// @param for_each indicates whether function searches through whole buffer and removes
 			/// given format from all occurences of given string or stops after the first one
 			///
-			void RemoveFormatting(short val_b, const std::basic_string<C> &s,
-					      short val_e, bool for_each = 1);
+			void RemoveFormatting(short val_b, std::basic_string<C> pattern, short val_e,
+					      bool case_sensitive, bool for_each = 1);
 			
 			/// Sets the pointer to string, that will be passed in operator<<() to window
 			/// object instead of the internal buffer. This is useful if you took the content
@@ -187,8 +190,9 @@ template <typename C> std::basic_string<C> NCurses::basic_buffer<C>::Str() const
 }
 
 template <typename C> bool NCurses::basic_buffer<C>::SetFormatting(	short val_b,
-									const std::basic_string<C> &s,
+									std::basic_string<C> s,
 									short val_e,
+									bool case_sensitive,
 									bool for_each
 								  )
 {
@@ -196,8 +200,12 @@ template <typename C> bool NCurses::basic_buffer<C>::SetFormatting(	short val_b,
 		return false;
 	bool result = false;
 	std::basic_string<C> base = itsString.str();
+	if (!case_sensitive)
+	{
+		ToLower(s);
+		ToLower(base);
+	}
 	FormatPos fp;
-	
 	for (size_t i = base.find(s); i != std::basic_string<C>::npos; i = base.find(s, i))
 	{
 		result = true;
@@ -216,22 +224,27 @@ template <typename C> bool NCurses::basic_buffer<C>::SetFormatting(	short val_b,
 }
 
 template <typename C> void NCurses::basic_buffer<C>::RemoveFormatting(	short val_b,
-									const std::basic_string<C> &s,
+									std::basic_string<C> pattern,
 									short val_e,
+									bool case_sensitive,
 									bool for_each
 								     )
 {
-	if (s.empty())
+	if (pattern.empty())
 		return;
 	std::basic_string<C> base = itsString.str();
+	if (!case_sensitive)
+	{
+		ToLower(pattern);
+		ToLower(base);
+	}
 	FormatPos fp;
-	
-	for (size_t i = base.find(s); i != std::basic_string<C>::npos; i = base.find(s, i))
+	for (size_t i = base.find(pattern); i != std::basic_string<C>::npos; i = base.find(pattern, i))
 	{
 		fp.Value = val_b;
 		fp.Position = i;
 		itsFormat.remove(fp);
-		i += s.length();
+		i += pattern.length();
 		fp.Value = val_e;
 		fp.Position = i;
 		itsFormat.remove(fp);

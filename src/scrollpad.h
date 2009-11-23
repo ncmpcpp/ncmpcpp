@@ -60,13 +60,14 @@ namespace NCurses
 			/// @param val_b flag set at the beginning of found occurence of string
 			/// @param s string that function seaches for
 			/// @param val_e flag set at the end of found occurence of string
+			/// @param case_sensitive indicates whether algorithm should care about case sensitivity
 			/// @param for_each indicates whether function searches through whole text and sets
 			/// given format for all occurences of given string or stops after first occurence
 			/// @return true if at least one occurence of the string was found, false otherwise
 			/// @see basic_buffer::SetFormatting()
 			///
 			bool SetFormatting(short val_b, const std::basic_string<my_char_t> &s,
-					   short val_e, bool for_each = 1);
+					   short val_e, bool case_sensitive, bool for_each = 1);
 			
 			/// Removes all format flags and colors from stored text
 			///
@@ -130,6 +131,7 @@ namespace NCurses
 			int itsBeginning;
 			
 			bool itsFoundForEach;
+			bool itsFoundCaseSensitive;
 			short itsFoundValueBegin;
 			short itsFoundValueEnd;
 			std::basic_string<my_char_t> itsFoundPattern;
