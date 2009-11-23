@@ -293,6 +293,7 @@ void Help::GetKeybindings()
 	*w << DisplayKeys(Key.Space)			<< "Select/deselect song (right column)\n";
 	*w << DisplayKeys(&Key.VolumeDown[0], 1)	<< "Previous column\n";
 	*w << DisplayKeys(&Key.VolumeUp[0], 1)		<< "Next column\n";
+	*w << DisplayKeys(Key.GoToParentDir)		<< "Go to parent directory (left column, directories view)\n";
 #	endif // HAVE_TAGLIB_H
 	
 	

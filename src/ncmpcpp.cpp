@@ -533,6 +533,13 @@ int main(int argc, char *argv[])
 				myBrowser->Main()->Reset();
 				myBrowser->EnterPressed();
 			}
+#			ifdef HAVE_TAGLIB_H
+			else if (myScreen->ActiveWindow() == myTagEditor->Dirs && myTagEditor->CurrentDir() != "/")
+			{
+				myTagEditor->Dirs->Reset();
+				myTagEditor->EnterPressed();
+			}
+#			endif // HAVE_TAGLIB_H
 		}
 		else if (Keypressed(input, Key.Enter))
 		{
