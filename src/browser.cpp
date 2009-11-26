@@ -255,7 +255,17 @@ void Browser::GetSelectedSongs(MPD::SongList &v)
 		{
 			case itDirectory:
 			{
-				Mpd.GetDirectoryRecursive(locale_to_utf_cpy(item.name), v);
+#				ifndef WIN32
+				if (isLocal())
+				{
+					MPD::ItemList list;
+					GetLocalDirectory(list, item.name, 1);
+					for (MPD::ItemList::const_iterator j = list.begin(); j != list.end(); ++j)
+						v.push_back(j->song);
+				}
+				else
+#				endif // !WIN32
+					Mpd.GetDirectoryRecursive(locale_to_utf_cpy(item.name), v);
 				break;
 			}
 			case itSong:
