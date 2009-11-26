@@ -64,8 +64,8 @@ class Playlist : public Screen<Window>
 		void UpdateTimer() { time(&itsTimer); }
 		time_t Timer() const { return itsTimer; }
 		
-		bool Add(const MPD::Song &s, bool in_playlist, bool play);
-		bool Add(const MPD::SongList &l, bool play);
+		bool Add(const MPD::Song &s, bool in_playlist, bool play, int position = -1);
+		bool Add(const MPD::SongList &l, bool play, int position = -1);
 		
 		static std::string SongToString(const MPD::Song &, void *);
 		static std::string SongInColumnsToString(const MPD::Song &, void *);
