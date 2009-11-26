@@ -246,6 +246,8 @@ void Browser::GetSelectedSongs(MPD::SongList &v)
 {
 	std::vector<size_t> selected;
 	w->GetSelected(selected);
+	if (selected.empty())
+		selected.push_back(w->Choice());
 	for (std::vector<size_t>::const_iterator it = selected.begin(); it != selected.end(); ++it)
 	{
 		const Item &item = w->at(*it);

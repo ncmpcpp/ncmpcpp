@@ -37,7 +37,7 @@ SelectedItemsAdder *mySelectedItemsAdder = new SelectedItemsAdder;
 void SelectedItemsAdder::Init()
 {
 	SetDimensions();
-	itsPlaylistSelector = new Menu<std::string>((COLS-itsWidth)/2, (MainHeight-itsHeight)/2+MainStartY, itsWidth, itsHeight, "Add selected items to...", Config.main_color, Config.window_border);
+	itsPlaylistSelector = new Menu<std::string>((COLS-itsWidth)/2, (MainHeight-itsHeight)/2+MainStartY, itsWidth, itsHeight, "Add selected item(s) to...", Config.main_color, Config.window_border);
 	itsPlaylistSelector->CyclicScrolling(Config.use_cyclic_scrolling);
 	itsPlaylistSelector->HighlightColor(Config.main_highlight_color);
 	itsPlaylistSelector->SetItemDisplayer(Display::Generic);
@@ -66,11 +66,7 @@ void SelectedItemsAdder::SwitchTo()
 	}
 	if (!myScreen->allowsSelection())
 		return;
-	if (!myScreen->GetList()->hasSelected())
-	{
-		ShowMessage("No selected items!");
-		return;
-	}
+	
 	if (MainHeight < 5)
 	{
 		ShowMessage("Screen is too small to display this window!");
@@ -177,7 +173,7 @@ void SelectedItemsAdder::EnterPressed()
 				for (MPD::SongList::const_iterator it = list.begin(); it != list.end(); ++it)
 					Mpd.AddToPlaylist(utf_playlist, **it);
 				if (Mpd.CommitCommandsList())
-					ShowMessage("Selected items added to playlist \"%s\"!", playlist.c_str());
+					ShowMessage("Selected item(s) added to playlist \"%s\"!", playlist.c_str());
 			}
 		}
 		else if (pos > 1 && pos < w->Size()-1) // add items to existing playlist
@@ -187,7 +183,7 @@ void SelectedItemsAdder::EnterPressed()
 			for (MPD::SongList::const_iterator it = list.begin(); it != list.end(); ++it)
 				Mpd.AddToPlaylist(playlist, **it);
 			if (Mpd.CommitCommandsList())
-				ShowMessage("Selected items added to playlist \"%s\"!", w->Current().c_str());
+				ShowMessage("Selected item(s) added to playlist \"%s\"!", w->Current().c_str());
 		}
 		if (pos != w->Size()-1)
 		{
@@ -235,7 +231,7 @@ void SelectedItemsAdder::EnterPressed()
 		}
 		
 		if (successful_operation)
-			ShowMessage("Selected items added!");
+			ShowMessage("Selected item(s) added!");
 	}
 	MPD::FreeSongList(list);
 	SwitchTo();

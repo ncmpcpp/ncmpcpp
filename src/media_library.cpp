@@ -419,10 +419,10 @@ void MediaLibrary::GetSelectedSongs(MPD::SongList &v)
 {
 	std::vector<size_t> selected;
 	Songs->GetSelected(selected);
+	if (selected.empty())
+		selected.push_back(Songs->Choice());
 	for (std::vector<size_t>::const_iterator it = selected.begin(); it != selected.end(); ++it)
-	{
 		v.push_back(new MPD::Song(Songs->at(*it)));
-	}
 }
 
 void MediaLibrary::ApplyFilter(const std::string &s)

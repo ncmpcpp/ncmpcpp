@@ -803,6 +803,8 @@ void TagEditor::GetSelectedSongs(MPD::SongList &v)
 {
 	std::vector<size_t> selected;
 	Tags->GetSelected(selected);
+	if (selected.empty())
+		selected.push_back(Tags->Choice());
 	for (std::vector<size_t>::const_iterator it = selected.begin(); it != selected.end(); ++it)
 		v.push_back(new MPD::Song(Tags->at(*it)));
 }

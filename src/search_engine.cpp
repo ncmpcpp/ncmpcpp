@@ -231,6 +231,8 @@ void SearchEngine::GetSelectedSongs(MPD::SongList &v)
 {
 	std::vector<size_t> selected;
 	w->GetSelected(selected);
+	if (selected.empty() && w->Choice() >= StaticOptions)
+		selected.push_back(w->Choice());
 	for (std::vector<size_t>::const_iterator it = selected.begin(); it != selected.end(); ++it)
 		v.push_back(new MPD::Song(*w->at(*it).second));
 }
