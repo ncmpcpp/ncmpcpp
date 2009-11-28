@@ -162,6 +162,8 @@ void Lyrics::SwitchTo()
 						first = 0;
 					}
 					w->Flush();
+					if (Reload)
+						w->Refresh();
 				}
 				else
 				{
