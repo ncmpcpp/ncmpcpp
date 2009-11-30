@@ -97,6 +97,7 @@ void SelectedItemsAdder::SwitchTo()
 	
 	MPD::TagList playlists;
 	Mpd.GetPlaylists(playlists);
+	sort(playlists.begin(), playlists.end(), CaseInsensitiveSorting());
 	for (MPD::TagList::iterator it = playlists.begin(); it != playlists.end(); ++it)
 	{
 		utf_to_locale(*it);
