@@ -415,46 +415,6 @@ int main(int argc, char *argv[])
 		
 		if (myScreen == myPlaylist)
 			myPlaylist->EnableHighlighting();
-		else if (
-		   myScreen == myLibrary
-		|| myScreen == myPlaylistEditor
-#		ifdef HAVE_TAGLIB_H
-		|| myScreen == myTagEditor
-#		endif // HAVE_TAGLIB_H
-			)
-		{
-			if (Keypressed(input, Key.Up)
-			||  Keypressed(input, Key.Down)
-			||  Keypressed(input, Key.PageUp)
-			||  Keypressed(input, Key.PageDown)
-			||  Keypressed(input, Key.Home)
-			||  Keypressed(input, Key.End)
-			||  Keypressed(input, Key.ApplyFilter)
-			||  Keypressed(input, Key.FindForward)
-			||  Keypressed(input, Key.FindBackward)
-			||  Keypressed(input, Key.NextFoundPosition)
-			||  Keypressed(input, Key.PrevFoundPosition))
-			{
-				if (myScreen->ActiveWindow() == myLibrary->Artists)
-				{
-					myLibrary->Albums->Clear();
-				}
-				else if (myScreen->ActiveWindow() == myLibrary->Albums)
-				{
-					myLibrary->Songs->Clear();
-				}
-				else if (myScreen->ActiveWindow() == myPlaylistEditor->Playlists)
-				{
-					myPlaylistEditor->Content->Clear();
-				}
-#				ifdef HAVE_TAGLIB_H
-				else if (myScreen->ActiveWindow() == myTagEditor->LeftColumn)
-				{
-					myTagEditor->Tags->Clear();
-				}
-#				endif // HAVE_TAGLIB_H
-			}
-		}
 		
 		// key mapping beginning
 		
@@ -644,15 +604,15 @@ int main(int argc, char *argv[])
 				LockStatusbar();
 				Statusbar() << "Delete playlist \"" << Shorten(TO_WSTRING(name), COLS-28) << "\" ? [" << fmtBold << 'y' << fmtBoldEnd << '/' << fmtBold << 'n' << fmtBoldEnd << "]";
 				wFooter->Refresh();
-				input = 0;
+				int answer = 0;
 				do
 				{
 					TraceMpdStatus();
-					wFooter->ReadKey(input);
+					wFooter->ReadKey(answer);
 				}
-				while (input != 'y' && input != 'n');
+				while (answer != 'y' && answer != 'n');
 				UnlockStatusbar();
-				if (input == 'y')
+				if (answer == 'y')
 				{
 					if (Mpd.DeletePlaylist(locale_to_utf_cpy(name)))
 					{
@@ -692,15 +652,15 @@ int main(int argc, char *argv[])
 				LockStatusbar();
 				Statusbar() << "Delete " << (item.type == itSong ? "file" : "directory") << " \"" << Shorten(TO_WSTRING(name), COLS-30) << "\" ? [" << fmtBold << 'y' << fmtBoldEnd << '/' << fmtBold << 'n' << fmtBoldEnd << "] ";
 				wFooter->Refresh();
-				input = 0;
+				int answer = 0;
 				do
 				{
 					TraceMpdStatus();
-					wFooter->ReadKey(input);
+					wFooter->ReadKey(answer);
 				}
-				while (input != 'y' && input != 'n');
+				while (answer != 'y' && answer != 'n');
 				UnlockStatusbar();
-				if (input == 'y')
+				if (answer == 'y')
 				{
 					std::string path;
 					if (!myBrowser->isLocal())
@@ -814,15 +774,15 @@ int main(int argc, char *argv[])
 					LockStatusbar();
 					Statusbar() << "Playlist already exists, overwrite: " << playlist_name << " ? [" << fmtBold << 'y' << fmtBoldEnd << '/' << fmtBold << 'n' << fmtBoldEnd << "] ";
 					wFooter->Refresh();
-					input = 0;
-					while (input != 'y' && input != 'n')
+					int answer = 0;
+					while (answer != 'y' && answer != 'n')
 					{
 						TraceMpdStatus();
-						wFooter->ReadKey(input);
+						wFooter->ReadKey(answer);
 					}
 					UnlockStatusbar();
 					
-					if (input == 'y')
+					if (answer == 'y')
 					{
 						Mpd.DeletePlaylist(real_playlist_name);
 						if (Mpd.SavePlaylist(real_playlist_name))
@@ -1698,15 +1658,15 @@ int main(int argc, char *argv[])
 					*wFooter << " \"" << myPlaylistEditor->Playlists->Current() << "\"";
 				*wFooter << " ? [" << fmtBold << 'y' << fmtBoldEnd << '/' << fmtBold << 'n' << fmtBoldEnd << "] ";
 				wFooter->Refresh();
-				input = 0;
+				int answer = 0;
 				do
 				{
 					TraceMpdStatus();
-					wFooter->ReadKey(input);
+					wFooter->ReadKey(answer);
 				}
-				while (input != 'y' && input != 'n');
+				while (answer != 'y' && answer != 'n');
 				UnlockStatusbar();
-				if (input != 'y')
+				if (answer != 'y')
 				{
 					ShowMessage("Aborted!");
 					continue;
@@ -1838,15 +1798,15 @@ int main(int argc, char *argv[])
 			LockStatusbar();
 			Statusbar() << "Replay gain mode ? [" << fmtBold << 'o' << fmtBoldEnd << "ff/" << fmtBold << 't' << fmtBoldEnd << "rack/" << fmtBold << 'a' << fmtBoldEnd << "lbum]";
 			wFooter->Refresh();
-			input = 0;
+			int answer = 0;
 			do
 			{
 				TraceMpdStatus();
-				wFooter->ReadKey(input);
+				wFooter->ReadKey(answer);
 			}
-			while (input != 'o' && input != 't' && input != 'a');
+			while (answer != 'o' && answer != 't' && answer != 'a');
 			UnlockStatusbar();
-			Mpd.SetReplayGainMode(input == 't' ? rgmTrack : (input == 'a' ? rgmAlbum : rgmOff));
+			Mpd.SetReplayGainMode(answer == 't' ? rgmTrack : (answer == 'a' ? rgmAlbum : rgmOff));
 			ShowMessage("Replay gain mode: %s", Mpd.GetReplayGainMode().c_str());
 		}
 		else if (Keypressed(input, Key.ToggleSpaceMode))
@@ -1888,15 +1848,15 @@ int main(int argc, char *argv[])
 				LockStatusbar();
 				Statusbar() << "Tag type ? [" << fmtBold << 'a' << fmtBoldEnd << "rtist/" << fmtBold << 'y' << fmtBoldEnd << "ear/" << fmtBold << 'g' << fmtBoldEnd << "enre/" << fmtBold << 'c' << fmtBoldEnd << "omposer/" << fmtBold << 'p' << fmtBoldEnd << "erformer] ";
 				wFooter->Refresh();
-				input = 0;
+				int answer = 0;
 				do
 				{
 					TraceMpdStatus();
-					wFooter->ReadKey(input);
+					wFooter->ReadKey(answer);
 				}
-				while (input != 'a' && input != 'y' && input != 'g' && input != 'c' && input != 'p');
+				while (answer != 'a' && answer != 'y' && answer != 'g' && answer != 'c' && answer != 'p');
 				UnlockStatusbar();
-				mpd_tag_type new_tagitem = IntoTagItem(input);
+				mpd_tag_type new_tagitem = IntoTagItem(answer);
 				if (new_tagitem != Config.media_lib_primary_tag)
 				{
 					Config.media_lib_primary_tag = new_tagitem;
@@ -2010,6 +1970,46 @@ int main(int argc, char *argv[])
 			myServerInfo->SwitchTo();
 		}
 		// key mapping end
+		
+		if (myScreen == myLibrary
+		||  myScreen == myPlaylistEditor
+#		ifdef HAVE_TAGLIB_H
+		||  myScreen == myTagEditor
+#		endif // HAVE_TAGLIB_H
+		   )
+		{
+			if (Keypressed(input, Key.Up)
+			||  Keypressed(input, Key.Down)
+			||  Keypressed(input, Key.PageUp)
+			||  Keypressed(input, Key.PageDown)
+			||  Keypressed(input, Key.Home)
+			||  Keypressed(input, Key.End)
+			||  Keypressed(input, Key.ApplyFilter)
+			||  Keypressed(input, Key.FindForward)
+			||  Keypressed(input, Key.FindBackward)
+			||  Keypressed(input, Key.NextFoundPosition)
+			||  Keypressed(input, Key.PrevFoundPosition))
+			{
+				if (myScreen->ActiveWindow() == myLibrary->Artists)
+				{
+					myLibrary->Albums->Clear();
+				}
+				else if (myScreen->ActiveWindow() == myLibrary->Albums)
+				{
+					myLibrary->Songs->Clear();
+				}
+				else if (myScreen->ActiveWindow() == myPlaylistEditor->Playlists)
+				{
+					myPlaylistEditor->Content->Clear();
+				}
+#				ifdef HAVE_TAGLIB_H
+				else if (myScreen->ActiveWindow() == myTagEditor->LeftColumn)
+				{
+					myTagEditor->Tags->Clear();
+				}
+#				endif // HAVE_TAGLIB_H
+			}
+		}
 		
 #		ifdef ENABLE_VISUALIZER
 		// visualizer sets timmeout to 40ms, but since only it needs such small
