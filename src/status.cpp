@@ -134,7 +134,18 @@ void TraceMpdStatus()
 		BlockItemListUpdate = 0;
 		Playlist::BlockUpdate = 0;
 		UpdateStatusImmediately = 0;
-		gettimeofday(&past, 0);
+		if (!Mpd.SupportsIdle())
+		{
+			gettimeofday(&past, 0);
+		}
+		else if (Config.display_bitrate && Global::Timer.tv_sec > past.tv_sec && Mpd.isPlaying())
+		{
+			// ncmpcpp doesn't fetch status constantly if mpd supports
+			// idle mode so current song's bitrate is never updated.
+			// we need to force ncmpcpp to fetch it.
+			Mpd.OrderDataFetching();
+			gettimeofday(&past, 0);
+		}
 	}
 	
 	myScreen->Update();
