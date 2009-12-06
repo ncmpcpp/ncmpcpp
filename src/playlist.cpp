@@ -227,7 +227,7 @@ void Playlist::EnterPressed()
 
 void Playlist::SpacePressed()
 {
-	if (w == Items)
+	if (w == Items && !Items->Empty())
 	{
 		Items->Select(Items->Choice(), !Items->isSelected());
 		Items->Scroll(wDown);
