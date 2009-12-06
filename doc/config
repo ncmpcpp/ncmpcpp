@@ -263,6 +263,14 @@
 #
 #display_screens_numbers_on_start = "yes"
 #
+##
+## How shall key_screen_switcher work?
+##
+## - yes - always switch between browser and playlist
+## - no  - switch between current and last used screen
+##
+#screen_switcher_browser_only = "yes"
+#
 #jump_to_now_playing_song_at_start = "yes"
 #
 #ask_before_clearing_main_playlist = "no"

@@ -37,6 +37,7 @@ class Browser : public Screen< Menu<MPD::Item> >
 		virtual void EnterPressed();
 		virtual void SpacePressed();
 		virtual void MouseButtonPressed(MEVENT);
+		virtual bool isTabbable() { return true; }
 		
 		virtual MPD::Song *CurrentSong();
 		

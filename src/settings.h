@@ -187,6 +187,7 @@ struct ncmpcpp_config
 	bool header_text_scrolling;
 	bool statusbar_visibility;
 	bool centered_cursor;
+	bool screen_switcher_browser_only;
 	bool autocenter_mode;
 	bool wrapped_search;
 	bool space_selects;

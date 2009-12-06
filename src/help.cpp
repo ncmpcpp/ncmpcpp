@@ -55,6 +55,8 @@ void Help::SwitchTo()
 	if (hasToBeResized)
 		Resize();
 	
+	if (myScreen != this && myScreen->isTabbable())
+		myPrevScreen = myScreen;
 	myScreen = this;
 	RedrawHeader = 1;
 
@@ -133,7 +135,10 @@ void Help::GetKeybindings()
 	*w << DisplayKeys(Key.Home)			<< "Home\n";
 	*w << DisplayKeys(Key.End)			<< "End\n";
 	*w << "\n";
-	*w << DisplayKeys(Key.ScreenSwitcher)		<< "Switch between playlist and browser\n";
+	if (Config.screen_switcher_browser_only)
+		*w << DisplayKeys(Key.ScreenSwitcher)   << "Switch between playlist and browser\n";
+	else
+		*w << DisplayKeys(Key.ScreenSwitcher)   << "Switch between current and last screen\n";
 	*w << DisplayKeys(Key.Help)			<< "Help screen\n";
 	*w << DisplayKeys(Key.Playlist)			<< "Playlist screen\n";
 	*w << DisplayKeys(Key.Browser)			<< "Browse screen\n";

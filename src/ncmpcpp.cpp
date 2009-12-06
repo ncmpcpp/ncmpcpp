@@ -73,6 +73,7 @@ using namespace MPD;
 
 BasicScreen *Global::myScreen;
 BasicScreen *Global::myOldScreen;
+BasicScreen *Global::myPrevScreen;
 
 Window *Global::wHeader;
 Window *Global::wFooter;
@@ -276,6 +277,12 @@ int main(int argc, char *argv[])
 	wFooter->AddFDCallback(Mpd.GetFD(), StatusbarMPDCallback);
 	wFooter->CreateHistory();
 	
+	// initialize screens to browser as default previous screen
+	myScreen = myBrowser;
+	myPrevScreen = myBrowser;
+	myOldScreen = myBrowser;
+
+	// go to playlist
 	myPlaylist->SwitchTo();
 	myPlaylist->UpdateTimer();
 	
@@ -1915,10 +1922,20 @@ int main(int argc, char *argv[])
 		}
 		else if (Keypressed(input, Key.ScreenSwitcher))
 		{
-			if (myScreen == myPlaylist)
-				myBrowser->SwitchTo();
+			if (Config.screen_switcher_browser_only)
+			{
+				if (myScreen == myPlaylist)
+					myBrowser->SwitchTo();
+				else
+					myPlaylist->SwitchTo();
+			}
 			else
-				myPlaylist->SwitchTo();
+			{
+				if (myScreen->isTabbable())
+					myPrevScreen->SwitchTo();
+				else
+					myOldScreen->SwitchTo();
+			}
 		}
 		else if (Keypressed(input, Key.Playlist))
 		{

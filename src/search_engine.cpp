@@ -89,6 +89,9 @@ void SearchEngine::SwitchTo()
 	
 	if (w->Empty())
 		Prepare();
+
+	if (myScreen != this && myScreen->isTabbable())
+		myPrevScreen = myScreen;
 	myScreen = this;
 	RedrawHeader = 1;
 	

@@ -294,6 +294,7 @@ void DefaultConfiguration(ncmpcpp_config &conf)
 	conf.header_text_scrolling = true;
 	conf.statusbar_visibility = true;
 	conf.centered_cursor = false;
+	conf.screen_switcher_browser_only = true;
 	conf.autocenter_mode = false;
 	conf.wrapped_search = true;
 	conf.space_selects = false;
@@ -753,6 +754,10 @@ void ReadConfiguration(ncmpcpp_config &conf)
 			else if (cl.find("statusbar_visibility") != std::string::npos)
 			{
 				conf.statusbar_visibility = v == "yes";
+			}
+			else if (cl.find("screen_switcher_browser_only") != std::string::npos)
+			{
+				conf.screen_switcher_browser_only = v == "yes";
 			}
 			else if (cl.find("autocenter_mode") != std::string::npos)
 			{

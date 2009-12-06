@@ -87,6 +87,9 @@ void Browser::SwitchTo()
 		Config.browser_sort_by_mtime = 0;
 	
 	w->Empty() ? myBrowser->GetDirectory(itsBrowsedDir) : myBrowser->UpdateItemList();
+
+	if (myScreen != this && myScreen->isTabbable())
+		myPrevScreen = myScreen;
 	myScreen = this;
 	RedrawHeader = 1;
 }

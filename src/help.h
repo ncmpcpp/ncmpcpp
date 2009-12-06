@@ -34,6 +34,7 @@ class Help : public Screen<Scrollpad>
 		
 		virtual void EnterPressed() { }
 		virtual void SpacePressed() { }
+		virtual bool isTabbable() { return true; }
 		
 		virtual bool allowsSelection() { return false; }
 		

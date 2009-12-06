@@ -53,6 +53,7 @@ class TagEditor : public Screen<Window>
 		virtual void EnterPressed();
 		virtual void SpacePressed();
 		virtual void MouseButtonPressed(MEVENT);
+		virtual bool isTabbable() { return true; }
 		
 		virtual MPD::Song *CurrentSong();
 		

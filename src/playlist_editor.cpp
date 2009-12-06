@@ -102,6 +102,8 @@ void PlaylistEditor::SwitchTo()
 	if (hasToBeResized)
 		Resize();
 	
+	if (myScreen != this && myScreen->isTabbable())
+		myPrevScreen = myScreen;
 	myScreen = this;
 	RedrawHeader = 1;
 	Refresh();

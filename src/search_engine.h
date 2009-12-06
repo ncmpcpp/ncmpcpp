@@ -35,6 +35,7 @@ class SearchEngine : public Screen< Menu< std::pair<Buffer *, MPD::Song *> > >
 		virtual void EnterPressed();
 		virtual void SpacePressed();
 		virtual void MouseButtonPressed(MEVENT);
+		virtual bool isTabbable() { return true; }
 		
 		virtual MPD::Song *CurrentSong();
 		

@@ -28,7 +28,9 @@
 namespace Global
 {
 	extern BasicScreen *myScreen;
-	extern BasicScreen *myOldScreen;
+	extern BasicScreen *myOldScreen;	// for info, lyrics, popups
+	extern BasicScreen *myPrevScreen;	// "real" screen switching
+						// 	(browser, search, etc.)
 	
 	extern Window *wHeader;
 	extern Window *wFooter;

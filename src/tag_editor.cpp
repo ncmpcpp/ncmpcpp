@@ -42,6 +42,7 @@ using Global::MainHeight;
 using Global::MainStartY;
 using Global::myOldScreen;
 using Global::myScreen;
+using Global::myPrevScreen;
 using Global::wFooter;
 
 TagEditor *myTagEditor = new TagEditor;
@@ -197,6 +198,8 @@ void TagEditor::SwitchTo()
 	if (hasToBeResized)
 		Resize();
 	
+	if (myScreen != this && myScreen->isTabbable())
+		myPrevScreen = myScreen;
 	myScreen = this;
 	Global::RedrawHeader = 1;
 	Refresh();

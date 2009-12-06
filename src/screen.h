@@ -118,6 +118,11 @@ class BasicScreen
 		/// cast to List if available or null pointer otherwise
 		///
 		virtual List *GetList() = 0;
+
+		/// When this is overwritten with a function returning true, the
+		/// screen will be used in tab switching.
+		///
+		virtual bool isTabbable() { return false; }
 		
 		/// Should be set to true each time screen needs resize
 		///

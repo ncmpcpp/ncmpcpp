@@ -213,6 +213,9 @@ If set to "playlist", Search engine will perform searching in current MPD playli
 .B display_screens_numbers_on_start = yes/no
 If enabled, screens' names and their keybindings will be shown in header window until key is pressed, otherwise they won't be displayed at all.
 .TP 
+.B screen_switcher_browser_only = yes/no
+If enabled, the "screen_switcher" key (<Tab> by default) will only switch between the playlist and browser screens. If disabled, the last active screen will be remembered, and the "screen_switcher" key will jump back.
+.TP 
 .B jump_to_now_playing_song_at_start = yes/no
 If enabled, ncmpcpp will jump at start to now playing song if mpd is playing or paused.
 .TP 
