@@ -52,8 +52,8 @@ class MediaLibrary : public Screen<Window>
 		
 		virtual MPD::Song *CurrentSong();
 		
-		virtual bool allowsSelection() { return w == Songs; }
-		virtual void ReverseSelection() { Songs->ReverseSelection(); }
+		virtual bool allowsSelection() { return true; }
+		virtual void ReverseSelection();
 		virtual void GetSelectedSongs(MPD::SongList &);
 		
 		virtual void ApplyFilter(const std::string &);

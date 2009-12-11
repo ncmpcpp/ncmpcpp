@@ -53,11 +53,15 @@ void MediaLibrary::Init()
 	Artists = new Menu<std::string>(0, MainStartY, itsLeftColWidth, MainHeight, IntoStr(Config.media_lib_primary_tag) + "s", Config.main_color, brNone);
 	Artists->HighlightColor(Config.active_column_color);
 	Artists->CyclicScrolling(Config.use_cyclic_scrolling);
+	Artists->SetSelectPrefix(&Config.selected_item_prefix);
+	Artists->SetSelectSuffix(&Config.selected_item_suffix);
 	Artists->SetItemDisplayer(Display::Generic);
 	
 	Albums = new Menu< std::pair<std::string, SearchConstraints> >(itsMiddleColStartX, MainStartY, itsMiddleColWidth, MainHeight, "Albums", Config.main_color, brNone);
 	Albums->HighlightColor(Config.main_highlight_color);
 	Albums->CyclicScrolling(Config.use_cyclic_scrolling);
+	Albums->SetSelectPrefix(&Config.selected_item_prefix);
+	Albums->SetSelectSuffix(&Config.selected_item_suffix);
 	Albums->SetItemDisplayer(Display::Pairs);
 	Albums->SetGetStringFunction(StringPairToString);
 	
@@ -322,9 +326,14 @@ void MediaLibrary::Update()
 
 void MediaLibrary::SpacePressed()
 {
-	if (Config.space_selects && w == Songs)
+	if (Config.space_selects)
 	{
-		Songs->Select(Songs->Choice(), !Songs->isSelected());
+		if (w == Artists)
+			Artists->Select(Artists->Choice(), !Artists->isSelected());
+		else if (w == Albums)
+			Albums->Select(Albums->Choice(), !Albums->isSelected());
+		else if (w == Songs)
+			Songs->Select(Songs->Choice(), !Songs->isSelected());
 		w->Scroll(wDown);
 	}
 	else
@@ -417,14 +426,73 @@ List *MediaLibrary::GetList()
 		return 0;
 }
 
+void MediaLibrary::ReverseSelection()
+{
+	if (w == Artists)
+		Artists->ReverseSelection();
+	else if (w == Albums)
+		Albums->ReverseSelection();
+	else if (w == Songs)
+		Songs->ReverseSelection();
+}
+
 void MediaLibrary::GetSelectedSongs(MPD::SongList &v)
 {
 	std::vector<size_t> selected;
-	Songs->GetSelected(selected);
-	if (selected.empty())
-		selected.push_back(Songs->Choice());
-	for (std::vector<size_t>::const_iterator it = selected.begin(); it != selected.end(); ++it)
-		v.push_back(new MPD::Song(Songs->at(*it)));
+	if (w == Artists && !Artists->Empty())
+	{
+		Artists->GetSelected(selected);
+		if (selected.empty())
+			selected.push_back(Artists->Choice());
+		for (std::vector<size_t>::const_iterator it = selected.begin(); it != selected.end(); ++it)
+		{
+			MPD::SongList list;
+			Mpd.StartSearch(1);
+			Mpd.AddSearch(Config.media_lib_primary_tag, locale_to_utf_cpy(Artists->at(*it)));
+			Mpd.CommitSearch(list);
+			for (MPD::SongList::const_iterator sIt = list.begin(); sIt != list.end(); ++sIt)
+				v.push_back(new MPD::Song(**sIt));
+			FreeSongList(list);
+		}
+	}
+	else if (w == Albums && !Albums->Empty())
+	{
+		Albums->GetSelected(selected);
+		if (selected.empty())
+		{
+			// shortcut via the existing song list in right column
+			if (v.empty())
+				v.reserve(Songs->Size());
+			for (size_t i = 0; i < Songs->Size(); ++i)
+				v.push_back(new MPD::Song((*Songs)[i]));
+		}
+		else
+		{
+			for (std::vector<size_t>::const_iterator it = selected.begin(); it != selected.end(); ++it)
+			{
+				MPD::SongList list;
+				Mpd.StartSearch(1);
+				Mpd.AddSearch(Config.media_lib_primary_tag, hasTwoColumns
+						?  Albums->at(*it).second.Artist
+						: locale_to_utf_cpy(Artists->Current()));
+				Mpd.AddSearch(MPD_TAG_ALBUM, Albums->at(*it).second.Album);
+				if (!Albums->at(*it).second.Album.empty()) // for <no album>
+					Mpd.AddSearch(MPD_TAG_DATE, Albums->at(*it).second.Year);
+				Mpd.CommitSearch(list);
+				for (MPD::SongList::const_iterator sIt = list.begin(); sIt != list.end(); ++sIt)
+					v.push_back(new MPD::Song(**sIt));
+				FreeSongList(list);
+			}
+		}
+	}
+	else if (w == Songs && !Songs->Empty())
+	{
+		Songs->GetSelected(selected);
+		if (selected.empty())
+			selected.push_back(Songs->Choice());
+		for (std::vector<size_t>::const_iterator it = selected.begin(); it != selected.end(); ++it)
+			v.push_back(new MPD::Song(Songs->at(*it)));
+	}
 }
 
 void MediaLibrary::ApplyFilter(const std::string &s)
@@ -476,34 +544,26 @@ void MediaLibrary::PrevColumn()
 
 void MediaLibrary::AddToPlaylist(bool add_n_play)
 {
-	SongList list;
-	
-	if (!Artists->Empty() && w == Artists)
+	if (w == Songs && !Songs->Empty())
+		Songs->Bold(Songs->Choice(), myPlaylist->Add(Songs->Current(), Songs->isBold(), add_n_play));
+	else
 	{
-		Mpd.StartSearch(1);
-		Mpd.AddSearch(Config.media_lib_primary_tag, locale_to_utf_cpy(Artists->Current()));
-		Mpd.CommitSearch(list);
-		
+		MPD::SongList list;
+		GetSelectedSongs(list);
+
 		if (myPlaylist->Add(list, add_n_play))
 		{
-			std::string tag_type = IntoStr(Config.media_lib_primary_tag);
-			ToLower(tag_type);
-			ShowMessage("Adding songs of %s \"%s\"", tag_type.c_str(), Artists->Current().c_str());
+			if (!Artists->Empty() && w == Artists)
+			{
+				std::string tag_type = IntoStr(Config.media_lib_primary_tag);
+				ToLower(tag_type);
+				ShowMessage("Adding songs of %s \"%s\"", tag_type.c_str(), Artists->Current().c_str());
+			}
+			else if (w == Albums)
+				ShowMessage("Adding songs from album \"%s\"", Albums->Current().second.Album.c_str());
 		}
 	}
-	else if (w == Albums)
-	{
-		MPD::SongList l;
-		l.reserve(Songs->Size());
-		for (size_t i = 0; i < Songs->Size(); ++i)
-			l.push_back(&(*Songs)[i]);
-		
-		if (myPlaylist->Add(l, add_n_play))
-			ShowMessage("Adding songs from album \"%s\"", Albums->Current().second.Album.c_str());
-	}
-	else if (w == Songs && !Songs->Empty())
-		Songs->Bold(Songs->Choice(), myPlaylist->Add(Songs->Current(), Songs->isBold(), add_n_play));
-	FreeSongList(list);
+
 	if (!add_n_play)
 	{
 		w->Scroll(wDown);
