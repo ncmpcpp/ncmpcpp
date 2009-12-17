@@ -566,42 +566,51 @@ void MediaLibrary::LocateSong(const MPD::Song &s)
 			ShowMessage("Invalid tag type in left column of the media library");
 			return;
 	}
-	if (primary_tag == "")
+	if (primary_tag.empty())
 	{
 		std::string item_type = IntoStr(Config.media_lib_primary_tag);
 		ToLower(item_type);
 		ShowMessage("Can't jump to media library because the song has no %s tag set.", item_type.c_str());
 		return;
 	}
-
+	
 	if (myScreen != this)
 		SwitchTo();
 	Statusbar() << "Jumping to song...";
 	wFooter->Refresh();
-
-	if (Artists->Empty() || primary_tag != Artists->Current())
+	
+	if (!hasTwoColumns)
 	{
-		Update();
-		for (size_t i = 0; i < Artists->Size(); ++i)
+		if (Artists->Empty())
+			Update();
+		if (primary_tag != Artists->Current())
 		{
-			if (primary_tag == Artists->at(i))
+			for (size_t i = 0; i < Artists->Size(); ++i)
 			{
-				Artists->Highlight(i);
-				Albums->Clear();
-				break;
+				if (primary_tag == (*Artists)[i])
+				{
+					Artists->Highlight(i);
+					Albums->Clear();
+					break;
+				}
 			}
 		}
 	}
-
+	
+	if (Albums->Empty())
+		Update();
+	
 	std::string album = s.GetAlbum();
 	std::string date = s.GetDate();
-	if (Albums->Empty() || (album != Albums->Current().second.Album
-				&& date != Albums->Current().second.Year))
+	if ((hasTwoColumns && Albums->Current().second.Artist != primary_tag)
+	||  album != Albums->Current().second.Album
+	||  date != Albums->Current().second.Year)
 	{
-		Update();
 		for (size_t i = 0; i < Albums->Size(); ++i)
 		{
-			if (album == Albums->at(i).second.Album && date == Albums->at(i).second.Year)
+			if ((!hasTwoColumns || (*Albums)[i].second.Artist == primary_tag)
+			&&   album == (*Albums)[i].second.Album
+			&&   date == (*Albums)[i].second.Year)
 			{
 				Albums->Highlight(i);
 				Songs->Clear();
@@ -609,21 +618,23 @@ void MediaLibrary::LocateSong(const MPD::Song &s)
 			}
 		}
 	}
-
-	std::string song = s.GetTitle();
-	if (Songs->Empty() || song != Songs->Current().GetTitle())
-	{
+	
+	if (Songs->Empty())
 		Update();
+	
+	std::string song = s.GetTitle();
+	if (song != Songs->Current().GetTitle())
+	{
 		for (size_t i = 0; i < Songs->Size(); ++i)
 		{
-			if (song == Songs->at(i).GetTitle())
+			if (song == (*Songs)[i].GetTitle())
 			{
 				Songs->Highlight(i);
 				break;
 			}
 		}
 	}
-
+	
 	Artists->HighlightColor(Config.main_highlight_color);
 	Albums->HighlightColor(Config.main_highlight_color);
 	Songs->HighlightColor(Config.active_column_color);
