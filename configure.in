@@ -58,7 +58,7 @@ AC_CHECK_HEADERS([langinfo.h], , AC_MSG_WARN(locale detection disabled))
 dnl ==============================
 dnl = checking for libmpdclient2 =
 dnl ==============================
-PKG_CHECK_MODULES([libmpdclient], [libmpdclient >= 2.0], [
+PKG_CHECK_MODULES([libmpdclient], [libmpdclient >= 2.1], [
 	AC_SUBST(libmpdclient_LIBS)
 	AC_SUBST(libmpdclient_CFLAGS)
 	CPPFLAGS="$CPPFLAGS $libmpdclient_CFLAGS"
