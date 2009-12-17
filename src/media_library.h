@@ -64,6 +64,8 @@ class MediaLibrary : public Screen<Window>
 		void NextColumn();
 		void PrevColumn();
 		
+		void LocateSong(const MPD::Song &);
+		
 		Menu<std::string> *Artists;
 		Menu< std::pair<std::string, SearchConstraints> > *Albums;
 		Menu<MPD::Song> *Songs;

@@ -117,6 +117,7 @@ struct ncmpcpp_keys
 	int SavePlaylist[2];
 	int GoToNowPlaying[2];
 	int GoToContainingDir[2];
+	int GoToMediaLibrary[2];
 	int ToggleAutoCenter[2];
 	int ToggleDisplayMode[2];
 	int ToggleInterface[2];

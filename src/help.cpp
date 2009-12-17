@@ -195,6 +195,7 @@ void Help::GetKeybindings()
 	*w << DisplayKeys(Key.NextFoundPosition)	<< "Go to next found position\n";
 	*w << DisplayKeys(Key.ToggleFindMode)		<< "Toggle find mode (normal/wrapped)\n";
 	*w << DisplayKeys(Key.GoToContainingDir)	<< "Locate song in browser\n";
+	*w << DisplayKeys(Key.GoToMediaLibrary)		<< "Locate current song in media library\n";
 	*w << DisplayKeys(Key.ToggleDisplayMode)	<< "Toggle display mode\n";
 	*w << DisplayKeys(Key.ToggleInterface)		<< "Toggle user interface\n";
 	*w << DisplayKeys(Key.GoToPosition)		<< "Go to given position in current song (in % by default)\n";

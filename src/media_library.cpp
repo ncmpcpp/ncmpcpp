@@ -542,6 +542,95 @@ void MediaLibrary::PrevColumn()
 	}
 }
 
+void MediaLibrary::LocateSong(const MPD::Song &s)
+{
+	std::string primary_tag;
+	switch (Config.media_lib_primary_tag)
+	{
+		case MPD_TAG_ARTIST:
+			primary_tag = s.GetArtist();
+			break;
+		case MPD_TAG_DATE:
+			primary_tag = s.GetDate();
+			break;
+		case MPD_TAG_GENRE:
+			primary_tag = s.GetGenre();
+			break;
+		case MPD_TAG_COMPOSER:
+			primary_tag = s.GetComposer();
+			break;
+		case MPD_TAG_PERFORMER:
+			primary_tag = s.GetPerformer();
+			break;
+		default:
+			ShowMessage("Invalid tag type in left column of the media library");
+			return;
+	}
+	if (primary_tag == "")
+	{
+		std::string item_type = IntoStr(Config.media_lib_primary_tag);
+		ToLower(item_type);
+		ShowMessage("Can't jump to media library because the song has no %s tag set.", item_type.c_str());
+		return;
+	}
+
+	if (myScreen != this)
+		SwitchTo();
+	Statusbar() << "Jumping to song...";
+	wFooter->Refresh();
+
+	if (Artists->Empty() || primary_tag != Artists->Current())
+	{
+		Update();
+		for (size_t i = 0; i < Artists->Size(); ++i)
+		{
+			if (primary_tag == Artists->at(i))
+			{
+				Artists->Highlight(i);
+				Albums->Clear();
+				break;
+			}
+		}
+	}
+
+	std::string album = s.GetAlbum();
+	std::string date = s.GetDate();
+	if (Albums->Empty() || (album != Albums->Current().second.Album
+				&& date != Albums->Current().second.Year))
+	{
+		Update();
+		for (size_t i = 0; i < Albums->Size(); ++i)
+		{
+			if (album == Albums->at(i).second.Album && date == Albums->at(i).second.Year)
+			{
+				Albums->Highlight(i);
+				Songs->Clear();
+				break;
+			}
+		}
+	}
+
+	std::string song = s.GetTitle();
+	if (Songs->Empty() || song != Songs->Current().GetTitle())
+	{
+		Update();
+		for (size_t i = 0; i < Songs->Size(); ++i)
+		{
+			if (song == Songs->at(i).GetTitle())
+			{
+				Songs->Highlight(i);
+				break;
+			}
+		}
+	}
+
+	Artists->HighlightColor(Config.main_highlight_color);
+	Albums->HighlightColor(Config.main_highlight_color);
+	Songs->HighlightColor(Config.active_column_color);
+	w = Songs;
+	Refresh();
+}
+
 void MediaLibrary::AddToPlaylist(bool add_n_play)
 {
 	if (w == Songs && !Songs->Empty())

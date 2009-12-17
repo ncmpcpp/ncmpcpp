@@ -166,6 +166,7 @@ void DefaultKeys(ncmpcpp_keys &keys)
 	keys.SavePlaylist[0] = 'S';
 	keys.GoToNowPlaying[0] = 'o';
 	keys.GoToContainingDir[0] = 'G';
+	keys.GoToMediaLibrary[0] = '~';
 	keys.ToggleAutoCenter[0] = 'U';
 	keys.ToggleDisplayMode[0] = 'p';
 	keys.ToggleInterface[0] = '\\';
@@ -239,6 +240,7 @@ void DefaultKeys(ncmpcpp_keys &keys)
 	keys.SavePlaylist[1] = null_key;
 	keys.GoToNowPlaying[1] = null_key;
 	keys.GoToContainingDir[1] = null_key;
+	keys.GoToMediaLibrary[1] = null_key;
 	keys.ToggleAutoCenter[1] = null_key;
 	keys.ToggleDisplayMode[1] = null_key;
 	keys.ToggleInterface[1] = null_key;
@@ -490,6 +492,8 @@ void ReadKeys(ncmpcpp_keys &keys)
 				GetKeys(key, keys.ToggleLyricsDB);
 			else if (key.find("key_go_to_containing_directory ") != std::string::npos)
 				GetKeys(key, keys.GoToContainingDir);
+			else if (key.find("key_go_to_media_library ") != std::string::npos)
+				GetKeys(key, keys.GoToMediaLibrary);
 			else if (key.find("key_go_to_parent_dir ") != std::string::npos)
 				GetKeys(key, keys.GoToParentDir);
 			else if (key.find("key_switch_tag_type_list ") != std::string::npos)

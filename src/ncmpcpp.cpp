@@ -1545,6 +1545,12 @@ int main(int argc, char *argv[])
 			if (s)
 				myBrowser->LocateSong(*s);
 		}
+		else if (Keypressed(input, Key.GoToMediaLibrary))
+		{
+			Song *s = myScreen->CurrentSong();
+			if (s)
+				myLibrary->LocateSong(*s);
+		}
 		else if (Keypressed(input, Key.GoToPosition))
 		{
 			if (!Mpd.GetTotalTime())
