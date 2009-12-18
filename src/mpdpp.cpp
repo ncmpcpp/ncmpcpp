@@ -328,6 +328,7 @@ void Connection::UpdateStats()
 	if (itsStats)
 		mpd_stats_free(itsStats);
 	itsStats = mpd_run_stats(itsConnection);
+	GoIdle();
 }
 
 bool Connection::UpdateDirectory(const std::string &path)
@@ -637,6 +638,7 @@ void Connection::GetPlaylistChanges(unsigned version, SongList &v)
 	while (mpd_song *s = mpd_recv_song(itsConnection))
 		v.push_back(new Song(s, 1));
 	mpd_response_finish(itsConnection);
+	GoIdle();
 }
 
 Song Connection::GetSong(const std::string &path)
@@ -648,6 +650,7 @@ Song Connection::GetSong(const std::string &path)
 	mpd_send_list_all_meta(itsConnection, path.c_str());
 	mpd_song *s = mpd_recv_song(itsConnection);
 	mpd_response_finish(itsConnection);
+	GoIdle();
 	return Song(s);
 }
 
@@ -660,7 +663,9 @@ Song Connection::GetCurrentSong()
 {
 	assert(!isCommandsListEnabled);
 	GoBusy();
-	return Song(itsConnection && isPlaying() ? mpd_run_current_song(itsConnection) : 0);
+	Song result = Song(itsConnection && isPlaying() ? mpd_run_current_song(itsConnection) : 0);
+	GoIdle();
+	return result;
 }
 
 void Connection::GetPlaylistContent(const std::string &path, SongList &v)
@@ -673,6 +678,7 @@ void Connection::GetPlaylistContent(const std::string &path, SongList &v)
 	while (mpd_song *s = mpd_recv_song(itsConnection))
 		v.push_back(new Song(s));
 	mpd_response_finish(itsConnection);
+	GoIdle();
 }
 
 void Connection::SetRepeat(bool mode)
@@ -1024,6 +1030,7 @@ void Connection::GetList(TagList &v, mpd_tag_type type)
 		mpd_return_pair(itsConnection, item);
 	}
 	mpd_response_finish(itsConnection);
+	GoIdle();
 }
 
 void Connection::GetAlbums(const std::string &artist, TagList &v)
@@ -1043,6 +1050,7 @@ void Connection::GetAlbums(const std::string &artist, TagList &v)
 		mpd_return_pair(itsConnection, item);
 	}
 	mpd_response_finish(itsConnection);
+	GoIdle();
 }
 
 void Connection::StartSearch(bool exact_match)
@@ -1079,6 +1087,7 @@ void Connection::CommitSearch(SongList &v)
 	while (mpd_song *s = mpd_recv_song(itsConnection))
 		v.push_back(new Song(s));
 	mpd_response_finish(itsConnection);
+	GoIdle();
 }
 
 void Connection::CommitSearch(TagList &v)
@@ -1095,6 +1104,7 @@ void Connection::CommitSearch(TagList &v)
 		mpd_return_pair(itsConnection, tag);
 	}
 	mpd_response_finish(itsConnection);
+	GoIdle();
 }
 
 void Connection::GetDirectory(const std::string &path, ItemList &v)
@@ -1130,6 +1140,7 @@ void Connection::GetDirectory(const std::string &path, ItemList &v)
 		mpd_entity_free(item);
 	}
 	mpd_response_finish(itsConnection);
+	GoIdle();
 }
 
 void Connection::GetDirectoryRecursive(const std::string &path, SongList &v)
@@ -1142,6 +1153,7 @@ void Connection::GetDirectoryRecursive(const std::string &path, SongList &v)
 	while (mpd_song *s = mpd_recv_song(itsConnection))
 		v.push_back(new Song(s));
 	mpd_response_finish(itsConnection);
+	GoIdle();
 }
 
 void Connection::GetSongs(const std::string &path, SongList &v)
@@ -1154,6 +1166,7 @@ void Connection::GetSongs(const std::string &path, SongList &v)
 	while (mpd_song *s = mpd_recv_song(itsConnection))
 		v.push_back(new Song(s));
 	mpd_response_finish(itsConnection);
+	GoIdle();
 }
 
 void Connection::GetDirectories(const std::string &path, TagList &v)
@@ -1169,6 +1182,7 @@ void Connection::GetDirectories(const std::string &path, TagList &v)
 		mpd_directory_free(dir);
 	}
 	mpd_response_finish(itsConnection);
+	GoIdle();
 }
 
 void Connection::GetOutputs(OutputList &v)
@@ -1184,6 +1198,7 @@ void Connection::GetOutputs(OutputList &v)
 		mpd_output_free(output);
 	}
 	mpd_response_finish(itsConnection);
+	GoIdle();
 }
 
 bool Connection::EnableOutput(int id)
@@ -1231,6 +1246,7 @@ void Connection::GetURLHandlers(TagList &v)
 		mpd_return_pair(itsConnection, handler);
 	}
 	mpd_response_finish(itsConnection);
+	GoIdle();
 }
 
 void Connection::GetTagTypes(TagList &v)
@@ -1246,6 +1262,7 @@ void Connection::GetTagTypes(TagList &v)
 		mpd_return_pair(itsConnection, tag_type);
 	}
 	mpd_response_finish(itsConnection);
+	GoIdle();
 }
 
 int Connection::CheckForErrors()
