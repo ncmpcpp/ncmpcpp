@@ -30,6 +30,7 @@
 #include "helpers.h"
 #include "lyrics.h"
 #include "media_library.h"
+#include "misc.h"
 #include "outputs.h"
 #include "playlist.h"
 #include "playlist_editor.h"
@@ -309,6 +310,7 @@ void NcmpcppStatusChanged(Connection *, StatusChanges changed, void *)
 		}
 		if (myPlaylistEditor->Main())
 			myPlaylistEditor->Content->Clear();
+		changed.DBUpdating = 1;
 	}
 	if (changed.PlayerState)
 	{
@@ -524,6 +526,11 @@ void NcmpcppStatusChanged(Connection *, StatusChanges changed, void *)
 		if (Mpd.Version() < 14 || Mpd.Version() > 15)
 			mpd_db_updating = Mpd.GetDBIsUpdating() ? 'U' : 0;
 		ShowMessage(Mpd.GetDBIsUpdating() ? "Database update finished!" : "Database update started!");
+		if (changed.Database && myScreen == mySelectedItemsAdder)
+		{
+			myScreen->SwitchTo(); // switch to previous screen
+			ShowMessage("Database has changed, you need to select your item(s) once again!");
+		}
 	}
 	if (changed.StatusFlags && (Config.header_visibility || Config.new_design))
 	{
