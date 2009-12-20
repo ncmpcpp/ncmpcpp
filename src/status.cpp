@@ -525,7 +525,7 @@ void NcmpcppStatusChanged(Connection *, StatusChanges changed, void *)
 		// finished and nothing changed, so we need to switch it off for them.
 		if (Mpd.Version() < 14 || Mpd.Version() > 15)
 			mpd_db_updating = Mpd.GetDBIsUpdating() ? 'U' : 0;
-		ShowMessage(Mpd.GetDBIsUpdating() ? "Database update finished!" : "Database update started!");
+		ShowMessage(Mpd.GetDBIsUpdating() ? "Database update started!" : "Database update finished!");
 		if (changed.Database && myScreen == mySelectedItemsAdder)
 		{
 			myScreen->SwitchTo(); // switch to previous screen
