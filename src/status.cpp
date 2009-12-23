@@ -364,8 +364,14 @@ void NcmpcppStatusChanged(Connection *, StatusChanges changed, void *)
 			*wHeader << XY(0, 1) << fmtBold << player_state << fmtBoldEnd;
 			wHeader->Refresh();
 		}
-		else if (!block_statusbar_update && Config.statusbar_visibility && player_state.empty())
-			*wFooter << XY(0, 1) << wclrtoeol;
+		else if (!block_statusbar_update && Config.statusbar_visibility)
+		{
+			*wFooter << XY(0, 1);
+			if (player_state.empty())
+				*wFooter << wclrtoeol;
+			else
+				*wFooter << fmtBold << player_state << fmtBoldEnd;
+		}
 	}
 	if (changed.SongID)
 	{
