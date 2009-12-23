@@ -72,7 +72,7 @@ bool Connection::Connect()
 	if (!itsPassword.empty())
 		SendPassword();
 	itsFD = mpd_connection_get_fd(itsConnection);
-	supportsIdle = Version() > 13;
+	supportsIdle = isIdleEnabled && Version() > 13;
 	// in UpdateStatus() we compare it to itsElapsedTimer[0],
 	// and for the first time it has always evaluate to true
 	// so we need it to be zero at this point

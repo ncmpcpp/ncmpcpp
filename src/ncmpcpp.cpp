@@ -241,6 +241,7 @@ int main(int argc, char *argv[])
 		Mpd.SetPort(Config.mpd_port);
 	
 	Mpd.SetTimeout(Config.mpd_connection_timeout);
+	Mpd.SetIdleEnabled(Config.enable_idle_notifications);
 	
 	if (argc > 1)
 		ParseArgv(argc, argv);

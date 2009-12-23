@@ -94,6 +94,7 @@ namespace MPD
 			
 			float Version() const;
 			
+			void SetIdleEnabled(bool val) { isIdleEnabled = val; }
 			bool SupportsIdle() const { return supportsIdle; }
 			void OrderDataFetching() { hasData = 1; }
 			int GetFD() const { return itsFD; }
@@ -223,6 +224,7 @@ namespace MPD
 			
 			int itsFD;
 			bool isIdle;
+			bool isIdleEnabled;
 			bool supportsIdle;
 			bool hasData;
 			

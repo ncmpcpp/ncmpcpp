@@ -284,6 +284,7 @@ void DefaultConfiguration(ncmpcpp_config &conf)
 	conf.window_border = brGreen;
 	conf.active_window_border = brRed;
 	conf.media_lib_primary_tag = MPD_TAG_ARTIST;
+	conf.enable_idle_notifications = false;
 	conf.colors_enabled = true;
 	conf.fancy_scrolling = true;
 	conf.playlist_show_remaining_time = false;
@@ -714,6 +715,10 @@ void ReadConfiguration(ncmpcpp_config &conf)
 			{
 				if (!v.empty())
 					conf.color2 = IntoColor(v);
+			}
+			else if (cl.find("mpd_communication_mode") != std::string::npos)
+			{
+				conf.enable_idle_notifications = v == "notifications";
 			}
 			else if (cl.find("colors_enabled") != std::string::npos)
 			{

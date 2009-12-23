@@ -176,6 +176,7 @@ struct ncmpcpp_config
 	
 	mpd_tag_type media_lib_primary_tag;
 	
+	bool enable_idle_notifications;
 	bool colors_enabled;
 	bool fancy_scrolling;
 	bool playlist_show_remaining_time;
