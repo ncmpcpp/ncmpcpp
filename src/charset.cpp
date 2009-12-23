@@ -33,23 +33,10 @@
 
 namespace
 {
-	inline bool char_non_ascii(char ch)
-	{
-		return (ch & 0x80) != 0;
-	}
-	
 	bool has_non_ascii_chars(const char *s)
 	{
 		for (; *s; ++s)
-			if (char_non_ascii(*s))
-				return true;
-		return false;
-	}
-	
-	bool has_non_ascii_chars(const std::string &s)
-	{
-		for (std::string::const_iterator it = s.begin(); it != s.end(); ++it)
-			if (char_non_ascii(*it))
+			if (*s & 0x80)
 				return true;
 		return false;
 	}
@@ -88,7 +75,7 @@ namespace
 
 void utf_to_locale(std::string &s)
 {
-	if (s.empty() || Config.system_encoding.empty() || !has_non_ascii_chars(s))
+	if (s.empty() || Config.system_encoding.empty() || !has_non_ascii_chars(s.c_str()))
 		return;
 	const char *tmp = strdup(s.c_str());
 	charset_convert("utf-8", Config.system_encoding.c_str(), tmp, 1, s.length());
@@ -105,7 +92,7 @@ std::string utf_to_locale_cpy(const std::string &s)
 
 void locale_to_utf(std::string &s)
 {
-	if (s.empty() || Config.system_encoding.empty() || !has_non_ascii_chars(s))
+	if (s.empty() || Config.system_encoding.empty() || !has_non_ascii_chars(s.c_str()))
 		return;
 	const char *tmp = strdup(s.c_str());
 	charset_convert(Config.system_encoding.c_str(), "utf-8", tmp, 1, s.length());
