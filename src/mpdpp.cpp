@@ -413,12 +413,18 @@ void Connection::Toggle()
 	if (!isCommandsListEnabled)
 	{
 		GoBusy();
-		mpd_run_toggle_pause(itsConnection);;
+		if (isPlaying())
+			mpd_run_toggle_pause(itsConnection);
+		else
+			mpd_run_play(itsConnection);
 	}
 	else
 	{
 		assert(!isIdle);
-		mpd_send_toggle_pause(itsConnection);
+		if (isPlaying())
+			mpd_send_toggle_pause(itsConnection);
+		else
+			mpd_send_toggle_pause(itsConnection);
 	}
 }
 
