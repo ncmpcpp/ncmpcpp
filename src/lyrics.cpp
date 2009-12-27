@@ -130,6 +130,7 @@ void Lyrics::SwitchTo()
 			}
 			RedrawHeader = 1;
 			w->Clear();
+			w->Reset();
 #			ifdef HAVE_CURL_CURL_H
 			static_cast<Window &>(*w) << "Fetching lyrics...";
 			w->Window::Refresh();

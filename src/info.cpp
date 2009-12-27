@@ -126,6 +126,7 @@ void Info::GetSong()
 		RedrawHeader = 1;
 		itsTitle = "Song info";
 		w->Clear();
+		w->Reset();
 		PrepareSong(*s);
 		w->Window::Clear();
 		w->Flush();
@@ -172,6 +173,7 @@ void Info::GetArtist()
 		RedrawHeader = 1;
 		itsTitle = "Artist info - " + itsArtist;
 		w->Clear();
+		w->Reset();
 		static_cast<Window &>(*w) << "Fetching artist info...";
 		w->Window::Refresh();
 #		ifdef HAVE_PTHREAD_H
