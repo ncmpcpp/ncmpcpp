@@ -333,6 +333,7 @@ void DefaultConfiguration(ncmpcpp_config &conf)
 	conf.lyrics_db = 0;
 	conf.regex_type = 0;
 	conf.lines_scrolled = 2;
+	conf.selected_item_suffix_length = 0;
 #	ifdef HAVE_LANGINFO_H
 	conf.system_encoding = nl_langinfo(CODESET);
 	if (conf.system_encoding == "UTF-8") // mpd uses utf-8 by default so no need to convert
@@ -688,6 +689,7 @@ void ReadConfiguration(ncmpcpp_config &conf)
 				{
 					conf.selected_item_suffix.Clear();
 					String2Buffer(v, conf.selected_item_suffix);
+					conf.selected_item_suffix_length = Window::Length(conf.selected_item_suffix.Str());
 				}
 			}
 			else if (cl.find("now_playing_prefix") != std::string::npos)

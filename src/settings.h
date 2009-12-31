@@ -227,6 +227,8 @@ struct ncmpcpp_config
 	int regex_type;
 	
 	unsigned lines_scrolled;
+	
+	size_t selected_item_suffix_length;
 };
 
 extern ncmpcpp_config Config;

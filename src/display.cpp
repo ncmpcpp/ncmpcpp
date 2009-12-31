@@ -255,7 +255,7 @@ void Display::Songs(const MPD::Song &s, void *data, Menu<MPD::Song> *menu)
 				String2Buffer(TO_WSTRING(line.substr(it-line.begin()+1)), buf);
 				if (is_now_playing)
 					buf << Config.now_playing_suffix;
-				*menu << XY(menu->GetWidth()-buf.Str().length(), menu->Y()) << buf;
+				*menu << XY(menu->GetWidth()-buf.Str().length()-(menu->isSelected(menu->CurrentlyDrawedPosition()) ? Config.selected_item_suffix_length : 0), menu->Y()) << buf;
 				return;
 			}
 			else // not a color nor right align, just a random character
