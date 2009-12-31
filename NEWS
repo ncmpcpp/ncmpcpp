@@ -1,3 +1,19 @@
+ncmpcpp-0.5
+
+ + bash completion support
+ + libmpdclient2 support
+ + "idle" command support
+ + new screen: mpd server info
+ + new feature: sort songs in browser by mtime
+ + new feature: lyrics "refreshing"
+ + new feature: toggle replay gain mode
+ + new feature: support for centered cursor
+ + new feature: add selected items to playlist at given position
+ + playlist: support for range sort/reverse
+ + tag editor: support for numerating tracks using xx/xx format
+ + a lot of minor fixes
+
+
 ncmpcpp-0.4.1
 
  + support for writing performer, composer and disc tags into ogg and flac files
