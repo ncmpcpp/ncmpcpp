@@ -689,7 +689,7 @@ void ReadConfiguration(ncmpcpp_config &conf)
 				{
 					conf.selected_item_suffix.Clear();
 					String2Buffer(v, conf.selected_item_suffix);
-					conf.selected_item_suffix_length = Window::Length(conf.selected_item_suffix.Str());
+					conf.selected_item_suffix_length = Window::Length(TO_WSTRING(conf.selected_item_suffix.Str()));
 				}
 			}
 			else if (cl.find("now_playing_prefix") != std::string::npos)
