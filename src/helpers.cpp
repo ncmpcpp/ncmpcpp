@@ -176,6 +176,12 @@ void ParseArgv(int argc, char **argv)
 		}
 		else if (!strcmp(argv[i], "toggle"))
 		{
+			Mpd.UpdateStatus();
+			if (!Mpd.GetErrorMessage().empty())
+			{
+				std::cout << "Error: " << Mpd.GetErrorMessage() << std::endl;
+				exit(1);
+			}
 			Mpd.Toggle();
 			quit = 1;
 		}

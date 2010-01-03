@@ -424,7 +424,7 @@ void Connection::Toggle()
 		if (isPlaying())
 			mpd_send_toggle_pause(itsConnection);
 		else
-			mpd_send_toggle_pause(itsConnection);
+			mpd_send_play(itsConnection);
 	}
 }
 
