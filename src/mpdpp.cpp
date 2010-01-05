@@ -1022,28 +1022,7 @@ void Connection::GetList(TagList &v, mpd_tag_type type)
 	mpd_search_commit(itsConnection);
 	while (mpd_pair *item = mpd_recv_pair_tag(itsConnection, type))
 	{
-		if (item->value[0] != 0) // do not push empty item
-			v.push_back(item->value);
-		mpd_return_pair(itsConnection, item);
-	}
-	mpd_response_finish(itsConnection);
-	GoIdle();
-}
-
-void Connection::GetAlbums(const std::string &artist, TagList &v)
-{
-	if (!itsConnection)
-		return;
-	assert(!isCommandsListEnabled);
-	GoBusy();
-	mpd_search_db_tags(itsConnection, MPD_TAG_ALBUM);
-	if (!artist.empty())
-		mpd_search_add_tag_constraint(itsConnection, MPD_OPERATOR_DEFAULT, MPD_TAG_ARTIST, artist.c_str());
-	mpd_search_commit(itsConnection);
-	while (mpd_pair *item = mpd_recv_pair_tag(itsConnection, MPD_TAG_ALBUM))
-	{
-		if (item->value[0] != 0) // do not push empty item
-			v.push_back(item->value);
+		v.push_back(item->value);
 		mpd_return_pair(itsConnection, item);
 	}
 	mpd_response_finish(itsConnection);
@@ -1096,8 +1075,7 @@ void Connection::CommitSearch(TagList &v)
 	mpd_search_commit(itsConnection);
 	while (mpd_pair *tag = mpd_recv_pair_tag(itsConnection, itsSearchedField))
 	{
-		if (tag->value[0] != 0) // do not push empty item
-			v.push_back(tag->value);
+		v.push_back(tag->value);
 		mpd_return_pair(itsConnection, tag);
 	}
 	mpd_response_finish(itsConnection);

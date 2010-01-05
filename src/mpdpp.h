@@ -197,7 +197,6 @@ namespace MPD
 			
 			void GetPlaylists(TagList &);
 			void GetList(TagList &, mpd_tag_type);
-			void GetAlbums(const std::string &, TagList &);
 			void GetDirectory(const std::string &, ItemList &);
 			void GetDirectoryRecursive(const std::string &, SongList &);
 			void GetSongs(const std::string &, SongList &);

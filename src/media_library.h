@@ -36,6 +36,11 @@ class MediaLibrary : public Screen<Window>
 		std::string Year;
 	};
 	
+	struct SearchConstraintsSorting
+	{
+		bool operator()(const SearchConstraints &a, const SearchConstraints &b) const;
+	};
+	
 	public:
 		virtual void SwitchTo();
 		virtual void Resize();
@@ -67,7 +72,7 @@ class MediaLibrary : public Screen<Window>
 		void LocateSong(const MPD::Song &);
 		
 		Menu<std::string> *Artists;
-		Menu< std::pair<std::string, SearchConstraints> > *Albums;
+		Menu<SearchConstraints> *Albums;
 		Menu<MPD::Song> *Songs;
 		
 	protected:
@@ -77,6 +82,9 @@ class MediaLibrary : public Screen<Window>
 		void AddToPlaylist(bool);
 		
 		static std::string SongToString(const MPD::Song &s, void *);
+		
+		static std::string AlbumToString(const SearchConstraints &, void *);
+		static void DisplayAlbums(const SearchConstraints &, void *, Menu<SearchConstraints> *);
 		
 		static bool SortSongsByTrack(MPD::Song *, MPD::Song *);
 		static bool SortSongsByYear(MPD::Song *, MPD::Song *);

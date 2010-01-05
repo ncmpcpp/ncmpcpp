@@ -235,7 +235,7 @@ void TagEditor::Update()
 		{
 			*Albums << XY(0, 0) << "Fetching albums...";
 			Albums->Window::Refresh();
-			Mpd.GetAlbums("", list);
+			Mpd.GetList(list, MPD_TAG_ALBUM);
 			for (MPD::TagList::const_iterator it = list.begin(); it != list.end(); ++it)
 			{
 				MPD::SongList l;

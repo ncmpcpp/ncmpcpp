@@ -1420,9 +1420,9 @@ int main(int argc, char *argv[])
 			{
 				LockStatusbar();
 				Statusbar() << fmtBold << "Album: " << fmtBoldEnd;
-				std::string new_album = wFooter->GetString(myLibrary->Albums->Current().second.Album);
+				std::string new_album = wFooter->GetString(myLibrary->Albums->Current().Album);
 				UnlockStatusbar();
-				if (!new_album.empty() && new_album != myLibrary->Albums->Current().second.Album)
+				if (!new_album.empty() && new_album != myLibrary->Albums->Current().Album)
 				{
 					bool success = 1;
 					ShowMessage("Updating tags...");
