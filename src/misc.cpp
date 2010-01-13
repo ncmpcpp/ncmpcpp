@@ -223,7 +223,7 @@ void SelectedItemsAdder::EnterPressed()
 		}
 		else if (pos == 3) // after currently playing album
 		{
-			std::string album = myPlaylist->CurrentSong()->GetAlbum();
+			std::string album = myPlaylist->NowPlayingSong()->GetAlbum();
 			int i;
 			for (i = Mpd.GetCurrentSongPos()+1; i < int(myPlaylist->Items->Size()); ++i)
 				if ((*myPlaylist->Items)[i].GetAlbum() != album)
