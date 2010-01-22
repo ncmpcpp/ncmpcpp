@@ -64,14 +64,12 @@ class SearchEngine : public Screen< Menu< std::pair<Buffer *, MPD::Song *> > >
 		void Search();
 		
 		static std::string SearchEngineOptionToString(const std::pair<Buffer *, MPD::Song *> &, void *);
-		static bool SEStringComparison(const std::string &a, const std::string &b, bool case_sensitive);
 		
 		static const size_t ConstraintsNumber = 10;
 		static const char *ConstraintsNames[];
 		std::string itsConstraints[ConstraintsNumber];
 		
 		static bool MatchToPattern;
-		static int CaseSensitive;
 };
 
 extern SearchEngine *mySearcher;

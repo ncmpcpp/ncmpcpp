@@ -50,12 +50,11 @@ const char *SearchEngine::ConstraintsNames[] =
 const char *SearchEngine::NormalMode = "Match if tag contains searched phrase (regexes supported)";
 const char *SearchEngine::StrictMode = "Match only if both values are the same";
 
-size_t SearchEngine::StaticOptions = 20;
-size_t SearchEngine::SearchButton = 15;
-size_t SearchEngine::ResetButton = 16;
+size_t SearchEngine::StaticOptions = 19;
+size_t SearchEngine::ResetButton = 15;
+size_t SearchEngine::SearchButton = 14;
 
 bool SearchEngine::MatchToPattern = 1;
-int SearchEngine::CaseSensitive = REG_ICASE;
 
 void SearchEngine::Init()
 {
@@ -125,20 +124,15 @@ void SearchEngine::EnterPressed()
 		*w->Current().first << fmtBold << std::setw(10) << std::left << ConstraintsNames[option] << fmtBoldEnd << ' ';
 		ShowTag(*w->Current().first, itsConstraints[option]);
 	}
-	else if (option == 11)
+	else if (option == ConstraintsNumber+1)
 	{
 		Config.search_in_db = !Config.search_in_db;
 		*w->Current().first << fmtBold << "Search in:" << fmtBoldEnd << ' ' << (Config.search_in_db ? "Database" : "Current playlist");
 	}
-	else if (option == 12)
+	else if (option == ConstraintsNumber+2)
 	{
 		MatchToPattern = !MatchToPattern;
 		*w->Current().first << fmtBold << "Search mode:" << fmtBoldEnd << ' ' << (MatchToPattern ? NormalMode : StrictMode);
-	}
-	else if (option == 13)
-	{
-		CaseSensitive = !CaseSensitive * REG_ICASE;
-		*w->Current().first << fmtBold << "Case sensitive:" << fmtBoldEnd << ' ' << (!CaseSensitive ? "Yes" : "No");
 	}
 	else if (option == SearchButton)
 	{
@@ -269,7 +263,7 @@ void SearchEngine::Prepare()
 {
 	for (size_t i = 0; i < w->Size(); ++i)
 	{
-		if (i == 10 || i == 14 || i == ResetButton+1 || i == ResetButton+3) // separators
+		if (i == ConstraintsNumber || i == SearchButton-1 || i == ResetButton+1 || i == ResetButton+3) // separators
 			continue;
 		delete (*w)[i].first;
 		delete (*w)[i].second;
@@ -277,14 +271,14 @@ void SearchEngine::Prepare()
 	
 	w->SetTitle("");
 	w->Clear();
-	w->ResizeList(17);
+	w->ResizeList(StaticOptions-3);
 	
-	w->IntoSeparator(10);
-	w->IntoSeparator(14);
+	w->IntoSeparator(ConstraintsNumber);
+	w->IntoSeparator(SearchButton-1);
 	
-	for (size_t i = 0; i < 17; ++i)
+	for (size_t i = 0; i < StaticOptions-3; ++i)
 	{
-		if (i == 10 || i == 14) // separators
+		if (i == ConstraintsNumber || i == SearchButton-1) // separators
 			continue;
 		(*w)[i].first = new Buffer();
 	}
@@ -295,9 +289,8 @@ void SearchEngine::Prepare()
 		ShowTag(*(*w)[i].first, itsConstraints[i]);
 	}
 	
-	*w->at(11).first << fmtBold << "Search in:" << fmtBoldEnd << ' ' << (Config.search_in_db ? "Database" : "Current playlist");
-	*w->at(12).first << fmtBold << "Search mode:" << fmtBoldEnd << ' ' << (MatchToPattern ? NormalMode : StrictMode);
-	*w->at(13).first << fmtBold << "Case sensitive:" << fmtBoldEnd << ' ' << (!CaseSensitive ? "Yes" : "No");
+	*w->at(ConstraintsNumber+1).first << fmtBold << "Search in:" << fmtBoldEnd << ' ' << (Config.search_in_db ? "Database" : "Current playlist");
+	*w->at(ConstraintsNumber+2).first << fmtBold << "Search mode:" << fmtBoldEnd << ' ' << (MatchToPattern ? NormalMode : StrictMode);
 	
 	*w->at(SearchButton).first << "Search";
 	*w->at(ResetButton).first << "Reset";
@@ -337,7 +330,7 @@ void SearchEngine::Search()
 			regex_t rx;
 			if (!itsConstraints[0].empty())
 			{
-				if (regcomp(&rx, itsConstraints[0].c_str(), CaseSensitive | Config.regex_type) == 0)
+				if (regcomp(&rx, itsConstraints[0].c_str(), REG_ICASE | Config.regex_type) == 0)
 				{
 					any_found =
 						!regexec(&rx, (*it)->GetArtist().c_str(), 0, 0, 0)
@@ -355,91 +348,93 @@ void SearchEngine::Search()
 			
 			if (found && !itsConstraints[1].empty())
 			{
-				if (!regcomp(&rx, itsConstraints[1].c_str(), CaseSensitive | Config.regex_type))
+				if (!regcomp(&rx, itsConstraints[1].c_str(), REG_ICASE | Config.regex_type))
 					found = !regexec(&rx, (*it)->GetArtist().c_str(), 0, 0, 0);
 				regfree(&rx);
 			}
 			if (found && !itsConstraints[2].empty())
 			{
-				if (!regcomp(&rx, itsConstraints[2].c_str(), CaseSensitive | Config.regex_type))
+				if (!regcomp(&rx, itsConstraints[2].c_str(), REG_ICASE | Config.regex_type))
 					found = !regexec(&rx, (*it)->GetTitle().c_str(), 0, 0, 0);
 				regfree(&rx);
 			}
 			if (found && !itsConstraints[3].empty())
 			{
-				if (!regcomp(&rx, itsConstraints[3].c_str(), CaseSensitive | Config.regex_type))
+				if (!regcomp(&rx, itsConstraints[3].c_str(), REG_ICASE | Config.regex_type))
 					found = !regexec(&rx, (*it)->GetAlbum().c_str(), 0, 0, 0);
 				regfree(&rx);
 			}
 			if (found && !itsConstraints[4].empty())
 			{
-				if (!regcomp(&rx, itsConstraints[4].c_str(), CaseSensitive | Config.regex_type))
+				if (!regcomp(&rx, itsConstraints[4].c_str(), REG_ICASE | Config.regex_type))
 					found = !regexec(&rx, (*it)->GetName().c_str(), 0, 0, 0);
 				regfree(&rx);
 			}
 			if (found && !itsConstraints[5].empty())
 			{
-				if (!regcomp(&rx, itsConstraints[5].c_str(), CaseSensitive | Config.regex_type))
+				if (!regcomp(&rx, itsConstraints[5].c_str(), REG_ICASE | Config.regex_type))
 					found = !regexec(&rx, (*it)->GetComposer().c_str(), 0, 0, 0);
 				regfree(&rx);
 			}
 			if (found && !itsConstraints[6].empty())
 			{
-				if (!regcomp(&rx, itsConstraints[6].c_str(), CaseSensitive | Config.regex_type))
+				if (!regcomp(&rx, itsConstraints[6].c_str(), REG_ICASE | Config.regex_type))
 					found = !regexec(&rx, (*it)->GetPerformer().c_str(), 0, 0, 0);
 				regfree(&rx);
 			}
 			if (found && !itsConstraints[7].empty())
 			{
-				if (!regcomp(&rx, itsConstraints[7].c_str(), CaseSensitive | Config.regex_type))
+				if (!regcomp(&rx, itsConstraints[7].c_str(), REG_ICASE | Config.regex_type))
 					found = !regexec(&rx, (*it)->GetGenre().c_str(), 0, 0, 0);
 				regfree(&rx);
 			}
 			if (found && !itsConstraints[8].empty())
 			{
-				if (!regcomp(&rx, itsConstraints[8].c_str(), CaseSensitive | Config.regex_type))
+				if (!regcomp(&rx, itsConstraints[8].c_str(), REG_ICASE | Config.regex_type))
 					found = !regexec(&rx, (*it)->GetDate().c_str(), 0, 0, 0);
 				regfree(&rx);
 			}
 			if (found && !itsConstraints[9].empty())
 			{
-				if (!regcomp(&rx, itsConstraints[9].c_str(), CaseSensitive | Config.regex_type))
+				if (!regcomp(&rx, itsConstraints[9].c_str(), REG_ICASE | Config.regex_type))
 					found = !regexec(&rx, (*it)->GetComment().c_str(), 0, 0, 0);
 				regfree(&rx);
 			}
 		}
 		else
 		{
+			CaseInsensitiveStringComparison cmp;
+			
 			if (!itsConstraints[0].empty())
 				any_found =
-					SEStringComparison((*it)->GetArtist(), itsConstraints[0], CaseSensitive)
-				||	SEStringComparison((*it)->GetTitle(), itsConstraints[0], CaseSensitive)
-				||	SEStringComparison((*it)->GetAlbum(), itsConstraints[0], CaseSensitive)
-				||	SEStringComparison((*it)->GetName(), itsConstraints[0], CaseSensitive)
-				||	SEStringComparison((*it)->GetComposer(), itsConstraints[0], CaseSensitive)
-				||	SEStringComparison((*it)->GetPerformer(), itsConstraints[0], CaseSensitive)
-				||	SEStringComparison((*it)->GetGenre(), itsConstraints[0], CaseSensitive)
-				||	SEStringComparison((*it)->GetDate(), itsConstraints[0], CaseSensitive)
-				||	SEStringComparison((*it)->GetComment(), itsConstraints[0], CaseSensitive);
+					!cmp((*it)->GetArtist(), itsConstraints[0])
+				||	!cmp((*it)->GetTitle(), itsConstraints[0])
+				||	!cmp((*it)->GetAlbum(), itsConstraints[0])
+				||	!cmp((*it)->GetName(), itsConstraints[0])
+				||	!cmp((*it)->GetComposer(), itsConstraints[0])
+				||	!cmp((*it)->GetPerformer(), itsConstraints[0])
+				||	!cmp((*it)->GetGenre(), itsConstraints[0])
+				||	!cmp((*it)->GetDate(), itsConstraints[0])
+				||	!cmp((*it)->GetComment(), itsConstraints[0]);
 			
 			if (found && !itsConstraints[1].empty())
-				found = SEStringComparison((*it)->GetArtist(), itsConstraints[1], CaseSensitive);
+				found = !cmp((*it)->GetArtist(), itsConstraints[1]);
 			if (found && !itsConstraints[2].empty())
-				found = SEStringComparison((*it)->GetTitle(), itsConstraints[2], CaseSensitive);
+				found = !cmp((*it)->GetTitle(), itsConstraints[2]);
 			if (found && !itsConstraints[3].empty())
-				found = SEStringComparison((*it)->GetAlbum(), itsConstraints[3], CaseSensitive);
+				found = !cmp((*it)->GetAlbum(), itsConstraints[3]);
 			if (found && !itsConstraints[4].empty())
-				found = SEStringComparison((*it)->GetName(), itsConstraints[4], CaseSensitive);
+				found = !cmp((*it)->GetName(), itsConstraints[4]);
 			if (found && !itsConstraints[5].empty())
-				found = SEStringComparison((*it)->GetComposer(), itsConstraints[5], CaseSensitive);
+				found = !cmp((*it)->GetComposer(), itsConstraints[5]);
 			if (found && !itsConstraints[6].empty())
-				found = SEStringComparison((*it)->GetPerformer(), itsConstraints[6], CaseSensitive);
+				found = !cmp((*it)->GetPerformer(), itsConstraints[6]);
 			if (found && !itsConstraints[7].empty())
-				found = SEStringComparison((*it)->GetGenre(), itsConstraints[7], CaseSensitive);
+				found = !cmp((*it)->GetGenre(), itsConstraints[7]);
 			if (found && !itsConstraints[8].empty())
-				found = SEStringComparison((*it)->GetDate(), itsConstraints[8], CaseSensitive);
+				found = !cmp((*it)->GetDate(), itsConstraints[8]);
 			if (found && !itsConstraints[9].empty())
-				found = SEStringComparison((*it)->GetComment(), itsConstraints[9], CaseSensitive);
+				found = !cmp((*it)->GetComment(), itsConstraints[9]);
 		}
 		
 		if (found && any_found)
@@ -453,11 +448,6 @@ void SearchEngine::Search()
 	}
 	if (Config.search_in_db) // free song list only if it's database
 		MPD::FreeSongList(list);
-}
-
-bool SearchEngine::SEStringComparison(const std::string &a, const std::string &b, bool case_sensitive)
-{
-	return case_sensitive ? a == b : !CaseInsensitiveStringComparison()(a, b);
 }
 
 std::string SearchEngine::SearchEngineOptionToString(const std::pair<Buffer *, MPD::Song *> &pair, void *)
