@@ -1844,11 +1844,27 @@ int main(int argc, char *argv[])
 			if (myScreen == myPlaylist)
 			{
 				LockStatusbar();
-				Statusbar() << "Number of random songs: ";
+				Statusbar() << "Add random ? [" << fmtBold << 's' << fmtBoldEnd << "ongs/" << fmtBold << 'a' << fmtBoldEnd << "rtists/al" << fmtBold << 'b' << fmtBoldEnd << "ums] ";
+				wFooter->Refresh();
+				int answer = 0;
+				do
+				{
+					TraceMpdStatus();
+					wFooter->ReadKey(answer);
+				}
+				while (answer != 's' && answer != 'a' && answer != 'b');
+				UnlockStatusbar();
+				
+				mpd_tag_type tag_type = IntoTagItem(answer);
+				std::string tag_type_str = answer == 's' ? "song" : IntoStr(tag_type);
+				ToLower(tag_type_str);
+				
+				LockStatusbar();
+				Statusbar() << "Number of random " << tag_type_str << "s: ";
 				size_t number = StrToLong(wFooter->GetString());
 				UnlockStatusbar();
-				if (number && Mpd.AddRandomSongs(number))
-					ShowMessage("%zu random song%s added to playlist!", number, number == 1 ? "" : "s");
+				if (number && (answer == 's' ? Mpd.AddRandomSongs(number) : Mpd.AddRandomTag(tag_type, number)))
+					ShowMessage("%zu random %s%s added to playlist!", number, tag_type_str.c_str(), number == 1 ? "" : "s");
 			}
 			else if (myScreen == myBrowser && !myBrowser->isLocal())
 			{

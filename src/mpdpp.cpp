@@ -864,6 +864,41 @@ void MPD::Connection::Add(const std::string &path)
 	}
 }
 
+bool MPD::Connection::AddRandomTag(mpd_tag_type tag, size_t number)
+{
+	if (!itsConnection && !number)
+		return false;
+	assert(!isCommandsListEnabled);
+	
+	TagList tags;
+	GetList(tags, tag);
+	
+	if (number > tags.size())
+	{
+		if (itsErrorHandler)
+			itsErrorHandler(this, 0, "Requested number is out of range!", itsErrorHandlerUserdata);
+		return false;
+	}
+	else
+	{
+		srand(time(0));
+		std::random_shuffle(tags.begin(), tags.end());
+		TagList::const_iterator it = tags.begin()+rand()%(tags.size()-number);
+		for (size_t i = 0; i < number && it != tags.end(); ++i)
+		{
+			StartSearch(1);
+			AddSearch(tag, *it++);
+			SongList list;
+			CommitSearch(list);
+			StartCommandsList();
+			for (SongList::const_iterator j = list.begin(); j != list.end(); ++j)
+				AddSong(**j);
+			CommitCommandsList();
+		}
+	}
+	return true;
+}
+
 bool MPD::Connection::AddRandomSongs(size_t number)
 {
 	if (!itsConnection && !number)

@@ -125,6 +125,8 @@ mpd_tag_type IntoTagItem(char c)
 	{
 		case 'a':
 			return MPD_TAG_ARTIST;
+		case 'b':
+			return MPD_TAG_ALBUM;
 		case 'y':
 			return MPD_TAG_DATE;
 		case 'g':
