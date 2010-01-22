@@ -39,8 +39,6 @@
 using Global::MainHeight;
 using Global::MainStartY;
 using Global::myOldScreen;
-using Global::myScreen;
-using Global::wFooter;
 
 TinyTagEditor *myTinyTagEditor = new TinyTagEditor;
 
@@ -70,8 +68,8 @@ void TinyTagEditor::SwitchTo()
 	{
 		if (hasToBeResized)
 			Resize();
-		myOldScreen = myScreen;
-		myScreen = this;
+		myOldScreen = Global::myScreen;
+		Global::myScreen = this;
 		Global::RedrawHeader = 1;
 	}
 	else
@@ -103,7 +101,7 @@ void TinyTagEditor::EnterPressed()
 	{
 		size_t pos = option-8;
 		Statusbar() << fmtBold << Info::Tags[pos].Name << ": " << fmtBoldEnd;
-		s.SetTags(Info::Tags[pos].Set, wFooter->GetString(s.GetTags(Info::Tags[pos].Get)));
+		s.SetTags(Info::Tags[pos].Set, Global::wFooter->GetString(s.GetTags(Info::Tags[pos].Get)));
 		w->at(option).Clear();
 		w->at(option) << fmtBold << Info::Tags[pos].Name << ':' << fmtBoldEnd << ' ';
 		ShowTag(w->at(option), s.GetTags(Info::Tags[pos].Get));
@@ -115,7 +113,7 @@ void TinyTagEditor::EnterPressed()
 		size_t dot = filename.rfind(".");
 		std::string extension = filename.substr(dot);
 		filename = filename.substr(0, dot);
-		std::string new_name = wFooter->GetString(filename);
+		std::string new_name = Global::wFooter->GetString(filename);
 		s.SetNewName(new_name + extension);
 		w->at(option).Clear();
 		w->at(option) << fmtBold << "Filename:" << fmtBoldEnd << ' ' << (s.GetNewName().empty() ? s.GetName() : s.GetNewName());

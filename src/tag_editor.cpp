@@ -40,10 +40,6 @@
 
 using Global::MainHeight;
 using Global::MainStartY;
-using Global::myOldScreen;
-using Global::myScreen;
-using Global::myPrevScreen;
-using Global::wFooter;
 
 TagEditor *myTagEditor = new TagEditor;
 
@@ -189,6 +185,8 @@ std::basic_string<my_char_t> TagEditor::Title()
 
 void TagEditor::SwitchTo()
 {
+	using Global::myScreen;
+	
 	if (myScreen == this)
 		return;
 	
@@ -199,7 +197,7 @@ void TagEditor::SwitchTo()
 		Resize();
 	
 	if (myScreen != this && myScreen->isTabbable())
-		myPrevScreen = myScreen;
+		Global::myPrevScreen = myScreen;
 	myScreen = this;
 	Global::RedrawHeader = 1;
 	Refresh();
@@ -323,6 +321,8 @@ void TagEditor::Update()
 
 void TagEditor::EnterPressed()
 {
+	using Global::wFooter;
+	
 	if (w == Dirs)
 	{
 		MPD::TagList test;
@@ -996,7 +996,7 @@ bool TagEditor::WriteTags(MPD::Song &s)
 			locale_to_utf(new_name);
 			if (rename(path_to_file.c_str(), new_name.c_str()) == 0 && !file_is_from_db)
 			{
-				if (myOldScreen == myPlaylist)
+				if (Global::myOldScreen == myPlaylist)
 				{
 					// if we rename local file, it won't get updated
 					// so just remove it from playlist and add again

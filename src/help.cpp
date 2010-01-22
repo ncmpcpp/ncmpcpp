@@ -25,7 +25,8 @@
 #include "settings.h"
 #include "tag_editor.h"
 
-using namespace Global;
+using Global::MainHeight;
+using Global::MainStartY;
 
 Help *myHelp = new Help;
 
@@ -46,6 +47,8 @@ void Help::Resize()
 
 void Help::SwitchTo()
 {
+	using Global::myScreen;
+	
 	if (myScreen == this)
 		return;
 	
@@ -56,9 +59,9 @@ void Help::SwitchTo()
 		Resize();
 	
 	if (myScreen != this && myScreen->isTabbable())
-		myPrevScreen = myScreen;
+		Global::myPrevScreen = myScreen;
 	myScreen = this;
-	RedrawHeader = 1;
+	Global::RedrawHeader = 1;
 
 }
 

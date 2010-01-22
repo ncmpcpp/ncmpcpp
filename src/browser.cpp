@@ -36,8 +36,14 @@
 # include "tag_editor.h"
 #endif // HAVE_TAGLIB_H
 
-using namespace Global;
-using namespace MPD;
+using Global::MainHeight;
+using Global::MainStartY;
+using Global::myScreen;
+using Global::RedrawHeader;
+
+using MPD::itDirectory;
+using MPD::itSong;
+using MPD::itPlaylist;
 
 Browser *myBrowser = new Browser;
 
@@ -51,7 +57,7 @@ const char *Browser::SupportedExtensions[] =
 
 void Browser::Init()
 {
-	w = new Menu<Item>(0, MainStartY, COLS, MainHeight, Config.columns_in_browser ? Display::Columns() : "", Config.main_color, brNone);
+	w = new Menu<MPD::Item>(0, MainStartY, COLS, MainHeight, Config.columns_in_browser ? Display::Columns() : "", Config.main_color, brNone);
 	w->HighlightColor(Config.main_highlight_color);
 	w->CyclicScrolling(Config.use_cyclic_scrolling);
 	w->SetSelectPrefix(&Config.selected_item_prefix);
@@ -89,7 +95,7 @@ void Browser::SwitchTo()
 	w->Empty() ? myBrowser->GetDirectory(itsBrowsedDir) : myBrowser->UpdateItemList();
 
 	if (myScreen != this && myScreen->isTabbable())
-		myPrevScreen = myScreen;
+		Global::myPrevScreen = myScreen;
 	myScreen = this;
 	RedrawHeader = 1;
 }
@@ -97,7 +103,7 @@ void Browser::SwitchTo()
 std::basic_string<my_char_t> Browser::Title()
 {
 	std::basic_string<my_char_t> result = U("Browse: ");
-	result += Scroller(TO_WSTRING(itsBrowsedDir), itsScrollBeginning, w->GetWidth()-result.length()-(Config.new_design ? 2 : VolumeState.length()));
+	result += Scroller(TO_WSTRING(itsBrowsedDir), itsScrollBeginning, w->GetWidth()-result.length()-(Config.new_design ? 2 : Global::VolumeState.length()));
 	return result;
 }
 
@@ -106,7 +112,7 @@ void Browser::EnterPressed()
 	if (w->Empty())
 		return;
 	
-	const Item &item = w->Current();
+	const MPD::Item &item = w->Current();
 	switch (item.type)
 	{
 		case itDirectory:
@@ -122,7 +128,7 @@ void Browser::EnterPressed()
 		}
 		case itPlaylist:
 		{
-			SongList list;
+			MPD::SongList list;
 			Mpd.GetPlaylistContent(locale_to_utf_cpy(item.name), list);
 			if (myPlaylist->Add(list, 1))
 				ShowMessage("Loading and playing playlist %s...", item.name.c_str());
@@ -147,7 +153,7 @@ void Browser::SpacePressed()
 	if (itsBrowsedDir != "/" && w->Choice() == 0 /* parent dir */)
 		return;
 	
-	const Item &item = w->Current();
+	const MPD::Item &item = w->Current();
 	switch (item.type)
 	{
 		case itDirectory:
@@ -155,11 +161,11 @@ void Browser::SpacePressed()
 			if (itsBrowsedDir != "/" && !w->Choice())
 				break; // do not let add parent dir.
 			
-			SongList list;
+			MPD::SongList list;
 #			ifndef WIN32
 			if (isLocal())
 			{
-				ItemList items;
+				MPD::ItemList items;
 				ShowMessage("Scanning \"%s\"...", item.name.c_str());
 				myBrowser->GetLocalDirectory(items, item.name, 1);
 				list.reserve(items.size());
@@ -183,7 +189,7 @@ void Browser::SpacePressed()
 		}
 		case itPlaylist:
 		{
-			SongList list;
+			MPD::SongList list;
 			Mpd.GetPlaylistContent(locale_to_utf_cpy(item.name), list);
 			if (myPlaylist->Add(list, 0))
 				ShowMessage("Loading playlist %s...", item.name.c_str());
@@ -253,7 +259,7 @@ void Browser::GetSelectedSongs(MPD::SongList &v)
 		selected.push_back(w->Choice());
 	for (std::vector<size_t>::const_iterator it = selected.begin(); it != selected.end(); ++it)
 	{
-		const Item &item = w->at(*it);
+		const MPD::Item &item = w->at(*it);
 		switch (item.type)
 		{
 			case itDirectory:
@@ -273,7 +279,7 @@ void Browser::GetSelectedSongs(MPD::SongList &v)
 			}
 			case itSong:
 			{
-				v.push_back(new Song(*item.song));
+				v.push_back(new MPD::Song(*item.song));
 				break;
 			}
 			case itPlaylist:
@@ -350,16 +356,16 @@ void Browser::GetDirectory(std::string dir, std::string subdir)
 	
 	if (dir != "/")
 	{
-		Item parent;
+		MPD::Item parent;
 		size_t slash = dir.rfind("/");
-		parent.song = reinterpret_cast<Song *>(1); // in that way we assume that's really parent dir
+		parent.song = reinterpret_cast<MPD::Song *>(1); // in that way we assume that's really parent dir
 		parent.name = slash != std::string::npos ? dir.substr(0, slash) : "/";
 		parent.type = itDirectory;
 		utf_to_locale(parent.name);
 		w->AddOption(parent);
 	}
 	
-	ItemList list;
+	MPD::ItemList list;
 #	ifndef WIN32
 	isLocal() ? GetLocalDirectory(list) : Mpd.GetDirectory(dir, list);
 #	else
@@ -368,7 +374,7 @@ void Browser::GetDirectory(std::string dir, std::string subdir)
 	if (!isLocal()) // local directory is already sorted
 		sort(list.begin(), list.end(), CaseInsensitiveSorting());
 	
-	for (ItemList::iterator it = list.begin(); it != list.end(); ++it)
+	for (MPD::ItemList::iterator it = list.begin(); it != list.end(); ++it)
 	{
 		switch (it->type)
 		{
@@ -407,7 +413,7 @@ void Browser::GetDirectory(std::string dir, std::string subdir)
 }
 
 #ifndef WIN32
-void Browser::GetLocalDirectory(ItemList &v, const std::string &directory, bool recursively) const
+void Browser::GetLocalDirectory(MPD::ItemList &v, const std::string &directory, bool recursively) const
 {
 	DIR *dir = opendir((directory.empty() ? itsBrowsedDir : directory).c_str());
 	
@@ -435,7 +441,7 @@ void Browser::GetLocalDirectory(ItemList &v, const std::string &directory, bool 
 	{
 		if (!Config.local_browser_show_hidden_files && file->d_name[0] == '.')
 			continue;
-		Item new_item;
+		MPD::Item new_item;
 		full_path = directory.empty() ? itsBrowsedDir : directory;
 		if (itsBrowsedDir != "/")
 			full_path += "/";
@@ -459,7 +465,7 @@ void Browser::GetLocalDirectory(ItemList &v, const std::string &directory, bool 
 		{
 			new_item.type = itSong;
 			mpd_pair file_pair = { "file", full_path.c_str() };
-			new_item.song = new Song(mpd_song_begin(&file_pair));
+			new_item.song = new MPD::Song(mpd_song_begin(&file_pair));
 #			ifdef HAVE_TAGLIB_H
 			if (!recursively)
 				TagEditor::ReadTags(*new_item.song);

@@ -29,8 +29,9 @@
 #include "playlist.h"
 #include "status.h"
 
-using namespace MPD;
-using namespace Global;
+using Global::MainHeight;
+using Global::MainStartY;
+using Global::myScreen;
 
 MediaLibrary *myLibrary = new MediaLibrary;
 
@@ -66,7 +67,7 @@ void MediaLibrary::Init()
 	Albums->SetGetStringFunction(AlbumToString);
 	Albums->SetGetStringFunctionUserData(this);
 	
-	Songs = new Menu<Song>(itsRightColStartX, MainStartY, itsRightColWidth, MainHeight, "Songs", Config.main_color, brNone);
+	Songs = new Menu<MPD::Song>(itsRightColStartX, MainStartY, itsRightColWidth, MainHeight, "Songs", Config.main_color, brNone);
 	Songs->HighlightColor(Config.main_highlight_color);
 	Songs->CyclicScrolling(Config.use_cyclic_scrolling);
 	Songs->SetSelectPrefix(&Config.selected_item_prefix);
@@ -151,9 +152,9 @@ void MediaLibrary::SwitchTo()
 		Resize();
 	
 	if (myScreen != this && myScreen->isTabbable())
-		myPrevScreen = myScreen;
+		Global::myPrevScreen = myScreen;
 	myScreen = this;
-	RedrawHeader = 1;
+	Global::RedrawHeader = 1;
 	Refresh();
 	UpdateSongList(Songs);
 }
@@ -167,11 +168,11 @@ void MediaLibrary::Update()
 {
 	if (!hasTwoColumns && Artists->Empty())
 	{
-		TagList list;
+		MPD::TagList list;
 		Albums->Clear();
 		Mpd.GetList(list, Config.media_lib_primary_tag);
 		sort(list.begin(), list.end(), CaseInsensitiveSorting());
-		for (TagList::iterator it = list.begin(); it != list.end(); ++it)
+		for (MPD::TagList::iterator it = list.begin(); it != list.end(); ++it)
 		{
 			if (!it->empty())
 			{
@@ -187,23 +188,23 @@ void MediaLibrary::Update()
 	{
 		Songs->Clear();
 		Albums->Reset();
-		TagList list;
+		MPD::TagList list;
 		locale_to_utf(Artists->Current());
 		Mpd.StartFieldSearch(MPD_TAG_ALBUM);
 		Mpd.AddSearch(Config.media_lib_primary_tag, Artists->Current());
 		Mpd.CommitSearch(list);
 		
-		for (TagList::iterator it = list.begin(); it != list.end(); ++it)
+		for (MPD::TagList::iterator it = list.begin(); it != list.end(); ++it)
 		{
 			if (Config.media_library_display_date)
 			{
-				TagList l;
+				MPD::TagList l;
 				Mpd.StartFieldSearch(MPD_TAG_DATE);
 				Mpd.AddSearch(Config.media_lib_primary_tag, Artists->Current());
 				Mpd.AddSearch(MPD_TAG_ALBUM, *it);
 				Mpd.CommitSearch(l);
 				utf_to_locale(*it);
-				for (TagList::iterator j = l.begin(); j != l.end(); ++j)
+				for (MPD::TagList::iterator j = l.begin(); j != l.end(); ++j)
 				{
 					utf_to_locale(*j);
 					Albums->AddOption(SearchConstraints(*it, *j));
@@ -223,32 +224,32 @@ void MediaLibrary::Update()
 	else if (hasTwoColumns && Albums->Empty())
 	{
 		Songs->Clear();
-		TagList artists;
+		MPD::TagList artists;
 		*Albums << XY(0, 0) << "Fetching albums...";
 		Albums->Window::Refresh();
 		Mpd.GetList(artists, Config.media_lib_primary_tag);
-		for (TagList::iterator i = artists.begin(); i != artists.end(); ++i)
+		for (MPD::TagList::iterator i = artists.begin(); i != artists.end(); ++i)
 		{
 			if (i->empty())
 				continue;
-			TagList albums;
+			MPD::TagList albums;
 			Mpd.StartFieldSearch(MPD_TAG_ALBUM);
 			Mpd.AddSearch(Config.media_lib_primary_tag, *i);
 			Mpd.CommitSearch(albums);
-			for (TagList::iterator j = albums.begin(); j != albums.end(); ++j)
+			for (MPD::TagList::iterator j = albums.begin(); j != albums.end(); ++j)
 			{
 				if (Config.media_library_display_date)
 				{
 					if (Config.media_lib_primary_tag != MPD_TAG_DATE)
 					{
-						TagList years;
+						MPD::TagList years;
 						Mpd.StartFieldSearch(MPD_TAG_DATE);
 						Mpd.AddSearch(Config.media_lib_primary_tag, *i);
 						Mpd.AddSearch(MPD_TAG_ALBUM, *j);
 						Mpd.CommitSearch(years);
 						utf_to_locale(*i);
 						utf_to_locale(*j);
-						for (TagList::iterator k = years.begin(); k != years.end(); ++k)
+						for (MPD::TagList::iterator k = years.begin(); k != years.end(); ++k)
 						{
 							utf_to_locale(*k);
 							Albums->AddOption(SearchConstraints(*i, *j, *k));
@@ -284,7 +285,7 @@ void MediaLibrary::Update()
 	if ((hasTwoColumns || !Artists->Empty()) && Songs->Empty())
 	{
 		Songs->Reset();
-		SongList list;
+		MPD::SongList list;
 		
 		Mpd.StartSearch(1);
 		Mpd.AddSearch(Config.media_lib_primary_tag, locale_to_utf_cpy(hasTwoColumns ? Albums->Current().Artist : Artists->Current()));
@@ -304,7 +305,7 @@ void MediaLibrary::Update()
 		sort(list.begin(), list.end(), SortSongsByTrack);
 		bool bold = 0;
 		
-		for (SongList::const_iterator it = list.begin(); it != list.end(); ++it)
+		for (MPD::SongList::const_iterator it = list.begin(); it != list.end(); ++it)
 		{
 			for (size_t j = 0; j < myPlaylist->Items->Size(); ++j)
 			{
@@ -575,7 +576,7 @@ void MediaLibrary::LocateSong(const MPD::Song &s)
 	if (myScreen != this)
 		SwitchTo();
 	Statusbar() << "Jumping to song...";
-	wFooter->Refresh();
+	Global::wFooter->Refresh();
 	
 	if (!hasTwoColumns)
 	{
@@ -710,7 +711,7 @@ bool MediaLibrary::SearchConstraintsSorting::operator()(const SearchConstraints 
 	return (result == 0 ? cmp(a.Album, b.Album) : result) < 0;
 }
 
-bool MediaLibrary::SortSongsByTrack(Song *a, Song *b)
+bool MediaLibrary::SortSongsByTrack(MPD::Song *a, MPD::Song *b)
 {
 	if (a->GetDisc() == b->GetDisc())
 		return StrToInt(a->GetTrack()) < StrToInt(b->GetTrack());

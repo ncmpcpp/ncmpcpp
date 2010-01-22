@@ -30,8 +30,6 @@
 #include "status.h"
 #include "tag_editor.h"
 
-using namespace MPD;
-
 bool ConnectToMPD()
 {
 	if (!Mpd.Connect())
@@ -228,17 +226,17 @@ void ParseArgv(int argc, char **argv)
 		exit(0);
 }
 
-bool CaseInsensitiveSorting::operator()(const Item &a, const Item &b)
+bool CaseInsensitiveSorting::operator()(const MPD::Item &a, const MPD::Item &b)
 {
 	if (a.type == b.type)
 	{
 		switch (a.type)
 		{
-			case itDirectory:
+			case MPD::itDirectory:
 				return cmp(ExtractTopDirectory(a.name), ExtractTopDirectory(b.name)) < 0;
-			case itPlaylist:
+			case MPD::itPlaylist:
 				return cmp(a.name, b.name) < 0;
-			case itSong:
+			case MPD::itSong:
 				return Config.browser_sort_by_mtime
 						? a.song->GetMTime() > b.song->GetMTime()
 						: operator()(a.song, b.song);
@@ -258,7 +256,7 @@ std::string Timestamp(time_t t)
 	return result;
 }
 
-void UpdateSongList(Menu<Song> *menu)
+void UpdateSongList(Menu<MPD::Song> *menu)
 {
 	bool bold = 0;
 	for (size_t i = 0; i < menu->Size(); ++i)
@@ -278,21 +276,21 @@ void UpdateSongList(Menu<Song> *menu)
 }
 
 #ifdef HAVE_TAGLIB_H
-std::string FindSharedDir(Menu<Song> *menu)
+std::string FindSharedDir(Menu<MPD::Song> *menu)
 {
-	SongList list;
+	MPD::SongList list;
 	for (size_t i = 0; i < menu->Size(); ++i)
 		list.push_back(&(*menu)[i]);
 	return FindSharedDir(list);
 }
 
-std::string FindSharedDir(const SongList &v)
+std::string FindSharedDir(const MPD::SongList &v)
 {
 	if (v.empty()) // this should never happen, but in case...
 		FatalError("empty SongList passed to FindSharedDir(const SongList &)!");
 	size_t i = -1;
 	std::string first = v.front()->GetDirectory();
-	for (SongList::const_iterator it = ++v.begin(); it != v.end(); ++it)
+	for (MPD::SongList::const_iterator it = ++v.begin(); it != v.end(); ++it)
 	{
 		size_t j = 0;
 		std::string dir = (*it)->GetDirectory();

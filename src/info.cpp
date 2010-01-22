@@ -41,7 +41,10 @@
 #include "status.h"
 #include "tag_editor.h"
 
-using namespace Global;
+using Global::MainHeight;
+using Global::MainStartY;
+using Global::myScreen;
+using Global::myOldScreen;
 
 #ifdef HAVE_CURL_CURL_H
 const std::string Info::Folder = home_path + HOME_FOLDER"artists";
@@ -123,7 +126,7 @@ void Info::GetSong()
 		
 		myOldScreen = myScreen;
 		myScreen = this;
-		RedrawHeader = 1;
+		Global::RedrawHeader = 1;
 		itsTitle = "Song info";
 		w->Clear();
 		w->Reset();
@@ -170,7 +173,7 @@ void Info::GetArtist()
 			Resize();
 		myOldScreen = myScreen;
 		myScreen = this;
-		RedrawHeader = 1;
+		Global::RedrawHeader = 1;
 		itsTitle = "Artist info - " + itsArtist;
 		w->Clear();
 		w->Reset();
@@ -240,7 +243,7 @@ void *Info::PrepareArtist(void *screen_void_ptr)
 	std::string result;
 	CURLcode code;
 	
-	pthread_mutex_lock(&CurlLock);
+	pthread_mutex_lock(&Global::CurlLock);
 	CURL *info = curl_easy_init();
 	curl_easy_setopt(info, CURLOPT_URL, url.c_str());
 	curl_easy_setopt(info, CURLOPT_WRITEFUNCTION, write_data);
@@ -249,7 +252,7 @@ void *Info::PrepareArtist(void *screen_void_ptr)
 	curl_easy_setopt(info, CURLOPT_NOSIGNAL, 1);
 	code = curl_easy_perform(info);
 	curl_easy_cleanup(info);
-	pthread_mutex_unlock(&CurlLock);
+	pthread_mutex_unlock(&Global::CurlLock);
 	
 	curl_free(c_artist);
 	

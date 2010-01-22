@@ -25,7 +25,9 @@
 #include "display.h"
 #include "global.h"
 
-using namespace Global;
+using Global::MainHeight;
+using Global::MainStartY;
+using Global::myScreen;
 
 Outputs *myOutputs = new Outputs;
 
@@ -52,11 +54,11 @@ void Outputs::SwitchTo()
 		Resize();
 	
 	if (myScreen != this && myScreen->isTabbable())
-		myPrevScreen = myScreen;
+		Global::myPrevScreen = myScreen;
 	myScreen = this;
 	w->Window::Clear();
 	
-	RedrawHeader = 1;
+	Global::RedrawHeader = 1;
 }
 
 void Outputs::Resize()

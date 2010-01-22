@@ -32,7 +32,9 @@
 #include "settings.h"
 #include "status.h"
 
-using namespace Global;
+using Global::MainHeight;
+using Global::MainStartY;
+using Global::myScreen;
 
 Clock *myClock = new Clock;
 
@@ -88,10 +90,10 @@ void Clock::SwitchTo()
 		Resize();
 	
 	if (myScreen != this && myScreen->isTabbable())
-		myPrevScreen = myScreen;
+		Global::myPrevScreen = myScreen;
 	myScreen = this;
 	myPlaylist->Items->Hide();
-	RedrawHeader = 1;
+	Global::RedrawHeader = 1;
 	Prepare();
 	// clearing screen apparently fixes the problem with last digits being misrendered
 	w->Clear();
@@ -109,7 +111,7 @@ void Clock::Update()
 		myPlaylist->SwitchTo();
 	
 	static timeval past = { 0, 0 };
-	if (Timer.tv_sec <= past.tv_sec)
+	if (Global::Timer.tv_sec <= past.tv_sec)
 		return;
 	gettimeofday(&past, 0);
 	

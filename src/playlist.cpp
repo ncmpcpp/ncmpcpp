@@ -28,7 +28,8 @@
 #include "song.h"
 #include "status.h"
 
-using namespace Global;
+using Global::MainHeight;
+using Global::MainStartY;
 
 Playlist *myPlaylist = new Playlist;
 
@@ -86,6 +87,8 @@ void Playlist::Init()
 
 void Playlist::SwitchTo()
 {
+	using Global::myScreen;
+	
 	if (myScreen == this)
 		return;
 	
@@ -98,13 +101,13 @@ void Playlist::SwitchTo()
 		Resize();
 	
 	if (myScreen != this && myScreen->isTabbable())
-		myPrevScreen = myScreen;
+		Global::myPrevScreen = myScreen;
 	myScreen = this;
 	Items->Window::Clear();
 	EnableHighlighting();
 	if (w != Items) // even if sorting window is active, background has to be refreshed anyway
 		Items->Display();
-	RedrawHeader = 1;
+	Global::RedrawHeader = 1;
 }
 
 void Playlist::Resize()
@@ -132,7 +135,7 @@ std::basic_string<my_char_t> Playlist::Title()
 	std::basic_string<my_char_t> result = U("Playlist ");
 	if (ReloadTotalLength || ReloadRemaining)
 		itsBufferedStats = TotalLength();
-	result += Scroller(TO_WSTRING(itsBufferedStats), itsScrollBegin, Items->GetWidth()-result.length()-(Config.new_design ? 2 : VolumeState.length()));
+	result += Scroller(TO_WSTRING(itsBufferedStats), itsScrollBegin, Items->GetWidth()-result.length()-(Config.new_design ? 2 : Global::VolumeState.length()));
 	return result;
 }
 
@@ -143,7 +146,7 @@ void Playlist::EnterPressed()
 		if (!Items->Empty())
 		{
 			Mpd.PlayID(Items->Current().GetID());
-			UpdateStatusImmediately = 1;
+			Global::UpdateStatusImmediately = 1;
 		}
 	}
 	else if (w == SortDialog)
@@ -425,7 +428,7 @@ std::string Playlist::SongInColumnsToString(const MPD::Song &s, void *)
 
 bool Playlist::Add(const MPD::Song &s, bool in_playlist, bool play, int position)
 {
-	BlockItemListUpdate = 1;
+	Global::BlockItemListUpdate = 1;
 	if (Config.ncmpc_like_songs_adding && in_playlist)
 	{
 		unsigned hash = s.GetHash();

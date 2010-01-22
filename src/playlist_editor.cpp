@@ -30,8 +30,8 @@
 #include "status.h"
 #include "tag_editor.h"
 
-using namespace Global;
-using namespace MPD;
+using Global::MainHeight;
+using Global::MainStartY;
 
 PlaylistEditor *myPlaylistEditor = new PlaylistEditor;
 
@@ -50,7 +50,7 @@ void PlaylistEditor::Init()
 	Playlists->CyclicScrolling(Config.use_cyclic_scrolling);
 	Playlists->SetItemDisplayer(Display::Generic);
 	
-	Content = new Menu<Song>(RightColumnStartX, MainStartY, RightColumnWidth, MainHeight, "Playlist's content", Config.main_color, brNone);
+	Content = new Menu<MPD::Song>(RightColumnStartX, MainStartY, RightColumnWidth, MainHeight, "Playlist's content", Config.main_color, brNone);
 	Content->HighlightColor(Config.main_highlight_color);
 	Content->CyclicScrolling(Config.use_cyclic_scrolling);
 	Content->SetSelectPrefix(&Config.selected_item_prefix);
@@ -93,6 +93,8 @@ void PlaylistEditor::Refresh()
 
 void PlaylistEditor::SwitchTo()
 {
+	using Global::myScreen;
+	
 	if (myScreen == this)
 		return;
 	
@@ -103,9 +105,9 @@ void PlaylistEditor::SwitchTo()
 		Resize();
 	
 	if (myScreen != this && myScreen->isTabbable())
-		myPrevScreen = myScreen;
+		Global::myPrevScreen = myScreen;
 	myScreen = this;
-	RedrawHeader = 1;
+	Global::RedrawHeader = 1;
 	Refresh();
 	UpdateSongList(Content);
 }
@@ -115,10 +117,10 @@ void PlaylistEditor::Update()
 	if (Playlists->Empty())
 	{
 		Content->Clear();
-		TagList list;
+		MPD::TagList list;
 		Mpd.GetPlaylists(list);
 		sort(list.begin(), list.end(), CaseInsensitiveSorting());
-		for (TagList::iterator it = list.begin(); it != list.end(); ++it)
+		for (MPD::TagList::iterator it = list.begin(); it != list.end(); ++it)
 		{
 			utf_to_locale(*it);
 			Playlists->AddOption(*it);
@@ -130,14 +132,14 @@ void PlaylistEditor::Update()
 	if (!Playlists->Empty() && Content->Empty())
 	{
 		Content->Reset();
-		SongList list;
+		MPD::SongList list;
 		Mpd.GetPlaylistContent(locale_to_utf_cpy(Playlists->Current()), list);
 		if (!list.empty())
 			Content->SetTitle("Playlist's content (" + IntoStr(list.size()) + " item" + (list.size() == 1 ? ")" : "s)"));
 		else
 			Content->SetTitle("Playlist's content");
 		bool bold = 0;
-		for (SongList::const_iterator it = list.begin(); it != list.end(); ++it)
+		for (MPD::SongList::const_iterator it = list.begin(); it != list.end(); ++it)
 		{
 			for (size_t j = 0; j < myPlaylist->Items->Size(); ++j)
 			{
@@ -150,7 +152,7 @@ void PlaylistEditor::Update()
 			Content->AddOption(**it, bold);
 			bold = 0;
 		}
-		FreeSongList(list);
+		MPD::FreeSongList(list);
 		Content->Window::Clear();
 		Content->Display();
 	}
@@ -193,7 +195,7 @@ void PlaylistEditor::PrevColumn()
 
 void PlaylistEditor::AddToPlaylist(bool add_n_play)
 {
-	SongList list;
+	MPD::SongList list;
 	
 	if (w == Playlists && !Playlists->Empty())
 	{

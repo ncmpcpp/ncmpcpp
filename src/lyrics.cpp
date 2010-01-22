@@ -49,7 +49,10 @@
 # define LYRICS_FOLDER "/.lyrics"
 #endif // WIN32
 
-using namespace Global;
+using Global::MainHeight;
+using Global::MainStartY;
+using Global::myScreen;
+using Global::myOldScreen;
 
 const std::string Lyrics::Folder = home_path + LYRICS_FOLDER;
 
@@ -128,7 +131,7 @@ void Lyrics::SwitchTo()
 				myOldScreen = myScreen;
 				myScreen = this;
 			}
-			RedrawHeader = 1;
+			Global::RedrawHeader = 1;
 			w->Clear();
 			w->Reset();
 #			ifdef HAVE_CURL_CURL_H
@@ -188,7 +191,7 @@ void Lyrics::SwitchTo()
 std::basic_string<my_char_t> Lyrics::Title()
 {
 	std::basic_string<my_char_t> result = U("Lyrics: ");
-	result += Scroller(TO_WSTRING(itsSong.toString("{%a - %t}")), itsScrollBegin, w->GetWidth()-result.length()-(Config.new_design ? 2 : VolumeState.length()));
+	result += Scroller(TO_WSTRING(itsSong.toString("{%a - %t}")), itsScrollBegin, w->GetWidth()-result.length()-(Config.new_design ? 2 : Global::VolumeState.length()));
 	return result;
 }
 
@@ -216,7 +219,7 @@ void *Lyrics::Get(void *screen_void_ptr)
 	Replace(url, "%title%", c_title);
 	
 	CURLcode code;
-	pthread_mutex_lock(&CurlLock);
+	pthread_mutex_lock(&Global::CurlLock);
 	CURL *lyrics = curl_easy_init();
 	curl_easy_setopt(lyrics, CURLOPT_URL, url.c_str());
 	curl_easy_setopt(lyrics, CURLOPT_WRITEFUNCTION, write_data);
@@ -225,7 +228,7 @@ void *Lyrics::Get(void *screen_void_ptr)
 	curl_easy_setopt(lyrics, CURLOPT_NOSIGNAL, 1);
 	code = curl_easy_perform(lyrics);
 	curl_easy_cleanup(lyrics);
-	pthread_mutex_unlock(&CurlLock);
+	pthread_mutex_unlock(&Global::CurlLock);
 	
 	curl_free(c_artist);
 	curl_free(c_title);

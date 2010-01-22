@@ -31,8 +31,6 @@
 #include <fcntl.h>
 #include <sys/time.h>
 
-using Global::myScreen;
-using Global::myPrevScreen;
 using Global::MainStartY;
 using Global::MainHeight;
 
@@ -62,6 +60,8 @@ void Visualizer::Init()
 
 void Visualizer::SwitchTo()
 {
+	using Global::myScreen;
+	
 	if (myScreen == this)
 		return;
 	
@@ -72,7 +72,7 @@ void Visualizer::SwitchTo()
 		Resize();
 	
 	if (myScreen != this && myScreen->isTabbable())
-		myPrevScreen = myScreen;
+		Global::myPrevScreen = myScreen;
 	myScreen = this;
 	w->Clear();
 	

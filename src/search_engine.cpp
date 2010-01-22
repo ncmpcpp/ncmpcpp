@@ -28,8 +28,8 @@
 #include "settings.h"
 #include "status.h"
 
-using namespace MPD;
-using namespace Global;
+using Global::MainHeight;
+using Global::MainStartY;
 
 SearchEngine *mySearcher = new SearchEngine;
 
@@ -59,7 +59,7 @@ int SearchEngine::CaseSensitive = REG_ICASE;
 
 void SearchEngine::Init()
 {
-	w = new Menu< std::pair<Buffer *, Song *> >(0, MainStartY, COLS, MainHeight, "", Config.main_color, brNone);
+	w = new Menu< std::pair<Buffer *, MPD::Song *> >(0, MainStartY, COLS, MainHeight, "", Config.main_color, brNone);
 	w->HighlightColor(Config.main_highlight_color);
 	w->CyclicScrolling(Config.use_cyclic_scrolling);
 	w->SetItemDisplayer(Display::SearchEngine);
@@ -78,6 +78,8 @@ void SearchEngine::Resize()
 
 void SearchEngine::SwitchTo()
 {
+	using Global::myScreen;
+	
 	if (myScreen == this)
 		return;
 	
@@ -91,9 +93,9 @@ void SearchEngine::SwitchTo()
 		Prepare();
 
 	if (myScreen != this && myScreen->isTabbable())
-		myPrevScreen = myScreen;
+		Global::myPrevScreen = myScreen;
 	myScreen = this;
-	RedrawHeader = 1;
+	Global::RedrawHeader = 1;
 	
 	if (!w->Back().first)
 	{
@@ -118,7 +120,7 @@ void SearchEngine::EnterPressed()
 	if (option < 10)
 	{
 		Statusbar() << fmtBold << ConstraintsNames[option] << fmtBoldEnd << ' ';
-		itsConstraints[option] = wFooter->GetString(itsConstraints[option]);
+		itsConstraints[option] = Global::wFooter->GetString(itsConstraints[option]);
 		w->Current().first->Clear();
 		*w->Current().first << fmtBold << std::setw(10) << std::left << ConstraintsNames[option] << fmtBoldEnd << ' ';
 		ShowTag(*w->Current().first, itsConstraints[option]);
@@ -151,7 +153,7 @@ void SearchEngine::EnterPressed()
 			size_t found = w->Size()-SearchEngine::StaticOptions;
 			found += 3; // don't count options inserted below
 			w->InsertSeparator(ResetButton+1);
-			w->InsertOption(ResetButton+2, std::make_pair(static_cast<Buffer *>(0), static_cast<Song *>(0)), 1, 1);
+			w->InsertOption(ResetButton+2, std::make_pair(static_cast<Buffer *>(0), static_cast<MPD::Song *>(0)), 1, 1);
 			w->at(ResetButton+2).first = new Buffer();
 			*w->at(ResetButton+2).first << Config.color1 << "Search results: " << Config.color2 << "Found " << found  << (found > 1 ? " songs" : " song") << clDefault;
 			w->InsertSeparator(ResetButton+3);
@@ -315,7 +317,7 @@ void SearchEngine::Search()
 	if (constraints_empty)
 		return;
 	
-	SongList list;
+	MPD::SongList list;
 	if (Config.search_in_db)
 		Mpd.GetDirectoryRecursive("/", list);
 	else
@@ -328,7 +330,7 @@ void SearchEngine::Search()
 	bool any_found = 1;
 	bool found = 1;
 	
-	for (SongList::const_iterator it = list.begin(); it != list.end(); ++it)
+	for (MPD::SongList::const_iterator it = list.begin(); it != list.end(); ++it)
 	{
 		if (MatchToPattern)
 		{
@@ -442,7 +444,7 @@ void SearchEngine::Search()
 		
 		if (found && any_found)
 		{
-			Song *ss = Config.search_in_db ? *it : new Song(**it);
+			MPD::Song *ss = Config.search_in_db ? *it : new MPD::Song(**it);
 			w->AddOption(std::make_pair(static_cast<Buffer *>(0), ss));
 			list[it-list.begin()] = 0;
 		}
@@ -450,7 +452,7 @@ void SearchEngine::Search()
 		any_found = 1;
 	}
 	if (Config.search_in_db) // free song list only if it's database
-		FreeSongList(list);
+		MPD::FreeSongList(list);
 }
 
 bool SearchEngine::SEStringComparison(const std::string &a, const std::string &b, bool case_sensitive)

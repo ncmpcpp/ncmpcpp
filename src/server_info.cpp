@@ -25,7 +25,6 @@
 
 using Global::MainHeight;
 using Global::MainStartY;
-using Global::myScreen;
 using Global::myOldScreen;
 
 ServerInfo *myServerInfo = new ServerInfo;
@@ -43,6 +42,8 @@ void ServerInfo::Init()
 
 void ServerInfo::SwitchTo()
 {
+	using Global::myScreen;
+	
 	if (myScreen == this)
 	{
 		myOldScreen->SwitchTo();

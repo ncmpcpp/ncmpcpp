@@ -39,8 +39,11 @@
 #include "status.h"
 #include "tag_editor.h"
 
-using namespace Global;
-using namespace MPD;
+using Global::myScreen;
+using Global::wFooter;
+using Global::Timer;
+using Global::wHeader;
+using Global::VolumeState;
 
 bool Global::UpdateStatusImmediately = 0;
 bool Global::RedrawStatusbar = 0;
@@ -129,12 +132,12 @@ void TraceMpdStatus()
 	static timeval past = { 0, 0 };
 	
 	gettimeofday(&Global::Timer, 0);
-	if (Mpd.Connected() && (Mpd.SupportsIdle() || Timer.tv_sec > past.tv_sec || UpdateStatusImmediately))
+	if (Mpd.Connected() && (Mpd.SupportsIdle() || Timer.tv_sec > past.tv_sec || Global::UpdateStatusImmediately))
 	{
 		Mpd.UpdateStatus();
-		BlockItemListUpdate = 0;
+		Global::BlockItemListUpdate = 0;
 		Playlist::BlockUpdate = 0;
-		UpdateStatusImmediately = 0;
+		Global::UpdateStatusImmediately = 0;
 		if (!Mpd.SupportsIdle())
 		{
 			gettimeofday(&past, 0);
@@ -171,7 +174,7 @@ void TraceMpdStatus()
 			else
 				block_progressbar_update = !allow_statusbar_unlock;
 			
-			if (Mpd.GetState() != psPlay && !block_statusbar_update && !block_progressbar_update)
+			if (Mpd.GetState() != MPD::psPlay && !block_statusbar_update && !block_progressbar_update)
 			{
 				if (Config.new_design)
 					DrawProgressbar(Mpd.GetElapsedTime(), Mpd.GetTotalTime());
@@ -183,7 +186,7 @@ void TraceMpdStatus()
 	}
 }
 
-void NcmpcppErrorCallback(Connection *, int errorid, const char *msg, void *)
+void NcmpcppErrorCallback(MPD::Connection *, int errorid, const char *msg, void *)
 {
 	if (errorid == MPD_SERVER_ERROR_PERMISSION)
 	{
@@ -198,7 +201,7 @@ void NcmpcppErrorCallback(Connection *, int errorid, const char *msg, void *)
 		ShowMessage("%s", msg);
 }
 
-void NcmpcppStatusChanged(Connection *, StatusChanges changed, void *)
+void NcmpcppStatusChanged(MPD::Connection *, MPD::StatusChanges changed, void *)
 {
 	static size_t playing_song_scroll_begin = 0;
 	static size_t first_line_scroll_begin = 0;
@@ -222,7 +225,7 @@ void NcmpcppStatusChanged(Connection *, StatusChanges changed, void *)
 			
 			bool was_filtered = myPlaylist->Items->isFiltered();
 			myPlaylist->Items->ShowAll();
-			SongList list;
+			MPD::SongList list;
 			
 			size_t playlist_length = Mpd.GetPlaylistLength();
 			if (playlist_length < myPlaylist->Items->Size())
@@ -230,7 +233,7 @@ void NcmpcppStatusChanged(Connection *, StatusChanges changed, void *)
 			
 			Mpd.GetPlaylistChanges(Mpd.GetOldPlaylistID(), list);
 			myPlaylist->Items->Reserve(playlist_length);
-			for (SongList::const_iterator it = list.begin(); it != list.end(); ++it)
+			for (MPD::SongList::const_iterator it = list.begin(); it != list.end(); ++it)
 			{
 				int pos = (*it)->GetPosition();
 				if (pos < int(myPlaylist->Items->Size()))
@@ -265,7 +268,7 @@ void NcmpcppStatusChanged(Connection *, StatusChanges changed, void *)
 			ShowMessage("Cleared playlist!");
 		}
 		
-		if (!BlockItemListUpdate)
+		if (!Global::BlockItemListUpdate)
 		{
 			if (myScreen == myBrowser)
 			{
@@ -316,27 +319,27 @@ void NcmpcppStatusChanged(Connection *, StatusChanges changed, void *)
 	{
 		switch (Mpd.GetState())
 		{
-			case psUnknown:
+			case MPD::psUnknown:
 			{
 				player_state = "[unknown]";
 				break;
 			}
-			case psPlay:
+			case MPD::psPlay:
 			{
 				if (!np.Empty())
 					WindowTitle(utf_to_locale_cpy(np.toString(Config.song_window_title_format)));
 				player_state = Config.new_design ? "[playing]" : "Playing: ";
 				Playlist::ReloadRemaining = 1;
-				if (Mpd.GetOldState() == psStop) // show track info in status immediately
+				if (Mpd.GetOldState() == MPD::psStop) // show track info in status immediately
 					changed.ElapsedTime = 1;
 				break;
 			}
-			case psPause:
+			case MPD::psPause:
 			{
 				player_state = Config.new_design ? "[paused] " : "[Paused] ";
 				break;
 			}
-			case psStop:
+			case MPD::psStop:
 			{
 				WindowTitle("ncmpc++ ver. "VERSION);
 				if (!block_progressbar_update)
@@ -386,7 +389,7 @@ void NcmpcppStatusChanged(Connection *, StatusChanges changed, void *)
 			if (Config.autocenter_mode && !myPlaylist->Items->isFiltered())
 				myPlaylist->Items->Highlight(myPlaylist->NowPlaying);
 			
-			if (Config.now_playing_lyrics && !Mpd.GetSingle() && myScreen == myLyrics && myOldScreen == myPlaylist)
+			if (Config.now_playing_lyrics && !Mpd.GetSingle() && myScreen == myLyrics && Global::myOldScreen == myPlaylist)
 				Lyrics::Reload = 1;
 		}
 		Playlist::ReloadRemaining = 1;
@@ -394,7 +397,7 @@ void NcmpcppStatusChanged(Connection *, StatusChanges changed, void *)
 		first_line_scroll_begin = 0;
 		second_line_scroll_begin = 0;
 	}
-	if (changed.ElapsedTime || changed.SongID || RedrawStatusbar)
+	if (changed.ElapsedTime || changed.SongID || Global::RedrawStatusbar)
 	{
 		if (np.Empty() && !(np = Mpd.GetCurrentSong()).Empty())
 			WindowTitle(utf_to_locale_cpy(np.toString(Config.song_window_title_format)));
@@ -406,10 +409,10 @@ void NcmpcppStatusChanged(Connection *, StatusChanges changed, void *)
 				if (Config.display_remaining_time)
 				{
 					tracklength = "-";
-					tracklength += Song::ShowTime(Mpd.GetTotalTime()-Mpd.GetElapsedTime());
+					tracklength += MPD::Song::ShowTime(Mpd.GetTotalTime()-Mpd.GetElapsedTime());
 				}
 				else
-					tracklength = Song::ShowTime(Mpd.GetElapsedTime());
+					tracklength = MPD::Song::ShowTime(Mpd.GetElapsedTime());
 				if (Mpd.GetTotalTime())
 				{
 					tracklength += "/";
@@ -435,7 +438,7 @@ void NcmpcppStatusChanged(Connection *, StatusChanges changed, void *)
 				size_t second_margin = (std::max(player_state.length(), size_t(8))+1)*2;
 				size_t second_start = second_len < COLS-second_margin ? (COLS-second_len)/2 : player_state.length()+1;
 				
-				if (!SeekingInProgress)
+				if (!Global::SeekingInProgress)
 					*wHeader << XY(0, 0) << wclrtoeol << tracklength;
 				*wHeader << XY(first_start, 0);
 				first.Write(*wHeader, first_line_scroll_begin, COLS-tracklength.length()-VolumeState.length()-1, U(" ** "));
@@ -462,17 +465,17 @@ void NcmpcppStatusChanged(Connection *, StatusChanges changed, void *)
 					if (Config.display_remaining_time)
 					{
 						tracklength += "-";
-						tracklength += Song::ShowTime(Mpd.GetTotalTime()-Mpd.GetElapsedTime());
+						tracklength += MPD::Song::ShowTime(Mpd.GetTotalTime()-Mpd.GetElapsedTime());
 					}
 					else
-						tracklength += Song::ShowTime(Mpd.GetElapsedTime());
+						tracklength += MPD::Song::ShowTime(Mpd.GetElapsedTime());
 					tracklength += "/";
 					tracklength += MPD::Song::ShowTime(Mpd.GetTotalTime());
 					tracklength += "]";
 				}
 				else
 				{
-					tracklength += Song::ShowTime(Mpd.GetElapsedTime());
+					tracklength += MPD::Song::ShowTime(Mpd.GetElapsedTime());
 					tracklength += "]";
 				}
 				basic_buffer<my_char_t> np_song;
@@ -483,7 +486,7 @@ void NcmpcppStatusChanged(Connection *, StatusChanges changed, void *)
 			}
 			if (!block_progressbar_update)
 				DrawProgressbar(Mpd.GetElapsedTime(), Mpd.GetTotalTime());
-			RedrawStatusbar = 0;
+			Global::RedrawStatusbar = 0;
 		}
 		else
 		{
@@ -618,7 +621,7 @@ void NcmpcppStatusChanged(Connection *, StatusChanges changed, void *)
 	}
 	*wFooter << fmtBoldEnd;
 	wFooter->GotoXY(sx, sy);
-	if (changed.PlayerState || (changed.ElapsedTime && (!Config.new_design || Mpd.GetState() == psPlay)))
+	if (changed.PlayerState || (changed.ElapsedTime && (!Config.new_design || Mpd.GetState() == MPD::psPlay)))
 		wFooter->Refresh();
 	if (changed.Playlist || changed.Database || changed.PlayerState || changed.SongID)
 		myScreen->RefreshWindow();
@@ -648,7 +651,7 @@ void DrawProgressbar(unsigned elapsed, unsigned time)
 
 void ShowMessage(const char *format, ...)
 {
-	if (MessagesAllowed && allow_statusbar_unlock)
+	if (Global::MessagesAllowed && allow_statusbar_unlock)
 	{
 		time(&time_of_statusbar_lock);
 		lock_statusbar_delay = Config.message_delay_time;
