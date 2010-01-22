@@ -87,7 +87,6 @@ class MediaLibrary : public Screen<Window>
 		static void DisplayAlbums(const SearchConstraints &, void *, Menu<SearchConstraints> *);
 		
 		static bool SortSongsByTrack(MPD::Song *, MPD::Song *);
-		static bool SortSongsByYear(MPD::Song *, MPD::Song *);
 		
 		static bool hasTwoColumns;
 		static size_t itsLeftColWidth;

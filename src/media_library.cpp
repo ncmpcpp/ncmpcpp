@@ -710,11 +710,6 @@ bool MediaLibrary::SearchConstraintsSorting::operator()(const SearchConstraints 
 	return (result == 0 ? cmp(a.Album, b.Album) : result) < 0;
 }
 
-bool MediaLibrary::SortSongsByYear(Song *a, Song *b)
-{
-	return a->GetDate() < b->GetDate();
-}
-
 bool MediaLibrary::SortSongsByTrack(Song *a, Song *b)
 {
 	if (a->GetDisc() == b->GetDisc())
