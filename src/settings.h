@@ -217,6 +217,7 @@ struct ncmpcpp_config
 	bool visualizer_use_wave;
 	bool browser_sort_by_mtime;
 	bool tag_editor_extended_numeration;
+	bool media_library_display_date;
 	
 	int mpd_port;
 	int mpd_connection_timeout;

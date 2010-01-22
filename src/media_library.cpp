@@ -64,6 +64,7 @@ void MediaLibrary::Init()
 	Albums->SetSelectSuffix(&Config.selected_item_suffix);
 	Albums->SetItemDisplayer(DisplayAlbums);
 	Albums->SetGetStringFunction(AlbumToString);
+	Albums->SetGetStringFunctionUserData(this);
 	
 	Songs = new Menu<Song>(itsRightColStartX, MainStartY, itsRightColWidth, MainHeight, "Songs", Config.main_color, brNone);
 	Songs->HighlightColor(Config.main_highlight_color);
@@ -194,16 +195,24 @@ void MediaLibrary::Update()
 		
 		for (TagList::iterator it = list.begin(); it != list.end(); ++it)
 		{
-			TagList l;
-			Mpd.StartFieldSearch(MPD_TAG_DATE);
-			Mpd.AddSearch(Config.media_lib_primary_tag, Artists->Current());
-			Mpd.AddSearch(MPD_TAG_ALBUM, *it);
-			Mpd.CommitSearch(l);
-			utf_to_locale(*it);
-			for (TagList::iterator j = l.begin(); j != l.end(); ++j)
+			if (Config.media_library_display_date)
 			{
-				utf_to_locale(*j);
-				Albums->AddOption(SearchConstraints(*it, *j));
+				TagList l;
+				Mpd.StartFieldSearch(MPD_TAG_DATE);
+				Mpd.AddSearch(Config.media_lib_primary_tag, Artists->Current());
+				Mpd.AddSearch(MPD_TAG_ALBUM, *it);
+				Mpd.CommitSearch(l);
+				utf_to_locale(*it);
+				for (TagList::iterator j = l.begin(); j != l.end(); ++j)
+				{
+					utf_to_locale(*j);
+					Albums->AddOption(SearchConstraints(*it, *j));
+				}
+			}
+			else
+			{
+				utf_to_locale(*it);
+				Albums->AddOption(SearchConstraints(*it, ""));
 			}
 		}
 		utf_to_locale(Artists->Current());
@@ -228,26 +237,35 @@ void MediaLibrary::Update()
 			Mpd.CommitSearch(albums);
 			for (TagList::iterator j = albums.begin(); j != albums.end(); ++j)
 			{
-				if (Config.media_lib_primary_tag != MPD_TAG_DATE)
+				if (Config.media_library_display_date)
 				{
-					TagList years;
-					Mpd.StartFieldSearch(MPD_TAG_DATE);
-					Mpd.AddSearch(Config.media_lib_primary_tag, *i);
-					Mpd.AddSearch(MPD_TAG_ALBUM, *j);
-					Mpd.CommitSearch(years);
-					utf_to_locale(*i);
-					utf_to_locale(*j);
-					for (TagList::iterator k = years.begin(); k != years.end(); ++k)
+					if (Config.media_lib_primary_tag != MPD_TAG_DATE)
 					{
-						utf_to_locale(*k);
-						Albums->AddOption(SearchConstraints(*i, *j, *k));
+						TagList years;
+						Mpd.StartFieldSearch(MPD_TAG_DATE);
+						Mpd.AddSearch(Config.media_lib_primary_tag, *i);
+						Mpd.AddSearch(MPD_TAG_ALBUM, *j);
+						Mpd.CommitSearch(years);
+						utf_to_locale(*i);
+						utf_to_locale(*j);
+						for (TagList::iterator k = years.begin(); k != years.end(); ++k)
+						{
+							utf_to_locale(*k);
+							Albums->AddOption(SearchConstraints(*i, *j, *k));
+						}
+					}
+					else
+					{
+						utf_to_locale(*i);
+						utf_to_locale(*j);
+						Albums->AddOption(SearchConstraints(*i, *j, *i));
 					}
 				}
 				else
 				{
 					utf_to_locale(*i);
 					utf_to_locale(*j);
-					Albums->AddOption(SearchConstraints(*i, *j, *i));
+					Albums->AddOption(SearchConstraints(*i, *j, ""));
 				}
 			}
 		}
@@ -278,7 +296,8 @@ void MediaLibrary::Update()
 		else
 		{
 			Mpd.AddSearch(MPD_TAG_ALBUM, locale_to_utf_cpy(Albums->Current().Album));
-			Mpd.AddSearch(MPD_TAG_DATE, locale_to_utf_cpy(Albums->Current().Year));
+			if (Config.media_library_display_date)
+				Mpd.AddSearch(MPD_TAG_DATE, locale_to_utf_cpy(Albums->Current().Year));
 		}
 		Mpd.CommitSearch(list);
 		
@@ -661,12 +680,12 @@ std::string MediaLibrary::SongToString(const MPD::Song &s, void *)
 	return s.toString(Config.song_library_format);
 }
 
-std::string MediaLibrary::AlbumToString(const SearchConstraints &sc, void *)
+std::string MediaLibrary::AlbumToString(const SearchConstraints &sc, void *ptr)
 {
 	std::string result;
 	if (!sc.Artist.empty())
 		(result += sc.Artist) += " - ";
-	if (!sc.Year.empty())
+	if ((!static_cast<MediaLibrary *>(ptr)->hasTwoColumns || Config.media_lib_primary_tag != MPD_TAG_DATE) && !sc.Year.empty())
 		((result += "(") += sc.Year) += ") ";
 	result += sc.Album.empty() ? "<no album>" : sc.Album;
 	return result;
