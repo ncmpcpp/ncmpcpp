@@ -229,6 +229,7 @@ struct ncmpcpp_config
 	int regex_type;
 	
 	unsigned lines_scrolled;
+	unsigned search_engine_default_search_mode;
 	
 	size_t selected_item_suffix_length;
 };

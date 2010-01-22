@@ -53,9 +53,6 @@ class SearchEngine : public Screen< Menu< std::pair<Buffer *, MPD::Song *> > >
 		static size_t SearchButton;
 		static size_t ResetButton;
 		
-		static const char *NormalMode;
-		static const char *StrictMode;
-		
 	protected:
 		virtual void Init();
 		
@@ -63,7 +60,11 @@ class SearchEngine : public Screen< Menu< std::pair<Buffer *, MPD::Song *> > >
 		void Prepare();
 		void Search();
 		
+		const char **SearchMode;
+		
 		static std::string SearchEngineOptionToString(const std::pair<Buffer *, MPD::Song *> &, void *);
+		
+		static const char *SearchModes[];
 		
 		static const size_t ConstraintsNumber = 10;
 		static const char *ConstraintsNames[];

@@ -1042,13 +1042,27 @@ void MPD::Connection::StartFieldSearch(mpd_tag_type item)
 	}
 }
 
-void MPD::Connection::AddSearch(mpd_tag_type item, const std::string &str)
+void MPD::Connection::AddSearch(mpd_tag_type item, const std::string &str) const
 {
 	// mpd version < 0.14.* doesn't support empty search constraints
 	if (Version() < 14 && str.empty())
 		return;
 	if (itsConnection)
 		mpd_search_add_tag_constraint(itsConnection, MPD_OPERATOR_DEFAULT, item, str.c_str());
+}
+
+void MPD::Connection::AddSearchAny(const std::string &str) const
+{
+	assert(!str.empty());
+	if (itsConnection)
+		mpd_search_add_any_tag_constraint(itsConnection, MPD_OPERATOR_DEFAULT, str.c_str());
+}
+
+void MPD::Connection::AddSearchURI(const std::string &str) const
+{
+	assert(!str.empty());
+	if (itsConnection)
+		mpd_search_add_uri_constraint(itsConnection, MPD_OPERATOR_DEFAULT, str.c_str());
 }
 
 void MPD::Connection::CommitSearch(SongList &v)

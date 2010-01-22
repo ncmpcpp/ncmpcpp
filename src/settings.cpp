@@ -336,6 +336,7 @@ void DefaultConfiguration(ncmpcpp_config &conf)
 	conf.lyrics_db = 0;
 	conf.regex_type = 0;
 	conf.lines_scrolled = 2;
+	conf.search_engine_default_search_mode = 0;
 	conf.selected_item_suffix_length = 0;
 #	ifdef HAVE_LANGINFO_H
 	conf.system_encoding = nl_langinfo(CODESET);
@@ -901,6 +902,15 @@ void ReadConfiguration(ncmpcpp_config &conf)
 			{
 				if (!v.empty())
 					conf.lines_scrolled = StrToInt(v);
+			}
+			else if (cl.find("search_engine_default_search_mode") != std::string::npos)
+			{
+				if (!v.empty())
+				{
+					unsigned mode = StrToInt(v);
+					if (--mode < 3)
+						conf.search_engine_default_search_mode = mode;
+				}
 			}
 			else if (cl.find("song_window_title_format") != std::string::npos)
 			{

@@ -191,7 +191,9 @@ namespace MPD
 			
 			void StartSearch(bool);
 			void StartFieldSearch(mpd_tag_type);
-			void AddSearch(mpd_tag_type, const std::string &);
+			void AddSearch(mpd_tag_type, const std::string &) const;
+			void AddSearchAny(const std::string &str) const;
+			void AddSearchURI(const std::string &str) const;
 			void CommitSearch(SongList &);
 			void CommitSearch(TagList &);
 			

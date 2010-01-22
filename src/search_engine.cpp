@@ -47,14 +47,17 @@ const char *SearchEngine::ConstraintsNames[] =
 	"Comment:"
 };
 
-const char *SearchEngine::NormalMode = "Match if tag contains searched phrase (regexes supported)";
-const char *SearchEngine::StrictMode = "Match only if both values are the same";
+const char *SearchEngine::SearchModes[] =
+{
+	"Match if tag contains searched phrase (no regexes)",
+	"Match if tag contains searched phrase (regexes supported)",
+	"Match only if both values are the same",
+	0
+};
 
 size_t SearchEngine::StaticOptions = 19;
 size_t SearchEngine::ResetButton = 15;
 size_t SearchEngine::SearchButton = 14;
-
-bool SearchEngine::MatchToPattern = 1;
 
 void SearchEngine::Init()
 {
@@ -65,6 +68,7 @@ void SearchEngine::Init()
 	w->SetSelectPrefix(&Config.selected_item_prefix);
 	w->SetSelectSuffix(&Config.selected_item_suffix);
 	w->SetGetStringFunction(SearchEngineOptionToString);
+	SearchMode = &SearchModes[Config.search_engine_default_search_mode];
 	isInitialized = 1;
 }
 
@@ -131,8 +135,9 @@ void SearchEngine::EnterPressed()
 	}
 	else if (option == ConstraintsNumber+2)
 	{
-		MatchToPattern = !MatchToPattern;
-		*w->Current().first << fmtBold << "Search mode:" << fmtBoldEnd << ' ' << (MatchToPattern ? NormalMode : StrictMode);
+		if (!*++SearchMode)
+			SearchMode = &SearchModes[0];
+		*w->Current().first << fmtBold << "Search mode:" << fmtBoldEnd << ' ' << *SearchMode;
 	}
 	else if (option == SearchButton)
 	{
@@ -290,7 +295,7 @@ void SearchEngine::Prepare()
 	}
 	
 	*w->at(ConstraintsNumber+1).first << fmtBold << "Search in:" << fmtBoldEnd << ' ' << (Config.search_in_db ? "Database" : "Current playlist");
-	*w->at(ConstraintsNumber+2).first << fmtBold << "Search mode:" << fmtBoldEnd << ' ' << (MatchToPattern ? NormalMode : StrictMode);
+	*w->at(ConstraintsNumber+2).first << fmtBold << "Search mode:" << fmtBoldEnd << ' ' << *SearchMode;
 	
 	*w->at(SearchButton).first << "Search";
 	*w->at(ResetButton).first << "Reset";
@@ -310,6 +315,36 @@ void SearchEngine::Search()
 	if (constraints_empty)
 		return;
 	
+	if (Config.search_in_db && (SearchMode == &SearchModes[0] || SearchMode == &SearchModes[2])) // use built-in mpd searching
+	{
+		Mpd.StartSearch(SearchMode == &SearchModes[2]);
+		if (!itsConstraints[0].empty())
+			Mpd.AddSearchAny(itsConstraints[0]);
+		if (!itsConstraints[1].empty())
+			Mpd.AddSearch(MPD_TAG_ARTIST, itsConstraints[1]);
+		if (!itsConstraints[2].empty())
+			Mpd.AddSearch(MPD_TAG_TITLE, itsConstraints[2]);
+		if (!itsConstraints[3].empty())
+			Mpd.AddSearch(MPD_TAG_ALBUM, itsConstraints[3]);
+		if (!itsConstraints[4].empty())
+			Mpd.AddSearchURI(itsConstraints[4]);
+		if (!itsConstraints[5].empty())
+			Mpd.AddSearch(MPD_TAG_COMPOSER, itsConstraints[5]);
+		if (!itsConstraints[6].empty())
+			Mpd.AddSearch(MPD_TAG_PERFORMER, itsConstraints[6]);
+		if (!itsConstraints[7].empty())
+			Mpd.AddSearch(MPD_TAG_GENRE, itsConstraints[7]);
+		if (!itsConstraints[8].empty())
+			Mpd.AddSearch(MPD_TAG_DATE, itsConstraints[8]);
+		if (!itsConstraints[9].empty())
+			Mpd.AddSearch(MPD_TAG_COMMENT, itsConstraints[9]);
+		MPD::SongList results;
+		Mpd.CommitSearch(results);
+		for (MPD::SongList::const_iterator it = results.begin(); it != results.end(); ++it)
+			w->AddOption(std::make_pair(static_cast<Buffer *>(0), *it));
+		return;
+	}
+	
 	MPD::SongList list;
 	if (Config.search_in_db)
 		Mpd.GetDirectoryRecursive("/", list);
@@ -325,7 +360,7 @@ void SearchEngine::Search()
 	
 	for (MPD::SongList::const_iterator it = list.begin(); it != list.end(); ++it)
 	{
-		if (MatchToPattern)
+		if (SearchMode != &SearchModes[2]) // match to pattern
 		{
 			regex_t rx;
 			if (!itsConstraints[0].empty())
@@ -401,7 +436,7 @@ void SearchEngine::Search()
 				regfree(&rx);
 			}
 		}
-		else
+		else // match only if values are equal
 		{
 			CaseInsensitiveStringComparison cmp;
 			
