@@ -112,12 +112,12 @@ std::basic_string<my_char_t> SearchEngine::Title()
 void SearchEngine::EnterPressed()
 {
 	size_t option = w->Choice();
-	if (option > 10 && option < SearchButton)
+	if (option > ConstraintsNumber && option < SearchButton)
 		w->Current().first->Clear();
-	if (option < 15)
+	if (option < SearchButton)
 		LockStatusbar();
 	
-	if (option < 10)
+	if (option < ConstraintsNumber)
 	{
 		Statusbar() << fmtBold << ConstraintsNames[option] << fmtBoldEnd << ' ';
 		itsConstraints[option] = Global::wFooter->GetString(itsConstraints[option]);
@@ -140,7 +140,7 @@ void SearchEngine::EnterPressed()
 		CaseSensitive = !CaseSensitive * REG_ICASE;
 		*w->Current().first << fmtBold << "Case sensitive:" << fmtBoldEnd << ' ' << (!CaseSensitive ? "Yes" : "No");
 	}
-	else if (option == 15)
+	else if (option == SearchButton)
 	{
 		ShowMessage("Searching...");
 		if (w->Size() > StaticOptions)
@@ -168,7 +168,7 @@ void SearchEngine::EnterPressed()
 		else
 			ShowMessage("No results found");
 	}
-	else if (option == 16)
+	else if (option == ResetButton)
 	{
 		for (size_t i = 0; i < ConstraintsNumber; ++i)
 			itsConstraints[i].clear();
@@ -179,7 +179,7 @@ void SearchEngine::EnterPressed()
 	else
 		w->Bold(w->Choice(), myPlaylist->Add(*w->Current().second, w->isBold(), 1));
 	
-	if (option < 15)
+	if (option < SearchButton)
 		UnlockStatusbar();
 }
 
@@ -208,7 +208,7 @@ void SearchEngine::MouseButtonPressed(MEVENT me)
 		if (!w->Goto(me.y))
 			return;
 		w->Refresh();
-		if ((me.bstate & BUTTON3_PRESSED || w->Choice() > 10) && w->Choice() < StaticOptions)
+		if ((me.bstate & BUTTON3_PRESSED || w->Choice() > ConstraintsNumber) && w->Choice() < StaticOptions)
 			EnterPressed();
 		else if (w->Choice() >= StaticOptions)
 		{
@@ -299,8 +299,8 @@ void SearchEngine::Prepare()
 	*w->at(12).first << fmtBold << "Search mode:" << fmtBoldEnd << ' ' << (MatchToPattern ? NormalMode : StrictMode);
 	*w->at(13).first << fmtBold << "Case sensitive:" << fmtBoldEnd << ' ' << (!CaseSensitive ? "Yes" : "No");
 	
-	*w->at(15).first << "Search";
-	*w->at(16).first << "Reset";
+	*w->at(SearchButton).first << "Search";
+	*w->at(ResetButton).first << "Reset";
 }
 
 void SearchEngine::Search()
