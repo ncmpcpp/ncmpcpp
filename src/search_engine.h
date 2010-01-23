@@ -59,6 +59,7 @@ class SearchEngine : public Screen< Menu< std::pair<Buffer *, MPD::Song *> > >
 	private:
 		void Prepare();
 		void Search();
+		void Reset();
 		
 		const char **SearchMode;
 		

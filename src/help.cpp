@@ -254,6 +254,7 @@ void Help::GetKeybindings()
 	*w << DisplayKeys(Key.EditTags)			<< "Edit song's tags\n";
 #	endif // HAVE_TAGLIB_H
 	*w << DisplayKeys(Key.ToggleSingle)		<< "Start searching immediately\n";
+	*w << DisplayKeys(Key.SearchEngine)		<< "Reset search engine\n";
 	
 	
 	*w << "\n\n   " << fmtBold << "Keys - Media library\n -----------------------------------------\n" << fmtBoldEnd;

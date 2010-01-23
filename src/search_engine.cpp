@@ -84,7 +84,10 @@ void SearchEngine::SwitchTo()
 	using Global::myScreen;
 	
 	if (myScreen == this)
+	{
+		Reset();
 		return;
+	}
 	
 	if (!isInitialized)
 		Init();
@@ -169,11 +172,7 @@ void SearchEngine::EnterPressed()
 	}
 	else if (option == ResetButton)
 	{
-		for (size_t i = 0; i < ConstraintsNumber; ++i)
-			itsConstraints[i].clear();
-		w->Reset();
-		Prepare();
-		ShowMessage("Search state reset");
+		Reset();
 	}
 	else
 		w->Bold(w->Choice(), myPlaylist->Add(*w->Current().second, w->isBold(), 1));
@@ -299,6 +298,15 @@ void SearchEngine::Prepare()
 	
 	*w->at(SearchButton).first << "Search";
 	*w->at(ResetButton).first << "Reset";
+}
+
+void SearchEngine::Reset()
+{
+	for (size_t i = 0; i < ConstraintsNumber; ++i)
+		itsConstraints[i].clear();
+	w->Reset();
+	Prepare();
+	ShowMessage("Search state reset");
 }
 
 void SearchEngine::Search()
