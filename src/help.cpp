@@ -138,10 +138,10 @@ void Help::GetKeybindings()
 	*w << DisplayKeys(Key.Home)			<< "Home\n";
 	*w << DisplayKeys(Key.End)			<< "End\n";
 	*w << "\n";
-	if (Config.screen_switcher_browser_only)
-		*w << DisplayKeys(Key.ScreenSwitcher)   << "Switch between playlist and browser\n";
-	else
+	if (Config.screen_switcher_previous)
 		*w << DisplayKeys(Key.ScreenSwitcher)   << "Switch between current and last screen\n";
+	else
+		*w << DisplayKeys(Key.ScreenSwitcher)   << "Switch between given sequence of screens\n";
 	*w << DisplayKeys(Key.Help)			<< "Help screen\n";
 	*w << DisplayKeys(Key.Playlist)			<< "Playlist screen\n";
 	*w << DisplayKeys(Key.Browser)			<< "Browse screen\n";

@@ -269,10 +269,26 @@
 ##
 ## How shall key_screen_switcher work?
 ##
-## - yes - always switch between browser and playlist
-## - no  - switch between current and last used screen
+## - "previous" - switch between current and last used screen
+## - "sequence: 2 -> 9 -> 5" - switch between given sequence of screens.
 ##
-#screen_switcher_browser_only = "yes"
+## Screen numbers you can use after 'sequence' keyword are:
+##
+## - 1 - help
+## - 2 - playlist
+## - 3 - browser
+## - 4 - search engine
+## - 5 - media library
+## - 6 - playlist editor
+## - 7 - tag editor
+## - 8 - outputs
+## - 9 - visualizer
+## - 10 - clock
+##
+## As you can see, above example will switch between
+## playlist, visualizer and media library screens.
+##
+#screen_switcher_mode = "sequence: 2 -> 3"
 #
 #jump_to_now_playing_song_at_start = "yes"
 #

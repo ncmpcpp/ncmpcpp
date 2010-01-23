@@ -26,10 +26,20 @@
 #include <fstream>
 #include <stdexcept>
 
+#include "browser.h"
+#include "clock.h"
 #include "global.h"
+#include "help.h"
 #include "helpers.h"
 #include "lyrics.h"
+#include "media_library.h"
+#include "outputs.h"
+#include "playlist.h"
+#include "playlist_editor.h"
+#include "search_engine.h"
 #include "settings.h"
+#include "tag_editor.h"
+#include "visualizer.h"
 
 #ifdef HAVE_LANGINFO_H
 # include <langinfo.h>
@@ -69,6 +79,43 @@ namespace
 	Border IntoBorder(const std::string &color)
 	{
 		return Border(IntoColor(color));
+	}
+	
+	BasicScreen *IntoScreen(int n)
+	{
+		switch (n)
+		{
+			case 1:
+				return myHelp;
+			case 2:
+				return myPlaylist;
+			case 3:
+				return myBrowser;
+			case 4:
+				return mySearcher;
+			case 5:
+				return myLibrary;
+			case 6:
+				return myPlaylistEditor;
+#			ifdef HAVE_TAGLIB_H
+			case 7:
+				return myTagEditor;
+#			endif // HAVE_TAGLIB_H
+#			ifdef ENABLE_OUTPUTS
+			case 8:
+				return myOutputs;
+#			endif // ENABLE_OUTPUTS
+#			ifdef ENABLE_VISUALIZER
+			case 9:
+				return myVisualizer;
+#			endif // ENABLE_VISUALIZER
+#			ifdef ENABLE_CLOCK
+			case 10:
+				return myClock;
+#			endif // ENABLE_CLOCK
+			default:
+				return 0;
+		}
 	}
 }
 
@@ -297,7 +344,7 @@ void DefaultConfiguration(ncmpcpp_config &conf)
 	conf.header_text_scrolling = true;
 	conf.statusbar_visibility = true;
 	conf.centered_cursor = false;
-	conf.screen_switcher_browser_only = true;
+	conf.screen_switcher_previous = false;
 	conf.autocenter_mode = false;
 	conf.wrapped_search = true;
 	conf.space_selects = false;
@@ -343,6 +390,10 @@ void DefaultConfiguration(ncmpcpp_config &conf)
 	if (conf.system_encoding == "UTF-8") // mpd uses utf-8 by default so no need to convert
 		conf.system_encoding.clear();
 #	endif // HAVE_LANGINFO_H
+	
+	// default screens sequence
+	conf.screens_seq.push_back(myPlaylist);
+	conf.screens_seq.push_back(myBrowser);
 }
 
 void ReadKeys(ncmpcpp_keys &keys)
@@ -768,9 +819,30 @@ void ReadConfiguration(ncmpcpp_config &conf)
 			{
 				conf.statusbar_visibility = v == "yes";
 			}
-			else if (cl.find("screen_switcher_browser_only") != std::string::npos)
+			else if (cl.find("screen_switcher_mode") != std::string::npos)
 			{
-				conf.screen_switcher_browser_only = v == "yes";
+				if (v.find("previous") != std::string::npos)
+				{
+					conf.screen_switcher_previous = true;
+				}
+				else if (v.find("sequence") != std::string::npos)
+				{
+					conf.screen_switcher_previous = false;
+					conf.screens_seq.clear();
+					for (std::string::const_iterator it = v.begin(); it != v.end(); )
+					{
+						while (it != v.end() && !isdigit(*it))
+							++it;
+						if (it == v.end())
+							break;
+						if (BasicScreen *screen = IntoScreen(atoi(&*it)))
+							conf.screens_seq.push_back(screen);
+						while (it != v.end() && isdigit(*it))
+							++it;
+					}
+					// throw away duplicates
+					conf.screens_seq.unique();
+				}
 			}
 			else if (cl.find("autocenter_mode") != std::string::npos)
 			{

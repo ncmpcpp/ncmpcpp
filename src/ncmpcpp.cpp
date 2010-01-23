@@ -1945,19 +1945,20 @@ int main(int argc, char *argv[])
 		}
 		else if (Keypressed(input, Key.ScreenSwitcher))
 		{
-			if (Config.screen_switcher_browser_only)
-			{
-				if (myScreen == myPlaylist)
-					myBrowser->SwitchTo();
-				else
-					myPlaylist->SwitchTo();
-			}
-			else
+			if (Config.screen_switcher_previous)
 			{
 				if (myScreen->isTabbable())
 					myPrevScreen->SwitchTo();
 				else
 					myOldScreen->SwitchTo();
+			}
+			else if (!Config.screens_seq.empty())
+			{
+				std::list<BasicScreen *>::const_iterator screen = std::find(Config.screens_seq.begin(), Config.screens_seq.end(), myScreen);
+				if (++screen == Config.screens_seq.end())
+					(*Config.screens_seq.begin())->SwitchTo();
+				else
+					(*screen)->SwitchTo();
 			}
 		}
 		else if (Keypressed(input, Key.Playlist))

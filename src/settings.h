@@ -38,6 +38,8 @@
 const std::string config_dir = home_path + HOME_FOLDER;
 const int null_key = std::numeric_limits<int>::max();
 
+class BasicScreen; // forward declaration for screens sequence
+
 struct Column
 {
 	Column() : right_alignment(0), display_empty_tag(1) { }
@@ -189,7 +191,7 @@ struct ncmpcpp_config
 	bool header_text_scrolling;
 	bool statusbar_visibility;
 	bool centered_cursor;
-	bool screen_switcher_browser_only;
+	bool screen_switcher_previous;
 	bool autocenter_mode;
 	bool wrapped_search;
 	bool space_selects;
@@ -232,6 +234,8 @@ struct ncmpcpp_config
 	unsigned search_engine_default_search_mode;
 	
 	size_t selected_item_suffix_length;
+	
+	std::list<BasicScreen *> screens_seq;
 };
 
 extern ncmpcpp_config Config;
