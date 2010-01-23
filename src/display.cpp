@@ -20,6 +20,7 @@
 
 #include "display.h"
 #include "helpers.h"
+#include "info.h"
 #include "playlist.h"
 
 std::string Display::Columns()
@@ -283,49 +284,17 @@ void Display::Songs(const MPD::Song &s, void *data, Menu<MPD::Song> *menu)
 
 void Display::Tags(const MPD::Song &s, void *data, Menu<MPD::Song> *menu)
 {
-	switch (static_cast<Menu<std::string> *>(data)->Choice())
+	size_t i = static_cast<Menu<std::string> *>(data)->Choice();
+	if (i < 11)
 	{
-		case 0:
-			ShowTag(*menu, s.GetTags(&MPD::Song::GetTitle));
-			return;
-		case 1:
-			ShowTag(*menu, s.GetTags(&MPD::Song::GetArtist));
-			return;
-		case 2:
-			ShowTag(*menu, s.GetTags(&MPD::Song::GetAlbumArtist));
-			return;
-		case 3:
-			ShowTag(*menu, s.GetTags(&MPD::Song::GetAlbum));
-			return;
-		case 4:
-			ShowTag(*menu, s.GetTags(&MPD::Song::GetDate));
-			return;
-		case 5:
-			ShowTag(*menu, s.GetTags(&MPD::Song::GetTrack));
-			return;
-		case 6:
-			ShowTag(*menu, s.GetTags(&MPD::Song::GetGenre));
-			return;
-		case 7:
-			ShowTag(*menu, s.GetTags(&MPD::Song::GetComposer));
-			return;
-		case 8:
-			ShowTag(*menu, s.GetTags(&MPD::Song::GetPerformer));
-			return;
-		case 9:
-			ShowTag(*menu, s.GetTags(&MPD::Song::GetDisc));
-			return;
-		case 10:
-			ShowTag(*menu, s.GetTags(&MPD::Song::GetComment));
-			return;
-		case 12:
-			if (s.GetNewName().empty())
-				*menu << s.GetName();
-			else
-				*menu << s.GetName() << Config.color2 << " -> " << clEnd << s.GetNewName();
-			return;
-		default:
-			return;
+		ShowTag(*menu, s.GetTags(Info::Tags[i].Get));
+	}
+	else if (i == 12)
+	{
+		if (s.GetNewName().empty())
+			*menu << s.GetName();
+		else
+			*menu << s.GetName() << Config.color2 << " -> " << clEnd << s.GetNewName();
 	}
 }
 
