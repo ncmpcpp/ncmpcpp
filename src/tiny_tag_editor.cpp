@@ -208,8 +208,11 @@ bool TinyTagEditor::GetTags()
 	w->IntoSeparator(21);
 	
 	if (!extendedTagsSupported(f.file()))
+	{
+		w->Static(10, 1);
 		for (size_t i = 15; i <= 17; ++i)
 			w->Static(i, 1);
+	}
 	
 	w->Highlight(8);
 	
