@@ -97,7 +97,7 @@ void TinyTagEditor::EnterPressed()
 	MPD::Song &s = itsEdited;
 	
 	LockStatusbar();
-	if (option < 17) // separator after comment
+	if (option < 19) // separator after comment
 	{
 		size_t pos = option-8;
 		Statusbar() << fmtBold << Info::Tags[pos].Name << ": " << fmtBoldEnd;
@@ -106,7 +106,7 @@ void TinyTagEditor::EnterPressed()
 		w->at(option) << fmtBold << Info::Tags[pos].Name << ':' << fmtBoldEnd << ' ';
 		ShowTag(w->at(option), s.GetTags(Info::Tags[pos].Get));
 	}
-	else if (option == 19)
+	else if (option == 20)
 	{
 		Statusbar() << fmtBold << "Filename: " << fmtBoldEnd;
 		std::string filename = s.GetNewName().empty() ? s.GetName() : s.GetNewName();
@@ -120,7 +120,7 @@ void TinyTagEditor::EnterPressed()
 	}
 	UnlockStatusbar();
 	
-	if (option == 21)
+	if (option == 22)
 	{
 		ShowMessage("Updating tags...");
 		if (TagEditor::WriteTags(s))
@@ -143,7 +143,7 @@ void TinyTagEditor::EnterPressed()
 		else
 			ShowMessage("Error while writing tags!");
 	}
-	if (option > 20)
+	if (option > 21)
 		myOldScreen->SwitchTo();
 }
 
@@ -198,17 +198,17 @@ bool TinyTagEditor::GetTags()
 	w->Clear();
 	w->Reset();
 	
-	w->ResizeList(23);
+	w->ResizeList(24);
 	
 	for (size_t i = 0; i < 7; ++i)
 		w->Static(i, 1);
 	
 	w->IntoSeparator(7);
-	w->IntoSeparator(18);
-	w->IntoSeparator(20);
+	w->IntoSeparator(19);
+	w->IntoSeparator(21);
 	
 	if (!extendedTagsSupported(f.file()))
-		for (size_t i = 14; i <= 16; ++i)
+		for (size_t i = 15; i <= 17; ++i)
 			w->Static(i, 1);
 	
 	w->Highlight(8);
@@ -229,10 +229,10 @@ bool TinyTagEditor::GetTags()
 		ShowTag(w->at(pos), s.GetTags(m->Get));
 	}
 	
-	w->at(19) << fmtBold << "Filename:" << fmtBoldEnd << ' ' << s.GetName();
+	w->at(20) << fmtBold << "Filename:" << fmtBoldEnd << ' ' << s.GetName();
 	
-	w->at(21) << "Save";
-	w->at(22) << "Cancel";
+	w->at(22) << "Save";
+	w->at(23) << "Cancel";
 	return true;
 }
 

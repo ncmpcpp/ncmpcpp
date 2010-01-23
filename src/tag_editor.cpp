@@ -84,6 +84,7 @@ void TagEditor::Init()
 	
 	TagTypes->AddOption("Title");
 	TagTypes->AddOption("Artist");
+	TagTypes->AddOption("Album Artist");
 	TagTypes->AddOption("Album");
 	TagTypes->AddOption("Year");
 	TagTypes->AddOption("Track");
@@ -316,7 +317,10 @@ void TagEditor::Update()
 		Tags->Refresh();
 	}
 	else if (TagTypes->Choice() >= 13)
+	{
 		Tags->Window::Clear();
+		Tags->Window::Refresh();
+	}
 }
 
 void TagEditor::EnterPressed()
@@ -352,6 +356,7 @@ void TagEditor::EnterPressed()
 		
 		FParserLegend->Clear();
 		*FParserLegend << "%a - artist\n";
+		*FParserLegend << "%A - album artist\n";
 		*FParserLegend << "%t - title\n";
 		*FParserLegend << "%b - album\n";
 		*FParserLegend << "%y - year\n";
@@ -523,14 +528,18 @@ void TagEditor::EnterPressed()
 			set = &MPD::Song::SetArtist;
 			break;
 		case 2:
+			get = &MPD::Song::GetAlbumArtist;
+			set = &MPD::Song::SetAlbumArtist;
+			break;
+		case 3:
 			get = &MPD::Song::GetAlbum;
 			set = &MPD::Song::SetAlbum;
 			break;
-		case 3:
+		case 4:
 			get = &MPD::Song::GetDate;
 			set = &MPD::Song::SetDate;
 			break;
-		case 4:
+		case 5:
 			get = &MPD::Song::GetTrack;
 			set = &MPD::Song::SetTrack;
 			if (w == TagTypes)
@@ -562,27 +571,27 @@ void TagEditor::EnterPressed()
 					ShowMessage("Aborted!");
 			}
 			break;
-		case 5:
+		case 6:
 			get = &MPD::Song::GetGenre;
 			set = &MPD::Song::SetGenre;
 			break;
-		case 6:
+		case 7:
 			get = &MPD::Song::GetComposer;
 			set = &MPD::Song::SetComposer;
 			break;
-		case 7:
+		case 8:
 			get = &MPD::Song::GetPerformer;
 			set = &MPD::Song::SetPerformer;
 			break;
-		case 8:
+		case 9:
 			get = &MPD::Song::GetDisc;
 			set = &MPD::Song::SetDisc;
 			break;
-		case 9:
+		case 10:
 			get = &MPD::Song::GetComment;
 			set = &MPD::Song::SetComment;
 			break;
-		case 10:
+		case 11:
 		{
 			if (w == TagTypes)
 			{
@@ -611,13 +620,13 @@ void TagEditor::EnterPressed()
 			}
 			return;
 		}
-		case 11: // reset
+		case 12: // reset
 		{
 			Tags->Clear();
 			ShowMessage("Changes reset");
 			return;
 		}
-		case 12: // save
+		case 13: // save
 		{
 			bool success = 1;
 			ShowMessage("Writing changes...");
@@ -646,7 +655,7 @@ void TagEditor::EnterPressed()
 				Tags->Clear();
 			return;
 		}
-		case 13: // capitalize first letters
+		case 14: // capitalize first letters
 		{
 			ShowMessage("Processing...");
 			for (MPD::SongList::iterator it = EditedSongs.begin(); it != EditedSongs.end(); ++it)
@@ -654,7 +663,7 @@ void TagEditor::EnterPressed()
 			ShowMessage("Done!");
 			break;
 		}
-		case 14: // lower all letters
+		case 15: // lower all letters
 		{
 			ShowMessage("Processing...");
 			for (MPD::SongList::iterator it = EditedSongs.begin(); it != EditedSongs.end(); ++it)
@@ -666,7 +675,7 @@ void TagEditor::EnterPressed()
 			break;
 	}
 	
-	if (w == TagTypes && id != 0 && id != 4 && set)
+	if (w == TagTypes && id != 0 && id != 5 && set)
 	{
 		LockStatusbar();
 		Statusbar() << fmtBold << TagTypes->Current() << fmtBoldEnd << ": ";
@@ -900,6 +909,7 @@ void TagEditor::ReadTags(MPD::Song &s)
 	s.SetGenre(f.tag()->genre().to8Bit(1));
 	if (mpegf)
 	{
+		s.SetAlbumArtist(!mpegf->ID3v2Tag()->frameListMap()["TPE2"].isEmpty() ? mpegf->ID3v2Tag()->frameListMap()["TPE2"].front()->toString().to8Bit(1) : "");
 		s.SetComposer(!mpegf->ID3v2Tag()->frameListMap()["TCOM"].isEmpty() ? mpegf->ID3v2Tag()->frameListMap()["TCOM"].front()->toString().to8Bit(1) : "");
 		s.SetPerformer(!mpegf->ID3v2Tag()->frameListMap()["TOPE"].isEmpty() ? mpegf->ID3v2Tag()->frameListMap()["TOPE"].front()->toString().to8Bit(1) : "");
 		s.SetDisc(!mpegf->ID3v2Tag()->frameListMap()["TPOS"].isEmpty() ? mpegf->ID3v2Tag()->frameListMap()["TPOS"].front()->toString().to8Bit(1) : "");
@@ -924,6 +934,11 @@ void TagEditor::WriteXiphComments(const MPD::Song &s, TagLib::Ogg::XiphComment *
 	TagLib::StringList list;
 	
 	tag->addField("DISCNUMBER", ToWString(s.GetDisc())); // disc
+	
+	tag->removeField("ALBUM ARTIST"); // album artist
+	GetTagList(list, s, &MPD::Song::GetAlbumArtist);
+	for (TagLib::StringList::ConstIterator it = list.begin(); it != list.end(); ++it)
+		tag->addField("ALBUM ARTIST", *it, 0);
 	
 	tag->removeField("COMPOSER"); // composer
 	GetTagList(list, s, &MPD::Song::GetComposer);
@@ -966,6 +981,9 @@ bool TagEditor::WriteTags(MPD::Song &s)
 			WriteID3v2("TRCK", tag, ToWString(s.GetTrack()));  // track
 			WriteID3v2("TCON", tag, ToWString(s.GetGenre()));  // genre
 			WriteID3v2("TPOS", tag, ToWString(s.GetDisc()));   // disc
+			
+			GetTagList(list, s, &MPD::Song::GetAlbumArtist);
+			WriteID3v2("TPE2", tag, list); // album artist
 			
 			GetTagList(list, s, &MPD::Song::GetComposer);
 			WriteID3v2("TCOM", tag, list); // composer
@@ -1041,6 +1059,7 @@ void TagEditor::CapitalizeFirstLetters(MPD::Song &s)
 	s.SetTitle(CapitalizeFirstLetters(s.GetTitle()));
 	s.SetArtist(CapitalizeFirstLetters(s.GetArtist()));
 	s.SetAlbum(CapitalizeFirstLetters(s.GetAlbum()));
+	s.SetAlbumArtist(CapitalizeFirstLetters(s.GetAlbumArtist()));
 	s.SetGenre(CapitalizeFirstLetters(s.GetGenre()));
 	s.SetComposer(CapitalizeFirstLetters(s.GetComposer()));
 	s.SetPerformer(CapitalizeFirstLetters(s.GetPerformer()));
@@ -1061,6 +1080,10 @@ void TagEditor::LowerAllLetters(MPD::Song &s)
 	conv = s.GetAlbum();
 	ToLower(conv);
 	s.SetAlbum(conv);
+	
+	conv = s.GetAlbumArtist();
+	ToLower(conv);
+	s.SetAlbumArtist(conv);
 	
 	conv = s.GetGenre();
 	ToLower(conv);
@@ -1103,30 +1126,33 @@ std::string TagEditor::TagToString(const MPD::Song &s, void *data)
 			result = s.GetArtist();
 			break;
 		case 2:
-			result = s.GetAlbum();
+			result = s.GetAlbumArtist();
 			break;
 		case 3:
-			result = s.GetDate();
+			result = s.GetAlbum();
 			break;
 		case 4:
-			result = s.GetTrack();
+			result = s.GetDate();
 			break;
 		case 5:
-			result = s.GetGenre();
+			result = s.GetTrack();
 			break;
 		case 6:
-			result = s.GetComposer();
+			result = s.GetGenre();
 			break;
 		case 7:
-			result = s.GetPerformer();
+			result = s.GetComposer();
 			break;
 		case 8:
-			result = s.GetDisc();
+			result = s.GetPerformer();
 			break;
 		case 9:
+			result = s.GetDisc();
+			break;
+		case 10:
 			result = s.GetComment();
 			break;
-		case 11:
+		case 12:
 			result = s.GetNewName().empty() ? s.GetName() : s.GetName() + " -> " + s.GetNewName();
 			break;
 		default:
@@ -1169,6 +1195,8 @@ MPD::Song::SetFunction TagEditor::IntoSetFunction(char c)
 	{
 		case 'a':
 			return &MPD::Song::SetArtist;
+		case 'A':
+			return &MPD::Song::SetAlbumArtist;
 		case 't':
 			return &MPD::Song::SetTitle;
 		case 'b':

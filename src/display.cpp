@@ -60,6 +60,9 @@ std::string Display::Columns()
 			case 'a':
 				tag = "Artist";
 				break;
+			case 'A':
+				tag = "Album Artist";
+				break;
 			case 't':
 				tag = "Title";
 				break;
@@ -159,6 +162,9 @@ void Display::SongsInColumns(const MPD::Song &s, void *, Menu<MPD::Song> *menu)
 				break;
 			case 'a':
 				get = &MPD::Song::GetArtist;
+				break;
+			case 'A':
+				get = &MPD::Song::GetAlbumArtist;
 				break;
 			case 'b':
 				get = &MPD::Song::GetAlbum;
@@ -286,30 +292,33 @@ void Display::Tags(const MPD::Song &s, void *data, Menu<MPD::Song> *menu)
 			ShowTag(*menu, s.GetTags(&MPD::Song::GetArtist));
 			return;
 		case 2:
-			ShowTag(*menu, s.GetTags(&MPD::Song::GetAlbum));
+			ShowTag(*menu, s.GetTags(&MPD::Song::GetAlbumArtist));
 			return;
 		case 3:
-			ShowTag(*menu, s.GetTags(&MPD::Song::GetDate));
+			ShowTag(*menu, s.GetTags(&MPD::Song::GetAlbum));
 			return;
 		case 4:
-			ShowTag(*menu, s.GetTags(&MPD::Song::GetTrack));
+			ShowTag(*menu, s.GetTags(&MPD::Song::GetDate));
 			return;
 		case 5:
-			ShowTag(*menu, s.GetTags(&MPD::Song::GetGenre));
+			ShowTag(*menu, s.GetTags(&MPD::Song::GetTrack));
 			return;
 		case 6:
-			ShowTag(*menu, s.GetTags(&MPD::Song::GetComposer));
+			ShowTag(*menu, s.GetTags(&MPD::Song::GetGenre));
 			return;
 		case 7:
-			ShowTag(*menu, s.GetTags(&MPD::Song::GetPerformer));
+			ShowTag(*menu, s.GetTags(&MPD::Song::GetComposer));
 			return;
 		case 8:
-			ShowTag(*menu, s.GetTags(&MPD::Song::GetDisc));
+			ShowTag(*menu, s.GetTags(&MPD::Song::GetPerformer));
 			return;
 		case 9:
+			ShowTag(*menu, s.GetTags(&MPD::Song::GetDisc));
+			return;
+		case 10:
 			ShowTag(*menu, s.GetTags(&MPD::Song::GetComment));
 			return;
-		case 11:
+		case 12:
 			if (s.GetNewName().empty())
 				*menu << s.GetName();
 			else

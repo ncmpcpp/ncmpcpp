@@ -88,6 +88,7 @@
 ## %f - filename
 ## %D - directory
 ## %a - artist
+## %A - album artist
 ## %t - title
 ## %b - album
 ## %y - year

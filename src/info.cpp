@@ -60,17 +60,18 @@ Info *myInfo = new Info;
 
 const Info::Metadata Info::Tags[] =
 {
-	{ "Title",	&MPD::Song::GetTitle,	  &MPD::Song::SetTitle     },
-	{ "Artist",	&MPD::Song::GetArtist,	  &MPD::Song::SetArtist    },
-	{ "Album",	&MPD::Song::GetAlbum,	  &MPD::Song::SetAlbum     },
-	{ "Year",	&MPD::Song::GetDate,	  &MPD::Song::SetDate      },
-	{ "Track",	&MPD::Song::GetTrack,	  &MPD::Song::SetTrack     },
-	{ "Genre",	&MPD::Song::GetGenre,	  &MPD::Song::SetGenre     },
-	{ "Composer",	&MPD::Song::GetComposer,  &MPD::Song::SetComposer  },
-	{ "Performer",	&MPD::Song::GetPerformer, &MPD::Song::SetPerformer },
-	{ "Disc",	&MPD::Song::GetDisc,	  &MPD::Song::SetDisc      },
-	{ "Comment",	&MPD::Song::GetComment,	  &MPD::Song::SetComment   },
-	{ 0,		0,			  0			   }
+	{ "Title",		&MPD::Song::GetTitle,		&MPD::Song::SetTitle		},
+	{ "Artist",		&MPD::Song::GetArtist,		&MPD::Song::SetArtist		},
+	{ "Album Artist",	&MPD::Song::GetAlbumArtist,	&MPD::Song::SetAlbumArtist	},
+	{ "Album",		&MPD::Song::GetAlbum,		&MPD::Song::SetAlbum		},
+	{ "Year",		&MPD::Song::GetDate,		&MPD::Song::SetDate		},
+	{ "Track",		&MPD::Song::GetTrack,		&MPD::Song::SetTrack		},
+	{ "Genre",		&MPD::Song::GetGenre,		&MPD::Song::SetGenre		},
+	{ "Composer",		&MPD::Song::GetComposer,	&MPD::Song::SetComposer		},
+	{ "Performer",		&MPD::Song::GetPerformer,	&MPD::Song::SetPerformer	},
+	{ "Disc",		&MPD::Song::GetDisc,		&MPD::Song::SetDisc		},
+	{ "Comment",		&MPD::Song::GetComment,		&MPD::Song::SetComment		},
+	{ 0,			0,				0				}
 };
 
 void Info::Init()

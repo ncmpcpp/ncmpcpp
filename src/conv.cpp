@@ -48,6 +48,8 @@ std::string IntoStr(mpd_tag_type tag) // this is only for left column's title in
 			return "Artist";
 		case MPD_TAG_ALBUM:
 			return "Album";
+		case MPD_TAG_ALBUM_ARTIST:
+			return "Album Artist";
 		case MPD_TAG_TITLE:
 			return "Title";
 		case MPD_TAG_TRACK:
@@ -125,6 +127,8 @@ mpd_tag_type IntoTagItem(char c)
 	{
 		case 'a':
 			return MPD_TAG_ARTIST;
+		case 'A':
+			return MPD_TAG_ALBUM_ARTIST;
 		case 'b':
 			return MPD_TAG_ALBUM;
 		case 'y':
@@ -149,6 +153,8 @@ MPD::Song::SetFunction IntoSetFunction(mpd_tag_type tag)
 			return &MPD::Song::SetArtist;
 		case MPD_TAG_ALBUM:
 			return &MPD::Song::SetAlbum;
+		case MPD_TAG_ALBUM_ARTIST:
+			return &MPD::Song::SetAlbumArtist;
 		case MPD_TAG_TITLE:
 			return &MPD::Song::SetTitle;
 		case MPD_TAG_TRACK:

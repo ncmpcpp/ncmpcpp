@@ -1876,7 +1876,7 @@ int main(int argc, char *argv[])
 			||	 (myLibrary->Columns() == 2 && myScreen->ActiveWindow() == myLibrary->Albums))
 			{
 				LockStatusbar();
-				Statusbar() << "Tag type ? [" << fmtBold << 'a' << fmtBoldEnd << "rtist/" << fmtBold << 'y' << fmtBoldEnd << "ear/" << fmtBold << 'g' << fmtBoldEnd << "enre/" << fmtBold << 'c' << fmtBoldEnd << "omposer/" << fmtBold << 'p' << fmtBoldEnd << "erformer] ";
+				Statusbar() << "Tag type ? [" << fmtBold << 'a' << fmtBoldEnd << "rtist/album" << fmtBold << 'A' << fmtBoldEnd << "rtist/" << fmtBold << 'y' << fmtBoldEnd << "ear/" << fmtBold << 'g' << fmtBoldEnd << "enre/" << fmtBold << 'c' << fmtBoldEnd << "omposer/" << fmtBold << 'p' << fmtBoldEnd << "erformer] ";
 				wFooter->Refresh();
 				int answer = 0;
 				do
@@ -1884,7 +1884,7 @@ int main(int argc, char *argv[])
 					TraceMpdStatus();
 					wFooter->ReadKey(answer);
 				}
-				while (answer != 'a' && answer != 'y' && answer != 'g' && answer != 'c' && answer != 'p');
+				while (answer != 'a' && answer != 'A' && answer != 'y' && answer != 'g' && answer != 'c' && answer != 'p');
 				UnlockStatusbar();
 				mpd_tag_type new_tagitem = IntoTagItem(answer);
 				if (new_tagitem != Config.media_lib_primary_tag)

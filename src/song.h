@@ -47,6 +47,7 @@ namespace MPD
 			std::string GetArtist(unsigned = 0) const;
 			std::string GetTitle(unsigned = 0) const;
 			std::string GetAlbum(unsigned = 0) const;
+			std::string GetAlbumArtist(unsigned = 0) const;
 			std::string GetTrack(unsigned = 0) const;
 			std::string GetTrackNumber(unsigned = 0) const;
 			std::string GetDate(unsigned = 0) const;
@@ -69,6 +70,7 @@ namespace MPD
 			void SetArtist(const std::string &, unsigned = 0);
 			void SetTitle(const std::string &, unsigned = 0);
 			void SetAlbum(const std::string &, unsigned = 0);
+			void SetAlbumArtist(const std::string &, unsigned = 0);
 			void SetTrack(const std::string &, unsigned = 0);
 			void SetTrack(unsigned, unsigned = 0);
 			void SetDate(const std::string &, unsigned = 0);

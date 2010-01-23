@@ -190,6 +190,11 @@ std::string MPD::Song::GetAlbum(unsigned pos) const
 	return GetTag(MPD_TAG_ALBUM, pos);
 }
 
+std::string MPD::Song::GetAlbumArtist(unsigned pos) const
+{
+	return GetTag(MPD_TAG_ALBUM_ARTIST, pos);
+}
+
 std::string MPD::Song::GetTrack(unsigned pos) const
 {
 	std::string track = GetTag(MPD_TAG_TRACK, pos);
@@ -261,6 +266,11 @@ void MPD::Song::SetTitle(const std::string &str, unsigned pos)
 void MPD::Song::SetAlbum(const std::string &str, unsigned pos)
 {
 	SetTag(MPD_TAG_ALBUM, pos, str);
+}
+
+void MPD::Song::SetAlbumArtist(const std::string &str, unsigned pos)
+{
+	SetTag(MPD_TAG_ALBUM_ARTIST, pos, str);
 }
 
 void MPD::Song::SetTrack(const std::string &str, unsigned pos)
@@ -373,6 +383,9 @@ std::string MPD::Song::ParseFormat(std::string::const_iterator &it, const char *
 					break;
 				case 'a':
 					get = &MPD::Song::GetArtist;
+					break;
+				case 'A':
+					get = &MPD::Song::GetAlbumArtist;
 					break;
 				case 'b':
 					get = &MPD::Song::GetAlbum;
