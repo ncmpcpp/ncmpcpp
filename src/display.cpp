@@ -130,13 +130,15 @@ void Display::SongsInColumns(const MPD::Song &s, void *, Menu<MPD::Song> *menu)
 	if (Config.columns.size() > 1)
 		next2last = Config.columns.end()-2;
 	
+	bool discard_colors = Config.discard_column_colors_if_item_is_selected && menu->isSelected(menu->CurrentlyDrawedPosition());
+	
 	for (it = Config.columns.begin(); it != Config.columns.end(); ++it)
 	{
 		if (where)
 		{
 			menu->GotoXY(where, menu->Y());
 			*menu << ' ';
-			if ((it-1)->color != clDefault)
+			if (!discard_colors && (it-1)->color != clDefault)
 				*menu << clEnd;
 		}
 		
@@ -203,7 +205,7 @@ void Display::SongsInColumns(const MPD::Song &s, void *, Menu<MPD::Song> *menu)
 			default:
 				break;
 		}
-		if (it->color != clDefault)
+		if (!discard_colors && it->color != clDefault)
 			*menu << it->color;
 		whline(menu->Raw(), 32, menu->GetWidth()-where);
 		std::string tag = get ? s.GetTags(get) : "";
@@ -226,7 +228,7 @@ void Display::SongsInColumns(const MPD::Song &s, void *, Menu<MPD::Song> *menu)
 		}
 		where += width;
 	}
-	if ((--it)->color != clDefault)
+	if (!discard_colors && (--it)->color != clDefault)
 		*menu << clEnd;
 	if (is_now_playing)
 		*menu << Config.now_playing_suffix;

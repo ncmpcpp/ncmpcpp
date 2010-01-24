@@ -222,6 +222,8 @@
 #
 #search_engine_display_mode = "classic" (classic/columns)
 #
+#discard_column_colors_if_item_is_selected = "yes"
+#
 #incremental_seeking = "yes"
 #
 #seek_time = "1"

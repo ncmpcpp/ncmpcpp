@@ -373,6 +373,7 @@ void DefaultConfiguration(ncmpcpp_config &conf)
 	conf.browser_sort_by_mtime = false;
 	conf.tag_editor_extended_numeration = false;
 	conf.media_library_display_date = true;
+	conf.discard_column_colors_if_item_is_selected = true;
 	conf.set_window_title = true;
 	conf.mpd_port = 6600;
 	conf.mpd_connection_timeout = 15;
@@ -951,6 +952,10 @@ void ReadConfiguration(ncmpcpp_config &conf)
 			else if (cl.find("media_library_display_date") != std::string::npos)
 			{
 				conf.media_library_display_date = v == "yes";
+			}
+			else if (cl.find("discard_column_colors_if_item_is_selected") != std::string::npos)
+			{
+				conf.discard_column_colors_if_item_is_selected = v == "yes";
 			}
 			else if (cl.find("enable_window_title") != std::string::npos)
 			{
