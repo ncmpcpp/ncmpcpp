@@ -122,7 +122,10 @@ void UnlockStatusbar()
 	}
 	if (!Mpd.isPlaying())
 	{
-		Statusbar() << wclrtoeol;
+		if (Config.new_design)
+			DrawProgressbar(Mpd.GetElapsedTime(), Mpd.GetTotalTime());
+		else
+			Statusbar() << wclrtoeol;
 		wFooter->Refresh();
 	}
 }
