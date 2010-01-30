@@ -203,7 +203,8 @@ void SelectedItemsAdder::EnterPressed()
 	}
 	else
 	{
-		if (pos > 0 && pos < 3 && !Mpd.isPlaying())
+		// disable adding after current track/album when stopped
+		if (pos > 1 && pos < 4 && !Mpd.isPlaying())
 		{
 			ShowMessage("Player is stopped!");
 			return;
