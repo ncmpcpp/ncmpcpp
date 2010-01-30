@@ -130,7 +130,7 @@ void Display::SongsInColumns(const MPD::Song &s, void *, Menu<MPD::Song> *menu)
 	if (Config.columns.size() > 1)
 		next2last = Config.columns.end()-2;
 	
-	bool discard_colors = Config.discard_column_colors_if_item_is_selected && menu->isSelected(menu->CurrentlyDrawedPosition());
+	bool discard_colors = Config.discard_colors_if_item_is_selected && menu->GetColor() != Config.main_color && menu->isSelected(menu->CurrentlyDrawedPosition());
 	
 	for (it = Config.columns.begin(); it != Config.columns.end(); ++it)
 	{
@@ -243,6 +243,8 @@ void Display::Songs(const MPD::Song &s, void *data, Menu<MPD::Song> *menu)
 	if (is_now_playing)
 		*menu << Config.now_playing_prefix;
 	
+	bool discard_colors = Config.discard_colors_if_item_is_selected && menu->GetColor() != Config.main_color && menu->isSelected(menu->CurrentlyDrawedPosition());
+	
 	std::string line = s.toString(*static_cast<std::string *>(data), "$");
 	for (std::string::const_iterator it = line.begin(); it != line.end(); ++it)
 	{
@@ -255,7 +257,8 @@ void Display::Songs(const MPD::Song &s, void *data, Menu<MPD::Song> *menu)
 			}
 			else if (isdigit(*it)) // color
 			{
-				*menu << Color(*it-'0');
+				if (!discard_colors)
+					*menu << Color(*it-'0');
 			}
 			else if (*it == 'R') // right align
 			{
@@ -264,7 +267,11 @@ void Display::Songs(const MPD::Song &s, void *data, Menu<MPD::Song> *menu)
 				String2Buffer(TO_WSTRING(line.substr(it-line.begin()+1)), buf);
 				if (is_now_playing)
 					buf << Config.now_playing_suffix;
-				*menu << XY(menu->GetWidth()-buf.Str().length()-(menu->isSelected(menu->CurrentlyDrawedPosition()) ? Config.selected_item_suffix_length : 0), menu->Y()) << buf;
+				*menu << XY(menu->GetWidth()-buf.Str().length()-(menu->isSelected(menu->CurrentlyDrawedPosition()) ? Config.selected_item_suffix_length : 0), menu->Y());
+				if (discard_colors)
+					*menu << buf.Str();
+				else
+					*menu << buf;
 				return;
 			}
 			else // not a color nor right align, just a random character
