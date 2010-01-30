@@ -39,7 +39,7 @@
 #include "help.h"
 #include "helpers.h"
 #include "media_library.h"
-#include "misc.h"
+#include "sel_items_adder.h"
 #include "server_info.h"
 #include "lyrics.h"
 #include "playlist.h"

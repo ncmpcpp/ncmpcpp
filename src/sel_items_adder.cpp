@@ -22,10 +22,10 @@
 #include "browser.h"
 #include "display.h"
 #include "global.h"
-#include "misc.h"
 #include "mpdpp.h"
 #include "playlist.h"
 #include "playlist_editor.h"
+#include "sel_items_adder.h"
 
 using Global::MainHeight;
 using Global::MainStartY;
