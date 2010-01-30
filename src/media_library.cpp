@@ -329,9 +329,15 @@ void MediaLibrary::SpacePressed()
 	if (Config.space_selects)
 	{
 		if (w == Artists)
+		{
 			Artists->Select(Artists->Choice(), !Artists->isSelected());
+			Albums->Clear();
+		}
 		else if (w == Albums)
+		{
 			Albums->Select(Albums->Choice(), !Albums->isSelected());
+			Songs->Clear();
+		}
 		else if (w == Songs)
 			Songs->Select(Songs->Choice(), !Songs->isSelected());
 		w->Scroll(wDown);
