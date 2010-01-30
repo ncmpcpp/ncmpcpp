@@ -687,7 +687,7 @@ void ReadConfiguration(ncmpcpp_config &conf)
 			else if (cl.find("system_encoding") != std::string::npos)
 			{
 				if (!v.empty())
-					conf.system_encoding = v + "//TRANSLIT";
+					conf.system_encoding = v;
 			}
 			else if (cl.find("execute_on_song_change") != std::string::npos)
 			{
