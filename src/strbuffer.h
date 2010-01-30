@@ -106,6 +106,10 @@ namespace NCurses
 			void RemoveFormatting(short val_b, std::basic_string<C> pattern, short val_e,
 					      bool case_sensitive, bool for_each = 1);
 			
+			/// Removes all formating applied to string in buffer.
+			///
+			void RemoveFormatting();
+			
 			/// Sets the pointer to string, that will be passed in operator<<() to window
 			/// object instead of the internal buffer. This is useful if you took the content
 			/// of the buffer, modified it somehow and want to print the modified version instead
@@ -251,6 +255,11 @@ template <typename C> void NCurses::basic_buffer<C>::RemoveFormatting(	short val
 		if (!for_each)
 			break;
 	}
+}
+
+template <typename C> void NCurses::basic_buffer<C>::RemoveFormatting()
+{
+	itsFormat.clear();
 }
 
 template <typename C> void NCurses::basic_buffer<C>::SetTemp(std::basic_string<C> *tmp)
