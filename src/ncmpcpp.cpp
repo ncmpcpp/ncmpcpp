@@ -576,9 +576,8 @@ int main(int argc, char *argv[])
 				}
 				else
 				{
-					Playlist::BlockNowPlayingUpdate = 1;
 					wFooter->SetTimeout(50);
-					int del_counter = 0;
+					bool adjust_np = myPlaylist->NowPlaying > int(myPlaylist->CurrentSong()->GetPosition());
 					while (!myPlaylist->Items->Empty() && Keypressed(input, Key.Delete))
 					{
 						size_t id = myPlaylist->Items->Choice();
@@ -586,21 +585,19 @@ int main(int argc, char *argv[])
 						Playlist::BlockUpdate = 1;
 						myPlaylist->UpdateTimer();
 						// needed for keeping proper position of now playing song.
-						if (myPlaylist->NowPlaying > int(myPlaylist->CurrentSong()->GetPosition())-del_counter)
+						if (adjust_np)
 							--myPlaylist->NowPlaying;
 						if (Mpd.DeleteID(myPlaylist->CurrentSong()->GetID()))
 						{
 							myPlaylist->Items->DeleteOption(id);
 							myPlaylist->Items->Refresh();
 							wFooter->ReadKey(input);
-							++del_counter;
 						}
 						else
 							break;
 					}
 					myPlaylist->FixPositions(myPlaylist->Items->Choice());
 					wFooter->SetTimeout(ncmpcpp_window_timeout);
-					Playlist::BlockNowPlayingUpdate = 0;
 				}
 			}
 			else if (
