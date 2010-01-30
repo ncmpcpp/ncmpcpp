@@ -27,7 +27,7 @@
 class SelectedItemsAdder : public Screen< Menu<std::string> >
 {
 	public:
-		SelectedItemsAdder() : itsPSWidth(35), itsPSHeight(10) { }
+		SelectedItemsAdder() : itsPSWidth(35), itsPSHeight(11) { }
 		
 		virtual void SwitchTo();
 		virtual void Resize();

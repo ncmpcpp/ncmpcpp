@@ -50,6 +50,7 @@ void SelectedItemsAdder::Init()
 	itsPositionSelector->AddOption("At the beginning of playlist");
 	itsPositionSelector->AddOption("After current track");
 	itsPositionSelector->AddOption("After current album");
+	itsPositionSelector->AddOption("After highlighted item");
 	itsPositionSelector->AddSeparator();
 	itsPositionSelector->AddOption("Cancel");
 	
@@ -229,6 +230,10 @@ void SelectedItemsAdder::EnterPressed()
 				if ((*myPlaylist->Items)[i].GetAlbum() != album)
 					break;
 			successful_operation = myPlaylist->Add(list, 0, i);
+		}
+		else if (pos == 4) // after highlighted item
+		{
+			successful_operation = myPlaylist->Add(list, 0, std::min(myPlaylist->Items->Choice()+1, myPlaylist->Items->Size()));
 		}
 		else
 		{
