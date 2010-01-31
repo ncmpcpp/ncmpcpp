@@ -225,6 +225,7 @@ template <typename WindowType> void Screen<WindowType>::ReadKey(int &key)
 
 template <typename WindowType> void Screen<WindowType>::Scroll(Where where, const int key[2])
 {
+	List *list = Config.centered_cursor ? dynamic_cast<List *>(w) : 0;
 	if (!Config.fancy_scrolling && key)
 	{
 		int in = key[0];
@@ -233,15 +234,19 @@ template <typename WindowType> void Screen<WindowType>::Scroll(Where where, cons
 		{
 			TraceMpdStatus();
 			w->Scroll(where);
+			if (list)
+				list->Highlight(list->Choice());
 			w->Refresh();
 			w->ReadKey(in);
 		}
 		w->SetTimeout(ncmpcpp_window_timeout);
 	}
 	else
+	{
 		w->Scroll(where);
-	if (List *list = Config.centered_cursor ? dynamic_cast<List *>(w) : 0)
-		list->Highlight(list->Choice());
+		if (list)
+			list->Highlight(list->Choice());
+	}
 }
 
 template <typename WindowType> void Screen<WindowType>::MouseButtonPressed(MEVENT me)
