@@ -125,24 +125,29 @@ void MediaLibrary::Refresh()
 
 void MediaLibrary::SwitchTo()
 {
-	if (myScreen == this && !Config.media_library_disable_two_column_mode)
+	if (myScreen == this)
 	{
-		hasTwoColumns = !hasTwoColumns;
-		hasToBeResized = 1;
-		Artists->Clear();
-		Albums->Clear();
-		Albums->Reset();
-		Songs->Clear();
-		if (hasTwoColumns)
-		{
-			if (w == Artists)
-				NextColumn();
-			std::string item_type = IntoStr(Config.media_lib_primary_tag);
-			ToLower(item_type);
-			Albums->SetTitle("Albums (sorted by " + item_type + ")");
-		}
+		if (Config.media_library_disable_two_column_mode)
+			return;
 		else
-			Albums->SetTitle("Albums");
+		{
+			hasTwoColumns = !hasTwoColumns;
+			hasToBeResized = 1;
+			Artists->Clear();
+			Albums->Clear();
+			Albums->Reset();
+			Songs->Clear();
+			if (hasTwoColumns)
+			{
+				if (w == Artists)
+					NextColumn();
+				std::string item_type = IntoStr(Config.media_lib_primary_tag);
+				ToLower(item_type);
+				Albums->SetTitle("Albums (sorted by " + item_type + ")");
+			}
+			else
+				Albums->SetTitle("Albums");
+		}
 	}
 	
 	if (!isInitialized)

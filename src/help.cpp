@@ -259,7 +259,7 @@ void Help::GetKeybindings()
 	
 	*w << "\n\n   " << fmtBold << "Keys - Media library\n -----------------------------------------\n" << fmtBoldEnd;
 	if (!Config.media_library_disable_two_column_mode)
-		*w << DisplayKeys(Key.MediaLibrary)		<< "Switch between two/three columns\n";
+		*w << DisplayKeys(Key.MediaLibrary)	<< "Switch between two/three columns\n";
 	*w << DisplayKeys(&Key.VolumeDown[0], 1)	<< "Previous column\n";
 	*w << DisplayKeys(&Key.VolumeUp[0], 1)		<< "Next column\n";
 	*w << DisplayKeys(Key.Enter)			<< "Add to playlist and play song/album/artist's songs\n";
