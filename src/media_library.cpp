@@ -125,7 +125,7 @@ void MediaLibrary::Refresh()
 
 void MediaLibrary::SwitchTo()
 {
-	if (myScreen == this)
+	if (myScreen == this && !Config.media_library_disable_two_column_mode)
 	{
 		hasTwoColumns = !hasTwoColumns;
 		hasToBeResized = 1;

@@ -220,6 +220,7 @@ struct ncmpcpp_config
 	bool browser_sort_by_mtime;
 	bool tag_editor_extended_numeration;
 	bool media_library_display_date;
+	bool media_library_disable_two_column_mode;
 	bool discard_colors_if_item_is_selected;
 	
 	int mpd_port;

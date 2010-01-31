@@ -323,6 +323,8 @@
 #
 #media_library_display_date = "yes"
 #
+#media_library_disable_two_column_mode = "no"
+#
 #enable_window_title = "yes"
 #
 ##
