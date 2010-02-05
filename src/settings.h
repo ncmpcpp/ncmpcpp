@@ -236,6 +236,7 @@ struct ncmpcpp_config
 	unsigned search_engine_default_search_mode;
 	
 	size_t selected_item_suffix_length;
+	size_t now_playing_suffix_length;
 	
 	std::list<BasicScreen *> screens_seq;
 };

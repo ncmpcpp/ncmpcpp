@@ -125,13 +125,14 @@ void Display::SongsInColumns(const MPD::Song &s, void *, Menu<MPD::Song> *menu)
 	if (Config.columns.empty())
 		return;
 	
-	std::vector<Column>::const_iterator next2last, it;
+	std::vector<Column>::const_iterator next2last, last, it;
 	size_t where = 0;
 	int width;
 	
 	bool last_fixed = Config.columns.back().fixed;
 	if (Config.columns.size() > 1)
 		next2last = Config.columns.end()-2;
+	last = Config.columns.end()-1;
 	
 	bool discard_colors = Config.discard_colors_if_item_is_selected && menu->isSelected(menu->CurrentlyDrawedPosition());
 	
@@ -211,9 +212,19 @@ void Display::SongsInColumns(const MPD::Song &s, void *, Menu<MPD::Song> *menu)
 			*menu << it->color;
 		whline(menu->Raw(), 32, menu->GetWidth()-where);
 		std::string tag = get ? s.GetTags(get) : "";
+		
+		// last column might need to be shrinked to make space for np/sel suffixes
+		if (it == last)
+		{
+			if (menu->isSelected(menu->CurrentlyDrawedPosition()))
+				width -= Config.selected_item_suffix_length;
+			if (is_now_playing)
+				width -= Config.now_playing_suffix_length;
+		}
+		
 		if (it->right_alignment)
 		{
-			if (!tag.empty() || it->display_empty_tag)
+			if (width > 0 && (!tag.empty() || it->display_empty_tag))
 			{
 				int x, y;
 				menu->GetXY(x, y);
@@ -223,10 +234,25 @@ void Display::SongsInColumns(const MPD::Song &s, void *, Menu<MPD::Song> *menu)
 		}
 		else
 		{
-			if (!tag.empty())
-				*menu << tag;
-			else if (it->display_empty_tag)
-				*menu << Config.empty_tag;
+			if (it == last)
+			{
+				if (width > 0)
+				{
+					std::basic_string<my_char_t> str;
+					if (!tag.empty())
+						str = TO_WSTRING(tag).substr(0, width-1);
+					else if (it->display_empty_tag)
+						str = TO_WSTRING(Config.empty_tag).substr(0, width-1);
+					*menu << str;
+				}
+			}
+			else
+			{
+				if (!tag.empty())
+					*menu << tag;
+				else if (it->display_empty_tag)
+					*menu << Config.empty_tag;
+			}
 		}
 		where += width;
 	}

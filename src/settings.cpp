@@ -387,6 +387,7 @@ void DefaultConfiguration(ncmpcpp_config &conf)
 	conf.lines_scrolled = 2;
 	conf.search_engine_default_search_mode = 0;
 	conf.selected_item_suffix_length = 0;
+	conf.now_playing_suffix_length = 0;
 #	ifdef HAVE_LANGINFO_H
 	conf.system_encoding = nl_langinfo(CODESET);
 	if (conf.system_encoding == "UTF-8") // mpd uses utf-8 by default so no need to convert
@@ -765,6 +766,7 @@ void ReadConfiguration(ncmpcpp_config &conf)
 				{
 					conf.now_playing_suffix.Clear();
 					String2Buffer(TO_WSTRING(v), conf.now_playing_suffix);
+					conf.now_playing_suffix_length = Window::Length(conf.now_playing_suffix.Str());
 				}
 			}
 			else if (cl.find("color1") != std::string::npos)
