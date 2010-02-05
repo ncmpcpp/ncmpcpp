@@ -234,7 +234,7 @@ template <typename WindowType> void Screen<WindowType>::Scroll(Where where, cons
 			TraceMpdStatus();
 			w->Scroll(where);
 			w->Refresh();
-			w->ReadKey(in);
+			ReadKey(in);
 		}
 		w->SetTimeout(ncmpcpp_window_timeout);
 	}

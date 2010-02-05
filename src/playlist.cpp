@@ -241,6 +241,12 @@ void Playlist::SpacePressed()
 	}
 }
 
+void Playlist::ReadKey(int &key)
+{
+	w->ReadKey(key);
+	UpdateTimer();
+}
+
 void Playlist::MouseButtonPressed(MEVENT me)
 {
 	if (w == Items && !Items->Empty() && Items->hasCoords(me.x, me.y))
