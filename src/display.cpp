@@ -39,13 +39,12 @@ std::string Display::Columns()
 	
 	for (std::vector<Column>::const_iterator it = Config.columns.begin(); it != Config.columns.end(); ++it)
 	{
-		width = (last_fixed && it == next2last
-				? COLS-where-(++next2last)->width
-				: (it == Config.columns.end()-1
-					? COLS-where
-					: (it->width*(it->fixed ? 1 : COLS/100.0))
-				  )
-			);
+		if (last_fixed && it == next2last)
+			width = COLS-where-(++next2last)->width;
+		else if (it == Config.columns.end()-1)
+			width = COLS-where;
+		else
+			width = it->width*(it->fixed ? 1 : COLS/100.0);
 		
 		switch (it->type)
 		{
@@ -97,7 +96,11 @@ std::string Display::Columns()
 				break;
 		}
 		if (it->right_alignment)
-			for (long i = 0; i < long(width-tag.length()-(it != Config.columns.begin())); ++i, result += ' ') { }
+		{
+			long i = width-tag.length()-(it != Config.columns.begin());
+			if (i > 0)
+				result += std::string(i, ' ');
+		}
 		
 		where += width;
 		result += tag;
@@ -142,13 +145,12 @@ void Display::SongsInColumns(const MPD::Song &s, void *, Menu<MPD::Song> *menu)
 				*menu << clEnd;
 		}
 		
-		width = (last_fixed && it == next2last
-				? COLS-where-(++next2last)->width
-				: (it == Config.columns.end()-1
-					? menu->GetWidth()-where
-					: (it->width*(it->fixed ? 1 : COLS/100.0))
-				  )
-			);
+		if (last_fixed && it == next2last)
+			width = COLS-where-(++next2last)->width;
+		else if (it == Config.columns.end()-1)
+			width = menu->GetWidth()-where;
+		else
+			width = it->width*(it->fixed ? 1 : COLS/100.0);
 		
 		MPD::Song::GetFunction get = 0;
 		
