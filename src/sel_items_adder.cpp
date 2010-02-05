@@ -39,11 +39,13 @@ void SelectedItemsAdder::Init()
 	SetDimensions();
 	itsPlaylistSelector = new Menu<std::string>((COLS-itsWidth)/2, (MainHeight-itsHeight)/2+MainStartY, itsWidth, itsHeight, "Add selected item(s) to...", Config.main_color, Config.window_border);
 	itsPlaylistSelector->CyclicScrolling(Config.use_cyclic_scrolling);
+	itsPlaylistSelector->CenteredCursor(Config.centered_cursor);
 	itsPlaylistSelector->HighlightColor(Config.main_highlight_color);
 	itsPlaylistSelector->SetItemDisplayer(Display::Generic);
 	
 	itsPositionSelector = new Menu<std::string>((COLS-itsPSWidth)/2, (MainHeight-itsPSHeight)/2+MainStartY, itsPSWidth, itsPSHeight, "Where?", Config.main_color, Config.window_border);
 	itsPositionSelector->CyclicScrolling(Config.use_cyclic_scrolling);
+	itsPositionSelector->CenteredCursor(Config.centered_cursor);
 	itsPositionSelector->HighlightColor(Config.main_highlight_color);
 	itsPositionSelector->SetItemDisplayer(Display::Generic);
 	itsPositionSelector->AddOption("At the end of playlist");

@@ -441,6 +441,11 @@ namespace NCurses
 			///
 			void CyclicScrolling(bool state) { useCyclicScrolling = state; }
 			
+			/// Turns on/off centered cursor
+			/// @param state state of centered cursor
+			///
+			void CenteredCursor(bool state) { useCenteredCursor = state; }
+			
 			/// Checks if list is empty
 			/// @return true if list is empty, false otherwise
 			///
@@ -528,6 +533,8 @@ namespace NCurses
 			bool highlightEnabled;
 			bool useCyclicScrolling;
 			
+			bool useCenteredCursor;
+			
 			size_t itsCurrentlyDrawedPosition;
 			
 			Buffer *itsSelectedPrefix;
@@ -558,6 +565,7 @@ template <typename T> NCurses::Menu<T>::Menu(size_t startx,
 					itsHighlightColor(itsBaseColor),
 					highlightEnabled(1),
 					useCyclicScrolling(0),
+					useCenteredCursor(0),
 					itsSelectedPrefix(0),
 					itsSelectedSuffix(0)
 {
@@ -573,6 +581,8 @@ template <typename T> NCurses::Menu<T>::Menu(const Menu &m) : Window(m),
 					itsHighlight(m.itsHighlight),
 					itsHighlightColor(m.itsHighlightColor),
 					highlightEnabled(m.highlightEnabled),
+					useCyclicScrolling(m.useCyclicScrolling),
+					useCenteredCursor(m.useCenteredCursor),
 					itsSelectedPrefix(m.itsSelectedPrefix),
 					itsSelectedSuffix(m.itsSelectedSuffix)
 {
@@ -871,6 +881,8 @@ template <typename T> void NCurses::Menu<T>::Scroll(Where where)
 			break;
 		}
 	}
+	if (useCenteredCursor)
+		Highlight(itsHighlight);
 }
 
 template <typename T> void NCurses::Menu<T>::Reset()

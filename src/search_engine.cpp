@@ -64,6 +64,7 @@ void SearchEngine::Init()
 	w = new Menu< std::pair<Buffer *, MPD::Song *> >(0, MainStartY, COLS, MainHeight, "", Config.main_color, brNone);
 	w->HighlightColor(Config.main_highlight_color);
 	w->CyclicScrolling(Config.use_cyclic_scrolling);
+	w->CenteredCursor(Config.centered_cursor);
 	w->SetItemDisplayer(Display::SearchEngine);
 	w->SetSelectPrefix(&Config.selected_item_prefix);
 	w->SetSelectSuffix(&Config.selected_item_suffix);

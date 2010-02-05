@@ -54,6 +54,7 @@ void MediaLibrary::Init()
 	Artists = new Menu<std::string>(0, MainStartY, itsLeftColWidth, MainHeight, IntoStr(Config.media_lib_primary_tag) + "s", Config.main_color, brNone);
 	Artists->HighlightColor(Config.active_column_color);
 	Artists->CyclicScrolling(Config.use_cyclic_scrolling);
+	Artists->CenteredCursor(Config.centered_cursor);
 	Artists->SetSelectPrefix(&Config.selected_item_prefix);
 	Artists->SetSelectSuffix(&Config.selected_item_suffix);
 	Artists->SetItemDisplayer(Display::Generic);
@@ -61,6 +62,7 @@ void MediaLibrary::Init()
 	Albums = new Menu<SearchConstraints>(itsMiddleColStartX, MainStartY, itsMiddleColWidth, MainHeight, "Albums", Config.main_color, brNone);
 	Albums->HighlightColor(Config.main_highlight_color);
 	Albums->CyclicScrolling(Config.use_cyclic_scrolling);
+	Albums->CenteredCursor(Config.centered_cursor);
 	Albums->SetSelectPrefix(&Config.selected_item_prefix);
 	Albums->SetSelectSuffix(&Config.selected_item_suffix);
 	Albums->SetItemDisplayer(DisplayAlbums);
@@ -70,6 +72,7 @@ void MediaLibrary::Init()
 	Songs = new Menu<MPD::Song>(itsRightColStartX, MainStartY, itsRightColWidth, MainHeight, "Songs", Config.main_color, brNone);
 	Songs->HighlightColor(Config.main_highlight_color);
 	Songs->CyclicScrolling(Config.use_cyclic_scrolling);
+	Songs->CenteredCursor(Config.centered_cursor);
 	Songs->SetSelectPrefix(&Config.selected_item_prefix);
 	Songs->SetSelectSuffix(&Config.selected_item_suffix);
 	Songs->SetItemDisplayer(Display::Songs);

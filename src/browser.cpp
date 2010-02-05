@@ -60,6 +60,7 @@ void Browser::Init()
 	w = new Menu<MPD::Item>(0, MainStartY, COLS, MainHeight, Config.columns_in_browser ? Display::Columns() : "", Config.main_color, brNone);
 	w->HighlightColor(Config.main_highlight_color);
 	w->CyclicScrolling(Config.use_cyclic_scrolling);
+	w->CenteredCursor(Config.centered_cursor);
 	w->SetSelectPrefix(&Config.selected_item_prefix);
 	w->SetSelectSuffix(&Config.selected_item_suffix);
 	w->SetItemDisplayer(Display::Items);
