@@ -393,7 +393,7 @@ void DefaultConfiguration(ncmpcpp_config &conf)
 	if (conf.system_encoding == "UTF-8") // mpd uses utf-8 by default so no need to convert
 		conf.system_encoding.clear();
 #	endif // HAVE_LANGINFO_H
-	
+	conf.startup_screen = myPlaylist;
 	// default screens sequence
 	conf.screens_seq.push_back(myPlaylist);
 	conf.screens_seq.push_back(myBrowser);
@@ -847,6 +847,12 @@ void ReadConfiguration(ncmpcpp_config &conf)
 					// throw away duplicates
 					conf.screens_seq.unique();
 				}
+			}
+			else if (cl.find("startup_screen") != std::string::npos)
+			{
+				conf.startup_screen = IntoScreen(atoi(v.c_str()));
+				if (!conf.startup_screen)
+					conf.startup_screen = myPlaylist;
 			}
 			else if (cl.find("autocenter_mode") != std::string::npos)
 			{

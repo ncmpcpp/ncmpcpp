@@ -238,6 +238,7 @@ struct ncmpcpp_config
 	size_t selected_item_suffix_length;
 	size_t now_playing_suffix_length;
 	
+	BasicScreen *startup_screen;
 	std::list<BasicScreen *> screens_seq;
 };
 

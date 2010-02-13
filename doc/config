@@ -292,6 +292,12 @@
 ##
 #screen_switcher_mode = "sequence: 2 -> 3"
 #
+##
+## Note: You can define startup screen for ncmpcpp
+## by choosing screen number from the list above.
+##
+#startup_screen = "2"
+#
 #jump_to_now_playing_song_at_start = "yes"
 #
 #ask_before_clearing_main_playlist = "no"

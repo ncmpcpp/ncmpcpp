@@ -287,6 +287,10 @@ int main(int argc, char *argv[])
 	myPlaylist->SwitchTo();
 	myPlaylist->UpdateTimer();
 	
+	// go to startup screen
+	if (Config.startup_screen != myScreen)
+		Config.startup_screen->SwitchTo();
+	
 	Mpd.SetStatusUpdater(NcmpcppStatusChanged, 0);
 	Mpd.SetErrorHandler(NcmpcppErrorCallback, 0);
 	
@@ -311,6 +315,7 @@ int main(int argc, char *argv[])
 	if (Config.mouse_support)
 		mousemask(ALL_MOUSE_EVENTS, 0);
 	
+	Mpd.OrderDataFetching();
 	if (Config.jump_to_now_playing_song_at_start)
 	{
 		TraceMpdStatus();
