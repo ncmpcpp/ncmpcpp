@@ -1,3 +1,17 @@
+ncmpcpp-0.5.1
+
+ + new feature: customizable startup screen
+ + new feature: locate song in media library
+ + new feature: support for built-in mpd searching in search engine
+ + new feature: support for adding random artists/albums to playlist
+ + new feature: support for album artist tag
+ + new feature: support for switching between user-defined sequence of screens
+ + new feature: discard column colors if item is selected (optional)
+ + new feature: support for adding tracks to playlist after highlighted item
+ + make displaying dates of albums in media library optional
+ + several bugfixes
+
+
 ncmpcpp-0.5
 
  + bash completion support
