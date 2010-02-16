@@ -42,22 +42,7 @@ class CaseInsensitiveStringComparison
 	}
 	
 	public:
-		int operator()(const std::string &a, const std::string &b)
-		{
-			const char *i = a.c_str();
-			const char *j = b.c_str();
-			if (Config.ignore_leading_the)
-			{
-				if (hasTheWord(a))
-					i += 4;
-				if (hasTheWord(b))
-					j += 4;
-			}
-			int dist;
-			while (!(dist = tolower(*i)-tolower(*j)) && *j)
-				++i, ++j;
-			return dist;
-		}
+		int operator()(const std::string &a, const std::string &b);
 };
 
 class CaseInsensitiveSorting

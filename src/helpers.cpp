@@ -226,6 +226,23 @@ void ParseArgv(int argc, char **argv)
 		exit(0);
 }
 
+int CaseInsensitiveStringComparison::operator()(const std::string &a, const std::string &b)
+{
+	const char *i = a.c_str();
+	const char *j = b.c_str();
+	if (Config.ignore_leading_the)
+	{
+		if (hasTheWord(a))
+			i += 4;
+		if (hasTheWord(b))
+			j += 4;
+	}
+	int dist;
+	while (!(dist = tolower(*i)-tolower(*j)) && *j)
+		++i, ++j;
+	return dist;
+}
+
 bool CaseInsensitiveSorting::operator()(const MPD::Item &a, const MPD::Item &b)
 {
 	if (a.type == b.type)
