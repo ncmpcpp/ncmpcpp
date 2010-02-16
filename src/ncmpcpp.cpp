@@ -223,12 +223,12 @@ namespace
 int main(int argc, char *argv[])
 {
 	setlocale(LC_ALL, "");
-	
 	CreateConfigDir();
-	DefaultConfiguration(Config);
-	DefaultKeys(Key);
-	ReadConfiguration(Config);
-	ReadKeys(Key);
+	
+	Config.SetDefaults();
+	Key.SetDefaults();
+	Config.Read();
+	Key.Read();
 	
 	if (getenv("MPD_HOST"))
 		Mpd.SetHostname(getenv("MPD_HOST"));

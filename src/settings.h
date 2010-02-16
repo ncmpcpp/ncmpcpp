@@ -52,8 +52,11 @@ struct Column
 	bool display_empty_tag;
 };
 
-struct ncmpcpp_keys
+struct NcmpcppKeys
 {
+	void SetDefaults();
+	void Read();
+	
 	int Up[2];
 	int Down[2];
 	int PageUp[2];
@@ -129,8 +132,11 @@ struct ncmpcpp_keys
 	int Quit[2];
 };
 
-struct ncmpcpp_config
+struct NcmpcppConfig
 {
+	void SetDefaults();
+	void Read();
+	
 	std::string mpd_host;
 	std::string mpd_music_dir;
 	std::string visualizer_fifo_path;
@@ -242,15 +248,13 @@ struct ncmpcpp_config
 	std::list<BasicScreen *> screens_seq;
 };
 
-extern ncmpcpp_config Config;
-extern ncmpcpp_keys Key;
+extern NcmpcppKeys Key;
+extern NcmpcppConfig Config;
 
 void CreateConfigDir();
 void SetWindowsDimensions(size_t &header_height, size_t &footer_start_y, size_t &footer_height);
-void DefaultKeys(ncmpcpp_keys &);
-void DefaultConfiguration(ncmpcpp_config &);
-void ReadKeys(ncmpcpp_keys &);
-void ReadConfiguration(ncmpcpp_config &);
+void ReadKeys(NcmpcppKeys &);
+void ReadConfiguration(NcmpcppConfig &);
 
 #endif
 
