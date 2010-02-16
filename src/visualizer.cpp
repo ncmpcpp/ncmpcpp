@@ -107,6 +107,7 @@ void Visualizer::Update()
 	if (!Mpd.isPlaying())
 	{
 		w->Clear();
+		w->Refresh();
 		return;
 	}
 	
