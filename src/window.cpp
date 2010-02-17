@@ -535,7 +535,7 @@ std::string Window::GetString(const std::string &base, size_t length, size_t wid
 				if (x < maxx)
 				{
 					real_x++;
-					x += wcwidth((*tmp)[beginning+real_x-minx-1]);
+					x += std::max(wcwidth((*tmp)[beginning+real_x-minx-1]), 1);
 				}
 				else if (beginning < maxbeginning)
 					beginning++;
@@ -551,7 +551,7 @@ std::string Window::GetString(const std::string &base, size_t length, size_t wid
 				if (x > minx)
 				{
 					real_x--;
-					x -= wcwidth((*tmp)[beginning+real_x-minx]);
+					x -= std::max(wcwidth((*tmp)[beginning+real_x-minx]), 1);
 				}
 				else if (beginning > 0)
 					beginning--;
@@ -940,9 +940,7 @@ std::wstring ToWString(const std::string &s)
 
 size_t Window::Length(const std::wstring &ws)
 {
-	size_t length = 0;
-	for (std::wstring::const_iterator it = ws.begin(); it != ws.end(); ++it)
-		length += wcwidth(*it);
-	return length;
+	int len = wcswidth(ws.c_str(), -1);
+	return len < 0 ? ws.length() : len;
 }
 
