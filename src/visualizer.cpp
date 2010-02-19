@@ -111,9 +111,10 @@ void Visualizer::Update()
 		return;
 	}
 	
-	if (itsOutputID != -1 && Global::Timer.tv_sec > itsTimer.tv_sec+120)
+	if (itsOutputID != -1 && Global::Timer.tv_sec > itsTimer.tv_sec+Config.visualizer_sync_interval)
 	{
 		Mpd.DisableOutput(itsOutputID);
+		usleep(50000);
 		Mpd.EnableOutput(itsOutputID);
 		gettimeofday(&itsTimer, 0);
 	}

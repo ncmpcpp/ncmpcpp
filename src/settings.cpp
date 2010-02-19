@@ -386,6 +386,7 @@ void NcmpcppConfig::SetDefaults()
 	regex_type = 0;
 	lines_scrolled = 2;
 	search_engine_default_search_mode = 0;
+	visualizer_sync_interval = 30;
 	selected_item_suffix_length = 0;
 	now_playing_suffix_length = 0;
 #	ifdef HAVE_LANGINFO_H
@@ -1001,6 +1002,12 @@ void NcmpcppConfig::Read()
 					if (--mode < 3)
 						search_engine_default_search_mode = mode;
 				}
+			}
+			else if (cl.find("visualizer_sync_interval") != std::string::npos)
+			{
+				unsigned interval = StrToInt(v);
+				if (interval)
+					visualizer_sync_interval = interval;
 			}
 			else if (cl.find("song_window_title_format") != std::string::npos)
 			{

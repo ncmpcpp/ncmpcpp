@@ -240,6 +240,7 @@ struct NcmpcppConfig
 	
 	unsigned lines_scrolled;
 	unsigned search_engine_default_search_mode;
+	unsigned visualizer_sync_interval;
 	
 	size_t selected_item_suffix_length;
 	size_t now_playing_suffix_length;
