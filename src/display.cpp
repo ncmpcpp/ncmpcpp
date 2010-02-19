@@ -39,10 +39,10 @@ std::string Display::Columns()
 	
 	for (std::vector<Column>::const_iterator it = Config.columns.begin(); it != Config.columns.end(); ++it)
 	{
-		if (last_fixed && it == next2last)
-			width = COLS-where-(++next2last)->width;
-		else if (it == Config.columns.end()-1)
+		if (it == Config.columns.end()-1)
 			width = COLS-where;
+		else if (last_fixed && it == next2last)
+			width = COLS-where-(++next2last)->width;
 		else
 			width = it->width*(it->fixed ? 1 : COLS/100.0);
 		
@@ -146,10 +146,10 @@ void Display::SongsInColumns(const MPD::Song &s, void *, Menu<MPD::Song> *menu)
 				*menu << clEnd;
 		}
 		
-		if (last_fixed && it == next2last)
-			width = COLS-where-(++next2last)->width;
-		else if (it == Config.columns.end()-1)
+		if (it == Config.columns.end()-1)
 			width = menu->GetWidth()-where;
+		else if (last_fixed && it == next2last)
+			width = COLS-where-(++next2last)->width;
 		else
 			width = it->width*(it->fixed ? 1 : COLS/100.0);
 		
