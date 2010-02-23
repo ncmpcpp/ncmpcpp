@@ -290,7 +290,7 @@ void MediaLibrary::Update()
 		w = Artists;
 	}
 	
-	if ((hasTwoColumns || !Artists->Empty()) && Songs->Empty())
+	if (!(hasTwoColumns ? Albums->Empty() : Artists->Empty()) && Songs->Empty())
 	{
 		Songs->Reset();
 		MPD::SongList list;
