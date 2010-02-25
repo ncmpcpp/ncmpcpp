@@ -68,7 +68,7 @@ PKG_CHECK_MODULES([libmpdclient], [libmpdclient >= 2.1], [
 		AC_MSG_ERROR([missing mpd/client.h header])
 	)
 ],
-	AC_MSG_ERROR([libmpdclient2 is required!])
+	AC_MSG_ERROR([libmpdclient >= 2.1 is required!])
 )
 
 dnl ======================
