@@ -210,6 +210,7 @@ struct NcmpcppConfig
 	bool display_screens_numbers_on_start;
 	bool jump_to_now_playing_song_at_start;
 	bool clock_display_seconds;
+	bool display_volume_level;
 	bool display_bitrate;
 	bool display_remaining_time;
 	bool ignore_leading_the;

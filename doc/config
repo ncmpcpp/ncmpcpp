@@ -314,6 +314,8 @@
 #
 #clock_display_seconds = "no"
 #
+#display_volume_level = "yes"
+#
 #display_bitrate = "no"
 #
 #display_remaining_time = "no"

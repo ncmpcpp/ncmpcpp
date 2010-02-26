@@ -600,7 +600,7 @@ void NcmpcppStatusChanged(MPD::Connection *, MPD::StatusChanges changed, void *)
 			refresh();
 		}
 	}
-	if (changed.Volume && (Config.header_visibility || Config.new_design))
+	if (changed.Volume && Config.display_volume_level && (Config.header_visibility || Config.new_design))
 	{
 		VolumeState = Config.new_design ? " Vol: " : " Volume: ";
 		int volume = Mpd.GetVolume();

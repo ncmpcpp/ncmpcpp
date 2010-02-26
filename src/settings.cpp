@@ -357,6 +357,7 @@ void NcmpcppConfig::SetDefaults()
 	display_screens_numbers_on_start = true;
 	jump_to_now_playing_song_at_start = true;
 	clock_display_seconds = false;
+	display_volume_level = true;
 	display_bitrate = false;
 	display_remaining_time = false;
 	ignore_leading_the = false;
@@ -906,6 +907,10 @@ void NcmpcppConfig::Read()
 			else if (cl.find("clock_display_seconds") != std::string::npos)
 			{
 				clock_display_seconds = v == "yes";
+			}
+			else if (cl.find("display_volume_level") != std::string::npos)
+			{
+				display_volume_level = v == "yes";
 			}
 			else if (cl.find("display_bitrate") != std::string::npos)
 			{
