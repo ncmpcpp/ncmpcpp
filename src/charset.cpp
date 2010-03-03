@@ -88,7 +88,7 @@ namespace
 		iconv_close(cd);
 		*outbuf = 0;
 		if (delete_old)
-			delete [] instart;
+			free(const_cast<char *>(instart));
 		inbuf = outstart;
 	}
 }
@@ -100,7 +100,7 @@ void utf_to_locale(std::string &s)
 	const char *tmp = strdup(s.c_str());
 	charset_convert("utf-8", Config.system_encoding.c_str(), tmp, 1, s.length());
 	s = tmp;
-	delete [] tmp;
+	free(const_cast<char *>(tmp));
 }
 
 std::string utf_to_locale_cpy(const std::string &s)
@@ -117,7 +117,7 @@ void locale_to_utf(std::string &s)
 	const char *tmp = strdup(s.c_str());
 	charset_convert(Config.system_encoding.c_str(), "utf-8", tmp, 1, s.length());
 	s = tmp;
-	delete [] tmp;
+	free(const_cast<char *>(tmp));
 }
 
 std::string locale_to_utf_cpy(const std::string &s)
