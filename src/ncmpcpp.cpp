@@ -1588,9 +1588,17 @@ int main(int argc, char *argv[])
 		}
 		else if (Keypressed(input, Key.GoToContainingDir))
 		{
-			Song *s = myScreen->CurrentSong();
-			if (s)
-				myBrowser->LocateSong(*s);
+			if (myScreen == myBrowser && myBrowser->Main()->Current().type == itPlaylist)
+			{
+				const std::string pl_name = myBrowser->Main()->Current().name;
+				myPlaylistEditor->JumpTo(pl_name);
+			}
+			else
+			{
+				Song *s = myScreen->CurrentSong();
+				if (s)
+					myBrowser->LocateSong(*s);
+			}
 		}
 		else if (Keypressed(input, Key.GoToMediaLibrary))
 		{

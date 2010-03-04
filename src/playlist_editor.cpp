@@ -289,6 +289,20 @@ void PlaylistEditor::ApplyFilter(const std::string &s)
 	GetList()->ApplyFilter(s, 0, REG_ICASE | Config.regex_type);
 }
 
+void PlaylistEditor::JumpTo(const std::string &s)
+{
+	SwitchTo();
+	for (size_t i = 0; i < Playlists->Size(); ++i)
+	{
+		if (s == (*Playlists)[i])
+		{
+			Playlists->Highlight(i);
+			Content->Clear();
+			break;
+		}
+	}
+}
+
 List *PlaylistEditor::GetList()
 {
 	if (w == Playlists)

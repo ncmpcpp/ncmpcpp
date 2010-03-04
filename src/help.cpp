@@ -249,6 +249,7 @@ void Help::GetKeybindings()
 	*w << DisplayKeys(Key.GoToNowPlaying)		<< "Locate currently playing song\n";
 	*w << DisplayKeys(Key.GoToParentDir)		<< "Go to parent directory\n";
 	*w << DisplayKeys(Key.Delete)			<< "Delete playlist/file/directory\n";
+	*w << DisplayKeys(Key.GoToContainingDir)	<< "Jump to playlist editor (playlists only)\n";
 	
 	
 	*w << "\n\n   " << fmtBold << "Keys - Search engine\n -----------------------------------------\n" << fmtBoldEnd;
