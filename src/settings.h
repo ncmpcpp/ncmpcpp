@@ -59,6 +59,10 @@ struct NcmpcppKeys
 	
 	int Up[2];
 	int Down[2];
+	int UpAlbum[2];
+	int DownAlbum[2];
+	int UpArtist[2];
+	int DownArtist[2];
 	int PageUp[2];
 	int PageDown[2];
 	int Home[2];

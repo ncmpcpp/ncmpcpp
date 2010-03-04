@@ -48,6 +48,7 @@ class SearchEngine : public Screen< Menu< std::pair<Buffer *, MPD::Song *> > >
 		virtual List *GetList() { return w->Size() >= StaticOptions ? w : 0; }
 		
 		void UpdateFoundList();
+		void Scroll(int);
 		
 		static size_t StaticOptions;
 		static size_t SearchButton;

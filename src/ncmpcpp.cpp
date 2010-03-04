@@ -439,6 +439,51 @@ int main(int argc, char *argv[])
 		{
 			myScreen->Scroll(wDown, Key.Down);
 		}
+		else if (Keypressed(input, Key.UpAlbum)  || Keypressed(input, Key.DownAlbum)
+		     ||  Keypressed(input, Key.UpArtist) || Keypressed(input, Key.DownArtist))
+		{
+			Menu<MPD::Song> *songs = NULL;
+			if (myScreen == myPlaylist && !myPlaylist->Items->Empty())
+				songs = myPlaylist->Items;
+			else if (myScreen->ActiveWindow() == myPlaylistEditor->Content)
+				songs = myPlaylistEditor->Content;
+			else if (myScreen == mySearcher)
+				mySearcher->Scroll(input);
+
+			if (songs && !songs->Empty())
+			{
+				size_t pos = songs->Choice();
+				if (Keypressed(input, Key.UpAlbum))
+				{
+					std::string album = songs->at(pos).GetAlbum();
+					while (pos > 0)
+						if (songs->at(--pos).GetAlbum() != album)
+							break;
+				}
+				else if (Keypressed(input, Key.DownAlbum))
+				{
+					std::string album = songs->at(pos).GetAlbum();
+					while (pos < songs->Size() - 1)
+						if (songs->at(++pos).GetAlbum() != album)
+							break;
+				}
+				else if (Keypressed(input, Key.UpArtist))
+				{
+					std::string artist = songs->at(pos).GetArtist();
+					while (pos > 0)
+						if (songs->at(--pos).GetArtist() != artist)
+							break;
+				}
+				else if (Keypressed(input, Key.DownArtist))
+				{
+					std::string artist = songs->at(pos).GetArtist();
+					while (pos < songs->Size() - 1)
+						if (songs->at(++pos).GetArtist() != artist)
+							break;
+				}
+				songs->Highlight(pos);
+			}
+		}
 		else if (Keypressed(input, Key.PageUp))
 		{
 			myScreen->Scroll(wPageUp, Key.PageUp);
