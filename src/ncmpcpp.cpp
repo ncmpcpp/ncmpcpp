@@ -1413,7 +1413,7 @@ int main(int argc, char *argv[])
 					if (success)
 					{
 						Mpd.UpdateDirectory(locale_to_utf_cpy(FindSharedDir(list)));
-						ShowMessage("Tags updated succesfully!");
+						ShowMessage("Tags updated successfully!");
 					}
 					FreeSongList(list);
 				}
@@ -1453,7 +1453,7 @@ int main(int argc, char *argv[])
 					if (success)
 					{
 						Mpd.UpdateDirectory(locale_to_utf_cpy(FindSharedDir(myLibrary->Songs)));
-						ShowMessage("Tags updated succesfully!");
+						ShowMessage("Tags updated successfully!");
 					}
 				}
 			}
