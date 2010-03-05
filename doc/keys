@@ -16,6 +16,14 @@
 #
 #key_down = 258 'j'
 #
+#key_up_album = '['
+#
+#key_down_album = ']'
+#
+#key_up_artist = '{'
+#
+#key_down_artist = '}'
+#
 #key_page_up = 339
 #
 #key_page_down = 338

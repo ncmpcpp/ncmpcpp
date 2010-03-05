@@ -150,6 +150,10 @@ void NcmpcppKeys::SetDefaults()
 {
 	Up[0] = KEY_UP;
 	Down[0] = KEY_DOWN;
+	UpAlbum[0] = '[';
+	DownAlbum[0] = ']';
+	UpArtist[0] = '{';
+	DownArtist[0] = '}';
 	PageUp[0] = KEY_PPAGE;
 	PageDown[0] = KEY_NPAGE;
 	Home[0] = KEY_HOME;
@@ -224,6 +228,10 @@ void NcmpcppKeys::SetDefaults()
 	
 	Up[1] = 'k';
 	Down[1] = 'j';
+	UpAlbum[1] = null_key;
+	DownAlbum[1] = null_key;
+	UpArtist[1] = null_key;
+	DownArtist[1] = null_key;
 	PageUp[1] = null_key;
 	PageDown[1] = null_key;
 	Home[1] = null_key;
@@ -418,6 +426,14 @@ void NcmpcppKeys::Read()
 				GetKeys(key, Up);
 			else if (key.find("key_down ") != std::string::npos)
 				GetKeys(key, Down);
+			else if (key.find("key_up_album ") != std::string::npos)
+				GetKeys(key, UpAlbum);
+			else if (key.find("key_down_album ") != std::string::npos)
+				GetKeys(key, DownAlbum);
+			else if (key.find("key_up_artist ") != std::string::npos)
+				GetKeys(key, UpArtist);
+			else if (key.find("key_down_artist ") != std::string::npos)
+				GetKeys(key, DownArtist);
 			else if (key.find("key_page_up ") != std::string::npos)
 				GetKeys(key, PageUp);
 			else if (key.find("key_page_down ") != std::string::npos)

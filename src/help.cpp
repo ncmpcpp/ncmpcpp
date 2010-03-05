@@ -133,6 +133,10 @@ void Help::GetKeybindings()
 	*w << "   " << fmtBold << "Keys - Movement\n -----------------------------------------\n" << fmtBoldEnd;
 	*w << DisplayKeys(Key.Up)			<< "Move Cursor up\n";
 	*w << DisplayKeys(Key.Down)			<< "Move Cursor down\n";
+	*w << DisplayKeys(Key.UpAlbum)			<< "Move Cursor up one album\n";
+	*w << DisplayKeys(Key.DownAlbum)		<< "Move Cursor down one album\n";
+	*w << DisplayKeys(Key.UpArtist)			<< "Move Cursor up one artist\n";
+	*w << DisplayKeys(Key.DownArtist)		<< "Move Cursor down one artist\n";
 	*w << DisplayKeys(Key.PageUp)			<< "Page up\n";
 	*w << DisplayKeys(Key.PageDown)			<< "Page down\n";
 	*w << DisplayKeys(Key.Home)			<< "Home\n";
@@ -245,6 +249,7 @@ void Help::GetKeybindings()
 	*w << DisplayKeys(Key.GoToNowPlaying)		<< "Locate currently playing song\n";
 	*w << DisplayKeys(Key.GoToParentDir)		<< "Go to parent directory\n";
 	*w << DisplayKeys(Key.Delete)			<< "Delete playlist/file/directory\n";
+	*w << DisplayKeys(Key.GoToContainingDir)	<< "Jump to playlist editor (playlists only)\n";
 	
 	
 	*w << "\n\n   " << fmtBold << "Keys - Search engine\n -----------------------------------------\n" << fmtBoldEnd;

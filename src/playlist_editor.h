@@ -46,6 +46,8 @@ class PlaylistEditor : public Screen<Window>
 		virtual void GetSelectedSongs(MPD::SongList &);
 		
 		virtual void ApplyFilter(const std::string &);
+
+		virtual void JumpTo(const std::string &);
 		
 		virtual List *GetList();
 		
