@@ -267,61 +267,40 @@ void SearchEngine::UpdateFoundList()
 void SearchEngine::Scroll(int input)
 {
 	size_t pos = w->Choice();
-	size_t oldpos = pos;
-	//w->Goto(pos);
-	//w->Goto(pos2);
-	//std::string album = w->at(pos).second->GetAlbum();
-	//ShowMessage("pos (choice): %i / pos2 (realchoice): %i / album: %s", pos, pos2, album.c_str());
-	//return;
-
+	
 	// above the reset button
-	if (pos < StaticOptions - 4)
+	if (pos < ResetButton)
 	{
-		if (Keypressed(input, Key.UpAlbum) ||
-		    Keypressed(input, Key.UpArtist))
+		if (Keypressed(input, Key.UpAlbum) || Keypressed(input, Key.UpArtist))
 			w->Highlight(0);
-		else if (Keypressed(input, Key.DownAlbum) ||
-		         Keypressed(input, Key.DownArtist))
-			w->Highlight(StaticOptions - 4);    // reset
-		return;
+		else if (Keypressed(input, Key.DownAlbum) || Keypressed(input, Key.DownArtist))
+			w->Highlight(ResetButton);
 	}
-
 	// reset button
-	if (pos == StaticOptions - 4)
+	else if (pos == ResetButton)
 	{
-		if (Keypressed(input, Key.UpAlbum) ||
-		    Keypressed(input, Key.UpArtist))
+		if (Keypressed(input, Key.UpAlbum) || Keypressed(input, Key.UpArtist))
 			w->Highlight(0);
-		else if (Keypressed(input, Key.DownAlbum) ||
-		         Keypressed(input, Key.DownArtist))
-			w->Highlight(StaticOptions);	    // first search result
-		return;
+		else if (Keypressed(input, Key.DownAlbum) || Keypressed(input, Key.DownArtist))
+			w->Highlight(StaticOptions); // first search result
 	}
-
-	// first search result
-	if (pos == StaticOptions)
-	{
-		if (Keypressed(input, Key.UpAlbum))
-		{
-			w->Highlight(StaticOptions - 4);    // reset
-			return;
-		}
-		else if (Keypressed(input, Key.UpArtist))
-		{
-			w->Highlight(0);
-			return;
-		}
-	}
-
 	// we are in the search results at this point
-	if (pos >= StaticOptions)
+	else if (pos >= StaticOptions)
 	{
 		if (Keypressed(input, Key.UpAlbum))
 		{
-			std::string album = w->at(pos).second->GetAlbum();
-			while (pos > StaticOptions)
-				if (w->at(--pos).second->GetAlbum() != album)
-					break;
+			if (pos == StaticOptions)
+			{
+				w->Highlight(ResetButton);
+				return;
+			}
+			else
+			{
+				std::string album = w->at(pos).second->GetAlbum();
+				while (pos > StaticOptions)
+					if (w->at(--pos).second->GetAlbum() != album)
+						break;
+			}
 		}
 		else if (Keypressed(input, Key.DownAlbum))
 		{
@@ -332,10 +311,18 @@ void SearchEngine::Scroll(int input)
 		}
 		else if (Keypressed(input, Key.UpArtist))
 		{
-			std::string artist = w->at(pos).second->GetArtist();
-			while (pos > StaticOptions)
-				if (w->at(--pos).second->GetArtist() != artist)
-					break;
+			if (pos == StaticOptions)
+			{
+				w->Highlight(0);
+				return;
+			}
+			else
+			{
+				std::string artist = w->at(pos).second->GetArtist();
+				while (pos > StaticOptions)
+					if (w->at(--pos).second->GetArtist() != artist)
+						break;
+			}
 		}
 		else if (Keypressed(input, Key.DownArtist))
 		{
