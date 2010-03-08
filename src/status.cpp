@@ -392,7 +392,7 @@ void NcmpcppStatusChanged(MPD::Connection *, MPD::StatusChanges changed, void *)
 			if (Config.autocenter_mode && !myPlaylist->Items->isFiltered())
 				myPlaylist->Items->Highlight(myPlaylist->NowPlaying);
 			
-			if (Config.now_playing_lyrics && !Mpd.GetSingle() && myScreen == myLyrics && Global::myOldScreen == myPlaylist)
+			if (Config.now_playing_lyrics && myScreen == myLyrics && Global::myOldScreen == myPlaylist)
 				Lyrics::Reload = 1;
 		}
 		Playlist::ReloadRemaining = 1;
