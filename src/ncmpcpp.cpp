@@ -275,7 +275,8 @@ int main(int argc, char *argv[])
 	wFooter = new Window(0, footer_start_y, COLS, footer_height, "", Config.statusbar_color, brNone);
 	wFooter->SetTimeout(ncmpcpp_window_timeout);
 	wFooter->SetGetStringHelper(StatusbarGetStringHelper);
-	wFooter->AddFDCallback(Mpd.GetFD(), StatusbarMPDCallback);
+	if (Mpd.SupportsIdle())
+		wFooter->AddFDCallback(Mpd.GetFD(), StatusbarMPDCallback);
 	wFooter->CreateHistory();
 	
 	// initialize screens to browser as default previous screen
@@ -333,7 +334,8 @@ int main(int argc, char *argv[])
 			if (Mpd.Connect())
 			{
 				ShowMessage("Connected to %s!", Mpd.GetHostname().c_str());
-				wFooter->AddFDCallback(Mpd.GetFD(), StatusbarMPDCallback);
+				if (Mpd.SupportsIdle())
+					wFooter->AddFDCallback(Mpd.GetFD(), StatusbarMPDCallback);
 				MessagesAllowed = 0;
 				UpdateStatusImmediately = 1;
 #				ifdef ENABLE_VISUALIZER
