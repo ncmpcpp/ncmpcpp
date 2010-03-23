@@ -191,7 +191,11 @@ void TraceMpdStatus()
 
 void NcmpcppErrorCallback(MPD::Connection *, int errorid, const char *msg, void *)
 {
-	if (errorid == MPD_SERVER_ERROR_PERMISSION)
+	// for errorid:
+	// - 0-7 bits define MPD_ERROR_* codes, compare them with (0xff & errorid)
+	// - 8-15 bits define MPD_SERVER_ERROR_* codes, compare them with (errorid >> 8)
+	
+	if ((errorid >> 8) == MPD_SERVER_ERROR_PERMISSION)
 	{
 		wFooter->SetGetStringHelper(0);
 		Statusbar() << "Password: ";

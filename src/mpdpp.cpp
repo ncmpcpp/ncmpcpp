@@ -124,6 +124,7 @@ void MPD::Connection::SetHostname(const std::string &host)
 
 bool MPD::Connection::SendPassword()
 {
+	assert(itsConnection);
 	GoBusy();
 	assert(!isCommandsListEnabled);
 	mpd_run_password(itsConnection, itsPassword.c_str());
@@ -1297,8 +1298,8 @@ int MPD::Connection::CheckForErrors()
 		{
 			// this is to avoid setting too small max size as we check it before fetching current status
 			// setting real max playlist length is in UpdateStatus()
-			error_code = mpd_connection_get_server_error(itsConnection);
-			if (error_code == MPD_SERVER_ERROR_PLAYLIST_MAX && itsMaxPlaylistLength == size_t(-1))
+			error_code |= (mpd_connection_get_server_error(itsConnection) << 8);
+			if ((error_code >> 8) == MPD_SERVER_ERROR_PLAYLIST_MAX && itsMaxPlaylistLength == size_t(-1))
 				itsMaxPlaylistLength = 0;
 		}
 		if (!mpd_connection_clear_error(itsConnection))
