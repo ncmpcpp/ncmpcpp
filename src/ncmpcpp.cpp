@@ -335,7 +335,13 @@ int main(int argc, char *argv[])
 			{
 				ShowMessage("Connected to %s!", Mpd.GetHostname().c_str());
 				if (Mpd.SupportsIdle())
+				{
 					wFooter->AddFDCallback(Mpd.GetFD(), StatusbarMPDCallback);
+					Mpd.OrderDataFetching(); // we need info about new connection
+				}
+				// we want everything updated after reconnect, no blocking.
+				Playlist::BlockUpdate = 0;
+				Global::BlockItemListUpdate = 0;
 				MessagesAllowed = 0;
 				UpdateStatusImmediately = 1;
 #				ifdef ENABLE_VISUALIZER
