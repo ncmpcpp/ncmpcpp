@@ -254,6 +254,8 @@ void Browser::ReverseSelection()
 
 void Browser::GetSelectedSongs(MPD::SongList &v)
 {
+	if (w->Empty())
+		return;
 	std::vector<size_t> selected;
 	w->GetSelected(selected);
 	if (selected.empty())

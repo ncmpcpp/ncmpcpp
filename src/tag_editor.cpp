@@ -285,14 +285,17 @@ void TagEditor::Update()
 		MPD::SongList list;
 		if (Config.albums_in_tag_editor)
 		{
-			Mpd.StartSearch(1);
-			Mpd.AddSearch(MPD_TAG_ALBUM, Albums->Current().second);
-			Mpd.CommitSearch(list);
-			sort(list.begin(), list.end(), CaseInsensitiveSorting());
-			for (MPD::SongList::iterator it = list.begin(); it != list.end(); ++it)
+			if (!Albums->Empty())
 			{
-				(*it)->Localize();
-				Tags->AddOption(**it);
+				Mpd.StartSearch(1);
+				Mpd.AddSearch(MPD_TAG_ALBUM, Albums->Current().second);
+				Mpd.CommitSearch(list);
+				sort(list.begin(), list.end(), CaseInsensitiveSorting());
+				for (MPD::SongList::iterator it = list.begin(); it != list.end(); ++it)
+				{
+					(*it)->Localize();
+					Tags->AddOption(**it);
+				}
 			}
 		}
 		else

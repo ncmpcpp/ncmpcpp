@@ -233,6 +233,8 @@ MPD::Song *SearchEngine::CurrentSong()
 
 void SearchEngine::GetSelectedSongs(MPD::SongList &v)
 {
+	if (w->Empty())
+		return;
 	std::vector<size_t> selected;
 	w->GetSelected(selected);
 	if (selected.empty() && w->Choice() >= StaticOptions)

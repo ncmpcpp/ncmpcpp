@@ -280,6 +280,8 @@ MPD::Song *Playlist::CurrentSong()
 
 void Playlist::GetSelectedSongs(MPD::SongList &v)
 {
+	if (myPlaylist->Items->Empty())
+		return;
 	std::vector<size_t> selected;
 	Items->GetSelected(selected);
 	if (selected.empty())
