@@ -1303,7 +1303,14 @@ int MPD::Connection::CheckForErrors()
 				itsMaxPlaylistLength = 0;
 		}
 		if (!mpd_connection_clear_error(itsConnection))
+		{
 			Disconnect();
+			// notify about mpd state changed to unknown.
+			StatusChanges changes;
+			changes.PlayerState = 1;
+			if (itsUpdater)
+				itsUpdater(this, changes, itsErrorHandlerUserdata);
+		}
 		if (itsErrorHandler)
 			itsErrorHandler(this, error_code, itsErrorMessage.c_str(), itsErrorHandlerUserdata);
 	}
