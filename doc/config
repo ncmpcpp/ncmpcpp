@@ -360,9 +360,9 @@
 #search_engine_default_search_mode = "1"
 #
 ##
-## Note: These triggers will allow you to phisically remove
-## files and directories from your hdd using ncmpcpp's
-## browser screen.
+## Note: Below variables can allow you to physically
+## remove files and directories from your hdd using
+## ncmpcpp's browser screen.
 ##
 #
 #allow_physical_files_deletion = "no"
