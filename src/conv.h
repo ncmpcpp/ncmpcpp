@@ -21,6 +21,7 @@
 #ifndef _CONV_H
 #define _CONV_H
 
+#include <cstring>
 #include <string>
 
 #include "window.h"
@@ -33,7 +34,8 @@ template <size_t N> inline size_t static_strlen(const char (&)[N])
 
 template <size_t N> void Replace(std::string &s, const char (&from)[N], const char *to)
 {
-	for (size_t i = 0; (i = s.find(from, i)) != std::string::npos; i += N)
+	size_t to_len = strlen(to);
+	for (size_t i = 0; (i = s.find(from, i)) != std::string::npos; i += to_len)
 		s.replace(i, N-1, to);
 }
 
