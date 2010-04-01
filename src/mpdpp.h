@@ -92,7 +92,7 @@ namespace MPD
 			const std::string & GetHostname() { return itsHost; }
 			int GetPort() { return itsPort; }
 			
-			float Version() const;
+			unsigned Version() const;
 			
 			void SetIdleEnabled(bool val) { isIdleEnabled = val; }
 			bool SupportsIdle() const { return supportsIdle; }

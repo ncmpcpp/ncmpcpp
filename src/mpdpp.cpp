@@ -102,12 +102,9 @@ void MPD::Connection::Disconnect()
 	itsMaxPlaylistLength = -1;
 }
 
-float MPD::Connection::Version() const
+unsigned MPD::Connection::Version() const
 {
-	if (!itsConnection)
-		return 0;
-	const unsigned *version = mpd_connection_get_server_version(itsConnection);
-	return version[1] + version[2]*0.1;
+	return itsConnection ? mpd_connection_get_server_version(itsConnection)[1] : 0;
 }
 
 void MPD::Connection::SetHostname(const std::string &host)
