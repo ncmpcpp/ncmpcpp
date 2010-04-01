@@ -41,6 +41,8 @@ const unsigned Visualizer::Samples = 2048;
 const unsigned Visualizer::FFTResults = Samples/2+1;
 #endif // HAVE_FFTW3_H
 
+int Visualizer::WindowTimeout = 1000/25; /* 25 fps */
+
 void Visualizer::Init()
 {
 	w = new Window(0, MainStartY, COLS, MainHeight, "", Config.main_color, brNone);
@@ -82,7 +84,7 @@ void Visualizer::SwitchTo()
 	itsTimer.tv_usec = 0;
 	
 	if (itsFifo >= 0)
-		Global::wFooter->SetTimeout(1000/25);
+		Global::wFooter->SetTimeout(WindowTimeout);
 	Global::RedrawHeader = 1;
 }
 
@@ -103,13 +105,11 @@ void Visualizer::Update()
 	if (itsFifo < 0)
 		return;
 	
-	// if mpd is stopped, clear the screen
-	if (!Mpd.isPlaying())
-	{
-		w->Clear();
-		w->Refresh();
+	// it supports only PCM in format 44100:16:1
+	static int16_t buf[Samples];
+	ssize_t data = read(itsFifo, buf, sizeof(buf));
+	if (data < 0) // no data available in fifo
 		return;
-	}
 	
 	if (itsOutputID != -1 && Global::Timer.tv_sec > itsTimer.tv_sec+Config.visualizer_sync_interval)
 	{
@@ -118,12 +118,6 @@ void Visualizer::Update()
 		Mpd.EnableOutput(itsOutputID);
 		gettimeofday(&itsTimer, 0);
 	}
-	
-	// it supports only PCM in format 44100:16:1
-	static int16_t buf[Samples];
-	ssize_t data = read(itsFifo, buf, sizeof(buf));
-	if (data < 0) // no data available in fifo
-		return;
 	
 	w->Clear();
 #	ifdef HAVE_FFTW3_H

@@ -58,6 +58,8 @@ class Visualizer : public Screen<Window>
 		void ResetFD();
 		void FindOutputID();
 		
+		static int WindowTimeout;
+		
 	protected:
 		virtual void Init();
 		

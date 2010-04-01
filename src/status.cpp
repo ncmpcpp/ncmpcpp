@@ -38,6 +38,7 @@
 #include "settings.h"
 #include "status.h"
 #include "tag_editor.h"
+#include "visualizer.h"
 
 using Global::myScreen;
 using Global::wFooter;
@@ -324,7 +325,8 @@ void NcmpcppStatusChanged(MPD::Connection *, MPD::StatusChanges changed, void *)
 	}
 	if (changed.PlayerState)
 	{
-		switch (Mpd.GetState())
+		MPD::PlayerState state = Mpd.GetState();
+		switch (state)
 		{
 			case MPD::psUnknown:
 			{
@@ -366,9 +368,17 @@ void NcmpcppStatusChanged(MPD::Connection *, MPD::StatusChanges changed, void *)
 				}
 				else
 					player_state.clear();
+#				ifdef ENABLE_VISUALIZER
+				if (myScreen == myVisualizer)
+					myVisualizer->Main()->Clear();
+#				endif // ENABLE_VISUALIZER
 				break;
 			}
 		}
+#		ifdef ENABLE_VISUALIZER
+		if (myScreen == myVisualizer)
+			wFooter->SetTimeout(state == MPD::psPlay ? Visualizer::WindowTimeout : ncmpcpp_window_timeout);
+#		endif // ENABLE_VISUALIZER
 		if (Config.new_design)
 		{
 			*wHeader << XY(0, 1) << fmtBold << player_state << fmtBoldEnd;
