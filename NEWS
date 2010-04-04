@@ -1,3 +1,11 @@
+ncmpcpp-0.5.3
+
+* new feature: new movement keys: {Up,Down}{Album,Artist}
+* new feature: make displaying volume level in statusbar optional
+* new feature: jump from browser to playlist editor
+* bugfixes
+
+
 ncmpcpp-0.5.2
 
  + bugfixes
