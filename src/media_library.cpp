@@ -557,6 +557,14 @@ void MediaLibrary::PrevColumn()
 
 void MediaLibrary::LocateSong(const MPD::Song &s)
 {
+	if (Mpd.Version() < 14)
+	{
+		// <mpd-0.14.* has no ability to search for empty tags, which sometimes
+		// leaves albums column empty. since this function relies on this column
+		// being non-empty, it has to be disabled for these versions.
+		ShowMessage("Your MPD version is too old to handle this function properly, please upgrade.");
+		return;
+	}
 	std::string primary_tag;
 	switch (Config.media_lib_primary_tag)
 	{
