@@ -17,7 +17,7 @@
 #
 #mpd_crossfade_time = "5"
 #
-#mpd_communication_mode = "polling" (polling/notifications)
+#mpd_communication_mode = "notifications" (polling/notifications)
 #
 ##### music visualizer #####
 ##

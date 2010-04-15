@@ -341,7 +341,7 @@ void NcmpcppConfig::SetDefaults()
 	window_border = brGreen;
 	active_window_border = brRed;
 	media_lib_primary_tag = MPD_TAG_ARTIST;
-	enable_idle_notifications = false;
+	enable_idle_notifications = true;
 	colors_enabled = true;
 	fancy_scrolling = true;
 	playlist_show_remaining_time = false;
