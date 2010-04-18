@@ -194,6 +194,7 @@ void NcmpcppKeys::SetDefaults()
 	ToggleSpaceMode[0] = 't';
 	ToggleAddMode[0] = 'T';
 	ToggleMouse[0] = '|';
+	ToggleBitrateVisibility[0] = 'B';
 	Shuffle[0] = 'Z';
 	ToggleCrossfade[0] = 'x';
 	SetCrossfade[0] = 'X';
@@ -272,6 +273,7 @@ void NcmpcppKeys::SetDefaults()
 	ToggleSpaceMode[1] = NullKey;
 	ToggleAddMode[1] = NullKey;
 	ToggleMouse[1] = NullKey;
+	ToggleBitrateVisibility[1] = NullKey;
 	Shuffle[1] = NullKey;
 	ToggleCrossfade[1] = NullKey;
 	SetCrossfade[1] = NullKey;

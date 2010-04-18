@@ -1902,6 +1902,11 @@ int main(int argc, char *argv[])
 			mousemask(Config.mouse_support ? ALL_MOUSE_EVENTS : 0, 0);
 			ShowMessage("Mouse support %s", Config.mouse_support ? "enabled" : "disabled");
 		}
+		else if (Keypressed(input, Key.ToggleBitrateVisibility))
+		{
+			Config.display_bitrate = !Config.display_bitrate;
+			ShowMessage("Bitrate visibility %s", Config.display_bitrate ? "enabled" : "disabled");
+		}
 		else if (Keypressed(input, Key.SwitchTagTypeList))
 		{
 			if (myScreen == myPlaylist)
