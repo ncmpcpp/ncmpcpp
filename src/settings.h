@@ -21,7 +21,6 @@
 #ifndef _SETTINGS_H
 #define _SETTINGS_H
 
-#include <limits>
 #include <vector>
 
 #include <mpd/client.h>
@@ -36,7 +35,6 @@
 #endif // WIN32
 
 const std::string config_dir = home_path + HOME_FOLDER;
-const int null_key = std::numeric_limits<int>::max();
 
 class BasicScreen; // forward declaration for screens sequence
 
@@ -54,6 +52,8 @@ struct Column
 
 struct NcmpcppKeys
 {
+	static const int NullKey = -1;
+	
 	void SetDefaults();
 	void Read();
 	

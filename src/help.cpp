@@ -76,7 +76,7 @@ std::string Help::DisplayKeys(int *key, int size)
 	std::string result = "\t";
 	for (int i = 0; i < size; i++)
 	{
-		if (key[i] == null_key);
+		if (key[i] == NcmpcppKeys::NullKey);
 		else if (key[i] == 259)
 			result += "Up";
 		else if (key[i] == 258)

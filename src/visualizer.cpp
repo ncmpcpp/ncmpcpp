@@ -28,6 +28,7 @@
 #include <cmath>
 #include <cstring>
 #include <fstream>
+#include <limits>
 #include <fcntl.h>
 #include <sys/time.h>
 

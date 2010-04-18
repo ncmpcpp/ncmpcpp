@@ -72,8 +72,13 @@ namespace
 		}
 		else
 			one = line;
-		key[0] = !one.empty() && one[0] == '\'' ? one[1] : (atoi(one.c_str()) == 0 ? null_key : atoi(one.c_str()));
-		key[1] = !two.empty() && two[0] == '\'' ? two[1] : (atoi(two.c_str()) == 0 ? null_key : atoi(two.c_str()));
+		key[0] = !one.empty() && one[0] == '\''
+				? one[1]
+				: (atoi(one.c_str()) == 0 ? NcmpcppKeys::NullKey : atoi(one.c_str()));
+		
+		key[1] = !two.empty() && two[0] == '\''
+				? two[1]
+				: (atoi(two.c_str()) == 0 ? NcmpcppKeys::NullKey : atoi(two.c_str()));
 	}
 	
 	Border IntoBorder(const std::string &color)
@@ -225,23 +230,23 @@ void NcmpcppKeys::SetDefaults()
 	GoToParentDir[0] = KEY_BACKSPACE;
 	SwitchTagTypeList[0] = '`';
 	Quit[0] = 'q';
-	
+
 	Up[1] = 'k';
 	Down[1] = 'j';
-	UpAlbum[1] = null_key;
-	DownAlbum[1] = null_key;
-	UpArtist[1] = null_key;
-	DownArtist[1] = null_key;
-	PageUp[1] = null_key;
-	PageDown[1] = null_key;
-	Home[1] = null_key;
-	End[1] = null_key;
-	Space[1] = null_key;
-	Enter[1] = null_key;
+	UpAlbum[1] = NullKey;
+	DownAlbum[1] = NullKey;
+	UpArtist[1] = NullKey;
+	DownArtist[1] = NullKey;
+	PageUp[1] = NullKey;
+	PageDown[1] = NullKey;
+	Home[1] = NullKey;
+	End[1] = NullKey;
+	Space[1] = NullKey;
+	Enter[1] = NullKey;
 	Delete[1] = 'd';
 	VolumeUp[1] = '+';
 	VolumeDown[1] = '-';
-	ScreenSwitcher[1] = null_key;
+	ScreenSwitcher[1] = NullKey;
 	Help[1] = 265;
 	Playlist[1] = 266;
 	Browser[1] = 267;
@@ -252,56 +257,56 @@ void NcmpcppKeys::SetDefaults()
 	Outputs[1] = 272;
 	Visualizer[1] = 273;
 	Clock[1] = 274;
-	ServerInfo[1] = null_key;
-	Stop[1] = null_key;
-	Pause[1] = null_key;
-	Next[1] = null_key;
-	Prev[1] = null_key;
-	SeekForward[1] = null_key;
-	SeekBackward[1] = null_key;
-	ToggleRepeat[1] = null_key;
-	ToggleRandom[1] = null_key;
-	ToggleSingle[1] = null_key;
-	ToggleConsume[1] = null_key;
-	ToggleReplayGainMode[1] = null_key;
-	ToggleSpaceMode[1] = null_key;
-	ToggleAddMode[1] = null_key;
-	ToggleMouse[1] = null_key;
-	Shuffle[1] = null_key;
-	ToggleCrossfade[1] = null_key;
-	SetCrossfade[1] = null_key;
-	UpdateDB[1] = null_key;
-	SortPlaylist[1] = null_key;
-	ApplyFilter[1] = null_key;
-	FindForward[1] = null_key;
-	FindBackward[1] = null_key;
-	NextFoundPosition[1] = null_key;
-	PrevFoundPosition[1] = null_key;
-	ToggleFindMode[1] = null_key;
-	EditTags[1] = null_key;
-	SongInfo[1] = null_key;
-	ArtistInfo[1] = null_key;
-	GoToPosition[1] = null_key;
-	Lyrics[1] = null_key;
-	ReverseSelection[1] = null_key;
-	DeselectAll[1] = null_key;
-	AddSelected[1] = null_key;
-	Clear[1] = null_key;
-	Crop[1] = null_key;
-	MvSongUp[1] = null_key;
-	MvSongDown[1] = null_key;
-	MoveTo[1] = null_key;
-	Add[1] = null_key;
-	SavePlaylist[1] = null_key;
-	GoToNowPlaying[1] = null_key;
-	GoToContainingDir[1] = null_key;
-	GoToMediaLibrary[1] = null_key;
-	ToggleAutoCenter[1] = null_key;
-	ToggleDisplayMode[1] = null_key;
-	ToggleInterface[1] = null_key;
-	ToggleLyricsDB[1] = null_key;
+	ServerInfo[1] = NullKey;
+	Stop[1] = NullKey;
+	Pause[1] = NullKey;
+	Next[1] = NullKey;
+	Prev[1] = NullKey;
+	SeekForward[1] = NullKey;
+	SeekBackward[1] = NullKey;
+	ToggleRepeat[1] = NullKey;
+	ToggleRandom[1] = NullKey;
+	ToggleSingle[1] = NullKey;
+	ToggleConsume[1] = NullKey;
+	ToggleReplayGainMode[1] = NullKey;
+	ToggleSpaceMode[1] = NullKey;
+	ToggleAddMode[1] = NullKey;
+	ToggleMouse[1] = NullKey;
+	Shuffle[1] = NullKey;
+	ToggleCrossfade[1] = NullKey;
+	SetCrossfade[1] = NullKey;
+	UpdateDB[1] = NullKey;
+	SortPlaylist[1] = NullKey;
+	ApplyFilter[1] = NullKey;
+	FindForward[1] = NullKey;
+	FindBackward[1] = NullKey;
+	NextFoundPosition[1] = NullKey;
+	PrevFoundPosition[1] = NullKey;
+	ToggleFindMode[1] = NullKey;
+	EditTags[1] = NullKey;
+	SongInfo[1] = NullKey;
+	ArtistInfo[1] = NullKey;
+	GoToPosition[1] = NullKey;
+	Lyrics[1] = NullKey;
+	ReverseSelection[1] = NullKey;
+	DeselectAll[1] = NullKey;
+	AddSelected[1] = NullKey;
+	Clear[1] = NullKey;
+	Crop[1] = NullKey;
+	MvSongUp[1] = NullKey;
+	MvSongDown[1] = NullKey;
+	MoveTo[1] = NullKey;
+	Add[1] = NullKey;
+	SavePlaylist[1] = NullKey;
+	GoToNowPlaying[1] = NullKey;
+	GoToContainingDir[1] = NullKey;
+	GoToMediaLibrary[1] = NullKey;
+	ToggleAutoCenter[1] = NullKey;
+	ToggleDisplayMode[1] = NullKey;
+	ToggleInterface[1] = NullKey;
+	ToggleLyricsDB[1] = NullKey;
 	GoToParentDir[1] = 127;
-	SwitchTagTypeList[1] = null_key;
+	SwitchTagTypeList[1] = NullKey;
 	Quit[1] = 'Q';
 }
 
