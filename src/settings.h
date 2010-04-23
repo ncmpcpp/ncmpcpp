@@ -52,7 +52,7 @@ struct Column
 
 struct NcmpcppKeys
 {
-	static const int NullKey = -1;
+	static const int NullKey = 0;
 	
 	void SetDefaults();
 	void Read();
