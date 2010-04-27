@@ -998,11 +998,11 @@ std::string TagEditor::CapitalizeFirstLetters(const std::string &s)
 	if (s.empty())
 		return "";
 	std::string result = s;
-	if (isalpha(result[0]))
+	if (!isspace(result[0]))
 		result[0] = toupper(result[0]);
 	for (std::string::iterator it = result.begin()+1; it != result.end(); ++it)
 	{
-		if (isalpha(*it) && !isalpha(*(it-1)) && *(it-1) != '\'')
+		if (!isspace(*it) && isspace(*(it-1)) && *(it-1) != '\'')
 			*it = toupper(*it);
 	}
 	return result;
