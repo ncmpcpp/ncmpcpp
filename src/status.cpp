@@ -138,10 +138,6 @@ void TraceMpdStatus()
 	gettimeofday(&Global::Timer, 0);
 	if (Mpd.Connected() && (Mpd.SupportsIdle() || Timer.tv_sec > past.tv_sec || Global::UpdateStatusImmediately))
 	{
-		Mpd.UpdateStatus();
-		Global::BlockItemListUpdate = 0;
-		Playlist::BlockUpdate = 0;
-		Global::UpdateStatusImmediately = 0;
 		if (!Mpd.SupportsIdle())
 		{
 			gettimeofday(&past, 0);
@@ -154,6 +150,10 @@ void TraceMpdStatus()
 			Mpd.OrderDataFetching();
 			gettimeofday(&past, 0);
 		}
+		Mpd.UpdateStatus();
+		Global::BlockItemListUpdate = 0;
+		Playlist::BlockUpdate = 0;
+		Global::UpdateStatusImmediately = 0;
 	}
 	
 	myScreen->Update();
