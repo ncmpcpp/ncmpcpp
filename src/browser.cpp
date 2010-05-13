@@ -324,13 +324,11 @@ void Browser::LocateSong(const MPD::Song &s)
 	if (myScreen != this)
 		SwitchTo();
 	
-	std::string option = s.toString(Config.song_status_format);
-	locale_to_utf(option);
 	if (itsBrowsedDir != s.GetDirectory())
 		GetDirectory(s.GetDirectory());
 	for (size_t i = 0; i < w->Size(); ++i)
 	{
-		if (w->at(i).type == itSong && option == w->at(i).song->toString(Config.song_status_format))
+		if ((*w)[i].type == itSong && s.GetHash() == (*w)[i].song->GetHash())
 		{
 			w->Highlight(i);
 			break;
