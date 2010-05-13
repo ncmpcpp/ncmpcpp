@@ -1614,6 +1614,14 @@ int main(int argc, char *argv[])
 			if (s)
 				myLibrary->LocateSong(*s);
 		}
+#		ifdef HAVE_TAGLIB_H
+		else if (Keypressed(input, Key.GoToTagEditor))
+		{
+			CHECK_MPD_MUSIC_DIR;
+			if (Song *s = myScreen->CurrentSong())
+				myTagEditor->LocateSong(*s);
+		}
+#		endif // HAVE_TAGLIB_H
 		else if (Keypressed(input, Key.GoToPosition))
 		{
 			if (!Mpd.GetTotalTime())

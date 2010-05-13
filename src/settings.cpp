@@ -224,6 +224,7 @@ void NcmpcppKeys::SetDefaults()
 	GoToNowPlaying[0] = 'o';
 	GoToContainingDir[0] = 'G';
 	GoToMediaLibrary[0] = '~';
+	GoToTagEditor[0] = 'E';
 	ToggleAutoCenter[0] = 'U';
 	ToggleDisplayMode[0] = 'p';
 	ToggleInterface[0] = '\\';
@@ -303,6 +304,7 @@ void NcmpcppKeys::SetDefaults()
 	GoToNowPlaying[1] = NullKey;
 	GoToContainingDir[1] = NullKey;
 	GoToMediaLibrary[1] = NullKey;
+	GoToTagEditor[1] = NullKey;
 	ToggleAutoCenter[1] = NullKey;
 	ToggleDisplayMode[1] = NullKey;
 	ToggleInterface[1] = NullKey;

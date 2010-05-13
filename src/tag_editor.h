@@ -68,6 +68,8 @@ class TagEditor : public Screen<Window>
 		void NextColumn();
 		void PrevColumn();
 		
+		void LocateSong(const MPD::Song &s);
+		
 		Menu<string_pair> *LeftColumn;
 		Menu<string_pair> *Albums;
 		Menu<string_pair> *Dirs;

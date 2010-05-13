@@ -128,6 +128,7 @@ struct NcmpcppKeys
 	int GoToNowPlaying[2];
 	int GoToContainingDir[2];
 	int GoToMediaLibrary[2];
+	int GoToTagEditor[2];
 	int ToggleAutoCenter[2];
 	int ToggleDisplayMode[2];
 	int ToggleInterface[2];

@@ -847,6 +847,63 @@ void TagEditor::PrevColumn()
 	}
 }
 
+void TagEditor::LocateSong(const MPD::Song &s)
+{
+	if (s.GetDirectory().empty())
+		return;
+	
+	if (LeftColumn == Albums)
+	{
+		Config.albums_in_tag_editor = false;
+		if (w == LeftColumn)
+			w = Dirs;
+		LeftColumn = Dirs;
+	}
+		
+	if (Global::myScreen != this)
+		SwitchTo();
+	
+	// go to right directory
+	if (itsBrowsedDir != s.GetDirectory())
+	{
+		itsBrowsedDir = s.GetDirectory();
+		itsBrowsedDir = itsBrowsedDir.substr(0, itsBrowsedDir.find('/'));
+		if (itsBrowsedDir.empty())
+			itsBrowsedDir = "/";
+		Dirs->Clear();
+		Update();
+	}
+	if (itsBrowsedDir == "/")
+		Dirs->Reset(); // go to the first pos, which is "." (music dir root)
+	
+	// highlight directory we need and get files from it
+	std::string dir = ExtractTopDirectory(s.GetDirectory());
+	for (size_t i = 0; i < Dirs->Size(); ++i)
+	{
+		if ((*Dirs)[i].first == dir)
+		{
+			Dirs->Highlight(i);
+			break;
+		}
+	}
+	Tags->Clear();
+	Update();
+	
+	// go to the right column
+	NextColumn();
+	NextColumn();
+	
+	// highlight our file
+	for (size_t i = 0; i < Tags->Size(); ++i)
+	{
+		if ((*Tags)[i].GetHash() == s.GetHash())
+		{
+			Tags->Highlight(i);
+			break;
+		}
+	}
+}
+
 void TagEditor::ReadTags(MPD::Song &s)
 {
 	TagLib::FileRef f(s.GetFile().c_str());

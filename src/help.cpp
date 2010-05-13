@@ -204,6 +204,9 @@ void Help::GetKeybindings()
 	*w << DisplayKeys(Key.ToggleFindMode)		<< "Toggle find mode (normal/wrapped)\n";
 	*w << DisplayKeys(Key.GoToContainingDir)	<< "Locate song in browser\n";
 	*w << DisplayKeys(Key.GoToMediaLibrary)		<< "Locate current song in media library\n";
+#	ifdef HAVE_TAGLIB_H
+	*w << DisplayKeys(Key.GoToTagEditor)		<< "Locate current song in tag editor\n";
+#	endif // HAVE_TAGLIB_H
 	*w << DisplayKeys(Key.ToggleDisplayMode)	<< "Toggle display mode\n";
 	*w << DisplayKeys(Key.ToggleInterface)		<< "Toggle user interface\n";
 	*w << DisplayKeys(Key.GoToPosition)		<< "Go to given position in current song (in % by default)\n";
