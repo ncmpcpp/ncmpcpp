@@ -643,12 +643,11 @@ void MediaLibrary::LocateSong(const MPD::Song &s)
 	if (Songs->Empty())
 		Update();
 	
-	std::string song = s.GetTitle();
-	if (song != Songs->Current().GetTitle())
+	if (s.GetHash() != Songs->Current().GetHash())
 	{
 		for (size_t i = 0; i < Songs->Size(); ++i)
 		{
-			if (song == (*Songs)[i].GetTitle())
+			if (s.GetHash()  == (*Songs)[i].GetHash())
 			{
 				Songs->Highlight(i);
 				break;
