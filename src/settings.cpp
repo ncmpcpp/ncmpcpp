@@ -356,6 +356,7 @@ void NcmpcppConfig::SetDefaults()
 	colors_enabled = true;
 	fancy_scrolling = true;
 	playlist_show_remaining_time = false;
+	playlist_shorten_total_times = false;
 	playlist_separate_albums = false;
 	columns_in_playlist = false;
 	columns_in_browser = false;
@@ -832,6 +833,10 @@ void NcmpcppConfig::Read()
 			else if (cl.find("playlist_show_remaining_time") != std::string::npos)
 			{
 				playlist_show_remaining_time = v == "yes";
+			}
+			else if (cl.find("playlist_shorten_total_times") != std::string::npos)
+			{
+				playlist_shorten_total_times = v == "yes";
 			}
 			else if (cl.find("playlist_separate_albums") != std::string::npos)
 			{

@@ -387,12 +387,12 @@ std::string Playlist::TotalLength()
 	if (itsTotalLength)
 	{
 		result << ", length: ";
-		ShowTime(result, itsTotalLength, 0);
+		ShowTime(result, itsTotalLength, Config.playlist_shorten_total_times);
 	}
 	if (Config.playlist_show_remaining_time && itsRemainingTime && !Items->isFiltered() && Items->Size() > 1)
 	{
 		result << " :: remaining: ";
-		ShowTime(result, itsRemainingTime, 0);
+		ShowTime(result, itsRemainingTime, Config.playlist_shorten_total_times);
 	}
 	result << ')';
 	return result.str();
