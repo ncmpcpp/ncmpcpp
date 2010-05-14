@@ -152,6 +152,8 @@
 #
 #key_toggle_display_mode = 'p'
 #
+#key_toggle_separators_in_playlist = '!'
+#
 #key_toggle_lyrics_db = 'L'
 #
 #key_go_to_containing_directory = 'G'

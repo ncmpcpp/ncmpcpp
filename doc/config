@@ -226,6 +226,8 @@
 #
 #playlist_show_remaining_time = "no"
 #
+#playlist_separate_albums = "no"
+#
 #playlist_display_mode = "classic" (classic/columns)
 #
 #browser_display_mode = "classic" (classic/columns)

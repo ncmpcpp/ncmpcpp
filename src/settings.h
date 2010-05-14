@@ -132,6 +132,7 @@ struct NcmpcppKeys
 	int ToggleAutoCenter[2];
 	int ToggleDisplayMode[2];
 	int ToggleInterface[2];
+	int ToggleSeparatorsInPlaylist[2];
 	int ToggleLyricsDB[2];
 	int GoToParentDir[2];
 	int SwitchTagTypeList[2];
@@ -195,6 +196,7 @@ struct NcmpcppConfig
 	bool colors_enabled;
 	bool fancy_scrolling;
 	bool playlist_show_remaining_time;
+	bool playlist_separate_albums;
 	bool columns_in_playlist;
 	bool columns_in_browser;
 	bool columns_in_search_engine;

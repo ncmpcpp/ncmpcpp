@@ -542,7 +542,7 @@ int main(int argc, char *argv[])
 			else if (mouse_event.bstate & (BUTTON1_PRESSED | BUTTON2_PRESSED | BUTTON3_PRESSED | BUTTON4_PRESSED))
 				myScreen->MouseButtonPressed(mouse_event);
 		}
-		if (Keypressed(input, Key.ToggleInterface))
+		else if (Keypressed(input, Key.ToggleInterface))
 		{
 			Config.new_design = !Config.new_design;
 			Config.statusbar_visibility = Config.new_design ? 0 : real_statusbar_visibility;
@@ -940,8 +940,8 @@ int main(int argc, char *argv[])
 						if (modify_now_playing)
 							--myPlaylist->NowPlaying;
 						--to;
-						myPlaylist->Items->at(from).SetPosition(to);
-						myPlaylist->Items->at(to).SetPosition(from);
+						myPlaylist->Items->at(to+1).SetPosition(to);
+						myPlaylist->Items->at(to).SetPosition(to+1);
 						myPlaylist->Items->Swap(to, to+1);
 						myPlaylist->Items->Scroll(wUp);
 						myPlaylist->Items->Refresh();
@@ -1066,8 +1066,8 @@ int main(int argc, char *argv[])
 						if (modify_now_playing)
 							++myPlaylist->NowPlaying;
 						++to;
-						myPlaylist->Items->at(from).SetPosition(to);
-						myPlaylist->Items->at(to).SetPosition(from);
+						myPlaylist->Items->at(to-1).SetPosition(to);
+						myPlaylist->Items->at(to).SetPosition(to-1);
 						myPlaylist->Items->Swap(to, to-1);
 						myPlaylist->Items->Scroll(wDown);
 						myPlaylist->Items->Refresh();
@@ -1314,6 +1314,11 @@ int main(int argc, char *argv[])
 				if (mySearcher->Main()->Size() > SearchEngine::StaticOptions)
 					mySearcher->Main()->SetTitle(Config.columns_in_search_engine ? Display::Columns() : "");
 			}
+		}
+		else if (Keypressed(input, Key.ToggleSeparatorsInPlaylist))
+		{
+			Config.playlist_separate_albums = !Config.playlist_separate_albums;
+			ShowMessage("Separators between albums in playlist: %s", Config.playlist_separate_albums ? "On" : "Off");
 		}
 #		ifdef HAVE_CURL_CURL_H
 		else if (Keypressed(input, Key.ToggleLyricsDB))

@@ -209,6 +209,7 @@ void Help::GetKeybindings()
 #	endif // HAVE_TAGLIB_H
 	*w << DisplayKeys(Key.ToggleDisplayMode)	<< "Toggle display mode\n";
 	*w << DisplayKeys(Key.ToggleInterface)		<< "Toggle user interface\n";
+	*w << DisplayKeys(Key.ToggleSeparatorsInPlaylist) << "Toggle displaying separators between albums in playlist\n";
 	*w << DisplayKeys(Key.GoToPosition)		<< "Go to given position in current song (in % by default)\n";
 	*w << DisplayKeys(Key.SongInfo)			<< "Show song info\n";
 #	ifdef HAVE_CURL_CURL_H

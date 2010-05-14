@@ -228,6 +228,7 @@ void NcmpcppKeys::SetDefaults()
 	ToggleAutoCenter[0] = 'U';
 	ToggleDisplayMode[0] = 'p';
 	ToggleInterface[0] = '\\';
+	ToggleSeparatorsInPlaylist[0] = '!';
 	ToggleLyricsDB[0] = 'L';
 	GoToParentDir[0] = KEY_BACKSPACE;
 	SwitchTagTypeList[0] = '`';
@@ -308,6 +309,7 @@ void NcmpcppKeys::SetDefaults()
 	ToggleAutoCenter[1] = NullKey;
 	ToggleDisplayMode[1] = NullKey;
 	ToggleInterface[1] = NullKey;
+	ToggleSeparatorsInPlaylist[1] = NullKey;
 	ToggleLyricsDB[1] = NullKey;
 	GoToParentDir[1] = 127;
 	SwitchTagTypeList[1] = NullKey;
@@ -354,6 +356,7 @@ void NcmpcppConfig::SetDefaults()
 	colors_enabled = true;
 	fancy_scrolling = true;
 	playlist_show_remaining_time = false;
+	playlist_separate_albums = false;
 	columns_in_playlist = false;
 	columns_in_browser = false;
 	columns_in_search_engine = false;
@@ -571,6 +574,8 @@ void NcmpcppKeys::Read()
 				GetKeys(key, ToggleAutoCenter);
 			else if (key.find("key_toggle_display_mode ") != std::string::npos)
 				GetKeys(key, ToggleDisplayMode);
+			else if (key.find("key_toggle_separators_in_playlist ") != std::string::npos)
+				GetKeys(key, ToggleSeparatorsInPlaylist);
 			else if (key.find("key_toggle_lyrics_db ") != std::string::npos)
 				GetKeys(key, ToggleLyricsDB);
 			else if (key.find("key_go_to_containing_directory ") != std::string::npos)
@@ -825,6 +830,10 @@ void NcmpcppConfig::Read()
 			else if (cl.find("playlist_show_remaining_time") != std::string::npos)
 			{
 				playlist_show_remaining_time = v == "yes";
+			}
+			else if (cl.find("playlist_separate_albums") != std::string::npos)
+			{
+				playlist_separate_albums = v == "yes";
 			}
 			else if (cl.find("playlist_display_mode") != std::string::npos)
 			{

@@ -125,6 +125,12 @@ void Display::SongsInColumns(const MPD::Song &s, void *, Menu<MPD::Song> *menu)
 	if (Config.columns.empty())
 		return;
 	
+	bool separate_albums = Config.playlist_separate_albums
+			&& s.GetPosition()+1 < myPlaylist->Items->Size()
+			&& (*myPlaylist->Items)[s.GetPosition()+1].GetAlbum() != s.GetAlbum();
+	if (separate_albums)
+		*menu << fmtUnderline;
+	
 	std::vector<Column>::const_iterator next2last, last, it;
 	size_t where = 0;
 	int width;
@@ -260,6 +266,8 @@ void Display::SongsInColumns(const MPD::Song &s, void *, Menu<MPD::Song> *menu)
 		*menu << clEnd;
 	if (is_now_playing)
 		*menu << Config.now_playing_suffix;
+	if (separate_albums)
+		*menu << fmtUnderlineEnd;
 }
 
 void Display::Songs(const MPD::Song &s, void *data, Menu<MPD::Song> *menu)
@@ -270,6 +278,15 @@ void Display::Songs(const MPD::Song &s, void *data, Menu<MPD::Song> *menu)
 	bool is_now_playing = menu == myPlaylist->Items && (menu->isFiltered() ? s.GetPosition() : menu->CurrentlyDrawedPosition()) == size_t(myPlaylist->NowPlaying);
 	if (is_now_playing)
 		*menu << Config.now_playing_prefix;
+	
+	bool separate_albums = Config.playlist_separate_albums
+			&& s.GetPosition()+1 < myPlaylist->Items->Size()
+			&& (*myPlaylist->Items)[s.GetPosition()+1].GetAlbum() != s.GetAlbum();
+	if (separate_albums)
+	{
+		*menu << fmtUnderline;
+		mvwhline(menu->Raw(), menu->Y(), 0, ' ', menu->GetWidth());
+	}
 	
 	bool discard_colors = Config.discard_colors_if_item_is_selected && menu->isSelected(menu->CurrentlyDrawedPosition());
 	
@@ -298,6 +315,8 @@ void Display::Songs(const MPD::Song &s, void *data, Menu<MPD::Song> *menu)
 				if (is_now_playing)
 					buf << Config.now_playing_suffix;
 				*menu << XY(menu->GetWidth()-buf.Str().length()-(menu->isSelected(menu->CurrentlyDrawedPosition()) ? Config.selected_item_suffix_length : 0), menu->Y()) << buf;
+				if (separate_albums)
+					*menu << fmtUnderlineEnd;
 				return;
 			}
 			else // not a color nor right align, just a random character
@@ -315,6 +334,8 @@ void Display::Songs(const MPD::Song &s, void *data, Menu<MPD::Song> *menu)
 	}
 	if (is_now_playing)
 		*menu << Config.now_playing_suffix;
+	if (separate_albums)
+		*menu << fmtUnderlineEnd;
 }
 
 void Display::Tags(const MPD::Song &s, void *data, Menu<MPD::Song> *menu)
