@@ -516,6 +516,8 @@ void NcmpcppKeys::Read()
 				GetKeys(key, ToggleAddMode);
 			else if (key.find("key_toggle_mouse ") != std::string::npos)
 				GetKeys(key, ToggleMouse);
+			else if (key.find("key_toggle_bitrate_visibility ") != std::string::npos)
+				GetKeys(key, ToggleBitrateVisibility);
 			else if (key.find("key_shuffle ") != std::string::npos)
 				GetKeys(key, Shuffle);
 			else if (key.find("key_toggle_crossfade ") != std::string::npos)

@@ -48,6 +48,8 @@
 #
 #key_toggle_mouse = '|'
 #
+#key_toggle_bitrate_visibility = 'B'
+#
 #key_screen_switcher = 9
 #
 #key_help = '1' 265
