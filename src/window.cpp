@@ -940,7 +940,11 @@ std::wstring ToWString(const std::string &s)
 
 size_t Window::Length(const std::wstring &ws)
 {
+#	ifdef WIN32
+	return ws.length();
+#	else
 	int len = wcswidth(ws.c_str(), -1);
 	return len < 0 ? ws.length() : len;
+#	endif // WIN32
 }
 

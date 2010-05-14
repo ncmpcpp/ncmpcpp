@@ -268,8 +268,12 @@ bool CaseInsensitiveSorting::operator()(const MPD::Item &a, const MPD::Item &b)
 std::string Timestamp(time_t t)
 {
 	char result[32];
+#	ifdef WIN32
+	result[strftime(result, 31, "%x %X", localtime(&t))] = 0;
+#	else
 	tm info;
 	result[strftime(result, 31, "%x %X", localtime_r(&t, &info))] = 0;
+#	endif // WIN32
 	return result;
 }
 
