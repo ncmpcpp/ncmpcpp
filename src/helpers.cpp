@@ -356,7 +356,7 @@ std::string GetLineValue(std::string &line, char a, char b, bool once)
 	++pos[0];
 	std::string result = pos[0] >= 0 && pos[1] >= 0 ? line.substr(pos[0], pos[1]-pos[0]) : "";
 	
-	// replace \a and \b to a and b respectively
+	// replace \a and \b with a and b respectively
 	char r1[] = "\\ ", r2[] = " ";
 	r1[1] = r2[0] = a;
 	Replace(result, r1, r2);

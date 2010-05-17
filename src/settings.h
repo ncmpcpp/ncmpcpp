@@ -43,9 +43,9 @@ struct Column
 	Column() : right_alignment(0), display_empty_tag(1) { }
 	
 	std::basic_string<my_char_t> name;
+	std::string type;
 	unsigned width;
 	Color color;
-	char type;
 	bool fixed;
 	bool right_alignment;
 	bool display_empty_tag;
@@ -157,6 +157,7 @@ struct NcmpcppConfig
 	std::string song_window_title_format;
 	std::string song_library_format;
 	std::string tag_editor_album_format;
+	std::string song_in_columns_to_string_format;
 	std::string external_editor;
 	std::string system_encoding;
 	std::string execute_on_song_change;

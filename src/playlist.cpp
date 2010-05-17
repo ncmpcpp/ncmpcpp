@@ -415,25 +415,7 @@ std::string Playlist::SongToString(const MPD::Song &s, void *data)
 
 std::string Playlist::SongInColumnsToString(const MPD::Song &s, void *)
 {
-	std::string result = "{";
-	for (std::vector<Column>::const_iterator it = Config.columns.begin(); it != Config.columns.end(); ++it)
-	{
-		if (it->type == 't')
-		{
-			result += "{%t}|{%f}";
-		}
-		else
-		{
-			// tags should be put in additional braces as if they are not, the
-			// tag that is not present within 'main' braces discards them all.
-			result += "{%";
-			result += it->type;
-			result += "}";
-		}
-		result += " ";
-	}
-	result += "}";
-	return s.toString(result);
+	return s.toString(Config.song_in_columns_to_string_format);
 }
 
 bool Playlist::Add(const MPD::Song &s, bool in_playlist, bool play, int position)

@@ -208,12 +208,21 @@
 ## - r - column will be right aligned
 ## - E - if tag is empty, empty tag marker won't be displayed
 ##
-## You can also give a column custom name by putting it after
-## attributes, separated with character ':', e.g. {lr:Length}
-## gives you right aligned column of lengths named "Length".
+## You can also:
+##
+## - give a column custom name by putting it after attributes,
+##   separated with character ':', e.g. {lr:Length} gives you
+##   right aligned column of lengths named "Length".
+##
+## - define sequence of tags, that have to be displayed in case
+##   predecessor is empty in a way similar to the one in classic
+##   song format, i.e. using '|' character, e.g. {a|c|p:Owner}
+##   creates column named "Owner" that tries to display artist
+##   tag and then composer and performer if previous ones are
+##   not available.
 ##
 #
-#song_columns_list_format = "(7f)[green]{l} (25)[cyan]{a} (40)[]{t} (30)[red]{b}"
+#song_columns_list_format = "(7f)[green]{l} (25)[cyan]{a} (40)[]{t|f} (30)[red]{b}"
 #
 ##### various settings #####
 #

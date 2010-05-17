@@ -1149,13 +1149,7 @@ void NcmpcppConfig::Read()
 		Column col;
 		col.color = IntoColor(GetLineValue(song_list_columns_format, '[', ']', 1));
 		std::string tag_type = GetLineValue(song_list_columns_format, '{', '}', 1);
-		if (tag_type.length() > 0) // at least tag type was specified
-			col.type = tag_type[0];
-		else
-		{
-			col.type = 0;
-			col.display_empty_tag = 0;
-		}
+		
 		col.fixed = *width.rbegin() == 'f';
 		
 		// alternative name
@@ -1166,20 +1160,51 @@ void NcmpcppConfig::Read()
 			tag_type.resize(tag_type_colon_pos);
 		}
 		
-		for (std::string::const_iterator it = tag_type.begin()+(tag_type.length() > 0); it != tag_type.end(); ++it)
+		if (!tag_type.empty())
 		{
-			switch (*it)
+			size_t i = -1;
+			
+			// extract tag types in format a|b|c etc.
+			do
+				col.type += tag_type[(++i)++]; // nice one.
+			while (tag_type[i] == '|');
+			
+			// apply attributes
+			for (; i < tag_type.length(); ++i)
 			{
-				case 'r':
-					col.right_alignment = 1;
-					break;
-				case 'E':
-					col.display_empty_tag = 0;
-					break;
+				switch (tag_type[i])
+				{
+					case 'r':
+						col.right_alignment = 1;
+						break;
+					case 'E':
+						col.display_empty_tag = 0;
+						break;
+				}
 			}
 		}
+		else // empty column
+			col.display_empty_tag = 0;
+		
 		col.width = StrToInt(width);
 		columns.push_back(col);
 	}
+	
+	// generate format for converting tags in columns to string for Playlist::SongInColumnsToString()
+	char tag[] = "{% }|";
+	song_in_columns_to_string_format = "{";
+	for (std::vector<Column>::const_iterator it = columns.begin(); it != columns.end(); ++it)
+	{
+		for (std::string::const_iterator j = it->type.begin(); j != it->type.end(); ++j)
+		{
+			tag[2] = *j;
+			song_in_columns_to_string_format += tag;
+		}
+		*song_in_columns_to_string_format.rbegin() = ' ';
+	}
+	if (song_in_columns_to_string_format.length() == 1) // only '{'
+		song_in_columns_to_string_format += '}';
+	else
+		*song_in_columns_to_string_format.rbegin() = '}';
 }
 

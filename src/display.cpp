@@ -28,7 +28,7 @@ std::string Display::Columns()
 	if (Config.columns.empty())
 		return "";
 	
-	std::basic_string<my_char_t> result, tag;
+	std::basic_string<my_char_t> result;
 	size_t where = 0;
 	int width;
 	
@@ -46,57 +46,63 @@ std::string Display::Columns()
 		else
 			width = it->width*(it->fixed ? 1 : COLS/100.0);
 		
-		if (it->name.empty())
+		std::basic_string<my_char_t> tag;
+		if (it->type.length() >= 1 && it->name.empty())
 		{
-			switch (it->type)
+			for (size_t j = 0; j < it->type.length(); ++j)
 			{
-				case 'l':
-					tag = U("Time");
-					break;
-				case 'f':
-					tag = U("Filename");
-					break;
-				case 'D':
-					tag = U("Directory");
-					break;
-				case 'a':
-					tag = U("Artist");
-					break;
-				case 'A':
-					tag = U("Album Artist");
-					break;
-				case 't':
-					tag = U("Title");
-					break;
-				case 'b':
-					tag = U("Album");
-					break;
-				case 'y':
-					tag = U("Year");
-					break;
-				case 'n':
-				case 'N':
-					tag = U("Track");
-					break;
-				case 'g':
-					tag = U("Genre");
-					break;
-				case 'c':
-					tag = U("Composer");
-					break;
-				case 'p':
-					tag = U("Performer");
-					break;
-				case 'd':
-					tag = U("Disc");
-					break;
-				case 'C':
-					tag = U("Comment");
-					break;
-				default:
-					tag.clear();
-					break;
+				switch (it->type[j])
+				{
+					case 'l':
+						tag += U("Time");
+						break;
+					case 'f':
+						tag += U("Filename");
+						break;
+					case 'D':
+						tag += U("Directory");
+						break;
+					case 'a':
+						tag += U("Artist");
+						break;
+					case 'A':
+						tag += U("Album Artist");
+						break;
+					case 't':
+						tag += U("Title");
+						break;
+					case 'b':
+						tag += U("Album");
+						break;
+					case 'y':
+						tag += U("Year");
+						break;
+					case 'n':
+					case 'N':
+						tag += U("Track");
+						break;
+					case 'g':
+						tag += U("Genre");
+						break;
+					case 'c':
+						tag += U("Composer");
+						break;
+					case 'p':
+						tag += U("Performer");
+						break;
+					case 'd':
+						tag += U("Disc");
+						break;
+					case 'C':
+						tag += U("Comment");
+						break;
+					default:
+						tag += U("?");
+						break;
+				}
+				tag += '/';
 			}
+			tag.resize(tag.length()-1);
 		}
 		else
 			tag = it->name;
@@ -169,63 +175,66 @@ void Display::SongsInColumns(const MPD::Song &s, void *, Menu<MPD::Song> *menu)
 		
 		MPD::Song::GetFunction get = 0;
 		
-		switch (it->type)
+		std::string tag;
+		for (size_t i = 0; i < it->type.length(); ++i)
 		{
-			case 'l':
-				get = &MPD::Song::GetLength;
-				break;
-			case 'D':
-				get = &MPD::Song::GetDirectory;
-				break;
-			case 'f':
-				get = &MPD::Song::GetName;
-				break;
-			case 'a':
-				get = &MPD::Song::GetArtist;
-				break;
-			case 'A':
-				get = &MPD::Song::GetAlbumArtist;
-				break;
-			case 'b':
-				get = &MPD::Song::GetAlbum;
-				break;
-			case 'y':
-				get = &MPD::Song::GetDate;
-				break;
-			case 'n':
-				get = &MPD::Song::GetTrackNumber;
-				break;
-			case 'N':
-				get = &MPD::Song::GetTrack;
-				break;
-			case 'g':
-				get = &MPD::Song::GetGenre;
-				break;
-			case 'c':
-				get = &MPD::Song::GetComposer;
-				break;
-			case 'p':
-				get = &MPD::Song::GetPerformer;
-				break;
-			case 'd':
-				get = &MPD::Song::GetDisc;
-				break;
-			case 'C':
-				get = &MPD::Song::GetComment;
-				break;
-			case 't':
-				if (!s.GetTitle().empty())
-					get = &MPD::Song::GetTitle;
-				else
+			switch (it->type[i])
+			{
+				case 'l':
+					get = &MPD::Song::GetLength;
+					break;
+				case 'D':
+					get = &MPD::Song::GetDirectory;
+					break;
+				case 'f':
 					get = &MPD::Song::GetName;
-				break;
-			default:
+					break;
+				case 'a':
+					get = &MPD::Song::GetArtist;
+					break;
+				case 'A':
+					get = &MPD::Song::GetAlbumArtist;
+					break;
+				case 'b':
+					get = &MPD::Song::GetAlbum;
+					break;
+				case 'y':
+					get = &MPD::Song::GetDate;
+					break;
+				case 'n':
+					get = &MPD::Song::GetTrackNumber;
+					break;
+				case 'N':
+					get = &MPD::Song::GetTrack;
+					break;
+				case 'g':
+					get = &MPD::Song::GetGenre;
+					break;
+				case 'c':
+					get = &MPD::Song::GetComposer;
+					break;
+				case 'p':
+					get = &MPD::Song::GetPerformer;
+					break;
+				case 'd':
+					get = &MPD::Song::GetDisc;
+					break;
+				case 'C':
+					get = &MPD::Song::GetComment;
+					break;
+				case 't':
+					get = &MPD::Song::GetTitle;
+					break;
+				default:
+					break;
+			}
+			tag = get ? s.GetTags(get) : "";
+			if (!tag.empty())
 				break;
 		}
 		if (!discard_colors && it->color != clDefault)
 			*menu << it->color;
 		whline(menu->Raw(), 32, menu->GetWidth()-where);
-		std::string tag = get ? s.GetTags(get) : "";
 		
 		// last column might need to be shrinked to make space for np/sel suffixes
 		if (it == last)
