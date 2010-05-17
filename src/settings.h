@@ -42,6 +42,7 @@ struct Column
 {
 	Column() : right_alignment(0), display_empty_tag(1) { }
 	
+	std::basic_string<my_char_t> name;
 	unsigned width;
 	Color color;
 	char type;

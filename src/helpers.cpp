@@ -338,8 +338,9 @@ std::string FindSharedDir(const std::string &one, const std::string &two)
 std::string GetLineValue(std::string &line, char a, char b, bool once)
 {
 	int pos[2] = { -1, -1 };
-	size_t i;
-	for (i = line.find(a); i != std::string::npos && pos[1] < 0; i = line.find(b, i))
+	char x = a;
+	size_t i = 0;
+	while ((i = line.find(x, i)) != std::string::npos && pos[1] < 0)
 	{
 		if (i && line[i-1] == '\\')
 		{
@@ -349,10 +350,22 @@ std::string GetLineValue(std::string &line, char a, char b, bool once)
 		if (once)
 			line[i] = 0;
 		pos[pos[0] >= 0] = i++;
+		if (x == a)
+			x = b;
 	}
-	pos[0]++;
+	++pos[0];
 	std::string result = pos[0] >= 0 && pos[1] >= 0 ? line.substr(pos[0], pos[1]-pos[0]) : "";
-	Replace(result, "\\\"", "\"");
+	
+	// replace \a and \b to a and b respectively
+	char r1[] = "\\ ", r2[] = " ";
+	r1[1] = r2[0] = a;
+	Replace(result, r1, r2);
+	if (a != b)
+	{
+		r1[1] = r2[0] = b;
+		Replace(result, r1, r2);
+	}
+	
 	return result;
 }
 

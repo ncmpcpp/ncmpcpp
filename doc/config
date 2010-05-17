@@ -208,7 +208,9 @@
 ## - r - column will be right aligned
 ## - E - if tag is empty, empty tag marker won't be displayed
 ##
-## E.g. {lr} will give you right aligned column of lengths.
+## You can also give a column custom name by putting it after
+## attributes, separated with character ':', e.g. {lr:Length}
+## gives you right aligned column of lengths named "Length".
 ##
 #
 #song_columns_list_format = "(7f)[green]{l} (25)[cyan]{a} (40)[]{t} (30)[red]{b}"

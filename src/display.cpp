@@ -28,7 +28,7 @@ std::string Display::Columns()
 	if (Config.columns.empty())
 		return "";
 	
-	std::string result, tag;
+	std::basic_string<my_char_t> result, tag;
 	size_t where = 0;
 	int width;
 	
@@ -46,71 +46,79 @@ std::string Display::Columns()
 		else
 			width = it->width*(it->fixed ? 1 : COLS/100.0);
 		
-		switch (it->type)
+		if (it->name.empty())
 		{
-			case 'l':
-				tag = "Time";
-				break;
-			case 'f':
-				tag = "Filename";
-				break;
-			case 'D':
-				tag = "Directory";
-				break;
-			case 'a':
-				tag = "Artist";
-				break;
-			case 'A':
-				tag = "Album Artist";
-				break;
-			case 't':
-				tag = "Title";
-				break;
-			case 'b':
-				tag = "Album";
-				break;
-			case 'y':
-				tag = "Year";
-				break;
-			case 'n':
-			case 'N':
-				tag = "Track";
-				break;
-			case 'g':
-				tag = "Genre";
-				break;
-			case 'c':
-				tag = "Composer";
-				break;
-			case 'p':
-				tag = "Performer";
-				break;
-			case 'd':
-				tag = "Disc";
-				break;
-			case 'C':
-				tag = "Comment";
-				break;
-			default:
-				tag.clear();
-				break;
+			switch (it->type)
+			{
+				case 'l':
+					tag = U("Time");
+					break;
+				case 'f':
+					tag = U("Filename");
+					break;
+				case 'D':
+					tag = U("Directory");
+					break;
+				case 'a':
+					tag = U("Artist");
+					break;
+				case 'A':
+					tag = U("Album Artist");
+					break;
+				case 't':
+					tag = U("Title");
+					break;
+				case 'b':
+					tag = U("Album");
+					break;
+				case 'y':
+					tag = U("Year");
+					break;
+				case 'n':
+				case 'N':
+					tag = U("Track");
+					break;
+				case 'g':
+					tag = U("Genre");
+					break;
+				case 'c':
+					tag = U("Composer");
+					break;
+				case 'p':
+					tag = U("Performer");
+					break;
+				case 'd':
+					tag = U("Disc");
+					break;
+				case 'C':
+					tag = U("Comment");
+					break;
+				default:
+					tag.clear();
+					break;
+			}
 		}
+		else
+			tag = it->name;
 		if (it->right_alignment)
 		{
 			long i = width-tag.length()-(it != Config.columns.begin());
 			if (i > 0)
-				result += std::string(i, ' ');
+				result.resize(result.length()+i, ' ');
 		}
 		
 		where += width;
 		result += tag;
 		
 		if (result.length() > where)
-			result = result.substr(0, where);
+		{
+			result.resize(where);
+			result += ' ';
+		}
 		else
-			for (size_t i = result.length(); i <= where && i < size_t(COLS); ++i, result += ' ') { }
+			result.resize(std::min(where+1, size_t(COLS)), ' ');
 	}
-	return result;
+	return TO_STRING(result);
 }
 
 void Display::SongsInColumns(const MPD::Song &s, void *, Menu<MPD::Song> *menu)

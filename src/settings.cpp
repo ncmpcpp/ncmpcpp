@@ -1143,7 +1143,8 @@ void NcmpcppConfig::Read()
 	}
 	f.close();
 	
-	for (std::string width = GetLineValue(song_list_columns_format, '(', ')', 1); !width.empty(); width = GetLineValue(song_list_columns_format, '(', ')', 1))
+	std::string width;
+	while (!(width = GetLineValue(song_list_columns_format, '(', ')', 1)).empty())
 	{
 		Column col;
 		col.color = IntoColor(GetLineValue(song_list_columns_format, '[', ']', 1));
@@ -1156,6 +1157,15 @@ void NcmpcppConfig::Read()
 			col.display_empty_tag = 0;
 		}
 		col.fixed = *width.rbegin() == 'f';
+		
+		// alternative name
+		size_t tag_type_colon_pos = tag_type.find(':');
+		if (tag_type_colon_pos != std::string::npos)
+		{
+			col.name = TO_WSTRING(tag_type.substr(tag_type_colon_pos+1));
+			tag_type.resize(tag_type_colon_pos);
+		}
+		
 		for (std::string::const_iterator it = tag_type.begin()+(tag_type.length() > 0); it != tag_type.end(); ++it)
 		{
 			switch (*it)
