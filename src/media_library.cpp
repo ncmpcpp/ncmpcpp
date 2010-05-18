@@ -42,6 +42,12 @@ size_t MediaLibrary::itsMiddleColStartX;
 size_t MediaLibrary::itsRightColWidth;
 size_t MediaLibrary::itsRightColStartX;
 
+// this string marks the position in middle column that works as "All tracks" option. it's
+// assigned to Year in SearchConstraint class since date normally cannot contain other chars
+// than ciphers and -'s (0x7f is interpreted as backspace keycode, so it's quite safe to assume
+// that it won't appear in any tag, let alone date).
+const char MediaLibrary::AllTracksMarker[] = "\x7f";
+
 void MediaLibrary::Init()
 {
 	hasTwoColumns = 0;
@@ -227,6 +233,11 @@ void MediaLibrary::Update()
 		utf_to_locale(Artists->Current());
 		if (!Albums->Empty())
 			Albums->Sort<SearchConstraintsSorting>();
+		if (Albums->Size() > 1)
+		{
+			Albums->AddSeparator();
+			Albums->AddOption(SearchConstraints("", AllTracksMarker));
+		}
 		Albums->Refresh();
 	}
 	else if (hasTwoColumns && Albums->Empty())
@@ -304,13 +315,16 @@ void MediaLibrary::Update()
 		}
 		else
 		{
-			Mpd.AddSearch(MPD_TAG_ALBUM, locale_to_utf_cpy(Albums->Current().Album));
-			if (Config.media_library_display_date)
-				Mpd.AddSearch(MPD_TAG_DATE, locale_to_utf_cpy(Albums->Current().Year));
+			if (Albums->Current().Year != AllTracksMarker)
+			{
+				Mpd.AddSearch(MPD_TAG_ALBUM, locale_to_utf_cpy(Albums->Current().Album));
+				if (Config.media_library_display_date)
+					Mpd.AddSearch(MPD_TAG_DATE, locale_to_utf_cpy(Albums->Current().Year));
+			}
 		}
 		Mpd.CommitSearch(list);
 		
-		sort(list.begin(), list.end(), SortSongsByTrack);
+		sort(list.begin(), list.end(), Albums->Current().Year == AllTracksMarker ? SortAllTracks : SortSongsByTrack);
 		bool bold = 0;
 		
 		for (MPD::SongList::const_iterator it = list.begin(); it != list.end(); ++it)
@@ -704,6 +718,8 @@ std::string MediaLibrary::SongToString(const MPD::Song &s, void *)
 
 std::string MediaLibrary::AlbumToString(const SearchConstraints &sc, void *ptr)
 {
+	if (sc.Year == AllTracksMarker)
+		return "All tracks";
 	std::string result;
 	if (!sc.Artist.empty())
 		(result += sc.Artist) += " - ";
@@ -738,5 +754,15 @@ bool MediaLibrary::SortSongsByTrack(MPD::Song *a, MPD::Song *b)
 		return StrToInt(a->GetTrack()) < StrToInt(b->GetTrack());
 	else
 		return StrToInt(a->GetDisc()) < StrToInt(b->GetDisc());
+}
+
+bool MediaLibrary::SortAllTracks(MPD::Song *a, MPD::Song *b)
+{
+	static MPD::Song::GetFunction gets[] = { &MPD::Song::GetDate, &MPD::Song::GetAlbum, &MPD::Song::GetDisc, 0 };
+	CaseInsensitiveStringComparison cmp;
+	for (MPD::Song::GetFunction *get = gets; *get; ++get)
+		if (int ret = cmp(a->GetTags(*get), b->GetTags(*get)))
+			return ret < 0;
+	return a->GetTrack() < b->GetTrack();
 }
 
