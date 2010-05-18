@@ -357,8 +357,11 @@ void MediaLibrary::SpacePressed()
 		}
 		else if (w == Albums)
 		{
-			Albums->Select(Albums->Choice(), !Albums->isSelected());
-			Songs->Clear();
+			if (Albums->Current().Year != AllTracksMarker)
+			{
+				Albums->Select(Albums->Choice(), !Albums->isSelected());
+				Songs->Clear();
+			}
 		}
 		else if (w == Songs)
 			Songs->Select(Songs->Choice(), !Songs->isSelected());
@@ -687,7 +690,8 @@ void MediaLibrary::AddToPlaylist(bool add_n_play)
 
 		if (myPlaylist->Add(list, add_n_play))
 		{
-			if (!Artists->Empty() && w == Artists)
+			if ((!Artists->Empty() && w == Artists)
+			||  (w == Albums && Albums->Current().Year == AllTracksMarker))
 			{
 				std::string tag_type = IntoStr(Config.media_lib_primary_tag);
 				ToLower(tag_type);
