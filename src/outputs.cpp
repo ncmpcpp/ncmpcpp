@@ -86,6 +86,8 @@ void Outputs::EnterPressed()
 		if (Mpd.EnableOutput(w->Choice()))
 			ShowMessage("Output \"%s\" enabled", w->Current().first.c_str());
 	}
+	if (!Mpd.SupportsIdle())
+		FetchList();
 }
 
 void Outputs::MouseButtonPressed(MEVENT me)
