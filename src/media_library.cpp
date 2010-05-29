@@ -184,6 +184,7 @@ void MediaLibrary::Update()
 	{
 		MPD::TagList list;
 		Albums->Clear();
+		Songs->Clear();
 		Mpd.GetList(list, Config.media_lib_primary_tag);
 		sort(list.begin(), list.end(), CaseInsensitiveSorting());
 		for (MPD::TagList::iterator it = list.begin(); it != list.end(); ++it)
@@ -198,9 +199,8 @@ void MediaLibrary::Update()
 		Artists->Refresh();
 	}
 	
-	if (!hasTwoColumns && !Artists->Empty() && Albums->Empty())
+	if (!hasTwoColumns && !Artists->Empty() && Albums->Empty() && Songs->Empty())
 	{
-		Songs->Clear();
 		Albums->Reset();
 		MPD::TagList list;
 		locale_to_utf(Artists->Current());
@@ -324,7 +324,8 @@ void MediaLibrary::Update()
 		}
 		Mpd.CommitSearch(list);
 		
-		sort(list.begin(), list.end(), Albums->Current().Year == AllTracksMarker ? SortAllTracks : SortSongsByTrack);
+		if (!Albums->Empty()) // for compatibility with mpd < 0.14
+			sort(list.begin(), list.end(), Albums->Current().Year == AllTracksMarker ? SortAllTracks : SortSongsByTrack);
 		bool bold = 0;
 		
 		for (MPD::SongList::const_iterator it = list.begin(); it != list.end(); ++it)
@@ -354,6 +355,7 @@ void MediaLibrary::SpacePressed()
 		{
 			Artists->Select(Artists->Choice(), !Artists->isSelected());
 			Albums->Clear();
+			Songs->Clear();
 		}
 		else if (w == Albums)
 		{
@@ -629,6 +631,7 @@ void MediaLibrary::LocateSong(const MPD::Song &s)
 				{
 					Artists->Highlight(i);
 					Albums->Clear();
+					Songs->Clear();
 					break;
 				}
 			}

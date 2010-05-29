@@ -2115,6 +2115,7 @@ int main(int argc, char *argv[])
 				if (myScreen->ActiveWindow() == myLibrary->Artists)
 				{
 					myLibrary->Albums->Clear();
+					myLibrary->Songs->Clear();
 				}
 				else if (myScreen->ActiveWindow() == myLibrary->Albums)
 				{
