@@ -426,20 +426,13 @@ void Browser::GetLocalDirectory(MPD::ItemList &v, const std::string &directory, 
 	struct stat file_stat;
 	std::string full_path;
 	
-	// omit . and ..
-	for (int i = 0; i < 2; ++i)
-	{
-		file = readdir(dir);
-		if (!file)
-		{
-			closedir(dir);
-			return;
-		}
-	}
-	
 	size_t old_size = v.size();
 	while ((file = readdir(dir)))
 	{
+		// omit . and ..
+		if (file->d_name[0] == '.' && (file->d_name[1] == '\0' || (file->d_name[1] == '.' && file->d_name[2] == '\0')))
+			continue;
+		
 		if (!Config.local_browser_show_hidden_files && file->d_name[0] == '.')
 			continue;
 		MPD::Item new_item;
@@ -488,19 +481,12 @@ void Browser::ClearDirectory(const std::string &path) const
 	struct stat file_stat;
 	std::string full_path;
 	
-	// omit . and ..
-	for (int i = 0; i < 2; ++i)
-	{
-		file = readdir(dir);
-		if (!file)
-		{
-			closedir(dir);
-			return;
-		}
-	}
-	
 	while ((file = readdir(dir)))
 	{
+		// omit . and ..
+		if (file->d_name[0] == '.' && (file->d_name[1] == '\0' || (file->d_name[1] == '.' && file->d_name[2] == '\0')))
+			continue;
+		
 		full_path = path;
 		if (*full_path.rbegin() != '/')
 			full_path += '/';
