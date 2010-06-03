@@ -1,3 +1,16 @@
+ncmpcpp-0.5.4
+
+* new feature: toggle bitrate visibility at runtime
+* new feature: locate song in tag editor
+* new feature: separators between albums in playlist
+* new feature: customizable columns' names
+* new feature: support for multiple tag types in one column
+* media library: support for "All tracks" option in middlle column
+* playlist: shorten units' names displayed in statusbar
+* browser: critical bugfix in feature "remove directory physically from hdd"
+* a few other bugfixes
+
+
 ncmpcpp-0.5.3
 
 * new feature: new movement keys: {Up,Down}{Album,Artist}
