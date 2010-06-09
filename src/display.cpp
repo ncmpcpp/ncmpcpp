@@ -22,6 +22,9 @@
 #include "helpers.h"
 #include "info.h"
 #include "playlist.h"
+#include "global.h"
+
+using Global::myScreen;
 
 std::string Display::Columns()
 {
@@ -140,6 +143,7 @@ void Display::SongsInColumns(const MPD::Song &s, void *, Menu<MPD::Song> *menu)
 		return;
 	
 	bool separate_albums = Config.playlist_separate_albums
+			&& myScreen == myPlaylist
 			&& s.GetPosition()+1 < myPlaylist->Items->Size()
 			&& (*myPlaylist->Items)[s.GetPosition()+1].GetAlbum() != s.GetAlbum();
 	if (separate_albums)
@@ -297,6 +301,7 @@ void Display::Songs(const MPD::Song &s, void *data, Menu<MPD::Song> *menu)
 		*menu << Config.now_playing_prefix;
 	
 	bool separate_albums = Config.playlist_separate_albums
+			&& myScreen == myPlaylist
 			&& s.GetPosition()+1 < myPlaylist->Items->Size()
 			&& (*myPlaylist->Items)[s.GetPosition()+1].GetAlbum() != s.GetAlbum();
 	if (separate_albums)
