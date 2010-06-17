@@ -142,18 +142,21 @@ void MPD::Connection::SetErrorHandler(ErrorHandler handler, void *data)
 
 void MPD::Connection::GoIdle()
 {
-	if (supportsIdle && !isIdle && mpd_send_idle(itsConnection))
+	if (supportsIdle && !itsIdleBlocked && !isIdle && mpd_send_idle(itsConnection))
 		isIdle = 1;
 }
 
 int MPD::Connection::GoBusy()
 {
+	int flags = 0;
 	if (isIdle && mpd_send_noidle(itsConnection))
 	{
 		isIdle = 0;
-		return mpd_recv_idle(itsConnection, 1);
+		if (hasData)
+			flags = mpd_recv_idle(itsConnection, 1);
+		mpd_response_finish(itsConnection);
 	}
-	return 0;
+	return flags;
 }
 
 void MPD::Connection::UpdateStatus()

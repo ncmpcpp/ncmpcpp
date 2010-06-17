@@ -95,6 +95,7 @@ namespace MPD
 			unsigned Version() const;
 			
 			void SetIdleEnabled(bool val) { isIdleEnabled = val; }
+			void BlockIdle(bool val) { itsIdleBlocked = val; }
 			bool SupportsIdle() const { return supportsIdle; }
 			void OrderDataFetching() { hasData = 1; }
 			int GetFD() const { return itsFD; }
@@ -227,6 +228,7 @@ namespace MPD
 			int itsFD;
 			bool isIdle;
 			bool isIdleEnabled;
+			bool itsIdleBlocked;
 			bool supportsIdle;
 			bool hasData;
 			

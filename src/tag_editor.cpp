@@ -232,6 +232,7 @@ void TagEditor::Update()
 		{
 			*Albums << XY(0, 0) << "Fetching albums...";
 			Albums->Window::Refresh();
+			Mpd.BlockIdle(1); // for the same reason as in media library
 			Mpd.GetList(list, MPD_TAG_ALBUM);
 			for (MPD::TagList::const_iterator it = list.begin(); it != list.end(); ++it)
 			{
@@ -246,6 +247,7 @@ void TagEditor::Update()
 				}
 				MPD::FreeSongList(l);
 			}
+			Mpd.BlockIdle(0);
 			Albums->Sort<CaseInsensitiveSorting>();
 		}
 		else

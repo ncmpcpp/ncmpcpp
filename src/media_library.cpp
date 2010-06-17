@@ -201,6 +201,10 @@ void MediaLibrary::Update()
 	
 	if (!hasTwoColumns && !Artists->Empty() && Albums->Empty() && Songs->Empty())
 	{
+		// idle has to be blocked for now since it would be enabled and
+		// disabled a few times by each mpd command, which makes no sense
+		// and slows down the whole process.
+		Mpd.BlockIdle(1);
 		Albums->Reset();
 		MPD::TagList list;
 		locale_to_utf(Artists->Current());
@@ -239,6 +243,7 @@ void MediaLibrary::Update()
 			Albums->AddOption(SearchConstraints("", AllTracksMarker));
 		}
 		Albums->Refresh();
+		Mpd.BlockIdle(0);
 	}
 	else if (hasTwoColumns && Albums->Empty())
 	{
@@ -246,6 +251,7 @@ void MediaLibrary::Update()
 		MPD::TagList artists;
 		*Albums << XY(0, 0) << "Fetching albums...";
 		Albums->Window::Refresh();
+		Mpd.BlockIdle(1);
 		Mpd.GetList(artists, Config.media_lib_primary_tag);
 		for (MPD::TagList::iterator i = artists.begin(); i != artists.end(); ++i)
 		{
@@ -289,6 +295,7 @@ void MediaLibrary::Update()
 				}
 			}
 		}
+		Mpd.BlockIdle(0);
 		if (!Albums->Empty())
 			Albums->Sort<SearchConstraintsSorting>();
 		Albums->Refresh();
