@@ -491,7 +491,8 @@ bool Playlist::Add(const MPD::SongList &l, bool play, int position)
 			if (Mpd.AddSong(**j, position) < 0)
 				break;
 	}
-	Mpd.CommitCommandsList();
+	if (!Mpd.CommitCommandsList())
+		return false;
 	
 	if (play && old_playlist_size < Items->Size())
 		Mpd.Play(old_playlist_size);
