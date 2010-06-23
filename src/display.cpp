@@ -144,8 +144,8 @@ void Display::SongsInColumns(const MPD::Song &s, void *, Menu<MPD::Song> *menu)
 	
 	bool separate_albums = Config.playlist_separate_albums
 			&& myScreen == myPlaylist
-			&& s.GetPosition()+1 < myPlaylist->Items->Size()
-			&& (*myPlaylist->Items)[s.GetPosition()+1].GetAlbum() != s.GetAlbum();
+			&& menu->CurrentlyDrawedPosition()+1 < myPlaylist->Items->Size()
+			&& (*myPlaylist->Items)[menu->CurrentlyDrawedPosition()+1].GetAlbum() != s.GetAlbum();
 	if (separate_albums)
 		*menu << fmtUnderline;
 	
@@ -302,8 +302,8 @@ void Display::Songs(const MPD::Song &s, void *data, Menu<MPD::Song> *menu)
 	
 	bool separate_albums = Config.playlist_separate_albums
 			&& myScreen == myPlaylist
-			&& s.GetPosition()+1 < myPlaylist->Items->Size()
-			&& (*myPlaylist->Items)[s.GetPosition()+1].GetAlbum() != s.GetAlbum();
+			&& menu->CurrentlyDrawedPosition()+1 < myPlaylist->Items->Size()
+			&& (*myPlaylist->Items)[menu->CurrentlyDrawedPosition()+1].GetAlbum() != s.GetAlbum();
 	if (separate_albums)
 	{
 		*menu << fmtUnderline;
