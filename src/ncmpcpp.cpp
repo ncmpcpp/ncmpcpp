@@ -659,7 +659,7 @@ int main(int argc, char *argv[])
 				}
 			}
 			else if (
-				 (myScreen == myBrowser && !myBrowser->Main()->Empty() && myBrowser->Main()->Current().type == itPlaylist)
+				 (myScreen == myBrowser && !myBrowser->Main()->Empty() && myBrowser->CurrentDir() == "/" && myBrowser->Main()->Current().type == itPlaylist)
 			||       (myScreen->ActiveWindow() == myPlaylistEditor->Playlists)
 				)
 			{
@@ -691,7 +691,7 @@ int main(int argc, char *argv[])
 					myPlaylistEditor->Playlists->Clear(); // make playlists list update itself
 			}
 #			ifndef WIN32
-			else if (myScreen == myBrowser && !myBrowser->Main()->Empty() && myBrowser->Main()->Current().type != itPlaylist)
+			else if (myScreen == myBrowser && !myBrowser->Main()->Empty())
 			{
 				if (!myBrowser->isLocal())
 					CHECK_MPD_MUSIC_DIR;
@@ -713,7 +713,7 @@ int main(int argc, char *argv[])
 				
 				std::string name = item.type == itSong ? item.song->GetName() : item.name;
 				LockStatusbar();
-				Statusbar() << "Delete " << (item.type == itSong ? "file" : "directory") << " \"" << Shorten(TO_WSTRING(name), COLS-30) << "\" ? [" << fmtBold << 'y' << fmtBoldEnd << '/' << fmtBold << 'n' << fmtBoldEnd << "] ";
+				Statusbar() << "Delete " << (item.type == itSong ? "file" : item.type == itDirectory ? "directory" : "playlist") << " \"" << Shorten(TO_WSTRING(name), COLS-30) << "\" ? [" << fmtBold << 'y' << fmtBoldEnd << '/' << fmtBold << 'n' << fmtBoldEnd << "] ";
 				wFooter->Refresh();
 				int answer = 0;
 				do

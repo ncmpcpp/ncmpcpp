@@ -552,7 +552,7 @@ std::string Browser::ItemToString(const MPD::Item &item, void *)
 		{
 			if (item.song)
 				return "[..]";
-			return "[" + ExtractTopDirectory(item.name) + "]";
+			return "[" + ExtractTopName(item.name) + "]";
 		}
 		case MPD::itSong:
 		{
@@ -563,7 +563,7 @@ std::string Browser::ItemToString(const MPD::Item &item, void *)
 		}
 		case MPD::itPlaylist:
 		{
-			return Config.browser_playlist_prefix.Str() + item.name;
+			return Config.browser_playlist_prefix.Str() + ExtractTopName(item.name);
 		}
 		default:
 		{

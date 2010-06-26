@@ -212,7 +212,7 @@ std::string FindSharedDir(Menu<MPD::Song> *);
 std::string FindSharedDir(const MPD::SongList &);
 #endif // HAVE_TAGLIB_H
 std::string FindSharedDir(const std::string &, const std::string &);
-std::string ExtractTopDirectory(const std::string &);
+std::string ExtractTopName(const std::string &);
 
 std::string GetLineValue(std::string &, char = '"', char = '"', bool = 0);
 

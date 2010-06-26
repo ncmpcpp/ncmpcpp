@@ -387,7 +387,7 @@ void Display::Items(const MPD::Item &item, void *, Menu<MPD::Item> *menu)
 				*menu << "[..]";
 				return;
 			}
-			*menu << "[" << ExtractTopDirectory(item.name) << "]";
+			*menu << "[" << ExtractTopName(item.name) << "]";
 			return;
 		}
 		case MPD::itSong:
@@ -397,7 +397,7 @@ void Display::Items(const MPD::Item &item, void *, Menu<MPD::Item> *menu)
 				Display::SongsInColumns(*item.song, 0, reinterpret_cast<Menu<MPD::Song> *>(menu));
 			return;
 		case MPD::itPlaylist:
-			*menu << Config.browser_playlist_prefix << item.name;
+			*menu << Config.browser_playlist_prefix << ExtractTopName(item.name);
 			return;
 		default:
 			return;

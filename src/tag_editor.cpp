@@ -879,7 +879,7 @@ void TagEditor::LocateSong(const MPD::Song &s)
 		Dirs->Reset(); // go to the first pos, which is "." (music dir root)
 	
 	// highlight directory we need and get files from it
-	std::string dir = ExtractTopDirectory(s.GetDirectory());
+	std::string dir = ExtractTopName(s.GetDirectory());
 	for (size_t i = 0; i < Dirs->Size(); ++i)
 	{
 		if ((*Dirs)[i].first == dir)

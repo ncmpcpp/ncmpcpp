@@ -250,7 +250,7 @@ bool CaseInsensitiveSorting::operator()(const MPD::Item &a, const MPD::Item &b)
 		switch (a.type)
 		{
 			case MPD::itDirectory:
-				return cmp(ExtractTopDirectory(a.name), ExtractTopDirectory(b.name)) < 0;
+				return cmp(ExtractTopName(a.name), ExtractTopName(b.name)) < 0;
 			case MPD::itPlaylist:
 				return cmp(a.name, b.name) < 0;
 			case MPD::itSong:
@@ -369,7 +369,7 @@ std::string GetLineValue(std::string &line, char a, char b, bool once)
 	return result;
 }
 
-std::string ExtractTopDirectory(const std::string &s)
+std::string ExtractTopName(const std::string &s)
 {
 	size_t slash = s.rfind("/");
 	return slash != std::string::npos ? s.substr(++slash) : s;
