@@ -194,7 +194,7 @@ void NcmpcppKeys::SetDefaults()
 	ToggleSpaceMode[0] = 't';
 	ToggleAddMode[0] = 'T';
 	ToggleMouse[0] = '|';
-	ToggleBitrateVisibility[0] = 'B';
+	ToggleBitrateVisibility[0] = '#';
 	Shuffle[0] = 'Z';
 	ToggleCrossfade[0] = 'x';
 	SetCrossfade[0] = 'X';
@@ -213,6 +213,7 @@ void NcmpcppKeys::SetDefaults()
 	Lyrics[0] = 'l';
 	ReverseSelection[0] = 'v';
 	DeselectAll[0] = 'V';
+	SelectAlbum[0] = 'B';
 	AddSelected[0] = 'A';
 	Clear[0] = 'c';
 	Crop[0] = 'C';
@@ -294,6 +295,7 @@ void NcmpcppKeys::SetDefaults()
 	Lyrics[1] = NullKey;
 	ReverseSelection[1] = NullKey;
 	DeselectAll[1] = NullKey;
+	SelectAlbum[1] = NullKey;
 	AddSelected[1] = NullKey;
 	Clear[1] = NullKey;
 	Crop[1] = NullKey;
@@ -555,6 +557,8 @@ void NcmpcppKeys::Read()
 				GetKeys(key, ReverseSelection);
 			else if (key.find("key_deselect_all ") != std::string::npos)
 				GetKeys(key, DeselectAll);
+			else if (key.find("key_select_album ") != std::string::npos)
+				GetKeys(key, SelectAlbum);
 			else if (key.find("key_add_selected_items ") != std::string::npos)
 				GetKeys(key, AddSelected);
 			else if (key.find("key_clear ") != std::string::npos)

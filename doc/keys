@@ -48,7 +48,7 @@
 #
 #key_toggle_mouse = '|'
 #
-#key_toggle_bitrate_visibility = 'B'
+#key_toggle_bitrate_visibility = '#'
 #
 #key_screen_switcher = 9
 #
@@ -131,6 +131,8 @@
 #key_reverse_selection = 'v'
 #
 #key_deselect_all = 'V'
+#
+#key_select_album = 'B'
 #
 #key_add_selected_items = 'A'
 #

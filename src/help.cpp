@@ -182,6 +182,7 @@ void Help::GetKeybindings()
 	*w << DisplayKeys(Key.ToggleMouse)		<< "Toggle mouse support\n";
 	*w << DisplayKeys(Key.ReverseSelection)		<< "Reverse selection\n";
 	*w << DisplayKeys(Key.DeselectAll)		<< "Deselect all items\n";
+	*w << DisplayKeys(Key.SelectAlbum)		<< "Select songs of album around cursor\n";
 	*w << DisplayKeys(Key.AddSelected)		<< "Add selected items to playlist/m3u file\n";
 	*w << "\n";
 	*w << DisplayKeys(Key.ToggleRepeat)		<< "Toggle repeat mode\n";

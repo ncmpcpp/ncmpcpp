@@ -118,6 +118,7 @@ struct NcmpcppKeys
 	int Lyrics[2];
 	int ReverseSelection[2];
 	int DeselectAll[2];
+	int SelectAlbum[2];
 	int AddSelected[2];
 	int Clear[2];
 	int Crop[2];

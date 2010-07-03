@@ -1694,6 +1694,44 @@ int main(int argc, char *argv[])
 				ShowMessage("Items deselected!");
 			}
 		}
+		else if (Keypressed(input, Key.SelectAlbum))
+		{
+			if (myScreen->allowsSelection())
+			{
+				Menu<MPD::Song> *songs = NULL;
+				if (myScreen == myPlaylist && !myPlaylist->Items->Empty())
+					songs = myPlaylist->Items;
+				else if (myScreen->ActiveWindow() == myPlaylistEditor->Content)
+					songs = myPlaylistEditor->Content;
+
+				if (songs && !songs->Empty())
+				{
+					size_t pos = songs->Choice();
+					std::string album = songs->at(pos).GetAlbum();
+					List *mList = myScreen->GetList();
+					// select song under cursor
+					mList->Select(pos, 1);
+					// go up
+					while (pos > 0)
+					{
+						if (songs->at(--pos).GetAlbum() != album)
+							break;
+						else
+							mList->Select(pos, 1);
+					}
+					// go down
+					pos = songs->Choice();
+					while (pos < songs->Size() - 1)
+					{
+						if (songs->at(++pos).GetAlbum() != album)
+							break;
+						else
+							mList->Select(pos, 1);
+					}
+					ShowMessage("Album around cursor position selected.");
+				}
+			}
+		}
 		else if (Keypressed(input, Key.AddSelected))
 		{
 			mySelectedItemsAdder->SwitchTo();
