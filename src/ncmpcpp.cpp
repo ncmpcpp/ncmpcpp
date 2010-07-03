@@ -1703,6 +1703,8 @@ int main(int argc, char *argv[])
 					songs = myPlaylist->Items;
 				else if (myScreen->ActiveWindow() == myPlaylistEditor->Content)
 					songs = myPlaylistEditor->Content;
+				else if (myScreen == mySearcher)
+					mySearcher->SelectAlbum();
 
 				if (songs && !songs->Empty())
 				{

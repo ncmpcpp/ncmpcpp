@@ -337,6 +337,36 @@ void SearchEngine::Scroll(int input)
 	}
 }
 
+void SearchEngine::SelectAlbum()
+{
+	size_t pos = w->Choice();
+	if (pos < StaticOptions)
+		return;		// not on a song
+	
+	std::string album = w->at(pos).second->GetAlbum();
+
+	// select song under cursor
+	w->Select(pos, 1);
+
+	// go up
+	while (pos > StaticOptions)
+	{
+		if (w->at(--pos).second->GetAlbum() != album)
+			break;
+		else
+			w->Select(pos, 1);
+	}
+
+	// go down
+	while (pos < w->Size() - 1)
+	{
+		if (w->at(++pos).second->GetAlbum() != album)
+			break;
+		else
+			w->Select(pos, 1);
+	}
+}
+
 void SearchEngine::Prepare()
 {
 	for (size_t i = 0; i < w->Size(); ++i)
