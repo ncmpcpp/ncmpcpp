@@ -266,11 +266,9 @@ int main(int argc, char *argv[])
 	
 	SetWindowsDimensions(header_height, footer_start_y, footer_height);
 	
+	wHeader = new Window(0, 0, COLS, header_height, "", Config.header_color, brNone);
 	if (Config.header_visibility || Config.new_design)
-	{
-		wHeader = new Window(0, 0, COLS, header_height, "", Config.header_color, brNone);
 		wHeader->Display();
-	}
 	
 	wFooter = new Window(0, footer_start_y, COLS, footer_height, "", Config.statusbar_color, brNone);
 	wFooter->SetTimeout(ncmpcpp_window_timeout);
