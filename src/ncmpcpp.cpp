@@ -1706,39 +1706,36 @@ int main(int argc, char *argv[])
 		{
 			if (myScreen->allowsSelection())
 			{
-				Menu<MPD::Song> *songs = NULL;
-				if (myScreen == myPlaylist && !myPlaylist->Items->Empty())
-					songs = myPlaylist->Items;
-				else if (myScreen->ActiveWindow() == myPlaylistEditor->Content)
-					songs = myPlaylistEditor->Content;
-				else if (myScreen == mySearcher)
-					mySearcher->SelectAlbum();
-
-				if (songs && !songs->Empty())
+				if (List *mList = myScreen->GetList())
 				{
-					size_t pos = songs->Choice();
-					std::string album = songs->at(pos).GetAlbum();
-					List *mList = myScreen->GetList();
-					// select song under cursor
-					mList->Select(pos, 1);
-					// go up
-					while (pos > 0)
+					size_t pos = mList->Choice();
+					if (MPD::Song *s = myScreen->GetSong(pos))
 					{
-						if (songs->at(--pos).GetAlbum() != album)
-							break;
-						else
-							mList->Select(pos, 1);
+						std::string album = s->GetAlbum();
+						
+						// select song under cursor
+						mList->Select(pos, 1);
+						// go up
+						while (pos > 0)
+						{
+							s = myScreen->GetSong(--pos);
+							if (!s || s->GetAlbum() != album)
+								break;
+							else
+								mList->Select(pos, 1);
+						}
+						// go down
+						pos = mList->Choice();
+						while (pos < mList->Size() - 1)
+						{
+							s = myScreen->GetSong(++pos);
+							if (!s || s->GetAlbum() != album)
+								break;
+							else
+								mList->Select(pos, 1);
+						}
+						ShowMessage("Album around cursor position selected.");
 					}
-					// go down
-					pos = songs->Choice();
-					while (pos < songs->Size() - 1)
-					{
-						if (songs->at(++pos).GetAlbum() != album)
-							break;
-						else
-							mList->Select(pos, 1);
-					}
-					ShowMessage("Album around cursor position selected.");
 				}
 			}
 		}
