@@ -56,6 +56,7 @@ class MediaLibrary : public Screen<Window>
 		virtual bool isTabbable() { return true; }
 		
 		virtual MPD::Song *CurrentSong();
+		virtual MPD::Song *GetSong(size_t pos) { return w == Songs ? &Songs->at(pos) : 0; }
 		
 		virtual bool allowsSelection() { return true; }
 		virtual void ReverseSelection();

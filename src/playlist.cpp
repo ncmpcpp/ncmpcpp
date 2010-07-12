@@ -47,6 +47,8 @@ Menu< std::pair<std::string, MPD::Song::GetFunction> > *Playlist::SortDialog = 0
 
 void Playlist::Init()
 {
+	static Display::ScreenFormat sf = { this, &Config.song_list_format };
+	
 	Items = new Menu<MPD::Song>(0, MainStartY, COLS, MainHeight, Config.columns_in_playlist ? Display::Columns() : "", Config.main_color, brNone);
 	Items->CyclicScrolling(Config.use_cyclic_scrolling);
 	Items->CenteredCursor(Config.centered_cursor);
@@ -54,7 +56,7 @@ void Playlist::Init()
 	Items->SetSelectPrefix(&Config.selected_item_prefix);
 	Items->SetSelectSuffix(&Config.selected_item_suffix);
 	Items->SetItemDisplayer(Config.columns_in_playlist ? Display::SongsInColumns : Display::Songs);
-	Items->SetItemDisplayerUserData(&Config.song_list_format);
+	Items->SetItemDisplayerUserData(&sf);
 	Items->SetGetStringFunction(Config.columns_in_playlist ? SongInColumnsToString : SongToString);
 	Items->SetGetStringFunctionUserData(&Config.song_list_format);
 	
@@ -275,7 +277,7 @@ void Playlist::MouseButtonPressed(MEVENT me)
 
 MPD::Song *Playlist::CurrentSong()
 {
-	return !Items->Empty() ? &Items->Current() : 0;
+	return w == Items && !Items->Empty() ? &Items->Current() : 0;
 }
 
 void Playlist::GetSelectedSongs(MPD::SongList &v)

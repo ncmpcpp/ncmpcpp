@@ -51,6 +51,8 @@ void PlaylistEditor::Init()
 	Playlists->CenteredCursor(Config.centered_cursor);
 	Playlists->SetItemDisplayer(Display::Generic);
 	
+	static Display::ScreenFormat sf = { this, &Config.song_list_format };
+	
 	Content = new Menu<MPD::Song>(RightColumnStartX, MainStartY, RightColumnWidth, MainHeight, "Playlist's content", Config.main_color, brNone);
 	Content->HighlightColor(Config.main_highlight_color);
 	Content->CyclicScrolling(Config.use_cyclic_scrolling);
@@ -58,7 +60,7 @@ void PlaylistEditor::Init()
 	Content->SetSelectPrefix(&Config.selected_item_prefix);
 	Content->SetSelectSuffix(&Config.selected_item_suffix);
 	Content->SetItemDisplayer(Display::Songs);
-	Content->SetItemDisplayerUserData(&Config.song_list_format);
+	Content->SetItemDisplayerUserData(&sf);
 	Content->SetGetStringFunction(Playlist::SongToString);
 	Content->SetGetStringFunctionUserData(&Config.song_list_format);
 	

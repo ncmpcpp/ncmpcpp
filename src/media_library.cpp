@@ -75,6 +75,8 @@ void MediaLibrary::Init()
 	Albums->SetGetStringFunction(AlbumToString);
 	Albums->SetGetStringFunctionUserData(this);
 	
+	static Display::ScreenFormat sf = { this, &Config.song_library_format };
+	
 	Songs = new Menu<MPD::Song>(itsRightColStartX, MainStartY, itsRightColWidth, MainHeight, "Songs", Config.main_color, brNone);
 	Songs->HighlightColor(Config.main_highlight_color);
 	Songs->CyclicScrolling(Config.use_cyclic_scrolling);
@@ -82,7 +84,7 @@ void MediaLibrary::Init()
 	Songs->SetSelectPrefix(&Config.selected_item_prefix);
 	Songs->SetSelectSuffix(&Config.selected_item_suffix);
 	Songs->SetItemDisplayer(Display::Songs);
-	Songs->SetItemDisplayerUserData(&Config.song_library_format);
+	Songs->SetItemDisplayerUserData(&sf);
 	Songs->SetGetStringFunction(SongToString);
 	
 	w = Artists;

@@ -24,9 +24,16 @@
 #include "ncmpcpp.h"
 #include "menu.h"
 #include "mpdpp.h"
+#include "screen.h"
 
 namespace Display
 {
+	struct ScreenFormat
+	{
+		BasicScreen *screen;
+		std::string *format;
+	};
+	
 	std::string Columns();
 	
 	template <typename T> void Generic(const T &t, void *, Menu<T> *menu)

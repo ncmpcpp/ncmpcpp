@@ -96,6 +96,11 @@ class BasicScreen
 		///
 		virtual MPD::Song *CurrentSong() { return 0; }
 		
+		/// @return pointer to song at given position in the screen
+		/// (if screen is provides one) or null pointer otherwise.
+		///
+		virtual MPD::Song *GetSong(GNUC_UNUSED size_t pos) { return 0; }
+		
 		/// @return true if the screen allows selecting items, false otherwise
 		///
 		virtual bool allowsSelection() = 0;

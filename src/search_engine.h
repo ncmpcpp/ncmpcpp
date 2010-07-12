@@ -38,6 +38,7 @@ class SearchEngine : public Screen< Menu< std::pair<Buffer *, MPD::Song *> > >
 		virtual bool isTabbable() { return true; }
 		
 		virtual MPD::Song *CurrentSong();
+		virtual MPD::Song *GetSong(size_t pos) { return w->at(pos).second; }
 		
 		virtual bool allowsSelection() { return w->Choice() >= StaticOptions; }
 		virtual void ReverseSelection() { w->ReverseSelection(StaticOptions); }

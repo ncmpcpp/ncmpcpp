@@ -61,11 +61,14 @@ size_t SearchEngine::SearchButton = 14;
 
 void SearchEngine::Init()
 {
+	static Display::ScreenFormat sf = { this, &Config.song_list_format };
+	
 	w = new Menu< std::pair<Buffer *, MPD::Song *> >(0, MainStartY, COLS, MainHeight, "", Config.main_color, brNone);
 	w->HighlightColor(Config.main_highlight_color);
 	w->CyclicScrolling(Config.use_cyclic_scrolling);
 	w->CenteredCursor(Config.centered_cursor);
 	w->SetItemDisplayer(Display::SearchEngine);
+	w->SetItemDisplayerUserData(&sf);
 	w->SetSelectPrefix(&Config.selected_item_prefix);
 	w->SetSelectSuffix(&Config.selected_item_suffix);
 	w->SetGetStringFunction(SearchEngineOptionToString);

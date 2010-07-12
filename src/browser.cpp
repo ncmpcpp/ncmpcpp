@@ -57,6 +57,8 @@ const char *Browser::SupportedExtensions[] =
 
 void Browser::Init()
 {
+	static Display::ScreenFormat sf = { this, &Config.song_list_format };
+	
 	w = new Menu<MPD::Item>(0, MainStartY, COLS, MainHeight, Config.columns_in_browser ? Display::Columns() : "", Config.main_color, brNone);
 	w->HighlightColor(Config.main_highlight_color);
 	w->CyclicScrolling(Config.use_cyclic_scrolling);
@@ -64,6 +66,7 @@ void Browser::Init()
 	w->SetSelectPrefix(&Config.selected_item_prefix);
 	w->SetSelectSuffix(&Config.selected_item_suffix);
 	w->SetItemDisplayer(Display::Items);
+	w->SetItemDisplayerUserData(&sf);
 	w->SetGetStringFunction(ItemToString);
 	isInitialized = 1;
 }

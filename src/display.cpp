@@ -18,6 +18,8 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
+#include <cassert>
+
 #include "display.h"
 #include "helpers.h"
 #include "info.h"
@@ -130,7 +132,7 @@ std::string Display::Columns()
 	return TO_STRING(result);
 }
 
-void Display::SongsInColumns(const MPD::Song &s, void *, Menu<MPD::Song> *menu)
+void Display::SongsInColumns(const MPD::Song &s, void *data, Menu<MPD::Song> *menu)
 {
 	if (!s.Localized())
 		const_cast<MPD::Song *>(&s)->Localize();
@@ -142,10 +144,14 @@ void Display::SongsInColumns(const MPD::Song &s, void *, Menu<MPD::Song> *menu)
 	if (Config.columns.empty())
 		return;
 	
-	bool separate_albums = Config.playlist_separate_albums
-			&& myScreen == myPlaylist
-			&& menu->CurrentlyDrawedPosition()+1 < myPlaylist->Items->Size()
-			&& (*myPlaylist->Items)[menu->CurrentlyDrawedPosition()+1].GetAlbum() != s.GetAlbum();
+	assert(data);
+	bool separate_albums = false;
+	if (Config.playlist_separate_albums && menu->CurrentlyDrawedPosition()+1 < menu->Size())
+	{
+		MPD::Song *next = static_cast<ScreenFormat *>(data)->screen->GetSong(menu->CurrentlyDrawedPosition()+1);
+		if (next && next->GetAlbum() != s.GetAlbum())
+			separate_albums = true;
+	}
 	if (separate_albums)
 		*menu << fmtUnderline;
 	
@@ -300,10 +306,14 @@ void Display::Songs(const MPD::Song &s, void *data, Menu<MPD::Song> *menu)
 	if (is_now_playing)
 		*menu << Config.now_playing_prefix;
 	
-	bool separate_albums = Config.playlist_separate_albums
-			&& myScreen == myPlaylist
-			&& menu->CurrentlyDrawedPosition()+1 < myPlaylist->Items->Size()
-			&& (*myPlaylist->Items)[menu->CurrentlyDrawedPosition()+1].GetAlbum() != s.GetAlbum();
+	assert(data);
+	bool separate_albums = false;
+	if (Config.playlist_separate_albums && menu->CurrentlyDrawedPosition()+1 < menu->Size())
+	{
+		MPD::Song *next = static_cast<ScreenFormat *>(data)->screen->GetSong(menu->CurrentlyDrawedPosition()+1);
+		if (next && next->GetAlbum() != s.GetAlbum())
+			separate_albums = true;
+	}
 	if (separate_albums)
 	{
 		*menu << fmtUnderline;
@@ -312,7 +322,7 @@ void Display::Songs(const MPD::Song &s, void *data, Menu<MPD::Song> *menu)
 	
 	bool discard_colors = Config.discard_colors_if_item_is_selected && menu->isSelected(menu->CurrentlyDrawedPosition());
 	
-	std::string line = s.toString(*static_cast<std::string *>(data), "$");
+	std::string line = s.toString(*static_cast<ScreenFormat *>(data)->format, "$");
 	for (std::string::const_iterator it = line.begin(); it != line.end(); ++it)
 	{
 		if (*it == '$')
@@ -376,7 +386,7 @@ void Display::Tags(const MPD::Song &s, void *data, Menu<MPD::Song> *menu)
 	}
 }
 
-void Display::Items(const MPD::Item &item, void *, Menu<MPD::Item> *menu)
+void Display::Items(const MPD::Item &item, void *data, Menu<MPD::Item> *menu)
 {
 	switch (item.type)
 	{
@@ -392,9 +402,9 @@ void Display::Items(const MPD::Item &item, void *, Menu<MPD::Item> *menu)
 		}
 		case MPD::itSong:
 			if (!Config.columns_in_browser)
-				Display::Songs(*item.song, &Config.song_list_format, reinterpret_cast<Menu<MPD::Song> *>(menu));
+				Display::Songs(*item.song, data, reinterpret_cast<Menu<MPD::Song> *>(menu));
 			else
-				Display::SongsInColumns(*item.song, 0, reinterpret_cast<Menu<MPD::Song> *>(menu));
+				Display::SongsInColumns(*item.song, data, reinterpret_cast<Menu<MPD::Song> *>(menu));
 			return;
 		case MPD::itPlaylist:
 			*menu << Config.browser_playlist_prefix << ExtractTopName(item.name);
@@ -404,14 +414,14 @@ void Display::Items(const MPD::Item &item, void *, Menu<MPD::Item> *menu)
 	}
 }
 
-void Display::SearchEngine(const std::pair<Buffer *, MPD::Song *> &pair, void *, Menu< std::pair<Buffer *, MPD::Song *> > *menu)
+void Display::SearchEngine(const std::pair<Buffer *, MPD::Song *> &pair, void *data, Menu< std::pair<Buffer *, MPD::Song *> > *menu)
 {
 	if (pair.second)
 	{
 		if (!Config.columns_in_search_engine)
-			Display::Songs(*pair.second, &Config.song_list_format, reinterpret_cast<Menu<MPD::Song> *>(menu));
+			Display::Songs(*pair.second, data, reinterpret_cast<Menu<MPD::Song> *>(menu));
 		else
-			Display::SongsInColumns(*pair.second, 0, reinterpret_cast<Menu<MPD::Song> *>(menu));
+			Display::SongsInColumns(*pair.second, data, reinterpret_cast<Menu<MPD::Song> *>(menu));
 	}
 	
 	else
