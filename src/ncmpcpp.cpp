@@ -711,7 +711,10 @@ int main(int argc, char *argv[])
 				
 				std::string name = item.type == itSong ? item.song->GetName() : item.name;
 				LockStatusbar();
-				Statusbar() << "Delete " << (item.type == itSong ? "file" : item.type == itDirectory ? "directory" : "playlist") << " \"" << Shorten(TO_WSTRING(name), COLS-30) << "\" ? [" << fmtBold << 'y' << fmtBoldEnd << '/' << fmtBold << 'n' << fmtBoldEnd << "] ";
+				if (myBrowser->Main()->hasSelected())
+					Statusbar() << "Delete selected items ? [" << fmtBold << 'y' << fmtBoldEnd << '/' << fmtBold << 'n' << fmtBoldEnd << "] ";
+				else
+					Statusbar() << "Delete " << (item.type == itSong ? "file" : item.type == itDirectory ? "directory" : "playlist") << " \"" << Shorten(TO_WSTRING(name), COLS-30) << "\" ? [" << fmtBold << 'y' << fmtBoldEnd << '/' << fmtBold << 'n' << fmtBoldEnd << "] ";
 				wFooter->Refresh();
 				int answer = 0;
 				do
@@ -723,27 +726,34 @@ int main(int argc, char *argv[])
 				UnlockStatusbar();
 				if (answer == 'y')
 				{
-					std::string path;
-					if (!myBrowser->isLocal())
-						path = Config.mpd_music_dir;
-					path += item.type == itSong ? item.song->GetFile() : item.name;
-					
-					if (item.type == itDirectory)
-						myBrowser->ClearDirectory(path);
-					
-					if (remove(path.c_str()) == 0)
+					std::vector<size_t> list;
+					myBrowser->Main()->GetSelected(list);
+					if (list.empty())
+						list.push_back(myBrowser->Main()->Choice());
+					bool success = 1;
+					for (size_t i = 0; i < list.size(); ++i)
 					{
-						static const char msg[] = "\"%s\" deleted!";
-						ShowMessage(msg, Shorten(TO_WSTRING(name), COLS-static_strlen(msg)).c_str());
+						const MPD::Item &it = (*myBrowser->Main())[list[i]];
+						name = it.type == itSong ? it.song->GetName() : it.name;
+						if (myBrowser->DeleteItem(it))
+						{
+							static const char msg[] = "\"%s\" deleted!";
+							ShowMessage(msg, Shorten(TO_WSTRING(name), COLS-static_strlen(msg)).c_str());
+						}
+						else
+						{
+							static const char msg[] = "Couldn't remove \"%s\": %s";
+							ShowMessage(msg, Shorten(TO_WSTRING(name), COLS-static_strlen(msg)-25).c_str(), strerror(errno));
+							success = 0;
+							break;
+						}
+					}
+					if (success)
+					{
 						if (!myBrowser->isLocal())
 							Mpd.UpdateDirectory(myBrowser->CurrentDir());
 						else
 							myBrowser->GetDirectory(myBrowser->CurrentDir());
-					}
-					else
-					{
-						static const char msg[] = "Couldn't remove \"%s\": %s";
-						ShowMessage(msg, Shorten(TO_WSTRING(name), COLS-static_strlen(msg)-25).c_str(), strerror(errno));
 					}
 				}
 				else

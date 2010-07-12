@@ -520,6 +520,27 @@ void Browser::ChangeBrowseMode()
 	GetDirectory(itsBrowsedDir);
 	RedrawHeader = 1;
 }
+
+bool Browser::DeleteItem(const MPD::Item &item)
+{
+	// parent dir
+	if (item.type == itDirectory && item.song)
+		return false;
+	
+	// playlist creatd by mpd
+	if (!isLocal() && item.type == itPlaylist && CurrentDir() == "/")
+		return Mpd.DeletePlaylist(locale_to_utf_cpy(item.name));
+	
+	std::string path;
+	if (!isLocal())
+		path = Config.mpd_music_dir;
+	path += item.type == itSong ? item.song->GetFile() : item.name;
+	
+	if (item.type == itDirectory)
+		ClearDirectory(path);
+	
+	return remove(path.c_str()) == 0;
+}
 #endif // !WIN32
 
 void Browser::UpdateItemList()

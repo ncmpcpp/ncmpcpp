@@ -58,6 +58,7 @@ class Browser : public Screen< Menu<MPD::Item> >
 		void GetLocalDirectory(MPD::ItemList &, const std::string & = "", bool = 0) const;
 		void ClearDirectory(const std::string &) const;
 		void ChangeBrowseMode();
+		bool DeleteItem(const MPD::Item &);
 #		endif // !WIN32
 		void UpdateItemList();
 		
