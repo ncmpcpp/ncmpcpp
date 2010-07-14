@@ -220,6 +220,8 @@ void NcmpcppKeys::SetDefaults()
 	MvSongUp[0] = 'm';
 	MvSongDown[0] = 'n';
 	MoveTo[0] = 'M';
+	MoveBefore[0] = NullKey;
+	MoveAfter[0] = NullKey;
 	Add[0] = 'a';
 	SavePlaylist[0] = 'S';
 	GoToNowPlaying[0] = 'o';
@@ -302,6 +304,8 @@ void NcmpcppKeys::SetDefaults()
 	MvSongUp[1] = NullKey;
 	MvSongDown[1] = NullKey;
 	MoveTo[1] = NullKey;
+	MoveBefore[1] = NullKey;
+	MoveAfter[1] = NullKey;
 	Add[1] = NullKey;
 	SavePlaylist[1] = NullKey;
 	GoToNowPlaying[1] = NullKey;
@@ -571,6 +575,10 @@ void NcmpcppKeys::Read()
 				GetKeys(key, MvSongDown);
 			else if (key.find("key_move_to ") != std::string::npos)
 				GetKeys(key, MoveTo);
+			else if (key.find("key_move_before ") != std::string::npos)
+				GetKeys(key, MoveBefore);
+			else if (key.find("key_move_after ") != std::string::npos)
+				GetKeys(key, MoveAfter);
 			else if (key.find("key_add ") != std::string::npos)
 				GetKeys(key, Add);
 			else if (key.find("key_save_playlist ") != std::string::npos)

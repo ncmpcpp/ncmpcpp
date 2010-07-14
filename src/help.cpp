@@ -231,6 +231,8 @@ void Help::GetKeybindings()
 	*w << DisplayKeys(Key.MvSongUp)			<< "Move item(s) up\n";
 	*w << DisplayKeys(Key.MvSongDown)		<< "Move item(s) down\n";
 	*w << DisplayKeys(Key.MoveTo)			<< "Move selected item(s) to cursor position\n";
+	*w << DisplayKeys(Key.MoveBefore)		<< "Move selected item(s) before cursor position\n";
+	*w << DisplayKeys(Key.MoveAfter)		<< "Move selected item(s) after cursor position\n";
 	*w << DisplayKeys(Key.Add)			<< "Add url/file/directory to playlist\n";
 #	ifdef HAVE_TAGLIB_H
 	*w << DisplayKeys(Key.EditTags)			<< "Edit song's tags\n";

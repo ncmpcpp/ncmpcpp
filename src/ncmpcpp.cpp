@@ -1137,7 +1137,8 @@ int main(int argc, char *argv[])
 				wFooter->SetTimeout(ncmpcpp_window_timeout);
 			}
 		}
-		else if (Keypressed(input, Key.MoveTo) && myScreen == myPlaylist)
+		else if ((Keypressed(input, Key.MoveTo) || Keypressed(input, Key.MoveBefore)
+					|| Keypressed(input, Key.MoveAfter)) && myScreen == myPlaylist)
 		{
 			CHECK_PLAYLIST_FOR_FILTERING;
 			if (!myPlaylist->Items->hasSelected())
@@ -1147,13 +1148,18 @@ int main(int argc, char *argv[])
 			}
 			Playlist::BlockUpdate = 1;
 			size_t pos = myPlaylist->Items->Choice();
-			 // if cursor is at the last item, break convention and move at the end of playlist
-			if (pos == myPlaylist->Items->Size()-1)
-				pos++;
 			std::vector<size_t> list;
 			myPlaylist->Items->GetSelected(list);
 			if (pos >= list.front() && pos <= list.back())
 				continue;
+			if (Keypressed(input, Key.MoveTo))
+			{
+				 // if cursor is at the last item, break convention and move at the end of playlist
+				if (pos == myPlaylist->Items->Size()-1)
+					pos++;
+			}
+			else if (Keypressed(input, Key.MoveAfter))
+				pos++;
 			int diff = pos-list.front();
 			Mpd.StartCommandsList();
 			if (diff > 0)

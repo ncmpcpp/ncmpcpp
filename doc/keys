@@ -146,6 +146,10 @@
 #
 #key_move_to = 'M'
 #
+#key_move_before = 0
+#
+#key_move_after = 0
+#
 #key_add = 'a'
 #
 #key_save_playlist = 'S'

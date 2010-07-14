@@ -125,6 +125,8 @@ struct NcmpcppKeys
 	int MvSongUp[2];
 	int MvSongDown[2];
 	int MoveTo[2];
+	int MoveBefore[2];
+	int MoveAfter[2];
 	int Add[2];
 	int SavePlaylist[2];
 	int GoToNowPlaying[2];
