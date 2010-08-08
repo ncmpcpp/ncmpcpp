@@ -261,6 +261,8 @@ void *Lyrics::Get(void *screen_void_ptr)
 		pthread_exit(0);
 	}
 	
+	if (my_lyrics == &Lyricsfly)
+		Replace(result, "[br]", "");
 	Replace(result, "&lt;", "<");
 	Replace(result, "&gt;", ">");
 	
@@ -337,12 +339,13 @@ void Lyrics::Take()
 }
 #endif // HAVE_PTHREAD_H
 
-const unsigned Lyrics::DBs = 1; // number of currently supported lyrics databases
+const unsigned Lyrics::DBs = 2; // number of currently supported lyrics databases
 
 const char *Lyrics::PluginsList[] =
 {
 	//"lyricsplugin.com",
 	"lyrc.com.ar",
+	"lyricsfly.com",
 	0
 };
 
@@ -369,7 +372,7 @@ const Lyrics::Plugin Lyrics::LyricsPlugin =
 	LyricsPlugin_NotFound
 };*/
 
-bool Lyrics::LyrcComAr_NotFound(const std::string &s)
+bool Lyrics::Generic_NotFound(const std::string &s)
 {
 	// it should never fail as open_tag and close_tag
 	// are not present if lyrics are not found
@@ -381,7 +384,15 @@ const Lyrics::Plugin Lyrics::LyrcComAr =
 	"http://lyrc.com.ar/tema1es.php?artist=%artist%&songname=%title%",
 	"</table>",
 	"<p>",
-	LyrcComAr_NotFound
+	Generic_NotFound
+};
+
+const Lyrics::Plugin Lyrics::Lyricsfly =
+{
+	"http://api.lyricsfly.com/api/api.php?i=30002e18b71fbe4f0-temporary.API.access&a=%artist%&t=%title%",
+	"<tx>",
+	"</tx>",
+	Generic_NotFound
 };
 
 const Lyrics::Plugin *Lyrics::ChoosePlugin(int i)
@@ -391,6 +402,8 @@ const Lyrics::Plugin *Lyrics::ChoosePlugin(int i)
 		case 0:
 			//return &LyricsPlugin;
 			return &LyrcComAr;
+		case 1:
+			return &Lyricsfly;
 		default:
 			return &LyrcComAr;
 	}

@@ -389,6 +389,7 @@
 ## supported lyrics databases:
 ##
 ## - 1 - lyrc.com.ar
+## - 2 - lyricsfly.com
 ##
 #
 #lyrics_database = "1"
