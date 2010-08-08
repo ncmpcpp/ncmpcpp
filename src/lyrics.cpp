@@ -341,7 +341,8 @@ const unsigned Lyrics::DBs = 1; // number of currently supported lyrics database
 
 const char *Lyrics::PluginsList[] =
 {
-	"lyricsplugin.com",
+	//"lyricsplugin.com",
+	"lyrc.com.ar",
 	0
 };
 
@@ -350,7 +351,7 @@ const char *Lyrics::GetPluginName(int offset)
 	return PluginsList[offset];
 }
 
-bool Lyrics::LyricsPlugin_NotFound(const std::string &s)
+/*bool Lyrics::LyricsPlugin_NotFound(const std::string &s)
 {
 	if  (s.empty())
 		return true;
@@ -366,6 +367,21 @@ const Lyrics::Plugin Lyrics::LyricsPlugin =
 	"<div id=\"lyrics\">",
 	"</div>",
 	LyricsPlugin_NotFound
+};*/
+
+bool Lyrics::LyrcComAr_NotFound(const std::string &s)
+{
+	// it should never fail as open_tag and close_tag
+	// are not present if lyrics are not found
+	return false;
+}
+
+const Lyrics::Plugin Lyrics::LyrcComAr =
+{
+	"http://lyrc.com.ar/tema1es.php?artist=%artist%&songname=%title%",
+	"</table>",
+	"<p>",
+	LyrcComAr_NotFound
 };
 
 const Lyrics::Plugin *Lyrics::ChoosePlugin(int i)
@@ -373,9 +389,10 @@ const Lyrics::Plugin *Lyrics::ChoosePlugin(int i)
 	switch (i)
 	{
 		case 0:
-			return &LyricsPlugin;
+			//return &LyricsPlugin;
+			return &LyrcComAr;
 		default:
-			return &LyricsPlugin;
+			return &LyrcComAr;
 	}
 }
 

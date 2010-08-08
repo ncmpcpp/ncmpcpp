@@ -84,7 +84,8 @@ class Lyrics : public Screen<Scrollpad>
 #		endif // HAVE_PTHREAD_H
 		
 		static const Plugin *ChoosePlugin(int);
-		static bool LyricsPlugin_NotFound(const std::string &);
+		//static bool LyricsPlugin_NotFound(const std::string &);
+		static bool LyrcComAr_NotFound(const std::string &);
 		
 		static bool Ready;
 		
@@ -93,7 +94,8 @@ class Lyrics : public Screen<Scrollpad>
 #		endif // HAVE_PTHREAD_H
 		
 		static const char *PluginsList[];
-		static const Plugin LyricsPlugin;
+		//static const Plugin LyricsPlugin;
+		static const Plugin LyrcComAr;
 #		endif // HAVE_CURL_CURL_H
 		
 		size_t itsScrollBegin;
