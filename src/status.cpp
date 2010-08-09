@@ -205,6 +205,11 @@ void NcmpcppErrorCallback(MPD::Connection *, int errorid, const char *msg, void 
 			ShowMessage("Password accepted!");
 		wFooter->SetGetStringHelper(StatusbarGetStringHelper);
 	}
+	else if ((errorid >> 8) == MPD_SERVER_ERROR_NO_EXIST && myScreen == myBrowser)
+	{
+		myBrowser->GetDirectory(PathGoDownOneLevel(myBrowser->CurrentDir()));
+		myBrowser->Refresh();
+	}
 	else
 		ShowMessage("%s", msg);
 }

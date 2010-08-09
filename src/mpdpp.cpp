@@ -191,7 +191,13 @@ void MPD::Connection::UpdateStatus()
 		}
 	}
 	
+	// if CheckForErrors() invokes callback, it can do some communication with mpd.
+	// the problem is, we *have* to be out from idle mode here and issuing commands
+	// will enter it again, which certainly is not desired, so let's block it for
+	// a while.
+	BlockIdle(true);
 	CheckForErrors();
+	BlockIdle(false);
 	
 	if (!itsConnection)
 		return;
