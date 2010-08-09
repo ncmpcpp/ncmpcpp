@@ -279,7 +279,7 @@ void Lyrics::Save(const std::string &lyrics)
 	}
 }
 
-void Lyrics::FetchAgain()
+void Lyrics::Refetch()
 {
 	std::string path = Folder + "/" + locale_to_utf_cpy(itsSong.GetArtist()) + " - " + locale_to_utf_cpy(itsSong.GetTitle()) + ".txt";
 	if (!remove(path.c_str()))

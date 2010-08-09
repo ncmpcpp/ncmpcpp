@@ -2033,7 +2033,7 @@ int main(int argc, char *argv[])
 			}
 			else if (myScreen == myLyrics)
 			{
-				myLyrics->FetchAgain();
+				myLyrics->Refetch();
 			}
 		}
 		else if (Keypressed(input, Key.SongInfo))

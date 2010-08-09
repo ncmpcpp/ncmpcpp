@@ -47,7 +47,7 @@ class Lyrics : public Screen<Scrollpad>
 		
 		void Edit();
 		void Save(const std::string &lyrics);
-		void FetchAgain();
+		void Refetch();
 		
 		static bool Reload;
 		
