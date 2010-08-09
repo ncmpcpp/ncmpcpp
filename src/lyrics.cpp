@@ -72,7 +72,7 @@ void Lyrics::Update()
 	if (ReadyToTake)
 		Take();
 	
-	if (Downloader)
+	if (DownloadInProgress)
 	{
 		w->Flush();
 		w->Refresh();
@@ -174,7 +174,7 @@ void *Lyrics::Download()
 void Lyrics::Load()
 {
 #	ifdef HAVE_CURL_CURL_H
-	if (Downloader)
+	if (DownloadInProgress)
 		return;
 #	endif // HAVE_CURL_CURL_H
 	if (itsSong.GetArtist().empty() || itsSong.GetTitle().empty())
@@ -214,8 +214,8 @@ void Lyrics::Load()
 	else
 	{
 #		ifdef HAVE_CURL_CURL_H
-		Downloader = new pthread_t;
-		pthread_create(Downloader, 0, DownloadWrapper, this);
+		pthread_create(&Downloader, 0, DownloadWrapper, this);
+		DownloadInProgress = 1;
 #		else
 		*w << "Local lyrics not found. As ncmpcpp has been compiled without curl support, you can put appropriate lyrics into " << Folder << " directory (file syntax is \"$ARTIST - $TITLE.txt\") or recompile ncmpcpp with curl support.";
 		w->Flush();
@@ -278,11 +278,10 @@ void Lyrics::Refetch()
 void Lyrics::Take()
 {
 	assert(ReadyToTake);
-	pthread_join(*Downloader, 0);
+	pthread_join(Downloader, 0);
 	w->Flush();
 	w->Refresh();
-	delete Downloader;
-	Downloader = 0;
+	DownloadInProgress = 0;
 	ReadyToTake = 0;
 }
 #endif // HAVE_CURL_CURL_H

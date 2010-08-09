@@ -30,7 +30,7 @@ class Lyrics : public Screen<Scrollpad>
 	public:
 		Lyrics() : ReloadNP(0),
 #		ifdef HAVE_CURL_CURL_H
-		ReadyToTake(0), Downloader(0),
+		ReadyToTake(0), DownloadInProgress(0),
 #		endif // HAVE_CURL_CURL_H
 		itsScrollBegin(0) { }
 		
@@ -63,7 +63,6 @@ class Lyrics : public Screen<Scrollpad>
 		void Load();
 		
 		std::string itsFilenamePath;
-		
 		static const std::string Folder;
 		
 #		ifdef HAVE_CURL_CURL_H
@@ -72,7 +71,8 @@ class Lyrics : public Screen<Scrollpad>
 		
 		void Take();
 		bool ReadyToTake;
-		pthread_t *Downloader;
+		bool DownloadInProgress;
+		pthread_t Downloader;
 #		endif // HAVE_CURL_CURL_H
 		
 		size_t itsScrollBegin;
