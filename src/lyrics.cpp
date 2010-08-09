@@ -231,6 +231,8 @@ void *Lyrics::Get(void *screen_void_ptr)
 			output.close();
 		}
 	}
+	else
+		*screen->w << "\nLyrics weren't found.";
 	
 	Ready = 1;
 	pthread_exit(0);
