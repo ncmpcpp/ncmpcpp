@@ -49,12 +49,14 @@ class Lyrics : public Screen<Scrollpad>
 		void Save(const std::string &lyrics);
 		void Refetch();
 		
-		static bool Reload;
+		static bool ReloadNP;
 		
 	protected:
 		virtual void Init();
 		
 	private:
+		void Load();
+		
 		std::string itsFilenamePath;
 		
 		static const std::string Folder;
@@ -64,7 +66,7 @@ class Lyrics : public Screen<Scrollpad>
 		
 		void Take();
 		
-		static bool Ready;
+		static bool ReadyToTake;
 		
 		static pthread_t *Downloader;
 		
