@@ -49,8 +49,7 @@ LyricsFetcher::Result LyricsFetcher::fetch(const std::string &artist, const std:
 	
 	if (code != CURLE_OK)
 	{
-		result.second = "Error while fetching lyrics: ";
-		result.second += curl_easy_strerror(code);
+		result.second = curl_easy_strerror(code);
 		return result;
 	}
 	
@@ -105,8 +104,7 @@ LyricsFetcher::Result LyricwikiFetcher::fetch(const std::string &artist, const s
 		
 		if (code != CURLE_OK)
 		{
-			result.second = "Error while fetching lyrics: ";
-			result.second += curl_easy_strerror(code);
+			result.second = curl_easy_strerror(code);
 			return result;
 		}
 		
