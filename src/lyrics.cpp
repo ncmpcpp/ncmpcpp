@@ -112,7 +112,15 @@ void Lyrics::SwitchTo()
 #		ifdef HAVE_CURL_CURL_H
 		if (Downloader && !Ready)
 		{
-			ShowMessage("Lyrics are being downloaded...");
+			if (hasToBeResized)
+				Resize();
+			
+			itsScrollBegin = 0;
+			
+			myOldScreen = myScreen;
+			myScreen = this;
+			
+			Global::RedrawHeader = 1;
 			return;
 		}
 		else if (Ready)
