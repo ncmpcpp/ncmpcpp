@@ -147,7 +147,7 @@ std::string LyricwikiFetcher::unescapeHtmlUtf8(const std::string &data)
 				result += (0x80 | ((n >> 6) & 0x3f));
 				result += (0x80 | (n & 0x3f));
 			}
-			if (n >= 0x80)
+			else if (n >= 0x80)
 			{
 				result += (0xc0 | ((n >> 6) & 0x1f));
 				result += (0x80 | (n & 0x3f));
