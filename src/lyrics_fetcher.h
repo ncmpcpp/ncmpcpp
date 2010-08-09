@@ -43,6 +43,8 @@ struct LyricsFetcher
 		
 		virtual bool notLyrics(GNUC_UNUSED const std::string &data) { return false; }
 		virtual void postProcess(std::string &data);
+		
+		bool getContent(const char *open_tag, const char *close_tag, std::string &data);
 };
 
 struct LyrcComArFetcher : public LyricsFetcher
@@ -53,6 +55,22 @@ struct LyrcComArFetcher : public LyricsFetcher
 		virtual const char *getURL() { return "http://lyrc.com.ar/tema1es.php?artist=%artist%&songname=%title%"; }
 		virtual const char *getOpenTag() { return "</table>"; }
 		virtual const char *getCloseTag() { return "<p>"; }
+};
+
+struct LyricwikiFetcher : public LyricsFetcher
+{
+	virtual const char *name() { return "lyricwiki.com"; }
+	virtual Result fetch(const std::string &artist, const std::string &title);
+	
+	protected:
+		virtual const char *getURL() { return "http://lyrics.wikia.com/api.php?action=lyrics&fmt=xml&func=getSong&artist=%artist%&song=%title%"; }
+		virtual const char *getOpenTag() { return "<url>"; }
+		virtual const char *getCloseTag() { return "</url>"; }
+		
+		virtual bool notLyrics(const std::string &data);
+		
+	private:
+		std::string unescape(const std::string &data);
 };
 
 struct LyricsflyFetcher : public LyricsFetcher

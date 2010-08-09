@@ -22,11 +22,14 @@
 
 #ifdef HAVE_CURL_CURL_H
 
+#include <cstdlib>
+
 #include "conv.h"
 #include "lyrics_fetcher.h"
 
 LyricsFetcher *lyricsPlugins[] =
 {
+	new LyricwikiFetcher(),
 	new LyrcComArFetcher(),
 	new LyricsflyFetcher(),
 	0
@@ -51,20 +54,9 @@ LyricsFetcher::Result LyricsFetcher::fetch(const std::string &artist, const std:
 		return result;
 	}
 	
-	size_t a, b;
-	bool parse_failed = false;
-	if ((a = data.find(getOpenTag())) != std::string::npos)
-	{
-		a += strlen(getCloseTag())-1;
-		if ((b = data.find(getCloseTag(), a)) != std::string::npos)
-			data = data.substr(a, b-a);
-		else
-			parse_failed = true;
-	}
-	else
-		parse_failed = true;
+	bool parse_ok = getContent(getOpenTag(), getCloseTag(), data);
 	
-	if (parse_failed || notLyrics(data))
+	if (!parse_ok || notLyrics(data))
 	{
 		result.second = "Not found";
 		return result;
@@ -77,11 +69,86 @@ LyricsFetcher::Result LyricsFetcher::fetch(const std::string &artist, const std:
 	return result;
 }
 
+bool LyricsFetcher::getContent(const char *open_tag, const char *close_tag, std::string &data)
+{
+	size_t a, b;
+	if ((a = data.find(open_tag)) != std::string::npos)
+	{
+		a += strlen(open_tag);
+		if ((b = data.find(close_tag, a)) != std::string::npos)
+			data = data.substr(a, b-a);
+		else
+			return false;
+	}
+	else
+		return false;
+	return true;
+}
+
 void LyricsFetcher::postProcess(std::string &data)
 {
 	EscapeHtml(data);
 	Trim(data);
 }
+
+/***********************************************************************/
+
+LyricsFetcher::Result LyricwikiFetcher::fetch(const std::string &artist, const std::string &title)
+{
+	LyricsFetcher::Result result = LyricsFetcher::fetch(artist, title);
+	if (result.first == true)
+	{
+		result.first = false;
+		
+		std::string data;
+		CURLcode code = Curl::perform(result.second, data);
+		
+		if (code != CURLE_OK)
+		{
+			result.second = "Error while fetching lyrics: ";
+			result.second += curl_easy_strerror(code);
+			return result;
+		}
+		
+		bool parse_ok = getContent("'17'/></a></div>", "<!--", data);
+		
+		if (!parse_ok)
+		{
+			result.second = "Not found";
+			return result;
+		}
+		
+		Replace(data, "<br />", "\n");
+		
+		result.second = unescape(data);
+		result.first = true;
+	}
+	return result;
+}
+
+bool LyricwikiFetcher::notLyrics(const std::string &data)
+{
+	return data.find("action=edit") != std::string::npos;
+}
+
+std::string LyricwikiFetcher::unescape(const std::string &data)
+{
+	std::string result;
+	for (size_t i = 0, j; i < data.length(); ++i)
+	{
+		if (data[i] == '&' && data[i+1] == '#' && (j = data.find(';', i)) != std::string::npos)
+		{
+			int n = atoi(&data.c_str()[i+2]);
+			result += char(n);
+			i = j;
+		}
+		else
+			result += data[i];
+	}
+	return result;
+}
+
+/***********************************************************************/
 
 void LyricsflyFetcher::postProcess(std::string &data)
 {
