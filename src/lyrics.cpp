@@ -50,12 +50,6 @@ using Global::myScreen;
 using Global::myOldScreen;
 
 const std::string Lyrics::Folder = home_path + LYRICS_FOLDER;
-bool Lyrics::ReloadNP = 0;
-
-#ifdef HAVE_CURL_CURL_H
-bool Lyrics::ReadyToTake = 0;
-pthread_t *Lyrics::Downloader = 0;
-#endif // HAVE_CURL_CURL_H
 
 Lyrics *myLyrics = new Lyrics;
 
@@ -100,32 +94,29 @@ void Lyrics::Update()
 void Lyrics::SwitchTo()
 {
 	if (myScreen == this)
+		return myOldScreen->SwitchTo();
+	
+	if (!isInitialized)
+		Init();
+	
+	if (hasToBeResized)
+		Resize();
+	
+	itsScrollBegin = 0;
+	
+	myOldScreen = myScreen;
+	myScreen = this;
+	
+	// for taking lyrics if they were downloaded
+	Update();
+	
+	if (const MPD::Song *s = myOldScreen->CurrentSong())
 	{
-		myOldScreen->SwitchTo();
+		itsSong = *s;
+		Load();
 	}
-	else
-	{
-		if (!isInitialized)
-			Init();
-		
-		if (hasToBeResized)
-			Resize();
-		
-		itsScrollBegin = 0;
-		
-		myOldScreen = myScreen;
-		myScreen = this;
-		
-		Update();
-		
-		if (const MPD::Song *s = myOldScreen->CurrentSong())
-		{
-			itsSong = *s;
-			Load();
-		}
-		
-		Global::RedrawHeader = 1;
-	}
+	
+	Global::RedrawHeader = 1;
 }
 
 std::basic_string<my_char_t> Lyrics::Title()
@@ -142,35 +133,38 @@ void Lyrics::SpacePressed()
 }
 
 #ifdef HAVE_CURL_CURL_H
-void *Lyrics::Get(void *screen_void_ptr)
+void *Lyrics::DownloadWrapper(void *this_ptr)
 {
-	Lyrics *screen = static_cast<Lyrics *>(screen_void_ptr);
-	
-	std::string artist = Curl::escape(locale_to_utf_cpy(screen->itsSong.GetArtist()));
-	std::string title = Curl::escape(locale_to_utf_cpy(screen->itsSong.GetTitle()));
+	return static_cast<Lyrics *>(this_ptr)->Download();
+}
+
+void *Lyrics::Download()
+{
+	std::string artist = Curl::escape(locale_to_utf_cpy(itsSong.GetArtist()));
+	std::string title = Curl::escape(locale_to_utf_cpy(itsSong.GetTitle()));
 	
 	LyricsFetcher::Result result;
 	
 	for (LyricsFetcher **plugin = lyricsPlugins; *plugin != 0; ++plugin)
 	{
-		*screen->w << "Fetching lyrics from " << fmtBold << (*plugin)->name() << fmtBoldEnd << "... ";
+		*w << "Fetching lyrics from " << fmtBold << (*plugin)->name() << fmtBoldEnd << "... ";
 		result = (*plugin)->fetch(artist, title);
 		if (result.first == false)
-			*screen->w << clRed << result.second << clEnd << "\n";
+			*w << clRed << result.second << clEnd << "\n";
 		else
 			break;
 	}
 	
 	if (result.first == true)
 	{
-		screen->Save(result.second);
+		Save(result.second);
 		
 		utf_to_locale(result.second);
-		screen->w->Clear();
-		*screen->w << result.second;
+		w->Clear();
+		*w << result.second;
 	}
 	else
-		*screen->w << "\nLyrics weren't found.";
+		*w << "\nLyrics weren't found.";
 	
 	ReadyToTake = 1;
 	pthread_exit(0);
@@ -221,7 +215,7 @@ void Lyrics::Load()
 	{
 #		ifdef HAVE_CURL_CURL_H
 		Downloader = new pthread_t;
-		pthread_create(Downloader, 0, Get, this);
+		pthread_create(Downloader, 0, DownloadWrapper, this);
 #		else
 		*w << "Local lyrics not found. As ncmpcpp has been compiled without curl support, you can put appropriate lyrics into " << Folder << " directory (file syntax is \"$ARTIST - $TITLE.txt\") or recompile ncmpcpp with curl support.";
 		w->Flush();

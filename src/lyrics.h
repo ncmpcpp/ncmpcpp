@@ -28,7 +28,12 @@
 class Lyrics : public Screen<Scrollpad>
 {
 	public:
-		Lyrics() : itsScrollBegin(0) { }
+		Lyrics() : ReloadNP(0),
+#		ifdef HAVE_CURL_CURL_H
+		ReadyToTake(0), Downloader(0),
+#		endif // HAVE_CURL_CURL_H
+		itsScrollBegin(0) { }
+		
 		~Lyrics() { }
 		
 		virtual void Resize();
@@ -49,7 +54,7 @@ class Lyrics : public Screen<Scrollpad>
 		void Save(const std::string &lyrics);
 		void Refetch();
 		
-		static bool ReloadNP;
+		bool ReloadNP;
 		
 	protected:
 		virtual void Init();
@@ -62,14 +67,12 @@ class Lyrics : public Screen<Scrollpad>
 		static const std::string Folder;
 		
 #		ifdef HAVE_CURL_CURL_H
-		static void *Get(void *);
+		void *Download();
+		static void *DownloadWrapper(void *);
 		
 		void Take();
-		
-		static bool ReadyToTake;
-		
-		static pthread_t *Downloader;
-		
+		bool ReadyToTake;
+		pthread_t *Downloader;
 #		endif // HAVE_CURL_CURL_H
 		
 		size_t itsScrollBegin;
