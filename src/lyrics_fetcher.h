@@ -70,7 +70,7 @@ struct LyricwikiFetcher : public LyricsFetcher
 		virtual bool notLyrics(const std::string &data);
 		
 	private:
-		std::string unescape(const std::string &data);
+		std::string unescapeHtmlUtf8(const std::string &data);
 };
 
 struct LyricsflyFetcher : public LyricsFetcher

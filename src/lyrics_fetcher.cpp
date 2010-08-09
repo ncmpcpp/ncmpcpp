@@ -120,7 +120,7 @@ LyricsFetcher::Result LyricwikiFetcher::fetch(const std::string &artist, const s
 		
 		Replace(data, "<br />", "\n");
 		
-		result.second = unescape(data);
+		result.second = unescapeHtmlUtf8(data);
 		result.first = true;
 	}
 	return result;
@@ -131,7 +131,7 @@ bool LyricwikiFetcher::notLyrics(const std::string &data)
 	return data.find("action=edit") != std::string::npos;
 }
 
-std::string LyricwikiFetcher::unescape(const std::string &data)
+std::string LyricwikiFetcher::unescapeHtmlUtf8(const std::string &data)
 {
 	std::string result;
 	for (size_t i = 0, j; i < data.length(); ++i)
@@ -139,7 +139,19 @@ std::string LyricwikiFetcher::unescape(const std::string &data)
 		if (data[i] == '&' && data[i+1] == '#' && (j = data.find(';', i)) != std::string::npos)
 		{
 			int n = atoi(&data.c_str()[i+2]);
-			result += char(n);
+			if (n >= 0x800)
+			{
+				result += (0xe0 | ((n >> 12) & 0x0f));
+				result += (0x80 | ((n >> 6) & 0x3f));
+				result += (0x80 | (n & 0x3f));
+			}
+			if (n >= 0x80)
+			{
+				result += (0xc0 | ((n >> 6) & 0x1f));
+				result += (0x80 | (n & 0x3f));
+			}
+			else
+				result += n;
 			i = j;
 		}
 		else
