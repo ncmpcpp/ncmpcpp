@@ -87,7 +87,7 @@ bool LyricsFetcher::getContent(const char *open_tag, const char *close_tag, std:
 
 void LyricsFetcher::postProcess(std::string &data)
 {
-	EscapeHtml(data);
+	StripHtmlTags(data);
 	Trim(data);
 }
 

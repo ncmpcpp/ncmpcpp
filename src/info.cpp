@@ -245,7 +245,7 @@ void *Info::PrepareArtist(void *screen_void_ptr)
 	
 	if (a != std::string::npos)
 	{
-		EscapeHtml(result);
+		StripHtmlTags(result);
 		*screen->w << "Last.fm returned an error message: " << result;
 		ArtistReady = 1;
 		pthread_exit(0);
@@ -259,7 +259,7 @@ void *Info::PrepareArtist(void *screen_void_ptr)
 		result[j] = '.';
 		i += static_strlen("<name>");
 		similar.push_back(result.substr(i, j-i));
-		EscapeHtml(similar.back());
+		StripHtmlTags(similar.back());
 	}
 	std::vector<std::string> urls;
 	for (size_t i = result.find("<url>"); i != std::string::npos; i = result.find("<url>"))
@@ -299,7 +299,7 @@ void *Info::PrepareArtist(void *screen_void_ptr)
 		result = result.substr(a, b-a);
 	}
 	
-	EscapeHtml(result);
+	StripHtmlTags(result);
 	Trim(result);
 	
 	std::ostringstream filebuffer;

@@ -60,7 +60,7 @@ std::string Shorten(const std::basic_string<my_char_t> &s, size_t max_length);
 
 void EscapeUnallowedChars(std::string &);
 
-void EscapeHtml(std::string &s);
+void StripHtmlTags(std::string &s);
 
 void Trim(std::string &s);
 

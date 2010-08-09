@@ -206,7 +206,7 @@ void EscapeUnallowedChars(std::string &s)
 	}
 }
 
-void EscapeHtml(std::string &s)
+void StripHtmlTags(std::string &s)
 {
 	bool erase = 0;
 	for (size_t i = s.find("<"); i != std::string::npos; i = s.find("<"))
