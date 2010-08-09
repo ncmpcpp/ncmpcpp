@@ -28,6 +28,7 @@
 #include <fstream>
 
 #include "lyrics.h"
+#include "lyrics_fetcher.h"
 
 #include "browser.h"
 #include "charset.h"
@@ -85,9 +86,17 @@ void Lyrics::Resize()
 void Lyrics::Update()
 {
 #	if defined(HAVE_CURL_CURL_H) && defined(HAVE_PTHREAD_H)
-	if (myLyrics->Ready)
-		myLyrics->Take();
+	if (Ready)
+		Take();
 #	endif // HAVE_CURL_CURL_H && HAVE_PTHREAD_H
+	
+#	ifdef HAVE_PTHREAD_H
+	if (Downloader)
+	{
+		w->Flush();
+		w->Refresh();
+	}
+#	endif
 	
 	if (Reload)
 		SwitchTo();
@@ -134,13 +143,9 @@ void Lyrics::SwitchTo()
 			Global::RedrawHeader = 1;
 			w->Clear();
 			w->Reset();
-#			ifdef HAVE_CURL_CURL_H
-			static_cast<Window &>(*w) << "Fetching lyrics...";
-			w->Window::Refresh();
 #			ifdef HAVE_PTHREAD_H
 			if (!Downloader)
 #			endif // HAVE_PTHREAD_H
-#			endif // HAVE_CURL_CURL_H
 			{
 				std::string file = locale_to_utf_cpy(itsSong.GetArtist()) + " - " + locale_to_utf_cpy(itsSong.GetTitle()) + ".txt";
 				EscapeUnallowedChars(file);
@@ -205,62 +210,35 @@ void Lyrics::SpacePressed()
 void *Lyrics::Get(void *screen_void_ptr)
 {
 	Lyrics *screen = static_cast<Lyrics *>(screen_void_ptr);
-	const Plugin *my_lyrics = ChoosePlugin(Config.lyrics_db);
 	
-	std::string result;
-	std::string artist = locale_to_utf_cpy(screen->itsSong.GetArtist());
-	std::string title = locale_to_utf_cpy(screen->itsSong.GetTitle());
+	std::string artist = Curl::escape(locale_to_utf_cpy(screen->itsSong.GetArtist()));
+	std::string title = Curl::escape(locale_to_utf_cpy(screen->itsSong.GetTitle()));
 	
-	std::string url = my_lyrics->url;
-	Replace(url, "%artist%", Curl::escape(artist).c_str());
-	Replace(url, "%title%", Curl::escape(title).c_str());
+	LyricsFetcher::Result result;
 	
-	CURLcode code = Curl::perform(url, result);
-	
-	if (code != CURLE_OK)
+	for (LyricsFetcher **plugin = lyricsPlugins; *plugin != 0; ++plugin)
 	{
-		*screen->w << "Error while fetching lyrics: " << curl_easy_strerror(code);
-		Ready = 1;
-		pthread_exit(0);
-	}
-	
-	size_t a, b;
-	bool parse_failed = 0;
-	
-	if ((a = result.find(my_lyrics->tag_open)) != std::string::npos)
-	{
-		a += strlen(my_lyrics->tag_open);
-		if ((b = result.find(my_lyrics->tag_close, a)) != std::string::npos)
-			result = result.substr(a, b-a);
+		*screen->w << "Fetching lyrics from " << fmtBold << (*plugin)->name() << fmtBoldEnd << "... ";
+		result = (*plugin)->fetch(artist, title);
+		if (result.first == false)
+			*screen->w << clRed << result.second << clEnd << "\n";
 		else
-			parse_failed = 1;
+			break;
 	}
-	else
-		parse_failed = 1;
 	
-	if (parse_failed || my_lyrics->not_found(result))
+	if (result.first == true)
 	{
-		*screen->w << "Not found";
-		Ready = 1;
-		pthread_exit(0);
+		screen->w->Clear();
+		*screen->w << utf_to_locale_cpy(result.second);
+		
+		std::ofstream output(screen->itsFilenamePath.c_str());
+		if (output.is_open())
+		{
+			output << result.second;
+			output.close();
+		}
 	}
 	
-	if (my_lyrics == &Lyricsfly)
-		Replace(result, "[br]", "");
-	Replace(result, "&lt;", "<");
-	Replace(result, "&gt;", ">");
-	
-	EscapeHtml(result);
-	Trim(result);
-	
-	*screen->w << utf_to_locale_cpy(result);
-	
-	std::ofstream output(screen->itsFilenamePath.c_str());
-	if (output.is_open())
-	{
-		output << result;
-		output.close();
-	}
 	Ready = 1;
 	pthread_exit(0);
 }
@@ -307,9 +285,7 @@ void Lyrics::FetchAgain()
 	}
 }
 
-#ifdef HAVE_CURL_CURL_H
-
-#ifdef HAVE_PTHREAD_H
+#if defined(HAVE_CURL_CURL_H) && defined(HAVE_PTHREAD_H)
 void Lyrics::Take()
 {
 	if (!Ready)
@@ -321,77 +297,5 @@ void Lyrics::Take()
 	Downloader = 0;
 	Ready = 0;
 }
-#endif // HAVE_PTHREAD_H
-
-const unsigned Lyrics::DBs = 2; // number of currently supported lyrics databases
-
-const char *Lyrics::PluginsList[] =
-{
-	//"lyricsplugin.com",
-	"lyrc.com.ar",
-	"lyricsfly.com",
-	0
-};
-
-const char *Lyrics::GetPluginName(int offset)
-{
-	return PluginsList[offset];
-}
-
-/*bool Lyrics::LyricsPlugin_NotFound(const std::string &s)
-{
-	if  (s.empty())
-		return true;
-	for (std::string::const_iterator it = s.begin(); it != s.end(); ++it)
-		if (isprint(*it))
-			return false;
-	return true;
-}
-
-const Lyrics::Plugin Lyrics::LyricsPlugin =
-{
-	"http://www.lyricsplugin.com/winamp03/plugin/?artist=%artist%&title=%title%",
-	"<div id=\"lyrics\">",
-	"</div>",
-	LyricsPlugin_NotFound
-};*/
-
-bool Lyrics::Generic_NotFound(const std::string &)
-{
-	// it should never fail as open_tag and close_tag
-	// are not present if lyrics are not found
-	return false;
-}
-
-const Lyrics::Plugin Lyrics::LyrcComAr =
-{
-	"http://lyrc.com.ar/tema1es.php?artist=%artist%&songname=%title%",
-	"</table>",
-	"<p>",
-	Generic_NotFound
-};
-
-const Lyrics::Plugin Lyrics::Lyricsfly =
-{
-	"http://api.lyricsfly.com/api/api.php?i=30002e18b71fbe4f0-temporary.API.access&a=%artist%&t=%title%",
-	"<tx>",
-	"</tx>",
-	Generic_NotFound
-};
-
-const Lyrics::Plugin *Lyrics::ChoosePlugin(int i)
-{
-	switch (i)
-	{
-		case 0:
-			//return &LyricsPlugin;
-			return &LyrcComAr;
-		case 1:
-			return &Lyricsfly;
-		default:
-			return &LyrcComAr;
-	}
-}
-
-#endif // HAVE_CURL_CURL_H
+#endif // HAVE_CURL_CURL_H && HAVE_PTHREAD_H
 

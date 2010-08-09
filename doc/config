@@ -384,16 +384,6 @@
 #
 #allow_physical_directories_deletion = "no"
 #
-##### lyrics support #####
-##
-## supported lyrics databases:
-##
-## - 1 - lyrc.com.ar
-## - 2 - lyricsfly.com
-##
-#
-#lyrics_database = "1"
-#
 #external_editor = ""
 #
 #use_console_editor = "no" (set to yes, if your editor is console app)

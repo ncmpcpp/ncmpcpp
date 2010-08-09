@@ -22,45 +22,71 @@
 
 #ifdef HAVE_CURL_CURL_H
 
-#include <cstdlib>
+#include "conv.h"
+#include "lyrics_fetcher.h"
 
-namespace
+LyricsFetcher *lyricsPlugins[] =
 {
-	size_t write_data(char *buffer, size_t size, size_t nmemb, void *data)
+	new LyrcComArFetcher(),
+	new LyricsflyFetcher(),
+	0
+};
+
+LyricsFetcher::Result LyricsFetcher::fetch(const std::string &artist, const std::string &title)
+{
+	Result result;
+	result.first = false;
+	
+	std::string url = getURL();
+	Replace(url, "%artist%", artist.c_str());
+	Replace(url, "%title%", title.c_str());
+	
+	std::string data;
+	CURLcode code = Curl::perform(url, data);
+	
+	if (code != CURLE_OK)
 	{
-		size_t result = size*nmemb;
-		static_cast<std::string *>(data)->append(buffer, result);
+		result.second = "Error while fetching lyrics: ";
+		result.second += curl_easy_strerror(code);
 		return result;
 	}
-}
-
-CURLcode Curl::perform(const std::string &URL, std::string &data, unsigned timeout)
-{
-#	ifdef HAVE_PTHREAD_H
-	static pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
-	pthread_mutex_lock(&lock);
-#	endif
-	CURLcode result;
-	CURL *c = curl_easy_init();
-	curl_easy_setopt(c, CURLOPT_URL, URL.c_str());
-	curl_easy_setopt(c, CURLOPT_WRITEFUNCTION, write_data);
-	curl_easy_setopt(c, CURLOPT_WRITEDATA, &data);
-	curl_easy_setopt(c, CURLOPT_CONNECTTIMEOUT, timeout);
-	curl_easy_setopt(c, CURLOPT_NOSIGNAL, 1);
-	result = curl_easy_perform(c);
-	curl_easy_cleanup(c);
-#	ifdef HAVE_PTHREAD_H
-	pthread_mutex_unlock(&lock);
-#	endif
+	
+	size_t a, b;
+	bool parse_failed = false;
+	if ((a = data.find(getOpenTag())) != std::string::npos)
+	{
+		a += strlen(getCloseTag())-1;
+		if ((b = data.find(getCloseTag(), a)) != std::string::npos)
+			data = data.substr(a, b-a);
+		else
+			parse_failed = true;
+	}
+	else
+		parse_failed = true;
+	
+	if (parse_failed || notLyrics(data))
+	{
+		result.second = "Not found";
+		return result;
+	}
+	
+	postProcess(data);
+	
+	result.second = data;
+	result.first = true;
 	return result;
 }
 
-std::string Curl::escape(const std::string &s)
+void LyricsFetcher::postProcess(std::string &data)
 {
-	char *cs = curl_easy_escape(0, s.c_str(), s.length());
-	std::string result(cs);
-	curl_free(cs);
-	return result;
+	EscapeHtml(data);
+	Trim(data);
+}
+
+void LyricsflyFetcher::postProcess(std::string &data)
+{
+	Replace(data, "[br]", "");
+	Trim(data);
 }
 
 #endif // HAVE_CURL_CURL_H

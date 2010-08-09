@@ -18,50 +18,57 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
-#include "curl_handle.h"
+#ifndef _LYRICS_FETCHER_H
+#define _LYRICS_FETCHER_H
+
+#ifdef HAVE_CONFIG_H
+# include "config.h"
+#endif
 
 #ifdef HAVE_CURL_CURL_H
 
-#include <cstdlib>
+#include <string>
 
-namespace
+struct LyricsFetcher
 {
-	size_t write_data(char *buffer, size_t size, size_t nmemb, void *data)
-	{
-		size_t result = size*nmemb;
-		static_cast<std::string *>(data)->append(buffer, result);
-		return result;
-	}
-}
+	typedef std::pair<bool, std::string> Result;
+	
+	virtual const char *name() = 0;
+	virtual Result fetch(const std::string &artist, const std::string &title);
+	
+	protected:
+		virtual const char *getURL() = 0;
+		virtual const char *getOpenTag() = 0;
+		virtual const char *getCloseTag() = 0;
+		
+		virtual bool notLyrics(GNUC_UNUSED const std::string &data) { return false; }
+		virtual void postProcess(std::string &data);
+};
 
-CURLcode Curl::perform(const std::string &URL, std::string &data, unsigned timeout)
+struct LyrcComArFetcher : public LyricsFetcher
 {
-#	ifdef HAVE_PTHREAD_H
-	static pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
-	pthread_mutex_lock(&lock);
-#	endif
-	CURLcode result;
-	CURL *c = curl_easy_init();
-	curl_easy_setopt(c, CURLOPT_URL, URL.c_str());
-	curl_easy_setopt(c, CURLOPT_WRITEFUNCTION, write_data);
-	curl_easy_setopt(c, CURLOPT_WRITEDATA, &data);
-	curl_easy_setopt(c, CURLOPT_CONNECTTIMEOUT, timeout);
-	curl_easy_setopt(c, CURLOPT_NOSIGNAL, 1);
-	result = curl_easy_perform(c);
-	curl_easy_cleanup(c);
-#	ifdef HAVE_PTHREAD_H
-	pthread_mutex_unlock(&lock);
-#	endif
-	return result;
-}
+	virtual const char *name() { return "lyrc.com.ar"; }
+	
+	protected:
+		virtual const char *getURL() { return "http://lyrc.com.ar/tema1es.php?artist=%artist%&songname=%title%"; }
+		virtual const char *getOpenTag() { return "</table>"; }
+		virtual const char *getCloseTag() { return "<p>"; }
+};
 
-std::string Curl::escape(const std::string &s)
+struct LyricsflyFetcher : public LyricsFetcher
 {
-	char *cs = curl_easy_escape(0, s.c_str(), s.length());
-	std::string result(cs);
-	curl_free(cs);
-	return result;
-}
+	virtual const char *name() { return "lyricsfly.com"; }
+	
+	protected:
+		virtual const char *getURL() { return "http://api.lyricsfly.com/api/api.php?i=1b76e55254f5f22ae-temporary.API.access&a=%artist%&t=%title%"; }
+		virtual const char *getOpenTag() { return "<tx>"; }
+		virtual const char *getCloseTag() { return "</tx>"; }
+		
+		virtual void postProcess(std::string &data);
+};
+
+extern LyricsFetcher *lyricsPlugins[];
 
 #endif // HAVE_CURL_CURL_H
 
+#endif
