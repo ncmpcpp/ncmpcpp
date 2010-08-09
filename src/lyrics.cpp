@@ -229,15 +229,11 @@ void *Lyrics::Get(void *screen_void_ptr)
 	
 	if (result.first == true)
 	{
-		screen->w->Clear();
-		*screen->w << utf_to_locale_cpy(result.second);
+		screen->Save(result.second);
 		
-		std::ofstream output(screen->itsFilenamePath.c_str());
-		if (output.is_open())
-		{
-			output << result.second;
-			output.close();
-		}
+		utf_to_locale(result.second);
+		screen->w->Clear();
+		*screen->w << result.second;
 	}
 	else
 		*screen->w << "\nLyrics weren't found.";
@@ -271,6 +267,16 @@ void Lyrics::Edit()
 	}
 	else
 		system(("nohup " + Config.external_editor + " \"" + itsFilenamePath + "\" > /dev/null 2>&1 &").c_str());
+}
+
+void Lyrics::Save(const std::string &lyrics)
+{
+	std::ofstream output(itsFilenamePath.c_str());
+	if (output.is_open())
+	{
+		output << lyrics;
+		output.close();
+	}
 }
 
 void Lyrics::FetchAgain()
