@@ -19,6 +19,7 @@
  ***************************************************************************/
 
 #include "info.h"
+#include "curl_handle.h"
 
 #ifdef HAVE_CURL_CURL_H
 # include <fstream>
@@ -27,8 +28,6 @@
 # else
 #  include <sys/stat.h>
 # endif // WIN32
-# include "curl/curl.h"
-# include "helpers.h"
 #endif
 
 #include "browser.h"
@@ -236,26 +235,12 @@ void *Info::PrepareArtist(void *screen_void_ptr)
 {
 	Info *screen = static_cast<Info *>(screen_void_ptr);
 	
-	char *c_artist = curl_easy_escape(0, screen->itsArtist.c_str(), screen->itsArtist.length());
 	std::string url = "http://ws.audioscrobbler.com/2.0/?method=artist.getinfo&artist=";
-	url += c_artist;
+	url += Curl::escape(screen->itsArtist);
 	url += "&api_key=d94e5b6e26469a2d1ffae8ef20131b79";
 	
 	std::string result;
-	CURLcode code;
-	
-	pthread_mutex_lock(&Global::CurlLock);
-	CURL *info = curl_easy_init();
-	curl_easy_setopt(info, CURLOPT_URL, url.c_str());
-	curl_easy_setopt(info, CURLOPT_WRITEFUNCTION, write_data);
-	curl_easy_setopt(info, CURLOPT_WRITEDATA, &result);
-	curl_easy_setopt(info, CURLOPT_CONNECTTIMEOUT, 10);
-	curl_easy_setopt(info, CURLOPT_NOSIGNAL, 1);
-	code = curl_easy_perform(info);
-	curl_easy_cleanup(info);
-	pthread_mutex_unlock(&Global::CurlLock);
-	
-	curl_free(c_artist);
+	CURLcode code = Curl::perform(url, result);
 	
 	if (code != CURLE_OK)
 	{

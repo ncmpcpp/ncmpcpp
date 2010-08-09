@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2008-2010 by Andrzej Rybczak                            *
+ *   Copyright (C) 2008-2009 by Andrzej Rybczak                            *
  *   electricityispower@gmail.com                                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -18,24 +18,50 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
-#ifndef _NCMPCPP_H
-#define _NCMPCPP_H
+#include "curl_handle.h"
 
-#include "window.h"
-#include "menu.h"
-#include "scrollpad.h"
+#ifdef HAVE_CURL_CURL_H
 
-#ifdef HAVE_PTHREAD_H
-# include <pthread.h>
-#else
-# define pthread_exit(x) return (x)
-#endif // HAVE_PTHREAD_H
+#include <cstdlib>
 
-using namespace NCurses;
+namespace
+{
+	size_t write_data(char *buffer, size_t size, size_t nmemb, void *data)
+	{
+		size_t result = size*nmemb;
+		static_cast<std::string *>(data)->append(buffer, result);
+		return result;
+	}
+}
 
-typedef std::pair<std::string, std::string> string_pair;
+CURLcode Curl::perform(const std::string &URL, std::string &data, unsigned timeout)
+{
+#	ifdef HAVE_PTHREAD_H
+	static pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
+	pthread_mutex_lock(&lock);
+#	endif
+	CURLcode result;
+	CURL *c = curl_easy_init();
+	curl_easy_setopt(c, CURLOPT_URL, URL.c_str());
+	curl_easy_setopt(c, CURLOPT_WRITEFUNCTION, write_data);
+	curl_easy_setopt(c, CURLOPT_WRITEDATA, &data);
+	curl_easy_setopt(c, CURLOPT_CONNECTTIMEOUT, timeout);
+	curl_easy_setopt(c, CURLOPT_NOSIGNAL, 1);
+	result = curl_easy_perform(c);
+	curl_easy_cleanup(c);
+#	ifdef HAVE_PTHREAD_H
+	pthread_mutex_unlock(&lock);
+#	endif
+	return result;
+}
 
-const int ncmpcpp_window_timeout = 500;
+std::string Curl::escape(const std::string &s)
+{
+	char *cs = curl_easy_escape(0, s.c_str(), s.length());
+	std::string result(cs);
+	curl_free(cs);
+	return result;
+}
 
-#endif
+#endif // HAVE_CURL_CURL_H
 

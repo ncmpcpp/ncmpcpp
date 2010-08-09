@@ -31,6 +31,7 @@
 
 #include "browser.h"
 #include "charset.h"
+#include "curl_handle.h"
 #include "global.h"
 #include "helpers.h"
 
@@ -63,7 +64,6 @@ bool Lyrics::Ready = 0;
 
 #ifdef HAVE_PTHREAD_H
 pthread_t *Lyrics::Downloader = 0;
-pthread_mutex_t Global::CurlLock = PTHREAD_MUTEX_INITIALIZER;
 #endif // HAVE_PTHREAD_H
 #endif // HAVE_CURL_CURL_H
 
@@ -211,27 +211,11 @@ void *Lyrics::Get(void *screen_void_ptr)
 	std::string artist = locale_to_utf_cpy(screen->itsSong.GetArtist());
 	std::string title = locale_to_utf_cpy(screen->itsSong.GetTitle());
 	
-	char *c_artist = curl_easy_escape(0, artist.c_str(), artist.length());
-	char *c_title = curl_easy_escape(0, title.c_str(), title.length());
-	
 	std::string url = my_lyrics->url;
-	Replace(url, "%artist%", c_artist);
-	Replace(url, "%title%", c_title);
+	Replace(url, "%artist%", Curl::escape(artist).c_str());
+	Replace(url, "%title%", Curl::escape(title).c_str());
 	
-	CURLcode code;
-	pthread_mutex_lock(&Global::CurlLock);
-	CURL *lyrics = curl_easy_init();
-	curl_easy_setopt(lyrics, CURLOPT_URL, url.c_str());
-	curl_easy_setopt(lyrics, CURLOPT_WRITEFUNCTION, write_data);
-	curl_easy_setopt(lyrics, CURLOPT_WRITEDATA, &result);
-	curl_easy_setopt(lyrics, CURLOPT_CONNECTTIMEOUT, 10);
-	curl_easy_setopt(lyrics, CURLOPT_NOSIGNAL, 1);
-	code = curl_easy_perform(lyrics);
-	curl_easy_cleanup(lyrics);
-	pthread_mutex_unlock(&Global::CurlLock);
-	
-	curl_free(c_artist);
-	curl_free(c_title);
+	CURLcode code = Curl::perform(url, result);
 	
 	if (code != CURLE_OK)
 	{
@@ -372,7 +356,7 @@ const Lyrics::Plugin Lyrics::LyricsPlugin =
 	LyricsPlugin_NotFound
 };*/
 
-bool Lyrics::Generic_NotFound(const std::string &s)
+bool Lyrics::Generic_NotFound(const std::string &)
 {
 	// it should never fail as open_tag and close_tag
 	// are not present if lyrics are not found

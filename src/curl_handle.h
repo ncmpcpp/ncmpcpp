@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2008-2010 by Andrzej Rybczak                            *
+ *   Copyright (C) 2008-2009 by Andrzej Rybczak                            *
  *   electricityispower@gmail.com                                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -18,24 +18,30 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
-#ifndef _NCMPCPP_H
-#define _NCMPCPP_H
+#ifndef _CURL_HANDLE_H
+#define _CURL_HANDLE_H
 
-#include "window.h"
-#include "menu.h"
-#include "scrollpad.h"
+#ifdef HAVE_CONFIG_H
+# include "config.h"
+#endif
+
+#ifdef HAVE_CURL_CURL_H
 
 #ifdef HAVE_PTHREAD_H
 # include <pthread.h>
-#else
-# define pthread_exit(x) return (x)
 #endif // HAVE_PTHREAD_H
 
-using namespace NCurses;
+#include <string>
+#include "curl/curl.h"
 
-typedef std::pair<std::string, std::string> string_pair;
+namespace Curl
+{
+	CURLcode perform(const std::string &URL, std::string &data, unsigned timeout = 10);
+	
+	std::string escape(const std::string &s);
+}
 
-const int ncmpcpp_window_timeout = 500;
+#endif // HAVE_CURL_CURL_H
 
 #endif
 

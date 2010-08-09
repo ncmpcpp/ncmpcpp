@@ -25,10 +25,6 @@
 #include "mpdpp.h"
 #include "screen.h"
 
-#ifdef HAVE_CURL_CURL_H
-# include "curl/curl.h"
-#endif
-
 class Lyrics : public Screen<Scrollpad>
 {
 	struct Plugin
