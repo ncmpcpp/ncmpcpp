@@ -119,6 +119,8 @@ LyricsFetcher::Result LyricwikiFetcher::fetch(const std::string &artist, const s
 		}
 		
 		Replace(data, "<br />", "\n");
+		StripHtmlTags(data);
+		Trim(data);
 		
 		result.second = unescapeHtmlUtf8(data);
 		result.first = true;
