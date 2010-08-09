@@ -36,10 +36,8 @@ namespace
 
 CURLcode Curl::perform(const std::string &URL, std::string &data, unsigned timeout)
 {
-#	ifdef HAVE_PTHREAD_H
 	static pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
 	pthread_mutex_lock(&lock);
-#	endif
 	CURLcode result;
 	CURL *c = curl_easy_init();
 	curl_easy_setopt(c, CURLOPT_URL, URL.c_str());
@@ -49,9 +47,7 @@ CURLcode Curl::perform(const std::string &URL, std::string &data, unsigned timeo
 	curl_easy_setopt(c, CURLOPT_NOSIGNAL, 1);
 	result = curl_easy_perform(c);
 	curl_easy_cleanup(c);
-#	ifdef HAVE_PTHREAD_H
 	pthread_mutex_unlock(&lock);
-#	endif
 	return result;
 }
 

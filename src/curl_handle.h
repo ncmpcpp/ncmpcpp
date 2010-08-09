@@ -27,10 +27,6 @@
 
 #ifdef HAVE_CURL_CURL_H
 
-#ifdef HAVE_PTHREAD_H
-# include <pthread.h>
-#endif // HAVE_PTHREAD_H
-
 #include <string>
 #include "curl/curl.h"
 

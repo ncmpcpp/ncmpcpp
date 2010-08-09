@@ -40,9 +40,9 @@ class Info : public Screen<Scrollpad>
 		
 		virtual std::basic_string<my_char_t> Title();
 		
-#		if defined(HAVE_CURL_CURL_H) && defined(HAVE_PTHREAD_H)
+#		ifdef HAVE_CURL_CURL_H
 		virtual void Update();
-#		endif // HAVE_CURL_CURL_H && HAVE_PTHREAD_H
+#		endif // HAVE_CURL_CURL_H
 		
 		virtual void EnterPressed() { }
 		virtual void SpacePressed() { }
@@ -74,9 +74,7 @@ class Info : public Screen<Scrollpad>
 		static const std::string Folder;
 		static bool ArtistReady;
 		
-#		ifdef HAVE_PTHREAD_H
 		static pthread_t *Downloader;
-#		endif // HAVE_PTHREAD_H
 		
 #		endif // HAVE_CURL_CURL_H
 };

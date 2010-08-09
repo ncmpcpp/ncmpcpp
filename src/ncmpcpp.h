@@ -25,12 +25,6 @@
 #include "menu.h"
 #include "scrollpad.h"
 
-#ifdef HAVE_PTHREAD_H
-# include <pthread.h>
-#else
-# define pthread_exit(x) return (x)
-#endif // HAVE_PTHREAD_H
-
 using namespace NCurses;
 
 typedef std::pair<std::string, std::string> string_pair;

@@ -105,9 +105,6 @@ void ParseArgv(int argc, char **argv)
 #			ifdef HAVE_TAGLIB_H
 			<< " taglib"
 #			endif
-#			ifdef HAVE_PTHREAD_H
-			<< " threads"
-#			endif
 #			ifdef _UTF8
 			<< " unicode"
 #			endif

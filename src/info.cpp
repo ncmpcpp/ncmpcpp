@@ -49,9 +49,7 @@ using Global::myOldScreen;
 const std::string Info::Folder = home_path + HOME_FOLDER"artists";
 bool Info::ArtistReady = 0;
 
-#ifdef HAVE_PTHREAD_H
 pthread_t *Info::Downloader = 0;
-#endif // HAVE_PTHREAD_H
 
 #endif // HAVE_CURL_CURL_H
 
@@ -91,7 +89,7 @@ std::basic_string<my_char_t> Info::Title()
 	return TO_WSTRING(itsTitle);
 }
 
-#if defined(HAVE_CURL_CURL_H) && defined(HAVE_PTHREAD_H)
+#ifdef HAVE_CURL_CURL_H
 void Info::Update()
 {
 	if (!ArtistReady)
@@ -103,7 +101,7 @@ void Info::Update()
 	Downloader = 0;
 	ArtistReady = 0;
 }
-#endif // HAVE_CURL_CURL_H && HAVE_PTHREAD_H
+#endif // HAVE_CURL_CURL_H
 
 void Info::GetSong()
 {
@@ -149,7 +147,6 @@ void Info::GetArtist()
 		if (!isInitialized)
 			Init();
 		
-#		ifdef HAVE_PTHREAD_H
 		if (Downloader && !ArtistReady)
 		{
 			ShowMessage("Artist info is being downloaded...");
@@ -157,7 +154,6 @@ void Info::GetArtist()
 		}
 		else if (ArtistReady)
 			Update();
-#		endif // HAVE_PTHREAD_H
 		
 		MPD::Song *s = myScreen->CurrentSong();
 		
@@ -179,9 +175,7 @@ void Info::GetArtist()
 		w->Reset();
 		static_cast<Window &>(*w) << "Fetching artist info...";
 		w->Window::Refresh();
-#		ifdef HAVE_PTHREAD_H
 		if (!Downloader)
-#		endif // HAVE_PTHREAD_H
 		{
 			locale_to_utf(itsArtist);
 			
@@ -219,13 +213,8 @@ void Info::GetArtist()
 			}
 			else
 			{
-#				ifdef HAVE_PTHREAD_H
 				Downloader = new pthread_t;
 				pthread_create(Downloader, 0, PrepareArtist, this);
-#				else
-				PrepareArtist(this);
-				w->Flush();
-#				endif // HAVE_PTHREAD_H
 			}
 		}
 	}

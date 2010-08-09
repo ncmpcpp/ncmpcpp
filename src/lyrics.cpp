@@ -63,9 +63,7 @@ bool Lyrics::Reload = 0;
 #ifdef HAVE_CURL_CURL_H
 bool Lyrics::Ready = 0;
 
-#ifdef HAVE_PTHREAD_H
 pthread_t *Lyrics::Downloader = 0;
-#endif // HAVE_PTHREAD_H
 #endif // HAVE_CURL_CURL_H
 
 Lyrics *myLyrics = new Lyrics;
@@ -85,18 +83,16 @@ void Lyrics::Resize()
 
 void Lyrics::Update()
 {
-#	if defined(HAVE_CURL_CURL_H) && defined(HAVE_PTHREAD_H)
+#	ifdef HAVE_CURL_CURL_H
 	if (Ready)
 		Take();
-#	endif // HAVE_CURL_CURL_H && HAVE_PTHREAD_H
 	
-#	ifdef HAVE_PTHREAD_H
 	if (Downloader)
 	{
 		w->Flush();
 		w->Refresh();
 	}
-#	endif
+#	endif // HAVE_CURL_CURL_H
 	
 	if (Reload)
 		SwitchTo();
@@ -113,7 +109,7 @@ void Lyrics::SwitchTo()
 		if (!isInitialized)
 			Init();
 		
-#		if defined(HAVE_CURL_CURL_H) && defined(HAVE_PTHREAD_H)
+#		ifdef HAVE_CURL_CURL_H
 		if (Downloader && !Ready)
 		{
 			ShowMessage("Lyrics are being downloaded...");
@@ -121,7 +117,7 @@ void Lyrics::SwitchTo()
 		}
 		else if (Ready)
 			Take();
-#		endif // HAVE_CURL_CURL_H && HAVE_PTHREAD_H
+#		endif // HAVE_CURL_CURL_H
 		
 		const MPD::Song *s = Reload ? myPlaylist->NowPlayingSong() : myScreen->CurrentSong();
 		
@@ -143,9 +139,9 @@ void Lyrics::SwitchTo()
 			Global::RedrawHeader = 1;
 			w->Clear();
 			w->Reset();
-#			ifdef HAVE_PTHREAD_H
+#			ifdef HAVE_CURL_CURL_H
 			if (!Downloader)
-#			endif // HAVE_PTHREAD_H
+#			endif // HAVE_CURL_CURL_H
 			{
 				std::string file = locale_to_utf_cpy(itsSong.GetArtist()) + " - " + locale_to_utf_cpy(itsSong.GetTitle()) + ".txt";
 				EscapeUnallowedChars(file);
@@ -176,12 +172,9 @@ void Lyrics::SwitchTo()
 				}
 				else
 				{
-#					if defined(HAVE_CURL_CURL_H) && defined(HAVE_PTHREAD_H)
+#					ifdef HAVE_CURL_CURL_H
 					Downloader = new pthread_t;
 					pthread_create(Downloader, 0, Get, this);
-#					elif defined(HAVE_CURL_CURL_H)
-					Get(this);
-					w->Flush();
 #					else
 					*w << "Local lyrics not found. As ncmpcpp has been compiled without curl support, you can put appropriate lyrics into " << Folder << " directory (file syntax is \"$ARTIST - $TITLE.txt\") or recompile ncmpcpp with curl support.";
 					w->Flush();
@@ -285,7 +278,7 @@ void Lyrics::FetchAgain()
 	}
 }
 
-#if defined(HAVE_CURL_CURL_H) && defined(HAVE_PTHREAD_H)
+#ifdef HAVE_CURL_CURL_H
 void Lyrics::Take()
 {
 	if (!Ready)
@@ -297,5 +290,5 @@ void Lyrics::Take()
 	Downloader = 0;
 	Ready = 0;
 }
-#endif // HAVE_CURL_CURL_H && HAVE_PTHREAD_H
+#endif // HAVE_CURL_CURL_H
 

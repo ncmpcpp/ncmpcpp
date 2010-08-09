@@ -61,15 +61,11 @@ class Lyrics : public Screen<Scrollpad>
 #		ifdef HAVE_CURL_CURL_H
 		static void *Get(void *);
 		
-#		ifdef HAVE_PTHREAD_H
 		void Take();
-#		endif // HAVE_PTHREAD_H
 		
 		static bool Ready;
 		
-#		ifdef HAVE_PTHREAD_H
 		static pthread_t *Downloader;
-#		endif // HAVE_PTHREAD_H
 		
 #		endif // HAVE_CURL_CURL_H
 		

@@ -17,7 +17,6 @@ AC_ARG_WITH(curl, AS_HELP_STRING([--with-curl], [Enable fetching lyrics from the
 AC_ARG_WITH(fftw, AS_HELP_STRING([--with-fftw], [Enable fftw support (required for frequency spectrum vizualization) @<:@default=auto@:>@]), [fftw=$withval], [fftw=auto])
 AC_ARG_WITH(iconv, AS_HELP_STRING([--with-iconv], [Enable iconv support (Note: if you use utf-8 system wide, you can disable this) @<:@default=auto@:>@]), [iconv=$withval], [iconv=auto])
 AC_ARG_WITH(pdcurses, AS_HELP_STRING([--with-pdcurses[=LIBNAME]], [Link against pdcurses instead of ncurses @<:@default=XCurses@:>@]), [pdcurses=$withval], [pdcurses=no])
-AC_ARG_WITH(threads, AS_HELP_STRING([--with-threads], [Enable threading support using posix threads @<:@default=auto@:>@]), [threads=$withval], [threads=auto])
 AC_ARG_WITH(taglib, AS_HELP_STRING([--with-taglib], [Enable tag editor @<:@default=auto@:>@]), [taglib=$withval], [taglib=auto])
 
 if test "$outputs" = "yes"; then
@@ -69,6 +68,15 @@ PKG_CHECK_MODULES([libmpdclient], [libmpdclient >= 2.1], [
 	)
 ],
 	AC_MSG_ERROR([libmpdclient >= 2.1 is required!])
+)
+
+dnl ========================
+dnl = checking for pthread =
+dnl ========================
+AC_CHECK_HEADERS([pthread.h],
+	AC_CHECK_LIB(pthread, pthread_create, LDFLAGS="$LDFLAGS -lpthread",
+		AC_MSG_ERROR([pthread.h found but there is no pthread library to make use of])
+	),
 )
 
 dnl ======================
@@ -157,17 +165,10 @@ if test "$visualizer" = "yes" ; then
 	AC_DEFINE([ENABLE_VISUALIZER], [1], [enables music visualizer screen])
 fi
 
-dnl =================================
-dnl = checking for curl and pthread =
-dnl =================================
+dnl =====================
+dnl = checking for curl =
+dnl =====================
 if test "$curl" != "no" ; then
-	if test "$threads" != "no" ; then
-		AC_CHECK_HEADERS([pthread.h], AC_CHECK_LIB(pthread, pthread_create, LDFLAGS="$LDFLAGS -lpthread",
-			if test "$threads" = "yes" ; then
-				AC_MSG_ERROR([pthread.h found but there is no pthread library to make use of])
-			fi
-		), )
-	fi
 	AC_PATH_PROG(CURL_CONFIG, curl-config)
 	if test "$CURL_CONFIG" != "" ; then
 		CPPFLAGS="$CPPFLAGS `$CURL_CONFIG --cflags`"
@@ -189,6 +190,7 @@ if test "$curl" != "no" ; then
 		)
 	fi
 fi
+
 
 dnl =======================
 dnl = checking for taglib =
