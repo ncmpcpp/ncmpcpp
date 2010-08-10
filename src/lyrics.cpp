@@ -33,7 +33,6 @@
 #include "global.h"
 #include "helpers.h"
 #include "lyrics.h"
-#include "lyrics_fetcher.h"
 #include "playlist.h"
 #include "settings.h"
 #include "song.h"
@@ -145,13 +144,18 @@ void *Lyrics::Download()
 	
 	LyricsFetcher::Result result;
 	
-	for (LyricsFetcher **plugin = lyricsPlugins; *plugin != 0; ++plugin)
+	// if one of plugins is selected, try only this one,
+	// otherwise try all of them until one of them succeeds
+	bool fetcher_defined = Fetcher && *Fetcher;
+	for (LyricsFetcher **plugin = fetcher_defined ? Fetcher : lyricsPlugins; *plugin != 0; ++plugin)
 	{
 		*w << "Fetching lyrics from " << fmtBold << (*plugin)->name() << fmtBoldEnd << "... ";
 		result = (*plugin)->fetch(artist, title);
 		if (result.first == false)
 			*w << clRed << result.second << clEnd << "\n";
 		else
+			break;
+		if (fetcher_defined)
 			break;
 	}
 	
@@ -261,7 +265,10 @@ void Lyrics::Save(const std::string &lyrics)
 
 void Lyrics::Refetch()
 {
-	std::string path = Folder + "/" + locale_to_utf_cpy(itsSong.GetArtist()) + " - " + locale_to_utf_cpy(itsSong.GetTitle()) + ".txt";
+	std::string file = locale_to_utf_cpy(itsSong.GetArtist()) + " - " + locale_to_utf_cpy(itsSong.GetTitle()) + ".txt";
+	EscapeUnallowedChars(file);
+	std::string path = Folder + "/" + file;
+	
 	if (!remove(path.c_str()))
 	{
 		Load();
@@ -274,6 +281,18 @@ void Lyrics::Refetch()
 }
 
 #ifdef HAVE_CURL_CURL_H
+void Lyrics::ToggleFetcher()
+{
+	if (Fetcher && *Fetcher)
+		++Fetcher;
+	else
+		Fetcher = &lyricsPlugins[0];
+	if (*Fetcher)
+		ShowMessage("Using lyrics database: %s", (*Fetcher)->name());
+	else
+		ShowMessage("Using all lyrics databases");
+}
+
 void Lyrics::Take()
 {
 	assert(ReadyToTake);

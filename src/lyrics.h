@@ -24,13 +24,14 @@
 #include "ncmpcpp.h"
 #include "mpdpp.h"
 #include "screen.h"
+#include "lyrics_fetcher.h"
 
 class Lyrics : public Screen<Scrollpad>
 {
 	public:
 		Lyrics() : ReloadNP(0),
 #		ifdef HAVE_CURL_CURL_H
-		ReadyToTake(0), DownloadInProgress(0),
+		ReadyToTake(0), DownloadInProgress(0), Fetcher(0),
 #		endif // HAVE_CURL_CURL_H
 		itsScrollBegin(0) { }
 		
@@ -53,6 +54,9 @@ class Lyrics : public Screen<Scrollpad>
 		void Edit();
 		void Save(const std::string &lyrics);
 		void Refetch();
+#		ifdef HAVE_CURL_CURL_H
+		void ToggleFetcher();
+#		endif // HAVE_CURL_CURL_H
 		
 		bool ReloadNP;
 		
@@ -73,6 +77,7 @@ class Lyrics : public Screen<Scrollpad>
 		bool ReadyToTake;
 		bool DownloadInProgress;
 		pthread_t Downloader;
+		LyricsFetcher **Fetcher;
 #		endif // HAVE_CURL_CURL_H
 		
 		size_t itsScrollBegin;

@@ -1334,6 +1334,12 @@ int main(int argc, char *argv[])
 			Config.playlist_separate_albums = !Config.playlist_separate_albums;
 			ShowMessage("Separators between albums in playlist: %s", Config.playlist_separate_albums ? "On" : "Off");
 		}
+#		ifdef HAVE_CURL_CURL_H
+		else if (Keypressed(input, Key.ToggleLyricsDB))
+		{
+			myLyrics->ToggleFetcher();
+		}
+#		endif // HAVE_CURL_CURL_H
 		else if (Keypressed(input, Key.ToggleAutoCenter))
 		{
 			Config.autocenter_mode = !Config.autocenter_mode;
