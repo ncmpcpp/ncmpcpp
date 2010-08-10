@@ -152,9 +152,8 @@ LyricsFetcher::Result GoogleLyricsFetcher::fetch(const std::string &artist, cons
 	Result result;
 	result.first = false;
 	
-	std::string search_str = "%22";
-	search_str += artist;
-	search_str += "%22+";
+	std::string search_str = artist;
+	search_str += "+";
 	search_str += title;
 	search_str += "+";
 	search_str += getSiteKeyword();
