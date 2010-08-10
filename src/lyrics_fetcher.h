@@ -135,6 +135,8 @@ struct LyricsmaniaFetcher : public GoogleLyricsFetcher
 		virtual const char *getSiteKeyword() { return "lyricsmania"; }
 		virtual const char *getOpenTag() { return "</strong> :<br />"; }
 		virtual const char *getCloseTag() { return "&#91; <a"; }
+		
+		virtual void postProcess(std::string &data);
 };
 
 extern LyricsFetcher *lyricsPlugins[];

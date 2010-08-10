@@ -221,5 +221,15 @@ bool MetrolyricsFetcher::isURLOk(const std::string &url)
 	return GoogleLyricsFetcher::isURLOk(url) && url.find("sitemap.xml") == std::string::npos;
 }
 
+/**********************************************************************/
+
+void LyricsmaniaFetcher::postProcess(std::string &data)
+{
+	// lyricsmania.com uses iso-8859-1 as the encoding
+	// so we need to convert obtained lyrics to utf-8
+	iconv_convert_from_to("iso-8859-1", "utf-8", data);
+	LyricsFetcher::postProcess(data);
+}
+
 #endif // HAVE_CURL_CURL_H
 
