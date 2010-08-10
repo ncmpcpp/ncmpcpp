@@ -93,6 +93,14 @@ namespace
 	}
 }
 
+void iconv_convert_from_to(const char *from, const char *to, std::string &s)
+{
+	const char *tmp = strdup(s.c_str());
+	charset_convert(from, to, tmp, true, s.length());
+	s = tmp;
+	free(const_cast<char *>(tmp));
+}
+
 void utf_to_locale(std::string &s)
 {
 	if (s.empty() || Config.system_encoding.empty() || !has_non_ascii_chars(s.c_str()))

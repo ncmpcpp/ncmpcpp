@@ -45,6 +45,8 @@ struct LyricsFetcher
 		virtual void postProcess(std::string &data);
 		
 		bool getContent(const char *open_tag, const char *close_tag, std::string &data);
+		
+		static const char msgNotFound[];
 };
 
 struct LyrcComArFetcher : public LyricsFetcher
@@ -68,9 +70,6 @@ struct LyricwikiFetcher : public LyricsFetcher
 		virtual const char *getCloseTag() { return "</url>"; }
 		
 		virtual bool notLyrics(const std::string &data);
-		
-	private:
-		std::string unescapeHtmlUtf8(const std::string &data);
 };
 
 struct LyricsflyFetcher : public LyricsFetcher
@@ -83,6 +82,59 @@ struct LyricsflyFetcher : public LyricsFetcher
 		virtual const char *getCloseTag() { return "</tx>"; }
 		
 		virtual void postProcess(std::string &data);
+};
+
+/**********************************************************************/
+
+struct GoogleLyricsFetcher : public LyricsFetcher
+{
+	virtual Result fetch(const std::string &artist, const std::string &title);
+	
+	protected:
+		virtual const char *getSiteKeyword() = 0;
+		virtual const char *getURL() { return URL; }
+		
+		virtual bool isURLOk(const std::string &url);
+	private:
+		const char *URL;
+};
+
+struct LyricstimeFetcher : public GoogleLyricsFetcher
+{
+	virtual const char *name() { return "lyricstime.com"; }
+	
+	protected:
+		virtual const char *getSiteKeyword() { return "lyricstime"; }
+		virtual const char *getOpenTag() { return "<div id=\"songlyrics\" >"; }
+		virtual const char *getCloseTag() { return "</div>"; }
+		
+		virtual bool isURLOk(const std::string &url);
+		
+		virtual void postProcess(std::string &data);
+};
+
+struct MetrolyricsFetcher : public GoogleLyricsFetcher
+{
+	virtual const char *name() { return "metrolyrics.com"; }
+	
+	protected:
+		virtual const char *getSiteKeyword() { return "metrolyrics"; }
+		virtual const char *getOpenTag() { return "<div id=\"lyrics\">"; }
+		virtual const char *getCloseTag() { return "</div>"; }
+		
+		virtual bool isURLOk(const std::string &url);
+		
+		virtual void postProcess(std::string &data);
+};
+
+struct LyricsmaniaFetcher : public GoogleLyricsFetcher
+{
+	virtual const char *name() { return "lyricsmania.com"; }
+	
+	protected:
+		virtual const char *getSiteKeyword() { return "lyricsmania"; }
+		virtual const char *getOpenTag() { return "</strong> :<br />"; }
+		virtual const char *getCloseTag() { return "&#91; <a"; }
 };
 
 extern LyricsFetcher *lyricsPlugins[];

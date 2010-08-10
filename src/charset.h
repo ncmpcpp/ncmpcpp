@@ -29,6 +29,8 @@
 
 #include <string>
 
+void iconv_convert_from_to(const char *from, const char *to, std::string &s);
+
 void utf_to_locale(std::string &);
 void locale_to_utf(std::string &);
 
@@ -39,6 +41,8 @@ void utf_to_locale(const char *&, bool);
 void locale_to_utf(const char *&, bool);
 
 #else
+
+#define iconv_convert_from_to(x, y, z);
 
 #define utf_to_locale(x);
 #define locale_to_utf(x);

@@ -206,6 +206,35 @@ void EscapeUnallowedChars(std::string &s)
 	}
 }
 
+std::string unescapeHtmlUtf8(const std::string &data)
+{
+	std::string result;
+	for (size_t i = 0, j; i < data.length(); ++i)
+	{
+		if (data[i] == '&' && data[i+1] == '#' && (j = data.find(';', i)) != std::string::npos)
+		{
+			int n = atoi(&data.c_str()[i+2]);
+			if (n >= 0x800)
+			{
+				result += (0xe0 | ((n >> 12) & 0x0f));
+				result += (0x80 | ((n >> 6) & 0x3f));
+				result += (0x80 | (n & 0x3f));
+			}
+			else if (n >= 0x80)
+			{
+				result += (0xc0 | ((n >> 6) & 0x1f));
+				result += (0x80 | (n & 0x3f));
+			}
+			else
+				result += n;
+			i = j;
+		}
+		else
+			result += data[i];
+	}
+	return result;
+}
+
 void StripHtmlTags(std::string &s)
 {
 	bool erase = 0;

@@ -229,7 +229,7 @@ void *Info::PrepareArtist(void *screen_void_ptr)
 	url += "&api_key=d94e5b6e26469a2d1ffae8ef20131b79";
 	
 	std::string result;
-	CURLcode code = Curl::perform(url, result);
+	CURLcode code = Curl::perform(result, url);
 	
 	if (code != CURLE_OK)
 	{

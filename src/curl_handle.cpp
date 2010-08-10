@@ -34,7 +34,7 @@ namespace
 	}
 }
 
-CURLcode Curl::perform(const std::string &URL, std::string &data, unsigned timeout)
+CURLcode Curl::perform(std::string &data, const std::string &URL, const std::string &referer, unsigned timeout)
 {
 	static pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
 	pthread_mutex_lock(&lock);
@@ -45,6 +45,9 @@ CURLcode Curl::perform(const std::string &URL, std::string &data, unsigned timeo
 	curl_easy_setopt(c, CURLOPT_WRITEDATA, &data);
 	curl_easy_setopt(c, CURLOPT_CONNECTTIMEOUT, timeout);
 	curl_easy_setopt(c, CURLOPT_NOSIGNAL, 1);
+	curl_easy_setopt(c, CURLOPT_USERAGENT, "ncmpcpp " VERSION);
+	if (!referer.empty())
+		curl_easy_setopt(c, CURLOPT_REFERER, referer.c_str());
 	result = curl_easy_perform(c);
 	curl_easy_cleanup(c);
 	pthread_mutex_unlock(&lock);

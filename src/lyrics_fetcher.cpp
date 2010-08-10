@@ -24,16 +24,22 @@
 
 #include <cstdlib>
 
+#include "charset.h"
 #include "conv.h"
 #include "lyrics_fetcher.h"
 
 LyricsFetcher *lyricsPlugins[] =
 {
 	new LyricwikiFetcher(),
+	new LyricsmaniaFetcher(),
+	new LyricstimeFetcher(),
+	new MetrolyricsFetcher(),
 	new LyrcComArFetcher(),
 	new LyricsflyFetcher(),
 	0
 };
+
+const char LyricsFetcher::msgNotFound[] = "Not found";
 
 LyricsFetcher::Result LyricsFetcher::fetch(const std::string &artist, const std::string &title)
 {
@@ -45,7 +51,7 @@ LyricsFetcher::Result LyricsFetcher::fetch(const std::string &artist, const std:
 	Replace(url, "%title%", title.c_str());
 	
 	std::string data;
-	CURLcode code = Curl::perform(url, data);
+	CURLcode code = Curl::perform(data, url);
 	
 	if (code != CURLE_OK)
 	{
@@ -57,7 +63,7 @@ LyricsFetcher::Result LyricsFetcher::fetch(const std::string &artist, const std:
 	
 	if (!parse_ok || notLyrics(data))
 	{
-		result.second = "Not found";
+		result.second = msgNotFound;
 		return result;
 	}
 	
@@ -100,7 +106,7 @@ LyricsFetcher::Result LyricwikiFetcher::fetch(const std::string &artist, const s
 		result.first = false;
 		
 		std::string data;
-		CURLcode code = Curl::perform(result.second, data);
+		CURLcode code = Curl::perform(data, result.second);
 		
 		if (code != CURLE_OK)
 		{
@@ -112,7 +118,7 @@ LyricsFetcher::Result LyricwikiFetcher::fetch(const std::string &artist, const s
 		
 		if (!parse_ok)
 		{
-			result.second = "Not found";
+			result.second = msgNotFound;
 			return result;
 		}
 		
@@ -131,41 +137,88 @@ bool LyricwikiFetcher::notLyrics(const std::string &data)
 	return data.find("action=edit") != std::string::npos;
 }
 
-std::string LyricwikiFetcher::unescapeHtmlUtf8(const std::string &data)
-{
-	std::string result;
-	for (size_t i = 0, j; i < data.length(); ++i)
-	{
-		if (data[i] == '&' && data[i+1] == '#' && (j = data.find(';', i)) != std::string::npos)
-		{
-			int n = atoi(&data.c_str()[i+2]);
-			if (n >= 0x800)
-			{
-				result += (0xe0 | ((n >> 12) & 0x0f));
-				result += (0x80 | ((n >> 6) & 0x3f));
-				result += (0x80 | (n & 0x3f));
-			}
-			else if (n >= 0x80)
-			{
-				result += (0xc0 | ((n >> 6) & 0x1f));
-				result += (0x80 | (n & 0x3f));
-			}
-			else
-				result += n;
-			i = j;
-		}
-		else
-			result += data[i];
-	}
-	return result;
-}
-
 /***********************************************************************/
 
 void LyricsflyFetcher::postProcess(std::string &data)
 {
 	Replace(data, "[br]", "");
 	Trim(data);
+}
+
+/**********************************************************************/
+
+LyricsFetcher::Result GoogleLyricsFetcher::fetch(const std::string &artist, const std::string &title)
+{
+	Result result;
+	result.first = false;
+	
+	std::string search_str = "%22";
+	search_str += artist;
+	search_str += "%22+";
+	search_str += title;
+	search_str += "+";
+	search_str += getSiteKeyword();
+	
+	std::string google_url = "http://www.google.com/search?hl=en&ie=UTF-8&oe=UTF-8&q=";
+	google_url += search_str;
+	google_url += "&btnI=I%27m+Feeling+Lucky";
+	
+	std::string data;
+	CURLcode code = Curl::perform(data, google_url, google_url);
+	
+	if (code != CURLE_OK)
+	{
+		result.second = curl_easy_strerror(code);
+		return result;
+	}
+	
+	bool found_url = getContent("<A HREF=\"", "\">here</A>", data);
+	
+	if (!found_url || !isURLOk(data))
+	{
+		result.second = msgNotFound;
+		return result;
+	}
+	
+	URL = data.c_str();
+	return LyricsFetcher::fetch("", "");
+}
+
+bool GoogleLyricsFetcher::isURLOk(const std::string &url)
+{
+	return url.find(getSiteKeyword()) != std::string::npos;
+}
+
+/**********************************************************************/
+
+bool LyricstimeFetcher::isURLOk(const std::string &url)
+{
+	// it sometimes returns list of all artists that begin
+	// with a given letter, e.g. www.lyricstime.com/A.html, which
+	// is 25 chars long, so we want longer.
+	return GoogleLyricsFetcher::isURLOk(url) && url.length() > 25;
+}
+
+void LyricstimeFetcher::postProcess(std::string &data)
+{
+	// lyricstime.com uses iso-8859-1 as the encoding
+	// so we need to convert obtained lyrics to utf-8
+	iconv_convert_from_to("iso-8859-1", "utf-8", data);
+	LyricsFetcher::postProcess(data);
+}
+
+/**********************************************************************/
+
+void MetrolyricsFetcher::postProcess(std::string &data)
+{
+	data = unescapeHtmlUtf8(data);
+	LyricsFetcher::postProcess(data);
+}
+
+bool MetrolyricsFetcher::isURLOk(const std::string &url)
+{
+	// it sometimes return link to sitemap.xml, which is huge so we need to discard it
+	return GoogleLyricsFetcher::isURLOk(url) && url.find("sitemap.xml") == std::string::npos;
 }
 
 #endif // HAVE_CURL_CURL_H
