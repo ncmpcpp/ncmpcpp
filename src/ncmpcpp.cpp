@@ -47,6 +47,7 @@
 #include "search_engine.h"
 #include "settings.h"
 #include "song.h"
+#include "song_info.h"
 #include "info.h"
 #include "outputs.h"
 #include "status.h"
@@ -2044,7 +2045,7 @@ int main(int argc, char *argv[])
 		}
 		else if (Keypressed(input, Key.SongInfo))
 		{
-			myInfo->GetSong();
+			mySongInfo->SwitchTo();
 		}
 #		ifdef HAVE_CURL_CURL_H
 		else if (Keypressed(input, Key.ArtistInfo))

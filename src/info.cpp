@@ -55,22 +55,6 @@ pthread_t *Info::Downloader = 0;
 
 Info *myInfo = new Info;
 
-const Info::Metadata Info::Tags[] =
-{
-	{ "Title",		&MPD::Song::GetTitle,		&MPD::Song::SetTitle		},
-	{ "Artist",		&MPD::Song::GetArtist,		&MPD::Song::SetArtist		},
-	{ "Album Artist",	&MPD::Song::GetAlbumArtist,	&MPD::Song::SetAlbumArtist	},
-	{ "Album",		&MPD::Song::GetAlbum,		&MPD::Song::SetAlbum		},
-	{ "Year",		&MPD::Song::GetDate,		&MPD::Song::SetDate		},
-	{ "Track",		&MPD::Song::GetTrack,		&MPD::Song::SetTrack		},
-	{ "Genre",		&MPD::Song::GetGenre,		&MPD::Song::SetGenre		},
-	{ "Composer",		&MPD::Song::GetComposer,	&MPD::Song::SetComposer		},
-	{ "Performer",		&MPD::Song::GetPerformer,	&MPD::Song::SetPerformer	},
-	{ "Disc",		&MPD::Song::GetDisc,		&MPD::Song::SetDisc		},
-	{ "Comment",		&MPD::Song::GetComment,		&MPD::Song::SetComment		},
-	{ 0,			0,				0				}
-};
-
 void Info::Init()
 {
 	w = new Scrollpad(0, MainStartY, COLS, MainHeight, "", Config.main_color, brNone);
@@ -101,40 +85,6 @@ void Info::Update()
 	Downloader = 0;
 	ArtistReady = 0;
 }
-#endif // HAVE_CURL_CURL_H
-
-void Info::GetSong()
-{
-	if (myScreen == this)
-	{
-		myOldScreen->SwitchTo();
-	}
-	else
-	{
-		if (!isInitialized)
-			Init();
-		
-		MPD::Song *s = myScreen->CurrentSong();
-		
-		if (!s)
-			return;
-		
-		if (hasToBeResized)
-			Resize();
-		
-		myOldScreen = myScreen;
-		myScreen = this;
-		Global::RedrawHeader = 1;
-		itsTitle = "Song info";
-		w->Clear();
-		w->Reset();
-		PrepareSong(*s);
-		w->Window::Clear();
-		w->Flush();
-	}
-}
-
-#ifdef HAVE_CURL_CURL_H
 
 void Info::GetArtist()
 {
@@ -338,38 +288,4 @@ void *Info::PrepareArtist(void *screen_void_ptr)
 	pthread_exit(0);
 }
 #endif // HVAE_CURL_CURL_H
-
-void Info::PrepareSong(MPD::Song &s)
-{
-#	ifdef HAVE_TAGLIB_H
-	std::string path_to_file;
-	if (s.isFromDB())
-		path_to_file += Config.mpd_music_dir;
-	path_to_file += s.GetFile();
-	TagLib::FileRef f(path_to_file.c_str());
-	if (!f.isNull())
-		s.SetComment(f.tag()->comment().to8Bit(1));
-#	endif // HAVE_TAGLIB_H
-	
-	*w << fmtBold << Config.color1 << "Filename: " << fmtBoldEnd << Config.color2 << s.GetName() << "\n" << clEnd;
-	*w << fmtBold << "Directory: " << fmtBoldEnd << Config.color2;
-	ShowTag(*w, s.GetDirectory());
-	*w << "\n\n" << clEnd;
-	*w << fmtBold << "Length: " << fmtBoldEnd << Config.color2 << s.GetLength() << "\n" << clEnd;
-#	ifdef HAVE_TAGLIB_H
-	if (!f.isNull())
-	{
-		*w << fmtBold << "Bitrate: " << fmtBoldEnd << Config.color2 << f.audioProperties()->bitrate() << " kbps\n" << clEnd;
-		*w << fmtBold << "Sample rate: " << fmtBoldEnd << Config.color2 << f.audioProperties()->sampleRate() << " Hz\n" << clEnd;
-		*w << fmtBold << "Channels: " << fmtBoldEnd << Config.color2 << (f.audioProperties()->channels() == 1 ? "Mono" : "Stereo") << "\n" << clDefault;
-	}
-#	endif // HAVE_TAGLIB_H
-	*w << clDefault;
-	
-	for (const Metadata *m = Tags; m->Name; ++m)
-	{
-		*w << fmtBold << "\n" << m->Name << ": " << fmtBoldEnd;
-		ShowTag(*w, s.GetTags(m->Get));
-	}
-}
 

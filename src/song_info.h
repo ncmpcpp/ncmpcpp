@@ -18,24 +18,26 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
-#ifndef _H_INFO
-#define _H_INFO
+#ifndef _SONG_INFO_H
+#define _SONG_INFO_H
 
-#include "ncmpcpp.h"
-#include "mpdpp.h"
 #include "screen.h"
+#include "song.h"
 
-class Info : public Screen<Scrollpad>
+class SongInfo : public Screen<Scrollpad>
 {
 	public:
-		virtual void SwitchTo() { }
+		struct Metadata
+		{
+			const char *Name;
+			MPD::Song::GetFunction Get;
+			MPD::Song::SetFunction Set;
+		};
+		
+		virtual void SwitchTo();
 		virtual void Resize();
 		
 		virtual std::basic_string<my_char_t> Title();
-		
-#		ifdef HAVE_CURL_CURL_H
-		virtual void Update();
-#		endif // HAVE_CURL_CURL_H
 		
 		virtual void EnterPressed() { }
 		virtual void SpacePressed() { }
@@ -44,30 +46,16 @@ class Info : public Screen<Scrollpad>
 		
 		virtual List *GetList() { return 0; }
 		
-#		ifdef HAVE_CURL_CURL_H
-		void GetArtist();
-#		endif // HAVE_CURL_CURL_H
+		static const Metadata Tags[];
 		
 	protected:
 		virtual void Init();
 		
 	private:
-		std::string itsArtist;
-		std::string itsTitle;
-		std::string itsFilenamePath;
-		
-#		ifdef HAVE_CURL_CURL_H
-		static void *PrepareArtist(void *);
-		
-		static const std::string Folder;
-		static bool ArtistReady;
-		
-		static pthread_t *Downloader;
-		
-#		endif // HAVE_CURL_CURL_H
+		void PrepareSong(MPD::Song &);
 };
 
-extern Info *myInfo;
+extern SongInfo *mySongInfo;
 
 #endif
 

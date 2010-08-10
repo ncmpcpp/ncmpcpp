@@ -31,7 +31,7 @@
 #include "charset.h"
 #include "display.h"
 #include "global.h"
-#include "info.h"
+#include "song_info.h"
 #include "playlist.h"
 #include "search_engine.h"
 #include "tag_editor.h"
@@ -101,11 +101,11 @@ void TinyTagEditor::EnterPressed()
 	if (option < 19) // separator after comment
 	{
 		size_t pos = option-8;
-		Statusbar() << fmtBold << Info::Tags[pos].Name << ": " << fmtBoldEnd;
-		s.SetTags(Info::Tags[pos].Set, Global::wFooter->GetString(s.GetTags(Info::Tags[pos].Get)));
+		Statusbar() << fmtBold << SongInfo::Tags[pos].Name << ": " << fmtBoldEnd;
+		s.SetTags(SongInfo::Tags[pos].Set, Global::wFooter->GetString(s.GetTags(SongInfo::Tags[pos].Get)));
 		w->at(option).Clear();
-		w->at(option) << fmtBold << Info::Tags[pos].Name << ':' << fmtBoldEnd << ' ';
-		ShowTag(w->at(option), s.GetTags(Info::Tags[pos].Get));
+		w->at(option) << fmtBold << SongInfo::Tags[pos].Name << ':' << fmtBoldEnd << ' ';
+		ShowTag(w->at(option), s.GetTags(SongInfo::Tags[pos].Get));
 	}
 	else if (option == 20)
 	{
@@ -227,7 +227,7 @@ bool TinyTagEditor::GetTags()
 	w->at(6) << fmtBold << Config.color1 << "Channels: " << fmtBoldEnd << Config.color2 << (f.audioProperties()->channels() == 1 ? "Mono" : "Stereo") << clDefault;
 	
 	unsigned pos = 8;
-	for (const Info::Metadata *m = Info::Tags; m->Name; ++m, ++pos)
+	for (const SongInfo::Metadata *m = SongInfo::Tags; m->Name; ++m, ++pos)
 	{
 		w->at(pos) << fmtBold << m->Name << ":" << fmtBoldEnd << ' ';
 		ShowTag(w->at(pos), s.GetTags(m->Get));

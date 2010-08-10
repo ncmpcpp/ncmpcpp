@@ -22,7 +22,7 @@
 
 #include "display.h"
 #include "helpers.h"
-#include "info.h"
+#include "song_info.h"
 #include "playlist.h"
 #include "global.h"
 
@@ -375,7 +375,7 @@ void Display::Tags(const MPD::Song &s, void *data, Menu<MPD::Song> *menu)
 	size_t i = static_cast<Menu<std::string> *>(data)->Choice();
 	if (i < 11)
 	{
-		ShowTag(*menu, s.GetTags(Info::Tags[i].Get));
+		ShowTag(*menu, s.GetTags(SongInfo::Tags[i].Get));
 	}
 	else if (i == 12)
 	{
