@@ -94,6 +94,7 @@ struct GoogleLyricsFetcher : public LyricsFetcher
 		virtual const char *getSiteKeyword() = 0;
 		virtual const char *getURL() { return URL; }
 		
+		virtual bool notLyrics(const std::string &data);
 		virtual bool isURLOk(const std::string &url);
 	private:
 		const char *URL;
@@ -137,6 +138,30 @@ struct LyricsmaniaFetcher : public GoogleLyricsFetcher
 		virtual const char *getCloseTag() { return "&#91; <a"; }
 		
 		virtual void postProcess(std::string &data);
+};
+
+struct SonglyricsFetcher : public GoogleLyricsFetcher
+{
+	virtual const char *name() { return "songlyrics.com"; }
+	
+	protected:
+		virtual const char *getSiteKeyword() { return "songlyrics"; }
+		virtual const char *getOpenTag() { return "-6000px;\">"; }
+		virtual const char *getCloseTag() { return "</p>"; }
+		
+		virtual void postProcess(std::string &data);
+};
+
+struct LyriczzFetcher : public GoogleLyricsFetcher
+{
+	virtual const char *name() { return "lyriczz.com"; }
+	
+	protected:
+		virtual const char *getSiteKeyword() { return "lyriczz"; }
+		virtual const char *getOpenTag() { return "border=0 /></a>"; }
+		virtual const char *getCloseTag() { return "<a href"; }
+		
+		//virtual void postProcess(std::string &data);
 };
 
 extern LyricsFetcher *lyricsPlugins[];

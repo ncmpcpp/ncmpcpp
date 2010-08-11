@@ -31,6 +31,8 @@
 LyricsFetcher *lyricsPlugins[] =
 {
 	new LyricwikiFetcher(),
+	new LyriczzFetcher(),
+	new SonglyricsFetcher(),
 	new LyricsmaniaFetcher(),
 	new LyricstimeFetcher(),
 	new MetrolyricsFetcher(),
@@ -183,6 +185,11 @@ LyricsFetcher::Result GoogleLyricsFetcher::fetch(const std::string &artist, cons
 	return LyricsFetcher::fetch("", "");
 }
 
+bool GoogleLyricsFetcher::notLyrics(const std::string &data)
+{
+	return LyricsFetcher::notLyrics(data);
+}
+
 bool GoogleLyricsFetcher::isURLOk(const std::string &url)
 {
 	return url.find(getSiteKeyword()) != std::string::npos;
@@ -227,6 +234,17 @@ void LyricsmaniaFetcher::postProcess(std::string &data)
 	// lyricsmania.com uses iso-8859-1 as the encoding
 	// so we need to convert obtained lyrics to utf-8
 	iconv_convert_from_to("iso-8859-1", "utf-8", data);
+	LyricsFetcher::postProcess(data);
+}
+
+/**********************************************************************/
+
+void SonglyricsFetcher::postProcess(std::string &data)
+{
+	size_t i = data.find('['), j = data.find(']');
+	if (i != std::string::npos && i != std::string::npos)
+		data.replace(i, j-i+2, "");
+	data = unescapeHtmlUtf8(data);
 	LyricsFetcher::postProcess(data);
 }
 
