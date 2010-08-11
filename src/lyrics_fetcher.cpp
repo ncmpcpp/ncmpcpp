@@ -143,8 +143,8 @@ bool LyricwikiFetcher::notLyrics(const std::string &data)
 
 void LyricsflyFetcher::postProcess(std::string &data)
 {
-	Replace(data, "[br]", "");
-	Trim(data);
+	Replace(data, "[br]", "\n");
+	LyricsFetcher::postProcess(data);
 }
 
 /**********************************************************************/
