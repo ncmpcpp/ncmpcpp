@@ -31,6 +31,7 @@
 LyricsFetcher *lyricsPlugins[] =
 {
 	new LyricwikiFetcher(),
+	new Sing365Fetcher(),
 	new LyriczzFetcher(),
 	new SonglyricsFetcher(),
 	new LyricsmaniaFetcher(),
@@ -181,13 +182,12 @@ LyricsFetcher::Result GoogleLyricsFetcher::fetch(const std::string &artist, cons
 		return result;
 	}
 	
+	data = unescapeHtmlUtf8(data);
+	//result.second = data;
+	//return result;
+	
 	URL = data.c_str();
 	return LyricsFetcher::fetch("", "");
-}
-
-bool GoogleLyricsFetcher::notLyrics(const std::string &data)
-{
-	return LyricsFetcher::notLyrics(data);
 }
 
 bool GoogleLyricsFetcher::isURLOk(const std::string &url)
@@ -224,7 +224,7 @@ void MetrolyricsFetcher::postProcess(std::string &data)
 bool MetrolyricsFetcher::isURLOk(const std::string &url)
 {
 	// it sometimes return link to sitemap.xml, which is huge so we need to discard it
-	return GoogleLyricsFetcher::isURLOk(url) && url.find("sitemap.xml") == std::string::npos;
+	return GoogleLyricsFetcher::isURLOk(url) && url.find("sitemap") == std::string::npos;
 }
 
 /**********************************************************************/
