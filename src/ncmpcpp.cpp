@@ -2068,7 +2068,7 @@ int main(int argc, char *argv[])
 			else if (myScreen == myLibrary && myLibrary->Main() == myLibrary->Artists)
 				artist = myLibrary->Artists->Current();
 			
-			if (!artist.empty() && myLastfm->SetArtistInfoArgs(artist))
+			if (!artist.empty() && myLastfm->SetArtistInfoArgs(artist, Config.lastfm_preferred_language))
 				myLastfm->SwitchTo();
 		}
 #		endif // HAVE_CURL_CURL_H

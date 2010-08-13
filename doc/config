@@ -287,6 +287,16 @@
 #
 #follow_now_playing_lyrics = "no"
 #
+##
+## Note: If you set this variable, ncmpcpp will try to
+## get info from last.fm in language you set and if it
+## fails, it will fall back to english. Otherwise it will
+## use english the first time.
+##
+## Note: Language has to be expressed as an ISO 639 alpha-2 code.
+##
+#lastfm_preferred_language = ""
+#
 #ncmpc_like_songs_adding = "no" (enabled - add/remove, disabled - always add)
 #
 #show_hidden_files_in_local_browser = "no"

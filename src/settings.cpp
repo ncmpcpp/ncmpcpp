@@ -763,6 +763,11 @@ void NcmpcppConfig::Read()
 					new_header_second_line += '}';
 				}
 			}
+			else if (cl.find("lastfm_preferred_language") != std::string::npos)
+			{
+				if (!v.empty() && v != "en")
+					lastfm_preferred_language = v;
+			}
 			else if (cl.find("browser_playlist_prefix") != std::string::npos)
 			{
 				if (!v.empty())
