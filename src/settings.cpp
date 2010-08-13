@@ -184,6 +184,7 @@ void NcmpcppKeys::SetDefaults()
 	Pause[0] = 'P';
 	Next[0] = '>';
 	Prev[0] = '<';
+	Replay[0] = KEY_BACKSPACE;
 	SeekForward[0] = 'f';
 	SeekBackward[0] = 'b';
 	ToggleRepeat[0] = 'r';
@@ -268,6 +269,7 @@ void NcmpcppKeys::SetDefaults()
 	Pause[1] = NullKey;
 	Next[1] = NullKey;
 	Prev[1] = NullKey;
+	Replay[1] = 127;
 	SeekForward[1] = NullKey;
 	SeekBackward[1] = NullKey;
 	ToggleRepeat[1] = NullKey;
@@ -503,6 +505,8 @@ void NcmpcppKeys::Read()
 				GetKeys(key, Next);
 			else if (key.find("key_prev ") != std::string::npos)
 				GetKeys(key, Prev);
+			else if (key.find("key_replay ") != std::string::npos)
+				GetKeys(key, Replay);
 			else if (key.find("key_seek_forward ") != std::string::npos)
 				GetKeys(key, SeekForward);
 			else if (key.find("key_seek_backward ") != std::string::npos)

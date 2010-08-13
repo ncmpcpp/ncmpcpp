@@ -172,6 +172,7 @@ void Help::GetKeybindings()
 	*w << DisplayKeys(Key.Pause)			<< "Pause\n";
 	*w << DisplayKeys(Key.Next)			<< "Next track\n";
 	*w << DisplayKeys(Key.Prev)			<< "Previous track\n";
+	*w << DisplayKeys(Key.Replay)			<< "Play current track from the beginning\n";
 	*w << DisplayKeys(Key.SeekForward)		<< "Seek forward\n";
 	*w << DisplayKeys(Key.SeekBackward)		<< "Seek backward\n";
 	*w << DisplayKeys(Key.VolumeDown)		<< "Decrease volume\n";

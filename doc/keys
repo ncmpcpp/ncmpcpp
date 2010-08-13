@@ -82,6 +82,8 @@
 #
 #key_prev = '<'
 #
+#key_replay = 263 127
+#
 #key_seek_forward = 'f'
 #
 #key_seek_backward = 'b'

@@ -551,7 +551,13 @@ int main(int argc, char *argv[])
 			design_changed = 1;
 			resize_screen();
 		}
-		else if (Keypressed(input, Key.GoToParentDir))
+		else if (Keypressed(input, Key.GoToParentDir)
+		     &&  (myScreen == myBrowser
+#			ifdef HAVE_TAGLIB_H
+		        || myScreen == myTagEditor
+#			endif // HAVE_TAGLIB_H
+			 )
+			)
 		{
 			if (myScreen == myBrowser && myBrowser->CurrentDir() != "/")
 			{
@@ -795,6 +801,14 @@ int main(int argc, char *argv[])
 					utf_to_locale(myPlaylistEditor->Playlists->Current());
 					wFooter->SetTimeout(ncmpcpp_window_timeout);
 				}
+			}
+		}
+		else if (Keypressed(input, Key.Replay))
+		{
+			if (Mpd.isPlaying())
+			{
+				Mpd.Seek(0);
+				UpdateStatusImmediately = 1;
 			}
 		}
 		else if (Keypressed(input, Key.Prev))

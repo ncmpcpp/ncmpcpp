@@ -89,6 +89,7 @@ struct NcmpcppKeys
 	int Pause[2];
 	int Next[2];
 	int Prev[2];
+	int Replay[2];
 	int SeekForward[2];
 	int SeekBackward[2];
 	int ToggleRepeat[2];
