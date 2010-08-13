@@ -428,6 +428,8 @@
 #
 #active_column_color = "red"
 #
+#visualizer_color = "yellow"
+#
 #window_border_color = "green"
 #
 #active_window_border = "red"

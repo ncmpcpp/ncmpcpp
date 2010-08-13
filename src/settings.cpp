@@ -359,6 +359,7 @@ void NcmpcppConfig::SetDefaults()
 	active_column_color = clRed;
 	window_border = brGreen;
 	active_window_border = brRed;
+	visualizer_color = clYellow;
 	media_lib_primary_tag = MPD_TAG_ARTIST;
 	enable_idle_notifications = true;
 	colors_enabled = true;
@@ -1134,6 +1135,11 @@ void NcmpcppConfig::Read()
 			{
 				if (!v.empty())
 					active_column_color = IntoColor(v);
+			}
+			else if (cl.find("visualizer_color") != std::string::npos)
+			{
+				if (!v.empty())
+					visualizer_color = IntoColor(v);
 			}
 			else if (cl.find("window_border_color ") != std::string::npos)
 			{

@@ -193,6 +193,7 @@ struct NcmpcppConfig
 	Color statusbar_color;
 	Color alternative_ui_separator_color;
 	Color active_column_color;
+	Color visualizer_color;
 	
 	Border window_border;
 	Border active_window_border;

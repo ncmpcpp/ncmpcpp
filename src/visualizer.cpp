@@ -46,7 +46,7 @@ int Visualizer::WindowTimeout = 1000/25; /* 25 fps */
 
 void Visualizer::Init()
 {
-	w = new Window(0, MainStartY, COLS, MainHeight, "", Config.main_color, brNone);
+	w = new Window(0, MainStartY, COLS, MainHeight, "", Config.visualizer_color, brNone);
 	
 	ResetFD();
 #	ifdef HAVE_FFTW3_H
