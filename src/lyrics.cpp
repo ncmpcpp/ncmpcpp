@@ -79,7 +79,8 @@ void Lyrics::Update()
 #	endif // HAVE_CURL_CURL_H
 	if (ReloadNP)
 	{
-		if (const MPD::Song *s = myPlaylist->NowPlayingSong())
+		const MPD::Song *s = myPlaylist->NowPlayingSong();
+		if (s && !s->GetArtist().empty() && !s->GetTitle().empty())
 		{
 			Global::RedrawHeader = 1;
 			itsScrollBegin = 0;
@@ -109,11 +110,14 @@ void Lyrics::SwitchTo()
 	// for taking lyrics if they were downloaded
 	Update();
 	
-	if (const MPD::Song *s = myOldScreen->CurrentSong())
+	const MPD::Song *s = myOldScreen->CurrentSong();
+	if (s && !s->GetArtist().empty() && !s->GetTitle().empty())
 	{
 		itsSong = *s;
 		Load();
 	}
+	else
+		return myOldScreen->SwitchTo();
 	
 	Global::RedrawHeader = 1;
 }
@@ -181,8 +185,9 @@ void Lyrics::Load()
 	if (DownloadInProgress)
 		return;
 #	endif // HAVE_CURL_CURL_H
-	if (itsSong.GetArtist().empty() || itsSong.GetTitle().empty())
-		return;
+	
+	assert(!itsSong.GetArtist().empty());
+	assert(!itsSong.GetTitle().empty());
 	
 	itsSong.Localize();
 	std::string file = locale_to_utf_cpy(itsSong.GetArtist()) + " - " + locale_to_utf_cpy(itsSong.GetTitle()) + ".txt";

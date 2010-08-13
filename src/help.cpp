@@ -304,6 +304,10 @@ void Help::GetKeybindings()
 	*w << DisplayKeys(Key.SwitchTagTypeList)	<< "Refetch lyrics\n";
 	
 	
+	*w << "\n\n   " << fmtBold << "Keys - Artist info\n -----------------------------------------\n" << fmtBoldEnd;
+	*w << DisplayKeys(Key.SwitchTagTypeList)	<< "Refetch artist info\n";
+	
+	
 #	ifdef HAVE_TAGLIB_H
 	*w << "\n\n   " << fmtBold << "Keys - Tiny tag editor\n -----------------------------------------\n" << fmtBoldEnd;
 	*w << DisplayKeys(Key.Enter)			<< "Edit tag\n";

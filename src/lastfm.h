@@ -18,24 +18,31 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
-#ifndef _H_INFO
-#define _H_INFO
+#ifndef _H_LASTFM
+#define _H_LASTFM
 
-#include "ncmpcpp.h"
-#include "mpdpp.h"
+#ifdef HAVE_CONFIG_H
+# include "config.h"
+#endif
+
+#ifdef HAVE_CURL_CURL_H
+
+#include <memory>
+
+#include "lastfm_service.h"
 #include "screen.h"
 
-class Info : public Screen<Scrollpad>
+class Lastfm : public Screen<Scrollpad>
 {
 	public:
-		virtual void SwitchTo() { }
+		Lastfm() : isReadyToTake(0), isDownloadInProgress(0) { }
+		
+		virtual void SwitchTo();
 		virtual void Resize();
 		
 		virtual std::basic_string<my_char_t> Title();
 		
-#		ifdef HAVE_CURL_CURL_H
 		virtual void Update();
-#		endif // HAVE_CURL_CURL_H
 		
 		virtual void EnterPressed() { }
 		virtual void SpacePressed() { }
@@ -44,30 +51,39 @@ class Info : public Screen<Scrollpad>
 		
 		virtual List *GetList() { return 0; }
 		
-#		ifdef HAVE_CURL_CURL_H
-		void GetArtist();
-#		endif // HAVE_CURL_CURL_H
+		void Refetch();
+		
+		bool SetArtistInfoArgs(const std::string &artist, const std::string &lang = "");
 		
 	protected:
 		virtual void Init();
 		
 	private:
+		std::basic_string<my_char_t> itsTitle;
+		
 		std::string itsArtist;
-		std::string itsTitle;
-		std::string itsFilenamePath;
+		std::string itsFilename;
 		
-#		ifdef HAVE_CURL_CURL_H
-		static void *PrepareArtist(void *);
+		std::string itsFolder;
 		
-		static const std::string Folder;
-		static bool ArtistReady;
+		std::auto_ptr<LastfmService> itsService;
+		LastfmService::Args itsArgs;
 		
-		static pthread_t *Downloader;
+		void Load();
+		void Save(const std::string &data);
+		void SetTitleAndFolder();
 		
-#		endif // HAVE_CURL_CURL_H
+		void Download();
+		static void *DownloadWrapper(void *);
+		
+		bool isReadyToTake;
+		bool isDownloadInProgress;
+		pthread_t itsDownloader;
 };
 
-extern Info *myInfo;
+extern Lastfm *myLastfm;
+
+#endif // HAVE_CURL_CURL_H
 
 #endif
 

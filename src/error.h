@@ -29,6 +29,8 @@
 
 #include <string>
 
+#define Error(msg) std::cerr << "ncmpcpp: " << msg;
+
 void FatalError(const std::string &msg) GNUC_NORETURN;
 
 #endif
