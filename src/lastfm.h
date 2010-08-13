@@ -76,6 +76,7 @@ class Lastfm : public Screen<Scrollpad>
 		void Download();
 		static void *DownloadWrapper(void *);
 		
+		void Take();
 		bool isReadyToTake;
 		bool isDownloadInProgress;
 		pthread_t itsDownloader;

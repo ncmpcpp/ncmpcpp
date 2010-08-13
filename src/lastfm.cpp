@@ -64,13 +64,17 @@ std::basic_string<my_char_t> Lastfm::Title()
 void Lastfm::Update()
 {
 	if (isReadyToTake)
-	{
-		pthread_join(itsDownloader, 0);
-		w->Flush();
-		w->Refresh();
-		isDownloadInProgress = 0;
-		isReadyToTake = 0;
-	}
+		Take();
+}
+
+void Lastfm::Take()
+{
+	assert(isReadyToTake);
+	pthread_join(itsDownloader, 0);
+	w->Flush();
+	w->Refresh();
+	isDownloadInProgress = 0;
+	isReadyToTake = 0;
 }
 
 void Lastfm::SwitchTo()
@@ -84,8 +88,9 @@ void Lastfm::SwitchTo()
 	if (hasToBeResized)
 		Resize();
 	
-	// if something is ready to take, take it
-	Update();
+	// get an old info if it waits
+	if (isReadyToTake)
+		Take();
 	
 	Load();
 	
