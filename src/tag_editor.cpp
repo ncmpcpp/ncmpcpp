@@ -223,7 +223,7 @@ void TagEditor::Refresh()
 
 void TagEditor::Update()
 {
-	if (LeftColumn->Empty())
+	if (LeftColumn->ReallyEmpty())
 	{
 		LeftColumn->Window::Clear();
 		Tags->Clear();
@@ -281,7 +281,7 @@ void TagEditor::Update()
 		TagTypes->Refresh();
 	}
 	
-	if (Tags->Empty())
+	if (Tags->ReallyEmpty())
 	{
 		Tags->Reset();
 		MPD::SongList list;
@@ -654,7 +654,7 @@ void TagEditor::EnterPressed()
 
 void TagEditor::SpacePressed()
 {
-	if (w == Tags)
+	if (w == Tags && !Tags->Empty())
 	{
 		Tags->Select(Tags->Choice(), !Tags->isSelected());
 		w->Scroll(wDown);
@@ -769,6 +769,8 @@ MPD::Song *TagEditor::CurrentSong()
 
 void TagEditor::GetSelectedSongs(MPD::SongList &v)
 {
+	if (w != Tags || Tags->Empty())
+		return;
 	std::vector<size_t> selected;
 	Tags->GetSelected(selected);
 	if (selected.empty())
@@ -806,7 +808,7 @@ void TagEditor::NextColumn()
 		w = TagTypes;
 		TagTypes->HighlightColor(Config.active_column_color);
 	}
-	else if (w == TagTypes && TagTypes->Choice() < 12 && !Tags->Empty())
+	else if (w == TagTypes && TagTypes->Choice() < 12 && !Tags->ReallyEmpty())
 	{
 		TagTypes->HighlightColor(Config.main_highlight_color);
 		w->Refresh();
