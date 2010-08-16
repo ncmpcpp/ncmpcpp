@@ -1539,7 +1539,9 @@ int main(int argc, char *argv[])
 					}
 				}
 			}
-			else if (myScreen->ActiveWindow() == myTagEditor->Dirs)
+			else if (myScreen->ActiveWindow() == myTagEditor->Dirs
+			     &&  !myTagEditor->Dirs->Empty()
+			     &&  myTagEditor->Dirs->Choice() > 0)
 			{
 				std::string old_dir = myTagEditor->Dirs->Current().first;
 				LockStatusbar();
@@ -1569,7 +1571,7 @@ int main(int argc, char *argv[])
 			{
 				myLyrics->Edit();
 			}
-			if (myScreen == myBrowser && myBrowser->Main()->Current().type == itDirectory)
+			if (myScreen == myBrowser && !myBrowser->Main()->Empty() && myBrowser->Main()->Current().type == itDirectory)
 			{
 				std::string old_dir = myBrowser->Main()->Current().name;
 				LockStatusbar();
@@ -1602,7 +1604,15 @@ int main(int argc, char *argv[])
 					}
 				}
 			}
-			else if (myScreen->ActiveWindow() == myPlaylistEditor->Playlists || (myScreen == myBrowser && myBrowser->Main()->Current().type == itPlaylist))
+			else if (
+				 (myScreen->ActiveWindow() == myPlaylistEditor->Playlists
+			       && !myPlaylistEditor->Playlists->Empty()
+				 )
+			     ||  (myScreen == myBrowser
+			       && !myBrowser->Main()->Empty()
+			       && myBrowser->Main()->Current().type == itPlaylist
+				 )
+				)
 			{
 				std::string old_name = myScreen->ActiveWindow() == myPlaylistEditor->Playlists ? myPlaylistEditor->Playlists->Current() : myBrowser->Main()->Current().name;
 				LockStatusbar();
