@@ -38,7 +38,6 @@ LyricsFetcher *lyricsPlugins[] =
 	new LyricstimeFetcher(),
 	new MetrolyricsFetcher(),
 	new LyrcComArFetcher(),
-	new LyricsflyFetcher(),
 	0
 };
 
@@ -138,14 +137,6 @@ LyricsFetcher::Result LyricwikiFetcher::fetch(const std::string &artist, const s
 bool LyricwikiFetcher::notLyrics(const std::string &data)
 {
 	return data.find("action=edit") != std::string::npos;
-}
-
-/***********************************************************************/
-
-void LyricsflyFetcher::postProcess(std::string &data)
-{
-	Replace(data, "[br]", "\n");
-	LyricsFetcher::postProcess(data);
 }
 
 /**********************************************************************/

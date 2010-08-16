@@ -72,18 +72,6 @@ struct LyricwikiFetcher : public LyricsFetcher
 		virtual bool notLyrics(const std::string &data);
 };
 
-struct LyricsflyFetcher : public LyricsFetcher
-{
-	virtual const char *name() { return "lyricsfly.com"; }
-	
-	protected:
-		virtual const char *getURL() { return "http://api.lyricsfly.com/api/api.php?i=1b76e55254f5f22ae-temporary.API.access&a=%artist%&t=%title%"; }
-		virtual const char *getOpenTag() { return "<tx>"; }
-		virtual const char *getCloseTag() { return "</tx>"; }
-		
-		virtual void postProcess(std::string &data);
-};
-
 /**********************************************************************/
 
 struct GoogleLyricsFetcher : public LyricsFetcher
