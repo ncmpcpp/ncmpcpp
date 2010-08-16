@@ -118,7 +118,7 @@ void PlaylistEditor::SwitchTo()
 
 void PlaylistEditor::Update()
 {
-	if (Playlists->Empty())
+	if (Playlists->ReallyEmpty())
 	{
 		Content->Clear();
 		MPD::TagList list;
@@ -133,7 +133,7 @@ void PlaylistEditor::Update()
 		Playlists->Refresh();
 	}
 	
-	if (!Playlists->Empty() && Content->Empty())
+	if (!Playlists->Empty() && Content->ReallyEmpty())
 	{
 		Content->Reset();
 		MPD::SongList list;
@@ -161,14 +161,14 @@ void PlaylistEditor::Update()
 		Content->Display();
 	}
 	
-	if (w == Content && Content->Empty())
+	if (w == Content && Content->ReallyEmpty())
 	{
 		Content->HighlightColor(Config.main_highlight_color);
 		Playlists->HighlightColor(Config.active_column_color);
 		w = Playlists;
 	}
 	
-	if (Content->Empty())
+	if (Content->ReallyEmpty())
 	{
 		*Content << XY(0, 0) << "Playlist is empty.";
 		Content->Window::Refresh();
