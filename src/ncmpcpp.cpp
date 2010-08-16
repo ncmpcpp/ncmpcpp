@@ -1461,7 +1461,7 @@ int main(int argc, char *argv[])
 			{
 				myTinyTagEditor->SwitchTo();
 			}
-			else if (myScreen->ActiveWindow() == myLibrary->Artists)
+			else if (myScreen->ActiveWindow() == myLibrary->Artists && !myLibrary->Artists->Empty())
 			{
 				LockStatusbar();
 				Statusbar() << fmtBold << IntoStr(Config.media_lib_primary_tag) << fmtBoldEnd << ": ";
@@ -1500,7 +1500,7 @@ int main(int argc, char *argv[])
 					FreeSongList(list);
 				}
 			}
-			else if (myScreen->ActiveWindow() == myLibrary->Albums)
+			else if (myScreen->ActiveWindow() == myLibrary->Albums && !myLibrary->Albums->Empty())
 			{
 				LockStatusbar();
 				Statusbar() << fmtBold << "Album: " << fmtBoldEnd;

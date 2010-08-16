@@ -182,7 +182,7 @@ std::basic_string<my_char_t> MediaLibrary::Title()
 
 void MediaLibrary::Update()
 {
-	if (!hasTwoColumns && Artists->Empty())
+	if (!hasTwoColumns && Artists->ReallyEmpty())
 	{
 		MPD::TagList list;
 		Albums->Clear();
@@ -201,7 +201,7 @@ void MediaLibrary::Update()
 		Artists->Refresh();
 	}
 	
-	if (!hasTwoColumns && !Artists->Empty() && Albums->Empty() && Songs->Empty())
+	if (!hasTwoColumns && !Artists->ReallyEmpty() && Albums->ReallyEmpty() && Songs->ReallyEmpty())
 	{
 		// idle has to be blocked for now since it would be enabled and
 		// disabled a few times by each mpd command, which makes no sense
@@ -247,7 +247,7 @@ void MediaLibrary::Update()
 		Albums->Refresh();
 		Mpd.BlockIdle(0);
 	}
-	else if (hasTwoColumns && Albums->Empty())
+	else if (hasTwoColumns && Albums->ReallyEmpty())
 	{
 		Songs->Clear();
 		MPD::TagList artists;
@@ -303,14 +303,14 @@ void MediaLibrary::Update()
 		Albums->Refresh();
 	}
 	
-	if (!hasTwoColumns && !Artists->Empty() && w == Albums && Albums->Empty())
+	if (!hasTwoColumns && !Artists->ReallyEmpty() && w == Albums && Albums->ReallyEmpty())
 	{
 		Albums->HighlightColor(Config.main_highlight_color);
 		Artists->HighlightColor(Config.active_column_color);
 		w = Artists;
 	}
 	
-	if (!(hasTwoColumns ? Albums->Empty() : Artists->Empty()) && Songs->Empty())
+	if (!(hasTwoColumns ? Albums->ReallyEmpty() : Artists->ReallyEmpty()) && Songs->ReallyEmpty())
 	{
 		Songs->Reset();
 		MPD::SongList list;
@@ -545,16 +545,16 @@ void MediaLibrary::NextColumn()
 {
 	if (w == Artists)
 	{
-		if (!hasTwoColumns && Songs->Empty())
+		if (!hasTwoColumns && Songs->ReallyEmpty())
 			return;
 		Artists->HighlightColor(Config.main_highlight_color);
 		w->Refresh();
 		w = Albums;
 		Albums->HighlightColor(Config.active_column_color);
-		if (!Albums->Empty())
+		if (!Albums->ReallyEmpty())
 			return;
 	}
-	if (w == Albums && !Songs->Empty())
+	if (w == Albums && !Songs->ReallyEmpty())
 	{
 		Albums->HighlightColor(Config.main_highlight_color);
 		w->Refresh();
@@ -571,7 +571,7 @@ void MediaLibrary::PrevColumn()
 		w->Refresh();
 		w = Albums;
 		Albums->HighlightColor(Config.active_column_color);
-		if (!Albums->Empty())
+		if (!Albums->ReallyEmpty())
 			return;
 	}
 	if (w == Albums && !hasTwoColumns)

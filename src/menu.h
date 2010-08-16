@@ -448,8 +448,16 @@ namespace NCurses
 			
 			/// Checks if list is empty
 			/// @return true if list is empty, false otherwise
+			/// @see ReallyEmpty()
 			///
 			virtual bool Empty() const { return itsOptionsPtr->empty(); }
+			
+			/// Checks if list is really empty since Empty() may not
+			/// be accurate if filter is set)
+			/// @return true if list is empty, false otherwise
+			/// @see Empty()
+			///
+			virtual bool ReallyEmpty() const { return itsOptions.empty(); }
 			
 			/// @return size of the list
 			///
