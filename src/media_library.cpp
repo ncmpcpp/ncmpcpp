@@ -201,7 +201,7 @@ void MediaLibrary::Update()
 		Artists->Refresh();
 	}
 	
-	if (!hasTwoColumns && !Artists->ReallyEmpty() && Albums->ReallyEmpty() && Songs->ReallyEmpty())
+	if (!hasTwoColumns && !Artists->Empty() && Albums->ReallyEmpty() && Songs->ReallyEmpty())
 	{
 		// idle has to be blocked for now since it would be enabled and
 		// disabled a few times by each mpd command, which makes no sense
@@ -303,14 +303,14 @@ void MediaLibrary::Update()
 		Albums->Refresh();
 	}
 	
-	if (!hasTwoColumns && !Artists->ReallyEmpty() && w == Albums && Albums->ReallyEmpty())
+	if (!hasTwoColumns && !Artists->Empty() && w == Albums && Albums->ReallyEmpty())
 	{
 		Albums->HighlightColor(Config.main_highlight_color);
 		Artists->HighlightColor(Config.active_column_color);
 		w = Artists;
 	}
 	
-	if (!(hasTwoColumns ? Albums->ReallyEmpty() : Artists->ReallyEmpty()) && Songs->ReallyEmpty())
+	if (!(hasTwoColumns ? Albums->Empty() : Artists->Empty()) && Songs->ReallyEmpty())
 	{
 		Songs->Reset();
 		MPD::SongList list;

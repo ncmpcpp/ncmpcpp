@@ -2089,7 +2089,7 @@ int main(int argc, char *argv[])
 			
 			if (s)
 				artist = s->GetArtist();
-			else if (myScreen == myLibrary && myLibrary->Main() == myLibrary->Artists)
+			else if (myScreen == myLibrary && myLibrary->Main() == myLibrary->Artists && !myLibrary->Artists->Empty())
 				artist = myLibrary->Artists->Current();
 			
 			if (!artist.empty() && myLastfm->SetArtistInfoArgs(artist, Config.lastfm_preferred_language))
