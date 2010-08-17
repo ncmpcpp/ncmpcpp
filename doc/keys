@@ -42,6 +42,10 @@
 #
 #key_volume_down = 260 '-'
 #
+#key_prev_column = 260
+#
+#key_next_column = 261
+#
 #key_toggle_space_mode = 't'
 #
 #key_toggle_add_mode = 'T'

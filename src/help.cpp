@@ -274,8 +274,8 @@ void Help::GetKeybindings()
 	*w << "\n\n   " << fmtBold << "Keys - Media library\n -----------------------------------------\n" << fmtBoldEnd;
 	if (!Config.media_library_disable_two_column_mode)
 		*w << DisplayKeys(Key.MediaLibrary)	<< "Switch between two/three columns\n";
-	*w << DisplayKeys(&Key.VolumeDown[0], 1)	<< "Previous column\n";
-	*w << DisplayKeys(&Key.VolumeUp[0], 1)		<< "Next column\n";
+	*w << DisplayKeys(Key.PrevColumn)		<< "Previous column\n";
+	*w << DisplayKeys(Key.NextColumn)		<< "Next column\n";
 	*w << DisplayKeys(Key.Enter)			<< "Add to playlist and play song/album/artist's songs\n";
 	*w << DisplayKeys(Key.Space)			<< "Add to playlist song/album/artist's songs\n";
 #	ifdef HAVE_TAGLIB_H
@@ -285,8 +285,8 @@ void Help::GetKeybindings()
 	
 	
 	*w << "\n\n   " << fmtBold << "Keys - Playlist Editor\n -----------------------------------------\n" << fmtBoldEnd;
-	*w << DisplayKeys(&Key.VolumeDown[0], 1)	<< "Previous column\n";
-	*w << DisplayKeys(&Key.VolumeUp[0], 1)		<< "Next column\n";
+	*w << DisplayKeys(Key.PrevColumn)		<< "Previous column\n";
+	*w << DisplayKeys(Key.NextColumn)		<< "Next column\n";
 	*w << DisplayKeys(Key.Enter)			<< "Add item to playlist and play\n";
 	*w << DisplayKeys(Key.Space)			<< "Add to playlist/select item\n";
 #	ifdef HAVE_TAGLIB_H
@@ -320,8 +320,8 @@ void Help::GetKeybindings()
 	*w << DisplayKeys(Key.Enter)			<< "Perform operation on all/selected songs (middle column)\n";
 	*w << DisplayKeys(Key.Space)			<< "Switch to albums/directories view (left column)\n";
 	*w << DisplayKeys(Key.Space)			<< "Select/deselect song (right column)\n";
-	*w << DisplayKeys(&Key.VolumeDown[0], 1)	<< "Previous column\n";
-	*w << DisplayKeys(&Key.VolumeUp[0], 1)		<< "Next column\n";
+	*w << DisplayKeys(Key.PrevColumn)		<< "Previous column\n";
+	*w << DisplayKeys(Key.NextColumn)		<< "Next column\n";
 	*w << DisplayKeys(Key.GoToParentDir)		<< "Go to parent directory (left column, directories view)\n";
 #	endif // HAVE_TAGLIB_H
 	

@@ -580,43 +580,61 @@ int main(int argc, char *argv[])
 		{
 			myScreen->SpacePressed();
 		}
-		else if (Keypressed(input, Key.VolumeUp))
+		else if (Keypressed(input, Key.PrevColumn)
+		     &&  (myScreen == myLibrary
+		       || myScreen == myPlaylistEditor
+#		ifdef HAVE_TAGLIB_H
+		       || myScreen == myTagEditor
+#		endif // HAVE_TAGLIB_H)
+			 )
+			)
 		{
-			if (myScreen == myLibrary && input == Key.VolumeUp[0])
-			{
-				myLibrary->NextColumn();
-			}
-			else if (myScreen == myPlaylistEditor && input == Key.VolumeUp[0])
-			{
-				myPlaylistEditor->NextColumn();
-			}
-#			ifdef HAVE_TAGLIB_H
-			else if (myScreen == myTagEditor && input == Key.VolumeUp[0])
-			{
-				myTagEditor->NextColumn();
-			}
-#			endif // HAVE_TAGLIB_H
-			else
-				Mpd.SetVolume(Mpd.GetVolume()+1);
-		}
-		else if (Keypressed(input, Key.VolumeDown))
-		{
-			if (myScreen == myLibrary && input == Key.VolumeDown[0])
+			if (myScreen == myLibrary)
 			{
 				myLibrary->PrevColumn();
 			}
-			else if (myScreen == myPlaylistEditor && input == Key.VolumeDown[0])
+			else if (myScreen == myPlaylistEditor)
 			{
 				myPlaylistEditor->PrevColumn();
 			}
 #			ifdef HAVE_TAGLIB_H
-			else if (myScreen == myTagEditor && input == Key.VolumeDown[0])
+			else if (myScreen == myTagEditor)
 			{
 				myTagEditor->PrevColumn();
 			}
 #			endif // HAVE_TAGLIB_H
-			else
-				Mpd.SetVolume(Mpd.GetVolume()-1);
+		}
+		else if (Keypressed(input, Key.NextColumn)
+		     &&  (myScreen == myLibrary
+		       || myScreen == myPlaylistEditor
+#		ifdef HAVE_TAGLIB_H
+		       || myScreen == myTagEditor
+#		endif // HAVE_TAGLIB_H)
+			 )
+			)
+		{
+			if (myScreen == myLibrary)
+			{
+				myLibrary->NextColumn();
+			}
+			else if (myScreen == myPlaylistEditor)
+			{
+				myPlaylistEditor->NextColumn();
+			}
+#			ifdef HAVE_TAGLIB_H
+			else if (myScreen == myTagEditor)
+			{
+				myTagEditor->NextColumn();
+			}
+#			endif // HAVE_TAGLIB_H
+		}
+		else if (Keypressed(input, Key.VolumeUp))
+		{
+			Mpd.SetVolume(Mpd.GetVolume()+1);
+		}
+		else if (Keypressed(input, Key.VolumeDown))
+		{
+			Mpd.SetVolume(Mpd.GetVolume()-1);
 		}
 		else if (Keypressed(input, Key.Delete))
 		{

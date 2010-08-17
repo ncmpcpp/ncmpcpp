@@ -168,6 +168,8 @@ void NcmpcppKeys::SetDefaults()
 	Delete[0] = KEY_DC;
 	VolumeUp[0] = KEY_RIGHT;
 	VolumeDown[0] = KEY_LEFT;
+	PrevColumn[0] = KEY_LEFT;
+	NextColumn[0] = KEY_RIGHT;
 	ScreenSwitcher[0] = 9;
 	Help[0] = '1';
 	Playlist[0] = '2';
@@ -253,6 +255,8 @@ void NcmpcppKeys::SetDefaults()
 	Delete[1] = 'd';
 	VolumeUp[1] = '+';
 	VolumeDown[1] = '-';
+	PrevColumn[1] = NullKey;
+	NextColumn[1] = NullKey;
 	ScreenSwitcher[1] = NullKey;
 	Help[1] = 265;
 	Playlist[1] = 266;
@@ -474,6 +478,10 @@ void NcmpcppKeys::Read()
 				GetKeys(key, VolumeUp);
 			else if (key.find("key_volume_down ") != std::string::npos)
 				GetKeys(key, VolumeDown);
+			else if (key.find("key_prev_column ") != std::string::npos)
+				GetKeys(key, PrevColumn);
+			else if (key.find("key_next_column ") != std::string::npos)
+				GetKeys(key, NextColumn);
 			else if (key.find("key_screen_switcher ") != std::string::npos)
 				GetKeys(key, ScreenSwitcher);
 			else if (key.find("key_help ") != std::string::npos)

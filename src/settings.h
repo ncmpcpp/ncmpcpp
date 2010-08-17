@@ -73,6 +73,8 @@ struct NcmpcppKeys
 	int Delete[2];
 	int VolumeUp[2];
 	int VolumeDown[2];
+	int PrevColumn[2];
+	int NextColumn[2];
 	int ScreenSwitcher[2];
 	int Help[2];
 	int Playlist[2];
