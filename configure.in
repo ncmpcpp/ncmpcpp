@@ -101,10 +101,10 @@ dnl = checking for ncurses =
 dnl ========================
 if test "$pdcurses" = "no" ; then
 	if test "$unicode" = "yes" ; then
-		curses_config_bin=ncursesw5-config
+		curses_config_bin="ncursesw6-config ncursesw5-config"
 		AC_DEFINE([_UTF8], [1], [enables unicode support])
 	else
-		curses_config_bin=ncurses5-config
+		curses_config_bin="ncurses6-config ncurses5-config"
 	fi
 else
 	if test "$pdcurses" = "yes" ; then
@@ -115,7 +115,7 @@ else
 	fi
 	AC_DEFINE([USE_PDCURSES], [1], [enables pdcurses support])
 fi
-AC_PATH_PROG(CURSES_CONFIG, $curses_config_bin)
+AC_PATH_PROGS(CURSES_CONFIG, $curses_config_bin)
 if test "$CURSES_CONFIG" != "" ; then
 	CPPFLAGS="$CPPFLAGS `$CURSES_CONFIG --cflags`"
 	LDFLAGS="$LDFLAGS `$CURSES_CONFIG --libs`"
