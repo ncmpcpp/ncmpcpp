@@ -248,6 +248,7 @@ struct NcmpcppConfig
 	bool media_library_display_date;
 	bool media_library_disable_two_column_mode;
 	bool discard_colors_if_item_is_selected;
+	bool store_lyrics_in_song_dir;
 	
 	int mpd_port;
 	int mpd_connection_timeout;

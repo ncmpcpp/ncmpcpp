@@ -219,6 +219,9 @@ If enabled, seek time will increment by one each second of seeking.
 .B follow_now_playing_lyrics = yes/no
 If enabled, lyrics will be switched at song's change to currently playing one's (Note: this works only if you are viewing lyrics of item from Playlist).
 .TP
+.B store_lyrics_in_song_dir = yes/no
+If enabled, lyrics will be saved in song's directory, otherwise in ~/.lyrics. Note that it needs properly set mpd_music_dir.
+.TP
 .B lastfm_preferred_language = ISO 639 alpha-2 language code
 If set, ncmpcpp will try to get info from last.fm in language you set and if it fails, it will fall back to english. Otherwise it will use english the first time.
 .TP

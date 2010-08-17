@@ -410,6 +410,7 @@ void NcmpcppConfig::SetDefaults()
 	media_library_display_date = true;
 	media_library_disable_two_column_mode = false;
 	discard_colors_if_item_is_selected = true;
+	store_lyrics_in_song_dir = false;
 	set_window_title = true;
 	mpd_port = 6600;
 	mpd_connection_timeout = 15;
@@ -1046,6 +1047,16 @@ void NcmpcppConfig::Read()
 			else if (cl.find("discard_colors_if_item_is_selected") != std::string::npos)
 			{
 				discard_colors_if_item_is_selected = v == "yes";
+			}
+			else if (cl.find("store_lyrics_in_song_dir") != std::string::npos)
+			{
+				if (mpd_music_dir.empty())
+				{
+					std::cout << "Warning: store_lyrics_in_song_dir = \"yes\" is ";
+					std::cout << "not allowed without mpd_music_dir set, discarding.\n";
+				}
+				else
+					store_lyrics_in_song_dir = v == "yes";
 			}
 			else if (cl.find("enable_window_title") != std::string::npos)
 			{

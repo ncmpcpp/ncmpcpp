@@ -48,13 +48,12 @@ using Global::MainStartY;
 using Global::myScreen;
 using Global::myOldScreen;
 
-const std::string Lyrics::Folder = home_path + LYRICS_FOLDER;
-
 Lyrics *myLyrics = new Lyrics;
 
 void Lyrics::Init()
 {
 	w = new Scrollpad(0, MainStartY, COLS, MainHeight, "", Config.main_color, brNone);
+	itsFolder = home_path + LYRICS_FOLDER;
 	isInitialized = 1;
 }
 
@@ -180,6 +179,37 @@ void *Lyrics::Download()
 }
 #endif // HAVE_CURL_CURL_H
 
+void Lyrics::SetFilename()
+{
+	if (Config.store_lyrics_in_song_dir)
+	{
+		if (itsSong.isFromDB())
+		{
+			itsFilename = Config.mpd_music_dir;
+			itsFilename += "/";
+			itsFilename += itsSong.GetFile();
+		}
+		else
+			itsFilename = itsSong.GetFile();
+		// replace song's extension with .txt
+		size_t dot = itsFilename.rfind('.');
+		assert(dot != std::string::npos);
+		itsFilename.resize(dot);
+		itsFilename += ".txt";
+	}
+	else
+	{
+		std::string file = locale_to_utf_cpy(itsSong.GetArtist());
+		file += " - ";
+		file += locale_to_utf_cpy(itsSong.GetTitle());
+		file += ".txt";
+		EscapeUnallowedChars(file);
+		itsFilename = itsFolder;
+		itsFilename += "/";
+		itsFilename += file;
+	}
+}
+
 void Lyrics::Load()
 {
 #	ifdef HAVE_CURL_CURL_H
@@ -191,11 +221,9 @@ void Lyrics::Load()
 	assert(!itsSong.GetTitle().empty());
 	
 	itsSong.Localize();
-	std::string file = locale_to_utf_cpy(itsSong.GetArtist()) + " - " + locale_to_utf_cpy(itsSong.GetTitle()) + ".txt";
-	EscapeUnallowedChars(file);
-	itsFilename = Folder + "/" + file;
+	SetFilename();
 	
-	mkdir(Folder.c_str()
+	mkdir(itsFolder.c_str()
 #	ifndef WIN32
 	, 0755
 #	endif // !WIN32

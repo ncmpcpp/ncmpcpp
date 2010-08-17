@@ -63,8 +63,9 @@ class Lyrics : public Screen<Scrollpad>
 	private:
 		void Load();
 		
+		void SetFilename();
 		std::string itsFilename;
-		static const std::string Folder;
+		std::string itsFolder;
 		
 #		ifdef HAVE_CURL_CURL_H
 		void *Download();
