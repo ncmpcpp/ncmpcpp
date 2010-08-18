@@ -250,7 +250,6 @@ void MPD::Connection::UpdateStatus()
 		{
 			if (idle_mask != 0)
 			{
-				itsChanges.Playlist = idle_mask & MPD_IDLE_QUEUE;
 				itsChanges.Database = idle_mask & MPD_IDLE_DATABASE;
 				itsChanges.DBUpdating = idle_mask & MPD_IDLE_UPDATE;
 				itsChanges.Volume = idle_mask & MPD_IDLE_MIXER;
@@ -259,9 +258,6 @@ void MPD::Connection::UpdateStatus()
 			}
 			else
 			{
-				itsChanges.Playlist = mpd_status_get_queue_version(itsOldStatus)
-						   != mpd_status_get_queue_version(itsCurrentStatus);
-				
 				itsChanges.ElapsedTime = mpd_status_get_elapsed_time(itsOldStatus)
 						      != mpd_status_get_elapsed_time(itsCurrentStatus);
 				
@@ -285,6 +281,9 @@ void MPD::Connection::UpdateStatus()
 				// from mpd status, it's possible only with idle notifications
 				itsChanges.Outputs = 0;
 			}
+			
+			itsChanges.Playlist = mpd_status_get_queue_version(itsOldStatus)
+					   != mpd_status_get_queue_version(itsCurrentStatus);
 			
 			itsChanges.SongID = mpd_status_get_song_id(itsOldStatus)
 					 != mpd_status_get_song_id(itsCurrentStatus);
