@@ -22,6 +22,7 @@
 #include <config.h>
 #endif
 
+#include <cstdlib>
 #include <cstring>
 #include <iomanip>
 #include <sstream>
@@ -370,13 +371,21 @@ std::string MPD::Song::ParseFormat(std::string::const_iterator &it, const char *
 		
 		if (*it == '%')
 		{
-			switch (*++it)
+			size_t delimiter = 0;
+			if (isdigit(*++it))
 			{
-				case '%':
-					result += *it; // no break here
-				default:
-					get = toGetFunction(*it);
+				delimiter = atol(&*it);
+				while (isdigit(*++it)) { }
 			}
+			
+			if (*it == '%')
+			{
+				result += *it;
+				get = 0;
+			}
+			else
+				get = toGetFunction(*it);
+			
 			if (get)
 			{
 				std::string tag = GetTags(get);
@@ -386,6 +395,12 @@ std::string MPD::Song::ParseFormat(std::string::const_iterator &it, const char *
 							tag.replace(i, 1, std::string(1, FormatEscapeCharacter) + *ch);
 				if (!tag.empty() && (get != &MPD::Song::GetLength || GetTotalLength()))
 				{
+					if (delimiter)
+					{
+						const std::basic_string<my_char_t> &s = TO_WSTRING(tag);
+						if (NCurses::Window::Length(s) > delimiter)
+							tag = Shorten(s, delimiter);
+					}
 					has_some_tags = 1;
 					result += tag;
 				}

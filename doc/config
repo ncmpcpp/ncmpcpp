@@ -115,6 +115,10 @@
 ## only if all requested values are available and/or define alternate
 ## value with { }|{ } eg. {%a - %t}|{%f}
 ##
+## Note: If you want to set limit on maximal length of a tag, just
+## put the appropriate number between % and character that defines
+## tag type, e.g. to make album take max. 20 terminal cells, use '%20b'.
+##
 ## Note: Format that is similar to "%a - %t" (i.e. without any additional
 ## braces) is equal to "{%a - %t}", so if one of the tags is missing,
 ## you'll get nothing.
