@@ -28,6 +28,47 @@
 
 using Global::myScreen;
 
+namespace
+{
+	const my_char_t *toColumnName(char c)
+	{
+		switch (c)
+		{
+			case 'l':
+				return U("Time");
+			case 'f':
+				return U("Filename");
+			case 'D':
+				return U("Directory");
+			case 'a':
+				return U("Artist");
+			case 'A':
+				return U("Album Artist");
+			case 't':
+				return U("Title");
+			case 'b':
+				return U("Album");
+			case 'y':
+				return U("Year");
+			case 'n':
+			case 'N':
+				return U("Track");
+			case 'g':
+				return U("Genre");
+			case 'c':
+				return U("Composer");
+			case 'p':
+				return U("Performer");
+			case 'd':
+				return U("Disc");
+			case 'C':
+				return U("Comment");
+			default:
+				return U("?");
+		}
+	}
+}
+
 std::string Display::Columns()
 {
 	if (Config.columns.empty())
@@ -56,55 +97,7 @@ std::string Display::Columns()
 		{
 			for (size_t j = 0; j < it->type.length(); ++j)
 			{
-				switch (it->type[j])
-				{
-					case 'l':
-						tag += U("Time");
-						break;
-					case 'f':
-						tag += U("Filename");
-						break;
-					case 'D':
-						tag += U("Directory");
-						break;
-					case 'a':
-						tag += U("Artist");
-						break;
-					case 'A':
-						tag += U("Album Artist");
-						break;
-					case 't':
-						tag += U("Title");
-						break;
-					case 'b':
-						tag += U("Album");
-						break;
-					case 'y':
-						tag += U("Year");
-						break;
-					case 'n':
-					case 'N':
-						tag += U("Track");
-						break;
-					case 'g':
-						tag += U("Genre");
-						break;
-					case 'c':
-						tag += U("Composer");
-						break;
-					case 'p':
-						tag += U("Performer");
-						break;
-					case 'd':
-						tag += U("Disc");
-						break;
-					case 'C':
-						tag += U("Comment");
-						break;
-					default:
-						tag += U("?");
-						break;
-				}
+				tag += toColumnName(it->type[j]);
 				tag += '/';
 			}
 			tag.resize(tag.length()-1);
