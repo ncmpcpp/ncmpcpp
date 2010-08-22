@@ -275,8 +275,6 @@ extern NcmpcppConfig Config;
 
 void CreateConfigDir();
 void SetWindowsDimensions(size_t &header_height, size_t &footer_start_y, size_t &footer_height);
-void ReadKeys(NcmpcppKeys &);
-void ReadConfiguration(NcmpcppConfig &);
 
 #endif
 
