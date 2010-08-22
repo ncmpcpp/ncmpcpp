@@ -24,6 +24,7 @@
 # include <sys/stat.h>
 #endif // WIN32
 #include <fstream>
+#include <iostream>
 #include <stdexcept>
 
 #include "browser.h"
@@ -1052,8 +1053,8 @@ void NcmpcppConfig::Read()
 			{
 				if (mpd_music_dir.empty())
 				{
-					std::cout << "Warning: store_lyrics_in_song_dir = \"yes\" is ";
-					std::cout << "not allowed without mpd_music_dir set, discarding.\n";
+					std::cerr << "Warning: store_lyrics_in_song_dir = \"yes\" is ";
+					std::cerr << "not allowed without mpd_music_dir set, discarding.\n";
 				}
 				else
 					store_lyrics_in_song_dir = v == "yes";
