@@ -1027,7 +1027,7 @@ bool MPD::Connection::DeletePlaylist(const std::string &name)
 	}
 }
 
-bool MPD::Connection::SavePlaylist(const std::string &name)
+int MPD::Connection::SavePlaylist(const std::string &name)
 {
 	if (!itsConnection)
 		return false;
@@ -1035,8 +1035,12 @@ bool MPD::Connection::SavePlaylist(const std::string &name)
 	GoBusy();
 	mpd_send_save(itsConnection, name.c_str());
 	mpd_response_finish(itsConnection);
-	return !(mpd_connection_get_error(itsConnection) == MPD_ERROR_SERVER
-	&&	 mpd_connection_get_server_error(itsConnection) == MPD_SERVER_ERROR_EXIST);
+	
+	if (mpd_connection_get_error(itsConnection) == MPD_ERROR_SERVER
+	&&  mpd_connection_get_server_error(itsConnection) == MPD_SERVER_ERROR_EXIST)
+		return MPD_SERVER_ERROR_EXIST;
+	else
+		return CheckForErrors();
 }
 
 void MPD::Connection::GetPlaylists(TagList &v)
@@ -1295,7 +1299,7 @@ void MPD::Connection::GetTagTypes(TagList &v)
 
 int MPD::Connection::CheckForErrors()
 {
-	int error_code = 0;
+	int error_code = MPD_ERROR_SUCCESS;
 	if ((error_code = mpd_connection_get_error(itsConnection)) != MPD_ERROR_SUCCESS)
 	{
 		itsErrorMessage = mpd_connection_get_error_message(itsConnection);

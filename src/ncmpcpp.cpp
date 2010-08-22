@@ -870,37 +870,41 @@ int main(int argc, char *argv[])
 					if (Mpd.GetErrorMessage().empty())
 						ShowMessage("Filtered items added to playlist \"%s\"", playlist_name.c_str());
 				}
-				else if (Mpd.SavePlaylist(real_playlist_name))
-				{
-					ShowMessage("Playlist saved as: %s", playlist_name.c_str());
-					if (myPlaylistEditor->Main()) // check if initialized
-						myPlaylistEditor->Playlists->Clear(); // make playlist's list update itself
-				}
 				else
 				{
-					LockStatusbar();
-					Statusbar() << "Playlist already exists, overwrite: " << playlist_name << " ? [" << fmtBold << 'y' << fmtBoldEnd << '/' << fmtBold << 'n' << fmtBoldEnd << "] ";
-					wFooter->Refresh();
-					int answer = 0;
-					while (answer != 'y' && answer != 'n')
+					int result = Mpd.SavePlaylist(real_playlist_name);
+					if (result == MPD_ERROR_SUCCESS)
 					{
-						TraceMpdStatus();
-						wFooter->ReadKey(answer);
+						ShowMessage("Playlist saved as: %s", playlist_name.c_str());
+						if (myPlaylistEditor->Main()) // check if initialized
+							myPlaylistEditor->Playlists->Clear(); // make playlist's list update itself
 					}
-					UnlockStatusbar();
-					
-					if (answer == 'y')
+					else if (result == MPD_SERVER_ERROR_EXIST)
 					{
-						Mpd.DeletePlaylist(real_playlist_name);
-						if (Mpd.SavePlaylist(real_playlist_name))
-							ShowMessage("Playlist overwritten!");
+						LockStatusbar();
+						Statusbar() << "Playlist already exists, overwrite: " << playlist_name << " ? [" << fmtBold << 'y' << fmtBoldEnd << '/' << fmtBold << 'n' << fmtBoldEnd << "] ";
+						wFooter->Refresh();
+						int answer = 0;
+						while (answer != 'y' && answer != 'n')
+						{
+							TraceMpdStatus();
+							wFooter->ReadKey(answer);
+						}
+						UnlockStatusbar();
+						
+						if (answer == 'y')
+						{
+							Mpd.DeletePlaylist(real_playlist_name);
+							if (Mpd.SavePlaylist(real_playlist_name) == MPD_ERROR_SUCCESS)
+								ShowMessage("Playlist overwritten!");
+						}
+						else
+							ShowMessage("Aborted!");
+						if (myPlaylistEditor->Main()) // check if initialized
+							myPlaylistEditor->Playlists->Clear(); // make playlist's list update itself
+						if (myScreen == myPlaylist)
+							myPlaylist->EnableHighlighting();
 					}
-					else
-						ShowMessage("Aborted!");
-					if (myPlaylistEditor->Main()) // check if initialized
-						myPlaylistEditor->Playlists->Clear(); // make playlist's list update itself
-					if (myScreen == myPlaylist)
-						myPlaylist->EnableHighlighting();
 				}
 			}
 			if (myBrowser->Main()
