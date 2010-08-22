@@ -88,7 +88,7 @@ std::string Display::Columns()
 		if (it == Config.columns.end()-1)
 			width = COLS-where;
 		else if (last_fixed && it == next2last)
-			width = COLS-where-(++next2last)->width;
+			width = COLS-where-1-(++next2last)->width;
 		else
 			width = it->width*(it->fixed ? 1 : COLS/100.0);
 		
@@ -129,6 +129,9 @@ void Display::SongsInColumns(const MPD::Song &s, void *data, Menu<MPD::Song> *me
 {
 	if (!s.Localized())
 		const_cast<MPD::Song *>(&s)->Localize();
+	
+	/// FIXME: This function is pure mess, it needs to be
+	/// rewritten and unified with Display::Columns() a bit.
 	
 	bool is_now_playing = menu == myPlaylist->Items && (menu->isFiltered() ? s.GetPosition() : menu->CurrentlyDrawedPosition()) == size_t(myPlaylist->NowPlaying);
 	if (is_now_playing)
@@ -172,7 +175,7 @@ void Display::SongsInColumns(const MPD::Song &s, void *data, Menu<MPD::Song> *me
 		if (it == Config.columns.end()-1)
 			width = menu->GetWidth()-where;
 		else if (last_fixed && it == next2last)
-			width = COLS-where-(++next2last)->width;
+			width = COLS-where-1-(++next2last)->width;
 		else
 			width = it->width*(it->fixed ? 1 : COLS/100.0);
 		
