@@ -372,56 +372,10 @@ std::string MPD::Song::ParseFormat(std::string::const_iterator &it, const char *
 		{
 			switch (*++it)
 			{
-				case 'l':
-					get = &MPD::Song::GetLength;
-					break;
-				case 'D':
-					get = &MPD::Song::GetDirectory;
-					break;
-				case 'f':
-					get = &MPD::Song::GetName;
-					break;
-				case 'a':
-					get = &MPD::Song::GetArtist;
-					break;
-				case 'A':
-					get = &MPD::Song::GetAlbumArtist;
-					break;
-				case 'b':
-					get = &MPD::Song::GetAlbum;
-					break;
-				case 'y':
-					get = &MPD::Song::GetDate;
-					break;
-				case 'n':
-					get = &MPD::Song::GetTrackNumber;
-					break;
-				case 'N':
-					get = &MPD::Song::GetTrack;
-					break;
-				case 'g':
-					get = &MPD::Song::GetGenre;
-					break;
-				case 'c':
-					get = &MPD::Song::GetComposer;
-					break;
-				case 'p':
-					get = &MPD::Song::GetPerformer;
-					break;
-				case 'd':
-					get = &MPD::Song::GetDisc;
-					break;
-				case 'C':
-					get = &MPD::Song::GetComment;
-					break;
-				case 't':
-					get = &MPD::Song::GetTitle;
-					break;
 				case '%':
 					result += *it; // no break here
 				default:
-					get = 0;
-					break;
+					get = toGetFunction(*it);
 			}
 			if (get)
 			{

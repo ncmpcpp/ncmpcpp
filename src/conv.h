@@ -52,6 +52,8 @@ NCurses::Color IntoColor(const std::string &);
 
 mpd_tag_type IntoTagItem(char);
 
+MPD::Song::GetFunction toGetFunction(char c);
+
 #ifdef HAVE_TAGLIB_H
 MPD::Song::SetFunction IntoSetFunction(mpd_tag_type);
 #endif // HAVE_TAGLIB_H

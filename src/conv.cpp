@@ -144,6 +144,45 @@ mpd_tag_type IntoTagItem(char c)
 	}
 }
 
+MPD::Song::GetFunction toGetFunction(char c)
+{
+	switch (c)
+	{
+		case 'l':
+			return &MPD::Song::GetLength;
+		case 'D':
+			return &MPD::Song::GetDirectory;
+		case 'f':
+			return &MPD::Song::GetName;
+		case 'a':
+			return &MPD::Song::GetArtist;
+		case 'A':
+			return &MPD::Song::GetAlbumArtist;
+		case 'b':
+			return &MPD::Song::GetAlbum;
+		case 'y':
+			return &MPD::Song::GetDate;
+		case 'n':
+			return &MPD::Song::GetTrackNumber;
+		case 'N':
+			return &MPD::Song::GetTrack;
+		case 'g':
+			return &MPD::Song::GetGenre;
+		case 'c':
+			return &MPD::Song::GetComposer;
+		case 'p':
+			return &MPD::Song::GetPerformer;
+		case 'd':
+			return &MPD::Song::GetDisc;
+		case 'C':
+			return &MPD::Song::GetComment;
+		case 't':
+			return &MPD::Song::GetTitle;
+		default:
+			return 0;
+	}
+}
+
 #ifdef HAVE_TAGLIB_H
 MPD::Song::SetFunction IntoSetFunction(mpd_tag_type tag)
 {
