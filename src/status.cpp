@@ -357,11 +357,7 @@ void NcmpcppStatusChanged(MPD::Connection *, MPD::StatusChanges changed, void *)
 			{
 				WindowTitle("ncmpc++ ver. "VERSION);
 				if (!block_progressbar_update)
-				{
-					*wFooter << Config.progressbar_color;
-					mvwhline(wFooter->Raw(), 0, 0, 0, wFooter->GetWidth());
-					*wFooter << clEnd;
-				}
+					DrawProgressbar(0, 0);
 				Playlist::ReloadRemaining = 1;
 				myPlaylist->NowPlaying = -1;
 				if (Config.new_design)
@@ -659,7 +655,7 @@ void DrawProgressbar(unsigned elapsed, unsigned time)
 {
 	unsigned howlong = time ? wFooter->GetWidth()*elapsed/time : 0;
 	*wFooter << fmtBold << Config.progressbar_color;
-	mvwhline(wFooter->Raw(), 0, 0, 0, wFooter->GetWidth());
+	mvwhline(wFooter->Raw(), 0, 0, Config.progressbar[2], wFooter->GetWidth());
 	if (time)
 	{
 		unsigned pb_width = std::min(size_t(howlong), wFooter->GetWidth());

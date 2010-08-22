@@ -343,7 +343,7 @@ void NcmpcppConfig::SetDefaults()
 	new_header_first_line = "{$b$1$aqqu$/a$9 {%t}|{%f} $1$atqq$/a$9$/b}";
 	new_header_second_line = "{{{$4$b%a$/b$9}{ - $7%b$9}{ ($4%y$9)}}|{%D}}";
 	browser_playlist_prefix << clRed << "(playlist)" << clEnd << ' ';
-	progressbar = U("=>");
+	progressbar = U("=>\0");
 	pattern = "%n - %t";
 	selected_item_prefix << clMagenta;
 	selected_item_suffix << clEnd;
@@ -793,9 +793,16 @@ void NcmpcppConfig::Read()
 			}
 			else if (cl.find("progressbar_look") != std::string::npos)
 			{
-				progressbar = TO_WSTRING(v);
-				if (progressbar.length() != 2)
-					FatalError("the length of progressbar_look is not two characters long!");
+				std::basic_string<my_char_t> pb = TO_WSTRING(v);
+				if (pb.length() < 2 || pb.length() > 3)
+				{
+					std::cerr << "Warning: length of progressbar_look should be either ";
+					std::cerr << "2 or 3, but it's " << pb.length() << ", discarding.\n";
+				}
+				else
+					progressbar = pb;
+				// if two characters were specified, add third one as null
+				progressbar.resize(3);
 			}
 			else if (cl.find("default_tag_editor_pattern") != std::string::npos)
 			{
