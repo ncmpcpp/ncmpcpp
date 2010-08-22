@@ -140,9 +140,12 @@ namespace
 		mySearcher->hasToBeResized = 1;
 		myLibrary->hasToBeResized = 1;
 		myPlaylistEditor->hasToBeResized = 1;
-		myLastfm->hasToBeResized = 1;
 		myLyrics->hasToBeResized = 1;
 		mySelectedItemsAdder->hasToBeResized = 1;
+		
+#		ifdef HAVE_CURL_CURL_H
+		myLastfm->hasToBeResized = 1;
+#		endif // HAVE_CURL_CURL_H
 		
 #		ifdef HAVE_TAGLIB_H
 		myTinyTagEditor->hasToBeResized = 1;
@@ -1941,7 +1944,11 @@ int main(int argc, char *argv[])
 				if (myScreen == myPlaylist)
 					myPlaylist->EnableHighlighting();
 			}
-			else if (myScreen == myHelp || myScreen == myLyrics || myScreen == myLastfm)
+			else if (myScreen == myHelp || myScreen == myLyrics
+#			ifdef HAVE_CURL_CURL_H
+			     || myScreen == myLastfm
+#			endif // HAVE_CURL_CURL_H
+				)
 			{
 				LockStatusbar();
 				Statusbar() << "Find: ";
@@ -2084,10 +2091,12 @@ int main(int argc, char *argv[])
 			{
 				myLyrics->Refetch();
 			}
+#			ifdef HAVE_CURL_CURL_H
 			else if (myScreen == myLastfm)
 			{
 				myLastfm->Refetch();
 			}
+#			endif // HAVE_CURL_CURL_H
 		}
 		else if (Keypressed(input, Key.SongInfo))
 		{

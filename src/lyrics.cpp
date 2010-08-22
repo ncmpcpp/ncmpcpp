@@ -103,9 +103,11 @@ void Lyrics::SwitchTo()
 	
 	itsScrollBegin = 0;
 	
+#	ifdef HAVE_CURL_CURL_H
 	// take lyrics if they were downloaded
 	if (isReadyToTake)
 		Take();
+#	endif // HAVE_CURL_CURL_H
 	
 	if (const MPD::Song *s = myScreen->CurrentSong())
 	{
@@ -255,7 +257,7 @@ void Lyrics::Load()
 		pthread_create(&itsDownloader, 0, DownloadWrapper, this);
 		isDownloadInProgress = 1;
 #		else
-		*w << "Local lyrics not found. As ncmpcpp has been compiled without curl support, you can put appropriate lyrics into " << Folder << " directory (file syntax is \"$ARTIST - $TITLE.txt\") or recompile ncmpcpp with curl support.";
+		*w << "Local lyrics not found. As ncmpcpp has been compiled without curl support, you can put appropriate lyrics into " << itsFolder << " directory (file syntax is \"$ARTIST - $TITLE.txt\") or recompile ncmpcpp with curl support.";
 		w->Flush();
 #		endif
 	}
@@ -287,6 +289,7 @@ void Lyrics::Edit()
 		system(("nohup " + Config.external_editor + " \"" + itsFilename + "\" > /dev/null 2>&1 &").c_str());
 }
 
+#ifdef HAVE_CURL_CURL_H
 void Lyrics::Save(const std::string &lyrics)
 {
 	std::ofstream output(itsFilename.c_str());
@@ -296,6 +299,7 @@ void Lyrics::Save(const std::string &lyrics)
 		output.close();
 	}
 }
+#endif // HAVE_CURL_CURL_H
 
 void Lyrics::Refetch()
 {
