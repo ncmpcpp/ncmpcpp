@@ -691,9 +691,8 @@ void NcmpcppConfig::Read()
 			}
 			else if (cl.find("song_list_format") != std::string::npos)
 			{
-				if (!v.empty())
+				if (!v.empty() && MPD::Song::isFormatOk("song_list_format", v))
 				{
-					MPD::Song::ValidateFormat("song_list_format", v);
 					song_list_format = '{';
 					song_list_format += v;
 					song_list_format += '}';
@@ -706,9 +705,8 @@ void NcmpcppConfig::Read()
 			}
 			else if (cl.find("song_status_format") != std::string::npos)
 			{
-				if (!v.empty())
+				if (!v.empty() && MPD::Song::isFormatOk("song_status_format", v))
 				{
-					MPD::Song::ValidateFormat("song_status_format", v);
 					song_status_format = '{';
 					song_status_format += v;
 					song_status_format += '}';
@@ -725,9 +723,8 @@ void NcmpcppConfig::Read()
 			}
 			else if (cl.find("song_library_format") != std::string::npos)
 			{
-				if (!v.empty())
+				if (!v.empty() && MPD::Song::isFormatOk("song_library_format", v))
 				{
-					MPD::Song::ValidateFormat("song_library_format", v);
 					song_library_format = '{';
 					song_library_format += v;
 					song_library_format += '}';
@@ -735,9 +732,8 @@ void NcmpcppConfig::Read()
 			}
 			else if (cl.find("tag_editor_album_format") != std::string::npos)
 			{
-				if (!v.empty())
+				if (!v.empty() && MPD::Song::isFormatOk("tag_editor_album_format", v))
 				{
-					MPD::Song::ValidateFormat("tag_editor_album_format", v);
 					tag_editor_album_format = '{';
 					tag_editor_album_format += v;
 					tag_editor_album_format += '}';
@@ -760,9 +756,8 @@ void NcmpcppConfig::Read()
 			}
 			else if (cl.find("alternative_header_first_line_format") != std::string::npos)
 			{
-				if (!v.empty())
+				if (!v.empty() && MPD::Song::isFormatOk("alternative_header_first_line_format", v))
 				{
-					MPD::Song::ValidateFormat("alternative_header_first_line_format", v);
 					new_header_first_line = '{';
 					new_header_first_line += v;
 					new_header_first_line += '}';
@@ -770,9 +765,8 @@ void NcmpcppConfig::Read()
 			}
 			else if (cl.find("alternative_header_second_line_format") != std::string::npos)
 			{
-				if (!v.empty())
+				if (!v.empty() && MPD::Song::isFormatOk("alternative_header_second_line_format", v))
 				{
-					MPD::Song::ValidateFormat("alternative_header_second_line_format", v);
 					new_header_second_line = '{';
 					new_header_second_line += v;
 					new_header_second_line += '}';
@@ -1096,9 +1090,8 @@ void NcmpcppConfig::Read()
 			}
 			else if (cl.find("song_window_title_format") != std::string::npos)
 			{
-				if (!v.empty())
+				if (!v.empty() && MPD::Song::isFormatOk("song_window_title_format", v))
 				{
-					MPD::Song::ValidateFormat("song_window_title_format", v);
 					song_window_title_format = '{';
 					song_window_title_format += v;
 					song_window_title_format += '}';

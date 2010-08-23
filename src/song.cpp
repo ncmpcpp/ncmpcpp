@@ -25,6 +25,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <iomanip>
+#include <iostream>
 #include <sstream>
 #include <stdexcept>
 
@@ -492,7 +493,7 @@ std::string MPD::Song::ShowTime(int length)
 	return ss.str();
 }
 
-void MPD::Song::ValidateFormat(const std::string &type, const std::string &s)
+bool MPD::Song::isFormatOk(const std::string &type, const std::string &s)
 {
 	int braces = 0;
 	for (std::string::const_iterator it = s.begin(); it != s.end(); ++it)
@@ -503,7 +504,22 @@ void MPD::Song::ValidateFormat(const std::string &type, const std::string &s)
 			--braces;
 	}
 	if (braces)
-		FatalError(type + ": number of opening and closing braces does not equal!");
+	{
+		std::cerr << type << ": number of opening and closing braces does not equal!\n";
+		return false;
+	}
+	
+	for (size_t i = s.find('%'); i != std::string::npos; i = s.find('%', i))
+	{
+		if (isdigit(s[++i]))
+			while (isdigit(s[++i])) { }
+		if (!toGetFunction(s[i]))
+		{
+			std::cerr << type << ": invalid character at position " << IntoStr(s[i]) << ": '" << s[i] << "'\n";
+			return false;
+		}
+	}
+	return true;
 }
 
 void MPD::Song::SetHashAndSlash()
