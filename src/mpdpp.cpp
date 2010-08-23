@@ -1027,6 +1027,15 @@ bool MPD::Connection::DeletePlaylist(const std::string &name)
 	}
 }
 
+bool MPD::Connection::LoadPlaylist(const std::string &name)
+{
+	if (!itsConnection)
+		return false;
+	assert(!isCommandsListEnabled);
+	GoBusy();
+	return mpd_run_load(itsConnection, name.c_str());
+}
+
 int MPD::Connection::SavePlaylist(const std::string &name)
 {
 	if (!itsConnection)

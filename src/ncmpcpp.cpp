@@ -1235,13 +1235,21 @@ int main(int argc, char *argv[])
 			UnlockStatusbar();
 			if (!path.empty())
 			{
+				Statusbar() << "Adding...";
+				wFooter->Refresh();
 				if (myScreen == myPlaylistEditor)
 				{
 					Mpd.AddToPlaylist(myPlaylistEditor->Playlists->Current(), path);
 					myPlaylistEditor->Content->Clear(); // make it refetch content of playlist
 				}
 				else
-					Mpd.Add(path);
+				{
+					static const char lastfm_url[] = "lastfm://";
+					if (path.compare(0, static_strlen(lastfm_url), lastfm_url) == 0)
+						Mpd.LoadPlaylist(path);
+					else
+						Mpd.Add(path);
+				}
 				UpdateStatusImmediately = 1;
 			}
 		}
