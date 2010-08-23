@@ -1805,6 +1805,28 @@ int main(int argc, char *argv[])
 		else if (Keypressed(input, Key.Crop))
 		{
 			CHECK_PLAYLIST_FOR_FILTERING;
+			if (Config.ask_before_clearing_main_playlist)
+			{
+				LockStatusbar();
+				Statusbar() << "Do you really want to crop playlist";
+				if (myScreen->ActiveWindow() == myPlaylistEditor->Content)
+					*wFooter << " \"" << myPlaylistEditor->Playlists->Current() << "\"";
+				*wFooter << " ? [" << fmtBold << 'y' << fmtBoldEnd << '/' << fmtBold << 'n' << fmtBoldEnd << "] ";
+				wFooter->Refresh();
+				int answer = 0;
+				do
+				{
+					TraceMpdStatus();
+					wFooter->ReadKey(answer);
+				}
+				while (answer != 'y' && answer != 'n');
+				UnlockStatusbar();
+				if (answer != 'y')
+				{
+					ShowMessage("Aborted!");
+					continue;
+				}
+			}
 			if (myPlaylist->Items->hasSelected())
 			{
 				Mpd.StartCommandsList();
