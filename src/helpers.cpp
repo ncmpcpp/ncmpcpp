@@ -43,7 +43,7 @@ bool ConnectToMPD()
 void ParseArgv(int argc, char **argv)
 {
 	bool quit = 0;
-	std::string now_playing_format = "{{(%l) }{{%a - }%t}}|{%f}}";
+	std::string now_playing_format = "{{{(%l) }{{%a - }%t}}|{%f}}";
 	
 	for (int i = 1; i < argc; ++i)
 	{
@@ -147,7 +147,7 @@ void ParseArgv(int argc, char **argv)
 			{
 				if (argc > ++i)
 				{
-					if (MPD::Song::isFormatOk("now-playing format", now_playing_format))
+					if (MPD::Song::isFormatOk("now-playing format", argv[i]))
 					{
 						// apply additional pair of braces
 						now_playing_format = "{";
