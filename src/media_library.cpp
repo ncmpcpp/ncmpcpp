@@ -492,6 +492,7 @@ void MediaLibrary::GetSelectedSongs(MPD::SongList &v)
 			Mpd.StartSearch(1);
 			Mpd.AddSearch(Config.media_lib_primary_tag, locale_to_utf_cpy(Artists->at(*it)));
 			Mpd.CommitSearch(list);
+			sort(list.begin(), list.end(), SortAllTracks);
 			for (MPD::SongList::const_iterator sIt = list.begin(); sIt != list.end(); ++sIt)
 				v.push_back(new MPD::Song(**sIt));
 			FreeSongList(list);
