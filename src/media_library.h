@@ -28,10 +28,10 @@ class MediaLibrary : public Screen<Window>
 {
 	struct SearchConstraints
 	{
-		SearchConstraints(const std::string &artist, const std::string &album, const std::string &year) : Artist(artist), Album(album), Year(year) { }
+		SearchConstraints(const std::string &tag, const std::string &album, const std::string &year) : PrimaryTag(tag), Album(album), Year(year) { }
 		SearchConstraints(const std::string &album, const std::string &year) : Album(album), Year(year) { }
 		
-		std::string Artist;
+		std::string PrimaryTag;
 		std::string Album;
 		std::string Year;
 	};

@@ -311,7 +311,7 @@ void MediaLibrary::Update()
 		MPD::SongList list;
 		
 		Mpd.StartSearch(1);
-		Mpd.AddSearch(Config.media_lib_primary_tag, locale_to_utf_cpy(hasTwoColumns ? Albums->Current().Artist : Artists->Current()));
+		Mpd.AddSearch(Config.media_lib_primary_tag, locale_to_utf_cpy(hasTwoColumns ? Albums->Current().PrimaryTag : Artists->Current()));
 		if (Albums->Empty()) // left for compatibility with <mpd-0.14
 		{
 			*Albums << XY(0, 0) << "No albums found.";
@@ -511,7 +511,7 @@ void MediaLibrary::GetSelectedSongs(MPD::SongList &v)
 				MPD::SongList list;
 				Mpd.StartSearch(1);
 				Mpd.AddSearch(Config.media_lib_primary_tag, hasTwoColumns
-						?  Albums->at(*it).Artist
+						?  Albums->at(*it).PrimaryTag
 						: locale_to_utf_cpy(Artists->Current()));
 				Mpd.AddSearch(MPD_TAG_ALBUM, Albums->at(*it).Album);
 				Mpd.AddSearch(MPD_TAG_DATE, Albums->at(*it).Year);
@@ -648,13 +648,13 @@ void MediaLibrary::LocateSong(const MPD::Song &s)
 	
 	std::string album = s.GetAlbum();
 	std::string date = s.GetDate();
-	if ((hasTwoColumns && Albums->Current().Artist != primary_tag)
+	if ((hasTwoColumns && Albums->Current().PrimaryTag != primary_tag)
 	||  album != Albums->Current().Album
 	||  date != Albums->Current().Year)
 	{
 		for (size_t i = 0; i < Albums->Size(); ++i)
 		{
-			if ((!hasTwoColumns || (*Albums)[i].Artist == primary_tag)
+			if ((!hasTwoColumns || (*Albums)[i].PrimaryTag == primary_tag)
 			&&   album == (*Albums)[i].Album
 			&&   date == (*Albums)[i].Year)
 			{
@@ -734,7 +734,7 @@ std::string MediaLibrary::AlbumToString(const SearchConstraints &sc, void *ptr)
 		return "All tracks";
 	std::string result;
 	if (static_cast<MediaLibrary *>(ptr)->hasTwoColumns)
-		(result += sc.Artist.empty() ? Config.empty_tag : sc.Artist) += " - ";
+		(result += sc.PrimaryTag.empty() ? Config.empty_tag : sc.PrimaryTag) += " - ";
 	if ((!static_cast<MediaLibrary *>(ptr)->hasTwoColumns || Config.media_lib_primary_tag != MPD_TAG_DATE) && !sc.Year.empty())
 		((result += "(") += sc.Year) += ") ";
 	result += sc.Album.empty() ? "<no album>" : sc.Album;
@@ -755,7 +755,7 @@ bool MediaLibrary::SearchConstraintsSorting::operator()(const SearchConstraints 
 {
 	int result;
 	CaseInsensitiveStringComparison cmp;
-	result = cmp(a.Artist, b.Artist);
+	result = cmp(a.PrimaryTag, b.PrimaryTag);
 	if (result != 0)
 		return result < 0;
 	result = cmp(a.Year, b.Year);
