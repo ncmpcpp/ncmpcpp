@@ -63,7 +63,7 @@ void MediaLibrary::Init()
 	Artists->CenteredCursor(Config.centered_cursor);
 	Artists->SetSelectPrefix(&Config.selected_item_prefix);
 	Artists->SetSelectSuffix(&Config.selected_item_suffix);
-	Artists->SetItemDisplayer(Display::Generic);
+	Artists->SetItemDisplayer(DisplayPrimaryTags);
 	
 	Albums = new Menu<SearchConstraints>(itsMiddleColStartX, MainStartY, itsMiddleColWidth, MainHeight, "Albums", Config.main_color, brNone);
 	Albums->HighlightColor(Config.main_highlight_color);
@@ -191,11 +191,8 @@ void MediaLibrary::Update()
 		sort(list.begin(), list.end(), CaseInsensitiveSorting());
 		for (MPD::TagList::iterator it = list.begin(); it != list.end(); ++it)
 		{
-			if (!it->empty())
-			{
-				utf_to_locale(*it);
-				Artists->AddOption(*it);
-			}
+			utf_to_locale(*it);
+			Artists->AddOption(*it);
 		}
 		Artists->Window::Clear();
 		Artists->Refresh();
@@ -257,8 +254,6 @@ void MediaLibrary::Update()
 		Mpd.GetList(artists, Config.media_lib_primary_tag);
 		for (MPD::TagList::iterator i = artists.begin(); i != artists.end(); ++i)
 		{
-			if (i->empty())
-				continue;
 			MPD::TagList albums;
 			Mpd.StartFieldSearch(MPD_TAG_ALBUM);
 			Mpd.AddSearch(Config.media_lib_primary_tag, *i);
@@ -738,8 +733,8 @@ std::string MediaLibrary::AlbumToString(const SearchConstraints &sc, void *ptr)
 	if (sc.Year == AllTracksMarker)
 		return "All tracks";
 	std::string result;
-	if (!sc.Artist.empty())
-		(result += sc.Artist) += " - ";
+	if (static_cast<MediaLibrary *>(ptr)->hasTwoColumns)
+		(result += sc.Artist.empty() ? Config.empty_tag : sc.Artist) += " - ";
 	if ((!static_cast<MediaLibrary *>(ptr)->hasTwoColumns || Config.media_lib_primary_tag != MPD_TAG_DATE) && !sc.Year.empty())
 		((result += "(") += sc.Year) += ") ";
 	result += sc.Album.empty() ? "<no album>" : sc.Album;
@@ -751,16 +746,18 @@ void MediaLibrary::DisplayAlbums(const SearchConstraints &sc, void *, Menu<Searc
 	*menu << AlbumToString(sc, 0);
 }
 
+void MediaLibrary::DisplayPrimaryTags(const std::string &tag, void *, Menu<std::string> *menu)
+{
+	*menu << (!tag.empty() ? tag : Config.empty_tag);
+}
+
 bool MediaLibrary::SearchConstraintsSorting::operator()(const SearchConstraints &a, const SearchConstraints &b) const
 {
 	int result;
 	CaseInsensitiveStringComparison cmp;
-	if (!a.Artist.empty() || b.Artist.empty())
-	{
-		result = cmp(a.Artist, b.Artist);
-		if (result != 0)
-			return result < 0;
-	}
+	result = cmp(a.Artist, b.Artist);
+	if (result != 0)
+		return result < 0;
 	result = cmp(a.Year, b.Year);
 	return (result == 0 ? cmp(a.Album, b.Album) : result) < 0;
 }

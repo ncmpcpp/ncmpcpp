@@ -86,6 +86,7 @@ class MediaLibrary : public Screen<Window>
 		
 		static std::string AlbumToString(const SearchConstraints &, void *);
 		static void DisplayAlbums(const SearchConstraints &, void *, Menu<SearchConstraints> *);
+		static void DisplayPrimaryTags(const std::string &artist, void *, Menu<std::string> *menu);
 		
 		static bool SortSongsByTrack(MPD::Song *, MPD::Song *);
 		static bool SortAllTracks(MPD::Song *, MPD::Song *);
