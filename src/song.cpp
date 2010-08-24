@@ -515,7 +515,7 @@ bool MPD::Song::isFormatOk(const std::string &type, const std::string &s)
 			while (isdigit(s[++i])) { }
 		if (!toGetFunction(s[i]))
 		{
-			std::cerr << type << ": invalid character at position " << IntoStr(s[i]) << ": '" << s[i] << "'\n";
+			std::cerr << type << ": invalid character at position " << IntoStr(i+1) << ": '" << s[i] << "'\n";
 			return false;
 		}
 	}
