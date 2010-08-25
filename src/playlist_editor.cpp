@@ -45,7 +45,7 @@ void PlaylistEditor::Init()
 	RightColumnStartX = LeftColumnWidth+1;
 	RightColumnWidth = COLS-LeftColumnWidth-1;
 	
-	Playlists = new Menu<std::string>(0, MainStartY, LeftColumnWidth, MainHeight, "Playlists", Config.main_color, brNone);
+	Playlists = new Menu<std::string>(0, MainStartY, LeftColumnWidth, MainHeight, Config.titles_visibility ? "Playlists" : "", Config.main_color, brNone);
 	Playlists->HighlightColor(Config.active_column_color);
 	Playlists->CyclicScrolling(Config.use_cyclic_scrolling);
 	Playlists->CenteredCursor(Config.centered_cursor);
@@ -53,7 +53,7 @@ void PlaylistEditor::Init()
 	
 	static Display::ScreenFormat sf = { this, &Config.song_list_format };
 	
-	Content = new Menu<MPD::Song>(RightColumnStartX, MainStartY, RightColumnWidth, MainHeight, "Playlist's content", Config.main_color, brNone);
+	Content = new Menu<MPD::Song>(RightColumnStartX, MainStartY, RightColumnWidth, MainHeight, Config.titles_visibility ? "Playlist's content" : "", Config.main_color, brNone);
 	Content->HighlightColor(Config.main_highlight_color);
 	Content->CyclicScrolling(Config.use_cyclic_scrolling);
 	Content->CenteredCursor(Config.centered_cursor);
@@ -139,9 +139,9 @@ void PlaylistEditor::Update()
 		MPD::SongList list;
 		Mpd.GetPlaylistContent(locale_to_utf_cpy(Playlists->Current()), list);
 		if (!list.empty())
-			Content->SetTitle("Playlist's content (" + IntoStr(list.size()) + " item" + (list.size() == 1 ? ")" : "s)"));
+			Content->SetTitle(Config.titles_visibility ? "Playlist's content (" + IntoStr(list.size()) + " item" + (list.size() == 1 ? ")" : "s)") : "");
 		else
-			Content->SetTitle("Playlist's content");
+			Content->SetTitle(Config.titles_visibility ? "Playlist's content" : "");
 		bool bold = 0;
 		for (MPD::SongList::const_iterator it = list.begin(); it != list.end(); ++it)
 		{

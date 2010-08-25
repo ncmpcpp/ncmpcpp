@@ -155,7 +155,7 @@ void SearchEngine::EnterPressed()
 		if (!w->Back().first)
 		{
 			if (Config.columns_in_search_engine)
-				w->SetTitle(Display::Columns());
+				w->SetTitle(Config.titles_visibility ? Display::Columns() : "");
 			size_t found = w->Size()-SearchEngine::StaticOptions;
 			found += 3; // don't count options inserted below
 			w->InsertSeparator(ResetButton+1);

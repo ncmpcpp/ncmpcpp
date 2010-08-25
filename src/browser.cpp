@@ -59,7 +59,7 @@ void Browser::Init()
 {
 	static Display::ScreenFormat sf = { this, &Config.song_list_format };
 	
-	w = new Menu<MPD::Item>(0, MainStartY, COLS, MainHeight, Config.columns_in_browser ? Display::Columns() : "", Config.main_color, brNone);
+	w = new Menu<MPD::Item>(0, MainStartY, COLS, MainHeight, Config.columns_in_browser && Config.titles_visibility ? Display::Columns() : "", Config.main_color, brNone);
 	w->HighlightColor(Config.main_highlight_color);
 	w->CyclicScrolling(Config.use_cyclic_scrolling);
 	w->CenteredCursor(Config.centered_cursor);

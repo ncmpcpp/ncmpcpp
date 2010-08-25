@@ -215,6 +215,7 @@ struct NcmpcppConfig
 	bool header_visibility;
 	bool header_text_scrolling;
 	bool statusbar_visibility;
+	bool titles_visibility;
 	bool centered_cursor;
 	bool screen_switcher_previous;
 	bool autocenter_mode;

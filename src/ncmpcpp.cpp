@@ -1352,7 +1352,7 @@ int main(int argc, char *argv[])
 				if (Config.columns_in_playlist)
 				{
 					myPlaylist->Items->SetItemDisplayer(Display::SongsInColumns);
-					myPlaylist->Items->SetTitle(Display::Columns());
+					myPlaylist->Items->SetTitle(Config.titles_visibility ? Display::Columns() : "");
 					myPlaylist->Items->SetGetStringFunction(Playlist::SongInColumnsToString);
 				}
 				else
@@ -1366,7 +1366,7 @@ int main(int argc, char *argv[])
 			{
 				Config.columns_in_browser = !Config.columns_in_browser;
 				ShowMessage("Browser display mode: %s", Config.columns_in_browser ? "Columns" : "Classic");
-				myBrowser->Main()->SetTitle(Config.columns_in_browser ? Display::Columns() : "");
+				myBrowser->Main()->SetTitle(Config.columns_in_browser && Config.titles_visibility ? Display::Columns() : "");
 				
 			}
 			else if (myScreen == mySearcher)
@@ -1374,7 +1374,7 @@ int main(int argc, char *argv[])
 				Config.columns_in_search_engine = !Config.columns_in_search_engine;
 				ShowMessage("Search engine display mode: %s", Config.columns_in_search_engine ? "Columns" : "Classic");
 				if (mySearcher->Main()->Size() > SearchEngine::StaticOptions)
-					mySearcher->Main()->SetTitle(Config.columns_in_search_engine ? Display::Columns() : "");
+					mySearcher->Main()->SetTitle(Config.columns_in_search_engine && Config.titles_visibility ? Display::Columns() : "");
 			}
 		}
 		else if (Keypressed(input, Key.ToggleSeparatorsInPlaylist))
@@ -2102,7 +2102,7 @@ int main(int argc, char *argv[])
 				{
 					Config.media_lib_primary_tag = new_tagitem;
 					std::string item_type = IntoStr(Config.media_lib_primary_tag);
-					myLibrary->Artists->SetTitle(item_type + "s");
+					myLibrary->Artists->SetTitle(Config.titles_visibility ? item_type + "s" : "");
 					myLibrary->Artists->Reset();
 					ToLower(item_type);
 					if (myLibrary->Columns() == 2)
@@ -2110,7 +2110,7 @@ int main(int argc, char *argv[])
 						myLibrary->Songs->Clear();
 						myLibrary->Albums->Reset();
 						myLibrary->Albums->Clear();
-						myLibrary->Albums->SetTitle("Albums (sorted by " + item_type + ")");
+						myLibrary->Albums->SetTitle(Config.titles_visibility ? "Albums (sorted by " + item_type + ")" : "");
 						myLibrary->Albums->Display();
 					}
 					else

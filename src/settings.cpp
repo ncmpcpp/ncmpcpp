@@ -378,6 +378,7 @@ void NcmpcppConfig::SetDefaults()
 	header_visibility = true;
 	header_text_scrolling = true;
 	statusbar_visibility = true;
+	titles_visibility = true;
 	centered_cursor = false;
 	screen_switcher_previous = false;
 	autocenter_mode = false;
@@ -898,6 +899,10 @@ void NcmpcppConfig::Read()
 			else if (cl.find("statusbar_visibility") != std::string::npos)
 			{
 				statusbar_visibility = v == "yes";
+			}
+			else if (cl.find("titles_visibility") != std::string::npos)
+			{
+				titles_visibility = v == "yes";
 			}
 			else if (cl.find("screen_switcher_mode") != std::string::npos)
 			{

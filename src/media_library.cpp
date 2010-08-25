@@ -57,7 +57,7 @@ void MediaLibrary::Init()
 	itsRightColWidth = COLS-COLS/3*2-1;
 	itsRightColStartX = itsLeftColWidth+itsMiddleColWidth+2;
 	
-	Artists = new Menu<std::string>(0, MainStartY, itsLeftColWidth, MainHeight, IntoStr(Config.media_lib_primary_tag) + "s", Config.main_color, brNone);
+	Artists = new Menu<std::string>(0, MainStartY, itsLeftColWidth, MainHeight, Config.titles_visibility ? IntoStr(Config.media_lib_primary_tag) + "s" : "", Config.main_color, brNone);
 	Artists->HighlightColor(Config.active_column_color);
 	Artists->CyclicScrolling(Config.use_cyclic_scrolling);
 	Artists->CenteredCursor(Config.centered_cursor);
@@ -65,7 +65,7 @@ void MediaLibrary::Init()
 	Artists->SetSelectSuffix(&Config.selected_item_suffix);
 	Artists->SetItemDisplayer(DisplayPrimaryTags);
 	
-	Albums = new Menu<SearchConstraints>(itsMiddleColStartX, MainStartY, itsMiddleColWidth, MainHeight, "Albums", Config.main_color, brNone);
+	Albums = new Menu<SearchConstraints>(itsMiddleColStartX, MainStartY, itsMiddleColWidth, MainHeight, Config.titles_visibility ? "Albums" : "", Config.main_color, brNone);
 	Albums->HighlightColor(Config.main_highlight_color);
 	Albums->CyclicScrolling(Config.use_cyclic_scrolling);
 	Albums->CenteredCursor(Config.centered_cursor);
@@ -77,7 +77,7 @@ void MediaLibrary::Init()
 	
 	static Display::ScreenFormat sf = { this, &Config.song_library_format };
 	
-	Songs = new Menu<MPD::Song>(itsRightColStartX, MainStartY, itsRightColWidth, MainHeight, "Songs", Config.main_color, brNone);
+	Songs = new Menu<MPD::Song>(itsRightColStartX, MainStartY, itsRightColWidth, MainHeight, Config.titles_visibility ? "Songs" : "", Config.main_color, brNone);
 	Songs->HighlightColor(Config.main_highlight_color);
 	Songs->CyclicScrolling(Config.use_cyclic_scrolling);
 	Songs->CenteredCursor(Config.centered_cursor);
@@ -152,12 +152,17 @@ void MediaLibrary::SwitchTo()
 			{
 				if (w == Artists)
 					NextColumn();
-				std::string item_type = IntoStr(Config.media_lib_primary_tag);
-				ToLower(item_type);
-				Albums->SetTitle("Albums (sorted by " + item_type + ")");
+				if (Config.titles_visibility)
+				{
+					std::string item_type = IntoStr(Config.media_lib_primary_tag);
+					ToLower(item_type);
+					Albums->SetTitle("Albums (sorted by " + item_type + ")");
+				}
+				else
+					Albums->SetTitle("");
 			}
 			else
-				Albums->SetTitle("Albums");
+				Albums->SetTitle(Config.titles_visibility ? "Albums" : "");
 		}
 	}
 	

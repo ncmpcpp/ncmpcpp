@@ -64,14 +64,14 @@ void TagEditor::Init()
 {
 	SetDimensions();
 	
-	Albums = new Menu<string_pair>(0, MainStartY, LeftColumnWidth, MainHeight, "Albums", Config.main_color, brNone);
+	Albums = new Menu<string_pair>(0, MainStartY, LeftColumnWidth, MainHeight, Config.titles_visibility ? "Albums" : "", Config.main_color, brNone);
 	Albums->HighlightColor(Config.active_column_color);
 	Albums->CyclicScrolling(Config.use_cyclic_scrolling);
 	Albums->CenteredCursor(Config.centered_cursor);
 	Albums->SetItemDisplayer(Display::Pairs);
 	Albums->SetGetStringFunction(StringPairToString);
 	
-	Dirs = new Menu<string_pair>(0, MainStartY, LeftColumnWidth, MainHeight, "Directories", Config.main_color, brNone);
+	Dirs = new Menu<string_pair>(0, MainStartY, LeftColumnWidth, MainHeight, Config.titles_visibility ? "Directories" : "", Config.main_color, brNone);
 	Dirs->HighlightColor(Config.active_column_color);
 	Dirs->CyclicScrolling(Config.use_cyclic_scrolling);
 	Dirs->CenteredCursor(Config.centered_cursor);
@@ -80,7 +80,7 @@ void TagEditor::Init()
 	
 	LeftColumn = Config.albums_in_tag_editor ? Albums : Dirs;
 	
-	TagTypes = new Menu<std::string>(MiddleColumnStartX, MainStartY, MiddleColumnWidth, MainHeight, "Tag types", Config.main_color, brNone);
+	TagTypes = new Menu<std::string>(MiddleColumnStartX, MainStartY, MiddleColumnWidth, MainHeight, Config.titles_visibility ? "Tag types" : "", Config.main_color, brNone);
 	TagTypes->HighlightColor(Config.main_highlight_color);
 	TagTypes->CyclicScrolling(Config.use_cyclic_scrolling);
 	TagTypes->CenteredCursor(Config.centered_cursor);
@@ -91,7 +91,8 @@ void TagEditor::Init()
 	TagTypes->AddSeparator();
 	TagTypes->AddOption("Filename");
 	TagTypes->AddSeparator();
-	TagTypes->AddOption("Options", 1, 1);
+	if (Config.titles_visibility)
+		TagTypes->AddOption("Options", 1, 1);
 	TagTypes->AddSeparator();
 	TagTypes->AddOption("Reset");
 	TagTypes->AddOption("Save");
@@ -99,7 +100,7 @@ void TagEditor::Init()
 	TagTypes->AddOption("Capitalize First Letters");
 	TagTypes->AddOption("lower all letters");
 	
-	Tags = new Menu<MPD::Song>(RightColumnStartX, MainStartY, RightColumnWidth, MainHeight, "Tags", Config.main_color, brNone);
+	Tags = new Menu<MPD::Song>(RightColumnStartX, MainStartY, RightColumnWidth, MainHeight, Config.titles_visibility ? "Tags" : "", Config.main_color, brNone);
 	Tags->HighlightColor(Config.main_highlight_color);
 	Tags->CyclicScrolling(Config.use_cyclic_scrolling);
 	Tags->CenteredCursor(Config.centered_cursor);

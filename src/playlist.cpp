@@ -49,7 +49,7 @@ void Playlist::Init()
 {
 	static Display::ScreenFormat sf = { this, &Config.song_list_format };
 	
-	Items = new Menu<MPD::Song>(0, MainStartY, COLS, MainHeight, Config.columns_in_playlist ? Display::Columns() : "", Config.main_color, brNone);
+	Items = new Menu<MPD::Song>(0, MainStartY, COLS, MainHeight, Config.columns_in_playlist && Config.titles_visibility ? Display::Columns() : "", Config.main_color, brNone);
 	Items->CyclicScrolling(Config.use_cyclic_scrolling);
 	Items->CenteredCursor(Config.centered_cursor);
 	Items->HighlightColor(Config.main_highlight_color);
@@ -118,7 +118,7 @@ void Playlist::Resize()
 {
 	Items->Resize(COLS, MainHeight);
 	Items->MoveTo(0, MainStartY);
-	Items->SetTitle(Config.columns_in_playlist ? Display::Columns() : "");
+	Items->SetTitle(Config.columns_in_playlist && Config.titles_visibility ? Display::Columns() : "");
 	if (w == SortDialog) // if sorting window is active, playlist needs refreshing
 		Items->Display();
 	

@@ -285,6 +285,8 @@
 #
 #statusbar_visibility = "yes"
 #
+#titles_visibility = "yes"
+#
 #header_text_scrolling = "yes"
 #
 #fancy_scrolling = "yes"
