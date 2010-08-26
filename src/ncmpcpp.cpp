@@ -265,6 +265,9 @@ int main(int argc, char *argv[])
 	
 	bool real_statusbar_visibility = Config.statusbar_visibility;
 	
+	if (!Config.titles_visibility)
+		wattron(stdscr, COLOR_PAIR(Config.main_color));
+	
 	if (Config.new_design)
 		Config.statusbar_visibility = 0;
 	
