@@ -214,7 +214,7 @@ void Lastfm::Refetch()
 
 bool Lastfm::SetArtistInfoArgs(const std::string &artist, const std::string &lang)
 {
-	if (isDownloadInProgress)
+	if (isDownloading())
 		return false;
 	
 	itsService.reset(new ArtistInfo);

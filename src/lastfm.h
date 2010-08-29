@@ -53,6 +53,7 @@ class Lastfm : public Screen<Scrollpad>
 		
 		void Refetch();
 		
+		bool isDownloading() { return isDownloadInProgress && !isReadyToTake; }
 		bool SetArtistInfoArgs(const std::string &artist, const std::string &lang = "");
 		
 	protected:

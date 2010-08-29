@@ -2142,7 +2142,7 @@ int main(int argc, char *argv[])
 #		ifdef HAVE_CURL_CURL_H
 		else if (Keypressed(input, Key.ArtistInfo))
 		{
-			if (myScreen == myLastfm)
+			if (myScreen == myLastfm || myLastfm->isDownloading())
 			{
 				myLastfm->SwitchTo();
 				continue;
