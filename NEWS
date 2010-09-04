@@ -1,3 +1,22 @@
+ncmpcpp-0.5.5
+
+* new feature: select album around cursor
+* new feature: 'replay' function
+* fixed feature: display separators between albums
+* playlist: support for adding last.fm streams
+* browser: support for operations on m3u playlists not created by MPD
+* browser: support for deleting group of selected items
+* media library: show songs with primary tag unspecified
+* lyrics: new fetching system
+* lyrics: support for storing lyrics in song's directory
+* artist info: support for preffered language
+* settings: support for custom visualization color
+* settings: support for 'empty' part of progressbar in progressbar_look
+* settings: new config option: titles_visibility
+* song format: support for limiting maximal length of a tag
+* a lot of minor fixes
+
+
 ncmpcpp-0.5.4
 
 * new feature: toggle bitrate visibility at runtime
