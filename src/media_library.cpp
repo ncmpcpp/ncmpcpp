@@ -196,6 +196,8 @@ void MediaLibrary::Update()
 		sort(list.begin(), list.end(), CaseInsensitiveSorting());
 		for (MPD::TagList::iterator it = list.begin(); it != list.end(); ++it)
 		{
+			if (it->empty() && !Config.media_library_display_empty_tag)
+				continue;
 			utf_to_locale(*it);
 			Artists->AddOption(*it);
 		}
