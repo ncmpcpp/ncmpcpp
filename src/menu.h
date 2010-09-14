@@ -1000,7 +1000,8 @@ template <typename T> void NCurses::Menu<T>::ReverseSelection(size_t beginning)
 {
 	option_iterator it = itsOptionsPtr->begin()+beginning;
 	for (size_t i = beginning; i < Size(); ++i, ++it)
-		(*it)->isSelected = !(*it)->isSelected && !(*it)->isStatic;
+		if (*it)
+			(*it)->isSelected = !(*it)->isSelected && !(*it)->isStatic;
 }
 
 template <typename T> bool NCurses::Menu<T>::Search(const std::string &constraint, size_t beginning, int flags)
