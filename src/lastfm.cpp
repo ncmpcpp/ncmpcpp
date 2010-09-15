@@ -201,15 +201,13 @@ void Lastfm::Save(const std::string &data)
 
 void Lastfm::Refetch()
 {
-	if (!remove(itsFilename.c_str()))
-	{
-		Load();
-	}
-	else
+	if (remove(itsFilename.c_str()) && errno != ENOENT)
 	{
 		static const char msg[] = "Couldn't remove \"%s\": %s";
 		ShowMessage(msg, Shorten(TO_WSTRING(itsFilename), COLS-static_strlen(msg)-25).c_str(), strerror(errno));
+		return;
 	}
+	Load();
 }
 
 bool Lastfm::SetArtistInfoArgs(const std::string &artist, const std::string &lang)

@@ -303,15 +303,13 @@ void Lyrics::Save(const std::string &lyrics)
 
 void Lyrics::Refetch()
 {
-	if (!remove(itsFilename.c_str()))
-	{
-		Load();
-	}
-	else
+	if (remove(itsFilename.c_str()) && errno != ENOENT)
 	{
 		static const char msg[] = "Couldn't remove \"%s\": %s";
 		ShowMessage(msg, Shorten(TO_WSTRING(itsFilename), COLS-static_strlen(msg)-25).c_str(), strerror(errno));
+		return;
 	}
+	Load();
 }
 
 #ifdef HAVE_CURL_CURL_H
