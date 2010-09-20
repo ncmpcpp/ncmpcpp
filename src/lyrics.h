@@ -21,6 +21,8 @@
 #ifndef _LYRICS_H
 #define _LYRICS_H
 
+#include <pthread.h>
+
 #include "ncmpcpp.h"
 #include "mpdpp.h"
 #include "screen.h"

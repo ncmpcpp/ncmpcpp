@@ -23,6 +23,7 @@
 #ifdef HAVE_CURL_CURL_H
 
 #include <cstdlib>
+#include <pthread.h>
 
 namespace
 {

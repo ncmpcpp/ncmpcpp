@@ -28,6 +28,7 @@
 #ifdef HAVE_CURL_CURL_H
 
 #include <memory>
+#include <pthread.h>
 
 #include "lastfm_service.h"
 #include "screen.h"
