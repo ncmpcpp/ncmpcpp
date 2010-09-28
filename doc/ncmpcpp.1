@@ -55,7 +55,7 @@ Note: COLOR has to be the name (not a number) of one of colors 1-8 from SONG FOR
 Supported configuration options:
 .TP 
 .B mpd_host = HOST
-Connect to MPD running on specified host/unix socket.
+Connect to MPD running on specified host/unix socket. When HOST starts with a '/', it is assumed to be a unix socket.
 .TP 
 .B mpd_music_dir = PATH
 Search for files in specified directory. This is needed for tag editor to work.
