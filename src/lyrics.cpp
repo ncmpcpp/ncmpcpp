@@ -111,16 +111,18 @@ void Lyrics::SwitchTo()
 	
 	if (const MPD::Song *s = myScreen->CurrentSong())
 	{
-		myOldScreen = myScreen;
-		myScreen = this;
-		
 		if (!s->GetArtist().empty() && !s->GetTitle().empty())
 		{
+			myOldScreen = myScreen;
+			myScreen = this;
+			
 			itsSong = *s;
 			Load();
+			
+			Global::RedrawHeader = 1;
 		}
-		
-		Global::RedrawHeader = 1;
+		else
+			ShowMessage("Song must have both artist and title tag set!");
 	}
 }
 
