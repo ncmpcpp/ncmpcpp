@@ -251,11 +251,19 @@ template <typename WindowType> void Screen<WindowType>::MouseButtonPressed(MEVEN
 {
 	if (me.bstate & BUTTON2_PRESSED)
 	{
-		Scroll(wPageDown);
+		if (Config.mouse_list_scroll_whole_page)
+			Scroll(wPageDown);
+		else
+			for (size_t i = 0; i < Config.lines_scrolled; ++i)
+				Scroll(wDown);
 	}
 	else if (me.bstate & BUTTON4_PRESSED)
 	{
-		Scroll(wPageUp);
+		if (Config.mouse_list_scroll_whole_page)
+			Scroll(wPageUp);
+		else
+			for (size_t i = 0; i < Config.lines_scrolled; ++i)
+				Scroll(wUp);
 	}
 }
 
