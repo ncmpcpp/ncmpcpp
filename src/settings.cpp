@@ -333,7 +333,7 @@ void NcmpcppConfig::SetDefaults()
 {
 	mpd_host = "localhost";
 	empty_tag = "<empty>";
-	song_list_columns_format = "(7f)[green]{l} (25)[cyan]{a} (40)[]{t} (30)[red]{b}";
+	song_list_columns_format = "(7f)[green]{l} (25)[cyan]{a} (40)[]{t|f} (30)[red]{b}";
 	song_list_format = "{{%a - }{%t}|{$8%f$9}$R{$3(%l)$9}}";
 	song_status_format = "{{{%a{ \"%b\"{ (%y)}} - }{%t}}|{%f}}";
 	song_status_format_no_colors = song_status_format;
