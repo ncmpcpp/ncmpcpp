@@ -97,6 +97,16 @@ namespace
 	bool order_resize = 0;
 	size_t header_height, footer_start_y, footer_height;
 	
+	void check_screen_min_size()
+	{
+		if (COLS < 20 || MainHeight < 3)
+		{
+			DestroyScreen();
+			std::cout << "Screen is too small!\n";
+			exit(1);
+		}
+	}
+	
 	void resize_screen()
 	{
 		order_resize = 0;
@@ -122,12 +132,7 @@ namespace
 		RedrawHeader = 1;
 		MainHeight = LINES-(Config.new_design ? 7 : 4);
 		
-		if (COLS < 20 || MainHeight < 3)
-		{
-			DestroyScreen();
-			std::cout << "Screen is too small!\n";
-			exit(1);
-		}
+		check_screen_min_size();
 		
 		if (!Config.header_visibility)
 			MainHeight += 2;
@@ -272,6 +277,7 @@ int main(int argc, char *argv[])
 		Config.statusbar_visibility = 0;
 	
 	SetWindowsDimensions(header_height, footer_start_y, footer_height);
+	check_screen_min_size();
 	
 	wHeader = new Window(0, 0, COLS, header_height, "", Config.header_color, brNone);
 	if (Config.header_visibility || Config.new_design)
