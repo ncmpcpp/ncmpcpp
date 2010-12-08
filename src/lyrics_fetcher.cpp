@@ -38,6 +38,7 @@ LyricsFetcher *lyricsPlugins[] =
 	new LyricstimeFetcher(),
 	new MetrolyricsFetcher(),
 	new LyrcComArFetcher(),
+	new InternetLyricsFetcher(),
 	0
 };
 
@@ -237,6 +238,24 @@ void SonglyricsFetcher::postProcess(std::string &data)
 		data.replace(i, j-i+2, "");
 	data = unescapeHtmlUtf8(data);
 	LyricsFetcher::postProcess(data);
+}
+
+/**********************************************************************/
+
+LyricsFetcher::Result InternetLyricsFetcher::fetch(const std::string &artist, const std::string &title)
+{
+	GoogleLyricsFetcher::fetch(artist, title);
+	LyricsFetcher::Result result;
+	result.first = false;
+	result.second = "The following site may contain lyrics for this song: ";
+	result.second += URL;
+	return result;
+}
+
+bool InternetLyricsFetcher::isURLOk(const std::string &url)
+{
+	URL = url;
+	return false;
 }
 
 #endif // HAVE_CURL_CURL_H

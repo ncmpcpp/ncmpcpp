@@ -160,6 +160,22 @@ struct Sing365Fetcher : public GoogleLyricsFetcher
 		virtual const char *getCloseTag() { return "<div align"; }
 };
 
+struct InternetLyricsFetcher : public GoogleLyricsFetcher
+{
+	virtual const char *name() { return "the Internet"; }
+	virtual Result fetch(const std::string &artist, const std::string &title);
+	
+	protected:
+		virtual const char *getSiteKeyword() { return "lyrics"; }
+		virtual const char *getOpenTag() { return ""; }
+		virtual const char *getCloseTag() { return ""; }
+		
+		virtual bool isURLOk(const std::string &url);
+		
+	private:
+		std::string URL;
+};
+
 extern LyricsFetcher *lyricsPlugins[];
 
 #endif // HAVE_CURL_CURL_H
