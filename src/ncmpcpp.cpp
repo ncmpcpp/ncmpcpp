@@ -934,6 +934,9 @@ int main(int argc, char *argv[])
 			else if (myScreen == myPlaylist && !myPlaylist->Items->Empty())
 			{
 				CHECK_PLAYLIST_FOR_FILTERING;
+				// remove search results as we may move them to different positions, but
+				// search rememebers positions and may point to wrong ones after that.
+				myPlaylist->Items->Search("");
 				wFooter->SetTimeout(50);
 				if (myPlaylist->Items->hasSelected())
 				{
@@ -1012,6 +1015,9 @@ int main(int argc, char *argv[])
 			}
 			else if (myScreen->ActiveWindow() == myPlaylistEditor->Content && !myPlaylistEditor->Content->Empty())
 			{
+				// remove search results as we may move them to different positions, but
+				// search rememebers positions and may point to wrong ones after that.
+				myPlaylistEditor->Content->Search("");
 				wFooter->SetTimeout(50);
 				if (myPlaylistEditor->Content->hasSelected())
 				{
@@ -1066,6 +1072,9 @@ int main(int argc, char *argv[])
 			else if (myScreen == myPlaylist && !myPlaylist->Items->Empty())
 			{
 				CHECK_PLAYLIST_FOR_FILTERING;
+				// remove search results as we may move them to different positions, but
+				// search rememebers positions and may point to wrong ones after that.
+				myPlaylist->Items->Search("");
 				wFooter->SetTimeout(50);
 				if (myPlaylist->Items->hasSelected())
 				{
@@ -1139,6 +1148,9 @@ int main(int argc, char *argv[])
 			}
 			else if (myScreen->ActiveWindow() == myPlaylistEditor->Content && !myPlaylistEditor->Content->Empty())
 			{
+				// remove search results as we may move them to different positions, but
+				// search rememebers positions and may point to wrong ones after that.
+				myPlaylistEditor->Content->Search("");
 				wFooter->SetTimeout(50);
 				if (myPlaylistEditor->Content->hasSelected())
 				{
@@ -1195,6 +1207,9 @@ int main(int argc, char *argv[])
 				ShowMessage("No selected items to move!");
 				continue;
 			}
+			// remove search results as we may move them to different positions, but
+			// search rememebers positions and may point to wrong ones after that.
+			myPlaylist->Items->Search("");
 			Playlist::BlockUpdate = 1;
 			size_t pos = myPlaylist->Items->Choice();
 			std::vector<size_t> list;
