@@ -285,6 +285,7 @@ void StripHtmlTags(std::string &s)
 	Replace(s, "&#039;", "'");
 	Replace(s, "&amp;", "&");
 	Replace(s, "&quot;", "\"");
+	Replace(s, "&nbsp;", " ");
 	for (size_t i = 0; i < s.length(); ++i)
 	{
 		if (erase)
