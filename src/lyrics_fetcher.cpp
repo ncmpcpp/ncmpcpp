@@ -209,6 +209,15 @@ void LyricstimeFetcher::postProcess(std::string &data)
 
 void MetrolyricsFetcher::postProcess(std::string &data)
 {
+	// throw away [ from ... ] info
+	size_t i = data.find('['), j = data.find(']');
+	if (i != std::string::npos && i != std::string::npos)
+		data.replace(i, j-i+1, "");
+	// some of lyrics have both \n chars and <br />, html tags
+	// are always present whereas \n chars are not, so we need to
+	// throw them away to avoid having line breaks doubled.
+	Replace(data, "&#10;", "");
+	Replace(data, "<br />", "\n");
 	data = unescapeHtmlUtf8(data);
 	LyricsFetcher::postProcess(data);
 }
@@ -233,6 +242,9 @@ void LyricsmaniaFetcher::postProcess(std::string &data)
 
 void SonglyricsFetcher::postProcess(std::string &data)
 {
+	// throw away [ ... lyrics are found on www.songlyrics.com ] info.
+	// there is +2 instead of +1 in third line because there is extra
+	// space after ] we also want to get rid of
 	size_t i = data.find('['), j = data.find(']');
 	if (i != std::string::npos && i != std::string::npos)
 		data.replace(i, j-i+2, "");
