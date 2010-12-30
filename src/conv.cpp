@@ -279,7 +279,7 @@ void StripHtmlTags(std::string &s)
 	bool erase = 0;
 	for (size_t i = s.find("<"); i != std::string::npos; i = s.find("<"))
 	{
-		size_t j = s.find(">")+1;
+		size_t j = s.find(">", i)+1;
 		s.replace(i, j-i, "");
 	}
 	Replace(s, "&#039;", "'");
