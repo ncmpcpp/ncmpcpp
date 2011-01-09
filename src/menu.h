@@ -279,6 +279,12 @@ namespace NCurses
 			///
 			bool isStatic(int pos = -1) const;
 			
+			/// Checks whether given position is separator
+			/// @param pos position to be checked, -1 checks currently highlighted position
+			/// @return true if position is separator, false otherwise
+			///
+			bool isSeparator(int pos = -1) const;
+			
 			/// Selects/deselects given position
 			/// @param pos position in list
 			/// @param state state of selection
@@ -954,6 +960,12 @@ template <typename T> bool NCurses::Menu<T>::isStatic(int pos) const
 	if (!itsOptionsPtr->at(pos))
 		return 1;
 	return (*itsOptionsPtr)[pos]->isStatic;
+}
+
+template <typename T> bool NCurses::Menu<T>::isSeparator(int pos) const
+{
+	pos = pos == -1 ? itsHighlight : pos;
+	return !itsOptionsPtr->at(pos);
 }
 
 template <typename T> bool NCurses::Menu<T>::hasSelected() const
