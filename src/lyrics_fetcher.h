@@ -160,6 +160,16 @@ struct Sing365Fetcher : public GoogleLyricsFetcher
 		virtual const char *getCloseTag() { return "<div align"; }
 };
 
+struct LyricsvipFetcher : public GoogleLyricsFetcher
+{
+	virtual const char *name() { return "lyricsvip.com"; }
+	
+	protected:
+		virtual const char *getSiteKeyword() { return "lyricsvip"; }
+		virtual const char *getOpenTag() { return "</h2>"; }
+		virtual const char *getCloseTag() { return "</td>"; }
+};
+
 struct InternetLyricsFetcher : public GoogleLyricsFetcher
 {
 	virtual const char *name() { return "the Internet"; }
