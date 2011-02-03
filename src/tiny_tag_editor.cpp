@@ -182,7 +182,6 @@ bool TinyTagEditor::GetTags()
 	if (s.isFromDB())
 		path_to_file += Config.mpd_music_dir;
 	path_to_file += s.GetFile();
-	locale_to_utf(path_to_file);
 	
 	TagLib::FileRef f(path_to_file.c_str());
 	if (f.isNull())
