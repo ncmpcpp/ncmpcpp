@@ -1256,6 +1256,7 @@ int main(int argc, char *argv[])
 			LockStatusbar();
 			Statusbar() << (myScreen == myPlaylistEditor ? "Add to playlist: " : "Add: ");
 			std::string path = wFooter->GetString();
+			locale_to_utf(path);
 			UnlockStatusbar();
 			if (!path.empty())
 			{
