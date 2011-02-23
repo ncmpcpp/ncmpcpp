@@ -158,6 +158,7 @@ struct NcmpcppConfig
 	std::string empty_tag;
 	std::string song_list_columns_format;
 	std::string song_list_format;
+	std::string song_list_format_dollar_free;
 	std::string song_status_format;
 	std::string song_status_format_no_colors;
 	std::string song_window_title_format;

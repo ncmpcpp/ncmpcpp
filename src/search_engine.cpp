@@ -603,7 +603,7 @@ void SearchEngine::Search()
 std::string SearchEngine::SearchEngineOptionToString(const std::pair<Buffer *, MPD::Song *> &pair, void *)
 {
 	if (!Config.columns_in_search_engine)
-		return pair.second->toString(Config.song_list_format);
+		return pair.second->toString(Config.song_list_format_dollar_free);
 	else
 		return Playlist::SongInColumnsToString(*pair.second, 0);
 }

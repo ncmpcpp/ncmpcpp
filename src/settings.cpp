@@ -123,6 +123,19 @@ namespace
 				return 0;
 		}
 	}
+	
+	std::string RemoveDollarFormatting(const std::string &s)
+	{
+		std::string result;
+		for (size_t i = 0; i < s.size(); ++i)
+		{
+			if (s[i] != '$')
+				result += s[i];
+			else
+				++i;
+		}
+		return result;
+	}
 }
 
 void CreateConfigDir()
@@ -335,6 +348,7 @@ void NcmpcppConfig::SetDefaults()
 	empty_tag = "<empty>";
 	song_list_columns_format = "(7f)[green]{l} (25)[cyan]{a} (40)[]{t|f} (30)[red]{b}";
 	song_list_format = "{{%a - }{%t}|{$8%f$9}$R{$3(%l)$9}}";
+	song_list_format_dollar_free = RemoveDollarFormatting(song_list_format);
 	song_status_format = "{{{%a{ \"%b\"{ (%y)}} - }{%t}}|{%f}}";
 	song_status_format_no_colors = song_status_format;
 	song_window_title_format = "{{%a - }{%t}|{%f}}";
@@ -698,6 +712,7 @@ void NcmpcppConfig::Read()
 					song_list_format = '{';
 					song_list_format += v;
 					song_list_format += '}';
+					song_list_format_dollar_free = RemoveDollarFormatting(song_list_format);
 				}
 			}
 			else if (cl.find("song_columns_list_format") != std::string::npos)

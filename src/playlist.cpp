@@ -58,7 +58,7 @@ void Playlist::Init()
 	Items->SetItemDisplayer(Config.columns_in_playlist ? Display::SongsInColumns : Display::Songs);
 	Items->SetItemDisplayerUserData(&sf);
 	Items->SetGetStringFunction(Config.columns_in_playlist ? SongInColumnsToString : SongToString);
-	Items->SetGetStringFunctionUserData(&Config.song_list_format);
+	Items->SetGetStringFunctionUserData(&Config.song_list_format_dollar_free);
 	
 	if (!SortDialog)
 	{

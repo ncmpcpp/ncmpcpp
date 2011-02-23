@@ -62,7 +62,7 @@ void PlaylistEditor::Init()
 	Content->SetItemDisplayer(Display::Songs);
 	Content->SetItemDisplayerUserData(&sf);
 	Content->SetGetStringFunction(Playlist::SongToString);
-	Content->SetGetStringFunctionUserData(&Config.song_list_format);
+	Content->SetGetStringFunctionUserData(&Config.song_list_format_dollar_free);
 	
 	w = Playlists;
 	isInitialized = 1;

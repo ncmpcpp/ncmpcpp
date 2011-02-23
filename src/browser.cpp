@@ -581,7 +581,7 @@ std::string Browser::ItemToString(const MPD::Item &item, void *)
 		case MPD::itSong:
 		{
 			if (!Config.columns_in_browser)
-				return item.song->toString(Config.song_list_format);
+				return item.song->toString(Config.song_list_format_dollar_free);
 			else
 				return Playlist::SongInColumnsToString(*item.song, 0);
 		}
