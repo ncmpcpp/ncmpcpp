@@ -125,12 +125,18 @@ LyricsFetcher::Result LyricwikiFetcher::fetch(const std::string &artist, const s
 			result.second = msgNotFound;
 			return result;
 		}
+		data = unescapeHtmlUtf8(data);
+		if (data.find("Unfortunately, we are not licensed to display the full lyrics for this song at the moment.") != std::string::npos)
+		{
+			result.second = "Licence restriction";
+			return result;
+		}
 		
 		Replace(data, "<br />", "\n");
 		StripHtmlTags(data);
 		Trim(data);
 		
-		result.second = unescapeHtmlUtf8(data);
+		result.second = data;
 		result.first = true;
 	}
 	return result;
