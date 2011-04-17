@@ -2231,6 +2231,28 @@ int main(int argc, char *argv[])
 					(*screen)->SwitchTo();
 			}
 		}
+                else if (input == 353)
+                {
+                        if (Config.screen_switcher_previous)
+			{
+				if (myScreen->isTabbable())
+					myPrevScreen->SwitchTo();
+				else
+					myOldScreen->SwitchTo();
+			}
+			else if (!Config.screens_seq.empty())
+			{
+				std::list<BasicScreen *>::const_iterator screen = std::find(Config.screens_seq.begin(), Config.screens_seq.end(), myScreen);
+				if (screen == Config.screens_seq.begin()) {
+                                        screen = --(Config.screens_seq.end());
+                                        (*screen)->SwitchTo();
+                                }
+				else {
+                                        --screen;
+					(*screen)->SwitchTo();
+                                }
+                        }
+                }
 		else if (Keypressed(input, Key.Playlist))
 		{
 			myPlaylist->SwitchTo();
