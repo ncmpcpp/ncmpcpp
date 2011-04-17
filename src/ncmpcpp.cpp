@@ -147,6 +147,7 @@ namespace
 		myPlaylistEditor->hasToBeResized = 1;
 		myLyrics->hasToBeResized = 1;
 		mySelectedItemsAdder->hasToBeResized = 1;
+                mySongInfo->hasToBeResized = 1;
 		
 #		ifdef HAVE_CURL_CURL_H
 		myLastfm->hasToBeResized = 1;
