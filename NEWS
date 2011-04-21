@@ -1,3 +1,12 @@
+ncmpcpp-0.5.7
+
+* convert input path to utf8 before calling 'add' command
+* extras: add program that copies Artist to AlbumArtist for mp3/ogg/flac files
+* lyrics fetcher: add support for lyricsvip.com
+* lyrics fetcher: skip lyricwiki if there's licence restriction on lyrics
+* tag editor: do not convert filenames back to utf8 while reading files using taglib
+* search engine: fix error occuring while trying to select first album in results
+
 ncmpcpp-0.5.6
 
 * settings: make displaying 'empty tag' entry optional
