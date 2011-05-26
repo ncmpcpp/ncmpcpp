@@ -170,6 +170,16 @@ struct LyricsvipFetcher : public GoogleLyricsFetcher
 		virtual const char *getCloseTag() { return "</td>"; }
 };
 
+struct JustSomeLyricsFetcher : public GoogleLyricsFetcher
+{
+	virtual const char *name() { return "justsomelyrics.com"; }
+	
+	protected:
+		virtual const char *getSiteKeyword() { return "justsomelyrics"; }
+		virtual const char *getOpenTag() { return "alt=\"phone\" />\n</div>"; }
+		virtual const char *getCloseTag() { return "<div class=\"adsdiv\">"; }
+};
+
 struct InternetLyricsFetcher : public GoogleLyricsFetcher
 {
 	virtual const char *name() { return "the Internet"; }

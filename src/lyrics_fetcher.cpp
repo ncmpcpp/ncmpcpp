@@ -38,6 +38,7 @@ LyricsFetcher *lyricsPlugins[] =
 	new LyricsmaniaFetcher(),
 	new LyricstimeFetcher(),
 	new MetrolyricsFetcher(),
+	new JustSomeLyricsFetcher(),
 	new LyrcComArFetcher(),
 	new InternetLyricsFetcher(),
 	0
