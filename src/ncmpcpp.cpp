@@ -322,7 +322,7 @@ int main(int argc, char *argv[])
 	signal(SIGWINCH, sighandler);
 #	endif // !WIN32
 	
-	MEVENT mouse_event;
+	MEVENT mouse_event, old_mouse_event;
 	mouseinterval(0);
 	if (Config.mouse_support)
 		mousemask(ALL_MOUSE_EVENTS, 0);
@@ -522,6 +522,15 @@ int main(int argc, char *argv[])
 		else if (Config.mouse_support && input == KEY_MOUSE)
 		{
 			getmouse(&mouse_event);
+			// workaround shitty ncurses behavior introduced in >=5.8, when we mysteriously get
+			// a few times after ncmpcpp startup 2^27 code instead of BUTTON1_RELEASED. since that
+			// 2^27 thing shows constantly instead of BUTTON2_PRESSED, it was redefined to be recognized
+			// as BUTTON2_PRESSED. but clearly we don't want to trigger behavior bound to BUTTON2
+			// after BUTTON1 was pressed. so, here is the workaround: if last event was BUTTON1_PRESSED,
+			// we MUST get BUTTON1_RELEASED afterwards. if we get BUTTON2_PRESSED, erroneus behavior
+			// is about to occur and we need to prevent that.
+			if (old_mouse_event.bstate & BUTTON1_PRESSED && mouse_event.bstate & BUTTON2_PRESSED)
+				continue;
 			if (mouse_event.bstate & BUTTON1_PRESSED
 			&&  mouse_event.y == LINES-(Config.statusbar_visibility ? 2 : 1)
 			   ) // progressbar
@@ -552,6 +561,7 @@ int main(int argc, char *argv[])
 			}
 			else if (mouse_event.bstate & (BUTTON1_PRESSED | BUTTON2_PRESSED | BUTTON3_PRESSED | BUTTON4_PRESSED))
 				myScreen->MouseButtonPressed(mouse_event);
+			old_mouse_event = mouse_event;
 		}
 		else if (Keypressed(input, Key.ToggleInterface))
 		{
