@@ -523,13 +523,13 @@ int main(int argc, char *argv[])
 		{
 			getmouse(&mouse_event);
 			// workaround shitty ncurses behavior introduced in >=5.8, when we mysteriously get
-			// a few times after ncmpcpp startup 2^27 code instead of BUTTON1_RELEASED. since that
+			// a few times after ncmpcpp startup 2^27 code instead of BUTTON{1,3}_RELEASED. since that
 			// 2^27 thing shows constantly instead of BUTTON2_PRESSED, it was redefined to be recognized
 			// as BUTTON2_PRESSED. but clearly we don't want to trigger behavior bound to BUTTON2
-			// after BUTTON1 was pressed. so, here is the workaround: if last event was BUTTON1_PRESSED,
-			// we MUST get BUTTON1_RELEASED afterwards. if we get BUTTON2_PRESSED, erroneus behavior
+			// after BUTTON{1,3} was pressed. so, here is the workaround: if last event was BUTTON{1,3}_PRESSED,
+			// we MUST get BUTTON{1,3}_RELEASED afterwards. if we get BUTTON2_PRESSED, erroneus behavior
 			// is about to occur and we need to prevent that.
-			if (old_mouse_event.bstate & BUTTON1_PRESSED && mouse_event.bstate & BUTTON2_PRESSED)
+			if (old_mouse_event.bstate & (BUTTON1_PRESSED | BUTTON3_PRESSED) && mouse_event.bstate & BUTTON2_PRESSED)
 				continue;
 			if (mouse_event.bstate & BUTTON1_PRESSED
 			&&  mouse_event.y == LINES-(Config.statusbar_visibility ? 2 : 1)
