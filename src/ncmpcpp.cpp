@@ -323,6 +323,7 @@ int main(int argc, char *argv[])
 #	endif // !WIN32
 	
 	MEVENT mouse_event, old_mouse_event;
+	old_mouse_event.bstate = 0;
 	mouseinterval(0);
 	if (Config.mouse_support)
 		mousemask(ALL_MOUSE_EVENTS, 0);
