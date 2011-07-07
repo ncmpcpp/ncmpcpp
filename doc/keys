@@ -56,6 +56,8 @@
 #
 #key_screen_switcher = 9
 #
+#key_backward_screen_switcher = 353
+#
 #key_help = '1' 265
 #
 #key_playlist = '2' 266

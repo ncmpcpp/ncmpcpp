@@ -101,6 +101,8 @@ std::string Help::DisplayKeys(int *key, int size)
 			result += "Left";
 		else if (key[i] == 9)
 			result += "Tab";
+		else if (key[i] == 353)
+			result += "Shift-Tab";
 		else if (key[i] >= 1 && key[i] <= 26)
 		{
 			result += "Ctrl-";
@@ -145,7 +147,10 @@ void Help::GetKeybindings()
 	if (Config.screen_switcher_previous)
 		*w << DisplayKeys(Key.ScreenSwitcher)   << "Switch between current and last screen\n";
 	else
-		*w << DisplayKeys(Key.ScreenSwitcher)   << "Switch between given sequence of screens\n";
+	{
+		*w << DisplayKeys(Key.ScreenSwitcher)   << "Switch to next screen in sequence\n";
+		*w << DisplayKeys(Key.BackwardScreenSwitcher) << "Switch to previous screen in sequence\n";
+	}
 	*w << DisplayKeys(Key.Help)			<< "Help screen\n";
 	*w << DisplayKeys(Key.Playlist)			<< "Playlist screen\n";
 	*w << DisplayKeys(Key.Browser)			<< "Browse screen\n";

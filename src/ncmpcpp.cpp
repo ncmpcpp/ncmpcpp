@@ -147,7 +147,7 @@ namespace
 		myPlaylistEditor->hasToBeResized = 1;
 		myLyrics->hasToBeResized = 1;
 		mySelectedItemsAdder->hasToBeResized = 1;
-                mySongInfo->hasToBeResized = 1;
+		mySongInfo->hasToBeResized = 1;
 		
 #		ifdef HAVE_CURL_CURL_H
 		myLastfm->hasToBeResized = 1;
@@ -2231,9 +2231,9 @@ int main(int argc, char *argv[])
 					(*screen)->SwitchTo();
 			}
 		}
-                else if (input == 353)
-                {
-                        if (Config.screen_switcher_previous)
+		else if (!Config.screen_switcher_previous && Keypressed(input, Key.BackwardScreenSwitcher))
+		{
+			if (Config.screen_switcher_previous)
 			{
 				if (myScreen->isTabbable())
 					myPrevScreen->SwitchTo();
@@ -2243,16 +2243,12 @@ int main(int argc, char *argv[])
 			else if (!Config.screens_seq.empty())
 			{
 				std::list<BasicScreen *>::const_iterator screen = std::find(Config.screens_seq.begin(), Config.screens_seq.end(), myScreen);
-				if (screen == Config.screens_seq.begin()) {
-                                        screen = --(Config.screens_seq.end());
-                                        (*screen)->SwitchTo();
-                                }
-				else {
-                                        --screen;
-					(*screen)->SwitchTo();
-                                }
-                        }
-                }
+				if (screen == Config.screens_seq.begin())
+					(*Config.screens_seq.rbegin())->SwitchTo();
+				else
+					(*--screen)->SwitchTo();
+			}
+		}
 		else if (Keypressed(input, Key.Playlist))
 		{
 			myPlaylist->SwitchTo();

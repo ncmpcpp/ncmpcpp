@@ -76,6 +76,7 @@ struct NcmpcppKeys
 	int PrevColumn[2];
 	int NextColumn[2];
 	int ScreenSwitcher[2];
+	int BackwardScreenSwitcher[2];
 	int Help[2];
 	int Playlist[2];
 	int Browser[2];

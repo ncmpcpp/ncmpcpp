@@ -185,6 +185,7 @@ void NcmpcppKeys::SetDefaults()
 	PrevColumn[0] = KEY_LEFT;
 	NextColumn[0] = KEY_RIGHT;
 	ScreenSwitcher[0] = 9;
+	BackwardScreenSwitcher[0] = 353;
 	Help[0] = '1';
 	Playlist[0] = '2';
 	Browser[0] = '3';
@@ -272,6 +273,7 @@ void NcmpcppKeys::SetDefaults()
 	PrevColumn[1] = NullKey;
 	NextColumn[1] = NullKey;
 	ScreenSwitcher[1] = NullKey;
+	BackwardScreenSwitcher[1] = NullKey;
 	Help[1] = 265;
 	Playlist[1] = 266;
 	Browser[1] = 267;
@@ -502,6 +504,8 @@ void NcmpcppKeys::Read()
 				GetKeys(key, NextColumn);
 			else if (key.find("key_screen_switcher ") != std::string::npos)
 				GetKeys(key, ScreenSwitcher);
+			else if (key.find("key_backward_screen_switcher ") != std::string::npos)
+				GetKeys(key, BackwardScreenSwitcher);
 			else if (key.find("key_help ") != std::string::npos)
 				GetKeys(key, Help);
 			else if (key.find("key_playlist ") != std::string::npos)
