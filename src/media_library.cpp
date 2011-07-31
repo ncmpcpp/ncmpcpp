@@ -633,6 +633,7 @@ void MediaLibrary::LocateSong(const MPD::Song &s)
 	
 	if (!hasTwoColumns)
 	{
+		Artists->ApplyFilter("");
 		if (Artists->Empty())
 			Update();
 		if (primary_tag != Artists->Current())
@@ -650,6 +651,7 @@ void MediaLibrary::LocateSong(const MPD::Song &s)
 		}
 	}
 	
+	Albums->ApplyFilter("");
 	if (Albums->Empty())
 		Update();
 	
@@ -672,6 +674,7 @@ void MediaLibrary::LocateSong(const MPD::Song &s)
 		}
 	}
 	
+	Songs->ApplyFilter("");
 	if (Songs->Empty())
 		Update();
 	
