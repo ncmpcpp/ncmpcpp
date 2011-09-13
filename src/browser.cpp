@@ -75,6 +75,7 @@ void Browser::Resize()
 {
 	w->Resize(COLS, MainHeight);
 	w->MoveTo(0, MainStartY);
+	w->SetTitle(Config.columns_in_browser && Config.titles_visibility ? Display::Columns() : "");
 	hasToBeResized = 0;
 }
 
