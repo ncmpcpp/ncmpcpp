@@ -111,8 +111,6 @@ void Clock::Update()
 		myPlaylist->SwitchTo();
 	
 	static timeval past = { 0, 0 };
-	if (Global::Timer.tv_sec <= past.tv_sec)
-		return;
 	gettimeofday(&past, 0);
 	
 	tm *time = localtime(&past.tv_sec);
