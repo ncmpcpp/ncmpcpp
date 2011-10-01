@@ -1286,7 +1286,11 @@ int main(int argc, char *argv[])
 				{
 					static const char lastfm_url[] = "lastfm://";
 					if (path.compare(0, static_strlen(lastfm_url), lastfm_url) == 0
-					||  path.find(".pls", path.length()-4) != std::string::npos)
+					||  path.find(".asx", path.length()-4) != std::string::npos
+					||  path.find(".cue", path.length()-4) != std::string::npos
+					||  path.find(".m3u", path.length()-4) != std::string::npos
+					||  path.find(".pls", path.length()-4) != std::string::npos
+					||  path.find(".xspf", path.length()-5) != std::string::npos)
 						Mpd.LoadPlaylist(path);
 					else
 						Mpd.Add(path);

@@ -132,11 +132,22 @@ void Browser::EnterPressed()
 		}
 		case itPlaylist:
 		{
-			MPD::SongList list;
-			Mpd.GetPlaylistContent(locale_to_utf_cpy(item.name), list);
-			if (myPlaylist->Add(list, 1))
-				ShowMessage("Loading and playing playlist %s...", item.name.c_str());
-			FreeSongList(list);
+			if (itsBrowsedDir == "/")
+			{
+				MPD::SongList list;
+				Mpd.GetPlaylistContent(locale_to_utf_cpy(item.name), list);
+				if (myPlaylist->Add(list, 1))
+					ShowMessage("Loading and playing playlist %s...", item.name.c_str());
+				FreeSongList(list);
+			}
+			else
+			{
+				std::string name = itsBrowsedDir + "/" + item.name;
+				ShowMessage("Loading playlist %s...", name.c_str());
+				locale_to_utf(name);
+				if (Mpd.LoadPlaylist(name))
+					ShowMessage("Playlist loaded.");
+			}
 			break;
 		}
 	}
@@ -193,11 +204,11 @@ void Browser::SpacePressed()
 		}
 		case itPlaylist:
 		{
-			MPD::SongList list;
-			Mpd.GetPlaylistContent(locale_to_utf_cpy(item.name), list);
-			if (myPlaylist->Add(list, 0))
-				ShowMessage("Loading playlist %s...", item.name.c_str());
-			FreeSongList(list);
+			std::string name = itsBrowsedDir == "/" ? item.name : itsBrowsedDir + "/" + item.name;
+			ShowMessage("Loading playlist %s...", name.c_str());
+			locale_to_utf(name);
+			if (Mpd.LoadPlaylist(name))
+				ShowMessage("Playlist loaded.");
 			break;
 		}
 	}
