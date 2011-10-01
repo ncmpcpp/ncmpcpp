@@ -80,6 +80,7 @@ void SearchEngine::Resize()
 {
 	w->Resize(COLS, MainHeight);
 	w->MoveTo(0, MainStartY);
+	w->SetTitle(Config.columns_in_search_engine && Config.titles_visibility ? Display::Columns() : "");
 	hasToBeResized = 0;
 }
 
