@@ -1,3 +1,10 @@
+ncmpcpp-0.5.8
+
+* lyrics fetcher: add support for justsomelyrics.com
+* add command line switch -s/--screen for switching screen at startup
+* add proper support for asx/cue/m3u/pls/xspf playlists
+* bugfixes
+
 ncmpcpp-0.5.7
 
 * convert input path to utf8 before calling 'add' command
