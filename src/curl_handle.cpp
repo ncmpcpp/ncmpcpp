@@ -37,8 +37,6 @@ namespace
 
 CURLcode Curl::perform(std::string &data, const std::string &URL, const std::string &referer, unsigned timeout)
 {
-	static pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
-	pthread_mutex_lock(&lock);
 	CURLcode result;
 	CURL *c = curl_easy_init();
 	curl_easy_setopt(c, CURLOPT_URL, URL.c_str());
@@ -51,7 +49,6 @@ CURLcode Curl::perform(std::string &data, const std::string &URL, const std::str
 		curl_easy_setopt(c, CURLOPT_REFERER, referer.c_str());
 	result = curl_easy_perform(c);
 	curl_easy_cleanup(c);
-	pthread_mutex_unlock(&lock);
 	return result;
 }
 

@@ -222,6 +222,7 @@ void Help::GetKeybindings()
 #	ifdef HAVE_CURL_CURL_H
 	*w << DisplayKeys(Key.ArtistInfo)		<< "Show artist info\n";
 	*w << DisplayKeys(Key.ToggleLyricsDB)		<< "Toggle lyrics database\n";
+	*w << DisplayKeys(Key.ToggleFetchingLyricsInBackground) << "Toggle fetching lyrics for current song in background\n";
 #	endif // HAVE_CURL_CURL_H
 	*w << DisplayKeys(Key.Lyrics)			<< "Show/hide song's lyrics\n";
 	*w << "\n";

@@ -33,7 +33,7 @@ class Lyrics : public Screen<Scrollpad>
 	public:
 		Lyrics() : ReloadNP(0),
 #		ifdef HAVE_CURL_CURL_H
-		isReadyToTake(0), isDownloadInProgress(0), itsFetcher(0),
+		isReadyToTake(0), isDownloadInProgress(0),
 #		endif // HAVE_CURL_CURL_H
 		itsScrollBegin(0) { }
 		
@@ -53,8 +53,10 @@ class Lyrics : public Screen<Scrollpad>
 		
 		void Edit();
 		void Refetch();
+		
 #		ifdef HAVE_CURL_CURL_H
-		void ToggleFetcher();
+		static void ToggleFetcher();
+		static void DownloadInBackground(const MPD::Song *s);
 #		endif // HAVE_CURL_CURL_H
 		
 		bool ReloadNP;
@@ -65,25 +67,29 @@ class Lyrics : public Screen<Scrollpad>
 	private:
 		void Load();
 		
-		void SetFilename();
-		std::string itsFilename;
-		std::string itsFolder;
-		
 #		ifdef HAVE_CURL_CURL_H
+		static void *DownloadInBackgroundImpl(void *);
+		// storage for songs for which lyrics are being downloaded at the moment
+		static std::set<MPD::Song *> itsDownloaded;
+		
 		void *Download();
 		static void *DownloadWrapper(void *);
-		
-		void Save(const std::string &lyrics);
+		static void Save(const std::string &filename, const std::string &lyrics);
 		
 		void Take();
 		bool isReadyToTake;
 		bool isDownloadInProgress;
 		pthread_t itsDownloader;
-		LyricsFetcher **itsFetcher;
+		
+		static LyricsFetcher **itsFetcher;
 #		endif // HAVE_CURL_CURL_H
 		
 		size_t itsScrollBegin;
 		MPD::Song itsSong;
+		std::string itsFilename;
+		
+		static std::string itsFolder;
+		static std::string GenerateFilename(const MPD::Song &s);
 };
 
 extern Lyrics *myLyrics;

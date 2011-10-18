@@ -225,6 +225,9 @@ If enabled, seek time will increment by one each second of seeking.
 .B follow_now_playing_lyrics = yes/no
 If enabled, lyrics will be switched at song's change to currently playing one's (Note: this works only if you are viewing lyrics of item from Playlist).
 .TP
+.B fetch_lyrics_for_current_song_in_background = yes/no
+If enabled, each time song changes lyrics fetcher will be automatically run in background in attempt to download lyrics for currently playing song.
+.TP
 .B store_lyrics_in_song_dir = yes/no
 If enabled, lyrics will be saved in song's directory, otherwise in ~/.lyrics. Note that it needs properly set mpd_music_dir.
 .TP

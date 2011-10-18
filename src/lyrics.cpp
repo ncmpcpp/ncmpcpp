@@ -48,12 +48,18 @@ using Global::MainStartY;
 using Global::myScreen;
 using Global::myOldScreen;
 
+std::string Lyrics::itsFolder = home_path + LYRICS_FOLDER;
+
+#ifdef HAVE_CURL_CURL_H
+LyricsFetcher **Lyrics::itsFetcher = 0;
+std::set<MPD::Song *> Lyrics::itsDownloaded;
+#endif // HAVE_CURL_CURL_H
+
 Lyrics *myLyrics = new Lyrics;
 
 void Lyrics::Init()
 {
 	w = new Scrollpad(0, MainStartY, COLS, MainHeight, "", Config.main_color, brNone);
-	itsFolder = home_path + LYRICS_FOLDER;
 	isInitialized = 1;
 }
 
@@ -107,6 +113,12 @@ void Lyrics::SwitchTo()
 	// take lyrics if they were downloaded
 	if (isReadyToTake)
 		Take();
+	
+	if (isDownloadInProgress || !itsDownloaded.empty())
+	{
+		ShowMessage("Lyrics are being downloaded...");
+		return;
+	}
 #	endif // HAVE_CURL_CURL_H
 	
 	if (const MPD::Song *s = myScreen->CurrentSong())
@@ -140,9 +152,55 @@ void Lyrics::SpacePressed()
 }
 
 #ifdef HAVE_CURL_CURL_H
-void *Lyrics::DownloadWrapper(void *this_ptr)
+void Lyrics::DownloadInBackground(const MPD::Song *s)
 {
-	return static_cast<Lyrics *>(this_ptr)->Download();
+	if (!s || s->GetArtist().empty() || s->GetTitle().empty())
+		return;
+	if (!s->Localized())
+		const_cast<MPD::Song *>(s)->Localize();
+	
+	std::string filename = GenerateFilename(*s);
+	std::ifstream f(filename.c_str());
+	if (f.is_open())
+	{
+		f.close();
+		return;
+	}
+	ShowMessage("Fetching lyrics for %s...", s->toString(Config.song_status_format_no_colors).c_str());
+	// we need to copy it and store separetely since this song may get deleted in the meantime.
+	MPD::Song *s_copy = new MPD::Song(*s);
+	itsDownloaded.insert(s_copy);
+	pthread_t t;
+	pthread_attr_t attr;
+	pthread_attr_init(&attr);
+	pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
+	pthread_create(&t, &attr, DownloadInBackgroundImpl, s_copy);
+}
+
+void *Lyrics::DownloadInBackgroundImpl(void *void_ptr)
+{
+	MPD::Song *s = static_cast<MPD::Song *>(void_ptr);
+	
+	std::string artist = Curl::escape(locale_to_utf_cpy(s->GetArtist()));
+	std::string title = Curl::escape(locale_to_utf_cpy(s->GetTitle()));
+	
+	LyricsFetcher::Result result;
+	bool fetcher_defined = itsFetcher && *itsFetcher;
+	for (LyricsFetcher **plugin = fetcher_defined ? itsFetcher : lyricsPlugins; *plugin != 0; ++plugin)
+	{
+		result = (*plugin)->fetch(artist, title);
+		if (result.first)
+			break;
+		if (fetcher_defined)
+			break;
+	}
+	if (result.first == true)
+		Save(GenerateFilename(*s), result.second);
+	
+	delete s;
+	itsDownloaded.erase(s);
+	
+	pthread_exit(0);
 }
 
 void *Lyrics::Download()
@@ -169,7 +227,7 @@ void *Lyrics::Download()
 	
 	if (result.first == true)
 	{
-		Save(result.second);
+		Save(itsFilename, result.second);
 		
 		utf_to_locale(result.second);
 		w->Clear();
@@ -181,37 +239,44 @@ void *Lyrics::Download()
 	isReadyToTake = 1;
 	pthread_exit(0);
 }
+
+void *Lyrics::DownloadWrapper(void *this_ptr)
+{
+	return static_cast<Lyrics *>(this_ptr)->Download();
+}
 #endif // HAVE_CURL_CURL_H
 
-void Lyrics::SetFilename()
+std::string Lyrics::GenerateFilename(const MPD::Song &s)
 {
+	std::string filename;
 	if (Config.store_lyrics_in_song_dir)
 	{
-		if (itsSong.isFromDB())
+		if (s.isFromDB())
 		{
-			itsFilename = Config.mpd_music_dir;
-			itsFilename += "/";
-			itsFilename += itsSong.GetFile();
+			filename = Config.mpd_music_dir;
+			filename += "/";
+			filename += s.GetFile();
 		}
 		else
-			itsFilename = itsSong.GetFile();
+			filename = s.GetFile();
 		// replace song's extension with .txt
-		size_t dot = itsFilename.rfind('.');
+		size_t dot = filename.rfind('.');
 		assert(dot != std::string::npos);
-		itsFilename.resize(dot);
-		itsFilename += ".txt";
+		filename.resize(dot);
+		filename += ".txt";
 	}
 	else
 	{
-		std::string file = locale_to_utf_cpy(itsSong.GetArtist());
+		std::string file = locale_to_utf_cpy(s.GetArtist());
 		file += " - ";
-		file += locale_to_utf_cpy(itsSong.GetTitle());
+		file += locale_to_utf_cpy(s.GetTitle());
 		file += ".txt";
 		EscapeUnallowedChars(file);
-		itsFilename = itsFolder;
-		itsFilename += "/";
-		itsFilename += file;
+		filename = itsFolder;
+		filename += "/";
+		filename += file;
 	}
+	return filename;
 }
 
 void Lyrics::Load()
@@ -225,7 +290,7 @@ void Lyrics::Load()
 	assert(!itsSong.GetTitle().empty());
 	
 	itsSong.Localize();
-	SetFilename();
+	itsFilename = GenerateFilename(itsSong);
 	
 	mkdir(itsFolder.c_str()
 #	ifndef WIN32
@@ -292,9 +357,9 @@ void Lyrics::Edit()
 }
 
 #ifdef HAVE_CURL_CURL_H
-void Lyrics::Save(const std::string &lyrics)
+void Lyrics::Save(const std::string &filename, const std::string &lyrics)
 {
-	std::ofstream output(itsFilename.c_str());
+	std::ofstream output(filename.c_str());
 	if (output.is_open())
 	{
 		output << lyrics;

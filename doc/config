@@ -297,6 +297,8 @@
 #
 #follow_now_playing_lyrics = "no"
 #
+#fetch_lyrics_for_current_song_in_background = "no"
+#
 #store_lyrics_in_song_dir = "no"
 #
 ##

@@ -1432,6 +1432,11 @@ int main(int argc, char *argv[])
 		{
 			myLyrics->ToggleFetcher();
 		}
+		else if (Keypressed(input, Key.ToggleFetchingLyricsInBackground))
+		{
+			Config.fetch_lyrics_in_background = !Config.fetch_lyrics_in_background;
+			ShowMessage("Fetching lyrics for currently playing song in background: %s", Config.fetch_lyrics_in_background ? "On" : "Off");
+		}
 #		endif // HAVE_CURL_CURL_H
 		else if (Keypressed(input, Key.ToggleAutoCenter))
 		{

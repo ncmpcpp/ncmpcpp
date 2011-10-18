@@ -172,6 +172,8 @@
 #
 #key_toggle_lyrics_db = 'L'
 #
+#key_toggle_fetching_lyrics_for_current_song_in_background = 'F'
+#
 #key_go_to_containing_directory = 'G'
 #
 #key_go_to_media_library = '~'

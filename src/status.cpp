@@ -401,6 +401,11 @@ void NcmpcppStatusChanged(MPD::Connection *, MPD::StatusChanges changed, void *)
 			if (!Config.execute_on_song_change.empty())
 				system(Config.execute_on_song_change.c_str());
 			
+#			ifdef HAVE_CURL_CURL_H
+			if (Config.fetch_lyrics_in_background)
+				Lyrics::DownloadInBackground(myPlaylist->NowPlayingSong());
+#			endif // HAVE_CURL_CURL_H
+			
 			if (Mpd.isPlaying() && !(np = Mpd.GetCurrentSong()).Empty())
 				WindowTitle(utf_to_locale_cpy(np.toString(Config.song_window_title_format)));
 			
