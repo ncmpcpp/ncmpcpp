@@ -126,21 +126,21 @@ void Visualizer::Update()
 		draw = &Visualizer::DrawSoundWave;
 	
 	w->Clear();
+	ssize_t samples_read = data/sizeof(int16_t);
 	if (Config.visualizer_in_stereo)
 	{
-		ssize_t bytes_read = data/sizeof(int16_t);
-		int16_t buf_left[bytes_read/2], buf_right[bytes_read/2];
-		for (ssize_t i = 0, j = 0; i < bytes_read; i += 2, ++j)
+		int16_t buf_left[samples_read/2], buf_right[samples_read/2];
+		for (ssize_t i = 0, j = 0; i < samples_read; i += 2, ++j)
 		{
 			buf_left[j] = buf[i];
 			buf_right[j] = buf[i+1];
 		}
 		size_t half_height = MainHeight/2;
-		(this->*draw)(buf_left, data/2, 0, half_height);
-		(this->*draw)(buf_right, data/2, half_height+(draw == &Visualizer::DrawSoundWave ? 1 : 0), half_height+(draw != &Visualizer::DrawSoundWave ? 1 : 0));
+		(this->*draw)(buf_left, samples_read/2, 0, half_height);
+		(this->*draw)(buf_right, samples_read/2, half_height+(draw == &Visualizer::DrawSoundWave ? 1 : 0), half_height+(draw != &Visualizer::DrawSoundWave ? 1 : 0));
 	}
 	else
-		(this->*draw)(buf, data, 0, MainHeight);
+		(this->*draw)(buf, samples_read, 0, MainHeight);
 	w->Refresh();
 }
 
@@ -152,9 +152,9 @@ void Visualizer::SpacePressed()
 #	endif // HAVE_FFTW3_H
 }
 
-void Visualizer::DrawSoundWave(int16_t *buf, ssize_t data, size_t y_offset, size_t height)
+void Visualizer::DrawSoundWave(int16_t *buf, ssize_t samples, size_t y_offset, size_t height)
 {
-	const int samples_per_col = data/sizeof(int16_t)/COLS;
+	const int samples_per_col = samples/COLS;
 	const int half_height = height/2;
 	*w << fmtAltCharset;
 	double prev_point_pos = 0;
@@ -182,12 +182,15 @@ void Visualizer::DrawSoundWave(int16_t *buf, ssize_t data, size_t y_offset, size
 }
 
 #ifdef HAVE_FFTW3_H
-void Visualizer::DrawFrequencySpectrum(int16_t *buf, ssize_t data, size_t y_offset, size_t height)
+void Visualizer::DrawFrequencySpectrum(int16_t *buf, ssize_t samples, size_t y_offset, size_t height)
 {
-	// zero old values
-	std::fill(buf+data/sizeof(int16_t), buf+data/2, 0);
-	for (unsigned i = 0; i < data/2; ++i)
-		itsInput[i] = buf[i];
+	for (unsigned i = 0, j = 0; i < itsSamples; ++i)
+	{
+		if (j < samples)
+			itsInput[i] = buf[j++];
+		else
+			itsInput[i] = 0;
+	}
 	
 	fftw_execute(itsPlan);
 	
