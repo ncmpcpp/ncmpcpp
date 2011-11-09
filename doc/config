@@ -23,16 +23,23 @@
 ##
 ## Note: In order to make music visualizer work you'll
 ## need to use mpd fifo output, whose format parameter
-## has to be set to 44100:16:1. Example configuration:
-## (it has to be put into mpd.conf)
+## has to be set to 44100:16:1 for mono visualization
+## or 44100:16:2 for stereo visualization. Example
+## configuration (it has to be put into mpd.conf):
 ##
 ## audio_output {
 ##        type            "fifo"
 ##        name            "My FIFO"
 ##        path            "/tmp/mpd.fifo"
-##        format          "44100:16:1"
+##        format          "44100:16:2"
 ## }
 ##
+#
+##
+## If you set format to 44100:16:2, make it 'yes'.
+##
+#
+#visualizer_in_stereo = "no"
 #
 #visualizer_fifo_path = ""
 #

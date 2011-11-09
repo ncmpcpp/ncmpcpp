@@ -426,6 +426,7 @@ void NcmpcppConfig::SetDefaults()
 	mouse_list_scroll_whole_page = true;
 	new_design = false;
 	visualizer_use_wave = true;
+	visualizer_in_stereo = false;
 	browser_sort_by_mtime = false;
 	tag_editor_extended_numeration = false;
 	media_library_display_date = true;
@@ -1055,6 +1056,10 @@ void NcmpcppConfig::Read()
 			else if (cl.find("visualizer_type") != std::string::npos)
 			{
 				visualizer_use_wave = v == "wave";
+			}
+			else if (cl.find("visualizer_in_stereo") != std::string::npos)
+			{
+				visualizer_in_stereo = v == "yes";
 			}
 			else if (cl.find("mouse_support") != std::string::npos)
 			{
