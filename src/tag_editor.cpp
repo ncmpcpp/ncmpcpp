@@ -872,7 +872,11 @@ void TagEditor::LocateSong(const MPD::Song &s)
 	if (itsBrowsedDir != s.GetDirectory())
 	{
 		itsBrowsedDir = s.GetDirectory();
-		itsBrowsedDir = itsBrowsedDir.substr(0, itsBrowsedDir.rfind('/'));
+		size_t last_slash = itsBrowsedDir.rfind('/');
+		if (last_slash != std::string::npos)
+			itsBrowsedDir = itsBrowsedDir.substr(0, last_slash);
+		else
+			itsBrowsedDir = "/";
 		if (itsBrowsedDir.empty())
 			itsBrowsedDir = "/";
 		Dirs->Clear();
