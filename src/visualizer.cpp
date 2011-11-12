@@ -61,6 +61,7 @@ void Visualizer::Init()
 void Visualizer::SwitchTo()
 {
 	using Global::myScreen;
+	using Global::myLockedScreen;
 	
 	if (myScreen == this)
 		return;
@@ -68,7 +69,10 @@ void Visualizer::SwitchTo()
 	if (!isInitialized)
 		Init();
 	
-	if (hasToBeResized)
+	if (myLockedScreen)
+		UpdateInactiveScreen(this);
+	
+	if (hasToBeResized || myLockedScreen)
 		Resize();
 	
 	if (myScreen != this && myScreen->isTabbable())
@@ -88,8 +92,10 @@ void Visualizer::SwitchTo()
 
 void Visualizer::Resize()
 {
-	w->Resize(COLS, MainHeight);
-	w->MoveTo(0, MainStartY);
+	size_t x_offset, width;
+	GetWindowResizeParams(x_offset, width);
+	w->Resize(width, MainHeight);
+	w->MoveTo(x_offset, MainStartY);
 	hasToBeResized = 0;
 }
 
@@ -154,11 +160,12 @@ void Visualizer::SpacePressed()
 
 void Visualizer::DrawSoundWave(int16_t *buf, ssize_t samples, size_t y_offset, size_t height)
 {
-	const int samples_per_col = samples/COLS;
+	const int samples_per_col = samples/w->GetWidth();
 	const int half_height = height/2;
 	*w << fmtAltCharset;
 	double prev_point_pos = 0;
-	for (int i = 0; i < COLS; ++i)
+	const size_t win_width = w->GetWidth();
+	for (size_t i = 0; i < win_width; ++i)
 	{
 		double point_pos = 0;
 		for (int j = 0; j < samples_per_col; ++j)
@@ -198,8 +205,9 @@ void Visualizer::DrawFrequencySpectrum(int16_t *buf, ssize_t samples, size_t y_o
 	for (unsigned i = 0; i < itsFFTResults; ++i)
 		itsFreqsMagnitude[i] = sqrt(itsOutput[i][0]*itsOutput[i][0] + itsOutput[i][1]*itsOutput[i][1])/1e5*height/5;
 	
-	const int freqs_per_col = itsFFTResults/COLS /* cut bandwidth a little to achieve better look */ * 4/5;
-	for (int i = 0; i < COLS; ++i)
+	const size_t win_width = w->GetWidth();
+	const int freqs_per_col = itsFFTResults/win_width /* cut bandwidth a little to achieve better look */ * 7/10;
+	for (size_t i = 0; i < win_width; ++i)
 	{
 		size_t bar_height = 0;
 		for (int j = 0; j < freqs_per_col; ++j)

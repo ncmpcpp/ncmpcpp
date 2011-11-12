@@ -349,6 +349,13 @@
 #screen_switcher_mode = "sequence: 2 -> 3"
 #
 ##
+## Default width of locked screen (in %).
+## Acceptable values are from 20 to 80.
+##
+#
+#locked_screen_width_part = "50"
+#
+##
 ## Note: You can define startup screen for ncmpcpp
 ## by choosing screen number from the list above.
 ##

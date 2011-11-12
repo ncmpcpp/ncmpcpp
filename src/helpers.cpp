@@ -461,3 +461,28 @@ std::basic_string<my_char_t> Scroller(const std::basic_string<my_char_t> &str, s
 	return result;
 }
 
+bool SwitchToNextColumn(BasicScreen *screen)
+{
+	if (screen == myLibrary)
+		return myLibrary->NextColumn();
+	else if (screen == myPlaylistEditor)
+		return myPlaylistEditor->NextColumn();
+#	ifdef HAVE_TAGLIB_H
+	else if (screen == myTagEditor)
+		return myTagEditor->NextColumn();
+#	endif // HAVE_TAGLIB_H
+	return false;
+}
+
+bool SwitchToPrevColumn(BasicScreen *screen)
+{
+	if (screen == myLibrary)
+		return myLibrary->PrevColumn();
+	else if (screen == myPlaylistEditor)
+		return myPlaylistEditor->PrevColumn();
+#	ifdef HAVE_TAGLIB_H
+	else if (screen == myTagEditor)
+		return myTagEditor->PrevColumn();
+#	endif // HAVE_TAGLIB_H
+	return false;
+}

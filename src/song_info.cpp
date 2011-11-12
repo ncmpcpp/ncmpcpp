@@ -24,8 +24,6 @@
 
 using Global::MainHeight;
 using Global::MainStartY;
-using Global::myScreen;
-using Global::myOldScreen;
 
 SongInfo *mySongInfo = new SongInfo;
 
@@ -53,8 +51,10 @@ void SongInfo::Init()
 
 void SongInfo::Resize()
 {
-	w->Resize(COLS, MainHeight);
-	w->MoveTo(0, MainStartY);
+	size_t x_offset, width;
+	GetWindowResizeParams(x_offset, width);
+	w->Resize(width, MainHeight);
+	w->MoveTo(x_offset, MainStartY);
 	hasToBeResized = 0;
 }
 
@@ -65,18 +65,25 @@ std::basic_string<my_char_t> SongInfo::Title()
 
 void SongInfo::SwitchTo()
 {
+	using Global::myScreen;
+	using Global::myOldScreen;
+	using Global::myLockedScreen;
+	
 	if (myScreen == this)
 		return myOldScreen->SwitchTo();
 	
 	if (!isInitialized)
 		Init();
 	
+	if (myLockedScreen)
+		UpdateInactiveScreen(this);
+	
 	MPD::Song *s = myScreen->CurrentSong();
 	
 	if (!s)
 		return;
 	
-	if (hasToBeResized)
+	if (hasToBeResized || myLockedScreen)
 		Resize();
 	
 	myOldScreen = myScreen;

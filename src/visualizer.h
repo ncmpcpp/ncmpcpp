@@ -54,6 +54,8 @@ class Visualizer : public Screen<Window>
 		
 		virtual bool allowsSelection() { return false; }
 		
+		virtual bool isMergable() { return true; }
+		
 		void SetFD();
 		void ResetFD();
 		void FindOutputID();
@@ -62,6 +64,7 @@ class Visualizer : public Screen<Window>
 		
 	protected:
 		virtual void Init();
+		virtual bool isLockable() { return true; }
 		
 	private:
 		void DrawSoundWave(int16_t *, ssize_t, size_t, size_t);

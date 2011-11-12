@@ -34,7 +34,7 @@ namespace Display
 		std::string *format;
 	};
 	
-	std::string Columns();
+	std::string Columns(size_t);
 	
 	template <typename T> void Generic(const T &t, void *, Menu<T> *menu)
 	{

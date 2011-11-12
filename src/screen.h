@@ -28,6 +28,10 @@
 #include "settings.h"
 #include "status.h"
 
+void ApplyToVisibleWindows(void (BasicScreen::*f)());
+void UpdateInactiveScreen(BasicScreen *);
+bool isVisible(BasicScreen *);
+
 /// An interface for various instantiations of Screen template class. Since C++ doesn't like
 /// comparison of two different instantiations of the same template class we need the most
 /// basic class to be non-template to allow it.
@@ -43,7 +47,7 @@ class BasicScreen
 		
 		/// @see Screen::ActiveWindow()
 		///
-		virtual void *ActiveWindow() = 0;
+		virtual Window *ActiveWindow() = 0;
 		
 		/// Method used for switching to screen
 		///
@@ -129,9 +133,22 @@ class BasicScreen
 		///
 		virtual bool isTabbable() { return false; }
 		
+		/// @return true if screen is mergable, ie. can be "proper" subwindow
+		/// if one of the screens is locked. Screens that somehow resemble popups
+		/// will want to return false here.
+		virtual bool isMergable() = 0;
+		
+		/// Locks current screen.
+		/// @return true if lock was successful, false otherwise. Note that
+		/// if there is already locked screen, it'll not overwrite it.
+		bool Lock();
+		
 		/// Should be set to true each time screen needs resize
 		///
 		bool hasToBeResized;
+		
+		/// Unlocks a screen, ie. hides merged window (if there is one set).
+		static void Unlock();
 		
 	protected:
 		/// Since screens initialization is lazy, we don't want to do
@@ -140,6 +157,18 @@ class BasicScreen
 		/// to true to somehow avoid next attempt of initialization.
 		///
 		virtual void Init() = 0;
+		
+		/// @return true if screen can be locked. Note that returning
+		/// false here doesn't neccesarily mean that screen is also not
+		/// mergable (eg. lyrics screen is not lockable since that wouldn't
+		/// make much sense, but it's perfectly fine to merge it).
+		virtual bool isLockable() = 0;
+		
+		/// Gets X offset and width of current screen to be used eg. in Resize() function.
+		/// @param adjust_locked_screen indicates whether this function should
+		/// automatically adjust locked screen's dimensions (is there is one set)
+		/// if current screen is going to be subwindow.
+		void GetWindowResizeParams(size_t &x_offset, size_t &width, bool adjust_locked_screen = true);
 		
 		/// Flag that inditates whether the screen is initialized or not
 		///
@@ -161,7 +190,7 @@ template <typename WindowType> class Screen : public BasicScreen
 		/// active
 		/// @return address to window object cast to void *
 		///
-		virtual void *ActiveWindow();
+		virtual Window *ActiveWindow();
 		
 		/// @return pointer to currently active window
 		///
@@ -203,7 +232,7 @@ template <typename WindowType> class Screen : public BasicScreen
 		WindowType *w;
 };
 
-template <typename WindowType> void *Screen<WindowType>::ActiveWindow()
+template <typename WindowType> Window *Screen<WindowType>::ActiveWindow()
 {
 	return w;
 }

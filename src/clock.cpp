@@ -54,47 +54,57 @@ void Clock::Init()
 {
 	Width = Config.clock_display_seconds ? 60 : 40;
 	
+	itsPane = new Window(0, MainStartY, COLS, MainHeight, "", Config.main_color, brNone);
 	w = new Window((COLS-Width)/2, (MainHeight-Height)/2+MainStartY, Width, Height-1, "", Config.main_color, Border(Config.main_color));
 	isInitialized = 1;
 }
 
 void Clock::Resize()
 {
-	if (Width <= size_t(COLS) && Height <= MainHeight)
-	{
-		w->MoveTo((COLS-Width)/2, (MainHeight-Height)/2+MainStartY);
-		if (myScreen == this)
-		{
-			if (myPlaylist->hasToBeResized)
-				myPlaylist->Resize();
-			myPlaylist->Items->Hide();
-			w->Display();
-		}
-	}
+	size_t x_offset, width;
+	GetWindowResizeParams(x_offset, width);
+	
+	// used for clearing area out of clock window while resizing terminal
+	itsPane->Resize(width, MainHeight);
+	itsPane->MoveTo(x_offset, MainStartY);
+	itsPane->Refresh();
+	
+	if (Width <= width && Height <= MainHeight)
+		w->MoveTo(x_offset+(width-Width)/2, MainStartY+(MainHeight-Height)/2);
 }
 
 void Clock::SwitchTo()
 {
-	if (Width > size_t(COLS) || Height > MainHeight)
-	{
-		ShowMessage("Screen is too small to display clock!");
-		return;
-	}
+	using Global::myLockedScreen;
+	
 	if (myScreen == this)
 		return;
 	
 	if (!isInitialized)
 		Init();
 	
-	if (hasToBeResized)
+	if (myLockedScreen)
+		UpdateInactiveScreen(this);
+	
+	size_t x_offset, width;
+	GetWindowResizeParams(x_offset, width, false);
+	if (Width > width || Height > MainHeight)
+	{
+		ShowMessage("Screen is too small to display clock!");
+		if (myLockedScreen)
+			UpdateInactiveScreen(myLockedScreen);
+		return;
+	}
+	
+	if (hasToBeResized || myLockedScreen)
 		Resize();
 	
 	if (myScreen != this && myScreen->isTabbable())
 		Global::myPrevScreen = myScreen;
 	myScreen = this;
-	myPlaylist->Items->Hide();
 	Global::RedrawHeader = 1;
 	Prepare();
+	itsPane->Refresh();
 	// clearing screen apparently fixes the problem with last digits being misrendered
 	w->Clear();
 	w->Display();
@@ -107,8 +117,20 @@ std::basic_string<my_char_t> Clock::Title()
 
 void Clock::Update()
 {
-	if (Width > size_t(COLS) || Height > MainHeight)
-		myPlaylist->SwitchTo();
+	if (Width > itsPane->GetWidth() || Height > MainHeight)
+	{
+		using Global::myLockedScreen;
+		using Global::myInactiveScreen;
+		
+		if (myLockedScreen)
+		{
+			if (myInactiveScreen != myLockedScreen)
+				myScreen = myInactiveScreen;
+			myLockedScreen->SwitchTo();
+		}
+		else
+			myPlaylist->SwitchTo();
+	}
 	
 	static timeval past = { 0, 0 };
 	gettimeofday(&past, 0);

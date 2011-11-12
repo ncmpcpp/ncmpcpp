@@ -48,10 +48,13 @@ class TinyTagEditor : public Screen< Menu<Buffer> >
 		
 		virtual List *GetList() { return 0; }
 		
+		virtual bool isMergable() { return true; }
+		
 		bool SetEdited(MPD::Song *);
 		
 	protected:
 		virtual void Init();
+		virtual bool isLockable() { return true; }
 		
 	private:
 		bool GetTags();

@@ -36,6 +36,7 @@ using Global::myScreen;
 MediaLibrary *myLibrary = new MediaLibrary;
 
 bool MediaLibrary::hasTwoColumns;
+size_t MediaLibrary::itsLeftColStartX;
 size_t MediaLibrary::itsLeftColWidth;
 size_t MediaLibrary::itsMiddleColWidth;
 size_t MediaLibrary::itsMiddleColStartX;
@@ -93,27 +94,30 @@ void MediaLibrary::Init()
 
 void MediaLibrary::Resize()
 {
+	size_t x_offset, width;
+	GetWindowResizeParams(x_offset, width);
 	if (!hasTwoColumns)
 	{
-		itsLeftColWidth = COLS/3-1;
-		itsMiddleColStartX = itsLeftColWidth+1;
-		itsMiddleColWidth = COLS/3;
-		itsRightColStartX = itsLeftColWidth+itsMiddleColWidth+2;
-		itsRightColWidth = COLS-COLS/3*2-1;
+		itsLeftColStartX = x_offset;
+		itsLeftColWidth = width/3-1;
+		itsMiddleColStartX = itsLeftColStartX+itsLeftColWidth+1;
+		itsMiddleColWidth = width/3;
+		itsRightColStartX = itsMiddleColStartX+itsMiddleColWidth+1;
+		itsRightColWidth = width-width/3*2-1;
 	}
 	else
 	{
-		itsMiddleColStartX = 0;
-		itsMiddleColWidth = COLS/2;
-		itsRightColStartX = itsMiddleColWidth+1;
-		itsRightColWidth = COLS-itsMiddleColWidth-1;
+		itsMiddleColStartX = x_offset;
+		itsMiddleColWidth = width/2;
+		itsRightColStartX = x_offset+itsMiddleColWidth+1;
+		itsRightColWidth = width-itsMiddleColWidth-1;
 	}
 	
 	Artists->Resize(itsLeftColWidth, MainHeight);
 	Albums->Resize(itsMiddleColWidth, MainHeight);
 	Songs->Resize(itsRightColWidth, MainHeight);
 	
-	Artists->MoveTo(0, MainStartY);
+	Artists->MoveTo(itsLeftColStartX, MainStartY);
 	Albums->MoveTo(itsMiddleColStartX, MainStartY);
 	Songs->MoveTo(itsRightColStartX, MainStartY);
 	
@@ -136,6 +140,8 @@ void MediaLibrary::Refresh()
 
 void MediaLibrary::SwitchTo()
 {
+	using Global::myLockedScreen;
+	
 	if (myScreen == this)
 	{
 		if (Config.media_library_disable_two_column_mode)
@@ -169,7 +175,10 @@ void MediaLibrary::SwitchTo()
 	if (!isInitialized)
 		Init();
 	
-	if (hasToBeResized)
+	if (myLockedScreen)
+		UpdateInactiveScreen(this);
+	
+	if (hasToBeResized || myLockedScreen)
 		Resize();
 	
 	if (myScreen != this && myScreen->isTabbable())
@@ -544,18 +553,18 @@ void MediaLibrary::ApplyFilter(const std::string &s)
 	GetList()->ApplyFilter(s, 0, REG_ICASE | Config.regex_type);
 }
 
-void MediaLibrary::NextColumn()
+bool MediaLibrary::NextColumn()
 {
 	if (w == Artists)
 	{
 		if (!hasTwoColumns && Songs->ReallyEmpty())
-			return;
+			return false;
 		Artists->HighlightColor(Config.main_highlight_color);
 		w->Refresh();
 		w = Albums;
 		Albums->HighlightColor(Config.active_column_color);
 		if (!Albums->ReallyEmpty())
-			return;
+			return true;
 	}
 	if (w == Albums && !Songs->ReallyEmpty())
 	{
@@ -563,10 +572,12 @@ void MediaLibrary::NextColumn()
 		w->Refresh();
 		w = Songs;
 		Songs->HighlightColor(Config.active_column_color);
+		return true;
 	}
+	return false;
 }
 
-void MediaLibrary::PrevColumn()
+bool MediaLibrary::PrevColumn()
 {
 	if (w == Songs)
 	{
@@ -575,7 +586,7 @@ void MediaLibrary::PrevColumn()
 		w = Albums;
 		Albums->HighlightColor(Config.active_column_color);
 		if (!Albums->ReallyEmpty())
-			return;
+			return true;
 	}
 	if (w == Albums && !hasTwoColumns)
 	{
@@ -583,7 +594,9 @@ void MediaLibrary::PrevColumn()
 		w->Refresh();
 		w = Artists;
 		Artists->HighlightColor(Config.active_column_color);
+		return true;
 	}
+	return false;
 }
 
 void MediaLibrary::LocateSong(const MPD::Song &s)

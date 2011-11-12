@@ -54,23 +54,32 @@ void TinyTagEditor::Init()
 
 void TinyTagEditor::Resize()
 {
-	w->Resize(COLS, MainHeight);
-	w->MoveTo(0, MainStartY);
+	size_t x_offset, width;
+	GetWindowResizeParams(x_offset, width);
+	w->Resize(width, MainHeight);
+	w->MoveTo(x_offset, MainStartY);
 	hasToBeResized = 0;
 }
 
 void TinyTagEditor::SwitchTo()
 {
+	using Global::myScreen;
+	using Global::myLockedScreen;
+	
 	if (itsEdited.isStream())
 	{
 		ShowMessage("Streams cannot be edited!");
 	}
 	else if (GetTags())
 	{
-		if (hasToBeResized)
+		if (myLockedScreen)
+			UpdateInactiveScreen(this);
+		
+		if (hasToBeResized || myLockedScreen)
 			Resize();
-		myOldScreen = Global::myScreen;
-		Global::myScreen = this;
+		
+		myOldScreen = myScreen;
+		myScreen = this;
 		Global::RedrawHeader = 1;
 	}
 	else

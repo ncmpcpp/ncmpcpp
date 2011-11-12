@@ -65,8 +65,10 @@ void Lyrics::Init()
 
 void Lyrics::Resize()
 {
-	w->Resize(COLS, MainHeight);
-	w->MoveTo(0, MainStartY);
+	size_t x_offset, width;
+	GetWindowResizeParams(x_offset, width);
+	w->Resize(width, MainHeight);
+	w->MoveTo(x_offset, MainStartY);
 	hasToBeResized = 0;
 }
 
@@ -98,6 +100,9 @@ void Lyrics::Update()
 
 void Lyrics::SwitchTo()
 {
+	using Global::myLockedScreen;
+	using Global::myInactiveScreen;
+	
 	if (myScreen == this)
 		return myOldScreen->SwitchTo();
 	
@@ -134,14 +139,25 @@ void Lyrics::SwitchTo()
 			Global::RedrawHeader = 1;
 		}
 		else
+		{
 			ShowMessage("Song must have both artist and title tag set!");
+			return;
+		}
+	}
+	// if we resize for locked screen, we have to do that in the end since
+	// fetching lyrics may fail (eg. if tags are missing) and we don't want
+	// to adjust screen size then.
+	if (myLockedScreen)
+	{
+		UpdateInactiveScreen(this);
+		Resize();
 	}
 }
 
 std::basic_string<my_char_t> Lyrics::Title()
 {
 	std::basic_string<my_char_t> result = U("Lyrics: ");
-	result += Scroller(TO_WSTRING(itsSong.toString("{%a - %t}")), itsScrollBegin, w->GetWidth()-result.length()-(Config.new_design ? 2 : Global::VolumeState.length()));
+	result += Scroller(TO_WSTRING(itsSong.toString("{%a - %t}")), itsScrollBegin, COLS-result.length()-(Config.new_design ? 2 : Global::VolumeState.length()));
 	return result;
 }
 

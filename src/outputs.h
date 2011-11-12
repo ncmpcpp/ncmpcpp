@@ -48,10 +48,13 @@ class Outputs : public Screen< Menu<MPD::Output> >
 		
 		virtual List *GetList() { return w; }
 		
+		virtual bool isMergable() { return true; }
+		
 		void FetchList();
 		
 	protected:
 		virtual void Init();
+		virtual bool isLockable() { return true; }
 };
 
 extern Outputs *myOutputs;

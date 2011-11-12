@@ -143,6 +143,7 @@ struct NcmpcppKeys
 	int ToggleSeparatorsInPlaylist[2];
 	int ToggleLyricsDB[2];
 	int ToggleFetchingLyricsInBackground[2];
+	int ToggleScreenLock[2];
 	int GoToParentDir[2];
 	int SwitchTagTypeList[2];
 	int Quit[2];
@@ -269,6 +270,8 @@ struct NcmpcppConfig
 	unsigned lines_scrolled;
 	unsigned search_engine_default_search_mode;
 	unsigned visualizer_sync_interval;
+	
+	double locked_screen_width_part;
 	
 	size_t selected_item_suffix_length;
 	size_t now_playing_suffix_length;

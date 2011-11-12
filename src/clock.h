@@ -50,10 +50,15 @@ class Clock : public Screen<Window>
 		
 		virtual List *GetList() { return 0; }
 		
+		virtual bool isMergable() { return true; }
+		
 	protected:
 		virtual void Init();
+		virtual bool isLockable() { return false; }
 		
 	private:
+		Window *itsPane;
+		
 		static void Prepare();
 		static void Set(int, int);
 		

@@ -46,10 +46,13 @@ class SongInfo : public Screen<Scrollpad>
 		
 		virtual List *GetList() { return 0; }
 		
+		virtual bool isMergable() { return true; }
+		
 		static const Metadata Tags[];
 		
 	protected:
 		virtual void Init();
+		virtual bool isLockable() { return false; }
 		
 	private:
 		void PrepareSong(MPD::Song &);

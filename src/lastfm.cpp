@@ -38,8 +38,6 @@
 
 using Global::MainHeight;
 using Global::MainStartY;
-using Global::myScreen;
-using Global::myOldScreen;
 
 Lastfm *myLastfm = new Lastfm;
 
@@ -51,8 +49,10 @@ void Lastfm::Init()
 
 void Lastfm::Resize()
 {
-	w->Resize(COLS, MainHeight);
-	w->MoveTo(0, MainStartY);
+	size_t x_offset, width;
+	GetWindowResizeParams(x_offset, width);
+	w->Resize(width, MainHeight);
+	w->MoveTo(x_offset, MainStartY);
 	hasToBeResized = 0;
 }
 
@@ -79,13 +79,20 @@ void Lastfm::Take()
 
 void Lastfm::SwitchTo()
 {
+	using Global::myScreen;
+	using Global::myOldScreen;
+	using Global::myLockedScreen;
+	
 	if (myScreen == this)
 		return myOldScreen->SwitchTo();
 	
 	if (!isInitialized)
 		Init();
 	
-	if (hasToBeResized)
+	if (myLockedScreen)
+		UpdateInactiveScreen(this);
+	
+	if (hasToBeResized || myLockedScreen)
 		Resize();
 	
 	// get an old info if it waits

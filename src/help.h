@@ -40,8 +40,11 @@ class Help : public Screen<Scrollpad>
 		
 		virtual List *GetList() { return 0; }
 		
+		virtual bool isMergable() { return true; }
+		
 	protected:
 		virtual void Init();
+		virtual bool isLockable() { return true; }
 		
 	private:
 		std::string DisplayKeys(int *, int = 2);

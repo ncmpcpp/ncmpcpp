@@ -48,6 +48,7 @@ const std::string TagEditor::PatternsFile = config_dir + "patterns.list";
 std::list<std::string> TagEditor::Patterns;
 
 size_t TagEditor::LeftColumnWidth;
+size_t TagEditor::LeftColumnStartX;
 size_t TagEditor::MiddleColumnWidth;
 size_t TagEditor::MiddleColumnStartX;
 size_t TagEditor::RightColumnWidth;
@@ -62,7 +63,7 @@ size_t TagEditor::FParserHeight;
 
 void TagEditor::Init()
 {
-	SetDimensions();
+	SetDimensions(0, COLS);
 	
 	Albums = new Menu<string_pair>(0, MainStartY, LeftColumnWidth, MainHeight, Config.titles_visibility ? "Albums" : "", Config.main_color, brNone);
 	Albums->HighlightColor(Config.active_column_color);
@@ -133,17 +134,18 @@ void TagEditor::Init()
 	isInitialized = 1;
 }
 
-void TagEditor::SetDimensions()
+void TagEditor::SetDimensions(size_t x_offset, size_t width)
 {
 	MiddleColumnWidth = std::min(26, COLS-2);
-	LeftColumnWidth = (COLS-MiddleColumnWidth)/2;
-	MiddleColumnStartX = LeftColumnWidth+1;
-	RightColumnWidth = COLS-LeftColumnWidth-MiddleColumnWidth-2;
-	RightColumnStartX = LeftColumnWidth+MiddleColumnWidth+2;
+	LeftColumnStartX = x_offset;
+	LeftColumnWidth = (width-MiddleColumnWidth)/2;
+	MiddleColumnStartX = LeftColumnStartX+LeftColumnWidth+1;
+	RightColumnWidth = width-LeftColumnWidth-MiddleColumnWidth-2;
+	RightColumnStartX = MiddleColumnStartX+MiddleColumnWidth+1;
 	
 	FParserDialogWidth = std::min(30, COLS);
 	FParserDialogHeight = std::min(size_t(6), MainHeight);
-	FParserWidth = COLS*0.9;
+	FParserWidth = width*0.9;
 	FParserHeight = std::min(size_t(LINES*0.8), MainHeight);
 	FParserWidthOne = FParserWidth/2;
 	FParserWidthTwo = FParserWidth-FParserWidthOne;
@@ -151,7 +153,9 @@ void TagEditor::SetDimensions()
 
 void TagEditor::Resize()
 {
-	SetDimensions();
+	size_t x_offset, width;
+	GetWindowResizeParams(x_offset, width);
+	SetDimensions(x_offset, width);
 	
 	Albums->Resize(LeftColumnWidth, MainHeight);
 	Dirs->Resize(LeftColumnWidth, MainHeight);
@@ -162,15 +166,15 @@ void TagEditor::Resize()
 	FParserLegend->Resize(FParserWidthTwo, FParserHeight);
 	FParserPreview->Resize(FParserWidthTwo, FParserHeight);
 	
-	Albums->MoveTo(0, MainStartY);
-	Dirs->MoveTo(0, MainStartY);
+	Albums->MoveTo(LeftColumnStartX, MainStartY);
+	Dirs->MoveTo(LeftColumnStartX, MainStartY);
 	TagTypes->MoveTo(MiddleColumnStartX, MainStartY);
 	Tags->MoveTo(RightColumnStartX, MainStartY);
 	
-	FParserDialog->MoveTo((COLS-FParserDialogWidth)/2, (MainHeight-FParserDialogHeight)/2+MainStartY);
-	FParser->MoveTo((COLS-FParserWidth)/2, (MainHeight-FParserHeight)/2+MainStartY);
-	FParserLegend->MoveTo((COLS-FParserWidth)/2+FParserWidthOne, (MainHeight-FParserHeight)/2+MainStartY);
-	FParserPreview->MoveTo((COLS-FParserWidth)/2+FParserWidthOne, (MainHeight-FParserHeight)/2+MainStartY);
+	FParserDialog->MoveTo(x_offset+(width-FParserDialogWidth)/2, (MainHeight-FParserDialogHeight)/2+MainStartY);
+	FParser->MoveTo(x_offset+(width-FParserWidth)/2, (MainHeight-FParserHeight)/2+MainStartY);
+	FParserLegend->MoveTo(x_offset+(width-FParserWidth)/2+FParserWidthOne, (MainHeight-FParserHeight)/2+MainStartY);
+	FParserPreview->MoveTo(x_offset+(width-FParserWidth)/2+FParserWidthOne, (MainHeight-FParserHeight)/2+MainStartY);
 	
 	if (MainHeight < 5 && (w == FParserDialog || w == FParser || w == FParserHelper)) // screen too low
 		w = TagTypes; // fall back to main columns
@@ -186,6 +190,7 @@ std::basic_string<my_char_t> TagEditor::Title()
 void TagEditor::SwitchTo()
 {
 	using Global::myScreen;
+	using Global::myLockedScreen;
 	
 	if (myScreen == this)
 		return;
@@ -193,7 +198,10 @@ void TagEditor::SwitchTo()
 	if (!isInitialized)
 		Init();
 	
-	if (hasToBeResized)
+	if (myLockedScreen)
+		UpdateInactiveScreen(this);
+	
+	if (hasToBeResized || myLockedScreen)
 		Resize();
 	
 	if (myScreen != this && myScreen->isTabbable())
@@ -800,7 +808,7 @@ List *TagEditor::GetList()
 		return 0;
 }
 
-void TagEditor::NextColumn()
+bool TagEditor::NextColumn()
 {
 	if (w == LeftColumn)
 	{
@@ -808,6 +816,7 @@ void TagEditor::NextColumn()
 		w->Refresh();
 		w = TagTypes;
 		TagTypes->HighlightColor(Config.active_column_color);
+		return true;
 	}
 	else if (w == TagTypes && TagTypes->Choice() < 12 && !Tags->ReallyEmpty())
 	{
@@ -815,6 +824,7 @@ void TagEditor::NextColumn()
 		w->Refresh();
 		w = Tags;
 		Tags->HighlightColor(Config.active_column_color);
+		return true;
 	}
 	else if (w == FParser)
 	{
@@ -823,10 +833,12 @@ void TagEditor::NextColumn()
 		w = FParserHelper;
 		FParserHelper->SetBorder(Config.active_window_border);
 		FParserHelper->Display();
+		return true;
 	}
+	return false;
 }
 
-void TagEditor::PrevColumn()
+bool TagEditor::PrevColumn()
 {
 	if (w == Tags)
 	{
@@ -834,6 +846,7 @@ void TagEditor::PrevColumn()
 		w->Refresh();
 		w = TagTypes;
 		TagTypes->HighlightColor(Config.active_column_color);
+		return true;
 	}
 	else if (w == TagTypes)
 	{
@@ -841,6 +854,7 @@ void TagEditor::PrevColumn()
 		w->Refresh();
 		w = LeftColumn;
 		LeftColumn->HighlightColor(Config.active_column_color);
+		return true;
 	}
 	else if (w == FParserHelper)
 	{
@@ -849,7 +863,9 @@ void TagEditor::PrevColumn()
 		w = FParser;
 		FParser->SetBorder(Config.active_window_border);
 		FParser->Display();
+		return true;
 	}
+	return false;
 }
 
 void TagEditor::LocateSong(const MPD::Song &s)

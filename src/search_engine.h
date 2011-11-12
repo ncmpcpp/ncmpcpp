@@ -48,6 +48,8 @@ class SearchEngine : public Screen< Menu< std::pair<Buffer *, MPD::Song *> > >
 		
 		virtual List *GetList() { return w->Size() >= StaticOptions ? w : 0; }
 		
+		virtual bool isMergable() { return true; }
+		
 		void UpdateFoundList();
 		void Scroll(int);
 		void SelectAlbum();
@@ -58,6 +60,7 @@ class SearchEngine : public Screen< Menu< std::pair<Buffer *, MPD::Song *> > >
 		
 	protected:
 		virtual void Init();
+		virtual bool isLockable() { return true; }
 		
 	private:
 		void Prepare();

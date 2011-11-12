@@ -52,18 +52,22 @@ class PlaylistEditor : public Screen<Window>
 		
 		virtual List *GetList();
 		
-		void NextColumn();
-		void PrevColumn();
+		virtual bool isMergable() { return true; }
+		
+		bool NextColumn();
+		bool PrevColumn();
 		
 		Menu<std::string> *Playlists;
 		Menu<MPD::Song> *Content;
 		
 	protected:
 		virtual void Init();
+		virtual bool isLockable() { return true; }
 		
 	private:
 		void AddToPlaylist(bool);
 		
+		static size_t LeftColumnStartX;
 		static size_t LeftColumnWidth;
 		static size_t RightColumnStartX;
 		static size_t RightColumnWidth;

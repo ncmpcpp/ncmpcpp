@@ -51,6 +51,8 @@ class Lyrics : public Screen<Scrollpad>
 		
 		virtual List *GetList() { return 0; }
 		
+		virtual bool isMergable() { return true; }
+		
 		void Edit();
 		void Refetch();
 		
@@ -63,6 +65,7 @@ class Lyrics : public Screen<Scrollpad>
 		
 	protected:
 		virtual void Init();
+		virtual bool isLockable() { return false; }
 		
 	private:
 		void Load();

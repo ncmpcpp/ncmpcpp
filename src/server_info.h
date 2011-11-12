@@ -40,8 +40,11 @@ class ServerInfo : public Screen<Scrollpad>
 		
 		virtual List *GetList() { return 0; }
 		
+		virtual bool isMergable() { return false; }
+		
 	protected:
 		virtual void Init();
+		virtual bool isLockable() { return false; }
 		
 	private:
 		void SetDimensions();

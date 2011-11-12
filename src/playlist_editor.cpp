@@ -35,6 +35,7 @@ using Global::MainStartY;
 
 PlaylistEditor *myPlaylistEditor = new PlaylistEditor;
 
+size_t PlaylistEditor::LeftColumnStartX;
 size_t PlaylistEditor::LeftColumnWidth;
 size_t PlaylistEditor::RightColumnStartX;
 size_t PlaylistEditor::RightColumnWidth;
@@ -70,14 +71,18 @@ void PlaylistEditor::Init()
 
 void PlaylistEditor::Resize()
 {
-	LeftColumnWidth = COLS/3-1;
-	RightColumnStartX = LeftColumnWidth+1;
-	RightColumnWidth = COLS-LeftColumnWidth-1;
+	size_t x_offset, width;
+	GetWindowResizeParams(x_offset, width);
+	
+	LeftColumnStartX = x_offset;
+	LeftColumnWidth = width/3-1;
+	RightColumnStartX = LeftColumnStartX+LeftColumnWidth+1;
+	RightColumnWidth = width-LeftColumnWidth-1;
 	
 	Playlists->Resize(LeftColumnWidth, MainHeight);
 	Content->Resize(RightColumnWidth, MainHeight);
 	
-	Playlists->MoveTo(0, MainStartY);
+	Playlists->MoveTo(LeftColumnStartX, MainStartY);
 	Content->MoveTo(RightColumnStartX, MainStartY);
 	
 	hasToBeResized = 0;
@@ -98,6 +103,7 @@ void PlaylistEditor::Refresh()
 void PlaylistEditor::SwitchTo()
 {
 	using Global::myScreen;
+	using Global::myLockedScreen;
 	
 	if (myScreen == this)
 		return;
@@ -105,7 +111,10 @@ void PlaylistEditor::SwitchTo()
 	if (!isInitialized)
 		Init();
 	
-	if (hasToBeResized)
+	if (myLockedScreen)
+		UpdateInactiveScreen(this);
+	
+	if (hasToBeResized || myLockedScreen)
 		Resize();
 	
 	if (myScreen != this && myScreen->isTabbable())
@@ -139,7 +148,11 @@ void PlaylistEditor::Update()
 		MPD::SongList list;
 		Mpd.GetPlaylistContent(locale_to_utf_cpy(Playlists->Current()), list);
 		if (!list.empty())
-			Content->SetTitle(Config.titles_visibility ? "Playlist's content (" + IntoStr(list.size()) + " item" + (list.size() == 1 ? ")" : "s)") : "");
+		{
+			std::string title = Config.titles_visibility ? "Playlist's content (" + IntoStr(list.size()) + " item" + (list.size() == 1 ? ")" : "s)") : "";
+			title.resize(Content->GetWidth());
+			Content->SetTitle(title);
+		}
 		else
 			Content->SetTitle(Config.titles_visibility ? "Playlist's content" : "");
 		bool bold = 0;
@@ -175,7 +188,7 @@ void PlaylistEditor::Update()
 	}
 }
 
-void PlaylistEditor::NextColumn()
+bool PlaylistEditor::NextColumn()
 {
 	if (w == Playlists)
 	{
@@ -183,10 +196,12 @@ void PlaylistEditor::NextColumn()
 		w->Refresh();
 		w = Content;
 		Content->HighlightColor(Config.active_column_color);
+		return true;
 	}
+	return false;
 }
 
-void PlaylistEditor::PrevColumn()
+bool PlaylistEditor::PrevColumn()
 {
 	if (w == Content)
 	{
@@ -194,7 +209,9 @@ void PlaylistEditor::PrevColumn()
 		w->Refresh();
 		w = Playlists;
 		Playlists->HighlightColor(Config.active_column_color);
+		return true;
 	}
+	return false;
 }
 
 void PlaylistEditor::AddToPlaylist(bool add_n_play)

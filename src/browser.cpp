@@ -59,7 +59,7 @@ void Browser::Init()
 {
 	static Display::ScreenFormat sf = { this, &Config.song_list_format };
 	
-	w = new Menu<MPD::Item>(0, MainStartY, COLS, MainHeight, Config.columns_in_browser && Config.titles_visibility ? Display::Columns() : "", Config.main_color, brNone);
+	w = new Menu<MPD::Item>(0, MainStartY, COLS, MainHeight, Config.columns_in_browser && Config.titles_visibility ? Display::Columns(COLS) : "", Config.main_color, brNone);
 	w->HighlightColor(Config.main_highlight_color);
 	w->CyclicScrolling(Config.use_cyclic_scrolling);
 	w->CenteredCursor(Config.centered_cursor);
@@ -73,14 +73,19 @@ void Browser::Init()
 
 void Browser::Resize()
 {
-	w->Resize(COLS, MainHeight);
-	w->MoveTo(0, MainStartY);
-	w->SetTitle(Config.columns_in_browser && Config.titles_visibility ? Display::Columns() : "");
+	size_t x_offset, width;
+	GetWindowResizeParams(x_offset, width);
+	w->Resize(width, MainHeight);
+	w->MoveTo(x_offset, MainStartY);
+	w->SetTitle(Config.columns_in_browser && Config.titles_visibility ? Display::Columns(w->GetWidth()) : "");
 	hasToBeResized = 0;
 }
 
 void Browser::SwitchTo()
 {
+	using Global::myLockedScreen;
+	using Global::myInactiveScreen;
+	
 	if (myScreen == this)
 	{
 #		ifndef WIN32
@@ -91,7 +96,10 @@ void Browser::SwitchTo()
 	if (!isInitialized)
 		Init();
 	
-	if (hasToBeResized)
+	if (myLockedScreen)
+		UpdateInactiveScreen(this);
+	
+	if (hasToBeResized || myLockedScreen)
 		Resize();
 	
 	if (isLocal()) // local browser doesn't support sorting by mtime
@@ -108,7 +116,7 @@ void Browser::SwitchTo()
 std::basic_string<my_char_t> Browser::Title()
 {
 	std::basic_string<my_char_t> result = U("Browse: ");
-	result += Scroller(TO_WSTRING(itsBrowsedDir), itsScrollBeginning, w->GetWidth()-result.length()-(Config.new_design ? 2 : Global::VolumeState.length()));
+	result += Scroller(TO_WSTRING(itsBrowsedDir), itsScrollBeginning, COLS-result.length()-(Config.new_design ? 2 : Global::VolumeState.length()));
 	return result;
 }
 

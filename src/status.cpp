@@ -41,6 +41,8 @@
 #include "visualizer.h"
 
 using Global::myScreen;
+using Global::myLockedScreen;
+using Global::myInactiveScreen;
 using Global::wFooter;
 using Global::Timer;
 using Global::wHeader;
@@ -156,6 +158,16 @@ void TraceMpdStatus()
 		Global::UpdateStatusImmediately = 0;
 	}
 	
+	if (myLockedScreen)
+	{
+		if (myScreen == myLockedScreen)
+		{
+			if (myInactiveScreen)
+				myInactiveScreen->Update();
+		}
+		else
+			myLockedScreen->Update();
+	}
 	myScreen->Update();
 	
 	if (myScreen->ActiveWindow() == myPlaylist->Items
@@ -283,19 +295,19 @@ void NcmpcppStatusChanged(MPD::Connection *, MPD::StatusChanges changed, void *)
 		
 		if (!Global::BlockItemListUpdate)
 		{
-			if (myScreen == myBrowser)
+			if (isVisible(myBrowser))
 			{
 				myBrowser->UpdateItemList();
 			}
-			else if (myScreen == mySearcher)
+			else if (isVisible(mySearcher))
 			{
 				mySearcher->UpdateFoundList();
 			}
-			else if (myScreen == myLibrary)
+			else if (isVisible(myLibrary))
 			{
 				UpdateSongList(myLibrary->Songs);
 			}
-			else if (myScreen == myPlaylistEditor)
+			else if (isVisible(myPlaylistEditor))
 			{
 				UpdateSongList(myPlaylistEditor->Content);
 			}
@@ -305,7 +317,7 @@ void NcmpcppStatusChanged(MPD::Connection *, MPD::StatusChanges changed, void *)
 	{
 		if (myBrowser->Main())
 		{
-			if (myScreen == myBrowser)
+			if (isVisible(myBrowser))
 				myBrowser->GetDirectory(myBrowser->CurrentDir());
 			else
 				myBrowser->Main()->Clear();
@@ -370,7 +382,7 @@ void NcmpcppStatusChanged(MPD::Connection *, MPD::StatusChanges changed, void *)
 				else
 					player_state.clear();
 #				ifdef ENABLE_VISUALIZER
-				if (myScreen == myVisualizer)
+				if (isVisible(myVisualizer))
 					myVisualizer->Main()->Clear();
 #				endif // ENABLE_VISUALIZER
 				break;
@@ -412,7 +424,7 @@ void NcmpcppStatusChanged(MPD::Connection *, MPD::StatusChanges changed, void *)
 			if (Config.autocenter_mode && !myPlaylist->Items->isFiltered())
 				myPlaylist->Items->Highlight(myPlaylist->NowPlaying);
 			
-			if (Config.now_playing_lyrics && myScreen == myLyrics && Global::myOldScreen == myPlaylist)
+			if (Config.now_playing_lyrics && isVisible(myLyrics) && Global::myOldScreen == myPlaylist)
 				myLyrics->ReloadNP = 1;
 		}
 		Playlist::ReloadRemaining = 1;
@@ -647,7 +659,7 @@ void NcmpcppStatusChanged(MPD::Connection *, MPD::StatusChanges changed, void *)
 	if (changed.PlayerState || (changed.ElapsedTime && (!Config.new_design || Mpd.GetState() == MPD::psPlay)))
 		wFooter->Refresh();
 	if (changed.Playlist || changed.Database || changed.PlayerState || changed.SongID)
-		myScreen->RefreshWindow();
+		ApplyToVisibleWindows(&BasicScreen::RefreshWindow);
 }
 
 Window &Statusbar()

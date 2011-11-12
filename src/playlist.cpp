@@ -49,7 +49,7 @@ void Playlist::Init()
 {
 	static Display::ScreenFormat sf = { this, &Config.song_list_format };
 	
-	Items = new Menu<MPD::Song>(0, MainStartY, COLS, MainHeight, Config.columns_in_playlist && Config.titles_visibility ? Display::Columns() : "", Config.main_color, brNone);
+	Items = new Menu<MPD::Song>(0, MainStartY, COLS, MainHeight, Config.columns_in_playlist && Config.titles_visibility ? Display::Columns(COLS) : "", Config.main_color, brNone);
 	Items->CyclicScrolling(Config.use_cyclic_scrolling);
 	Items->CenteredCursor(Config.centered_cursor);
 	Items->HighlightColor(Config.main_highlight_color);
@@ -92,6 +92,8 @@ void Playlist::Init()
 void Playlist::SwitchTo()
 {
 	using Global::myScreen;
+	using Global::myLockedScreen;
+	using Global::myInactiveScreen;
 	
 	if (myScreen == this)
 		return;
@@ -101,7 +103,10 @@ void Playlist::SwitchTo()
 	
 	itsScrollBegin = 0;
 	
-	if (hasToBeResized)
+	if (myLockedScreen)
+		UpdateInactiveScreen(this);
+	
+	if (hasToBeResized || myLockedScreen)
 		Resize();
 	
 	if (myScreen != this && myScreen->isTabbable())
@@ -116,9 +121,12 @@ void Playlist::SwitchTo()
 
 void Playlist::Resize()
 {
-	Items->Resize(COLS, MainHeight);
-	Items->MoveTo(0, MainStartY);
-	Items->SetTitle(Config.columns_in_playlist && Config.titles_visibility ? Display::Columns() : "");
+	size_t x_offset, width;
+	GetWindowResizeParams(x_offset, width);
+	Items->Resize(width, MainHeight);
+	Items->MoveTo(x_offset, MainStartY);
+
+	Items->SetTitle(Config.columns_in_playlist && Config.titles_visibility ? Display::Columns(Items->GetWidth()) : "");
 	if (w == SortDialog) // if sorting window is active, playlist needs refreshing
 		Items->Display();
 	
@@ -126,7 +134,7 @@ void Playlist::Resize()
 	if (Items->GetWidth() >= SortDialogWidth && MainHeight >= 5)
 	{
 		SortDialog->Resize(SortDialogWidth, SortDialogHeight);
-		SortDialog->MoveTo((COLS-SortDialogWidth)/2, (MainHeight-SortDialogHeight)/2+MainStartY);
+		SortDialog->MoveTo(x_offset+(width-SortDialogWidth)/2, (MainHeight-SortDialogHeight)/2+MainStartY);
 	}
 	else // if screen is too low to display sorting window, fall back to items list
 		w = Items;
@@ -139,7 +147,7 @@ std::basic_string<my_char_t> Playlist::Title()
 	std::basic_string<my_char_t> result = U("Playlist ");
 	if (ReloadTotalLength || ReloadRemaining)
 		itsBufferedStats = TotalLength();
-	result += Scroller(TO_WSTRING(itsBufferedStats), itsScrollBegin, Items->GetWidth()-result.length()-(Config.new_design ? 2 : Global::VolumeState.length()));
+	result += Scroller(TO_WSTRING(itsBufferedStats), itsScrollBegin, COLS-result.length()-(Config.new_design ? 2 : Global::VolumeState.length()));
 	return result;
 }
 

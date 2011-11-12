@@ -43,8 +43,11 @@ class SelectedItemsAdder : public Screen< Menu<std::string> >
 		
 		virtual List *GetList() { return w; }
 		
+		virtual bool isMergable() { return false; }
+		
 	protected:
 		virtual void Init();
+		virtual bool isLockable() { return false; }
 		
 	private:
 		void SetDimensions();

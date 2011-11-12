@@ -52,6 +52,8 @@ class Lastfm : public Screen<Scrollpad>
 		
 		virtual List *GetList() { return 0; }
 		
+		virtual bool isMergable() { return true; }
+		
 		void Refetch();
 		
 		bool isDownloading() { return isDownloadInProgress && !isReadyToTake; }
@@ -59,6 +61,7 @@ class Lastfm : public Screen<Scrollpad>
 		
 	protected:
 		virtual void Init();
+		virtual bool isLockable() { return false; }
 		
 	private:
 		std::basic_string<my_char_t> itsTitle;

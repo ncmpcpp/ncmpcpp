@@ -252,6 +252,7 @@ void NcmpcppKeys::SetDefaults()
 	ToggleSeparatorsInPlaylist[0] = '!';
 	ToggleLyricsDB[0] = 'L';
 	ToggleFetchingLyricsInBackground[0] = 'F';
+	ToggleScreenLock[0] = 12;
 	GoToParentDir[0] = KEY_BACKSPACE;
 	SwitchTagTypeList[0] = '`';
 	Quit[0] = 'q';
@@ -341,6 +342,7 @@ void NcmpcppKeys::SetDefaults()
 	ToggleSeparatorsInPlaylist[1] = NullKey;
 	ToggleLyricsDB[1] = NullKey;
 	ToggleFetchingLyricsInBackground[1] = NullKey;
+	ToggleScreenLock[1] = NullKey;
 	GoToParentDir[1] = 127;
 	SwitchTagTypeList[1] = NullKey;
 	Quit[1] = 'Q';
@@ -446,6 +448,7 @@ void NcmpcppConfig::SetDefaults()
 	lines_scrolled = 2;
 	search_engine_default_search_mode = 0;
 	visualizer_sync_interval = 30;
+	locked_screen_width_part = 0.5;
 	selected_item_suffix_length = 0;
 	now_playing_suffix_length = 0;
 #	ifdef HAVE_LANGINFO_H
@@ -1130,6 +1133,12 @@ void NcmpcppConfig::Read()
 				unsigned interval = StrToInt(v);
 				if (interval)
 					visualizer_sync_interval = interval;
+			}
+			else if (cl.find("locked_screen_width_part") != std::string::npos)
+			{
+				unsigned part = StrToInt(v);
+				if (part)
+					locked_screen_width_part = part/100.0;
 			}
 			else if (cl.find("song_window_title_format") != std::string::npos)
 			{

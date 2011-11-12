@@ -45,13 +45,18 @@ void Outputs::Init()
 
 void Outputs::SwitchTo()
 {
+	using Global::myLockedScreen;
+	
 	if (myScreen == this)
 		return;
 	
 	if (!isInitialized)
 		Init();
 	
-	if (hasToBeResized)
+	if (myLockedScreen)
+		UpdateInactiveScreen(this);
+	
+	if (hasToBeResized || myLockedScreen)
 		Resize();
 	
 	if (myScreen != this && myScreen->isTabbable())
@@ -64,8 +69,10 @@ void Outputs::SwitchTo()
 
 void Outputs::Resize()
 {
-	w->Resize(COLS, MainHeight);
-	w->MoveTo(0, MainStartY);
+	size_t x_offset, width;
+	GetWindowResizeParams(x_offset, width);
+	w->Resize(width, MainHeight);
+	w->MoveTo(x_offset, MainStartY);
 	hasToBeResized = 0;
 }
 

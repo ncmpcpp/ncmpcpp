@@ -75,6 +75,8 @@ using namespace MPD;
 BasicScreen *Global::myScreen;
 BasicScreen *Global::myOldScreen;
 BasicScreen *Global::myPrevScreen;
+BasicScreen *Global::myLockedScreen;
+BasicScreen *Global::myInactiveScreen;
 
 Window *Global::wHeader;
 Window *Global::wFooter;
@@ -105,6 +107,40 @@ namespace
 			std::cout << "Screen is too small!\n";
 			exit(1);
 		}
+	}
+	
+	void set_resize_flags()
+	{
+		myHelp->hasToBeResized = 1;
+		myPlaylist->hasToBeResized = 1;
+		myBrowser->hasToBeResized = 1;
+		mySearcher->hasToBeResized = 1;
+		myLibrary->hasToBeResized = 1;
+		myPlaylistEditor->hasToBeResized = 1;
+		myLyrics->hasToBeResized = 1;
+		mySelectedItemsAdder->hasToBeResized = 1;
+		mySongInfo->hasToBeResized = 1;
+		
+#		ifdef HAVE_CURL_CURL_H
+		myLastfm->hasToBeResized = 1;
+#		endif // HAVE_CURL_CURL_H
+		
+#		ifdef HAVE_TAGLIB_H
+		myTinyTagEditor->hasToBeResized = 1;
+		myTagEditor->hasToBeResized = 1;
+#		endif // HAVE_TAGLIB_H
+		
+#		ifdef ENABLE_VISUALIZER
+		myVisualizer->hasToBeResized = 1;
+#		endif // ENABLE_VISUALIZER
+		
+#		ifdef ENABLE_OUTPUTS
+		myOutputs->hasToBeResized = 1;
+#		endif // ENABLE_OUTPUTS
+		
+#		ifdef ENABLE_CLOCK
+		myClock->hasToBeResized = 1;
+#		endif // ENABLE_CLOCK
 	}
 	
 	void resize_screen()
@@ -139,38 +175,9 @@ namespace
 		if (!Config.statusbar_visibility)
 			MainHeight++;
 		
-		myHelp->hasToBeResized = 1;
-		myPlaylist->hasToBeResized = 1;
-		myBrowser->hasToBeResized = 1;
-		mySearcher->hasToBeResized = 1;
-		myLibrary->hasToBeResized = 1;
-		myPlaylistEditor->hasToBeResized = 1;
-		myLyrics->hasToBeResized = 1;
-		mySelectedItemsAdder->hasToBeResized = 1;
-		mySongInfo->hasToBeResized = 1;
+		set_resize_flags();
 		
-#		ifdef HAVE_CURL_CURL_H
-		myLastfm->hasToBeResized = 1;
-#		endif // HAVE_CURL_CURL_H
-		
-#		ifdef HAVE_TAGLIB_H
-		myTinyTagEditor->hasToBeResized = 1;
-		myTagEditor->hasToBeResized = 1;
-#		endif // HAVE_TAGLIB_H
-		
-#		ifdef ENABLE_VISUALIZER
-		myVisualizer->hasToBeResized = 1;
-#		endif // ENABLE_VISUALIZER
-		
-#		ifdef ENABLE_OUTPUTS
-		myOutputs->hasToBeResized = 1;
-#		endif // ENABLE_OUTPUTS
-		
-#		ifdef ENABLE_CLOCK
-		myClock->hasToBeResized = 1;
-#		endif // ENABLE_CLOCK
-		
-		myScreen->Resize();
+		ApplyToVisibleWindows(&BasicScreen::Resize);
 		
 		if (Config.header_visibility || Config.new_design)
 			wHeader->Resize(COLS, header_height);
@@ -179,7 +186,7 @@ namespace
 		wFooter->MoveTo(0, footer_start_y);
 		wFooter->Resize(COLS, Config.statusbar_visibility ? 2 : 1);
 		
-		myScreen->Refresh();
+		ApplyToVisibleWindows(&BasicScreen::Refresh);
 		RedrawStatusbar = 1;
 		StatusChanges changes;
 		if (!Mpd.isPlaying() || design_changed)
@@ -201,6 +208,7 @@ namespace
 			ShowMessage("User interface: %s", Config.new_design ? "Alternative" : "Classic");
 		}
 		wFooter->Refresh();
+		refresh();
 	}
 	
 #	if !defined(WIN32)
@@ -440,6 +448,7 @@ int main(int argc, char *argv[])
 		// header stuff end
 		
 		if (input != ERR)
+			//ApplyToVisibleWindows(&BasicScreen::RefreshWindow);
 			myScreen->RefreshWindow();
 		wFooter->ReadKey(input);
 		
@@ -449,9 +458,6 @@ int main(int argc, char *argv[])
 		if (!title_allowed)
 			RedrawHeader = 1;
 		title_allowed = 1;
-		
-		if (myScreen == myPlaylist)
-			myPlaylist->EnableHighlighting();
 		
 		// key mapping beginning
 		
@@ -607,53 +613,25 @@ int main(int argc, char *argv[])
 		{
 			myScreen->SpacePressed();
 		}
-		else if (Keypressed(input, Key.PrevColumn)
-		     &&  (myScreen == myLibrary
-		       || myScreen == myPlaylistEditor
-#		ifdef HAVE_TAGLIB_H
-		       || myScreen == myTagEditor
-#		endif // HAVE_TAGLIB_H)
-			 )
-			)
+		else if (Keypressed(input, Key.PrevColumn) && SwitchToPrevColumn(myScreen)) { }
+		else if (Keypressed(input, Key.NextColumn) && SwitchToNextColumn(myScreen)) { }
+		else if (Keypressed(input, Key.PrevColumn) && myLockedScreen && myInactiveScreen && myScreen->isMergable())
 		{
-			if (myScreen == myLibrary)
+			if (myScreen != myLockedScreen)
 			{
-				myLibrary->PrevColumn();
+				myInactiveScreen = myScreen;
+				myScreen = myLockedScreen;
+				RedrawHeader = 1;
 			}
-			else if (myScreen == myPlaylistEditor)
-			{
-				myPlaylistEditor->PrevColumn();
-			}
-#			ifdef HAVE_TAGLIB_H
-			else if (myScreen == myTagEditor)
-			{
-				myTagEditor->PrevColumn();
-			}
-#			endif // HAVE_TAGLIB_H
 		}
-		else if (Keypressed(input, Key.NextColumn)
-		     &&  (myScreen == myLibrary
-		       || myScreen == myPlaylistEditor
-#		ifdef HAVE_TAGLIB_H
-		       || myScreen == myTagEditor
-#		endif // HAVE_TAGLIB_H)
-			 )
-			)
+		else if (Keypressed(input, Key.NextColumn) && myLockedScreen && myInactiveScreen && myScreen->isMergable())
 		{
-			if (myScreen == myLibrary)
+			if (myScreen == myLockedScreen)
 			{
-				myLibrary->NextColumn();
+				myScreen = myInactiveScreen;
+				myInactiveScreen = myLockedScreen;
+				RedrawHeader = 1;
 			}
-			else if (myScreen == myPlaylistEditor)
-			{
-				myPlaylistEditor->NextColumn();
-			}
-#			ifdef HAVE_TAGLIB_H
-			else if (myScreen == myTagEditor)
-			{
-				myTagEditor->NextColumn();
-			}
-#			endif // HAVE_TAGLIB_H
 		}
 		else if (Keypressed(input, Key.VolumeUp))
 		{
@@ -1397,7 +1375,7 @@ int main(int argc, char *argv[])
 				if (Config.columns_in_playlist)
 				{
 					myPlaylist->Items->SetItemDisplayer(Display::SongsInColumns);
-					myPlaylist->Items->SetTitle(Config.titles_visibility ? Display::Columns() : "");
+					myPlaylist->Items->SetTitle(Config.titles_visibility ? Display::Columns(myPlaylist->Items->GetWidth()) : "");
 					myPlaylist->Items->SetGetStringFunction(Playlist::SongInColumnsToString);
 				}
 				else
@@ -1411,7 +1389,7 @@ int main(int argc, char *argv[])
 			{
 				Config.columns_in_browser = !Config.columns_in_browser;
 				ShowMessage("Browser display mode: %s", Config.columns_in_browser ? "Columns" : "Classic");
-				myBrowser->Main()->SetTitle(Config.columns_in_browser && Config.titles_visibility ? Display::Columns() : "");
+				myBrowser->Main()->SetTitle(Config.columns_in_browser && Config.titles_visibility ? Display::Columns(myBrowser->Main()->GetWidth()) : "");
 				
 			}
 			else if (myScreen == mySearcher)
@@ -1419,7 +1397,7 @@ int main(int argc, char *argv[])
 				Config.columns_in_search_engine = !Config.columns_in_search_engine;
 				ShowMessage("Search engine display mode: %s", Config.columns_in_search_engine ? "Columns" : "Classic");
 				if (mySearcher->Main()->Size() > SearchEngine::StaticOptions)
-					mySearcher->Main()->SetTitle(Config.columns_in_search_engine && Config.titles_visibility ? Display::Columns() : "");
+					mySearcher->Main()->SetTitle(Config.columns_in_search_engine && Config.titles_visibility ? Display::Columns(mySearcher->Main()->GetWidth()) : "");
 			}
 		}
 		else if (Keypressed(input, Key.ToggleSeparatorsInPlaylist))
@@ -1735,6 +1713,35 @@ int main(int argc, char *argv[])
 			Song *s = myScreen->CurrentSong();
 			if (s)
 				myLibrary->LocateSong(*s);
+		}
+		else if (Keypressed(input, Key.ToggleScreenLock))
+		{
+			if (myLockedScreen != 0)
+			{
+				BasicScreen::Unlock();
+				set_resize_flags();
+				ShowMessage("Screen unlocked");
+			}
+			else
+			{
+				LockStatusbar();
+				Statusbar() << "% of the locked screen's width to be reserved (20-80): ";
+				std::string str_part = wFooter->GetString(IntoStr(Config.locked_screen_width_part*100));
+				UnlockStatusbar();
+				if (str_part.empty())
+					continue;
+				unsigned part = StrToInt(str_part);
+				if (part < 20 || part > 80)
+				{
+					ShowMessage("Invalid number!");
+					continue;
+				}
+				Config.locked_screen_width_part = part/100.0;
+				if (myScreen->Lock())
+					ShowMessage("Screen locked (with %d%% width)", part);
+				else
+					ShowMessage("Screen cannot be locked");
+			}
 		}
 #		ifdef HAVE_TAGLIB_H
 		else if (Keypressed(input, Key.GoToTagEditor))
@@ -2353,10 +2360,13 @@ int main(int argc, char *argv[])
 			}
 		}
 		
+		if (myScreen == myPlaylist)
+			myPlaylist->EnableHighlighting();
+		
 #		ifdef ENABLE_VISUALIZER
 		// visualizer sets timmeout to 40ms, but since only it needs such small
 		// value, we should restore defalt one after switching to another screen.
-		if (wFooter->GetTimeout() < ncmpcpp_window_timeout && myScreen != myVisualizer)
+		if (wFooter->GetTimeout() < ncmpcpp_window_timeout && !isVisible(myVisualizer))
 			wFooter->SetTimeout(ncmpcpp_window_timeout);
 #		endif // ENABLE_VISUALIZER
 	}
