@@ -124,6 +124,16 @@ namespace
 		}
 	}
 	
+	std::string GetOptionName(const std::string &s)
+	{
+		size_t equal = s.find('=');
+		if (equal == std::string::npos)
+			return "";
+		std::string result = s.substr(0, equal);
+		Trim(result);
+		return result;
+	}
+	
 	std::string RemoveDollarFormatting(const std::string &s)
 	{
 		std::string result;
@@ -465,7 +475,7 @@ void NcmpcppConfig::SetDefaults()
 void NcmpcppKeys::Read()
 {
 	std::ifstream f(keys_config_file.c_str());
-	std::string key;
+	std::string key, name;
 	
 	if (!f.is_open())
 		return;
@@ -475,177 +485,179 @@ void NcmpcppKeys::Read()
 		getline(f, key);
 		if (!key.empty() && key[0] != '#')
 		{
-			if (key.find("key_up ") != std::string::npos)
+			name = GetOptionName(key);
+			
+			if (name == "key_up")
 				GetKeys(key, Up);
-			else if (key.find("key_down ") != std::string::npos)
+			else if (name == "key_down")
 				GetKeys(key, Down);
-			else if (key.find("key_up_album ") != std::string::npos)
+			else if (name == "key_up_album")
 				GetKeys(key, UpAlbum);
-			else if (key.find("key_down_album ") != std::string::npos)
+			else if (name == "key_down_album")
 				GetKeys(key, DownAlbum);
-			else if (key.find("key_up_artist ") != std::string::npos)
+			else if (name == "key_up_artist")
 				GetKeys(key, UpArtist);
-			else if (key.find("key_down_artist ") != std::string::npos)
+			else if (name == "key_down_artist")
 				GetKeys(key, DownArtist);
-			else if (key.find("key_page_up ") != std::string::npos)
+			else if (name == "key_page_up")
 				GetKeys(key, PageUp);
-			else if (key.find("key_page_down ") != std::string::npos)
+			else if (name == "key_page_down")
 				GetKeys(key, PageDown);
-			else if (key.find("key_home ") != std::string::npos)
+			else if (name == "key_home")
 				GetKeys(key, Home);
-			else if (key.find("key_end ") != std::string::npos)
+			else if (name == "key_end")
 				GetKeys(key, End);
-			else if (key.find("key_space ") != std::string::npos)
+			else if (name == "key_space")
 				GetKeys(key, Space);
-			else if (key.find("key_enter ") != std::string::npos)
+			else if (name == "key_enter")
 				GetKeys(key, Enter);
-			else if (key.find("key_delete ") != std::string::npos)
+			else if (name == "key_delete")
 				GetKeys(key, Delete);
-			else if (key.find("key_volume_up ") != std::string::npos)
+			else if (name == "key_volume_up")
 				GetKeys(key, VolumeUp);
-			else if (key.find("key_volume_down ") != std::string::npos)
+			else if (name == "key_volume_down")
 				GetKeys(key, VolumeDown);
-			else if (key.find("key_prev_column ") != std::string::npos)
+			else if (name == "key_prev_column")
 				GetKeys(key, PrevColumn);
-			else if (key.find("key_next_column ") != std::string::npos)
+			else if (name == "key_next_column")
 				GetKeys(key, NextColumn);
-			else if (key.find("key_screen_switcher ") != std::string::npos)
+			else if (name == "key_screen_switcher")
 				GetKeys(key, ScreenSwitcher);
-			else if (key.find("key_backward_screen_switcher ") != std::string::npos)
+			else if (name == "key_backward_screen_switcher")
 				GetKeys(key, BackwardScreenSwitcher);
-			else if (key.find("key_help ") != std::string::npos)
+			else if (name == "key_help")
 				GetKeys(key, Help);
-			else if (key.find("key_playlist ") != std::string::npos)
+			else if (name == "key_playlist")
 				GetKeys(key, Playlist);
-			else if (key.find("key_browser ") != std::string::npos)
+			else if (name == "key_browser")
 				GetKeys(key, Browser);
-			else if (key.find("key_search_engine ") != std::string::npos)
+			else if (name == "key_search_engine")
 				GetKeys(key, SearchEngine);
-			else if (key.find("key_media_library ") != std::string::npos)
+			else if (name == "key_media_library")
 				GetKeys(key, MediaLibrary);
-			else if (key.find("key_playlist_editor ") != std::string::npos)
+			else if (name == "key_playlist_editor")
 				GetKeys(key, PlaylistEditor);
-			else if (key.find("key_tag_editor ") != std::string::npos)
+			else if (name == "key_tag_editor")
 				GetKeys(key, TagEditor);
-			else if (key.find("key_outputs ") != std::string::npos)
+			else if (name == "key_outputs")
 				GetKeys(key, Outputs);
-			else if (key.find("key_music_visualizer ") != std::string::npos)
+			else if (name == "key_music_visualizer")
 				GetKeys(key, Visualizer);
-			else if (key.find("key_clock ") != std::string::npos)
+			else if (name == "key_clock")
 				GetKeys(key, Clock);
-			else if (key.find("key_server_info ") != std::string::npos)
+			else if (name == "key_server_info")
 				GetKeys(key, ServerInfo);
-			else if (key.find("key_stop ") != std::string::npos)
+			else if (name == "key_stop")
 				GetKeys(key, Stop);
-			else if (key.find("key_pause ") != std::string::npos)
+			else if (name == "key_pause")
 				GetKeys(key, Pause);
-			else if (key.find("key_next ") != std::string::npos)
+			else if (name == "key_next")
 				GetKeys(key, Next);
-			else if (key.find("key_prev ") != std::string::npos)
+			else if (name == "key_prev")
 				GetKeys(key, Prev);
-			else if (key.find("key_replay ") != std::string::npos)
+			else if (name == "key_replay")
 				GetKeys(key, Replay);
-			else if (key.find("key_seek_forward ") != std::string::npos)
+			else if (name == "key_seek_forward")
 				GetKeys(key, SeekForward);
-			else if (key.find("key_seek_backward ") != std::string::npos)
+			else if (name == "key_seek_backward")
 				GetKeys(key, SeekBackward);
-			else if (key.find("key_toggle_repeat ") != std::string::npos)
+			else if (name == "key_toggle_repeat")
 				GetKeys(key, ToggleRepeat);
-			else if (key.find("key_toggle_random ") != std::string::npos)
+			else if (name == "key_toggle_random")
 				GetKeys(key, ToggleRandom);
-			else if (key.find("key_toggle_single ") != std::string::npos)
+			else if (name == "key_toggle_single")
 				GetKeys(key, ToggleSingle);
-			else if (key.find("key_toggle_consume ") != std::string::npos)
+			else if (name == "key_toggle_consume")
 				GetKeys(key, ToggleConsume);
-			else if (key.find("key_toggle_replay_gain_mode ") != std::string::npos)
+			else if (name == "key_toggle_replay_gain_mode")
 				GetKeys(key, ToggleReplayGainMode);
-			else if (key.find("key_toggle_space_mode ") != std::string::npos)
+			else if (name == "key_toggle_space_mode")
 				GetKeys(key, ToggleSpaceMode);
-			else if (key.find("key_toggle_add_mode ") != std::string::npos)
+			else if (name == "key_toggle_add_mode")
 				GetKeys(key, ToggleAddMode);
-			else if (key.find("key_toggle_mouse ") != std::string::npos)
+			else if (name == "key_toggle_mouse")
 				GetKeys(key, ToggleMouse);
-			else if (key.find("key_toggle_bitrate_visibility ") != std::string::npos)
+			else if (name == "key_toggle_bitrate_visibility")
 				GetKeys(key, ToggleBitrateVisibility);
-			else if (key.find("key_shuffle ") != std::string::npos)
+			else if (name == "key_shuffle")
 				GetKeys(key, Shuffle);
-			else if (key.find("key_toggle_crossfade ") != std::string::npos)
+			else if (name == "key_toggle_crossfade")
 				GetKeys(key, ToggleCrossfade);
-			else if (key.find("key_set_crossfade ") != std::string::npos)
+			else if (name == "key_set_crossfade")
 				GetKeys(key, SetCrossfade);
-			else if (key.find("key_update_db ") != std::string::npos)
+			else if (name == "key_update_db")
 				GetKeys(key, UpdateDB);
-			else if (key.find("key_sort_playlist ") != std::string::npos)
+			else if (name == "key_sort_playlist")
 				GetKeys(key, SortPlaylist);
-			else if (key.find("key_apply_filter ") != std::string::npos)
+			else if (name == "key_apply_filter")
 				GetKeys(key, ApplyFilter);
-			else if (key.find("key_find_forward ") != std::string::npos)
+			else if (name == "key_find_forward")
 				GetKeys(key, FindForward);
-			else if (key.find("key_find_backward ") != std::string::npos)
+			else if (name == "key_find_backward")
 				GetKeys(key, FindBackward);
-			else if (key.find("key_next_found_position ") != std::string::npos)
+			else if (name == "key_next_found_position")
 				GetKeys(key, NextFoundPosition);
-			else if (key.find("key_prev_found_position ") != std::string::npos)
+			else if (name == "key_prev_found_position")
 				GetKeys(key, PrevFoundPosition);
-			else if (key.find("key_toggle_find_mode ") != std::string::npos)
+			else if (name == "key_toggle_find_mode")
 				GetKeys(key, ToggleFindMode);
-			else if (key.find("key_edit_tags ") != std::string::npos)
+			else if (name == "key_edit_tags")
 				GetKeys(key, EditTags);
-			else if (key.find("key_go_to_position ") != std::string::npos)
+			else if (name == "key_go_to_position")
 				GetKeys(key, GoToPosition);
-			else if (key.find("key_song_info ") != std::string::npos)
+			else if (name == "key_song_info")
 				GetKeys(key, SongInfo);
-			else if (key.find("key_artist_info ") != std::string::npos)
+			else if (name == "key_artist_info")
 				GetKeys(key, ArtistInfo);
-			else if (key.find("key_lyrics ") != std::string::npos)
+			else if (name == "key_lyrics")
 				GetKeys(key, Lyrics);
-			else if (key.find("key_reverse_selection ") != std::string::npos)
+			else if (name == "key_reverse_selection")
 				GetKeys(key, ReverseSelection);
-			else if (key.find("key_deselect_all ") != std::string::npos)
+			else if (name == "key_deselect_all")
 				GetKeys(key, DeselectAll);
-			else if (key.find("key_select_album ") != std::string::npos)
+			else if (name == "key_select_album")
 				GetKeys(key, SelectAlbum);
-			else if (key.find("key_add_selected_items ") != std::string::npos)
+			else if (name == "key_add_selected_items")
 				GetKeys(key, AddSelected);
-			else if (key.find("key_clear ") != std::string::npos)
+			else if (name == "key_clear")
 				GetKeys(key, Clear);
-			else if (key.find("key_crop ") != std::string::npos)
+			else if (name == "key_crop")
 				GetKeys(key, Crop);
-			else if (key.find("key_move_song_up ") != std::string::npos)
+			else if (name == "key_move_song_up")
 				GetKeys(key, MvSongUp);
-			else if (key.find("key_move_song_down ") != std::string::npos)
+			else if (name == "key_move_song_down")
 				GetKeys(key, MvSongDown);
-			else if (key.find("key_move_to ") != std::string::npos)
+			else if (name == "key_move_to")
 				GetKeys(key, MoveTo);
-			else if (key.find("key_move_before ") != std::string::npos)
+			else if (name == "key_move_before")
 				GetKeys(key, MoveBefore);
-			else if (key.find("key_move_after ") != std::string::npos)
+			else if (name == "key_move_after")
 				GetKeys(key, MoveAfter);
-			else if (key.find("key_add ") != std::string::npos)
+			else if (name == "key_add")
 				GetKeys(key, Add);
-			else if (key.find("key_save_playlist ") != std::string::npos)
+			else if (name == "key_save_playlist")
 				GetKeys(key, SavePlaylist);
-			else if (key.find("key_go_to_now_playing ") != std::string::npos)
+			else if (name == "key_go_to_now_playing")
 				GetKeys(key, GoToNowPlaying);
-			else if (key.find("key_toggle_auto_center ") != std::string::npos)
+			else if (name == "key_toggle_auto_center")
 				GetKeys(key, ToggleAutoCenter);
-			else if (key.find("key_toggle_display_mode ") != std::string::npos)
+			else if (name == "key_toggle_display_mode")
 				GetKeys(key, ToggleDisplayMode);
-			else if (key.find("key_toggle_separators_in_playlist ") != std::string::npos)
+			else if (name == "key_toggle_separators_in_playlist")
 				GetKeys(key, ToggleSeparatorsInPlaylist);
-			else if (key.find("key_toggle_lyrics_db ") != std::string::npos)
+			else if (name == "key_toggle_lyrics_db")
 				GetKeys(key, ToggleLyricsDB);
-			else if (key.find("key_toggle_fetching_lyrics_for_current_song_in_background ") != std::string::npos)
+			else if (name == "key_toggle_fetching_lyrics_for_current_song_in_background")
 				GetKeys(key, ToggleFetchingLyricsInBackground);
-			else if (key.find("key_go_to_containing_directory ") != std::string::npos)
+			else if (name == "key_go_to_containing_directory")
 				GetKeys(key, GoToContainingDir);
-			else if (key.find("key_go_to_media_library ") != std::string::npos)
+			else if (name == "key_go_to_media_library")
 				GetKeys(key, GoToMediaLibrary);
-			else if (key.find("key_go_to_parent_dir ") != std::string::npos)
+			else if (name == "key_go_to_parent_dir")
 				GetKeys(key, GoToParentDir);
-			else if (key.find("key_switch_tag_type_list ") != std::string::npos)
+			else if (name == "key_switch_tag_type_list")
 				GetKeys(key, SwitchTagTypeList);
-			else if (key.find("key_quit ") != std::string::npos)
+			else if (name == "key_quit")
 				GetKeys(key, Quit);
 		}
 	}
@@ -655,20 +667,22 @@ void NcmpcppKeys::Read()
 void NcmpcppConfig::Read()
 {
 	std::ifstream f(config_file.c_str());
-	std::string cl, v;
+	std::string cl, v, name;
 	
 	while (f.is_open() && !f.eof())
 	{
 		getline(f, cl);
 		if (!cl.empty() && cl[0] != '#')
 		{
+			name = GetOptionName(cl);
 			v = GetLineValue(cl);
-			if (cl.find("mpd_host") != std::string::npos)
+			
+			if (name == "mpd_host")
 			{
 				if (!v.empty())
 					mpd_host = v;
 			}
-			else if (cl.find("mpd_music_dir") != std::string::npos)
+			else if (name == "mpd_music_dir")
 			{
 				if (!v.empty())
 				{
@@ -678,47 +692,47 @@ void NcmpcppConfig::Read()
 					mpd_music_dir = v + "/";
 				}
 			}
-			else if (cl.find("visualizer_fifo_path") != std::string::npos)
+			else if (name == "visualizer_fifo_path")
 			{
 				if (!v.empty())
 					visualizer_fifo_path = v;
 			}
-			else if (cl.find("visualizer_output_name") != std::string::npos)
+			else if (name == "visualizer_output_name")
 			{
 				if (!v.empty())
 					visualizer_output_name = v;
 			}
-			else if (cl.find("mpd_port") != std::string::npos)
+			else if (name == "mpd_port")
 			{
 				if (StrToInt(v))
 					mpd_port = StrToInt(v);
 			}
-			else if (cl.find("mpd_connection_timeout") != std::string::npos)
+			else if (name == "mpd_connection_timeout")
 			{
 				if (StrToInt(v))
 					mpd_connection_timeout = StrToInt(v);
 			}
-			else if (cl.find("mpd_crossfade_time") != std::string::npos)
+			else if (name == "mpd_crossfade_time")
 			{
 				if (StrToInt(v) > 0)
 					crossfade_time = StrToInt(v);
 			}
-			else if (cl.find("seek_time") != std::string::npos)
+			else if (name == "seek_time")
 			{
 				if (StrToInt(v) > 0)
 					seek_time = StrToInt(v);
 			}
-			else if (cl.find("playlist_disable_highlight_delay") != std::string::npos)
+			else if (name == "playlist_disable_highlight_delay")
 			{
 				if (StrToInt(v) >= 0)
 					playlist_disable_highlight_delay = StrToInt(v);
 			}
-			else if (cl.find("message_delay_time") != std::string::npos)
+			else if (name == "message_delay_time")
 			{
 				if (StrToInt(v) > 0)
 					message_delay_time = StrToInt(v);
 			}
-			else if (cl.find("song_list_format") != std::string::npos)
+			else if (name == "song_list_format")
 			{
 				if (!v.empty() && MPD::Song::isFormatOk("song_list_format", v))
 				{
@@ -728,12 +742,12 @@ void NcmpcppConfig::Read()
 					song_list_format_dollar_free = RemoveDollarFormatting(song_list_format);
 				}
 			}
-			else if (cl.find("song_columns_list_format") != std::string::npos)
+			else if (name == "song_columns_list_format")
 			{
 				if (!v.empty())
 					song_list_columns_format = v;
 			}
-			else if (cl.find("song_status_format") != std::string::npos)
+			else if (name == "song_status_format")
 			{
 				if (!v.empty() && MPD::Song::isFormatOk("song_status_format", v))
 				{
@@ -751,7 +765,7 @@ void NcmpcppConfig::Read()
 						song_status_format_no_colors = song_status_format;
 				}
 			}
-			else if (cl.find("song_library_format") != std::string::npos)
+			else if (name == "song_library_format")
 			{
 				if (!v.empty() && MPD::Song::isFormatOk("song_library_format", v))
 				{
@@ -760,7 +774,7 @@ void NcmpcppConfig::Read()
 					song_library_format += '}';
 				}
 			}
-			else if (cl.find("tag_editor_album_format") != std::string::npos)
+			else if (name == "tag_editor_album_format")
 			{
 				if (!v.empty() && MPD::Song::isFormatOk("tag_editor_album_format", v))
 				{
@@ -769,22 +783,22 @@ void NcmpcppConfig::Read()
 					tag_editor_album_format += '}';
 				}
 			}
-			else if (cl.find("external_editor") != std::string::npos)
+			else if (name == "external_editor")
 			{
 				if (!v.empty())
 					external_editor = v;
 			}
-			else if (cl.find("system_encoding") != std::string::npos)
+			else if (name == "system_encoding")
 			{
 				if (!v.empty())
 					system_encoding = v;
 			}
-			else if (cl.find("execute_on_song_change") != std::string::npos)
+			else if (name == "execute_on_song_change")
 			{
 				if (!v.empty())
 					execute_on_song_change = v;
 			}
-			else if (cl.find("alternative_header_first_line_format") != std::string::npos)
+			else if (name == "alternative_header_first_line_format")
 			{
 				if (!v.empty() && MPD::Song::isFormatOk("alternative_header_first_line_format", v))
 				{
@@ -793,7 +807,7 @@ void NcmpcppConfig::Read()
 					new_header_first_line += '}';
 				}
 			}
-			else if (cl.find("alternative_header_second_line_format") != std::string::npos)
+			else if (name == "alternative_header_second_line_format")
 			{
 				if (!v.empty() && MPD::Song::isFormatOk("alternative_header_second_line_format", v))
 				{
@@ -802,12 +816,12 @@ void NcmpcppConfig::Read()
 					new_header_second_line += '}';
 				}
 			}
-			else if (cl.find("lastfm_preferred_language") != std::string::npos)
+			else if (name == "lastfm_preferred_language")
 			{
 				if (!v.empty() && v != "en")
 					lastfm_preferred_language = v;
 			}
-			else if (cl.find("browser_playlist_prefix") != std::string::npos)
+			else if (name == "browser_playlist_prefix")
 			{
 				if (!v.empty())
 				{
@@ -815,7 +829,7 @@ void NcmpcppConfig::Read()
 					String2Buffer(v, browser_playlist_prefix);
 				}
 			}
-			else if (cl.find("progressbar_look") != std::string::npos)
+			else if (name == "progressbar_look")
 			{
 				std::basic_string<my_char_t> pb = TO_WSTRING(v);
 				if (pb.length() < 2 || pb.length() > 3)
@@ -828,12 +842,12 @@ void NcmpcppConfig::Read()
 				// if two characters were specified, add third one as null
 				progressbar.resize(3);
 			}
-			else if (cl.find("default_tag_editor_pattern") != std::string::npos)
+			else if (name == "default_tag_editor_pattern")
 			{
 				if (!v.empty())
 					pattern = v;
 			}
-			else if (cl.find("selected_item_prefix") != std::string::npos)
+			else if (name == "selected_item_prefix")
 			{
 				if (!v.empty())
 				{
@@ -841,7 +855,7 @@ void NcmpcppConfig::Read()
 					String2Buffer(v, selected_item_prefix);
 				}
 			}
-			else if (cl.find("selected_item_suffix") != std::string::npos)
+			else if (name == "selected_item_suffix")
 			{
 				if (!v.empty())
 				{
@@ -850,7 +864,7 @@ void NcmpcppConfig::Read()
 					selected_item_suffix_length = Window::Length(TO_WSTRING(selected_item_suffix.Str()));
 				}
 			}
-			else if (cl.find("now_playing_prefix") != std::string::npos)
+			else if (name == "now_playing_prefix")
 			{
 				if (!v.empty())
 				{
@@ -858,7 +872,7 @@ void NcmpcppConfig::Read()
 					String2Buffer(v, now_playing_prefix);
 				}
 			}
-			else if (cl.find("now_playing_suffix") != std::string::npos)
+			else if (name == "now_playing_suffix")
 			{
 				if (!v.empty())
 				{
@@ -867,73 +881,73 @@ void NcmpcppConfig::Read()
 					now_playing_suffix_length = Window::Length(now_playing_suffix.Str());
 				}
 			}
-			else if (cl.find("color1") != std::string::npos)
+			else if (name == "color1")
 			{
 				if (!v.empty())
 					color1 = IntoColor(v);
 			}
-			else if (cl.find("color2") != std::string::npos)
+			else if (name == "color2")
 			{
 				if (!v.empty())
 					color2 = IntoColor(v);
 			}
-			else if (cl.find("mpd_communication_mode") != std::string::npos)
+			else if (name == "mpd_communication_mode")
 			{
 				enable_idle_notifications = v == "notifications";
 			}
-			else if (cl.find("colors_enabled") != std::string::npos)
+			else if (name == "colors_enabled")
 			{
 				colors_enabled = v == "yes";
 			}
-			else if (cl.find("fancy_scrolling") != std::string::npos)
+			else if (name == "fancy_scrolling")
 			{
 				fancy_scrolling = v == "yes";
 			}
-			else if (cl.find("cyclic_scrolling") != std::string::npos)
+			else if (name == "cyclic_scrolling")
 			{
 				use_cyclic_scrolling = v == "yes";
 			}
-			else if (cl.find("playlist_show_remaining_time") != std::string::npos)
+			else if (name == "playlist_show_remaining_time")
 			{
 				playlist_show_remaining_time = v == "yes";
 			}
-			else if (cl.find("playlist_shorten_total_times") != std::string::npos)
+			else if (name == "playlist_shorten_total_times")
 			{
 				playlist_shorten_total_times = v == "yes";
 			}
-			else if (cl.find("playlist_separate_albums") != std::string::npos)
+			else if (name == "playlist_separate_albums")
 			{
 				playlist_separate_albums = v == "yes";
 			}
-			else if (cl.find("playlist_display_mode") != std::string::npos)
+			else if (name == "playlist_display_mode")
 			{
 				columns_in_playlist = v == "columns";
 			}
-			else if (cl.find("browser_display_mode") != std::string::npos)
+			else if (name == "browser_display_mode")
 			{
 				columns_in_browser = v == "columns";
 			}
-			else if (cl.find("search_engine_display_mode") != std::string::npos)
+			else if (name == "search_engine_display_mode")
 			{
 				columns_in_search_engine = v == "columns";
 			}
-			else if (cl.find("header_visibility") != std::string::npos)
+			else if (name == "header_visibility")
 			{
 				header_visibility = v == "yes";
 			}
-			else if (cl.find("header_text_scrolling") != std::string::npos)
+			else if (name == "header_text_scrolling")
 			{
 				header_text_scrolling = v == "yes";
 			}
-			else if (cl.find("statusbar_visibility") != std::string::npos)
+			else if (name == "statusbar_visibility")
 			{
 				statusbar_visibility = v == "yes";
 			}
-			else if (cl.find("titles_visibility") != std::string::npos)
+			else if (name == "titles_visibility")
 			{
 				titles_visibility = v == "yes";
 			}
-			else if (cl.find("screen_switcher_mode") != std::string::npos)
+			else if (name == "screen_switcher_mode")
 			{
 				if (v.find("previous") != std::string::npos)
 				{
@@ -958,145 +972,145 @@ void NcmpcppConfig::Read()
 					screens_seq.unique();
 				}
 			}
-			else if (cl.find("startup_screen") != std::string::npos)
+			else if (name == "startup_screen")
 			{
 				startup_screen = IntoScreen(atoi(v.c_str()));
 				if (!startup_screen)
 					startup_screen = myPlaylist;
 			}
-			else if (cl.find("autocenter_mode") != std::string::npos)
+			else if (name == "autocenter_mode")
 			{
 				autocenter_mode = v == "yes";
 			}
-			else if (cl.find("centered_cursor") != std::string::npos)
+			else if (name == "centered_cursor")
 			{
 				centered_cursor = v == "yes";
 			}
-			else if (cl.find("default_find_mode") != std::string::npos)
+			else if (name == "default_find_mode")
 			{
 				wrapped_search = v == "wrapped";
 			}
-			else if (cl.find("default_space_mode") != std::string::npos)
+			else if (name == "default_space_mode")
 			{
 				space_selects = v == "select";
 			}
-			else if (cl.find("default_tag_editor_left_col") != std::string::npos)
+			else if (name == "default_tag_editor_left_col")
 			{
 				albums_in_tag_editor = v == "albums";
 			}
-			else if (cl.find("incremental_seeking") != std::string::npos)
+			else if (name == "incremental_seeking")
 			{
 				incremental_seeking = v == "yes";
 			}
-			else if (cl.find("show_hidden_files_in_local_browser") != std::string::npos)
+			else if (name == "show_hidden_files_in_local_browser")
 			{
 				local_browser_show_hidden_files = v == "yes";
 			}
-			else if (cl.find("follow_now_playing_lyrics") != std::string::npos)
+			else if (name == "follow_now_playing_lyrics")
 			{
 				now_playing_lyrics = v == "yes";
 			}
-			else if (cl.find("fetch_lyrics_for_current_song_in_background") != std::string::npos)
+			else if (name == "fetch_lyrics_for_current_song_in_background")
 			{
 				fetch_lyrics_in_background = v == "yes";
 			}
-			else if (cl.find("ncmpc_like_songs_adding") != std::string::npos)
+			else if (name == "ncmpc_like_songs_adding")
 			{
 				ncmpc_like_songs_adding = v == "yes";
 			}
-			else if (cl.find("default_place_to_search_in") != std::string::npos)
+			else if (name == "default_place_to_search_in")
 			{
 				search_in_db = v == "database";
 			}
-			else if (cl.find("display_screens_numbers_on_start") != std::string::npos)
+			else if (name == "display_screens_numbers_on_start")
 			{
 				display_screens_numbers_on_start = v == "yes";
 			}
-			else if (cl.find("jump_to_now_playing_song_at_start") != std::string::npos)
+			else if (name == "jump_to_now_playing_song_at_start")
 			{
 				jump_to_now_playing_song_at_start = v == "yes";
 			}
-			else if (cl.find("clock_display_seconds") != std::string::npos)
+			else if (name == "clock_display_seconds")
 			{
 				clock_display_seconds = v == "yes";
 			}
-			else if (cl.find("display_volume_level") != std::string::npos)
+			else if (name == "display_volume_level")
 			{
 				display_volume_level = v == "yes";
 			}
-			else if (cl.find("display_bitrate") != std::string::npos)
+			else if (name == "display_bitrate")
 			{
 				display_bitrate = v == "yes";
 			}
-			else if (cl.find("display_remaining_time") != std::string::npos)
+			else if (name == "display_remaining_time")
 			{
 				display_remaining_time = v == "yes";
 			}
-			else if (cl.find("ignore_leading_the") != std::string::npos)
+			else if (name == "ignore_leading_the")
 			{
 				ignore_leading_the = v == "yes";
 			}
-			else if (cl.find("use_console_editor") != std::string::npos)
+			else if (name == "use_console_editor")
 			{
 				use_console_editor = v == "yes";
 			}
-			else if (cl.find("block_search_constraints_change_if_items_found") != std::string::npos)
+			else if (name == "block_search_constraints_change_if_items_found")
 			{
 				block_search_constraints_change = v == "yes";
 			}
-			else if (cl.find("allow_physical_files_deletion") != std::string::npos)
+			else if (name == "allow_physical_files_deletion")
 			{
 				allow_physical_files_deletion = v == "yes";
 			}
-			else if (cl.find("allow_physical_directories_deletion") != std::string::npos)
+			else if (name == "allow_physical_directories_deletion")
 			{
 				allow_physical_directories_deletion = v == "yes";
 			}
-			else if (cl.find("ask_before_clearing_main_playlist") != std::string::npos)
+			else if (name == "ask_before_clearing_main_playlist")
 			{
 				ask_before_clearing_main_playlist = v == "yes";
 			}
-			else if (cl.find("visualizer_type") != std::string::npos)
+			else if (name == "visualizer_type")
 			{
 				visualizer_use_wave = v == "wave";
 			}
-			else if (cl.find("visualizer_in_stereo") != std::string::npos)
+			else if (name == "visualizer_in_stereo")
 			{
 				visualizer_in_stereo = v == "yes";
 			}
-			else if (cl.find("mouse_support") != std::string::npos)
+			else if (name == "mouse_support")
 			{
 				mouse_support = v == "yes";
 			}
-			else if (cl.find("mouse_list_scroll_whole_page") != std::string::npos)
+			else if (name == "mouse_list_scroll_whole_page")
 			{
 				mouse_list_scroll_whole_page = v == "yes";
 			}
-			else if (cl.find("user_interface") != std::string::npos)
+			else if (name == "user_interface")
 			{
 				new_design = v == "alternative";
 			}
-			else if (cl.find("tag_editor_extended_numeration") != std::string::npos)
+			else if (name == "tag_editor_extended_numeration")
 			{
 				tag_editor_extended_numeration = v == "yes";
 			}
-			else if (cl.find("media_library_display_date") != std::string::npos)
+			else if (name == "media_library_display_date")
 			{
 				media_library_display_date = v == "yes";
 			}
-			else if (cl.find("media_library_display_empty_tag") != std::string::npos)
+			else if (name == "media_library_display_empty_tag")
 			{
 				media_library_display_empty_tag = v == "yes";
 			}
-			else if (cl.find("media_library_disable_two_column_mode") != std::string::npos)
+			else if (name == "media_library_disable_two_column_mode")
 			{
 				media_library_disable_two_column_mode = v == "yes";
 			}
-			else if (cl.find("discard_colors_if_item_is_selected") != std::string::npos)
+			else if (name == "discard_colors_if_item_is_selected")
 			{
 				discard_colors_if_item_is_selected = v == "yes";
 			}
-			else if (cl.find("store_lyrics_in_song_dir") != std::string::npos)
+			else if (name == "store_lyrics_in_song_dir")
 			{
 				if (mpd_music_dir.empty())
 				{
@@ -1106,20 +1120,20 @@ void NcmpcppConfig::Read()
 				else
 					store_lyrics_in_song_dir = v == "yes";
 			}
-			else if (cl.find("enable_window_title") != std::string::npos)
+			else if (name == "enable_window_title")
 			{
 				set_window_title = v == "yes";
 			}
-			else if (cl.find("regular_expressions") != std::string::npos)
+			else if (name == "regular_expressions")
 			{
 				regex_type = REG_EXTENDED * (v != "basic");
 			}
-			else if (cl.find("lines_scrolled") != std::string::npos)
+			else if (name == "lines_scrolled")
 			{
 				if (!v.empty())
 					lines_scrolled = StrToInt(v);
 			}
-			else if (cl.find("search_engine_default_search_mode") != std::string::npos)
+			else if (name == "search_engine_default_search_mode")
 			{
 				if (!v.empty())
 				{
@@ -1128,19 +1142,19 @@ void NcmpcppConfig::Read()
 						search_engine_default_search_mode = mode;
 				}
 			}
-			else if (cl.find("visualizer_sync_interval") != std::string::npos)
+			else if (name == "visualizer_sync_interval")
 			{
 				unsigned interval = StrToInt(v);
 				if (interval)
 					visualizer_sync_interval = interval;
 			}
-			else if (cl.find("locked_screen_width_part") != std::string::npos)
+			else if (name == "locked_screen_width_part")
 			{
 				unsigned part = StrToInt(v);
 				if (part)
 					locked_screen_width_part = part/100.0;
 			}
-			else if (cl.find("song_window_title_format") != std::string::npos)
+			else if (name == "song_window_title_format")
 			{
 				if (!v.empty() && MPD::Song::isFormatOk("song_window_title_format", v))
 				{
@@ -1149,81 +1163,81 @@ void NcmpcppConfig::Read()
 					song_window_title_format += '}';
 				}
 			}
-			else if (cl.find("empty_tag_marker") != std::string::npos)
+			else if (name == "empty_tag_marker")
 			{
 				empty_tag = v; // is this case empty string is allowed
 			}
-			else if (cl.find("empty_tag_color") != std::string::npos)
+			else if (name == "empty_tag_color")
 			{
 				if (!v.empty())
 					empty_tags_color = IntoColor(v);
 			}
-			else if (cl.find("header_window_color") != std::string::npos)
+			else if (name == "header_window_color")
 			{
 				if (!v.empty())
 					header_color = IntoColor(v);
 			}
-			else if (cl.find("volume_color") != std::string::npos)
+			else if (name == "volume_color")
 			{
 				if (!v.empty())
 					volume_color = IntoColor(v);
 			}
-			else if (cl.find("state_line_color") != std::string::npos)
+			else if (name == "state_line_color")
 			{
 				if (!v.empty())
 					state_line_color = IntoColor(v);
 			}
-			else if (cl.find("state_flags_color") != std::string::npos)
+			else if (name == "state_flags_color")
 			{
 				if (!v.empty())
 					state_flags_color = IntoColor(v);
 			}
-			else if (cl.find("main_window_color") != std::string::npos)
+			else if (name == "main_window_color")
 			{
 				if (!v.empty())
 					main_color = IntoColor(v);
 			}
-			else if (cl.find("main_window_highlight_color") != std::string::npos)
+			else if (name == "main_window_highlight_color")
 			{
 				if (!v.empty())
 					main_highlight_color = IntoColor(v);
 			}
-			else if (cl.find("progressbar_color") != std::string::npos)
+			else if (name == "progressbar_color")
 			{
 				if (!v.empty())
 					progressbar_color = IntoColor(v);
 			}
-			else if (cl.find("statusbar_color") != std::string::npos)
+			else if (name == "statusbar_color")
 			{
 				if (!v.empty())
 					statusbar_color = IntoColor(v);
 			}
-			else if (cl.find("alternative_ui_separator_color") != std::string::npos)
+			else if (name == "alternative_ui_separator_color")
 			{
 				if (!v.empty())
 					alternative_ui_separator_color = IntoColor(v);
 			}
-			else if (cl.find("active_column_color") != std::string::npos)
+			else if (name == "active_column_color")
 			{
 				if (!v.empty())
 					active_column_color = IntoColor(v);
 			}
-			else if (cl.find("visualizer_color") != std::string::npos)
+			else if (name == "visualizer_color")
 			{
 				if (!v.empty())
 					visualizer_color = IntoColor(v);
 			}
-			else if (cl.find("window_border_color ") != std::string::npos)
+			else if (name == "window_border_color")
 			{
 				if (!v.empty())
 					window_border = IntoBorder(v);
 			}
-			else if (cl.find("active_window_border") != std::string::npos)
+			else if (name == "active_window_border")
 			{
 				if (!v.empty())
 					active_window_border = IntoBorder(v);
 			}
-			else if (cl.find("media_library_left_column") != std::string::npos)
+			else if (name == "media_library_left_column")
 			{
 				if (!v.empty())
 					media_lib_primary_tag = IntoTagItem(v[0]);
