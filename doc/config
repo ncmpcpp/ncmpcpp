@@ -355,6 +355,8 @@
 #
 #locked_screen_width_part = "50"
 #
+#ask_for_locked_screen_width_part = "yes"
+#
 ##
 ## Note: You can define startup screen for ncmpcpp
 ## by choosing screen number from the list above.

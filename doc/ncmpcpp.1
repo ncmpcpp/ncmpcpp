@@ -255,6 +255,9 @@ If set to "previous", key_screen_switcher will switch between current and last u
 .B locked_screen_width_part = 20-80
 If you want to lock a screen, ncmpcpp asks for % of locked screen's width to be reserved before that and provides a default value, which is the one you can set here.
 .TP 
+.B ask_for_locked_screen_width_part = yes/no
+If enabled, ncmpcpp will ask for % of locked screen's width each time you want to lock a screen. If you disable that, it'll silently attempt to use default value.
+.TP 
 .B startup_screen = SCREEN_NUMBER
 Screen that has to be displayed at start (playlist by default).
 .TP 

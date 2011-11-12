@@ -1724,16 +1724,20 @@ int main(int argc, char *argv[])
 			}
 			else
 			{
-				LockStatusbar();
-				Statusbar() << "% of the locked screen's width to be reserved (20-80): ";
-				std::string str_part = wFooter->GetString(IntoStr(Config.locked_screen_width_part*100));
-				UnlockStatusbar();
-				if (str_part.empty())
-					continue;
-				unsigned part = StrToInt(str_part);
+				int part = Config.locked_screen_width_part*100;
+				if (Config.ask_for_locked_screen_width_part)
+				{
+					LockStatusbar();
+					Statusbar() << "% of the locked screen's width to be reserved (20-80): ";
+					std::string str_part = wFooter->GetString(IntoStr(Config.locked_screen_width_part*100));
+					UnlockStatusbar();
+					if (str_part.empty())
+						continue;
+					part = StrToInt(str_part);
+				}
 				if (part < 20 || part > 80)
 				{
-					ShowMessage("Invalid number!");
+					ShowMessage("Invalid number (%d)!", part);
 					continue;
 				}
 				Config.locked_screen_width_part = part/100.0;

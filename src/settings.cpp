@@ -446,6 +446,7 @@ void NcmpcppConfig::SetDefaults()
 	media_library_disable_two_column_mode = false;
 	discard_colors_if_item_is_selected = true;
 	store_lyrics_in_song_dir = false;
+	ask_for_locked_screen_width_part = true;
 	set_window_title = true;
 	mpd_port = 6600;
 	mpd_connection_timeout = 15;
@@ -1150,9 +1151,14 @@ void NcmpcppConfig::Read()
 			}
 			else if (name == "locked_screen_width_part")
 			{
-				unsigned part = StrToInt(v);
+				int part = StrToInt(v);
 				if (part)
 					locked_screen_width_part = part/100.0;
+			}
+			else if (name == "ask_for_locked_screen_width_part")
+			{
+				if (!v.empty())
+					ask_for_locked_screen_width_part = v == "yes";
 			}
 			else if (name == "song_window_title_format")
 			{

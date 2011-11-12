@@ -257,6 +257,7 @@ struct NcmpcppConfig
 	bool media_library_disable_two_column_mode;
 	bool discard_colors_if_item_is_selected;
 	bool store_lyrics_in_song_dir;
+	bool ask_for_locked_screen_width_part;
 	
 	int mpd_port;
 	int mpd_connection_timeout;
