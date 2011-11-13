@@ -20,9 +20,13 @@
 
 #ifdef WIN32
 # include <io.h>
+# define _WIN32_IE 0x0400
+# include <shlobj.h>
 #else
 # include <sys/stat.h>
 #endif // WIN32
+#include <cstdlib>
+#include <string>
 #include <fstream>
 #include <iostream>
 #include <stdexcept>
@@ -45,9 +49,6 @@
 #ifdef HAVE_LANGINFO_H
 # include <langinfo.h>
 #endif
-
-const std::string config_file = config_dir + "config";
-const std::string keys_config_file = config_dir + "keys";
 
 NcmpcppConfig Config;
 NcmpcppKeys Key;
@@ -148,9 +149,9 @@ namespace
 	}
 }
 
-void CreateConfigDir()
+void CreateDir(const std::string &dir)
 {
-	mkdir(config_dir.c_str()
+	mkdir(dir.c_str()
 #	ifndef WIN32
 	, 0755
 #	endif // !WIN32
@@ -476,7 +477,7 @@ void NcmpcppConfig::SetDefaults()
 
 void NcmpcppKeys::Read()
 {
-	std::ifstream f(keys_config_file.c_str());
+	std::ifstream f((Config.ncmpcpp_directory + "keys").c_str());
 	std::string key, name;
 	
 	if (!f.is_open())
@@ -666,12 +667,60 @@ void NcmpcppKeys::Read()
 	f.close();
 }
 
+NcmpcppConfig::NcmpcppConfig()
+{
+#	ifdef WIN32
+	ncmpcpp_directory = GetHomeDirectory() + "ncmpcpp/";
+	lyrics_directory = ncmpcpp_directory + "lyrics/";
+#	else
+	ncmpcpp_directory = GetHomeDirectory() + ".ncmpcpp/";
+	lyrics_directory = GetHomeDirectory() + ".lyrics/";
+#	endif // WIN32
+	config_file_path = ncmpcpp_directory + "config";
+}
+
+const std::string &NcmpcppConfig::GetHomeDirectory()
+{
+	if (!home_directory.empty())
+		return home_directory;
+#	ifdef WIN32
+	char path[MAX_PATH];
+	SHGetSpecialFolderPath(0, path, CSIDL_PERSONAL, 0);
+	home_directory = path ? path : "";
+	replace(home_directory.begin(), home_directory.end(), '\\', '/');
+#	else
+	char *home = getenv("HOME");
+	home_directory = home ? home : "<unknown>";
+#	endif // WIN32
+	if (!home_directory.empty() && *home_directory.rbegin() != '/')
+		home_directory += '/';
+	return home_directory;
+}
+
+void NcmpcppConfig::CheckForCommandLineConfigFilePath(char **argv, int argc)
+{
+	if (argc < 3)
+		return;
+	for (int i = 1; i < argc; ++i)
+	{
+		if (!strcmp(argv[i], "-c") || !strcmp(argv[i], "--config"))
+		{
+			if (++i >= argc)
+				continue;
+			config_file_path = argv[i];
+		}
+	}
+}
+
 void NcmpcppConfig::Read()
 {
-	std::ifstream f(config_file.c_str());
+	std::ifstream f(config_file_path.c_str());
 	std::string cl, v, name;
 	
-	while (f.is_open() && !f.eof())
+	if (!f.is_open())
+		return;
+	
+	while (!f.eof())
 	{
 		getline(f, cl);
 		if (!cl.empty() && cl[0] != '#')
@@ -679,7 +728,23 @@ void NcmpcppConfig::Read()
 			name = GetOptionName(cl);
 			v = GetLineValue(cl);
 			
-			if (name == "mpd_host")
+			if (name == "ncmpcpp_directory")
+			{
+				if (!v.empty())
+				{
+					MakeProperPath(v);
+					ncmpcpp_directory = v;
+				}
+			}
+			else if (name == "lyrics_directory")
+			{
+				if (!v.empty())
+				{
+					MakeProperPath(v);
+					lyrics_directory = v;
+				}
+			}
+			else if (name == "mpd_host")
 			{
 				if (!v.empty())
 					mpd_host = v;
@@ -688,10 +753,8 @@ void NcmpcppConfig::Read()
 			{
 				if (!v.empty())
 				{
-					 // if ~ is used at the beginning, replace it with user's home folder
-					if (v[0] == '~')
-						v.replace(0, 1, home_path);
-					mpd_music_dir = v + "/";
+					MakeProperPath(v);
+					mpd_music_dir = v;
 				}
 			}
 			else if (name == "visualizer_fifo_path")
@@ -1322,3 +1385,13 @@ void NcmpcppConfig::Read()
 		*song_in_columns_to_string_format.rbegin() = '}';
 }
 
+void NcmpcppConfig::MakeProperPath(std::string &dir)
+{
+	if (dir.empty())
+		return;
+	if (dir[0] == '~')
+		dir.replace(0, 1, home_directory);
+	replace(dir.begin(), dir.end(), '\\', '/');
+	if (*dir.rbegin() != '/')
+		dir += '/';
+}

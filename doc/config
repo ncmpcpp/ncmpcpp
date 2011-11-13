@@ -3,6 +3,25 @@
 ## ~/.ncmpcpp/config and set up your preferences  ##
 ####################################################
 #
+##### directories ######
+##
+## Directory for storing ncmpcpp related files.
+## Changing it is useful if you want to store
+## everything somewhere else and provide command
+## line setting for alternative location to config
+## file which defines that while launching ncmpcpp.
+##
+#
+#ncmpcpp_directory = "~/.ncmpcpp"
+#
+##
+## Directory for storing downloaded lyrics. It
+## defaults to ~/.lyrics since other MPD clients
+## (eg. ncmpc) also use that location.
+##
+#
+#lyrics_directory = "~/.lyrics"
+#
 ##### connection settings #####
 #
 ## set it in order to make tag editor and renaming files work properly

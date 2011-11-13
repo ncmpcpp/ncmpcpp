@@ -538,7 +538,9 @@ void Browser::ChangeBrowseMode()
 	
 	itsBrowseLocally = !itsBrowseLocally;
 	ShowMessage("Browse mode: %s", itsBrowseLocally ? "Local filesystem" : "MPD music dir");
-	itsBrowsedDir = itsBrowseLocally ? home_path : "/";
+	itsBrowsedDir = itsBrowseLocally ? Config.GetHomeDirectory() : "/";
+	if (itsBrowseLocally && *itsBrowsedDir.rbegin() == '/')
+		itsBrowsedDir.resize(itsBrowsedDir.length()-1);
 	w->Reset();
 	GetDirectory(itsBrowsedDir);
 	RedrawHeader = 1;

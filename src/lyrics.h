@@ -91,7 +91,6 @@ class Lyrics : public Screen<Scrollpad>
 		MPD::Song itsSong;
 		std::string itsFilename;
 		
-		static std::string itsFolder;
 		static std::string GenerateFilename(const MPD::Song &s);
 };
 

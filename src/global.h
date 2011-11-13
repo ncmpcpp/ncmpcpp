@@ -21,6 +21,8 @@
 #ifndef _GLOBAL_H
 #define _GLOBAL_H
 
+#include <sys/time.h>
+
 #include "ncmpcpp.h"
 #include "mpdpp.h"
 #include "screen.h"

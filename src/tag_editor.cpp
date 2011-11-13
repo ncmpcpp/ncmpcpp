@@ -44,7 +44,7 @@ using Global::MainStartY;
 
 TagEditor *myTagEditor = new TagEditor;
 
-const std::string TagEditor::PatternsFile = config_dir + "patterns.list";
+std::string TagEditor::PatternsFile = "patterns.list";
 std::list<std::string> TagEditor::Patterns;
 
 size_t TagEditor::LeftColumnWidth;
@@ -63,6 +63,7 @@ size_t TagEditor::FParserHeight;
 
 void TagEditor::Init()
 {
+	PatternsFile = Config.ncmpcpp_directory + "patterns.list";
 	SetDimensions(0, COLS);
 	
 	Albums = new Menu<string_pair>(0, MainStartY, LeftColumnWidth, MainHeight, Config.titles_visibility ? "Albums" : "", Config.main_color, brNone);

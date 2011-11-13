@@ -166,7 +166,7 @@ void Lastfm::SetTitleAndFolder()
 	{
 		itsTitle = U("Artist info - ");
 		itsTitle += TO_WSTRING(itsArgs.find("artist")->second);
-		itsFolder = home_path + HOME_FOLDER + "artists";
+		itsFolder = Config.ncmpcpp_directory + "artists";
 	}
 }
 

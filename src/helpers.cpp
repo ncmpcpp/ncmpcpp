@@ -125,6 +125,7 @@ void ParseArgv(int argc, char **argv)
 			<< "Usage: ncmpcpp [OPTION]...\n"
 			<< "  -h, --host                connect to server at host [localhost]\n"
 			<< "  -p, --port                connect to server at port [6600]\n"
+			<< "  -c, --config              use alternative configuration file\n"
 			<< "  -s, --screen <name>       specify the startup screen\n"
 			<< "  -?, --help                show this help message\n"
 			<< "  -v, --version             display version information\n"
@@ -142,7 +143,7 @@ void ParseArgv(int argc, char **argv)
 		}
 		
 		if (!ConnectToMPD())
-			exit(0);
+			exit(1);
 		
 		if (!strcmp(argv[i], "-s") || !strcmp(argv[i], "--screen"))
 		{
@@ -257,6 +258,11 @@ void ParseArgv(int argc, char **argv)
 			if (i != argc)
 				Mpd.SetVolume(Mpd.GetVolume()+atoi(argv[i]));
 			quit = 1;
+		}
+		else if (!strcmp(argv[i], "-c") || !strcmp(argv[i], "--config"))
+		{
+			// this is used in NcmpcppConfig::CheckForCommandLineConfigFilePath, ignoring here.
+			++i;
 		}
 		else
 		{

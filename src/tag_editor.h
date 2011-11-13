@@ -117,7 +117,7 @@ class TagEditor : public Screen<Window>
 		std::string itsBrowsedDir;
 		std::string itsHighlightedDir;
 		
-		static const std::string PatternsFile;
+		static std::string PatternsFile;
 		static std::list<std::string> Patterns;
 		
 		static size_t MiddleColumnWidth;

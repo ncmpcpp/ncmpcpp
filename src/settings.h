@@ -25,16 +25,7 @@
 
 #include <mpd/client.h>
 
-#include "home.h"
 #include "ncmpcpp.h"
-
-#ifdef WIN32
-# define HOME_FOLDER "\\ncmpcpp\\"
-#else
-# define HOME_FOLDER "/.ncmpcpp/"
-#endif // WIN32
-
-const std::string config_dir = home_path + HOME_FOLDER;
 
 class BasicScreen; // forward declaration for screens sequence
 
@@ -151,8 +142,16 @@ struct NcmpcppKeys
 
 struct NcmpcppConfig
 {
+	NcmpcppConfig();
+	
+	const std::string &GetHomeDirectory();
+	void CheckForCommandLineConfigFilePath(char **argv, int argc);
+	
 	void SetDefaults();
 	void Read();
+	
+	std::string ncmpcpp_directory;
+	std::string lyrics_directory;
 	
 	std::string mpd_host;
 	std::string mpd_music_dir;
@@ -280,12 +279,18 @@ struct NcmpcppConfig
 	
 	BasicScreen *startup_screen;
 	std::list<BasicScreen *> screens_seq;
+	
+	private:
+		void MakeProperPath(std::string &dir);
+		
+		std::string home_directory;
+		std::string config_file_path;
 };
 
 extern NcmpcppKeys Key;
 extern NcmpcppConfig Config;
 
-void CreateConfigDir();
+void CreateDir(const std::string &dir);
 void SetWindowsDimensions(size_t &header_height, size_t &footer_start_y, size_t &footer_height);
 
 #endif

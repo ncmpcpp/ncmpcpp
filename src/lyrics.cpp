@@ -20,11 +20,6 @@
 
 #include <cassert>
 #include <cerrno>
-#ifdef WIN32
-# include <io.h>
-#else
-# include <sys/stat.h>
-#endif // WIN32
 #include <fstream>
 
 #include "browser.h"
@@ -37,18 +32,10 @@
 #include "settings.h"
 #include "song.h"
 
-#ifdef WIN32
-# define LYRICS_FOLDER HOME_FOLDER"\\lyrics\\"
-#else
-# define LYRICS_FOLDER "/.lyrics"
-#endif // WIN32
-
 using Global::MainHeight;
 using Global::MainStartY;
 using Global::myScreen;
 using Global::myOldScreen;
-
-std::string Lyrics::itsFolder = home_path + LYRICS_FOLDER;
 
 #ifdef HAVE_CURL_CURL_H
 LyricsFetcher **Lyrics::itsFetcher = 0;
@@ -288,7 +275,7 @@ std::string Lyrics::GenerateFilename(const MPD::Song &s)
 		file += locale_to_utf_cpy(s.GetTitle());
 		file += ".txt";
 		EscapeUnallowedChars(file);
-		filename = itsFolder;
+		filename = Config.lyrics_directory;
 		filename += "/";
 		filename += file;
 	}
@@ -308,11 +295,7 @@ void Lyrics::Load()
 	itsSong.Localize();
 	itsFilename = GenerateFilename(itsSong);
 	
-	mkdir(itsFolder.c_str()
-#	ifndef WIN32
-	, 0755
-#	endif // !WIN32
-	);
+	CreateDir(Config.lyrics_directory);
 	
 	w->Clear();
 	w->Reset();

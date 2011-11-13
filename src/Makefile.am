@@ -12,7 +12,7 @@ INCLUDES= $(all_includes)
 # the library search path.
 ncmpcpp_LDFLAGS = $(all_libraries)
 noinst_HEADERS = browser.h charset.h clock.h conv.h curl_handle.h display.h \
-	error.h global.h help.h helpers.h home.h lastfm.h lastfm_service.h lyrics.h \
+	error.h global.h help.h helpers.h lastfm.h lastfm_service.h lyrics.h \
 	lyrics_fetcher.h media_library.h menu.h mpdpp.h outputs.h playlist_editor.h screen.h \
 	scrollpad.h search_engine.h sel_items_adder.h server_info.h settings.h song.h \
 	song_info.h tag_editor.h tiny_tag_editor.h tolower.h visualizer.h window.h

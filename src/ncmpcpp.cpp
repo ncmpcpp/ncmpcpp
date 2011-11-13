@@ -238,10 +238,11 @@ namespace
 	}
 }
 
-int main(int argc, char *argv[])
+int main(int argc, char **argv)
 {
 	setlocale(LC_ALL, "");
-	CreateConfigDir();
+	
+	Config.CheckForCommandLineConfigFilePath(argv, argc);
 	
 	Config.SetDefaults();
 	Key.SetDefaults();
@@ -265,13 +266,15 @@ int main(int argc, char *argv[])
 		ParseArgv(argc, argv);
 	
 	if (!ConnectToMPD())
-		return -1;
+		exit(1);
+	
+	CreateDir(Config.ncmpcpp_directory);
 	
 	// always execute these commands, even if ncmpcpp use exit function
 	atexit(do_at_exit);
 	
 	// redirect std::cerr output to ~/.ncmpcpp/error.log file
-	errorlog.open((config_dir + "error.log").c_str(), std::ios::app);
+	errorlog.open((Config.ncmpcpp_directory + "error.log").c_str(), std::ios::app);
 	cerr_buffer = std::cerr.rdbuf();
 	std::cerr.rdbuf(errorlog.rdbuf());
 	

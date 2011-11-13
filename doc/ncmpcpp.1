@@ -15,6 +15,9 @@ Connect to server at host [localhost]
 .B \-p, \-\-port
 Connect to server at port [6600]
 .TP
+.B \-c, \-\-config
+Use alternative configuration file
+.TP
 .B \-s, \-\-screen <name>
 Specify the startup screen (<name> may be: help, playlist, browser, search-engine, media-library, playlist-editor, tag-editor, outputs, visualizer, clock)
 .TP
@@ -56,6 +59,12 @@ Note: Each config option value must be enclosed in quotation marks (var = "examp
 Note: COLOR has to be the name (not a number) of one of colors 1-8 from SONG FORMAT section.
 
 Supported configuration options:
+.TP 
+.B ncmpcpp_directory = PATH
+Directory for storing ncmpcpp related files. Changing it is useful if you want to store everything somewhere else and provide command line setting for alternative location to config file which defines that while launching ncmpcpp.
+.TP 
+.B lyrics_directory = PATH
+Directory for storing downloaded lyrics. It defaults to ~/.lyrics since other MPD clients (eg. ncmpc) also use that location.
 .TP 
 .B mpd_host = HOST
 Connect to MPD running on specified host/unix socket. When HOST starts with a '/', it is assumed to be a unix socket.
