@@ -170,7 +170,7 @@ void TraceMpdStatus()
 	}
 	myScreen->Update();
 	
-	if (myScreen->ActiveWindow() == myPlaylist->Items
+	if (isVisible(myPlaylist) && myPlaylist->ActiveWindow() == myPlaylist->Items
 	&&  Timer.tv_sec == myPlaylist->Timer()+Config.playlist_disable_highlight_delay
 	&&  myPlaylist->Items->isHighlighted()
 	&&  Config.playlist_disable_highlight_delay)
