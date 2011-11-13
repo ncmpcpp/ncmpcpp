@@ -215,6 +215,7 @@ struct NcmpcppConfig
 	bool columns_in_playlist;
 	bool columns_in_browser;
 	bool columns_in_search_engine;
+	bool columns_in_playlist_editor;
 	bool set_window_title;
 	bool header_visibility;
 	bool header_text_scrolling;

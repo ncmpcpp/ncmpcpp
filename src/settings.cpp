@@ -405,6 +405,7 @@ void NcmpcppConfig::SetDefaults()
 	columns_in_playlist = false;
 	columns_in_browser = false;
 	columns_in_search_engine = false;
+	columns_in_playlist_editor = false;
 	header_visibility = true;
 	header_text_scrolling = true;
 	statusbar_visibility = true;
@@ -931,6 +932,10 @@ void NcmpcppConfig::Read()
 			else if (name == "search_engine_display_mode")
 			{
 				columns_in_search_engine = v == "columns";
+			}
+			else if (name == "playlist_editor_display_mode")
+			{
+				columns_in_playlist_editor = v == "columns";
 			}
 			else if (name == "header_visibility")
 			{

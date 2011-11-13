@@ -60,9 +60,9 @@ void PlaylistEditor::Init()
 	Content->CenteredCursor(Config.centered_cursor);
 	Content->SetSelectPrefix(&Config.selected_item_prefix);
 	Content->SetSelectSuffix(&Config.selected_item_suffix);
-	Content->SetItemDisplayer(Display::Songs);
+	Content->SetItemDisplayer(Config.columns_in_playlist_editor ? Display::SongsInColumns : Display::Songs);
 	Content->SetItemDisplayerUserData(&sf);
-	Content->SetGetStringFunction(Playlist::SongToString);
+	Content->SetGetStringFunction(Config.columns_in_playlist_editor ? Playlist::SongInColumnsToString : Playlist::SongToString);
 	Content->SetGetStringFunctionUserData(&Config.song_list_format_dollar_free);
 	
 	w = Playlists;

@@ -1399,6 +1399,21 @@ int main(int argc, char *argv[])
 				if (mySearcher->Main()->Size() > SearchEngine::StaticOptions)
 					mySearcher->Main()->SetTitle(Config.columns_in_search_engine && Config.titles_visibility ? Display::Columns(mySearcher->Main()->GetWidth()) : "");
 			}
+			else if (myScreen->ActiveWindow() == myPlaylistEditor->Content)
+			{
+				Config.columns_in_playlist_editor = !Config.columns_in_playlist_editor;
+				ShowMessage("Playlist editor display mode: %s", Config.columns_in_playlist_editor ? "Columns" : "Classic");
+				if (Config.columns_in_playlist_editor)
+				{
+					myPlaylistEditor->Content->SetItemDisplayer(Display::SongsInColumns);
+					myPlaylistEditor->Content->SetGetStringFunction(Playlist::SongInColumnsToString);
+				}
+				else
+				{
+					myPlaylistEditor->Content->SetItemDisplayer(Display::Songs);
+					myPlaylistEditor->Content->SetGetStringFunction(Playlist::SongToString);
+				}
+			}
 		}
 		else if (Keypressed(input, Key.ToggleSeparatorsInPlaylist))
 		{
