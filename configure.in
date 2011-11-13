@@ -33,7 +33,7 @@ dnl =====================================
 AC_MSG_CHECKING([whether compiler supports -fno-exceptions])
 old_CXXFLAGS="$CXXFLAGS"
 CXXFLAGS="-fno-exceptions"
-AC_COMPILE_IFELSE(AC_LANG_PROGRAM([[ ]]),
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[ ]])],
 	AC_MSG_RESULT([yes])
 	no_exceptions="-fno-exceptions"
 	,
@@ -85,7 +85,7 @@ dnl ======================
 if test "$iconv" != "no" ; then
 	AC_CHECK_HEADERS([iconv.h],
 		AC_MSG_CHECKING([whether iconv takes const char **])
-		AC_COMPILE_IFELSE(AC_LANG_PROGRAM([[#include <iconv.h>]], [[iconv(0, (const char **)0, 0, 0, 0);]]),
+		AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <iconv.h>]], [[iconv(0, (const char **)0, 0, 0, 0);]])],
 			AC_MSG_RESULT([yes]) AC_DEFINE([ICONV_CONST], [const], [pass const pointer to iconv]),
 			AC_MSG_RESULT([no]) AC_DEFINE([ICONV_CONST], [], [pass non-const pointer to iconv]))
 		AC_CHECK_LIB(iconv, libiconv, LDFLAGS="$LDFLAGS -liconv", )
