@@ -42,7 +42,7 @@ bool ConnectToMPD()
 {
 	if (!Mpd.Connect())
 	{
-		std::cout << "Cannot connect to mpd: " << Mpd.GetErrorMessage() << std::endl;
+		std::cout << "Couldn't connect to MPD (host = " << Mpd.GetHostname() << ", port = " << Mpd.GetPort() << "): " << Mpd.GetErrorMessage() << std::endl;
 		return false;
 	}
 	return true;
