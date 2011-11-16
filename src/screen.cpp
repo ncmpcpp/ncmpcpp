@@ -44,13 +44,13 @@ void ApplyToVisibleWindows(void (BasicScreen::*f)())
 
 void UpdateInactiveScreen(BasicScreen *screen)
 {
-	myInactiveScreen = myLockedScreen == screen ? 0 : myScreen;
+	myInactiveScreen = myLockedScreen == screen ? 0 : myLockedScreen;
 }
 
 bool isVisible(BasicScreen *screen)
 {
 	assert(screen != 0);
-	if (myLockedScreen)
+	if (myLockedScreen && myScreen->isMergable())
 		return screen == myScreen || screen == myInactiveScreen || screen == myLockedScreen;
 	else
 		return screen == myScreen;
