@@ -29,7 +29,7 @@ using Global::myInactiveScreen;
 
 void ApplyToVisibleWindows(void (BasicScreen::*f)())
 {
-	if (myLockedScreen)
+	if (myLockedScreen && myScreen->isMergable())
 	{
 		if (myScreen == myLockedScreen)
 		{
@@ -51,7 +51,7 @@ bool isVisible(BasicScreen *screen)
 {
 	assert(screen != 0);
 	if (myLockedScreen && myScreen->isMergable())
-		return screen == myScreen || screen == myInactiveScreen || screen == myLockedScreen;
+		return screen == myInactiveScreen || screen == myLockedScreen;
 	else
 		return screen == myScreen;
 }

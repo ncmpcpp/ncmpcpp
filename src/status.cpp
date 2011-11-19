@@ -158,17 +158,7 @@ void TraceMpdStatus()
 		Global::UpdateStatusImmediately = 0;
 	}
 	
-	if (myLockedScreen)
-	{
-		if (myScreen == myLockedScreen)
-		{
-			if (myInactiveScreen)
-				myInactiveScreen->Update();
-		}
-		else
-			myLockedScreen->Update();
-	}
-	myScreen->Update();
+	ApplyToVisibleWindows(&BasicScreen::Update);
 	
 	if (isVisible(myPlaylist) && myPlaylist->ActiveWindow() == myPlaylist->Items
 	&&  Timer.tv_sec == myPlaylist->Timer()+Config.playlist_disable_highlight_delay
