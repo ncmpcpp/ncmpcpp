@@ -819,7 +819,7 @@ bool TagEditor::NextColumn()
 		TagTypes->HighlightColor(Config.active_column_color);
 		return true;
 	}
-	else if (w == TagTypes && TagTypes->Choice() < 12 && !Tags->ReallyEmpty())
+	else if (w == TagTypes && TagTypes->Choice() < 13 && !Tags->ReallyEmpty())
 	{
 		TagTypes->HighlightColor(Config.main_highlight_color);
 		w->Refresh();
