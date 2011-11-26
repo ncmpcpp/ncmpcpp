@@ -33,6 +33,7 @@ LyricsFetcher *lyricsPlugins[] =
 	new LyricwikiFetcher(),
 	new LyricsvipFetcher(),
 	new Sing365Fetcher(),
+	new LoloLyricsFetcher(),
 	new LyriczzFetcher(),
 	new SonglyricsFetcher(),
 	new LyricsmaniaFetcher(),
