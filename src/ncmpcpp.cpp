@@ -618,7 +618,8 @@ int main(int argc, char **argv)
 		}
 		else if (Keypressed(input, Key.PrevColumn) && SwitchToPrevColumn(myScreen)) { }
 		else if (Keypressed(input, Key.NextColumn) && SwitchToNextColumn(myScreen)) { }
-		else if (Keypressed(input, Key.PrevColumn) && myLockedScreen && myInactiveScreen && myScreen->isMergable())
+		else if (Keypressed(input, Key.PrevColumn) && myLockedScreen && myInactiveScreen
+		     &&  myLockedScreen != myScreen && myScreen->isMergable())
 		{
 			if (myScreen != myLockedScreen)
 			{
@@ -627,7 +628,8 @@ int main(int argc, char **argv)
 				RedrawHeader = 1;
 			}
 		}
-		else if (Keypressed(input, Key.NextColumn) && myLockedScreen && myInactiveScreen && myScreen->isMergable())
+		else if (Keypressed(input, Key.NextColumn) && myLockedScreen && myInactiveScreen
+		     &&  myLockedScreen == myScreen && myScreen->isMergable())
 		{
 			if (myScreen == myLockedScreen)
 			{
