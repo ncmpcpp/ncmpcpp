@@ -334,8 +334,6 @@ int main(int argc, char **argv)
 	signal(SIGWINCH, sighandler);
 #	endif // !WIN32
 	
-	MEVENT mouse_event, old_mouse_event;
-	old_mouse_event.bstate = 0;
 	mouseinterval(0);
 	if (Config.mouse_support)
 		mousemask(ALL_MOUSE_EVENTS, 0);
@@ -451,7 +449,6 @@ int main(int argc, char **argv)
 		// header stuff end
 		
 		if (input != ERR)
-			//ApplyToVisibleWindows(&BasicScreen::RefreshWindow);
 			myScreen->RefreshWindow();
 		wFooter->ReadKey(input);
 		
@@ -535,6 +532,8 @@ int main(int argc, char **argv)
 		}
 		else if (Config.mouse_support && input == KEY_MOUSE)
 		{
+			static MEVENT mouse_event, old_mouse_event;
+			old_mouse_event = mouse_event;
 			getmouse(&mouse_event);
 			// workaround shitty ncurses behavior introduced in >=5.8, when we mysteriously get
 			// a few times after ncmpcpp startup 2^27 code instead of BUTTON{1,3}_RELEASED. since that
@@ -575,7 +574,6 @@ int main(int argc, char **argv)
 			}
 			else if (mouse_event.bstate & (BUTTON1_PRESSED | BUTTON2_PRESSED | BUTTON3_PRESSED | BUTTON4_PRESSED))
 				myScreen->MouseButtonPressed(mouse_event);
-			old_mouse_event = mouse_event;
 		}
 		else if (Keypressed(input, Key.ToggleInterface))
 		{
