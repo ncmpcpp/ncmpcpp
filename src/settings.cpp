@@ -375,6 +375,7 @@ void NcmpcppConfig::SetDefaults()
 	new_header_second_line = "{{{$4$b%a$/b$9}{ - $7%b$9}{ ($4%y$9)}}|{%D}}";
 	browser_playlist_prefix << clRed << "(playlist)" << clEnd << ' ';
 	progressbar = U("=>\0");
+	visualizer_chars = U("◆│");
 	pattern = "%n - %t";
 	selected_item_prefix << clMagenta;
 	selected_item_suffix << clEnd;
@@ -906,6 +907,16 @@ void NcmpcppConfig::Read()
 					progressbar = pb;
 				// if two characters were specified, add third one as null
 				progressbar.resize(3);
+			}
+			else if (name == "visualizer_look")
+			{
+				std::basic_string<my_char_t> vc = TO_WSTRING(v);
+				if (vc.length() != 2)
+				{
+					std::cerr << "Warning: length of visualizer_look should be 2, but it's " << vc.length() << ", discarding.\n";
+				}
+				else
+					visualizer_chars = vc;
 			}
 			else if (name == "default_tag_editor_pattern")
 			{

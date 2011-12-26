@@ -162,7 +162,6 @@ void Visualizer::DrawSoundWave(int16_t *buf, ssize_t samples, size_t y_offset, s
 {
 	const int samples_per_col = samples/w->GetWidth();
 	const int half_height = height/2;
-	*w << fmtAltCharset;
 	double prev_point_pos = 0;
 	const size_t win_width = w->GetWidth();
 	for (size_t i = 0; i < win_width; ++i)
@@ -173,7 +172,7 @@ void Visualizer::DrawSoundWave(int16_t *buf, ssize_t samples, size_t y_offset, s
 		point_pos /= samples_per_col;
 		point_pos /= std::numeric_limits<int16_t>::max();
 		point_pos *= half_height;
-		*w << XY(i, y_offset+half_height+point_pos) << '`';
+		*w << XY(i, y_offset+half_height+point_pos) << Config.visualizer_chars[0];
 		if (i && abs(prev_point_pos-point_pos) > 2)
 		{
 			// if gap is too big. intermediate values are needed
@@ -181,11 +180,10 @@ void Visualizer::DrawSoundWave(int16_t *buf, ssize_t samples, size_t y_offset, s
 			const int breakpoint = std::max(prev_point_pos, point_pos);
 			const int half = (prev_point_pos+point_pos)/2;
 			for (int k = std::min(prev_point_pos, point_pos)+1; k < breakpoint; k += 2)
-					*w << XY(i-(k < half), y_offset+half_height+k) << '`';
+				*w << XY(i-(k < half), y_offset+half_height+k) << Config.visualizer_chars[0];
 		}
 		prev_point_pos = point_pos;
 	}
-	*w << fmtAltCharsetEnd;
 }
 
 #ifdef HAVE_FFTW3_H
@@ -213,7 +211,10 @@ void Visualizer::DrawFrequencySpectrum(int16_t *buf, ssize_t samples, size_t y_o
 		for (int j = 0; j < freqs_per_col; ++j)
 			bar_height += itsFreqsMagnitude[i*freqs_per_col+j];
 		bar_height = std::min(bar_height/freqs_per_col, height);
-		mvwvline(w->Raw(), y_offset > 0 ? y_offset : height-bar_height, i, 0, bar_height);
+		const size_t start_y = y_offset > 0 ? y_offset : height-bar_height;
+		const size_t stop_y = std::min(bar_height+start_y, w->GetHeight());
+		for (size_t j = start_y; j < stop_y; ++j)
+			*w << XY(i, j) << Config.visualizer_chars[1];
 	}
 }
 #endif // HAVE_FFTW3_H

@@ -89,6 +89,8 @@
 #
 #visualizer_type = "wave" (spectrum/wave)
 #
+#visualizer_look = "◆│"
+#
 ##### system encoding #####
 ##
 ## ncmpcpp should detect your charset encoding
