@@ -39,7 +39,9 @@ using Global::myOldScreen;
 
 #ifdef HAVE_CURL_CURL_H
 LyricsFetcher **Lyrics::itsFetcher = 0;
-std::set<MPD::Song *> Lyrics::itsDownloaded;
+std::queue<MPD::Song *> Lyrics::itsToDownload;
+pthread_mutex_t Lyrics::itsDIBLock = PTHREAD_MUTEX_INITIALIZER;
+size_t Lyrics::itsWorkersNumber = 0;
 #endif // HAVE_CURL_CURL_H
 
 Lyrics *myLyrics = new Lyrics;
@@ -106,7 +108,7 @@ void Lyrics::SwitchTo()
 	if (isReadyToTake)
 		Take();
 	
-	if (isDownloadInProgress || !itsDownloaded.empty())
+	if (isDownloadInProgress || itsWorkersNumber > 0)
 	{
 		ShowMessage("Lyrics are being downloaded...");
 		return;
@@ -170,20 +172,56 @@ void Lyrics::DownloadInBackground(const MPD::Song *s)
 		return;
 	}
 	ShowMessage("Fetching lyrics for %s...", s->toString(Config.song_status_format_no_colors).c_str());
-	// we need to copy it and store separetely since this song may get deleted in the meantime.
+	
 	MPD::Song *s_copy = new MPD::Song(*s);
-	itsDownloaded.insert(s_copy);
-	pthread_t t;
-	pthread_attr_t attr;
-	pthread_attr_init(&attr);
-	pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
-	pthread_create(&t, &attr, DownloadInBackgroundImpl, s_copy);
+	pthread_mutex_lock(&itsDIBLock);
+	if (itsWorkersNumber == itsMaxWorkersNumber)
+		itsToDownload.push(s_copy);
+	else
+	{
+		++itsWorkersNumber;
+		pthread_t t;
+		pthread_attr_t attr;
+		pthread_attr_init(&attr);
+		pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
+		pthread_create(&t, &attr, DownloadInBackgroundImpl, s_copy);
+	}
+	pthread_mutex_unlock(&itsDIBLock);
 }
 
 void *Lyrics::DownloadInBackgroundImpl(void *void_ptr)
 {
 	MPD::Song *s = static_cast<MPD::Song *>(void_ptr);
+	DownloadInBackgroundImplHelper(s);
+	delete s;
 	
+	while (true)
+	{
+		pthread_mutex_lock(&itsDIBLock);
+		if (itsToDownload.empty())
+		{
+			pthread_mutex_unlock(&itsDIBLock);
+			break;
+		}
+		else
+		{
+			s = itsToDownload.front();
+			itsToDownload.pop();
+			pthread_mutex_unlock(&itsDIBLock);
+		}
+		DownloadInBackgroundImplHelper(s);
+		delete s;
+	}
+	
+	pthread_mutex_lock(&itsDIBLock);
+	--itsWorkersNumber;
+	pthread_mutex_unlock(&itsDIBLock);
+	
+	pthread_exit(0);
+}
+
+void Lyrics::DownloadInBackgroundImplHelper(MPD::Song *s)
+{
 	std::string artist = Curl::escape(locale_to_utf_cpy(s->GetArtist()));
 	std::string title = Curl::escape(locale_to_utf_cpy(s->GetTitle()));
 	
@@ -199,11 +237,6 @@ void *Lyrics::DownloadInBackgroundImpl(void *void_ptr)
 	}
 	if (result.first == true)
 		Save(GenerateFilename(*s), result.second);
-	
-	delete s;
-	itsDownloaded.erase(s);
-	
-	pthread_exit(0);
 }
 
 void *Lyrics::Download()

@@ -22,6 +22,7 @@
 #define _LYRICS_H
 
 #include <pthread.h>
+#include <queue>
 
 #include "ncmpcpp.h"
 #include "mpdpp.h"
@@ -72,8 +73,16 @@ class Lyrics : public Screen<Scrollpad>
 		
 #		ifdef HAVE_CURL_CURL_H
 		static void *DownloadInBackgroundImpl(void *);
-		// storage for songs for which lyrics are being downloaded at the moment
-		static std::set<MPD::Song *> itsDownloaded;
+		static void DownloadInBackgroundImplHelper(MPD::Song *);
+		// lock for allowing exclusive access to itsToDownload and itsWorkersNumber
+		static pthread_mutex_t itsDIBLock;
+		// storage for songs for which lyrics are scheduled to be downloaded
+		static std::queue<MPD::Song *> itsToDownload;
+		// current worker threads (ie. downloading lyrics)
+		static size_t itsWorkersNumber;
+		// maximum number of worker threads. if it's reached, next lyrics requests
+		// are put into itsToDownload queue.
+		static const size_t itsMaxWorkersNumber = 4;
 		
 		void *Download();
 		static void *DownloadWrapper(void *);
