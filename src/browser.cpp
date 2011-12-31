@@ -154,8 +154,8 @@ void Browser::EnterPressed()
 				std::string name = item.name;
 				ShowMessage("Loading playlist %s...", name.c_str());
 				locale_to_utf(name);
-				if (Mpd.LoadPlaylist(name))
-					ShowMessage("Playlist loaded.");
+				if (!Mpd.LoadPlaylist(name))
+					ShowMessage("Couldn't load playlist.");
 			}
 			break;
 		}
@@ -216,8 +216,8 @@ void Browser::SpacePressed()
 			std::string name = item.name;
 			ShowMessage("Loading playlist %s...", name.c_str());
 			locale_to_utf(name);
-			if (Mpd.LoadPlaylist(name))
-				ShowMessage("Playlist loaded.");
+			if (!Mpd.LoadPlaylist(name))
+				ShowMessage("Couldn't load playlist.");
 			break;
 		}
 	}
