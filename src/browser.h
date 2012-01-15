@@ -73,7 +73,7 @@ class Browser : public Screen< Menu<MPD::Item> >
 		static bool hasSupportedExtension(const std::string &);
 		static std::string ItemToString(const MPD::Item &, void *);
 		
-		static const char *SupportedExtensions[];
+		static std::set<std::string> SupportedExtensions;
 		
 		bool itsBrowseLocally;
 		size_t itsScrollBeginning;

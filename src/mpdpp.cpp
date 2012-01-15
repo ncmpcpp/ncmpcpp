@@ -682,6 +682,24 @@ void MPD::Connection::GetPlaylistContent(const std::string &path, SongList &v)
 	GoIdle();
 }
 
+void MPD::Connection::GetSupportedExtensions(std::set<std::string> &acc)
+{
+	if (!itsConnection)
+		return;
+	assert(!isCommandsListEnabled);
+	GoBusy();
+	
+	mpd_send_command(itsConnection, "decoders", NULL);
+	if (mpd_pair *pair = mpd_recv_pair_named(itsConnection, "suffix"))
+	{
+		acc.insert(pair->value);
+		mpd_return_pair(itsConnection, pair);
+	}
+	mpd_response_finish(itsConnection);
+	
+	GoIdle();
+}
+
 void MPD::Connection::SetRepeat(bool mode)
 {
 	if (!itsConnection)

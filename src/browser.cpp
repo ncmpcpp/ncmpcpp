@@ -47,13 +47,7 @@ using MPD::itPlaylist;
 
 Browser *myBrowser = new Browser;
 
-const char *Browser::SupportedExtensions[] =
-{
-	"wma", "asf", "rm", "mp1", "mp2", "mp3",
-	"mp4", "m4a", "flac", "ogg", "wav", "au",
-	"aiff", "aif", "ac3", "aac", "mpc", "it",
-	"mod", "s3m", "xm", "wv", 0
-};
+std::set<std::string> Browser::SupportedExtensions;
 
 void Browser::Init()
 {
@@ -68,6 +62,10 @@ void Browser::Init()
 	w->SetItemDisplayer(Display::Items);
 	w->SetItemDisplayerUserData(&sf);
 	w->SetGetStringFunction(ItemToString);
+	
+	if (SupportedExtensions.empty())
+		Mpd.GetSupportedExtensions(SupportedExtensions);
+	
 	isInitialized = 1;
 }
 
@@ -330,11 +328,7 @@ bool Browser::hasSupportedExtension(const std::string &file)
 	
 	std::string ext = file.substr(last_dot+1);
 	ToLower(ext);
-	for (int i = 0; SupportedExtensions[i]; ++i)
-		if (strcmp(ext.c_str(), SupportedExtensions[i]) == 0)
-			return true;
-	
-	return false;
+	return SupportedExtensions.find(ext) != SupportedExtensions.end();
 }
 
 void Browser::LocateSong(const MPD::Song &s)

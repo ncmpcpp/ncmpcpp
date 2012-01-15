@@ -21,6 +21,7 @@
 #ifndef _MPDPP_H
 #define _MPDPP_H
 
+#include <set>
 #include <vector>
 
 #include <mpd/client.h>
@@ -161,6 +162,8 @@ namespace MPD
 			int GetCurrentSongPos() const;
 			Song GetSong(const std::string &);
 			void GetPlaylistContent(const std::string &, SongList &);
+			
+			void GetSupportedExtensions(std::set<std::string> &);
 			
 			void SetRepeat(bool);
 			void SetRandom(bool);
