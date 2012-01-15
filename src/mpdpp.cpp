@@ -690,7 +690,7 @@ void MPD::Connection::GetSupportedExtensions(std::set<std::string> &acc)
 	GoBusy();
 	
 	mpd_send_command(itsConnection, "decoders", NULL);
-	if (mpd_pair *pair = mpd_recv_pair_named(itsConnection, "suffix"))
+	while (mpd_pair *pair = mpd_recv_pair_named(itsConnection, "suffix"))
 	{
 		acc.insert(pair->value);
 		mpd_return_pair(itsConnection, pair);
