@@ -51,7 +51,7 @@ bool isVisible(BasicScreen *screen)
 {
 	assert(screen != 0);
 	if (myLockedScreen && myScreen->isMergable())
-		return screen == myInactiveScreen || screen == myLockedScreen;
+		return screen == myScreen || screen == myInactiveScreen || screen == myLockedScreen;
 	else
 		return screen == myScreen;
 }
