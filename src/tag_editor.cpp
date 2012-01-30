@@ -39,6 +39,7 @@
 #include "song_info.h"
 #include "playlist.h"
 
+using Global::myScreen;
 using Global::MainHeight;
 using Global::MainStartY;
 
@@ -190,7 +191,6 @@ std::basic_string<my_char_t> TagEditor::Title()
 
 void TagEditor::SwitchTo()
 {
-	using Global::myScreen;
 	using Global::myLockedScreen;
 	
 	if (myScreen == this)
@@ -871,6 +871,9 @@ bool TagEditor::PrevColumn()
 
 void TagEditor::LocateSong(const MPD::Song &s)
 {
+	if (myScreen == this)
+		return;
+	
 	if (s.GetDirectory().empty())
 		return;
 	
