@@ -951,7 +951,7 @@ bool MPD::Connection::AddRandomSongs(size_t number)
 		srand(time(0));
 		std::random_shuffle(files.begin(), files.end());
 		StartCommandsList();
-		TagList::const_iterator it = files.begin()+rand()%(files.size()-number);
+		TagList::const_iterator it = files.begin()+rand()%(std::max(size_t(1), files.size()-number));
 		for (size_t i = 0; i < number && it != files.end(); ++i)
 			AddSong(*it++);
 		CommitCommandsList();
