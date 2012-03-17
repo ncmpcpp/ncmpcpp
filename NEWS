@@ -1,3 +1,14 @@
+ncmpcpp-0.5.9
+
+* new feature: support for fetching lyrics for currently playing song in background
+* new feature: support for stereo visualization
+* new feature: support for merging screens together
+* playlist editor: add support for columns display mode
+* settings: provide a way to use alternative location for configuration file
+* settings: make characters used in visualizer customizable
+* lyrics fetcher: add support for lololyrics.com
+* various bugfixes
+
 ncmpcpp-0.5.8
 
 * lyrics fetcher: add support for justsomelyrics.com
