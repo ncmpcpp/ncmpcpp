@@ -25,6 +25,7 @@
 # include <winsock.h>
 #else
 # include <sys/select.h>
+# include <unistd.h>
 #endif
 
 #include "error.h"
