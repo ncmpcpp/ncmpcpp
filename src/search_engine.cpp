@@ -37,6 +37,7 @@ const char *SearchEngine::ConstraintsNames[] =
 {
 	"Any:",
 	"Artist:",
+	"Album Artist:",
 	"Title:",
 	"Album:",
 	"Filename:",
@@ -55,9 +56,9 @@ const char *SearchEngine::SearchModes[] =
 	0
 };
 
-size_t SearchEngine::StaticOptions = 19;
-size_t SearchEngine::ResetButton = 15;
-size_t SearchEngine::SearchButton = 14;
+size_t SearchEngine::StaticOptions = 20;
+size_t SearchEngine::ResetButton = 16;
+size_t SearchEngine::SearchButton = 15;
 
 void SearchEngine::Init()
 {
@@ -139,7 +140,7 @@ void SearchEngine::EnterPressed()
 		Statusbar() << fmtBold << ConstraintsNames[option] << fmtBoldEnd << ' ';
 		itsConstraints[option] = Global::wFooter->GetString(itsConstraints[option]);
 		w->Current().first->Clear();
-		*w->Current().first << fmtBold << std::setw(10) << std::left << ConstraintsNames[option] << fmtBoldEnd << ' ';
+		*w->Current().first << fmtBold << std::setw(13) << std::left << ConstraintsNames[option] << fmtBoldEnd << ' ';
 		ShowTag(*w->Current().first, itsConstraints[option]);
 	}
 	else if (option == ConstraintsNumber+1)
@@ -403,7 +404,7 @@ void SearchEngine::Prepare()
 	
 	for (size_t i = 0; i < ConstraintsNumber; ++i)
 	{
-		*(*w)[i].first << fmtBold << std::setw(10) << std::left << ConstraintsNames[i] << fmtBoldEnd << ' ';
+		*(*w)[i].first << fmtBold << std::setw(13) << std::left << ConstraintsNames[i] << fmtBoldEnd << ' ';
 		ShowTag(*(*w)[i].first, itsConstraints[i]);
 	}
 	
@@ -445,21 +446,23 @@ void SearchEngine::Search()
 		if (!itsConstraints[1].empty())
 			Mpd.AddSearch(MPD_TAG_ARTIST, itsConstraints[1]);
 		if (!itsConstraints[2].empty())
-			Mpd.AddSearch(MPD_TAG_TITLE, itsConstraints[2]);
+			Mpd.AddSearch(MPD_TAG_ALBUM_ARTIST, itsConstraints[2]);
 		if (!itsConstraints[3].empty())
-			Mpd.AddSearch(MPD_TAG_ALBUM, itsConstraints[3]);
+			Mpd.AddSearch(MPD_TAG_TITLE, itsConstraints[3]);
 		if (!itsConstraints[4].empty())
-			Mpd.AddSearchURI(itsConstraints[4]);
+			Mpd.AddSearch(MPD_TAG_ALBUM, itsConstraints[4]);
 		if (!itsConstraints[5].empty())
-			Mpd.AddSearch(MPD_TAG_COMPOSER, itsConstraints[5]);
+			Mpd.AddSearchURI(itsConstraints[5]);
 		if (!itsConstraints[6].empty())
-			Mpd.AddSearch(MPD_TAG_PERFORMER, itsConstraints[6]);
+			Mpd.AddSearch(MPD_TAG_COMPOSER, itsConstraints[6]);
 		if (!itsConstraints[7].empty())
-			Mpd.AddSearch(MPD_TAG_GENRE, itsConstraints[7]);
+			Mpd.AddSearch(MPD_TAG_PERFORMER, itsConstraints[7]);
 		if (!itsConstraints[8].empty())
-			Mpd.AddSearch(MPD_TAG_DATE, itsConstraints[8]);
+			Mpd.AddSearch(MPD_TAG_GENRE, itsConstraints[8]);
 		if (!itsConstraints[9].empty())
-			Mpd.AddSearch(MPD_TAG_COMMENT, itsConstraints[9]);
+			Mpd.AddSearch(MPD_TAG_DATE, itsConstraints[9]);
+		if (!itsConstraints[10].empty())
+			Mpd.AddSearch(MPD_TAG_COMMENT, itsConstraints[10]);
 		MPD::SongList results;
 		Mpd.CommitSearch(results);
 		for (MPD::SongList::const_iterator it = results.begin(); it != results.end(); ++it)
@@ -491,6 +494,7 @@ void SearchEngine::Search()
 				{
 					any_found =
 						!regexec(&rx, (*it)->GetArtist().c_str(), 0, 0, 0)
+					||	!regexec(&rx, (*it)->GetAlbumArtist().c_str(), 0, 0, 0)
 					||	!regexec(&rx, (*it)->GetTitle().c_str(), 0, 0, 0)
 					||	!regexec(&rx, (*it)->GetAlbum().c_str(), 0, 0, 0)
 					||	!regexec(&rx, (*it)->GetName().c_str(), 0, 0, 0)
@@ -512,48 +516,54 @@ void SearchEngine::Search()
 			if (found && !itsConstraints[2].empty())
 			{
 				if (!regcomp(&rx, itsConstraints[2].c_str(), REG_ICASE | Config.regex_type))
-					found = !regexec(&rx, (*it)->GetTitle().c_str(), 0, 0, 0);
+					found = !regexec(&rx, (*it)->GetAlbumArtist().c_str(), 0, 0, 0);
 				regfree(&rx);
 			}
 			if (found && !itsConstraints[3].empty())
 			{
-				if (!regcomp(&rx, itsConstraints[3].c_str(), REG_ICASE | Config.regex_type))
-					found = !regexec(&rx, (*it)->GetAlbum().c_str(), 0, 0, 0);
+				if(!regcomp(&rx, itsConstraints[3].c_str(), REG_ICASE | Config.regex_type))
+					found = !regexec(&rx, (*it)->GetTitle().c_str(), 0, 0, 0);
 				regfree(&rx);
 			}
 			if (found && !itsConstraints[4].empty())
 			{
 				if (!regcomp(&rx, itsConstraints[4].c_str(), REG_ICASE | Config.regex_type))
-					found = !regexec(&rx, (*it)->GetName().c_str(), 0, 0, 0);
+					found = !regexec(&rx, (*it)->GetAlbum().c_str(), 0, 0, 0);
 				regfree(&rx);
 			}
 			if (found && !itsConstraints[5].empty())
 			{
 				if (!regcomp(&rx, itsConstraints[5].c_str(), REG_ICASE | Config.regex_type))
-					found = !regexec(&rx, (*it)->GetComposer().c_str(), 0, 0, 0);
+					found = !regexec(&rx, (*it)->GetName().c_str(), 0, 0, 0);
 				regfree(&rx);
 			}
 			if (found && !itsConstraints[6].empty())
 			{
 				if (!regcomp(&rx, itsConstraints[6].c_str(), REG_ICASE | Config.regex_type))
-					found = !regexec(&rx, (*it)->GetPerformer().c_str(), 0, 0, 0);
+					found = !regexec(&rx, (*it)->GetComposer().c_str(), 0, 0, 0);
 				regfree(&rx);
 			}
 			if (found && !itsConstraints[7].empty())
 			{
 				if (!regcomp(&rx, itsConstraints[7].c_str(), REG_ICASE | Config.regex_type))
-					found = !regexec(&rx, (*it)->GetGenre().c_str(), 0, 0, 0);
+					found = !regexec(&rx, (*it)->GetPerformer().c_str(), 0, 0, 0);
 				regfree(&rx);
 			}
 			if (found && !itsConstraints[8].empty())
 			{
 				if (!regcomp(&rx, itsConstraints[8].c_str(), REG_ICASE | Config.regex_type))
-					found = !regexec(&rx, (*it)->GetDate().c_str(), 0, 0, 0);
+					found = !regexec(&rx, (*it)->GetGenre().c_str(), 0, 0, 0);
 				regfree(&rx);
 			}
 			if (found && !itsConstraints[9].empty())
 			{
 				if (!regcomp(&rx, itsConstraints[9].c_str(), REG_ICASE | Config.regex_type))
+					found = !regexec(&rx, (*it)->GetDate().c_str(), 0, 0, 0);
+				regfree(&rx);
+			}
+			if (found && !itsConstraints[10].empty())
+			{
+				if (!regcomp(&rx, itsConstraints[10].c_str(), REG_ICASE | Config.regex_type))
 					found = !regexec(&rx, (*it)->GetComment().c_str(), 0, 0, 0);
 				regfree(&rx);
 			}
@@ -565,6 +575,7 @@ void SearchEngine::Search()
 			if (!itsConstraints[0].empty())
 				any_found =
 					!cmp((*it)->GetArtist(), itsConstraints[0])
+				||	!cmp((*it)->GetAlbumArtist(), itsConstraints[0])
 				||	!cmp((*it)->GetTitle(), itsConstraints[0])
 				||	!cmp((*it)->GetAlbum(), itsConstraints[0])
 				||	!cmp((*it)->GetName(), itsConstraints[0])
@@ -577,21 +588,23 @@ void SearchEngine::Search()
 			if (found && !itsConstraints[1].empty())
 				found = !cmp((*it)->GetArtist(), itsConstraints[1]);
 			if (found && !itsConstraints[2].empty())
-				found = !cmp((*it)->GetTitle(), itsConstraints[2]);
+				found = !cmp((*it)->GetAlbumArtist(), itsConstraints[2]);
 			if (found && !itsConstraints[3].empty())
-				found = !cmp((*it)->GetAlbum(), itsConstraints[3]);
+				found = !cmp((*it)->GetTitle(), itsConstraints[3]);
 			if (found && !itsConstraints[4].empty())
-				found = !cmp((*it)->GetName(), itsConstraints[4]);
+				found = !cmp((*it)->GetAlbum(), itsConstraints[4]);
 			if (found && !itsConstraints[5].empty())
-				found = !cmp((*it)->GetComposer(), itsConstraints[5]);
+				found = !cmp((*it)->GetName(), itsConstraints[5]);
 			if (found && !itsConstraints[6].empty())
-				found = !cmp((*it)->GetPerformer(), itsConstraints[6]);
+				found = !cmp((*it)->GetComposer(), itsConstraints[6]);
 			if (found && !itsConstraints[7].empty())
-				found = !cmp((*it)->GetGenre(), itsConstraints[7]);
+				found = !cmp((*it)->GetPerformer(), itsConstraints[7]);
 			if (found && !itsConstraints[8].empty())
-				found = !cmp((*it)->GetDate(), itsConstraints[8]);
+				found = !cmp((*it)->GetGenre(), itsConstraints[8]);
 			if (found && !itsConstraints[9].empty())
-				found = !cmp((*it)->GetComment(), itsConstraints[9]);
+				found = !cmp((*it)->GetDate(), itsConstraints[9]);
+			if (found && !itsConstraints[10].empty())
+				found = !cmp((*it)->GetComment(), itsConstraints[10]);
 		}
 		
 		if (found && any_found)
