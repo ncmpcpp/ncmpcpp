@@ -116,6 +116,8 @@
 #
 #key_apply_filter = 6
 #
+#key_clear_filter = 7
+#
 #key_find_forward = '/'
 #
 #key_find_backward = '?'

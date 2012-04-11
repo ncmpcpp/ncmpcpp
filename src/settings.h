@@ -101,6 +101,7 @@ struct NcmpcppKeys
 	int UpdateDB[2];
 	int SortPlaylist[2];
 	int ApplyFilter[2];
+	int DisableFilter[2];
 	int FindForward[2];
 	int FindBackward[2];
 	int NextFoundPosition[2];

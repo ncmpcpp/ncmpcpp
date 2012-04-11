@@ -2028,6 +2028,24 @@ int main(int argc, char **argv)
 				RedrawHeader = 1;
 			}
 		}
+		else if (Keypressed(input, Key.DisableFilter))
+		{
+			List *mList = myScreen->GetList();
+			
+			if (!mList)
+				continue;
+			
+			mList->ApplyFilter("");
+			
+			ShowMessage("Filtering disabled");
+			
+			if (myScreen == myPlaylist)
+			{
+				myPlaylist->EnableHighlighting();
+				Playlist::ReloadTotalLength = 1;
+				RedrawHeader = 1;
+			}
+		}
 		else if (Keypressed(input, Key.FindForward) || Keypressed(input, Key.FindBackward))
 		{
 			List *mList = myScreen->GetList();
@@ -2356,6 +2374,7 @@ int main(int argc, char **argv)
 			||  Keypressed(input, Key.Home)
 			||  Keypressed(input, Key.End)
 			||  Keypressed(input, Key.ApplyFilter)
+			||  Keypressed(input, Key.DisableFilter)
 			||  Keypressed(input, Key.FindForward)
 			||  Keypressed(input, Key.FindBackward)
 			||  Keypressed(input, Key.NextFoundPosition)

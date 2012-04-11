@@ -230,6 +230,7 @@ void NcmpcppKeys::SetDefaults()
 	UpdateDB[0] = 'u';
 	SortPlaylist[0] = 22;
 	ApplyFilter[0] = 6;
+	DisableFilter[0] = 7;
 	FindForward[0] = '/';
 	FindBackward[0] = '?';
 	NextFoundPosition[0] = '.';
@@ -320,6 +321,7 @@ void NcmpcppKeys::SetDefaults()
 	UpdateDB[1] = NullKey;
 	SortPlaylist[1] = NullKey;
 	ApplyFilter[1] = NullKey;
+	DisableFilter[1] = NullKey;
 	FindForward[1] = NullKey;
 	FindBackward[1] = NullKey;
 	NextFoundPosition[1] = NullKey;
@@ -595,6 +597,8 @@ void NcmpcppKeys::Read()
 				GetKeys(key, SortPlaylist);
 			else if (name == "key_apply_filter")
 				GetKeys(key, ApplyFilter);
+			else if (name == "key_clear_filter")
+				GetKeys(key, DisableFilter);
 			else if (name == "key_find_forward")
 				GetKeys(key, FindForward);
 			else if (name == "key_find_backward")
