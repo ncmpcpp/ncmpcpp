@@ -2177,9 +2177,13 @@ int main(int argc, char **argv)
 			}
 			else if (myScreen == myBrowser && !myBrowser->isLocal())
 			{
-				Config.browser_sort_by_mtime = !Config.browser_sort_by_mtime;
+				Config.sort_mode = (Config.sort_mode + 1) % 3;
 				myBrowser->Main()->Sort<CaseInsensitiveSorting>(myBrowser->CurrentDir() != "/");
-				ShowMessage("Sort songs by: %s", Config.browser_sort_by_mtime ? "Modification time" : "Name");
+				switch (Config.sort_mode) {
+					case 0: ShowMessage("Sort songs by: Name"); break;
+					case 1: ShowMessage("Sort songs by: Modification time"); break;
+					case 2: ShowMessage("Sort songs by: Custom format"); break;
+				}
 			}
 			else if (myScreen->ActiveWindow() == myLibrary->Artists
 			||	 (myLibrary->Columns() == 2 && myScreen->ActiveWindow() == myLibrary->Albums))

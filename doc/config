@@ -179,6 +179,17 @@
 #tag_editor_album_format = "{(%y) }%b"
 #
 ##
+## Note: Below variables are used for sorting the library browser.
+## The sort mode determines how the song library is sorted, and can
+## be used in combination with a sort format to specify a custom sorting format.
+## Possible values for sort_mode are "name", "mtime" and "format".
+##
+#
+#sort_mode = "name"
+#
+#sort_format = "{%b~%n}|{~%n}|{~~%t}|{~~%f}"
+#
+##
 ## Note: Below variables are for alternative version of user's interface.
 ## Their syntax supports all tags and colors listed above plus some extra
 ## markers used for text attributes. They are followed by character '$'.

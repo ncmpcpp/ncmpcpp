@@ -372,6 +372,7 @@ void NcmpcppConfig::SetDefaults()
 	song_status_format_no_colors = song_status_format;
 	song_window_title_format = "{{%a - }{%t}|{%f}}";
 	song_library_format = "{{%n - }{%t}|{%f}}";
+	sort_format = "{%b~%n}|{~%n}|{~~%t}|{~~%f}";
 	tag_editor_album_format = "{{(%y) }%b}";
 	new_header_first_line = "{$b$1$aqqu$/a$9 {%t}|{%f} $1$atqq$/a$9$/b}";
 	new_header_second_line = "{{{$4$b%a$/b$9}{ - $7%b$9}{ ($4%y$9)}}|{%D}}";
@@ -444,7 +445,6 @@ void NcmpcppConfig::SetDefaults()
 	new_design = false;
 	visualizer_use_wave = true;
 	visualizer_in_stereo = false;
-	browser_sort_by_mtime = false;
 	tag_editor_extended_numeration = false;
 	media_library_display_date = true;
 	media_library_display_empty_tag = true;
@@ -464,6 +464,7 @@ void NcmpcppConfig::SetDefaults()
 	lines_scrolled = 2;
 	search_engine_default_search_mode = 0;
 	visualizer_sync_interval = 30;
+	sort_mode = 0;
 	locked_screen_width_part = 0.5;
 	selected_item_suffix_length = 0;
 	now_playing_suffix_length = 0;
@@ -853,6 +854,11 @@ void NcmpcppConfig::Read()
 					tag_editor_album_format += '}';
 				}
 			}
+			else if (name == "sort_format")
+			{
+				if (!v.empty())
+					sort_format = v;
+			}
 			else if (name == "external_editor")
 			{
 				if (!v.empty())
@@ -1231,6 +1237,12 @@ void NcmpcppConfig::Read()
 				unsigned interval = StrToInt(v);
 				if (interval)
 					visualizer_sync_interval = interval;
+			}
+			else if (name == "sort_mode")
+			{
+				if (v == "mtime") sort_mode = 1;
+				else if (v == "format") sort_mode = 2;
+				else sort_mode = 0; // "name" or invalid
 			}
 			else if (name == "locked_screen_width_part")
 			{

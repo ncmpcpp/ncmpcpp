@@ -306,10 +306,16 @@ bool CaseInsensitiveSorting::operator()(const MPD::Item &a, const MPD::Item &b)
 				return cmp(ExtractTopName(a.name), ExtractTopName(b.name)) < 0;
 			case MPD::itPlaylist:
 				return cmp(a.name, b.name) < 0;
-			case MPD::itSong:
-				return Config.browser_sort_by_mtime
-						? a.song->GetMTime() > b.song->GetMTime()
-						: operator()(a.song, b.song);
+			case MPD::itSong: {
+				unsigned mode = Config.sort_mode;
+				if (myBrowser->isLocal() && mode == 1) mode = 0; // local browser doesn't support sorting by mtime.
+				switch (mode) {
+					case 0: return operator()(a.song, b.song);
+					case 1: return a.song->GetMTime() > b.song->GetMTime();
+					case 2: return cmp(a.song->toString(Config.sort_format), b.song->toString(Config.sort_format)) < 0;
+					default: return 0; // no other mode.
+				}
+			}
 			default: // there's no other type, just silence compiler.
 				return 0;
 		}

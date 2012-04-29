@@ -168,6 +168,7 @@ struct NcmpcppConfig
 	std::string song_library_format;
 	std::string tag_editor_album_format;
 	std::string song_in_columns_to_string_format;
+	std::string sort_format;
 	std::string external_editor;
 	std::string system_encoding;
 	std::string execute_on_song_change;
@@ -252,7 +253,6 @@ struct NcmpcppConfig
 	bool new_design;
 	bool visualizer_use_wave;
 	bool visualizer_in_stereo;
-	bool browser_sort_by_mtime;
 	bool tag_editor_extended_numeration;
 	bool media_library_display_date;
 	bool media_library_display_empty_tag;
@@ -273,6 +273,7 @@ struct NcmpcppConfig
 	unsigned lines_scrolled;
 	unsigned search_engine_default_search_mode;
 	unsigned visualizer_sync_interval;
+	unsigned sort_mode;
 	
 	double locked_screen_width_part;
 	
