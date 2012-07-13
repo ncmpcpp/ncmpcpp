@@ -261,6 +261,19 @@ void SonglyricsFetcher::postProcess(std::string &data)
 	LyricsFetcher::postProcess(data);
 }
 
+
+/**********************************************************************/
+
+void LyricsvipFetcher::postProcess(std::string &data)
+{
+	// throw away <div> with ad
+	size_t i = data.find("<div class=\"ad\""), j = data.find("</div>");
+	if (i != std::string::npos && i != std::string::npos)
+		data.replace(i, j-i+static_strlen("</div>"), "");
+	data = unescapeHtmlUtf8(data);
+	LyricsFetcher::postProcess(data);
+}
+
 /**********************************************************************/
 
 LyricsFetcher::Result InternetLyricsFetcher::fetch(const std::string &artist, const std::string &title)

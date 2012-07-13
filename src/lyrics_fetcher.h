@@ -168,6 +168,8 @@ struct LyricsvipFetcher : public GoogleLyricsFetcher
 		virtual const char *getSiteKeyword() { return "lyricsvip"; }
 		virtual const char *getOpenTag() { return "</h2>"; }
 		virtual const char *getCloseTag() { return "</td>"; }
+		
+		virtual void postProcess(std::string &data);
 };
 
 struct JustSomeLyricsFetcher : public GoogleLyricsFetcher
