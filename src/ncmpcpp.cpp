@@ -342,8 +342,9 @@ int main(int argc, char **argv)
 	if (Config.jump_to_now_playing_song_at_start)
 	{
 		TraceMpdStatus();
-		if (myPlaylist->isPlaying())
-			myPlaylist->Items->Highlight(myPlaylist->NowPlaying);
+		int curr_pos = Mpd.GetCurrentSongPos();
+		if  (curr_pos >= 0)
+			myPlaylist->Items->Highlight(curr_pos);
 	}
 	
 	while (!main_exit)

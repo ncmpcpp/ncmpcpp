@@ -158,7 +158,8 @@ namespace MPD
 			
 			const std::string & GetErrorMessage() const { return itsErrorMessage; }
 			
-			Song GetCurrentSong();
+			Song GetCurrentlyPlayingSong();
+			int GetCurrentlyPlayingSongPos() const;
 			int GetCurrentSongPos() const;
 			Song GetSong(const std::string &);
 			void GetPlaylistContent(const std::string &, SongList &);

@@ -229,13 +229,13 @@ void NcmpcppStatusChanged(MPD::Connection *, MPD::StatusChanges changed, void *)
 	wFooter->GetXY(sx, sy);
 	
 	if (!Playlist::BlockNowPlayingUpdate)
-		myPlaylist->NowPlaying = Mpd.GetCurrentSongPos();
+		myPlaylist->NowPlaying = Mpd.GetCurrentlyPlayingSongPos();
 	
 	if (changed.Playlist)
 	{
 		if (!Playlist::BlockUpdate)
 		{
-			if (!(np = Mpd.GetCurrentSong()).Empty())
+			if (!(np = Mpd.GetCurrentlyPlayingSong()).Empty())
 				WindowTitle(utf_to_locale_cpy(np.toString(Config.song_window_title_format)));
 			
 			bool was_filtered = myPlaylist->Items->isFiltered();
@@ -408,7 +408,7 @@ void NcmpcppStatusChanged(MPD::Connection *, MPD::StatusChanges changed, void *)
 				Lyrics::DownloadInBackground(myPlaylist->NowPlayingSong());
 #			endif // HAVE_CURL_CURL_H
 			
-			if (Mpd.isPlaying() && !(np = Mpd.GetCurrentSong()).Empty())
+			if (Mpd.isPlaying() && !(np = Mpd.GetCurrentlyPlayingSong()).Empty())
 				WindowTitle(utf_to_locale_cpy(np.toString(Config.song_window_title_format)));
 			
 			if (Config.autocenter_mode && !myPlaylist->Items->isFiltered())
@@ -424,7 +424,7 @@ void NcmpcppStatusChanged(MPD::Connection *, MPD::StatusChanges changed, void *)
 	}
 	if (changed.ElapsedTime || changed.SongID || Global::RedrawStatusbar)
 	{
-		if (np.Empty() && !(np = Mpd.GetCurrentSong()).Empty())
+		if (np.Empty() && !(np = Mpd.GetCurrentlyPlayingSong()).Empty())
 			WindowTitle(utf_to_locale_cpy(np.toString(Config.song_window_title_format)));
 		if (!np.Empty() && Mpd.isPlaying())
 		{
