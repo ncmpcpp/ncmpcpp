@@ -298,7 +298,7 @@ void Help::GetKeybindings()
 	*w << DisplayKeys(Key.SwitchTagTypeList)	<< "Tag type list switcher (left column)\n";
 	
 	
-	*w << "\n\n   " << fmtBold << "Keys - Playlist Editor\n -----------------------------------------\n" << fmtBoldEnd;
+	*w << "\n\n   " << fmtBold << "Keys - Playlist editor\n -----------------------------------------\n" << fmtBoldEnd;
 	*w << DisplayKeys(Key.PrevColumn)		<< "Previous column\n";
 	*w << DisplayKeys(Key.NextColumn)		<< "Next column\n";
 	*w << DisplayKeys(Key.Enter)			<< "Add item to playlist and play\n";
