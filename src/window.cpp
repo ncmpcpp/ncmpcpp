@@ -497,14 +497,6 @@ std::string Window::GetString(const std::string &base, size_t length, size_t wid
 		prefresh(itsWindow, 0, 0, itsStartY, itsStartX, itsStartY+itsHeight-1, itsStartX+itsWidth-1);
 		ReadKey(input);
 		
-		// these key codes are special and should be ignored
-		if (input >= KEY_CTRL_A
-		&&  input != KEY_CTRL_H
-		&&  input != KEY_ENTER
-		&&  input != KEY_CTRL_U
-		&&  input <= KEY_CTRL_Z)
-			continue;
-		
 		switch (input)
 		{
 			case ERR:
@@ -599,30 +591,34 @@ std::string Window::GetString(const std::string &base, size_t length, size_t wid
 				if (int(mbrtowc(&wc_in, tmp_in.c_str(), MB_CUR_MAX, 0)) < 0)
 					break;
 				
-				if (wcwidth(wc_in) > 1)
+				int wcwidth_res = wcwidth(wc_in);
+				if (wcwidth_res > 1)
 					block_scrolling = 1;
 				
-				if ((real_x-minx)+beginning >= tmp->length())
+				if (wcwidth_res > 0) // is char printable? we want to ignore things like Ctrl-?, Fx etc.
 				{
-					tmp->push_back(wc_in);
-					if (!beginning)
+					if ((real_x-minx)+beginning >= tmp->length())
 					{
-						real_x++;
-						x += wcwidth(wc_in);
-					}
-					beginning++;
-					gotoend = 1;
-				}
-				else
-				{
-					tmp->insert(tmp->begin()+(real_x-minx)+beginning, wc_in);
-					if (x < maxx)
-					{
-						real_x++;
-						x += wcwidth(wc_in);
-					}
-					else if (beginning < maxbeginning)
+						tmp->push_back(wc_in);
+						if (!beginning)
+						{
+							real_x++;
+							x += wcwidth(wc_in);
+						}
 						beginning++;
+						gotoend = 1;
+					}
+					else
+					{
+						tmp->insert(tmp->begin()+(real_x-minx)+beginning, wc_in);
+						if (x < maxx)
+						{
+							real_x++;
+							x += wcwidth(wc_in);
+						}
+						else if (beginning < maxbeginning)
+							beginning++;
+					}
 				}
 				tmp_in.clear();
 			}
