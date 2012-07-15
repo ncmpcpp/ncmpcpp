@@ -1304,7 +1304,6 @@ int main(int argc, char **argv)
 			wFooter->SetTimeout(ncmpcpp_window_timeout);
 			
 			SeekingInProgress = 1;
-			*wFooter << fmtBold;
 			while (Keypressed(input, Key.SeekForward) || Keypressed(input, Key.SeekBackward))
 			{
 				TraceMpdStatus();
@@ -1326,6 +1325,7 @@ int main(int argc, char **argv)
 						songpos = 0;
 				}
 				
+				*wFooter << fmtBold;
 				std::string tracklength;
 				if (Config.new_design)
 				{
@@ -1356,10 +1356,10 @@ int main(int argc, char **argv)
 					tracklength += "]";
 					*wFooter << XY(wFooter->GetWidth()-tracklength.length(), 1) << tracklength;
 				}
+				*wFooter << fmtBoldEnd;
 				DrawProgressbar(songpos, Mpd.GetTotalTime());
 				wFooter->Refresh();
 			}
-			*wFooter << fmtBoldEnd;
 			SeekingInProgress = 0;
 			Mpd.Seek(songpos);
 			UpdateStatusImmediately = 1;

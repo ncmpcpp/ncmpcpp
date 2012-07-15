@@ -308,6 +308,8 @@
 ##
 #progressbar_look = "=>"
 #
+#progressbar_boldness = "yes"
+#
 #default_place_to_search_in = "database" (database/playlist)
 #
 #user_interface = "classic" (classic/alternative)
@@ -487,6 +489,8 @@
 #main_window_highlight_color = "yellow"
 #
 #progressbar_color = "default"
+#
+#progressbar_elapsed_color = "default"
 #
 #statusbar_color = "default"
 #

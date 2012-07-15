@@ -200,6 +200,7 @@ struct NcmpcppConfig
 	Color main_color;
 	Color main_highlight_color;
 	Color progressbar_color;
+	Color progressbar_elapsed_color;
 	Color statusbar_color;
 	Color alternative_ui_separator_color;
 	Color active_column_color;
@@ -262,6 +263,7 @@ struct NcmpcppConfig
 	bool discard_colors_if_item_is_selected;
 	bool store_lyrics_in_song_dir;
 	bool ask_for_locked_screen_width_part;
+	bool progressbar_boldness;
 	
 	int mpd_port;
 	int mpd_connection_timeout;

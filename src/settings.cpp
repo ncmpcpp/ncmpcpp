@@ -394,6 +394,7 @@ void NcmpcppConfig::SetDefaults()
 	main_color = clYellow;
 	main_highlight_color = main_color;
 	progressbar_color = clDefault;
+	progressbar_elapsed_color = clDefault;
 	statusbar_color = clDefault;
 	alternative_ui_separator_color = clBlack;
 	active_column_color = clRed;
@@ -452,6 +453,7 @@ void NcmpcppConfig::SetDefaults()
 	discard_colors_if_item_is_selected = true;
 	store_lyrics_in_song_dir = false;
 	ask_for_locked_screen_width_part = true;
+	progressbar_boldness = true;
 	set_window_title = true;
 	mpd_port = 6600;
 	mpd_connection_timeout = 15;
@@ -1262,6 +1264,11 @@ void NcmpcppConfig::Read()
 				if (!v.empty())
 					ask_for_locked_screen_width_part = v == "yes";
 			}
+			else if (name == "progressbar_boldness")
+			{
+				if (!v.empty())
+					progressbar_boldness = v == "yes";
+			}
 			else if (name == "song_window_title_format")
 			{
 				if (!v.empty() && MPD::Song::isFormatOk("song_window_title_format", v))
@@ -1314,6 +1321,11 @@ void NcmpcppConfig::Read()
 			{
 				if (!v.empty())
 					progressbar_color = IntoColor(v);
+			}
+			else if (name == "progressbar_elapsed_color")
+			{
+				if (!v.empty())
+					progressbar_elapsed_color = IntoColor(v);
 			}
 			else if (name == "statusbar_color")
 			{
