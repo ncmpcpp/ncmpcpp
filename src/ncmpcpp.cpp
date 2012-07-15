@@ -249,6 +249,8 @@ int main(int argc, char **argv)
 	Config.Read();
 	Key.Read();
 	
+	Config.GenerateColumns();
+	
 	if (getenv("MPD_HOST"))
 		Mpd.SetHostname(getenv("MPD_HOST"));
 	if (getenv("MPD_PORT"))

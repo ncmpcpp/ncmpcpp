@@ -152,6 +152,7 @@ struct NcmpcppConfig
 	
 	void SetDefaults();
 	void Read();
+	void GenerateColumns();
 	
 	std::string ncmpcpp_directory;
 	std::string lyrics_directory;

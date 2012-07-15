@@ -1365,7 +1365,11 @@ void NcmpcppConfig::Read()
 		}
 	}
 	f.close();
-	
+}
+
+void NcmpcppConfig::GenerateColumns()
+{
+	columns.clear();
 	std::string width;
 	while (!(width = GetLineValue(song_list_columns_format, '(', ')', 1)).empty())
 	{
