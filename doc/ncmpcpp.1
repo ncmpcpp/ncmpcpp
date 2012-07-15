@@ -132,11 +132,11 @@ Format for albums' list in Tag editor.
 .B song_window_title_format
 Song format for window title.
 .TP
-.B sort_mode
-Determines the sort mode for the song library. Possible values are "name", "mtime" and "format".
+.B browser_sort_mode
+Determines sort mode for browser. Possible values are "name", "mtime" and "format".
 .TP
-.B sort_format
-Format to use for sorting the song library. For this option to be effective, sort_mode must be set to "format".
+.B browser_sort_format
+Format to use for sorting songs in browser. For this option to be effective, browser_sort_mode must be set to "format".
 .TP 
 .B external_editor = PATH
 Path to external editor used to edit lyrics.
@@ -301,7 +301,7 @@ If enabled, bitrate of currently playing song will be displayed in statusbar.
 If enabled, remaining time of currently playing song will be be displayed in statusbar instead of elapsed time.
 .TP 
 .B ignore_leading_the = yes/no
-If enabled, word "the" at the beginning of tags/filenames will be ignored while sorting items. Note that this doesn't currently work with custom sorting formats.
+If enabled, word "the" at the beginning of tags/filenames/sort format will be ignored while sorting items.
 .TP 
 .B use_console_editor = yes/no
 If your external editor is console application, you need to enable it.

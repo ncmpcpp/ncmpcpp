@@ -29,6 +29,8 @@
 
 class BasicScreen; // forward declaration for screens sequence
 
+enum SortMode { smName, smMTime, smCustomFormat };
+
 struct Column
 {
 	Column() : right_alignment(0), display_empty_tag(1) { }
@@ -168,7 +170,7 @@ struct NcmpcppConfig
 	std::string song_library_format;
 	std::string tag_editor_album_format;
 	std::string song_in_columns_to_string_format;
-	std::string sort_format;
+	std::string browser_sort_format;
 	std::string external_editor;
 	std::string system_encoding;
 	std::string execute_on_song_change;
@@ -273,7 +275,6 @@ struct NcmpcppConfig
 	unsigned lines_scrolled;
 	unsigned search_engine_default_search_mode;
 	unsigned visualizer_sync_interval;
-	unsigned sort_mode;
 	
 	double locked_screen_width_part;
 	
@@ -282,6 +283,8 @@ struct NcmpcppConfig
 	
 	BasicScreen *startup_screen;
 	std::list<BasicScreen *> screens_seq;
+	
+	SortMode browser_sort_mode;
 	
 	private:
 		void MakeProperPath(std::string &dir);

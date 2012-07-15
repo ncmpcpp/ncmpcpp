@@ -2175,15 +2175,28 @@ int main(int argc, char **argv)
 				if (number && (answer == 's' ? Mpd.AddRandomSongs(number) : Mpd.AddRandomTag(tag_type, number)))
 					ShowMessage("%zu random %s%s added to playlist!", number, tag_type_str.c_str(), number == 1 ? "" : "s");
 			}
-			else if (myScreen == myBrowser && !myBrowser->isLocal())
+			else if (myScreen == myBrowser)
 			{
-				Config.sort_mode = (Config.sort_mode + 1) % 3;
-				myBrowser->Main()->Sort<CaseInsensitiveSorting>(myBrowser->CurrentDir() != "/");
-				switch (Config.sort_mode) {
-					case 0: ShowMessage("Sort songs by: Name"); break;
-					case 1: ShowMessage("Sort songs by: Modification time"); break;
-					case 2: ShowMessage("Sort songs by: Custom format"); break;
+				switch (Config.browser_sort_mode)
+				{
+					case smName:
+						if (!myBrowser->isLocal())
+						{
+							Config.browser_sort_mode = smMTime;
+							ShowMessage("Sort songs by: Modification time");
+							break;
+						}
+						// local browser doesn't support sorting by mtime, so we just skip it.
+					case smMTime:
+						Config.browser_sort_mode = smCustomFormat;
+						ShowMessage("Sort songs by: Custom format");
+						break;
+					case smCustomFormat:
+						Config.browser_sort_mode = smName;
+						ShowMessage("Sort songs by: Name");
+						break;
 				}
+				myBrowser->Main()->Sort<CaseInsensitiveSorting>(myBrowser->CurrentDir() != "/");
 			}
 			else if (myScreen->ActiveWindow() == myLibrary->Artists
 			||	 (myLibrary->Columns() == 2 && myScreen->ActiveWindow() == myLibrary->Albums))

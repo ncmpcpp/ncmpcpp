@@ -100,6 +100,9 @@ void Browser::SwitchTo()
 	if (hasToBeResized || myLockedScreen)
 		Resize();
 	
+	if (isLocal() && Config.browser_sort_mode == smMTime) // local browser doesn't support sorting by mtime
+		Config.browser_sort_mode = smName;
+	
 	w->Empty() ? myBrowser->GetDirectory(itsBrowsedDir) : myBrowser->UpdateItemList();
 
 	if (myScreen != this && myScreen->isTabbable())

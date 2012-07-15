@@ -372,7 +372,7 @@ void NcmpcppConfig::SetDefaults()
 	song_status_format_no_colors = song_status_format;
 	song_window_title_format = "{{%a - }{%t}|{%f}}";
 	song_library_format = "{{%n - }{%t}|{%f}}";
-	sort_format = "{%b~%n}|{~%n}|{~~%t}|{~~%f}";
+	browser_sort_format = "{{%a - }{%t}|{%f} {(%l)}}";
 	tag_editor_album_format = "{{(%y) }%b}";
 	new_header_first_line = "{$b$1$aqqu$/a$9 {%t}|{%f} $1$atqq$/a$9$/b}";
 	new_header_second_line = "{{{$4$b%a$/b$9}{ - $7%b$9}{ ($4%y$9)}}|{%D}}";
@@ -464,7 +464,6 @@ void NcmpcppConfig::SetDefaults()
 	lines_scrolled = 2;
 	search_engine_default_search_mode = 0;
 	visualizer_sync_interval = 30;
-	sort_mode = 0;
 	locked_screen_width_part = 0.5;
 	selected_item_suffix_length = 0;
 	now_playing_suffix_length = 0;
@@ -474,6 +473,7 @@ void NcmpcppConfig::SetDefaults()
 		system_encoding.clear();
 #	endif // HAVE_LANGINFO_H
 	startup_screen = myPlaylist;
+	browser_sort_mode = smName;
 	// default screens sequence
 	screens_seq.push_back(myPlaylist);
 	screens_seq.push_back(myBrowser);
@@ -854,10 +854,14 @@ void NcmpcppConfig::Read()
 					tag_editor_album_format += '}';
 				}
 			}
-			else if (name == "sort_format")
+			else if (name == "browser_sort_format")
 			{
-				if (!v.empty())
-					sort_format = v;
+				if (!v.empty() && MPD::Song::isFormatOk("browser_sort_format", v))
+				{
+					browser_sort_format = '{';
+					browser_sort_format += v;
+					browser_sort_format += '}';
+				}
 			}
 			else if (name == "external_editor")
 			{
@@ -1240,9 +1244,12 @@ void NcmpcppConfig::Read()
 			}
 			else if (name == "sort_mode")
 			{
-				if (v == "mtime") sort_mode = 1;
-				else if (v == "format") sort_mode = 2;
-				else sort_mode = 0; // "name" or invalid
+				if (v == "mtime")
+					browser_sort_mode = smMTime;
+				else if (v == "format")
+					browser_sort_mode = smCustomFormat;
+				else
+					browser_sort_mode = smName; // "name" or invalid
 			}
 			else if (name == "locked_screen_width_part")
 			{

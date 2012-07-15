@@ -298,30 +298,36 @@ int CaseInsensitiveStringComparison::operator()(const std::string &a, const std:
 
 bool CaseInsensitiveSorting::operator()(const MPD::Item &a, const MPD::Item &b)
 {
+	bool result;
 	if (a.type == b.type)
 	{
 		switch (a.type)
 		{
 			case MPD::itDirectory:
-				return cmp(ExtractTopName(a.name), ExtractTopName(b.name)) < 0;
+				result = cmp(ExtractTopName(a.name), ExtractTopName(b.name)) < 0;
+				break;
 			case MPD::itPlaylist:
-				return cmp(a.name, b.name) < 0;
-			case MPD::itSong: {
-				unsigned mode = Config.sort_mode;
-				if (myBrowser->isLocal() && mode == 1) mode = 0; // local browser doesn't support sorting by mtime.
-				switch (mode) {
-					case 0: return operator()(a.song, b.song);
-					case 1: return a.song->GetMTime() > b.song->GetMTime();
-					case 2: return cmp(a.song->toString(Config.sort_format), b.song->toString(Config.sort_format)) < 0;
-					default: return 0; // no other mode.
+				result = cmp(a.name, b.name) < 0;
+				break;
+			case MPD::itSong:
+				switch (Config.browser_sort_mode)
+				{
+					case smName:
+						result = operator()(a.song, b.song);
+						break;
+					case smMTime:
+						result = a.song->GetMTime() > b.song->GetMTime();
+						break;
+					case smCustomFormat:
+						result = cmp(a.song->toString(Config.browser_sort_format), b.song->toString(Config.browser_sort_format)) < 0;
+						break;
 				}
-			}
-			default: // there's no other type, just silence compiler.
-				return 0;
+				break;
 		}
 	}
 	else
-		return a.type < b.type;
+		result = a.type < b.type;
+	return result;
 }
 
 std::string Timestamp(time_t t)
