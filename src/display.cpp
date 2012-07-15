@@ -49,7 +49,7 @@ namespace
 			case 'b':
 				return U("Album");
 			case 'y':
-				return U("Year");
+				return U("Date");
 			case 'n':
 			case 'N':
 				return U("Track");

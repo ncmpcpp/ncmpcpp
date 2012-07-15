@@ -74,7 +74,7 @@ void Playlist::Init()
 		SortDialog->AddOption(std::make_pair("Disc", &MPD::Song::GetDisc));
 		SortDialog->AddOption(std::make_pair("Track", &MPD::Song::GetTrack));
 		SortDialog->AddOption(std::make_pair("Genre", &MPD::Song::GetGenre));
-		SortDialog->AddOption(std::make_pair("Year", &MPD::Song::GetDate));
+		SortDialog->AddOption(std::make_pair("Date", &MPD::Song::GetDate));
 		SortDialog->AddOption(std::make_pair("Composer", &MPD::Song::GetComposer));
 		SortDialog->AddOption(std::make_pair("Performer", &MPD::Song::GetPerformer));
 		SortDialog->AddOption(std::make_pair("Title", &MPD::Song::GetTitle));

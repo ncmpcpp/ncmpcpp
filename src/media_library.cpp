@@ -44,7 +44,7 @@ size_t MediaLibrary::itsRightColWidth;
 size_t MediaLibrary::itsRightColStartX;
 
 // this string marks the position in middle column that works as "All tracks" option. it's
-// assigned to Year in SearchConstraint class since date normally cannot contain other chars
+// assigned to Date in SearchConstraint class since date normally cannot contain other chars
 // than ciphers and -'s (0x7f is interpreted as backspace keycode, so it's quite safe to assume
 // that it won't appear in any tag, let alone date).
 const char MediaLibrary::AllTracksMarker[] = "\x7f";
@@ -280,14 +280,14 @@ void MediaLibrary::Update()
 				{
 					if (Config.media_lib_primary_tag != MPD_TAG_DATE)
 					{
-						MPD::TagList years;
+						MPD::TagList dates;
 						Mpd.StartFieldSearch(MPD_TAG_DATE);
 						Mpd.AddSearch(Config.media_lib_primary_tag, *i);
 						Mpd.AddSearch(MPD_TAG_ALBUM, *j);
-						Mpd.CommitSearch(years);
+						Mpd.CommitSearch(dates);
 						utf_to_locale(*i);
 						utf_to_locale(*j);
-						for (MPD::TagList::iterator k = years.begin(); k != years.end(); ++k)
+						for (MPD::TagList::iterator k = dates.begin(); k != dates.end(); ++k)
 						{
 							utf_to_locale(*k);
 							Albums->AddOption(SearchConstraints(*i, *j, *k));
@@ -335,17 +335,17 @@ void MediaLibrary::Update()
 		}
 		else
 		{
-			if (Albums->Current().Year != AllTracksMarker)
+			if (Albums->Current().Date != AllTracksMarker)
 			{
 				Mpd.AddSearch(MPD_TAG_ALBUM, locale_to_utf_cpy(Albums->Current().Album));
 				if (Config.media_library_display_date)
-					Mpd.AddSearch(MPD_TAG_DATE, locale_to_utf_cpy(Albums->Current().Year));
+					Mpd.AddSearch(MPD_TAG_DATE, locale_to_utf_cpy(Albums->Current().Date));
 			}
 		}
 		Mpd.CommitSearch(list);
 		
 		if (!Albums->Empty()) // for compatibility with mpd < 0.14
-			sort(list.begin(), list.end(), Albums->Current().Year == AllTracksMarker ? SortAllTracks : SortSongsByTrack);
+			sort(list.begin(), list.end(), Albums->Current().Date == AllTracksMarker ? SortAllTracks : SortSongsByTrack);
 		bool bold = 0;
 		
 		for (MPD::SongList::const_iterator it = list.begin(); it != list.end(); ++it)
@@ -379,7 +379,7 @@ void MediaLibrary::SpacePressed()
 		}
 		else if (w == Albums)
 		{
-			if (Albums->Current().Year != AllTracksMarker)
+			if (Albums->Current().Date != AllTracksMarker)
 			{
 				Albums->Select(Albums->Choice(), !Albums->isSelected());
 				Songs->Clear();
@@ -530,7 +530,7 @@ void MediaLibrary::GetSelectedSongs(MPD::SongList &v)
 						?  Albums->at(*it).PrimaryTag
 						: locale_to_utf_cpy(Artists->Current()));
 				Mpd.AddSearch(MPD_TAG_ALBUM, Albums->at(*it).Album);
-				Mpd.AddSearch(MPD_TAG_DATE, Albums->at(*it).Year);
+				Mpd.AddSearch(MPD_TAG_DATE, Albums->at(*it).Date);
 				Mpd.CommitSearch(list);
 				for (MPD::SongList::const_iterator sIt = list.begin(); sIt != list.end(); ++sIt)
 					v.push_back(new MPD::Song(**sIt));
@@ -672,13 +672,13 @@ void MediaLibrary::LocateSong(const MPD::Song &s)
 	std::string date = s.GetDate();
 	if ((hasTwoColumns && Albums->Current().PrimaryTag != primary_tag)
 	||  album != Albums->Current().Album
-	||  date != Albums->Current().Year)
+	||  date != Albums->Current().Date)
 	{
 		for (size_t i = 0; i < Albums->Size(); ++i)
 		{
 			if ((!hasTwoColumns || (*Albums)[i].PrimaryTag == primary_tag)
 			&&   album == (*Albums)[i].Album
-			&&   date == (*Albums)[i].Year)
+			&&   date == (*Albums)[i].Date)
 			{
 				Albums->Highlight(i);
 				Songs->Clear();
@@ -722,7 +722,7 @@ void MediaLibrary::AddToPlaylist(bool add_n_play)
 		if (myPlaylist->Add(list, add_n_play))
 		{
 			if ((!Artists->Empty() && w == Artists)
-			||  (w == Albums && Albums->Current().Year == AllTracksMarker))
+			||  (w == Albums && Albums->Current().Date == AllTracksMarker))
 			{
 				std::string tag_type = IntoStr(Config.media_lib_primary_tag);
 				ToLower(tag_type);
@@ -753,13 +753,13 @@ std::string MediaLibrary::SongToString(const MPD::Song &s, void *)
 
 std::string MediaLibrary::AlbumToString(const SearchConstraints &sc, void *ptr)
 {
-	if (sc.Year == AllTracksMarker)
+	if (sc.Date == AllTracksMarker)
 		return "All tracks";
 	std::string result;
 	if (static_cast<MediaLibrary *>(ptr)->hasTwoColumns)
 		(result += sc.PrimaryTag.empty() ? Config.empty_tag : sc.PrimaryTag) += " - ";
-	if ((!static_cast<MediaLibrary *>(ptr)->hasTwoColumns || Config.media_lib_primary_tag != MPD_TAG_DATE) && !sc.Year.empty())
-		((result += "(") += sc.Year) += ") ";
+	if ((!static_cast<MediaLibrary *>(ptr)->hasTwoColumns || Config.media_lib_primary_tag != MPD_TAG_DATE) && !sc.Date.empty())
+		((result += "(") += sc.Date) += ") ";
 	result += sc.Album.empty() ? "<no album>" : sc.Album;
 	return result;
 }
@@ -781,7 +781,7 @@ bool MediaLibrary::SearchConstraintsSorting::operator()(const SearchConstraints 
 	result = cmp(a.PrimaryTag, b.PrimaryTag);
 	if (result != 0)
 		return result < 0;
-	result = cmp(a.Year, b.Year);
+	result = cmp(a.Date, b.Date);
 	return (result == 0 ? cmp(a.Album, b.Album) : result) < 0;
 }
 

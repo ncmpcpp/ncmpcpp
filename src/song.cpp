@@ -290,11 +290,6 @@ void MPD::Song::SetDate(const std::string &str, unsigned pos)
 	SetTag(MPD_TAG_DATE, pos, str);
 }
 
-void MPD::Song::SetDate(unsigned year, unsigned pos)
-{
-	SetTag(MPD_TAG_DATE, pos, IntoStr(year));
-}
-
 void MPD::Song::SetGenre(const std::string &str, unsigned pos)
 {
 	SetTag(MPD_TAG_GENRE, pos, str);

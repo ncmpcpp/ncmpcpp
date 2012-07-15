@@ -33,7 +33,7 @@ const SongInfo::Metadata SongInfo::Tags[] =
  { "Artist",		&MPD::Song::GetArtist,		&MPD::Song::SetArtist		},
  { "Album Artist",	&MPD::Song::GetAlbumArtist,	&MPD::Song::SetAlbumArtist	},
  { "Album",		&MPD::Song::GetAlbum,		&MPD::Song::SetAlbum		},
- { "Year",		&MPD::Song::GetDate,		&MPD::Song::SetDate		},
+ { "Date",		&MPD::Song::GetDate,		&MPD::Song::SetDate		},
  { "Track",		&MPD::Song::GetTrack,		&MPD::Song::SetTrack		},
  { "Genre",		&MPD::Song::GetGenre,		&MPD::Song::SetGenre		},
  { "Composer",		&MPD::Song::GetComposer,	&MPD::Song::SetComposer		},

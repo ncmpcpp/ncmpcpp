@@ -44,7 +44,7 @@ const char *SearchEngine::ConstraintsNames[] =
 	"Composer:",
 	"Performer:",
 	"Genre:",
-	"Year:",
+	"Date:",
 	"Comment:"
 };
 

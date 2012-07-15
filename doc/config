@@ -129,7 +129,7 @@
 ## %A - album artist
 ## %t - title
 ## %b - album
-## %y - year
+## %y - date
 ## %n - track number (01/12 -> 01)
 ## %N - full track info (01/12 -> 01/12)
 ## %g - genre

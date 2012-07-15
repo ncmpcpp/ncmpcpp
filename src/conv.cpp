@@ -57,7 +57,7 @@ std::string IntoStr(mpd_tag_type tag) // this is only for left column's title in
 		case MPD_TAG_GENRE:
 			return "Genre";
 		case MPD_TAG_DATE:
-			return "Year";
+			return "Date";
 		case MPD_TAG_COMPOSER:
 			return "Composer";
 		case MPD_TAG_PERFORMER:

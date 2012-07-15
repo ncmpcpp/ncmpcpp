@@ -372,7 +372,7 @@ void TagEditor::EnterPressed()
 		*FParserLegend << "%A - album artist\n";
 		*FParserLegend << "%t - title\n";
 		*FParserLegend << "%b - album\n";
-		*FParserLegend << "%y - year\n";
+		*FParserLegend << "%y - date\n";
 		*FParserLegend << "%n - track number\n";
 		*FParserLegend << "%g - genre\n";
 		*FParserLegend << "%c - composer\n";

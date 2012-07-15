@@ -74,7 +74,6 @@ namespace MPD
 			void SetTrack(const std::string &, unsigned = 0);
 			void SetTrack(unsigned, unsigned = 0);
 			void SetDate(const std::string &, unsigned = 0);
-			void SetDate(unsigned, unsigned = 0);
 			void SetGenre(const std::string &, unsigned = 0);
 			void SetComposer(const std::string &, unsigned = 0);
 			void SetPerformer(const std::string &, unsigned = 0);
