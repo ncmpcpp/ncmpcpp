@@ -483,7 +483,7 @@ std::string Window::GetString(const std::string &base, size_t length, size_t wid
 			gotoend = 0;
 		}
 		
-		mvwhline(itsWindow, y, minx, 32, width+1);
+		mvwhline(itsWindow, y, minx, ' ', width+1);
 		
 		if (!encrypted)
 			mvwprintw(itsWindow, y, minx, "%ls", tmp->substr(beginning, width+1).c_str());
@@ -498,12 +498,11 @@ std::string Window::GetString(const std::string &base, size_t length, size_t wid
 		ReadKey(input);
 		
 		// these key codes are special and should be ignored
-		if ((input < 10 || (input > 10 && input != 21 && input < 32))
-#		ifdef USE_PDCURSES
-		&&   input != KEY_BACKSPACE)
-#		else
-		)
-#		endif // USE_PDCURSES
+		if (input >= KEY_CTRL_A
+		&&  input != KEY_CTRL_H
+		&&  input != KEY_ENTER
+		&&  input != KEY_CTRL_U
+		&&  input <= KEY_CTRL_Z)
 			continue;
 		
 		switch (input)
@@ -542,7 +541,9 @@ std::string Window::GetString(const std::string &base, size_t length, size_t wid
 					beginning++;
 				break;
 			}
-			case KEY_BACKSPACE: case 127:
+			case KEY_CTRL_H:
+			case KEY_BACKSPACE:
+			case KEY_BACKSPACE_2:
 			{
 				if (x <= minx && !beginning)
 					break;
@@ -556,7 +557,7 @@ std::string Window::GetString(const std::string &base, size_t length, size_t wid
 				}
 				else if (beginning > 0)
 					beginning--;
-				if (input != KEY_BACKSPACE && input != 127)
+				if (input != KEY_CTRL_H && input != KEY_BACKSPACE && input != KEY_BACKSPACE_2)
 					break; // backspace = left & delete.
 			}
 			case KEY_DC:
@@ -582,9 +583,9 @@ std::string Window::GetString(const std::string &base, size_t length, size_t wid
 				gotoend = 1;
 				break;
 			}
-			case 10:
+			case KEY_ENTER:
 				break;
-			case 21: // CTRL+U
+			case KEY_CTRL_U:
 				tmp->clear();
 				real_maxx = maxx = real_x = x = minx;
 				maxbeginning = beginning = 0;
@@ -627,7 +628,7 @@ std::string Window::GetString(const std::string &base, size_t length, size_t wid
 			}
 		}
 	}
-	while (input != 10);
+	while (input != KEY_ENTER);
 	curs_set(0);
 	
 	if (itsHistory && !encrypted)

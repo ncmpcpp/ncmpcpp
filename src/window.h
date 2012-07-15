@@ -44,10 +44,42 @@
 # define GNUC_PRINTF(a, b)
 #endif
 
-#ifdef USE_PDCURSES
-# undef KEY_BACKSPACE
-# define KEY_BACKSPACE 8
-#else
+// define some Ctrl-? keys
+#define KEY_CTRL_A 1
+#define KEY_CTRL_B 2
+#define KEY_CTRL_C 3
+#define KEY_CTRL_D 4
+#define KEY_CTRL_E 5
+#define KEY_CTRL_F 6
+#define KEY_CTRL_G 7
+#define KEY_CTRL_H 8
+#define KEY_CTRL_I 9
+#define KEY_CTRL_J 10
+#define KEY_CTRL_K 11
+#define KEY_CTRL_L 12
+#define KEY_CTRL_M 13
+#define KEY_CTRL_N 14
+#define KEY_CTRL_O 15
+#define KEY_CTRL_P 16
+#define KEY_CTRL_Q 17
+#define KEY_CTRL_R 18
+#define KEY_CTRL_S 19
+#define KEY_CTRL_T 20
+#define KEY_CTRL_U 21
+#define KEY_CTRL_V 22
+#define KEY_CTRL_W 23
+#define KEY_CTRL_X 24
+#define KEY_CTRL_Y 25
+#define KEY_CTRL_Z 26
+
+// define alternative KEY_BACKSPACE (used in some terminal emulators)
+#define KEY_BACKSPACE_2 127
+
+// KEY_ENTER is 343, which doesn't make any sense. This makes it useful.
+#undef KEY_ENTER
+#define KEY_ENTER 10
+
+#ifndef USE_PDCURSES
 // NOTICE: redefine BUTTON2_PRESSED as it doesn't always work, I noticed
 // that it sometimes returns 134217728 (2^27) instead of expected mask, so the
 // modified define does it right but is rather experimental.
