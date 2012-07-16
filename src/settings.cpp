@@ -1362,6 +1362,8 @@ void NcmpcppConfig::Read()
 				if (!v.empty())
 					media_lib_primary_tag = IntoTagItem(v[0]);
 			}
+			else
+				std::cout << "Unknown option: " << name << ", ignoring.\n";
 		}
 	}
 	f.close();
