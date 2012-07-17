@@ -55,9 +55,10 @@ class Lyrics : public Screen<Scrollpad>
 		virtual bool isMergable() { return true; }
 		
 		void Edit();
-		void Refetch();
 		
 #		ifdef HAVE_CURL_CURL_H
+		void Refetch();
+		
 		static void ToggleFetcher();
 		static void DownloadInBackground(const MPD::Song *s);
 #		endif // HAVE_CURL_CURL_H

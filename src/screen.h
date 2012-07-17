@@ -81,7 +81,7 @@ class BasicScreen
 		
 		/// @see Screen::Scroll()
 		///
-		virtual void Scroll(Where where, const int key[2] = 0) = 0;
+		virtual void Scroll(Where where) = 0;
 		
 		/// Invoked after Enter was pressed
 		///
@@ -212,10 +212,8 @@ template <typename WindowType> class Screen : public BasicScreen
 		/// if fancy scrolling feature is disabled, enters the
 		/// loop that holds main loop until user releases the key
 		/// @param where indicates where one wants to scroll
-		/// @param key needed if fancy scrolling is disabled to
-		/// define the conditional for while loop
 		///
-		virtual void Scroll(Where where, const int key[2] = 0);
+		virtual void Scroll(Where where);
 		
 		/// Invoked after there was one of mouse buttons pressed
 		/// @param me struct that contains coords of where the click
@@ -257,23 +255,9 @@ template <typename WindowType> void Screen<WindowType>::ReadKey(int &key)
 	w->ReadKey(key);
 }
 
-template <typename WindowType> void Screen<WindowType>::Scroll(Where where, const int key[2])
+template <typename WindowType> void Screen<WindowType>::Scroll(Where where)
 {
-	if (!Config.fancy_scrolling && key)
-	{
-		int in = key[0];
-		w->SetTimeout(50);
-		while (Keypressed(in, key))
-		{
-			TraceMpdStatus();
-			w->Scroll(where);
-			w->Refresh();
-			ReadKey(in);
-		}
-		w->SetTimeout(ncmpcpp_window_timeout);
-	}
-	else
-		w->Scroll(where);
+	w->Scroll(where);
 }
 
 template <typename WindowType> void Screen<WindowType>::MouseButtonPressed(MEVENT me)

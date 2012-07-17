@@ -25,6 +25,7 @@
 
 #include <mpd/client.h>
 
+#include "actions.h"
 #include "ncmpcpp.h"
 
 class BasicScreen; // forward declaration for screens sequence
@@ -46,101 +47,15 @@ struct Column
 
 struct NcmpcppKeys
 {
-	static const int NullKey = 0;
+	typedef std::pair<
+			std::multimap<int, Action *>::iterator
+		,	std::multimap<int, Action *>::iterator
+		> Binding;
 	
-	void SetDefaults();
-	void Read();
+	void GenerateKeybindings();
+	int GetFirstBinding(const ActionType at);
 	
-	int Up[2];
-	int Down[2];
-	int UpAlbum[2];
-	int DownAlbum[2];
-	int UpArtist[2];
-	int DownArtist[2];
-	int PageUp[2];
-	int PageDown[2];
-	int Home[2];
-	int End[2];
-	int Space[2];
-	int Enter[2];
-	int Delete[2];
-	int VolumeUp[2];
-	int VolumeDown[2];
-	int PrevColumn[2];
-	int NextColumn[2];
-	int ScreenSwitcher[2];
-	int BackwardScreenSwitcher[2];
-	int Help[2];
-	int Playlist[2];
-	int Browser[2];
-	int SearchEngine[2];
-	int MediaLibrary[2];
-	int PlaylistEditor[2];
-	int TagEditor[2];
-	int Outputs[2];
-	int Visualizer[2];
-	int Clock[2];
-	int ServerInfo[2];
-	int Stop[2];
-	int Pause[2];
-	int Next[2];
-	int Prev[2];
-	int Replay[2];
-	int SeekForward[2];
-	int SeekBackward[2];
-	int ToggleRepeat[2];
-	int ToggleRandom[2];
-	int ToggleSingle[2];
-	int ToggleConsume[2];
-	int ToggleReplayGainMode[2];
-	int ToggleSpaceMode[2];
-	int ToggleAddMode[2];
-	int ToggleMouse[2];
-	int ToggleBitrateVisibility[2];
-	int Shuffle[2];
-	int ToggleCrossfade[2];
-	int SetCrossfade[2];
-	int UpdateDB[2];
-	int SortPlaylist[2];
-	int ApplyFilter[2];
-	int DisableFilter[2];
-	int FindForward[2];
-	int FindBackward[2];
-	int NextFoundPosition[2];
-	int PrevFoundPosition[2];
-	int ToggleFindMode[2];
-	int EditTags[2];
-	int SongInfo[2];
-	int ArtistInfo[2];
-	int GoToPosition[2];
-	int Lyrics[2];
-	int ReverseSelection[2];
-	int DeselectAll[2];
-	int SelectAlbum[2];
-	int AddSelected[2];
-	int Clear[2];
-	int Crop[2];
-	int MvSongUp[2];
-	int MvSongDown[2];
-	int MoveTo[2];
-	int MoveBefore[2];
-	int MoveAfter[2];
-	int Add[2];
-	int SavePlaylist[2];
-	int GoToNowPlaying[2];
-	int GoToContainingDir[2];
-	int GoToMediaLibrary[2];
-	int GoToTagEditor[2];
-	int ToggleAutoCenter[2];
-	int ToggleDisplayMode[2];
-	int ToggleInterface[2];
-	int ToggleSeparatorsInPlaylist[2];
-	int ToggleLyricsDB[2];
-	int ToggleFetchingLyricsInBackground[2];
-	int ToggleScreenLock[2];
-	int GoToParentDir[2];
-	int SwitchTagTypeList[2];
-	int Quit[2];
+	std::multimap<int, Action *> Bindings;
 };
 
 struct NcmpcppConfig
@@ -214,7 +129,6 @@ struct NcmpcppConfig
 	
 	bool enable_idle_notifications;
 	bool colors_enabled;
-	bool fancy_scrolling;
 	bool playlist_show_remaining_time;
 	bool playlist_shorten_total_times;
 	bool playlist_separate_albums;
@@ -239,7 +153,6 @@ struct NcmpcppConfig
 	bool fetch_lyrics_in_background;
 	bool local_browser_show_hidden_files;
 	bool search_in_db;
-	bool display_screens_numbers_on_start;
 	bool jump_to_now_playing_song_at_start;
 	bool clock_display_seconds;
 	bool display_volume_level;
@@ -300,7 +213,6 @@ extern NcmpcppKeys Key;
 extern NcmpcppConfig Config;
 
 void CreateDir(const std::string &dir);
-void SetWindowsDimensions(size_t &header_height, size_t &footer_start_y, size_t &footer_height);
 
 #endif
 

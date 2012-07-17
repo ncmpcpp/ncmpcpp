@@ -68,7 +68,9 @@ class TagEditor : public Screen<Window>
 		
 		virtual bool isMergable() { return true; }
 		
+		bool isNextColumnAvailable();
 		bool NextColumn();
+		bool isPrevColumnAvailable();
 		bool PrevColumn();
 		
 		void LocateSong(const MPD::Song &s);

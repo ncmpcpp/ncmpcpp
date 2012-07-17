@@ -21,6 +21,7 @@
 #ifndef _PLAYLIST_EDITOR_H
 #define _PLAYLIST_EDITOR_H
 
+#include "playlist.h"
 #include "ncmpcpp.h"
 
 class PlaylistEditor : public Screen<Window>
@@ -48,13 +49,17 @@ class PlaylistEditor : public Screen<Window>
 		
 		virtual void ApplyFilter(const std::string &);
 
-		virtual void JumpTo(const std::string &);
+		virtual void Locate(const std::string &);
 		
 		virtual List *GetList();
 		
 		virtual bool isMergable() { return true; }
 		
+		void MoveSelectedItems(Playlist::Movement where);
+		
+		bool isNextColumnAvailable();
 		bool NextColumn();
+		bool isPrevColumnAvailable();
 		bool PrevColumn();
 		
 		Menu<std::string> *Playlists;

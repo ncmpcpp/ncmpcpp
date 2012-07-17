@@ -277,77 +277,6 @@ void SearchEngine::UpdateFoundList()
 	}
 }
 
-void SearchEngine::Scroll(int input)
-{
-	size_t pos = w->Choice();
-	
-	// above the reset button
-	if (pos < ResetButton)
-	{
-		if (Keypressed(input, Key.UpAlbum) || Keypressed(input, Key.UpArtist))
-			w->Highlight(0);
-		else if (Keypressed(input, Key.DownAlbum) || Keypressed(input, Key.DownArtist))
-			w->Highlight(ResetButton);
-	}
-	// reset button
-	else if (pos == ResetButton)
-	{
-		if (Keypressed(input, Key.UpAlbum) || Keypressed(input, Key.UpArtist))
-			w->Highlight(0);
-		else if (Keypressed(input, Key.DownAlbum) || Keypressed(input, Key.DownArtist))
-			w->Highlight(StaticOptions); // first search result
-	}
-	// we are in the search results at this point
-	else if (pos >= StaticOptions)
-	{
-		if (Keypressed(input, Key.UpAlbum))
-		{
-			if (pos == StaticOptions)
-			{
-				w->Highlight(ResetButton);
-				return;
-			}
-			else
-			{
-				std::string album = w->at(pos).second->GetAlbum();
-				while (pos > StaticOptions)
-					if (w->at(--pos).second->GetAlbum() != album)
-						break;
-			}
-		}
-		else if (Keypressed(input, Key.DownAlbum))
-		{
-			std::string album = w->at(pos).second->GetAlbum();
-			while (pos < w->Size() - 1)
-				if (w->at(++pos).second->GetAlbum() != album)
-					break;
-		}
-		else if (Keypressed(input, Key.UpArtist))
-		{
-			if (pos == StaticOptions)
-			{
-				w->Highlight(0);
-				return;
-			}
-			else
-			{
-				std::string artist = w->at(pos).second->GetArtist();
-				while (pos > StaticOptions)
-					if (w->at(--pos).second->GetArtist() != artist)
-						break;
-			}
-		}
-		else if (Keypressed(input, Key.DownArtist))
-		{
-			std::string artist = w->at(pos).second->GetArtist();
-			while (pos < w->Size() - 1)
-				if (w->at(++pos).second->GetArtist() != artist)
-					break;
-		}
-		w->Highlight(pos);
-	}
-}
-
 void SearchEngine::SelectAlbum()
 {
 	size_t pos = w->Choice();
@@ -622,9 +551,13 @@ void SearchEngine::Search()
 
 std::string SearchEngine::SearchEngineOptionToString(const std::pair<Buffer *, MPD::Song *> &pair, void *)
 {
-	if (!Config.columns_in_search_engine)
-		return pair.second->toString(Config.song_list_format_dollar_free);
+	if (pair.second)
+	{
+		if (!Config.columns_in_search_engine)
+			return pair.second->toString(Config.song_list_format_dollar_free);
+		else
+			return Playlist::SongInColumnsToString(*pair.second, 0);
+	}
 	else
-		return Playlist::SongInColumnsToString(*pair.second, 0);
+		return "";
 }
-

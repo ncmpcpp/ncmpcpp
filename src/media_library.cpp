@@ -19,6 +19,7 @@
  ***************************************************************************/
 
 #include <algorithm>
+#include <cassert>
 
 #include "charset.h"
 #include "display.h"
@@ -553,31 +554,57 @@ void MediaLibrary::ApplyFilter(const std::string &s)
 	GetList()->ApplyFilter(s, 0, REG_ICASE | Config.regex_type);
 }
 
-bool MediaLibrary::NextColumn()
+bool MediaLibrary::isNextColumnAvailable()
+{
+	assert(!hasTwoColumns || w != Artists);
+	if (w == Artists)
+	{
+		if (!Albums->ReallyEmpty() && !Songs->ReallyEmpty())
+			return true;
+	}
+	else if (w == Albums)
+	{
+		if (!Songs->ReallyEmpty())
+			return true;
+	}
+	return false;
+}
+
+void MediaLibrary::NextColumn()
 {
 	if (w == Artists)
 	{
-		if (!hasTwoColumns && Songs->ReallyEmpty())
-			return false;
 		Artists->HighlightColor(Config.main_highlight_color);
 		w->Refresh();
 		w = Albums;
 		Albums->HighlightColor(Config.active_column_color);
-		if (!Albums->ReallyEmpty())
-			return true;
 	}
-	if (w == Albums && !Songs->ReallyEmpty())
+	else if (w == Albums)
 	{
 		Albums->HighlightColor(Config.main_highlight_color);
 		w->Refresh();
 		w = Songs;
 		Songs->HighlightColor(Config.active_column_color);
-		return true;
+	}
+}
+
+bool MediaLibrary::isPrevColumnAvailable()
+{
+	assert(!hasTwoColumns || w != Artists);
+	if (w == Songs)
+	{
+		if (!Albums->ReallyEmpty() && (hasTwoColumns || !Artists->ReallyEmpty()))
+			return true;
+	}
+	else if (w == Albums)
+	{
+		if (!hasTwoColumns && !Artists->ReallyEmpty())
+			return true;
 	}
 	return false;
 }
 
-bool MediaLibrary::PrevColumn()
+void MediaLibrary::PrevColumn()
 {
 	if (w == Songs)
 	{
@@ -585,18 +612,14 @@ bool MediaLibrary::PrevColumn()
 		w->Refresh();
 		w = Albums;
 		Albums->HighlightColor(Config.active_column_color);
-		if (!Albums->ReallyEmpty())
-			return true;
 	}
-	if (w == Albums && !hasTwoColumns)
+	else if (w == Albums && !hasTwoColumns)
 	{
 		Albums->HighlightColor(Config.main_highlight_color);
 		w->Refresh();
 		w = Artists;
 		Artists->HighlightColor(Config.active_column_color);
-		return true;
 	}
-	return false;
 }
 
 void MediaLibrary::LocateSong(const MPD::Song &s)

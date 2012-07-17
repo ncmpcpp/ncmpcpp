@@ -50,7 +50,7 @@ class TinyTagEditor : public Screen< Menu<Buffer> >
 		
 		virtual bool isMergable() { return true; }
 		
-		bool SetEdited(MPD::Song *);
+		void SetEdited(const MPD::Song &);
 		
 	protected:
 		virtual void Init();

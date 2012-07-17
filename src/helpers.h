@@ -219,8 +219,7 @@ std::string GetLineValue(std::string &, char = '"', char = '"', bool = 0);
 
 std::basic_string<my_char_t> Scroller(const std::basic_string<my_char_t> &str, size_t &pos, size_t width);
 
-bool SwitchToNextColumn(BasicScreen *);
-bool SwitchToPrevColumn(BasicScreen *);
+bool askYesNoQuestion(const Buffer &question, void (*callback)());
 
 #endif
 

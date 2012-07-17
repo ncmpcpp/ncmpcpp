@@ -98,8 +98,8 @@ namespace NCurses
 			virtual bool isFiltered() = 0;
 	};
 	
-	/// This template class is generic menu, that has holds
-	/// any values that are std::vector compatible.
+	/// This template class is generic menu capable of
+	/// holding any std::vector compatible values.
 	///
 	template <typename T> class Menu : public Window, public List
 	{

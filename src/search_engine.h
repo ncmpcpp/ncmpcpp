@@ -51,7 +51,6 @@ class SearchEngine : public Screen< Menu< std::pair<Buffer *, MPD::Song *> > >
 		virtual bool isMergable() { return true; }
 		
 		void UpdateFoundList();
-		void Scroll(int);
 		void SelectAlbum();
 		
 		static size_t StaticOptions;

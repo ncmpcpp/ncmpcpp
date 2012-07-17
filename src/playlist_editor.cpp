@@ -188,6 +188,100 @@ void PlaylistEditor::Update()
 	}
 }
 
+void PlaylistEditor::MoveSelectedItems(Playlist::Movement where)
+{
+	if (Content->Empty())
+		return;
+	
+	// remove search results as we may move them to different positions, but
+	// search rememebers positions and may point to wrong ones after that.
+	Content->Search("");
+	
+	switch (where)
+	{
+		case Playlist::mUp:
+		{
+			if (Content->hasSelected())
+			{
+				std::vector<size_t> list;
+				Content->GetSelected(list);
+					
+				if (list.front() > 0)
+				{
+					Mpd.StartCommandsList();
+					std::vector<size_t>::const_iterator it = list.begin();
+					for (; it != list.end(); ++it)
+						Mpd.Move(Playlists->Current(), *it-1, *it);
+					if (Mpd.CommitCommandsList())
+					{
+						for (it = list.begin(); it != list.end(); ++it)
+							Content->Swap(*it-1, *it);
+						Content->Highlight(list[(list.size()-1)/2]-1);
+					}
+				}
+			}
+			else
+			{
+				size_t pos = Content->Choice();
+				if (pos > 0)
+				{
+					if (Mpd.Move(Playlists->Current(), pos-1, pos))
+					{
+						Content->Scroll(wUp);
+						Content->Swap(pos-1, pos);
+					}
+				}
+			}
+			break;
+		}
+		case Playlist::mDown:
+		{
+			if (Content->hasSelected())
+			{
+				std::vector<size_t> list;
+				Content->GetSelected(list);
+				
+				if (list.back() < Content->Size()-1)
+				{
+					Mpd.StartCommandsList();
+					std::vector<size_t>::const_reverse_iterator it = list.rbegin();
+					for (; it != list.rend(); ++it)
+						Mpd.Move(Playlists->Current(), *it, *it+1);
+					if (Mpd.CommitCommandsList())
+					{
+						Content->Highlight(list[(list.size()-1)/2]+1);
+						for (it = list.rbegin(); it != list.rend(); ++it)
+							Content->Swap(*it, *it+1);
+					}
+				}
+			}
+			else
+			{
+				size_t pos = Content->Choice();
+				if (pos < Content->Size()-1)
+				{
+					if (Mpd.Move(Playlists->Current(), pos, pos+1))
+					{
+						Content->Scroll(wDown);
+						Content->Swap(pos, pos+1);
+					}
+				}
+			}
+			break;
+		}
+	}
+}
+
+bool PlaylistEditor::isNextColumnAvailable()
+{
+	if (w == Playlists)
+	{
+		if (!Content->ReallyEmpty())
+			return true;
+	}
+	return false;
+}
+
 bool PlaylistEditor::NextColumn()
 {
 	if (w == Playlists)
@@ -197,6 +291,16 @@ bool PlaylistEditor::NextColumn()
 		w = Content;
 		Content->HighlightColor(Config.active_column_color);
 		return true;
+	}
+	return false;
+}
+
+bool PlaylistEditor::isPrevColumnAvailable()
+{
+	if (w == Content)
+	{
+		if (!Playlists->ReallyEmpty())
+			return true;
 	}
 	return false;
 }
@@ -308,18 +412,21 @@ void PlaylistEditor::ApplyFilter(const std::string &s)
 	GetList()->ApplyFilter(s, 0, REG_ICASE | Config.regex_type);
 }
 
-void PlaylistEditor::JumpTo(const std::string &s)
+void PlaylistEditor::Locate(const std::string &name)
 {
-	SwitchTo();
+	if (!isInitialized)
+		Init();
+	Update();
 	for (size_t i = 0; i < Playlists->Size(); ++i)
 	{
-		if (s == (*Playlists)[i])
+		if (name == (*Playlists)[i])
 		{
 			Playlists->Highlight(i);
 			Content->Clear();
 			break;
 		}
 	}
+	SwitchTo();
 }
 
 List *PlaylistEditor::GetList()

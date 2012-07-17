@@ -30,19 +30,12 @@
 #endif
 
 #include "curses.h"
+#include "gcc.h"
 
 #include <list>
 #include <stack>
 #include <vector>
 #include <string>
-
-#if defined(__GNUC__) && __GNUC__ >= 3
-# define GNUC_UNUSED __attribute__((unused))
-# define GNUC_PRINTF(a, b) __attribute__((format(printf, a, b)))
-#else
-# define GNUC_UNUSED
-# define GNUC_PRINTF(a, b)
-#endif
 
 // define some Ctrl-? keys
 #define KEY_CTRL_A 1
@@ -71,6 +64,24 @@
 #define KEY_CTRL_X 24
 #define KEY_CTRL_Y 25
 #define KEY_CTRL_Z 26
+
+// define F? keys
+#define KEY_F1 265
+#define KEY_F2 266
+#define KEY_F3 267
+#define KEY_F4 268
+#define KEY_F5 269
+#define KEY_F6 270
+#define KEY_F7 271
+#define KEY_F8 272
+#define KEY_F9 273
+#define KEY_F10 274
+#define KEY_F11 275
+#define KEY_F12 276
+
+// other handy keys
+#define KEY_TAB 9
+#define KEY_SHIFT_TAB 353
 
 // define alternative KEY_BACKSPACE (used in some terminal emulators)
 #define KEY_BACKSPACE_2 127

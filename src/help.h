@@ -47,7 +47,14 @@ class Help : public Screen<Scrollpad>
 		virtual bool isLockable() { return true; }
 		
 	private:
-		std::string DisplayKeys(int *, int = 2);
+		void KeysSection(const char *title) { Section("Keys", title); }
+		void MouseSection(const char *title) { Section("Mouse", title); }
+		void Section(const char *type, const char *title);
+		void KeyDesc(const ActionType at, const char *desc);
+		void MouseDesc(std::string action, const char *desc, bool indent = false);
+		void MouseColumn(const char *column);
+		
+		std::string DisplayKeys2(const ActionType at);
 		void GetKeybindings();
 };
 

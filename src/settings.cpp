@@ -31,6 +31,7 @@
 #include <iostream>
 #include <stdexcept>
 
+#include "actions.h"
 #include "browser.h"
 #include "clock.h"
 #include "global.h"
@@ -55,34 +56,6 @@ NcmpcppKeys Key;
 
 namespace
 {
-	void GetKeys(std::string &line, int *key)
-	{
-		size_t i = line.find("=")+1;
-		line = line.substr(i, line.length()-i);
-		i = 0;
-		if (line[i] == ' ')
-			while (line[++i] == ' ') { }
-		line = line.substr(i, line.length()-i);
-		i = line.find(" ");
-		std::string one;
-		std::string two;
-		if (i != std::string::npos)
-		{
-			one = line.substr(0, i);
-			i++;
-			two = line.substr(i, line.length()-i);
-		}
-		else
-			one = line;
-		key[0] = !one.empty() && one[0] == '\''
-				? one[1]
-				: (atoi(one.c_str()) == 0 ? NcmpcppKeys::NullKey : atoi(one.c_str()));
-		
-		key[1] = !two.empty() && two[0] == '\''
-				? two[1]
-				: (atoi(two.c_str()) == 0 ? NcmpcppKeys::NullKey : atoi(two.c_str()));
-	}
-	
 	Border IntoBorder(const std::string &color)
 	{
 		return Border(IntoColor(color));
@@ -158,207 +131,156 @@ void CreateDir(const std::string &dir)
 	);
 }
 
-void SetWindowsDimensions(size_t &header_height, size_t &footer_start_y, size_t &footer_height)
+void NcmpcppKeys::GenerateKeybindings()
 {
-	Global::MainStartY = Config.new_design ? 5 : 2;
-	Global::MainHeight = LINES-(Config.new_design ? 7 : 4);
+#	define BIND(key, action) Bindings.insert(std::make_pair(key, Action::Get(action)))
 	
-	if (!Config.header_visibility)
-	{
-		Global::MainStartY -= 2;
-		Global::MainHeight += 2;
-	}
-	if (!Config.statusbar_visibility)
-		Global::MainHeight++;
+	BIND(KEY_MOUSE,		aMouseEvent);
+	BIND(KEY_UP,		aScrollUp);
+	BIND(KEY_DOWN,		aScrollDown);
+	BIND('[',		aScrollUpAlbum);
+	BIND(']',		aScrollDownAlbum);
+	BIND('{',		aScrollUpArtist);
+	BIND('}',		aScrollDownArtist);
+	BIND(KEY_PPAGE,		aPageUp);
+	BIND(KEY_NPAGE,		aPageDown);
+	BIND(KEY_HOME,		aMoveHome);
+	BIND(KEY_END,		aMoveEnd);
+	BIND(' ',		aPressSpace);
+	BIND(KEY_ENTER,		aPressEnter);
+	BIND(KEY_DC,		aDelete);
+	BIND(KEY_RIGHT,		aNextColumn);
+	BIND(KEY_RIGHT,		aSlaveScreen);
+	BIND(KEY_RIGHT,		aVolumeUp);
+	BIND(KEY_LEFT,		aPreviousColumn);
+	BIND(KEY_LEFT,		aMasterScreen);
+	BIND(KEY_LEFT,		aVolumeDown);
+	BIND(KEY_TAB,		aNextScreen);
+	BIND(KEY_SHIFT_TAB,	aPreviousScreen);
+	BIND('1',		aShowHelp);
+	BIND('2',		aShowPlaylist);
+	BIND('3',		aShowBrowser);
+	BIND('4',		aShowSearchEngine);
+	BIND('5',		aShowMediaLibrary);
+	BIND('6',		aShowPlaylistEditor);
+	BIND('7',		aShowTagEditor);
+	BIND('8',		aShowOutputs);
+	BIND('9',		aShowVisualizer);
+	BIND('0',		aShowClock);
+	BIND('@',		aShowServerInfo);
+	BIND('s',		aStop);
+	BIND('P',		aPause);
+	BIND('>',		aNextSong);
+	BIND('<',		aPreviousSong);
+	BIND(KEY_BACKSPACE,	aJumpToParentDir);
+	BIND(KEY_BACKSPACE,	aReplaySong);
+	BIND(KEY_BACKSPACE_2,	aJumpToParentDir);
+	BIND(KEY_BACKSPACE_2,	aReplaySong);
+	BIND('f',		aSeekForward);
+	BIND('b',		aSeekBackward);
+	BIND('r',		aToggleRepeat);
+	BIND('z',		aToggleRandom);
+	BIND('y',		aSaveTagChanges);
+	BIND('y',		aStartSearching);
+	BIND('y',		aToggleSingle);
+	BIND('R',		aToggleConsume);
+	BIND('Y',		aToggleReplayGainMode);
+	BIND('t',		aToggleSpaceMode);
+	BIND('T',		aToggleAddMode);
+	BIND('|',		aToggleMouse);
+	BIND('#',		aToggleBitrateVisibility);
+	BIND('Z',		aShuffle);
+	BIND('x',		aToggleCrossfade);
+	BIND('X',		aSetCrossfade);
+	BIND('u',		aUpdateDatabase);
+	BIND(KEY_CTRL_V,	aSortPlaylist);
+	BIND(KEY_CTRL_R,	aReversePlaylist);
+	BIND(KEY_CTRL_F,	aApplyFilter);
+	BIND(KEY_CTRL_G,	aDisableFilter);
+	BIND('/',		aFind);
+	BIND('/',		aFindItemForward);
+	BIND('?',		aFind);
+	BIND('?',		aFindItemBackward);
+	BIND('.',		aNextFoundItem);
+	BIND(',',		aPreviousFoundItem);
+	BIND('w',		aToggleFindMode);
+	BIND('e',		aEditSong);
+	BIND('e',		aEditLibraryTag);
+	BIND('e',		aEditLibraryAlbum);
+	BIND('e',		aEditDirectoryName);
+	BIND('e',		aEditPlaylistName);
+	BIND('e',		aEditLyrics);
+	BIND('i',		aShowSongInfo);
+	BIND('I',		aShowArtistInfo);
+	BIND('g',		aJumpToPositionInSong);
+	BIND('l',		aShowLyrics);
+	BIND('v',		aReverseSelection);
+	BIND('V',		aDeselectItems);
+	BIND('B',		aSelectAlbum);
+	BIND('a',		aAddSelectedItems);
+	BIND('c',		aClearPlaylist);
+	BIND('c',		aClearMainPlaylist);
+	BIND('C',		aCropPlaylist);
+	BIND('C',		aCropMainPlaylist);
+	BIND('m',		aMoveSortOrderUp);
+	BIND('m',		aMoveSelectedItemsUp);
+	BIND('n',		aMoveSortOrderDown);
+	BIND('n',		aMoveSelectedItemsDown);
+	BIND('M',		aMoveSelectedItemsTo);
+	BIND('A',		aAdd);
+	BIND('S',		aSavePlaylist);
+	BIND('o',		aJumpToPlayingSong);
+	BIND('G',		aJumpToBrowser);
+	BIND('G',		aJumpToPlaylistEditor);
+	BIND('~',		aJumpToMediaLibrary);
+	BIND('E',		aJumpToTagEditor);
+	BIND('U',		aToggleAutoCenter);
+	BIND('p',		aToggleDisplayMode);
+	BIND('\\',		aToggleInterface);
+	BIND('!',		aToggleSeparatorsInPlaylist);
+	BIND('L',		aToggleLyricsFetcher);
+	BIND('F',		aToggleFetchingLyricsInBackground);
+	BIND(KEY_CTRL_L,	aToggleScreenLock);
+	BIND('`',		aToggleBrowserSortMode);
+	BIND('`',		aToggleLibraryTagType);
+	BIND('`',		aRefetchLyrics);
+	BIND('`',		aRefetchArtistInfo);
+	BIND('`',		aAddRandomItems);
+	BIND('q',		aQuit);
 	
-	header_height = Config.new_design ? (Config.header_visibility ? 5 : 3) : 1;
-	footer_start_y = LINES-(Config.statusbar_visibility ? 2 : 1);
-	footer_height = Config.statusbar_visibility ? 2 : 1;
+	BIND('k',		aScrollUp);
+	BIND('j',		aScrollDown);
+	BIND('d',		aDelete);
+	BIND('+',		aVolumeUp);
+	BIND('-',		aVolumeDown);
+	BIND(KEY_F1,		aShowHelp);
+	BIND(KEY_F2,		aShowPlaylist);
+	BIND(KEY_F3,		aShowBrowser);
+	BIND(KEY_F4,		aShowSearchEngine);
+	BIND(KEY_F5,		aShowMediaLibrary);
+	BIND(KEY_F6,		aShowPlaylistEditor);
+	BIND(KEY_F7,		aShowTagEditor);
+	BIND(KEY_F8,		aShowOutputs);
+	BIND(KEY_F9,		aShowVisualizer);
+	BIND(KEY_F10,		aShowClock);
+	BIND('Q',		aQuit);
+	
+#	undef BIND
 }
 
-void NcmpcppKeys::SetDefaults()
+int NcmpcppKeys::GetFirstBinding(const ActionType at)
 {
-	Up[0] = KEY_UP;
-	Down[0] = KEY_DOWN;
-	UpAlbum[0] = '[';
-	DownAlbum[0] = ']';
-	UpArtist[0] = '{';
-	DownArtist[0] = '}';
-	PageUp[0] = KEY_PPAGE;
-	PageDown[0] = KEY_NPAGE;
-	Home[0] = KEY_HOME;
-	End[0] = KEY_END;
-	Space[0] = 32;
-	Enter[0] = 10;
-	Delete[0] = KEY_DC;
-	VolumeUp[0] = KEY_RIGHT;
-	VolumeDown[0] = KEY_LEFT;
-	PrevColumn[0] = KEY_LEFT;
-	NextColumn[0] = KEY_RIGHT;
-	ScreenSwitcher[0] = 9;
-	BackwardScreenSwitcher[0] = 353;
-	Help[0] = '1';
-	Playlist[0] = '2';
-	Browser[0] = '3';
-	SearchEngine[0] = '4';
-	MediaLibrary[0] = '5';
-	PlaylistEditor[0] = '6';
-	TagEditor[0] = '7';
-	Outputs[0] = '8';
-	Visualizer[0] = '9';
-	Clock[0] = '0';
-	ServerInfo[0] = '@';
-	Stop[0] = 's';
-	Pause[0] = 'P';
-	Next[0] = '>';
-	Prev[0] = '<';
-	Replay[0] = KEY_BACKSPACE;
-	SeekForward[0] = 'f';
-	SeekBackward[0] = 'b';
-	ToggleRepeat[0] = 'r';
-	ToggleRandom[0] = 'z';
-	ToggleSingle[0] = 'y';
-	ToggleConsume[0] = 'R';
-	ToggleReplayGainMode[0] = 'Y';
-	ToggleSpaceMode[0] = 't';
-	ToggleAddMode[0] = 'T';
-	ToggleMouse[0] = '|';
-	ToggleBitrateVisibility[0] = '#';
-	Shuffle[0] = 'Z';
-	ToggleCrossfade[0] = 'x';
-	SetCrossfade[0] = 'X';
-	UpdateDB[0] = 'u';
-	SortPlaylist[0] = 22;
-	ApplyFilter[0] = 6;
-	DisableFilter[0] = 7;
-	FindForward[0] = '/';
-	FindBackward[0] = '?';
-	NextFoundPosition[0] = '.';
-	PrevFoundPosition[0] = ',';
-	ToggleFindMode[0] = 'w';
-	EditTags[0] = 'e';
-	SongInfo[0] = 'i';
-	ArtistInfo[0] = 'I';
-	GoToPosition[0] = 'g';
-	Lyrics[0] = 'l';
-	ReverseSelection[0] = 'v';
-	DeselectAll[0] = 'V';
-	SelectAlbum[0] = 'B';
-	AddSelected[0] = 'A';
-	Clear[0] = 'c';
-	Crop[0] = 'C';
-	MvSongUp[0] = 'm';
-	MvSongDown[0] = 'n';
-	MoveTo[0] = 'M';
-	MoveBefore[0] = NullKey;
-	MoveAfter[0] = NullKey;
-	Add[0] = 'a';
-	SavePlaylist[0] = 'S';
-	GoToNowPlaying[0] = 'o';
-	GoToContainingDir[0] = 'G';
-	GoToMediaLibrary[0] = '~';
-	GoToTagEditor[0] = 'E';
-	ToggleAutoCenter[0] = 'U';
-	ToggleDisplayMode[0] = 'p';
-	ToggleInterface[0] = '\\';
-	ToggleSeparatorsInPlaylist[0] = '!';
-	ToggleLyricsDB[0] = 'L';
-	ToggleFetchingLyricsInBackground[0] = 'F';
-	ToggleScreenLock[0] = 12;
-	GoToParentDir[0] = KEY_BACKSPACE;
-	SwitchTagTypeList[0] = '`';
-	Quit[0] = 'q';
-
-	Up[1] = 'k';
-	Down[1] = 'j';
-	UpAlbum[1] = NullKey;
-	DownAlbum[1] = NullKey;
-	UpArtist[1] = NullKey;
-	DownArtist[1] = NullKey;
-	PageUp[1] = NullKey;
-	PageDown[1] = NullKey;
-	Home[1] = NullKey;
-	End[1] = NullKey;
-	Space[1] = NullKey;
-	Enter[1] = NullKey;
-	Delete[1] = 'd';
-	VolumeUp[1] = '+';
-	VolumeDown[1] = '-';
-	PrevColumn[1] = NullKey;
-	NextColumn[1] = NullKey;
-	ScreenSwitcher[1] = NullKey;
-	BackwardScreenSwitcher[1] = NullKey;
-	Help[1] = 265;
-	Playlist[1] = 266;
-	Browser[1] = 267;
-	SearchEngine[1] = 268;
-	MediaLibrary[1] = 269;
-	PlaylistEditor[1] = 270;
-	TagEditor[1] = 271;
-	Outputs[1] = 272;
-	Visualizer[1] = 273;
-	Clock[1] = 274;
-	ServerInfo[1] = NullKey;
-	Stop[1] = NullKey;
-	Pause[1] = NullKey;
-	Next[1] = NullKey;
-	Prev[1] = NullKey;
-	Replay[1] = 127;
-	SeekForward[1] = NullKey;
-	SeekBackward[1] = NullKey;
-	ToggleRepeat[1] = NullKey;
-	ToggleRandom[1] = NullKey;
-	ToggleSingle[1] = NullKey;
-	ToggleConsume[1] = NullKey;
-	ToggleReplayGainMode[1] = NullKey;
-	ToggleSpaceMode[1] = NullKey;
-	ToggleAddMode[1] = NullKey;
-	ToggleMouse[1] = NullKey;
-	ToggleBitrateVisibility[1] = NullKey;
-	Shuffle[1] = NullKey;
-	ToggleCrossfade[1] = NullKey;
-	SetCrossfade[1] = NullKey;
-	UpdateDB[1] = NullKey;
-	SortPlaylist[1] = NullKey;
-	ApplyFilter[1] = NullKey;
-	DisableFilter[1] = NullKey;
-	FindForward[1] = NullKey;
-	FindBackward[1] = NullKey;
-	NextFoundPosition[1] = NullKey;
-	PrevFoundPosition[1] = NullKey;
-	ToggleFindMode[1] = NullKey;
-	EditTags[1] = NullKey;
-	SongInfo[1] = NullKey;
-	ArtistInfo[1] = NullKey;
-	GoToPosition[1] = NullKey;
-	Lyrics[1] = NullKey;
-	ReverseSelection[1] = NullKey;
-	DeselectAll[1] = NullKey;
-	SelectAlbum[1] = NullKey;
-	AddSelected[1] = NullKey;
-	Clear[1] = NullKey;
-	Crop[1] = NullKey;
-	MvSongUp[1] = NullKey;
-	MvSongDown[1] = NullKey;
-	MoveTo[1] = NullKey;
-	MoveBefore[1] = NullKey;
-	MoveAfter[1] = NullKey;
-	Add[1] = NullKey;
-	SavePlaylist[1] = NullKey;
-	GoToNowPlaying[1] = NullKey;
-	GoToContainingDir[1] = NullKey;
-	GoToMediaLibrary[1] = NullKey;
-	GoToTagEditor[1] = NullKey;
-	ToggleAutoCenter[1] = NullKey;
-	ToggleDisplayMode[1] = NullKey;
-	ToggleInterface[1] = NullKey;
-	ToggleSeparatorsInPlaylist[1] = NullKey;
-	ToggleLyricsDB[1] = NullKey;
-	ToggleFetchingLyricsInBackground[1] = NullKey;
-	ToggleScreenLock[1] = NullKey;
-	GoToParentDir[1] = 127;
-	SwitchTagTypeList[1] = NullKey;
-	Quit[1] = 'Q';
+	int result = 0;
+	std::multimap<int, Action *>::const_iterator it = Bindings.begin();
+	for (; it != Bindings.end(); ++it)
+	{
+		if (it->second->Type() == at)
+		{
+			result = it->first;
+			break;
+		}
+	}
+	return result;
 }
 
 void NcmpcppConfig::SetDefaults()
@@ -404,7 +326,6 @@ void NcmpcppConfig::SetDefaults()
 	media_lib_primary_tag = MPD_TAG_ARTIST;
 	enable_idle_notifications = true;
 	colors_enabled = true;
-	fancy_scrolling = true;
 	playlist_show_remaining_time = false;
 	playlist_shorten_total_times = false;
 	playlist_separate_albums = false;
@@ -428,7 +349,6 @@ void NcmpcppConfig::SetDefaults()
 	fetch_lyrics_in_background = false;
 	local_browser_show_hidden_files = false;
 	search_in_db = true;
-	display_screens_numbers_on_start = true;
 	jump_to_now_playing_song_at_start = true;
 	clock_display_seconds = false;
 	display_volume_level = true;
@@ -479,200 +399,6 @@ void NcmpcppConfig::SetDefaults()
 	// default screens sequence
 	screens_seq.push_back(myPlaylist);
 	screens_seq.push_back(myBrowser);
-}
-
-void NcmpcppKeys::Read()
-{
-	std::ifstream f((Config.ncmpcpp_directory + "keys").c_str());
-	std::string key, name;
-	
-	if (!f.is_open())
-		return;
-	
-	while (!f.eof())
-	{
-		getline(f, key);
-		if (!key.empty() && key[0] != '#')
-		{
-			name = GetOptionName(key);
-			
-			if (name == "key_up")
-				GetKeys(key, Up);
-			else if (name == "key_down")
-				GetKeys(key, Down);
-			else if (name == "key_up_album")
-				GetKeys(key, UpAlbum);
-			else if (name == "key_down_album")
-				GetKeys(key, DownAlbum);
-			else if (name == "key_up_artist")
-				GetKeys(key, UpArtist);
-			else if (name == "key_down_artist")
-				GetKeys(key, DownArtist);
-			else if (name == "key_page_up")
-				GetKeys(key, PageUp);
-			else if (name == "key_page_down")
-				GetKeys(key, PageDown);
-			else if (name == "key_home")
-				GetKeys(key, Home);
-			else if (name == "key_end")
-				GetKeys(key, End);
-			else if (name == "key_space")
-				GetKeys(key, Space);
-			else if (name == "key_enter")
-				GetKeys(key, Enter);
-			else if (name == "key_delete")
-				GetKeys(key, Delete);
-			else if (name == "key_volume_up")
-				GetKeys(key, VolumeUp);
-			else if (name == "key_volume_down")
-				GetKeys(key, VolumeDown);
-			else if (name == "key_prev_column")
-				GetKeys(key, PrevColumn);
-			else if (name == "key_next_column")
-				GetKeys(key, NextColumn);
-			else if (name == "key_screen_switcher")
-				GetKeys(key, ScreenSwitcher);
-			else if (name == "key_backward_screen_switcher")
-				GetKeys(key, BackwardScreenSwitcher);
-			else if (name == "key_help")
-				GetKeys(key, Help);
-			else if (name == "key_playlist")
-				GetKeys(key, Playlist);
-			else if (name == "key_browser")
-				GetKeys(key, Browser);
-			else if (name == "key_search_engine")
-				GetKeys(key, SearchEngine);
-			else if (name == "key_media_library")
-				GetKeys(key, MediaLibrary);
-			else if (name == "key_playlist_editor")
-				GetKeys(key, PlaylistEditor);
-			else if (name == "key_tag_editor")
-				GetKeys(key, TagEditor);
-			else if (name == "key_outputs")
-				GetKeys(key, Outputs);
-			else if (name == "key_music_visualizer")
-				GetKeys(key, Visualizer);
-			else if (name == "key_clock")
-				GetKeys(key, Clock);
-			else if (name == "key_server_info")
-				GetKeys(key, ServerInfo);
-			else if (name == "key_stop")
-				GetKeys(key, Stop);
-			else if (name == "key_pause")
-				GetKeys(key, Pause);
-			else if (name == "key_next")
-				GetKeys(key, Next);
-			else if (name == "key_prev")
-				GetKeys(key, Prev);
-			else if (name == "key_replay")
-				GetKeys(key, Replay);
-			else if (name == "key_seek_forward")
-				GetKeys(key, SeekForward);
-			else if (name == "key_seek_backward")
-				GetKeys(key, SeekBackward);
-			else if (name == "key_toggle_repeat")
-				GetKeys(key, ToggleRepeat);
-			else if (name == "key_toggle_random")
-				GetKeys(key, ToggleRandom);
-			else if (name == "key_toggle_single")
-				GetKeys(key, ToggleSingle);
-			else if (name == "key_toggle_consume")
-				GetKeys(key, ToggleConsume);
-			else if (name == "key_toggle_replay_gain_mode")
-				GetKeys(key, ToggleReplayGainMode);
-			else if (name == "key_toggle_space_mode")
-				GetKeys(key, ToggleSpaceMode);
-			else if (name == "key_toggle_add_mode")
-				GetKeys(key, ToggleAddMode);
-			else if (name == "key_toggle_mouse")
-				GetKeys(key, ToggleMouse);
-			else if (name == "key_toggle_bitrate_visibility")
-				GetKeys(key, ToggleBitrateVisibility);
-			else if (name == "key_shuffle")
-				GetKeys(key, Shuffle);
-			else if (name == "key_toggle_crossfade")
-				GetKeys(key, ToggleCrossfade);
-			else if (name == "key_set_crossfade")
-				GetKeys(key, SetCrossfade);
-			else if (name == "key_update_db")
-				GetKeys(key, UpdateDB);
-			else if (name == "key_sort_playlist")
-				GetKeys(key, SortPlaylist);
-			else if (name == "key_apply_filter")
-				GetKeys(key, ApplyFilter);
-			else if (name == "key_clear_filter")
-				GetKeys(key, DisableFilter);
-			else if (name == "key_find_forward")
-				GetKeys(key, FindForward);
-			else if (name == "key_find_backward")
-				GetKeys(key, FindBackward);
-			else if (name == "key_next_found_position")
-				GetKeys(key, NextFoundPosition);
-			else if (name == "key_prev_found_position")
-				GetKeys(key, PrevFoundPosition);
-			else if (name == "key_toggle_find_mode")
-				GetKeys(key, ToggleFindMode);
-			else if (name == "key_edit_tags")
-				GetKeys(key, EditTags);
-			else if (name == "key_go_to_position")
-				GetKeys(key, GoToPosition);
-			else if (name == "key_song_info")
-				GetKeys(key, SongInfo);
-			else if (name == "key_artist_info")
-				GetKeys(key, ArtistInfo);
-			else if (name == "key_lyrics")
-				GetKeys(key, Lyrics);
-			else if (name == "key_reverse_selection")
-				GetKeys(key, ReverseSelection);
-			else if (name == "key_deselect_all")
-				GetKeys(key, DeselectAll);
-			else if (name == "key_select_album")
-				GetKeys(key, SelectAlbum);
-			else if (name == "key_add_selected_items")
-				GetKeys(key, AddSelected);
-			else if (name == "key_clear")
-				GetKeys(key, Clear);
-			else if (name == "key_crop")
-				GetKeys(key, Crop);
-			else if (name == "key_move_song_up")
-				GetKeys(key, MvSongUp);
-			else if (name == "key_move_song_down")
-				GetKeys(key, MvSongDown);
-			else if (name == "key_move_to")
-				GetKeys(key, MoveTo);
-			else if (name == "key_move_before")
-				GetKeys(key, MoveBefore);
-			else if (name == "key_move_after")
-				GetKeys(key, MoveAfter);
-			else if (name == "key_add")
-				GetKeys(key, Add);
-			else if (name == "key_save_playlist")
-				GetKeys(key, SavePlaylist);
-			else if (name == "key_go_to_now_playing")
-				GetKeys(key, GoToNowPlaying);
-			else if (name == "key_toggle_auto_center")
-				GetKeys(key, ToggleAutoCenter);
-			else if (name == "key_toggle_display_mode")
-				GetKeys(key, ToggleDisplayMode);
-			else if (name == "key_toggle_separators_in_playlist")
-				GetKeys(key, ToggleSeparatorsInPlaylist);
-			else if (name == "key_toggle_lyrics_db")
-				GetKeys(key, ToggleLyricsDB);
-			else if (name == "key_toggle_fetching_lyrics_for_current_song_in_background")
-				GetKeys(key, ToggleFetchingLyricsInBackground);
-			else if (name == "key_go_to_containing_directory")
-				GetKeys(key, GoToContainingDir);
-			else if (name == "key_go_to_media_library")
-				GetKeys(key, GoToMediaLibrary);
-			else if (name == "key_go_to_parent_dir")
-				GetKeys(key, GoToParentDir);
-			else if (name == "key_switch_tag_type_list")
-				GetKeys(key, SwitchTagTypeList);
-			else if (name == "key_quit")
-				GetKeys(key, Quit);
-		}
-	}
-	f.close();
 }
 
 NcmpcppConfig::NcmpcppConfig()
@@ -991,10 +717,6 @@ void NcmpcppConfig::Read()
 			{
 				colors_enabled = v == "yes";
 			}
-			else if (name == "fancy_scrolling")
-			{
-				fancy_scrolling = v == "yes";
-			}
 			else if (name == "cyclic_scrolling")
 			{
 				use_cyclic_scrolling = v == "yes";
@@ -1117,10 +839,6 @@ void NcmpcppConfig::Read()
 			else if (name == "default_place_to_search_in")
 			{
 				search_in_db = v == "database";
-			}
-			else if (name == "display_screens_numbers_on_start")
-			{
-				display_screens_numbers_on_start = v == "yes";
 			}
 			else if (name == "jump_to_now_playing_song_at_start")
 			{

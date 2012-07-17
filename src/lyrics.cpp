@@ -398,20 +398,18 @@ void Lyrics::Save(const std::string &filename, const std::string &lyrics)
 		output.close();
 	}
 }
-#endif // HAVE_CURL_CURL_H
 
 void Lyrics::Refetch()
 {
 	if (remove(itsFilename.c_str()) && errno != ENOENT)
 	{
-		static const char msg[] = "Couldn't remove \"%s\": %s";
+		const char msg[] = "Couldn't remove \"%s\": %s";
 		ShowMessage(msg, Shorten(TO_WSTRING(itsFilename), COLS-static_strlen(msg)-25).c_str(), strerror(errno));
 		return;
 	}
 	Load();
 }
 
-#ifdef HAVE_CURL_CURL_H
 void Lyrics::ToggleFetcher()
 {
 	if (itsFetcher && *itsFetcher)

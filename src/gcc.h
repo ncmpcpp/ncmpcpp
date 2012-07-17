@@ -18,38 +18,10 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
-#ifndef _GLOBAL_H
-#define _GLOBAL_H
-
-#include <sys/time.h>
-
-#include "ncmpcpp.h"
-#include "mpdpp.h"
-#include "screen.h"
-
-namespace Global
-{
-	extern BasicScreen *myScreen;
-	extern BasicScreen *myOldScreen;	// for info, lyrics, popups
-	extern BasicScreen *myPrevScreen;	// "real" screen switching (browser, search, etc.)
-	extern BasicScreen *myLockedScreen;     // points at the screen that was locked (or is null if no screen is locked)
-	extern BasicScreen *myInactiveScreen;   // points at inactive screen, if locking was enabled and two screens are displayed
-	
-	extern Window *wHeader;
-	extern Window *wFooter;
-	
-	extern size_t MainStartY;
-	extern size_t MainHeight;
-	
-	extern bool MessagesAllowed;
-	extern bool SeekingInProgress;
-	extern bool RedrawHeader;
-	extern bool RedrawStatusbar;
-	
-	extern std::string VolumeState;
-	
-	extern timeval Timer;
-}
-
+#if defined(__GNUC__) && __GNUC__ >= 3
+# define GNUC_UNUSED __attribute__((unused))
+# define GNUC_PRINTF(a, b) __attribute__((format(printf, a, b)))
+#else
+# define GNUC_UNUSED
+# define GNUC_PRINTF(a, b)
 #endif
-

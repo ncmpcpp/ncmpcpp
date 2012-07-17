@@ -48,11 +48,8 @@ using Global::Timer;
 using Global::wHeader;
 using Global::VolumeState;
 
-bool Global::UpdateStatusImmediately = 0;
 bool Global::RedrawStatusbar = 0;
-
 std::string Global::VolumeState;
-
 timeval Global::Timer;
 
 namespace
@@ -137,8 +134,8 @@ void TraceMpdStatus()
 {
 	static timeval past = { 0, 0 };
 	
-	gettimeofday(&Global::Timer, 0);
-	if (Mpd.Connected() && (Mpd.SupportsIdle() || Timer.tv_sec > past.tv_sec || Global::UpdateStatusImmediately))
+	gettimeofday(&Timer, 0);
+	if (Mpd.Connected() && (Mpd.SupportsIdle() || Timer.tv_sec > past.tv_sec))
 	{
 		if (!Mpd.SupportsIdle())
 		{
@@ -153,9 +150,6 @@ void TraceMpdStatus()
 			gettimeofday(&past, 0);
 		}
 		Mpd.UpdateStatus();
-		Global::BlockItemListUpdate = 0;
-		Playlist::BlockUpdate = 0;
-		Global::UpdateStatusImmediately = 0;
 	}
 	
 	ApplyToVisibleWindows(&BasicScreen::Update);
@@ -227,50 +221,46 @@ void NcmpcppStatusChanged(MPD::Connection *, MPD::StatusChanges changed, void *)
 	int sx, sy;
 	wFooter->GetXY(sx, sy);
 	
-	if (!Playlist::BlockNowPlayingUpdate)
-		myPlaylist->NowPlaying = Mpd.GetCurrentlyPlayingSongPos();
+	myPlaylist->NowPlaying = Mpd.GetCurrentlyPlayingSongPos();
 	
 	if (changed.Playlist)
 	{
-		if (!Playlist::BlockUpdate)
+		if (!(np = Mpd.GetCurrentlyPlayingSong()).Empty())
+			WindowTitle(utf_to_locale_cpy(np.toString(Config.song_window_title_format)));
+		
+		bool was_filtered = myPlaylist->Items->isFiltered();
+		myPlaylist->Items->ShowAll();
+		MPD::SongList list;
+		
+		size_t playlist_length = Mpd.GetPlaylistLength();
+		if (playlist_length < myPlaylist->Items->Size())
+			myPlaylist->Items->ResizeList(playlist_length);
+		
+		Mpd.GetPlaylistChanges(Mpd.GetOldPlaylistID(), list);
+		myPlaylist->Items->Reserve(playlist_length);
+		for (MPD::SongList::const_iterator it = list.begin(); it != list.end(); ++it)
 		{
-			if (!(np = Mpd.GetCurrentlyPlayingSong()).Empty())
-				WindowTitle(utf_to_locale_cpy(np.toString(Config.song_window_title_format)));
-			
-			bool was_filtered = myPlaylist->Items->isFiltered();
-			myPlaylist->Items->ShowAll();
-			MPD::SongList list;
-			
-			size_t playlist_length = Mpd.GetPlaylistLength();
-			if (playlist_length < myPlaylist->Items->Size())
-				myPlaylist->Items->ResizeList(playlist_length);
-			
-			Mpd.GetPlaylistChanges(Mpd.GetOldPlaylistID(), list);
-			myPlaylist->Items->Reserve(playlist_length);
-			for (MPD::SongList::const_iterator it = list.begin(); it != list.end(); ++it)
+			int pos = (*it)->GetPosition();
+			if (pos < int(myPlaylist->Items->Size()))
 			{
-				int pos = (*it)->GetPosition();
-				if (pos < int(myPlaylist->Items->Size()))
-				{
-					// if song's already in playlist, replace it with a new one
-					myPlaylist->Items->at(pos) = **it;
-				}
-				else
-				{
-					// otherwise just add it to playlist
-					myPlaylist->Items->AddOption(**it);
-				}
-				myPlaylist->Items->at(pos).CopyPtr(0);
-				(*it)->NullMe();
+				// if song's already in playlist, replace it with a new one
+				myPlaylist->Items->at(pos) = **it;
 			}
-			if (was_filtered)
+			else
 			{
-				myPlaylist->ApplyFilter(myPlaylist->Items->GetFilter());
-				if (myPlaylist->Items->Empty())
-					myPlaylist->Items->ShowAll();
+				// otherwise just add it to playlist
+				myPlaylist->Items->AddOption(**it);
 			}
-			FreeSongList(list);
+			myPlaylist->Items->at(pos).CopyPtr(0);
+			(*it)->NullMe();
 		}
+		if (was_filtered)
+		{
+			myPlaylist->ApplyFilter(myPlaylist->Items->GetFilter());
+			if (myPlaylist->Items->Empty())
+				myPlaylist->Items->ShowAll();
+		}
+		FreeSongList(list);
 		
 		Playlist::ReloadTotalLength = 1;
 		Playlist::ReloadRemaining = 1;
@@ -282,24 +272,21 @@ void NcmpcppStatusChanged(MPD::Connection *, MPD::StatusChanges changed, void *)
 			ShowMessage("Cleared playlist!");
 		}
 		
-		if (!Global::BlockItemListUpdate)
+		if (isVisible(myBrowser))
 		{
-			if (isVisible(myBrowser))
-			{
-				myBrowser->UpdateItemList();
-			}
-			else if (isVisible(mySearcher))
-			{
-				mySearcher->UpdateFoundList();
-			}
-			else if (isVisible(myLibrary))
-			{
-				UpdateSongList(myLibrary->Songs);
-			}
-			else if (isVisible(myPlaylistEditor))
-			{
-				UpdateSongList(myPlaylistEditor->Content);
-			}
+			myBrowser->UpdateItemList();
+		}
+		else if (isVisible(mySearcher))
+		{
+			mySearcher->UpdateFoundList();
+		}
+		else if (isVisible(myLibrary))
+		{
+			UpdateSongList(myLibrary->Songs);
+		}
+		else if (isVisible(myPlaylistEditor))
+		{
+			UpdateSongList(myPlaylistEditor->Content);
 		}
 	}
 	if (changed.Database)

@@ -33,7 +33,6 @@ namespace MPD
 	{
 		extern const char *PartOfSongsAdded;
 		extern const char *FullPlaylist;
-		extern const char *FunctionDisabledFilteringEnabled;
 	}
 	
 	enum ItemType { itDirectory, itSong, itPlaylist };
@@ -121,7 +120,7 @@ namespace MPD
 			void Stop();
 			void Next();
 			void Prev();
-			void Move(unsigned, unsigned);
+			bool Move(unsigned, unsigned);
 			void Swap(unsigned, unsigned);
 			void Seek(unsigned);
 			void Shuffle();
@@ -193,7 +192,7 @@ namespace MPD
 			void ClearPlaylist(const std::string &);
 			void AddToPlaylist(const std::string &, const Song &);
 			void AddToPlaylist(const std::string &, const std::string &);
-			void Move(const std::string &, int, int);
+			bool Move(const std::string &, int, int);
 			bool Rename(const std::string &, const std::string &);
 			
 			void StartSearch(bool);

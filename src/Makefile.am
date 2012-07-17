@@ -1,10 +1,11 @@
 bin_PROGRAMS = ncmpcpp
-ncmpcpp_SOURCES = browser.cpp charset.cpp clock.cpp conv.cpp curl_handle.cpp \
-	display.cpp error.cpp help.cpp helpers.cpp lastfm.cpp lastfm_service.cpp lyrics.cpp \
-	lyrics_fetcher.cpp media_library.cpp menu.cpp mpdpp.cpp ncmpcpp.cpp outputs.cpp \
-	playlist.cpp playlist_editor.cpp screen.cpp scrollpad.cpp search_engine.cpp \
-	sel_items_adder.cpp server_info.cpp settings.cpp song.cpp song_info.cpp status.cpp \
-	tag_editor.cpp tiny_tag_editor.cpp tolower.cpp visualizer.cpp window.cpp
+ncmpcpp_SOURCES = actions.cpp browser.cpp charset.cpp clock.cpp conv.cpp \
+	curl_handle.cpp display.cpp error.cpp help.cpp helpers.cpp lastfm.cpp \
+	lastfm_service.cpp lyrics.cpp lyrics_fetcher.cpp media_library.cpp menu.cpp mpdpp.cpp \
+	ncmpcpp.cpp outputs.cpp playlist.cpp playlist_editor.cpp screen.cpp scrollpad.cpp \
+	search_engine.cpp sel_items_adder.cpp server_info.cpp settings.cpp song.cpp song_info.cpp \
+	status.cpp tag_editor.cpp tiny_tag_editor.cpp tolower.cpp visualizer.cpp \
+	window.cpp
 
 # set the include path found by configure
 INCLUDES= $(all_includes)

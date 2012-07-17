@@ -36,9 +36,6 @@ Playlist *myPlaylist = new Playlist;
 bool Playlist::ReloadTotalLength = 0;
 bool Playlist::ReloadRemaining = 0;
 
-bool Playlist::BlockNowPlayingUpdate = 0;
-bool Playlist::BlockUpdate = 0;
-
 const size_t Playlist::SortOptions = 10;
 const size_t Playlist::SortDialogWidth = 30;
 size_t Playlist::SortDialogHeight;
@@ -156,10 +153,7 @@ void Playlist::EnterPressed()
 	if (w == Items)
 	{
 		if (!Items->Empty())
-		{
 			Mpd.PlayID(Items->Current().GetID());
-			Global::UpdateStatusImmediately = 1;
-		}
 	}
 	else if (w == SortDialog)
 	{
@@ -177,21 +171,7 @@ void Playlist::EnterPressed()
 		
 		if (pos > SortOptions)
 		{
-			if (pos == SortOptions+2) // reverse
-			{
-				BlockUpdate = 1;
-				ShowMessage("Reversing playlist order...");
-				Mpd.StartCommandsList();
-				for (size_t i = beginning, j = end-1; i < (beginning+end)/2; ++i, --j)
-				{
-					Mpd.Swap(i, j);
-					Items->Swap(i, j);
-				}
-				ShowMessage(Mpd.CommitCommandsList() ? "Playlist reversed!" : "Error while reversing playlist!");
-				w = Items;
-				return;
-			}
-			else if (pos == SortOptions+3) // cancel
+			if (pos == SortOptions+2) // cancel
 			{
 				w = Items;
 				return;
@@ -221,7 +201,6 @@ void Playlist::EnterPressed()
 			return;
 		}
 		
-		BlockUpdate = 1;
 		Mpd.StartCommandsList();
 		do
 		{
@@ -237,7 +216,8 @@ void Playlist::EnterPressed()
 			}
 		}
 		while (playlist != cmp);
-		ShowMessage(Mpd.CommitCommandsList() ? "Playlist sorted!" : "Error while sorting playlist!");
+		if (Mpd.CommitCommandsList())
+			ShowMessage("Playlist sorted!");
 		w = Items;
 	}
 }
@@ -290,7 +270,7 @@ MPD::Song *Playlist::CurrentSong()
 
 void Playlist::GetSelectedSongs(MPD::SongList &v)
 {
-	if (myPlaylist->Items->Empty())
+	if (Items->Empty())
 		return;
 	std::vector<size_t> selected;
 	Items->GetSelected(selected);
@@ -306,8 +286,97 @@ void Playlist::ApplyFilter(const std::string &s)
 		Items->ApplyFilter(s, 0, REG_ICASE | Config.regex_type);
 }
 
+bool Playlist::isFiltered()
+{
+	if (Items->isFiltered())
+	{
+		ShowMessage("Function disabled due to enabled filtering in playlist");
+		return true;
+	}
+	return false;
+}
+
+void Playlist::MoveSelectedItems(Movement where)
+{
+	if (Items->Empty() || isFiltered())
+		return;
+
+	// remove search results as we may move them to different positions, but
+	// search rememebers positions and may point to wrong ones after that.
+	Items->Search("");
+	
+	switch (where)
+	{
+		case mUp:
+		{
+			if (myPlaylist->Items->hasSelected())
+			{
+				std::vector<size_t> list;
+				myPlaylist->Items->GetSelected(list);
+				if (list.front() > 0)
+				{
+					Mpd.StartCommandsList();
+					std::vector<size_t>::const_iterator it = list.begin();
+					for (; it != list.end(); ++it)
+						Mpd.Move(*it-1, *it);
+					if (Mpd.CommitCommandsList())
+					{
+						myPlaylist->Items->Select(list.back(), false);
+						myPlaylist->Items->Select(list.front()-1, true);
+						myPlaylist->Items->Highlight(list[(list.size()-1)/2]-1);
+					}
+				}
+			}
+			else
+			{
+				size_t pos = myPlaylist->Items->Choice();
+				if (pos > 0)
+				{
+					if (Mpd.Move(pos-1, pos))
+						myPlaylist->Items->Scroll(wUp);
+				}
+			}
+			break;
+		}
+		case mDown:
+		{
+			if (Items->hasSelected())
+			{
+				std::vector<size_t> list;
+				Items->GetSelected(list);
+					
+				if (list.back() < Items->Size()-1)
+				{
+					Mpd.StartCommandsList();
+					std::vector<size_t>::const_reverse_iterator it = list.rbegin();
+					for (; it != list.rend(); ++it)
+						Mpd.Move(*it, *it+1);
+					if (Mpd.CommitCommandsList())
+					{
+						Items->Select(list.front(), false);
+						Items->Select(list.back()+1, true);
+						Items->Highlight(list[(list.size()-1)/2]+1);
+					}
+				}
+			}
+			else
+			{
+				size_t pos = Items->Choice();
+				if (pos < Items->Size()-1)
+				{
+					if (Mpd.Move(pos, pos+1))
+						Items->Scroll(wDown);
+				}
+			}
+			break;
+		}
+	}
+}
+
 void Playlist::Sort()
 {
+	if (isFiltered())
+		return;
 	if (Items->GetWidth() < SortDialogWidth || MainHeight < 5)
 		ShowMessage("Screen is too small to display dialog window!");
 	else
@@ -317,24 +386,56 @@ void Playlist::Sort()
 	}
 }
 
-void Playlist::AdjustSortOrder(int key)
+void Playlist::Reverse()
 {
-	if (Keypressed(key, Key.MvSongUp))
+	if (isFiltered())
+		return;
+	ShowMessage("Reversing playlist order...");
+	size_t beginning = -1, end = -1;
+	for (size_t i = 0; i < Items->Size(); ++i)
 	{
-		size_t pos = SortDialog->Choice();
-		if (pos > 0 && pos < SortOptions)
+		if (Items->isSelected(i))
 		{
-			SortDialog->Swap(pos, pos-1);
-			SortDialog->Scroll(wUp);
+			if (beginning == size_t(-1))
+				beginning = i;
+			end = i;
 		}
 	}
-	else if (Keypressed(key, Key.MvSongDown))
+	if (beginning == size_t(-1)) // no selected items
 	{
-		size_t pos = SortDialog->Choice();
-		if (pos < SortOptions-1)
+		beginning = 0;
+		end = Items->Size();
+	}
+	Mpd.StartCommandsList();
+	for (size_t i = beginning, j = end-1; i < (beginning+end)/2; ++i, --j)
+		Mpd.Swap(i, j);
+	if (Mpd.CommitCommandsList())
+		 ShowMessage("Playlist reversed!");
+}
+
+void Playlist::AdjustSortOrder(Movement where)
+{
+	switch (where)
+	{
+		case mUp:
 		{
-			SortDialog->Swap(pos, pos+1);
-			SortDialog->Scroll(wDown);
+			size_t pos = SortDialog->Choice();
+			if (pos > 0 && pos < SortOptions)
+			{
+				SortDialog->Swap(pos, pos-1);
+				SortDialog->Scroll(wUp);
+			}
+			break;
+		}
+		case mDown:
+		{
+			size_t pos = SortDialog->Choice();
+			if (pos < SortOptions-1)
+			{
+				SortDialog->Swap(pos, pos+1);
+				SortDialog->Scroll(wDown);
+			}
+			break;
 		}
 	}
 }
@@ -430,7 +531,6 @@ std::string Playlist::SongInColumnsToString(const MPD::Song &s, void *)
 
 bool Playlist::Add(const MPD::Song &s, bool in_playlist, bool play, int position)
 {
-	Global::BlockItemListUpdate = 1;
 	if (Config.ncmpc_like_songs_adding && in_playlist)
 	{
 		unsigned hash = s.GetHash();
@@ -448,7 +548,6 @@ bool Playlist::Add(const MPD::Song &s, bool in_playlist, bool play, int position
 		}
 		else
 		{
-			Playlist::BlockUpdate = 1;
 			Mpd.StartCommandsList();
 			for (size_t i = 0; i < Items->Size(); ++i)
 			{
@@ -460,7 +559,6 @@ bool Playlist::Add(const MPD::Song &s, bool in_playlist, bool play, int position
 				}
 			}
 			Mpd.CommitCommandsList();
-			Playlist::BlockUpdate = 0;
 			return false;
 		}
 	}

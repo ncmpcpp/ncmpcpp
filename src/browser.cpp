@@ -508,12 +508,12 @@ void Browser::ClearDirectory(const std::string &path) const
 			ClearDirectory(full_path);
 		if (remove(full_path.c_str()) == 0)
 		{
-			static const char msg[] = "Deleting \"%s\"...";
+			const char msg[] = "Deleting \"%s\"...";
 			ShowMessage(msg, Shorten(TO_WSTRING(full_path), COLS-static_strlen(msg)).c_str());
 		}
 		else
 		{
-			static const char msg[] = "Couldn't remove \"%s\": %s";
+			const char msg[] = "Couldn't remove \"%s\": %s";
 			ShowMessage(msg, Shorten(TO_WSTRING(full_path), COLS-static_strlen(msg)-25).c_str(), strerror(errno));
 		}
 	}

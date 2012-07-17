@@ -30,7 +30,6 @@ MPD::Connection Mpd;
 
 const char *MPD::Message::PartOfSongsAdded = "Only part of requested songs' list added to playlist!";
 const char *MPD::Message::FullPlaylist = "Playlist is full!";
-const char *MPD::Message::FunctionDisabledFilteringEnabled = "Function disabled due to enabled filtering in playlist";
 
 MPD::Connection::Connection() : itsConnection(0),
 				isCommandsListEnabled(0),
@@ -480,19 +479,19 @@ void MPD::Connection::Prev()
 	}
 }
 
-void MPD::Connection::Move(unsigned from, unsigned to)
+bool MPD::Connection::Move(unsigned from, unsigned to)
 {
 	if (!itsConnection)
-		return;
+		return false;
 	if (!isCommandsListEnabled)
 	{
 		GoBusy();
-		mpd_run_move(itsConnection, from, to);
+		return mpd_run_move(itsConnection, from, to);
 	}
 	else
 	{
 		assert(!isIdle);
-		mpd_send_move(itsConnection, from, to);
+		return mpd_send_move(itsConnection, from, to);
 	}
 }
 
@@ -598,17 +597,21 @@ void MPD::Connection::AddToPlaylist(const std::string &path, const std::string &
 	}
 }
 
-void MPD::Connection::Move(const std::string &path, int from, int to)
+bool MPD::Connection::Move(const std::string &path, int from, int to)
 {
 	if (!itsConnection)
-		return;
+		return false;
 	if (!isCommandsListEnabled)
+	{
 		GoBusy();
+		return mpd_send_playlist_move(itsConnection, path.c_str(), from, to)
+		    && mpd_response_finish(itsConnection);
+	}
 	else
+	{
 		assert(!isIdle);
-	mpd_send_playlist_move(itsConnection, path.c_str(), from, to);
-	if (!isCommandsListEnabled)
-		mpd_response_finish(itsConnection);
+		return mpd_send_playlist_move(itsConnection, path.c_str(), from, to);
+	}
 }
 
 bool MPD::Connection::Rename(const std::string &from, const std::string &to)
@@ -1025,10 +1028,10 @@ bool MPD::Connection::CommitCommandsList()
 	assert(isCommandsListEnabled);
 	assert(!isIdle);
 	mpd_command_list_end(itsConnection);
-	mpd_response_finish(itsConnection);
+	isCommandsListEnabled = 0;
+	return mpd_response_finish(itsConnection);
 	if (GetPlaylistLength() == itsMaxPlaylistLength && itsErrorHandler)
 		itsErrorHandler(this, MPD_SERVER_ERROR_PLAYLIST_MAX, Message::FullPlaylist, itsErrorHandlerUserdata);
-	isCommandsListEnabled = 0;
 	bool result = !CheckForErrors();
 	UpdateStatus();
 	return result;

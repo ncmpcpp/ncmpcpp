@@ -530,18 +530,8 @@ void TagEditor::EnterPressed()
 	
 	if (w == TagTypes && id == 5)
 	{
-		LockStatusbar();
-		Statusbar() << "Number tracks? [" << fmtBold << 'y' << fmtBoldEnd << '/' << fmtBold << 'n' << fmtBoldEnd << "] ";
-		wFooter->Refresh();
-		int in = 0;
-		do
-		{
-			TraceMpdStatus();
-			wFooter->ReadKey(in);
-		}
-		while (in != 'y' && in != 'n');
-		UnlockStatusbar();
-		if (in == 'y')
+		bool yes = Action::AskYesNoQuestion("Number tracks?", TraceMpdStatus);
+		if (yes)
 		{
 			MPD::SongList::iterator it = EditedSongs.begin();
 			for (unsigned i = 1; i <= EditedSongs.size(); ++i, ++it)
@@ -640,7 +630,7 @@ void TagEditor::EnterPressed()
 				ShowMessage("Writing tags in \"%s\"...", (*it)->GetName().c_str());
 				if (!WriteTags(**it))
 				{
-					static const char msg[] = "Error while writing tags in \"%s\"!";
+					const char msg[] = "Error while writing tags in \"%s\"!";
 					ShowMessage(msg, Shorten(TO_WSTRING((*it)->GetFile()), COLS-static_strlen(msg)).c_str());
 					success = 0;
 					break;
@@ -809,6 +799,25 @@ List *TagEditor::GetList()
 		return 0;
 }
 
+bool TagEditor::isNextColumnAvailable()
+{
+	if (w == LeftColumn)
+	{
+		if (!TagTypes->ReallyEmpty() && !Tags->ReallyEmpty())
+			return true;
+	}
+	else if (w == TagTypes)
+	{
+		if (!Tags->ReallyEmpty())
+			return true;
+	}
+	else if (w == FParser)
+	{
+		return true;
+	}
+	return false;
+}
+
 bool TagEditor::NextColumn()
 {
 	if (w == LeftColumn)
@@ -834,6 +843,25 @@ bool TagEditor::NextColumn()
 		w = FParserHelper;
 		FParserHelper->SetBorder(Config.active_window_border);
 		FParserHelper->Display();
+		return true;
+	}
+	return false;
+}
+
+bool TagEditor::isPrevColumnAvailable()
+{
+	if (w == Tags)
+	{
+		if (!TagTypes->ReallyEmpty() && !LeftColumn->ReallyEmpty())
+			return true;
+	}
+	else if (w == TagTypes)
+	{
+		if (!LeftColumn->ReallyEmpty())
+			return true;
+	}
+	else if (w == FParserHelper)
+	{
 		return true;
 	}
 	return false;

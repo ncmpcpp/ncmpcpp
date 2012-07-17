@@ -175,12 +175,9 @@ void TinyTagEditor::MouseButtonPressed(MEVENT me)
 		Screen< Menu<Buffer> >::MouseButtonPressed(me);
 }
 
-bool TinyTagEditor::SetEdited(MPD::Song *s)
+void TinyTagEditor::SetEdited(const MPD::Song &s)
 {
-	if (!s)
-		return false;
-	itsEdited = *s;
-	return true;
+	itsEdited = s;
 }
 
 bool TinyTagEditor::GetTags()
