@@ -76,7 +76,7 @@ std::basic_string<my_char_t> Help::Title()
 	return U("Help");
 }
 
-std::string Help::DisplayKeys2(const ActionType at)
+std::string Help::DisplayKeys(const ActionType at)
 {
 	bool backspace = true;
 	std::string result;
@@ -144,7 +144,7 @@ void Help::Section(const char *type, const char *title)
 
 void Help::KeyDesc(const ActionType at, const char *desc)
 {
-	*w << "    " << DisplayKeys2(at) << " : " << desc << "\n";
+	*w << "    " << DisplayKeys(at) << " : " << desc << "\n";
 }
 
 void Help::MouseDesc(std::string action, const char *desc, bool indent)
@@ -221,6 +221,7 @@ void Help::GetKeybindings()
 	KeyDesc(aDeselectItems, "Deselect items");
 	KeyDesc(aSelectAlbum, "Select songs of album around the cursor");
 	KeyDesc(aAddSelectedItems, "Add selected items to playlist");
+	KeyDesc(aAddRandomItems, "Add random items to playlist");
 	*w << "\n";
 	KeyDesc(aToggleRepeat, "Toggle repeat mode");
 	KeyDesc(aToggleRandom, "Toggle random mode");
@@ -265,7 +266,6 @@ void Help::GetKeybindings()
 	
 	KeysSection("Playlist");
 	KeyDesc(aPressEnter, "Play selected item");
-	KeyDesc(aAddRandomItems, "Add random items to playlist");
 	KeyDesc(aDelete, "Delete selected item(s) from playlist");
 	KeyDesc(aClearMainPlaylist, "Clear playlist");
 	KeyDesc(aCropMainPlaylist, "Clear playlist except playing/selected items");

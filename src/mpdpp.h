@@ -151,7 +151,6 @@ namespace MPD
 			unsigned long PlayTime() const { return itsStats ? mpd_stats_get_play_time(itsStats) : 0; }
 			unsigned long DBPlayTime() const { return itsStats ? mpd_stats_get_db_play_time(itsStats) : 0; }
 			
-			size_t GetMaxPlaylistLength() const { return itsMaxPlaylistLength; }
 			size_t GetPlaylistLength() const { return itsCurrentStatus ? mpd_status_get_queue_length(itsCurrentStatus) : 0; }
 			void GetPlaylistChanges(unsigned, SongList &);
 			
@@ -227,7 +226,6 @@ namespace MPD
 			bool isCommandsListEnabled;
 			
 			std::string itsErrorMessage;
-			size_t itsMaxPlaylistLength;
 			
 			int itsFD;
 			bool isIdle;

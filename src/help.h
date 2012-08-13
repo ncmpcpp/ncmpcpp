@@ -54,7 +54,7 @@ class Help : public Screen<Scrollpad>
 		void MouseDesc(std::string action, const char *desc, bool indent = false);
 		void MouseColumn(const char *column);
 		
-		std::string DisplayKeys2(const ActionType at);
+		std::string DisplayKeys(const ActionType at);
 		void GetKeybindings();
 };
 

@@ -290,7 +290,7 @@ bool Playlist::isFiltered()
 {
 	if (Items->isFiltered())
 	{
-		ShowMessage("Function disabled due to enabled filtering in playlist");
+		ShowMessage("Function currently unavailable due to filtered playlist");
 		return true;
 	}
 	return false;
@@ -599,19 +599,12 @@ bool Playlist::Add(const MPD::SongList &l, bool play, int position)
 			if (Mpd.AddSong(**j, position) < 0)
 				break;
 	}
+	
 	if (!Mpd.CommitCommandsList())
 		return false;
 	
 	if (play && old_playlist_size < Items->Size())
 		Mpd.Play(old_playlist_size);
 	
-	if (position < 0 && Items->Back().GetHash() != l.back()->GetHash())
-	{
-		if (it != l.begin())
-			ShowMessage("%s", MPD::Message::PartOfSongsAdded);
-		return false;
-	}
-	else
-		return true;
+	return true;
 }
-
