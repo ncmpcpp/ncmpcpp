@@ -50,8 +50,7 @@ namespace
 				return U("Album");
 			case 'y':
 				return U("Date");
-			case 'n':
-			case 'N':
+			case 'n': case 'N':
 				return U("Track");
 			case 'g':
 				return U("Genre");
@@ -63,6 +62,8 @@ namespace
 				return U("Disc");
 			case 'C':
 				return U("Comment");
+			case 'P':
+				return U("Priority");
 			default:
 				return U("?");
 		}

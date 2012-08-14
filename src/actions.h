@@ -43,10 +43,10 @@ enum ActionType
 	aApplyFilter, aDisableFilter, aFind, aFindItemForward, aFindItemBackward, aNextFoundItem,
 	aPreviousFoundItem, aToggleFindMode, aToggleReplayGainMode, aToggleSpaceMode, aToggleAddMode,
 	aToggleMouse, aToggleBitrateVisibility, aAddRandomItems, aToggleBrowserSortMode, aToggleLibraryTagType,
-	aRefetchLyrics, aRefetchArtistInfo, aShowSongInfo, aShowArtistInfo, aShowLyrics, aQuit,
-	aNextScreen, aPreviousScreen, aShowHelp, aShowPlaylist, aShowBrowser, aShowSearchEngine,
-	aShowMediaLibrary, aShowPlaylistEditor, aShowTagEditor, aShowOutputs, aShowVisualizer,
-	aShowClock, aShowServerInfo
+	aRefetchLyrics, aRefetchArtistInfo, aSetSelectedItemsPriority, aShowSongInfo, aShowArtistInfo,
+	aShowLyrics, aQuit, aNextScreen, aPreviousScreen, aShowHelp, aShowPlaylist, aShowBrowser,
+	aShowSearchEngine, aShowMediaLibrary, aShowPlaylistEditor, aShowTagEditor, aShowOutputs,
+	aShowVisualizer, aShowClock, aShowServerInfo
 };
 
 struct Action
@@ -703,6 +703,13 @@ struct RefetchLyrics : public Action
 struct RefetchArtistInfo : public Action
 {
 	RefetchArtistInfo() : Action(aRefetchArtistInfo, "refetch_artist_info") { }
+	virtual bool canBeRun() const;
+	virtual void Run();
+};
+
+struct SetSelectedItemsPriority : public Action
+{
+	SetSelectedItemsPriority() : Action(aSetSelectedItemsPriority, "set_selected_items_priority") { }
 	virtual bool canBeRun() const;
 	virtual void Run();
 };

@@ -84,6 +84,13 @@ std::string MPD::Song::GetLength(unsigned pos) const
 	return !len ? "-:--" : ShowTime(len);
 }
 
+std::string MPD::Song::GetPriority(unsigned pos) const
+{
+	if (pos > 0)
+		return "";
+	return IntoStr(GetPrio());
+}
+
 void MPD::Song::Localize()
 {
 #	ifdef HAVE_ICONV_H

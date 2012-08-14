@@ -246,6 +246,7 @@ void NcmpcppKeys::GenerateKeybindings()
 	BIND('`',		aRefetchLyrics);
 	BIND('`',		aRefetchArtistInfo);
 	BIND('`',		aAddRandomItems);
+	BIND(KEY_CTRL_P,	aSetSelectedItemsPriority);
 	BIND('q',		aQuit);
 	
 	BIND('k',		aScrollUp);

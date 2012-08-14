@@ -137,6 +137,7 @@
 ## %p - performer
 ## %d - disc
 ## %C - comment
+## %P - priority
 ## $R - begin right alignment
 ##
 ## you can also put them in { } and then it will be displayed

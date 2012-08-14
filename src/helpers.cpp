@@ -481,3 +481,14 @@ std::basic_string<my_char_t> Scroller(const std::basic_string<my_char_t> &str, s
 		result = s;
 	return result;
 }
+
+bool isInteger(const char *s)
+{
+	assert(s);
+	if (*s == '\0')
+		return false;
+	for (const char *it = s; *it != '\0'; ++it)
+		if (!isdigit(*it) && (it != s || *it != '-'))
+			return false;
+	return true;
+}

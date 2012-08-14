@@ -2250,6 +2250,40 @@ void RefetchArtistInfo::Run()
 #	endif // HAVE_CURL_CURL_H
 }
 
+bool SetSelectedItemsPriority::canBeRun() const
+{
+	return myScreen->ActiveWindow() == myPlaylist->Items;
+}
+
+void SetSelectedItemsPriority::Run()
+{
+	using Global::wFooter;
+	
+	assert(myScreen->ActiveWindow() == myPlaylist->Items);
+	if (myPlaylist->Items->Empty())
+		return;
+	
+	if (Mpd.Version() < 17)
+	{
+		ShowMessage("Priorities are supported in MPD >= 0.17.0");
+		return;
+	}
+	
+	LockStatusbar();
+	Statusbar() << "Set priority [0-255]: ";
+	std::string strprio = wFooter->GetString();
+	UnlockStatusbar();
+	if (!isInteger(strprio.c_str()))
+		return;
+	int prio = atoi(strprio.c_str());
+	if (prio < 0 || prio > 255)
+	{
+		ShowMessage("Entered number is out of range");
+		return;
+	}
+	myPlaylist->SetSelectedItemsPriority(prio);
+}
+
 void ShowSongInfo::Run()
 {
 	mySongInfo->SwitchTo();
@@ -2594,6 +2628,7 @@ Action *Action::Get(ActionType at)
 		insertAction(new ToggleLibraryTagType());
 		insertAction(new RefetchLyrics());
 		insertAction(new RefetchArtistInfo());
+		insertAction(new SetSelectedItemsPriority());
 		insertAction(new ShowSongInfo());
 		insertAction(new ShowArtistInfo());
 		insertAction(new ShowLyrics());

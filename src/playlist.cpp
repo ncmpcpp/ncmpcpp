@@ -607,3 +607,16 @@ bool Playlist::Add(const MPD::SongList &l, bool play, int position)
 	
 	return true;
 }
+
+void Playlist::SetSelectedItemsPriority(int prio)
+{
+	std::vector<size_t> list;
+	myPlaylist->Items->GetSelected(list);
+	if (list.empty())
+		list.push_back(Items->Choice());
+	Mpd.StartCommandsList();
+	for (std::vector<size_t>::const_iterator it = list.begin(); it != list.end(); ++it)
+		Mpd.SetPriority((*Items)[*it], prio);
+	if (Mpd.CommitCommandsList())
+		ShowMessage("Priority set");
+}

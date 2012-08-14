@@ -221,5 +221,7 @@ std::basic_string<my_char_t> Scroller(const std::basic_string<my_char_t> &str, s
 
 bool askYesNoQuestion(const Buffer &question, void (*callback)());
 
+bool isInteger(const char *s);
+
 #endif
 

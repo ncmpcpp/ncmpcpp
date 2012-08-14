@@ -839,6 +839,22 @@ void MPD::Connection::SetCrossfade(unsigned crossfade)
 	}
 }
 
+bool MPD::Connection::SetPriority(const Song &s, int prio)
+{
+	if (!itsConnection)
+		return false;
+	if (!isCommandsListEnabled)
+	{
+		GoBusy();
+		return mpd_run_prio_id(itsConnection, prio, s.GetID());
+	}
+	else
+	{
+		assert(!isIdle);
+		return mpd_send_prio_id(itsConnection, prio, s.GetID());
+	}
+}
+
 int MPD::Connection::AddSong(const std::string &path, int pos)
 {
 	if (!itsConnection)

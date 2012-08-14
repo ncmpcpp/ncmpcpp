@@ -174,6 +174,8 @@ namespace MPD
 			std::string GetReplayGainMode();
 			void SetReplayGainMode(ReplayGainMode);
 			
+			bool SetPriority(const Song &s, int prio);
+			
 			int AddSong(const std::string &, int = -1); // returns id of added song
 			int AddSong(const Song &, int = -1); // returns id of added song
 			bool AddRandomTag(mpd_tag_type, size_t);

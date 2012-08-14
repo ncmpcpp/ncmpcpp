@@ -57,6 +57,7 @@ namespace MPD
 			std::string GetDisc(unsigned = 0) const;
 			std::string GetComment(unsigned = 0) const;
 			std::string GetLength(unsigned = 0) const;
+			std::string GetPriority(unsigned = 0) const;
 			
 			std::string GetTags(GetFunction) const;
 			
@@ -64,6 +65,7 @@ namespace MPD
 			unsigned GetTotalLength() const { return mpd_song_get_duration(itsSong); }
 			unsigned GetPosition() const { return mpd_song_get_pos(itsSong); }
 			unsigned GetID() const { return mpd_song_get_id(itsSong); }
+			unsigned GetPrio() const { return mpd_song_get_prio(itsSong); }
 			
 			time_t GetMTime() const { return mpd_song_get_last_modified(itsSong); }
 			

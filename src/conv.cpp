@@ -178,6 +178,8 @@ MPD::Song::GetFunction toGetFunction(char c)
 			return &MPD::Song::GetComment;
 		case 't':
 			return &MPD::Song::GetTitle;
+		case 'P':
+			return &MPD::Song::GetPriority;
 		default:
 			return 0;
 	}
