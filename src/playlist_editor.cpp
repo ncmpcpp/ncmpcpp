@@ -325,12 +325,6 @@ void PlaylistEditor::AddToPlaylist(bool add_n_play)
 	
 	if (w == Playlists && !Playlists->Empty())
 	{
-		const char *msg;
-		if (add_n_play)
-			msg = "Loading and playing playlist \"%s\"...";
-		else
-			msg = "Loading playlist \"%s\"...";
-		ShowMessage(msg, Playlists->Current().c_str());
 		if (Mpd.LoadPlaylist(utf_to_locale_cpy(Playlists->Current())))
 		{
 			ShowMessage("Playlist \"%s\" loaded", Playlists->Current().c_str());

@@ -629,7 +629,7 @@ void MediaLibrary::LocateSong(const MPD::Song &s)
 		// <mpd-0.14.* has no ability to search for empty tags, which sometimes
 		// leaves albums column empty. since this function relies on this column
 		// being non-empty, it has to be disabled for these versions.
-		ShowMessage("Your MPD version is too old to handle this function properly, please upgrade.");
+		ShowMessage("This function is supported in MPD >= 0.14.0");
 		return;
 	}
 	std::string primary_tag;
@@ -650,15 +650,15 @@ void MediaLibrary::LocateSong(const MPD::Song &s)
 		case MPD_TAG_PERFORMER:
 			primary_tag = s.GetPerformer();
 			break;
-		default:
-			ShowMessage("Invalid tag type in left column of the media library");
+		default: // shouldn't happen
+			assert(false);
 			return;
 	}
 	if (primary_tag.empty())
 	{
 		std::string item_type = IntoStr(Config.media_lib_primary_tag);
 		ToLower(item_type);
-		ShowMessage("Can't jump to media library because the song has no %s tag set.", item_type.c_str());
+		ShowMessage("Can't use this function because the song has no %s tag set", item_type.c_str());
 		return;
 	}
 	
@@ -749,10 +749,10 @@ void MediaLibrary::AddToPlaylist(bool add_n_play)
 			{
 				std::string tag_type = IntoStr(Config.media_lib_primary_tag);
 				ToLower(tag_type);
-				ShowMessage("Adding songs of %s \"%s\"", tag_type.c_str(), Artists->Current().c_str());
+				ShowMessage("Songs with %s = \"%s\" added", tag_type.c_str(), Artists->Current().c_str());
 			}
 			else if (w == Albums)
-				ShowMessage("Adding songs from album \"%s\"", Albums->Current().Album.c_str());
+				ShowMessage("Songs from album \"%s\" added", Albums->Current().Album.c_str());
 		}
 	}
 

@@ -90,7 +90,7 @@ void Clock::SwitchTo()
 	GetWindowResizeParams(x_offset, width, false);
 	if (Width > width || Height > MainHeight)
 	{
-		ShowMessage("Screen is too small to display clock!");
+		ShowMessage("Screen is too small to display clock");
 		if (myLockedScreen)
 			UpdateInactiveScreen(myLockedScreen);
 		return;

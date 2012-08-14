@@ -535,19 +535,19 @@ void MPD::Connection::Shuffle()
 	}
 }
 
-void MPD::Connection::ClearPlaylist()
+bool MPD::Connection::ClearPlaylist()
 {
 	if (!itsConnection)
-		return;
+		return false;
 	if (!isCommandsListEnabled)
 	{
 		GoBusy();
-		mpd_run_clear(itsConnection);
+		return mpd_run_clear(itsConnection);
 	}
 	else
 	{
 		assert(!isIdle);
-		mpd_send_clear(itsConnection);
+		return mpd_send_clear(itsConnection);
 	}
 }
 

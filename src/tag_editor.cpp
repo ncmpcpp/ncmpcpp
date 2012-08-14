@@ -456,7 +456,7 @@ void TagEditor::EnterPressed()
 					std::string new_file = GenerateFilename(s, "{" + Config.pattern + "}");
 					if (new_file.empty() && !FParserUsePreview)
 					{
-						ShowMessage("File \"%s\" would have an empty name!", s.GetName().c_str());
+						ShowMessage("File \"%s\" would have an empty name", s.GetName().c_str());
 						FParserUsePreview = 1;
 						success = 0;
 					}
@@ -485,7 +485,7 @@ void TagEditor::EnterPressed()
 				quit = 1;
 			}
 			if (pos != 3 || success)
-				ShowMessage("Operation finished!");
+				ShowMessage("Operation finished");
 		}
 		else if (pos == 2) // show legend
 		{
@@ -541,10 +541,10 @@ void TagEditor::EnterPressed()
 				else
 					(*it)->SetTrack(i);
 			}
-			ShowMessage("Tracks numbered!");
+			ShowMessage("Tracks numbered");
 		}
 		else
-			ShowMessage("Aborted!");
+			ShowMessage("Aborted");
 		return;
 	}
 	
@@ -580,7 +580,7 @@ void TagEditor::EnterPressed()
 			{
 				if (size_t(COLS) < FParserDialogWidth || MainHeight < FParserDialogHeight)
 				{
-					ShowMessage("Screen is too small to display additional windows!");
+					ShowMessage("Screen is too small to display additional windows");
 					return;
 				}
 				FParserDialog->Reset();
@@ -607,14 +607,14 @@ void TagEditor::EnterPressed()
 			ShowMessage("Processing...");
 			for (MPD::SongList::iterator it = EditedSongs.begin(); it != EditedSongs.end(); ++it)
 				CapitalizeFirstLetters(**it);
-			ShowMessage("Done!");
+			ShowMessage("Done");
 		}
 		else if (id == 13) // lower all letters
 		{
 			ShowMessage("Processing...");
 			for (MPD::SongList::iterator it = EditedSongs.begin(); it != EditedSongs.end(); ++it)
 				LowerAllLetters(**it);
-			ShowMessage("Done!");
+			ShowMessage("Done");
 		}
 		else if (id == 14) // reset
 		{
@@ -630,7 +630,7 @@ void TagEditor::EnterPressed()
 				ShowMessage("Writing tags in \"%s\"...", (*it)->GetName().c_str());
 				if (!WriteTags(**it))
 				{
-					const char msg[] = "Error while writing tags in \"%s\"!";
+					const char msg[] = "Error while writing tags in \"%s\"";
 					ShowMessage(msg, Shorten(TO_WSTRING((*it)->GetFile()), COLS-static_strlen(msg)).c_str());
 					success = 0;
 					break;
@@ -638,7 +638,7 @@ void TagEditor::EnterPressed()
 			}
 			if (success)
 			{
-				ShowMessage("Tags updated!");
+				ShowMessage("Tags updated");
 				TagTypes->HighlightColor(Config.main_highlight_color);
 				TagTypes->Reset();
 				w->Refresh();

@@ -216,7 +216,7 @@ void Playlist::EnterPressed()
 		}
 		while (playlist != cmp);
 		if (Mpd.CommitCommandsList())
-			ShowMessage("Playlist sorted!");
+			ShowMessage("Playlist sorted");
 		w = Items;
 	}
 }
@@ -377,7 +377,7 @@ void Playlist::Sort()
 	if (isFiltered())
 		return;
 	if (Items->GetWidth() < SortDialogWidth || MainHeight < 5)
-		ShowMessage("Screen is too small to display dialog window!");
+		ShowMessage("Screen is too small to display dialog window");
 	else
 	{
 		SortDialog->Reset();
@@ -409,7 +409,7 @@ void Playlist::Reverse()
 	for (size_t i = beginning, j = end-1; i < (beginning+end)/2; ++i, --j)
 		Mpd.Swap(i, j);
 	if (Mpd.CommitCommandsList())
-		 ShowMessage("Playlist reversed!");
+		 ShowMessage("Playlist reversed");
 }
 
 void Playlist::AdjustSortOrder(Movement where)
@@ -437,16 +437,6 @@ void Playlist::AdjustSortOrder(Movement where)
 			break;
 		}
 	}
-}
-
-void Playlist::FixPositions(size_t beginning)
-{
-	bool was_filtered = Items->isFiltered();
-	Items->ShowAll();
-	for (size_t i = beginning; i < Items->Size(); ++i)
-		(*Items)[i].SetPosition(i);
-	if (was_filtered)
-		Items->ShowFiltered();
 }
 
 void Playlist::EnableHighlighting()

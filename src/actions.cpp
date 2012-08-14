@@ -208,7 +208,7 @@ void Action::Seek()
 	
 	if (!Mpd.GetTotalTime())
 	{
-		ShowMessage("Unknown item length!");
+		ShowMessage("Unknown item length");
 		return;
 	}
 	
@@ -323,7 +323,7 @@ void Action::FindItem(const FindDirection fd)
 		return;
 	
 	if (success)
-		ShowMessage("Searching finished!");
+		ShowMessage("Searching finished");
 	else
 		ShowMessage("Unable to find \"%s\"", findme.c_str());
 	
@@ -390,7 +390,7 @@ bool Action::isMPDMusicDirSet()
 {
 	if (Config.mpd_music_dir.empty())
 	{
-		ShowMessage("mpd_music_dir is not set!");
+		ShowMessage("Proper mpd_music_dir variable has to be set in configuration file");
 		return false;
 	}
 	return true;
@@ -722,8 +722,7 @@ void Delete::Run()
 			{
 				for (size_t i = 0; i < myPlaylist->Items->Size(); ++i)
 					myPlaylist->Items->Select(i, 0);
-				myPlaylist->FixPositions(list.front());
-				ShowMessage("Selected items deleted!");
+				ShowMessage("Selected items deleted");
 			}
 		}
 		else
@@ -744,14 +743,14 @@ void Delete::Run()
 		{
 			if (Mpd.DeletePlaylist(locale_to_utf_cpy(name)))
 			{
-				const char msg[] = "Playlist \"%s\" deleted!";
+				const char msg[] = "Playlist \"%s\" deleted";
 				ShowMessage(msg, Shorten(TO_WSTRING(name), COLS-static_strlen(msg)).c_str());
 				if (myBrowser->Main() && !myBrowser->isLocal() && myBrowser->CurrentDir() == "/")
 					myBrowser->GetDirectory("/");
 			}
 		}
 		else
-			ShowMessage("Aborted!");
+			ShowMessage("Aborted");
 		if (myPlaylistEditor->Main()) // check if initialized
 			myPlaylistEditor->Playlists->Clear(); // make playlists list update itself
 	}
@@ -802,12 +801,12 @@ void Delete::Run()
 				name = it.type == itSong ? it.song->GetName() : it.name;
 				if (myBrowser->DeleteItem(it))
 				{
-					const char msg[] = "\"%s\" deleted!";
+					const char msg[] = "\"%s\" deleted";
 					ShowMessage(msg, Shorten(TO_WSTRING(name), COLS-static_strlen(msg)).c_str());
 				}
 				else
 				{
-					const char msg[] = "Couldn't remove \"%s\": %s";
+					const char msg[] = "Couldn't delete \"%s\": %s";
 					ShowMessage(msg, Shorten(TO_WSTRING(name), COLS-static_strlen(msg)-25).c_str(), strerror(errno));
 					success = 0;
 					break;
@@ -822,7 +821,7 @@ void Delete::Run()
 			}
 		}
 		else
-			ShowMessage("Aborted!");
+			ShowMessage("Aborted");
 			
 	}
 #	endif // !WIN32
@@ -841,7 +840,7 @@ void Delete::Run()
 				myPlaylistEditor->Content->DeleteOption(*it);
 			}
 			Mpd.CommitCommandsList();
-			ShowMessage("Selected items deleted from playlist \"%s\"!", myPlaylistEditor->Playlists->Current().c_str());
+			ShowMessage("Selected items deleted from playlist \"%s\"", myPlaylistEditor->Playlists->Current().c_str());
 		}
 		else
 		{
@@ -883,7 +882,7 @@ void SavePlaylist::Run()
 	UnlockStatusbar();
 	if (playlist_name.find("/") != std::string::npos)
 	{
-		ShowMessage("Playlist name cannot contain slashes!");
+		ShowMessage("Playlist name must not contain slashes");
 		return;
 	}
 	if (!playlist_name.empty())
@@ -902,7 +901,7 @@ void SavePlaylist::Run()
 			int result = Mpd.SavePlaylist(real_playlist_name);
 			if (result == MPD_ERROR_SUCCESS)
 			{
-				ShowMessage("Playlist saved as: %s", playlist_name.c_str());
+				ShowMessage("Playlist saved as \"%s\"", playlist_name.c_str());
 				if (myPlaylistEditor->Main()) // check if initialized
 					myPlaylistEditor->Playlists->Clear(); // make playlist's list update itself
 			}
@@ -913,10 +912,10 @@ void SavePlaylist::Run()
 				{
 					Mpd.DeletePlaylist(real_playlist_name);
 					if (Mpd.SavePlaylist(real_playlist_name) == MPD_ERROR_SUCCESS)
-						ShowMessage("Playlist overwritten!");
+						ShowMessage("Playlist overwritten");
 				}
 				else
-					ShowMessage("Aborted!");
+					ShowMessage("Aborted");
 				if (myPlaylistEditor->Main()) // check if initialized
 					myPlaylistEditor->Playlists->Clear(); // make playlist's list update itself
 				if (myScreen == myPlaylist)
@@ -992,7 +991,7 @@ void MoveSelectedItemsTo::Run()
 		return;
 	if (!myPlaylist->Items->hasSelected())
 	{
-		ShowMessage("No selected items to move!");
+		ShowMessage("No selected items to move");
 		return;
 	}
 	// remove search results as we may move them to different positions, but
@@ -1195,7 +1194,7 @@ void ToggleFetchingLyricsInBackground::Run()
 {
 #	ifdef HAVE_CURL_CURL_H
 	Config.fetch_lyrics_in_background = !Config.fetch_lyrics_in_background;
-	ShowMessage("Fetching lyrics for currently playing song in background: %s", Config.fetch_lyrics_in_background ? "On" : "Off");
+	ShowMessage("Fetching lyrics for playing songs in background: %s", Config.fetch_lyrics_in_background ? "On" : "Off");
 #	endif // HAVE_CURL_CURL_H
 }
 
@@ -1399,7 +1398,7 @@ void EditLibraryTag::Run()
 			std::string path = Config.mpd_music_dir + (*it)->GetFile();
 			if (!TagEditor::WriteTags(**it))
 			{
-				const char msg[] = "Error while updating tags in \"%s\"!";
+				const char msg[] = "Error while updating tags in \"%s\"";
 				ShowMessage(msg, Shorten(TO_WSTRING((*it)->GetFile()), COLS-static_strlen(msg)).c_str());
 				success = 0;
 				break;
@@ -1408,7 +1407,7 @@ void EditLibraryTag::Run()
 		if (success)
 		{
 			Mpd.UpdateDirectory(locale_to_utf_cpy(FindSharedDir(list)));
-			ShowMessage("Tags updated successfully!");
+			ShowMessage("Tags updated successfully");
 		}
 		FreeSongList(list);
 	}
@@ -1448,7 +1447,7 @@ void EditLibraryAlbum::Run()
 			TagLib::FileRef f(locale_to_utf_cpy(path).c_str());
 			if (f.isNull())
 			{
-				const char msg[] = "Error while opening file \"%s\"!";
+				const char msg[] = "Error while opening file \"%s\"";
 				ShowMessage(msg, Shorten(TO_WSTRING((*myLibrary->Songs)[i].GetFile()), COLS-static_strlen(msg)).c_str());
 				success = 0;
 				break;
@@ -1456,7 +1455,7 @@ void EditLibraryAlbum::Run()
 			f.tag()->setAlbum(ToWString(new_album));
 			if (!f.save())
 			{
-				const char msg[] = "Error while writing tags in \"%s\"!";
+				const char msg[] = "Error while writing tags in \"%s\"";
 				ShowMessage(msg, Shorten(TO_WSTRING((*myLibrary->Songs)[i].GetFile()), COLS-static_strlen(msg)).c_str());
 				success = 0;
 				break;
@@ -1465,7 +1464,7 @@ void EditLibraryAlbum::Run()
 		if (success)
 		{
 			Mpd.UpdateDirectory(locale_to_utf_cpy(FindSharedDir(myLibrary->Songs)));
-			ShowMessage("Tags updated successfully!");
+			ShowMessage("Tags updated successfully");
 		}
 	}
 #	endif // HAVE_TAGLIB_H
@@ -1658,14 +1657,14 @@ void ToggleScreenLock::Run()
 		}
 		if (part < 20 || part > 80)
 		{
-			ShowMessage("Invalid number (%d)!", part);
+			ShowMessage("Number is out of range");
 			return;
 		}
 		Config.locked_screen_width_part = part/100.0;
 		if (myScreen->Lock())
 			ShowMessage("Screen locked (with %d%% width)", part);
 		else
-			ShowMessage("Screen cannot be locked");
+			ShowMessage("Current screen can't be locked");
 	}
 }
 
@@ -1700,7 +1699,7 @@ void JumpToPositionInSong::Run()
 	
 	if (!Mpd.GetTotalTime())
 	{
-		ShowMessage("Unknown item length!");
+		ShowMessage("Unknown item length");
 		return;
 	}
 	
@@ -1722,7 +1721,7 @@ void JumpToPositionInSong::Run()
 		if (newpos >= 0 && newpos <= Mpd.GetTotalTime())
 			Mpd.Seek(newpos);
 		else
-			ShowMessage("Out of bounds, 0:00-%s possible for mm:ss, %s given.", s->GetLength().c_str(), MPD::Song::ShowTime(newpos).c_str());
+			ShowMessage("Out of bounds, 0:00-%s possible for mm:ss, %s given", s->GetLength().c_str(), MPD::Song::ShowTime(newpos).c_str());
 	}
 	else if (position.find('s') != std::string::npos) // probably position in seconds
 	{
@@ -1730,7 +1729,7 @@ void JumpToPositionInSong::Run()
 		if (newpos >= 0 && newpos <= Mpd.GetTotalTime())
 			Mpd.Seek(newpos);
 		else
-			ShowMessage("Out of bounds, 0-%d possible for seconds, %d given.", s->GetTotalLength(), newpos);
+			ShowMessage("Out of bounds, 0-%d possible for seconds, %d given", s->GetTotalLength(), newpos);
 	}
 	else
 	{
@@ -1738,7 +1737,7 @@ void JumpToPositionInSong::Run()
 		if (newpos >= 0 && newpos <= 100)
 			Mpd.Seek(Mpd.GetTotalTime()*newpos/100.0);
 		else
-			ShowMessage("Out of bounds, 0-100 possible for %%, %d given.", newpos);
+			ShowMessage("Out of bounds, 0-100 possible for %%, %d given", newpos);
 	}
 }
 
@@ -1750,7 +1749,7 @@ bool ReverseSelection::canBeRun() const
 void ReverseSelection::Run()
 {
 	myScreen->ReverseSelection();
-	ShowMessage("Selection reversed!");
+	ShowMessage("Selection reversed");
 }
 
 bool DeselectItems::canBeRun() const
@@ -1765,7 +1764,7 @@ void DeselectItems::Run()
 		return;
 	for (size_t i = 0; i < mList->Size(); ++i)
 		mList->Select(i, 0);
-	ShowMessage("Items deselected!");
+	ShowMessage("Items deselected");
 }
 
 bool SelectAlbum::canBeRun() const
@@ -1804,7 +1803,7 @@ void SelectAlbum::Run()
 			else
 				mList->Select(pos, 1);
 		}
-		ShowMessage("Album around cursor position selected.");
+		ShowMessage("Album around cursor position selected");
 	}
 }
 
@@ -1836,9 +1835,9 @@ void CropMainPlaylist::Run()
 		              || (!delete_all_but_current && !myPlaylist->Items->isSelected(myPlaylist->NowPlaying));
 		if (myPlaylist->isPlaying() && delete_np)
 			Mpd.DeleteID(myPlaylist->NowPlayingSong()->GetID());
-		ShowMessage("Deleting all items but selected...");
+		ShowMessage("Cropping playlist...");
 		if (Mpd.CommitCommandsList())
-			ShowMessage("Items deleted!");
+			ShowMessage("Playlist cropped");
 	}
 }
 
@@ -1868,10 +1867,10 @@ void CropPlaylist::Run()
 			if (delete_i)
 				Mpd.Delete(playlist, i);
 		}
-		ShowMessage("Deleting all items but selected...");
+		ShowMessage("Cropping playlist \"%s\"...", myPlaylistEditor->Playlists->Current().c_str());
 		if (Mpd.CommitCommandsList())
 		{
-			ShowMessage("Items deleted!");
+			ShowMessage("Playlist \"%s\" cropped", myPlaylistEditor->Playlists->Current().c_str());
 			// enforce content update
 			myPlaylistEditor->Content->Clear();
 		}
@@ -1892,12 +1891,13 @@ void ClearMainPlaylist::Run()
 			for (int i = myPlaylist->Items->Size()-1; i >= 0; --i)
 				Mpd.Delete((*myPlaylist->Items)[i].GetPosition());
 			if (Mpd.CommitCommandsList())
-				ShowMessage("Filtered items deleted!");
+				ShowMessage("Filtered items deleted");
 		}
 		else
 		{
 			ShowMessage("Clearing playlist...");
-			Mpd.ClearPlaylist();
+			if (Mpd.ClearPlaylist())
+				ShowMessage("Playlist cleared");
 		}
 	}
 }
@@ -1911,20 +1911,21 @@ void ClearPlaylist::Run()
 {
 	if (myPlaylistEditor->Playlists->Empty())
 		return;
-	
+	// OMGPLZ
 	bool yes = true;
 	if (Config.ask_before_clearing_main_playlist)
 		yes = AskYesNoQuestion("Do you really want to clear playlist \"" + myPlaylistEditor->Playlists->Current() + "\"?", TraceMpdStatus);
 	if (yes)
 	{
-		if (myPlaylist->Items->isFiltered())
+		if (myPlaylistEditor->Content->isFiltered())
 		{
-			ShowMessage("Deleting filtered items...");
+			std::string playlist = locale_to_utf_cpy(myPlaylistEditor->Playlists->Current());
+			ShowMessage("Deleting filtered items from playlist \"%s\"...", myPlaylistEditor->Playlists->Current().c_str());
 			Mpd.StartCommandsList();
 			for (int i = myPlaylistEditor->Content->Size()-1; i >= 0; --i)
-				Mpd.Delete((*myPlaylistEditor->Content)[i].GetPosition());
+				Mpd.Delete(playlist, (*myPlaylistEditor->Content)[i].GetPosition());
 			if (Mpd.CommitCommandsList())
-				ShowMessage("Filtered items deleted!");
+				ShowMessage("Filtered items deleted from playlist \"%s\"", myPlaylistEditor->Playlists->Current().c_str());
 		}
 		else
 		{
@@ -2095,7 +2096,7 @@ void ToggleReplayGainMode::Run()
 void ToggleSpaceMode::Run()
 {
 	Config.space_selects = !Config.space_selects;
-	ShowMessage("Space mode: %s item", Config.space_selects ? "Select/deselect" : "Add");
+	ShowMessage("Space mode: %s item", Config.space_selects ? "Select" : "Add");
 }
 
 void ToggleAddMode::Run()
@@ -2142,7 +2143,7 @@ void AddRandomItems::Run()
 	size_t number = StrToLong(wFooter->GetString());
 	UnlockStatusbar();
 	if (number && (answer == 's' ? Mpd.AddRandomSongs(number) : Mpd.AddRandomTag(tag_type, number)))
-		ShowMessage("%zu random %s%s added to playlist!", number, tag_type_str.c_str(), number == 1 ? "" : "s");
+		ShowMessage("%zu random %s%s added to playlist", number, tag_type_str.c_str(), number == 1 ? "" : "s");
 }
 
 bool ToggleBrowserSortMode::canBeRun() const
@@ -2278,7 +2279,7 @@ void SetSelectedItemsPriority::Run()
 	int prio = atoi(strprio.c_str());
 	if (prio < 0 || prio > 255)
 	{
-		ShowMessage("Entered number is out of range");
+		ShowMessage("Number is out of range");
 		return;
 	}
 	myPlaylist->SetSelectedItemsPriority(prio);

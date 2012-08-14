@@ -52,7 +52,7 @@ void ServerInfo::SwitchTo()
 	}
 	if (MainHeight < 5)
 	{
-		ShowMessage("Screen is too small to display this window!");
+		ShowMessage("Screen is too small to display this window");
 		return;
 	}
 	

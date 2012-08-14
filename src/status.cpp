@@ -198,7 +198,7 @@ void NcmpcppErrorCallback(MPD::Connection *, int errorid, const char *msg, void 
 		Statusbar() << "Password: ";
 		Mpd.SetPassword(wFooter->GetString(-1, 0, 1));
 		if (Mpd.SendPassword())
-			ShowMessage("Password accepted!");
+			ShowMessage("Password accepted");
 		wFooter->SetGetStringHelper(StatusbarGetStringHelper);
 	}
 	else if ((errorid >> 8) == MPD_SERVER_ERROR_NO_EXIST && myScreen == myBrowser)
@@ -207,7 +207,7 @@ void NcmpcppErrorCallback(MPD::Connection *, int errorid, const char *msg, void 
 		myBrowser->Refresh();
 	}
 	else
-		ShowMessage("%s", msg);
+		ShowMessage("MPD: %s", msg);
 }
 
 void NcmpcppStatusChanged(MPD::Connection *, MPD::StatusChanges changed, void *)
@@ -269,7 +269,6 @@ void NcmpcppStatusChanged(MPD::Connection *, MPD::StatusChanges changed, void *)
 		{
 			myPlaylist->Items->Reset();
 			myPlaylist->Items->Window::Clear();
-			ShowMessage("Cleared playlist!");
 		}
 		
 		if (isVisible(myBrowser))
@@ -550,7 +549,7 @@ void NcmpcppStatusChanged(MPD::Connection *, MPD::StatusChanges changed, void *)
 		if (changed.Database && myScreen == mySelectedItemsAdder)
 		{
 			myScreen->SwitchTo(); // switch to previous screen
-			ShowMessage("Database has changed, you need to select your item(s) once again!");
+			ShowMessage("Database has changed, you need to select your item(s) once again");
 		}
 	}
 	if (changed.StatusFlags && (Config.header_visibility || Config.new_design))

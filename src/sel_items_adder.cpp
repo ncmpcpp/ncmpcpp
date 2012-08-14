@@ -72,7 +72,7 @@ void SelectedItemsAdder::SwitchTo()
 	
 	if (MainHeight < 5)
 	{
-		ShowMessage("Screen is too small to display this window!");
+		ShowMessage("Screen is too small to display this window");
 		return;
 	}
 	
@@ -90,7 +90,7 @@ void SelectedItemsAdder::SwitchTo()
 	
 	bool playlists_not_active = myScreen == myBrowser && myBrowser->isLocal();
 	if (playlists_not_active)
-		ShowMessage("Local items cannot be added to m3u playlist!");
+		ShowMessage("Local items can't be added to stored playlists");
 	
 	w->Clear();
 	w->Reset();
@@ -182,7 +182,7 @@ void SelectedItemsAdder::EnterPressed()
 				for (MPD::SongList::const_iterator it = list.begin(); it != list.end(); ++it)
 					Mpd.AddToPlaylist(utf_playlist, **it);
 				if (Mpd.CommitCommandsList())
-					ShowMessage("Selected item(s) added to playlist \"%s\"!", playlist.c_str());
+					ShowMessage("Selected item(s) added to playlist \"%s\"", playlist.c_str());
 			}
 		}
 		else if (pos > 1 && pos < w->Size()-1) // add items to existing playlist
@@ -192,7 +192,7 @@ void SelectedItemsAdder::EnterPressed()
 			for (MPD::SongList::const_iterator it = list.begin(); it != list.end(); ++it)
 				Mpd.AddToPlaylist(playlist, **it);
 			if (Mpd.CommitCommandsList())
-				ShowMessage("Selected item(s) added to playlist \"%s\"!", w->Current().c_str());
+				ShowMessage("Selected item(s) added to playlist \"%s\"", w->Current().c_str());
 		}
 		if (pos != w->Size()-1)
 		{
@@ -208,7 +208,7 @@ void SelectedItemsAdder::EnterPressed()
 		// disable adding after current track/album when stopped
 		if (pos > 1 && pos < 4 && !Mpd.isPlaying())
 		{
-			ShowMessage("Player is stopped!");
+			ShowMessage("Player is stopped");
 			return;
 		}
 		
@@ -245,7 +245,7 @@ void SelectedItemsAdder::EnterPressed()
 		}
 		
 		if (successful_operation)
-			ShowMessage("Selected item(s) added!");
+			ShowMessage("Selected item(s) added");
 	}
 	MPD::FreeSongList(list);
 	SwitchTo();

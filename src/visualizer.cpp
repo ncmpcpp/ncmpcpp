@@ -242,7 +242,7 @@ void Visualizer::FindOutputID()
 			if (outputs[i].first == Config.visualizer_output_name)
 				itsOutputID = i;
 		if (itsOutputID == -1)
-			ShowMessage("There is no output named \"%s\"!", Config.visualizer_output_name.c_str());
+			ShowMessage("There is no output named \"%s\"", Config.visualizer_output_name.c_str());
 	}
 }
 

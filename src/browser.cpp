@@ -140,11 +140,11 @@ void Browser::EnterPressed()
 		}
 		case itPlaylist:
 		{
-			ShowMessage("Loading and playing playlist \"%s\"...", item.name.c_str());
 			if (Mpd.LoadPlaylist(locale_to_utf_cpy(item.name)))
+			{
 				ShowMessage("Playlist \"%s\" loaded", item.name.c_str());
-			else
 				myPlaylist->PlayNewlyAddedSongs();
+			}
 		}
 	}
 }
@@ -178,7 +178,7 @@ void Browser::SpacePressed()
 			{
 				MPD::SongList list;
 				MPD::ItemList items;
-				ShowMessage("Scanning \"%s\"...", item.name.c_str());
+				ShowMessage("Scanning directory \"%s\"...", item.name.c_str());
 				myBrowser->GetLocalDirectory(items, item.name, 1);
 				list.reserve(items.size());
 				for (MPD::ItemList::const_iterator it = items.begin(); it != items.end(); ++it)
@@ -190,7 +190,7 @@ void Browser::SpacePressed()
 #			endif // !WIN32
 				result = Mpd.Add(locale_to_utf_cpy(item.name));
 			if (result)
-				ShowMessage("Added folder: %s", item.name.c_str());
+				ShowMessage("Directory \"%s\" added", item.name.c_str());
 			break;
 		}
 		case itSong:
@@ -201,7 +201,6 @@ void Browser::SpacePressed()
 		}
 		case itPlaylist:
 		{
-			ShowMessage("Loading playlist \"%s\"...", item.name.c_str());
 			if (Mpd.LoadPlaylist(locale_to_utf_cpy(item.name)))
 				ShowMessage("Playlist \"%s\" loaded", item.name.c_str());
 			break;
@@ -519,7 +518,7 @@ void Browser::ChangeBrowseMode()
 		return;
 	
 	itsBrowseLocally = !itsBrowseLocally;
-	ShowMessage("Browse mode: %s", itsBrowseLocally ? "Local filesystem" : "MPD music dir");
+	ShowMessage("Browse mode: %s", itsBrowseLocally ? "Local filesystem" : "MPD database");
 	itsBrowsedDir = itsBrowseLocally ? Config.GetHomeDirectory() : "/";
 	if (itsBrowseLocally && *itsBrowsedDir.rbegin() == '/')
 		itsBrowsedDir.resize(itsBrowsedDir.length()-1);

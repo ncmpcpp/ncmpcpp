@@ -70,7 +70,7 @@ namespace
 	{
 		if (signal == SIGPIPE)
 		{
-			ShowMessage("Broken pipe signal caught!");
+			ShowMessage("SIGPIPE (broken pipe signal) received");
 		}
 		else if (signal == SIGWINCH)
 		{
@@ -206,7 +206,7 @@ int main(int argc, char **argv)
 			ShowMessage("Attempting to reconnect...");
 			if (Mpd.Connect())
 			{
-				ShowMessage("Connected to %s!", Mpd.GetHostname().c_str());
+				ShowMessage("Connected to %s", Mpd.GetHostname().c_str());
 				if (Mpd.SupportsIdle())
 				{
 					wFooter->AddFDCallback(Mpd.GetFD(), StatusbarMPDCallback);

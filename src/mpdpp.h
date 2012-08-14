@@ -124,7 +124,7 @@ namespace MPD
 			void Swap(unsigned, unsigned);
 			void Seek(unsigned);
 			void Shuffle();
-			void ClearPlaylist();
+			bool ClearPlaylist();
 			
 			bool isPlaying() const { return GetState() > psStop; }
 			

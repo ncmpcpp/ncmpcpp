@@ -172,7 +172,7 @@ void SearchEngine::EnterPressed()
 			*w->at(ResetButton+2).first << Config.color1 << "Search results: " << Config.color2 << "Found " << found  << (found > 1 ? " songs" : " song") << clDefault;
 			w->InsertSeparator(ResetButton+3);
 			UpdateFoundList();
-			ShowMessage("Searching finished!");
+			ShowMessage("Searching finished");
 			if (Config.block_search_constraints_change)
 				for (size_t i = 0; i < StaticOptions-4; ++i)
 					w->Static(i, 1);

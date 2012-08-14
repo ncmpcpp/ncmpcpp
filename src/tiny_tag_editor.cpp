@@ -68,7 +68,7 @@ void TinyTagEditor::SwitchTo()
 	
 	if (itsEdited.isStream())
 	{
-		ShowMessage("Streams cannot be edited!");
+		ShowMessage("Streams can't be edited");
 	}
 	else if (GetTags())
 	{
@@ -135,7 +135,7 @@ void TinyTagEditor::EnterPressed()
 		ShowMessage("Updating tags...");
 		if (TagEditor::WriteTags(s))
 		{
-			ShowMessage("Tags updated!");
+			ShowMessage("Tags updated");
 			if (s.isFromDB())
 			{
 				Mpd.UpdateDirectory(locale_to_utf_cpy(s.GetDirectory()));
@@ -151,7 +151,7 @@ void TinyTagEditor::EnterPressed()
 			}
 		}
 		else
-			ShowMessage("Error while writing tags!");
+			ShowMessage("Error while writing tags");
 	}
 	if (option > 21)
 		myOldScreen->SwitchTo();

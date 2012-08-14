@@ -69,7 +69,6 @@ class Playlist : public Screen<Window>
 		void Reverse();
 		void AdjustSortOrder(Movement where);
 		bool SortingInProgress() { return w == SortDialog; }
-		void FixPositions(size_t = 0);
 		
 		void EnableHighlighting();
 		void UpdateTimer() { time(&itsTimer); }

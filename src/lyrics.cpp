@@ -129,7 +129,7 @@ void Lyrics::SwitchTo()
 		}
 		else
 		{
-			ShowMessage("Song must have both artist and title tag set!");
+			ShowMessage("Song must have both artist and title tag set");
 			return;
 		}
 	}
@@ -171,7 +171,7 @@ void Lyrics::DownloadInBackground(const MPD::Song *s)
 		f.close();
 		return;
 	}
-	ShowMessage("Fetching lyrics for %s...", s->toString(Config.song_status_format_no_colors).c_str());
+	ShowMessage("Fetching lyrics for \"%s\"...", s->toString(Config.song_status_format_no_colors).c_str());
 	
 	MPD::Song *s_copy = new MPD::Song(*s);
 	pthread_mutex_lock(&itsDIBLock);
@@ -369,7 +369,7 @@ void Lyrics::Edit()
 	
 	if (Config.external_editor.empty())
 	{
-		ShowMessage("External editor is not set!");
+		ShowMessage("Proper external_editor variable has to be set in configuration file");
 		return;
 	}
 	
