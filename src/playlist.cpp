@@ -59,7 +59,7 @@ void Playlist::Init()
 	
 	if (!SortDialog)
 	{
-		SortDialogHeight = std::min(int(MainHeight), 18);
+		SortDialogHeight = std::min(int(MainHeight), 17);
 		
 		SortDialog = new Menu< std::pair<std::string, MPD::Song::GetFunction> >((COLS-SortDialogWidth)/2, (MainHeight-SortDialogHeight)/2+MainStartY, SortDialogWidth, SortDialogHeight, "Sort songs by...", Config.main_color, Config.window_border);
 		SortDialog->CyclicScrolling(Config.use_cyclic_scrolling);
@@ -78,7 +78,6 @@ void Playlist::Init()
 		SortDialog->AddOption(std::make_pair("Filename", &MPD::Song::GetFile));
 		SortDialog->AddSeparator();
 		SortDialog->AddOption(std::make_pair("Sort", static_cast<MPD::Song::GetFunction>(0)));
-		SortDialog->AddOption(std::make_pair("Reverse", static_cast<MPD::Song::GetFunction>(0)));
 		SortDialog->AddOption(std::make_pair("Cancel", static_cast<MPD::Song::GetFunction>(0)));
 	}
 	
@@ -127,7 +126,7 @@ void Playlist::Resize()
 	if (w == SortDialog) // if sorting window is active, playlist needs refreshing
 		Items->Display();
 	
-	SortDialogHeight = std::min(int(MainHeight), 18);
+	SortDialogHeight = std::min(int(MainHeight), 17);
 	if (Items->GetWidth() >= SortDialogWidth && MainHeight >= 5)
 	{
 		SortDialog->Resize(SortDialogWidth, SortDialogHeight);
