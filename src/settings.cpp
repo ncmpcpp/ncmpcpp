@@ -268,21 +268,6 @@ void NcmpcppKeys::GenerateKeybindings()
 #	undef BIND
 }
 
-int NcmpcppKeys::GetFirstBinding(const ActionType at)
-{
-	int result = 0;
-	std::multimap<int, Action *>::const_iterator it = Bindings.begin();
-	for (; it != Bindings.end(); ++it)
-	{
-		if (it->second->Type() == at)
-		{
-			result = it->first;
-			break;
-		}
-	}
-	return result;
-}
-
 void NcmpcppConfig::SetDefaults()
 {
 	mpd_host = "localhost";

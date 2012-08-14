@@ -53,7 +53,6 @@ struct NcmpcppKeys
 		> Binding;
 	
 	void GenerateKeybindings();
-	int GetFirstBinding(const ActionType at);
 	
 	std::multimap<int, Action *> Bindings;
 };
