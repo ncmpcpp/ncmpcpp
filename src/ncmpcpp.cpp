@@ -94,6 +94,7 @@ namespace
 
 int main(int argc, char **argv)
 {
+	srand(time(0));
 	setlocale(LC_ALL, "");
 	
 	Config.CheckForCommandLineConfigFilePath(argv, argc);

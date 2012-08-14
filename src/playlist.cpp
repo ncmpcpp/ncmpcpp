@@ -182,39 +182,14 @@ void Playlist::EnterPressed()
 			return;
 		}
 		
-		ShowMessage("Sorting playlist...");
-		MPD::SongList playlist, cmp;
-		
+		MPD::SongList playlist;
 		playlist.reserve(end-beginning);
 		for (size_t i = beginning; i < end; ++i)
-		{
-			(*Items)[i].SetPosition(i);
 			playlist.push_back(&(*Items)[i]);
-		}
-		cmp = playlist;
-		sort(playlist.begin(), playlist.end(), Playlist::Sorting);
 		
-		if (playlist == cmp)
-		{
-			ShowMessage("Playlist is already sorted");
-			return;
-		}
-		
+		ShowMessage("Sorting...");
 		Mpd.StartCommandsList();
-		do
-		{
-			for (size_t i = 0, j = beginning; i < playlist.size(); ++i, ++j)
-			{
-				if (playlist[i]->GetPosition() > j)
-				{
-					Mpd.Swap(playlist[i]->GetPosition(), j);
-					std::swap(cmp[playlist[i]->GetPosition()-beginning], cmp[i]);
-					Items->Swap(playlist[i]->GetPosition(), j);
-				}
-				cmp[i]->SetPosition(j);
-			}
-		}
-		while (playlist != cmp);
+		QuickSort(playlist.begin(), playlist.end(), playlist.begin());
 		if (Mpd.CommitCommandsList())
 			ShowMessage("Playlist sorted");
 		w = Items;
@@ -445,13 +420,23 @@ void Playlist::EnableHighlighting()
 	UpdateTimer();
 }
 
-bool Playlist::Sorting(MPD::Song *a, MPD::Song *b)
+void Playlist::QuickSort(MPD::SongList::iterator first, MPD::SongList::iterator last, MPD::SongList::iterator begin)
 {
-	CaseInsensitiveStringComparison cmp;
-	for (size_t i = 0; i < SortOptions; ++i)
-		if (int ret = cmp(a->GetTags((*SortDialog)[i].second), b->GetTags((*SortDialog)[i].second)))
-			return ret < 0;
-	return a->GetPosition() < b->GetPosition();
+	if (last-first > 1)
+	{
+		MPD::SongList::iterator pivot = first+rand()%(last-first);
+		IterSwap(pivot, last-1, begin);
+		pivot = last-1;
+		
+		MPD::SongList::iterator tmp = first;
+		for (MPD::SongList::iterator i = first; i != pivot; ++i)
+			if (SongComp(*i, *pivot))
+				IterSwap(i, tmp++, begin);
+		IterSwap(tmp, pivot, begin);
+		
+		QuickSort(first, tmp, begin);
+		QuickSort(tmp+1, last, begin);
+	}
 }
 
 std::string Playlist::TotalLength()

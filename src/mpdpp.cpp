@@ -916,7 +916,6 @@ bool MPD::Connection::AddRandomTag(mpd_tag_type tag, size_t number)
 	}
 	else
 	{
-		srand(time(0));
 		std::random_shuffle(tags.begin(), tags.end());
 		TagList::const_iterator it = tags.begin()+rand()%(tags.size()-number);
 		for (size_t i = 0; i < number && it != tags.end(); ++i)
