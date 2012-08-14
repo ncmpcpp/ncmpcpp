@@ -18,6 +18,7 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
+#include <cassert>
 #include <cstring>
 #include <algorithm>
 #include <iostream>
@@ -298,7 +299,7 @@ int CaseInsensitiveStringComparison::operator()(const std::string &a, const std:
 
 bool CaseInsensitiveSorting::operator()(const MPD::Item &a, const MPD::Item &b)
 {
-	bool result;
+	bool result = false;
 	if (a.type == b.type)
 	{
 		switch (a.type)
@@ -323,6 +324,8 @@ bool CaseInsensitiveSorting::operator()(const MPD::Item &a, const MPD::Item &b)
 						break;
 				}
 				break;
+			default: // there is no other option, silence compiler
+				assert(false);
 		}
 	}
 	else

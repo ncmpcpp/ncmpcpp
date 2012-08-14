@@ -375,9 +375,10 @@ void Lyrics::Edit()
 	
 	ShowMessage("Opening lyrics in external editor...");
 	
+	GNUC_UNUSED int res;
 	if (Config.use_console_editor)
 	{
-		system(("/bin/sh -c \"" + Config.external_editor + " \\\"" + itsFilename + "\\\"\"").c_str());
+		res = system(("/bin/sh -c \"" + Config.external_editor + " \\\"" + itsFilename + "\\\"\"").c_str());
 		// below is needed as screen gets cleared, but apparently
 		// ncurses doesn't know about it, so we need to reload main screen
 		endwin();
@@ -385,7 +386,7 @@ void Lyrics::Edit()
 		curs_set(0);
 	}
 	else
-		system(("nohup " + Config.external_editor + " \"" + itsFilename + "\" > /dev/null 2>&1 &").c_str());
+		res = system(("nohup " + Config.external_editor + " \"" + itsFilename + "\" > /dev/null 2>&1 &").c_str());
 }
 
 #ifdef HAVE_CURL_CURL_H

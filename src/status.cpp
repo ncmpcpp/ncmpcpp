@@ -386,8 +386,9 @@ void NcmpcppStatusChanged(MPD::Connection *, MPD::StatusChanges changed, void *)
 	{
 		if (myPlaylist->isPlaying())
 		{
+			GNUC_UNUSED int res;
 			if (!Config.execute_on_song_change.empty())
-				system(Config.execute_on_song_change.c_str());
+				res = system(Config.execute_on_song_change.c_str());
 			
 #			ifdef HAVE_CURL_CURL_H
 			if (Config.fetch_lyrics_in_background)
