@@ -551,18 +551,18 @@ bool MPD::Connection::ClearPlaylist()
 	}
 }
 
-void MPD::Connection::ClearPlaylist(const std::string &playlist)
+bool MPD::Connection::ClearPlaylist(const std::string &playlist)
 {
 	if (!itsConnection)
-		return;
+		return false;
 	if (!isCommandsListEnabled)
 	{
 		GoBusy();
-		mpd_run_playlist_clear(itsConnection, playlist.c_str());
+		return mpd_run_playlist_clear(itsConnection, playlist.c_str());
 	}
 	else
 	{
-		mpd_send_playlist_clear(itsConnection, playlist.c_str());
+		return mpd_send_playlist_clear(itsConnection, playlist.c_str());
 		assert(!isIdle);
 	}
 }

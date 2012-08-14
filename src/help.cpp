@@ -268,7 +268,7 @@ void Help::GetKeybindings()
 	KeyDesc(aPressEnter, "Play selected item");
 	KeyDesc(aDelete, "Delete selected item(s) from playlist");
 	KeyDesc(aClearMainPlaylist, "Clear playlist");
-	KeyDesc(aCropMainPlaylist, "Clear playlist except playing/selected items");
+	KeyDesc(aCropMainPlaylist, "Clear playlist except selected item(s)");
 	KeyDesc(aSetSelectedItemsPriority, "Set priority of selected items");
 	KeyDesc(aMoveSelectedItemsUp, "Move selected item(s) up");
 	KeyDesc(aMoveSelectedItemsDown, "Move selected item(s) down");

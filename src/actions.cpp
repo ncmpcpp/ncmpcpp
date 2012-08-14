@@ -1814,6 +1814,8 @@ void AddSelectedItems::Run()
 
 void CropMainPlaylist::Run()
 {
+	if (myPlaylist->isFiltered())
+		return;
 	bool yes = true;
 	if (Config.ask_before_clearing_main_playlist)
 		yes = AskYesNoQuestion("Do you really want to crop main playlist?", TraceMpdStatus);
@@ -1848,9 +1850,8 @@ bool CropPlaylist::canBeRun() const
 
 void CropPlaylist::Run()
 {
-	if (myPlaylistEditor->Playlists->Empty())
+	if (myPlaylistEditor->Playlists->Empty() || myPlaylistEditor->isContentFiltered())
 		return;
-	
 	bool yes = true;
 	if (Config.ask_before_clearing_main_playlist)
 		yes = AskYesNoQuestion("Do you really want to crop playlist \"" + myPlaylistEditor->Playlists->Current() + "\"?", TraceMpdStatus);
@@ -1909,29 +1910,17 @@ bool ClearPlaylist::canBeRun() const
 
 void ClearPlaylist::Run()
 {
-	if (myPlaylistEditor->Playlists->Empty())
+	if (myPlaylistEditor->Playlists->Empty() || myPlaylistEditor->isContentFiltered())
 		return;
-	// OMGPLZ
 	bool yes = true;
 	if (Config.ask_before_clearing_main_playlist)
 		yes = AskYesNoQuestion("Do you really want to clear playlist \"" + myPlaylistEditor->Playlists->Current() + "\"?", TraceMpdStatus);
 	if (yes)
 	{
-		if (myPlaylistEditor->Content->isFiltered())
-		{
-			std::string playlist = locale_to_utf_cpy(myPlaylistEditor->Playlists->Current());
-			ShowMessage("Deleting filtered items from playlist \"%s\"...", myPlaylistEditor->Playlists->Current().c_str());
-			Mpd.StartCommandsList();
-			for (int i = myPlaylistEditor->Content->Size()-1; i >= 0; --i)
-				Mpd.Delete(playlist, (*myPlaylistEditor->Content)[i].GetPosition());
-			if (Mpd.CommitCommandsList())
-				ShowMessage("Filtered items deleted from playlist \"%s\"", myPlaylistEditor->Playlists->Current().c_str());
-		}
-		else
-		{
-			ShowMessage("Clearing playlist...");
-			Mpd.ClearPlaylist(locale_to_utf_cpy(myPlaylistEditor->Playlists->Current()));
-		}
+		
+		ShowMessage("Clearing playlist \"%s\"...", myPlaylistEditor->Playlists->Current().c_str());
+		if (Mpd.ClearPlaylist(locale_to_utf_cpy(myPlaylistEditor->Playlists->Current())))
+			ShowMessage("Playlist \"%s\" cleared", myPlaylistEditor->Playlists->Current().c_str());
 	}
 }
 

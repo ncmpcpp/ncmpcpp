@@ -57,6 +57,7 @@ class PlaylistEditor : public Screen<Window>
 		
 		void MoveSelectedItems(Playlist::Movement where);
 		
+		bool isContentFiltered();
 		bool isNextColumnAvailable();
 		bool NextColumn();
 		bool isPrevColumnAvailable();

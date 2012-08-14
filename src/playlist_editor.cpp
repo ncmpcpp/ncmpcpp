@@ -273,6 +273,17 @@ void PlaylistEditor::MoveSelectedItems(Playlist::Movement where)
 	}
 }
 
+bool PlaylistEditor::isContentFiltered()
+{
+	if (Content->isFiltered())
+	{
+		ShowMessage("Function currently unavailable due to filtered playlist content");
+		return true;
+	}
+	return false;
+}
+
+
 bool PlaylistEditor::isNextColumnAvailable()
 {
 	if (w == Playlists)

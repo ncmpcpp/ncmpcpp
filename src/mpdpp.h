@@ -190,7 +190,7 @@ namespace MPD
 			bool DeletePlaylist(const std::string &);
 			bool LoadPlaylist(const std::string &name);
 			int SavePlaylist(const std::string &);
-			void ClearPlaylist(const std::string &);
+			bool ClearPlaylist(const std::string &);
 			void AddToPlaylist(const std::string &, const Song &);
 			void AddToPlaylist(const std::string &, const std::string &);
 			bool Move(const std::string &, int, int);
