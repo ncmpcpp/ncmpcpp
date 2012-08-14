@@ -180,7 +180,7 @@ namespace MPD
 			int AddSong(const Song &, int = -1); // returns id of added song
 			bool AddRandomTag(mpd_tag_type, size_t);
 			bool AddRandomSongs(size_t);
-			void Add(const std::string &path);
+			bool Add(const std::string &path);
 			bool Delete(unsigned);
 			bool DeleteID(unsigned);
 			bool Delete(const std::string &, unsigned);

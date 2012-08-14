@@ -134,23 +134,17 @@ void Browser::EnterPressed()
 		}
 		case itSong:
 		{
-			w->Bold(w->Choice(), myPlaylist->Add(*item.song, w->isBold(), 1));
+			bool res = myPlaylist->Add(*item.song, w->isBold(), 1);
+			w->Bold(w->Choice(), res);
 			break;
 		}
 		case itPlaylist:
 		{
-			std::string name = item.name;
-			ShowMessage("Loading and playing playlist %s...", name.c_str());
-			locale_to_utf(name);
-			if (!Mpd.LoadPlaylist(name))
-				ShowMessage("Couldn't load playlist.");
+			ShowMessage("Loading and playing playlist \"%s\"...", item.name.c_str());
+			if (Mpd.LoadPlaylist(locale_to_utf_cpy(item.name)))
+				ShowMessage("Playlist \"%s\" loaded", item.name.c_str());
 			else
-			{
-				size_t old_size = myPlaylist->Items->Size();
-				Mpd.UpdateStatus();
-				if (old_size < myPlaylist->Items->Size())
-					Mpd.Play(old_size);
-			}
+				myPlaylist->PlayNewlyAddedSongs();
 		}
 	}
 }
@@ -178,39 +172,38 @@ void Browser::SpacePressed()
 			if (itsBrowsedDir != "/" && !w->Choice())
 				break; // do not let add parent dir.
 			
-			MPD::SongList list;
+			bool result;
 #			ifndef WIN32
 			if (isLocal())
 			{
+				MPD::SongList list;
 				MPD::ItemList items;
 				ShowMessage("Scanning \"%s\"...", item.name.c_str());
 				myBrowser->GetLocalDirectory(items, item.name, 1);
 				list.reserve(items.size());
 				for (MPD::ItemList::const_iterator it = items.begin(); it != items.end(); ++it)
 					list.push_back(it->song);
+				result = myPlaylist->Add(list, 0);
+				FreeSongList(list);
 			}
 			else
 #			endif // !WIN32
-				Mpd.GetDirectoryRecursive(locale_to_utf_cpy(item.name), list);
-			
-			if (myPlaylist->Add(list, 0))
+				result = Mpd.Add(locale_to_utf_cpy(item.name));
+			if (result)
 				ShowMessage("Added folder: %s", item.name.c_str());
-			
-			FreeSongList(list);
 			break;
 		}
 		case itSong:
 		{
-			w->Bold(w->Choice(), myPlaylist->Add(*item.song, w->isBold(), 0));
+			bool res = myPlaylist->Add(*item.song, w->isBold(), 0);
+			w->Bold(w->Choice(), res);
 			break;
 		}
 		case itPlaylist:
 		{
-			std::string name = item.name;
-			ShowMessage("Loading playlist %s...", name.c_str());
-			locale_to_utf(name);
-			if (!Mpd.LoadPlaylist(name))
-				ShowMessage("Couldn't load playlist.");
+			ShowMessage("Loading playlist \"%s\"...", item.name.c_str());
+			if (Mpd.LoadPlaylist(locale_to_utf_cpy(item.name)))
+				ShowMessage("Playlist \"%s\" loaded", item.name.c_str());
 			break;
 		}
 	}

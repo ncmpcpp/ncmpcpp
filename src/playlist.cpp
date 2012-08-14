@@ -581,8 +581,6 @@ bool Playlist::Add(const MPD::SongList &l, bool play, int position)
 	if (l.empty())
 		return false;
 	
-	size_t old_playlist_size = Items->Size();
-	
 	Mpd.StartCommandsList();
 	MPD::SongList::const_iterator it = l.begin();
 	if (position < 0)
@@ -598,14 +596,23 @@ bool Playlist::Add(const MPD::SongList &l, bool play, int position)
 			if (Mpd.AddSong(**j, position) < 0)
 				break;
 	}
-	
 	if (!Mpd.CommitCommandsList())
 		return false;
-	
-	if (play && old_playlist_size < Items->Size())
-		Mpd.Play(old_playlist_size);
-	
+	if (play)
+		PlayNewlyAddedSongs();
 	return true;
+}
+
+void Playlist::PlayNewlyAddedSongs()
+{
+	bool is_filtered = Items->isFiltered();
+	Items->ShowAll();
+	size_t old_size = Items->Size();
+	Mpd.UpdateStatus();
+	if (old_size < Items->Size())
+		Mpd.Play(old_size);
+	if (is_filtered)
+		Items->ShowFiltered();
 }
 
 void Playlist::SetSelectedItemsPriority(int prio)

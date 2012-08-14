@@ -35,17 +35,17 @@ SearchEngine *mySearcher = new SearchEngine;
 
 const char *SearchEngine::ConstraintsNames[] =
 {
-	"Any:",
-	"Artist:",
-	"Album Artist:",
-	"Title:",
-	"Album:",
-	"Filename:",
-	"Composer:",
-	"Performer:",
-	"Genre:",
-	"Date:",
-	"Comment:"
+	"Any",
+	"Artist",
+	"Album Artist",
+	"Title",
+	"Album",
+	"Filename",
+	"Composer",
+	"Performer",
+	"Genre",
+	"Date",
+	"Comment"
 };
 
 const char *SearchEngine::SearchModes[] =
@@ -137,10 +137,10 @@ void SearchEngine::EnterPressed()
 	
 	if (option < ConstraintsNumber)
 	{
-		Statusbar() << fmtBold << ConstraintsNames[option] << fmtBoldEnd << ' ';
+		Statusbar() << fmtBold << ConstraintsNames[option] << fmtBoldEnd << ": ";
 		itsConstraints[option] = Global::wFooter->GetString(itsConstraints[option]);
 		w->Current().first->Clear();
-		*w->Current().first << fmtBold << std::setw(13) << std::left << ConstraintsNames[option] << fmtBoldEnd << ' ';
+		*w->Current().first << fmtBold << std::setw(13) << std::left << ConstraintsNames[option] << fmtBoldEnd << ": ";
 		ShowTag(*w->Current().first, itsConstraints[option]);
 	}
 	else if (option == ConstraintsNumber+1)
@@ -333,7 +333,7 @@ void SearchEngine::Prepare()
 	
 	for (size_t i = 0; i < ConstraintsNumber; ++i)
 	{
-		*(*w)[i].first << fmtBold << std::setw(13) << std::left << ConstraintsNames[i] << fmtBoldEnd << ' ';
+		*(*w)[i].first << fmtBold << std::setw(13) << std::left << ConstraintsNames[i] << fmtBoldEnd << ": ";
 		ShowTag(*(*w)[i].first, itsConstraints[i]);
 	}
 	

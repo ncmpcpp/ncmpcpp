@@ -77,6 +77,7 @@ class Playlist : public Screen<Window>
 		
 		bool Add(const MPD::Song &s, bool in_playlist, bool play, int position = -1);
 		bool Add(const MPD::SongList &l, bool play, int position = -1);
+		void PlayNewlyAddedSongs();
 		
 		void SetSelectedItemsPriority(int prio);
 		

@@ -883,19 +883,19 @@ int MPD::Connection::AddSong(const Song &s, int pos)
 	return !s.Empty() ? (AddSong((!s.isFromDB() ? "file://" : "") + (s.Localized() ? locale_to_utf_cpy(s.GetFile()) : s.GetFile()), pos)) : -1;
 }
 
-void MPD::Connection::Add(const std::string &path)
+bool MPD::Connection::Add(const std::string &path)
 {
 	if (!itsConnection)
-		return;
+		return false;
 	if (!isCommandsListEnabled)
 	{
 		GoBusy();
-		mpd_run_add(itsConnection, path.c_str());
+		return mpd_run_add(itsConnection, path.c_str());
 	}
 	else
 	{
 		assert(!isIdle);
-		mpd_send_add(itsConnection, path.c_str());
+		return mpd_send_add(itsConnection, path.c_str());
 	}
 }
 
