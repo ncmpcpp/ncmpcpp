@@ -515,7 +515,10 @@ void Browser::ClearDirectory(const std::string &path) const
 void Browser::ChangeBrowseMode()
 {
 	if (Mpd.GetHostname()[0] != '/')
+	{
+		ShowMessage("For browsing local filesystem connection to MPD via UNIX Socket is required");
 		return;
+	}
 	
 	itsBrowseLocally = !itsBrowseLocally;
 	ShowMessage("Browse mode: %s", itsBrowseLocally ? "Local filesystem" : "MPD database");

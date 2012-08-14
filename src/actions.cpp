@@ -2058,14 +2058,15 @@ void ToggleFindMode::Run()
 	ShowMessage("Search mode: %s", Config.wrapped_search ? "Wrapped" : "Normal");
 }
 
-bool ToggleReplayGainMode::canBeRun() const
-{
-	return Mpd.Version() >= 16;
-}
-
 void ToggleReplayGainMode::Run()
 {
 	using Global::wFooter;
+	
+	if (Mpd.Version() < 16)
+	{
+		ShowMessage("Replay gain mode control is supported in MPD >= 0.16.0");
+		return;
+	}
 	
 	LockStatusbar();
 	Statusbar() << "Replay gain mode? [" << fmtBold << 'o' << fmtBoldEnd << "ff/" << fmtBold << 't' << fmtBoldEnd << "rack/" << fmtBold << 'a' << fmtBoldEnd << "lbum]";
