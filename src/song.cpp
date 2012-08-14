@@ -322,11 +322,6 @@ void MPD::Song::SetComment(const std::string &str, unsigned pos)
 	SetTag(MPD_TAG_COMMENT, pos, str);
 }
 
-void MPD::Song::SetPosition(unsigned pos)
-{
-	mpd_song_set_pos(itsSong, pos);
-}
-
 void MPD::Song::SetTags(SetFunction f, const std::string &value)
 {
 	unsigned pos = 0;

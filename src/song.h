@@ -81,7 +81,6 @@ namespace MPD
 			void SetPerformer(const std::string &, unsigned = 0);
 			void SetDisc(const std::string &, unsigned = 0);
 			void SetComment(const std::string &, unsigned = 0);
-			void SetPosition(unsigned);
 			
 			void SetTags(SetFunction, const std::string &);
 			
