@@ -2222,7 +2222,9 @@ bool RefetchLyrics::canBeRun() const
 
 void RefetchLyrics::Run()
 {
+#	ifdef HAVE_CURL_CURL_H
 	myLyrics->Refetch();
+#	endif // HAVE_CURL_CURL_H
 }
 
 bool RefetchArtistInfo::canBeRun() const
@@ -2446,9 +2448,10 @@ bool ShowTagEditor::canBeRun() const
 
 void ShowTagEditor::Run()
 {
+#	ifdef HAVE_TAGLIB_H
 	if (isMPDMusicDirSet())
 		myTagEditor->SwitchTo();
-	
+#	endif // HAVE_TAGLIB_H
 }
 
 bool ShowOutputs::canBeRun() const
