@@ -172,6 +172,8 @@ void NcmpcppKeys::GenerateKeybindings()
 	BIND('P',		aPause);
 	BIND('>',		aNextSong);
 	BIND('<',		aPreviousSong);
+	BIND(KEY_CTRL_H,	aJumpToParentDir);
+	BIND(KEY_CTRL_H,	aReplaySong);
 	BIND(KEY_BACKSPACE,	aJumpToParentDir);
 	BIND(KEY_BACKSPACE,	aReplaySong);
 	BIND(KEY_BACKSPACE_2,	aJumpToParentDir);

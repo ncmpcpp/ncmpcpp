@@ -133,7 +133,7 @@ std::string Help::DisplayKeys(const ActionType at)
 			result += " ";
 		}
 	}
-	result.resize(12, ' ');
+	result.resize(16, ' ');
 	return result;
 }
 
