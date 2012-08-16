@@ -41,11 +41,9 @@ AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[ ]])],
 )
 CXXFLAGS="$old_CXXFLAGS $no_exceptions"
 
-
-dnl ====================================
-dnl = checking for win32 related stuff =
-dnl ====================================
-AC_CHECK_LIB(ws2_32, _head_libws2_32_a, LDFLAGS="$LDFLAGS -lws2_32", )
+dnl ==============================
+dnl = checking for regex (win32) =
+dnl ==============================
 AC_CHECK_LIB(regex, regcomp, LDFLAGS="$LDFLAGS -lregex", )
 
 dnl ================================
@@ -190,7 +188,6 @@ if test "$curl" != "no" ; then
 		)
 	fi
 fi
-
 
 dnl =======================
 dnl = checking for taglib =

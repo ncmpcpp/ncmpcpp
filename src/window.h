@@ -112,7 +112,7 @@
 
 // workaraund for win32
 #ifdef WIN32
-# define wcwidth(x) 1
+# define wcwidth(x) int(!iscntrl(x))
 #endif
 
 /// Converts wide string to narrow string
