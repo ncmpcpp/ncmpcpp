@@ -80,8 +80,9 @@
 #define KEY_F12 276
 
 // other handy keys
-#define KEY_TAB 9
 #define KEY_SHIFT_TAB 353
+#define KEY_SPACE 32
+#define KEY_TAB 9
 
 // define alternative KEY_BACKSPACE (used in some terminal emulators)
 #define KEY_BACKSPACE_2 127

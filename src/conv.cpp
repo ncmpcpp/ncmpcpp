@@ -97,6 +97,62 @@ std::string IntoStr(NCurses::Color color)
 	return result;
 }
 
+std::string IntoStr(const Action::Key &key, bool *print_backspace)
+{
+	std::string result;
+	if (key == Action::Key(KEY_UP, ctNCurses))
+		result += "Up";
+	else if (key == Action::Key(KEY_DOWN, ctNCurses))
+		result += "Down";
+	else if (key == Action::Key(KEY_PPAGE, ctNCurses))
+		result += "PageUp";
+	else if (key == Action::Key(KEY_NPAGE, ctNCurses))
+		result += "PageDown";
+	else if (key == Action::Key(KEY_HOME, ctNCurses))
+		result += "Home";
+	else if (key == Action::Key(KEY_END, ctNCurses))
+		result += "End";
+	else if (key == Action::Key(KEY_SPACE, ctStandard))
+		result += "Space";
+	else if (key == Action::Key(KEY_ENTER, ctStandard))
+		result += "Enter";
+	else if (key == Action::Key(KEY_DC, ctNCurses))
+		result += "Delete";
+	else if (key == Action::Key(KEY_RIGHT, ctNCurses))
+		result += "Right";
+	else if (key == Action::Key(KEY_LEFT, ctNCurses))
+		result += "Left";
+	else if (key == Action::Key(KEY_TAB, ctStandard))
+		result += "Tab";
+	else if (key == Action::Key(KEY_SHIFT_TAB, ctNCurses))
+		result += "Shift-Tab";
+	else if (key >= Action::Key(KEY_CTRL_A, ctStandard) && key <= Action::Key(KEY_CTRL_Z, ctStandard))
+	{
+		result += "Ctrl-";
+		result += key.getChar()+64;
+	}
+	else if (key >= Action::Key(KEY_F1, ctNCurses) && key <= Action::Key(KEY_F12, ctNCurses))
+	{
+		result += "F";
+		result += IntoStr(key.getChar()-264);
+	}
+	else if ((key == Action::Key(KEY_BACKSPACE, ctNCurses) || key == Action::Key(KEY_BACKSPACE_2, ctStandard)))
+	{
+		// since some terminals interpret KEY_BACKSPACE as backspace and other need KEY_BACKSPACE_2,
+		// actions have to be bound to either of them, but we want to display "Backspace" only once,
+		// hance this 'print_backspace' switch.
+		if (!print_backspace || *print_backspace)
+		{
+			result += "Backspace";
+			if (print_backspace)
+				*print_backspace = false;
+		}
+	}
+	else
+		result += ToString(std::wstring(1, key.getChar()));
+	return result;
+}
+
 NCurses::Color IntoColor(const std::string &color)
 {
 	NCurses::Color result = NCurses::clDefault;

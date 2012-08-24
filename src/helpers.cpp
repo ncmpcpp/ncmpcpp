@@ -262,7 +262,7 @@ void ParseArgv(int argc, char **argv)
 		}
 		else if (!strcmp(argv[i], "-c") || !strcmp(argv[i], "--config"))
 		{
-			// this is used in NcmpcppConfig::CheckForCommandLineConfigFilePath, ignoring here.
+			// this is used in Configuration::CheckForCommandLineConfigFilePath, ignoring here.
 			++i;
 		}
 		else

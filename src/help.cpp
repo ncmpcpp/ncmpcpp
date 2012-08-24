@@ -78,58 +78,13 @@ std::basic_string<my_char_t> Help::Title()
 
 std::string Help::DisplayKeys(const ActionType at)
 {
-	bool backspace = true;
+	bool print_backspace = true;
 	std::string result;
-	for (std::multimap<int, Action *>::const_iterator it = Key.Bindings.begin(); it != Key.Bindings.end(); ++it)
+	for (std::multimap<Action::Key, Action *>::const_iterator it = Keys.Bindings.begin(); it != Keys.Bindings.end(); ++it)
 	{
 		if (it->second->Type() == at)
 		{
-			int key = it->first;
-			
-			if (key == 259)
-				result += "Up";
-			else if (key == 258)
-				result += "Down";
-			else if (key == 339)
-				result += "PageUp";
-			else if (key == 338)
-				result += "PageDown";
-			else if (key == 262)
-				result += "Home";
-			else if (key == 360)
-				result += "End";
-			else if (key == 32)
-				result += "Space";
-			else if (key == 10)
-				result += "Enter";
-			else if (key == 330)
-				result += "Delete";
-			else if (key == 261)
-				result += "Right";
-			else if (key == 260)
-				result += "Left";
-			else if (key == 9)
-				result += "Tab";
-			else if (key == 353)
-				result += "Shift-Tab";
-			else if (key >= 1 && key <= 26)
-			{
-				result += "Ctrl-";
-				result += key+64;
-			}
-			else if (key >= 265 && key <= 276)
-			{
-				result += "F";
-				result += IntoStr(key-264);
-			}
-			else if ((key == 263 || key == 127) && !backspace);
-			else if ((key == 263 || key == 127) && backspace)
-			{
-				result += "Backspace";
-				backspace = false;
-			}
-			else if (isprint(key))
-				result += key;
+			result += IntoStr(it->first, &print_backspace);
 			result += " ";
 		}
 	}

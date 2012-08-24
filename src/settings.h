@@ -45,21 +45,21 @@ struct Column
 	bool display_empty_tag;
 };
 
-struct NcmpcppKeys
+struct KeyConfiguration
 {
 	typedef std::pair<
-			std::multimap<int, Action *>::iterator
-		,	std::multimap<int, Action *>::iterator
+			std::multimap<Action::Key, Action *>::iterator
+		,	std::multimap<Action::Key, Action *>::iterator
 		> Binding;
 	
-	void GenerateKeybindings();
+	void GenerateBindings();
 	
-	std::multimap<int, Action *> Bindings;
+	std::multimap<Action::Key, Action *> Bindings;
 };
 
-struct NcmpcppConfig
+struct Configuration
 {
-	NcmpcppConfig();
+	Configuration();
 	
 	const std::string &GetHomeDirectory();
 	void CheckForCommandLineConfigFilePath(char **argv, int argc);
@@ -208,8 +208,8 @@ struct NcmpcppConfig
 		std::string config_file_path;
 };
 
-extern NcmpcppKeys Key;
-extern NcmpcppConfig Config;
+extern KeyConfiguration Keys;
+extern Configuration Config;
 
 void CreateDir(const std::string &dir);
 

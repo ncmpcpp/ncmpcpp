@@ -103,7 +103,7 @@ int main(int argc, char **argv)
 	Config.Read();
 	
 	Config.GenerateColumns();
-	Key.GenerateKeybindings();
+	Keys.GenerateBindings();
 	
 	if (getenv("MPD_HOST"))
 		Mpd.SetHostname(getenv("MPD_HOST"));
@@ -175,8 +175,7 @@ int main(int argc, char **argv)
 	Mpd.SetErrorHandler(NcmpcppErrorCallback, 0);
 	
 	// local variables
-	int input = 0;
-	
+	Action::Key input(Action::NoOp);
 	timeval past = { 0, 0 };
 	// local variables end
 	
@@ -263,14 +262,14 @@ int main(int argc, char **argv)
 		}
 		// header stuff end
 		
-		if (input != ERR)
+		if (input != Action::NoOp)
 			myScreen->RefreshWindow();
-		wFooter->ReadKey(input);
+		input = Action::ReadKey(*wFooter);
 		
-		if (input == ERR)
+		if (input == Action::NoOp)
 			continue;
 		
-		NcmpcppKeys::Binding k = Key.Bindings.equal_range(input);
+		KeyConfiguration::Binding k = Keys.Bindings.equal_range(input);
 		for (; k.first != k.second; ++k.first)
 			if (k.first->second->Execute())
 				break;

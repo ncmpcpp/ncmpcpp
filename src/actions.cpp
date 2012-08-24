@@ -58,6 +58,35 @@ size_t Action::FooterHeight;
 size_t Action::FooterStartY;
 
 std::map<ActionType, Action *> Action::Actions;
+Action::Key Action::NoOp = Action::Key(ERR, ctNCurses);
+
+Action::Key Action::ReadKey(Window &w)
+{
+	std::string tmp;
+	int input;
+	while (true)
+	{
+		w.ReadKey(input);
+		if (input == ERR)
+			return NoOp;
+		if (input > 255)
+			return Key(input, ctNCurses);
+		else
+		{
+			wchar_t wc;
+			tmp += input;
+			size_t conv_res = mbrtowc(&wc, tmp.c_str(), MB_CUR_MAX, 0);
+			if (conv_res == size_t(-1)) // incomplete multibyte character
+				continue;
+			else if (conv_res == size_t(-2)) // garbage character sequence
+				return NoOp;
+			else // character complete
+				return Key(wc, ctStandard);
+		}
+	}
+	// not reachable
+	assert(false);
+}
 
 void Action::ValidateScreenSize()
 {
@@ -215,7 +244,6 @@ void Action::Seek()
 	LockProgressbar();
 	LockStatusbar();
 	
-	int input;
 	int songpos = Mpd.GetElapsedTime();
 	time_t t = time(0);
 	
@@ -227,11 +255,11 @@ void Action::Seek()
 	{
 		TraceMpdStatus();
 		myPlaylist->UpdateTimer();
-		wFooter->ReadKey(input);
 		
 		int howmuch = Config.incremental_seeking ? (myPlaylist->Timer()-t)/2+Config.seek_time : Config.seek_time;
 		
-		NcmpcppKeys::Binding k = Key.Bindings.equal_range(input);
+		Key input = ReadKey(*wFooter);
+		KeyConfiguration::Binding k = Keys.Bindings.equal_range(input);
 		// no action?
 		if (k.first == k.second)
 			break;

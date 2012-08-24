@@ -49,8 +49,41 @@ enum ActionType
 	aShowVisualizer, aShowClock, aShowServerInfo
 };
 
+enum CharType { ctStandard, ctNCurses };
+
 struct Action
 {
+	/// Key for binding actions to it. Supports non-ascii characters.
+	struct Key
+	{
+		Key(wchar_t ch, CharType ct) : Char(ch), Type(ct) { }
+		
+		wchar_t getChar() const { return Char; }
+		CharType getType() const { return Type; }
+		
+#		define INEQUALITY_OPERATOR(CMP)			\
+			bool operator CMP (const Key &k) const	\
+			{					\
+				if (Char CMP k.Char)		\
+					return true;		\
+				if (Char != k.Char)		\
+					return false;		\
+				return Type CMP k.Type;		\
+			}
+		INEQUALITY_OPERATOR(<);
+		INEQUALITY_OPERATOR(<=);
+		INEQUALITY_OPERATOR(>);
+		INEQUALITY_OPERATOR(>=);
+#		undef INEQUALITY_OPERATOR
+		
+		bool operator==(const Key &k) const { return Char == k.Char && Type == k.Type; }
+		bool operator!=(const Key &k) const { return !(*this == k); }
+		
+		private:
+			wchar_t Char;
+			CharType Type;
+	};
+	
 	enum FindDirection { fdForward, fdBackward };
 	
 	Action(ActionType type, const char *name) : itsType(type), itsName(name) { }
@@ -67,6 +100,8 @@ struct Action
 		}
 		return false;
 	}
+	
+	static Key ReadKey(Window &w);
 	
 	static void ValidateScreenSize();
 	static void SetResizeFlags();
@@ -86,6 +121,8 @@ struct Action
 	static size_t HeaderHeight;
 	static size_t FooterHeight;
 	static size_t FooterStartY;
+	
+	static Key NoOp;
 	
 	protected:
 		virtual bool canBeRun() const { return true; }
