@@ -261,9 +261,9 @@ void Action::Seek()
 		Key input = ReadKey(*wFooter);
 		KeyConfiguration::Binding k = Keys.Bindings.equal_range(input);
 		// no action?
-		if (k.first == k.second)
+		if (k.first == k.second || !k.first->second.isSingle())
 			break;
-		Action *a = k.first->second;
+		Action *a = k.first->second.getAction();
 		if (dynamic_cast<SeekForward *>(a))
 		{
 			if (songpos < Mpd.GetTotalTime())

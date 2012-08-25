@@ -80,9 +80,9 @@ std::string Help::DisplayKeys(const ActionType at)
 {
 	bool print_backspace = true;
 	std::string result;
-	for (std::multimap<Action::Key, Action *>::const_iterator it = Keys.Bindings.begin(); it != Keys.Bindings.end(); ++it)
+	for (std::multimap<Action::Key, Bind>::const_iterator it = Keys.Bindings.begin(); it != Keys.Bindings.end(); ++it)
 	{
-		if (it->second->Type() == at)
+		if (it->second.isSingle() && it->second.getAction()->Type() == at)
 		{
 			result += IntoStr(it->first, &print_backspace);
 			result += " ";

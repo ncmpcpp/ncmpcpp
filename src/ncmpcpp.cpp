@@ -271,8 +271,22 @@ int main(int argc, char **argv)
 		
 		KeyConfiguration::Binding k = Keys.Bindings.equal_range(input);
 		for (; k.first != k.second; ++k.first)
-			if (k.first->second->Execute())
+		{
+			Bind &b = k.first->second;
+			if (b.isSingle())
+			{
+				if (b.getAction()->Execute())
+					break;
+			}
+			else
+			{
+				Bind::ActionChain *chain = b.getChain();
+				for (Bind::ActionChain::iterator it = chain->begin(); it != chain->end(); ++it)
+					if (!(*it)->Execute())
+						break;
 				break;
+			}
+		}
 		
 		if (myScreen == myPlaylist)
 			myPlaylist->EnableHighlighting();

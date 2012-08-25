@@ -35,11 +35,24 @@ old_CXXFLAGS="$CXXFLAGS"
 CXXFLAGS="-fno-exceptions"
 AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[ ]])],
 	AC_MSG_RESULT([yes])
-	no_exceptions="-fno-exceptions"
-	,
+		no_exceptions="-fno-exceptions",
 	AC_MSG_RESULT([no])
 )
 CXXFLAGS="$old_CXXFLAGS $no_exceptions"
+
+dnl ================================
+dnl = checking for -std=c++0x flag =
+dnl ================================
+AC_MSG_CHECKING([whether compiler supports -std=c++0x])
+old_CXXFLAGS="$CXXFLAGS"
+CXXFLAGS="-std=c++0x"
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[ ]])],
+	AC_MSG_RESULT([yes])
+		std_cpp0x="-std=c++0x",
+	AC_MSG_RESULT([no])
+		AC_MSG_ERROR([[Your compiler doesn't seem to support C++0x, please upgrade (GCC >= 4.4)]])
+)
+CXXFLAGS="$old_CXXFLAGS $std_cpp0x"
 
 dnl ==============================
 dnl = checking for regex (win32) =
