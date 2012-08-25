@@ -42,7 +42,6 @@ class Playlist : public Screen<Window>
 		
 		virtual void EnterPressed();
 		virtual void SpacePressed();
-		virtual void ReadKey(int &);
 		virtual void MouseButtonPressed(MEVENT);
 		virtual bool isTabbable() { return true; }
 		

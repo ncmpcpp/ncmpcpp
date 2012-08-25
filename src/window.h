@@ -36,6 +36,7 @@
 #include <stack>
 #include <vector>
 #include <string>
+#include <queue>
 
 // define some Ctrl-? keys
 #define KEY_CTRL_A 1
@@ -275,12 +276,12 @@ namespace NCurses
 			/// @see CreateHistory()
 			///
 			std::string GetString(const std::string &base, size_t length = -1,
-					      size_t width = 0, bool encrypted = 0) const;
+					      size_t width = 0, bool encrypted = 0);
 			
 			/// Wrapper for above function that doesn't take base string (it will be empty).
 			/// Taken parameters are the same as for above.
 			///
-			std::string GetString(size_t length = -1, size_t width = 0, bool encrypted = 0) const
+			std::string GetString(size_t length = -1, size_t width = 0, bool encrypted = 0)
 			{
 				return GetString("", length, width, encrypted);
 			}
@@ -407,14 +408,13 @@ namespace NCurses
 			///
 			bool FDCallbacksListEmpty() const;
 			
-			/// Reads key from standard input and writes it into read_key variable
-			/// @param read_key variable for read key to be written into it
+			/// Reads key from standard input (or takes it from input queue)
+			/// and writes it into read_key variable
 			///
-			void ReadKey(int &read_key) const;
+			int ReadKey();
 			
-			/// Waits until user press a key.
-			///
-			void ReadKey() const;
+			/// Push single character into input queue, so it can get consumed by ReadKey
+			void PushChar(int ch);
 			
 			/// Scrolls the window by amount of lines given in its parameter
 			/// @param where indicates how many lines it has to scroll
@@ -611,11 +611,16 @@ namespace NCurses
 			int itsX;
 			int itsY;
 			
-			/// window's title
+			/// window title
 			std::string itsTitle;
 			
 			/// stack of colors
 			std::stack<Colors> itsColors;
+			
+			/// input queue of a window. you can put characters there using
+			/// PushChar and they will be immediately consumed and
+			/// returned by ReadKey
+			std::queue<int> itsInputQueue;
 			
 			/// containter used for additional file descriptors that have
 			/// to be polled in ReadKey() and correspondent callbacks that

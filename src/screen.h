@@ -75,10 +75,6 @@ class BasicScreen
 		///
 		virtual void RefreshWindow() = 0;
 		
-		/// see Screen::ReadKey()
-		///
-		virtual void ReadKey(int &key) = 0;
-		
 		/// @see Screen::Scroll()
 		///
 		virtual void Scroll(Where where) = 0;
@@ -204,10 +200,7 @@ template <typename WindowType> class Screen : public BasicScreen
 		///
 		virtual void RefreshWindow();
 		
-		/// Reads a key from the screen
-		///
-		virtual void ReadKey(int &key);
-		
+
 		/// Scrolls the screen by given amount of lines and
 		/// if fancy scrolling feature is disabled, enters the
 		/// loop that holds main loop until user releases the key
@@ -248,11 +241,6 @@ template <typename WindowType> void Screen<WindowType>::Refresh()
 template <typename WindowType> void Screen<WindowType>::RefreshWindow()
 {
 	w->Display();
-}
-
-template <typename WindowType> void Screen<WindowType>::ReadKey(int &key)
-{
-	w->ReadKey(key);
 }
 
 template <typename WindowType> void Screen<WindowType>::Scroll(Where where)

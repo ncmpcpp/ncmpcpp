@@ -66,7 +66,7 @@ Action::Key Action::ReadKey(Window &w)
 	int input;
 	while (true)
 	{
-		w.ReadKey(input);
+		input = w.ReadKey();
 		if (input == ERR)
 			return NoOp;
 		if (input > 255)
@@ -407,7 +407,7 @@ bool Action::AskYesNoQuestion(const std::string &question, void (*callback)())
 	{
 		if (callback)
 			callback();
-		wFooter->ReadKey(answer);
+		answer = wFooter->ReadKey();
 	}
 	while (answer != 'y' && answer != 'n');
 	UnlockStatusbar();
@@ -2103,7 +2103,7 @@ void ToggleReplayGainMode::Run()
 	do
 	{
 		TraceMpdStatus();
-		wFooter->ReadKey(answer);
+		answer = wFooter->ReadKey();
 	}
 	while (answer != 'o' && answer != 't' && answer != 'a');
 	UnlockStatusbar();
@@ -2147,7 +2147,7 @@ void AddRandomItems::Run()
 	do
 	{
 		TraceMpdStatus();
-		wFooter->ReadKey(answer);
+		answer = wFooter->ReadKey();
 	}
 	while (answer != 's' && answer != 'a' && answer != 'b');
 	UnlockStatusbar();
@@ -2210,7 +2210,7 @@ void ToggleLibraryTagType::Run()
 	do
 	{
 		TraceMpdStatus();
-		wFooter->ReadKey(answer);
+		answer = wFooter->ReadKey();
 	}
 	while (answer != 'a' && answer != 'A' && answer != 'y' && answer != 'g' && answer != 'c' && answer != 'p');
 	UnlockStatusbar();

@@ -371,8 +371,17 @@ bool Window::FDCallbacksListEmpty() const
 	return itsFDs.empty();
 }
 
-void Window::ReadKey(int &read_key) const
+int Window::ReadKey()
 {
+	int result;
+	// if there are characters in input queue, get them and
+	// return immediately.
+	if (!itsInputQueue.empty())
+	{
+		result = itsInputQueue.front();
+		itsInputQueue.pop();
+		return result;
+	}
 	// in pdcurses polling stdin doesn't work, so we can't poll
 	// both stdin and other file descriptors in one select. the
 	// workaround is to set the timeout of select to 0, poll
@@ -401,7 +410,7 @@ void Window::ReadKey(int &read_key) const
 	if (select(fd_max+1, &fdset, 0, 0, itsWindowTimeout < 0 ? 0 : &timeout) > 0)
 	{
 #		if !defined(USE_PDCURSES)
-		read_key = FD_ISSET(STDIN_FILENO, &fdset) ? wgetch(itsWindow) : ERR;
+		result = FD_ISSET(STDIN_FILENO, &fdset) ? wgetch(itsWindow) : ERR;
 #		endif // !USE_PDCURSES
 		for (FDCallbacks::const_iterator it = itsFDs.begin(); it != itsFDs.end(); ++it)
 			if (FD_ISSET(it->first, &fdset))
@@ -409,18 +418,19 @@ void Window::ReadKey(int &read_key) const
 	}
 #	if !defined(USE_PDCURSES)
 	else
-		read_key = ERR;
+		result = ERR;
 #	else
-	read_key = wgetch(itsWindow);
+	result = wgetch(itsWindow);
 #	endif
+	return result;
 }
 
-void Window::ReadKey() const
+void Window::PushChar(int ch)
 {
-	wgetch(itsWindow);
+	itsInputQueue.push(ch);
 }
 
-std::string Window::GetString(const std::string &base, size_t length, size_t width, bool encrypted) const
+std::string Window::GetString(const std::string &base, size_t length, size_t width, bool encrypted)
 {
 	int input;
 	size_t beginning, maxbeginning, minx, x, real_x, y, maxx, real_maxx;
@@ -495,7 +505,7 @@ std::string Window::GetString(const std::string &base, size_t length, size_t wid
 		
 		wmove(itsWindow, y, x);
 		prefresh(itsWindow, 0, 0, itsStartY, itsStartX, itsStartY+itsHeight-1, itsStartX+itsWidth-1);
-		ReadKey(input);
+		input = ReadKey();
 		
 		switch (input)
 		{
