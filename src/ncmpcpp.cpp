@@ -175,7 +175,7 @@ int main(int argc, char **argv)
 	Mpd.SetErrorHandler(NcmpcppErrorCallback, 0);
 	
 	// local variables
-	Action::Key input(Action::NoOp);
+	Action::Key input(0, ctStandard);
 	timeval past = { 0, 0 };
 	// local variables end
 	
