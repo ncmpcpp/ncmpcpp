@@ -62,14 +62,14 @@ struct Action
 		wchar_t getChar() const { return Char; }
 		CharType getType() const { return Type; }
 		
-#		define INEQUALITY_OPERATOR(CMP)			\
-			bool operator CMP (const Key &k) const	\
-			{					\
-				if (Char CMP k.Char)		\
-					return true;		\
-				if (Char != k.Char)		\
-					return false;		\
-				return Type CMP k.Type;		\
+#		define INEQUALITY_OPERATOR(CMP) \
+			bool operator CMP (const Key &k) const \
+			{ \
+				if (Char CMP k.Char) \
+					return true; \
+				if (Char != k.Char) \
+					return false; \
+				return Type CMP k.Type; \
 			}
 		INEQUALITY_OPERATOR(<);
 		INEQUALITY_OPERATOR(<=);
