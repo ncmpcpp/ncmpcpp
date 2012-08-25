@@ -634,6 +634,7 @@ struct ReversePlaylist : public Action
 struct ApplyFilter : public Action
 {
 	ApplyFilter() : Action(aApplyFilter, "apply_filter") { }
+	virtual bool canBeRun() const;
 	virtual void Run();
 };
 

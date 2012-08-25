@@ -1972,14 +1972,18 @@ void ReversePlaylist::Run()
 	myPlaylist->Reverse();
 }
 
+bool ApplyFilter::canBeRun() const
+{
+	return myScreen->GetList();
+}
+
 void ApplyFilter::Run()
 {
 	using Global::RedrawHeader;
 	using Global::wFooter;
 	
 	List *mList = myScreen->GetList();
-	if (!mList)
-		return;
+	assert(mList);
 	
 	LockStatusbar();
 	Statusbar() << fmtBold << "Apply filter: " << fmtBoldEnd;
@@ -2004,24 +2008,16 @@ void ApplyFilter::Run()
 
 void DisableFilter::Run()
 {
-	using Global::RedrawHeader;
 	using Global::wFooter;
 	
-	List *mList = myScreen->GetList();
-	if (!mList)
-		return;
-	
-	mList->ApplyFilter("");
-	
-	ShowMessage("Filtering disabled");
-	
-	if (myScreen == myPlaylist)
+	ApplyFilter *applyFilter = dynamic_cast<ApplyFilter *>(Get(aApplyFilter));
+	if (applyFilter && applyFilter->canBeRun())
 	{
-		myPlaylist->EnableHighlighting();
-		Playlist::ReloadTotalLength = true;
-		RedrawHeader = true;
+		// delete current filter
+		wFooter->PushChar(KEY_CTRL_U);
+		wFooter->PushChar(KEY_ENTER);
+		applyFilter->Execute();
 	}
-	ListsChangeFinisher();
 }
 
 bool Find::canBeRun() const
