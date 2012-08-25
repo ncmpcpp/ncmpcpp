@@ -27,6 +27,17 @@ using Global::myScreen;
 using Global::myLockedScreen;
 using Global::myInactiveScreen;
 
+namespace
+{
+	void DrawScreenSeparator(int x)
+	{
+		attron(COLOR_PAIR(Config.main_color));
+		mvvline(Global::MainStartY, x, 0, Global::MainHeight);
+		attroff(COLOR_PAIR(Config.main_color));
+		refresh();
+	}
+}
+
 void ApplyToVisibleWindows(void (BasicScreen::*f)())
 {
 	if (myLockedScreen && myScreen->isMergable())
@@ -42,9 +53,28 @@ void ApplyToVisibleWindows(void (BasicScreen::*f)())
 	(myScreen->*f)();
 }
 
-void UpdateInactiveScreen(BasicScreen *screen)
+void UpdateInactiveScreen(BasicScreen *screen_to_be_set)
 {
-	myInactiveScreen = myLockedScreen == screen ? 0 : myLockedScreen;
+	if (myInactiveScreen && myLockedScreen != myInactiveScreen && myLockedScreen == screen_to_be_set)
+	{
+		// if we're here, the following conditions are (or at least should be) met:
+		// 1. screen is split (myInactiveScreen is not null)
+		// 2. current screen (myScreen) is not splittable, ie. is stacked on top of split screens
+		// 3. current screen was activated while master screen was active
+		// 4. we are returning to master screen
+		// in such case we want to keep slave screen visible, so we never set it to null
+		// as in "else" case. we also need to refresh it and redraw separator between
+		// them as stacked screen probably has overwritten part ot it.
+		myInactiveScreen->Refresh();
+		DrawScreenSeparator(COLS*Config.locked_screen_width_part);
+	}
+	else
+	{
+		if (myLockedScreen == screen_to_be_set)
+			myInactiveScreen = 0;
+		else
+			myInactiveScreen = myLockedScreen;
+	}
 }
 
 bool isVisible(BasicScreen *screen)
@@ -74,11 +104,7 @@ void BasicScreen::GetWindowResizeParams(size_t &x_offset, size_t &width, bool ad
 			{
 				myLockedScreen->Resize();
 				myLockedScreen->Refresh();
-				
-				attron(COLOR_PAIR(Config.main_color));
-				mvvline(Global::MainStartY, x_offset-1, 0, Global::MainHeight);
-				attroff(COLOR_PAIR(Config.main_color));
-				refresh();
+				DrawScreenSeparator(x_offset-1);
 			}
 		}
 	}
