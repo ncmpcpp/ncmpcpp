@@ -43,7 +43,7 @@ class Visualizer : public Screen<Window>
 		virtual std::basic_string<my_char_t> Title();
 		
 		virtual void Update();
-		virtual void Scroll(Where, const int *) { }
+		virtual void Scroll(Where) { }
 		
 		virtual void EnterPressed() { }
 		virtual void SpacePressed();
