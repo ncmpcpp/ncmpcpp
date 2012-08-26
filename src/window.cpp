@@ -654,9 +654,9 @@ std::string Window::GetString(const std::string &base, size_t length, size_t wid
 
 void Window::GetXY(int &x, int &y)
 {
-	getyx(itsWindow, y, x);
-	itsX = x;
-	itsY = y;
+	getyx(itsWindow, itsY, itsX);
+	x = itsX;
+	y = itsY;
 }
 
 void Window::GotoXY(int x, int y)
@@ -666,13 +666,15 @@ void Window::GotoXY(int x, int y)
 	itsY = y;
 }
 
- int Window::X() const
+ int Window::X()
 {
+	getyx(itsWindow, itsY, itsX);
 	return itsX;
 }
 
-int Window::Y() const
+int Window::Y()
 {
+	getyx(itsWindow, itsY, itsX);
 	return itsY;
 }
 
@@ -956,3 +958,17 @@ size_t Window::Length(const std::wstring &ws)
 #	endif // WIN32
 }
 
+void Window::Cut (std::wstring &ws, size_t max_len)
+{
+	size_t i = 0;
+	int remained_len = max_len;
+	for (; i < ws.length(); ++i)
+	{
+		remained_len -= wcwidth(ws[i]);
+		if (remained_len < 0)
+		{
+			ws.resize(i);
+			break;
+		}
+	}
+}

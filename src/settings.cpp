@@ -371,6 +371,7 @@ void Configuration::SetDefaults()
 	search_engine_default_search_mode = 0;
 	visualizer_sync_interval = 30;
 	locked_screen_width_part = 0.5;
+	selected_item_prefix_length = 0;
 	selected_item_suffix_length = 0;
 	now_playing_suffix_length = 0;
 #	ifdef HAVE_LANGINFO_H
@@ -655,6 +656,7 @@ void Configuration::Read()
 				{
 					selected_item_prefix.Clear();
 					String2Buffer(v, selected_item_prefix);
+					selected_item_prefix_length = Window::Length(TO_WSTRING(selected_item_prefix.Str()));
 				}
 			}
 			else if (name == "selected_item_suffix")
@@ -672,6 +674,7 @@ void Configuration::Read()
 				{
 					now_playing_prefix.Clear();
 					String2Buffer(v, now_playing_prefix);
+					now_playing_prefix_length = Window::Length(TO_WSTRING(now_playing_prefix.Str()));
 				}
 			}
 			else if (name == "now_playing_suffix")
@@ -1119,6 +1122,23 @@ void Configuration::GenerateColumns()
 		
 		col.width = StrToInt(width);
 		columns.push_back(col);
+	}
+	
+	// calculate which column is the last one to have relative width and stretch it accordingly
+	if (!columns.empty())
+	{
+		int stretch_limit = 0;
+		auto it = columns.rbegin();
+		for (; it != columns.rend(); ++it)
+		{
+			if (it->fixed)
+				stretch_limit += it->width;
+			else
+				break;
+		}
+		// if it's false, all columns are fixed
+		if (it != columns.rend())
+			it->stretch_limit = stretch_limit;
 	}
 	
 	// generate format for converting tags in columns to string for Playlist::SongInColumnsToString()

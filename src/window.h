@@ -298,21 +298,15 @@ namespace NCurses
 			///
 			void GotoXY(int x, int y);
 			
-			/// @return last X position that was set with GetXY(). Note that it most
-			/// likely won't report correct position unless called after GetXY() and
-			/// before any function that can print anything to window.
+			/// @return x window coordinate
 			/// @see GetXY()
 			///
-			int X() const;
+			int X();
 			
-			/// @return last Y position that was set with GetXY(). Since Y position
-			/// doesn't change so frequently as X does, it can be called (with some
-			/// caution) after something was printed to window and still may report
-			/// correct position, but if you're not sure, obtain Y pos with GetXY()
-			/// instead.
+			/// @return y windows coordinate
 			/// @see GetXY()
 			///
-			int Y() const;
+			int Y();
 			
 			/// Used to indicate whether given coordinates of main screen lies within
 			/// window area or not and if they do, transform them into in-window coords.
@@ -525,6 +519,13 @@ namespace NCurses
 			/// @return real length of wide string
 			///
 			static size_t Length(const std::wstring &ws);
+			
+			/// Cuts string so it fits desired length on the screen. Note that it uses
+			/// wcwidth to check real width of all characters it contains. If string
+			/// fits requested length it's not modified at all.
+			/// @param ws wide string to be cut
+			/// @param max_len maximal length of string
+			static void Cut(std::wstring &ws, size_t max_len);
 			
 		protected:
 			/// Sets colors of window (interal use only)

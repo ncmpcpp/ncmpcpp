@@ -75,69 +75,72 @@ std::string Display::Columns(size_t list_width)
 	if (Config.columns.empty())
 		return "";
 	
-	std::basic_string<my_char_t> result;
-	size_t where = 0;
+	std::string result;
+	
 	int width;
-	
-	std::vector<Column>::const_iterator next2last;
-	bool last_fixed = Config.columns.back().fixed;
-	if (Config.columns.size() > 1)
-		next2last = Config.columns.end()-2;
-	
-	for (std::vector<Column>::const_iterator it = Config.columns.begin(); it != Config.columns.end(); ++it)
+	int remained_width = list_width;
+	std::vector<Column>::const_iterator it, last = Config.columns.end() - 1;
+	for (it = Config.columns.begin(); it != Config.columns.end(); ++it)
 	{
-		if (it == Config.columns.end()-1)
-			width = list_width-where;
-		else if (last_fixed && it == next2last)
-			width = list_width-where-1-(++next2last)->width;
+		// column has relative width and all after it have fixed width,
+		// so stretch it so it fills whole screen along with these after.
+		if (it->stretch_limit >= 0) // (*)
+			width = remained_width - it->stretch_limit;
 		else
-			width = it->width*(it->fixed ? 1 : list_width/100.0);
+			width = it->fixed ? it->width : it->width * list_width * 0.01;
+		// columns with relative width may shrink to 0, omit them
+		if (width == 0)
+			continue;
+		// if column is not last, we need to have spacing between it
+		// and next column, so we substract it now and restore later.
+		if (it != last)
+			--width;
 		
-		std::basic_string<my_char_t> tag;
-		if (it->type.length() >= 1 && it->name.empty())
+		// if column doesn't fit into screen, discard it and any other after it.
+		if (remained_width-width < 0 || width < 0 /* this one may come from (*) */)
+			break;
+		
+		std::basic_string<my_char_t> name;
+		if (it->name.empty())
 		{
 			for (size_t j = 0; j < it->type.length(); ++j)
 			{
-				tag += toColumnName(it->type[j]);
-				tag += '/';
+				name += toColumnName(it->type[j]);
+				name += '/';
 			}
-			tag.resize(tag.length()-1);
+			name.resize(name.length()-1);
 		}
 		else
-			tag = it->name;
+			name = it->name;
+		Window::Cut(name, width);
+		
+		int x_off = std::max(0, width - int(Window::Length(name)));
 		if (it->right_alignment)
 		{
-			long i = width-tag.length()-(it != Config.columns.begin());
-			if (i > 0)
-				result.resize(result.length()+i, ' ');
-		}
-		
-		where += width;
-		result += tag;
-		
-		if (result.length() > where)
-		{
-			result.resize(where);
-			result += ' ';
+			result += std::string(x_off, KEY_SPACE);
+			result += TO_STRING(name);
 		}
 		else
-			result.resize(std::min(where+1, size_t(COLS)), ' ');
+		{
+			result += TO_STRING(name);
+			result += std::string(x_off, KEY_SPACE);
+		}
+		
+		if (it != last)
+		{
+			// add missing width's part and restore the value.
+			remained_width -= width+1;
+			result += ' ';
+		}
 	}
-	result.resize(list_width);
-	return TO_STRING(result);
+	
+	return result;
 }
 
 void Display::SongsInColumns(const MPD::Song &s, void *data, Menu<MPD::Song> *menu)
 {
 	if (!s.Localized())
 		const_cast<MPD::Song *>(&s)->Localize();
-	
-	/// FIXME: This function is pure mess, it needs to be
-	/// rewritten and unified with Display::Columns() a bit.
-	
-	bool is_now_playing = menu == myPlaylist->Items && (menu->isFiltered() ? s.GetPosition() : menu->CurrentlyDrawedPosition()) == size_t(myPlaylist->NowPlaying);
-	if (is_now_playing)
-		*menu << Config.now_playing_prefix;
 	
 	if (Config.columns.empty())
 		return;
@@ -153,95 +156,115 @@ void Display::SongsInColumns(const MPD::Song &s, void *data, Menu<MPD::Song> *me
 	if (separate_albums)
 		*menu << fmtUnderline;
 	
-	std::vector<Column>::const_iterator next2last, last, it;
-	size_t where = 0;
+	int song_pos = menu->isFiltered() ? s.GetPosition() : menu->CurrentlyDrawedPosition();
+	bool is_now_playing = menu == myPlaylist->Items && song_pos == myPlaylist->NowPlaying;
+	bool is_selected = menu->isSelected(menu->CurrentlyDrawedPosition());
+	bool discard_colors = Config.discard_colors_if_item_is_selected && is_selected;
+	
+	if (is_now_playing)
+		*menu << Config.now_playing_prefix;
+	
 	int width;
-	
-	bool last_fixed = Config.columns.back().fixed;
-	if (Config.columns.size() > 1)
-		next2last = Config.columns.end()-2;
-	last = Config.columns.end()-1;
-	
-	bool discard_colors = Config.discard_colors_if_item_is_selected && menu->isSelected(menu->CurrentlyDrawedPosition());
-	
+	int y = menu->Y();
+	int remained_width = menu->GetWidth();
+	std::vector<Column>::const_iterator it, last = Config.columns.end() - 1;
 	for (it = Config.columns.begin(); it != Config.columns.end(); ++it)
 	{
-		if (where)
+		// check current X coordinate
+		int x = menu->X();
+		// column has relative width and all after it have fixed width,
+		// so stretch it so it fills whole screen along with these after.
+		if (it->stretch_limit >= 0) // (*)
+			width = remained_width - it->stretch_limit;
+		else
+			width = it->fixed ? it->width : it->width * menu->GetWidth() * 0.01;
+		// columns with relative width may shrink to 0, omit them
+		if (width == 0)
+			continue;
+		// if column is not last, we need to have spacing between it
+		// and next column, so we substract it now and restore later.
+		if (it != last)
+			--width;
+		
+		if (it == Config.columns.begin() && (is_now_playing || is_selected))
 		{
-			menu->GotoXY(where, menu->Y());
-			*menu << ' ';
-			if (!discard_colors && (it-1)->color != clDefault)
-				*menu << clEnd;
+			// here comes the shitty part. if we applied now playing or selected
+			// prefix, first column's width needs to be properly modified, so
+			// next column is not affected by them. if prefixes fit, we just
+			// subtract their width from allowed column's width. if they don't,
+			// then we pretend that they do, but we adjust current cursor position
+			// so part of them will be overwritten by next column.
+			int offset = 0;
+			if (is_now_playing)
+				offset += Config.now_playing_prefix_length;
+			if (is_selected)
+				offset += Config.selected_item_prefix_length;
+			if (width-offset < 0)
+			{
+				remained_width -= width + 1;
+				menu->GotoXY(width, y);
+				*menu << ' ';
+				continue;
+			}
+			width -= offset;
+			remained_width -= offset;
 		}
 		
-		if (it == Config.columns.end()-1)
-			width = menu->GetWidth()-where;
-		else if (last_fixed && it == next2last)
-			width = menu->GetWidth()-where-1-(++next2last)->width;
-		else
-			width = it->width*(it->fixed ? 1 : menu->GetWidth()/100.0);
+		// if column doesn't fit into screen, discard it and any other after it.
+		if (remained_width-width < 0 || width < 0 /* this one may come from (*) */)
+			break;
 		
-		MPD::Song::GetFunction get = 0;
-		
-		std::string tag;
+		std::basic_string<my_char_t> tag;
 		for (size_t i = 0; i < it->type.length(); ++i)
 		{
-			get = toGetFunction(it->type[i]);
-			tag = get ? s.GetTags(get) : "";
+			MPD::Song::GetFunction get = toGetFunction(it->type[i]);
+			tag = TO_WSTRING(get ? s.GetTags(get) : "");
 			if (!tag.empty())
 				break;
 		}
+		if (tag.empty() && it->display_empty_tag)
+			tag = TO_WSTRING(Config.empty_tag);
+		Window::Cut(tag, width);
+		
 		if (!discard_colors && it->color != clDefault)
 			*menu << it->color;
-		whline(menu->Raw(), 32, menu->GetWidth()-where);
 		
-		// last column might need to be shrinked to make space for np/sel suffixes
-		if (it == last)
-		{
-			if (menu->isSelected(menu->CurrentlyDrawedPosition()))
-				width -= Config.selected_item_suffix_length;
-			if (is_now_playing)
-				width -= Config.now_playing_suffix_length;
-		}
-		
+		int x_off = 0;
+		// if column uses right alignment, calculate proper offset.
+		// otherwise just assume offset is 0, ie. we start from the left.
 		if (it->right_alignment)
+			x_off = std::max(0, width - int(Window::Length(tag)));
+		
+		whline(menu->Raw(), KEY_SPACE, width);
+		menu->GotoXY(x + x_off, y);
+		*menu << tag;
+		menu->GotoXY(x + width, y);
+		if (it != last)
 		{
-			if (width > 0 && (!tag.empty() || it->display_empty_tag))
-			{
-				int x, y;
-				menu->GetXY(x, y);
-				std::basic_string<my_char_t> wtag = TO_WSTRING(tag.empty() ? Config.empty_tag : tag).substr(0, width-!!x);
-				*menu << XY(x+width-Window::Length(wtag)-!!x, y) << wtag;
-			}
+			// add missing width's part and restore the value.
+			*menu << ' ';
+			remained_width -= width+1;
 		}
-		else
-		{
-			if (it == last)
-			{
-				if (width > 0)
-				{
-					std::basic_string<my_char_t> str;
-					if (!tag.empty())
-						str = TO_WSTRING(tag).substr(0, width-1);
-					else if (it->display_empty_tag)
-						str = TO_WSTRING(Config.empty_tag).substr(0, width-1);
-					*menu << str;
-				}
-			}
-			else
-			{
-				if (!tag.empty())
-					*menu << tag;
-				else if (it->display_empty_tag)
-					*menu << Config.empty_tag;
-			}
-		}
-		where += width;
+		
+		if (!discard_colors && it->color != clDefault)
+			*menu << clEnd;
 	}
-	if (!discard_colors && (--it)->color != clDefault)
-		*menu << clEnd;
+	
+	// here comes the shitty part, second chapter. here we apply
+	// now playing suffix or/and make room for selected suffix
+	// (as it will be applied in Menu::Refresh when this function
+	// returns there).
 	if (is_now_playing)
+	{
+		int np_x = menu->GetWidth() - Config.now_playing_suffix_length;
+		if (is_selected)
+			np_x -= Config.selected_item_suffix_length;
+		menu->GotoXY(np_x, y);
 		*menu << Config.now_playing_suffix;
+	}
+	if (is_selected)
+		menu->GotoXY(menu->GetWidth() - Config.selected_item_suffix_length, y);
+	
 	if (separate_albums)
 		*menu << fmtUnderlineEnd;
 }

@@ -35,11 +35,12 @@ enum SortMode { smName, smMTime, smCustomFormat };
 
 struct Column
 {
-	Column() : right_alignment(0), display_empty_tag(1) { }
+	Column() : stretch_limit(-1), right_alignment(0), display_empty_tag(1) { }
 	
 	std::basic_string<my_char_t> name;
 	std::string type;
-	unsigned width;
+	int width;
+	int stretch_limit;
 	Color color;
 	bool fixed;
 	bool right_alignment;
@@ -219,7 +220,9 @@ struct Configuration
 	
 	double locked_screen_width_part;
 	
+	size_t selected_item_prefix_length;
 	size_t selected_item_suffix_length;
+	size_t now_playing_prefix_length;
 	size_t now_playing_suffix_length;
 	
 	BasicScreen *startup_screen;
