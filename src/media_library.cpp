@@ -329,24 +329,15 @@ void MediaLibrary::Update()
 		
 		Mpd.StartSearch(1);
 		Mpd.AddSearch(Config.media_lib_primary_tag, locale_to_utf_cpy(hasTwoColumns ? Albums->Current().PrimaryTag : Artists->Current()));
-		if (Albums->Empty()) // left for compatibility with <mpd-0.14
+		if (Albums->Current().Date != AllTracksMarker)
 		{
-			*Albums << XY(0, 0) << "No albums found.";
-			Albums->Window::Refresh();
-		}
-		else
-		{
-			if (Albums->Current().Date != AllTracksMarker)
-			{
-				Mpd.AddSearch(MPD_TAG_ALBUM, locale_to_utf_cpy(Albums->Current().Album));
-				if (Config.media_library_display_date)
-					Mpd.AddSearch(MPD_TAG_DATE, locale_to_utf_cpy(Albums->Current().Date));
-			}
+			Mpd.AddSearch(MPD_TAG_ALBUM, locale_to_utf_cpy(Albums->Current().Album));
+			if (Config.media_library_display_date)
+				Mpd.AddSearch(MPD_TAG_DATE, locale_to_utf_cpy(Albums->Current().Date));
 		}
 		Mpd.CommitSearch(list);
 		
-		if (!Albums->Empty()) // for compatibility with mpd < 0.14
-			sort(list.begin(), list.end(), Albums->Current().Date == AllTracksMarker ? SortAllTracks : SortSongsByTrack);
+		sort(list.begin(), list.end(), Albums->Current().Date == AllTracksMarker ? SortAllTracks : SortSongsByTrack);
 		bool bold = 0;
 		
 		for (MPD::SongList::const_iterator it = list.begin(); it != list.end(); ++it)

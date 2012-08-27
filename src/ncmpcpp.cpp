@@ -119,6 +119,12 @@ int main(int argc, char **argv)
 	if (!ConnectToMPD())
 		exit(1);
 	
+	if (Mpd.Version() < 14)
+	{
+		std::cout << "MPD < 0.14 is not supported, please upgrade.\n";
+		exit(1);
+	}
+	
 	CreateDir(Config.ncmpcpp_directory);
 	
 	// always execute these commands, even if ncmpcpp use exit function
