@@ -187,9 +187,39 @@ void Playlist::EnterPressed()
 		for (size_t i = beginning; i < end; ++i)
 			playlist.push_back(&(*Items)[i]);
 		
+		std::function<void(MPD::SongList::iterator, MPD::SongList::iterator)> iter_swap, quick_sort;
+		auto song_cmp = [](MPD::Song *a, MPD::Song *b) {
+			CaseInsensitiveStringComparison cmp;
+				for (size_t i = 0; i < SortOptions; ++i)
+					if (int ret = cmp(a->GetTags((*SortDialog)[i].second), b->GetTags((*SortDialog)[i].second)))
+						return ret < 0;
+				return a->GetPosition() < b->GetPosition();
+		};
+		iter_swap = [&playlist](MPD::SongList::iterator a, MPD::SongList::iterator b) {
+			std::iter_swap(a, b);
+			Mpd.Swap(a-playlist.begin(), b-playlist.begin());
+		};
+		quick_sort = [this, &song_cmp, &quick_sort, &iter_swap](MPD::SongList::iterator first, MPD::SongList::iterator last) {
+			if (last-first > 1)
+			{
+				MPD::SongList::iterator pivot = first+rand()%(last-first);
+				iter_swap(pivot, last-1);
+				pivot = last-1;
+				
+				MPD::SongList::iterator tmp = first;
+				for (MPD::SongList::iterator i = first; i != pivot; ++i)
+					if (song_cmp(*i, *pivot))
+						iter_swap(i, tmp++);
+				iter_swap(tmp, pivot);
+				
+				quick_sort(first, tmp);
+				quick_sort(tmp+1, last);
+			}
+		};
+		
 		ShowMessage("Sorting...");
 		Mpd.StartCommandsList();
-		QuickSort(playlist.begin(), playlist.end(), playlist.begin());
+		quick_sort(playlist.begin(), playlist.end());
 		if (Mpd.CommitCommandsList())
 			ShowMessage("Playlist sorted");
 		w = Items;
@@ -412,25 +442,6 @@ void Playlist::EnableHighlighting()
 {
 	Items->Highlighting(1);
 	UpdateTimer();
-}
-
-void Playlist::QuickSort(MPD::SongList::iterator first, MPD::SongList::iterator last, MPD::SongList::iterator begin)
-{
-	if (last-first > 1)
-	{
-		MPD::SongList::iterator pivot = first+rand()%(last-first);
-		IterSwap(pivot, last-1, begin);
-		pivot = last-1;
-		
-		MPD::SongList::iterator tmp = first;
-		for (MPD::SongList::iterator i = first; i != pivot; ++i)
-			if (SongComp(*i, *pivot))
-				IterSwap(i, tmp++, begin);
-		IterSwap(tmp, pivot, begin);
-		
-		QuickSort(first, tmp, begin);
-		QuickSort(tmp+1, last, begin);
-	}
 }
 
 std::string Playlist::TotalLength()
