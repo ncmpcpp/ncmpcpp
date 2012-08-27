@@ -569,8 +569,7 @@ bool MPD::Connection::ClearPlaylist(const std::string &playlist)
 
 void MPD::Connection::AddToPlaylist(const std::string &path, const Song &s)
 {
-	if (!s.Empty())
-		AddToPlaylist(path, s.GetFile());
+	AddToPlaylist(path, s.getURI());
 }
 
 void MPD::Connection::AddToPlaylist(const std::string &path, const std::string &file)
@@ -632,7 +631,7 @@ void MPD::Connection::GetPlaylistChanges(unsigned version, SongList &v)
 	GoBusy();
 	mpd_send_queue_changes_meta(itsConnection, version);
 	while (mpd_song *s = mpd_recv_song(itsConnection))
-		v.push_back(new Song(s, 1));
+		v.push_back(new Song(s));
 	mpd_response_finish(itsConnection);
 	GoIdle();
 }
@@ -664,7 +663,8 @@ MPD::Song MPD::Connection::GetCurrentlyPlayingSong()
 {
 	assert(!isCommandsListEnabled);
 	GoBusy();
-	Song result = Song(itsConnection && isPlaying() ? mpd_run_current_song(itsConnection) : 0);
+	mpd_song *s = itsConnection && isPlaying() ? mpd_run_current_song(itsConnection) : 0;
+	Song result = s ? Song(s) : Song();
 	GoIdle();
 	return result;
 }
@@ -846,12 +846,12 @@ bool MPD::Connection::SetPriority(const Song &s, int prio)
 	if (!isCommandsListEnabled)
 	{
 		GoBusy();
-		return mpd_run_prio_id(itsConnection, prio, s.GetID());
+		return mpd_run_prio_id(itsConnection, prio, s.getID());
 	}
 	else
 	{
 		assert(!isIdle);
-		return mpd_send_prio_id(itsConnection, prio, s.GetID());
+		return mpd_send_prio_id(itsConnection, prio, s.getID());
 	}
 }
 
@@ -880,7 +880,7 @@ int MPD::Connection::AddSong(const std::string &path, int pos)
 
 int MPD::Connection::AddSong(const Song &s, int pos)
 {
-	return !s.Empty() ? (AddSong((!s.isFromDB() ? "file://" : "") + (s.Localized() ? locale_to_utf_cpy(s.GetFile()) : s.GetFile()), pos)) : -1;
+	return AddSong((!s.isFromDatabase() ? "file://" : "") + s.getURI(), pos);
 }
 
 bool MPD::Connection::Add(const std::string &path)

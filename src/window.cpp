@@ -732,7 +732,7 @@ size_t Window::GetStartY() const
 	return starty;
 }
 
-const std::string &Window::GetTitle() const
+const std::string &Window::getTitle() const
 {
 	return itsTitle;
 }

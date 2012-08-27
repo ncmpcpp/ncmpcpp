@@ -222,9 +222,6 @@ void NcmpcppStatusChanged(MPD::Connection *, MPD::StatusChanges changed, void *)
 	
 	if (changed.Playlist)
 	{
-		if (!(np = Mpd.GetCurrentlyPlayingSong()).Empty())
-			WindowTitle(utf_to_locale_cpy(np.toString(Config.song_window_title_format)));
-		
 		bool was_filtered = myPlaylist->Items->isFiltered();
 		myPlaylist->Items->ShowAll();
 		MPD::SongList list;
@@ -237,7 +234,7 @@ void NcmpcppStatusChanged(MPD::Connection *, MPD::StatusChanges changed, void *)
 		myPlaylist->Items->Reserve(playlist_length);
 		for (MPD::SongList::const_iterator it = list.begin(); it != list.end(); ++it)
 		{
-			int pos = (*it)->GetPosition();
+			int pos = (*it)->getPosition();
 			if (pos < int(myPlaylist->Items->Size()))
 			{
 				// if song's already in playlist, replace it with a new one
@@ -248,8 +245,6 @@ void NcmpcppStatusChanged(MPD::Connection *, MPD::StatusChanges changed, void *)
 				// otherwise just add it to playlist
 				myPlaylist->Items->AddOption(**it);
 			}
-			myPlaylist->Items->at(pos).CopyPtr(0);
-			(*it)->NullMe();
 		}
 		if (was_filtered)
 		{
@@ -324,8 +319,7 @@ void NcmpcppStatusChanged(MPD::Connection *, MPD::StatusChanges changed, void *)
 			}
 			case MPD::psPlay:
 			{
-				if (!np.Empty())
-					WindowTitle(utf_to_locale_cpy(np.toString(Config.song_window_title_format)));
+				//WindowTitle(utf_to_locale_cpy(np.toString(Config.song_window_title_format)));
 				player_state = Config.new_design ? "[playing]" : "Playing: ";
 				Playlist::ReloadRemaining = true;
 				if (Mpd.GetOldState() == MPD::psStop) // show track info in status immediately
@@ -391,9 +385,6 @@ void NcmpcppStatusChanged(MPD::Connection *, MPD::StatusChanges changed, void *)
 				Lyrics::DownloadInBackground(myPlaylist->NowPlayingSong());
 #			endif // HAVE_CURL_CURL_H
 			
-			if (Mpd.isPlaying() && !(np = Mpd.GetCurrentlyPlayingSong()).Empty())
-				WindowTitle(utf_to_locale_cpy(np.toString(Config.song_window_title_format)));
-			
 			if (Config.autocenter_mode && !myPlaylist->Items->isFiltered())
 				myPlaylist->Items->Highlight(myPlaylist->NowPlaying);
 			
@@ -407,9 +398,13 @@ void NcmpcppStatusChanged(MPD::Connection *, MPD::StatusChanges changed, void *)
 	}
 	if (changed.ElapsedTime || changed.SongID || Global::RedrawStatusbar)
 	{
-		if (np.Empty() && !(np = Mpd.GetCurrentlyPlayingSong()).Empty())
-			WindowTitle(utf_to_locale_cpy(np.toString(Config.song_window_title_format)));
-		if (!np.Empty() && Mpd.isPlaying())
+		if (np.empty())
+		{
+			np = Mpd.GetCurrentlyPlayingSong();
+			if (!np.empty())
+				WindowTitle(utf_to_locale_cpy(np.toString(Config.song_window_title_format)));
+		}
+		if (!np.empty() && Mpd.isPlaying())
 		{
 			std::string tracklength;
 			if (Config.new_design)
@@ -487,7 +482,7 @@ void NcmpcppStatusChanged(MPD::Connection *, MPD::StatusChanges changed, void *)
 					tracklength += "]";
 				}
 				basic_buffer<my_char_t> np_song;
-				String2Buffer(TO_WSTRING(utf_to_locale_cpy(np.toString(Config.song_status_format, "$"))), np_song);
+				//String2Buffer(TO_WSTRING(utf_to_locale_cpy(np.toString(Config.song_status_format, "$"))), np_song);
 				*wFooter << XY(0, 1) << wclrtoeol << fmtBold << player_state << fmtBoldEnd;
 				np_song.Write(*wFooter, playing_song_scroll_begin, wFooter->GetWidth()-player_state.length()-tracklength.length(), U(" ** "));
 				*wFooter << fmtBold << XY(wFooter->GetWidth()-tracklength.length(), 1) << tracklength << fmtBoldEnd;

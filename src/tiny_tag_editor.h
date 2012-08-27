@@ -57,7 +57,7 @@ class TinyTagEditor : public Screen< Menu<Buffer> >
 		virtual bool isLockable() { return true; }
 		
 	private:
-		bool GetTags();
+		bool getTags();
 		MPD::Song itsEdited;
 		
 		static bool extendedTagsSupported(TagLib::File *);

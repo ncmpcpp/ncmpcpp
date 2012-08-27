@@ -242,7 +242,7 @@ namespace NCurses
 			
 			/// @return window's title
 			///
-			const std::string &GetTitle() const;
+			const std::string &getTitle() const;
 			
 			/// @return current window's color
 			///

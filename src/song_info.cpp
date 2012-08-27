@@ -29,18 +29,18 @@ SongInfo *mySongInfo = new SongInfo;
 
 const SongInfo::Metadata SongInfo::Tags[] =
 {
- { "Title",		&MPD::Song::GetTitle,		&MPD::Song::SetTitle		},
- { "Artist",		&MPD::Song::GetArtist,		&MPD::Song::SetArtist		},
- { "Album Artist",	&MPD::Song::GetAlbumArtist,	&MPD::Song::SetAlbumArtist	},
- { "Album",		&MPD::Song::GetAlbum,		&MPD::Song::SetAlbum		},
- { "Date",		&MPD::Song::GetDate,		&MPD::Song::SetDate		},
- { "Track",		&MPD::Song::GetTrack,		&MPD::Song::SetTrack		},
- { "Genre",		&MPD::Song::GetGenre,		&MPD::Song::SetGenre		},
- { "Composer",		&MPD::Song::GetComposer,	&MPD::Song::SetComposer		},
- { "Performer",		&MPD::Song::GetPerformer,	&MPD::Song::SetPerformer	},
- { "Disc",		&MPD::Song::GetDisc,		&MPD::Song::SetDisc		},
- { "Comment",		&MPD::Song::GetComment,		&MPD::Song::SetComment		},
- { 0,			0,				0				}
+ { "Title",        &MPD::Song::getTitle,       },
+ { "Artist",       &MPD::Song::getArtist,      },
+ { "Album Artist", &MPD::Song::getAlbumArtist, },
+ { "Album",        &MPD::Song::getAlbum,       },
+ { "Date",         &MPD::Song::getDate,        },
+ { "Track",        &MPD::Song::getTrack,       },
+ { "Genre",        &MPD::Song::getGenre,       },
+ { "Composer",     &MPD::Song::getComposer,    },
+ { "Performer",    &MPD::Song::getPerformer,   },
+ { "Disc",         &MPD::Song::getDisc,        },
+ { "Comment",      &MPD::Song::getComment,     },
+ { 0,              0,                          }
 };
 
 void SongInfo::Init()
@@ -101,19 +101,19 @@ void SongInfo::PrepareSong(MPD::Song &s)
 {
 #	ifdef HAVE_TAGLIB_H
 	std::string path_to_file;
-	if (s.isFromDB())
+	if (s.isFromDatabase())
 		path_to_file += Config.mpd_music_dir;
-	path_to_file += s.GetFile();
+	path_to_file += s.getURI();
 	TagLib::FileRef f(path_to_file.c_str());
 	if (!f.isNull())
 		s.SetComment(f.tag()->comment().to8Bit(1));
 #	endif // HAVE_TAGLIB_H
 	
-	*w << fmtBold << Config.color1 << "Filename: " << fmtBoldEnd << Config.color2 << s.GetName() << "\n" << clEnd;
+	*w << fmtBold << Config.color1 << "Filename: " << fmtBoldEnd << Config.color2 << s.getName() << "\n" << clEnd;
 	*w << fmtBold << "Directory: " << fmtBoldEnd << Config.color2;
-	ShowTag(*w, s.GetDirectory());
+	ShowTag(*w, s.getDirectory());
 	*w << "\n\n" << clEnd;
-	*w << fmtBold << "Length: " << fmtBoldEnd << Config.color2 << s.GetLength() << "\n" << clEnd;
+	*w << fmtBold << "Length: " << fmtBoldEnd << Config.color2 << s.getLength() << "\n" << clEnd;
 #	ifdef HAVE_TAGLIB_H
 	if (!f.isNull())
 	{
@@ -127,7 +127,7 @@ void SongInfo::PrepareSong(MPD::Song &s)
 	for (const Metadata *m = Tags; m->Name; ++m)
 	{
 		*w << fmtBold << "\n" << m->Name << ": " << fmtBoldEnd;
-		ShowTag(*w, s.GetTags(m->Get));
+		ShowTag(*w, s.getTags(m->Get));
 	}
 }
 

@@ -66,16 +66,16 @@ void Playlist::Init()
 		SortDialog->CenteredCursor(Config.centered_cursor);
 		SortDialog->SetItemDisplayer(Display::Pairs);
 		
-		SortDialog->AddOption(std::make_pair("Artist", &MPD::Song::GetArtist));
-		SortDialog->AddOption(std::make_pair("Album", &MPD::Song::GetAlbum));
-		SortDialog->AddOption(std::make_pair("Disc", &MPD::Song::GetDisc));
-		SortDialog->AddOption(std::make_pair("Track", &MPD::Song::GetTrack));
-		SortDialog->AddOption(std::make_pair("Genre", &MPD::Song::GetGenre));
-		SortDialog->AddOption(std::make_pair("Date", &MPD::Song::GetDate));
-		SortDialog->AddOption(std::make_pair("Composer", &MPD::Song::GetComposer));
-		SortDialog->AddOption(std::make_pair("Performer", &MPD::Song::GetPerformer));
-		SortDialog->AddOption(std::make_pair("Title", &MPD::Song::GetTitle));
-		SortDialog->AddOption(std::make_pair("Filename", &MPD::Song::GetFile));
+		SortDialog->AddOption(std::make_pair("Artist", &MPD::Song::getArtist));
+		SortDialog->AddOption(std::make_pair("Album", &MPD::Song::getAlbum));
+		SortDialog->AddOption(std::make_pair("Disc", &MPD::Song::getDisc));
+		SortDialog->AddOption(std::make_pair("Track", &MPD::Song::getTrack));
+		SortDialog->AddOption(std::make_pair("Genre", &MPD::Song::getGenre));
+		SortDialog->AddOption(std::make_pair("Date", &MPD::Song::getDate));
+		SortDialog->AddOption(std::make_pair("Composer", &MPD::Song::getComposer));
+		SortDialog->AddOption(std::make_pair("Performer", &MPD::Song::getPerformer));
+		SortDialog->AddOption(std::make_pair("Title", &MPD::Song::getTitle));
+		SortDialog->AddOption(std::make_pair("Filename", &MPD::Song::getURI));
 		SortDialog->AddSeparator();
 		SortDialog->AddOption(std::make_pair("Sort", static_cast<MPD::Song::GetFunction>(0)));
 		SortDialog->AddOption(std::make_pair("Cancel", static_cast<MPD::Song::GetFunction>(0)));
@@ -152,7 +152,7 @@ void Playlist::EnterPressed()
 	if (w == Items)
 	{
 		if (!Items->Empty())
-			Mpd.PlayID(Items->Current().GetID());
+			Mpd.PlayID(Items->Current().getID());
 	}
 	else if (w == SortDialog)
 	{
@@ -191,9 +191,9 @@ void Playlist::EnterPressed()
 		auto song_cmp = [](MPD::Song *a, MPD::Song *b) {
 			CaseInsensitiveStringComparison cmp;
 				for (size_t i = 0; i < SortOptions; ++i)
-					if (int ret = cmp(a->GetTags((*SortDialog)[i].second), b->GetTags((*SortDialog)[i].second)))
+					if (int ret = cmp(a->getTags((*SortDialog)[i].second), b->getTags((*SortDialog)[i].second)))
 						return ret < 0;
-				return a->GetPosition() < b->GetPosition();
+				return a->getPosition() < b->getPosition();
 		};
 		iter_swap = [&playlist](MPD::SongList::iterator a, MPD::SongList::iterator b) {
 			std::iter_swap(a, b);
@@ -452,14 +452,14 @@ std::string Playlist::TotalLength()
 	{
 		itsTotalLength = 0;
 		for (size_t i = 0; i < Items->Size(); ++i)
-			itsTotalLength += (*Items)[i].GetTotalLength();
+			itsTotalLength += (*Items)[i].getDuration();
 		ReloadTotalLength = 0;
 	}
 	if (Config.playlist_show_remaining_time && ReloadRemaining && !Items->isFiltered())
 	{
 		itsRemainingTime = 0;
 		for (size_t i = NowPlaying; i < Items->Size(); ++i)
-			itsRemainingTime += (*Items)[i].GetTotalLength();
+			itsRemainingTime += (*Items)[i].getDuration();
 		ReloadRemaining = false;
 	}
 	
@@ -512,12 +512,12 @@ bool Playlist::Add(const MPD::Song &s, bool in_playlist, bool play, int position
 {
 	if (Config.ncmpc_like_songs_adding && in_playlist)
 	{
-		unsigned hash = s.GetHash();
+		unsigned hash = s.getHash();
 		if (play)
 		{
 			for (size_t i = 0; i < Items->Size(); ++i)
 			{
-				if (Items->at(i).GetHash() == hash)
+				if (Items->at(i).getHash() == hash)
 				{
 					Mpd.Play(i);
 					break;
@@ -530,7 +530,7 @@ bool Playlist::Add(const MPD::Song &s, bool in_playlist, bool play, int position
 			Mpd.StartCommandsList();
 			for (size_t i = 0; i < Items->Size(); ++i)
 			{
-				if ((*Items)[i].GetHash() == hash)
+				if ((*Items)[i].getHash() == hash)
 				{
 					Mpd.Delete(i);
 					Items->DeleteOption(i);

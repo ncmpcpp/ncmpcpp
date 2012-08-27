@@ -139,9 +139,6 @@ std::string Display::Columns(size_t list_width)
 
 void Display::SongsInColumns(const MPD::Song &s, void *data, Menu<MPD::Song> *menu)
 {
-	if (!s.Localized())
-		const_cast<MPD::Song *>(&s)->Localize();
-	
 	if (Config.columns.empty())
 		return;
 	
@@ -150,13 +147,13 @@ void Display::SongsInColumns(const MPD::Song &s, void *data, Menu<MPD::Song> *me
 	if (Config.playlist_separate_albums && menu->CurrentlyDrawedPosition()+1 < menu->Size())
 	{
 		MPD::Song *next = static_cast<ScreenFormat *>(data)->screen->GetSong(menu->CurrentlyDrawedPosition()+1);
-		if (next && next->GetAlbum() != s.GetAlbum())
+		if (next && next->getAlbum() != s.getAlbum())
 			separate_albums = true;
 	}
 	if (separate_albums)
 		*menu << fmtUnderline;
 	
-	int song_pos = menu->isFiltered() ? s.GetPosition() : menu->CurrentlyDrawedPosition();
+	int song_pos = menu->isFiltered() ? s.getPosition() : menu->CurrentlyDrawedPosition();
 	bool is_now_playing = menu == myPlaylist->Items && song_pos == myPlaylist->NowPlaying;
 	bool is_selected = menu->isSelected(menu->CurrentlyDrawedPosition());
 	bool discard_colors = Config.discard_colors_if_item_is_selected && is_selected;
@@ -218,7 +215,7 @@ void Display::SongsInColumns(const MPD::Song &s, void *data, Menu<MPD::Song> *me
 		for (size_t i = 0; i < it->type.length(); ++i)
 		{
 			MPD::Song::GetFunction get = toGetFunction(it->type[i]);
-			tag = TO_WSTRING(get ? s.GetTags(get) : "");
+			tag = TO_WSTRING(get ? s.getTags(get) : "");
 			if (!tag.empty())
 				break;
 		}
@@ -271,10 +268,7 @@ void Display::SongsInColumns(const MPD::Song &s, void *data, Menu<MPD::Song> *me
 
 void Display::Songs(const MPD::Song &s, void *data, Menu<MPD::Song> *menu)
 {
-	if (!s.Localized())
-		const_cast<MPD::Song *>(&s)->Localize();
-	
-	bool is_now_playing = menu == myPlaylist->Items && (menu->isFiltered() ? s.GetPosition() : menu->CurrentlyDrawedPosition()) == size_t(myPlaylist->NowPlaying);
+	bool is_now_playing = menu == myPlaylist->Items && (menu->isFiltered() ? s.getPosition() : menu->CurrentlyDrawedPosition()) == size_t(myPlaylist->NowPlaying);
 	if (is_now_playing)
 		*menu << Config.now_playing_prefix;
 	
@@ -283,7 +277,7 @@ void Display::Songs(const MPD::Song &s, void *data, Menu<MPD::Song> *menu)
 	if (Config.playlist_separate_albums && menu->CurrentlyDrawedPosition()+1 < menu->Size())
 	{
 		MPD::Song *next = static_cast<ScreenFormat *>(data)->screen->GetSong(menu->CurrentlyDrawedPosition()+1);
-		if (next && next->GetAlbum() != s.GetAlbum())
+		if (next && next->getAlbum() != s.getAlbum())
 			separate_albums = true;
 	}
 	if (separate_albums)
@@ -347,14 +341,16 @@ void Display::Tags(const MPD::Song &s, void *data, Menu<MPD::Song> *menu)
 	size_t i = static_cast<Menu<std::string> *>(data)->Choice();
 	if (i < 11)
 	{
-		ShowTag(*menu, s.GetTags(SongInfo::Tags[i].Get));
+		ShowTag(*menu, s.getTags(SongInfo::Tags[i].Get));
 	}
 	else if (i == 12)
 	{
-		if (s.GetNewName().empty())
-			*menu << s.GetName();
+		// FIXME
+		/*if (s.GetNewName().empty())
+			*menu << s.getName();
 		else
-			*menu << s.GetName() << Config.color2 << " -> " << clEnd << s.GetNewName();
+			*menu << s.getName() << Config.color2 << " -> " << clEnd << s.GetNewName();
+		*/
 	}
 }
 

@@ -381,7 +381,7 @@ void TagEditor::EnterPressed()
 		*FParserLegend << "%C - comment\n\n";
 		*FParserLegend << fmtBold << "Files:\n" << fmtBoldEnd;
 		for (MPD::SongList::const_iterator it = EditedSongs.begin(); it != EditedSongs.end(); ++it)
-			*FParserLegend << Config.color2 << " * " << clEnd << (*it)->GetName() << "\n";
+			*FParserLegend << Config.color2 << " * " << clEnd << (*it)->getName() << "\n";
 		FParserLegend->Flush();
 		
 		if (!Patterns.empty())
@@ -442,7 +442,7 @@ void TagEditor::EnterPressed()
 				{
 					if (FParserUsePreview)
 					{
-						*FParserPreview << fmtBold << s.GetName() << ":\n" << fmtBoldEnd;
+						*FParserPreview << fmtBold << s.getName() << ":\n" << fmtBoldEnd;
 						*FParserPreview << ParseFilename(s, Config.pattern, FParserUsePreview) << "\n";
 					}
 					else
@@ -450,13 +450,13 @@ void TagEditor::EnterPressed()
 				}
 				else // rename files
 				{
-					std::string file = s.GetName();
+					std::string file = s.getName();
 					size_t last_dot = file.rfind(".");
 					std::string extension = file.substr(last_dot);
 					std::string new_file = GenerateFilename(s, "{" + Config.pattern + "}");
 					if (new_file.empty() && !FParserUsePreview)
 					{
-						ShowMessage("File \"%s\" would have an empty name", s.GetName().c_str());
+						ShowMessage("File \"%s\" would have an empty name", s.getName().c_str());
 						FParserUsePreview = 1;
 						success = 0;
 					}
@@ -556,7 +556,7 @@ void TagEditor::EnterPressed()
 		{
 			LockStatusbar();
 			Statusbar() << fmtBold << TagTypes->Current() << fmtBoldEnd << ": ";
-			std::string new_tag = wFooter->GetString(Tags->Current().GetTags(get));
+			std::string new_tag = wFooter->GetString(Tags->Current().getTags(get));
 			UnlockStatusbar();
 			for (MPD::SongList::iterator it = EditedSongs.begin(); it != EditedSongs.end(); ++it)
 				(*it)->SetTags(set, new_tag);
@@ -565,9 +565,9 @@ void TagEditor::EnterPressed()
 		{
 			LockStatusbar();
 			Statusbar() << fmtBold << TagTypes->Current() << fmtBoldEnd << ": ";
-			std::string new_tag = wFooter->GetString(Tags->Current().GetTags(get));
+			std::string new_tag = wFooter->GetString(Tags->Current().getTags(get));
 			UnlockStatusbar();
-			if (new_tag != Tags->Current().GetTags(get))
+			if (new_tag != Tags->Current().getTags(get))
 				Tags->Current().SetTags(set, new_tag);
 			Tags->Scroll(wDown);
 		}
@@ -589,7 +589,7 @@ void TagEditor::EnterPressed()
 			else if (w == Tags)
 			{
 				MPD::Song &s = Tags->Current();
-				std::string old_name = s.GetNewName().empty() ? s.GetName() : s.GetNewName();
+				std::string old_name = s.GetNewName().empty() ? s.getName() : s.GetNewName();
 				size_t last_dot = old_name.rfind(".");
 				std::string extension = old_name.substr(last_dot);
 				old_name = old_name.substr(0, last_dot);
@@ -627,11 +627,11 @@ void TagEditor::EnterPressed()
 			ShowMessage("Writing changes...");
 			for (MPD::SongList::iterator it = EditedSongs.begin(); it != EditedSongs.end(); ++it)
 			{
-				ShowMessage("Writing tags in \"%s\"...", (*it)->GetName().c_str());
+				ShowMessage("Writing tags in \"%s\"...", (*it)->getName().c_str());
 				if (!WriteTags(**it))
 				{
 					const char msg[] = "Error while writing tags in \"%s\"";
-					ShowMessage(msg, Shorten(TO_WSTRING((*it)->GetFile()), COLS-static_strlen(msg)).c_str());
+					ShowMessage(msg, Shorten(TO_WSTRING((*it)->getURI()), COLS-static_strlen(msg)).c_str());
 					success = 0;
 					break;
 				}
@@ -953,7 +953,7 @@ void TagEditor::LocateSong(const MPD::Song &s)
 	// highlight our file
 	for (size_t i = 0; i < Tags->Size(); ++i)
 	{
-		if ((*Tags)[i].GetHash() == s.GetHash())
+		if ((*Tags)[i].getHash() == s.getHash())
 		{
 			Tags->Highlight(i);
 			break;
@@ -963,7 +963,7 @@ void TagEditor::LocateSong(const MPD::Song &s)
 
 void TagEditor::ReadTags(MPD::Song &s)
 {
-	TagLib::FileRef f(s.GetFile().c_str());
+	TagLib::FileRef f(s.getURI().c_str());
 	if (f.isNull())
 		return;
 	
@@ -1001,20 +1001,20 @@ void TagEditor::WriteXiphComments(const MPD::Song &s, TagLib::Ogg::XiphComment *
 {
 	TagLib::StringList list;
 	
-	tag->addField("DISCNUMBER", ToWString(s.GetDisc())); // disc
+	tag->addField("DISCNUMBER", ToWString(s.getDisc())); // disc
 	
 	tag->removeField("ALBUM ARTIST"); // album artist
-	GetTagList(list, s, &MPD::Song::GetAlbumArtist);
+	GetTagList(list, s, &MPD::Song::getAlbumArtist);
 	for (TagLib::StringList::ConstIterator it = list.begin(); it != list.end(); ++it)
 		tag->addField("ALBUM ARTIST", *it, 0);
 	
 	tag->removeField("COMPOSER"); // composer
-	GetTagList(list, s, &MPD::Song::GetComposer);
+	GetTagList(list, s, &MPD::Song::getComposer);
 	for (TagLib::StringList::ConstIterator it = list.begin(); it != list.end(); ++it)
 		tag->addField("COMPOSER", *it, 0);
 	
 	tag->removeField("PERFORMER"); // performer
-	GetTagList(list, s, &MPD::Song::GetPerformer);
+	GetTagList(list, s, &MPD::Song::getPerformer);
 	for (TagLib::StringList::ConstIterator it = list.begin(); it != list.end(); ++it)
 		tag->addField("PERFORMER", *it, 0);
 }
@@ -1022,40 +1022,40 @@ void TagEditor::WriteXiphComments(const MPD::Song &s, TagLib::Ogg::XiphComment *
 bool TagEditor::WriteTags(MPD::Song &s)
 {
 	std::string path_to_file;
-	bool file_is_from_db = s.isFromDB();
+	bool file_is_from_db = s.isFromDatabase();
 	if (file_is_from_db)
 		path_to_file += Config.mpd_music_dir;
-	path_to_file += s.GetFile();
+	path_to_file += s.getURI();
 	TagLib::FileRef f(path_to_file.c_str());
 	if (!f.isNull())
 	{
-		f.tag()->setTitle(ToWString(s.GetTitle()));
-		f.tag()->setArtist(ToWString(s.GetArtist()));
-		f.tag()->setAlbum(ToWString(s.GetAlbum()));
-		f.tag()->setYear(StrToInt(s.GetDate()));
-		f.tag()->setTrack(StrToInt(s.GetTrack()));
-		f.tag()->setGenre(ToWString(s.GetGenre()));
-		f.tag()->setComment(ToWString(s.GetComment()));
+		f.tag()->setTitle(ToWString(s.getTitle()));
+		f.tag()->setArtist(ToWString(s.getArtist()));
+		f.tag()->setAlbum(ToWString(s.getAlbum()));
+		f.tag()->setYear(StrToInt(s.getDate()));
+		f.tag()->setTrack(StrToInt(s.getTrack()));
+		f.tag()->setGenre(ToWString(s.getGenre()));
+		f.tag()->setComment(ToWString(s.getComment()));
 		if (TagLib::MPEG::File *mp3_file = dynamic_cast<TagLib::MPEG::File *>(f.file()))
 		{
 			TagLib::ID3v2::Tag *tag = mp3_file->ID3v2Tag(1);
 			TagLib::StringList list;
 			
-			WriteID3v2("TIT2", tag, ToWString(s.GetTitle()));  // title
-			WriteID3v2("TPE1", tag, ToWString(s.GetArtist())); // artist
-			WriteID3v2("TALB", tag, ToWString(s.GetAlbum()));  // album
-			WriteID3v2("TDRC", tag, ToWString(s.GetDate()));   // date
-			WriteID3v2("TRCK", tag, ToWString(s.GetTrack()));  // track
-			WriteID3v2("TCON", tag, ToWString(s.GetGenre()));  // genre
-			WriteID3v2("TPOS", tag, ToWString(s.GetDisc()));   // disc
+			WriteID3v2("TIT2", tag, ToWString(s.getTitle()));  // title
+			WriteID3v2("TPE1", tag, ToWString(s.getArtist())); // artist
+			WriteID3v2("TALB", tag, ToWString(s.getAlbum()));  // album
+			WriteID3v2("TDRC", tag, ToWString(s.getDate()));   // date
+			WriteID3v2("TRCK", tag, ToWString(s.getTrack()));  // track
+			WriteID3v2("TCON", tag, ToWString(s.getGenre()));  // genre
+			WriteID3v2("TPOS", tag, ToWString(s.getDisc()));   // disc
 			
-			GetTagList(list, s, &MPD::Song::GetAlbumArtist);
+			GetTagList(list, s, &MPD::Song::getAlbumArtist);
 			WriteID3v2("TPE2", tag, list); // album artist
 			
-			GetTagList(list, s, &MPD::Song::GetComposer);
+			GetTagList(list, s, &MPD::Song::getComposer);
 			WriteID3v2("TCOM", tag, list); // composer
 			
-			GetTagList(list, s, &MPD::Song::GetPerformer);
+			GetTagList(list, s, &MPD::Song::getPerformer);
 			// in >=mpd-0.16 treating TOPE frame as performer tag
 			// was dropped in favor of TPE3/TPE4 frames, so we have
 			// to write frame accurate to used mpd version
@@ -1092,7 +1092,7 @@ bool TagEditor::WriteTags(MPD::Song &s)
 					if (id >= 0)
 					{
 						s = myPlaylist->Items->Back();
-						Mpd.Move(s.GetPosition(), pos);
+						Mpd.Move(s.getPosition(), pos);
 					}
 					Mpd.CommitCommandsList();
 				}
@@ -1159,7 +1159,7 @@ std::string TagEditor::TagToString(const MPD::Song &s, void *data)
 	if (i < 11)
 		result = (s.*SongInfo::Tags[i].Get)(0);
 	else if (i == 12)
-		result = s.GetNewName().empty() ? s.GetName() : s.GetName() + " -> " + s.GetNewName();
+		result = s.GetNewName().empty() ? s.getName() : s.getName() + " -> " + s.GetNewName();
 	return result.empty() ? Config.empty_tag : result;
 }
 
@@ -1234,7 +1234,7 @@ std::string TagEditor::ParseFilename(MPD::Song &s, std::string mask, bool previe
 	std::ostringstream result;
 	std::vector<std::string> separators;
 	std::vector< std::pair<char, std::string> > tags;
-	std::string file = s.GetName().substr(0, s.GetName().rfind("."));
+	std::string file = s.getName().substr(0, s.getName().rfind("."));
 	
 	for (size_t i = mask.find("%"); i != std::string::npos; i = mask.find("%"))
 	{

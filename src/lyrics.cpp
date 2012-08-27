@@ -76,7 +76,7 @@ void Lyrics::Update()
 	if (ReloadNP)
 	{
 		const MPD::Song *s = myPlaylist->NowPlayingSong();
-		if (s && !s->GetArtist().empty() && !s->GetTitle().empty())
+		if (s && !s->getArtist().empty() && !s->getTitle().empty())
 		{
 			Global::RedrawHeader = true;
 			itsScrollBegin = 0;
@@ -117,7 +117,7 @@ void Lyrics::SwitchTo()
 	
 	if (const MPD::Song *s = myScreen->CurrentSong())
 	{
-		if (!s->GetArtist().empty() && !s->GetTitle().empty())
+		if (!s->getArtist().empty() && !s->getTitle().empty())
 		{
 			myOldScreen = myScreen;
 			myScreen = this;
@@ -159,10 +159,8 @@ void Lyrics::SpacePressed()
 #ifdef HAVE_CURL_CURL_H
 void Lyrics::DownloadInBackground(const MPD::Song *s)
 {
-	if (!s || s->GetArtist().empty() || s->GetTitle().empty())
+	if (!s || s->getArtist().empty() || s->getTitle().empty())
 		return;
-	if (!s->Localized())
-		const_cast<MPD::Song *>(s)->Localize();
 	
 	std::string filename = GenerateFilename(*s);
 	std::ifstream f(filename.c_str());
@@ -222,8 +220,8 @@ void *Lyrics::DownloadInBackgroundImpl(void *void_ptr)
 
 void Lyrics::DownloadInBackgroundImplHelper(MPD::Song *s)
 {
-	std::string artist = Curl::escape(locale_to_utf_cpy(s->GetArtist()));
-	std::string title = Curl::escape(locale_to_utf_cpy(s->GetTitle()));
+	std::string artist = Curl::escape(locale_to_utf_cpy(s->getArtist()));
+	std::string title = Curl::escape(locale_to_utf_cpy(s->getTitle()));
 	
 	LyricsFetcher::Result result;
 	bool fetcher_defined = itsFetcher && *itsFetcher;
@@ -241,8 +239,8 @@ void Lyrics::DownloadInBackgroundImplHelper(MPD::Song *s)
 
 void *Lyrics::Download()
 {
-	std::string artist = Curl::escape(locale_to_utf_cpy(itsSong.GetArtist()));
-	std::string title = Curl::escape(locale_to_utf_cpy(itsSong.GetTitle()));
+	std::string artist = Curl::escape(locale_to_utf_cpy(itsSong.getArtist()));
+	std::string title = Curl::escape(locale_to_utf_cpy(itsSong.getTitle()));
 	
 	LyricsFetcher::Result result;
 	
@@ -287,14 +285,14 @@ std::string Lyrics::GenerateFilename(const MPD::Song &s)
 	std::string filename;
 	if (Config.store_lyrics_in_song_dir)
 	{
-		if (s.isFromDB())
+		if (s.isFromDatabase())
 		{
 			filename = Config.mpd_music_dir;
 			filename += "/";
-			filename += s.GetFile();
+			filename += s.getURI();
 		}
 		else
-			filename = s.GetFile();
+			filename = s.getURI();
 		// replace song's extension with .txt
 		size_t dot = filename.rfind('.');
 		assert(dot != std::string::npos);
@@ -303,9 +301,9 @@ std::string Lyrics::GenerateFilename(const MPD::Song &s)
 	}
 	else
 	{
-		std::string file = locale_to_utf_cpy(s.GetArtist());
+		std::string file = locale_to_utf_cpy(s.getArtist());
 		file += " - ";
-		file += locale_to_utf_cpy(s.GetTitle());
+		file += locale_to_utf_cpy(s.getTitle());
 		file += ".txt";
 		EscapeUnallowedChars(file);
 		filename = Config.lyrics_directory;
@@ -322,10 +320,9 @@ void Lyrics::Load()
 		return;
 #	endif // HAVE_CURL_CURL_H
 	
-	assert(!itsSong.GetArtist().empty());
-	assert(!itsSong.GetTitle().empty());
+	assert(!itsSong.getArtist().empty());
+	assert(!itsSong.getTitle().empty());
 	
-	itsSong.Localize();
 	itsFilename = GenerateFilename(itsSong);
 	
 	CreateDir(Config.lyrics_directory);

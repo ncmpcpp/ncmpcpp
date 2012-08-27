@@ -161,7 +161,7 @@ void PlaylistEditor::Update()
 		{
 			for (size_t j = 0; j < myPlaylist->Items->Size(); ++j)
 			{
-				if ((*it)->GetHash() == myPlaylist->Items->at(j).GetHash())
+				if ((*it)->getHash() == myPlaylist->Items->at(j).getHash())
 				{
 					bold = 1;
 					break;

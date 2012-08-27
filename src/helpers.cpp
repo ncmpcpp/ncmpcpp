@@ -317,7 +317,7 @@ bool CaseInsensitiveSorting::operator()(const MPD::Item &a, const MPD::Item &b)
 						result = operator()(a.song, b.song);
 						break;
 					case smMTime:
-						result = a.song->GetMTime() > b.song->GetMTime();
+						result = a.song->getMTime() > b.song->getMTime();
 						break;
 					case smCustomFormat:
 						result = cmp(a.song->toString(Config.browser_sort_format), b.song->toString(Config.browser_sort_format)) < 0;
@@ -352,7 +352,7 @@ void UpdateSongList(Menu<MPD::Song> *menu)
 	{
 		for (size_t j = 0; j < myPlaylist->Items->Size(); ++j)
 		{
-			if (myPlaylist->Items->at(j).GetHash() == menu->at(i).GetHash())
+			if (myPlaylist->Items->at(j).getHash() == menu->at(i).getHash())
 			{
 				bold = 1;
 				break;

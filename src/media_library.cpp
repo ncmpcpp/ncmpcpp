@@ -344,7 +344,7 @@ void MediaLibrary::Update()
 		{
 			for (size_t j = 0; j < myPlaylist->Items->Size(); ++j)
 			{
-				if ((*it)->GetHash() == myPlaylist->Items->at(j).GetHash())
+				if ((*it)->getHash() == myPlaylist->Items->at(j).getHash())
 				{
 					bold = 1;
 					break;
@@ -627,19 +627,19 @@ void MediaLibrary::LocateSong(const MPD::Song &s)
 	switch (Config.media_lib_primary_tag)
 	{
 		case MPD_TAG_ARTIST:
-			primary_tag = s.GetArtist();
+			primary_tag = s.getArtist();
 			break;
 		case MPD_TAG_DATE:
-			primary_tag = s.GetDate();
+			primary_tag = s.getDate();
 			break;
 		case MPD_TAG_GENRE:
-			primary_tag = s.GetGenre();
+			primary_tag = s.getGenre();
 			break;
 		case MPD_TAG_COMPOSER:
-			primary_tag = s.GetComposer();
+			primary_tag = s.getComposer();
 			break;
 		case MPD_TAG_PERFORMER:
-			primary_tag = s.GetPerformer();
+			primary_tag = s.getPerformer();
 			break;
 		default: // shouldn't happen
 			assert(false);
@@ -682,8 +682,8 @@ void MediaLibrary::LocateSong(const MPD::Song &s)
 	if (Albums->Empty())
 		Update();
 	
-	std::string album = s.GetAlbum();
-	std::string date = s.GetDate();
+	std::string album = s.getAlbum();
+	std::string date = s.getDate();
 	if ((hasTwoColumns && Albums->Current().PrimaryTag != primary_tag)
 	||  album != Albums->Current().Album
 	||  date != Albums->Current().Date)
@@ -705,11 +705,11 @@ void MediaLibrary::LocateSong(const MPD::Song &s)
 	if (Songs->Empty())
 		Update();
 	
-	if (s.GetHash() != Songs->Current().GetHash())
+	if (s.getHash() != Songs->Current().getHash())
 	{
 		for (size_t i = 0; i < Songs->Size(); ++i)
 		{
-			if (s.GetHash()  == (*Songs)[i].GetHash())
+			if (s.getHash()  == (*Songs)[i].getHash())
 			{
 				Songs->Highlight(i);
 				break;
@@ -801,19 +801,19 @@ bool MediaLibrary::SearchConstraintsSorting::operator()(const SearchConstraints 
 
 bool MediaLibrary::SortSongsByTrack(MPD::Song *a, MPD::Song *b)
 {
-	if (a->GetDisc() == b->GetDisc())
-		return StrToInt(a->GetTrack()) < StrToInt(b->GetTrack());
+	if (a->getDisc() == b->getDisc())
+		return StrToInt(a->getTrack()) < StrToInt(b->getTrack());
 	else
-		return StrToInt(a->GetDisc()) < StrToInt(b->GetDisc());
+		return StrToInt(a->getDisc()) < StrToInt(b->getDisc());
 }
 
 bool MediaLibrary::SortAllTracks(MPD::Song *a, MPD::Song *b)
 {
-	static MPD::Song::GetFunction gets[] = { &MPD::Song::GetDate, &MPD::Song::GetAlbum, &MPD::Song::GetDisc, 0 };
+	static MPD::Song::GetFunction gets[] = { &MPD::Song::getDate, &MPD::Song::getAlbum, &MPD::Song::getDisc, 0 };
 	CaseInsensitiveStringComparison cmp;
 	for (MPD::Song::GetFunction *get = gets; *get; ++get)
-		if (int ret = cmp(a->GetTags(*get), b->GetTags(*get)))
+		if (int ret = cmp(a->getTags(*get), b->getTags(*get)))
 			return ret < 0;
-	return a->GetTrack() < b->GetTrack();
+	return a->getTrack() < b->getTrack();
 }
 

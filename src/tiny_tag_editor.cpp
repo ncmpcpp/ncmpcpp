@@ -70,7 +70,7 @@ void TinyTagEditor::SwitchTo()
 	{
 		ShowMessage("Streams can't be edited");
 	}
-	else if (GetTags())
+	else if (getTags())
 	{
 		if (myLockedScreen)
 			UpdateInactiveScreen(this);
@@ -85,9 +85,9 @@ void TinyTagEditor::SwitchTo()
 	else
 	{
 		std::string full_path;
-		if (itsEdited.isFromDB())
+		if (itsEdited.isFromDatabase())
 			full_path += Config.mpd_music_dir;
-		full_path += itsEdited.GetFile();
+		full_path += itsEdited.getURI();
 		
 		std::string message = "Couldn't read file \"";
 		message += Shorten(TO_WSTRING(full_path), COLS-message.length()-3);
@@ -111,22 +111,22 @@ void TinyTagEditor::EnterPressed()
 	{
 		size_t pos = option-8;
 		Statusbar() << fmtBold << SongInfo::Tags[pos].Name << ": " << fmtBoldEnd;
-		s.SetTags(SongInfo::Tags[pos].Set, Global::wFooter->GetString(s.GetTags(SongInfo::Tags[pos].Get)));
+		s.SetTags(SongInfo::Tags[pos].Set, Global::wFooter->GetString(s.getTags(SongInfo::Tags[pos].Get)));
 		w->at(option).Clear();
 		w->at(option) << fmtBold << SongInfo::Tags[pos].Name << ':' << fmtBoldEnd << ' ';
-		ShowTag(w->at(option), s.GetTags(SongInfo::Tags[pos].Get));
+		ShowTag(w->at(option), s.getTags(SongInfo::Tags[pos].Get));
 	}
 	else if (option == 20)
 	{
 		Statusbar() << fmtBold << "Filename: " << fmtBoldEnd;
-		std::string filename = s.GetNewName().empty() ? s.GetName() : s.GetNewName();
+		std::string filename = s.GetNewName().empty() ? s.getName() : s.GetNewName();
 		size_t dot = filename.rfind(".");
 		std::string extension = filename.substr(dot);
 		filename = filename.substr(0, dot);
 		std::string new_name = Global::wFooter->GetString(filename);
 		s.SetNewName(new_name + extension);
 		w->at(option).Clear();
-		w->at(option) << fmtBold << "Filename:" << fmtBoldEnd << ' ' << (s.GetNewName().empty() ? s.GetName() : s.GetNewName());
+		w->at(option) << fmtBold << "Filename:" << fmtBoldEnd << ' ' << (s.GetNewName().empty() ? s.getName() : s.GetNewName());
 	}
 	UnlockStatusbar();
 	
@@ -136,7 +136,7 @@ void TinyTagEditor::EnterPressed()
 		if (TagEditor::WriteTags(s))
 		{
 			ShowMessage("Tags updated");
-			if (s.isFromDB())
+			if (s.isFromDatabase())
 			{
 				Mpd.UpdateDirectory(locale_to_utf_cpy(s.GetDirectory()));
 				if (myOldScreen == mySearcher) // songs from search engine are not updated automatically
@@ -180,21 +180,21 @@ void TinyTagEditor::SetEdited(const MPD::Song &s)
 	itsEdited = s;
 }
 
-bool TinyTagEditor::GetTags()
+bool TinyTagEditor::getTags()
 {
 	MPD::Song &s = itsEdited;
 	
 	std::string path_to_file;
-	if (s.isFromDB())
+	if (s.isFromDatabase())
 		path_to_file += Config.mpd_music_dir;
-	path_to_file += s.GetFile();
+	path_to_file += s.getURI();
 	
 	TagLib::FileRef f(path_to_file.c_str());
 	if (f.isNull())
 		return false;
 	s.SetComment(f.tag()->comment().to8Bit(1));
 	
-	std::string ext = s.GetFile();
+	std::string ext = s.getURI();
 	ext = ext.substr(ext.rfind(".")+1);
 	ToLower(ext);
 	
@@ -222,11 +222,11 @@ bool TinyTagEditor::GetTags()
 	
 	w->Highlight(8);
 	
-	w->at(0) << fmtBold << Config.color1 << "Song name: " << fmtBoldEnd << Config.color2 << s.GetName() << clEnd;
+	w->at(0) << fmtBold << Config.color1 << "Song name: " << fmtBoldEnd << Config.color2 << s.getName() << clEnd;
 	w->at(1) << fmtBold << Config.color1 << "Location in DB: " << fmtBoldEnd << Config.color2;
 	ShowTag(w->at(1), s.GetDirectory());
 	w->at(1) << clEnd;
-	w->at(3) << fmtBold << Config.color1 << "Length: " << fmtBoldEnd << Config.color2 << s.GetLength() << clEnd;
+	w->at(3) << fmtBold << Config.color1 << "Length: " << fmtBoldEnd << Config.color2 << s.getLength() << clEnd;
 	w->at(4) << fmtBold << Config.color1 << "Bitrate: " << fmtBoldEnd << Config.color2 << f.audioProperties()->bitrate() << " kbps" << clEnd;
 	w->at(5) << fmtBold << Config.color1 << "Sample rate: " << fmtBoldEnd << Config.color2 << f.audioProperties()->sampleRate() << " Hz" << clEnd;
 	w->at(6) << fmtBold << Config.color1 << "Channels: " << fmtBoldEnd << Config.color2 << (f.audioProperties()->channels() == 1 ? "Mono" : "Stereo") << clDefault;
@@ -235,10 +235,10 @@ bool TinyTagEditor::GetTags()
 	for (const SongInfo::Metadata *m = SongInfo::Tags; m->Name; ++m, ++pos)
 	{
 		w->at(pos) << fmtBold << m->Name << ":" << fmtBoldEnd << ' ';
-		ShowTag(w->at(pos), s.GetTags(m->Get));
+		ShowTag(w->at(pos), s.getTags(m->Get));
 	}
 	
-	w->at(20) << fmtBold << "Filename:" << fmtBoldEnd << ' ' << s.GetName();
+	w->at(20) << fmtBold << "Filename:" << fmtBoldEnd << ' ' << s.getName();
 	
 	w->at(22) << "Save";
 	w->at(23) << "Cancel";

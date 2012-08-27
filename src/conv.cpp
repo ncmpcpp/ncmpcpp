@@ -205,37 +205,37 @@ MPD::Song::GetFunction toGetFunction(char c)
 	switch (c)
 	{
 		case 'l':
-			return &MPD::Song::GetLength;
+			return &MPD::Song::getLength;
 		case 'D':
-			return &MPD::Song::GetDirectory;
+			return &MPD::Song::getDirectory;
 		case 'f':
-			return &MPD::Song::GetName;
+			return &MPD::Song::getName;
 		case 'a':
-			return &MPD::Song::GetArtist;
+			return &MPD::Song::getArtist;
 		case 'A':
-			return &MPD::Song::GetAlbumArtist;
+			return &MPD::Song::getAlbumArtist;
 		case 'b':
-			return &MPD::Song::GetAlbum;
+			return &MPD::Song::getAlbum;
 		case 'y':
-			return &MPD::Song::GetDate;
+			return &MPD::Song::getDate;
 		case 'n':
-			return &MPD::Song::GetTrackNumber;
+			return &MPD::Song::getTrackNumber;
 		case 'N':
-			return &MPD::Song::GetTrack;
+			return &MPD::Song::getTrack;
 		case 'g':
-			return &MPD::Song::GetGenre;
+			return &MPD::Song::getGenre;
 		case 'c':
-			return &MPD::Song::GetComposer;
+			return &MPD::Song::getComposer;
 		case 'p':
-			return &MPD::Song::GetPerformer;
+			return &MPD::Song::getPerformer;
 		case 'd':
-			return &MPD::Song::GetDisc;
+			return &MPD::Song::getDisc;
 		case 'C':
-			return &MPD::Song::GetComment;
+			return &MPD::Song::getComment;
 		case 't':
-			return &MPD::Song::GetTitle;
+			return &MPD::Song::getTitle;
 		case 'P':
-			return &MPD::Song::GetPriority;
+			return &MPD::Song::getPriority;
 		default:
 			return 0;
 	}

@@ -494,11 +494,11 @@ void ScrollUpArtist::Run()
 	size_t pos = mList->Choice();
 	if (MPD::Song *s = myScreen->GetSong(pos))
 	{
-		std::string artist = s->GetArtist();
+		std::string artist = s->getArtist();
 		while (pos > 0)
 		{
 			s = myScreen->GetSong(--pos);
-			if (!s || s->GetArtist() != artist)
+			if (!s || s->getArtist() != artist)
 				break;
 		}
 		mList->Highlight(pos);
@@ -513,11 +513,11 @@ void ScrollUpAlbum::Run()
 	size_t pos = mList->Choice();
 	if (MPD::Song *s = myScreen->GetSong(pos))
 	{
-		std::string album = s->GetAlbum();
+		std::string album = s->getAlbum();
 		while (pos > 0)
 		{
 			s = myScreen->GetSong(--pos);
-			if (!s || s->GetAlbum() != album)
+			if (!s || s->getAlbum() != album)
 				break;
 		}
 		mList->Highlight(pos);
@@ -532,11 +532,11 @@ void ScrollDownArtist::Run()
 	size_t pos = mList->Choice();
 	if (MPD::Song *s = myScreen->GetSong(pos))
 	{
-		std::string artist = s->GetArtist();
+		std::string artist = s->getArtist();
 		while (pos < mList->Size() - 1)
 		{
 			s = myScreen->GetSong(++pos);
-			if (!s || s->GetArtist() != artist)
+			if (!s || s->getArtist() != artist)
 				break;
 		}
 		mList->Highlight(pos);
@@ -551,11 +551,11 @@ void ScrollDownAlbum::Run()
 	size_t pos = mList->Choice();
 	if (MPD::Song *s = myScreen->GetSong(pos))
 	{
-		std::string album = s->GetAlbum();
+		std::string album = s->getAlbum();
 		while (pos < mList->Size() - 1)
 		{
 			s = myScreen->GetSong(++pos);
-			if (!s || s->GetAlbum() != album)
+			if (!s || s->getAlbum() != album)
 				break;
 		}
 		mList->Highlight(pos);
@@ -745,7 +745,7 @@ void Delete::Run()
 			myPlaylist->Items->GetSelected(list);
 			Mpd.StartCommandsList();
 			for (std::vector<size_t>::reverse_iterator it = list.rbegin(); it != list.rend(); ++it)
-				Mpd.DeleteID((*myPlaylist->Items)[*it].GetID());
+				Mpd.DeleteID((*myPlaylist->Items)[*it].getID());
 			if (Mpd.CommitCommandsList())
 			{
 				for (size_t i = 0; i < myPlaylist->Items->Size(); ++i)
@@ -754,7 +754,7 @@ void Delete::Run()
 			}
 		}
 		else
-			Mpd.DeleteID(myPlaylist->CurrentSong()->GetID());
+			Mpd.DeleteID(myPlaylist->CurrentSong()->getID());
 	}
 	else if (
 		 (myScreen == myBrowser && !myBrowser->Main()->Empty() && myBrowser->CurrentDir() == "/" && myBrowser->Main()->Current().type == itPlaylist)
@@ -803,7 +803,7 @@ void Delete::Run()
 		if (item.type == itDirectory && item.song) // parent dir
 			return;
 		
-		std::string name = item.type == itSong ? item.song->GetName() : item.name;
+		std::string name = item.type == itSong ? item.song->getName() : item.name;
 		std::string question;
 		if (myBrowser->Main()->hasSelected())
 			question = "Delete selected items?";
@@ -826,7 +826,7 @@ void Delete::Run()
 			for (size_t i = 0; i < list.size(); ++i)
 			{
 				const MPD::Item &it = (*myBrowser->Main())[list[i]];
-				name = it.type == itSong ? it.song->GetName() : it.name;
+				name = it.type == itSong ? it.song->getName() : it.name;
 				if (myBrowser->DeleteItem(it))
 				{
 					const char msg[] = "\"%s\" deleted";
@@ -1422,12 +1422,12 @@ void EditLibraryTag::Run()
 		{
 			(*it)->Localize();
 			(*it)->SetTags(set, new_tag);
-			ShowMessage("Updating tags in \"%s\"...", (*it)->GetName().c_str());
-			std::string path = Config.mpd_music_dir + (*it)->GetFile();
+			ShowMessage("Updating tags in \"%s\"...", (*it)->getName().c_str());
+			std::string path = Config.mpd_music_dir + (*it)->getURI();
 			if (!TagEditor::WriteTags(**it))
 			{
 				const char msg[] = "Error while updating tags in \"%s\"";
-				ShowMessage(msg, Shorten(TO_WSTRING((*it)->GetFile()), COLS-static_strlen(msg)).c_str());
+				ShowMessage(msg, Shorten(TO_WSTRING((*it)->getURI()), COLS-static_strlen(msg)).c_str());
 				success = 0;
 				break;
 			}
@@ -1470,13 +1470,13 @@ void EditLibraryAlbum::Run()
 		for (size_t i = 0;  i < myLibrary->Songs->Size(); ++i)
 		{
 			(*myLibrary->Songs)[i].Localize();
-			ShowMessage("Updating tags in \"%s\"...", (*myLibrary->Songs)[i].GetName().c_str());
-			std::string path = Config.mpd_music_dir + (*myLibrary->Songs)[i].GetFile();
+			ShowMessage("Updating tags in \"%s\"...", (*myLibrary->Songs)[i].getName().c_str());
+			std::string path = Config.mpd_music_dir + (*myLibrary->Songs)[i].getURI();
 			TagLib::FileRef f(locale_to_utf_cpy(path).c_str());
 			if (f.isNull())
 			{
 				const char msg[] = "Error while opening file \"%s\"";
-				ShowMessage(msg, Shorten(TO_WSTRING((*myLibrary->Songs)[i].GetFile()), COLS-static_strlen(msg)).c_str());
+				ShowMessage(msg, Shorten(TO_WSTRING((*myLibrary->Songs)[i].getURI()), COLS-static_strlen(msg)).c_str());
 				success = 0;
 				break;
 			}
@@ -1484,7 +1484,7 @@ void EditLibraryAlbum::Run()
 			if (!f.save())
 			{
 				const char msg[] = "Error while writing tags in \"%s\"";
-				ShowMessage(msg, Shorten(TO_WSTRING((*myLibrary->Songs)[i].GetFile()), COLS-static_strlen(msg)).c_str());
+				ShowMessage(msg, Shorten(TO_WSTRING((*myLibrary->Songs)[i].getURI()), COLS-static_strlen(msg)).c_str());
 				success = 0;
 				break;
 			}
@@ -1749,7 +1749,7 @@ void JumpToPositionInSong::Run()
 		if (newpos >= 0 && newpos <= Mpd.GetTotalTime())
 			Mpd.Seek(newpos);
 		else
-			ShowMessage("Out of bounds, 0:00-%s possible for mm:ss, %s given", s->GetLength().c_str(), MPD::Song::ShowTime(newpos).c_str());
+			ShowMessage("Out of bounds, 0:00-%s possible for mm:ss, %s given", s->getLength().c_str(), MPD::Song::ShowTime(newpos).c_str());
 	}
 	else if (position.find('s') != std::string::npos) // probably position in seconds
 	{
@@ -1757,7 +1757,7 @@ void JumpToPositionInSong::Run()
 		if (newpos >= 0 && newpos <= Mpd.GetTotalTime())
 			Mpd.Seek(newpos);
 		else
-			ShowMessage("Out of bounds, 0-%d possible for seconds, %d given", s->GetTotalLength(), newpos);
+			ShowMessage("Out of bounds, 0-%d possible for seconds, %d given", s->getDuration(), newpos);
 	}
 	else
 	{
@@ -1808,7 +1808,7 @@ void SelectAlbum::Run()
 	size_t pos = mList->Choice();
 	if (MPD::Song *s = myScreen->GetSong(pos))
 	{
-		std::string album = s->GetAlbum();
+		std::string album = s->getAlbum();
 		
 		// select song under cursor
 		mList->Select(pos, 1);
@@ -1816,7 +1816,7 @@ void SelectAlbum::Run()
 		while (pos > 0)
 		{
 			s = myScreen->GetSong(--pos);
-			if (!s || s->GetAlbum() != album)
+			if (!s || s->getAlbum() != album)
 				break;
 			else
 				mList->Select(pos, 1);
@@ -1826,7 +1826,7 @@ void SelectAlbum::Run()
 		while (pos < mList->Size() - 1)
 		{
 			s = myScreen->GetSong(++pos);
-			if (!s || s->GetAlbum() != album)
+			if (!s || s->getAlbum() != album)
 				break;
 			else
 				mList->Select(pos, 1);
@@ -1864,7 +1864,7 @@ void CropMainPlaylist::Run()
 		bool delete_np = (delete_all_but_current && current != myPlaylist->NowPlaying)
 		              || (!delete_all_but_current && !myPlaylist->Items->isSelected(myPlaylist->NowPlaying));
 		if (myPlaylist->isPlaying() && delete_np)
-			Mpd.DeleteID(myPlaylist->NowPlayingSong()->GetID());
+			Mpd.DeleteID(myPlaylist->NowPlayingSong()->getID());
 		ShowMessage("Cropping playlist...");
 		if (Mpd.CommitCommandsList())
 			ShowMessage("Playlist cropped");
@@ -1918,7 +1918,7 @@ void ClearMainPlaylist::Run()
 			ShowMessage("Deleting filtered items...");
 			Mpd.StartCommandsList();
 			for (int i = myPlaylist->Items->Size()-1; i >= 0; --i)
-				Mpd.Delete((*myPlaylist->Items)[i].GetPosition());
+				Mpd.Delete((*myPlaylist->Items)[i].getPosition());
 			if (Mpd.CommitCommandsList())
 				ShowMessage("Filtered items deleted");
 		}
@@ -2326,7 +2326,7 @@ void ShowArtistInfo::Run()
 	MPD::Song *s = myScreen->CurrentSong();
 	
 	if (s)
-		artist = s->GetArtist();
+		artist = s->getArtist();
 	else if (myScreen == myLibrary && myLibrary->Main() == myLibrary->Artists && !myLibrary->Artists->Empty())
 		artist = myLibrary->Artists->Current();
 	

@@ -320,19 +320,19 @@ bool Browser::hasSupportedExtension(const std::string &file)
 
 void Browser::LocateSong(const MPD::Song &s)
 {
-	if (s.GetDirectory().empty())
+	if (s.getDirectory().empty())
 		return;
 	
-	itsBrowseLocally = !s.isFromDB();
+	itsBrowseLocally = !s.isFromDatabase();
 	
 	if (myScreen != this)
 		SwitchTo();
 	
-	if (itsBrowsedDir != s.GetDirectory())
-		GetDirectory(s.GetDirectory());
+	if (itsBrowsedDir != s.getDirectory())
+		GetDirectory(s.getDirectory());
 	for (size_t i = 0; i < w->Size(); ++i)
 	{
-		if ((*w)[i].type == itSong && s.GetHash() == (*w)[i].song->GetHash())
+		if ((*w)[i].type == itSong && s.getHash() == (*w)[i].song->getHash())
 		{
 			w->Highlight(i);
 			break;
@@ -402,7 +402,7 @@ void Browser::GetDirectory(std::string dir, std::string subdir)
 				bool bold = 0;
 				for (size_t i = 0; i < myPlaylist->Items->Size(); ++i)
 				{
-					if (myPlaylist->Items->at(i).GetHash() == it->song->GetHash())
+					if (myPlaylist->Items->at(i).getHash() == it->song->getHash())
 					{
 						bold = 1;
 						break;
@@ -543,7 +543,7 @@ bool Browser::DeleteItem(const MPD::Item &item)
 	std::string path;
 	if (!isLocal())
 		path = Config.mpd_music_dir;
-	path += item.type == itSong ? item.song->GetFile() : item.name;
+	path += item.type == itSong ? item.song->getURI() : item.name;
 	
 	if (item.type == itDirectory)
 		ClearDirectory(path);
@@ -561,7 +561,7 @@ void Browser::UpdateItemList()
 		{
 			for (size_t j = 0; j < myPlaylist->Items->Size(); ++j)
 			{
-				if (myPlaylist->Items->at(j).GetHash() == w->at(i).song->GetHash())
+				if (myPlaylist->Items->at(j).getHash() == w->at(i).song->getHash())
 				{
 					bold = 1;
 					break;

@@ -266,7 +266,7 @@ void SearchEngine::UpdateFoundList()
 	{
 		for (size_t j = 0; j < myPlaylist->Items->Size(); ++j)
 		{
-			if (myPlaylist->Items->at(j).GetHash() == w->at(i).second->GetHash())
+			if (myPlaylist->Items->at(j).getHash() == w->at(i).second->getHash())
 			{
 				bold = 1;
 				break;
@@ -283,7 +283,7 @@ void SearchEngine::SelectAlbum()
 	if (pos < StaticOptions)
 		return;		// not on a song
 	
-	std::string album = w->at(pos).second->GetAlbum();
+	std::string album = w->at(pos).second->getAlbum();
 
 	// select song under cursor
 	w->Select(pos, 1);
@@ -291,7 +291,7 @@ void SearchEngine::SelectAlbum()
 	// go up
 	while (pos > StaticOptions)
 	{
-		if (w->at(--pos).second->GetAlbum() != album)
+		if (w->at(--pos).second->getAlbum() != album)
 			break;
 		else
 			w->Select(pos, 1);
@@ -300,7 +300,7 @@ void SearchEngine::SelectAlbum()
 	// go down
 	while (pos < w->Size() - 1)
 	{
-		if (w->at(++pos).second->GetAlbum() != album)
+		if (w->at(++pos).second->getAlbum() != album)
 			break;
 		else
 			w->Select(pos, 1);
@@ -422,16 +422,16 @@ void SearchEngine::Search()
 				if (regcomp(&rx, itsConstraints[0].c_str(), REG_ICASE | Config.regex_type) == 0)
 				{
 					any_found =
-						!regexec(&rx, (*it)->GetArtist().c_str(), 0, 0, 0)
-					||	!regexec(&rx, (*it)->GetAlbumArtist().c_str(), 0, 0, 0)
-					||	!regexec(&rx, (*it)->GetTitle().c_str(), 0, 0, 0)
-					||	!regexec(&rx, (*it)->GetAlbum().c_str(), 0, 0, 0)
-					||	!regexec(&rx, (*it)->GetName().c_str(), 0, 0, 0)
-					||	!regexec(&rx, (*it)->GetComposer().c_str(), 0, 0, 0)
-					||	!regexec(&rx, (*it)->GetPerformer().c_str(), 0, 0, 0)
-					||	!regexec(&rx, (*it)->GetGenre().c_str(), 0, 0, 0)
-					||	!regexec(&rx, (*it)->GetDate().c_str(), 0, 0, 0)
-					||	!regexec(&rx, (*it)->GetComment().c_str(), 0, 0, 0);
+						!regexec(&rx, (*it)->getArtist().c_str(), 0, 0, 0)
+					||	!regexec(&rx, (*it)->getAlbumArtist().c_str(), 0, 0, 0)
+					||	!regexec(&rx, (*it)->getTitle().c_str(), 0, 0, 0)
+					||	!regexec(&rx, (*it)->getAlbum().c_str(), 0, 0, 0)
+					||	!regexec(&rx, (*it)->getName().c_str(), 0, 0, 0)
+					||	!regexec(&rx, (*it)->getComposer().c_str(), 0, 0, 0)
+					||	!regexec(&rx, (*it)->getPerformer().c_str(), 0, 0, 0)
+					||	!regexec(&rx, (*it)->getGenre().c_str(), 0, 0, 0)
+					||	!regexec(&rx, (*it)->getDate().c_str(), 0, 0, 0)
+					||	!regexec(&rx, (*it)->getComment().c_str(), 0, 0, 0);
 				}
 				regfree(&rx);
 			}
@@ -439,61 +439,61 @@ void SearchEngine::Search()
 			if (found && !itsConstraints[1].empty())
 			{
 				if (!regcomp(&rx, itsConstraints[1].c_str(), REG_ICASE | Config.regex_type))
-					found = !regexec(&rx, (*it)->GetArtist().c_str(), 0, 0, 0);
+					found = !regexec(&rx, (*it)->getArtist().c_str(), 0, 0, 0);
 				regfree(&rx);
 			}
 			if (found && !itsConstraints[2].empty())
 			{
 				if (!regcomp(&rx, itsConstraints[2].c_str(), REG_ICASE | Config.regex_type))
-					found = !regexec(&rx, (*it)->GetAlbumArtist().c_str(), 0, 0, 0);
+					found = !regexec(&rx, (*it)->getAlbumArtist().c_str(), 0, 0, 0);
 				regfree(&rx);
 			}
 			if (found && !itsConstraints[3].empty())
 			{
 				if(!regcomp(&rx, itsConstraints[3].c_str(), REG_ICASE | Config.regex_type))
-					found = !regexec(&rx, (*it)->GetTitle().c_str(), 0, 0, 0);
+					found = !regexec(&rx, (*it)->getTitle().c_str(), 0, 0, 0);
 				regfree(&rx);
 			}
 			if (found && !itsConstraints[4].empty())
 			{
 				if (!regcomp(&rx, itsConstraints[4].c_str(), REG_ICASE | Config.regex_type))
-					found = !regexec(&rx, (*it)->GetAlbum().c_str(), 0, 0, 0);
+					found = !regexec(&rx, (*it)->getAlbum().c_str(), 0, 0, 0);
 				regfree(&rx);
 			}
 			if (found && !itsConstraints[5].empty())
 			{
 				if (!regcomp(&rx, itsConstraints[5].c_str(), REG_ICASE | Config.regex_type))
-					found = !regexec(&rx, (*it)->GetName().c_str(), 0, 0, 0);
+					found = !regexec(&rx, (*it)->getName().c_str(), 0, 0, 0);
 				regfree(&rx);
 			}
 			if (found && !itsConstraints[6].empty())
 			{
 				if (!regcomp(&rx, itsConstraints[6].c_str(), REG_ICASE | Config.regex_type))
-					found = !regexec(&rx, (*it)->GetComposer().c_str(), 0, 0, 0);
+					found = !regexec(&rx, (*it)->getComposer().c_str(), 0, 0, 0);
 				regfree(&rx);
 			}
 			if (found && !itsConstraints[7].empty())
 			{
 				if (!regcomp(&rx, itsConstraints[7].c_str(), REG_ICASE | Config.regex_type))
-					found = !regexec(&rx, (*it)->GetPerformer().c_str(), 0, 0, 0);
+					found = !regexec(&rx, (*it)->getPerformer().c_str(), 0, 0, 0);
 				regfree(&rx);
 			}
 			if (found && !itsConstraints[8].empty())
 			{
 				if (!regcomp(&rx, itsConstraints[8].c_str(), REG_ICASE | Config.regex_type))
-					found = !regexec(&rx, (*it)->GetGenre().c_str(), 0, 0, 0);
+					found = !regexec(&rx, (*it)->getGenre().c_str(), 0, 0, 0);
 				regfree(&rx);
 			}
 			if (found && !itsConstraints[9].empty())
 			{
 				if (!regcomp(&rx, itsConstraints[9].c_str(), REG_ICASE | Config.regex_type))
-					found = !regexec(&rx, (*it)->GetDate().c_str(), 0, 0, 0);
+					found = !regexec(&rx, (*it)->getDate().c_str(), 0, 0, 0);
 				regfree(&rx);
 			}
 			if (found && !itsConstraints[10].empty())
 			{
 				if (!regcomp(&rx, itsConstraints[10].c_str(), REG_ICASE | Config.regex_type))
-					found = !regexec(&rx, (*it)->GetComment().c_str(), 0, 0, 0);
+					found = !regexec(&rx, (*it)->getComment().c_str(), 0, 0, 0);
 				regfree(&rx);
 			}
 		}
@@ -503,37 +503,37 @@ void SearchEngine::Search()
 			
 			if (!itsConstraints[0].empty())
 				any_found =
-					!cmp((*it)->GetArtist(), itsConstraints[0])
-				||	!cmp((*it)->GetAlbumArtist(), itsConstraints[0])
-				||	!cmp((*it)->GetTitle(), itsConstraints[0])
-				||	!cmp((*it)->GetAlbum(), itsConstraints[0])
-				||	!cmp((*it)->GetName(), itsConstraints[0])
-				||	!cmp((*it)->GetComposer(), itsConstraints[0])
-				||	!cmp((*it)->GetPerformer(), itsConstraints[0])
-				||	!cmp((*it)->GetGenre(), itsConstraints[0])
-				||	!cmp((*it)->GetDate(), itsConstraints[0])
-				||	!cmp((*it)->GetComment(), itsConstraints[0]);
+					!cmp((*it)->getArtist(), itsConstraints[0])
+				||	!cmp((*it)->getAlbumArtist(), itsConstraints[0])
+				||	!cmp((*it)->getTitle(), itsConstraints[0])
+				||	!cmp((*it)->getAlbum(), itsConstraints[0])
+				||	!cmp((*it)->getName(), itsConstraints[0])
+				||	!cmp((*it)->getComposer(), itsConstraints[0])
+				||	!cmp((*it)->getPerformer(), itsConstraints[0])
+				||	!cmp((*it)->getGenre(), itsConstraints[0])
+				||	!cmp((*it)->getDate(), itsConstraints[0])
+				||	!cmp((*it)->getComment(), itsConstraints[0]);
 			
 			if (found && !itsConstraints[1].empty())
-				found = !cmp((*it)->GetArtist(), itsConstraints[1]);
+				found = !cmp((*it)->getArtist(), itsConstraints[1]);
 			if (found && !itsConstraints[2].empty())
-				found = !cmp((*it)->GetAlbumArtist(), itsConstraints[2]);
+				found = !cmp((*it)->getAlbumArtist(), itsConstraints[2]);
 			if (found && !itsConstraints[3].empty())
-				found = !cmp((*it)->GetTitle(), itsConstraints[3]);
+				found = !cmp((*it)->getTitle(), itsConstraints[3]);
 			if (found && !itsConstraints[4].empty())
-				found = !cmp((*it)->GetAlbum(), itsConstraints[4]);
+				found = !cmp((*it)->getAlbum(), itsConstraints[4]);
 			if (found && !itsConstraints[5].empty())
-				found = !cmp((*it)->GetName(), itsConstraints[5]);
+				found = !cmp((*it)->getName(), itsConstraints[5]);
 			if (found && !itsConstraints[6].empty())
-				found = !cmp((*it)->GetComposer(), itsConstraints[6]);
+				found = !cmp((*it)->getComposer(), itsConstraints[6]);
 			if (found && !itsConstraints[7].empty())
-				found = !cmp((*it)->GetPerformer(), itsConstraints[7]);
+				found = !cmp((*it)->getPerformer(), itsConstraints[7]);
 			if (found && !itsConstraints[8].empty())
-				found = !cmp((*it)->GetGenre(), itsConstraints[8]);
+				found = !cmp((*it)->getGenre(), itsConstraints[8]);
 			if (found && !itsConstraints[9].empty())
-				found = !cmp((*it)->GetDate(), itsConstraints[9]);
+				found = !cmp((*it)->getDate(), itsConstraints[9]);
 			if (found && !itsConstraints[10].empty())
-				found = !cmp((*it)->GetComment(), itsConstraints[10]);
+				found = !cmp((*it)->getComment(), itsConstraints[10]);
 		}
 		
 		if (found && any_found)
