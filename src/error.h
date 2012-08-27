@@ -21,17 +21,11 @@
 #ifndef _ERROR_H
 #define _ERROR_H
 
-#if defined(__GNUC__) && __GNUC__ >= 3
-# define GNUC_NORETURN __attribute__((noreturn))
-#else
-# define GNUC_NORETURN
-#endif
-
 #include <string>
+#include "gcc.h"
 
 #define Error(msg) std::cerr << "ncmpcpp: " << msg;
 
 void FatalError(const std::string &msg) GNUC_NORETURN;
 
 #endif
-

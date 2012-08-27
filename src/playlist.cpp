@@ -34,7 +34,7 @@ using Global::MainStartY;
 Playlist *myPlaylist = new Playlist;
 
 bool Playlist::ReloadTotalLength = 0;
-bool Playlist::ReloadRemaining = 0;
+bool Playlist::ReloadRemaining = false;
 
 const size_t Playlist::SortOptions = 10;
 const size_t Playlist::SortDialogWidth = 30;
@@ -112,7 +112,7 @@ void Playlist::SwitchTo()
 	EnableHighlighting();
 	if (w != Items) // even if sorting window is active, background has to be refreshed anyway
 		Items->Display();
-	Global::RedrawHeader = 1;
+	Global::RedrawHeader = true;
 }
 
 void Playlist::Resize()
@@ -460,7 +460,7 @@ std::string Playlist::TotalLength()
 		itsRemainingTime = 0;
 		for (size_t i = NowPlaying; i < Items->Size(); ++i)
 			itsRemainingTime += (*Items)[i].GetTotalLength();
-		ReloadRemaining = 0;
+		ReloadRemaining = false;
 	}
 	
 	result << '(' << Items->Size() << (Items->Size() == 1 ? " item" : " items");

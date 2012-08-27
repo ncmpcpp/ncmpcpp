@@ -104,7 +104,7 @@ void Lastfm::SwitchTo()
 	myOldScreen = myScreen;
 	myScreen = this;
 	
-	Global::RedrawHeader = 1;
+	Global::RedrawHeader = true;
 }
 
 void Lastfm::Load()

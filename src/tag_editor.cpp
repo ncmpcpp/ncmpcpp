@@ -208,7 +208,7 @@ void TagEditor::SwitchTo()
 	if (myScreen != this && myScreen->isTabbable())
 		Global::myPrevScreen = myScreen;
 	myScreen = this;
-	Global::RedrawHeader = 1;
+	Global::RedrawHeader = true;
 	Refresh();
 }
 

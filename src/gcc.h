@@ -19,9 +19,11 @@
  ***************************************************************************/
 
 #if defined(__GNUC__) && __GNUC__ >= 3
+# define GNUC_NORETURN __attribute__((noreturn))
 # define GNUC_UNUSED __attribute__((unused))
 # define GNUC_PRINTF(a, b) __attribute__((format(printf, a, b)))
 #else
+# define GNUC_NORETURN
 # define GNUC_UNUSED
 # define GNUC_PRINTF(a, b)
 #endif

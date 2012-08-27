@@ -102,7 +102,7 @@ void Clock::SwitchTo()
 	if (myScreen != this && myScreen->isTabbable())
 		Global::myPrevScreen = myScreen;
 	myScreen = this;
-	Global::RedrawHeader = 1;
+	Global::RedrawHeader = true;
 	Prepare();
 	itsPane->Refresh();
 	// clearing screen apparently fixes the problem with last digits being misrendered

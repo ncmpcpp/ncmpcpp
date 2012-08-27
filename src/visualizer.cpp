@@ -88,7 +88,7 @@ void Visualizer::SwitchTo()
 	
 	if (itsFifo >= 0)
 		Global::wFooter->SetTimeout(WindowTimeout);
-	Global::RedrawHeader = 1;
+	Global::RedrawHeader = true;
 }
 
 void Visualizer::Resize()

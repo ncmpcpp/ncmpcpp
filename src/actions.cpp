@@ -162,7 +162,7 @@ void Action::ResizeScreen()
 	}
 #	endif
 	
-	RedrawHeader = 1;
+	RedrawHeader = true;
 	MainHeight = LINES-(Config.new_design ? 7 : 4);
 	
 	ValidateScreenSize();
@@ -184,7 +184,7 @@ void Action::ResizeScreen()
 	wFooter->Resize(COLS, Config.statusbar_visibility ? 2 : 1);
 	
 	ApplyToVisibleWindows(&BasicScreen::Refresh);
-	RedrawStatusbar = 1;
+	RedrawStatusbar = true;
 	MPD::StatusChanges changes;
 	if (!Mpd.isPlaying() || DesignChanged)
 	{
@@ -199,7 +199,7 @@ void Action::ResizeScreen()
 	NcmpcppStatusChanged(&Mpd, changes, 0);
 	if (DesignChanged)
 	{
-		RedrawStatusbar = 1;
+		RedrawStatusbar = true;
 		NcmpcppStatusChanged(&Mpd, MPD::StatusChanges(), 0);
 		DesignChanged = 0;
 		ShowMessage("User interface: %s", Config.new_design ? "Alternative" : "Classic");

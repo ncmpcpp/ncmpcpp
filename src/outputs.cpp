@@ -64,7 +64,7 @@ void Outputs::SwitchTo()
 	myScreen = this;
 	w->Window::Clear();
 	
-	Global::RedrawHeader = 1;
+	Global::RedrawHeader = true;
 }
 
 void Outputs::Resize()

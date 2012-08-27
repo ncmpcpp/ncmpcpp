@@ -41,25 +41,6 @@
 #include "status.h"
 #include "visualizer.h"
 
-using namespace Global;
-using namespace MPD;
-
-BasicScreen *Global::myScreen;
-BasicScreen *Global::myOldScreen;
-BasicScreen *Global::myPrevScreen;
-BasicScreen *Global::myLockedScreen;
-BasicScreen *Global::myInactiveScreen;
-
-Window *Global::wHeader;
-Window *Global::wFooter;
-
-size_t Global::MainStartY;
-size_t Global::MainHeight;
-
-bool Global::MessagesAllowed = 0;
-bool Global::SeekingInProgress = 0;
-bool Global::RedrawHeader = 1;
-
 namespace
 {
 	std::ofstream errorlog;
@@ -94,6 +75,20 @@ namespace
 
 int main(int argc, char **argv)
 {
+	using Global::myScreen;
+	using Global::myOldScreen;
+	using Global::myPrevScreen;
+	using Global::myLockedScreen;
+	using Global::myInactiveScreen;
+	
+	using Global::wHeader;
+	using Global::wFooter;
+	
+	using Global::RedrawHeader;
+	using Global::ShowMessages;
+	using Global::VolumeState;
+	using Global::Timer;
+	
 	srand(time(0));
 	setlocale(LC_ALL, "");
 	
@@ -212,7 +207,7 @@ int main(int argc, char **argv)
 					wFooter->AddFDCallback(Mpd.GetFD(), StatusbarMPDCallback);
 					Mpd.OrderDataFetching(); // we need info about new connection
 				}
-				MessagesAllowed = 0;
+				ShowMessages = false;
 #				ifdef ENABLE_VISUALIZER
 				myVisualizer->ResetFD();
 				if (myScreen == myVisualizer)
@@ -224,7 +219,7 @@ int main(int argc, char **argv)
 		
 		TraceMpdStatus();
 		
-		MessagesAllowed = 1;
+		ShowMessages = true;
 		
 		if (Action::OrderResize)
 			Action::ResizeScreen();
@@ -234,7 +229,7 @@ int main(int argc, char **argv)
 		&&   (myScreen == myPlaylist || myScreen == myBrowser || myScreen == myLyrics)
 		   )
 		{
-			RedrawHeader = 1;
+			RedrawHeader = true;
 			gettimeofday(&past, 0);
 		}
 		if (Config.header_visibility && RedrawHeader)
@@ -258,7 +253,7 @@ int main(int argc, char **argv)
 				*wHeader << clEnd;
 			}
 			wHeader->Refresh();
-			RedrawHeader = 0;
+			RedrawHeader = false;
 		}
 		// header stuff end
 		

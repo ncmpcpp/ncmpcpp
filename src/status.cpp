@@ -43,14 +43,12 @@
 using Global::myScreen;
 using Global::myLockedScreen;
 using Global::myInactiveScreen;
-using Global::wFooter;
-using Global::Timer;
-using Global::wHeader;
-using Global::VolumeState;
 
-bool Global::RedrawStatusbar = 0;
-std::string Global::VolumeState;
-timeval Global::Timer;
+using Global::wFooter;
+using Global::wHeader;
+
+using Global::Timer;
+using Global::VolumeState;
 
 namespace
 {
@@ -191,7 +189,6 @@ void NcmpcppErrorCallback(MPD::Connection *, int errorid, const char *msg, void 
 	// for errorid:
 	// - 0-7 bits define MPD_ERROR_* codes, compare them with (0xff & errorid)
 	// - 8-15 bits define MPD_SERVER_ERROR_* codes, compare them with (errorid >> 8)
-	
 	if ((errorid >> 8) == MPD_SERVER_ERROR_PERMISSION)
 	{
 		wFooter->SetGetStringHelper(0);
@@ -262,8 +259,8 @@ void NcmpcppStatusChanged(MPD::Connection *, MPD::StatusChanges changed, void *)
 		}
 		FreeSongList(list);
 		
-		Playlist::ReloadTotalLength = 1;
-		Playlist::ReloadRemaining = 1;
+		Playlist::ReloadTotalLength = true;
+		Playlist::ReloadRemaining = true;
 		
 		if (myPlaylist->Items->Empty())
 		{
@@ -330,7 +327,7 @@ void NcmpcppStatusChanged(MPD::Connection *, MPD::StatusChanges changed, void *)
 				if (!np.Empty())
 					WindowTitle(utf_to_locale_cpy(np.toString(Config.song_window_title_format)));
 				player_state = Config.new_design ? "[playing]" : "Playing: ";
-				Playlist::ReloadRemaining = 1;
+				Playlist::ReloadRemaining = true;
 				if (Mpd.GetOldState() == MPD::psStop) // show track info in status immediately
 					changed.ElapsedTime = 1;
 				break;
@@ -345,7 +342,7 @@ void NcmpcppStatusChanged(MPD::Connection *, MPD::StatusChanges changed, void *)
 				WindowTitle("ncmpcpp ver. "VERSION);
 				if (!block_progressbar_update)
 					DrawProgressbar(0, 0);
-				Playlist::ReloadRemaining = 1;
+				Playlist::ReloadRemaining = true;
 				myPlaylist->NowPlaying = -1;
 				if (Config.new_design)
 				{
@@ -403,7 +400,7 @@ void NcmpcppStatusChanged(MPD::Connection *, MPD::StatusChanges changed, void *)
 			if (Config.now_playing_lyrics && isVisible(myLyrics) && Global::myOldScreen == myPlaylist)
 				myLyrics->ReloadNP = 1;
 		}
-		Playlist::ReloadRemaining = 1;
+		Playlist::ReloadRemaining = true;
 		playing_song_scroll_begin = 0;
 		first_line_scroll_begin = 0;
 		second_line_scroll_begin = 0;
@@ -497,7 +494,7 @@ void NcmpcppStatusChanged(MPD::Connection *, MPD::StatusChanges changed, void *)
 			}
 			if (!block_progressbar_update)
 				DrawProgressbar(Mpd.GetElapsedTime(), Mpd.GetTotalTime());
-			Global::RedrawStatusbar = 0;
+			Global::RedrawStatusbar = false;
 		}
 		else
 		{
@@ -676,7 +673,7 @@ void DrawProgressbar(unsigned elapsed, unsigned time)
 
 void ShowMessage(const char *format, ...)
 {
-	if (Global::MessagesAllowed && allow_statusbar_unlock)
+	if (Global::ShowMessages && allow_statusbar_unlock)
 	{
 		time(&time_of_statusbar_lock);
 		lock_statusbar_delay = Config.message_delay_time;

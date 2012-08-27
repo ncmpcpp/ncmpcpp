@@ -80,7 +80,7 @@ void TinyTagEditor::SwitchTo()
 		
 		myOldScreen = myScreen;
 		myScreen = this;
-		Global::RedrawHeader = 1;
+		Global::RedrawHeader = true;
 	}
 	else
 	{
