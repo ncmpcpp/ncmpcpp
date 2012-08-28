@@ -136,12 +136,51 @@ namespace NCurses
 			///
 			void Clear();
 			
-			/// @param t any object that has defined ostream &operator<<()
-			/// @return reference to itself
-			///
-			template <typename T> basic_buffer<C> &operator<<(const T &t)
+			basic_buffer<C> &operator<<(int n)
 			{
-				itsString << t;
+				itsString << n;
+				return *this;
+			}
+			
+			basic_buffer<C> &operator<<(long int n)
+			{
+				itsString << n;
+				return *this;
+			}
+			
+			basic_buffer<C> &operator<<(unsigned int n)
+			{
+				itsString << n;
+				return *this;
+			}
+			
+			basic_buffer<C> &operator<<(long unsigned int n)
+			{
+				itsString << n;
+				return *this;
+			}
+			
+			basic_buffer<C> &operator<<(char c)
+			{
+				itsString << c;
+				return *this;
+			}
+			
+			basic_buffer<C> &operator<<(wchar_t c)
+			{
+				itsString << c;
+				return *this;
+			}
+			
+			basic_buffer<C> &operator<<(const C *s)
+			{
+				itsString << s;
+				return *this;
+			}
+			
+			basic_buffer<C> &operator<<(const std::basic_string<C> &s)
+			{
+				itsString << s;
 				return *this;
 			}
 			
@@ -161,9 +200,37 @@ namespace NCurses
 			///
 			basic_buffer<C> &operator<<(const basic_buffer<C> &buf);
 			
-			/// Friend operator, that handles printing
+			/// Friend operator that handles printing
 			/// the content of buffer to window object
-			friend Window &operator<< <>(Window &, const basic_buffer<C> &);
+			friend Window &operator<<(Window &w, const basic_buffer<C> &buf)
+			{
+				const std::basic_string<C> &s = buf.itsTempString ? *buf.itsTempString : buf.itsString.str();
+				if (buf.itsFormat.empty())
+					w << s;
+				else
+				{
+					std::basic_string<C> tmp;
+					auto b = buf.itsFormat.begin(), e = buf.itsFormat.end();
+					for (size_t i = 0; i < s.length() || b != e; ++i)
+					{
+						while (b != e && i == b->Position)
+						{
+							if (!tmp.empty())
+							{
+								w << tmp;
+								tmp.clear();
+							}
+							buf.LoadAttribute(w, b->Value);
+							b++;
+						}
+						if (i < s.length())
+							tmp += s[i];
+					}
+					if (!tmp.empty())
+						w << tmp;
+				}
+				return w;
+			}
 			
 		private:
 			/// Loads an attribute to given window object
@@ -281,7 +348,7 @@ template <typename C> void NCurses::basic_buffer<C>::Write(	Window &w,
 		s += separator;
 		len = 0;
 		
-		typename std::list<typename NCurses::basic_buffer<C>::FormatPos>::const_iterator lb = itsFormat.begin();
+		auto lb = itsFormat.begin();
 		if (itsFormat.back().Position > start_pos) // if there is no attributes from current position, don't load them
 		{
 			// load all attributes that are before start position
@@ -358,44 +425,10 @@ template <typename C> NCurses::basic_buffer<C> &NCurses::basic_buffer<C>::operat
 	itsString << buf.itsString.str();
 	std::list<FormatPos> tmp = buf.itsFormat;
 	if (len)
-		for (typename std::list<typename NCurses::basic_buffer<C>::FormatPos>::iterator it = tmp.begin(); it != tmp.end(); ++it)
+		for (auto it = tmp.begin(); it != tmp.end(); ++it)
 			it->Position += len;
 	itsFormat.merge(tmp);
 	return *this;
 }
 
-template <typename C> NCurses::Window &operator<<(NCurses::Window &w, const NCurses::basic_buffer<C> &buf)
-{
-	const std::basic_string<C> &s = buf.itsTempString ? *buf.itsTempString : buf.itsString.str();
-	if (buf.itsFormat.empty())
-	{
-		w << s;
-	}
-	else
-	{
-		std::basic_string<C> tmp;
-		typename std::list<typename NCurses::basic_buffer<C>::FormatPos>::const_iterator b = buf.itsFormat.begin();
-		typename std::list<typename NCurses::basic_buffer<C>::FormatPos>::const_iterator e = buf.itsFormat.end();
-		for (size_t i = 0; i < s.length() || b != e; ++i)
-		{
-			while (b != e && i == b->Position)
-			{
-				if (!tmp.empty())
-				{
-					w << tmp;
-					tmp.clear();
-				}
-				buf.LoadAttribute(w, b->Value);
-				b++;
-			}
-			if (i < s.length())
-				tmp += s[i];
-		}
-		if (!tmp.empty())
-			w << tmp;
-	}
-	return w;
-}
-
 #endif
-

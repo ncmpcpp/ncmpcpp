@@ -109,25 +109,24 @@ void SongInfo::PrepareSong(MPD::Song &s)
 		s.SetComment(f.tag()->comment().to8Bit(1));
 #	endif // HAVE_TAGLIB_H
 	
-	*w << fmtBold << Config.color1 << "Filename: " << fmtBoldEnd << Config.color2 << s.getName() << "\n" << clEnd;
-	*w << fmtBold << "Directory: " << fmtBoldEnd << Config.color2;
+	*w << fmtBold << Config.color1 << U("Filename: ") << fmtBoldEnd << Config.color2 << s.getName() << '\n' << clEnd;
+	*w << fmtBold << U("Directory: ") << fmtBoldEnd << Config.color2;
 	ShowTag(*w, s.getDirectory());
-	*w << "\n\n" << clEnd;
-	*w << fmtBold << "Length: " << fmtBoldEnd << Config.color2 << s.getLength() << "\n" << clEnd;
+	*w << U("\n\n") << clEnd;
+	*w << fmtBold << U("Length: ") << fmtBoldEnd << Config.color2 << s.getLength() << '\n' << clEnd;
 #	ifdef HAVE_TAGLIB_H
 	if (!f.isNull())
 	{
-		*w << fmtBold << "Bitrate: " << fmtBoldEnd << Config.color2 << f.audioProperties()->bitrate() << " kbps\n" << clEnd;
-		*w << fmtBold << "Sample rate: " << fmtBoldEnd << Config.color2 << f.audioProperties()->sampleRate() << " Hz\n" << clEnd;
-		*w << fmtBold << "Channels: " << fmtBoldEnd << Config.color2 << (f.audioProperties()->channels() == 1 ? "Mono" : "Stereo") << "\n" << clDefault;
+		*w << fmtBold << U("Bitrate: ") << fmtBoldEnd << Config.color2 << f.audioProperties()->bitrate() << U(" kbps\n") << clEnd;
+		*w << fmtBold << U("Sample rate: ") << fmtBoldEnd << Config.color2 << f.audioProperties()->sampleRate() << U(" Hz\n") << clEnd;
+		*w << fmtBold << U("Channels: ") << fmtBoldEnd << Config.color2 << (f.audioProperties()->channels() == 1 ? U("Mono") : U("Stereo")) << '\n' << clDefault;
 	}
 #	endif // HAVE_TAGLIB_H
 	*w << clDefault;
 	
 	for (const Metadata *m = Tags; m->Name; ++m)
 	{
-		*w << fmtBold << "\n" << m->Name << ": " << fmtBoldEnd;
+		*w << fmtBold << '\n' << TO_WSTRING(m->Name) << U(": ") << fmtBoldEnd;
 		ShowTag(*w, s.getTags(m->Get));
 	}
 }
-

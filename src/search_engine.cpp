@@ -137,10 +137,12 @@ void SearchEngine::EnterPressed()
 	
 	if (option < ConstraintsNumber)
 	{
-		Statusbar() << fmtBold << ConstraintsNames[option] << fmtBoldEnd << ": ";
+		std::string constraint = ConstraintsNames[option];
+		Statusbar() << fmtBold << constraint << fmtBoldEnd << ": ";
 		itsConstraints[option] = Global::wFooter->GetString(itsConstraints[option]);
 		w->Current().buffer().Clear();
-		w->Current().buffer() << fmtBold << std::setw(13) << std::left << ConstraintsNames[option] << fmtBoldEnd << ": ";
+		constraint.resize(13, ' ');
+		w->Current().buffer() << fmtBold << constraint << fmtBoldEnd << ": ";
 		ShowTag(w->Current().buffer(), itsConstraints[option]);
 	}
 	else if (option == ConstraintsNumber+1)
@@ -324,7 +326,9 @@ void SearchEngine::Prepare()
 	
 	for (size_t i = 0; i < ConstraintsNumber; ++i)
 	{
-		(*w)[i].mkBuffer() << fmtBold << std::setw(13) << std::left << ConstraintsNames[i] << fmtBoldEnd << ": ";
+		std::string constraint = ConstraintsNames[i];
+		constraint.resize(13, ' ');
+		(*w)[i].mkBuffer() << fmtBold << constraint << fmtBoldEnd << ": ";
 		ShowTag((*w)[i].buffer(), itsConstraints[i]);
 	}
 	

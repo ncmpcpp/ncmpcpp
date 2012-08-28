@@ -249,10 +249,10 @@ void *Lyrics::Download()
 	bool fetcher_defined = itsFetcher && *itsFetcher;
 	for (LyricsFetcher **plugin = fetcher_defined ? itsFetcher : lyricsPlugins; *plugin != 0; ++plugin)
 	{
-		*w << "Fetching lyrics from " << fmtBold << (*plugin)->name() << fmtBoldEnd << "... ";
+		*w << U("Fetching lyrics from ") << fmtBold << TO_WSTRING((*plugin)->name()) << fmtBoldEnd << U("... ");
 		result = (*plugin)->fetch(artist, title);
 		if (result.first == false)
-			*w << clRed << result.second << clEnd << "\n";
+			*w << clRed << TO_WSTRING(result.second) << clEnd << '\n';
 		else
 			break;
 		if (fetcher_defined)
@@ -268,7 +268,7 @@ void *Lyrics::Download()
 		*w << result.second;
 	}
 	else
-		*w << "\nLyrics weren't found.";
+		*w << '\n' << U("Lyrics weren't found.");
 	
 	isReadyToTake = 1;
 	pthread_exit(0);
@@ -338,7 +338,7 @@ void Lyrics::Load()
 		while (getline(input, line))
 		{
 			if (!first)
-				*w << "\n";
+				*w << '\n';
 			utf_to_locale(line);
 			*w << line;
 			first = 0;
@@ -353,7 +353,7 @@ void Lyrics::Load()
 		pthread_create(&itsDownloader, 0, DownloadWrapper, this);
 		isDownloadInProgress = 1;
 #		else
-		*w << "Local lyrics not found. As ncmpcpp has been compiled without curl support, you can put appropriate lyrics into " << Config.lyrics_directory << " directory (file syntax is \"$ARTIST - $TITLE.txt\") or recompile ncmpcpp with curl support.";
+		*w << U("Local lyrics not found. As ncmpcpp has been compiled without curl support, you can put appropriate lyrics into ") << TO_WSTRING(Config.lyrics_directory) << U(" directory (file syntax is \"$ARTIST - $TITLE.txt\") or recompile ncmpcpp with curl support.");
 		w->Flush();
 #		endif
 	}

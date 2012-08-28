@@ -143,7 +143,7 @@ void Lastfm::Load()
 		while (getline(input, line))
 		{
 			if (!first)
-				*w << "\n";
+				*w << '\n';
 			utf_to_locale(line);
 			*w << line;
 			first = 0;
@@ -153,7 +153,7 @@ void Lastfm::Load()
 	}
 	else
 	{
-		*w << "Fetching informations... ";
+		*w << U("Fetching informations... ");
 		pthread_create(&itsDownloader, 0, DownloadWrapper, this);
 		isDownloadInProgress = 1;
 	}
