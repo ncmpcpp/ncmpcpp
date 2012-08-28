@@ -29,20 +29,13 @@
 
 namespace MPD
 {
-	namespace Message
-	{
-		extern const char *PartOfSongsAdded;
-		extern const char *FullPlaylist;
-	}
-	
 	enum ItemType { itDirectory, itSong, itPlaylist };
 	enum PlayerState { psUnknown, psStop, psPlay, psPause };
 	enum ReplayGainMode { rgmOff, rgmTrack, rgmAlbum };
 	
 	struct Item
 	{
-		Item() : song(0) { }
-		Song *song;
+		Song song;
 		ItemType type;
 		std::string name;
 	};
@@ -69,12 +62,9 @@ namespace MPD
 	typedef std::pair<std::string, bool> Output;
 	
 	typedef std::vector<Item> ItemList;
-	typedef std::vector<Song *> SongList;
+	typedef std::vector<Song> SongList;
 	typedef std::vector<std::string> TagList;
 	typedef std::vector<Output> OutputList;
-
-	void FreeSongList(SongList &);
-	void FreeItemList(ItemList &);
 
 	class Connection
 	{

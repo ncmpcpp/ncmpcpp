@@ -64,7 +64,7 @@ void SearchEngine::Init()
 {
 	static Display::ScreenFormat sf = { this, &Config.song_list_format };
 	
-	w = new Menu< std::pair<Buffer *, MPD::Song *> >(0, MainStartY, COLS, MainHeight, "", Config.main_color, brNone);
+	w = new Menu<SEItem>(0, MainStartY, COLS, MainHeight, "", Config.main_color, brNone);
 	w->HighlightColor(Config.main_highlight_color);
 	w->CyclicScrolling(Config.use_cyclic_scrolling);
 	w->CenteredCursor(Config.centered_cursor);
@@ -115,7 +115,7 @@ void SearchEngine::SwitchTo()
 	myScreen = this;
 	Global::RedrawHeader = true;
 	
-	if (!w->Back().first)
+	if (!w->Back().isSong())
 	{
 		*w << XY(0, 0) << "Updating list...";
 		UpdateFoundList();
@@ -131,7 +131,7 @@ void SearchEngine::EnterPressed()
 {
 	size_t option = w->Choice();
 	if (option > ConstraintsNumber && option < SearchButton)
-		w->Current().first->Clear();
+		w->Current().buffer().Clear();
 	if (option < SearchButton)
 		LockStatusbar();
 	
@@ -139,20 +139,20 @@ void SearchEngine::EnterPressed()
 	{
 		Statusbar() << fmtBold << ConstraintsNames[option] << fmtBoldEnd << ": ";
 		itsConstraints[option] = Global::wFooter->GetString(itsConstraints[option]);
-		w->Current().first->Clear();
-		*w->Current().first << fmtBold << std::setw(13) << std::left << ConstraintsNames[option] << fmtBoldEnd << ": ";
-		ShowTag(*w->Current().first, itsConstraints[option]);
+		w->Current().buffer().Clear();
+		w->Current().buffer() << fmtBold << std::setw(13) << std::left << ConstraintsNames[option] << fmtBoldEnd << ": ";
+		ShowTag(w->Current().buffer(), itsConstraints[option]);
 	}
 	else if (option == ConstraintsNumber+1)
 	{
 		Config.search_in_db = !Config.search_in_db;
-		*w->Current().first << fmtBold << "Search in:" << fmtBoldEnd << ' ' << (Config.search_in_db ? "Database" : "Current playlist");
+		w->Current().buffer() << fmtBold << "Search in:" << fmtBoldEnd << ' ' << (Config.search_in_db ? "Database" : "Current playlist");
 	}
 	else if (option == ConstraintsNumber+2)
 	{
 		if (!*++SearchMode)
 			SearchMode = &SearchModes[0];
-		*w->Current().first << fmtBold << "Search mode:" << fmtBoldEnd << ' ' << *SearchMode;
+		w->Current().buffer() << fmtBold << "Search mode:" << fmtBoldEnd << ' ' << *SearchMode;
 	}
 	else if (option == SearchButton)
 	{
@@ -160,16 +160,15 @@ void SearchEngine::EnterPressed()
 		if (w->Size() > StaticOptions)
 			Prepare();
 		Search();
-		if (!w->Back().first)
+		if (w->Back().isSong())
 		{
 			if (Config.columns_in_search_engine)
 				w->SetTitle(Config.titles_visibility ? Display::Columns(w->GetWidth()) : "");
 			size_t found = w->Size()-SearchEngine::StaticOptions;
 			found += 3; // don't count options inserted below
 			w->InsertSeparator(ResetButton+1);
-			w->InsertOption(ResetButton+2, std::make_pair(static_cast<Buffer *>(0), static_cast<MPD::Song *>(0)), 1, 1);
-			w->at(ResetButton+2).first = new Buffer();
-			*w->at(ResetButton+2).first << Config.color1 << "Search results: " << Config.color2 << "Found " << found  << (found > 1 ? " songs" : " song") << clDefault;
+			w->InsertOption(ResetButton+2, SEItem(), 1, 1);
+			w->at(ResetButton+2).mkBuffer() << Config.color1 << "Search results: " << Config.color2 << "Found " << found  << (found > 1 ? " songs" : " song") << clDefault;
 			w->InsertSeparator(ResetButton+3);
 			UpdateFoundList();
 			ShowMessage("Searching finished");
@@ -187,7 +186,10 @@ void SearchEngine::EnterPressed()
 		Reset();
 	}
 	else
-		w->Bold(w->Choice(), myPlaylist->Add(*w->Current().second, w->isBold(), 1));
+	{
+		bool res = myPlaylist->Add(w->Current().song(), 1, 1);
+		w->Bold(w->Choice(), res);
+	}
 	
 	if (option < SearchButton)
 		UnlockStatusbar();
@@ -195,7 +197,7 @@ void SearchEngine::EnterPressed()
 
 void SearchEngine::SpacePressed()
 {
-	if (w->Current().first)
+	if (!w->Current().isSong())
 		return;
 	
 	if (Config.space_selects)
@@ -205,7 +207,8 @@ void SearchEngine::SpacePressed()
 		return;
 	}
 	
-	w->Bold(w->Choice(), myPlaylist->Add(*w->Current().second, w->isBold(), 0));
+	bool res = myPlaylist->Add(w->Current().song(), 0, 0);
+	w->Bold(w->Choice(), res);
 	w->Scroll(wDown);
 }
 
@@ -234,12 +237,12 @@ void SearchEngine::MouseButtonPressed(MEVENT me)
 		}
 	}
 	else
-		Screen< Menu< std::pair<Buffer *, MPD::Song *> > >::MouseButtonPressed(me);
+		Screen< Menu<SEItem> >::MouseButtonPressed(me);
 }
 
 MPD::Song *SearchEngine::CurrentSong()
 {
-	return !w->Empty() ? w->Current().second : 0;
+	return !w->Empty() && w->Current().isSong() ? &w->Current().song() : 0;
 }
 
 void SearchEngine::GetSelectedSongs(MPD::SongList &v)
@@ -250,8 +253,11 @@ void SearchEngine::GetSelectedSongs(MPD::SongList &v)
 	w->GetSelected(selected);
 	if (selected.empty() && w->Choice() >= StaticOptions)
 		selected.push_back(w->Choice());
-	for (std::vector<size_t>::const_iterator it = selected.begin(); it != selected.end(); ++it)
-		v.push_back(new MPD::Song(*w->at(*it).second));
+	for (auto it = selected.begin(); it != selected.end(); ++it)
+	{
+		assert(w->at(*it).isSong());
+		v.push_back(w->at(*it).song());
+	}
 }
 
 void SearchEngine::ApplyFilter(const std::string &s)
@@ -266,7 +272,7 @@ void SearchEngine::UpdateFoundList()
 	{
 		for (size_t j = 0; j < myPlaylist->Items->Size(); ++j)
 		{
-			if (myPlaylist->Items->at(j).getHash() == w->at(i).second->getHash())
+			if (myPlaylist->Items->at(j).getHash() == w->at(i).song().getHash())
 			{
 				bold = 1;
 				break;
@@ -283,24 +289,24 @@ void SearchEngine::SelectAlbum()
 	if (pos < StaticOptions)
 		return;		// not on a song
 	
-	std::string album = w->at(pos).second->getAlbum();
-
+	std::string album = w->at(pos).song().getAlbum();
+	
 	// select song under cursor
 	w->Select(pos, 1);
-
+	
 	// go up
 	while (pos > StaticOptions)
 	{
-		if (w->at(--pos).second->getAlbum() != album)
+		if (w->at(--pos).song().getAlbum() != album)
 			break;
 		else
 			w->Select(pos, 1);
 	}
-
+	
 	// go down
 	while (pos < w->Size() - 1)
 	{
-		if (w->at(++pos).second->getAlbum() != album)
+		if (w->at(++pos).song().getAlbum() != album)
 			break;
 		else
 			w->Select(pos, 1);
@@ -309,14 +315,6 @@ void SearchEngine::SelectAlbum()
 
 void SearchEngine::Prepare()
 {
-	for (size_t i = 0; i < w->Size(); ++i)
-	{
-		if (i == ConstraintsNumber || i == SearchButton-1 || i == ResetButton+1 || i == ResetButton+3) // separators
-			continue;
-		delete (*w)[i].first;
-		delete (*w)[i].second;
-	}
-	
 	w->SetTitle("");
 	w->Clear();
 	w->ResizeList(StaticOptions-3);
@@ -324,24 +322,17 @@ void SearchEngine::Prepare()
 	w->IntoSeparator(ConstraintsNumber);
 	w->IntoSeparator(SearchButton-1);
 	
-	for (size_t i = 0; i < StaticOptions-3; ++i)
-	{
-		if (i == ConstraintsNumber || i == SearchButton-1) // separators
-			continue;
-		(*w)[i].first = new Buffer();
-	}
-	
 	for (size_t i = 0; i < ConstraintsNumber; ++i)
 	{
-		*(*w)[i].first << fmtBold << std::setw(13) << std::left << ConstraintsNames[i] << fmtBoldEnd << ": ";
-		ShowTag(*(*w)[i].first, itsConstraints[i]);
+		(*w)[i].mkBuffer() << fmtBold << std::setw(13) << std::left << ConstraintsNames[i] << fmtBoldEnd << ": ";
+		ShowTag((*w)[i].buffer(), itsConstraints[i]);
 	}
 	
-	*w->at(ConstraintsNumber+1).first << fmtBold << "Search in:" << fmtBoldEnd << ' ' << (Config.search_in_db ? "Database" : "Current playlist");
-	*w->at(ConstraintsNumber+2).first << fmtBold << "Search mode:" << fmtBoldEnd << ' ' << *SearchMode;
+	w->at(ConstraintsNumber+1).mkBuffer() << fmtBold << "Search in:" << fmtBoldEnd << ' ' << (Config.search_in_db ? "Database" : "Current playlist");
+	w->at(ConstraintsNumber+2).mkBuffer() << fmtBold << "Search mode:" << fmtBoldEnd << ' ' << *SearchMode;
 	
-	*w->at(SearchButton).first << "Search";
-	*w->at(ResetButton).first << "Reset";
+	w->at(SearchButton).mkBuffer() << "Search";
+	w->at(ResetButton).mkBuffer() << "Reset";
 }
 
 void SearchEngine::Reset()
@@ -394,8 +385,8 @@ void SearchEngine::Search()
 			Mpd.AddSearch(MPD_TAG_COMMENT, itsConstraints[10]);
 		MPD::SongList results;
 		Mpd.CommitSearch(results);
-		for (MPD::SongList::const_iterator it = results.begin(); it != results.end(); ++it)
-			w->AddOption(std::make_pair(static_cast<Buffer *>(0), *it));
+		for (auto it = results.begin(); it != results.end(); ++it)
+			w->AddOption(*it);
 		return;
 	}
 	
@@ -406,7 +397,7 @@ void SearchEngine::Search()
 	{
 		list.reserve(myPlaylist->Items->Size());
 		for (size_t i = 0; i < myPlaylist->Items->Size(); ++i)
-			list.push_back(&(*myPlaylist->Items)[i]);
+			list.push_back((*myPlaylist->Items)[i]);
 	}
 	
 	bool any_found = 1;
@@ -422,16 +413,16 @@ void SearchEngine::Search()
 				if (regcomp(&rx, itsConstraints[0].c_str(), REG_ICASE | Config.regex_type) == 0)
 				{
 					any_found =
-						!regexec(&rx, (*it)->getArtist().c_str(), 0, 0, 0)
-					||	!regexec(&rx, (*it)->getAlbumArtist().c_str(), 0, 0, 0)
-					||	!regexec(&rx, (*it)->getTitle().c_str(), 0, 0, 0)
-					||	!regexec(&rx, (*it)->getAlbum().c_str(), 0, 0, 0)
-					||	!regexec(&rx, (*it)->getName().c_str(), 0, 0, 0)
-					||	!regexec(&rx, (*it)->getComposer().c_str(), 0, 0, 0)
-					||	!regexec(&rx, (*it)->getPerformer().c_str(), 0, 0, 0)
-					||	!regexec(&rx, (*it)->getGenre().c_str(), 0, 0, 0)
-					||	!regexec(&rx, (*it)->getDate().c_str(), 0, 0, 0)
-					||	!regexec(&rx, (*it)->getComment().c_str(), 0, 0, 0);
+						!regexec(&rx, it->getArtist().c_str(), 0, 0, 0)
+					||	!regexec(&rx, it->getAlbumArtist().c_str(), 0, 0, 0)
+					||	!regexec(&rx, it->getTitle().c_str(), 0, 0, 0)
+					||	!regexec(&rx, it->getAlbum().c_str(), 0, 0, 0)
+					||	!regexec(&rx, it->getName().c_str(), 0, 0, 0)
+					||	!regexec(&rx, it->getComposer().c_str(), 0, 0, 0)
+					||	!regexec(&rx, it->getPerformer().c_str(), 0, 0, 0)
+					||	!regexec(&rx, it->getGenre().c_str(), 0, 0, 0)
+					||	!regexec(&rx, it->getDate().c_str(), 0, 0, 0)
+					||	!regexec(&rx, it->getComment().c_str(), 0, 0, 0);
 				}
 				regfree(&rx);
 			}
@@ -439,61 +430,61 @@ void SearchEngine::Search()
 			if (found && !itsConstraints[1].empty())
 			{
 				if (!regcomp(&rx, itsConstraints[1].c_str(), REG_ICASE | Config.regex_type))
-					found = !regexec(&rx, (*it)->getArtist().c_str(), 0, 0, 0);
+					found = !regexec(&rx, it->getArtist().c_str(), 0, 0, 0);
 				regfree(&rx);
 			}
 			if (found && !itsConstraints[2].empty())
 			{
 				if (!regcomp(&rx, itsConstraints[2].c_str(), REG_ICASE | Config.regex_type))
-					found = !regexec(&rx, (*it)->getAlbumArtist().c_str(), 0, 0, 0);
+					found = !regexec(&rx, it->getAlbumArtist().c_str(), 0, 0, 0);
 				regfree(&rx);
 			}
 			if (found && !itsConstraints[3].empty())
 			{
 				if(!regcomp(&rx, itsConstraints[3].c_str(), REG_ICASE | Config.regex_type))
-					found = !regexec(&rx, (*it)->getTitle().c_str(), 0, 0, 0);
+					found = !regexec(&rx, it->getTitle().c_str(), 0, 0, 0);
 				regfree(&rx);
 			}
 			if (found && !itsConstraints[4].empty())
 			{
 				if (!regcomp(&rx, itsConstraints[4].c_str(), REG_ICASE | Config.regex_type))
-					found = !regexec(&rx, (*it)->getAlbum().c_str(), 0, 0, 0);
+					found = !regexec(&rx, it->getAlbum().c_str(), 0, 0, 0);
 				regfree(&rx);
 			}
 			if (found && !itsConstraints[5].empty())
 			{
 				if (!regcomp(&rx, itsConstraints[5].c_str(), REG_ICASE | Config.regex_type))
-					found = !regexec(&rx, (*it)->getName().c_str(), 0, 0, 0);
+					found = !regexec(&rx, it->getName().c_str(), 0, 0, 0);
 				regfree(&rx);
 			}
 			if (found && !itsConstraints[6].empty())
 			{
 				if (!regcomp(&rx, itsConstraints[6].c_str(), REG_ICASE | Config.regex_type))
-					found = !regexec(&rx, (*it)->getComposer().c_str(), 0, 0, 0);
+					found = !regexec(&rx, it->getComposer().c_str(), 0, 0, 0);
 				regfree(&rx);
 			}
 			if (found && !itsConstraints[7].empty())
 			{
 				if (!regcomp(&rx, itsConstraints[7].c_str(), REG_ICASE | Config.regex_type))
-					found = !regexec(&rx, (*it)->getPerformer().c_str(), 0, 0, 0);
+					found = !regexec(&rx, it->getPerformer().c_str(), 0, 0, 0);
 				regfree(&rx);
 			}
 			if (found && !itsConstraints[8].empty())
 			{
 				if (!regcomp(&rx, itsConstraints[8].c_str(), REG_ICASE | Config.regex_type))
-					found = !regexec(&rx, (*it)->getGenre().c_str(), 0, 0, 0);
+					found = !regexec(&rx, it->getGenre().c_str(), 0, 0, 0);
 				regfree(&rx);
 			}
 			if (found && !itsConstraints[9].empty())
 			{
 				if (!regcomp(&rx, itsConstraints[9].c_str(), REG_ICASE | Config.regex_type))
-					found = !regexec(&rx, (*it)->getDate().c_str(), 0, 0, 0);
+					found = !regexec(&rx, it->getDate().c_str(), 0, 0, 0);
 				regfree(&rx);
 			}
 			if (found && !itsConstraints[10].empty())
 			{
 				if (!regcomp(&rx, itsConstraints[10].c_str(), REG_ICASE | Config.regex_type))
-					found = !regexec(&rx, (*it)->getComment().c_str(), 0, 0, 0);
+					found = !regexec(&rx, it->getComment().c_str(), 0, 0, 0);
 				regfree(&rx);
 			}
 		}
@@ -503,60 +494,57 @@ void SearchEngine::Search()
 			
 			if (!itsConstraints[0].empty())
 				any_found =
-					!cmp((*it)->getArtist(), itsConstraints[0])
-				||	!cmp((*it)->getAlbumArtist(), itsConstraints[0])
-				||	!cmp((*it)->getTitle(), itsConstraints[0])
-				||	!cmp((*it)->getAlbum(), itsConstraints[0])
-				||	!cmp((*it)->getName(), itsConstraints[0])
-				||	!cmp((*it)->getComposer(), itsConstraints[0])
-				||	!cmp((*it)->getPerformer(), itsConstraints[0])
-				||	!cmp((*it)->getGenre(), itsConstraints[0])
-				||	!cmp((*it)->getDate(), itsConstraints[0])
-				||	!cmp((*it)->getComment(), itsConstraints[0]);
+					!cmp(it->getArtist(), itsConstraints[0])
+				||	!cmp(it->getAlbumArtist(), itsConstraints[0])
+				||	!cmp(it->getTitle(), itsConstraints[0])
+				||	!cmp(it->getAlbum(), itsConstraints[0])
+				||	!cmp(it->getName(), itsConstraints[0])
+				||	!cmp(it->getComposer(), itsConstraints[0])
+				||	!cmp(it->getPerformer(), itsConstraints[0])
+				||	!cmp(it->getGenre(), itsConstraints[0])
+				||	!cmp(it->getDate(), itsConstraints[0])
+				||	!cmp(it->getComment(), itsConstraints[0]);
 			
 			if (found && !itsConstraints[1].empty())
-				found = !cmp((*it)->getArtist(), itsConstraints[1]);
+				found = !cmp(it->getArtist(), itsConstraints[1]);
 			if (found && !itsConstraints[2].empty())
-				found = !cmp((*it)->getAlbumArtist(), itsConstraints[2]);
+				found = !cmp(it->getAlbumArtist(), itsConstraints[2]);
 			if (found && !itsConstraints[3].empty())
-				found = !cmp((*it)->getTitle(), itsConstraints[3]);
+				found = !cmp(it->getTitle(), itsConstraints[3]);
 			if (found && !itsConstraints[4].empty())
-				found = !cmp((*it)->getAlbum(), itsConstraints[4]);
+				found = !cmp(it->getAlbum(), itsConstraints[4]);
 			if (found && !itsConstraints[5].empty())
-				found = !cmp((*it)->getName(), itsConstraints[5]);
+				found = !cmp(it->getName(), itsConstraints[5]);
 			if (found && !itsConstraints[6].empty())
-				found = !cmp((*it)->getComposer(), itsConstraints[6]);
+				found = !cmp(it->getComposer(), itsConstraints[6]);
 			if (found && !itsConstraints[7].empty())
-				found = !cmp((*it)->getPerformer(), itsConstraints[7]);
+				found = !cmp(it->getPerformer(), itsConstraints[7]);
 			if (found && !itsConstraints[8].empty())
-				found = !cmp((*it)->getGenre(), itsConstraints[8]);
+				found = !cmp(it->getGenre(), itsConstraints[8]);
 			if (found && !itsConstraints[9].empty())
-				found = !cmp((*it)->getDate(), itsConstraints[9]);
+				found = !cmp(it->getDate(), itsConstraints[9]);
 			if (found && !itsConstraints[10].empty())
-				found = !cmp((*it)->getComment(), itsConstraints[10]);
+				found = !cmp(it->getComment(), itsConstraints[10]);
 		}
 		
 		if (found && any_found)
 		{
-			MPD::Song *ss = Config.search_in_db ? *it : new MPD::Song(**it);
-			w->AddOption(std::make_pair(static_cast<Buffer *>(0), ss));
+			w->AddOption(*it);
 			list[it-list.begin()] = 0;
 		}
 		found = 1;
 		any_found = 1;
 	}
-	if (Config.search_in_db) // free song list only if it's database
-		MPD::FreeSongList(list);
 }
 
-std::string SearchEngine::SearchEngineOptionToString(const std::pair<Buffer *, MPD::Song *> &pair, void *)
+std::string SearchEngine::SearchEngineOptionToString(const SEItem &ei, void *)
 {
-	if (pair.second)
+	if (!ei.isSong())
 	{
 		if (!Config.columns_in_search_engine)
-			return pair.second->toString(Config.song_list_format_dollar_free);
+			return ei.song().toString(Config.song_list_format_dollar_free);
 		else
-			return Playlist::SongInColumnsToString(*pair.second, 0);
+			return Playlist::SongInColumnsToString(ei.song(), 0);
 	}
 	else
 		return "";

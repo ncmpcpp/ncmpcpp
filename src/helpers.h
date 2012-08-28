@@ -55,9 +55,9 @@ class CaseInsensitiveSorting
 			return cmp(a, b) < 0;
 		}
 		
-		bool operator()(MPD::Song *a, MPD::Song *b)
+		bool operator()(const MPD::Song &a, const MPD::Song &b)
 		{
-			return cmp(a->getName(), b->getName()) < 0;
+			return cmp(a.getName(), b.getName()) < 0;
 		}
 		
 		template <typename A, typename B> bool operator()(const std::pair<A, B> &a, const std::pair<A, B> &b)

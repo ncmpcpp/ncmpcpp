@@ -317,10 +317,10 @@ bool CaseInsensitiveSorting::operator()(const MPD::Item &a, const MPD::Item &b)
 						result = operator()(a.song, b.song);
 						break;
 					case smMTime:
-						result = a.song->getMTime() > b.song->getMTime();
+						result = a.song.getMTime() > b.song.getMTime();
 						break;
 					case smCustomFormat:
-						result = cmp(a.song->toString(Config.browser_sort_format), b.song->toString(Config.browser_sort_format)) < 0;
+						result = cmp(a.song.toString(Config.browser_sort_format), b.song.toString(Config.browser_sort_format)) < 0;
 						break;
 				}
 				break;

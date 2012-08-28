@@ -234,16 +234,16 @@ void NcmpcppStatusChanged(MPD::Connection *, MPD::StatusChanges changed, void *)
 		myPlaylist->Items->Reserve(playlist_length);
 		for (MPD::SongList::const_iterator it = list.begin(); it != list.end(); ++it)
 		{
-			int pos = (*it)->getPosition();
+			int pos = it->getPosition();
 			if (pos < int(myPlaylist->Items->Size()))
 			{
 				// if song's already in playlist, replace it with a new one
-				myPlaylist->Items->at(pos) = **it;
+				myPlaylist->Items->at(pos) = *it;
 			}
 			else
 			{
 				// otherwise just add it to playlist
-				myPlaylist->Items->AddOption(**it);
+				myPlaylist->Items->AddOption(*it);
 			}
 		}
 		if (was_filtered)
@@ -252,7 +252,6 @@ void NcmpcppStatusChanged(MPD::Connection *, MPD::StatusChanges changed, void *)
 			if (myPlaylist->Items->Empty())
 				myPlaylist->Items->ShowAll();
 		}
-		FreeSongList(list);
 		
 		Playlist::ReloadTotalLength = true;
 		Playlist::ReloadRemaining = true;

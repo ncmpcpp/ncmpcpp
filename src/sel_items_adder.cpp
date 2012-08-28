@@ -179,8 +179,8 @@ void SelectedItemsAdder::EnterPressed()
 			{
 				std::string utf_playlist = locale_to_utf_cpy(playlist);
 				Mpd.StartCommandsList();
-				for (MPD::SongList::const_iterator it = list.begin(); it != list.end(); ++it)
-					Mpd.AddToPlaylist(utf_playlist, **it);
+				for (auto it = list.begin(); it != list.end(); ++it)
+					Mpd.AddToPlaylist(utf_playlist, *it);
 				if (Mpd.CommitCommandsList())
 					ShowMessage("Selected item(s) added to playlist \"%s\"", playlist.c_str());
 			}
@@ -189,8 +189,8 @@ void SelectedItemsAdder::EnterPressed()
 		{
 			std::string playlist = locale_to_utf_cpy(w->Current());
 			Mpd.StartCommandsList();
-			for (MPD::SongList::const_iterator it = list.begin(); it != list.end(); ++it)
-				Mpd.AddToPlaylist(playlist, **it);
+			for (auto it = list.begin(); it != list.end(); ++it)
+				Mpd.AddToPlaylist(playlist, *it);
 			if (Mpd.CommitCommandsList())
 				ShowMessage("Selected item(s) added to playlist \"%s\"", w->Current().c_str());
 		}
@@ -247,7 +247,6 @@ void SelectedItemsAdder::EnterPressed()
 		if (successful_operation)
 			ShowMessage("Selected item(s) added");
 	}
-	MPD::FreeSongList(list);
 	SwitchTo();
 }
 

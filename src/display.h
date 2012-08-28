@@ -25,6 +25,7 @@
 #include "menu.h"
 #include "mpdpp.h"
 #include "screen.h"
+#include "search_engine.h"
 
 namespace Display
 {
@@ -52,7 +53,7 @@ namespace Display
 	
 	void Tags(const MPD::Song &, void *, Menu<MPD::Song> *);
 	
-	void SearchEngine(const std::pair<Buffer *, MPD::Song *> &, void *, Menu< std::pair<Buffer *, MPD::Song *> > *);
+	void SearchEngine(const SEItem &, void *, Menu<SEItem> *);
 	
 	void Items(const MPD::Item &, void *, Menu<MPD::Item> *);
 }

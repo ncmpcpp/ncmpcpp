@@ -157,20 +157,19 @@ void PlaylistEditor::Update()
 		else
 			Content->SetTitle(Config.titles_visibility ? "Playlist's content" : "");
 		bool bold = 0;
-		for (MPD::SongList::const_iterator it = list.begin(); it != list.end(); ++it)
+		for (auto it = list.begin(); it != list.end(); ++it)
 		{
 			for (size_t j = 0; j < myPlaylist->Items->Size(); ++j)
 			{
-				if ((*it)->getHash() == myPlaylist->Items->at(j).getHash())
+				if (it->getHash() == myPlaylist->Items->at(j).getHash())
 				{
 					bold = 1;
 					break;
 				}
 			}
-			Content->AddOption(**it, bold);
+			Content->AddOption(*it, bold);
 			bold = 0;
 		}
-		MPD::FreeSongList(list);
 		Content->Window::Clear();
 		Content->Display();
 	}
@@ -346,7 +345,6 @@ void PlaylistEditor::AddToPlaylist(bool add_n_play)
 	else if (w == Content && !Content->Empty())
 		Content->Bold(Content->Choice(), myPlaylist->Add(Content->Current(), Content->isBold(), add_n_play));
 	
-	FreeSongList(list);
 	if (!add_n_play)
 		w->Scroll(wDown);
 }
@@ -416,8 +414,8 @@ void PlaylistEditor::GetSelectedSongs(MPD::SongList &v)
 	Content->GetSelected(selected);
 	if (selected.empty())
 		selected.push_back(Content->Choice());
-	for (std::vector<size_t>::const_iterator it = selected.begin(); it != selected.end(); ++it)
-		v.push_back(new MPD::Song(Content->at(*it)));
+	for (auto it = selected.begin(); it != selected.end(); ++it)
+		v.push_back(Content->at(*it));
 }
 
 void PlaylistEditor::ApplyFilter(const std::string &s)

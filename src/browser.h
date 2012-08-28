@@ -40,7 +40,7 @@ class Browser : public Screen< Menu<MPD::Item> >
 		virtual bool isTabbable() { return true; }
 		
 		virtual MPD::Song *CurrentSong();
-		virtual MPD::Song *GetSong(size_t pos) { return w->at(pos).type == MPD::itSong ? (*w)[pos].song : 0; }
+		virtual MPD::Song *GetSong(size_t pos) { return w->at(pos).type == MPD::itSong ? &(*w)[pos].song : 0; }
 		
 		virtual bool allowsSelection() { return true; }
 		virtual void ReverseSelection();
@@ -64,6 +64,8 @@ class Browser : public Screen< Menu<MPD::Item> >
 		bool DeleteItem(const MPD::Item &);
 #		endif // !WIN32
 		void UpdateItemList();
+		
+		bool isParentDir(size_t pos) { return itsBrowsedDir != "/" && pos == 0; }
 		
 	protected:
 		virtual void Init();

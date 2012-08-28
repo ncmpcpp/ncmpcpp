@@ -337,23 +337,22 @@ void MediaLibrary::Update()
 		}
 		Mpd.CommitSearch(list);
 		
-		sort(list.begin(), list.end(), Albums->Current().Date == AllTracksMarker ? SortAllTracks : SortSongsByTrack);
+		std::sort(list.begin(), list.end(), Albums->Current().Date == AllTracksMarker ? SortAllTracks : SortSongsByTrack);
 		bool bold = 0;
 		
 		for (MPD::SongList::const_iterator it = list.begin(); it != list.end(); ++it)
 		{
 			for (size_t j = 0; j < myPlaylist->Items->Size(); ++j)
 			{
-				if ((*it)->getHash() == myPlaylist->Items->at(j).getHash())
+				if (it->getHash() == myPlaylist->Items->at(j).getHash())
 				{
 					bold = 1;
 					break;
 				}
 			}
-			Songs->AddOption(**it, bold);
+			Songs->AddOption(*it, bold);
 			bold = 0;
 		}
-		FreeSongList(list);
 		Songs->Window::Clear();
 		Songs->Refresh();
 	}
@@ -489,16 +488,14 @@ void MediaLibrary::GetSelectedSongs(MPD::SongList &v)
 		Artists->GetSelected(selected);
 		if (selected.empty())
 			selected.push_back(Artists->Choice());
-		for (std::vector<size_t>::const_iterator it = selected.begin(); it != selected.end(); ++it)
+		for (auto it = selected.begin(); it != selected.end(); ++it)
 		{
 			MPD::SongList list;
 			Mpd.StartSearch(1);
 			Mpd.AddSearch(Config.media_lib_primary_tag, locale_to_utf_cpy(Artists->at(*it)));
 			Mpd.CommitSearch(list);
-			sort(list.begin(), list.end(), SortAllTracks);
-			for (MPD::SongList::const_iterator sIt = list.begin(); sIt != list.end(); ++sIt)
-				v.push_back(new MPD::Song(**sIt));
-			FreeSongList(list);
+			std::sort(list.begin(), list.end(), SortAllTracks);
+			std::copy(list.begin(), list.end(), std::back_inserter(v));
 		}
 	}
 	else if (w == Albums && !Albums->Empty())
@@ -510,11 +507,11 @@ void MediaLibrary::GetSelectedSongs(MPD::SongList &v)
 			if (v.empty())
 				v.reserve(Songs->Size());
 			for (size_t i = 0; i < Songs->Size(); ++i)
-				v.push_back(new MPD::Song((*Songs)[i]));
+				v.push_back((*Songs)[i]);
 		}
 		else
 		{
-			for (std::vector<size_t>::const_iterator it = selected.begin(); it != selected.end(); ++it)
+			for (auto it = selected.begin(); it != selected.end(); ++it)
 			{
 				MPD::SongList list;
 				Mpd.StartSearch(1);
@@ -524,9 +521,7 @@ void MediaLibrary::GetSelectedSongs(MPD::SongList &v)
 				Mpd.AddSearch(MPD_TAG_ALBUM, Albums->at(*it).Album);
 				Mpd.AddSearch(MPD_TAG_DATE, Albums->at(*it).Date);
 				Mpd.CommitSearch(list);
-				for (MPD::SongList::const_iterator sIt = list.begin(); sIt != list.end(); ++sIt)
-					v.push_back(new MPD::Song(**sIt));
-				FreeSongList(list);
+				std::copy(list.begin(), list.end(), std::back_inserter(v));
 			}
 		}
 	}
@@ -535,8 +530,8 @@ void MediaLibrary::GetSelectedSongs(MPD::SongList &v)
 		Songs->GetSelected(selected);
 		if (selected.empty())
 			selected.push_back(Songs->Choice());
-		for (std::vector<size_t>::const_iterator it = selected.begin(); it != selected.end(); ++it)
-			v.push_back(new MPD::Song(Songs->at(*it)));
+		for (auto it = selected.begin(); it != selected.end(); ++it)
+			v.push_back(Songs->at(*it));
 	}
 }
 
@@ -799,21 +794,21 @@ bool MediaLibrary::SearchConstraintsSorting::operator()(const SearchConstraints 
 	return (result == 0 ? cmp(a.Album, b.Album) : result) < 0;
 }
 
-bool MediaLibrary::SortSongsByTrack(MPD::Song *a, MPD::Song *b)
+bool MediaLibrary::SortSongsByTrack(const MPD::Song &a, const MPD::Song &b)
 {
-	if (a->getDisc() == b->getDisc())
-		return StrToInt(a->getTrack()) < StrToInt(b->getTrack());
+	if (a.getDisc() == b.getDisc())
+		return StrToInt(a.getTrack()) < StrToInt(b.getTrack());
 	else
-		return StrToInt(a->getDisc()) < StrToInt(b->getDisc());
+		return StrToInt(a.getDisc()) < StrToInt(b.getDisc());
 }
 
-bool MediaLibrary::SortAllTracks(MPD::Song *a, MPD::Song *b)
+bool MediaLibrary::SortAllTracks(const MPD::Song &a, const MPD::Song &b)
 {
 	static MPD::Song::GetFunction gets[] = { &MPD::Song::getDate, &MPD::Song::getAlbum, &MPD::Song::getDisc, 0 };
 	CaseInsensitiveStringComparison cmp;
 	for (MPD::Song::GetFunction *get = gets; *get; ++get)
-		if (int ret = cmp(a->getTags(*get), b->getTags(*get)))
+		if (int ret = cmp(a.getTags(*get), b.getTags(*get)))
 			return ret < 0;
-	return a->getTrack() < b->getTrack();
+	return a.getTrack() < b.getTrack();
 }
 

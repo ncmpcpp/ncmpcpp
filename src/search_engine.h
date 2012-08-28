@@ -21,10 +21,58 @@
 #ifndef _SEARCH_ENGINE_H
 #define _SEARCH_ENGINE_H
 
+#include <cassert>
+
 #include "mpdpp.h"
 #include "ncmpcpp.h"
 
-class SearchEngine : public Screen< Menu< std::pair<Buffer *, MPD::Song *> > >
+struct SEItem
+{
+	SEItem() : isThisSong(false), itsBuffer(0) { }
+	SEItem(Buffer *buf) : isThisSong(false), itsBuffer(buf) { }
+	SEItem(const MPD::Song &s) : isThisSong(true), itsSong(s) { }
+	SEItem(const SEItem &ei) { *this = ei; }
+	~SEItem() {
+		if (!isThisSong)
+			delete itsBuffer;
+	}
+	
+	Buffer &mkBuffer() {
+		assert(!isThisSong);
+		delete itsBuffer;
+		itsBuffer = new Buffer();
+		return *itsBuffer;
+	}
+	
+	bool isSong() const { return isThisSong; }
+	
+	Buffer &buffer() { assert(!isThisSong && itsBuffer); return *itsBuffer; }
+	MPD::Song &song() { assert(isThisSong); return itsSong; }
+	
+	const Buffer &buffer() const { assert(!isThisSong && itsBuffer); return *itsBuffer; }
+	const MPD::Song &song() const { assert(isThisSong); return itsSong; }
+	
+	SEItem &operator=(const SEItem &se) {
+		if (this == &se)
+			return *this;
+		isThisSong = se.isThisSong;
+		if (se.isThisSong)
+			itsSong = se.itsSong;
+		else if (se.itsBuffer)
+			itsBuffer = new Buffer(*se.itsBuffer);
+		else
+			itsBuffer = 0;
+		return *this;
+	}
+	
+	private:
+		bool isThisSong;
+		
+		Buffer *itsBuffer;
+		MPD::Song itsSong;
+};
+
+class SearchEngine : public Screen< Menu<SEItem> >
 {
 	public:
 		virtual void Resize();
@@ -38,7 +86,7 @@ class SearchEngine : public Screen< Menu< std::pair<Buffer *, MPD::Song *> > >
 		virtual bool isTabbable() { return true; }
 		
 		virtual MPD::Song *CurrentSong();
-		virtual MPD::Song *GetSong(size_t pos) { return !w->isSeparator(pos) ? w->at(pos).second : 0; }
+		virtual MPD::Song *GetSong(size_t pos) { return !w->isSeparator(pos) && w->at(pos).isSong() ? &w->at(pos).song() : 0; }
 		
 		virtual bool allowsSelection() { return w->Choice() >= StaticOptions; }
 		virtual void ReverseSelection() { w->ReverseSelection(StaticOptions); }
@@ -68,7 +116,7 @@ class SearchEngine : public Screen< Menu< std::pair<Buffer *, MPD::Song *> > >
 		
 		const char **SearchMode;
 		
-		static std::string SearchEngineOptionToString(const std::pair<Buffer *, MPD::Song *> &, void *);
+		static std::string SearchEngineOptionToString(const SEItem &, void *);
 		
 		static const char *SearchModes[];
 		

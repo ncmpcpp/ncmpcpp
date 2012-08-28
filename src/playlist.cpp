@@ -185,15 +185,15 @@ void Playlist::EnterPressed()
 		MPD::SongList playlist;
 		playlist.reserve(end-beginning);
 		for (size_t i = beginning; i < end; ++i)
-			playlist.push_back(&(*Items)[i]);
+			playlist.push_back((*Items)[i]);
 		
 		std::function<void(MPD::SongList::iterator, MPD::SongList::iterator)> iter_swap, quick_sort;
-		auto song_cmp = [](MPD::Song *a, MPD::Song *b) {
+		auto song_cmp = [](const MPD::Song &a, const MPD::Song &b) {
 			CaseInsensitiveStringComparison cmp;
 				for (size_t i = 0; i < SortOptions; ++i)
-					if (int ret = cmp(a->getTags((*SortDialog)[i].second), b->getTags((*SortDialog)[i].second)))
+					if (int ret = cmp(a.getTags((*SortDialog)[i].second), b.getTags((*SortDialog)[i].second)))
 						return ret < 0;
-				return a->getPosition() < b->getPosition();
+				return a.getPosition() < b.getPosition();
 		};
 		iter_swap = [&playlist](MPD::SongList::iterator a, MPD::SongList::iterator b) {
 			std::iter_swap(a, b);
@@ -274,8 +274,8 @@ void Playlist::GetSelectedSongs(MPD::SongList &v)
 	Items->GetSelected(selected);
 	if (selected.empty())
 		selected.push_back(Items->Choice());
-	for (std::vector<size_t>::const_iterator it = selected.begin(); it != selected.end(); ++it)
-		v.push_back(new MPD::Song(Items->at(*it)));
+	for (auto it = selected.begin(); it != selected.end(); ++it)
+		v.push_back(Items->at(*it));
 }
 
 void Playlist::ApplyFilter(const std::string &s)
@@ -562,18 +562,16 @@ bool Playlist::Add(const MPD::SongList &l, bool play, int position)
 		return false;
 	
 	Mpd.StartCommandsList();
-	MPD::SongList::const_iterator it = l.begin();
 	if (position < 0)
 	{
-		for (; it != l.end(); ++it)
-			if (Mpd.AddSong(**it) < 0)
+		for (auto it = l.begin(); it != l.end(); ++it)
+			if (Mpd.AddSong(*it) < 0)
 				break;
 	}
 	else
 	{
-		MPD::SongList::const_reverse_iterator j = l.rbegin();
-		for (; j != l.rend(); ++j)
-			if (Mpd.AddSong(**j, position) < 0)
+		for (auto j = l.rbegin(); j != l.rend(); ++j)
+			if (Mpd.AddSong(*j, position) < 0)
 				break;
 	}
 	if (!Mpd.CommitCommandsList())

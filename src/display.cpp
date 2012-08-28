@@ -360,7 +360,7 @@ void Display::Items(const MPD::Item &item, void *data, Menu<MPD::Item> *menu)
 	{
 		case MPD::itDirectory:
 		{
-			if (item.song)
+			if (!item.song.empty())
 			{
 				*menu << "[..]";
 				return;
@@ -370,9 +370,9 @@ void Display::Items(const MPD::Item &item, void *data, Menu<MPD::Item> *menu)
 		}
 		case MPD::itSong:
 			if (!Config.columns_in_browser)
-				Display::Songs(*item.song, data, reinterpret_cast<Menu<MPD::Song> *>(menu));
+				Display::Songs(item.song, data, reinterpret_cast<Menu<MPD::Song> *>(menu));
 			else
-				Display::SongsInColumns(*item.song, data, reinterpret_cast<Menu<MPD::Song> *>(menu));
+				Display::SongsInColumns(item.song, data, reinterpret_cast<Menu<MPD::Song> *>(menu));
 			return;
 		case MPD::itPlaylist:
 			*menu << Config.browser_playlist_prefix << ExtractTopName(item.name);
@@ -382,17 +382,15 @@ void Display::Items(const MPD::Item &item, void *data, Menu<MPD::Item> *menu)
 	}
 }
 
-void Display::SearchEngine(const std::pair<Buffer *, MPD::Song *> &pair, void *data, Menu< std::pair<Buffer *, MPD::Song *> > *menu)
+void Display::SearchEngine(const SEItem &ei, void *data, Menu<SEItem> *menu)
 {
-	if (pair.second)
+	if (ei.isSong())
 	{
 		if (!Config.columns_in_search_engine)
-			Display::Songs(*pair.second, data, reinterpret_cast<Menu<MPD::Song> *>(menu));
+			Display::Songs(ei.song(), data, reinterpret_cast<Menu<MPD::Song> *>(menu));
 		else
-			Display::SongsInColumns(*pair.second, data, reinterpret_cast<Menu<MPD::Song> *>(menu));
+			Display::SongsInColumns(ei.song(), data, reinterpret_cast<Menu<MPD::Song> *>(menu));
 	}
-	
 	else
-		*menu << *pair.first;
+		*menu << ei.buffer();
 }
-
