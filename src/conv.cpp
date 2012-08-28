@@ -33,11 +33,11 @@ long StrToLong(const std::string &str)
 	return atol(str.c_str());
 }
 
-std::string IntoStr(int l)
+std::string IntoStr(int i)
 {
-	std::ostringstream ss;
-	ss << l;
-	return ss.str();
+	char buf[32];
+	snprintf(buf, sizeof(buf), "%d", i);
+	return buf;
 }
 
 std::string IntoStr(mpd_tag_type tag) // this is only for left column's title in media library
