@@ -199,12 +199,10 @@ std::string Song::getPriority(unsigned idx) const
 	assert(pimpl);
 	if (idx > 0)
 		return "";
-	char buf[10];
-	snprintf(buf, sizeof(buf), "%d", getPrio());
-	return buf;
+	return unsignedIntTo<std::string>::apply(getPrio());
 }
 
-std::string MPD::Song::getTags(GetFunction f, const std::string tag_separator) const
+std::string MPD::Song::getTags(GetFunction f, const std::string &tag_separator) const
 {
 	assert(pimpl);
 	unsigned idx = 0;
@@ -287,7 +285,7 @@ std::string Song::ShowTime(unsigned length)
 	length -= minutes*60;
 	int seconds = length;
 	
-	char buf[10];
+	char buf[32];
 	if (hours > 0)
 		snprintf(buf, sizeof(buf), "%d:%02d:%02d", hours, minutes, seconds);
 	else
@@ -307,7 +305,7 @@ bool MPD::Song::isFormatOk(const std::string &type, const std::string &fmt)
 	}
 	if (braces)
 	{
-		std::cerr << type << ": number of opening and closing braces does not equal!\n";
+		std::cerr << type << ": number of opening and closing braces does not equal\n";
 		return false;
 	}
 	

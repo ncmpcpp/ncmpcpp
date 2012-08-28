@@ -54,7 +54,7 @@ struct Song
 	std::string getLength(unsigned idx = 0) const;
 	std::string getPriority(unsigned idx = 0) const;
 	
-	std::string getTags(GetFunction f, const std::string tag_separator = ", ") const;
+	std::string getTags(GetFunction f, const std::string &tag_separator = ", ") const;
 	
 	unsigned getHash() const;
 	unsigned getDuration() const;
