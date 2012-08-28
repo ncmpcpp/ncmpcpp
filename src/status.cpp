@@ -478,7 +478,7 @@ void NcmpcppStatusChanged(MPD::Connection *, MPD::StatusChanges changed, void *)
 					tracklength += "]";
 				}
 				basic_buffer<my_char_t> np_song;
-				//String2Buffer(TO_WSTRING(utf_to_locale_cpy(np.toString(Config.song_status_format, "$"))), np_song);
+				String2Buffer(TO_WSTRING(utf_to_locale_cpy(np.toString(Config.song_status_format, "$"))), np_song);
 				*wFooter << XY(0, 1) << wclrtoeol << fmtBold << player_state << fmtBoldEnd;
 				np_song.Write(*wFooter, playing_song_scroll_begin, wFooter->GetWidth()-player_state.length()-tracklength.length(), U(" ** "));
 				*wFooter << fmtBold << XY(wFooter->GetWidth()-tracklength.length(), 1) << tracklength << fmtBoldEnd;
