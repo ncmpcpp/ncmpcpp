@@ -290,7 +290,11 @@ void Browser::GetSelectedSongs(MPD::SongList &v)
 				}
 				else
 #				endif // !WIN32
-					Mpd.GetDirectoryRecursive(locale_to_utf_cpy(item.name), v);
+				{
+					Mpd.GetDirectoryRecursive(locale_to_utf_cpy(item.name), [&v](MPD::Song &&s) {
+						v.push_back(s);
+					});
+				}
 				break;
 			}
 			case itSong:
@@ -300,7 +304,9 @@ void Browser::GetSelectedSongs(MPD::SongList &v)
 			}
 			case itPlaylist:
 			{
-				Mpd.GetPlaylistContent(locale_to_utf_cpy(item.name), v);
+				Mpd.GetPlaylistContent(locale_to_utf_cpy(item.name), [&v](MPD::Song &&s) {
+					v.push_back(s);
+				});
 				break;
 			}
 		}
@@ -370,9 +376,18 @@ void Browser::GetDirectory(std::string dir, std::string subdir)
 	
 	MPD::ItemList list;
 #	ifndef WIN32
-	isLocal() ? GetLocalDirectory(list) : Mpd.GetDirectory(dir, list);
+	if (isLocal())
+		GetLocalDirectory(list);
+	else
+	{
+		Mpd.GetDirectory(dir, [&list](MPD::Item &&i) {
+			list.push_back(i);
+		});
+	}
 #	else
-	Mpd.GetDirectory(dir, list);
+	Mpd.GetDirectory(dir, [&list](MPD::Item &&i) {
+		list.push_back(i);
+	});
 #	endif // !WIN32
 	if (!isLocal()) // local directory is already sorted
 		std::sort(list.begin(), list.end(), CaseInsensitiveSorting());

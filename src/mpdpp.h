@@ -59,7 +59,18 @@ namespace MPD
 		bool Outputs:1;
 	};
 	
-	typedef std::pair<std::string, bool> Output;
+	struct Output
+	{
+		Output(const std::string &name_, bool enabled) : m_name(name_), m_enabled(enabled) { }
+		
+		const std::string &name() const { return m_name; }
+		bool isEnabled() const { return m_enabled; }
+		
+		private:
+			std::string m_name;
+			bool m_enabled;
+		
+	};
 	
 	typedef std::vector<Item> ItemList;
 	typedef std::vector<Song> SongList;
@@ -142,7 +153,7 @@ namespace MPD
 			unsigned long DBPlayTime() const { return itsStats ? mpd_stats_get_db_play_time(itsStats) : 0; }
 			
 			size_t GetPlaylistLength() const { return itsCurrentStatus ? mpd_status_get_queue_length(itsCurrentStatus) : 0; }
-			void GetPlaylistChanges(unsigned, SongList &);
+			void GetPlaylistChanges(unsigned, std::function<void(Song &&)> f);
 			
 			const std::string & GetErrorMessage() const { return itsErrorMessage; }
 			
@@ -150,7 +161,7 @@ namespace MPD
 			int GetCurrentlyPlayingSongPos() const;
 			int GetCurrentSongPos() const;
 			Song GetSong(const std::string &);
-			void GetPlaylistContent(const std::string &, SongList &);
+			void GetPlaylistContent(const std::string &, std::function<void(Song &&)> f);
 			
 			void GetSupportedExtensions(std::set<std::string> &);
 			
@@ -191,22 +202,22 @@ namespace MPD
 			void AddSearch(mpd_tag_type, const std::string &) const;
 			void AddSearchAny(const std::string &str) const;
 			void AddSearchURI(const std::string &str) const;
-			void CommitSearch(SongList &);
-			void CommitSearch(TagList &);
+			void CommitSearchSongs(std::function<void(Song &&)> f);
+			void CommitSearchTags(std::function<void(std::string &&)> f);
 			
 			void GetPlaylists(TagList &);
 			void GetList(TagList &, mpd_tag_type);
-			void GetDirectory(const std::string &, ItemList &);
-			void GetDirectoryRecursive(const std::string &, SongList &);
+			void GetDirectory(const std::string &, std::function<void(Item &&)> f);
+			void GetDirectoryRecursive(const std::string &, std::function<void(Song &&)> f);
 			void GetSongs(const std::string &, SongList &);
 			void GetDirectories(const std::string &, TagList &);
 			
-			void GetOutputs(OutputList &);
+			void GetOutputs(std::function<void(Output &&)> f);
 			bool EnableOutput(int);
 			bool DisableOutput(int);
 			
-			void GetURLHandlers(TagList &v);
-			void GetTagTypes(TagList &v);
+			void GetURLHandlers(std::function<void(std::string &&)> f);
+			void GetTagTypes(std::function<void(std::string &&)> f);
 			
 		private:
 			void GoIdle();

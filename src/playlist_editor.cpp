@@ -146,30 +146,20 @@ void PlaylistEditor::Update()
 	if (!Playlists->Empty() && Content->ReallyEmpty())
 	{
 		Content->Reset();
-		MPD::SongList list;
-		Mpd.GetPlaylistContent(locale_to_utf_cpy(Playlists->Current()), list);
-		if (!list.empty())
+		size_t plsize = 0;
+		Mpd.GetPlaylistContent(locale_to_utf_cpy(Playlists->Current()), [this, &plsize](MPD::Song &&s) {
+			Content->AddOption(s, myPlaylist->checkForSong(s));
+			++plsize;
+		});
+		if (plsize > 0)
 		{
-			std::string title = Config.titles_visibility ? "Playlist's content (" + IntoStr(list.size()) + " item" + (list.size() == 1 ? ")" : "s)") : "";
+			std::string title = Config.titles_visibility ? "Playlist content (" + IntoStr(plsize) + " item" + (plsize == 1 ? ")" : "s)") : "";
 			title.resize(Content->GetWidth());
 			Content->SetTitle(title);
 		}
 		else
-			Content->SetTitle(Config.titles_visibility ? "Playlist's content" : "");
-		bool bold = 0;
-		for (auto it = list.begin(); it != list.end(); ++it)
-		{
-			for (size_t j = 0; j < myPlaylist->Items->Size(); ++j)
-			{
-				if (it->getHash() == myPlaylist->Items->at(j).getHash())
-				{
-					bold = 1;
-					break;
-				}
-			}
-			Content->AddOption(*it, bold);
-			bold = 0;
-		}
+			Content->SetTitle(Config.titles_visibility ? "Playlist content" : "");
+		
 		Content->Window::Clear();
 		Content->Display();
 	}

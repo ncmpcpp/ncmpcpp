@@ -222,31 +222,28 @@ void NcmpcppStatusChanged(MPD::Connection *, MPD::StatusChanges changed, void *)
 	
 	if (changed.Playlist)
 	{
-		bool was_filtered = myPlaylist->Items->isFiltered();
+		bool is_filtered = myPlaylist->Items->isFiltered();
 		myPlaylist->Items->ShowAll();
-		MPD::SongList list;
 		
 		size_t playlist_length = Mpd.GetPlaylistLength();
 		if (playlist_length < myPlaylist->Items->Size())
 			myPlaylist->Items->ResizeList(playlist_length);
 		
-		Mpd.GetPlaylistChanges(Mpd.GetOldPlaylistID(), list);
-		myPlaylist->Items->Reserve(playlist_length);
-		for (MPD::SongList::const_iterator it = list.begin(); it != list.end(); ++it)
-		{
-			int pos = it->getPosition();
+		Mpd.GetPlaylistChanges(Mpd.GetOldPlaylistID(), [](MPD::Song &&s) {
+			int pos = s.getPosition();
 			if (pos < int(myPlaylist->Items->Size()))
 			{
 				// if song's already in playlist, replace it with a new one
-				myPlaylist->Items->at(pos) = *it;
+				myPlaylist->Items->at(pos) = s;
 			}
 			else
 			{
 				// otherwise just add it to playlist
-				myPlaylist->Items->AddOption(*it);
+				myPlaylist->Items->AddOption(s);
 			}
-		}
-		if (was_filtered)
+		});
+		
+		if (is_filtered)
 		{
 			myPlaylist->ApplyFilter(myPlaylist->Items->GetFilter());
 			if (myPlaylist->Items->Empty())

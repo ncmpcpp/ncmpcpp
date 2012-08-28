@@ -621,17 +621,15 @@ bool MPD::Connection::Rename(const std::string &from, const std::string &to)
 	}
 }
 
-void MPD::Connection::GetPlaylistChanges(unsigned version, SongList &v)
+void MPD::Connection::GetPlaylistChanges(unsigned version, std::function<void(MPD::Song &&)> f)
 {
 	if (!itsConnection)
 		return;
 	assert(!isCommandsListEnabled);
-	if (!version)
-		v.reserve(GetPlaylistLength());
 	GoBusy();
 	mpd_send_queue_changes_meta(itsConnection, version);
 	while (mpd_song *s = mpd_recv_song(itsConnection))
-		v.push_back(Song(s));
+		f(Song(s));
 	mpd_response_finish(itsConnection);
 	GoIdle();
 }
@@ -669,7 +667,7 @@ MPD::Song MPD::Connection::GetCurrentlyPlayingSong()
 	return result;
 }
 
-void MPD::Connection::GetPlaylistContent(const std::string &path, SongList &v)
+void MPD::Connection::GetPlaylistContent(const std::string &path, std::function<void(MPD::Song &&)> f)
 {
 	if (!itsConnection)
 		return;
@@ -677,7 +675,7 @@ void MPD::Connection::GetPlaylistContent(const std::string &path, SongList &v)
 	GoBusy();
 	mpd_send_list_playlist_meta(itsConnection, path.c_str());
 	while (mpd_song *s = mpd_recv_song(itsConnection))
-		v.push_back(Song(s));
+		f(Song(s));
 	mpd_response_finish(itsConnection);
 	GoIdle();
 }
@@ -923,7 +921,9 @@ bool MPD::Connection::AddRandomTag(mpd_tag_type tag, size_t number)
 			StartSearch(1);
 			AddSearch(tag, *it++);
 			SongList list;
-			CommitSearch(list);
+			CommitSearchSongs([&list](MPD::Song &&s) {
+				list.push_back(s);
+			});
 			StartCommandsList();
 			for (auto j = list.begin(); j != list.end(); ++j)
 				AddSong(*j);
@@ -1079,11 +1079,10 @@ void MPD::Connection::GetPlaylists(TagList &v)
 {
 	if (!itsConnection)
 		return;
-	ItemList list;
-	GetDirectory("/", list);
-	for (ItemList::const_iterator it = list.begin(); it != list.end(); ++it)
-		if (it->type == itPlaylist)
-			v.push_back(it->name);
+	GetDirectory("/", [&v](Item &&it) {
+		if (it.type == itPlaylist)
+			v.push_back(it.name);
+	});
 }
 
 void MPD::Connection::GetList(TagList &v, mpd_tag_type type)
@@ -1141,7 +1140,7 @@ void MPD::Connection::AddSearchURI(const std::string &str) const
 		mpd_search_add_uri_constraint(itsConnection, MPD_OPERATOR_DEFAULT, str.c_str());
 }
 
-void MPD::Connection::CommitSearch(SongList &v)
+void MPD::Connection::CommitSearchSongs(std::function<void(MPD::Song &&)> f)
 {
 	if (!itsConnection)
 		return;
@@ -1149,12 +1148,12 @@ void MPD::Connection::CommitSearch(SongList &v)
 	GoBusy();
 	mpd_search_commit(itsConnection);
 	while (mpd_song *s = mpd_recv_song(itsConnection))
-		v.push_back(Song(s));
+		f(Song(s));
 	mpd_response_finish(itsConnection);
 	GoIdle();
 }
 
-void MPD::Connection::CommitSearch(TagList &v)
+void MPD::Connection::CommitSearchTags(std::function<void(std::string &&)> f)
 {
 	if (!itsConnection)
 		return;
@@ -1163,14 +1162,14 @@ void MPD::Connection::CommitSearch(TagList &v)
 	mpd_search_commit(itsConnection);
 	while (mpd_pair *tag = mpd_recv_pair_tag(itsConnection, itsSearchedField))
 	{
-		v.push_back(tag->value);
+		f(tag->value);
 		mpd_return_pair(itsConnection, tag);
 	}
 	mpd_response_finish(itsConnection);
 	GoIdle();
 }
 
-void MPD::Connection::GetDirectory(const std::string &path, ItemList &v)
+void MPD::Connection::GetDirectory(const std::string &path, std::function<void(Item &&)> f)
 {
 	if (!itsConnection)
 		return;
@@ -1185,28 +1184,26 @@ void MPD::Connection::GetDirectory(const std::string &path, ItemList &v)
 			case MPD_ENTITY_TYPE_DIRECTORY:
 				it.name = mpd_directory_get_path(mpd_entity_get_directory(item));
 				it.type = itDirectory;
-				goto WRITE;
+				break;
 			case MPD_ENTITY_TYPE_SONG:
 				it.song = Song(mpd_song_dup(mpd_entity_get_song(item)));
 				it.type = itSong;
-				goto WRITE;
+				break;
 			case MPD_ENTITY_TYPE_PLAYLIST:
 				it.name = mpd_playlist_get_path(mpd_entity_get_playlist(item));
 				it.type = itPlaylist;
-				goto WRITE;
-			WRITE:
-				v.push_back(it);
 				break;
 			default:
-				break;
+				assert(false);
 		}
 		mpd_entity_free(item);
+		f(std::move(it));
 	}
 	mpd_response_finish(itsConnection);
 	GoIdle();
 }
 
-void MPD::Connection::GetDirectoryRecursive(const std::string &path, SongList &v)
+void MPD::Connection::GetDirectoryRecursive(const std::string &path, std::function<void(MPD::Song &&)> f)
 {
 	if (!itsConnection)
 		return;
@@ -1214,20 +1211,7 @@ void MPD::Connection::GetDirectoryRecursive(const std::string &path, SongList &v
 	GoBusy();
 	mpd_send_list_all_meta(itsConnection, path.c_str());
 	while (mpd_song *s = mpd_recv_song(itsConnection))
-		v.push_back(Song(s));
-	mpd_response_finish(itsConnection);
-	GoIdle();
-}
-
-void MPD::Connection::GetSongs(const std::string &path, SongList &v)
-{
-	if (!itsConnection)
-		return;
-	assert(!isCommandsListEnabled);
-	GoBusy();
-	mpd_send_list_meta(itsConnection, path.c_str());
-	while (mpd_song *s = mpd_recv_song(itsConnection))
-		v.push_back(Song(s));
+		f(Song(s));
 	mpd_response_finish(itsConnection);
 	GoIdle();
 }
@@ -1248,7 +1232,7 @@ void MPD::Connection::GetDirectories(const std::string &path, TagList &v)
 	GoIdle();
 }
 
-void MPD::Connection::GetOutputs(OutputList &v)
+void MPD::Connection::GetOutputs(std::function<void(Output &&)> f)
 {
 	if (!itsConnection)
 		return;
@@ -1257,7 +1241,7 @@ void MPD::Connection::GetOutputs(OutputList &v)
 	mpd_send_outputs(itsConnection);
 	while (mpd_output *output = mpd_recv_output(itsConnection))
 	{
-		v.push_back(std::make_pair(mpd_output_get_name(output), mpd_output_get_enabled(output)));
+		f(Output(mpd_output_get_name(output), mpd_output_get_enabled(output)));
 		mpd_output_free(output);
 	}
 	mpd_response_finish(itsConnection);
@@ -1296,7 +1280,7 @@ bool MPD::Connection::DisableOutput(int id)
 	}
 }
 
-void MPD::Connection::GetURLHandlers(TagList &v)
+void MPD::Connection::GetURLHandlers(std::function<void(std::string &&)> f)
 {
 	if (!itsConnection)
 		return;
@@ -1305,14 +1289,14 @@ void MPD::Connection::GetURLHandlers(TagList &v)
 	mpd_send_list_url_schemes(itsConnection);
 	while (mpd_pair *handler = mpd_recv_pair_named(itsConnection, "handler"))
 	{
-		v.push_back(handler->value);
+		f(handler->value);
 		mpd_return_pair(itsConnection, handler);
 	}
 	mpd_response_finish(itsConnection);
 	GoIdle();
 }
 
-void MPD::Connection::GetTagTypes(TagList &v)
+void MPD::Connection::GetTagTypes(std::function<void(std::string &&)> f)
 {
 	if (!itsConnection)
 		return;
@@ -1321,7 +1305,7 @@ void MPD::Connection::GetTagTypes(TagList &v)
 	mpd_send_list_tag_types(itsConnection);
 	while (mpd_pair *tag_type = mpd_recv_pair_named(itsConnection, "tagtype"))
 	{
-		v.push_back(tag_type->value);
+		f(tag_type->value);
 		mpd_return_pair(itsConnection, tag_type);
 	}
 	mpd_response_finish(itsConnection);

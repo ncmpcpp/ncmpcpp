@@ -53,6 +53,8 @@ namespace Display
 	
 	void Tags(const MPD::Song &, void *, Menu<MPD::Song> *);
 	
+	void Outputs(const MPD::Output &, void *, Menu<MPD::Output> *);
+	
 	void SearchEngine(const SEItem &, void *, Menu<SEItem> *);
 	
 	void Items(const MPD::Item &, void *, Menu<MPD::Item> *);

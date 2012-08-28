@@ -37,7 +37,7 @@ void Outputs::Init()
 	w->CyclicScrolling(Config.use_cyclic_scrolling);
 	w->CenteredCursor(Config.centered_cursor);
 	w->HighlightColor(Config.main_highlight_color);
-	w->SetItemDisplayer(Display::Pairs);
+	w->SetItemDisplayer(Display::Outputs);
 	
 	isInitialized = 1;
 	FetchList();
@@ -83,15 +83,15 @@ std::basic_string<my_char_t> Outputs::Title()
 
 void Outputs::EnterPressed()
 {
-	if (w->Current().second)
+	if (w->Current().isEnabled())
 	{
 		if (Mpd.DisableOutput(w->Choice()))
-			ShowMessage("Output \"%s\" disabled", w->Current().first.c_str());
+			ShowMessage("Output \"%s\" disabled", w->Current().name().c_str());
 	}
 	else
 	{
 		if (Mpd.EnableOutput(w->Choice()))
-			ShowMessage("Output \"%s\" enabled", w->Current().first.c_str());
+			ShowMessage("Output \"%s\" enabled", w->Current().name().c_str());
 	}
 	if (!Mpd.SupportsIdle())
 		FetchList();
@@ -115,11 +115,10 @@ void Outputs::FetchList()
 {
 	if (!isInitialized)
 		return;
-	MPD::OutputList ol;
-	Mpd.GetOutputs(ol);
 	w->Clear();
-	for (MPD::OutputList::const_iterator it = ol.begin(); it != ol.end(); ++it)
-		w->AddOption(*it, it->second);
+	Mpd.GetOutputs([this](MPD::Output &&o) {
+		w->AddOption(o, o.isEnabled());
+	});
 	if (myScreen == this)
 		w->Refresh();
 }

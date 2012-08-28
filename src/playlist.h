@@ -79,6 +79,8 @@ class Playlist : public Screen<Window>
 		
 		void SetSelectedItemsPriority(int prio);
 		
+		bool checkForSong(const MPD::Song &s);
+		
 		static std::string SongToString(const MPD::Song &, void *);
 		static std::string SongInColumnsToString(const MPD::Song &, void *);
 		

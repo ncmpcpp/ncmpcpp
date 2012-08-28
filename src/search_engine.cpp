@@ -187,7 +187,7 @@ void SearchEngine::EnterPressed()
 	}
 	else
 	{
-		bool res = myPlaylist->Add(w->Current().song(), 1, 1);
+		bool res = myPlaylist->Add(w->Current().song(), w->isBold(), 1);
 		w->Bold(w->Choice(), res);
 	}
 	
@@ -207,7 +207,7 @@ void SearchEngine::SpacePressed()
 		return;
 	}
 	
-	bool res = myPlaylist->Add(w->Current().song(), 0, 0);
+	bool res = myPlaylist->Add(w->Current().song(), w->isBold(), 0);
 	w->Bold(w->Choice(), res);
 	w->Scroll(wDown);
 }
@@ -383,16 +383,19 @@ void SearchEngine::Search()
 			Mpd.AddSearch(MPD_TAG_DATE, itsConstraints[9]);
 		if (!itsConstraints[10].empty())
 			Mpd.AddSearch(MPD_TAG_COMMENT, itsConstraints[10]);
-		MPD::SongList results;
-		Mpd.CommitSearch(results);
-		for (auto it = results.begin(); it != results.end(); ++it)
-			w->AddOption(*it);
+		Mpd.CommitSearchSongs([this](MPD::Song &&s) {
+			w->AddOption(s);
+		});
 		return;
 	}
 	
 	MPD::SongList list;
 	if (Config.search_in_db)
-		Mpd.GetDirectoryRecursive("/", list);
+	{
+		Mpd.GetDirectoryRecursive("/", [&list](MPD::Song &&s) {
+			list.push_back(s);
+		});
+	}
 	else
 	{
 		list.reserve(myPlaylist->Items->Size());

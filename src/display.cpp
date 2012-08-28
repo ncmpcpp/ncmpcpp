@@ -354,6 +354,12 @@ void Display::Tags(const MPD::Song &s, void *data, Menu<MPD::Song> *menu)
 	}
 }
 
+void Display::Outputs (const MPD::Output &o, void * , Menu< MPD::Output > *menu)
+{
+	*menu << o.name();
+}
+
+
 void Display::Items(const MPD::Item &item, void *data, Menu<MPD::Item> *menu)
 {
 	switch (item.type)

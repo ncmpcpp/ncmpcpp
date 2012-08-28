@@ -605,3 +605,11 @@ void Playlist::SetSelectedItemsPriority(int prio)
 	if (Mpd.CommitCommandsList())
 		ShowMessage("Priority set");
 }
+
+bool Playlist::checkForSong (const MPD::Song &s)
+{
+	for (size_t i = 0; i < Items->Size(); ++i)
+		if (s.getHash() == (*Items)[i].getHash())
+			return true;
+	return false;
+}
