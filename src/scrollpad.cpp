@@ -86,9 +86,11 @@ void Scrollpad::Flush()
 	}
 	itsRealHeight = std::max(itsHeight, itsRealHeight);
 	Recreate(itsWidth, itsRealHeight);
-	itsBuffer.SetTemp(&s);
+	// print our modified string
+	std::swap(s, itsBuffer.itsString);
 	static_cast<Window &>(*this) << itsBuffer;
-	itsBuffer.SetTemp(0);
+	// restore original one
+	std::swap(s, itsBuffer.itsString);
 }
 
 bool Scrollpad::SetFormatting(short val_b, const std::basic_string<my_char_t> &s, short val_e, bool case_sensitive, bool for_each)

@@ -35,6 +35,8 @@ namespace NCurses {
 ///
 template <typename C> class basic_buffer
 {
+	friend class Scrollpad;
+	
 	/// Struct used for storing information about
 	/// one color/format flag along with its position
 	///
@@ -62,15 +64,10 @@ template <typename C> class basic_buffer
 	///
 	std::list<FormatPos> itsFormat;
 	
-	/// Pointer to temporary string
-	/// @see SetTemp()
-	///
-	std::basic_string<C> *itsTempString;
-	
 	public:
 		/// Constructs an empty buffer
 		///
-		basic_buffer() : itsTempString(0) { }
+		basic_buffer() { }
 		
 		/// Constructs a buffer from the existed one
 		/// @param b copied buffer
@@ -109,15 +106,6 @@ template <typename C> class basic_buffer
 		/// Removes all formating applied to string in buffer.
 		///
 		void RemoveFormatting();
-		
-		/// Sets the pointer to string, that will be passed in operator<<() to window
-		/// object instead of the internal buffer. This is useful if you took the content
-		/// of the buffer, modified it somehow and want to print the modified version instead
-		/// of the original one, but with the original formatting informations. Note that after
-		/// you're done with the printing etc., this pointer has to be set to null.
-		/// @param tmp address of the temporary string
-		///
-		void SetTemp(std::basic_string<C> *tmp);
 		
 		/// Prints to window object given part of the string, loading all needed formatting info
 		/// and cleaning up after. The main goal of this function is to provide interface for
@@ -204,7 +192,7 @@ template <typename C> class basic_buffer
 		/// the content of buffer to window object
 		friend Window &operator<<(Window &w, const basic_buffer<C> &buf)
 		{
-			const std::basic_string<C> &s = buf.itsTempString ? *buf.itsTempString : buf.itsString;
+			const std::basic_string<C> &s = buf.itsString;
 			if (buf.itsFormat.empty())
 				w << s;
 			else
@@ -251,7 +239,7 @@ typedef basic_buffer<wchar_t> WBuffer;
 
 
 template <typename C> basic_buffer<C>::basic_buffer(const basic_buffer &b)
-	: itsString(b.itsString), itsFormat(b.itsFormat), itsTempString(b.itsTempString) { }
+	: itsString(b.itsString), itsFormat(b.itsFormat) { }
 
 template <typename C> const std::basic_string<C> &basic_buffer<C>::Str() const
 {
@@ -327,11 +315,6 @@ template <typename C> void basic_buffer<C>::RemoveFormatting(
 template <typename C> void basic_buffer<C>::RemoveFormatting()
 {
 	itsFormat.clear();
-}
-
-template <typename C> void basic_buffer<C>::SetTemp(std::basic_string<C> *tmp)
-{
-	itsTempString = tmp;
 }
 
 template <typename C> void basic_buffer<C>::Write(
