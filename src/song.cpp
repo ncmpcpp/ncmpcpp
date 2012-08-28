@@ -317,7 +317,7 @@ bool MPD::Song::isFormatOk(const std::string &type, const std::string &fmt)
 			while (isdigit(fmt[++i])) { }
 		if (!toGetFunction(fmt[i]))
 		{
-			std::cerr << type << ": invalid character at position " << IntoStr(i+1) << ": '" << fmt[i] << "'\n";
+			std::cerr << type << ": invalid character at position " << unsignedLongIntTo<std::string>::apply(i+1) << ": '" << fmt[i] << "'\n";
 			return false;
 		}
 	}

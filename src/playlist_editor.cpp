@@ -153,7 +153,7 @@ void PlaylistEditor::Update()
 		});
 		if (plsize > 0)
 		{
-			std::string title = Config.titles_visibility ? "Playlist content (" + IntoStr(plsize) + " item" + (plsize == 1 ? ")" : "s)") : "";
+			std::string title = Config.titles_visibility ? "Playlist content (" + unsignedLongIntTo<std::string>::apply(plsize) + " item" + (plsize == 1 ? ")" : "s)") : "";
 			title.resize(Content->GetWidth());
 			Content->SetTitle(title);
 		}

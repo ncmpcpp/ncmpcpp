@@ -170,7 +170,7 @@ void SearchEngine::EnterPressed()
 			found += 3; // don't count options inserted below
 			w->InsertSeparator(ResetButton+1);
 			w->InsertOption(ResetButton+2, SEItem(), 1, 1);
-			w->at(ResetButton+2).mkBuffer() << Config.color1 << "Search results: " << Config.color2 << "Found " << found  << (found > 1 ? " songs" : " song") << clDefault;
+			w->at(ResetButton+2).mkBuffer() << Config.color1 << "Search results: " << Config.color2 << "Found " << found << (found > 1 ? " songs" : " song") << clDefault;
 			w->InsertSeparator(ResetButton+3);
 			UpdateFoundList();
 			ShowMessage("Searching finished");

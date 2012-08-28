@@ -61,6 +61,7 @@ noinst_HEADERS = \
 	media_library.h \
 	menu.h \
 	mpdpp.h \
+	numeric_conversions.h \
 	outputs.h \
 	playlist_editor.h \
 	screen.h \

@@ -21,10 +21,10 @@
 #ifndef _STRBUFFER_H
 #define _STRBUFFER_H
 
+#include "numeric_conversions.h"
 #include "tolower.h"
 #include "window.h"
 
-#include <sstream>
 #include <list>
 
 namespace NCurses
@@ -56,7 +56,7 @@ namespace NCurses
 		
 		/// Internal buffer for storing raw text
 		///
-		std::basic_ostringstream<C> itsString;
+		std::basic_string<C> itsString;
 		
 		/// List used for storing formatting informations
 		///
@@ -79,7 +79,7 @@ namespace NCurses
 			
 			/// @return raw content of the buffer without formatting informations
 			///
-			std::basic_string<C> Str() const;
+			const std::basic_string<C> &Str() const;
 			
 			/// Searches for given string in buffer and sets format/color at the
 			/// beginning and end of it using val_b and val_e flags accordingly
@@ -138,49 +138,49 @@ namespace NCurses
 			
 			basic_buffer<C> &operator<<(int n)
 			{
-				itsString << n;
+				itsString += intTo< std::basic_string<C> >::apply(n);
 				return *this;
 			}
 			
 			basic_buffer<C> &operator<<(long int n)
 			{
-				itsString << n;
+				itsString += longIntTo< std::basic_string<C> >::apply(n);
 				return *this;
 			}
 			
 			basic_buffer<C> &operator<<(unsigned int n)
 			{
-				itsString << n;
+				itsString += unsignedIntTo< std::basic_string<C> >::apply(n);
 				return *this;
 			}
 			
-			basic_buffer<C> &operator<<(long unsigned int n)
+			basic_buffer<C> &operator<<(unsigned long int n)
 			{
-				itsString << n;
+				itsString += unsignedLongIntTo< std::basic_string<C> >::apply(n);
 				return *this;
 			}
 			
 			basic_buffer<C> &operator<<(char c)
 			{
-				itsString << c;
+				itsString += c;
 				return *this;
 			}
 			
-			basic_buffer<C> &operator<<(wchar_t c)
+			basic_buffer<C> &operator<<(wchar_t wc)
 			{
-				itsString << c;
+				itsString += wc;
 				return *this;
 			}
 			
 			basic_buffer<C> &operator<<(const C *s)
 			{
-				itsString << s;
+				itsString += s;
 				return *this;
 			}
 			
 			basic_buffer<C> &operator<<(const std::basic_string<C> &s)
 			{
-				itsString << s;
+				itsString += s;
 				return *this;
 			}
 			
@@ -204,7 +204,7 @@ namespace NCurses
 			/// the content of buffer to window object
 			friend Window &operator<<(Window &w, const basic_buffer<C> &buf)
 			{
-				const std::basic_string<C> &s = buf.itsTempString ? *buf.itsTempString : buf.itsString.str();
+				const std::basic_string<C> &s = buf.itsTempString ? *buf.itsTempString : buf.itsString;
 				if (buf.itsFormat.empty())
 					w << s;
 				else
@@ -249,15 +249,11 @@ namespace NCurses
 	typedef basic_buffer<wchar_t> WBuffer;
 }
 
-template <typename C> NCurses::basic_buffer<C>::basic_buffer(const basic_buffer &b) : itsFormat(b.itsFormat),
-										itsTempString(b.itsTempString)
-{
-	itsString << b.itsString.str();
-}
+template <typename C> NCurses::basic_buffer<C>::basic_buffer(const basic_buffer &b) : itsString(b.itsString), itsFormat(b.itsFormat), itsTempString(b.itsTempString) { }
 
-template <typename C> std::basic_string<C> NCurses::basic_buffer<C>::Str() const
+template <typename C> const std::basic_string<C> &NCurses::basic_buffer<C>::Str() const
 {
-	return itsString.str();
+	return itsString;
 }
 
 template <typename C> bool NCurses::basic_buffer<C>::SetFormatting(	short val_b,
@@ -270,7 +266,7 @@ template <typename C> bool NCurses::basic_buffer<C>::SetFormatting(	short val_b,
 	if (s.empty())
 		return false;
 	bool result = false;
-	std::basic_string<C> base = itsString.str();
+	std::basic_string<C> base = itsString;
 	if (!case_sensitive)
 	{
 		ToLower(s);
@@ -303,7 +299,7 @@ template <typename C> void NCurses::basic_buffer<C>::RemoveFormatting(	short val
 {
 	if (pattern.empty())
 		return;
-	std::basic_string<C> base = itsString.str();
+	std::basic_string<C> base = itsString;
 	if (!case_sensitive)
 	{
 		ToLower(pattern);
@@ -340,7 +336,7 @@ template <typename C> void NCurses::basic_buffer<C>::Write(	Window &w,
 								const std::basic_string<C> &separator
 							  ) const
 {
-	std::basic_string<C> s = itsString.str();
+	std::basic_string<C> s = itsString;
 	size_t len = Window::Length(s);
 	
 	if (len > width)
@@ -393,7 +389,7 @@ template <typename C> void NCurses::basic_buffer<C>::Write(	Window &w,
 
 template <typename C> void NCurses::basic_buffer<C>::Clear()
 {
-	itsString.str(std::basic_string<C>());
+	itsString.clear();
 	itsFormat.clear();
 }
 
@@ -408,7 +404,7 @@ template <typename C> void NCurses::basic_buffer<C>::LoadAttribute(Window &w, sh
 template <typename C> NCurses::basic_buffer<C> &NCurses::basic_buffer<C>::operator<<(Color color)
 {
 	FormatPos f;
-	f.Position = itsString.str().length();
+	f.Position = itsString.length();
 	f.Value = color;
 	itsFormat.push_back(f);
 	return *this;
@@ -421,12 +417,12 @@ template <typename C> NCurses::basic_buffer<C> &NCurses::basic_buffer<C>::operat
 
 template <typename C> NCurses::basic_buffer<C> &NCurses::basic_buffer<C>::operator<<(const NCurses::basic_buffer<C> &buf)
 {
-	size_t len = itsString.str().length();
-	itsString << buf.itsString.str();
+	size_t length = itsString.length();
+	itsString += buf.itsString;
 	std::list<FormatPos> tmp = buf.itsFormat;
-	if (len)
+	if (length)
 		for (auto it = tmp.begin(); it != tmp.end(); ++it)
-			it->Position += len;
+			it->Position += length;
 	itsFormat.merge(tmp);
 	return *this;
 }

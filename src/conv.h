@@ -24,6 +24,7 @@
 #include <cstring>
 #include <string>
 
+#include "numeric_conversions.h"
 #include "actions.h"
 #include "window.h"
 #include "song.h"
@@ -43,7 +44,6 @@ template <size_t N> void Replace(std::string &s, const char (&from)[N], const ch
 int StrToInt(const std::string &);
 long StrToLong(const std::string &);
 
-std::string IntoStr(int);
 std::string IntoStr(mpd_tag_type);
 std::string IntoStr(NCurses::Color);
 std::string IntoStr(const Action::Key &key, bool *print_backspace = 0);

@@ -19,8 +19,6 @@
  ***************************************************************************/
 
 #include <algorithm>
-#include <sstream>
-
 #include "conv.h"
 
 int StrToInt(const std::string &str)
@@ -31,13 +29,6 @@ int StrToInt(const std::string &str)
 long StrToLong(const std::string &str)
 {
 	return atol(str.c_str());
-}
-
-std::string IntoStr(int i)
-{
-	char buf[32];
-	snprintf(buf, sizeof(buf), "%d", i);
-	return buf;
 }
 
 std::string IntoStr(mpd_tag_type tag) // this is only for left column's title in media library
@@ -134,7 +125,7 @@ std::string IntoStr(const Action::Key &key, bool *print_backspace)
 	else if (key >= Action::Key(KEY_F1, ctNCurses) && key <= Action::Key(KEY_F12, ctNCurses))
 	{
 		result += "F";
-		result += IntoStr(key.getChar()-264);
+		result += intTo<std::string>::apply(key.getChar()-264);
 	}
 	else if ((key == Action::Key(KEY_BACKSPACE, ctNCurses) || key == Action::Key(KEY_BACKSPACE_2, ctStandard)))
 	{

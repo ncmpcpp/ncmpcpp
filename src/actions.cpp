@@ -1677,7 +1677,7 @@ void ToggleScreenLock::Run()
 		{
 			LockStatusbar();
 			Statusbar() << "% of the locked screen's width to be reserved (20-80): ";
-			std::string str_part = wFooter->GetString(IntoStr(Config.locked_screen_width_part*100));
+			std::string str_part = wFooter->GetString(intTo<std::string>::apply(Config.locked_screen_width_part*100));
 			UnlockStatusbar();
 			if (str_part.empty())
 				return;

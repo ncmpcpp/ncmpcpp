@@ -421,7 +421,7 @@ void NcmpcppStatusChanged(MPD::Connection *, MPD::StatusChanges changed, void *)
 				if (Config.display_bitrate && Mpd.GetBitrate())
 				{
 					tracklength += " ";
-					tracklength += IntoStr(Mpd.GetBitrate());
+					tracklength += intTo<std::string>::apply(Mpd.GetBitrate());
 					tracklength += " kbps";
 				}
 				
@@ -455,7 +455,7 @@ void NcmpcppStatusChanged(MPD::Connection *, MPD::StatusChanges changed, void *)
 				if (Config.display_bitrate && Mpd.GetBitrate())
 				{
 					tracklength += " [";
-					tracklength += IntoStr(Mpd.GetBitrate());
+					tracklength += intTo<std::string>::apply(Mpd.GetBitrate());
 					tracklength += " kbps]";
 				}
 				tracklength += " [";
@@ -604,7 +604,7 @@ void NcmpcppStatusChanged(MPD::Connection *, MPD::StatusChanges changed, void *)
 			VolumeState += "n/a";
 		else
 		{
-			VolumeState += IntoStr(volume);
+			VolumeState += intTo<std::string>::apply(volume);
 			VolumeState += "%";
 		}
 		*wHeader << Config.volume_color;
