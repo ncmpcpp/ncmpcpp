@@ -365,24 +365,16 @@ void UpdateSongList(Menu<MPD::Song> *menu)
 }
 
 #ifdef HAVE_TAGLIB_H
-std::string FindSharedDir(Menu<MPD::Song> *menu)
-{
-	MPD::SongList list;
-	for (size_t i = 0; i < menu->Size(); ++i)
-		list.push_back(&(*menu)[i]);
-	return FindSharedDir(list);
-}
-
 std::string FindSharedDir(const MPD::SongList &v)
 {
 	if (v.empty()) // this should never happen, but in case...
 		FatalError("empty SongList passed to FindSharedDir(const SongList &)!");
 	size_t i = -1;
-	std::string first = v.front()->GetDirectory();
+	std::string first = v.front().getDirectory();
 	for (MPD::SongList::const_iterator it = ++v.begin(); it != v.end(); ++it)
 	{
 		size_t j = 0;
-		std::string dir = (*it)->GetDirectory();
+		std::string dir = it->getDirectory();
 		size_t length = std::min(first.length(), dir.length());
 		while (!first.compare(j, 1, dir, j, 1) && j < length && j < i)
 			++j;

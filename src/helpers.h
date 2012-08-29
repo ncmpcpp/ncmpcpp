@@ -220,11 +220,20 @@ std::string Timestamp(time_t t);
 
 void UpdateSongList(Menu<MPD::Song> *);
 
+std::string FindSharedDir(const std::string &, const std::string &);
 #ifdef HAVE_TAGLIB_H
-std::string FindSharedDir(Menu<MPD::Song> *);
+template <typename T> std::string FindSharedDir(Menu<T> *menu)
+{
+	assert(!menu->Empty());
+	std::string dir;
+	dir = (*menu)[0].getDirectory();
+	for (size_t i = 1; i < menu->Size(); ++i)
+		dir = FindSharedDir(dir, (*menu)[i].getDirectory());
+	return dir;
+}
 std::string FindSharedDir(const MPD::SongList &);
 #endif // HAVE_TAGLIB_H
-std::string FindSharedDir(const std::string &, const std::string &);
+
 std::string ExtractTopName(const std::string &);
 std::string PathGoDownOneLevel(const std::string &path);
 

@@ -21,9 +21,7 @@
 #ifndef _TAG_EDITOR_H
 #define _TAG_EDITOR_H
 
-#ifdef HAVE_CONFIG_H
-# include <config.h>
-#endif
+#include "config.h"
 
 #ifdef HAVE_TAGLIB_H
 
@@ -79,13 +77,13 @@ class TagEditor : public Screen<Window>
 		Menu<string_pair> *Albums;
 		Menu<string_pair> *Dirs;
 		Menu<std::string> *TagTypes;
-		Menu<MPD::Song> *Tags;
+		Menu<MPD::MutableSong> *Tags;
 		
 		/// NOTICE: this string is always in utf8, no need to convert it
 		const std::string &CurrentDir() { return itsBrowsedDir; }
 		
-		static void ReadTags(MPD::Song &);
-		static bool WriteTags(MPD::Song &);
+		static void ReadTags(MPD::MutableSong &);
+		static bool WriteTags(MPD::MutableSong &);
 		
 	protected:
 		virtual void Init();
@@ -94,7 +92,7 @@ class TagEditor : public Screen<Window>
 	private:
 		void SetDimensions(size_t, size_t);
 		
-		MPD::SongList EditedSongs;
+		std::vector<MPD::MutableSong *> EditedSongs;
 		Menu<std::string> *FParserDialog;
 		Menu<std::string> *FParser;
 		Scrollpad *FParserHelper;
@@ -103,18 +101,18 @@ class TagEditor : public Screen<Window>
 		bool FParserUsePreview;
 		
 		static std::string CapitalizeFirstLetters(const std::string &);
-		static void CapitalizeFirstLetters(MPD::Song &);
-		static void LowerAllLetters(MPD::Song &);
-		static void GetTagList(TagLib::StringList &, const MPD::Song &, MPD::Song::GetFunction);
-		static void WriteXiphComments(const MPD::Song &, TagLib::Ogg::XiphComment *);
+		static void CapitalizeFirstLetters(MPD::MutableSong &);
+		static void LowerAllLetters(MPD::MutableSong &);
+		static void GetTagList(TagLib::StringList &, const MPD::MutableSong &, MPD::Song::GetFunction);
+		static void WriteXiphComments(const MPD::MutableSong &, TagLib::Ogg::XiphComment *);
 		
 		static void GetPatternList();
 		static void SavePatternList();
-		static MPD::Song::SetFunction IntoSetFunction(char);
-		static std::string GenerateFilename(const MPD::Song &, const std::string &);
-		static std::string ParseFilename(MPD::Song &, std::string, bool);
+		static MPD::MutableSong::SetFunction IntoSetFunction(char);
+		static std::string GenerateFilename(const MPD::MutableSong &, const std::string &);
+		static std::string ParseFilename(MPD::MutableSong &, std::string, bool);
 		
-		static std::string TagToString(const MPD::Song &, void *);
+		static std::string TagToString(const MPD::MutableSong &, void *);
 		
 		std::string itsBrowsedDir;
 		std::string itsHighlightedDir;

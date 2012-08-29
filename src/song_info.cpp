@@ -29,18 +29,18 @@ SongInfo *mySongInfo = new SongInfo;
 
 const SongInfo::Metadata SongInfo::Tags[] =
 {
- { "Title",        &MPD::Song::getTitle,       },
- { "Artist",       &MPD::Song::getArtist,      },
- { "Album Artist", &MPD::Song::getAlbumArtist, },
- { "Album",        &MPD::Song::getAlbum,       },
- { "Date",         &MPD::Song::getDate,        },
- { "Track",        &MPD::Song::getTrack,       },
- { "Genre",        &MPD::Song::getGenre,       },
- { "Composer",     &MPD::Song::getComposer,    },
- { "Performer",    &MPD::Song::getPerformer,   },
- { "Disc",         &MPD::Song::getDisc,        },
- { "Comment",      &MPD::Song::getComment,     },
- { 0,              0,                          }
+ { "Title",        &MPD::Song::getTitle,       &MPD::MutableSong::setTitle       },
+ { "Artist",       &MPD::Song::getArtist,      &MPD::MutableSong::setArtist      },
+ { "Album Artist", &MPD::Song::getAlbumArtist, &MPD::MutableSong::setAlbumArtist },
+ { "Album",        &MPD::Song::getAlbum,       &MPD::MutableSong::setAlbum       },
+ { "Date",         &MPD::Song::getDate,        &MPD::MutableSong::setDate        },
+ { "Track",        &MPD::Song::getTrack,       &MPD::MutableSong::setTrack       },
+ { "Genre",        &MPD::Song::getGenre,       &MPD::MutableSong::setGenre       },
+ { "Composer",     &MPD::Song::getComposer,    &MPD::MutableSong::setComposer    },
+ { "Performer",    &MPD::Song::getPerformer,   &MPD::MutableSong::setPerformer   },
+ { "Disc",         &MPD::Song::getDisc,        &MPD::MutableSong::setDisc        },
+ { "Comment",      &MPD::Song::getComment,     &MPD::MutableSong::setComment     },
+ { 0,              0,                          0                                  }
 };
 
 void SongInfo::Init()
@@ -105,8 +105,6 @@ void SongInfo::PrepareSong(MPD::Song &s)
 		path_to_file += Config.mpd_music_dir;
 	path_to_file += s.getURI();
 	TagLib::FileRef f(path_to_file.c_str());
-	if (!f.isNull())
-		s.SetComment(f.tag()->comment().to8Bit(1));
 #	endif // HAVE_TAGLIB_H
 	
 	*w << fmtBold << Config.color1 << U("Filename: ") << fmtBoldEnd << Config.color2 << s.getName() << '\n' << clEnd;

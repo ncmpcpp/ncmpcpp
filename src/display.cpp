@@ -336,7 +336,7 @@ void Display::Songs(const MPD::Song &s, void *data, Menu<MPD::Song> *menu)
 		*menu << fmtUnderlineEnd;
 }
 
-void Display::Tags(const MPD::Song &s, void *data, Menu<MPD::Song> *menu)
+void Display::Tags(const MPD::MutableSong &s, void *data, Menu<MPD::MutableSong> *menu)
 {
 	size_t i = static_cast<Menu<std::string> *>(data)->Choice();
 	if (i < 11)
@@ -345,12 +345,10 @@ void Display::Tags(const MPD::Song &s, void *data, Menu<MPD::Song> *menu)
 	}
 	else if (i == 12)
 	{
-		// FIXME
-		/*if (s.GetNewName().empty())
+		if (s.getNewURI().empty())
 			*menu << s.getName();
 		else
-			*menu << s.getName() << Config.color2 << " -> " << clEnd << s.GetNewName();
-		*/
+			*menu << s.getName() << Config.color2 << " -> " << clEnd << s.getNewURI();
 	}
 }
 

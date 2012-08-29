@@ -1410,34 +1410,36 @@ void EditLibraryTag::Run()
 	UnlockStatusbar();
 	if (!new_tag.empty() && new_tag != myLibrary->Artists->Current())
 	{
-		bool success = 1;
-		MPD::SongList list;
 		ShowMessage("Updating tags...");
 		Mpd.StartSearch(1);
 		Mpd.AddSearch(Config.media_lib_primary_tag, locale_to_utf_cpy(myLibrary->Artists->Current()));
-		Mpd.CommitSearch(list);
-		MPD::Song::SetFunction set = IntoSetFunction(Config.media_lib_primary_tag);
+		MPD::MutableSong::SetFunction set = IntoSetFunction(Config.media_lib_primary_tag);
 		assert(set);
-		for (MPD::SongList::iterator it = list.begin(); it != list.end(); ++it)
-		{
-			(*it)->Localize();
-			(*it)->SetTags(set, new_tag);
-			ShowMessage("Updating tags in \"%s\"...", (*it)->getName().c_str());
-			std::string path = Config.mpd_music_dir + (*it)->getURI();
-			if (!TagEditor::WriteTags(**it))
+		bool success = true;
+		std::string dir_to_update;
+		Mpd.CommitSearchSongs([set, &new_tag, &success, &dir_to_update](MPD::Song &&s) {
+			if (!success)
+				return;
+			MPD::MutableSong es = s;
+			es.setTag(set, new_tag);
+			ShowMessage("Updating tags in \"%s\"...", es.getName().c_str());
+			std::string path = Config.mpd_music_dir + es.getURI();
+			if (!TagEditor::WriteTags(es))
 			{
 				const char msg[] = "Error while updating tags in \"%s\"";
-				ShowMessage(msg, Shorten(TO_WSTRING((*it)->getURI()), COLS-static_strlen(msg)).c_str());
-				success = 0;
-				break;
+				ShowMessage(msg, Shorten(TO_WSTRING(es.getURI()), COLS-static_strlen(msg)).c_str());
+				success = false;
 			}
-		}
+			if (dir_to_update.empty())
+				dir_to_update = es.getDirectory();
+			else
+				FindSharedDir(es.getDirectory(), dir_to_update);
+		});
 		if (success)
 		{
-			Mpd.UpdateDirectory(locale_to_utf_cpy(FindSharedDir(list)));
+			Mpd.UpdateDirectory(dir_to_update);
 			ShowMessage("Tags updated successfully");
 		}
-		FreeSongList(list);
 	}
 #	endif // HAVE_TAGLIB_H
 }
@@ -1469,10 +1471,9 @@ void EditLibraryAlbum::Run()
 		ShowMessage("Updating tags...");
 		for (size_t i = 0;  i < myLibrary->Songs->Size(); ++i)
 		{
-			(*myLibrary->Songs)[i].Localize();
 			ShowMessage("Updating tags in \"%s\"...", (*myLibrary->Songs)[i].getName().c_str());
 			std::string path = Config.mpd_music_dir + (*myLibrary->Songs)[i].getURI();
-			TagLib::FileRef f(locale_to_utf_cpy(path).c_str());
+			TagLib::FileRef f(path.c_str());
 			if (f.isNull())
 			{
 				const char msg[] = "Error while opening file \"%s\"";
@@ -1491,7 +1492,7 @@ void EditLibraryAlbum::Run()
 		}
 		if (success)
 		{
-			Mpd.UpdateDirectory(locale_to_utf_cpy(FindSharedDir(myLibrary->Songs)));
+			Mpd.UpdateDirectory(FindSharedDir(myLibrary->Songs));
 			ShowMessage("Tags updated successfully");
 		}
 	}

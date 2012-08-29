@@ -18,6 +18,7 @@ ncmpcpp_SOURCES = \
 	media_library.cpp \
 	menu.cpp \
 	mpdpp.cpp \
+	mutable_song.cpp \
 	ncmpcpp.cpp \
 	outputs.cpp \
 	playlist.cpp \
@@ -31,6 +32,7 @@ ncmpcpp_SOURCES = \
 	song.cpp \
 	song_info.cpp \
 	status.cpp \
+	string_utilities.cpp \
 	tag_editor.cpp \
 	tiny_tag_editor.cpp \
 	tolower.cpp \
@@ -61,6 +63,7 @@ noinst_HEADERS = \
 	media_library.h \
 	menu.h \
 	mpdpp.h \
+	mutable_song.h \
 	numeric_conversions.h \
 	outputs.h \
 	playlist_editor.h \
@@ -72,6 +75,7 @@ noinst_HEADERS = \
 	settings.h \
 	song.h \
 	song_info.h \
+	string_utilities.h \
 	tag_editor.h \
 	tiny_tag_editor.h \
 	tolower.h \

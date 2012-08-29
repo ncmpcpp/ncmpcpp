@@ -31,7 +31,7 @@ class SongInfo : public Screen<Scrollpad>
 		{
 			const char *Name;
 			MPD::Song::GetFunction Get;
-			//MPD::Song::SetFunction Set;
+			MPD::MutableSong::SetFunction Set;
 		};
 		
 		virtual void SwitchTo();

@@ -27,6 +27,7 @@
 #include "numeric_conversions.h"
 #include "actions.h"
 #include "window.h"
+#include "mutable_song.h"
 #include "song.h"
 
 template <size_t N> inline size_t static_strlen(const char (&)[N])
@@ -55,7 +56,7 @@ mpd_tag_type IntoTagItem(char);
 MPD::Song::GetFunction toGetFunction(char c);
 
 #ifdef HAVE_TAGLIB_H
-MPD::Song::SetFunction IntoSetFunction(mpd_tag_type);
+MPD::MutableSong::SetFunction IntoSetFunction(mpd_tag_type);
 #endif // HAVE_TAGLIB_H
 
 std::string Shorten(const std::basic_string<my_char_t> &s, size_t max_length);

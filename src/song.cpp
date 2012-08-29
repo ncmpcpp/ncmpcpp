@@ -136,14 +136,11 @@ std::string Song::getTrack(unsigned idx) const
 std::string Song::getTrackNumber(unsigned idx) const
 {
 	assert(pimpl);
-	std::string track = pimpl->getTag(MPD_TAG_TRACK, idx);
+	std::string track = getTrack(idx);
 	size_t slash = track.find('/');
 	if (slash != std::string::npos)
 		track.resize(slash);
-	if (track.length() == 1 && track[0] != '0')
-		return "0"+track;
-	else
-		return track;
+	return track;
 }
 
 std::string Song::getDate(unsigned idx) const

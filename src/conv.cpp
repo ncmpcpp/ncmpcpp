@@ -233,32 +233,32 @@ MPD::Song::GetFunction toGetFunction(char c)
 }
 
 #ifdef HAVE_TAGLIB_H
-MPD::Song::SetFunction IntoSetFunction(mpd_tag_type tag)
+MPD::MutableSong::SetFunction IntoSetFunction(mpd_tag_type tag)
 {
 	switch (tag)
 	{
 		case MPD_TAG_ARTIST:
-			return &MPD::Song::SetArtist;
+			return &MPD::MutableSong::setArtist;
 		case MPD_TAG_ALBUM:
-			return &MPD::Song::SetAlbum;
+			return &MPD::MutableSong::setAlbum;
 		case MPD_TAG_ALBUM_ARTIST:
-			return &MPD::Song::SetAlbumArtist;
+			return &MPD::MutableSong::setAlbumArtist;
 		case MPD_TAG_TITLE:
-			return &MPD::Song::SetTitle;
+			return &MPD::MutableSong::setTitle;
 		case MPD_TAG_TRACK:
-			return &MPD::Song::SetTrack;
+			return &MPD::MutableSong::setTrack;
 		case MPD_TAG_GENRE:
-			return &MPD::Song::SetGenre;
+			return &MPD::MutableSong::setGenre;
 		case MPD_TAG_DATE:
-			return &MPD::Song::SetDate;
+			return &MPD::MutableSong::setDate;
 		case MPD_TAG_COMPOSER:
-			return &MPD::Song::SetComposer;
+			return &MPD::MutableSong::setComposer;
 		case MPD_TAG_PERFORMER:
-			return &MPD::Song::SetPerformer;
+			return &MPD::MutableSong::setPerformer;
 		case MPD_TAG_COMMENT:
-			return &MPD::Song::SetComment;
+			return &MPD::MutableSong::setComment;
 		case MPD_TAG_DISC:
-			return &MPD::Song::SetDisc;
+			return &MPD::MutableSong::setDisc;
 		default:
 			return 0;
 	}

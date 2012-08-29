@@ -1232,6 +1232,19 @@ void MPD::Connection::GetDirectories(const std::string &path, TagList &v)
 	GoIdle();
 }
 
+void MPD::Connection::GetSongs(const std::string &path, SongList &v)
+{
+	if (!itsConnection)
+		return;
+	assert(!isCommandsListEnabled);
+	GoBusy();
+	mpd_send_list_meta(itsConnection, path.c_str());
+	while (mpd_song *s = mpd_recv_song(itsConnection))
+		v.push_back(Song(s));
+	mpd_response_finish(itsConnection);
+	GoIdle();
+}
+
 void MPD::Connection::GetOutputs(std::function<void(Output &&)> f)
 {
 	if (!itsConnection)

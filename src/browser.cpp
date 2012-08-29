@@ -478,8 +478,9 @@ void Browser::GetLocalDirectory(MPD::ItemList &v, const std::string &directory, 
 			mpd_pair file_pair = { "file", full_path.c_str() };
 			new_item.song = MPD::Song(mpd_song_begin(&file_pair));
 #			ifdef HAVE_TAGLIB_H
-			if (!recursively)
-				TagEditor::ReadTags(*new_item.song);
+			// FIXME
+			//if (!recursively)
+			//	TagEditor::ReadTags(*new_item.song);
 #			endif // HAVE_TAGLIB_H
 			v.push_back(new_item);
 		}

@@ -18,47 +18,25 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
-#ifndef _DISPLAY_H
-#define _DISPLAY_H
+#include <cassert>
+#include "string_utilities.h"
 
-#include "ncmpcpp.h"
-#include "menu.h"
-#include "mpdpp.h"
-#include "screen.h"
-#include "search_engine.h"
-
-namespace Display
+std::vector<std::string> split(const std::string &s, const std::string &delimiter)
 {
-	struct ScreenFormat
+	if (delimiter.empty())
+		return { s };
+	std::vector<std::string> result;
+	size_t i = 0, j = 0;
+	while (true)
 	{
-		BasicScreen *screen;
-		std::string *format;
-	};
-	
-	std::string Columns(size_t);
-	
-	template <typename T> void Generic(const T &t, void *, Menu<T> *menu)
-	{
-		*menu << t;
+		i = j;
+		j = s.find(delimiter, i);
+		if (j == std::string::npos)
+			break;
+		else
+			result.push_back(s.substr(i, j-i));
+		j += delimiter.length();
 	}
-	
-	template <typename A, typename B> void Pairs(const std::pair<A, B> &pair, void *, Menu< std::pair<A, B> > *menu)
-	{
-		*menu << pair.first;
-	}
-	
-	void SongsInColumns(const MPD::Song &, void *, Menu<MPD::Song> *);
-	
-	void Songs(const MPD::Song &, void *, Menu<MPD::Song> *);
-	
-	void Tags(const MPD::MutableSong &, void *, Menu<MPD::MutableSong> *);
-	
-	void Outputs(const MPD::Output &, void *, Menu<MPD::Output> *);
-	
-	void SearchEngine(const SEItem &, void *, Menu<SEItem> *);
-	
-	void Items(const MPD::Item &, void *, Menu<MPD::Item> *);
+	result.push_back(s.substr(i));
+	return result;
 }
-
-#endif
-

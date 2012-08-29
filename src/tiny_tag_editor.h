@@ -21,9 +21,7 @@
 #ifndef _TINY_TAG_EDITOR_H
 #define _TINY_TAG_EDITOR_H
 
-#ifdef HAVE_CONFIG_H
-# include <config.h>
-#endif
+#include "config.h"
 
 #ifdef HAVE_TAGLIB_H
 
@@ -58,7 +56,7 @@ class TinyTagEditor : public Screen< Menu<Buffer> >
 		
 	private:
 		bool getTags();
-		MPD::Song itsEdited;
+		MPD::MutableSong itsEdited;
 		
 		static bool extendedTagsSupported(TagLib::File *);
 };

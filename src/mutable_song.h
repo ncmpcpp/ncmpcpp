@@ -18,72 +18,80 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
-#ifndef _SONG_H
-#define _SONG_H
+#ifndef _EDITABLE_SONG_H
+#define _EDITABLE_SONG_H
 
-#include <functional>
-#include <memory>
-#include <string>
-
-#include <mpd/client.h>
+#include <map>
+#include "song.h"
 
 namespace MPD {//
 
-struct Song
+struct MutableSong : public Song
 {
-	typedef std::string (Song::*GetFunction)(unsigned) const;
+	typedef void (MutableSong::*SetFunction)(const std::string &, unsigned);
 	
-	Song() { }
-	Song(mpd_song *s);
+	MutableSong() { }
+	MutableSong(Song s) : Song(s) { }
 	
-	virtual std::string getURI(unsigned idx = 0) const;
-	virtual std::string getName(unsigned idx = 0) const;
-	virtual std::string getDirectory(unsigned idx = 0) const;
 	virtual std::string getArtist(unsigned idx = 0) const;
 	virtual std::string getTitle(unsigned idx = 0) const;
 	virtual std::string getAlbum(unsigned idx = 0) const;
 	virtual std::string getAlbumArtist(unsigned idx = 0) const;
 	virtual std::string getTrack(unsigned idx = 0) const;
-	virtual std::string getTrackNumber(unsigned idx = 0) const;
 	virtual std::string getDate(unsigned idx = 0) const;
 	virtual std::string getGenre(unsigned idx = 0) const;
 	virtual std::string getComposer(unsigned idx = 0) const;
 	virtual std::string getPerformer(unsigned idx = 0) const;
 	virtual std::string getDisc(unsigned idx = 0) const;
 	virtual std::string getComment(unsigned idx = 0) const;
-	virtual std::string getLength(unsigned idx = 0) const;
-	virtual std::string getPriority(unsigned idx = 0) const;
 	
-	virtual std::string getTags(GetFunction f, const std::string &tag_separator = ", ") const;
+	void setArtist(const std::string &value, unsigned idx = 0);
+	void setTitle(const std::string &value, unsigned idx = 0);
+	void setAlbum(const std::string &value, unsigned idx = 0);
+	void setAlbumArtist(const std::string &value, unsigned idx = 0);
+	void setTrack(const std::string &value, unsigned idx = 0);
+	void setDate(const std::string &value, unsigned idx = 0);
+	void setGenre(const std::string &value, unsigned idx = 0);
+	void setComposer(const std::string &value, unsigned idx = 0);
+	void setPerformer(const std::string &value, unsigned idx = 0);
+	void setDisc(const std::string &value, unsigned idx = 0);
+	void setComment(const std::string &value, unsigned idx = 0);
 	
-	virtual unsigned getHash() const;
-	virtual unsigned getDuration() const;
-	virtual unsigned getPosition() const;
-	virtual unsigned getID() const;
-	virtual unsigned getPrio() const;
-	virtual time_t getMTime() const;
+	const std::string &getNewURI() const;
+	void setNewURI(const std::string &value);
 	
-	virtual bool isFromDatabase() const;
-	virtual bool isStream() const;
+	void setTag(SetFunction set, const std::string &value, const std::string &delimiter = "");
 	
-	virtual bool empty() const;
+	bool isModified() const;
+	void clearModifications();
 	
-	virtual std::string toString(const std::string &fmt, const std::string &tag_separator = ", ",
-	                             const std::string &escape_chars = "") const;
-	
-	static std::string ShowTime(unsigned length);
-	static bool isFormatOk(const std::string &type, const std::string &fmt);
-	
-	static const char FormatEscapeCharacter = 1;
-	
-	private:
-		std::string ParseFormat(std::string::const_iterator &it, const std::string &tag_separator,
-		                        const std::string &escape_chars) const;
+private:
+	struct Tag
+	{
+		Tag(mpd_tag_type type_, unsigned idx_) : m_type(type_), m_idx(idx_) { }
 		
-		std::shared_ptr<struct SongImpl> pimpl;
+		mpd_tag_type type() const { return m_type; }
+		unsigned idx() const { return m_idx; }
+		
+		bool operator<(const Tag &t) const
+		{
+			if (m_type != t.m_type)
+				return m_type < t.m_type;
+			return m_idx < t.m_idx;
+		}
+		
+	private:
+		mpd_tag_type m_type;
+		unsigned m_idx;
+	};
+	
+	std::string getTag(mpd_tag_type tag_type, std::function<std::string()> orig_value, unsigned idx) const;
+	void replaceTag(mpd_tag_type tag_type, std::string &&orig_value, const std::string &value, unsigned idx);
+	
+	std::string m_uri;
+	std::map<Tag, std::string> m_tags;
 };
 
 }
 
-#endif
-
+#endif // _EDITABLE_SONG_H
