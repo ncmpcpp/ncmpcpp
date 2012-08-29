@@ -24,6 +24,7 @@
 #include "ncmpcpp.h"
 #include "menu.h"
 #include "mpdpp.h"
+#include "mutable_song.h"
 #include "screen.h"
 #include "search_engine.h"
 

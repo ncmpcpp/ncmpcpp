@@ -28,6 +28,7 @@
 // taglib includes
 #include "tfile.h"
 
+#include "mutable_song.h"
 #include "screen.h"
 
 class TinyTagEditor : public Screen< Menu<Buffer> >

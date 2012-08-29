@@ -26,6 +26,7 @@
 # include <sys/stat.h>
 #endif // WIN32
 #include <cstdlib>
+#include <cstring>
 #include <string>
 #include <fstream>
 #include <iostream>
@@ -46,6 +47,7 @@
 #include "settings.h"
 #include "tag_editor.h"
 #include "visualizer.h"
+#include "utility/type_conversions.h"
 
 #ifdef HAVE_LANGINFO_H
 # include <langinfo.h>
@@ -56,12 +58,36 @@ KeyConfiguration Keys;
 
 namespace
 {
-	Border IntoBorder(const std::string &color)
+	NCurses::Color stringToColor(const std::string &color)
 	{
-		return Border(IntoColor(color));
+		NCurses::Color result = NCurses::clDefault;
+		
+		if (color == "black")
+			result = NCurses::clBlack;
+		else if (color == "red")
+			result = NCurses::clRed;
+		else if (color == "green")
+			result = NCurses::clGreen;
+		else if (color == "yellow")
+			result = NCurses::clYellow;
+		else if (color == "blue")
+			result = NCurses::clBlue;
+		else if (color == "magenta")
+			result = NCurses::clMagenta;
+		else if (color == "cyan")
+			result = NCurses::clCyan;
+		else if (color == "white")
+			result = NCurses::clWhite;
+		
+		return result;
 	}
 	
-	BasicScreen *IntoScreen(int n)
+	Border stringToBorder(const std::string &border)
+	{
+		return Border(stringToColor(border));
+	}
+	
+	BasicScreen *intToScreen(int n)
 	{
 		switch (n)
 		{
@@ -488,33 +514,33 @@ void Configuration::Read()
 			}
 			else if (name == "mpd_port")
 			{
-				if (StrToInt(v))
-					mpd_port = StrToInt(v);
+				if (stringToInt(v))
+					mpd_port = stringToInt(v);
 			}
 			else if (name == "mpd_connection_timeout")
 			{
-				if (StrToInt(v))
-					mpd_connection_timeout = StrToInt(v);
+				if (stringToInt(v))
+					mpd_connection_timeout = stringToInt(v);
 			}
 			else if (name == "mpd_crossfade_time")
 			{
-				if (StrToInt(v) > 0)
-					crossfade_time = StrToInt(v);
+				if (stringToInt(v) > 0)
+					crossfade_time = stringToInt(v);
 			}
 			else if (name == "seek_time")
 			{
-				if (StrToInt(v) > 0)
-					seek_time = StrToInt(v);
+				if (stringToInt(v) > 0)
+					seek_time = stringToInt(v);
 			}
 			else if (name == "playlist_disable_highlight_delay")
 			{
-				if (StrToInt(v) >= 0)
-					playlist_disable_highlight_delay = StrToInt(v);
+				if (stringToInt(v) >= 0)
+					playlist_disable_highlight_delay = stringToInt(v);
 			}
 			else if (name == "message_delay_time")
 			{
-				if (StrToInt(v) > 0)
-					message_delay_time = StrToInt(v);
+				if (stringToInt(v) > 0)
+					message_delay_time = stringToInt(v);
 			}
 			else if (name == "song_list_format")
 			{
@@ -689,12 +715,12 @@ void Configuration::Read()
 			else if (name == "color1")
 			{
 				if (!v.empty())
-					color1 = IntoColor(v);
+					color1 = stringToColor(v);
 			}
 			else if (name == "color2")
 			{
 				if (!v.empty())
-					color2 = IntoColor(v);
+					color2 = stringToColor(v);
 			}
 			else if (name == "mpd_communication_mode")
 			{
@@ -768,7 +794,7 @@ void Configuration::Read()
 							++it;
 						if (it == v.end())
 							break;
-						if (BasicScreen *screen = IntoScreen(atoi(&*it)))
+						if (BasicScreen *screen = intToScreen(atoi(&*it)))
 							screens_seq.push_back(screen);
 						while (it != v.end() && isdigit(*it))
 							++it;
@@ -779,7 +805,7 @@ void Configuration::Read()
 			}
 			else if (name == "startup_screen")
 			{
-				startup_screen = IntoScreen(atoi(v.c_str()));
+				startup_screen = intToScreen(atoi(v.c_str()));
 				if (!startup_screen)
 					startup_screen = myPlaylist;
 			}
@@ -932,20 +958,20 @@ void Configuration::Read()
 			else if (name == "lines_scrolled")
 			{
 				if (!v.empty())
-					lines_scrolled = StrToInt(v);
+					lines_scrolled = stringToInt(v);
 			}
 			else if (name == "search_engine_default_search_mode")
 			{
 				if (!v.empty())
 				{
-					unsigned mode = StrToInt(v);
+					unsigned mode = stringToInt(v);
 					if (--mode < 3)
 						search_engine_default_search_mode = mode;
 				}
 			}
 			else if (name == "visualizer_sync_interval")
 			{
-				unsigned interval = StrToInt(v);
+				unsigned interval = stringToInt(v);
 				if (interval)
 					visualizer_sync_interval = interval;
 			}
@@ -960,7 +986,7 @@ void Configuration::Read()
 			}
 			else if (name == "locked_screen_width_part")
 			{
-				int part = StrToInt(v);
+				int part = stringToInt(v);
 				if (part)
 					locked_screen_width_part = part/100.0;
 			}
@@ -990,82 +1016,82 @@ void Configuration::Read()
 			else if (name == "empty_tag_color")
 			{
 				if (!v.empty())
-					empty_tags_color = IntoColor(v);
+					empty_tags_color = stringToColor(v);
 			}
 			else if (name == "header_window_color")
 			{
 				if (!v.empty())
-					header_color = IntoColor(v);
+					header_color = stringToColor(v);
 			}
 			else if (name == "volume_color")
 			{
 				if (!v.empty())
-					volume_color = IntoColor(v);
+					volume_color = stringToColor(v);
 			}
 			else if (name == "state_line_color")
 			{
 				if (!v.empty())
-					state_line_color = IntoColor(v);
+					state_line_color = stringToColor(v);
 			}
 			else if (name == "state_flags_color")
 			{
 				if (!v.empty())
-					state_flags_color = IntoColor(v);
+					state_flags_color = stringToColor(v);
 			}
 			else if (name == "main_window_color")
 			{
 				if (!v.empty())
-					main_color = IntoColor(v);
+					main_color = stringToColor(v);
 			}
 			else if (name == "main_window_highlight_color")
 			{
 				if (!v.empty())
-					main_highlight_color = IntoColor(v);
+					main_highlight_color = stringToColor(v);
 			}
 			else if (name == "progressbar_color")
 			{
 				if (!v.empty())
-					progressbar_color = IntoColor(v);
+					progressbar_color = stringToColor(v);
 			}
 			else if (name == "progressbar_elapsed_color")
 			{
 				if (!v.empty())
-					progressbar_elapsed_color = IntoColor(v);
+					progressbar_elapsed_color = stringToColor(v);
 			}
 			else if (name == "statusbar_color")
 			{
 				if (!v.empty())
-					statusbar_color = IntoColor(v);
+					statusbar_color = stringToColor(v);
 			}
 			else if (name == "alternative_ui_separator_color")
 			{
 				if (!v.empty())
-					alternative_ui_separator_color = IntoColor(v);
+					alternative_ui_separator_color = stringToColor(v);
 			}
 			else if (name == "active_column_color")
 			{
 				if (!v.empty())
-					active_column_color = IntoColor(v);
+					active_column_color = stringToColor(v);
 			}
 			else if (name == "visualizer_color")
 			{
 				if (!v.empty())
-					visualizer_color = IntoColor(v);
+					visualizer_color = stringToColor(v);
 			}
 			else if (name == "window_border_color")
 			{
 				if (!v.empty())
-					window_border = IntoBorder(v);
+					window_border = stringToBorder(v);
 			}
 			else if (name == "active_window_border")
 			{
 				if (!v.empty())
-					active_window_border = IntoBorder(v);
+					active_window_border = stringToBorder(v);
 			}
 			else if (name == "media_library_left_column")
 			{
 				if (!v.empty())
-					media_lib_primary_tag = IntoTagItem(v[0]);
+					media_lib_primary_tag = charToTagType(v[0]);
 			}
 			else
 				std::cout << "Unknown option: " << name << ", ignoring.\n";
@@ -1082,7 +1108,7 @@ void Configuration::GenerateColumns()
 	while (!(width = getEnclosedString(song_list_columns_format, '(', ')', &pos)).empty())
 	{
 		Column col;
-		col.color = IntoColor(getEnclosedString(song_list_columns_format, '[', ']', &pos));
+		col.color = stringToColor(getEnclosedString(song_list_columns_format, '[', ']', &pos));
 		std::string tag_type = getEnclosedString(song_list_columns_format, '{', '}', &pos);
 		
 		col.fixed = *width.rbegin() == 'f';
@@ -1121,7 +1147,7 @@ void Configuration::GenerateColumns()
 		else // empty column
 			col.display_empty_tag = 0;
 		
-		col.width = StrToInt(width);
+		col.width = stringToInt(width);
 		columns.push_back(col);
 	}
 	

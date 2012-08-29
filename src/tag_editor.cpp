@@ -625,7 +625,7 @@ void TagEditor::EnterPressed()
 				if (!WriteTags(**it))
 				{
 					const char msg[] = "Error while writing tags in \"%s\"";
-					ShowMessage(msg, Shorten(TO_WSTRING((*it)->getURI()), COLS-static_strlen(msg)).c_str());
+					ShowMessage(msg, Shorten(TO_WSTRING((*it)->getURI()), COLS-const_strlen(msg)).c_str());
 					success = 0;
 					break;
 				}
@@ -1026,8 +1026,8 @@ bool TagEditor::WriteTags(MPD::MutableSong &s)
 		f.tag()->setTitle(ToWString(s.getTitle()));
 		f.tag()->setArtist(ToWString(s.getArtist()));
 		f.tag()->setAlbum(ToWString(s.getAlbum()));
-		f.tag()->setYear(StrToInt(s.getDate()));
-		f.tag()->setTrack(StrToInt(s.getTrack()));
+		f.tag()->setYear(stringToInt(s.getDate()));
+		f.tag()->setTrack(stringToInt(s.getTrack()));
 		f.tag()->setGenre(ToWString(s.getGenre()));
 		f.tag()->setComment(ToWString(s.getComment()));
 		if (TagLib::MPEG::File *mp3_file = dynamic_cast<TagLib::MPEG::File *>(f.file()))
@@ -1219,7 +1219,7 @@ MPD::MutableSong::SetFunction TagEditor::IntoSetFunction(char c)
 std::string TagEditor::GenerateFilename(const MPD::MutableSong &s, const std::string &pattern)
 {
 	std::string result = s.toString(pattern);
-	EscapeUnallowedChars(result);
+	removeInvalidCharsFromFilename(result);
 	return result;
 }
 

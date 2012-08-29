@@ -29,6 +29,7 @@
 #endif
 
 #include "error.h"
+#include "utility/string.h"
 #include "window.h"
 
 using namespace NCurses;
@@ -921,31 +922,6 @@ Window &Window::operator<<(size_t s)
 {
 	wprintw(itsWindow, "%zu", s);
 	return *this;
-}
-
-std::string ToString(const std::wstring &ws)
-{
-	std::string result;
-	char s[MB_CUR_MAX];
-	for (size_t i = 0; i < ws.length(); ++i)
-	{
-		int n = wcrtomb(s, ws[i], 0);
-		if (n > 0)
-			result.append(s, n);
-	}
-	return result;
-}
-
-std::wstring ToWString(const std::string &s)
-{
-	std::wstring result;
-	wchar_t *ws = new wchar_t[s.length()];
-	const char *c_s = s.c_str();
-	int n = mbsrtowcs(ws, &c_s, s.length(), 0);
-	if (n > 0)
-		result.append(ws, n);
-	delete [] ws;
-	return result;
 }
 
 size_t Window::Length(const std::wstring &ws)

@@ -23,6 +23,52 @@
 #include <algorithm>
 #include "utility/string.h"
 
+int stringToInt(const std::string &s)
+{
+	return atoi(s.c_str());
+}
+
+long stringToLongInt(const std::string &s)
+{
+	return atol(s.c_str());
+}
+
+bool isInteger(const char *s)
+{
+	assert(s);
+	if (*s == '\0')
+		return false;
+	for (const char *it = s; *it != '\0'; ++it)
+		if (!isdigit(*it) && (it != s || *it != '-'))
+			return false;
+		return true;
+}
+
+std::string ToString(const std::wstring &ws)
+{
+	std::string result;
+	char s[MB_CUR_MAX];
+	for (size_t i = 0; i < ws.length(); ++i)
+	{
+		int n = wcrtomb(s, ws[i], 0);
+		if (n > 0)
+			result.append(s, n);
+	}
+	return result;
+}
+
+std::wstring ToWString(const std::string &s)
+{
+	std::wstring result;
+	wchar_t *ws = new wchar_t[s.length()];
+	const char *c_s = s.c_str();
+	int n = mbsrtowcs(ws, &c_s, s.length(), 0);
+	if (n > 0)
+		result.append(ws, n);
+	delete [] ws;
+	return result;
+}
+
 std::vector<std::string> split(const std::string &s, const std::string &delimiter)
 {
 	if (delimiter.empty())
@@ -134,13 +180,18 @@ std::string getEnclosedString(const std::string &s, char a, char b, size_t *pos)
 	return result;
 }
 
-bool isInteger(const char *s)
+void removeInvalidCharsFromFilename(std::string &filename)
 {
-	assert(s);
-	if (*s == '\0')
-		return false;
-	for (const char *it = s; *it != '\0'; ++it)
-		if (!isdigit(*it) && (it != s || *it != '-'))
-			return false;
-		return true;
+	const char *unallowed_chars = "\"*/:<>?\\|";
+	for (const char *c = unallowed_chars; *c; ++c)
+	{
+		for (size_t i = 0; i < filename.length(); ++i)
+		{
+			if (filename[i] == *c)
+			{
+				filename.erase(filename.begin()+i);
+				--i;
+			}
+		}
+	}
 }

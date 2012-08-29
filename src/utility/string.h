@@ -21,8 +21,43 @@
 #ifndef _UTILITY_STRING
 #define _UTILITY_STRING
 
+#include <cstdarg>
 #include <string>
 #include <vector>
+#include "gcc.h"
+
+template <size_t N> size_t const_strlen(const char (&)[N]) {
+	return N-1;
+}
+
+template <size_t N, typename T> struct print { };
+template <size_t N> struct print<N, std::string> {
+	static std::string apply(const char *format, ...) GNUC_PRINTF(1, 2) {
+		char buf[N];
+		va_list args;
+		va_start(args, format);
+		vsnprintf(buf, sizeof(buf)/sizeof(char), format, args);
+		va_end(args);
+		return buf;
+	}
+};
+template <size_t N> struct print<N, std::wstring> {
+	static std::wstring apply(const wchar_t *format, ...) {
+		wchar_t buf[N];
+		va_list args;
+		va_start(args, format);
+		vswprintf(buf, sizeof(buf)/sizeof(wchar_t), format, args);
+		va_end(args);
+		return buf;
+	}
+};
+
+int stringToInt(const std::string &s);
+long stringToLongInt(const std::string &s);
+bool isInteger(const char *s);
+
+std::string ToString(const std::wstring &ws);
+std::wstring ToWString(const std::string &s);
 
 std::vector<std::string> split(const std::string &s, const std::string &delimiter);
 void replace(std::string &s, const std::string &from, const std::string &to);
@@ -38,6 +73,6 @@ std::string getSharedDirectory(const std::string &dir1, const std::string &dir2)
 
 std::string getEnclosedString(const std::string &s, char a, char b, size_t *pos);
 
-bool isInteger(const char *s);
+void removeInvalidCharsFromFilename(std::string &filename);
 
 #endif // _UTILITY_STRING

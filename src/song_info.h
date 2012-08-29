@@ -22,7 +22,7 @@
 #define _SONG_INFO_H
 
 #include "screen.h"
-#include "song.h"
+#include "mutable_song.h"
 
 class SongInfo : public Screen<Scrollpad>
 {

@@ -18,75 +18,58 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
-#include <cstdio>
-#include <cwchar>
 #include <string>
+#include "string.h"
 
-#ifndef _NUMERIC_CONVERSIONS_H
-#define _NUMERIC_CONVERSIONS_H
+#ifndef _UTILITY_NUMERIC_CONVERSIONS_H
+#define _UTILITY_NUMERIC_CONVERSIONS_H
 
 template <typename R> struct intTo { };
 template <> struct intTo<std::string> {
 	static std::string apply(int n) {
-		char buf[32];
-		snprintf(buf, sizeof(buf), "%d", n);
-		return buf;
+		return print<32, std::string>::apply("%d", n);
 	}
 };
 template <> struct intTo<std::wstring> {
 	static std::wstring apply(int n) {
-		wchar_t buf[32];
-		swprintf(buf, sizeof(buf)/sizeof(wchar_t), L"%d", n);
-		return buf;
+		return print<32, std::wstring>::apply(L"%d", n);
 	}
 };
 
 template <typename R> struct longIntTo { };
 template <> struct longIntTo<std::string> {
 	static std::string apply(long int n) {
-		char buf[32];
-		snprintf(buf, sizeof(buf), "%ld", n);
-		return buf;
+		return print<32, std::string>::apply("%ld", n);
 	}
 };
 template <> struct longIntTo<std::wstring> {
 	static std::wstring apply(long int n) {
-		wchar_t buf[32];
-		swprintf(buf, sizeof(buf)/sizeof(wchar_t), L"%ld", n);
-		return buf;
+		return print<32, std::wstring>::apply(L"%ld", n);
 	}
 };
 
 template <typename R> struct unsignedIntTo { };
 template <> struct unsignedIntTo<std::string> {
 	static std::string apply(unsigned int n) {
-		char buf[32];
-		snprintf(buf, sizeof(buf), "%u", n);
-		return buf;
+		return print<32, std::string>::apply("%u", n);
 	}
 };
 template <> struct unsignedIntTo<std::wstring> {
 	static std::wstring apply(unsigned int n) {
-		wchar_t buf[32];
-		swprintf(buf, sizeof(buf)/sizeof(wchar_t), L"%u", n);
-		return buf;
+		return print<32, std::wstring>::apply(L"%u", n);
 	}
 };
 
 template <typename R> struct unsignedLongIntTo { };
 template <> struct unsignedLongIntTo<std::string> {
 	static std::string apply(unsigned long int n) {
-		char buf[32];
-		snprintf(buf, sizeof(buf), "%lu", n);
-		return buf;
+		return print<32, std::string>::apply("%lu", n);
 	}
 };
 template <> struct unsignedLongIntTo<std::wstring> {
 	static std::wstring apply(unsigned long int n) {
-		wchar_t buf[32];
-		swprintf(buf, sizeof(buf)/sizeof(wchar_t), L"%lu", n);
-		return buf;
+		return print<32, std::wstring>::apply(L"%lu", n);
 	}
 };
 
-#endif // _NUMERIC_CONVERSIONS_H
+#endif // _UTILITY_NUMERIC_CONVERSIONS_H

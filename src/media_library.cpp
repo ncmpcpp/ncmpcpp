@@ -30,6 +30,7 @@
 #include "playlist.h"
 #include "status.h"
 #include "utility/comparators.h"
+#include "utility/type_conversions.h"
 
 using Global::MainHeight;
 using Global::MainStartY;
@@ -60,7 +61,7 @@ void MediaLibrary::Init()
 	itsRightColWidth = COLS-COLS/3*2-1;
 	itsRightColStartX = itsLeftColWidth+itsMiddleColWidth+2;
 	
-	Artists = new Menu<std::string>(0, MainStartY, itsLeftColWidth, MainHeight, Config.titles_visibility ? IntoStr(Config.media_lib_primary_tag) + "s" : "", Config.main_color, brNone);
+	Artists = new Menu<std::string>(0, MainStartY, itsLeftColWidth, MainHeight, Config.titles_visibility ? tagTypeToString(Config.media_lib_primary_tag) + "s" : "", Config.main_color, brNone);
 	Artists->HighlightColor(Config.active_column_color);
 	Artists->CyclicScrolling(Config.use_cyclic_scrolling);
 	Artists->CenteredCursor(Config.centered_cursor);
@@ -162,7 +163,7 @@ void MediaLibrary::SwitchTo()
 					NextColumn();
 				if (Config.titles_visibility)
 				{
-					std::string item_type = IntoStr(Config.media_lib_primary_tag);
+					std::string item_type = tagTypeToString(Config.media_lib_primary_tag);
 					lowercase(item_type);
 					Albums->SetTitle("Albums (sorted by " + item_type + ")");
 				}
@@ -635,7 +636,7 @@ void MediaLibrary::LocateSong(const MPD::Song &s)
 	}
 	if (primary_tag.empty())
 	{
-		std::string item_type = IntoStr(Config.media_lib_primary_tag);
+		std::string item_type = tagTypeToString(Config.media_lib_primary_tag);
 		lowercase(item_type);
 		ShowMessage("Can't use this function because the song has no %s tag set", item_type.c_str());
 		return;
@@ -726,7 +727,7 @@ void MediaLibrary::AddToPlaylist(bool add_n_play)
 			if ((!Artists->Empty() && w == Artists)
 			||  (w == Albums && Albums->Current().Date == AllTracksMarker))
 			{
-				std::string tag_type = IntoStr(Config.media_lib_primary_tag);
+				std::string tag_type = tagTypeToString(Config.media_lib_primary_tag);
 				lowercase(tag_type);
 				ShowMessage("Songs with %s = \"%s\" added", tag_type.c_str(), Artists->Current().c_str());
 			}
@@ -790,9 +791,9 @@ bool MediaLibrary::SearchConstraintsSorting::operator()(const SearchConstraints 
 bool MediaLibrary::SortSongsByTrack(const MPD::Song &a, const MPD::Song &b)
 {
 	if (a.getDisc() == b.getDisc())
-		return StrToInt(a.getTrack()) < StrToInt(b.getTrack());
+		return stringToInt(a.getTrack()) < stringToInt(b.getTrack());
 	else
-		return StrToInt(a.getDisc()) < StrToInt(b.getDisc());
+		return stringToInt(a.getDisc()) < stringToInt(b.getDisc());
 }
 
 bool MediaLibrary::SortAllTracks(const MPD::Song &a, const MPD::Song &b)

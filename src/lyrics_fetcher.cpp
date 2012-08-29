@@ -23,11 +23,12 @@
 #ifdef HAVE_CURL_CURL_H
 
 #include <cstdlib>
+#include <cstring>
 
 #include "charset.h"
-#include "conv.h"
 #include "lyrics_fetcher.h"
 #include "utility/html.h"
+#include "utility/string.h"
 
 LyricsFetcher *lyricsPlugins[] =
 {
@@ -270,7 +271,7 @@ void LyricsvipFetcher::postProcess(std::string &data)
 	// throw away <div> with ad
 	size_t i = data.find("<div class=\"ad\""), j = data.find("</div>");
 	if (i != std::string::npos && i != std::string::npos)
-		data.replace(i, j-i+static_strlen("</div>"), "");
+		data.replace(i, j-i+const_strlen("</div>"), "");
 	data = unescapeHtmlUtf8(data);
 	LyricsFetcher::postProcess(data);
 }

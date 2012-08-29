@@ -24,7 +24,9 @@
 #include <memory>
 
 #include "song.h"
-#include "conv.h"
+#include "utility/numeric_conversions.h"
+#include "utility/type_conversions.h"
+#include "window.h"
 
 namespace {//
 
@@ -282,12 +284,10 @@ std::string Song::ShowTime(unsigned length)
 	length -= minutes*60;
 	int seconds = length;
 	
-	char buf[32];
 	if (hours > 0)
-		snprintf(buf, sizeof(buf), "%d:%02d:%02d", hours, minutes, seconds);
+		return print<32, std::string>::apply("%d:%02d:%02d", hours, minutes, seconds);
 	else
-		snprintf(buf, sizeof(buf), "%d:%02d", minutes, seconds);
-	return buf;
+		return print<32, std::string>::apply("%d:%02d", minutes, seconds);
 }
 
 bool MPD::Song::isFormatOk(const std::string &type, const std::string &fmt)
@@ -310,7 +310,7 @@ bool MPD::Song::isFormatOk(const std::string &type, const std::string &fmt)
 	{
 		if (isdigit(fmt[++i]))
 			while (isdigit(fmt[++i])) { }
-		if (!toGetFunction(fmt[i]))
+		if (!charToGetFunction(fmt[i]))
 		{
 			std::cerr << type << ": invalid character at position " << unsignedLongIntTo<std::string>::apply(i+1) << ": '" << fmt[i] << "'\n";
 			return false;
@@ -353,7 +353,7 @@ std::string Song::ParseFormat(std::string::const_iterator &it, const std::string
 				get = 0;
 			}
 			else
-				get = toGetFunction(*it);
+				get = charToGetFunction(*it);
 			
 			if (get)
 			{
@@ -368,9 +368,9 @@ std::string Song::ParseFormat(std::string::const_iterator &it, const std::string
 				{
 					if (delimiter)
 					{
-						const std::basic_string<my_char_t> &s = TO_WSTRING(tag);
+						/*const std::basic_string<my_char_t> &s = TO_WSTRING(tag);
 						if (NCurses::Window::Length(s) > delimiter)
-							tag = Shorten(s, delimiter);
+							tag = Shorten(s, delimiter);*/
 					}
 					has_some_tags = 1;
 					result += tag;

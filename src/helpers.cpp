@@ -353,3 +353,15 @@ std::basic_string<my_char_t> Scroller(const std::basic_string<my_char_t> &str, s
 		result = s;
 	return result;
 }
+
+std::string Shorten(const std::basic_string<my_char_t> &s, size_t max_length)
+{
+	if (s.length() <= max_length)
+		return TO_STRING(s);
+	if (max_length < 2)
+		return "";
+	std::basic_string<my_char_t> result(s, 0, max_length/2-!(max_length%2));
+	result += U("..");
+	result += s.substr(s.length()-max_length/2+1);
+	return TO_STRING(result);
+}

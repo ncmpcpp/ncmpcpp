@@ -30,6 +30,7 @@
 
 #include <cassert>
 #include <cerrno>
+#include <cstring>
 #include <fstream>
 #include <iostream>
 
@@ -125,7 +126,7 @@ void Lastfm::Load()
 	
 	std::string file = artist + ".txt";
 	lowercase(file);
-	EscapeUnallowedChars(file);
+	removeInvalidCharsFromFilename(file);
 	
 	itsFilename = itsFolder + "/" + file;
 	
@@ -211,7 +212,7 @@ void Lastfm::Refetch()
 	if (remove(itsFilename.c_str()) && errno != ENOENT)
 	{
 		const char msg[] = "Couldn't remove \"%s\": %s";
-		ShowMessage(msg, Shorten(TO_WSTRING(itsFilename), COLS-static_strlen(msg)-25).c_str(), strerror(errno));
+		ShowMessage(msg, Shorten(TO_WSTRING(itsFilename), COLS-const_strlen(msg)-25).c_str(), strerror(errno));
 		return;
 	}
 	Load();

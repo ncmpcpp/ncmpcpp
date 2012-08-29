@@ -33,6 +33,7 @@
 #include "tag.h"
 
 #include "mpdpp.h"
+#include "mutable_song.h"
 #include "screen.h"
 
 class TagEditor : public Screen<Window>

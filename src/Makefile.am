@@ -3,11 +3,11 @@ ncmpcpp_SOURCES = \
 	utility/comparators.cpp \
 	utility/html.cpp \
 	utility/string.cpp \
+	utility/type_conversions.cpp \
 	actions.cpp \
 	browser.cpp \
 	charset.cpp \
 	clock.cpp \
-	conv.cpp \
 	curl_handle.cpp \
 	display.cpp \
 	error.cpp \
@@ -49,10 +49,11 @@ noinst_HEADERS = \
 	utility/comparators.h \
 	utility/html.h \
 	utility/string.h \
+	utility/numeric_conversions.h \
+	utility/type_conversions.h \
 	browser.h \
 	charset.h \
 	clock.h \
-	conv.h \
 	curl_handle.h \
 	display.h \
 	error.h \
@@ -68,7 +69,6 @@ noinst_HEADERS = \
 	menu.h \
 	mpdpp.h \
 	mutable_song.h \
-	numeric_conversions.h \
 	outputs.h \
 	playlist_editor.h \
 	screen.h \

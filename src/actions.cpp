@@ -20,6 +20,7 @@
 
 #include <cassert>
 #include <cerrno>
+#include <cstring>
 #include <iostream>
 
 #include "actions.h"
@@ -44,6 +45,7 @@
 #include "song_info.h"
 #include "outputs.h"
 #include "utility/string.h"
+#include "utility/type_conversions.h"
 #include "tag_editor.h"
 #include "tiny_tag_editor.h"
 #include "visualizer.h"
@@ -786,7 +788,7 @@ void Delete::Run()
 			if (Mpd.DeletePlaylist(locale_to_utf_cpy(name)))
 			{
 				const char msg[] = "Playlist \"%s\" deleted";
-				ShowMessage(msg, Shorten(TO_WSTRING(name), COLS-static_strlen(msg)).c_str());
+				ShowMessage(msg, Shorten(TO_WSTRING(name), COLS-const_strlen(msg)).c_str());
 				if (myBrowser->Main() && !myBrowser->isLocal() && myBrowser->CurrentDir() == "/")
 					myBrowser->GetDirectory("/");
 			}
@@ -844,12 +846,12 @@ void Delete::Run()
 				if (myBrowser->DeleteItem(it))
 				{
 					const char msg[] = "\"%s\" deleted";
-					ShowMessage(msg, Shorten(TO_WSTRING(name), COLS-static_strlen(msg)).c_str());
+					ShowMessage(msg, Shorten(TO_WSTRING(name), COLS-const_strlen(msg)).c_str());
 				}
 				else
 				{
 					const char msg[] = "Couldn't delete \"%s\": %s";
-					ShowMessage(msg, Shorten(TO_WSTRING(name), COLS-static_strlen(msg)-25).c_str(), strerror(errno));
+					ShowMessage(msg, Shorten(TO_WSTRING(name), COLS-const_strlen(msg)-25).c_str(), strerror(errno));
 					success = 0;
 					break;
 				}
@@ -1109,7 +1111,7 @@ void Add::Run()
 		else
 		{
 			const char lastfm_url[] = "lastfm://";
-			if (path.compare(0, static_strlen(lastfm_url), lastfm_url) == 0
+			if (path.compare(0, const_strlen(lastfm_url), lastfm_url) == 0
 			||  path.find(".asx", path.length()-4) != std::string::npos
 			||  path.find(".cue", path.length()-4) != std::string::npos
 			||  path.find(".m3u", path.length()-4) != std::string::npos
@@ -1372,7 +1374,7 @@ void SetCrossfade::Run()
 	Statusbar() << "Set crossfade to: ";
 	std::string crossfade = wFooter->GetString(3);
 	UnlockStatusbar();
-	int cf = StrToInt(crossfade);
+	int cf = stringToInt(crossfade);
 	if (cf > 0)
 	{
 		Config.crossfade_time = cf;
@@ -1419,7 +1421,7 @@ void EditLibraryTag::Run()
 	if (!isMPDMusicDirSet())
 		return;
 	LockStatusbar();
-	Statusbar() << fmtBold << IntoStr(Config.media_lib_primary_tag) << fmtBoldEnd << ": ";
+	Statusbar() << fmtBold << tagTypeToString(Config.media_lib_primary_tag) << fmtBoldEnd << ": ";
 	std::string new_tag = wFooter->GetString(myLibrary->Artists->Current());
 	UnlockStatusbar();
 	if (!new_tag.empty() && new_tag != myLibrary->Artists->Current())
@@ -1427,7 +1429,7 @@ void EditLibraryTag::Run()
 		ShowMessage("Updating tags...");
 		Mpd.StartSearch(1);
 		Mpd.AddSearch(Config.media_lib_primary_tag, locale_to_utf_cpy(myLibrary->Artists->Current()));
-		MPD::MutableSong::SetFunction set = IntoSetFunction(Config.media_lib_primary_tag);
+		MPD::MutableSong::SetFunction set = tagTypeToSetFunction(Config.media_lib_primary_tag);
 		assert(set);
 		bool success = true;
 		std::string dir_to_update;
@@ -1441,7 +1443,7 @@ void EditLibraryTag::Run()
 			if (!TagEditor::WriteTags(es))
 			{
 				const char msg[] = "Error while updating tags in \"%s\"";
-				ShowMessage(msg, Shorten(TO_WSTRING(es.getURI()), COLS-static_strlen(msg)).c_str());
+				ShowMessage(msg, Shorten(TO_WSTRING(es.getURI()), COLS-const_strlen(msg)).c_str());
 				success = false;
 			}
 			if (dir_to_update.empty())
@@ -1491,7 +1493,7 @@ void EditLibraryAlbum::Run()
 			if (f.isNull())
 			{
 				const char msg[] = "Error while opening file \"%s\"";
-				ShowMessage(msg, Shorten(TO_WSTRING((*myLibrary->Songs)[i].getURI()), COLS-static_strlen(msg)).c_str());
+				ShowMessage(msg, Shorten(TO_WSTRING((*myLibrary->Songs)[i].getURI()), COLS-const_strlen(msg)).c_str());
 				success = 0;
 				break;
 			}
@@ -1499,7 +1501,7 @@ void EditLibraryAlbum::Run()
 			if (!f.save())
 			{
 				const char msg[] = "Error while writing tags in \"%s\"";
-				ShowMessage(msg, Shorten(TO_WSTRING((*myLibrary->Songs)[i].getURI()), COLS-static_strlen(msg)).c_str());
+				ShowMessage(msg, Shorten(TO_WSTRING((*myLibrary->Songs)[i].getURI()), COLS-const_strlen(msg)).c_str());
 				success = 0;
 				break;
 			}
@@ -1553,7 +1555,7 @@ void EditDirectoryName::Run()
 			if (rename_result == 0)
 			{
 				const char msg[] = "Directory renamed to \"%s\"";
-				ShowMessage(msg, Shorten(TO_WSTRING(new_dir), COLS-static_strlen(msg)).c_str());
+				ShowMessage(msg, Shorten(TO_WSTRING(new_dir), COLS-const_strlen(msg)).c_str());
 				if (!myBrowser->isLocal())
 					Mpd.UpdateDirectory(locale_to_utf_cpy(getSharedDirectory(old_dir, new_dir)));
 				myBrowser->GetDirectory(myBrowser->CurrentDir());
@@ -1561,7 +1563,7 @@ void EditDirectoryName::Run()
 			else
 			{
 				const char msg[] = "Couldn't rename \"%s\": %s";
-				ShowMessage(msg, Shorten(TO_WSTRING(old_dir), COLS-static_strlen(msg)-25).c_str(), strerror(errno));
+				ShowMessage(msg, Shorten(TO_WSTRING(old_dir), COLS-const_strlen(msg)-25).c_str(), strerror(errno));
 			}
 		}
 	}
@@ -1580,13 +1582,13 @@ void EditDirectoryName::Run()
 			if (rename(full_old_dir.c_str(), full_new_dir.c_str()) == 0)
 			{
 				const char msg[] = "Directory renamed to \"%s\"";
-				ShowMessage(msg, Shorten(TO_WSTRING(new_dir), COLS-static_strlen(msg)).c_str());
+				ShowMessage(msg, Shorten(TO_WSTRING(new_dir), COLS-const_strlen(msg)).c_str());
 				Mpd.UpdateDirectory(myTagEditor->CurrentDir());
 			}
 			else
 			{
 				const char msg[] = "Couldn't rename \"%s\": %s";
-				ShowMessage(msg, Shorten(TO_WSTRING(old_dir), COLS-static_strlen(msg)-25).c_str(), strerror(errno));
+				ShowMessage(msg, Shorten(TO_WSTRING(old_dir), COLS-const_strlen(msg)-25).c_str(), strerror(errno));
 			}
 		}
 	}
@@ -1620,7 +1622,7 @@ void EditPlaylistName::Run()
 		if (Mpd.Rename(locale_to_utf_cpy(old_name), locale_to_utf_cpy(new_name)))
 		{
 			const char msg[] = "Playlist renamed to \"%s\"";
-			ShowMessage(msg, Shorten(TO_WSTRING(new_name), COLS-static_strlen(msg)).c_str());
+			ShowMessage(msg, Shorten(TO_WSTRING(new_name), COLS-const_strlen(msg)).c_str());
 			if (myBrowser->Main() && !myBrowser->isLocal())
 				myBrowser->GetDirectory("/");
 			if (myPlaylistEditor->Main())
@@ -1696,7 +1698,7 @@ void ToggleScreenLock::Run()
 			UnlockStatusbar();
 			if (str_part.empty())
 				return;
-			part = StrToInt(str_part);
+			part = stringToInt(str_part);
 		}
 		if (part < 20 || part > 80)
 		{
@@ -1760,7 +1762,7 @@ void JumpToPositionInSong::Run()
 	int newpos = 0;
 	if (position.find(':') != std::string::npos) // probably time in mm:ss
 	{
-		newpos = StrToInt(position)*60 + StrToInt(position.substr(position.find(':')+1));
+		newpos = stringToInt(position)*60 + stringToInt(position.substr(position.find(':')+1));
 		if (newpos >= 0 && newpos <= Mpd.GetTotalTime())
 			Mpd.Seek(newpos);
 		else
@@ -1768,7 +1770,7 @@ void JumpToPositionInSong::Run()
 	}
 	else if (position.find('s') != std::string::npos) // probably position in seconds
 	{
-		newpos = StrToInt(position);
+		newpos = stringToInt(position);
 		if (newpos >= 0 && newpos <= Mpd.GetTotalTime())
 			Mpd.Seek(newpos);
 		else
@@ -1776,7 +1778,7 @@ void JumpToPositionInSong::Run()
 	}
 	else
 	{
-		newpos = StrToInt(position);
+		newpos = stringToInt(position);
 		if (newpos >= 0 && newpos <= 100)
 			Mpd.Seek(Mpd.GetTotalTime()*newpos/100.0);
 		else
@@ -2163,13 +2165,13 @@ void AddRandomItems::Run()
 	while (answer != 's' && answer != 'a' && answer != 'b');
 	UnlockStatusbar();
 	
-	mpd_tag_type tag_type = IntoTagItem(answer);
-	std::string tag_type_str = answer == 's' ? "song" : IntoStr(tag_type);
+	mpd_tag_type tag_type = charToTagType(answer);
+	std::string tag_type_str = answer == 's' ? "song" : tagTypeToString(tag_type);
 	lowercase(tag_type_str);
 	
 	LockStatusbar();
 	Statusbar() << "Number of random " << tag_type_str << "s: ";
-	size_t number = StrToLong(wFooter->GetString());
+	size_t number = stringToLongInt(wFooter->GetString());
 	UnlockStatusbar();
 	if (number && (answer == 's' ? Mpd.AddRandomSongs(number) : Mpd.AddRandomTag(tag_type, number)))
 		ShowMessage("%zu random %s%s added to playlist", number, tag_type_str.c_str(), number == 1 ? "" : "s");
@@ -2225,11 +2227,11 @@ void ToggleLibraryTagType::Run()
 	}
 	while (answer != 'a' && answer != 'A' && answer != 'y' && answer != 'g' && answer != 'c' && answer != 'p');
 	UnlockStatusbar();
-	mpd_tag_type new_tagitem = IntoTagItem(answer);
+	mpd_tag_type new_tagitem = charToTagType(answer);
 	if (new_tagitem != Config.media_lib_primary_tag)
 	{
 		Config.media_lib_primary_tag = new_tagitem;
-		std::string item_type = IntoStr(Config.media_lib_primary_tag);
+		std::string item_type = tagTypeToString(Config.media_lib_primary_tag);
 		myLibrary->Artists->SetTitle(Config.titles_visibility ? item_type + "s" : "");
 		myLibrary->Artists->Reset();
 		lowercase(item_type);

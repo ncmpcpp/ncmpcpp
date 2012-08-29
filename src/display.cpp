@@ -25,6 +25,7 @@
 #include "song_info.h"
 #include "playlist.h"
 #include "global.h"
+#include "utility/type_conversions.h"
 
 using Global::myScreen;
 
@@ -214,7 +215,7 @@ void Display::SongsInColumns(const MPD::Song &s, void *data, Menu<MPD::Song> *me
 		std::basic_string<my_char_t> tag;
 		for (size_t i = 0; i < it->type.length(); ++i)
 		{
-			MPD::Song::GetFunction get = toGetFunction(it->type[i]);
+			MPD::Song::GetFunction get = charToGetFunction(it->type[i]);
 			tag = TO_WSTRING(get ? s.getTags(get) : "");
 			if (!tag.empty())
 				break;

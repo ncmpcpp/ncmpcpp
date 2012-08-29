@@ -22,7 +22,6 @@
 
 #ifdef HAVE_CURL_CURL_H
 
-#include "conv.h"
 #include "curl_handle.h"
 #include "settings.h"
 #include "utility/html.h"
@@ -118,7 +117,7 @@ bool ArtistInfo::parse(std::string &data)
 	
 	if ((a = data.find("<content>")) != std::string::npos)
 	{
-		a += static_strlen("<content>");
+		a += const_strlen("<content>");
 		if ((b = data.find("</content>")) == std::string::npos)
 			parse_failed = true;
 	}
@@ -142,17 +141,17 @@ bool ArtistInfo::parse(std::string &data)
 		    i != std::string::npos; i = data.find("<name>", i), k = data.find("<url>", k))
 	{
 		j = data.find("</name>", i);
-		i += static_strlen("<name>");
+		i += const_strlen("<name>");
 		
 		l = data.find("</url>", k);
-		k += static_strlen("<url>");
+		k += const_strlen("<url>");
 		
 		similars.push_back(std::make_pair(data.substr(i, j-i), data.substr(k, l-k)));
 		stripHtmlTags(similars.back().first);
 	}
 	
-	a += static_strlen("<![CDATA[");
-	b -= static_strlen("]]>");
+	a += const_strlen("<![CDATA[");
+	b -= const_strlen("]]>");
 	data = data.substr(a, b-a);
 	
 	postProcess(data);

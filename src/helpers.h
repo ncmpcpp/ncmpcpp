@@ -21,7 +21,6 @@
 #ifndef _HELPERS_H
 #define _HELPERS_H
 
-#include "conv.h"
 #include "mpdpp.h"
 #include "ncmpcpp.h"
 #include "settings.h"
@@ -193,5 +192,7 @@ template <typename T> std::string getSharedDirectory(Menu<T> *menu)
 #endif // HAVE_TAGLIB_H
 
 std::basic_string<my_char_t> Scroller(const std::basic_string<my_char_t> &str, size_t &pos, size_t width);
+
+std::string Shorten(const std::basic_string<my_char_t> &s, size_t max_length);
 
 #endif

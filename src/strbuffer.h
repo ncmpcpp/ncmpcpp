@@ -21,9 +21,8 @@
 #ifndef _STRBUFFER_H
 #define _STRBUFFER_H
 
-#include "numeric_conversions.h"
 #include "window.h"
-#include "utility/string.h"
+#include "utility/numeric_conversions.h"
 
 #include <list>
 

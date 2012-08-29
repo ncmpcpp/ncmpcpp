@@ -20,6 +20,7 @@
 
 #include <cassert>
 #include <cerrno>
+#include <cstring>
 #include <fstream>
 
 #include "browser.h"
@@ -305,7 +306,7 @@ std::string Lyrics::GenerateFilename(const MPD::Song &s)
 		file += " - ";
 		file += locale_to_utf_cpy(s.getTitle());
 		file += ".txt";
-		EscapeUnallowedChars(file);
+		removeInvalidCharsFromFilename(file);
 		filename = Config.lyrics_directory;
 		filename += "/";
 		filename += file;
@@ -402,7 +403,7 @@ void Lyrics::Refetch()
 	if (remove(itsFilename.c_str()) && errno != ENOENT)
 	{
 		const char msg[] = "Couldn't remove \"%s\": %s";
-		ShowMessage(msg, Shorten(TO_WSTRING(itsFilename), COLS-static_strlen(msg)-25).c_str(), strerror(errno));
+		ShowMessage(msg, Shorten(TO_WSTRING(itsFilename), COLS-const_strlen(msg)-25).c_str(), strerror(errno));
 		return;
 	}
 	Load();

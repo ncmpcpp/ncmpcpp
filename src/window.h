@@ -117,18 +117,6 @@
 # define wcwidth(x) int(!iscntrl(x))
 #endif
 
-/// Converts wide string to narrow string
-/// @param ws wide string
-/// @return narrow string
-///
-std::string ToString(const std::wstring &ws);
-
-/// Converts narrow string to wide string
-/// @param s narrow string
-/// @return wide string
-///
-std::wstring ToWString(const std::string &s);
-
 /// NCurses namespace provides set of easy-to-use
 /// wrappers over original curses library
 ///
