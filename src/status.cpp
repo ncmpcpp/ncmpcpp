@@ -222,6 +222,10 @@ void NcmpcppStatusChanged(MPD::Connection *, MPD::StatusChanges changed, void *)
 	
 	if (changed.Playlist)
 	{
+		np = Mpd.GetCurrentlyPlayingSong();
+		if (!np.empty())
+			WindowTitle(np.toString(Config.song_window_title_format));
+		
 		bool is_filtered = myPlaylist->Items->isFiltered();
 		myPlaylist->Items->ShowAll();
 		
@@ -315,7 +319,8 @@ void NcmpcppStatusChanged(MPD::Connection *, MPD::StatusChanges changed, void *)
 			}
 			case MPD::psPlay:
 			{
-				//WindowTitle(utf_to_locale_cpy(np.toString(Config.song_window_title_format)));
+				if (!np.empty())
+					WindowTitle(np.toString(Config.song_window_title_format));
 				player_state = Config.new_design ? "[playing]" : "Playing: ";
 				Playlist::ReloadRemaining = true;
 				if (Mpd.GetOldState() == MPD::psStop) // show track info in status immediately
@@ -381,6 +386,13 @@ void NcmpcppStatusChanged(MPD::Connection *, MPD::StatusChanges changed, void *)
 				Lyrics::DownloadInBackground(myPlaylist->NowPlayingSong());
 #			endif // HAVE_CURL_CURL_H
 			
+			if (Mpd.isPlaying())
+			{
+				np = Mpd.GetCurrentlyPlayingSong();
+				if (!np.empty())
+					WindowTitle(np.toString(Config.song_window_title_format));
+			}
+				
 			if (Config.autocenter_mode && !myPlaylist->Items->isFiltered())
 				myPlaylist->Items->Highlight(myPlaylist->NowPlaying);
 			
