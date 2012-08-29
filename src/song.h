@@ -77,10 +77,12 @@ struct Song
 	static const char FormatEscapeCharacter = 1;
 	
 	private:
+		const char *getTag(mpd_tag_type type, unsigned idx) const;
 		std::string ParseFormat(std::string::const_iterator &it, const std::string &tag_separator,
 		                        const std::string &escape_chars) const;
 		
-		std::shared_ptr<struct SongImpl> pimpl;
+		std::shared_ptr<mpd_song> m_song;
+		unsigned m_hash;
 };
 
 }

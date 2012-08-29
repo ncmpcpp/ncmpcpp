@@ -42,40 +42,32 @@ unsigned calc_hash(const char* s, unsigned seed = 0)
 
 namespace MPD {//
 
-struct SongImpl
+const char *Song::getTag(mpd_tag_type type, unsigned idx) const
 {
-	mpd_song *m_song;
-	unsigned m_hash;
-	
-	SongImpl(mpd_song *s, unsigned hash) : m_song(s), m_hash(hash) { }
-	~SongImpl() { mpd_song_free(m_song); }
-	
-	const char *getTag(mpd_tag_type type, unsigned idx)
-	{
-		const char *tag = mpd_song_get_tag(m_song, type, idx);
-		return tag ? tag : "";
-	}
-};
+	const char *tag = mpd_song_get_tag(m_song.get(), type, idx);
+	return tag ? tag : "";
+}
 
 Song::Song(mpd_song *s)
 {
 	assert(s);
-	pimpl = std::shared_ptr<SongImpl>(new SongImpl(s, calc_hash(mpd_song_get_uri(s))));
+	m_song = std::shared_ptr<mpd_song>(s, mpd_song_free);
+	m_hash = calc_hash(mpd_song_get_uri(s));
 }
 
 std::string Song::getURI(unsigned idx) const
 {
-	assert(pimpl);
+	assert(m_song);
 	if (idx > 0)
 		return "";
 	else
-		return mpd_song_get_uri(pimpl->m_song);
+		return mpd_song_get_uri(m_song.get());
 }
 
 std::string Song::getName(unsigned idx) const
 {
-	assert(pimpl);
-	mpd_song *s = pimpl->m_song;
+	assert(m_song);
+	mpd_song *s = m_song.get();
 	const char *res = mpd_song_get_tag(s, MPD_TAG_NAME, idx);
 	if (!res && idx > 0)
 		return "";
@@ -89,10 +81,10 @@ std::string Song::getName(unsigned idx) const
 
 std::string Song::getDirectory(unsigned idx) const
 {
-	assert(pimpl);
+	assert(m_song);
 	if (idx > 0 || isStream())
 		return "";
-	const char *uri = mpd_song_get_uri(pimpl->m_song);
+	const char *uri = mpd_song_get_uri(m_song.get());
 	const char *name = strrchr(uri, '/');
 	if (name)
 		return std::string(uri, name-uri);
@@ -102,32 +94,32 @@ std::string Song::getDirectory(unsigned idx) const
 
 std::string Song::getArtist(unsigned idx) const
 {
-	assert(pimpl);
-	return pimpl->getTag(MPD_TAG_ARTIST, idx);
+	assert(m_song);
+	return getTag(MPD_TAG_ARTIST, idx);
 }
 
 std::string Song::getTitle(unsigned idx) const
 {
-	assert(pimpl);
-	return pimpl->getTag(MPD_TAG_TITLE, idx);
+	assert(m_song);
+	return getTag(MPD_TAG_TITLE, idx);
 }
 
 std::string Song::getAlbum(unsigned idx) const
 {
-	assert(pimpl);
-	return pimpl->getTag(MPD_TAG_ALBUM, idx);
+	assert(m_song);
+	return getTag(MPD_TAG_ALBUM, idx);
 }
 
 std::string Song::getAlbumArtist(unsigned idx) const
 {
-	assert(pimpl);
-	return pimpl->getTag(MPD_TAG_ALBUM_ARTIST, idx);
+	assert(m_song);
+	return getTag(MPD_TAG_ALBUM_ARTIST, idx);
 }
 
 std::string Song::getTrack(unsigned idx) const
 {
-	assert(pimpl);
-	std::string track = pimpl->getTag(MPD_TAG_TRACK, idx);
+	assert(m_song);
+	std::string track = getTag(MPD_TAG_TRACK, idx);
 	if ((track.length() == 1 && track[0] != '0')
 	||  (track.length() > 3  && track[1] == '/'))
 		return "0"+track;
@@ -137,7 +129,7 @@ std::string Song::getTrack(unsigned idx) const
 
 std::string Song::getTrackNumber(unsigned idx) const
 {
-	assert(pimpl);
+	assert(m_song);
 	std::string track = getTrack(idx);
 	size_t slash = track.find('/');
 	if (slash != std::string::npos)
@@ -147,46 +139,46 @@ std::string Song::getTrackNumber(unsigned idx) const
 
 std::string Song::getDate(unsigned idx) const
 {
-	assert(pimpl);
-	return pimpl->getTag(MPD_TAG_DATE, idx);
+	assert(m_song);
+	return getTag(MPD_TAG_DATE, idx);
 }
 
 std::string Song::getGenre(unsigned idx) const
 {
-	assert(pimpl);
-	return pimpl->getTag(MPD_TAG_GENRE, idx);
+	assert(m_song);
+	return getTag(MPD_TAG_GENRE, idx);
 }
 
 std::string Song::getComposer(unsigned idx) const
 {
-	assert(pimpl);
-	return pimpl->getTag(MPD_TAG_COMPOSER, idx);
+	assert(m_song);
+	return getTag(MPD_TAG_COMPOSER, idx);
 }
 
 std::string Song::getPerformer(unsigned idx) const
 {
-	assert(pimpl);
-	return pimpl->getTag(MPD_TAG_PERFORMER, idx);
+	assert(m_song);
+	return getTag(MPD_TAG_PERFORMER, idx);
 }
 
 std::string Song::getDisc(unsigned idx) const
 {
-	assert(pimpl);
-	return pimpl->getTag(MPD_TAG_DISC, idx);
+	assert(m_song);
+	return getTag(MPD_TAG_DISC, idx);
 }
 
 std::string Song::getComment(unsigned idx) const
 {
-	assert(pimpl);
-	return pimpl->getTag(MPD_TAG_COMMENT, idx);
+	assert(m_song);
+	return getTag(MPD_TAG_COMMENT, idx);
 }
 
 std::string Song::getLength(unsigned idx) const
 {
-	assert(pimpl);
+	assert(m_song);
 	if (idx > 0)
 		return "";
-	unsigned len = mpd_song_get_duration(pimpl->m_song);
+	unsigned len = mpd_song_get_duration(m_song.get());
 	if (len > 0)
 		return ShowTime(len);
 	else
@@ -195,7 +187,7 @@ std::string Song::getLength(unsigned idx) const
 
 std::string Song::getPriority(unsigned idx) const
 {
-	assert(pimpl);
+	assert(m_song);
 	if (idx > 0)
 		return "";
 	return unsignedIntTo<std::string>::apply(getPrio());
@@ -203,7 +195,7 @@ std::string Song::getPriority(unsigned idx) const
 
 std::string MPD::Song::getTags(GetFunction f, const std::string &tag_separator) const
 {
-	assert(pimpl);
+	assert(m_song);
 	unsigned idx = 0;
 	std::string result;
 	for (std::string tag; !(tag = (this->*f)(idx)).empty(); ++idx)
@@ -217,61 +209,61 @@ std::string MPD::Song::getTags(GetFunction f, const std::string &tag_separator) 
 
 unsigned Song::getHash() const
 {
-	assert(pimpl);
-	return pimpl->m_hash;
+	assert(m_song);
+	return m_hash;
 }
 
 unsigned Song::getDuration() const
 {
-	assert(pimpl);
-	return mpd_song_get_duration(pimpl->m_song);
+	assert(m_song);
+	return mpd_song_get_duration(m_song.get());
 }
 
 unsigned Song::getPosition() const
 {
-	assert(pimpl);
-	return mpd_song_get_pos(pimpl->m_song);
+	assert(m_song);
+	return mpd_song_get_pos(m_song.get());
 }
 
 unsigned Song::getID() const
 {
-	assert(pimpl);
-	return mpd_song_get_id(pimpl->m_song);
+	assert(m_song);
+	return mpd_song_get_id(m_song.get());
 }
 
 unsigned Song::getPrio() const
 {
-	assert(pimpl);
-	return mpd_song_get_prio(pimpl->m_song);
+	assert(m_song);
+	return mpd_song_get_prio(m_song.get());
 }
 
 time_t Song::getMTime() const
 {
-	assert(pimpl);
-	return mpd_song_get_last_modified(pimpl->m_song);
+	assert(m_song);
+	return mpd_song_get_last_modified(m_song.get());
 }
 
 bool Song::isFromDatabase() const
 {
-	assert(pimpl);
-	const char *uri = mpd_song_get_uri(pimpl->m_song);
+	assert(m_song);
+	const char *uri = mpd_song_get_uri(m_song.get());
 	return uri[0] != '/' || !strrchr(uri, '/');
 }
 
 bool Song::isStream() const
 {
-	assert(pimpl);
-	return !strncmp(mpd_song_get_uri(pimpl->m_song), "http://", 7);
+	assert(m_song);
+	return !strncmp(mpd_song_get_uri(m_song.get()), "http://", 7);
 }
 
 bool Song::empty() const
 {
-	return pimpl == 0;
+	return m_song == 0;
 }
 
 std::string Song::toString(const std::string &fmt, const std::string &tag_separator, const std::string &escape_chars) const
 {
-	assert(pimpl);
+	assert(m_song);
 	std::string::const_iterator it = fmt.begin();
 	return ParseFormat(it, tag_separator, escape_chars);
 }
