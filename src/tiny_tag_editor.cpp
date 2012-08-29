@@ -188,7 +188,7 @@ bool TinyTagEditor::getTags()
 	
 	std::string ext = itsEdited.getURI();
 	ext = ext.substr(ext.rfind(".")+1);
-	ToLower(ext);
+	lowercase(ext);
 	
 	if (!isInitialized)
 		Init();

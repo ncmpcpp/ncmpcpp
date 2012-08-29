@@ -32,6 +32,7 @@
 #include "playlist.h"
 #include "settings.h"
 #include "status.h"
+#include "utility/comparators.h"
 #ifdef HAVE_TAGLIB_H
 # include "tag_editor.h"
 #endif // HAVE_TAGLIB_H
@@ -325,7 +326,7 @@ bool Browser::hasSupportedExtension(const std::string &file)
 		return false;
 	
 	std::string ext = file.substr(last_dot+1);
-	ToLower(ext);
+	lowercase(ext);
 	return SupportedExtensions.find(ext) != SupportedExtensions.end();
 }
 
@@ -594,7 +595,7 @@ std::string Browser::ItemToString(const MPD::Item &item, void *)
 	{
 		case MPD::itDirectory:
 		{
-			return "[" + ExtractTopName(item.name) + "]";
+			return "[" + getBasename(item.name) + "]";
 		}
 		case MPD::itSong:
 		{
@@ -605,7 +606,7 @@ std::string Browser::ItemToString(const MPD::Item &item, void *)
 		}
 		case MPD::itPlaylist:
 		{
-			return Config.browser_playlist_prefix.Str() + ExtractTopName(item.name);
+			return Config.browser_playlist_prefix.Str() + getBasename(item.name);
 		}
 		default:
 		{

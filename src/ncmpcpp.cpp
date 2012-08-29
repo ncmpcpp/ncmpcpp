@@ -116,7 +116,7 @@ int main(int argc, char **argv)
 	if (argc > 1)
 		ParseArgv(argc, argv);
 	
-	if (!ConnectToMPD())
+	if (!Action::ConnectToMPD())
 		exit(1);
 	
 	if (Mpd.Version() < 14)

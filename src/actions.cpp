@@ -28,6 +28,7 @@
 #include "display.h"
 #include "global.h"
 #include "mpdpp.h"
+#include "utility/comparators.h"
 
 #include "browser.h"
 #include "clock.h"
@@ -42,6 +43,7 @@
 #include "server_info.h"
 #include "song_info.h"
 #include "outputs.h"
+#include "utility/string.h"
 #include "tag_editor.h"
 #include "tiny_tag_editor.h"
 #include "visualizer.h"
@@ -393,6 +395,18 @@ void Action::ListsChangeFinisher()
 		}
 #		endif // HAVE_TAGLIB_H
 	}
+}
+
+bool Action::ConnectToMPD()
+{
+	if (!Mpd.Connect())
+	{
+		std::cout << "Couldn't connect to MPD ";
+		std::cout << "(host = " << Mpd.GetHostname() << ", port = " << Mpd.GetPort() << ")";
+		std::cout << ": " << Mpd.GetErrorMessage() << std::endl;
+		return false;
+	}
+	return true;
 }
 
 bool Action::AskYesNoQuestion(const std::string &question, void (*callback)())
@@ -1433,7 +1447,7 @@ void EditLibraryTag::Run()
 			if (dir_to_update.empty())
 				dir_to_update = es.getDirectory();
 			else
-				FindSharedDir(es.getDirectory(), dir_to_update);
+				getSharedDirectory(es.getDirectory(), dir_to_update);
 		});
 		if (success)
 		{
@@ -1492,7 +1506,7 @@ void EditLibraryAlbum::Run()
 		}
 		if (success)
 		{
-			Mpd.UpdateDirectory(FindSharedDir(myLibrary->Songs));
+			Mpd.UpdateDirectory(getSharedDirectory(myLibrary->Songs));
 			ShowMessage("Tags updated successfully");
 		}
 	}
@@ -1541,7 +1555,7 @@ void EditDirectoryName::Run()
 				const char msg[] = "Directory renamed to \"%s\"";
 				ShowMessage(msg, Shorten(TO_WSTRING(new_dir), COLS-static_strlen(msg)).c_str());
 				if (!myBrowser->isLocal())
-					Mpd.UpdateDirectory(locale_to_utf_cpy(FindSharedDir(old_dir, new_dir)));
+					Mpd.UpdateDirectory(locale_to_utf_cpy(getSharedDirectory(old_dir, new_dir)));
 				myBrowser->GetDirectory(myBrowser->CurrentDir());
 			}
 			else
@@ -2151,7 +2165,7 @@ void AddRandomItems::Run()
 	
 	mpd_tag_type tag_type = IntoTagItem(answer);
 	std::string tag_type_str = answer == 's' ? "song" : IntoStr(tag_type);
-	ToLower(tag_type_str);
+	lowercase(tag_type_str);
 	
 	LockStatusbar();
 	Statusbar() << "Number of random " << tag_type_str << "s: ";
@@ -2218,7 +2232,7 @@ void ToggleLibraryTagType::Run()
 		std::string item_type = IntoStr(Config.media_lib_primary_tag);
 		myLibrary->Artists->SetTitle(Config.titles_visibility ? item_type + "s" : "");
 		myLibrary->Artists->Reset();
-		ToLower(item_type);
+		lowercase(item_type);
 		if (myLibrary->Columns() == 2)
 		{
 			myLibrary->Songs->Clear();

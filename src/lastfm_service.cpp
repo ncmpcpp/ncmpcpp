@@ -25,6 +25,7 @@
 #include "conv.h"
 #include "curl_handle.h"
 #include "settings.h"
+#include "utility/html.h"
 
 const char *LastfmService::baseURL = "http://ws.audioscrobbler.com/2.0/?api_key=d94e5b6e26469a2d1ffae8ef20131b79&method=";
 
@@ -55,7 +56,7 @@ LastfmService::Result LastfmService::fetch(Args &args)
 	
 	if (actionFailed(data))
 	{
-		StripHtmlTags(data);
+		stripHtmlTags(data);
 		result.second = data;
 		return result;
 	}
@@ -91,8 +92,8 @@ bool LastfmService::actionFailed(const std::string &data)
 
 void LastfmService::postProcess(std::string &data)
 {
-	StripHtmlTags(data);
-	Trim(data);
+	stripHtmlTags(data);
+	trim(data);
 }
 
 /***********************************************************************/
@@ -147,7 +148,7 @@ bool ArtistInfo::parse(std::string &data)
 		k += static_strlen("<url>");
 		
 		similars.push_back(std::make_pair(data.substr(i, j-i), data.substr(k, l-k)));
-		StripHtmlTags(similars.back().first);
+		stripHtmlTags(similars.back().first);
 	}
 	
 	a += static_strlen("<![CDATA[");

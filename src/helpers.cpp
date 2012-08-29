@@ -39,16 +39,6 @@
 #include "outputs.h"
 #include "visualizer.h"
 
-bool ConnectToMPD()
-{
-	if (!Mpd.Connect())
-	{
-		std::cout << "Couldn't connect to MPD (host = " << Mpd.GetHostname() << ", port = " << Mpd.GetPort() << "): " << Mpd.GetErrorMessage() << std::endl;
-		return false;
-	}
-	return true;
-}
-
 void ParseArgv(int argc, char **argv)
 {
 	bool quit = 0;
@@ -143,7 +133,7 @@ void ParseArgv(int argc, char **argv)
 			exit(0);
 		}
 		
-		if (!ConnectToMPD())
+		if (!Action::ConnectToMPD())
 			exit(1);
 		
 		if (!strcmp(argv[i], "-s") || !strcmp(argv[i], "--screen"))
@@ -203,8 +193,8 @@ void ParseArgv(int argc, char **argv)
 						now_playing_format = "{";
 						now_playing_format += argv[i];
 						now_playing_format += "}";
-						Replace(now_playing_format, "\\n", "\n");
-						Replace(now_playing_format, "\\t", "\t");
+						replace(now_playing_format, "\\n", "\n");
+						replace(now_playing_format, "\\t", "\t");
 					}
 				}
 				std::cout << utf_to_locale_cpy(Mpd.GetCurrentlyPlayingSong().toString(now_playing_format)) << "\n";
@@ -280,59 +270,6 @@ void ParseArgv(int argc, char **argv)
 		exit(0);
 }
 
-int CaseInsensitiveStringComparison::operator()(const std::string &a, const std::string &b)
-{
-	const char *i = a.c_str();
-	const char *j = b.c_str();
-	if (Config.ignore_leading_the)
-	{
-		if (hasTheWord(a))
-			i += 4;
-		if (hasTheWord(b))
-			j += 4;
-	}
-	int dist;
-	while (!(dist = tolower(*i)-tolower(*j)) && *j)
-		++i, ++j;
-	return dist;
-}
-
-bool CaseInsensitiveSorting::operator()(const MPD::Item &a, const MPD::Item &b)
-{
-	bool result = false;
-	if (a.type == b.type)
-	{
-		switch (a.type)
-		{
-			case MPD::itDirectory:
-				result = cmp(ExtractTopName(a.name), ExtractTopName(b.name)) < 0;
-				break;
-			case MPD::itPlaylist:
-				result = cmp(a.name, b.name) < 0;
-				break;
-			case MPD::itSong:
-				switch (Config.browser_sort_mode)
-				{
-					case smName:
-						result = operator()(a.song, b.song);
-						break;
-					case smMTime:
-						result = a.song.getMTime() > b.song.getMTime();
-						break;
-					case smCustomFormat:
-						result = cmp(a.song.toString(Config.browser_sort_format), b.song.toString(Config.browser_sort_format)) < 0;
-						break;
-				}
-				break;
-			default: // there is no other option, silence compiler
-				assert(false);
-		}
-	}
-	else
-		result = a.type < b.type;
-	return result;
-}
-
 std::string Timestamp(time_t t)
 {
 	char result[32];
@@ -365,10 +302,10 @@ void UpdateSongList(Menu<MPD::Song> *menu)
 }
 
 #ifdef HAVE_TAGLIB_H
-std::string FindSharedDir(const MPD::SongList &v)
+std::string getSharedDirectory(const MPD::SongList &v)
 {
 	if (v.empty()) // this should never happen, but in case...
-		FatalError("empty SongList passed to FindSharedDir(const SongList &)!");
+		FatalError("empty SongList passed to getSharedDirectory(const SongList &)!");
 	size_t i = -1;
 	std::string first = v.front().getDirectory();
 	for (MPD::SongList::const_iterator it = ++v.begin(); it != v.end(); ++it)
@@ -383,63 +320,6 @@ std::string FindSharedDir(const MPD::SongList &v)
 	return i ? first.substr(0, i) : "/";
 }
 #endif // HAVE_TAGLIB_H
-
-std::string FindSharedDir(const std::string &one, const std::string &two)
-{
-	if (one == two)
-		return one;
-	size_t i = 0;
-	while (!one.compare(i, 1, two, i, 1))
-		++i;
-	i = one.rfind("/", i);
-	return i != std::string::npos ? one.substr(0, i) : "/";
-}
-
-std::string GetLineValue(std::string &line, char a, char b, bool once)
-{
-	int pos[2] = { -1, -1 };
-	char x = a;
-	size_t i = 0;
-	while ((i = line.find(x, i)) != std::string::npos && pos[1] < 0)
-	{
-		if (i && line[i-1] == '\\')
-		{
-			i++;
-			continue;
-		}
-		if (once)
-			line[i] = 0;
-		pos[pos[0] >= 0] = i++;
-		if (x == a)
-			x = b;
-	}
-	++pos[0];
-	std::string result = pos[0] >= 0 && pos[1] >= 0 ? line.substr(pos[0], pos[1]-pos[0]) : "";
-	
-	// replace \a and \b with a and b respectively
-	char r1[] = "\\ ", r2[] = " ";
-	r1[1] = r2[0] = a;
-	Replace(result, r1, r2);
-	if (a != b)
-	{
-		r1[1] = r2[0] = b;
-		Replace(result, r1, r2);
-	}
-	
-	return result;
-}
-
-std::string ExtractTopName(const std::string &s)
-{
-	size_t slash = s.rfind("/");
-	return slash != std::string::npos ? s.substr(++slash) : s;
-}
-
-std::string PathGoDownOneLevel(const std::string &path)
-{
-	size_t i = path.rfind('/');
-	return i == std::string::npos ? "/" : path.substr(0, i);
-}
 
 std::basic_string<my_char_t> Scroller(const std::basic_string<my_char_t> &str, size_t &pos, size_t width)
 {
@@ -472,15 +352,4 @@ std::basic_string<my_char_t> Scroller(const std::basic_string<my_char_t> &str, s
 	else
 		result = s;
 	return result;
-}
-
-bool isInteger(const char *s)
-{
-	assert(s);
-	if (*s == '\0')
-		return false;
-	for (const char *it = s; *it != '\0'; ++it)
-		if (!isdigit(*it) && (it != s || *it != '-'))
-			return false;
-	return true;
 }

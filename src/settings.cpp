@@ -104,7 +104,7 @@ namespace
 		if (equal == std::string::npos)
 			return "";
 		std::string result = s.substr(0, equal);
-		Trim(result);
+		trim(result);
 		return result;
 	}
 	
@@ -445,7 +445,7 @@ void Configuration::Read()
 		if (!cl.empty() && cl[0] != '#')
 		{
 			name = GetOptionName(cl);
-			v = GetLineValue(cl);
+			v = getEnclosedString(cl, '"', '"', 0);
 			
 			if (name == "ncmpcpp_directory")
 			{
@@ -1078,11 +1078,12 @@ void Configuration::GenerateColumns()
 {
 	columns.clear();
 	std::string width;
-	while (!(width = GetLineValue(song_list_columns_format, '(', ')', 1)).empty())
+	size_t pos = 0;
+	while (!(width = getEnclosedString(song_list_columns_format, '(', ')', &pos)).empty())
 	{
 		Column col;
-		col.color = IntoColor(GetLineValue(song_list_columns_format, '[', ']', 1));
-		std::string tag_type = GetLineValue(song_list_columns_format, '{', '}', 1);
+		col.color = IntoColor(getEnclosedString(song_list_columns_format, '[', ']', &pos));
+		std::string tag_type = getEnclosedString(song_list_columns_format, '{', '}', &pos);
 		
 		col.fixed = *width.rbegin() == 'f';
 		

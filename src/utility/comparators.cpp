@@ -18,25 +18,58 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
-#include <cassert>
-#include "string_utilities.h"
+#include "comparators.h"
+#include "settings.h"
 
-std::vector<std::string> split(const std::string &s, const std::string &delimiter)
+int CaseInsensitiveStringComparison::operator()(const std::string &a, const std::string &b)
 {
-	if (delimiter.empty())
-		return { s };
-	std::vector<std::string> result;
-	size_t i = 0, j = 0;
-	while (true)
+	const char *i = a.c_str();
+	const char *j = b.c_str();
+	if (Config.ignore_leading_the)
 	{
-		i = j;
-		j = s.find(delimiter, i);
-		if (j == std::string::npos)
-			break;
-		else
-			result.push_back(s.substr(i, j-i));
-		j += delimiter.length();
+		if (hasTheWord(a))
+			i += 4;
+		if (hasTheWord(b))
+			j += 4;
 	}
-	result.push_back(s.substr(i));
+	int dist;
+	while (!(dist = tolower(*i)-tolower(*j)) && *j)
+		++i, ++j;
+	return dist;
+}
+
+bool CaseInsensitiveSorting::operator()(const MPD::Item &a, const MPD::Item &b)
+{
+	bool result = false;
+	if (a.type == b.type)
+	{
+		switch (a.type)
+		{
+			case MPD::itDirectory:
+				result = cmp(getBasename(a.name), getBasename(b.name)) < 0;
+				break;
+			case MPD::itPlaylist:
+				result = cmp(a.name, b.name) < 0;
+				break;
+			case MPD::itSong:
+				switch (Config.browser_sort_mode)
+				{
+					case smName:
+						result = operator()(a.song, b.song);
+						break;
+					case smMTime:
+						result = a.song.getMTime() > b.song.getMTime();
+						break;
+					case smCustomFormat:
+						result = cmp(a.song.toString(Config.browser_sort_format), b.song.toString(Config.browser_sort_format)) < 0;
+						break;
+				}
+				break;
+			default: // there is no other option, silence compiler
+				assert(false);
+		}
+	}
+	else
+		result = a.type < b.type;
 	return result;
 }

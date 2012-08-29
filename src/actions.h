@@ -109,6 +109,7 @@ struct Action
 	static void ResizeScreen();
 	static void SetWindowsDimensions();
 	
+	static bool ConnectToMPD();
 	static bool AskYesNoQuestion(const std::string &question, void (*callback)());
 	static bool isMPDMusicDirSet();
 	

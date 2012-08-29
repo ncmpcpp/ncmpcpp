@@ -352,11 +352,10 @@ void Display::Tags(const MPD::MutableSong &s, void *data, Menu<MPD::MutableSong>
 	}
 }
 
-void Display::Outputs (const MPD::Output &o, void * , Menu< MPD::Output > *menu)
+void Display::Outputs(const MPD::Output &o, void * , Menu< MPD::Output > *menu)
 {
 	*menu << o.name();
 }
-
 
 void Display::Items(const MPD::Item &item, void *data, Menu<MPD::Item> *menu)
 {
@@ -369,7 +368,7 @@ void Display::Items(const MPD::Item &item, void *data, Menu<MPD::Item> *menu)
 				*menu << "[..]";
 				return;
 			}
-			*menu << "[" << ExtractTopName(item.name) << "]";
+			*menu << "[" << getBasename(item.name) << "]";
 			return;
 		}
 		case MPD::itSong:
@@ -379,7 +378,7 @@ void Display::Items(const MPD::Item &item, void *data, Menu<MPD::Item> *menu)
 				Display::SongsInColumns(item.song, data, reinterpret_cast<Menu<MPD::Song> *>(menu));
 			return;
 		case MPD::itPlaylist:
-			*menu << Config.browser_playlist_prefix << ExtractTopName(item.name);
+			*menu << Config.browser_playlist_prefix << getBasename(item.name);
 			return;
 		default:
 			return;

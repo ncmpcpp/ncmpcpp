@@ -27,6 +27,7 @@
 #include "charset.h"
 #include "conv.h"
 #include "lyrics_fetcher.h"
+#include "utility/html.h"
 
 LyricsFetcher *lyricsPlugins[] =
 {
@@ -53,8 +54,8 @@ LyricsFetcher::Result LyricsFetcher::fetch(const std::string &artist, const std:
 	result.first = false;
 	
 	std::string url = getURL();
-	Replace(url, "%artist%", artist.c_str());
-	Replace(url, "%title%", title.c_str());
+	replace(url, "%artist%", artist.c_str());
+	replace(url, "%title%", title.c_str());
 	
 	std::string data;
 	CURLcode code = Curl::perform(data, url);
@@ -98,8 +99,8 @@ bool LyricsFetcher::getContent(const char *open_tag, const char *close_tag, std:
 
 void LyricsFetcher::postProcess(std::string &data)
 {
-	StripHtmlTags(data);
-	Trim(data);
+	stripHtmlTags(data);
+	trim(data);
 }
 
 /***********************************************************************/
@@ -134,9 +135,9 @@ LyricsFetcher::Result LyricwikiFetcher::fetch(const std::string &artist, const s
 			return result;
 		}
 		
-		Replace(data, "<br />", "\n");
-		StripHtmlTags(data);
-		Trim(data);
+		replace(data, "<br />", "\n");
+		stripHtmlTags(data);
+		trim(data);
 		
 		result.second = data;
 		result.first = true;
@@ -225,8 +226,8 @@ void MetrolyricsFetcher::postProcess(std::string &data)
 	// some of lyrics have both \n chars and <br />, html tags
 	// are always present whereas \n chars are not, so we need to
 	// throw them away to avoid having line breaks doubled.
-	Replace(data, "&#10;", "");
-	Replace(data, "<br />", "\n");
+	replace(data, "&#10;", "");
+	replace(data, "<br />", "\n");
 	data = unescapeHtmlUtf8(data);
 	LyricsFetcher::postProcess(data);
 }

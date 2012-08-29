@@ -18,13 +18,13 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
-#ifndef HAVE_TOLOWER_H
-#define HAVE_TOLOWER_H
+#ifndef _UTILITY_HTML
+#define _UTILITY_HTML
 
 #include <string>
 
-void ToLower(std::string &);
-void ToLower(std::wstring &);
+std::string unescapeHtmlUtf8(const std::string &s);
 
-#endif
+void stripHtmlTags(std::string &s);
 
+#endif // _UTILITY_HTML

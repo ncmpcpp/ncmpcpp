@@ -1,5 +1,8 @@
 bin_PROGRAMS = ncmpcpp
 ncmpcpp_SOURCES = \
+	utility/comparators.cpp \
+	utility/html.cpp \
+	utility/string.cpp \
 	actions.cpp \
 	browser.cpp \
 	charset.cpp \
@@ -32,10 +35,8 @@ ncmpcpp_SOURCES = \
 	song.cpp \
 	song_info.cpp \
 	status.cpp \
-	string_utilities.cpp \
 	tag_editor.cpp \
 	tiny_tag_editor.cpp \
-	tolower.cpp \
 	visualizer.cpp \
 	window.cpp
 
@@ -45,6 +46,9 @@ INCLUDES= $(all_includes)
 # the library search path.
 ncmpcpp_LDFLAGS = $(all_libraries)
 noinst_HEADERS = \
+	utility/comparators.h \
+	utility/html.h \
+	utility/string.h \
 	browser.h \
 	charset.h \
 	clock.h \
@@ -75,9 +79,7 @@ noinst_HEADERS = \
 	settings.h \
 	song.h \
 	song_info.h \
-	string_utilities.h \
 	tag_editor.h \
 	tiny_tag_editor.h \
-	tolower.h \
 	visualizer.h \
 	window.h

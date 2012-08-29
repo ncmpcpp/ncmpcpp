@@ -27,6 +27,7 @@
 #include "search_engine.h"
 #include "settings.h"
 #include "status.h"
+#include "utility/comparators.h"
 
 using Global::MainHeight;
 using Global::MainStartY;

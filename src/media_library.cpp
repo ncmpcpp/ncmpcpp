@@ -29,6 +29,7 @@
 #include "mpdpp.h"
 #include "playlist.h"
 #include "status.h"
+#include "utility/comparators.h"
 
 using Global::MainHeight;
 using Global::MainStartY;
@@ -162,7 +163,7 @@ void MediaLibrary::SwitchTo()
 				if (Config.titles_visibility)
 				{
 					std::string item_type = IntoStr(Config.media_lib_primary_tag);
-					ToLower(item_type);
+					lowercase(item_type);
 					Albums->SetTitle("Albums (sorted by " + item_type + ")");
 				}
 				else
@@ -635,7 +636,7 @@ void MediaLibrary::LocateSong(const MPD::Song &s)
 	if (primary_tag.empty())
 	{
 		std::string item_type = IntoStr(Config.media_lib_primary_tag);
-		ToLower(item_type);
+		lowercase(item_type);
 		ShowMessage("Can't use this function because the song has no %s tag set", item_type.c_str());
 		return;
 	}
@@ -726,7 +727,7 @@ void MediaLibrary::AddToPlaylist(bool add_n_play)
 			||  (w == Albums && Albums->Current().Date == AllTracksMarker))
 			{
 				std::string tag_type = IntoStr(Config.media_lib_primary_tag);
-				ToLower(tag_type);
+				lowercase(tag_type);
 				ShowMessage("Songs with %s = \"%s\" added", tag_type.c_str(), Artists->Current().c_str());
 			}
 			else if (w == Albums)

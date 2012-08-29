@@ -26,6 +26,7 @@
 #include "playlist.h"
 #include "playlist_editor.h"
 #include "sel_items_adder.h"
+#include "utility/comparators.h"
 
 using Global::MainHeight;
 using Global::MainStartY;

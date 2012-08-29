@@ -38,6 +38,7 @@
 #include "global.h"
 #include "song_info.h"
 #include "playlist.h"
+#include "utility/comparators.h"
 
 using Global::myScreen;
 using Global::MainHeight;
@@ -637,7 +638,7 @@ void TagEditor::EnterPressed()
 				w->Refresh();
 				w = LeftColumn;
 				LeftColumn->HighlightColor(Config.active_column_color);
-				Mpd.UpdateDirectory(FindSharedDir(Tags));
+				Mpd.UpdateDirectory(getSharedDirectory(Tags));
 			}
 			else
 				Tags->Clear();
@@ -927,7 +928,7 @@ void TagEditor::LocateSong(const MPD::Song &s)
 		Dirs->Reset(); // go to the first pos, which is "." (music dir root)
 	
 	// highlight directory we need and get files from it
-	std::string dir = ExtractTopName(s.getDirectory());
+	std::string dir = getBasename(s.getDirectory());
 	for (size_t i = 0; i < Dirs->Size(); ++i)
 	{
 		if ((*Dirs)[i].first == dir)
@@ -1131,7 +1132,7 @@ void TagEditor::LowerAllLetters(MPD::MutableSong &s)
 		unsigned i = 0;
 		for (std::string tag; !(tag = (s.*m->Get)(i)).empty(); ++i)
 		{
-			ToLower(tag);
+			lowercase(tag);
 			(s.*m->Set)(tag, i);
 		}
 	}

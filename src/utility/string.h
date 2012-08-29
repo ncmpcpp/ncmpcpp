@@ -18,18 +18,26 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
-#include <algorithm>
-#include <wctype.h>
+#ifndef _UTILITY_STRING
+#define _UTILITY_STRING
 
-#include "tolower.h"
+#include <string>
+#include <vector>
 
-void ToLower(std::string &s)
-{
-	transform(s.begin(), s.end(), s.begin(), tolower);
-}
+std::vector<std::string> split(const std::string &s, const std::string &delimiter);
+void replace(std::string &s, const std::string &from, const std::string &to);
 
-void ToLower(std::wstring &s)
-{
-	transform(s.begin(), s.end(), s.begin(), towlower);
-}
+void lowercase(std::string &s);
+void lowercase(std::wstring &s);
 
+void trim(std::string &s);
+
+std::string getBasename(const std::string &path);
+std::string getParentDirectory(const std::string &path);
+std::string getSharedDirectory(const std::string &dir1, const std::string &dir2);
+
+std::string getEnclosedString(const std::string &s, char a, char b, size_t *pos);
+
+bool isInteger(const char *s);
+
+#endif // _UTILITY_STRING

@@ -35,13 +35,6 @@ template <size_t N> inline size_t static_strlen(const char (&)[N])
 	return N-1;
 }
 
-template <size_t N> void Replace(std::string &s, const char (&from)[N], const char *to)
-{
-	size_t to_len = strlen(to);
-	for (size_t i = 0; (i = s.find(from, i)) != std::string::npos; i += to_len)
-		s.replace(i, N-1, to);
-}
-
 int StrToInt(const std::string &);
 long StrToLong(const std::string &);
 
@@ -62,12 +55,6 @@ MPD::MutableSong::SetFunction IntoSetFunction(mpd_tag_type);
 std::string Shorten(const std::basic_string<my_char_t> &s, size_t max_length);
 
 void EscapeUnallowedChars(std::string &);
-
-std::string unescapeHtmlUtf8(const std::string &data);
-
-void StripHtmlTags(std::string &s);
-
-void Trim(std::string &s);
 
 #endif
 

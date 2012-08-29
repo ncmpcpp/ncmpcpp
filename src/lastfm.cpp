@@ -124,7 +124,7 @@ void Lastfm::Load()
 	locale_to_utf(artist);
 	
 	std::string file = artist + ".txt";
-	ToLower(file);
+	lowercase(file);
 	EscapeUnallowedChars(file);
 	
 	itsFilename = itsFolder + "/" + file;

@@ -18,29 +18,48 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
-#include <ctime>
-#include <cstdlib>
-#include <iostream>
+#ifndef _UTILITY_COMPARATORS
+#define _UTILITY_COMPARATORS
 
-#include "error.h"
+#include <string>
+#include "mpdpp.h"
 
-namespace
+class CaseInsensitiveStringComparison
 {
-	const char *Timestamp()
+	bool hasTheWord(const std::string &s)
 	{
-		char result[32];
-		time_t raw;
-		tm *t;
-		time(&raw);
-		t = localtime(&raw);
-		result[strftime(result, 31, "%Y/%m/%d %X", t)] = 0;
-		return result;
+		return  (s.length() > 3)
+		&&	(s[0] == 't' || s[0] == 'T')
+		&&	(s[1] == 'h' || s[1] == 'H')
+		&&	(s[2] == 'e' || s[2] == 'E')
+		&&	(s[3] == ' ');
 	}
-}
+	
+public:
+	int operator()(const std::string &a, const std::string &b);
+};
 
-void FatalError(const std::string &msg)
+class CaseInsensitiveSorting
 {
-	std::cerr << "[" << Timestamp() << "] " << msg << std::endl;
-	abort();
-}
+	CaseInsensitiveStringComparison cmp;
+	
+public:
+	bool operator()(const std::string &a, const std::string &b)
+	{
+		return cmp(a, b) < 0;
+	}
+	
+	bool operator()(const MPD::Song &a, const MPD::Song &b)
+	{
+		return cmp(a.getName(), b.getName()) < 0;
+	}
+	
+	template <typename A, typename B> bool operator()(const std::pair<A, B> &a, const std::pair<A, B> &b)
+	{
+		return cmp(a.first, b.first) < 0;
+	}
+	
+	bool operator()(const MPD::Item &a, const MPD::Item &b);
+};
 
+#endif // _UTILITY_COMPARATORS

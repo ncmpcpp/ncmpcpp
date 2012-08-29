@@ -27,46 +27,7 @@
 #include "settings.h"
 #include "status.h"
 
-bool ConnectToMPD();
 void ParseArgv(int, char **);
-
-class CaseInsensitiveStringComparison
-{
-	bool hasTheWord(const std::string &s)
-	{
-		return  (s.length() > 3)
-		&&	(s[0] == 't' || s[0] == 'T')
-		&&	(s[1] == 'h' || s[1] == 'H')
-		&&	(s[2] == 'e' || s[2] == 'E')
-		&&	(s[3] == ' ');
-	}
-	
-	public:
-		int operator()(const std::string &a, const std::string &b);
-};
-
-class CaseInsensitiveSorting
-{
-	CaseInsensitiveStringComparison cmp;
-	
-	public:
-		bool operator()(const std::string &a, const std::string &b)
-		{
-			return cmp(a, b) < 0;
-		}
-		
-		bool operator()(const MPD::Song &a, const MPD::Song &b)
-		{
-			return cmp(a.getName(), b.getName()) < 0;
-		}
-		
-		template <typename A, typename B> bool operator()(const std::pair<A, B> &a, const std::pair<A, B> &b)
-		{
-			return cmp(a.first, b.first) < 0;
-		}
-		
-		bool operator()(const MPD::Item &, const MPD::Item &);
-};
 
 template <typename A, typename B> std::string StringPairToString(const std::pair<A, B> &pair, void *)
 {
@@ -211,39 +172,26 @@ template <typename T> void ShowTag(T &buf, const std::string &tag)
 		buf << tag;
 }
 
-inline bool Keypressed(int in, const int *key)
-{
-	return in == key[0] || in == key[1];
-}
-
 std::string Timestamp(time_t t);
 
 void UpdateSongList(Menu<MPD::Song> *);
 
-std::string FindSharedDir(const std::string &, const std::string &);
 #ifdef HAVE_TAGLIB_H
-template <typename T> std::string FindSharedDir(Menu<T> *menu)
+template <typename T> std::string getSharedDirectory(Menu<T> *menu)
 {
 	assert(!menu->Empty());
 	std::string dir;
 	dir = (*menu)[0].getDirectory();
 	for (size_t i = 1; i < menu->Size(); ++i)
-		dir = FindSharedDir(dir, (*menu)[i].getDirectory());
+	{
+		dir = getSharedDirectory(dir, (*menu)[i].getDirectory());
+		if (dir == "/")
+			break;
+	}
 	return dir;
 }
-std::string FindSharedDir(const MPD::SongList &);
 #endif // HAVE_TAGLIB_H
-
-std::string ExtractTopName(const std::string &);
-std::string PathGoDownOneLevel(const std::string &path);
-
-std::string GetLineValue(std::string &, char = '"', char = '"', bool = 0);
 
 std::basic_string<my_char_t> Scroller(const std::basic_string<my_char_t> &str, size_t &pos, size_t width);
 
-bool askYesNoQuestion(const Buffer &question, void (*callback)());
-
-bool isInteger(const char *s);
-
 #endif
-

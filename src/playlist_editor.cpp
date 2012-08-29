@@ -30,6 +30,7 @@
 #include "mpdpp.h"
 #include "status.h"
 #include "tag_editor.h"
+#include "utility/comparators.h"
 
 using Global::MainHeight;
 using Global::MainStartY;

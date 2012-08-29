@@ -19,7 +19,7 @@
  ***************************************************************************/
 
 #include "mutable_song.h"
-#include "string_utilities.h"
+#include "utility/string.h"
 
 namespace MPD {//
 

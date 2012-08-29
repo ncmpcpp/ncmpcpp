@@ -27,6 +27,7 @@
 #include "playlist.h"
 #include "song.h"
 #include "status.h"
+#include "utility/comparators.h"
 
 using Global::MainHeight;
 using Global::MainStartY;

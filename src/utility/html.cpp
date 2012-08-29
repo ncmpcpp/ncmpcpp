@@ -18,12 +18,63 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
-#ifndef _STRING_UTILITIES
-#define _STRING_UTILITIES
+#include "utility/html.h"
+#include "utility/string.h"
 
-#include <string>
-#include <vector>
+std::string unescapeHtmlUtf8(const std::string &data)
+{
+	std::string result;
+	for (size_t i = 0, j; i < data.length(); ++i)
+	{
+		if (data[i] == '&' && data[i+1] == '#' && (j = data.find(';', i)) != std::string::npos)
+		{
+			int n = atoi(&data.c_str()[i+2]);
+			if (n >= 0x800)
+			{
+				result += (0xe0 | ((n >> 12) & 0x0f));
+				result += (0x80 | ((n >> 6) & 0x3f));
+				result += (0x80 | (n & 0x3f));
+			}
+			else if (n >= 0x80)
+			{
+				result += (0xc0 | ((n >> 6) & 0x1f));
+				result += (0x80 | (n & 0x3f));
+			}
+			else
+				result += n;
+			i = j;
+		}
+		else
+			result += data[i];
+	}
+	return result;
+}
 
-std::vector<std::string> split(const std::string &s, const std::string &delimiter);
-
-#endif // _STRING_UTILITIES
+void stripHtmlTags(std::string &s)
+{
+	bool erase = 0;
+	for (size_t i = s.find("<"); i != std::string::npos; i = s.find("<"))
+	{
+		size_t j = s.find(">", i)+1;
+		s.replace(i, j-i, "");
+	}
+	replace(s, "&#039;", "'");
+	replace(s, "&amp;", "&");
+	replace(s, "&quot;", "\"");
+	replace(s, "&nbsp;", " ");
+	for (size_t i = 0; i < s.length(); ++i)
+	{
+		if (erase)
+		{
+			s.erase(s.begin()+i);
+			erase = 0;
+		}
+		if (s[i] == 13) // ascii code for windows line ending, get rid of this shit
+		{
+			s[i] = '\n';
+			erase = 1;
+		}
+		else if (s[i] == '\t')
+			s[i] = ' ';
+	}
+}

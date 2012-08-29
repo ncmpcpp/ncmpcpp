@@ -22,8 +22,8 @@
 #define _STRBUFFER_H
 
 #include "numeric_conversions.h"
-#include "tolower.h"
 #include "window.h"
+#include "utility/string.h"
 
 #include <list>
 
@@ -260,8 +260,8 @@ template <typename C> bool basic_buffer<C>::SetFormatting(
 	std::basic_string<C> base = itsString;
 	if (!case_sensitive)
 	{
-		ToLower(s);
-		ToLower(base);
+		lowercase(s);
+		lowercase(base);
 	}
 	FormatPos fp;
 	for (size_t i = base.find(s); i != std::basic_string<C>::npos; i = base.find(s, i))
@@ -294,8 +294,8 @@ template <typename C> void basic_buffer<C>::RemoveFormatting(
 	std::basic_string<C> base = itsString;
 	if (!case_sensitive)
 	{
-		ToLower(pattern);
-		ToLower(base);
+		lowercase(pattern);
+		lowercase(base);
 	}
 	FormatPos fp;
 	for (size_t i = base.find(pattern); i != std::basic_string<C>::npos; i = base.find(pattern, i))
