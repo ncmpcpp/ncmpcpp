@@ -152,6 +152,20 @@ void MutableSong::setNewURI(const std::string &value)
 		m_uri = value;
 }
 
+unsigned MutableSong::getDuration() const
+{
+	if (m_duration > 0)
+		return m_duration;
+	else
+		return Song::getDuration();
+}
+
+
+void MutableSong::setDuration(unsigned int duration)
+{
+	m_duration = duration;
+}
+
 void MutableSong::setTag(SetFunction set, const std::string &value, const std::string &delimiter)
 {
 	auto tags = split(value, delimiter);

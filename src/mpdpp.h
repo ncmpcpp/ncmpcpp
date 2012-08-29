@@ -35,7 +35,7 @@ namespace MPD
 	
 	struct Item
 	{
-		Song song;
+		std::shared_ptr<Song> song;
 		ItemType type;
 		std::string name;
 	};

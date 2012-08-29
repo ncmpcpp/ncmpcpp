@@ -819,7 +819,7 @@ void Delete::Run()
 		if (myBrowser->isParentDir(myBrowser->Main()->Choice()))
 			return;
 		
-		std::string name = item.type == itSong ? item.song.getName() : item.name;
+		std::string name = item.type == itSong ? item.song->getName() : item.name;
 		std::string question;
 		if (myBrowser->Main()->hasSelected())
 			question = "Delete selected items?";
@@ -842,7 +842,7 @@ void Delete::Run()
 			for (size_t i = 0; i < list.size(); ++i)
 			{
 				const MPD::Item &it = (*myBrowser->Main())[list[i]];
-				name = it.type == itSong ? it.song.getName() : it.name;
+				name = it.type == itSong ? it.song->getName() : it.name;
 				if (myBrowser->DeleteItem(it))
 				{
 					const char msg[] = "\"%s\" deleted";

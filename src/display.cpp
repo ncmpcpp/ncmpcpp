@@ -364,19 +364,14 @@ void Display::Items(const MPD::Item &item, void *data, Menu<MPD::Item> *menu)
 	{
 		case MPD::itDirectory:
 		{
-			if (!item.song.empty())
-			{
-				*menu << "[..]";
-				return;
-			}
 			*menu << "[" << getBasename(item.name) << "]";
 			return;
 		}
 		case MPD::itSong:
 			if (!Config.columns_in_browser)
-				Display::Songs(item.song, data, reinterpret_cast<Menu<MPD::Song> *>(menu));
+				Display::Songs(*item.song, data, reinterpret_cast<Menu<MPD::Song> *>(menu));
 			else
-				Display::SongsInColumns(item.song, data, reinterpret_cast<Menu<MPD::Song> *>(menu));
+				Display::SongsInColumns(*item.song, data, reinterpret_cast<Menu<MPD::Song> *>(menu));
 			return;
 		case MPD::itPlaylist:
 			*menu << Config.browser_playlist_prefix << getBasename(item.name);

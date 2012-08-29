@@ -962,7 +962,8 @@ void TagEditor::ReadTags(MPD::MutableSong &s)
 		return;
 	
 	TagLib::MPEG::File *mpegf = dynamic_cast<TagLib::MPEG::File *>(f.file());
-
+	s.setDuration(f.audioProperties()->length());
+	
 	s.setArtist(f.tag()->artist().to8Bit(1));
 	s.setTitle(f.tag()->title().to8Bit(1));
 	s.setAlbum(f.tag()->album().to8Bit(1));

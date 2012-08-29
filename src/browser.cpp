@@ -144,7 +144,7 @@ void Browser::EnterPressed()
 		}
 		case itSong:
 		{
-			bool res = myPlaylist->Add(item.song, w->isBold(), 1);
+			bool res = myPlaylist->Add(*item.song, w->isBold(), 1);
 			w->Bold(w->Choice(), res);
 			break;
 		}
@@ -189,7 +189,7 @@ void Browser::SpacePressed()
 				myBrowser->GetLocalDirectory(items, item.name, 1);
 				list.reserve(items.size());
 				for (MPD::ItemList::const_iterator it = items.begin(); it != items.end(); ++it)
-					list.push_back(it->song);
+					list.push_back(*it->song);
 				result = myPlaylist->Add(list, 0);
 			}
 			else
@@ -201,7 +201,7 @@ void Browser::SpacePressed()
 		}
 		case itSong:
 		{
-			bool res = myPlaylist->Add(item.song, w->isBold(), 0);
+			bool res = myPlaylist->Add(*item.song, w->isBold(), 0);
 			w->Bold(w->Choice(), res);
 			break;
 		}
@@ -258,7 +258,7 @@ void Browser::MouseButtonPressed(MEVENT me)
 
 MPD::Song *Browser::CurrentSong()
 {
-	return !w->Empty() && w->Current().type == itSong ? &w->Current().song : 0;
+	return !w->Empty() && w->Current().type == itSong ? w->Current().song.get() : 0;
 }
 
 void Browser::ReverseSelection()
@@ -287,7 +287,7 @@ void Browser::GetSelectedSongs(MPD::SongList &v)
 					MPD::ItemList list;
 					GetLocalDirectory(list, item.name, 1);
 					for (auto j = list.begin(); j != list.end(); ++j)
-						v.push_back(j->song);
+						v.push_back(*j->song);
 				}
 				else
 #				endif // !WIN32
@@ -300,7 +300,7 @@ void Browser::GetSelectedSongs(MPD::SongList &v)
 			}
 			case itSong:
 			{
-				v.push_back(item.song);
+				v.push_back(*item.song);
 				break;
 			}
 			case itPlaylist:
@@ -344,7 +344,7 @@ void Browser::LocateSong(const MPD::Song &s)
 		GetDirectory(s.getDirectory());
 	for (size_t i = 0; i < w->Size(); ++i)
 	{
-		if ((*w)[i].type == itSong && s.getHash() == (*w)[i].song.getHash())
+		if ((*w)[i].type == itSong && s.getHash() == (*w)[i].song->getHash())
 		{
 			w->Highlight(i);
 			break;
@@ -416,7 +416,7 @@ void Browser::GetDirectory(std::string dir, std::string subdir)
 				bool bold = 0;
 				for (size_t i = 0; i < myPlaylist->Items->Size(); ++i)
 				{
-					if (myPlaylist->Items->at(i).getHash() == it->song.getHash())
+					if (myPlaylist->Items->at(i).getHash() == it->song->getHash())
 					{
 						bold = 1;
 						break;
@@ -477,11 +477,12 @@ void Browser::GetLocalDirectory(MPD::ItemList &v, const std::string &directory, 
 		{
 			new_item.type = itSong;
 			mpd_pair file_pair = { "file", full_path.c_str() };
-			new_item.song = MPD::Song(mpd_song_begin(&file_pair));
+			MPD::MutableSong *s = new MPD::MutableSong(mpd_song_begin(&file_pair));
+			new_item.song = std::shared_ptr<MPD::Song>(s);
 #			ifdef HAVE_TAGLIB_H
 			// FIXME
-			//if (!recursively)
-			//	TagEditor::ReadTags(*new_item.song);
+			if (!recursively)
+				TagEditor::ReadTags(*s);
 #			endif // HAVE_TAGLIB_H
 			v.push_back(new_item);
 		}
@@ -558,7 +559,7 @@ bool Browser::DeleteItem(const MPD::Item &item)
 	std::string path;
 	if (!isLocal())
 		path = Config.mpd_music_dir;
-	path += item.type == itSong ? item.song.getURI() : item.name;
+	path += item.type == itSong ? item.song->getURI() : item.name;
 	
 	if (item.type == itDirectory)
 		ClearDirectory(path);
@@ -569,23 +570,9 @@ bool Browser::DeleteItem(const MPD::Item &item)
 
 void Browser::UpdateItemList()
 {
-	bool bold = 0;
 	for (size_t i = 0; i < w->Size(); ++i)
-	{
-		if (w->at(i).type == itSong)
-		{
-			for (size_t j = 0; j < myPlaylist->Items->Size(); ++j)
-			{
-				if (myPlaylist->Items->at(j).getHash() == w->at(i).song.getHash())
-				{
-					bold = 1;
-					break;
-				}
-			}
-			w->Bold(i, bold);
-			bold = 0;
-		}
-	}
+		if ((*w)[i].type == itSong)
+			w->Bold(i, myPlaylist->checkForSong(*(*w)[i].song));
 	w->Refresh();
 }
 
@@ -600,9 +587,9 @@ std::string Browser::ItemToString(const MPD::Item &item, void *)
 		case MPD::itSong:
 		{
 			if (!Config.columns_in_browser)
-				return item.song.toString(Config.song_list_format_dollar_free);
+				return item.song->toString(Config.song_list_format_dollar_free);
 			else
-				return Playlist::SongInColumnsToString(item.song, 0);
+				return Playlist::SongInColumnsToString(*item.song, 0);
 		}
 		case MPD::itPlaylist:
 		{

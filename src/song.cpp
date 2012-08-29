@@ -178,7 +178,7 @@ std::string Song::getLength(unsigned idx) const
 	assert(m_song);
 	if (idx > 0)
 		return "";
-	unsigned len = mpd_song_get_duration(m_song.get());
+	unsigned len = getDuration();
 	if (len > 0)
 		return ShowTime(len);
 	else
