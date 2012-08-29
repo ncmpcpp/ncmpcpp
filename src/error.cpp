@@ -28,7 +28,7 @@ namespace
 {
 	const char *Timestamp()
 	{
-		char result[32];
+		static char result[32];
 		time_t raw;
 		tm *t;
 		time(&raw);
