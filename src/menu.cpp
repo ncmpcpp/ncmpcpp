@@ -28,9 +28,9 @@ template <> std::string Menu<std::string>::GetItem(size_t pos)
 	if (m_options_ptr->at(pos))
 	{
 		if (m_get_string_helper)
-			result = m_get_string_helper((*m_options_ptr)[pos]->Value);
+			result = m_get_string_helper((*m_options_ptr)[pos]->value());
 		else
-			result = (*m_options_ptr)[pos]->Value;
+			result = (*m_options_ptr)[pos]->value();
 	}
 	return result;
 }

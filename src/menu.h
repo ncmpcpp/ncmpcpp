@@ -120,14 +120,26 @@ template <typename T> struct Menu : public Window, public List
 	///
 	struct Item
 	{
-		Item() : isBold(0), isSelected(0), isStatic(0) { }
-		Item(const T &t, bool is_bold, bool is_static) :
-		Value(t), isBold(is_bold), isSelected(0), isStatic(is_static) { }
+		Item() : m_is_bold(false), m_is_selected(false), m_is_inactive(false) { }
+		Item(const T &value_, bool is_bold, bool is_inactive)
+		: m_value(value_), m_is_bold(is_bold), m_is_selected(false), m_is_inactive(is_inactive) { }
 		
-		T Value;
-		bool isBold;
-		bool isSelected;
-		bool isStatic;
+		T &value() { return m_value; }
+		const T &value() const { return m_value; }
+		
+		void setBold(bool is_bold) { m_is_bold = is_bold; }
+		void setSelected(bool is_selected) { m_is_selected = is_selected; }
+		void setInactive(bool is_inactive) { m_is_inactive = is_inactive; }
+		
+		bool isBold() const { return m_is_bold; }
+		bool isSelected() const { return m_is_selected; }
+		bool isInactive() const { return m_is_inactive; }
+		
+	private:
+		T m_value;
+		bool m_is_bold;
+		bool m_is_selected;
+		bool m_is_inactive;
 	};
 	
 	template <typename ValueT, typename BaseIterator> class ItemIterator
@@ -145,7 +157,7 @@ template <typename T> struct Menu : public Window, public List
 		>::value;
 		template <typename Result, bool referenceValue> struct getObject { };
 		template <typename Result> struct getObject<Result, true> {
-			static Result &apply(BaseIterator it) { return (*it)->Value; }
+			static Result &apply(BaseIterator it) { return (*it)->value(); }
 		};
 		template <typename Result> struct getObject<Result, false> {
 			static Result &apply(BaseIterator it) { return **it; }
@@ -725,7 +737,7 @@ template <typename T> void Menu<T>::Bold(int pos, bool state)
 {
 	if (!m_options_ptr->at(pos))
 		return;
-	(*m_options_ptr)[pos]->isBold = state;
+	(*m_options_ptr)[pos]->setBold(state);
 }
 
 template <typename T> void Menu<T>::Swap(size_t one, size_t two)
@@ -750,7 +762,7 @@ template <typename T> void Menu<T>::Move(size_t from, size_t to)
 
 template <typename T> bool Menu<T>::Goto(size_t y)
 {
-	if (!m_options_ptr->at(itsBeginning+y) || m_options_ptr->at(itsBeginning+y)->isStatic)
+	if (!m_options_ptr->at(itsBeginning+y) || m_options_ptr->at(itsBeginning+y)->isInactive())
 		return false;
 	itsHighlight = itsBeginning+y;
 	return true;
@@ -776,10 +788,10 @@ template <typename T> void Menu<T>::Refresh()
 	if (!m_options_ptr->empty() && itsHighlight > int(m_options_ptr->size())-1)
 		itsHighlight = m_options_ptr->size()-1;
 	
-	if (!(*m_options_ptr)[itsHighlight] || (*m_options_ptr)[itsHighlight]->isStatic) // it shouldn't be here
+	if (!(*m_options_ptr)[itsHighlight] || (*m_options_ptr)[itsHighlight]->isInactive()) // it shouldn't be here
 	{
 		Scroll(wUp);
-		if (!(*m_options_ptr)[itsHighlight] || (*m_options_ptr)[itsHighlight]->isStatic)
+		if (!(*m_options_ptr)[itsHighlight] || (*m_options_ptr)[itsHighlight]->isInactive())
 			Scroll(wDown);
 	}
 	
@@ -798,7 +810,7 @@ template <typename T> void Menu<T>::Refresh()
 			mvwhline(itsWindow, line++, 0, 0, itsWidth);
 			continue;
 		}
-		if ((*m_options_ptr)[i]->isBold)
+		if ((*m_options_ptr)[i]->isBold())
 			*this << fmtBold;
 		if (m_highlight_enabled && int(i) == itsHighlight)
 		{
@@ -806,18 +818,18 @@ template <typename T> void Menu<T>::Refresh()
 			*this << m_highlight_color;
 		}
 		mvwhline(itsWindow, line, 0, 32, itsWidth);
-		if ((*m_options_ptr)[i]->isSelected && m_selected_prefix)
+		if ((*m_options_ptr)[i]->isSelected() && m_selected_prefix)
 			*this << *m_selected_prefix;
 		if (m_item_displayer)
-			m_item_displayer(*this, (*m_options_ptr)[i]->Value);
-		if ((*m_options_ptr)[i]->isSelected && m_selected_suffix)
+			m_item_displayer(*this, (*m_options_ptr)[i]->value());
+		if ((*m_options_ptr)[i]->isSelected() && m_selected_suffix)
 			*this << *m_selected_suffix;
 		if (m_highlight_enabled && int(i) == itsHighlight)
 		{
 			*this << clEnd;
 			*this << fmtReverseEnd;
 		}
-		if ((*m_options_ptr)[i]->isBold)
+		if ((*m_options_ptr)[i]->isBold())
 			*this << fmtBoldEnd;
 		line++;
 	}
@@ -849,7 +861,7 @@ template <typename T> void Menu<T>::Scroll(Where where)
 			{
 				itsHighlight--;
 			}
-			if (!(*m_options_ptr)[itsHighlight] || (*m_options_ptr)[itsHighlight]->isStatic)
+			if (!(*m_options_ptr)[itsHighlight] || (*m_options_ptr)[itsHighlight]->isInactive())
 			{
 				Scroll(itsHighlight == 0 && !m_cyclic_scroll_enabled ? wDown : wUp);
 			}
@@ -871,7 +883,7 @@ template <typename T> void Menu<T>::Scroll(Where where)
 			{
 				itsHighlight++;
 			}
-			if (!(*m_options_ptr)[itsHighlight] || (*m_options_ptr)[itsHighlight]->isStatic)
+			if (!(*m_options_ptr)[itsHighlight] || (*m_options_ptr)[itsHighlight]->isInactive())
 			{
 				Scroll(itsHighlight == MaxHighlight && !m_cyclic_scroll_enabled ? wUp : wDown);
 			}
@@ -889,7 +901,7 @@ template <typename T> void Menu<T>::Scroll(Where where)
 				if (itsHighlight < 0)
 					itsHighlight = 0;
 			}
-			if (!(*m_options_ptr)[itsHighlight] || (*m_options_ptr)[itsHighlight]->isStatic)
+			if (!(*m_options_ptr)[itsHighlight] || (*m_options_ptr)[itsHighlight]->isInactive())
 			{
 				Scroll(itsHighlight == 0 && !m_cyclic_scroll_enabled ? wDown : wUp);
 			}
@@ -907,7 +919,7 @@ template <typename T> void Menu<T>::Scroll(Where where)
 				if (itsHighlight > MaxHighlight)
 					itsHighlight = MaxHighlight;
 			}
-			if (!(*m_options_ptr)[itsHighlight] || (*m_options_ptr)[itsHighlight]->isStatic)
+			if (!(*m_options_ptr)[itsHighlight] || (*m_options_ptr)[itsHighlight]->isInactive())
 			{
 				Scroll(itsHighlight == MaxHighlight && !m_cyclic_scroll_enabled ? wUp : wDown);
 			}
@@ -917,7 +929,7 @@ template <typename T> void Menu<T>::Scroll(Where where)
 		{
 			itsHighlight = 0;
 			itsBeginning = 0;
-			if (!(*m_options_ptr)[itsHighlight] || (*m_options_ptr)[itsHighlight]->isStatic)
+			if (!(*m_options_ptr)[itsHighlight] || (*m_options_ptr)[itsHighlight]->isInactive())
 			{
 				Scroll(itsHighlight == 0 ? wDown : wUp);
 			}
@@ -927,7 +939,7 @@ template <typename T> void Menu<T>::Scroll(Where where)
 		{
 			itsHighlight = MaxHighlight;
 			itsBeginning = MaxBeginning;
-			if (!(*m_options_ptr)[itsHighlight] || (*m_options_ptr)[itsHighlight]->isStatic)
+			if (!(*m_options_ptr)[itsHighlight] || (*m_options_ptr)[itsHighlight]->isInactive())
 			{
 				Scroll(itsHighlight == MaxHighlight ? wUp : wDown);
 			}
@@ -968,21 +980,21 @@ template <typename T> bool Menu<T>::isBold(int pos)
 	pos = pos == -1 ? itsHighlight : pos;
 	if (!m_options_ptr->at(pos))
 		return 0;
-	return (*m_options_ptr)[pos]->isBold;
+	return (*m_options_ptr)[pos]->isBold();
 }
 
 template <typename T> void Menu<T>::Select(int pos, bool state)
 {
 	if (!m_options_ptr->at(pos))
 		return;
-	(*m_options_ptr)[pos]->isSelected = state;
+	(*m_options_ptr)[pos]->setSelected(state);
 }
 
 template <typename T> void Menu<T>::Static(int pos, bool state)
 {
 	if (!m_options_ptr->at(pos))
 		return;
-	(*m_options_ptr)[pos]->isStatic = state;
+	(*m_options_ptr)[pos]->setInactive(state);
 }
 
 template <typename T> bool Menu<T>::isSelected(int pos) const
@@ -990,7 +1002,7 @@ template <typename T> bool Menu<T>::isSelected(int pos) const
 	pos = pos == -1 ? itsHighlight : pos;
 	if (!m_options_ptr->at(pos))
 		return 0;
-	return (*m_options_ptr)[pos]->isSelected;
+	return (*m_options_ptr)[pos]->isSelected();
 }
 
 template <typename T> bool Menu<T>::isStatic(int pos) const
@@ -998,7 +1010,7 @@ template <typename T> bool Menu<T>::isStatic(int pos) const
 	pos = pos == -1 ? itsHighlight : pos;
 	if (!m_options_ptr->at(pos))
 		return 1;
-	return (*m_options_ptr)[pos]->isStatic;
+	return (*m_options_ptr)[pos]->isInactive();
 }
 
 template <typename T> bool Menu<T>::isSeparator(int pos) const
@@ -1010,7 +1022,7 @@ template <typename T> bool Menu<T>::isSeparator(int pos) const
 template <typename T> bool Menu<T>::hasSelected() const
 {
 	for (auto it = m_options_ptr->begin(); it != m_options_ptr->end(); ++it)
-		if (*it && (*it)->isSelected)
+		if (*it && (*it)->isSelected())
 			return true;
 	return false;
 }
@@ -1018,7 +1030,7 @@ template <typename T> bool Menu<T>::hasSelected() const
 template <typename T> void Menu<T>::GetSelected(std::vector<size_t> &v) const
 {
 	for (size_t i = 0; i < m_options_ptr->size(); ++i)
-		if ((*m_options_ptr)[i] && (*m_options_ptr)[i]->isSelected)
+		if ((*m_options_ptr)[i] && (*m_options_ptr)[i]->isSelected())
 			v.push_back(i);
 }
 
@@ -1042,7 +1054,7 @@ template <typename T> size_t Menu<T>::RealChoice() const
 {
 	size_t result = 0;
 	for (auto it = m_options_ptr->begin(); it != m_options_ptr->begin()+itsHighlight; ++it)
-		if (*it && !(*it)->isStatic)
+		if (*it && !(*it)->isInactive())
 			result++;
 	return result;
 }
@@ -1052,7 +1064,7 @@ template <typename T> void Menu<T>::ReverseSelection(size_t beginning)
 	auto it = m_options_ptr->begin()+beginning;
 	for (size_t i = beginning; i < Size(); ++i, ++it)
 		if (*it)
-			(*it)->isSelected = !(*it)->isSelected && !(*it)->isStatic;
+			(*it)->setSelected(!(*it)->isSelected() && !(*it)->isInactive());
 }
 
 template <typename T> bool Menu<T>::Search(const std::string &constraint, size_t beginning, int flags)
@@ -1135,7 +1147,7 @@ template <typename T> const std::string &Menu<T>::GetFilter()
 template <typename T> std::string Menu<T>::GetItem(size_t pos)
 {
 	if (m_options_ptr->at(pos) && m_get_string_helper)
-		return m_get_string_helper((*m_options_ptr)[pos]->Value);
+		return m_get_string_helper((*m_options_ptr)[pos]->value());
 	else
 		return "";
 }
@@ -1144,56 +1156,56 @@ template <typename T> T &Menu<T>::Back()
 {
 	if (!m_options_ptr->back())
 		FatalError("Menu::Back() has requested separator!");
-	return m_options_ptr->back()->Value;
+	return m_options_ptr->back()->value();
 }
 
 template <typename T> const T &Menu<T>::Back() const
 {
 	if (!m_options_ptr->back())
 		FatalError("Menu::Back() has requested separator!");
-	return m_options_ptr->back()->Value;
+	return m_options_ptr->back()->value();
 }
 
 template <typename T> T &Menu<T>::Current()
 {
 	if (!m_options_ptr->at(itsHighlight))
 		FatalError("Menu::Current() has requested separator!");
-	return (*m_options_ptr)[itsHighlight]->Value;
+	return (*m_options_ptr)[itsHighlight]->value();
 }
 
 template <typename T> const T &Menu<T>::Current() const
 {
 	if (!m_options_ptr->at(itsHighlight))
 		FatalError("Menu::Current() const has requested separator!");
-	return (*m_options_ptr)[itsHighlight]->Value;
+	return (*m_options_ptr)[itsHighlight]->value();
 }
 
 template <typename T> T &Menu<T>::at(size_t pos)
 {
 	if (!m_options_ptr->at(pos))
 		FatalError("Menu::at() has requested separator!");
-	return (*m_options_ptr)[pos]->Value;
+	return (*m_options_ptr)[pos]->value();
 }
 
 template <typename T> const T &Menu<T>::at(size_t pos) const
 {
 	if (!m_options->at(pos))
 		FatalError("Menu::at() const has requested separator!");
-	return (*m_options_ptr)[pos]->Value;
+	return (*m_options_ptr)[pos]->value();
 }
 
 template <typename T> const T &Menu<T>::operator[](size_t pos) const
 {
 	if (!(*m_options_ptr)[pos])
 		FatalError("Menu::operator[] const has requested separator!");
-	return (*m_options_ptr)[pos]->Value;
+	return (*m_options_ptr)[pos]->value();
 }
 
 template <typename T> T &Menu<T>::operator[](size_t pos)
 {
 	if (!(*m_options_ptr)[pos])
 		FatalError("Menu::operator[] has requested separator!");
-	return (*m_options_ptr)[pos]->Value;
+	return (*m_options_ptr)[pos]->value();
 }
 
 }
