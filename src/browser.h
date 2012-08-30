@@ -73,7 +73,7 @@ class Browser : public Screen< Menu<MPD::Item> >
 		
 	private:
 		static bool hasSupportedExtension(const std::string &);
-		static std::string ItemToString(const MPD::Item &, void *);
+		static std::string ItemToString(const MPD::Item &item);
 		
 		static std::set<std::string> SupportedExtensions;
 		

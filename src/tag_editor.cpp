@@ -73,14 +73,14 @@ void TagEditor::Init()
 	Albums->CyclicScrolling(Config.use_cyclic_scrolling);
 	Albums->CenteredCursor(Config.centered_cursor);
 	Albums->setItemDisplayer(Display::Pair<std::string, std::string>);
-	Albums->SetGetStringFunction(StringPairToString);
+	Albums->SetItemStringifier(StringPairToString);
 	
 	Dirs = new Menu<string_pair>(0, MainStartY, LeftColumnWidth, MainHeight, Config.titles_visibility ? "Directories" : "", Config.main_color, brNone);
 	Dirs->HighlightColor(Config.active_column_color);
 	Dirs->CyclicScrolling(Config.use_cyclic_scrolling);
 	Dirs->CenteredCursor(Config.centered_cursor);
 	Dirs->setItemDisplayer(Display::Pair<std::string, std::string>);
-	Dirs->SetGetStringFunction(StringPairToString);
+	Dirs->SetItemStringifier(StringPairToString);
 	
 	LeftColumn = Config.albums_in_tag_editor ? Albums : Dirs;
 	
@@ -111,9 +111,7 @@ void TagEditor::Init()
 	Tags->SetSelectPrefix(&Config.selected_item_prefix);
 	Tags->SetSelectSuffix(&Config.selected_item_suffix);
 	Tags->setItemDisplayer(Display::Tags);
-	Tags->setItemDisplayerData(TagTypes);
-	Tags->SetGetStringFunction(TagToString);
-	Tags->SetGetStringFunctionUserData(TagTypes);
+	Tags->SetItemStringifier(TagToString);
 	
 	FParserDialog = new Menu<std::string>((COLS-FParserDialogWidth)/2, (MainHeight-FParserDialogHeight)/2+MainStartY, FParserDialogWidth, FParserDialogHeight, "", Config.main_color, Config.window_border);
 	FParserDialog->CyclicScrolling(Config.use_cyclic_scrolling);
@@ -1147,10 +1145,10 @@ void TagEditor::GetTagList(TagLib::StringList &list, const MPD::MutableSong &s, 
 		list.append(ToWString(value));
 }
 
-std::string TagEditor::TagToString(const MPD::MutableSong &s, void *data)
+std::string TagEditor::TagToString(const MPD::MutableSong &s)
 {
 	std::string result;
-	size_t i = static_cast<Menu<std::string> *>(data)->Choice();
+	size_t i = myTagEditor->TagTypes->Choice();
 	if (i < 11)
 		result = (s.*SongInfo::Tags[i].Get)(0);
 	else if (i == 12)

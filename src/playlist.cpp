@@ -45,18 +45,22 @@ Menu< std::pair<std::string, MPD::Song::GetFunction> > *Playlist::SortDialog = 0
 
 void Playlist::Init()
 {
-	static Display::ScreenFormat sf = { this, &Config.song_list_format };
-	
 	Items = new Menu<MPD::Song>(0, MainStartY, COLS, MainHeight, Config.columns_in_playlist && Config.titles_visibility ? Display::Columns(COLS) : "", Config.main_color, brNone);
 	Items->CyclicScrolling(Config.use_cyclic_scrolling);
 	Items->CenteredCursor(Config.centered_cursor);
 	Items->HighlightColor(Config.main_highlight_color);
 	Items->SetSelectPrefix(&Config.selected_item_prefix);
 	Items->SetSelectSuffix(&Config.selected_item_suffix);
-	Items->setItemDisplayer(Config.columns_in_playlist ? Display::SongsInColumns : Display::Songs);
-	Items->setItemDisplayerData(&sf);
-	Items->SetGetStringFunction(Config.columns_in_playlist ? SongInColumnsToString : SongToString);
-	Items->SetGetStringFunctionUserData(&Config.song_list_format_dollar_free);
+	if (Config.columns_in_playlist)
+	{
+		Items->setItemDisplayer(std::bind(Display::SongsInColumns, _1, _2, *this));
+		Items->SetItemStringifier(SongInColumnsToString);
+	}
+	else
+	{
+		Items->setItemDisplayer(std::bind(Display::Songs, _1, _2, *this, Config.song_list_format));
+		Items->SetItemStringifier(SongToString);
+	}
 	
 	if (!SortDialog)
 	{
@@ -499,12 +503,12 @@ const MPD::Song *Playlist::NowPlayingSong()
 	return s;
 }
 
-std::string Playlist::SongToString(const MPD::Song &s, void *data)
+std::string Playlist::SongToString(const MPD::Song &s)
 {
-	return s.toString(*static_cast<std::string *>(data));
+	return s.toString(Config.song_list_format_dollar_free);
 }
 
-std::string Playlist::SongInColumnsToString(const MPD::Song &s, void *)
+std::string Playlist::SongInColumnsToString(const MPD::Song &s)
 {
 	return s.toString(Config.song_in_columns_to_string_format);
 }

@@ -23,6 +23,7 @@
 
 #include <regex.h>
 #include <algorithm>
+#include <functional>
 #include <set>
 
 #include "error.h"
@@ -107,14 +108,14 @@ namespace NCurses
 		/// If not set by setItemDisplayer(), menu won't display anything.
 		/// @see setItemDisplayer()
 		///
-		typedef std::function<void(const T &, void *, Menu<T> *)> ItemDisplayer;
+		typedef std::function<void(Menu<T> &, const T &)> ItemDisplayer;
 		
 		/// Function helper prototype used for converting items to strings.
-		/// If not set by SetGetStringFunction(), searching and filtering
+		/// If not set by SetItemStringifier(), searching and filtering
 		/// won't work (note that Menu<std::string> doesn't need this)
-		/// @see SetGetStringFunction()
+		/// @see SetItemStringifier()
 		///
-		typedef std::function<std::string(const T &, void *)> GetStringFunction;
+		typedef std::function<std::string(const T &)> ItemStringifier;
 		
 		/// Struct that holds each item in the list and its attributes
 		///
@@ -175,22 +176,10 @@ namespace NCurses
 			///
 			void setItemDisplayer(ItemDisplayer ptr) { m_item_displayer = ptr; }
 			
-			/// Sets optional user data, that is passed to
-			/// ItemDisplayer function each time it's invoked
-			/// @param data void pointer to userdata
-			///
-			void setItemDisplayerData(void *data) { m_item_displayer_data = data; }
-			
 			/// Sets helper function that is responsible for converting items to strings
-			/// @param f function pointer that matches the GetStringFunction prototype
+			/// @param f function pointer that matches the ItemStringifier prototype
 			///
-			void SetGetStringFunction(GetStringFunction f) { m_get_string_helper = f; }
-			
-			/// Sets optional user data, that is passed to
-			/// GetStringFunction function each time it's invoked
-			/// @param data void pointer to user data
-			///
-			void SetGetStringFunctionUserData(void *data) { m_get_string_helper_data = data; }
+			void SetItemStringifier(ItemStringifier f) { m_get_string_helper = f; }
 			
 			/// Reserves the size for internal container (this just calls std::vector::reserve())
 			/// @param size requested size
@@ -326,7 +315,7 @@ namespace NCurses
 			///
 			size_t RealChoice() const;
 			
-			/// Searches the list for a given contraint. It uses GetStringFunction to convert stored items
+			/// Searches the list for a given contraint. It uses ItemStringifier to convert stored items
 			/// into strings and then performs pattern matching. Note that this supports regular expressions.
 			/// @param constraint a search constraint to be used
 			/// @param beginning beginning of range that has to be searched through
@@ -352,7 +341,7 @@ namespace NCurses
 			virtual void PrevFound(bool wrap);
 			
 			/// Filters the list, showing only the items that matches the pattern. It uses
-			/// GetStringFunction to convert stored items into strings and then performs
+			/// ItemStringifier to convert stored items into strings and then performs
 			/// pattern matching. Note that this supports regular expressions.
 			/// @param filter a pattern to be used in pattern matching
 			/// @param beginning beginning of range that has to be filtered
@@ -376,7 +365,7 @@ namespace NCurses
 			///
 			void ShowFiltered() { m_options_ptr = &m_filtered_options; }
 			
-			/// Converts given position in list to string using GetStringFunction
+			/// Converts given position in list to string using ItemStringifier
 			/// if specified and an empty string otherwise
 			/// @param pos position to be converted
 			/// @return item converted to string
@@ -473,7 +462,7 @@ namespace NCurses
 			/// defined only within drawing function that is called by Refresh()
 			/// @see Refresh()
 			///
-			size_t CurrentlyDrawedPosition() const { return m_currently_drawn_positions; }
+			size_t CurrentlyDrawedPosition() const { return m_drawn_position; }
 			
 			/// @return reference to last item on the list
 			/// @throw List::InvalidItem if requested item is separator
@@ -527,9 +516,7 @@ namespace NCurses
 			void ClearFiltered();
 			
 			ItemDisplayer m_item_displayer;
-			void *m_item_displayer_data;
-			GetStringFunction m_get_string_helper;
-			void *m_get_string_helper_data;
+			ItemStringifier m_get_string_helper;
 			
 			std::string m_filter;
 			std::string m_search_constraint;
@@ -549,7 +536,7 @@ namespace NCurses
 			
 			bool m_autocenter_cursor;
 			
-			size_t m_currently_drawn_positions;
+			size_t m_drawn_position;
 			
 			Buffer *m_selected_prefix;
 			Buffer *m_selected_suffix;
@@ -570,9 +557,7 @@ template <typename T> NCurses::Menu<T>::Menu(size_t startx,
 					Border border)
 					: Window(startx, starty, width, height, title, color, border),
 					m_item_displayer(0),
-					m_item_displayer_data(0),
 					m_get_string_helper(0),
-					m_get_string_helper_data(0),
 					m_options_ptr(&m_options),
 					itsBeginning(0),
 					itsHighlight(0),
@@ -587,9 +572,7 @@ template <typename T> NCurses::Menu<T>::Menu(size_t startx,
 
 template <typename T> NCurses::Menu<T>::Menu(const Menu &m) : Window(m),
 					m_item_displayer(m.m_item_displayer),
-					m_item_displayer_data(m.m_item_displayer_data),
 					m_get_string_helper(m.m_get_string_helper),
-					m_get_string_helper_data(m.m_get_string_helper_data),
 					m_options_ptr(m.m_options_ptr),
 					itsBeginning(m.itsBeginning),
 					itsHighlight(m.itsHighlight),
@@ -745,7 +728,7 @@ template <typename T> void NCurses::Menu<T>::Refresh()
 	}
 	
 	size_t line = 0;
-	for (size_t &i = (m_currently_drawn_positions = itsBeginning); i < itsBeginning+itsHeight; ++i)
+	for (size_t &i = (m_drawn_position = itsBeginning); i < itsBeginning+itsHeight; ++i)
 	{
 		GotoXY(0, line);
 		if (i >= m_options_ptr->size())
@@ -770,7 +753,7 @@ template <typename T> void NCurses::Menu<T>::Refresh()
 		if ((*m_options_ptr)[i]->isSelected && m_selected_prefix)
 			*this << *m_selected_prefix;
 		if (m_item_displayer)
-			m_item_displayer((*m_options_ptr)[i]->Item, m_item_displayer_data, this);
+			m_item_displayer(*this, (*m_options_ptr)[i]->Item);
 		if ((*m_options_ptr)[i]->isSelected && m_selected_suffix)
 			*this << *m_selected_suffix;
 		if (m_highlight_enabled && int(i) == itsHighlight)
@@ -1096,7 +1079,7 @@ template <typename T> const std::string &NCurses::Menu<T>::GetFilter()
 template <typename T> std::string NCurses::Menu<T>::GetOption(size_t pos)
 {
 	if (m_options_ptr->at(pos) && m_get_string_helper)
-		return m_get_string_helper((*m_options_ptr)[pos]->Item, m_get_string_helper_data);
+		return m_get_string_helper((*m_options_ptr)[pos]->Item);
 	else
 		return "";
 }

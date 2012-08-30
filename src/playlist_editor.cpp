@@ -54,18 +54,22 @@ void PlaylistEditor::Init()
 	Playlists->CenteredCursor(Config.centered_cursor);
 	Playlists->setItemDisplayer(Display::Default<std::string>);
 	
-	static Display::ScreenFormat sf = { this, &Config.song_list_format };
-	
 	Content = new Menu<MPD::Song>(RightColumnStartX, MainStartY, RightColumnWidth, MainHeight, Config.titles_visibility ? "Playlist's content" : "", Config.main_color, brNone);
 	Content->HighlightColor(Config.main_highlight_color);
 	Content->CyclicScrolling(Config.use_cyclic_scrolling);
 	Content->CenteredCursor(Config.centered_cursor);
 	Content->SetSelectPrefix(&Config.selected_item_prefix);
 	Content->SetSelectSuffix(&Config.selected_item_suffix);
-	Content->setItemDisplayer(Config.columns_in_playlist_editor ? Display::SongsInColumns : Display::Songs);
-	Content->setItemDisplayerData(&sf);
-	Content->SetGetStringFunction(Config.columns_in_playlist_editor ? Playlist::SongInColumnsToString : Playlist::SongToString);
-	Content->SetGetStringFunctionUserData(&Config.song_list_format_dollar_free);
+	if (Config.columns_in_playlist_editor)
+	{
+		Content->setItemDisplayer(std::bind(Display::SongsInColumns, _1, _2, *this));
+		Content->SetItemStringifier(Playlist::SongInColumnsToString);
+	}
+	else
+	{
+		Content->setItemDisplayer(std::bind(Display::Songs, _1, _2, *this, Config.song_list_format));
+		Content->SetItemStringifier(Playlist::SongToString);
+	}
 	
 	w = Playlists;
 	isInitialized = 1;

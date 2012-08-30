@@ -39,11 +39,6 @@
 #include "outputs.h"
 #include "visualizer.h"
 
-std::string StringPairToString(const std::pair<std::string, std::string> &pair, void *)
-{
-	return pair.first;
-}
-
 void ParseArgv(int argc, char **argv)
 {
 	bool quit = 0;
@@ -273,6 +268,11 @@ void ParseArgv(int argc, char **argv)
 	}
 	if (quit)
 		exit(0);
+}
+
+std::string StringPairToString(const std::pair<std::string, std::string> &pair)
+{
+	return pair.first;
 }
 
 std::string Timestamp(time_t t)

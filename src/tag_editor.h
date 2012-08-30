@@ -113,7 +113,7 @@ class TagEditor : public Screen<Window>
 		static std::string GenerateFilename(const MPD::MutableSong &, const std::string &);
 		static std::string ParseFilename(MPD::MutableSong &, std::string, bool);
 		
-		static std::string TagToString(const MPD::MutableSong &, void *);
+		static std::string TagToString(const MPD::MutableSong &);
 		
 		std::string itsBrowsedDir;
 		std::string itsHighlightedDir;

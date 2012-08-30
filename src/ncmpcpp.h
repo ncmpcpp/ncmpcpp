@@ -26,6 +26,7 @@
 #include "scrollpad.h"
 
 using namespace NCurses;
+using namespace std::placeholders;
 
 typedef std::pair<std::string, std::string> string_pair;
 

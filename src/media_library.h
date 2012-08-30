@@ -87,11 +87,10 @@ class MediaLibrary : public Screen<Window>
 	private:
 		void AddToPlaylist(bool);
 		
-		static std::string SongToString(const MPD::Song &s, void *);
-		
-		static std::string AlbumToString(const SearchConstraints &, void *);
-		static void DisplayAlbums(const SearchConstraints &, void *, Menu<SearchConstraints> *);
-		static void DisplayPrimaryTags(const std::string &artist, void *, Menu<std::string> *menu);
+		static std::string SongToString(const MPD::Song &s);
+		static std::string AlbumToString(const SearchConstraints &);
+		static void DisplayAlbums(Menu<SearchConstraints> &menu, const SearchConstraints &sc);
+		static void DisplayPrimaryTags(Menu<std::string> &menu, const std::string &tag);
 		
 		static bool SortSongsByTrack(const MPD::Song &, const MPD::Song &);
 		static bool SortAllTracks(const MPD::Song &, const MPD::Song &);

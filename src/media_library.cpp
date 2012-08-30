@@ -76,10 +76,7 @@ void MediaLibrary::Init()
 	Albums->SetSelectPrefix(&Config.selected_item_prefix);
 	Albums->SetSelectSuffix(&Config.selected_item_suffix);
 	Albums->setItemDisplayer(DisplayAlbums);
-	Albums->SetGetStringFunction(AlbumToString);
-	Albums->SetGetStringFunctionUserData(this);
-	
-	static Display::ScreenFormat sf = { this, &Config.song_library_format };
+	Albums->SetItemStringifier(AlbumToString);
 	
 	Songs = new Menu<MPD::Song>(itsRightColStartX, MainStartY, itsRightColWidth, MainHeight, Config.titles_visibility ? "Songs" : "", Config.main_color, brNone);
 	Songs->HighlightColor(Config.main_highlight_color);
@@ -87,9 +84,8 @@ void MediaLibrary::Init()
 	Songs->CenteredCursor(Config.centered_cursor);
 	Songs->SetSelectPrefix(&Config.selected_item_prefix);
 	Songs->SetSelectSuffix(&Config.selected_item_suffix);
-	Songs->setItemDisplayer(Display::Songs);
-	Songs->setItemDisplayerData(&sf);
-	Songs->SetGetStringFunction(SongToString);
+	Songs->setItemDisplayer(std::bind(Display::Songs, _1, _2, *this, Config.song_library_format));
+	Songs->SetItemStringifier(SongToString);
 	
 	w = Artists;
 	isInitialized = 1;
@@ -749,32 +745,35 @@ void MediaLibrary::AddToPlaylist(bool add_n_play)
 	}
 }
 
-std::string MediaLibrary::SongToString(const MPD::Song &s, void *)
+std::string MediaLibrary::SongToString(const MPD::Song &s)
 {
 	return s.toString(Config.song_library_format);
 }
 
-std::string MediaLibrary::AlbumToString(const SearchConstraints &sc, void *ptr)
+std::string MediaLibrary::AlbumToString(const SearchConstraints &sc)
 {
 	if (sc.Date == AllTracksMarker)
 		return "All tracks";
 	std::string result;
-	if (static_cast<MediaLibrary *>(ptr)->hasTwoColumns)
+	if (myLibrary->hasTwoColumns)
 		(result += sc.PrimaryTag.empty() ? Config.empty_tag : sc.PrimaryTag) += " - ";
-	if ((!static_cast<MediaLibrary *>(ptr)->hasTwoColumns || Config.media_lib_primary_tag != MPD_TAG_DATE) && !sc.Date.empty())
+	if ((!myLibrary || Config.media_lib_primary_tag != MPD_TAG_DATE) && !sc.Date.empty())
 		((result += "(") += sc.Date) += ") ";
 	result += sc.Album.empty() ? "<no album>" : sc.Album;
 	return result;
 }
 
-void MediaLibrary::DisplayAlbums(const SearchConstraints &sc, void *, Menu<SearchConstraints> *menu)
+void MediaLibrary::DisplayAlbums(Menu<SearchConstraints> &menu, const SearchConstraints &sc)
 {
-	*menu << AlbumToString(sc, 0);
+	menu << AlbumToString(sc);
 }
 
-void MediaLibrary::DisplayPrimaryTags(const std::string &tag, void *, Menu<std::string> *menu)
+void MediaLibrary::DisplayPrimaryTags(Menu<std::string> &menu, const std::string &tag)
 {
-	*menu << (!tag.empty() ? tag : Config.empty_tag);
+	if (tag.empty())
+		menu << Config.empty_tag;
+	else
+		menu << tag;
 }
 
 bool MediaLibrary::SearchConstraintsSorting::operator()(const SearchConstraints &a, const SearchConstraints &b) const

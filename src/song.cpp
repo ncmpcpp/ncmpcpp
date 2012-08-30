@@ -258,7 +258,7 @@ bool Song::isStream() const
 
 bool Song::empty() const
 {
-	return m_song == 0;
+	return m_song.get() == 0;
 }
 
 std::string Song::toString(const std::string &fmt, const std::string &tag_separator, const std::string &escape_chars) const

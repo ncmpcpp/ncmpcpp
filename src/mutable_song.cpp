@@ -25,27 +25,27 @@ namespace MPD {//
 
 std::string MutableSong::getArtist(unsigned idx) const
 {
-	return getTag(MPD_TAG_ARTIST, [this, idx](){ return Song::getArtist(idx); }, idx);
+	return getTag(MPD_TAG_ARTIST, [this, idx](){ return this->Song::getArtist(idx); }, idx);
 }
 
 std::string MutableSong::getTitle(unsigned idx) const
 {
-	return getTag(MPD_TAG_TITLE, [this, idx](){ return Song::getTitle(idx); }, idx);
+	return getTag(MPD_TAG_TITLE, [this, idx](){ return this->Song::getTitle(idx); }, idx);
 }
 
 std::string MutableSong::getAlbum(unsigned idx) const
 {
-	return getTag(MPD_TAG_ALBUM, [this, idx](){ return Song::getAlbum(idx); }, idx);
+	return getTag(MPD_TAG_ALBUM, [this, idx](){ return this->Song::getAlbum(idx); }, idx);
 }
 
 std::string MutableSong::getAlbumArtist(unsigned idx) const
 {
-	return getTag(MPD_TAG_ALBUM_ARTIST, [this, idx](){ return Song::getAlbumArtist(idx); }, idx);
+	return getTag(MPD_TAG_ALBUM_ARTIST, [this, idx](){ return this->Song::getAlbumArtist(idx); }, idx);
 }
 
 std::string MutableSong::getTrack(unsigned idx) const
 {
-	std::string track = getTag(MPD_TAG_TRACK, [this, idx](){ return Song::getTrack(idx); }, idx);
+	std::string track = getTag(MPD_TAG_TRACK, [this, idx](){ return this->Song::getTrack(idx); }, idx);
 	if ((track.length() == 1 && track[0] != '0')
 	||  (track.length() > 3  && track[1] == '/'))
 		return "0"+track;
@@ -55,32 +55,32 @@ std::string MutableSong::getTrack(unsigned idx) const
 
 std::string MutableSong::getDate(unsigned idx) const
 {
-	return getTag(MPD_TAG_DATE, [this, idx](){ return Song::getDate(idx); }, idx);
+	return getTag(MPD_TAG_DATE, [this, idx](){ return this->Song::getDate(idx); }, idx);
 }
 
 std::string MutableSong::getGenre(unsigned idx) const
 {
-	return getTag(MPD_TAG_GENRE, [this, idx](){ return Song::getGenre(idx); }, idx);
+	return getTag(MPD_TAG_GENRE, [this, idx](){ return this->Song::getGenre(idx); }, idx);
 }
 
 std::string MutableSong::getComposer(unsigned idx) const
 {
-	return getTag(MPD_TAG_COMPOSER, [this, idx](){ return Song::getComposer(idx); }, idx);
+	return getTag(MPD_TAG_COMPOSER, [this, idx](){ return this->Song::getComposer(idx); }, idx);
 }
 
 std::string MutableSong::getPerformer(unsigned idx) const
 {
-	return getTag(MPD_TAG_PERFORMER, [this, idx](){ return Song::getPerformer(idx); }, idx);
+	return getTag(MPD_TAG_PERFORMER, [this, idx](){ return this->Song::getPerformer(idx); }, idx);
 }
 
 std::string MutableSong::getDisc(unsigned idx) const
 {
-	return getTag(MPD_TAG_DISC, [this, idx](){ return Song::getDisc(idx); }, idx);
+	return getTag(MPD_TAG_DISC, [this, idx](){ return this->Song::getDisc(idx); }, idx);
 }
 
 std::string MutableSong::getComment(unsigned idx) const
 {
-	return getTag(MPD_TAG_COMMENT, [this, idx](){ return Song::getComment(idx); }, idx);
+	return getTag(MPD_TAG_COMMENT, [this, idx](){ return this->Song::getComment(idx); }, idx);
 }
 
 void MutableSong::setArtist(const std::string &value, unsigned idx)

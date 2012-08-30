@@ -63,17 +63,14 @@ size_t SearchEngine::SearchButton = 15;
 
 void SearchEngine::Init()
 {
-	static Display::ScreenFormat sf = { this, &Config.song_list_format };
-	
 	w = new Menu<SEItem>(0, MainStartY, COLS, MainHeight, "", Config.main_color, brNone);
 	w->HighlightColor(Config.main_highlight_color);
 	w->CyclicScrolling(Config.use_cyclic_scrolling);
 	w->CenteredCursor(Config.centered_cursor);
 	w->setItemDisplayer(Display::SearchEngine);
-	w->setItemDisplayerData(&sf);
 	w->SetSelectPrefix(&Config.selected_item_prefix);
 	w->SetSelectSuffix(&Config.selected_item_suffix);
-	w->SetGetStringFunction(SearchEngineOptionToString);
+	w->SetItemStringifier(SearchEngineOptionToString);
 	SearchMode = &SearchModes[Config.search_engine_default_search_mode];
 	isInitialized = 1;
 }
@@ -545,15 +542,15 @@ void SearchEngine::Search()
 	}
 }
 
-std::string SearchEngine::SearchEngineOptionToString(const SEItem &ei, void *)
+std::string SearchEngine::SearchEngineOptionToString(const SEItem &ei)
 {
+	std::string result;
 	if (!ei.isSong())
 	{
-		if (!Config.columns_in_search_engine)
-			return ei.song().toString(Config.song_list_format_dollar_free);
+		if (Config.columns_in_search_engine)
+			result = Playlist::SongInColumnsToString(ei.song());
 		else
-			return Playlist::SongInColumnsToString(ei.song(), 0);
+			result = ei.song().toString(Config.song_list_format_dollar_free);
 	}
-	else
-		return "";
+	return result;
 }

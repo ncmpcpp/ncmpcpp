@@ -81,8 +81,8 @@ class Playlist : public Screen<Window>
 		
 		bool checkForSong(const MPD::Song &s);
 		
-		static std::string SongToString(const MPD::Song &, void *);
-		static std::string SongInColumnsToString(const MPD::Song &, void *);
+		static std::string SongToString(const MPD::Song &s);
+		static std::string SongInColumnsToString(const MPD::Song &s);
 		
 		Menu< MPD::Song > *Items;
 		

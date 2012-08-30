@@ -24,13 +24,13 @@ using namespace NCurses;
 
 template <> std::string Menu<std::string>::GetOption(size_t pos)
 {
+	std::string result;
 	if (m_options_ptr->at(pos))
 	{
 		if (m_get_string_helper)
-			return m_get_string_helper((*m_options_ptr)[pos]->Item, m_get_string_helper_data);
+			result = m_get_string_helper((*m_options_ptr)[pos]->Item);
 		else
-			return (*m_options_ptr)[pos]->Item;
+			result = (*m_options_ptr)[pos]->Item;
 	}
-	else
-		return "";
+	return result;
 }

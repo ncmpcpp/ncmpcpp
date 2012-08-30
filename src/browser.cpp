@@ -52,17 +52,14 @@ std::set<std::string> Browser::SupportedExtensions;
 
 void Browser::Init()
 {
-	static Display::ScreenFormat sf = { this, &Config.song_list_format };
-	
 	w = new Menu<MPD::Item>(0, MainStartY, COLS, MainHeight, Config.columns_in_browser && Config.titles_visibility ? Display::Columns(COLS) : "", Config.main_color, brNone);
 	w->HighlightColor(Config.main_highlight_color);
 	w->CyclicScrolling(Config.use_cyclic_scrolling);
 	w->CenteredCursor(Config.centered_cursor);
 	w->SetSelectPrefix(&Config.selected_item_prefix);
 	w->SetSelectSuffix(&Config.selected_item_suffix);
-	w->setItemDisplayer(Display::Items);
-	w->setItemDisplayerData(&sf);
-	w->SetGetStringFunction(ItemToString);
+	w->setItemDisplayer(std::bind(Display::Items, _1, _2));
+	w->SetItemStringifier(ItemToString);
 	
 	if (SupportedExtensions.empty())
 		Mpd.GetSupportedExtensions(SupportedExtensions);
@@ -576,29 +573,22 @@ void Browser::UpdateItemList()
 	w->Refresh();
 }
 
-std::string Browser::ItemToString(const MPD::Item &item, void *)
+std::string Browser::ItemToString(const MPD::Item &item)
 {
+	std::string result;
 	switch (item.type)
 	{
 		case MPD::itDirectory:
-		{
-			return "[" + getBasename(item.name) + "]";
-		}
+			result = "[" + getBasename(item.name) + "]";
+			break;
 		case MPD::itSong:
-		{
 			if (!Config.columns_in_browser)
-				return item.song->toString(Config.song_list_format_dollar_free);
+				result = item.song->toString(Config.song_list_format_dollar_free);
 			else
-				return Playlist::SongInColumnsToString(*item.song, 0);
-		}
+				result = Playlist::SongInColumnsToString(*item.song);
 		case MPD::itPlaylist:
-		{
-			return Config.browser_playlist_prefix.Str() + getBasename(item.name);
-		}
-		default:
-		{
-			return "";
-		}
+			result = Config.browser_playlist_prefix.Str() + getBasename(item.name);
 	}
+	return result;
 }
 

@@ -116,7 +116,7 @@ class SearchEngine : public Screen< Menu<SEItem> >
 		
 		const char **SearchMode;
 		
-		static std::string SearchEngineOptionToString(const SEItem &, void *);
+		static std::string SearchEngineOptionToString(const SEItem &);
 		
 		static const char *SearchModes[];
 		

@@ -30,35 +30,29 @@
 
 namespace Display
 {
-	struct ScreenFormat
-	{
-		BasicScreen *screen;
-		std::string *format;
-	};
-	
 	std::string Columns(size_t);
 	
-	template <typename T> void Default(const T &t, void *, Menu<T> *menu)
+	template <typename T> void Default(Menu<T> &menu, const T &t)
 	{
-		*menu << t;
+		menu << t;
 	}
 	
-	template <typename A, typename B> void Pair(const std::pair<A, B> &pair, void *, Menu< std::pair<A, B> > *menu)
+	template <typename A, typename B> void Pair(Menu< std::pair<A, B> > &menu, const std::pair<A, B> &pair)
 	{
-		*menu << pair.first;
+		menu << pair.first;
 	}
 	
-	void SongsInColumns(const MPD::Song &, void *, Menu<MPD::Song> *);
+	void SongsInColumns(Menu<MPD::Song> &menu, const MPD::Song &s, BasicScreen &screen);
 	
-	void Songs(const MPD::Song &, void *, Menu<MPD::Song> *);
+	void Songs(Menu<MPD::Song> &menu, const MPD::Song &s, BasicScreen &screen, const std::string &format);
 	
-	void Tags(const MPD::MutableSong &, void *, Menu<MPD::MutableSong> *);
+	void Tags(Menu<MPD::MutableSong> &menu, const MPD::MutableSong &s);
 	
-	void Outputs(const MPD::Output &, void *, Menu<MPD::Output> *);
+	void Outputs(Menu<MPD::Output> &menu, const MPD::Output &o);
 	
-	void SearchEngine(const SEItem &, void *, Menu<SEItem> *);
+	void SearchEngine(Menu<SEItem> &menu, const SEItem &si);
 	
-	void Items(const MPD::Item &, void *, Menu<MPD::Item> *);
+	void Items(Menu<MPD::Item> &menu, const MPD::Item &item);
 }
 
 #endif
