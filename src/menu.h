@@ -104,17 +104,17 @@ namespace NCurses
 	template <typename T> class Menu : public Window, public List
 	{
 		/// Function helper prototype used to display each option on the screen.
-		/// If not set by SetItemDisplayer(), menu won't display anything.
-		/// @see SetItemDisplayer()
+		/// If not set by setItemDisplayer(), menu won't display anything.
+		/// @see setItemDisplayer()
 		///
-		typedef void (*ItemDisplayer)(const T &, void *, Menu<T> *);
+		typedef std::function<void(const T &, void *, Menu<T> *)> ItemDisplayer;
 		
 		/// Function helper prototype used for converting items to strings.
 		/// If not set by SetGetStringFunction(), searching and filtering
 		/// won't work (note that Menu<std::string> doesn't need this)
 		/// @see SetGetStringFunction()
 		///
-		typedef std::string (*GetStringFunction)(const T &, void *);
+		typedef std::function<std::string(const T &, void *)> GetStringFunction;
 		
 		/// Struct that holds each item in the list and its attributes
 		///
@@ -173,24 +173,24 @@ namespace NCurses
 			/// Sets helper function that is responsible for displaying items
 			/// @param ptr function pointer that matches the ItemDisplayer prototype
 			///
-			void SetItemDisplayer(ItemDisplayer ptr) { itsItemDisplayer = ptr; }
+			void setItemDisplayer(ItemDisplayer ptr) { m_item_displayer = ptr; }
 			
 			/// Sets optional user data, that is passed to
 			/// ItemDisplayer function each time it's invoked
 			/// @param data void pointer to userdata
 			///
-			void SetItemDisplayerUserData(void *data) { itsItemDisplayerUserdata = data; }
+			void setItemDisplayerData(void *data) { m_item_displayer_data = data; }
 			
 			/// Sets helper function that is responsible for converting items to strings
 			/// @param f function pointer that matches the GetStringFunction prototype
 			///
-			void SetGetStringFunction(GetStringFunction f) { itsGetStringFunction = f; }
+			void SetGetStringFunction(GetStringFunction f) { m_get_string_helper = f; }
 			
 			/// Sets optional user data, that is passed to
 			/// GetStringFunction function each time it's invoked
 			/// @param data void pointer to user data
 			///
-			void SetGetStringFunctionUserData(void *data) { itsGetStringFunctionUserData = data; }
+			void SetGetStringFunctionUserData(void *data) { m_get_string_helper_data = data; }
 			
 			/// Reserves the size for internal container (this just calls std::vector::reserve())
 			/// @param size requested size
@@ -337,7 +337,7 @@ namespace NCurses
 			
 			/// @return const reference to currently used search constraint
 			///
-			virtual const std::string &GetSearchConstraint() { return itsSearchConstraint; }
+			virtual const std::string &GetSearchConstraint() { return m_search_constraint; }
 			
 			/// Moves current position in the list to the next found one
 			/// @param wrap if true, this function will go to the first
@@ -366,21 +366,21 @@ namespace NCurses
 			
 			/// @return true if list is currently filtered, false otherwise
 			///
-			virtual bool isFiltered() { return itsOptionsPtr == &itsFilteredOptions; }
+			virtual bool isFiltered() { return m_options_ptr == &m_filtered_options; }
 			
 			/// Turns off filtering
 			///
-			void ShowAll() { itsOptionsPtr = &itsOptions; }
+			void ShowAll() { m_options_ptr = &m_options; }
 			
 			/// Turns on filtering
 			///
-			void ShowFiltered() { itsOptionsPtr = &itsFilteredOptions; }
+			void ShowFiltered() { m_options_ptr = &m_filtered_options; }
 			
 			/// Converts given position in list to string using GetStringFunction
 			/// if specified and an empty string otherwise
 			/// @param pos position to be converted
 			/// @return item converted to string
-			/// @see SetItemDisplayer()
+			/// @see setItemDisplayer()
 			///
 			std::string GetOption(size_t pos);
 			
@@ -409,61 +409,61 @@ namespace NCurses
 			///
 			template <typename Comparison> void Sort(size_t beginning = 0, size_t end = -1)
 			{
-				if (itsOptions.empty())
+				if (m_options.empty())
 					return;
-				sort(itsOptions.begin()+beginning, end == size_t(-1) ? itsOptions.end() : itsOptions.begin()+end, InternalSorting<Comparison>());
+				sort(m_options.begin()+beginning, end == size_t(-1) ? m_options.end() : m_options.begin()+end, InternalSorting<Comparison>());
 				if (isFiltered())
-					ApplyFilter(itsFilter);
+					ApplyFilter(m_filter);
 			}
 			
 			/// Sets prefix, that is put before each selected item to indicate its selection
 			/// Note that the passed variable is not deleted along with menu object.
 			/// @param b pointer to buffer that contains the prefix
 			///
-			void SetSelectPrefix(Buffer *b) { itsSelectedPrefix = b; }
+			void SetSelectPrefix(Buffer *b) { m_selected_prefix = b; }
 			
 			/// Sets suffix, that is put after each selected item to indicate its selection
 			/// Note that the passed variable is not deleted along with menu object.
 			/// @param b pointer to buffer that contains the suffix
 			///
-			void SetSelectSuffix(Buffer *b) { itsSelectedSuffix = b; }
+			void SetSelectSuffix(Buffer *b) { m_selected_suffix = b; }
 			
 			/// Sets custom color of highlighted position
 			/// @param col custom color
 			///
-			void HighlightColor(Color color) { itsHighlightColor = color; }
+			void HighlightColor(Color color) { m_highlight_color = color; }
 			
 			/// @return state of highlighting
 			///
-			bool isHighlighted() { return highlightEnabled; }
+			bool isHighlighted() { return m_highlight_enabled; }
 			
 			/// Turns on/off highlighting
 			/// @param state state of hihglighting
 			///
-			void Highlighting(bool state) { highlightEnabled = state; }
+			void Highlighting(bool state) { m_highlight_enabled = state; }
 			
 			/// Turns on/off cyclic scrolling
 			/// @param state state of cyclic scrolling
 			///
-			void CyclicScrolling(bool state) { useCyclicScrolling = state; }
+			void CyclicScrolling(bool state) { m_cyclic_scroll_enabled = state; }
 			
 			/// Turns on/off centered cursor
 			/// @param state state of centered cursor
 			///
-			void CenteredCursor(bool state) { useCenteredCursor = state; }
+			void CenteredCursor(bool state) { m_autocenter_cursor = state; }
 			
 			/// Checks if list is empty
 			/// @return true if list is empty, false otherwise
 			/// @see ReallyEmpty()
 			///
-			virtual bool Empty() const { return itsOptionsPtr->empty(); }
+			virtual bool Empty() const { return m_options_ptr->empty(); }
 			
 			/// Checks if list is really empty since Empty() may not
 			/// be accurate if filter is set)
 			/// @return true if list is empty, false otherwise
 			/// @see Empty()
 			///
-			virtual bool ReallyEmpty() const { return itsOptions.empty(); }
+			virtual bool ReallyEmpty() const { return m_options.empty(); }
 			
 			/// @return size of the list
 			///
@@ -473,7 +473,7 @@ namespace NCurses
 			/// defined only within drawing function that is called by Refresh()
 			/// @see Refresh()
 			///
-			size_t CurrentlyDrawedPosition() const { return itsCurrentlyDrawedPosition; }
+			size_t CurrentlyDrawedPosition() const { return m_currently_drawn_positions; }
 			
 			/// @return reference to last item on the list
 			/// @throw List::InvalidItem if requested item is separator
@@ -526,33 +526,33 @@ namespace NCurses
 			///
 			void ClearFiltered();
 			
-			ItemDisplayer itsItemDisplayer;
-			void *itsItemDisplayerUserdata;
-			GetStringFunction itsGetStringFunction;
-			void *itsGetStringFunctionUserData;
+			ItemDisplayer m_item_displayer;
+			void *m_item_displayer_data;
+			GetStringFunction m_get_string_helper;
+			void *m_get_string_helper_data;
 			
-			std::string itsFilter;
-			std::string itsSearchConstraint;
+			std::string m_filter;
+			std::string m_search_constraint;
 			
-			std::vector<Option *> *itsOptionsPtr;
-			std::vector<Option *> itsOptions;
-			std::vector<Option *> itsFilteredOptions;
-			std::vector<size_t> itsFilteredRealPositions;
-			std::set<size_t> itsFound;
+			std::vector<Option *> *m_options_ptr;
+			std::vector<Option *> m_options;
+			std::vector<Option *> m_filtered_options;
+			std::vector<size_t> m_filtered_positions;
+			std::set<size_t> m_found_positions;
 			
 			int itsBeginning;
 			int itsHighlight;
 			
-			Color itsHighlightColor;
-			bool highlightEnabled;
-			bool useCyclicScrolling;
+			Color m_highlight_color;
+			bool m_highlight_enabled;
+			bool m_cyclic_scroll_enabled;
 			
-			bool useCenteredCursor;
+			bool m_autocenter_cursor;
 			
-			size_t itsCurrentlyDrawedPosition;
+			size_t m_currently_drawn_positions;
 			
-			Buffer *itsSelectedPrefix;
-			Buffer *itsSelectedSuffix;
+			Buffer *m_selected_prefix;
+			Buffer *m_selected_suffix;
 	};
 	
 	/// Specialization of Menu<T>::GetOption for T = std::string, it's obvious
@@ -569,129 +569,129 @@ template <typename T> NCurses::Menu<T>::Menu(size_t startx,
 					Color color,
 					Border border)
 					: Window(startx, starty, width, height, title, color, border),
-					itsItemDisplayer(0),
-					itsItemDisplayerUserdata(0),
-					itsGetStringFunction(0),
-					itsGetStringFunctionUserData(0),
-					itsOptionsPtr(&itsOptions),
+					m_item_displayer(0),
+					m_item_displayer_data(0),
+					m_get_string_helper(0),
+					m_get_string_helper_data(0),
+					m_options_ptr(&m_options),
 					itsBeginning(0),
 					itsHighlight(0),
-					itsHighlightColor(itsBaseColor),
-					highlightEnabled(1),
-					useCyclicScrolling(0),
-					useCenteredCursor(0),
-					itsSelectedPrefix(0),
-					itsSelectedSuffix(0)
+					m_highlight_color(itsBaseColor),
+					m_highlight_enabled(1),
+					m_cyclic_scroll_enabled(0),
+					m_autocenter_cursor(0),
+					m_selected_prefix(0),
+					m_selected_suffix(0)
 {
 }
 
 template <typename T> NCurses::Menu<T>::Menu(const Menu &m) : Window(m),
-					itsItemDisplayer(m.itsItemDisplayer),
-					itsItemDisplayerUserdata(m.itsItemDisplayerUserdata),
-					itsGetStringFunction(m.itsGetStringFunction),
-					itsGetStringFunctionUserData(m.itsGetStringFunctionUserData),
-					itsOptionsPtr(m.itsOptionsPtr),
+					m_item_displayer(m.m_item_displayer),
+					m_item_displayer_data(m.m_item_displayer_data),
+					m_get_string_helper(m.m_get_string_helper),
+					m_get_string_helper_data(m.m_get_string_helper_data),
+					m_options_ptr(m.m_options_ptr),
 					itsBeginning(m.itsBeginning),
 					itsHighlight(m.itsHighlight),
-					itsHighlightColor(m.itsHighlightColor),
-					highlightEnabled(m.highlightEnabled),
-					useCyclicScrolling(m.useCyclicScrolling),
-					useCenteredCursor(m.useCenteredCursor),
-					itsSelectedPrefix(m.itsSelectedPrefix),
-					itsSelectedSuffix(m.itsSelectedSuffix)
+					m_highlight_color(m.m_highlight_color),
+					m_highlight_enabled(m.m_highlight_enabled),
+					m_cyclic_scroll_enabled(m.m_cyclic_scroll_enabled),
+					m_autocenter_cursor(m.m_autocenter_cursor),
+					m_selected_prefix(m.m_selected_prefix),
+					m_selected_suffix(m.m_selected_suffix)
 {
-	itsOptions.reserve(m.itsOptions.size());
-	for (option_const_iterator it = m.itsOptions.begin(); it != m.itsOptions.end(); ++it)
-		itsOptions.push_back(new Option(**it));
+	m_options.reserve(m.m_options.size());
+	for (option_const_iterator it = m.m_options.begin(); it != m.m_options.end(); ++it)
+		m_options.push_back(new Option(**it));
 }
 
 template <typename T> NCurses::Menu<T>::~Menu()
 {
-	for (option_iterator it = itsOptions.begin(); it != itsOptions.end(); ++it)
+	for (option_iterator it = m_options.begin(); it != m_options.end(); ++it)
 		delete *it;
 }
 
 template <typename T> void NCurses::Menu<T>::Reserve(size_t size)
 {
-	itsOptions.reserve(size);
+	m_options.reserve(size);
 }
 
 template <typename T> void NCurses::Menu<T>::ResizeList(size_t size)
 {
-	if (size > itsOptions.size())
+	if (size > m_options.size())
 	{
-		itsOptions.resize(size);
+		m_options.resize(size);
 		for (size_t i = 0; i < size; ++i)
-			if (!itsOptions[i])
-				itsOptions[i] = new Option();
+			if (!m_options[i])
+				m_options[i] = new Option();
 	}
-	else if (size < itsOptions.size())
+	else if (size < m_options.size())
 	{
-		for (size_t i = size; i < itsOptions.size(); ++i)
-			delete itsOptions[i];
-		itsOptions.resize(size);
+		for (size_t i = size; i < m_options.size(); ++i)
+			delete m_options[i];
+		m_options.resize(size);
 	}
 }
 
 template <typename T> void NCurses::Menu<T>::AddOption(const T &item, bool is_bold, bool is_static)
 {
-	itsOptions.push_back(new Option(item, is_bold, is_static));
+	m_options.push_back(new Option(item, is_bold, is_static));
 }
 
 template <typename T> void NCurses::Menu<T>::AddSeparator()
 {
-	itsOptions.push_back(static_cast<Option *>(0));
+	m_options.push_back(static_cast<Option *>(0));
 }
 
 template <typename T> void NCurses::Menu<T>::InsertOption(size_t pos, const T &item, bool is_bold, bool is_static)
 {
-	itsOptions.insert(itsOptions.begin()+pos, new Option(item, is_bold, is_static));
+	m_options.insert(m_options.begin()+pos, new Option(item, is_bold, is_static));
 }
 
 template <typename T> void NCurses::Menu<T>::InsertSeparator(size_t pos)
 {
-	itsOptions.insert(itsOptions.begin()+pos, 0);
+	m_options.insert(m_options.begin()+pos, 0);
 }
 
 template <typename T> void NCurses::Menu<T>::DeleteOption(size_t pos)
 {
-	if (itsOptionsPtr->empty())
+	if (m_options_ptr->empty())
 		return;
-	if (itsOptionsPtr == &itsFilteredOptions)
+	if (m_options_ptr == &m_filtered_options)
 	{
-		delete itsOptions.at(itsFilteredRealPositions[pos]);
-		itsOptions.erase(itsOptions.begin()+itsFilteredRealPositions[pos]);
-		itsFilteredOptions.erase(itsFilteredOptions.begin()+pos);
-		itsFilteredRealPositions.erase(itsFilteredRealPositions.begin()+pos);
-		for (size_t i = pos; i < itsFilteredRealPositions.size(); ++i)
-			itsFilteredRealPositions[i]--;
+		delete m_options.at(m_filtered_positions[pos]);
+		m_options.erase(m_options.begin()+m_filtered_positions[pos]);
+		m_filtered_options.erase(m_filtered_options.begin()+pos);
+		m_filtered_positions.erase(m_filtered_positions.begin()+pos);
+		for (size_t i = pos; i < m_filtered_positions.size(); ++i)
+			m_filtered_positions[i]--;
 	}
 	else
 	{
-		delete itsOptions.at(pos);
-		itsOptions.erase(itsOptions.begin()+pos);
+		delete m_options.at(pos);
+		m_options.erase(m_options.begin()+pos);
 	}
-	itsFound.clear();
-	if (itsOptionsPtr->empty())
+	m_found_positions.clear();
+	if (m_options_ptr->empty())
 		Window::Clear();
 }
 
 template <typename T> void NCurses::Menu<T>::IntoSeparator(size_t pos)
 {
-	delete itsOptionsPtr->at(pos);
-	(*itsOptionsPtr)[pos] = 0;
+	delete m_options_ptr->at(pos);
+	(*m_options_ptr)[pos] = 0;
 }
 
 template <typename T> void NCurses::Menu<T>::Bold(int pos, bool state)
 {
-	if (!itsOptionsPtr->at(pos))
+	if (!m_options_ptr->at(pos))
 		return;
-	(*itsOptionsPtr)[pos]->isBold = state;
+	(*m_options_ptr)[pos]->isBold = state;
 }
 
 template <typename T> void NCurses::Menu<T>::Swap(size_t one, size_t two)
 {
-	std::swap(itsOptions.at(one), itsOptions.at(two));
+	std::swap(m_options.at(one), m_options.at(two));
 }
 
 template <typename T> void NCurses::Menu<T>::Move(size_t from, size_t to)
@@ -700,18 +700,18 @@ template <typename T> void NCurses::Menu<T>::Move(size_t from, size_t to)
 	if (diff > 0)
 	{
 		for (size_t i = from; i > to; --i)
-			std::swap(itsOptions.at(i), itsOptions.at(i-1));
+			std::swap(m_options.at(i), m_options.at(i-1));
 	}
 	else if (diff < 0)
 	{
 		for (size_t i = from; i < to; ++i)
-			std::swap(itsOptions.at(i), itsOptions.at(i+1));
+			std::swap(m_options.at(i), m_options.at(i+1));
 	}
 }
 
 template <typename T> bool NCurses::Menu<T>::Goto(size_t y)
 {
-	if (!itsOptionsPtr->at(itsBeginning+y) || itsOptionsPtr->at(itsBeginning+y)->isStatic)
+	if (!m_options_ptr->at(itsBeginning+y) || m_options_ptr->at(itsBeginning+y)->isStatic)
 		return false;
 	itsHighlight = itsBeginning+y;
 	return true;
@@ -719,12 +719,12 @@ template <typename T> bool NCurses::Menu<T>::Goto(size_t y)
 
 template <typename T> void NCurses::Menu<T>::Refresh()
 {
-	if (itsOptionsPtr->empty())
+	if (m_options_ptr->empty())
 	{
 		Window::Refresh();
 		return;
 	}
-	int MaxBeginning = itsOptionsPtr->size() < itsHeight ? 0 : itsOptionsPtr->size()-itsHeight;
+	int MaxBeginning = m_options_ptr->size() < itsHeight ? 0 : m_options_ptr->size()-itsHeight;
 	
 	if (itsBeginning < itsHighlight-int(itsHeight)+1) // highlighted position is off the screen
 		itsBeginning = itsHighlight-itsHeight+1;
@@ -734,51 +734,51 @@ template <typename T> void NCurses::Menu<T>::Refresh()
 	else if (itsBeginning > MaxBeginning)
 		itsBeginning = MaxBeginning;
 	
-	if (!itsOptionsPtr->empty() && itsHighlight > int(itsOptionsPtr->size())-1)
-		itsHighlight = itsOptionsPtr->size()-1;
+	if (!m_options_ptr->empty() && itsHighlight > int(m_options_ptr->size())-1)
+		itsHighlight = m_options_ptr->size()-1;
 	
-	if (!(*itsOptionsPtr)[itsHighlight] || (*itsOptionsPtr)[itsHighlight]->isStatic) // it shouldn't be here
+	if (!(*m_options_ptr)[itsHighlight] || (*m_options_ptr)[itsHighlight]->isStatic) // it shouldn't be here
 	{
 		Scroll(wUp);
-		if (!(*itsOptionsPtr)[itsHighlight] || (*itsOptionsPtr)[itsHighlight]->isStatic)
+		if (!(*m_options_ptr)[itsHighlight] || (*m_options_ptr)[itsHighlight]->isStatic)
 			Scroll(wDown);
 	}
 	
 	size_t line = 0;
-	for (size_t &i = (itsCurrentlyDrawedPosition = itsBeginning); i < itsBeginning+itsHeight; ++i)
+	for (size_t &i = (m_currently_drawn_positions = itsBeginning); i < itsBeginning+itsHeight; ++i)
 	{
 		GotoXY(0, line);
-		if (i >= itsOptionsPtr->size())
+		if (i >= m_options_ptr->size())
 		{
 			for (; line < itsHeight; ++line)
 				mvwhline(itsWindow, line, 0, 32, itsWidth);
 			break;
 		}
-		if (!(*itsOptionsPtr)[i]) // separator
+		if (!(*m_options_ptr)[i]) // separator
 		{
 			mvwhline(itsWindow, line++, 0, 0, itsWidth);
 			continue;
 		}
-		if ((*itsOptionsPtr)[i]->isBold)
+		if ((*m_options_ptr)[i]->isBold)
 			*this << fmtBold;
-		if (highlightEnabled && int(i) == itsHighlight)
+		if (m_highlight_enabled && int(i) == itsHighlight)
 		{
 			*this << fmtReverse;
-			*this << itsHighlightColor;
+			*this << m_highlight_color;
 		}
 		mvwhline(itsWindow, line, 0, 32, itsWidth);
-		if ((*itsOptionsPtr)[i]->isSelected && itsSelectedPrefix)
-			*this << *itsSelectedPrefix;
-		if (itsItemDisplayer)
-			itsItemDisplayer((*itsOptionsPtr)[i]->Item, itsItemDisplayerUserdata, this);
-		if ((*itsOptionsPtr)[i]->isSelected && itsSelectedSuffix)
-			*this << *itsSelectedSuffix;
-		if (highlightEnabled && int(i) == itsHighlight)
+		if ((*m_options_ptr)[i]->isSelected && m_selected_prefix)
+			*this << *m_selected_prefix;
+		if (m_item_displayer)
+			m_item_displayer((*m_options_ptr)[i]->Item, m_item_displayer_data, this);
+		if ((*m_options_ptr)[i]->isSelected && m_selected_suffix)
+			*this << *m_selected_suffix;
+		if (m_highlight_enabled && int(i) == itsHighlight)
 		{
 			*this << clEnd;
 			*this << fmtReverseEnd;
 		}
-		if ((*itsOptionsPtr)[i]->isBold)
+		if ((*m_options_ptr)[i]->isBold)
 			*this << fmtBoldEnd;
 		line++;
 	}
@@ -787,10 +787,10 @@ template <typename T> void NCurses::Menu<T>::Refresh()
 
 template <typename T> void NCurses::Menu<T>::Scroll(Where where)
 {
-	if (itsOptionsPtr->empty())
+	if (m_options_ptr->empty())
 		return;
-	int MaxHighlight = itsOptionsPtr->size()-1;
-	int MaxBeginning = itsOptionsPtr->size() < itsHeight ? 0 : itsOptionsPtr->size()-itsHeight;
+	int MaxHighlight = m_options_ptr->size()-1;
+	int MaxBeginning = m_options_ptr->size() < itsHeight ? 0 : m_options_ptr->size()-itsHeight;
 	int MaxCurrentHighlight = itsBeginning+itsHeight-1;
 	switch (where)
 	{
@@ -802,7 +802,7 @@ template <typename T> void NCurses::Menu<T>::Scroll(Where where)
 			}
 			if (itsHighlight == 0)
 			{
-				if (useCyclicScrolling)
+				if (m_cyclic_scroll_enabled)
 					return Scroll(wEnd);
 				break;
 			}
@@ -810,9 +810,9 @@ template <typename T> void NCurses::Menu<T>::Scroll(Where where)
 			{
 				itsHighlight--;
 			}
-			if (!(*itsOptionsPtr)[itsHighlight] || (*itsOptionsPtr)[itsHighlight]->isStatic)
+			if (!(*m_options_ptr)[itsHighlight] || (*m_options_ptr)[itsHighlight]->isStatic)
 			{
-				Scroll(itsHighlight == 0 && !useCyclicScrolling ? wDown : wUp);
+				Scroll(itsHighlight == 0 && !m_cyclic_scroll_enabled ? wDown : wUp);
 			}
 			break;
 		}
@@ -824,7 +824,7 @@ template <typename T> void NCurses::Menu<T>::Scroll(Where where)
 			}
 			if (itsHighlight == MaxHighlight)
 			{
-				if (useCyclicScrolling)
+				if (m_cyclic_scroll_enabled)
 					return Scroll(wHome);
 				break;
 			}
@@ -832,15 +832,15 @@ template <typename T> void NCurses::Menu<T>::Scroll(Where where)
 			{
 				itsHighlight++;
 			}
-			if (!(*itsOptionsPtr)[itsHighlight] || (*itsOptionsPtr)[itsHighlight]->isStatic)
+			if (!(*m_options_ptr)[itsHighlight] || (*m_options_ptr)[itsHighlight]->isStatic)
 			{
-				Scroll(itsHighlight == MaxHighlight && !useCyclicScrolling ? wUp : wDown);
+				Scroll(itsHighlight == MaxHighlight && !m_cyclic_scroll_enabled ? wUp : wDown);
 			}
 			break;
 		}
 		case wPageUp:
 		{
-			if (useCyclicScrolling && itsHighlight == 0)
+			if (m_cyclic_scroll_enabled && itsHighlight == 0)
 				return Scroll(wEnd);
 			itsHighlight -= itsHeight;
 			itsBeginning -= itsHeight;
@@ -850,15 +850,15 @@ template <typename T> void NCurses::Menu<T>::Scroll(Where where)
 				if (itsHighlight < 0)
 					itsHighlight = 0;
 			}
-			if (!(*itsOptionsPtr)[itsHighlight] || (*itsOptionsPtr)[itsHighlight]->isStatic)
+			if (!(*m_options_ptr)[itsHighlight] || (*m_options_ptr)[itsHighlight]->isStatic)
 			{
-				Scroll(itsHighlight == 0 && !useCyclicScrolling ? wDown : wUp);
+				Scroll(itsHighlight == 0 && !m_cyclic_scroll_enabled ? wDown : wUp);
 			}
 			break;
 		}
 		case wPageDown:
 		{
-			if (useCyclicScrolling && itsHighlight == MaxHighlight)
+			if (m_cyclic_scroll_enabled && itsHighlight == MaxHighlight)
 				return Scroll(wHome);
 			itsHighlight += itsHeight;
 			itsBeginning += itsHeight;
@@ -868,9 +868,9 @@ template <typename T> void NCurses::Menu<T>::Scroll(Where where)
 				if (itsHighlight > MaxHighlight)
 					itsHighlight = MaxHighlight;
 			}
-			if (!(*itsOptionsPtr)[itsHighlight] || (*itsOptionsPtr)[itsHighlight]->isStatic)
+			if (!(*m_options_ptr)[itsHighlight] || (*m_options_ptr)[itsHighlight]->isStatic)
 			{
-				Scroll(itsHighlight == MaxHighlight && !useCyclicScrolling ? wUp : wDown);
+				Scroll(itsHighlight == MaxHighlight && !m_cyclic_scroll_enabled ? wUp : wDown);
 			}
 			break;
 		}
@@ -878,7 +878,7 @@ template <typename T> void NCurses::Menu<T>::Scroll(Where where)
 		{
 			itsHighlight = 0;
 			itsBeginning = 0;
-			if (!(*itsOptionsPtr)[itsHighlight] || (*itsOptionsPtr)[itsHighlight]->isStatic)
+			if (!(*m_options_ptr)[itsHighlight] || (*m_options_ptr)[itsHighlight]->isStatic)
 			{
 				Scroll(itsHighlight == 0 ? wDown : wUp);
 			}
@@ -888,14 +888,14 @@ template <typename T> void NCurses::Menu<T>::Scroll(Where where)
 		{
 			itsHighlight = MaxHighlight;
 			itsBeginning = MaxBeginning;
-			if (!(*itsOptionsPtr)[itsHighlight] || (*itsOptionsPtr)[itsHighlight]->isStatic)
+			if (!(*m_options_ptr)[itsHighlight] || (*m_options_ptr)[itsHighlight]->isStatic)
 			{
 				Scroll(itsHighlight == MaxHighlight ? wUp : wDown);
 			}
 			break;
 		}
 	}
-	if (useCenteredCursor)
+	if (m_autocenter_cursor)
 		Highlight(itsHighlight);
 }
 
@@ -907,70 +907,70 @@ template <typename T> void NCurses::Menu<T>::Reset()
 
 template <typename T> void NCurses::Menu<T>::ClearFiltered()
 {
-	itsFilteredOptions.clear();
-	itsFilteredRealPositions.clear();
-	itsOptionsPtr = &itsOptions;
+	m_filtered_options.clear();
+	m_filtered_positions.clear();
+	m_options_ptr = &m_options;
 }
 
 template <typename T> void NCurses::Menu<T>::Clear()
 {
-	for (option_iterator it = itsOptions.begin(); it != itsOptions.end(); ++it)
+	for (option_iterator it = m_options.begin(); it != m_options.end(); ++it)
 		delete *it;
-	itsOptions.clear();
-	itsFound.clear();
-	itsFilter.clear();
+	m_options.clear();
+	m_found_positions.clear();
+	m_filter.clear();
 	ClearFiltered();
-	itsOptionsPtr = &itsOptions;
+	m_options_ptr = &m_options;
 	Window::Clear();
 }
 
 template <typename T> bool NCurses::Menu<T>::isBold(int pos)
 {
 	pos = pos == -1 ? itsHighlight : pos;
-	if (!itsOptionsPtr->at(pos))
+	if (!m_options_ptr->at(pos))
 		return 0;
-	return (*itsOptionsPtr)[pos]->isBold;
+	return (*m_options_ptr)[pos]->isBold;
 }
 
 template <typename T> void NCurses::Menu<T>::Select(int pos, bool state)
 {
-	if (!itsOptionsPtr->at(pos))
+	if (!m_options_ptr->at(pos))
 		return;
-	(*itsOptionsPtr)[pos]->isSelected = state;
+	(*m_options_ptr)[pos]->isSelected = state;
 }
 
 template <typename T> void NCurses::Menu<T>::Static(int pos, bool state)
 {
-	if (!itsOptionsPtr->at(pos))
+	if (!m_options_ptr->at(pos))
 		return;
-	(*itsOptionsPtr)[pos]->isStatic = state;
+	(*m_options_ptr)[pos]->isStatic = state;
 }
 
 template <typename T> bool NCurses::Menu<T>::isSelected(int pos) const
 {
 	pos = pos == -1 ? itsHighlight : pos;
-	if (!itsOptionsPtr->at(pos))
+	if (!m_options_ptr->at(pos))
 		return 0;
-	return (*itsOptionsPtr)[pos]->isSelected;
+	return (*m_options_ptr)[pos]->isSelected;
 }
 
 template <typename T> bool NCurses::Menu<T>::isStatic(int pos) const
 {
 	pos = pos == -1 ? itsHighlight : pos;
-	if (!itsOptionsPtr->at(pos))
+	if (!m_options_ptr->at(pos))
 		return 1;
-	return (*itsOptionsPtr)[pos]->isStatic;
+	return (*m_options_ptr)[pos]->isStatic;
 }
 
 template <typename T> bool NCurses::Menu<T>::isSeparator(int pos) const
 {
 	pos = pos == -1 ? itsHighlight : pos;
-	return !itsOptionsPtr->at(pos);
+	return !m_options_ptr->at(pos);
 }
 
 template <typename T> bool NCurses::Menu<T>::hasSelected() const
 {
-	for (option_const_iterator it = itsOptionsPtr->begin(); it != itsOptionsPtr->end(); ++it)
+	for (option_const_iterator it = m_options_ptr->begin(); it != m_options_ptr->end(); ++it)
 		if (*it && (*it)->isSelected)
 			return true;
 	return false;
@@ -978,8 +978,8 @@ template <typename T> bool NCurses::Menu<T>::hasSelected() const
 
 template <typename T> void NCurses::Menu<T>::GetSelected(std::vector<size_t> &v) const
 {
-	for (size_t i = 0; i < itsOptionsPtr->size(); ++i)
-		if ((*itsOptionsPtr)[i] && (*itsOptionsPtr)[i]->isSelected)
+	for (size_t i = 0; i < m_options_ptr->size(); ++i)
+		if ((*m_options_ptr)[i] && (*m_options_ptr)[i]->isSelected)
 			v.push_back(i);
 }
 
@@ -991,7 +991,7 @@ template <typename T> void NCurses::Menu<T>::Highlight(size_t pos)
 
 template <typename T> size_t NCurses::Menu<T>::Size() const
 {
-	return itsOptionsPtr->size();
+	return m_options_ptr->size();
 }
 
 template <typename T> size_t NCurses::Menu<T>::Choice() const
@@ -1002,7 +1002,7 @@ template <typename T> size_t NCurses::Menu<T>::Choice() const
 template <typename T> size_t NCurses::Menu<T>::RealChoice() const
 {
 	size_t result = 0;
-	for (option_const_iterator it = itsOptionsPtr->begin(); it != itsOptionsPtr->begin()+itsHighlight; ++it)
+	for (option_const_iterator it = m_options_ptr->begin(); it != m_options_ptr->begin()+itsHighlight; ++it)
 		if (*it && !(*it)->isStatic)
 			result++;
 	return result;
@@ -1010,7 +1010,7 @@ template <typename T> size_t NCurses::Menu<T>::RealChoice() const
 
 template <typename T> void NCurses::Menu<T>::ReverseSelection(size_t beginning)
 {
-	option_iterator it = itsOptionsPtr->begin()+beginning;
+	option_iterator it = m_options_ptr->begin()+beginning;
 	for (size_t i = beginning; i < Size(); ++i, ++it)
 		if (*it)
 			(*it)->isSelected = !(*it)->isSelected && !(*it)->isStatic;
@@ -1018,143 +1018,143 @@ template <typename T> void NCurses::Menu<T>::ReverseSelection(size_t beginning)
 
 template <typename T> bool NCurses::Menu<T>::Search(const std::string &constraint, size_t beginning, int flags)
 {
-	itsFound.clear();
-	itsSearchConstraint.clear();
+	m_found_positions.clear();
+	m_search_constraint.clear();
 	if (constraint.empty())
 		return false;
-	itsSearchConstraint = constraint;
+	m_search_constraint = constraint;
 	regex_t rx;
-	if (regcomp(&rx, itsSearchConstraint.c_str(), flags) == 0)
+	if (regcomp(&rx, m_search_constraint.c_str(), flags) == 0)
 	{
-		for (size_t i = beginning; i < itsOptionsPtr->size(); ++i)
+		for (size_t i = beginning; i < m_options_ptr->size(); ++i)
 		{
 			if (regexec(&rx, GetOption(i).c_str(), 0, 0, 0) == 0)
-				itsFound.insert(i);
+				m_found_positions.insert(i);
 		}
 	}
 	regfree(&rx);
-	return !itsFound.empty();
+	return !m_found_positions.empty();
 }
 
 template <typename T> void NCurses::Menu<T>::NextFound(bool wrap)
 {
-	if (itsFound.empty())
+	if (m_found_positions.empty())
 		return;
-	std::set<size_t>::iterator next = itsFound.upper_bound(itsHighlight);
-	if (next != itsFound.end())
+	std::set<size_t>::iterator next = m_found_positions.upper_bound(itsHighlight);
+	if (next != m_found_positions.end())
 		Highlight(*next);
 	else if (wrap)
-		Highlight(*itsFound.begin());
+		Highlight(*m_found_positions.begin());
 }
 
 template <typename T> void NCurses::Menu<T>::PrevFound(bool wrap)
 {
-	if (itsFound.empty())
+	if (m_found_positions.empty())
 		return;
-	std::set<size_t>::iterator prev = itsFound.lower_bound(itsHighlight);
-	if (prev != itsFound.begin())
+	std::set<size_t>::iterator prev = m_found_positions.lower_bound(itsHighlight);
+	if (prev != m_found_positions.begin())
 		Highlight(*--prev);
 	else if (wrap)
-		Highlight(*itsFound.rbegin());
+		Highlight(*m_found_positions.rbegin());
 }
 
 template <typename T> void NCurses::Menu<T>::ApplyFilter(const std::string &filter, size_t beginning, int flags)
 {
-	itsFound.clear();
+	m_found_positions.clear();
 	ClearFiltered();
-	itsFilter = filter;
-	if (itsFilter.empty())
+	m_filter = filter;
+	if (m_filter.empty())
 		return;
 	for (size_t i = 0; i < beginning; ++i)
 	{
-		itsFilteredRealPositions.push_back(i);
-		itsFilteredOptions.push_back(itsOptions[i]);
+		m_filtered_positions.push_back(i);
+		m_filtered_options.push_back(m_options[i]);
 	}
 	regex_t rx;
-	if (regcomp(&rx, itsFilter.c_str(), flags) == 0)
+	if (regcomp(&rx, m_filter.c_str(), flags) == 0)
 	{
-		for (size_t i = beginning; i < itsOptions.size(); ++i)
+		for (size_t i = beginning; i < m_options.size(); ++i)
 		{
 			if (regexec(&rx, GetOption(i).c_str(), 0, 0, 0) == 0)
 			{
-				itsFilteredRealPositions.push_back(i);
-				itsFilteredOptions.push_back(itsOptions[i]);
+				m_filtered_positions.push_back(i);
+				m_filtered_options.push_back(m_options[i]);
 			}
 		}
 	}
 	regfree(&rx);
-	itsOptionsPtr = &itsFilteredOptions;
-	if (itsOptionsPtr->empty()) // oops, we didn't find anything
+	m_options_ptr = &m_filtered_options;
+	if (m_options_ptr->empty()) // oops, we didn't find anything
 		Window::Clear();
 }
 
 template <typename T> const std::string &NCurses::Menu<T>::GetFilter()
 {
-	return itsFilter;
+	return m_filter;
 }
 
 template <typename T> std::string NCurses::Menu<T>::GetOption(size_t pos)
 {
-	if (itsOptionsPtr->at(pos) && itsGetStringFunction)
-		return itsGetStringFunction((*itsOptionsPtr)[pos]->Item, itsGetStringFunctionUserData);
+	if (m_options_ptr->at(pos) && m_get_string_helper)
+		return m_get_string_helper((*m_options_ptr)[pos]->Item, m_get_string_helper_data);
 	else
 		return "";
 }
 
 template <typename T> T &NCurses::Menu<T>::Back()
 {
-	if (!itsOptionsPtr->back())
+	if (!m_options_ptr->back())
 		FatalError("Menu::Back() has requested separator!");
-	return itsOptionsPtr->back()->Item;
+	return m_options_ptr->back()->Item;
 }
 
 template <typename T> const T &NCurses::Menu<T>::Back() const
 {
-	if (!itsOptionsPtr->back())
+	if (!m_options_ptr->back())
 		FatalError("Menu::Back() has requested separator!");
-	return itsOptionsPtr->back()->Item;
+	return m_options_ptr->back()->Item;
 }
 
 template <typename T> T &NCurses::Menu<T>::Current()
 {
-	if (!itsOptionsPtr->at(itsHighlight))
+	if (!m_options_ptr->at(itsHighlight))
 		FatalError("Menu::Current() has requested separator!");
-	return (*itsOptionsPtr)[itsHighlight]->Item;
+	return (*m_options_ptr)[itsHighlight]->Item;
 }
 
 template <typename T> const T &NCurses::Menu<T>::Current() const
 {
-	if (!itsOptionsPtr->at(itsHighlight))
+	if (!m_options_ptr->at(itsHighlight))
 		FatalError("Menu::Current() const has requested separator!");
-	return (*itsOptionsPtr)[itsHighlight]->Item;
+	return (*m_options_ptr)[itsHighlight]->Item;
 }
 
 template <typename T> T &NCurses::Menu<T>::at(size_t pos)
 {
-	if (!itsOptionsPtr->at(pos))
+	if (!m_options_ptr->at(pos))
 		FatalError("Menu::at() has requested separator!");
-	return (*itsOptionsPtr)[pos]->Item;
+	return (*m_options_ptr)[pos]->Item;
 }
 
 template <typename T> const T &NCurses::Menu<T>::at(size_t pos) const
 {
-	if (!itsOptions->at(pos))
+	if (!m_options->at(pos))
 		FatalError("Menu::at() const has requested separator!");
-	return (*itsOptionsPtr)[pos]->Item;
+	return (*m_options_ptr)[pos]->Item;
 }
 
 template <typename T> const T &NCurses::Menu<T>::operator[](size_t pos) const
 {
-	if (!(*itsOptionsPtr)[pos])
+	if (!(*m_options_ptr)[pos])
 		FatalError("Menu::operator[] const has requested separator!");
-	return (*itsOptionsPtr)[pos]->Item;
+	return (*m_options_ptr)[pos]->Item;
 }
 
 template <typename T> T &NCurses::Menu<T>::operator[](size_t pos)
 {
-	if (!(*itsOptionsPtr)[pos])
+	if (!(*m_options_ptr)[pos])
 		FatalError("Menu::operator[] has requested separator!");
-	return (*itsOptionsPtr)[pos]->Item;
+	return (*m_options_ptr)[pos]->Item;
 }
 
 #endif

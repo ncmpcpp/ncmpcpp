@@ -52,7 +52,7 @@ void PlaylistEditor::Init()
 	Playlists->HighlightColor(Config.active_column_color);
 	Playlists->CyclicScrolling(Config.use_cyclic_scrolling);
 	Playlists->CenteredCursor(Config.centered_cursor);
-	Playlists->SetItemDisplayer(Display::Generic);
+	Playlists->setItemDisplayer(Display::Default<std::string>);
 	
 	static Display::ScreenFormat sf = { this, &Config.song_list_format };
 	
@@ -62,8 +62,8 @@ void PlaylistEditor::Init()
 	Content->CenteredCursor(Config.centered_cursor);
 	Content->SetSelectPrefix(&Config.selected_item_prefix);
 	Content->SetSelectSuffix(&Config.selected_item_suffix);
-	Content->SetItemDisplayer(Config.columns_in_playlist_editor ? Display::SongsInColumns : Display::Songs);
-	Content->SetItemDisplayerUserData(&sf);
+	Content->setItemDisplayer(Config.columns_in_playlist_editor ? Display::SongsInColumns : Display::Songs);
+	Content->setItemDisplayerData(&sf);
 	Content->SetGetStringFunction(Config.columns_in_playlist_editor ? Playlist::SongInColumnsToString : Playlist::SongToString);
 	Content->SetGetStringFunctionUserData(&Config.song_list_format_dollar_free);
 	

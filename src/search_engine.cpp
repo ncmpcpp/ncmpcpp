@@ -69,8 +69,8 @@ void SearchEngine::Init()
 	w->HighlightColor(Config.main_highlight_color);
 	w->CyclicScrolling(Config.use_cyclic_scrolling);
 	w->CenteredCursor(Config.centered_cursor);
-	w->SetItemDisplayer(Display::SearchEngine);
-	w->SetItemDisplayerUserData(&sf);
+	w->setItemDisplayer(Display::SearchEngine);
+	w->setItemDisplayerData(&sf);
 	w->SetSelectPrefix(&Config.selected_item_prefix);
 	w->SetSelectSuffix(&Config.selected_item_suffix);
 	w->SetGetStringFunction(SearchEngineOptionToString);

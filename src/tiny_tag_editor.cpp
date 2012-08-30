@@ -48,7 +48,7 @@ void TinyTagEditor::Init()
 	w->HighlightColor(Config.main_highlight_color);
 	w->CyclicScrolling(Config.use_cyclic_scrolling);
 	w->CenteredCursor(Config.centered_cursor);
-	w->SetItemDisplayer(Display::Generic);
+	w->setItemDisplayer(Display::Default<Buffer>);
 	isInitialized = 1;
 }
 

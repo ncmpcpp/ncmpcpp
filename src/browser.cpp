@@ -60,8 +60,8 @@ void Browser::Init()
 	w->CenteredCursor(Config.centered_cursor);
 	w->SetSelectPrefix(&Config.selected_item_prefix);
 	w->SetSelectSuffix(&Config.selected_item_suffix);
-	w->SetItemDisplayer(Display::Items);
-	w->SetItemDisplayerUserData(&sf);
+	w->setItemDisplayer(Display::Items);
+	w->setItemDisplayerData(&sf);
 	w->SetGetStringFunction(ItemToString);
 	
 	if (SupportedExtensions.empty())

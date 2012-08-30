@@ -72,14 +72,14 @@ void TagEditor::Init()
 	Albums->HighlightColor(Config.active_column_color);
 	Albums->CyclicScrolling(Config.use_cyclic_scrolling);
 	Albums->CenteredCursor(Config.centered_cursor);
-	Albums->SetItemDisplayer(Display::Pairs);
+	Albums->setItemDisplayer(Display::Pair<std::string, std::string>);
 	Albums->SetGetStringFunction(StringPairToString);
 	
 	Dirs = new Menu<string_pair>(0, MainStartY, LeftColumnWidth, MainHeight, Config.titles_visibility ? "Directories" : "", Config.main_color, brNone);
 	Dirs->HighlightColor(Config.active_column_color);
 	Dirs->CyclicScrolling(Config.use_cyclic_scrolling);
 	Dirs->CenteredCursor(Config.centered_cursor);
-	Dirs->SetItemDisplayer(Display::Pairs);
+	Dirs->setItemDisplayer(Display::Pair<std::string, std::string>);
 	Dirs->SetGetStringFunction(StringPairToString);
 	
 	LeftColumn = Config.albums_in_tag_editor ? Albums : Dirs;
@@ -88,7 +88,7 @@ void TagEditor::Init()
 	TagTypes->HighlightColor(Config.main_highlight_color);
 	TagTypes->CyclicScrolling(Config.use_cyclic_scrolling);
 	TagTypes->CenteredCursor(Config.centered_cursor);
-	TagTypes->SetItemDisplayer(Display::Generic);
+	TagTypes->setItemDisplayer(Display::Default<std::string>);
 	
 	for (const SongInfo::Metadata *m = SongInfo::Tags; m->Name; ++m)
 		TagTypes->AddOption(m->Name);
@@ -110,15 +110,15 @@ void TagEditor::Init()
 	Tags->CenteredCursor(Config.centered_cursor);
 	Tags->SetSelectPrefix(&Config.selected_item_prefix);
 	Tags->SetSelectSuffix(&Config.selected_item_suffix);
-	Tags->SetItemDisplayer(Display::Tags);
-	Tags->SetItemDisplayerUserData(TagTypes);
+	Tags->setItemDisplayer(Display::Tags);
+	Tags->setItemDisplayerData(TagTypes);
 	Tags->SetGetStringFunction(TagToString);
 	Tags->SetGetStringFunctionUserData(TagTypes);
 	
 	FParserDialog = new Menu<std::string>((COLS-FParserDialogWidth)/2, (MainHeight-FParserDialogHeight)/2+MainStartY, FParserDialogWidth, FParserDialogHeight, "", Config.main_color, Config.window_border);
 	FParserDialog->CyclicScrolling(Config.use_cyclic_scrolling);
 	FParserDialog->CenteredCursor(Config.centered_cursor);
-	FParserDialog->SetItemDisplayer(Display::Generic);
+	FParserDialog->setItemDisplayer(Display::Default<std::string>);
 	FParserDialog->AddOption("Get tags from filename");
 	FParserDialog->AddOption("Rename files");
 	FParserDialog->AddSeparator();
@@ -127,7 +127,7 @@ void TagEditor::Init()
 	FParser = new Menu<std::string>((COLS-FParserWidth)/2, (MainHeight-FParserHeight)/2+MainStartY, FParserWidthOne, FParserHeight, "_", Config.main_color, Config.active_window_border);
 	FParser->CyclicScrolling(Config.use_cyclic_scrolling);
 	FParser->CenteredCursor(Config.centered_cursor);
-	FParser->SetItemDisplayer(Display::Generic);
+	FParser->setItemDisplayer(Display::Default<std::string>);
 	
 	FParserLegend = new Scrollpad((COLS-FParserWidth)/2+FParserWidthOne, (MainHeight-FParserHeight)/2+MainStartY, FParserWidthTwo, FParserHeight, "Legend", Config.main_color, Config.window_border);
 	

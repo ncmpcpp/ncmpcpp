@@ -28,10 +28,7 @@
 
 void ParseArgv(int, char **);
 
-template <typename A, typename B> std::string StringPairToString(const std::pair<A, B> &pair, void *)
-{
-	return pair.first;
-}
+std::string StringPairToString(const std::pair<std::string, std::string> &pair, void *);
 
 template <typename T> struct StringConverter {
 	const char *operator()(const char *s) { return s; }

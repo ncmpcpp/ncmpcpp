@@ -39,6 +39,11 @@
 #include "outputs.h"
 #include "visualizer.h"
 
+std::string StringPairToString(const std::pair<std::string, std::string> &pair, void *)
+{
+	return pair.first;
+}
+
 void ParseArgv(int argc, char **argv)
 {
 	bool quit = 0;

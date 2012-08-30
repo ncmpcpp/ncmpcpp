@@ -67,7 +67,7 @@ void MediaLibrary::Init()
 	Artists->CenteredCursor(Config.centered_cursor);
 	Artists->SetSelectPrefix(&Config.selected_item_prefix);
 	Artists->SetSelectSuffix(&Config.selected_item_suffix);
-	Artists->SetItemDisplayer(DisplayPrimaryTags);
+	Artists->setItemDisplayer(DisplayPrimaryTags);
 	
 	Albums = new Menu<SearchConstraints>(itsMiddleColStartX, MainStartY, itsMiddleColWidth, MainHeight, Config.titles_visibility ? "Albums" : "", Config.main_color, brNone);
 	Albums->HighlightColor(Config.main_highlight_color);
@@ -75,7 +75,7 @@ void MediaLibrary::Init()
 	Albums->CenteredCursor(Config.centered_cursor);
 	Albums->SetSelectPrefix(&Config.selected_item_prefix);
 	Albums->SetSelectSuffix(&Config.selected_item_suffix);
-	Albums->SetItemDisplayer(DisplayAlbums);
+	Albums->setItemDisplayer(DisplayAlbums);
 	Albums->SetGetStringFunction(AlbumToString);
 	Albums->SetGetStringFunctionUserData(this);
 	
@@ -87,8 +87,8 @@ void MediaLibrary::Init()
 	Songs->CenteredCursor(Config.centered_cursor);
 	Songs->SetSelectPrefix(&Config.selected_item_prefix);
 	Songs->SetSelectSuffix(&Config.selected_item_suffix);
-	Songs->SetItemDisplayer(Display::Songs);
-	Songs->SetItemDisplayerUserData(&sf);
+	Songs->setItemDisplayer(Display::Songs);
+	Songs->setItemDisplayerData(&sf);
 	Songs->SetGetStringFunction(SongToString);
 	
 	w = Artists;

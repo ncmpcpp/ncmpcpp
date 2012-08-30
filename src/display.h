@@ -38,12 +38,12 @@ namespace Display
 	
 	std::string Columns(size_t);
 	
-	template <typename T> void Generic(const T &t, void *, Menu<T> *menu)
+	template <typename T> void Default(const T &t, void *, Menu<T> *menu)
 	{
 		*menu << t;
 	}
 	
-	template <typename A, typename B> void Pairs(const std::pair<A, B> &pair, void *, Menu< std::pair<A, B> > *menu)
+	template <typename A, typename B> void Pair(const std::pair<A, B> &pair, void *, Menu< std::pair<A, B> > *menu)
 	{
 		*menu << pair.first;
 	}

@@ -1161,13 +1161,13 @@ void ToggleDisplayMode::Run()
 		
 		if (Config.columns_in_playlist)
 		{
-			myPlaylist->Items->SetItemDisplayer(Display::SongsInColumns);
+			myPlaylist->Items->setItemDisplayer(Display::SongsInColumns);
 			myPlaylist->Items->SetTitle(Config.titles_visibility ? Display::Columns(myPlaylist->Items->GetWidth()) : "");
 			myPlaylist->Items->SetGetStringFunction(Playlist::SongInColumnsToString);
 		}
 		else
 		{
-			myPlaylist->Items->SetItemDisplayer(Display::Songs);
+			myPlaylist->Items->setItemDisplayer(Display::Songs);
 			myPlaylist->Items->SetTitle("");
 			myPlaylist->Items->SetGetStringFunction(Playlist::SongToString);
 		}
@@ -1191,12 +1191,12 @@ void ToggleDisplayMode::Run()
 		ShowMessage("Playlist editor display mode: %s", Config.columns_in_playlist_editor ? "Columns" : "Classic");
 		if (Config.columns_in_playlist_editor)
 		{
-			myPlaylistEditor->Content->SetItemDisplayer(Display::SongsInColumns);
+			myPlaylistEditor->Content->setItemDisplayer(Display::SongsInColumns);
 			myPlaylistEditor->Content->SetGetStringFunction(Playlist::SongInColumnsToString);
 		}
 		else
 		{
-			myPlaylistEditor->Content->SetItemDisplayer(Display::Songs);
+			myPlaylistEditor->Content->setItemDisplayer(Display::Songs);
 			myPlaylistEditor->Content->SetGetStringFunction(Playlist::SongToString);
 		}
 	}

@@ -37,7 +37,7 @@ void Outputs::Init()
 	w->CyclicScrolling(Config.use_cyclic_scrolling);
 	w->CenteredCursor(Config.centered_cursor);
 	w->HighlightColor(Config.main_highlight_color);
-	w->SetItemDisplayer(Display::Outputs);
+	w->setItemDisplayer(Display::Outputs);
 	
 	isInitialized = 1;
 	FetchList();
