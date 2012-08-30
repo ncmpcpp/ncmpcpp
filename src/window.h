@@ -264,7 +264,7 @@ namespace NCurses
 			/// @see CreateHistory()
 			///
 			std::string GetString(const std::string &base, size_t length = -1,
-					      size_t width = 0, bool encrypted = 0);
+			                      size_t width = 0, bool encrypted = 0);
 			
 			/// Wrapper for above function that doesn't take base string (it will be empty).
 			/// Taken parameters are the same as for above.
@@ -273,12 +273,6 @@ namespace NCurses
 			{
 				return GetString("", length, width, encrypted);
 			}
-			
-			/// Gets present position of cursor's coordinates
-			/// @param x variable that will be set to current X position
-			/// @param y variable that will be set to current Y position
-			///
-			void GetXY(int &x, int &y);
 			
 			/// Moves cursor to given coordinates
 			/// @param x given X position
@@ -592,13 +586,6 @@ namespace NCurses
 			/// @see GetString()
 			///
 			GetStringHelper itsGetStringHelper;
-			
-			/// temporary coordinates
-			/// @see X()
-			/// @see Y()
-			///
-			int itsX;
-			int itsY;
 			
 			/// window title
 			std::string itsTitle;

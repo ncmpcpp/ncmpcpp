@@ -91,8 +91,6 @@ Window::Window(size_t startx,
 		itsBaseBgColor(clDefault),
 		itsBorder(border),
 		itsGetStringHelper(0),
-		itsX(0),
-		itsY(0),
 		itsTitle(title),
 		itsHistory(0),
 		itsBoldCounter(0),
@@ -141,8 +139,6 @@ Window::Window(const Window &w) : itsWindow(dupwin(w.itsWindow)),
 				itsBaseBgColor(w.itsBaseBgColor),
 				itsBorder(w.itsBorder),
 				itsGetStringHelper(w.itsGetStringHelper),
-				itsX(w.itsX),
-				itsY(w.itsY),
 				itsTitle(w.itsTitle),
 				itsColors(w.itsColors),
 				itsHistory(w.itsHistory),
@@ -653,30 +649,19 @@ std::string Window::GetString(const std::string &base, size_t length, size_t wid
 	return ToString(*tmp);
 }
 
-void Window::GetXY(int &x, int &y)
-{
-	getyx(itsWindow, itsY, itsX);
-	x = itsX;
-	y = itsY;
-}
-
 void Window::GotoXY(int x, int y)
 {
 	wmove(itsWindow, y, x);
-	itsX = x;
-	itsY = y;
 }
 
  int Window::X()
 {
-	getyx(itsWindow, itsY, itsX);
-	return itsX;
+	return getcurx(itsWindow);
 }
 
 int Window::Y()
 {
-	getyx(itsWindow, itsY, itsX);
-	return itsY;
+	return getcury(itsWindow);
 }
 
 bool Window::hasCoords(int &x, int &y)
