@@ -207,7 +207,7 @@ void MediaLibrary::Update()
 			if (it->empty() && !Config.media_library_display_empty_tag)
 				continue;
 			utf_to_locale(*it);
-			Artists->AddOption(*it);
+			Artists->AddItem(*it);
 		}
 		Artists->Window::Clear();
 		Artists->Refresh();
@@ -237,22 +237,22 @@ void MediaLibrary::Update()
 				utf_to_locale(*album);
 				Mpd.CommitSearchTags([this, &album](std::string &&date) {
 					utf_to_locale(date);
-					Albums->AddOption(SearchConstraints(*album, date));
+					Albums->AddItem(SearchConstraints(*album, date));
 				});
 			}
 			else
 			{
 				utf_to_locale(*album);
-				Albums->AddOption(SearchConstraints(*album, ""));
+				Albums->AddItem(SearchConstraints(*album, ""));
 			}
 		}
 		utf_to_locale(Artists->Current());
 		if (!Albums->Empty())
-			Albums->Sort<SearchConstraintsSorting>();
+			std::sort(Albums->Begin(), Albums->End(), SearchConstraintsSorting());
 		if (Albums->Size() > 1)
 		{
 			Albums->AddSeparator();
-			Albums->AddOption(SearchConstraints("", AllTracksMarker));
+			Albums->AddItem(SearchConstraints("", AllTracksMarker));
 		}
 		Albums->Refresh();
 		Mpd.BlockIdle(0);
@@ -286,27 +286,27 @@ void MediaLibrary::Update()
 						utf_to_locale(*album);
 						Mpd.CommitSearchTags([this, &artist, &album](std::string &&tag) {
 							utf_to_locale(tag);
-							Albums->AddOption(SearchConstraints(*artist, *album, tag));
+							Albums->AddItem(SearchConstraints(*artist, *album, tag));
 						});
 					}
 					else
 					{
 						utf_to_locale(*artist);
 						utf_to_locale(*album);
-						Albums->AddOption(SearchConstraints(*artist, *album, *artist));
+						Albums->AddItem(SearchConstraints(*artist, *album, *artist));
 					}
 				}
 				else
 				{
 					utf_to_locale(*artist);
 					utf_to_locale(*album);
-					Albums->AddOption(SearchConstraints(*artist, *album, ""));
+					Albums->AddItem(SearchConstraints(*artist, *album, ""));
 				}
 			}
 		}
 		Mpd.BlockIdle(0);
 		if (!Albums->Empty())
-			Albums->Sort<SearchConstraintsSorting>();
+			std::sort(Albums->Begin(), Albums->End(), SearchConstraintsSorting());
 		Albums->Refresh();
 	}
 	
@@ -320,7 +320,6 @@ void MediaLibrary::Update()
 	if (!(hasTwoColumns ? Albums->Empty() : Artists->Empty()) && Songs->ReallyEmpty())
 	{
 		Songs->Reset();
-		MPD::SongList list;
 		
 		Mpd.StartSearch(1);
 		Mpd.AddSearch(Config.media_lib_primary_tag, locale_to_utf_cpy(hasTwoColumns ? Albums->Current().PrimaryTag : Artists->Current()));
@@ -330,17 +329,15 @@ void MediaLibrary::Update()
 			if (Config.media_library_display_date)
 				Mpd.AddSearch(MPD_TAG_DATE, locale_to_utf_cpy(Albums->Current().Date));
 		}
-		Mpd.CommitSearchSongs([&list](MPD::Song &&s) {
-			list.push_back(s);
+		Mpd.CommitSearchSongs([this](MPD::Song &&s) {
+			Songs->AddItem(s, myPlaylist->checkForSong(s));
 		});
 		
 		if (Albums->Current().Date == AllTracksMarker)
-			std::sort(list.begin(), list.end(), SortAllTracks);
+			std::sort(Songs->Begin(), Songs->End(), SortAllTracks);
 		else
-			std::sort(list.begin(), list.end(), SortSongsByTrack);
+			std::sort(Songs->Begin(), Songs->End(), SortSongsByTrack);
 		
-		for (auto it = list.begin(); it != list.end(); ++it)
-			Songs->AddOption(*it, myPlaylist->checkForSong(*it));
 		Songs->Window::Clear();
 		Songs->Refresh();
 	}

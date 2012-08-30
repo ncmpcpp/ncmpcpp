@@ -243,7 +243,7 @@ void NcmpcppStatusChanged(MPD::Connection *, MPD::StatusChanges changed, void *)
 			else
 			{
 				// otherwise just add it to playlist
-				myPlaylist->Items->AddOption(s);
+				myPlaylist->Items->AddItem(s);
 			}
 		});
 		

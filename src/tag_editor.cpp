@@ -91,18 +91,18 @@ void TagEditor::Init()
 	TagTypes->setItemDisplayer(Display::Default<std::string>);
 	
 	for (const SongInfo::Metadata *m = SongInfo::Tags; m->Name; ++m)
-		TagTypes->AddOption(m->Name);
+		TagTypes->AddItem(m->Name);
 	TagTypes->AddSeparator();
-	TagTypes->AddOption("Filename");
+	TagTypes->AddItem("Filename");
 	TagTypes->AddSeparator();
 	if (Config.titles_visibility)
-		TagTypes->AddOption("Options", 1, 1);
+		TagTypes->AddItem("Options", 1, 1);
 	TagTypes->AddSeparator();
-	TagTypes->AddOption("Capitalize First Letters");
-	TagTypes->AddOption("lower all letters");
+	TagTypes->AddItem("Capitalize First Letters");
+	TagTypes->AddItem("lower all letters");
 	TagTypes->AddSeparator();
-	TagTypes->AddOption("Reset");
-	TagTypes->AddOption("Save");
+	TagTypes->AddItem("Reset");
+	TagTypes->AddItem("Save");
 	
 	Tags = new Menu<MPD::MutableSong>(RightColumnStartX, MainStartY, RightColumnWidth, MainHeight, Config.titles_visibility ? "Tags" : "", Config.main_color, brNone);
 	Tags->HighlightColor(Config.main_highlight_color);
@@ -117,10 +117,10 @@ void TagEditor::Init()
 	FParserDialog->CyclicScrolling(Config.use_cyclic_scrolling);
 	FParserDialog->CenteredCursor(Config.centered_cursor);
 	FParserDialog->setItemDisplayer(Display::Default<std::string>);
-	FParserDialog->AddOption("Get tags from filename");
-	FParserDialog->AddOption("Rename files");
+	FParserDialog->AddItem("Get tags from filename");
+	FParserDialog->AddItem("Rename files");
 	FParserDialog->AddSeparator();
-	FParserDialog->AddOption("Cancel");
+	FParserDialog->AddItem("Cancel");
 	
 	FParser = new Menu<std::string>((COLS-FParserWidth)/2, (MainHeight-FParserHeight)/2+MainStartY, FParserWidthOne, FParserHeight, "_", Config.main_color, Config.active_window_border);
 	FParser->CyclicScrolling(Config.use_cyclic_scrolling);
@@ -252,10 +252,10 @@ void TagEditor::Update()
 					l.push_back(s);
 				});
 				if (!l.empty())
-					Albums->AddOption(std::make_pair(l[0].toString(Config.tag_editor_album_format), *it));
+					Albums->AddItem(std::make_pair(l[0].toString(Config.tag_editor_album_format), *it));
 			}
 			Mpd.BlockIdle(0);
-			Albums->Sort<CaseInsensitiveSorting>();
+			std::sort(Albums->Begin(), Albums->End(), CaseInsensitiveSorting());
 		}
 		else
 		{
@@ -266,18 +266,18 @@ void TagEditor::Update()
 			{
 				size_t slash = itsBrowsedDir.rfind("/");
 				std::string parent = slash != std::string::npos ? itsBrowsedDir.substr(0, slash) : "/";
-				Dirs->AddOption(make_pair("[..]", parent));
+				Dirs->AddItem(make_pair("[..]", parent));
 			}
 			else
 			{
-				Dirs->AddOption(std::make_pair(".", "/"));
+				Dirs->AddItem(std::make_pair(".", "/"));
 			}
 			for (MPD::TagList::const_iterator it = list.begin(); it != list.end(); ++it)
 			{
 				size_t slash = it->rfind("/");
 				std::string to_display = slash != std::string::npos ? it->substr(slash+1) : *it;
 				utf_to_locale(to_display);
-				Dirs->AddOption(make_pair(to_display, *it));
+				Dirs->AddItem(make_pair(to_display, *it));
 				if (*it == itsHighlightedDir)
 					highlightme = Dirs->Size()-1;
 			}
@@ -303,7 +303,7 @@ void TagEditor::Update()
 				});
 				std::sort(list.begin(), list.end(), CaseInsensitiveSorting());
 				for (auto it = list.begin(); it != list.end(); ++it)
-					Tags->AddOption(*it);
+					Tags->AddItem(*it);
 			}
 		}
 		else
@@ -311,7 +311,7 @@ void TagEditor::Update()
 			Mpd.GetSongs(Dirs->Current().second, list);
 			std::sort(list.begin(), list.end(), CaseInsensitiveSorting());
 			for (auto it = list.begin(); it != list.end(); ++it)
-				Tags->AddOption(*it);
+				Tags->AddItem(*it);
 		}
 		Tags->Window::Clear();
 		Tags->Refresh();
@@ -380,19 +380,19 @@ void TagEditor::EnterPressed()
 			Config.pattern = Patterns.front();
 		FParser->Clear();
 		FParser->Reset();
-		FParser->AddOption("Pattern: " + Config.pattern);
-		FParser->AddOption("Preview");
-		FParser->AddOption("Legend");
+		FParser->AddItem("Pattern: " + Config.pattern);
+		FParser->AddItem("Preview");
+		FParser->AddItem("Legend");
 		FParser->AddSeparator();
-		FParser->AddOption("Proceed");
-		FParser->AddOption("Cancel");
+		FParser->AddItem("Proceed");
+		FParser->AddItem("Cancel");
 		if (!Patterns.empty())
 		{
 			FParser->AddSeparator();
-			FParser->AddOption("Recent patterns", 1, 1);
+			FParser->AddItem("Recent patterns", 1, 1);
 			FParser->AddSeparator();
 			for (std::list<std::string>::const_iterator it = Patterns.begin(); it != Patterns.end(); ++it)
-				FParser->AddOption(*it);
+				FParser->AddItem(*it);
 		}
 		
 		FParser->SetTitle(choice == 0 ? "Get tags from filename" : "Rename files");

@@ -22,15 +22,15 @@
 
 using namespace NCurses;
 
-template <> std::string Menu<std::string>::GetOption(size_t pos)
+template <> std::string Menu<std::string>::GetItem(size_t pos)
 {
 	std::string result;
 	if (m_options_ptr->at(pos))
 	{
 		if (m_get_string_helper)
-			result = m_get_string_helper((*m_options_ptr)[pos]->Item);
+			result = m_get_string_helper((*m_options_ptr)[pos]->Value);
 		else
-			result = (*m_options_ptr)[pos]->Item;
+			result = (*m_options_ptr)[pos]->Value;
 	}
 	return result;
 }

@@ -71,19 +71,19 @@ void Playlist::Init()
 		SortDialog->CenteredCursor(Config.centered_cursor);
 		SortDialog->setItemDisplayer(Display::Pair<std::string, MPD::Song::GetFunction>);
 		
-		SortDialog->AddOption(std::make_pair("Artist", &MPD::Song::getArtist));
-		SortDialog->AddOption(std::make_pair("Album", &MPD::Song::getAlbum));
-		SortDialog->AddOption(std::make_pair("Disc", &MPD::Song::getDisc));
-		SortDialog->AddOption(std::make_pair("Track", &MPD::Song::getTrack));
-		SortDialog->AddOption(std::make_pair("Genre", &MPD::Song::getGenre));
-		SortDialog->AddOption(std::make_pair("Date", &MPD::Song::getDate));
-		SortDialog->AddOption(std::make_pair("Composer", &MPD::Song::getComposer));
-		SortDialog->AddOption(std::make_pair("Performer", &MPD::Song::getPerformer));
-		SortDialog->AddOption(std::make_pair("Title", &MPD::Song::getTitle));
-		SortDialog->AddOption(std::make_pair("Filename", &MPD::Song::getURI));
+		SortDialog->AddItem(std::make_pair("Artist", &MPD::Song::getArtist));
+		SortDialog->AddItem(std::make_pair("Album", &MPD::Song::getAlbum));
+		SortDialog->AddItem(std::make_pair("Disc", &MPD::Song::getDisc));
+		SortDialog->AddItem(std::make_pair("Track", &MPD::Song::getTrack));
+		SortDialog->AddItem(std::make_pair("Genre", &MPD::Song::getGenre));
+		SortDialog->AddItem(std::make_pair("Date", &MPD::Song::getDate));
+		SortDialog->AddItem(std::make_pair("Composer", &MPD::Song::getComposer));
+		SortDialog->AddItem(std::make_pair("Performer", &MPD::Song::getPerformer));
+		SortDialog->AddItem(std::make_pair("Title", &MPD::Song::getTitle));
+		SortDialog->AddItem(std::make_pair("Filename", &MPD::Song::getURI));
 		SortDialog->AddSeparator();
-		SortDialog->AddOption(std::make_pair("Sort", static_cast<MPD::Song::GetFunction>(0)));
-		SortDialog->AddOption(std::make_pair("Cancel", static_cast<MPD::Song::GetFunction>(0)));
+		SortDialog->AddItem(std::make_pair("Sort", static_cast<MPD::Song::GetFunction>(0)));
+		SortDialog->AddItem(std::make_pair("Cancel", static_cast<MPD::Song::GetFunction>(0)));
 	}
 	
 	w = Items;
@@ -538,7 +538,7 @@ bool Playlist::Add(const MPD::Song &s, bool in_playlist, bool play, int position
 				if ((*Items)[i].getHash() == hash)
 				{
 					Mpd.Delete(i);
-					Items->DeleteOption(i);
+					Items->DeleteItem(i);
 					i--;
 				}
 			}

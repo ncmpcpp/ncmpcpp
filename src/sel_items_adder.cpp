@@ -18,6 +18,7 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
+#include <algorithm>
 #include "charset.h"
 #include "browser.h"
 #include "display.h"
@@ -49,13 +50,13 @@ void SelectedItemsAdder::Init()
 	itsPositionSelector->CenteredCursor(Config.centered_cursor);
 	itsPositionSelector->HighlightColor(Config.main_highlight_color);
 	itsPositionSelector->setItemDisplayer(Display::Default<std::string>);
-	itsPositionSelector->AddOption("At the end of playlist");
-	itsPositionSelector->AddOption("At the beginning of playlist");
-	itsPositionSelector->AddOption("After current track");
-	itsPositionSelector->AddOption("After current album");
-	itsPositionSelector->AddOption("After highlighted item");
+	itsPositionSelector->AddItem("At the end of playlist");
+	itsPositionSelector->AddItem("At the beginning of playlist");
+	itsPositionSelector->AddItem("After current track");
+	itsPositionSelector->AddItem("After current album");
+	itsPositionSelector->AddItem("After highlighted item");
 	itsPositionSelector->AddSeparator();
-	itsPositionSelector->AddOption("Cancel");
+	itsPositionSelector->AddItem("Cancel");
 	
 	w = itsPlaylistSelector;
 	isInitialized = 1;
@@ -96,20 +97,20 @@ void SelectedItemsAdder::SwitchTo()
 	w->Clear();
 	w->Reset();
 	if (myOldScreen != myPlaylist)
-		w->AddOption("Current MPD playlist", 0, 0);
-	w->AddOption("New playlist", 0, playlists_not_active);
+		w->AddItem("Current MPD playlist", 0, 0);
+	w->AddItem("New playlist", 0, playlists_not_active);
 	w->AddSeparator();
 	
 	MPD::TagList playlists;
 	Mpd.GetPlaylists(playlists);
-	sort(playlists.begin(), playlists.end(), CaseInsensitiveSorting());
+	std::sort(playlists.begin(), playlists.end(), CaseInsensitiveSorting());
 	for (MPD::TagList::iterator it = playlists.begin(); it != playlists.end(); ++it)
 	{
 		utf_to_locale(*it);
-		w->AddOption(*it, 0, playlists_not_active);
+		w->AddItem(*it, 0, playlists_not_active);
 	}
 	w->AddSeparator();
-	w->AddOption("Cancel");
+	w->AddItem("Cancel");
 	
 	myScreen = this;
 	w->Window::Clear();

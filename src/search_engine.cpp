@@ -167,7 +167,7 @@ void SearchEngine::EnterPressed()
 			size_t found = w->Size()-SearchEngine::StaticOptions;
 			found += 3; // don't count options inserted below
 			w->InsertSeparator(ResetButton+1);
-			w->InsertOption(ResetButton+2, SEItem(), 1, 1);
+			w->InsertItem(ResetButton+2, SEItem(), 1, 1);
 			w->at(ResetButton+2).mkBuffer() << Config.color1 << "Search results: " << Config.color2 << "Found " << found << (found > 1 ? " songs" : " song") << clDefault;
 			w->InsertSeparator(ResetButton+3);
 			UpdateFoundList();
@@ -386,7 +386,7 @@ void SearchEngine::Search()
 		if (!itsConstraints[10].empty())
 			Mpd.AddSearch(MPD_TAG_COMMENT, itsConstraints[10]);
 		Mpd.CommitSearchSongs([this](MPD::Song &&s) {
-			w->AddOption(s);
+			w->AddItem(s);
 		});
 		return;
 	}
@@ -534,7 +534,7 @@ void SearchEngine::Search()
 		
 		if (found && any_found)
 		{
-			w->AddOption(*it);
+			w->AddItem(*it);
 			list[it-list.begin()] = 0;
 		}
 		found = 1;

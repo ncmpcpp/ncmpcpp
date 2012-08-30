@@ -22,8 +22,8 @@
 #define _MENU_H
 
 #include <regex.h>
-#include <algorithm>
 #include <functional>
+#include <iterator>
 #include <set>
 
 #include "error.h"
@@ -102,7 +102,7 @@ namespace NCurses
 	/// This template class is generic menu capable of
 	/// holding any std::vector compatible values.
 	///
-	template <typename T> class Menu : public Window, public List
+	template <typename T> struct Menu : public Window, public List
 	{
 		/// Function helper prototype used to display each option on the screen.
 		/// If not set by setItemDisplayer(), menu won't display anything.
@@ -119,36 +119,94 @@ namespace NCurses
 		
 		/// Struct that holds each item in the list and its attributes
 		///
-		struct Option
+		struct Item
 		{
-			Option() : isBold(0), isSelected(0), isStatic(0) { }
-			Option(const T &t, bool is_bold, bool is_static) :
-			Item(t), isBold(is_bold), isSelected(0), isStatic(is_static) { }
+			Item() : isBold(0), isSelected(0), isStatic(0) { }
+			Item(const T &t, bool is_bold, bool is_static) :
+			Value(t), isBold(is_bold), isSelected(0), isStatic(is_static) { }
 			
-			T Item;
+			T Value;
 			bool isBold;
 			bool isSelected;
 			bool isStatic;
 		};
 		
-		/// Functor that wraps around the functor passed to Sort()
-		/// to fit to internal container structure
-		///
-		template <typename Comparison> class InternalSorting
+		template <typename ValueT, typename BaseIterator> class ItemIterator
+			: public std::iterator<std::random_access_iterator_tag, ValueT>
 		{
-			Comparison cmp;
+			friend class Menu<T>;
 			
-			public:
-				bool operator()(Option *a, Option *b)
-				{
-					return cmp(a->Item, b->Item);
-				}
+			BaseIterator m_it;
+			explicit ItemIterator(BaseIterator it) : m_it(it) { }
+			
+			static const bool referenceValue = !std::is_same<
+				ValueT, typename std::remove_pointer<
+					typename BaseIterator::value_type
+				>::type
+			>::value;
+			template <typename Result, bool referenceValue> struct getObject { };
+			template <typename Result> struct getObject<Result, true> {
+				static Result &apply(BaseIterator it) { return (*it)->Value; }
+			};
+			template <typename Result> struct getObject<Result, false> {
+				static Result &apply(BaseIterator it) { return **it; }
+			};
+			
+		public:
+			ItemIterator() { }
+			
+			ValueT &operator*() const { return getObject<ValueT, referenceValue>::apply(m_it); }
+			typename BaseIterator::value_type operator->() { return *m_it; }
+			
+			ItemIterator &operator++() { ++m_it; return *this; }
+			ItemIterator operator++(int) { return ItemIterator(m_it++); }
+			
+			ItemIterator &operator--() { --m_it; return *this; }
+			ItemIterator operator--(int) { return ItemIterator(m_it--); }
+			
+			ValueT &operator[](ptrdiff_t n) const {
+				return getObject<ValueT, referenceValue>::apply(&m_it[n]);
+			}
+			
+			ItemIterator &operator+=(ptrdiff_t n) { m_it += n; return *this; }
+			ItemIterator operator+(ptrdiff_t n) const { return ItemIterator(m_it + n); }
+			
+			ItemIterator &operator-=(ptrdiff_t n) { m_it -= n; return *this; }
+			ItemIterator operator-(ptrdiff_t n) const { return ItemIterator(m_it - n); }
+			
+			ptrdiff_t operator-(const ItemIterator &rhs) const { return m_it - rhs.m_it; }
+			
+			template <typename Iterator>
+			bool operator==(const Iterator &rhs) const { return m_it == rhs.m_it; }
+			template <typename Iterator>
+			bool operator!=(const Iterator &rhs) const { return m_it != rhs.m_it; }
+			template <typename Iterator>
+			bool operator<(const Iterator &rhs) const { return m_it < rhs.m_it; }
+			template <typename Iterator>
+			bool operator<=(const Iterator &rhs) const { return m_it <= rhs.m_it; }
+			template <typename Iterator>
+			bool operator>(const Iterator &rhs) const { return m_it > rhs.m_it; }
+			template <typename Iterator>
+			bool operator>=(const Iterator &rhs) const { return m_it >= rhs.m_it; }
+			
+			/// non-const to const conversion
+			template <typename Iterator> operator ItemIterator<
+				typename std::add_const<ValueT>::type, Iterator
+			>() { return ItemIterator(m_it); }
+			
+			const BaseIterator &base() { return m_it; }
 		};
 		
-		typedef typename std::vector<Option *>::iterator option_iterator;
-		typedef typename std::vector<Option *>::const_iterator option_const_iterator;
-		
-		public:
+			typedef ItemIterator<
+				T, typename std::vector<Item *>::iterator
+			> Iterator;
+			
+			typedef ItemIterator<
+				typename std::add_const<T>::type, typename std::vector<Item *>::const_iterator
+			> ConstIterator;
+			
+			typedef std::reverse_iterator<Iterator> ReverseIterator;
+			typedef std::reverse_iterator<ConstIterator> ConstReverseIterator;
 			
 			/// Constructs an empty menu with given parameters
 			/// @param startx X position of left upper corner of constructed menu
@@ -196,7 +254,7 @@ namespace NCurses
 			/// @param is_bold defines the initial state of bold attribute
 			/// @param is_static defines the initial state of static attribute
 			///
-			void AddOption(const T &item, bool is_bold = 0, bool is_static = 0);
+			void AddItem(const T &item, bool is_bold = 0, bool is_static = 0);
 			
 			/// Adds separator to list
 			///
@@ -208,7 +266,7 @@ namespace NCurses
 			/// @param is_bold defines the initial state of bold attribute
 			/// @param is_static defines the initial state of static attribute
 			///
-			void InsertOption(size_t pos, const T &Item, bool is_bold = 0, bool is_static = 0);
+			void InsertItem(size_t pos, const T &Item, bool is_bold = 0, bool is_static = 0);
 			
 			/// Inserts separator to list at given position
 			/// @param pos initial position of inserted separator
@@ -218,7 +276,7 @@ namespace NCurses
 			/// Deletes item from given position
 			/// @param pos given position of item to be deleted
 			///
-			void DeleteOption(size_t pos);
+			void DeleteItem(size_t pos);
 			
 			/// Converts the option into separator
 			/// @param pos position of item to be converted
@@ -371,7 +429,7 @@ namespace NCurses
 			/// @return item converted to string
 			/// @see setItemDisplayer()
 			///
-			std::string GetOption(size_t pos);
+			std::string GetItem(size_t pos);
 			
 			/// Refreshes the menu window
 			/// @see Window::Refresh()
@@ -392,18 +450,6 @@ namespace NCurses
 			/// Sets the highlighted position to 0
 			///
 			void Reset();
-			
-			/// Sorts all items using Comparison object with defined operator()
-			/// @param beginning beginning of range that has to be sorted
-			///
-			template <typename Comparison> void Sort(size_t beginning = 0, size_t end = -1)
-			{
-				if (m_options.empty())
-					return;
-				sort(m_options.begin()+beginning, end == size_t(-1) ? m_options.end() : m_options.begin()+end, InternalSorting<Comparison>());
-				if (isFiltered())
-					ApplyFilter(m_filter);
-			}
 			
 			/// Sets prefix, that is put before each selected item to indicate its selection
 			/// Note that the passed variable is not deleted along with menu object.
@@ -509,7 +555,19 @@ namespace NCurses
 			/// @throw List::InvalidItem if requested item is separator
 			///
 			T &operator[](size_t pos);
-		
+			
+			Iterator Begin() { return Iterator(m_options_ptr->begin()); }
+			ConstIterator Begin() const { return ConstIterator(m_options_ptr->begin()); }
+			
+			Iterator End() { return Iterator(m_options_ptr->end()); }
+			ConstIterator End() const { return ConstIterator(m_options_ptr->end()); }
+			
+			ReverseIterator Rbegin() { return ReverseIterator(End()); }
+			ConstReverseIterator Rbegin() const { return ConstReverseIterator(End()); }
+			
+			ReverseIterator Rend() { return ReverseIterator(Begin()); }
+			ConstReverseIterator Rend() const { return ConstReverseIterator(Begin()); }
+			
 		protected:
 			/// Clears filter, filtered data etc.
 			///
@@ -521,9 +579,9 @@ namespace NCurses
 			std::string m_filter;
 			std::string m_search_constraint;
 			
-			std::vector<Option *> *m_options_ptr;
-			std::vector<Option *> m_options;
-			std::vector<Option *> m_filtered_options;
+			std::vector<Item *> *m_options_ptr;
+			std::vector<Item *> m_options;
+			std::vector<Item *> m_filtered_options;
 			std::vector<size_t> m_filtered_positions;
 			std::set<size_t> m_found_positions;
 			
@@ -542,10 +600,10 @@ namespace NCurses
 			Buffer *m_selected_suffix;
 	};
 	
-	/// Specialization of Menu<T>::GetOption for T = std::string, it's obvious
+	/// Specialization of Menu<T>::GetItem for T = std::string, it's obvious
 	/// that if strings are stored, we don't need extra function to convert
 	/// them to strings by default
-	template <> std::string Menu<std::string>::GetOption(size_t pos);
+	template <> std::string Menu<std::string>::GetItem(size_t pos);
 }
 
 template <typename T> NCurses::Menu<T>::Menu(size_t startx,
@@ -584,13 +642,13 @@ template <typename T> NCurses::Menu<T>::Menu(const Menu &m) : Window(m),
 					m_selected_suffix(m.m_selected_suffix)
 {
 	m_options.reserve(m.m_options.size());
-	for (option_const_iterator it = m.m_options.begin(); it != m.m_options.end(); ++it)
-		m_options.push_back(new Option(**it));
+	for (auto it = m.m_options.begin(); it != m.m_options.end(); ++it)
+		m_options.push_back(new Item(**it));
 }
 
 template <typename T> NCurses::Menu<T>::~Menu()
 {
-	for (option_iterator it = m_options.begin(); it != m_options.end(); ++it)
+	for (auto it = m_options.begin(); it != m_options.end(); ++it)
 		delete *it;
 }
 
@@ -606,7 +664,7 @@ template <typename T> void NCurses::Menu<T>::ResizeList(size_t size)
 		m_options.resize(size);
 		for (size_t i = 0; i < size; ++i)
 			if (!m_options[i])
-				m_options[i] = new Option();
+				m_options[i] = new Item();
 	}
 	else if (size < m_options.size())
 	{
@@ -616,19 +674,19 @@ template <typename T> void NCurses::Menu<T>::ResizeList(size_t size)
 	}
 }
 
-template <typename T> void NCurses::Menu<T>::AddOption(const T &item, bool is_bold, bool is_static)
+template <typename T> void NCurses::Menu<T>::AddItem(const T &item, bool is_bold, bool is_static)
 {
-	m_options.push_back(new Option(item, is_bold, is_static));
+	m_options.push_back(new Item(item, is_bold, is_static));
 }
 
 template <typename T> void NCurses::Menu<T>::AddSeparator()
 {
-	m_options.push_back(static_cast<Option *>(0));
+	m_options.push_back(static_cast<Item *>(0));
 }
 
-template <typename T> void NCurses::Menu<T>::InsertOption(size_t pos, const T &item, bool is_bold, bool is_static)
+template <typename T> void NCurses::Menu<T>::InsertItem(size_t pos, const T &item, bool is_bold, bool is_static)
 {
-	m_options.insert(m_options.begin()+pos, new Option(item, is_bold, is_static));
+	m_options.insert(m_options.begin()+pos, new Item(item, is_bold, is_static));
 }
 
 template <typename T> void NCurses::Menu<T>::InsertSeparator(size_t pos)
@@ -636,7 +694,7 @@ template <typename T> void NCurses::Menu<T>::InsertSeparator(size_t pos)
 	m_options.insert(m_options.begin()+pos, 0);
 }
 
-template <typename T> void NCurses::Menu<T>::DeleteOption(size_t pos)
+template <typename T> void NCurses::Menu<T>::DeleteItem(size_t pos)
 {
 	if (m_options_ptr->empty())
 		return;
@@ -753,7 +811,7 @@ template <typename T> void NCurses::Menu<T>::Refresh()
 		if ((*m_options_ptr)[i]->isSelected && m_selected_prefix)
 			*this << *m_selected_prefix;
 		if (m_item_displayer)
-			m_item_displayer(*this, (*m_options_ptr)[i]->Item);
+			m_item_displayer(*this, (*m_options_ptr)[i]->Value);
 		if ((*m_options_ptr)[i]->isSelected && m_selected_suffix)
 			*this << *m_selected_suffix;
 		if (m_highlight_enabled && int(i) == itsHighlight)
@@ -897,7 +955,7 @@ template <typename T> void NCurses::Menu<T>::ClearFiltered()
 
 template <typename T> void NCurses::Menu<T>::Clear()
 {
-	for (option_iterator it = m_options.begin(); it != m_options.end(); ++it)
+	for (auto it = m_options.begin(); it != m_options.end(); ++it)
 		delete *it;
 	m_options.clear();
 	m_found_positions.clear();
@@ -953,7 +1011,7 @@ template <typename T> bool NCurses::Menu<T>::isSeparator(int pos) const
 
 template <typename T> bool NCurses::Menu<T>::hasSelected() const
 {
-	for (option_const_iterator it = m_options_ptr->begin(); it != m_options_ptr->end(); ++it)
+	for (auto it = m_options_ptr->begin(); it != m_options_ptr->end(); ++it)
 		if (*it && (*it)->isSelected)
 			return true;
 	return false;
@@ -985,7 +1043,7 @@ template <typename T> size_t NCurses::Menu<T>::Choice() const
 template <typename T> size_t NCurses::Menu<T>::RealChoice() const
 {
 	size_t result = 0;
-	for (option_const_iterator it = m_options_ptr->begin(); it != m_options_ptr->begin()+itsHighlight; ++it)
+	for (auto it = m_options_ptr->begin(); it != m_options_ptr->begin()+itsHighlight; ++it)
 		if (*it && !(*it)->isStatic)
 			result++;
 	return result;
@@ -993,7 +1051,7 @@ template <typename T> size_t NCurses::Menu<T>::RealChoice() const
 
 template <typename T> void NCurses::Menu<T>::ReverseSelection(size_t beginning)
 {
-	option_iterator it = m_options_ptr->begin()+beginning;
+	auto it = m_options_ptr->begin()+beginning;
 	for (size_t i = beginning; i < Size(); ++i, ++it)
 		if (*it)
 			(*it)->isSelected = !(*it)->isSelected && !(*it)->isStatic;
@@ -1011,7 +1069,7 @@ template <typename T> bool NCurses::Menu<T>::Search(const std::string &constrain
 	{
 		for (size_t i = beginning; i < m_options_ptr->size(); ++i)
 		{
-			if (regexec(&rx, GetOption(i).c_str(), 0, 0, 0) == 0)
+			if (regexec(&rx, GetItem(i).c_str(), 0, 0, 0) == 0)
 				m_found_positions.insert(i);
 		}
 	}
@@ -1058,7 +1116,7 @@ template <typename T> void NCurses::Menu<T>::ApplyFilter(const std::string &filt
 	{
 		for (size_t i = beginning; i < m_options.size(); ++i)
 		{
-			if (regexec(&rx, GetOption(i).c_str(), 0, 0, 0) == 0)
+			if (regexec(&rx, GetItem(i).c_str(), 0, 0, 0) == 0)
 			{
 				m_filtered_positions.push_back(i);
 				m_filtered_options.push_back(m_options[i]);
@@ -1076,10 +1134,10 @@ template <typename T> const std::string &NCurses::Menu<T>::GetFilter()
 	return m_filter;
 }
 
-template <typename T> std::string NCurses::Menu<T>::GetOption(size_t pos)
+template <typename T> std::string NCurses::Menu<T>::GetItem(size_t pos)
 {
 	if (m_options_ptr->at(pos) && m_get_string_helper)
-		return m_get_string_helper((*m_options_ptr)[pos]->Item);
+		return m_get_string_helper((*m_options_ptr)[pos]->Value);
 	else
 		return "";
 }
@@ -1088,56 +1146,56 @@ template <typename T> T &NCurses::Menu<T>::Back()
 {
 	if (!m_options_ptr->back())
 		FatalError("Menu::Back() has requested separator!");
-	return m_options_ptr->back()->Item;
+	return m_options_ptr->back()->Value;
 }
 
 template <typename T> const T &NCurses::Menu<T>::Back() const
 {
 	if (!m_options_ptr->back())
 		FatalError("Menu::Back() has requested separator!");
-	return m_options_ptr->back()->Item;
+	return m_options_ptr->back()->Value;
 }
 
 template <typename T> T &NCurses::Menu<T>::Current()
 {
 	if (!m_options_ptr->at(itsHighlight))
 		FatalError("Menu::Current() has requested separator!");
-	return (*m_options_ptr)[itsHighlight]->Item;
+	return (*m_options_ptr)[itsHighlight]->Value;
 }
 
 template <typename T> const T &NCurses::Menu<T>::Current() const
 {
 	if (!m_options_ptr->at(itsHighlight))
 		FatalError("Menu::Current() const has requested separator!");
-	return (*m_options_ptr)[itsHighlight]->Item;
+	return (*m_options_ptr)[itsHighlight]->Value;
 }
 
 template <typename T> T &NCurses::Menu<T>::at(size_t pos)
 {
 	if (!m_options_ptr->at(pos))
 		FatalError("Menu::at() has requested separator!");
-	return (*m_options_ptr)[pos]->Item;
+	return (*m_options_ptr)[pos]->Value;
 }
 
 template <typename T> const T &NCurses::Menu<T>::at(size_t pos) const
 {
 	if (!m_options->at(pos))
 		FatalError("Menu::at() const has requested separator!");
-	return (*m_options_ptr)[pos]->Item;
+	return (*m_options_ptr)[pos]->Value;
 }
 
 template <typename T> const T &NCurses::Menu<T>::operator[](size_t pos) const
 {
 	if (!(*m_options_ptr)[pos])
 		FatalError("Menu::operator[] const has requested separator!");
-	return (*m_options_ptr)[pos]->Item;
+	return (*m_options_ptr)[pos]->Value;
 }
 
 template <typename T> T &NCurses::Menu<T>::operator[](size_t pos)
 {
 	if (!(*m_options_ptr)[pos])
 		FatalError("Menu::operator[] has requested separator!");
-	return (*m_options_ptr)[pos]->Item;
+	return (*m_options_ptr)[pos]->Value;
 }
 
 #endif

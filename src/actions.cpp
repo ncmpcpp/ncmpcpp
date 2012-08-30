@@ -881,7 +881,7 @@ void Delete::Run()
 			for (std::vector<size_t>::reverse_iterator it = list.rbegin(); it != list.rend(); ++it)
 			{
 				Mpd.Delete(playlist, *it);
-				myPlaylistEditor->Content->DeleteOption(*it);
+				myPlaylistEditor->Content->DeleteItem(*it);
 			}
 			Mpd.CommitCommandsList();
 			ShowMessage("Selected items deleted from playlist \"%s\"", myPlaylistEditor->Playlists->Current().c_str());
@@ -889,7 +889,7 @@ void Delete::Run()
 		else
 		{
 			if (Mpd.Delete(myPlaylistEditor->Playlists->Current(), myPlaylistEditor->Content->Choice()))
-				myPlaylistEditor->Content->DeleteOption(myPlaylistEditor->Content->Choice());
+				myPlaylistEditor->Content->DeleteItem(myPlaylistEditor->Content->Choice());
 		}
 	}
 }
@@ -2203,7 +2203,7 @@ void ToggleBrowserSortMode::Run()
 			ShowMessage("Sort songs by: Name");
 			break;
 	}
-	myBrowser->Main()->Sort<CaseInsensitiveSorting>(myBrowser->CurrentDir() != "/");
+	std::sort(myBrowser->Main()->Begin()+(myBrowser->CurrentDir() != "/"), myBrowser->Main()->End(), CaseInsensitiveSorting());
 }
 
 bool ToggleLibraryTagType::canBeRun() const

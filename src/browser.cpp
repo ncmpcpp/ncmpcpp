@@ -369,7 +369,7 @@ void Browser::GetDirectory(std::string dir, std::string subdir)
 		MPD::Item parent;
 		parent.name = "..";
 		parent.type = itDirectory;
-		w->AddOption(parent);
+		w->AddItem(parent);
 	}
 	
 	MPD::ItemList list;
@@ -397,7 +397,7 @@ void Browser::GetDirectory(std::string dir, std::string subdir)
 			case itPlaylist:
 			{
 				utf_to_locale(it->name);
-				w->AddOption(*it);
+				w->AddItem(*it);
 				break;
 			}
 			case itDirectory:
@@ -405,7 +405,7 @@ void Browser::GetDirectory(std::string dir, std::string subdir)
 				utf_to_locale(it->name);
 				if (it->name == subdir)
 					highlightme = w->Size();
-				w->AddOption(*it);
+				w->AddItem(*it);
 				break;
 			}
 			case itSong:
@@ -419,7 +419,7 @@ void Browser::GetDirectory(std::string dir, std::string subdir)
 						break;
 					}
 				}
-				w->AddOption(*it, bold);
+				w->AddItem(*it, bold);
 				break;
 			}
 		}

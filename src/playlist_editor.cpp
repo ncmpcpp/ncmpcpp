@@ -142,7 +142,7 @@ void PlaylistEditor::Update()
 		for (MPD::TagList::iterator it = list.begin(); it != list.end(); ++it)
 		{
 			utf_to_locale(*it);
-			Playlists->AddOption(*it);
+			Playlists->AddItem(*it);
 		}
 		Playlists->Window::Clear();
 		Playlists->Refresh();
@@ -153,7 +153,7 @@ void PlaylistEditor::Update()
 		Content->Reset();
 		size_t plsize = 0;
 		Mpd.GetPlaylistContent(locale_to_utf_cpy(Playlists->Current()), [this, &plsize](MPD::Song &&s) {
-			Content->AddOption(s, myPlaylist->checkForSong(s));
+			Content->AddItem(s, myPlaylist->checkForSong(s));
 			++plsize;
 		});
 		if (plsize > 0)
