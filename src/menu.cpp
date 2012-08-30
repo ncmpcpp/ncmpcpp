@@ -20,7 +20,7 @@
 
 #include "menu.h"
 
-using namespace NCurses;
+namespace NCurses {
 
 template <> std::string Menu<std::string>::GetItem(size_t pos)
 {
@@ -33,4 +33,6 @@ template <> std::string Menu<std::string>::GetItem(size_t pos)
 			result = (*m_options_ptr)[pos]->Value;
 	}
 	return result;
+}
+
 }
