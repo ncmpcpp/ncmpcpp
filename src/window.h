@@ -32,6 +32,7 @@
 #include "curses.h"
 #include "gcc.h"
 
+#include <functional>
 #include <list>
 #include <stack>
 #include <vector>
@@ -148,7 +149,7 @@ namespace NCurses
 	/// to obtain string from Window::GetString() function
 	/// @see Window::GetString()
 	///
-	typedef void (*GetStringHelper)(const std::wstring &);
+	typedef std::function<void(const std::wstring &)> GetStringHelper;
 	
 	/// Initializes curses screen and sets some additional attributes
 	/// @param window_title title of the window (has an effect only if pdcurses lib is used)

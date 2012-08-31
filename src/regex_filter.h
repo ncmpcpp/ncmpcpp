@@ -18,36 +18,44 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
-#ifndef _STATUS_CHECKER_H
-#define _STATUS_CHECKER_H
+#ifndef _REGEX_FILTER
+#define _REGEX_FILTER
 
-#include "interfaces.h"
-#include "mpdpp.h"
-#include "ncmpcpp.h"
+#include "menu.h"
 
-#ifndef USE_PDCURSES
- void WindowTitle(const std::string &);
-#else
-# define WindowTitle(x);
-#endif // USE_PDCURSES
+template <typename T> struct RegexFilter
+{
+	typedef NCurses::Menu<T> MenuT;
+	typedef typename NCurses::Menu<T>::Item MenuItem;
+	typedef std::function<bool(const Regex &, MenuT &menu, const MenuItem &)> FilterFunction;
+	
+	RegexFilter(const std::string &regex_, int cflags, FilterFunction custom_filter = 0)
+	: m_rx(regex_, cflags), m_custom_filter(custom_filter) { }
+	
+	bool operator()(MenuT &menu, const MenuItem &item) {
+		if (m_rx.regex().empty())
+			return true;
+		if (!m_rx.error().empty())
+			return false;
+		if (m_custom_filter)
+			return m_custom_filter(m_rx, menu, item);
+		return m_rx.match(menu.Stringify(item));
+	}
+	
+	static std::string currentFilter(NCurses::Menu<T> &menu)
+	{
+		std::string filter;
+		auto rf = menu.getFilter().template target< RegexFilter<T> >();
+		if (rf)
+			filter = rf->m_rx.regex();
+		return filter;
+	}
+	
+private:
+	Regex m_rx;
+	FilterFunction m_custom_filter;
+};
 
-void LockProgressbar();
-void UnlockProgressbar();
 
-void LockStatusbar();
-void UnlockStatusbar();
-
-void TraceMpdStatus();
-void NcmpcppStatusChanged(MPD::Connection *, MPD::StatusChanges, void *);
-void NcmpcppErrorCallback(MPD::Connection *, int, const char *, void *);
-
-Window &Statusbar();
-void DrawProgressbar(unsigned elapsed, unsigned time);
-void ShowMessage(const char *, ...) GNUC_PRINTF(1, 2);
-
-void StatusbarMPDCallback();
-void StatusbarGetStringHelper(const std::wstring &);
-void StatusbarApplyFilterImmediately(Filterable *f, const std::wstring &ws);
 
 #endif
-

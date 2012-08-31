@@ -78,12 +78,13 @@ void StatusbarGetStringHelper(const std::wstring &)
 	TraceMpdStatus();
 }
 
-void StatusbarApplyFilterImmediately(const std::wstring &ws)
+void StatusbarApplyFilterImmediately(Filterable *f, const std::wstring &ws)
 {
 	static std::wstring cmp;
 	if (cmp != ws)
 	{
-		myScreen->ApplyFilter(ToString((cmp = ws)));
+		cmp = ws;
+		f->applyFilter(ToString(cmp));
 		myScreen->RefreshWindow();
 	}
 	TraceMpdStatus();
@@ -249,7 +250,7 @@ void NcmpcppStatusChanged(MPD::Connection *, MPD::StatusChanges changed, void *)
 		
 		if (is_filtered)
 		{
-			myPlaylist->ApplyFilter(myPlaylist->Items->GetFilter());
+			myPlaylist->applyFilter(myPlaylist->currentFilter());
 			if (myPlaylist->Items->Empty())
 				myPlaylist->Items->ShowAll();
 		}

@@ -21,10 +21,12 @@
 #ifndef _BROWSER_H
 #define _BROWSER_H
 
+#include "interfaces.h"
 #include "ncmpcpp.h"
+#include "regex_filter.h"
 #include "screen.h"
 
-class Browser : public Screen< Menu<MPD::Item> >
+class Browser : public Screen< Menu<MPD::Item> >, public Filterable
 {
 	public:
 		Browser() : itsBrowseLocally(0), itsScrollBeginning(0), itsBrowsedDir("/") { }
@@ -46,7 +48,8 @@ class Browser : public Screen< Menu<MPD::Item> >
 		virtual void ReverseSelection();
 		virtual void GetSelectedSongs(MPD::SongList &);
 		
-		virtual void ApplyFilter(const std::string &);
+		virtual std::string currentFilter();
+		virtual void applyFilter(const std::string &filter);
 		
 		virtual List *GetList() { return w; }
 		

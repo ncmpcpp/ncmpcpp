@@ -18,36 +18,45 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
-#ifndef _STATUS_CHECKER_H
-#define _STATUS_CHECKER_H
+#ifndef _REGEXES_H
+#define _REGEXES_H
 
-#include "interfaces.h"
-#include "mpdpp.h"
-#include "ncmpcpp.h"
+#include <regex.h>
+#include <string>
 
-#ifndef USE_PDCURSES
- void WindowTitle(const std::string &);
-#else
-# define WindowTitle(x);
-#endif // USE_PDCURSES
+struct Regex
+{
+	Regex();
+	Regex(const std::string &regex, int cflags);
+	Regex(const Regex &rhs);
+	virtual ~Regex();
+	
+	/// @return regular expression
+	const std::string &regex() const { return m_regex; }
+	
+	/// @return compilation error (if there was any)
+	const std::string &error() const { return m_error; }
+	
+	/// compiles regular expression
+	/// @result true if compilation was successful, false otherwise
+	bool compile();
+	
+	/// compiles regular expression
+	/// @result true if compilation was successful, false otherwise
+	bool compile(const std::string &regex, int cflags);
+	
+	/// tries to match compiled regex with given string
+	/// @return true if string was matched, false otherwise
+	bool match(const std::string &s) const;
+	
+	Regex &operator=(const Regex &rhs);
+	
+private:
+	std::string m_regex;
+	std::string m_error;
+	regex_t m_rx;
+	int m_cflags;
+	bool m_compiled;
+};
 
-void LockProgressbar();
-void UnlockProgressbar();
-
-void LockStatusbar();
-void UnlockStatusbar();
-
-void TraceMpdStatus();
-void NcmpcppStatusChanged(MPD::Connection *, MPD::StatusChanges, void *);
-void NcmpcppErrorCallback(MPD::Connection *, int, const char *, void *);
-
-Window &Statusbar();
-void DrawProgressbar(unsigned elapsed, unsigned time);
-void ShowMessage(const char *, ...) GNUC_PRINTF(1, 2);
-
-void StatusbarMPDCallback();
-void StatusbarGetStringHelper(const std::wstring &);
-void StatusbarApplyFilterImmediately(Filterable *f, const std::wstring &ws);
-
-#endif
-
+#endif // _REGEXES_H

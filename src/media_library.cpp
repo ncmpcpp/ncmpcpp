@@ -527,9 +527,43 @@ void MediaLibrary::GetSelectedSongs(MPD::SongList &v)
 	}
 }
 
-void MediaLibrary::ApplyFilter(const std::string &s)
+std::string MediaLibrary::currentFilter()
 {
-	GetList()->ApplyFilter(s, 0, REG_ICASE | Config.regex_type);
+	std::string filter;
+	if (w == Artists)
+		filter = RegexFilter<std::string>::currentFilter(*Artists);
+	else if (w == Albums)
+		filter = RegexFilter<SearchConstraints>::currentFilter(*Albums);
+	else if (w == Songs)
+		filter = RegexFilter<MPD::Song>::currentFilter(*Songs);
+	return filter;
+}
+
+void MediaLibrary::applyFilter(const std::string &filter)
+{
+	if (w == Artists)
+	{
+		Artists->ShowAll();
+		auto rx = RegexFilter<std::string>(filter, Config.regex_type);
+		Artists->Filter(Artists->Begin(), Artists->End(), rx);
+	}
+	else if (w == Albums)
+	{
+		Albums->ShowAll();
+		auto fun = [](const Regex &rx, Menu<SearchConstraints> &menu, const Menu<SearchConstraints>::Item &item) {
+			if (item.isSeparator() || item.value().Date == AllTracksMarker)
+				return true;
+			return rx.match(menu.Stringify(item));
+		};
+		auto rx = RegexFilter<SearchConstraints>(filter, Config.regex_type, fun);
+		Albums->Filter(Albums->Begin(), Albums->End(), rx);
+	}
+	else if (w == Songs)
+	{
+		Songs->ShowAll();
+		auto rx = RegexFilter<MPD::Song>(filter, Config.regex_type);
+		Songs->Filter(Songs->Begin(), Songs->End(), rx);
+	}
 }
 
 bool MediaLibrary::isNextColumnAvailable()
@@ -647,7 +681,7 @@ void MediaLibrary::LocateSong(const MPD::Song &s)
 	
 	if (!hasTwoColumns)
 	{
-		Artists->ApplyFilter("");
+		Artists->ShowAll();
 		if (Artists->Empty())
 			Update();
 		if (primary_tag != Artists->Current().value())
@@ -665,7 +699,7 @@ void MediaLibrary::LocateSong(const MPD::Song &s)
 		}
 	}
 	
-	Albums->ApplyFilter("");
+	Albums->ShowAll();
 	if (Albums->Empty())
 		Update();
 	
@@ -688,7 +722,7 @@ void MediaLibrary::LocateSong(const MPD::Song &s)
 		}
 	}
 	
-	Songs->ApplyFilter("");
+	Songs->ShowAll();
 	if (Songs->Empty())
 		Update();
 	

@@ -18,36 +18,16 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
-#ifndef _STATUS_CHECKER_H
-#define _STATUS_CHECKER_H
+#ifndef _INTERFACES_H
+#define _INTERFACES_H
 
-#include "interfaces.h"
-#include "mpdpp.h"
-#include "ncmpcpp.h"
+#include <string>
+#include "gcc.h"
 
-#ifndef USE_PDCURSES
- void WindowTitle(const std::string &);
-#else
-# define WindowTitle(x);
-#endif // USE_PDCURSES
+struct Filterable
+{
+	virtual std::string currentFilter() = 0;
+	virtual void applyFilter(const std::string &filter) = 0;
+};
 
-void LockProgressbar();
-void UnlockProgressbar();
-
-void LockStatusbar();
-void UnlockStatusbar();
-
-void TraceMpdStatus();
-void NcmpcppStatusChanged(MPD::Connection *, MPD::StatusChanges, void *);
-void NcmpcppErrorCallback(MPD::Connection *, int, const char *, void *);
-
-Window &Statusbar();
-void DrawProgressbar(unsigned elapsed, unsigned time);
-void ShowMessage(const char *, ...) GNUC_PRINTF(1, 2);
-
-void StatusbarMPDCallback();
-void StatusbarGetStringHelper(const std::wstring &);
-void StatusbarApplyFilterImmediately(Filterable *f, const std::wstring &ws);
-
-#endif
-
+#endif // _INTERFACES_H

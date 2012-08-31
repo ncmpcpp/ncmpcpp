@@ -18,36 +18,70 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
-#ifndef _STATUS_CHECKER_H
-#define _STATUS_CHECKER_H
+#include <cassert>
+#include "regexes.h"
 
-#include "interfaces.h"
-#include "mpdpp.h"
-#include "ncmpcpp.h"
+Regex::Regex() : m_cflags(0), m_compiled(false) { }
 
-#ifndef USE_PDCURSES
- void WindowTitle(const std::string &);
-#else
-# define WindowTitle(x);
-#endif // USE_PDCURSES
+Regex::Regex(const std::string &regex_, int cflags)
+: m_regex(regex_), m_cflags(cflags), m_compiled(false)
+{
+	compile();
+}
 
-void LockProgressbar();
-void UnlockProgressbar();
+Regex::Regex (const Regex &rhs)
+: m_regex(rhs.m_regex), m_cflags(rhs.m_cflags), m_compiled(false)
+{
+	if (rhs.m_compiled)
+		compile();
+}
 
-void LockStatusbar();
-void UnlockStatusbar();
+Regex::~Regex()
+{
+	if (m_compiled)
+		regfree(&m_rx);
+}
 
-void TraceMpdStatus();
-void NcmpcppStatusChanged(MPD::Connection *, MPD::StatusChanges, void *);
-void NcmpcppErrorCallback(MPD::Connection *, int, const char *, void *);
+bool Regex::compile()
+{
+	if (m_compiled)
+	{
+		m_error.clear();
+		regfree(&m_rx);
+	}
+	int comp_res = regcomp(&m_rx, m_regex.c_str(), m_cflags);
+	bool result = true;
+	if (comp_res != 0)
+	{
+		char buf[256];
+		regerror(comp_res, &m_rx, buf, sizeof(buf));
+		m_error = buf;
+		result = false;
+	}
+	m_compiled = result;
+	return result;
+}
 
-Window &Statusbar();
-void DrawProgressbar(unsigned elapsed, unsigned time);
-void ShowMessage(const char *, ...) GNUC_PRINTF(1, 2);
+bool Regex::compile(const std::string &regex_, int cflags)
+{
+	m_regex = regex_;
+	m_cflags = cflags;
+	return compile();
+}
 
-void StatusbarMPDCallback();
-void StatusbarGetStringHelper(const std::wstring &);
-void StatusbarApplyFilterImmediately(Filterable *f, const std::wstring &ws);
+bool Regex::match(const std::string &s) const
+{
+	assert(m_compiled);
+	return regexec(&m_rx, s.c_str(), 0, 0, 0) == 0;
+}
 
-#endif
-
+Regex &Regex::operator=(const Regex &rhs)
+{
+	if (this == &rhs)
+		return *this;
+	m_regex = rhs.m_regex;
+	m_cflags = rhs.m_cflags;
+	if (rhs.m_compiled)
+		compile();
+	return *this;
+}

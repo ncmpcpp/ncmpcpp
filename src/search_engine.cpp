@@ -156,6 +156,7 @@ void SearchEngine::EnterPressed()
 	}
 	else if (option == SearchButton)
 	{
+		w->ShowAll();
 		ShowMessage("Searching...");
 		if (w->Size() > StaticOptions)
 			Prepare();
@@ -260,9 +261,21 @@ void SearchEngine::GetSelectedSongs(MPD::SongList &v)
 	}
 }
 
-void SearchEngine::ApplyFilter(const std::string &s)
+std::string SearchEngine::currentFilter()
 {
-	w->ApplyFilter(s, StaticOptions, REG_ICASE | Config.regex_type);
+	return RegexFilter<SEItem>::currentFilter(*w);
+}
+
+void SearchEngine::applyFilter(const std::string &filter)
+{
+	w->ShowAll();
+	auto fun = [](const Regex &rx, Menu<SEItem> &menu, const Menu<SEItem>::Item &item) {
+		if (item.isSeparator() || !item.value().isSong())
+			return true;
+		return rx.match(menu.Stringify(item));
+	};
+	auto rx = RegexFilter<SEItem>(filter, Config.regex_type, fun);
+	w->Filter(w->Begin(), w->End(), rx);
 }
 
 void SearchEngine::UpdateFoundList()
@@ -515,7 +528,7 @@ void SearchEngine::Search()
 std::string SearchEngine::SearchEngineOptionToString(const SEItem &ei)
 {
 	std::string result;
-	if (!ei.isSong())
+	if (ei.isSong())
 	{
 		if (Config.columns_in_search_engine)
 			result = Playlist::SongInColumnsToString(ei.song());

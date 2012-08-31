@@ -19,6 +19,7 @@
  ***************************************************************************/
 
 #include <algorithm>
+#include <sstream>
 
 #include "display.h"
 #include "global.h"
@@ -283,10 +284,22 @@ void Playlist::GetSelectedSongs(MPD::SongList &v)
 		v.push_back(Items->at(*it).value());
 }
 
-void Playlist::ApplyFilter(const std::string &s)
+std::string Playlist::currentFilter()
+{
+	std::string filter;
+	if (w == Items)
+		filter = RegexFilter<MPD::Song>::currentFilter(*Items);
+	return filter;
+}
+
+void Playlist::applyFilter(const std::string &filter)
 {
 	if (w == Items)
-		Items->ApplyFilter(s, 0, REG_ICASE | Config.regex_type);
+	{
+		Items->ShowAll();
+		auto rx = RegexFilter<MPD::Song>(filter, Config.regex_type);
+		Items->Filter(Items->Begin(), Items->End(), rx);
+	}
 }
 
 bool Playlist::isFiltered()

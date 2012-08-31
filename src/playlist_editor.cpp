@@ -416,9 +416,30 @@ void PlaylistEditor::GetSelectedSongs(MPD::SongList &v)
 		v.push_back(Content->at(*it).value());
 }
 
-void PlaylistEditor::ApplyFilter(const std::string &s)
+std::string PlaylistEditor::currentFilter()
 {
-	GetList()->ApplyFilter(s, 0, REG_ICASE | Config.regex_type);
+	std::string filter;
+	if (w == Playlists)
+		filter = RegexFilter<std::string>::currentFilter(*Playlists);
+	else if (w == Content)
+		filter = RegexFilter<MPD::Song>::currentFilter(*Content);
+	return filter;
+}
+
+void PlaylistEditor::applyFilter(const std::string &filter)
+{
+	if (w == Playlists)
+	{
+		Playlists->ShowAll();
+		auto rx = RegexFilter<std::string>(filter, Config.regex_type);
+		Playlists->Filter(Playlists->Begin(), Playlists->End(), rx);
+	}
+	else if (w == Content)
+	{
+		Content->ShowAll();
+		auto rx = RegexFilter<MPD::Song>(filter, Config.regex_type);
+		Content->Filter(Content->Begin(), Content->End(), rx);
+	}
 }
 
 void PlaylistEditor::Locate(const std::string &name)

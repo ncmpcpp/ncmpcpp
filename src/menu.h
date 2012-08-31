@@ -22,14 +22,14 @@
 #define _MENU_H
 
 #include <cassert>
-#include <regex.h>
 #include <functional>
 #include <iterator>
 #include <set>
 
 #include "error.h"
-#include "window.h"
+#include "regexes.h"
 #include "strbuffer.h"
+#include "window.h"
 
 namespace NCurses {
 
@@ -65,14 +65,6 @@ struct List
 	///
 	virtual void PrevFound(bool wrap) = 0;
 	
-	/// @see Menu::ApplyFilter()
-	///
-	virtual void ApplyFilter(const std::string &filter, size_t beginning = 0, int flags = 0) = 0;
-	
-	/// @see Menu::GetFilter()
-	///
-	virtual const std::string &GetFilter() = 0;
-	
 	/// @see Menu::isFiltered()
 	///
 	virtual bool isFiltered() = 0;
@@ -83,21 +75,6 @@ struct List
 ///
 template <typename T> struct Menu : public Window, public List
 {
-	/// Function helper prototype used to display each option on the screen.
-	/// If not set by setItemDisplayer(), menu won't display anything.
-	/// @see setItemDisplayer()
-	///
-	typedef std::function<void(Menu<T> &)> ItemDisplayer;
-	
-	/// Function helper prototype used for converting items to strings.
-	/// If not set by SetItemStringifier(), searching and filtering
-	/// won't work (note that Menu<std::string> doesn't need this)
-	/// @see SetItemStringifier()
-	///
-	typedef std::function<std::string(const T &)> ItemStringifier;
-	
-	/// Struct that holds each item in the list and its attributes
-	///
 	struct Item
 	{
 		friend class Menu<T>;
@@ -221,6 +198,21 @@ template <typename T> struct Menu : public Window, public List
 	typedef std::reverse_iterator<ValueIterator> ReverseValueIterator;
 	typedef std::reverse_iterator<ConstValueIterator> ConstReverseValueIterator;
 	
+	/// Function helper prototype used to display each option on the screen.
+	/// If not set by setItemDisplayer(), menu won't display anything.
+	/// @see setItemDisplayer()
+	///
+	typedef std::function<void(Menu<T> &)> ItemDisplayer;
+	
+	/// Function helper prototype used for converting items to strings.
+	/// If not set by SetItemStringifier(), searching and filtering
+	/// won't work (note that Menu<std::string> doesn't need this)
+	/// @see SetItemStringifier()
+	///
+	typedef std::function<std::string(const T &)> ItemStringifier;
+	
+	typedef std::function<bool(Menu<T> &, const Item &)> FilterFunction;
+	
 	/// Constructs an empty menu with given parameters
 	/// @param startx X position of left upper corner of constructed menu
 	/// @param starty Y position of left upper corner of constructed menu
@@ -240,12 +232,12 @@ template <typename T> struct Menu : public Window, public List
 	/// Sets helper function that is responsible for displaying items
 	/// @param ptr function pointer that matches the ItemDisplayer prototype
 	///
-	void setItemDisplayer(ItemDisplayer ptr) { m_item_displayer = ptr; }
+	void setItemDisplayer(const ItemDisplayer &f) { m_item_displayer = f; }
 	
 	/// Sets helper function that is responsible for converting items to strings
 	/// @param f function pointer that matches the ItemStringifier prototype
 	///
-	void SetItemStringifier(ItemStringifier f) { m_get_string_helper = f; }
+	void SetItemStringifier(const ItemStringifier &f) { m_item_stringifier = f; }
 	
 	/// Reserves the size for internal container (this just calls std::vector::reserve())
 	/// @param size requested size
@@ -322,6 +314,8 @@ template <typename T> struct Menu : public Window, public List
 	///
 	size_t Choice() const;
 	
+	template <typename Iterator> void Filter(Iterator first, Iterator last, const FilterFunction &f);
+	
 	/// Searches the list for a given contraint. It uses ItemStringifier to convert stored items
 	/// into strings and then performs pattern matching. Note that this supports regular expressions.
 	/// @param constraint a search constraint to be used
@@ -347,22 +341,15 @@ template <typename T> struct Menu : public Window, public List
 	///
 	virtual void PrevFound(bool wrap);
 	
-	/// Filters the list, showing only the items that matches the pattern. It uses
-	/// ItemStringifier to convert stored items into strings and then performs
-	/// pattern matching. Note that this supports regular expressions.
-	/// @param filter a pattern to be used in pattern matching
-	/// @param beginning beginning of range that has to be filtered
-	/// @param flags regex flags (REG_EXTENDED, REG_ICASE, REG_NOSUB, REG_NEWLINE)
-	///
-	virtual void ApplyFilter(const std::string &filter, size_t beginning = 0, int flags = 0);
-	
 	/// @return const reference to currently used filter
 	///
-	virtual const std::string &GetFilter();
+	//virtual const std::string &GetFilter();
+	
+	const FilterFunction &getFilter() { return m_filter; }
 	
 	/// @return true if list is currently filtered, false otherwise
 	///
-	virtual bool isFiltered() { return m_options_ptr == &m_filtered_options; }
+	bool isFiltered() { return m_options_ptr == &m_filtered_options; }
 	
 	/// Turns off filtering
 	///
@@ -379,6 +366,8 @@ template <typename T> struct Menu : public Window, public List
 	/// @see setItemDisplayer()
 	///
 	std::string GetItem(size_t pos);
+	
+	std::string Stringify(const Item &item) const;
 	
 	/// Refreshes the menu window
 	/// @see Window::Refresh()
@@ -534,7 +523,7 @@ template <typename T> struct Menu : public Window, public List
 private:
 	/// Clears filter, filtered data etc.
 	///
-	void ClearFiltered();
+	void clearFiltered();
 	
 	bool isHighlightable(size_t pos)
 	{
@@ -542,9 +531,9 @@ private:
 	}
 	
 	ItemDisplayer m_item_displayer;
-	ItemStringifier m_get_string_helper;
+	ItemStringifier m_item_stringifier;
 	
-	std::string m_filter;
+	FilterFunction m_filter;
 	std::string m_search_constraint;
 	
 	std::vector<Item *> *m_options_ptr;
@@ -568,10 +557,10 @@ private:
 	Buffer m_selected_suffix;
 };
 
-/// Specialization of Menu<T>::GetItem for T = std::string, it's obvious
-/// that if strings are stored, we don't need extra function to convert
-/// them to strings by default
+/// Specialization for T = std::string. It's obvious that if strings are stored,
+/// we don't need extra function to convert them to strings by default
 template <> std::string Menu<std::string>::GetItem(size_t pos);
+template <> std::string Menu<std::string>::Stringify(const Menu<std::string>::Item &item) const;
 
 template <typename T> Menu<T>::Menu(size_t startx,
 	size_t starty,
@@ -582,7 +571,7 @@ template <typename T> Menu<T>::Menu(size_t startx,
 	Border border)
 	: Window(startx, starty, width, height, title, color, border),
 	m_item_displayer(0),
-	m_get_string_helper(0),
+	m_item_stringifier(0),
 	m_options_ptr(&m_options),
 	m_beginning(0),
 	m_highlight(0),
@@ -667,6 +656,7 @@ template <typename T> void Menu<T>::Refresh()
 	if (m_options_ptr->empty())
 	{
 		Window::Clear();
+		Window::Refresh();
 		return;
 	}
 	
@@ -681,7 +671,7 @@ template <typename T> void Menu<T>::Refresh()
 	if (!isHighlightable(m_highlight))
 	{
 		Scroll(wUp);
-		if (isHighlightable(m_highlight))
+		if (!isHighlightable(m_highlight))
 			Scroll(wDown);
 	}
 	
@@ -822,7 +812,7 @@ template <typename T> void Menu<T>::Reset()
 	m_beginning = 0;
 }
 
-template <typename T> void Menu<T>::ClearFiltered()
+template <typename T> void Menu<T>::clearFiltered()
 {
 	m_filtered_options.clear();
 	m_filtered_positions.clear();
@@ -833,10 +823,9 @@ template <typename T> void Menu<T>::Clear()
 {
 	for (auto it = m_options.begin(); it != m_options.end(); ++it)
 		delete *it;
+	clearFiltered();
 	m_options.clear();
 	m_found_positions.clear();
-	m_filter.clear();
-	ClearFiltered();
 	m_options_ptr = &m_options;
 }
 
@@ -875,6 +864,24 @@ template <typename T> size_t Menu<T>::Choice() const
 	return m_highlight;
 }
 
+template <typename T> template <typename Iterator_>
+void Menu<T>::Filter(Iterator_ first, Iterator_ last, const FilterFunction &f)
+{
+	assert(m_options_ptr != &m_filtered_options);
+	clearFiltered();
+	m_filter = f;
+	for (auto it = first; it != last; ++it)
+	{
+		if (m_filter(*this, *it))
+		{
+			size_t pos = it-Begin();
+			m_filtered_positions.push_back(pos);
+			m_filtered_options.push_back(*it.base());
+		}
+	}
+	m_options_ptr = &m_filtered_options;
+}
+
 template <typename T> void Menu<T>::ReverseSelection(size_t beginning)
 {
 	auto it = m_options_ptr->begin()+beginning;
@@ -889,16 +896,15 @@ template <typename T> bool Menu<T>::Search(const std::string &constraint, size_t
 	if (constraint.empty())
 		return false;
 	m_search_constraint = constraint;
-	regex_t rx;
-	if (regcomp(&rx, m_search_constraint.c_str(), flags) == 0)
+	Regex rx;
+	if (rx.compile(m_search_constraint, flags))
 	{
 		for (size_t i = beginning; i < m_options_ptr->size(); ++i)
 		{
-			if (regexec(&rx, GetItem(i).c_str(), 0, 0, 0) == 0)
+			if (rx.match(GetItem(i)))
 				m_found_positions.insert(i);
 		}
 	}
-	regfree(&rx);
 	return !m_found_positions.empty();
 }
 
@@ -924,44 +930,19 @@ template <typename T> void Menu<T>::PrevFound(bool wrap)
 		Highlight(*m_found_positions.rbegin());
 }
 
-template <typename T> void Menu<T>::ApplyFilter(const std::string &filter, size_t beginning, int flags)
-{
-	m_found_positions.clear();
-	ClearFiltered();
-	m_filter = filter;
-	if (m_filter.empty())
-		return;
-	for (size_t i = 0; i < beginning; ++i)
-	{
-		m_filtered_positions.push_back(i);
-		m_filtered_options.push_back(m_options[i]);
-	}
-	regex_t rx;
-	if (regcomp(&rx, m_filter.c_str(), flags) == 0)
-	{
-		for (size_t i = beginning; i < m_options.size(); ++i)
-		{
-			if (regexec(&rx, GetItem(i).c_str(), 0, 0, 0) == 0)
-			{
-				m_filtered_positions.push_back(i);
-				m_filtered_options.push_back(m_options[i]);
-			}
-		}
-	}
-	regfree(&rx);
-	m_options_ptr = &m_filtered_options;
-}
-
-template <typename T> const std::string &Menu<T>::GetFilter()
-{
-	return m_filter;
-}
-
 template <typename T> std::string Menu<T>::GetItem(size_t pos)
 {
 	std::string result;
-	if (m_get_string_helper)
-		result = m_get_string_helper((*m_options_ptr)[pos]->value());
+	if (m_item_stringifier)
+		result = m_item_stringifier((*m_options_ptr)[pos]->value());
+	return result;
+}
+
+template <typename T> std::string Menu<T>::Stringify(const Item &item) const
+{
+	std::string result;
+	if (m_item_stringifier)
+		result = m_item_stringifier(item.value());
 	return result;
 }
 

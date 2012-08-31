@@ -1991,7 +1991,7 @@ void ReversePlaylist::Run()
 
 bool ApplyFilter::canBeRun() const
 {
-	return myScreen->GetList();
+	return dynamic_cast<Filterable *>(myScreen);
 }
 
 void ApplyFilter::Run()
@@ -1999,20 +1999,21 @@ void ApplyFilter::Run()
 	using Global::RedrawHeader;
 	using Global::wFooter;
 	
-	List *mList = myScreen->GetList();
-	assert(mList);
+	Filterable *f = dynamic_cast<Filterable *>(myScreen);
+	assert(f);
 	
 	LockStatusbar();
 	Statusbar() << fmtBold << "Apply filter: " << fmtBoldEnd;
-	wFooter->SetGetStringHelper(StatusbarApplyFilterImmediately);
-	wFooter->GetString(mList->GetFilter());
+	wFooter->SetGetStringHelper(std::bind(StatusbarApplyFilterImmediately, f, _1));
+	wFooter->GetString(f->currentFilter());
 	wFooter->SetGetStringHelper(StatusbarGetStringHelper);
 	UnlockStatusbar();
 	
-	if (mList->isFiltered())
-		ShowMessage("Using filter \"%s\"", mList->GetFilter().c_str());
-	else
+	std::string filter = f->currentFilter();
+ 	if (filter.empty())
 		ShowMessage("Filtering disabled");
+ 	else
+		ShowMessage("Using filter \"%s\"", filter.c_str());
 	
 	if (myScreen == myPlaylist)
 	{

@@ -26,6 +26,7 @@ ncmpcpp_SOURCES = \
 	outputs.cpp \
 	playlist.cpp \
 	playlist_editor.cpp \
+	regexes.cpp \
 	screen.cpp \
 	scrollpad.cpp \
 	search_engine.cpp \
@@ -60,6 +61,7 @@ noinst_HEADERS = \
 	global.h \
 	help.h \
 	helpers.h \
+	interfaces.h \
 	lastfm.h \
 	lastfm_service.h \
 	lyrics.h \
@@ -71,6 +73,8 @@ noinst_HEADERS = \
 	mutable_song.h \
 	outputs.h \
 	playlist_editor.h \
+	regex_filter.h \
+	regexes.h \
 	screen.h \
 	scrollpad.h \
 	search_engine.h \

@@ -319,9 +319,21 @@ void Browser::GetSelectedSongs(MPD::SongList &v)
 	}
 }
 
-void Browser::ApplyFilter(const std::string &s)
+std::string Browser::currentFilter()
 {
-	w->ApplyFilter(s, itsBrowsedDir == "/" ? 0 : 1, REG_ICASE | Config.regex_type);
+	return RegexFilter<MPD::Item>::currentFilter(*w);
+}
+
+void Browser::applyFilter(const std::string &filter)
+{
+	w->ShowAll();
+	auto fun = [](const Regex &rx, Menu<MPD::Item> &menu, const Menu<MPD::Item>::Item &item) {
+		if (item.value().type == MPD::itDirectory && item.value().name == "..")
+			return true;
+		return rx.match(menu.Stringify(item));
+	};
+	auto rx = RegexFilter<MPD::Item>(filter, Config.regex_type, fun);
+	w->Filter(w->Begin(), w->End(), rx);
 }
 
 bool Browser::hasSupportedExtension(const std::string &file)
@@ -485,7 +497,6 @@ void Browser::GetLocalDirectory(MPD::ItemList &v, const std::string &directory, 
 			MPD::MutableSong *s = new MPD::MutableSong(mpd_song_begin(&file_pair));
 			new_item.song = std::shared_ptr<MPD::Song>(s);
 #			ifdef HAVE_TAGLIB_H
-			// FIXME
 			if (!recursively)
 				TagEditor::ReadTags(*s);
 #			endif // HAVE_TAGLIB_H

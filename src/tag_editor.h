@@ -34,9 +34,10 @@
 
 #include "mpdpp.h"
 #include "mutable_song.h"
+#include "regex_filter.h"
 #include "screen.h"
 
-class TagEditor : public Screen<Window>
+class TagEditor : public Screen<Window>, public Filterable
 {
 	public:
 		TagEditor() : FParser(0), FParserHelper(0), FParserLegend(0), FParserPreview(0), itsBrowsedDir("/") { }
@@ -61,7 +62,8 @@ class TagEditor : public Screen<Window>
 		virtual void ReverseSelection() { Tags->ReverseSelection(); }
 		virtual void GetSelectedSongs(MPD::SongList &);
 		
-		virtual void ApplyFilter(const std::string &);
+		virtual std::string currentFilter();
+		virtual void applyFilter(const std::string &filter);
 		
 		virtual List *GetList();
 		

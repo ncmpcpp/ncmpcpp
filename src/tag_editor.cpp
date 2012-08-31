@@ -23,6 +23,7 @@
 #ifdef HAVE_TAGLIB_H
 
 #include <fstream>
+#include <sstream>
 #include <stdexcept>
 
 // taglib includes
@@ -266,7 +267,7 @@ void TagEditor::Update()
 			{
 				size_t slash = itsBrowsedDir.rfind("/");
 				std::string parent = slash != std::string::npos ? itsBrowsedDir.substr(0, slash) : "/";
-				Dirs->AddItem(make_pair("[..]", parent));
+				Dirs->AddItem(make_pair("..", parent));
 			}
 			else
 			{
@@ -771,14 +772,43 @@ void TagEditor::GetSelectedSongs(MPD::SongList &v)
 		v.push_back(static_cast<MPD::Song>((*Tags)[*it].value()));
 }
 
-void TagEditor::ApplyFilter(const std::string &s)
+std::string TagEditor::currentFilter()
+{
+	std::string filter;
+	if (w == Dirs)
+		filter = RegexFilter<string_pair>::currentFilter(*Dirs);
+	else if (w == Albums)
+		filter = RegexFilter<string_pair>::currentFilter(*Albums);
+	else if (w == Tags)
+		filter = RegexFilter<MPD::MutableSong>::currentFilter(*Tags);
+	return filter;
+}
+
+void TagEditor::applyFilter(const std::string &filter)
 {
 	if (w == Dirs)
-		Dirs->ApplyFilter(s, 1, REG_ICASE | Config.regex_type);
+	{
+		Dirs->ShowAll();
+		auto fun = [](const Regex &rx, Menu<string_pair> &menu, const Menu<string_pair>::Item &item) {
+			if (item.value().first == "." || item.value().first == "..")
+				return true;
+			return rx.match(menu.Stringify(item));
+		};
+		auto rx = RegexFilter<string_pair>(filter, Config.regex_type, fun);
+		Dirs->Filter(Dirs->Begin(), Dirs->End(), rx);
+	}
 	else if (w == Albums)
-		Albums->ApplyFilter(s, 0, REG_ICASE | Config.regex_type);
+	{
+		Albums->ShowAll();
+		auto rx = RegexFilter<string_pair>(filter, Config.regex_type);
+		Albums->Filter(Albums->Begin(), Albums->End(), rx);
+	}
 	else if (w == Tags)
-		Tags->ApplyFilter(s, 0, REG_ICASE | Config.regex_type);
+	{
+		Tags->ShowAll();
+		auto rx = RegexFilter<MPD::MutableSong>(filter, Config.regex_type);
+		Tags->Filter(Tags->Begin(), Tags->End(), rx);
+	}
 }
 
 List *TagEditor::GetList()

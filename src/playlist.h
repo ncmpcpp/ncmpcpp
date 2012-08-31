@@ -21,13 +21,12 @@
 #ifndef _PLAYLIST_H
 #define _PLAYLIST_H
 
-#include <sstream>
-
+#include "interfaces.h"
 #include "ncmpcpp.h"
 #include "screen.h"
 #include "song.h"
 
-class Playlist : public Screen<Window>
+class Playlist : public Screen<Window>, public Filterable
 {
 	public:
 		enum Movement { mUp, mDown };
@@ -52,7 +51,8 @@ class Playlist : public Screen<Window>
 		virtual void ReverseSelection() { Items->ReverseSelection(); }
 		virtual void GetSelectedSongs(MPD::SongList &);
 		
-		virtual void ApplyFilter(const std::string &);
+		virtual std::string currentFilter();
+		virtual void applyFilter(const std::string &filter);
 		
 		virtual List *GetList() { return w == Items ? Items : 0; }
 		

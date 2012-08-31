@@ -116,9 +116,6 @@ class BasicScreen
 		///
 		virtual void GetSelectedSongs(GNUC_UNUSED MPD::SongList &v) { }
 		
-		/// Applies a filter to the screen
-		virtual void ApplyFilter(GNUC_UNUSED const std::string &filter) { }
-		
 		/// @return pointer to instantiation of Menu template class
 		/// cast to List if available or null pointer otherwise
 		///

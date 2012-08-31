@@ -27,11 +27,21 @@ template <> std::string Menu<std::string>::GetItem(size_t pos)
 	std::string result;
 	if (m_options_ptr->at(pos))
 	{
-		if (m_get_string_helper)
-			result = m_get_string_helper((*m_options_ptr)[pos]->value());
+		if (m_item_stringifier)
+			result = m_item_stringifier((*m_options_ptr)[pos]->value());
 		else
 			result = (*m_options_ptr)[pos]->value();
 	}
+	return result;
+}
+
+template <> std::string Menu<std::string>::Stringify(const Menu<std::string>::Item &item) const
+{
+	std::string result;
+	if (m_item_stringifier)
+		result = m_item_stringifier(item.value());
+	else
+		result = item.value();
 	return result;
 }
 

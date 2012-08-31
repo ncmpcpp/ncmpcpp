@@ -392,7 +392,7 @@ void Configuration::SetDefaults()
 	playlist_disable_highlight_delay = 5;
 	message_delay_time = 4;
 	lyrics_db = 0;
-	regex_type = 0;
+	regex_type = REG_ICASE;
 	lines_scrolled = 2;
 	search_engine_default_search_mode = 0;
 	visualizer_sync_interval = 30;
@@ -953,7 +953,8 @@ void Configuration::Read()
 			}
 			else if (name == "regular_expressions")
 			{
-				regex_type = REG_EXTENDED * (v != "basic");
+				if (v != "basic")
+					regex_type |= REG_EXTENDED;
 			}
 			else if (name == "lines_scrolled")
 			{

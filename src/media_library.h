@@ -21,10 +21,12 @@
 #ifndef _H_MEDIA_LIBRARY
 #define _H_MEDIA_LIBRARY
 
+#include "interfaces.h"
 #include "ncmpcpp.h"
+#include "regex_filter.h"
 #include "screen.h"
 
-class MediaLibrary : public Screen<Window>
+class MediaLibrary : public Screen<Window>, public Filterable
 {
 	struct SearchConstraints
 	{
@@ -63,7 +65,8 @@ class MediaLibrary : public Screen<Window>
 		virtual void ReverseSelection();
 		virtual void GetSelectedSongs(MPD::SongList &);
 		
-		virtual void ApplyFilter(const std::string &);
+		virtual std::string currentFilter();
+		virtual void applyFilter(const std::string &filter);
 		
 		virtual List *GetList();
 		
