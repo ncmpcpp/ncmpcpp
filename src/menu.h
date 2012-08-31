@@ -37,19 +37,6 @@ namespace NCurses {
 ///
 struct List
 {
-	/// @see Menu::hasSelected()
-	///
-	virtual bool hasSelected() const = 0;
-	
-	/// @see Menu::GetSelected()
-	///
-	virtual void GetSelected(std::vector<size_t> &v) const = 0;
-	
-	/// Highlights given position
-	/// @param pos position to be highlighted
-	///
-	virtual void Highlight(size_t pos) = 0;
-	
 	/// @return currently highlighted position
 	///
 	virtual size_t Choice() const = 0;
@@ -314,12 +301,12 @@ template <typename T> struct Menu : public Window, public List
 	/// Checks whether list contains selected positions
 	/// @return true if it contains them, false otherwise
 	///
-	virtual bool hasSelected() const;
+	bool hasSelected() const;
 	
 	/// Gets positions of items that are selected
 	/// @param v vector to be filled with selected positions numbers
 	///
-	virtual void GetSelected(std::vector<size_t> &v) const;
+	void GetSelected(std::vector<size_t> &v) const;
 	
 	/// Reverses selection of all items in list
 	/// @param beginning beginning of range that has to be reversed

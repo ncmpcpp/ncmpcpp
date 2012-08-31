@@ -514,10 +514,10 @@ void ScrollUpArtist::Run()
 		while (pos > 0)
 		{
 			s = myScreen->GetSong(--pos);
+			myScreen->Scroll(wUp);
 			if (!s || s->getArtist() != artist)
 				break;
 		}
-		mList->Highlight(pos);
 	}
 }
 
@@ -533,10 +533,10 @@ void ScrollUpAlbum::Run()
 		while (pos > 0)
 		{
 			s = myScreen->GetSong(--pos);
+			myScreen->Scroll(wUp);
 			if (!s || s->getAlbum() != album)
 				break;
 		}
-		mList->Highlight(pos);
 	}
 }
 
@@ -552,10 +552,10 @@ void ScrollDownArtist::Run()
 		while (pos < mList->Size() - 1)
 		{
 			s = myScreen->GetSong(++pos);
+			myScreen->Scroll(wDown);
 			if (!s || s->getArtist() != artist)
 				break;
 		}
-		mList->Highlight(pos);
 	}
 }
 
@@ -571,10 +571,10 @@ void ScrollDownAlbum::Run()
 		while (pos < mList->Size() - 1)
 		{
 			s = myScreen->GetSong(++pos);
+			myScreen->Scroll(wDown);
 			if (!s || s->getAlbum() != album)
 				break;
 		}
-		mList->Highlight(pos);
 	}
 }
 
@@ -1806,8 +1806,6 @@ void DeselectItems::Run()
 {
 	// FIXME
 	/*List *mList = myScreen->GetList();
-	if (!mList->hasSelected())
-		return;
 	for (size_t i = 0; i < mList->Size(); ++i)
 		mList->Select(i, 0);
 	ShowMessage("Items deselected");*/
