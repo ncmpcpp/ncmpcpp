@@ -255,7 +255,7 @@ void TagEditor::Update()
 					Albums->AddItem(std::make_pair(l[0].toString(Config.tag_editor_album_format), *it));
 			}
 			Mpd.BlockIdle(0);
-			std::sort(Albums->Begin(), Albums->End(), CaseInsensitiveSorting());
+			std::sort(Albums->BeginV(), Albums->EndV(), CaseInsensitiveSorting());
 		}
 		else
 		{

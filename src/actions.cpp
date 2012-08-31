@@ -2205,7 +2205,7 @@ void ToggleBrowserSortMode::Run()
 			ShowMessage("Sort songs by: Name");
 			break;
 	}
-	std::sort(myBrowser->Main()->Begin()+(myBrowser->CurrentDir() != "/"), myBrowser->Main()->End(), CaseInsensitiveSorting());
+	std::sort(myBrowser->Main()->BeginV()+(myBrowser->CurrentDir() != "/"), myBrowser->Main()->EndV(), CaseInsensitiveSorting());
 }
 
 bool ToggleLibraryTagType::canBeRun() const

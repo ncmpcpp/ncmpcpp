@@ -248,7 +248,7 @@ void MediaLibrary::Update()
 		}
 		utf_to_locale(Artists->Current().value());
 		if (!Albums->Empty())
-			std::sort(Albums->Begin(), Albums->End(), SearchConstraintsSorting());
+			std::sort(Albums->BeginV(), Albums->EndV(), SearchConstraintsSorting());
 		if (Albums->Size() > 1)
 		{
 			Albums->AddSeparator();
@@ -306,7 +306,7 @@ void MediaLibrary::Update()
 		}
 		Mpd.BlockIdle(0);
 		if (!Albums->Empty())
-			std::sort(Albums->Begin(), Albums->End(), SearchConstraintsSorting());
+			std::sort(Albums->BeginV(), Albums->EndV(), SearchConstraintsSorting());
 		Albums->Refresh();
 	}
 	
@@ -334,9 +334,9 @@ void MediaLibrary::Update()
 		});
 		
 		if (Albums->Current().value().Date == AllTracksMarker)
-			std::sort(Songs->Begin(), Songs->End(), SortAllTracks);
+			std::sort(Songs->BeginV(), Songs->EndV(), SortAllTracks);
 		else
-			std::sort(Songs->Begin(), Songs->End(), SortSongsByTrack);
+			std::sort(Songs->BeginV(), Songs->EndV(), SortSongsByTrack);
 		
 		Songs->Window::Clear();
 		Songs->Refresh();

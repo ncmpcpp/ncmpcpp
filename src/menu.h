@@ -215,15 +215,24 @@ template <typename T> struct Menu : public Window, public List
 	};
 	
 	typedef ItemIterator<
-		T, typename std::vector<Item *>::iterator
+		Item, typename std::vector<Item *>::iterator
 	> Iterator;
-	
 	typedef ItemIterator<
-		typename std::add_const<T>::type, typename std::vector<Item *>::const_iterator
+		const Item, typename std::vector<Item *>::const_iterator
 	> ConstIterator;
 	
 	typedef std::reverse_iterator<Iterator> ReverseIterator;
 	typedef std::reverse_iterator<ConstIterator> ConstReverseIterator;
+	
+	typedef ItemIterator<
+		T, typename std::vector<Item *>::iterator
+	> ValueIterator;
+	typedef ItemIterator<
+		typename std::add_const<T>::type, typename std::vector<Item *>::const_iterator
+	> ConstValueIterator;
+	
+	typedef std::reverse_iterator<ValueIterator> ReverseValueIterator;
+	typedef std::reverse_iterator<ConstValueIterator> ConstReverseValueIterator;
 	
 	/// Constructs an empty menu with given parameters
 	/// @param startx X position of left upper corner of constructed menu
@@ -522,15 +531,23 @@ template <typename T> struct Menu : public Window, public List
 	
 	Iterator Begin() { return Iterator(m_options_ptr->begin()); }
 	ConstIterator Begin() const { return ConstIterator(m_options_ptr->begin()); }
-	
 	Iterator End() { return Iterator(m_options_ptr->end()); }
 	ConstIterator End() const { return ConstIterator(m_options_ptr->end()); }
 	
 	ReverseIterator Rbegin() { return ReverseIterator(End()); }
 	ConstReverseIterator Rbegin() const { return ConstReverseIterator(End()); }
-	
 	ReverseIterator Rend() { return ReverseIterator(Begin()); }
 	ConstReverseIterator Rend() const { return ConstReverseIterator(Begin()); }
+	
+	ValueIterator BeginV() { return ValueIterator(m_options_ptr->begin()); }
+	ConstValueIterator BeginV() const { return ConstValueIterator(m_options_ptr->begin()); }
+	ValueIterator EndV() { return ValueIterator(m_options_ptr->end()); }
+	ConstValueIterator EndV() const { return ConstValueIterator(m_options_ptr->end()); }
+	
+	ReverseValueIterator RbeginV() { return ReverseValueIterator(End()); }
+	ConstReverseIterator RbeginV() const { return ConstReverseValueIterator(End()); }
+	ReverseValueIterator RendV() { return ReverseValueIterator(Begin()); }
+	ConstReverseValueIterator RendV() const { return ConstReverseValueIterator(Begin()); }
 		
 private:
 	/// Clears filter, filtered data etc.
@@ -1063,4 +1080,3 @@ template <typename T> typename Menu<T>::Item &Menu<T>::operator[](size_t pos)
 }
 
 #endif
-
