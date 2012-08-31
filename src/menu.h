@@ -537,10 +537,15 @@ template <typename T> struct Menu : public Window, public List
 	ReverseIterator Rend() { return ReverseIterator(Begin()); }
 	ConstReverseIterator Rend() const { return ConstReverseIterator(Begin()); }
 		
-protected:
+private:
 	/// Clears filter, filtered data etc.
 	///
 	void ClearFiltered();
+	
+	bool isHighlightable(size_t pos)
+	{
+		return !(*m_options_ptr)[pos]->isSeparator() && !(*m_options_ptr)[pos]->isInactive();
+	}
 	
 	ItemDisplayer m_item_displayer;
 	ItemStringifier m_get_string_helper;
@@ -554,8 +559,8 @@ protected:
 	std::vector<size_t> m_filtered_positions;
 	std::set<size_t> m_found_positions;
 	
-	int itsBeginning;
-	int itsHighlight;
+	size_t m_beginning;
+	size_t m_highlight;
 	
 	Color m_highlight_color;
 	bool m_highlight_enabled;
@@ -585,8 +590,8 @@ template <typename T> Menu<T>::Menu(size_t startx,
 					m_item_displayer(0),
 					m_get_string_helper(0),
 					m_options_ptr(&m_options),
-					itsBeginning(0),
-					itsHighlight(0),
+					m_beginning(0),
+					m_highlight(0),
 					m_highlight_color(itsBaseColor),
 					m_highlight_enabled(1),
 					m_cyclic_scroll_enabled(0),
@@ -600,8 +605,8 @@ template <typename T> Menu<T>::Menu(const Menu &m) : Window(m),
 					m_item_displayer(m.m_item_displayer),
 					m_get_string_helper(m.m_get_string_helper),
 					m_options_ptr(m.m_options_ptr),
-					itsBeginning(m.itsBeginning),
-					itsHighlight(m.itsHighlight),
+					m_beginning(m.m_beginning),
+					m_highlight(m.m_highlight),
 					m_highlight_color(m.m_highlight_color),
 					m_highlight_enabled(m.m_highlight_enabled),
 					m_cyclic_scroll_enabled(m.m_cyclic_scroll_enabled),
@@ -706,9 +711,9 @@ template <typename T> void Menu<T>::Move(size_t from, size_t to)
 
 template <typename T> bool Menu<T>::Goto(size_t y)
 {
-	if (!m_options_ptr->at(itsBeginning+y) || m_options_ptr->at(itsBeginning+y)->isInactive())
+	if (!isHighlightable(m_beginning+y))
 		return false;
-	itsHighlight = itsBeginning+y;
+	m_highlight = m_beginning+y;
 	return true;
 }
 
@@ -719,63 +724,59 @@ template <typename T> void Menu<T>::Refresh()
 		Window::Refresh();
 		return;
 	}
-	int MaxBeginning = m_options_ptr->size() < itsHeight ? 0 : m_options_ptr->size()-itsHeight;
 	
-	if (itsBeginning < itsHighlight-int(itsHeight)+1) // highlighted position is off the screen
-		itsBeginning = itsHighlight-itsHeight+1;
+	size_t max_beginning = m_options_ptr->size() < itsHeight ? 0 : m_options_ptr->size()-itsHeight;
+	m_beginning = std::min(m_beginning, max_beginning);
 	
-	if (itsBeginning < 0)
-		itsBeginning = 0;
-	else if (itsBeginning > MaxBeginning)
-		itsBeginning = MaxBeginning;
+	// if highlighted position is off the screen, make it visible
+	m_highlight = std::min(m_highlight, m_beginning+itsHeight-1);
+	// if highlighted position is invalid, correct it
+	m_highlight = std::min(m_highlight, m_options_ptr->size()-1);
 	
-	if (!m_options_ptr->empty() && itsHighlight > int(m_options_ptr->size())-1)
-		itsHighlight = m_options_ptr->size()-1;
-	
-	if ((*m_options_ptr)[itsHighlight]->isSeparator() || (*m_options_ptr)[itsHighlight]->isInactive()) // it shouldn't be here
+	if (!isHighlightable(m_highlight))
 	{
 		Scroll(wUp);
-		if ((*m_options_ptr)[itsHighlight]->isSeparator() || (*m_options_ptr)[itsHighlight]->isInactive())
+		if (isHighlightable(m_highlight))
 			Scroll(wDown);
 	}
 	
 	size_t line = 0;
-	for (size_t &i = (m_drawn_position = itsBeginning); i < itsBeginning+itsHeight; ++i)
+	m_drawn_position = m_beginning;
+	for (size_t &i = m_drawn_position; i < m_beginning+itsHeight; ++i, ++line)
 	{
 		GotoXY(0, line);
 		if (i >= m_options_ptr->size())
 		{
 			for (; line < itsHeight; ++line)
-				mvwhline(itsWindow, line, 0, 32, itsWidth);
+				mvwhline(itsWindow, line, 0, KEY_SPACE, itsWidth);
 			break;
 		}
 		if ((*m_options_ptr)[i]->isSeparator())
 		{
-			mvwhline(itsWindow, line++, 0, 0, itsWidth);
+			mvwhline(itsWindow, line, 0, 0, itsWidth);
 			continue;
 		}
 		if ((*m_options_ptr)[i]->isBold())
 			*this << fmtBold;
-		if (m_highlight_enabled && int(i) == itsHighlight)
+		if (m_highlight_enabled && i == m_highlight)
 		{
 			*this << fmtReverse;
 			*this << m_highlight_color;
 		}
-		mvwhline(itsWindow, line, 0, 32, itsWidth);
+		mvwhline(itsWindow, line, 0, KEY_SPACE, itsWidth);
 		if ((*m_options_ptr)[i]->isSelected() && m_selected_prefix)
 			*this << *m_selected_prefix;
 		if (m_item_displayer)
 			m_item_displayer(*this, (*m_options_ptr)[i]->value());
 		if ((*m_options_ptr)[i]->isSelected() && m_selected_suffix)
 			*this << *m_selected_suffix;
-		if (m_highlight_enabled && int(i) == itsHighlight)
+		if (m_highlight_enabled && i == m_highlight)
 		{
 			*this << clEnd;
 			*this << fmtReverseEnd;
 		}
 		if ((*m_options_ptr)[i]->isBold())
 			*this << fmtBoldEnd;
-		line++;
 	}
 	Window::Refresh();
 }
@@ -784,120 +785,96 @@ template <typename T> void Menu<T>::Scroll(Where where)
 {
 	if (m_options_ptr->empty())
 		return;
-	int MaxHighlight = m_options_ptr->size()-1;
-	int MaxBeginning = m_options_ptr->size() < itsHeight ? 0 : m_options_ptr->size()-itsHeight;
-	int MaxCurrentHighlight = itsBeginning+itsHeight-1;
+	size_t max_highlight = m_options_ptr->size()-1;
+	size_t max_beginning = m_options_ptr->size() < itsHeight ? 0 : m_options_ptr->size()-itsHeight;
+	size_t max_visible_highlight = m_beginning+itsHeight-1;
 	switch (where)
 	{
 		case wUp:
 		{
-			if (itsHighlight <= itsBeginning && itsHighlight > 0)
-			{
-				itsBeginning--;
-			}
-			if (itsHighlight == 0)
+			if (m_highlight <= m_beginning && m_highlight > 0)
+				--m_beginning;
+			if (m_highlight == 0)
 			{
 				if (m_cyclic_scroll_enabled)
 					return Scroll(wEnd);
 				break;
 			}
 			else
-			{
-				itsHighlight--;
-			}
-			if ((*m_options_ptr)[itsHighlight]->isSeparator() || (*m_options_ptr)[itsHighlight]->isInactive())
-			{
-				Scroll(itsHighlight == 0 && !m_cyclic_scroll_enabled ? wDown : wUp);
-			}
+				--m_highlight;
+			if (!isHighlightable(m_highlight))
+				Scroll(m_highlight == 0 && !m_cyclic_scroll_enabled ? wDown : wUp);
 			break;
 		}
 		case wDown:
 		{
-			if (itsHighlight >= MaxCurrentHighlight && itsHighlight < MaxHighlight)
-			{
-				itsBeginning++;
-			}
-			if (itsHighlight == MaxHighlight)
+			if (m_highlight >= max_visible_highlight && m_highlight < max_highlight)
+				++m_beginning;
+			if (m_highlight == max_highlight)
 			{
 				if (m_cyclic_scroll_enabled)
 					return Scroll(wHome);
 				break;
 			}
 			else
-			{
-				itsHighlight++;
-			}
-			if ((*m_options_ptr)[itsHighlight]->isSeparator() || (*m_options_ptr)[itsHighlight]->isInactive())
-			{
-				Scroll(itsHighlight == MaxHighlight && !m_cyclic_scroll_enabled ? wUp : wDown);
-			}
+				++m_highlight;
+			if (!isHighlightable(m_highlight))
+				Scroll(m_highlight == max_highlight && !m_cyclic_scroll_enabled ? wUp : wDown);
 			break;
 		}
 		case wPageUp:
 		{
-			if (m_cyclic_scroll_enabled && itsHighlight == 0)
+			if (m_cyclic_scroll_enabled && m_highlight == 0)
 				return Scroll(wEnd);
-			itsHighlight -= itsHeight;
-			itsBeginning -= itsHeight;
-			if (itsBeginning < 0)
-			{
-				itsBeginning = 0;
-				if (itsHighlight < 0)
-					itsHighlight = 0;
-			}
-			if ((*m_options_ptr)[itsHighlight]->isSeparator() || (*m_options_ptr)[itsHighlight]->isInactive())
-			{
-				Scroll(itsHighlight == 0 && !m_cyclic_scroll_enabled ? wDown : wUp);
-			}
+			if (m_highlight < itsHeight)
+				m_highlight = 0;
+			else
+				m_highlight -= itsHeight;
+			if (m_beginning < itsHeight)
+				m_beginning = 0;
+			else
+				m_beginning -= itsHeight;
+			if (!isHighlightable(m_highlight))
+				Scroll(m_highlight == 0 && !m_cyclic_scroll_enabled ? wDown : wUp);
 			break;
 		}
 		case wPageDown:
 		{
-			if (m_cyclic_scroll_enabled && itsHighlight == MaxHighlight)
+			if (m_cyclic_scroll_enabled && m_highlight == max_highlight)
 				return Scroll(wHome);
-			itsHighlight += itsHeight;
-			itsBeginning += itsHeight;
-			if (itsBeginning > MaxBeginning)
-			{
-				itsBeginning = MaxBeginning;
-				if (itsHighlight > MaxHighlight)
-					itsHighlight = MaxHighlight;
-			}
-			if ((*m_options_ptr)[itsHighlight]->isSeparator() || (*m_options_ptr)[itsHighlight]->isInactive())
-			{
-				Scroll(itsHighlight == MaxHighlight && !m_cyclic_scroll_enabled ? wUp : wDown);
-			}
+			m_highlight += itsHeight;
+			m_beginning += itsHeight;
+			m_beginning = std::min(m_beginning, max_beginning);
+			m_highlight = std::min(m_highlight, max_highlight);
+			if (!isHighlightable(m_highlight))
+				Scroll(m_highlight == max_highlight && !m_cyclic_scroll_enabled ? wUp : wDown);
 			break;
 		}
 		case wHome:
 		{
-			itsHighlight = 0;
-			itsBeginning = 0;
-			if ((*m_options_ptr)[itsHighlight]->isSeparator() || (*m_options_ptr)[itsHighlight]->isInactive())
-			{
-				Scroll(itsHighlight == 0 ? wDown : wUp);
-			}
+			m_highlight = 0;
+			m_beginning = 0;
+			if (!isHighlightable(m_highlight))
+				Scroll(wDown);
 			break;
 		}
 		case wEnd:
 		{
-			itsHighlight = MaxHighlight;
-			itsBeginning = MaxBeginning;
-			if ((*m_options_ptr)[itsHighlight]->isSeparator() || (*m_options_ptr)[itsHighlight]->isInactive())
-			{
-				Scroll(itsHighlight == MaxHighlight ? wUp : wDown);
-			}
+			m_highlight = max_highlight;
+			m_beginning = max_beginning;
+			if (!isHighlightable(m_highlight))
+				Scroll(wUp);
 			break;
 		}
 	}
 	if (m_autocenter_cursor)
-		Highlight(itsHighlight);
+		Highlight(m_highlight);
 }
 
 template <typename T> void Menu<T>::Reset()
 {
-	itsHighlight = 0;
-	itsBeginning = 0;
+	m_highlight = 0;
+	m_beginning = 0;
 }
 
 template <typename T> void Menu<T>::ClearFiltered()
@@ -936,8 +913,12 @@ template <typename T> void Menu<T>::GetSelected(std::vector<size_t> &v) const
 
 template <typename T> void Menu<T>::Highlight(size_t pos)
 {
-	itsHighlight = pos;
-	itsBeginning = pos-itsHeight/2;
+	m_highlight = pos;
+	size_t half_height = itsHeight/2;
+	if (pos < half_height)
+		m_beginning = 0;
+	else
+		m_beginning = pos-half_height;
 }
 
 template <typename T> size_t Menu<T>::Size() const
@@ -947,13 +928,13 @@ template <typename T> size_t Menu<T>::Size() const
 
 template <typename T> size_t Menu<T>::Choice() const
 {
-	return itsHighlight;
+	return m_highlight;
 }
 
 template <typename T> size_t Menu<T>::RealChoice() const
 {
 	size_t result = 0;
-	for (auto it = m_options_ptr->begin(); it != m_options_ptr->begin()+itsHighlight; ++it)
+	for (auto it = m_options_ptr->begin(); it != m_options_ptr->begin()+m_highlight; ++it)
 		if (!(*it)->isInactive())
 			result++;
 	return result;
@@ -990,7 +971,7 @@ template <typename T> void Menu<T>::NextFound(bool wrap)
 {
 	if (m_found_positions.empty())
 		return;
-	std::set<size_t>::iterator next = m_found_positions.upper_bound(itsHighlight);
+	std::set<size_t>::iterator next = m_found_positions.upper_bound(m_highlight);
 	if (next != m_found_positions.end())
 		Highlight(*next);
 	else if (wrap)
@@ -1001,7 +982,7 @@ template <typename T> void Menu<T>::PrevFound(bool wrap)
 {
 	if (m_found_positions.empty())
 		return;
-	std::set<size_t>::iterator prev = m_found_positions.lower_bound(itsHighlight);
+	std::set<size_t>::iterator prev = m_found_positions.lower_bound(m_highlight);
 	if (prev != m_found_positions.begin())
 		Highlight(*--prev);
 	else if (wrap)
@@ -1045,10 +1026,10 @@ template <typename T> const std::string &Menu<T>::GetFilter()
 
 template <typename T> std::string Menu<T>::GetItem(size_t pos)
 {
-	if (m_options_ptr->at(pos) && m_get_string_helper)
-		return m_get_string_helper((*m_options_ptr)[pos]->value());
-	else
-		return "";
+	std::string result;
+	if (m_get_string_helper)
+		result = m_get_string_helper((*m_options_ptr)[pos]->value());
+	return result;
 }
 
 template <typename T> typename Menu<T>::Item &Menu<T>::Back()
@@ -1063,12 +1044,12 @@ template <typename T> const typename Menu<T>::Item &Menu<T>::Back() const
 
 template <typename T> typename Menu<T>::Item &Menu<T>::Current()
 {
-	return *(*m_options_ptr)[itsHighlight];
+	return *(*m_options_ptr)[m_highlight];
 }
 
 template <typename T> const typename Menu<T>::Item &Menu<T>::Current() const
 {
-	return *(*m_options_ptr)[itsHighlight];
+	return *(*m_options_ptr)[m_highlight];
 }
 
 template <typename T> typename Menu<T>::Item &Menu<T>::at(size_t pos)
@@ -1083,11 +1064,13 @@ template <typename T> const typename Menu<T>::Item &Menu<T>::at(size_t pos) cons
 
 template <typename T> const typename Menu<T>::Item &Menu<T>::operator[](size_t pos) const
 {
+	assert(m_options_ptr->size() > pos);
 	return *(*m_options_ptr)[pos];
 }
 
 template <typename T> typename Menu<T>::Item &Menu<T>::operator[](size_t pos)
 {
+	assert(m_options_ptr->size() > pos);
 	return *(*m_options_ptr)[pos];
 }
 
