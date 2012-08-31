@@ -177,10 +177,10 @@ template <typename T> std::string getSharedDirectory(Menu<T> *menu)
 {
 	assert(!menu->Empty());
 	std::string dir;
-	dir = (*menu)[0].getDirectory();
+// 	dir = (*menu)[0].value().getDirectory();
 	for (size_t i = 1; i < menu->Size(); ++i)
 	{
-		dir = getSharedDirectory(dir, (*menu)[i].getDirectory());
+		dir = getSharedDirectory(dir, (*menu)[i].value().getDirectory());
 		if (dir == "/")
 			break;
 	}

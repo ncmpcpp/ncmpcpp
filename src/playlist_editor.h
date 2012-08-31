@@ -41,7 +41,7 @@ class PlaylistEditor : public Screen<Window>
 		virtual bool isTabbable() { return true; }
 		
 		virtual MPD::Song *CurrentSong();
-		virtual MPD::Song *GetSong(size_t pos) { return w == Content ? &Content->at(pos) : 0; }
+		virtual MPD::Song *GetSong(size_t pos) { return w == Content ? &Content->at(pos).value() : 0; }
 		
 		virtual bool allowsSelection() { return w == Content; }
 		virtual void ReverseSelection() { Content->ReverseSelection(); }

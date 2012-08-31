@@ -86,7 +86,7 @@ class SearchEngine : public Screen< Menu<SEItem> >
 		virtual bool isTabbable() { return true; }
 		
 		virtual MPD::Song *CurrentSong();
-		virtual MPD::Song *GetSong(size_t pos) { return !w->isSeparator(pos) && w->at(pos).isSong() ? &w->at(pos).song() : 0; }
+		virtual MPD::Song *GetSong(size_t pos) { return !(*w)[pos].isSeparator() && w->at(pos).value().isSong() ? &w->at(pos).value().song() : 0; }
 		
 		virtual bool allowsSelection() { return w->Choice() >= StaticOptions; }
 		virtual void ReverseSelection() { w->ReverseSelection(StaticOptions); }
@@ -99,7 +99,6 @@ class SearchEngine : public Screen< Menu<SEItem> >
 		virtual bool isMergable() { return true; }
 		
 		void UpdateFoundList();
-		void SelectAlbum();
 		
 		static size_t StaticOptions;
 		static size_t SearchButton;

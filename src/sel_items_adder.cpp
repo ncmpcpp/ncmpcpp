@@ -189,12 +189,12 @@ void SelectedItemsAdder::EnterPressed()
 		}
 		else if (pos > 1 && pos < w->Size()-1) // add items to existing playlist
 		{
-			std::string playlist = locale_to_utf_cpy(w->Current());
+			std::string playlist = locale_to_utf_cpy(w->Current().value());
 			Mpd.StartCommandsList();
 			for (auto it = list.begin(); it != list.end(); ++it)
 				Mpd.AddToPlaylist(playlist, *it);
 			if (Mpd.CommitCommandsList())
-				ShowMessage("Selected item(s) added to playlist \"%s\"", w->Current().c_str());
+				ShowMessage("Selected item(s) added to playlist \"%s\"", w->Current().value().c_str());
 		}
 		if (pos != w->Size()-1)
 		{
@@ -232,7 +232,7 @@ void SelectedItemsAdder::EnterPressed()
 			std::string album = myPlaylist->NowPlayingSong()->getAlbum();
 			int i;
 			for (i = Mpd.GetCurrentlyPlayingSongPos()+1; i < int(myPlaylist->Items->Size()); ++i)
-				if ((*myPlaylist->Items)[i].getAlbum() != album)
+				if ((*myPlaylist->Items)[i].value().getAlbum() != album)
 					break;
 			successful_operation = myPlaylist->Add(list, 0, i);
 		}

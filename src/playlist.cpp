@@ -157,7 +157,7 @@ void Playlist::EnterPressed()
 	if (w == Items)
 	{
 		if (!Items->Empty())
-			Mpd.PlayID(Items->Current().getID());
+			Mpd.PlayID(Items->Current().value().getID());
 	}
 	else if (w == SortDialog)
 	{
@@ -190,13 +190,13 @@ void Playlist::EnterPressed()
 		MPD::SongList playlist;
 		playlist.reserve(end-beginning);
 		for (size_t i = beginning; i < end; ++i)
-			playlist.push_back((*Items)[i]);
+			playlist.push_back((*Items)[i].value());
 		
 		std::function<void(MPD::SongList::iterator, MPD::SongList::iterator)> iter_swap, quick_sort;
 		auto song_cmp = [](const MPD::Song &a, const MPD::Song &b) {
 			CaseInsensitiveStringComparison cmp;
 				for (size_t i = 0; i < SortOptions; ++i)
-					if (int ret = cmp(a.getTags((*SortDialog)[i].second), b.getTags((*SortDialog)[i].second)))
+					if (int ret = cmp(a.getTags((*SortDialog)[i].value().second), b.getTags((*SortDialog)[i].value().second)))
 						return ret < 0;
 				return a.getPosition() < b.getPosition();
 		};
@@ -235,7 +235,7 @@ void Playlist::SpacePressed()
 {
 	if (w == Items && !Items->Empty())
 	{
-		Items->Select(Items->Choice(), !Items->isSelected());
+		Items->Current().setSelected(!Items->Current().isSelected());
 		Items->Scroll(wDown);
 	}
 }
@@ -268,7 +268,7 @@ void Playlist::MouseButtonPressed(MEVENT me)
 
 MPD::Song *Playlist::CurrentSong()
 {
-	return w == Items && !Items->Empty() ? &Items->Current() : 0;
+	return w == Items && !Items->Empty() ? &Items->Current().value() : 0;
 }
 
 void Playlist::GetSelectedSongs(MPD::SongList &v)
@@ -280,7 +280,7 @@ void Playlist::GetSelectedSongs(MPD::SongList &v)
 	if (selected.empty())
 		selected.push_back(Items->Choice());
 	for (auto it = selected.begin(); it != selected.end(); ++it)
-		v.push_back(Items->at(*it));
+		v.push_back(Items->at(*it).value());
 }
 
 void Playlist::ApplyFilter(const std::string &s)
@@ -312,7 +312,7 @@ void Playlist::MoveSelectedItems(Movement where)
 	{
 		case mUp:
 		{
-			if (myPlaylist->Items->hasSelected())
+			if (Items->hasSelected())
 			{
 				std::vector<size_t> list;
 				myPlaylist->Items->GetSelected(list);
@@ -324,9 +324,9 @@ void Playlist::MoveSelectedItems(Movement where)
 						Mpd.Move(*it-1, *it);
 					if (Mpd.CommitCommandsList())
 					{
-						myPlaylist->Items->Select(list.back(), false);
-						myPlaylist->Items->Select(list.front()-1, true);
-						myPlaylist->Items->Highlight(list[(list.size()-1)/2]-1);
+						Items->at(list.back()).setSelected(false);
+						Items->at(list.front()-1).setSelected(true);
+						Items->Highlight(list[(list.size()-1)/2]-1);
 					}
 				}
 			}
@@ -336,7 +336,7 @@ void Playlist::MoveSelectedItems(Movement where)
 				if (pos > 0)
 				{
 					if (Mpd.Move(pos-1, pos))
-						myPlaylist->Items->Scroll(wUp);
+						Items->Scroll(wUp);
 				}
 			}
 			break;
@@ -356,8 +356,8 @@ void Playlist::MoveSelectedItems(Movement where)
 						Mpd.Move(*it, *it+1);
 					if (Mpd.CommitCommandsList())
 					{
-						Items->Select(list.front(), false);
-						Items->Select(list.back()+1, true);
+						Items->at(list.front()).setSelected(false);
+						Items->at(list.back()+1).setSelected(true);
 						Items->Highlight(list[(list.size()-1)/2]+1);
 					}
 				}
@@ -397,7 +397,7 @@ void Playlist::Reverse()
 	size_t beginning = -1, end = -1;
 	for (size_t i = 0; i < Items->Size(); ++i)
 	{
-		if (Items->isSelected(i))
+		if (Items->at(i).isSelected())
 		{
 			if (beginning == size_t(-1))
 				beginning = i;
@@ -457,14 +457,14 @@ std::string Playlist::TotalLength()
 	{
 		itsTotalLength = 0;
 		for (size_t i = 0; i < Items->Size(); ++i)
-			itsTotalLength += (*Items)[i].getDuration();
+			itsTotalLength += (*Items)[i].value().getDuration();
 		ReloadTotalLength = 0;
 	}
 	if (Config.playlist_show_remaining_time && ReloadRemaining && !Items->isFiltered())
 	{
 		itsRemainingTime = 0;
 		for (size_t i = NowPlaying; i < Items->Size(); ++i)
-			itsRemainingTime += (*Items)[i].getDuration();
+			itsRemainingTime += (*Items)[i].value().getDuration();
 		ReloadRemaining = false;
 	}
 	
@@ -497,7 +497,7 @@ const MPD::Song *Playlist::NowPlayingSong()
 {
 	bool was_filtered = Items->isFiltered();
 	Items->ShowAll();
-	const MPD::Song *s = isPlaying() ? &Items->at(NowPlaying) : 0;
+	const MPD::Song *s = isPlaying() ? &Items->at(NowPlaying).value() : 0;
 	if (was_filtered)
 		Items->ShowFiltered();
 	return s;
@@ -522,7 +522,7 @@ bool Playlist::Add(const MPD::Song &s, bool in_playlist, bool play, int position
 		{
 			for (size_t i = 0; i < Items->Size(); ++i)
 			{
-				if (Items->at(i).getHash() == hash)
+				if (Items->at(i).value().getHash() == hash)
 				{
 					Mpd.Play(i);
 					break;
@@ -535,7 +535,7 @@ bool Playlist::Add(const MPD::Song &s, bool in_playlist, bool play, int position
 			Mpd.StartCommandsList();
 			for (size_t i = 0; i < Items->Size(); ++i)
 			{
-				if ((*Items)[i].getHash() == hash)
+				if ((*Items)[i].value().getHash() == hash)
 				{
 					Mpd.Delete(i);
 					Items->DeleteItem(i);
@@ -606,7 +606,7 @@ void Playlist::SetSelectedItemsPriority(int prio)
 		list.push_back(Items->Choice());
 	Mpd.StartCommandsList();
 	for (std::vector<size_t>::const_iterator it = list.begin(); it != list.end(); ++it)
-		Mpd.SetPriority((*Items)[*it], prio);
+		Mpd.SetPriority((*Items)[*it].value(), prio);
 	if (Mpd.CommitCommandsList())
 		ShowMessage("Priority set");
 }
@@ -614,7 +614,7 @@ void Playlist::SetSelectedItemsPriority(int prio)
 bool Playlist::checkForSong (const MPD::Song &s)
 {
 	for (size_t i = 0; i < Items->Size(); ++i)
-		if (s.getHash() == (*Items)[i].getHash())
+		if (s.getHash() == (*Items)[i].value().getHash())
 			return true;
 	return false;
 }

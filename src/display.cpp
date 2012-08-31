@@ -157,7 +157,7 @@ void Display::SongsInColumns(Menu<MPD::Song> &menu, const MPD::Song &s, BasicScr
 	
 	int song_pos = menu.isFiltered() ? s.getPosition() : menu.CurrentlyDrawedPosition();
 	bool is_now_playing = &menu == myPlaylist->Items && song_pos == myPlaylist->NowPlaying;
-	bool is_selected = menu.isSelected(menu.CurrentlyDrawedPosition());
+	bool is_selected = menu[menu.CurrentlyDrawedPosition()].isSelected();
 	bool discard_colors = Config.discard_colors_if_item_is_selected && is_selected;
 	
 	if (is_now_playing)
@@ -287,7 +287,8 @@ void Display::Songs(Menu<MPD::Song> &menu, const MPD::Song &s, BasicScreen &scre
 		mvwhline(menu.Raw(), menu.Y(), 0, ' ', menu.GetWidth());
 	}
 	
-	bool discard_colors = Config.discard_colors_if_item_is_selected && menu.isSelected(menu.CurrentlyDrawedPosition());
+	bool discard_colors = Config.discard_colors_if_item_is_selected
+	  && menu[menu.CurrentlyDrawedPosition()].isSelected();
 	
 	std::string line = s.toString(format, "$");
 	for (std::string::const_iterator it = line.begin(); it != line.end(); ++it)
@@ -313,7 +314,7 @@ void Display::Songs(Menu<MPD::Song> &menu, const MPD::Song &s, BasicScreen &scre
 					buf.RemoveFormatting();
 				if (is_now_playing)
 					buf << Config.now_playing_suffix;
-				menu << XY(menu.GetWidth()-buf.Str().length()-(menu.isSelected(menu.CurrentlyDrawedPosition()) ? Config.selected_item_suffix_length : 0), menu.Y()) << buf;
+				menu << XY(menu.GetWidth()-buf.Str().length()-(menu[menu.CurrentlyDrawedPosition()].isSelected() ? Config.selected_item_suffix_length : 0), menu.Y()) << buf;
 				if (separate_albums)
 					menu << fmtUnderlineEnd;
 				return;

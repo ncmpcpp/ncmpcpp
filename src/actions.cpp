@@ -761,11 +761,11 @@ void Delete::Run()
 			myPlaylist->Items->GetSelected(list);
 			Mpd.StartCommandsList();
 			for (std::vector<size_t>::reverse_iterator it = list.rbegin(); it != list.rend(); ++it)
-				Mpd.DeleteID((*myPlaylist->Items)[*it].getID());
+				Mpd.DeleteID((*myPlaylist->Items)[*it].value().getID());
 			if (Mpd.CommitCommandsList())
 			{
-				for (size_t i = 0; i < myPlaylist->Items->Size(); ++i)
-					myPlaylist->Items->Select(i, 0);
+				for (auto it = myPlaylist->Items->Begin(); it != myPlaylist->Items->End(); ++it)
+					it->setSelected(false);
 				ShowMessage("Selected items deleted");
 			}
 		}
@@ -773,15 +773,15 @@ void Delete::Run()
 			Mpd.DeleteID(myPlaylist->CurrentSong()->getID());
 	}
 	else if (
-		 (myScreen == myBrowser && !myBrowser->Main()->Empty() && myBrowser->CurrentDir() == "/" && myBrowser->Main()->Current().type == itPlaylist)
+		 (myScreen == myBrowser && !myBrowser->Main()->Empty() && myBrowser->CurrentDir() == "/" && myBrowser->Main()->Current().value().type == itPlaylist)
 	||       (myScreen->ActiveWindow() == myPlaylistEditor->Playlists)
 		)
 	{
 		std::string name;
 		if (myScreen == myBrowser)
-			name = myBrowser->Main()->Current().name;
+			name = myBrowser->Main()->Current().value().name;
 		else
-			name = myPlaylistEditor->Playlists->Current();
+			name = myPlaylistEditor->Playlists->Current().value();
 		bool yes = AskYesNoQuestion("Delete playlist \"" + Shorten(TO_WSTRING(name), COLS-28) + "\"?", TraceMpdStatus);
 		if (yes)
 		{
@@ -804,7 +804,7 @@ void Delete::Run()
 		if (!myBrowser->isLocal() && !isMPDMusicDirSet())
 			return;
 		
-		MPD::Item &item = myBrowser->Main()->Current();
+		MPD::Item &item = myBrowser->Main()->Current().value();
 		
 		if (item.type == itSong && !Config.allow_physical_files_deletion)
 		{
@@ -841,7 +841,7 @@ void Delete::Run()
 			bool success = 1;
 			for (size_t i = 0; i < list.size(); ++i)
 			{
-				const MPD::Item &it = (*myBrowser->Main())[list[i]];
+				const MPD::Item &it = (*myBrowser->Main())[list[i]].value();
 				name = it.type == itSong ? it.song->getName() : it.name;
 				if (myBrowser->DeleteItem(it))
 				{
@@ -875,7 +875,7 @@ void Delete::Run()
 		{
 			std::vector<size_t> list;
 			myPlaylistEditor->Content->GetSelected(list);
-			std::string playlist = locale_to_utf_cpy(myPlaylistEditor->Playlists->Current());
+			std::string playlist = locale_to_utf_cpy(myPlaylistEditor->Playlists->Current().value());
 			ShowMessage("Deleting selected items...");
 			Mpd.StartCommandsList();
 			for (std::vector<size_t>::reverse_iterator it = list.rbegin(); it != list.rend(); ++it)
@@ -884,11 +884,11 @@ void Delete::Run()
 				myPlaylistEditor->Content->DeleteItem(*it);
 			}
 			Mpd.CommitCommandsList();
-			ShowMessage("Selected items deleted from playlist \"%s\"", myPlaylistEditor->Playlists->Current().c_str());
+			ShowMessage("Selected items deleted from playlist \"%s\"", myPlaylistEditor->Playlists->Current().value().c_str());
 		}
 		else
 		{
-			if (Mpd.Delete(myPlaylistEditor->Playlists->Current(), myPlaylistEditor->Content->Choice()))
+			if (Mpd.Delete(myPlaylistEditor->Playlists->Current().value(), myPlaylistEditor->Content->Choice()))
 				myPlaylistEditor->Content->DeleteItem(myPlaylistEditor->Content->Choice());
 		}
 	}
@@ -935,7 +935,7 @@ void SavePlaylist::Run()
 		{
 			Mpd.StartCommandsList();
 			for (size_t i = 0; i < myPlaylist->Items->Size(); ++i)
-				Mpd.AddToPlaylist(real_playlist_name, (*myPlaylist->Items)[i]);
+				Mpd.AddToPlaylist(real_playlist_name, (*myPlaylist->Items)[i].value());
 			Mpd.CommitCommandsList();
 			if (Mpd.GetErrorMessage().empty())
 				ShowMessage("Filtered items added to playlist \"%s\"", playlist_name.c_str());
@@ -1061,8 +1061,8 @@ void MoveSelectedItemsTo::Run()
 			i = list.size()-1;
 			for (it = list.rbegin(); it != list.rend(); ++it, --i)
 			{
-				myPlaylist->Items->Select(*it, false);
-				myPlaylist->Items->Select(pos+i, true);
+				myPlaylist->Items->at(*it).setSelected(false);
+				myPlaylist->Items->at(pos+i).setSelected(true);
 			}
 		}
 	}
@@ -1077,8 +1077,8 @@ void MoveSelectedItemsTo::Run()
 			i = 0;
 			for (it = list.begin(); it != list.end(); ++it, ++i)
 			{
-				myPlaylist->Items->Select(*it, false);
-				myPlaylist->Items->Select(pos+i, true);
+				myPlaylist->Items->at(*it).setSelected(false);
+				myPlaylist->Items->at(pos+i).setSelected(true);
 			}
 		}
 	}
@@ -1105,7 +1105,7 @@ void Add::Run()
 		wFooter->Refresh();
 		if (myScreen == myPlaylistEditor)
 		{
-			Mpd.AddToPlaylist(myPlaylistEditor->Playlists->Current(), path);
+			Mpd.AddToPlaylist(myPlaylistEditor->Playlists->Current().value(), path);
 			myPlaylistEditor->Content->Clear(); // make it refetch content of playlist
 		}
 		else
@@ -1316,7 +1316,7 @@ bool StartSearching::canBeRun() const
 
 void StartSearching::Run()
 {
-	if (mySearcher->Main()->isStatic(0))
+	if (mySearcher->Main()->at(0).isInactive())
 		return;
 	mySearcher->Main()->Highlight(SearchEngine::SearchButton);
 	mySearcher->Main()->Highlighting(0);
@@ -1422,13 +1422,13 @@ void EditLibraryTag::Run()
 		return;
 	LockStatusbar();
 	Statusbar() << fmtBold << tagTypeToString(Config.media_lib_primary_tag) << fmtBoldEnd << ": ";
-	std::string new_tag = wFooter->GetString(myLibrary->Artists->Current());
+	std::string new_tag = wFooter->GetString(myLibrary->Artists->Current().value());
 	UnlockStatusbar();
-	if (!new_tag.empty() && new_tag != myLibrary->Artists->Current())
+	if (!new_tag.empty() && new_tag != myLibrary->Artists->Current().value())
 	{
 		ShowMessage("Updating tags...");
 		Mpd.StartSearch(1);
-		Mpd.AddSearch(Config.media_lib_primary_tag, locale_to_utf_cpy(myLibrary->Artists->Current()));
+		Mpd.AddSearch(Config.media_lib_primary_tag, locale_to_utf_cpy(myLibrary->Artists->Current().value()));
 		MPD::MutableSong::SetFunction set = tagTypeToSetFunction(Config.media_lib_primary_tag);
 		assert(set);
 		bool success = true;
@@ -1479,21 +1479,21 @@ void EditLibraryAlbum::Run()
 		return;
 	LockStatusbar();
 	Statusbar() << fmtBold << "Album: " << fmtBoldEnd;
-	std::string new_album = wFooter->GetString(myLibrary->Albums->Current().Album);
+	std::string new_album = wFooter->GetString(myLibrary->Albums->Current().value().Album);
 	UnlockStatusbar();
-	if (!new_album.empty() && new_album != myLibrary->Albums->Current().Album)
+	if (!new_album.empty() && new_album != myLibrary->Albums->Current().value().Album)
 	{
 		bool success = 1;
 		ShowMessage("Updating tags...");
 		for (size_t i = 0;  i < myLibrary->Songs->Size(); ++i)
 		{
-			ShowMessage("Updating tags in \"%s\"...", (*myLibrary->Songs)[i].getName().c_str());
-			std::string path = Config.mpd_music_dir + (*myLibrary->Songs)[i].getURI();
+			ShowMessage("Updating tags in \"%s\"...", (*myLibrary->Songs)[i].value().getName().c_str());
+			std::string path = Config.mpd_music_dir + (*myLibrary->Songs)[i].value().getURI();
 			TagLib::FileRef f(path.c_str());
 			if (f.isNull())
 			{
 				const char msg[] = "Error while opening file \"%s\"";
-				ShowMessage(msg, Shorten(TO_WSTRING((*myLibrary->Songs)[i].getURI()), COLS-const_strlen(msg)).c_str());
+				ShowMessage(msg, Shorten(TO_WSTRING((*myLibrary->Songs)[i].value().getURI()), COLS-const_strlen(msg)).c_str());
 				success = 0;
 				break;
 			}
@@ -1501,7 +1501,7 @@ void EditLibraryAlbum::Run()
 			if (!f.save())
 			{
 				const char msg[] = "Error while writing tags in \"%s\"";
-				ShowMessage(msg, Shorten(TO_WSTRING((*myLibrary->Songs)[i].getURI()), COLS-const_strlen(msg)).c_str());
+				ShowMessage(msg, Shorten(TO_WSTRING((*myLibrary->Songs)[i].value().getURI()), COLS-const_strlen(msg)).c_str());
 				success = 0;
 				break;
 			}
@@ -1519,7 +1519,7 @@ bool EditDirectoryName::canBeRun() const
 {
 	return   (myScreen == myBrowser
 	      && !myBrowser->Main()->Empty()
-	      && myBrowser->Main()->Current().type == MPD::itDirectory)
+		  && myBrowser->Main()->Current().value().type == MPD::itDirectory)
 #	ifdef HAVE_TAGLIB_H
 	    ||   (myScreen->ActiveWindow() == myTagEditor->Dirs
 	      && !myTagEditor->Dirs->Empty()
@@ -1536,7 +1536,7 @@ void EditDirectoryName::Run()
 		return;
 	if (myScreen == myBrowser)
 	{
-		std::string old_dir = myBrowser->Main()->Current().name;
+		std::string old_dir = myBrowser->Main()->Current().value().name;
 		LockStatusbar();
 		Statusbar() << fmtBold << "Directory: " << fmtBoldEnd;
 		std::string new_dir = wFooter->GetString(old_dir);
@@ -1570,7 +1570,7 @@ void EditDirectoryName::Run()
 #	ifdef HAVE_TAGLIB_H
 	else if (myScreen->ActiveWindow() == myTagEditor->Dirs)
 	{
-		std::string old_dir = myTagEditor->Dirs->Current().first;
+		std::string old_dir = myTagEditor->Dirs->Current().value().first;
 		LockStatusbar();
 		Statusbar() << fmtBold << "Directory: " << fmtBoldEnd;
 		std::string new_dir = wFooter->GetString(old_dir);
@@ -1601,7 +1601,7 @@ bool EditPlaylistName::canBeRun() const
 	      && !myPlaylistEditor->Playlists->Empty())
 	    ||   (myScreen == myBrowser
 	      && !myBrowser->Main()->Empty()
-	      && myBrowser->Main()->Current().type == MPD::itPlaylist);
+		  && myBrowser->Main()->Current().value().type == MPD::itPlaylist);
 }
 
 void EditPlaylistName::Run()
@@ -1610,9 +1610,9 @@ void EditPlaylistName::Run()
 	
 	std::string old_name;
 	if (myScreen->ActiveWindow() == myPlaylistEditor->Playlists)
-		old_name = myPlaylistEditor->Playlists->Current();
+		old_name = myPlaylistEditor->Playlists->Current().value();
 	else
-		old_name = myBrowser->Main()->Current().name;
+		old_name = myBrowser->Main()->Current().value().name;
 	LockStatusbar();
 	Statusbar() << fmtBold << "Playlist: " << fmtBoldEnd;
 	std::string new_name = wFooter->GetString(old_name);
@@ -1668,12 +1668,12 @@ void JumpToMediaLibrary::Run()
 bool JumpToPlaylistEditor::canBeRun() const
 {
 	return myScreen == myBrowser
-	    && myBrowser->Main()->Current().type == MPD::itPlaylist;
+	    && myBrowser->Main()->Current().value().type == MPD::itPlaylist;
 }
 
 void JumpToPlaylistEditor::Run()
 {
-	myPlaylistEditor->Locate(myBrowser->Main()->Current().name);
+	myPlaylistEditor->Locate(myBrowser->Main()->Current().value().name);
 }
 
 void ToggleScreenLock::Run()
@@ -1804,12 +1804,13 @@ bool DeselectItems::canBeRun() const
 
 void DeselectItems::Run()
 {
-	List *mList = myScreen->GetList();
+	// FIXME
+	/*List *mList = myScreen->GetList();
 	if (!mList->hasSelected())
 		return;
 	for (size_t i = 0; i < mList->Size(); ++i)
 		mList->Select(i, 0);
-	ShowMessage("Items deselected");
+	ShowMessage("Items deselected");*/
 }
 
 bool SelectAlbum::canBeRun() const
@@ -1820,7 +1821,8 @@ bool SelectAlbum::canBeRun() const
 
 void SelectAlbum::Run()
 {
-	List *mList = myScreen->GetList();
+	// FIXME
+	/*List *mList = myScreen->GetList();
 	assert(mList);
 	size_t pos = mList->Choice();
 	if (MPD::Song *s = myScreen->GetSong(pos))
@@ -1850,6 +1852,7 @@ void SelectAlbum::Run()
 		}
 		ShowMessage("Album around cursor position selected");
 	}
+	*/
 }
 
 void AddSelectedItems::Run()
@@ -1872,14 +1875,14 @@ void CropMainPlaylist::Run()
 		for (int i = myPlaylist->Items->Size()-1; i >= 0; --i)
 		{
 			bool delete_i = (delete_all_but_current && i != current)
-			             || (!delete_all_but_current && !myPlaylist->Items->isSelected(i));
+			             || (!delete_all_but_current && !myPlaylist->Items->at(i).isSelected());
 			if (delete_i && i != myPlaylist->NowPlaying)
 				Mpd.Delete(i);
 		}
 		// if mpd deletes now playing song deletion will be sluggishly slow
 		// then so we have to assure it will be deleted at the very end.
 		bool delete_np = (delete_all_but_current && current != myPlaylist->NowPlaying)
-		              || (!delete_all_but_current && !myPlaylist->Items->isSelected(myPlaylist->NowPlaying));
+		              || (!delete_all_but_current && !myPlaylist->Items->at(myPlaylist->NowPlaying).isSelected());
 		if (myPlaylist->isPlaying() && delete_np)
 			Mpd.DeleteID(myPlaylist->NowPlayingSong()->getID());
 		ShowMessage("Cropping playlist...");
@@ -1899,24 +1902,24 @@ void CropPlaylist::Run()
 		return;
 	bool yes = true;
 	if (Config.ask_before_clearing_main_playlist)
-		yes = AskYesNoQuestion("Do you really want to crop playlist \"" + myPlaylistEditor->Playlists->Current() + "\"?", TraceMpdStatus);
+		yes = AskYesNoQuestion("Do you really want to crop playlist \"" + myPlaylistEditor->Playlists->Current().value() + "\"?", TraceMpdStatus);
 	if (yes)
 	{
 		bool delete_all_but_current = !myPlaylistEditor->Content->hasSelected();
 		Mpd.StartCommandsList();
 		int current = myPlaylistEditor->Content->Choice();
-		std::string playlist = locale_to_utf_cpy(myPlaylistEditor->Playlists->Current());
+		std::string playlist = locale_to_utf_cpy(myPlaylistEditor->Playlists->Current().value());
 		for (int i = myPlaylistEditor->Content->Size()-1; i >= 0; --i)
 		{
 			bool delete_i = (delete_all_but_current && i != current)
-			             || (!delete_all_but_current && !myPlaylistEditor->Content->isSelected(i));
+			             || (!delete_all_but_current && !myPlaylistEditor->Content->at(i).isSelected());
 			if (delete_i)
 				Mpd.Delete(playlist, i);
 		}
-		ShowMessage("Cropping playlist \"%s\"...", myPlaylistEditor->Playlists->Current().c_str());
+		ShowMessage("Cropping playlist \"%s\"...", myPlaylistEditor->Playlists->Current().value().c_str());
 		if (Mpd.CommitCommandsList())
 		{
-			ShowMessage("Playlist \"%s\" cropped", myPlaylistEditor->Playlists->Current().c_str());
+			ShowMessage("Playlist \"%s\" cropped", myPlaylistEditor->Playlists->Current().value().c_str());
 			// enforce content update
 			myPlaylistEditor->Content->Clear();
 		}
@@ -1935,7 +1938,7 @@ void ClearMainPlaylist::Run()
 			ShowMessage("Deleting filtered items...");
 			Mpd.StartCommandsList();
 			for (int i = myPlaylist->Items->Size()-1; i >= 0; --i)
-				Mpd.Delete((*myPlaylist->Items)[i].getPosition());
+				Mpd.Delete((*myPlaylist->Items)[i].value().getPosition());
 			if (Mpd.CommitCommandsList())
 				ShowMessage("Filtered items deleted");
 		}
@@ -1959,13 +1962,12 @@ void ClearPlaylist::Run()
 		return;
 	bool yes = true;
 	if (Config.ask_before_clearing_main_playlist)
-		yes = AskYesNoQuestion("Do you really want to clear playlist \"" + myPlaylistEditor->Playlists->Current() + "\"?", TraceMpdStatus);
+		yes = AskYesNoQuestion("Do you really want to clear playlist \"" + myPlaylistEditor->Playlists->Current().value() + "\"?", TraceMpdStatus);
 	if (yes)
 	{
-		
-		ShowMessage("Clearing playlist \"%s\"...", myPlaylistEditor->Playlists->Current().c_str());
-		if (Mpd.ClearPlaylist(locale_to_utf_cpy(myPlaylistEditor->Playlists->Current())))
-			ShowMessage("Playlist \"%s\" cleared", myPlaylistEditor->Playlists->Current().c_str());
+		ShowMessage("Clearing playlist \"%s\"...", myPlaylistEditor->Playlists->Current().value().c_str());
+		if (Mpd.ClearPlaylist(locale_to_utf_cpy(myPlaylistEditor->Playlists->Current().value())))
+			ShowMessage("Playlist \"%s\" cleared", myPlaylistEditor->Playlists->Current().value().c_str());
 	}
 }
 
@@ -2345,7 +2347,7 @@ void ShowArtistInfo::Run()
 	if (s)
 		artist = s->getArtist();
 	else if (myScreen == myLibrary && myLibrary->Main() == myLibrary->Artists && !myLibrary->Artists->Empty())
-		artist = myLibrary->Artists->Current();
+		artist = myLibrary->Artists->Current().value();
 	
 	if (!artist.empty() && myLastfm->SetArtistInfoArgs(artist, Config.lastfm_preferred_language))
 		myLastfm->SwitchTo();

@@ -221,9 +221,9 @@ void MediaLibrary::Update()
 		Mpd.BlockIdle(1);
 		Albums->Reset();
 		MPD::TagList list;
-		locale_to_utf(Artists->Current());
+		locale_to_utf(Artists->Current().value());
 		Mpd.StartFieldSearch(MPD_TAG_ALBUM);
-		Mpd.AddSearch(Config.media_lib_primary_tag, Artists->Current());
+		Mpd.AddSearch(Config.media_lib_primary_tag, Artists->Current().value());
 		Mpd.CommitSearchTags([&list](std::string &&album) {
 			list.push_back(album);
 		});
@@ -232,7 +232,7 @@ void MediaLibrary::Update()
 			if (Config.media_library_display_date)
 			{
 				Mpd.StartFieldSearch(MPD_TAG_DATE);
-				Mpd.AddSearch(Config.media_lib_primary_tag, Artists->Current());
+				Mpd.AddSearch(Config.media_lib_primary_tag, Artists->Current().value());
 				Mpd.AddSearch(MPD_TAG_ALBUM, *album);
 				utf_to_locale(*album);
 				Mpd.CommitSearchTags([this, &album](std::string &&date) {
@@ -246,7 +246,7 @@ void MediaLibrary::Update()
 				Albums->AddItem(SearchConstraints(*album, ""));
 			}
 		}
-		utf_to_locale(Artists->Current());
+		utf_to_locale(Artists->Current().value());
 		if (!Albums->Empty())
 			std::sort(Albums->Begin(), Albums->End(), SearchConstraintsSorting());
 		if (Albums->Size() > 1)
@@ -322,18 +322,18 @@ void MediaLibrary::Update()
 		Songs->Reset();
 		
 		Mpd.StartSearch(1);
-		Mpd.AddSearch(Config.media_lib_primary_tag, locale_to_utf_cpy(hasTwoColumns ? Albums->Current().PrimaryTag : Artists->Current()));
-		if (Albums->Current().Date != AllTracksMarker)
+		Mpd.AddSearch(Config.media_lib_primary_tag, locale_to_utf_cpy(hasTwoColumns ? Albums->Current().value().PrimaryTag : Artists->Current().value()));
+		if (Albums->Current().value().Date != AllTracksMarker)
 		{
-			Mpd.AddSearch(MPD_TAG_ALBUM, locale_to_utf_cpy(Albums->Current().Album));
+			Mpd.AddSearch(MPD_TAG_ALBUM, locale_to_utf_cpy(Albums->Current().value().Album));
 			if (Config.media_library_display_date)
-				Mpd.AddSearch(MPD_TAG_DATE, locale_to_utf_cpy(Albums->Current().Date));
+				Mpd.AddSearch(MPD_TAG_DATE, locale_to_utf_cpy(Albums->Current().value().Date));
 		}
 		Mpd.CommitSearchSongs([this](MPD::Song &&s) {
 			Songs->AddItem(s, myPlaylist->checkForSong(s));
 		});
 		
-		if (Albums->Current().Date == AllTracksMarker)
+		if (Albums->Current().value().Date == AllTracksMarker)
 			std::sort(Songs->Begin(), Songs->End(), SortAllTracks);
 		else
 			std::sort(Songs->Begin(), Songs->End(), SortSongsByTrack);
@@ -349,20 +349,25 @@ void MediaLibrary::SpacePressed()
 	{
 		if (w == Artists)
 		{
-			Artists->Select(Artists->Choice(), !Artists->isSelected());
+			size_t i = Artists->Choice();
+			Artists->at(i).setSelected(!Artists->at(i).isSelected());
 			Albums->Clear();
 			Songs->Clear();
 		}
 		else if (w == Albums)
 		{
-			if (Albums->Current().Date != AllTracksMarker)
+			if (Albums->Current().value().Date != AllTracksMarker)
 			{
-				Albums->Select(Albums->Choice(), !Albums->isSelected());
+				size_t i = Albums->Choice();
+				Albums->at(i).setSelected(!Albums->at(i).isSelected());
 				Songs->Clear();
 			}
 		}
 		else if (w == Songs)
-			Songs->Select(Songs->Choice(), !Songs->isSelected());
+		{
+			size_t i = Songs->Choice();
+			Songs->at(i).setSelected(!Songs->at(i).isSelected());
+		}
 		w->Scroll(wDown);
 	}
 	else
@@ -440,7 +445,7 @@ void MediaLibrary::MouseButtonPressed(MEVENT me)
 
 MPD::Song *MediaLibrary::CurrentSong()
 {
-	return w == Songs && !Songs->Empty() ? &Songs->Current() : 0;
+	return w == Songs && !Songs->Empty() ? &Songs->Current().value() : 0;
 }
 
 List *MediaLibrary::GetList()
@@ -477,7 +482,7 @@ void MediaLibrary::GetSelectedSongs(MPD::SongList &v)
 		{
 			MPD::SongList list;
 			Mpd.StartSearch(1);
-			Mpd.AddSearch(Config.media_lib_primary_tag, locale_to_utf_cpy(Artists->at(*it)));
+			Mpd.AddSearch(Config.media_lib_primary_tag, locale_to_utf_cpy(Artists->at(*it).value()));
 			Mpd.CommitSearchSongs([&list](MPD::Song &&s) {
 				list.push_back(s);
 			});
@@ -494,7 +499,7 @@ void MediaLibrary::GetSelectedSongs(MPD::SongList &v)
 			if (v.empty())
 				v.reserve(Songs->Size());
 			for (size_t i = 0; i < Songs->Size(); ++i)
-				v.push_back((*Songs)[i]);
+				v.push_back((*Songs)[i].value());
 		}
 		else
 		{
@@ -502,10 +507,10 @@ void MediaLibrary::GetSelectedSongs(MPD::SongList &v)
 			{
 				Mpd.StartSearch(1);
 				Mpd.AddSearch(Config.media_lib_primary_tag, hasTwoColumns
-						?  Albums->at(*it).PrimaryTag
-						: locale_to_utf_cpy(Artists->Current()));
-				Mpd.AddSearch(MPD_TAG_ALBUM, Albums->at(*it).Album);
-				Mpd.AddSearch(MPD_TAG_DATE, Albums->at(*it).Date);
+						?  Albums->at(*it).value().PrimaryTag
+						: locale_to_utf_cpy(Artists->Current().value()));
+				Mpd.AddSearch(MPD_TAG_ALBUM, Albums->at(*it).value().Album);
+				Mpd.AddSearch(MPD_TAG_DATE, Albums->at(*it).value().Date);
 				Mpd.CommitSearchSongs([&v](MPD::Song &&s) {
 					v.push_back(s);
 				});
@@ -518,7 +523,7 @@ void MediaLibrary::GetSelectedSongs(MPD::SongList &v)
 		if (selected.empty())
 			selected.push_back(Songs->Choice());
 		for (auto it = selected.begin(); it != selected.end(); ++it)
-			v.push_back(Songs->at(*it));
+			v.push_back(Songs->at(*it).value());
 	}
 }
 
@@ -645,11 +650,11 @@ void MediaLibrary::LocateSong(const MPD::Song &s)
 		Artists->ApplyFilter("");
 		if (Artists->Empty())
 			Update();
-		if (primary_tag != Artists->Current())
+		if (primary_tag != Artists->Current().value())
 		{
 			for (size_t i = 0; i < Artists->Size(); ++i)
 			{
-				if (primary_tag == (*Artists)[i])
+				if (primary_tag == (*Artists)[i].value())
 				{
 					Artists->Highlight(i);
 					Albums->Clear();
@@ -666,15 +671,15 @@ void MediaLibrary::LocateSong(const MPD::Song &s)
 	
 	std::string album = s.getAlbum();
 	std::string date = s.getDate();
-	if ((hasTwoColumns && Albums->Current().PrimaryTag != primary_tag)
-	||  album != Albums->Current().Album
-	||  date != Albums->Current().Date)
+	if ((hasTwoColumns && Albums->Current().value().PrimaryTag != primary_tag)
+	||  album != Albums->Current().value().Album
+	||  date != Albums->Current().value().Date)
 	{
 		for (size_t i = 0; i < Albums->Size(); ++i)
 		{
-			if ((!hasTwoColumns || (*Albums)[i].PrimaryTag == primary_tag)
-			&&   album == (*Albums)[i].Album
-			&&   date == (*Albums)[i].Date)
+			if ((!hasTwoColumns || (*Albums)[i].value().PrimaryTag == primary_tag)
+			&&   album == (*Albums)[i].value().Album
+			&&   date == (*Albums)[i].value().Date)
 			{
 				Albums->Highlight(i);
 				Songs->Clear();
@@ -687,11 +692,11 @@ void MediaLibrary::LocateSong(const MPD::Song &s)
 	if (Songs->Empty())
 		Update();
 	
-	if (s.getHash() != Songs->Current().getHash())
+	if (s.getHash() != Songs->Current().value().getHash())
 	{
 		for (size_t i = 0; i < Songs->Size(); ++i)
 		{
-			if (s.getHash()  == (*Songs)[i].getHash())
+			if (s.getHash()  == (*Songs)[i].value().getHash())
 			{
 				Songs->Highlight(i);
 				break;
@@ -709,7 +714,10 @@ void MediaLibrary::LocateSong(const MPD::Song &s)
 void MediaLibrary::AddToPlaylist(bool add_n_play)
 {
 	if (w == Songs && !Songs->Empty())
-		Songs->Bold(Songs->Choice(), myPlaylist->Add(Songs->Current(), Songs->isBold(), add_n_play));
+	{
+		bool res = myPlaylist->Add(Songs->Current().value(), Songs->Current().isBold(), add_n_play);
+		Songs->Current().setBold(res);
+	}
 	else
 	{
 		MPD::SongList list;
@@ -718,14 +726,14 @@ void MediaLibrary::AddToPlaylist(bool add_n_play)
 		if (myPlaylist->Add(list, add_n_play))
 		{
 			if ((!Artists->Empty() && w == Artists)
-			||  (w == Albums && Albums->Current().Date == AllTracksMarker))
+			||  (w == Albums && Albums->Current().value().Date == AllTracksMarker))
 			{
 				std::string tag_type = tagTypeToString(Config.media_lib_primary_tag);
 				lowercase(tag_type);
-				ShowMessage("Songs with %s = \"%s\" added", tag_type.c_str(), Artists->Current().c_str());
+				ShowMessage("Songs with %s = \"%s\" added", tag_type.c_str(), Artists->Current().value().c_str());
 			}
 			else if (w == Albums)
-				ShowMessage("Songs from album \"%s\" added", Albums->Current().Album.c_str());
+				ShowMessage("Songs from album \"%s\" added", Albums->Current().value().Album.c_str());
 		}
 	}
 

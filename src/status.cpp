@@ -238,7 +238,7 @@ void NcmpcppStatusChanged(MPD::Connection *, MPD::StatusChanges changed, void *)
 			if (pos < int(myPlaylist->Items->Size()))
 			{
 				// if song's already in playlist, replace it with a new one
-				myPlaylist->Items->at(pos) = s;
+				myPlaylist->Items->at(pos).value() = s;
 			}
 			else
 			{

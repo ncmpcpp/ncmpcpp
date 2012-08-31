@@ -83,15 +83,15 @@ std::basic_string<my_char_t> Outputs::Title()
 
 void Outputs::EnterPressed()
 {
-	if (w->Current().isEnabled())
+	if (w->Current().value().isEnabled())
 	{
 		if (Mpd.DisableOutput(w->Choice()))
-			ShowMessage("Output \"%s\" disabled", w->Current().name().c_str());
+			ShowMessage("Output \"%s\" disabled", w->Current().value().name().c_str());
 	}
 	else
 	{
 		if (Mpd.EnableOutput(w->Choice()))
-			ShowMessage("Output \"%s\" enabled", w->Current().name().c_str());
+			ShowMessage("Output \"%s\" enabled", w->Current().value().name().c_str());
 	}
 	if (!Mpd.SupportsIdle())
 		FetchList();

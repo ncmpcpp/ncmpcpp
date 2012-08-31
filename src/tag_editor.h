@@ -55,7 +55,7 @@ class TagEditor : public Screen<Window>
 		virtual bool isTabbable() { return true; }
 		
 		virtual MPD::Song *CurrentSong();
-		virtual MPD::Song *GetSong(size_t pos) { return w == Tags ? &Tags->at(pos) : 0; }
+		virtual MPD::Song *GetSong(size_t pos) { return w == Tags ? &Tags->at(pos).value() : 0; }
 		
 		virtual bool allowsSelection() { return w == Tags; }
 		virtual void ReverseSelection() { Tags->ReverseSelection(); }

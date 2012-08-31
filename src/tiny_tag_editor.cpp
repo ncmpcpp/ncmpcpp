@@ -110,9 +110,9 @@ void TinyTagEditor::EnterPressed()
 		size_t pos = option-8;
 		Statusbar() << fmtBold << SongInfo::Tags[pos].Name << ": " << fmtBoldEnd;
 		itsEdited.setTag(SongInfo::Tags[pos].Set, Global::wFooter->GetString(itsEdited.getTags(SongInfo::Tags[pos].Get)));
-		w->at(option).Clear();
-		w->at(option) << fmtBold << SongInfo::Tags[pos].Name << ':' << fmtBoldEnd << ' ';
-		ShowTag(w->at(option), itsEdited.getTags(SongInfo::Tags[pos].Get));
+		w->at(option).value().Clear();
+		w->at(option).value() << fmtBold << SongInfo::Tags[pos].Name << ':' << fmtBoldEnd << ' ';
+		ShowTag(w->at(option).value(), itsEdited.getTags(SongInfo::Tags[pos].Get));
 	}
 	else if (option == 20)
 	{
@@ -123,8 +123,8 @@ void TinyTagEditor::EnterPressed()
 		filename = filename.substr(0, dot);
 		std::string new_name = Global::wFooter->GetString(filename);
 		itsEdited.setNewURI(new_name + extension);
-		w->at(option).Clear();
-		w->at(option) << fmtBold << "Filename:" << fmtBoldEnd << ' ' << (itsEdited.getNewURI().empty() ? itsEdited.getName() : itsEdited.getNewURI());
+		w->at(option).value().Clear();
+		w->at(option).value() << fmtBold << "Filename:" << fmtBoldEnd << ' ' << (itsEdited.getNewURI().empty() ? itsEdited.getName() : itsEdited.getNewURI());
 	}
 	UnlockStatusbar();
 	
@@ -139,7 +139,7 @@ void TinyTagEditor::EnterPressed()
 			else
 			{
 				if (myOldScreen == myPlaylist)
-					myPlaylist->Items->Current() = itsEdited;
+					myPlaylist->Items->Current().value() = itsEdited;
 				else if (myOldScreen == myBrowser)
 					myBrowser->GetDirectory(myBrowser->CurrentDir());
 			}
@@ -199,41 +199,41 @@ bool TinyTagEditor::getTags()
 	w->ResizeList(24);
 	
 	for (size_t i = 0; i < 7; ++i)
-		w->Static(i, 1);
+		w->at(i).setInactive(true);
 	
-	w->IntoSeparator(7);
-	w->IntoSeparator(19);
-	w->IntoSeparator(21);
+	w->at(7).setSeparator(true);
+	w->at(19).setSeparator(true);
+	w->at(21).setSeparator(true);
 	
 	if (!extendedTagsSupported(f.file()))
 	{
-		w->Static(10, 1);
+		w->at(10).setInactive(true);
 		for (size_t i = 15; i <= 17; ++i)
-			w->Static(i, 1);
+			w->at(i).setInactive(true);
 	}
 	
 	w->Highlight(8);
 	
-	w->at(0) << fmtBold << Config.color1 << "Song name: " << fmtBoldEnd << Config.color2 << itsEdited.getName() << clEnd;
-	w->at(1) << fmtBold << Config.color1 << "Location in DB: " << fmtBoldEnd << Config.color2;
-	ShowTag(w->at(1), itsEdited.getDirectory());
-	w->at(1) << clEnd;
-	w->at(3) << fmtBold << Config.color1 << "Length: " << fmtBoldEnd << Config.color2 << itsEdited.getLength() << clEnd;
-	w->at(4) << fmtBold << Config.color1 << "Bitrate: " << fmtBoldEnd << Config.color2 << f.audioProperties()->bitrate() << " kbps" << clEnd;
-	w->at(5) << fmtBold << Config.color1 << "Sample rate: " << fmtBoldEnd << Config.color2 << f.audioProperties()->sampleRate() << " Hz" << clEnd;
-	w->at(6) << fmtBold << Config.color1 << "Channels: " << fmtBoldEnd << Config.color2 << (f.audioProperties()->channels() == 1 ? "Mono" : "Stereo") << clDefault;
+	w->at(0).value() << fmtBold << Config.color1 << "Song name: " << fmtBoldEnd << Config.color2 << itsEdited.getName() << clEnd;
+	w->at(1).value() << fmtBold << Config.color1 << "Location in DB: " << fmtBoldEnd << Config.color2;
+	ShowTag(w->at(1).value(), itsEdited.getDirectory());
+	w->at(1).value() << clEnd;
+	w->at(3).value() << fmtBold << Config.color1 << "Length: " << fmtBoldEnd << Config.color2 << itsEdited.getLength() << clEnd;
+	w->at(4).value() << fmtBold << Config.color1 << "Bitrate: " << fmtBoldEnd << Config.color2 << f.audioProperties()->bitrate() << " kbps" << clEnd;
+	w->at(5).value() << fmtBold << Config.color1 << "Sample rate: " << fmtBoldEnd << Config.color2 << f.audioProperties()->sampleRate() << " Hz" << clEnd;
+	w->at(6).value() << fmtBold << Config.color1 << "Channels: " << fmtBoldEnd << Config.color2 << (f.audioProperties()->channels() == 1 ? "Mono" : "Stereo") << clDefault;
 	
 	unsigned pos = 8;
 	for (const SongInfo::Metadata *m = SongInfo::Tags; m->Name; ++m, ++pos)
 	{
-		w->at(pos) << fmtBold << m->Name << ":" << fmtBoldEnd << ' ';
-		ShowTag(w->at(pos), itsEdited.getTags(m->Get));
+		w->at(pos).value() << fmtBold << m->Name << ":" << fmtBoldEnd << ' ';
+		ShowTag(w->at(pos).value(), itsEdited.getTags(m->Get));
 	}
 	
-	w->at(20) << fmtBold << "Filename:" << fmtBoldEnd << ' ' << itsEdited.getName();
+	w->at(20).value() << fmtBold << "Filename:" << fmtBoldEnd << ' ' << itsEdited.getName();
 	
-	w->at(22) << "Save";
-	w->at(23) << "Cancel";
+	w->at(22).value() << "Save";
+	w->at(23).value() << "Cancel";
 	return true;
 }
 

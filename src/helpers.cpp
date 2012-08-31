@@ -294,13 +294,13 @@ void UpdateSongList(Menu<MPD::Song> *menu)
 	{
 		for (size_t j = 0; j < myPlaylist->Items->Size(); ++j)
 		{
-			if (myPlaylist->Items->at(j).getHash() == menu->at(i).getHash())
+			if (myPlaylist->Items->at(j).value().getHash() == menu->at(i).value().getHash())
 			{
 				bold = 1;
 				break;
 			}
 		}
-		menu->Bold(i, bold);
+		(*menu)[i].setBold(bold);
 		bold = 0;
 	}
 	menu->Refresh();

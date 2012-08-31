@@ -121,7 +121,7 @@ void Browser::EnterPressed()
 	if (w->Empty())
 		return;
 	
-	const MPD::Item &item = w->Current();
+	const MPD::Item &item = w->Current().value();
 	switch (item.type)
 	{
 		case itDirectory:
@@ -141,8 +141,9 @@ void Browser::EnterPressed()
 		}
 		case itSong:
 		{
-			bool res = myPlaylist->Add(*item.song, w->isBold(), 1);
-			w->Bold(w->Choice(), res);
+			size_t i = w->Choice();
+			bool res = myPlaylist->Add(*item.song, w->at(i).isBold(), 1);
+			w->at(i).setBold(res);
 			break;
 		}
 		case itPlaylist:
@@ -161,9 +162,11 @@ void Browser::SpacePressed()
 	if (w->Empty())
 		return;
 	
-	if (Config.space_selects && w->Choice() >= (itsBrowsedDir != "/" ? 1 : 0))
+	size_t i = itsBrowsedDir != "/" ? 1 : 0;
+	if (Config.space_selects && w->Choice() >= i)
 	{
-		w->Select(w->Choice(), !w->isSelected());
+		i = w->Choice();
+		w->at(i).setSelected(!w->at(i).isSelected());
 		w->Scroll(wDown);
 		return;
 	}
@@ -171,7 +174,7 @@ void Browser::SpacePressed()
 	if (isParentDir(w->Choice()))
 		return;
 	
-	const MPD::Item &item = w->Current();
+	const MPD::Item &item = w->Current().value();
 	switch (item.type)
 	{
 		case itDirectory:
@@ -198,8 +201,9 @@ void Browser::SpacePressed()
 		}
 		case itSong:
 		{
-			bool res = myPlaylist->Add(*item.song, w->isBold(), 0);
-			w->Bold(w->Choice(), res);
+			i = w->Choice();
+			bool res = myPlaylist->Add(*item.song, w->at(i).isBold(), 0);
+			w->at(i).setBold(res);
 			break;
 		}
 		case itPlaylist:
@@ -219,12 +223,12 @@ void Browser::MouseButtonPressed(MEVENT me)
 	if (me.bstate & (BUTTON1_PRESSED | BUTTON3_PRESSED))
 	{
 		w->Goto(me.y);
-		switch (w->Current().type)
+		switch (w->Current().value().type)
 		{
 			case itDirectory:
 				if (me.bstate & BUTTON1_PRESSED)
 				{
-					GetDirectory(w->Current().name);
+					GetDirectory(w->Current().value().name);
 					RedrawHeader = true;
 				}
 				else
@@ -255,7 +259,11 @@ void Browser::MouseButtonPressed(MEVENT me)
 
 MPD::Song *Browser::CurrentSong()
 {
-	return !w->Empty() && w->Current().type == itSong ? w->Current().song.get() : 0;
+	const MPD::Item &item = w->Current().value();
+	if (!w->Empty() && item.type == itSong)
+		return item.song.get();
+	else
+		return 0;
 }
 
 void Browser::ReverseSelection()
@@ -273,7 +281,7 @@ void Browser::GetSelectedSongs(MPD::SongList &v)
 		selected.push_back(w->Choice());
 	for (auto it = selected.begin(); it != selected.end(); ++it)
 	{
-		const MPD::Item &item = w->at(*it);
+		const MPD::Item &item = w->at(*it).value();
 		switch (item.type)
 		{
 			case itDirectory:
@@ -341,7 +349,7 @@ void Browser::LocateSong(const MPD::Song &s)
 		GetDirectory(s.getDirectory());
 	for (size_t i = 0; i < w->Size(); ++i)
 	{
-		if ((*w)[i].type == itSong && s.getHash() == (*w)[i].song->getHash())
+		if ((*w)[i].value().type == itSong && s.getHash() == (*w)[i].value().song->getHash())
 		{
 			w->Highlight(i);
 			break;
@@ -413,7 +421,7 @@ void Browser::GetDirectory(std::string dir, std::string subdir)
 				bool bold = 0;
 				for (size_t i = 0; i < myPlaylist->Items->Size(); ++i)
 				{
-					if (myPlaylist->Items->at(i).getHash() == it->song->getHash())
+					if (myPlaylist->Items->at(i).value().getHash() == it->song->getHash())
 					{
 						bold = 1;
 						break;
@@ -568,8 +576,8 @@ bool Browser::DeleteItem(const MPD::Item &item)
 void Browser::UpdateItemList()
 {
 	for (size_t i = 0; i < w->Size(); ++i)
-		if ((*w)[i].type == itSong)
-			w->Bold(i, myPlaylist->checkForSong(*(*w)[i].song));
+		if ((*w)[i].value().type == itSong)
+			w->at(i).setBold(myPlaylist->checkForSong(*(*w)[i].value().song));
 	w->Refresh();
 }
 
