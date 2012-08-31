@@ -31,121 +31,52 @@
 
 using Global::myScreen;
 
-namespace
+namespace {//
+
+const my_char_t *toColumnName(char c)
 {
-	const my_char_t *toColumnName(char c)
+	switch (c)
 	{
-		switch (c)
-		{
-			case 'l':
-				return U("Time");
-			case 'f':
-				return U("Filename");
-			case 'D':
-				return U("Directory");
-			case 'a':
-				return U("Artist");
-			case 'A':
-				return U("Album Artist");
-			case 't':
-				return U("Title");
-			case 'b':
-				return U("Album");
-			case 'y':
-				return U("Date");
-			case 'n': case 'N':
-				return U("Track");
-			case 'g':
-				return U("Genre");
-			case 'c':
-				return U("Composer");
-			case 'p':
-				return U("Performer");
-			case 'd':
-				return U("Disc");
-			case 'C':
-				return U("Comment");
-			case 'P':
-				return U("Priority");
-			default:
-				return U("?");
-		}
+		case 'l':
+			return U("Time");
+		case 'f':
+			return U("Filename");
+		case 'D':
+			return U("Directory");
+		case 'a':
+			return U("Artist");
+		case 'A':
+			return U("Album Artist");
+		case 't':
+			return U("Title");
+		case 'b':
+			return U("Album");
+		case 'y':
+			return U("Date");
+		case 'n': case 'N':
+			return U("Track");
+		case 'g':
+			return U("Genre");
+		case 'c':
+			return U("Composer");
+		case 'p':
+			return U("Performer");
+		case 'd':
+			return U("Disc");
+		case 'C':
+			return U("Comment");
+		case 'P':
+			return U("Priority");
+		default:
+			return U("?");
 	}
 }
 
-std::string Display::Columns(size_t list_width)
+template <typename T>
+void setProperties(Menu<T> &menu, const MPD::Song &s, BasicScreen &screen, bool &separate_albums,
+                   bool &is_now_playing, bool &is_selected, bool &discard_colors)
 {
-	if (Config.columns.empty())
-		return "";
-	
-	std::string result;
-	
-	int width;
-	int remained_width = list_width;
-	std::vector<Column>::const_iterator it, last = Config.columns.end() - 1;
-	for (it = Config.columns.begin(); it != Config.columns.end(); ++it)
-	{
-		// column has relative width and all after it have fixed width,
-		// so stretch it so it fills whole screen along with these after.
-		if (it->stretch_limit >= 0) // (*)
-			width = remained_width - it->stretch_limit;
-		else
-			width = it->fixed ? it->width : it->width * list_width * 0.01;
-		// columns with relative width may shrink to 0, omit them
-		if (width == 0)
-			continue;
-		// if column is not last, we need to have spacing between it
-		// and next column, so we substract it now and restore later.
-		if (it != last)
-			--width;
-		
-		// if column doesn't fit into screen, discard it and any other after it.
-		if (remained_width-width < 0 || width < 0 /* this one may come from (*) */)
-			break;
-		
-		std::basic_string<my_char_t> name;
-		if (it->name.empty())
-		{
-			for (size_t j = 0; j < it->type.length(); ++j)
-			{
-				name += toColumnName(it->type[j]);
-				name += '/';
-			}
-			name.resize(name.length()-1);
-		}
-		else
-			name = it->name;
-		Window::Cut(name, width);
-		
-		int x_off = std::max(0, width - int(Window::Length(name)));
-		if (it->right_alignment)
-		{
-			result += std::string(x_off, KEY_SPACE);
-			result += TO_STRING(name);
-		}
-		else
-		{
-			result += TO_STRING(name);
-			result += std::string(x_off, KEY_SPACE);
-		}
-		
-		if (it != last)
-		{
-			// add missing width's part and restore the value.
-			remained_width -= width+1;
-			result += ' ';
-		}
-	}
-	
-	return result;
-}
-
-void Display::SongsInColumns(Menu<MPD::Song> &menu, const MPD::Song &s, BasicScreen &screen)
-{
-	if (Config.columns.empty())
-		return;
-	
-	bool separate_albums = false;
+	separate_albums = false;
 	if (Config.playlist_separate_albums && menu.CurrentlyDrawedPosition()+1 < menu.Size())
 	{
 		MPD::Song *next = screen.GetSong(menu.CurrentlyDrawedPosition()+1);
@@ -156,9 +87,73 @@ void Display::SongsInColumns(Menu<MPD::Song> &menu, const MPD::Song &s, BasicScr
 		menu << fmtUnderline;
 	
 	int song_pos = menu.isFiltered() ? s.getPosition() : menu.CurrentlyDrawedPosition();
-	bool is_now_playing = &menu == myPlaylist->Items && song_pos == myPlaylist->NowPlaying;
-	bool is_selected = menu[menu.CurrentlyDrawedPosition()].isSelected();
-	bool discard_colors = Config.discard_colors_if_item_is_selected && is_selected;
+	is_now_playing = song_pos == myPlaylist->NowPlaying && s.getID() > 0; // playlist
+	is_selected = menu[menu.CurrentlyDrawedPosition()].isSelected();
+	discard_colors = Config.discard_colors_if_item_is_selected && is_selected;
+}
+
+template <typename T>
+void showSongs(Menu<T> &menu, const MPD::Song &s, BasicScreen &screen, const std::string &format)
+{
+	bool separate_albums, is_now_playing, is_selected, discard_colors;
+	setProperties(menu, s, screen, separate_albums, is_now_playing, is_selected, discard_colors);
+	
+	std::string line = s.toString(format, "$");
+	for (std::string::const_iterator it = line.begin(); it != line.end(); ++it)
+	{
+		if (*it == '$')
+		{
+			if (++it == line.end()) // end of format
+			{
+				menu << '$';
+				break;
+			}
+			else if (isdigit(*it)) // color
+			{
+				if (!discard_colors)
+					menu << Color(*it-'0');
+			}
+			else if (*it == 'R') // right align
+			{
+				basic_buffer<my_char_t> buf;
+				buf << U(" ");
+				String2Buffer(TO_WSTRING(line.substr(it-line.begin()+1)), buf);
+				if (discard_colors)
+					buf.RemoveFormatting();
+				if (is_now_playing)
+					buf << Config.now_playing_suffix;
+				menu << XY(menu.GetWidth()-buf.Str().length()-(menu[menu.CurrentlyDrawedPosition()].isSelected() ? Config.selected_item_suffix_length : 0), menu.Y()) << buf;
+				if (separate_albums)
+					menu << fmtUnderlineEnd;
+				return;
+			}
+			else // not a color nor right align, just a random character
+				menu << *--it;
+		}
+		else if (*it == MPD::Song::FormatEscapeCharacter)
+		{
+			// treat '$' as a normal character if song format escape char is prepended to it
+			if (++it == line.end() || *it != '$')
+				--it;
+			menu << *it;
+		}
+		else
+			menu << *it;
+	}
+	if (is_now_playing)
+		menu << Config.now_playing_suffix;
+	if (separate_albums)
+		menu << fmtUnderlineEnd;
+}
+
+template <typename T>
+void showSongsInColumns(Menu<T> &menu, const MPD::Song &s, BasicScreen &screen)
+{
+	if (Config.columns.empty())
+		return;
+	
+	bool separate_albums, is_now_playing, is_selected, discard_colors;
+	setProperties(menu, s, screen, separate_albums, is_now_playing, is_selected, discard_colors);
 	
 	if (is_now_playing)
 		menu << Config.now_playing_prefix;
@@ -268,74 +263,83 @@ void Display::SongsInColumns(Menu<MPD::Song> &menu, const MPD::Song &s, BasicScr
 		menu << fmtUnderlineEnd;
 }
 
-void Display::Songs(Menu<MPD::Song> &menu, const MPD::Song &s, BasicScreen &screen, const std::string &format)
+}
+
+std::string Display::Columns(size_t list_width)
 {
-	bool is_now_playing = &menu == myPlaylist->Items && (menu.isFiltered() ? s.getPosition() : menu.CurrentlyDrawedPosition()) == size_t(myPlaylist->NowPlaying);
-	if (is_now_playing)
-		menu << Config.now_playing_prefix;
+	if (Config.columns.empty())
+		return "";
 	
-	bool separate_albums = false;
-	if (Config.playlist_separate_albums && menu.CurrentlyDrawedPosition()+1 < menu.Size())
-	{
-		MPD::Song *next = screen.GetSong(menu.CurrentlyDrawedPosition()+1);
-		if (next && next->getAlbum() != s.getAlbum())
-			separate_albums = true;
-	}
-	if (separate_albums)
-	{
-		menu << fmtUnderline;
-		mvwhline(menu.Raw(), menu.Y(), 0, ' ', menu.GetWidth());
-	}
+	std::string result;
 	
-	bool discard_colors = Config.discard_colors_if_item_is_selected
-	  && menu[menu.CurrentlyDrawedPosition()].isSelected();
-	
-	std::string line = s.toString(format, "$");
-	for (std::string::const_iterator it = line.begin(); it != line.end(); ++it)
+	int width;
+	int remained_width = list_width;
+	std::vector<Column>::const_iterator it, last = Config.columns.end() - 1;
+	for (it = Config.columns.begin(); it != Config.columns.end(); ++it)
 	{
-		if (*it == '$')
+		// column has relative width and all after it have fixed width,
+		// so stretch it so it fills whole screen along with these after.
+		if (it->stretch_limit >= 0) // (*)
+			width = remained_width - it->stretch_limit;
+		else
+			width = it->fixed ? it->width : it->width * list_width * 0.01;
+		// columns with relative width may shrink to 0, omit them
+		if (width == 0)
+			continue;
+		// if column is not last, we need to have spacing between it
+		// and next column, so we substract it now and restore later.
+		if (it != last)
+			--width;
+		
+		// if column doesn't fit into screen, discard it and any other after it.
+		if (remained_width-width < 0 || width < 0 /* this one may come from (*) */)
+			break;
+		
+		std::basic_string<my_char_t> name;
+		if (it->name.empty())
 		{
-			if (++it == line.end()) // end of format
+			for (size_t j = 0; j < it->type.length(); ++j)
 			{
-				menu << '$';
-				break;
+				name += toColumnName(it->type[j]);
+				name += '/';
 			}
-			else if (isdigit(*it)) // color
-			{
-				if (!discard_colors)
-					menu << Color(*it-'0');
-			}
-			else if (*it == 'R') // right align
-			{
-				basic_buffer<my_char_t> buf;
-				buf << U(" ");
-				String2Buffer(TO_WSTRING(line.substr(it-line.begin()+1)), buf);
-				if (discard_colors)
-					buf.RemoveFormatting();
-				if (is_now_playing)
-					buf << Config.now_playing_suffix;
-				menu << XY(menu.GetWidth()-buf.Str().length()-(menu[menu.CurrentlyDrawedPosition()].isSelected() ? Config.selected_item_suffix_length : 0), menu.Y()) << buf;
-				if (separate_albums)
-					menu << fmtUnderlineEnd;
-				return;
-			}
-			else // not a color nor right align, just a random character
-				menu << *--it;
-		}
-		else if (*it == MPD::Song::FormatEscapeCharacter)
-		{
-			// treat '$' as a normal character if song format escape char is prepended to it
-			if (++it == line.end() || *it != '$')
-				--it;
-			menu << *it;
+			name.resize(name.length()-1);
 		}
 		else
-			menu << *it;
+			name = it->name;
+		Window::Cut(name, width);
+		
+		int x_off = std::max(0, width - int(Window::Length(name)));
+		if (it->right_alignment)
+		{
+			result += std::string(x_off, KEY_SPACE);
+			result += TO_STRING(name);
+		}
+		else
+		{
+			result += TO_STRING(name);
+			result += std::string(x_off, KEY_SPACE);
+		}
+		
+		if (it != last)
+		{
+			// add missing width's part and restore the value.
+			remained_width -= width+1;
+			result += ' ';
+		}
 	}
-	if (is_now_playing)
-		menu << Config.now_playing_suffix;
-	if (separate_albums)
-		menu << fmtUnderlineEnd;
+	
+	return result;
+}
+
+void Display::SongsInColumns(Menu<MPD::Song> &menu, const MPD::Song &s, BasicScreen &screen)
+{
+	showSongsInColumns(menu, s, screen);
+}
+
+void Display::Songs(Menu<MPD::Song> &menu, const MPD::Song &s, BasicScreen &screen, const std::string &format)
+{
+	showSongs(menu, s, screen, format);
 }
 
 void Display::Tags(Menu<MPD::MutableSong> &menu, const MPD::MutableSong &s)
@@ -364,21 +368,17 @@ void Display::Items(Menu<MPD::Item> &menu, const MPD::Item &item)
 	switch (item.type)
 	{
 		case MPD::itDirectory:
-		{
 			menu << "[" << getBasename(item.name) << "]";
-			return;
-		}
+			break;
 		case MPD::itSong:
 			if (!Config.columns_in_browser)
-				Display::Songs(reinterpret_cast<Menu<MPD::Song> &>(menu), *item.song, *myBrowser, Config.song_list_format);
+				showSongs(menu, *item.song, *myBrowser, Config.song_list_format);
 			else
-				Display::SongsInColumns(reinterpret_cast<Menu<MPD::Song> &>(menu), *item.song, *myBrowser);
-			return;
+				showSongsInColumns(menu, *item.song, *myBrowser);
+			break;
 		case MPD::itPlaylist:
 			menu << Config.browser_playlist_prefix << getBasename(item.name);
-			return;
-		default:
-			return;
+			break;
 	}
 }
 
@@ -387,9 +387,9 @@ void Display::SearchEngine(Menu<SEItem> &menu, const SEItem &ei)
 	if (ei.isSong())
 	{
 		if (!Config.columns_in_search_engine)
-			Display::Songs(reinterpret_cast<Menu<MPD::Song> &>(menu), ei.song(), *mySearcher, Config.song_list_format);
+			showSongs(menu, ei.song(), *mySearcher, Config.song_list_format);
 		else
-			Display::SongsInColumns(reinterpret_cast<Menu<MPD::Song> &>(menu), ei.song(), *mySearcher);
+			showSongsInColumns(menu, ei.song(), *mySearcher);
 	}
 	else
 		menu << ei.buffer();
