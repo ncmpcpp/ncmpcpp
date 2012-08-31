@@ -62,12 +62,12 @@ void PlaylistEditor::Init()
 	Content->SetSelectSuffix(Config.selected_item_suffix);
 	if (Config.columns_in_playlist_editor)
 	{
-		Content->setItemDisplayer(std::bind(Display::SongsInColumns, _1, _2, *this));
+		Content->setItemDisplayer(std::bind(Display::SongsInColumns, _1, *this));
 		Content->SetItemStringifier(Playlist::SongInColumnsToString);
 	}
 	else
 	{
-		Content->setItemDisplayer(std::bind(Display::Songs, _1, _2, *this, Config.song_list_format));
+		Content->setItemDisplayer(std::bind(Display::Songs, _1, *this, Config.song_list_format));
 		Content->SetItemStringifier(Playlist::SongToString);
 	}
 	

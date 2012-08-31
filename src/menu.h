@@ -100,7 +100,7 @@ template <typename T> struct Menu : public Window, public List
 	/// If not set by setItemDisplayer(), menu won't display anything.
 	/// @see setItemDisplayer()
 	///
-	typedef std::function<void(Menu<T> &, const T &)> ItemDisplayer;
+	typedef std::function<void(Menu<T> &)> ItemDisplayer;
 	
 	/// Function helper prototype used for converting items to strings.
 	/// If not set by SetItemStringifier(), searching and filtering
@@ -466,11 +466,17 @@ template <typename T> struct Menu : public Window, public List
 	///
 	virtual size_t Size() const;
 	
-	/// @return position of currently drawed item. The result is
-	/// defined only within drawing function that is called by Refresh()
+	/// @return currently drawn item. The result is defined only within
+	/// drawing function that is called by Refresh()
 	/// @see Refresh()
 	///
-	size_t CurrentlyDrawedPosition() const { return m_drawn_position; }
+	const Item &Drawn() const { return *(*m_options_ptr)[m_drawn_position]; }
+	
+	/// @return position of currently drawn item. The result is defined
+	/// only within drawing function that is called by Refresh()
+	/// @see Refresh()
+	///
+	size_t DrawnPosition() const { return m_drawn_position; }
 	
 	/// @return reference to last item on the list
 	/// @throw List::InvalidItem if requested item is separator
@@ -537,7 +543,7 @@ template <typename T> struct Menu : public Window, public List
 	ConstReverseIterator RbeginV() const { return ConstReverseValueIterator(End()); }
 	ReverseValueIterator RendV() { return ReverseValueIterator(Begin()); }
 	ConstReverseValueIterator RendV() const { return ConstReverseValueIterator(Begin()); }
-		
+	
 private:
 	/// Clears filter, filtered data etc.
 	///
@@ -719,7 +725,7 @@ template <typename T> void Menu<T>::Refresh()
 		if ((*m_options_ptr)[i]->isSelected())
 			*this << m_selected_prefix;
 		if (m_item_displayer)
-			m_item_displayer(*this, (*m_options_ptr)[i]->value());
+			m_item_displayer(*this);
 		if ((*m_options_ptr)[i]->isSelected())
 			*this << m_selected_suffix;
 		if (m_highlight_enabled && i == m_highlight)

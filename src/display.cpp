@@ -77,18 +77,18 @@ void setProperties(Menu<T> &menu, const MPD::Song &s, BasicScreen &screen, bool 
                    bool &is_now_playing, bool &is_selected, bool &discard_colors)
 {
 	separate_albums = false;
-	if (Config.playlist_separate_albums && menu.CurrentlyDrawedPosition()+1 < menu.Size())
+	if (Config.playlist_separate_albums)
 	{
-		MPD::Song *next = screen.GetSong(menu.CurrentlyDrawedPosition()+1);
+		MPD::Song *next = screen.GetSong(menu.DrawnPosition()+1);
 		if (next && next->getAlbum() != s.getAlbum())
 			separate_albums = true;
 	}
 	if (separate_albums)
 		menu << fmtUnderline;
 	
-	int song_pos = menu.isFiltered() ? s.getPosition() : menu.CurrentlyDrawedPosition();
+	int song_pos = menu.isFiltered() ? s.getPosition() : menu.DrawnPosition();
 	is_now_playing = song_pos == myPlaylist->NowPlaying && s.getID() > 0; // playlist
-	is_selected = menu[menu.CurrentlyDrawedPosition()].isSelected();
+	is_selected = menu.Drawn().isSelected();
 	discard_colors = Config.discard_colors_if_item_is_selected && is_selected;
 }
 
@@ -99,7 +99,7 @@ void showSongs(Menu<T> &menu, const MPD::Song &s, BasicScreen &screen, const std
 	setProperties(menu, s, screen, separate_albums, is_now_playing, is_selected, discard_colors);
 	
 	std::string line = s.toString(format, "$");
-	for (std::string::const_iterator it = line.begin(); it != line.end(); ++it)
+	for (auto it = line.begin(); it != line.end(); ++it)
 	{
 		if (*it == '$')
 		{
@@ -122,7 +122,7 @@ void showSongs(Menu<T> &menu, const MPD::Song &s, BasicScreen &screen, const std
 					buf.RemoveFormatting();
 				if (is_now_playing)
 					buf << Config.now_playing_suffix;
-				menu << XY(menu.GetWidth()-buf.Str().length()-(menu[menu.CurrentlyDrawedPosition()].isSelected() ? Config.selected_item_suffix_length : 0), menu.Y()) << buf;
+				menu << XY(menu.GetWidth()-buf.Str().length()-(is_selected ? Config.selected_item_suffix_length : 0), menu.Y()) << buf;
 				if (separate_albums)
 					menu << fmtUnderlineEnd;
 				return;
@@ -332,18 +332,19 @@ std::string Display::Columns(size_t list_width)
 	return result;
 }
 
-void Display::SongsInColumns(Menu<MPD::Song> &menu, const MPD::Song &s, BasicScreen &screen)
+void Display::SongsInColumns(Menu<MPD::Song> &menu, BasicScreen &screen)
 {
-	showSongsInColumns(menu, s, screen);
+	showSongsInColumns(menu, menu.Drawn().value(), screen);
 }
 
-void Display::Songs(Menu<MPD::Song> &menu, const MPD::Song &s, BasicScreen &screen, const std::string &format)
+void Display::Songs(Menu<MPD::Song> &menu, BasicScreen &screen, const std::string &format)
 {
-	showSongs(menu, s, screen, format);
+	showSongs(menu, menu.Drawn().value(), screen, format);
 }
 
-void Display::Tags(Menu<MPD::MutableSong> &menu, const MPD::MutableSong &s)
+void Display::Tags(Menu<MPD::MutableSong> &menu)
 {
+	const MPD::MutableSong &s = menu.Drawn().value();
 	size_t i = myTagEditor->TagTypes->Choice();
 	if (i < 11)
 	{
@@ -358,13 +359,14 @@ void Display::Tags(Menu<MPD::MutableSong> &menu, const MPD::MutableSong &s)
 	}
 }
 
-void Display::Outputs(Menu< MPD::Output > &menu, const MPD::Output &o)
+void Display::Outputs(Menu< MPD::Output > &menu)
 {
-	menu << o.name();
+	menu << menu.Drawn().value().name();
 }
 
-void Display::Items(Menu<MPD::Item> &menu, const MPD::Item &item)
+void Display::Items(Menu<MPD::Item> &menu)
 {
+	const MPD::Item &item = menu.Drawn().value();
 	switch (item.type)
 	{
 		case MPD::itDirectory:
@@ -382,15 +384,16 @@ void Display::Items(Menu<MPD::Item> &menu, const MPD::Item &item)
 	}
 }
 
-void Display::SearchEngine(Menu<SEItem> &menu, const SEItem &ei)
+void Display::SearchEngine(Menu<SEItem> &menu)
 {
-	if (ei.isSong())
+	const SEItem &si = menu.Drawn().value();
+	if (si.isSong())
 	{
 		if (!Config.columns_in_search_engine)
-			showSongs(menu, ei.song(), *mySearcher, Config.song_list_format);
+			showSongs(menu, si.song(), *mySearcher, Config.song_list_format);
 		else
-			showSongsInColumns(menu, ei.song(), *mySearcher);
+			showSongsInColumns(menu, si.song(), *mySearcher);
 	}
 	else
-		menu << ei.buffer();
+		menu << si.buffer();
 }

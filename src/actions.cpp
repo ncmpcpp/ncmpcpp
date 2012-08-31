@@ -1161,13 +1161,13 @@ void ToggleDisplayMode::Run()
 		
 		if (Config.columns_in_playlist)
 		{
-			myPlaylist->Items->setItemDisplayer(std::bind(Display::SongsInColumns, _1, _2, *myPlaylist));
+			myPlaylist->Items->setItemDisplayer(std::bind(Display::SongsInColumns, _1, *myPlaylist));
 			myPlaylist->Items->SetTitle(Config.titles_visibility ? Display::Columns(myPlaylist->Items->GetWidth()) : "");
 			myPlaylist->Items->SetItemStringifier(Playlist::SongInColumnsToString);
 		}
 		else
 		{
-			myPlaylist->Items->setItemDisplayer(std::bind(Display::Songs, _1, _2, *myPlaylist, Config.song_list_format));
+			myPlaylist->Items->setItemDisplayer(std::bind(Display::Songs, _1, *myPlaylist, Config.song_list_format));
 			myPlaylist->Items->SetTitle("");
 			myPlaylist->Items->SetItemStringifier(Playlist::SongToString);
 		}
@@ -1191,12 +1191,12 @@ void ToggleDisplayMode::Run()
 		ShowMessage("Playlist editor display mode: %s", Config.columns_in_playlist_editor ? "Columns" : "Classic");
 		if (Config.columns_in_playlist_editor)
 		{
-			myPlaylistEditor->Content->setItemDisplayer(std::bind(Display::SongsInColumns, _1, _2, *myPlaylistEditor));
+			myPlaylistEditor->Content->setItemDisplayer(std::bind(Display::SongsInColumns, _1, *myPlaylistEditor));
 			myPlaylistEditor->Content->SetItemStringifier(Playlist::SongInColumnsToString);
 		}
 		else
 		{
-			myPlaylistEditor->Content->setItemDisplayer(std::bind(Display::Songs, _1, _2, *myPlaylistEditor, Config.song_list_format));
+			myPlaylistEditor->Content->setItemDisplayer(std::bind(Display::Songs, _1, *myPlaylistEditor, Config.song_list_format));
 			myPlaylistEditor->Content->SetItemStringifier(Playlist::SongToString);
 		}
 	}

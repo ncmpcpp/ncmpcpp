@@ -58,7 +58,7 @@ void Browser::Init()
 	w->CenteredCursor(Config.centered_cursor);
 	w->SetSelectPrefix(Config.selected_item_prefix);
 	w->SetSelectSuffix(Config.selected_item_suffix);
-	w->setItemDisplayer(std::bind(Display::Items, _1, _2));
+	w->setItemDisplayer(Display::Items);
 	w->SetItemStringifier(ItemToString);
 	
 	if (SupportedExtensions.empty())

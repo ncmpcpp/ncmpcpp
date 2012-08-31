@@ -90,8 +90,8 @@ class MediaLibrary : public Screen<Window>
 		
 		static std::string SongToString(const MPD::Song &s);
 		static std::string AlbumToString(const SearchConstraints &);
-		static void DisplayAlbums(Menu<SearchConstraints> &menu, const SearchConstraints &sc);
-		static void DisplayPrimaryTags(Menu<std::string> &menu, const std::string &tag);
+		static void DisplayAlbums(Menu<SearchConstraints> &menu);
+		static void DisplayPrimaryTags(Menu<std::string> &menu);
 		
 		static bool SortSongsByTrack(const MPD::Song &, const MPD::Song &);
 		static bool SortAllTracks(const MPD::Song &, const MPD::Song &);

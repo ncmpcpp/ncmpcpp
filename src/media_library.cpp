@@ -84,7 +84,7 @@ void MediaLibrary::Init()
 	Songs->CenteredCursor(Config.centered_cursor);
 	Songs->SetSelectPrefix(Config.selected_item_prefix);
 	Songs->SetSelectSuffix(Config.selected_item_suffix);
-	Songs->setItemDisplayer(std::bind(Display::Songs, _1, _2, *this, Config.song_library_format));
+	Songs->setItemDisplayer(std::bind(Display::Songs, _1, *this, Config.song_library_format));
 	Songs->SetItemStringifier(SongToString);
 	
 	w = Artists;
@@ -768,13 +768,14 @@ std::string MediaLibrary::AlbumToString(const SearchConstraints &sc)
 	return result;
 }
 
-void MediaLibrary::DisplayAlbums(Menu<SearchConstraints> &menu, const SearchConstraints &sc)
+void MediaLibrary::DisplayAlbums(Menu<SearchConstraints> &menu)
 {
-	menu << AlbumToString(sc);
+	menu << AlbumToString(menu.Drawn().value());
 }
 
-void MediaLibrary::DisplayPrimaryTags(Menu<std::string> &menu, const std::string &tag)
+void MediaLibrary::DisplayPrimaryTags(Menu<std::string> &menu)
 {
+	const std::string &tag = menu.Drawn().value();
 	if (tag.empty())
 		menu << Config.empty_tag;
 	else
