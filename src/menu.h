@@ -137,7 +137,7 @@ template <typename T> struct Menu : public Window, public List
 		ItemIterator() { }
 		
 		ValueT &operator*() const { return getObject<ValueT, referenceValue>::apply(m_it); }
-		typename BaseIterator::value_type operator->() { return *m_it; }
+		ValueT *operator->() const { return &getObject<ValueT, referenceValue>::apply(m_it); }
 		
 		ItemIterator &operator++() { ++m_it; return *this; }
 		ItemIterator operator++(int) { return ItemIterator(m_it++); }
@@ -146,7 +146,7 @@ template <typename T> struct Menu : public Window, public List
 		ItemIterator operator--(int) { return ItemIterator(m_it--); }
 		
 		ValueT &operator[](ptrdiff_t n) const {
-			return getObject<ValueT, referenceValue>::apply(&m_it[n]);
+			return getObject<ValueT, referenceValue>::apply(m_it + n);
 		}
 		
 		ItemIterator &operator+=(ptrdiff_t n) { m_it += n; return *this; }
@@ -341,10 +341,8 @@ template <typename T> struct Menu : public Window, public List
 	///
 	virtual void PrevFound(bool wrap);
 	
-	/// @return const reference to currently used filter
+	/// @return const reference to currently used filter function
 	///
-	//virtual const std::string &GetFilter();
-	
 	const FilterFunction &getFilter() { return m_filter; }
 	
 	/// @return true if list is currently filtered, false otherwise
@@ -385,7 +383,7 @@ template <typename T> struct Menu : public Window, public List
 	///
 	virtual void Clear();
 	
-	/// Sets the highlighted position to 0
+	/// Sets highlighted position to 0
 	///
 	void Reset();
 	
@@ -515,10 +513,10 @@ template <typename T> struct Menu : public Window, public List
 	ValueIterator EndV() { return ValueIterator(m_options_ptr->end()); }
 	ConstValueIterator EndV() const { return ConstValueIterator(m_options_ptr->end()); }
 	
-	ReverseValueIterator RbeginV() { return ReverseValueIterator(End()); }
-	ConstReverseIterator RbeginV() const { return ConstReverseValueIterator(End()); }
-	ReverseValueIterator RendV() { return ReverseValueIterator(Begin()); }
-	ConstReverseValueIterator RendV() const { return ConstReverseValueIterator(Begin()); }
+	ReverseValueIterator RbeginV() { return ReverseValueIterator(EndV()); }
+	ConstReverseIterator RbeginV() const { return ConstReverseValueIterator(EndV()); }
+	ReverseValueIterator RendV() { return ReverseValueIterator(BeginV()); }
+	ConstReverseValueIterator RendV() const { return ConstReverseValueIterator(BeginV()); }
 	
 private:
 	/// Clears filter, filtered data etc.
