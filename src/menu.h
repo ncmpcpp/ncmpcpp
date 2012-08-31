@@ -337,11 +337,6 @@ template <typename T> struct Menu : public Window, public List
 	///
 	size_t Choice() const;
 	
-	/// @return real current positions, i.e it doesn't
-	/// count positions that are static or separators
-	///
-	size_t RealChoice() const;
-	
 	/// Searches the list for a given contraint. It uses ItemStringifier to convert stored items
 	/// into strings and then performs pattern matching. Note that this supports regular expressions.
 	/// @param constraint a search constraint to be used
@@ -929,15 +924,6 @@ template <typename T> size_t Menu<T>::Size() const
 template <typename T> size_t Menu<T>::Choice() const
 {
 	return m_highlight;
-}
-
-template <typename T> size_t Menu<T>::RealChoice() const
-{
-	size_t result = 0;
-	for (auto it = m_options_ptr->begin(); it != m_options_ptr->begin()+m_highlight; ++it)
-		if (!(*it)->isInactive())
-			result++;
-	return result;
 }
 
 template <typename T> void Menu<T>::ReverseSelection(size_t beginning)

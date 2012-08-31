@@ -348,8 +348,8 @@ void TagEditor::EnterPressed()
 	}
 	else if (w == FParserDialog)
 	{
-		size_t choice = FParserDialog->RealChoice();
-		if (choice == 2) // cancel
+		size_t choice = FParserDialog->Choice();
+		if (choice == 3) // cancel
 		{
 			w = TagTypes;
 			Refresh();
@@ -404,9 +404,9 @@ void TagEditor::EnterPressed()
 	else if (w == FParser)
 	{
 		bool quit = 0;
-		size_t pos = FParser->RealChoice();
+		size_t pos = FParser->Choice();
 		
-		if (pos == 3) // save
+		if (pos == 4) // save
 			FParserUsePreview = 0;
 		
 		if (pos == 0) // change pattern
@@ -422,7 +422,7 @@ void TagEditor::EnterPressed()
 				FParser->at(0).value() += Config.pattern;
 			}
 		}
-		else if (pos == 1 || pos == 3) // preview or proceed
+		else if (pos == 1 || pos == 4) // preview or proceed
 		{
 			bool success = 1;
 			ShowMessage("Parsing...");
@@ -476,7 +476,7 @@ void TagEditor::EnterPressed()
 				Patterns.insert(Patterns.begin(), Config.pattern);
 				quit = 1;
 			}
-			if (pos != 3 || success)
+			if (pos != 4 || success)
 				ShowMessage("Operation finished");
 		}
 		else if (pos == 2) // show legend
@@ -484,7 +484,7 @@ void TagEditor::EnterPressed()
 			FParserHelper = FParserLegend;
 			FParserHelper->Display();
 		}
-		else if (pos == 4) // cancel
+		else if (pos == 5) // cancel
 		{
 			quit = 1;
 		}
@@ -518,7 +518,7 @@ void TagEditor::EnterPressed()
 		for (size_t i = 0; i < Tags->Size(); ++i)
 			EditedSongs.push_back(&(*Tags)[i].value());
 	
-	size_t id = TagTypes->RealChoice();
+	size_t id = TagTypes->Choice();
 	
 	if (w == TagTypes && id == 5)
 	{
@@ -566,7 +566,7 @@ void TagEditor::EnterPressed()
 	}
 	else
 	{
-		if (id == 11) // filename related options
+		if (id == 12) // filename related options
 		{
 			if (w == TagTypes)
 			{
@@ -594,26 +594,26 @@ void TagEditor::EnterPressed()
 				Tags->Scroll(wDown);
 			}
 		}
-		else if (id == 12) // capitalize first letters
+		else if (id == 16) // capitalize first letters
 		{
 			ShowMessage("Processing...");
 			for (auto it = EditedSongs.begin(); it != EditedSongs.end(); ++it)
 				CapitalizeFirstLetters(**it);
 			ShowMessage("Done");
 		}
-		else if (id == 13) // lower all letters
+		else if (id == 17) // lower all letters
 		{
 			ShowMessage("Processing...");
 			for (auto it = EditedSongs.begin(); it != EditedSongs.end(); ++it)
 				LowerAllLetters(**it);
 			ShowMessage("Done");
 		}
-		else if (id == 14) // reset
+		else if (id == 18) // reset
 		{
 			Tags->Clear();
 			ShowMessage("Changes reset");
 		}
-		else if (id == 15) // save
+		else if (id == 19) // save
 		{
 			bool success = 1;
 			ShowMessage("Writing changes...");
