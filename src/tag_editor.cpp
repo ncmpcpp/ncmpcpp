@@ -108,8 +108,8 @@ void TagEditor::Init()
 	Tags->HighlightColor(Config.main_highlight_color);
 	Tags->CyclicScrolling(Config.use_cyclic_scrolling);
 	Tags->CenteredCursor(Config.centered_cursor);
-	Tags->SetSelectPrefix(&Config.selected_item_prefix);
-	Tags->SetSelectSuffix(&Config.selected_item_suffix);
+	Tags->SetSelectPrefix(Config.selected_item_prefix);
+	Tags->SetSelectSuffix(Config.selected_item_suffix);
 	Tags->setItemDisplayer(Display::Tags);
 	Tags->SetItemStringifier(TagToString);
 	

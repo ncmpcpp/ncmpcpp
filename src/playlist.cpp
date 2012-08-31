@@ -49,8 +49,8 @@ void Playlist::Init()
 	Items->CyclicScrolling(Config.use_cyclic_scrolling);
 	Items->CenteredCursor(Config.centered_cursor);
 	Items->HighlightColor(Config.main_highlight_color);
-	Items->SetSelectPrefix(&Config.selected_item_prefix);
-	Items->SetSelectSuffix(&Config.selected_item_suffix);
+	Items->SetSelectPrefix(Config.selected_item_prefix);
+	Items->SetSelectSuffix(Config.selected_item_suffix);
 	if (Config.columns_in_playlist)
 	{
 		Items->setItemDisplayer(std::bind(Display::SongsInColumns, _1, _2, *this));

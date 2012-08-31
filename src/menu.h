@@ -246,11 +246,6 @@ template <typename T> struct Menu : public Window, public List
 	Menu(size_t startx, size_t starty, size_t width, size_t height,
 			const std::string &title, Color color, Border border);
 	
-	/// Copies the menu
-	/// @param m copied menu
-	///
-	Menu(const Menu &m);
-	
 	/// Destroys the object and frees memory
 	///
 	virtual ~Menu();
@@ -309,12 +304,6 @@ template <typename T> struct Menu : public Window, public List
 	/// @param two position of second item
 	///
 	void Swap(size_t one, size_t two);
-	
-	/// Moves requested item from one position to another
-	/// @param from the position of item that has to be moved
-	/// @param to the position that indicates where the object has to be moved
-	///
-	void Move(size_t from, size_t to);
 	
 	/// Moves the highlighted position to the given line of window
 	/// @param y Y position of menu window to be highlighted
@@ -428,13 +417,13 @@ template <typename T> struct Menu : public Window, public List
 	/// Note that the passed variable is not deleted along with menu object.
 	/// @param b pointer to buffer that contains the prefix
 	///
-	void SetSelectPrefix(Buffer *b) { m_selected_prefix = b; }
+	void SetSelectPrefix(const Buffer &b) { m_selected_prefix = b; }
 	
 	/// Sets suffix, that is put after each selected item to indicate its selection
 	/// Note that the passed variable is not deleted along with menu object.
 	/// @param b pointer to buffer that contains the suffix
 	///
-	void SetSelectSuffix(Buffer *b) { m_selected_suffix = b; }
+	void SetSelectSuffix(const Buffer &b) { m_selected_suffix = b; }
 	
 	/// Sets custom color of highlighted position
 	/// @param col custom color
@@ -582,8 +571,8 @@ private:
 	
 	size_t m_drawn_position;
 	
-	Buffer *m_selected_prefix;
-	Buffer *m_selected_suffix;
+	Buffer m_selected_prefix;
+	Buffer m_selected_suffix;
 };
 
 /// Specialization of Menu<T>::GetItem for T = std::string, it's obvious
@@ -592,43 +581,23 @@ private:
 template <> std::string Menu<std::string>::GetItem(size_t pos);
 
 template <typename T> Menu<T>::Menu(size_t startx,
-					size_t starty,
-					size_t width,
-					size_t height,
-					const std::string &title,
-					Color color,
-					Border border)
-					: Window(startx, starty, width, height, title, color, border),
-					m_item_displayer(0),
-					m_get_string_helper(0),
-					m_options_ptr(&m_options),
-					m_beginning(0),
-					m_highlight(0),
-					m_highlight_color(itsBaseColor),
-					m_highlight_enabled(1),
-					m_cyclic_scroll_enabled(0),
-					m_autocenter_cursor(0),
-					m_selected_prefix(0),
-					m_selected_suffix(0)
+	size_t starty,
+	size_t width,
+	size_t height,
+	const std::string &title,
+	Color color,
+	Border border)
+	: Window(startx, starty, width, height, title, color, border),
+	m_item_displayer(0),
+	m_get_string_helper(0),
+	m_options_ptr(&m_options),
+	m_beginning(0),
+	m_highlight(0),
+	m_highlight_color(itsBaseColor),
+	m_highlight_enabled(true),
+	m_cyclic_scroll_enabled(false),
+	m_autocenter_cursor(false)
 {
-}
-
-template <typename T> Menu<T>::Menu(const Menu &m) : Window(m),
-					m_item_displayer(m.m_item_displayer),
-					m_get_string_helper(m.m_get_string_helper),
-					m_options_ptr(m.m_options_ptr),
-					m_beginning(m.m_beginning),
-					m_highlight(m.m_highlight),
-					m_highlight_color(m.m_highlight_color),
-					m_highlight_enabled(m.m_highlight_enabled),
-					m_cyclic_scroll_enabled(m.m_cyclic_scroll_enabled),
-					m_autocenter_cursor(m.m_autocenter_cursor),
-					m_selected_prefix(m.m_selected_prefix),
-					m_selected_suffix(m.m_selected_suffix)
-{
-	m_options.reserve(m.m_options.size());
-	for (auto it = m.m_options.begin(); it != m.m_options.end(); ++it)
-		m_options.push_back(new Item(**it));
 }
 
 template <typename T> Menu<T>::~Menu()
@@ -659,9 +628,9 @@ template <typename T> void Menu<T>::ResizeList(size_t size)
 	}
 }
 
-template <typename T> void Menu<T>::AddItem(const T &item, bool is_bold, bool is_static)
+template <typename T> void Menu<T>::AddItem(const T &item, bool is_bold, bool is_inactive)
 {
-	m_options.push_back(new Item(item, is_bold, is_static));
+	m_options.push_back(new Item(item, is_bold, is_inactive));
 }
 
 template <typename T> void Menu<T>::AddSeparator()
@@ -669,9 +638,9 @@ template <typename T> void Menu<T>::AddSeparator()
 	m_options.push_back(Item::mkSeparator());
 }
 
-template <typename T> void Menu<T>::InsertItem(size_t pos, const T &item, bool is_bold, bool is_static)
+template <typename T> void Menu<T>::InsertItem(size_t pos, const T &item, bool is_bold, bool is_inactive)
 {
-	m_options.insert(m_options.begin()+pos, new Item(item, is_bold, is_static));
+	m_options.insert(m_options.begin()+pos, new Item(item, is_bold, is_inactive));
 }
 
 template <typename T> void Menu<T>::InsertSeparator(size_t pos)
@@ -681,44 +650,15 @@ template <typename T> void Menu<T>::InsertSeparator(size_t pos)
 
 template <typename T> void Menu<T>::DeleteItem(size_t pos)
 {
-	assert(pos < m_options_ptr->size());
-	if (m_options_ptr == &m_filtered_options)
-	{
-		delete m_options.at(m_filtered_positions[pos]);
-		m_options.erase(m_options.begin()+m_filtered_positions[pos]);
-		m_filtered_options.erase(m_filtered_options.begin()+pos);
-		m_filtered_positions.erase(m_filtered_positions.begin()+pos);
-		for (size_t i = pos; i < m_filtered_positions.size(); ++i)
-			m_filtered_positions[i]--;
-	}
-	else
-	{
-		delete m_options.at(pos);
-		m_options.erase(m_options.begin()+pos);
-	}
-	m_found_positions.clear();
-	if (m_options_ptr->empty())
-		Window::Clear();
+	assert(m_options_ptr != &m_filtered_options);
+	assert(pos < m_options.size());
+	delete m_options[pos];
+	m_options.erase(m_options.begin()+pos);
 }
 
 template <typename T> void Menu<T>::Swap(size_t one, size_t two)
 {
 	std::swap(m_options.at(one), m_options.at(two));
-}
-
-template <typename T> void Menu<T>::Move(size_t from, size_t to)
-{
-	int diff = from-to;
-	if (diff > 0)
-	{
-		for (size_t i = from; i > to; --i)
-			std::swap(m_options.at(i), m_options.at(i-1));
-	}
-	else if (diff < 0)
-	{
-		for (size_t i = from; i < to; ++i)
-			std::swap(m_options.at(i), m_options.at(i+1));
-	}
 }
 
 template <typename T> bool Menu<T>::Goto(size_t y)
@@ -733,7 +673,7 @@ template <typename T> void Menu<T>::Refresh()
 {
 	if (m_options_ptr->empty())
 	{
-		Window::Refresh();
+		Window::Clear();
 		return;
 	}
 	
@@ -776,12 +716,12 @@ template <typename T> void Menu<T>::Refresh()
 			*this << m_highlight_color;
 		}
 		mvwhline(itsWindow, line, 0, KEY_SPACE, itsWidth);
-		if ((*m_options_ptr)[i]->isSelected() && m_selected_prefix)
-			*this << *m_selected_prefix;
+		if ((*m_options_ptr)[i]->isSelected())
+			*this << m_selected_prefix;
 		if (m_item_displayer)
 			m_item_displayer(*this, (*m_options_ptr)[i]->value());
-		if ((*m_options_ptr)[i]->isSelected() && m_selected_suffix)
-			*this << *m_selected_suffix;
+		if ((*m_options_ptr)[i]->isSelected())
+			*this << m_selected_suffix;
 		if (m_highlight_enabled && i == m_highlight)
 		{
 			*this << clEnd;
@@ -905,7 +845,6 @@ template <typename T> void Menu<T>::Clear()
 	m_filter.clear();
 	ClearFiltered();
 	m_options_ptr = &m_options;
-	Window::Clear();
 }
 
 template <typename T> bool Menu<T>::hasSelected() const
@@ -1018,8 +957,6 @@ template <typename T> void Menu<T>::ApplyFilter(const std::string &filter, size_
 	}
 	regfree(&rx);
 	m_options_ptr = &m_filtered_options;
-	if (m_options_ptr->empty()) // oops, we didn't find anything
-		Window::Clear();
 }
 
 template <typename T> const std::string &Menu<T>::GetFilter()

@@ -68,8 +68,8 @@ void SearchEngine::Init()
 	w->CyclicScrolling(Config.use_cyclic_scrolling);
 	w->CenteredCursor(Config.centered_cursor);
 	w->setItemDisplayer(Display::SearchEngine);
-	w->SetSelectPrefix(&Config.selected_item_prefix);
-	w->SetSelectSuffix(&Config.selected_item_suffix);
+	w->SetSelectPrefix(Config.selected_item_prefix);
+	w->SetSelectSuffix(Config.selected_item_suffix);
 	w->SetItemStringifier(SearchEngineOptionToString);
 	SearchMode = &SearchModes[Config.search_engine_default_search_mode];
 	isInitialized = 1;
