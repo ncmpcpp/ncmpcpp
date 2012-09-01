@@ -159,7 +159,7 @@ class BasicScreen
 		
 		/// Gets X offset and width of current screen to be used eg. in Resize() function.
 		/// @param adjust_locked_screen indicates whether this function should
-		/// automatically adjust locked screen's dimensions (is there is one set)
+		/// automatically adjust locked screen's dimensions (if there is one set)
 		/// if current screen is going to be subwindow.
 		void GetWindowResizeParams(size_t &x_offset, size_t &width, bool adjust_locked_screen = true);
 		

@@ -64,10 +64,6 @@ struct List
 	/// @see Menu::PrevFound()
 	///
 	virtual void PrevFound(bool wrap) = 0;
-	
-	/// @see Menu::isFiltered()
-	///
-	virtual bool isFiltered() = 0;
 };
 
 /// This template class is generic menu capable of

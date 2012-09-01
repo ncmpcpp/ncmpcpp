@@ -42,7 +42,7 @@ template <typename T> struct RegexFilter
 		return m_rx.match(menu.Stringify(item));
 	}
 	
-	static std::string currentFilter(NCurses::Menu<T> &menu)
+	static std::string currentFilter(MenuT &menu)
 	{
 		std::string filter;
 		auto rf = menu.getFilter().template target< RegexFilter<T> >();
@@ -55,7 +55,5 @@ private:
 	Regex m_rx;
 	FilterFunction m_custom_filter;
 };
-
-
 
 #endif
