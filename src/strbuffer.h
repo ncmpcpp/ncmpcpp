@@ -210,8 +210,7 @@ template <typename C> class basic_buffer
 						buf.LoadAttribute(w, b->Value);
 						b++;
 					}
-					if (i < s.length())
-						tmp += s[i];
+					tmp += s[i];
 				}
 				if (!tmp.empty())
 					w << tmp;
