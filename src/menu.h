@@ -148,9 +148,10 @@ template <typename T> struct Menu : public Window, public List
 		bool operator>=(const Iterator &rhs) const { return m_it >= rhs.m_it; }
 		
 		/// non-const to const conversion
-		template <typename Iterator> operator ItemIterator<
-			typename std::add_const<ValueT>::type, Iterator
-		>() { return ItemIterator(m_it); }
+		template <typename Iterator>
+		operator ItemIterator<typename std::add_const<ValueT>::type, Iterator>() {
+			return ItemIterator<typename std::add_const<ValueT>::type, Iterator>(m_it);
+		}
 		
 		const BaseIterator &base() { return m_it; }
 	};
