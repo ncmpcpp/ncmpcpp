@@ -337,9 +337,8 @@ void Action::FindItem(const FindDirection fd)
 {
 	using Global::wFooter;
 	
-	List *mList = myScreen->GetList();
-	if (!mList)
-		return;
+	Searchable *w = dynamic_cast<Searchable *>(myScreen);
+	assert(w);
 	
 	LockStatusbar();
 	Statusbar() << "Find " << (fd == fdForward ? "forward" : "backward") << ": ";
@@ -349,7 +348,7 @@ void Action::FindItem(const FindDirection fd)
 	if (!findme.empty())
 		ShowMessage("Searching...");
 	
-	bool success = mList->Search(findme, 0, REG_ICASE | Config.regex_type);
+	bool success = w->search(findme);
 	
 	if (findme.empty())
 		return;
@@ -359,10 +358,10 @@ void Action::FindItem(const FindDirection fd)
 	else
 		ShowMessage("Unable to find \"%s\"", findme.c_str());
 	
-	if (fd == fdForward)
-		mList->NextFound(Config.wrapped_search);
-	else
-		mList->PrevFound(Config.wrapped_search);
+ 	if (fd == fdForward)
+ 		w->nextFound(Config.wrapped_search);
+ 	else
+ 		w->prevFound(Config.wrapped_search);
 	
 	if (myScreen == myPlaylist)
 		myPlaylist->EnableHighlighting();
@@ -377,7 +376,7 @@ void Action::ListsChangeFinisher()
 #	endif // HAVE_TAGLIB_H
 	   )
 	{
-		if (myScreen->ActiveWindow() == myLibrary->Artists)
+		if (myScreen->ActiveWindow() == myLibrary->Tags)
 		{
 			myLibrary->Albums->Clear();
 			myLibrary->Songs->Clear();
@@ -816,7 +815,7 @@ void Delete::Run()
 			ShowMessage("Deleting directories is disabled by default, see man page for more details");
 			return;
 		}
-		if (myBrowser->isParentDir(myBrowser->Main()->Choice()))
+		if (myBrowser->isParentDirectory(item))
 			return;
 		
 		std::string name = item.type == itSong ? item.song->getName() : item.name;
@@ -1038,9 +1037,6 @@ void MoveSelectedItemsTo::Run()
 		ShowMessage("No selected items to move");
 		return;
 	}
-	// remove search results as we may move them to different positions, but
-	// search rememebers positions and may point to wrong ones after that.
-	myPlaylist->Items->Search("");
 	size_t pos = myPlaylist->Items->Choice();
 	std::vector<size_t> list;
 	myPlaylist->Items->GetSelected(list);
@@ -1163,13 +1159,11 @@ void ToggleDisplayMode::Run()
 		{
 			myPlaylist->Items->setItemDisplayer(std::bind(Display::SongsInColumns, _1, *myPlaylist));
 			myPlaylist->Items->SetTitle(Config.titles_visibility ? Display::Columns(myPlaylist->Items->GetWidth()) : "");
-			myPlaylist->Items->SetItemStringifier(Playlist::SongInColumnsToString);
 		}
 		else
 		{
 			myPlaylist->Items->setItemDisplayer(std::bind(Display::Songs, _1, *myPlaylist, Config.song_list_format));
 			myPlaylist->Items->SetTitle("");
-			myPlaylist->Items->SetItemStringifier(Playlist::SongToString);
 		}
 	}
 	else if (myScreen == myBrowser)
@@ -1192,12 +1186,10 @@ void ToggleDisplayMode::Run()
 		if (Config.columns_in_playlist_editor)
 		{
 			myPlaylistEditor->Content->setItemDisplayer(std::bind(Display::SongsInColumns, _1, *myPlaylistEditor));
-			myPlaylistEditor->Content->SetItemStringifier(Playlist::SongInColumnsToString);
 		}
 		else
 		{
 			myPlaylistEditor->Content->setItemDisplayer(std::bind(Display::Songs, _1, *myPlaylistEditor, Config.song_list_format));
-			myPlaylistEditor->Content->SetItemStringifier(Playlist::SongToString);
 		}
 	}
 }
@@ -1406,8 +1398,8 @@ void EditSong::Run()
 bool EditLibraryTag::canBeRun() const
 {
 #	ifdef HAVE_TAGLIB_H
-	return myScreen->ActiveWindow() == myLibrary->Artists
-	   && !myLibrary->Artists->Empty();
+	return myScreen->ActiveWindow() == myLibrary->Tags
+	   && !myLibrary->Tags->Empty();
 #	else
 	return false;
 #	endif // HAVE_TAGLIB_H
@@ -1422,13 +1414,13 @@ void EditLibraryTag::Run()
 		return;
 	LockStatusbar();
 	Statusbar() << fmtBold << tagTypeToString(Config.media_lib_primary_tag) << fmtBoldEnd << ": ";
-	std::string new_tag = wFooter->GetString(myLibrary->Artists->Current().value());
+	std::string new_tag = wFooter->GetString(myLibrary->Tags->Current().value());
 	UnlockStatusbar();
-	if (!new_tag.empty() && new_tag != myLibrary->Artists->Current().value())
+	if (!new_tag.empty() && new_tag != myLibrary->Tags->Current().value())
 	{
 		ShowMessage("Updating tags...");
 		Mpd.StartSearch(1);
-		Mpd.AddSearch(Config.media_lib_primary_tag, locale_to_utf_cpy(myLibrary->Artists->Current().value()));
+		Mpd.AddSearch(Config.media_lib_primary_tag, locale_to_utf_cpy(myLibrary->Tags->Current().value()));
 		MPD::MutableSong::SetFunction set = tagTypeToSetFunction(Config.media_lib_primary_tag);
 		assert(set);
 		bool success = true;
@@ -2064,10 +2056,20 @@ void Find::Run()
 	s->Main()->Flush();
 }
 
+bool FindItemBackward::canBeRun() const
+{
+	return dynamic_cast<Searchable *>(myScreen);
+}
+
 void FindItemForward::Run()
 {
 	FindItem(fdForward);
 	ListsChangeFinisher();
+}
+
+bool FindItemForward::canBeRun() const
+{
+	return dynamic_cast<Searchable *>(myScreen);
 }
 
 void FindItemBackward::Run()
@@ -2076,21 +2078,29 @@ void FindItemBackward::Run()
 	ListsChangeFinisher();
 }
 
+bool NextFoundItem::canBeRun() const
+{
+	return dynamic_cast<Searchable *>(myScreen);
+}
+
 void NextFoundItem::Run()
 {
-	List *mList = myScreen->GetList();
-	if (!mList)
-		return;
-	mList->NextFound(Config.wrapped_search);
+	Searchable *w = dynamic_cast<Searchable *>(myScreen);
+	assert(w);
+	w->nextFound(Config.wrapped_search);
 	ListsChangeFinisher();
+}
+
+bool PreviousFoundItem::canBeRun() const
+{
+	return dynamic_cast<Searchable *>(myScreen);
 }
 
 void PreviousFoundItem::Run()
 {
-	List *mList = myScreen->GetList();
-	if (!mList)
-		return;
-	mList->PrevFound(Config.wrapped_search);
+	Searchable *w = dynamic_cast<Searchable *>(myScreen);
+	assert(w);
+	w->prevFound(Config.wrapped_search);
 	ListsChangeFinisher();
 }
 
@@ -2209,7 +2219,7 @@ void ToggleBrowserSortMode::Run()
 
 bool ToggleLibraryTagType::canBeRun() const
 {
-	return (myScreen->ActiveWindow() == myLibrary->Artists)
+	return (myScreen->ActiveWindow() == myLibrary->Tags)
 	    || (myLibrary->Columns() == 2 && myScreen->ActiveWindow() == myLibrary->Albums);
 }
 
@@ -2233,8 +2243,8 @@ void ToggleLibraryTagType::Run()
 	{
 		Config.media_lib_primary_tag = new_tagitem;
 		std::string item_type = tagTypeToString(Config.media_lib_primary_tag);
-		myLibrary->Artists->SetTitle(Config.titles_visibility ? item_type + "s" : "");
-		myLibrary->Artists->Reset();
+		myLibrary->Tags->SetTitle(Config.titles_visibility ? item_type + "s" : "");
+		myLibrary->Tags->Reset();
 		lowercase(item_type);
 		if (myLibrary->Columns() == 2)
 		{
@@ -2246,8 +2256,8 @@ void ToggleLibraryTagType::Run()
 		}
 		else
 		{
-			myLibrary->Artists->Clear();
-			myLibrary->Artists->Display();
+			myLibrary->Tags->Clear();
+			myLibrary->Tags->Display();
 		}
 		ShowMessage("Switched to list of %s tag", item_type.c_str());
 	}
@@ -2345,8 +2355,8 @@ void ShowArtistInfo::Run()
 	
 	if (s)
 		artist = s->getArtist();
-	else if (myScreen == myLibrary && myLibrary->Main() == myLibrary->Artists && !myLibrary->Artists->Empty())
-		artist = myLibrary->Artists->Current().value();
+	else if (myScreen == myLibrary && myLibrary->Main() == myLibrary->Tags && !myLibrary->Tags->Empty())
+		artist = myLibrary->Tags->Current().value();
 	
 	if (!artist.empty() && myLastfm->SetArtistInfoArgs(artist, Config.lastfm_preferred_language))
 		myLastfm->SwitchTo();

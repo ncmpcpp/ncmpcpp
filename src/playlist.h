@@ -26,7 +26,7 @@
 #include "screen.h"
 #include "song.h"
 
-class Playlist : public Screen<Window>, public Filterable
+class Playlist : public Screen<Window>, public Filterable, public Searchable
 {
 	public:
 		enum Movement { mUp, mDown };
@@ -51,8 +51,14 @@ class Playlist : public Screen<Window>, public Filterable
 		virtual void ReverseSelection() { Items->ReverseSelection(); }
 		virtual void GetSelectedSongs(MPD::SongList &);
 		
+		/// Filterable implementation
 		virtual std::string currentFilter();
 		virtual void applyFilter(const std::string &filter);
+		
+		/// Searchable implementation
+		virtual bool search(const std::string &constraint);
+		virtual void nextFound(bool wrap);
+		virtual void prevFound(bool wrap);
 		
 		virtual List *GetList() { return w == Items ? Items : 0; }
 		
@@ -67,7 +73,7 @@ class Playlist : public Screen<Window>, public Filterable
 		void Sort();
 		void Reverse();
 		void AdjustSortOrder(Movement where);
-		bool SortingInProgress() { return w == SortDialog; }
+		bool SortingInProgress();
 		
 		void EnableHighlighting();
 		void UpdateTimer() { time(&itsTimer); }
@@ -81,8 +87,8 @@ class Playlist : public Screen<Window>, public Filterable
 		
 		bool checkForSong(const MPD::Song &s);
 		
-		static std::string SongToString(const MPD::Song &s);
-		static std::string SongInColumnsToString(const MPD::Song &s);
+		//static std::string SongToString(const MPD::Song &s);
+		//static std::string SongInColumnsToString(const MPD::Song &s);
 		
 		Menu< MPD::Song > *Items;
 		
@@ -97,7 +103,6 @@ class Playlist : public Screen<Window>, public Filterable
 		
 	private:
 		std::string TotalLength();
-		
 		std::string itsBufferedStats;
 		
 		size_t itsTotalLength;
@@ -105,11 +110,6 @@ class Playlist : public Screen<Window>, public Filterable
 		size_t itsScrollBegin;
 		
 		time_t itsTimer;
-		
-		static Menu< std::pair<std::string, MPD::Song::GetFunction> > *SortDialog;
-		static const size_t SortOptions;
-		static const size_t SortDialogWidth;
-		static size_t SortDialogHeight;
 };
 
 extern Playlist *myPlaylist;

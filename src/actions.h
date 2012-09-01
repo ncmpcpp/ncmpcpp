@@ -655,24 +655,28 @@ struct Find : public Action
 struct FindItemForward : public Action
 {
 	FindItemForward() : Action(aFindItemForward, "find_item_forward") { }
+	virtual bool canBeRun() const;
 	virtual void Run();
 };
 
 struct FindItemBackward : public Action
 {
 	FindItemBackward() : Action(aFindItemBackward, "find_item_backward") { }
+	virtual bool canBeRun() const;
 	virtual void Run();
 };
 
 struct NextFoundItem : public Action
 {
 	NextFoundItem() : Action(aNextFoundItem, "next_found_item") { }
+	virtual bool canBeRun() const;
 	virtual void Run();
 };
 
 struct PreviousFoundItem : public Action
 {
 	PreviousFoundItem() : Action(aPreviousFoundItem, "previous_found_item") { }
+	virtual bool canBeRun() const;
 	virtual void Run();
 };
 

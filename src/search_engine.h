@@ -23,7 +23,6 @@
 
 #include <cassert>
 
-#include "regex_filter.h"
 #include "interfaces.h"
 #include "mpdpp.h"
 #include "ncmpcpp.h"
@@ -74,7 +73,7 @@ struct SEItem
 		MPD::Song itsSong;
 };
 
-class SearchEngine : public Screen< Menu<SEItem> >, public Filterable
+class SearchEngine : public Screen< Menu<SEItem> >, public Filterable, public Searchable
 {
 	public:
 		virtual void Resize();
@@ -94,8 +93,14 @@ class SearchEngine : public Screen< Menu<SEItem> >, public Filterable
 		virtual void ReverseSelection() { w->ReverseSelection(StaticOptions); }
 		virtual void GetSelectedSongs(MPD::SongList &);
 		
+		/// Filterable implementation
 		virtual std::string currentFilter();
 		virtual void applyFilter(const std::string &filter);
+		
+		/// Searchable implementation
+		virtual bool search(const std::string &constraint);
+		virtual void nextFound(bool wrap);
+		virtual void prevFound(bool wrap);
 		
 		virtual List *GetList() { return w->Size() >= StaticOptions ? w : 0; }
 		
@@ -117,8 +122,6 @@ class SearchEngine : public Screen< Menu<SEItem> >, public Filterable
 		void Reset();
 		
 		const char **SearchMode;
-		
-		static std::string SearchEngineOptionToString(const SEItem &);
 		
 		static const char *SearchModes[];
 		

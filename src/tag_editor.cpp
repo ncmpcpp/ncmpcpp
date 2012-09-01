@@ -47,22 +47,47 @@ using Global::MainStartY;
 
 TagEditor *myTagEditor = new TagEditor;
 
-std::string TagEditor::PatternsFile = "patterns.list";
-std::list<std::string> TagEditor::Patterns;
+namespace {//
 
-size_t TagEditor::LeftColumnWidth;
-size_t TagEditor::LeftColumnStartX;
-size_t TagEditor::MiddleColumnWidth;
-size_t TagEditor::MiddleColumnStartX;
-size_t TagEditor::RightColumnWidth;
-size_t TagEditor::RightColumnStartX;
+size_t LeftColumnWidth;
+size_t LeftColumnStartX;
+size_t MiddleColumnWidth;
+size_t MiddleColumnStartX;
+size_t RightColumnWidth;
+size_t RightColumnStartX;
 
-size_t TagEditor::FParserDialogWidth;
-size_t TagEditor::FParserDialogHeight;
-size_t TagEditor::FParserWidth;
-size_t TagEditor::FParserWidthOne;
-size_t TagEditor::FParserWidthTwo;
-size_t TagEditor::FParserHeight;
+size_t FParserDialogWidth;
+size_t FParserDialogHeight;
+size_t FParserWidth;
+size_t FParserWidthOne;
+size_t FParserWidthTwo;
+size_t FParserHeight;
+
+std::list<std::string> Patterns;
+std::string PatternsFile = "patterns.list";
+
+std::string CapitalizeFirstLetters(const std::string &s);
+void CapitalizeFirstLetters(MPD::MutableSong &s);
+void LowerAllLetters(MPD::MutableSong &s);
+void GetTagList(TagLib::StringList &list, const MPD::MutableSong &s, MPD::Song::GetFunction f);
+
+template <typename T>
+void WriteID3v2(const TagLib::ByteVector &type, TagLib::ID3v2::Tag *tag, const T &list);
+void WriteXiphComments(const MPD::MutableSong &s, TagLib::Ogg::XiphComment *tag);
+
+void GetPatternList();
+void SavePatternList();
+
+MPD::MutableSong::SetFunction IntoSetFunction(char c);
+std::string GenerateFilename(const MPD::MutableSong &s, const std::string &pattern);
+std::string ParseFilename(MPD::MutableSong &s, std::string mask, bool preview);
+
+std::string SongToString(const MPD::MutableSong &s);
+bool DirEntryMatcher(const Regex &rx, const string_pair &dir, bool filter);
+bool AlbumEntryMatcher(const Regex &rx, const string_pair &dir);
+bool SongEntryMatcher(const Regex &rx, const MPD::MutableSong &s);
+
+}
 
 void TagEditor::Init()
 {
@@ -74,14 +99,12 @@ void TagEditor::Init()
 	Albums->CyclicScrolling(Config.use_cyclic_scrolling);
 	Albums->CenteredCursor(Config.centered_cursor);
 	Albums->setItemDisplayer(Display::Pair<std::string, std::string>);
-	Albums->SetItemStringifier(StringPairToString);
 	
 	Dirs = new Menu<string_pair>(0, MainStartY, LeftColumnWidth, MainHeight, Config.titles_visibility ? "Directories" : "", Config.main_color, brNone);
 	Dirs->HighlightColor(Config.active_column_color);
 	Dirs->CyclicScrolling(Config.use_cyclic_scrolling);
 	Dirs->CenteredCursor(Config.centered_cursor);
 	Dirs->setItemDisplayer(Display::Pair<std::string, std::string>);
-	Dirs->SetItemStringifier(StringPairToString);
 	
 	LeftColumn = Config.albums_in_tag_editor ? Albums : Dirs;
 	
@@ -112,7 +135,6 @@ void TagEditor::Init()
 	Tags->SetSelectPrefix(Config.selected_item_prefix);
 	Tags->SetSelectSuffix(Config.selected_item_suffix);
 	Tags->setItemDisplayer(Display::Tags);
-	Tags->SetItemStringifier(TagToString);
 	
 	FParserDialog = new Menu<std::string>((COLS-FParserDialogWidth)/2, (MainHeight-FParserDialogHeight)/2+MainStartY, FParserDialogWidth, FParserDialogHeight, "", Config.main_color, Config.window_border);
 	FParserDialog->CyclicScrolling(Config.use_cyclic_scrolling);
@@ -772,6 +794,8 @@ void TagEditor::GetSelectedSongs(MPD::SongList &v)
 		v.push_back(static_cast<MPD::Song>((*Tags)[*it].value()));
 }
 
+/***********************************************************************/
+
 std::string TagEditor::currentFilter()
 {
 	std::string filter;
@@ -789,27 +813,69 @@ void TagEditor::applyFilter(const std::string &filter)
 	if (w == Dirs)
 	{
 		Dirs->ShowAll();
-		auto fun = [](const Regex &rx, Menu<string_pair> &menu, const Menu<string_pair>::Item &item) {
-			if (item.value().first == "." || item.value().first == "..")
-				return true;
-			return rx.match(menu.Stringify(item));
-		};
+		auto fun = std::bind(DirEntryMatcher, _1, _2, true);
 		auto rx = RegexFilter<string_pair>(filter, Config.regex_type, fun);
-		Dirs->Filter(Dirs->Begin(), Dirs->End(), rx);
+		Dirs->filter(Dirs->Begin(), Dirs->End(), rx);
 	}
 	else if (w == Albums)
 	{
 		Albums->ShowAll();
-		auto rx = RegexFilter<string_pair>(filter, Config.regex_type);
-		Albums->Filter(Albums->Begin(), Albums->End(), rx);
+		auto rx = RegexFilter<string_pair>(filter, Config.regex_type, AlbumEntryMatcher);
+		Albums->filter(Albums->Begin(), Albums->End(), rx);
 	}
 	else if (w == Tags)
 	{
 		Tags->ShowAll();
-		auto rx = RegexFilter<MPD::MutableSong>(filter, Config.regex_type);
-		Tags->Filter(Tags->Begin(), Tags->End(), rx);
+		auto rx = RegexFilter<MPD::MutableSong>(filter, Config.regex_type, SongEntryMatcher);
+		Tags->filter(Tags->Begin(), Tags->End(), rx);
 	}
 }
+
+/***********************************************************************/
+
+bool TagEditor::search(const std::string &constraint)
+{
+	bool result = false;
+	if (w == Dirs)
+	{
+		auto fun = std::bind(DirEntryMatcher, _1, _2, false);
+		auto rx = RegexFilter<string_pair>(constraint, Config.regex_type, fun);
+		result = Dirs->search(Dirs->Begin(), Dirs->End(), rx);
+	}
+	else if (w == Albums)
+	{
+		auto rx = RegexFilter<string_pair>(constraint, Config.regex_type, AlbumEntryMatcher);
+		result = Albums->search(Albums->Begin(), Albums->End(), rx);
+	}
+	else if (w == Tags)
+	{
+		auto rx = RegexFilter<MPD::MutableSong>(constraint, Config.regex_type, SongEntryMatcher);
+		result = Tags->search(Tags->Begin(), Tags->End(), rx);
+	}
+	return result;
+}
+
+void TagEditor::nextFound(bool wrap)
+{
+	if (w == Dirs)
+		Dirs->NextFound(wrap);
+	else if (w == Albums)
+		Albums->NextFound(wrap);
+	else if (w == Tags)
+		Tags->NextFound(wrap);
+}
+
+void TagEditor::prevFound(bool wrap)
+{
+	if (w == Dirs)
+		Dirs->PrevFound(wrap);
+	else if (w == Albums)
+		Albums->PrevFound(wrap);
+	else if (w == Tags)
+		Tags->PrevFound(wrap);
+}
+
+/***********************************************************************/
 
 List *TagEditor::GetList()
 {
@@ -1008,40 +1074,6 @@ void TagEditor::ReadTags(MPD::MutableSong &s)
 	s.setComment(f.tag()->comment().to8Bit(1));
 }
 
-namespace
-{
-	template <typename T> void WriteID3v2(const TagLib::ByteVector &type, TagLib::ID3v2::Tag *tag, const T &list)
-	{
-		using TagLib::ID3v2::TextIdentificationFrame;
-		tag->removeFrames(type);
-		TextIdentificationFrame *frame = new TextIdentificationFrame(type, TagLib::String::UTF8);
-		frame->setText(list);
-		tag->addFrame(frame);
-	}
-}
-
-void TagEditor::WriteXiphComments(const MPD::MutableSong &s, TagLib::Ogg::XiphComment *tag)
-{
-	TagLib::StringList list;
-	
-	tag->addField("DISCNUMBER", ToWString(s.getDisc())); // disc
-	
-	tag->removeField("ALBUM ARTIST"); // album artist
-	GetTagList(list, s, &MPD::Song::getAlbumArtist);
-	for (TagLib::StringList::ConstIterator it = list.begin(); it != list.end(); ++it)
-		tag->addField("ALBUM ARTIST", *it, 0);
-	
-	tag->removeField("COMPOSER"); // composer
-	GetTagList(list, s, &MPD::Song::getComposer);
-	for (TagLib::StringList::ConstIterator it = list.begin(); it != list.end(); ++it)
-		tag->addField("COMPOSER", *it, 0);
-	
-	tag->removeField("PERFORMER"); // performer
-	GetTagList(list, s, &MPD::Song::getPerformer);
-	for (TagLib::StringList::ConstIterator it = list.begin(); it != list.end(); ++it)
-		tag->addField("PERFORMER", *it, 0);
-}
-
 bool TagEditor::WriteTags(MPD::MutableSong &s)
 {
 	std::string path_to_file;
@@ -1129,7 +1161,9 @@ bool TagEditor::WriteTags(MPD::MutableSong &s)
 		return false;
 }
 
-std::string TagEditor::CapitalizeFirstLetters(const std::string &s)
+namespace {//
+
+std::string CapitalizeFirstLetters(const std::string &s)
 {
 	if (s.empty())
 		return "";
@@ -1144,7 +1178,7 @@ std::string TagEditor::CapitalizeFirstLetters(const std::string &s)
 	return result;
 }
 
-void TagEditor::CapitalizeFirstLetters(MPD::MutableSong &s)
+void CapitalizeFirstLetters(MPD::MutableSong &s)
 {
 	for (const SongInfo::Metadata *m = SongInfo::Tags; m->Name; ++m)
 	{
@@ -1154,7 +1188,7 @@ void TagEditor::CapitalizeFirstLetters(MPD::MutableSong &s)
 	}
 }
 
-void TagEditor::LowerAllLetters(MPD::MutableSong &s)
+void LowerAllLetters(MPD::MutableSong &s)
 {
 	for (const SongInfo::Metadata *m = SongInfo::Tags; m->Name; ++m)
 	{
@@ -1167,7 +1201,7 @@ void TagEditor::LowerAllLetters(MPD::MutableSong &s)
 	}
 }
 
-void TagEditor::GetTagList(TagLib::StringList &list, const MPD::MutableSong &s, MPD::Song::GetFunction f)
+void GetTagList(TagLib::StringList &list, const MPD::MutableSong &s, MPD::Song::GetFunction f)
 {
 	list.clear();
 	unsigned pos = 0;
@@ -1175,18 +1209,38 @@ void TagEditor::GetTagList(TagLib::StringList &list, const MPD::MutableSong &s, 
 		list.append(ToWString(value));
 }
 
-std::string TagEditor::TagToString(const MPD::MutableSong &s)
+template <typename T> void WriteID3v2(const TagLib::ByteVector &type, TagLib::ID3v2::Tag *tag, const T &list)
 {
-	std::string result;
-	size_t i = myTagEditor->TagTypes->Choice();
-	if (i < 11)
-		result = (s.*SongInfo::Tags[i].Get)(0);
-	else if (i == 12)
-		result = s.getNewURI().empty() ? s.getName() : s.getName() + " -> " + s.getNewURI();
-	return result.empty() ? Config.empty_tag : result;
+	using TagLib::ID3v2::TextIdentificationFrame;
+	tag->removeFrames(type);
+	TextIdentificationFrame *frame = new TextIdentificationFrame(type, TagLib::String::UTF8);
+	frame->setText(list);
+	tag->addFrame(frame);
 }
 
-void TagEditor::GetPatternList()
+void WriteXiphComments(const MPD::MutableSong &s, TagLib::Ogg::XiphComment *tag)
+{
+	TagLib::StringList list;
+	
+	tag->addField("DISCNUMBER", ToWString(s.getDisc())); // disc
+	
+	tag->removeField("ALBUM ARTIST"); // album artist
+	GetTagList(list, s, &MPD::Song::getAlbumArtist);
+	for (TagLib::StringList::ConstIterator it = list.begin(); it != list.end(); ++it)
+		tag->addField("ALBUM ARTIST", *it, 0);
+	
+	tag->removeField("COMPOSER"); // composer
+	GetTagList(list, s, &MPD::Song::getComposer);
+	for (TagLib::StringList::ConstIterator it = list.begin(); it != list.end(); ++it)
+		tag->addField("COMPOSER", *it, 0);
+	
+	tag->removeField("PERFORMER"); // performer
+	GetTagList(list, s, &MPD::Song::getPerformer);
+	for (TagLib::StringList::ConstIterator it = list.begin(); it != list.end(); ++it)
+		tag->addField("PERFORMER", *it, 0);
+}
+
+void GetPatternList()
 {
 	if (Patterns.empty())
 	{
@@ -1197,12 +1251,12 @@ void TagEditor::GetPatternList()
 			while (getline(input, line))
 				if (!line.empty())
 					Patterns.push_back(line);
-			input.close();
+				input.close();
 		}
 	}
 }
 
-void TagEditor::SavePatternList()
+void SavePatternList()
 {
 	std::ofstream output(PatternsFile.c_str());
 	if (output.is_open())
@@ -1213,8 +1267,7 @@ void TagEditor::SavePatternList()
 		output.close();
 	}
 }
-
-MPD::MutableSong::SetFunction TagEditor::IntoSetFunction(char c)
+MPD::MutableSong::SetFunction IntoSetFunction(char c)
 {
 	switch (c)
 	{
@@ -1245,14 +1298,14 @@ MPD::MutableSong::SetFunction TagEditor::IntoSetFunction(char c)
 	}
 }
 
-std::string TagEditor::GenerateFilename(const MPD::MutableSong &s, const std::string &pattern)
+std::string GenerateFilename(const MPD::MutableSong &s, const std::string &pattern)
 {
 	std::string result = s.toString(pattern);
 	removeInvalidCharsFromFilename(result);
 	return result;
 }
 
-std::string TagEditor::ParseFilename(MPD::MutableSong &s, std::string mask, bool preview)
+std::string ParseFilename(MPD::MutableSong &s, std::string mask, bool preview)
 {
 	std::ostringstream result;
 	std::vector<std::string> separators;
@@ -1268,7 +1321,7 @@ std::string TagEditor::ParseFilename(MPD::MutableSong &s, std::string mask, bool
 			separators.push_back(mask.substr(0, i));
 	}
 	size_t i = 0;
-	for (std::vector<std::string>::const_iterator it = separators.begin(); it != separators.end(); ++it, ++i)
+	for (auto it = separators.begin(); it != separators.end(); ++it, ++i)
 	{
 		size_t j = file.find(*it);
 		tags.at(i).second = file.substr(0, j);
@@ -1289,22 +1342,52 @@ std::string TagEditor::ParseFilename(MPD::MutableSong &s, std::string mask, bool
 		return "Error while parsing filename!\n";
 	}
 	
-	for (std::vector< std::pair<char, std::string> >::iterator it = tags.begin(); it != tags.end(); ++it)
+	for (auto it = tags.begin(); it != tags.end(); ++it)
 	{
 		for (std::string::iterator j = it->second.begin(); j != it->second.end(); ++j)
 			if (*j == '_')
 				*j = ' ';
-		
-		if (!preview)
-		{
-			MPD::MutableSong::SetFunction set = IntoSetFunction(it->first);
-			if (set)
-				s.setTag(set, it->second);
-		}
-		else
-			result << "%" << it->first << ": " << it->second << "\n";
+			
+			if (!preview)
+			{
+				MPD::MutableSong::SetFunction set = IntoSetFunction(it->first);
+				if (set)
+					s.setTag(set, it->second);
+			}
+			else
+				result << "%" << it->first << ": " << it->second << "\n";
 	}
 	return result.str();
+}
+
+std::string SongToString(const MPD::MutableSong &s)
+{
+	std::string result;
+	size_t i = myTagEditor->TagTypes->Choice();
+	if (i < 11)
+		result = (s.*SongInfo::Tags[i].Get)(0);
+	else if (i == 12)
+		result = s.getNewURI().empty() ? s.getName() : s.getName() + " -> " + s.getNewURI();
+	return result.empty() ? Config.empty_tag : result;
+}
+
+bool DirEntryMatcher(const Regex &rx, const string_pair &dir, bool filter)
+{
+	if (dir.first == "." || dir.first == "..")
+		return filter;
+	return rx.match(dir.first);
+}
+
+bool AlbumEntryMatcher(const Regex &rx, const string_pair &dir)
+{
+	return rx.match(dir.first);
+}
+
+bool SongEntryMatcher(const Regex &rx, const MPD::MutableSong &s)
+{
+	return rx.match(SongToString(s));
+}
+
 }
 
 #endif

@@ -37,10 +37,18 @@ using Global::MainStartY;
 
 PlaylistEditor *myPlaylistEditor = new PlaylistEditor;
 
-size_t PlaylistEditor::LeftColumnStartX;
-size_t PlaylistEditor::LeftColumnWidth;
-size_t PlaylistEditor::RightColumnStartX;
-size_t PlaylistEditor::RightColumnWidth;
+namespace {//
+
+size_t LeftColumnStartX;
+size_t LeftColumnWidth;
+size_t RightColumnStartX;
+size_t RightColumnWidth;
+
+std::string SongToString(const MPD::Song &s);
+bool PlaylistEntryMatcher(const Regex &rx, const std::string &playlist);
+bool SongEntryMatcher(const Regex &rx, const MPD::Song &s);
+
+}
 
 void PlaylistEditor::Init()
 {
@@ -61,15 +69,9 @@ void PlaylistEditor::Init()
 	Content->SetSelectPrefix(Config.selected_item_prefix);
 	Content->SetSelectSuffix(Config.selected_item_suffix);
 	if (Config.columns_in_playlist_editor)
-	{
 		Content->setItemDisplayer(std::bind(Display::SongsInColumns, _1, *this));
-		Content->SetItemStringifier(Playlist::SongInColumnsToString);
-	}
 	else
-	{
 		Content->setItemDisplayer(std::bind(Display::Songs, _1, *this, Config.song_list_format));
-		Content->SetItemStringifier(Playlist::SongToString);
-	}
 	
 	w = Playlists;
 	isInitialized = 1;
@@ -190,7 +192,7 @@ void PlaylistEditor::MoveSelectedItems(Playlist::Movement where)
 	
 	// remove search results as we may move them to different positions, but
 	// search rememebers positions and may point to wrong ones after that.
-	Content->Search("");
+	Content->clearSearchResults();
 	
 	switch (where)
 	{
@@ -416,6 +418,8 @@ void PlaylistEditor::GetSelectedSongs(MPD::SongList &v)
 		v.push_back(Content->at(*it).value());
 }
 
+/***********************************************************************/
+
 std::string PlaylistEditor::currentFilter()
 {
 	std::string filter;
@@ -431,16 +435,52 @@ void PlaylistEditor::applyFilter(const std::string &filter)
 	if (w == Playlists)
 	{
 		Playlists->ShowAll();
-		auto rx = RegexFilter<std::string>(filter, Config.regex_type);
-		Playlists->Filter(Playlists->Begin(), Playlists->End(), rx);
+		auto rx = RegexFilter<std::string>(filter, Config.regex_type, PlaylistEntryMatcher);
+		Playlists->filter(Playlists->Begin(), Playlists->End(), rx);
 	}
 	else if (w == Content)
 	{
 		Content->ShowAll();
-		auto rx = RegexFilter<MPD::Song>(filter, Config.regex_type);
-		Content->Filter(Content->Begin(), Content->End(), rx);
+		auto rx = RegexFilter<MPD::Song>(filter, Config.regex_type, SongEntryMatcher);
+		Content->filter(Content->Begin(), Content->End(), rx);
 	}
 }
+
+/***********************************************************************/
+
+bool PlaylistEditor::search(const std::string &constraint)
+{
+	bool result = false;
+	if (w == Playlists)
+	{
+		auto rx = RegexFilter<std::string>(constraint, Config.regex_type, PlaylistEntryMatcher);
+		result = Playlists->search(Playlists->Begin(), Playlists->End(), rx);
+	}
+	else if (w == Content)
+	{
+		auto rx = RegexFilter<MPD::Song>(constraint, Config.regex_type, SongEntryMatcher);
+		result = Content->search(Content->Begin(), Content->End(), rx);
+	}
+	return result;
+}
+
+void PlaylistEditor::nextFound(bool wrap)
+{
+	if (w == Playlists)
+		Playlists->NextFound(wrap);
+	else if (w == Content)
+		Content->NextFound(wrap);
+}
+
+void PlaylistEditor::prevFound(bool wrap)
+{
+	if (w == Playlists)
+		Playlists->PrevFound(wrap);
+	else if (w == Content)
+		Content->PrevFound(wrap);
+}
+
+/***********************************************************************/
 
 void PlaylistEditor::Locate(const std::string &name)
 {
@@ -466,5 +506,32 @@ List *PlaylistEditor::GetList()
 	else if (w == Content)
 		return Content;
 	else // silence compiler
+	{
 		assert(false);
+		return 0;
+	}
+}
+
+namespace {//
+
+std::string SongToString(const MPD::Song &s)
+{
+	std::string result;
+	if (Config.columns_in_playlist_editor)
+		result = s.toString(Config.song_in_columns_to_string_format);
+	else
+		result = s.toString(Config.song_list_format_dollar_free);
+	return result;
+}
+
+bool PlaylistEntryMatcher(const Regex &rx, const std::string &playlist)
+{
+	return rx.match(playlist);
+}
+
+bool SongEntryMatcher(const Regex &rx, const MPD::Song &s)
+{
+	return rx.match(SongToString(s));
+}
+
 }

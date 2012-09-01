@@ -34,41 +34,20 @@
 namespace NCurses {
 
 /// List class is an interface for Menu class
-///
 struct List
 {
 	/// @return currently highlighted position
-	///
 	virtual size_t Choice() const = 0;
 	
 	/// @see Menu::Empty()
-	///
 	virtual bool Empty() const = 0;
 	
 	/// @see Menu::Size()
-	///
 	virtual size_t Size() const = 0;
-	
-	/// @see Menu::Search()
-	///
-	virtual bool Search(const std::string &constraint, size_t beginning = 0, int flags = 0) = 0;
-	
-	/// @see Menu::GetSearchConstraint()
-	///
-	virtual const std::string &GetSearchConstraint() = 0;
-	
-	/// @see Menu::NextFound()
-	///
-	virtual void NextFound(bool wrap) = 0;
-	
-	/// @see Menu::PrevFound()
-	///
-	virtual void PrevFound(bool wrap) = 0;
 };
 
 /// This template class is generic menu capable of
 /// holding any std::vector compatible values.
-///
 template <typename T> struct Menu : public Window, public List
 {
 	struct Item
@@ -116,10 +95,12 @@ template <typename T> struct Menu : public Window, public List
 		BaseIterator m_it;
 		explicit ItemIterator(BaseIterator it) : m_it(it) { }
 		
+		// base iterator's value_type doesn't change between const and non-const
+		// version, so we need to strip const off ValueT too for proper template
+		// version to be instantiated.
 		static const bool referenceValue = !std::is_same<
-			ValueT, typename std::remove_pointer<
-				typename BaseIterator::value_type
-			>::type
+			typename std::remove_const<ValueT>::type,
+			typename std::remove_pointer<typename BaseIterator::value_type>::type
 		>::value;
 		template <typename Result, bool referenceValue> struct getObject { };
 		template <typename Result> struct getObject<Result, true> {
@@ -197,17 +178,9 @@ template <typename T> struct Menu : public Window, public List
 	/// Function helper prototype used to display each option on the screen.
 	/// If not set by setItemDisplayer(), menu won't display anything.
 	/// @see setItemDisplayer()
-	///
 	typedef std::function<void(Menu<T> &)> ItemDisplayer;
 	
-	/// Function helper prototype used for converting items to strings.
-	/// If not set by SetItemStringifier(), searching and filtering
-	/// won't work (note that Menu<std::string> doesn't need this)
-	/// @see SetItemStringifier()
-	///
-	typedef std::function<std::string(const T &)> ItemStringifier;
-	
-	typedef std::function<bool(Menu<T> &, const Item &)> FilterFunction;
+	typedef std::function<bool(const Item &)> FilterFunction;
 	
 	/// Constructs an empty menu with given parameters
 	/// @param startx X position of left upper corner of constructed menu
@@ -217,43 +190,31 @@ template <typename T> struct Menu : public Window, public List
 	/// @param title title of constructed menu
 	/// @param color base color of constructed menu
 	/// @param border border of constructed menu
-	///
 	Menu(size_t startx, size_t starty, size_t width, size_t height,
 			const std::string &title, Color color, Border border);
 	
 	/// Destroys the object and frees memory
-	///
 	virtual ~Menu();
 	
 	/// Sets helper function that is responsible for displaying items
 	/// @param ptr function pointer that matches the ItemDisplayer prototype
-	///
 	void setItemDisplayer(const ItemDisplayer &f) { m_item_displayer = f; }
-	
-	/// Sets helper function that is responsible for converting items to strings
-	/// @param f function pointer that matches the ItemStringifier prototype
-	///
-	void SetItemStringifier(const ItemStringifier &f) { m_item_stringifier = f; }
 	
 	/// Reserves the size for internal container (this just calls std::vector::reserve())
 	/// @param size requested size
-	///
 	void Reserve(size_t size);
 	
 	/// Resizes the list to given size (adequate to std::vector::resize())
 	/// @param size requested size
-	///
 	void ResizeList(size_t size);
 	
 	/// Adds new option to list
 	/// @param item object that has to be added
 	/// @param is_bold defines the initial state of bold attribute
 	/// @param is_static defines the initial state of static attribute
-	///
 	void AddItem(const T &item, bool is_bold = 0, bool is_static = 0);
 	
 	/// Adds separator to list
-	///
 	void AddSeparator();
 	
 	/// Inserts new option to list at given position
@@ -261,237 +222,182 @@ template <typename T> struct Menu : public Window, public List
 	/// @param item object that has to be inserted
 	/// @param is_bold defines the initial state of bold attribute
 	/// @param is_static defines the initial state of static attribute
-	///
 	void InsertItem(size_t pos, const T &Item, bool is_bold = 0, bool is_static = 0);
 	
 	/// Inserts separator to list at given position
 	/// @param pos initial position of inserted separator
-	///
 	void InsertSeparator(size_t pos);
 	
 	/// Deletes item from given position
 	/// @param pos given position of item to be deleted
-	///
 	void DeleteItem(size_t pos);
 	
 	/// Swaps the content of two items
 	/// @param one position of first item
 	/// @param two position of second item
-	///
 	void Swap(size_t one, size_t two);
 	
 	/// Moves the highlighted position to the given line of window
 	/// @param y Y position of menu window to be highlighted
 	/// @return true if the position is reachable, false otherwise
-	///
 	bool Goto(size_t y);
 	
 	/// Checks whether list contains selected positions
 	/// @return true if it contains them, false otherwise
-	///
 	bool hasSelected() const;
 	
 	/// Gets positions of items that are selected
 	/// @param v vector to be filled with selected positions numbers
-	///
 	void GetSelected(std::vector<size_t> &v) const;
 	
 	/// Reverses selection of all items in list
 	/// @param beginning beginning of range that has to be reversed
-	///
 	void ReverseSelection(size_t beginning = 0);
 	
 	/// Highlights given position
 	/// @param pos position to be highlighted
-	///
 	void Highlight(size_t pos);
 	
 	/// @return currently highlighted position
-	///
 	size_t Choice() const;
 	
-	template <typename Iterator> void Filter(Iterator first, Iterator last, const FilterFunction &f);
+	void filter(ConstIterator first, ConstIterator last, const FilterFunction &f);
 	
-	/// Searches the list for a given contraint. It uses ItemStringifier to convert stored items
-	/// into strings and then performs pattern matching. Note that this supports regular expressions.
-	/// @param constraint a search constraint to be used
-	/// @param beginning beginning of range that has to be searched through
-	/// @param flags regex flags (REG_EXTENDED, REG_ICASE, REG_NOSUB, REG_NEWLINE)
-	/// @return true if at least one item matched the given pattern, false otherwise
-	///
-	virtual bool Search(const std::string &constraint, size_t beginning = 0, int flags = 0);
+	bool search(ConstIterator first, ConstIterator last, const FilterFunction &f);
 	
-	/// @return const reference to currently used search constraint
-	///
-	virtual const std::string &GetSearchConstraint() { return m_search_constraint; }
+	/// Clears filter results
+	void clearFilterResults();
+	
+	/// Clears search results
+	void clearSearchResults();
 	
 	/// Moves current position in the list to the next found one
 	/// @param wrap if true, this function will go to the first
 	/// found pos after the last one, otherwise it'll do nothing.
-	///
 	virtual void NextFound(bool wrap);
 	
 	/// Moves current position in the list to the previous found one
 	/// @param wrap if true, this function will go to the last
 	/// found pos after the first one, otherwise it'll do nothing.
-	///
 	virtual void PrevFound(bool wrap);
 	
 	/// @return const reference to currently used filter function
-	///
 	const FilterFunction &getFilter() { return m_filter; }
 	
 	/// @return true if list is currently filtered, false otherwise
-	///
 	bool isFiltered() { return m_options_ptr == &m_filtered_options; }
 	
 	/// Turns off filtering
-	///
 	void ShowAll() { m_options_ptr = &m_options; }
 	
 	/// Turns on filtering
-	///
 	void ShowFiltered() { m_options_ptr = &m_filtered_options; }
-	
-	/// Converts given position in list to string using ItemStringifier
-	/// if specified and an empty string otherwise
-	/// @param pos position to be converted
-	/// @return item converted to string
-	/// @see setItemDisplayer()
-	///
-	std::string GetItem(size_t pos);
-	
-	std::string Stringify(const Item &item) const;
 	
 	/// Refreshes the menu window
 	/// @see Window::Refresh()
-	///
 	virtual void Refresh();
 	
 	/// Scrolls by given amount of lines
 	/// @param where indicated where exactly one wants to go
 	/// @see Window::Scroll()
-	///
 	virtual void Scroll(Where where);
 	
 	/// Cleares all options, used filters etc. It doesn't reset highlighted position though.
 	/// @see Reset()
-	///
 	virtual void Clear();
 	
 	/// Sets highlighted position to 0
-	///
 	void Reset();
 	
 	/// Sets prefix, that is put before each selected item to indicate its selection
 	/// Note that the passed variable is not deleted along with menu object.
 	/// @param b pointer to buffer that contains the prefix
-	///
 	void SetSelectPrefix(const Buffer &b) { m_selected_prefix = b; }
 	
 	/// Sets suffix, that is put after each selected item to indicate its selection
 	/// Note that the passed variable is not deleted along with menu object.
 	/// @param b pointer to buffer that contains the suffix
-	///
 	void SetSelectSuffix(const Buffer &b) { m_selected_suffix = b; }
 	
 	/// Sets custom color of highlighted position
 	/// @param col custom color
-	///
 	void HighlightColor(Color color) { m_highlight_color = color; }
 	
 	/// @return state of highlighting
-	///
 	bool isHighlighted() { return m_highlight_enabled; }
 	
 	/// Turns on/off highlighting
 	/// @param state state of hihglighting
-	///
 	void Highlighting(bool state) { m_highlight_enabled = state; }
 	
 	/// Turns on/off cyclic scrolling
 	/// @param state state of cyclic scrolling
-	///
 	void CyclicScrolling(bool state) { m_cyclic_scroll_enabled = state; }
 	
 	/// Turns on/off centered cursor
 	/// @param state state of centered cursor
-	///
 	void CenteredCursor(bool state) { m_autocenter_cursor = state; }
 	
 	/// Checks if list is empty
 	/// @return true if list is empty, false otherwise
 	/// @see ReallyEmpty()
-	///
 	virtual bool Empty() const { return m_options_ptr->empty(); }
 	
 	/// Checks if list is really empty since Empty() may not
 	/// be accurate if filter is set)
 	/// @return true if list is empty, false otherwise
 	/// @see Empty()
-	///
 	virtual bool ReallyEmpty() const { return m_options.empty(); }
 	
 	/// @return size of the list
-	///
 	virtual size_t Size() const;
 	
 	/// @return currently drawn item. The result is defined only within
 	/// drawing function that is called by Refresh()
 	/// @see Refresh()
-	///
 	const Item &Drawn() const { return *(*m_options_ptr)[m_drawn_position]; }
 	
 	/// @return position of currently drawn item. The result is defined
 	/// only within drawing function that is called by Refresh()
 	/// @see Refresh()
-	///
 	size_t DrawnPosition() const { return m_drawn_position; }
 	
 	/// @return reference to last item on the list
 	/// @throw List::InvalidItem if requested item is separator
-	///
 	Menu<T>::Item &Back();
 	
 	/// @return const reference to last item on the list
 	/// @throw List::InvalidItem if requested item is separator
-	///
 	const Menu<T>::Item &Back() const;
 	
 	/// @return reference to curently highlighted object
 	/// @throw List::InvalidItem if requested item is separator
-	///
 	Menu<T>::Item &Current();
 	
 	/// @return const reference to curently highlighted object
 	/// @throw List::InvalidItem if requested item is separator
-	///
 	const Menu<T>::Item &Current() const;
 	
 	/// @param pos requested position
 	/// @return reference to item at given position
 	/// @throw std::out_of_range if given position is out of range
 	/// @throw List::InvalidItem if requested item is separator
-	///
 	Menu<T>::Item &at(size_t pos);
 	
 	/// @param pos requested position
 	/// @return const reference to item at given position
 	/// @throw std::out_of_range if given position is out of range
 	/// @throw List::InvalidItem if requested item is separator
-	///
 	const Menu<T>::Item &at(size_t pos) const;
 	
 	/// @param pos requested position
 	/// @return const reference to item at given position
 	/// @throw List::InvalidItem if requested item is separator
-	///
 	const Menu<T>::Item &operator[](size_t pos) const;
 	
 	/// @param pos requested position
 	/// @return const reference to item at given position
 	/// @throw List::InvalidItem if requested item is separator
-	///
 	Menu<T>::Item &operator[](size_t pos);
 	
 	Iterator Begin() { return Iterator(m_options_ptr->begin()); }
@@ -515,20 +421,15 @@ template <typename T> struct Menu : public Window, public List
 	ConstReverseValueIterator RendV() const { return ConstReverseValueIterator(BeginV()); }
 	
 private:
-	/// Clears filter, filtered data etc.
-	///
-	void clearFiltered();
-	
 	bool isHighlightable(size_t pos)
 	{
 		return !(*m_options_ptr)[pos]->isSeparator() && !(*m_options_ptr)[pos]->isInactive();
 	}
 	
 	ItemDisplayer m_item_displayer;
-	ItemStringifier m_item_stringifier;
 	
 	FilterFunction m_filter;
-	std::string m_search_constraint;
+	FilterFunction m_searcher;
 	
 	std::vector<Item *> *m_options_ptr;
 	std::vector<Item *> m_options;
@@ -551,11 +452,6 @@ private:
 	Buffer m_selected_suffix;
 };
 
-/// Specialization for T = std::string. It's obvious that if strings are stored,
-/// we don't need extra function to convert them to strings by default
-template <> std::string Menu<std::string>::GetItem(size_t pos);
-template <> std::string Menu<std::string>::Stringify(const Menu<std::string>::Item &item) const;
-
 template <typename T> Menu<T>::Menu(size_t startx,
 	size_t starty,
 	size_t width,
@@ -565,7 +461,6 @@ template <typename T> Menu<T>::Menu(size_t startx,
 	Border border)
 	: Window(startx, starty, width, height, title, color, border),
 	m_item_displayer(0),
-	m_item_stringifier(0),
 	m_options_ptr(&m_options),
 	m_beginning(0),
 	m_highlight(0),
@@ -806,18 +701,11 @@ template <typename T> void Menu<T>::Reset()
 	m_beginning = 0;
 }
 
-template <typename T> void Menu<T>::clearFiltered()
-{
-	m_filtered_options.clear();
-	m_filtered_positions.clear();
-	m_options_ptr = &m_options;
-}
-
 template <typename T> void Menu<T>::Clear()
 {
 	for (auto it = m_options.begin(); it != m_options.end(); ++it)
 		delete *it;
-	clearFiltered();
+	clearFilterResults();
 	m_options.clear();
 	m_found_positions.clear();
 	m_options_ptr = &m_options;
@@ -858,15 +746,15 @@ template <typename T> size_t Menu<T>::Choice() const
 	return m_highlight;
 }
 
-template <typename T> template <typename Iterator_>
-void Menu<T>::Filter(Iterator_ first, Iterator_ last, const FilterFunction &f)
+template <typename T>
+void Menu<T>::filter(ConstIterator first, ConstIterator last, const FilterFunction &f)
 {
 	assert(m_options_ptr != &m_filtered_options);
-	clearFiltered();
+	clearFilterResults();
 	m_filter = f;
 	for (auto it = first; it != last; ++it)
 	{
-		if (m_filter(*this, *it))
+		if (m_filter(*it))
 		{
 			size_t pos = it-Begin();
 			m_filtered_positions.push_back(pos);
@@ -876,6 +764,34 @@ void Menu<T>::Filter(Iterator_ first, Iterator_ last, const FilterFunction &f)
 	m_options_ptr = &m_filtered_options;
 }
 
+template <typename T> void Menu<T>::clearFilterResults()
+{
+	m_filtered_options.clear();
+	m_filtered_positions.clear();
+	m_options_ptr = &m_options;
+}
+
+template <typename T>
+bool Menu<T>::search(ConstIterator first, ConstIterator last, const FilterFunction &f)
+{
+	m_found_positions.clear();
+	m_searcher = f;
+	for (auto it = first; it != last; ++it)
+	{
+		if (m_searcher(*it))
+		{
+			size_t pos = it-Begin();
+			m_found_positions.insert(pos);
+		}
+	}
+	return !m_found_positions.empty();
+}
+
+template <typename T> void Menu<T>::clearSearchResults()
+{
+	m_found_positions.clear();
+}
+
 template <typename T> void Menu<T>::ReverseSelection(size_t beginning)
 {
 	auto it = m_options_ptr->begin()+beginning;
@@ -883,30 +799,11 @@ template <typename T> void Menu<T>::ReverseSelection(size_t beginning)
 		(*it)->setSelected(!(*it)->isSelected() && !(*it)->isInactive());
 }
 
-template <typename T> bool Menu<T>::Search(const std::string &constraint, size_t beginning, int flags)
-{
-	m_found_positions.clear();
-	m_search_constraint.clear();
-	if (constraint.empty())
-		return false;
-	m_search_constraint = constraint;
-	Regex rx;
-	if (rx.compile(m_search_constraint, flags))
-	{
-		for (size_t i = beginning; i < m_options_ptr->size(); ++i)
-		{
-			if (rx.match(GetItem(i)))
-				m_found_positions.insert(i);
-		}
-	}
-	return !m_found_positions.empty();
-}
-
 template <typename T> void Menu<T>::NextFound(bool wrap)
 {
 	if (m_found_positions.empty())
 		return;
-	std::set<size_t>::iterator next = m_found_positions.upper_bound(m_highlight);
+	auto next = m_found_positions.upper_bound(m_highlight);
 	if (next != m_found_positions.end())
 		Highlight(*next);
 	else if (wrap)
@@ -917,27 +814,11 @@ template <typename T> void Menu<T>::PrevFound(bool wrap)
 {
 	if (m_found_positions.empty())
 		return;
-	std::set<size_t>::iterator prev = m_found_positions.lower_bound(m_highlight);
+	auto prev = m_found_positions.lower_bound(m_highlight);
 	if (prev != m_found_positions.begin())
 		Highlight(*--prev);
 	else if (wrap)
 		Highlight(*m_found_positions.rbegin());
-}
-
-template <typename T> std::string Menu<T>::GetItem(size_t pos)
-{
-	std::string result;
-	if (m_item_stringifier)
-		result = m_item_stringifier((*m_options_ptr)[pos]->value());
-	return result;
-}
-
-template <typename T> std::string Menu<T>::Stringify(const Item &item) const
-{
-	std::string result;
-	if (m_item_stringifier)
-		result = m_item_stringifier(item.value());
-	return result;
 }
 
 template <typename T> typename Menu<T>::Item &Menu<T>::Back()

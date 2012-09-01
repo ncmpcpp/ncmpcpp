@@ -227,6 +227,8 @@ void NcmpcppStatusChanged(MPD::Connection *, MPD::StatusChanges changed, void *)
 		if (!np.empty())
 			WindowTitle(np.toString(Config.song_window_title_format));
 		
+		myPlaylist->Items->clearSearchResults();
+		
 		bool is_filtered = myPlaylist->Items->isFiltered();
 		myPlaylist->Items->ShowAll();
 		
@@ -302,7 +304,7 @@ void NcmpcppStatusChanged(MPD::Connection *, MPD::StatusChanges changed, void *)
 			if (myLibrary->Columns() == 2)
 				myLibrary->Albums->Clear();
 			else
-				myLibrary->Artists->Clear();
+				myLibrary->Tags->Clear();
 		}
 		if (myPlaylistEditor->Main())
 			myPlaylistEditor->Content->Clear();

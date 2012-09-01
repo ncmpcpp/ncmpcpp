@@ -23,27 +23,10 @@
 
 #include "interfaces.h"
 #include "ncmpcpp.h"
-#include "regex_filter.h"
 #include "screen.h"
 
-class MediaLibrary : public Screen<Window>, public Filterable
+class MediaLibrary : public Screen<Window>, public Filterable, public Searchable
 {
-	struct SearchConstraints
-	{
-		SearchConstraints() { }
-		SearchConstraints(const std::string &tag, const std::string &album, const std::string &date) : PrimaryTag(tag), Album(album), Date(date) { }
-		SearchConstraints(const std::string &album, const std::string &date) : Album(album), Date(date) { }
-		
-		std::string PrimaryTag;
-		std::string Album;
-		std::string Date;
-	};
-	
-	struct SearchConstraintsSorting
-	{
-		bool operator()(const SearchConstraints &a, const SearchConstraints &b) const;
-	};
-	
 	public:
 		virtual void SwitchTo();
 		virtual void Resize();
@@ -65,14 +48,20 @@ class MediaLibrary : public Screen<Window>, public Filterable
 		virtual void ReverseSelection();
 		virtual void GetSelectedSongs(MPD::SongList &);
 		
+		/// Filterable implementation
 		virtual std::string currentFilter();
 		virtual void applyFilter(const std::string &filter);
+		
+		/// Searchable implementation
+		virtual bool search(const std::string &constraint);
+		virtual void nextFound(bool wrap);
+		virtual void prevFound(bool wrap);
 		
 		virtual List *GetList();
 		
 		virtual bool isMergable() { return true; }
 		
-		int Columns() { return hasTwoColumns ? 2 : 3; }
+		int Columns();
 		bool isNextColumnAvailable();
 		void NextColumn();
 		bool isPrevColumnAvailable();
@@ -80,7 +69,20 @@ class MediaLibrary : public Screen<Window>, public Filterable
 		
 		void LocateSong(const MPD::Song &);
 		
-		Menu<std::string> *Artists;
+		struct SearchConstraints
+		{
+			SearchConstraints() { }
+			SearchConstraints(const std::string &tag, const std::string &album, const std::string &date)
+			: PrimaryTag(tag), Album(album), Date(date) { }
+			SearchConstraints(const std::string &album, const std::string &date)
+			: Album(album), Date(date) { }
+			
+			std::string PrimaryTag;
+			std::string Album;
+			std::string Date;
+		};
+		
+		Menu<std::string> *Tags;
 		Menu<SearchConstraints> *Albums;
 		Menu<MPD::Song> *Songs;
 		
@@ -90,24 +92,6 @@ class MediaLibrary : public Screen<Window>, public Filterable
 		
 	private:
 		void AddToPlaylist(bool);
-		
-		static std::string SongToString(const MPD::Song &s);
-		static std::string AlbumToString(const SearchConstraints &);
-		static void DisplayAlbums(Menu<SearchConstraints> &menu);
-		static void DisplayPrimaryTags(Menu<std::string> &menu);
-		
-		static bool SortSongsByTrack(const MPD::Song &, const MPD::Song &);
-		static bool SortAllTracks(const MPD::Song &, const MPD::Song &);
-		
-		static bool hasTwoColumns;
-		static size_t itsLeftColStartX;
-		static size_t itsLeftColWidth;
-		static size_t itsMiddleColWidth;
-		static size_t itsMiddleColStartX;
-		static size_t itsRightColWidth;
-		static size_t itsRightColStartX;
-		
-		static const char AllTracksMarker[];
 };
 
 extern MediaLibrary *myLibrary;

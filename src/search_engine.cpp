@@ -18,12 +18,14 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
+#include <array>
 #include <iomanip>
 
 #include "display.h"
 #include "global.h"
 #include "helpers.h"
 #include "playlist.h"
+#include "regex_filter.h"
 #include "search_engine.h"
 #include "settings.h"
 #include "status.h"
@@ -33,6 +35,40 @@ using Global::MainHeight;
 using Global::MainStartY;
 
 SearchEngine *mySearcher = new SearchEngine;
+
+namespace {//
+
+/*const std::array<const std::string, 11> constraintsNames = {{
+	"Any",
+	"Artist",
+	"Album Artist",
+	"Title",
+	"Album",
+	"Filename",
+	"Composer",
+	"Performer",
+	"Genre",
+	"Date",
+	"Comment"
+}};
+
+const std::array<const char *, 3> searchModes = {{
+	"Match if tag contains searched phrase (no regexes)",
+	"Match if tag contains searched phrase (regexes supported)",
+	"Match only if both values are the same"
+}};
+
+namespace pos {//
+	const size_t searchIn = constraintsNames.size()-1+1+1; // separated
+	const size_t searchMode = searchIn+1;
+	const size_t search = searchMode+1+1; // separated
+	const size_t reset = search+1;
+}*/
+
+std::string SEItemToString(const SEItem &ei);
+bool SEItemEntryMatcher(const Regex &rx, const Menu<SEItem>::Item &item, bool filter);
+
+}
 
 const char *SearchEngine::ConstraintsNames[] =
 {
@@ -70,7 +106,6 @@ void SearchEngine::Init()
 	w->setItemDisplayer(Display::SearchEngine);
 	w->SetSelectPrefix(Config.selected_item_prefix);
 	w->SetSelectSuffix(Config.selected_item_suffix);
-	w->SetItemStringifier(SearchEngineOptionToString);
 	SearchMode = &SearchModes[Config.search_engine_default_search_mode];
 	isInitialized = 1;
 }
@@ -261,22 +296,41 @@ void SearchEngine::GetSelectedSongs(MPD::SongList &v)
 	}
 }
 
+/***********************************************************************/
+
 std::string SearchEngine::currentFilter()
 {
-	return RegexFilter<SEItem>::currentFilter(*w);
+	return RegexItemFilter<SEItem>::currentFilter(*w);
 }
 
 void SearchEngine::applyFilter(const std::string &filter)
 {
 	w->ShowAll();
-	auto fun = [](const Regex &rx, Menu<SEItem> &menu, const Menu<SEItem>::Item &item) {
-		if (item.isSeparator() || !item.value().isSong())
-			return true;
-		return rx.match(menu.Stringify(item));
-	};
-	auto rx = RegexFilter<SEItem>(filter, Config.regex_type, fun);
-	w->Filter(w->Begin(), w->End(), rx);
+	auto fun = std::bind(SEItemEntryMatcher, _1, _2, true);
+	auto rx = RegexItemFilter<SEItem>(filter, Config.regex_type, fun);
+	w->filter(w->Begin(), w->End(), rx);
 }
+
+/***********************************************************************/
+
+bool SearchEngine::search(const std::string &constraint)
+{
+	auto fun = std::bind(SEItemEntryMatcher, _1, _2, false);
+	auto rx = RegexItemFilter<SEItem>(constraint, Config.regex_type, fun);
+	return w->search(w->Begin(), w->End(), rx);
+}
+
+void SearchEngine::nextFound(bool wrap)
+{
+	w->NextFound(wrap);
+}
+
+void SearchEngine::prevFound(bool wrap)
+{
+	w->PrevFound(wrap);
+}
+
+/***********************************************************************/
 
 void SearchEngine::UpdateFoundList()
 {
@@ -525,15 +579,28 @@ void SearchEngine::Search()
 	}
 }
 
-std::string SearchEngine::SearchEngineOptionToString(const SEItem &ei)
+namespace {//
+
+std::string SEItemToString(const SEItem &ei)
 {
 	std::string result;
 	if (ei.isSong())
 	{
 		if (Config.columns_in_search_engine)
-			result = Playlist::SongInColumnsToString(ei.song());
+			result = ei.song().toString(Config.song_in_columns_to_string_format);
 		else
 			result = ei.song().toString(Config.song_list_format_dollar_free);
 	}
+	else
+		result = ei.buffer().Str();
 	return result;
+}
+
+bool SEItemEntryMatcher(const Regex &rx, const Menu<SEItem>::Item &item, bool filter)
+{
+	if (item.isSeparator() || !item.value().isSong())
+		return filter;
+	return rx.match(SEItemToString(item.value()));
+}
+
 }

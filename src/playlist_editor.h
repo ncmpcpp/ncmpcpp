@@ -24,7 +24,7 @@
 #include "playlist.h"
 #include "ncmpcpp.h"
 
-class PlaylistEditor : public Screen<Window>, public Filterable
+class PlaylistEditor : public Screen<Window>, public Filterable, public Searchable
 {
 	public:
 		virtual void SwitchTo();
@@ -47,9 +47,15 @@ class PlaylistEditor : public Screen<Window>, public Filterable
 		virtual void ReverseSelection() { Content->ReverseSelection(); }
 		virtual void GetSelectedSongs(MPD::SongList &);
 		
+		/// Filterable implementation
 		virtual std::string currentFilter();
 		virtual void applyFilter(const std::string &filter);
-
+		
+		/// Searchable implementation
+		virtual bool search(const std::string &constraint);
+		virtual void nextFound(bool wrap);
+		virtual void prevFound(bool wrap);
+		
 		virtual void Locate(const std::string &);
 		
 		virtual List *GetList();
@@ -73,11 +79,6 @@ class PlaylistEditor : public Screen<Window>, public Filterable
 		
 	private:
 		void AddToPlaylist(bool);
-		
-		static size_t LeftColumnStartX;
-		static size_t LeftColumnWidth;
-		static size_t RightColumnStartX;
-		static size_t RightColumnWidth;
 };
 
 extern PlaylistEditor *myPlaylistEditor;

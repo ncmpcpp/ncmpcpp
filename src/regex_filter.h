@@ -26,20 +26,18 @@
 template <typename T> struct RegexFilter
 {
 	typedef NCurses::Menu<T> MenuT;
-	typedef typename NCurses::Menu<T>::Item MenuItem;
-	typedef std::function<bool(const Regex &, MenuT &menu, const MenuItem &)> FilterFunction;
+	typedef typename NCurses::Menu<T>::Item Item;
+	typedef std::function<bool(const Regex &, const T &)> FilterFunction;
 	
-	RegexFilter(const std::string &regex_, int cflags, FilterFunction custom_filter = 0)
-	: m_rx(regex_, cflags), m_custom_filter(custom_filter) { }
+	RegexFilter(const std::string &regex_, int cflags, FilterFunction filter)
+	: m_rx(regex_, cflags), m_filter(filter) { }
 	
-	bool operator()(MenuT &menu, const MenuItem &item) {
+	bool operator()(const Item &item) {
 		if (m_rx.regex().empty())
 			return true;
 		if (!m_rx.error().empty())
 			return false;
-		if (m_custom_filter)
-			return m_custom_filter(m_rx, menu, item);
-		return m_rx.match(menu.Stringify(item));
+		return m_filter(m_rx, item.value());
 	}
 	
 	static std::string currentFilter(MenuT &menu)
@@ -53,7 +51,38 @@ template <typename T> struct RegexFilter
 	
 private:
 	Regex m_rx;
-	FilterFunction m_custom_filter;
+	FilterFunction m_filter;
+};
+
+template <typename T> struct RegexItemFilter
+{
+	typedef NCurses::Menu<T> MenuT;
+	typedef typename NCurses::Menu<T>::Item Item;
+	typedef std::function<bool(const Regex &, const Item &)> FilterFunction;
+	
+	RegexItemFilter(const std::string &regex_, int cflags, FilterFunction filter)
+	: m_rx(regex_, cflags), m_filter(filter) { }
+	
+	bool operator()(const Item &item) {
+		if (m_rx.regex().empty())
+			return true;
+		if (!m_rx.error().empty())
+			return false;
+		return m_filter(m_rx, item);
+	}
+	
+	static std::string currentFilter(MenuT &menu)
+	{
+		std::string filter;
+		auto rf = menu.getFilter().template target< RegexItemFilter<T> >();
+		if (rf)
+			filter = rf->m_rx.regex();
+		return filter;
+	}
+	
+private:
+	Regex m_rx;
+	FilterFunction m_filter;
 };
 
 #endif

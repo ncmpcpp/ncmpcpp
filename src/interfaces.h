@@ -30,4 +30,11 @@ struct Filterable
 	virtual void applyFilter(const std::string &filter) = 0;
 };
 
+struct Searchable
+{
+	virtual bool search(const std::string &constraint) = 0;
+	virtual void nextFound(bool wrap) = 0;
+	virtual void prevFound(bool wrap) = 0;
+};
+
 #endif // _INTERFACES_H

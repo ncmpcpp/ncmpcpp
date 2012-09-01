@@ -26,7 +26,7 @@
 #include "regex_filter.h"
 #include "screen.h"
 
-class Browser : public Screen< Menu<MPD::Item> >, public Filterable
+class Browser : public Screen< Menu<MPD::Item> >, public Filterable, public Searchable
 {
 	public:
 		Browser() : itsBrowseLocally(0), itsScrollBeginning(0), itsBrowsedDir("/") { }
@@ -48,8 +48,14 @@ class Browser : public Screen< Menu<MPD::Item> >, public Filterable
 		virtual void ReverseSelection();
 		virtual void GetSelectedSongs(MPD::SongList &);
 		
+		/// Filterable implementation
 		virtual std::string currentFilter();
 		virtual void applyFilter(const std::string &filter);
+		
+		/// Searchable implementation
+		virtual bool search(const std::string &constraint);
+		virtual void nextFound(bool wrap);
+		virtual void prevFound(bool wrap);
 		
 		virtual List *GetList() { return w; }
 		
@@ -68,18 +74,15 @@ class Browser : public Screen< Menu<MPD::Item> >, public Filterable
 #		endif // !WIN32
 		void UpdateItemList();
 		
-		bool isParentDir(size_t pos) { return itsBrowsedDir != "/" && pos == 0; }
+		static bool isParentDirectory(const MPD::Item &item) {
+			return item.type == MPD::itDirectory && item.name == "..";
+		}
 		
 	protected:
 		virtual void Init();
 		virtual bool isLockable() { return true; }
 		
 	private:
-		static bool hasSupportedExtension(const std::string &);
-		static std::string ItemToString(const MPD::Item &item);
-		
-		static std::set<std::string> SupportedExtensions;
-		
 		bool itsBrowseLocally;
 		size_t itsScrollBeginning;
 		std::string itsBrowsedDir;

@@ -37,7 +37,7 @@
 #include "regex_filter.h"
 #include "screen.h"
 
-class TagEditor : public Screen<Window>, public Filterable
+class TagEditor : public Screen<Window>, public Filterable, public Searchable
 {
 	public:
 		TagEditor() : FParser(0), FParserHelper(0), FParserLegend(0), FParserPreview(0), itsBrowsedDir("/") { }
@@ -62,8 +62,14 @@ class TagEditor : public Screen<Window>, public Filterable
 		virtual void ReverseSelection() { Tags->ReverseSelection(); }
 		virtual void GetSelectedSongs(MPD::SongList &);
 		
+		/// Filterable implementation
 		virtual std::string currentFilter();
 		virtual void applyFilter(const std::string &filter);
+		
+		/// Searchable implementation
+		virtual bool search(const std::string &constraint);
+		virtual void nextFound(bool wrap);
+		virtual void prevFound(bool wrap);
 		
 		virtual List *GetList();
 		
@@ -103,39 +109,8 @@ class TagEditor : public Screen<Window>, public Filterable
 		Scrollpad *FParserPreview;
 		bool FParserUsePreview;
 		
-		static std::string CapitalizeFirstLetters(const std::string &);
-		static void CapitalizeFirstLetters(MPD::MutableSong &);
-		static void LowerAllLetters(MPD::MutableSong &);
-		static void GetTagList(TagLib::StringList &, const MPD::MutableSong &, MPD::Song::GetFunction);
-		static void WriteXiphComments(const MPD::MutableSong &, TagLib::Ogg::XiphComment *);
-		
-		static void GetPatternList();
-		static void SavePatternList();
-		static MPD::MutableSong::SetFunction IntoSetFunction(char);
-		static std::string GenerateFilename(const MPD::MutableSong &, const std::string &);
-		static std::string ParseFilename(MPD::MutableSong &, std::string, bool);
-		
-		static std::string TagToString(const MPD::MutableSong &);
-		
 		std::string itsBrowsedDir;
 		std::string itsHighlightedDir;
-		
-		static std::string PatternsFile;
-		static std::list<std::string> Patterns;
-		
-		static size_t MiddleColumnWidth;
-		static size_t LeftColumnStartX;
-		static size_t LeftColumnWidth;
-		static size_t MiddleColumnStartX;
-		static size_t RightColumnWidth;
-		static size_t RightColumnStartX;
-		
-		static size_t FParserDialogWidth;
-		static size_t FParserDialogHeight;
-		static size_t FParserWidth;
-		static size_t FParserWidthOne;
-		static size_t FParserWidthTwo;
-		static size_t FParserHeight;
 };
 
 extern TagEditor *myTagEditor;

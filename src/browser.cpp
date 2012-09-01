@@ -32,10 +32,8 @@
 #include "playlist.h"
 #include "settings.h"
 #include "status.h"
+#include "tag_editor.h"
 #include "utility/comparators.h"
-#ifdef HAVE_TAGLIB_H
-# include "tag_editor.h"
-#endif // HAVE_TAGLIB_H
 
 using Global::MainHeight;
 using Global::MainStartY;
@@ -48,7 +46,15 @@ using MPD::itPlaylist;
 
 Browser *myBrowser = new Browser;
 
-std::set<std::string> Browser::SupportedExtensions;
+namespace {//
+
+std::set<std::string> SupportedExtensions;
+bool hasSupportedExtension(const std::string &file);
+
+std::string ItemToString(const MPD::Item &item);
+bool BrowserEntryMatcher(const Regex &rx, const MPD::Item &item, bool filter);
+
+}
 
 void Browser::Init()
 {
@@ -59,7 +65,6 @@ void Browser::Init()
 	w->SetSelectPrefix(Config.selected_item_prefix);
 	w->SetSelectSuffix(Config.selected_item_suffix);
 	w->setItemDisplayer(Display::Items);
-	w->SetItemStringifier(ItemToString);
 	
 	if (SupportedExtensions.empty())
 		Mpd.GetSupportedExtensions(SupportedExtensions);
@@ -126,7 +131,7 @@ void Browser::EnterPressed()
 	{
 		case itDirectory:
 		{
-			if (isParentDir(w->Choice()))
+			if (isParentDirectory(item))
 			{
 				size_t slash = itsBrowsedDir.rfind("/");
 				if (slash != std::string::npos)
@@ -171,10 +176,11 @@ void Browser::SpacePressed()
 		return;
 	}
 	
-	if (isParentDir(w->Choice()))
+	const MPD::Item &item = w->Current().value();
+	
+	if (isParentDirectory(item))
 		return;
 	
-	const MPD::Item &item = w->Current().value();
 	switch (item.type)
 	{
 		case itDirectory:
@@ -319,6 +325,8 @@ void Browser::GetSelectedSongs(MPD::SongList &v)
 	}
 }
 
+/***********************************************************************/
+
 std::string Browser::currentFilter()
 {
 	return RegexFilter<MPD::Item>::currentFilter(*w);
@@ -327,25 +335,31 @@ std::string Browser::currentFilter()
 void Browser::applyFilter(const std::string &filter)
 {
 	w->ShowAll();
-	auto fun = [](const Regex &rx, Menu<MPD::Item> &menu, const Menu<MPD::Item>::Item &item) {
-		if (item.value().type == MPD::itDirectory && item.value().name == "..")
-			return true;
-		return rx.match(menu.Stringify(item));
-	};
+	auto fun = std::bind(BrowserEntryMatcher, _1, _2, true);
 	auto rx = RegexFilter<MPD::Item>(filter, Config.regex_type, fun);
-	w->Filter(w->Begin(), w->End(), rx);
+	w->filter(w->Begin(), w->End(), rx);
 }
 
-bool Browser::hasSupportedExtension(const std::string &file)
+/***********************************************************************/
+
+bool Browser::search(const std::string &constraint)
 {
-	size_t last_dot = file.rfind(".");
-	if (last_dot > file.length())
-		return false;
-	
-	std::string ext = file.substr(last_dot+1);
-	lowercase(ext);
-	return SupportedExtensions.find(ext) != SupportedExtensions.end();
+	auto fun = std::bind(BrowserEntryMatcher, _1, _2, false);
+	auto rx = RegexFilter<MPD::Item>(constraint, Config.regex_type, fun);
+	return w->search(w->Begin(), w->End(), rx);
 }
+
+void Browser::nextFound(bool wrap)
+{
+	w->NextFound(wrap);
+}
+
+void Browser::prevFound(bool wrap)
+{
+	w->PrevFound(wrap);
+}
+
+/***********************************************************************/
 
 void Browser::LocateSong(const MPD::Song &s)
 {
@@ -592,7 +606,20 @@ void Browser::UpdateItemList()
 	w->Refresh();
 }
 
-std::string Browser::ItemToString(const MPD::Item &item)
+namespace {//
+
+bool hasSupportedExtension(const std::string &file)
+{
+	size_t last_dot = file.rfind(".");
+	if (last_dot > file.length())
+		return false;
+	
+	std::string ext = file.substr(last_dot+1);
+	lowercase(ext);
+	return SupportedExtensions.find(ext) != SupportedExtensions.end();
+}
+
+std::string ItemToString(const MPD::Item &item)
 {
 	std::string result;
 	switch (item.type)
@@ -601,13 +628,23 @@ std::string Browser::ItemToString(const MPD::Item &item)
 			result = "[" + getBasename(item.name) + "]";
 			break;
 		case MPD::itSong:
-			if (!Config.columns_in_browser)
-				result = item.song->toString(Config.song_list_format_dollar_free);
+			if (Config.columns_in_browser)
+				result = item.song->toString(Config.song_in_columns_to_string_format);
 			else
-				result = Playlist::SongInColumnsToString(*item.song);
+				result = item.song->toString(Config.song_list_format_dollar_free);
+			break;
 		case MPD::itPlaylist:
 			result = Config.browser_playlist_prefix.Str() + getBasename(item.name);
+			break;
 	}
 	return result;
 }
 
+bool BrowserEntryMatcher(const Regex &rx, const MPD::Item &item, bool filter)
+{
+	if (Browser::isParentDirectory(item))
+		return filter;
+	return rx.match(ItemToString(item));
+}
+
+}
