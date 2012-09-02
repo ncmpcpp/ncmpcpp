@@ -63,167 +63,167 @@ template <typename C> class basic_buffer
 	///
 	std::list<FormatPos> itsFormat;
 	
-	public:
-		/// Constructs an empty buffer
-		///
-		basic_buffer() { }
-		
-		/// Constructs a buffer from the existed one
-		/// @param b copied buffer
-		///
-		basic_buffer(const basic_buffer &b);
-		
-		/// @return raw content of the buffer without formatting informations
-		///
-		const std::basic_string<C> &Str() const;
-		
-		/// Searches for given string in buffer and sets format/color at the
-		/// beginning and end of it using val_b and val_e flags accordingly
-		/// @param val_b flag set at the beginning of found occurence of string
-		/// @param s string that function seaches for
-		/// @param val_e flag set at the end of found occurence of string
-		/// @param case_sensitive indicates whether algorithm should care about case sensitivity
-		/// @param for_each indicates whether function searches through whole buffer and sets
-		/// the format for all occurences of given string or stops after the first one
-		/// @return true if at least one occurence of the string was found, false otherwise
-		///
-		bool SetFormatting(short val_b, std::basic_string<C> s, short val_e,
-						   bool case_sensitive, bool for_each = 1);
-		
-		/// Searches for given string in buffer and removes given
-		/// format/color from the beginning and end of its occurence
-		/// @param val_b flag to be removed from the beginning of the string
-		/// @param s string that function seaches for
-		/// @param val_e flag to be removed from the end of the string
-		/// @param case_sensitive indicates whether algorithm should care about case sensitivity
-		/// @param for_each indicates whether function searches through whole buffer and removes
-		/// given format from all occurences of given string or stops after the first one
-		///
-		void RemoveFormatting(short val_b, std::basic_string<C> pattern, short val_e,
-							  bool case_sensitive, bool for_each = 1);
-		
-		/// Removes all formating applied to string in buffer.
-		///
-		void RemoveFormatting();
-		
-		/// Prints to window object given part of the string, loading all needed formatting info
-		/// and cleaning up after. The main goal of this function is to provide interface for
-		/// colorful scrollers.
-		/// @param w window object that we want to print to
-		/// @param start_pos reference to start position of the string. note that this variable is
-		/// incremented by one after each call or set to 0 if end of string is reached
-		/// @param width width of the string to be printed
-		/// @param separator additional text to be placed between the end and the beginning of
-		/// the string
-		///
-		void Write(Window &w, size_t &start_pos, size_t width,
-				   const std::basic_string<C> &separator) const;
-		
-		/// Clears the content of the buffer and its formatting informations
-		///
-		void Clear();
-		
-		basic_buffer<C> &operator<<(int n)
+public:
+	/// Constructs an empty buffer
+	///
+	basic_buffer() { }
+	
+	/// Constructs a buffer from the existed one
+	/// @param b copied buffer
+	///
+	basic_buffer(const basic_buffer &b);
+	
+	/// @return raw content of the buffer without formatting informations
+	///
+	const std::basic_string<C> &Str() const;
+	
+	/// Searches for given string in buffer and sets format/color at the
+	/// beginning and end of it using val_b and val_e flags accordingly
+	/// @param val_b flag set at the beginning of found occurence of string
+	/// @param s string that function seaches for
+	/// @param val_e flag set at the end of found occurence of string
+	/// @param case_sensitive indicates whether algorithm should care about case sensitivity
+	/// @param for_each indicates whether function searches through whole buffer and sets
+	/// the format for all occurences of given string or stops after the first one
+	/// @return true if at least one occurence of the string was found, false otherwise
+	///
+	bool SetFormatting(short val_b, std::basic_string<C> s, short val_e,
+						bool case_sensitive, bool for_each = 1);
+	
+	/// Searches for given string in buffer and removes given
+	/// format/color from the beginning and end of its occurence
+	/// @param val_b flag to be removed from the beginning of the string
+	/// @param s string that function seaches for
+	/// @param val_e flag to be removed from the end of the string
+	/// @param case_sensitive indicates whether algorithm should care about case sensitivity
+	/// @param for_each indicates whether function searches through whole buffer and removes
+	/// given format from all occurences of given string or stops after the first one
+	///
+	void RemoveFormatting(short val_b, std::basic_string<C> pattern, short val_e,
+							bool case_sensitive, bool for_each = 1);
+	
+	/// Removes all formating applied to string in buffer.
+	///
+	void RemoveFormatting();
+	
+	/// Prints to window object given part of the string, loading all needed formatting info
+	/// and cleaning up after. The main goal of this function is to provide interface for
+	/// colorful scrollers.
+	/// @param w window object that we want to print to
+	/// @param start_pos reference to start position of the string. note that this variable is
+	/// incremented by one after each call or set to 0 if end of string is reached
+	/// @param width width of the string to be printed
+	/// @param separator additional text to be placed between the end and the beginning of
+	/// the string
+	///
+	void Write(Window &w, size_t &start_pos, size_t width,
+				const std::basic_string<C> &separator) const;
+	
+	/// Clears the content of the buffer and its formatting informations
+	///
+	void Clear();
+	
+	basic_buffer<C> &operator<<(int n)
+	{
+		itsString += intTo< std::basic_string<C> >::apply(n);
+		return *this;
+	}
+	
+	basic_buffer<C> &operator<<(long int n)
+	{
+		itsString += longIntTo< std::basic_string<C> >::apply(n);
+		return *this;
+	}
+	
+	basic_buffer<C> &operator<<(unsigned int n)
+	{
+		itsString += unsignedIntTo< std::basic_string<C> >::apply(n);
+		return *this;
+	}
+	
+	basic_buffer<C> &operator<<(unsigned long int n)
+	{
+		itsString += unsignedLongIntTo< std::basic_string<C> >::apply(n);
+		return *this;
+	}
+	
+	basic_buffer<C> &operator<<(char c)
+	{
+		itsString += c;
+		return *this;
+	}
+	
+	basic_buffer<C> &operator<<(wchar_t wc)
+	{
+		itsString += wc;
+		return *this;
+	}
+	
+	basic_buffer<C> &operator<<(const C *s)
+	{
+		itsString += s;
+		return *this;
+	}
+	
+	basic_buffer<C> &operator<<(const std::basic_string<C> &s)
+	{
+		itsString += s;
+		return *this;
+	}
+	
+	/// Handles colors
+	/// @return reference to itself
+	///
+	basic_buffer<C> &operator<<(Color color);
+	
+	/// Handles format flags
+	/// @return reference to itself
+	///
+	basic_buffer<C> &operator<<(Format f);
+	
+	/// Handles copying one buffer to another using operator<<()
+	/// @param buf buffer to be copied
+	/// @return reference to itself
+	///
+	basic_buffer<C> &operator<<(const basic_buffer<C> &buf);
+	
+	/// Friend operator that handles printing
+	/// the content of buffer to window object
+	friend Window &operator<<(Window &w, const basic_buffer<C> &buf)
+	{
+		const std::basic_string<C> &s = buf.itsString;
+		if (buf.itsFormat.empty())
+			w << s;
+		else
 		{
-			itsString += intTo< std::basic_string<C> >::apply(n);
-			return *this;
-		}
-		
-		basic_buffer<C> &operator<<(long int n)
-		{
-			itsString += longIntTo< std::basic_string<C> >::apply(n);
-			return *this;
-		}
-		
-		basic_buffer<C> &operator<<(unsigned int n)
-		{
-			itsString += unsignedIntTo< std::basic_string<C> >::apply(n);
-			return *this;
-		}
-		
-		basic_buffer<C> &operator<<(unsigned long int n)
-		{
-			itsString += unsignedLongIntTo< std::basic_string<C> >::apply(n);
-			return *this;
-		}
-		
-		basic_buffer<C> &operator<<(char c)
-		{
-			itsString += c;
-			return *this;
-		}
-		
-		basic_buffer<C> &operator<<(wchar_t wc)
-		{
-			itsString += wc;
-			return *this;
-		}
-		
-		basic_buffer<C> &operator<<(const C *s)
-		{
-			itsString += s;
-			return *this;
-		}
-		
-		basic_buffer<C> &operator<<(const std::basic_string<C> &s)
-		{
-			itsString += s;
-			return *this;
-		}
-		
-		/// Handles colors
-		/// @return reference to itself
-		///
-		basic_buffer<C> &operator<<(Color color);
-		
-		/// Handles format flags
-		/// @return reference to itself
-		///
-		basic_buffer<C> &operator<<(Format f);
-		
-		/// Handles copying one buffer to another using operator<<()
-		/// @param buf buffer to be copied
-		/// @return reference to itself
-		///
-		basic_buffer<C> &operator<<(const basic_buffer<C> &buf);
-		
-		/// Friend operator that handles printing
-		/// the content of buffer to window object
-		friend Window &operator<<(Window &w, const basic_buffer<C> &buf)
-		{
-			const std::basic_string<C> &s = buf.itsString;
-			if (buf.itsFormat.empty())
-				w << s;
-			else
+			std::basic_string<C> tmp;
+			auto b = buf.itsFormat.begin(), e = buf.itsFormat.end();
+			for (size_t i = 0; i < s.length() || b != e; ++i)
 			{
-				std::basic_string<C> tmp;
-				auto b = buf.itsFormat.begin(), e = buf.itsFormat.end();
-				for (size_t i = 0; i < s.length() || b != e; ++i)
+				while (b != e && i == b->Position)
 				{
-					while (b != e && i == b->Position)
+					if (!tmp.empty())
 					{
-						if (!tmp.empty())
-						{
-							w << tmp;
-							tmp.clear();
-						}
-						buf.LoadAttribute(w, b->Value);
-						b++;
+						w << tmp;
+						tmp.clear();
 					}
-					tmp += s[i];
+					buf.LoadAttribute(w, b->Value);
+					b++;
 				}
-				if (!tmp.empty())
-					w << tmp;
+				tmp += s[i];
 			}
-			return w;
+			if (!tmp.empty())
+				w << tmp;
 		}
-		
-	private:
-		/// Loads an attribute to given window object
-		/// @param w window object we want to load attribute to
-		/// @param value value of attribute to be loaded
-		///
-		void LoadAttribute(Window &w, short value) const;
+		return w;
+	}
+	
+private:
+	/// Loads an attribute to given window object
+	/// @param w window object we want to load attribute to
+	/// @param value value of attribute to be loaded
+	///
+	void LoadAttribute(Window &w, short value) const;
 };
 
 /// Standard buffer that uses narrow characters
