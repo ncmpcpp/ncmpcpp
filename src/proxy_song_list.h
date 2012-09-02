@@ -24,6 +24,16 @@
 #include "menu.h"
 #include "song.h"
 
+/// This fancy class provides a way to use NC::Menu<T> template instantiations
+/// with different Ts in a uniform manner. Note that since it provides methods
+/// such as getSong or currentSong, it's biased towards menus that somehow
+/// contain songs.
+///
+/// Dependent types are T and F. T is type of items stored inside Menu, whereas
+/// F is a function that takes Menu<T>::Item and converts it into MPD::Song pointer.
+/// For Menu<MPD::Song> this is just taking address of given MPD::Song, but e.g.
+/// Menu<MPD::Item> returns not null pointer only if requested position actually
+/// contains a song and not directory or playlist.
 class ProxySongList
 {
 	struct Interface
