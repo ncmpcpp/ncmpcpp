@@ -892,16 +892,6 @@ MPD::SongList TagEditor::getSelectedSongs()
 
 /***********************************************************************/
 
-NC::List *TagEditor::GetList()
-{
-	if (w == LeftColumn)
-		return LeftColumn;
-	else if (w == Tags)
-		return Tags;
-	else
-		return 0;
-}
-
 bool TagEditor::isNextColumnAvailable()
 {
 	if (w == LeftColumn)

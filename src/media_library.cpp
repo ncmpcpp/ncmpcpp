@@ -436,18 +436,6 @@ void MediaLibrary::MouseButtonPressed(MEVENT me)
 	}
 }
 
-NC::List *MediaLibrary::GetList()
-{
-	if (w == Tags)
-		return Tags;
-	else if (w == Albums)
-		return Albums;
-	else if (w == Songs)
-		return Songs;
-	else // silence compiler
-		return 0;
-}
-
 /***********************************************************************/
 
 std::string MediaLibrary::currentFilter()

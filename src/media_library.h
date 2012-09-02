@@ -56,8 +56,6 @@ class MediaLibrary : public Screen<NC::Window>, public Filterable, public HasSon
 		virtual void reverseSelection();
 		virtual MPD::SongList getSelectedSongs();
 		
-		virtual NC::List *GetList();
-		
 		virtual bool isMergable() { return true; }
 		
 		int Columns();

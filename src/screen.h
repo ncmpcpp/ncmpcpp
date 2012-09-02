@@ -74,10 +74,6 @@ class BasicScreen
 		
 		/// @see Screen::MouseButtonPressed()
 		virtual void MouseButtonPressed(MEVENT) { }
-		
-		/// @return pointer to instantiation of Menu template class
-		/// cast to List if available or null pointer otherwise
-		virtual NC::List *GetList() = 0;
 
 		/// When this is overwritten with a function returning true, the
 		/// screen will be used in tab switching.

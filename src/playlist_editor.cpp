@@ -564,19 +564,6 @@ void PlaylistEditor::Locate(const std::string &name)
 	SwitchTo();
 }
 
-NC::List *PlaylistEditor::GetList()
-{
-	if (w == Playlists)
-		return Playlists;
-	else if (w == Content)
-		return Content;
-	else // silence compiler
-	{
-		assert(false);
-		return 0;
-	}
-}
-
 namespace {//
 
 std::string SongToString(const MPD::Song &s)

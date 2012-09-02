@@ -57,8 +57,6 @@ class PlaylistEditor : public Screen<NC::Window>, public Filterable, public HasS
 		
 		virtual void Locate(const std::string &);
 		
-		virtual NC::List *GetList();
-		
 		virtual bool isMergable() { return true; }
 		
 		void MoveSelectedItems(Playlist::Movement where);

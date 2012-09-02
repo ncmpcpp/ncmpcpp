@@ -48,10 +48,6 @@ class Visualizer : public Screen<NC::Window>
 		virtual void MouseButtonPressed(MEVENT) { }
 		virtual bool isTabbable() { return true; }
 		
-		virtual NC::List *GetList() { return 0; }
-		
-		virtual bool allowsSelection() { return false; }
-		
 		virtual bool isMergable() { return true; }
 		
 		void SetFD();

@@ -58,8 +58,6 @@ class Browser : public Screen< NC::Menu<MPD::Item> >, public Filterable, public 
 		virtual void reverseSelection();
 		virtual MPD::SongList getSelectedSongs();
 		
-		virtual NC::List *GetList() { return w; }
-		
 		virtual bool isMergable() { return true; }
 		
 		const std::string &CurrentDir() { return itsBrowsedDir; }

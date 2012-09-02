@@ -38,10 +38,6 @@ class SelectedItemsAdder : public Screen< NC::Menu<std::string> >
 		virtual void SpacePressed() { }
 		virtual void MouseButtonPressed(MEVENT);
 		
-		virtual bool allowsSelection() { return false; }
-		
-		virtual NC::List *GetList() { return w; }
-		
 		virtual bool isMergable() { return false; }
 		
 	protected:

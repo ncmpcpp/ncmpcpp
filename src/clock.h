@@ -44,10 +44,6 @@ class Clock : public Screen<NC::Window>
 		virtual void MouseButtonPressed(MEVENT) { }
 		virtual bool isTabbable() { return true; }
 		
-		virtual bool allowsSelection() { return false; }
-		
-		virtual NC::List *GetList() { return 0; }
-		
 		virtual bool isMergable() { return true; }
 		
 	protected:

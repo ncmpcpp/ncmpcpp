@@ -33,22 +33,9 @@
 
 namespace NC {
 
-/// List class is an interface for Menu class
-struct List
-{
-	/// @return currently highlighted position
-	virtual size_t Choice() const = 0;
-	
-	/// @see Menu::Empty()
-	virtual bool Empty() const = 0;
-	
-	/// @see Menu::Size()
-	virtual size_t Size() const = 0;
-};
-
 /// This template class is generic menu capable of
 /// holding any std::vector compatible values.
-template <typename T> struct Menu : public Window, public List
+template <typename T> struct Menu : public Window
 {
 	struct Item
 	{

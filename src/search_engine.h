@@ -102,8 +102,6 @@ class SearchEngine : public Screen< NC::Menu<SEItem> >, public Filterable, publi
 		virtual void reverseSelection();
 		virtual MPD::SongList getSelectedSongs();
 		
-		virtual NC::List *GetList() { return w->Size() >= StaticOptions ? w : 0; }
-		
 		virtual bool isMergable() { return true; }
 		
 		void UpdateFoundList();

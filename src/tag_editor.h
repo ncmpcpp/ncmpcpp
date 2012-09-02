@@ -67,8 +67,6 @@ class TagEditor : public Screen<NC::Window>, public Filterable, public HasSongs,
 		virtual void reverseSelection();
 		virtual MPD::SongList getSelectedSongs();
 		
-		virtual NC::List *GetList();
-		
 		virtual bool isMergable() { return true; }
 		
 		bool isNextColumnAvailable();

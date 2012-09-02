@@ -61,8 +61,6 @@ class Playlist : public Screen<NC::Window>, public Filterable, public HasSongs, 
 		virtual void reverseSelection();
 		virtual MPD::SongList getSelectedSongs();
 		
-		virtual NC::List *GetList() { return w == Items ? Items : 0; }
-		
 		virtual bool isMergable() { return true; }
 		
 		bool isFiltered();

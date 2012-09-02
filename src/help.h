@@ -36,10 +36,6 @@ class Help : public Screen<NC::Scrollpad>
 		virtual void SpacePressed() { }
 		virtual bool isTabbable() { return true; }
 		
-		virtual bool allowsSelection() { return false; }
-		
-		virtual NC::List *GetList() { return 0; }
-		
 		virtual bool isMergable() { return true; }
 		
 	protected:

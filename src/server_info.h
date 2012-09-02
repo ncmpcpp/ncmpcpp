@@ -36,10 +36,6 @@ class ServerInfo : public Screen<NC::Scrollpad>
 		virtual void EnterPressed() { }
 		virtual void SpacePressed() { }
 		
-		virtual bool allowsSelection() { return false; }
-		
-		virtual NC::List *GetList() { return 0; }
-		
 		virtual bool isMergable() { return false; }
 		
 	protected:

@@ -43,10 +43,6 @@ class TinyTagEditor : public Screen< NC::Menu<NC::Buffer> >
 		virtual void SpacePressed() { }
 		virtual void MouseButtonPressed(MEVENT);
 		
-		virtual bool allowsSelection() { return false; }
-		
-		virtual NC::List *GetList() { return 0; }
-		
 		virtual bool isMergable() { return true; }
 		
 		void SetEdited(const MPD::Song &);

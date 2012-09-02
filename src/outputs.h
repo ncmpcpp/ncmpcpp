@@ -42,10 +42,6 @@ class Outputs : public Screen< NC::Menu<MPD::Output> >
 		virtual void MouseButtonPressed(MEVENT);
 		virtual bool isTabbable() { return true; }
 		
-		virtual bool allowsSelection() { return false; }
-		
-		virtual NC::List *GetList() { return w; }
-		
 		virtual bool isMergable() { return true; }
 		
 		void FetchList();
