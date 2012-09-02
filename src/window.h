@@ -21,9 +21,7 @@
 #ifndef _WINDOW_H
 #define _WINDOW_H
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
+#include "config.h"
 
 #ifdef USE_PDCURSES
 # define NCURSES_MOUSE_VERSION 1
