@@ -237,11 +237,10 @@ void Visualizer::FindOutputID()
 	if (!Config.visualizer_output_name.empty())
 	{
 		size_t i = 0;
-		Mpd.GetOutputs([this, &i](MPD::Output &&o) {
-			if (o.name() == Config.visualizer_output_name)
+		auto outputs = Mpd.GetOutputs();
+		for (auto o = outputs.begin(); o != outputs.end(); ++o, ++i)
+			if (o->name() == Config.visualizer_output_name)
 				itsOutputID = i;
-			++i;
-		});
 		if (itsOutputID == -1)
 			ShowMessage("There is no output named \"%s\"", Config.visualizer_output_name.c_str());
 	}

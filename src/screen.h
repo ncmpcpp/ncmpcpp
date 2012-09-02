@@ -46,84 +46,46 @@ class BasicScreen
 		virtual ~BasicScreen() { }
 		
 		/// @see Screen::ActiveWindow()
-		///
 		virtual Window *ActiveWindow() = 0;
 		
 		/// Method used for switching to screen
-		///
 		virtual void SwitchTo() = 0;
 		
 		/// Method that should resize screen
 		/// if requested by hasToBeResized
-		///
 		virtual void Resize() = 0;
 		
 		/// @return title of the screen
-		///
 		virtual std::basic_string<my_char_t> Title() = 0;
 		
 		/// If the screen contantly has to update itself
 		/// somehow, it should be called by this function.
-		///
 		virtual void Update() { }
 		
 		/// @see Screen::Refresh()
-		///
 		virtual void Refresh() = 0;
 		
 		/// @see Screen::RefreshWindow()
-		///
 		virtual void RefreshWindow() = 0;
 		
 		/// @see Screen::Scroll()
-		///
 		virtual void Scroll(Where where) = 0;
 		
 		/// Invoked after Enter was pressed
-		///
 		virtual void EnterPressed() = 0;
 		
 		/// Invoked after Space was pressed
-		///
 		virtual void SpacePressed() = 0;
 		
 		/// @see Screen::MouseButtonPressed()
-		///
 		virtual void MouseButtonPressed(MEVENT) { }
-		
-		/// @return pointer to currently selected song in the screen
-		/// (if screen provides one) or null pointer otherwise.
-		///
-		virtual MPD::Song *CurrentSong() { return 0; }
-		
-		/// @return pointer to song at given position in the screen
-		/// (if screen is provides one) or null pointer otherwise.
-		///
-		virtual MPD::Song *GetSong(GNUC_UNUSED size_t pos) { return 0; }
-		
-		/// @return true if the screen allows selecting items, false otherwise
-		///
-		virtual bool allowsSelection() = 0;
-		
-		/// Reverses selection. Does nothing by default since pure
-		/// virtual allowsSelection() should remind of this function
-		/// to be defined
-		///
-		virtual void ReverseSelection() { }
-		
-		/// Gets selected songs' positions from the screen
-		/// @param v vector to be filled with positions
-		///
-		virtual void GetSelectedSongs(GNUC_UNUSED MPD::SongList &v) { }
 		
 		/// @return pointer to instantiation of Menu template class
 		/// cast to List if available or null pointer otherwise
-		///
 		virtual List *GetList() = 0;
 
 		/// When this is overwritten with a function returning true, the
 		/// screen will be used in tab switching.
-		///
 		virtual bool isTabbable() { return false; }
 		
 		/// @return true if screen is mergable, ie. can be "proper" subwindow
@@ -137,7 +99,6 @@ class BasicScreen
 		bool Lock();
 		
 		/// Should be set to true each time screen needs resize
-		///
 		bool hasToBeResized;
 		
 		/// Unlocks a screen, ie. hides merged window (if there is one set).
@@ -182,33 +143,26 @@ template <typename WindowType> class Screen : public BasicScreen
 		/// it's useful to determine the one that is being
 		/// active
 		/// @return address to window object cast to void *
-		///
 		virtual Window *ActiveWindow();
 		
 		/// @return pointer to currently active window
-		///
 		WindowType *Main();
 		
 		/// Refreshes whole screen
-		///
 		virtual void Refresh();
 		
 		/// Refreshes active window of the screen
-		///
 		virtual void RefreshWindow();
 		
-
 		/// Scrolls the screen by given amount of lines and
 		/// if fancy scrolling feature is disabled, enters the
 		/// loop that holds main loop until user releases the key
 		/// @param where indicates where one wants to scroll
-		///
 		virtual void Scroll(Where where);
 		
 		/// Invoked after there was one of mouse buttons pressed
 		/// @param me struct that contains coords of where the click
 		/// had its place and button actions
-		///
 		virtual void MouseButtonPressed(MEVENT me);
 		
 	protected:
@@ -216,7 +170,6 @@ template <typename WindowType> class Screen : public BasicScreen
 		/// of window used by the screen. What is more, it should
 		/// always be assigned to the currently active window (if
 		/// acreen contains more that one)
-		///
 		WindowType *w;
 };
 
@@ -268,7 +221,6 @@ template <typename WindowType> void Screen<WindowType>::MouseButtonPressed(MEVEN
 /// Specialization for Screen<Scrollpad>::MouseButtonPressed, that should
 /// not scroll whole page, but rather a few lines (the number of them is
 /// defined in the config)
-///
 template <> inline void Screen<Scrollpad>::MouseButtonPressed(MEVENT me)
 {
 	if (me.bstate & BUTTON2_PRESSED)

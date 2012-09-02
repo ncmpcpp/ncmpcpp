@@ -116,9 +116,9 @@ void Outputs::FetchList()
 	if (!isInitialized)
 		return;
 	w->Clear();
-	Mpd.GetOutputs([this](MPD::Output &&o) {
-		w->AddItem(o, o.isEnabled());
-	});
+	auto outputs = Mpd.GetOutputs();
+	for (auto o = outputs.begin(); o != outputs.end(); ++o)
+		w->AddItem(*o, o->isEnabled());
 	if (myScreen == this)
 		w->Refresh();
 }

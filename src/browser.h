@@ -26,7 +26,7 @@
 #include "regex_filter.h"
 #include "screen.h"
 
-class Browser : public Screen< Menu<MPD::Item> >, public Filterable, public Searchable
+class Browser : public Screen< Menu<MPD::Item> >, public Filterable, public HasSongs, public Searchable
 {
 	public:
 		Browser() : itsBrowseLocally(0), itsScrollBeginning(0), itsBrowsedDir("/") { }
@@ -41,13 +41,6 @@ class Browser : public Screen< Menu<MPD::Item> >, public Filterable, public Sear
 		virtual void MouseButtonPressed(MEVENT);
 		virtual bool isTabbable() { return true; }
 		
-		virtual MPD::Song *CurrentSong();
-		virtual MPD::Song *GetSong(size_t pos) { return w->at(pos).value().type == MPD::itSong ? (*w)[pos].value().song.get() : 0; }
-		
-		virtual bool allowsSelection() { return true; }
-		virtual void ReverseSelection();
-		virtual void GetSelectedSongs(MPD::SongList &);
-		
 		/// Filterable implementation
 		virtual std::string currentFilter();
 		virtual void applyFilter(const std::string &filter);
@@ -56,6 +49,15 @@ class Browser : public Screen< Menu<MPD::Item> >, public Filterable, public Sear
 		virtual bool search(const std::string &constraint);
 		virtual void nextFound(bool wrap);
 		virtual void prevFound(bool wrap);
+		
+		/// HasSongs implementation
+		virtual MPD::Song *getSong(size_t pos);
+		virtual MPD::Song *currentSong();
+		
+		virtual bool allowsSelection();
+		virtual void reverseSelection();
+		virtual void removeSelection();
+		virtual MPD::SongList getSelectedSongs();
 		
 		virtual List *GetList() { return w; }
 		

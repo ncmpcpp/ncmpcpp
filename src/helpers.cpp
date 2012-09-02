@@ -270,11 +270,6 @@ void ParseArgv(int argc, char **argv)
 		exit(0);
 }
 
-std::string StringPairToString(const std::pair<std::string, std::string> &pair)
-{
-	return pair.first;
-}
-
 std::string Timestamp(time_t t)
 {
 	char result[32];
@@ -305,26 +300,6 @@ void UpdateSongList(Menu<MPD::Song> *menu)
 	}
 	menu->Refresh();
 }
-
-#ifdef HAVE_TAGLIB_H
-std::string getSharedDirectory(const MPD::SongList &v)
-{
-	if (v.empty()) // this should never happen, but in case...
-		FatalError("empty SongList passed to getSharedDirectory(const SongList &)!");
-	size_t i = -1;
-	std::string first = v.front().getDirectory();
-	for (MPD::SongList::const_iterator it = ++v.begin(); it != v.end(); ++it)
-	{
-		size_t j = 0;
-		std::string dir = it->getDirectory();
-		size_t length = std::min(first.length(), dir.length());
-		while (!first.compare(j, 1, dir, j, 1) && j < length && j < i)
-			++j;
-		i = j;
-	}
-	return i ? first.substr(0, i) : "/";
-}
-#endif // HAVE_TAGLIB_H
 
 std::basic_string<my_char_t> Scroller(const std::basic_string<my_char_t> &str, size_t &pos, size_t width)
 {

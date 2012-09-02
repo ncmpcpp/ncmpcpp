@@ -60,9 +60,11 @@ void PlaylistEditor::Init()
 	Playlists->HighlightColor(Config.active_column_color);
 	Playlists->CyclicScrolling(Config.use_cyclic_scrolling);
 	Playlists->CenteredCursor(Config.centered_cursor);
+	Playlists->SetSelectPrefix(Config.selected_item_prefix);
+	Playlists->SetSelectSuffix(Config.selected_item_suffix);
 	Playlists->setItemDisplayer(Display::Default<std::string>);
 	
-	Content = new Menu<MPD::Song>(RightColumnStartX, MainStartY, RightColumnWidth, MainHeight, Config.titles_visibility ? "Playlist's content" : "", Config.main_color, brNone);
+	Content = new Menu<MPD::Song>(RightColumnStartX, MainStartY, RightColumnWidth, MainHeight, Config.titles_visibility ? "Playlist content" : "", Config.main_color, brNone);
 	Content->HighlightColor(Config.main_highlight_color);
 	Content->CyclicScrolling(Config.use_cyclic_scrolling);
 	Content->CenteredCursor(Config.centered_cursor);
@@ -138,15 +140,10 @@ void PlaylistEditor::Update()
 	if (Playlists->ReallyEmpty())
 	{
 		Content->Clear();
-		MPD::TagList list;
-		Mpd.GetPlaylists(list);
-		sort(list.begin(), list.end(), CaseInsensitiveSorting());
-		for (MPD::TagList::iterator it = list.begin(); it != list.end(); ++it)
-		{
-			utf_to_locale(*it);
+		auto list = Mpd.GetPlaylists();
+		std::sort(list.begin(), list.end(), CaseInsensitiveSorting());
+		for (auto it = list.begin(); it != list.end(); ++it)
 			Playlists->AddItem(*it);
-		}
-		Playlists->Window::Clear();
 		Playlists->Refresh();
 	}
 	
@@ -154,20 +151,26 @@ void PlaylistEditor::Update()
 	{
 		Content->Reset();
 		size_t plsize = 0;
-		Mpd.GetPlaylistContent(locale_to_utf_cpy(Playlists->Current().value()), [this, &plsize](MPD::Song &&s) {
-			Content->AddItem(s, myPlaylist->checkForSong(s));
-			++plsize;
-		});
-		if (plsize > 0)
+		auto songs = Mpd.GetPlaylistContent(Playlists->Current().value());
+		for (auto s = songs.begin(); s != songs.end(); ++s, ++plsize)
+			Content->AddItem(*s, myPlaylist->checkForSong(*s));
+		std::string title;
+		if (Config.titles_visibility)
 		{
-			std::string title = Config.titles_visibility ? "Playlist content (" + unsignedLongIntTo<std::string>::apply(plsize) + " item" + (plsize == 1 ? ")" : "s)") : "";
+			title = "Playlist content";
+			if (plsize > 0)
+			{
+				title += " (";
+				title += unsignedLongIntTo<std::string>::apply(plsize);
+				title += " item";
+				if (plsize == 1)
+					title += ")";
+				else
+					title += "s)";
+			}
 			title.resize(Content->GetWidth());
-			Content->SetTitle(title);
 		}
-		else
-			Content->SetTitle(Config.titles_visibility ? "Playlist content" : "");
-		
-		Content->Window::Clear();
+		Content->SetTitle(title);
 		Content->Display();
 	}
 	
@@ -351,13 +354,27 @@ void PlaylistEditor::AddToPlaylist(bool add_n_play)
 
 void PlaylistEditor::SpacePressed()
 {
-	if (Config.space_selects && w == Content)
+	if (Config.space_selects)
 	{
-		Content->Current().setSelected(!Content->Current().isSelected());
-		w->Scroll(wDown);
+		if (w == Playlists)
+		{
+			if (!Playlists->Empty())
+			{
+				Playlists->Current().setSelected(!Playlists->Current().isSelected());
+				Playlists->Scroll(wDown);
+			}
+		}
+		else if (w == Content)
+		{
+			if (!Content->Empty())
+			{
+				Content->Current().setSelected(!Content->Current().isSelected());
+				Content->Scroll(wDown);
+			}
+		}
 	}
 	else
-		AddToPlaylist(0);
+		AddToPlaylist(false);
 }
 
 void PlaylistEditor::MouseButtonPressed(MEVENT me)
@@ -401,21 +418,6 @@ void PlaylistEditor::MouseButtonPressed(MEVENT me)
 		else
 			Screen<Window>::MouseButtonPressed(me);
 	}
-}
-
-MPD::Song *PlaylistEditor::CurrentSong()
-{
-	return w == Content && !Content->Empty() ? &Content->Current().value() : 0;
-}
-
-void PlaylistEditor::GetSelectedSongs(MPD::SongList &v)
-{
-	std::vector<size_t> selected;
-	Content->GetSelected(selected);
-	if (selected.empty())
-		selected.push_back(Content->Choice());
-	for (auto it = selected.begin(); it != selected.end(); ++it)
-		v.push_back(Content->at(*it).value());
 }
 
 /***********************************************************************/
@@ -478,6 +480,81 @@ void PlaylistEditor::prevFound(bool wrap)
 		Playlists->PrevFound(wrap);
 	else if (w == Content)
 		Content->PrevFound(wrap);
+}
+
+/***********************************************************************/
+
+MPD::Song *PlaylistEditor::getSong(size_t pos)
+{
+	MPD::Song *ptr = 0;
+	if (w == Content)
+		ptr = &(*Content)[pos].value();
+	return ptr;
+}
+
+MPD::Song *PlaylistEditor::currentSong()
+{
+	if (w == Content && !Content->Empty())
+		return getSong(Content->Choice());
+	else
+		return 0;
+}
+
+bool PlaylistEditor::allowsSelection()
+{
+	return true;
+}
+
+void PlaylistEditor::removeSelection()
+{
+	if (w == Playlists)
+		removeSelectionHelper(Playlists->Begin(), Playlists->End());
+	else if (w == Content)
+		removeSelectionHelper(Content->Begin(), Content->End());
+}
+
+void PlaylistEditor::reverseSelection()
+{
+	if (w == Playlists)
+		reverseSelectionHelper(Playlists->Begin(), Playlists->End());
+	else if (w == Content)
+		reverseSelectionHelper(Content->Begin(), Content->End());
+}
+
+MPD::SongList PlaylistEditor::getSelectedSongs()
+{
+	MPD::SongList result;
+	if (w == Playlists)
+	{
+		bool any_selected = false;
+		for (auto it = Playlists->Begin(); it != Playlists->End(); ++it)
+		{
+			if (it->isSelected())
+			{
+				any_selected = true;
+				auto songs = Mpd.GetPlaylistContent(it->value());
+				result.insert(result.end(), songs.begin(), songs.end());
+			}
+		}
+		// we don't check for empty result here as it's possible that
+		// all selected playlists are empty.
+		if (!any_selected && !Content->Empty())
+		{
+			withUnfilteredMenu(*Content, [this, &result]() {
+				result.insert(result.end(), Content->BeginV(), Content->EndV());
+			});
+		}
+	}
+	else if (w == Content)
+	{
+		for (auto it = Content->Begin(); it != Content->End(); ++it)
+			if (it->isSelected())
+				result.push_back(it->value());
+		// if no item is selected, add current one
+		if (result.empty() && !Content->Empty())
+			result.push_back(Content->Current().value());
+	}
+	return result;
 }
 
 /***********************************************************************/

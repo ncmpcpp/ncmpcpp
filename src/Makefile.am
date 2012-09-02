@@ -19,7 +19,6 @@ ncmpcpp_SOURCES = \
 	lyrics.cpp \
 	lyrics_fetcher.cpp \
 	media_library.cpp \
-	menu.cpp \
 	mpdpp.cpp \
 	mutable_song.cpp \
 	ncmpcpp.cpp \

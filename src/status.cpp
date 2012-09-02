@@ -236,19 +236,21 @@ void NcmpcppStatusChanged(MPD::Connection *, MPD::StatusChanges changed, void *)
 		if (playlist_length < myPlaylist->Items->Size())
 			myPlaylist->Items->ResizeList(playlist_length);
 		
-		Mpd.GetPlaylistChanges(Mpd.GetOldPlaylistID(), [](MPD::Song &&s) {
-			int pos = s.getPosition();
-			if (pos < int(myPlaylist->Items->Size()))
+		auto songs = Mpd.GetPlaylistChanges(Mpd.GetOldPlaylistID());
+		for (auto s = songs.begin(); s != songs.end(); ++s)
+		{
+			size_t pos = s->getPosition();
+			if (pos < myPlaylist->Items->Size())
 			{
 				// if song's already in playlist, replace it with a new one
-				myPlaylist->Items->at(pos).value() = s;
+				myPlaylist->Items->at(pos).value() = *s;
 			}
 			else
 			{
 				// otherwise just add it to playlist
-				myPlaylist->Items->AddItem(s);
+				myPlaylist->Items->AddItem(*s);
 			}
-		});
+		}
 		
 		if (is_filtered)
 		{

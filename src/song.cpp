@@ -30,9 +30,9 @@
 
 namespace {//
 
-unsigned calc_hash(const char* s, unsigned seed = 0)
+size_t calc_hash(const char* s, unsigned seed = 0)
 {
-	unsigned hash = seed;
+	size_t hash = seed;
 	while (*s)
 		hash = hash * 101  +  *s++;
 	return hash;

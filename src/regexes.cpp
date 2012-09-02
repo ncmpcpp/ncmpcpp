@@ -42,6 +42,16 @@ Regex::~Regex()
 		regfree(&m_rx);
 }
 
+const std::string &Regex::regex() const
+{
+	return m_regex;
+}
+
+const std::string &Regex::error() const
+{
+	return m_error;
+}
+
 bool Regex::compile()
 {
 	if (m_compiled)

@@ -32,10 +32,10 @@ struct Regex
 	virtual ~Regex();
 	
 	/// @return regular expression
-	const std::string &regex() const { return m_regex; }
+	const std::string &regex() const;
 	
 	/// @return compilation error (if there was any)
-	const std::string &error() const { return m_error; }
+	const std::string &error() const;
 	
 	/// compiles regular expression
 	/// @result true if compilation was successful, false otherwise

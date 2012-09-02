@@ -35,12 +35,8 @@ void ServerInfo::Init()
 	SetDimensions();
 	w = new Scrollpad((COLS-itsWidth)/2, (MainHeight-itsHeight)/2+MainStartY, itsWidth, itsHeight, "MPD server info", Config.main_color, Config.window_border);
 	
-	Mpd.GetURLHandlers([this](std::string &&handler) {
-		itsURLHandlers.push_back(handler);
-	});
-	Mpd.GetTagTypes([this](std::string &&tag_type) {
-		itsTagTypes.push_back(tag_type);
-	});
+	itsURLHandlers = Mpd.GetURLHandlers();
+	itsTagTypes = Mpd.GetTagTypes();
 	
 	isInitialized = 1;
 }
@@ -119,11 +115,11 @@ void ServerInfo::Update()
 	*w << fmtBold << U("Last DB update: ") << fmtBoldEnd << Timestamp(Mpd.DBUpdateTime()) << '\n';
 	*w << '\n';
 	*w << fmtBold << U("URL Handlers:") << fmtBoldEnd;
-	for (MPD::TagList::const_iterator it = itsURLHandlers.begin(); it != itsURLHandlers.end(); ++it)
+	for (auto it = itsURLHandlers.begin(); it != itsURLHandlers.end(); ++it)
 		*w << (it != itsURLHandlers.begin() ? U(", ") : U(" ")) << *it;
 	*w << U("\n\n");
 	*w << fmtBold << U("Tag Types:") << fmtBoldEnd;
-	for (MPD::TagList::const_iterator it = itsTagTypes.begin(); it != itsTagTypes.end(); ++it)
+	for (auto it = itsTagTypes.begin(); it != itsTagTypes.end(); ++it)
 		*w << (it != itsTagTypes.begin() ? U(", ") : U(" ")) << *it;
 	
 	w->Flush();

@@ -74,7 +74,7 @@ namespace MPD
 	
 	typedef std::vector<Item> ItemList;
 	typedef std::vector<Song> SongList;
-	typedef std::vector<std::string> TagList;
+	typedef std::vector<std::string> StringList;
 	typedef std::vector<Output> OutputList;
 
 	class Connection
@@ -153,15 +153,15 @@ namespace MPD
 			unsigned long DBPlayTime() const { return itsStats ? mpd_stats_get_db_play_time(itsStats) : 0; }
 			
 			size_t GetPlaylistLength() const { return itsCurrentStatus ? mpd_status_get_queue_length(itsCurrentStatus) : 0; }
-			void GetPlaylistChanges(unsigned, std::function<void(Song &&)> f);
+			SongList GetPlaylistChanges(unsigned);
 			
-			const std::string & GetErrorMessage() const { return itsErrorMessage; }
+			const std::string &GetErrorMessage() const { return itsErrorMessage; }
 			
 			Song GetCurrentlyPlayingSong();
 			int GetCurrentlyPlayingSongPos() const;
 			int GetCurrentSongPos() const;
 			Song GetSong(const std::string &);
-			void GetPlaylistContent(const std::string &, std::function<void(Song &&)> f);
+			SongList GetPlaylistContent(const std::string &);
 			
 			void GetSupportedExtensions(std::set<std::string> &);
 			
@@ -202,22 +202,22 @@ namespace MPD
 			void AddSearch(mpd_tag_type, const std::string &) const;
 			void AddSearchAny(const std::string &str) const;
 			void AddSearchURI(const std::string &str) const;
-			void CommitSearchSongs(std::function<void(Song &&)> f);
-			void CommitSearchTags(std::function<void(std::string &&)> f);
+			SongList CommitSearchSongs();
+			StringList CommitSearchTags();
 			
-			void GetPlaylists(TagList &);
-			void GetList(TagList &, mpd_tag_type);
-			void GetDirectory(const std::string &, std::function<void(Item &&)> f);
-			void GetDirectoryRecursive(const std::string &, std::function<void(Song &&)> f);
-			void GetSongs(const std::string &, SongList &);
-			void GetDirectories(const std::string &, TagList &);
+			StringList GetPlaylists();
+			StringList GetList(mpd_tag_type);
+			ItemList GetDirectory(const std::string &);
+			SongList GetDirectoryRecursive(const std::string &);
+			SongList GetSongs(const std::string &);
+			StringList GetDirectories(const std::string &);
 			
-			void GetOutputs(std::function<void(Output &&)> f);
+			OutputList GetOutputs();
 			bool EnableOutput(int);
 			bool DisableOutput(int);
 			
-			void GetURLHandlers(std::function<void(std::string &&)> f);
-			void GetTagTypes(std::function<void(std::string &&)> f);
+			StringList GetURLHandlers();
+			StringList GetTagTypes();
 			
 		private:
 			void GoIdle();

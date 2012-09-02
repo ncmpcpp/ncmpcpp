@@ -276,26 +276,6 @@ void SearchEngine::MouseButtonPressed(MEVENT me)
 		Screen< Menu<SEItem> >::MouseButtonPressed(me);
 }
 
-MPD::Song *SearchEngine::CurrentSong()
-{
-	return !w->Empty() && w->Current().value().isSong() ? &w->Current().value().song() : 0;
-}
-
-void SearchEngine::GetSelectedSongs(MPD::SongList &v)
-{
-	if (w->Empty())
-		return;
-	std::vector<size_t> selected;
-	w->GetSelected(selected);
-	if (selected.empty() && w->Choice() >= StaticOptions)
-		selected.push_back(w->Choice());
-	for (auto it = selected.begin(); it != selected.end(); ++it)
-	{
-		assert(w->at(*it).value().isSong());
-		v.push_back(w->at(*it).value().song());
-	}
-}
-
 /***********************************************************************/
 
 std::string SearchEngine::currentFilter()
@@ -332,22 +312,65 @@ void SearchEngine::prevFound(bool wrap)
 
 /***********************************************************************/
 
+MPD::Song *SearchEngine::getSong(size_t pos)
+{
+	MPD::Song *ptr = 0;
+	auto &item = (*w)[pos];
+	if (!item.isSeparator() && item.value().isSong())
+		ptr = &item.value().song();
+	return ptr;
+}
+
+MPD::Song *SearchEngine::currentSong()
+{
+	if (w->Empty())
+		return 0;
+	else
+		return getSong(w->Choice());
+}
+
+bool SearchEngine::allowsSelection()
+{
+	return w->Current().value().isSong();
+}
+
+void SearchEngine::removeSelection()
+{
+	removeSelectionHelper(w->Begin(), w->End());
+}
+
+void SearchEngine::reverseSelection()
+{
+	reverseSelectionHelper(w->Begin()+std::min(StaticOptions, w->Size()), w->End());
+}
+
+MPD::SongList SearchEngine::getSelectedSongs()
+{
+	MPD::SongList result;
+	for (auto it = w->Begin(); it != w->End(); ++it)
+	{
+		if (it->isSelected())
+		{
+			assert(it->value().isSong());
+			result.push_back(it->value().song());
+		}
+	}
+	// if no item is selected, add current one
+	if (result.empty() && !w->Empty())
+	{
+		assert(w->Current().value().isSong());
+		result.push_back(w->Current().value().song());
+	}
+	return result;
+}
+
+/***********************************************************************/
+
 void SearchEngine::UpdateFoundList()
 {
-	bool bold = 0;
-	for (size_t i = StaticOptions; i < w->Size(); ++i)
-	{
-		for (size_t j = 0; j < myPlaylist->Items->Size(); ++j)
-		{
-			if (myPlaylist->Items->at(j).value().getHash() == w->at(i).value().song().getHash())
-			{
-				bold = 1;
-				break;
-			}
-		}
-		w->at(i).setBold(bold);
-		bold = 0;
-	}
+	for (auto it = w->Begin(); it != w->End(); ++it)
+		if (it->value().isSong())
+			it->setBold(myPlaylist->checkForSong(it->value().song()));
 }
 
 void SearchEngine::Prepare()
@@ -422,30 +445,26 @@ void SearchEngine::Search()
 			Mpd.AddSearch(MPD_TAG_DATE, itsConstraints[9]);
 		if (!itsConstraints[10].empty())
 			Mpd.AddSearch(MPD_TAG_COMMENT, itsConstraints[10]);
-		Mpd.CommitSearchSongs([this](MPD::Song &&s) {
-			w->AddItem(s);
-		});
+		auto songs = Mpd.CommitSearchSongs();
+		for (auto s = songs.begin(); s != songs.end(); ++s)
+			w->AddItem(*s);
 		return;
 	}
 	
 	MPD::SongList list;
 	if (Config.search_in_db)
-	{
-		Mpd.GetDirectoryRecursive("/", [&list](MPD::Song &&s) {
-			list.push_back(s);
-		});
-	}
+		list = Mpd.GetDirectoryRecursive("/");
 	else
 	{
 		list.reserve(myPlaylist->Items->Size());
-		for (size_t i = 0; i < myPlaylist->Items->Size(); ++i)
-			list.push_back((*myPlaylist->Items)[i].value());
+		for (auto s = myPlaylist->Items->BeginV(); s != myPlaylist->Items->EndV(); ++s)
+			list.push_back(*s);
 	}
 	
 	bool any_found = 1;
 	bool found = 1;
 	
-	for (MPD::SongList::const_iterator it = list.begin(); it != list.end(); ++it)
+	for (auto it = list.begin(); it != list.end(); ++it)
 	{
 		if (SearchMode != &SearchModes[2]) // match to pattern
 		{

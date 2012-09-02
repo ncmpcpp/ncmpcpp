@@ -269,23 +269,6 @@ void Playlist::MouseButtonPressed(MEVENT me)
 	}
 }
 
-MPD::Song *Playlist::CurrentSong()
-{
-	return w == Items && !Items->Empty() ? &Items->Current().value() : 0;
-}
-
-void Playlist::GetSelectedSongs(MPD::SongList &v)
-{
-	if (Items->Empty())
-		return;
-	std::vector<size_t> selected;
-	Items->GetSelected(selected);
-	if (selected.empty())
-		selected.push_back(Items->Choice());
-	for (auto it = selected.begin(); it != selected.end(); ++it)
-		v.push_back(Items->at(*it).value());
-}
-
 /***********************************************************************/
 
 std::string Playlist::currentFilter()
@@ -332,6 +315,54 @@ void Playlist::prevFound(bool wrap)
 }
 
 /***********************************************************************/
+
+MPD::Song *Playlist::getSong(size_t pos)
+{
+	MPD::Song *ptr = 0;
+	if (w == Items)
+		ptr = &(*Items)[pos].value();
+	return ptr;
+}
+
+MPD::Song *Playlist::currentSong()
+{
+	if (Items->Empty())
+		return 0;
+	else
+		return getSong(Items->Choice());
+}
+
+bool Playlist::allowsSelection()
+{
+	return w == Items;
+}
+
+void Playlist::removeSelection()
+{
+	removeSelectionHelper(Items->Begin(), Items->End());
+}
+
+void Playlist::reverseSelection()
+{
+	reverseSelectionHelper(Items->Begin(), Items->End());
+}
+
+MPD::SongList Playlist::getSelectedSongs()
+{
+	MPD::SongList result;
+	if (w == Items)
+	{
+		for (auto it = Items->Begin(); it != Items->End(); ++it)
+			if (it->isSelected())
+				result.push_back(it->value());
+		if (result.empty() && !Items->Empty())
+			result.push_back(Items->Current().value());
+	}
+	return result;
+}
+
+/***********************************************************************/
+
 
 bool Playlist::isFiltered()
 {

@@ -78,8 +78,10 @@ void SongInfo::SwitchTo()
 	if (myLockedScreen)
 		UpdateInactiveScreen(this);
 	
-	MPD::Song *s = myScreen->CurrentSong();
-	
+	auto hs = dynamic_cast<HasSongs *>(myScreen);
+	if (!hs)
+		return;
+	auto s = hs->currentSong();
 	if (!s)
 		return;
 	

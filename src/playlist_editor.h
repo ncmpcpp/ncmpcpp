@@ -24,7 +24,7 @@
 #include "playlist.h"
 #include "ncmpcpp.h"
 
-class PlaylistEditor : public Screen<Window>, public Filterable, public Searchable
+class PlaylistEditor : public Screen<Window>, public Filterable, public HasSongs, public Searchable
 {
 	public:
 		virtual void SwitchTo();
@@ -40,13 +40,6 @@ class PlaylistEditor : public Screen<Window>, public Filterable, public Searchab
 		virtual void MouseButtonPressed(MEVENT);
 		virtual bool isTabbable() { return true; }
 		
-		virtual MPD::Song *CurrentSong();
-		virtual MPD::Song *GetSong(size_t pos) { return w == Content ? &Content->at(pos).value() : 0; }
-		
-		virtual bool allowsSelection() { return w == Content; }
-		virtual void ReverseSelection() { Content->ReverseSelection(); }
-		virtual void GetSelectedSongs(MPD::SongList &);
-		
 		/// Filterable implementation
 		virtual std::string currentFilter();
 		virtual void applyFilter(const std::string &filter);
@@ -55,6 +48,15 @@ class PlaylistEditor : public Screen<Window>, public Filterable, public Searchab
 		virtual bool search(const std::string &constraint);
 		virtual void nextFound(bool wrap);
 		virtual void prevFound(bool wrap);
+		
+		/// HasSongs implementation
+		virtual MPD::Song *getSong(size_t pos);
+		virtual MPD::Song *currentSong();
+		
+		virtual bool allowsSelection();
+		virtual void reverseSelection();
+		virtual void removeSelection();
+		virtual MPD::SongList getSelectedSongs();
 		
 		virtual void Locate(const std::string &);
 		

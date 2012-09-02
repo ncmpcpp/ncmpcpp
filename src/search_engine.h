@@ -26,6 +26,7 @@
 #include "interfaces.h"
 #include "mpdpp.h"
 #include "ncmpcpp.h"
+#include "screen.h"
 
 struct SEItem
 {
@@ -73,7 +74,7 @@ struct SEItem
 		MPD::Song itsSong;
 };
 
-class SearchEngine : public Screen< Menu<SEItem> >, public Filterable, public Searchable
+class SearchEngine : public Screen< Menu<SEItem> >, public Filterable, public HasSongs, public Searchable
 {
 	public:
 		virtual void Resize();
@@ -86,13 +87,6 @@ class SearchEngine : public Screen< Menu<SEItem> >, public Filterable, public Se
 		virtual void MouseButtonPressed(MEVENT);
 		virtual bool isTabbable() { return true; }
 		
-		virtual MPD::Song *CurrentSong();
-		virtual MPD::Song *GetSong(size_t pos) { return !(*w)[pos].isSeparator() && w->at(pos).value().isSong() ? &w->at(pos).value().song() : 0; }
-		
-		virtual bool allowsSelection() { return w->Choice() >= StaticOptions; }
-		virtual void ReverseSelection() { w->ReverseSelection(StaticOptions); }
-		virtual void GetSelectedSongs(MPD::SongList &);
-		
 		/// Filterable implementation
 		virtual std::string currentFilter();
 		virtual void applyFilter(const std::string &filter);
@@ -101,6 +95,15 @@ class SearchEngine : public Screen< Menu<SEItem> >, public Filterable, public Se
 		virtual bool search(const std::string &constraint);
 		virtual void nextFound(bool wrap);
 		virtual void prevFound(bool wrap);
+		
+		/// HasSongs implementation
+		virtual MPD::Song *getSong(size_t pos);
+		virtual MPD::Song *currentSong();
+		
+		virtual bool allowsSelection();
+		virtual void reverseSelection();
+		virtual void removeSelection();
+		virtual MPD::SongList getSelectedSongs();
 		
 		virtual List *GetList() { return w->Size() >= StaticOptions ? w : 0; }
 		

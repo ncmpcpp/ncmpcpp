@@ -259,32 +259,28 @@ void TagEditor::Update()
 	{
 		LeftColumn->Window::Clear();
 		Tags->Clear();
-		MPD::TagList list;
 		if (Config.albums_in_tag_editor)
 		{
 			*Albums << XY(0, 0) << "Fetching albums...";
 			Albums->Window::Refresh();
-			Mpd.BlockIdle(1); // for the same reason as in media library
-			Mpd.GetList(list, MPD_TAG_ALBUM);
-			for (MPD::TagList::const_iterator it = list.begin(); it != list.end(); ++it)
+			Mpd.BlockIdle(true); // for the same reason as in media library
+			auto albums = Mpd.GetList(MPD_TAG_ALBUM);
+			for (auto album = albums.begin(); album != albums.end(); ++album)
 			{
-				MPD::SongList l;
 				Mpd.StartSearch(1);
-				Mpd.AddSearch(MPD_TAG_ALBUM, *it);
-				Mpd.CommitSearchSongs([&l](MPD::Song &&s) {
-					l.push_back(s);
-				});
-				if (!l.empty())
-					Albums->AddItem(std::make_pair(l[0].toString(Config.tag_editor_album_format), *it));
+				Mpd.AddSearch(MPD_TAG_ALBUM, *album);
+				auto songs = Mpd.CommitSearchSongs();
+				if (!songs.empty())
+					Albums->AddItem(std::make_pair(songs[0].toString(Config.tag_editor_album_format), *album));
 			}
-			Mpd.BlockIdle(0);
+			Mpd.BlockIdle(false);
 			std::sort(Albums->BeginV(), Albums->EndV(), CaseInsensitiveSorting());
 		}
 		else
 		{
 			int highlightme = -1;
-			Mpd.GetDirectories(itsBrowsedDir, list);
-			sort(list.begin(), list.end(), CaseInsensitiveSorting());
+			auto dirs = Mpd.GetDirectories(itsBrowsedDir);
+			std::sort(dirs.begin(), dirs.end(), CaseInsensitiveSorting());
 			if (itsBrowsedDir != "/")
 			{
 				size_t slash = itsBrowsedDir.rfind("/");
@@ -292,16 +288,13 @@ void TagEditor::Update()
 				Dirs->AddItem(make_pair("..", parent));
 			}
 			else
-			{
 				Dirs->AddItem(std::make_pair(".", "/"));
-			}
-			for (MPD::TagList::const_iterator it = list.begin(); it != list.end(); ++it)
+			for (auto dir = dirs.begin(); dir != dirs.end(); ++dir)
 			{
-				size_t slash = it->rfind("/");
-				std::string to_display = slash != std::string::npos ? it->substr(slash+1) : *it;
-				utf_to_locale(to_display);
-				Dirs->AddItem(make_pair(to_display, *it));
-				if (*it == itsHighlightedDir)
+				size_t slash = dir->rfind("/");
+				std::string to_display = slash != std::string::npos ? dir->substr(slash+1) : *dir;
+				Dirs->AddItem(make_pair(to_display, *dir));
+				if (*dir == itsHighlightedDir)
 					highlightme = Dirs->Size()-1;
 			}
 			if (highlightme != -1)
@@ -314,29 +307,25 @@ void TagEditor::Update()
 	if (Tags->ReallyEmpty())
 	{
 		Tags->Reset();
-		MPD::SongList list;
 		if (Config.albums_in_tag_editor)
 		{
 			if (!Albums->Empty())
 			{
 				Mpd.StartSearch(1);
 				Mpd.AddSearch(MPD_TAG_ALBUM, Albums->Current().value().second);
-				Mpd.CommitSearchSongs([&list](MPD::Song &&s) {
-					list.push_back(s);
-				});
-				std::sort(list.begin(), list.end(), CaseInsensitiveSorting());
-				for (auto it = list.begin(); it != list.end(); ++it)
-					Tags->AddItem(*it);
+				auto albums = Mpd.CommitSearchSongs();
+				std::sort(albums.begin(), albums.end(), CaseInsensitiveSorting());
+				for (auto album = albums.begin(); album != albums.end(); ++album)
+					Tags->AddItem(*album);
 			}
 		}
 		else
 		{
-			Mpd.GetSongs(Dirs->Current().value().second, list);
-			std::sort(list.begin(), list.end(), CaseInsensitiveSorting());
-			for (auto it = list.begin(); it != list.end(); ++it)
-				Tags->AddItem(*it);
+			auto songs = Mpd.GetSongs(Dirs->Current().value().second);
+			std::sort(songs.begin(), songs.end(), CaseInsensitiveSorting());
+			for (auto s = songs.begin(); s != songs.end(); ++s)
+				Tags->AddItem(*s);
 		}
-		Tags->Window::Clear();
 		Tags->Refresh();
 	}
 	
@@ -357,9 +346,8 @@ void TagEditor::EnterPressed()
 	
 	if (w == Dirs)
 	{
-		MPD::TagList test;
-		Mpd.GetDirectories(LeftColumn->Current().value().second, test);
-		if (!test.empty())
+		auto dirs = Mpd.GetDirectories(LeftColumn->Current().value().second);
+		if (!dirs.empty())
 		{
 			itsHighlightedDir = itsBrowsedDir;
 			itsBrowsedDir = LeftColumn->Current().value().second;
@@ -659,7 +647,7 @@ void TagEditor::EnterPressed()
 				w->Refresh();
 				w = LeftColumn;
 				LeftColumn->HighlightColor(Config.active_column_color);
-				Mpd.UpdateDirectory(getSharedDirectory(Tags));
+				Mpd.UpdateDirectory(getSharedDirectory(Tags->BeginV(), Tags->EndV()));
 			}
 			else
 				Tags->Clear();
@@ -777,23 +765,6 @@ void TagEditor::MouseButtonPressed(MEVENT me)
 	}
 }
 
-MPD::Song *TagEditor::CurrentSong()
-{
-	return w == Tags && !Tags->Empty() ? &Tags->Current().value() : 0;
-}
-
-void TagEditor::GetSelectedSongs(MPD::SongList &v)
-{
-	if (w != Tags || Tags->Empty())
-		return;
-	std::vector<size_t> selected;
-	Tags->GetSelected(selected);
-	if (selected.empty())
-		selected.push_back(Tags->Choice());
-	for (auto it = selected.begin(); it != selected.end(); ++it)
-		v.push_back(static_cast<MPD::Song>((*Tags)[*it].value()));
-}
-
 /***********************************************************************/
 
 std::string TagEditor::currentFilter()
@@ -873,6 +844,56 @@ void TagEditor::prevFound(bool wrap)
 		Albums->PrevFound(wrap);
 	else if (w == Tags)
 		Tags->PrevFound(wrap);
+}
+
+/***********************************************************************/
+
+MPD::Song *TagEditor::getSong(size_t pos)
+{
+	MPD::Song *ptr = 0;
+	if (w == Tags)
+		ptr = &(*Tags)[pos].value();
+	return ptr;
+}
+
+MPD::Song *TagEditor::currentSong()
+{
+	if (w == Tags && !Tags->Empty())
+		return getSong(Tags->Choice());
+	else
+		return 0;
+}
+
+bool TagEditor::allowsSelection()
+{
+	return w == Tags;
+}
+
+void TagEditor::removeSelection()
+{
+	if (w == Tags)
+		removeSelectionHelper(Tags->Begin(), Tags->End());
+}
+
+void TagEditor::reverseSelection()
+{
+	if (w == Tags)
+		reverseSelectionHelper(Tags->Begin(), Tags->End());
+}
+
+MPD::SongList TagEditor::getSelectedSongs()
+{
+	MPD::SongList result;
+	if (w == Tags)
+	{
+		for (auto it = Tags->Begin(); it != Tags->End(); ++it)
+			if (it->isSelected())
+				result.push_back(it->value());
+		// if no song was selected, add current one
+		if (result.empty() && !Tags->Empty())
+			result.push_back(Tags->Current().value());
+	}
+	return result;
 }
 
 /***********************************************************************/

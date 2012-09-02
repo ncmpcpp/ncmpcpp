@@ -49,8 +49,8 @@ class ServerInfo : public Screen<Scrollpad>
 	private:
 		void SetDimensions();
 		
-		MPD::TagList itsURLHandlers;
-		MPD::TagList itsTagTypes;
+		MPD::StringList itsURLHandlers;
+		MPD::StringList itsTagTypes;
 		
 		size_t itsWidth;
 		size_t itsHeight;

@@ -82,7 +82,7 @@ struct Song
 		                        const std::string &escape_chars) const;
 		
 		std::shared_ptr<mpd_song> m_song;
-		unsigned m_hash;
+		size_t m_hash;
 };
 
 }

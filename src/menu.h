@@ -153,7 +153,7 @@ template <typename T> struct Menu : public Window, public List
 			return ItemIterator<typename std::add_const<ValueT>::type, Iterator>(m_it);
 		}
 		
-		const BaseIterator &base() { return m_it; }
+		const BaseIterator &base() const { return m_it; }
 	};
 	
 	typedef ItemIterator<
@@ -250,10 +250,6 @@ template <typename T> struct Menu : public Window, public List
 	/// Gets positions of items that are selected
 	/// @param v vector to be filled with selected positions numbers
 	void GetSelected(std::vector<size_t> &v) const;
-	
-	/// Reverses selection of all items in list
-	/// @param beginning beginning of range that has to be reversed
-	void ReverseSelection(size_t beginning = 0);
 	
 	/// Highlights given position
 	/// @param pos position to be highlighted
@@ -372,33 +368,27 @@ template <typename T> struct Menu : public Window, public List
 	const Menu<T>::Item &Back() const;
 	
 	/// @return reference to curently highlighted object
-	/// @throw List::InvalidItem if requested item is separator
 	Menu<T>::Item &Current();
 	
 	/// @return const reference to curently highlighted object
-	/// @throw List::InvalidItem if requested item is separator
 	const Menu<T>::Item &Current() const;
 	
 	/// @param pos requested position
 	/// @return reference to item at given position
 	/// @throw std::out_of_range if given position is out of range
-	/// @throw List::InvalidItem if requested item is separator
 	Menu<T>::Item &at(size_t pos);
 	
 	/// @param pos requested position
 	/// @return const reference to item at given position
 	/// @throw std::out_of_range if given position is out of range
-	/// @throw List::InvalidItem if requested item is separator
 	const Menu<T>::Item &at(size_t pos) const;
 	
 	/// @param pos requested position
 	/// @return const reference to item at given position
-	/// @throw List::InvalidItem if requested item is separator
 	const Menu<T>::Item &operator[](size_t pos) const;
 	
 	/// @param pos requested position
 	/// @return const reference to item at given position
-	/// @throw List::InvalidItem if requested item is separator
 	Menu<T>::Item &operator[](size_t pos);
 	
 	Iterator Begin() { return Iterator(m_options_ptr->begin()); }
@@ -744,6 +734,7 @@ template <typename T> size_t Menu<T>::Size() const
 
 template <typename T> size_t Menu<T>::Choice() const
 {
+	assert(!Empty());
 	return m_highlight;
 }
 
@@ -791,13 +782,6 @@ bool Menu<T>::search(ConstIterator first, ConstIterator last, const FilterFuncti
 template <typename T> void Menu<T>::clearSearchResults()
 {
 	m_found_positions.clear();
-}
-
-template <typename T> void Menu<T>::ReverseSelection(size_t beginning)
-{
-	auto it = m_options_ptr->begin()+beginning;
-	for (size_t i = beginning; i < Size(); ++i, ++it)
-		(*it)->setSelected(!(*it)->isSelected() && !(*it)->isInactive());
 }
 
 template <typename T> void Menu<T>::NextFound(bool wrap)

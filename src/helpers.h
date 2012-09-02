@@ -26,9 +26,41 @@
 #include "settings.h"
 #include "status.h"
 
-void ParseArgv(int, char **);
+template <typename Iterator> void removeSelectionHelper(Iterator first, Iterator last)
+{
+	for (; first != last; ++first)
+		first->setSelected(false);
+}
 
-std::string StringPairToString(const std::pair<std::string, std::string> &pair);
+template <typename Iterator> void reverseSelectionHelper(Iterator first, Iterator last)
+{
+	for (; first != last; ++first)
+		first->setSelected(!first->isSelected());
+}
+
+template <typename Iterator> std::string getSharedDirectory(Iterator first, Iterator last)
+{
+	assert(first != last);
+	std::string result = first->getDirectory();
+	while (++first != last)
+	{
+		result = getSharedDirectory(result, first->getDirectory());
+		if (result == "/")
+			break;
+	}
+	return result;
+}
+
+template <typename T> void withUnfilteredMenu(Menu<T> &menu, std::function<void()> action)
+{
+	bool is_filtered = menu.isFiltered();
+	menu.ShowAll();
+	action();
+	if (is_filtered)
+		menu.ShowFiltered();
+}
+
+void ParseArgv(int, char **);
 
 template <typename T> struct StringConverter {
 	const char *operator()(const char *s) { return s; }
@@ -171,22 +203,6 @@ template <typename T> void ShowTag(T &buf, const std::string &tag)
 std::string Timestamp(time_t t);
 
 void UpdateSongList(Menu<MPD::Song> *);
-
-#ifdef HAVE_TAGLIB_H
-template <typename T> std::string getSharedDirectory(Menu<T> *menu)
-{
-	assert(!menu->Empty());
-	std::string dir;
-// 	dir = (*menu)[0].value().getDirectory();
-	for (size_t i = 1; i < menu->Size(); ++i)
-	{
-		dir = getSharedDirectory(dir, (*menu)[i].value().getDirectory());
-		if (dir == "/")
-			break;
-	}
-	return dir;
-}
-#endif // HAVE_TAGLIB_H
 
 std::basic_string<my_char_t> Scroller(const std::basic_string<my_char_t> &str, size_t &pos, size_t width);
 

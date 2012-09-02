@@ -26,7 +26,7 @@
 #include "screen.h"
 #include "song.h"
 
-class Playlist : public Screen<Window>, public Filterable, public Searchable
+class Playlist : public Screen<Window>, public Filterable, public HasSongs, public Searchable
 {
 	public:
 		enum Movement { mUp, mDown };
@@ -44,13 +44,6 @@ class Playlist : public Screen<Window>, public Filterable, public Searchable
 		virtual void MouseButtonPressed(MEVENT);
 		virtual bool isTabbable() { return true; }
 		
-		virtual MPD::Song *CurrentSong();
-		virtual MPD::Song *GetSong(size_t pos) { return w == Items ? &Items->at(pos).value() : 0; }
-		
-		virtual bool allowsSelection() { return w == Items; }
-		virtual void ReverseSelection() { Items->ReverseSelection(); }
-		virtual void GetSelectedSongs(MPD::SongList &);
-		
 		/// Filterable implementation
 		virtual std::string currentFilter();
 		virtual void applyFilter(const std::string &filter);
@@ -59,6 +52,15 @@ class Playlist : public Screen<Window>, public Filterable, public Searchable
 		virtual bool search(const std::string &constraint);
 		virtual void nextFound(bool wrap);
 		virtual void prevFound(bool wrap);
+		
+		/// HasSongs implementation
+		virtual MPD::Song *getSong(size_t pos);
+		virtual MPD::Song *currentSong();
+		
+		virtual bool allowsSelection();
+		virtual void reverseSelection();
+		virtual void removeSelection();
+		virtual MPD::SongList getSelectedSongs();
 		
 		virtual List *GetList() { return w == Items ? Items : 0; }
 		

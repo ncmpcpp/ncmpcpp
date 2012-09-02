@@ -766,9 +766,7 @@ struct ShowSongInfo : public Action
 struct ShowArtistInfo : public Action
 {
 	ShowArtistInfo() : Action(aShowArtistInfo, "show_artist_info") { }
-#	ifndef HAVE_CURL_CURL_H
 	virtual bool canBeRun() const;
-#	endif // NOT HAVE_CURL_CURL_H
 	virtual void Run();
 };
 

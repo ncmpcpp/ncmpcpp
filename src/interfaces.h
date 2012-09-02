@@ -22,6 +22,7 @@
 #define _INTERFACES_H
 
 #include <string>
+#include "mpdpp.h"
 #include "gcc.h"
 
 struct Filterable
@@ -35,6 +36,17 @@ struct Searchable
 	virtual bool search(const std::string &constraint) = 0;
 	virtual void nextFound(bool wrap) = 0;
 	virtual void prevFound(bool wrap) = 0;
+};
+
+struct HasSongs
+{
+	virtual MPD::Song *getSong(size_t pos) = 0;
+	virtual MPD::Song *currentSong() = 0;
+	
+	virtual bool allowsSelection() = 0;
+	virtual void reverseSelection() = 0;
+	virtual void removeSelection() = 0;
+	virtual MPD::SongList getSelectedSongs() = 0;
 };
 
 #endif // _INTERFACES_H

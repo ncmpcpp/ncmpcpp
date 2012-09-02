@@ -69,7 +69,8 @@ void SelectedItemsAdder::SwitchTo()
 		myOldScreen->SwitchTo();
 		return;
 	}
-	if (!myScreen->allowsSelection())
+	auto hs = dynamic_cast<HasSongs *>(myScreen);
+	if (!hs || !hs->allowsSelection())
 		return;
 	
 	if (MainHeight < 5)
@@ -101,19 +102,14 @@ void SelectedItemsAdder::SwitchTo()
 	w->AddItem("New playlist", 0, playlists_not_active);
 	w->AddSeparator();
 	
-	MPD::TagList playlists;
-	Mpd.GetPlaylists(playlists);
+	auto playlists = Mpd.GetPlaylists();
 	std::sort(playlists.begin(), playlists.end(), CaseInsensitiveSorting());
-	for (MPD::TagList::iterator it = playlists.begin(); it != playlists.end(); ++it)
-	{
-		utf_to_locale(*it);
+	for (auto it = playlists.begin(); it != playlists.end(); ++it)
 		w->AddItem(*it, 0, playlists_not_active);
-	}
 	w->AddSeparator();
 	w->AddItem("Cancel");
 	
 	myScreen = this;
-	w->Window::Clear();
 }
 
 void SelectedItemsAdder::Resize()
@@ -161,7 +157,7 @@ void SelectedItemsAdder::EnterPressed()
 	
 	MPD::SongList list;
 	if ((w != itsPlaylistSelector || pos != 0) && pos != w->Size()-1)
-		myOldScreen->GetSelectedSongs(list);
+		list = dynamic_cast<HasSongs &>(*myOldScreen).getSelectedSongs();
 	
 	if (w == itsPlaylistSelector)
 	{

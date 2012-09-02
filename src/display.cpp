@@ -73,13 +73,13 @@ const my_char_t *toColumnName(char c)
 }
 
 template <typename T>
-void setProperties(Menu<T> &menu, const MPD::Song &s, BasicScreen &screen, bool &separate_albums,
+void setProperties(Menu<T> &menu, const MPD::Song &s, HasSongs &screen, bool &separate_albums,
                    bool &is_now_playing, bool &is_selected, bool &discard_colors)
 {
 	separate_albums = false;
 	if (Config.playlist_separate_albums)
 	{
-		MPD::Song *next = screen.GetSong(menu.DrawnPosition()+1);
+		auto next = screen.getSong(menu.DrawnPosition()+1);
 		if (next && next->getAlbum() != s.getAlbum())
 			separate_albums = true;
 	}
@@ -87,13 +87,14 @@ void setProperties(Menu<T> &menu, const MPD::Song &s, BasicScreen &screen, bool 
 		menu << fmtUnderline;
 	
 	int song_pos = menu.isFiltered() ? s.getPosition() : menu.DrawnPosition();
-	is_now_playing = song_pos == myPlaylist->NowPlaying && s.getID() > 0; // playlist
+	is_now_playing = static_cast<void *>(&menu) == myPlaylist->Items
+	              && song_pos == myPlaylist->NowPlaying;
 	is_selected = menu.Drawn().isSelected();
 	discard_colors = Config.discard_colors_if_item_is_selected && is_selected;
 }
 
 template <typename T>
-void showSongs(Menu<T> &menu, const MPD::Song &s, BasicScreen &screen, const std::string &format)
+void showSongs(Menu<T> &menu, const MPD::Song &s, HasSongs &screen, const std::string &format)
 {
 	bool separate_albums, is_now_playing, is_selected, discard_colors;
 	setProperties(menu, s, screen, separate_albums, is_now_playing, is_selected, discard_colors);
@@ -147,7 +148,7 @@ void showSongs(Menu<T> &menu, const MPD::Song &s, BasicScreen &screen, const std
 }
 
 template <typename T>
-void showSongsInColumns(Menu<T> &menu, const MPD::Song &s, BasicScreen &screen)
+void showSongsInColumns(Menu<T> &menu, const MPD::Song &s, HasSongs &screen)
 {
 	if (Config.columns.empty())
 		return;
@@ -332,12 +333,12 @@ std::string Display::Columns(size_t list_width)
 	return result;
 }
 
-void Display::SongsInColumns(Menu<MPD::Song> &menu, BasicScreen &screen)
+void Display::SongsInColumns(Menu<MPD::Song> &menu, HasSongs &screen)
 {
 	showSongsInColumns(menu, menu.Drawn().value(), screen);
 }
 
-void Display::Songs(Menu<MPD::Song> &menu, BasicScreen &screen, const std::string &format)
+void Display::Songs(Menu<MPD::Song> &menu, HasSongs &screen, const std::string &format)
 {
 	showSongs(menu, menu.Drawn().value(), screen, format);
 }

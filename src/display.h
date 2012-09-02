@@ -21,11 +21,11 @@
 #ifndef _DISPLAY_H
 #define _DISPLAY_H
 
+#include "interfaces.h"
 #include "ncmpcpp.h"
 #include "menu.h"
 #include "mpdpp.h"
 #include "mutable_song.h"
-#include "screen.h"
 #include "search_engine.h"
 
 namespace Display
@@ -42,9 +42,9 @@ namespace Display
 		menu << menu.Drawn().value().first;
 	}
 	
-	void SongsInColumns(Menu<MPD::Song> &menu, BasicScreen &screen);
+	void SongsInColumns(Menu<MPD::Song> &menu, HasSongs &screen);
 	
-	void Songs(Menu<MPD::Song> &menu, BasicScreen &screen, const std::string &format);
+	void Songs(Menu<MPD::Song> &menu, HasSongs &screen, const std::string &format);
 	
 	void Tags(Menu<MPD::MutableSong> &menu);
 	

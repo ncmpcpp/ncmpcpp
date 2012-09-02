@@ -263,68 +263,6 @@ void Browser::MouseButtonPressed(MEVENT me)
 		Screen< Menu<MPD::Item> >::MouseButtonPressed(me);
 }
 
-MPD::Song *Browser::CurrentSong()
-{
-	const MPD::Item &item = w->Current().value();
-	if (!w->Empty() && item.type == itSong)
-		return item.song.get();
-	else
-		return 0;
-}
-
-void Browser::ReverseSelection()
-{
-	w->ReverseSelection(itsBrowsedDir == "/" ? 0 : 1);
-}
-
-void Browser::GetSelectedSongs(MPD::SongList &v)
-{
-	if (w->Empty())
-		return;
-	std::vector<size_t> selected;
-	w->GetSelected(selected);
-	if (selected.empty())
-		selected.push_back(w->Choice());
-	for (auto it = selected.begin(); it != selected.end(); ++it)
-	{
-		const MPD::Item &item = w->at(*it).value();
-		switch (item.type)
-		{
-			case itDirectory:
-			{
-#				ifndef WIN32
-				if (isLocal())
-				{
-					MPD::ItemList list;
-					GetLocalDirectory(list, item.name, 1);
-					for (auto j = list.begin(); j != list.end(); ++j)
-						v.push_back(*j->song);
-				}
-				else
-#				endif // !WIN32
-				{
-					Mpd.GetDirectoryRecursive(locale_to_utf_cpy(item.name), [&v](MPD::Song &&s) {
-						v.push_back(s);
-					});
-				}
-				break;
-			}
-			case itSong:
-			{
-				v.push_back(*item.song);
-				break;
-			}
-			case itPlaylist:
-			{
-				Mpd.GetPlaylistContent(locale_to_utf_cpy(item.name), [&v](MPD::Song &&s) {
-					v.push_back(s);
-				});
-				break;
-			}
-		}
-	}
-}
-
 /***********************************************************************/
 
 std::string Browser::currentFilter()
@@ -360,6 +298,75 @@ void Browser::prevFound(bool wrap)
 }
 
 /***********************************************************************/
+
+MPD::Song *Browser::getSong(size_t pos)
+{
+	MPD::Song *ptr = 0;
+	if ((*w)[pos].value().type == itSong)
+		ptr = (*w)[pos].value().song.get();
+	return ptr;
+}
+
+MPD::Song *Browser::currentSong()
+{
+	if (w->Empty())
+		return 0;
+	else
+		return getSong(w->Choice());
+}
+
+bool Browser::allowsSelection()
+{
+	return true;
+}
+
+void Browser::removeSelection()
+{
+	removeSelectionHelper(w->Begin(), w->End());
+}
+
+void Browser::reverseSelection()
+{
+	reverseSelectionHelper(w->Begin()+(itsBrowsedDir == "/" ? 0 : 1), w->End());
+}
+
+MPD::SongList Browser::getSelectedSongs()
+{
+	MPD::SongList result;
+	auto item_handler = [this, &result](const MPD::Item &item) {
+		if (item.type == itDirectory)
+		{
+#			ifndef WIN32
+			if (isLocal())
+			{
+				MPD::ItemList list;
+				GetLocalDirectory(list, item.name, true);
+				for (auto it = list.begin(); it != list.end(); ++it)
+					result.push_back(*it->song);
+			}
+			else
+#			endif // !WIN32
+			{
+				auto list = Mpd.GetDirectoryRecursive(item.name);
+				result.insert(result.end(), list.begin(), list.end());
+			}
+		}
+		else if (item.type == itSong)
+			result.push_back(*item.song);
+		else if (item.type == itPlaylist)
+		{
+			auto list = Mpd.GetPlaylistContent(item.name);
+			result.insert(result.end(), list.begin(), list.end());
+		}
+	};
+	for (auto it = w->Begin(); it != w->End(); ++it)
+		if (it->isSelected())
+			item_handler(it->value());
+	// if no item is selected, add current one
+	if (result.empty() && !w->Empty())
+		item_handler(w->Current().value());
+	return result;
+}
 
 void Browser::LocateSong(const MPD::Song &s)
 {
@@ -411,15 +418,9 @@ void Browser::GetDirectory(std::string dir, std::string subdir)
 	if (isLocal())
 		GetLocalDirectory(list);
 	else
-	{
-		Mpd.GetDirectory(dir, [&list](MPD::Item &&i) {
-			list.push_back(i);
-		});
-	}
+		list = Mpd.GetDirectory(dir);
 #	else
-	Mpd.GetDirectory(dir, [&list](MPD::Item &&i) {
-		list.push_back(i);
-	});
+	list = Mpd.GetDirectory(dir);
 #	endif // !WIN32
 	if (!isLocal()) // local directory is already sorted
 		std::sort(list.begin(), list.end(), CaseInsensitiveSorting());

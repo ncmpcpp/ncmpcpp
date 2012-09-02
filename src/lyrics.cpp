@@ -116,7 +116,11 @@ void Lyrics::SwitchTo()
 	}
 #	endif // HAVE_CURL_CURL_H
 	
-	if (const MPD::Song *s = myScreen->CurrentSong())
+	auto hs = dynamic_cast<HasSongs *>(myScreen);
+	if (!hs)
+		return;
+	
+	if (const MPD::Song *s = hs->currentSong())
 	{
 		if (!s->getArtist().empty() && !s->getTitle().empty())
 		{
@@ -137,7 +141,7 @@ void Lyrics::SwitchTo()
 	// if we resize for locked screen, we have to do that in the end since
 	// fetching lyrics may fail (eg. if tags are missing) and we don't want
 	// to adjust screen size then.
-	if (myLockedScreen)
+	if (myLockedScreen) // BUG
 	{
 		UpdateInactiveScreen(this);
 		Resize();
