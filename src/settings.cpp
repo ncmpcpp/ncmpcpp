@@ -25,6 +25,7 @@
 #else
 # include <sys/stat.h>
 #endif // WIN32
+#include <algorithm>
 #include <cstdlib>
 #include <cstring>
 #include <string>
@@ -58,33 +59,33 @@ KeyConfiguration Keys;
 
 namespace
 {
-	NCurses::Color stringToColor(const std::string &color)
+	NC::Color stringToColor(const std::string &color)
 	{
-		NCurses::Color result = NCurses::clDefault;
+		NC::Color result = NC::clDefault;
 		
 		if (color == "black")
-			result = NCurses::clBlack;
+			result = NC::clBlack;
 		else if (color == "red")
-			result = NCurses::clRed;
+			result = NC::clRed;
 		else if (color == "green")
-			result = NCurses::clGreen;
+			result = NC::clGreen;
 		else if (color == "yellow")
-			result = NCurses::clYellow;
+			result = NC::clYellow;
 		else if (color == "blue")
-			result = NCurses::clBlue;
+			result = NC::clBlue;
 		else if (color == "magenta")
-			result = NCurses::clMagenta;
+			result = NC::clMagenta;
 		else if (color == "cyan")
-			result = NCurses::clCyan;
+			result = NC::clCyan;
 		else if (color == "white")
-			result = NCurses::clWhite;
+			result = NC::clWhite;
 		
 		return result;
 	}
 	
-	Border stringToBorder(const std::string &border)
+	NC::Border stringToBorder(const std::string &border)
 	{
-		return Border(stringToColor(border));
+		return NC::Border(stringToColor(border));
 	}
 	
 	BasicScreen *intToScreen(int n)
@@ -308,31 +309,31 @@ void Configuration::SetDefaults()
 	tag_editor_album_format = "{{(%y) }%b}";
 	new_header_first_line = "{$b$1$aqqu$/a$9 {%t}|{%f} $1$atqq$/a$9$/b}";
 	new_header_second_line = "{{{$4$b%a$/b$9}{ - $7%b$9}{ ($4%y$9)}}|{%D}}";
-	browser_playlist_prefix << clRed << "(playlist)" << clEnd << ' ';
+	browser_playlist_prefix << NC::clRed << "(playlist)" << NC::clEnd << ' ';
 	progressbar = U("=>\0");
 	visualizer_chars = U("◆│");
 	pattern = "%n - %t";
-	selected_item_prefix << clMagenta;
-	selected_item_suffix << clEnd;
-	now_playing_prefix << fmtBold;
-	now_playing_suffix << fmtBoldEnd;
-	color1 = clWhite;
-	color2 = clGreen;
-	empty_tags_color = clCyan;
-	header_color = clDefault;
-	volume_color = clDefault;
-	state_line_color = clDefault;
-	state_flags_color = clDefault;
-	main_color = clYellow;
+	selected_item_prefix << NC::clMagenta;
+	selected_item_suffix << NC::clEnd;
+	now_playing_prefix << NC::fmtBold;
+	now_playing_suffix << NC::fmtBoldEnd;
+	color1 = NC::clWhite;
+	color2 = NC::clGreen;
+	empty_tags_color = NC::clCyan;
+	header_color = NC::clDefault;
+	volume_color = NC::clDefault;
+	state_line_color = NC::clDefault;
+	state_flags_color = NC::clDefault;
+	main_color = NC::clYellow;
 	main_highlight_color = main_color;
-	progressbar_color = clDefault;
-	progressbar_elapsed_color = clDefault;
-	statusbar_color = clDefault;
-	alternative_ui_separator_color = clBlack;
-	active_column_color = clRed;
-	window_border = brGreen;
-	active_window_border = brRed;
-	visualizer_color = clYellow;
+	progressbar_color = NC::clDefault;
+	progressbar_elapsed_color = NC::clDefault;
+	statusbar_color = NC::clDefault;
+	alternative_ui_separator_color = NC::clBlack;
+	active_column_color = NC::clRed;
+	window_border = NC::brGreen;
+	active_window_border = NC::brRed;
+	visualizer_color = NC::clYellow;
 	media_lib_primary_tag = MPD_TAG_ARTIST;
 	enable_idle_notifications = true;
 	colors_enabled = true;
@@ -567,7 +568,7 @@ void Configuration::Read()
 					// make version without colors
 					if (song_status_format.find("$") != std::string::npos)
 					{
-						Buffer status_no_colors;
+						NC::Buffer status_no_colors;
 						String2Buffer(song_status_format, status_no_colors);
 						song_status_format_no_colors = status_no_colors.Str();
 					}
@@ -682,7 +683,7 @@ void Configuration::Read()
 				{
 					selected_item_prefix.Clear();
 					String2Buffer(v, selected_item_prefix);
-					selected_item_prefix_length = Window::Length(TO_WSTRING(selected_item_prefix.Str()));
+					selected_item_prefix_length = NC::Window::Length(TO_WSTRING(selected_item_prefix.Str()));
 				}
 			}
 			else if (name == "selected_item_suffix")
@@ -691,7 +692,7 @@ void Configuration::Read()
 				{
 					selected_item_suffix.Clear();
 					String2Buffer(v, selected_item_suffix);
-					selected_item_suffix_length = Window::Length(TO_WSTRING(selected_item_suffix.Str()));
+					selected_item_suffix_length = NC::Window::Length(TO_WSTRING(selected_item_suffix.Str()));
 				}
 			}
 			else if (name == "now_playing_prefix")
@@ -700,7 +701,7 @@ void Configuration::Read()
 				{
 					now_playing_prefix.Clear();
 					String2Buffer(v, now_playing_prefix);
-					now_playing_prefix_length = Window::Length(TO_WSTRING(now_playing_prefix.Str()));
+					now_playing_prefix_length = NC::Window::Length(TO_WSTRING(now_playing_prefix.Str()));
 				}
 			}
 			else if (name == "now_playing_suffix")
@@ -709,7 +710,7 @@ void Configuration::Read()
 				{
 					now_playing_suffix.Clear();
 					String2Buffer(TO_WSTRING(v), now_playing_suffix);
-					now_playing_suffix_length = Window::Length(now_playing_suffix.Str());
+					now_playing_suffix_length = NC::Window::Length(now_playing_suffix.Str());
 				}
 			}
 			else if (name == "color1")
@@ -1172,7 +1173,7 @@ void Configuration::GenerateColumns()
 	// generate format for converting tags in columns to string for Playlist::SongInColumnsToString()
 	char tag[] = "{% }|";
 	song_in_columns_to_string_format = "{";
-	for (std::vector<Column>::const_iterator it = columns.begin(); it != columns.end(); ++it)
+	for (auto it = columns.begin(); it != columns.end(); ++it)
 	{
 		for (std::string::const_iterator j = it->type.begin(); j != it->type.end(); ++j)
 		{
@@ -1193,7 +1194,7 @@ void Configuration::MakeProperPath(std::string &dir)
 		return;
 	if (dir[0] == '~')
 		dir.replace(0, 1, home_directory);
-	replace(dir.begin(), dir.end(), '\\', '/');
+	std::replace(dir.begin(), dir.end(), '\\', '/');
 	if (*dir.rbegin() != '/')
 		dir += '/';
 }

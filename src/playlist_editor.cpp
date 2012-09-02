@@ -32,6 +32,8 @@
 #include "tag_editor.h"
 #include "utility/comparators.h"
 
+using namespace std::placeholders;
+
 using Global::MainHeight;
 using Global::MainStartY;
 
@@ -56,7 +58,7 @@ void PlaylistEditor::Init()
 	RightColumnStartX = LeftColumnWidth+1;
 	RightColumnWidth = COLS-LeftColumnWidth-1;
 	
-	Playlists = new Menu<std::string>(0, MainStartY, LeftColumnWidth, MainHeight, Config.titles_visibility ? "Playlists" : "", Config.main_color, brNone);
+	Playlists = new NC::Menu<std::string>(0, MainStartY, LeftColumnWidth, MainHeight, Config.titles_visibility ? "Playlists" : "", Config.main_color, NC::brNone);
 	Playlists->HighlightColor(Config.active_column_color);
 	Playlists->CyclicScrolling(Config.use_cyclic_scrolling);
 	Playlists->CenteredCursor(Config.centered_cursor);
@@ -64,7 +66,7 @@ void PlaylistEditor::Init()
 	Playlists->SetSelectSuffix(Config.selected_item_suffix);
 	Playlists->setItemDisplayer(Display::Default<std::string>);
 	
-	Content = new Menu<MPD::Song>(RightColumnStartX, MainStartY, RightColumnWidth, MainHeight, Config.titles_visibility ? "Playlist content" : "", Config.main_color, brNone);
+	Content = new NC::Menu<MPD::Song>(RightColumnStartX, MainStartY, RightColumnWidth, MainHeight, Config.titles_visibility ? "Playlist content" : "", Config.main_color, NC::brNone);
 	Content->HighlightColor(Config.main_highlight_color);
 	Content->CyclicScrolling(Config.use_cyclic_scrolling);
 	Content->CenteredCursor(Config.centered_cursor);
@@ -183,7 +185,7 @@ void PlaylistEditor::Update()
 	
 	if (Content->ReallyEmpty())
 	{
-		*Content << XY(0, 0) << "Playlist is empty.";
+		*Content << NC::XY(0, 0) << "Playlist is empty.";
 		Content->Window::Refresh();
 	}
 }
@@ -227,7 +229,7 @@ void PlaylistEditor::MoveSelectedItems(Playlist::Movement where)
 				{
 					if (Mpd.Move(Playlists->Current().value(), pos-1, pos))
 					{
-						Content->Scroll(wUp);
+						Content->Scroll(NC::wUp);
 						Content->Swap(pos-1, pos);
 					}
 				}
@@ -262,7 +264,7 @@ void PlaylistEditor::MoveSelectedItems(Playlist::Movement where)
 				{
 					if (Mpd.Move(Playlists->Current().value(), pos, pos+1))
 					{
-						Content->Scroll(wDown);
+						Content->Scroll(NC::wDown);
 						Content->Swap(pos, pos+1);
 					}
 				}
@@ -349,7 +351,7 @@ void PlaylistEditor::AddToPlaylist(bool add_n_play)
 	}
 	
 	if (!add_n_play)
-		w->Scroll(wDown);
+		w->Scroll(NC::wDown);
 }
 
 void PlaylistEditor::SpacePressed()
@@ -361,7 +363,7 @@ void PlaylistEditor::SpacePressed()
 			if (!Playlists->Empty())
 			{
 				Playlists->Current().setSelected(!Playlists->Current().isSelected());
-				Playlists->Scroll(wDown);
+				Playlists->Scroll(NC::wDown);
 			}
 		}
 		else if (w == Content)
@@ -369,7 +371,7 @@ void PlaylistEditor::SpacePressed()
 			if (!Content->Empty())
 			{
 				Content->Current().setSelected(!Content->Current().isSelected());
-				Content->Scroll(wDown);
+				Content->Scroll(NC::wDown);
 			}
 		}
 	}
@@ -391,11 +393,11 @@ void PlaylistEditor::MouseButtonPressed(MEVENT me)
 				size_t pos = Playlists->Choice();
 				SpacePressed();
 				if (pos < Playlists->Size()-1)
-					Playlists->Scroll(wUp);
+					Playlists->Scroll(NC::wUp);
 			}
 		}
 		else
-			Screen<Window>::MouseButtonPressed(me);
+			Screen<NC::Window>::MouseButtonPressed(me);
 		Content->Clear();
 	}
 	else if (!Content->Empty() && Content->hasCoords(me.x, me.y))
@@ -410,13 +412,13 @@ void PlaylistEditor::MouseButtonPressed(MEVENT me)
 				size_t pos = Content->Choice();
 				SpacePressed();
 				if (pos < Content->Size()-1)
-					Content->Scroll(wUp);
+					Content->Scroll(NC::wUp);
 			}
 			else
 				EnterPressed();
 		}
 		else
-			Screen<Window>::MouseButtonPressed(me);
+			Screen<NC::Window>::MouseButtonPressed(me);
 	}
 }
 
@@ -576,7 +578,7 @@ void PlaylistEditor::Locate(const std::string &name)
 	SwitchTo();
 }
 
-List *PlaylistEditor::GetList()
+NC::List *PlaylistEditor::GetList()
 {
 	if (w == Playlists)
 		return Playlists;

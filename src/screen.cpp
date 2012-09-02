@@ -20,23 +20,109 @@
 
 #include <cassert>
 
-#include "screen.h"
 #include "global.h"
+#include "screen.h"
+#include "settings.h"
 
 using Global::myScreen;
 using Global::myLockedScreen;
 using Global::myInactiveScreen;
 
-namespace
+namespace {//
+
+void DrawScreenSeparator(int x)
 {
-	void DrawScreenSeparator(int x)
+	attron(COLOR_PAIR(Config.main_color));
+	mvvline(Global::MainStartY, x, 0, Global::MainHeight);
+	attroff(COLOR_PAIR(Config.main_color));
+	refresh();
+}
+
+}
+
+void GenericMouseButtonPressed(NC::Window *w, MEVENT me)
+{
+	if (me.bstate & BUTTON2_PRESSED)
 	{
-		attron(COLOR_PAIR(Config.main_color));
-		mvvline(Global::MainStartY, x, 0, Global::MainHeight);
-		attroff(COLOR_PAIR(Config.main_color));
-		refresh();
+		if (Config.mouse_list_scroll_whole_page)
+			w->Scroll(NC::wPageDown);
+		else
+			for (size_t i = 0; i < Config.lines_scrolled; ++i)
+				w->Scroll(NC::wDown);
+	}
+	else if (me.bstate & BUTTON4_PRESSED)
+	{
+		if (Config.mouse_list_scroll_whole_page)
+			w->Scroll(NC::wPageUp);
+		else
+			for (size_t i = 0; i < Config.lines_scrolled; ++i)
+				w->Scroll(NC::wUp);
 	}
 }
+
+void ScrollpadMouseButtonPressed(NC::Scrollpad *w, MEVENT me)
+{
+	if (me.bstate & BUTTON2_PRESSED)
+	{
+		for (size_t i = 0; i < Config.lines_scrolled; ++i)
+			w->Scroll(NC::wDown);
+	}
+	else if (me.bstate & BUTTON4_PRESSED)
+	{
+		for (size_t i = 0; i < Config.lines_scrolled; ++i)
+			w->Scroll(NC::wUp);
+	}
+}
+
+/***********************************************************************/
+
+void BasicScreen::GetWindowResizeParams(size_t &x_offset, size_t &width, bool adjust_locked_screen)
+{
+	width = COLS;
+	x_offset = 0;
+	if (myLockedScreen && myInactiveScreen)
+	{
+		size_t locked_width = COLS*Config.locked_screen_width_part;
+		if (myLockedScreen == this)
+			width = locked_width;
+		else
+		{
+			width = COLS-locked_width-1;
+			x_offset = locked_width+1;
+			
+			if (adjust_locked_screen)
+			{
+				myLockedScreen->Resize();
+				myLockedScreen->Refresh();
+				DrawScreenSeparator(x_offset-1);
+			}
+		}
+	}
+}
+
+bool BasicScreen::Lock()
+{
+	if (myLockedScreen)
+		return false;
+	if (isLockable())
+	{
+		myLockedScreen = this;
+		return true;
+	}
+	else
+		return false;
+}
+
+void BasicScreen::Unlock()
+{
+	if (myInactiveScreen && myInactiveScreen != myLockedScreen)
+		myScreen = myInactiveScreen;
+	myLockedScreen->SwitchTo();
+	myLockedScreen = 0;
+	myInactiveScreen = 0;
+}
+
+/***********************************************************************/
 
 void ApplyToVisibleWindows(void (BasicScreen::*f)())
 {
@@ -84,50 +170,4 @@ bool isVisible(BasicScreen *screen)
 		return screen == myScreen || screen == myInactiveScreen || screen == myLockedScreen;
 	else
 		return screen == myScreen;
-}
-
-void BasicScreen::GetWindowResizeParams(size_t &x_offset, size_t &width, bool adjust_locked_screen)
-{
-	width = COLS;
-	x_offset = 0;
-	if (myLockedScreen && myInactiveScreen)
-	{
-		size_t locked_width = COLS*Config.locked_screen_width_part;
-		if (myLockedScreen == this)
-			width = locked_width;
-		else
-		{
-			width = COLS-locked_width-1;
-			x_offset = locked_width+1;
-			
-			if (adjust_locked_screen)
-			{
-				myLockedScreen->Resize();
-				myLockedScreen->Refresh();
-				DrawScreenSeparator(x_offset-1);
-			}
-		}
-	}
-}
-
-bool BasicScreen::Lock()
-{
-	if (myLockedScreen)
-		return false;
-	if (isLockable())
-	{
-		 myLockedScreen = this;
-		 return true;
-	}
-	else
-		return false;
-}
-
-void BasicScreen::Unlock()
-{
-	if (myInactiveScreen && myInactiveScreen != myLockedScreen)
-		myScreen = myInactiveScreen;
-	myLockedScreen->SwitchTo();
-	myLockedScreen = 0;
-	myInactiveScreen = 0;
 }

@@ -21,9 +21,7 @@
 #ifndef _OUTPUTS_H
 #define _OUTPUTS_H
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
+#include "config.h"
 
 #ifdef ENABLE_OUTPUTS
 
@@ -31,7 +29,7 @@
 #include "mpdpp.h"
 #include "screen.h"
 
-class Outputs : public Screen< Menu<MPD::Output> >
+class Outputs : public Screen< NC::Menu<MPD::Output> >
 {
 	public:
 		virtual void SwitchTo();
@@ -46,7 +44,7 @@ class Outputs : public Screen< Menu<MPD::Output> >
 		
 		virtual bool allowsSelection() { return false; }
 		
-		virtual List *GetList() { return w; }
+		virtual NC::List *GetList() { return w; }
 		
 		virtual bool isMergable() { return true; }
 		

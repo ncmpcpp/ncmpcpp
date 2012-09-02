@@ -21,9 +21,7 @@
 #ifndef _VISUALIZER_H
 #define _VISUALIZER_H
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
+#include "config.h"
 
 #ifdef ENABLE_VISUALIZER
 
@@ -34,7 +32,7 @@
 # include <fftw3.h>
 #endif
 
-class Visualizer : public Screen<Window>
+class Visualizer : public Screen<NC::Window>
 {
 	public:
 		virtual void SwitchTo();
@@ -43,14 +41,14 @@ class Visualizer : public Screen<Window>
 		virtual std::basic_string<my_char_t> Title();
 		
 		virtual void Update();
-		virtual void Scroll(Where) { }
+		virtual void Scroll(NC::Where) { }
 		
 		virtual void EnterPressed() { }
 		virtual void SpacePressed();
 		virtual void MouseButtonPressed(MEVENT) { }
 		virtual bool isTabbable() { return true; }
 		
-		virtual NCurses::List *GetList() { return 0; }
+		virtual NC::List *GetList() { return 0; }
 		
 		virtual bool allowsSelection() { return false; }
 		

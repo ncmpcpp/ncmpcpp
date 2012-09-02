@@ -282,22 +282,10 @@ std::string Timestamp(time_t t)
 	return result;
 }
 
-void UpdateSongList(Menu<MPD::Song> *menu)
+void UpdateSongList(NC::Menu<MPD::Song> *menu)
 {
-	bool bold = 0;
-	for (size_t i = 0; i < menu->Size(); ++i)
-	{
-		for (size_t j = 0; j < myPlaylist->Items->Size(); ++j)
-		{
-			if (myPlaylist->Items->at(j).value().getHash() == menu->at(i).value().getHash())
-			{
-				bold = 1;
-				break;
-			}
-		}
-		(*menu)[i].setBold(bold);
-		bold = 0;
-	}
+	for (auto it = menu->Begin(); it != menu->End(); ++it)
+		it->setSelected(myPlaylist->checkForSong(it->value()));
 	menu->Refresh();
 }
 
@@ -307,14 +295,14 @@ std::basic_string<my_char_t> Scroller(const std::basic_string<my_char_t> &str, s
 	if (!Config.header_text_scrolling)
 		return s;
 	std::basic_string<my_char_t> result;
-	size_t len = Window::Length(s);
+	size_t len = NC::Window::Length(s);
 	
 	if (len > width)
 	{
 		s += U(" ** ");
 		len = 0;
-		std::basic_string<my_char_t>::const_iterator b = s.begin(), e = s.end();
-		for (std::basic_string<my_char_t>::const_iterator it = b+pos; it < e && len < width; ++it)
+		auto b = s.begin(), e = s.end();
+		for (auto it = b+pos; it < e && len < width; ++it)
 		{
 			if ((len += wcwidth(*it)) > width)
 				break;

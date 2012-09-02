@@ -34,6 +34,7 @@
 #include <fstream>
 #include <iostream>
 
+#include "helpers.h"
 #include "charset.h"
 #include "global.h"
 
@@ -44,7 +45,7 @@ Lastfm *myLastfm = new Lastfm;
 
 void Lastfm::Init()
 {
-	w = new Scrollpad(0, MainStartY, COLS, MainHeight, "", Config.main_color, brNone);
+	w = new NC::Scrollpad(0, MainStartY, COLS, MainHeight, "", Config.main_color, NC::brNone);
 	isInitialized = 1;
 }
 
@@ -190,7 +191,7 @@ void Lastfm::Download()
 		itsService->colorizeOutput(*w);
 	}
 	else
-		*w << clRed << result.second << clEnd;
+		*w << NC::clRed << result.second << NC::clEnd;
 	
 	isReadyToTake = 1;
 }

@@ -35,6 +35,8 @@
 #include "tag_editor.h"
 #include "utility/comparators.h"
 
+using namespace std::placeholders;
+
 using Global::MainHeight;
 using Global::MainStartY;
 using Global::myScreen;
@@ -58,7 +60,7 @@ bool BrowserEntryMatcher(const Regex &rx, const MPD::Item &item, bool filter);
 
 void Browser::Init()
 {
-	w = new Menu<MPD::Item>(0, MainStartY, COLS, MainHeight, Config.columns_in_browser && Config.titles_visibility ? Display::Columns(COLS) : "", Config.main_color, brNone);
+	w = new NC::Menu<MPD::Item>(0, MainStartY, COLS, MainHeight, Config.columns_in_browser && Config.titles_visibility ? Display::Columns(COLS) : "", Config.main_color, NC::brNone);
 	w->HighlightColor(Config.main_highlight_color);
 	w->CyclicScrolling(Config.use_cyclic_scrolling);
 	w->CenteredCursor(Config.centered_cursor);
@@ -172,7 +174,7 @@ void Browser::SpacePressed()
 	{
 		i = w->Choice();
 		w->at(i).setSelected(!w->at(i).isSelected());
-		w->Scroll(wDown);
+		w->Scroll(NC::wDown);
 		return;
 	}
 	
@@ -219,7 +221,7 @@ void Browser::SpacePressed()
 			break;
 		}
 	}
-	w->Scroll(wDown);
+	w->Scroll(NC::wDown);
 }
 
 void Browser::MouseButtonPressed(MEVENT me)
@@ -242,7 +244,7 @@ void Browser::MouseButtonPressed(MEVENT me)
 					size_t pos = w->Choice();
 					SpacePressed();
 					if (pos < w->Size()-1)
-						w->Scroll(wUp);
+						w->Scroll(NC::wUp);
 				}
 				break;
 			case itPlaylist:
@@ -252,7 +254,7 @@ void Browser::MouseButtonPressed(MEVENT me)
 					size_t pos = w->Choice();
 					SpacePressed();
 					if (pos < w->Size()-1)
-						w->Scroll(wUp);
+						w->Scroll(NC::wUp);
 				}
 				else
 					EnterPressed();
@@ -260,7 +262,7 @@ void Browser::MouseButtonPressed(MEVENT me)
 		}
 	}
 	else
-		Screen< Menu<MPD::Item> >::MouseButtonPressed(me);
+		Screen< NC::Menu<MPD::Item> >::MouseButtonPressed(me);
 }
 
 /***********************************************************************/

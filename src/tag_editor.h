@@ -27,17 +27,13 @@
 
 #include <list>
 
-// taglib headers
-#include "xiphcomment.h"
-#include "fileref.h"
-#include "tag.h"
-
+#include "interfaces.h"
 #include "mpdpp.h"
 #include "mutable_song.h"
 #include "regex_filter.h"
 #include "screen.h"
 
-class TagEditor : public Screen<Window>, public Filterable, public HasSongs, public Searchable
+class TagEditor : public Screen<NC::Window>, public Filterable, public HasSongs, public Searchable
 {
 	public:
 		TagEditor() : FParser(0), FParserHelper(0), FParserLegend(0), FParserPreview(0), itsBrowsedDir("/") { }
@@ -73,7 +69,7 @@ class TagEditor : public Screen<Window>, public Filterable, public HasSongs, pub
 		virtual void removeSelection();
 		virtual MPD::SongList getSelectedSongs();
 		
-		virtual List *GetList();
+		virtual NC::List *GetList();
 		
 		virtual bool isMergable() { return true; }
 		
@@ -84,11 +80,11 @@ class TagEditor : public Screen<Window>, public Filterable, public HasSongs, pub
 		
 		void LocateSong(const MPD::Song &s);
 		
-		Menu<string_pair> *LeftColumn;
-		Menu<string_pair> *Albums;
-		Menu<string_pair> *Dirs;
-		Menu<std::string> *TagTypes;
-		Menu<MPD::MutableSong> *Tags;
+		NC::Menu< std::pair<std::string, std::string> > *LeftColumn;
+		NC::Menu< std::pair<std::string, std::string> > *Albums;
+		NC::Menu< std::pair<std::string, std::string> > *Dirs;
+		NC::Menu<std::string> *TagTypes;
+		NC::Menu<MPD::MutableSong> *Tags;
 		
 		/// NOTICE: this string is always in utf8, no need to convert it
 		const std::string &CurrentDir() { return itsBrowsedDir; }
@@ -104,11 +100,11 @@ class TagEditor : public Screen<Window>, public Filterable, public HasSongs, pub
 		void SetDimensions(size_t, size_t);
 		
 		std::vector<MPD::MutableSong *> EditedSongs;
-		Menu<std::string> *FParserDialog;
-		Menu<std::string> *FParser;
-		Scrollpad *FParserHelper;
-		Scrollpad *FParserLegend;
-		Scrollpad *FParserPreview;
+		NC::Menu<std::string> *FParserDialog;
+		NC::Menu<std::string> *FParser;
+		NC::Scrollpad *FParserHelper;
+		NC::Scrollpad *FParserLegend;
+		NC::Scrollpad *FParserPreview;
 		bool FParserUsePreview;
 		
 		std::string itsBrowsedDir;

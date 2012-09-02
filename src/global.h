@@ -23,7 +23,6 @@
 
 #include <sys/time.h>
 
-#include "ncmpcpp.h"
 #include "mpdpp.h"
 #include "screen.h"
 
@@ -45,10 +44,10 @@ namespace Global
 	extern BasicScreen *myInactiveScreen; 
 	
 	// header window (above main window)
-	extern Window *wHeader;
+	extern NC::Window *wHeader;
 	
 	// footer window (below main window)
-	extern Window *wFooter;
+	extern NC::Window *wFooter;
 	
 	// Y coordinate of top of main window
 	extern size_t MainStartY;

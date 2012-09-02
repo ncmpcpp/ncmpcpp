@@ -21,10 +21,9 @@
 #ifndef _SEL_ITEMS_ADDER_H
 #define _SEL_ITEMS_ADDER_H
 
-#include "ncmpcpp.h"
 #include "screen.h"
 
-class SelectedItemsAdder : public Screen< Menu<std::string> >
+class SelectedItemsAdder : public Screen< NC::Menu<std::string> >
 {
 	public:
 		SelectedItemsAdder() : itsPSWidth(35), itsPSHeight(11) { }
@@ -41,7 +40,7 @@ class SelectedItemsAdder : public Screen< Menu<std::string> >
 		
 		virtual bool allowsSelection() { return false; }
 		
-		virtual List *GetList() { return w; }
+		virtual NC::List *GetList() { return w; }
 		
 		virtual bool isMergable() { return false; }
 		
@@ -52,8 +51,8 @@ class SelectedItemsAdder : public Screen< Menu<std::string> >
 	private:
 		void SetDimensions();
 		
-		Menu<std::string> *itsPlaylistSelector;
-		Menu<std::string> *itsPositionSelector;
+		NC::Menu<std::string> *itsPlaylistSelector;
+		NC::Menu<std::string> *itsPositionSelector;
 		
 		size_t itsPSWidth;
 		size_t itsPSHeight;

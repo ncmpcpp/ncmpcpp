@@ -24,6 +24,7 @@
 #include <functional>
 #include <memory>
 #include <string>
+#include <vector>
 
 #include <mpd/client.h>
 
@@ -84,6 +85,8 @@ struct Song
 		std::shared_ptr<mpd_song> m_song;
 		size_t m_hash;
 };
+
+typedef std::vector<Song> SongList;
 
 }
 

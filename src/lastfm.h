@@ -33,7 +33,7 @@
 #include "lastfm_service.h"
 #include "screen.h"
 
-class Lastfm : public Screen<Scrollpad>
+class Lastfm : public Screen<NC::Scrollpad>
 {
 	public:
 		Lastfm() : isReadyToTake(0), isDownloadInProgress(0) { }
@@ -50,7 +50,7 @@ class Lastfm : public Screen<Scrollpad>
 		
 		virtual bool allowsSelection() { return false; }
 		
-		virtual List *GetList() { return 0; }
+		virtual NC::List *GetList() { return 0; }
 		
 		virtual bool isMergable() { return true; }
 		

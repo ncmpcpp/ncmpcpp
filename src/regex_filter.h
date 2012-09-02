@@ -25,8 +25,8 @@
 
 template <typename T> struct RegexFilter
 {
-	typedef NCurses::Menu<T> MenuT;
-	typedef typename NCurses::Menu<T>::Item Item;
+	typedef NC::Menu<T> MenuT;
+	typedef typename NC::Menu<T>::Item Item;
 	typedef std::function<bool(const Regex &, const T &)> FilterFunction;
 	
 	RegexFilter(const std::string &regex_, int cflags, FilterFunction filter)
@@ -56,8 +56,8 @@ private:
 
 template <typename T> struct RegexItemFilter
 {
-	typedef NCurses::Menu<T> MenuT;
-	typedef typename NCurses::Menu<T>::Item Item;
+	typedef NC::Menu<T> MenuT;
+	typedef typename NC::Menu<T>::Item Item;
 	typedef std::function<bool(const Regex &, const Item &)> FilterFunction;
 	
 	RegexItemFilter(const std::string &regex_, int cflags, FilterFunction filter)

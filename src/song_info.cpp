@@ -19,8 +19,14 @@
  ***************************************************************************/
 
 #include "global.h"
+#include "helpers.h"
 #include "song_info.h"
 #include "tag_editor.h"
+
+#ifdef HAVE_TAGLIB_H
+# include "fileref.h"
+# include "tag.h"
+#endif // HAVE_TAGLIB_H
 
 using Global::MainHeight;
 using Global::MainStartY;
@@ -45,7 +51,7 @@ const SongInfo::Metadata SongInfo::Tags[] =
 
 void SongInfo::Init()
 {
-	w = new Scrollpad(0, MainStartY, COLS, MainHeight, "", Config.main_color, brNone);
+	w = new NC::Scrollpad(0, MainStartY, COLS, MainHeight, "", Config.main_color, NC::brNone);
 	isInitialized = 1;
 }
 
@@ -109,24 +115,24 @@ void SongInfo::PrepareSong(MPD::Song &s)
 	TagLib::FileRef f(path_to_file.c_str());
 #	endif // HAVE_TAGLIB_H
 	
-	*w << fmtBold << Config.color1 << U("Filename: ") << fmtBoldEnd << Config.color2 << s.getName() << '\n' << clEnd;
-	*w << fmtBold << U("Directory: ") << fmtBoldEnd << Config.color2;
+	*w << NC::fmtBold << Config.color1 << U("Filename: ") << NC::fmtBoldEnd << Config.color2 << s.getName() << '\n' << NC::clEnd;
+	*w << NC::fmtBold << U("Directory: ") << NC::fmtBoldEnd << Config.color2;
 	ShowTag(*w, s.getDirectory());
-	*w << U("\n\n") << clEnd;
-	*w << fmtBold << U("Length: ") << fmtBoldEnd << Config.color2 << s.getLength() << '\n' << clEnd;
+	*w << U("\n\n") << NC::clEnd;
+	*w << NC::fmtBold << U("Length: ") << NC::fmtBoldEnd << Config.color2 << s.getLength() << '\n' << NC::clEnd;
 #	ifdef HAVE_TAGLIB_H
 	if (!f.isNull())
 	{
-		*w << fmtBold << U("Bitrate: ") << fmtBoldEnd << Config.color2 << f.audioProperties()->bitrate() << U(" kbps\n") << clEnd;
-		*w << fmtBold << U("Sample rate: ") << fmtBoldEnd << Config.color2 << f.audioProperties()->sampleRate() << U(" Hz\n") << clEnd;
-		*w << fmtBold << U("Channels: ") << fmtBoldEnd << Config.color2 << (f.audioProperties()->channels() == 1 ? U("Mono") : U("Stereo")) << '\n' << clDefault;
+		*w << NC::fmtBold << U("Bitrate: ") << NC::fmtBoldEnd << Config.color2 << f.audioProperties()->bitrate() << U(" kbps\n") << NC::clEnd;
+		*w << NC::fmtBold << U("Sample rate: ") << NC::fmtBoldEnd << Config.color2 << f.audioProperties()->sampleRate() << U(" Hz\n") << NC::clEnd;
+		*w << NC::fmtBold << U("Channels: ") << NC::fmtBoldEnd << Config.color2 << (f.audioProperties()->channels() == 1 ? U("Mono") : U("Stereo")) << '\n' << NC::clDefault;
 	}
 #	endif // HAVE_TAGLIB_H
-	*w << clDefault;
+	*w << NC::clDefault;
 	
 	for (const Metadata *m = Tags; m->Name; ++m)
 	{
-		*w << fmtBold << '\n' << TO_WSTRING(m->Name) << U(": ") << fmtBoldEnd;
+		*w << NC::fmtBold << '\n' << TO_WSTRING(m->Name) << U(": ") << NC::fmtBoldEnd;
 		ShowTag(*w, s.getTags(m->Get));
 	}
 }

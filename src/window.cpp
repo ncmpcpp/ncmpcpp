@@ -32,9 +32,9 @@
 #include "utility/string.h"
 #include "window.h"
 
-using namespace NCurses;
+namespace NC {//
 
-void NCurses::InitScreen(GNUC_UNUSED const char *window_title, bool enable_colors)
+void InitScreen(GNUC_UNUSED const char *window_title, bool enable_colors)
 {
 	const int ColorsTable[] =
 	{
@@ -65,7 +65,7 @@ void NCurses::InitScreen(GNUC_UNUSED const char *window_title, bool enable_color
 	curs_set(0);
 }
 
-void NCurses::DestroyScreen()
+void DestroyScreen()
 {
 	curs_set(1);
 	endwin();
@@ -919,7 +919,7 @@ size_t Window::Length(const std::wstring &ws)
 #	endif // WIN32
 }
 
-void Window::Cut (std::wstring &ws, size_t max_len)
+void Window::Cut(std::wstring &ws, size_t max_len)
 {
 	size_t i = 0;
 	int remained_len = max_len;
@@ -932,4 +932,6 @@ void Window::Cut (std::wstring &ws, size_t max_len)
 			break;
 		}
 	}
+}
+
 }

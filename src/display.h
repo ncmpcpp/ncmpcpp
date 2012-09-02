@@ -22,9 +22,7 @@
 #define _DISPLAY_H
 
 #include "interfaces.h"
-#include "ncmpcpp.h"
 #include "menu.h"
-#include "mpdpp.h"
 #include "mutable_song.h"
 #include "search_engine.h"
 
@@ -32,27 +30,27 @@ namespace Display
 {
 	std::string Columns(size_t);
 	
-	template <typename T> void Default(Menu<T> &menu)
+	template <typename T> void Default(NC::Menu<T> &menu)
 	{
 		menu << menu.Drawn().value();
 	}
 	
-	template <typename A, typename B> void Pair(Menu< std::pair<A, B> > &menu)
+	template <typename A, typename B> void Pair(NC::Menu< std::pair<A, B> > &menu)
 	{
 		menu << menu.Drawn().value().first;
 	}
 	
-	void SongsInColumns(Menu<MPD::Song> &menu, HasSongs &screen);
+	void SongsInColumns(NC::Menu<MPD::Song> &menu, HasSongs &screen);
 	
-	void Songs(Menu<MPD::Song> &menu, HasSongs &screen, const std::string &format);
+	void Songs(NC::Menu<MPD::Song> &menu, HasSongs &screen, const std::string &format);
 	
-	void Tags(Menu<MPD::MutableSong> &menu);
+	void Tags(NC::Menu<MPD::MutableSong> &menu);
 	
-	void Outputs(Menu<MPD::Output> &menu);
+	void Outputs(NC::Menu<MPD::Output> &menu);
 	
-	void SearchEngine(Menu<SEItem> &menu);
+	void SearchEngine(NC::Menu<SEItem> &menu);
 	
-	void Items(Menu<MPD::Item> &menu);
+	void Items(NC::Menu<MPD::Item> &menu);
 }
 
 #endif

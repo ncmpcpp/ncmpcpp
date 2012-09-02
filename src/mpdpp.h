@@ -73,7 +73,6 @@ namespace MPD
 	};
 	
 	typedef std::vector<Item> ItemList;
-	typedef std::vector<Song> SongList;
 	typedef std::vector<std::string> StringList;
 	typedef std::vector<Output> OutputList;
 

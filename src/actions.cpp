@@ -29,6 +29,7 @@
 #include "display.h"
 #include "global.h"
 #include "mpdpp.h"
+#include "helpers.h"
 #include "utility/comparators.h"
 
 #include "browser.h"
@@ -50,6 +51,12 @@
 #include "tiny_tag_editor.h"
 #include "visualizer.h"
 
+#ifdef HAVE_TAGLIB_H
+# include "fileref.h"
+# include "tag.h"
+#endif // HAVE_TAGLIB_H
+
+using namespace std::placeholders;
 using Global::myScreen;
 
 bool Action::OriginalStatusbarVisibility;
@@ -64,7 +71,7 @@ size_t Action::FooterStartY;
 std::map<ActionType, Action *> Action::Actions;
 Action::Key Action::NoOp = Action::Key(ERR, ctNCurses);
 
-Action::Key Action::ReadKey(Window &w)
+Action::Key Action::ReadKey(NC::Window &w)
 {
 	std::string tmp;
 	int input;
@@ -98,7 +105,7 @@ void Action::ValidateScreenSize()
 	
 	if (COLS < 20 || MainHeight < 3)
 	{
-		DestroyScreen();
+		NC::DestroyScreen();
 		std::cout << "Screen is too small!\n";
 		exit(1);
 	}
@@ -252,7 +259,7 @@ void Action::Seek()
 	time_t t = time(0);
 	
 	int old_timeout = wFooter->GetTimeout();
-	wFooter->SetTimeout(ncmpcpp_window_timeout);
+	wFooter->SetTimeout(500);
 	
 	SeekingInProgress = true;
 	while (true)
@@ -289,7 +296,7 @@ void Action::Seek()
 		else
 			break;
 		
-		*wFooter << fmtBold;
+		*wFooter << NC::fmtBold;
 		std::string tracklength;
 		if (Config.new_design)
 		{
@@ -302,7 +309,7 @@ void Action::Seek()
 				tracklength = MPD::Song::ShowTime(songpos);
 			tracklength += "/";
 			tracklength += MPD::Song::ShowTime(Mpd.GetTotalTime());
-			*wHeader << XY(0, 0) << tracklength << " ";
+			*wHeader << NC::XY(0, 0) << tracklength << " ";
 			wHeader->Refresh();
 		}
 		else
@@ -318,9 +325,9 @@ void Action::Seek()
 			tracklength += "/";
 			tracklength += MPD::Song::ShowTime(Mpd.GetTotalTime());
 			tracklength += "]";
-			*wFooter << XY(wFooter->GetWidth()-tracklength.length(), 1) << tracklength;
+			*wFooter << NC::XY(wFooter->GetWidth()-tracklength.length(), 1) << tracklength;
 		}
-		*wFooter << fmtBoldEnd;
+		*wFooter << NC::fmtBoldEnd;
 		DrawProgressbar(songpos, Mpd.GetTotalTime());
 		wFooter->Refresh();
 	}
@@ -415,7 +422,7 @@ bool Action::AskYesNoQuestion(const std::string &question, void (*callback)())
 	using Global::wFooter;
 	
 	LockStatusbar();
-	Statusbar() << question << " [" << fmtBold << 'y' << fmtBoldEnd << '/' << fmtBold << 'n' << fmtBoldEnd << "]";
+	Statusbar() << question << " [" << NC::fmtBold << 'y' << NC::fmtBoldEnd << '/' << NC::fmtBold << 'n' << NC::fmtBoldEnd << "]";
 	wFooter->Refresh();
 	int answer = 0;
 	do
@@ -491,13 +498,13 @@ void MouseEvent::Run()
 
 void ScrollUp::Run()
 {
-	myScreen->Scroll(wUp);
+	myScreen->Scroll(NC::wUp);
 	ListsChangeFinisher();
 }
 
 void ScrollDown::Run()
 {
-	myScreen->Scroll(wDown);
+	myScreen->Scroll(NC::wDown);
 	ListsChangeFinisher();
 }
 
@@ -583,25 +590,25 @@ void ScrollDownAlbum::Run()
 
 void PageUp::Run()
 {
-	myScreen->Scroll(wPageUp);
+	myScreen->Scroll(NC::wPageUp);
 	ListsChangeFinisher();
 }
 
 void PageDown::Run()
 {
-	myScreen->Scroll(wPageDown);
+	myScreen->Scroll(NC::wPageDown);
 	ListsChangeFinisher();
 }
 
 void MoveHome::Run()
 {
-	myScreen->Scroll(wHome);
+	myScreen->Scroll(NC::wHome);
 	ListsChangeFinisher();
 }
 
 void MoveEnd::Run()
 {
-	myScreen->Scroll(wEnd);
+	myScreen->Scroll(NC::wEnd);
 	ListsChangeFinisher();
 }
 
@@ -1416,7 +1423,7 @@ void EditLibraryTag::Run()
 	if (!isMPDMusicDirSet())
 		return;
 	LockStatusbar();
-	Statusbar() << fmtBold << tagTypeToString(Config.media_lib_primary_tag) << fmtBoldEnd << ": ";
+	Statusbar() << NC::fmtBold << tagTypeToString(Config.media_lib_primary_tag) << NC::fmtBoldEnd << ": ";
 	std::string new_tag = wFooter->GetString(myLibrary->Tags->Current().value());
 	UnlockStatusbar();
 	if (!new_tag.empty() && new_tag != myLibrary->Tags->Current().value())
@@ -1469,7 +1476,7 @@ void EditLibraryAlbum::Run()
 	if (!isMPDMusicDirSet())
 		return;
 	LockStatusbar();
-	Statusbar() << fmtBold << "Album: " << fmtBoldEnd;
+	Statusbar() << NC::fmtBold << "Album: " << NC::fmtBoldEnd;
 	std::string new_album = wFooter->GetString(myLibrary->Albums->Current().value().Album);
 	UnlockStatusbar();
 	if (!new_album.empty() && new_album != myLibrary->Albums->Current().value().Album)
@@ -1529,7 +1536,7 @@ void EditDirectoryName::Run()
 	{
 		std::string old_dir = myBrowser->Main()->Current().value().name;
 		LockStatusbar();
-		Statusbar() << fmtBold << "Directory: " << fmtBoldEnd;
+		Statusbar() << NC::fmtBold << "Directory: " << NC::fmtBoldEnd;
 		std::string new_dir = wFooter->GetString(old_dir);
 		UnlockStatusbar();
 		if (!new_dir.empty() && new_dir != old_dir)
@@ -1563,7 +1570,7 @@ void EditDirectoryName::Run()
 	{
 		std::string old_dir = myTagEditor->Dirs->Current().value().first;
 		LockStatusbar();
-		Statusbar() << fmtBold << "Directory: " << fmtBoldEnd;
+		Statusbar() << NC::fmtBold << "Directory: " << NC::fmtBoldEnd;
 		std::string new_dir = wFooter->GetString(old_dir);
 		UnlockStatusbar();
 		if (!new_dir.empty() && new_dir != old_dir)
@@ -1605,7 +1612,7 @@ void EditPlaylistName::Run()
 	else
 		old_name = myBrowser->Main()->Current().value().name;
 	LockStatusbar();
-	Statusbar() << fmtBold << "Playlist: " << fmtBoldEnd;
+	Statusbar() << NC::fmtBold << "Playlist: " << NC::fmtBoldEnd;
 	std::string new_name = wFooter->GetString(old_name);
 	UnlockStatusbar();
 	if (!new_name.empty() && new_name != old_name)
@@ -2005,7 +2012,7 @@ void ApplyFilter::Run()
 	assert(f);
 	
 	LockStatusbar();
-	Statusbar() << fmtBold << "Apply filter: " << fmtBoldEnd;
+	Statusbar() << NC::fmtBold << "Apply filter: " << NC::fmtBoldEnd;
 	wFooter->SetGetStringHelper(std::bind(StatusbarApplyFilterImmediately, f, _1));
 	wFooter->GetString(f->currentFilter());
 	wFooter->SetGetStringHelper(StatusbarGetStringHelper);
@@ -2060,9 +2067,9 @@ void Find::Run()
 	UnlockStatusbar();
 	
 	ShowMessage("Searching...");
-	Screen<Scrollpad> *s = static_cast<Screen<Scrollpad> *>(myScreen);
+	Screen<NC::Scrollpad> *s = static_cast<Screen<NC::Scrollpad> *>(myScreen);
 	s->Main()->RemoveFormatting();
-	ShowMessage("%s", findme.empty() || s->Main()->SetFormatting(fmtReverse, TO_WSTRING(findme), fmtReverseEnd, 0) ? "Done!" : "No matching patterns found");
+	ShowMessage("%s", findme.empty() || s->Main()->SetFormatting(NC::fmtReverse, TO_WSTRING(findme), NC::fmtReverseEnd, 0) ? "Done!" : "No matching patterns found");
 	s->Main()->Flush();
 }
 
@@ -2131,7 +2138,7 @@ void ToggleReplayGainMode::Run()
 	}
 	
 	LockStatusbar();
-	Statusbar() << "Replay gain mode? [" << fmtBold << 'o' << fmtBoldEnd << "ff/" << fmtBold << 't' << fmtBoldEnd << "rack/" << fmtBold << 'a' << fmtBoldEnd << "lbum]";
+	Statusbar() << "Replay gain mode? [" << NC::fmtBold << 'o' << NC::fmtBoldEnd << "ff/" << NC::fmtBold << 't' << NC::fmtBoldEnd << "rack/" << NC::fmtBold << 'a' << NC::fmtBoldEnd << "lbum]";
 	wFooter->Refresh();
 	int answer = 0;
 	do
@@ -2175,7 +2182,7 @@ void AddRandomItems::Run()
 	using Global::wFooter;
 	
 	LockStatusbar();
-	Statusbar() << "Add random? [" << fmtBold << 's' << fmtBoldEnd << "ongs/" << fmtBold << 'a' << fmtBoldEnd << "rtists/al" << fmtBold << 'b' << fmtBoldEnd << "ums] ";
+	Statusbar() << "Add random? [" << NC::fmtBold << 's' << NC::fmtBoldEnd << "ongs/" << NC::fmtBold << 'a' << NC::fmtBoldEnd << "rtists/al" << NC::fmtBold << 'b' << NC::fmtBoldEnd << "ums] ";
 	wFooter->Refresh();
 	int answer = 0;
 	do
@@ -2238,7 +2245,7 @@ void ToggleLibraryTagType::Run()
 	using Global::wFooter;
 	
 	LockStatusbar();
-	Statusbar() << "Tag type? [" << fmtBold << 'a' << fmtBoldEnd << "rtist/album" << fmtBold << 'A' << fmtBoldEnd << "rtist/" << fmtBold << 'y' << fmtBoldEnd << "ear/" << fmtBold << 'g' << fmtBoldEnd << "enre/" << fmtBold << 'c' << fmtBoldEnd << "omposer/" << fmtBold << 'p' << fmtBoldEnd << "erformer] ";
+	Statusbar() << "Tag type? [" << NC::fmtBold << 'a' << NC::fmtBoldEnd << "rtist/album" << NC::fmtBold << 'A' << NC::fmtBoldEnd << "rtist/" << NC::fmtBold << 'y' << NC::fmtBoldEnd << "ear/" << NC::fmtBold << 'g' << NC::fmtBoldEnd << "enre/" << NC::fmtBold << 'c' << NC::fmtBoldEnd << "omposer/" << NC::fmtBold << 'p' << NC::fmtBoldEnd << "erformer] ";
 	wFooter->Refresh();
 	int answer = 0;
 	do

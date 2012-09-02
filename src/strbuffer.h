@@ -26,7 +26,7 @@
 
 #include <list>
 
-namespace NCurses {
+namespace NC {
 
 /// Buffer template class that can store text along with its
 /// format attributes. The content can be easily printed to
@@ -233,8 +233,6 @@ typedef basic_buffer<char> Buffer;
 /// Standard buffer that uses wide characters
 ///
 typedef basic_buffer<wchar_t> WBuffer;
-
-
 
 template <typename C> basic_buffer<C>::basic_buffer(const basic_buffer &b)
 	: itsString(b.itsString), itsFormat(b.itsFormat) { }

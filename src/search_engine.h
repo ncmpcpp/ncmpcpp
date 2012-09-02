@@ -25,13 +25,12 @@
 
 #include "interfaces.h"
 #include "mpdpp.h"
-#include "ncmpcpp.h"
 #include "screen.h"
 
 struct SEItem
 {
 	SEItem() : isThisSong(false), itsBuffer(0) { }
-	SEItem(Buffer *buf) : isThisSong(false), itsBuffer(buf) { }
+	SEItem(NC::Buffer *buf) : isThisSong(false), itsBuffer(buf) { }
 	SEItem(const MPD::Song &s) : isThisSong(true), itsSong(s) { }
 	SEItem(const SEItem &ei) { *this = ei; }
 	~SEItem() {
@@ -39,19 +38,19 @@ struct SEItem
 			delete itsBuffer;
 	}
 	
-	Buffer &mkBuffer() {
+	NC::Buffer &mkBuffer() {
 		assert(!isThisSong);
 		delete itsBuffer;
-		itsBuffer = new Buffer();
+		itsBuffer = new NC::Buffer();
 		return *itsBuffer;
 	}
 	
 	bool isSong() const { return isThisSong; }
 	
-	Buffer &buffer() { assert(!isThisSong && itsBuffer); return *itsBuffer; }
+	NC::Buffer &buffer() { assert(!isThisSong && itsBuffer); return *itsBuffer; }
 	MPD::Song &song() { assert(isThisSong); return itsSong; }
 	
-	const Buffer &buffer() const { assert(!isThisSong && itsBuffer); return *itsBuffer; }
+	const NC::Buffer &buffer() const { assert(!isThisSong && itsBuffer); return *itsBuffer; }
 	const MPD::Song &song() const { assert(isThisSong); return itsSong; }
 	
 	SEItem &operator=(const SEItem &se) {
@@ -61,7 +60,7 @@ struct SEItem
 		if (se.isThisSong)
 			itsSong = se.itsSong;
 		else if (se.itsBuffer)
-			itsBuffer = new Buffer(*se.itsBuffer);
+			itsBuffer = new NC::Buffer(*se.itsBuffer);
 		else
 			itsBuffer = 0;
 		return *this;
@@ -70,11 +69,11 @@ struct SEItem
 	private:
 		bool isThisSong;
 		
-		Buffer *itsBuffer;
+		NC::Buffer *itsBuffer;
 		MPD::Song itsSong;
 };
 
-class SearchEngine : public Screen< Menu<SEItem> >, public Filterable, public HasSongs, public Searchable
+class SearchEngine : public Screen< NC::Menu<SEItem> >, public Filterable, public HasSongs, public Searchable
 {
 	public:
 		virtual void Resize();
@@ -105,7 +104,7 @@ class SearchEngine : public Screen< Menu<SEItem> >, public Filterable, public Ha
 		virtual void removeSelection();
 		virtual MPD::SongList getSelectedSongs();
 		
-		virtual List *GetList() { return w->Size() >= StaticOptions ? w : 0; }
+		virtual NC::List *GetList() { return w->Size() >= StaticOptions ? w : 0; }
 		
 		virtual bool isMergable() { return true; }
 		

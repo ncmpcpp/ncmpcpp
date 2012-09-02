@@ -24,6 +24,8 @@
 
 #include "display.h"
 #include "global.h"
+#include "settings.h"
+#include "status.h"
 
 using Global::MainHeight;
 using Global::MainStartY;
@@ -33,7 +35,7 @@ Outputs *myOutputs = new Outputs;
 
 void Outputs::Init()
 {
-	w = new Menu<MPD::Output>(0, MainStartY, COLS, MainHeight, "", Config.main_color, brNone);
+	w = new NC::Menu<MPD::Output>(0, MainStartY, COLS, MainHeight, "", Config.main_color, NC::brNone);
 	w->CyclicScrolling(Config.use_cyclic_scrolling);
 	w->CenteredCursor(Config.centered_cursor);
 	w->HighlightColor(Config.main_highlight_color);
@@ -108,7 +110,7 @@ void Outputs::MouseButtonPressed(MEVENT me)
 			EnterPressed();
 	}
 	else
-		Screen< Menu<MPD::Output> >::MouseButtonPressed(me);
+		Screen< NC::Menu<MPD::Output> >::MouseButtonPressed(me);
 }
 
 void Outputs::FetchList()

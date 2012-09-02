@@ -22,9 +22,8 @@
 #define _PLAYLIST_EDITOR_H
 
 #include "playlist.h"
-#include "ncmpcpp.h"
 
-class PlaylistEditor : public Screen<Window>, public Filterable, public HasSongs, public Searchable
+class PlaylistEditor : public Screen<NC::Window>, public Filterable, public HasSongs, public Searchable
 {
 	public:
 		virtual void SwitchTo();
@@ -60,7 +59,7 @@ class PlaylistEditor : public Screen<Window>, public Filterable, public HasSongs
 		
 		virtual void Locate(const std::string &);
 		
-		virtual List *GetList();
+		virtual NC::List *GetList();
 		
 		virtual bool isMergable() { return true; }
 		
@@ -72,8 +71,8 @@ class PlaylistEditor : public Screen<Window>, public Filterable, public HasSongs
 		bool isPrevColumnAvailable();
 		bool PrevColumn();
 		
-		Menu<std::string> *Playlists;
-		Menu<MPD::Song> *Content;
+		NC::Menu<std::string> *Playlists;
+		NC::Menu<MPD::Song> *Content;
 		
 	protected:
 		virtual void Init();

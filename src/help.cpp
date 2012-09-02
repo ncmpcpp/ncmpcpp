@@ -22,8 +22,8 @@
 
 #include "global.h"
 #include "help.h"
+#include "scrollpad.h"
 #include "settings.h"
-#include "tag_editor.h"
 
 using Global::MainHeight;
 using Global::MainStartY;
@@ -88,11 +88,13 @@ std::string keyToString(const Action::Key &key, bool *print_backspace)
 	return result;
 }
 
+
+
 }
 
 void Help::Init()
 {
-	w = new Scrollpad(0, MainStartY, COLS, MainHeight, "", Config.main_color, brNone);
+	w = new NC::Scrollpad(0, MainStartY, COLS, MainHeight, "", Config.main_color, NC::brNone);
 	GetKeybindings();
 	w->Flush();
 	isInitialized = 1;
@@ -154,8 +156,8 @@ std::string Help::DisplayKeys(const ActionType at)
 
 void Help::Section(const char *type, const char *title)
 {
-	*w << U("\n  ") << fmtBold << TO_WSTRING(type) << U(" - ");
-	*w << TO_WSTRING(title) << fmtBoldEnd << '\n' << '\n';
+	*w << U("\n  ") << NC::fmtBold << TO_WSTRING(type) << U(" - ");
+	*w << TO_WSTRING(title) << NC::fmtBoldEnd << '\n' << '\n';
 }
 
 void Help::KeyDesc(const ActionType at, const char *desc)
@@ -172,7 +174,7 @@ void Help::MouseDesc(std::string action, const char *desc, bool indent)
 
 void Help::MouseColumn(const char *column)
 {
-	*w << fmtBold << U("    ") << TO_WSTRING(column) << U(" column:\n") << fmtBoldEnd;
+	*w << NC::fmtBold << U("    ") << TO_WSTRING(column) << U(" column:\n") << NC::fmtBoldEnd;
 }
 
 void Help::GetKeybindings()

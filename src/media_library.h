@@ -22,10 +22,9 @@
 #define _H_MEDIA_LIBRARY
 
 #include "interfaces.h"
-#include "ncmpcpp.h"
 #include "screen.h"
 
-class MediaLibrary : public Screen<Window>, public Filterable, public HasSongs, public Searchable
+class MediaLibrary : public Screen<NC::Window>, public Filterable, public HasSongs, public Searchable
 {
 	public:
 		virtual void SwitchTo();
@@ -59,7 +58,7 @@ class MediaLibrary : public Screen<Window>, public Filterable, public HasSongs, 
 		virtual void removeSelection();
 		virtual MPD::SongList getSelectedSongs();
 		
-		virtual List *GetList();
+		virtual NC::List *GetList();
 		
 		virtual bool isMergable() { return true; }
 		
@@ -84,9 +83,9 @@ class MediaLibrary : public Screen<Window>, public Filterable, public HasSongs, 
 			std::string Date;
 		};
 		
-		Menu<std::string> *Tags;
-		Menu<SearchConstraints> *Albums;
-		Menu<MPD::Song> *Songs;
+		NC::Menu<std::string> *Tags;
+		NC::Menu<SearchConstraints> *Albums;
+		NC::Menu<MPD::Song> *Songs;
 		
 	protected:
 		virtual void Init();

@@ -73,7 +73,7 @@ const my_char_t *toColumnName(char c)
 }
 
 template <typename T>
-void setProperties(Menu<T> &menu, const MPD::Song &s, HasSongs &screen, bool &separate_albums,
+void setProperties(NC::Menu<T> &menu, const MPD::Song &s, HasSongs &screen, bool &separate_albums,
                    bool &is_now_playing, bool &is_selected, bool &discard_colors)
 {
 	separate_albums = false;
@@ -84,7 +84,7 @@ void setProperties(Menu<T> &menu, const MPD::Song &s, HasSongs &screen, bool &se
 			separate_albums = true;
 	}
 	if (separate_albums)
-		menu << fmtUnderline;
+		menu << NC::fmtUnderline;
 	
 	int song_pos = menu.isFiltered() ? s.getPosition() : menu.DrawnPosition();
 	is_now_playing = static_cast<void *>(&menu) == myPlaylist->Items
@@ -94,7 +94,7 @@ void setProperties(Menu<T> &menu, const MPD::Song &s, HasSongs &screen, bool &se
 }
 
 template <typename T>
-void showSongs(Menu<T> &menu, const MPD::Song &s, HasSongs &screen, const std::string &format)
+void showSongs(NC::Menu<T> &menu, const MPD::Song &s, HasSongs &screen, const std::string &format)
 {
 	bool separate_albums, is_now_playing, is_selected, discard_colors;
 	setProperties(menu, s, screen, separate_albums, is_now_playing, is_selected, discard_colors);
@@ -112,20 +112,20 @@ void showSongs(Menu<T> &menu, const MPD::Song &s, HasSongs &screen, const std::s
 			else if (isdigit(*it)) // color
 			{
 				if (!discard_colors)
-					menu << Color(*it-'0');
+					menu << NC::Color(*it-'0');
 			}
 			else if (*it == 'R') // right align
 			{
-				basic_buffer<my_char_t> buf;
+				NC::basic_buffer<my_char_t> buf;
 				buf << U(" ");
 				String2Buffer(TO_WSTRING(line.substr(it-line.begin()+1)), buf);
 				if (discard_colors)
 					buf.RemoveFormatting();
 				if (is_now_playing)
 					buf << Config.now_playing_suffix;
-				menu << XY(menu.GetWidth()-buf.Str().length()-(is_selected ? Config.selected_item_suffix_length : 0), menu.Y()) << buf;
+				menu << NC::XY(menu.GetWidth()-buf.Str().length()-(is_selected ? Config.selected_item_suffix_length : 0), menu.Y()) << buf;
 				if (separate_albums)
-					menu << fmtUnderlineEnd;
+					menu << NC::fmtUnderlineEnd;
 				return;
 			}
 			else // not a color nor right align, just a random character
@@ -144,11 +144,11 @@ void showSongs(Menu<T> &menu, const MPD::Song &s, HasSongs &screen, const std::s
 	if (is_now_playing)
 		menu << Config.now_playing_suffix;
 	if (separate_albums)
-		menu << fmtUnderlineEnd;
+		menu << NC::fmtUnderlineEnd;
 }
 
 template <typename T>
-void showSongsInColumns(Menu<T> &menu, const MPD::Song &s, HasSongs &screen)
+void showSongsInColumns(NC::Menu<T> &menu, const MPD::Song &s, HasSongs &screen)
 {
 	if (Config.columns.empty())
 		return;
@@ -219,16 +219,16 @@ void showSongsInColumns(Menu<T> &menu, const MPD::Song &s, HasSongs &screen)
 		}
 		if (tag.empty() && it->display_empty_tag)
 			tag = TO_WSTRING(Config.empty_tag);
-		Window::Cut(tag, width);
+		NC::Window::Cut(tag, width);
 		
-		if (!discard_colors && it->color != clDefault)
+		if (!discard_colors && it->color != NC::clDefault)
 			menu << it->color;
 		
 		int x_off = 0;
 		// if column uses right alignment, calculate proper offset.
 		// otherwise just assume offset is 0, ie. we start from the left.
 		if (it->right_alignment)
-			x_off = std::max(0, width - int(Window::Length(tag)));
+			x_off = std::max(0, width - int(NC::Window::Length(tag)));
 		
 		whline(menu.Raw(), KEY_SPACE, width);
 		menu.GotoXY(x + x_off, y);
@@ -241,8 +241,8 @@ void showSongsInColumns(Menu<T> &menu, const MPD::Song &s, HasSongs &screen)
 			remained_width -= width+1;
 		}
 		
-		if (!discard_colors && it->color != clDefault)
-			menu << clEnd;
+		if (!discard_colors && it->color != NC::clDefault)
+			menu << NC::clEnd;
 	}
 	
 	// here comes the shitty part, second chapter. here we apply
@@ -261,7 +261,7 @@ void showSongsInColumns(Menu<T> &menu, const MPD::Song &s, HasSongs &screen)
 		menu.GotoXY(menu.GetWidth() - Config.selected_item_suffix_length, y);
 	
 	if (separate_albums)
-		menu << fmtUnderlineEnd;
+		menu << NC::fmtUnderlineEnd;
 }
 
 }
@@ -308,9 +308,9 @@ std::string Display::Columns(size_t list_width)
 		}
 		else
 			name = it->name;
-		Window::Cut(name, width);
+		NC::Window::Cut(name, width);
 		
-		int x_off = std::max(0, width - int(Window::Length(name)));
+		int x_off = std::max(0, width - int(NC::Window::Length(name)));
 		if (it->right_alignment)
 		{
 			result += std::string(x_off, KEY_SPACE);
@@ -333,17 +333,17 @@ std::string Display::Columns(size_t list_width)
 	return result;
 }
 
-void Display::SongsInColumns(Menu<MPD::Song> &menu, HasSongs &screen)
+void Display::SongsInColumns(NC::Menu<MPD::Song> &menu, HasSongs &screen)
 {
 	showSongsInColumns(menu, menu.Drawn().value(), screen);
 }
 
-void Display::Songs(Menu<MPD::Song> &menu, HasSongs &screen, const std::string &format)
+void Display::Songs(NC::Menu<MPD::Song> &menu, HasSongs &screen, const std::string &format)
 {
 	showSongs(menu, menu.Drawn().value(), screen, format);
 }
 
-void Display::Tags(Menu<MPD::MutableSong> &menu)
+void Display::Tags(NC::Menu<MPD::MutableSong> &menu)
 {
 	const MPD::MutableSong &s = menu.Drawn().value();
 	size_t i = myTagEditor->TagTypes->Choice();
@@ -356,16 +356,16 @@ void Display::Tags(Menu<MPD::MutableSong> &menu)
 		if (s.getNewURI().empty())
 			menu << s.getName();
 		else
-			menu << s.getName() << Config.color2 << " -> " << clEnd << s.getNewURI();
+			menu << s.getName() << Config.color2 << " -> " << NC::clEnd << s.getNewURI();
 	}
 }
 
-void Display::Outputs(Menu< MPD::Output > &menu)
+void Display::Outputs(NC::Menu<MPD::Output> &menu)
 {
 	menu << menu.Drawn().value().name();
 }
 
-void Display::Items(Menu<MPD::Item> &menu)
+void Display::Items(NC::Menu<MPD::Item> &menu)
 {
 	const MPD::Item &item = menu.Drawn().value();
 	switch (item.type)
@@ -385,7 +385,7 @@ void Display::Items(Menu<MPD::Item> &menu)
 	}
 }
 
-void Display::SearchEngine(Menu<SEItem> &menu)
+void Display::SearchEngine(NC::Menu<SEItem> &menu)
 {
 	const SEItem &si = menu.Drawn().value();
 	if (si.isSong())

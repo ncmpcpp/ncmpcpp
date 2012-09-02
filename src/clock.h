@@ -30,7 +30,7 @@
 #include "window.h"
 #include "screen.h"
 
-class Clock : public Screen<Window>
+class Clock : public Screen<NC::Window>
 {
 	public:
 		virtual void Resize();
@@ -39,7 +39,7 @@ class Clock : public Screen<Window>
 		virtual std::basic_string<my_char_t> Title();
 		
 		virtual void Update();
-		virtual void Scroll(Where) { }
+		virtual void Scroll(NC::Where) { }
 		
 		virtual void EnterPressed() { }
 		virtual void SpacePressed() { }
@@ -48,7 +48,7 @@ class Clock : public Screen<Window>
 		
 		virtual bool allowsSelection() { return false; }
 		
-		virtual List *GetList() { return 0; }
+		virtual NC::List *GetList() { return 0; }
 		
 		virtual bool isMergable() { return true; }
 		
@@ -57,7 +57,7 @@ class Clock : public Screen<Window>
 		virtual bool isLockable() { return false; }
 		
 	private:
-		Window *itsPane;
+		NC::Window *itsPane;
 		
 		static void Prepare();
 		static void Set(int, int);

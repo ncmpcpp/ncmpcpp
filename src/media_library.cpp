@@ -34,6 +34,8 @@
 #include "utility/comparators.h"
 #include "utility/type_conversions.h"
 
+using namespace std::placeholders;
+
 using Global::MainHeight;
 using Global::MainStartY;
 using Global::myScreen;
@@ -62,11 +64,11 @@ std::string AlbumToString(const SearchConstraints &sc);
 std::string SongToString(const MPD::Song &s);
 
 bool TagEntryMatcher(const Regex &rx, const std::string &tag);
-bool AlbumEntryMatcher(const Regex &rx, const Menu<SearchConstraints>::Item &item, bool filter);
+bool AlbumEntryMatcher(const Regex &rx, const NC::Menu<SearchConstraints>::Item &item, bool filter);
 bool SongEntryMatcher(const Regex &rx, const MPD::Song &s);
 
-void DisplayAlbums(Menu<SearchConstraints> &menu);
-void DisplayPrimaryTags(Menu<std::string> &menu);
+void DisplayAlbums(NC::Menu<SearchConstraints> &menu);
+void DisplayPrimaryTags(NC::Menu<std::string> &menu);
 
 bool SortSongsByTrack(const MPD::Song &a, const MPD::Song &b);
 bool SortAllTracks(const MPD::Song &a, const MPD::Song &b);
@@ -83,7 +85,7 @@ void MediaLibrary::Init()
 	itsRightColWidth = COLS-COLS/3*2-1;
 	itsRightColStartX = itsLeftColWidth+itsMiddleColWidth+2;
 	
-	Tags = new Menu<std::string>(0, MainStartY, itsLeftColWidth, MainHeight, Config.titles_visibility ? tagTypeToString(Config.media_lib_primary_tag) + "s" : "", Config.main_color, brNone);
+	Tags = new NC::Menu<std::string>(0, MainStartY, itsLeftColWidth, MainHeight, Config.titles_visibility ? tagTypeToString(Config.media_lib_primary_tag) + "s" : "", Config.main_color, NC::brNone);
 	Tags->HighlightColor(Config.active_column_color);
 	Tags->CyclicScrolling(Config.use_cyclic_scrolling);
 	Tags->CenteredCursor(Config.centered_cursor);
@@ -91,7 +93,7 @@ void MediaLibrary::Init()
 	Tags->SetSelectSuffix(Config.selected_item_suffix);
 	Tags->setItemDisplayer(DisplayPrimaryTags);
 	
-	Albums = new Menu<SearchConstraints>(itsMiddleColStartX, MainStartY, itsMiddleColWidth, MainHeight, Config.titles_visibility ? "Albums" : "", Config.main_color, brNone);
+	Albums = new NC::Menu<SearchConstraints>(itsMiddleColStartX, MainStartY, itsMiddleColWidth, MainHeight, Config.titles_visibility ? "Albums" : "", Config.main_color, NC::brNone);
 	Albums->HighlightColor(Config.main_highlight_color);
 	Albums->CyclicScrolling(Config.use_cyclic_scrolling);
 	Albums->CenteredCursor(Config.centered_cursor);
@@ -99,7 +101,7 @@ void MediaLibrary::Init()
 	Albums->SetSelectSuffix(Config.selected_item_suffix);
 	Albums->setItemDisplayer(DisplayAlbums);
 	
-	Songs = new Menu<MPD::Song>(itsRightColStartX, MainStartY, itsRightColWidth, MainHeight, Config.titles_visibility ? "Songs" : "", Config.main_color, brNone);
+	Songs = new NC::Menu<MPD::Song>(itsRightColStartX, MainStartY, itsRightColWidth, MainHeight, Config.titles_visibility ? "Songs" : "", Config.main_color, NC::brNone);
 	Songs->HighlightColor(Config.main_highlight_color);
 	Songs->CyclicScrolling(Config.use_cyclic_scrolling);
 	Songs->CenteredCursor(Config.centered_cursor);
@@ -152,7 +154,7 @@ void MediaLibrary::Refresh()
 	Songs->Display();
 	if (Albums->Empty())
 	{
-		*Albums << XY(0, 0) << "No albums found.";
+		*Albums << NC::XY(0, 0) << "No albums found.";
 		Albums->Window::Refresh();
 	}
 }
@@ -267,7 +269,7 @@ void MediaLibrary::Update()
 	else if (hasTwoColumns && Albums->ReallyEmpty())
 	{
 		Songs->Clear();
-		*Albums << XY(0, 0) << "Fetching albums...";
+		*Albums << NC::XY(0, 0) << "Fetching albums...";
 		Albums->Window::Refresh();
 		Mpd.BlockIdle(true);
 		auto artists = Mpd.GetList(Config.media_lib_primary_tag);
@@ -359,7 +361,7 @@ void MediaLibrary::SpacePressed()
 			size_t i = Songs->Choice();
 			Songs->at(i).setSelected(!Songs->at(i).isSelected());
 		}
-		w->Scroll(wDown);
+		w->Scroll(NC::wDown);
 	}
 	else
 		AddToPlaylist(0);
@@ -382,11 +384,11 @@ void MediaLibrary::MouseButtonPressed(MEVENT me)
 				size_t pos = Tags->Choice();
 				SpacePressed();
 				if (pos < Tags->Size()-1)
-					Tags->Scroll(wUp);
+					Tags->Scroll(NC::wUp);
 			}
 		}
 		else
-			Screen<Window>::MouseButtonPressed(me);
+			Screen<NC::Window>::MouseButtonPressed(me);
 		Albums->Clear();
 		Songs->Clear();
 	}
@@ -402,11 +404,11 @@ void MediaLibrary::MouseButtonPressed(MEVENT me)
 				size_t pos = Albums->Choice();
 				SpacePressed();
 				if (pos < Albums->Size()-1)
-					Albums->Scroll(wUp);
+					Albums->Scroll(NC::wUp);
 			}
 		}
 		else
-			Screen<Window>::MouseButtonPressed(me);
+			Screen<NC::Window>::MouseButtonPressed(me);
 		Songs->Clear();
 	}
 	else if (!Songs->Empty() && Songs->hasCoords(me.x, me.y))
@@ -424,17 +426,17 @@ void MediaLibrary::MouseButtonPressed(MEVENT me)
 				size_t pos = Songs->Choice();
 				SpacePressed();
 				if (pos < Songs->Size()-1)
-					Songs->Scroll(wUp);
+					Songs->Scroll(NC::wUp);
 			}
 			else
 				EnterPressed();
 		}
 		else
-			Screen<Window>::MouseButtonPressed(me);
+			Screen<NC::Window>::MouseButtonPressed(me);
 	}
 }
 
-List *MediaLibrary::GetList()
+NC::List *MediaLibrary::GetList()
 {
 	if (w == Tags)
 		return Tags;
@@ -841,7 +843,7 @@ void MediaLibrary::AddToPlaylist(bool add_n_play)
 
 	if (!add_n_play)
 	{
-		w->Scroll(wDown);
+		w->Scroll(NC::wDown);
 		if (w == Tags)
 		{
 			Albums->Clear();
@@ -881,14 +883,12 @@ std::string SongToString(const MPD::Song &s)
 	return s.toString(Config.song_library_format);
 }
 
-/***********************************************************************/
-
 bool TagEntryMatcher(const Regex &rx, const std::string &tag)
 {
 	return rx.match(tag);
 }
 
-bool AlbumEntryMatcher(const Regex &rx, const Menu<SearchConstraints>::Item &item, bool filter)
+bool AlbumEntryMatcher(const Regex &rx, const NC::Menu<SearchConstraints>::Item &item, bool filter)
 {
 	if (item.isSeparator() || item.value().Date == AllTracksMarker)
 		return filter;
@@ -902,12 +902,12 @@ bool SongEntryMatcher(const Regex &rx, const MPD::Song &s)
 
 /***********************************************************************/
 
-void DisplayAlbums(Menu<SearchConstraints> &menu)
+void DisplayAlbums(NC::Menu<SearchConstraints> &menu)
 {
 	menu << AlbumToString(menu.Drawn().value());
 }
 
-void DisplayPrimaryTags(Menu<std::string> &menu)
+void DisplayPrimaryTags(NC::Menu<std::string> &menu)
 {
 	const std::string &tag = menu.Drawn().value();
 	if (tag.empty())

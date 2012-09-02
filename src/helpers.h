@@ -21,10 +21,16 @@
 #ifndef _HELPERS_H
 #define _HELPERS_H
 
+#include "interfaces.h"
 #include "mpdpp.h"
-#include "ncmpcpp.h"
+#include "screen.h"
 #include "settings.h"
 #include "status.h"
+
+inline HasSongs *hasSongs(BasicScreen *screen)
+{
+	return dynamic_cast<HasSongs *>(screen);
+}
 
 template <typename Iterator> void removeSelectionHelper(Iterator first, Iterator last)
 {
@@ -51,7 +57,7 @@ template <typename Iterator> std::string getSharedDirectory(Iterator first, Iter
 	return result;
 }
 
-template <typename T> void withUnfilteredMenu(Menu<T> &menu, std::function<void()> action)
+template <typename T> void withUnfilteredMenu(NC::Menu<T> &menu, std::function<void()> action)
 {
 	bool is_filtered = menu.isFiltered();
 	menu.ShowAll();
@@ -65,17 +71,17 @@ void ParseArgv(int, char **);
 template <typename T> struct StringConverter {
 	const char *operator()(const char *s) { return s; }
 };
-template <> struct StringConverter< basic_buffer<wchar_t> > {
+template <> struct StringConverter< NC::basic_buffer<wchar_t> > {
 	std::wstring operator()(const char *s) { return ToWString(s); }
 };
-template <> struct StringConverter<Scrollpad> {
+template <> struct StringConverter<NC::Scrollpad> {
 	std::basic_string<my_char_t> operator()(const char *s) { return TO_WSTRING(s); }
 };
 
-template <typename C> void String2Buffer(const std::basic_string<C> &s, basic_buffer<C> &buf)
+template <typename C> void String2Buffer(const std::basic_string<C> &s, NC::basic_buffer<C> &buf)
 {
-	StringConverter< basic_buffer<C> > cnv;
-	for (typename std::basic_string<C>::const_iterator it = s.begin(); it != s.end(); ++it)
+	StringConverter< NC::basic_buffer<C> > cnv;
+	for (auto it = s.begin(); it != s.end(); ++it)
 	{
 		if (*it == '$')
 		{
@@ -86,23 +92,23 @@ template <typename C> void String2Buffer(const std::basic_string<C> &s, basic_bu
 			}
 			else if (isdigit(*it))
 			{
-				buf << Color(*it-'0');
+				buf << NC::Color(*it-'0');
 			}
 			else
 			{
 				switch (*it)
 				{
 					case 'b':
-						buf << fmtBold;
+						buf << NC::fmtBold;
 						break;
 					case 'u':
-						buf << fmtUnderline;
+						buf << NC::fmtUnderline;
 						break;
 					case 'a':
-						buf << fmtAltCharset;
+						buf << NC::fmtAltCharset;
 						break;
 					case 'r':
-						buf << fmtReverse;
+						buf << NC::fmtReverse;
 						break;
 					case '/':
 						if (++it == s.end())
@@ -113,16 +119,16 @@ template <typename C> void String2Buffer(const std::basic_string<C> &s, basic_bu
 						switch (*it)
 						{
 							case 'b':
-								buf << fmtBoldEnd;
+								buf << NC::fmtBoldEnd;
 								break;
 							case 'u':
-								buf << fmtUnderlineEnd;
+								buf << NC::fmtUnderlineEnd;
 								break;
 							case 'a':
-								buf << fmtAltCharsetEnd;
+								buf << NC::fmtAltCharsetEnd;
 								break;
 							case 'r':
-								buf << fmtReverseEnd;
+								buf << NC::fmtReverseEnd;
 								break;
 							default:
 								buf << '$' << *--it;
@@ -195,14 +201,14 @@ template <typename T> void ShowTime(T &buf, size_t length, bool short_names)
 template <typename T> void ShowTag(T &buf, const std::string &tag)
 {
 	if (tag.empty())
-		buf << Config.empty_tags_color << Config.empty_tag << clEnd;
+		buf << Config.empty_tags_color << Config.empty_tag << NC::clEnd;
 	else
 		buf << tag;
 }
 
 std::string Timestamp(time_t t);
 
-void UpdateSongList(Menu<MPD::Song> *);
+void UpdateSongList(NC::Menu<MPD::Song> *);
 
 std::basic_string<my_char_t> Scroller(const std::basic_string<my_char_t> &str, size_t &pos, size_t width);
 

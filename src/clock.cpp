@@ -54,8 +54,8 @@ void Clock::Init()
 {
 	Width = Config.clock_display_seconds ? 60 : 40;
 	
-	itsPane = new Window(0, MainStartY, COLS, MainHeight, "", Config.main_color, brNone);
-	w = new Window((COLS-Width)/2, (MainHeight-Height)/2+MainStartY, Width, Height-1, "", Config.main_color, Border(Config.main_color));
+	itsPane = new NC::Window(0, MainStartY, COLS, MainHeight, "", Config.main_color, NC::brNone);
+	w = new NC::Window((COLS-Width)/2, (MainHeight-Height)/2+MainStartY, Width, Height-1, "", Config.main_color, NC::Border(Config.main_color));
 	isInitialized = 1;
 }
 
@@ -160,7 +160,7 @@ void Clock::Update()
 		next[k] = 0;
 		for (int s = 1; s >= 0; --s)
 		{
-			*w << (s ? fmtReverse : fmtReverseEnd);
+			*w << (s ? NC::fmtReverse : NC::fmtReverseEnd);
 			for (int i = 0; i < 6; ++i)
 			{
 				long a = (newer[i] ^ older[i]) & (s ? newer : older)[i];

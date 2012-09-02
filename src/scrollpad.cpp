@@ -22,7 +22,7 @@
 
 #include "scrollpad.h"
 
-using namespace NCurses;
+namespace NC {//
 
 Scrollpad::Scrollpad(size_t startx,
 			size_t starty,
@@ -208,3 +208,4 @@ Scrollpad &Scrollpad::operator<<(const std::string &s)
 }
 #endif // _UTF8
 
+}

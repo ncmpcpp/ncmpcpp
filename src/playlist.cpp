@@ -31,6 +31,8 @@
 #include "status.h"
 #include "utility/comparators.h"
 
+using namespace std::placeholders;
+
 using Global::MainHeight;
 using Global::MainStartY;
 
@@ -41,7 +43,7 @@ bool Playlist::ReloadRemaining = false;
 
 namespace {//
 
-Menu< std::pair<std::string, MPD::Song::GetFunction> > *SortDialog = 0;
+NC::Menu< std::pair<std::string, MPD::Song::GetFunction> > *SortDialog = 0;
 size_t SortDialogHeight;
 
 const size_t SortOptions = 10;
@@ -54,7 +56,7 @@ bool playlistEntryMatcher(const Regex &rx, const MPD::Song &s);
 
 void Playlist::Init()
 {
-	Items = new Menu<MPD::Song>(0, MainStartY, COLS, MainHeight, Config.columns_in_playlist && Config.titles_visibility ? Display::Columns(COLS) : "", Config.main_color, brNone);
+	Items = new NC::Menu<MPD::Song>(0, MainStartY, COLS, MainHeight, Config.columns_in_playlist && Config.titles_visibility ? Display::Columns(COLS) : "", Config.main_color, NC::brNone);
 	Items->CyclicScrolling(Config.use_cyclic_scrolling);
 	Items->CenteredCursor(Config.centered_cursor);
 	Items->HighlightColor(Config.main_highlight_color);
@@ -69,7 +71,7 @@ void Playlist::Init()
 	{
 		SortDialogHeight = std::min(int(MainHeight), 17);
 		
-		SortDialog = new Menu< std::pair<std::string, MPD::Song::GetFunction> >((COLS-SortDialogWidth)/2, (MainHeight-SortDialogHeight)/2+MainStartY, SortDialogWidth, SortDialogHeight, "Sort songs by...", Config.main_color, Config.window_border);
+		SortDialog = new NC::Menu< std::pair<std::string, MPD::Song::GetFunction> >((COLS-SortDialogWidth)/2, (MainHeight-SortDialogHeight)/2+MainStartY, SortDialogWidth, SortDialogHeight, "Sort songs by...", Config.main_color, Config.window_border);
 		SortDialog->CyclicScrolling(Config.use_cyclic_scrolling);
 		SortDialog->CenteredCursor(Config.centered_cursor);
 		SortDialog->setItemDisplayer(Display::Pair<std::string, MPD::Song::GetFunction>);
@@ -239,7 +241,7 @@ void Playlist::SpacePressed()
 	if (w == Items && !Items->Empty())
 	{
 		Items->Current().setSelected(!Items->Current().isSelected());
-		Items->Scroll(wDown);
+		Items->Scroll(NC::wDown);
 	}
 }
 
@@ -254,7 +256,7 @@ void Playlist::MouseButtonPressed(MEVENT me)
 				EnterPressed();
 		}
 		else
-			Screen<Window>::MouseButtonPressed(me);
+			Screen<NC::Window>::MouseButtonPressed(me);
 	}
 	else if (w == SortDialog && SortDialog->hasCoords(me.x, me.y))
 	{
@@ -265,7 +267,7 @@ void Playlist::MouseButtonPressed(MEVENT me)
 				EnterPressed();
 		}
 		else
-			Screen<Window>::MouseButtonPressed(me);
+			Screen<NC::Window>::MouseButtonPressed(me);
 	}
 }
 
@@ -407,7 +409,7 @@ void Playlist::MoveSelectedItems(Movement where)
 				if (pos > 0)
 				{
 					if (Mpd.Move(pos-1, pos))
-						Items->Scroll(wUp);
+						Items->Scroll(NC::wUp);
 				}
 			}
 			break;
@@ -439,7 +441,7 @@ void Playlist::MoveSelectedItems(Movement where)
 				if (pos < Items->Size()-1)
 				{
 					if (Mpd.Move(pos, pos+1))
-						Items->Scroll(wDown);
+						Items->Scroll(NC::wDown);
 				}
 			}
 			break;
@@ -497,7 +499,7 @@ void Playlist::AdjustSortOrder(Movement where)
 			if (pos > 0 && pos < SortOptions)
 			{
 				SortDialog->Swap(pos, pos-1);
-				SortDialog->Scroll(wUp);
+				SortDialog->Scroll(NC::wUp);
 			}
 			break;
 		}
@@ -507,7 +509,7 @@ void Playlist::AdjustSortOrder(Movement where)
 			if (pos < SortOptions-1)
 			{
 				SortDialog->Swap(pos, pos+1);
-				SortDialog->Scroll(wDown);
+				SortDialog->Scroll(NC::wDown);
 			}
 			break;
 		}

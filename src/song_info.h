@@ -24,7 +24,7 @@
 #include "screen.h"
 #include "mutable_song.h"
 
-class SongInfo : public Screen<Scrollpad>
+class SongInfo : public Screen<NC::Scrollpad>
 {
 	public:
 		struct Metadata
@@ -44,7 +44,7 @@ class SongInfo : public Screen<Scrollpad>
 		
 		virtual bool allowsSelection() { return false; }
 		
-		virtual List *GetList() { return 0; }
+		virtual NC::List *GetList() { return 0; }
 		
 		virtual bool isMergable() { return true; }
 		

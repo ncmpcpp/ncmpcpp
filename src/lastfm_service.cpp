@@ -102,10 +102,10 @@ bool ArtistInfo::checkArgs(const Args &args)
 	return args.find("artist") != args.end();
 }
 
-void ArtistInfo::colorizeOutput(NCurses::Scrollpad &w)
+void ArtistInfo::colorizeOutput(NC::Scrollpad &w)
 {
-	w.SetFormatting(fmtBold, U("\n\nSimilar artists:\n"), fmtBoldEnd, false);
-	w.SetFormatting(Config.color2, U("\n * "), clEnd, true);
+	w.SetFormatting(NC::fmtBold, U("\n\nSimilar artists:\n"), NC::fmtBoldEnd, false);
+	w.SetFormatting(Config.color2, U("\n * "), NC::clEnd, true);
 	// below is used so format won't be removed using RemoveFormatting() by accident.
 	w.ForgetFormatting();
 }

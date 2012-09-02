@@ -22,11 +22,9 @@
 #define _BROWSER_H
 
 #include "interfaces.h"
-#include "ncmpcpp.h"
-#include "regex_filter.h"
 #include "screen.h"
 
-class Browser : public Screen< Menu<MPD::Item> >, public Filterable, public HasSongs, public Searchable
+class Browser : public Screen< NC::Menu<MPD::Item> >, public Filterable, public HasSongs, public Searchable
 {
 	public:
 		Browser() : itsBrowseLocally(0), itsScrollBeginning(0), itsBrowsedDir("/") { }
@@ -59,7 +57,7 @@ class Browser : public Screen< Menu<MPD::Item> >, public Filterable, public HasS
 		virtual void removeSelection();
 		virtual MPD::SongList getSelectedSongs();
 		
-		virtual List *GetList() { return w; }
+		virtual NC::List *GetList() { return w; }
 		
 		virtual bool isMergable() { return true; }
 		

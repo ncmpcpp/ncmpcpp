@@ -31,7 +31,7 @@
 #include "strbuffer.h"
 #include "window.h"
 
-namespace NCurses {
+namespace NC {
 
 /// List class is an interface for Menu class
 struct List

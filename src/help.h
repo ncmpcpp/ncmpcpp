@@ -21,10 +21,10 @@
 #ifndef _HELP_H
 #define _HELP_H
 
-#include "ncmpcpp.h"
+#include "actions.h"
 #include "screen.h"
 
-class Help : public Screen<Scrollpad>
+class Help : public Screen<NC::Scrollpad>
 {
 	public:
 		virtual void Resize();
@@ -38,7 +38,7 @@ class Help : public Screen<Scrollpad>
 		
 		virtual bool allowsSelection() { return false; }
 		
-		virtual List *GetList() { return 0; }
+		virtual NC::List *GetList() { return 0; }
 		
 		virtual bool isMergable() { return true; }
 		

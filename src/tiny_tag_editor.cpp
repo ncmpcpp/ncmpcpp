@@ -26,10 +26,12 @@
 #include "mpegfile.h"
 #include "vorbisfile.h"
 #include "flacfile.h"
+#include "fileref.h"
 
 #include "browser.h"
 #include "charset.h"
 #include "display.h"
+#include "helpers.h"
 #include "global.h"
 #include "song_info.h"
 #include "playlist.h"
@@ -44,11 +46,11 @@ TinyTagEditor *myTinyTagEditor = new TinyTagEditor;
 
 void TinyTagEditor::Init()
 {
-	w = new Menu<Buffer>(0, MainStartY, COLS, MainHeight, "", Config.main_color, brNone);
+	w = new NC::Menu<NC::Buffer>(0, MainStartY, COLS, MainHeight, "", Config.main_color, NC::brNone);
 	w->HighlightColor(Config.main_highlight_color);
 	w->CyclicScrolling(Config.use_cyclic_scrolling);
 	w->CenteredCursor(Config.centered_cursor);
-	w->setItemDisplayer(Display::Default<Buffer>);
+	w->setItemDisplayer(Display::Default<NC::Buffer>);
 	isInitialized = 1;
 }
 
@@ -108,15 +110,15 @@ void TinyTagEditor::EnterPressed()
 	if (option < 19) // separator after comment
 	{
 		size_t pos = option-8;
-		Statusbar() << fmtBold << SongInfo::Tags[pos].Name << ": " << fmtBoldEnd;
+		Statusbar() << NC::fmtBold << SongInfo::Tags[pos].Name << ": " << NC::fmtBoldEnd;
 		itsEdited.setTag(SongInfo::Tags[pos].Set, Global::wFooter->GetString(itsEdited.getTags(SongInfo::Tags[pos].Get)));
 		w->at(option).value().Clear();
-		w->at(option).value() << fmtBold << SongInfo::Tags[pos].Name << ':' << fmtBoldEnd << ' ';
+		w->at(option).value() << NC::fmtBold << SongInfo::Tags[pos].Name << ':' << NC::fmtBoldEnd << ' ';
 		ShowTag(w->at(option).value(), itsEdited.getTags(SongInfo::Tags[pos].Get));
 	}
 	else if (option == 20)
 	{
-		Statusbar() << fmtBold << "Filename: " << fmtBoldEnd;
+		Statusbar() << NC::fmtBold << "Filename: " << NC::fmtBoldEnd;
 		std::string filename = itsEdited.getNewURI().empty() ? itsEdited.getName() : itsEdited.getNewURI();
 		size_t dot = filename.rfind(".");
 		std::string extension = filename.substr(dot);
@@ -124,7 +126,7 @@ void TinyTagEditor::EnterPressed()
 		std::string new_name = Global::wFooter->GetString(filename);
 		itsEdited.setNewURI(new_name + extension);
 		w->at(option).value().Clear();
-		w->at(option).value() << fmtBold << "Filename:" << fmtBoldEnd << ' ' << (itsEdited.getNewURI().empty() ? itsEdited.getName() : itsEdited.getNewURI());
+		w->at(option).value() << NC::fmtBold << "Filename:" << NC::fmtBoldEnd << ' ' << (itsEdited.getNewURI().empty() ? itsEdited.getName() : itsEdited.getNewURI());
 	}
 	UnlockStatusbar();
 	
@@ -166,7 +168,7 @@ void TinyTagEditor::MouseButtonPressed(MEVENT me)
 		}
 	}
 	else
-		Screen< Menu<Buffer> >::MouseButtonPressed(me);
+		Screen< NC::Menu<NC::Buffer> >::MouseButtonPressed(me);
 }
 
 void TinyTagEditor::SetEdited(const MPD::Song &s)
@@ -214,23 +216,23 @@ bool TinyTagEditor::getTags()
 	
 	w->Highlight(8);
 	
-	w->at(0).value() << fmtBold << Config.color1 << "Song name: " << fmtBoldEnd << Config.color2 << itsEdited.getName() << clEnd;
-	w->at(1).value() << fmtBold << Config.color1 << "Location in DB: " << fmtBoldEnd << Config.color2;
+	w->at(0).value() << NC::fmtBold << Config.color1 << "Song name: " << NC::fmtBoldEnd << Config.color2 << itsEdited.getName() << NC::clEnd;
+	w->at(1).value() << NC::fmtBold << Config.color1 << "Location in DB: " << NC::fmtBoldEnd << Config.color2;
 	ShowTag(w->at(1).value(), itsEdited.getDirectory());
-	w->at(1).value() << clEnd;
-	w->at(3).value() << fmtBold << Config.color1 << "Length: " << fmtBoldEnd << Config.color2 << itsEdited.getLength() << clEnd;
-	w->at(4).value() << fmtBold << Config.color1 << "Bitrate: " << fmtBoldEnd << Config.color2 << f.audioProperties()->bitrate() << " kbps" << clEnd;
-	w->at(5).value() << fmtBold << Config.color1 << "Sample rate: " << fmtBoldEnd << Config.color2 << f.audioProperties()->sampleRate() << " Hz" << clEnd;
-	w->at(6).value() << fmtBold << Config.color1 << "Channels: " << fmtBoldEnd << Config.color2 << (f.audioProperties()->channels() == 1 ? "Mono" : "Stereo") << clDefault;
+	w->at(1).value() << NC::clEnd;
+	w->at(3).value() << NC::fmtBold << Config.color1 << "Length: " << NC::fmtBoldEnd << Config.color2 << itsEdited.getLength() << NC::clEnd;
+	w->at(4).value() << NC::fmtBold << Config.color1 << "Bitrate: " << NC::fmtBoldEnd << Config.color2 << f.audioProperties()->bitrate() << " kbps" << NC::clEnd;
+	w->at(5).value() << NC::fmtBold << Config.color1 << "Sample rate: " << NC::fmtBoldEnd << Config.color2 << f.audioProperties()->sampleRate() << " Hz" << NC::clEnd;
+	w->at(6).value() << NC::fmtBold << Config.color1 << "Channels: " << NC::fmtBoldEnd << Config.color2 << (f.audioProperties()->channels() == 1 ? "Mono" : "Stereo") << NC::clDefault;
 	
 	unsigned pos = 8;
 	for (const SongInfo::Metadata *m = SongInfo::Tags; m->Name; ++m, ++pos)
 	{
-		w->at(pos).value() << fmtBold << m->Name << ":" << fmtBoldEnd << ' ';
+		w->at(pos).value() << NC::fmtBold << m->Name << ":" << NC::fmtBoldEnd << ' ';
 		ShowTag(w->at(pos).value(), itsEdited.getTags(m->Get));
 	}
 	
-	w->at(20).value() << fmtBold << "Filename:" << fmtBoldEnd << ' ' << itsEdited.getName();
+	w->at(20).value() << NC::fmtBold << "Filename:" << NC::fmtBoldEnd << ' ' << itsEdited.getName();
 	
 	w->at(22).value() << "Save";
 	w->at(23).value() << "Cancel";

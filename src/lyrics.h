@@ -24,12 +24,11 @@
 #include <pthread.h>
 #include <queue>
 
-#include "ncmpcpp.h"
 #include "mpdpp.h"
 #include "screen.h"
 #include "lyrics_fetcher.h"
 
-class Lyrics : public Screen<Scrollpad>
+class Lyrics : public Screen<NC::Scrollpad>
 {
 	public:
 		Lyrics() : ReloadNP(0),
@@ -50,7 +49,7 @@ class Lyrics : public Screen<Scrollpad>
 		
 		virtual bool allowsSelection() { return false; }
 		
-		virtual List *GetList() { return 0; }
+		virtual NC::List *GetList() { return 0; }
 		
 		virtual bool isMergable() { return true; }
 		

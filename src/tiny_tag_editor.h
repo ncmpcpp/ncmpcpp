@@ -31,7 +31,7 @@
 #include "mutable_song.h"
 #include "screen.h"
 
-class TinyTagEditor : public Screen< Menu<Buffer> >
+class TinyTagEditor : public Screen< NC::Menu<NC::Buffer> >
 {
 	public:
 		virtual void Resize();
@@ -45,7 +45,7 @@ class TinyTagEditor : public Screen< Menu<Buffer> >
 		
 		virtual bool allowsSelection() { return false; }
 		
-		virtual List *GetList() { return 0; }
+		virtual NC::List *GetList() { return 0; }
 		
 		virtual bool isMergable() { return true; }
 		

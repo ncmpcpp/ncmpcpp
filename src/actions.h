@@ -23,7 +23,7 @@
 
 #include <map>
 #include <string>
-#include "ncmpcpp.h"
+#include "window.h"
 
 enum ActionType
 {
@@ -102,7 +102,7 @@ struct Action
 		return false;
 	}
 	
-	static Key ReadKey(Window &w);
+	static Key ReadKey(NC::Window &w);
 	
 	static void ValidateScreenSize();
 	static void SetResizeFlags();

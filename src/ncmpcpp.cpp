@@ -29,7 +29,6 @@
 #include <stdexcept>
 
 #include "mpdpp.h"
-#include "ncmpcpp.h"
 
 #include "actions.h"
 #include "browser.h"
@@ -67,7 +66,7 @@ namespace
 		errorlog.close();
 		Mpd.Disconnect();
 #		ifndef USE_PDCURSES // destroying screen somehow crashes pdcurses
-		DestroyScreen();
+		NC::DestroyScreen();
 #		endif // USE_PDCURSES
 		WindowTitle("");
 	}
@@ -135,7 +134,7 @@ int main(int argc, char **argv)
 	cerr_buffer = std::cerr.rdbuf();
 	std::cerr.rdbuf(errorlog.rdbuf());
 	
-	InitScreen("ncmpcpp ver. "VERSION, Config.colors_enabled);
+	NC::InitScreen("ncmpcpp ver. "VERSION, Config.colors_enabled);
 	
 	Action::OriginalStatusbarVisibility = Config.statusbar_visibility;
 	
@@ -148,12 +147,12 @@ int main(int argc, char **argv)
 	Action::SetWindowsDimensions();
 	Action::ValidateScreenSize();
 	
-	wHeader = new Window(0, 0, COLS, Action::HeaderHeight, "", Config.header_color, brNone);
+	wHeader = new NC::Window(0, 0, COLS, Action::HeaderHeight, "", Config.header_color, NC::brNone);
 	if (Config.header_visibility || Config.new_design)
 		wHeader->Display();
 	
-	wFooter = new Window(0, Action::FooterStartY, COLS, Action::FooterHeight, "", Config.statusbar_color, brNone);
-	wFooter->SetTimeout(ncmpcpp_window_timeout);
+	wFooter = new NC::Window(0, Action::FooterStartY, COLS, Action::FooterHeight, "", Config.statusbar_color, NC::brNone);
+	wFooter->SetTimeout(500);
 	wFooter->SetGetStringHelper(StatusbarGetStringHelper);
 	if (Mpd.SupportsIdle())
 		wFooter->AddFDCallback(Mpd.GetFD(), StatusbarMPDCallback);
@@ -243,20 +242,20 @@ int main(int argc, char **argv)
 			if (Config.new_design)
 			{
 				std::basic_string<my_char_t> title = myScreen->Title();
-				*wHeader << XY(0, 3) << wclrtoeol;
-				*wHeader << fmtBold << Config.alternative_ui_separator_color;
+				*wHeader << NC::XY(0, 3) << wclrtoeol;
+				*wHeader << NC::fmtBold << Config.alternative_ui_separator_color;
 				mvwhline(wHeader->Raw(), 2, 0, 0, COLS);
 				mvwhline(wHeader->Raw(), 4, 0, 0, COLS);
-				*wHeader << XY((COLS-Window::Length(title))/2, 3);
-				*wHeader << Config.header_color << title << clEnd;
-				*wHeader << clEnd << fmtBoldEnd;
+				*wHeader << NC::XY((COLS-NC::Window::Length(title))/2, 3);
+				*wHeader << Config.header_color << title << NC::clEnd;
+				*wHeader << NC::clEnd << NC::fmtBoldEnd;
 			}
 			else
 			{
-				*wHeader << XY(0, 0) << wclrtoeol << fmtBold << myScreen->Title() << fmtBoldEnd;
+				*wHeader << NC::XY(0, 0) << wclrtoeol << NC::fmtBold << myScreen->Title() << NC::fmtBoldEnd;
 				*wHeader << Config.volume_color;
-				*wHeader << XY(wHeader->GetWidth()-VolumeState.length(), 0) << VolumeState;
-				*wHeader << clEnd;
+				*wHeader << NC::XY(wHeader->GetWidth()-VolumeState.length(), 0) << VolumeState;
+				*wHeader << NC::clEnd;
 			}
 			wHeader->Refresh();
 			RedrawHeader = false;
@@ -295,10 +294,10 @@ int main(int argc, char **argv)
 #		ifdef ENABLE_VISUALIZER
 		// visualizer sets timeout to 40ms, but since only it needs such small
 		// value, we should restore defalt one after switching to another screen.
-		if (wFooter->GetTimeout() < ncmpcpp_window_timeout
+		if (wFooter->GetTimeout() < 500
 		&&  !(myScreen == myVisualizer || myLockedScreen == myVisualizer || myInactiveScreen == myVisualizer)
 		   )
-			wFooter->SetTimeout(ncmpcpp_window_timeout);
+			wFooter->SetTimeout(500);
 #		endif // ENABLE_VISUALIZER
 	}
 	return 0;

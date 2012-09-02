@@ -27,6 +27,8 @@
 #include "playlist.h"
 #include "playlist_editor.h"
 #include "sel_items_adder.h"
+#include "settings.h"
+#include "status.h"
 #include "utility/comparators.h"
 
 using Global::MainHeight;
@@ -39,13 +41,13 @@ SelectedItemsAdder *mySelectedItemsAdder = new SelectedItemsAdder;
 void SelectedItemsAdder::Init()
 {
 	SetDimensions();
-	itsPlaylistSelector = new Menu<std::string>((COLS-itsWidth)/2, (MainHeight-itsHeight)/2+MainStartY, itsWidth, itsHeight, "Add selected item(s) to...", Config.main_color, Config.window_border);
+	itsPlaylistSelector = new NC::Menu<std::string>((COLS-itsWidth)/2, (MainHeight-itsHeight)/2+MainStartY, itsWidth, itsHeight, "Add selected item(s) to...", Config.main_color, Config.window_border);
 	itsPlaylistSelector->CyclicScrolling(Config.use_cyclic_scrolling);
 	itsPlaylistSelector->CenteredCursor(Config.centered_cursor);
 	itsPlaylistSelector->HighlightColor(Config.main_highlight_color);
 	itsPlaylistSelector->setItemDisplayer(Display::Default<std::string>);
 	
-	itsPositionSelector = new Menu<std::string>((COLS-itsPSWidth)/2, (MainHeight-itsPSHeight)/2+MainStartY, itsPSWidth, itsPSHeight, "Where?", Config.main_color, Config.window_border);
+	itsPositionSelector = new NC::Menu<std::string>((COLS-itsPSWidth)/2, (MainHeight-itsPSHeight)/2+MainStartY, itsPSWidth, itsPSHeight, "Where?", Config.main_color, Config.window_border);
 	itsPositionSelector->CyclicScrolling(Config.use_cyclic_scrolling);
 	itsPositionSelector->CenteredCursor(Config.centered_cursor);
 	itsPositionSelector->HighlightColor(Config.main_highlight_color);
@@ -259,7 +261,7 @@ void SelectedItemsAdder::MouseButtonPressed(MEVENT me)
 			EnterPressed();
 	}
 	else
-		Screen< Menu<std::string> >::MouseButtonPressed(me);
+		Screen< NC::Menu<std::string> >::MouseButtonPressed(me);
 }
 
 void SelectedItemsAdder::SetDimensions()

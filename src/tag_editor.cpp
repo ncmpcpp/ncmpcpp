@@ -32,14 +32,20 @@
 #include "mpegfile.h"
 #include "vorbisfile.h"
 #include "flacfile.h"
+#include "xiphcomment.h"
+#include "fileref.h"
+#include "tag.h"
 
 #include "browser.h"
 #include "charset.h"
 #include "display.h"
 #include "global.h"
+#include "helpers.h"
 #include "song_info.h"
 #include "playlist.h"
 #include "utility/comparators.h"
+
+using namespace std::placeholders;
 
 using Global::myScreen;
 using Global::MainHeight;
@@ -83,8 +89,8 @@ std::string GenerateFilename(const MPD::MutableSong &s, const std::string &patte
 std::string ParseFilename(MPD::MutableSong &s, std::string mask, bool preview);
 
 std::string SongToString(const MPD::MutableSong &s);
-bool DirEntryMatcher(const Regex &rx, const string_pair &dir, bool filter);
-bool AlbumEntryMatcher(const Regex &rx, const string_pair &dir);
+bool DirEntryMatcher(const Regex &rx, const std::pair<std::string, std::string> &dir, bool filter);
+bool AlbumEntryMatcher(const Regex &rx, const std::pair<std::string, std::string> &dir);
 bool SongEntryMatcher(const Regex &rx, const MPD::MutableSong &s);
 
 }
@@ -94,13 +100,13 @@ void TagEditor::Init()
 	PatternsFile = Config.ncmpcpp_directory + "patterns.list";
 	SetDimensions(0, COLS);
 	
-	Albums = new Menu<string_pair>(0, MainStartY, LeftColumnWidth, MainHeight, Config.titles_visibility ? "Albums" : "", Config.main_color, brNone);
+	Albums = new NC::Menu< std::pair<std::string, std::string> >(0, MainStartY, LeftColumnWidth, MainHeight, Config.titles_visibility ? "Albums" : "", Config.main_color, NC::brNone);
 	Albums->HighlightColor(Config.active_column_color);
 	Albums->CyclicScrolling(Config.use_cyclic_scrolling);
 	Albums->CenteredCursor(Config.centered_cursor);
 	Albums->setItemDisplayer(Display::Pair<std::string, std::string>);
 	
-	Dirs = new Menu<string_pair>(0, MainStartY, LeftColumnWidth, MainHeight, Config.titles_visibility ? "Directories" : "", Config.main_color, brNone);
+	Dirs = new NC::Menu< std::pair<std::string, std::string> >(0, MainStartY, LeftColumnWidth, MainHeight, Config.titles_visibility ? "Directories" : "", Config.main_color, NC::brNone);
 	Dirs->HighlightColor(Config.active_column_color);
 	Dirs->CyclicScrolling(Config.use_cyclic_scrolling);
 	Dirs->CenteredCursor(Config.centered_cursor);
@@ -108,7 +114,7 @@ void TagEditor::Init()
 	
 	LeftColumn = Config.albums_in_tag_editor ? Albums : Dirs;
 	
-	TagTypes = new Menu<std::string>(MiddleColumnStartX, MainStartY, MiddleColumnWidth, MainHeight, Config.titles_visibility ? "Tag types" : "", Config.main_color, brNone);
+	TagTypes = new NC::Menu<std::string>(MiddleColumnStartX, MainStartY, MiddleColumnWidth, MainHeight, Config.titles_visibility ? "Tag types" : "", Config.main_color, NC::brNone);
 	TagTypes->HighlightColor(Config.main_highlight_color);
 	TagTypes->CyclicScrolling(Config.use_cyclic_scrolling);
 	TagTypes->CenteredCursor(Config.centered_cursor);
@@ -128,7 +134,7 @@ void TagEditor::Init()
 	TagTypes->AddItem("Reset");
 	TagTypes->AddItem("Save");
 	
-	Tags = new Menu<MPD::MutableSong>(RightColumnStartX, MainStartY, RightColumnWidth, MainHeight, Config.titles_visibility ? "Tags" : "", Config.main_color, brNone);
+	Tags = new NC::Menu<MPD::MutableSong>(RightColumnStartX, MainStartY, RightColumnWidth, MainHeight, Config.titles_visibility ? "Tags" : "", Config.main_color, NC::brNone);
 	Tags->HighlightColor(Config.main_highlight_color);
 	Tags->CyclicScrolling(Config.use_cyclic_scrolling);
 	Tags->CenteredCursor(Config.centered_cursor);
@@ -136,7 +142,7 @@ void TagEditor::Init()
 	Tags->SetSelectSuffix(Config.selected_item_suffix);
 	Tags->setItemDisplayer(Display::Tags);
 	
-	FParserDialog = new Menu<std::string>((COLS-FParserDialogWidth)/2, (MainHeight-FParserDialogHeight)/2+MainStartY, FParserDialogWidth, FParserDialogHeight, "", Config.main_color, Config.window_border);
+	FParserDialog = new NC::Menu<std::string>((COLS-FParserDialogWidth)/2, (MainHeight-FParserDialogHeight)/2+MainStartY, FParserDialogWidth, FParserDialogHeight, "", Config.main_color, Config.window_border);
 	FParserDialog->CyclicScrolling(Config.use_cyclic_scrolling);
 	FParserDialog->CenteredCursor(Config.centered_cursor);
 	FParserDialog->setItemDisplayer(Display::Default<std::string>);
@@ -145,14 +151,14 @@ void TagEditor::Init()
 	FParserDialog->AddSeparator();
 	FParserDialog->AddItem("Cancel");
 	
-	FParser = new Menu<std::string>((COLS-FParserWidth)/2, (MainHeight-FParserHeight)/2+MainStartY, FParserWidthOne, FParserHeight, "_", Config.main_color, Config.active_window_border);
+	FParser = new NC::Menu<std::string>((COLS-FParserWidth)/2, (MainHeight-FParserHeight)/2+MainStartY, FParserWidthOne, FParserHeight, "_", Config.main_color, Config.active_window_border);
 	FParser->CyclicScrolling(Config.use_cyclic_scrolling);
 	FParser->CenteredCursor(Config.centered_cursor);
 	FParser->setItemDisplayer(Display::Default<std::string>);
 	
-	FParserLegend = new Scrollpad((COLS-FParserWidth)/2+FParserWidthOne, (MainHeight-FParserHeight)/2+MainStartY, FParserWidthTwo, FParserHeight, "Legend", Config.main_color, Config.window_border);
+	FParserLegend = new NC::Scrollpad((COLS-FParserWidth)/2+FParserWidthOne, (MainHeight-FParserHeight)/2+MainStartY, FParserWidthTwo, FParserHeight, "Legend", Config.main_color, Config.window_border);
 	
-	FParserPreview = new Scrollpad((COLS-FParserWidth)/2+FParserWidthOne, (MainHeight-FParserHeight)/2+MainStartY, FParserWidthTwo, FParserHeight, "Preview", Config.main_color, Config.window_border);
+	FParserPreview = new NC::Scrollpad((COLS-FParserWidth)/2+FParserWidthOne, (MainHeight-FParserHeight)/2+MainStartY, FParserWidthTwo, FParserHeight, "Preview", Config.main_color, Config.window_border);
 	
 	w = LeftColumn;
 	isInitialized = 1;
@@ -261,7 +267,7 @@ void TagEditor::Update()
 		Tags->Clear();
 		if (Config.albums_in_tag_editor)
 		{
-			*Albums << XY(0, 0) << "Fetching albums...";
+			*Albums << NC::XY(0, 0) << "Fetching albums...";
 			Albums->Window::Refresh();
 			Mpd.BlockIdle(true); // for the same reason as in media library
 			auto albums = Mpd.GetList(MPD_TAG_ALBUM);
@@ -382,9 +388,9 @@ void TagEditor::EnterPressed()
 		*FParserLegend << U("%p - performer\n");
 		*FParserLegend << U("%d - disc\n");
 		*FParserLegend << U("%C - comment\n\n");
-		*FParserLegend << fmtBold << U("Files:\n") << fmtBoldEnd;
+		*FParserLegend << NC::fmtBold << U("Files:\n") << NC::fmtBoldEnd;
 		for (auto it = EditedSongs.begin(); it != EditedSongs.end(); ++it)
-			*FParserLegend << Config.color2 << U(" * ") << clEnd << (*it)->getName() << '\n';
+			*FParserLegend << Config.color2 << U(" * ") << NC::clEnd << (*it)->getName() << '\n';
 		FParserLegend->Flush();
 		
 		if (!Patterns.empty())
@@ -445,7 +451,7 @@ void TagEditor::EnterPressed()
 				{
 					if (FParserUsePreview)
 					{
-						*FParserPreview << fmtBold << s.getName() << U(":\n") << fmtBoldEnd;
+						*FParserPreview << NC::fmtBold << s.getName() << U(":\n") << NC::fmtBoldEnd;
 						*FParserPreview << ParseFilename(s, Config.pattern, FParserUsePreview) << '\n';
 					}
 					else
@@ -465,9 +471,9 @@ void TagEditor::EnterPressed()
 					}
 					if (!FParserUsePreview)
 						s.setNewURI(new_file + extension);
-					*FParserPreview << file << Config.color2 << U(" -> ") << clEnd;
+					*FParserPreview << file << Config.color2 << U(" -> ") << NC::clEnd;
 					if (new_file.empty())
-						*FParserPreview << Config.empty_tags_color << Config.empty_tag << clEnd;
+						*FParserPreview << Config.empty_tags_color << Config.empty_tag << NC::clEnd;
 					else
 						*FParserPreview << new_file << extension;
 					*FParserPreview << '\n' << '\n';
@@ -558,7 +564,7 @@ void TagEditor::EnterPressed()
 		if (id > 0 && w == TagTypes)
 		{
 			LockStatusbar();
-			Statusbar() << fmtBold << TagTypes->Current().value() << fmtBoldEnd << ": ";
+			Statusbar() << NC::fmtBold << TagTypes->Current().value() << NC::fmtBoldEnd << ": ";
 			std::string new_tag = wFooter->GetString(Tags->Current().value().getTags(get));
 			UnlockStatusbar();
 			for (auto it = EditedSongs.begin(); it != EditedSongs.end(); ++it)
@@ -567,12 +573,12 @@ void TagEditor::EnterPressed()
 		else if (w == Tags)
 		{
 			LockStatusbar();
-			Statusbar() << fmtBold << TagTypes->Current().value() << fmtBoldEnd << ": ";
+			Statusbar() << NC::fmtBold << TagTypes->Current().value() << NC::fmtBoldEnd << ": ";
 			std::string new_tag = wFooter->GetString(Tags->Current().value().getTags(get));
 			UnlockStatusbar();
 			if (new_tag != Tags->Current().value().getTags(get))
 				Tags->Current().value().setTag(set, new_tag);
-			Tags->Scroll(wDown);
+			Tags->Scroll(NC::wDown);
 		}
 	}
 	else
@@ -597,12 +603,12 @@ void TagEditor::EnterPressed()
 				std::string extension = old_name.substr(last_dot);
 				old_name = old_name.substr(0, last_dot);
 				LockStatusbar();
-				Statusbar() << fmtBold << "New filename: " << fmtBoldEnd;
+				Statusbar() << NC::fmtBold << "New filename: " << NC::fmtBoldEnd;
 				std::string new_name = wFooter->GetString(old_name);
 				UnlockStatusbar();
 				if (!new_name.empty() && new_name != old_name)
 					s.setNewURI(new_name + extension);
-				Tags->Scroll(wDown);
+				Tags->Scroll(NC::wDown);
 			}
 		}
 		else if (id == 16) // capitalize first letters
@@ -660,7 +666,7 @@ void TagEditor::SpacePressed()
 	if (w == Tags && !Tags->Empty())
 	{
 		Tags->Current().setSelected(!Tags->Current().isSelected());
-		w->Scroll(wDown);
+		w->Scroll(NC::wDown);
 		return;
 	}
 	if (w != LeftColumn)
@@ -686,7 +692,7 @@ void TagEditor::MouseButtonPressed(MEVENT me)
 					EnterPressed();
 			}
 			else
-				Screen<Window>::MouseButtonPressed(me);
+				Screen<NC::Window>::MouseButtonPressed(me);
 		}
 	}
 	else if (w == FParser || w == FParserHelper)
@@ -702,13 +708,13 @@ void TagEditor::MouseButtonPressed(MEVENT me)
 					EnterPressed();
 			}
 			else
-				Screen<Window>::MouseButtonPressed(me);
+				Screen<NC::Window>::MouseButtonPressed(me);
 		}
 		else if (FParserHelper->hasCoords(me.x, me.y))
 		{
 			if (w != FParserHelper)
 				NextColumn();
-			reinterpret_cast<Screen<Scrollpad> *>(this)->Screen<Scrollpad>::MouseButtonPressed(me);
+			ScrollpadMouseButtonPressed(FParserHelper, me);
 		}
 	}
 	else if (!LeftColumn->Empty() && LeftColumn->hasCoords(me.x, me.y))
@@ -727,7 +733,7 @@ void TagEditor::MouseButtonPressed(MEVENT me)
 				SpacePressed();
 		}
 		else
-			Screen<Window>::MouseButtonPressed(me);
+			Screen<NC::Window>::MouseButtonPressed(me);
 		Tags->Clear();
 	}
 	else if (!TagTypes->Empty() && TagTypes->hasCoords(me.x, me.y))
@@ -744,7 +750,7 @@ void TagEditor::MouseButtonPressed(MEVENT me)
 				EnterPressed();
 		}
 		else
-			Screen<Window>::MouseButtonPressed(me);
+			Screen<NC::Window>::MouseButtonPressed(me);
 	}
 	else if (!Tags->Empty() && Tags->hasCoords(me.x, me.y))
 	{
@@ -761,7 +767,7 @@ void TagEditor::MouseButtonPressed(MEVENT me)
 				EnterPressed();
 		}
 		else
-			Screen<Window>::MouseButtonPressed(me);
+			Screen<NC::Window>::MouseButtonPressed(me);
 	}
 }
 
@@ -771,9 +777,9 @@ std::string TagEditor::currentFilter()
 {
 	std::string filter;
 	if (w == Dirs)
-		filter = RegexFilter<string_pair>::currentFilter(*Dirs);
+		filter = RegexFilter< std::pair<std::string, std::string> >::currentFilter(*Dirs);
 	else if (w == Albums)
-		filter = RegexFilter<string_pair>::currentFilter(*Albums);
+		filter = RegexFilter< std::pair<std::string, std::string> >::currentFilter(*Albums);
 	else if (w == Tags)
 		filter = RegexFilter<MPD::MutableSong>::currentFilter(*Tags);
 	return filter;
@@ -785,13 +791,13 @@ void TagEditor::applyFilter(const std::string &filter)
 	{
 		Dirs->ShowAll();
 		auto fun = std::bind(DirEntryMatcher, _1, _2, true);
-		auto rx = RegexFilter<string_pair>(filter, Config.regex_type, fun);
+		auto rx = RegexFilter< std::pair<std::string, std::string> >(filter, Config.regex_type, fun);
 		Dirs->filter(Dirs->Begin(), Dirs->End(), rx);
 	}
 	else if (w == Albums)
 	{
 		Albums->ShowAll();
-		auto rx = RegexFilter<string_pair>(filter, Config.regex_type, AlbumEntryMatcher);
+		auto rx = RegexFilter< std::pair<std::string, std::string> >(filter, Config.regex_type, AlbumEntryMatcher);
 		Albums->filter(Albums->Begin(), Albums->End(), rx);
 	}
 	else if (w == Tags)
@@ -810,12 +816,12 @@ bool TagEditor::search(const std::string &constraint)
 	if (w == Dirs)
 	{
 		auto fun = std::bind(DirEntryMatcher, _1, _2, false);
-		auto rx = RegexFilter<string_pair>(constraint, Config.regex_type, fun);
+		auto rx = RegexFilter< std::pair<std::string, std::string> >(constraint, Config.regex_type, fun);
 		result = Dirs->search(Dirs->Begin(), Dirs->End(), rx);
 	}
 	else if (w == Albums)
 	{
-		auto rx = RegexFilter<string_pair>(constraint, Config.regex_type, AlbumEntryMatcher);
+		auto rx = RegexFilter< std::pair<std::string, std::string> >(constraint, Config.regex_type, AlbumEntryMatcher);
 		result = Albums->search(Albums->Begin(), Albums->End(), rx);
 	}
 	else if (w == Tags)
@@ -898,7 +904,7 @@ MPD::SongList TagEditor::getSelectedSongs()
 
 /***********************************************************************/
 
-List *TagEditor::GetList()
+NC::List *TagEditor::GetList()
 {
 	if (w == LeftColumn)
 		return LeftColumn;
@@ -1392,14 +1398,14 @@ std::string SongToString(const MPD::MutableSong &s)
 	return result.empty() ? Config.empty_tag : result;
 }
 
-bool DirEntryMatcher(const Regex &rx, const string_pair &dir, bool filter)
+bool DirEntryMatcher(const Regex &rx, const std::pair<std::string, std::string> &dir, bool filter)
 {
 	if (dir.first == "." || dir.first == "..")
 		return filter;
 	return rx.match(dir.first);
 }
 
-bool AlbumEntryMatcher(const Regex &rx, const string_pair &dir)
+bool AlbumEntryMatcher(const Regex &rx, const std::pair<std::string, std::string> &dir)
 {
 	return rx.match(dir.first);
 }

@@ -21,16 +21,11 @@
 #ifndef _SCREEN_H
 #define _SCREEN_H
 
-#include "window.h"
 #include "menu.h"
-#include "mpdpp.h"
-#include "helpers.h"
-#include "settings.h"
-#include "status.h"
+#include "scrollpad.h"
 
-void ApplyToVisibleWindows(void (BasicScreen::*f)());
-void UpdateInactiveScreen(BasicScreen *);
-bool isVisible(BasicScreen *);
+void GenericMouseButtonPressed(NC::Window *w, MEVENT me);
+void ScrollpadMouseButtonPressed(NC::Scrollpad *w, MEVENT me);
 
 /// An interface for various instantiations of Screen template class. Since C++ doesn't like
 /// comparison of two different instantiations of the same template class we need the most
@@ -46,7 +41,7 @@ class BasicScreen
 		virtual ~BasicScreen() { }
 		
 		/// @see Screen::ActiveWindow()
-		virtual Window *ActiveWindow() = 0;
+		virtual NC::Window *ActiveWindow() = 0;
 		
 		/// Method used for switching to screen
 		virtual void SwitchTo() = 0;
@@ -69,7 +64,7 @@ class BasicScreen
 		virtual void RefreshWindow() = 0;
 		
 		/// @see Screen::Scroll()
-		virtual void Scroll(Where where) = 0;
+		virtual void Scroll(NC::Where where) = 0;
 		
 		/// Invoked after Enter was pressed
 		virtual void EnterPressed() = 0;
@@ -82,7 +77,7 @@ class BasicScreen
 		
 		/// @return pointer to instantiation of Menu template class
 		/// cast to List if available or null pointer otherwise
-		virtual List *GetList() = 0;
+		virtual NC::List *GetList() = 0;
 
 		/// When this is overwritten with a function returning true, the
 		/// screen will be used in tab switching.
@@ -129,6 +124,10 @@ class BasicScreen
 		bool isInitialized;
 };
 
+void ApplyToVisibleWindows(void (BasicScreen::*f)());
+void UpdateInactiveScreen(BasicScreen *screen_to_be_set);
+bool isVisible(BasicScreen *screen);
+
 /// Class that all screens should derive from. It provides basic interface
 /// for the screen to be working properly and assumes that we didn't forget
 /// about anything vital.
@@ -143,7 +142,7 @@ template <typename WindowType> class Screen : public BasicScreen
 		/// it's useful to determine the one that is being
 		/// active
 		/// @return address to window object cast to void *
-		virtual Window *ActiveWindow();
+		virtual NC::Window *ActiveWindow();
 		
 		/// @return pointer to currently active window
 		WindowType *Main();
@@ -158,7 +157,7 @@ template <typename WindowType> class Screen : public BasicScreen
 		/// if fancy scrolling feature is disabled, enters the
 		/// loop that holds main loop until user releases the key
 		/// @param where indicates where one wants to scroll
-		virtual void Scroll(Where where);
+		virtual void Scroll(NC::Where where);
 		
 		/// Invoked after there was one of mouse buttons pressed
 		/// @param me struct that contains coords of where the click
@@ -173,7 +172,7 @@ template <typename WindowType> class Screen : public BasicScreen
 		WindowType *w;
 };
 
-template <typename WindowType> Window *Screen<WindowType>::ActiveWindow()
+template <typename WindowType> NC::Window *Screen<WindowType>::ActiveWindow()
 {
 	return w;
 }
@@ -193,46 +192,22 @@ template <typename WindowType> void Screen<WindowType>::RefreshWindow()
 	w->Display();
 }
 
-template <typename WindowType> void Screen<WindowType>::Scroll(Where where)
+template <typename WindowType> void Screen<WindowType>::Scroll(NC::Where where)
 {
 	w->Scroll(where);
 }
 
 template <typename WindowType> void Screen<WindowType>::MouseButtonPressed(MEVENT me)
 {
-	if (me.bstate & BUTTON2_PRESSED)
-	{
-		if (Config.mouse_list_scroll_whole_page)
-			Scroll(wPageDown);
-		else
-			for (size_t i = 0; i < Config.lines_scrolled; ++i)
-				Scroll(wDown);
-	}
-	else if (me.bstate & BUTTON4_PRESSED)
-	{
-		if (Config.mouse_list_scroll_whole_page)
-			Scroll(wPageUp);
-		else
-			for (size_t i = 0; i < Config.lines_scrolled; ++i)
-				Scroll(wUp);
-	}
+	GenericMouseButtonPressed(w, me);
 }
 
 /// Specialization for Screen<Scrollpad>::MouseButtonPressed, that should
 /// not scroll whole page, but rather a few lines (the number of them is
 /// defined in the config)
-template <> inline void Screen<Scrollpad>::MouseButtonPressed(MEVENT me)
+template <> inline void Screen<NC::Scrollpad>::MouseButtonPressed(MEVENT me)
 {
-	if (me.bstate & BUTTON2_PRESSED)
-	{
-		for (size_t i = 0; i < Config.lines_scrolled; ++i)
-			Scroll(wDown);
-	}
-	else if (me.bstate & BUTTON4_PRESSED)
-	{
-		for (size_t i = 0; i < Config.lines_scrolled; ++i)
-			Scroll(wUp);
-	}
+	ScrollpadMouseButtonPressed(w, me);
 }
 
 #endif

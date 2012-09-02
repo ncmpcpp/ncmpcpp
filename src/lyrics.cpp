@@ -30,6 +30,7 @@
 #include "helpers.h"
 #include "lyrics.h"
 #include "playlist.h"
+#include "scrollpad.h"
 #include "settings.h"
 #include "song.h"
 
@@ -49,7 +50,7 @@ Lyrics *myLyrics = new Lyrics;
 
 void Lyrics::Init()
 {
-	w = new Scrollpad(0, MainStartY, COLS, MainHeight, "", Config.main_color, brNone);
+	w = new NC::Scrollpad(0, MainStartY, COLS, MainHeight, "", Config.main_color, NC::brNone);
 	isInitialized = 1;
 }
 
@@ -254,10 +255,10 @@ void *Lyrics::Download()
 	bool fetcher_defined = itsFetcher && *itsFetcher;
 	for (LyricsFetcher **plugin = fetcher_defined ? itsFetcher : lyricsPlugins; *plugin != 0; ++plugin)
 	{
-		*w << U("Fetching lyrics from ") << fmtBold << TO_WSTRING((*plugin)->name()) << fmtBoldEnd << U("... ");
+		*w << U("Fetching lyrics from ") << NC::fmtBold << TO_WSTRING((*plugin)->name()) << NC::fmtBoldEnd << U("... ");
 		result = (*plugin)->fetch(artist, title);
 		if (result.first == false)
-			*w << clRed << TO_WSTRING(result.second) << clEnd << '\n';
+			*w << NC::clRed << TO_WSTRING(result.second) << NC::clEnd << '\n';
 		else
 			break;
 		if (fetcher_defined)

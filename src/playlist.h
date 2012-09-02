@@ -22,11 +22,10 @@
 #define _PLAYLIST_H
 
 #include "interfaces.h"
-#include "ncmpcpp.h"
 #include "screen.h"
 #include "song.h"
 
-class Playlist : public Screen<Window>, public Filterable, public HasSongs, public Searchable
+class Playlist : public Screen<NC::Window>, public Filterable, public HasSongs, public Searchable
 {
 	public:
 		enum Movement { mUp, mDown };
@@ -62,7 +61,7 @@ class Playlist : public Screen<Window>, public Filterable, public HasSongs, publ
 		virtual void removeSelection();
 		virtual MPD::SongList getSelectedSongs();
 		
-		virtual List *GetList() { return w == Items ? Items : 0; }
+		virtual NC::List *GetList() { return w == Items ? Items : 0; }
 		
 		virtual bool isMergable() { return true; }
 		
@@ -92,7 +91,7 @@ class Playlist : public Screen<Window>, public Filterable, public HasSongs, publ
 		//static std::string SongToString(const MPD::Song &s);
 		//static std::string SongInColumnsToString(const MPD::Song &s);
 		
-		Menu< MPD::Song > *Items;
+		NC::Menu< MPD::Song > *Items;
 		
 		int NowPlaying;
 		

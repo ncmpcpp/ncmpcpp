@@ -23,11 +23,9 @@
 
 #include <cassert>
 #include <vector>
-
 #include <mpd/client.h>
-
 #include "actions.h"
-#include "ncmpcpp.h"
+#include "strbuffer.h"
 
 class BasicScreen; // forward declaration for screens sequence
 
@@ -41,7 +39,7 @@ struct Column
 	std::string type;
 	int width;
 	int stretch_limit;
-	Color color;
+	NC::Color color;
 	bool fixed;
 	bool right_alignment;
 	bool display_empty_tag;
@@ -126,30 +124,30 @@ struct Configuration
 	
 	std::vector<Column> columns;
 	
-	Buffer browser_playlist_prefix;
-	Buffer selected_item_prefix;
-	Buffer selected_item_suffix;
-	Buffer now_playing_prefix;
-	basic_buffer<my_char_t> now_playing_suffix;
+	NC::Buffer browser_playlist_prefix;
+	NC::Buffer selected_item_prefix;
+	NC::Buffer selected_item_suffix;
+	NC::Buffer now_playing_prefix;
+	NC::basic_buffer<my_char_t> now_playing_suffix;
 	
-	Color color1;
-	Color color2;
-	Color empty_tags_color;
-	Color header_color;
-	Color volume_color;
-	Color state_line_color;
-	Color state_flags_color;
-	Color main_color;
-	Color main_highlight_color;
-	Color progressbar_color;
-	Color progressbar_elapsed_color;
-	Color statusbar_color;
-	Color alternative_ui_separator_color;
-	Color active_column_color;
-	Color visualizer_color;
+	NC::Color color1;
+	NC::Color color2;
+	NC::Color empty_tags_color;
+	NC::Color header_color;
+	NC::Color volume_color;
+	NC::Color state_line_color;
+	NC::Color state_flags_color;
+	NC::Color main_color;
+	NC::Color main_highlight_color;
+	NC::Color progressbar_color;
+	NC::Color progressbar_elapsed_color;
+	NC::Color statusbar_color;
+	NC::Color alternative_ui_separator_color;
+	NC::Color active_column_color;
+	NC::Color visualizer_color;
 	
-	Border window_border;
-	Border active_window_border;
+	NC::Border window_border;
+	NC::Border active_window_border;
 	
 	mpd_tag_type media_lib_primary_tag;
 	

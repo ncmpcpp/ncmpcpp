@@ -118,10 +118,10 @@
 # define wcwidth(x) int(!iscntrl(x))
 #endif
 
-/// NCurses namespace provides set of easy-to-use
+/// NC namespace provides set of easy-to-use
 /// wrappers over original curses library
 ///
-namespace NCurses
+namespace NC
 {
 	/// Colors used by NCurses
 	///

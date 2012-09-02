@@ -346,7 +346,7 @@ void NcmpcppStatusChanged(MPD::Connection *, MPD::StatusChanges changed, void *)
 				myPlaylist->NowPlaying = -1;
 				if (Config.new_design)
 				{
-					*wHeader << XY(0, 0) << wclrtoeol << XY(0, 1) << wclrtoeol;
+					*wHeader << NC::XY(0, 0) << wclrtoeol << NC::XY(0, 1) << wclrtoeol;
 					player_state = "[stopped]";
 					changed.Volume = 1;
 					changed.StatusFlags = 1;
@@ -362,20 +362,20 @@ void NcmpcppStatusChanged(MPD::Connection *, MPD::StatusChanges changed, void *)
 		}
 #		ifdef ENABLE_VISUALIZER
 		if (myScreen == myVisualizer)
-			wFooter->SetTimeout(state == MPD::psPlay ? Visualizer::WindowTimeout : ncmpcpp_window_timeout);
+			wFooter->SetTimeout(state == MPD::psPlay ? Visualizer::WindowTimeout : 500);
 #		endif // ENABLE_VISUALIZER
 		if (Config.new_design)
 		{
-			*wHeader << XY(0, 1) << fmtBold << player_state << fmtBoldEnd;
+			*wHeader << NC::XY(0, 1) << NC::fmtBold << player_state << NC::fmtBoldEnd;
 			wHeader->Refresh();
 		}
 		else if (!block_statusbar_update && Config.statusbar_visibility)
 		{
-			*wFooter << XY(0, 1);
+			*wFooter << NC::XY(0, 1);
 			if (player_state.empty())
 				*wFooter << wclrtoeol;
 			else
-				*wFooter << fmtBold << player_state << fmtBoldEnd;
+				*wFooter << NC::fmtBold << player_state << NC::fmtBoldEnd;
 		}
 	}
 	if (changed.SongID)
@@ -442,28 +442,28 @@ void NcmpcppStatusChanged(MPD::Connection *, MPD::StatusChanges changed, void *)
 					tracklength += " kbps";
 				}
 				
-				basic_buffer<my_char_t> first, second;
+				NC::basic_buffer<my_char_t> first, second;
 				String2Buffer(TO_WSTRING(utf_to_locale_cpy(np.toString(Config.new_header_first_line, "$"))), first);
 				String2Buffer(TO_WSTRING(utf_to_locale_cpy(np.toString(Config.new_header_second_line, "$"))), second);
 				
-				size_t first_len = Window::Length(first.Str());
+				size_t first_len = NC::Window::Length(first.Str());
 				size_t first_margin = (std::max(tracklength.length()+1, VolumeState.length()))*2;
 				size_t first_start = first_len < COLS-first_margin ? (COLS-first_len)/2 : tracklength.length()+1;
 				
-				size_t second_len = Window::Length(second.Str());
+				size_t second_len = NC::Window::Length(second.Str());
 				size_t second_margin = (std::max(player_state.length(), size_t(8))+1)*2;
 				size_t second_start = second_len < COLS-second_margin ? (COLS-second_len)/2 : player_state.length()+1;
 				
 				if (!Global::SeekingInProgress)
-					*wHeader << XY(0, 0) << wclrtoeol << tracklength;
-				*wHeader << XY(first_start, 0);
+					*wHeader << NC::XY(0, 0) << wclrtoeol << tracklength;
+				*wHeader << NC::XY(first_start, 0);
 				first.Write(*wHeader, first_line_scroll_begin, COLS-tracklength.length()-VolumeState.length()-1, U(" ** "));
 				
-				*wHeader << XY(0, 1) << wclrtoeol << fmtBold << player_state << fmtBoldEnd;
-				*wHeader << XY(second_start, 1);
+				*wHeader << NC::XY(0, 1) << wclrtoeol << NC::fmtBold << player_state << NC::fmtBoldEnd;
+				*wHeader << NC::XY(second_start, 1);
 				second.Write(*wHeader, second_line_scroll_begin, COLS-player_state.length()-8-2, U(" ** "));
 				
-				*wHeader << XY(wHeader->GetWidth()-VolumeState.length(), 0) << Config.volume_color << VolumeState << clEnd;
+				*wHeader << NC::XY(wHeader->GetWidth()-VolumeState.length(), 0) << Config.volume_color << VolumeState << NC::clEnd;
 				
 				changed.StatusFlags = 1;
 			}
@@ -494,11 +494,11 @@ void NcmpcppStatusChanged(MPD::Connection *, MPD::StatusChanges changed, void *)
 					tracklength += MPD::Song::ShowTime(Mpd.GetElapsedTime());
 					tracklength += "]";
 				}
-				basic_buffer<my_char_t> np_song;
+				NC::basic_buffer<my_char_t> np_song;
 				String2Buffer(TO_WSTRING(utf_to_locale_cpy(np.toString(Config.song_status_format, "$"))), np_song);
-				*wFooter << XY(0, 1) << wclrtoeol << fmtBold << player_state << fmtBoldEnd;
+				*wFooter << NC::XY(0, 1) << wclrtoeol << NC::fmtBold << player_state << NC::fmtBoldEnd;
 				np_song.Write(*wFooter, playing_song_scroll_begin, wFooter->GetWidth()-player_state.length()-tracklength.length(), U(" ** "));
-				*wFooter << fmtBold << XY(wFooter->GetWidth()-tracklength.length(), 1) << tracklength << fmtBoldEnd;
+				*wFooter << NC::fmtBold << NC::XY(wFooter->GetWidth()-tracklength.length(), 1) << tracklength << NC::fmtBoldEnd;
 			}
 			if (!block_progressbar_update)
 				DrawProgressbar(Mpd.GetElapsedTime(), Mpd.GetTotalTime());
@@ -507,7 +507,7 @@ void NcmpcppStatusChanged(MPD::Connection *, MPD::StatusChanges changed, void *)
 		else
 		{
 			if (!block_statusbar_update && Config.statusbar_visibility)
-				*wFooter << XY(0, 1) << wclrtoeol;
+				*wFooter << NC::XY(0, 1) << wclrtoeol;
 		}
 	}
 	
@@ -571,12 +571,12 @@ void NcmpcppStatusChanged(MPD::Connection *, MPD::StatusChanges changed, void *)
 			switch_state += mpd_crossfade ? mpd_crossfade : '-';
 			switch_state += mpd_db_updating ? mpd_db_updating : '-';
 			switch_state += ']';
-			*wHeader << XY(COLS-switch_state.length(), 1) << fmtBold << Config.state_flags_color << switch_state << clEnd << fmtBoldEnd;
+			*wHeader << NC::XY(COLS-switch_state.length(), 1) << NC::fmtBold << Config.state_flags_color << switch_state << NC::clEnd << NC::fmtBoldEnd;
 			if (Config.new_design && !Config.header_visibility) // in this case also draw separator
 			{
-				*wHeader << fmtBold << clBlack;
+				*wHeader << NC::fmtBold << NC::clBlack;
 				mvwhline(wHeader->Raw(), 2, 0, 0, COLS);
-				*wHeader << clEnd << fmtBoldEnd;
+				*wHeader << NC::clEnd << NC::fmtBoldEnd;
 			}
 			wHeader->Refresh();
 		}
@@ -625,8 +625,8 @@ void NcmpcppStatusChanged(MPD::Connection *, MPD::StatusChanges changed, void *)
 			VolumeState += "%";
 		}
 		*wHeader << Config.volume_color;
-		*wHeader << XY(wHeader->GetWidth()-VolumeState.length(), 0) << VolumeState;
-		*wHeader << clEnd;
+		*wHeader << NC::XY(wHeader->GetWidth()-VolumeState.length(), 0) << VolumeState;
+		*wHeader << NC::clEnd;
 		wHeader->Refresh();
 	}
 	if (changed.Outputs)
@@ -642,9 +642,9 @@ void NcmpcppStatusChanged(MPD::Connection *, MPD::StatusChanges changed, void *)
 		ApplyToVisibleWindows(&BasicScreen::RefreshWindow);
 }
 
-Window &Statusbar()
+NC::Window &Statusbar()
 {
-	*wFooter << XY(0, Config.statusbar_visibility) << wclrtoeol;
+	*wFooter << NC::XY(0, Config.statusbar_visibility) << wclrtoeol;
 	return *wFooter;
 }
 
@@ -653,7 +653,7 @@ void DrawProgressbar(unsigned elapsed, unsigned time)
 	unsigned pb_width = wFooter->GetWidth();
 	unsigned howlong = time ? pb_width*elapsed/time : 0;
 	if (Config.progressbar_boldness)
-		*wFooter << fmtBold;
+		*wFooter << NC::fmtBold;
 	*wFooter << Config.progressbar_color;
 	if (Config.progressbar[2] != '\0')
 	{
@@ -672,11 +672,11 @@ void DrawProgressbar(unsigned elapsed, unsigned time)
 			*wFooter << Config.progressbar[0];
 		if (howlong < wFooter->GetWidth())
 			*wFooter << Config.progressbar[1];
-		*wFooter << clEnd;
+		*wFooter << NC::clEnd;
 	}
-	*wFooter << clEnd;
+	*wFooter << NC::clEnd;
 	if (Config.progressbar_boldness)
-		*wFooter << fmtBoldEnd;
+		*wFooter << NC::fmtBoldEnd;
 }
 
 void ShowMessage(const char *format, ...)
@@ -690,7 +690,7 @@ void ShowMessage(const char *format, ...)
 		else
 			block_progressbar_update = 1;
 		wFooter->GotoXY(0, Config.statusbar_visibility);
-		*wFooter << fmtBoldEnd;
+		*wFooter << NC::fmtBoldEnd;
 		va_list list;
 		va_start(list, format);
 		wmove(wFooter->Raw(), Config.statusbar_visibility, 0);

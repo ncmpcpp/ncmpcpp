@@ -31,6 +31,8 @@
 #include "status.h"
 #include "utility/comparators.h"
 
+using namespace std::placeholders;
+
 using Global::MainHeight;
 using Global::MainStartY;
 
@@ -66,7 +68,7 @@ namespace pos {//
 }*/
 
 std::string SEItemToString(const SEItem &ei);
-bool SEItemEntryMatcher(const Regex &rx, const Menu<SEItem>::Item &item, bool filter);
+bool SEItemEntryMatcher(const Regex &rx, const NC::Menu<SEItem>::Item &item, bool filter);
 
 }
 
@@ -99,7 +101,7 @@ size_t SearchEngine::SearchButton = 15;
 
 void SearchEngine::Init()
 {
-	w = new Menu<SEItem>(0, MainStartY, COLS, MainHeight, "", Config.main_color, brNone);
+	w = new NC::Menu<SEItem>(0, MainStartY, COLS, MainHeight, "", Config.main_color, NC::brNone);
 	w->HighlightColor(Config.main_highlight_color);
 	w->CyclicScrolling(Config.use_cyclic_scrolling);
 	w->CenteredCursor(Config.centered_cursor);
@@ -150,7 +152,7 @@ void SearchEngine::SwitchTo()
 	
 	if (!w->Back().value().isSong())
 	{
-		*w << XY(0, 0) << "Updating list...";
+		*w << NC::XY(0, 0) << "Updating list...";
 		UpdateFoundList();
 	}
 }
@@ -171,23 +173,23 @@ void SearchEngine::EnterPressed()
 	if (option < ConstraintsNumber)
 	{
 		std::string constraint = ConstraintsNames[option];
-		Statusbar() << fmtBold << constraint << fmtBoldEnd << ": ";
+		Statusbar() << NC::fmtBold << constraint << NC::fmtBoldEnd << ": ";
 		itsConstraints[option] = Global::wFooter->GetString(itsConstraints[option]);
 		w->Current().value().buffer().Clear();
 		constraint.resize(13, ' ');
-		w->Current().value().buffer() << fmtBold << constraint << fmtBoldEnd << ": ";
+		w->Current().value().buffer() << NC::fmtBold << constraint << NC::fmtBoldEnd << ": ";
 		ShowTag(w->Current().value().buffer(), itsConstraints[option]);
 	}
 	else if (option == ConstraintsNumber+1)
 	{
 		Config.search_in_db = !Config.search_in_db;
-		w->Current().value().buffer() << fmtBold << "Search in:" << fmtBoldEnd << ' ' << (Config.search_in_db ? "Database" : "Current playlist");
+		w->Current().value().buffer() << NC::fmtBold << "Search in:" << NC::fmtBoldEnd << ' ' << (Config.search_in_db ? "Database" : "Current playlist");
 	}
 	else if (option == ConstraintsNumber+2)
 	{
 		if (!*++SearchMode)
 			SearchMode = &SearchModes[0];
-		w->Current().value().buffer() << fmtBold << "Search mode:" << fmtBoldEnd << ' ' << *SearchMode;
+		w->Current().value().buffer() << NC::fmtBold << "Search mode:" << NC::fmtBoldEnd << ' ' << *SearchMode;
 	}
 	else if (option == SearchButton)
 	{
@@ -204,15 +206,15 @@ void SearchEngine::EnterPressed()
 			found += 3; // don't count options inserted below
 			w->InsertSeparator(ResetButton+1);
 			w->InsertItem(ResetButton+2, SEItem(), 1, 1);
-			w->at(ResetButton+2).value().mkBuffer() << Config.color1 << "Search results: " << Config.color2 << "Found " << found << (found > 1 ? " songs" : " song") << clDefault;
+			w->at(ResetButton+2).value().mkBuffer() << Config.color1 << "Search results: " << Config.color2 << "Found " << found << (found > 1 ? " songs" : " song") << NC::clDefault;
 			w->InsertSeparator(ResetButton+3);
 			UpdateFoundList();
 			ShowMessage("Searching finished");
 			if (Config.block_search_constraints_change)
 				for (size_t i = 0; i < StaticOptions-4; ++i)
 					w->at(i).setInactive(true);
-			w->Scroll(wDown);
-			w->Scroll(wDown);
+			w->Scroll(NC::wDown);
+			w->Scroll(NC::wDown);
 		}
 		else
 			ShowMessage("No results found");
@@ -239,13 +241,13 @@ void SearchEngine::SpacePressed()
 	if (Config.space_selects)
 	{
 		w->Current().setSelected(!w->Current().isSelected());
-		w->Scroll(wDown);
+		w->Scroll(NC::wDown);
 		return;
 	}
 	
 	bool res = myPlaylist->Add(w->Current().value().song(), w->Current().isBold(), 0);
 	w->Current().setBold(res);
-	w->Scroll(wDown);
+	w->Scroll(NC::wDown);
 }
 
 void SearchEngine::MouseButtonPressed(MEVENT me)
@@ -266,14 +268,14 @@ void SearchEngine::MouseButtonPressed(MEVENT me)
 				size_t pos = w->Choice();
 				SpacePressed();
 				if (pos < w->Size()-1)
-					w->Scroll(wUp);
+					w->Scroll(NC::wUp);
 			}
 			else
 				EnterPressed();
 		}
 	}
 	else
-		Screen< Menu<SEItem> >::MouseButtonPressed(me);
+		Screen< NC::Menu<SEItem> >::MouseButtonPressed(me);
 }
 
 /***********************************************************************/
@@ -386,12 +388,12 @@ void SearchEngine::Prepare()
 	{
 		std::string constraint = ConstraintsNames[i];
 		constraint.resize(13, ' ');
-		(*w)[i].value().mkBuffer() << fmtBold << constraint << fmtBoldEnd << ": ";
+		(*w)[i].value().mkBuffer() << NC::fmtBold << constraint << NC::fmtBoldEnd << ": ";
 		ShowTag((*w)[i].value().buffer(), itsConstraints[i]);
 	}
 	
-	w->at(ConstraintsNumber+1).value().mkBuffer() << fmtBold << "Search in:" << fmtBoldEnd << ' ' << (Config.search_in_db ? "Database" : "Current playlist");
-	w->at(ConstraintsNumber+2).value().mkBuffer() << fmtBold << "Search mode:" << fmtBoldEnd << ' ' << *SearchMode;
+	w->at(ConstraintsNumber+1).value().mkBuffer() << NC::fmtBold << "Search in:" << NC::fmtBoldEnd << ' ' << (Config.search_in_db ? "Database" : "Current playlist");
+	w->at(ConstraintsNumber+2).value().mkBuffer() << NC::fmtBold << "Search mode:" << NC::fmtBoldEnd << ' ' << *SearchMode;
 	
 	w->at(SearchButton).value().mkBuffer() << "Search";
 	w->at(ResetButton).value().mkBuffer() << "Reset";
@@ -615,7 +617,7 @@ std::string SEItemToString(const SEItem &ei)
 	return result;
 }
 
-bool SEItemEntryMatcher(const Regex &rx, const Menu<SEItem>::Item &item, bool filter)
+bool SEItemEntryMatcher(const Regex &rx, const NC::Menu<SEItem>::Item &item, bool filter)
 {
 	if (item.isSeparator() || !item.value().isSong())
 		return filter;
