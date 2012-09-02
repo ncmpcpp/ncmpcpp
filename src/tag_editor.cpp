@@ -854,31 +854,19 @@ void TagEditor::prevFound(bool wrap)
 
 /***********************************************************************/
 
-MPD::Song *TagEditor::getSong(size_t pos)
+std::shared_ptr<ProxySongList> TagEditor::getProxySongList()
 {
-	MPD::Song *ptr = 0;
+	auto ptr = nullProxySongList();
 	if (w == Tags)
-		ptr = &(*Tags)[pos].value();
+		ptr = mkProxySongList(*Tags, [](NC::Menu<MPD::MutableSong>::Item &item) {
+			return &item.value();
+		});
 	return ptr;
-}
-
-MPD::Song *TagEditor::currentSong()
-{
-	if (w == Tags && !Tags->Empty())
-		return getSong(Tags->Choice());
-	else
-		return 0;
 }
 
 bool TagEditor::allowsSelection()
 {
 	return w == Tags;
-}
-
-void TagEditor::removeSelection()
-{
-	if (w == Tags)
-		removeSelectionHelper(Tags->Begin(), Tags->End());
 }
 
 void TagEditor::reverseSelection()

@@ -318,6 +318,16 @@ void Playlist::prevFound(bool wrap)
 
 /***********************************************************************/
 
+std::shared_ptr<ProxySongList> Playlist::getProxySongList()
+{
+	auto ptr = nullProxySongList();
+	if (w == Items)
+		ptr = mkProxySongList(*Items, [](NC::Menu<MPD::Song>::Item &item) {
+			return &item.value();
+		});
+	return ptr;
+}
+
 MPD::Song *Playlist::getSong(size_t pos)
 {
 	MPD::Song *ptr = 0;
@@ -337,11 +347,6 @@ MPD::Song *Playlist::currentSong()
 bool Playlist::allowsSelection()
 {
 	return w == Items;
-}
-
-void Playlist::removeSelection()
-{
-	removeSelectionHelper(Items->Begin(), Items->End());
 }
 
 void Playlist::reverseSelection()

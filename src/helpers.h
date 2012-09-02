@@ -32,10 +32,22 @@ inline HasSongs *hasSongs(BasicScreen *screen)
 	return dynamic_cast<HasSongs *>(screen);
 }
 
-template <typename Iterator> void removeSelectionHelper(Iterator first, Iterator last)
+inline std::shared_ptr<ProxySongList> proxySongList(BasicScreen *screen)
 {
-	for (; first != last; ++first)
-		first->setSelected(false);
+	auto ptr = nullProxySongList();
+	auto hs = hasSongs(screen);
+	if (hs)
+		ptr = hs->getProxySongList();
+	return ptr;
+}
+
+inline MPD::Song *currentSong(BasicScreen *screen)
+{
+	MPD::Song *ptr = 0;
+	auto pl = proxySongList(screen);
+	if (pl)
+		ptr = pl->currentSong();
+	return ptr;
 }
 
 template <typename Iterator> void reverseSelectionHelper(Iterator first, Iterator last)

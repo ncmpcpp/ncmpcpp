@@ -531,35 +531,19 @@ void MediaLibrary::prevFound(bool wrap)
 
 /***********************************************************************/
 
-MPD::Song *MediaLibrary::getSong(size_t pos)
+std::shared_ptr<ProxySongList> MediaLibrary::getProxySongList()
 {
-	MPD::Song *ptr = 0;
+	auto ptr = nullProxySongList();
 	if (w == Songs)
-		ptr = &(*Songs)[pos].value();
+		ptr = mkProxySongList(*Songs, [](NC::Menu<MPD::Song>::Item &item) {
+			return &item.value();
+		});
 	return ptr;
-}
-
-MPD::Song *MediaLibrary::currentSong()
-{
-	if (w == Songs && !Songs->Empty())
-		return getSong(Songs->Choice());
-	else
-		return 0;
 }
 
 bool MediaLibrary::allowsSelection()
 {
 	return true;
-}
-
-void MediaLibrary::removeSelection()
-{
-	if (w == Tags)
-		removeSelectionHelper(Tags->Begin(), Tags->End());
-	else if (w == Albums)
-		removeSelectionHelper(Albums->Begin(), Albums->End());
-	else if (w == Songs)
-		removeSelectionHelper(Songs->Begin(), Songs->End());
 }
 
 void MediaLibrary::reverseSelection()

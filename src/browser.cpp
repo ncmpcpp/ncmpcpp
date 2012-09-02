@@ -301,6 +301,16 @@ void Browser::prevFound(bool wrap)
 
 /***********************************************************************/
 
+std::shared_ptr<ProxySongList> Browser::getProxySongList()
+{
+	return mkProxySongList(*w, [](NC::Menu<MPD::Item>::Item &item) {
+		MPD::Song *ptr = 0;
+		if (item.value().type == itSong)
+			ptr = item.value().song.get();
+		return ptr;
+	});
+}
+
 MPD::Song *Browser::getSong(size_t pos)
 {
 	MPD::Song *ptr = 0;
@@ -320,11 +330,6 @@ MPD::Song *Browser::currentSong()
 bool Browser::allowsSelection()
 {
 	return true;
-}
-
-void Browser::removeSelection()
-{
-	removeSelectionHelper(w->Begin(), w->End());
 }
 
 void Browser::reverseSelection()

@@ -72,6 +72,7 @@ noinst_HEADERS = \
 	mutable_song.h \
 	outputs.h \
 	playlist_editor.h \
+	proxy_song_list.h \
 	regex_filter.h \
 	regexes.h \
 	screen.h \

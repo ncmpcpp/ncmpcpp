@@ -314,31 +314,19 @@ void SearchEngine::prevFound(bool wrap)
 
 /***********************************************************************/
 
-MPD::Song *SearchEngine::getSong(size_t pos)
+std::shared_ptr< ProxySongList > SearchEngine::getProxySongList()
 {
-	MPD::Song *ptr = 0;
-	auto &item = (*w)[pos];
-	if (!item.isSeparator() && item.value().isSong())
-		ptr = &item.value().song();
-	return ptr;
-}
-
-MPD::Song *SearchEngine::currentSong()
-{
-	if (w->Empty())
-		return 0;
-	else
-		return getSong(w->Choice());
+	return mkProxySongList(*w, [](NC::Menu<SEItem>::Item &item) {
+		MPD::Song *ptr = 0;
+		if (!item.isSeparator() && item.value().isSong())
+			ptr = &item.value().song();
+		return ptr;
+	});
 }
 
 bool SearchEngine::allowsSelection()
 {
 	return w->Current().value().isSong();
-}
-
-void SearchEngine::removeSelection()
-{
-	removeSelectionHelper(w->Begin(), w->End());
 }
 
 void SearchEngine::reverseSelection()

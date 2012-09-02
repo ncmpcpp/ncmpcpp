@@ -486,33 +486,19 @@ void PlaylistEditor::prevFound(bool wrap)
 
 /***********************************************************************/
 
-MPD::Song *PlaylistEditor::getSong(size_t pos)
+std::shared_ptr<ProxySongList> PlaylistEditor::getProxySongList()
 {
-	MPD::Song *ptr = 0;
+	auto ptr = nullProxySongList();
 	if (w == Content)
-		ptr = &(*Content)[pos].value();
+		ptr = mkProxySongList(*Content, [](NC::Menu<MPD::Song>::Item &item) {
+			return &item.value();
+		});
 	return ptr;
-}
-
-MPD::Song *PlaylistEditor::currentSong()
-{
-	if (w == Content && !Content->Empty())
-		return getSong(Content->Choice());
-	else
-		return 0;
 }
 
 bool PlaylistEditor::allowsSelection()
 {
 	return true;
-}
-
-void PlaylistEditor::removeSelection()
-{
-	if (w == Playlists)
-		removeSelectionHelper(Playlists->Begin(), Playlists->End());
-	else if (w == Content)
-		removeSelectionHelper(Content->Begin(), Content->End());
 }
 
 void PlaylistEditor::reverseSelection()

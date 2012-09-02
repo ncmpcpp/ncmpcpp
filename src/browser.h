@@ -22,6 +22,7 @@
 #define _BROWSER_H
 
 #include "interfaces.h"
+#include "mpdpp.h"
 #include "screen.h"
 
 class Browser : public Screen< NC::Menu<MPD::Item> >, public Filterable, public HasSongs, public Searchable
@@ -51,10 +52,10 @@ class Browser : public Screen< NC::Menu<MPD::Item> >, public Filterable, public 
 		/// HasSongs implementation
 		virtual MPD::Song *getSong(size_t pos);
 		virtual MPD::Song *currentSong();
+		virtual std::shared_ptr<ProxySongList> getProxySongList();
 		
 		virtual bool allowsSelection();
 		virtual void reverseSelection();
-		virtual void removeSelection();
 		virtual MPD::SongList getSelectedSongs();
 		
 		virtual NC::List *GetList() { return w; }

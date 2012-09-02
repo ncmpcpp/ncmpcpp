@@ -79,7 +79,9 @@ void setProperties(NC::Menu<T> &menu, const MPD::Song &s, HasSongs &screen, bool
 	separate_albums = false;
 	if (Config.playlist_separate_albums)
 	{
-		auto next = screen.getSong(menu.DrawnPosition()+1);
+		auto pl = screen.getProxySongList();
+		assert(pl);
+		auto next = pl->getSong(menu.DrawnPosition()+1);
 		if (next && next->getAlbum() != s.getAlbum())
 			separate_albums = true;
 	}

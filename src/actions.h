@@ -168,24 +168,28 @@ struct ScrollDown : public Action
 struct ScrollUpArtist : public Action
 {
 	ScrollUpArtist() : Action(aScrollUpArtist, "scroll_up_artist") { }
+	virtual bool canBeRun() const;
 	virtual void Run();
 };
 
 struct ScrollUpAlbum : public Action
 {
 	ScrollUpAlbum() : Action(aScrollUpAlbum, "scroll_up_album") { }
+	virtual bool canBeRun() const;
 	virtual void Run();
 };
 
 struct ScrollDownArtist : public Action
 {
 	ScrollDownArtist() : Action(aScrollDownArtist, "scroll_down_artist") { }
+	virtual bool canBeRun() const;
 	virtual void Run();
 };
 
 struct ScrollDownAlbum : public Action
 {
 	ScrollDownAlbum() : Action(aScrollDownAlbum, "scroll_down_album") { }
+	virtual bool canBeRun() const;
 	virtual void Run();
 };
 

@@ -117,28 +117,26 @@ void Lyrics::SwitchTo()
 	}
 #	endif // HAVE_CURL_CURL_H
 	
-	auto hs = dynamic_cast<HasSongs *>(myScreen);
-	if (!hs)
+	const MPD::Song *s = currentSong(myScreen);
+	if (!s)
 		return;
 	
-	if (const MPD::Song *s = hs->currentSong())
+	if (!s->getArtist().empty() && !s->getTitle().empty())
 	{
-		if (!s->getArtist().empty() && !s->getTitle().empty())
-		{
-			myOldScreen = myScreen;
-			myScreen = this;
-			
-			itsSong = *s;
-			Load();
-			
-			Global::RedrawHeader = true;
-		}
-		else
-		{
-			ShowMessage("Song must have both artist and title tag set");
-			return;
-		}
+		myOldScreen = myScreen;
+		myScreen = this;
+		
+		itsSong = *s;
+		Load();
+		
+		Global::RedrawHeader = true;
 	}
+	else
+	{
+		ShowMessage("Song must have both artist and title tag set");
+		return;
+	}
+	
 	// if we resize for locked screen, we have to do that in the end since
 	// fetching lyrics may fail (eg. if tags are missing) and we don't want
 	// to adjust screen size then.

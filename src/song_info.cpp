@@ -84,10 +84,7 @@ void SongInfo::SwitchTo()
 	if (myLockedScreen)
 		UpdateInactiveScreen(this);
 	
-	auto hs = dynamic_cast<HasSongs *>(myScreen);
-	if (!hs)
-		return;
-	auto s = hs->currentSong();
+	auto s = currentSong(myScreen);
 	if (!s)
 		return;
 	

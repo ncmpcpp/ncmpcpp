@@ -50,12 +50,10 @@ class MediaLibrary : public Screen<NC::Window>, public Filterable, public HasSon
 		virtual void prevFound(bool wrap);
 		
 		/// HasSongs implementation
-		virtual MPD::Song *getSong(size_t pos);
-		virtual MPD::Song *currentSong();
+		virtual std::shared_ptr<ProxySongList> getProxySongList();
 		
 		virtual bool allowsSelection();
 		virtual void reverseSelection();
-		virtual void removeSelection();
 		virtual MPD::SongList getSelectedSongs();
 		
 		virtual NC::List *GetList();

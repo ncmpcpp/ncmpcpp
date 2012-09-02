@@ -22,8 +22,9 @@
 #define _INTERFACES_H
 
 #include <string>
-#include "mpdpp.h"
 #include "gcc.h"
+#include "song.h"
+#include "proxy_song_list.h"
 
 struct Filterable
 {
@@ -40,12 +41,10 @@ struct Searchable
 
 struct HasSongs
 {
-	virtual MPD::Song *getSong(size_t pos) = 0;
-	virtual MPD::Song *currentSong() = 0;
+	virtual std::shared_ptr<ProxySongList> getProxySongList() = 0;
 	
 	virtual bool allowsSelection() = 0;
 	virtual void reverseSelection() = 0;
-	virtual void removeSelection() = 0;
 	virtual MPD::SongList getSelectedSongs() = 0;
 };
 
