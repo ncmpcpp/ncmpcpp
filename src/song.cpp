@@ -38,6 +38,19 @@ size_t calc_hash(const char* s, unsigned seed = 0)
 	return hash;
 }
 
+// temporary hack, it won't work properly with wide characters
+std::string Shorten(const std::basic_string<my_char_t> &s, size_t max_length)
+{
+	if (s.length() <= max_length)
+		return TO_STRING(s);
+	if (max_length < 2)
+		return "";
+	std::basic_string<my_char_t> result(s, 0, max_length/2-!(max_length%2));
+	result += U("..");
+	result += s.substr(s.length()-max_length/2+1);
+	return TO_STRING(result);
+}
+
 }
 
 namespace MPD {//
@@ -360,9 +373,9 @@ std::string Song::ParseFormat(std::string::const_iterator &it, const std::string
 				{
 					if (delimiter)
 					{
-						/*const std::basic_string<my_char_t> &s = TO_WSTRING(tag);
-						if (NCurses::Window::Length(s) > delimiter)
-							tag = Shorten(s, delimiter);*/
+						const std::basic_string<my_char_t> &s = TO_WSTRING(tag);
+						if (NC::Window::Length(s) > delimiter)
+							tag = Shorten(s, delimiter);
 					}
 					has_some_tags = 1;
 					result += tag;
