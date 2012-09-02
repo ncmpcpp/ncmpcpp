@@ -35,6 +35,8 @@ struct Song
 	typedef std::string (Song::*GetFunction)(unsigned) const;
 	
 	Song() { }
+	virtual ~Song() { }
+	
 	Song(mpd_song *s);
 	
 	virtual std::string getURI(unsigned idx = 0) const;

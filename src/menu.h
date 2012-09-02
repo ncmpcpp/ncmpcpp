@@ -39,7 +39,7 @@ template <typename T> struct Menu : public Window
 {
 	struct Item
 	{
-		friend class Menu<T>;
+		friend struct Menu<T>;
 		
 		Item()
 		: m_is_bold(false), m_is_selected(false), m_is_inactive(false), m_is_separator(false) { }
@@ -77,7 +77,7 @@ template <typename T> struct Menu : public Window
 	template <typename ValueT, typename BaseIterator> class ItemIterator
 		: public std::iterator<std::random_access_iterator_tag, ValueT>
 	{
-		friend class Menu<T>;
+		friend struct Menu<T>;
 		
 		BaseIterator m_it;
 		explicit ItemIterator(BaseIterator it) : m_it(it) { }

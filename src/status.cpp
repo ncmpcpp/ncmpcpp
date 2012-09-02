@@ -339,7 +339,7 @@ void NcmpcppStatusChanged(MPD::Connection *, MPD::StatusChanges changed, void *)
 			}
 			case MPD::psStop:
 			{
-				WindowTitle("ncmpcpp ver. "VERSION);
+				WindowTitle("ncmpcpp ver. " VERSION);
 				if (!block_progressbar_update)
 					DrawProgressbar(0, 0);
 				Playlist::ReloadRemaining = true;
