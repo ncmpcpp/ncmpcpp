@@ -21,12 +21,11 @@
 #ifndef _STRBUFFER_H
 #define _STRBUFFER_H
 
-#include "window.h"
-#include "utility/numeric_conversions.h"
-
 #include <list>
+#include "utility/numeric_conversions.h"
+#include "window.h"
 
-namespace NC {
+namespace NC {//
 
 /// Buffer template class that can store text along with its
 /// format attributes. The content can be easily printed to
@@ -62,6 +61,7 @@ template <typename C> class basic_buffer
 	/// List used for storing formatting informations
 	///
 	std::list<FormatPos> itsFormat;
+	
 	
 public:
 	/// Constructs an empty buffer

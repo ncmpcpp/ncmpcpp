@@ -119,8 +119,8 @@
 /// NC namespace provides set of easy-to-use
 /// wrappers over original curses library
 ///
-namespace NC
-{
+namespace NC {//
+
 /// Colors used by NCurses
 ///
 enum Color { clDefault, clBlack, clRed, clGreen, clYellow, clBlue, clMagenta, clCyan, clWhite, clEnd };
