@@ -96,7 +96,7 @@ void Help::Init()
 {
 	w = new NC::Scrollpad(0, MainStartY, COLS, MainHeight, "", Config.main_color, NC::brNone);
 	GetKeybindings();
-	w->Flush();
+	w->flush();
 	isInitialized = 1;
 }
 
@@ -104,8 +104,8 @@ void Help::Resize()
 {
 	size_t x_offset, width;
 	GetWindowResizeParams(x_offset, width);
-	w->Resize(width, MainHeight);
-	w->MoveTo(x_offset, MainStartY);
+	w->resize(width, MainHeight);
+	w->moveTo(x_offset, MainStartY);
 	hasToBeResized = 0;
 }
 

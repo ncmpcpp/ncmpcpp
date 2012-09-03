@@ -180,17 +180,17 @@ template <typename WindowType> WindowType *Screen<WindowType>::Main()
 
 template <typename WindowType> void Screen<WindowType>::Refresh()
 {
-	w->Display();
+	w->display();
 }
 
 template <typename WindowType> void Screen<WindowType>::RefreshWindow()
 {
-	w->Display();
+	w->display();
 }
 
 template <typename WindowType> void Screen<WindowType>::Scroll(NC::Where where)
 {
-	w->Scroll(where);
+	w->scroll(where);
 }
 
 template <typename WindowType> void Screen<WindowType>::MouseButtonPressed(MEVENT me)

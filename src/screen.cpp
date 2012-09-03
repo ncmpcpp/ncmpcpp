@@ -45,18 +45,18 @@ void GenericMouseButtonPressed(NC::Window *w, MEVENT me)
 	if (me.bstate & BUTTON2_PRESSED)
 	{
 		if (Config.mouse_list_scroll_whole_page)
-			w->Scroll(NC::wPageDown);
+			w->scroll(NC::wPageDown);
 		else
 			for (size_t i = 0; i < Config.lines_scrolled; ++i)
-				w->Scroll(NC::wDown);
+				w->scroll(NC::wDown);
 	}
 	else if (me.bstate & BUTTON4_PRESSED)
 	{
 		if (Config.mouse_list_scroll_whole_page)
-			w->Scroll(NC::wPageUp);
+			w->scroll(NC::wPageUp);
 		else
 			for (size_t i = 0; i < Config.lines_scrolled; ++i)
-				w->Scroll(NC::wUp);
+				w->scroll(NC::wUp);
 	}
 }
 
@@ -65,12 +65,12 @@ void ScrollpadMouseButtonPressed(NC::Scrollpad *w, MEVENT me)
 	if (me.bstate & BUTTON2_PRESSED)
 	{
 		for (size_t i = 0; i < Config.lines_scrolled; ++i)
-			w->Scroll(NC::wDown);
+			w->scroll(NC::wDown);
 	}
 	else if (me.bstate & BUTTON4_PRESSED)
 	{
 		for (size_t i = 0; i < Config.lines_scrolled; ++i)
-			w->Scroll(NC::wUp);
+			w->scroll(NC::wUp);
 	}
 }
 

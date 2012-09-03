@@ -32,25 +32,25 @@ Scrollpad::Scrollpad(size_t startx,
 			Color color,
 			Border border)
 			: Window(startx, starty, width, height, title, color, border),
-			itsBeginning(0),
-			itsFoundValueBegin(-1),
-			itsFoundValueEnd(-1),
-			itsRealHeight(1)
+			m_beginning(0),
+			m_found_value_begin(-1),
+			m_found_value_end(-1),
+			m_real_height(1)
 {
 }
 
 Scrollpad::Scrollpad(const Scrollpad &s) : Window(s)
 {
-	itsBuffer << s.itsBuffer;
-	itsBeginning = s.itsBeginning;
-	itsRealHeight = s.itsRealHeight;
+	m_buffer << s.m_buffer;
+	m_beginning = s.m_beginning;
+	m_real_height = s.m_real_height;
 }
 
-void Scrollpad::Flush()
+void Scrollpad::flush()
 {
-	itsRealHeight = 1;
+	m_real_height = 1;
 	
-	std::basic_string<my_char_t> s = itsBuffer.Str();
+	std::basic_string<my_char_t> s = m_buffer.str();
 	
 	size_t x = 0;
 	int x_pos = 0;
@@ -66,7 +66,7 @@ void Scrollpad::Flush()
 			x_pos = x;
 		}
 		
-		if (x >= itsWidth)
+		if (x >= m_width)
 		{
 			// if line is over, there was at least one space in this line and we are in the middle of the word, restore position to last known space and make it EOL
 			if (space_pos > 0 && (s[i] != ' ' || s[i+1] != ' '))
@@ -77,133 +77,133 @@ void Scrollpad::Flush()
 			}
 		}
 		
-		if (x >= itsWidth || s[i] == '\n')
+		if (x >= m_width || s[i] == '\n')
 		{
-			itsRealHeight++;
+			m_real_height++;
 			x = 0;
 			space_pos = 0;
 		}
 	}
-	itsRealHeight = std::max(itsHeight, itsRealHeight);
-	Recreate(itsWidth, itsRealHeight);
+	m_real_height = std::max(m_height, m_real_height);
+	recreate(m_width, m_real_height);
 	// print our modified string
-	std::swap(s, itsBuffer.itsString);
-	static_cast<Window &>(*this) << itsBuffer;
+	std::swap(s, m_buffer.m_string);
+	static_cast<Window &>(*this) << m_buffer;
 	// restore original one
-	std::swap(s, itsBuffer.itsString);
+	std::swap(s, m_buffer.m_string);
 }
 
-bool Scrollpad::SetFormatting(short val_b, const std::basic_string<my_char_t> &s, short val_e, bool case_sensitive, bool for_each)
+bool Scrollpad::setFormatting(short val_b, const std::basic_string<my_char_t> &s, short val_e, bool case_sensitive, bool for_each)
 {
-	bool result = itsBuffer.SetFormatting(val_b, s, val_e, case_sensitive, for_each);
+	bool result = m_buffer.setFormatting(val_b, s, val_e, case_sensitive, for_each);
 	if (result)
 	{
-		itsFoundForEach = for_each;
-		itsFoundCaseSensitive = case_sensitive;
-		itsFoundValueBegin = val_b;
-		itsFoundValueEnd = val_e;
-		itsFoundPattern = s;
+		m_found_for_each = for_each;
+		m_found_case_sensitive = case_sensitive;
+		m_found_value_begin = val_b;
+		m_found_value_end = val_e;
+		m_found_pattern = s;
 	}
 	else
-		ForgetFormatting();
+		forgetFormatting();
 	return result;
 }
 
-void Scrollpad::ForgetFormatting()
+void Scrollpad::forgetFormatting()
 {
-	itsFoundValueBegin = -1;
-	itsFoundValueEnd = -1;
-	itsFoundPattern.clear();
+	m_found_value_begin = -1;
+	m_found_value_end = -1;
+	m_found_pattern.clear();
 }
 
-void Scrollpad::RemoveFormatting()
+void Scrollpad::removeFormatting()
 {
-	if (itsFoundValueBegin >= 0 && itsFoundValueEnd >= 0)
-		itsBuffer.RemoveFormatting(itsFoundValueBegin, itsFoundPattern, itsFoundValueEnd, itsFoundCaseSensitive, itsFoundForEach);
+	if (m_found_value_begin >= 0 && m_found_value_end >= 0)
+		m_buffer.removeFormatting(m_found_value_begin, m_found_pattern, m_found_value_end, m_found_case_sensitive, m_found_for_each);
 }
 
-void Scrollpad::Refresh()
+void Scrollpad::refresh()
 {
-	int MaxBeginning = itsRealHeight-itsHeight;
+	int MaxBeginning = m_real_height-m_height;
 	assert(MaxBeginning >= 0);
-	if (itsBeginning > MaxBeginning)
-		itsBeginning = MaxBeginning;
-	prefresh(itsWindow, itsBeginning, 0, itsStartY, itsStartX, itsStartY+itsHeight-1, itsStartX+itsWidth-1);
+	if (m_beginning > MaxBeginning)
+		m_beginning = MaxBeginning;
+	prefresh(m_window, m_beginning, 0, m_start_y, m_start_x, m_start_y+m_height-1, m_start_x+m_width-1);
 }
 
-void Scrollpad::Resize(size_t new_width, size_t new_height)
+void Scrollpad::resize(size_t new_width, size_t new_height)
 {
-	AdjustDimensions(new_width, new_height);
-	Flush();
+	adjustDimensions(new_width, new_height);
+	flush();
 }
 
-void Scrollpad::Scroll(Where where)
+void Scrollpad::scroll(Where where)
 {
-	int MaxBeginning = /*itsContent.size() < itsHeight ? 0 : */itsRealHeight-itsHeight;
+	int MaxBeginning = /*itsContent.size() < m_height ? 0 : */m_real_height-m_height;
 	
 	switch (where)
 	{
 		case wUp:
 		{
-			if (itsBeginning > 0)
-				itsBeginning--;
+			if (m_beginning > 0)
+				m_beginning--;
 			break;
 		}
 		case wDown:
 		{
-			if (itsBeginning < MaxBeginning)
-				itsBeginning++;
+			if (m_beginning < MaxBeginning)
+				m_beginning++;
 			break;
 		}
 		case wPageUp:
 		{
-			itsBeginning -= itsHeight;
-			if (itsBeginning < 0)
-				itsBeginning = 0;
+			m_beginning -= m_height;
+			if (m_beginning < 0)
+				m_beginning = 0;
 			break;
 		}
 		case wPageDown:
 		{
-			itsBeginning += itsHeight;
-			if (itsBeginning > MaxBeginning)
-				itsBeginning = MaxBeginning;
+			m_beginning += m_height;
+			if (m_beginning > MaxBeginning)
+				m_beginning = MaxBeginning;
 			break;
 		}
 		case wHome:
 		{
-			itsBeginning = 0;
+			m_beginning = 0;
 			break;
 		}
 		case wEnd:
 		{
-			itsBeginning = MaxBeginning;
+			m_beginning = MaxBeginning;
 			break;
 		}
 	}
 }
 
-void Scrollpad::Clear()
+void Scrollpad::clear()
 {
-	itsRealHeight = itsHeight;
-	itsBuffer.Clear();
-	wclear(itsWindow);
-	delwin(itsWindow);
-	itsWindow = newpad(itsHeight, itsWidth);
-	SetTimeout(itsWindowTimeout);
-	SetColor(itsColor, itsBgColor);
-	ForgetFormatting();
-	keypad(itsWindow, 1);
+	m_real_height = m_height;
+	m_buffer.clear();
+	wclear(m_window);
+	delwin(m_window);
+	m_window = newpad(m_height, m_width);
+	setTimeout(m_window_timeout);
+	setColor(m_color, m_bg_color);
+	forgetFormatting();
+	keypad(m_window, 1);
 }
 
-void Scrollpad::Reset()
+void Scrollpad::reset()
 {
-	itsBeginning = 0;
+	m_beginning = 0;
 }
 
 #ifdef _UTF8
 Scrollpad &Scrollpad::operator<<(const std::string &s)
 {
-	itsBuffer << ToWString(s);
+	m_buffer << ToWString(s);
 	return *this;
 }
 #endif // _UTF8

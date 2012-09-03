@@ -284,9 +284,9 @@ std::string Timestamp(time_t t)
 
 void UpdateSongList(NC::Menu<MPD::Song> *menu)
 {
-	for (auto it = menu->Begin(); it != menu->End(); ++it)
+	for (auto it = menu->begin(); it != menu->end(); ++it)
 		it->setSelected(myPlaylist->checkForSong(it->value()));
-	menu->Refresh();
+	menu->refresh();
 }
 
 std::basic_string<my_char_t> Scroller(const std::basic_string<my_char_t> &str, size_t &pos, size_t width)
@@ -295,7 +295,7 @@ std::basic_string<my_char_t> Scroller(const std::basic_string<my_char_t> &str, s
 	if (!Config.header_text_scrolling)
 		return s;
 	std::basic_string<my_char_t> result;
-	size_t len = NC::Window::Length(s);
+	size_t len = NC::Window::length(s);
 	
 	if (len > width)
 	{

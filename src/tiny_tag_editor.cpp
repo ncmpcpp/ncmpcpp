@@ -47,9 +47,9 @@ TinyTagEditor *myTinyTagEditor = new TinyTagEditor;
 void TinyTagEditor::Init()
 {
 	w = new NC::Menu<NC::Buffer>(0, MainStartY, COLS, MainHeight, "", Config.main_color, NC::brNone);
-	w->HighlightColor(Config.main_highlight_color);
-	w->CyclicScrolling(Config.use_cyclic_scrolling);
-	w->CenteredCursor(Config.centered_cursor);
+	w->setHighlightColor(Config.main_highlight_color);
+	w->cyclicScrolling(Config.use_cyclic_scrolling);
+	w->centeredCursor(Config.centered_cursor);
 	w->setItemDisplayer(Display::Default<NC::Buffer>);
 	isInitialized = 1;
 }
@@ -58,8 +58,8 @@ void TinyTagEditor::Resize()
 {
 	size_t x_offset, width;
 	GetWindowResizeParams(x_offset, width);
-	w->Resize(width, MainHeight);
-	w->MoveTo(x_offset, MainStartY);
+	w->resize(width, MainHeight);
+	w->moveTo(x_offset, MainStartY);
 	hasToBeResized = 0;
 }
 
@@ -105,14 +105,14 @@ std::basic_string<my_char_t> TinyTagEditor::Title()
 
 void TinyTagEditor::EnterPressed()
 {
-	size_t option = w->Choice();
+	size_t option = w->choice();
 	LockStatusbar();
 	if (option < 19) // separator after comment
 	{
 		size_t pos = option-8;
 		Statusbar() << NC::fmtBold << SongInfo::Tags[pos].Name << ": " << NC::fmtBoldEnd;
-		itsEdited.setTag(SongInfo::Tags[pos].Set, Global::wFooter->GetString(itsEdited.getTags(SongInfo::Tags[pos].Get)));
-		w->at(option).value().Clear();
+		itsEdited.setTag(SongInfo::Tags[pos].Set, Global::wFooter->getString(itsEdited.getTags(SongInfo::Tags[pos].Get)));
+		w->at(option).value().clear();
 		w->at(option).value() << NC::fmtBold << SongInfo::Tags[pos].Name << ':' << NC::fmtBoldEnd << ' ';
 		ShowTag(w->at(option).value(), itsEdited.getTags(SongInfo::Tags[pos].Get));
 	}
@@ -123,9 +123,9 @@ void TinyTagEditor::EnterPressed()
 		size_t dot = filename.rfind(".");
 		std::string extension = filename.substr(dot);
 		filename = filename.substr(0, dot);
-		std::string new_name = Global::wFooter->GetString(filename);
+		std::string new_name = Global::wFooter->getString(filename);
 		itsEdited.setNewURI(new_name + extension);
-		w->at(option).value().Clear();
+		w->at(option).value().clear();
 		w->at(option).value() << NC::fmtBold << "Filename:" << NC::fmtBoldEnd << ' ' << (itsEdited.getNewURI().empty() ? itsEdited.getName() : itsEdited.getNewURI());
 	}
 	UnlockStatusbar();
@@ -141,7 +141,7 @@ void TinyTagEditor::EnterPressed()
 			else
 			{
 				if (myOldScreen == myPlaylist)
-					myPlaylist->Items->Current().value() = itsEdited;
+					myPlaylist->Items->current().value() = itsEdited;
 				else if (myOldScreen == myBrowser)
 					myBrowser->GetDirectory(myBrowser->CurrentDir());
 			}
@@ -155,7 +155,7 @@ void TinyTagEditor::EnterPressed()
 
 void TinyTagEditor::MouseButtonPressed(MEVENT me)
 {
-	if (w->Empty() || !w->hasCoords(me.x, me.y) || size_t(me.y) >= w->Size())
+	if (w->empty() || !w->hasCoords(me.x, me.y) || size_t(me.y) >= w->size())
 		return;
 	if (me.bstate & (BUTTON1_PRESSED | BUTTON3_PRESSED))
 	{
@@ -163,7 +163,7 @@ void TinyTagEditor::MouseButtonPressed(MEVENT me)
 			return;
 		if (me.bstate & BUTTON3_PRESSED)
 		{
-			w->Refresh();
+			w->refresh();
 			EnterPressed();
 		}
 	}
@@ -195,10 +195,10 @@ bool TinyTagEditor::getTags()
 	if (!isInitialized)
 		Init();
 	
-	w->Clear();
-	w->Reset();
+	w->clear();
+	w->reset();
 	
-	w->ResizeList(24);
+	w->resizeList(24);
 	
 	for (size_t i = 0; i < 7; ++i)
 		w->at(i).setInactive(true);
@@ -214,7 +214,7 @@ bool TinyTagEditor::getTags()
 			w->at(i).setInactive(true);
 	}
 	
-	w->Highlight(8);
+	w->highlight(8);
 	
 	w->at(0).value() << NC::fmtBold << Config.color1 << "Song name: " << NC::fmtBoldEnd << Config.color2 << itsEdited.getName() << NC::clEnd;
 	w->at(1).value() << NC::fmtBold << Config.color1 << "Location in DB: " << NC::fmtBoldEnd << Config.color2;

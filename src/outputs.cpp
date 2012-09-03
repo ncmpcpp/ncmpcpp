@@ -36,9 +36,9 @@ Outputs *myOutputs = new Outputs;
 void Outputs::Init()
 {
 	w = new NC::Menu<MPD::Output>(0, MainStartY, COLS, MainHeight, "", Config.main_color, NC::brNone);
-	w->CyclicScrolling(Config.use_cyclic_scrolling);
-	w->CenteredCursor(Config.centered_cursor);
-	w->HighlightColor(Config.main_highlight_color);
+	w->cyclicScrolling(Config.use_cyclic_scrolling);
+	w->centeredCursor(Config.centered_cursor);
+	w->setHighlightColor(Config.main_highlight_color);
 	w->setItemDisplayer(Display::Outputs);
 	
 	isInitialized = 1;
@@ -64,7 +64,7 @@ void Outputs::SwitchTo()
 	if (myScreen != this && myScreen->isTabbable())
 		Global::myPrevScreen = myScreen;
 	myScreen = this;
-	w->Window::Clear();
+	w->Window::clear();
 	
 	Global::RedrawHeader = true;
 }
@@ -73,8 +73,8 @@ void Outputs::Resize()
 {
 	size_t x_offset, width;
 	GetWindowResizeParams(x_offset, width);
-	w->Resize(width, MainHeight);
-	w->MoveTo(x_offset, MainStartY);
+	w->resize(width, MainHeight);
+	w->moveTo(x_offset, MainStartY);
 	hasToBeResized = 0;
 }
 
@@ -85,15 +85,15 @@ std::basic_string<my_char_t> Outputs::Title()
 
 void Outputs::EnterPressed()
 {
-	if (w->Current().value().isEnabled())
+	if (w->current().value().isEnabled())
 	{
-		if (Mpd.DisableOutput(w->Choice()))
-			ShowMessage("Output \"%s\" disabled", w->Current().value().name().c_str());
+		if (Mpd.DisableOutput(w->choice()))
+			ShowMessage("Output \"%s\" disabled", w->current().value().name().c_str());
 	}
 	else
 	{
-		if (Mpd.EnableOutput(w->Choice()))
-			ShowMessage("Output \"%s\" enabled", w->Current().value().name().c_str());
+		if (Mpd.EnableOutput(w->choice()))
+			ShowMessage("Output \"%s\" enabled", w->current().value().name().c_str());
 	}
 	if (!Mpd.SupportsIdle())
 		FetchList();
@@ -101,7 +101,7 @@ void Outputs::EnterPressed()
 
 void Outputs::MouseButtonPressed(MEVENT me)
 {
-	if (w->Empty() || !w->hasCoords(me.x, me.y) || size_t(me.y) >= w->Size())
+	if (w->empty() || !w->hasCoords(me.x, me.y) || size_t(me.y) >= w->size())
 		return;
 	if (me.bstate & BUTTON1_PRESSED || me.bstate & BUTTON3_PRESSED)
 	{
@@ -117,12 +117,12 @@ void Outputs::FetchList()
 {
 	if (!isInitialized)
 		return;
-	w->Clear();
+	w->clear();
 	auto outputs = Mpd.GetOutputs();
 	for (auto o = outputs.begin(); o != outputs.end(); ++o)
-		w->AddItem(*o, o->isEnabled());
+		w->addItem(*o, o->isEnabled());
 	if (myScreen == this)
-		w->Refresh();
+		w->refresh();
 }
 
 #endif // ENABLE_OUTPUTS

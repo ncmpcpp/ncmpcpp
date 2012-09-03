@@ -64,7 +64,7 @@ class Playlist : public Screen<NC::Window>, public Filterable, public HasSongs, 
 		virtual bool isMergable() { return true; }
 		
 		bool isFiltered();
-		bool isPlaying() { return NowPlaying >= 0 && !Items->Empty(); }
+		bool isPlaying() { return NowPlaying >= 0 && !Items->empty(); }
 		const MPD::Song *NowPlayingSong();
 		
 		void MoveSelectedItems(Movement where);

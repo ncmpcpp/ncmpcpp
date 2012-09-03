@@ -81,17 +81,17 @@ void setProperties(NC::Menu<T> &menu, const MPD::Song &s, HasSongs &screen, bool
 	{
 		auto pl = screen.getProxySongList();
 		assert(pl);
-		auto next = pl->getSong(menu.DrawnPosition()+1);
+		auto next = pl->getSong(menu.drawnPosition()+1);
 		if (next && next->getAlbum() != s.getAlbum())
 			separate_albums = true;
 	}
 	if (separate_albums)
 		menu << NC::fmtUnderline;
 	
-	int song_pos = menu.isFiltered() ? s.getPosition() : menu.DrawnPosition();
+	int song_pos = menu.isFiltered() ? s.getPosition() : menu.drawnPosition();
 	is_now_playing = static_cast<void *>(&menu) == myPlaylist->Items
 	              && song_pos == myPlaylist->NowPlaying;
-	is_selected = menu.Drawn().isSelected();
+	is_selected = menu.drawn().isSelected();
 	discard_colors = Config.discard_colors_if_item_is_selected && is_selected;
 }
 
@@ -122,10 +122,10 @@ void showSongs(NC::Menu<T> &menu, const MPD::Song &s, HasSongs &screen, const st
 				buf << U(" ");
 				String2Buffer(TO_WSTRING(line.substr(it-line.begin()+1)), buf);
 				if (discard_colors)
-					buf.RemoveFormatting();
+					buf.removeFormatting();
 				if (is_now_playing)
 					buf << Config.now_playing_suffix;
-				menu << NC::XY(menu.GetWidth()-buf.Str().length()-(is_selected ? Config.selected_item_suffix_length : 0), menu.Y()) << buf;
+				menu << NC::XY(menu.getWidth()-buf.str().length()-(is_selected ? Config.selected_item_suffix_length : 0), menu.y()) << buf;
 				if (separate_albums)
 					menu << NC::fmtUnderlineEnd;
 				return;
@@ -162,19 +162,19 @@ void showSongsInColumns(NC::Menu<T> &menu, const MPD::Song &s, HasSongs &screen)
 		menu << Config.now_playing_prefix;
 	
 	int width;
-	int y = menu.Y();
-	int remained_width = menu.GetWidth();
+	int y = menu.y();
+	int remained_width = menu.getWidth();
 	std::vector<Column>::const_iterator it, last = Config.columns.end() - 1;
 	for (it = Config.columns.begin(); it != Config.columns.end(); ++it)
 	{
 		// check current X coordinate
-		int x = menu.X();
+		int x = menu.x();
 		// column has relative width and all after it have fixed width,
 		// so stretch it so it fills whole screen along with these after.
 		if (it->stretch_limit >= 0) // (*)
 			width = remained_width - it->stretch_limit;
 		else
-			width = it->fixed ? it->width : it->width * menu.GetWidth() * 0.01;
+			width = it->fixed ? it->width : it->width * menu.getWidth() * 0.01;
 		// columns with relative width may shrink to 0, omit them
 		if (width == 0)
 			continue;
@@ -199,7 +199,7 @@ void showSongsInColumns(NC::Menu<T> &menu, const MPD::Song &s, HasSongs &screen)
 			if (width-offset < 0)
 			{
 				remained_width -= width + 1;
-				menu.GotoXY(width, y);
+				menu.goToXY(width, y);
 				menu << ' ';
 				continue;
 			}
@@ -221,7 +221,7 @@ void showSongsInColumns(NC::Menu<T> &menu, const MPD::Song &s, HasSongs &screen)
 		}
 		if (tag.empty() && it->display_empty_tag)
 			tag = TO_WSTRING(Config.empty_tag);
-		NC::Window::Cut(tag, width);
+		NC::Window::cut(tag, width);
 		
 		if (!discard_colors && it->color != NC::clDefault)
 			menu << it->color;
@@ -230,12 +230,12 @@ void showSongsInColumns(NC::Menu<T> &menu, const MPD::Song &s, HasSongs &screen)
 		// if column uses right alignment, calculate proper offset.
 		// otherwise just assume offset is 0, ie. we start from the left.
 		if (it->right_alignment)
-			x_off = std::max(0, width - int(NC::Window::Length(tag)));
+			x_off = std::max(0, width - int(NC::Window::length(tag)));
 		
-		whline(menu.Raw(), KEY_SPACE, width);
-		menu.GotoXY(x + x_off, y);
+		whline(menu.raw(), KEY_SPACE, width);
+		menu.goToXY(x + x_off, y);
 		menu << tag;
-		menu.GotoXY(x + width, y);
+		menu.goToXY(x + width, y);
 		if (it != last)
 		{
 			// add missing width's part and restore the value.
@@ -253,14 +253,14 @@ void showSongsInColumns(NC::Menu<T> &menu, const MPD::Song &s, HasSongs &screen)
 	// returns there).
 	if (is_now_playing)
 	{
-		int np_x = menu.GetWidth() - Config.now_playing_suffix_length;
+		int np_x = menu.getWidth() - Config.now_playing_suffix_length;
 		if (is_selected)
 			np_x -= Config.selected_item_suffix_length;
-		menu.GotoXY(np_x, y);
+		menu.goToXY(np_x, y);
 		menu << Config.now_playing_suffix;
 	}
 	if (is_selected)
-		menu.GotoXY(menu.GetWidth() - Config.selected_item_suffix_length, y);
+		menu.goToXY(menu.getWidth() - Config.selected_item_suffix_length, y);
 	
 	if (separate_albums)
 		menu << NC::fmtUnderlineEnd;
@@ -310,9 +310,9 @@ std::string Display::Columns(size_t list_width)
 		}
 		else
 			name = it->name;
-		NC::Window::Cut(name, width);
+		NC::Window::cut(name, width);
 		
-		int x_off = std::max(0, width - int(NC::Window::Length(name)));
+		int x_off = std::max(0, width - int(NC::Window::length(name)));
 		if (it->right_alignment)
 		{
 			result += std::string(x_off, KEY_SPACE);
@@ -337,18 +337,18 @@ std::string Display::Columns(size_t list_width)
 
 void Display::SongsInColumns(NC::Menu<MPD::Song> &menu, HasSongs &screen)
 {
-	showSongsInColumns(menu, menu.Drawn().value(), screen);
+	showSongsInColumns(menu, menu.drawn().value(), screen);
 }
 
 void Display::Songs(NC::Menu<MPD::Song> &menu, HasSongs &screen, const std::string &format)
 {
-	showSongs(menu, menu.Drawn().value(), screen, format);
+	showSongs(menu, menu.drawn().value(), screen, format);
 }
 
 void Display::Tags(NC::Menu<MPD::MutableSong> &menu)
 {
-	const MPD::MutableSong &s = menu.Drawn().value();
-	size_t i = myTagEditor->TagTypes->Choice();
+	const MPD::MutableSong &s = menu.drawn().value();
+	size_t i = myTagEditor->TagTypes->choice();
 	if (i < 11)
 	{
 		ShowTag(menu, s.getTags(SongInfo::Tags[i].Get));
@@ -364,12 +364,12 @@ void Display::Tags(NC::Menu<MPD::MutableSong> &menu)
 
 void Display::Outputs(NC::Menu<MPD::Output> &menu)
 {
-	menu << menu.Drawn().value().name();
+	menu << menu.drawn().value().name();
 }
 
 void Display::Items(NC::Menu<MPD::Item> &menu)
 {
-	const MPD::Item &item = menu.Drawn().value();
+	const MPD::Item &item = menu.drawn().value();
 	switch (item.type)
 	{
 		case MPD::itDirectory:
@@ -389,7 +389,7 @@ void Display::Items(NC::Menu<MPD::Item> &menu)
 
 void Display::SearchEngine(NC::Menu<SEItem> &menu)
 {
-	const SEItem &si = menu.Drawn().value();
+	const SEItem &si = menu.drawn().value();
 	if (si.isSong())
 	{
 		if (!Config.columns_in_search_engine)

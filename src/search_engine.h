@@ -117,7 +117,7 @@ class SearchEngine : public Screen< NC::Menu<SEItem> >, public Filterable, publi
 	private:
 		void Prepare();
 		void Search();
-		void Reset();
+		void reset();
 		
 		const char **SearchMode;
 		

@@ -72,10 +72,10 @@ template <typename Iterator> std::string getSharedDirectory(Iterator first, Iter
 template <typename T> void withUnfilteredMenu(NC::Menu<T> &menu, std::function<void()> action)
 {
 	bool is_filtered = menu.isFiltered();
-	menu.ShowAll();
+	menu.showAll();
 	action();
 	if (is_filtered)
-		menu.ShowFiltered();
+		menu.showFiltered();
 }
 
 void ParseArgv(int, char **);

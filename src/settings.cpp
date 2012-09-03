@@ -570,7 +570,7 @@ void Configuration::Read()
 					{
 						NC::Buffer status_no_colors;
 						String2Buffer(song_status_format, status_no_colors);
-						song_status_format_no_colors = status_no_colors.Str();
+						song_status_format_no_colors = status_no_colors.str();
 					}
 					else
 						song_status_format_no_colors = song_status_format;
@@ -645,7 +645,7 @@ void Configuration::Read()
 			{
 				if (!v.empty())
 				{
-					browser_playlist_prefix.Clear();
+					browser_playlist_prefix.clear();
 					String2Buffer(v, browser_playlist_prefix);
 				}
 			}
@@ -681,36 +681,36 @@ void Configuration::Read()
 			{
 				if (!v.empty())
 				{
-					selected_item_prefix.Clear();
+					selected_item_prefix.clear();
 					String2Buffer(v, selected_item_prefix);
-					selected_item_prefix_length = NC::Window::Length(TO_WSTRING(selected_item_prefix.Str()));
+					selected_item_prefix_length = NC::Window::length(TO_WSTRING(selected_item_prefix.str()));
 				}
 			}
 			else if (name == "selected_item_suffix")
 			{
 				if (!v.empty())
 				{
-					selected_item_suffix.Clear();
+					selected_item_suffix.clear();
 					String2Buffer(v, selected_item_suffix);
-					selected_item_suffix_length = NC::Window::Length(TO_WSTRING(selected_item_suffix.Str()));
+					selected_item_suffix_length = NC::Window::length(TO_WSTRING(selected_item_suffix.str()));
 				}
 			}
 			else if (name == "now_playing_prefix")
 			{
 				if (!v.empty())
 				{
-					now_playing_prefix.Clear();
+					now_playing_prefix.clear();
 					String2Buffer(v, now_playing_prefix);
-					now_playing_prefix_length = NC::Window::Length(TO_WSTRING(now_playing_prefix.Str()));
+					now_playing_prefix_length = NC::Window::length(TO_WSTRING(now_playing_prefix.str()));
 				}
 			}
 			else if (name == "now_playing_suffix")
 			{
 				if (!v.empty())
 				{
-					now_playing_suffix.Clear();
+					now_playing_suffix.clear();
 					String2Buffer(TO_WSTRING(v), now_playing_suffix);
-					now_playing_suffix_length = NC::Window::Length(now_playing_suffix.Str());
+					now_playing_suffix_length = NC::Window::length(now_playing_suffix.str());
 				}
 			}
 			else if (name == "color1")

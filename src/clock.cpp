@@ -65,12 +65,12 @@ void Clock::Resize()
 	GetWindowResizeParams(x_offset, width);
 	
 	// used for clearing area out of clock window while resizing terminal
-	itsPane->Resize(width, MainHeight);
-	itsPane->MoveTo(x_offset, MainStartY);
-	itsPane->Refresh();
+	itsPane->resize(width, MainHeight);
+	itsPane->moveTo(x_offset, MainStartY);
+	itsPane->refresh();
 	
 	if (Width <= width && Height <= MainHeight)
-		w->MoveTo(x_offset+(width-Width)/2, MainStartY+(MainHeight-Height)/2);
+		w->moveTo(x_offset+(width-Width)/2, MainStartY+(MainHeight-Height)/2);
 }
 
 void Clock::SwitchTo()
@@ -104,10 +104,10 @@ void Clock::SwitchTo()
 	myScreen = this;
 	Global::RedrawHeader = true;
 	Prepare();
-	itsPane->Refresh();
+	itsPane->refresh();
 	// clearing screen apparently fixes the problem with last digits being misrendered
-	w->Clear();
-	w->Display();
+	w->clear();
+	w->display();
 }
 
 std::basic_string<my_char_t> Clock::Title()
@@ -117,7 +117,7 @@ std::basic_string<my_char_t> Clock::Title()
 
 void Clock::Update()
 {
-	if (Width > itsPane->GetWidth() || Height > MainHeight)
+	if (Width > itsPane->getWidth() || Height > MainHeight)
 	{
 		using Global::myLockedScreen;
 		using Global::myInactiveScreen;
@@ -150,7 +150,7 @@ void Clock::Update()
 	char buf[64];
 	strftime(buf, 64, "%x", time);
 	attron(COLOR_PAIR(Config.main_color));
-	mvprintw(w->GetStartY()+w->GetHeight(), w->GetStartX()+(w->GetWidth()-strlen(buf))/2, "%s", buf);
+	mvprintw(w->getStarty()+w->getHeight(), w->getStartX()+(w->getWidth()-strlen(buf))/2, "%s", buf);
 	attroff(COLOR_PAIR(Config.main_color));
 	refresh();
 	
@@ -173,7 +173,7 @@ void Clock::Update()
 						{
 							if (!(a & (t << 1)))
 							{
-								w->GotoXY(2*j+2, i);
+								w->goToXY(2*j+2, i);
 							}
 							if (Config.clock_display_seconds || j < 18)
 								*w << "  ";
@@ -187,7 +187,7 @@ void Clock::Update()
 			}
 		}
 	}
-	w->Refresh();
+	w->refresh();
 }
 
 void Clock::Prepare()

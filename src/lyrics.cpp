@@ -58,8 +58,8 @@ void Lyrics::Resize()
 {
 	size_t x_offset, width;
 	GetWindowResizeParams(x_offset, width);
-	w->Resize(width, MainHeight);
-	w->MoveTo(x_offset, MainStartY);
+	w->resize(width, MainHeight);
+	w->moveTo(x_offset, MainStartY);
 	hasToBeResized = 0;
 }
 
@@ -71,8 +71,8 @@ void Lyrics::Update()
 	
 	if (isDownloadInProgress)
 	{
-		w->Flush();
-		w->Refresh();
+		w->flush();
+		w->refresh();
 	}
 #	endif // HAVE_CURL_CURL_H
 	if (ReloadNP)
@@ -268,7 +268,7 @@ void *Lyrics::Download()
 		Save(itsFilename, result.second);
 		
 		utf_to_locale(result.second);
-		w->Clear();
+		w->clear();
 		*w << result.second;
 	}
 	else
@@ -331,8 +331,8 @@ void Lyrics::Load()
 	
 	CreateDir(Config.lyrics_directory);
 	
-	w->Clear();
-	w->Reset();
+	w->clear();
+	w->reset();
 	
 	std::ifstream input(itsFilename.c_str());
 	if (input.is_open())
@@ -347,9 +347,9 @@ void Lyrics::Load()
 			*w << line;
 			first = 0;
 		}
-		w->Flush();
+		w->flush();
 		if (ReloadNP)
-			w->Refresh();
+			w->refresh();
 	}
 	else
 	{
@@ -358,7 +358,7 @@ void Lyrics::Load()
 		isDownloadInProgress = 1;
 #		else
 		*w << U("Local lyrics not found. As ncmpcpp has been compiled without curl support, you can put appropriate lyrics into ") << TO_WSTRING(Config.lyrics_directory) << U(" directory (file syntax is \"$ARTIST - $TITLE.txt\") or recompile ncmpcpp with curl support.");
-		w->Flush();
+		w->flush();
 #		endif
 	}
 }
@@ -428,8 +428,8 @@ void Lyrics::Take()
 {
 	assert(isReadyToTake);
 	pthread_join(itsDownloader, 0);
-	w->Flush();
-	w->Refresh();
+	w->flush();
+	w->refresh();
 	isDownloadInProgress = 0;
 	isReadyToTake = 0;
 }

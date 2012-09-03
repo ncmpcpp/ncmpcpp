@@ -86,27 +86,27 @@ void MediaLibrary::Init()
 	itsRightColStartX = itsLeftColWidth+itsMiddleColWidth+2;
 	
 	Tags = new NC::Menu<std::string>(0, MainStartY, itsLeftColWidth, MainHeight, Config.titles_visibility ? tagTypeToString(Config.media_lib_primary_tag) + "s" : "", Config.main_color, NC::brNone);
-	Tags->HighlightColor(Config.active_column_color);
-	Tags->CyclicScrolling(Config.use_cyclic_scrolling);
-	Tags->CenteredCursor(Config.centered_cursor);
-	Tags->SetSelectPrefix(Config.selected_item_prefix);
-	Tags->SetSelectSuffix(Config.selected_item_suffix);
+	Tags->setHighlightColor(Config.active_column_color);
+	Tags->cyclicScrolling(Config.use_cyclic_scrolling);
+	Tags->centeredCursor(Config.centered_cursor);
+	Tags->setSelectedPrefix(Config.selected_item_prefix);
+	Tags->setSelectedSuffix(Config.selected_item_suffix);
 	Tags->setItemDisplayer(DisplayPrimaryTags);
 	
 	Albums = new NC::Menu<SearchConstraints>(itsMiddleColStartX, MainStartY, itsMiddleColWidth, MainHeight, Config.titles_visibility ? "Albums" : "", Config.main_color, NC::brNone);
-	Albums->HighlightColor(Config.main_highlight_color);
-	Albums->CyclicScrolling(Config.use_cyclic_scrolling);
-	Albums->CenteredCursor(Config.centered_cursor);
-	Albums->SetSelectPrefix(Config.selected_item_prefix);
-	Albums->SetSelectSuffix(Config.selected_item_suffix);
+	Albums->setHighlightColor(Config.main_highlight_color);
+	Albums->cyclicScrolling(Config.use_cyclic_scrolling);
+	Albums->centeredCursor(Config.centered_cursor);
+	Albums->setSelectedPrefix(Config.selected_item_prefix);
+	Albums->setSelectedSuffix(Config.selected_item_suffix);
 	Albums->setItemDisplayer(DisplayAlbums);
 	
 	Songs = new NC::Menu<MPD::Song>(itsRightColStartX, MainStartY, itsRightColWidth, MainHeight, Config.titles_visibility ? "Songs" : "", Config.main_color, NC::brNone);
-	Songs->HighlightColor(Config.main_highlight_color);
-	Songs->CyclicScrolling(Config.use_cyclic_scrolling);
-	Songs->CenteredCursor(Config.centered_cursor);
-	Songs->SetSelectPrefix(Config.selected_item_prefix);
-	Songs->SetSelectSuffix(Config.selected_item_suffix);
+	Songs->setHighlightColor(Config.main_highlight_color);
+	Songs->cyclicScrolling(Config.use_cyclic_scrolling);
+	Songs->centeredCursor(Config.centered_cursor);
+	Songs->setSelectedPrefix(Config.selected_item_prefix);
+	Songs->setSelectedSuffix(Config.selected_item_suffix);
 	Songs->setItemDisplayer(std::bind(Display::Songs, _1, *this, Config.song_library_format));
 	
 	w = Tags;
@@ -134,28 +134,28 @@ void MediaLibrary::Resize()
 		itsRightColWidth = width-itsMiddleColWidth-1;
 	}
 	
-	Tags->Resize(itsLeftColWidth, MainHeight);
-	Albums->Resize(itsMiddleColWidth, MainHeight);
-	Songs->Resize(itsRightColWidth, MainHeight);
+	Tags->resize(itsLeftColWidth, MainHeight);
+	Albums->resize(itsMiddleColWidth, MainHeight);
+	Songs->resize(itsRightColWidth, MainHeight);
 	
-	Tags->MoveTo(itsLeftColStartX, MainStartY);
-	Albums->MoveTo(itsMiddleColStartX, MainStartY);
-	Songs->MoveTo(itsRightColStartX, MainStartY);
+	Tags->moveTo(itsLeftColStartX, MainStartY);
+	Albums->moveTo(itsMiddleColStartX, MainStartY);
+	Songs->moveTo(itsRightColStartX, MainStartY);
 	
 	hasToBeResized = 0;
 }
 
 void MediaLibrary::Refresh()
 {
-	Tags->Display();
+	Tags->display();
 	mvvline(MainStartY, itsMiddleColStartX-1, 0, MainHeight);
-	Albums->Display();
+	Albums->display();
 	mvvline(MainStartY, itsRightColStartX-1, 0, MainHeight);
-	Songs->Display();
-	if (Albums->Empty())
+	Songs->display();
+	if (Albums->empty())
 	{
 		*Albums << NC::XY(0, 0) << "No albums found.";
-		Albums->Window::Refresh();
+		Albums->Window::refresh();
 	}
 }
 
@@ -171,10 +171,10 @@ void MediaLibrary::SwitchTo()
 		{
 			hasTwoColumns = !hasTwoColumns;
 			hasToBeResized = 1;
-			Tags->Clear();
-			Albums->Clear();
-			Albums->Reset();
-			Songs->Clear();
+			Tags->clear();
+			Albums->clear();
+			Albums->reset();
+			Songs->clear();
 			if (hasTwoColumns)
 			{
 				if (w == Tags)
@@ -183,13 +183,13 @@ void MediaLibrary::SwitchTo()
 				{
 					std::string item_type = tagTypeToString(Config.media_lib_primary_tag);
 					lowercase(item_type);
-					Albums->SetTitle("Albums (sorted by " + item_type + ")");
+					Albums->setTitle("Albums (sorted by " + item_type + ")");
 				}
 				else
-					Albums->SetTitle("");
+					Albums->setTitle("");
 			}
 			else
-				Albums->SetTitle(Config.titles_visibility ? "Albums" : "");
+				Albums->setTitle(Config.titles_visibility ? "Albums" : "");
 		}
 	}
 	
@@ -217,60 +217,60 @@ std::basic_string<my_char_t> MediaLibrary::Title()
 
 void MediaLibrary::Update()
 {
-	if (!hasTwoColumns && Tags->ReallyEmpty())
+	if (!hasTwoColumns && Tags->reallyEmpty())
 	{
-		Albums->Clear();
-		Songs->Clear();
+		Albums->clear();
+		Songs->clear();
 		auto list = Mpd.GetList(Config.media_lib_primary_tag);
 		std::sort(list.begin(), list.end(), CaseInsensitiveSorting());
 		for (auto it = list.begin(); it != list.end(); ++it)
 		{
 			if (it->empty() && !Config.media_library_display_empty_tag)
 				continue;
-			Tags->AddItem(*it);
+			Tags->addItem(*it);
 		}
-		Tags->Refresh();
+		Tags->refresh();
 	}
 	
-	if (!hasTwoColumns && !Tags->Empty() && Albums->ReallyEmpty() && Songs->ReallyEmpty())
+	if (!hasTwoColumns && !Tags->empty() && Albums->reallyEmpty() && Songs->reallyEmpty())
 	{
 		// idle has to be blocked for now since it would be enabled and
 		// disabled a few times by each mpd command, which makes no sense
 		// and slows down the whole process.
 		Mpd.BlockIdle(true);
-		Albums->Reset();
+		Albums->reset();
 		Mpd.StartFieldSearch(MPD_TAG_ALBUM);
-		Mpd.AddSearch(Config.media_lib_primary_tag, Tags->Current().value());
+		Mpd.AddSearch(Config.media_lib_primary_tag, Tags->current().value());
 		auto albums = Mpd.CommitSearchTags();
 		for (auto album = albums.begin(); album != albums.end(); ++album)
 		{
 			if (Config.media_library_display_date)
 			{
 				Mpd.StartFieldSearch(MPD_TAG_DATE);
-				Mpd.AddSearch(Config.media_lib_primary_tag, Tags->Current().value());
+				Mpd.AddSearch(Config.media_lib_primary_tag, Tags->current().value());
 				Mpd.AddSearch(MPD_TAG_ALBUM, *album);
 				auto dates = Mpd.CommitSearchTags();
 				for (auto date = dates.begin(); date != dates.end(); ++date)
-					Albums->AddItem(SearchConstraints(*album, *date));
+					Albums->addItem(SearchConstraints(*album, *date));
 			}
 			else
-				Albums->AddItem(SearchConstraints(*album, ""));
+				Albums->addItem(SearchConstraints(*album, ""));
 		}
-		if (!Albums->Empty())
-			std::sort(Albums->BeginV(), Albums->EndV(), SortSearchConstraints);
-		if (Albums->Size() > 1)
+		if (!Albums->empty())
+			std::sort(Albums->beginV(), Albums->endV(), SortSearchConstraints);
+		if (Albums->size() > 1)
 		{
-			Albums->AddSeparator();
-			Albums->AddItem(SearchConstraints("", AllTracksMarker));
+			Albums->addSeparator();
+			Albums->addItem(SearchConstraints("", AllTracksMarker));
 		}
-		Albums->Refresh();
+		Albums->refresh();
 		Mpd.BlockIdle(false);
 	}
-	else if (hasTwoColumns && Albums->ReallyEmpty())
+	else if (hasTwoColumns && Albums->reallyEmpty())
 	{
-		Songs->Clear();
+		Songs->clear();
 		*Albums << NC::XY(0, 0) << "Fetching albums...";
-		Albums->Window::Refresh();
+		Albums->Window::refresh();
 		Mpd.BlockIdle(true);
 		auto artists = Mpd.GetList(Config.media_lib_primary_tag);
 		for (auto artist = artists.begin(); artist != artists.end(); ++artist)
@@ -289,50 +289,50 @@ void MediaLibrary::Update()
 						Mpd.AddSearch(MPD_TAG_ALBUM, *album);
 						auto dates = Mpd.CommitSearchTags();
 						for (auto date = dates.begin(); date != dates.end(); ++date)
-							Albums->AddItem(SearchConstraints(*artist, *album, *date));
+							Albums->addItem(SearchConstraints(*artist, *album, *date));
 					}
 					else
-						Albums->AddItem(SearchConstraints(*artist, *album, *artist));
+						Albums->addItem(SearchConstraints(*artist, *album, *artist));
 				}
 				else
-					Albums->AddItem(SearchConstraints(*artist, *album, ""));
+					Albums->addItem(SearchConstraints(*artist, *album, ""));
 			}
 		}
 		Mpd.BlockIdle(0);
-		if (!Albums->Empty())
-			std::sort(Albums->BeginV(), Albums->EndV(), SortSearchConstraints);
-		Albums->Refresh();
+		if (!Albums->empty())
+			std::sort(Albums->beginV(), Albums->endV(), SortSearchConstraints);
+		Albums->refresh();
 	}
 	
-	if (!hasTwoColumns && !Tags->Empty() && w == Albums && Albums->ReallyEmpty())
+	if (!hasTwoColumns && !Tags->empty() && w == Albums && Albums->reallyEmpty())
 	{
-		Albums->HighlightColor(Config.main_highlight_color);
-		Tags->HighlightColor(Config.active_column_color);
+		Albums->setHighlightColor(Config.main_highlight_color);
+		Tags->setHighlightColor(Config.active_column_color);
 		w = Tags;
 	}
 	
-	if (!(hasTwoColumns ? Albums->Empty() : Tags->Empty()) && Songs->ReallyEmpty())
+	if (!(hasTwoColumns ? Albums->empty() : Tags->empty()) && Songs->reallyEmpty())
 	{
-		Songs->Reset();
+		Songs->reset();
 		
 		Mpd.StartSearch(1);
-		Mpd.AddSearch(Config.media_lib_primary_tag, locale_to_utf_cpy(hasTwoColumns ? Albums->Current().value().PrimaryTag : Tags->Current().value()));
-		if (Albums->Current().value().Date != AllTracksMarker)
+		Mpd.AddSearch(Config.media_lib_primary_tag, locale_to_utf_cpy(hasTwoColumns ? Albums->current().value().PrimaryTag : Tags->current().value()));
+		if (Albums->current().value().Date != AllTracksMarker)
 		{
-			Mpd.AddSearch(MPD_TAG_ALBUM, locale_to_utf_cpy(Albums->Current().value().Album));
+			Mpd.AddSearch(MPD_TAG_ALBUM, locale_to_utf_cpy(Albums->current().value().Album));
 			if (Config.media_library_display_date)
-				Mpd.AddSearch(MPD_TAG_DATE, locale_to_utf_cpy(Albums->Current().value().Date));
+				Mpd.AddSearch(MPD_TAG_DATE, locale_to_utf_cpy(Albums->current().value().Date));
 		}
 		auto songs = Mpd.CommitSearchSongs();
 		for (auto s = songs.begin(); s != songs.end(); ++s)
-			Songs->AddItem(*s, myPlaylist->checkForSong(*s));
+			Songs->addItem(*s, myPlaylist->checkForSong(*s));
 		
-		if (Albums->Current().value().Date == AllTracksMarker)
-			std::sort(Songs->BeginV(), Songs->EndV(), SortAllTracks);
+		if (Albums->current().value().Date == AllTracksMarker)
+			std::sort(Songs->beginV(), Songs->endV(), SortAllTracks);
 		else
-			std::sort(Songs->BeginV(), Songs->EndV(), SortSongsByTrack);
+			std::sort(Songs->beginV(), Songs->endV(), SortSongsByTrack);
 		
-		Songs->Refresh();
+		Songs->refresh();
 	}
 }
 
@@ -342,26 +342,26 @@ void MediaLibrary::SpacePressed()
 	{
 		if (w == Tags)
 		{
-			size_t i = Tags->Choice();
+			size_t i = Tags->choice();
 			Tags->at(i).setSelected(!Tags->at(i).isSelected());
-			Albums->Clear();
-			Songs->Clear();
+			Albums->clear();
+			Songs->clear();
 		}
 		else if (w == Albums)
 		{
-			if (Albums->Current().value().Date != AllTracksMarker)
+			if (Albums->current().value().Date != AllTracksMarker)
 			{
-				size_t i = Albums->Choice();
+				size_t i = Albums->choice();
 				Albums->at(i).setSelected(!Albums->at(i).isSelected());
-				Songs->Clear();
+				Songs->clear();
 			}
 		}
 		else if (w == Songs)
 		{
-			size_t i = Songs->Choice();
+			size_t i = Songs->choice();
 			Songs->at(i).setSelected(!Songs->at(i).isSelected());
 		}
-		w->Scroll(NC::wDown);
+		w->scroll(NC::wDown);
 	}
 	else
 		AddToPlaylist(0);
@@ -369,64 +369,64 @@ void MediaLibrary::SpacePressed()
 
 void MediaLibrary::MouseButtonPressed(MEVENT me)
 {
-	if (!Tags->Empty() && Tags->hasCoords(me.x, me.y))
+	if (!Tags->empty() && Tags->hasCoords(me.x, me.y))
 	{
 		if (w != Tags)
 		{
 			PrevColumn();
 			PrevColumn();
 		}
-		if (size_t(me.y) < Tags->Size() && (me.bstate & (BUTTON1_PRESSED | BUTTON3_PRESSED)))
+		if (size_t(me.y) < Tags->size() && (me.bstate & (BUTTON1_PRESSED | BUTTON3_PRESSED)))
 		{
 			Tags->Goto(me.y);
 			if (me.bstate & BUTTON3_PRESSED)
 			{
-				size_t pos = Tags->Choice();
+				size_t pos = Tags->choice();
 				SpacePressed();
-				if (pos < Tags->Size()-1)
-					Tags->Scroll(NC::wUp);
+				if (pos < Tags->size()-1)
+					Tags->scroll(NC::wUp);
 			}
 		}
 		else
 			Screen<NC::Window>::MouseButtonPressed(me);
-		Albums->Clear();
-		Songs->Clear();
+		Albums->clear();
+		Songs->clear();
 	}
-	else if (!Albums->Empty() && Albums->hasCoords(me.x, me.y))
+	else if (!Albums->empty() && Albums->hasCoords(me.x, me.y))
 	{
 		if (w != Albums)
 			w == Tags ? NextColumn() : PrevColumn();
-		if (size_t(me.y) < Albums->Size() && (me.bstate & (BUTTON1_PRESSED | BUTTON3_PRESSED)))
+		if (size_t(me.y) < Albums->size() && (me.bstate & (BUTTON1_PRESSED | BUTTON3_PRESSED)))
 		{
 			Albums->Goto(me.y);
 			if (me.bstate & BUTTON3_PRESSED)
 			{
-				size_t pos = Albums->Choice();
+				size_t pos = Albums->choice();
 				SpacePressed();
-				if (pos < Albums->Size()-1)
-					Albums->Scroll(NC::wUp);
+				if (pos < Albums->size()-1)
+					Albums->scroll(NC::wUp);
 			}
 		}
 		else
 			Screen<NC::Window>::MouseButtonPressed(me);
-		Songs->Clear();
+		Songs->clear();
 	}
-	else if (!Songs->Empty() && Songs->hasCoords(me.x, me.y))
+	else if (!Songs->empty() && Songs->hasCoords(me.x, me.y))
 	{
 		if (w != Songs)
 		{
 			NextColumn();
 			NextColumn();
 		}
-		if (size_t(me.y) < Songs->Size() && (me.bstate & (BUTTON1_PRESSED | BUTTON3_PRESSED)))
+		if (size_t(me.y) < Songs->size() && (me.bstate & (BUTTON1_PRESSED | BUTTON3_PRESSED)))
 		{
 			Songs->Goto(me.y);
 			if (me.bstate & BUTTON1_PRESSED)
 			{
-				size_t pos = Songs->Choice();
+				size_t pos = Songs->choice();
 				SpacePressed();
-				if (pos < Songs->Size()-1)
-					Songs->Scroll(NC::wUp);
+				if (pos < Songs->size()-1)
+					Songs->scroll(NC::wUp);
 			}
 			else
 				EnterPressed();
@@ -454,22 +454,22 @@ void MediaLibrary::applyFilter(const std::string &filter)
 {
 	if (w == Tags)
 	{
-		Tags->ShowAll();
+		Tags->showAll();
 		auto rx = RegexFilter<std::string>(filter, Config.regex_type, TagEntryMatcher);
-		Tags->filter(Tags->Begin(), Tags->End(), rx);
+		Tags->filter(Tags->begin(), Tags->end(), rx);
 	}
 	else if (w == Albums)
 	{
-		Albums->ShowAll();
+		Albums->showAll();
 		auto fun = std::bind(AlbumEntryMatcher, _1, _2, true);
 		auto rx = RegexItemFilter<SearchConstraints>(filter, Config.regex_type, fun);
-		Albums->filter(Albums->Begin(), Albums->End(), rx);
+		Albums->filter(Albums->begin(), Albums->end(), rx);
 	}
 	else if (w == Songs)
 	{
-		Songs->ShowAll();
+		Songs->showAll();
 		auto rx = RegexFilter<MPD::Song>(filter, Config.regex_type, SongEntryMatcher);
-		Songs->filter(Songs->Begin(), Songs->End(), rx);
+		Songs->filter(Songs->begin(), Songs->end(), rx);
 	}
 }
 
@@ -481,18 +481,18 @@ bool MediaLibrary::search(const std::string &constraint)
 	if (w == Tags)
 	{
 		auto rx = RegexFilter<std::string>(constraint, Config.regex_type, TagEntryMatcher);
-		result = Tags->search(Tags->Begin(), Tags->End(), rx);
+		result = Tags->search(Tags->begin(), Tags->end(), rx);
 	}
 	else if (w == Albums)
 	{
 		auto fun = std::bind(AlbumEntryMatcher, _1, _2, false);
 		auto rx = RegexItemFilter<SearchConstraints>(constraint, Config.regex_type, fun);
-		result = Albums->search(Albums->Begin(), Albums->End(), rx);
+		result = Albums->search(Albums->begin(), Albums->end(), rx);
 	}
 	else if (w == Songs)
 	{
 		auto rx = RegexFilter<MPD::Song>(constraint, Config.regex_type, SongEntryMatcher);
-		result = Songs->search(Songs->Begin(), Songs->End(), rx);
+		result = Songs->search(Songs->begin(), Songs->end(), rx);
 	}
 	return result;
 }
@@ -500,21 +500,21 @@ bool MediaLibrary::search(const std::string &constraint)
 void MediaLibrary::nextFound(bool wrap)
 {
 	if (w == Tags)
-		Tags->NextFound(wrap);
+		Tags->nextFound(wrap);
 	else if (w == Albums)
-		Albums->NextFound(wrap);
+		Albums->nextFound(wrap);
 	else if (w == Songs)
-		Songs->NextFound(wrap);
+		Songs->nextFound(wrap);
 }
 
 void MediaLibrary::prevFound(bool wrap)
 {
 	if (w == Tags)
-		Tags->PrevFound(wrap);
+		Tags->prevFound(wrap);
 	else if (w == Albums)
-		Albums->PrevFound(wrap);
+		Albums->prevFound(wrap);
 	else if (w == Songs)
-		Songs->PrevFound(wrap);
+		Songs->prevFound(wrap);
 }
 
 /***********************************************************************/
@@ -537,17 +537,17 @@ bool MediaLibrary::allowsSelection()
 void MediaLibrary::reverseSelection()
 {
 	if (w == Tags)
-		reverseSelectionHelper(Tags->Begin(), Tags->End());
+		reverseSelectionHelper(Tags->begin(), Tags->end());
 	else if (w == Albums)
 	{
 		// omit "All tracks"
-		if (Albums->Size() > 1)
-			reverseSelectionHelper(Albums->Begin(), Albums->End()-2);
+		if (Albums->size() > 1)
+			reverseSelectionHelper(Albums->begin(), Albums->end()-2);
 		else
-			reverseSelectionHelper(Albums->Begin(), Albums->End());
+			reverseSelectionHelper(Albums->begin(), Albums->end());
 	}
 	else if (w == Songs)
-		reverseSelectionHelper(Songs->Begin(), Songs->End());
+		reverseSelectionHelper(Songs->begin(), Songs->end());
 }
 
 MPD::SongList MediaLibrary::getSelectedSongs()
@@ -562,16 +562,16 @@ MPD::SongList MediaLibrary::getSelectedSongs()
 			std::sort(songs.begin(), songs.end(), SortAllTracks);
 			result.insert(result.end(), songs.begin(), songs.end());
 		};
-		for (auto it = Tags->Begin(); it != Tags->End(); ++it)
+		for (auto it = Tags->begin(); it != Tags->end(); ++it)
 			if (it->isSelected())
 				tag_handler(it->value());
 		// if no item is selected, add current one
-		if (result.empty() && !Tags->Empty())
-			tag_handler(Tags->Current().value());
+		if (result.empty() && !Tags->empty())
+			tag_handler(Tags->current().value());
 	}
 	else if (w == Albums)
 	{
-		for (auto it = Albums->Begin(); it != Albums->End() && !it->isSeparator(); ++it)
+		for (auto it = Albums->begin(); it != Albums->end() && !it->isSeparator(); ++it)
 		{
 			if (it->isSelected())
 			{
@@ -580,7 +580,7 @@ MPD::SongList MediaLibrary::getSelectedSongs()
 				if (hasTwoColumns)
 					Mpd.AddSearch(Config.media_lib_primary_tag, sc.PrimaryTag);
 				else
-					Mpd.AddSearch(Config.media_lib_primary_tag, Tags->Current().value());
+					Mpd.AddSearch(Config.media_lib_primary_tag, Tags->current().value());
 				Mpd.AddSearch(MPD_TAG_ALBUM, sc.Album);
 				Mpd.AddSearch(MPD_TAG_DATE, sc.Date);
 				auto songs = Mpd.CommitSearchSongs();
@@ -589,21 +589,21 @@ MPD::SongList MediaLibrary::getSelectedSongs()
 			}
 		}
 		// if no item is selected, add songs from right column
-		if (result.empty() && !Albums->Empty())
+		if (result.empty() && !Albums->empty())
 		{
 			withUnfilteredMenu(*Songs, [this, &result]() {
-				result.insert(result.end(), Songs->BeginV(), Songs->EndV());
+				result.insert(result.end(), Songs->beginV(), Songs->endV());
 			});
 		}
 	}
 	else if (w == Songs)
 	{
-		for (auto it = Songs->Begin(); it != Songs->End(); ++it)
+		for (auto it = Songs->begin(); it != Songs->end(); ++it)
 			if (it->isSelected())
 				result.push_back(it->value());
 		// if no item is selected, add current one
-		if (result.empty() && !Songs->Empty())
-			result.push_back(Songs->Current().value());
+		if (result.empty() && !Songs->empty())
+			result.push_back(Songs->current().value());
 	}
 	return result;
 }
@@ -623,12 +623,12 @@ bool MediaLibrary::isNextColumnAvailable()
 	assert(!hasTwoColumns || w != Tags);
 	if (w == Tags)
 	{
-		if (!Albums->ReallyEmpty() && !Songs->ReallyEmpty())
+		if (!Albums->reallyEmpty() && !Songs->reallyEmpty())
 			return true;
 	}
 	else if (w == Albums)
 	{
-		if (!Songs->ReallyEmpty())
+		if (!Songs->reallyEmpty())
 			return true;
 	}
 	return false;
@@ -638,17 +638,17 @@ void MediaLibrary::NextColumn()
 {
 	if (w == Tags)
 	{
-		Tags->HighlightColor(Config.main_highlight_color);
-		w->Refresh();
+		Tags->setHighlightColor(Config.main_highlight_color);
+		w->refresh();
 		w = Albums;
-		Albums->HighlightColor(Config.active_column_color);
+		Albums->setHighlightColor(Config.active_column_color);
 	}
 	else if (w == Albums)
 	{
-		Albums->HighlightColor(Config.main_highlight_color);
-		w->Refresh();
+		Albums->setHighlightColor(Config.main_highlight_color);
+		w->refresh();
 		w = Songs;
-		Songs->HighlightColor(Config.active_column_color);
+		Songs->setHighlightColor(Config.active_column_color);
 	}
 }
 
@@ -657,12 +657,12 @@ bool MediaLibrary::isPrevColumnAvailable()
 	assert(!hasTwoColumns || w != Tags);
 	if (w == Songs)
 	{
-		if (!Albums->ReallyEmpty() && (hasTwoColumns || !Tags->ReallyEmpty()))
+		if (!Albums->reallyEmpty() && (hasTwoColumns || !Tags->reallyEmpty()))
 			return true;
 	}
 	else if (w == Albums)
 	{
-		if (!hasTwoColumns && !Tags->ReallyEmpty())
+		if (!hasTwoColumns && !Tags->reallyEmpty())
 			return true;
 	}
 	return false;
@@ -672,17 +672,17 @@ void MediaLibrary::PrevColumn()
 {
 	if (w == Songs)
 	{
-		Songs->HighlightColor(Config.main_highlight_color);
-		w->Refresh();
+		Songs->setHighlightColor(Config.main_highlight_color);
+		w->refresh();
 		w = Albums;
-		Albums->HighlightColor(Config.active_column_color);
+		Albums->setHighlightColor(Config.active_column_color);
 	}
 	else if (w == Albums && !hasTwoColumns)
 	{
-		Albums->HighlightColor(Config.main_highlight_color);
-		w->Refresh();
+		Albums->setHighlightColor(Config.main_highlight_color);
+		w->refresh();
 		w = Tags;
-		Tags->HighlightColor(Config.active_column_color);
+		Tags->setHighlightColor(Config.active_column_color);
 	}
 }
 
@@ -721,108 +721,108 @@ void MediaLibrary::LocateSong(const MPD::Song &s)
 	if (myScreen != this)
 		SwitchTo();
 	Statusbar() << "Jumping to song...";
-	Global::wFooter->Refresh();
+	Global::wFooter->refresh();
 	
 	if (!hasTwoColumns)
 	{
-		Tags->ShowAll();
-		if (Tags->Empty())
+		Tags->showAll();
+		if (Tags->empty())
 			Update();
-		if (primary_tag != Tags->Current().value())
+		if (primary_tag != Tags->current().value())
 		{
-			for (size_t i = 0; i < Tags->Size(); ++i)
+			for (size_t i = 0; i < Tags->size(); ++i)
 			{
 				if (primary_tag == (*Tags)[i].value())
 				{
-					Tags->Highlight(i);
-					Albums->Clear();
-					Songs->Clear();
+					Tags->highlight(i);
+					Albums->clear();
+					Songs->clear();
 					break;
 				}
 			}
 		}
 	}
 	
-	Albums->ShowAll();
-	if (Albums->Empty())
+	Albums->showAll();
+	if (Albums->empty())
 		Update();
 	
 	std::string album = s.getAlbum();
 	std::string date = s.getDate();
-	if ((hasTwoColumns && Albums->Current().value().PrimaryTag != primary_tag)
-	||  album != Albums->Current().value().Album
-	||  date != Albums->Current().value().Date)
+	if ((hasTwoColumns && Albums->current().value().PrimaryTag != primary_tag)
+	||  album != Albums->current().value().Album
+	||  date != Albums->current().value().Date)
 	{
-		for (size_t i = 0; i < Albums->Size(); ++i)
+		for (size_t i = 0; i < Albums->size(); ++i)
 		{
 			if ((!hasTwoColumns || (*Albums)[i].value().PrimaryTag == primary_tag)
 			&&   album == (*Albums)[i].value().Album
 			&&   date == (*Albums)[i].value().Date)
 			{
-				Albums->Highlight(i);
-				Songs->Clear();
+				Albums->highlight(i);
+				Songs->clear();
 				break;
 			}
 		}
 	}
 	
-	Songs->ShowAll();
-	if (Songs->Empty())
+	Songs->showAll();
+	if (Songs->empty())
 		Update();
 	
-	if (s.getHash() != Songs->Current().value().getHash())
+	if (s.getHash() != Songs->current().value().getHash())
 	{
-		for (size_t i = 0; i < Songs->Size(); ++i)
+		for (size_t i = 0; i < Songs->size(); ++i)
 		{
 			if (s.getHash()  == (*Songs)[i].value().getHash())
 			{
-				Songs->Highlight(i);
+				Songs->highlight(i);
 				break;
 			}
 		}
 	}
 	
-	Tags->HighlightColor(Config.main_highlight_color);
-	Albums->HighlightColor(Config.main_highlight_color);
-	Songs->HighlightColor(Config.active_column_color);
+	Tags->setHighlightColor(Config.main_highlight_color);
+	Albums->setHighlightColor(Config.main_highlight_color);
+	Songs->setHighlightColor(Config.active_column_color);
 	w = Songs;
 	Refresh();
 }
 
 void MediaLibrary::AddToPlaylist(bool add_n_play)
 {
-	if (w == Songs && !Songs->Empty())
+	if (w == Songs && !Songs->empty())
 	{
-		bool res = myPlaylist->Add(Songs->Current().value(), Songs->Current().isBold(), add_n_play);
-		Songs->Current().setBold(res);
+		bool res = myPlaylist->Add(Songs->current().value(), Songs->current().isBold(), add_n_play);
+		Songs->current().setBold(res);
 	}
 	else
 	{
 		auto list = getSelectedSongs();
 		if (myPlaylist->Add(list, add_n_play))
 		{
-			if ((!Tags->Empty() && w == Tags)
-			||  (w == Albums && Albums->Current().value().Date == AllTracksMarker))
+			if ((!Tags->empty() && w == Tags)
+			||  (w == Albums && Albums->current().value().Date == AllTracksMarker))
 			{
 				std::string tag_type = tagTypeToString(Config.media_lib_primary_tag);
 				lowercase(tag_type);
-				ShowMessage("Songs with %s = \"%s\" added", tag_type.c_str(), Tags->Current().value().c_str());
+				ShowMessage("Songs with %s = \"%s\" added", tag_type.c_str(), Tags->current().value().c_str());
 			}
 			else if (w == Albums)
-				ShowMessage("Songs from album \"%s\" added", Albums->Current().value().Album.c_str());
+				ShowMessage("Songs from album \"%s\" added", Albums->current().value().Album.c_str());
 		}
 	}
 
 	if (!add_n_play)
 	{
-		w->Scroll(NC::wDown);
+		w->scroll(NC::wDown);
 		if (w == Tags)
 		{
-			Albums->Clear();
-			Songs->Clear();
+			Albums->clear();
+			Songs->clear();
 		}
 		else if (w == Albums)
-			Songs->Clear();
+			Songs->clear();
 	}
 }
 
@@ -876,12 +876,12 @@ bool SongEntryMatcher(const Regex &rx, const MPD::Song &s)
 
 void DisplayAlbums(NC::Menu<SearchConstraints> &menu)
 {
-	menu << AlbumToString(menu.Drawn().value());
+	menu << AlbumToString(menu.drawn().value());
 }
 
 void DisplayPrimaryTags(NC::Menu<std::string> &menu)
 {
-	const std::string &tag = menu.Drawn().value();
+	const std::string &tag = menu.drawn().value();
 	if (tag.empty())
 		menu << Config.empty_tag;
 	else

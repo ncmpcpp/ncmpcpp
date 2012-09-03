@@ -190,35 +190,35 @@ template <typename T> struct Menu : public Window
 	
 	/// Reserves the size for internal container (this just calls std::vector::reserve())
 	/// @param size requested size
-	void Reserve(size_t size);
+	void reserve(size_t size);
 	
 	/// Resizes the list to given size (adequate to std::vector::resize())
 	/// @param size requested size
-	void ResizeList(size_t size);
+	void resizeList(size_t size);
 	
 	/// Adds new option to list
 	/// @param item object that has to be added
 	/// @param is_bold defines the initial state of bold attribute
 	/// @param is_static defines the initial state of static attribute
-	void AddItem(const T &item, bool is_bold = 0, bool is_static = 0);
+	void addItem(const T &item, bool is_bold = 0, bool is_static = 0);
 	
 	/// Adds separator to list
-	void AddSeparator();
+	void addSeparator();
 	
 	/// Inserts new option to list at given position
 	/// @param pos initial position of inserted item
 	/// @param item object that has to be inserted
 	/// @param is_bold defines the initial state of bold attribute
 	/// @param is_static defines the initial state of static attribute
-	void InsertItem(size_t pos, const T &Item, bool is_bold = 0, bool is_static = 0);
+	void insertItem(size_t pos, const T &Item, bool is_bold = 0, bool is_static = 0);
 	
 	/// Inserts separator to list at given position
 	/// @param pos initial position of inserted separator
-	void InsertSeparator(size_t pos);
+	void insertSeparator(size_t pos);
 	
 	/// Deletes item from given position
 	/// @param pos given position of item to be deleted
-	void DeleteItem(size_t pos);
+	void deleteItem(size_t pos);
 	
 	/// Swaps the content of two items
 	/// @param one position of first item
@@ -236,14 +236,14 @@ template <typename T> struct Menu : public Window
 	
 	/// Gets positions of items that are selected
 	/// @param v vector to be filled with selected positions numbers
-	void GetSelected(std::vector<size_t> &v) const;
+	void getSelected(std::vector<size_t> &v) const;
 	
 	/// Highlights given position
 	/// @param pos position to be highlighted
-	void Highlight(size_t pos);
+	void highlight(size_t pos);
 	
 	/// @return currently highlighted position
-	size_t Choice() const;
+	size_t choice() const;
 	
 	void filter(ConstIterator first, ConstIterator last, const FilterFunction &f);
 	
@@ -258,12 +258,12 @@ template <typename T> struct Menu : public Window
 	/// Moves current position in the list to the next found one
 	/// @param wrap if true, this function will go to the first
 	/// found pos after the last one, otherwise it'll do nothing.
-	virtual void NextFound(bool wrap);
+	void nextFound(bool wrap);
 	
 	/// Moves current position in the list to the previous found one
 	/// @param wrap if true, this function will go to the last
 	/// found pos after the first one, otherwise it'll do nothing.
-	virtual void PrevFound(bool wrap);
+	void prevFound(bool wrap);
 	
 	/// @return const reference to currently used filter function
 	const FilterFunction &getFilter() { return m_filter; }
@@ -272,131 +272,131 @@ template <typename T> struct Menu : public Window
 	bool isFiltered() { return m_options_ptr == &m_filtered_options; }
 	
 	/// Turns off filtering
-	void ShowAll() { m_options_ptr = &m_options; }
+	void showAll() { m_options_ptr = &m_options; }
 	
 	/// Turns on filtering
-	void ShowFiltered() { m_options_ptr = &m_filtered_options; }
+	void showFiltered() { m_options_ptr = &m_filtered_options; }
 	
 	/// Refreshes the menu window
 	/// @see Window::Refresh()
-	virtual void Refresh();
+	virtual void refresh();
 	
 	/// Scrolls by given amount of lines
 	/// @param where indicated where exactly one wants to go
 	/// @see Window::Scroll()
-	virtual void Scroll(Where where);
+	virtual void scroll(Where where);
 	
 	/// Cleares all options, used filters etc. It doesn't reset highlighted position though.
-	/// @see Reset()
-	virtual void Clear();
+	/// @see reset()
+	virtual void clear();
 	
 	/// Sets highlighted position to 0
-	void Reset();
+	void reset();
 	
 	/// Sets prefix, that is put before each selected item to indicate its selection
 	/// Note that the passed variable is not deleted along with menu object.
 	/// @param b pointer to buffer that contains the prefix
-	void SetSelectPrefix(const Buffer &b) { m_selected_prefix = b; }
+	void setSelectedPrefix(const Buffer &b) { m_selected_prefix = b; }
 	
 	/// Sets suffix, that is put after each selected item to indicate its selection
 	/// Note that the passed variable is not deleted along with menu object.
 	/// @param b pointer to buffer that contains the suffix
-	void SetSelectSuffix(const Buffer &b) { m_selected_suffix = b; }
+	void setSelectedSuffix(const Buffer &b) { m_selected_suffix = b; }
 	
 	/// Sets custom color of highlighted position
 	/// @param col custom color
-	void HighlightColor(Color color) { m_highlight_color = color; }
+	void setHighlightColor(Color color) { m_highlight_color = color; }
 	
 	/// @return state of highlighting
 	bool isHighlighted() { return m_highlight_enabled; }
 	
 	/// Turns on/off highlighting
 	/// @param state state of hihglighting
-	void Highlighting(bool state) { m_highlight_enabled = state; }
+	void setHighlighting(bool state) { m_highlight_enabled = state; }
 	
 	/// Turns on/off cyclic scrolling
 	/// @param state state of cyclic scrolling
-	void CyclicScrolling(bool state) { m_cyclic_scroll_enabled = state; }
+	void cyclicScrolling(bool state) { m_cyclic_scroll_enabled = state; }
 	
 	/// Turns on/off centered cursor
 	/// @param state state of centered cursor
-	void CenteredCursor(bool state) { m_autocenter_cursor = state; }
+	void centeredCursor(bool state) { m_autocenter_cursor = state; }
 	
 	/// Checks if list is empty
 	/// @return true if list is empty, false otherwise
-	/// @see ReallyEmpty()
-	virtual bool Empty() const { return m_options_ptr->empty(); }
+	/// @see reallyEmpty()
+	bool empty() const { return m_options_ptr->empty(); }
 	
 	/// Checks if list is really empty since Empty() may not
 	/// be accurate if filter is set)
 	/// @return true if list is empty, false otherwise
 	/// @see Empty()
-	virtual bool ReallyEmpty() const { return m_options.empty(); }
+	bool reallyEmpty() const { return m_options.empty(); }
 	
 	/// @return size of the list
-	virtual size_t Size() const;
+	size_t size() const { return m_options_ptr->size(); }
 	
 	/// @return currently drawn item. The result is defined only within
 	/// drawing function that is called by Refresh()
 	/// @see Refresh()
-	const Item &Drawn() const { return *(*m_options_ptr)[m_drawn_position]; }
+	const Item &drawn() const { return *(*m_options_ptr)[m_drawn_position]; }
 	
 	/// @return position of currently drawn item. The result is defined
 	/// only within drawing function that is called by Refresh()
 	/// @see Refresh()
-	size_t DrawnPosition() const { return m_drawn_position; }
+	size_t drawnPosition() const { return m_drawn_position; }
 	
 	/// @return reference to last item on the list
 	/// @throw List::InvalidItem if requested item is separator
-	Menu<T>::Item &Back();
+	Menu<T>::Item &back() { return *m_options_ptr->back(); }
 	
 	/// @return const reference to last item on the list
 	/// @throw List::InvalidItem if requested item is separator
-	const Menu<T>::Item &Back() const;
+	const Menu<T>::Item &back() const { return *m_options_ptr->back(); }
 	
 	/// @return reference to curently highlighted object
-	Menu<T>::Item &Current();
+	Menu<T>::Item &current() { return *(*m_options_ptr)[m_highlight]; }
 	
 	/// @return const reference to curently highlighted object
-	const Menu<T>::Item &Current() const;
+	const Menu<T>::Item &current() const { return *(*m_options_ptr)[m_highlight]; }
 	
 	/// @param pos requested position
 	/// @return reference to item at given position
 	/// @throw std::out_of_range if given position is out of range
-	Menu<T>::Item &at(size_t pos);
+	Menu<T>::Item &at(size_t pos) { return *m_options_ptr->at(pos); }
 	
 	/// @param pos requested position
 	/// @return const reference to item at given position
 	/// @throw std::out_of_range if given position is out of range
-	const Menu<T>::Item &at(size_t pos) const;
+	const Menu<T>::Item &at(size_t pos) const { return *m_options_ptr->at(pos); }
 	
 	/// @param pos requested position
 	/// @return const reference to item at given position
-	const Menu<T>::Item &operator[](size_t pos) const;
+	const Menu<T>::Item &operator[](size_t pos) const  { return *(*m_options_ptr)[pos]; }
 	
 	/// @param pos requested position
 	/// @return const reference to item at given position
-	Menu<T>::Item &operator[](size_t pos);
+	Menu<T>::Item &operator[](size_t pos) { return *(*m_options_ptr)[pos]; }
 	
-	Iterator Begin() { return Iterator(m_options_ptr->begin()); }
-	ConstIterator Begin() const { return ConstIterator(m_options_ptr->begin()); }
-	Iterator End() { return Iterator(m_options_ptr->end()); }
-	ConstIterator End() const { return ConstIterator(m_options_ptr->end()); }
+	Iterator begin() { return Iterator(m_options_ptr->begin()); }
+	ConstIterator begin() const { return ConstIterator(m_options_ptr->begin()); }
+	Iterator end() { return Iterator(m_options_ptr->end()); }
+	ConstIterator end() const { return ConstIterator(m_options_ptr->end()); }
 	
-	ReverseIterator Rbegin() { return ReverseIterator(End()); }
-	ConstReverseIterator Rbegin() const { return ConstReverseIterator(End()); }
-	ReverseIterator Rend() { return ReverseIterator(Begin()); }
-	ConstReverseIterator Rend() const { return ConstReverseIterator(Begin()); }
+	ReverseIterator rbegin() { return ReverseIterator(end()); }
+	ConstReverseIterator rbegin() const { return ConstReverseIterator(end()); }
+	ReverseIterator rend() { return ReverseIterator(begin()); }
+	ConstReverseIterator rend() const { return ConstReverseIterator(begin()); }
 	
-	ValueIterator BeginV() { return ValueIterator(m_options_ptr->begin()); }
-	ConstValueIterator BeginV() const { return ConstValueIterator(m_options_ptr->begin()); }
-	ValueIterator EndV() { return ValueIterator(m_options_ptr->end()); }
-	ConstValueIterator EndV() const { return ConstValueIterator(m_options_ptr->end()); }
+	ValueIterator beginV() { return ValueIterator(m_options_ptr->begin()); }
+	ConstValueIterator beginV() const { return ConstValueIterator(m_options_ptr->begin()); }
+	ValueIterator endV() { return ValueIterator(m_options_ptr->end()); }
+	ConstValueIterator endV() const { return ConstValueIterator(m_options_ptr->end()); }
 	
-	ReverseValueIterator RbeginV() { return ReverseValueIterator(EndV()); }
-	ConstReverseIterator RbeginV() const { return ConstReverseValueIterator(EndV()); }
-	ReverseValueIterator RendV() { return ReverseValueIterator(BeginV()); }
-	ConstReverseValueIterator RendV() const { return ConstReverseValueIterator(BeginV()); }
+	ReverseValueIterator rbeginV() { return ReverseValueIterator(endV()); }
+	ConstReverseIterator rbeginV() const { return ConstReverseValueIterator(endV()); }
+	ReverseValueIterator rendV() { return ReverseValueIterator(beginV()); }
+	ConstReverseValueIterator rendV() const { return ConstReverseValueIterator(beginV()); }
 	
 private:
 	bool isHighlightable(size_t pos)
@@ -442,7 +442,7 @@ template <typename T> Menu<T>::Menu(size_t startx,
 	m_options_ptr(&m_options),
 	m_beginning(0),
 	m_highlight(0),
-	m_highlight_color(itsBaseColor),
+	m_highlight_color(m_base_color),
 	m_highlight_enabled(true),
 	m_cyclic_scroll_enabled(false),
 	m_autocenter_cursor(false)
@@ -455,12 +455,12 @@ template <typename T> Menu<T>::~Menu()
 		delete *it;
 }
 
-template <typename T> void Menu<T>::Reserve(size_t size)
+template <typename T> void Menu<T>::reserve(size_t size)
 {
 	m_options.reserve(size);
 }
 
-template <typename T> void Menu<T>::ResizeList(size_t size)
+template <typename T> void Menu<T>::resizeList(size_t size)
 {
 	if (size > m_options.size())
 	{
@@ -477,27 +477,27 @@ template <typename T> void Menu<T>::ResizeList(size_t size)
 	}
 }
 
-template <typename T> void Menu<T>::AddItem(const T &item, bool is_bold, bool is_inactive)
+template <typename T> void Menu<T>::addItem(const T &item, bool is_bold, bool is_inactive)
 {
 	m_options.push_back(new Item(item, is_bold, is_inactive));
 }
 
-template <typename T> void Menu<T>::AddSeparator()
+template <typename T> void Menu<T>::addSeparator()
 {
 	m_options.push_back(Item::mkSeparator());
 }
 
-template <typename T> void Menu<T>::InsertItem(size_t pos, const T &item, bool is_bold, bool is_inactive)
+template <typename T> void Menu<T>::insertItem(size_t pos, const T &item, bool is_bold, bool is_inactive)
 {
 	m_options.insert(m_options.begin()+pos, new Item(item, is_bold, is_inactive));
 }
 
-template <typename T> void Menu<T>::InsertSeparator(size_t pos)
+template <typename T> void Menu<T>::insertSeparator(size_t pos)
 {
 	m_options.insert(m_options.begin()+pos, Item::mkSeparator());
 }
 
-template <typename T> void Menu<T>::DeleteItem(size_t pos)
+template <typename T> void Menu<T>::deleteItem(size_t pos)
 {
 	assert(m_options_ptr != &m_filtered_options);
 	assert(pos < m_options.size());
@@ -518,44 +518,44 @@ template <typename T> bool Menu<T>::Goto(size_t y)
 	return true;
 }
 
-template <typename T> void Menu<T>::Refresh()
+template <typename T> void Menu<T>::refresh()
 {
 	if (m_options_ptr->empty())
 	{
-		Window::Clear();
-		Window::Refresh();
+		Window::clear();
+		Window::refresh();
 		return;
 	}
 	
-	size_t max_beginning = m_options_ptr->size() < itsHeight ? 0 : m_options_ptr->size()-itsHeight;
+	size_t max_beginning = m_options_ptr->size() < m_height ? 0 : m_options_ptr->size()-m_height;
 	m_beginning = std::min(m_beginning, max_beginning);
 	
 	// if highlighted position is off the screen, make it visible
-	m_highlight = std::min(m_highlight, m_beginning+itsHeight-1);
+	m_highlight = std::min(m_highlight, m_beginning+m_height-1);
 	// if highlighted position is invalid, correct it
 	m_highlight = std::min(m_highlight, m_options_ptr->size()-1);
 	
 	if (!isHighlightable(m_highlight))
 	{
-		Scroll(wUp);
+		scroll(wUp);
 		if (!isHighlightable(m_highlight))
-			Scroll(wDown);
+			scroll(wDown);
 	}
 	
 	size_t line = 0;
 	m_drawn_position = m_beginning;
-	for (size_t &i = m_drawn_position; i < m_beginning+itsHeight; ++i, ++line)
+	for (size_t &i = m_drawn_position; i < m_beginning+m_height; ++i, ++line)
 	{
-		GotoXY(0, line);
+		goToXY(0, line);
 		if (i >= m_options_ptr->size())
 		{
-			for (; line < itsHeight; ++line)
-				mvwhline(itsWindow, line, 0, KEY_SPACE, itsWidth);
+			for (; line < m_height; ++line)
+				mvwhline(m_window, line, 0, KEY_SPACE, m_width);
 			break;
 		}
 		if ((*m_options_ptr)[i]->isSeparator())
 		{
-			mvwhline(itsWindow, line, 0, 0, itsWidth);
+			mvwhline(m_window, line, 0, 0, m_width);
 			continue;
 		}
 		if ((*m_options_ptr)[i]->isBold())
@@ -565,7 +565,7 @@ template <typename T> void Menu<T>::Refresh()
 			*this << fmtReverse;
 			*this << m_highlight_color;
 		}
-		mvwhline(itsWindow, line, 0, KEY_SPACE, itsWidth);
+		mvwhline(m_window, line, 0, KEY_SPACE, m_width);
 		if ((*m_options_ptr)[i]->isSelected())
 			*this << m_selected_prefix;
 		if (m_item_displayer)
@@ -580,16 +580,16 @@ template <typename T> void Menu<T>::Refresh()
 		if ((*m_options_ptr)[i]->isBold())
 			*this << fmtBoldEnd;
 	}
-	Window::Refresh();
+	Window::refresh();
 }
 
-template <typename T> void Menu<T>::Scroll(Where where)
+template <typename T> void Menu<T>::scroll(Where where)
 {
 	if (m_options_ptr->empty())
 		return;
 	size_t max_highlight = m_options_ptr->size()-1;
-	size_t max_beginning = m_options_ptr->size() < itsHeight ? 0 : m_options_ptr->size()-itsHeight;
-	size_t max_visible_highlight = m_beginning+itsHeight-1;
+	size_t max_beginning = m_options_ptr->size() < m_height ? 0 : m_options_ptr->size()-m_height;
+	size_t max_visible_highlight = m_beginning+m_height-1;
 	switch (where)
 	{
 		case wUp:
@@ -599,13 +599,13 @@ template <typename T> void Menu<T>::Scroll(Where where)
 			if (m_highlight == 0)
 			{
 				if (m_cyclic_scroll_enabled)
-					return Scroll(wEnd);
+					return scroll(wEnd);
 				break;
 			}
 			else
 				--m_highlight;
 			if (!isHighlightable(m_highlight))
-				Scroll(m_highlight == 0 && !m_cyclic_scroll_enabled ? wDown : wUp);
+				scroll(m_highlight == 0 && !m_cyclic_scroll_enabled ? wDown : wUp);
 			break;
 		}
 		case wDown:
@@ -615,41 +615,41 @@ template <typename T> void Menu<T>::Scroll(Where where)
 			if (m_highlight == max_highlight)
 			{
 				if (m_cyclic_scroll_enabled)
-					return Scroll(wHome);
+					return scroll(wHome);
 				break;
 			}
 			else
 				++m_highlight;
 			if (!isHighlightable(m_highlight))
-				Scroll(m_highlight == max_highlight && !m_cyclic_scroll_enabled ? wUp : wDown);
+				scroll(m_highlight == max_highlight && !m_cyclic_scroll_enabled ? wUp : wDown);
 			break;
 		}
 		case wPageUp:
 		{
 			if (m_cyclic_scroll_enabled && m_highlight == 0)
-				return Scroll(wEnd);
-			if (m_highlight < itsHeight)
+				return scroll(wEnd);
+			if (m_highlight < m_height)
 				m_highlight = 0;
 			else
-				m_highlight -= itsHeight;
-			if (m_beginning < itsHeight)
+				m_highlight -= m_height;
+			if (m_beginning < m_height)
 				m_beginning = 0;
 			else
-				m_beginning -= itsHeight;
+				m_beginning -= m_height;
 			if (!isHighlightable(m_highlight))
-				Scroll(m_highlight == 0 && !m_cyclic_scroll_enabled ? wDown : wUp);
+				scroll(m_highlight == 0 && !m_cyclic_scroll_enabled ? wDown : wUp);
 			break;
 		}
 		case wPageDown:
 		{
 			if (m_cyclic_scroll_enabled && m_highlight == max_highlight)
-				return Scroll(wHome);
-			m_highlight += itsHeight;
-			m_beginning += itsHeight;
+				return scroll(wHome);
+			m_highlight += m_height;
+			m_beginning += m_height;
 			m_beginning = std::min(m_beginning, max_beginning);
 			m_highlight = std::min(m_highlight, max_highlight);
 			if (!isHighlightable(m_highlight))
-				Scroll(m_highlight == max_highlight && !m_cyclic_scroll_enabled ? wUp : wDown);
+				scroll(m_highlight == max_highlight && !m_cyclic_scroll_enabled ? wUp : wDown);
 			break;
 		}
 		case wHome:
@@ -657,7 +657,7 @@ template <typename T> void Menu<T>::Scroll(Where where)
 			m_highlight = 0;
 			m_beginning = 0;
 			if (!isHighlightable(m_highlight))
-				Scroll(wDown);
+				scroll(wDown);
 			break;
 		}
 		case wEnd:
@@ -665,21 +665,21 @@ template <typename T> void Menu<T>::Scroll(Where where)
 			m_highlight = max_highlight;
 			m_beginning = max_beginning;
 			if (!isHighlightable(m_highlight))
-				Scroll(wUp);
+				scroll(wUp);
 			break;
 		}
 	}
 	if (m_autocenter_cursor)
-		Highlight(m_highlight);
+		highlight(m_highlight);
 }
 
-template <typename T> void Menu<T>::Reset()
+template <typename T> void Menu<T>::reset()
 {
 	m_highlight = 0;
 	m_beginning = 0;
 }
 
-template <typename T> void Menu<T>::Clear()
+template <typename T> void Menu<T>::clear()
 {
 	for (auto it = m_options.begin(); it != m_options.end(); ++it)
 		delete *it;
@@ -691,37 +691,32 @@ template <typename T> void Menu<T>::Clear()
 
 template <typename T> bool Menu<T>::hasSelected() const
 {
-	for (auto it = m_options_ptr->begin(); it != m_options_ptr->end(); ++it)
-		if ((*it)->isSelected())
+	for (auto it = begin(); it != end(); ++it)
+		if (it->isSelected())
 			return true;
 	return false;
 }
 
-template <typename T> void Menu<T>::GetSelected(std::vector<size_t> &v) const
+template <typename T> void Menu<T>::getSelected(std::vector<size_t> &v) const
 {
 	for (size_t i = 0; i < m_options_ptr->size(); ++i)
 		if ((*m_options_ptr)[i]->isSelected())
 			v.push_back(i);
 }
 
-template <typename T> void Menu<T>::Highlight(size_t pos)
+template <typename T> void Menu<T>::highlight(size_t pos)
 {
 	m_highlight = pos;
-	size_t half_height = itsHeight/2;
+	size_t half_height = m_height/2;
 	if (pos < half_height)
 		m_beginning = 0;
 	else
 		m_beginning = pos-half_height;
 }
 
-template <typename T> size_t Menu<T>::Size() const
+template <typename T> size_t Menu<T>::choice() const
 {
-	return m_options_ptr->size();
-}
-
-template <typename T> size_t Menu<T>::Choice() const
-{
-	assert(!Empty());
+	assert(!empty());
 	return m_highlight;
 }
 
@@ -735,7 +730,7 @@ void Menu<T>::filter(ConstIterator first, ConstIterator last, const FilterFuncti
 	{
 		if (m_filter(*it))
 		{
-			size_t pos = it-Begin();
+			size_t pos = it-begin();
 			m_filtered_positions.push_back(pos);
 			m_filtered_options.push_back(*it.base());
 		}
@@ -759,7 +754,7 @@ bool Menu<T>::search(ConstIterator first, ConstIterator last, const FilterFuncti
 	{
 		if (m_searcher(*it))
 		{
-			size_t pos = it-Begin();
+			size_t pos = it-begin();
 			m_found_positions.insert(pos);
 		}
 	}
@@ -771,68 +766,26 @@ template <typename T> void Menu<T>::clearSearchResults()
 	m_found_positions.clear();
 }
 
-template <typename T> void Menu<T>::NextFound(bool wrap)
+template <typename T> void Menu<T>::nextFound(bool wrap)
 {
 	if (m_found_positions.empty())
 		return;
 	auto next = m_found_positions.upper_bound(m_highlight);
 	if (next != m_found_positions.end())
-		Highlight(*next);
+		highlight(*next);
 	else if (wrap)
-		Highlight(*m_found_positions.begin());
+		highlight(*m_found_positions.begin());
 }
 
-template <typename T> void Menu<T>::PrevFound(bool wrap)
+template <typename T> void Menu<T>::prevFound(bool wrap)
 {
 	if (m_found_positions.empty())
 		return;
 	auto prev = m_found_positions.lower_bound(m_highlight);
 	if (prev != m_found_positions.begin())
-		Highlight(*--prev);
+		highlight(*--prev);
 	else if (wrap)
-		Highlight(*m_found_positions.rbegin());
-}
-
-template <typename T> typename Menu<T>::Item &Menu<T>::Back()
-{
-	return *m_options_ptr->back();
-}
-
-template <typename T> const typename Menu<T>::Item &Menu<T>::Back() const
-{
-	return *m_options_ptr->back();
-}
-
-template <typename T> typename Menu<T>::Item &Menu<T>::Current()
-{
-	return *(*m_options_ptr)[m_highlight];
-}
-
-template <typename T> const typename Menu<T>::Item &Menu<T>::Current() const
-{
-	return *(*m_options_ptr)[m_highlight];
-}
-
-template <typename T> typename Menu<T>::Item &Menu<T>::at(size_t pos)
-{
-	return *m_options_ptr->at(pos);
-}
-
-template <typename T> const typename Menu<T>::Item &Menu<T>::at(size_t pos) const
-{
-	return *m_options_ptr->at(pos);
-}
-
-template <typename T> const typename Menu<T>::Item &Menu<T>::operator[](size_t pos) const
-{
-	assert(m_options_ptr->size() > pos);
-	return *(*m_options_ptr)[pos];
-}
-
-template <typename T> typename Menu<T>::Item &Menu<T>::operator[](size_t pos)
-{
-	assert(m_options_ptr->size() > pos);
-	return *(*m_options_ptr)[pos];
+		highlight(*m_found_positions.rbegin());
 }
 
 }

@@ -59,8 +59,8 @@ void SongInfo::Resize()
 {
 	size_t x_offset, width;
 	GetWindowResizeParams(x_offset, width);
-	w->Resize(width, MainHeight);
-	w->MoveTo(x_offset, MainStartY);
+	w->resize(width, MainHeight);
+	w->moveTo(x_offset, MainStartY);
 	hasToBeResized = 0;
 }
 
@@ -96,10 +96,10 @@ void SongInfo::SwitchTo()
 	
 	Global::RedrawHeader = true;
 	
-	w->Clear();
-	w->Reset();
+	w->clear();
+	w->reset();
 	PrepareSong(*s);
-	w->Flush();
+	w->flush();
 }
 
 void SongInfo::PrepareSong(MPD::Song &s)

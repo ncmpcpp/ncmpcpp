@@ -59,10 +59,10 @@ class ProxySongList
 		Impl(Menu &menu, F f) : m_menu(menu), m_song_getter(f) { }
 		virtual ~Impl() { }
 		
-		virtual bool empty() { return m_menu.Empty(); }
-		virtual size_t size() { return m_menu.Size(); }
-		virtual size_t choice() { return m_menu.Choice(); }
-		virtual void highlight(size_t pos) { m_menu.Highlight(pos); }
+		virtual bool empty() { return m_menu.empty(); }
+		virtual size_t size() { return m_menu.size(); }
+		virtual size_t choice() { return m_menu.choice(); }
+		virtual void highlight(size_t pos) { m_menu.highlight(pos); }
 		
 		virtual bool isSelected(size_t pos) {
 			return m_menu[pos].isSelected();
@@ -77,12 +77,12 @@ class ProxySongList
 		}
 		
 		virtual MPD::Song *currentSong() {
-			if (!m_menu.Empty())
-				return getSong(m_menu.Choice());
+			if (!m_menu.empty())
+				return getSong(m_menu.choice());
 			else
 				return 0;
 		}
-	
+		
 	private:
 		Menu &m_menu;
 		F m_song_getter;

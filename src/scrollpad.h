@@ -28,7 +28,6 @@ namespace NC
 {
 	/// Scrollpad is specialized window that can hold large portion of text and
 	/// supports scrolling if the amount of it is bigger than the window area.
-	///
 	class Scrollpad: public Window
 	{
 		public:
@@ -40,20 +39,17 @@ namespace NC
 			/// @param title title of constructed window
 			/// @param color base color of constructed window
 			/// @param border border of constructed window
-			///
 			Scrollpad(size_t startx, size_t starty, size_t width, size_t height,
 				  const std::string &title, Color color, Border border);
 			
 			/// Copies the scrollpad
 			/// @param s copied scrollpad
-			///
 			Scrollpad(const Scrollpad &s);
 			
 			/// Prints the text stored in internal buffer to window. Note that
 			/// all changes that has been made for text stored in scrollpad won't
 			/// be visible until one invokes this function
-			///
-			void Flush();
+			void flush();
 			
 			/// Searches for given string in text and sets format/color at the
 			/// beginning and end of it using val_b and val_e flags accordingly
@@ -64,52 +60,49 @@ namespace NC
 			/// @param for_each indicates whether function searches through whole text and sets
 			/// given format for all occurences of given string or stops after first occurence
 			/// @return true if at least one occurence of the string was found, false otherwise
-			/// @see basic_buffer::SetFormatting()
-			///
-			bool SetFormatting(short val_b, const std::basic_string<my_char_t> &s,
+			/// @see basic_buffer::setFormatting()
+			bool setFormatting(short val_b, const std::basic_string<my_char_t> &s,
 					   short val_e, bool case_sensitive, bool for_each = 1);
 			
 			/// Removes all format flags and colors from stored text
-			///
-			void ForgetFormatting();
+			void forgetFormatting();
 			
 			/// Removes all format flags and colors that was applied
-			/// by the most recent call to SetFormatting() function
-			/// @see SetFormatting()
-			/// @see basic_buffer::RemoveFormatting()
-			///
-			void RemoveFormatting();
+			/// by the most recent call to setFormatting() function
+			/// @see setFormatting()
+			/// @see basic_buffer::removeFormatting()
+			void removeFormatting();
 			
 			/// @return text stored in internal buffer
 			///
-			std::basic_string<my_char_t> Content() { return itsBuffer.Str(); }
+			const std::basic_string<my_char_t> &content() { return m_buffer.str(); }
 			
 			/// Refreshes the window
 			/// @see Window::Refresh()
 			///
-			virtual void Refresh();
+			virtual void refresh();
 			
 			/// Scrolls by given amount of lines
 			/// @param where indicates where exactly one wants to go
 			/// @see Window::Scroll()
 			///
-			virtual void Scroll(Where where);
+			virtual void scroll(Where where);
 			
 			/// Resizes the window
 			/// @param new_width new window's width
 			/// @param new_height new window's height
 			/// @see Window::Resize()
 			///
-			virtual void Resize(size_t new_width, size_t new_height);
+			virtual void resize(size_t new_width, size_t new_height);
 			
 			/// Cleares the content of scrollpad
-			/// @see Window::Clear()
+			/// @see Window::clear()
 			///
-			virtual void Clear();
+			virtual void clear();
 			
 			/// Sets starting position to the beginning
 			///
-			void Reset();
+			void reset();
 			
 			/// Template function that redirects all data passed
 			/// to the scrollpad window to its internal buffer
@@ -118,7 +111,7 @@ namespace NC
 			///
 			template <typename T> Scrollpad &operator<<(const T &obj)
 			{
-				itsBuffer << obj;
+				m_buffer << obj;
 				return *this;
 			}
 #			ifdef _UTF8
@@ -126,17 +119,17 @@ namespace NC
 #			endif // _UTF8
 			
 		private:
-			basic_buffer<my_char_t> itsBuffer;
+			basic_buffer<my_char_t> m_buffer;
 			
-			int itsBeginning;
+			int m_beginning;
 			
-			bool itsFoundForEach;
-			bool itsFoundCaseSensitive;
-			short itsFoundValueBegin;
-			short itsFoundValueEnd;
-			std::basic_string<my_char_t> itsFoundPattern;
+			bool m_found_for_each;
+			bool m_found_case_sensitive;
+			short m_found_value_begin;
+			short m_found_value_end;
+			std::basic_string<my_char_t> m_found_pattern;
 			
-			size_t itsRealHeight;
+			size_t m_real_height;
 	};
 }
 

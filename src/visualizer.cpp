@@ -81,7 +81,7 @@ void Visualizer::SwitchTo()
 	if (myScreen != this && myScreen->isTabbable())
 		Global::myPrevScreen = myScreen;
 	myScreen = this;
-	w->Clear();
+	w->clear();
 	
 	SetFD();
 	
@@ -89,7 +89,7 @@ void Visualizer::SwitchTo()
 	itsTimer.tv_usec = 0;
 	
 	if (itsFifo >= 0)
-		Global::wFooter->SetTimeout(WindowTimeout);
+		Global::wFooter->setTimeout(WindowTimeout);
 	Global::RedrawHeader = true;
 }
 
@@ -97,8 +97,8 @@ void Visualizer::Resize()
 {
 	size_t x_offset, width;
 	GetWindowResizeParams(x_offset, width);
-	w->Resize(width, MainHeight);
-	w->MoveTo(x_offset, MainStartY);
+	w->resize(width, MainHeight);
+	w->moveTo(x_offset, MainStartY);
 	hasToBeResized = 0;
 }
 
@@ -134,7 +134,7 @@ void Visualizer::Update()
 #	endif // HAVE_FFTW3_H
 		draw = &Visualizer::DrawSoundWave;
 	
-	w->Clear();
+	w->clear();
 	ssize_t samples_read = data/sizeof(int16_t);
 	if (Config.visualizer_in_stereo)
 	{
@@ -150,7 +150,7 @@ void Visualizer::Update()
 	}
 	else
 		(this->*draw)(buf, samples_read, 0, MainHeight);
-	w->Refresh();
+	w->refresh();
 }
 
 void Visualizer::SpacePressed()
@@ -163,10 +163,10 @@ void Visualizer::SpacePressed()
 
 void Visualizer::DrawSoundWave(int16_t *buf, ssize_t samples, size_t y_offset, size_t height)
 {
-	const int samples_per_col = samples/w->GetWidth();
+	const int samples_per_col = samples/w->getWidth();
 	const int half_height = height/2;
 	double prev_point_pos = 0;
-	const size_t win_width = w->GetWidth();
+	const size_t win_width = w->getWidth();
 	for (size_t i = 0; i < win_width; ++i)
 	{
 		double point_pos = 0;
@@ -206,7 +206,7 @@ void Visualizer::DrawFrequencySpectrum(int16_t *buf, ssize_t samples, size_t y_o
 	for (unsigned i = 0; i < itsFFTResults; ++i)
 		itsFreqsMagnitude[i] = sqrt(itsOutput[i][0]*itsOutput[i][0] + itsOutput[i][1]*itsOutput[i][1])/1e5*height/5;
 	
-	const size_t win_width = w->GetWidth();
+	const size_t win_width = w->getWidth();
 	const int freqs_per_col = itsFFTResults/win_width /* cut bandwidth a little to achieve better look */ * 7/10;
 	for (size_t i = 0; i < win_width; ++i)
 	{
@@ -215,7 +215,7 @@ void Visualizer::DrawFrequencySpectrum(int16_t *buf, ssize_t samples, size_t y_o
 			bar_height += itsFreqsMagnitude[i*freqs_per_col+j];
 		bar_height = std::min(bar_height/freqs_per_col, height);
 		const size_t start_y = y_offset > 0 ? y_offset : height-bar_height;
-		const size_t stop_y = std::min(bar_height+start_y, w->GetHeight());
+		const size_t stop_y = std::min(bar_height+start_y, w->getHeight());
 		for (size_t j = start_y; j < stop_y; ++j)
 			*w << NC::XY(i, j) << Config.visualizer_chars[1];
 	}

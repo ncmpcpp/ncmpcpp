@@ -53,8 +53,8 @@ void Lastfm::Resize()
 {
 	size_t x_offset, width;
 	GetWindowResizeParams(x_offset, width);
-	w->Resize(width, MainHeight);
-	w->MoveTo(x_offset, MainStartY);
+	w->resize(width, MainHeight);
+	w->moveTo(x_offset, MainStartY);
 	hasToBeResized = 0;
 }
 
@@ -73,8 +73,8 @@ void Lastfm::Take()
 {
 	assert(isReadyToTake);
 	pthread_join(itsDownloader, 0);
-	w->Flush();
-	w->Refresh();
+	w->flush();
+	w->refresh();
 	isDownloadInProgress = 0;
 	isReadyToTake = 0;
 }
@@ -119,8 +119,8 @@ void Lastfm::Load()
 	
 	SetTitleAndFolder();
 	
-	w->Clear();
-	w->Reset();
+	w->clear();
+	w->reset();
 	
 	std::string artist = itsArgs.find("artist")->second;
 	locale_to_utf(artist);
@@ -159,7 +159,7 @@ void Lastfm::Load()
 		pthread_create(&itsDownloader, 0, DownloadWrapper, this);
 		isDownloadInProgress = 1;
 	}
-	w->Flush();
+	w->flush();
 }
 
 void Lastfm::SetTitleAndFolder()
@@ -185,7 +185,7 @@ void Lastfm::Download()
 	if (result.first)
 	{
 		Save(result.second);
-		w->Clear();
+		w->clear();
 		utf_to_locale(result.second);
 		*w << result.second;
 		itsService->colorizeOutput(*w);

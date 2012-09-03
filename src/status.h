@@ -45,7 +45,7 @@ void DrawProgressbar(unsigned elapsed, unsigned time);
 void ShowMessage(const char *, ...) GNUC_PRINTF(1, 2);
 
 void StatusbarMPDCallback();
-void StatusbarGetStringHelper(const std::wstring &);
+void StatusbargetStringHelper(const std::wstring &);
 void StatusbarApplyFilterImmediately(Filterable *f, const std::wstring &ws);
 
 #endif

@@ -67,7 +67,7 @@ void ServerInfo::SwitchTo()
 		Resize();
 	
 	myScreen = this;
-	w->Window::Clear();
+	//w->Window::clear();
 }
 
 void ServerInfo::Resize()
@@ -75,8 +75,8 @@ void ServerInfo::Resize()
 	SetDimensions();
 	if (itsHeight < 5) // screen too low to display this window
 		return myOldScreen->SwitchTo();
-	w->Resize(itsWidth, itsHeight);
-	w->MoveTo((COLS-itsWidth)/2, (MainHeight-itsHeight)/2+MainStartY);
+	w->resize(itsWidth, itsHeight);
+	w->moveTo((COLS-itsWidth)/2, (MainHeight-itsHeight)/2+MainStartY);
 	if (myOldScreen && myOldScreen->hasToBeResized) // resize background window
 	{
 		myOldScreen->Resize();
@@ -98,7 +98,7 @@ void ServerInfo::Update()
 	gettimeofday(&past, 0);
 	
 	Mpd.UpdateStats();
-	w->Clear();
+	w->clear();
 	
 	*w << NC::fmtBold << U("Version: ") << NC::fmtBoldEnd << U("0.") << Mpd.Version() << U(".*\n");
 	*w << NC::fmtBold << U("Uptime: ") << NC::fmtBoldEnd;
@@ -123,8 +123,8 @@ void ServerInfo::Update()
 	for (auto it = itsTagTypes.begin(); it != itsTagTypes.end(); ++it)
 		*w << (it != itsTagTypes.begin() ? U(", ") : U(" ")) << *it;
 	
-	w->Flush();
-	w->Refresh();
+	w->flush();
+	w->refresh();
 }
 
 void ServerInfo::SetDimensions()

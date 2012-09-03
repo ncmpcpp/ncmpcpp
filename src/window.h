@@ -91,6 +91,9 @@
 #undef KEY_ENTER
 #define KEY_ENTER 10
 
+// undefine scroll macro as it collides with Window::scroll
+#undef scroll
+
 #ifndef USE_PDCURSES
 // NOTICE: redefine BUTTON2_PRESSED as it doesn't always work, I noticed
 // that it sometimes returns 134217728 (2^27) instead of expected mask, so the
@@ -118,15 +121,12 @@
 
 /// NC namespace provides set of easy-to-use
 /// wrappers over original curses library
-///
 namespace NC {//
 
 /// Colors used by NCurses
-///
 enum Color { clDefault, clBlack, clRed, clGreen, clYellow, clBlue, clMagenta, clCyan, clWhite, clEnd };
 
 /// Format flags used by NCurses
-///
 enum Format {
 	fmtNone = clEnd+1,
 	fmtBold, fmtBoldEnd,
@@ -136,32 +136,26 @@ enum Format {
 };
 
 /// Available border colors for window
-///
 enum Border { brNone, brBlack, brRed, brGreen, brYellow, brBlue, brMagenta, brCyan, brWhite };
 
 /// This indicates how much the window has to be scrolled
-///
 enum Where { wUp, wDown, wPageUp, wPageDown, wHome, wEnd };
 
 /// Helper function that is invoked each time one will want
-/// to obtain string from Window::GetString() function
-/// @see Window::GetString()
-///
+/// to obtain string from Window::getString() function
+/// @see Window::getString()
 typedef std::function<void(const std::wstring &)> GetStringHelper;
 
 /// Initializes curses screen and sets some additional attributes
 /// @param window_title title of the window (has an effect only if pdcurses lib is used)
 /// @param enable_colors enables colors
-///
-void InitScreen(const char *window_title, bool enable_colors);
+void initScreen(const char *window_title, bool enable_colors);
 
 /// Destroys the screen
-///
-void DestroyScreen();
+void destroyScreen();
 
 /// Struct used to set color of both foreground and background of window
 /// @see Window::operator<<()
-///
 struct Colors
 {
 	Colors(Color one, Color two = clDefault) : fg(one), bg(two) { }
@@ -171,7 +165,6 @@ struct Colors
 
 /// Struct used for going to given coordinates
 /// @see Window::operator<<()
-///
 struct XY
 {
 	XY(int xx, int yy) : x(xx), y(yy) { }
@@ -180,7 +173,6 @@ struct XY
 };
 
 /// Main class of NCurses namespace, used as base for other specialized windows
-///
 struct Window
 {
 	/// Constructs an empty window with given parameters
@@ -191,56 +183,44 @@ struct Window
 	/// @param title title of constructed window
 	/// @param color base color of constructed window
 	/// @param border border of constructed window
-	///
 	Window(size_t startx, size_t starty, size_t width, size_t height,
 			const std::string &title, Color color, Border border);
 	
 	/// Copies thw window
 	/// @param w copied window
-	///
 	Window(const Window &w);
 	
 	/// Destroys the window and frees memory
-	///
 	virtual ~Window();
 	
 	/// Allows for direct access to internal WINDOW pointer in case there
 	/// is no wrapper for a function from curses library one may want to use
 	/// @return internal WINDOW pointer
-	///
-	WINDOW *Raw() const { return itsWindow; }
+	WINDOW *raw() const { return m_window; }
 	
 	/// @return window's width
-	///
-	size_t GetWidth() const;
+	size_t getWidth() const;
 	
 	/// @return window's height
-	///
-	size_t GetHeight() const;
+	size_t getHeight() const;
 	
 	/// @return X position of left upper window's corner
-	///
-	size_t GetStartX() const;
+	size_t getStartX() const;
 	
 	/// @return Y position of left upper window's corner
-	///
-	size_t GetStartY() const;
+	size_t getStarty() const;
 	
 	/// @return window's title
-	///
 	const std::string &getTitle() const;
 	
 	/// @return current window's color
-	///
-	Color GetColor() const;
+	Color getColor() const;
 	
 	/// @return current window's border
-	///
-	Border GetBorder() const;
+	Border getBorder() const;
 	
 	/// @return current window's timeout
-	///
-	int GetTimeout() const;
+	int getTimeout() const;
 	
 	/// Reads the string from standard input. Note that this is much more complex
 	/// function than getstr() from curses library. It allows for moving through
@@ -257,36 +237,31 @@ struct Window
 	/// actual text.
 	/// @return edited string
 	///
-	/// @see SetGetStringHelper()
+	/// @see setGetStringHelper()
 	/// @see SetTimeout()
 	/// @see CreateHistory()
-	///
-	std::string GetString(const std::string &base, size_t length = -1,
+	std::string getString(const std::string &base, size_t length = -1,
 	                      size_t width = 0, bool encrypted = 0);
 	
 	/// Wrapper for above function that doesn't take base string (it will be empty).
 	/// Taken parameters are the same as for above.
-	///
-	std::string GetString(size_t length = -1, size_t width = 0, bool encrypted = 0)
+	std::string getString(size_t length = -1, size_t width = 0, bool encrypted = 0)
 	{
-		return GetString("", length, width, encrypted);
+		return getString("", length, width, encrypted);
 	}
 	
 	/// Moves cursor to given coordinates
 	/// @param x given X position
 	/// @param y given Y position
-	///
-	void GotoXY(int x, int y);
+	void goToXY(int x, int y);
 	
 	/// @return x window coordinate
-	/// @see GetXY()
-	///
-	int X();
+	/// @see GetXy()
+	int x();
 	
 	/// @return y windows coordinate
-	/// @see GetXY()
-	///
-	int Y();
+	/// @see GetXy()
+	int y();
 	
 	/// Used to indicate whether given coordinates of main screen lies within
 	/// window area or not and if they do, transform them into in-window coords.
@@ -294,106 +269,82 @@ struct Window
 	/// @param x X position of main screen to be checked
 	/// @param y Y position of main screen to be checked
 	/// @return true if it transformed variables, false otherwise
-	///
 	bool hasCoords(int &x, int &y);
 	
-	/// Sets helper function used in GetString()
-	/// @param helper pointer to function that matches GetStringHelper prototype
-	/// @see GetString()
-	///
-	void SetGetStringHelper(GetStringHelper helper) { itsGetStringHelper = helper; }
+	/// Sets helper function used in getString()
+	/// @param helper pointer to function that matches getStringHelper prototype
+	/// @see getString()
+	void setGetStringHelper(GetStringHelper helper) { m_get_string_helper = helper; }
 	
 	/// Sets window's base color
 	/// @param fg foregound base color
 	/// @param bg background base color
-	///
-	void SetBaseColor(Color fg, Color bg = clDefault);
+	void setBaseColor(Color fg, Color bg = clDefault);
 	
 	/// Sets window's border
 	/// @param border new window's border
-	///
-	void SetBorder(Border border);
+	void setBorder(Border border);
 	
 	/// Sets window's timeout
 	/// @param timeout window's timeout
-	///
-	void SetTimeout(int timeout);
+	void setTimeout(int timeout);
 	
 	/// Sets window's title
 	/// @param new_title new title for window
-	///
-	void SetTitle(const std::string &new_title);
+	void setTitle(const std::string &new_title);
 	
 	/// Creates internal container that stores all previous
 	/// strings that were edited using this window.
-	///
-	void CreateHistory();
+	void createHistory();
 	
 	/// Deletes container with all previous history entries
-	///
-	void DeleteHistory();
-	
-	/// "Hides" the window by filling its area with given character
-	/// @param ch character to fill the area
-	/// @see Clear()
-	///
-	void Hide(char ch = 32) const;
+	void deleteHistory();
 	
 	/// Refreshed whole window and its border
 	/// @see Refresh()
-	///
-	void Display();
+	void display();
 	
 	/// Refreshes whole window, but not the border
-	/// @see Display()
-	///
-	virtual void Refresh();
+	/// @see display()
+	virtual void refresh();
 	
 	/// Moves the window to new coordinates
 	/// @param new_x new X position of left upper corner of window
 	/// @param new_y new Y position of left upper corner of window
-	///
-	virtual void MoveTo(size_t new_x, size_t new_y);
+	virtual void moveTo(size_t new_x, size_t new_y);
 	
 	/// Resizes the window
 	/// @param new_width new window's width
 	/// @param new_height new window's height
-	///
-	virtual void Resize(size_t new_width, size_t new_height);
+	virtual void resize(size_t new_width, size_t new_height);
 	
 	/// Cleares the window
-	///
-	virtual void Clear();
+	virtual void clear();
 	
 	/// Adds given file descriptor to the list that will be polled in
 	/// ReadKey() along with stdin and callback that will be invoked
 	/// when there is data waiting for reading in it
 	/// @param fd file descriptor
 	/// @param callback callback
-	///
-	void AddFDCallback(int fd, void (*callback)());
+	void addFDCallback(int fd, void (*callback)());
 	
 	/// Clears list of file descriptors and their callbacks
-	///
-	void ClearFDCallbacksList();
+	void clearFDCallbacksList();
 	
 	/// Checks if list of file descriptors is empty
 	/// @return true if list is empty, false otherwise
-	///
 	bool FDCallbacksListEmpty() const;
 	
 	/// Reads key from standard input (or takes it from input queue)
 	/// and writes it into read_key variable
-	///
-	int ReadKey();
+	int readKey();
 	
 	/// Push single character into input queue, so it can get consumed by ReadKey
-	void PushChar(int ch);
+	void pushChar(int ch);
 	
 	/// Scrolls the window by amount of lines given in its parameter
 	/// @param where indicates how many lines it has to scroll
-	///
-	virtual void Scroll(Where where);
+	virtual void scroll(Where where);
 	
 	/// Applies function of compatible prototype to internal WINDOW pointer
 	/// The mostly used function in this case seem to be wclrtoeol(), which
@@ -402,13 +353,11 @@ struct Window
 	/// recommend anyone passing this pointer here ;)
 	/// @param f pointer to function to call with internal WINDOW pointer
 	/// @return reference to itself
-	///
 	Window &operator<<(int (*f)(WINDOW *));
 	
 	/// Applies foreground and background colors to window
 	/// @param colors struct that holds new colors information
 	/// @return reference to itself
-	///
 	Window &operator<<(Colors colors);
 	
 	/// Applies foregound color to window. Note that colors applied
@@ -417,7 +366,6 @@ struct Window
 	/// all colors and fall back to base one, pass clDefault.
 	/// @param color new color value
 	/// @return reference to itself
-	///
 	Window &operator<<(Color color);
 	
 	/// Applies format flag to window. Note that these attributes are
@@ -425,191 +373,181 @@ struct Window
 	/// it you have to pass fmtBoldEnd also twice.
 	/// @param format format flag
 	/// @return reference to itself
-	///
 	Window &operator<<(Format format);
 	
 	/// Moves current cursor position to given coordinates.
 	/// @param coords struct that holds information about new coordinations
 	/// @return reference to itself
-	///
 	Window &operator<<(XY coords);
 	
 	/// Prints string to window
 	/// @param s const pointer to char array to be printed
 	/// @return reference to itself
-	///
 	Window &operator<<(const char *s);
 	
 	/// Prints single character to window
 	/// @param c character to be printed
 	/// @return reference to itself
-	///
 	Window &operator<<(char c);
 	
 	/// Prints wide string to window
 	/// @param ws const pointer to wchar_t array to be printed
 	/// @return reference to itself
-	///
 	Window &operator<<(const wchar_t *ws);
 	
 	/// Prints single wide character to window
 	/// @param wc wide character to be printed
 	/// @return reference to itself
-	///
 	Window &operator<<(wchar_t wc);
 	
 	/// Prints int to window
 	/// @param i integer value to be printed
 	/// @return reference to itself
-	///
 	Window &operator<<(int i);
 	
 	/// Prints double to window
 	/// @param d double value to be printed
 	/// @return reference to itself
-	///
 	Window &operator<<(double d);
 	
 	/// Prints size_t to window
 	/// @param s size value to be printed
 	/// @return reference to itself
-	///
 	Window &operator<<(size_t s);
 	
 	/// Prints std::string to window
 	/// @param s string to be printed
 	/// @return reference to itself
-	///
 	Window &operator<<(const std::string &s);
 	
 	/// Prints std::wstring to window
 	/// @param ws wide string to be printed
 	/// @return reference to itself
-	///
 	Window &operator<<(const std::wstring &ws);
-	
-	/// Fallback for Length() for wide strings used if unicode support is disabled
-	/// @param s string that real length has to be measured
-	/// @return standard std::string::length() result since it's only fallback
-	///
-	static size_t Length(const std::string &s) { return s.length(); }
 	
 	/// Measures real length of wide string (required if e.g. asian characters are used)
 	/// @param ws wide string that real length has to be measured
 	/// @return real length of wide string
-	///
-	static size_t Length(const std::wstring &ws);
+	static size_t length(const std::wstring &ws);
+	
+	/// Fallback for Length() for wide strings used if unicode support is disabled
+	/// @param s string that real length has to be measured
+	/// @return standard std::string::length() result since it's only fallback
+	static size_t length(const std::string &s) { return s.length(); }
 	
 	/// Cuts string so it fits desired length on the screen. Note that it uses
 	/// wcwidth to check real width of all characters it contains. If string
 	/// fits requested length it's not modified at all.
 	/// @param ws wide string to be cut
 	/// @param max_len maximal length of string
-	static void Cut(std::wstring &ws, size_t max_len);
+	static void cut(std::wstring &ws, size_t max_len);
+	
+	/// Variant for std::string, it just falls back to std::string::resize
+	static void cut(std::string &s, size_t max_len) { s.resize(max_len); }
 	
 protected:
 	/// Sets colors of window (interal use only)
 	/// @param fg foregound color
 	/// @param bg background color
 	///
-	void SetColor(Color fg, Color bg = clDefault);
+	void setColor(Color fg, Color bg = clDefault);
 	
 	/// Refreshes window's border
 	///
-	void ShowBorder() const;
+	void showBorder() const;
 	
 	/// Changes dimensions of window, called from Resize()
 	/// @param width new window's width
 	/// @param height new window's height
 	/// @see Resize()
 	///
-	void AdjustDimensions(size_t width, size_t height);
+	void adjustDimensions(size_t width, size_t height);
 	
 	/// Deletes old window and creates new. It's called by Resize(),
-	/// SetBorder() or SetTitle() since internally windows are
+	/// SetBorder() or setTitle() since internally windows are
 	/// handled as curses pads and change in size requires to delete
 	/// them and create again, there is no way to change size of pad.
 	/// @see SetBorder()
-	/// @see SetTitle()
+	/// @see setTitle()
 	/// @see Resize()
 	///
-	virtual void Recreate(size_t width, size_t height);
+	virtual void recreate(size_t width, size_t height);
 	
 	/// internal WINDOW pointers
-	WINDOW *itsWindow;
-	WINDOW *itsWinBorder;
+	WINDOW *m_window;
+	WINDOW *m_border_window;
 	
 	/// start points and dimensions
-	size_t itsStartX;
-	size_t itsStartY;
-	size_t itsWidth;
-	size_t itsHeight;
+	size_t m_start_x;
+	size_t m_start_y;
+	size_t m_width;
+	size_t m_height;
 	
 	/// window timeout
-	int itsWindowTimeout;
+	int m_window_timeout;
 	
 	/// current colors
-	Color itsColor;
-	Color itsBgColor;
+	Color m_color;
+	Color m_bg_color;
 	
 	/// base colors
-	Color itsBaseColor;
-	Color itsBaseBgColor;
+	Color m_base_color;
+	Color m_base_bg_color;
 	
 	/// current border
-	Border itsBorder;
+	Border m_border;
 	
 private:
 	/// Sets state of bold attribute (internal use only)
 	/// @param bold_state state of bold attribute
 	///
-	void Bold(bool bold_state) const;
+	void bold(bool bold_state) const;
 	
 	/// Sets state of underline attribute (internal use only)
 	/// @param underline_state state of underline attribute
 	///
-	void Underline(bool underline_state) const;
+	void underline(bool underline_state) const;
 	
 	/// Sets state of reverse attribute (internal use only)
 	/// @param reverse_state state of reverse attribute
 	///
-	void Reverse(bool reverse_state) const;
+	void reverse(bool reverse_state) const;
 	
 	/// Sets state of altcharset attribute (internal use only)
 	/// @param altcharset_state state of altcharset attribute
 	///
-	void AltCharset(bool altcharset_state) const;
+	void altCharset(bool altcharset_state) const;
 	
-	/// pointer to helper function used by GetString()
-	/// @see GetString()
+	/// pointer to helper function used by getString()
+	/// @see getString()
 	///
-	GetStringHelper itsGetStringHelper;
+	GetStringHelper m_get_string_helper;
 	
 	/// window title
-	std::string itsTitle;
+	std::string m_title;
 	
 	/// stack of colors
-	std::stack<Colors> itsColors;
+	std::stack<Colors> m_color_stack;
 	
 	/// input queue of a window. you can put characters there using
 	/// PushChar and they will be immediately consumed and
 	/// returned by ReadKey
-	std::queue<int> itsInputQueue;
+	std::queue<int> m_input_queue;
 	
 	/// containter used for additional file descriptors that have
 	/// to be polled in ReadKey() and correspondent callbacks that
 	/// are invoked if there is data available in them
 	typedef std::vector< std::pair<int, void (*)()> > FDCallbacks;
-	FDCallbacks itsFDs;
+	FDCallbacks m_fds;
 	
 	/// pointer to container used as history
-	std::list<std::wstring> *itsHistory;
+	std::list<std::wstring> *m_history;
 	
 	/// counters for format flags
-	int itsBoldCounter;
-	int itsUnderlineCounter;
-	int itsReverseCounter;
-	int itsAltCharsetCounter;
+	int m_bold_counter;
+	int m_underline_counter;
+	int m_reverse_counter;
+	int m_alt_charset_counter;
 };
 
 }

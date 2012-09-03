@@ -374,7 +374,7 @@ std::string Song::ParseFormat(std::string::const_iterator &it, const std::string
 					if (delimiter)
 					{
 						const std::basic_string<my_char_t> &s = TO_WSTRING(tag);
-						if (NC::Window::Length(s) > delimiter)
+						if (NC::Window::length(s) > delimiter)
 							tag = Shorten(s, delimiter);
 					}
 					has_some_tags = 1;
