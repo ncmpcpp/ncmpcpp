@@ -32,7 +32,7 @@ namespace NC {//
 /// window or taken as raw string at any time.
 template <typename C> class basic_buffer
 {
-	friend class Scrollpad;
+	friend struct Scrollpad;
 	
 	/// Struct used for storing information about
 	/// one color/format flag along with its position
