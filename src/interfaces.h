@@ -28,12 +28,14 @@
 
 struct Filterable
 {
+	virtual bool allowsFiltering() = 0;
 	virtual std::string currentFilter() = 0;
 	virtual void applyFilter(const std::string &filter) = 0;
 };
 
 struct Searchable
 {
+	virtual bool allowsSearching() = 0;
 	virtual bool search(const std::string &constraint) = 0;
 	virtual void nextFound(bool wrap) = 0;
 	virtual void prevFound(bool wrap) = 0;

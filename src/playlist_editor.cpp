@@ -424,6 +424,11 @@ void PlaylistEditor::MouseButtonPressed(MEVENT me)
 
 /***********************************************************************/
 
+bool PlaylistEditor::allowsFiltering()
+{
+	return true;
+}
+
 std::string PlaylistEditor::currentFilter()
 {
 	std::string filter;
@@ -451,6 +456,11 @@ void PlaylistEditor::applyFilter(const std::string &filter)
 }
 
 /***********************************************************************/
+
+bool PlaylistEditor::allowsSearching()
+{
+	return true;
+}
 
 bool PlaylistEditor::search(const std::string &constraint)
 {

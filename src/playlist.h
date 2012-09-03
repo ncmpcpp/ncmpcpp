@@ -44,10 +44,12 @@ class Playlist : public Screen<NC::Window>, public Filterable, public HasSongs, 
 		virtual bool isTabbable() { return true; }
 		
 		/// Filterable implementation
+		virtual bool allowsFiltering();
 		virtual std::string currentFilter();
 		virtual void applyFilter(const std::string &filter);
 		
 		/// Searchable implementation
+		virtual bool allowsSearching();
 		virtual bool search(const std::string &constraint);
 		virtual void nextFound(bool wrap);
 		virtual void prevFound(bool wrap);

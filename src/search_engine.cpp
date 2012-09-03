@@ -280,6 +280,11 @@ void SearchEngine::MouseButtonPressed(MEVENT me)
 
 /***********************************************************************/
 
+bool SearchEngine::allowsFiltering()
+{
+	return w->back().value().isSong();
+}
+
 std::string SearchEngine::currentFilter()
 {
 	return RegexItemFilter<SEItem>::currentFilter(*w);
@@ -294,6 +299,11 @@ void SearchEngine::applyFilter(const std::string &filter)
 }
 
 /***********************************************************************/
+
+bool SearchEngine::allowsSearching()
+{
+	return w->back().value().isSong();
+}
 
 bool SearchEngine::search(const std::string &constraint)
 {

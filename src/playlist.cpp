@@ -272,6 +272,11 @@ void Playlist::MouseButtonPressed(MEVENT me)
 
 /***********************************************************************/
 
+bool Playlist::allowsFiltering()
+{
+	return true;
+}
+
 std::string Playlist::currentFilter()
 {
 	std::string filter;
@@ -291,6 +296,11 @@ void Playlist::applyFilter(const std::string &filter)
 }
 
 /***********************************************************************/
+
+bool Playlist::allowsSearching()
+{
+	return true;
+}
 
 bool Playlist::search(const std::string &constraint)
 {

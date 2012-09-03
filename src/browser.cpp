@@ -267,6 +267,11 @@ void Browser::MouseButtonPressed(MEVENT me)
 
 /***********************************************************************/
 
+bool Browser::allowsFiltering()
+{
+	return true;
+}
+
 std::string Browser::currentFilter()
 {
 	return RegexFilter<MPD::Item>::currentFilter(*w);
@@ -281,6 +286,11 @@ void Browser::applyFilter(const std::string &filter)
 }
 
 /***********************************************************************/
+
+bool Browser::allowsSearching()
+{
+	return true;
+}
 
 bool Browser::search(const std::string &constraint)
 {

@@ -346,6 +346,7 @@ void Action::FindItem(const FindDirection fd)
 	
 	Searchable *w = dynamic_cast<Searchable *>(myScreen);
 	assert(w);
+	assert(w->allowsSearching());
 	
 	LockStatusbar();
 	Statusbar() << "Find " << (fd == fdForward ? "forward" : "backward") << ": ";
@@ -1997,7 +1998,8 @@ void ReversePlaylist::Run()
 
 bool ApplyFilter::canBeRun() const
 {
-	return dynamic_cast<Filterable *>(myScreen);
+	auto w = dynamic_cast<Filterable *>(myScreen);
+	return w && w->allowsFiltering();
 }
 
 void ApplyFilter::Run()
@@ -2007,6 +2009,7 @@ void ApplyFilter::Run()
 	
 	Filterable *f = dynamic_cast<Filterable *>(myScreen);
 	assert(f);
+	assert(f->allowsFiltering());
 	
 	LockStatusbar();
 	Statusbar() << NC::fmtBold << "Apply filter: " << NC::fmtBoldEnd;
@@ -2072,7 +2075,8 @@ void Find::Run()
 
 bool FindItemBackward::canBeRun() const
 {
-	return dynamic_cast<Searchable *>(myScreen);
+	auto w = dynamic_cast<Searchable *>(myScreen);
+	return w && w->allowsSearching();
 }
 
 void FindItemForward::Run()
@@ -2083,7 +2087,8 @@ void FindItemForward::Run()
 
 bool FindItemForward::canBeRun() const
 {
-	return dynamic_cast<Searchable *>(myScreen);
+	auto w = dynamic_cast<Searchable *>(myScreen);
+	return w && w->allowsSearching();
 }
 
 void FindItemBackward::Run()

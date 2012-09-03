@@ -773,6 +773,11 @@ void TagEditor::MouseButtonPressed(MEVENT me)
 
 /***********************************************************************/
 
+bool TagEditor::allowsFiltering()
+{
+	return w == LeftColumn || w == Tags;
+}
+
 std::string TagEditor::currentFilter()
 {
 	std::string filter;
@@ -809,6 +814,11 @@ void TagEditor::applyFilter(const std::string &filter)
 }
 
 /***********************************************************************/
+
+bool TagEditor::allowsSearching()
+{
+	return w == LeftColumn || w == Tags;
+}
 
 bool TagEditor::search(const std::string &constraint)
 {

@@ -438,6 +438,11 @@ void MediaLibrary::MouseButtonPressed(MEVENT me)
 
 /***********************************************************************/
 
+bool MediaLibrary::allowsFiltering()
+{
+	return true;
+}
+
 std::string MediaLibrary::currentFilter()
 {
 	std::string filter;
@@ -474,6 +479,11 @@ void MediaLibrary::applyFilter(const std::string &filter)
 }
 
 /***********************************************************************/
+
+bool MediaLibrary::allowsSearching()
+{
+	return true;
+}
 
 bool MediaLibrary::search(const std::string &constraint)
 {
