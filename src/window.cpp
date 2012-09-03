@@ -420,7 +420,7 @@ void Window::pushChar(int ch)
 	m_input_queue.push(ch);
 }
 
-std::string Window::getString(const std::string &base, size_t length, size_t width, bool encrypted)
+std::string Window::getString(const std::string &base, size_t length_, size_t width, bool encrypted)
 {
 	int input;
 	size_t beginning, maxbeginning, minx, x, real_x, y, maxx, real_maxx;
@@ -584,7 +584,7 @@ std::string Window::getString(const std::string &base, size_t length, size_t wid
 				break;
 			default:
 			{
-				if (tmp->length() >= length)
+				if (tmp->length() >= length_)
 					break;
 				
 				tmp_in += input;
@@ -647,12 +647,12 @@ void Window::goToXY(int x, int y)
 	wmove(m_window, y, x);
 }
 
- int Window::x()
+int Window::getX()
 {
 	return getcurx(m_window);
 }
 
-int Window::y()
+int Window::getY()
 {
 	return getcury(m_window);
 }

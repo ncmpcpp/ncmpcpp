@@ -240,14 +240,14 @@ struct Window
 	/// @see setGetStringHelper()
 	/// @see SetTimeout()
 	/// @see CreateHistory()
-	std::string getString(const std::string &base, size_t length = -1,
+	std::string getString(const std::string &base, size_t length_ = -1,
 	                      size_t width = 0, bool encrypted = 0);
 	
 	/// Wrapper for above function that doesn't take base string (it will be empty).
 	/// Taken parameters are the same as for above.
-	std::string getString(size_t length = -1, size_t width = 0, bool encrypted = 0)
+	std::string getString(size_t length_ = -1, size_t width = 0, bool encrypted = 0)
 	{
-		return getString("", length, width, encrypted);
+		return getString("", length_, width, encrypted);
 	}
 	
 	/// Moves cursor to given coordinates
@@ -256,12 +256,10 @@ struct Window
 	void goToXY(int x, int y);
 	
 	/// @return x window coordinate
-	/// @see GetXy()
-	int x();
+	int getX();
 	
 	/// @return y windows coordinate
-	/// @see GetXy()
-	int y();
+	int getY();
 	
 	/// Used to indicate whether given coordinates of main screen lies within
 	/// window area or not and if they do, transform them into in-window coords.

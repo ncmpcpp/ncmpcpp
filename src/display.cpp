@@ -125,7 +125,7 @@ void showSongs(NC::Menu<T> &menu, const MPD::Song &s, HasSongs &screen, const st
 					buf.removeFormatting();
 				if (is_now_playing)
 					buf << Config.now_playing_suffix;
-				menu << NC::XY(menu.getWidth()-buf.str().length()-(is_selected ? Config.selected_item_suffix_length : 0), menu.y()) << buf;
+				menu << NC::XY(menu.getWidth()-buf.str().length()-(is_selected ? Config.selected_item_suffix_length : 0), menu.getY()) << buf;
 				if (separate_albums)
 					menu << NC::fmtUnderlineEnd;
 				return;
@@ -162,13 +162,13 @@ void showSongsInColumns(NC::Menu<T> &menu, const MPD::Song &s, HasSongs &screen)
 		menu << Config.now_playing_prefix;
 	
 	int width;
-	int y = menu.y();
+	int y = menu.getY();
 	int remained_width = menu.getWidth();
 	std::vector<Column>::const_iterator it, last = Config.columns.end() - 1;
 	for (it = Config.columns.begin(); it != Config.columns.end(); ++it)
 	{
 		// check current X coordinate
-		int x = menu.x();
+		int x = menu.getX();
 		// column has relative width and all after it have fixed width,
 		// so stretch it so it fills whole screen along with these after.
 		if (it->stretch_limit >= 0) // (*)

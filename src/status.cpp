@@ -216,8 +216,8 @@ void NcmpcppStatusChanged(MPD::Connection *, MPD::StatusChanges changed, void *)
 	static std::string player_state;
 	static MPD::Song np;
 	
-	int sx = wFooter->x();
-	int sy = wFooter->y();
+	int sx = wFooter->getX();
+	int sy = wFooter->getY();
 	
 	myPlaylist->NowPlaying = Mpd.GetCurrentlyPlayingSongPos();
 	

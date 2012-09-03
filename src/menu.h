@@ -455,25 +455,25 @@ template <typename T> Menu<T>::~Menu()
 		delete *it;
 }
 
-template <typename T> void Menu<T>::reserve(size_t size)
+template <typename T> void Menu<T>::reserve(size_t size_)
 {
-	m_options.reserve(size);
+	m_options.reserve(size_);
 }
 
-template <typename T> void Menu<T>::resizeList(size_t size)
+template <typename T> void Menu<T>::resizeList(size_t new_size)
 {
-	if (size > m_options.size())
+	if (new_size > m_options.size())
 	{
-		m_options.resize(size);
-		for (size_t i = 0; i < size; ++i)
+		m_options.resize(new_size);
+		for (size_t i = 0; i < new_size; ++i)
 			if (!m_options[i])
 				m_options[i] = new Item();
 	}
-	else if (size < m_options.size())
+	else if (new_size < m_options.size())
 	{
-		for (size_t i = size; i < m_options.size(); ++i)
+		for (size_t i = new_size; i < m_options.size(); ++i)
 			delete m_options[i];
-		m_options.resize(size);
+		m_options.resize(new_size);
 	}
 }
 
