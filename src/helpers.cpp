@@ -285,7 +285,7 @@ std::string Timestamp(time_t t)
 void UpdateSongList(NC::Menu<MPD::Song> *menu)
 {
 	for (auto it = menu->begin(); it != menu->end(); ++it)
-		it->setSelected(myPlaylist->checkForSong(it->value()));
+		it->setBold(myPlaylist->checkForSong(it->value()));
 	menu->refresh();
 }
 
