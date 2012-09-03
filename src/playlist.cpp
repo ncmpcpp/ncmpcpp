@@ -379,7 +379,6 @@ MPD::SongList Playlist::getSelectedSongs()
 
 /***********************************************************************/
 
-
 bool Playlist::isFiltered()
 {
 	if (Items->isFiltered())

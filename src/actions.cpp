@@ -2020,7 +2020,10 @@ void ApplyFilter::Run()
 	
 	std::string filter = f->currentFilter();
  	if (filter.empty())
+	{
+		myPlaylist->Items->clearFilterResults();
 		ShowMessage("Filtering disabled");
+	}
  	else
 		ShowMessage("Using filter \"%s\"", filter.c_str());
 	
