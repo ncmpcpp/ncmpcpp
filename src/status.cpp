@@ -223,9 +223,9 @@ void NcmpcppStatusChanged(MPD::Connection *, MPD::StatusChanges changed, void *)
 	
 	if (changed.Playlist)
 	{
-		//np = Mpd.GetCurrentlyPlayingSong();
-		//if (!np.empty())
-		//	WindowTitle(np.toString(Config.song_window_title_format));
+		np = Mpd.GetCurrentlyPlayingSong();
+		if (!np.empty())
+			WindowTitle(np.toString(Config.song_window_title_format));
 		
 		myPlaylist->Items->clearSearchResults();
 		
