@@ -336,6 +336,11 @@ void MediaLibrary::Update()
 	}
 }
 
+void MediaLibrary::EnterPressed()
+{
+	AddToPlaylist(true);
+}
+
 void MediaLibrary::SpacePressed()
 {
 	if (Config.space_selects)

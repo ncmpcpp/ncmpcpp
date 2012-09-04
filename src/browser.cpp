@@ -320,22 +320,6 @@ std::shared_ptr<ProxySongList> Browser::getProxySongList()
 	});
 }
 
-MPD::Song *Browser::getSong(size_t pos)
-{
-	MPD::Song *ptr = 0;
-	if ((*w)[pos].value().type == itSong)
-		ptr = (*w)[pos].value().song.get();
-	return ptr;
-}
-
-MPD::Song *Browser::currentSong()
-{
-	if (w->empty())
-		return 0;
-	else
-		return getSong(w->choice());
-}
-
 bool Browser::allowsSelection()
 {
 	return true;

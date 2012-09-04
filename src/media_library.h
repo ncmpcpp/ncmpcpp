@@ -27,39 +27,40 @@
 class MediaLibrary : public Screen<NC::Window>, public Filterable, public HasSongs, public Searchable
 {
 	public:
-		virtual void SwitchTo();
-		virtual void Resize();
+		virtual void SwitchTo() OVERRIDE;
+		virtual void Resize() OVERRIDE;
 		
-		virtual std::basic_string<my_char_t> Title();
+		virtual std::basic_string<my_char_t> Title() OVERRIDE;
 		
-		virtual void Refresh();
-		virtual void Update();
+		virtual void Refresh() OVERRIDE;
+		virtual void Update() OVERRIDE;
 		
-		virtual void EnterPressed() { AddToPlaylist(1); }
-		virtual void SpacePressed();
-		virtual void MouseButtonPressed(MEVENT);
-		virtual bool isTabbable() { return true; }
+		virtual void EnterPressed() OVERRIDE;
+		virtual void SpacePressed() OVERRIDE;
+		virtual void MouseButtonPressed(MEVENT me) OVERRIDE;
+		
+		virtual bool isTabbable() OVERRIDE { return true; }
+		virtual bool isMergable() OVERRIDE { return true; }
 		
 		/// Filterable implementation
-		virtual bool allowsFiltering();
-		virtual std::string currentFilter();
-		virtual void applyFilter(const std::string &filter);
+		virtual bool allowsFiltering() OVERRIDE;
+		virtual std::string currentFilter() OVERRIDE;
+		virtual void applyFilter(const std::string &filter) OVERRIDE;
 		
 		/// Searchable implementation
-		virtual bool allowsSearching();
-		virtual bool search(const std::string &constraint);
-		virtual void nextFound(bool wrap);
-		virtual void prevFound(bool wrap);
+		virtual bool allowsSearching() OVERRIDE;
+		virtual bool search(const std::string &constraint) OVERRIDE;
+		virtual void nextFound(bool wrap) OVERRIDE;
+		virtual void prevFound(bool wrap) OVERRIDE;
 		
 		/// HasSongs implementation
-		virtual std::shared_ptr<ProxySongList> getProxySongList();
+		virtual std::shared_ptr<ProxySongList> getProxySongList() OVERRIDE;
 		
-		virtual bool allowsSelection();
-		virtual void reverseSelection();
-		virtual MPD::SongList getSelectedSongs();
+		virtual bool allowsSelection() OVERRIDE;
+		virtual void reverseSelection() OVERRIDE;
+		virtual MPD::SongList getSelectedSongs() OVERRIDE;
 		
-		virtual bool isMergable() { return true; }
-		
+		// private members
 		int Columns();
 		bool isNextColumnAvailable();
 		void NextColumn();

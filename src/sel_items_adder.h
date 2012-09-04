@@ -28,21 +28,25 @@ class SelectedItemsAdder : public Screen< NC::Menu<std::string> >
 	public:
 		SelectedItemsAdder() : itsPSWidth(35), itsPSHeight(11) { }
 		
-		virtual void SwitchTo();
-		virtual void Resize();
-		virtual void Refresh();
+		// Screen< NC::Menu<std::string> > implementation
+		virtual void SwitchTo() OVERRIDE;
+		virtual void Resize() OVERRIDE;
+		virtual void Refresh() OVERRIDE;
 		
-		virtual std::basic_string<my_char_t> Title();
+		virtual std::basic_string<my_char_t> Title() OVERRIDE;
 		
-		virtual void EnterPressed();
-		virtual void SpacePressed() { }
-		virtual void MouseButtonPressed(MEVENT);
+		virtual void Update() OVERRIDE { }
 		
-		virtual bool isMergable() { return false; }
+		virtual void EnterPressed() OVERRIDE;
+		virtual void SpacePressed() OVERRIDE { }
+		virtual void MouseButtonPressed(MEVENT me) OVERRIDE;
+		
+		virtual bool isMergable() OVERRIDE { return false; }
+		virtual bool isTabbable() OVERRIDE { return false; }
 		
 	protected:
-		virtual void Init();
-		virtual bool isLockable() { return false; }
+		virtual void Init() OVERRIDE;
+		virtual bool isLockable() OVERRIDE { return false; }
 		
 	private:
 		void SetDimensions();

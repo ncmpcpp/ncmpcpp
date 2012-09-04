@@ -35,38 +35,40 @@ class Playlist : public Screen<NC::Window>, public Filterable, public HasSongs, 
 		Playlist() : NowPlaying(-1), itsTotalLength(0), itsRemainingTime(0), itsScrollBegin(0) { }
 		~Playlist() { }
 		
-		virtual void SwitchTo();
-		virtual void Resize();
+		// Screen<NC::Window> implementation
+		virtual void SwitchTo() OVERRIDE;
+		virtual void Resize() OVERRIDE;
 		
-		virtual std::basic_string<my_char_t> Title();
+		virtual std::basic_string<my_char_t> Title() OVERRIDE;
 		
-		virtual void EnterPressed();
-		virtual void SpacePressed();
-		virtual void MouseButtonPressed(MEVENT);
-		virtual bool isTabbable() { return true; }
+		virtual void Update() OVERRIDE { }
 		
-		/// Filterable implementation
-		virtual bool allowsFiltering();
-		virtual std::string currentFilter();
-		virtual void applyFilter(const std::string &filter);
+		virtual void EnterPressed() OVERRIDE;
+		virtual void SpacePressed() OVERRIDE;
+		virtual void MouseButtonPressed(MEVENT me) OVERRIDE;
 		
-		/// Searchable implementation
+		virtual bool isTabbable() OVERRIDE { return true; }
+		virtual bool isMergable() OVERRIDE { return true; }
+		
+		// Filterable implementation
+		virtual bool allowsFiltering() OVERRIDE;
+		virtual std::string currentFilter() OVERRIDE;
+		virtual void applyFilter(const std::string &filter) OVERRIDE;
+		
+		// Searchable implementation
 		virtual bool allowsSearching();
-		virtual bool search(const std::string &constraint);
-		virtual void nextFound(bool wrap);
-		virtual void prevFound(bool wrap);
+		virtual bool search(const std::string &constraint) OVERRIDE;
+		virtual void nextFound(bool wrap) OVERRIDE;
+		virtual void prevFound(bool wrap) OVERRIDE;
 		
-		/// HasSongs implementation
-		virtual MPD::Song *getSong(size_t pos);
-		virtual MPD::Song *currentSong();
-		virtual std::shared_ptr<ProxySongList> getProxySongList();
+		// HasSongs implementation
+		virtual std::shared_ptr<ProxySongList> getProxySongList() OVERRIDE;
 		
-		virtual bool allowsSelection();
-		virtual void reverseSelection();
-		virtual MPD::SongList getSelectedSongs();
+		virtual bool allowsSelection() OVERRIDE;
+		virtual void reverseSelection() OVERRIDE;
+		virtual MPD::SongList getSelectedSongs() OVERRIDE;
 		
-		virtual bool isMergable() { return true; }
-		
+		// private members
 		bool isFiltered();
 		bool isPlaying() { return NowPlaying >= 0 && !Items->empty(); }
 		const MPD::Song *NowPlayingSong();
@@ -93,9 +95,6 @@ class Playlist : public Screen<NC::Window>, public Filterable, public HasSongs, 
 		void registerHash(size_t hash);
 		void unregisterHash(size_t hash);
 		
-		//static std::string SongToString(const MPD::Song &s);
-		//static std::string SongInColumnsToString(const MPD::Song &s);
-		
 		NC::Menu< MPD::Song > *Items;
 		
 		int NowPlaying;
@@ -104,8 +103,8 @@ class Playlist : public Screen<NC::Window>, public Filterable, public HasSongs, 
 		static bool ReloadRemaining;
 		
 	protected:
-		virtual void Init();
-		virtual bool isLockable() { return true; }
+		virtual void Init() OVERRIDE;
+		virtual bool isLockable() OVERRIDE { return true; }
 		
 	private:
 		std::string TotalLength();

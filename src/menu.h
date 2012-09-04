@@ -283,16 +283,16 @@ template <typename T> struct Menu : public Window
 	
 	/// Refreshes the menu window
 	/// @see Window::Refresh()
-	virtual void refresh();
+	virtual void refresh() OVERRIDE;
 	
 	/// Scrolls by given amount of lines
 	/// @param where indicated where exactly one wants to go
 	/// @see Window::Scroll()
-	virtual void scroll(Where where);
+	virtual void scroll(Where where) OVERRIDE;
 	
 	/// Cleares all options, used filters etc. It doesn't reset highlighted position though.
 	/// @see reset()
-	virtual void clear();
+	virtual void clear() OVERRIDE;
 	
 	/// Sets highlighted position to 0
 	void reset();

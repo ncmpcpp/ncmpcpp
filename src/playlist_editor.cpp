@@ -312,6 +312,11 @@ void PlaylistEditor::AddToPlaylist(bool add_n_play)
 		w->scroll(NC::wDown);
 }
 
+void PlaylistEditor::EnterPressed()
+{
+	AddToPlaylist(true);
+}
+
 void PlaylistEditor::SpacePressed()
 {
 	if (Config.space_selects)

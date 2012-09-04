@@ -37,18 +37,21 @@ class Lyrics : public Screen<NC::Scrollpad>
 #		endif // HAVE_CURL_CURL_H
 		itsScrollBegin(0) { }
 		
-		virtual void Resize();
-		virtual void SwitchTo();
+		// Screen<NC::Scrollpad> implementation
+		virtual void Resize() OVERRIDE;
+		virtual void SwitchTo() OVERRIDE;
 		
-		virtual std::basic_string<my_char_t> Title();
+		virtual std::basic_string<my_char_t> Title() OVERRIDE;
 		
-		virtual void Update();
+		virtual void Update() OVERRIDE;
 		
-		virtual void EnterPressed() { }
-		virtual void SpacePressed();
+		virtual void EnterPressed() OVERRIDE { }
+		virtual void SpacePressed() OVERRIDE;
 		
-		virtual bool isMergable() { return true; }
+		virtual bool isMergable() OVERRIDE { return true; }
+		virtual bool isTabbable() OVERRIDE { return false; }
 		
+		// private members
 		void Edit();
 		
 #		ifdef HAVE_CURL_CURL_H
@@ -61,8 +64,8 @@ class Lyrics : public Screen<NC::Scrollpad>
 		bool ReloadNP;
 		
 	protected:
-		virtual void Init();
-		virtual bool isLockable() { return false; }
+		virtual void Init() OVERRIDE;
+		virtual bool isLockable() OVERRIDE { return false; }
 		
 	private:
 		void Load();

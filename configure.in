@@ -84,6 +84,18 @@ AC_COMPILE_IFELSE([AC_LANG_PROGRAM([#include <functional>], [[int a = 5; std::fu
 		AC_MSG_ERROR([[Your compiler doesn't seem to support lambda functions, please upgrade (GCC >= 4.5)]])
 )
 
+dnl =========================================
+dnl = checking for override keyword support =
+dnl =========================================
+AH_TEMPLATE([OVERRIDE], [override keyword used in C++11])
+AC_MSG_CHECKING([whether compiler supports override keyword])
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[struct A { virtual void foo() { } }; struct B : public A { virtual void foo() override { } };]], [])],
+	AC_MSG_RESULT([yes])
+		AC_DEFINE([OVERRIDE], [override]),
+	AC_MSG_RESULT([no])
+		AC_DEFINE([OVERRIDE], []),
+)
+
 dnl ==============================
 dnl = checking for regex (win32) =
 dnl ==============================

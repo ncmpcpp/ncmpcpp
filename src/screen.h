@@ -30,18 +30,25 @@ void ScrollpadMouseButtonPressed(NC::Scrollpad *w, MEVENT me);
 /// An interface for various instantiations of Screen template class. Since C++ doesn't like
 /// comparison of two different instantiations of the same template class we need the most
 /// basic class to be non-template to allow it.
-///
 class BasicScreen
 {
 	public:
 		/// Initializes all variables to zero
-		///
 		BasicScreen() : hasToBeResized(0), isInitialized(0) { }
 		
 		virtual ~BasicScreen() { }
 		
 		/// @see Screen::ActiveWindow()
 		virtual NC::Window *ActiveWindow() = 0;
+		
+		/// @see Screen::Refresh()
+		virtual void Refresh() = 0;
+		
+		/// @see Screen::RefreshWindow()
+		virtual void RefreshWindow() = 0;
+		
+		/// @see Screen::Scroll()
+		virtual void Scroll(NC::Where where) = 0;
 		
 		/// Method used for switching to screen
 		virtual void SwitchTo() = 0;
@@ -55,16 +62,7 @@ class BasicScreen
 		
 		/// If the screen contantly has to update itself
 		/// somehow, it should be called by this function.
-		virtual void Update() { }
-		
-		/// @see Screen::Refresh()
-		virtual void Refresh() = 0;
-		
-		/// @see Screen::RefreshWindow()
-		virtual void RefreshWindow() = 0;
-		
-		/// @see Screen::Scroll()
-		virtual void Scroll(NC::Where where) = 0;
+		virtual void Update() = 0;
 		
 		/// Invoked after Enter was pressed
 		virtual void EnterPressed() = 0;
@@ -73,11 +71,11 @@ class BasicScreen
 		virtual void SpacePressed() = 0;
 		
 		/// @see Screen::MouseButtonPressed()
-		virtual void MouseButtonPressed(MEVENT) { }
-
+		virtual void MouseButtonPressed(MEVENT me) = 0;
+		
 		/// When this is overwritten with a function returning true, the
 		/// screen will be used in tab switching.
-		virtual bool isTabbable() { return false; }
+		virtual bool isTabbable() = 0;
 		
 		/// @return true if screen is mergable, ie. can be "proper" subwindow
 		/// if one of the screens is locked. Screens that somehow resemble popups
@@ -100,7 +98,6 @@ class BasicScreen
 		/// this in the constructor. This function should be invoked
 		/// only once and after that isInitialized flag has to be set
 		/// to true to somehow avoid next attempt of initialization.
-		///
 		virtual void Init() = 0;
 		
 		/// @return true if screen can be locked. Note that returning
@@ -116,7 +113,6 @@ class BasicScreen
 		void GetWindowResizeParams(size_t &x_offset, size_t &width, bool adjust_locked_screen = true);
 		
 		/// Flag that inditates whether the screen is initialized or not
-		///
 		bool isInitialized;
 };
 
@@ -138,27 +134,39 @@ template <typename WindowType> class Screen : public BasicScreen
 		/// it's useful to determine the one that is being
 		/// active
 		/// @return address to window object cast to void *
-		virtual NC::Window *ActiveWindow();
-		
-		/// @return pointer to currently active window
-		WindowType *Main();
+		virtual NC::Window *ActiveWindow() OVERRIDE {
+			return w;
+		}
 		
 		/// Refreshes whole screen
-		virtual void Refresh();
+		virtual void Refresh() OVERRIDE {
+			w->display();
+		}
 		
 		/// Refreshes active window of the screen
-		virtual void RefreshWindow();
+		virtual void RefreshWindow() OVERRIDE {
+			w->display();
+		}
 		
 		/// Scrolls the screen by given amount of lines and
 		/// if fancy scrolling feature is disabled, enters the
 		/// loop that holds main loop until user releases the key
 		/// @param where indicates where one wants to scroll
-		virtual void Scroll(NC::Where where);
+		virtual void Scroll(NC::Where where) OVERRIDE {
+			w->scroll(where);
+		}
 		
 		/// Invoked after there was one of mouse buttons pressed
 		/// @param me struct that contains coords of where the click
 		/// had its place and button actions
-		virtual void MouseButtonPressed(MEVENT me);
+		virtual void MouseButtonPressed(MEVENT me) OVERRIDE {
+			GenericMouseButtonPressed(w, me);
+		}
+		
+		/// @return pointer to currently active window
+		WindowType *Main() {
+			return w;
+		}
 		
 	protected:
 		/// Template parameter that should indicate the main type
@@ -167,36 +175,6 @@ template <typename WindowType> class Screen : public BasicScreen
 		/// acreen contains more that one)
 		WindowType *w;
 };
-
-template <typename WindowType> NC::Window *Screen<WindowType>::ActiveWindow()
-{
-	return w;
-}
-
-template <typename WindowType> WindowType *Screen<WindowType>::Main()
-{
-	return w;
-}
-
-template <typename WindowType> void Screen<WindowType>::Refresh()
-{
-	w->display();
-}
-
-template <typename WindowType> void Screen<WindowType>::RefreshWindow()
-{
-	w->display();
-}
-
-template <typename WindowType> void Screen<WindowType>::Scroll(NC::Where where)
-{
-	w->scroll(where);
-}
-
-template <typename WindowType> void Screen<WindowType>::MouseButtonPressed(MEVENT me)
-{
-	GenericMouseButtonPressed(w, me);
-}
 
 /// Specialization for Screen<Scrollpad>::MouseButtonPressed, that should
 /// not scroll whole page, but rather a few lines (the number of them is

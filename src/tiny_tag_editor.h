@@ -34,22 +34,27 @@
 class TinyTagEditor : public Screen< NC::Menu<NC::Buffer> >
 {
 	public:
-		virtual void Resize();
-		virtual void SwitchTo();
+		// Screen< NC::Menu<NC::Buffer> > implementation
+		virtual void Resize() OVERRIDE;
+		virtual void SwitchTo() OVERRIDE;
 		
-		virtual std::basic_string<my_char_t> Title();
+		virtual std::basic_string<my_char_t> Title() OVERRIDE;
 		
-		virtual void EnterPressed();
-		virtual void SpacePressed() { }
-		virtual void MouseButtonPressed(MEVENT);
+		virtual void Update() OVERRIDE { }
 		
-		virtual bool isMergable() { return true; }
+		virtual void EnterPressed() OVERRIDE;
+		virtual void SpacePressed() OVERRIDE { }
+		virtual void MouseButtonPressed(MEVENT me) OVERRIDE;
 		
+		virtual bool isMergable() OVERRIDE { return true; }
+		virtual bool isTabbable() OVERRIDE { return false; }
+		
+		// private members
 		void SetEdited(const MPD::Song &);
 		
 	protected:
-		virtual void Init();
-		virtual bool isLockable() { return true; }
+		virtual void Init() OVERRIDE;
+		virtual bool isLockable() OVERRIDE { return true; }
 		
 	private:
 		bool getTags();

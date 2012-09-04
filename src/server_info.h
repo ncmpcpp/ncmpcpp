@@ -26,21 +26,23 @@
 class ServerInfo : public Screen<NC::Scrollpad>
 {
 	public:
-		virtual void SwitchTo();
-		virtual void Resize();
+		// Screen<NC::Scrollpad> implementation
+		virtual void SwitchTo() OVERRIDE;
+		virtual void Resize() OVERRIDE;
 		
-		virtual std::basic_string<my_char_t> Title();
+		virtual std::basic_string<my_char_t> Title() OVERRIDE;
 		
-		virtual void Update();
+		virtual void Update() OVERRIDE;
 		
-		virtual void EnterPressed() { }
-		virtual void SpacePressed() { }
+		virtual void EnterPressed() OVERRIDE { }
+		virtual void SpacePressed() OVERRIDE { }
 		
-		virtual bool isMergable() { return false; }
+		virtual bool isMergable() OVERRIDE { return false; }
+		virtual bool isTabbable() OVERRIDE { return false; }
 		
 	protected:
-		virtual void Init();
-		virtual bool isLockable() { return false; }
+		virtual void Init() OVERRIDE;
+		virtual bool isLockable() OVERRIDE { return false; }
 		
 	private:
 		void SetDimensions();

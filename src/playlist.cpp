@@ -338,22 +338,6 @@ std::shared_ptr<ProxySongList> Playlist::getProxySongList()
 	return ptr;
 }
 
-MPD::Song *Playlist::getSong(size_t pos)
-{
-	MPD::Song *ptr = 0;
-	if (w == Items)
-		ptr = &(*Items)[pos].value();
-	return ptr;
-}
-
-MPD::Song *Playlist::currentSong()
-{
-	if (Items->empty())
-		return 0;
-	else
-		return getSong(Items->choice());
-}
-
 bool Playlist::allowsSelection()
 {
 	return w == Items;

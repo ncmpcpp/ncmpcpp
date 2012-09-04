@@ -79,25 +79,25 @@ struct Scrollpad: public Window
 	/// Refreshes the window
 	/// @see Window::Refresh()
 	///
-	virtual void refresh();
+	virtual void refresh() OVERRIDE;
 	
 	/// Scrolls by given amount of lines
 	/// @param where indicates where exactly one wants to go
 	/// @see Window::Scroll()
 	///
-	virtual void scroll(Where where);
+	virtual void scroll(Where where) OVERRIDE;
 	
 	/// Resizes the window
 	/// @param new_width new window's width
 	/// @param new_height new window's height
 	/// @see Window::Resize()
 	///
-	virtual void resize(size_t new_width, size_t new_height);
+	virtual void resize(size_t new_width, size_t new_height) OVERRIDE;
 	
 	/// Cleares the content of scrollpad
 	/// @see Window::clear()
 	///
-	virtual void clear();
+	virtual void clear() OVERRIDE;
 	
 	/// Sets starting position to the beginning
 	///

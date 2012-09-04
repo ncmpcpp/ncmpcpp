@@ -76,43 +76,48 @@ struct SEItem
 class SearchEngine : public Screen< NC::Menu<SEItem> >, public Filterable, public HasSongs, public Searchable
 {
 	public:
-		virtual void Resize();
-		virtual void SwitchTo();
+		// Screen< NC::Menu<SEItem> > implementation
+		virtual void Resize() OVERRIDE;
+		virtual void SwitchTo() OVERRIDE;
 		
-		virtual std::basic_string<my_char_t> Title();
+		virtual std::basic_string<my_char_t> Title() OVERRIDE;
 		
-		virtual void EnterPressed();
-		virtual void SpacePressed();
-		virtual void MouseButtonPressed(MEVENT);
-		virtual bool isTabbable() { return true; }
+		virtual void Update() OVERRIDE { }
 		
-		/// Filterable implementation
-		virtual bool allowsFiltering();
-		virtual std::string currentFilter();
-		virtual void applyFilter(const std::string &filter);
+		virtual void EnterPressed() OVERRIDE;
+		virtual void SpacePressed() OVERRIDE;
+		virtual void MouseButtonPressed(MEVENT me) OVERRIDE;
 		
-		/// Searchable implementation
-		virtual bool allowsSearching();
-		virtual bool search(const std::string &constraint);
-		virtual void nextFound(bool wrap);
-		virtual void prevFound(bool wrap);
+		virtual bool isTabbable() OVERRIDE { return true; }
+		virtual bool isMergable() OVERRIDE { return true; }
 		
-		/// HasSongs implementation
-		virtual std::shared_ptr<ProxySongList> getProxySongList();
+		// Filterable implementation
+		virtual bool allowsFiltering() OVERRIDE;
+		virtual std::string currentFilter() OVERRIDE;
+		virtual void applyFilter(const std::string &filter) OVERRIDE;
 		
-		virtual bool allowsSelection();
-		virtual void reverseSelection();
-		virtual MPD::SongList getSelectedSongs();
+		// Searchable implementation
+		virtual bool allowsSearching() OVERRIDE;
+		virtual bool search(const std::string &constraint) OVERRIDE;
+		virtual void nextFound(bool wrap) OVERRIDE;
+		virtual void prevFound(bool wrap) OVERRIDE;
 		
-		virtual bool isMergable() { return true; }
+		// HasSongs implementation
+		virtual std::shared_ptr<ProxySongList> getProxySongList() OVERRIDE;
+		
+		virtual bool allowsSelection() OVERRIDE;
+		virtual void reverseSelection() OVERRIDE;
+		virtual MPD::SongList getSelectedSongs() OVERRIDE;
+		
+		// private members
 		
 		static size_t StaticOptions;
 		static size_t SearchButton;
 		static size_t ResetButton;
 		
 	protected:
-		virtual void Init();
-		virtual bool isLockable() { return true; }
+		virtual void Init() OVERRIDE;
+		virtual bool isLockable() OVERRIDE { return true; }
 		
 	private:
 		void Prepare();

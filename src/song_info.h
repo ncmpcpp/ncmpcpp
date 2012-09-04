@@ -34,21 +34,27 @@ class SongInfo : public Screen<NC::Scrollpad>
 			MPD::MutableSong::SetFunction Set;
 		};
 		
-		virtual void SwitchTo();
-		virtual void Resize();
+		// Screen<NC::Scrollpad> implementation
+		virtual void SwitchTo() OVERRIDE;
+		virtual void Resize() OVERRIDE;
 		
-		virtual std::basic_string<my_char_t> Title();
+		virtual std::basic_string<my_char_t> Title() OVERRIDE;
 		
-		virtual void EnterPressed() { }
-		virtual void SpacePressed() { }
+		virtual void Update() OVERRIDE { }
 		
-		virtual bool isMergable() { return true; }
+		virtual void EnterPressed() OVERRIDE { }
+		virtual void SpacePressed() OVERRIDE { }
+		
+		virtual bool isMergable() OVERRIDE { return true; }
+		virtual bool isTabbable() OVERRIDE { return false; }
+		
+		// private members
 		
 		static const Metadata Tags[];
 		
 	protected:
-		virtual void Init();
-		virtual bool isLockable() { return false; }
+		virtual void Init() OVERRIDE;
+		virtual bool isLockable() OVERRIDE { return false; }
 		
 	private:
 		void PrepareSong(MPD::Song &);
