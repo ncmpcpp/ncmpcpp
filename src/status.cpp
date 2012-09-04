@@ -262,7 +262,7 @@ void NcmpcppStatusChanged(MPD::Connection *, MPD::StatusChanges changed, void *)
 		if (isVisible(myBrowser))
 			markSongsInPlaylist(myBrowser->getProxySongList());
 		if (isVisible(mySearcher))
-			markSongsInPlaylist(myLibrary->getProxySongList());
+			markSongsInPlaylist(mySearcher->getProxySongList());
 		if (isVisible(myLibrary))
 			markSongsInPlaylist(myLibrary->songsProxyList());
 		if (isVisible(myPlaylistEditor))
