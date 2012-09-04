@@ -398,7 +398,7 @@ void Action::ListsChangeFinisher()
 			myPlaylistEditor->Content->clear();
 		}
 #		ifdef HAVE_TAGLIB_H
-		else if (myScreen->ActiveWindow() == myTagEditor->LeftColumn)
+		else if (myScreen->ActiveWindow() == myTagEditor->Dirs)
 		{
 			myTagEditor->Tags->clear();
 		}
@@ -1202,7 +1202,7 @@ void UpdateDatabase::Run()
 	if (myScreen == myBrowser)
 		Mpd.UpdateDirectory(locale_to_utf_cpy(myBrowser->CurrentDir()));
 #	ifdef HAVE_TAGLIB_H
-	else if (myScreen == myTagEditor && !Config.albums_in_tag_editor)
+	else if (myScreen == myTagEditor)
 		Mpd.UpdateDirectory(myTagEditor->CurrentDir());
 #	endif // HAVE_TAGLIB_H
 	else

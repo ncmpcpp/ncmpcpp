@@ -294,7 +294,6 @@ void NcmpcppStatusChanged(MPD::Connection *, MPD::StatusChanges changed, void *)
 #		ifdef HAVE_TAGLIB_H
 		if (myTagEditor->Main())
 		{
-			myTagEditor->Albums->clear();
 			myTagEditor->Dirs->clear();
 		}
 #		endif // HAVE_TAGLIB_H

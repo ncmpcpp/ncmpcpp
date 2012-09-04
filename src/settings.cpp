@@ -354,7 +354,6 @@ void Configuration::SetDefaults()
 	wrapped_search = true;
 	space_selects = false;
 	ncmpc_like_songs_adding = false;
-	albums_in_tag_editor = false;
 	incremental_seeking = true;
 	now_playing_lyrics = false;
 	fetch_lyrics_in_background = false;
@@ -825,10 +824,6 @@ void Configuration::Read()
 			else if (name == "default_space_mode")
 			{
 				space_selects = v == "select";
-			}
-			else if (name == "default_tag_editor_left_col")
-			{
-				albums_in_tag_editor = v == "albums";
 			}
 			else if (name == "incremental_seeking")
 			{

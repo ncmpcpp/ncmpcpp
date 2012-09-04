@@ -78,8 +78,6 @@ class TagEditor : public Screen<NC::Window>, public Filterable, public HasSongs,
 		
 		void LocateSong(const MPD::Song &s);
 		
-		NC::Menu< std::pair<std::string, std::string> > *LeftColumn;
-		NC::Menu< std::pair<std::string, std::string> > *Albums;
 		NC::Menu< std::pair<std::string, std::string> > *Dirs;
 		NC::Menu<std::string> *TagTypes;
 		NC::Menu<MPD::MutableSong> *Tags;

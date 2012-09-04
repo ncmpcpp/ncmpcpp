@@ -171,7 +171,6 @@ struct Configuration
 	bool wrapped_search;
 	bool space_selects;
 	bool ncmpc_like_songs_adding;
-	bool albums_in_tag_editor;
 	bool incremental_seeking;
 	bool now_playing_lyrics;
 	bool fetch_lyrics_in_background;

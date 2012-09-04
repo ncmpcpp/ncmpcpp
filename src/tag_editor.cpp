@@ -90,7 +90,6 @@ std::string ParseFilename(MPD::MutableSong &s, std::string mask, bool preview);
 
 std::string SongToString(const MPD::MutableSong &s);
 bool DirEntryMatcher(const Regex &rx, const std::pair<std::string, std::string> &dir, bool filter);
-bool AlbumEntryMatcher(const Regex &rx, const std::pair<std::string, std::string> &dir);
 bool SongEntryMatcher(const Regex &rx, const MPD::MutableSong &s);
 
 }
@@ -100,19 +99,11 @@ void TagEditor::Init()
 	PatternsFile = Config.ncmpcpp_directory + "patterns.list";
 	SetDimensions(0, COLS);
 	
-	Albums = new NC::Menu< std::pair<std::string, std::string> >(0, MainStartY, LeftColumnWidth, MainHeight, Config.titles_visibility ? "Albums" : "", Config.main_color, NC::brNone);
-	Albums->setHighlightColor(Config.active_column_color);
-	Albums->cyclicScrolling(Config.use_cyclic_scrolling);
-	Albums->centeredCursor(Config.centered_cursor);
-	Albums->setItemDisplayer(Display::Pair<std::string, std::string>);
-	
 	Dirs = new NC::Menu< std::pair<std::string, std::string> >(0, MainStartY, LeftColumnWidth, MainHeight, Config.titles_visibility ? "Directories" : "", Config.main_color, NC::brNone);
 	Dirs->setHighlightColor(Config.active_column_color);
 	Dirs->cyclicScrolling(Config.use_cyclic_scrolling);
 	Dirs->centeredCursor(Config.centered_cursor);
 	Dirs->setItemDisplayer(Display::Pair<std::string, std::string>);
-	
-	LeftColumn = Config.albums_in_tag_editor ? Albums : Dirs;
 	
 	TagTypes = new NC::Menu<std::string>(MiddleColumnStartX, MainStartY, MiddleColumnWidth, MainHeight, Config.titles_visibility ? "Tag types" : "", Config.main_color, NC::brNone);
 	TagTypes->setHighlightColor(Config.main_highlight_color);
@@ -160,7 +151,7 @@ void TagEditor::Init()
 	
 	FParserPreview = new NC::Scrollpad((COLS-FParserWidth)/2+FParserWidthOne, (MainHeight-FParserHeight)/2+MainStartY, FParserWidthTwo, FParserHeight, "Preview", Config.main_color, Config.window_border);
 	
-	w = LeftColumn;
+	w = Dirs;
 	isInitialized = 1;
 }
 
@@ -187,7 +178,6 @@ void TagEditor::Resize()
 	GetWindowResizeParams(x_offset, width);
 	SetDimensions(x_offset, width);
 	
-	Albums->resize(LeftColumnWidth, MainHeight);
 	Dirs->resize(LeftColumnWidth, MainHeight);
 	TagTypes->resize(MiddleColumnWidth, MainHeight);
 	Tags->resize(RightColumnWidth, MainHeight);
@@ -196,7 +186,6 @@ void TagEditor::Resize()
 	FParserLegend->resize(FParserWidthTwo, FParserHeight);
 	FParserPreview->resize(FParserWidthTwo, FParserHeight);
 	
-	Albums->moveTo(LeftColumnStartX, MainStartY);
 	Dirs->moveTo(LeftColumnStartX, MainStartY);
 	TagTypes->moveTo(MiddleColumnStartX, MainStartY);
 	Tags->moveTo(RightColumnStartX, MainStartY);
@@ -242,7 +231,6 @@ void TagEditor::SwitchTo()
 
 void TagEditor::Refresh()
 {
-	LeftColumn->display();
 	mvvline(MainStartY, MiddleColumnStartX-1, 0, MainHeight);
 	TagTypes->display();
 	mvvline(MainStartY, RightColumnStartX-1, 0, MainHeight);
@@ -261,77 +249,43 @@ void TagEditor::Refresh()
 
 void TagEditor::Update()
 {
-	if (LeftColumn->reallyEmpty())
+	if (Dirs->reallyEmpty())
 	{
-		LeftColumn->Window::clear();
+		Dirs->Window::clear();
 		Tags->clear();
-		if (Config.albums_in_tag_editor)
+		
+		int highlightme = -1;
+		auto dirs = Mpd.GetDirectories(itsBrowsedDir);
+		std::sort(dirs.begin(), dirs.end(), CaseInsensitiveSorting());
+		if (itsBrowsedDir != "/")
 		{
-			*Albums << NC::XY(0, 0) << "Fetching albums...";
-			Albums->Window::refresh();
-			Mpd.BlockIdle(true); // for the same reason as in media library
-			auto albums = Mpd.GetList(MPD_TAG_ALBUM);
-			for (auto album = albums.begin(); album != albums.end(); ++album)
-			{
-				Mpd.StartSearch(1);
-				Mpd.AddSearch(MPD_TAG_ALBUM, *album);
-				auto songs = Mpd.CommitSearchSongs();
-				if (!songs.empty())
-					Albums->addItem(std::make_pair(songs[0].toString(Config.tag_editor_album_format), *album));
-			}
-			Mpd.BlockIdle(false);
-			std::sort(Albums->beginV(), Albums->endV(), CaseInsensitiveSorting());
+			size_t slash = itsBrowsedDir.rfind("/");
+			std::string parent = slash != std::string::npos ? itsBrowsedDir.substr(0, slash) : "/";
+			Dirs->addItem(make_pair("..", parent));
 		}
 		else
+			Dirs->addItem(std::make_pair(".", "/"));
+		for (auto dir = dirs.begin(); dir != dirs.end(); ++dir)
 		{
-			int highlightme = -1;
-			auto dirs = Mpd.GetDirectories(itsBrowsedDir);
-			std::sort(dirs.begin(), dirs.end(), CaseInsensitiveSorting());
-			if (itsBrowsedDir != "/")
-			{
-				size_t slash = itsBrowsedDir.rfind("/");
-				std::string parent = slash != std::string::npos ? itsBrowsedDir.substr(0, slash) : "/";
-				Dirs->addItem(make_pair("..", parent));
-			}
-			else
-				Dirs->addItem(std::make_pair(".", "/"));
-			for (auto dir = dirs.begin(); dir != dirs.end(); ++dir)
-			{
-				size_t slash = dir->rfind("/");
-				std::string to_display = slash != std::string::npos ? dir->substr(slash+1) : *dir;
-				Dirs->addItem(make_pair(to_display, *dir));
-				if (*dir == itsHighlightedDir)
-					highlightme = Dirs->size()-1;
-			}
-			if (highlightme != -1)
-				Dirs->highlight(highlightme);
+			size_t slash = dir->rfind("/");
+			std::string to_display = slash != std::string::npos ? dir->substr(slash+1) : *dir;
+			Dirs->addItem(make_pair(to_display, *dir));
+			if (*dir == itsHighlightedDir)
+				highlightme = Dirs->size()-1;
 		}
-		LeftColumn->display();
-		TagTypes->refresh();
+		if (highlightme != -1)
+			Dirs->highlight(highlightme);
+		
+		Dirs->display();
 	}
 	
 	if (Tags->reallyEmpty())
 	{
 		Tags->reset();
-		if (Config.albums_in_tag_editor)
-		{
-			if (!Albums->empty())
-			{
-				Mpd.StartSearch(1);
-				Mpd.AddSearch(MPD_TAG_ALBUM, Albums->current().value().second);
-				auto albums = Mpd.CommitSearchSongs();
-				std::sort(albums.begin(), albums.end(), CaseInsensitiveSorting());
-				for (auto album = albums.begin(); album != albums.end(); ++album)
-					Tags->addItem(*album);
-			}
-		}
-		else
-		{
-			auto songs = Mpd.GetSongs(Dirs->current().value().second);
-			std::sort(songs.begin(), songs.end(), CaseInsensitiveSorting());
-			for (auto s = songs.begin(); s != songs.end(); ++s)
-				Tags->addItem(*s);
-		}
+		auto songs = Mpd.GetSongs(Dirs->current().value().second);
+		std::sort(songs.begin(), songs.end(), CaseInsensitiveSorting());
+		for (auto s = songs.begin(); s != songs.end(); ++s)
+			Tags->addItem(*s);
 		Tags->refresh();
 	}
 	
@@ -352,16 +306,16 @@ void TagEditor::EnterPressed()
 	
 	if (w == Dirs)
 	{
-		auto dirs = Mpd.GetDirectories(LeftColumn->current().value().second);
+		auto dirs = Mpd.GetDirectories(Dirs->current().value().second);
 		if (!dirs.empty())
 		{
 			itsHighlightedDir = itsBrowsedDir;
-			itsBrowsedDir = LeftColumn->current().value().second;
-			LeftColumn->clear();
-			LeftColumn->reset();
+			itsBrowsedDir = Dirs->current().value().second;
+			Dirs->clear();
+			Dirs->reset();
 		}
 		else
-			ShowMessage("No subdirs found");
+			ShowMessage("No subdirectories found");
 	}
 	else if (w == FParserDialog)
 	{
@@ -652,8 +606,8 @@ void TagEditor::EnterPressed()
 				TagTypes->setHighlightColor(Config.main_highlight_color);
 				TagTypes->reset();
 				w->refresh();
-				w = LeftColumn;
-				LeftColumn->setHighlightColor(Config.active_column_color);
+				w = Dirs;
+				Dirs->setHighlightColor(Config.active_column_color);
 				Mpd.UpdateDirectory(getSharedDirectory(Tags->beginV(), Tags->endV()));
 			}
 			else
@@ -668,16 +622,7 @@ void TagEditor::SpacePressed()
 	{
 		Tags->current().setSelected(!Tags->current().isSelected());
 		w->scroll(NC::wDown);
-		return;
 	}
-	if (w != LeftColumn)
-		return;
-	
-	Config.albums_in_tag_editor = !Config.albums_in_tag_editor;
-	w = LeftColumn = Config.albums_in_tag_editor ? Albums : Dirs;
-	ShowMessage("Switched to %s view", Config.albums_in_tag_editor ? "albums" : "directories");
-	LeftColumn->display();
-	Tags->clear();
 }
 
 void TagEditor::MouseButtonPressed(MEVENT me)
@@ -718,16 +663,16 @@ void TagEditor::MouseButtonPressed(MEVENT me)
 			ScrollpadMouseButtonPressed(FParserHelper, me);
 		}
 	}
-	else if (!LeftColumn->empty() && LeftColumn->hasCoords(me.x, me.y))
+	else if (!Dirs->empty() && Dirs->hasCoords(me.x, me.y))
 	{
-		if (w != LeftColumn)
+		if (w != Dirs)
 		{
 			PrevColumn();
 			PrevColumn();
 		}
-		if (size_t(me.y) < LeftColumn->size() && (me.bstate & (BUTTON1_PRESSED | BUTTON3_PRESSED)))
+		if (size_t(me.y) < Dirs->size() && (me.bstate & (BUTTON1_PRESSED | BUTTON3_PRESSED)))
 		{
-			LeftColumn->Goto(me.y);
+			Dirs->Goto(me.y);
 			if (me.bstate & BUTTON1_PRESSED)
 				EnterPressed();
 			else
@@ -740,7 +685,7 @@ void TagEditor::MouseButtonPressed(MEVENT me)
 	else if (!TagTypes->empty() && TagTypes->hasCoords(me.x, me.y))
 	{
 		if (w != TagTypes)
-			w == LeftColumn ? NextColumn() : PrevColumn();
+			w == Dirs ? NextColumn() : PrevColumn();
 		if (size_t(me.y) < TagTypes->size() && (me.bstate & (BUTTON1_PRESSED | BUTTON3_PRESSED)))
 		{
 			if (!TagTypes->Goto(me.y))
@@ -776,7 +721,7 @@ void TagEditor::MouseButtonPressed(MEVENT me)
 
 bool TagEditor::allowsFiltering()
 {
-	return w == LeftColumn || w == Tags;
+	return w == Dirs || w == Tags;
 }
 
 std::string TagEditor::currentFilter()
@@ -784,8 +729,6 @@ std::string TagEditor::currentFilter()
 	std::string filter;
 	if (w == Dirs)
 		filter = RegexFilter< std::pair<std::string, std::string> >::currentFilter(*Dirs);
-	else if (w == Albums)
-		filter = RegexFilter< std::pair<std::string, std::string> >::currentFilter(*Albums);
 	else if (w == Tags)
 		filter = RegexFilter<MPD::MutableSong>::currentFilter(*Tags);
 	return filter;
@@ -800,12 +743,6 @@ void TagEditor::applyFilter(const std::string &filter)
 		auto rx = RegexFilter< std::pair<std::string, std::string> >(filter, Config.regex_type, fun);
 		Dirs->filter(Dirs->begin(), Dirs->end(), rx);
 	}
-	else if (w == Albums)
-	{
-		Albums->showAll();
-		auto rx = RegexFilter< std::pair<std::string, std::string> >(filter, Config.regex_type, AlbumEntryMatcher);
-		Albums->filter(Albums->begin(), Albums->end(), rx);
-	}
 	else if (w == Tags)
 	{
 		Tags->showAll();
@@ -818,7 +755,7 @@ void TagEditor::applyFilter(const std::string &filter)
 
 bool TagEditor::allowsSearching()
 {
-	return w == LeftColumn || w == Tags;
+	return w == Dirs || w == Tags;
 }
 
 bool TagEditor::search(const std::string &constraint)
@@ -829,11 +766,6 @@ bool TagEditor::search(const std::string &constraint)
 		auto fun = std::bind(DirEntryMatcher, _1, _2, false);
 		auto rx = RegexFilter< std::pair<std::string, std::string> >(constraint, Config.regex_type, fun);
 		result = Dirs->search(Dirs->begin(), Dirs->end(), rx);
-	}
-	else if (w == Albums)
-	{
-		auto rx = RegexFilter< std::pair<std::string, std::string> >(constraint, Config.regex_type, AlbumEntryMatcher);
-		result = Albums->search(Albums->begin(), Albums->end(), rx);
 	}
 	else if (w == Tags)
 	{
@@ -847,8 +779,6 @@ void TagEditor::nextFound(bool wrap)
 {
 	if (w == Dirs)
 		Dirs->nextFound(wrap);
-	else if (w == Albums)
-		Albums->nextFound(wrap);
 	else if (w == Tags)
 		Tags->nextFound(wrap);
 }
@@ -857,8 +787,6 @@ void TagEditor::prevFound(bool wrap)
 {
 	if (w == Dirs)
 		Dirs->prevFound(wrap);
-	else if (w == Albums)
-		Albums->prevFound(wrap);
 	else if (w == Tags)
 		Tags->prevFound(wrap);
 }
@@ -905,7 +833,7 @@ MPD::SongList TagEditor::getSelectedSongs()
 
 bool TagEditor::isNextColumnAvailable()
 {
-	if (w == LeftColumn)
+	if (w == Dirs)
 	{
 		if (!TagTypes->reallyEmpty() && !Tags->reallyEmpty())
 			return true;
@@ -924,9 +852,9 @@ bool TagEditor::isNextColumnAvailable()
 
 bool TagEditor::NextColumn()
 {
-	if (w == LeftColumn)
+	if (w == Dirs)
 	{
-		LeftColumn->setHighlightColor(Config.main_highlight_color);
+		Dirs->setHighlightColor(Config.main_highlight_color);
 		w->refresh();
 		w = TagTypes;
 		TagTypes->setHighlightColor(Config.active_column_color);
@@ -956,12 +884,12 @@ bool TagEditor::isPrevColumnAvailable()
 {
 	if (w == Tags)
 	{
-		if (!TagTypes->reallyEmpty() && !LeftColumn->reallyEmpty())
+		if (!TagTypes->reallyEmpty() && !Dirs->reallyEmpty())
 			return true;
 	}
 	else if (w == TagTypes)
 	{
-		if (!LeftColumn->reallyEmpty())
+		if (!Dirs->reallyEmpty())
 			return true;
 	}
 	else if (w == FParserHelper)
@@ -985,8 +913,8 @@ bool TagEditor::PrevColumn()
 	{
 		TagTypes->setHighlightColor(Config.main_highlight_color);
 		w->refresh();
-		w = LeftColumn;
-		LeftColumn->setHighlightColor(Config.active_column_color);
+		w = Dirs;
+		Dirs->setHighlightColor(Config.active_column_color);
 		return true;
 	}
 	else if (w == FParserHelper)
@@ -1009,14 +937,6 @@ void TagEditor::LocateSong(const MPD::Song &s)
 	if (s.getDirectory().empty())
 		return;
 	
-	if (LeftColumn == Albums)
-	{
-		Config.albums_in_tag_editor = false;
-		if (w == LeftColumn)
-			w = Dirs;
-		LeftColumn = Dirs;
-	}
-		
 	if (Global::myScreen != this)
 		SwitchTo();
 	
@@ -1391,11 +1311,6 @@ bool DirEntryMatcher(const Regex &rx, const std::pair<std::string, std::string> 
 {
 	if (dir.first == "." || dir.first == "..")
 		return filter;
-	return rx.match(dir.first);
-}
-
-bool AlbumEntryMatcher(const Regex &rx, const std::pair<std::string, std::string> &dir)
-{
 	return rx.match(dir.first);
 }
 
