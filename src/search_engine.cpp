@@ -150,11 +150,7 @@ void SearchEngine::SwitchTo()
 	myScreen = this;
 	Global::RedrawHeader = true;
 	
-	if (!w->back().value().isSong())
-	{
-		*w << NC::XY(0, 0) << "Updating list...";
-		UpdateFoundList();
-	}
+	markSongsInPlaylist(getProxySongList());
 }
 
 std::basic_string<my_char_t> SearchEngine::Title()
@@ -208,7 +204,7 @@ void SearchEngine::EnterPressed()
 			w->insertItem(ResetButton+2, SEItem(), 1, 1);
 			w->at(ResetButton+2).value().mkBuffer() << Config.color1 << "Search results: " << Config.color2 << "Found " << found << (found > 1 ? " songs" : " song") << NC::clDefault;
 			w->insertSeparator(ResetButton+3);
-			UpdateFoundList();
+			markSongsInPlaylist(getProxySongList());
 			ShowMessage("Searching finished");
 			if (Config.block_search_constraints_change)
 				for (size_t i = 0; i < StaticOptions-4; ++i)
@@ -361,13 +357,6 @@ MPD::SongList SearchEngine::getSelectedSongs()
 }
 
 /***********************************************************************/
-
-void SearchEngine::UpdateFoundList()
-{
-	for (auto it = w->begin(); it != w->end(); ++it)
-		if (it->value().isSong())
-			it->setBold(myPlaylist->checkForSong(it->value().song()));
-}
 
 void SearchEngine::Prepare()
 {

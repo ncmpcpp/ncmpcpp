@@ -282,11 +282,12 @@ std::string Timestamp(time_t t)
 	return result;
 }
 
-void UpdateSongList(NC::Menu<MPD::Song> *menu)
+void markSongsInPlaylist(std::shared_ptr<ProxySongList> pl)
 {
-	for (auto it = menu->begin(); it != menu->end(); ++it)
-		it->setBold(myPlaylist->checkForSong(it->value()));
-	menu->refresh();
+	size_t list_size = pl->size();
+	for (size_t i = 0; i < list_size; ++i)
+		if (auto s = pl->getSong(i))
+			pl->setBold(i, myPlaylist->checkForSong(*s));
 }
 
 std::basic_string<my_char_t> Scroller(const std::basic_string<my_char_t> &str, size_t &pos, size_t width)

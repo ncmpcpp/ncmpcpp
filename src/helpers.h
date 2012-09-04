@@ -394,7 +394,7 @@ template <typename T> void ShowTag(T &buf, const std::string &tag)
 
 std::string Timestamp(time_t t);
 
-void UpdateSongList(NC::Menu<MPD::Song> *);
+void markSongsInPlaylist(std::shared_ptr<ProxySongList> pl);
 
 std::basic_string<my_char_t> Scroller(const std::basic_string<my_char_t> &str, size_t &pos, size_t width);
 

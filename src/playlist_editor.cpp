@@ -133,7 +133,7 @@ void PlaylistEditor::SwitchTo()
 		Global::myPrevScreen = myScreen;
 	myScreen = this;
 	Global::RedrawHeader = true;
-	UpdateSongList(Content);
+	markSongsInPlaylist(contentProxyList());
 	Refresh();
 }
 
@@ -283,6 +283,13 @@ bool PlaylistEditor::PrevColumn()
 		return true;
 	}
 	return false;
+}
+
+std::shared_ptr<ProxySongList> PlaylistEditor::contentProxyList()
+{
+	return mkProxySongList(*Content, [](NC::Menu<MPD::Song>::Item &item) {
+		return &item.value();
+	});
 }
 
 void PlaylistEditor::AddToPlaylist(bool add_n_play)
@@ -451,9 +458,7 @@ std::shared_ptr<ProxySongList> PlaylistEditor::getProxySongList()
 {
 	auto ptr = nullProxySongList();
 	if (w == Content)
-		ptr = mkProxySongList(*Content, [](NC::Menu<MPD::Song>::Item &item) {
-			return &item.value();
-		});
+		ptr = contentProxyList();
 	return ptr;
 }
 

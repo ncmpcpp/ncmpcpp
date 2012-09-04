@@ -48,6 +48,9 @@ class ProxySongList
 		virtual bool isSelected(size_t pos) = 0;
 		virtual void setSelected(size_t pos, bool selected) = 0;
 		
+		virtual bool isBold(size_t pos) = 0;
+		virtual void setBold(size_t pos, bool bold) = 0;
+		
 		virtual MPD::Song *getSong(size_t pos) = 0;
 		virtual MPD::Song *currentSong() = 0;
 	};
@@ -67,15 +70,20 @@ class ProxySongList
 		virtual bool isSelected(size_t pos) {
 			return m_menu[pos].isSelected();
 		}
-		
 		virtual void setSelected(size_t pos, bool selected) {
 			m_menu[pos].setSelected(selected);
+		}
+		
+		virtual bool isBold(size_t pos) {
+			return m_menu[pos].isBold();
+		}
+		virtual void setBold(size_t pos, bool bold) {
+			m_menu[pos].setBold(bold);
 		}
 		
 		virtual MPD::Song *getSong(size_t pos) {
 			return m_song_getter(m_menu[pos]);
 		}
-		
 		virtual MPD::Song *currentSong() {
 			if (!m_menu.empty())
 				return getSong(m_menu.choice());
@@ -101,6 +109,9 @@ public:
 	
 	bool isSelected(size_t pos) { return m_impl->isSelected(pos); }
 	void setSelected(size_t pos, bool selected) { m_impl->setSelected(pos, selected); }
+	
+	bool isBold(size_t pos) { return m_impl->isBold(pos); }
+	void setBold(size_t pos, bool bold) { m_impl->setBold(pos, bold); }
 	
 	MPD::Song *getSong(size_t pos) { return m_impl->getSong(pos); }
 	MPD::Song *currentSong() { return m_impl->currentSong(); }

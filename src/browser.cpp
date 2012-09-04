@@ -108,7 +108,10 @@ void Browser::SwitchTo()
 	if (isLocal() && Config.browser_sort_mode == smMTime) // local browser doesn't support sorting by mtime
 		Config.browser_sort_mode = smName;
 	
-	w->empty() ? myBrowser->GetDirectory(itsBrowsedDir) : myBrowser->UpdateItemList();
+	if (w->empty())
+		myBrowser->GetDirectory(itsBrowsedDir);
+	else
+		markSongsInPlaylist(getProxySongList());
 
 	if (myScreen != this && myScreen->isTabbable())
 		Global::myPrevScreen = myScreen;
@@ -611,13 +614,6 @@ bool Browser::deleteItem(const MPD::Item &item)
 	return remove(path.c_str()) == 0;
 }
 #endif // !WIN32
-
-void Browser::UpdateItemList()
-{
-	for (auto it = w->begin(); it != w->end(); ++it)
-		if (it->value().type == itSong)
-			it->setBold(myPlaylist->checkForSong(*it->value().song));
-}
 
 namespace {//
 

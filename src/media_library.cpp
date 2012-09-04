@@ -206,8 +206,8 @@ void MediaLibrary::SwitchTo()
 		Global::myPrevScreen = myScreen;
 	myScreen = this;
 	Global::RedrawHeader = true;
+	markSongsInPlaylist(songsProxyList());
 	Refresh();
-	UpdateSongList(Songs);
 }
 
 std::basic_string<my_char_t> MediaLibrary::Title()
@@ -533,9 +533,7 @@ std::shared_ptr<ProxySongList> MediaLibrary::getProxySongList()
 {
 	auto ptr = nullProxySongList();
 	if (w == Songs)
-		ptr = mkProxySongList(*Songs, [](NC::Menu<MPD::Song>::Item &item) {
-			return &item.value();
-		});
+		ptr = songsProxyList();
 	return ptr;
 }
 
@@ -694,6 +692,13 @@ void MediaLibrary::PrevColumn()
 		w = Tags;
 		Tags->setHighlightColor(Config.active_column_color);
 	}
+}
+
+std::shared_ptr<ProxySongList> MediaLibrary::songsProxyList()
+{
+	return mkProxySongList(*Songs, [](NC::Menu<MPD::Song>::Item &item) {
+		return &item.value();
+	});
 }
 
 void MediaLibrary::LocateSong(const MPD::Song &s)

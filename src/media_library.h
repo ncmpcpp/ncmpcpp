@@ -68,6 +68,8 @@ class MediaLibrary : public Screen<NC::Window>, public Filterable, public HasSon
 		
 		void LocateSong(const MPD::Song &);
 		
+		std::shared_ptr<ProxySongList> songsProxyList();
+		
 		struct SearchConstraints
 		{
 			SearchConstraints() { }

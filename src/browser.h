@@ -73,7 +73,6 @@ class Browser : public Screen< NC::Menu<MPD::Item> >, public Filterable, public 
 		void ChangeBrowseMode();
 		bool deleteItem(const MPD::Item &);
 #		endif // !WIN32
-		void UpdateItemList();
 		
 		static bool isParentDirectory(const MPD::Item &item) {
 			return item.type == MPD::itDirectory && item.name == "..";

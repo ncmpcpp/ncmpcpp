@@ -260,13 +260,13 @@ void NcmpcppStatusChanged(MPD::Connection *, MPD::StatusChanges changed, void *)
 		Playlist::ReloadRemaining = true;
 		
 		if (isVisible(myBrowser))
-			myBrowser->UpdateItemList();
+			markSongsInPlaylist(myBrowser->getProxySongList());
 		if (isVisible(mySearcher))
-			mySearcher->UpdateFoundList();
+			markSongsInPlaylist(myLibrary->getProxySongList());
 		if (isVisible(myLibrary))
-			UpdateSongList(myLibrary->Songs);
+			markSongsInPlaylist(myLibrary->songsProxyList());
 		if (isVisible(myPlaylistEditor))
-			UpdateSongList(myPlaylistEditor->Content);
+			markSongsInPlaylist(myPlaylistEditor->contentProxyList());
 	}
 	if (changed.StoredPlaylists)
 	{

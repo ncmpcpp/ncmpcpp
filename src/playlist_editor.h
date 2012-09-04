@@ -72,6 +72,8 @@ class PlaylistEditor : public Screen<NC::Window>, public Filterable, public HasS
 		bool isPrevColumnAvailable();
 		bool PrevColumn();
 		
+		std::shared_ptr<ProxySongList> contentProxyList();
+		
 		NC::Menu<std::string> *Playlists;
 		NC::Menu<MPD::Song> *Content;
 		

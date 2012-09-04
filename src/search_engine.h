@@ -106,8 +106,6 @@ class SearchEngine : public Screen< NC::Menu<SEItem> >, public Filterable, publi
 		
 		virtual bool isMergable() { return true; }
 		
-		void UpdateFoundList();
-		
 		static size_t StaticOptions;
 		static size_t SearchButton;
 		static size_t ResetButton;
