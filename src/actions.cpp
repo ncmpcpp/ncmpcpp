@@ -1062,10 +1062,7 @@ void Add::Run()
 		Statusbar() << "Adding...";
 		wFooter->refresh();
 		if (myScreen == myPlaylistEditor)
-		{
 			Mpd.AddToPlaylist(myPlaylistEditor->Playlists->current().value(), path);
-			myPlaylistEditor->Content->clear(); // make it refetch content of playlist
-		}
 		else
 		{
 			const char lastfm_url[] = "lastfm://";

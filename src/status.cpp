@@ -305,8 +305,6 @@ void NcmpcppStatusChanged(MPD::Connection *, MPD::StatusChanges changed, void *)
 			else
 				myLibrary->Tags->clear();
 		}
-		if (myPlaylistEditor->Main())
-			myPlaylistEditor->Content->clear();
 		changed.DBUpdating = 1;
 	}
 	if (changed.PlayerState)
