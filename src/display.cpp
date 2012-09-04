@@ -76,22 +76,23 @@ template <typename T>
 void setProperties(NC::Menu<T> &menu, const MPD::Song &s, HasSongs &screen, bool &separate_albums,
                    bool &is_now_playing, bool &is_selected, bool &discard_colors)
 {
+	size_t drawn_pos = menu.drawn() - menu.begin();
 	separate_albums = false;
 	if (Config.playlist_separate_albums)
 	{
 		auto pl = screen.getProxySongList();
 		assert(pl);
-		auto next = pl->getSong(menu.drawnPosition()+1);
+		auto next = pl->getSong(drawn_pos+1);
 		if (next && next->getAlbum() != s.getAlbum())
 			separate_albums = true;
 	}
 	if (separate_albums)
 		menu << NC::fmtUnderline;
 	
-	int song_pos = menu.isFiltered() ? s.getPosition() : menu.drawnPosition();
+	int song_pos = menu.isFiltered() ? s.getPosition() : drawn_pos;
 	is_now_playing = static_cast<void *>(&menu) == myPlaylist->Items
 	              && song_pos == myPlaylist->NowPlaying;
-	is_selected = menu.drawn().isSelected();
+	is_selected = menu.drawn()->isSelected();
 	discard_colors = Config.discard_colors_if_item_is_selected && is_selected;
 }
 
@@ -337,17 +338,17 @@ std::string Display::Columns(size_t list_width)
 
 void Display::SongsInColumns(NC::Menu<MPD::Song> &menu, HasSongs &screen)
 {
-	showSongsInColumns(menu, menu.drawn().value(), screen);
+	showSongsInColumns(menu, menu.drawn()->value(), screen);
 }
 
 void Display::Songs(NC::Menu<MPD::Song> &menu, HasSongs &screen, const std::string &format)
 {
-	showSongs(menu, menu.drawn().value(), screen, format);
+	showSongs(menu, menu.drawn()->value(), screen, format);
 }
 
 void Display::Tags(NC::Menu<MPD::MutableSong> &menu)
 {
-	const MPD::MutableSong &s = menu.drawn().value();
+	const MPD::MutableSong &s = menu.drawn()->value();
 	size_t i = myTagEditor->TagTypes->choice();
 	if (i < 11)
 	{
@@ -364,12 +365,12 @@ void Display::Tags(NC::Menu<MPD::MutableSong> &menu)
 
 void Display::Outputs(NC::Menu<MPD::Output> &menu)
 {
-	menu << menu.drawn().value().name();
+	menu << menu.drawn()->value().name();
 }
 
 void Display::Items(NC::Menu<MPD::Item> &menu)
 {
-	const MPD::Item &item = menu.drawn().value();
+	const MPD::Item &item = menu.drawn()->value();
 	switch (item.type)
 	{
 		case MPD::itDirectory:
@@ -389,7 +390,7 @@ void Display::Items(NC::Menu<MPD::Item> &menu)
 
 void Display::SearchEngine(NC::Menu<SEItem> &menu)
 {
-	const SEItem &si = menu.drawn().value();
+	const SEItem &si = menu.drawn()->value();
 	if (si.isSong())
 	{
 		if (!Config.columns_in_search_engine)

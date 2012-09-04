@@ -32,12 +32,12 @@ namespace Display
 	
 	template <typename T> void Default(NC::Menu<T> &menu)
 	{
-		menu << menu.drawn().value();
+		menu << menu.drawn()->value();
 	}
 	
 	template <typename A, typename B> void Pair(NC::Menu< std::pair<A, B> > &menu)
 	{
-		menu << menu.drawn().value().first;
+		menu << menu.drawn()->value().first;
 	}
 	
 	void SongsInColumns(NC::Menu<MPD::Song> &menu, HasSongs &screen);

@@ -343,12 +343,7 @@ template <typename T> struct Menu : public Window
 	/// @return currently drawn item. The result is defined only within
 	/// drawing function that is called by Refresh()
 	/// @see Refresh()
-	const Item &drawn() const { return *(*m_options_ptr)[m_drawn_position]; }
-	
-	/// @return position of currently drawn item. The result is defined
-	/// only within drawing function that is called by Refresh()
-	/// @see Refresh()
-	size_t drawnPosition() const { return m_drawn_position; }
+	ConstIterator drawn() const { return begin() + m_drawn_position; }
 	
 	/// @return reference to last item on the list
 	/// @throw List::InvalidItem if requested item is separator

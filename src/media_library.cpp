@@ -893,12 +893,12 @@ bool SongEntryMatcher(const Regex &rx, const MPD::Song &s)
 
 void DisplayAlbums(NC::Menu<SearchConstraints> &menu)
 {
-	menu << AlbumToString(menu.drawn().value());
+	menu << AlbumToString(menu.drawn()->value());
 }
 
 void DisplayPrimaryTags(NC::Menu<std::string> &menu)
 {
-	const std::string &tag = menu.drawn().value();
+	const std::string &tag = menu.drawn()->value();
 	if (tag.empty())
 		menu << Config.empty_tag;
 	else
