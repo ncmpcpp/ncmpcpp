@@ -60,6 +60,10 @@ template <typename T> struct Menu : public Window
 		bool isSeparator() const { return m_is_separator; }
 		
 	private:
+		// make those private, they shouldn't be used
+		Item(const Item &) { assert(false); }
+		Item &operator=(const Item &) { assert(false); }
+		
 		static Item *mkSeparator()
 		{
 			Item *i = new Item;
@@ -234,10 +238,6 @@ template <typename T> struct Menu : public Window
 	/// @return true if it contains them, false otherwise
 	bool hasSelected() const;
 	
-	/// Gets positions of items that are selected
-	/// @param v vector to be filled with selected positions numbers
-	void getSelected(std::vector<size_t> &v) const;
-	
 	/// Highlights given position
 	/// @param pos position to be highlighted
 	void highlight(size_t pos);
@@ -247,10 +247,14 @@ template <typename T> struct Menu : public Window
 	
 	void filter(ConstIterator first, ConstIterator last, const FilterFunction &f);
 	
+	void applyCurrentFilter(ConstIterator first, ConstIterator last);
+	
 	bool search(ConstIterator first, ConstIterator last, const FilterFunction &f);
 	
 	/// Clears filter results
 	void clearFilterResults();
+	
+	void clearFilter();
 	
 	/// Clears search results
 	void clearSearchResults();
@@ -378,6 +382,11 @@ template <typename T> struct Menu : public Window
 	/// @return const reference to item at given position
 	Menu<T>::Item &operator[](size_t pos) { return *(*m_options_ptr)[pos]; }
 	
+	Iterator currentI() { return Iterator(m_options_ptr->begin() + m_highlight); }
+	ConstIterator currentI() const { return ConstIterator(m_options_ptr->begin() + m_highlight); }
+	ValueIterator currentVI() { return ValueIterator(m_options_ptr->begin() + m_highlight); }
+	ConstValueIterator currentVI() const { return ConstValueIterator(m_options_ptr->begin() + m_highlight); }
+	
 	Iterator begin() { return Iterator(m_options_ptr->begin()); }
 	ConstIterator begin() const { return ConstIterator(m_options_ptr->begin()); }
 	Iterator end() { return Iterator(m_options_ptr->end()); }
@@ -412,7 +421,6 @@ private:
 	std::vector<Item *> *m_options_ptr;
 	std::vector<Item *> m_options;
 	std::vector<Item *> m_filtered_options;
-	std::vector<size_t> m_filtered_positions;
 	std::set<size_t> m_found_positions;
 	
 	size_t m_beginning;
@@ -697,13 +705,6 @@ template <typename T> bool Menu<T>::hasSelected() const
 	return false;
 }
 
-template <typename T> void Menu<T>::getSelected(std::vector<size_t> &v) const
-{
-	for (size_t i = 0; i < m_options_ptr->size(); ++i)
-		if ((*m_options_ptr)[i]->isSelected())
-			v.push_back(i);
-}
-
 template <typename T> void Menu<T>::highlight(size_t pos)
 {
 	m_highlight = pos;
@@ -727,22 +728,31 @@ void Menu<T>::filter(ConstIterator first, ConstIterator last, const FilterFuncti
 	clearFilterResults();
 	m_filter = f;
 	for (auto it = first; it != last; ++it)
-	{
 		if (m_filter(*it))
-		{
-			size_t pos = it-begin();
-			m_filtered_positions.push_back(pos);
 			m_filtered_options.push_back(*it.base());
-		}
-	}
-	m_options_ptr = &m_filtered_options;
+	if (m_filtered_options == m_options)
+		m_filtered_options.clear();
+	else
+		m_options_ptr = &m_filtered_options;
 }
+
+template <typename T>
+void Menu<T>::applyCurrentFilter(ConstIterator first, ConstIterator last)
+{
+	assert(m_filter);
+	filter(first, last, m_filter);
+}
+
 
 template <typename T> void Menu<T>::clearFilterResults()
 {
 	m_filtered_options.clear();
-	m_filtered_positions.clear();
 	m_options_ptr = &m_options;
+}
+
+template <typename T> void Menu<T>::clearFilter()
+{
+	m_filter = 0;
 }
 
 template <typename T>

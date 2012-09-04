@@ -42,8 +42,9 @@ namespace MPD
 	
 	struct StatusChanges
 	{
-		StatusChanges() : Playlist(0), SongID(0), Database(0), DBUpdating(0), Volume(0), ElapsedTime(0), Crossfade(0), Random(0), Repeat(0), Single(0), Consume(0), PlayerState(0), StatusFlags(0), Outputs(0) { }
+		StatusChanges() : Playlist(0), StoredPlaylists(0), SongID(0), Database(0), DBUpdating(0), Volume(0), ElapsedTime(0), Crossfade(0), Random(0), Repeat(0), Single(0), Consume(0), PlayerState(0), StatusFlags(0), Outputs(0) { }
 		bool Playlist:1;
+		bool StoredPlaylists:1;
 		bool SongID:1;
 		bool Database:1;
 		bool DBUpdating:1;
@@ -193,7 +194,7 @@ namespace MPD
 			bool ClearPlaylist(const std::string &);
 			void AddToPlaylist(const std::string &, const Song &);
 			void AddToPlaylist(const std::string &, const std::string &);
-			bool Move(const std::string &, int, int);
+			bool PlaylistMove(const std::string &, int, int);
 			bool Rename(const std::string &, const std::string &);
 			
 			void StartSearch(bool);

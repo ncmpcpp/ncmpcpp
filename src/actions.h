@@ -355,6 +355,7 @@ struct MoveSelectedItemsDown : public Action
 struct MoveSelectedItemsTo : public Action
 {
 	MoveSelectedItemsTo() : Action(aMoveSelectedItemsTo, "move_selected_items_to") { }
+	virtual bool canBeRun() const;
 	virtual void Run();
 };
 

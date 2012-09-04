@@ -50,6 +50,189 @@ inline MPD::Song *currentSong(BasicScreen *screen)
 	return ptr;
 }
 
+template <typename Iterator> bool hasSelected(Iterator first, Iterator last)
+{
+	for (; first != last; ++first)
+		if (first->isSelected())
+			return true;
+	return false;
+}
+
+template <typename Iterator> std::vector<Iterator> getSelected(Iterator first, Iterator last)
+{
+	std::vector<Iterator> result;
+	for (; first != last; ++first)
+		if (first->isSelected())
+			result.push_back(first);
+	return result;
+}
+
+template <typename T> void selectCurrentIfNoneSelected(NC::Menu<T> &m)
+{
+	if (!hasSelected(m.begin(), m.end()))
+		m.current().setSelected(true);
+}
+
+template <typename Iterator>
+std::vector<Iterator> getSelectedOrCurrent(Iterator first, Iterator last, Iterator current)
+{
+	std::vector<Iterator> result = getSelected(first, last);
+	if (result.empty())
+		result.push_back(current);
+	return result;
+}
+
+template <typename T, typename F> void withUnfilteredMenu(NC::Menu<T> &m, F action)
+{
+	bool is_filtered = m.isFiltered();
+	m.showAll();
+	action();
+	if (is_filtered)
+		m.showFiltered();
+}
+
+template <typename T, typename F>
+void withUnfilteredMenuReapplyFilter(NC::Menu<T> &m, F action)
+{
+	m.showAll();
+	action();
+	if (m.getFilter())
+	{
+		m.applyCurrentFilter(m.begin(), m.end());
+		if (m.empty())
+		{
+			m.clearFilter();
+			m.clearFilterResults();
+		}
+	}
+}
+
+template <typename T, typename F>
+void moveSelectedItemsUp(NC::Menu<T> &m, F swap_fun)
+{
+	if (m.choice() > 0)
+		selectCurrentIfNoneSelected(m);
+	auto list = getSelected(m.begin(), m.end());
+	auto begin = m.begin();
+	if (!list.empty() && list.front() != m.begin())
+	{
+		Mpd.StartCommandsList();
+		for (auto it = list.begin(); it != list.end(); ++it)
+			swap_fun(Mpd, *it - begin, *it - begin - 1);
+		if (Mpd.CommitCommandsList())
+		{
+			if (list.size() > 1)
+			{
+				for (auto it = list.begin(); it != list.end(); ++it)
+				{
+					(*it)->setSelected(false);
+					(*it-1)->setSelected(true);
+				}
+				m.highlight(list[(list.size())/2] - begin - 1);
+			}
+			else
+			{
+				// if we move only one item, do not select it. however, if single item
+				// was selected prior to move, it'll deselect it. oh well.
+				list[0]->setSelected(false);
+				m.scroll(NC::wUp);
+			}
+		}
+	}
+}
+
+template <typename T, typename F>
+void moveSelectedItemsDown(NC::Menu<T> &m, F swap_fun)
+{
+	if (m.choice() < m.size()-1)
+		selectCurrentIfNoneSelected(m);
+	auto list = getSelected(m.rbegin(), m.rend());
+	auto begin = m.begin() + 1; // reverse iterators add 1, so we need to cancel it
+	if (!list.empty() && list.front() != m.rbegin())
+	{
+		Mpd.StartCommandsList();
+		for (auto it = list.begin(); it != list.end(); ++it)
+			swap_fun(Mpd, it->base() - begin, it->base() - begin + 1);
+		if (Mpd.CommitCommandsList())
+		{
+			if (list.size() > 1)
+			{
+				for (auto it = list.begin(); it != list.end(); ++it)
+				{
+					(*it)->setSelected(false);
+					(*it-1)->setSelected(true);
+				}
+				m.highlight(list[(list.size())/2].base() - begin + 1);
+			}
+			else
+			{
+				// if we move only one item, do not select it. however, if single item
+				// was selected prior to move, it'll deselect it. oh well.
+				list[0]->setSelected(false);
+				m.scroll(NC::wDown);
+			}
+		}
+	}
+}
+
+template <typename T, typename F>
+void moveSelectedItemsTo(NC::Menu<T> &m, F move_fun)
+{
+	if (m.empty())
+		return;
+	auto cur_ptr = &m.current().value();
+	withUnfilteredMenu(m, [&]() {
+		// this is kinda shitty, but there is no other way to know
+		// what position current item has in unfiltered menu.
+		ptrdiff_t pos = 0;
+		for (auto it = m.begin(); it != m.end(); ++it, ++pos)
+			if (&it->value() == cur_ptr)
+				break;
+		auto begin = m.begin();
+		auto list = getSelected(m.begin(), m.end());
+		// we move only truly selected items
+		if (list.empty())
+			return;
+		// we can't move to the middle of selected items
+		//(this also handles case when list.size() == 1)
+		if (pos >= (list.front() - begin) && pos <= (list.back() - begin))
+			return;
+		int diff = pos - (list.front() - begin);
+		Mpd.StartCommandsList();
+		if (diff > 0) // move down
+		{
+			pos -= list.size();
+			size_t i = list.size()-1;
+			for (auto it = list.rbegin(); it != list.rend(); ++it, --i)
+				move_fun(Mpd, *it - begin, pos+i);
+			if (Mpd.CommitCommandsList())
+			{
+				i = list.size()-1;
+				for (auto it = list.rbegin(); it != list.rend(); ++it, --i)
+				{
+					(*it)->setSelected(false);
+					m[pos+i].setSelected(true);
+				}
+			}
+		}
+		else if (diff < 0) // move up
+		{
+			size_t i = 0;
+			for (auto it = list.begin(); it != list.end(); ++it, ++i)
+				move_fun(Mpd, *it - begin, pos+i);
+			if (Mpd.CommitCommandsList())
+			{
+				i = 0;
+				for (auto it = list.begin(); it != list.end(); ++it, ++i)
+				{
+					(*it)->setSelected(false);
+					m[pos+i].setSelected(true);
+				}
+			}
+		}
+	});
+}
+
 template <typename Iterator> void reverseSelectionHelper(Iterator first, Iterator last)
 {
 	for (; first != last; ++first)
@@ -67,15 +250,6 @@ template <typename Iterator> std::string getSharedDirectory(Iterator first, Iter
 			break;
 	}
 	return result;
-}
-
-template <typename T> void withUnfilteredMenu(NC::Menu<T> &menu, std::function<void()> action)
-{
-	bool is_filtered = menu.isFiltered();
-	menu.showAll();
-	action();
-	if (is_filtered)
-		menu.showFiltered();
 }
 
 void ParseArgv(int, char **);

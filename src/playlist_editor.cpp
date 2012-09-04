@@ -133,46 +133,64 @@ void PlaylistEditor::SwitchTo()
 		Global::myPrevScreen = myScreen;
 	myScreen = this;
 	Global::RedrawHeader = true;
-	Refresh();
 	UpdateSongList(Content);
+	Refresh();
 }
 
 void PlaylistEditor::Update()
 {
-	if (Playlists->reallyEmpty())
+	if (Playlists->reallyEmpty() || playlistsUpdateRequested)
 	{
-		Content->clear();
-		auto list = Mpd.GetPlaylists();
-		std::sort(list.begin(), list.end(), CaseInsensitiveSorting());
-		for (auto it = list.begin(); it != list.end(); ++it)
-			Playlists->addItem(*it);
+		playlistsUpdateRequested = false;
+		Playlists->clearSearchResults();
+		withUnfilteredMenuReapplyFilter(*Playlists, [this]() {
+			auto list = Mpd.GetPlaylists();
+			std::sort(list.begin(), list.end(), CaseInsensitiveSorting());
+			auto playlist = list.begin();
+			if (Playlists->size() > list.size())
+				Playlists->resizeList(list.size());
+			for (auto it = Playlists->begin(); it != Playlists->end(); ++it, ++playlist)
+				it->value() = *playlist;
+			for (; playlist != list.end(); ++playlist)
+				Playlists->addItem(*playlist);
+		});
 		Playlists->refresh();
 	}
 	
-	if (!Playlists->empty() && Content->reallyEmpty())
+	if (!Playlists->empty() && (Content->reallyEmpty() || contentUpdateRequested))
 	{
-		Content->reset();
-		size_t plsize = 0;
-		auto songs = Mpd.GetPlaylistContent(Playlists->current().value());
-		for (auto s = songs.begin(); s != songs.end(); ++s, ++plsize)
-			Content->addItem(*s, myPlaylist->checkForSong(*s));
-		std::string title;
-		if (Config.titles_visibility)
-		{
-			title = "Playlist content";
-			if (plsize > 0)
+		contentUpdateRequested = false;
+		Content->clearSearchResults();
+		withUnfilteredMenuReapplyFilter(*Content, [this]() {
+			auto list = Mpd.GetPlaylistContent(Playlists->current().value());
+			auto song = list.begin();
+			if (Content->size() > list.size())
+				Content->resizeList(list.size());
+			for (auto it = Content->begin(); it != Content->end(); ++it, ++song)
 			{
-				title += " (";
-				title += unsignedLongIntTo<std::string>::apply(plsize);
-				title += " item";
-				if (plsize == 1)
-					title += ")";
-				else
-					title += "s)";
+				it->value() = *song;
+				it->setBold(myPlaylist->checkForSong(*song));
 			}
-			title.resize(Content->getWidth());
-		}
-		Content->setTitle(title);
+			for (; song != list.end(); ++song)
+				Content->addItem(*song, myPlaylist->checkForSong(*song));
+			std::string title;
+			if (Config.titles_visibility)
+			{
+				title = "Playlist content";
+				if (list.size() > 0)
+				{
+					title += " (";
+					title += unsignedLongIntTo<std::string>::apply(list.size());
+					title += " item";
+					if (list.size() == 1)
+						title += ")";
+					else
+						title += "s)";
+				}
+				title.resize(Content->getWidth());
+			}
+			Content->setTitle(title);
+		});
 		Content->display();
 	}
 	
@@ -192,83 +210,19 @@ void PlaylistEditor::Update()
 
 void PlaylistEditor::MoveSelectedItems(Playlist::Movement where)
 {
-	if (Content->empty())
+	if (Content->empty() || isContentFiltered())
 		return;
-	
-	// remove search results as we may move them to different positions, but
-	// search rememebers positions and may point to wrong ones after that.
-	Content->clearSearchResults();
 	
 	switch (where)
 	{
 		case Playlist::mUp:
 		{
-			if (Content->hasSelected())
-			{
-				std::vector<size_t> list;
-				Content->getSelected(list);
-					
-				if (list.front() > 0)
-				{
-					Mpd.StartCommandsList();
-					std::vector<size_t>::const_iterator it = list.begin();
-					for (; it != list.end(); ++it)
-						Mpd.Move(Playlists->current().value(), *it-1, *it);
-					if (Mpd.CommitCommandsList())
-					{
-						for (it = list.begin(); it != list.end(); ++it)
-							Content->Swap(*it-1, *it);
-						Content->highlight(list[(list.size()-1)/2]-1);
-					}
-				}
-			}
-			else
-			{
-				size_t pos = Content->choice();
-				if (pos > 0)
-				{
-					if (Mpd.Move(Playlists->current().value(), pos-1, pos))
-					{
-						Content->scroll(NC::wUp);
-						Content->Swap(pos-1, pos);
-					}
-				}
-			}
+			moveSelectedItemsUp(*Content, std::bind(&MPD::Connection::PlaylistMove, _1, Playlists->current().value(), _2, _3));
 			break;
 		}
 		case Playlist::mDown:
 		{
-			if (Content->hasSelected())
-			{
-				std::vector<size_t> list;
-				Content->getSelected(list);
-				
-				if (list.back() < Content->size()-1)
-				{
-					Mpd.StartCommandsList();
-					std::vector<size_t>::const_reverse_iterator it = list.rbegin();
-					for (; it != list.rend(); ++it)
-						Mpd.Move(Playlists->current().value(), *it, *it+1);
-					if (Mpd.CommitCommandsList())
-					{
-						Content->highlight(list[(list.size()-1)/2]+1);
-						for (it = list.rbegin(); it != list.rend(); ++it)
-							Content->Swap(*it, *it+1);
-					}
-				}
-			}
-			else
-			{
-				size_t pos = Content->choice();
-				if (pos < Content->size()-1)
-				{
-					if (Mpd.Move(Playlists->current().value(), pos, pos+1))
-					{
-						Content->scroll(NC::wDown);
-						Content->Swap(pos, pos+1);
-					}
-				}
-			}
+			moveSelectedItemsDown(*Content, std::bind(&MPD::Connection::PlaylistMove, _1, Playlists->current().value(), _2, _3));
 			break;
 		}
 	}

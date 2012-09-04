@@ -228,51 +228,36 @@ void NcmpcppStatusChanged(MPD::Connection *, MPD::StatusChanges changed, void *)
 			WindowTitle(np.toString(Config.song_window_title_format));
 		
 		myPlaylist->Items->clearSearchResults();
-		
-		bool is_filtered = myPlaylist->Items->isFiltered();
-		myPlaylist->Items->showAll();
-		
-		size_t playlist_length = Mpd.GetPlaylistLength();
-		if (playlist_length < myPlaylist->Items->size())
-		{
-			auto it = myPlaylist->Items->begin()+playlist_length;
-			auto end = myPlaylist->Items->end();
-			for (; it != end; ++it)
-				myPlaylist->unregisterHash(it->value().getHash());
-			myPlaylist->Items->resizeList(playlist_length);
-		}
-		
-		auto songs = Mpd.GetPlaylistChanges(Mpd.GetOldPlaylistID());
-		for (auto s = songs.begin(); s != songs.end(); ++s)
-		{
-			size_t pos = s->getPosition();
-			if (pos < myPlaylist->Items->size())
+		withUnfilteredMenuReapplyFilter(*myPlaylist->Items, []() {
+			size_t playlist_length = Mpd.GetPlaylistLength();
+			if (playlist_length < myPlaylist->Items->size())
 			{
-				// if song's already in playlist, replace it with a new one
-				MPD::Song &old_s = myPlaylist->Items->at(pos).value();
-				myPlaylist->unregisterHash(old_s.getHash());
-				old_s = *s;
+				auto it = myPlaylist->Items->begin()+playlist_length;
+				auto end = myPlaylist->Items->end();
+				for (; it != end; ++it)
+					myPlaylist->unregisterHash(it->value().getHash());
+				myPlaylist->Items->resizeList(playlist_length);
 			}
-			else
+			
+			auto songs = Mpd.GetPlaylistChanges(Mpd.GetOldPlaylistID());
+			for (auto s = songs.begin(); s != songs.end(); ++s)
 			{
-				// otherwise just add it to playlist
-				myPlaylist->Items->addItem(*s);
+				size_t pos = s->getPosition();
+				if (pos < myPlaylist->Items->size())
+				{
+					// if song's already in playlist, replace it with a new one
+					MPD::Song &old_s = (*myPlaylist->Items)[pos].value();
+					myPlaylist->unregisterHash(old_s.getHash());
+					old_s = *s;
+				}
+				else // otherwise just add it to playlist
+					myPlaylist->Items->addItem(*s);
+				myPlaylist->registerHash(s->getHash());
 			}
-			myPlaylist->registerHash(s->getHash());
-		}
-		
-		if (is_filtered)
-		{
-			myPlaylist->applyFilter(myPlaylist->currentFilter());
-			if (myPlaylist->Items->empty())
-				myPlaylist->Items->showAll();
-		}
+		});
 		
 		Playlist::ReloadTotalLength = true;
 		Playlist::ReloadRemaining = true;
-		
-		if (myPlaylist->Items->empty())
-			myPlaylist->Items->reset();
 		
 		if (isVisible(myBrowser))
 			myBrowser->UpdateItemList();
@@ -282,6 +267,20 @@ void NcmpcppStatusChanged(MPD::Connection *, MPD::StatusChanges changed, void *)
 			UpdateSongList(myLibrary->Songs);
 		if (isVisible(myPlaylistEditor))
 			UpdateSongList(myPlaylistEditor->Content);
+	}
+	if (changed.StoredPlaylists)
+	{
+		if (myPlaylistEditor->Main())
+		{
+			myPlaylistEditor->requestPlaylistsUpdate();
+			myPlaylistEditor->requestContentsUpdate();
+		}
+		if (myBrowser->Main() && myBrowser->CurrentDir() == "/")
+		{
+			myBrowser->GetDirectory("/");
+			if (isVisible(myBrowser))
+				myBrowser->Refresh();
+		}
 	}
 	if (changed.Database)
 	{

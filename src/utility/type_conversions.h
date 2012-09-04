@@ -21,6 +21,7 @@
 #ifndef _UTILITY_TYPE_CONVERSIONS
 #define _UTILITY_TYPE_CONVERSIONS
 
+#include "mpdpp.h"
 #include "mutable_song.h"
 
 std::string tagTypeToString(mpd_tag_type tag);
@@ -28,5 +29,7 @@ MPD::MutableSong::SetFunction tagTypeToSetFunction(mpd_tag_type tag);
 
 mpd_tag_type charToTagType(char c);
 MPD::Song::GetFunction charToGetFunction(char c);
+
+std::string itemTypeToString(MPD::ItemType type);
 
 #endif // _UTILITY_TYPE_CONVERSIONS

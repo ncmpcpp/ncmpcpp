@@ -63,6 +63,9 @@ class PlaylistEditor : public Screen<NC::Window>, public Filterable, public HasS
 		
 		void MoveSelectedItems(Playlist::Movement where);
 		
+		void requestPlaylistsUpdate() { playlistsUpdateRequested = true; }
+		void requestContentsUpdate() { contentUpdateRequested = true; }
+		
 		bool isContentFiltered();
 		bool isNextColumnAvailable();
 		bool NextColumn();
@@ -78,6 +81,9 @@ class PlaylistEditor : public Screen<NC::Window>, public Filterable, public HasS
 		
 	private:
 		void AddToPlaylist(bool);
+		
+		bool playlistsUpdateRequested;
+		bool contentUpdateRequested;
 };
 
 extern PlaylistEditor *myPlaylistEditor;

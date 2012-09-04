@@ -778,48 +778,17 @@ void Delete::Run()
 	
 	if (!myPlaylist->Items->empty() && myScreen == myPlaylist)
 	{
-		if (myPlaylist->Items->hasSelected())
+		auto list = getSelectedOrCurrent(myPlaylist->Items->begin(), myPlaylist->Items->end(), myPlaylist->Items->currentI());
+		Mpd.StartCommandsList();
+		for (auto it = list.rbegin(); it != list.rend(); ++it)
+			Mpd.DeleteID((*it)->value().getID());
+		if (Mpd.CommitCommandsList())
 		{
-			std::vector<size_t> list;
-			myPlaylist->Items->getSelected(list);
-			Mpd.StartCommandsList();
-			for (std::vector<size_t>::reverse_iterator it = list.rbegin(); it != list.rend(); ++it)
-				Mpd.DeleteID((*myPlaylist->Items)[*it].value().getID());
-			if (Mpd.CommitCommandsList())
-			{
-				for (auto it = myPlaylist->Items->begin(); it != myPlaylist->Items->end(); ++it)
-					it->setSelected(false);
+			for (auto it = list.begin(); it != list.end(); ++it)
+				(*it)->setSelected(false);
+			if (list.size() > 1)
 				ShowMessage("Selected items deleted");
-			}
 		}
-		else
-			Mpd.DeleteID(myPlaylist->currentSong()->getID());
-	}
-	else if (
-		 (myScreen == myBrowser && !myBrowser->Main()->empty() && myBrowser->CurrentDir() == "/" && myBrowser->Main()->current().value().type == itPlaylist)
-	||       (myScreen->ActiveWindow() == myPlaylistEditor->Playlists)
-		)
-	{
-		std::string name;
-		if (myScreen == myBrowser)
-			name = myBrowser->Main()->current().value().name;
-		else
-			name = myPlaylistEditor->Playlists->current().value();
-		bool yes = AskYesNoQuestion("Delete playlist \"" + Shorten(TO_WSTRING(name), COLS-28) + "\"?", TraceMpdStatus);
-		if (yes)
-		{
-			if (Mpd.DeletePlaylist(locale_to_utf_cpy(name)))
-			{
-				const char msg[] = "Playlist \"%s\" deleted";
-				ShowMessage(msg, Shorten(TO_WSTRING(name), COLS-const_strlen(msg)).c_str());
-				if (myBrowser->Main() && !myBrowser->isLocal() && myBrowser->CurrentDir() == "/")
-					myBrowser->GetDirectory("/");
-			}
-		}
-		else
-			ShowMessage("Aborted");
-		if (myPlaylistEditor->Main()) // check if initialized
-			myPlaylistEditor->Playlists->clear(); // make playlists list update itself
 	}
 #	ifndef WIN32
 	else if (myScreen == myBrowser && !myBrowser->Main()->empty())
@@ -827,46 +796,29 @@ void Delete::Run()
 		if (!myBrowser->isLocal() && !isMPDMusicDirSet())
 			return;
 		
-		MPD::Item &item = myBrowser->Main()->current().value();
-		
-		if (item.type == itSong && !Config.allow_physical_files_deletion)
-		{
-			ShowMessage("Deleting files is disabled by default, see man page for more details");
-			return;
-		}
-		if (item.type == itDirectory && !Config.allow_physical_directories_deletion)
-		{
-			ShowMessage("Deleting directories is disabled by default, see man page for more details");
-			return;
-		}
-		if (myBrowser->isParentDirectory(item))
-			return;
-		
-		std::string name = item.type == itSong ? item.song->getName() : item.name;
 		std::string question;
 		if (myBrowser->Main()->hasSelected())
 			question = "Delete selected items?";
 		else
 		{
+			MPD::Item &item = myBrowser->Main()->current().value();
+			std::string name = item.type == itSong ? item.song->getName() : item.name;
 			question = "Delete ";
-			question += (item.type == itSong ? "file" : item.type == itDirectory ? "directory" : "playlist");
+			question += itemTypeToString(item.type);
 			question += " \"";
-			question += Shorten(TO_WSTRING(name), COLS-30);
+			question += Shorten(TO_WSTRING(name), COLS-question.size()-10);
 			question += "\"?";
 		}
 		bool yes = AskYesNoQuestion(question, TraceMpdStatus);
 		if (yes)
 		{
-			std::vector<size_t> list;
-			myBrowser->Main()->getSelected(list);
-			if (list.empty())
-				list.push_back(myBrowser->Main()->choice());
-			bool success = 1;
-			for (size_t i = 0; i < list.size(); ++i)
+			bool success = true;
+			auto list = getSelectedOrCurrent(myBrowser->Main()->begin(), myBrowser->Main()->end(), myBrowser->Main()->currentI());
+			for (auto it = list.begin(); it != list.end(); ++it)
 			{
-				const MPD::Item &it = (*myBrowser->Main())[list[i]].value();
-				name = it.type == itSong ? it.song->getName() : it.name;
-				if (myBrowser->deleteItem(it))
+				const MPD::Item &i = (*it)->value();
+				std::string name = i.type == itSong ? i.song->getName() : i.name;
+				if (myBrowser->deleteItem(i))
 				{
 					const char msg[] = "\"%s\" deleted";
 					ShowMessage(msg, Shorten(TO_WSTRING(name), COLS-const_strlen(msg)).c_str());
@@ -875,7 +827,7 @@ void Delete::Run()
 				{
 					const char msg[] = "Couldn't delete \"%s\": %s";
 					ShowMessage(msg, Shorten(TO_WSTRING(name), COLS-const_strlen(msg)-25).c_str(), strerror(errno));
-					success = 0;
+					success = false;
 					break;
 				}
 			}
@@ -883,8 +835,6 @@ void Delete::Run()
 			{
 				if (!myBrowser->isLocal())
 					Mpd.UpdateDirectory(myBrowser->CurrentDir());
-				else
-					myBrowser->GetDirectory(myBrowser->CurrentDir());
 			}
 		}
 		else
@@ -892,27 +842,47 @@ void Delete::Run()
 			
 	}
 #	endif // !WIN32
-	else if (myScreen->ActiveWindow() == myPlaylistEditor->Content && !myPlaylistEditor->Content->empty())
+	else if (myScreen == myPlaylistEditor && !myPlaylistEditor->Content->empty())
 	{
-		if (myPlaylistEditor->Content->hasSelected())
+		if (myScreen->ActiveWindow() == myPlaylistEditor->Playlists)
 		{
-			std::vector<size_t> list;
-			myPlaylistEditor->Content->getSelected(list);
-			std::string playlist = locale_to_utf_cpy(myPlaylistEditor->Playlists->current().value());
-			ShowMessage("Deleting selected items...");
-			Mpd.StartCommandsList();
-			for (std::vector<size_t>::reverse_iterator it = list.rbegin(); it != list.rend(); ++it)
+			std::string question;
+			if (myPlaylistEditor->Playlists->hasSelected())
+				question = "Delete selected playlists?";
+			else
 			{
-				Mpd.Delete(playlist, *it);
-				myPlaylistEditor->Content->deleteItem(*it);
+				question = "Delete playlist \"";
+				question += Shorten(TO_WSTRING(myPlaylistEditor->Playlists->current().value()), COLS-question.size()-10);
+				question += "\"?";
 			}
-			Mpd.CommitCommandsList();
-			ShowMessage("Selected items deleted from playlist \"%s\"", myPlaylistEditor->Playlists->current().value().c_str());
+			bool yes = AskYesNoQuestion(question, TraceMpdStatus);
+			if (yes)
+			{
+				auto list = getSelectedOrCurrent(myPlaylistEditor->Playlists->begin(), myPlaylistEditor->Playlists->end(), myPlaylistEditor->Playlists->currentI());
+				Mpd.StartCommandsList();
+				for (auto it = list.begin(); it != list.end(); ++it)
+					Mpd.DeletePlaylist((*it)->value());
+				if (Mpd.CommitCommandsList())
+					ShowMessage("Playlist%s deleted", list.size() == 1 ? "" : "s");
+			}
+			else
+				ShowMessage("Aborted");
 		}
-		else
+		else if (myScreen->ActiveWindow() == myPlaylistEditor->Content)
 		{
-			if (Mpd.Delete(myPlaylistEditor->Playlists->current().value(), myPlaylistEditor->Content->choice()))
-				myPlaylistEditor->Content->deleteItem(myPlaylistEditor->Content->choice());
+			// select current song so we won't lost track of it after filtering is canceled
+			selectCurrentIfNoneSelected(*myPlaylistEditor->Content);
+			myPlaylistEditor->Content->showAll();
+			auto list = getSelected(myPlaylistEditor->Content->begin(), myPlaylistEditor->Content->end());
+			Mpd.StartCommandsList();
+			auto begin = myPlaylistEditor->Content->begin();
+			for (auto it = list.rbegin(); it != list.rend(); ++it)
+				Mpd.Delete(myPlaylistEditor->Playlists->current().value(), *it-begin);
+			if (Mpd.CommitCommandsList())
+			{
+				if (list.size() > 1)
+					ShowMessage("Selected items deleted");
+			}
 		}
 	}
 }
@@ -1052,56 +1022,18 @@ void MoveSelectedItemsDown::Run()
 		myPlaylistEditor->MoveSelectedItems(Playlist::mDown);
 }
 
+bool MoveSelectedItemsTo::canBeRun() const
+{
+	return myScreen->ActiveWindow() == myPlaylist->Items
+	    || myScreen->ActiveWindow() == myPlaylistEditor->Content;
+}
+
 void MoveSelectedItemsTo::Run()
 {
-	if (myPlaylist->isFiltered())
-		return;
-	if (!myPlaylist->Items->hasSelected())
-	{
-		ShowMessage("No selected items to move");
-		return;
-	}
-	size_t pos = myPlaylist->Items->choice();
-	std::vector<size_t> list;
-	myPlaylist->Items->getSelected(list);
-	if (pos >= list.front() && pos <= list.back()) // can't move to the middle of selected items
-		return;
-	++pos; // always move after currently highlighted item
-	int diff = pos-list.front();
-	Mpd.StartCommandsList();
-	if (diff > 0)
-	{
-		pos -= list.size();
-		size_t i = list.size()-1;
-		std::vector<size_t>::reverse_iterator it = list.rbegin();
-		for (; it != list.rend(); ++it, --i)
-			Mpd.Move(*it, pos+i);
-		if (Mpd.CommitCommandsList())
-		{
-			i = list.size()-1;
-			for (it = list.rbegin(); it != list.rend(); ++it, --i)
-			{
-				myPlaylist->Items->at(*it).setSelected(false);
-				myPlaylist->Items->at(pos+i).setSelected(true);
-			}
-		}
-	}
-	else if (diff < 0)
-	{
-		size_t i = 0;
-		std::vector<size_t>::const_iterator it = list.begin();
-		for (; it != list.end(); ++it, ++i)
-			Mpd.Move(*it, pos+i);
-		if (Mpd.CommitCommandsList())
-		{
-			i = 0;
-			for (it = list.begin(); it != list.end(); ++it, ++i)
-			{
-				myPlaylist->Items->at(*it).setSelected(false);
-				myPlaylist->Items->at(pos+i).setSelected(true);
-			}
-		}
-	}
+	if (myScreen == myPlaylist)
+		moveSelectedItemsTo(*myPlaylist->Items, std::bind(&MPD::Connection::Move, _1, _2, _3));
+	else
+		moveSelectedItemsTo(*myPlaylistEditor->Content, std::bind(&MPD::Connection::PlaylistMove, _1, myPlaylistEditor->Playlists->current().value(), _2, _3));
 }
 
 bool Add::canBeRun() const

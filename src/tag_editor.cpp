@@ -526,14 +526,15 @@ void TagEditor::EnterPressed()
 	EditedSongs.clear();
 	if (Tags->hasSelected()) // if there are selected songs, perform operations only on them
 	{
-		std::vector<size_t> selected;
-		Tags->getSelected(selected);
-		for (auto it = selected.begin(); it != selected.end(); ++it)
-			EditedSongs.push_back(&(*Tags)[*it].value());
+		for (auto it = Tags->begin(); it != Tags->end(); ++it)
+			if (it->isSelected())
+				EditedSongs.push_back(&it->value());
 	}
 	else
-		for (size_t i = 0; i < Tags->size(); ++i)
-			EditedSongs.push_back(&(*Tags)[i].value());
+	{
+		for (auto it = Tags->begin(); it != Tags->end(); ++it)
+			EditedSongs.push_back(&it->value());
+	}
 	
 	size_t id = TagTypes->choice();
 	
