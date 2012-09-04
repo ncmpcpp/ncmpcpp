@@ -148,9 +148,7 @@ void Browser::EnterPressed()
 		}
 		case itSong:
 		{
-			size_t i = w->choice();
-			bool res = myPlaylist->Add(*item.song, w->at(i).isBold(), 1);
-			w->at(i).setBold(res);
+			myPlaylist->Add(*item.song, 1);
 			break;
 		}
 		case itPlaylist:
@@ -209,9 +207,7 @@ void Browser::SpacePressed()
 		}
 		case itSong:
 		{
-			i = w->choice();
-			bool res = myPlaylist->Add(*item.song, w->at(i).isBold(), 0);
-			w->at(i).setBold(res);
+			myPlaylist->Add(*item.song, 0);
 			break;
 		}
 		case itPlaylist:
@@ -618,10 +614,9 @@ bool Browser::deleteItem(const MPD::Item &item)
 
 void Browser::UpdateItemList()
 {
-	for (size_t i = 0; i < w->size(); ++i)
-		if ((*w)[i].value().type == itSong)
-			w->at(i).setBold(myPlaylist->checkForSong(*(*w)[i].value().song));
-	w->refresh();
+	for (auto it = w->begin(); it != w->end(); ++it)
+		if (it->value().type == itSong)
+			it->setBold(myPlaylist->checkForSong(*it->value().song));
 }
 
 namespace {//

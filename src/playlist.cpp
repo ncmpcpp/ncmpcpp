@@ -594,11 +594,11 @@ const MPD::Song *Playlist::NowPlayingSong()
 	return s;
 }
 
-bool Playlist::Add(const MPD::Song &s, bool in_playlist, bool play, int position)
+bool Playlist::Add(const MPD::Song &s, bool play, int position)
 {
-	if (Config.ncmpc_like_songs_adding && in_playlist)
+	if (Config.ncmpc_like_songs_adding && checkForSong(s))
 	{
-		unsigned hash = s.getHash();
+		size_t hash = s.getHash();
 		if (play)
 		{
 			for (size_t i = 0; i < Items->size(); ++i)
@@ -615,14 +615,8 @@ bool Playlist::Add(const MPD::Song &s, bool in_playlist, bool play, int position
 		{
 			Mpd.StartCommandsList();
 			for (size_t i = 0; i < Items->size(); ++i)
-			{
 				if ((*Items)[i].value().getHash() == hash)
-				{
 					Mpd.Delete(i);
-					Items->deleteItem(i);
-					i--;
-				}
-			}
 			Mpd.CommitCommandsList();
 			return false;
 		}
@@ -692,12 +686,24 @@ void Playlist::SetSelectedItemsPriority(int prio)
 		ShowMessage("Priority set");
 }
 
-bool Playlist::checkForSong (const MPD::Song &s)
+bool Playlist::checkForSong(const MPD::Song &s)
 {
-	for (size_t i = 0; i < Items->size(); ++i)
-		if (s.getHash() == (*Items)[i].value().getHash())
-			return true;
-	return false;
+	return itsSongHashes.find(s.getHash()) != itsSongHashes.end();
+}
+
+void Playlist::registerHash(size_t hash)
+{
+	itsSongHashes[hash] += 1;
+}
+
+void Playlist::unregisterHash(size_t hash)
+{
+	auto it = itsSongHashes.find(hash);
+	assert(it != itsSongHashes.end());
+	if (it->second == 1)
+		itsSongHashes.erase(it);
+	else
+		it->second -= 1;
 }
 
 namespace {//

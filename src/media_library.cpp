@@ -802,10 +802,7 @@ void MediaLibrary::LocateSong(const MPD::Song &s)
 void MediaLibrary::AddToPlaylist(bool add_n_play)
 {
 	if (w == Songs && !Songs->empty())
-	{
-		bool res = myPlaylist->Add(Songs->current().value(), Songs->current().isBold(), add_n_play);
-		Songs->current().setBold(res);
-	}
+		myPlaylist->Add(Songs->current().value(), add_n_play);
 	else
 	{
 		auto list = getSelectedSongs();

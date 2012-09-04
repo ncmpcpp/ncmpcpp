@@ -345,10 +345,7 @@ void PlaylistEditor::AddToPlaylist(bool add_n_play)
 		}
 	}
 	else if (w == Content && !Content->empty())
-	{
-		bool res = myPlaylist->Add(Content->current().value(), Content->current().isBold(), add_n_play);
-		Content->current().setBold(res);
-	}
+		myPlaylist->Add(Content->current().value(), add_n_play);
 	
 	if (!add_n_play)
 		w->scroll(NC::wDown);

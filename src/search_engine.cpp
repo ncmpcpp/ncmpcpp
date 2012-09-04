@@ -224,10 +224,7 @@ void SearchEngine::EnterPressed()
 		reset();
 	}
 	else
-	{
-		bool res = myPlaylist->Add(w->current().value().song(), w->current().isBold(), 1);
-		w->current().setBold(res);
-	}
+		myPlaylist->Add(w->current().value().song(), 1);
 	
 	if (option < SearchButton)
 		UnlockStatusbar();
@@ -245,8 +242,7 @@ void SearchEngine::SpacePressed()
 		return;
 	}
 	
-	bool res = myPlaylist->Add(w->current().value().song(), w->current().isBold(), 0);
-	w->current().setBold(res);
+	myPlaylist->Add(w->current().value().song(), 0);
 	w->scroll(NC::wDown);
 }
 

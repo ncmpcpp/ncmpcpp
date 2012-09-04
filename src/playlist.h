@@ -21,6 +21,8 @@
 #ifndef _PLAYLIST_H
 #define _PLAYLIST_H
 
+#include <map>
+
 #include "interfaces.h"
 #include "screen.h"
 #include "song.h"
@@ -80,13 +82,16 @@ class Playlist : public Screen<NC::Window>, public Filterable, public HasSongs, 
 		void UpdateTimer() { time(&itsTimer); }
 		time_t Timer() const { return itsTimer; }
 		
-		bool Add(const MPD::Song &s, bool in_playlist, bool play, int position = -1);
+		bool Add(const MPD::Song &s, bool play, int position = -1);
 		bool Add(const MPD::SongList &l, bool play, int position = -1);
 		void PlayNewlyAddedSongs();
 		
 		void SetSelectedItemsPriority(int prio);
 		
 		bool checkForSong(const MPD::Song &s);
+		
+		void registerHash(size_t hash);
+		void unregisterHash(size_t hash);
 		
 		//static std::string SongToString(const MPD::Song &s);
 		//static std::string SongInColumnsToString(const MPD::Song &s);
@@ -105,6 +110,8 @@ class Playlist : public Screen<NC::Window>, public Filterable, public HasSongs, 
 	private:
 		std::string TotalLength();
 		std::string itsBufferedStats;
+		
+		std::map<size_t, int> itsSongHashes;
 		
 		size_t itsTotalLength;
 		size_t itsRemainingTime;

@@ -234,7 +234,13 @@ void NcmpcppStatusChanged(MPD::Connection *, MPD::StatusChanges changed, void *)
 		
 		size_t playlist_length = Mpd.GetPlaylistLength();
 		if (playlist_length < myPlaylist->Items->size())
+		{
+			auto it = myPlaylist->Items->begin()+playlist_length;
+			auto end = myPlaylist->Items->end();
+			for (; it != end; ++it)
+				myPlaylist->unregisterHash(it->value().getHash());
 			myPlaylist->Items->resizeList(playlist_length);
+		}
 		
 		auto songs = Mpd.GetPlaylistChanges(Mpd.GetOldPlaylistID());
 		for (auto s = songs.begin(); s != songs.end(); ++s)
@@ -243,13 +249,16 @@ void NcmpcppStatusChanged(MPD::Connection *, MPD::StatusChanges changed, void *)
 			if (pos < myPlaylist->Items->size())
 			{
 				// if song's already in playlist, replace it with a new one
-				myPlaylist->Items->at(pos).value() = *s;
+				MPD::Song &old_s = myPlaylist->Items->at(pos).value();
+				myPlaylist->unregisterHash(old_s.getHash());
+				old_s = *s;
 			}
 			else
 			{
 				// otherwise just add it to playlist
 				myPlaylist->Items->addItem(*s);
 			}
+			myPlaylist->registerHash(s->getHash());
 		}
 		
 		if (is_filtered)
@@ -266,21 +275,13 @@ void NcmpcppStatusChanged(MPD::Connection *, MPD::StatusChanges changed, void *)
 			myPlaylist->Items->reset();
 		
 		if (isVisible(myBrowser))
-		{
 			myBrowser->UpdateItemList();
-		}
-		else if (isVisible(mySearcher))
-		{
+		if (isVisible(mySearcher))
 			mySearcher->UpdateFoundList();
-		}
-		else if (isVisible(myLibrary))
-		{
+		if (isVisible(myLibrary))
 			UpdateSongList(myLibrary->Songs);
-		}
-		else if (isVisible(myPlaylistEditor))
-		{
+		if (isVisible(myPlaylistEditor))
 			UpdateSongList(myPlaylistEditor->Content);
-		}
 	}
 	if (changed.Database)
 	{
