@@ -374,26 +374,6 @@ bool Playlist::isFiltered()
 	return false;
 }
 
-void Playlist::MoveSelectedItems(Movement where)
-{
-	if (Items->empty() || isFiltered())
-		return;
-	
-	switch (where)
-	{
-		case mUp:
-		{
-			moveSelectedItemsUp(*Items, std::bind(&MPD::Connection::Move, _1, _2, _3));
-			break;
-		}
-		case mDown:
-		{
-			moveSelectedItemsDown(*Items, std::bind(&MPD::Connection::Move, _1, _2, _3));
-			break;
-		}
-	}
-}
-
 void Playlist::Sort()
 {
 	if (isFiltered())
@@ -432,33 +412,6 @@ void Playlist::Reverse()
 		Mpd.Swap(i, j);
 	if (Mpd.CommitCommandsList())
 		 ShowMessage("Playlist reversed");
-}
-
-void Playlist::AdjustSortOrder(Movement where)
-{
-	switch (where)
-	{
-		case mUp:
-		{
-			size_t pos = SortDialog->choice();
-			if (pos > 0 && pos < SortOptions)
-			{
-				SortDialog->Swap(pos, pos-1);
-				SortDialog->scroll(NC::wUp);
-			}
-			break;
-		}
-		case mDown:
-		{
-			size_t pos = SortDialog->choice();
-			if (pos < SortOptions-1)
-			{
-				SortDialog->Swap(pos, pos+1);
-				SortDialog->scroll(NC::wDown);
-			}
-			break;
-		}
-	}
 }
 
 void Playlist::EnableHighlighting()
@@ -618,6 +571,26 @@ void Playlist::SetSelectedItemsPriority(int prio)
 bool Playlist::checkForSong(const MPD::Song &s)
 {
 	return itsSongHashes.find(s.getHash()) != itsSongHashes.end();
+}
+
+void Playlist::moveSortOrderDown()
+{
+	size_t pos = SortDialog->choice();
+	if (pos < SortOptions-1)
+	{
+		SortDialog->Swap(pos, pos+1);
+		SortDialog->scroll(NC::wDown);
+	}
+}
+
+void Playlist::moveSortOrderUp()
+{
+	size_t pos = SortDialog->choice();
+	if (pos > 0 && pos < SortOptions)
+	{
+		SortDialog->Swap(pos, pos-1);
+		SortDialog->scroll(NC::wUp);
+	}
 }
 
 void Playlist::registerHash(size_t hash)

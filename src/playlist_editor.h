@@ -21,7 +21,8 @@
 #ifndef _PLAYLIST_EDITOR_H
 #define _PLAYLIST_EDITOR_H
 
-#include "playlist.h"
+#include "interfaces.h"
+#include "screen.h"
 
 class PlaylistEditor : public Screen<NC::Window>, public Filterable, public HasSongs, public Searchable
 {
@@ -61,8 +62,6 @@ class PlaylistEditor : public Screen<NC::Window>, public Filterable, public HasS
 		
 		// private members
 		virtual void Locate(const std::string &);
-		
-		void MoveSelectedItems(Playlist::Movement where);
 		
 		void requestPlaylistsUpdate() { playlistsUpdateRequested = true; }
 		void requestContentsUpdate() { contentUpdateRequested = true; }

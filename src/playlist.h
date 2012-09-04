@@ -30,8 +30,6 @@
 class Playlist : public Screen<NC::Window>, public Filterable, public HasSongs, public Searchable
 {
 	public:
-		enum Movement { mUp, mDown };
-		
 		Playlist() : NowPlaying(-1), itsTotalLength(0), itsRemainingTime(0), itsScrollBegin(0) { }
 		~Playlist() { }
 		
@@ -73,11 +71,8 @@ class Playlist : public Screen<NC::Window>, public Filterable, public HasSongs, 
 		bool isPlaying() { return NowPlaying >= 0 && !Items->empty(); }
 		const MPD::Song *NowPlayingSong();
 		
-		void MoveSelectedItems(Movement where);
-		
 		void Sort();
 		void Reverse();
-		void AdjustSortOrder(Movement where);
 		bool SortingInProgress();
 		
 		void EnableHighlighting();
@@ -91,6 +86,9 @@ class Playlist : public Screen<NC::Window>, public Filterable, public HasSongs, 
 		void SetSelectedItemsPriority(int prio);
 		
 		bool checkForSong(const MPD::Song &s);
+		
+		void moveSortOrderUp();
+		void moveSortOrderDown();
 		
 		void registerHash(size_t hash);
 		void unregisterHash(size_t hash);

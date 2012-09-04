@@ -980,7 +980,7 @@ bool MoveSortOrderUp::canBeRun() const
 
 void MoveSortOrderUp::Run()
 {
-	myPlaylist->AdjustSortOrder(Playlist::mUp);
+	myPlaylist->moveSortOrderUp();
 }
 
 bool MoveSortOrderDown::canBeRun() const
@@ -991,35 +991,55 @@ bool MoveSortOrderDown::canBeRun() const
 
 void MoveSortOrderDown::Run()
 {
-	myPlaylist->AdjustSortOrder(Playlist::mDown);
+	myPlaylist->moveSortOrderDown();
 }
 
 bool MoveSelectedItemsUp::canBeRun() const
 {
-	return myScreen->ActiveWindow() == myPlaylist->Items
-	    || myScreen->ActiveWindow() == myPlaylistEditor->Content;
+	return ((myScreen->ActiveWindow() == myPlaylist->Items
+	    &&  !myPlaylist->Items->empty()
+	    &&  !myPlaylist->Items->isFiltered())
+	 ||    (myScreen->ActiveWindow() == myPlaylistEditor->Content
+	    &&  !myPlaylistEditor->Content->empty()
+	    &&  !myPlaylistEditor->Content->isFiltered()));
 }
 
 void MoveSelectedItemsUp::Run()
 {
 	if (myScreen == myPlaylist)
-		myPlaylist->MoveSelectedItems(Playlist::mUp);
+	{
+		moveSelectedItemsUp(*myPlaylist->Items, std::bind(&MPD::Connection::Move, _1, _2, _3));
+	}
 	else if (myScreen == myPlaylistEditor)
-		myPlaylistEditor->MoveSelectedItems(Playlist::mUp);
+	{
+		assert(!myPlaylistEditor->Playlists->empty());
+		std::string playlist = myPlaylistEditor->Playlists->current().value();
+		moveSelectedItemsUp(*myPlaylistEditor->Content, std::bind(&MPD::Connection::PlaylistMove, _1, playlist, _2, _3));
+	}
 }
 
 bool MoveSelectedItemsDown::canBeRun() const
 {
-	return myScreen->ActiveWindow() == myPlaylist->Items
-	    || myScreen->ActiveWindow() == myPlaylistEditor->Content;
+	return ((myScreen->ActiveWindow() == myPlaylist->Items
+	    &&  !myPlaylist->Items->empty()
+	    &&  !myPlaylist->Items->isFiltered())
+	 ||    (myScreen->ActiveWindow() == myPlaylistEditor->Content
+	    &&  !myPlaylistEditor->Content->empty()
+	    &&  !myPlaylistEditor->Content->isFiltered()));
 }
 
 void MoveSelectedItemsDown::Run()
 {
 	if (myScreen == myPlaylist)
-		myPlaylist->MoveSelectedItems(Playlist::mDown);
+	{
+		moveSelectedItemsDown(*myPlaylist->Items, std::bind(&MPD::Connection::Move, _1, _2, _3));
+	}
 	else if (myScreen == myPlaylistEditor)
-		myPlaylistEditor->MoveSelectedItems(Playlist::mDown);
+	{
+		assert(!myPlaylistEditor->Playlists->empty());
+		std::string playlist = myPlaylistEditor->Playlists->current().value();
+		moveSelectedItemsDown(*myPlaylistEditor->Content, std::bind(&MPD::Connection::PlaylistMove, _1, playlist, _2, _3));
+	}
 }
 
 bool MoveSelectedItemsTo::canBeRun() const

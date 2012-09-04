@@ -208,26 +208,6 @@ void PlaylistEditor::Update()
 	}
 }
 
-void PlaylistEditor::MoveSelectedItems(Playlist::Movement where)
-{
-	if (Content->empty() || isContentFiltered())
-		return;
-	
-	switch (where)
-	{
-		case Playlist::mUp:
-		{
-			moveSelectedItemsUp(*Content, std::bind(&MPD::Connection::PlaylistMove, _1, Playlists->current().value(), _2, _3));
-			break;
-		}
-		case Playlist::mDown:
-		{
-			moveSelectedItemsDown(*Content, std::bind(&MPD::Connection::PlaylistMove, _1, Playlists->current().value(), _2, _3));
-			break;
-		}
-	}
-}
-
 bool PlaylistEditor::isContentFiltered()
 {
 	if (Content->isFiltered())
@@ -237,7 +217,6 @@ bool PlaylistEditor::isContentFiltered()
 	}
 	return false;
 }
-
 
 bool PlaylistEditor::isNextColumnAvailable()
 {
