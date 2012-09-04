@@ -125,7 +125,7 @@ namespace MPD
 			void Swap(unsigned, unsigned);
 			void Seek(unsigned);
 			void Shuffle();
-			bool ClearPlaylist();
+			bool ClearMainPlaylist();
 			
 			bool isPlaying() const { return GetState() > psStop; }
 			
@@ -184,7 +184,7 @@ namespace MPD
 			bool Add(const std::string &path);
 			bool Delete(unsigned);
 			bool DeleteID(unsigned);
-			bool Delete(const std::string &, unsigned);
+			bool PlaylistDelete(const std::string &, unsigned);
 			void StartCommandsList();
 			bool CommitCommandsList();
 			

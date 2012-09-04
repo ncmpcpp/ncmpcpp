@@ -50,7 +50,8 @@ inline MPD::Song *currentSong(BasicScreen *screen)
 	return ptr;
 }
 
-template <typename Iterator> bool hasSelected(Iterator first, Iterator last)
+template <typename Iterator>
+bool hasSelected(Iterator first, Iterator last)
 {
 	for (; first != last; ++first)
 		if (first->isSelected())
@@ -58,7 +59,8 @@ template <typename Iterator> bool hasSelected(Iterator first, Iterator last)
 	return false;
 }
 
-template <typename Iterator> std::vector<Iterator> getSelected(Iterator first, Iterator last)
+template <typename Iterator>
+std::vector<Iterator> getSelected(Iterator first, Iterator last)
 {
 	std::vector<Iterator> result;
 	for (; first != last; ++first)
@@ -67,7 +69,8 @@ template <typename Iterator> std::vector<Iterator> getSelected(Iterator first, I
 	return result;
 }
 
-template <typename T> void selectCurrentIfNoneSelected(NC::Menu<T> &m)
+template <typename T>
+void selectCurrentIfNoneSelected(NC::Menu<T> &m)
 {
 	if (!hasSelected(m.begin(), m.end()))
 		m.current().setSelected(true);
@@ -82,7 +85,15 @@ std::vector<Iterator> getSelectedOrCurrent(Iterator first, Iterator last, Iterat
 	return result;
 }
 
-template <typename T, typename F> void withUnfilteredMenu(NC::Menu<T> &m, F action)
+template <typename Iterator>
+void reverseSelectionHelper(Iterator first, Iterator last)
+{
+	for (; first != last; ++first)
+		first->setSelected(!first->isSelected());
+}
+
+template <typename T, typename F>
+void withUnfilteredMenu(NC::Menu<T> &m, F action)
 {
 	bool is_filtered = m.isFiltered();
 	m.showAll();
@@ -107,8 +118,8 @@ void withUnfilteredMenuReapplyFilter(NC::Menu<T> &m, F action)
 	}
 }
 
-template <typename T, typename F>
-void moveSelectedItemsUp(NC::Menu<T> &m, F swap_fun)
+template <typename F>
+void moveSelectedItemsUp(NC::Menu<MPD::Song> &m, F swap_fun)
 {
 	if (m.choice() > 0)
 		selectCurrentIfNoneSelected(m);
@@ -141,8 +152,8 @@ void moveSelectedItemsUp(NC::Menu<T> &m, F swap_fun)
 	}
 }
 
-template <typename T, typename F>
-void moveSelectedItemsDown(NC::Menu<T> &m, F swap_fun)
+template <typename F>
+void moveSelectedItemsDown(NC::Menu<MPD::Song> &m, F swap_fun)
 {
 	if (m.choice() < m.size()-1)
 		selectCurrentIfNoneSelected(m);
@@ -175,11 +186,9 @@ void moveSelectedItemsDown(NC::Menu<T> &m, F swap_fun)
 	}
 }
 
-template <typename T, typename F>
-void moveSelectedItemsTo(NC::Menu<T> &m, F move_fun)
+template <typename F>
+void moveSelectedItemsTo(NC::Menu<MPD::Song> &m, F move_fun)
 {
-	if (m.empty())
-		return;
 	auto cur_ptr = &m.current().value();
 	withUnfilteredMenu(m, [&]() {
 		// this is kinda shitty, but there is no other way to know
@@ -233,10 +242,65 @@ void moveSelectedItemsTo(NC::Menu<T> &m, F move_fun)
 	});
 }
 
-template <typename Iterator> void reverseSelectionHelper(Iterator first, Iterator last)
+template <typename F>
+bool deleteSelectedSongs(NC::Menu<MPD::Song> &m, F delete_fun)
 {
-	for (; first != last; ++first)
-		first->setSelected(!first->isSelected());
+	bool result = false;
+	selectCurrentIfNoneSelected(m);
+	// ok, this is tricky. we need to operate on whole playlist
+	// to get positions right, but at the same time we need to
+	// ignore all songs that are not filtered. we use the fact
+	// that both ranges share the same values, ie. we can compare
+	// pointers to check whether an item belongs to filtered range.
+	NC::Menu<MPD::Song>::Iterator begin;
+	NC::Menu<MPD::Song>::ReverseIterator real_begin, real_end;
+	withUnfilteredMenu(m, [&]() {
+		// obtain iterators for unfiltered range
+		begin = m.begin() + 1; // cancel reverse iterator's offset
+		real_begin = m.rbegin();
+		real_end = m.rend();
+	});
+	// get iterator to filtered range
+	auto cur_filtered = m.rbegin();
+	Mpd.StartCommandsList();
+	for (auto it = real_begin; it != real_end; ++it)
+	{
+		// current iterator belongs to filtered range, proceed
+		if (&*it == &*cur_filtered)
+		{
+			if (it->isSelected())
+			{
+				it->setSelected(false);
+				delete_fun(Mpd, it.base() - begin);
+			}
+			++cur_filtered;
+		}
+	}
+	if (Mpd.CommitCommandsList())
+		result = true;
+	return result;
+}
+
+template <typename F>
+bool cropPlaylist(NC::Menu<MPD::Song> &m, F delete_fun)
+{
+	reverseSelectionHelper(m.begin(), m.end());
+	return deleteSelectedSongs(m, delete_fun);
+}
+
+template <typename F, typename G>
+bool clearPlaylist(NC::Menu<MPD::Song> &m, F delete_fun, G clear_fun)
+{
+	bool result = false;
+	if (m.isFiltered())
+	{
+		for (auto it = m.begin(); it != m.end(); ++it)
+			it->setSelected(true);
+		result = deleteSelectedSongs(m, delete_fun);
+	}
+	else
+		result = clear_fun(Mpd);
+	return result;
 }
 
 template <typename Iterator> std::string getSharedDirectory(Iterator first, Iterator last)

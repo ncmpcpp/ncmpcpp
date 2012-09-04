@@ -771,24 +771,12 @@ void VolumeDown::Run()
 
 void Delete::Run()
 {
-	using Global::wFooter;
-	using MPD::itDirectory;
-	using MPD::itSong;
-	using MPD::itPlaylist;
-	
-	if (!myPlaylist->Items->empty() && myScreen == myPlaylist)
+	if (myScreen == myPlaylist && !myPlaylist->Items->empty())
 	{
-		auto list = getSelectedOrCurrent(myPlaylist->Items->begin(), myPlaylist->Items->end(), myPlaylist->Items->currentI());
-		Mpd.StartCommandsList();
-		for (auto it = list.rbegin(); it != list.rend(); ++it)
-			Mpd.DeleteID((*it)->value().getID());
-		if (Mpd.CommitCommandsList())
-		{
-			for (auto it = list.begin(); it != list.end(); ++it)
-				(*it)->setSelected(false);
-			if (list.size() > 1)
-				ShowMessage("Selected items deleted");
-		}
+		ShowMessage("Deleting items...");
+		auto delete_fun = std::bind(&MPD::Connection::Delete, _1, _2);
+		if (deleteSelectedSongs(*myPlaylist->Items, delete_fun))
+			ShowMessage("Item(s) deleted");
 	}
 #	ifndef WIN32
 	else if (myScreen == myBrowser && !myBrowser->Main()->empty())
@@ -802,7 +790,7 @@ void Delete::Run()
 		else
 		{
 			MPD::Item &item = myBrowser->Main()->current().value();
-			std::string name = item.type == itSong ? item.song->getName() : item.name;
+			std::string name = item.type == MPD::itSong ? item.song->getName() : item.name;
 			question = "Delete ";
 			question += itemTypeToString(item.type);
 			question += " \"";
@@ -817,7 +805,7 @@ void Delete::Run()
 			for (auto it = list.begin(); it != list.end(); ++it)
 			{
 				const MPD::Item &i = (*it)->value();
-				std::string name = i.type == itSong ? i.song->getName() : i.name;
+				std::string name = i.type == MPD::itSong ? i.song->getName() : i.name;
 				if (myBrowser->deleteItem(i))
 				{
 					const char msg[] = "\"%s\" deleted";
@@ -839,7 +827,6 @@ void Delete::Run()
 		}
 		else
 			ShowMessage("Aborted");
-			
 	}
 #	endif // !WIN32
 	else if (myScreen == myPlaylistEditor && !myPlaylistEditor->Content->empty())
@@ -870,19 +857,11 @@ void Delete::Run()
 		}
 		else if (myScreen->ActiveWindow() == myPlaylistEditor->Content)
 		{
-			// select current song so we won't lost track of it after filtering is canceled
-			selectCurrentIfNoneSelected(*myPlaylistEditor->Content);
-			myPlaylistEditor->Content->showAll();
-			auto list = getSelected(myPlaylistEditor->Content->begin(), myPlaylistEditor->Content->end());
-			Mpd.StartCommandsList();
-			auto begin = myPlaylistEditor->Content->begin();
-			for (auto it = list.rbegin(); it != list.rend(); ++it)
-				Mpd.Delete(myPlaylistEditor->Playlists->current().value(), *it-begin);
-			if (Mpd.CommitCommandsList())
-			{
-				if (list.size() > 1)
-					ShowMessage("Selected items deleted");
-			}
+			std::string playlist = myPlaylistEditor->Playlists->current().value();
+			auto delete_fun = std::bind(&MPD::Connection::PlaylistDelete, _1, playlist, _2);
+			ShowMessage("Deleting items...");
+			if (deleteSelectedSongs(*myPlaylistEditor->Content, delete_fun))
+				ShowMessage("Item(s) deleted");
 		}
 	}
 }
@@ -1014,7 +993,8 @@ void MoveSelectedItemsUp::Run()
 	{
 		assert(!myPlaylistEditor->Playlists->empty());
 		std::string playlist = myPlaylistEditor->Playlists->current().value();
-		moveSelectedItemsUp(*myPlaylistEditor->Content, std::bind(&MPD::Connection::PlaylistMove, _1, playlist, _2, _3));
+		auto move_fun = std::bind(&MPD::Connection::PlaylistMove, _1, playlist, _2, _3);
+		moveSelectedItemsUp(*myPlaylistEditor->Content, move_fun);
 	}
 }
 
@@ -1038,7 +1018,8 @@ void MoveSelectedItemsDown::Run()
 	{
 		assert(!myPlaylistEditor->Playlists->empty());
 		std::string playlist = myPlaylistEditor->Playlists->current().value();
-		moveSelectedItemsDown(*myPlaylistEditor->Content, std::bind(&MPD::Connection::PlaylistMove, _1, playlist, _2, _3));
+		auto move_fun = std::bind(&MPD::Connection::PlaylistMove, _1, playlist, _2, _3);
+		moveSelectedItemsDown(*myPlaylistEditor->Content, move_fun);
 	}
 }
 
@@ -1053,7 +1034,12 @@ void MoveSelectedItemsTo::Run()
 	if (myScreen == myPlaylist)
 		moveSelectedItemsTo(*myPlaylist->Items, std::bind(&MPD::Connection::Move, _1, _2, _3));
 	else
-		moveSelectedItemsTo(*myPlaylistEditor->Content, std::bind(&MPD::Connection::PlaylistMove, _1, myPlaylistEditor->Playlists->current().value(), _2, _3));
+	{
+		assert(!myPlaylistEditor->Playlists->empty());
+		std::string playlist = myPlaylistEditor->Playlists->current().value();
+		auto move_fun = std::bind(&MPD::Connection::PlaylistMove, _1, playlist, _2, _3);
+		moveSelectedItemsTo(*myPlaylistEditor->Content, move_fun);
+	}
 }
 
 bool Add::canBeRun() const
@@ -1819,32 +1805,14 @@ void AddSelectedItems::Run()
 
 void CropMainPlaylist::Run()
 {
-	if (myPlaylist->isFiltered())
-		return;
 	bool yes = true;
 	if (Config.ask_before_clearing_main_playlist)
 		yes = AskYesNoQuestion("Do you really want to crop main playlist?", TraceMpdStatus);
 	if (yes)
 	{
-		bool delete_all_but_current = !myPlaylist->Items->hasSelected();
-		Mpd.StartCommandsList();
-		int current = myPlaylist->Items->choice();
-		for (int i = myPlaylist->Items->size()-1; i >= 0; --i)
-		{
-			bool delete_i = (delete_all_but_current && i != current)
-			             || (!delete_all_but_current && !myPlaylist->Items->at(i).isSelected());
-			if (delete_i && i != myPlaylist->NowPlaying)
-				Mpd.Delete(i);
-		}
-		// if mpd deletes now playing song deletion will be sluggishly slow
-		// then so we have to assure it will be deleted at the very end.
-		bool delete_np = (delete_all_but_current && current != myPlaylist->NowPlaying)
-		              || (!delete_all_but_current && !myPlaylist->Items->at(myPlaylist->NowPlaying).isSelected());
-		if (myPlaylist->isPlaying() && delete_np)
-			Mpd.DeleteID(myPlaylist->NowPlayingSong()->getID());
 		ShowMessage("Cropping playlist...");
-		if (Mpd.CommitCommandsList())
-			ShowMessage("Playlist cropped");
+		if (cropPlaylist(*myPlaylist->Items, std::bind(&MPD::Connection::Delete, _1, _2)))
+			ShowMessage("Cropping playlist...");
 	}
 }
 
@@ -1855,31 +1823,17 @@ bool CropPlaylist::canBeRun() const
 
 void CropPlaylist::Run()
 {
-	if (myPlaylistEditor->Playlists->empty() || myPlaylistEditor->isContentFiltered())
-		return;
+	assert(!myPlaylistEditor->Playlists->empty());
+	std::string playlist = myPlaylistEditor->Playlists->current().value();
 	bool yes = true;
 	if (Config.ask_before_clearing_main_playlist)
-		yes = AskYesNoQuestion("Do you really want to crop playlist \"" + myPlaylistEditor->Playlists->current().value() + "\"?", TraceMpdStatus);
+		yes = AskYesNoQuestion("Do you really want to crop playlist \"" + playlist + "\"?", TraceMpdStatus);
 	if (yes)
 	{
-		bool delete_all_but_current = !myPlaylistEditor->Content->hasSelected();
-		Mpd.StartCommandsList();
-		int current = myPlaylistEditor->Content->choice();
-		std::string playlist = locale_to_utf_cpy(myPlaylistEditor->Playlists->current().value());
-		for (int i = myPlaylistEditor->Content->size()-1; i >= 0; --i)
-		{
-			bool delete_i = (delete_all_but_current && i != current)
-			             || (!delete_all_but_current && !myPlaylistEditor->Content->at(i).isSelected());
-			if (delete_i)
-				Mpd.Delete(playlist, i);
-		}
-		ShowMessage("Cropping playlist \"%s\"...", myPlaylistEditor->Playlists->current().value().c_str());
-		if (Mpd.CommitCommandsList())
-		{
-			ShowMessage("Playlist \"%s\" cropped", myPlaylistEditor->Playlists->current().value().c_str());
-			// enforce content update
-			myPlaylistEditor->Content->clear();
-		}
+		auto delete_fun = std::bind(&MPD::Connection::PlaylistDelete, _1, playlist, _2);
+		ShowMessage("Cropping playlist \"%s\"...", playlist.c_str());
+		if (cropPlaylist(*myPlaylistEditor->Content, delete_fun))
+			ShowMessage("Playlist \"%s\" cropped", playlist.c_str());
 	}
 }
 
@@ -1890,21 +1844,11 @@ void ClearMainPlaylist::Run()
 		yes = AskYesNoQuestion("Do you really want to clear main playlist?", TraceMpdStatus);
 	if (yes)
 	{
-		if (myPlaylist->Items->isFiltered())
-		{
-			ShowMessage("Deleting filtered items...");
-			Mpd.StartCommandsList();
-			for (int i = myPlaylist->Items->size()-1; i >= 0; --i)
-				Mpd.Delete((*myPlaylist->Items)[i].value().getPosition());
-			if (Mpd.CommitCommandsList())
-				ShowMessage("Filtered items deleted");
-		}
-		else
-		{
-			ShowMessage("Clearing playlist...");
-			if (Mpd.ClearPlaylist())
-				ShowMessage("Playlist cleared");
-		}
+		auto delete_fun = std::bind(&MPD::Connection::Delete, _1, _2);
+		auto clear_fun = std::bind(&MPD::Connection::ClearMainPlaylist, _1);
+		ShowMessage("Deleting items...");
+		if (clearPlaylist(*myPlaylist->Items, delete_fun, clear_fun))
+			ShowMessage("Items deleted");
 	}
 }
 
@@ -1915,16 +1859,18 @@ bool ClearPlaylist::canBeRun() const
 
 void ClearPlaylist::Run()
 {
-	if (myPlaylistEditor->Playlists->empty() || myPlaylistEditor->isContentFiltered())
-		return;
+	assert(!myPlaylistEditor->Playlists->empty());
+	std::string playlist = myPlaylistEditor->Playlists->current().value();
 	bool yes = true;
 	if (Config.ask_before_clearing_main_playlist)
-		yes = AskYesNoQuestion("Do you really want to clear playlist \"" + myPlaylistEditor->Playlists->current().value() + "\"?", TraceMpdStatus);
+		yes = AskYesNoQuestion("Do you really want to clear playlist \"" + playlist + "\"?", TraceMpdStatus);
 	if (yes)
 	{
-		ShowMessage("Clearing playlist \"%s\"...", myPlaylistEditor->Playlists->current().value().c_str());
-		if (Mpd.ClearPlaylist(locale_to_utf_cpy(myPlaylistEditor->Playlists->current().value())))
-			ShowMessage("Playlist \"%s\" cleared", myPlaylistEditor->Playlists->current().value().c_str());
+		auto delete_fun = std::bind(&MPD::Connection::PlaylistDelete, _1, playlist, _2);
+		auto clear_fun = std::bind(&MPD::Connection::ClearPlaylist, _1, playlist);
+		ShowMessage("Deleting items from \"%s\"...", playlist.c_str());
+		if (clearPlaylist(*myPlaylistEditor->Content, delete_fun, clear_fun))
+			ShowMessage("Items deleted from \"%s\"", playlist.c_str());
 	}
 }
 

@@ -537,7 +537,7 @@ void MPD::Connection::Shuffle()
 	}
 }
 
-bool MPD::Connection::ClearPlaylist()
+bool MPD::Connection::ClearMainPlaylist()
 {
 	if (!itsConnection)
 		return false;
@@ -997,7 +997,7 @@ bool MPD::Connection::DeleteID(unsigned id)
 	return result;
 }
 
-bool MPD::Connection::Delete(const std::string &playlist, unsigned pos)
+bool MPD::Connection::PlaylistDelete(const std::string &playlist, unsigned pos)
 {
 	if (!itsConnection)
 		return false;
