@@ -177,16 +177,13 @@ void PlaylistEditor::Update()
 			if (Config.titles_visibility)
 			{
 				title = "Playlist content";
-				if (list.size() > 0)
-				{
-					title += " (";
-					title += unsignedLongIntTo<std::string>::apply(list.size());
-					title += " item";
-					if (list.size() == 1)
-						title += ")";
-					else
-						title += "s)";
-				}
+				title += " (";
+				title += unsignedLongIntTo<std::string>::apply(list.size());
+				title += " item";
+				if (list.size() == 1)
+					title += ")";
+				else
+					title += "s)";
 				title.resize(Content->getWidth());
 			}
 			Content->setTitle(title);
@@ -201,10 +198,10 @@ void PlaylistEditor::Update()
 		w = Playlists;
 	}
 	
-	if (Content->reallyEmpty())
+	if (Playlists->empty() && Content->reallyEmpty())
 	{
-		*Content << NC::XY(0, 0) << "Playlist is empty.";
-		Content->Window::refresh();
+		Content->Window::clear();
+		Content->Window::display();
 	}
 }
 
