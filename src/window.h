@@ -340,6 +340,9 @@ struct Window
 	/// Push single character into input queue, so it can get consumed by ReadKey
 	void pushChar(int ch);
 	
+	/// @return const reference to internal input queue
+	const std::queue<int> &inputQueue() { return m_input_queue; }
+	
 	/// Scrolls the window by amount of lines given in its parameter
 	/// @param where indicates how many lines it has to scroll
 	virtual void scroll(Where where);

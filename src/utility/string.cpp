@@ -174,6 +174,8 @@ std::string getEnclosedString(const std::string &s, char a, char b, size_t *pos)
 		// we want to set pos to char after b if possible
 		if (i < s.length())
 			++i;
+		else // we reached end of string and didn't encounter closing char
+			result.clear();
 	}
 	if (pos != 0)
 		*pos = i;

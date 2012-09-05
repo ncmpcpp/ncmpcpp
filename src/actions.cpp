@@ -1879,15 +1879,16 @@ void ApplyFilter::Run()
 	using Global::wFooter;
 	
 	Filterable *f = dynamic_cast<Filterable *>(myScreen);
+	std::string filter = f->currentFilter();
 	
 	LockStatusbar();
 	Statusbar() << NC::fmtBold << "Apply filter: " << NC::fmtBoldEnd;
-	wFooter->setGetStringHelper(std::bind(StatusbarApplyFilterImmediately, f, _1));
-	wFooter->getString(f->currentFilter());
+	wFooter->setGetStringHelper(StatusbarApplyFilterImmediately(f, ToWString(filter)));
+	wFooter->getString(filter);
 	wFooter->setGetStringHelper(StatusbargetStringHelper);
 	UnlockStatusbar();
 	
-	std::string filter = f->currentFilter();
+	filter = f->currentFilter();
  	if (filter.empty())
 	{
 		myPlaylist->Items->clearFilterResults();

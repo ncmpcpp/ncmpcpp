@@ -46,7 +46,18 @@ void ShowMessage(const char *, ...) GNUC_PRINTF(1, 2);
 
 void StatusbarMPDCallback();
 void StatusbargetStringHelper(const std::wstring &);
-void StatusbarApplyFilterImmediately(Filterable *f, const std::wstring &ws);
+
+struct StatusbarApplyFilterImmediately
+{
+	StatusbarApplyFilterImmediately(Filterable *f, const std::wstring &filter)
+	: m_f(f), m_ws(filter) { }
+	
+	void operator()(const std::wstring &ws);
+	
+private:
+	Filterable *m_f;
+	std::wstring m_ws;
+};
 
 #endif
 

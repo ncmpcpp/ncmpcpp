@@ -78,16 +78,23 @@ void StatusbargetStringHelper(const std::wstring &)
 	TraceMpdStatus();
 }
 
-void StatusbarApplyFilterImmediately(Filterable *f, const std::wstring &ws)
+void StatusbarApplyFilterImmediately::operator()(const std::wstring &ws)
 {
-	static std::wstring cmp;
-	if (cmp != ws)
+	// if input queue is not empty, we don't want to update filter since next
+	// character will be taken from queue immediately, trigering this function
+	// again and thus making it inefficient, so let's apply filter only if
+	// "real" user input arrived. however, we want to apply filter if ENTER
+	// is next in queue, so its effects will be seen.
+	if (wFooter->inputQueue().empty() || wFooter->inputQueue().front() == KEY_ENTER)
 	{
-		cmp = ws;
-		f->applyFilter(ToString(cmp));
-		myScreen->RefreshWindow();
+		if (m_ws != ws)
+		{
+			m_ws = ws;
+			m_f->applyFilter(ToString(m_ws));
+			myScreen->RefreshWindow();
+		}
+		TraceMpdStatus();
 	}
-	TraceMpdStatus();
 }
 
 void LockProgressbar()
