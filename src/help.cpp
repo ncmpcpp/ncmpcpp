@@ -20,9 +20,9 @@
 
 #include "mpdpp.h"
 
+#include "bindings.h"
 #include "global.h"
 #include "help.h"
-#include "keys.h"
 #include "settings.h"
 
 using Global::MainHeight;
@@ -142,7 +142,7 @@ std::string Help::DisplayKeys(const ActionType at)
 {
 	bool print_backspace = true;
 	std::string result;
-	for (auto it = Keys.Bindings.begin(); it != Keys.Bindings.end(); ++it)
+	for (auto it = Bindings.begin(); it != Bindings.end(); ++it)
 	{
 		if (it->second.isSingle() && it->second.action()->Type() == at)
 		{

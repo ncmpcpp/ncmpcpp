@@ -31,10 +31,10 @@
 #include "mpdpp.h"
 
 #include "actions.h"
+#include "bindings.h"
 #include "browser.h"
 #include "global.h"
 #include "helpers.h"
-#include "keys.h"
 #include "lyrics.h"
 #include "playlist.h"
 #include "settings.h"
@@ -98,10 +98,10 @@ int main(int argc, char **argv)
 	Config.Read();
 	Config.GenerateColumns();
 	
-	if (!Keys.read(Config.ncmpcpp_directory + "keys"))
+	if (!Bindings.read(Config.ncmpcpp_directory + "keys"))
 		return 1;
 	
-	Keys.generateBindings();
+	Bindings.generateDefault();
 	
 	if (getenv("MPD_HOST"))
 		Mpd.SetHostname(getenv("MPD_HOST"));
@@ -273,7 +273,7 @@ int main(int argc, char **argv)
 		if (input == Key::noOp)
 			continue;
 		
-		auto k = Keys.Bindings.equal_range(input);
+		auto k = Bindings.get(input);
 		for (; k.first != k.second; ++k.first)
 		{
 			Binding &b = k.first->second;

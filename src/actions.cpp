@@ -32,10 +32,10 @@
 #include "helpers.h"
 #include "utility/comparators.h"
 
+#include "bindings.h"
 #include "browser.h"
 #include "clock.h"
 #include "help.h"
-#include "keys.h"
 #include "media_library.h"
 #include "lastfm.h"
 #include "lyrics.h"
@@ -249,7 +249,7 @@ void Action::Seek()
 		int howmuch = Config.incremental_seeking ? (myPlaylist->Timer()-t)/2+Config.seek_time : Config.seek_time;
 		
 		Key input = Key::read(*wFooter);
-		auto k = Keys.Bindings.equal_range(input);
+		auto k = Bindings.get(input);
 		if (k.first == k.second || !k.first->second.isSingle()) // no single action?
 			break;
 		Action *a = k.first->second.action();

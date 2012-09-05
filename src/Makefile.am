@@ -5,6 +5,7 @@ ncmpcpp_SOURCES = \
 	utility/string.cpp \
 	utility/type_conversions.cpp \
 	actions.cpp \
+	bindings.cpp \
 	browser.cpp \
 	charset.cpp \
 	clock.cpp \
@@ -14,7 +15,6 @@ ncmpcpp_SOURCES = \
 	global.cpp \
 	help.cpp \
 	helpers.cpp \
-	keys.cpp \
 	lastfm.cpp \
 	lastfm_service.cpp \
 	lyrics.cpp \
@@ -52,6 +52,7 @@ noinst_HEADERS = \
 	utility/string.h \
 	utility/numeric_conversions.h \
 	utility/type_conversions.h \
+	bindings.h \
 	browser.h \
 	charset.h \
 	clock.h \
@@ -62,7 +63,6 @@ noinst_HEADERS = \
 	help.h \
 	helpers.h \
 	interfaces.h \
-	keys.h \
 	lastfm.h \
 	lastfm_service.h \
 	lyrics.h \

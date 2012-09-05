@@ -18,8 +18,8 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
-#ifndef _KEYS_H
-#define _KEYS_H
+#ifndef _BINDINGS_H
+#define _BINDINGS_H
 
 #include <cassert>
 #include "actions.h"
@@ -105,24 +105,35 @@ private:
 	};
 };
 
-/// Key configuration
-struct KeyConfiguration
+/// Keybindings configuration
+struct BindingsConfiguration
 {
-	bool read(const std::string &file);
-	void generateBindings();
+	typedef std::multimap<Key, Binding> BindingsMap;
+	typedef BindingsMap::iterator BindingIterator;
+	typedef BindingsMap::const_iterator ConstBindingIterator;
 	
-	std::multimap<Key, Binding> Bindings;
+	bool read(const std::string &file);
+	void generateDefault();
+	
+	std::pair<BindingIterator, BindingIterator> get(const Key &k) {
+		return m_bindings.equal_range(k);
+	}
+	
+	ConstBindingIterator begin() const { return m_bindings.begin(); }
+	ConstBindingIterator end() const { return m_bindings.end(); }
 	
 private:
 	bool notBound(const Key &k) const {
-		return k != Key::noOp && Bindings.find(k) == Bindings.end();
+		return k != Key::noOp && m_bindings.find(k) == m_bindings.end();
 	}
 	
 	template <typename T> void bind(Key k, T t) {
-		Bindings.insert(std::make_pair(k, Binding(t)));
+		m_bindings.insert(std::make_pair(k, Binding(t)));
 	}
+	
+	BindingsMap m_bindings;
 };
 
-extern KeyConfiguration Keys;
+extern BindingsConfiguration Bindings;
 
-#endif // _KEYS_H
+#endif // _BINDINGS_H

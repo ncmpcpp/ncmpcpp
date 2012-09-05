@@ -21,10 +21,10 @@
 #include <fstream>
 #include <iostream>
 #include "global.h"
-#include "keys.h"
+#include "bindings.h"
 #include "utility/string.h"
 
-KeyConfiguration Keys;
+BindingsConfiguration Bindings;
 
 Key Key::noOp = Key(ERR, NCurses);
 
@@ -174,7 +174,7 @@ Key Key::read(NC::Window &w)
 	return result;
 }
 
-bool KeyConfiguration::read(const std::string &file)
+bool BindingsConfiguration::read(const std::string &file)
 {
 	bool result = true;
 	
@@ -250,7 +250,7 @@ bool KeyConfiguration::read(const std::string &file)
 	return result;
 }
 
-void KeyConfiguration::generateBindings()
+void BindingsConfiguration::generateDefault()
 {
 	Key k = Key::noOp;
 	if (notBound(k = stringToKey("mouse")))
