@@ -297,25 +297,25 @@ void BindingsConfiguration::generateDefault()
 		bind(k, aNextScreen);
 	if (notBound(k = stringToKey("shift_tab")))
 		bind(k, aPreviousScreen);
-	if (notBound(k = stringToKey("1")))
+	if (notBound(k = stringToKey("f1")))
 		bind(k, aShowHelp);
-	if (notBound(k = stringToKey("2")))
+	if (notBound(k = stringToKey("1")))
 		bind(k, aShowPlaylist);
-	if (notBound(k = stringToKey("3")))
+	if (notBound(k = stringToKey("2")))
 		bind(k, aShowBrowser);
-	if (notBound(k = stringToKey("4")))
+	if (notBound(k = stringToKey("3")))
 		bind(k, aShowSearchEngine);
-	if (notBound(k = stringToKey("5")))
+	if (notBound(k = stringToKey("4")))
 		bind(k, aShowMediaLibrary);
-	if (notBound(k = stringToKey("6")))
+	if (notBound(k = stringToKey("5")))
 		bind(k, aShowPlaylistEditor);
-	if (notBound(k = stringToKey("7")))
+	if (notBound(k = stringToKey("6")))
 		bind(k, aShowTagEditor);
-	if (notBound(k = stringToKey("8")))
+	if (notBound(k = stringToKey("7")))
 		bind(k, aShowOutputs);
-	if (notBound(k = stringToKey("9")))
+	if (notBound(k = stringToKey("8")))
 		bind(k, aShowVisualizer);
-	if (notBound(k = stringToKey("0")))
+	if (notBound(k = stringToKey("=")))
 		bind(k, aShowClock);
 	if (notBound(k = stringToKey("@")))
 		bind(k, aShowServerInfo);
@@ -496,26 +496,6 @@ void BindingsConfiguration::generateDefault()
 	if (notBound(k = stringToKey("-")))
 		bind(k, aVolumeDown);
 	
-	if (notBound(k = stringToKey("f1")))
-		bind(k, aShowHelp);
-	if (notBound(k = stringToKey("f2")))
-		bind(k, aShowPlaylist);
-	if (notBound(k = stringToKey("f3")))
-		bind(k, aShowBrowser);
-	if (notBound(k = stringToKey("f4")))
-		bind(k, aShowSearchEngine);
-	if (notBound(k = stringToKey("f5")))
-		bind(k, aShowMediaLibrary);
-	if (notBound(k = stringToKey("f6")))
-		bind(k, aShowPlaylistEditor);
-	if (notBound(k = stringToKey("f7")))
-		bind(k, aShowTagEditor);
-	if (notBound(k = stringToKey("f8")))
-		bind(k, aShowOutputs);
-	if (notBound(k = stringToKey("f9")))
-		bind(k, aShowVisualizer);
-	if (notBound(k = stringToKey("f10")))
-		bind(k, aShowClock);
 	if (notBound(k = stringToKey("Q")))
 		bind(k, aQuit);
 }
