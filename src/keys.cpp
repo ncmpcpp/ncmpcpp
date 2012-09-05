@@ -467,7 +467,7 @@ void KeyConfiguration::generateBindings()
 	if (notBound(k = stringToKey("\\")))
 		bind(k, aToggleInterface);
 	if (notBound(k = stringToKey("!")))
-		bind(k, aToggleSeparatorsInPlaylist);
+		bind(k, aToggleSeparatorsBetweenAlbums);
 	if (notBound(k = stringToKey("L")))
 		bind(k, aToggleLyricsFetcher);
 	if (notBound(k = stringToKey("F")))

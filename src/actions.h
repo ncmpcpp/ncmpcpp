@@ -33,7 +33,7 @@ enum ActionType
 	aPressEnter, aPressSpace, aPreviousColumn, aNextColumn, aMasterScreen, aSlaveScreen, aVolumeUp,
 	aVolumeDown, aDelete, aReplaySong, aPreviousSong, aNextSong, aPause, aStop, aSavePlaylist,
 	aMoveSortOrderUp, aMoveSortOrderDown, aMoveSelectedItemsUp, aMoveSelectedItemsDown,
-	aMoveSelectedItemsTo, aAdd, aSeekForward, aSeekBackward, aToggleDisplayMode, aToggleSeparatorsInPlaylist,
+	aMoveSelectedItemsTo, aAdd, aSeekForward, aSeekBackward, aToggleDisplayMode, aToggleSeparatorsBetweenAlbums,
 	aToggleLyricsFetcher, aToggleFetchingLyricsInBackground, aToggleAutoCenter, aUpdateDatabase,
 	aJumpToPlayingSong, aToggleRepeat, aShuffle, aToggleRandom, aStartSearching, aSaveTagChanges,
 	aToggleSingle, aToggleConsume, aToggleCrossfade, aSetCrossfade, aEditSong, aEditLibraryTag,
@@ -355,9 +355,9 @@ struct ToggleDisplayMode : public Action
 	virtual void Run();
 };
 
-struct ToggleSeparatorsInPlaylist : public Action
+struct ToggleSeparatorsBetweenAlbums : public Action
 {
-	ToggleSeparatorsInPlaylist() : Action(aToggleSeparatorsInPlaylist, "toggle_separators_in_playlist") { }
+	ToggleSeparatorsBetweenAlbums() : Action(aToggleSeparatorsBetweenAlbums, "toggle_separators_between_albums") { }
 	virtual bool canBeRun() const;
 	virtual void Run();
 };

@@ -1153,15 +1153,15 @@ void ToggleDisplayMode::Run()
 	}
 }
 
-bool ToggleSeparatorsInPlaylist::canBeRun() const
+bool ToggleSeparatorsBetweenAlbums::canBeRun() const
 {
-	return myScreen == myPlaylist;
+	return true;
 }
 
-void ToggleSeparatorsInPlaylist::Run()
+void ToggleSeparatorsBetweenAlbums::Run()
 {
 	Config.playlist_separate_albums = !Config.playlist_separate_albums;
-	ShowMessage("Separators between albums in playlist: %s", Config.playlist_separate_albums ? "On" : "Off");
+	ShowMessage("Separators between albums: %s", Config.playlist_separate_albums ? "On" : "Off");
 }
 
 #ifndef HAVE_CURL_CURL_H
@@ -2558,7 +2558,7 @@ void populateActions()
 	insertAction(new SeekForward());
 	insertAction(new SeekBackward());
 	insertAction(new ToggleDisplayMode());
-	insertAction(new ToggleSeparatorsInPlaylist());
+	insertAction(new ToggleSeparatorsBetweenAlbums());
 	insertAction(new ToggleLyricsFetcher());
 	insertAction(new ToggleFetchingLyricsInBackground());
 	insertAction(new ToggleAutoCenter());

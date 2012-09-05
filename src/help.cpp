@@ -270,7 +270,7 @@ void Help::GetKeybindings()
 #	endif // HAVE_TAGLIB_H
 	KeyDesc(aToggleDisplayMode, "Toggle display mode");
 	KeyDesc(aToggleInterface, "Toggle user interface");
-	KeyDesc(aToggleSeparatorsInPlaylist, "Toggle displaying separators between albums");
+	KeyDesc(aToggleSeparatorsBetweenAlbums, "Toggle displaying separators between albums");
 	KeyDesc(aJumpToPositionInSong, "Jump to given position in playing song (formats: mm:ss, x%)");
 	KeyDesc(aShowSongInfo, "Show song info");
 #	ifdef HAVE_CURL_CURL_H
