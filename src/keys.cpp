@@ -107,7 +107,7 @@ Action *parseActionLine(const std::string &line, F error)
 			if (k != Key::noOp)
 				result = new PushCharacters(&Global::wFooter, { k.getChar() });
 			else
-				error() << "invalid argument to function push_character: '" << arg << "'\n";
+				error() << "invalid character passed to push_character: '" << arg << "'\n";
 		}
 		else if (action_name == "push_characters")
 		{
@@ -122,7 +122,7 @@ Action *parseActionLine(const std::string &line, F error)
 				result = new PushCharacters(&Global::wFooter, std::move(queue));
 			}
 			else
-				error() << "push_characters requires its argument to be non-empty";
+				error() << "empty argument passed to push_characters\n";
 		}
 		else if (action_name == "require_runnable")
 		{
@@ -132,7 +132,7 @@ Action *parseActionLine(const std::string &line, F error)
 			if (action)
 				result = new RequireRunnable(action);
 			else
-				error() << "invalid action passed as argument to require_runnable: '" << arg << "'\n";
+				error() << "unknown action passed to require_runnable: '" << arg << "'\n";
 		}
 	}
 	return result;
