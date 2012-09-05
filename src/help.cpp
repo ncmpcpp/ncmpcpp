@@ -254,7 +254,6 @@ void Help::GetKeybindings()
 	KeyDesc(aUpdateDatabase, "Start music database update");
 	*w << '\n';
 	KeyDesc(aApplyFilter, "Apply filter");
-	KeyDesc(aDisableFilter, "Disable filter");
 	KeyDesc(aFindItemForward, "Find item forward");
 	KeyDesc(aFindItemBackward, "Find item backward");
 	KeyDesc(aPreviousFoundItem, "Go to previous found item");

@@ -29,6 +29,7 @@ struct PushCharacters : public Action
 	PushCharacters(NC::Window **w, std::vector<int> &&queue)
 	: Action(aMacroUtility, ""), m_window(w), m_queue(queue) { }
 	
+protected:
 	virtual void Run() {
 		for (auto it = m_queue.begin(); it != m_queue.end(); ++it)
 			(*m_window)->pushChar(*it);
@@ -44,6 +45,7 @@ struct RequireRunnable : public Action
 	RequireRunnable(Action *action)
 	: Action(aMacroUtility, ""), m_action(action) { assert(action); }
 	
+protected:
 	virtual bool canBeRun() const { return m_action->canBeRun(); }
 	virtual void Run() { }
 	

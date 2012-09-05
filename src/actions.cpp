@@ -1905,20 +1905,6 @@ void ApplyFilter::Run()
 	ListsChangeFinisher();
 }
 
-void DisableFilter::Run()
-{
-	using Global::wFooter;
-	
-	ApplyFilter *applyFilter = dynamic_cast<ApplyFilter *>(Get(aApplyFilter));
-	if (applyFilter && applyFilter->canBeRun())
-	{
-		// delete current filter
-		wFooter->pushChar(KEY_CTRL_U);
-		wFooter->pushChar(KEY_ENTER);
-		applyFilter->Execute();
-	}
-}
-
 bool Find::canBeRun() const
 {
 	return myScreen == myHelp
@@ -2563,7 +2549,6 @@ void populateActions()
 	insertAction(new SortPlaylist());
 	insertAction(new ReversePlaylist());
 	insertAction(new ApplyFilter());
-	insertAction(new DisableFilter());
 	insertAction(new Find());
 	insertAction(new FindItemForward());
 	insertAction(new FindItemBackward());

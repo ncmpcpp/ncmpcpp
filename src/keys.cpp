@@ -382,8 +382,6 @@ void KeyConfiguration::generateBindings()
 		bind(k, aReversePlaylist);
 	if (notBound(k = stringToKey("ctrl_f")))
 		bind(k, aApplyFilter);
-	if (notBound(k = stringToKey("ctrl_g")))
-		bind(k, aDisableFilter);
 	if (notBound(k = stringToKey("/")))
 	{
 		bind(k, aFind);
