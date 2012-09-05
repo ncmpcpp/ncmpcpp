@@ -922,7 +922,7 @@ bool SortAllTracks(const MPD::Song &a, const MPD::Song &b)
 		&MPD::Song::getAlbum,
 		&MPD::Song::getDisc
 	}};
-	CaseInsensitiveStringComparison cmp;
+	CaseInsensitiveStringComparison cmp(Config.ignore_leading_the);
 	for (auto get = gets.begin(); get != gets.end(); ++get)
 	{
 		int ret = cmp(a.getTags(*get), b.getTags(*get));
@@ -935,7 +935,7 @@ bool SortAllTracks(const MPD::Song &a, const MPD::Song &b)
 bool SortSearchConstraints(const SearchConstraints &a, const SearchConstraints &b)
 {
 	int result;
-	CaseInsensitiveStringComparison cmp;
+	CaseInsensitiveStringComparison cmp(Config.ignore_leading_the);
 	result = cmp(a.PrimaryTag, b.PrimaryTag);
 	if (result != 0)
 		return result < 0;

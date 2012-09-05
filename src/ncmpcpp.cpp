@@ -96,8 +96,11 @@ int main(int argc, char **argv)
 	
 	Config.SetDefaults();
 	Config.Read();
-	
 	Config.GenerateColumns();
+	
+	if (!Keys.read(Config.ncmpcpp_directory + "keys"))
+		return 1;
+	
 	Keys.generateBindings();
 	
 	if (getenv("MPD_HOST"))

@@ -21,24 +21,32 @@
 #include "comparators.h"
 #include "settings.h"
 
-int CaseInsensitiveStringComparison::operator()(const std::string &a, const std::string &b)
+bool CaseInsensitiveStringComparison::hasTheWord(const char *s) const
 {
-	const char *i = a.c_str();
-	const char *j = b.c_str();
-	if (Config.ignore_leading_the)
+	return (s[0] == 't' || s[0] == 'T')
+	&&     (s[1] == 'h' || s[1] == 'H')
+	&&     (s[2] == 'e' || s[2] == 'E')
+	&&     (s[3] == ' ');
+}
+
+int CaseInsensitiveStringComparison::operator()(const char *a, const char *b) const
+{
+	if (m_ignore_the)
 	{
 		if (hasTheWord(a))
-			i += 4;
+			a += 4;
 		if (hasTheWord(b))
-			j += 4;
+			b += 4;
 	}
 	int dist;
-	while (!(dist = tolower(*i)-tolower(*j)) && *j)
-		++i, ++j;
+	while (!(dist = tolower(*a)-tolower(*b)) && *b)
+		++a, ++b;
 	return dist;
 }
 
-bool CaseInsensitiveSorting::operator()(const MPD::Item &a, const MPD::Item &b)
+CaseInsensitiveSorting::CaseInsensitiveSorting(): cmp(Config.ignore_leading_the) { }
+
+bool CaseInsensitiveSorting::operator()(const MPD::Item &a, const MPD::Item &b) const
 {
 	bool result = false;
 	if (a.type == b.type)
@@ -65,8 +73,6 @@ bool CaseInsensitiveSorting::operator()(const MPD::Item &a, const MPD::Item &b)
 						break;
 				}
 				break;
-			default: // there is no other option, silence compiler
-				assert(false);
 		}
 	}
 	else

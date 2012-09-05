@@ -536,7 +536,7 @@ void SearchEngine::Search()
 		}
 		else // match only if values are equal
 		{
-			CaseInsensitiveStringComparison cmp;
+			CaseInsensitiveStringComparison cmp(Config.ignore_leading_the);
 			
 			if (!itsConstraints[0].empty())
 				any_found =

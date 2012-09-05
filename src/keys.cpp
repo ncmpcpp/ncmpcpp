@@ -18,146 +18,70 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
+#include <fstream>
+#include <iostream>
 #include "keys.h"
+#include "utility/comparators.h"
+#include "utility/string.h"
 
 KeyConfiguration Keys;
 
 Key Key::noOp = Key(ERR, NCurses);
 
-void KeyConfiguration::generateBindings()
+namespace {//
+
+Key stringToKey(const std::string &s)
 {
-	bind_(KEY_MOUSE, Key::NCurses, aMouseEvent);
-	bind_(KEY_UP, Key::NCurses, aScrollUp);
-	bind_(KEY_DOWN, Key::NCurses, aScrollDown);
-	bind_('[', Key::Standard, aScrollUpAlbum);
-	bind_(']', Key::Standard, aScrollDownAlbum);
-	bind_('{', Key::Standard, aScrollUpArtist);
-	bind_('}', Key::Standard, aScrollDownArtist);
-	bind_(KEY_PPAGE, Key::NCurses, aPageUp);
-	bind_(KEY_NPAGE, Key::NCurses, aPageDown);
-	bind_(KEY_HOME, Key::NCurses, aMoveHome);
-	bind_(KEY_END, Key::NCurses, aMoveEnd);
-	bind_(KEY_SPACE, Key::Standard, aPressSpace);
-	bind_(KEY_ENTER, Key::Standard, aPressEnter);
-	bind_(KEY_DC, Key::NCurses, aDelete);
-	bind_(KEY_RIGHT, Key::NCurses, aNextColumn);
-	bind_(KEY_RIGHT, Key::NCurses, aSlaveScreen);
-	bind_(KEY_RIGHT, Key::NCurses, aVolumeUp);
-	bind_(KEY_LEFT, Key::NCurses, aPreviousColumn);
-	bind_(KEY_LEFT, Key::NCurses, aMasterScreen);
-	bind_(KEY_LEFT, Key::NCurses, aVolumeDown);
-	bind_(KEY_TAB, Key::Standard, aNextScreen);
-	bind_(KEY_SHIFT_TAB, Key::NCurses, aPreviousScreen);
-	bind_('1', Key::Standard, aShowHelp);
-	bind_('2', Key::Standard, aShowPlaylist);
-	bind_('3', Key::Standard, aShowBrowser);
-	bind_('4', Key::Standard, aShowSearchEngine);
-	bind_('5', Key::Standard, aShowMediaLibrary);
-	bind_('6', Key::Standard, aShowPlaylistEditor);
-	bind_('7', Key::Standard, aShowTagEditor);
-	bind_('8', Key::Standard, aShowOutputs);
-	bind_('9', Key::Standard, aShowVisualizer);
-	bind_('0', Key::Standard, aShowClock);
-	bind_('@', Key::Standard, aShowServerInfo);
-	bind_('s', Key::Standard, aStop);
-	bind_('P', Key::Standard, aPause);
-	bind_('>', Key::Standard, aNextSong);
-	bind_('<', Key::Standard, aPreviousSong);
-	bind_(KEY_CTRL_H, Key::Standard, aJumpToParentDir);
-	bind_(KEY_CTRL_H, Key::Standard, aReplaySong);
-	bind_(KEY_BACKSPACE, Key::NCurses, aJumpToParentDir);
-	bind_(KEY_BACKSPACE, Key::NCurses, aReplaySong);
-	bind_(KEY_BACKSPACE_2, Key::Standard, aJumpToParentDir);
-	bind_(KEY_BACKSPACE_2, Key::Standard, aReplaySong);
-	bind_('f', Key::Standard, aSeekForward);
-	bind_('b', Key::Standard, aSeekBackward);
-	bind_('r', Key::Standard, aToggleRepeat);
-	bind_('z', Key::Standard, aToggleRandom);
-	bind_('y', Key::Standard, aSaveTagChanges);
-	bind_('y', Key::Standard, aStartSearching);
-	bind_('y', Key::Standard, aToggleSingle);
-	bind_('R', Key::Standard, aToggleConsume);
-	bind_('Y', Key::Standard, aToggleReplayGainMode);
-	bind_('t', Key::Standard, aToggleSpaceMode);
-	bind_('T', Key::Standard, aToggleAddMode);
-	bind_('|', Key::Standard, aToggleMouse);
-	bind_('#', Key::Standard, aToggleBitrateVisibility);
-	bind_('Z', Key::Standard, aShuffle);
-	bind_('x', Key::Standard, aToggleCrossfade);
-	bind_('X', Key::Standard, aSetCrossfade);
-	bind_('u', Key::Standard, aUpdateDatabase);
-	bind_(KEY_CTRL_V, Key::Standard, aSortPlaylist);
-	bind_(KEY_CTRL_R, Key::Standard, aReversePlaylist);
-	bind_(KEY_CTRL_F, Key::Standard, aApplyFilter);
-	bind_(KEY_CTRL_G, Key::Standard, aDisableFilter);
-	bind_('/', Key::Standard, aFind);
-	bind_('/', Key::Standard, aFindItemForward);
-	bind_('?', Key::Standard, aFind);
-	bind_('?', Key::Standard, aFindItemBackward);
-	bind_('.', Key::Standard, aNextFoundItem);
-	bind_(',', Key::Standard, aPreviousFoundItem);
-	bind_('w', Key::Standard, aToggleFindMode);
-	bind_('e', Key::Standard, aEditSong);
-	bind_('e', Key::Standard, aEditLibraryTag);
-	bind_('e', Key::Standard, aEditLibraryAlbum);
-	bind_('e', Key::Standard, aEditDirectoryName);
-	bind_('e', Key::Standard, aEditPlaylistName);
-	bind_('e', Key::Standard, aEditLyrics);
-	bind_('i', Key::Standard, aShowSongInfo);
-	bind_('I', Key::Standard, aShowArtistInfo);
-	bind_('g', Key::Standard, aJumpToPositionInSong);
-	bind_('l', Key::Standard, aShowLyrics);
-	bind_('v', Key::Standard, aReverseSelection);
-	bind_('V', Key::Standard, aDeselectItems);
-	bind_('B', Key::Standard, aSelectAlbum);
-	bind_('a', Key::Standard, aAddSelectedItems);
-	bind_('c', Key::Standard, aClearPlaylist);
-	bind_('c', Key::Standard, aClearMainPlaylist);
-	bind_('C', Key::Standard, aCropPlaylist);
-	bind_('C', Key::Standard, aCropMainPlaylist);
-	bind_('m', Key::Standard, aMoveSortOrderUp);
-	bind_('m', Key::Standard, aMoveSelectedItemsUp);
-	bind_('n', Key::Standard, aMoveSortOrderDown);
-	bind_('n', Key::Standard, aMoveSelectedItemsDown);
-	bind_('M', Key::Standard, aMoveSelectedItemsTo);
-	bind_('A', Key::Standard, aAdd);
-	bind_('S', Key::Standard, aSavePlaylist);
-	bind_('o', Key::Standard, aJumpToPlayingSong);
-	bind_('G', Key::Standard, aJumpToBrowser);
-	bind_('G', Key::Standard, aJumpToPlaylistEditor);
-	bind_('~', Key::Standard, aJumpToMediaLibrary);
-	bind_('E', Key::Standard, aJumpToTagEditor);
-	bind_('U', Key::Standard, aToggleAutoCenter);
-	bind_('p', Key::Standard, aToggleDisplayMode);
-	bind_('\\', Key::Standard, aToggleInterface);
-	bind_('!', Key::Standard, aToggleSeparatorsInPlaylist);
-	bind_('L', Key::Standard, aToggleLyricsFetcher);
-	bind_('F', Key::Standard, aToggleFetchingLyricsInBackground);
-	bind_(KEY_CTRL_L, Key::Standard, aToggleScreenLock);
-	bind_('`', Key::Standard, aToggleBrowserSortMode);
-	bind_('`', Key::Standard, aToggleLibraryTagType);
-	bind_('`', Key::Standard, aRefetchLyrics);
-	bind_('`', Key::Standard, aRefetchArtistInfo);
-	bind_('`', Key::Standard, aAddRandomItems);
-	bind_(KEY_CTRL_P, Key::Standard, aSetSelectedItemsPriority);
-	bind_('q', Key::Standard, aQuit);
-	
-	bind_('k', Key::Standard, aScrollUp);
-	bind_('j', Key::Standard, aScrollDown);
-	bind_('d', Key::Standard, aDelete);
-	bind_('+', Key::Standard, aVolumeUp);
-	bind_('-', Key::Standard, aVolumeDown);
-	bind_(KEY_F1, Key::NCurses, aShowHelp);
-	bind_(KEY_F2, Key::NCurses, aShowPlaylist);
-	bind_(KEY_F3, Key::NCurses, aShowBrowser);
-	bind_(KEY_F4, Key::NCurses, aShowSearchEngine);
-	bind_(KEY_F5, Key::NCurses, aShowMediaLibrary);
-	bind_(KEY_F6, Key::NCurses, aShowPlaylistEditor);
-	bind_(KEY_F7, Key::NCurses, aShowTagEditor);
-	bind_(KEY_F8, Key::NCurses, aShowOutputs);
-	bind_(KEY_F9, Key::NCurses, aShowVisualizer);
-	bind_(KEY_F10, Key::NCurses, aShowClock);
-	bind_('Q', Key::Standard, aQuit);
+	Key result = Key::noOp;
+	if (!s.compare("mouse"))
+		result = Key(KEY_MOUSE, Key::NCurses);
+	else if (!s.compare("up"))
+		result = Key(KEY_UP, Key::NCurses);
+	else if (!s.compare("down"))
+		result = Key(KEY_DOWN, Key::NCurses);
+	else if (!s.compare("page_up"))
+		result = Key(KEY_PPAGE, Key::NCurses);
+	else if (!s.compare("page_down"))
+		result = Key(KEY_NPAGE, Key::NCurses);
+	else if (!s.compare("home"))
+		result = Key(KEY_HOME, Key::NCurses);
+	else if (!s.compare("end"))
+		result = Key(KEY_END, Key::NCurses);
+	else if (!s.compare("space"))
+		result = Key(KEY_SPACE, Key::Standard);
+	else if (!s.compare("enter"))
+		result = Key(KEY_ENTER, Key::Standard);
+	else if (!s.compare("delete"))
+		result = Key(KEY_DC, Key::NCurses);
+	else if (!s.compare("left"))
+		result = Key(KEY_LEFT, Key::NCurses);
+	else if (!s.compare("right"))
+		result = Key(KEY_RIGHT, Key::NCurses);
+	else if (!s.compare("tab"))
+		result = Key(KEY_TAB, Key::Standard);
+	else if (!s.compare("shift_tab"))
+		result = Key(KEY_SHIFT_TAB, Key::NCurses);
+	else if (!s.compare(0, 5, "ctrl_") && s.length() > 5 && s[5] >= 'a' && s[5] <= 'z')
+		result = Key(KEY_CTRL_A + (s[5] - 'a'), Key::Standard);
+	else if (s.length() > 1 && s[0] == 'f')
+	{
+		int n = atoi(s.c_str() + 1);
+		if (n >= 1 && n <= 12)
+			result = Key(KEY_F1 + n - 1, Key::NCurses);
+	}
+	else if (!s.compare("backspace"))
+		result = Key(KEY_BACKSPACE, Key::NCurses);
+	else if (!s.compare("backspace_2"))
+		result = Key(KEY_BACKSPACE_2, Key::Standard);
+	else
+	{
+		std::wstring ws = ToWString(s);
+		if (ws.length() == 1)
+			result = Key(ws[0], Key::Standard);
+	}
+	return result;
+}
+
 }
 
 Key Key::read(NC::Window &w)
@@ -192,4 +116,352 @@ Key Key::read(NC::Window &w)
 		}
 	}
 	return result;
+}
+
+bool KeyConfiguration::read(const std::string &file)
+{
+	bool result = true;
+	
+	std::ifstream f(file);
+	if (!f.is_open())
+		return result;
+	
+	size_t line_no = 0;
+	bool key_def_in_progress = false;
+	Key key = Key::noOp;
+	Binding::ActionChain actions;
+	std::string line, strkey;
+	
+	auto error = [&]() -> std::ostream & {
+		std::cerr << file << ":" << line_no << ": ";
+		key_def_in_progress = false;
+		result = false;
+		return std::cerr;
+	};
+	auto bind_key_def = [&]() -> bool {
+		if (!actions.empty())
+		{
+			bind(key, actions);
+			actions.clear();
+			return true;
+		}
+		else
+		{
+			error() << "definition of key \"" << strkey << "\" cannot be empty.\n";
+			return false;
+		}
+	};
+	
+	while (!f.eof() && ++line_no)
+	{
+		getline(f, line);
+		if (line.empty() || line[0] == '#')
+			continue;
+		
+		if (!line.compare(0, 7, "def_key")) // beginning of key definition
+		{
+			if (key_def_in_progress)
+			{
+				if (!bind_key_def())
+					break;
+			}
+			key_def_in_progress = true;
+			strkey = getEnclosedString(line, '"', '"', 0);
+			key = stringToKey(strkey);
+			if (key == Key::noOp)
+			{
+				error() << "invalid key: \"" << strkey << "\"\n";
+				break;
+			}
+		}
+		else if (isspace(line[0])) // name of action to be bound
+		{
+			trim(line);
+			Action *action = Action::Get(line);
+			if (action)
+				actions.push_back(action);
+			else
+			{
+				error() << "unknown action: \"" << line << "\"\n";
+				break;
+			}
+		}
+	}
+	if (key_def_in_progress)
+		bind_key_def();
+	f.close();
+	return result;
+	
+}
+
+void KeyConfiguration::generateBindings()
+{
+	Key k = Key::noOp;
+	if (notBound(k = stringToKey("mouse")))
+		bind(k, aMouseEvent);
+	if (notBound(k = stringToKey("up")))
+		bind(k, aScrollUp);
+	if (notBound(k = stringToKey("down")))
+		bind(k, aScrollDown);
+	if (notBound(k = stringToKey("[")))
+		bind(k, aScrollUpAlbum);
+	if (notBound(k = stringToKey("]")))
+		bind(k, aScrollDownAlbum);
+	if (notBound(k = stringToKey("{")))
+		bind(k, aScrollUpArtist);
+	if (notBound(k = stringToKey("}")))
+		bind(k, aScrollDownArtist);
+	if (notBound(k = stringToKey("page_up")))
+		bind(k, aPageUp);
+	if (notBound(k = stringToKey("page_down")))
+		bind(k, aPageDown);
+	if (notBound(k = stringToKey("home")))
+		bind(k, aMoveHome);
+	if (notBound(k = stringToKey("end")))
+		bind(k, aMoveEnd);
+	if (notBound(k = stringToKey("space")))
+		bind(k, aPressSpace);
+	if (notBound(k = stringToKey("enter")))
+		bind(k, aPressEnter);
+	if (notBound(k = stringToKey("delete")))
+		bind(k, aDelete);
+	if (notBound(k = stringToKey("right")))
+	{
+		bind(k, aNextColumn);
+		bind(k, aSlaveScreen);
+		bind(k, aVolumeUp);
+	}
+	if (notBound(k = stringToKey("left")))
+	{
+		bind(k, aPreviousColumn);
+		bind(k, aMasterScreen);
+		bind(k, aVolumeDown);
+	}
+	if (notBound(k = stringToKey("tab")))
+		bind(k, aNextScreen);
+	if (notBound(k = stringToKey("shift_tab")))
+		bind(k, aPreviousScreen);
+	if (notBound(k = stringToKey("1")))
+		bind(k, aShowHelp);
+	if (notBound(k = stringToKey("2")))
+		bind(k, aShowPlaylist);
+	if (notBound(k = stringToKey("3")))
+		bind(k, aShowBrowser);
+	if (notBound(k = stringToKey("4")))
+		bind(k, aShowSearchEngine);
+	if (notBound(k = stringToKey("5")))
+		bind(k, aShowMediaLibrary);
+	if (notBound(k = stringToKey("6")))
+		bind(k, aShowPlaylistEditor);
+	if (notBound(k = stringToKey("7")))
+		bind(k, aShowTagEditor);
+	if (notBound(k = stringToKey("8")))
+		bind(k, aShowOutputs);
+	if (notBound(k = stringToKey("9")))
+		bind(k, aShowVisualizer);
+	if (notBound(k = stringToKey("0")))
+		bind(k, aShowClock);
+	if (notBound(k = stringToKey("@")))
+		bind(k, aShowServerInfo);
+	if (notBound(k = stringToKey("s")))
+		bind(k, aStop);
+	if (notBound(k = stringToKey("P")))
+		bind(k, aPause);
+	if (notBound(k = stringToKey(">")))
+		bind(k, aNextSong);
+	if (notBound(k = stringToKey("<")))
+		bind(k, aPreviousSong);
+	if (notBound(k = stringToKey("ctrl_h")))
+	{
+		bind(k, aJumpToParentDir);
+		bind(k, aReplaySong);
+	}
+	if (notBound(k = stringToKey("backspace")))
+	{
+		bind(k, aJumpToParentDir);
+		bind(k, aReplaySong);
+	}
+	if (notBound(k = stringToKey("backspace_2")))
+	{
+		bind(k, aJumpToParentDir);
+		bind(k, aReplaySong);
+	}
+	if (notBound(k = stringToKey("f")))
+		bind(k, aSeekForward);
+	if (notBound(k = stringToKey("b")))
+		bind(k, aSeekBackward);
+	if (notBound(k = stringToKey("r")))
+		bind(k, aToggleRepeat);
+	if (notBound(k = stringToKey("z")))
+		bind(k, aToggleRandom);
+	if (notBound(k = stringToKey("y")))
+	{
+		bind(k, aSaveTagChanges);
+		bind(k, aStartSearching);
+		bind(k, aToggleSingle);
+	}
+	if (notBound(k = stringToKey("R")))
+		bind(k, aToggleConsume);
+	if (notBound(k = stringToKey("Y")))
+		bind(k, aToggleReplayGainMode);
+	if (notBound(k = stringToKey("t")))
+		bind(k, aToggleSpaceMode);
+	if (notBound(k = stringToKey("T")))
+		bind(k, aToggleAddMode);
+	if (notBound(k = stringToKey("|")))
+		bind(k, aToggleMouse);
+	if (notBound(k = stringToKey("#")))
+		bind(k, aToggleBitrateVisibility);
+	if (notBound(k = stringToKey("Z")))
+		bind(k, aShuffle);
+	if (notBound(k = stringToKey("x")))
+		bind(k, aToggleCrossfade);
+	if (notBound(k = stringToKey("X")))
+		bind(k, aSetCrossfade);
+	if (notBound(k = stringToKey("u")))
+		bind(k, aUpdateDatabase);
+	if (notBound(k = stringToKey("ctrl_v")))
+		bind(k, aSortPlaylist);
+	if (notBound(k = stringToKey("ctrl_r")))
+		bind(k, aReversePlaylist);
+	if (notBound(k = stringToKey("ctrl_f")))
+		bind(k, aApplyFilter);
+	if (notBound(k = stringToKey("ctrl_g")))
+		bind(k, aDisableFilter);
+	if (notBound(k = stringToKey("/")))
+	{
+		bind(k, aFind);
+		bind(k, aFindItemForward);
+	}
+	if (notBound(k = stringToKey("/")))
+	{
+		bind(k, aFind);
+		bind(k, aFindItemBackward);
+	}
+	if (notBound(k = stringToKey(".")))
+		bind(k, aNextFoundItem);
+	if (notBound(k = stringToKey(",")))
+		bind(k, aPreviousFoundItem);
+	if (notBound(k = stringToKey("w")))
+		bind(k, aToggleFindMode);
+	if (notBound(k = stringToKey("e")))
+	{
+		bind(k, aEditSong);
+		bind(k, aEditLibraryTag);
+		bind(k, aEditLibraryAlbum);
+		bind(k, aEditDirectoryName);
+		bind(k, aEditPlaylistName);
+		bind(k, aEditLyrics);
+	}
+	if (notBound(k = stringToKey("i")))
+		bind(k, aShowSongInfo);
+	if (notBound(k = stringToKey("I")))
+		bind(k, aShowArtistInfo);
+	if (notBound(k = stringToKey("g")))
+		bind(k, aJumpToPositionInSong);
+	if (notBound(k = stringToKey("l")))
+		bind(k, aShowLyrics);
+	if (notBound(k = stringToKey("v")))
+		bind(k, aReverseSelection);
+	if (notBound(k = stringToKey("B")))
+		bind(k, aSelectAlbum);
+	if (notBound(k = stringToKey("a")))
+		bind(k, aAddSelectedItems);
+	if (notBound(k = stringToKey("c")))
+	{
+		bind(k, aClearPlaylist);
+		bind(k, aClearMainPlaylist);
+	}
+	if (notBound(k = stringToKey("C")))
+	{
+		bind(k, aCropPlaylist);
+		bind(k, aCropMainPlaylist);
+	}
+	if (notBound(k = stringToKey("m")))
+	{
+		bind(k, aMoveSortOrderUp);
+		bind(k, aMoveSelectedItemsUp);
+	}
+	if (notBound(k = stringToKey("n")))
+	{
+		bind(k, aMoveSortOrderDown);
+		bind(k, aMoveSelectedItemsDown);
+	}
+	if (notBound(k = stringToKey("M")))
+		bind(k, aMoveSelectedItemsTo);
+	if (notBound(k = stringToKey("A")))
+		bind(k, aAdd);
+	if (notBound(k = stringToKey("S")))
+		bind(k, aSavePlaylist);
+	if (notBound(k = stringToKey("o")))
+		bind(k, aJumpToPlayingSong);
+	if (notBound(k = stringToKey("G")))
+	{
+		bind(k, aJumpToBrowser);
+		bind(k, aJumpToPlaylistEditor);
+	}
+	if (notBound(k = stringToKey("~")))
+		bind(k, aJumpToMediaLibrary);
+	if (notBound(k = stringToKey("E")))
+		bind(k, aJumpToTagEditor);
+	if (notBound(k = stringToKey("U")))
+		bind(k, aToggleAutoCenter);
+	if (notBound(k = stringToKey("p")))
+		bind(k, aToggleDisplayMode);
+	if (notBound(k = stringToKey("\\")))
+		bind(k, aToggleInterface);
+	if (notBound(k = stringToKey("!")))
+		bind(k, aToggleSeparatorsInPlaylist);
+	if (notBound(k = stringToKey("L")))
+		bind(k, aToggleLyricsFetcher);
+	if (notBound(k = stringToKey("F")))
+		bind(k, aToggleFetchingLyricsInBackground);
+	if (notBound(k = stringToKey("ctrl_l")))
+		bind(k, aToggleScreenLock);
+	if (notBound(k = stringToKey("`")))
+	{
+		bind(k, aToggleBrowserSortMode);
+		bind(k, aToggleLibraryTagType);
+		bind(k, aRefetchLyrics);
+		bind(k, aRefetchArtistInfo);
+		bind(k, aAddRandomItems);
+	}
+	if (notBound(k = stringToKey("ctrl_p")))
+		bind(k, aSetSelectedItemsPriority);
+	if (notBound(k = stringToKey("q")))
+		bind(k, aQuit);
+	
+	if (notBound(k = stringToKey("k")))
+		bind(k, aScrollUp);
+	if (notBound(k = stringToKey("j")))
+		bind(k, aScrollDown);
+	if (notBound(k = stringToKey("d")))
+		bind(k, aDelete);
+	if (notBound(k = stringToKey("+")))
+		bind(k, aVolumeUp);
+	if (notBound(k = stringToKey("-")))
+		bind(k, aVolumeDown);
+	
+	if (notBound(k = stringToKey("f1")))
+		bind(k, aShowHelp);
+	if (notBound(k = stringToKey("f2")))
+		bind(k, aShowPlaylist);
+	if (notBound(k = stringToKey("f3")))
+		bind(k, aShowBrowser);
+	if (notBound(k = stringToKey("f4")))
+		bind(k, aShowSearchEngine);
+	if (notBound(k = stringToKey("f5")))
+		bind(k, aShowMediaLibrary);
+	if (notBound(k = stringToKey("f6")))
+		bind(k, aShowPlaylistEditor);
+	if (notBound(k = stringToKey("f7")))
+		bind(k, aShowTagEditor);
+	if (notBound(k = stringToKey("f8")))
+		bind(k, aShowOutputs);
+	if (notBound(k = stringToKey("f9")))
+		bind(k, aShowVisualizer);
+	if (notBound(k = stringToKey("f10")))
+		bind(k, aShowClock);
+	if (notBound(k = stringToKey("Q")))
+		bind(k, aQuit);
 }

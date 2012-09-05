@@ -28,7 +28,7 @@
 enum ActionType
 {
 	aMacroUtility,
-	aMouseEvent, aScrollUp, aScrollDown, aScrollUpArtist, aScrollUpAlbum, aScrollDownArtist,
+	aDummy, aMouseEvent, aScrollUp, aScrollDown, aScrollUpArtist, aScrollUpAlbum, aScrollDownArtist,
 	aScrollDownAlbum, aPageUp, aPageDown, aMoveHome, aMoveEnd, aToggleInterface, aJumpToParentDir,
 	aPressEnter, aPressSpace, aPreviousColumn, aNextColumn, aMasterScreen, aSlaveScreen, aVolumeUp,
 	aVolumeDown, aDelete, aReplaySong, aPreviousSong, aNextSong, aPause, aStop, aSavePlaylist,
@@ -79,6 +79,7 @@ struct Action
 	static bool isMPDMusicDirSet();
 	
 	static Action *Get(ActionType);
+	static Action *Get(const std::string &name);
 	
 	static bool OriginalStatusbarVisibility;
 	static bool DesignChanged;
@@ -100,9 +101,12 @@ struct Action
 	private:
 		ActionType itsType;
 		const char *itsName;
-		
-		static void insertAction(Action *a) { Actions[a->Type()] = a; }
-		static std::map<ActionType, Action *> Actions;
+};
+
+struct Dummy : public Action
+{
+	Dummy() : Action(aDummy, "dummy") { }
+	virtual void Run() { }
 };
 
 struct MouseEvent : public Action

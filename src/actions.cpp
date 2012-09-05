@@ -69,7 +69,14 @@ size_t Action::HeaderHeight;
 size_t Action::FooterHeight;
 size_t Action::FooterStartY;
 
-std::map<ActionType, Action *> Action::Actions;
+namespace {//
+
+std::map<ActionType, Action *> Actions;
+
+void insertAction(Action *a);
+void populateActions();
+
+}
 
 void Action::ValidateScreenSize()
 {
@@ -416,6 +423,29 @@ bool Action::isMPDMusicDirSet()
 		return false;
 	}
 	return true;
+}
+
+Action *Action::Get(ActionType at)
+{
+	if (Actions.empty())
+		populateActions();
+	return Actions[at];
+}
+
+Action *Action::Get(const std::string &name)
+{
+	Action *result = 0;
+	if (Actions.empty())
+		populateActions();
+	for (auto it = Actions.begin(); it != Actions.end(); ++it)
+	{
+		if (it->second->Name() == name)
+		{
+			result = it->second;
+			break;
+		}
+	}
+	return result;
 }
 
 bool MouseEvent::canBeRun() const
@@ -2478,120 +2508,126 @@ void ShowServerInfo::Run()
 	myServerInfo->SwitchTo();
 }
 
-Action *Action::Get(ActionType at)
+namespace {//
+
+void insertAction(Action *a)
 {
-	if (Actions.empty())
-	{
-		insertAction(new MouseEvent());
-		insertAction(new ScrollUp());
-		insertAction(new ScrollDown());
-		insertAction(new ScrollUpArtist());
-		insertAction(new ScrollUpAlbum());
-		insertAction(new ScrollDownArtist());
-		insertAction(new ScrollDownAlbum());
-		insertAction(new PageUp());
-		insertAction(new PageDown());
-		insertAction(new MoveHome());
-		insertAction(new MoveEnd());
-		insertAction(new ToggleInterface());
-		insertAction(new JumpToParentDir());
-		insertAction(new PressEnter());
-		insertAction(new PressSpace());
-		insertAction(new PreviousColumn());
-		insertAction(new NextColumn());
-		insertAction(new MasterScreen());
-		insertAction(new SlaveScreen());
-		insertAction(new VolumeUp());
-		insertAction(new VolumeDown());
-		insertAction(new Delete());
-		insertAction(new ReplaySong());
-		insertAction(new PreviousSong());
-		insertAction(new NextSong());
-		insertAction(new Pause());
-		insertAction(new Stop());
-		insertAction(new SavePlaylist());
-		insertAction(new MoveSortOrderUp());
-		insertAction(new MoveSortOrderDown());
-		insertAction(new MoveSelectedItemsUp());
-		insertAction(new MoveSelectedItemsDown());
-		insertAction(new MoveSelectedItemsTo());
-		insertAction(new Add());
-		insertAction(new SeekForward());
-		insertAction(new SeekBackward());
-		insertAction(new ToggleDisplayMode());
-		insertAction(new ToggleSeparatorsInPlaylist());
-		insertAction(new ToggleLyricsFetcher());
-		insertAction(new ToggleFetchingLyricsInBackground());
-		insertAction(new ToggleAutoCenter());
-		insertAction(new UpdateDatabase());
-		insertAction(new JumpToPlayingSong());
-		insertAction(new ToggleRepeat());
-		insertAction(new Shuffle());
-		insertAction(new ToggleRandom());
-		insertAction(new StartSearching());
-		insertAction(new SaveTagChanges());
-		insertAction(new ToggleSingle());
-		insertAction(new ToggleConsume());
-		insertAction(new ToggleCrossfade());
-		insertAction(new SetCrossfade());
-		insertAction(new EditSong());
-		insertAction(new EditLibraryTag());
-		insertAction(new EditLibraryAlbum());
-		insertAction(new EditDirectoryName());
-		insertAction(new EditPlaylistName());
-		insertAction(new EditLyrics());
-		insertAction(new JumpToBrowser());
-		insertAction(new JumpToMediaLibrary());
-		insertAction(new JumpToPlaylistEditor());
-		insertAction(new ToggleScreenLock());
-		insertAction(new JumpToTagEditor());
-		insertAction(new JumpToPositionInSong());
-		insertAction(new ReverseSelection());
-		insertAction(new DeselectItems());
-		insertAction(new SelectAlbum());
-		insertAction(new AddSelectedItems());
-		insertAction(new CropMainPlaylist());
-		insertAction(new CropPlaylist());
-		insertAction(new ClearMainPlaylist());
-		insertAction(new ClearPlaylist());
-		insertAction(new SortPlaylist());
-		insertAction(new ReversePlaylist());
-		insertAction(new ApplyFilter());
-		insertAction(new DisableFilter());
-		insertAction(new Find());
-		insertAction(new FindItemForward());
-		insertAction(new FindItemBackward());
-		insertAction(new NextFoundItem());
-		insertAction(new PreviousFoundItem());
-		insertAction(new ToggleFindMode());
-		insertAction(new ToggleReplayGainMode());
-		insertAction(new ToggleSpaceMode());
-		insertAction(new ToggleAddMode());
-		insertAction(new ToggleMouse());
-		insertAction(new ToggleBitrateVisibility());
-		insertAction(new AddRandomItems());
-		insertAction(new ToggleBrowserSortMode());
-		insertAction(new ToggleLibraryTagType());
-		insertAction(new RefetchLyrics());
-		insertAction(new RefetchArtistInfo());
-		insertAction(new SetSelectedItemsPriority());
-		insertAction(new ShowSongInfo());
-		insertAction(new ShowArtistInfo());
-		insertAction(new ShowLyrics());
-		insertAction(new Quit());
-		insertAction(new NextScreen());
-		insertAction(new PreviousScreen());
-		insertAction(new ShowHelp());
-		insertAction(new ShowPlaylist());
-		insertAction(new ShowBrowser());
-		insertAction(new ShowSearchEngine());
-		insertAction(new ShowMediaLibrary());
-		insertAction(new ShowPlaylistEditor());
-		insertAction(new ShowTagEditor());
-		insertAction(new ShowOutputs());
-		insertAction(new ShowVisualizer());
-		insertAction(new ShowClock());
-		insertAction(new ShowServerInfo());
-	}
-	return Actions[at];
+	Actions[a->Type()] = a;
+}
+
+void populateActions()
+{
+	insertAction(new Dummy());
+	insertAction(new MouseEvent());
+	insertAction(new ScrollUp());
+	insertAction(new ScrollDown());
+	insertAction(new ScrollUpArtist());
+	insertAction(new ScrollUpAlbum());
+	insertAction(new ScrollDownArtist());
+	insertAction(new ScrollDownAlbum());
+	insertAction(new PageUp());
+	insertAction(new PageDown());
+	insertAction(new MoveHome());
+	insertAction(new MoveEnd());
+	insertAction(new ToggleInterface());
+	insertAction(new JumpToParentDir());
+	insertAction(new PressEnter());
+	insertAction(new PressSpace());
+	insertAction(new PreviousColumn());
+	insertAction(new NextColumn());
+	insertAction(new MasterScreen());
+	insertAction(new SlaveScreen());
+	insertAction(new VolumeUp());
+	insertAction(new VolumeDown());
+	insertAction(new Delete());
+	insertAction(new ReplaySong());
+	insertAction(new PreviousSong());
+	insertAction(new NextSong());
+	insertAction(new Pause());
+	insertAction(new Stop());
+	insertAction(new SavePlaylist());
+	insertAction(new MoveSortOrderUp());
+	insertAction(new MoveSortOrderDown());
+	insertAction(new MoveSelectedItemsUp());
+	insertAction(new MoveSelectedItemsDown());
+	insertAction(new MoveSelectedItemsTo());
+	insertAction(new Add());
+	insertAction(new SeekForward());
+	insertAction(new SeekBackward());
+	insertAction(new ToggleDisplayMode());
+	insertAction(new ToggleSeparatorsInPlaylist());
+	insertAction(new ToggleLyricsFetcher());
+	insertAction(new ToggleFetchingLyricsInBackground());
+	insertAction(new ToggleAutoCenter());
+	insertAction(new UpdateDatabase());
+	insertAction(new JumpToPlayingSong());
+	insertAction(new ToggleRepeat());
+	insertAction(new Shuffle());
+	insertAction(new ToggleRandom());
+	insertAction(new StartSearching());
+	insertAction(new SaveTagChanges());
+	insertAction(new ToggleSingle());
+	insertAction(new ToggleConsume());
+	insertAction(new ToggleCrossfade());
+	insertAction(new SetCrossfade());
+	insertAction(new EditSong());
+	insertAction(new EditLibraryTag());
+	insertAction(new EditLibraryAlbum());
+	insertAction(new EditDirectoryName());
+	insertAction(new EditPlaylistName());
+	insertAction(new EditLyrics());
+	insertAction(new JumpToBrowser());
+	insertAction(new JumpToMediaLibrary());
+	insertAction(new JumpToPlaylistEditor());
+	insertAction(new ToggleScreenLock());
+	insertAction(new JumpToTagEditor());
+	insertAction(new JumpToPositionInSong());
+	insertAction(new ReverseSelection());
+	insertAction(new DeselectItems());
+	insertAction(new SelectAlbum());
+	insertAction(new AddSelectedItems());
+	insertAction(new CropMainPlaylist());
+	insertAction(new CropPlaylist());
+	insertAction(new ClearMainPlaylist());
+	insertAction(new ClearPlaylist());
+	insertAction(new SortPlaylist());
+	insertAction(new ReversePlaylist());
+	insertAction(new ApplyFilter());
+	insertAction(new DisableFilter());
+	insertAction(new Find());
+	insertAction(new FindItemForward());
+	insertAction(new FindItemBackward());
+	insertAction(new NextFoundItem());
+	insertAction(new PreviousFoundItem());
+	insertAction(new ToggleFindMode());
+	insertAction(new ToggleReplayGainMode());
+	insertAction(new ToggleSpaceMode());
+	insertAction(new ToggleAddMode());
+	insertAction(new ToggleMouse());
+	insertAction(new ToggleBitrateVisibility());
+	insertAction(new AddRandomItems());
+	insertAction(new ToggleBrowserSortMode());
+	insertAction(new ToggleLibraryTagType());
+	insertAction(new RefetchLyrics());
+	insertAction(new RefetchArtistInfo());
+	insertAction(new SetSelectedItemsPriority());
+	insertAction(new ShowSongInfo());
+	insertAction(new ShowArtistInfo());
+	insertAction(new ShowLyrics());
+	insertAction(new Quit());
+	insertAction(new NextScreen());
+	insertAction(new PreviousScreen());
+	insertAction(new ShowHelp());
+	insertAction(new ShowPlaylist());
+	insertAction(new ShowBrowser());
+	insertAction(new ShowSearchEngine());
+	insertAction(new ShowMediaLibrary());
+	insertAction(new ShowPlaylistEditor());
+	insertAction(new ShowTagEditor());
+	insertAction(new ShowOutputs());
+	insertAction(new ShowVisualizer());
+	insertAction(new ShowClock());
+	insertAction(new ShowServerInfo());
+}
+
 }

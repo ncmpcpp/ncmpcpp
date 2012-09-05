@@ -31,12 +31,15 @@ struct Key
 	
 	Key(wchar_t ch, Type ct) : m_char(ch), m_type(ct) { }
 	
-	wchar_t getChar() const { return m_char; }
-	Type getType() const { return m_type; }
+	wchar_t getChar() const {
+		return m_char;
+	}
+	Type getType() const {
+		return m_type;
+	}
 	
 #	define KEYS_DEFINE_OPERATOR(CMP) \
-	bool operator CMP (const Key &k) const \
-	{ \
+	bool operator CMP (const Key &k) const { \
 		if (m_char CMP k.m_char) \
 			return true; \
 		if (m_char != k.m_char) \
@@ -49,8 +52,12 @@ struct Key
 	KEYS_DEFINE_OPERATOR(>=);
 #	undef KEYS_DEFINE_OPERATOR
 	
-	bool operator==(const Key &k) const { return m_char == k.m_char && m_type == k.m_type; }
-	bool operator!=(const Key &k) const { return !(*this == k); }
+	bool operator==(const Key &k) const {
+		return m_char == k.m_char && m_type == k.m_type;
+	}
+	bool operator!=(const Key &k) const {
+		return !(*this == k);
+	}
 	
 	static Key read(NC::Window &w);
 	static Key noOp;
@@ -66,11 +73,28 @@ struct Binding
 	typedef std::vector<Action *> ActionChain;
 	
 	Binding(ActionType at) : m_is_single(true), m_action(Action::Get(at)) { }
-	Binding(ActionChain *chain_) : m_is_single(false), m_chain(chain_) { }
+	Binding(const ActionChain &actions) {
+		assert(actions.size() > 0);
+		if (actions.size() == 1) {
+			m_is_single = true;
+			m_action = actions[0];
+		} else {
+			m_is_single = false;
+			m_chain = new ActionChain(actions);
+		}
+	}
 	
-	bool isSingle() const { return m_is_single; }
-	ActionChain *chain() const { assert(!m_is_single); return m_chain; }
-	Action *action() const { assert(m_is_single); return m_action; }
+	bool isSingle() const {
+		return m_is_single;
+	}
+	ActionChain *chain() const {
+		assert(!m_is_single);
+		return m_chain;
+	}
+	Action *action() const {
+		assert(m_is_single);
+		return m_action;
+	}
 	
 private:
 	bool m_is_single;
@@ -83,13 +107,18 @@ private:
 /// Key configuration
 struct KeyConfiguration
 {
+	bool read(const std::string &file);
 	void generateBindings();
 	
 	std::multimap<Key, Binding> Bindings;
 	
 private:
-	template <typename T> void bind_(wchar_t c, Key::Type ct, T t) {
-		Bindings.insert(std::make_pair(Key(c, ct), Binding(t)));
+	bool notBound(const Key &k) const {
+		return k != Key::noOp && Bindings.find(k) == Bindings.end();
+	}
+	
+	template <typename T> void bind(Key k, T t) {
+		Bindings.insert(std::make_pair(k, Binding(t)));
 	}
 };
 

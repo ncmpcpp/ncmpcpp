@@ -199,7 +199,7 @@ void Playlist::EnterPressed()
 		
 		std::function<void(MPD::SongList::iterator, MPD::SongList::iterator)> iter_swap, quick_sort;
 		auto song_cmp = [](const MPD::Song &a, const MPD::Song &b) -> bool {
-			CaseInsensitiveStringComparison cmp;
+			CaseInsensitiveStringComparison cmp(Config.ignore_leading_the);
 				for (size_t i = 0; i < SortOptions; ++i)
 					if (int ret = cmp(a.getTags((*SortDialog)[i].value().second), b.getTags((*SortDialog)[i].value().second)))
 						return ret < 0;

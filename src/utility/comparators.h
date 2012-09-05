@@ -26,17 +26,24 @@
 
 class CaseInsensitiveStringComparison
 {
-	bool hasTheWord(const std::string &s)
-	{
-		return  (s.length() > 3)
-		&&	(s[0] == 't' || s[0] == 'T')
-		&&	(s[1] == 'h' || s[1] == 'H')
-		&&	(s[2] == 'e' || s[2] == 'E')
-		&&	(s[3] == ' ');
-	}
+	bool m_ignore_the;
+	
+	bool hasTheWord(const char *s) const;
 	
 public:
-	int operator()(const std::string &a, const std::string &b);
+	CaseInsensitiveStringComparison(bool ignore_the) : m_ignore_the(ignore_the) { }
+	
+	int operator()(const char *a, const char *b) const;
+	
+	int operator()(const char *a, const std::string &b) const {
+		return (*this)(a, b.c_str());
+	}
+	int operator()(const std::string &a, const char *b) const {
+		return (*this)(a.c_str(), b);
+	}
+	int operator()(const std::string &a, const std::string &b) const {
+		return (*this)(a.c_str(), b.c_str());
+	}
 };
 
 class CaseInsensitiveSorting
@@ -44,22 +51,22 @@ class CaseInsensitiveSorting
 	CaseInsensitiveStringComparison cmp;
 	
 public:
-	bool operator()(const std::string &a, const std::string &b)
-	{
+	CaseInsensitiveSorting();
+	
+	bool operator()(const std::string &a, const std::string &b) const {
 		return cmp(a, b) < 0;
 	}
 	
-	bool operator()(const MPD::Song &a, const MPD::Song &b)
-	{
+	bool operator()(const MPD::Song &a, const MPD::Song &b) const {
 		return cmp(a.getName(), b.getName()) < 0;
 	}
 	
-	template <typename A, typename B> bool operator()(const std::pair<A, B> &a, const std::pair<A, B> &b)
-	{
+	template <typename A, typename B>
+	bool operator()(const std::pair<A, B> &a, const std::pair<A, B> &b) const {
 		return cmp(a.first, b.first) < 0;
 	}
 	
-	bool operator()(const MPD::Item &a, const MPD::Item &b);
+	bool operator()(const MPD::Item &a, const MPD::Item &b) const;
 };
 
 #endif // _UTILITY_COMPARATORS
