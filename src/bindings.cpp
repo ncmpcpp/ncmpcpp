@@ -289,12 +289,16 @@ void BindingsConfiguration::generateDefault()
 		bind(k, aSlaveScreen);
 		bind(k, aVolumeUp);
 	}
+	if (notBound(k = stringToKey("+")))
+		bind(k, aVolumeUp);
 	if (notBound(k = stringToKey("left")))
 	{
 		bind(k, aPreviousColumn);
 		bind(k, aMasterScreen);
 		bind(k, aVolumeDown);
 	}
+	if (notBound(k = stringToKey("-")))
+		bind(k, aVolumeDown);
 	if (notBound(k = stringToKey("tab")))
 		bind(k, aNextScreen);
 	if (notBound(k = stringToKey("shift_tab")))
@@ -326,22 +330,22 @@ void BindingsConfiguration::generateDefault()
 	if (notBound(k = stringToKey("p")))
 		bind(k, aPause);
 	if (notBound(k = stringToKey(">")))
-		bind(k, aNextSong);
+		bind(k, aNext);
 	if (notBound(k = stringToKey("<")))
-		bind(k, aPreviousSong);
+		bind(k, aPrevious);
 	if (notBound(k = stringToKey("ctrl_h")))
 	{
-		bind(k, aJumpToParentDir);
+		bind(k, aJumpToParentDirectory);
 		bind(k, aReplaySong);
 	}
 	if (notBound(k = stringToKey("backspace")))
 	{
-		bind(k, aJumpToParentDir);
+		bind(k, aJumpToParentDirectory);
 		bind(k, aReplaySong);
 	}
 	if (notBound(k = stringToKey("backspace_2")))
 	{
-		bind(k, aJumpToParentDir);
+		bind(k, aJumpToParentDirectory);
 		bind(k, aReplaySong);
 	}
 	if (notBound(k = stringToKey("f")))
@@ -389,7 +393,7 @@ void BindingsConfiguration::generateDefault()
 		bind(k, aFind);
 		bind(k, aFindItemForward);
 	}
-	if (notBound(k = stringToKey("/")))
+	if (notBound(k = stringToKey("?")))
 	{
 		bind(k, aFind);
 		bind(k, aFindItemBackward);
@@ -463,7 +467,7 @@ void BindingsConfiguration::generateDefault()
 	if (notBound(k = stringToKey("E")))
 		bind(k, aJumpToTagEditor);
 	if (notBound(k = stringToKey("U")))
-		bind(k, aToggleAutoCenter);
+		bind(k, aTogglePlayingSongCentering);
 	if (notBound(k = stringToKey("P")))
 		bind(k, aToggleDisplayMode);
 	if (notBound(k = stringToKey("\\")))
@@ -489,17 +493,7 @@ void BindingsConfiguration::generateDefault()
 	if (notBound(k = stringToKey("q")))
 		bind(k, aQuit);
 	
-	if (notBound(k = stringToKey("k")))
-		bind(k, aScrollUp);
-	if (notBound(k = stringToKey("j")))
-		bind(k, aScrollDown);
-	if (notBound(k = stringToKey("d")))
-		bind(k, aDelete);
-	if (notBound(k = stringToKey("+")))
-		bind(k, aVolumeUp);
+	
 	if (notBound(k = stringToKey("-")))
 		bind(k, aVolumeDown);
-	
-	if (notBound(k = stringToKey("Q")))
-		bind(k, aQuit);
 }

@@ -637,7 +637,7 @@ void ToggleInterface::Run()
 	ResizeScreen();
 }
 
-bool JumpToParentDir::canBeRun() const
+bool JumpToParentDirectory::canBeRun() const
 {
 	return (myScreen == myBrowser)
 #	ifdef HAVE_TAGLIB_H
@@ -646,7 +646,7 @@ bool JumpToParentDir::canBeRun() const
 	;
 }
 
-void JumpToParentDir::Run()
+void JumpToParentDirectory::Run()
 {
 	if (myScreen == myBrowser)
 	{
@@ -1199,10 +1199,10 @@ void ToggleFetchingLyricsInBackground::Run()
 #	endif // HAVE_CURL_CURL_H
 }
 
-void ToggleAutoCenter::Run()
+void TogglePlayingSongCentering::Run()
 {
 	Config.autocenter_mode = !Config.autocenter_mode;
-	ShowMessage("Auto center mode: %s", Config.autocenter_mode ? "On" : "Off");
+	ShowMessage("Centering playing song: %s", Config.autocenter_mode ? "On" : "Off");
 	if (Config.autocenter_mode && myPlaylist->isPlaying() && !myPlaylist->Items->isFiltered())
 		myPlaylist->Items->highlight(myPlaylist->NowPlaying);
 }
@@ -2494,7 +2494,7 @@ void populateActions()
 	insertAction(new MoveHome());
 	insertAction(new MoveEnd());
 	insertAction(new ToggleInterface());
-	insertAction(new JumpToParentDir());
+	insertAction(new JumpToParentDirectory());
 	insertAction(new PressEnter());
 	insertAction(new PressSpace());
 	insertAction(new PreviousColumn());
@@ -2522,7 +2522,7 @@ void populateActions()
 	insertAction(new ToggleSeparatorsBetweenAlbums());
 	insertAction(new ToggleLyricsFetcher());
 	insertAction(new ToggleFetchingLyricsInBackground());
-	insertAction(new ToggleAutoCenter());
+	insertAction(new TogglePlayingSongCentering());
 	insertAction(new UpdateDatabase());
 	insertAction(new JumpToPlayingSong());
 	insertAction(new ToggleRepeat());

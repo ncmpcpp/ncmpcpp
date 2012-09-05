@@ -165,7 +165,7 @@ std::string getEnclosedString(const std::string &s, char a, char b, size_t *pos)
 		++i;
 		while (i < s.length() && s[i] != b)
 		{
-			if (s[i] == '\\' && i+1 < s.length() && s[i+1] == b)
+			if (s[i] == '\\' && i+1 < s.length() && (s[i+1] == '\\' || s[i+1] == b))
 				result += s[++i];
 			else
 				result += s[i];

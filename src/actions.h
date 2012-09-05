@@ -29,12 +29,12 @@ enum ActionType
 {
 	aMacroUtility,
 	aDummy, aMouseEvent, aScrollUp, aScrollDown, aScrollUpArtist, aScrollUpAlbum, aScrollDownArtist,
-	aScrollDownAlbum, aPageUp, aPageDown, aMoveHome, aMoveEnd, aToggleInterface, aJumpToParentDir,
+	aScrollDownAlbum, aPageUp, aPageDown, aMoveHome, aMoveEnd, aToggleInterface, aJumpToParentDirectory,
 	aPressEnter, aPressSpace, aPreviousColumn, aNextColumn, aMasterScreen, aSlaveScreen, aVolumeUp,
-	aVolumeDown, aDelete, aReplaySong, aPreviousSong, aNextSong, aPause, aStop, aSavePlaylist,
+	aVolumeDown, aDelete, aReplaySong, aPrevious, aNext, aPause, aStop, aSavePlaylist,
 	aMoveSortOrderUp, aMoveSortOrderDown, aMoveSelectedItemsUp, aMoveSelectedItemsDown,
 	aMoveSelectedItemsTo, aAdd, aSeekForward, aSeekBackward, aToggleDisplayMode, aToggleSeparatorsBetweenAlbums,
-	aToggleLyricsFetcher, aToggleFetchingLyricsInBackground, aToggleAutoCenter, aUpdateDatabase,
+	aToggleLyricsFetcher, aToggleFetchingLyricsInBackground, aTogglePlayingSongCentering, aUpdateDatabase,
 	aJumpToPlayingSong, aToggleRepeat, aShuffle, aToggleRandom, aStartSearching, aSaveTagChanges,
 	aToggleSingle, aToggleConsume, aToggleCrossfade, aSetCrossfade, aEditSong, aEditLibraryTag,
 	aEditLibraryAlbum, aEditDirectoryName, aEditPlaylistName, aEditLyrics, aJumpToBrowser,
@@ -211,15 +211,15 @@ protected:
 
 struct ToggleInterface : public Action
 {
-	ToggleInterface() : Action(aToggleInterface, "toggle_inferface") { }
+	ToggleInterface() : Action(aToggleInterface, "toggle_interface") { }
 	
 protected:
 	virtual void Run();
 };
 
-struct JumpToParentDir : public Action
+struct JumpToParentDirectory : public Action
 {
-	JumpToParentDir() : Action(aJumpToParentDir, "jump_to_parent_dir") { }
+	JumpToParentDirectory() : Action(aJumpToParentDirectory, "jump_to_parent_directory") { }
 	
 protected:
 	virtual bool canBeRun() const;
@@ -312,7 +312,7 @@ protected:
 
 struct PreviousSong : public Action
 {
-	PreviousSong() : Action(aPreviousSong, "previous") { }
+	PreviousSong() : Action(aPrevious, "previous") { }
 	
 protected:
 	virtual void Run();
@@ -320,7 +320,7 @@ protected:
 
 struct NextSong : public Action
 {
-	NextSong() : Action(aNextSong, "next") { }
+	NextSong() : Action(aNext, "next") { }
 	
 protected:
 	virtual void Run();
@@ -464,9 +464,10 @@ protected:
 	virtual void Run();
 };
 
-struct ToggleAutoCenter : public Action
+struct TogglePlayingSongCentering : public Action
 {
-	ToggleAutoCenter() : Action(aToggleAutoCenter, "toggle_autocentering") { }
+	TogglePlayingSongCentering()
+	: Action(aTogglePlayingSongCentering, "toggle_playing_song_centering") { }
 	
 protected:
 	virtual void Run();

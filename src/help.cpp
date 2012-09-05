@@ -225,8 +225,8 @@ void Help::GetKeybindings()
 	KeysSection("Global");
 	KeyDesc(aStop, "Stop");
 	KeyDesc(aPause, "Pause");
-	KeyDesc(aNextSong, "Next track");
-	KeyDesc(aPreviousSong, "Previous track");
+	KeyDesc(aNext, "Next track");
+	KeyDesc(aPrevious, "Previous track");
 	KeyDesc(aReplaySong, "Replay playing song");
 	KeyDesc(aSeekForward, "Seek forward in playing song");
 	KeyDesc(aSeekBackward, "Seek backward in playing song");
@@ -256,8 +256,8 @@ void Help::GetKeybindings()
 	KeyDesc(aApplyFilter, "Apply filter");
 	KeyDesc(aFindItemForward, "Find item forward");
 	KeyDesc(aFindItemBackward, "Find item backward");
-	KeyDesc(aPreviousFoundItem, "Go to previous found item");
-	KeyDesc(aNextFoundItem, "Go to next found item");
+	KeyDesc(aPreviousFoundItem, "Jump to previous found item");
+	KeyDesc(aNextFoundItem, "Jump to next found item");
 	KeyDesc(aToggleFindMode, "Toggle find mode (normal/wrapped)");
 	KeyDesc(aJumpToBrowser, "Locate song in browser");
 	KeyDesc(aJumpToMediaLibrary, "Locate song in media library");
@@ -298,7 +298,7 @@ void Help::GetKeybindings()
 	KeyDesc(aSortPlaylist, "Sort playlist");
 	KeyDesc(aReversePlaylist, "Reverse playlist");
 	KeyDesc(aJumpToPlayingSong, "Jump to playing song");
-	KeyDesc(aToggleAutoCenter, "Toggle auto center mode");
+	KeyDesc(aTogglePlayingSongCentering, "Toggle playing song centering");
 	
 	KeysSection("Browser");
 	KeyDesc(aPressEnter, "Enter directory/Add item to playlist and play it");
@@ -311,7 +311,7 @@ void Help::GetKeybindings()
 	KeyDesc(aShowBrowser, "Browse MPD database/local filesystem");
 	KeyDesc(aToggleBrowserSortMode, "Toggle sort mode");
 	KeyDesc(aJumpToPlayingSong, "Locate playing song");
-	KeyDesc(aJumpToParentDir, "Go to parent directory");
+	KeyDesc(aJumpToParentDirectory, "Jump to parent directory");
 	KeyDesc(aDelete, "Delete item");
 	KeyDesc(aJumpToPlaylistEditor, "Jump to playlist editor (playlists only)");
 	
@@ -371,7 +371,7 @@ void Help::GetKeybindings()
 	KeyDesc(aPressSpace, "Select item (right column)");
 	KeyDesc(aPreviousColumn, "Previous column");
 	KeyDesc(aNextColumn, "Next column");
-	KeyDesc(aJumpToParentDir, "Go to parent directory (left column, directories view)");
+	KeyDesc(aJumpToParentDirectory, "Jump to parent directory (left column, directories view)");
 #	endif // HAVE_TAGLIB_H
 	
 #	ifdef ENABLE_OUTPUTS
