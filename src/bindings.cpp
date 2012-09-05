@@ -323,7 +323,7 @@ void BindingsConfiguration::generateDefault()
 		bind(k, aShowServerInfo);
 	if (notBound(k = stringToKey("s")))
 		bind(k, aStop);
-	if (notBound(k = stringToKey("P")))
+	if (notBound(k = stringToKey("p")))
 		bind(k, aPause);
 	if (notBound(k = stringToKey(">")))
 		bind(k, aNextSong);
@@ -464,7 +464,7 @@ void BindingsConfiguration::generateDefault()
 		bind(k, aJumpToTagEditor);
 	if (notBound(k = stringToKey("U")))
 		bind(k, aToggleAutoCenter);
-	if (notBound(k = stringToKey("p")))
+	if (notBound(k = stringToKey("P")))
 		bind(k, aToggleDisplayMode);
 	if (notBound(k = stringToKey("\\")))
 		bind(k, aToggleInterface);
