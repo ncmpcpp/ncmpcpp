@@ -40,9 +40,9 @@ namespace Display
 		menu << menu.drawn()->value().first;
 	}
 	
-	void SongsInColumns(NC::Menu<MPD::Song> &menu, HasSongs &screen);
+	void SongsInColumns(NC::Menu<MPD::Song> &menu, HasSongs *screen);
 	
-	void Songs(NC::Menu<MPD::Song> &menu, HasSongs &screen, const std::string &format);
+	void Songs(NC::Menu<MPD::Song> &menu, HasSongs *screen, const std::string &format);
 	
 	void Tags(NC::Menu<MPD::MutableSong> &menu);
 	

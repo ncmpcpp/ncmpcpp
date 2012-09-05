@@ -63,9 +63,9 @@ void Playlist::Init()
 	Items->setSelectedPrefix(Config.selected_item_prefix);
 	Items->setSelectedSuffix(Config.selected_item_suffix);
 	if (Config.columns_in_playlist)
-		Items->setItemDisplayer(std::bind(Display::SongsInColumns, _1, *this));
+		Items->setItemDisplayer(std::bind(Display::SongsInColumns, _1, this));
 	else
-		Items->setItemDisplayer(std::bind(Display::Songs, _1, *this, Config.song_list_format));
+		Items->setItemDisplayer(std::bind(Display::Songs, _1, this, Config.song_list_format));
 	
 	if (!SortDialog)
 	{

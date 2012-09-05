@@ -73,9 +73,9 @@ void PlaylistEditor::Init()
 	Content->setSelectedPrefix(Config.selected_item_prefix);
 	Content->setSelectedSuffix(Config.selected_item_suffix);
 	if (Config.columns_in_playlist_editor)
-		Content->setItemDisplayer(std::bind(Display::SongsInColumns, _1, *this));
+		Content->setItemDisplayer(std::bind(Display::SongsInColumns, _1, this));
 	else
-		Content->setItemDisplayer(std::bind(Display::Songs, _1, *this, Config.song_list_format));
+		Content->setItemDisplayer(std::bind(Display::Songs, _1, this, Config.song_list_format));
 	
 	w = Playlists;
 	isInitialized = 1;

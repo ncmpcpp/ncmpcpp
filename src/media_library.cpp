@@ -107,7 +107,7 @@ void MediaLibrary::Init()
 	Songs->centeredCursor(Config.centered_cursor);
 	Songs->setSelectedPrefix(Config.selected_item_prefix);
 	Songs->setSelectedSuffix(Config.selected_item_suffix);
-	Songs->setItemDisplayer(std::bind(Display::Songs, _1, *this, Config.song_library_format));
+	Songs->setItemDisplayer(std::bind(Display::Songs, _1, this, Config.song_library_format));
 	
 	w = Tags;
 	isInitialized = 1;

@@ -1117,12 +1117,15 @@ void ToggleDisplayMode::Run()
 		
 		if (Config.columns_in_playlist)
 		{
-			myPlaylist->Items->setItemDisplayer(std::bind(Display::SongsInColumns, _1, *myPlaylist));
-			myPlaylist->Items->setTitle(Config.titles_visibility ? Display::Columns(myPlaylist->Items->getWidth()) : "");
+			myPlaylist->Items->setItemDisplayer(std::bind(Display::SongsInColumns, _1, myPlaylist));
+			if (Config.titles_visibility)
+				myPlaylist->Items->setTitle(Display::Columns(myPlaylist->Items->getWidth()));
+			else
+				myPlaylist->Items->setTitle("");
 		}
 		else
 		{
-			myPlaylist->Items->setItemDisplayer(std::bind(Display::Songs, _1, *myPlaylist, Config.song_list_format));
+			myPlaylist->Items->setItemDisplayer(std::bind(Display::Songs, _1, myPlaylist, Config.song_list_format));
 			myPlaylist->Items->setTitle("");
 		}
 	}
@@ -1144,9 +1147,9 @@ void ToggleDisplayMode::Run()
 		Config.columns_in_playlist_editor = !Config.columns_in_playlist_editor;
 		ShowMessage("Playlist editor display mode: %s", Config.columns_in_playlist_editor ? "Columns" : "Classic");
 		if (Config.columns_in_playlist_editor)
-			myPlaylistEditor->Content->setItemDisplayer(std::bind(Display::SongsInColumns, _1, *myPlaylistEditor));
+			myPlaylistEditor->Content->setItemDisplayer(std::bind(Display::SongsInColumns, _1, myPlaylistEditor));
 		else
-			myPlaylistEditor->Content->setItemDisplayer(std::bind(Display::Songs, _1, *myPlaylistEditor, Config.song_list_format));
+			myPlaylistEditor->Content->setItemDisplayer(std::bind(Display::Songs, _1, myPlaylistEditor, Config.song_list_format));
 	}
 }
 

@@ -336,14 +336,14 @@ std::string Display::Columns(size_t list_width)
 	return result;
 }
 
-void Display::SongsInColumns(NC::Menu<MPD::Song> &menu, HasSongs &screen)
+void Display::SongsInColumns(NC::Menu<MPD::Song> &menu, HasSongs *screen)
 {
-	showSongsInColumns(menu, menu.drawn()->value(), screen);
+	showSongsInColumns(menu, menu.drawn()->value(), *screen);
 }
 
-void Display::Songs(NC::Menu<MPD::Song> &menu, HasSongs &screen, const std::string &format)
+void Display::Songs(NC::Menu<MPD::Song> &menu, HasSongs *screen, const std::string &format)
 {
-	showSongs(menu, menu.drawn()->value(), screen, format);
+	showSongs(menu, menu.drawn()->value(), *screen, format);
 }
 
 void Display::Tags(NC::Menu<MPD::MutableSong> &menu)
