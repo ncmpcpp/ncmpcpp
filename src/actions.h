@@ -662,6 +662,7 @@ struct ToggleFindMode : public Action
 struct ToggleReplayGainMode : public Action
 {
 	ToggleReplayGainMode() : Action(aToggleReplayGainMode, "toggle_replay_gain_mode") { }
+	virtual bool canBeRun() const;
 	virtual void Run();
 };
 

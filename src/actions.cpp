@@ -639,22 +639,22 @@ void ToggleInterface::Run()
 
 bool JumpToParentDir::canBeRun() const
 {
-	return myScreen == myBrowser
+	return (myScreen == myBrowser && myBrowser->CurrentDir() != "/")
 #	ifdef HAVE_TAGLIB_H
-	    || myScreen == myTagEditor
+	    || (myScreen->ActiveWindow() == myTagEditor->Dirs && myTagEditor->CurrentDir() != "/")
 #	endif // HAVE_TAGLIB_H
 	;
 }
 
 void JumpToParentDir::Run()
 {
-	if (myScreen == myBrowser && myBrowser->CurrentDir() != "/")
+	if (myScreen == myBrowser)
 	{
 		myBrowser->Main()->reset();
 		myBrowser->EnterPressed();
 	}
 #	ifdef HAVE_TAGLIB_H
-	else if (myScreen->ActiveWindow() == myTagEditor->Dirs && myTagEditor->CurrentDir() != "/")
+	else if (myScreen == myTagEditor)
 	{
 		myTagEditor->Dirs->reset();
 		myTagEditor->EnterPressed();
@@ -978,10 +978,10 @@ bool MoveSelectedItemsUp::canBeRun() const
 {
 	return ((myScreen->ActiveWindow() == myPlaylist->Items
 	    &&  !myPlaylist->Items->empty()
-	    &&  !myPlaylist->Items->isFiltered())
+	    &&  !myPlaylist->isFiltered())
 	 ||    (myScreen->ActiveWindow() == myPlaylistEditor->Content
 	    &&  !myPlaylistEditor->Content->empty()
-	    &&  !myPlaylistEditor->Content->isFiltered()));
+	    &&  !myPlaylistEditor->isContentFiltered()));
 }
 
 void MoveSelectedItemsUp::Run()
@@ -1003,10 +1003,10 @@ bool MoveSelectedItemsDown::canBeRun() const
 {
 	return ((myScreen->ActiveWindow() == myPlaylist->Items
 	    &&  !myPlaylist->Items->empty()
-	    &&  !myPlaylist->Items->isFiltered())
+	    &&  !myPlaylist->isFiltered())
 	 ||    (myScreen->ActiveWindow() == myPlaylistEditor->Content
 	    &&  !myPlaylistEditor->Content->empty()
-	    &&  !myPlaylistEditor->Content->isFiltered()));
+	    &&  !myPlaylistEditor->isContentFiltered()));
 }
 
 void MoveSelectedItemsDown::Run()
@@ -1082,7 +1082,7 @@ void Add::Run()
 
 bool SeekForward::canBeRun() const
 {
-	return myPlaylist->NowPlayingSong();
+	return myPlaylist->NowPlayingSong() && Mpd.GetTotalTime() > 0;
 }
 
 void SeekForward::Run()
@@ -1092,7 +1092,7 @@ void SeekForward::Run()
 
 bool SeekBackward::canBeRun() const
 {
-	return myPlaylist->NowPlayingSong();
+	return myPlaylist->NowPlayingSong() && Mpd.GetTotalTime() > 0;
 }
 
 void SeekBackward::Run()
@@ -1215,8 +1215,10 @@ void UpdateDatabase::Run()
 
 bool JumpToPlayingSong::canBeRun() const
 {
-	return (myScreen == myPlaylist || myScreen == myBrowser || myScreen == myLibrary)
-	     && myPlaylist->isPlaying();
+	return ((myScreen == myPlaylist && !myPlaylist->isFiltered())
+	    ||  myScreen == myBrowser
+	    ||  myScreen == myLibrary)
+	  &&   myPlaylist->isPlaying();
 }
 
 void JumpToPlayingSong::Run()
@@ -1224,23 +1226,16 @@ void JumpToPlayingSong::Run()
 	using Global::RedrawHeader;
 	
 	if (myScreen == myPlaylist)
-	{
-		if (myPlaylist->isFiltered())
-			return;
-		assert(myPlaylist->isPlaying());
 		myPlaylist->Items->highlight(myPlaylist->NowPlaying);
-	}
 	else if (myScreen == myBrowser)
 	{
 		const MPD::Song *s = myPlaylist->NowPlayingSong();
-		assert(s);
 		myBrowser->LocateSong(*s);
 		RedrawHeader = true;
 	}
 	else if (myScreen == myLibrary)
 	{
 		const MPD::Song *s = myPlaylist->NowPlayingSong();
-		assert(s);
 		myLibrary->LocateSong(*s);
 	}
 }
@@ -1262,13 +1257,11 @@ void ToggleRandom::Run()
 
 bool StartSearching::canBeRun() const
 {
-	return myScreen == mySearcher;
+	return myScreen == mySearcher && !mySearcher->Main()->at(0).isInactive();
 }
 
 void StartSearching::Run()
 {
-	if (mySearcher->Main()->at(0).isInactive())
-		return;
 	mySearcher->Main()->highlight(SearchEngine::SearchButton);
 	mySearcher->Main()->setHighlighting(0);
 	mySearcher->Main()->refresh();
@@ -1336,7 +1329,7 @@ void SetCrossfade::Run()
 bool EditSong::canBeRun() const
 {
 #	ifdef HAVE_TAGLIB_H
-	return currentSong(myScreen);
+	return isMPDMusicDirSet() && currentSong(myScreen);
 #	else
 	return false;
 #	endif // HAVE_TAGLIB_H
@@ -1345,10 +1338,7 @@ bool EditSong::canBeRun() const
 void EditSong::Run()
 {
 #	ifdef HAVE_TAGLIB_H
-	if (!isMPDMusicDirSet())
-		return;
 	auto s = currentSong(myScreen);
-	assert(s);
 	myTinyTagEditor->SetEdited(*s);
 	myTinyTagEditor->SwitchTo();
 #	endif // HAVE_TAGLIB_H
@@ -1357,7 +1347,8 @@ void EditSong::Run()
 bool EditLibraryTag::canBeRun() const
 {
 #	ifdef HAVE_TAGLIB_H
-	return myScreen->ActiveWindow() == myLibrary->Tags
+	return isMPDMusicDirSet()
+	   &&  myScreen->ActiveWindow() == myLibrary->Tags
 	   && !myLibrary->Tags->empty();
 #	else
 	return false;
@@ -1369,8 +1360,6 @@ void EditLibraryTag::Run()
 #	ifdef HAVE_TAGLIB_H
 	using Global::wFooter;
 	
-	if (!isMPDMusicDirSet())
-		return;
 	LockStatusbar();
 	Statusbar() << NC::fmtBold << tagTypeToString(Config.media_lib_primary_tag) << NC::fmtBoldEnd << ": ";
 	std::string new_tag = wFooter->getString(myLibrary->Tags->current().value());
@@ -1410,7 +1399,8 @@ void EditLibraryTag::Run()
 bool EditLibraryAlbum::canBeRun() const
 {
 #	ifdef HAVE_TAGLIB_H
-	return myScreen->ActiveWindow() == myLibrary->Albums
+	return isMPDMusicDirSet()
+	    && myScreen->ActiveWindow() == myLibrary->Albums
 	    && !myLibrary->Albums->empty();
 #	else
 	return false;
@@ -1422,8 +1412,6 @@ void EditLibraryAlbum::Run()
 #	ifdef HAVE_TAGLIB_H
 	using Global::wFooter;
 	
-	if (!isMPDMusicDirSet())
-		return;
 	LockStatusbar();
 	Statusbar() << NC::fmtBold << "Album: " << NC::fmtBoldEnd;
 	std::string new_album = wFooter->getString(myLibrary->Albums->current().value().Album);
@@ -1464,13 +1452,14 @@ void EditLibraryAlbum::Run()
 
 bool EditDirectoryName::canBeRun() const
 {
-	return   (myScreen == myBrowser
+	return   isMPDMusicDirSet()
+	  &&     ((myScreen == myBrowser
 	      && !myBrowser->Main()->empty()
 		  && myBrowser->Main()->current().value().type == MPD::itDirectory)
 #	ifdef HAVE_TAGLIB_H
 	    ||   (myScreen->ActiveWindow() == myTagEditor->Dirs
 	      && !myTagEditor->Dirs->empty()
-	      && myTagEditor->Dirs->choice() > 0)
+	      && myTagEditor->Dirs->choice() > 0))
 #	endif // HAVE_TAGLIB_H
 	;
 }
@@ -1479,8 +1468,6 @@ void EditDirectoryName::Run()
 {
 	using Global::wFooter;
 	
-	if (!isMPDMusicDirSet())
-		return;
 	if (myScreen == myBrowser)
 	{
 		std::string old_dir = myBrowser->Main()->current().value().name;
@@ -1596,7 +1583,6 @@ bool JumpToBrowser::canBeRun() const
 void JumpToBrowser::Run()
 {
 	auto s = currentSong(myScreen);
-	assert(s);
 	myBrowser->LocateSong(*s);
 }
 
@@ -1608,7 +1594,6 @@ bool JumpToMediaLibrary::canBeRun() const
 void JumpToMediaLibrary::Run()
 {
 	auto s = currentSong(myScreen);
-	assert(s);
 	myLibrary->LocateSong(*s);
 }
 
@@ -1663,7 +1648,7 @@ void ToggleScreenLock::Run()
 bool JumpToTagEditor::canBeRun() const
 {
 #	ifdef HAVE_TAGLIB_H
-	return currentSong(myScreen);
+	return isMPDMusicDirSet() && currentSong(myScreen);
 #	else
 	return false;
 #	endif // HAVE_TAGLIB_H
@@ -1672,31 +1657,21 @@ bool JumpToTagEditor::canBeRun() const
 void JumpToTagEditor::Run()
 {
 #	ifdef HAVE_TAGLIB_H
-	if (!isMPDMusicDirSet())
-		return;
 	auto s = currentSong(myScreen);
-	assert(s);
 	myTagEditor->LocateSong(*s);
 #	endif // HAVE_TAGLIB_H
 }
 
 bool JumpToPositionInSong::canBeRun() const
 {
-	return myPlaylist->NowPlayingSong();
+	return myPlaylist->NowPlayingSong() && Mpd.GetTotalTime() > 0;
 }
 
 void JumpToPositionInSong::Run()
 {
 	using Global::wFooter;
 	
-	if (!Mpd.GetTotalTime())
-	{
-		ShowMessage("Unknown item length");
-		return;
-	}
-	
 	const MPD::Song *s = myPlaylist->NowPlayingSong();
-	assert(s);
 	
 	LockStatusbar();
 	Statusbar() << "Position to go (in %/mm:ss/seconds(s)): ";
@@ -1742,7 +1717,6 @@ bool ReverseSelection::canBeRun() const
 void ReverseSelection::Run()
 {
 	auto w = hasSongs(myScreen);
-	assert(w);
 	w->reverseSelection();
 	ShowMessage("Selection reversed");
 }
@@ -1755,7 +1729,6 @@ bool DeselectItems::canBeRun() const
 void DeselectItems::Run()
 {
 	auto pl = proxySongList(myScreen);
-	assert(pl);
 	for (size_t i = 0; i < pl->size(); ++i)
 		pl->setSelected(i, false);
 }
@@ -1769,7 +1742,6 @@ bool SelectAlbum::canBeRun() const
 void SelectAlbum::Run()
 {
 	auto pl = proxySongList(myScreen);
-	assert(pl);
 	size_t pos = pl->choice();
 	if (MPD::Song *s = pl->getSong(pos))
 	{
@@ -1907,8 +1879,6 @@ void ApplyFilter::Run()
 	using Global::wFooter;
 	
 	Filterable *f = dynamic_cast<Filterable *>(myScreen);
-	assert(f);
-	assert(f->allowsFiltering());
 	
 	LockStatusbar();
 	Statusbar() << NC::fmtBold << "Apply filter: " << NC::fmtBoldEnd;
@@ -2007,7 +1977,6 @@ bool NextFoundItem::canBeRun() const
 void NextFoundItem::Run()
 {
 	Searchable *w = dynamic_cast<Searchable *>(myScreen);
-	assert(w);
 	w->nextFound(Config.wrapped_search);
 	ListsChangeFinisher();
 }
@@ -2020,7 +1989,6 @@ bool PreviousFoundItem::canBeRun() const
 void PreviousFoundItem::Run()
 {
 	Searchable *w = dynamic_cast<Searchable *>(myScreen);
-	assert(w);
 	w->prevFound(Config.wrapped_search);
 	ListsChangeFinisher();
 }
@@ -2031,15 +1999,19 @@ void ToggleFindMode::Run()
 	ShowMessage("Search mode: %s", Config.wrapped_search ? "Wrapped" : "Normal");
 }
 
-void ToggleReplayGainMode::Run()
+bool ToggleReplayGainMode::canBeRun() const
 {
-	using Global::wFooter;
-	
 	if (Mpd.Version() < 16)
 	{
 		ShowMessage("Replay gain mode control is supported in MPD >= 0.16.0");
-		return;
+		return false;
 	}
+	return true;
+}
+
+void ToggleReplayGainMode::Run()
+{
+	using Global::wFooter;
 	
 	LockStatusbar();
 	Statusbar() << "Replay gain mode? [" << NC::fmtBold << 'o' << NC::fmtBoldEnd << "ff/" << NC::fmtBold << 't' << NC::fmtBoldEnd << "rack/" << NC::fmtBold << 'a' << NC::fmtBoldEnd << "lbum]";
@@ -2218,22 +2190,17 @@ void RefetchArtistInfo::Run()
 
 bool SetSelectedItemsPriority::canBeRun() const
 {
-	return myScreen->ActiveWindow() == myPlaylist->Items;
+	if (Mpd.Version() < 17)
+	{
+		ShowMessage("Priorities are supported in MPD >= 0.17.0");
+		return false;
+	}
+	return myScreen->ActiveWindow() == myPlaylist->Items && !myPlaylist->Items->empty();
 }
 
 void SetSelectedItemsPriority::Run()
 {
 	using Global::wFooter;
-	
-	assert(myScreen->ActiveWindow() == myPlaylist->Items);
-	if (myPlaylist->Items->empty())
-		return;
-	
-	if (Mpd.Version() < 17)
-	{
-		ShowMessage("Priorities are supported in MPD >= 0.17.0");
-		return;
-	}
 	
 	LockStatusbar();
 	Statusbar() << "Set priority [0-255]: ";
