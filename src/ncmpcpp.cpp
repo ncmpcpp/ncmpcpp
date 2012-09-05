@@ -34,6 +34,7 @@
 #include "browser.h"
 #include "global.h"
 #include "helpers.h"
+#include "keys.h"
 #include "lyrics.h"
 #include "playlist.h"
 #include "settings.h"
@@ -97,7 +98,7 @@ int main(int argc, char **argv)
 	Config.Read();
 	
 	Config.GenerateColumns();
-	Keys.GenerateBindings();
+	Keys.generateBindings();
 	
 	if (getenv("MPD_HOST"))
 		Mpd.SetHostname(getenv("MPD_HOST"));
@@ -175,7 +176,7 @@ int main(int argc, char **argv)
 	Mpd.SetErrorHandler(NcmpcppErrorCallback, 0);
 	
 	// local variables
-	Action::Key input(0, ctStandard);
+	Key input(0, Key::Standard);
 	timeval past = { 0, 0 };
 	// local variables end
 	
@@ -262,26 +263,26 @@ int main(int argc, char **argv)
 		}
 		// header stuff end
 		
-		if (input != Action::NoOp)
+		if (input != Key::noOp)
 			myScreen->RefreshWindow();
-		input = Action::ReadKey(*wFooter);
+		input = Key::read(*wFooter);
 		
-		if (input == Action::NoOp)
+		if (input == Key::noOp)
 			continue;
 		
-		KeyConfiguration::Binding k = Keys.Bindings.equal_range(input);
+		auto k = Keys.Bindings.equal_range(input);
 		for (; k.first != k.second; ++k.first)
 		{
-			Bind &b = k.first->second;
+			Binding &b = k.first->second;
 			if (b.isSingle())
 			{
-				if (b.getAction()->Execute())
+				if (b.action()->Execute())
 					break;
 			}
 			else
 			{
-				Bind::ActionChain *chain = b.getChain();
-				for (Bind::ActionChain::iterator it = chain->begin(); it != chain->end(); ++it)
+				auto chain = b.chain();
+				for (auto it = chain->begin(); it != chain->end(); ++it)
 					if (!(*it)->Execute())
 						break;
 				break;

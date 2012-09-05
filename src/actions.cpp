@@ -35,6 +35,7 @@
 #include "browser.h"
 #include "clock.h"
 #include "help.h"
+#include "keys.h"
 #include "media_library.h"
 #include "lastfm.h"
 #include "lyrics.h"
@@ -69,35 +70,6 @@ size_t Action::FooterHeight;
 size_t Action::FooterStartY;
 
 std::map<ActionType, Action *> Action::Actions;
-Action::Key Action::NoOp = Action::Key(ERR, ctNCurses);
-
-Action::Key Action::ReadKey(NC::Window &w)
-{
-	std::string tmp;
-	int input;
-	while (true)
-	{
-		input = w.readKey();
-		if (input == ERR)
-			return NoOp;
-		if (input > 255)
-			return Key(input, ctNCurses);
-		else
-		{
-			wchar_t wc;
-			tmp += input;
-			size_t conv_res = mbrtowc(&wc, tmp.c_str(), MB_CUR_MAX, 0);
-			if (conv_res == size_t(-1)) // incomplete multibyte character
-				continue;
-			else if (conv_res == size_t(-2)) // garbage character sequence
-				return NoOp;
-			else // character complete
-				return Key(wc, ctStandard);
-		}
-	}
-	// not reachable
-	assert(false);
-}
 
 void Action::ValidateScreenSize()
 {
@@ -269,12 +241,11 @@ void Action::Seek()
 		
 		int howmuch = Config.incremental_seeking ? (myPlaylist->Timer()-t)/2+Config.seek_time : Config.seek_time;
 		
-		Key input = ReadKey(*wFooter);
-		KeyConfiguration::Binding k = Keys.Bindings.equal_range(input);
-		// no action?
-		if (k.first == k.second || !k.first->second.isSingle())
+		Key input = Key::read(*wFooter);
+		auto k = Keys.Bindings.equal_range(input);
+		if (k.first == k.second || !k.first->second.isSingle()) // no single action?
 			break;
-		Action *a = k.first->second.getAction();
+		Action *a = k.first->second.action();
 		if (dynamic_cast<SeekForward *>(a))
 		{
 			if (songpos < Mpd.GetTotalTime())

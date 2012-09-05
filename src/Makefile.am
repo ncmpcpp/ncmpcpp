@@ -14,6 +14,7 @@ ncmpcpp_SOURCES = \
 	global.cpp \
 	help.cpp \
 	helpers.cpp \
+	keys.cpp \
 	lastfm.cpp \
 	lastfm_service.cpp \
 	lyrics.cpp \
@@ -61,6 +62,7 @@ noinst_HEADERS = \
 	help.h \
 	helpers.h \
 	interfaces.h \
+	keys.h \
 	lastfm.h \
 	lastfm_service.h \
 	lyrics.h \

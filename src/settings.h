@@ -45,43 +45,6 @@ struct Column
 	bool display_empty_tag;
 };
 
-struct Bind
-{
-	typedef std::vector<Action *> ActionChain;
-	
-	Bind(ActionType at) : isThisSingle(true), itsAction(Action::Get(at)) { }
-	Bind(ActionChain *chain) : isThisSingle(false), itsChain(chain) { }
-	
-	bool isSingle() const { return isThisSingle; }
-	ActionChain *getChain() const { assert(!isThisSingle); return itsChain; }
-	Action *getAction() const { assert(isThisSingle); return itsAction; }
-	
-	private:
-		bool isThisSingle;
-		union {
-			Action *itsAction;
-			ActionChain *itsChain;
-		};
-};
-
-struct KeyConfiguration
-{
-	typedef std::pair<
-			std::multimap<Action::Key, Bind>::iterator
-		,	std::multimap<Action::Key, Bind>::iterator
-		> Binding;
-	
-	void GenerateBindings();
-	
-	std::multimap<Action::Key, Bind> Bindings;
-	
-	private:
-		template <typename T> void Bind_(wchar_t c, CharType ct, T t)
-		{
-			Bindings.insert(std::make_pair(Action::Key(c, ct), Bind(t)));
-		}
-};
-
 struct Configuration
 {
 	Configuration();
@@ -234,7 +197,6 @@ struct Configuration
 		std::string config_file_path;
 };
 
-extern KeyConfiguration Keys;
 extern Configuration Config;
 
 void CreateDir(const std::string &dir);

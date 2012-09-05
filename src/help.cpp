@@ -22,7 +22,7 @@
 
 #include "global.h"
 #include "help.h"
-#include "scrollpad.h"
+#include "keys.h"
 #include "settings.h"
 
 using Global::MainHeight;
@@ -32,46 +32,46 @@ Help *myHelp = new Help;
 
 namespace {//
 
-std::string keyToString(const Action::Key &key, bool *print_backspace)
+std::string keyToString(const Key &key, bool *print_backspace)
 {
 	std::string result;
-	if (key == Action::Key(KEY_UP, ctNCurses))
+	if (key == Key(KEY_UP, Key::NCurses))
 		result += "Up";
-	else if (key == Action::Key(KEY_DOWN, ctNCurses))
+	else if (key == Key(KEY_DOWN, Key::NCurses))
 		result += "Down";
-	else if (key == Action::Key(KEY_PPAGE, ctNCurses))
+	else if (key == Key(KEY_PPAGE, Key::NCurses))
 		result += "PageUp";
-	else if (key == Action::Key(KEY_NPAGE, ctNCurses))
+	else if (key == Key(KEY_NPAGE, Key::NCurses))
 		result += "PageDown";
-	else if (key == Action::Key(KEY_HOME, ctNCurses))
+	else if (key == Key(KEY_HOME, Key::NCurses))
 		result += "Home";
-	else if (key == Action::Key(KEY_END, ctNCurses))
+	else if (key == Key(KEY_END, Key::NCurses))
 		result += "End";
-	else if (key == Action::Key(KEY_SPACE, ctStandard))
+	else if (key == Key(KEY_SPACE, Key::Standard))
 		result += "Space";
-	else if (key == Action::Key(KEY_ENTER, ctStandard))
+	else if (key == Key(KEY_ENTER, Key::Standard))
 		result += "Enter";
-	else if (key == Action::Key(KEY_DC, ctNCurses))
+	else if (key == Key(KEY_DC, Key::NCurses))
 		result += "Delete";
-	else if (key == Action::Key(KEY_RIGHT, ctNCurses))
+	else if (key == Key(KEY_RIGHT, Key::NCurses))
 		result += "Right";
-	else if (key == Action::Key(KEY_LEFT, ctNCurses))
+	else if (key == Key(KEY_LEFT, Key::NCurses))
 		result += "Left";
-	else if (key == Action::Key(KEY_TAB, ctStandard))
+	else if (key == Key(KEY_TAB, Key::Standard))
 		result += "Tab";
-	else if (key == Action::Key(KEY_SHIFT_TAB, ctNCurses))
+	else if (key == Key(KEY_SHIFT_TAB, Key::NCurses))
 		result += "Shift-Tab";
-	else if (key >= Action::Key(KEY_CTRL_A, ctStandard) && key <= Action::Key(KEY_CTRL_Z, ctStandard))
+	else if (key >= Key(KEY_CTRL_A, Key::Standard) && key <= Key(KEY_CTRL_Z, Key::Standard))
 	{
 		result += "Ctrl-";
 		result += key.getChar()+64;
 	}
-	else if (key >= Action::Key(KEY_F1, ctNCurses) && key <= Action::Key(KEY_F12, ctNCurses))
+	else if (key >= Key(KEY_F1, Key::NCurses) && key <= Key(KEY_F12, Key::NCurses))
 	{
 		result += "F";
 		result += intTo<std::string>::apply(key.getChar()-264);
 	}
-	else if ((key == Action::Key(KEY_BACKSPACE, ctNCurses) || key == Action::Key(KEY_BACKSPACE_2, ctStandard)))
+	else if ((key == Key(KEY_BACKSPACE, Key::NCurses) || key == Key(KEY_BACKSPACE_2, Key::Standard)))
 	{
 		// since some terminals interpret KEY_BACKSPACE as backspace and other need KEY_BACKSPACE_2,
 		// actions have to be bound to either of them, but we want to display "Backspace" only once,
@@ -142,9 +142,9 @@ std::string Help::DisplayKeys(const ActionType at)
 {
 	bool print_backspace = true;
 	std::string result;
-	for (std::multimap<Action::Key, Bind>::const_iterator it = Keys.Bindings.begin(); it != Keys.Bindings.end(); ++it)
+	for (auto it = Keys.Bindings.begin(); it != Keys.Bindings.end(); ++it)
 	{
-		if (it->second.isSingle() && it->second.getAction()->Type() == at)
+		if (it->second.isSingle() && it->second.action()->Type() == at)
 		{
 			result += keyToString(it->first, &print_backspace);
 			result += " ";
