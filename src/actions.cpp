@@ -639,9 +639,9 @@ void ToggleInterface::Run()
 
 bool JumpToParentDir::canBeRun() const
 {
-	return (myScreen == myBrowser && myBrowser->CurrentDir() != "/")
+	return (myScreen == myBrowser)
 #	ifdef HAVE_TAGLIB_H
-	    || (myScreen->ActiveWindow() == myTagEditor->Dirs && myTagEditor->CurrentDir() != "/")
+	    || (myScreen->ActiveWindow() == myTagEditor->Dirs)
 #	endif // HAVE_TAGLIB_H
 	;
 }
@@ -650,14 +650,20 @@ void JumpToParentDir::Run()
 {
 	if (myScreen == myBrowser)
 	{
-		myBrowser->Main()->reset();
-		myBrowser->EnterPressed();
+		if (myBrowser->CurrentDir() != "/")
+		{
+			myBrowser->Main()->reset();
+			myBrowser->EnterPressed();
+		}
 	}
 #	ifdef HAVE_TAGLIB_H
 	else if (myScreen == myTagEditor)
 	{
-		myTagEditor->Dirs->reset();
-		myTagEditor->EnterPressed();
+		if (myTagEditor->CurrentDir() != "/")
+		{
+			myTagEditor->Dirs->reset();
+			myTagEditor->EnterPressed();
+		}
 	}
 #	endif // HAVE_TAGLIB_H
 }
