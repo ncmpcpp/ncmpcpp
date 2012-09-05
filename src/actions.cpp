@@ -1727,16 +1727,17 @@ void ReverseSelection::Run()
 	ShowMessage("Selection reversed");
 }
 
-bool DeselectItems::canBeRun() const
+bool RemoveSelection::canBeRun() const
 {
 	return proxySongList(myScreen).get();
 }
 
-void DeselectItems::Run()
+void RemoveSelection::Run()
 {
 	auto pl = proxySongList(myScreen);
 	for (size_t i = 0; i < pl->size(); ++i)
 		pl->setSelected(i, false);
+	ShowMessage("Selection removed");
 }
 
 bool SelectAlbum::canBeRun() const
@@ -2546,7 +2547,7 @@ void populateActions()
 	insertAction(new JumpToTagEditor());
 	insertAction(new JumpToPositionInSong());
 	insertAction(new ReverseSelection());
-	insertAction(new DeselectItems());
+	insertAction(new RemoveSelection());
 	insertAction(new SelectAlbum());
 	insertAction(new AddSelectedItems());
 	insertAction(new CropMainPlaylist());

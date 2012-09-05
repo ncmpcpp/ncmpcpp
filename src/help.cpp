@@ -237,7 +237,7 @@ void Help::GetKeybindings()
 	KeyDesc(aToggleAddMode, "Toggle add mode (add or remove/always add)");
 	KeyDesc(aToggleMouse, "Toggle mouse support");
 	KeyDesc(aReverseSelection, "Reverse selection");
-	KeyDesc(aDeselectItems, "Deselect items");
+	KeyDesc(aRemoveSelection, "Remove selection");
 	KeyDesc(aSelectAlbum, "Select songs of album around the cursor");
 	KeyDesc(aAddSelectedItems, "Add selected items to playlist");
 	KeyDesc(aAddRandomItems, "Add random items to playlist");

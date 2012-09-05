@@ -39,7 +39,7 @@ enum ActionType
 	aToggleSingle, aToggleConsume, aToggleCrossfade, aSetCrossfade, aEditSong, aEditLibraryTag,
 	aEditLibraryAlbum, aEditDirectoryName, aEditPlaylistName, aEditLyrics, aJumpToBrowser,
 	aJumpToMediaLibrary, aJumpToPlaylistEditor, aToggleScreenLock, aJumpToTagEditor,
-	aJumpToPositionInSong, aReverseSelection, aDeselectItems, aSelectAlbum, aAddSelectedItems,
+	aJumpToPositionInSong, aReverseSelection, aRemoveSelection, aSelectAlbum, aAddSelectedItems,
 	aCropMainPlaylist, aCropPlaylist, aClearMainPlaylist, aClearPlaylist, aSortPlaylist, aReversePlaylist,
 	aApplyFilter, aFind, aFindItemForward, aFindItemBackward, aNextFoundItem,
 	aPreviousFoundItem, aToggleFindMode, aToggleReplayGainMode, aToggleSpaceMode, aToggleAddMode,
@@ -679,9 +679,9 @@ protected:
 	virtual void Run();
 };
 
-struct DeselectItems : public Action
+struct RemoveSelection : public Action
 {
-	DeselectItems() : Action(aDeselectItems, "deselect_items") { }
+	RemoveSelection() : Action(aRemoveSelection, "remove_selection") { }
 	
 protected:
 	virtual bool canBeRun() const;

@@ -419,6 +419,8 @@ void BindingsConfiguration::generateDefault()
 		bind(k, aShowLyrics);
 	if (notBound(k = stringToKey("v")))
 		bind(k, aReverseSelection);
+	if (notBound(k = stringToKey("V")))
+		bind(k, aRemoveSelection);
 	if (notBound(k = stringToKey("B")))
 		bind(k, aSelectAlbum);
 	if (notBound(k = stringToKey("a")))
