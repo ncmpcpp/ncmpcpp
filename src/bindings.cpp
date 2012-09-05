@@ -51,6 +51,8 @@ Key stringToSpecialKey(const std::string &s)
 		result = Key(KEY_SPACE, Key::Standard);
 	else if (!s.compare("enter"))
 		result = Key(KEY_ENTER, Key::Standard);
+	else if (!s.compare("insert"))
+		result = Key(KEY_IC, Key::NCurses);
 	else if (!s.compare("delete"))
 		result = Key(KEY_DC, Key::NCurses);
 	else if (!s.compare("left"))

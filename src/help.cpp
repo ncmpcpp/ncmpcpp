@@ -51,6 +51,8 @@ std::string keyToString(const Key &key, bool *print_backspace)
 		result += "Space";
 	else if (key == Key(KEY_ENTER, Key::Standard))
 		result += "Enter";
+	else if (key == Key(KEY_IC, Key::NCurses))
+		result += "Insert";
 	else if (key == Key(KEY_DC, Key::NCurses))
 		result += "Delete";
 	else if (key == Key(KEY_RIGHT, Key::NCurses))
@@ -87,8 +89,6 @@ std::string keyToString(const Key &key, bool *print_backspace)
 		result += ToString(std::wstring(1, key.getChar()));
 	return result;
 }
-
-
 
 }
 
