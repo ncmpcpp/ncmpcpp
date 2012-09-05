@@ -23,6 +23,7 @@
 
 #include <cassert>
 #include "actions.h"
+#include "macro_utilities.h"
 
 /// Key for binding actions to it. Supports non-ascii characters.
 struct Key

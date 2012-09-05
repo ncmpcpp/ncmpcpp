@@ -18,34 +18,37 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
+#ifndef _MACRO_UTILITIES
+#define _MACRO_UTILITIES
+
+#include <cassert>
 #include "actions.h"
 
 struct PushCharacters : public Action
 {
-	template <typename Iterator> PushCharacters(Window **w, Iterator first, Iterator last) : Action(aMacroUtility, "")
-	{
-		construct(w, first, last);
+	PushCharacters(NC::Window **w, std::vector<int> &&queue)
+	: Action(aMacroUtility, ""), m_window(w), m_queue(queue) { }
+	
+	virtual void Run() {
+		for (auto it = m_queue.begin(); it != m_queue.end(); ++it)
+			(*m_window)->pushChar(*it);
 	}
 	
-	PushCharacters(Window **w, const std::initializer_list<int> &v) : Action(aMacroUtility, "")
-	{
-		construct(w, v.begin(), v.end());
-	}
-	
-	virtual void Run()
-	{
-		for (auto it = itsQueue.begin(); it != itsQueue.end(); ++it)
-			(*itsWindow)->PushChar(*it);
-	}
-	
-	private:
-		template <typename Iterator> void construct(Window **w, Iterator first, Iterator last)
-		{
-			itsWindow = w;
-			for (; first != last; ++first)
-				itsQueue.push_back(*first);
-		}
-		
-		Window **itsWindow;
-		std::vector<int> itsQueue;
+private:
+	NC::Window **m_window;
+	std::vector<int> m_queue;
 };
+
+struct RequireRunnable : public Action
+{
+	RequireRunnable(Action *action)
+	: Action(aMacroUtility, ""), m_action(action) { assert(action); }
+	
+	virtual bool canBeRun() const { return m_action->canBeRun(); }
+	virtual void Run() { }
+	
+private:
+	Action *m_action;
+};
+
+#endif // _MACRO_UTILITIES

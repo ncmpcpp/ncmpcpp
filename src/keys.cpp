@@ -20,8 +20,8 @@
 
 #include <fstream>
 #include <iostream>
+#include "global.h"
 #include "keys.h"
-#include "utility/comparators.h"
 #include "utility/string.h"
 
 KeyConfiguration Keys;
@@ -30,7 +30,7 @@ Key Key::noOp = Key(ERR, NCurses);
 
 namespace {//
 
-Key stringToKey(const std::string &s)
+Key stringToSpecialKey(const std::string &s)
 {
 	Key result = Key::noOp;
 	if (!s.compare("mouse"))
@@ -73,11 +73,67 @@ Key stringToKey(const std::string &s)
 		result = Key(KEY_BACKSPACE, Key::NCurses);
 	else if (!s.compare("backspace_2"))
 		result = Key(KEY_BACKSPACE_2, Key::Standard);
-	else
+	return result;
+}
+
+Key stringToKey(const std::string &s)
+{
+	Key result = stringToSpecialKey(s);
+	if (result == Key::noOp)
 	{
 		std::wstring ws = ToWString(s);
 		if (ws.length() == 1)
 			result = Key(ws[0], Key::Standard);
+	}
+	return result;
+}
+
+template <typename F>
+Action *parseActionLine(const std::string &line, F error)
+{
+	Action *result = 0;
+	size_t i = 0;
+	for (; i < line.size() && !isspace(line[i]); ++i) { }
+	if (i == line.size()) // only action name
+		result = Action::Get(line);
+	else // there is something else
+	{
+		std::string action_name = line.substr(0, i);
+		if (action_name == "push_character")
+		{
+			// push single character into input queue
+			std::string arg = getEnclosedString(line, '"', '"', 0);
+			Key k = stringToSpecialKey(arg);
+			if (k != Key::noOp)
+				result = new PushCharacters(&Global::wFooter, { k.getChar() });
+			else
+				error() << "invalid argument to function push_character: '" << arg << "'\n";
+		}
+		else if (action_name == "push_characters")
+		{
+			// push sequence of characters into input queue
+			std::string arg = getEnclosedString(line, '"', '"', 0);
+			if (!arg.empty())
+			{
+				std::vector<int> queue(arg.begin(), arg.end());
+				// if char is signed, cancel 1s from char -> int conversion
+				for (auto it = arg.begin(); it != arg.end(); ++it)
+					*it &= 0xff;
+				result = new PushCharacters(&Global::wFooter, std::move(queue));
+			}
+			else
+				error() << "push_characters requires its argument to be non-empty";
+		}
+		else if (action_name == "require_runnable")
+		{
+			// require that given action is runnable
+			std::string arg = getEnclosedString(line, '"', '"', 0);
+			Action *action = Action::Get(arg);
+			if (action)
+				result = new RequireRunnable(action);
+			else
+				error() << "invalid action passed as argument to require_runnable: '" << arg << "'\n";
+		}
 	}
 	return result;
 }
@@ -138,6 +194,7 @@ bool KeyConfiguration::read(const std::string &file)
 		result = false;
 		return std::cerr;
 	};
+	
 	auto bind_key_def = [&]() -> bool {
 		if (!actions.empty())
 		{
@@ -147,7 +204,7 @@ bool KeyConfiguration::read(const std::string &file)
 		}
 		else
 		{
-			error() << "definition of key \"" << strkey << "\" cannot be empty.\n";
+			error() << "definition of key '" << strkey << "' cannot be empty.\n";
 			return false;
 		}
 	};
@@ -170,19 +227,19 @@ bool KeyConfiguration::read(const std::string &file)
 			key = stringToKey(strkey);
 			if (key == Key::noOp)
 			{
-				error() << "invalid key: \"" << strkey << "\"\n";
+				error() << "invalid key: '" << strkey << "'\n";
 				break;
 			}
 		}
 		else if (isspace(line[0])) // name of action to be bound
 		{
 			trim(line);
-			Action *action = Action::Get(line);
+			Action *action = parseActionLine(line, error);
 			if (action)
 				actions.push_back(action);
 			else
 			{
-				error() << "unknown action: \"" << line << "\"\n";
+				error() << "unknown action: '" << line << "'\n";
 				break;
 			}
 		}
@@ -191,7 +248,6 @@ bool KeyConfiguration::read(const std::string &file)
 		bind_key_def();
 	f.close();
 	return result;
-	
 }
 
 void KeyConfiguration::generateBindings()

@@ -59,6 +59,8 @@ struct Action
 	const char *Name() const { return itsName; }
 	ActionType Type() const { return itsType; }
 	
+	virtual bool canBeRun() const { return true; }
+	
 	bool Execute()
 	{
 		if (canBeRun())
@@ -78,7 +80,7 @@ struct Action
 	static bool AskYesNoQuestion(const std::string &question, void (*callback)());
 	static bool isMPDMusicDirSet();
 	
-	static Action *Get(ActionType);
+	static Action *Get(ActionType at);
 	static Action *Get(const std::string &name);
 	
 	static bool OriginalStatusbarVisibility;
@@ -91,7 +93,6 @@ struct Action
 	static size_t FooterStartY;
 	
 	protected:
-		virtual bool canBeRun() const { return true; }
 		virtual void Run() = 0;
 		
 		static void Seek();
