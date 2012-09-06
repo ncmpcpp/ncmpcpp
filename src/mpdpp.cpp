@@ -28,7 +28,9 @@
 
 MPD::Connection Mpd;
 
-MPD::Connection::Connection() : itsConnection(0),
+namespace MPD {//
+
+Connection::Connection() : itsConnection(0),
 				isCommandsListEnabled(0),
 				isIdle(0),
 				supportsIdle(0),
@@ -43,7 +45,7 @@ MPD::Connection::Connection() : itsConnection(0),
 {
 }
 
-MPD::Connection::~Connection()
+Connection::~Connection()
 {
 	if (itsConnection)
 		mpd_connection_free(itsConnection);
@@ -55,7 +57,7 @@ MPD::Connection::~Connection()
 		mpd_status_free(itsCurrentStatus);
 }
 
-bool MPD::Connection::Connect()
+bool Connection::Connect()
 {
 	if (itsConnection)
 		return true;
@@ -73,12 +75,12 @@ bool MPD::Connection::Connect()
 	return !CheckForErrors();
 }
 
-bool MPD::Connection::Connected() const
+bool Connection::Connected() const
 {
 	return itsConnection;
 }
 
-void MPD::Connection::Disconnect()
+void Connection::Disconnect()
 {
 	if (itsConnection)
 		mpd_connection_free(itsConnection);
@@ -96,12 +98,12 @@ void MPD::Connection::Disconnect()
 	isCommandsListEnabled = 0;
 }
 
-unsigned MPD::Connection::Version() const
+unsigned Connection::Version() const
 {
 	return itsConnection ? mpd_connection_get_server_version(itsConnection)[1] : 0;
 }
 
-void MPD::Connection::SetHostname(const std::string &host)
+void Connection::SetHostname(const std::string &host)
 {
 	size_t at = host.find("@");
 	if (at != std::string::npos)
@@ -113,7 +115,7 @@ void MPD::Connection::SetHostname(const std::string &host)
 		itsHost = host;
 }
 
-bool MPD::Connection::SendPassword()
+bool Connection::SendPassword()
 {
 	assert(itsConnection);
 	GoBusy();
@@ -122,25 +124,25 @@ bool MPD::Connection::SendPassword()
 	return !CheckForErrors();
 }
 
-void MPD::Connection::SetStatusUpdater(StatusUpdater updater, void *data)
+void Connection::SetStatusUpdater(StatusUpdater updater, void *data)
 {
 	itsUpdater = updater;
 	itsStatusUpdaterUserdata = data;
 }
 
-void MPD::Connection::SetErrorHandler(ErrorHandler handler, void *data)
+void Connection::SetErrorHandler(ErrorHandler handler, void *data)
 {
 	itsErrorHandler = handler;
 	itsErrorHandlerUserdata = data;
 }
 
-void MPD::Connection::GoIdle()
+void Connection::GoIdle()
 {
 	if (supportsIdle && !itsIdleBlocked && !isIdle && mpd_send_idle(itsConnection))
 		isIdle = 1;
 }
 
-int MPD::Connection::GoBusy()
+int Connection::GoBusy()
 {
 	int flags = 0;
 	if (isIdle && mpd_send_noidle(itsConnection))
@@ -153,7 +155,7 @@ int MPD::Connection::GoBusy()
 	return flags;
 }
 
-void MPD::Connection::UpdateStatus()
+void Connection::UpdateStatus()
 {
 	if (!itsConnection)
 		return;
@@ -307,7 +309,7 @@ void MPD::Connection::UpdateStatus()
 	}
 }
 
-void MPD::Connection::UpdateStats()
+void Connection::UpdateStats()
 {
 	if (!itsConnection)
 		return;
@@ -319,7 +321,7 @@ void MPD::Connection::UpdateStats()
 	GoIdle();
 }
 
-bool MPD::Connection::UpdateDirectory(const std::string &path)
+bool Connection::UpdateDirectory(const std::string &path)
 {
 	if (!itsConnection)
 		return false;
@@ -339,7 +341,7 @@ bool MPD::Connection::UpdateDirectory(const std::string &path)
 	
 }
 
-void MPD::Connection::Play()
+void Connection::Play()
 {
 	if (!itsConnection)
 		return;
@@ -355,7 +357,7 @@ void MPD::Connection::Play()
 	}
 }
 
-void MPD::Connection::Play(int pos)
+void Connection::Play(int pos)
 {
 	if (!itsConnection)
 		return;
@@ -371,7 +373,7 @@ void MPD::Connection::Play(int pos)
 	}
 }
 
-void MPD::Connection::PlayID(int id)
+void Connection::PlayID(int id)
 {
 	if (!itsConnection)
 		return;
@@ -387,7 +389,7 @@ void MPD::Connection::PlayID(int id)
 	}
 }
 
-void MPD::Connection::Pause(bool state)
+void Connection::Pause(bool state)
 {
 	if (!itsConnection)
 		return;
@@ -403,7 +405,7 @@ void MPD::Connection::Pause(bool state)
 	}
 }
 
-void MPD::Connection::Toggle()
+void Connection::Toggle()
 {
 	if (!itsConnection)
 		return;
@@ -425,7 +427,7 @@ void MPD::Connection::Toggle()
 	}
 }
 
-void MPD::Connection::Stop()
+void Connection::Stop()
 {
 	if (!itsConnection)
 		return;
@@ -441,7 +443,7 @@ void MPD::Connection::Stop()
 	}
 }
 
-void MPD::Connection::Next()
+void Connection::Next()
 {
 	if (!itsConnection)
 		return;
@@ -457,7 +459,7 @@ void MPD::Connection::Next()
 	}
 }
 
-void MPD::Connection::Prev()
+void Connection::Prev()
 {
 	if (!itsConnection)
 		return;
@@ -473,7 +475,7 @@ void MPD::Connection::Prev()
 	}
 }
 
-bool MPD::Connection::Move(unsigned from, unsigned to)
+bool Connection::Move(unsigned from, unsigned to)
 {
 	if (!itsConnection)
 		return false;
@@ -489,7 +491,7 @@ bool MPD::Connection::Move(unsigned from, unsigned to)
 	}
 }
 
-void MPD::Connection::Swap(unsigned from, unsigned to)
+void Connection::Swap(unsigned from, unsigned to)
 {
 	if (!itsConnection)
 		return;
@@ -505,7 +507,7 @@ void MPD::Connection::Swap(unsigned from, unsigned to)
 	}
 }
 
-void MPD::Connection::Seek(unsigned where)
+void Connection::Seek(unsigned where)
 {
 	if (!itsConnection)
 		return;
@@ -521,7 +523,7 @@ void MPD::Connection::Seek(unsigned where)
 	}
 }
 
-void MPD::Connection::Shuffle()
+void Connection::Shuffle()
 {
 	if (!itsConnection)
 		return;
@@ -537,7 +539,7 @@ void MPD::Connection::Shuffle()
 	}
 }
 
-bool MPD::Connection::ClearMainPlaylist()
+bool Connection::ClearMainPlaylist()
 {
 	if (!itsConnection)
 		return false;
@@ -553,7 +555,7 @@ bool MPD::Connection::ClearMainPlaylist()
 	}
 }
 
-bool MPD::Connection::ClearPlaylist(const std::string &playlist)
+bool Connection::ClearPlaylist(const std::string &playlist)
 {
 	if (!itsConnection)
 		return false;
@@ -569,12 +571,12 @@ bool MPD::Connection::ClearPlaylist(const std::string &playlist)
 	}
 }
 
-void MPD::Connection::AddToPlaylist(const std::string &path, const Song &s)
+void Connection::AddToPlaylist(const std::string &path, const Song &s)
 {
 	AddToPlaylist(path, s.getURI());
 }
 
-void MPD::Connection::AddToPlaylist(const std::string &path, const std::string &file)
+void Connection::AddToPlaylist(const std::string &path, const std::string &file)
 {
 	if (!itsConnection)
 		return;
@@ -590,7 +592,7 @@ void MPD::Connection::AddToPlaylist(const std::string &path, const std::string &
 	}
 }
 
-bool MPD::Connection::PlaylistMove(const std::string &path, int from, int to)
+bool Connection::PlaylistMove(const std::string &path, int from, int to)
 {
 	if (!itsConnection)
 		return false;
@@ -607,7 +609,7 @@ bool MPD::Connection::PlaylistMove(const std::string &path, int from, int to)
 	}
 }
 
-bool MPD::Connection::Rename(const std::string &from, const std::string &to)
+bool Connection::Rename(const std::string &from, const std::string &to)
 {
 	if (!itsConnection)
 		return false;
@@ -623,7 +625,7 @@ bool MPD::Connection::Rename(const std::string &from, const std::string &to)
 	}
 }
 
-MPD::SongList MPD::Connection::GetPlaylistChanges(unsigned version)
+SongList Connection::GetPlaylistChanges(unsigned version)
 {
 	SongList result;
 	if (!itsConnection)
@@ -638,7 +640,7 @@ MPD::SongList MPD::Connection::GetPlaylistChanges(unsigned version)
 	return result;
 }
 
-MPD::Song MPD::Connection::GetSong(const std::string &path)
+Song Connection::GetSong(const std::string &path)
 {
 	if (!itsConnection)
 		return Song();
@@ -651,17 +653,17 @@ MPD::Song MPD::Connection::GetSong(const std::string &path)
 	return Song(s);
 }
 
-int MPD::Connection::GetCurrentSongPos() const
+int Connection::GetCurrentSongPos() const
 {
 	return itsCurrentStatus ? mpd_status_get_song_pos(itsCurrentStatus) : -1;
 }
 
-int MPD::Connection::GetCurrentlyPlayingSongPos() const
+int Connection::GetCurrentlyPlayingSongPos() const
 {
 	return isPlaying() ? GetCurrentSongPos() : -1;
 }
 
-MPD::Song MPD::Connection::GetCurrentlyPlayingSong()
+Song Connection::GetCurrentlyPlayingSong()
 {
 	assert(!isCommandsListEnabled);
 	GoBusy();
@@ -671,7 +673,7 @@ MPD::Song MPD::Connection::GetCurrentlyPlayingSong()
 	return result;
 }
 
-MPD::SongList MPD::Connection::GetPlaylistContent(const std::string &path)
+SongList Connection::GetPlaylistContent(const std::string &path)
 {
 	SongList result;
 	if (!itsConnection)
@@ -686,7 +688,7 @@ MPD::SongList MPD::Connection::GetPlaylistContent(const std::string &path)
 	return result;
 }
 
-void MPD::Connection::GetSupportedExtensions(std::set<std::string> &acc)
+void Connection::GetSupportedExtensions(std::set<std::string> &acc)
 {
 	if (!itsConnection)
 		return;
@@ -704,7 +706,7 @@ void MPD::Connection::GetSupportedExtensions(std::set<std::string> &acc)
 	GoIdle();
 }
 
-void MPD::Connection::SetRepeat(bool mode)
+void Connection::SetRepeat(bool mode)
 {
 	if (!itsConnection)
 		return;
@@ -720,7 +722,7 @@ void MPD::Connection::SetRepeat(bool mode)
 	}
 }
 
-void MPD::Connection::SetRandom(bool mode)
+void Connection::SetRandom(bool mode)
 {
 	if (!itsConnection)
 		return;
@@ -736,7 +738,7 @@ void MPD::Connection::SetRandom(bool mode)
 	}
 }
 
-void MPD::Connection::SetSingle(bool mode)
+void Connection::SetSingle(bool mode)
 {
 	if (!itsConnection)
 		return;
@@ -752,7 +754,7 @@ void MPD::Connection::SetSingle(bool mode)
 	}
 }
 
-void MPD::Connection::SetConsume(bool mode)
+void Connection::SetConsume(bool mode)
 {
 	if (!itsConnection)
 		return;
@@ -768,7 +770,7 @@ void MPD::Connection::SetConsume(bool mode)
 	}
 }
 
-void MPD::Connection::SetVolume(unsigned vol)
+void Connection::SetVolume(unsigned vol)
 {
 	if (!itsConnection || vol > 100)
 		return;
@@ -778,7 +780,7 @@ void MPD::Connection::SetVolume(unsigned vol)
 		UpdateStatus();
 }
 
-std::string MPD::Connection::GetReplayGainMode()
+std::string Connection::GetReplayGainMode()
 {
 	if (!itsConnection)
 		return "Unknown";
@@ -798,7 +800,7 @@ std::string MPD::Connection::GetReplayGainMode()
 	return result;
 }
 
-void MPD::Connection::SetReplayGainMode(ReplayGainMode mode)
+void Connection::SetReplayGainMode(ReplayGainMode mode)
 {
 	if (!itsConnection)
 		return;
@@ -827,7 +829,7 @@ void MPD::Connection::SetReplayGainMode(ReplayGainMode mode)
 		mpd_response_finish(itsConnection);
 }
 
-void MPD::Connection::SetCrossfade(unsigned crossfade)
+void Connection::SetCrossfade(unsigned crossfade)
 {
 	if (!itsConnection)
 		return;
@@ -843,7 +845,7 @@ void MPD::Connection::SetCrossfade(unsigned crossfade)
 	}
 }
 
-bool MPD::Connection::SetPriority(const Song &s, int prio)
+bool Connection::SetPriority(const Song &s, int prio)
 {
 	if (!itsConnection)
 		return false;
@@ -859,7 +861,7 @@ bool MPD::Connection::SetPriority(const Song &s, int prio)
 	}
 }
 
-int MPD::Connection::AddSong(const std::string &path, int pos)
+int Connection::AddSong(const std::string &path, int pos)
 {
 	if (!itsConnection)
 		return -1;
@@ -882,12 +884,12 @@ int MPD::Connection::AddSong(const std::string &path, int pos)
 	return id;
 }
 
-int MPD::Connection::AddSong(const Song &s, int pos)
+int Connection::AddSong(const Song &s, int pos)
 {
 	return AddSong((!s.isFromDatabase() ? "file://" : "") + s.getURI(), pos);
 }
 
-bool MPD::Connection::Add(const std::string &path)
+bool Connection::Add(const std::string &path)
 {
 	if (!itsConnection)
 		return false;
@@ -903,7 +905,7 @@ bool MPD::Connection::Add(const std::string &path)
 	}
 }
 
-bool MPD::Connection::AddRandomTag(mpd_tag_type tag, size_t number)
+bool Connection::AddRandomTag(mpd_tag_type tag, size_t number)
 {
 	if (!itsConnection && !number)
 		return false;
@@ -934,7 +936,7 @@ bool MPD::Connection::AddRandomTag(mpd_tag_type tag, size_t number)
 	return true;
 }
 
-bool MPD::Connection::AddRandomSongs(size_t number)
+bool Connection::AddRandomSongs(size_t number)
 {
 	if (!itsConnection && !number)
 		return false;
@@ -969,7 +971,7 @@ bool MPD::Connection::AddRandomSongs(size_t number)
 	return true;
 }
 
-bool MPD::Connection::Delete(unsigned pos)
+bool Connection::Delete(unsigned pos)
 {
 	if (!itsConnection)
 		return false;
@@ -983,7 +985,7 @@ bool MPD::Connection::Delete(unsigned pos)
 	return result;
 }
 
-bool MPD::Connection::DeleteID(unsigned id)
+bool Connection::DeleteID(unsigned id)
 {
 	if (!itsConnection)
 		return false;
@@ -997,7 +999,7 @@ bool MPD::Connection::DeleteID(unsigned id)
 	return result;
 }
 
-bool MPD::Connection::PlaylistDelete(const std::string &playlist, unsigned pos)
+bool Connection::PlaylistDelete(const std::string &playlist, unsigned pos)
 {
 	if (!itsConnection)
 		return false;
@@ -1013,7 +1015,7 @@ bool MPD::Connection::PlaylistDelete(const std::string &playlist, unsigned pos)
 	}
 }
 
-void MPD::Connection::StartCommandsList()
+void Connection::StartCommandsList()
 {
 	if (!itsConnection)
 		return;
@@ -1023,7 +1025,7 @@ void MPD::Connection::StartCommandsList()
 	isCommandsListEnabled = 1;
 }
 
-bool MPD::Connection::CommitCommandsList()
+bool Connection::CommitCommandsList()
 {
 	if (!itsConnection)
 		return false;
@@ -1034,7 +1036,7 @@ bool MPD::Connection::CommitCommandsList()
 	return mpd_response_finish(itsConnection);
 }
 
-bool MPD::Connection::DeletePlaylist(const std::string &name)
+bool Connection::DeletePlaylist(const std::string &name)
 {
 	if (!itsConnection)
 		return false;
@@ -1050,7 +1052,7 @@ bool MPD::Connection::DeletePlaylist(const std::string &name)
 	}
 }
 
-bool MPD::Connection::LoadPlaylist(const std::string &name)
+bool Connection::LoadPlaylist(const std::string &name)
 {
 	if (!itsConnection)
 		return false;
@@ -1059,7 +1061,7 @@ bool MPD::Connection::LoadPlaylist(const std::string &name)
 	return mpd_run_load(itsConnection, name.c_str());
 }
 
-int MPD::Connection::SavePlaylist(const std::string &name)
+int Connection::SavePlaylist(const std::string &name)
 {
 	if (!itsConnection)
 		return false;
@@ -1075,7 +1077,7 @@ int MPD::Connection::SavePlaylist(const std::string &name)
 		return CheckForErrors();
 }
 
-MPD::StringList MPD::Connection::GetPlaylists()
+StringList Connection::GetPlaylists()
 {
 	StringList result;
 	if (!itsConnection)
@@ -1087,7 +1089,7 @@ MPD::StringList MPD::Connection::GetPlaylists()
 	return result;
 }
 
-MPD::StringList MPD::Connection::GetList(mpd_tag_type type)
+StringList Connection::GetList(mpd_tag_type type)
 {
 	StringList result;
 	if (!itsConnection)
@@ -1106,13 +1108,13 @@ MPD::StringList MPD::Connection::GetList(mpd_tag_type type)
 	return result;
 }
 
-void MPD::Connection::StartSearch(bool exact_match)
+void Connection::StartSearch(bool exact_match)
 {
 	if (itsConnection)
 		mpd_search_db_songs(itsConnection, exact_match);
 }
 
-void MPD::Connection::StartFieldSearch(mpd_tag_type item)
+void Connection::StartFieldSearch(mpd_tag_type item)
 {
 	if (itsConnection)
 	{
@@ -1121,7 +1123,7 @@ void MPD::Connection::StartFieldSearch(mpd_tag_type item)
 	}
 }
 
-void MPD::Connection::AddSearch(mpd_tag_type item, const std::string &str) const
+void Connection::AddSearch(mpd_tag_type item, const std::string &str) const
 {
 	// mpd version < 0.14.* doesn't support empty search constraints
 	if (Version() < 14 && str.empty())
@@ -1130,21 +1132,21 @@ void MPD::Connection::AddSearch(mpd_tag_type item, const std::string &str) const
 		mpd_search_add_tag_constraint(itsConnection, MPD_OPERATOR_DEFAULT, item, str.c_str());
 }
 
-void MPD::Connection::AddSearchAny(const std::string &str) const
+void Connection::AddSearchAny(const std::string &str) const
 {
 	assert(!str.empty());
 	if (itsConnection)
 		mpd_search_add_any_tag_constraint(itsConnection, MPD_OPERATOR_DEFAULT, str.c_str());
 }
 
-void MPD::Connection::AddSearchURI(const std::string &str) const
+void Connection::AddSearchURI(const std::string &str) const
 {
 	assert(!str.empty());
 	if (itsConnection)
 		mpd_search_add_uri_constraint(itsConnection, MPD_OPERATOR_DEFAULT, str.c_str());
 }
 
-MPD::SongList MPD::Connection::CommitSearchSongs()
+SongList Connection::CommitSearchSongs()
 {
 	SongList result;
 	if (!itsConnection)
@@ -1159,7 +1161,7 @@ MPD::SongList MPD::Connection::CommitSearchSongs()
 	return result;
 }
 
-MPD::StringList MPD::Connection::CommitSearchTags()
+StringList Connection::CommitSearchTags()
 {
 	StringList result;
 	if (!itsConnection)
@@ -1177,7 +1179,7 @@ MPD::StringList MPD::Connection::CommitSearchTags()
 	return result;
 }
 
-MPD::ItemList MPD::Connection::GetDirectory(const std::string &path)
+ItemList Connection::GetDirectory(const std::string &path)
 {
 	ItemList result;
 	if (!itsConnection)
@@ -1213,7 +1215,7 @@ MPD::ItemList MPD::Connection::GetDirectory(const std::string &path)
 	return result;
 }
 
-MPD::SongList MPD::Connection::GetDirectoryRecursive(const std::string &path)
+SongList Connection::GetDirectoryRecursive(const std::string &path)
 {
 	SongList result;
 	if (!itsConnection)
@@ -1228,7 +1230,7 @@ MPD::SongList MPD::Connection::GetDirectoryRecursive(const std::string &path)
 	return result;
 }
 
-MPD::StringList MPD::Connection::GetDirectories(const std::string &path)
+StringList Connection::GetDirectories(const std::string &path)
 {
 	StringList result;
 	if (!itsConnection)
@@ -1246,7 +1248,7 @@ MPD::StringList MPD::Connection::GetDirectories(const std::string &path)
 	return result;
 }
 
-MPD::SongList MPD::Connection::GetSongs(const std::string &path)
+SongList Connection::GetSongs(const std::string &path)
 {
 	SongList result;
 	if (!itsConnection)
@@ -1261,7 +1263,7 @@ MPD::SongList MPD::Connection::GetSongs(const std::string &path)
 	return result;
 }
 
-MPD::OutputList MPD::Connection::GetOutputs()
+OutputList Connection::GetOutputs()
 {
 	OutputList result;
 	if (!itsConnection)
@@ -1279,7 +1281,7 @@ MPD::OutputList MPD::Connection::GetOutputs()
 	return result;
 }
 
-bool MPD::Connection::EnableOutput(int id)
+bool Connection::EnableOutput(int id)
 {
 	if (!itsConnection)
 		return false;
@@ -1295,7 +1297,7 @@ bool MPD::Connection::EnableOutput(int id)
 	}
 }
 
-bool MPD::Connection::DisableOutput(int id)
+bool Connection::DisableOutput(int id)
 {
 	if (!itsConnection)
 		return false;
@@ -1311,7 +1313,7 @@ bool MPD::Connection::DisableOutput(int id)
 	}
 }
 
-MPD::StringList MPD::Connection::GetURLHandlers()
+StringList Connection::GetURLHandlers()
 {
 	StringList result;
 	if (!itsConnection)
@@ -1329,7 +1331,7 @@ MPD::StringList MPD::Connection::GetURLHandlers()
 	return result;
 }
 
-MPD::StringList MPD::Connection::GetTagTypes()
+StringList Connection::GetTagTypes()
 {
 	StringList result;
 	if (!itsConnection)
@@ -1347,7 +1349,7 @@ MPD::StringList MPD::Connection::GetTagTypes()
 	return result;
 }
 
-int MPD::Connection::CheckForErrors()
+int Connection::CheckForErrors()
 {
 	int error_code = MPD_ERROR_SUCCESS;
 	if ((error_code = mpd_connection_get_error(itsConnection)) != MPD_ERROR_SUCCESS)
@@ -1368,4 +1370,6 @@ int MPD::Connection::CheckForErrors()
 			itsErrorHandler(this, error_code, itsErrorMessage.c_str(), itsErrorHandlerUserdata);
 	}
 	return error_code;
+}
+
 }
