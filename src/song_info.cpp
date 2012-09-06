@@ -93,8 +93,7 @@ void SongInfo::SwitchTo()
 	
 	myOldScreen = myScreen;
 	myScreen = this;
-	
-	Global::RedrawHeader = true;
+	DrawHeader();
 	
 	w->clear();
 	w->reset();

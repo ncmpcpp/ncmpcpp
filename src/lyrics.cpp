@@ -80,7 +80,7 @@ void Lyrics::Update()
 		const MPD::Song *s = myPlaylist->NowPlayingSong();
 		if (s && !s->getArtist().empty() && !s->getTitle().empty())
 		{
-			Global::RedrawHeader = true;
+			DrawHeader();
 			itsScrollBegin = 0;
 			itsSong = *s;
 			Load();
@@ -129,7 +129,7 @@ void Lyrics::SwitchTo()
 		itsSong = *s;
 		Load();
 		
-		Global::RedrawHeader = true;
+		DrawHeader();
 	}
 	else
 	{

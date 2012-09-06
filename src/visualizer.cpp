@@ -81,6 +81,7 @@ void Visualizer::SwitchTo()
 	if (myScreen != this && myScreen->isTabbable())
 		Global::myPrevScreen = myScreen;
 	myScreen = this;
+	DrawHeader();
 	w->clear();
 	
 	SetFD();
@@ -90,7 +91,6 @@ void Visualizer::SwitchTo()
 	
 	if (itsFifo >= 0)
 		Global::wFooter->setTimeout(WindowTimeout);
-	Global::RedrawHeader = true;
 }
 
 void Visualizer::Resize()

@@ -40,7 +40,6 @@ using namespace std::placeholders;
 using Global::MainHeight;
 using Global::MainStartY;
 using Global::myScreen;
-using Global::RedrawHeader;
 
 using MPD::itDirectory;
 using MPD::itSong;
@@ -116,7 +115,7 @@ void Browser::SwitchTo()
 	if (myScreen != this && myScreen->isTabbable())
 		Global::myPrevScreen = myScreen;
 	myScreen = this;
-	RedrawHeader = true;
+	DrawHeader();
 }
 
 std::basic_string<my_char_t> Browser::Title()
@@ -146,7 +145,7 @@ void Browser::EnterPressed()
 			}
 			else
 				GetDirectory(item.name, itsBrowsedDir);
-			RedrawHeader = true;
+			DrawHeader();
 			break;
 		}
 		case itSong:
@@ -236,7 +235,7 @@ void Browser::MouseButtonPressed(MEVENT me)
 				if (me.bstate & BUTTON1_PRESSED)
 				{
 					GetDirectory(w->current().value().name);
-					RedrawHeader = true;
+					DrawHeader();
 				}
 				else
 				{
@@ -574,7 +573,7 @@ void Browser::ChangeBrowseMode()
 		itsBrowsedDir.resize(itsBrowsedDir.length()-1);
 	w->reset();
 	GetDirectory(itsBrowsedDir);
-	RedrawHeader = true;
+	DrawHeader();
 }
 
 bool Browser::deleteItem(const MPD::Item &item)

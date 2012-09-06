@@ -40,6 +40,8 @@ void TraceMpdStatus();
 void NcmpcppStatusChanged(MPD::Connection *, MPD::StatusChanges, void *);
 void NcmpcppErrorCallback(MPD::Connection *, int, const char *, void *);
 
+void DrawHeader();
+
 NC::Window &Statusbar();
 void DrawProgressbar(unsigned elapsed, unsigned time);
 void ShowMessage(const char *, ...) GNUC_PRINTF(1, 2);

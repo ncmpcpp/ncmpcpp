@@ -121,7 +121,7 @@ void Playlist::SwitchTo()
 	EnableHighlighting();
 	if (w != Items) // even if sorting window is active, background has to be refreshed anyway
 		Items->display();
-	Global::RedrawHeader = true;
+	DrawHeader();
 }
 
 void Playlist::Resize()

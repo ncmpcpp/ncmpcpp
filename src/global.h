@@ -61,9 +61,6 @@ namespace Global
 	// indicates whether seeking action in currently in progress
 	extern bool SeekingInProgress;
 	
-	// indicates whether header should be immediately repainted
-	extern bool RedrawHeader;
-	
 	// indicates whether statusbar should be immediately repainted
 	extern bool RedrawStatusbar;
 	

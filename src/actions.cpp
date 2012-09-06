@@ -127,7 +127,6 @@ void Action::SetResizeFlags()
 void Action::ResizeScreen()
 {
 	using Global::MainHeight;
-	using Global::RedrawHeader;
 	using Global::RedrawStatusbar;
 	using Global::wHeader;
 	using Global::wFooter;
@@ -152,7 +151,6 @@ void Action::ResizeScreen()
 	}
 #	endif
 	
-	RedrawHeader = true;
 	MainHeight = LINES-(Config.new_design ? 7 : 4);
 	
 	ValidateScreenSize();
@@ -194,6 +192,7 @@ void Action::ResizeScreen()
 		DesignChanged = 0;
 		ShowMessage("User interface: %s", Config.new_design ? "Alternative" : "Classic");
 	}
+	DrawHeader();
 	wFooter->refresh();
 	refresh();
 }
@@ -737,11 +736,10 @@ void MasterScreen::Run()
 {
 	using Global::myInactiveScreen;
 	using Global::myLockedScreen;
-	using Global::RedrawHeader;
 	
 	myInactiveScreen = myScreen;
 	myScreen = myLockedScreen;
-	RedrawHeader = true;
+	DrawHeader();
 }
 
 bool SlaveScreen::canBeRun() const
@@ -759,11 +757,10 @@ void SlaveScreen::Run()
 {
 	using Global::myInactiveScreen;
 	using Global::myLockedScreen;
-	using Global::RedrawHeader;
 	
 	myScreen = myInactiveScreen;
 	myInactiveScreen = myLockedScreen;
-	RedrawHeader = true;
+	DrawHeader();
 }
 
 void VolumeUp::Run()
@@ -1229,15 +1226,13 @@ bool JumpToPlayingSong::canBeRun() const
 
 void JumpToPlayingSong::Run()
 {
-	using Global::RedrawHeader;
-	
 	if (myScreen == myPlaylist)
 		myPlaylist->Items->highlight(myPlaylist->NowPlaying);
 	else if (myScreen == myBrowser)
 	{
 		const MPD::Song *s = myPlaylist->NowPlayingSong();
 		myBrowser->LocateSong(*s);
-		RedrawHeader = true;
+		DrawHeader();
 	}
 	else if (myScreen == myLibrary)
 	{
@@ -1882,7 +1877,6 @@ bool ApplyFilter::canBeRun() const
 
 void ApplyFilter::Run()
 {
-	using Global::RedrawHeader;
 	using Global::wFooter;
 	
 	Filterable *f = dynamic_cast<Filterable *>(myScreen);
@@ -1908,7 +1902,7 @@ void ApplyFilter::Run()
 	{
 		myPlaylist->EnableHighlighting();
 		Playlist::ReloadTotalLength = true;
-		RedrawHeader = true;
+		DrawHeader();
 	}
 	ListsChangeFinisher();
 }

@@ -65,8 +65,7 @@ void Outputs::SwitchTo()
 		Global::myPrevScreen = myScreen;
 	myScreen = this;
 	w->Window::clear();
-	
-	Global::RedrawHeader = true;
+	DrawHeader();
 }
 
 void Outputs::Resize()
