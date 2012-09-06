@@ -30,6 +30,53 @@ MPD::Connection Mpd;
 
 namespace MPD {//
 
+bool Statistics::empty() const
+{
+	return m_stats.get() == 0;
+}
+
+unsigned Statistics::artists() const
+{
+	assert(!empty());
+	return mpd_stats_get_number_of_artists(m_stats.get());
+}
+
+unsigned Statistics::albums() const
+{
+	assert(!empty());
+	return mpd_stats_get_number_of_albums(m_stats.get());
+}
+
+unsigned Statistics::songs() const
+{
+	assert(!empty());
+	return mpd_stats_get_number_of_songs(m_stats.get());
+}
+
+unsigned long Statistics::playTime() const
+{
+	assert(!empty());
+	return mpd_stats_get_play_time(m_stats.get());
+}
+
+unsigned long Statistics::uptime() const
+{
+	assert(!empty());
+	return mpd_stats_get_uptime(m_stats.get());
+}
+
+unsigned long Statistics::dbUpdateTime() const
+{
+	assert(!empty());
+	return mpd_stats_get_db_update_time(m_stats.get());
+}
+
+unsigned long Statistics::dbPlayTime() const
+{
+	assert(!empty());
+	return mpd_stats_get_db_play_time(m_stats.get());
+}
+
 Connection::Connection() : itsConnection(0),
 				isCommandsListEnabled(0),
 				isIdle(0),
@@ -39,7 +86,6 @@ Connection::Connection() : itsConnection(0),
 				itsTimeout(15),
 				itsCurrentStatus(0),
 				itsOldStatus(0),
-				itsStats(0),
 				itsUpdater(0),
 				itsErrorHandler(0)
 {
@@ -49,8 +95,6 @@ Connection::~Connection()
 {
 	if (itsConnection)
 		mpd_connection_free(itsConnection);
-	if (itsStats)
-		mpd_stats_free(itsStats);
 	if (itsOldStatus)
 		mpd_status_free(itsOldStatus);
 	if (itsCurrentStatus)
@@ -84,8 +128,6 @@ void Connection::Disconnect()
 {
 	if (itsConnection)
 		mpd_connection_free(itsConnection);
-	if (itsStats)
-		mpd_stats_free(itsStats);
 	if (itsOldStatus)
 		mpd_status_free(itsOldStatus);
 	if (itsCurrentStatus)
@@ -94,7 +136,6 @@ void Connection::Disconnect()
 	isIdle = 0;
 	itsCurrentStatus = 0;
 	itsOldStatus = 0;
-	itsStats = 0;
 	isCommandsListEnabled = 0;
 }
 
@@ -153,6 +194,14 @@ int Connection::GoBusy()
 		mpd_response_finish(itsConnection);
 	}
 	return flags;
+}
+
+Statistics Connection::getStatistics()
+{
+	assert(itsConnection);
+	GoBusy();
+	mpd_stats *stats = mpd_run_stats(itsConnection);
+	return Statistics(stats);
 }
 
 void Connection::UpdateStatus()
@@ -307,18 +356,6 @@ void Connection::UpdateStatus()
 		CheckForErrors();
 		GoIdle();
 	}
-}
-
-void Connection::UpdateStats()
-{
-	if (!itsConnection)
-		return;
-	assert(!isCommandsListEnabled);
-	GoBusy();
-	if (itsStats)
-		mpd_stats_free(itsStats);
-	itsStats = mpd_run_stats(itsConnection);
-	GoIdle();
 }
 
 bool Connection::UpdateDirectory(const std::string &path)

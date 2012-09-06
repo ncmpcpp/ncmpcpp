@@ -21,6 +21,7 @@
 #ifndef _MPDPP_H
 #define _MPDPP_H
 
+#include <cassert>
 #include <set>
 #include <vector>
 
@@ -32,6 +33,26 @@ namespace MPD {//
 enum ItemType { itDirectory, itSong, itPlaylist };
 enum PlayerState { psUnknown, psStop, psPlay, psPause };
 enum ReplayGainMode { rgmOff, rgmTrack, rgmAlbum };
+
+struct Statistics
+{
+	friend class Connection;
+	
+	bool empty() const;
+	
+	unsigned artists() const;
+	unsigned albums() const;
+	unsigned songs() const;
+	unsigned long playTime() const;
+	unsigned long uptime() const;
+	unsigned long dbUpdateTime() const;
+	unsigned long dbPlayTime() const;
+	
+private:
+	Statistics(mpd_stats *stats) : m_stats(stats, mpd_stats_free) { }
+	
+	std::shared_ptr<mpd_stats> m_stats;
+};
 
 struct Item
 {
@@ -78,6 +99,8 @@ typedef std::vector<Output> OutputList;
 
 class Connection
 {
+	friend struct Statistics;
+	
 	typedef void (*StatusUpdater) (Connection *, StatusChanges, void *);
 	typedef void (*ErrorHandler) (Connection *, int, const char *, void *);
 	
@@ -106,10 +129,11 @@ public:
 	void SetPassword(const std::string &password) { itsPassword = password; }
 	bool SendPassword();
 	
+	Statistics getStatistics();
+	
 	void SetStatusUpdater(StatusUpdater, void *);
 	void SetErrorHandler(ErrorHandler, void *);
 	void UpdateStatus();
-	void UpdateStats();
 	bool UpdateDirectory(const std::string &);
 	
 	void Play();
@@ -142,14 +166,6 @@ public:
 	unsigned GetElapsedTime() const { return itsCurrentStatus ? itsElapsed : 0; }
 	int GetTotalTime() const { return itsCurrentStatus ? mpd_status_get_total_time(itsCurrentStatus) : 0; }
 	unsigned GetBitrate() const { return itsCurrentStatus ? mpd_status_get_kbit_rate(itsCurrentStatus) : 0; }
-	
-	unsigned NumberOfArtists() const { return itsStats ? mpd_stats_get_number_of_artists(itsStats) : 0; }
-	unsigned NumberOfAlbums() const { return itsStats ? mpd_stats_get_number_of_albums(itsStats) : 0; }
-	unsigned NumberOfSongs() const { return itsStats ? mpd_stats_get_number_of_songs(itsStats) : 0; }
-	unsigned long Uptime() const { return itsStats ? mpd_stats_get_uptime(itsStats) : 0; }
-	unsigned long DBUpdateTime() const { return itsStats ? mpd_stats_get_db_update_time(itsStats) : 0; }
-	unsigned long PlayTime() const { return itsStats ? mpd_stats_get_play_time(itsStats) : 0; }
-	unsigned long DBPlayTime() const { return itsStats ? mpd_stats_get_db_play_time(itsStats) : 0; }
 	
 	size_t GetPlaylistLength() const { return itsCurrentStatus ? mpd_status_get_queue_length(itsCurrentStatus) : 0; }
 	SongList GetPlaylistChanges(unsigned);
@@ -219,6 +235,8 @@ public:
 	StringList GetTagTypes();
 	
 private:
+	//void check
+	
 	void GoIdle();
 	int GoBusy();
 	
@@ -243,7 +261,6 @@ private:
 	
 	mpd_status *itsCurrentStatus;
 	mpd_status *itsOldStatus;
-	mpd_stats *itsStats;
 	
 	unsigned itsElapsed;
 	time_t itsElapsedTimer[2];
