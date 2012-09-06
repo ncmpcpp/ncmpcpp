@@ -252,7 +252,7 @@ bool BindingsConfiguration::read(const std::string &file)
 	return result;
 }
 
-void BindingsConfiguration::generateDefault()
+void BindingsConfiguration::generateDefaults()
 {
 	Key k = Key::noOp;
 	if (notBound(k = stringToKey("mouse")))

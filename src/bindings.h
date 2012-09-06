@@ -113,7 +113,7 @@ struct BindingsConfiguration
 	typedef BindingsMap::const_iterator ConstBindingIterator;
 	
 	bool read(const std::string &file);
-	void generateDefault();
+	void generateDefaults();
 	
 	std::pair<BindingIterator, BindingIterator> get(const Key &k) {
 		return m_bindings.equal_range(k);
