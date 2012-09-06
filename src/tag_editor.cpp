@@ -231,6 +231,7 @@ void TagEditor::SwitchTo()
 
 void TagEditor::Refresh()
 {
+	Dirs->display();
 	mvvline(MainStartY, MiddleColumnStartX-1, 0, MainHeight);
 	TagTypes->display();
 	mvvline(MainStartY, RightColumnStartX-1, 0, MainHeight);
@@ -580,12 +581,12 @@ void TagEditor::EnterPressed()
 				LowerAllLetters(**it);
 			ShowMessage("Done");
 		}
-		else if (id == 18) // reset
+		else if (id == 19) // reset
 		{
 			Tags->clear();
 			ShowMessage("Changes reset");
 		}
-		else if (id == 19) // save
+		else if (id == 20) // save
 		{
 			bool success = 1;
 			ShowMessage("Writing changes...");
