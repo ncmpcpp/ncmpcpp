@@ -41,10 +41,6 @@ struct Scrollpad: public Window
 	Scrollpad(size_t startx, size_t starty, size_t width, size_t height,
 			const std::string &title, Color color, Border border);
 	
-	/// Copies the scrollpad
-	/// @param s copied scrollpad
-	Scrollpad(const Scrollpad &s);
-	
 	/// Prints the text stored in internal buffer to window. Note that
 	/// all changes that has been made for text stored in scrollpad won't
 	/// be visible until one invokes this function
@@ -120,7 +116,7 @@ struct Scrollpad: public Window
 private:
 	basic_buffer<my_char_t> m_buffer;
 	
-	int m_beginning;
+	size_t m_beginning;
 	
 	bool m_found_for_each;
 	bool m_found_case_sensitive;
