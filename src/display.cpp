@@ -91,14 +91,15 @@ void setProperties(NC::Menu<T> &menu, const MPD::Song &s, HasSongs &screen, bool
 		menu << NC::fmtUnderline;
 		mvwhline(menu.raw(), menu.getY(), 0, KEY_SPACE, menu.getWidth());
 	}
-	if (is_now_playing)
-		menu << Config.now_playing_prefix;
+	
+	is_selected = menu.drawn()->isSelected();
+	discard_colors = Config.discard_colors_if_item_is_selected && is_selected;
 	
 	int song_pos = menu.isFiltered() ? s.getPosition() : drawn_pos;
 	is_now_playing = static_cast<void *>(&menu) == myPlaylist->Items
 	              && song_pos == myPlaylist->NowPlaying;
-	is_selected = menu.drawn()->isSelected();
-	discard_colors = Config.discard_colors_if_item_is_selected && is_selected;
+	if (is_now_playing)
+		menu << Config.now_playing_prefix;
 }
 
 template <typename T>
