@@ -2063,9 +2063,16 @@ void AddRandomItems::Run()
 	while (answer != 's' && answer != 'a' && answer != 'b');
 	UnlockStatusbar();
 	
-	mpd_tag_type tag_type = charToTagType(answer);
-	std::string tag_type_str = answer == 's' ? "song" : tagTypeToString(tag_type);
-	lowercase(tag_type_str);
+	mpd_tag_type tag_type;
+	std::string tag_type_str ;
+	if (answer != 's')
+	{
+		tag_type = charToTagType(answer);
+		tag_type_str = tagTypeToString(tag_type);
+		lowercase(tag_type_str);
+	}
+	else
+		tag_type_str = "song";
 	
 	LockStatusbar();
 	Statusbar() << "Number of random " << tag_type_str << "s: ";
