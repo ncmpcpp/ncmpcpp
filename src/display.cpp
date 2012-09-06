@@ -87,7 +87,12 @@ void setProperties(NC::Menu<T> &menu, const MPD::Song &s, HasSongs &screen, bool
 			separate_albums = true;
 	}
 	if (separate_albums)
+	{
 		menu << NC::fmtUnderline;
+		mvwhline(menu.raw(), menu.getY(), 0, KEY_SPACE, menu.getWidth());
+	}
+	if (is_now_playing)
+		menu << Config.now_playing_prefix;
 	
 	int song_pos = menu.isFiltered() ? s.getPosition() : drawn_pos;
 	is_now_playing = static_cast<void *>(&menu) == myPlaylist->Items
@@ -158,9 +163,6 @@ void showSongsInColumns(NC::Menu<T> &menu, const MPD::Song &s, HasSongs &screen)
 	
 	bool separate_albums, is_now_playing, is_selected, discard_colors;
 	setProperties(menu, s, screen, separate_albums, is_now_playing, is_selected, discard_colors);
-	
-	if (is_now_playing)
-		menu << Config.now_playing_prefix;
 	
 	int width;
 	int y = menu.getY();
