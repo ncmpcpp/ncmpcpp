@@ -1619,6 +1619,7 @@ void ToggleScreenLock::Run()
 	{
 		BasicScreen::Unlock();
 		Action::SetResizeFlags();
+		myScreen->Resize();
 		ShowMessage("Screen unlocked");
 	}
 	else
