@@ -44,7 +44,8 @@ enum ActionType
 	aApplyFilter, aFind, aFindItemForward, aFindItemBackward, aNextFoundItem,
 	aPreviousFoundItem, aToggleFindMode, aToggleReplayGainMode, aToggleSpaceMode, aToggleAddMode,
 	aToggleMouse, aToggleBitrateVisibility, aAddRandomItems, aToggleBrowserSortMode, aToggleLibraryTagType,
-	aRefetchLyrics, aRefetchArtistInfo, aSetSelectedItemsPriority, aShowSongInfo, aShowArtistInfo,
+	aRefetchLyrics, aRefetchArtistInfo, aSetSelectedItemsPriority, aFilterPlaylistOnPriorities,
+	aShowSongInfo, aShowArtistInfo,
 	aShowLyrics, aQuit, aNextScreen, aPreviousScreen, aShowHelp, aShowPlaylist, aShowBrowser,
 	aShowSearchEngine, aShowMediaLibrary, aShowPlaylistEditor, aShowTagEditor, aShowOutputs,
 	aShowVisualizer, aShowClock, aShowServerInfo
@@ -909,6 +910,16 @@ struct SetSelectedItemsPriority : public Action
 {
 	SetSelectedItemsPriority()
 	: Action(aSetSelectedItemsPriority, "set_selected_items_priority") { }
+	
+protected:
+	virtual bool canBeRun() const;
+	virtual void Run();
+};
+
+struct FilterPlaylistOnPriorities : public Action
+{
+	FilterPlaylistOnPriorities()
+	: Action(aFilterPlaylistOnPriorities, "filter_playlist_on_priorities") { }
 	
 protected:
 	virtual bool canBeRun() const;

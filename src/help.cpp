@@ -297,6 +297,7 @@ void Help::GetKeybindings()
 	KeyDesc(aSavePlaylist, "Save playlist");
 	KeyDesc(aSortPlaylist, "Sort playlist");
 	KeyDesc(aReversePlaylist, "Reverse playlist");
+	KeyDesc(aFilterPlaylistOnPriorities, "Filter playlist on priorities");
 	KeyDesc(aJumpToPlayingSong, "Jump to playing song");
 	KeyDesc(aTogglePlayingSongCentering, "Toggle playing song centering");
 	

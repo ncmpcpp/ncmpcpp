@@ -2204,15 +2204,38 @@ void SetSelectedItemsPriority::Run()
 	Statusbar() << "Set priority [0-255]: ";
 	std::string strprio = wFooter->getString();
 	UnlockStatusbar();
-	if (!isInteger(strprio.c_str()))
+	if (!isInteger(strprio.c_str(), true))
 		return;
-	int prio = atoi(strprio.c_str());
+	int prio = stringToInt(strprio);
 	if (prio < 0 || prio > 255)
 	{
 		ShowMessage("Number is out of range");
 		return;
 	}
 	myPlaylist->SetSelectedItemsPriority(prio);
+}
+
+bool FilterPlaylistOnPriorities::canBeRun() const
+{
+	return myScreen->ActiveWindow() == myPlaylist->Items;
+}
+
+void FilterPlaylistOnPriorities::Run()
+{
+	using Global::wFooter;
+	
+	LockStatusbar();
+	Statusbar() << "Show songs with priority higher than: ";
+	std::string strprio = wFooter->getString();
+	UnlockStatusbar();
+	if (!isInteger(strprio.c_str(), false))
+		return;
+	unsigned prio = stringToInt(strprio);
+	myPlaylist->Items->filter(myPlaylist->Items->begin(), myPlaylist->Items->end(),
+		[prio](const NC::Menu<MPD::Song>::Item &s) {
+			return s.value().getPrio() > prio;
+	});
+	ShowMessage("Playlist filtered (songs with priority higher than %u)", prio);
 }
 
 void ShowSongInfo::Run()
@@ -2578,6 +2601,7 @@ void populateActions()
 	insertAction(new RefetchLyrics());
 	insertAction(new RefetchArtistInfo());
 	insertAction(new SetSelectedItemsPriority());
+	insertAction(new FilterPlaylistOnPriorities());
 	insertAction(new ShowSongInfo());
 	insertAction(new ShowArtistInfo());
 	insertAction(new ShowLyrics());

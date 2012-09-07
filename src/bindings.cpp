@@ -493,7 +493,6 @@ void BindingsConfiguration::generateDefaults()
 	if (notBound(k = stringToKey("q")))
 		bind(k, aQuit);
 	
-	
 	if (notBound(k = stringToKey("-")))
 		bind(k, aVolumeDown);
 }

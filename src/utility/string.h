@@ -54,7 +54,7 @@ template <size_t N> struct print<N, std::wstring> {
 
 int stringToInt(const std::string &s);
 long stringToLongInt(const std::string &s);
-bool isInteger(const char *s);
+bool isInteger(const char *s, bool accept_signed);
 
 std::string ToString(const std::wstring &ws);
 std::wstring ToWString(const std::string &s);
