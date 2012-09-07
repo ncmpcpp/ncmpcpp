@@ -132,10 +132,7 @@ void Clock::Update()
 			myPlaylist->SwitchTo();
 	}
 	
-	static timeval past = { 0, 0 };
-	gettimeofday(&past, 0);
-	
-	tm *time = localtime(&past.tv_sec);
+	tm *time = localtime(&Global::Timer.tv_sec);
 	
 	mask = 0;
 	Set(time->tm_sec % 10, 0);

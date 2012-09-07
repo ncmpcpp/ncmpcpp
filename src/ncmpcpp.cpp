@@ -237,7 +237,7 @@ int main(int argc, char **argv)
 		   )
 		{
 			DrawHeader();
-			gettimeofday(&past, 0);
+			past = Timer;
 		}
 		
 		// header stuff end

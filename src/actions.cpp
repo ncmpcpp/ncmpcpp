@@ -223,6 +223,7 @@ void Action::Seek()
 {
 	using Global::wHeader;
 	using Global::wFooter;
+	using Global::Timer;
 	using Global::SeekingInProgress;
 	
 	if (!Mpd.GetTotalTime())
@@ -235,7 +236,7 @@ void Action::Seek()
 	LockStatusbar();
 	
 	int songpos = Mpd.GetElapsedTime();
-	time_t t = time(0);
+	timeval t = Timer;
 	
 	int old_timeout = wFooter->getTimeout();
 	wFooter->setTimeout(500);
@@ -246,7 +247,7 @@ void Action::Seek()
 		TraceMpdStatus();
 		myPlaylist->UpdateTimer();
 		
-		int howmuch = Config.incremental_seeking ? (myPlaylist->Timer()-t)/2+Config.seek_time : Config.seek_time;
+		int howmuch = Config.incremental_seeking ? (Timer.tv_sec-t.tv_sec)/2+Config.seek_time : Config.seek_time;
 		
 		Key input = Key::read(*wFooter);
 		auto k = Bindings.get(input);

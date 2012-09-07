@@ -123,7 +123,7 @@ void Visualizer::Update()
 		Mpd.DisableOutput(itsOutputID);
 		usleep(50000);
 		Mpd.EnableOutput(itsOutputID);
-		gettimeofday(&itsTimer, 0);
+		itsTimer = Global::Timer;
 	}
 	
 	void (Visualizer::*draw)(int16_t *, ssize_t, size_t, size_t);

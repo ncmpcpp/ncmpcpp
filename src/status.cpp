@@ -52,7 +52,7 @@ using Global::VolumeState;
 
 namespace
 {
-	time_t time_of_statusbar_lock;
+	timeval time_of_statusbar_lock;
 	int lock_statusbar_delay = -1;
 	
 	bool block_statusbar_update = 0;
@@ -145,7 +145,7 @@ void TraceMpdStatus()
 	{
 		if (!Mpd.SupportsIdle())
 		{
-			gettimeofday(&past, 0);
+			past = Timer;
 		}
 		else if (Config.display_bitrate && Global::Timer.tv_sec > past.tv_sec && Mpd.isPlaying())
 		{
@@ -153,7 +153,7 @@ void TraceMpdStatus()
 			// idle mode so current song's bitrate is never updated.
 			// we need to force ncmpcpp to fetch it.
 			Mpd.OrderDataFetching();
-			gettimeofday(&past, 0);
+			past = Timer;
 		}
 		Mpd.UpdateStatus();
 	}
@@ -161,17 +161,17 @@ void TraceMpdStatus()
 	ApplyToVisibleWindows(&BasicScreen::Update);
 	
 	if (isVisible(myPlaylist) && myPlaylist->ActiveWindow() == myPlaylist->Items
-	&&  Timer.tv_sec == myPlaylist->Timer()+Config.playlist_disable_highlight_delay
+	&&  Timer.tv_sec == myPlaylist->Timer().tv_sec+Config.playlist_disable_highlight_delay
 	&&  myPlaylist->Items->isHighlighted()
 	&&  Config.playlist_disable_highlight_delay)
 	{
-		myPlaylist->Items->setHighlighting(0);
+		myPlaylist->Items->setHighlighting(false);
 		myPlaylist->Items->refresh();
 	}
 	
 	if (lock_statusbar_delay > 0)
 	{
-		if (Timer.tv_sec >= time_of_statusbar_lock+lock_statusbar_delay)
+		if (Timer.tv_sec >= time_of_statusbar_lock.tv_sec+lock_statusbar_delay)
 		{
 			lock_statusbar_delay = -1;
 			
@@ -709,7 +709,7 @@ void ShowMessage(const char *format, ...)
 {
 	if (Global::ShowMessages && allow_statusbar_unlock)
 	{
-		time(&time_of_statusbar_lock);
+		time_of_statusbar_lock = Global::Timer;
 		lock_statusbar_delay = Config.message_delay_time;
 		if (Config.statusbar_visibility)
 			block_statusbar_update = 1;

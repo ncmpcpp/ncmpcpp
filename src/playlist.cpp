@@ -420,6 +420,11 @@ void Playlist::EnableHighlighting()
 	UpdateTimer();
 }
 
+void Playlist::UpdateTimer()
+{
+	itsTimer = Global::Timer;
+}
+
 bool Playlist::SortingInProgress()
 {
 	return w == SortDialog;

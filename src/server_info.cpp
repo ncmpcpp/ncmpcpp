@@ -95,7 +95,7 @@ void ServerInfo::Update()
 	static timeval past = { 0, 0 };
 	if (Global::Timer.tv_sec <= past.tv_sec)
 		return;
-	gettimeofday(&past, 0);
+	past = Global::Timer;
 	
 	MPD::Statistics stats = Mpd.getStatistics();
 	if (stats.empty())
