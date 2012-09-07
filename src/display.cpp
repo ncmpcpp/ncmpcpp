@@ -349,6 +349,7 @@ void Display::Songs(NC::Menu<MPD::Song> &menu, HasSongs *screen, const std::stri
 	showSongs(menu, menu.drawn()->value(), *screen, format);
 }
 
+#ifdef HAVE_TAGLIB_H
 void Display::Tags(NC::Menu<MPD::MutableSong> &menu)
 {
 	const MPD::MutableSong &s = menu.drawn()->value();
@@ -365,6 +366,7 @@ void Display::Tags(NC::Menu<MPD::MutableSong> &menu)
 			menu << s.getName() << Config.color2 << " -> " << NC::clEnd << s.getNewURI();
 	}
 }
+#endif // HAVE_TAGLIB_H
 
 void Display::Outputs(NC::Menu<MPD::Output> &menu)
 {

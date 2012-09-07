@@ -28,6 +28,7 @@
 #include "playlist.h"
 #include "playlist_editor.h"
 #include "mpdpp.h"
+#include "regex_filter.h"
 #include "status.h"
 #include "tag_editor.h"
 #include "utility/comparators.h"

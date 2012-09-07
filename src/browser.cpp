@@ -30,6 +30,7 @@
 #include "global.h"
 #include "helpers.h"
 #include "playlist.h"
+#include "regex_filter.h"
 #include "settings.h"
 #include "status.h"
 #include "tag_editor.h"

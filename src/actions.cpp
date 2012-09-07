@@ -21,6 +21,7 @@
 #include <cassert>
 #include <cerrno>
 #include <cstring>
+#include <algorithm>
 #include <iostream>
 
 #include "actions.h"
@@ -1460,9 +1461,9 @@ bool EditDirectoryName::canBeRun() const
 #	ifdef HAVE_TAGLIB_H
 	    ||   (myScreen->ActiveWindow() == myTagEditor->Dirs
 	      && !myTagEditor->Dirs->empty()
-	      && myTagEditor->Dirs->choice() > 0))
+	      && myTagEditor->Dirs->choice() > 0)
 #	endif // HAVE_TAGLIB_H
-	;
+	);
 }
 
 void EditDirectoryName::Run()
