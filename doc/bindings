@@ -260,6 +260,9 @@
 #  toggle_replay_gain_mode
 #
 #def_key "t"
+#  toggle_space_mode
+#
+#def_key "T"
 #  toggle_add_mode
 #
 #def_key "|"
