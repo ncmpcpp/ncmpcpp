@@ -119,10 +119,10 @@ void Browser::SwitchTo()
 	DrawHeader();
 }
 
-std::basic_string<my_char_t> Browser::Title()
+std::wstring Browser::Title()
 {
-	std::basic_string<my_char_t> result = U("Browse: ");
-	result += Scroller(TO_WSTRING(itsBrowsedDir), itsScrollBeginning, COLS-result.length()-(Config.new_design ? 2 : Global::VolumeState.length()));
+	std::wstring result = L"Browse: ";
+	result += Scroller(ToWString(itsBrowsedDir), itsScrollBeginning, COLS-result.length()-(Config.new_design ? 2 : Global::VolumeState.length()));
 	return result;
 }
 
@@ -550,12 +550,12 @@ void Browser::ClearDirectory(const std::string &path) const
 		if (remove(full_path.c_str()) == 0)
 		{
 			const char msg[] = "Deleting \"%s\"...";
-			ShowMessage(msg, Shorten(TO_WSTRING(full_path), COLS-const_strlen(msg)).c_str());
+			ShowMessage(msg, Shorten(ToWString(full_path), COLS-const_strlen(msg)).c_str());
 		}
 		else
 		{
 			const char msg[] = "Couldn't remove \"%s\": %s";
-			ShowMessage(msg, Shorten(TO_WSTRING(full_path), COLS-const_strlen(msg)-25).c_str(), strerror(errno));
+			ShowMessage(msg, Shorten(ToWString(full_path), COLS-const_strlen(msg)-25).c_str(), strerror(errno));
 		}
 	}
 	closedir(dir);

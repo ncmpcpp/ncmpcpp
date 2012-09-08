@@ -321,11 +321,11 @@ void ParseArgv(int, char **);
 template <typename T> struct StringConverter {
 	const char *operator()(const char *s) { return s; }
 };
-template <> struct StringConverter< NC::basic_buffer<wchar_t> > {
+template <> struct StringConverter<NC::WBuffer> {
 	std::wstring operator()(const char *s) { return ToWString(s); }
 };
 template <> struct StringConverter<NC::Scrollpad> {
-	std::basic_string<my_char_t> operator()(const char *s) { return TO_WSTRING(s); }
+	std::wstring operator()(const char *s) { return ToWString(s); }
 };
 
 template <typename CharT>
@@ -461,8 +461,8 @@ std::string Timestamp(time_t t);
 
 void markSongsInPlaylist(std::shared_ptr<ProxySongList> pl);
 
-std::basic_string<my_char_t> Scroller(const std::basic_string<my_char_t> &str, size_t &pos, size_t width);
+std::wstring Scroller(const std::wstring &str, size_t &pos, size_t width);
 
-std::string Shorten(const std::basic_string<my_char_t> &s, size_t max_length);
+std::string Shorten(const std::wstring &s, size_t max_length);
 
 #endif

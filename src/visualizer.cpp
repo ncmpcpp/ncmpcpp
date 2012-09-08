@@ -102,9 +102,9 @@ void Visualizer::Resize()
 	hasToBeResized = 0;
 }
 
-std::basic_string<my_char_t> Visualizer::Title()
+std::wstring Visualizer::Title()
 {
-	return U("Music visualizer");
+	return L"Music visualizer";
 }
 
 void Visualizer::Update()

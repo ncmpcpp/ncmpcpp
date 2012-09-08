@@ -39,16 +39,16 @@ size_t calc_hash(const char* s, unsigned seed = 0)
 }
 
 // temporary hack, it won't work properly with wide characters
-std::string Shorten(const std::basic_string<my_char_t> &s, size_t max_length)
+std::string Shorten(const std::wstring &s, size_t max_length)
 {
 	if (s.length() <= max_length)
-		return TO_STRING(s);
+		return ToString(s);
 	if (max_length < 2)
 		return "";
-	std::basic_string<my_char_t> result(s, 0, max_length/2-!(max_length%2));
-	result += U("..");
+	std::wstring result(s, 0, max_length/2-!(max_length%2));
+	result += L"..";
 	result += s.substr(s.length()-max_length/2+1);
-	return TO_STRING(result);
+	return ToString(result);
 }
 
 }
@@ -373,7 +373,7 @@ std::string Song::ParseFormat(std::string::const_iterator &it, const std::string
 				{
 					if (delimiter)
 					{
-						const std::basic_string<my_char_t> &s = TO_WSTRING(tag);
+						std::wstring s = ToWString(tag);
 						if (NC::Window::length(s) > delimiter)
 							tag = Shorten(s, delimiter);
 					}

@@ -41,7 +41,7 @@ class Lyrics : public Screen<NC::Scrollpad>
 		virtual void Resize() OVERRIDE;
 		virtual void SwitchTo() OVERRIDE;
 		
-		virtual std::basic_string<my_char_t> Title() OVERRIDE;
+		virtual std::wstring Title() OVERRIDE;
 		
 		virtual void Update() OVERRIDE;
 		

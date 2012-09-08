@@ -110,9 +110,9 @@ void Clock::SwitchTo()
 	w->display();
 }
 
-std::basic_string<my_char_t> Clock::Title()
+std::wstring Clock::Title()
 {
-	return U("Clock");
+	return L"Clock";
 }
 
 void Clock::Update()

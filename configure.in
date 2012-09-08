@@ -155,7 +155,7 @@ dnl ========================
 if test "$pdcurses" = "no" ; then
 	if test "$unicode" = "yes" ; then
 		curses_config_bin="ncursesw6-config ncursesw5-config"
-		AC_DEFINE([_UTF8], [1], [enables unicode support])
+		AC_DEFINE([NCMPCPP_UNICODE], [1], [enables unicode support])
 	else
 		curses_config_bin="ncurses6-config ncurses5-config"
 	fi

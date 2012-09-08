@@ -201,9 +201,9 @@ void TagEditor::Resize()
 	hasToBeResized = 0;
 }
 
-std::basic_string<my_char_t> TagEditor::Title()
+std::wstring TagEditor::Title()
 {
-	return U("Tag editor");
+	return L"Tag editor";
 }
 
 void TagEditor::SwitchTo()
@@ -333,20 +333,20 @@ void TagEditor::EnterPressed()
 		// prepare additional windows
 		
 		FParserLegend->clear();
-		*FParserLegend << U("%a - artist\n");
-		*FParserLegend << U("%A - album artist\n");
-		*FParserLegend << U("%t - title\n");
-		*FParserLegend << U("%b - album\n");
-		*FParserLegend << U("%y - date\n");
-		*FParserLegend << U("%n - track number\n");
-		*FParserLegend << U("%g - genre\n");
-		*FParserLegend << U("%c - composer\n");
-		*FParserLegend << U("%p - performer\n");
-		*FParserLegend << U("%d - disc\n");
-		*FParserLegend << U("%C - comment\n\n");
-		*FParserLegend << NC::fmtBold << U("Files:\n") << NC::fmtBoldEnd;
+		*FParserLegend << L"%a - artist\n";
+		*FParserLegend << L"%A - album artist\n";
+		*FParserLegend << L"%t - title\n";
+		*FParserLegend << L"%b - album\n";
+		*FParserLegend << L"%y - date\n";
+		*FParserLegend << L"%n - track number\n";
+		*FParserLegend << L"%g - genre\n";
+		*FParserLegend << L"%c - composer\n";
+		*FParserLegend << L"%p - performer\n";
+		*FParserLegend << L"%d - disc\n";
+		*FParserLegend << L"%C - comment\n\n";
+		*FParserLegend << NC::fmtBold << L"Files:\n" << NC::fmtBoldEnd;
 		for (auto it = EditedSongs.begin(); it != EditedSongs.end(); ++it)
-			*FParserLegend << Config.color2 << U(" * ") << NC::clEnd << (*it)->getName() << '\n';
+			*FParserLegend << Config.color2 << L" * " << NC::clEnd << (*it)->getName() << '\n';
 		FParserLegend->flush();
 		
 		if (!Patterns.empty())
@@ -407,7 +407,7 @@ void TagEditor::EnterPressed()
 				{
 					if (FParserUsePreview)
 					{
-						*FParserPreview << NC::fmtBold << s.getName() << U(":\n") << NC::fmtBoldEnd;
+						*FParserPreview << NC::fmtBold << s.getName() << L":\n" << NC::fmtBoldEnd;
 						*FParserPreview << ParseFilename(s, Config.pattern, FParserUsePreview) << '\n';
 					}
 					else
@@ -427,7 +427,7 @@ void TagEditor::EnterPressed()
 					}
 					if (!FParserUsePreview)
 						s.setNewURI(new_file + extension);
-					*FParserPreview << file << Config.color2 << U(" -> ") << NC::clEnd;
+					*FParserPreview << file << Config.color2 << L" -> " << NC::clEnd;
 					if (new_file.empty())
 						*FParserPreview << Config.empty_tags_color << Config.empty_tag << NC::clEnd;
 					else
@@ -597,7 +597,7 @@ void TagEditor::EnterPressed()
 				if (!WriteTags(**it))
 				{
 					const char msg[] = "Error while writing tags in \"%s\"";
-					ShowMessage(msg, Shorten(TO_WSTRING((*it)->getURI()), COLS-const_strlen(msg)).c_str());
+					ShowMessage(msg, Shorten(ToWString((*it)->getURI()), COLS-const_strlen(msg)).c_str());
 					success = 0;
 					break;
 				}

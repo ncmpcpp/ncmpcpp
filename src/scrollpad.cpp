@@ -43,7 +43,7 @@ void Scrollpad::flush()
 {
 	m_real_height = 1;
 	
-	std::basic_string<my_char_t> s = m_buffer.str();
+	std::wstring s = m_buffer.str();
 	
 	size_t x = 0;
 	int x_pos = 0;
@@ -86,7 +86,7 @@ void Scrollpad::flush()
 	std::swap(s, m_buffer.m_string);
 }
 
-bool Scrollpad::setFormatting(short val_b, const std::basic_string<my_char_t> &s, short val_e, bool case_sensitive, bool for_each)
+bool Scrollpad::setFormatting(short val_b, const std::wstring &s, short val_e, bool case_sensitive, bool for_each)
 {
 	bool result = m_buffer.setFormatting(val_b, s, val_e, case_sensitive, for_each);
 	if (result)
@@ -191,12 +191,10 @@ void Scrollpad::reset()
 	m_beginning = 0;
 }
 
-#ifdef _UTF8
 Scrollpad &Scrollpad::operator<<(const std::string &s)
 {
 	m_buffer << ToWString(s);
 	return *this;
 }
-#endif // _UTF8
 
 }

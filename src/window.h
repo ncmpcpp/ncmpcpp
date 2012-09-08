@@ -102,18 +102,6 @@
 # define BUTTON2_PRESSED (NCURSES_MOUSE_MASK(2, NCURSES_BUTTON_PRESSED) | (1U << 27))
 #endif // USE_PDCURSES
 
-#ifdef _UTF8
-# define my_char_t wchar_t
-# define U(x) L##x
-# define TO_STRING(x) ToString(x)
-# define TO_WSTRING(x) ToWString(x)
-#else
-# define my_char_t char
-# define U(x) x
-# define TO_STRING(x) (x)
-# define TO_WSTRING(x) (x)
-#endif
-
 // workaraund for win32
 #ifdef WIN32
 # define wcwidth(x) int(!iscntrl(x))
@@ -431,21 +419,12 @@ struct Window
 	/// @return real length of wide string
 	static size_t length(const std::wstring &ws);
 	
-	/// Fallback for Length() for wide strings used if unicode support is disabled
-	/// @param s string that real length has to be measured
-	/// @return standard std::string::length() result since it's only fallback
-	static size_t length(const std::string &s) { return s.length(); }
-	
 	/// Cuts string so it fits desired length on the screen. Note that it uses
 	/// wcwidth to check real width of all characters it contains. If string
 	/// fits requested length it's not modified at all.
 	/// @param ws wide string to be cut
 	/// @param max_len maximal length of string
 	static void cut(std::wstring &ws, size_t max_len);
-	
-	/// Variant for std::string, it just falls back to std::string::resize
-	static void cut(std::string &s, size_t max_len) { s.resize(max_len); }
-	
 protected:
 	/// Sets colors of window (interal use only)
 	/// @param fg foregound color

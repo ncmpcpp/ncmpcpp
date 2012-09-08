@@ -145,7 +145,7 @@ void SelectedItemsAdder::Refresh()
 		itsPlaylistSelector->display();
 }
 
-std::basic_string<my_char_t> SelectedItemsAdder::Title()
+std::wstring SelectedItemsAdder::Title()
 {
 	return myOldScreen->Title();
 }

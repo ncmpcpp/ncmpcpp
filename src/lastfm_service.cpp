@@ -104,8 +104,8 @@ bool ArtistInfo::checkArgs(const Args &args)
 
 void ArtistInfo::colorizeOutput(NC::Scrollpad &w)
 {
-	w.setFormatting(NC::fmtBold, U("\n\nSimilar artists:\n"), NC::fmtBoldEnd, false);
-	w.setFormatting(Config.color2, U("\n * "), NC::clEnd, true);
+	w.setFormatting(NC::fmtBold, L"\n\nSimilar artists:\n", NC::fmtBoldEnd, false);
+	w.setFormatting(Config.color2, L"\n * ", NC::clEnd, true);
 	// below is used so format won't be removed using removeFormatting() by accident.
 	w.forgetFormatting();
 }

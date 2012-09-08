@@ -147,12 +147,12 @@ void Playlist::Resize()
 	hasToBeResized = 0;
 }
 
-std::basic_string<my_char_t> Playlist::Title()
+std::wstring Playlist::Title()
 {
-	std::basic_string<my_char_t> result = U("Playlist ");
+	std::wstring result = L"Playlist ";
 	if (ReloadTotalLength || ReloadRemaining)
 		itsBufferedStats = TotalLength();
-	result += Scroller(TO_WSTRING(itsBufferedStats), itsScrollBegin, COLS-result.length()-(Config.new_design ? 2 : Global::VolumeState.length()));
+	result += Scroller(ToWString(itsBufferedStats), itsScrollBegin, COLS-result.length()-(Config.new_design ? 2 : Global::VolumeState.length()));
 	return result;
 }
 

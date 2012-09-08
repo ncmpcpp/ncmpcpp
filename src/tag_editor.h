@@ -41,7 +41,7 @@ class TagEditor : public Screen<NC::Window>, public Filterable, public HasSongs,
 		virtual void Resize();
 		virtual void SwitchTo();
 		
-		virtual std::basic_string<my_char_t> Title();
+		virtual std::wstring Title();
 		
 		virtual void Refresh();
 		virtual void Update();

@@ -33,7 +33,7 @@ class SelectedItemsAdder : public Screen< NC::Menu<std::string> >
 		virtual void Resize() OVERRIDE;
 		virtual void Refresh() OVERRIDE;
 		
-		virtual std::basic_string<my_char_t> Title() OVERRIDE;
+		virtual std::wstring Title() OVERRIDE;
 		
 		virtual void Update() OVERRIDE { }
 		

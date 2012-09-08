@@ -77,9 +77,9 @@ void Outputs::Resize()
 	hasToBeResized = 0;
 }
 
-std::basic_string<my_char_t> Outputs::Title()
+std::wstring Outputs::Title()
 {
-	return U("Outputs");
+	return L"Outputs";
 }
 
 void Outputs::EnterPressed()

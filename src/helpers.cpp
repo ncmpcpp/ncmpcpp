@@ -104,7 +104,7 @@ void ParseArgv(int argc, char **argv)
 #			ifdef HAVE_TAGLIB_H
 			<< " taglib"
 #			endif
-#			ifdef _UTF8
+#			ifdef NCMPCPP_UNICODE
 			<< " unicode"
 #			endif
 			<< std::endl;
@@ -290,17 +290,17 @@ void markSongsInPlaylist(std::shared_ptr<ProxySongList> pl)
 			pl->setBold(i, myPlaylist->checkForSong(*s));
 }
 
-std::basic_string<my_char_t> Scroller(const std::basic_string<my_char_t> &str, size_t &pos, size_t width)
+std::wstring Scroller(const std::wstring &str, size_t &pos, size_t width)
 {
-	std::basic_string<my_char_t> s(str);
+	std::wstring s(str);
 	if (!Config.header_text_scrolling)
 		return s;
-	std::basic_string<my_char_t> result;
+	std::wstring result;
 	size_t len = NC::Window::length(s);
 	
 	if (len > width)
 	{
-		s += U(" ** ");
+		s += L" ** ";
 		len = 0;
 		auto b = s.begin(), e = s.end();
 		for (auto it = b+pos; it < e && len < width; ++it)
@@ -323,14 +323,14 @@ std::basic_string<my_char_t> Scroller(const std::basic_string<my_char_t> &str, s
 	return result;
 }
 
-std::string Shorten(const std::basic_string<my_char_t> &s, size_t max_length)
+std::string Shorten(const std::wstring &s, size_t max_length)
 {
 	if (s.length() <= max_length)
-		return TO_STRING(s);
+		return ToString(s);
 	if (max_length < 2)
 		return "";
-	std::basic_string<my_char_t> result(s, 0, max_length/2-!(max_length%2));
-	result += U("..");
+	std::wstring result(s, 0, max_length/2-!(max_length%2));
+	result += L"..";
 	result += s.substr(s.length()-max_length/2+1);
-	return TO_STRING(result);
+	return ToString(result);
 }

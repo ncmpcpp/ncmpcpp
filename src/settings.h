@@ -35,7 +35,7 @@ struct Column
 {
 	Column() : stretch_limit(-1), right_alignment(0), display_empty_tag(1) { }
 	
-	std::basic_string<my_char_t> name;
+	std::wstring name;
 	std::string type;
 	int width;
 	int stretch_limit;
@@ -80,8 +80,8 @@ struct Configuration
 	std::string new_header_first_line;
 	std::string new_header_second_line;
 	std::string lastfm_preferred_language;
-	std::basic_string<my_char_t> progressbar;
-	std::basic_string<my_char_t> visualizer_chars;
+	std::wstring progressbar;
+	std::wstring visualizer_chars;
 	
 	std::string pattern;
 	
@@ -91,7 +91,7 @@ struct Configuration
 	NC::Buffer selected_item_prefix;
 	NC::Buffer selected_item_suffix;
 	NC::Buffer now_playing_prefix;
-	NC::basic_buffer<my_char_t> now_playing_suffix;
+	NC::WBuffer now_playing_suffix;
 	
 	NC::Color color1;
 	NC::Color color2;

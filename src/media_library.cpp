@@ -242,9 +242,9 @@ void MediaLibrary::SwitchTo()
 	Refresh();
 }
 
-std::basic_string<my_char_t> MediaLibrary::Title()
+std::wstring MediaLibrary::Title()
 {
-	return U("Media library");
+	return L"Media library";
 }
 
 void MediaLibrary::Update()

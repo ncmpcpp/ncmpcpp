@@ -58,7 +58,7 @@ void Lastfm::Resize()
 	hasToBeResized = 0;
 }
 
-std::basic_string<my_char_t> Lastfm::Title()
+std::wstring Lastfm::Title()
 {
 	return itsTitle;
 }
@@ -153,7 +153,7 @@ void Lastfm::Load()
 	}
 	else
 	{
-		*w << U("Fetching informations... ");
+		*w << L"Fetching informations... ";
 		pthread_create(&itsDownloader, 0, DownloadWrapper, this);
 		isDownloadInProgress = 1;
 	}
@@ -164,8 +164,8 @@ void Lastfm::SetTitleAndFolder()
 {
 	if (dynamic_cast<ArtistInfo *>(itsService.get()))
 	{
-		itsTitle = U("Artist info - ");
-		itsTitle += TO_WSTRING(itsArgs.find("artist")->second);
+		itsTitle = L"Artist info - ";
+		itsTitle += ToWString(itsArgs.find("artist")->second);
 		itsFolder = Config.ncmpcpp_directory + "artists";
 	}
 }
@@ -211,7 +211,7 @@ void Lastfm::Refetch()
 	if (remove(itsFilename.c_str()) && errno != ENOENT)
 	{
 		const char msg[] = "Couldn't remove \"%s\": %s";
-		ShowMessage(msg, Shorten(TO_WSTRING(itsFilename), COLS-const_strlen(msg)-25).c_str(), strerror(errno));
+		ShowMessage(msg, Shorten(ToWString(itsFilename), COLS-const_strlen(msg)-25).c_str(), strerror(errno));
 		return;
 	}
 	Load();

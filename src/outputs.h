@@ -37,7 +37,7 @@ class Outputs : public Screen< NC::Menu<MPD::Output> >
 		virtual void SwitchTo() OVERRIDE;
 		virtual void Resize() OVERRIDE;
 		
-		virtual std::basic_string<my_char_t> Title() OVERRIDE;
+		virtual std::wstring Title() OVERRIDE;
 		
 		virtual void Update() OVERRIDE { }
 		

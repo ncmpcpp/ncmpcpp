@@ -173,8 +173,8 @@ void Configuration::SetDefaults()
 	new_header_first_line = "{$b$1$aqqu$/a$9 {%t}|{%f} $1$atqq$/a$9$/b}";
 	new_header_second_line = "{{{$4$b%a$/b$9}{ - $7%b$9}{ ($4%y$9)}}|{%D}}";
 	browser_playlist_prefix << NC::clRed << "(playlist)" << NC::clEnd << ' ';
-	progressbar = U("=>\0");
-	visualizer_chars = U("◆│");
+	progressbar = L"=>\0";
+	visualizer_chars = L"◆│";
 	pattern = "%n - %t";
 	selected_item_prefix << NC::clMagenta;
 	selected_item_suffix << NC::clEnd;
@@ -335,7 +335,7 @@ void Configuration::Read()
 		{
 			name = GetOptionName(cl);
 			v = getEnclosedString(cl, '"', '"', 0);
-			
+ 			
 			if (name == "ncmpcpp_directory")
 			{
 				if (!v.empty())
@@ -513,7 +513,7 @@ void Configuration::Read()
 			}
 			else if (name == "progressbar_look")
 			{
-				std::basic_string<my_char_t> pb = TO_WSTRING(v);
+				std::wstring pb = ToWString(v);
 				if (pb.length() < 2 || pb.length() > 3)
 				{
 					std::cerr << "Warning: length of progressbar_look should be either ";
@@ -526,7 +526,7 @@ void Configuration::Read()
 			}
 			else if (name == "visualizer_look")
 			{
-				std::basic_string<my_char_t> vc = TO_WSTRING(v);
+				std::wstring vc = ToWString(v);
 				if (vc.length() != 2)
 				{
 					std::cerr << "Warning: length of visualizer_look should be 2, but it's " << vc.length() << ", discarding.\n";
@@ -545,7 +545,7 @@ void Configuration::Read()
 				{
 					selected_item_prefix.clear();
 					String2Buffer(v, selected_item_prefix);
-					selected_item_prefix_length = NC::Window::length(TO_WSTRING(selected_item_prefix.str()));
+					selected_item_prefix_length = NC::Window::length(ToWString(selected_item_prefix.str()));
 				}
 			}
 			else if (name == "selected_item_suffix")
@@ -554,7 +554,7 @@ void Configuration::Read()
 				{
 					selected_item_suffix.clear();
 					String2Buffer(v, selected_item_suffix);
-					selected_item_suffix_length = NC::Window::length(TO_WSTRING(selected_item_suffix.str()));
+					selected_item_suffix_length = NC::Window::length(ToWString(selected_item_suffix.str()));
 				}
 			}
 			else if (name == "now_playing_prefix")
@@ -563,7 +563,7 @@ void Configuration::Read()
 				{
 					now_playing_prefix.clear();
 					String2Buffer(v, now_playing_prefix);
-					now_playing_prefix_length = NC::Window::length(TO_WSTRING(now_playing_prefix.str()));
+					now_playing_prefix_length = NC::Window::length(ToWString(now_playing_prefix.str()));
 				}
 			}
 			else if (name == "now_playing_suffix")
@@ -571,7 +571,7 @@ void Configuration::Read()
 				if (!v.empty())
 				{
 					now_playing_suffix.clear();
-					String2Buffer(TO_WSTRING(v), now_playing_suffix);
+					String2Buffer(ToWString(v), now_playing_suffix);
 					now_playing_suffix_length = NC::Window::length(now_playing_suffix.str());
 				}
 			}
@@ -977,7 +977,7 @@ void Configuration::GenerateColumns()
 		size_t tag_type_colon_pos = tag_type.find(':');
 		if (tag_type_colon_pos != std::string::npos)
 		{
-			col.name = TO_WSTRING(tag_type.substr(tag_type_colon_pos+1));
+			col.name = ToWString(tag_type.substr(tag_type_colon_pos+1));
 			tag_type.resize(tag_type_colon_pos);
 		}
 		

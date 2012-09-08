@@ -92,15 +92,15 @@ void TinyTagEditor::SwitchTo()
 		full_path += itsEdited.getURI();
 		
 		std::string message = "Couldn't read file \"";
-		message += Shorten(TO_WSTRING(full_path), COLS-message.length()-3);
+		message += Shorten(ToWString(full_path), COLS-message.length()-3);
 		message += "\"!";
 		ShowMessage("%s", message.c_str());
 	}
 }
 
-std::basic_string<my_char_t> TinyTagEditor::Title()
+std::wstring TinyTagEditor::Title()
 {
-	return U("Tiny tag editor");
+	return L"Tiny tag editor";
 }
 
 void TinyTagEditor::EnterPressed()

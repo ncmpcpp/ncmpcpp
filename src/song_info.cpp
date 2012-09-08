@@ -64,9 +64,9 @@ void SongInfo::Resize()
 	hasToBeResized = 0;
 }
 
-std::basic_string<my_char_t> SongInfo::Title()
+std::wstring SongInfo::Title()
 {
-	return U("Song info");
+	return L"Song info";
 }
 
 void SongInfo::SwitchTo()
@@ -115,24 +115,24 @@ void SongInfo::PrepareSong(MPD::Song &s)
 	TagLib::FileRef f(path_to_file.c_str());
 #	endif // HAVE_TAGLIB_H
 	
-	*w << NC::fmtBold << Config.color1 << U("Filename: ") << NC::fmtBoldEnd << Config.color2 << s.getName() << '\n' << NC::clEnd;
-	*w << NC::fmtBold << U("Directory: ") << NC::fmtBoldEnd << Config.color2;
+	*w << NC::fmtBold << Config.color1 << L"Filename: " << NC::fmtBoldEnd << Config.color2 << s.getName() << '\n' << NC::clEnd;
+	*w << NC::fmtBold << L"Directory: " << NC::fmtBoldEnd << Config.color2;
 	ShowTag(*w, s.getDirectory());
-	*w << U("\n\n") << NC::clEnd;
-	*w << NC::fmtBold << U("Length: ") << NC::fmtBoldEnd << Config.color2 << s.getLength() << '\n' << NC::clEnd;
+	*w << L"\n\n" << NC::clEnd;
+	*w << NC::fmtBold << L"Length: " << NC::fmtBoldEnd << Config.color2 << s.getLength() << '\n' << NC::clEnd;
 #	ifdef HAVE_TAGLIB_H
 	if (!f.isNull())
 	{
-		*w << NC::fmtBold << U("Bitrate: ") << NC::fmtBoldEnd << Config.color2 << f.audioProperties()->bitrate() << U(" kbps\n") << NC::clEnd;
-		*w << NC::fmtBold << U("Sample rate: ") << NC::fmtBoldEnd << Config.color2 << f.audioProperties()->sampleRate() << U(" Hz\n") << NC::clEnd;
-		*w << NC::fmtBold << U("Channels: ") << NC::fmtBoldEnd << Config.color2 << (f.audioProperties()->channels() == 1 ? U("Mono") : U("Stereo")) << '\n' << NC::clDefault;
+		*w << NC::fmtBold << L"Bitrate: " << NC::fmtBoldEnd << Config.color2 << f.audioProperties()->bitrate() << L" kbps\n" << NC::clEnd;
+		*w << NC::fmtBold << L"Sample rate: " << NC::fmtBoldEnd << Config.color2 << f.audioProperties()->sampleRate() << L" Hz\n" << NC::clEnd;
+		*w << NC::fmtBold << L"Channels: " << NC::fmtBoldEnd << Config.color2 << (f.audioProperties()->channels() == 1 ? L"Mono" : L"Stereo") << '\n' << NC::clDefault;
 	}
 #	endif // HAVE_TAGLIB_H
 	*w << NC::clDefault;
 	
 	for (const Metadata *m = Tags; m->Name; ++m)
 	{
-		*w << NC::fmtBold << '\n' << TO_WSTRING(m->Name) << U(": ") << NC::fmtBoldEnd;
+		*w << NC::fmtBold << '\n' << ToWString(m->Name) << L": " << NC::fmtBoldEnd;
 		ShowTag(*w, s.getTags(m->Get));
 	}
 }

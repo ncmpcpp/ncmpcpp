@@ -152,9 +152,9 @@ void SearchEngine::SwitchTo()
 	markSongsInPlaylist(getProxySongList());
 }
 
-std::basic_string<my_char_t> SearchEngine::Title()
+std::wstring SearchEngine::Title()
 {
-	return U("Search engine");
+	return L"Search engine";
 }
 
 void SearchEngine::EnterPressed()

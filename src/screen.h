@@ -58,7 +58,7 @@ class BasicScreen
 		virtual void Resize() = 0;
 		
 		/// @return title of the screen
-		virtual std::basic_string<my_char_t> Title() = 0;
+		virtual std::wstring Title() = 0;
 		
 		/// If the screen contantly has to update itself
 		/// somehow, it should be called by this function.

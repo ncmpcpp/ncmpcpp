@@ -443,9 +443,9 @@ void NcmpcppStatusChanged(MPD::Connection *, MPD::StatusChanges changed, void *)
 					tracklength += " kbps";
 				}
 				
-				NC::basic_buffer<my_char_t> first, second;
-				String2Buffer(TO_WSTRING(utf_to_locale_cpy(np.toString(Config.new_header_first_line, "$"))), first);
-				String2Buffer(TO_WSTRING(utf_to_locale_cpy(np.toString(Config.new_header_second_line, "$"))), second);
+				NC::WBuffer first, second;
+				String2Buffer(ToWString(utf_to_locale_cpy(np.toString(Config.new_header_first_line, "$"))), first);
+				String2Buffer(ToWString(utf_to_locale_cpy(np.toString(Config.new_header_second_line, "$"))), second);
 				
 				size_t first_len = NC::Window::length(first.str());
 				size_t first_margin = (std::max(tracklength.length()+1, VolumeState.length()))*2;
@@ -458,11 +458,11 @@ void NcmpcppStatusChanged(MPD::Connection *, MPD::StatusChanges changed, void *)
 				if (!Global::SeekingInProgress)
 					*wHeader << NC::XY(0, 0) << wclrtoeol << tracklength;
 				*wHeader << NC::XY(first_start, 0);
-				first.write(*wHeader, first_line_scroll_begin, COLS-tracklength.length()-VolumeState.length()-1, U(" ** "));
+				first.write(*wHeader, first_line_scroll_begin, COLS-tracklength.length()-VolumeState.length()-1, L" ** ");
 				
 				*wHeader << NC::XY(0, 1) << wclrtoeol << NC::fmtBold << player_state << NC::fmtBoldEnd;
 				*wHeader << NC::XY(second_start, 1);
-				second.write(*wHeader, second_line_scroll_begin, COLS-player_state.length()-8-2, U(" ** "));
+				second.write(*wHeader, second_line_scroll_begin, COLS-player_state.length()-8-2, L" ** ");
 				
 				*wHeader << NC::XY(wHeader->getWidth()-VolumeState.length(), 0) << Config.volume_color << VolumeState << NC::clEnd;
 				
@@ -495,10 +495,10 @@ void NcmpcppStatusChanged(MPD::Connection *, MPD::StatusChanges changed, void *)
 					tracklength += MPD::Song::ShowTime(Mpd.GetElapsedTime());
 					tracklength += "]";
 				}
-				NC::basic_buffer<my_char_t> np_song;
-				String2Buffer(TO_WSTRING(utf_to_locale_cpy(np.toString(Config.song_status_format, "$"))), np_song);
+				NC::WBuffer np_song;
+				String2Buffer(ToWString(utf_to_locale_cpy(np.toString(Config.song_status_format, "$"))), np_song);
 				*wFooter << NC::XY(0, 1) << wclrtoeol << NC::fmtBold << player_state << NC::fmtBoldEnd;
-				np_song.write(*wFooter, playing_song_scroll_begin, wFooter->getWidth()-player_state.length()-tracklength.length(), U(" ** "));
+				np_song.write(*wFooter, playing_song_scroll_begin, wFooter->getWidth()-player_state.length()-tracklength.length(), L" ** ");
 				*wFooter << NC::fmtBold << NC::XY(wFooter->getWidth()-tracklength.length(), 1) << tracklength << NC::fmtBoldEnd;
 			}
 			if (!block_progressbar_update)
@@ -649,7 +649,7 @@ void DrawHeader()
 		return;
 	if (Config.new_design)
 	{
-		std::basic_string<my_char_t> title = myScreen->Title();
+		std::wstring title = myScreen->Title();
 		*wHeader << NC::XY(0, 3) << wclrtoeol;
 		*wHeader << NC::fmtBold << Config.alternative_ui_separator_color;
 		mvwhline(wHeader->raw(), 2, 0, 0, COLS);

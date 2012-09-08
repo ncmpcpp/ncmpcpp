@@ -33,42 +33,42 @@ using Global::myScreen;
 
 namespace {//
 
-const my_char_t *toColumnName(char c)
+const wchar_t *toColumnName(char c)
 {
 	switch (c)
 	{
 		case 'l':
-			return U("Time");
+			return L"Time";
 		case 'f':
-			return U("Filename");
+			return L"Filename";
 		case 'D':
-			return U("Directory");
+			return L"Directory";
 		case 'a':
-			return U("Artist");
+			return L"Artist";
 		case 'A':
-			return U("Album Artist");
+			return L"Album Artist";
 		case 't':
-			return U("Title");
+			return L"Title";
 		case 'b':
-			return U("Album");
+			return L"Album";
 		case 'y':
-			return U("Date");
+			return L"Date";
 		case 'n': case 'N':
-			return U("Track");
+			return L"Track";
 		case 'g':
-			return U("Genre");
+			return L"Genre";
 		case 'c':
-			return U("Composer");
+			return L"Composer";
 		case 'p':
-			return U("Performer");
+			return L"Performer";
 		case 'd':
-			return U("Disc");
+			return L"Disc";
 		case 'C':
-			return U("Comment");
+			return L"Comment";
 		case 'P':
-			return U("Priority");
+			return L"Priority";
 		default:
-			return U("?");
+			return L"?";
 	}
 }
 
@@ -125,9 +125,9 @@ void showSongs(NC::Menu<T> &menu, const MPD::Song &s, HasSongs &screen, const st
 			}
 			else if (*it == 'R') // right align
 			{
-				NC::basic_buffer<my_char_t> buf;
-				buf << U(" ");
-				String2Buffer(TO_WSTRING(line.substr(it-line.begin()+1)), buf);
+				NC::WBuffer buf;
+				buf << L" ";
+				String2Buffer(ToWString(line.substr(it-line.begin()+1)), buf);
 				if (discard_colors)
 					buf.removeFormatting();
 				if (is_now_playing)
@@ -215,16 +215,16 @@ void showSongsInColumns(NC::Menu<T> &menu, const MPD::Song &s, HasSongs &screen)
 		if (remained_width-width < 0 || width < 0 /* this one may come from (*) */)
 			break;
 		
-		std::basic_string<my_char_t> tag;
+		std::wstring tag;
 		for (size_t i = 0; i < it->type.length(); ++i)
 		{
 			MPD::Song::GetFunction get = charToGetFunction(it->type[i]);
-			tag = TO_WSTRING(get ? s.getTags(get) : "");
+			tag = ToWString(get ? s.getTags(get) : "");
 			if (!tag.empty())
 				break;
 		}
 		if (tag.empty() && it->display_empty_tag)
-			tag = TO_WSTRING(Config.empty_tag);
+			tag = ToWString(Config.empty_tag);
 		NC::Window::cut(tag, width);
 		
 		if (!discard_colors && it->color != NC::clDefault)
@@ -302,7 +302,7 @@ std::string Display::Columns(size_t list_width)
 		if (remained_width-width < 0 || width < 0 /* this one may come from (*) */)
 			break;
 		
-		std::basic_string<my_char_t> name;
+		std::wstring name;
 		if (it->name.empty())
 		{
 			for (size_t j = 0; j < it->type.length(); ++j)
@@ -320,11 +320,11 @@ std::string Display::Columns(size_t list_width)
 		if (it->right_alignment)
 		{
 			result += std::string(x_off, KEY_SPACE);
-			result += TO_STRING(name);
+			result += ToString(name);
 		}
 		else
 		{
-			result += TO_STRING(name);
+			result += ToString(name);
 			result += std::string(x_off, KEY_SPACE);
 		}
 		

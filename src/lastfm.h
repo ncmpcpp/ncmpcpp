@@ -40,7 +40,7 @@ class Lastfm : public Screen<NC::Scrollpad>
 		virtual void SwitchTo() OVERRIDE;
 		virtual void Resize() OVERRIDE;
 		
-		virtual std::basic_string<my_char_t> Title() OVERRIDE;
+		virtual std::wstring Title() OVERRIDE;
 		
 		virtual void Update() OVERRIDE;
 		
@@ -61,7 +61,7 @@ class Lastfm : public Screen<NC::Scrollpad>
 		virtual bool isLockable() OVERRIDE { return false; }
 		
 	private:
-		std::basic_string<my_char_t> itsTitle;
+		std::wstring itsTitle;
 		
 		std::string itsArtist;
 		std::string itsFilename;
