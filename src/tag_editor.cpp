@@ -1103,17 +1103,15 @@ namespace {//
 
 std::string CapitalizeFirstLetters(const std::string &s)
 {
-	if (s.empty())
-		return "";
-	std::string result = s;
-	if (!isspace(result[0]))
-		result[0] = toupper(result[0]);
-	for (std::string::iterator it = result.begin()+1; it != result.end(); ++it)
+	std::wstring ws = ToWString(s);
+	wchar_t prev = 0;
+	for (auto it = ws.begin(); it != ws.end(); ++it)
 	{
-		if (!isspace(*it) && isspace(*(it-1)) && *(it-1) != '\'')
-			*it = toupper(*it);
+		if (!iswalpha(prev) && prev != L'\'')
+			*it = towupper(*it);
+		prev = *it;
 	}
-	return result;
+	return ToString(ws);
 }
 
 void CapitalizeFirstLetters(MPD::MutableSong &s)
