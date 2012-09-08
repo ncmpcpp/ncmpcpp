@@ -71,8 +71,41 @@ void DisplayAlbums(NC::Menu<SearchConstraints> &menu);
 void DisplayPrimaryTags(NC::Menu<std::string> &menu);
 
 bool SortSongsByTrack(const MPD::Song &a, const MPD::Song &b);
-bool SortAllTracks(const MPD::Song &a, const MPD::Song &b);
-bool SortSearchConstraints(const SearchConstraints &a, const SearchConstraints &b);
+
+struct SortAllTracks {
+	const std::array<MPD::Song::GetFunction, 3> m_gets;
+	LocaleStringComparison m_cmp;
+public:
+	SortAllTracks() : m_gets({{
+		&MPD::Song::getDate,
+		&MPD::Song::getAlbum,
+		&MPD::Song::getDisc
+	}}), m_cmp(std::locale(""), Config.ignore_leading_the) { }
+	bool operator()(const MPD::Song &a, const MPD::Song &b) {
+		for (auto get = m_gets.begin(); get != m_gets.end(); ++get) {
+			int ret = m_cmp(a.getTags(*get), b.getTags(*get));
+			if (ret != 0)
+				return ret < 0;
+		}
+		return a.getTrack() < b.getTrack();
+	}
+};
+
+class SortSearchConstraints {
+	LocaleStringComparison m_cmp;
+public:
+	SortSearchConstraints() : m_cmp(std::locale(""), Config.ignore_leading_the) { }
+	bool operator()(const SearchConstraints &a, const SearchConstraints &b) const {
+		int result;
+		result = m_cmp(a.PrimaryTag, b.PrimaryTag);
+		if (result != 0)
+			return result < 0;
+		result = m_cmp(a.Date, b.Date);
+		if (result != 0)
+			return result < 0;
+		return m_cmp(a.Album, b.Album) < 0;
+	}
+};
 
 }
 
@@ -257,7 +290,7 @@ void MediaLibrary::Update()
 				Albums->addItem(SearchConstraints(*album, ""));
 		}
 		if (!Albums->empty())
-			std::sort(Albums->beginV(), Albums->endV(), SortSearchConstraints);
+			std::sort(Albums->beginV(), Albums->endV(), SortSearchConstraints());
 		if (Albums->size() > 1)
 		{
 			Albums->addSeparator();
@@ -300,7 +333,7 @@ void MediaLibrary::Update()
 		}
 		Mpd.BlockIdle(0);
 		if (!Albums->empty())
-			std::sort(Albums->beginV(), Albums->endV(), SortSearchConstraints);
+			std::sort(Albums->beginV(), Albums->endV(), SortSearchConstraints());
 		Albums->refresh();
 	}
 	
@@ -328,7 +361,7 @@ void MediaLibrary::Update()
 			Songs->addItem(*s, myPlaylist->checkForSong(*s));
 		
 		if (Albums->current().value().Date == AllTracksMarker)
-			std::sort(Songs->beginV(), Songs->endV(), SortAllTracks);
+			std::sort(Songs->beginV(), Songs->endV(), SortAllTracks());
 		else
 			std::sort(Songs->beginV(), Songs->endV(), SortSongsByTrack);
 		
@@ -572,7 +605,7 @@ MPD::SongList MediaLibrary::getSelectedSongs()
 			Mpd.StartSearch(true);
 			Mpd.AddSearch(Config.media_lib_primary_tag, tag);
 			auto songs = Mpd.CommitSearchSongs();
-			std::sort(songs.begin(), songs.end(), SortAllTracks);
+			std::sort(songs.begin(), songs.end(), SortAllTracks());
 			result.insert(result.end(), songs.begin(), songs.end());
 		};
 		for (auto it = Tags->begin(); it != Tags->end(); ++it)
@@ -913,36 +946,6 @@ bool SortSongsByTrack(const MPD::Song &a, const MPD::Song &b)
 	if (cmp != 0)
 		return cmp;
 	return a.getTrack() < b.getTrack();
-}
-
-bool SortAllTracks(const MPD::Song &a, const MPD::Song &b)
-{
-	const std::array<MPD::Song::GetFunction, 3> gets = {{
-		&MPD::Song::getDate,
-		&MPD::Song::getAlbum,
-		&MPD::Song::getDisc
-	}};
-	CaseInsensitiveStringComparison cmp(Config.ignore_leading_the);
-	for (auto get = gets.begin(); get != gets.end(); ++get)
-	{
-		int ret = cmp(a.getTags(*get), b.getTags(*get));
-		if (ret != 0)
-			return ret < 0;
-	}
-	return a.getTrack() < b.getTrack();
-}
-
-bool SortSearchConstraints(const SearchConstraints &a, const SearchConstraints &b)
-{
-	int result;
-	CaseInsensitiveStringComparison cmp(Config.ignore_leading_the);
-	result = cmp(a.PrimaryTag, b.PrimaryTag);
-	if (result != 0)
-		return result < 0;
-	result = cmp(a.Date, b.Date);
-	if (result != 0)
-		return result < 0;
-	return cmp(a.Album, b.Album) < 0;
 }
 
 }

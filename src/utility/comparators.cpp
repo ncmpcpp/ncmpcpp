@@ -18,33 +18,37 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
+#include <locale>
 #include "comparators.h"
 #include "settings.h"
 
-bool CaseInsensitiveStringComparison::hasTheWord(const char *s) const
+bool LocaleStringComparison::hasTheWord(const std::string &s) const
 {
-	return (s[0] == 't' || s[0] == 'T')
+	return s.length() >= 4
+	&&     (s[0] == 't' || s[0] == 'T')
 	&&     (s[1] == 'h' || s[1] == 'H')
 	&&     (s[2] == 'e' || s[2] == 'E')
 	&&     (s[3] == ' ');
 }
 
-int CaseInsensitiveStringComparison::operator()(const char *a, const char *b) const
+int LocaleStringComparison::operator()(const std::string &a, const std::string &b) const
 {
+	const char *ac = a.c_str();
+	const char *bc = b.c_str();
+	size_t ac_off = 0, bc_off = 0;
 	if (m_ignore_the)
 	{
 		if (hasTheWord(a))
-			a += 4;
+			ac_off += 4;
 		if (hasTheWord(b))
-			b += 4;
+			bc_off += 4;
 	}
-	int dist;
-	while (!(dist = tolower(*a)-tolower(*b)) && *b)
-		++a, ++b;
-	return dist;
+	return std::use_facet< std::collate<char> >(m_locale).compare(
+		ac+ac_off, ac+a.length(), bc+bc_off, bc+b.length()
+	);
 }
 
-CaseInsensitiveSorting::CaseInsensitiveSorting(): cmp(Config.ignore_leading_the) { }
+CaseInsensitiveSorting::CaseInsensitiveSorting(): cmp(std::locale(""), Config.ignore_leading_the) { }
 
 bool CaseInsensitiveSorting::operator()(const MPD::Item &a, const MPD::Item &b) const
 {

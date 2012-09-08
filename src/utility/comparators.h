@@ -24,31 +24,23 @@
 #include <string>
 #include "mpdpp.h"
 
-class CaseInsensitiveStringComparison
+class LocaleStringComparison
 {
+	std::locale m_locale;
 	bool m_ignore_the;
 	
-	bool hasTheWord(const char *s) const;
+	bool hasTheWord(const std::string &s) const;
 	
 public:
-	CaseInsensitiveStringComparison(bool ignore_the) : m_ignore_the(ignore_the) { }
+	LocaleStringComparison(const std::locale &loc, bool ignore_the)
+	: m_locale(loc), m_ignore_the(ignore_the) { }
 	
-	int operator()(const char *a, const char *b) const;
-	
-	int operator()(const char *a, const std::string &b) const {
-		return (*this)(a, b.c_str());
-	}
-	int operator()(const std::string &a, const char *b) const {
-		return (*this)(a.c_str(), b);
-	}
-	int operator()(const std::string &a, const std::string &b) const {
-		return (*this)(a.c_str(), b.c_str());
-	}
+	int operator()(const std::string &a, const std::string &b) const;
 };
 
 class CaseInsensitiveSorting
 {
-	CaseInsensitiveStringComparison cmp;
+	LocaleStringComparison cmp;
 	
 public:
 	CaseInsensitiveSorting();

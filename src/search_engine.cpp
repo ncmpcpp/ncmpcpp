@@ -448,6 +448,7 @@ void SearchEngine::Search()
 	bool any_found = 1;
 	bool found = 1;
 	
+	LocaleStringComparison cmp(std::locale(""), Config.ignore_leading_the);
 	for (auto it = list.begin(); it != list.end(); ++it)
 	{
 		if (SearchMode != &SearchModes[2]) // match to pattern
@@ -535,8 +536,6 @@ void SearchEngine::Search()
 		}
 		else // match only if values are equal
 		{
-			CaseInsensitiveStringComparison cmp(Config.ignore_leading_the);
-			
 			if (!itsConstraints[0].empty())
 				any_found =
 					!cmp(it->getArtist(), itsConstraints[0])
@@ -573,10 +572,7 @@ void SearchEngine::Search()
 		}
 		
 		if (found && any_found)
-		{
 			w->addItem(*it);
-			list[it-list.begin()] = 0;
-		}
 		found = 1;
 		any_found = 1;
 	}
