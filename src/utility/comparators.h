@@ -23,13 +23,13 @@
 
 #include <string>
 #include "mpdpp.h"
+#include "settings.h"
+#include "menu.h"
 
 class LocaleStringComparison
 {
 	std::locale m_locale;
 	bool m_ignore_the;
-	
-	bool hasTheWord(const std::string &s) const;
 	
 public:
 	LocaleStringComparison(const std::locale &loc, bool ignore_the)
@@ -38,27 +38,41 @@ public:
 	int operator()(const std::string &a, const std::string &b) const;
 };
 
-class CaseInsensitiveSorting
+class LocaleBasedSorting
 {
-	LocaleStringComparison cmp;
+	LocaleStringComparison m_cmp;
 	
 public:
-	CaseInsensitiveSorting();
+	LocaleBasedSorting(const std::locale loc, bool ignore_the) : m_cmp(loc, ignore_the) { }
 	
 	bool operator()(const std::string &a, const std::string &b) const {
-		return cmp(a, b) < 0;
+		return m_cmp(a, b) < 0;
 	}
 	
 	bool operator()(const MPD::Song &a, const MPD::Song &b) const {
-		return cmp(a.getName(), b.getName()) < 0;
+		return m_cmp(a.getName(), b.getName()) < 0;
 	}
 	
 	template <typename A, typename B>
 	bool operator()(const std::pair<A, B> &a, const std::pair<A, B> &b) const {
-		return cmp(a.first, b.first) < 0;
+		return m_cmp(a.first, b.first) < 0;
 	}
+};
+
+class LocaleBasedItemSorting
+{
+	LocaleBasedSorting m_cmp;
+	SortMode m_sort_mode;
+	
+public:
+	LocaleBasedItemSorting(const std::locale loc, bool ignore_the, SortMode mode)
+	: m_cmp(loc, ignore_the), m_sort_mode(mode) { }
 	
 	bool operator()(const MPD::Item &a, const MPD::Item &b) const;
+	
+	bool operator()(const NC::Menu<MPD::Item>::Item &a, const NC::Menu<MPD::Item>::Item &b) const {
+		return (*this)(a.value(), b.value());
+	}
 };
 
 #endif // _UTILITY_COMPARATORS

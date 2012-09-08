@@ -20,15 +20,18 @@
 
 #include <locale>
 #include "comparators.h"
-#include "settings.h"
 
-bool LocaleStringComparison::hasTheWord(const std::string &s) const
+namespace {//
+
+bool hasTheWord(const std::string &s)
 {
 	return s.length() >= 4
 	&&     (s[0] == 't' || s[0] == 'T')
 	&&     (s[1] == 'h' || s[1] == 'H')
 	&&     (s[2] == 'e' || s[2] == 'E')
 	&&     (s[3] == ' ');
+}
+
 }
 
 int LocaleStringComparison::operator()(const std::string &a, const std::string &b) const
@@ -48,9 +51,7 @@ int LocaleStringComparison::operator()(const std::string &a, const std::string &
 	);
 }
 
-CaseInsensitiveSorting::CaseInsensitiveSorting(): cmp(std::locale(""), Config.ignore_leading_the) { }
-
-bool CaseInsensitiveSorting::operator()(const MPD::Item &a, const MPD::Item &b) const
+bool LocaleBasedItemSorting::operator()(const MPD::Item &a, const MPD::Item &b) const
 {
 	bool result = false;
 	if (a.type == b.type)
@@ -58,22 +59,23 @@ bool CaseInsensitiveSorting::operator()(const MPD::Item &a, const MPD::Item &b) 
 		switch (a.type)
 		{
 			case MPD::itDirectory:
-				result = cmp(getBasename(a.name), getBasename(b.name)) < 0;
+				result = m_cmp(getBasename(a.name), getBasename(b.name)) < 0;
 				break;
 			case MPD::itPlaylist:
-				result = cmp(a.name, b.name) < 0;
+				result = m_cmp(a.name, b.name) < 0;
 				break;
 			case MPD::itSong:
-				switch (Config.browser_sort_mode)
+				switch (m_sort_mode)
 				{
 					case smName:
-						result = operator()(*a.song, *b.song);
+						result = m_cmp(*a.song, *b.song);
 						break;
 					case smMTime:
 						result = a.song->getMTime() > b.song->getMTime();
 						break;
 					case smCustomFormat:
-						result = cmp(a.song->toString(Config.browser_sort_format), b.song->toString(Config.browser_sort_format)) < 0;
+						result = m_cmp(a.song->toString(Config.browser_sort_format),
+						               b.song->toString(Config.browser_sort_format)) < 0;
 						break;
 				}
 				break;

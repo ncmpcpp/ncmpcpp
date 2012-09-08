@@ -80,7 +80,7 @@ public:
 		&MPD::Song::getDate,
 		&MPD::Song::getAlbum,
 		&MPD::Song::getDisc
-	}}), m_cmp(std::locale(""), Config.ignore_leading_the) { }
+	}}), m_cmp(std::locale(), Config.ignore_leading_the) { }
 	bool operator()(const MPD::Song &a, const MPD::Song &b) {
 		for (auto get = m_gets.begin(); get != m_gets.end(); ++get) {
 			int ret = m_cmp(a.getTags(*get), b.getTags(*get));
@@ -94,7 +94,7 @@ public:
 class SortSearchConstraints {
 	LocaleStringComparison m_cmp;
 public:
-	SortSearchConstraints() : m_cmp(std::locale(""), Config.ignore_leading_the) { }
+	SortSearchConstraints() : m_cmp(std::locale(), Config.ignore_leading_the) { }
 	bool operator()(const SearchConstraints &a, const SearchConstraints &b) const {
 		int result;
 		result = m_cmp(a.PrimaryTag, b.PrimaryTag);
@@ -255,7 +255,8 @@ void MediaLibrary::Update()
 		Albums->clear();
 		Songs->clear();
 		auto list = Mpd.GetList(Config.media_lib_primary_tag);
-		std::sort(list.begin(), list.end(), CaseInsensitiveSorting());
+		std::sort(list.begin(), list.end(),
+			LocaleBasedSorting(std::locale(), Config.ignore_leading_the));
 		for (auto it = list.begin(); it != list.end(); ++it)
 		{
 			if (it->empty() && !Config.media_library_display_empty_tag)

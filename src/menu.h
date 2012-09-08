@@ -60,10 +60,6 @@ template <typename T> struct Menu : public Window
 		bool isSeparator() const { return m_is_separator; }
 		
 	private:
-		// make those private, they shouldn't be used
-		Item(const Item &) { assert(false); }
-		Item &operator=(const Item &) { assert(false); }
-		
 		static Item *mkSeparator()
 		{
 			Item *i = new Item;

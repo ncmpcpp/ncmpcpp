@@ -90,6 +90,7 @@ int main(int argc, char **argv)
 	
 	srand(time(0));
 	setlocale(LC_ALL, "");
+	std::locale::global(std::locale(""));
 	
 	Config.CheckForCommandLineConfigFilePath(argv, argc);
 	

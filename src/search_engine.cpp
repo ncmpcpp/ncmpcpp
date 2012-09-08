@@ -448,7 +448,7 @@ void SearchEngine::Search()
 	bool any_found = 1;
 	bool found = 1;
 	
-	LocaleStringComparison cmp(std::locale(""), Config.ignore_leading_the);
+	LocaleStringComparison cmp(std::locale(), Config.ignore_leading_the);
 	for (auto it = list.begin(); it != list.end(); ++it)
 	{
 		if (SearchMode != &SearchModes[2]) // match to pattern

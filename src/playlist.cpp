@@ -197,7 +197,7 @@ void Playlist::EnterPressed()
 		for (; begin != end; ++begin)
 			playlist.push_back(begin->value());
 		
-		LocaleStringComparison cmp(std::locale(""), Config.ignore_leading_the);
+		LocaleStringComparison cmp(std::locale(), Config.ignore_leading_the);
 		std::function<void(MPD::SongList::iterator, MPD::SongList::iterator)> iter_swap, quick_sort;
 		auto song_cmp = [&cmp](const MPD::Song &a, const MPD::Song &b) -> bool {
 				for (size_t i = 0; i < SortOptions; ++i)

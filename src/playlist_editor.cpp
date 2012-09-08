@@ -146,7 +146,8 @@ void PlaylistEditor::Update()
 		Playlists->clearSearchResults();
 		withUnfilteredMenuReapplyFilter(*Playlists, [this]() {
 			auto list = Mpd.GetPlaylists();
-			std::sort(list.begin(), list.end(), CaseInsensitiveSorting());
+			std::sort(list.begin(), list.end(),
+				LocaleBasedSorting(std::locale(), Config.ignore_leading_the));
 			auto playlist = list.begin();
 			if (Playlists->size() > list.size())
 				Playlists->resizeList(list.size());

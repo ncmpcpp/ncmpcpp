@@ -105,7 +105,8 @@ void SelectedItemsAdder::SwitchTo()
 	w->addSeparator();
 	
 	auto playlists = Mpd.GetPlaylists();
-	std::sort(playlists.begin(), playlists.end(), CaseInsensitiveSorting());
+	std::sort(playlists.begin(), playlists.end(),
+		LocaleBasedSorting(std::locale(), Config.ignore_leading_the));
 	for (auto it = playlists.begin(); it != playlists.end(); ++it)
 		w->addItem(*it, 0, playlists_not_active);
 	w->addSeparator();

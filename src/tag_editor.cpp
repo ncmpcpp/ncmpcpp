@@ -257,7 +257,7 @@ void TagEditor::Update()
 		
 		int highlightme = -1;
 		auto dirs = Mpd.GetDirectories(itsBrowsedDir);
-		std::sort(dirs.begin(), dirs.end(), CaseInsensitiveSorting());
+		std::sort(dirs.begin(), dirs.end(), LocaleBasedSorting(std::locale(), Config.ignore_leading_the));
 		if (itsBrowsedDir != "/")
 		{
 			size_t slash = itsBrowsedDir.rfind("/");
@@ -284,7 +284,8 @@ void TagEditor::Update()
 	{
 		Tags->reset();
 		auto songs = Mpd.GetSongs(Dirs->current().value().second);
-		std::sort(songs.begin(), songs.end(), CaseInsensitiveSorting());
+		std::sort(songs.begin(), songs.end(),
+			LocaleBasedSorting(std::locale(), Config.ignore_leading_the));
 		for (auto s = songs.begin(); s != songs.end(); ++s)
 			Tags->addItem(*s);
 		Tags->refresh();
