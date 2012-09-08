@@ -93,12 +93,16 @@ void SongInfo::SwitchTo()
 	
 	myOldScreen = myScreen;
 	myScreen = this;
-	DrawHeader();
 	
 	w->clear();
 	w->reset();
 	PrepareSong(*s);
 	w->flush();
+	
+	// redraw header after we're done with the file, since reading it from disk
+	// takes a bit of time and having header updated before content of a window
+	// is displayed doesn't look nice.
+	DrawHeader();
 }
 
 void SongInfo::PrepareSong(MPD::Song &s)
