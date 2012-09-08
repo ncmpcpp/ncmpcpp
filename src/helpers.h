@@ -317,8 +317,6 @@ template <typename Iterator> std::string getSharedDirectory(Iterator first, Iter
 	return result;
 }
 
-void ParseArgv(int, char **);
-
 template <typename T> struct StringConverter {
 	const char *operator()(const char *s) { return s; }
 };

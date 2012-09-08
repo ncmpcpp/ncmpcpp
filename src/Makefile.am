@@ -10,6 +10,7 @@ ncmpcpp_SOURCES = \
 	browser.cpp \
 	charset.cpp \
 	clock.cpp \
+	cmdargs.cpp \
 	curl_handle.cpp \
 	display.cpp \
 	error.cpp \
@@ -58,6 +59,7 @@ noinst_HEADERS = \
 	browser.h \
 	charset.h \
 	clock.h \
+	cmdargs.h \
 	curl_handle.h \
 	display.h \
 	error.h \

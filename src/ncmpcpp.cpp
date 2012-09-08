@@ -33,6 +33,7 @@
 #include "actions.h"
 #include "bindings.h"
 #include "browser.h"
+#include "cmdargs.h"
 #include "global.h"
 #include "helpers.h"
 #include "lyrics.h"
