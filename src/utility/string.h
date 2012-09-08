@@ -67,9 +67,6 @@ int stringToInt(const std::string &s);
 long stringToLongInt(const std::string &s);
 bool isInteger(const char *s, bool accept_signed);
 
-std::string ToString(const std::wstring &ws);
-std::wstring ToWString(const std::string &s);
-
 std::vector<std::string> split(const std::string &s, const std::string &delimiter);
 void replace(std::string &s, const std::string &from, const std::string &to);
 

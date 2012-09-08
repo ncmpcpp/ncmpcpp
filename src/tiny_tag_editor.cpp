@@ -91,10 +91,8 @@ void TinyTagEditor::SwitchTo()
 			full_path += Config.mpd_music_dir;
 		full_path += itsEdited.getURI();
 		
-		std::string message = "Couldn't read file \"";
-		message += Shorten(ToWString(full_path), COLS-message.length()-3);
-		message += "\"!";
-		ShowMessage("%s", message.c_str());
+		const char msg[] = "Couldn't read file \"%ls\"";
+		ShowMessage(msg, wideShorten(ToWString(full_path), COLS-const_strlen(msg)).c_str());
 	}
 }
 

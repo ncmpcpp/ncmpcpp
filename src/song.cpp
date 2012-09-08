@@ -26,6 +26,7 @@
 #include "song.h"
 #include "utility/numeric_conversions.h"
 #include "utility/type_conversions.h"
+#include "utility/wide_string.h"
 #include "window.h"
 
 namespace {//
@@ -36,19 +37,6 @@ size_t calc_hash(const char* s, unsigned seed = 0)
 	while (*s)
 		hash = hash * 101  +  *s++;
 	return hash;
-}
-
-// temporary hack, it won't work properly with wide characters
-std::string Shorten(const std::wstring &s, size_t max_length)
-{
-	if (s.length() <= max_length)
-		return ToString(s);
-	if (max_length < 2)
-		return "";
-	std::wstring result(s, 0, max_length/2-!(max_length%2));
-	result += L"..";
-	result += s.substr(s.length()-max_length/2+1);
-	return ToString(result);
 }
 
 }
@@ -289,10 +277,12 @@ std::string Song::ShowTime(unsigned length)
 	length -= minutes*60;
 	int seconds = length;
 	
+	std::string result;
 	if (hours > 0)
-		return print<32, std::string>::apply("%d:%02d:%02d", hours, minutes, seconds);
+		result = print<32, std::string>::apply("%d:%02d:%02d", hours, minutes, seconds);
 	else
-		return print<32, std::string>::apply("%d:%02d", minutes, seconds);
+		result = print<32, std::string>::apply("%d:%02d", minutes, seconds);
+	return result;
 }
 
 bool MPD::Song::isFormatOk(const std::string &type, const std::string &fmt)
@@ -324,7 +314,8 @@ bool MPD::Song::isFormatOk(const std::string &type, const std::string &fmt)
 	return true;
 }
 
-std::string Song::ParseFormat(std::string::const_iterator &it, const std::string &tag_separator, const std::string &escape_chars) const
+std::string Song::ParseFormat(std::string::const_iterator &it, const std::string &tag_separator,
+                              const std::string &escape_chars) const
 {
 	std::string result;
 	bool has_some_tags = 0;
@@ -371,12 +362,8 @@ std::string Song::ParseFormat(std::string::const_iterator &it, const std::string
 				}
 				if (!tag.empty() && (get != &MPD::Song::getLength || getDuration() > 0))
 				{
-					if (delimiter)
-					{
-						std::wstring s = ToWString(tag);
-						if (NC::Window::length(s) > delimiter)
-							tag = Shorten(s, delimiter);
-					}
+					if (delimiter && tag.size() > delimiter)
+						tag = ToString(wideShorten(ToWString(tag), delimiter));
 					has_some_tags = 1;
 					result += tag;
 				}

@@ -23,6 +23,7 @@
 #include "global.h"
 #include "bindings.h"
 #include "utility/string.h"
+#include "utility/wide_string.h"
 
 BindingsConfiguration Bindings;
 

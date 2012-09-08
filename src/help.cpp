@@ -25,6 +25,7 @@
 #include "help.h"
 #include "settings.h"
 #include "status.h"
+#include "utility/wide_string.h"
 
 using Global::MainHeight;
 using Global::MainStartY;

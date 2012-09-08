@@ -447,11 +447,11 @@ void NcmpcppStatusChanged(MPD::Connection *, MPD::StatusChanges changed, void *)
 				String2Buffer(ToWString(utf_to_locale_cpy(np.toString(Config.new_header_first_line, "$"))), first);
 				String2Buffer(ToWString(utf_to_locale_cpy(np.toString(Config.new_header_second_line, "$"))), second);
 				
-				size_t first_len = NC::Window::length(first.str());
+				size_t first_len = wideLength(first.str());
 				size_t first_margin = (std::max(tracklength.length()+1, VolumeState.length()))*2;
 				size_t first_start = first_len < COLS-first_margin ? (COLS-first_len)/2 : tracklength.length()+1;
 				
-				size_t second_len = NC::Window::length(second.str());
+				size_t second_len = wideLength(second.str());
 				size_t second_margin = (std::max(player_state.length(), size_t(8))+1)*2;
 				size_t second_start = second_len < COLS-second_margin ? (COLS-second_len)/2 : player_state.length()+1;
 				
@@ -654,7 +654,7 @@ void DrawHeader()
 		*wHeader << NC::fmtBold << Config.alternative_ui_separator_color;
 		mvwhline(wHeader->raw(), 2, 0, 0, COLS);
 		mvwhline(wHeader->raw(), 4, 0, 0, COLS);
-		*wHeader << NC::XY((COLS-NC::Window::length(title))/2, 3);
+		*wHeader << NC::XY((COLS-wideLength(title))/2, 3);
 		*wHeader << Config.header_color << title << NC::clEnd;
 		*wHeader << NC::clEnd << NC::fmtBoldEnd;
 	}

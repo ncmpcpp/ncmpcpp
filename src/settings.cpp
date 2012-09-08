@@ -545,7 +545,7 @@ void Configuration::Read()
 				{
 					selected_item_prefix.clear();
 					String2Buffer(v, selected_item_prefix);
-					selected_item_prefix_length = NC::Window::length(ToWString(selected_item_prefix.str()));
+					selected_item_prefix_length = wideLength(ToWString(selected_item_prefix.str()));
 				}
 			}
 			else if (name == "selected_item_suffix")
@@ -554,7 +554,7 @@ void Configuration::Read()
 				{
 					selected_item_suffix.clear();
 					String2Buffer(v, selected_item_suffix);
-					selected_item_suffix_length = NC::Window::length(ToWString(selected_item_suffix.str()));
+					selected_item_suffix_length = wideLength(ToWString(selected_item_suffix.str()));
 				}
 			}
 			else if (name == "now_playing_prefix")
@@ -563,7 +563,7 @@ void Configuration::Read()
 				{
 					now_playing_prefix.clear();
 					String2Buffer(v, now_playing_prefix);
-					now_playing_prefix_length = NC::Window::length(ToWString(now_playing_prefix.str()));
+					now_playing_prefix_length = wideLength(ToWString(now_playing_prefix.str()));
 				}
 			}
 			else if (name == "now_playing_suffix")
@@ -572,7 +572,7 @@ void Configuration::Read()
 				{
 					now_playing_suffix.clear();
 					String2Buffer(ToWString(v), now_playing_suffix);
-					now_playing_suffix_length = NC::Window::length(now_playing_suffix.str());
+					now_playing_suffix_length = wideLength(now_playing_suffix.str());
 				}
 			}
 			else if (name == "color1")

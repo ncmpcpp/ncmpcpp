@@ -21,6 +21,7 @@
 #include <cassert>
 
 #include "scrollpad.h"
+#include "utility/wide_string.h"
 
 namespace NC {//
 

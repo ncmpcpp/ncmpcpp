@@ -30,6 +30,7 @@
 
 #include "error.h"
 #include "utility/string.h"
+#include "utility/wide_string.h"
 #include "window.h"
 
 namespace NC {//
@@ -456,7 +457,7 @@ std::string Window::getString(const std::string &base, size_t length_, size_t wi
 			block_scrolling = 0;
 		
 		maxbeginning = block_scrolling ? 0 : (tmp->length() < width ? 0 : tmp->length()-width);
-		maxx = minx + (Window::length(*tmp) < width ? Window::length(*tmp) : width);
+		maxx = minx + (wideLength(*tmp) < width ? wideLength(*tmp) : width);
 		
 		real_maxx = minx + (tmp->length() < width ? tmp->length() : width);
 		
@@ -900,31 +901,6 @@ Window &Window::operator<<(size_t s)
 {
 	wprintw(m_window, "%zu", s);
 	return *this;
-}
-
-size_t Window::length(const std::wstring &ws)
-{
-#	ifdef WIN32
-	return ws.length();
-#	else
-	int len = wcswidth(ws.c_str(), -1);
-	return len < 0 ? ws.length() : len;
-#	endif // WIN32
-}
-
-void Window::cut(std::wstring &ws, size_t max_len)
-{
-	size_t i = 0;
-	int remained_len = max_len;
-	for (; i < ws.length(); ++i)
-	{
-		remained_len -= wcwidth(ws[i]);
-		if (remained_len < 0)
-		{
-			ws.resize(i);
-			break;
-		}
-	}
 }
 
 }

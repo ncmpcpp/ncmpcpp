@@ -800,7 +800,7 @@ void Delete::Run()
 			question = "Delete ";
 			question += itemTypeToString(item.type);
 			question += " \"";
-			question += Shorten(ToWString(name), COLS-question.size()-10);
+			question += ToString(wideShorten(ToWString(name), COLS-question.size()-10));
 			question += "\"?";
 		}
 		bool yes = AskYesNoQuestion(question, TraceMpdStatus);
@@ -814,13 +814,13 @@ void Delete::Run()
 				std::string name = i.type == MPD::itSong ? i.song->getName() : i.name;
 				if (myBrowser->deleteItem(i))
 				{
-					const char msg[] = "\"%s\" deleted";
-					ShowMessage(msg, Shorten(ToWString(name), COLS-const_strlen(msg)).c_str());
+					const char msg[] = "\"%ls\" deleted";
+					ShowMessage(msg, wideShorten(ToWString(name), COLS-const_strlen(msg)).c_str());
 				}
 				else
 				{
-					const char msg[] = "Couldn't delete \"%s\": %s";
-					ShowMessage(msg, Shorten(ToWString(name), COLS-const_strlen(msg)-25).c_str(), strerror(errno));
+					const char msg[] = "Couldn't delete \"%ls\": %s";
+					ShowMessage(msg, wideShorten(ToWString(name), COLS-const_strlen(msg)-25).c_str(), strerror(errno));
 					success = false;
 					break;
 				}
@@ -845,7 +845,7 @@ void Delete::Run()
 			else
 			{
 				question = "Delete playlist \"";
-				question += Shorten(ToWString(myPlaylistEditor->Playlists->current().value()), COLS-question.size()-10);
+				question += ToString(wideShorten(ToWString(myPlaylistEditor->Playlists->current().value()), COLS-question.size()-10));
 				question += "\"?";
 			}
 			bool yes = AskYesNoQuestion(question, TraceMpdStatus);
@@ -1384,8 +1384,8 @@ void EditLibraryTag::Run()
 			std::string path = Config.mpd_music_dir + es.getURI();
 			if (!TagEditor::WriteTags(es))
 			{
-				const char msg[] = "Error while updating tags in \"%s\"";
-				ShowMessage(msg, Shorten(ToWString(es.getURI()), COLS-const_strlen(msg)).c_str());
+				const char msg[] = "Error while updating tags in \"%ls\"";
+				ShowMessage(msg, wideShorten(ToWString(es.getURI()), COLS-const_strlen(msg)).c_str());
 				success = false;
 				break;
 			}
@@ -1430,16 +1430,16 @@ void EditLibraryAlbum::Run()
 			TagLib::FileRef f(path.c_str());
 			if (f.isNull())
 			{
-				const char msg[] = "Error while opening file \"%s\"";
-				ShowMessage(msg, Shorten(ToWString((*myLibrary->Songs)[i].value().getURI()), COLS-const_strlen(msg)).c_str());
+				const char msg[] = "Error while opening file \"%ls\"";
+				ShowMessage(msg, wideShorten(ToWString((*myLibrary->Songs)[i].value().getURI()), COLS-const_strlen(msg)).c_str());
 				success = 0;
 				break;
 			}
 			f.tag()->setAlbum(ToWString(new_album));
 			if (!f.save())
 			{
-				const char msg[] = "Error while writing tags in \"%s\"";
-				ShowMessage(msg, Shorten(ToWString((*myLibrary->Songs)[i].value().getURI()), COLS-const_strlen(msg)).c_str());
+				const char msg[] = "Error while writing tags in \"%ls\"";
+				ShowMessage(msg, wideShorten(ToWString((*myLibrary->Songs)[i].value().getURI()), COLS-const_strlen(msg)).c_str());
 				success = 0;
 				break;
 			}
@@ -1491,16 +1491,16 @@ void EditDirectoryName::Run()
 			int rename_result = rename(full_old_dir.c_str(), full_new_dir.c_str());
 			if (rename_result == 0)
 			{
-				const char msg[] = "Directory renamed to \"%s\"";
-				ShowMessage(msg, Shorten(ToWString(new_dir), COLS-const_strlen(msg)).c_str());
+				const char msg[] = "Directory renamed to \"%ls\"";
+				ShowMessage(msg, wideShorten(ToWString(new_dir), COLS-const_strlen(msg)).c_str());
 				if (!myBrowser->isLocal())
 					Mpd.UpdateDirectory(locale_to_utf_cpy(getSharedDirectory(old_dir, new_dir)));
 				myBrowser->GetDirectory(myBrowser->CurrentDir());
 			}
 			else
 			{
-				const char msg[] = "Couldn't rename \"%s\": %s";
-				ShowMessage(msg, Shorten(ToWString(old_dir), COLS-const_strlen(msg)-25).c_str(), strerror(errno));
+				const char msg[] = "Couldn't rename \"%ls\": %s";
+				ShowMessage(msg, wideShorten(ToWString(old_dir), COLS-const_strlen(msg)-25).c_str(), strerror(errno));
 			}
 		}
 	}
@@ -1518,14 +1518,14 @@ void EditDirectoryName::Run()
 			std::string full_new_dir = Config.mpd_music_dir + myTagEditor->CurrentDir() + "/" + locale_to_utf_cpy(new_dir);
 			if (rename(full_old_dir.c_str(), full_new_dir.c_str()) == 0)
 			{
-				const char msg[] = "Directory renamed to \"%s\"";
-				ShowMessage(msg, Shorten(ToWString(new_dir), COLS-const_strlen(msg)).c_str());
+				const char msg[] = "Directory renamed to \"%ls\"";
+				ShowMessage(msg, wideShorten(ToWString(new_dir), COLS-const_strlen(msg)).c_str());
 				Mpd.UpdateDirectory(myTagEditor->CurrentDir());
 			}
 			else
 			{
-				const char msg[] = "Couldn't rename \"%s\": %s";
-				ShowMessage(msg, Shorten(ToWString(old_dir), COLS-const_strlen(msg)-25).c_str(), strerror(errno));
+				const char msg[] = "Couldn't rename \"%ls\": %s";
+				ShowMessage(msg, wideShorten(ToWString(old_dir), COLS-const_strlen(msg)-25).c_str(), strerror(errno));
 			}
 		}
 	}
@@ -1558,8 +1558,8 @@ void EditPlaylistName::Run()
 	{
 		if (Mpd.Rename(locale_to_utf_cpy(old_name), locale_to_utf_cpy(new_name)))
 		{
-			const char msg[] = "Playlist renamed to \"%s\"";
-			ShowMessage(msg, Shorten(ToWString(new_name), COLS-const_strlen(msg)).c_str());
+			const char msg[] = "Playlist renamed to \"%ls\"";
+			ShowMessage(msg, wideShorten(ToWString(new_name), COLS-const_strlen(msg)).c_str());
 			if (myBrowser->Main() && !myBrowser->isLocal())
 				myBrowser->GetDirectory("/");
 			if (myPlaylistEditor->Main())

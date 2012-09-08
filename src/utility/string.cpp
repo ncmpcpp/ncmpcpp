@@ -44,31 +44,6 @@ bool isInteger(const char *s, bool accept_signed)
 		return true;
 }
 
-std::string ToString(const std::wstring &ws)
-{
-	std::string result;
-	char s[MB_CUR_MAX];
-	for (size_t i = 0; i < ws.length(); ++i)
-	{
-		int n = wcrtomb(s, ws[i], 0);
-		if (n > 0)
-			result.append(s, n);
-	}
-	return result;
-}
-
-std::wstring ToWString(const std::string &s)
-{
-	std::wstring result;
-	wchar_t *ws = new wchar_t[s.length()];
-	const char *c_s = s.c_str();
-	int n = mbsrtowcs(ws, &c_s, s.length(), 0);
-	if (n > 0)
-		result.append(ws, n);
-	delete [] ws;
-	return result;
-}
-
 std::vector<std::string> split(const std::string &s, const std::string &delimiter)
 {
 	if (delimiter.empty())

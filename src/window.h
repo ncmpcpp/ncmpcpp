@@ -413,18 +413,6 @@ struct Window
 	/// @param ws wide string to be printed
 	/// @return reference to itself
 	Window &operator<<(const std::wstring &ws);
-	
-	/// Measures real length of wide string (required if e.g. asian characters are used)
-	/// @param ws wide string that real length has to be measured
-	/// @return real length of wide string
-	static size_t length(const std::wstring &ws);
-	
-	/// Cuts string so it fits desired length on the screen. Note that it uses
-	/// wcwidth to check real width of all characters it contains. If string
-	/// fits requested length it's not modified at all.
-	/// @param ws wide string to be cut
-	/// @param max_len maximal length of string
-	static void cut(std::wstring &ws, size_t max_len);
 protected:
 	/// Sets colors of window (interal use only)
 	/// @param fg foregound color

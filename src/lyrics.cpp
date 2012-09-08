@@ -405,8 +405,8 @@ void Lyrics::Refetch()
 {
 	if (remove(itsFilename.c_str()) && errno != ENOENT)
 	{
-		const char msg[] = "Couldn't remove \"%s\": %s";
-		ShowMessage(msg, Shorten(ToWString(itsFilename), COLS-const_strlen(msg)-25).c_str(), strerror(errno));
+		const char msg[] = "Couldn't remove \"%ls\": %s";
+		ShowMessage(msg, wideShorten(ToWString(itsFilename), COLS-const_strlen(msg)-25).c_str(), strerror(errno));
 		return;
 	}
 	Load();

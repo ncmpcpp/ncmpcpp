@@ -23,6 +23,7 @@
 
 #include <list>
 #include "utility/numeric_conversions.h"
+#include "utility/wide_string.h"
 #include "window.h"
 
 namespace NC {//
@@ -306,7 +307,7 @@ template <typename CharT> void basic_buffer<CharT>::write(
 	) const
 {
 	std::basic_string<CharT> s = m_string;
-	size_t len = Window::length(s);
+	size_t len = wideLength(s);
 	
 	if (len > width)
 	{

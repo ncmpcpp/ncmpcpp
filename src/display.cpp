@@ -225,7 +225,7 @@ void showSongsInColumns(NC::Menu<T> &menu, const MPD::Song &s, HasSongs &screen)
 		}
 		if (tag.empty() && it->display_empty_tag)
 			tag = ToWString(Config.empty_tag);
-		NC::Window::cut(tag, width);
+		wideCut(tag, width);
 		
 		if (!discard_colors && it->color != NC::clDefault)
 			menu << it->color;
@@ -234,7 +234,7 @@ void showSongsInColumns(NC::Menu<T> &menu, const MPD::Song &s, HasSongs &screen)
 		// if column uses right alignment, calculate proper offset.
 		// otherwise just assume offset is 0, ie. we start from the left.
 		if (it->right_alignment)
-			x_off = std::max(0, width - int(NC::Window::length(tag)));
+			x_off = std::max(0, width - int(wideLength(tag)));
 		
 		whline(menu.raw(), KEY_SPACE, width);
 		menu.goToXY(x + x_off, y);
@@ -314,9 +314,9 @@ std::string Display::Columns(size_t list_width)
 		}
 		else
 			name = it->name;
-		NC::Window::cut(name, width);
+		wideCut(name, width);
 		
-		int x_off = std::max(0, width - int(NC::Window::length(name)));
+		int x_off = std::max(0, width - int(wideLength(name)));
 		if (it->right_alignment)
 		{
 			result += std::string(x_off, KEY_SPACE);

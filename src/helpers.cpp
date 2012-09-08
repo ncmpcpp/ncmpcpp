@@ -296,7 +296,7 @@ std::wstring Scroller(const std::wstring &str, size_t &pos, size_t width)
 	if (!Config.header_text_scrolling)
 		return s;
 	std::wstring result;
-	size_t len = NC::Window::length(s);
+	size_t len = wideLength(s);
 	
 	if (len > width)
 	{
@@ -321,16 +321,4 @@ std::wstring Scroller(const std::wstring &str, size_t &pos, size_t width)
 	else
 		result = s;
 	return result;
-}
-
-std::string Shorten(const std::wstring &s, size_t max_length)
-{
-	if (s.length() <= max_length)
-		return ToString(s);
-	if (max_length < 2)
-		return "";
-	std::wstring result(s, 0, max_length/2-!(max_length%2));
-	result += L"..";
-	result += s.substr(s.length()-max_length/2+1);
-	return ToString(result);
 }

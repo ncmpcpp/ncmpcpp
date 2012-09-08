@@ -26,6 +26,7 @@
 #include "screen.h"
 #include "settings.h"
 #include "status.h"
+#include "utility/wide_string.h"
 
 inline HasSongs *hasSongs(BasicScreen *screen)
 {
@@ -462,7 +463,5 @@ std::string Timestamp(time_t t);
 void markSongsInPlaylist(std::shared_ptr<ProxySongList> pl);
 
 std::wstring Scroller(const std::wstring &str, size_t &pos, size_t width);
-
-std::string Shorten(const std::wstring &s, size_t max_length);
 
 #endif
