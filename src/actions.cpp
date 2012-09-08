@@ -2065,8 +2065,7 @@ void AddRandomItems::Run()
 	if (answer != 's')
 	{
 		tag_type = charToTagType(answer);
-		tag_type_str = tagTypeToString(tag_type);
-		lowercase(tag_type_str);
+		tag_type_str = lowercase(tagTypeToString(tag_type));
 	}
 	else
 		tag_type_str = "song";
@@ -2137,7 +2136,7 @@ void ToggleLibraryTagType::Run()
 		std::string item_type = tagTypeToString(Config.media_lib_primary_tag);
 		myLibrary->Tags->setTitle(Config.titles_visibility ? item_type + "s" : "");
 		myLibrary->Tags->reset();
-		lowercase(item_type);
+		item_type = lowercase(item_type);
 		if (myLibrary->Columns() == 2)
 		{
 			myLibrary->Songs->clear();

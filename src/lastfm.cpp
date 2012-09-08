@@ -124,8 +124,7 @@ void Lastfm::Load()
 	std::string artist = itsArgs.find("artist")->second;
 	locale_to_utf(artist);
 	
-	std::string file = artist + ".txt";
-	lowercase(file);
+	std::string file = lowercase(artist + ".txt");
 	removeInvalidCharsFromFilename(file);
 	
 	itsFilename = itsFolder + "/" + file;

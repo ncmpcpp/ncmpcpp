@@ -609,8 +609,7 @@ bool hasSupportedExtension(const std::string &file)
 	if (last_dot > file.length())
 		return false;
 	
-	std::string ext = file.substr(last_dot+1);
-	lowercase(ext);
+	std::string ext = lowercase(file.substr(last_dot+1));
 	return SupportedExtensions.find(ext) != SupportedExtensions.end();
 }
 

@@ -22,6 +22,7 @@
 #define _UTILITY_STRING
 
 #include <cstdarg>
+#include <locale>
 #include <string>
 #include <vector>
 #include "gcc.h"
@@ -52,6 +53,16 @@ template <size_t N> struct print<N, std::wstring> {
 	}
 };
 
+template <typename CharT>
+std::basic_string<CharT> lowercase(std::basic_string<CharT> s)
+{
+	std::locale loc;
+	const std::ctype<CharT> &ct = std::use_facet< std::ctype<CharT> >(loc);
+	for (auto it = s.begin(); it != s.end(); ++it)
+		*it = ct.tolower(*it);
+	return s;
+}
+
 int stringToInt(const std::string &s);
 long stringToLongInt(const std::string &s);
 bool isInteger(const char *s, bool accept_signed);
@@ -61,9 +72,6 @@ std::wstring ToWString(const std::string &s);
 
 std::vector<std::string> split(const std::string &s, const std::string &delimiter);
 void replace(std::string &s, const std::string &from, const std::string &to);
-
-void lowercase(std::string &s);
-void lowercase(std::wstring &s);
 
 void trim(std::string &s);
 

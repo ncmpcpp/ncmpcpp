@@ -189,8 +189,7 @@ bool TinyTagEditor::getTags()
 	itsEdited.setComment(f.tag()->comment().to8Bit(1));
 	
 	std::string ext = itsEdited.getURI();
-	ext = ext.substr(ext.rfind(".")+1);
-	lowercase(ext);
+	ext = lowercase(ext.substr(ext.rfind(".")+1));
 	
 	if (!isInitialized)
 		Init();

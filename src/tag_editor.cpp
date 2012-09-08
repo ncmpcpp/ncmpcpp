@@ -1130,10 +1130,7 @@ void LowerAllLetters(MPD::MutableSong &s)
 	{
 		unsigned i = 0;
 		for (std::string tag; !(tag = (s.*m->Get)(i)).empty(); ++i)
-		{
-			lowercase(tag);
-			(s.*m->Set)(tag, i);
-		}
+			(s.*m->Set)(ToString(lowercase(ToWString(tag))), i);
 	}
 }
 

@@ -214,8 +214,7 @@ void MediaLibrary::SwitchTo()
 					NextColumn();
 				if (Config.titles_visibility)
 				{
-					std::string item_type = tagTypeToString(Config.media_lib_primary_tag);
-					lowercase(item_type);
+					std::string item_type = lowercase(tagTypeToString(Config.media_lib_primary_tag));
 					Albums->setTitle("Albums (sorted by " + item_type + ")");
 				}
 				else
@@ -766,8 +765,7 @@ void MediaLibrary::LocateSong(const MPD::Song &s)
 	}
 	if (primary_tag.empty())
 	{
-		std::string item_type = tagTypeToString(Config.media_lib_primary_tag);
-		lowercase(item_type);
+		std::string item_type = lowercase(tagTypeToString(Config.media_lib_primary_tag));
 		ShowMessage("Can't use this function because the song has no %s tag set", item_type.c_str());
 		return;
 	}
@@ -855,8 +853,7 @@ void MediaLibrary::AddToPlaylist(bool add_n_play)
 			if ((!Tags->empty() && w == Tags)
 			||  (w == Albums && Albums->current().value().Date == AllTracksMarker))
 			{
-				std::string tag_type = tagTypeToString(Config.media_lib_primary_tag);
-				lowercase(tag_type);
+				std::string tag_type = lowercase(tagTypeToString(Config.media_lib_primary_tag));
 				ShowMessage("Songs with %s = \"%s\" added", tag_type.c_str(), Tags->current().value().c_str());
 			}
 			else if (w == Albums)

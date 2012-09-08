@@ -234,11 +234,13 @@ template <typename C> bool basic_buffer<C>::setFormatting(
 	if (s.empty())
 		return false;
 	bool result = false;
-	std::basic_string<C> base = m_string;
-	if (!case_sensitive)
+	std::basic_string<C> base;
+	if (case_sensitive)
+		base = m_string;
+	else
 	{
-		lowercase(s);
-		lowercase(base);
+		base = lowercase(m_string);
+		s = lowercase(s);
 	}
 	FormatPos fp;
 	for (size_t i = base.find(s); i != std::basic_string<C>::npos; i = base.find(s, i))
@@ -268,11 +270,13 @@ template <typename C> void basic_buffer<C>::removeFormatting(
 {
 	if (pattern.empty())
 		return;
-	std::basic_string<C> base = m_string;
-	if (!case_sensitive)
+	std::basic_string<C> base;
+	if (case_sensitive)
+		base = m_string;
+	else
 	{
-		lowercase(pattern);
-		lowercase(base);
+		base = lowercase(base);
+		pattern = lowercase(pattern);
 	}
 	FormatPos fp;
 	for (size_t i = base.find(pattern); i != std::basic_string<C>::npos; i = base.find(pattern, i))
