@@ -328,9 +328,10 @@ template <> struct StringConverter<NC::Scrollpad> {
 	std::basic_string<my_char_t> operator()(const char *s) { return TO_WSTRING(s); }
 };
 
-template <typename C> void String2Buffer(const std::basic_string<C> &s, NC::basic_buffer<C> &buf)
+template <typename CharT>
+void String2Buffer(const std::basic_string<CharT> &s, NC::basic_buffer<CharT> &buf)
 {
-	StringConverter< NC::basic_buffer<C> > cnv;
+	StringConverter< NC::basic_buffer<CharT> > cnv;
 	for (auto it = s.begin(); it != s.end(); ++it)
 	{
 		if (*it == '$')

@@ -30,7 +30,7 @@ namespace NC {//
 /// Buffer template class that can store text along with its
 /// format attributes. The content can be easily printed to
 /// window or taken as raw string at any time.
-template <typename C> class basic_buffer
+template <typename CharT> class basic_buffer
 {
 	friend struct Scrollpad;
 	
@@ -53,7 +53,7 @@ template <typename C> class basic_buffer
 	};
 	
 	/// Internal buffer for storing raw text
-	std::basic_string<C> m_string;
+	std::basic_string<CharT> m_string;
 	
 	/// List used for storing formatting informations
 	std::list<FormatPos> m_format;
@@ -67,7 +67,7 @@ public:
 	basic_buffer(const basic_buffer &b);
 	
 	/// @return raw content of the buffer without formatting informations
-	const std::basic_string<C> &str() const;
+	const std::basic_string<CharT> &str() const;
 	
 	/// Searches for given string in buffer and sets format/color at the
 	/// beginning and end of it using val_b and val_e flags accordingly
@@ -78,7 +78,7 @@ public:
 	/// @param for_each indicates whether function searches through whole buffer and sets
 	/// the format for all occurences of given string or stops after the first one
 	/// @return true if at least one occurence of the string was found, false otherwise
-	bool setFormatting(short val_b, std::basic_string<C> s, short val_e,
+	bool setFormatting(short val_b, std::basic_string<CharT> s, short val_e,
 						bool case_sensitive, bool for_each = 1);
 	
 	/// Searches for given string in buffer and removes given
@@ -89,7 +89,7 @@ public:
 	/// @param case_sensitive indicates whether algorithm should care about case sensitivity
 	/// @param for_each indicates whether function searches through whole buffer and removes
 	/// given format from all occurences of given string or stops after the first one
-	void removeFormatting(short val_b, std::basic_string<C> pattern, short val_e,
+	void removeFormatting(short val_b, std::basic_string<CharT> pattern, short val_e,
 							bool case_sensitive, bool for_each = 1);
 	
 	/// Removes all formating applied to string in buffer.
@@ -105,54 +105,54 @@ public:
 	/// @param separator additional text to be placed between the end and the beginning of
 	/// the string
 	void write(Window &w, size_t &start_pos, size_t width,
-				const std::basic_string<C> &separator) const;
+				const std::basic_string<CharT> &separator) const;
 	
 	/// Clears the content of the buffer and its formatting informations
 	void clear();
 	
-	basic_buffer<C> &operator<<(int n)
+	basic_buffer<CharT> &operator<<(int n)
 	{
-		m_string += intTo< std::basic_string<C> >::apply(n);
+		m_string += intTo< std::basic_string<CharT> >::apply(n);
 		return *this;
 	}
 	
-	basic_buffer<C> &operator<<(long int n)
+	basic_buffer<CharT> &operator<<(long int n)
 	{
-		m_string += longIntTo< std::basic_string<C> >::apply(n);
+		m_string += longIntTo< std::basic_string<CharT> >::apply(n);
 		return *this;
 	}
 	
-	basic_buffer<C> &operator<<(unsigned int n)
+	basic_buffer<CharT> &operator<<(unsigned int n)
 	{
-		m_string += unsignedIntTo< std::basic_string<C> >::apply(n);
+		m_string += unsignedIntTo< std::basic_string<CharT> >::apply(n);
 		return *this;
 	}
 	
-	basic_buffer<C> &operator<<(unsigned long int n)
+	basic_buffer<CharT> &operator<<(unsigned long int n)
 	{
-		m_string += unsignedLongIntTo< std::basic_string<C> >::apply(n);
+		m_string += unsignedLongIntTo< std::basic_string<CharT> >::apply(n);
 		return *this;
 	}
 	
-	basic_buffer<C> &operator<<(char c)
+	basic_buffer<CharT> &operator<<(char c)
 	{
 		m_string += c;
 		return *this;
 	}
 	
-	basic_buffer<C> &operator<<(wchar_t wc)
+	basic_buffer<CharT> &operator<<(wchar_t wc)
 	{
 		m_string += wc;
 		return *this;
 	}
 	
-	basic_buffer<C> &operator<<(const C *s)
+	basic_buffer<CharT> &operator<<(const CharT *s)
 	{
 		m_string += s;
 		return *this;
 	}
 	
-	basic_buffer<C> &operator<<(const std::basic_string<C> &s)
+	basic_buffer<CharT> &operator<<(const std::basic_string<CharT> &s)
 	{
 		m_string += s;
 		return *this;
@@ -160,27 +160,27 @@ public:
 	
 	/// Handles colors
 	/// @return reference to itself
-	basic_buffer<C> &operator<<(Color color);
+	basic_buffer<CharT> &operator<<(Color color);
 	
 	/// Handles format flags
 	/// @return reference to itself
-	basic_buffer<C> &operator<<(Format f);
+	basic_buffer<CharT> &operator<<(Format f);
 	
 	/// Handles copying one buffer to another using operator<<()
 	/// @param buf buffer to be copied
 	/// @return reference to itself
-	basic_buffer<C> &operator<<(const basic_buffer<C> &buf);
+	basic_buffer<CharT> &operator<<(const basic_buffer<CharT> &buf);
 	
 	/// Friend operator that handles printing
 	/// the content of buffer to window object
-	friend Window &operator<<(Window &w, const basic_buffer<C> &buf)
+	friend Window &operator<<(Window &w, const basic_buffer<CharT> &buf)
 	{
-		const std::basic_string<C> &s = buf.m_string;
+		const std::basic_string<CharT> &s = buf.m_string;
 		if (buf.m_format.empty())
 			w << s;
 		else
 		{
-			std::basic_string<C> tmp;
+			std::basic_string<CharT> tmp;
 			auto b = buf.m_format.begin(), e = buf.m_format.end();
 			for (size_t i = 0; i < s.length() || b != e; ++i)
 			{
@@ -215,17 +215,17 @@ typedef basic_buffer<char> Buffer;
 /// Standard buffer that uses wide characters
 typedef basic_buffer<wchar_t> WBuffer;
 
-template <typename C> basic_buffer<C>::basic_buffer(const basic_buffer &b)
+template <typename CharT> basic_buffer<CharT>::basic_buffer(const basic_buffer &b)
 	: m_string(b.m_string), m_format(b.m_format) { }
 
-template <typename C> const std::basic_string<C> &basic_buffer<C>::str() const
+template <typename CharT> const std::basic_string<CharT> &basic_buffer<CharT>::str() const
 {
 	return m_string;
 }
 
-template <typename C> bool basic_buffer<C>::setFormatting(
+template <typename CharT> bool basic_buffer<CharT>::setFormatting(
 	short val_b,
-	std::basic_string<C> s,
+	std::basic_string<CharT> s,
 	short val_e,
 	bool case_sensitive,
 	bool for_each
@@ -234,7 +234,7 @@ template <typename C> bool basic_buffer<C>::setFormatting(
 	if (s.empty())
 		return false;
 	bool result = false;
-	std::basic_string<C> base;
+	std::basic_string<CharT> base;
 	if (case_sensitive)
 		base = m_string;
 	else
@@ -243,7 +243,7 @@ template <typename C> bool basic_buffer<C>::setFormatting(
 		s = lowercase(s);
 	}
 	FormatPos fp;
-	for (size_t i = base.find(s); i != std::basic_string<C>::npos; i = base.find(s, i))
+	for (size_t i = base.find(s); i != std::basic_string<CharT>::npos; i = base.find(s, i))
 	{
 		result = true;
 		fp.Value = val_b;
@@ -260,9 +260,9 @@ template <typename C> bool basic_buffer<C>::setFormatting(
 	return result;
 }
 
-template <typename C> void basic_buffer<C>::removeFormatting(
+template <typename CharT> void basic_buffer<CharT>::removeFormatting(
 	short val_b,
-	std::basic_string<C> pattern,
+	std::basic_string<CharT> pattern,
 	short val_e,
 	bool case_sensitive,
 	bool for_each
@@ -270,7 +270,7 @@ template <typename C> void basic_buffer<C>::removeFormatting(
 {
 	if (pattern.empty())
 		return;
-	std::basic_string<C> base;
+	std::basic_string<CharT> base;
 	if (case_sensitive)
 		base = m_string;
 	else
@@ -279,7 +279,7 @@ template <typename C> void basic_buffer<C>::removeFormatting(
 		pattern = lowercase(pattern);
 	}
 	FormatPos fp;
-	for (size_t i = base.find(pattern); i != std::basic_string<C>::npos; i = base.find(pattern, i))
+	for (size_t i = base.find(pattern); i != std::basic_string<CharT>::npos; i = base.find(pattern, i))
 	{
 		fp.Value = val_b;
 		fp.Position = i;
@@ -293,19 +293,19 @@ template <typename C> void basic_buffer<C>::removeFormatting(
 	}
 }
 
-template <typename C> void basic_buffer<C>::removeFormatting()
+template <typename CharT> void basic_buffer<CharT>::removeFormatting()
 {
 	m_format.clear();
 }
 
-template <typename C> void basic_buffer<C>::write(
+template <typename CharT> void basic_buffer<CharT>::write(
 	Window &w,
 	size_t &start_pos,
 	size_t width,
-	const std::basic_string<C> &separator
+	const std::basic_string<CharT> &separator
 	) const
 {
-	std::basic_string<C> s = m_string;
+	std::basic_string<CharT> s = m_string;
 	size_t len = Window::length(s);
 	
 	if (len > width)
@@ -356,13 +356,13 @@ template <typename C> void basic_buffer<C>::write(
 		w << *this;
 }
 
-template <typename C> void basic_buffer<C>::clear()
+template <typename CharT> void basic_buffer<CharT>::clear()
 {
 	m_string.clear();
 	m_format.clear();
 }
 
-template <typename C> void basic_buffer<C>::loadAttribute(Window &w, short value) const
+template <typename CharT> void basic_buffer<CharT>::loadAttribute(Window &w, short value) const
 {
 	if (value < fmtNone)
 		w << Color(value);
@@ -370,7 +370,7 @@ template <typename C> void basic_buffer<C>::loadAttribute(Window &w, short value
 		w << Format(value);
 }
 
-template <typename C> basic_buffer<C> &basic_buffer<C>::operator<<(Color color)
+template <typename CharT> basic_buffer<CharT> &basic_buffer<CharT>::operator<<(Color color)
 {
 	FormatPos f;
 	f.Position = m_string.length();
@@ -379,12 +379,12 @@ template <typename C> basic_buffer<C> &basic_buffer<C>::operator<<(Color color)
 	return *this;
 }
 
-template <typename C> basic_buffer<C> &basic_buffer<C>::operator<<(Format f)
+template <typename CharT> basic_buffer<CharT> &basic_buffer<CharT>::operator<<(Format f)
 {
 	return operator<<(Color(f));
 }
 
-template <typename C> basic_buffer<C> &basic_buffer<C>::operator<<(const basic_buffer<C> &buf)
+template <typename CharT> basic_buffer<CharT> &basic_buffer<CharT>::operator<<(const basic_buffer<CharT> &buf)
 {
 	size_t length = m_string.length();
 	m_string += buf.m_string;
