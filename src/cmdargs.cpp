@@ -42,28 +42,26 @@
 
 void ParseArgv(int argc, char **argv)
 {
-	bool quit = 0;
 	std::string now_playing_format = "{{{(%l) }{{%a - }%t}}|{%f}}";
-	
 	for (int i = 1; i < argc; ++i)
 	{
 		if (!strcmp(argv[i], "-h") || !strcmp(argv[i], "--host"))
 		{
 			if (++i >= argc)
-				exit(0);
+				exit(1);
 			Mpd.SetHostname(argv[i]);
 			continue;
 		}
 		if (!strcmp(argv[i], "-p") || !strcmp(argv[i], "--port"))
 		{
 			if (++i >= argc)
-				exit(0);
+				exit(1);
 			Mpd.SetPort(atoi(argv[i]));
 			continue;
 		}
 		else if (!strcmp(argv[i], "-v") || !strcmp(argv[i], "--version"))
 		{
-			std::cout << "ncmpcpp version: " << VERSION << "\n\n"
+			std::cout << "ncmpcpp " << VERSION << "\n\n"
 			<< "optional screens compiled-in:\n"
 #			ifdef HAVE_TAGLIB_H
 			<< " - tag editor\n"
@@ -119,17 +117,9 @@ void ParseArgv(int argc, char **argv)
 			<< "  -p, --port                connect to server at port [6600]\n"
 			<< "  -c, --config              use alternative configuration file\n"
 			<< "  -s, --screen <name>       specify the startup screen\n"
-			<< "  -?, --help                show this help message\n"
+			<< "  -?, --help                show help message\n"
 			<< "  -v, --version             display version information\n"
 			<< "  --now-playing             display now playing song [" << now_playing_format << "]\n"
-			<< "\n"
-			<< "  play                      start playing\n"
-			<< "  pause                     pause the currently playing song\n"
-			<< "  toggle                    toggle play/pause mode\n"
-			<< "  stop                      stop playing\n"
-			<< "  next                      play the next song\n"
-			<< "  prev                      play the previous song\n"
-			<< "  volume [+-]<num>          adjusts volume by [+-]<num>\n"
 			;
 			exit(0);
 		}
@@ -140,8 +130,8 @@ void ParseArgv(int argc, char **argv)
 		if (!strcmp(argv[i], "-s") || !strcmp(argv[i], "--screen"))
 		{
 			if (++i == argc) {
-				std::cout << "ncmpcpp: no screen specified" << std::endl;
-				exit(0);
+				std::cerr << "No screen specified" << std::endl;
+				exit(1);
 			}
 			if (!strcmp(argv[i], "help"))
 				Config.startup_screen = myHelp;
@@ -172,8 +162,8 @@ void ParseArgv(int argc, char **argv)
 				Config.startup_screen = myClock;
 #			endif // ENABLE_CLOCK
 			else {
-				std::cout << "ncmpcpp: invalid screen: " << argv[i] << std::endl;
-				exit(0);
+				std::cerr << "Invalid screen: " << argv[i] << std::endl;
+				exit(1);
 			}
 		}
 		else if (!strcmp(argv[i], "--now-playing"))
@@ -181,7 +171,7 @@ void ParseArgv(int argc, char **argv)
 			Mpd.UpdateStatus();
 			if (!Mpd.GetErrorMessage().empty())
 			{
-				std::cout << "Error: " << Mpd.GetErrorMessage() << std::endl;
+				std::cerr << "MPD error: " << Mpd.GetErrorMessage() << std::endl;
 				exit(1);
 			}
 			if (Mpd.isPlaying())
@@ -202,55 +192,6 @@ void ParseArgv(int argc, char **argv)
 			}
 			exit(0);
 		}
-		else if (!strcmp(argv[i], "play"))
-		{
-			Mpd.Play();
-			quit = 1;
-		}
-		else if (!strcmp(argv[i], "pause"))
-		{
-			Mpd.Pause(1);
-			quit = 1;
-		}
-		else if (!strcmp(argv[i], "toggle"))
-		{
-			Mpd.UpdateStatus();
-			if (!Mpd.GetErrorMessage().empty())
-			{
-				std::cout << "Error: " << Mpd.GetErrorMessage() << std::endl;
-				exit(1);
-			}
-			Mpd.Toggle();
-			quit = 1;
-		}
-		else if (!strcmp(argv[i], "stop"))
-		{
-			Mpd.Stop();
-			quit = 1;
-		}
-		else if (!strcmp(argv[i], "next"))
-		{
-			Mpd.Next();
-			quit = 1;
-		}
-		else if (!strcmp(argv[i], "prev"))
-		{
-			Mpd.Prev();
-			quit = 1;
-		}
-		else if (!strcmp(argv[i], "volume"))
-		{
-			i++;
-			Mpd.UpdateStatus();
-			if (!Mpd.GetErrorMessage().empty())
-			{
-				std::cout << "Error: " << Mpd.GetErrorMessage() << std::endl;
-				exit(1);
-			}
-			if (i != argc)
-				Mpd.SetVolume(Mpd.GetVolume()+atoi(argv[i]));
-			quit = 1;
-		}
 		else if (!strcmp(argv[i], "-c") || !strcmp(argv[i], "--config"))
 		{
 			// this is used in Configuration::CheckForCommandLineConfigFilePath, ignoring here.
@@ -258,15 +199,13 @@ void ParseArgv(int argc, char **argv)
 		}
 		else
 		{
-			std::cout << "ncmpcpp: invalid option: " << argv[i] << std::endl;
-			exit(0);
+			std::cerr << "Invalid option: " << argv[i] << std::endl;
+			exit(1);
 		}
 		if (!Mpd.GetErrorMessage().empty())
 		{
-			std::cout << "Error: " << Mpd.GetErrorMessage() << std::endl;
-			exit(0);
+			std::cerr << "Error: " << Mpd.GetErrorMessage() << std::endl;
+			exit(1);
 		}
 	}
-	if (quit)
-		exit(0);
 }
