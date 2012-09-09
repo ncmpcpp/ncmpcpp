@@ -24,6 +24,7 @@
 #include <cassert>
 #include <functional>
 #include <iterator>
+#include <memory>
 #include <set>
 
 #include "error.h"
@@ -35,11 +36,14 @@ namespace NC {
 
 /// This template class is generic menu capable of
 /// holding any std::vector compatible values.
-template <typename T> struct Menu : public Window
+template <typename T> class Menu : public Window
 {
+	struct ItemProxy;
+	
+public:
 	struct Item
 	{
-		friend struct Menu<T>;
+		friend class Menu<T>;
 		
 		Item()
 		: m_is_bold(false), m_is_selected(false), m_is_inactive(false), m_is_separator(false) { }
@@ -60,11 +64,11 @@ template <typename T> struct Menu : public Window
 		bool isSeparator() const { return m_is_separator; }
 		
 	private:
-		static Item *mkSeparator()
+		static Item mkSeparator()
 		{
-			Item *i = new Item;
-			i->m_is_separator = true;
-			return i;
+			Item item;
+			item.m_is_separator = true;
+			return item;
 		}
 		
 		T m_value;
@@ -77,7 +81,7 @@ template <typename T> struct Menu : public Window
 	template <typename ValueT, typename BaseIterator> class ItemIterator
 		: public std::iterator<std::random_access_iterator_tag, ValueT>
 	{
-		friend struct Menu<T>;
+		friend class Menu<T>;
 		
 		BaseIterator m_it;
 		explicit ItemIterator(BaseIterator it) : m_it(it) { }
@@ -87,7 +91,7 @@ template <typename T> struct Menu : public Window
 		// version to be instantiated.
 		static const bool referenceValue = !std::is_same<
 			typename std::remove_const<ValueT>::type,
-			typename std::remove_pointer<typename BaseIterator::value_type>::type
+			typename BaseIterator::value_type::element_type
 		>::value;
 		template <typename Result, bool referenceValue> struct getObject { };
 		template <typename Result> struct getObject<Result, true> {
@@ -144,20 +148,20 @@ template <typename T> struct Menu : public Window
 	};
 	
 	typedef ItemIterator<
-		Item, typename std::vector<Item *>::iterator
+		Item, typename std::vector<ItemProxy>::iterator
 	> Iterator;
 	typedef ItemIterator<
-		const Item, typename std::vector<Item *>::const_iterator
+		const Item, typename std::vector<ItemProxy>::const_iterator
 	> ConstIterator;
 	
 	typedef std::reverse_iterator<Iterator> ReverseIterator;
 	typedef std::reverse_iterator<ConstIterator> ConstReverseIterator;
 	
 	typedef ItemIterator<
-		T, typename std::vector<Item *>::iterator
+		T, typename std::vector<ItemProxy>::iterator
 	> ValueIterator;
 	typedef ItemIterator<
-		typename std::add_const<T>::type, typename std::vector<Item *>::const_iterator
+		typename std::add_const<T>::type, typename std::vector<ItemProxy>::const_iterator
 	> ConstValueIterator;
 	
 	typedef std::reverse_iterator<ValueIterator> ReverseValueIterator;
@@ -181,8 +185,8 @@ template <typename T> struct Menu : public Window
 	Menu(size_t startx, size_t starty, size_t width, size_t height,
 			const std::string &title, Color color, Border border);
 	
-	/// Destroys the object and frees memory
-	virtual ~Menu();
+	Menu(const Menu &) = delete;
+	Menu &operator=(const Menu &) = delete;
 	
 	/// Sets helper function that is responsible for displaying items
 	/// @param ptr function pointer that matches the ItemDisplayer prototype
@@ -399,6 +403,22 @@ template <typename T> struct Menu : public Window
 	ConstReverseValueIterator rendV() const { return ConstReverseValueIterator(beginV()); }
 	
 private:
+	struct ItemProxy
+	{
+		typedef Item element_type;
+		
+		ItemProxy() { }
+		ItemProxy(Item &&item) : m_ptr(std::make_shared<Item>(item)) { }
+		
+		Item &operator*() const { return *m_ptr; }
+		Item *operator->() const { return m_ptr.get(); }
+		
+		bool operator==(const ItemProxy &rhs) const { return m_ptr == rhs.m_ptr; }
+		
+	private:
+		std::shared_ptr<Item> m_ptr;
+	};
+	
 	bool isHighlightable(size_t pos)
 	{
 		return !(*m_options_ptr)[pos]->isSeparator() && !(*m_options_ptr)[pos]->isInactive();
@@ -409,9 +429,9 @@ private:
 	FilterFunction m_filter;
 	FilterFunction m_searcher;
 	
-	std::vector<Item *> *m_options_ptr;
-	std::vector<Item *> m_options;
-	std::vector<Item *> m_filtered_options;
+	std::vector<ItemProxy> *m_options_ptr;
+	std::vector<ItemProxy> m_options;
+	std::vector<ItemProxy> m_filtered_options;
 	std::set<size_t> m_found_positions;
 	
 	size_t m_beginning;
@@ -448,12 +468,6 @@ template <typename T> Menu<T>::Menu(size_t startx,
 {
 }
 
-template <typename T> Menu<T>::~Menu()
-{
-	for (auto it = m_options.begin(); it != m_options.end(); ++it)
-		delete *it;
-}
-
 template <typename T> void Menu<T>::reserve(size_t size_)
 {
 	m_options.reserve(size_);
@@ -463,22 +477,18 @@ template <typename T> void Menu<T>::resizeList(size_t new_size)
 {
 	if (new_size > m_options.size())
 	{
+		size_t old_size = m_options.size();
 		m_options.resize(new_size);
-		for (size_t i = 0; i < new_size; ++i)
-			if (!m_options[i])
-				m_options[i] = new Item();
+		for (size_t i = old_size; i < new_size; ++i)
+			m_options[i] = Item();
 	}
-	else if (new_size < m_options.size())
-	{
-		for (size_t i = new_size; i < m_options.size(); ++i)
-			delete m_options[i];
+	else
 		m_options.resize(new_size);
-	}
 }
 
 template <typename T> void Menu<T>::addItem(const T &item, bool is_bold, bool is_inactive)
 {
-	m_options.push_back(new Item(item, is_bold, is_inactive));
+	m_options.push_back(Item(item, is_bold, is_inactive));
 }
 
 template <typename T> void Menu<T>::addSeparator()
@@ -488,7 +498,7 @@ template <typename T> void Menu<T>::addSeparator()
 
 template <typename T> void Menu<T>::insertItem(size_t pos, const T &item, bool is_bold, bool is_inactive)
 {
-	m_options.insert(m_options.begin()+pos, new Item(item, is_bold, is_inactive));
+	m_options.insert(m_options.begin()+pos, Item(item, is_bold, is_inactive));
 }
 
 template <typename T> void Menu<T>::insertSeparator(size_t pos)
@@ -680,8 +690,6 @@ template <typename T> void Menu<T>::reset()
 
 template <typename T> void Menu<T>::clear()
 {
-	for (auto it = m_options.begin(); it != m_options.end(); ++it)
-		delete *it;
 	clearFilterResults();
 	m_options.clear();
 	m_found_positions.clear();
