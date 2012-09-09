@@ -942,7 +942,7 @@ bool SortSongsByTrack(const MPD::Song &a, const MPD::Song &b)
 {
 	int cmp = a.getDisc().compare(b.getDisc());
 	if (cmp != 0)
-		return cmp;
+		return cmp < 0;
 	return a.getTrack() < b.getTrack();
 }
 
