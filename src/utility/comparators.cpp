@@ -59,10 +59,10 @@ bool LocaleBasedItemSorting::operator()(const MPD::Item &a, const MPD::Item &b) 
 		switch (a.type)
 		{
 			case MPD::itDirectory:
-				result = m_cmp(getBasename(a.name), getBasename(b.name)) < 0;
+				result = m_cmp(getBasename(a.name), getBasename(b.name));
 				break;
 			case MPD::itPlaylist:
-				result = m_cmp(a.name, b.name) < 0;
+				result = m_cmp(a.name, b.name);
 				break;
 			case MPD::itSong:
 				switch (m_sort_mode)
@@ -75,7 +75,7 @@ bool LocaleBasedItemSorting::operator()(const MPD::Item &a, const MPD::Item &b) 
 						break;
 					case smCustomFormat:
 						result = m_cmp(a.song->toString(Config.browser_sort_format),
-						               b.song->toString(Config.browser_sort_format)) < 0;
+						               b.song->toString(Config.browser_sort_format));
 						break;
 				}
 				break;

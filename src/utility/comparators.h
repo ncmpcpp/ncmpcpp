@@ -43,7 +43,7 @@ class LocaleBasedSorting
 	LocaleStringComparison m_cmp;
 	
 public:
-	LocaleBasedSorting(const std::locale loc, bool ignore_the) : m_cmp(loc, ignore_the) { }
+	LocaleBasedSorting(const std::locale &loc, bool ignore_the) : m_cmp(loc, ignore_the) { }
 	
 	bool operator()(const std::string &a, const std::string &b) const {
 		return m_cmp(a, b) < 0;
@@ -65,7 +65,7 @@ class LocaleBasedItemSorting
 	SortMode m_sort_mode;
 	
 public:
-	LocaleBasedItemSorting(const std::locale loc, bool ignore_the, SortMode mode)
+	LocaleBasedItemSorting(const std::locale &loc, bool ignore_the, SortMode mode)
 	: m_cmp(loc, ignore_the), m_sort_mode(mode) { }
 	
 	bool operator()(const MPD::Item &a, const MPD::Item &b) const;
