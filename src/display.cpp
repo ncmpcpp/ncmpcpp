@@ -274,10 +274,9 @@ void showSongsInColumns(NC::Menu<T> &menu, const MPD::Song &s, HasSongs &screen)
 
 std::string Display::Columns(size_t list_width)
 {
-	if (Config.columns.empty())
-		return "";
-	
 	std::string result;
+	if (Config.columns.empty())
+		return result;
 	
 	int width;
 	int remained_width = list_width;
@@ -305,12 +304,16 @@ std::string Display::Columns(size_t list_width)
 		std::wstring name;
 		if (it->name.empty())
 		{
-			for (size_t j = 0; j < it->type.length(); ++j)
+			size_t j = 0;
+			while (true)
 			{
 				name += toColumnName(it->type[j]);
-				name += '/';
+				++j;
+				if (j < it->type.length())
+					name += '/';
+				else
+					break;
 			}
-			name.resize(name.length()-1);
 		}
 		else
 			name = it->name;
