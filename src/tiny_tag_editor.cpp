@@ -109,7 +109,7 @@ void TinyTagEditor::EnterPressed()
 	{
 		size_t pos = option-8;
 		Statusbar() << NC::fmtBold << SongInfo::Tags[pos].Name << ": " << NC::fmtBoldEnd;
-		itsEdited.setTag(SongInfo::Tags[pos].Set, Global::wFooter->getString(itsEdited.getTags(SongInfo::Tags[pos].Get)));
+		itsEdited.setTags(SongInfo::Tags[pos].Set, Global::wFooter->getString(itsEdited.getTags(SongInfo::Tags[pos].Get)));
 		w->at(option).value().clear();
 		w->at(option).value() << NC::fmtBold << SongInfo::Tags[pos].Name << ':' << NC::fmtBoldEnd << ' ';
 		ShowTag(w->at(option).value(), itsEdited.getTags(SongInfo::Tags[pos].Get));

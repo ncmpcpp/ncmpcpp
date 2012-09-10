@@ -525,7 +525,7 @@ void TagEditor::EnterPressed()
 			std::string new_tag = wFooter->getString(Tags->current().value().getTags(get));
 			UnlockStatusbar();
 			for (auto it = EditedSongs.begin(); it != EditedSongs.end(); ++it)
-				(*it)->setTag(set, new_tag);
+				(*it)->setTags(set, new_tag);
 		}
 		else if (w == Tags)
 		{
@@ -534,7 +534,7 @@ void TagEditor::EnterPressed()
 			std::string new_tag = wFooter->getString(Tags->current().value().getTags(get));
 			UnlockStatusbar();
 			if (new_tag != Tags->current().value().getTags(get))
-				Tags->current().value().setTag(set, new_tag);
+				Tags->current().value().setTags(set, new_tag);
 			Tags->scroll(NC::wDown);
 		}
 	}
@@ -1291,7 +1291,7 @@ std::string ParseFilename(MPD::MutableSong &s, std::string mask, bool preview)
 			{
 				MPD::MutableSong::SetFunction set = IntoSetFunction(it->first);
 				if (set)
-					s.setTag(set, it->second);
+					s.setTags(set, it->second);
 			}
 			else
 				result << "%" << it->first << ": " << it->second << "\n";

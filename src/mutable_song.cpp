@@ -166,7 +166,7 @@ void MutableSong::setDuration(unsigned int duration)
 	m_duration = duration;
 }
 
-void MutableSong::setTag(SetFunction set, const std::string &value, const std::string &delimiter)
+void MutableSong::setTags(SetFunction set, const std::string &value, const std::string &delimiter)
 {
 	auto tags = split(value, delimiter);
 	for (size_t i = 0; i < tags.size(); ++i)
@@ -182,17 +182,6 @@ void MutableSong::clearModifications()
 {
 	m_uri.clear();
 	m_tags.clear();
-}
-
-std::string MutableSong::getTag(mpd_tag_type tag_type, std::function<std::string()> orig_value, unsigned idx) const
-{
-	auto it = m_tags.find(Tag(tag_type, idx));
-	std::string result;
-	if (it == m_tags.end())
-		result = orig_value();
-	else
-		result = it->second;
-	return result;
 }
 
 void MutableSong::replaceTag(mpd_tag_type tag_type, std::string &&orig_value, const std::string &value, unsigned idx)

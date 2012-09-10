@@ -123,9 +123,8 @@ std::string Song::getTrack(unsigned idx) const
 	std::string track = getTag(MPD_TAG_TRACK, idx);
 	if ((track.length() == 1 && track[0] != '0')
 	||  (track.length() > 3  && track[1] == '/'))
-		return "0"+track;
-	else
-		return track;
+		track = "0"+track;
+	return track;
 }
 
 std::string Song::getTrackNumber(unsigned idx) const

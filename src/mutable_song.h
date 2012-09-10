@@ -63,7 +63,7 @@ struct MutableSong : public Song
 	virtual unsigned getDuration() const;
 	void setDuration(unsigned duration);
 	
-	void setTag(SetFunction set, const std::string &value, const std::string &delimiter = "");
+	void setTags(SetFunction set, const std::string &value, const std::string &delimiter = "");
 	
 	bool isModified() const;
 	void clearModifications();
@@ -88,8 +88,19 @@ private:
 		unsigned m_idx;
 	};
 	
-	std::string getTag(mpd_tag_type tag_type, std::function<std::string()> orig_value, unsigned idx) const;
-	void replaceTag(mpd_tag_type tag_type, std::string &&orig_value, const std::string &value, unsigned idx);
+	void replaceTag(mpd_tag_type tag_type, std::string &&orig_value,
+                    const std::string &value, unsigned idx);
+	
+	template <typename F>
+	std::string getTag(mpd_tag_type tag_type, F orig_value, unsigned idx) const {
+		auto it = m_tags.find(Tag(tag_type, idx));
+		std::string result;
+		if (it == m_tags.end())
+			result = orig_value();
+		else
+			result = it->second;
+		return result;
+	}
 	
 	std::string m_uri;
 	unsigned m_duration;
