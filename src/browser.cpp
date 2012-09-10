@@ -388,6 +388,7 @@ void Browser::LocateSong(const MPD::Song &s)
 			break;
 		}
 	}
+	DrawHeader();
 }
 
 void Browser::GetDirectory(std::string dir, std::string subdir)
