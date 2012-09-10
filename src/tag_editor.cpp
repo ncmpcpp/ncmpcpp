@@ -969,9 +969,15 @@ void TagEditor::LocateSong(const MPD::Song &s)
 			break;
 		}
 	}
+	// refresh window so we can be highlighted item
+	Dirs->refresh();
+	
 	Tags->clear();
 	Update();
 	
+	// reset TagTypes since it can be under Filename
+	// and then songs in right column are not visible.
+	TagTypes->reset();
 	// go to the right column
 	NextColumn();
 	NextColumn();
