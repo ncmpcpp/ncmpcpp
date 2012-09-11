@@ -31,6 +31,7 @@
 #include "playlist.h"
 #include "regex_filter.h"
 #include "status.h"
+#include "statusbar.h"
 #include "utility/comparators.h"
 #include "utility/type_conversions.h"
 
@@ -766,13 +767,13 @@ void MediaLibrary::LocateSong(const MPD::Song &s)
 	if (primary_tag.empty())
 	{
 		std::string item_type = lowercase(tagTypeToString(Config.media_lib_primary_tag));
-		ShowMessage("Can't use this function because the song has no %s tag set", item_type.c_str());
+		Statusbar::msg("Can't use this function because the song has no %s tag set", item_type.c_str());
 		return;
 	}
 	
 	if (myScreen != this)
 		SwitchTo();
-	Statusbar() << "Jumping to song...";
+	Statusbar::put() << "Jumping to song...";
 	Global::wFooter->refresh();
 	
 	if (!hasTwoColumns)
@@ -854,10 +855,10 @@ void MediaLibrary::AddToPlaylist(bool add_n_play)
 			||  (w == Albums && Albums->current().value().Date == AllTracksMarker))
 			{
 				std::string tag_type = lowercase(tagTypeToString(Config.media_lib_primary_tag));
-				ShowMessage("Songs with %s = \"%s\" added", tag_type.c_str(), Tags->current().value().c_str());
+				Statusbar::msg("Songs with %s = \"%s\" added", tag_type.c_str(), Tags->current().value().c_str());
 			}
 			else if (w == Albums)
-				ShowMessage("Songs from album \"%s\" added", Albums->current().value().Album.c_str());
+				Statusbar::msg("Songs from album \"%s\" added", Albums->current().value().Album.c_str());
 		}
 	}
 

@@ -33,6 +33,7 @@
 #include "scrollpad.h"
 #include "settings.h"
 #include "song.h"
+#include "statusbar.h"
 
 using Global::MainHeight;
 using Global::MainStartY;
@@ -112,7 +113,7 @@ void Lyrics::SwitchTo()
 	
 	if (isDownloadInProgress || itsWorkersNumber > 0)
 	{
-		ShowMessage("Lyrics are being downloaded...");
+		Statusbar::msg("Lyrics are being downloaded...");
 		return;
 	}
 #	endif // HAVE_CURL_CURL_H
@@ -133,7 +134,7 @@ void Lyrics::SwitchTo()
 	}
 	else
 	{
-		ShowMessage("Song must have both artist and title tag set");
+		Statusbar::msg("Song must have both artist and title tag set");
 		return;
 	}
 	
@@ -157,7 +158,7 @@ std::wstring Lyrics::Title()
 void Lyrics::SpacePressed()
 {
 	Config.now_playing_lyrics = !Config.now_playing_lyrics;
-	ShowMessage("Reload lyrics if song changes: %s", Config.now_playing_lyrics ? "On" : "Off");
+	Statusbar::msg("Reload lyrics if song changes: %s", Config.now_playing_lyrics ? "On" : "Off");
 }
 
 #ifdef HAVE_CURL_CURL_H
@@ -173,7 +174,7 @@ void Lyrics::DownloadInBackground(const MPD::Song &s)
 		f.close();
 		return;
 	}
-	ShowMessage("Fetching lyrics for \"%s\"...", s.toString(Config.song_status_format_no_colors).c_str());
+	Statusbar::msg("Fetching lyrics for \"%s\"...", s.toString(Config.song_status_format_no_colors).c_str());
 	
 	MPD::Song *s_copy = new MPD::Song(s);
 	pthread_mutex_lock(&itsDIBLock);
@@ -370,11 +371,11 @@ void Lyrics::Edit()
 	
 	if (Config.external_editor.empty())
 	{
-		ShowMessage("Proper external_editor variable has to be set in configuration file");
+		Statusbar::msg("Proper external_editor variable has to be set in configuration file");
 		return;
 	}
 	
-	ShowMessage("Opening lyrics in external editor...");
+	Statusbar::msg("Opening lyrics in external editor...");
 	
 	GNUC_UNUSED int res;
 	if (Config.use_console_editor)
@@ -406,7 +407,7 @@ void Lyrics::Refetch()
 	if (remove(itsFilename.c_str()) && errno != ENOENT)
 	{
 		const char msg[] = "Couldn't remove \"%ls\": %s";
-		ShowMessage(msg, wideShorten(ToWString(itsFilename), COLS-const_strlen(msg)-25).c_str(), strerror(errno));
+		Statusbar::msg(msg, wideShorten(ToWString(itsFilename), COLS-const_strlen(msg)-25).c_str(), strerror(errno));
 		return;
 	}
 	Load();
@@ -419,9 +420,9 @@ void Lyrics::ToggleFetcher()
 	else
 		itsFetcher = &lyricsPlugins[0];
 	if (*itsFetcher)
-		ShowMessage("Using lyrics database: %s", (*itsFetcher)->name());
+		Statusbar::msg("Using lyrics database: %s", (*itsFetcher)->name());
 	else
-		ShowMessage("Using all lyrics databases");
+		Statusbar::msg("Using all lyrics databases");
 }
 
 void Lyrics::Take()

@@ -41,8 +41,9 @@
 #include "display.h"
 #include "global.h"
 #include "helpers.h"
-#include "song_info.h"
 #include "playlist.h"
+#include "song_info.h"
+#include "statusbar.h"
 #include "utility/comparators.h"
 
 using namespace std::placeholders;
@@ -317,7 +318,7 @@ void TagEditor::EnterPressed()
 			Dirs->reset();
 		}
 		else
-			ShowMessage("No subdirectories found");
+			Statusbar::msg("No subdirectories found");
 	}
 	else if (w == FParserDialog)
 	{
@@ -384,10 +385,10 @@ void TagEditor::EnterPressed()
 		
 		if (pos == 0) // change pattern
 		{
-			LockStatusbar();
-			Statusbar() << "Pattern: ";
+			Statusbar::lock();
+			Statusbar::put() << "Pattern: ";
 			std::string new_pattern = wFooter->getString(Config.pattern);
-			UnlockStatusbar();
+			Statusbar::unlock();
 			if (!new_pattern.empty())
 			{
 				Config.pattern = new_pattern;
@@ -398,7 +399,7 @@ void TagEditor::EnterPressed()
 		else if (pos == 1 || pos == 4) // preview or proceed
 		{
 			bool success = 1;
-			ShowMessage("Parsing...");
+			Statusbar::msg("Parsing...");
 			FParserPreview->clear();
 			for (auto it = EditedSongs.begin(); it != EditedSongs.end(); ++it)
 			{
@@ -421,7 +422,7 @@ void TagEditor::EnterPressed()
 					std::string new_file = GenerateFilename(s, "{" + Config.pattern + "}");
 					if (new_file.empty() && !FParserUsePreview)
 					{
-						ShowMessage("File \"%s\" would have an empty name", s.getName().c_str());
+						Statusbar::msg("File \"%s\" would have an empty name", s.getName().c_str());
 						FParserUsePreview = 1;
 						success = 0;
 					}
@@ -450,7 +451,7 @@ void TagEditor::EnterPressed()
 				quit = 1;
 			}
 			if (pos != 4 || success)
-				ShowMessage("Operation finished");
+				Statusbar::msg("Operation finished");
 		}
 		else if (pos == 2) // show legend
 		{
@@ -507,10 +508,10 @@ void TagEditor::EnterPressed()
 				else
 					(*it)->setTrack(unsignedIntTo<std::string>::apply(i));
 			}
-			ShowMessage("Tracks numbered");
+			Statusbar::msg("Tracks numbered");
 		}
 		else
-			ShowMessage("Aborted");
+			Statusbar::msg("Aborted");
 		return;
 	}
 	
@@ -520,19 +521,19 @@ void TagEditor::EnterPressed()
 		MPD::MutableSong::SetFunction set = SongInfo::Tags[id].Set;
 		if (id > 0 && w == TagTypes)
 		{
-			LockStatusbar();
-			Statusbar() << NC::fmtBold << TagTypes->current().value() << NC::fmtBoldEnd << ": ";
+			Statusbar::lock();
+			Statusbar::put() << NC::fmtBold << TagTypes->current().value() << NC::fmtBoldEnd << ": ";
 			std::string new_tag = wFooter->getString(Tags->current().value().getTags(get));
-			UnlockStatusbar();
+			Statusbar::unlock();
 			for (auto it = EditedSongs.begin(); it != EditedSongs.end(); ++it)
 				(*it)->setTags(set, new_tag);
 		}
 		else if (w == Tags)
 		{
-			LockStatusbar();
-			Statusbar() << NC::fmtBold << TagTypes->current().value() << NC::fmtBoldEnd << ": ";
+			Statusbar::lock();
+			Statusbar::put() << NC::fmtBold << TagTypes->current().value() << NC::fmtBoldEnd << ": ";
 			std::string new_tag = wFooter->getString(Tags->current().value().getTags(get));
-			UnlockStatusbar();
+			Statusbar::unlock();
 			if (new_tag != Tags->current().value().getTags(get))
 				Tags->current().value().setTags(set, new_tag);
 			Tags->scroll(NC::wDown);
@@ -546,7 +547,7 @@ void TagEditor::EnterPressed()
 			{
 				if (size_t(COLS) < FParserDialogWidth || MainHeight < FParserDialogHeight)
 				{
-					ShowMessage("Screen is too small to display additional windows");
+					Statusbar::msg("Screen is too small to display additional windows");
 					return;
 				}
 				FParserDialog->reset();
@@ -559,10 +560,10 @@ void TagEditor::EnterPressed()
 				size_t last_dot = old_name.rfind(".");
 				std::string extension = old_name.substr(last_dot);
 				old_name = old_name.substr(0, last_dot);
-				LockStatusbar();
-				Statusbar() << NC::fmtBold << "New filename: " << NC::fmtBoldEnd;
+				Statusbar::lock();
+				Statusbar::put() << NC::fmtBold << "New filename: " << NC::fmtBoldEnd;
 				std::string new_name = wFooter->getString(old_name);
-				UnlockStatusbar();
+				Statusbar::unlock();
 				if (!new_name.empty() && new_name != old_name)
 					s.setNewURI(new_name + extension);
 				Tags->scroll(NC::wDown);
@@ -570,41 +571,41 @@ void TagEditor::EnterPressed()
 		}
 		else if (id == 16) // capitalize first letters
 		{
-			ShowMessage("Processing...");
+			Statusbar::msg("Processing...");
 			for (auto it = EditedSongs.begin(); it != EditedSongs.end(); ++it)
 				CapitalizeFirstLetters(**it);
-			ShowMessage("Done");
+			Statusbar::msg("Done");
 		}
 		else if (id == 17) // lower all letters
 		{
-			ShowMessage("Processing...");
+			Statusbar::msg("Processing...");
 			for (auto it = EditedSongs.begin(); it != EditedSongs.end(); ++it)
 				LowerAllLetters(**it);
-			ShowMessage("Done");
+			Statusbar::msg("Done");
 		}
 		else if (id == 19) // reset
 		{
 			Tags->clear();
-			ShowMessage("Changes reset");
+			Statusbar::msg("Changes reset");
 		}
 		else if (id == 20) // save
 		{
 			bool success = 1;
-			ShowMessage("Writing changes...");
+			Statusbar::msg("Writing changes...");
 			for (auto it = EditedSongs.begin(); it != EditedSongs.end(); ++it)
 			{
-				ShowMessage("Writing tags in \"%s\"...", (*it)->getName().c_str());
+				Statusbar::msg("Writing tags in \"%s\"...", (*it)->getName().c_str());
 				if (!WriteTags(**it))
 				{
 					const char msg[] = "Error while writing tags in \"%ls\"";
-					ShowMessage(msg, wideShorten(ToWString((*it)->getURI()), COLS-const_strlen(msg)).c_str());
+					Statusbar::msg(msg, wideShorten(ToWString((*it)->getURI()), COLS-const_strlen(msg)).c_str());
 					success = 0;
 					break;
 				}
 			}
 			if (success)
 			{
-				ShowMessage("Tags updated");
+				Statusbar::msg("Tags updated");
 				TagTypes->setHighlightColor(Config.main_highlight_color);
 				TagTypes->reset();
 				w->refresh();

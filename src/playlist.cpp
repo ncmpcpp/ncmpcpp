@@ -29,6 +29,7 @@
 #include "regex_filter.h"
 #include "song.h"
 #include "status.h"
+#include "statusbar.h"
 #include "utility/comparators.h"
 
 using namespace std::placeholders;
@@ -187,7 +188,7 @@ void Playlist::EnterPressed()
 		}
 		else
 		{
-			ShowMessage("Move tag types up and down to adjust sort order");
+			Statusbar::msg("Move tag types up and down to adjust sort order");
 			return;
 		}
 		
@@ -227,11 +228,11 @@ void Playlist::EnterPressed()
 			}
 		};
 		
-		ShowMessage("Sorting...");
+		Statusbar::msg("Sorting...");
 		Mpd.StartCommandsList();
 		quick_sort(playlist.begin(), playlist.end());
 		if (Mpd.CommitCommandsList())
-			ShowMessage("Playlist sorted");
+			Statusbar::msg("Playlist sorted");
 		w = Items;
 	}
 }
@@ -378,7 +379,7 @@ bool Playlist::isFiltered()
 {
 	if (Items->isFiltered())
 	{
-		ShowMessage("Function currently unavailable due to filtered playlist");
+		Statusbar::msg("Function currently unavailable due to filtered playlist");
 		return true;
 	}
 	return false;
@@ -389,7 +390,7 @@ void Playlist::Sort()
 	if (isFiltered())
 		return;
 	if (Items->getWidth() < SortDialogWidth || MainHeight < 5)
-		ShowMessage("Screen is too small to display dialog window");
+		Statusbar::msg("Screen is too small to display dialog window");
 	else
 	{
 		SortDialog->reset();
@@ -401,7 +402,7 @@ void Playlist::Reverse()
 {
 	if (isFiltered())
 		return;
-	ShowMessage("Reversing playlist order...");
+	Statusbar::msg("Reversing playlist order...");
 	size_t beginning = -1, end = -1;
 	for (size_t i = 0; i < Items->size(); ++i)
 	{
@@ -421,7 +422,7 @@ void Playlist::Reverse()
 	for (size_t i = beginning, j = end-1; i < (beginning+end)/2; ++i, --j)
 		Mpd.Swap(i, j);
 	if (Mpd.CommitCommandsList())
-		 ShowMessage("Playlist reversed");
+		 Statusbar::msg("Playlist reversed");
 }
 
 void Playlist::EnableHighlighting()
@@ -516,7 +517,7 @@ bool Playlist::Add(const MPD::Song &s, bool play, int position)
 		int id = Mpd.AddSong(s, position);
 		if (id >= 0)
 		{
-			ShowMessage("Added to playlist: %s", s.toString(Config.song_status_format_no_colors).c_str());
+			Statusbar::msg("Added to playlist: %s", s.toString(Config.song_status_format_no_colors).c_str());
 			if (play)
 				Mpd.PlayID(id);
 			return true;
@@ -570,7 +571,7 @@ void Playlist::SetSelectedItemsPriority(int prio)
 	for (auto it = list.begin(); it != list.end(); ++it)
 		Mpd.SetPriority((*it)->value(), prio);
 	if (Mpd.CommitCommandsList())
-		ShowMessage("Priority set");
+		Statusbar::msg("Priority set");
 }
 
 bool Playlist::checkForSong(const MPD::Song &s)

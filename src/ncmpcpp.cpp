@@ -40,6 +40,7 @@
 #include "playlist.h"
 #include "settings.h"
 #include "status.h"
+#include "statusbar.h"
 #include "visualizer.h"
 
 namespace
@@ -52,7 +53,7 @@ namespace
 	{
 		if (signal == SIGPIPE)
 		{
-			ShowMessage("SIGPIPE (broken pipe signal) received");
+			Statusbar::msg("SIGPIPE (broken pipe signal) received");
 		}
 		else if (signal == SIGWINCH)
 		{
@@ -157,9 +158,9 @@ int main(int argc, char **argv)
 	
 	wFooter = new NC::Window(0, Action::FooterStartY, COLS, Action::FooterHeight, "", Config.statusbar_color, NC::brNone);
 	wFooter->setTimeout(500);
-	wFooter->setGetStringHelper(StatusbargetStringHelper);
+	wFooter->setGetStringHelper(Statusbar::Helpers::getString);
 	if (Mpd.SupportsIdle())
-		wFooter->addFDCallback(Mpd.GetFD(), StatusbarMPDCallback);
+		wFooter->addFDCallback(Mpd.GetFD(), Statusbar::Helpers::mpd);
 	wFooter->createHistory();
 	
 	// initialize screens to browser as default previous screen
@@ -207,13 +208,13 @@ int main(int argc, char **argv)
 		{
 			if (!wFooter->FDCallbacksListEmpty())
 				wFooter->clearFDCallbacksList();
-			ShowMessage("Attempting to reconnect...");
+			Statusbar::msg("Attempting to reconnect...");
 			if (Mpd.Connect())
 			{
-				ShowMessage("Connected to %s", Mpd.GetHostname().c_str());
+				Statusbar::msg("Connected to %s", Mpd.GetHostname().c_str());
 				if (Mpd.SupportsIdle())
 				{
-					wFooter->addFDCallback(Mpd.GetFD(), StatusbarMPDCallback);
+					wFooter->addFDCallback(Mpd.GetFD(), Statusbar::Helpers::mpd);
 					Mpd.OrderDataFetching(); // we need info about new connection
 				}
 				ShowMessages = false;

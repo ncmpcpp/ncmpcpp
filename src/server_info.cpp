@@ -24,6 +24,7 @@
 #include "global.h"
 #include "helpers.h"
 #include "server_info.h"
+#include "statusbar.h"
 
 using Global::MainHeight;
 using Global::MainStartY;
@@ -53,7 +54,7 @@ void ServerInfo::SwitchTo()
 	}
 	if (MainHeight < 5)
 	{
-		ShowMessage("Screen is too small to display this window");
+		Statusbar::msg("Screen is too small to display this window");
 		return;
 	}
 	

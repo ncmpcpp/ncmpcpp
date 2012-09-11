@@ -31,6 +31,7 @@
 #include "playlist.h"
 #include "settings.h"
 #include "status.h"
+#include "statusbar.h"
 
 using Global::MainHeight;
 using Global::MainStartY;
@@ -90,7 +91,7 @@ void Clock::SwitchTo()
 	GetWindowResizeParams(x_offset, width, false);
 	if (Width > width || Height > MainHeight)
 	{
-		ShowMessage("Screen is too small to display clock");
+		Statusbar::msg("Screen is too small to display clock");
 		if (myLockedScreen)
 			UpdateInactiveScreen(myLockedScreen);
 		return;

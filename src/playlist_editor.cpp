@@ -30,6 +30,7 @@
 #include "mpdpp.h"
 #include "regex_filter.h"
 #include "status.h"
+#include "statusbar.h"
 #include "tag_editor.h"
 #include "utility/comparators.h"
 
@@ -211,7 +212,7 @@ bool PlaylistEditor::isContentFiltered()
 {
 	if (Content->isFiltered())
 	{
-		ShowMessage("Function currently unavailable due to filtered playlist content");
+		Statusbar::msg("Function currently unavailable due to filtered playlist content");
 		return true;
 	}
 	return false;
@@ -278,7 +279,7 @@ void PlaylistEditor::AddToPlaylist(bool add_n_play)
 	{
 		if (Mpd.LoadPlaylist(utf_to_locale_cpy(Playlists->current().value())))
 		{
-			ShowMessage("Playlist \"%s\" loaded", Playlists->current().value().c_str());
+			Statusbar::msg("Playlist \"%s\" loaded", Playlists->current().value().c_str());
 			if (add_n_play)
 				myPlaylist->PlayNewlyAddedSongs();
 		}

@@ -31,6 +31,7 @@
 #include "global.h"
 #include "mpdpp.h"
 #include "helpers.h"
+#include "statusbar.h"
 #include "utility/comparators.h"
 
 #include "bindings.h"
@@ -191,7 +192,7 @@ void Action::ResizeScreen()
 		RedrawStatusbar = true;
 		NcmpcppStatusChanged(&Mpd, MPD::StatusChanges(), 0);
 		DesignChanged = 0;
-		ShowMessage("User interface: %s", Config.new_design ? "Alternative" : "Classic");
+		Statusbar::msg("User interface: %s", Config.new_design ? "Alternative" : "Classic");
 	}
 	DrawHeader();
 	wFooter->refresh();
@@ -228,12 +229,12 @@ void Action::Seek()
 	
 	if (!Mpd.GetTotalTime())
 	{
-		ShowMessage("Unknown item length");
+		Statusbar::msg("Unknown item length");
 		return;
 	}
 	
-	LockProgressbar();
-	LockStatusbar();
+	Progressbar::lock();
+	Statusbar::lock();
 	
 	int songpos = Mpd.GetElapsedTime();
 	timeval t = Timer;
@@ -307,7 +308,7 @@ void Action::Seek()
 			*wFooter << NC::XY(wFooter->getWidth()-tracklength.length(), 1) << tracklength;
 		}
 		*wFooter << NC::fmtBoldEnd;
-		DrawProgressbar(songpos, Mpd.GetTotalTime());
+		Progressbar::draw(songpos, Mpd.GetTotalTime());
 		wFooter->refresh();
 	}
 	SeekingInProgress = false;
@@ -315,8 +316,8 @@ void Action::Seek()
 	
 	wFooter->setTimeout(old_timeout);
 	
-	UnlockProgressbar();
-	UnlockStatusbar();
+	Progressbar::unlock();
+	Statusbar::unlock();
 }
 
 void Action::FindItem(const FindDirection fd)
@@ -327,13 +328,13 @@ void Action::FindItem(const FindDirection fd)
 	assert(w);
 	assert(w->allowsSearching());
 	
-	LockStatusbar();
-	Statusbar() << "Find " << (fd == fdForward ? "forward" : "backward") << ": ";
+	Statusbar::lock();
+	Statusbar::put() << "Find " << (fd == fdForward ? "forward" : "backward") << ": ";
 	std::string findme = wFooter->getString();
-	UnlockStatusbar();
+	Statusbar::unlock();
 	
 	if (!findme.empty())
-		ShowMessage("Searching...");
+		Statusbar::msg("Searching...");
 	
 	bool success = w->search(findme);
 	
@@ -341,9 +342,9 @@ void Action::FindItem(const FindDirection fd)
 		return;
 	
 	if (success)
-		ShowMessage("Searching finished");
+		Statusbar::msg("Searching finished");
 	else
-		ShowMessage("Unable to find \"%s\"", findme.c_str());
+		Statusbar::msg("Unable to find \"%s\"", findme.c_str());
 	
  	if (fd == fdForward)
  		w->nextFound(Config.wrapped_search);
@@ -401,8 +402,8 @@ bool Action::AskYesNoQuestion(const std::string &question, void (*callback)())
 {
 	using Global::wFooter;
 	
-	LockStatusbar();
-	Statusbar() << question << " [" << NC::fmtBold << 'y' << NC::fmtBoldEnd << '/' << NC::fmtBold << 'n' << NC::fmtBoldEnd << "]";
+	Statusbar::lock();
+	Statusbar::put() << question << " [" << NC::fmtBold << 'y' << NC::fmtBoldEnd << '/' << NC::fmtBold << 'n' << NC::fmtBoldEnd << "]";
 	wFooter->refresh();
 	int answer = 0;
 	do
@@ -412,7 +413,7 @@ bool Action::AskYesNoQuestion(const std::string &question, void (*callback)())
 		answer = wFooter->readKey();
 	}
 	while (answer != 'y' && answer != 'n');
-	UnlockStatusbar();
+	Statusbar::unlock();
 	return answer == 'y';
 }
 
@@ -420,7 +421,7 @@ bool Action::isMPDMusicDirSet()
 {
 	if (Config.mpd_music_dir.empty())
 	{
-		ShowMessage("Proper mpd_music_dir variable has to be set in configuration file");
+		Statusbar::msg("Proper mpd_music_dir variable has to be set in configuration file");
 		return false;
 	}
 	return true;
@@ -632,8 +633,8 @@ void ToggleInterface::Run()
 	Config.new_design = !Config.new_design;
 	Config.statusbar_visibility = Config.new_design ? 0 : OriginalStatusbarVisibility;
 	SetWindowsDimensions();
-	UnlockProgressbar();
-	UnlockStatusbar();
+	Progressbar::unlock();
+	Statusbar::unlock();
 	DesignChanged = true;
 	ResizeScreen();
 }
@@ -779,10 +780,10 @@ void Delete::Run()
 {
 	if (myScreen == myPlaylist && !myPlaylist->Items->empty())
 	{
-		ShowMessage("Deleting items...");
+		Statusbar::msg("Deleting items...");
 		auto delete_fun = std::bind(&MPD::Connection::Delete, _1, _2);
 		if (deleteSelectedSongs(*myPlaylist->Items, delete_fun))
-			ShowMessage("Item(s) deleted");
+			Statusbar::msg("Item(s) deleted");
 	}
 #	ifndef WIN32
 	else if (myScreen == myBrowser && !myBrowser->Main()->empty())
@@ -815,12 +816,12 @@ void Delete::Run()
 				if (myBrowser->deleteItem(i))
 				{
 					const char msg[] = "\"%ls\" deleted";
-					ShowMessage(msg, wideShorten(ToWString(name), COLS-const_strlen(msg)).c_str());
+					Statusbar::msg(msg, wideShorten(ToWString(name), COLS-const_strlen(msg)).c_str());
 				}
 				else
 				{
 					const char msg[] = "Couldn't delete \"%ls\": %s";
-					ShowMessage(msg, wideShorten(ToWString(name), COLS-const_strlen(msg)-25).c_str(), strerror(errno));
+					Statusbar::msg(msg, wideShorten(ToWString(name), COLS-const_strlen(msg)-25).c_str(), strerror(errno));
 					success = false;
 					break;
 				}
@@ -832,7 +833,7 @@ void Delete::Run()
 			}
 		}
 		else
-			ShowMessage("Aborted");
+			Statusbar::msg("Aborted");
 	}
 #	endif // !WIN32
 	else if (myScreen == myPlaylistEditor && !myPlaylistEditor->Content->empty())
@@ -856,18 +857,18 @@ void Delete::Run()
 				for (auto it = list.begin(); it != list.end(); ++it)
 					Mpd.DeletePlaylist((*it)->value());
 				if (Mpd.CommitCommandsList())
-					ShowMessage("Playlist%s deleted", list.size() == 1 ? "" : "s");
+					Statusbar::msg("Playlist%s deleted", list.size() == 1 ? "" : "s");
 			}
 			else
-				ShowMessage("Aborted");
+				Statusbar::msg("Aborted");
 		}
 		else if (myScreen->ActiveWindow() == myPlaylistEditor->Content)
 		{
 			std::string playlist = myPlaylistEditor->Playlists->current().value();
 			auto delete_fun = std::bind(&MPD::Connection::PlaylistDelete, _1, playlist, _2);
-			ShowMessage("Deleting items...");
+			Statusbar::msg("Deleting items...");
 			if (deleteSelectedSongs(*myPlaylistEditor->Content, delete_fun))
-				ShowMessage("Item(s) deleted");
+				Statusbar::msg("Item(s) deleted");
 		}
 	}
 }
@@ -897,14 +898,14 @@ void SavePlaylist::Run()
 {
 	using Global::wFooter;
 	
-	LockStatusbar();
-	Statusbar() << "Save playlist as: ";
+	Statusbar::lock();
+	Statusbar::put() << "Save playlist as: ";
 	std::string playlist_name = wFooter->getString();
 	std::string real_playlist_name = locale_to_utf_cpy(playlist_name);
-	UnlockStatusbar();
+	Statusbar::unlock();
 	if (playlist_name.find("/") != std::string::npos)
 	{
-		ShowMessage("Playlist name must not contain slashes");
+		Statusbar::msg("Playlist name must not contain slashes");
 		return;
 	}
 	if (!playlist_name.empty())
@@ -916,14 +917,14 @@ void SavePlaylist::Run()
 				Mpd.AddToPlaylist(real_playlist_name, (*myPlaylist->Items)[i].value());
 			Mpd.CommitCommandsList();
 			if (Mpd.GetErrorMessage().empty())
-				ShowMessage("Filtered items added to playlist \"%s\"", playlist_name.c_str());
+				Statusbar::msg("Filtered items added to playlist \"%s\"", playlist_name.c_str());
 		}
 		else
 		{
 			int result = Mpd.SavePlaylist(real_playlist_name);
 			if (result == MPD_ERROR_SUCCESS)
 			{
-				ShowMessage("Playlist saved as \"%s\"", playlist_name.c_str());
+				Statusbar::msg("Playlist saved as \"%s\"", playlist_name.c_str());
 				if (myPlaylistEditor->Main()) // check if initialized
 					myPlaylistEditor->Playlists->clear(); // make playlist's list update itself
 			}
@@ -934,10 +935,10 @@ void SavePlaylist::Run()
 				{
 					Mpd.DeletePlaylist(real_playlist_name);
 					if (Mpd.SavePlaylist(real_playlist_name) == MPD_ERROR_SUCCESS)
-						ShowMessage("Playlist overwritten");
+						Statusbar::msg("Playlist overwritten");
 				}
 				else
-					ShowMessage("Aborted");
+					Statusbar::msg("Aborted");
 				if (myPlaylistEditor->Main()) // check if initialized
 					myPlaylistEditor->Playlists->clear(); // make playlist's list update itself
 				if (myScreen == myPlaylist)
@@ -1058,14 +1059,14 @@ void Add::Run()
 {
 	using Global::wFooter;
 	
-	LockStatusbar();
-	Statusbar() << (myScreen == myPlaylistEditor ? "Add to playlist: " : "Add: ");
+	Statusbar::lock();
+	Statusbar::put() << (myScreen == myPlaylistEditor ? "Add to playlist: " : "Add: ");
 	std::string path = wFooter->getString();
 	locale_to_utf(path);
-	UnlockStatusbar();
+	Statusbar::unlock();
 	if (!path.empty())
 	{
-		Statusbar() << "Adding...";
+		Statusbar::put() << "Adding...";
 		wFooter->refresh();
 		if (myScreen == myPlaylistEditor)
 			Mpd.AddToPlaylist(myPlaylistEditor->Playlists->current().value(), path);
@@ -1118,7 +1119,7 @@ void ToggleDisplayMode::Run()
 	if (myScreen == myPlaylist)
 	{
 		Config.columns_in_playlist = !Config.columns_in_playlist;
-		ShowMessage("Playlist display mode: %s", Config.columns_in_playlist ? "Columns" : "Classic");
+		Statusbar::msg("Playlist display mode: %s", Config.columns_in_playlist ? "Columns" : "Classic");
 		
 		if (Config.columns_in_playlist)
 		{
@@ -1137,20 +1138,20 @@ void ToggleDisplayMode::Run()
 	else if (myScreen == myBrowser)
 	{
 		Config.columns_in_browser = !Config.columns_in_browser;
-		ShowMessage("Browser display mode: %s", Config.columns_in_browser ? "Columns" : "Classic");
+		Statusbar::msg("Browser display mode: %s", Config.columns_in_browser ? "Columns" : "Classic");
 		myBrowser->Main()->setTitle(Config.columns_in_browser && Config.titles_visibility ? Display::Columns(myBrowser->Main()->getWidth()) : "");
 	}
 	else if (myScreen == mySearcher)
 	{
 		Config.columns_in_search_engine = !Config.columns_in_search_engine;
-		ShowMessage("Search engine display mode: %s", Config.columns_in_search_engine ? "Columns" : "Classic");
+		Statusbar::msg("Search engine display mode: %s", Config.columns_in_search_engine ? "Columns" : "Classic");
 		if (mySearcher->Main()->size() > SearchEngine::StaticOptions)
 			mySearcher->Main()->setTitle(Config.columns_in_search_engine && Config.titles_visibility ? Display::Columns(mySearcher->Main()->getWidth()) : "");
 	}
 	else if (myScreen->ActiveWindow() == myPlaylistEditor->Content)
 	{
 		Config.columns_in_playlist_editor = !Config.columns_in_playlist_editor;
-		ShowMessage("Playlist editor display mode: %s", Config.columns_in_playlist_editor ? "Columns" : "Classic");
+		Statusbar::msg("Playlist editor display mode: %s", Config.columns_in_playlist_editor ? "Columns" : "Classic");
 		if (Config.columns_in_playlist_editor)
 			myPlaylistEditor->Content->setItemDisplayer(std::bind(Display::SongsInColumns, _1, myPlaylistEditor));
 		else
@@ -1166,7 +1167,7 @@ bool ToggleSeparatorsBetweenAlbums::canBeRun() const
 void ToggleSeparatorsBetweenAlbums::Run()
 {
 	Config.playlist_separate_albums = !Config.playlist_separate_albums;
-	ShowMessage("Separators between albums: %s", Config.playlist_separate_albums ? "On" : "Off");
+	Statusbar::msg("Separators between albums: %s", Config.playlist_separate_albums ? "On" : "Off");
 }
 
 #ifndef HAVE_CURL_CURL_H
@@ -1194,14 +1195,14 @@ void ToggleFetchingLyricsInBackground::Run()
 {
 #	ifdef HAVE_CURL_CURL_H
 	Config.fetch_lyrics_in_background = !Config.fetch_lyrics_in_background;
-	ShowMessage("Fetching lyrics for playing songs in background: %s", Config.fetch_lyrics_in_background ? "On" : "Off");
+	Statusbar::msg("Fetching lyrics for playing songs in background: %s", Config.fetch_lyrics_in_background ? "On" : "Off");
 #	endif // HAVE_CURL_CURL_H
 }
 
 void TogglePlayingSongCentering::Run()
 {
 	Config.autocenter_mode = !Config.autocenter_mode;
-	ShowMessage("Centering playing song: %s", Config.autocenter_mode ? "On" : "Off");
+	Statusbar::msg("Centering playing song: %s", Config.autocenter_mode ? "On" : "Off");
 	if (Config.autocenter_mode && Mpd.isPlaying() && !myPlaylist->Items->isFiltered())
 		myPlaylist->Items->highlight(Mpd.GetCurrentlyPlayingSongPos());
 }
@@ -1315,10 +1316,10 @@ void SetCrossfade::Run()
 {
 	using Global::wFooter;
 	
-	LockStatusbar();
-	Statusbar() << "Set crossfade to: ";
+	Statusbar::lock();
+	Statusbar::put() << "Set crossfade to: ";
 	std::string crossfade = wFooter->getString(3);
-	UnlockStatusbar();
+	Statusbar::unlock();
 	int cf = stringToInt(crossfade);
 	if (cf > 0)
 	{
@@ -1361,13 +1362,13 @@ void EditLibraryTag::Run()
 #	ifdef HAVE_TAGLIB_H
 	using Global::wFooter;
 	
-	LockStatusbar();
-	Statusbar() << NC::fmtBold << tagTypeToString(Config.media_lib_primary_tag) << NC::fmtBoldEnd << ": ";
+	Statusbar::lock();
+	Statusbar::put() << NC::fmtBold << tagTypeToString(Config.media_lib_primary_tag) << NC::fmtBoldEnd << ": ";
 	std::string new_tag = wFooter->getString(myLibrary->Tags->current().value());
-	UnlockStatusbar();
+	Statusbar::unlock();
 	if (!new_tag.empty() && new_tag != myLibrary->Tags->current().value())
 	{
-		ShowMessage("Updating tags...");
+		Statusbar::msg("Updating tags...");
 		Mpd.StartSearch(1);
 		Mpd.AddSearch(Config.media_lib_primary_tag, locale_to_utf_cpy(myLibrary->Tags->current().value()));
 		MPD::MutableSong::SetFunction set = tagTypeToSetFunction(Config.media_lib_primary_tag);
@@ -1378,12 +1379,12 @@ void EditLibraryTag::Run()
 		{
 			MPD::MutableSong es = *s;
 			es.setTags(set, new_tag);
-			ShowMessage("Updating tags in \"%s\"...", es.getName().c_str());
+			Statusbar::msg("Updating tags in \"%s\"...", es.getName().c_str());
 			std::string path = Config.mpd_music_dir + es.getURI();
 			if (!TagEditor::WriteTags(es))
 			{
 				const char msg[] = "Error while updating tags in \"%ls\"";
-				ShowMessage(msg, wideShorten(ToWString(es.getURI()), COLS-const_strlen(msg)).c_str());
+				Statusbar::msg(msg, wideShorten(ToWString(es.getURI()), COLS-const_strlen(msg)).c_str());
 				success = false;
 				break;
 			}
@@ -1391,7 +1392,7 @@ void EditLibraryTag::Run()
 		if (success)
 		{
 			Mpd.UpdateDirectory(getSharedDirectory(songs.begin(), songs.end()));
-			ShowMessage("Tags updated successfully");
+			Statusbar::msg("Tags updated successfully");
 		}
 	}
 #	endif // HAVE_TAGLIB_H
@@ -1413,23 +1414,23 @@ void EditLibraryAlbum::Run()
 #	ifdef HAVE_TAGLIB_H
 	using Global::wFooter;
 	
-	LockStatusbar();
-	Statusbar() << NC::fmtBold << "Album: " << NC::fmtBoldEnd;
+	Statusbar::lock();
+	Statusbar::put() << NC::fmtBold << "Album: " << NC::fmtBoldEnd;
 	std::string new_album = wFooter->getString(myLibrary->Albums->current().value().Album);
-	UnlockStatusbar();
+	Statusbar::unlock();
 	if (!new_album.empty() && new_album != myLibrary->Albums->current().value().Album)
 	{
 		bool success = 1;
-		ShowMessage("Updating tags...");
+		Statusbar::msg("Updating tags...");
 		for (size_t i = 0;  i < myLibrary->Songs->size(); ++i)
 		{
-			ShowMessage("Updating tags in \"%s\"...", (*myLibrary->Songs)[i].value().getName().c_str());
+			Statusbar::msg("Updating tags in \"%s\"...", (*myLibrary->Songs)[i].value().getName().c_str());
 			std::string path = Config.mpd_music_dir + (*myLibrary->Songs)[i].value().getURI();
 			TagLib::FileRef f(path.c_str());
 			if (f.isNull())
 			{
 				const char msg[] = "Error while opening file \"%ls\"";
-				ShowMessage(msg, wideShorten(ToWString((*myLibrary->Songs)[i].value().getURI()), COLS-const_strlen(msg)).c_str());
+				Statusbar::msg(msg, wideShorten(ToWString((*myLibrary->Songs)[i].value().getURI()), COLS-const_strlen(msg)).c_str());
 				success = 0;
 				break;
 			}
@@ -1437,7 +1438,7 @@ void EditLibraryAlbum::Run()
 			if (!f.save())
 			{
 				const char msg[] = "Error while writing tags in \"%ls\"";
-				ShowMessage(msg, wideShorten(ToWString((*myLibrary->Songs)[i].value().getURI()), COLS-const_strlen(msg)).c_str());
+				Statusbar::msg(msg, wideShorten(ToWString((*myLibrary->Songs)[i].value().getURI()), COLS-const_strlen(msg)).c_str());
 				success = 0;
 				break;
 			}
@@ -1445,7 +1446,7 @@ void EditLibraryAlbum::Run()
 		if (success)
 		{
 			Mpd.UpdateDirectory(getSharedDirectory(myLibrary->Songs->beginV(), myLibrary->Songs->endV()));
-			ShowMessage("Tags updated successfully");
+			Statusbar::msg("Tags updated successfully");
 		}
 	}
 #	endif // HAVE_TAGLIB_H
@@ -1472,10 +1473,10 @@ void EditDirectoryName::Run()
 	if (myScreen == myBrowser)
 	{
 		std::string old_dir = myBrowser->Main()->current().value().name;
-		LockStatusbar();
-		Statusbar() << NC::fmtBold << "Directory: " << NC::fmtBoldEnd;
+		Statusbar::lock();
+		Statusbar::put() << NC::fmtBold << "Directory: " << NC::fmtBoldEnd;
 		std::string new_dir = wFooter->getString(old_dir);
-		UnlockStatusbar();
+		Statusbar::unlock();
 		if (!new_dir.empty() && new_dir != old_dir)
 		{
 			std::string full_old_dir;
@@ -1490,7 +1491,7 @@ void EditDirectoryName::Run()
 			if (rename_result == 0)
 			{
 				const char msg[] = "Directory renamed to \"%ls\"";
-				ShowMessage(msg, wideShorten(ToWString(new_dir), COLS-const_strlen(msg)).c_str());
+				Statusbar::msg(msg, wideShorten(ToWString(new_dir), COLS-const_strlen(msg)).c_str());
 				if (!myBrowser->isLocal())
 					Mpd.UpdateDirectory(locale_to_utf_cpy(getSharedDirectory(old_dir, new_dir)));
 				myBrowser->GetDirectory(myBrowser->CurrentDir());
@@ -1498,7 +1499,7 @@ void EditDirectoryName::Run()
 			else
 			{
 				const char msg[] = "Couldn't rename \"%ls\": %s";
-				ShowMessage(msg, wideShorten(ToWString(old_dir), COLS-const_strlen(msg)-25).c_str(), strerror(errno));
+				Statusbar::msg(msg, wideShorten(ToWString(old_dir), COLS-const_strlen(msg)-25).c_str(), strerror(errno));
 			}
 		}
 	}
@@ -1506,10 +1507,10 @@ void EditDirectoryName::Run()
 	else if (myScreen->ActiveWindow() == myTagEditor->Dirs)
 	{
 		std::string old_dir = myTagEditor->Dirs->current().value().first;
-		LockStatusbar();
-		Statusbar() << NC::fmtBold << "Directory: " << NC::fmtBoldEnd;
+		Statusbar::lock();
+		Statusbar::put() << NC::fmtBold << "Directory: " << NC::fmtBoldEnd;
 		std::string new_dir = wFooter->getString(old_dir);
-		UnlockStatusbar();
+		Statusbar::unlock();
 		if (!new_dir.empty() && new_dir != old_dir)
 		{
 			std::string full_old_dir = Config.mpd_music_dir + myTagEditor->CurrentDir() + "/" + locale_to_utf_cpy(old_dir);
@@ -1517,13 +1518,13 @@ void EditDirectoryName::Run()
 			if (rename(full_old_dir.c_str(), full_new_dir.c_str()) == 0)
 			{
 				const char msg[] = "Directory renamed to \"%ls\"";
-				ShowMessage(msg, wideShorten(ToWString(new_dir), COLS-const_strlen(msg)).c_str());
+				Statusbar::msg(msg, wideShorten(ToWString(new_dir), COLS-const_strlen(msg)).c_str());
 				Mpd.UpdateDirectory(myTagEditor->CurrentDir());
 			}
 			else
 			{
 				const char msg[] = "Couldn't rename \"%ls\": %s";
-				ShowMessage(msg, wideShorten(ToWString(old_dir), COLS-const_strlen(msg)-25).c_str(), strerror(errno));
+				Statusbar::msg(msg, wideShorten(ToWString(old_dir), COLS-const_strlen(msg)-25).c_str(), strerror(errno));
 			}
 		}
 	}
@@ -1548,16 +1549,16 @@ void EditPlaylistName::Run()
 		old_name = myPlaylistEditor->Playlists->current().value();
 	else
 		old_name = myBrowser->Main()->current().value().name;
-	LockStatusbar();
-	Statusbar() << NC::fmtBold << "Playlist: " << NC::fmtBoldEnd;
+	Statusbar::lock();
+	Statusbar::put() << NC::fmtBold << "Playlist: " << NC::fmtBoldEnd;
 	std::string new_name = wFooter->getString(old_name);
-	UnlockStatusbar();
+	Statusbar::unlock();
 	if (!new_name.empty() && new_name != old_name)
 	{
 		if (Mpd.Rename(locale_to_utf_cpy(old_name), locale_to_utf_cpy(new_name)))
 		{
 			const char msg[] = "Playlist renamed to \"%ls\"";
-			ShowMessage(msg, wideShorten(ToWString(new_name), COLS-const_strlen(msg)).c_str());
+			Statusbar::msg(msg, wideShorten(ToWString(new_name), COLS-const_strlen(msg)).c_str());
 			if (myBrowser->Main() && !myBrowser->isLocal())
 				myBrowser->GetDirectory("/");
 			if (myPlaylistEditor->Main())
@@ -1619,31 +1620,31 @@ void ToggleScreenLock::Run()
 		BasicScreen::Unlock();
 		Action::SetResizeFlags();
 		myScreen->Resize();
-		ShowMessage("Screen unlocked");
+		Statusbar::msg("Screen unlocked");
 	}
 	else
 	{
 		int part = Config.locked_screen_width_part*100;
 		if (Config.ask_for_locked_screen_width_part)
 		{
-			LockStatusbar();
-			Statusbar() << "% of the locked screen's width to be reserved (20-80): ";
+			Statusbar::lock();
+			Statusbar::put() << "% of the locked screen's width to be reserved (20-80): ";
 			std::string str_part = wFooter->getString(intTo<std::string>::apply(Config.locked_screen_width_part*100));
-			UnlockStatusbar();
+			Statusbar::unlock();
 			if (str_part.empty())
 				return;
 			part = stringToInt(str_part);
 		}
 		if (part < 20 || part > 80)
 		{
-			ShowMessage("Number is out of range");
+			Statusbar::msg("Number is out of range");
 			return;
 		}
 		Config.locked_screen_width_part = part/100.0;
 		if (myScreen->Lock())
-			ShowMessage("Screen locked (with %d%% width)", part);
+			Statusbar::msg("Screen locked (with %d%% width)", part);
 		else
-			ShowMessage("Current screen can't be locked");
+			Statusbar::msg("Current screen can't be locked");
 	}
 }
 
@@ -1675,10 +1676,10 @@ void JumpToPositionInSong::Run()
 	
 	const MPD::Song s = myPlaylist->nowPlayingSong();
 	
-	LockStatusbar();
-	Statusbar() << "Position to go (in %/mm:ss/seconds(s)): ";
+	Statusbar::lock();
+	Statusbar::put() << "Position to go (in %/mm:ss/seconds(s)): ";
 	std::string position = wFooter->getString();
-	UnlockStatusbar();
+	Statusbar::unlock();
 	
 	if (position.empty())
 		return;
@@ -1690,7 +1691,7 @@ void JumpToPositionInSong::Run()
 		if (newpos >= 0 && newpos <= Mpd.GetTotalTime())
 			Mpd.Seek(newpos);
 		else
-			ShowMessage("Out of bounds, 0:00-%s possible for mm:ss, %s given", s.getLength().c_str(), MPD::Song::ShowTime(newpos).c_str());
+			Statusbar::msg("Out of bounds, 0:00-%s possible for mm:ss, %s given", s.getLength().c_str(), MPD::Song::ShowTime(newpos).c_str());
 	}
 	else if (position.find('s') != std::string::npos) // probably position in seconds
 	{
@@ -1698,7 +1699,7 @@ void JumpToPositionInSong::Run()
 		if (newpos >= 0 && newpos <= Mpd.GetTotalTime())
 			Mpd.Seek(newpos);
 		else
-			ShowMessage("Out of bounds, 0-%d possible for seconds, %d given", s.getDuration(), newpos);
+			Statusbar::msg("Out of bounds, 0-%d possible for seconds, %d given", s.getDuration(), newpos);
 	}
 	else
 	{
@@ -1706,7 +1707,7 @@ void JumpToPositionInSong::Run()
 		if (newpos >= 0 && newpos <= 100)
 			Mpd.Seek(Mpd.GetTotalTime()*newpos/100.0);
 		else
-			ShowMessage("Out of bounds, 0-100 possible for %%, %d given", newpos);
+			Statusbar::msg("Out of bounds, 0-100 possible for %%, %d given", newpos);
 	}
 }
 
@@ -1720,7 +1721,7 @@ void ReverseSelection::Run()
 {
 	auto w = hasSongs(myScreen);
 	w->reverseSelection();
-	ShowMessage("Selection reversed");
+	Statusbar::msg("Selection reversed");
 }
 
 bool RemoveSelection::canBeRun() const
@@ -1733,7 +1734,7 @@ void RemoveSelection::Run()
 	auto pl = proxySongList(myScreen);
 	for (size_t i = 0; i < pl->size(); ++i)
 		pl->setSelected(i, false);
-	ShowMessage("Selection removed");
+	Statusbar::msg("Selection removed");
 }
 
 bool SelectAlbum::canBeRun() const
@@ -1770,7 +1771,7 @@ void SelectAlbum::Run()
 			else
 				pl->setSelected(pos, true);
 		}
-		ShowMessage("Album around cursor position selected");
+		Statusbar::msg("Album around cursor position selected");
 	}
 }
 
@@ -1786,9 +1787,9 @@ void CropMainPlaylist::Run()
 		yes = AskYesNoQuestion("Do you really want to crop main playlist?", TraceMpdStatus);
 	if (yes)
 	{
-		ShowMessage("Cropping playlist...");
+		Statusbar::msg("Cropping playlist...");
 		if (cropPlaylist(*myPlaylist->Items, std::bind(&MPD::Connection::Delete, _1, _2)))
-			ShowMessage("Cropping playlist...");
+			Statusbar::msg("Cropping playlist...");
 	}
 }
 
@@ -1807,9 +1808,9 @@ void CropPlaylist::Run()
 	if (yes)
 	{
 		auto delete_fun = std::bind(&MPD::Connection::PlaylistDelete, _1, playlist, _2);
-		ShowMessage("Cropping playlist \"%s\"...", playlist.c_str());
+		Statusbar::msg("Cropping playlist \"%s\"...", playlist.c_str());
 		if (cropPlaylist(*myPlaylistEditor->Content, delete_fun))
-			ShowMessage("Playlist \"%s\" cropped", playlist.c_str());
+			Statusbar::msg("Playlist \"%s\" cropped", playlist.c_str());
 	}
 }
 
@@ -1822,9 +1823,9 @@ void ClearMainPlaylist::Run()
 	{
 		auto delete_fun = std::bind(&MPD::Connection::Delete, _1, _2);
 		auto clear_fun = std::bind(&MPD::Connection::ClearMainPlaylist, _1);
-		ShowMessage("Deleting items...");
+		Statusbar::msg("Deleting items...");
 		if (clearPlaylist(*myPlaylist->Items, delete_fun, clear_fun))
-			ShowMessage("Items deleted");
+			Statusbar::msg("Items deleted");
 	}
 }
 
@@ -1844,9 +1845,9 @@ void ClearPlaylist::Run()
 	{
 		auto delete_fun = std::bind(&MPD::Connection::PlaylistDelete, _1, playlist, _2);
 		auto clear_fun = std::bind(&MPD::Connection::ClearPlaylist, _1, playlist);
-		ShowMessage("Deleting items from \"%s\"...", playlist.c_str());
+		Statusbar::msg("Deleting items from \"%s\"...", playlist.c_str());
 		if (clearPlaylist(*myPlaylistEditor->Content, delete_fun, clear_fun))
-			ShowMessage("Items deleted from \"%s\"", playlist.c_str());
+			Statusbar::msg("Items deleted from \"%s\"", playlist.c_str());
 	}
 }
 
@@ -1883,21 +1884,21 @@ void ApplyFilter::Run()
 	Filterable *f = dynamic_cast<Filterable *>(myScreen);
 	std::string filter = f->currentFilter();
 	
-	LockStatusbar();
-	Statusbar() << NC::fmtBold << "Apply filter: " << NC::fmtBoldEnd;
-	wFooter->setGetStringHelper(StatusbarApplyFilterImmediately(f, ToWString(filter)));
+	Statusbar::lock();
+	Statusbar::put() << NC::fmtBold << "Apply filter: " << NC::fmtBoldEnd;
+	wFooter->setGetStringHelper(Statusbar::Helpers::ApplyFilterImmediately(f, ToWString(filter)));
 	wFooter->getString(filter);
-	wFooter->setGetStringHelper(StatusbargetStringHelper);
-	UnlockStatusbar();
+	wFooter->setGetStringHelper(Statusbar::Helpers::getString);
+	Statusbar::unlock();
 	
 	filter = f->currentFilter();
  	if (filter.empty())
 	{
 		myPlaylist->Items->clearFilterResults();
-		ShowMessage("Filtering disabled");
+		Statusbar::msg("Filtering disabled");
 	}
  	else
-		ShowMessage("Using filter \"%s\"", filter.c_str());
+		Statusbar::msg("Using filter \"%s\"", filter.c_str());
 	
 	if (myScreen == myPlaylist)
 	{
@@ -1922,15 +1923,15 @@ void Find::Run()
 {
 	using Global::wFooter;
 	
-	LockStatusbar();
-	Statusbar() << "Find: ";
+	Statusbar::lock();
+	Statusbar::put() << "Find: ";
 	std::string findme = wFooter->getString();
-	UnlockStatusbar();
+	Statusbar::unlock();
 	
-	ShowMessage("Searching...");
+	Statusbar::msg("Searching...");
 	Screen<NC::Scrollpad> *s = static_cast<Screen<NC::Scrollpad> *>(myScreen);
 	s->Main()->removeFormatting();
-	ShowMessage("%s", findme.empty() || s->Main()->setFormatting(NC::fmtReverse, ToWString(findme), NC::fmtReverseEnd, 0) ? "Done!" : "No matching patterns found");
+	Statusbar::msg("%s", findme.empty() || s->Main()->setFormatting(NC::fmtReverse, ToWString(findme), NC::fmtReverseEnd, 0) ? "Done!" : "No matching patterns found");
 	s->Main()->flush();
 }
 
@@ -1985,14 +1986,14 @@ void PreviousFoundItem::Run()
 void ToggleFindMode::Run()
 {
 	Config.wrapped_search = !Config.wrapped_search;
-	ShowMessage("Search mode: %s", Config.wrapped_search ? "Wrapped" : "Normal");
+	Statusbar::msg("Search mode: %s", Config.wrapped_search ? "Wrapped" : "Normal");
 }
 
 bool ToggleReplayGainMode::canBeRun() const
 {
 	if (Mpd.Version() < 16)
 	{
-		ShowMessage("Replay gain mode control is supported in MPD >= 0.16.0");
+		Statusbar::msg("Replay gain mode control is supported in MPD >= 0.16.0");
 		return false;
 	}
 	return true;
@@ -2002,8 +2003,8 @@ void ToggleReplayGainMode::Run()
 {
 	using Global::wFooter;
 	
-	LockStatusbar();
-	Statusbar() << "Replay gain mode? [" << NC::fmtBold << 'o' << NC::fmtBoldEnd << "ff/" << NC::fmtBold << 't' << NC::fmtBoldEnd << "rack/" << NC::fmtBold << 'a' << NC::fmtBoldEnd << "lbum]";
+	Statusbar::lock();
+	Statusbar::put() << "Replay gain mode? [" << NC::fmtBold << 'o' << NC::fmtBoldEnd << "ff/" << NC::fmtBold << 't' << NC::fmtBoldEnd << "rack/" << NC::fmtBold << 'a' << NC::fmtBoldEnd << "lbum]";
 	wFooter->refresh();
 	int answer = 0;
 	do
@@ -2012,42 +2013,42 @@ void ToggleReplayGainMode::Run()
 		answer = wFooter->readKey();
 	}
 	while (answer != 'o' && answer != 't' && answer != 'a');
-	UnlockStatusbar();
+	Statusbar::unlock();
 	Mpd.SetReplayGainMode(answer == 't' ? MPD::rgmTrack : (answer == 'a' ? MPD::rgmAlbum : MPD::rgmOff));
-	ShowMessage("Replay gain mode: %s", Mpd.GetReplayGainMode().c_str());
+	Statusbar::msg("Replay gain mode: %s", Mpd.GetReplayGainMode().c_str());
 }
 
 void ToggleSpaceMode::Run()
 {
 	Config.space_selects = !Config.space_selects;
-	ShowMessage("Space mode: %s item", Config.space_selects ? "Select" : "Add");
+	Statusbar::msg("Space mode: %s item", Config.space_selects ? "Select" : "Add");
 }
 
 void ToggleAddMode::Run()
 {
 	Config.ncmpc_like_songs_adding = !Config.ncmpc_like_songs_adding;
-	ShowMessage("Add mode: %s", Config.ncmpc_like_songs_adding ? "Add item to playlist, remove if already added" : "Always add item to playlist");
+	Statusbar::msg("Add mode: %s", Config.ncmpc_like_songs_adding ? "Add item to playlist, remove if already added" : "Always add item to playlist");
 }
 
 void ToggleMouse::Run()
 {
 	Config.mouse_support = !Config.mouse_support;
 	mousemask(Config.mouse_support ? ALL_MOUSE_EVENTS : 0, 0);
-	ShowMessage("Mouse support %s", Config.mouse_support ? "enabled" : "disabled");
+	Statusbar::msg("Mouse support %s", Config.mouse_support ? "enabled" : "disabled");
 }
 
 void ToggleBitrateVisibility::Run()
 {
 	Config.display_bitrate = !Config.display_bitrate;
-	ShowMessage("Bitrate visibility %s", Config.display_bitrate ? "enabled" : "disabled");
+	Statusbar::msg("Bitrate visibility %s", Config.display_bitrate ? "enabled" : "disabled");
 }
 
 void AddRandomItems::Run()
 {
 	using Global::wFooter;
 	
-	LockStatusbar();
-	Statusbar() << "Add random? [" << NC::fmtBold << 's' << NC::fmtBoldEnd << "ongs/" << NC::fmtBold << 'a' << NC::fmtBoldEnd << "rtists/al" << NC::fmtBold << 'b' << NC::fmtBoldEnd << "ums] ";
+	Statusbar::lock();
+	Statusbar::put() << "Add random? [" << NC::fmtBold << 's' << NC::fmtBoldEnd << "ongs/" << NC::fmtBold << 'a' << NC::fmtBoldEnd << "rtists/al" << NC::fmtBold << 'b' << NC::fmtBoldEnd << "ums] ";
 	wFooter->refresh();
 	int answer = 0;
 	do
@@ -2056,7 +2057,7 @@ void AddRandomItems::Run()
 		answer = wFooter->readKey();
 	}
 	while (answer != 's' && answer != 'a' && answer != 'b');
-	UnlockStatusbar();
+	Statusbar::unlock();
 	
 	mpd_tag_type tag_type = MPD_TAG_ARTIST;
 	std::string tag_type_str ;
@@ -2068,12 +2069,12 @@ void AddRandomItems::Run()
 	else
 		tag_type_str = "song";
 	
-	LockStatusbar();
-	Statusbar() << "Number of random " << tag_type_str << "s: ";
+	Statusbar::lock();
+	Statusbar::put() << "Number of random " << tag_type_str << "s: ";
 	size_t number = stringToLongInt(wFooter->getString());
-	UnlockStatusbar();
+	Statusbar::unlock();
 	if (number && (answer == 's' ? Mpd.AddRandomSongs(number) : Mpd.AddRandomTag(tag_type, number)))
-		ShowMessage("%zu random %s%s added to playlist", number, tag_type_str.c_str(), number == 1 ? "" : "s");
+		Statusbar::msg("%zu random %s%s added to playlist", number, tag_type_str.c_str(), number == 1 ? "" : "s");
 }
 
 bool ToggleBrowserSortMode::canBeRun() const
@@ -2089,17 +2090,17 @@ void ToggleBrowserSortMode::Run()
 			if (!myBrowser->isLocal())
 			{
 				Config.browser_sort_mode = smMTime;
-				ShowMessage("Sort songs by: Modification time");
+				Statusbar::msg("Sort songs by: Modification time");
 				break;
 			}
 		// local browser doesn't support sorting by mtime, so we just skip it.
 		case smMTime:
 			Config.browser_sort_mode = smCustomFormat;
-			ShowMessage("Sort songs by: Custom format");
+			Statusbar::msg("Sort songs by: Custom format");
 			break;
 		case smCustomFormat:
 			Config.browser_sort_mode = smName;
-			ShowMessage("Sort songs by: Name");
+			Statusbar::msg("Sort songs by: Name");
 			break;
 	}
 	std::sort(myBrowser->Main()->begin()+(myBrowser->CurrentDir() != "/"), myBrowser->Main()->end(),
@@ -2116,8 +2117,8 @@ void ToggleLibraryTagType::Run()
 {
 	using Global::wFooter;
 	
-	LockStatusbar();
-	Statusbar() << "Tag type? [" << NC::fmtBold << 'a' << NC::fmtBoldEnd << "rtist/album" << NC::fmtBold << 'A' << NC::fmtBoldEnd << "rtist/" << NC::fmtBold << 'y' << NC::fmtBoldEnd << "ear/" << NC::fmtBold << 'g' << NC::fmtBoldEnd << "enre/" << NC::fmtBold << 'c' << NC::fmtBoldEnd << "omposer/" << NC::fmtBold << 'p' << NC::fmtBoldEnd << "erformer] ";
+	Statusbar::lock();
+	Statusbar::put() << "Tag type? [" << NC::fmtBold << 'a' << NC::fmtBoldEnd << "rtist/album" << NC::fmtBold << 'A' << NC::fmtBoldEnd << "rtist/" << NC::fmtBold << 'y' << NC::fmtBoldEnd << "ear/" << NC::fmtBold << 'g' << NC::fmtBoldEnd << "enre/" << NC::fmtBold << 'c' << NC::fmtBoldEnd << "omposer/" << NC::fmtBold << 'p' << NC::fmtBoldEnd << "erformer] ";
 	wFooter->refresh();
 	int answer = 0;
 	do
@@ -2126,7 +2127,7 @@ void ToggleLibraryTagType::Run()
 		answer = wFooter->readKey();
 	}
 	while (answer != 'a' && answer != 'A' && answer != 'y' && answer != 'g' && answer != 'c' && answer != 'p');
-	UnlockStatusbar();
+	Statusbar::unlock();
 	mpd_tag_type new_tagitem = charToTagType(answer);
 	if (new_tagitem != Config.media_lib_primary_tag)
 	{
@@ -2148,7 +2149,7 @@ void ToggleLibraryTagType::Run()
 			myLibrary->Tags->clear();
 			myLibrary->Tags->display();
 		}
-		ShowMessage("Switched to list of %s tag", item_type.c_str());
+		Statusbar::msg("Switched to list of %s tag", item_type.c_str());
 	}
 }
 
@@ -2188,7 +2189,7 @@ bool SetSelectedItemsPriority::canBeRun() const
 {
 	if (Mpd.Version() < 17)
 	{
-		ShowMessage("Priorities are supported in MPD >= 0.17.0");
+		Statusbar::msg("Priorities are supported in MPD >= 0.17.0");
 		return false;
 	}
 	return myScreen->ActiveWindow() == myPlaylist->Items && !myPlaylist->Items->empty();
@@ -2198,16 +2199,16 @@ void SetSelectedItemsPriority::Run()
 {
 	using Global::wFooter;
 	
-	LockStatusbar();
-	Statusbar() << "Set priority [0-255]: ";
+	Statusbar::lock();
+	Statusbar::put() << "Set priority [0-255]: ";
 	std::string strprio = wFooter->getString();
-	UnlockStatusbar();
+	Statusbar::unlock();
 	if (!isInteger(strprio.c_str(), true))
 		return;
 	int prio = stringToInt(strprio);
 	if (prio < 0 || prio > 255)
 	{
-		ShowMessage("Number is out of range");
+		Statusbar::msg("Number is out of range");
 		return;
 	}
 	myPlaylist->SetSelectedItemsPriority(prio);
@@ -2222,10 +2223,10 @@ void FilterPlaylistOnPriorities::Run()
 {
 	using Global::wFooter;
 	
-	LockStatusbar();
-	Statusbar() << "Show songs with priority higher than: ";
+	Statusbar::lock();
+	Statusbar::put() << "Show songs with priority higher than: ";
 	std::string strprio = wFooter->getString();
-	UnlockStatusbar();
+	Statusbar::unlock();
 	if (!isInteger(strprio.c_str(), false))
 		return;
 	unsigned prio = stringToInt(strprio);
@@ -2233,7 +2234,7 @@ void FilterPlaylistOnPriorities::Run()
 		[prio](const NC::Menu<MPD::Song>::Item &s) {
 			return s.value().getPrio() > prio;
 	});
-	ShowMessage("Playlist filtered (songs with priority higher than %u)", prio);
+	Statusbar::msg("Playlist filtered (songs with priority higher than %u)", prio);
 }
 
 void ShowSongInfo::Run()

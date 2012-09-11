@@ -32,36 +32,10 @@
 
 void DrawNowPlayingTitle();
 
-void LockProgressbar();
-void UnlockProgressbar();
-
-void LockStatusbar();
-void UnlockStatusbar();
-
 void TraceMpdStatus();
 void NcmpcppStatusChanged(MPD::Connection *, MPD::StatusChanges, void *);
 void NcmpcppErrorCallback(MPD::Connection *, int, const char *, void *);
 
 void DrawHeader();
 
-NC::Window &Statusbar();
-void DrawProgressbar(unsigned elapsed, unsigned time);
-void ShowMessage(const char *, ...) GNUC_PRINTF(1, 2);
-
-void StatusbarMPDCallback();
-void StatusbargetStringHelper(const std::wstring &);
-
-struct StatusbarApplyFilterImmediately
-{
-	StatusbarApplyFilterImmediately(Filterable *f, const std::wstring &filter)
-	: m_f(f), m_ws(filter) { }
-	
-	void operator()(const std::wstring &ws);
-	
-private:
-	Filterable *m_f;
-	std::wstring m_ws;
-};
-
 #endif
-

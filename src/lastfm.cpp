@@ -37,6 +37,7 @@
 #include "helpers.h"
 #include "charset.h"
 #include "global.h"
+#include "statusbar.h"
 
 using Global::MainHeight;
 using Global::MainStartY;
@@ -211,7 +212,7 @@ void Lastfm::Refetch()
 	if (remove(itsFilename.c_str()) && errno != ENOENT)
 	{
 		const char msg[] = "Couldn't remove \"%ls\": %s";
-		ShowMessage(msg, wideShorten(ToWString(itsFilename), COLS-const_strlen(msg)-25).c_str(), strerror(errno));
+		Statusbar::msg(msg, wideShorten(ToWString(itsFilename), COLS-const_strlen(msg)-25).c_str(), strerror(errno));
 		return;
 	}
 	Load();

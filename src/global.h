@@ -55,7 +55,7 @@ namespace Global
 	// height of main window
 	extern size_t MainHeight;
 	
-	// indicates whether messages from ShowMessage function should be shown
+	// indicates whether messages from Statusbar::msg function should be shown
 	extern bool ShowMessages;
 	
 	// indicates whether seeking action in currently in progress

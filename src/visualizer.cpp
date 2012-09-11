@@ -34,6 +34,7 @@
 #include "global.h"
 #include "settings.h"
 #include "status.h"
+#include "statusbar.h"
 
 using Global::MainStartY;
 using Global::MainHeight;
@@ -157,7 +158,7 @@ void Visualizer::SpacePressed()
 {
 #	ifdef HAVE_FFTW3_H
 	Config.visualizer_use_wave = !Config.visualizer_use_wave;
-	ShowMessage("Visualization type: %s", Config.visualizer_use_wave ? "Sound wave" : "Frequency spectrum");
+	Statusbar::msg("Visualization type: %s", Config.visualizer_use_wave ? "Sound wave" : "Frequency spectrum");
 #	endif // HAVE_FFTW3_H
 }
 
@@ -225,7 +226,7 @@ void Visualizer::DrawFrequencySpectrum(int16_t *buf, ssize_t samples, size_t y_o
 void Visualizer::SetFD()
 {
 	if (itsFifo < 0 && (itsFifo = open(Config.visualizer_fifo_path.c_str(), O_RDONLY | O_NONBLOCK)) < 0)
-		ShowMessage("Couldn't open \"%s\" for reading PCM data: %s", Config.visualizer_fifo_path.c_str(), strerror(errno));
+		Statusbar::msg("Couldn't open \"%s\" for reading PCM data: %s", Config.visualizer_fifo_path.c_str(), strerror(errno));
 }
 
 void Visualizer::ResetFD()
@@ -244,7 +245,7 @@ void Visualizer::FindOutputID()
 			if (o->name() == Config.visualizer_output_name)
 				itsOutputID = i;
 		if (itsOutputID == -1)
-			ShowMessage("There is no output named \"%s\"", Config.visualizer_output_name.c_str());
+			Statusbar::msg("There is no output named \"%s\"", Config.visualizer_output_name.c_str());
 	}
 }
 

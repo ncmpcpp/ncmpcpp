@@ -29,6 +29,7 @@
 #include "search_engine.h"
 #include "settings.h"
 #include "status.h"
+#include "statusbar.h"
 #include "utility/comparators.h"
 
 using namespace std::placeholders;
@@ -163,12 +164,12 @@ void SearchEngine::EnterPressed()
 	if (option > ConstraintsNumber && option < SearchButton)
 		w->current().value().buffer().clear();
 	if (option < SearchButton)
-		LockStatusbar();
+		Statusbar::lock();
 	
 	if (option < ConstraintsNumber)
 	{
 		std::string constraint = ConstraintsNames[option];
-		Statusbar() << NC::fmtBold << constraint << NC::fmtBoldEnd << ": ";
+		Statusbar::put() << NC::fmtBold << constraint << NC::fmtBoldEnd << ": ";
 		itsConstraints[option] = Global::wFooter->getString(itsConstraints[option]);
 		w->current().value().buffer().clear();
 		constraint.resize(13, ' ');
@@ -189,7 +190,7 @@ void SearchEngine::EnterPressed()
 	else if (option == SearchButton)
 	{
 		w->showAll();
-		ShowMessage("Searching...");
+		Statusbar::msg("Searching...");
 		if (w->size() > StaticOptions)
 			Prepare();
 		Search();
@@ -204,7 +205,7 @@ void SearchEngine::EnterPressed()
 			w->at(ResetButton+2).value().mkBuffer() << Config.color1 << "Search results: " << Config.color2 << "Found " << found << (found > 1 ? " songs" : " song") << NC::clDefault;
 			w->insertSeparator(ResetButton+3);
 			markSongsInPlaylist(getProxySongList());
-			ShowMessage("Searching finished");
+			Statusbar::msg("Searching finished");
 			if (Config.block_search_constraints_change)
 				for (size_t i = 0; i < StaticOptions-4; ++i)
 					w->at(i).setInactive(true);
@@ -212,7 +213,7 @@ void SearchEngine::EnterPressed()
 			w->scroll(NC::wDown);
 		}
 		else
-			ShowMessage("No results found");
+			Statusbar::msg("No results found");
 	}
 	else if (option == ResetButton)
 	{
@@ -222,7 +223,7 @@ void SearchEngine::EnterPressed()
 		myPlaylist->Add(w->current().value().song(), 1);
 	
 	if (option < SearchButton)
-		UnlockStatusbar();
+		Statusbar::unlock();
 }
 
 void SearchEngine::SpacePressed()
@@ -387,7 +388,7 @@ void SearchEngine::reset()
 		itsConstraints[i].clear();
 	w->reset();
 	Prepare();
-	ShowMessage("Search state reset");
+	Statusbar::msg("Search state reset");
 }
 
 void SearchEngine::Search()

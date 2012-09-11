@@ -37,6 +37,7 @@
 #include "sel_items_adder.h"
 #include "settings.h"
 #include "status.h"
+#include "statusbar.h"
 #include "tag_editor.h"
 #include "visualizer.h"
 
@@ -49,16 +50,6 @@ using Global::wHeader;
 
 using Global::Timer;
 using Global::VolumeState;
-
-namespace
-{
-	timeval time_of_statusbar_lock;
-	int lock_statusbar_delay = -1;
-	
-	bool block_statusbar_update = 0;
-	bool block_progressbar_update = 0;
-	bool allow_statusbar_unlock = 1;
-}
 
 #ifndef USE_PDCURSES
 void WindowTitle(const std::string &status)
@@ -74,100 +65,6 @@ void DrawNowPlayingTitle(MPD::Song &np)
 		np = myPlaylist->nowPlayingSong();
 	if (!np.empty())
 		WindowTitle(np.toString(Config.song_window_title_format));
-}
-
-void StatusbarMPDCallback()
-{
-	Mpd.OrderDataFetching();
-}
-
-void StatusbargetStringHelper(const std::wstring &)
-{
-	TraceMpdStatus();
-}
-
-void StatusbarApplyFilterImmediately::operator()(const std::wstring &ws)
-{
-	// if input queue is not empty, we don't want to update filter since next
-	// character will be taken from queue immediately, trigering this function
-	// again and thus making it inefficient, so let's apply filter only if
-	// "real" user input arrived. however, we want to apply filter if ENTER
-	// is next in queue, so its effects will be seen.
-	if (wFooter->inputQueue().empty() || wFooter->inputQueue().front() == KEY_ENTER)
-	{
-		if (m_ws != ws)
-		{
-			m_ws = ws;
-			m_f->applyFilter(ToString(m_ws));
-			myScreen->RefreshWindow();
-		}
-		TraceMpdStatus();
-	}
-}
-
-void LockProgressbar()
-{
-	block_progressbar_update = 1;
-}
-
-void UnlockProgressbar()
-{
-	block_progressbar_update = 0;
-}
-
-void LockStatusbar()
-{
-	if (Config.statusbar_visibility)
-		block_statusbar_update = 1;
-	else
-		block_progressbar_update = 1;
-	allow_statusbar_unlock = 0;
-}
-
-void UnlockStatusbar()
-{
-	allow_statusbar_unlock = 1;
-	if (lock_statusbar_delay < 0)
-	{
-		if (Config.statusbar_visibility)
-			block_statusbar_update = 0;
-		else
-			block_progressbar_update = 0;
-	}
-	if (!Mpd.isPlaying())
-	{
-		if (Config.new_design)
-			DrawProgressbar(Mpd.GetElapsedTime(), Mpd.GetTotalTime());
-		else
-			Statusbar() << wclrtoeol;
-		wFooter->refresh();
-	}
-}
-
-void TryToClearStatusbarMessage()
-{
-	using Global::Timer;
-	if (lock_statusbar_delay > 0)
-	{
-		if (Timer.tv_sec >= time_of_statusbar_lock.tv_sec+lock_statusbar_delay)
-		{
-			lock_statusbar_delay = -1;
-			
-			if (Config.statusbar_visibility)
-				block_statusbar_update = !allow_statusbar_unlock;
-			else
-				block_progressbar_update = !allow_statusbar_unlock;
-			
-			if (Mpd.GetState() != MPD::psPlay && !block_statusbar_update && !block_progressbar_update)
-			{
-				if (Config.new_design)
-					DrawProgressbar(Mpd.GetElapsedTime(), Mpd.GetTotalTime());
-				else
-					Statusbar() << wclrtoeol;
-				wFooter->refresh();
-			}
-		}
-	}
 }
 
 void TraceMpdStatus()
@@ -203,7 +100,7 @@ void TraceMpdStatus()
 		myPlaylist->Items->refresh();
 	}
 	
-	TryToClearStatusbarMessage();
+	Statusbar::tryRedraw();
 }
 
 void NcmpcppErrorCallback(MPD::Connection *, int errorid, const char *msg, void *)
@@ -214,11 +111,11 @@ void NcmpcppErrorCallback(MPD::Connection *, int errorid, const char *msg, void 
 	if ((errorid >> 8) == MPD_SERVER_ERROR_PERMISSION)
 	{
 		wFooter->setGetStringHelper(0);
-		Statusbar() << "Password: ";
+		Statusbar::put() << "Password: ";
 		Mpd.SetPassword(wFooter->getString(-1, 0, 1));
 		if (Mpd.SendPassword())
-			ShowMessage("Password accepted");
-		wFooter->setGetStringHelper(StatusbargetStringHelper);
+			Statusbar::msg("Password accepted");
+		wFooter->setGetStringHelper(Statusbar::Helpers::getString);
 	}
 	else if ((errorid >> 8) == MPD_SERVER_ERROR_NO_EXIST && myScreen == myBrowser)
 	{
@@ -226,7 +123,7 @@ void NcmpcppErrorCallback(MPD::Connection *, int errorid, const char *msg, void 
 		myBrowser->Refresh();
 	}
 	else
-		ShowMessage("MPD: %s", msg);
+		Statusbar::msg("MPD: %s", msg);
 }
 
 void NcmpcppStatusChanged(MPD::Connection *, MPD::StatusChanges changed, void *)
@@ -351,8 +248,8 @@ void NcmpcppStatusChanged(MPD::Connection *, MPD::StatusChanges changed, void *)
 			case MPD::psStop:
 			{
 				WindowTitle("ncmpcpp " VERSION);
-				if (!block_progressbar_update)
-					DrawProgressbar(0, 0);
+				if (Progressbar::isUnlocked())
+					Progressbar::draw(0, 0);
 				Playlist::ReloadRemaining = true;
 				if (Config.new_design)
 				{
@@ -379,7 +276,7 @@ void NcmpcppStatusChanged(MPD::Connection *, MPD::StatusChanges changed, void *)
 			*wHeader << NC::XY(0, 1) << NC::fmtBold << player_state << NC::fmtBoldEnd;
 			wHeader->refresh();
 		}
-		else if (!block_statusbar_update && Config.statusbar_visibility)
+		else if (Statusbar::isUnlocked() && Config.statusbar_visibility)
 		{
 			*wFooter << NC::XY(0, 1);
 			if (player_state.empty())
@@ -468,7 +365,7 @@ void NcmpcppStatusChanged(MPD::Connection *, MPD::StatusChanges changed, void *)
 				
 				changed.StatusFlags = 1;
 			}
-			else if (!block_statusbar_update && Config.statusbar_visibility)
+			else if (Statusbar::isUnlocked() && Config.statusbar_visibility)
 			{
 				if (Config.display_bitrate && Mpd.GetBitrate())
 				{
@@ -501,13 +398,13 @@ void NcmpcppStatusChanged(MPD::Connection *, MPD::StatusChanges changed, void *)
 				np_song.write(*wFooter, playing_song_scroll_begin, wFooter->getWidth()-player_state.length()-tracklength.length(), L" ** ");
 				*wFooter << NC::fmtBold << NC::XY(wFooter->getWidth()-tracklength.length(), 1) << tracklength << NC::fmtBoldEnd;
 			}
-			if (!block_progressbar_update)
-				DrawProgressbar(Mpd.GetElapsedTime(), Mpd.GetTotalTime());
+			if (Progressbar::isUnlocked())
+				Progressbar::draw(Mpd.GetElapsedTime(), Mpd.GetTotalTime());
 			Global::RedrawStatusbar = false;
 		}
 		else
 		{
-			if (!block_statusbar_update && Config.statusbar_visibility)
+			 if (Statusbar::isUnlocked() && Config.statusbar_visibility)
 				*wFooter << NC::XY(0, 1) << wclrtoeol;
 		}
 	}
@@ -522,28 +419,28 @@ void NcmpcppStatusChanged(MPD::Connection *, MPD::StatusChanges changed, void *)
 	if (changed.Repeat)
 	{
 		mpd_repeat = Mpd.GetRepeat() ? 'r' : 0;
-		ShowMessage("Repeat mode is %s", !mpd_repeat ? "off" : "on");
+		Statusbar::msg("Repeat mode is %s", !mpd_repeat ? "off" : "on");
 	}
 	if (changed.Random)
 	{
 		mpd_random = Mpd.GetRandom() ? 'z' : 0;
-		ShowMessage("Random mode is %s", !mpd_random ? "off" : "on");
+		Statusbar::msg("Random mode is %s", !mpd_random ? "off" : "on");
 	}
 	if (changed.Single)
 	{
 		mpd_single = Mpd.GetSingle() ? 's' : 0;
-		ShowMessage("Single mode is %s", !mpd_single ? "off" : "on");
+		Statusbar::msg("Single mode is %s", !mpd_single ? "off" : "on");
 	}
 	if (changed.Consume)
 	{
 		mpd_consume = Mpd.GetConsume() ? 'c' : 0;
-		ShowMessage("Consume mode is %s", !mpd_consume ? "off" : "on");
+		Statusbar::msg("Consume mode is %s", !mpd_consume ? "off" : "on");
 	}
 	if (changed.Crossfade)
 	{
 		int crossfade = Mpd.GetCrossfade();
 		mpd_crossfade = crossfade ? 'x' : 0;
-		ShowMessage("Crossfade set to %d seconds", crossfade);
+		Statusbar::msg("Crossfade set to %d seconds", crossfade);
 	}
 	if (changed.DBUpdating)
 	{
@@ -551,11 +448,11 @@ void NcmpcppStatusChanged(MPD::Connection *, MPD::StatusChanges changed, void *)
 		// finished and nothing changed, so we need to switch it off for them.
 		if (!Mpd.SupportsIdle() || Mpd.Version() > 15)
 			mpd_db_updating = Mpd.GetDBIsUpdating() ? 'U' : 0;
-		ShowMessage(Mpd.GetDBIsUpdating() ? "Database update started!" : "Database update finished!");
+		Statusbar::msg(Mpd.GetDBIsUpdating() ? "Database update started!" : "Database update finished!");
 		if (changed.Database && myScreen == mySelectedItemsAdder)
 		{
 			myScreen->SwitchTo(); // switch to previous screen
-			ShowMessage("Database has changed, you need to select your item(s) once again");
+			Statusbar::msg("Database has changed, you need to select your item(s) once again");
 		}
 	}
 	if (changed.StatusFlags && (Config.header_visibility || Config.new_design))
@@ -666,63 +563,4 @@ void DrawHeader()
 		*wHeader << NC::clEnd;
 	}
 	wHeader->refresh();
-}
-
-NC::Window &Statusbar()
-{
-	*wFooter << NC::XY(0, Config.statusbar_visibility) << wclrtoeol;
-	return *wFooter;
-}
-
-void DrawProgressbar(unsigned elapsed, unsigned time)
-{
-	unsigned pb_width = wFooter->getWidth();
-	unsigned howlong = time ? pb_width*elapsed/time : 0;
-	if (Config.progressbar_boldness)
-		*wFooter << NC::fmtBold;
-	*wFooter << Config.progressbar_color;
-	if (Config.progressbar[2] != '\0')
-	{
-		wFooter->goToXY(0, 0);
-		for (unsigned i = 0; i < pb_width; ++i)
-			*wFooter << Config.progressbar[2];
-		wFooter->goToXY(0, 0);
-	}
-	else
-		mvwhline(wFooter->raw(), 0, 0, 0, pb_width);
-	if (time)
-	{
-		*wFooter << Config.progressbar_elapsed_color;
-		pb_width = std::min(size_t(howlong), wFooter->getWidth());
-		for (unsigned i = 0; i < pb_width; ++i)
-			*wFooter << Config.progressbar[0];
-		if (howlong < wFooter->getWidth())
-			*wFooter << Config.progressbar[1];
-		*wFooter << NC::clEnd;
-	}
-	*wFooter << NC::clEnd;
-	if (Config.progressbar_boldness)
-		*wFooter << NC::fmtBoldEnd;
-}
-
-void ShowMessage(const char *format, ...)
-{
-	if (Global::ShowMessages && allow_statusbar_unlock)
-	{
-		time_of_statusbar_lock = Global::Timer;
-		lock_statusbar_delay = Config.message_delay_time;
-		if (Config.statusbar_visibility)
-			block_statusbar_update = 1;
-		else
-			block_progressbar_update = 1;
-		wFooter->goToXY(0, Config.statusbar_visibility);
-		*wFooter << NC::fmtBoldEnd;
-		va_list list;
-		va_start(list, format);
-		wmove(wFooter->raw(), Config.statusbar_visibility, 0);
-		vw_printw(wFooter->raw(), format, list);
-		wclrtoeol(wFooter->raw());
-		va_end(list);
-		wFooter->refresh();
-	}
 }

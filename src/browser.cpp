@@ -33,6 +33,7 @@
 #include "regex_filter.h"
 #include "settings.h"
 #include "status.h"
+#include "statusbar.h"
 #include "tag_editor.h"
 #include "utility/comparators.h"
 
@@ -158,7 +159,7 @@ void Browser::EnterPressed()
 		{
 			if (Mpd.LoadPlaylist(locale_to_utf_cpy(item.name)))
 			{
-				ShowMessage("Playlist \"%s\" loaded", item.name.c_str());
+				Statusbar::msg("Playlist \"%s\" loaded", item.name.c_str());
 				myPlaylist->PlayNewlyAddedSongs();
 			}
 		}
@@ -194,7 +195,7 @@ void Browser::SpacePressed()
 			{
 				MPD::SongList list;
 				MPD::ItemList items;
-				ShowMessage("Scanning directory \"%s\"...", item.name.c_str());
+				Statusbar::msg("Scanning directory \"%s\"...", item.name.c_str());
 				myBrowser->GetLocalDirectory(items, item.name, 1);
 				list.reserve(items.size());
 				for (MPD::ItemList::const_iterator it = items.begin(); it != items.end(); ++it)
@@ -205,7 +206,7 @@ void Browser::SpacePressed()
 #			endif // !WIN32
 				result = Mpd.Add(locale_to_utf_cpy(item.name));
 			if (result)
-				ShowMessage("Directory \"%s\" added", item.name.c_str());
+				Statusbar::msg("Directory \"%s\" added", item.name.c_str());
 			break;
 		}
 		case itSong:
@@ -216,7 +217,7 @@ void Browser::SpacePressed()
 		case itPlaylist:
 		{
 			if (Mpd.LoadPlaylist(locale_to_utf_cpy(item.name)))
-				ShowMessage("Playlist \"%s\" loaded", item.name.c_str());
+				Statusbar::msg("Playlist \"%s\" loaded", item.name.c_str());
 			break;
 		}
 	}
@@ -551,12 +552,12 @@ void Browser::ClearDirectory(const std::string &path) const
 		if (remove(full_path.c_str()) == 0)
 		{
 			const char msg[] = "Deleting \"%ls\"...";
-			ShowMessage(msg, wideShorten(ToWString(full_path), COLS-const_strlen(msg)).c_str());
+			Statusbar::msg(msg, wideShorten(ToWString(full_path), COLS-const_strlen(msg)).c_str());
 		}
 		else
 		{
 			const char msg[] = "Couldn't remove \"%ls\": %s";
-			ShowMessage(msg, wideShorten(ToWString(full_path), COLS-const_strlen(msg)-25).c_str(), strerror(errno));
+			Statusbar::msg(msg, wideShorten(ToWString(full_path), COLS-const_strlen(msg)-25).c_str(), strerror(errno));
 		}
 	}
 	closedir(dir);
@@ -566,12 +567,12 @@ void Browser::ChangeBrowseMode()
 {
 	if (Mpd.GetHostname()[0] != '/')
 	{
-		ShowMessage("For browsing local filesystem connection to MPD via UNIX Socket is required");
+		Statusbar::msg("For browsing local filesystem connection to MPD via UNIX Socket is required");
 		return;
 	}
 	
 	itsBrowseLocally = !itsBrowseLocally;
-	ShowMessage("Browse mode: %s", itsBrowseLocally ? "Local filesystem" : "MPD database");
+	Statusbar::msg("Browse mode: %s", itsBrowseLocally ? "Local filesystem" : "MPD database");
 	itsBrowsedDir = itsBrowseLocally ? Config.GetHomeDirectory() : "/";
 	if (itsBrowseLocally && *itsBrowsedDir.rbegin() == '/')
 		itsBrowsedDir.resize(itsBrowsedDir.length()-1);
