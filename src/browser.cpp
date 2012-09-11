@@ -138,13 +138,7 @@ void Browser::EnterPressed()
 		case itDirectory:
 		{
 			if (isParentDirectory(item))
-			{
-				size_t slash = itsBrowsedDir.rfind("/");
-				if (slash != std::string::npos)
-					GetDirectory(itsBrowsedDir.substr(0, slash), itsBrowsedDir);
-				else
-					GetDirectory("/", itsBrowsedDir);
-			}
+				GetDirectory(getParentDirectory(itsBrowsedDir), itsBrowsedDir);
 			else
 				GetDirectory(item.name, itsBrowsedDir);
 			DrawHeader();
