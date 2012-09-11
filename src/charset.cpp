@@ -100,7 +100,9 @@ void charset_convert(const char *from, const char *to, const char *&inbuf,
 
 }
 
-void iconv_convert_from_to(const char *from, const char *to, std::string &s)
+namespace IConv {//
+
+void convertFromTo(const char *from, const char *to, std::string &s)
 {
 	const char *tmp = strdup(s.c_str());
 	charset_convert(from, to, tmp, true, s.length());
@@ -108,7 +110,13 @@ void iconv_convert_from_to(const char *from, const char *to, std::string &s)
 	free(const_cast<char *>(tmp));
 }
 
-void utf_to_locale(std::string &s)
+std::string utf8ToLocale(std::string s)
+{
+	utf8ToLocale_(s);
+	return s;
+}
+
+void utf8ToLocale_(std::string &s)
 {
 	if (Config.system_encoding.empty() || !has_non_ascii_chars(s.c_str()))
 		return;
@@ -118,14 +126,13 @@ void utf_to_locale(std::string &s)
 	free(const_cast<char *>(tmp));
 }
 
-std::string utf_to_locale_cpy(const std::string &s)
+std::string localeToUtf8(std::string s)
 {
-	std::string result = s;
-	utf_to_locale(result);
-	return result;
+	localeToUtf8_(s);
+	return s;
 }
 
-void locale_to_utf(std::string &s)
+void localeToUtf8_(std::string &s)
 {
 	if (Config.system_encoding.empty() || !has_non_ascii_chars(s.c_str()) || is_utf8(s.c_str()))
 		return;
@@ -135,26 +142,6 @@ void locale_to_utf(std::string &s)
 	free(const_cast<char *>(tmp));
 }
 
-std::string locale_to_utf_cpy(const std::string &s)
-{
-	std::string result = s;
-	locale_to_utf(result);
-	return result;
-}
-
-void utf_to_locale(const char *&s, bool delete_old)
-{
-	if (!s || Config.system_encoding.empty() || !has_non_ascii_chars(s))
-		return;
-	charset_convert("utf-8", Config.system_encoding.c_str(), s, delete_old);
-}
-
-void locale_to_utf(const char *&s, bool delete_old)
-{
-	if (!s || Config.system_encoding.empty() || !has_non_ascii_chars(s) || is_utf8(s))
-		return;
-	charset_convert(Config.system_encoding.c_str(), "utf-8", s, delete_old);
 }
 
 #endif // HAVE_ICONV_H
-

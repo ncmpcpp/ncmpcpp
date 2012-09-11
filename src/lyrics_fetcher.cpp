@@ -212,7 +212,7 @@ void LyricstimeFetcher::postProcess(std::string &data)
 {
 	// lyricstime.com uses iso-8859-1 as the encoding
 	// so we need to convert obtained lyrics to utf-8
-	iconv_convert_from_to("iso-8859-1", "utf-8", data);
+	IConv::convertFromTo("iso-8859-1", "utf-8", data);
 	LyricsFetcher::postProcess(data);
 }
 
@@ -245,7 +245,7 @@ void LyricsmaniaFetcher::postProcess(std::string &data)
 {
 	// lyricsmania.com uses iso-8859-1 as the encoding
 	// so we need to convert obtained lyrics to utf-8
-	iconv_convert_from_to("iso-8859-1", "utf-8", data);
+	IConv::convertFromTo("iso-8859-1", "utf-8", data);
 	LyricsFetcher::postProcess(data);
 }
 

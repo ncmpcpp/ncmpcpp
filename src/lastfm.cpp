@@ -143,7 +143,7 @@ void Lastfm::Load()
 		{
 			if (!first)
 				*w << '\n';
-			utf_to_locale(line);
+			IConv::utf8ToLocale_(line);
 			*w << line;
 			first = 0;
 		}
@@ -183,7 +183,7 @@ void Lastfm::Download()
 	{
 		Save(result.second);
 		w->clear();
-		utf_to_locale(result.second);
+		IConv::utf8ToLocale_(result.second);
 		*w << result.second;
 		itsService->colorizeOutput(*w);
 	}

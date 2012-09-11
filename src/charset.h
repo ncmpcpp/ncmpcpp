@@ -22,33 +22,33 @@
 #define _CHARSET_H
 
 #include "config.h"
+#include <string>
+
+namespace IConv {//
 
 #ifdef HAVE_ICONV_H
 
-#include <string>
+void convertFromTo(const char *from, const char *to, std::string &s);
 
-void iconv_convert_from_to(const char *from, const char *to, std::string &s);
+std::string utf8ToLocale(std::string s);
+std::string localeToUtf8(std::string s);
 
-void utf_to_locale(std::string &);
-void locale_to_utf(std::string &);
-
-std::string utf_to_locale_cpy(const std::string &s);
-std::string locale_to_utf_cpy(const std::string &s);
-
-void utf_to_locale(const char *&, bool);
-void locale_to_utf(const char *&, bool);
+void utf8ToLocale_(std::string &s);
+void localeToUtf8_(std::string &s);
 
 #else
 
-#define iconv_convert_from_to(x, y, z);
+inline void convertFromTo(const char *, const char *, std::string &) { }
 
-#define utf_to_locale(x);
-#define locale_to_utf(x);
+inline std::string utf8ToLocale(std::string s) { return s; }
+inline std::string localeToUtf8(std::string s) { return s; }
 
-#define utf_to_locale_cpy(x) (x)
-#define locale_to_utf_cpy(x) (x)
+inline void utf8ToLocale_(std::string &) { }
+inline void localeToUtf8_(std::string &) { }
 
 #endif // HAVE_ICONV_H
+
+}
 
 #endif
 

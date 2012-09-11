@@ -188,7 +188,8 @@ void ParseArgv(int argc, char **argv)
 						replace(now_playing_format, "\\t", "\t");
 					}
 				}
-				std::cout << utf_to_locale_cpy(Mpd.GetCurrentlyPlayingSong().toString(now_playing_format)) << "\n";
+				std::cout << IConv::utf8ToLocale(
+					Mpd.GetCurrentlyPlayingSong().toString(now_playing_format)) << "\n";
 			}
 			exit(0);
 		}

@@ -268,7 +268,7 @@ void *Lyrics::Download()
 	{
 		Save(itsFilename, result.second);
 		w->clear();
-		utf_to_locale(result.second);
+		IConv::utf8ToLocale_(result.second);
 		*w << result.second;
 	}
 	else
@@ -343,7 +343,7 @@ void Lyrics::Load()
 		{
 			if (!first)
 				*w << '\n';
-			utf_to_locale(line);
+			IConv::utf8ToLocale_(line);
 			*w << line;
 			first = 0;
 		}

@@ -341,8 +341,8 @@ void NcmpcppStatusChanged(MPD::Connection *, MPD::StatusChanges changed, void *)
 				}
 				
 				NC::WBuffer first, second;
-				String2Buffer(ToWString(utf_to_locale_cpy(np.toString(Config.new_header_first_line, "$"))), first);
-				String2Buffer(ToWString(utf_to_locale_cpy(np.toString(Config.new_header_second_line, "$"))), second);
+				String2Buffer(ToWString(IConv::utf8ToLocale(np.toString(Config.new_header_first_line, "$"))), first);
+				String2Buffer(ToWString(IConv::utf8ToLocale(np.toString(Config.new_header_second_line, "$"))), second);
 				
 				size_t first_len = wideLength(first.str());
 				size_t first_margin = (std::max(tracklength.length()+1, VolumeState.length()))*2;
@@ -393,7 +393,7 @@ void NcmpcppStatusChanged(MPD::Connection *, MPD::StatusChanges changed, void *)
 					tracklength += "]";
 				}
 				NC::WBuffer np_song;
-				String2Buffer(ToWString(utf_to_locale_cpy(np.toString(Config.song_status_format, "$"))), np_song);
+				String2Buffer(ToWString(IConv::utf8ToLocale(np.toString(Config.song_status_format, "$"))), np_song);
 				*wFooter << NC::XY(0, 1) << wclrtoeol << NC::fmtBold << player_state << NC::fmtBoldEnd;
 				np_song.write(*wFooter, playing_song_scroll_begin, wFooter->getWidth()-player_state.length()-tracklength.length(), L" ** ");
 				*wFooter << NC::fmtBold << NC::XY(wFooter->getWidth()-tracklength.length(), 1) << tracklength << NC::fmtBoldEnd;
