@@ -168,6 +168,9 @@ int main(int argc, char **argv)
 	myPrevScreen = myBrowser;
 	myOldScreen = myBrowser;
 	
+	// initialize global timer
+	gettimeofday(&Timer, 0);
+	
 	// go to playlist
 	myPlaylist->SwitchTo();
 	myPlaylist->UpdateTimer();
