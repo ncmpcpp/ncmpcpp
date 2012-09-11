@@ -244,8 +244,8 @@ void Lyrics::DownloadInBackgroundImplHelper(const MPD::Song &s)
 
 void *Lyrics::Download()
 {
-	std::string artist = Curl::escape(locale_to_utf_cpy(itsSong.getArtist()));
-	std::string title = Curl::escape(locale_to_utf_cpy(itsSong.getTitle()));
+	std::string artist = Curl::escape(itsSong.getArtist());
+	std::string title = Curl::escape(itsSong.getTitle());
 	
 	LyricsFetcher::Result result;
 	
@@ -267,9 +267,8 @@ void *Lyrics::Download()
 	if (result.first == true)
 	{
 		Save(itsFilename, result.second);
-		
-		utf_to_locale(result.second);
 		w->clear();
+		utf_to_locale(result.second);
 		*w << result.second;
 	}
 	else
@@ -306,9 +305,9 @@ std::string Lyrics::GenerateFilename(const MPD::Song &s)
 	}
 	else
 	{
-		std::string file = locale_to_utf_cpy(s.getArtist());
+		std::string file = s.getArtist();
 		file += " - ";
-		file += locale_to_utf_cpy(s.getTitle());
+		file += s.getTitle();
 		file += ".txt";
 		removeInvalidCharsFromFilename(file);
 		filename = Config.lyrics_directory;

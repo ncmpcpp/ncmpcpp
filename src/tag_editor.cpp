@@ -1078,7 +1078,6 @@ bool TagEditor::WriteTags(MPD::MutableSong &s)
 			if (file_is_from_db)
 				new_name += Config.mpd_music_dir;
 			new_name += s.getDirectory() + "/" + s.getNewURI();
-			locale_to_utf(new_name);
 			if (rename(path_to_file.c_str(), new_name.c_str()) == 0 && !file_is_from_db)
 			{
 				if (Global::myOldScreen == myPlaylist)

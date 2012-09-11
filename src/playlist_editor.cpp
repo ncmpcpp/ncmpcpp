@@ -277,7 +277,7 @@ void PlaylistEditor::AddToPlaylist(bool add_n_play)
 	
 	if (w == Playlists && !Playlists->empty())
 	{
-		if (Mpd.LoadPlaylist(utf_to_locale_cpy(Playlists->current().value())))
+		if (Mpd.LoadPlaylist(Playlists->current().value()))
 		{
 			Statusbar::msg("Playlist \"%s\" loaded", Playlists->current().value().c_str());
 			if (add_n_play)

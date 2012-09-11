@@ -21,9 +21,7 @@
 #ifndef _CHARSET_H
 #define _CHARSET_H
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
+#include "config.h"
 
 #ifdef HAVE_ICONV_H
 

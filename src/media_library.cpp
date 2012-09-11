@@ -350,12 +350,12 @@ void MediaLibrary::Update()
 		Songs->reset();
 		
 		Mpd.StartSearch(1);
-		Mpd.AddSearch(Config.media_lib_primary_tag, locale_to_utf_cpy(hasTwoColumns ? Albums->current().value().PrimaryTag : Tags->current().value()));
+		Mpd.AddSearch(Config.media_lib_primary_tag, hasTwoColumns ? Albums->current().value().PrimaryTag : Tags->current().value());
 		if (Albums->current().value().Date != AllTracksMarker)
 		{
-			Mpd.AddSearch(MPD_TAG_ALBUM, locale_to_utf_cpy(Albums->current().value().Album));
+			Mpd.AddSearch(MPD_TAG_ALBUM, Albums->current().value().Album);
 			if (Config.media_library_display_date)
-				Mpd.AddSearch(MPD_TAG_DATE, locale_to_utf_cpy(Albums->current().value().Date));
+				Mpd.AddSearch(MPD_TAG_DATE, Albums->current().value().Date);
 		}
 		auto songs = Mpd.CommitSearchSongs();
 		for (auto s = songs.begin(); s != songs.end(); ++s)

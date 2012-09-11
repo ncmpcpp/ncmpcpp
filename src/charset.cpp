@@ -31,66 +31,73 @@
 
 #include "settings.h"
 
-namespace
+namespace {//
+
+bool is_utf8(const char *s)
 {
-	bool is_utf8(const char *s)
+	for (; *s; ++s)
 	{
-		for (; *s; ++s)
+		if (*s & 0x80) // 1xxxxxxx
 		{
-			if (*s & 0x80) // 1xxxxxxx
-			{
-				char c = 0x40;
-				unsigned i = 0;
-				while (c & *s)
-					++i, c >>= 1;
-				if (i < 1 || i > 3) // not 110xxxxx, 1110xxxx, 11110xxx
+			char c = 0x40;
+			unsigned i = 0;
+			while (c & *s)
+				++i, c >>= 1;
+			if (i < 1 || i > 3) // not 110xxxxx, 1110xxxx, 11110xxx
+				return false;
+			for (unsigned j = 0; j < i; ++j)
+				if (!*++s || !(*s & 0x80) || *s & 0x40) // 10xxxxxx
 					return false;
-				for (unsigned j = 0; j < i; ++j)
-					if (!*++s || !(*s & 0x80) || *s & 0x40) // 10xxxxxx
-						return false;
-			}
 		}
-		return true;
+	}
+	return true;
+}
+
+bool has_non_ascii_chars(const char *s)
+{
+	for (; *s; ++s)
+		if (*s & 0x80)
+			return true;
+	return false;
+}
+
+void charset_convert(const char *from, const char *to, const char *&inbuf,
+                     bool delete_old, size_t len = 0)
+{
+	assert(inbuf);
+	assert(from);
+	assert(to);
+	
+	iconv_t cd = iconv_open(to, from);
+	if (cd == iconv_t(-1))
+	{
+		std::cerr << "Error while executing iconv_open: " << strerror(errno) << "\n";
+		return;
 	}
 	
-	bool has_non_ascii_chars(const char *s)
-	{
-		for (; *s; ++s)
-			if (*s & 0x80)
-				return true;
-		return false;
-	}
+	if (!len)
+		len = strlen(inbuf);
+	size_t buflen = len*MB_CUR_MAX+1;
+	char *outbuf = static_cast<char *>(malloc(buflen));
+	char *outstart = outbuf;
+	const char *instart = inbuf;
 	
-	void charset_convert(const char *from, const char *to, const char *&inbuf, bool delete_old, size_t len = 0)
+	if (iconv(cd, const_cast<ICONV_CONST char **>(&inbuf), &len, &outbuf, &buflen) == size_t(-1))
 	{
-		if (!inbuf || !from || !to)
-			return;
-		
-		iconv_t cd = iconv_open(to, from);
-		
-		if (cd == iconv_t(-1))
-			return;
-		
-		if (!len)
-			len = strlen(inbuf);
-		size_t buflen = len*6+1;
-		char *outbuf = new char[buflen];
-		char *outstart = outbuf;
-		const char *instart = inbuf;
-		
-		if (iconv(cd, const_cast<ICONV_CONST char **>(&inbuf), &len, &outbuf, &buflen) == size_t(-1))
-		{
-			inbuf = instart;
-			delete [] outstart;
-			iconv_close(cd);
-			return;
-		}
-		iconv_close(cd);
+		std::cerr << "Error while executing iconv: " << strerror(errno) << "\n";
+		inbuf = instart;
+		delete [] outstart;
+	}
+	else
+	{
 		*outbuf = 0;
 		if (delete_old)
 			free(const_cast<char *>(instart));
 		inbuf = outstart;
 	}
+	iconv_close(cd);
+}
+
 }
 
 void iconv_convert_from_to(const char *from, const char *to, std::string &s)
@@ -103,7 +110,7 @@ void iconv_convert_from_to(const char *from, const char *to, std::string &s)
 
 void utf_to_locale(std::string &s)
 {
-	if (s.empty() || Config.system_encoding.empty() || !has_non_ascii_chars(s.c_str()))
+	if (Config.system_encoding.empty() || !has_non_ascii_chars(s.c_str()))
 		return;
 	const char *tmp = strdup(s.c_str());
 	charset_convert("utf-8", Config.system_encoding.c_str(), tmp, 1, s.length());
@@ -120,7 +127,7 @@ std::string utf_to_locale_cpy(const std::string &s)
 
 void locale_to_utf(std::string &s)
 {
-	if (s.empty() || Config.system_encoding.empty() || !has_non_ascii_chars(s.c_str()) || is_utf8(s.c_str()))
+	if (Config.system_encoding.empty() || !has_non_ascii_chars(s.c_str()) || is_utf8(s.c_str()))
 		return;
 	const char *tmp = strdup(s.c_str());
 	charset_convert(Config.system_encoding.c_str(), "utf-8", tmp, 1, s.length());

@@ -157,7 +157,7 @@ void Browser::EnterPressed()
 		}
 		case itPlaylist:
 		{
-			if (Mpd.LoadPlaylist(locale_to_utf_cpy(item.name)))
+			if (Mpd.LoadPlaylist(item.name))
 			{
 				Statusbar::msg("Playlist \"%s\" loaded", item.name.c_str());
 				myPlaylist->PlayNewlyAddedSongs();
@@ -204,7 +204,7 @@ void Browser::SpacePressed()
 			}
 			else
 #			endif // !WIN32
-				result = Mpd.Add(locale_to_utf_cpy(item.name));
+				result = Mpd.Add(item.name);
 			if (result)
 				Statusbar::msg("Directory \"%s\" added", item.name.c_str());
 			break;
@@ -216,7 +216,7 @@ void Browser::SpacePressed()
 		}
 		case itPlaylist:
 		{
-			if (Mpd.LoadPlaylist(locale_to_utf_cpy(item.name)))
+			if (Mpd.LoadPlaylist(item.name))
 				Statusbar::msg("Playlist \"%s\" loaded", item.name.c_str());
 			break;
 		}
@@ -403,8 +403,6 @@ void Browser::GetDirectory(std::string dir, std::string subdir)
 		w->reset();
 	itsBrowsedDir = dir;
 	
-	locale_to_utf(dir);
-	
 	w->clear();
 	
 	if (dir != "/")
@@ -434,13 +432,11 @@ void Browser::GetDirectory(std::string dir, std::string subdir)
 		{
 			case itPlaylist:
 			{
-				utf_to_locale(it->name);
 				w->addItem(*it);
 				break;
 			}
 			case itDirectory:
 			{
-				utf_to_locale(it->name);
 				if (it->name == subdir)
 					highlightme = w->size();
 				w->addItem(*it);
@@ -589,7 +585,7 @@ bool Browser::deleteItem(const MPD::Item &item)
 	
 	// playlist created by mpd
 	if (!isLocal() && item.type == itPlaylist && CurrentDir() == "/")
-		return Mpd.DeletePlaylist(locale_to_utf_cpy(item.name));
+		return Mpd.DeletePlaylist(item.name);
 	
 	std::string path;
 	if (!isLocal())

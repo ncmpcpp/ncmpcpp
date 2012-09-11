@@ -901,7 +901,6 @@ void SavePlaylist::Run()
 	Statusbar::lock();
 	Statusbar::put() << "Save playlist as: ";
 	std::string playlist_name = wFooter->getString();
-	std::string real_playlist_name = locale_to_utf_cpy(playlist_name);
 	Statusbar::unlock();
 	if (playlist_name.find("/") != std::string::npos)
 	{
@@ -914,14 +913,14 @@ void SavePlaylist::Run()
 		{
 			Mpd.StartCommandsList();
 			for (size_t i = 0; i < myPlaylist->Items->size(); ++i)
-				Mpd.AddToPlaylist(real_playlist_name, (*myPlaylist->Items)[i].value());
+				Mpd.AddToPlaylist(playlist_name, (*myPlaylist->Items)[i].value());
 			Mpd.CommitCommandsList();
 			if (Mpd.GetErrorMessage().empty())
 				Statusbar::msg("Filtered items added to playlist \"%s\"", playlist_name.c_str());
 		}
 		else
 		{
-			int result = Mpd.SavePlaylist(real_playlist_name);
+			int result = Mpd.SavePlaylist(playlist_name);
 			if (result == MPD_ERROR_SUCCESS)
 			{
 				Statusbar::msg("Playlist saved as \"%s\"", playlist_name.c_str());
@@ -933,8 +932,8 @@ void SavePlaylist::Run()
 				bool yes = AskYesNoQuestion("Playlist \"" + playlist_name + "\" already exists, overwrite?", TraceMpdStatus);
 				if (yes)
 				{
-					Mpd.DeletePlaylist(real_playlist_name);
-					if (Mpd.SavePlaylist(real_playlist_name) == MPD_ERROR_SUCCESS)
+					Mpd.DeletePlaylist(playlist_name);
+					if (Mpd.SavePlaylist(playlist_name) == MPD_ERROR_SUCCESS)
 						Statusbar::msg("Playlist overwritten");
 				}
 				else
@@ -1062,7 +1061,6 @@ void Add::Run()
 	Statusbar::lock();
 	Statusbar::put() << (myScreen == myPlaylistEditor ? "Add to playlist: " : "Add: ");
 	std::string path = wFooter->getString();
-	locale_to_utf(path);
 	Statusbar::unlock();
 	if (!path.empty())
 	{
@@ -1210,7 +1208,7 @@ void TogglePlayingSongCentering::Run()
 void UpdateDatabase::Run()
 {
 	if (myScreen == myBrowser)
-		Mpd.UpdateDirectory(locale_to_utf_cpy(myBrowser->CurrentDir()));
+		Mpd.UpdateDirectory(myBrowser->CurrentDir());
 #	ifdef HAVE_TAGLIB_H
 	else if (myScreen == myTagEditor)
 		Mpd.UpdateDirectory(myTagEditor->CurrentDir());
@@ -1370,7 +1368,7 @@ void EditLibraryTag::Run()
 	{
 		Statusbar::msg("Updating tags...");
 		Mpd.StartSearch(1);
-		Mpd.AddSearch(Config.media_lib_primary_tag, locale_to_utf_cpy(myLibrary->Tags->current().value()));
+		Mpd.AddSearch(Config.media_lib_primary_tag, myLibrary->Tags->current().value());
 		MPD::MutableSong::SetFunction set = tagTypeToSetFunction(Config.media_lib_primary_tag);
 		assert(set);
 		bool success = true;
@@ -1482,18 +1480,18 @@ void EditDirectoryName::Run()
 			std::string full_old_dir;
 			if (!myBrowser->isLocal())
 				full_old_dir += Config.mpd_music_dir;
-			full_old_dir += locale_to_utf_cpy(old_dir);
+			full_old_dir += old_dir;
 			std::string full_new_dir;
 			if (!myBrowser->isLocal())
 				full_new_dir += Config.mpd_music_dir;
-			full_new_dir += locale_to_utf_cpy(new_dir);
+			full_new_dir += new_dir;
 			int rename_result = rename(full_old_dir.c_str(), full_new_dir.c_str());
 			if (rename_result == 0)
 			{
 				const char msg[] = "Directory renamed to \"%ls\"";
 				Statusbar::msg(msg, wideShorten(ToWString(new_dir), COLS-const_strlen(msg)).c_str());
 				if (!myBrowser->isLocal())
-					Mpd.UpdateDirectory(locale_to_utf_cpy(getSharedDirectory(old_dir, new_dir)));
+					Mpd.UpdateDirectory(getSharedDirectory(old_dir, new_dir));
 				myBrowser->GetDirectory(myBrowser->CurrentDir());
 			}
 			else
@@ -1513,8 +1511,8 @@ void EditDirectoryName::Run()
 		Statusbar::unlock();
 		if (!new_dir.empty() && new_dir != old_dir)
 		{
-			std::string full_old_dir = Config.mpd_music_dir + myTagEditor->CurrentDir() + "/" + locale_to_utf_cpy(old_dir);
-			std::string full_new_dir = Config.mpd_music_dir + myTagEditor->CurrentDir() + "/" + locale_to_utf_cpy(new_dir);
+			std::string full_old_dir = Config.mpd_music_dir + myTagEditor->CurrentDir() + "/" + old_dir;
+			std::string full_new_dir = Config.mpd_music_dir + myTagEditor->CurrentDir() + "/" + new_dir;
 			if (rename(full_old_dir.c_str(), full_new_dir.c_str()) == 0)
 			{
 				const char msg[] = "Directory renamed to \"%ls\"";
@@ -1555,7 +1553,7 @@ void EditPlaylistName::Run()
 	Statusbar::unlock();
 	if (!new_name.empty() && new_name != old_name)
 	{
-		if (Mpd.Rename(locale_to_utf_cpy(old_name), locale_to_utf_cpy(new_name)))
+		if (Mpd.Rename(old_name, new_name))
 		{
 			const char msg[] = "Playlist renamed to \"%ls\"";
 			Statusbar::msg(msg, wideShorten(ToWString(new_name), COLS-const_strlen(msg)).c_str());

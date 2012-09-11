@@ -179,17 +179,16 @@ void SelectedItemsAdder::EnterPressed()
 			Statusbar::unlock();
 			if (!playlist.empty())
 			{
-				std::string utf_playlist = locale_to_utf_cpy(playlist);
 				Mpd.StartCommandsList();
 				for (auto it = list.begin(); it != list.end(); ++it)
-					Mpd.AddToPlaylist(utf_playlist, *it);
+					Mpd.AddToPlaylist(playlist, *it);
 				if (Mpd.CommitCommandsList())
 					Statusbar::msg("Selected item(s) added to playlist \"%s\"", playlist.c_str());
 			}
 		}
 		else if (pos > 1 && pos < w->size()-1) // add items to existing playlist
 		{
-			std::string playlist = locale_to_utf_cpy(w->current().value());
+			std::string playlist = w->current().value();
 			Mpd.StartCommandsList();
 			for (auto it = list.begin(); it != list.end(); ++it)
 				Mpd.AddToPlaylist(playlist, *it);
