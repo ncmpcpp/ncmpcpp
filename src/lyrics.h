@@ -58,7 +58,7 @@ class Lyrics : public Screen<NC::Scrollpad>
 		void Refetch();
 		
 		static void ToggleFetcher();
-		static void DownloadInBackground(const MPD::Song *s);
+		static void DownloadInBackground(const MPD::Song &s);
 #		endif // HAVE_CURL_CURL_H
 		
 		bool ReloadNP;
@@ -71,8 +71,8 @@ class Lyrics : public Screen<NC::Scrollpad>
 		void Load();
 		
 #		ifdef HAVE_CURL_CURL_H
-		static void *DownloadInBackgroundImpl(void *);
-		static void DownloadInBackgroundImplHelper(MPD::Song *);
+		static void *DownloadInBackgroundImpl(void *song_ptr);
+		static void DownloadInBackgroundImplHelper(const MPD::Song &s);
 		// lock for allowing exclusive access to itsToDownload and itsWorkersNumber
 		static pthread_mutex_t itsDIBLock;
 		// storage for songs for which lyrics are scheduled to be downloaded

@@ -473,7 +473,7 @@ void MouseEvent::Run()
 	&&  itsMouseEvent.y == LINES-(Config.statusbar_visibility ? 2 : 1)
 	   ) // progressbar
 	{
-		if (!myPlaylist->isPlaying())
+		if (!Mpd.isPlaying())
 			return;
 		Mpd.Seek(Mpd.GetTotalTime()*itsMouseEvent.x/double(COLS));
 	}
@@ -1087,7 +1087,7 @@ void Add::Run()
 
 bool SeekForward::canBeRun() const
 {
-	return myPlaylist->NowPlayingSong() && Mpd.GetTotalTime() > 0;
+	return Mpd.isPlaying() && Mpd.GetTotalTime() > 0;
 }
 
 void SeekForward::Run()
@@ -1097,7 +1097,7 @@ void SeekForward::Run()
 
 bool SeekBackward::canBeRun() const
 {
-	return myPlaylist->NowPlayingSong() && Mpd.GetTotalTime() > 0;
+	return Mpd.isPlaying() && Mpd.GetTotalTime() > 0;
 }
 
 void SeekBackward::Run()
@@ -1202,8 +1202,8 @@ void TogglePlayingSongCentering::Run()
 {
 	Config.autocenter_mode = !Config.autocenter_mode;
 	ShowMessage("Centering playing song: %s", Config.autocenter_mode ? "On" : "Off");
-	if (Config.autocenter_mode && myPlaylist->isPlaying() && !myPlaylist->Items->isFiltered())
-		myPlaylist->Items->highlight(myPlaylist->NowPlaying);
+	if (Config.autocenter_mode && Mpd.isPlaying() && !myPlaylist->Items->isFiltered())
+		myPlaylist->Items->highlight(Mpd.GetCurrentlyPlayingSongPos());
 }
 
 void UpdateDatabase::Run()
@@ -1223,23 +1223,21 @@ bool JumpToPlayingSong::canBeRun() const
 	return ((myScreen == myPlaylist && !myPlaylist->isFiltered())
 	    ||  myScreen == myBrowser
 	    ||  myScreen == myLibrary)
-	  &&   myPlaylist->isPlaying();
+	  &&   Mpd.isPlaying();
 }
 
 void JumpToPlayingSong::Run()
 {
 	if (myScreen == myPlaylist)
-		myPlaylist->Items->highlight(myPlaylist->NowPlaying);
+		myPlaylist->Items->highlight(Mpd.GetCurrentlyPlayingSongPos());
 	else if (myScreen == myBrowser)
 	{
-		const MPD::Song *s = myPlaylist->NowPlayingSong();
-		myBrowser->LocateSong(*s);
+		myBrowser->LocateSong(myPlaylist->nowPlayingSong());
 		DrawHeader();
 	}
 	else if (myScreen == myLibrary)
 	{
-		const MPD::Song *s = myPlaylist->NowPlayingSong();
-		myLibrary->LocateSong(*s);
+		myLibrary->LocateSong(myPlaylist->nowPlayingSong());
 	}
 }
 
@@ -1668,14 +1666,14 @@ void JumpToTagEditor::Run()
 
 bool JumpToPositionInSong::canBeRun() const
 {
-	return myPlaylist->NowPlayingSong() && Mpd.GetTotalTime() > 0;
+	return Mpd.isPlaying() && Mpd.GetTotalTime() > 0;
 }
 
 void JumpToPositionInSong::Run()
 {
 	using Global::wFooter;
 	
-	const MPD::Song *s = myPlaylist->NowPlayingSong();
+	const MPD::Song s = myPlaylist->nowPlayingSong();
 	
 	LockStatusbar();
 	Statusbar() << "Position to go (in %/mm:ss/seconds(s)): ";
@@ -1692,7 +1690,7 @@ void JumpToPositionInSong::Run()
 		if (newpos >= 0 && newpos <= Mpd.GetTotalTime())
 			Mpd.Seek(newpos);
 		else
-			ShowMessage("Out of bounds, 0:00-%s possible for mm:ss, %s given", s->getLength().c_str(), MPD::Song::ShowTime(newpos).c_str());
+			ShowMessage("Out of bounds, 0:00-%s possible for mm:ss, %s given", s.getLength().c_str(), MPD::Song::ShowTime(newpos).c_str());
 	}
 	else if (position.find('s') != std::string::npos) // probably position in seconds
 	{
@@ -1700,7 +1698,7 @@ void JumpToPositionInSong::Run()
 		if (newpos >= 0 && newpos <= Mpd.GetTotalTime())
 			Mpd.Seek(newpos);
 		else
-			ShowMessage("Out of bounds, 0-%d possible for seconds, %d given", s->getDuration(), newpos);
+			ShowMessage("Out of bounds, 0-%d possible for seconds, %d given", s.getDuration(), newpos);
 	}
 	else
 	{

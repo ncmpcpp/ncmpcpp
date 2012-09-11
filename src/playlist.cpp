@@ -364,6 +364,16 @@ MPD::SongList Playlist::getSelectedSongs()
 
 /***********************************************************************/
 
+MPD::Song Playlist::nowPlayingSong()
+{
+	MPD::Song s;
+	if (Mpd.isPlaying())
+		withUnfilteredMenu(*Items, [this, &s]() {
+			s = Items->at(Mpd.GetCurrentSongPos()).value();
+		});
+	return s;
+}
+
 bool Playlist::isFiltered()
 {
 	if (Items->isFiltered())
@@ -444,7 +454,7 @@ std::string Playlist::TotalLength()
 	if (Config.playlist_show_remaining_time && ReloadRemaining && !Items->isFiltered())
 	{
 		itsRemainingTime = 0;
-		for (size_t i = NowPlaying; i < Items->size(); ++i)
+		for (size_t i = Mpd.GetCurrentlyPlayingSongPos(); i < Items->size(); ++i)
 			itsRemainingTime += (*Items)[i].value().getDuration();
 		ReloadRemaining = false;
 	}
@@ -472,16 +482,6 @@ std::string Playlist::TotalLength()
 	}
 	result << ')';
 	return result.str();
-}
-
-const MPD::Song *Playlist::NowPlayingSong()
-{
-	bool was_filtered = Items->isFiltered();
-	Items->showAll();
-	const MPD::Song *s = isPlaying() ? &Items->at(NowPlaying).value() : 0;
-	if (was_filtered)
-		Items->showFiltered();
-	return s;
 }
 
 bool Playlist::Add(const MPD::Song &s, bool play, int position)

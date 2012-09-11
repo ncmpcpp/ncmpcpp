@@ -77,12 +77,12 @@ void Lyrics::Update()
 #	endif // HAVE_CURL_CURL_H
 	if (ReloadNP)
 	{
-		const MPD::Song *s = myPlaylist->NowPlayingSong();
-		if (s && !s->getArtist().empty() && !s->getTitle().empty())
+		const MPD::Song s = myPlaylist->nowPlayingSong();
+		if (!s.empty() && !s.getArtist().empty() && !s.getTitle().empty())
 		{
 			DrawHeader();
 			itsScrollBegin = 0;
-			itsSong = *s;
+			itsSong = s;
 			Load();
 		}
 		ReloadNP = 0;
@@ -161,21 +161,21 @@ void Lyrics::SpacePressed()
 }
 
 #ifdef HAVE_CURL_CURL_H
-void Lyrics::DownloadInBackground(const MPD::Song *s)
+void Lyrics::DownloadInBackground(const MPD::Song &s)
 {
-	if (!s || s->getArtist().empty() || s->getTitle().empty())
+	if (s.empty() || s.getArtist().empty() || s.getTitle().empty())
 		return;
 	
-	std::string filename = GenerateFilename(*s);
+	std::string filename = GenerateFilename(s);
 	std::ifstream f(filename.c_str());
 	if (f.is_open())
 	{
 		f.close();
 		return;
 	}
-	ShowMessage("Fetching lyrics for \"%s\"...", s->toString(Config.song_status_format_no_colors).c_str());
+	ShowMessage("Fetching lyrics for \"%s\"...", s.toString(Config.song_status_format_no_colors).c_str());
 	
-	MPD::Song *s_copy = new MPD::Song(*s);
+	MPD::Song *s_copy = new MPD::Song(s);
 	pthread_mutex_lock(&itsDIBLock);
 	if (itsWorkersNumber == itsMaxWorkersNumber)
 		itsToDownload.push(s_copy);
@@ -194,7 +194,7 @@ void Lyrics::DownloadInBackground(const MPD::Song *s)
 void *Lyrics::DownloadInBackgroundImpl(void *void_ptr)
 {
 	MPD::Song *s = static_cast<MPD::Song *>(void_ptr);
-	DownloadInBackgroundImplHelper(s);
+	DownloadInBackgroundImplHelper(*s);
 	delete s;
 	
 	while (true)
@@ -211,7 +211,7 @@ void *Lyrics::DownloadInBackgroundImpl(void *void_ptr)
 			itsToDownload.pop();
 			pthread_mutex_unlock(&itsDIBLock);
 		}
-		DownloadInBackgroundImplHelper(s);
+		DownloadInBackgroundImplHelper(*s);
 		delete s;
 	}
 	
@@ -222,10 +222,10 @@ void *Lyrics::DownloadInBackgroundImpl(void *void_ptr)
 	pthread_exit(0);
 }
 
-void Lyrics::DownloadInBackgroundImplHelper(MPD::Song *s)
+void Lyrics::DownloadInBackgroundImplHelper(const MPD::Song &s)
 {
-	std::string artist = Curl::escape(locale_to_utf_cpy(s->getArtist()));
-	std::string title = Curl::escape(locale_to_utf_cpy(s->getTitle()));
+	std::string artist = Curl::escape(s.getArtist());
+	std::string title = Curl::escape(s.getTitle());
 	
 	LyricsFetcher::Result result;
 	bool fetcher_defined = itsFetcher && *itsFetcher;
@@ -238,7 +238,7 @@ void Lyrics::DownloadInBackgroundImplHelper(MPD::Song *s)
 			break;
 	}
 	if (result.first == true)
-		Save(GenerateFilename(*s), result.second);
+		Save(GenerateFilename(s), result.second);
 }
 
 void *Lyrics::Download()

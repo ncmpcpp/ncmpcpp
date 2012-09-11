@@ -30,7 +30,7 @@
 class Playlist : public Screen<NC::Window>, public Filterable, public HasSongs, public Searchable
 {
 	public:
-		Playlist() : NowPlaying(-1), itsTotalLength(0), itsRemainingTime(0), itsScrollBegin(0) { }
+		Playlist() : itsTotalLength(0), itsRemainingTime(0), itsScrollBegin(0) { }
 		~Playlist() { }
 		
 		// Screen<NC::Window> implementation
@@ -67,9 +67,9 @@ class Playlist : public Screen<NC::Window>, public Filterable, public HasSongs, 
 		virtual MPD::SongList getSelectedSongs() OVERRIDE;
 		
 		// private members
+		MPD::Song nowPlayingSong();
+		
 		bool isFiltered();
-		bool isPlaying() { return NowPlaying >= 0 && !Items->empty(); }
-		const MPD::Song *NowPlayingSong();
 		
 		void Sort();
 		void Reverse();
@@ -94,8 +94,6 @@ class Playlist : public Screen<NC::Window>, public Filterable, public HasSongs, 
 		void unregisterHash(size_t hash);
 		
 		NC::Menu< MPD::Song > *Items;
-		
-		int NowPlaying;
 		
 		static bool ReloadTotalLength;
 		static bool ReloadRemaining;

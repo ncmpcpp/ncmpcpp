@@ -226,8 +226,6 @@ void NcmpcppStatusChanged(MPD::Connection *, MPD::StatusChanges changed, void *)
 	int sx = wFooter->getX();
 	int sy = wFooter->getY();
 	
-	myPlaylist->NowPlaying = Mpd.GetCurrentlyPlayingSongPos();
-	
 	if (changed.Playlist)
 	{
 		np = Mpd.GetCurrentlyPlayingSong();
@@ -344,7 +342,6 @@ void NcmpcppStatusChanged(MPD::Connection *, MPD::StatusChanges changed, void *)
 				if (!block_progressbar_update)
 					DrawProgressbar(0, 0);
 				Playlist::ReloadRemaining = true;
-				myPlaylist->NowPlaying = -1;
 				if (Config.new_design)
 				{
 					*wHeader << NC::XY(0, 0) << wclrtoeol << NC::XY(0, 1) << wclrtoeol;
@@ -381,7 +378,7 @@ void NcmpcppStatusChanged(MPD::Connection *, MPD::StatusChanges changed, void *)
 	}
 	if (changed.SongID)
 	{
-		if (myPlaylist->isPlaying())
+		if (Mpd.isPlaying())
 		{
 			GNUC_UNUSED int res;
 			if (!Config.execute_on_song_change.empty())
@@ -389,7 +386,7 @@ void NcmpcppStatusChanged(MPD::Connection *, MPD::StatusChanges changed, void *)
 			
 #			ifdef HAVE_CURL_CURL_H
 			if (Config.fetch_lyrics_in_background)
-				Lyrics::DownloadInBackground(myPlaylist->NowPlayingSong());
+				Lyrics::DownloadInBackground(myPlaylist->nowPlayingSong());
 #			endif // HAVE_CURL_CURL_H
 			
 			if (Mpd.isPlaying())
@@ -398,9 +395,9 @@ void NcmpcppStatusChanged(MPD::Connection *, MPD::StatusChanges changed, void *)
 				if (!np.empty())
 					WindowTitle(np.toString(Config.song_window_title_format));
 			}
-				
+			
 			if (Config.autocenter_mode && !myPlaylist->Items->isFiltered())
-				myPlaylist->Items->highlight(myPlaylist->NowPlaying);
+				myPlaylist->Items->highlight(Mpd.GetCurrentlyPlayingSongPos());
 			
 			if (Config.now_playing_lyrics && isVisible(myLyrics) && Global::myOldScreen == myPlaylist)
 				myLyrics->ReloadNP = 1;
