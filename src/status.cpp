@@ -68,6 +68,14 @@ void WindowTitle(const std::string &status)
 }
 #endif // !USE_PDCURSES
 
+void DrawNowPlayingTitle(MPD::Song &np)
+{
+	if (np.empty())
+		np = myPlaylist->nowPlayingSong();
+	if (!np.empty())
+		WindowTitle(np.toString(Config.song_window_title_format));
+}
+
 void StatusbarMPDCallback()
 {
 	Mpd.OrderDataFetching();
@@ -136,6 +144,32 @@ void UnlockStatusbar()
 	}
 }
 
+void TryToClearStatusbarMessage()
+{
+	using Global::Timer;
+	if (lock_statusbar_delay > 0)
+	{
+		if (Timer.tv_sec >= time_of_statusbar_lock.tv_sec+lock_statusbar_delay)
+		{
+			lock_statusbar_delay = -1;
+			
+			if (Config.statusbar_visibility)
+				block_statusbar_update = !allow_statusbar_unlock;
+			else
+				block_progressbar_update = !allow_statusbar_unlock;
+			
+			if (Mpd.GetState() != MPD::psPlay && !block_statusbar_update && !block_progressbar_update)
+			{
+				if (Config.new_design)
+					DrawProgressbar(Mpd.GetElapsedTime(), Mpd.GetTotalTime());
+				else
+					Statusbar() << wclrtoeol;
+				wFooter->refresh();
+			}
+		}
+	}
+}
+
 void TraceMpdStatus()
 {
 	static timeval past = { 0, 0 };
@@ -169,27 +203,7 @@ void TraceMpdStatus()
 		myPlaylist->Items->refresh();
 	}
 	
-	if (lock_statusbar_delay > 0)
-	{
-		if (Timer.tv_sec >= time_of_statusbar_lock.tv_sec+lock_statusbar_delay)
-		{
-			lock_statusbar_delay = -1;
-			
-			if (Config.statusbar_visibility)
-				block_statusbar_update = !allow_statusbar_unlock;
-			else
-				block_progressbar_update = !allow_statusbar_unlock;
-			
-			if (Mpd.GetState() != MPD::psPlay && !block_statusbar_update && !block_progressbar_update)
-			{
-				if (Config.new_design)
-					DrawProgressbar(Mpd.GetElapsedTime(), Mpd.GetTotalTime());
-				else
-					Statusbar() << wclrtoeol;
-				wFooter->refresh();
-			}
-		}
-	}
+	TryToClearStatusbarMessage();
 }
 
 void NcmpcppErrorCallback(MPD::Connection *, int errorid, const char *msg, void *)
@@ -221,17 +235,14 @@ void NcmpcppStatusChanged(MPD::Connection *, MPD::StatusChanges changed, void *)
 	static size_t first_line_scroll_begin = 0;
 	static size_t second_line_scroll_begin = 0;
 	static std::string player_state;
-	static MPD::Song np;
+	
+	MPD::Song np;
 	
 	int sx = wFooter->getX();
 	int sy = wFooter->getY();
 	
 	if (changed.Playlist)
 	{
-		np = Mpd.GetCurrentlyPlayingSong();
-		if (!np.empty())
-			WindowTitle(np.toString(Config.song_window_title_format));
-		
 		myPlaylist->Items->clearSearchResults();
 		withUnfilteredMenuReapplyFilter(*myPlaylist->Items, []() {
 			size_t playlist_length = Mpd.GetPlaylistLength();
@@ -260,6 +271,8 @@ void NcmpcppStatusChanged(MPD::Connection *, MPD::StatusChanges changed, void *)
 				myPlaylist->registerHash(s->getHash());
 			}
 		});
+		
+		DrawNowPlayingTitle(np);
 		
 		Playlist::ReloadTotalLength = true;
 		Playlist::ReloadRemaining = true;
@@ -323,8 +336,7 @@ void NcmpcppStatusChanged(MPD::Connection *, MPD::StatusChanges changed, void *)
 			}
 			case MPD::psPlay:
 			{
-				if (!np.empty())
-					WindowTitle(np.toString(Config.song_window_title_format));
+				DrawNowPlayingTitle(np);
 				player_state = Config.new_design ? "[playing]" : "Playing: ";
 				Playlist::ReloadRemaining = true;
 				if (Mpd.GetOldState() == MPD::psStop) // show track info in status immediately
@@ -389,12 +401,7 @@ void NcmpcppStatusChanged(MPD::Connection *, MPD::StatusChanges changed, void *)
 				Lyrics::DownloadInBackground(myPlaylist->nowPlayingSong());
 #			endif // HAVE_CURL_CURL_H
 			
-			if (Mpd.isPlaying())
-			{
-				np = Mpd.GetCurrentlyPlayingSong();
-				if (!np.empty())
-					WindowTitle(np.toString(Config.song_window_title_format));
-			}
+			DrawNowPlayingTitle(np);
 			
 			if (Config.autocenter_mode && !myPlaylist->Items->isFiltered())
 				myPlaylist->Items->highlight(Mpd.GetCurrentlyPlayingSongPos());
@@ -409,14 +416,10 @@ void NcmpcppStatusChanged(MPD::Connection *, MPD::StatusChanges changed, void *)
 	}
 	if (changed.ElapsedTime || changed.SongID || Global::RedrawStatusbar)
 	{
-		if (np.empty())
+		if (Mpd.isPlaying())
 		{
-			np = Mpd.GetCurrentlyPlayingSong();
-			if (!np.empty())
-				WindowTitle(utf_to_locale_cpy(np.toString(Config.song_window_title_format)));
-		}
-		if (!np.empty() && Mpd.isPlaying())
-		{
+			DrawNowPlayingTitle(np);
+			
 			std::string tracklength;
 			if (Config.new_design)
 			{

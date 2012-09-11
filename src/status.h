@@ -30,6 +30,8 @@
 # define WindowTitle(x);
 #endif // USE_PDCURSES
 
+void DrawNowPlayingTitle();
+
 void LockProgressbar();
 void UnlockProgressbar();
 
