@@ -1931,7 +1931,7 @@ void Find::Run()
 	Statusbar::msg("Searching...");
 	Screen<NC::Scrollpad> *s = static_cast<Screen<NC::Scrollpad> *>(myScreen);
 	s->Main()->removeFormatting();
-	Statusbar::msg("%s", findme.empty() || s->Main()->setFormatting(NC::fmtReverse, ToWString(findme), NC::fmtReverseEnd, 0) ? "Done!" : "No matching patterns found");
+	Statusbar::msg("%s", findme.empty() || s->Main()->setFormatting(NC::fmtReverse, ToWString(findme), NC::fmtReverseEnd, 0) ? "Done" : "No matching patterns found");
 	s->Main()->flush();
 }
 

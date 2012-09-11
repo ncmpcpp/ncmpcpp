@@ -103,7 +103,7 @@ Window::Window(size_t startx,
 	||  m_start_y > size_t(LINES)
 	||  m_width+m_start_x > size_t(COLS)
 	||  m_height+m_start_y > size_t(LINES))
-		FatalError("Constructed window is bigger than terminal size!");
+		FatalError("Constructed window is bigger than terminal size");
 	
 	if (m_border != brNone)
 	{

@@ -448,7 +448,7 @@ void NcmpcppStatusChanged(MPD::Connection *, MPD::StatusChanges changed, void *)
 		// finished and nothing changed, so we need to switch it off for them.
 		if (!Mpd.SupportsIdle() || Mpd.Version() > 15)
 			mpd_db_updating = Mpd.GetDBIsUpdating() ? 'U' : 0;
-		Statusbar::msg(Mpd.GetDBIsUpdating() ? "Database update started!" : "Database update finished!");
+		Statusbar::msg(Mpd.GetDBIsUpdating() ? "Database update started" : "Database update finished");
 		if (changed.Database && myScreen == mySelectedItemsAdder)
 		{
 			myScreen->SwitchTo(); // switch to previous screen

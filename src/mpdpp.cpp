@@ -952,7 +952,7 @@ bool Connection::AddRandomTag(mpd_tag_type tag, size_t number)
 	if (number > tags.size())
 	{
 		if (itsErrorHandler)
-			itsErrorHandler(this, 0, "Requested number is out of range!", itsErrorHandlerUserdata);
+			itsErrorHandler(this, 0, "Requested number is out of range", itsErrorHandlerUserdata);
 		return false;
 	}
 	else
@@ -993,7 +993,7 @@ bool Connection::AddRandomSongs(size_t number)
 	if (number > files.size())
 	{
 		if (itsErrorHandler)
-			itsErrorHandler(this, 0, "Requested number of random songs is bigger than size of your library!", itsErrorHandlerUserdata);
+			itsErrorHandler(this, 0, "Requested number of random songs is bigger than size of your library", itsErrorHandlerUserdata);
 		return false;
 	}
 	else
