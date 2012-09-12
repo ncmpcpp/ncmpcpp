@@ -86,7 +86,6 @@ struct Action
 	
 	static bool OriginalStatusbarVisibility;
 	static bool DesignChanged;
-	static bool OrderResize;
 	static bool ExitMainLoop;
 	
 	static size_t HeaderHeight;

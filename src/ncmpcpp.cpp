@@ -58,7 +58,7 @@ namespace
 		}
 		else if (signal == SIGWINCH)
 		{
-			Action::OrderResize = true;
+			Action::ResizeScreen();
 		}
 	}
 #	endif // !WIN32
@@ -234,9 +234,6 @@ int main(int argc, char **argv)
 		Status::trace();
 		
 		ShowMessages = true;
-		
-		if (Action::OrderResize)
-			Action::ResizeScreen();
 		
 		// header stuff
 		if (((Timer.tv_sec == past.tv_sec && Timer.tv_usec >= past.tv_usec+500000) || Timer.tv_sec > past.tv_sec)

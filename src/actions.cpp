@@ -65,7 +65,6 @@ using Global::myScreen;
 
 bool Action::OriginalStatusbarVisibility;
 bool Action::DesignChanged;
-bool Action::OrderResize;
 bool Action::ExitMainLoop = false;
 
 size_t Action::HeaderHeight;
@@ -132,8 +131,6 @@ void Action::ResizeScreen()
 	using Global::MainHeight;
 	using Global::wHeader;
 	using Global::wFooter;
-	
-	OrderResize = 0;
 	
 #	if defined(USE_PDCURSES)
 	resize_term(0, 0);
