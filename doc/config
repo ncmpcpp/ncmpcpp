@@ -226,7 +226,7 @@
 #
 #selected_item_suffix = "$9"
 #
-#modified_item_prefix = "$2> $9"
+#modified_item_prefix = "$3> $9"
 #
 ## colors are not supported for below variable
 #

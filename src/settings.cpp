@@ -181,7 +181,7 @@ void Configuration::SetDefaults()
 	selected_item_suffix << NC::clEnd;
 	now_playing_prefix << NC::fmtBold;
 	now_playing_suffix << NC::fmtBoldEnd;
-	modified_item_prefix << NC::clRed << "> " << NC::clEnd;
+	modified_item_prefix << NC::clGreen << "> " << NC::clEnd;
 	color1 = NC::clWhite;
 	color2 = NC::clGreen;
 	empty_tags_color = NC::clCyan;
