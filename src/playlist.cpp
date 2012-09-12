@@ -203,7 +203,7 @@ void Playlist::EnterPressed()
 		std::function<void(MPD::SongList::iterator, MPD::SongList::iterator)> iter_swap, quick_sort;
 		auto song_cmp = [&cmp](const MPD::Song &a, const MPD::Song &b) -> bool {
 				for (size_t i = 0; i < SortOptions; ++i)
-					if (int ret = cmp(a.getTags((*SortDialog)[i].value().second), b.getTags((*SortDialog)[i].value().second)))
+					if (int ret = cmp(a.getTags((*SortDialog)[i].value().second, Config.tags_separator), b.getTags((*SortDialog)[i].value().second, Config.tags_separator)))
 						return ret < 0;
 				return a.getPosition() < b.getPosition();
 		};
@@ -518,7 +518,7 @@ bool Playlist::Add(const MPD::Song &s, bool play, int position)
 		int id = Mpd.AddSong(s, position);
 		if (id >= 0)
 		{
-			Statusbar::msg("Added to playlist: %s", s.toString(Config.song_status_format_no_colors).c_str());
+			Statusbar::msg("Added to playlist: %s", s.toString(Config.song_status_format_no_colors, Config.tags_separator).c_str());
 			if (play)
 				Mpd.PlayID(id);
 			return true;
@@ -621,9 +621,9 @@ std::string songToString(const MPD::Song &s)
 {
 	std::string result;
 	if (Config.columns_in_playlist)
-		result = s.toString(Config.song_in_columns_to_string_format);
+		result = s.toString(Config.song_in_columns_to_string_format, Config.tags_separator);
 	else
-		result = s.toString(Config.song_list_format_dollar_free);
+		result = s.toString(Config.song_list_format_dollar_free, Config.tags_separator);
 	return result;
 }
 

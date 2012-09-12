@@ -616,9 +616,9 @@ std::string ItemToString(const MPD::Item &item)
 			break;
 		case MPD::itSong:
 			if (Config.columns_in_browser)
-				result = item.song->toString(Config.song_in_columns_to_string_format);
+				result = item.song->toString(Config.song_in_columns_to_string_format, Config.tags_separator);
 			else
-				result = item.song->toString(Config.song_list_format_dollar_free);
+				result = item.song->toString(Config.song_list_format_dollar_free, Config.tags_separator);
 			break;
 		case MPD::itPlaylist:
 			result = Config.browser_playlist_prefix.str() + getBasename(item.name);

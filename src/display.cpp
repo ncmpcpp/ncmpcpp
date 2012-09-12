@@ -109,7 +109,7 @@ void showSongs(NC::Menu<T> &menu, const MPD::Song &s, HasSongs &screen, const st
 	setProperties(menu, s, screen, separate_albums, is_now_playing, is_selected, discard_colors);
 	
 	size_t y = menu.getY();
-	std::string line = s.toString(format, "$");
+	std::string line = s.toString(format, Config.tags_separator, "$");
 	for (auto it = line.begin(); it != line.end(); ++it)
 	{
 		if (*it == '$')
@@ -223,7 +223,7 @@ void showSongsInColumns(NC::Menu<T> &menu, const MPD::Song &s, HasSongs &screen)
 		for (size_t i = 0; i < it->type.length(); ++i)
 		{
 			MPD::Song::GetFunction get = charToGetFunction(it->type[i]);
-			tag = ToWString(get ? s.getTags(get) : "");
+			tag = ToWString(get ? s.getTags(get, Config.tags_separator) : "");
 			if (!tag.empty())
 				break;
 		}
@@ -365,7 +365,7 @@ void Display::Tags(NC::Menu<MPD::MutableSong> &menu)
 	size_t i = myTagEditor->TagTypes->choice();
 	if (i < 11)
 	{
-		ShowTag(menu, s.getTags(SongInfo::Tags[i].Get));
+		ShowTag(menu, s.getTags(SongInfo::Tags[i].Get, Config.tags_separator));
 	}
 	else if (i == 12)
 	{

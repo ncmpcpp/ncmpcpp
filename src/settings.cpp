@@ -161,6 +161,7 @@ void Configuration::SetDefaults()
 {
 	mpd_host = "localhost";
 	empty_tag = "<empty>";
+	tags_separator = " | ";
 	song_list_columns_format = "(7f)[green]{l} (25)[cyan]{a} (40)[]{t|f} (30)[red]{b}";
 	song_list_format = "{{%a - }{%t}|{$8%f$9}$R{$3(%l)$9}}";
 	song_list_format_dollar_free = RemoveDollarFormatting(song_list_format);
@@ -881,6 +882,11 @@ void Configuration::Read()
 			else if (name == "empty_tag_marker")
 			{
 				empty_tag = v; // is this case empty string is allowed
+			}
+			else if (name == "tags_separator")
+			{
+				if (!v.empty())
+					tags_separator = v;
 			}
 			else if (name == "empty_tag_color")
 			{

@@ -588,9 +588,9 @@ std::string SEItemToString(const SEItem &ei)
 	if (ei.isSong())
 	{
 		if (Config.columns_in_search_engine)
-			result = ei.song().toString(Config.song_in_columns_to_string_format);
+			result = ei.song().toString(Config.song_in_columns_to_string_format, Config.tags_separator);
 		else
-			result = ei.song().toString(Config.song_list_format_dollar_free);
+			result = ei.song().toString(Config.song_list_format_dollar_free, Config.tags_separator);
 	}
 	else
 		result = ei.buffer().str();

@@ -189,7 +189,7 @@ void ParseArgv(int argc, char **argv)
 					}
 				}
 				std::cout << IConv::utf8ToLocale(
-					Mpd.GetCurrentlyPlayingSong().toString(now_playing_format)) << "\n";
+					Mpd.GetCurrentlyPlayingSong().toString(now_playing_format, Config.tags_separator)) << "\n";
 			}
 			exit(0);
 		}

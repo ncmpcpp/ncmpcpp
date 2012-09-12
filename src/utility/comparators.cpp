@@ -74,8 +74,8 @@ bool LocaleBasedItemSorting::operator()(const MPD::Item &a, const MPD::Item &b) 
 						result = a.song->getMTime() > b.song->getMTime();
 						break;
 					case smCustomFormat:
-						result = m_cmp(a.song->toString(Config.browser_sort_format),
-						               b.song->toString(Config.browser_sort_format));
+						result = m_cmp(a.song->toString(Config.browser_sort_format, Config.tags_separator),
+						               b.song->toString(Config.browser_sort_format, Config.tags_separator));
 						break;
 				}
 				break;

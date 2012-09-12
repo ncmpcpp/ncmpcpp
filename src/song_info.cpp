@@ -134,6 +134,6 @@ void SongInfo::PrepareSong(MPD::Song &s)
 	for (const Metadata *m = Tags; m->Name; ++m)
 	{
 		*w << NC::fmtBold << '\n' << ToWString(m->Name) << L": " << NC::fmtBoldEnd;
-		ShowTag(*w, s.getTags(m->Get));
+		ShowTag(*w, s.getTags(m->Get, Config.tags_separator));
 	}
 }

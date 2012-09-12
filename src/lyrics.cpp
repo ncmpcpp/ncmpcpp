@@ -152,7 +152,7 @@ void Lyrics::SwitchTo()
 std::wstring Lyrics::Title()
 {
 	std::wstring result = L"Lyrics: ";
-	result += Scroller(ToWString(itsSong.toString("{%a - %t}")), itsScrollBegin, COLS-result.length()-(Config.new_design ? 2 : Global::VolumeState.length()));
+	result += Scroller(ToWString(itsSong.toString("{%a - %t}", ", ")), itsScrollBegin, COLS-result.length()-(Config.new_design ? 2 : Global::VolumeState.length()));
 	return result;
 }
 
@@ -175,7 +175,7 @@ void Lyrics::DownloadInBackground(const MPD::Song &s)
 		f.close();
 		return;
 	}
-	Statusbar::msg("Fetching lyrics for \"%s\"...", s.toString(Config.song_status_format_no_colors).c_str());
+	Statusbar::msg("Fetching lyrics for \"%s\"...", s.toString(Config.song_status_format_no_colors, Config.tags_separator).c_str());
 	
 	MPD::Song *s_copy = new MPD::Song(s);
 	pthread_mutex_lock(&itsDIBLock);

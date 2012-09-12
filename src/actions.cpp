@@ -1362,7 +1362,7 @@ void EditLibraryTag::Run()
 		for (auto s = songs.begin(); s != songs.end(); ++s)
 		{
 			MPD::MutableSong es = *s;
-			es.setTags(set, new_tag);
+			es.setTags(set, new_tag, Config.tags_separator);
 			Statusbar::msg("Updating tags in \"%s\"...", es.getName().c_str());
 			std::string path = Config.mpd_music_dir + es.getURI();
 			if (!TagEditor::WriteTags(es))

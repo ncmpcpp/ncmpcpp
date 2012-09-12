@@ -64,6 +64,7 @@ struct Configuration
 	std::string visualizer_fifo_path;
 	std::string visualizer_output_name;
 	std::string empty_tag;
+	std::string tags_separator;
 	std::string song_list_columns_format;
 	std::string song_list_format;
 	std::string song_list_format_dollar_free;

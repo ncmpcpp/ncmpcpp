@@ -193,7 +193,7 @@ std::string Song::getPriority(unsigned idx) const
 	return unsignedIntTo<std::string>::apply(getPrio());
 }
 
-std::string MPD::Song::getTags(GetFunction f, const std::string &tag_separator) const
+std::string MPD::Song::getTags(GetFunction f, const std::string &tags_separator) const
 {
 	assert(m_song);
 	unsigned idx = 0;
@@ -201,7 +201,7 @@ std::string MPD::Song::getTags(GetFunction f, const std::string &tag_separator) 
 	for (std::string tag; !(tag = (this->*f)(idx)).empty(); ++idx)
 	{
 		if (!result.empty())
-			result += tag_separator;
+			result += tags_separator;
 		result += tag;
 	}
 	return result;
@@ -261,11 +261,11 @@ bool Song::empty() const
 	return m_song.get() == 0;
 }
 
-std::string Song::toString(const std::string &fmt, const std::string &tag_separator, const std::string &escape_chars) const
+std::string Song::toString(const std::string &fmt, const std::string &tags_separator, const std::string &escape_chars) const
 {
 	assert(m_song);
 	std::string::const_iterator it = fmt.begin();
-	return ParseFormat(it, tag_separator, escape_chars);
+	return ParseFormat(it, tags_separator, escape_chars);
 }
 
 std::string Song::ShowTime(unsigned length)
@@ -313,7 +313,7 @@ bool MPD::Song::isFormatOk(const std::string &type, const std::string &fmt)
 	return true;
 }
 
-std::string Song::ParseFormat(std::string::const_iterator &it, const std::string &tag_separator,
+std::string Song::ParseFormat(std::string::const_iterator &it, const std::string &tags_separator,
                               const std::string &escape_chars) const
 {
 	std::string result;
@@ -323,7 +323,7 @@ std::string Song::ParseFormat(std::string::const_iterator &it, const std::string
 	{
 		while (*it == '{')
 		{
-			std::string tags = ParseFormat(it, tag_separator, escape_chars);
+			std::string tags = ParseFormat(it, tags_separator, escape_chars);
 			if (!tags.empty())
 			{
 				has_some_tags = 1;
@@ -352,7 +352,7 @@ std::string Song::ParseFormat(std::string::const_iterator &it, const std::string
 			
 			if (get)
 			{
-				std::string tag = getTags(get, tag_separator);
+				std::string tag = getTags(get, tags_separator);
 				if (!escape_chars.empty()) // prepend format escape character to all given chars to escape
 				{
 					for (size_t i = 0; i < escape_chars.length(); ++i)
@@ -384,7 +384,7 @@ std::string Song::ParseFormat(std::string::const_iterator &it, const std::string
 				--brace_counter;
 		}
 		if (*++it == '|')
-			return ParseFormat(++it, tag_separator, escape_chars);
+			return ParseFormat(++it, tags_separator, escape_chars);
 		else
 			return "";
 	}

@@ -85,7 +85,8 @@ public:
 	}}), m_cmp(std::locale(), Config.ignore_leading_the) { }
 	bool operator()(const MPD::Song &a, const MPD::Song &b) {
 		for (auto get = m_gets.begin(); get != m_gets.end(); ++get) {
-			int ret = m_cmp(a.getTags(*get), b.getTags(*get));
+			int ret = m_cmp(a.getTags(*get, Config.tags_separator),
+			                b.getTags(*get, Config.tags_separator));
 			if (ret != 0)
 				return ret < 0;
 		}
@@ -902,7 +903,7 @@ std::string AlbumToString(const SearchConstraints &sc)
 
 std::string SongToString(const MPD::Song &s)
 {
-	return s.toString(Config.song_library_format);
+	return s.toString(Config.song_library_format, Config.tags_separator);
 }
 
 bool TagEntryMatcher(const Regex &rx, const std::string &tag)

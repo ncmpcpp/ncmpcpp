@@ -526,19 +526,19 @@ void TagEditor::EnterPressed()
 		{
 			Statusbar::lock();
 			Statusbar::put() << NC::fmtBold << TagTypes->current().value() << NC::fmtBoldEnd << ": ";
-			std::string new_tag = wFooter->getString(Tags->current().value().getTags(get));
+			std::string new_tag = wFooter->getString(Tags->current().value().getTags(get, Config.tags_separator));
 			Statusbar::unlock();
 			for (auto it = EditedSongs.begin(); it != EditedSongs.end(); ++it)
-				(*it)->setTags(set, new_tag);
+				(*it)->setTags(set, new_tag, Config.tags_separator);
 		}
 		else if (w == Tags)
 		{
 			Statusbar::lock();
 			Statusbar::put() << NC::fmtBold << TagTypes->current().value() << NC::fmtBoldEnd << ": ";
-			std::string new_tag = wFooter->getString(Tags->current().value().getTags(get));
+			std::string new_tag = wFooter->getString(Tags->current().value().getTags(get, Config.tags_separator));
 			Statusbar::unlock();
-			if (new_tag != Tags->current().value().getTags(get))
-				Tags->current().value().setTags(set, new_tag);
+			if (new_tag != Tags->current().value().getTags(get, Config.tags_separator))
+				Tags->current().value().setTags(set, new_tag, Config.tags_separator);
 			Tags->scroll(NC::wDown);
 		}
 	}
@@ -1254,7 +1254,7 @@ MPD::MutableSong::SetFunction IntoSetFunction(char c)
 
 std::string GenerateFilename(const MPD::MutableSong &s, const std::string &pattern)
 {
-	std::string result = s.toString(pattern);
+	std::string result = s.toString(pattern, Config.tags_separator);
 	removeInvalidCharsFromFilename(result);
 	return result;
 }
@@ -1306,7 +1306,7 @@ std::string ParseFilename(MPD::MutableSong &s, std::string mask, bool preview)
 			{
 				MPD::MutableSong::SetFunction set = IntoSetFunction(it->first);
 				if (set)
-					s.setTags(set, it->second);
+					s.setTags(set, it->second, Config.tags_separator);
 			}
 			else
 				result << "%" << it->first << ": " << it->second << "\n";

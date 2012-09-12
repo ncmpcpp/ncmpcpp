@@ -63,7 +63,7 @@ struct MutableSong : public Song
 	virtual unsigned getDuration() const;
 	void setDuration(unsigned duration);
 	
-	void setTags(SetFunction set, const std::string &value, const std::string &delimiter = "");
+	void setTags(SetFunction set, const std::string &value, const std::string &delimiter);
 	
 	bool isModified() const;
 	void clearModifications();

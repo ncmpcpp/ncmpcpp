@@ -429,6 +429,8 @@
 #
 #empty_tag_marker = "<empty>"
 #
+#tags_separator = " | "
+#
 #tag_editor_extended_numeration = "no"
 #
 #media_library_display_date = "yes"

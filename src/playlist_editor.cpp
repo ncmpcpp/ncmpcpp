@@ -521,9 +521,9 @@ std::string SongToString(const MPD::Song &s)
 {
 	std::string result;
 	if (Config.columns_in_playlist_editor)
-		result = s.toString(Config.song_in_columns_to_string_format);
+		result = s.toString(Config.song_in_columns_to_string_format, Config.tags_separator);
 	else
-		result = s.toString(Config.song_list_format_dollar_free);
+		result = s.toString(Config.song_list_format_dollar_free, Config.tags_separator);
 	return result;
 }
 
