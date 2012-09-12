@@ -432,7 +432,7 @@ void Configuration::Read()
 					if (song_status_format.find("$") != std::string::npos)
 					{
 						NC::Buffer status_no_colors;
-						String2Buffer(song_status_format, status_no_colors);
+						stringToBuffer(song_status_format, status_no_colors);
 						song_status_format_no_colors = status_no_colors.str();
 					}
 					else
@@ -509,7 +509,7 @@ void Configuration::Read()
 				if (!v.empty())
 				{
 					browser_playlist_prefix.clear();
-					String2Buffer(v, browser_playlist_prefix);
+					stringToBuffer(v, browser_playlist_prefix);
 				}
 			}
 			else if (name == "progressbar_look")
@@ -545,7 +545,7 @@ void Configuration::Read()
 				if (!v.empty())
 				{
 					selected_item_prefix.clear();
-					String2Buffer(v, selected_item_prefix);
+					stringToBuffer(v, selected_item_prefix);
 					selected_item_prefix_length = wideLength(ToWString(selected_item_prefix.str()));
 				}
 			}
@@ -554,7 +554,7 @@ void Configuration::Read()
 				if (!v.empty())
 				{
 					selected_item_suffix.clear();
-					String2Buffer(v, selected_item_suffix);
+					stringToBuffer(v, selected_item_suffix);
 					selected_item_suffix_length = wideLength(ToWString(selected_item_suffix.str()));
 				}
 			}
@@ -563,7 +563,7 @@ void Configuration::Read()
 				if (!v.empty())
 				{
 					now_playing_prefix.clear();
-					String2Buffer(v, now_playing_prefix);
+					stringToBuffer(v, now_playing_prefix);
 					now_playing_prefix_length = wideLength(ToWString(now_playing_prefix.str()));
 				}
 			}
@@ -572,8 +572,8 @@ void Configuration::Read()
 				if (!v.empty())
 				{
 					now_playing_suffix.clear();
-					String2Buffer(ToWString(v), now_playing_suffix);
-					now_playing_suffix_length = wideLength(now_playing_suffix.str());
+					stringToBuffer(v, now_playing_suffix);
+					now_playing_suffix_length = wideLength(ToWString(now_playing_suffix.str()));
 				}
 			}
 			else if (name == "modified_item_prefix")
@@ -581,7 +581,7 @@ void Configuration::Read()
 				if (!v.empty())
 				{
 					modified_item_prefix.clear();
-					String2Buffer(v, modified_item_prefix);
+					stringToBuffer(v, modified_item_prefix);
 				}
 			}
 			else if (name == "color1")

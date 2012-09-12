@@ -327,15 +327,14 @@ template <> struct StringConverter<NC::Scrollpad> {
 	std::wstring operator()(const char *s) { return ToWString(s); }
 };
 
-template <typename CharT>
-void String2Buffer(const std::basic_string<CharT> &s, NC::basic_buffer<CharT> &buf)
+template <typename Iterator>
+void stringToBuffer(Iterator first, Iterator last, NC::basic_buffer<typename Iterator::value_type> &buf)
 {
-	StringConverter< NC::basic_buffer<CharT> > cnv;
-	for (auto it = s.begin(); it != s.end(); ++it)
+	for (auto it = first; it != last; ++it)
 	{
 		if (*it == '$')
 		{
-			if (++it == s.end())
+			if (++it == last)
 			{
 				buf << '$';
 				break;
@@ -361,9 +360,9 @@ void String2Buffer(const std::basic_string<CharT> &s, NC::basic_buffer<CharT> &b
 						buf << NC::fmtReverse;
 						break;
 					case '/':
-						if (++it == s.end())
+						if (++it == last)
 						{
-							buf << cnv("$/");
+							buf << '$' << '/';
 							break;
 						}
 						switch (*it)
@@ -394,13 +393,19 @@ void String2Buffer(const std::basic_string<CharT> &s, NC::basic_buffer<CharT> &b
 		else if (*it == MPD::Song::FormatEscapeCharacter)
 		{
 			// treat '$' as a normal character if song format escape char is prepended to it
-			if (++it == s.end() || *it != '$')
+			if (++it == last || *it != '$')
 				--it;
 			buf << *it;
 		}
 		else
 			buf << *it;
 	}
+}
+
+template <typename CharT>
+void stringToBuffer(const std::basic_string<CharT> &s, NC::basic_buffer<CharT> &buf)
+{
+	stringToBuffer(s.begin(), s.end(), buf);
 }
 
 template <typename T> void ShowTime(T &buf, size_t length, bool short_names)

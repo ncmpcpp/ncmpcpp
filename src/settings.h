@@ -91,7 +91,7 @@ struct Configuration
 	NC::Buffer selected_item_prefix;
 	NC::Buffer selected_item_suffix;
 	NC::Buffer now_playing_prefix;
-	NC::WBuffer now_playing_suffix;
+	NC::Buffer now_playing_suffix;
 	NC::Buffer modified_item_prefix;
 	
 	NC::Color color1;
