@@ -1973,16 +1973,6 @@ void ToggleFindMode::Run()
 	Statusbar::msg("Search mode: %s", Config.wrapped_search ? "Wrapped" : "Normal");
 }
 
-bool ToggleReplayGainMode::canBeRun() const
-{
-	if (Mpd.Version() < 16)
-	{
-		Statusbar::msg("Replay gain mode control is supported in MPD >= 0.16.0");
-		return false;
-	}
-	return true;
-}
-
 void ToggleReplayGainMode::Run()
 {
 	using Global::wFooter;

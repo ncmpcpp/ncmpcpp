@@ -124,9 +124,9 @@ int main(int argc, char **argv)
 	if (!Action::ConnectToMPD())
 		exit(1);
 	
-	if (Mpd.Version() < 14)
+	if (Mpd.Version() < 16)
 	{
-		std::cout << "MPD < 0.14 is not supported, please upgrade.\n";
+		std::cout << "MPD < 0.16.0 is not supported, please upgrade.\n";
 		exit(1);
 	}
 	
