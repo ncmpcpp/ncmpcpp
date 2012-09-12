@@ -51,18 +51,18 @@ class TagEditor : public Screen<NC::Window>, public Filterable, public HasSongs,
 		virtual void MouseButtonPressed(MEVENT);
 		virtual bool isTabbable() { return true; }
 		
-		/// Filterable implementation
+		// Filterable implementation
 		virtual bool allowsFiltering();
 		virtual std::string currentFilter();
 		virtual void applyFilter(const std::string &filter);
 		
-		/// Searchable implementation
+		// Searchable implementation
 		virtual bool allowsSearching();
 		virtual bool search(const std::string &constraint);
 		virtual void nextFound(bool wrap);
 		virtual void prevFound(bool wrap);
 		
-		/// HasSongs implementation
+		// HasSongs implementation
 		virtual std::shared_ptr<ProxySongList> getProxySongList();
 		
 		virtual bool allowsSelection();
@@ -70,6 +70,9 @@ class TagEditor : public Screen<NC::Window>, public Filterable, public HasSongs,
 		virtual MPD::SongList getSelectedSongs();
 		
 		virtual bool isMergable() { return true; }
+		
+		// private members
+		bool ifAnyModifiedAskForDiscarding();
 		
 		bool isNextColumnAvailable();
 		bool NextColumn();

@@ -175,7 +175,7 @@ void MutableSong::setTags(SetFunction set, const std::string &value, const std::
 
 bool MutableSong::isModified() const
 {
-	return !m_uri.empty() && !m_tags.empty();
+	return !m_uri.empty() || !m_tags.empty();
 }
 
 void MutableSong::clearModifications()

@@ -74,6 +74,8 @@ size_t FParserHeight;
 std::list<std::string> Patterns;
 std::string PatternsFile = "patterns.list";
 
+bool isAnyModified(const NC::Menu<MPD::MutableSong> &m);
+
 std::string CapitalizeFirstLetters(const std::string &s);
 void CapitalizeFirstLetters(MPD::MutableSong &s);
 void LowerAllLetters(MPD::MutableSong &s);
@@ -586,7 +588,8 @@ void TagEditor::EnterPressed()
 		}
 		else if (id == 19) // reset
 		{
-			Tags->clear();
+			for (auto it = Tags->beginV(); it != Tags->endV(); ++it)
+				it->clearModifications();
 			Statusbar::msg("Changes reset");
 		}
 		else if (id == 20) // save
@@ -835,23 +838,30 @@ MPD::SongList TagEditor::getSelectedSongs()
 
 /***********************************************************************/
 
+bool TagEditor::ifAnyModifiedAskForDiscarding()
+{
+	bool result = true;
+	if (isAnyModified(*Tags))
+		result = Action::AskYesNoQuestion("There are pending changes, are you sure?", Status::trace);
+	return result;
+}
+
 bool TagEditor::isNextColumnAvailable()
 {
+	bool result = false;
 	if (w == Dirs)
 	{
 		if (!TagTypes->reallyEmpty() && !Tags->reallyEmpty())
-			return true;
+			result = true;
 	}
 	else if (w == TagTypes)
 	{
 		if (!Tags->reallyEmpty())
-			return true;
+			result = true;
 	}
 	else if (w == FParser)
-	{
-		return true;
-	}
-	return false;
+		result = true;
+	return result;
 }
 
 bool TagEditor::NextColumn()
@@ -886,21 +896,20 @@ bool TagEditor::NextColumn()
 
 bool TagEditor::isPrevColumnAvailable()
 {
+	bool result = false;
 	if (w == Tags)
 	{
 		if (!TagTypes->reallyEmpty() && !Dirs->reallyEmpty())
-			return true;
+			result = true;
 	}
 	else if (w == TagTypes)
 	{
 		if (!Dirs->reallyEmpty())
-			return true;
+			result = ifAnyModifiedAskForDiscarding();
 	}
 	else if (w == FParserHelper)
-	{
-		return true;
-	}
-	return false;
+		result = true;
+	return result;
 }
 
 bool TagEditor::PrevColumn()
@@ -1107,6 +1116,14 @@ bool TagEditor::WriteTags(MPD::MutableSong &s)
 }
 
 namespace {//
+
+bool isAnyModified(const NC::Menu<MPD::MutableSong> &m)
+{
+	for (auto it = m.beginV(); it != m.endV(); ++it)
+		if (it->isModified())
+			return true;
+	return false;
+}
 
 std::string CapitalizeFirstLetters(const std::string &s)
 {
