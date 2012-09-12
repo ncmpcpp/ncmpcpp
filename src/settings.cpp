@@ -180,6 +180,7 @@ void Configuration::SetDefaults()
 	selected_item_suffix << NC::clEnd;
 	now_playing_prefix << NC::fmtBold;
 	now_playing_suffix << NC::fmtBoldEnd;
+	modified_item_prefix << NC::clRed << "> " << NC::clEnd;
 	color1 = NC::clWhite;
 	color2 = NC::clGreen;
 	empty_tags_color = NC::clCyan;
@@ -573,6 +574,14 @@ void Configuration::Read()
 					now_playing_suffix.clear();
 					String2Buffer(ToWString(v), now_playing_suffix);
 					now_playing_suffix_length = wideLength(now_playing_suffix.str());
+				}
+			}
+			else if (name == "modified_item_prefix")
+			{
+				if (!v.empty())
+				{
+					modified_item_prefix.clear();
+					String2Buffer(v, modified_item_prefix);
 				}
 			}
 			else if (name == "color1")

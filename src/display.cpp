@@ -356,6 +356,8 @@ void Display::Songs(NC::Menu<MPD::Song> &menu, HasSongs *screen, const std::stri
 void Display::Tags(NC::Menu<MPD::MutableSong> &menu)
 {
 	const MPD::MutableSong &s = menu.drawn()->value();
+	if (s.isModified())
+		menu << Config.modified_item_prefix;
 	size_t i = myTagEditor->TagTypes->choice();
 	if (i < 11)
 	{
