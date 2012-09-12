@@ -169,8 +169,11 @@ void MutableSong::setDuration(unsigned int duration)
 void MutableSong::setTags(SetFunction set, const std::string &value, const std::string &delimiter)
 {
 	auto tags = split(value, delimiter);
-	for (size_t i = 0; i < tags.size(); ++i)
+	size_t i = 0;
+	for (; i < tags.size(); ++i)
 		(this->*set)(tags[i], i);
+	// set next tag to be empty, so tags with bigger indexes won't be read
+	(this->*set)("", i);
 }
 
 bool MutableSong::isModified() const

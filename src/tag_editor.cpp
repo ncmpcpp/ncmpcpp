@@ -27,6 +27,7 @@
 #include <stdexcept>
 
 // taglib includes
+#include "id3v1tag.h"
 #include "id3v2tag.h"
 #include "textidentificationframe.h"
 #include "mpegfile.h"
@@ -79,11 +80,13 @@ bool isAnyModified(const NC::Menu<MPD::MutableSong> &m);
 std::string CapitalizeFirstLetters(const std::string &s);
 void CapitalizeFirstLetters(MPD::MutableSong &s);
 void LowerAllLetters(MPD::MutableSong &s);
-void GetTagList(TagLib::StringList &list, const MPD::MutableSong &s, MPD::Song::GetFunction f);
 
-template <typename T>
-void WriteID3v2(const TagLib::ByteVector &type, TagLib::ID3v2::Tag *tag, const T &list);
-void WriteXiphComments(const MPD::MutableSong &s, TagLib::Ogg::XiphComment *tag);
+TagLib::StringList tagList(const MPD::MutableSong &s, MPD::Song::GetFunction f);
+
+void clearID3v1Tags(TagLib::ID3v1::Tag *tag);
+void writeCommonTags(const MPD::MutableSong &s, TagLib::Tag *tag);
+void writeID3v2Tags(const MPD::MutableSong &s, TagLib::ID3v2::Tag *tag);
+void writeXiphComments(const MPD::MutableSong &s, TagLib::Ogg::XiphComment *tag);
 
 void GetPatternList();
 void SavePatternList();
@@ -1039,43 +1042,21 @@ bool TagEditor::WriteTags(MPD::MutableSong &s)
 	TagLib::FileRef f(path_to_file.c_str());
 	if (!f.isNull())
 	{
-		f.tag()->setTitle(ToWString(s.getTitle()));
-		f.tag()->setArtist(ToWString(s.getArtist()));
-		f.tag()->setAlbum(ToWString(s.getAlbum()));
-		f.tag()->setYear(stringToInt(s.getDate()));
-		f.tag()->setTrack(stringToInt(s.getTrack()));
-		f.tag()->setGenre(ToWString(s.getGenre()));
-		f.tag()->setComment(ToWString(s.getComment()));
-		if (TagLib::MPEG::File *mp3_file = dynamic_cast<TagLib::MPEG::File *>(f.file()))
+		if (auto mp3_file = dynamic_cast<TagLib::MPEG::File *>(f.file()))
 		{
-			TagLib::ID3v2::Tag *tag = mp3_file->ID3v2Tag(1);
-			TagLib::StringList list;
-			
-			WriteID3v2("TIT2", tag, ToWString(s.getTitle()));  // title
-			WriteID3v2("TPE1", tag, ToWString(s.getArtist())); // artist
-			WriteID3v2("TALB", tag, ToWString(s.getAlbum()));  // album
-			WriteID3v2("TDRC", tag, ToWString(s.getDate()));   // date
-			WriteID3v2("TRCK", tag, ToWString(s.getTrack()));  // track
-			WriteID3v2("TCON", tag, ToWString(s.getGenre()));  // genre
-			WriteID3v2("TPOS", tag, ToWString(s.getDisc()));   // disc
-			
-			GetTagList(list, s, &MPD::Song::getAlbumArtist);
-			WriteID3v2("TPE2", tag, list); // album artist
-			
-			GetTagList(list, s, &MPD::Song::getComposer);
-			WriteID3v2("TCOM", tag, list); // composer
-			
-			GetTagList(list, s, &MPD::Song::getPerformer);
-			WriteID3v2("TPE3", tag, list); // performer
+			clearID3v1Tags(mp3_file->ID3v1Tag());
+			writeID3v2Tags(s, mp3_file->ID3v2Tag(true));
 		}
-		else if (TagLib::Ogg::Vorbis::File *ogg_file = dynamic_cast<TagLib::Ogg::Vorbis::File *>(f.file()))
+		else if (auto ogg_file = dynamic_cast<TagLib::Ogg::Vorbis::File *>(f.file()))
 		{
-			WriteXiphComments(s, ogg_file->tag());
+			writeXiphComments(s, ogg_file->tag());
 		}
-		else if (TagLib::FLAC::File *flac_file = dynamic_cast<TagLib::FLAC::File *>(f.file()))
+		else if (auto flac_file = dynamic_cast<TagLib::FLAC::File *>(f.file()))
 		{
-			WriteXiphComments(s, flac_file->xiphComment(1));
+			writeXiphComments(s, flac_file->xiphComment(true));
 		}
+		else
+			writeCommonTags(s, f.tag());
 		if (!f.save())
 			return false;
 		
@@ -1155,43 +1136,76 @@ void LowerAllLetters(MPD::MutableSong &s)
 	}
 }
 
-void GetTagList(TagLib::StringList &list, const MPD::MutableSong &s, MPD::Song::GetFunction f)
+TagLib::StringList tagList(const MPD::MutableSong &s, MPD::Song::GetFunction f)
 {
-	list.clear();
-	unsigned pos = 0;
-	for (std::string value; !(value = (s.*f)(pos)).empty(); ++pos)
-		list.append(ToWString(value));
+	TagLib::StringList result;
+	unsigned idx = 0;
+	for (std::string value; !(value = (s.*f)(idx)).empty(); ++idx)
+		result.append(ToWString(value));
+	return result;
 }
 
-template <typename T> void WriteID3v2(const TagLib::ByteVector &type, TagLib::ID3v2::Tag *tag, const T &list)
+void clearID3v1Tags(TagLib::ID3v1::Tag *tag)
 {
-	using TagLib::ID3v2::TextIdentificationFrame;
-	tag->removeFrames(type);
-	TextIdentificationFrame *frame = new TextIdentificationFrame(type, TagLib::String::UTF8);
-	frame->setText(list);
-	tag->addFrame(frame);
+	tag->setTitle(TagLib::String::null);
+	tag->setArtist(TagLib::String::null);
+	tag->setAlbum(TagLib::String::null);
+	tag->setYear(0);
+	tag->setTrack(0);
+	tag->setGenre(TagLib::String::null);
+	tag->setComment(TagLib::String::null);
 }
 
-void WriteXiphComments(const MPD::MutableSong &s, TagLib::Ogg::XiphComment *tag)
+void writeCommonTags(const MPD::MutableSong &s, TagLib::Tag *tag)
 {
-	TagLib::StringList list;
-	
-	tag->addField("DISCNUMBER", ToWString(s.getDisc())); // disc
-	
-	tag->removeField("ALBUM ARTIST"); // album artist
-	GetTagList(list, s, &MPD::Song::getAlbumArtist);
-	for (TagLib::StringList::ConstIterator it = list.begin(); it != list.end(); ++it)
-		tag->addField("ALBUM ARTIST", *it, 0);
-	
-	tag->removeField("COMPOSER"); // composer
-	GetTagList(list, s, &MPD::Song::getComposer);
-	for (TagLib::StringList::ConstIterator it = list.begin(); it != list.end(); ++it)
-		tag->addField("COMPOSER", *it, 0);
-	
-	tag->removeField("PERFORMER"); // performer
-	GetTagList(list, s, &MPD::Song::getPerformer);
-	for (TagLib::StringList::ConstIterator it = list.begin(); it != list.end(); ++it)
-		tag->addField("PERFORMER", *it, 0);
+	tag->setTitle(ToWString(s.getTitle()));
+	tag->setArtist(ToWString(s.getArtist()));
+	tag->setAlbum(ToWString(s.getAlbum()));
+	tag->setYear(stringToInt(s.getDate()));
+	tag->setTrack(stringToInt(s.getTrack()));
+	tag->setGenre(ToWString(s.getGenre()));
+	tag->setComment(ToWString(s.getComment()));
+}
+
+void writeID3v2Tags(const MPD::MutableSong &s, TagLib::ID3v2::Tag *tag)
+{
+	auto writeID3v2 = [&](const TagLib::ByteVector &type, const TagLib::StringList &list) {
+		tag->removeFrames(type);
+		auto frame = new TagLib::ID3v2::TextIdentificationFrame(type, TagLib::String::UTF8);
+		frame->setText(list);
+		tag->addFrame(frame);
+	};
+	writeID3v2("TIT2", tagList(s, &MPD::Song::getTitle));
+	writeID3v2("TPE1", tagList(s, &MPD::Song::getArtist));
+	writeID3v2("TPE2", tagList(s, &MPD::Song::getAlbumArtist));
+	writeID3v2("TALB", tagList(s, &MPD::Song::getAlbum));
+	writeID3v2("TDRC", tagList(s, &MPD::Song::getDate));
+	writeID3v2("TRCK", tagList(s, &MPD::Song::getTrack));
+	writeID3v2("TCON", tagList(s, &MPD::Song::getGenre));
+	writeID3v2("TCOM", tagList(s, &MPD::Song::getComposer));
+	writeID3v2("TPE3", tagList(s, &MPD::Song::getPerformer));
+	writeID3v2("TPOS", tagList(s, &MPD::Song::getDisc));
+	writeID3v2("COMM", tagList(s, &MPD::Song::getComment));
+}
+
+void writeXiphComments(const MPD::MutableSong &s, TagLib::Ogg::XiphComment *tag)
+{
+	auto writeXiph = [&](const TagLib::String &type, const TagLib::StringList &list) {
+		tag->removeField(type);
+		for (auto it = list.begin(); it != list.end(); ++it)
+			tag->addField(type, *it, false);
+	};
+	writeXiph("TITLE", tagList(s, &MPD::Song::getTitle));
+	writeXiph("ARTIST", tagList(s, &MPD::Song::getArtist));
+	writeXiph("ALBUM ARTIST", tagList(s, &MPD::Song::getAlbumArtist));
+	writeXiph("ALBUM", tagList(s, &MPD::Song::getAlbum));
+	writeXiph("DATE", tagList(s, &MPD::Song::getDate));
+	writeXiph("TRACKNUMBER", tagList(s, &MPD::Song::getTrack));
+	writeXiph("GENRE", tagList(s, &MPD::Song::getGenre));
+	writeXiph("COMPOSER", tagList(s, &MPD::Song::getComposer));
+	writeXiph("PERFORMER", tagList(s, &MPD::Song::getPerformer));
+	writeXiph("DISC", tagList(s, &MPD::Song::getDisc));
+	writeXiph("COMMENT", tagList(s, &MPD::Song::getComment));
 }
 
 void GetPatternList()
