@@ -74,7 +74,7 @@ struct Action
 	
 	static void ValidateScreenSize();
 	static void SetResizeFlags();
-	static void ResizeScreen();
+	static void ResizeScreen(bool reload_main_window);
 	static void SetWindowsDimensions();
 	
 	static bool ConnectToMPD();
@@ -85,7 +85,6 @@ struct Action
 	static Action *Get(const std::string &name);
 	
 	static bool OriginalStatusbarVisibility;
-	static bool DesignChanged;
 	static bool ExitMainLoop;
 	
 	static size_t HeaderHeight;

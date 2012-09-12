@@ -64,7 +64,6 @@ using namespace std::placeholders;
 using Global::myScreen;
 
 bool Action::OriginalStatusbarVisibility;
-bool Action::DesignChanged;
 bool Action::ExitMainLoop = false;
 
 size_t Action::HeaderHeight;
@@ -126,7 +125,7 @@ void Action::SetResizeFlags()
 #	endif // ENABLE_CLOCK
 }
 
-void Action::ResizeScreen()
+void Action::ResizeScreen(bool reload_main_window)
 {
 	using Global::MainHeight;
 	using Global::wHeader;
@@ -136,7 +135,7 @@ void Action::ResizeScreen()
 	resize_term(0, 0);
 #	else
 	// update internal screen dimensions
-	if (!DesignChanged)
+	if (reload_main_window)
 	{
 		endwin();
 		refresh();
@@ -157,7 +156,7 @@ void Action::ResizeScreen()
 	if (!Config.header_visibility)
 		MainHeight += 2;
 	if (!Config.statusbar_visibility)
-		MainHeight++;
+		++MainHeight;
 	
 	SetResizeFlags();
 	
@@ -173,21 +172,12 @@ void Action::ResizeScreen()
 	ApplyToVisibleWindows(&BasicScreen::Refresh);
 	
 	Status::Changes::elapsedTime();
-	if (!Mpd.isPlaying() || DesignChanged)
-	{
+	if (!Mpd.isPlaying())
 		Status::Changes::playerState();
-		if (DesignChanged)
-			Status::Changes::mixer();
-	}
 	// Note: routines for drawing separator if alternative user
 	// interface is active and header is hidden are placed in
 	// NcmpcppStatusChanges.StatusFlags
 	Status::Changes::flags();
-	if (DesignChanged)
-	{
-		DesignChanged = false;
-		Statusbar::msg("User interface: %s", Config.new_design ? "Alternative" : "Classic");
-	}
 	drawHeader();
 	wFooter->refresh();
 	refresh();
@@ -207,7 +197,7 @@ void Action::SetWindowsDimensions()
 		MainHeight += 2;
 	}
 	if (!Config.statusbar_visibility)
-		MainHeight++;
+		++MainHeight;
 	
 	HeaderHeight = Config.new_design ? (Config.header_visibility ? 5 : 3) : 1;
 	FooterStartY = LINES-(Config.statusbar_visibility ? 2 : 1);
@@ -629,8 +619,10 @@ void ToggleInterface::Run()
 	SetWindowsDimensions();
 	Progressbar::unlock();
 	Statusbar::unlock();
-	DesignChanged = true;
-	ResizeScreen();
+	ResizeScreen(false);
+	if (!Mpd.isPlaying())
+		Status::Changes::mixer();
+	Statusbar::msg("User interface: %s", Config.new_design ? "Alternative" : "Classic");
 }
 
 bool JumpToParentDirectory::canBeRun() const

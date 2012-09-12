@@ -58,7 +58,7 @@ namespace
 		}
 		else if (signal == SIGWINCH)
 		{
-			Action::ResizeScreen();
+			Action::ResizeScreen(true);
 		}
 	}
 #	endif // !WIN32
