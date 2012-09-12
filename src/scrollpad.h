@@ -55,7 +55,7 @@ struct Scrollpad: public Window
 	/// @param for_each indicates whether function searches through whole text and sets
 	/// given format for all occurences of given string or stops after first occurence
 	/// @return true if at least one occurence of the string was found, false otherwise
-	/// @see basic_buffer::setFormatting()
+	/// @see BasicBuffer::setFormatting()
 	bool setFormatting(short val_b, const std::wstring &s,
 				short val_e, bool case_sensitive, bool for_each = 1);
 	
@@ -65,7 +65,7 @@ struct Scrollpad: public Window
 	/// Removes all format flags and colors that was applied
 	/// by the most recent call to setFormatting() function
 	/// @see setFormatting()
-	/// @see basic_buffer::removeFormatting()
+	/// @see BasicBuffer::removeFormatting()
 	void removeFormatting();
 	
 	/// @return text stored in internal buffer

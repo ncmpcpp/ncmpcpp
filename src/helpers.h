@@ -328,7 +328,7 @@ template <> struct StringConverter<NC::Scrollpad> {
 };
 
 template <typename Iterator>
-void stringToBuffer(Iterator first, Iterator last, NC::basic_buffer<typename Iterator::value_type> &buf)
+void stringToBuffer(Iterator first, Iterator last, NC::BasicBuffer<typename Iterator::value_type> &buf)
 {
 	for (auto it = first; it != last; ++it)
 	{
@@ -403,7 +403,7 @@ void stringToBuffer(Iterator first, Iterator last, NC::basic_buffer<typename Ite
 }
 
 template <typename CharT>
-void stringToBuffer(const std::basic_string<CharT> &s, NC::basic_buffer<CharT> &buf)
+void stringToBuffer(const std::basic_string<CharT> &s, NC::BasicBuffer<CharT> &buf)
 {
 	stringToBuffer(s.begin(), s.end(), buf);
 }

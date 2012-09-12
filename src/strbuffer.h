@@ -31,7 +31,7 @@ namespace NC {//
 /// Buffer template class that can store text along with its
 /// format attributes. The content can be easily printed to
 /// window or taken as raw string at any time.
-template <typename CharT> class basic_buffer
+template <typename CharT> class BasicBuffer
 {
 	friend struct Scrollpad;
 	
@@ -61,11 +61,11 @@ template <typename CharT> class basic_buffer
 	
 public:
 	/// Constructs an empty buffer
-	basic_buffer() { }
+	BasicBuffer() { }
 	
 	/// Constructs a buffer from the existed one
 	/// @param b copied buffer
-	basic_buffer(const basic_buffer &b);
+	BasicBuffer(const BasicBuffer &b);
 	
 	/// @return raw content of the buffer without formatting informations
 	const std::basic_string<CharT> &str() const;
@@ -111,49 +111,49 @@ public:
 	/// Clears the content of the buffer and its formatting informations
 	void clear();
 	
-	basic_buffer<CharT> &operator<<(int n)
+	BasicBuffer<CharT> &operator<<(int n)
 	{
 		m_string += intTo< std::basic_string<CharT> >::apply(n);
 		return *this;
 	}
 	
-	basic_buffer<CharT> &operator<<(long int n)
+	BasicBuffer<CharT> &operator<<(long int n)
 	{
 		m_string += longIntTo< std::basic_string<CharT> >::apply(n);
 		return *this;
 	}
 	
-	basic_buffer<CharT> &operator<<(unsigned int n)
+	BasicBuffer<CharT> &operator<<(unsigned int n)
 	{
 		m_string += unsignedIntTo< std::basic_string<CharT> >::apply(n);
 		return *this;
 	}
 	
-	basic_buffer<CharT> &operator<<(unsigned long int n)
+	BasicBuffer<CharT> &operator<<(unsigned long int n)
 	{
 		m_string += unsignedLongIntTo< std::basic_string<CharT> >::apply(n);
 		return *this;
 	}
 	
-	basic_buffer<CharT> &operator<<(char c)
+	BasicBuffer<CharT> &operator<<(char c)
 	{
 		m_string += c;
 		return *this;
 	}
 	
-	basic_buffer<CharT> &operator<<(wchar_t wc)
+	BasicBuffer<CharT> &operator<<(wchar_t wc)
 	{
 		m_string += wc;
 		return *this;
 	}
 	
-	basic_buffer<CharT> &operator<<(const CharT *s)
+	BasicBuffer<CharT> &operator<<(const CharT *s)
 	{
 		m_string += s;
 		return *this;
 	}
 	
-	basic_buffer<CharT> &operator<<(const std::basic_string<CharT> &s)
+	BasicBuffer<CharT> &operator<<(const std::basic_string<CharT> &s)
 	{
 		m_string += s;
 		return *this;
@@ -161,20 +161,20 @@ public:
 	
 	/// Handles colors
 	/// @return reference to itself
-	basic_buffer<CharT> &operator<<(Color color);
+	BasicBuffer<CharT> &operator<<(Color color);
 	
 	/// Handles format flags
 	/// @return reference to itself
-	basic_buffer<CharT> &operator<<(Format f);
+	BasicBuffer<CharT> &operator<<(Format f);
 	
 	/// Handles copying one buffer to another using operator<<()
 	/// @param buf buffer to be copied
 	/// @return reference to itself
-	basic_buffer<CharT> &operator<<(const basic_buffer<CharT> &buf);
+	BasicBuffer<CharT> &operator<<(const BasicBuffer<CharT> &buf);
 	
 	/// Friend operator that handles printing
 	/// the content of buffer to window object
-	friend Window &operator<<(Window &w, const basic_buffer<CharT> &buf)
+	friend Window &operator<<(Window &w, const BasicBuffer<CharT> &buf)
 	{
 		const std::basic_string<CharT> &s = buf.m_string;
 		if (buf.m_format.empty())
@@ -211,20 +211,20 @@ private:
 };
 
 /// Standard buffer that uses narrow characters
-typedef basic_buffer<char> Buffer;
+typedef BasicBuffer<char> Buffer;
 
 /// Standard buffer that uses wide characters
-typedef basic_buffer<wchar_t> WBuffer;
+typedef BasicBuffer<wchar_t> WBuffer;
 
-template <typename CharT> basic_buffer<CharT>::basic_buffer(const basic_buffer &b)
+template <typename CharT> BasicBuffer<CharT>::BasicBuffer(const BasicBuffer &b)
 	: m_string(b.m_string), m_format(b.m_format) { }
 
-template <typename CharT> const std::basic_string<CharT> &basic_buffer<CharT>::str() const
+template <typename CharT> const std::basic_string<CharT> &BasicBuffer<CharT>::str() const
 {
 	return m_string;
 }
 
-template <typename CharT> bool basic_buffer<CharT>::setFormatting(
+template <typename CharT> bool BasicBuffer<CharT>::setFormatting(
 	short val_b,
 	std::basic_string<CharT> s,
 	short val_e,
@@ -261,7 +261,7 @@ template <typename CharT> bool basic_buffer<CharT>::setFormatting(
 	return result;
 }
 
-template <typename CharT> void basic_buffer<CharT>::removeFormatting(
+template <typename CharT> void BasicBuffer<CharT>::removeFormatting(
 	short val_b,
 	std::basic_string<CharT> pattern,
 	short val_e,
@@ -294,12 +294,12 @@ template <typename CharT> void basic_buffer<CharT>::removeFormatting(
 	}
 }
 
-template <typename CharT> void basic_buffer<CharT>::removeFormatting()
+template <typename CharT> void BasicBuffer<CharT>::removeFormatting()
 {
 	m_format.clear();
 }
 
-template <typename CharT> void basic_buffer<CharT>::write(
+template <typename CharT> void BasicBuffer<CharT>::write(
 	Window &w,
 	size_t &start_pos,
 	size_t width,
@@ -357,13 +357,13 @@ template <typename CharT> void basic_buffer<CharT>::write(
 		w << *this;
 }
 
-template <typename CharT> void basic_buffer<CharT>::clear()
+template <typename CharT> void BasicBuffer<CharT>::clear()
 {
 	m_string.clear();
 	m_format.clear();
 }
 
-template <typename CharT> void basic_buffer<CharT>::loadAttribute(Window &w, short value) const
+template <typename CharT> void BasicBuffer<CharT>::loadAttribute(Window &w, short value) const
 {
 	if (value < fmtNone)
 		w << Color(value);
@@ -371,7 +371,7 @@ template <typename CharT> void basic_buffer<CharT>::loadAttribute(Window &w, sho
 		w << Format(value);
 }
 
-template <typename CharT> basic_buffer<CharT> &basic_buffer<CharT>::operator<<(Color color)
+template <typename CharT> BasicBuffer<CharT> &BasicBuffer<CharT>::operator<<(Color color)
 {
 	FormatPos f;
 	f.Position = m_string.length();
@@ -380,12 +380,12 @@ template <typename CharT> basic_buffer<CharT> &basic_buffer<CharT>::operator<<(C
 	return *this;
 }
 
-template <typename CharT> basic_buffer<CharT> &basic_buffer<CharT>::operator<<(Format f)
+template <typename CharT> BasicBuffer<CharT> &BasicBuffer<CharT>::operator<<(Format f)
 {
 	return operator<<(Color(f));
 }
 
-template <typename CharT> basic_buffer<CharT> &basic_buffer<CharT>::operator<<(const basic_buffer<CharT> &buf)
+template <typename CharT> BasicBuffer<CharT> &BasicBuffer<CharT>::operator<<(const BasicBuffer<CharT> &buf)
 {
 	size_t length = m_string.length();
 	m_string += buf.m_string;
