@@ -27,6 +27,7 @@
 #include "settings.h"
 #include "status.h"
 #include "statusbar.h"
+#include "title.h"
 
 using Global::MainHeight;
 using Global::MainStartY;
@@ -66,7 +67,7 @@ void Outputs::SwitchTo()
 		Global::myPrevScreen = myScreen;
 	myScreen = this;
 	w->Window::clear();
-	DrawHeader();
+	drawHeader();
 }
 
 void Outputs::Resize()

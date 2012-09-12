@@ -36,6 +36,7 @@
 #include "statusbar.h"
 #include "tag_editor.h"
 #include "utility/comparators.h"
+#include "title.h"
 
 using namespace std::placeholders;
 
@@ -117,7 +118,7 @@ void Browser::SwitchTo()
 	if (myScreen != this && myScreen->isTabbable())
 		Global::myPrevScreen = myScreen;
 	myScreen = this;
-	DrawHeader();
+	drawHeader();
 }
 
 std::wstring Browser::Title()
@@ -141,7 +142,7 @@ void Browser::EnterPressed()
 				GetDirectory(getParentDirectory(itsBrowsedDir), itsBrowsedDir);
 			else
 				GetDirectory(item.name, itsBrowsedDir);
-			DrawHeader();
+			drawHeader();
 			break;
 		}
 		case itSong:
@@ -231,7 +232,7 @@ void Browser::MouseButtonPressed(MEVENT me)
 				if (me.bstate & BUTTON1_PRESSED)
 				{
 					GetDirectory(w->current().value().name);
-					DrawHeader();
+					drawHeader();
 				}
 				else
 				{
@@ -383,7 +384,7 @@ void Browser::LocateSong(const MPD::Song &s)
 			break;
 		}
 	}
-	DrawHeader();
+	drawHeader();
 }
 
 void Browser::GetDirectory(std::string dir, std::string subdir)
@@ -568,7 +569,7 @@ void Browser::ChangeBrowseMode()
 		itsBrowsedDir.resize(itsBrowsedDir.length()-1);
 	w->reset();
 	GetDirectory(itsBrowsedDir);
-	DrawHeader();
+	drawHeader();
 }
 
 bool Browser::deleteItem(const MPD::Item &item)

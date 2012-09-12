@@ -38,6 +38,7 @@
 #include "search_engine.h"
 #include "statusbar.h"
 #include "tag_editor.h"
+#include "title.h"
 
 using Global::MainHeight;
 using Global::MainStartY;
@@ -83,7 +84,7 @@ void TinyTagEditor::SwitchTo()
 		
 		myOldScreen = myScreen;
 		myScreen = this;
-		DrawHeader();
+		drawHeader();
 	}
 	else
 	{

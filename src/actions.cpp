@@ -53,6 +53,7 @@
 #include "tag_editor.h"
 #include "tiny_tag_editor.h"
 #include "visualizer.h"
+#include "title.h"
 
 #ifdef HAVE_TAGLIB_H
 # include "fileref.h"
@@ -129,7 +130,6 @@ void Action::SetResizeFlags()
 void Action::ResizeScreen()
 {
 	using Global::MainHeight;
-	using Global::RedrawStatusbar;
 	using Global::wHeader;
 	using Global::wFooter;
 	
@@ -174,27 +174,24 @@ void Action::ResizeScreen()
 	wFooter->resize(COLS, Config.statusbar_visibility ? 2 : 1);
 	
 	ApplyToVisibleWindows(&BasicScreen::Refresh);
-	RedrawStatusbar = true;
-	MPD::StatusChanges changes;
+	
+	Status::Changes::elapsedTime();
 	if (!Mpd.isPlaying() || DesignChanged)
 	{
-		changes.PlayerState = 1;
+		Status::Changes::playerState();
 		if (DesignChanged)
-			changes.Volume = 1;
+			Status::Changes::mixer();
 	}
 	// Note: routines for drawing separator if alternative user
 	// interface is active and header is hidden are placed in
 	// NcmpcppStatusChanges.StatusFlags
-	changes.StatusFlags = 1; // force status update
-	NcmpcppStatusChanged(&Mpd, changes, 0);
+	Status::Changes::flags();
 	if (DesignChanged)
 	{
-		RedrawStatusbar = true;
-		NcmpcppStatusChanged(&Mpd, MPD::StatusChanges(), 0);
-		DesignChanged = 0;
+		DesignChanged = false;
 		Statusbar::msg("User interface: %s", Config.new_design ? "Alternative" : "Classic");
 	}
-	DrawHeader();
+	drawHeader();
 	wFooter->refresh();
 	refresh();
 }
@@ -245,7 +242,7 @@ void Action::Seek()
 	SeekingInProgress = true;
 	while (true)
 	{
-		TraceMpdStatus();
+		Status::trace();
 		myPlaylist->UpdateTimer();
 		
 		int howmuch = Config.incremental_seeking ? (Timer.tv_sec-t.tv_sec)/2+Config.seek_time : Config.seek_time;
@@ -742,7 +739,7 @@ void MasterScreen::Run()
 	
 	myInactiveScreen = myScreen;
 	myScreen = myLockedScreen;
-	DrawHeader();
+	drawHeader();
 }
 
 bool SlaveScreen::canBeRun() const
@@ -763,7 +760,7 @@ void SlaveScreen::Run()
 	
 	myScreen = myInactiveScreen;
 	myInactiveScreen = myLockedScreen;
-	DrawHeader();
+	drawHeader();
 }
 
 void VolumeUp::Run()
@@ -804,7 +801,7 @@ void Delete::Run()
 			question += ToString(wideShorten(ToWString(name), COLS-question.size()-10));
 			question += "\"?";
 		}
-		bool yes = AskYesNoQuestion(question, TraceMpdStatus);
+		bool yes = AskYesNoQuestion(question, Status::trace);
 		if (yes)
 		{
 			bool success = true;
@@ -849,7 +846,7 @@ void Delete::Run()
 				question += ToString(wideShorten(ToWString(myPlaylistEditor->Playlists->current().value()), COLS-question.size()-10));
 				question += "\"?";
 			}
-			bool yes = AskYesNoQuestion(question, TraceMpdStatus);
+			bool yes = AskYesNoQuestion(question, Status::trace);
 			if (yes)
 			{
 				auto list = getSelectedOrCurrent(myPlaylistEditor->Playlists->begin(), myPlaylistEditor->Playlists->end(), myPlaylistEditor->Playlists->currentI());
@@ -929,7 +926,7 @@ void SavePlaylist::Run()
 			}
 			else if (result == MPD_SERVER_ERROR_EXIST)
 			{
-				bool yes = AskYesNoQuestion("Playlist \"" + playlist_name + "\" already exists, overwrite?", TraceMpdStatus);
+				bool yes = AskYesNoQuestion("Playlist \"" + playlist_name + "\" already exists, overwrite?", Status::trace);
 				if (yes)
 				{
 					Mpd.DeletePlaylist(playlist_name);
@@ -1232,7 +1229,7 @@ void JumpToPlayingSong::Run()
 	else if (myScreen == myBrowser)
 	{
 		myBrowser->LocateSong(myPlaylist->nowPlayingSong());
-		DrawHeader();
+		drawHeader();
 	}
 	else if (myScreen == myLibrary)
 	{
@@ -1782,7 +1779,7 @@ void CropMainPlaylist::Run()
 {
 	bool yes = true;
 	if (Config.ask_before_clearing_main_playlist)
-		yes = AskYesNoQuestion("Do you really want to crop main playlist?", TraceMpdStatus);
+		yes = AskYesNoQuestion("Do you really want to crop main playlist?", Status::trace);
 	if (yes)
 	{
 		Statusbar::msg("Cropping playlist...");
@@ -1802,7 +1799,7 @@ void CropPlaylist::Run()
 	std::string playlist = myPlaylistEditor->Playlists->current().value();
 	bool yes = true;
 	if (Config.ask_before_clearing_main_playlist)
-		yes = AskYesNoQuestion("Do you really want to crop playlist \"" + playlist + "\"?", TraceMpdStatus);
+		yes = AskYesNoQuestion("Do you really want to crop playlist \"" + playlist + "\"?", Status::trace);
 	if (yes)
 	{
 		auto delete_fun = std::bind(&MPD::Connection::PlaylistDelete, _1, playlist, _2);
@@ -1816,7 +1813,7 @@ void ClearMainPlaylist::Run()
 {
 	bool yes = true;
 	if (Config.ask_before_clearing_main_playlist)
-		yes = AskYesNoQuestion("Do you really want to clear main playlist?", TraceMpdStatus);
+		yes = AskYesNoQuestion("Do you really want to clear main playlist?", Status::trace);
 	if (yes)
 	{
 		auto delete_fun = std::bind(&MPD::Connection::Delete, _1, _2);
@@ -1838,7 +1835,7 @@ void ClearPlaylist::Run()
 	std::string playlist = myPlaylistEditor->Playlists->current().value();
 	bool yes = true;
 	if (Config.ask_before_clearing_main_playlist)
-		yes = AskYesNoQuestion("Do you really want to clear playlist \"" + playlist + "\"?", TraceMpdStatus);
+		yes = AskYesNoQuestion("Do you really want to clear playlist \"" + playlist + "\"?", Status::trace);
 	if (yes)
 	{
 		auto delete_fun = std::bind(&MPD::Connection::PlaylistDelete, _1, playlist, _2);
@@ -1902,7 +1899,7 @@ void ApplyFilter::Run()
 	{
 		myPlaylist->EnableHighlighting();
 		Playlist::ReloadTotalLength = true;
-		DrawHeader();
+		drawHeader();
 	}
 	ListsChangeFinisher();
 }
@@ -2007,7 +2004,7 @@ void ToggleReplayGainMode::Run()
 	int answer = 0;
 	do
 	{
-		TraceMpdStatus();
+		Status::trace();
 		answer = wFooter->readKey();
 	}
 	while (answer != 'o' && answer != 't' && answer != 'a');
@@ -2051,7 +2048,7 @@ void AddRandomItems::Run()
 	int answer = 0;
 	do
 	{
-		TraceMpdStatus();
+		Status::trace();
 		answer = wFooter->readKey();
 	}
 	while (answer != 's' && answer != 'a' && answer != 'b');
@@ -2121,7 +2118,7 @@ void ToggleLibraryTagType::Run()
 	int answer = 0;
 	do
 	{
-		TraceMpdStatus();
+		Status::trace();
 		answer = wFooter->readKey();
 	}
 	while (answer != 'a' && answer != 'A' && answer != 'y' && answer != 'g' && answer != 'c' && answer != 'p');

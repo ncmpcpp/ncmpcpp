@@ -175,7 +175,7 @@ void Statusbar::Helpers::mpd()
 
 void Statusbar::Helpers::getString(const std::wstring &)
 {
-	TraceMpdStatus();
+	Status::trace();
 }
 
 void Statusbar::Helpers::ApplyFilterImmediately::operator()(const std::wstring &ws)
@@ -194,6 +194,6 @@ void Statusbar::Helpers::ApplyFilterImmediately::operator()(const std::wstring &
 			m_f->applyFilter(ToString(m_ws));
 			myScreen->RefreshWindow();
 		}
-		TraceMpdStatus();
+		Status::trace();
 	}
 }

@@ -61,9 +61,6 @@ namespace Global
 	// indicates whether seeking action in currently in progress
 	extern bool SeekingInProgress;
 	
-	// indicates whether statusbar should be immediately repainted
-	extern bool RedrawStatusbar;
-	
 	// string that represents volume in right top corner. being global
 	// to be used for calculating width offsets in various files.
 	extern std::string VolumeState;

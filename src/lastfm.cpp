@@ -38,6 +38,7 @@
 #include "charset.h"
 #include "global.h"
 #include "statusbar.h"
+#include "title.h"
 
 using Global::MainHeight;
 using Global::MainStartY;
@@ -106,7 +107,7 @@ void Lastfm::SwitchTo()
 	
 	myOldScreen = myScreen;
 	myScreen = this;
-	DrawHeader();
+	drawHeader();
 }
 
 void Lastfm::Load()

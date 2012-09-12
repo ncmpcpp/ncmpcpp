@@ -18,40 +18,48 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
-#ifndef _STATUS_CHECKER_H
-#define _STATUS_CHECKER_H
+#include <cstring>
+#include <iostream>
 
-#include "interfaces.h"
-#include "mpdpp.h"
+#include "global.h"
+#include "settings.h"
+#include "title.h"
 
-namespace Status {//
-
-void trace();
-
-void handleError(MPD::Connection * , int errorid, const char *msg, void *);
-
-void update(MPD::Connection *, MPD::StatusChanges changes, void *);
-
-namespace Changes {//
-
-void playlist();
-void storedPlaylists();
-void database();
-void playerState();
-void songID();
-void elapsedTime();
-void repeat();
-void random();
-void single();
-void consume();
-void crossfade();
-void dbUpdateState();
-void flags();
-void mixer();
-void outputs();
-
+#ifdef USE_PDCURSES
+void windowTitle(const std::string &) { }
+#else
+void windowTitle(const std::string &status)
+{
+	if (strcmp(getenv("TERM"), "linux") && Config.set_window_title)
+		std::cout << "\033]0;" << status << "\7";
 }
+#endif // USE_PDCURSES
 
+void drawHeader()
+{
+	using Global::myScreen;
+	using Global::wHeader;
+	using Global::VolumeState;
+	
+	if (!Config.header_visibility)
+		return;
+	if (Config.new_design)
+	{
+		std::wstring title = myScreen->Title();
+		*wHeader << NC::XY(0, 3) << wclrtoeol;
+		*wHeader << NC::fmtBold << Config.alternative_ui_separator_color;
+		mvwhline(wHeader->raw(), 2, 0, 0, COLS);
+		mvwhline(wHeader->raw(), 4, 0, 0, COLS);
+		*wHeader << NC::XY((COLS-wideLength(title))/2, 3);
+		*wHeader << Config.header_color << title << NC::clEnd;
+		*wHeader << NC::clEnd << NC::fmtBoldEnd;
+	}
+	else
+	{
+		*wHeader << NC::XY(0, 0) << wclrtoeol << NC::fmtBold << myScreen->Title() << NC::fmtBoldEnd;
+		*wHeader << Config.volume_color;
+		*wHeader << NC::XY(wHeader->getWidth()-VolumeState.length(), 0) << VolumeState;
+		*wHeader << NC::clEnd;
+	}
+	wHeader->refresh();
 }
-
-#endif

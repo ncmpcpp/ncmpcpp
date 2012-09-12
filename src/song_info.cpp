@@ -22,6 +22,7 @@
 #include "helpers.h"
 #include "song_info.h"
 #include "tag_editor.h"
+#include "title.h"
 
 #ifdef HAVE_TAGLIB_H
 # include "fileref.h"
@@ -102,7 +103,7 @@ void SongInfo::SwitchTo()
 	// redraw header after we're done with the file, since reading it from disk
 	// takes a bit of time and having header updated before content of a window
 	// is displayed doesn't look nice.
-	DrawHeader();
+	drawHeader();
 }
 
 void SongInfo::PrepareSong(MPD::Song &s)

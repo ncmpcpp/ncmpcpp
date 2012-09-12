@@ -45,6 +45,7 @@
 #include "song_info.h"
 #include "statusbar.h"
 #include "utility/comparators.h"
+#include "title.h"
 
 using namespace std::placeholders;
 
@@ -226,7 +227,7 @@ void TagEditor::SwitchTo()
 	if (myScreen != this && myScreen->isTabbable())
 		Global::myPrevScreen = myScreen;
 	myScreen = this;
-	DrawHeader();
+	drawHeader();
 	Refresh();
 }
 
@@ -497,7 +498,7 @@ void TagEditor::EnterPressed()
 	
 	if (w == TagTypes && id == 5)
 	{
-		bool yes = Action::AskYesNoQuestion("Number tracks?", TraceMpdStatus);
+		bool yes = Action::AskYesNoQuestion("Number tracks?", Status::trace);
 		if (yes)
 		{
 			auto it = EditedSongs.begin();

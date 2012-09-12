@@ -35,6 +35,7 @@
 #include "settings.h"
 #include "status.h"
 #include "statusbar.h"
+#include "title.h"
 
 using Global::MainStartY;
 using Global::MainHeight;
@@ -82,7 +83,7 @@ void Visualizer::SwitchTo()
 	if (myScreen != this && myScreen->isTabbable())
 		Global::myPrevScreen = myScreen;
 	myScreen = this;
-	DrawHeader();
+	drawHeader();
 	w->clear();
 	
 	SetFD();

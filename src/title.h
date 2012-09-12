@@ -18,40 +18,13 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
-#ifndef _STATUS_CHECKER_H
-#define _STATUS_CHECKER_H
+#ifndef _TITLE_H
+#define _TITLE_H
 
-#include "interfaces.h"
-#include "mpdpp.h"
+#include "window.h"
 
-namespace Status {//
+void windowTitle(const std::string &title);
 
-void trace();
-
-void handleError(MPD::Connection * , int errorid, const char *msg, void *);
-
-void update(MPD::Connection *, MPD::StatusChanges changes, void *);
-
-namespace Changes {//
-
-void playlist();
-void storedPlaylists();
-void database();
-void playerState();
-void songID();
-void elapsedTime();
-void repeat();
-void random();
-void single();
-void consume();
-void crossfade();
-void dbUpdateState();
-void flags();
-void mixer();
-void outputs();
-
-}
-
-}
+void drawHeader();
 
 #endif

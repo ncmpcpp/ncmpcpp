@@ -34,6 +34,7 @@
 #include "settings.h"
 #include "song.h"
 #include "statusbar.h"
+#include "title.h"
 
 using Global::MainHeight;
 using Global::MainStartY;
@@ -81,7 +82,7 @@ void Lyrics::Update()
 		const MPD::Song s = myPlaylist->nowPlayingSong();
 		if (!s.empty() && !s.getArtist().empty() && !s.getTitle().empty())
 		{
-			DrawHeader();
+			drawHeader();
 			itsScrollBegin = 0;
 			itsSong = s;
 			Load();
@@ -130,7 +131,7 @@ void Lyrics::SwitchTo()
 		itsSong = *s;
 		Load();
 		
-		DrawHeader();
+		drawHeader();
 	}
 	else
 	{

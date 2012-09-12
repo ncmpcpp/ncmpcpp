@@ -31,6 +31,7 @@
 #include "status.h"
 #include "statusbar.h"
 #include "utility/comparators.h"
+#include "title.h"
 
 using namespace std::placeholders;
 
@@ -122,7 +123,7 @@ void Playlist::SwitchTo()
 	EnableHighlighting();
 	if (w != Items) // even if sorting window is active, background has to be refreshed anyway
 		Items->display();
-	DrawHeader();
+	drawHeader();
 }
 
 void Playlist::Resize()

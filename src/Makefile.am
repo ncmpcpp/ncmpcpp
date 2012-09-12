@@ -41,6 +41,7 @@ ncmpcpp_SOURCES = \
 	statusbar.cpp \
 	tag_editor.cpp \
 	tiny_tag_editor.cpp \
+	title.cpp \
 	visualizer.cpp \
 	window.cpp
 
@@ -94,5 +95,6 @@ noinst_HEADERS = \
 	statusbar.h \
 	tag_editor.h \
 	tiny_tag_editor.h \
+	title.h \
 	visualizer.h \
 	window.h

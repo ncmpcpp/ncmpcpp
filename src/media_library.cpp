@@ -34,6 +34,7 @@
 #include "statusbar.h"
 #include "utility/comparators.h"
 #include "utility/type_conversions.h"
+#include "title.h"
 
 using namespace std::placeholders;
 
@@ -238,7 +239,7 @@ void MediaLibrary::SwitchTo()
 	if (myScreen != this && myScreen->isTabbable())
 		Global::myPrevScreen = myScreen;
 	myScreen = this;
-	DrawHeader();
+	drawHeader();
 	markSongsInPlaylist(songsProxyList());
 	Refresh();
 }

@@ -26,6 +26,7 @@
 #include "settings.h"
 #include "status.h"
 #include "utility/wide_string.h"
+#include "title.h"
 
 using Global::MainHeight;
 using Global::MainStartY;
@@ -131,7 +132,7 @@ void Help::SwitchTo()
 	if (myScreen != this && myScreen->isTabbable())
 		Global::myPrevScreen = myScreen;
 	myScreen = this;
-	DrawHeader();
+	drawHeader();
 }
 
 std::wstring Help::Title()

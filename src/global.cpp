@@ -35,7 +35,5 @@ size_t Global::MainHeight;
 bool Global::ShowMessages = false;
 bool Global::SeekingInProgress = false;
 
-bool Global::RedrawStatusbar = true;
-
 std::string Global::VolumeState;
 timeval Global::Timer;

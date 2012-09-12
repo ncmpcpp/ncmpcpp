@@ -42,6 +42,7 @@
 #include "status.h"
 #include "statusbar.h"
 #include "visualizer.h"
+#include "title.h"
 
 namespace
 {
@@ -71,7 +72,7 @@ namespace
 #		ifndef USE_PDCURSES // destroying screen somehow crashes pdcurses
 		NC::destroyScreen();
 #		endif // USE_PDCURSES
-		WindowTitle("");
+		windowTitle("");
 	}
 }
 
@@ -179,8 +180,8 @@ int main(int argc, char **argv)
 	if (Config.startup_screen != myScreen)
 		Config.startup_screen->SwitchTo();
 	
-	Mpd.SetStatusUpdater(NcmpcppStatusChanged, 0);
-	Mpd.SetErrorHandler(NcmpcppErrorCallback, 0);
+	Mpd.SetStatusUpdater(Status::update, 0);
+	Mpd.SetErrorHandler(Status::handleError, 0);
 	
 	// local variables
 	Key input(0, Key::Standard);
@@ -199,7 +200,7 @@ int main(int argc, char **argv)
 	Mpd.OrderDataFetching();
 	if (Config.jump_to_now_playing_song_at_start)
 	{
-		TraceMpdStatus();
+		Status::trace();
 		int curr_pos = Mpd.GetCurrentSongPos();
 		if  (curr_pos >= 0)
 			myPlaylist->Items->highlight(curr_pos);
@@ -230,7 +231,7 @@ int main(int argc, char **argv)
 			}
 		}
 		
-		TraceMpdStatus();
+		Status::trace();
 		
 		ShowMessages = true;
 		
@@ -242,7 +243,7 @@ int main(int argc, char **argv)
 		&&   (myScreen == myPlaylist || myScreen == myBrowser || myScreen == myLyrics)
 		   )
 		{
-			DrawHeader();
+			drawHeader();
 			past = Timer;
 		}
 		

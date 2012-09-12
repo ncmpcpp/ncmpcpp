@@ -31,6 +31,7 @@
 #include "status.h"
 #include "statusbar.h"
 #include "utility/comparators.h"
+#include "title.h"
 
 using namespace std::placeholders;
 
@@ -149,7 +150,7 @@ void SearchEngine::SwitchTo()
 	if (myScreen != this && myScreen->isTabbable())
 		Global::myPrevScreen = myScreen;
 	myScreen = this;
-	DrawHeader();
+	drawHeader();
 	markSongsInPlaylist(getProxySongList());
 }
 

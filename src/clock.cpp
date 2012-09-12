@@ -32,6 +32,7 @@
 #include "settings.h"
 #include "status.h"
 #include "statusbar.h"
+#include "title.h"
 
 using Global::MainHeight;
 using Global::MainStartY;
@@ -103,7 +104,7 @@ void Clock::SwitchTo()
 	if (myScreen != this && myScreen->isTabbable())
 		Global::myPrevScreen = myScreen;
 	myScreen = this;
-	DrawHeader();
+	drawHeader();
 	Prepare();
 	itsPane->refresh();
 	// clearing screen apparently fixes the problem with last digits being misrendered
