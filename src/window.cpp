@@ -849,7 +849,8 @@ Window &Window::operator<<(XY coords)
 
 Window &Window::operator<<(const char *s)
 {
-	wprintw(m_window, "%s", s);
+	for (const char *c = s; *c != '\0'; ++c)
+		wprintw(m_window, "%c", *c);
 	return *this;
 }
 
@@ -861,7 +862,8 @@ Window &Window::operator<<(char c)
 
 Window &Window::operator<<(const wchar_t *ws)
 {
-	wprintw(m_window, "%ls", ws);
+	for (const wchar_t *wc = ws; *wc != L'\0'; ++wc)
+		wprintw(m_window, "%lc", *wc);
 	return *this;
 }
 
@@ -885,14 +887,17 @@ Window &Window::operator<<(double d)
 
 Window &Window::operator<<(const std::string &s)
 {
-	for (std::string::const_iterator it = s.begin(); it != s.end(); ++it)
+	// for some reason passing whole string at once with "%s" doesn't work
+	// (string is cut in the middle, probably due to limitation of ncurses'
+	// internal buffer?), so we need to pass characters in a loop.
+	for (auto it = s.begin(); it != s.end(); ++it)
 		wprintw(m_window, "%c", *it);
 	return *this;
 }
 
 Window &Window::operator<<(const std::wstring &ws)
 {
-	for (std::wstring::const_iterator it = ws.begin(); it != ws.end(); ++it)
+	for (auto it = ws.begin(); it != ws.end(); ++it)
 		wprintw(m_window, "%lc", *it);
 	return *this;
 }
