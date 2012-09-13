@@ -37,6 +37,9 @@ struct Regex
 	/// @return compilation error (if there was any)
 	const std::string &error() const;
 	
+	/// @return true if regular expression is compiled, false otherwise
+	bool compiled() const;
+	
 	/// compiles regular expression
 	/// @result true if compilation was successful, false otherwise
 	bool compile();

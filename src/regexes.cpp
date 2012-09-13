@@ -52,6 +52,11 @@ const std::string &Regex::error() const
 	return m_error;
 }
 
+bool Regex::compiled() const
+{
+	return m_compiled;
+}
+
 bool Regex::compile()
 {
 	if (m_compiled)

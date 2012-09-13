@@ -35,7 +35,7 @@ template <typename T> struct RegexFilter
 	bool operator()(const Item &item) {
 		if (m_rx.regex().empty())
 			return true;
-		if (!m_rx.error().empty())
+		if (!m_rx.compiled() || !m_rx.error().empty())
 			return false;
 		return m_filter(m_rx, item.value());
 	}
