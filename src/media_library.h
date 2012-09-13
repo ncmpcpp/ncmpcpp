@@ -26,6 +26,8 @@
 
 struct MediaLibrary : public Screen<NC::Window>, public Filterable, public HasColumns, public HasSongs, public Searchable
 {
+	MediaLibrary();
+	
 	virtual void switchTo() OVERRIDE;
 	virtual void resize() OVERRIDE;
 	
@@ -89,8 +91,7 @@ struct MediaLibrary : public Screen<NC::Window>, public Filterable, public HasCo
 	NC::Menu<MPD::Song> *Songs;
 	
 protected:
-	virtual void init();
-	virtual bool isLockable() { return true; }
+	virtual bool isLockable() OVERRIDE { return true; }
 	
 private:
 	void AddToPlaylist(bool);

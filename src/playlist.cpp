@@ -38,7 +38,7 @@ using namespace std::placeholders;
 using Global::MainHeight;
 using Global::MainStartY;
 
-Playlist *myPlaylist = new Playlist;
+Playlist *myPlaylist;
 
 bool Playlist::ReloadTotalLength = 0;
 bool Playlist::ReloadRemaining = false;
@@ -50,7 +50,7 @@ bool playlistEntryMatcher(const Regex &rx, const MPD::Song &s);
 
 }
 
-void Playlist::init()
+Playlist::Playlist() : itsTotalLength(0), itsRemainingTime(0), itsScrollBegin(0)
 {
 	w = new NC::Menu<MPD::Song>(0, MainStartY, COLS, MainHeight, Config.columns_in_playlist && Config.titles_visibility ? Display::Columns(COLS) : "", Config.main_color, NC::brNone);
 	w->cyclicScrolling(Config.use_cyclic_scrolling);
@@ -62,8 +62,6 @@ void Playlist::init()
 		w->setItemDisplayer(std::bind(Display::SongsInColumns, _1, this));
 	else
 		w->setItemDisplayer(std::bind(Display::Songs, _1, this, Config.song_list_format));
-	
-	isInitialized = 1;
 }
 
 void Playlist::switchTo()
@@ -74,9 +72,6 @@ void Playlist::switchTo()
 	
 	if (myScreen == this)
 		return;
-	
-	if (!isInitialized)
-		init();
 	
 	itsScrollBegin = 0;
 	

@@ -42,7 +42,7 @@ using Global::MainHeight;
 using Global::MainStartY;
 using Global::myScreen;
 
-MediaLibrary *myLibrary = new MediaLibrary;
+MediaLibrary *myLibrary;
 
 namespace {//
 
@@ -112,7 +112,7 @@ public:
 
 }
 
-void MediaLibrary::init()
+MediaLibrary::MediaLibrary()
 {
 	hasTwoColumns = 0;
 	itsLeftColWidth = COLS/3-1;
@@ -146,7 +146,6 @@ void MediaLibrary::init()
 	Songs->setItemDisplayer(std::bind(Display::Songs, _1, this, Config.song_library_format));
 	
 	w = Tags;
-	isInitialized = 1;
 }
 
 void MediaLibrary::resize()
@@ -227,9 +226,6 @@ void MediaLibrary::switchTo()
 				Albums->setTitle(Config.titles_visibility ? "Albums" : "");
 		}
 	}
-	
-	if (!isInitialized)
-		init();
 	
 	if (myLockedScreen)
 		updateInactiveScreen(this);

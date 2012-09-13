@@ -32,7 +32,7 @@
 using Global::MainHeight;
 using Global::MainStartY;
 
-SongInfo *mySongInfo = new SongInfo;
+SongInfo *mySongInfo;
 
 const SongInfo::Metadata SongInfo::Tags[] =
 {
@@ -47,13 +47,12 @@ const SongInfo::Metadata SongInfo::Tags[] =
  { "Performer",    &MPD::Song::getPerformer,   &MPD::MutableSong::setPerformer   },
  { "Disc",         &MPD::Song::getDisc,        &MPD::MutableSong::setDisc        },
  { "Comment",      &MPD::Song::getComment,     &MPD::MutableSong::setComment     },
- { 0,              0,                          0                                  }
+ { 0,              0,                          0                                 }
 };
 
-void SongInfo::init()
+SongInfo::SongInfo()
 {
 	w = new NC::Scrollpad(0, MainStartY, COLS, MainHeight, "", Config.main_color, NC::brNone);
-	isInitialized = 1;
 }
 
 void SongInfo::resize()
@@ -78,9 +77,6 @@ void SongInfo::switchTo()
 	
 	if (myScreen == this)
 		return myOldScreen->switchTo();
-	
-	if (!isInitialized)
-		init();
 	
 	if (myLockedScreen)
 		updateInactiveScreen(this);

@@ -152,6 +152,7 @@ int main(int argc, char **argv)
 	
 	Action::SetWindowsDimensions();
 	Action::ValidateScreenSize();
+	Action::InitializeScreens();
 	
 	wHeader = new NC::Window(0, 0, COLS, Action::HeaderHeight, "", Config.header_color, NC::brNone);
 	if (Config.header_visibility || Config.new_design)

@@ -176,12 +176,9 @@ void Status::Changes::playlist()
 
 void Status::Changes::storedPlaylists()
 {
-	if (myPlaylistEditor->main())
-	{
-		myPlaylistEditor->requestPlaylistsUpdate();
-		myPlaylistEditor->requestContentsUpdate();
-	}
-	if (myBrowser->main() && myBrowser->CurrentDir() == "/")
+	myPlaylistEditor->requestPlaylistsUpdate();
+	myPlaylistEditor->requestContentsUpdate();
+	if (myBrowser->CurrentDir() == "/")
 	{
 		myBrowser->GetDirectory("/");
 		if (isVisible(myBrowser))
@@ -191,26 +188,17 @@ void Status::Changes::storedPlaylists()
 
 void Status::Changes::database()
 {
-	if (myBrowser->main())
-	{
-		if (isVisible(myBrowser))
-			myBrowser->GetDirectory(myBrowser->CurrentDir());
-		else
-			myBrowser->main()->clear();
-	}
+	if (isVisible(myBrowser))
+		myBrowser->GetDirectory(myBrowser->CurrentDir());
+	else
+		myBrowser->main()->clear();
 #	ifdef HAVE_TAGLIB_H
-	if (myTagEditor->main())
-	{
-		myTagEditor->Dirs->clear();
-	}
+	myTagEditor->Dirs->clear();
 #	endif // HAVE_TAGLIB_H
-	if (myLibrary->main())
-	{
-		if (myLibrary->Columns() == 2)
-			myLibrary->Albums->clear();
-		else
-			myLibrary->Tags->clear();
-	}
+	if (myLibrary->Columns() == 2)
+		myLibrary->Albums->clear();
+	else
+		myLibrary->Tags->clear();
 }
 
 void Status::Changes::playerState()

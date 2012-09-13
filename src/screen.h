@@ -32,9 +32,7 @@ void scrollpadMouseButtonPressed(NC::Scrollpad *w, MEVENT me);
 /// basic class to be non-template to allow it.
 struct BasicScreen
 {
-	/// Initializes all variables to zero
-	BasicScreen() : hasToBeResized(0), isInitialized(0) { }
-	
+	BasicScreen() : hasToBeResized(false) { }
 	virtual ~BasicScreen() { }
 	
 	/// @see Screen::activeWindow()
@@ -93,12 +91,6 @@ struct BasicScreen
 	static void unlock();
 	
 protected:
-	/// Since screens initialization is lazy, we don't want to do
-	/// this in the constructor. This function should be invoked
-	/// only once and after that isInitialized flag has to be set
-	/// to true to somehow avoid next attempt of initialization.
-	virtual void init() = 0;
-	
 	/// @return true if screen can be locked. Note that returning
 	/// false here doesn't neccesarily mean that screen is also not
 	/// mergable (eg. lyrics screen is not lockable since that wouldn't
@@ -110,9 +102,6 @@ protected:
 	/// automatically adjust locked screen's dimensions (if there is one set)
 	/// if current screen is going to be subwindow.
 	void getWindowResizeParams(size_t &x_offset, size_t &width, bool adjust_locked_screen = true);
-	
-	/// Flag that inditates whether the screen is initialized or not
-	bool isInitialized;
 };
 
 void applyToVisibleWindows(void (BasicScreen::*f)());

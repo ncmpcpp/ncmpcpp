@@ -45,6 +45,27 @@ struct Column
 	bool display_empty_tag;
 };
 
+// FIXME: temporary hack
+struct ScreenRef
+{
+	ScreenRef() : m_ptr(0) { }
+	template <typename ScreenT>
+	ScreenRef(ScreenT *&ptr) : m_ptr(reinterpret_cast<BasicScreen **>(&ptr)) { }
+	
+	BasicScreen &operator*() const { return **m_ptr; }
+	BasicScreen *operator->() const { return *m_ptr; }
+	
+	bool operator==(const ScreenRef &rhs) const { return m_ptr == rhs.m_ptr; }
+	bool operator!=(const ScreenRef &rhs) const { return m_ptr != rhs.m_ptr; }
+	bool operator==(const BasicScreen *rhs) const { return *m_ptr == rhs; }
+	bool operator!=(const BasicScreen *rhs) const { return *m_ptr != rhs; }
+	
+	operator bool() { return m_ptr != 0; }
+	
+private:
+	BasicScreen **m_ptr;
+};
+
 struct Configuration
 {
 	Configuration();
@@ -187,8 +208,8 @@ struct Configuration
 	size_t now_playing_prefix_length;
 	size_t now_playing_suffix_length;
 	
-	BasicScreen *startup_screen;
-	std::list<BasicScreen *> screens_seq;
+	ScreenRef startup_screen;
+	std::list<ScreenRef> screens_seq;
 	
 	SortMode browser_sort_mode;
 	

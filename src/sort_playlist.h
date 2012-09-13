@@ -26,6 +26,8 @@
 
 struct SortPlaylistDialog : public Screen< NC::Menu< std::pair<std::string, MPD::Song::GetFunction> > >
 {
+	SortPlaylistDialog();
+	
 	virtual void switchTo() OVERRIDE;
 	virtual void resize() OVERRIDE;
 	
@@ -45,8 +47,7 @@ struct SortPlaylistDialog : public Screen< NC::Menu< std::pair<std::string, MPD:
 	void moveSortOrderDown();
 	
 protected:
-	virtual void init();
-	virtual bool isLockable() { return false; }
+	virtual bool isLockable() OVERRIDE { return false; }
 	
 private:
 	void setDimensions();

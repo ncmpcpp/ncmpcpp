@@ -32,15 +32,13 @@ using Global::myOldScreen;
 
 ServerInfo *myServerInfo = new ServerInfo;
 
-void ServerInfo::init()
+ServerInfo::ServerInfo()
 {
 	SetDimensions();
 	w = new NC::Scrollpad((COLS-itsWidth)/2, (MainHeight-itsHeight)/2+MainStartY, itsWidth, itsHeight, "MPD server info", Config.main_color, Config.window_border);
 	
 	itsURLHandlers = Mpd.GetURLHandlers();
 	itsTagTypes = Mpd.GetTagTypes();
-	
-	isInitialized = 1;
 }
 
 void ServerInfo::switchTo()
@@ -52,9 +50,6 @@ void ServerInfo::switchTo()
 		myOldScreen->switchTo();
 		return;
 	}
-	
-	if (!isInitialized)
-		init();
 	
 	// resize() can fall back to old screen, so we need it updated
 	myOldScreen = myScreen;

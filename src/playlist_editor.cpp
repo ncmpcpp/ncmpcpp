@@ -40,7 +40,7 @@ using namespace std::placeholders;
 using Global::MainHeight;
 using Global::MainStartY;
 
-PlaylistEditor *myPlaylistEditor = new PlaylistEditor;
+PlaylistEditor *myPlaylistEditor;
 
 namespace {//
 
@@ -55,7 +55,7 @@ bool SongEntryMatcher(const Regex &rx, const MPD::Song &s);
 
 }
 
-void PlaylistEditor::init()
+PlaylistEditor::PlaylistEditor()
 {
 	LeftColumnWidth = COLS/3-1;
 	RightColumnStartX = LeftColumnWidth+1;
@@ -81,7 +81,6 @@ void PlaylistEditor::init()
 		Content->setItemDisplayer(std::bind(Display::Songs, _1, this, Config.song_list_format));
 	
 	w = Playlists;
-	isInitialized = 1;
 }
 
 void PlaylistEditor::resize()
@@ -122,9 +121,6 @@ void PlaylistEditor::switchTo()
 	
 	if (myScreen == this)
 		return;
-	
-	if (!isInitialized)
-		init();
 	
 	if (myLockedScreen)
 		updateInactiveScreen(this);
@@ -509,8 +505,6 @@ void PlaylistEditor::nextColumn()
 
 void PlaylistEditor::Locate(const std::string &name)
 {
-	if (!isInitialized)
-		init();
 	update();
 	for (size_t i = 0; i < Playlists->size(); ++i)
 	{

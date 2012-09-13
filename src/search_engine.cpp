@@ -38,7 +38,7 @@ using namespace std::placeholders;
 using Global::MainHeight;
 using Global::MainStartY;
 
-SearchEngine *mySearcher = new SearchEngine;
+SearchEngine *mySearcher;
 
 namespace {//
 
@@ -101,7 +101,7 @@ size_t SearchEngine::StaticOptions = 20;
 size_t SearchEngine::ResetButton = 16;
 size_t SearchEngine::SearchButton = 15;
 
-void SearchEngine::init()
+SearchEngine::SearchEngine()
 {
 	w = new NC::Menu<SEItem>(0, MainStartY, COLS, MainHeight, "", Config.main_color, NC::brNone);
 	w->setHighlightColor(Config.main_highlight_color);
@@ -111,7 +111,6 @@ void SearchEngine::init()
 	w->setSelectedPrefix(Config.selected_item_prefix);
 	w->setSelectedSuffix(Config.selected_item_suffix);
 	SearchMode = &SearchModes[Config.search_engine_default_search_mode];
-	isInitialized = 1;
 }
 
 void SearchEngine::resize()
@@ -134,9 +133,6 @@ void SearchEngine::switchTo()
 		reset();
 		return;
 	}
-	
-	if (!isInitialized)
-		init();
 	
 	if (myLockedScreen)
 		updateInactiveScreen(this);

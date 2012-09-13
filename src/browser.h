@@ -27,7 +27,7 @@
 
 struct Browser : public Screen< NC::Menu<MPD::Item> >, public Filterable, public HasSongs, public Searchable
 {
-	Browser() : itsBrowseLocally(0), itsScrollBeginning(0), itsBrowsedDir("/") { }
+	Browser();
 	
 	// Screen< NC::Menu<MPD::Item> > implementation
 	virtual void resize() OVERRIDE;
@@ -80,7 +80,6 @@ struct Browser : public Screen< NC::Menu<MPD::Item> >, public Filterable, public
 	}
 	
 protected:
-	virtual void init() OVERRIDE;
 	virtual bool isLockable() OVERRIDE { return true; }
 	
 private:

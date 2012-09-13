@@ -33,9 +33,9 @@ using Global::MainHeight;
 using Global::MainStartY;
 using Global::myScreen;
 
-Outputs *myOutputs = new Outputs;
+Outputs *myOutputs;
 
-void Outputs::init()
+Outputs::Outputs()
 {
 	w = new NC::Menu<MPD::Output>(0, MainStartY, COLS, MainHeight, "", Config.main_color, NC::brNone);
 	w->cyclicScrolling(Config.use_cyclic_scrolling);
@@ -43,7 +43,6 @@ void Outputs::init()
 	w->setHighlightColor(Config.main_highlight_color);
 	w->setItemDisplayer(Display::Outputs);
 	
-	isInitialized = 1;
 	FetchList();
 }
 
@@ -53,9 +52,6 @@ void Outputs::switchTo()
 	
 	if (myScreen == this)
 		return;
-	
-	if (!isInitialized)
-		init();
 	
 	if (myLockedScreen)
 		updateInactiveScreen(this);
@@ -116,8 +112,6 @@ void Outputs::mouseButtonPressed(MEVENT me)
 
 void Outputs::FetchList()
 {
-	if (!isInitialized)
-		return;
 	w->clear();
 	auto outputs = Mpd.GetOutputs();
 	for (auto o = outputs.begin(); o != outputs.end(); ++o)

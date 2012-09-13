@@ -30,11 +30,7 @@
 
 struct Lyrics : public Screen<NC::Scrollpad>
 {
-	Lyrics() : ReloadNP(0),
-#	ifdef HAVE_CURL_CURL_H
-	isReadyToTake(0), isDownloadInProgress(0),
-#	endif // HAVE_CURL_CURL_H
-	itsScrollBegin(0) { }
+	Lyrics();
 	
 	// Screen<NC::Scrollpad> implementation
 	virtual void resize() OVERRIDE;
@@ -63,7 +59,6 @@ struct Lyrics : public Screen<NC::Scrollpad>
 	bool ReloadNP;
 	
 protected:
-	virtual void init() OVERRIDE;
 	virtual bool isLockable() OVERRIDE { return false; }
 	
 private:

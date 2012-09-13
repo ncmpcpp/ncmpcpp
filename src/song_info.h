@@ -33,6 +33,8 @@ struct SongInfo : public Screen<NC::Scrollpad>
 		MPD::MutableSong::SetFunction Set;
 	};
 	
+	SongInfo();
+	
 	// Screen<NC::Scrollpad> implementation
 	virtual void switchTo() OVERRIDE;
 	virtual void resize() OVERRIDE;
@@ -51,7 +53,6 @@ struct SongInfo : public Screen<NC::Scrollpad>
 	static const Metadata Tags[];
 	
 protected:
-	virtual void init() OVERRIDE;
 	virtual bool isLockable() OVERRIDE { return false; }
 	
 private:

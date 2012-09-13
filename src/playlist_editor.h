@@ -26,6 +26,8 @@
 
 struct PlaylistEditor : public Screen<NC::Window>, public Filterable, public HasColumns, public HasSongs, public Searchable
 {
+	PlaylistEditor();
+	
 	virtual void switchTo() OVERRIDE;
 	virtual void resize() OVERRIDE;
 	
@@ -78,7 +80,6 @@ struct PlaylistEditor : public Screen<NC::Window>, public Filterable, public Has
 	NC::Menu<MPD::Song> *Content;
 	
 protected:
-	virtual void init() OVERRIDE;
 	virtual bool isLockable() OVERRIDE { return true; }
 	
 private:

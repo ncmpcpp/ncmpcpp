@@ -37,9 +37,9 @@ using Global::MainStartY;
 using Global::myScreen;
 using Global::myOldScreen;
 
-SelectedItemsAdder *mySelectedItemsAdder = new SelectedItemsAdder;
+SelectedItemsAdder *mySelectedItemsAdder;
 
-void SelectedItemsAdder::init()
+SelectedItemsAdder::SelectedItemsAdder() : itsPSWidth(35), itsPSHeight(11)
 {
 	SetDimensions();
 	itsPlaylistSelector = new NC::Menu<std::string>((COLS-itsWidth)/2, (MainHeight-itsHeight)/2+MainStartY, itsWidth, itsHeight, "Add selected item(s) to...", Config.main_color, Config.window_border);
@@ -62,7 +62,6 @@ void SelectedItemsAdder::init()
 	itsPositionSelector->addItem("Cancel");
 	
 	w = itsPlaylistSelector;
-	isInitialized = 1;
 }
 
 void SelectedItemsAdder::switchTo()
@@ -75,9 +74,6 @@ void SelectedItemsAdder::switchTo()
 	auto hs = dynamic_cast<HasSongs *>(myScreen);
 	if (!hs || !hs->allowsSelection())
 		return;
-	
-	if (!isInitialized)
-		init();
 	
 	// default to main window
 	w = itsPlaylistSelector;
@@ -188,14 +184,6 @@ void SelectedItemsAdder::enterPressed()
 				Mpd.AddToPlaylist(playlist, *it);
 			if (Mpd.CommitCommandsList())
 				Statusbar::msg("Selected item(s) added to playlist \"%s\"", w->current().value().c_str());
-		}
-		if (pos != w->size()-1)
-		{
-			// refresh playlist's lists
-			if (myBrowser->main() && !myBrowser->isLocal() && myBrowser->CurrentDir() == "/")
-				myBrowser->GetDirectory("/");
-			if (myPlaylistEditor->main())
-				myPlaylistEditor->Playlists->clear(); // make playlist editor update itself
 		}
 	}
 	else

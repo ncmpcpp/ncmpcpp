@@ -49,7 +49,7 @@ using MPD::itDirectory;
 using MPD::itSong;
 using MPD::itPlaylist;
 
-Browser *myBrowser = new Browser;
+Browser *myBrowser;
 
 namespace {//
 
@@ -61,7 +61,7 @@ bool BrowserEntryMatcher(const Regex &rx, const MPD::Item &item, bool filter);
 
 }
 
-void Browser::init()
+Browser::Browser() : itsBrowseLocally(0), itsScrollBeginning(0), itsBrowsedDir("/")
 {
 	w = new NC::Menu<MPD::Item>(0, MainStartY, COLS, MainHeight, Config.columns_in_browser && Config.titles_visibility ? Display::Columns(COLS) : "", Config.main_color, NC::brNone);
 	w->setHighlightColor(Config.main_highlight_color);
@@ -73,8 +73,6 @@ void Browser::init()
 	
 	if (SupportedExtensions.empty())
 		Mpd.GetSupportedExtensions(SupportedExtensions);
-	
-	isInitialized = 1;
 }
 
 void Browser::resize()
@@ -98,9 +96,6 @@ void Browser::switchTo()
 		myBrowser->ChangeBrowseMode();
 #		endif // !WIN32
 	}
-	
-	if (!isInitialized)
-		init();
 	
 	if (myLockedScreen)
 		updateInactiveScreen(this);

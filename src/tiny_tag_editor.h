@@ -30,6 +30,8 @@
 
 struct TinyTagEditor : public Screen< NC::Menu<NC::Buffer> >
 {
+	TinyTagEditor();
+	
 	// Screen< NC::Menu<NC::Buffer> > implementation
 	virtual void resize() OVERRIDE;
 	virtual void switchTo() OVERRIDE;
@@ -49,7 +51,6 @@ struct TinyTagEditor : public Screen< NC::Menu<NC::Buffer> >
 	void SetEdited(const MPD::Song &);
 	
 protected:
-	virtual void init() OVERRIDE;
 	virtual bool isLockable() OVERRIDE { return true; }
 	
 private:

@@ -33,7 +33,7 @@
 
 struct Lastfm : public Screen<NC::Scrollpad>
 {
-	Lastfm() : isReadyToTake(0), isDownloadInProgress(0) { }
+	Lastfm();
 	
 	// Screen<NC::Scrollpad>
 	virtual void switchTo() OVERRIDE;
@@ -56,7 +56,6 @@ struct Lastfm : public Screen<NC::Scrollpad>
 	bool SetArtistInfoArgs(const std::string &artist, const std::string &lang = "");
 	
 protected:
-	virtual void init() OVERRIDE;
 	virtual bool isLockable() OVERRIDE { return false; }
 	
 private:

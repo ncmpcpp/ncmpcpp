@@ -43,12 +43,11 @@
 using Global::MainHeight;
 using Global::MainStartY;
 
-Lastfm *myLastfm = new Lastfm;
+Lastfm *myLastfm;
 
-void Lastfm::init()
+Lastfm::Lastfm() : isReadyToTake(0), isDownloadInProgress(0)
 {
 	w = new NC::Scrollpad(0, MainStartY, COLS, MainHeight, "", Config.main_color, NC::brNone);
-	isInitialized = 1;
 }
 
 void Lastfm::resize()
@@ -89,9 +88,6 @@ void Lastfm::switchTo()
 	
 	if (myScreen == this)
 		return myOldScreen->switchTo();
-	
-	if (!isInitialized)
-		init();
 	
 	if (myLockedScreen)
 		updateInactiveScreen(this);

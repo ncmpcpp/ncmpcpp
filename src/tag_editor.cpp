@@ -44,7 +44,7 @@ using Global::myScreen;
 using Global::MainHeight;
 using Global::MainStartY;
 
-TagEditor *myTagEditor = new TagEditor;
+TagEditor *myTagEditor;
 
 namespace {//
 
@@ -84,7 +84,7 @@ bool SongEntryMatcher(const Regex &rx, const MPD::MutableSong &s);
 
 }
 
-void TagEditor::init()
+TagEditor::TagEditor() : FParser(0), FParserHelper(0), FParserLegend(0), FParserPreview(0), itsBrowsedDir("/")
 {
 	PatternsFile = Config.ncmpcpp_directory + "patterns.list";
 	SetDimensions(0, COLS);
@@ -142,7 +142,6 @@ void TagEditor::init()
 	FParserPreview = new NC::Scrollpad((COLS-FParserWidth)/2+FParserWidthOne, (MainHeight-FParserHeight)/2+MainStartY, FParserWidthTwo, FParserHeight, "Preview", Config.main_color, Config.window_border);
 	
 	w = Dirs;
-	isInitialized = 1;
 }
 
 void TagEditor::SetDimensions(size_t x_offset, size_t width)
@@ -199,9 +198,6 @@ void TagEditor::switchTo()
 	
 	if (myScreen == this)
 		return;
-	
-	if (!isInitialized)
-		init();
 	
 	if (myLockedScreen)
 		updateInactiveScreen(this);

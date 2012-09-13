@@ -93,6 +93,42 @@ void Action::ValidateScreenSize()
 	}
 }
 
+void Action::InitializeScreens()
+{
+	myHelp = new Help;
+	myPlaylist = new Playlist;
+	myBrowser = new Browser;
+	mySearcher = new SearchEngine;
+	myLibrary = new MediaLibrary;
+	myPlaylistEditor = new PlaylistEditor;
+	myLyrics = new Lyrics;
+	mySelectedItemsAdder = new SelectedItemsAdder;
+	mySongInfo = new SongInfo;
+	mySortPlaylistDialog = new SortPlaylistDialog;
+	
+#	ifdef HAVE_CURL_CURL_H
+	myLastfm = new Lastfm;
+#	endif // HAVE_CURL_CURL_H
+	
+#	ifdef HAVE_TAGLIB_H
+	myTinyTagEditor = new TinyTagEditor;
+	myTagEditor = new TagEditor;
+#	endif // HAVE_TAGLIB_H
+	
+#	ifdef ENABLE_VISUALIZER
+	myVisualizer = new Visualizer;
+#	endif // ENABLE_VISUALIZER
+	
+#	ifdef ENABLE_OUTPUTS
+	myOutputs = new Outputs;
+#	endif // ENABLE_OUTPUTS
+	
+#	ifdef ENABLE_CLOCK
+	myClock = new Clock;
+#	endif // ENABLE_CLOCK
+	
+}
+
 void Action::SetResizeFlags()
 {
 	myHelp->hasToBeResized = 1;
@@ -891,8 +927,6 @@ void SavePlaylist::Run()
 			if (result == MPD_ERROR_SUCCESS)
 			{
 				Statusbar::msg("Playlist saved as \"%s\"", playlist_name.c_str());
-				if (myPlaylistEditor->main()) // check if initialized
-					myPlaylistEditor->Playlists->clear(); // make playlist's list update itself
 			}
 			else if (result == MPD_SERVER_ERROR_EXIST)
 			{
@@ -905,15 +939,12 @@ void SavePlaylist::Run()
 				}
 				else
 					Statusbar::msg("Aborted");
-				if (myPlaylistEditor->main()) // check if initialized
-					myPlaylistEditor->Playlists->clear(); // make playlist's list update itself
 				if (myScreen == myPlaylist)
 					myPlaylist->EnableHighlighting();
 			}
 		}
 	}
-	if (myBrowser->main()
-	&&  !myBrowser->isLocal()
+	if (!myBrowser->isLocal()
 	&&  myBrowser->CurrentDir() == "/"
 	&&  !myBrowser->main()->empty())
 		myBrowser->GetDirectory(myBrowser->CurrentDir());
@@ -1522,10 +1553,8 @@ void EditPlaylistName::Run()
 		{
 			const char msg[] = "Playlist renamed to \"%ls\"";
 			Statusbar::msg(msg, wideShorten(ToWString(new_name), COLS-const_strlen(msg)).c_str());
-			if (myBrowser->main() && !myBrowser->isLocal())
+			if (!myBrowser->isLocal())
 				myBrowser->GetDirectory("/");
-			if (myPlaylistEditor->main())
-				myPlaylistEditor->Playlists->clear();
 		}
 	}
 }
@@ -2145,7 +2174,7 @@ bool SetSelectedItemsPriority::canBeRun() const
 		Statusbar::msg("Priorities are supported in MPD >= 0.17.0");
 		return false;
 	}
-	return myScreen->activeWindow() == myPlaylist->main() && !myPlaylist->main()->empty();
+	return myScreen == myPlaylist && !myPlaylist->main()->empty();
 }
 
 void SetSelectedItemsPriority::Run()
@@ -2260,7 +2289,7 @@ void NextScreen::Run()
 	}
 	else if (!Config.screens_seq.empty())
 	{
-		std::list<BasicScreen *>::const_iterator screen = std::find(Config.screens_seq.begin(), Config.screens_seq.end(), myScreen);
+		auto screen = std::find(Config.screens_seq.begin(), Config.screens_seq.end(), myScreen);
 		if (++screen == Config.screens_seq.end())
 			Config.screens_seq.front()->switchTo();
 		else
@@ -2282,7 +2311,7 @@ void PreviousScreen::Run()
 	}
 	else if (!Config.screens_seq.empty())
 	{
-		std::list<BasicScreen *>::const_iterator screen = std::find(Config.screens_seq.begin(), Config.screens_seq.end(), myScreen);
+		auto screen = std::find(Config.screens_seq.begin(), Config.screens_seq.end(), myScreen);
 		if (screen == Config.screens_seq.begin())
 			Config.screens_seq.back()->switchTo();
 		else

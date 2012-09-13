@@ -26,6 +26,8 @@
 
 struct Help : public Screen<NC::Scrollpad>
 {
+	Help();
+	
 	virtual void resize() OVERRIDE;
 	virtual void switchTo() OVERRIDE;
 	
@@ -40,7 +42,6 @@ struct Help : public Screen<NC::Scrollpad>
 	virtual bool isMergable() OVERRIDE { return true; }
 	
 protected:
-	virtual void init() OVERRIDE;
 	virtual bool isLockable() OVERRIDE { return true; }
 	
 private:

@@ -87,7 +87,7 @@ namespace
 		return NC::Border(stringToColor(border));
 	}
 	
-	BasicScreen *intToScreen(int n)
+	ScreenRef intToScreen(int n)
 	{
 		switch (n)
 		{
@@ -120,7 +120,7 @@ namespace
 				return myClock;
 #			endif // ENABLE_CLOCK
 			default:
-				return 0;
+				return ScreenRef();
 		}
 	}
 	
@@ -667,7 +667,7 @@ void Configuration::Read()
 							++it;
 						if (it == v.end())
 							break;
-						if (BasicScreen *screen = intToScreen(atoi(&*it)))
+						if (auto screen = intToScreen(atoi(&*it)))
 							screens_seq.push_back(screen);
 						while (it != v.end() && isdigit(*it))
 							++it;

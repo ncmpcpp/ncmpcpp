@@ -38,7 +38,7 @@ using Global::MainHeight;
 using Global::MainStartY;
 using Global::myScreen;
 
-Clock *myClock = new Clock;
+Clock *myClock;
 
 short Clock::disp[11] =
 {
@@ -52,13 +52,12 @@ long Clock::older[6], Clock::next[6], Clock::newer[6], Clock::mask;
 size_t Clock::Width;
 const size_t Clock::Height = 8;
 
-void Clock::init()
+Clock::Clock()
 {
 	Width = Config.clock_display_seconds ? 60 : 40;
 	
 	itsPane = new NC::Window(0, MainStartY, COLS, MainHeight, "", Config.main_color, NC::brNone);
 	w = new NC::Window((COLS-Width)/2, (MainHeight-Height)/2+MainStartY, Width, Height-1, "", Config.main_color, NC::Border(Config.main_color));
-	isInitialized = 1;
 }
 
 void Clock::resize()
@@ -81,9 +80,6 @@ void Clock::switchTo()
 	
 	if (myScreen == this)
 		return;
-	
-	if (!isInitialized)
-		init();
 	
 	if (myLockedScreen)
 		updateInactiveScreen(this);

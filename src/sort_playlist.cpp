@@ -29,9 +29,9 @@
 using Global::MainHeight;
 using Global::MainStartY;
 
-SortPlaylistDialog *mySortPlaylistDialog = new SortPlaylistDialog;
+SortPlaylistDialog *mySortPlaylistDialog;
 
-void SortPlaylistDialog::init()
+SortPlaylistDialog::SortPlaylistDialog()
 {
 	setDimensions();
 	
@@ -54,12 +54,10 @@ void SortPlaylistDialog::init()
 	m_sort_options = w->size();
 	m_sort_entry = std::make_pair("Sort", static_cast<MPD::Song::GetFunction>(0));
 	m_cancel_entry = std::make_pair("Cancel", static_cast<MPD::Song::GetFunction>(0));
-
+	
 	w->addSeparator();
 	w->addItem(m_sort_entry);
 	w->addItem(m_cancel_entry);
-	
-	isInitialized = true;
 }
 
 void SortPlaylistDialog::switchTo()
@@ -70,9 +68,6 @@ void SortPlaylistDialog::switchTo()
 	using Global::myInactiveScreen;
 	
 	assert(myScreen != this);
-	
-	if (!isInitialized)
-		init();
 	
 	if (hasToBeResized)
 		resize();

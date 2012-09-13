@@ -31,7 +31,7 @@
 using Global::MainHeight;
 using Global::MainStartY;
 
-Help *myHelp = new Help;
+Help *myHelp;
 
 namespace {//
 
@@ -95,12 +95,11 @@ std::string keyToString(const Key &key, bool *print_backspace)
 
 }
 
-void Help::init()
+Help::Help()
 {
 	w = new NC::Scrollpad(0, MainStartY, COLS, MainHeight, "", Config.main_color, NC::brNone);
 	GetKeybindings();
 	w->flush();
-	isInitialized = 1;
 }
 
 void Help::resize()
@@ -119,9 +118,6 @@ void Help::switchTo()
 	
 	if (myScreen == this)
 		return;
-	
-	if (!isInitialized)
-		init();
 	
 	if (myLockedScreen)
 		updateInactiveScreen(this);

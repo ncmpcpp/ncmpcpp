@@ -25,6 +25,8 @@
 
 struct ServerInfo : public Screen<NC::Scrollpad>
 {
+	ServerInfo();
+	
 	// Screen<NC::Scrollpad> implementation
 	virtual void switchTo() OVERRIDE;
 	virtual void resize() OVERRIDE;
@@ -40,7 +42,6 @@ struct ServerInfo : public Screen<NC::Scrollpad>
 	virtual bool isTabbable() OVERRIDE { return false; }
 	
 protected:
-	virtual void init() OVERRIDE;
 	virtual bool isLockable() OVERRIDE { return false; }
 	
 private:

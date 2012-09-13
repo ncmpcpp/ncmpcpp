@@ -43,16 +43,15 @@ using Global::MainHeight;
 using Global::MainStartY;
 using Global::myOldScreen;
 
-TinyTagEditor *myTinyTagEditor = new TinyTagEditor;
+TinyTagEditor *myTinyTagEditor;
 
-void TinyTagEditor::init()
+TinyTagEditor::TinyTagEditor()
 {
 	w = new NC::Menu<NC::Buffer>(0, MainStartY, COLS, MainHeight, "", Config.main_color, NC::brNone);
 	w->setHighlightColor(Config.main_highlight_color);
 	w->cyclicScrolling(Config.use_cyclic_scrolling);
 	w->centeredCursor(Config.centered_cursor);
 	w->setItemDisplayer(Display::Default<NC::Buffer>);
-	isInitialized = 1;
 }
 
 void TinyTagEditor::resize()
@@ -190,9 +189,6 @@ bool TinyTagEditor::getTags()
 	
 	std::string ext = itsEdited.getURI();
 	ext = lowercase(ext.substr(ext.rfind(".")+1));
-	
-	if (!isInitialized)
-		init();
 	
 	w->clear();
 	w->reset();

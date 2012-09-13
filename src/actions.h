@@ -73,6 +73,7 @@ struct Action
 	}
 	
 	static void ValidateScreenSize();
+	static void InitializeScreens();
 	static void SetResizeFlags();
 	static void ResizeScreen(bool reload_main_window);
 	static void SetWindowsDimensions();

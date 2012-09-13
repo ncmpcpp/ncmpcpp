@@ -35,7 +35,7 @@
 
 struct TagEditor : public Screen<NC::Window>, public Filterable, public HasColumns, public HasSongs, public Searchable
 {
-	TagEditor() : FParser(0), FParserHelper(0), FParserLegend(0), FParserPreview(0), itsBrowsedDir("/") { }
+	TagEditor();
 	
 	virtual void resize() OVERRIDE;
 	virtual void switchTo() OVERRIDE;
@@ -87,8 +87,7 @@ struct TagEditor : public Screen<NC::Window>, public Filterable, public HasColum
 	NC::Menu<MPD::MutableSong> *Tags;
 	
 protected:
-	virtual void init();
-	virtual bool isLockable() { return true; }
+	virtual bool isLockable() OVERRIDE { return true; }
 	
 private:
 	void SetDimensions(size_t, size_t);

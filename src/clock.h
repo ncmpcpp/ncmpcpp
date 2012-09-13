@@ -30,6 +30,8 @@
 
 struct Clock : public Screen<NC::Window>
 {
+	Clock();
+	
 	virtual void resize() OVERRIDE;
 	virtual void switchTo() OVERRIDE;
 	
@@ -46,7 +48,6 @@ struct Clock : public Screen<NC::Window>
 	virtual bool isMergable() OVERRIDE { return true; }
 	
 protected:
-	virtual void init() OVERRIDE;
 	virtual bool isLockable() OVERRIDE { return false; }
 	
 private:

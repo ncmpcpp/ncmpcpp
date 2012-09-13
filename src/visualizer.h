@@ -34,6 +34,8 @@
 
 struct Visualizer : public Screen<NC::Window>
 {
+	Visualizer();
+	
 	virtual void switchTo() OVERRIDE;
 	virtual void resize() OVERRIDE;
 	
@@ -57,8 +59,7 @@ struct Visualizer : public Screen<NC::Window>
 	static const int WindowTimeout;
 	
 protected:
-	virtual void init();
-	virtual bool isLockable() { return true; }
+	virtual bool isLockable() OVERRIDE { return true; }
 	
 private:
 	void DrawSoundWave(int16_t *, ssize_t, size_t, size_t);

@@ -31,6 +31,8 @@
 
 struct Outputs : public Screen< NC::Menu<MPD::Output> >
 {
+	Outputs();
+	
 	// Screen< NC::Menu<MPD::Output> > implementation
 	virtual void switchTo() OVERRIDE;
 	virtual void resize() OVERRIDE;
@@ -50,7 +52,6 @@ struct Outputs : public Screen< NC::Menu<MPD::Output> >
 	void FetchList();
 	
 protected:
-	virtual void init() OVERRIDE;
 	virtual bool isLockable() OVERRIDE { return true; }
 };
 

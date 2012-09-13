@@ -25,7 +25,7 @@
 
 struct SelectedItemsAdder : public Screen< NC::Menu<std::string> >
 {
-	SelectedItemsAdder() : itsPSWidth(35), itsPSHeight(11) { }
+	SelectedItemsAdder();
 	
 	// Screen< NC::Menu<std::string> > implementation
 	virtual void switchTo() OVERRIDE;
@@ -44,7 +44,6 @@ struct SelectedItemsAdder : public Screen< NC::Menu<std::string> >
 	virtual bool isTabbable() OVERRIDE { return false; }
 	
 protected:
-	virtual void init() OVERRIDE;
 	virtual bool isLockable() OVERRIDE { return false; }
 	
 private:

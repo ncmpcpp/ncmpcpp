@@ -75,6 +75,8 @@ struct SEItem
 
 struct SearchEngine : public Screen< NC::Menu<SEItem> >, public Filterable, public HasSongs, public Searchable
 {
+	SearchEngine();
+	
 	// Screen< NC::Menu<SEItem> > implementation
 	virtual void resize() OVERRIDE;
 	virtual void switchTo() OVERRIDE;
@@ -115,7 +117,6 @@ struct SearchEngine : public Screen< NC::Menu<SEItem> >, public Filterable, publ
 	static size_t ResetButton;
 	
 protected:
-	virtual void init() OVERRIDE;
 	virtual bool isLockable() OVERRIDE { return true; }
 	
 private:

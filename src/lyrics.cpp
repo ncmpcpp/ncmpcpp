@@ -48,12 +48,15 @@ pthread_mutex_t Lyrics::itsDIBLock = PTHREAD_MUTEX_INITIALIZER;
 size_t Lyrics::itsWorkersNumber = 0;
 #endif // HAVE_CURL_CURL_H
 
-Lyrics *myLyrics = new Lyrics;
+Lyrics *myLyrics;
 
-void Lyrics::init()
+Lyrics::Lyrics() : ReloadNP(0),
+#ifdef HAVE_CURL_CURL_H
+	isReadyToTake(0), isDownloadInProgress(0),
+#endif // HAVE_CURL_CURL_H
+	itsScrollBegin(0)
 {
 	w = new NC::Scrollpad(0, MainStartY, COLS, MainHeight, "", Config.main_color, NC::brNone);
-	isInitialized = 1;
 }
 
 void Lyrics::resize()
@@ -98,9 +101,6 @@ void Lyrics::switchTo()
 	
 	if (myScreen == this)
 		return myOldScreen->switchTo();
-	
-	if (!isInitialized)
-		init();
 	
 	if (hasToBeResized)
 		resize();

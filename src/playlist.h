@@ -29,8 +29,7 @@
 
 struct Playlist : public Screen<NC::Menu<MPD::Song>>, public Filterable, public HasSongs, public Searchable
 {
-	Playlist() : itsTotalLength(0), itsRemainingTime(0), itsScrollBegin(0) { }
-	~Playlist() { }
+	Playlist();
 	
 	// Screen<NC::Menu<MPD::Song>> implementation
 	virtual void switchTo() OVERRIDE;
@@ -90,7 +89,6 @@ struct Playlist : public Screen<NC::Menu<MPD::Song>>, public Filterable, public 
 	static bool ReloadRemaining;
 	
 protected:
-	virtual void init() OVERRIDE;
 	virtual bool isLockable() OVERRIDE { return true; }
 	
 private:

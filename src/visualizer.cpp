@@ -40,11 +40,11 @@
 using Global::MainStartY;
 using Global::MainHeight;
 
-Visualizer *myVisualizer = new Visualizer;
+Visualizer *myVisualizer;
 
 const int Visualizer::WindowTimeout = 1000/25; /* 25 fps */
 
-void Visualizer::init()
+Visualizer::Visualizer()
 {
 	w = new NC::Window(0, MainStartY, COLS, MainHeight, "", Config.visualizer_color, NC::brNone);
 	
@@ -59,8 +59,6 @@ void Visualizer::init()
 #	endif // HAVE_FFTW3_H
 	
 	FindOutputID();
-	
-	isInitialized = 1;
 }
 
 void Visualizer::switchTo()
@@ -70,9 +68,6 @@ void Visualizer::switchTo()
 	
 	if (myScreen == this)
 		return;
-	
-	if (!isInitialized)
-		init();
 	
 	if (myLockedScreen)
 		updateInactiveScreen(this);
