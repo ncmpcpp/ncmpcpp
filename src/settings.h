@@ -27,7 +27,7 @@
 #include "actions.h"
 #include "strbuffer.h"
 
-class BasicScreen; // forward declaration for screens sequence
+struct BasicScreen; // forward declaration for screens sequence
 
 enum SortMode { smName, smMTime, smCustomFormat };
 
