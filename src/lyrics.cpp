@@ -246,7 +246,7 @@ void Lyrics::DownloadInBackgroundImplHelper(const MPD::Song &s)
 void *Lyrics::Download()
 {
 	std::string artist = Curl::escape(itsSong.getArtist());
-	std::string title = Curl::escape(itsSong.getTitle());
+	std::string title_ = Curl::escape(itsSong.getTitle());
 	
 	LyricsFetcher::Result result;
 	
@@ -256,7 +256,7 @@ void *Lyrics::Download()
 	for (LyricsFetcher **plugin = fetcher_defined ? itsFetcher : lyricsPlugins; *plugin != 0; ++plugin)
 	{
 		*w << L"Fetching lyrics from " << NC::fmtBold << ToWString((*plugin)->name()) << NC::fmtBoldEnd << L"... ";
-		result = (*plugin)->fetch(artist, title);
+		result = (*plugin)->fetch(artist, title_);
 		if (result.first == false)
 			*w << NC::clRed << ToWString(result.second) << NC::clEnd << '\n';
 		else
