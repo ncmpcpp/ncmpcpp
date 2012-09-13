@@ -327,7 +327,12 @@ void PlaylistEditor::MouseButtonPressed(MEVENT me)
 	if (!Playlists->empty() && Playlists->hasCoords(me.x, me.y))
 	{
 		if (w != Playlists)
-			PrevColumn();
+		{
+			if (isPrevColumnAvailable())
+				PrevColumn();
+			else
+				return;
+		}
 		if (size_t(me.y) < Playlists->size() && (me.bstate & (BUTTON1_PRESSED | BUTTON3_PRESSED)))
 		{
 			Playlists->Goto(me.y);
@@ -346,7 +351,12 @@ void PlaylistEditor::MouseButtonPressed(MEVENT me)
 	else if (!Content->empty() && Content->hasCoords(me.x, me.y))
 	{
 		if (w != Content)
-			NextColumn();
+		{
+			if (isNextColumnAvailable())
+				NextColumn();
+			else
+				return;
+		}
 		if (size_t(me.y) < Content->size() && (me.bstate & (BUTTON1_PRESSED | BUTTON3_PRESSED)))
 		{
 			Content->Goto(me.y);

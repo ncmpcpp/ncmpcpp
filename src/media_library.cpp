@@ -410,13 +410,32 @@ void MediaLibrary::SpacePressed()
 
 void MediaLibrary::MouseButtonPressed(MEVENT me)
 {
-	if (!Tags->empty() && Tags->hasCoords(me.x, me.y))
-	{
+	auto tryNextColumn = [this]() -> bool {
+		bool result = true;
+		if (w != Songs)
+		{
+			if (isNextColumnAvailable())
+				NextColumn();
+			else
+				result = false;
+		}
+		return result;
+	};
+	auto tryPreviousColumn = [this]() -> bool {
+		bool result = true;
 		if (w != Tags)
 		{
-			PrevColumn();
-			PrevColumn();
+			if (isPrevColumnAvailable())
+				PrevColumn();
+			else
+				result = false;
 		}
+		return result;
+	};
+	if (!Tags->empty() && Tags->hasCoords(me.x, me.y))
+	{
+		if (!tryPreviousColumn() || !tryPreviousColumn())
+			return;
 		if (size_t(me.y) < Tags->size() && (me.bstate & (BUTTON1_PRESSED | BUTTON3_PRESSED)))
 		{
 			Tags->Goto(me.y);
@@ -436,7 +455,15 @@ void MediaLibrary::MouseButtonPressed(MEVENT me)
 	else if (!Albums->empty() && Albums->hasCoords(me.x, me.y))
 	{
 		if (w != Albums)
-			w == Tags ? NextColumn() : PrevColumn();
+		{
+			bool success;
+			if (w == Tags)
+				success = tryNextColumn();
+			else
+				success = tryPreviousColumn();
+			if (!success)
+				return;
+		}
 		if (size_t(me.y) < Albums->size() && (me.bstate & (BUTTON1_PRESSED | BUTTON3_PRESSED)))
 		{
 			Albums->Goto(me.y);
@@ -454,11 +481,8 @@ void MediaLibrary::MouseButtonPressed(MEVENT me)
 	}
 	else if (!Songs->empty() && Songs->hasCoords(me.x, me.y))
 	{
-		if (w != Songs)
-		{
-			NextColumn();
-			NextColumn();
-		}
+		if (!tryNextColumn() || !tryNextColumn())
+			return;
 		if (size_t(me.y) < Songs->size() && (me.bstate & (BUTTON1_PRESSED | BUTTON3_PRESSED)))
 		{
 			Songs->Goto(me.y);

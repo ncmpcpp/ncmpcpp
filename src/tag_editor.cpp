@@ -642,6 +642,28 @@ void TagEditor::SpacePressed()
 
 void TagEditor::MouseButtonPressed(MEVENT me)
 {
+	auto tryPreviousColumn = [this]() -> bool {
+		bool result = true;
+		if (w != Dirs)
+		{
+			if (isPrevColumnAvailable())
+				PrevColumn();
+			else
+				result = false;
+		}
+		return result;
+	};
+	auto tryNextColumn = [this]() -> bool {
+		bool result = true;
+		if (w != Tags)
+		{
+			if (isNextColumnAvailable())
+				NextColumn();
+			else
+				result = false;
+		}
+		return result;
+	};
 	if (w == FParserDialog)
 	{
 		if (FParserDialog->hasCoords(me.x, me.y))
@@ -661,7 +683,12 @@ void TagEditor::MouseButtonPressed(MEVENT me)
 		if (FParser->hasCoords(me.x, me.y))
 		{
 			if (w != FParser)
-				PrevColumn();
+			{
+				if (isPrevColumnAvailable())
+					PrevColumn();
+				else
+					return;
+			}
 			if (size_t(me.y) < FParser->size() && (me.bstate & (BUTTON1_PRESSED | BUTTON3_PRESSED)))
 			{
 				FParser->Goto(me.y);
@@ -674,17 +701,19 @@ void TagEditor::MouseButtonPressed(MEVENT me)
 		else if (FParserHelper->hasCoords(me.x, me.y))
 		{
 			if (w != FParserHelper)
-				NextColumn();
+			{
+				if (isNextColumnAvailable())
+					NextColumn();
+				else
+					return;
+			}
 			ScrollpadMouseButtonPressed(FParserHelper, me);
 		}
 	}
 	else if (!Dirs->empty() && Dirs->hasCoords(me.x, me.y))
 	{
-		if (w != Dirs)
-		{
-			PrevColumn();
-			PrevColumn();
-		}
+		if (!tryPreviousColumn() || !tryPreviousColumn())
+			return;
 		if (size_t(me.y) < Dirs->size() && (me.bstate & (BUTTON1_PRESSED | BUTTON3_PRESSED)))
 		{
 			Dirs->Goto(me.y);
@@ -700,7 +729,15 @@ void TagEditor::MouseButtonPressed(MEVENT me)
 	else if (!TagTypes->empty() && TagTypes->hasCoords(me.x, me.y))
 	{
 		if (w != TagTypes)
-			w == Dirs ? NextColumn() : PrevColumn();
+		{
+			bool success;
+			if (w == Dirs)
+				success = tryNextColumn();
+			else
+				success = tryPreviousColumn();
+			if (!success)
+				return;
+		}
 		if (size_t(me.y) < TagTypes->size() && (me.bstate & (BUTTON1_PRESSED | BUTTON3_PRESSED)))
 		{
 			if (!TagTypes->Goto(me.y))
@@ -715,11 +752,8 @@ void TagEditor::MouseButtonPressed(MEVENT me)
 	}
 	else if (!Tags->empty() && Tags->hasCoords(me.x, me.y))
 	{
-		if (w != Tags)
-		{
-			NextColumn();
-			NextColumn();
-		}
+		if (!tryNextColumn() || !tryNextColumn())
+			return;
 		if (size_t(me.y) < Tags->size() && (me.bstate & (BUTTON1_PRESSED | BUTTON3_PRESSED)))
 		{
 			Tags->Goto(me.y);
