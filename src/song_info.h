@@ -24,40 +24,38 @@
 #include "screen.h"
 #include "mutable_song.h"
 
-class SongInfo : public Screen<NC::Scrollpad>
+struct SongInfo : public Screen<NC::Scrollpad>
 {
-	public:
-		struct Metadata
-		{
-			const char *Name;
-			MPD::Song::GetFunction Get;
-			MPD::MutableSong::SetFunction Set;
-		};
-		
-		// Screen<NC::Scrollpad> implementation
-		virtual void switchTo() OVERRIDE;
-		virtual void resize() OVERRIDE;
-		
-		virtual std::wstring title() OVERRIDE;
-		
-		virtual void update() OVERRIDE { }
-		
-		virtual void enterPressed() OVERRIDE { }
-		virtual void spacePressed() OVERRIDE { }
-		
-		virtual bool isMergable() OVERRIDE { return true; }
-		virtual bool isTabbable() OVERRIDE { return false; }
-		
-		// private members
-		
-		static const Metadata Tags[];
-		
-	protected:
-		virtual void init() OVERRIDE;
-		virtual bool isLockable() OVERRIDE { return false; }
-		
-	private:
-		void PrepareSong(MPD::Song &);
+	struct Metadata
+	{
+		const char *Name;
+		MPD::Song::GetFunction Get;
+		MPD::MutableSong::SetFunction Set;
+	};
+	
+	// Screen<NC::Scrollpad> implementation
+	virtual void switchTo() OVERRIDE;
+	virtual void resize() OVERRIDE;
+	
+	virtual std::wstring title() OVERRIDE;
+	
+	virtual void update() OVERRIDE { }
+	
+	virtual void enterPressed() OVERRIDE { }
+	virtual void spacePressed() OVERRIDE { }
+	
+	virtual bool isMergable() OVERRIDE { return true; }
+	virtual bool isTabbable() OVERRIDE { return false; }
+	
+	// private members
+	static const Metadata Tags[];
+	
+protected:
+	virtual void init() OVERRIDE;
+	virtual bool isLockable() OVERRIDE { return false; }
+	
+private:
+	void PrepareSong(MPD::Song &);
 };
 
 extern SongInfo *mySongInfo;

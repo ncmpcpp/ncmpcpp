@@ -29,31 +29,29 @@
 #include "mpdpp.h"
 #include "screen.h"
 
-class Outputs : public Screen< NC::Menu<MPD::Output> >
+struct Outputs : public Screen< NC::Menu<MPD::Output> >
 {
-	public:
-		
-		// Screen< NC::Menu<MPD::Output> > implementation
-		virtual void switchTo() OVERRIDE;
-		virtual void resize() OVERRIDE;
-		
-		virtual std::wstring title() OVERRIDE;
-		
-		virtual void update() OVERRIDE { }
-		
-		virtual void enterPressed() OVERRIDE;
-		virtual void spacePressed() OVERRIDE { }
-		virtual void mouseButtonPressed(MEVENT me) OVERRIDE;
-		
-		virtual bool isTabbable() OVERRIDE { return true; }
-		virtual bool isMergable() OVERRIDE { return true; }
-		
-		// private members
-		void FetchList();
-		
-	protected:
-		virtual void init() OVERRIDE;
-		virtual bool isLockable() OVERRIDE { return true; }
+	// Screen< NC::Menu<MPD::Output> > implementation
+	virtual void switchTo() OVERRIDE;
+	virtual void resize() OVERRIDE;
+	
+	virtual std::wstring title() OVERRIDE;
+	
+	virtual void update() OVERRIDE { }
+	
+	virtual void enterPressed() OVERRIDE;
+	virtual void spacePressed() OVERRIDE { }
+	virtual void mouseButtonPressed(MEVENT me) OVERRIDE;
+	
+	virtual bool isTabbable() OVERRIDE { return true; }
+	virtual bool isMergable() OVERRIDE { return true; }
+	
+	// private members
+	void FetchList();
+	
+protected:
+	virtual void init() OVERRIDE;
+	virtual bool isLockable() OVERRIDE { return true; }
 };
 
 extern Outputs *myOutputs;

@@ -41,16 +41,16 @@ struct LastfmService
 	virtual bool checkArgs(const Args &args) = 0;
 	virtual void colorizeOutput(NC::Scrollpad &w) = 0;
 	
-	protected:
-		virtual bool actionFailed(const std::string &data);
-		
-		virtual bool parse(std::string &data) = 0;
-		virtual void postProcess(std::string &data);
-		
-		virtual const char *methodName() = 0;
-		
-		static const char *baseURL;
-		static const char *msgParseFailed;
+protected:
+	virtual bool actionFailed(const std::string &data);
+	
+	virtual bool parse(std::string &data) = 0;
+	virtual void postProcess(std::string &data);
+	
+	virtual const char *methodName() = 0;
+	
+	static const char *baseURL;
+	static const char *msgParseFailed;
 };
 
 struct ArtistInfo : public LastfmService
@@ -60,10 +60,10 @@ struct ArtistInfo : public LastfmService
 	virtual bool checkArgs(const Args &args);
 	virtual void colorizeOutput(NC::Scrollpad &w);
 	
-	protected:
-		virtual bool parse(std::string &data);
-		
-		virtual const char *methodName() { return "artist.getinfo"; }
+protected:
+	virtual bool parse(std::string &data);
+	
+	virtual const char *methodName() { return "artist.getinfo"; }
 };
 
 #endif // HAVE_CURL_CURL_H

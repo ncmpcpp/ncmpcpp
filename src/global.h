@@ -26,47 +26,48 @@
 #include "mpdpp.h"
 #include "screen.h"
 
-namespace Global
-{
-	// currently active screen (displayed in main window)
-	extern BasicScreen *myScreen;
-	
-	// for info, lyrics, popups to remember which screen return to
-	extern BasicScreen *myOldScreen;
-	
-	// "real" screen switching (browser, search, etc.)
-	extern BasicScreen *myPrevScreen;
-	
-	// points at the screen that was locked (or is null if no screen is locked)
-	extern BasicScreen *myLockedScreen;
-	
-	// points at inactive screen, if locking was enabled and two screens are displayed
-	extern BasicScreen *myInactiveScreen; 
-	
-	// header window (above main window)
-	extern NC::Window *wHeader;
-	
-	// footer window (below main window)
-	extern NC::Window *wFooter;
-	
-	// Y coordinate of top of main window
-	extern size_t MainStartY;
-	
-	// height of main window
-	extern size_t MainHeight;
-	
-	// indicates whether messages from Statusbar::msg function should be shown
-	extern bool ShowMessages;
-	
-	// indicates whether seeking action in currently in progress
-	extern bool SeekingInProgress;
-	
-	// string that represents volume in right top corner. being global
-	// to be used for calculating width offsets in various files.
-	extern std::string VolumeState;
-	
-	// global timer
-	extern timeval Timer;
+namespace Global {//
+
+// currently active screen (displayed in main window)
+extern BasicScreen *myScreen;
+
+// for info, lyrics, popups to remember which screen return to
+extern BasicScreen *myOldScreen;
+
+// "real" screen switching (browser, search, etc.)
+extern BasicScreen *myPrevScreen;
+
+// points at the screen that was locked (or is null if no screen is locked)
+extern BasicScreen *myLockedScreen;
+
+// points at inactive screen, if locking was enabled and two screens are displayed
+extern BasicScreen *myInactiveScreen; 
+
+// header window (above main window)
+extern NC::Window *wHeader;
+
+// footer window (below main window)
+extern NC::Window *wFooter;
+
+// Y coordinate of top of main window
+extern size_t MainStartY;
+
+// height of main window
+extern size_t MainHeight;
+
+// indicates whether messages from Statusbar::msg function should be shown
+extern bool ShowMessages;
+
+// indicates whether seeking action in currently in progress
+extern bool SeekingInProgress;
+
+// string that represents volume in right top corner. being global
+// to be used for calculating width offsets in various files.
+extern std::string VolumeState;
+
+// global timer
+extern timeval Timer;
+
 }
 
 #endif

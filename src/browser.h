@@ -25,69 +25,68 @@
 #include "mpdpp.h"
 #include "screen.h"
 
-class Browser : public Screen< NC::Menu<MPD::Item> >, public Filterable, public HasSongs, public Searchable
+struct Browser : public Screen< NC::Menu<MPD::Item> >, public Filterable, public HasSongs, public Searchable
 {
-	public:
-		Browser() : itsBrowseLocally(0), itsScrollBeginning(0), itsBrowsedDir("/") { }
-		
-		// Screen< NC::Menu<MPD::Item> > implementation
-		virtual void resize() OVERRIDE;
-		virtual void switchTo() OVERRIDE;
-		
-		virtual std::wstring title() OVERRIDE;
-		
-		virtual void update() OVERRIDE { }
-		
-		virtual void enterPressed() OVERRIDE;
-		virtual void spacePressed() OVERRIDE;
-		virtual void mouseButtonPressed(MEVENT me) OVERRIDE;
-		
-		virtual bool isTabbable() OVERRIDE { return true; }
-		virtual bool isMergable() OVERRIDE { return true; }
-		
-		// Filterable implementation
-		virtual bool allowsFiltering() OVERRIDE;
-		virtual std::string currentFilter() OVERRIDE;
-		virtual void applyFilter(const std::string &filter) OVERRIDE;
-		
-		// Searchable implementation
-		virtual bool allowsSearching() OVERRIDE;
-		virtual bool search(const std::string &constraint) OVERRIDE;
-		virtual void nextFound(bool wrap) OVERRIDE;
-		virtual void prevFound(bool wrap) OVERRIDE;
-		
-		// HasSongs implementation
-		virtual std::shared_ptr<ProxySongList> getProxySongList() OVERRIDE;
-		
-		virtual bool allowsSelection() OVERRIDE;
-		virtual void reverseSelection() OVERRIDE;
-		virtual MPD::SongList getSelectedSongs() OVERRIDE;
-		
-		// private members
-		const std::string &CurrentDir() { return itsBrowsedDir; }
-		
-		bool isLocal() { return itsBrowseLocally; }
-		void LocateSong(const MPD::Song &);
-		void GetDirectory(std::string, std::string = "/");
-#		ifndef WIN32
-		void GetLocalDirectory(MPD::ItemList &, const std::string & = "", bool = 0) const;
-		void ClearDirectory(const std::string &) const;
-		void ChangeBrowseMode();
-		bool deleteItem(const MPD::Item &);
-#		endif // !WIN32
-		
-		static bool isParentDirectory(const MPD::Item &item) {
-			return item.type == MPD::itDirectory && item.name == "..";
-		}
-		
-	protected:
-		virtual void init() OVERRIDE;
-		virtual bool isLockable() OVERRIDE { return true; }
-		
-	private:
-		bool itsBrowseLocally;
-		size_t itsScrollBeginning;
-		std::string itsBrowsedDir;
+	Browser() : itsBrowseLocally(0), itsScrollBeginning(0), itsBrowsedDir("/") { }
+	
+	// Screen< NC::Menu<MPD::Item> > implementation
+	virtual void resize() OVERRIDE;
+	virtual void switchTo() OVERRIDE;
+	
+	virtual std::wstring title() OVERRIDE;
+	
+	virtual void update() OVERRIDE { }
+	
+	virtual void enterPressed() OVERRIDE;
+	virtual void spacePressed() OVERRIDE;
+	virtual void mouseButtonPressed(MEVENT me) OVERRIDE;
+	
+	virtual bool isTabbable() OVERRIDE { return true; }
+	virtual bool isMergable() OVERRIDE { return true; }
+	
+	// Filterable implementation
+	virtual bool allowsFiltering() OVERRIDE;
+	virtual std::string currentFilter() OVERRIDE;
+	virtual void applyFilter(const std::string &filter) OVERRIDE;
+	
+	// Searchable implementation
+	virtual bool allowsSearching() OVERRIDE;
+	virtual bool search(const std::string &constraint) OVERRIDE;
+	virtual void nextFound(bool wrap) OVERRIDE;
+	virtual void prevFound(bool wrap) OVERRIDE;
+	
+	// HasSongs implementation
+	virtual std::shared_ptr<ProxySongList> getProxySongList() OVERRIDE;
+	
+	virtual bool allowsSelection() OVERRIDE;
+	virtual void reverseSelection() OVERRIDE;
+	virtual MPD::SongList getSelectedSongs() OVERRIDE;
+	
+	// private members
+	const std::string &CurrentDir() { return itsBrowsedDir; }
+	
+	bool isLocal() { return itsBrowseLocally; }
+	void LocateSong(const MPD::Song &);
+	void GetDirectory(std::string, std::string = "/");
+#	ifndef WIN32
+	void GetLocalDirectory(MPD::ItemList &, const std::string & = "", bool = 0) const;
+	void ClearDirectory(const std::string &) const;
+	void ChangeBrowseMode();
+	bool deleteItem(const MPD::Item &);
+#	endif // !WIN32
+	
+	static bool isParentDirectory(const MPD::Item &item) {
+		return item.type == MPD::itDirectory && item.name == "..";
+	}
+	
+protected:
+	virtual void init() OVERRIDE;
+	virtual bool isLockable() OVERRIDE { return true; }
+	
+private:
+	bool itsBrowseLocally;
+	size_t itsScrollBeginning;
+	std::string itsBrowsedDir;
 };
 
 extern Browser *myBrowser;

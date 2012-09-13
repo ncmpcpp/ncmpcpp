@@ -32,53 +32,52 @@
 # include <fftw3.h>
 #endif
 
-class Visualizer : public Screen<NC::Window>
+struct Visualizer : public Screen<NC::Window>
 {
-	public:
-		virtual void switchTo() OVERRIDE;
-		virtual void resize() OVERRIDE;
-		
-		virtual std::wstring title() OVERRIDE;
-		
-		virtual void update() OVERRIDE;
-		virtual void scroll(NC::Where) OVERRIDE { }
-		
-		virtual void enterPressed() OVERRIDE { }
-		virtual void spacePressed() OVERRIDE;
-		virtual void mouseButtonPressed(MEVENT) OVERRIDE { }
-		
-		virtual bool isTabbable() OVERRIDE { return true; }
-		virtual bool isMergable() OVERRIDE { return true; }
-		
-		// private members
-		void SetFD();
-		void ResetFD();
-		void FindOutputID();
-		
-		static const int WindowTimeout;
-		
-	protected:
-		virtual void init();
-		virtual bool isLockable() { return true; }
-		
-	private:
-		void DrawSoundWave(int16_t *, ssize_t, size_t, size_t);
-#		ifdef HAVE_FFTW3_H
-		void DrawFrequencySpectrum(int16_t *, ssize_t, size_t, size_t);
-#		endif // HAVE_FFTW3_H
-		
-		int itsOutputID;
-		timeval itsTimer;
-		
-		int itsFifo;
-		unsigned itsSamples;
-#		ifdef HAVE_FFTW3_H
-		unsigned itsFFTResults;
-		unsigned *itsFreqsMagnitude;
-		double *itsInput;
-		fftw_complex *itsOutput;
-		fftw_plan itsPlan;
-#		endif // HAVE_FFTW3_H
+	virtual void switchTo() OVERRIDE;
+	virtual void resize() OVERRIDE;
+	
+	virtual std::wstring title() OVERRIDE;
+	
+	virtual void update() OVERRIDE;
+	virtual void scroll(NC::Where) OVERRIDE { }
+	
+	virtual void enterPressed() OVERRIDE { }
+	virtual void spacePressed() OVERRIDE;
+	virtual void mouseButtonPressed(MEVENT) OVERRIDE { }
+	
+	virtual bool isTabbable() OVERRIDE { return true; }
+	virtual bool isMergable() OVERRIDE { return true; }
+	
+	// private members
+	void SetFD();
+	void ResetFD();
+	void FindOutputID();
+	
+	static const int WindowTimeout;
+	
+protected:
+	virtual void init();
+	virtual bool isLockable() { return true; }
+	
+private:
+	void DrawSoundWave(int16_t *, ssize_t, size_t, size_t);
+#	ifdef HAVE_FFTW3_H
+	void DrawFrequencySpectrum(int16_t *, ssize_t, size_t, size_t);
+#	endif // HAVE_FFTW3_H
+	
+	int itsOutputID;
+	timeval itsTimer;
+	
+	int itsFifo;
+	unsigned itsSamples;
+#	ifdef HAVE_FFTW3_H
+	unsigned itsFFTResults;
+	unsigned *itsFreqsMagnitude;
+	double *itsInput;
+	fftw_complex *itsOutput;
+	fftw_plan itsPlan;
+#	endif // HAVE_FFTW3_H
 };
 
 extern Visualizer *myVisualizer;

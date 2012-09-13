@@ -31,57 +31,56 @@
 #include "lastfm_service.h"
 #include "screen.h"
 
-class Lastfm : public Screen<NC::Scrollpad>
+struct Lastfm : public Screen<NC::Scrollpad>
 {
-	public:
-		Lastfm() : isReadyToTake(0), isDownloadInProgress(0) { }
-		
-		// Screen<NC::Scrollpad>
-		virtual void switchTo() OVERRIDE;
-		virtual void resize() OVERRIDE;
-		
-		virtual std::wstring title() OVERRIDE;
-		
-		virtual void update() OVERRIDE;
-		
-		virtual void enterPressed() OVERRIDE { }
-		virtual void spacePressed() OVERRIDE { }
-		
-		virtual bool isMergable() OVERRIDE { return true; }
-		virtual bool isTabbable() OVERRIDE { return false; }
-		
-		// private members
-		void Refetch();
-		
-		bool isDownloading() { return isDownloadInProgress && !isReadyToTake; }
-		bool SetArtistInfoArgs(const std::string &artist, const std::string &lang = "");
-		
-	protected:
-		virtual void init() OVERRIDE;
-		virtual bool isLockable() OVERRIDE { return false; }
-		
-	private:
-		std::wstring itsTitle;
-		
-		std::string itsArtist;
-		std::string itsFilename;
-		
-		std::string itsFolder;
-		
-		std::auto_ptr<LastfmService> itsService;
-		LastfmService::Args itsArgs;
-		
-		void Load();
-		void Save(const std::string &data);
-		void SetTitleAndFolder();
-		
-		void Download();
-		static void *DownloadWrapper(void *);
-		
-		void Take();
-		bool isReadyToTake;
-		bool isDownloadInProgress;
-		pthread_t itsDownloader;
+	Lastfm() : isReadyToTake(0), isDownloadInProgress(0) { }
+	
+	// Screen<NC::Scrollpad>
+	virtual void switchTo() OVERRIDE;
+	virtual void resize() OVERRIDE;
+	
+	virtual std::wstring title() OVERRIDE;
+	
+	virtual void update() OVERRIDE;
+	
+	virtual void enterPressed() OVERRIDE { }
+	virtual void spacePressed() OVERRIDE { }
+	
+	virtual bool isMergable() OVERRIDE { return true; }
+	virtual bool isTabbable() OVERRIDE { return false; }
+	
+	// private members
+	void Refetch();
+	
+	bool isDownloading() { return isDownloadInProgress && !isReadyToTake; }
+	bool SetArtistInfoArgs(const std::string &artist, const std::string &lang = "");
+	
+protected:
+	virtual void init() OVERRIDE;
+	virtual bool isLockable() OVERRIDE { return false; }
+	
+private:
+	std::wstring itsTitle;
+	
+	std::string itsArtist;
+	std::string itsFilename;
+	
+	std::string itsFolder;
+	
+	std::auto_ptr<LastfmService> itsService;
+	LastfmService::Args itsArgs;
+	
+	void Load();
+	void Save(const std::string &data);
+	void SetTitleAndFolder();
+	
+	void Download();
+	static void *DownloadWrapper(void *);
+	
+	void Take();
+	bool isReadyToTake;
+	bool isDownloadInProgress;
+	pthread_t itsDownloader;
 };
 
 extern Lastfm *myLastfm;

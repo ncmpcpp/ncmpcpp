@@ -192,11 +192,11 @@ struct Configuration
 	
 	SortMode browser_sort_mode;
 	
-	private:
-		void MakeProperPath(std::string &dir);
-		
-		std::string home_directory;
-		std::string config_file_path;
+private:
+	void MakeProperPath(std::string &dir);
+	
+	std::string home_directory;
+	std::string config_file_path;
 };
 
 extern Configuration Config;

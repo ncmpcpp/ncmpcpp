@@ -23,35 +23,34 @@
 
 #include "screen.h"
 
-class ServerInfo : public Screen<NC::Scrollpad>
+struct ServerInfo : public Screen<NC::Scrollpad>
 {
-	public:
-		// Screen<NC::Scrollpad> implementation
-		virtual void switchTo() OVERRIDE;
-		virtual void resize() OVERRIDE;
-		
-		virtual std::wstring title() OVERRIDE;
-		
-		virtual void update() OVERRIDE;
-		
-		virtual void enterPressed() OVERRIDE { }
-		virtual void spacePressed() OVERRIDE { }
-		
-		virtual bool isMergable() OVERRIDE { return false; }
-		virtual bool isTabbable() OVERRIDE { return false; }
-		
-	protected:
-		virtual void init() OVERRIDE;
-		virtual bool isLockable() OVERRIDE { return false; }
-		
-	private:
-		void SetDimensions();
-		
-		MPD::StringList itsURLHandlers;
-		MPD::StringList itsTagTypes;
-		
-		size_t itsWidth;
-		size_t itsHeight;
+	// Screen<NC::Scrollpad> implementation
+	virtual void switchTo() OVERRIDE;
+	virtual void resize() OVERRIDE;
+	
+	virtual std::wstring title() OVERRIDE;
+	
+	virtual void update() OVERRIDE;
+	
+	virtual void enterPressed() OVERRIDE { }
+	virtual void spacePressed() OVERRIDE { }
+	
+	virtual bool isMergable() OVERRIDE { return false; }
+	virtual bool isTabbable() OVERRIDE { return false; }
+	
+protected:
+	virtual void init() OVERRIDE;
+	virtual bool isLockable() OVERRIDE { return false; }
+	
+private:
+	void SetDimensions();
+	
+	MPD::StringList itsURLHandlers;
+	MPD::StringList itsTagTypes;
+	
+	size_t itsWidth;
+	size_t itsHeight;
 };
 
 extern ServerInfo *myServerInfo;

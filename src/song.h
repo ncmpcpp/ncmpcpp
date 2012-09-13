@@ -79,13 +79,13 @@ struct Song
 	
 	static const char FormatEscapeCharacter = 1;
 	
-	private:
-		const char *getTag(mpd_tag_type type, unsigned idx) const;
-		std::string ParseFormat(std::string::const_iterator &it, const std::string &tags_separator,
-		                        const std::string &escape_chars) const;
-		
-		std::shared_ptr<mpd_song> m_song;
-		size_t m_hash;
+private:
+	const char *getTag(mpd_tag_type type, unsigned idx) const;
+	std::string ParseFormat(std::string::const_iterator &it, const std::string &tags_separator,
+							const std::string &escape_chars) const;
+	
+	std::shared_ptr<mpd_song> m_song;
+	size_t m_hash;
 };
 
 typedef std::vector<Song> SongList;

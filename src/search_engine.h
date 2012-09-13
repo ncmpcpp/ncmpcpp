@@ -73,66 +73,65 @@ struct SEItem
 		MPD::Song itsSong;
 };
 
-class SearchEngine : public Screen< NC::Menu<SEItem> >, public Filterable, public HasSongs, public Searchable
+struct SearchEngine : public Screen< NC::Menu<SEItem> >, public Filterable, public HasSongs, public Searchable
 {
-	public:
-		// Screen< NC::Menu<SEItem> > implementation
-		virtual void resize() OVERRIDE;
-		virtual void switchTo() OVERRIDE;
-		
-		virtual std::wstring title() OVERRIDE;
-		
-		virtual void update() OVERRIDE { }
-		
-		virtual void enterPressed() OVERRIDE;
-		virtual void spacePressed() OVERRIDE;
-		virtual void mouseButtonPressed(MEVENT me) OVERRIDE;
-		
-		virtual bool isTabbable() OVERRIDE { return true; }
-		virtual bool isMergable() OVERRIDE { return true; }
-		
-		// Filterable implementation
-		virtual bool allowsFiltering() OVERRIDE;
-		virtual std::string currentFilter() OVERRIDE;
-		virtual void applyFilter(const std::string &filter) OVERRIDE;
-		
-		// Searchable implementation
-		virtual bool allowsSearching() OVERRIDE;
-		virtual bool search(const std::string &constraint) OVERRIDE;
-		virtual void nextFound(bool wrap) OVERRIDE;
-		virtual void prevFound(bool wrap) OVERRIDE;
-		
-		// HasSongs implementation
-		virtual std::shared_ptr<ProxySongList> getProxySongList() OVERRIDE;
-		
-		virtual bool allowsSelection() OVERRIDE;
-		virtual void reverseSelection() OVERRIDE;
-		virtual MPD::SongList getSelectedSongs() OVERRIDE;
-		
-		// private members
-		
-		static size_t StaticOptions;
-		static size_t SearchButton;
-		static size_t ResetButton;
-		
-	protected:
-		virtual void init() OVERRIDE;
-		virtual bool isLockable() OVERRIDE { return true; }
-		
-	private:
-		void Prepare();
-		void Search();
-		void reset();
-		
-		const char **SearchMode;
-		
-		static const char *SearchModes[];
-		
-		static const size_t ConstraintsNumber = 11;
-		static const char *ConstraintsNames[];
-		std::string itsConstraints[ConstraintsNumber];
-		
-		static bool MatchToPattern;
+	// Screen< NC::Menu<SEItem> > implementation
+	virtual void resize() OVERRIDE;
+	virtual void switchTo() OVERRIDE;
+	
+	virtual std::wstring title() OVERRIDE;
+	
+	virtual void update() OVERRIDE { }
+	
+	virtual void enterPressed() OVERRIDE;
+	virtual void spacePressed() OVERRIDE;
+	virtual void mouseButtonPressed(MEVENT me) OVERRIDE;
+	
+	virtual bool isTabbable() OVERRIDE { return true; }
+	virtual bool isMergable() OVERRIDE { return true; }
+	
+	// Filterable implementation
+	virtual bool allowsFiltering() OVERRIDE;
+	virtual std::string currentFilter() OVERRIDE;
+	virtual void applyFilter(const std::string &filter) OVERRIDE;
+	
+	// Searchable implementation
+	virtual bool allowsSearching() OVERRIDE;
+	virtual bool search(const std::string &constraint) OVERRIDE;
+	virtual void nextFound(bool wrap) OVERRIDE;
+	virtual void prevFound(bool wrap) OVERRIDE;
+	
+	// HasSongs implementation
+	virtual std::shared_ptr<ProxySongList> getProxySongList() OVERRIDE;
+	
+	virtual bool allowsSelection() OVERRIDE;
+	virtual void reverseSelection() OVERRIDE;
+	virtual MPD::SongList getSelectedSongs() OVERRIDE;
+	
+	// private members
+	
+	static size_t StaticOptions;
+	static size_t SearchButton;
+	static size_t ResetButton;
+	
+protected:
+	virtual void init() OVERRIDE;
+	virtual bool isLockable() OVERRIDE { return true; }
+	
+private:
+	void Prepare();
+	void Search();
+	void reset();
+	
+	const char **SearchMode;
+	
+	static const char *SearchModes[];
+	
+	static const size_t ConstraintsNumber = 11;
+	static const char *ConstraintsNames[];
+	std::string itsConstraints[ConstraintsNumber];
+	
+	static bool MatchToPattern;
 };
 
 extern SearchEngine *mySearcher;

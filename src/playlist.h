@@ -27,84 +27,83 @@
 #include "screen.h"
 #include "song.h"
 
-class Playlist : public Screen<NC::Menu<MPD::Song>>, public Filterable, public HasSongs, public Searchable
+struct Playlist : public Screen<NC::Menu<MPD::Song>>, public Filterable, public HasSongs, public Searchable
 {
-	public:
-		Playlist() : itsTotalLength(0), itsRemainingTime(0), itsScrollBegin(0) { }
-		~Playlist() { }
-		
-		// Screen<NC::Menu<MPD::Song>> implementation
-		virtual void switchTo() OVERRIDE;
-		virtual void resize() OVERRIDE;
-		
-		virtual std::wstring title() OVERRIDE;
-		
-		virtual void update() OVERRIDE { }
-		
-		virtual void enterPressed() OVERRIDE;
-		virtual void spacePressed() OVERRIDE;
-		virtual void mouseButtonPressed(MEVENT me) OVERRIDE;
-		
-		virtual bool isTabbable() OVERRIDE { return true; }
-		virtual bool isMergable() OVERRIDE { return true; }
-		
-		// Filterable implementation
-		virtual bool allowsFiltering() OVERRIDE;
-		virtual std::string currentFilter() OVERRIDE;
-		virtual void applyFilter(const std::string &filter) OVERRIDE;
-		
-		// Searchable implementation
-		virtual bool allowsSearching();
-		virtual bool search(const std::string &constraint) OVERRIDE;
-		virtual void nextFound(bool wrap) OVERRIDE;
-		virtual void prevFound(bool wrap) OVERRIDE;
-		
-		// HasSongs implementation
-		virtual std::shared_ptr<ProxySongList> getProxySongList() OVERRIDE;
-		
-		virtual bool allowsSelection() OVERRIDE;
-		virtual void reverseSelection() OVERRIDE;
-		virtual MPD::SongList getSelectedSongs() OVERRIDE;
-		
-		// private members
-		MPD::Song nowPlayingSong();
-		
-		bool isFiltered();
-		void Reverse();
-		
-		void EnableHighlighting();
-		void UpdateTimer();
-		timeval Timer() const { return itsTimer; }
-		
-		bool Add(const MPD::Song &s, bool play, int position = -1);
-		bool Add(const MPD::SongList &l, bool play, int position = -1);
-		void PlayNewlyAddedSongs();
-		
-		void SetSelectedItemsPriority(int prio);
-		
-		bool checkForSong(const MPD::Song &s);
-		
-		void registerHash(size_t hash);
-		void unregisterHash(size_t hash);
-		
-		static bool ReloadTotalLength;
-		static bool ReloadRemaining;
-		
-	protected:
-		virtual void init() OVERRIDE;
-		virtual bool isLockable() OVERRIDE { return true; }
-		
-	private:
-		std::string TotalLength();
-		std::string itsBufferedStats;
-		
-		std::map<size_t, int> itsSongHashes;
-		
-		size_t itsTotalLength;
-		size_t itsRemainingTime;
-		size_t itsScrollBegin;
-		
-		timeval itsTimer;
+	Playlist() : itsTotalLength(0), itsRemainingTime(0), itsScrollBegin(0) { }
+	~Playlist() { }
+	
+	// Screen<NC::Menu<MPD::Song>> implementation
+	virtual void switchTo() OVERRIDE;
+	virtual void resize() OVERRIDE;
+	
+	virtual std::wstring title() OVERRIDE;
+	
+	virtual void update() OVERRIDE { }
+	
+	virtual void enterPressed() OVERRIDE;
+	virtual void spacePressed() OVERRIDE;
+	virtual void mouseButtonPressed(MEVENT me) OVERRIDE;
+	
+	virtual bool isTabbable() OVERRIDE { return true; }
+	virtual bool isMergable() OVERRIDE { return true; }
+	
+	// Filterable implementation
+	virtual bool allowsFiltering() OVERRIDE;
+	virtual std::string currentFilter() OVERRIDE;
+	virtual void applyFilter(const std::string &filter) OVERRIDE;
+	
+	// Searchable implementation
+	virtual bool allowsSearching();
+	virtual bool search(const std::string &constraint) OVERRIDE;
+	virtual void nextFound(bool wrap) OVERRIDE;
+	virtual void prevFound(bool wrap) OVERRIDE;
+	
+	// HasSongs implementation
+	virtual std::shared_ptr<ProxySongList> getProxySongList() OVERRIDE;
+	
+	virtual bool allowsSelection() OVERRIDE;
+	virtual void reverseSelection() OVERRIDE;
+	virtual MPD::SongList getSelectedSongs() OVERRIDE;
+	
+	// private members
+	MPD::Song nowPlayingSong();
+	
+	bool isFiltered();
+	void Reverse();
+	
+	void EnableHighlighting();
+	void UpdateTimer();
+	timeval Timer() const { return itsTimer; }
+	
+	bool Add(const MPD::Song &s, bool play, int position = -1);
+	bool Add(const MPD::SongList &l, bool play, int position = -1);
+	void PlayNewlyAddedSongs();
+	
+	void SetSelectedItemsPriority(int prio);
+	
+	bool checkForSong(const MPD::Song &s);
+	
+	void registerHash(size_t hash);
+	void unregisterHash(size_t hash);
+	
+	static bool ReloadTotalLength;
+	static bool ReloadRemaining;
+	
+protected:
+	virtual void init() OVERRIDE;
+	virtual bool isLockable() OVERRIDE { return true; }
+	
+private:
+	std::string TotalLength();
+	std::string itsBufferedStats;
+	
+	std::map<size_t, int> itsSongHashes;
+	
+	size_t itsTotalLength;
+	size_t itsRemainingTime;
+	size_t itsScrollBegin;
+	
+	timeval itsTimer;
 };
 
 extern Playlist *myPlaylist;

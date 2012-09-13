@@ -24,77 +24,76 @@
 #include "interfaces.h"
 #include "screen.h"
 
-class MediaLibrary : public Screen<NC::Window>, public Filterable, public HasColumns, public HasSongs, public Searchable
+struct MediaLibrary : public Screen<NC::Window>, public Filterable, public HasColumns, public HasSongs, public Searchable
 {
-	public:
-		virtual void switchTo() OVERRIDE;
-		virtual void resize() OVERRIDE;
+	virtual void switchTo() OVERRIDE;
+	virtual void resize() OVERRIDE;
+	
+	virtual std::wstring title() OVERRIDE;
+	
+	virtual void refresh() OVERRIDE;
+	virtual void update() OVERRIDE;
+	
+	virtual void enterPressed() OVERRIDE;
+	virtual void spacePressed() OVERRIDE;
+	virtual void mouseButtonPressed(MEVENT me) OVERRIDE;
+	
+	virtual bool isTabbable() OVERRIDE { return true; }
+	virtual bool isMergable() OVERRIDE { return true; }
+	
+	// Filterable implementation
+	virtual bool allowsFiltering() OVERRIDE;
+	virtual std::string currentFilter() OVERRIDE;
+	virtual void applyFilter(const std::string &filter) OVERRIDE;
+	
+	// Searchable implementation
+	virtual bool allowsSearching() OVERRIDE;
+	virtual bool search(const std::string &constraint) OVERRIDE;
+	virtual void nextFound(bool wrap) OVERRIDE;
+	virtual void prevFound(bool wrap) OVERRIDE;
+	
+	// HasSongs implementation
+	virtual std::shared_ptr<ProxySongList> getProxySongList() OVERRIDE;
+	
+	virtual bool allowsSelection() OVERRIDE;
+	virtual void reverseSelection() OVERRIDE;
+	virtual MPD::SongList getSelectedSongs() OVERRIDE;
+	
+	// HasColumns implementation
+	virtual bool previousColumnAvailable() OVERRIDE;
+	virtual void previousColumn() OVERRIDE;
+	
+	virtual bool nextColumnAvailable() OVERRIDE;
+	virtual void nextColumn() OVERRIDE;
+	
+	// private members
+	int Columns();
+	void LocateSong(const MPD::Song &);
+	std::shared_ptr<ProxySongList> songsProxyList();
+	
+	struct SearchConstraints
+	{
+		SearchConstraints() { }
+		SearchConstraints(const std::string &tag, const std::string &album, const std::string &date)
+		: PrimaryTag(tag), Album(album), Date(date) { }
+		SearchConstraints(const std::string &album, const std::string &date)
+		: Album(album), Date(date) { }
 		
-		virtual std::wstring title() OVERRIDE;
-		
-		virtual void refresh() OVERRIDE;
-		virtual void update() OVERRIDE;
-		
-		virtual void enterPressed() OVERRIDE;
-		virtual void spacePressed() OVERRIDE;
-		virtual void mouseButtonPressed(MEVENT me) OVERRIDE;
-		
-		virtual bool isTabbable() OVERRIDE { return true; }
-		virtual bool isMergable() OVERRIDE { return true; }
-		
-		// Filterable implementation
-		virtual bool allowsFiltering() OVERRIDE;
-		virtual std::string currentFilter() OVERRIDE;
-		virtual void applyFilter(const std::string &filter) OVERRIDE;
-		
-		// Searchable implementation
-		virtual bool allowsSearching() OVERRIDE;
-		virtual bool search(const std::string &constraint) OVERRIDE;
-		virtual void nextFound(bool wrap) OVERRIDE;
-		virtual void prevFound(bool wrap) OVERRIDE;
-		
-		// HasSongs implementation
-		virtual std::shared_ptr<ProxySongList> getProxySongList() OVERRIDE;
-		
-		virtual bool allowsSelection() OVERRIDE;
-		virtual void reverseSelection() OVERRIDE;
-		virtual MPD::SongList getSelectedSongs() OVERRIDE;
-		
-		// HasColumns implementation
-		virtual bool previousColumnAvailable() OVERRIDE;
-		virtual void previousColumn() OVERRIDE;
-		
-		virtual bool nextColumnAvailable() OVERRIDE;
-		virtual void nextColumn() OVERRIDE;
-		
-		// private members
-		int Columns();
-		void LocateSong(const MPD::Song &);
-		std::shared_ptr<ProxySongList> songsProxyList();
-		
-		struct SearchConstraints
-		{
-			SearchConstraints() { }
-			SearchConstraints(const std::string &tag, const std::string &album, const std::string &date)
-			: PrimaryTag(tag), Album(album), Date(date) { }
-			SearchConstraints(const std::string &album, const std::string &date)
-			: Album(album), Date(date) { }
-			
-			std::string PrimaryTag;
-			std::string Album;
-			std::string Date;
-		};
-		
-		NC::Menu<std::string> *Tags;
-		NC::Menu<SearchConstraints> *Albums;
-		NC::Menu<MPD::Song> *Songs;
-		
-	protected:
-		virtual void init();
-		virtual bool isLockable() { return true; }
-		
-	private:
-		void AddToPlaylist(bool);
+		std::string PrimaryTag;
+		std::string Album;
+		std::string Date;
+	};
+	
+	NC::Menu<std::string> *Tags;
+	NC::Menu<SearchConstraints> *Albums;
+	NC::Menu<MPD::Song> *Songs;
+	
+protected:
+	virtual void init();
+	virtual bool isLockable() { return true; }
+	
+private:
+	void AddToPlaylist(bool);
 };
 
 extern MediaLibrary *myLibrary;

@@ -23,42 +23,41 @@
 
 #include "screen.h"
 
-class SelectedItemsAdder : public Screen< NC::Menu<std::string> >
+struct SelectedItemsAdder : public Screen< NC::Menu<std::string> >
 {
-	public:
-		SelectedItemsAdder() : itsPSWidth(35), itsPSHeight(11) { }
-		
-		// Screen< NC::Menu<std::string> > implementation
-		virtual void switchTo() OVERRIDE;
-		virtual void resize() OVERRIDE;
-		virtual void refresh() OVERRIDE;
-		
-		virtual std::wstring title() OVERRIDE;
-		
-		virtual void update() OVERRIDE { }
-		
-		virtual void enterPressed() OVERRIDE;
-		virtual void spacePressed() OVERRIDE { }
-		virtual void mouseButtonPressed(MEVENT me) OVERRIDE;
-		
-		virtual bool isMergable() OVERRIDE { return false; }
-		virtual bool isTabbable() OVERRIDE { return false; }
-		
-	protected:
-		virtual void init() OVERRIDE;
-		virtual bool isLockable() OVERRIDE { return false; }
-		
-	private:
-		void SetDimensions();
-		
-		NC::Menu<std::string> *itsPlaylistSelector;
-		NC::Menu<std::string> *itsPositionSelector;
-		
-		size_t itsPSWidth;
-		size_t itsPSHeight;
-		
-		size_t itsWidth;
-		size_t itsHeight;
+	SelectedItemsAdder() : itsPSWidth(35), itsPSHeight(11) { }
+	
+	// Screen< NC::Menu<std::string> > implementation
+	virtual void switchTo() OVERRIDE;
+	virtual void resize() OVERRIDE;
+	virtual void refresh() OVERRIDE;
+	
+	virtual std::wstring title() OVERRIDE;
+	
+	virtual void update() OVERRIDE { }
+	
+	virtual void enterPressed() OVERRIDE;
+	virtual void spacePressed() OVERRIDE { }
+	virtual void mouseButtonPressed(MEVENT me) OVERRIDE;
+	
+	virtual bool isMergable() OVERRIDE { return false; }
+	virtual bool isTabbable() OVERRIDE { return false; }
+	
+protected:
+	virtual void init() OVERRIDE;
+	virtual bool isLockable() OVERRIDE { return false; }
+	
+private:
+	void SetDimensions();
+	
+	NC::Menu<std::string> *itsPlaylistSelector;
+	NC::Menu<std::string> *itsPositionSelector;
+	
+	size_t itsPSWidth;
+	size_t itsPSHeight;
+	
+	size_t itsWidth;
+	size_t itsHeight;
 };
 
 extern SelectedItemsAdder *mySelectedItemsAdder;

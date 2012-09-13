@@ -20,20 +20,24 @@
 
 #include "global.h"
 
-BasicScreen *Global::myScreen;
-BasicScreen *Global::myOldScreen;
-BasicScreen *Global::myPrevScreen;
-BasicScreen *Global::myLockedScreen;
-BasicScreen *Global::myInactiveScreen;
+namespace Global {//
 
-NC::Window *Global::wHeader;
-NC::Window *Global::wFooter;
+BasicScreen *myScreen;
+BasicScreen *myOldScreen;
+BasicScreen *myPrevScreen;
+BasicScreen *myLockedScreen;
+BasicScreen *myInactiveScreen;
 
-size_t Global::MainStartY;
-size_t Global::MainHeight;
+NC::Window *wHeader;
+NC::Window *wFooter;
 
-bool Global::ShowMessages = false;
-bool Global::SeekingInProgress = false;
+size_t MainStartY;
+size_t MainHeight;
 
-std::string Global::VolumeState;
-timeval Global::Timer;
+bool ShowMessages = false;
+bool SeekingInProgress = false;
+
+std::string VolumeState;
+timeval Timer;
+
+}
