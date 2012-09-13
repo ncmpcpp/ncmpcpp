@@ -76,12 +76,6 @@ void SelectedItemsAdder::switchTo()
 	if (!hs || !hs->allowsSelection())
 		return;
 	
-	if (MainHeight < 5)
-	{
-		Statusbar::msg("Screen is too small to display this window");
-		return;
-	}
-	
 	if (!isInitialized)
 		init();
 	

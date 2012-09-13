@@ -52,11 +52,6 @@ void ServerInfo::switchTo()
 		myOldScreen->switchTo();
 		return;
 	}
-	if (MainHeight < 5)
-	{
-		Statusbar::msg("Screen is too small to display this window");
-		return;
-	}
 	
 	if (!isInitialized)
 		init();

@@ -155,7 +155,7 @@ void TagEditor::SetDimensions(size_t x_offset, size_t width)
 	RightColumnStartX = MiddleColumnStartX+MiddleColumnWidth+1;
 	
 	FParserDialogWidth = std::min(30, COLS);
-	FParserDialogHeight = std::min(size_t(6), MainHeight);
+	FParserDialogHeight = std::min(size_t(5), MainHeight);
 	FParserWidth = width*0.9;
 	FParserHeight = std::min(size_t(LINES*0.8), MainHeight);
 	FParserWidthOne = FParserWidth/2;
@@ -184,9 +184,6 @@ void TagEditor::resize()
 	FParser->moveTo(x_offset+(width-FParserWidth)/2, (MainHeight-FParserHeight)/2+MainStartY);
 	FParserLegend->moveTo(x_offset+(width-FParserWidth)/2+FParserWidthOne, (MainHeight-FParserHeight)/2+MainStartY);
 	FParserPreview->moveTo(x_offset+(width-FParserWidth)/2+FParserWidthOne, (MainHeight-FParserHeight)/2+MainStartY);
-	
-	if (MainHeight < 5 && (w == FParserDialog || w == FParser || w == FParserHelper)) // screen too low
-		w = TagTypes; // fall back to main columns
 	
 	hasToBeResized = 0;
 }
@@ -534,11 +531,6 @@ void TagEditor::enterPressed()
 		{
 			if (w == TagTypes)
 			{
-				if (size_t(COLS) < FParserDialogWidth || MainHeight < FParserDialogHeight)
-				{
-					Statusbar::msg("Screen is too small to display additional windows");
-					return;
-				}
 				FParserDialog->reset();
 				w = FParserDialog;
 			}

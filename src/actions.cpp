@@ -84,10 +84,10 @@ void Action::ValidateScreenSize()
 {
 	using Global::MainHeight;
 	
-	if (COLS < 20 || MainHeight < 3)
+	if (COLS < 30 || MainHeight < 5)
 	{
 		NC::destroyScreen();
-		std::cout << "Screen is too small!\n";
+		std::cout << "Screen is too small to handle ncmpcpp correctly\n";
 		exit(1);
 	}
 }

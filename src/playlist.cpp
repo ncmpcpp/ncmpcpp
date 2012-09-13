@@ -137,14 +137,9 @@ void Playlist::resize()
 	if (w == SortDialog) // if sorting window is active, playlist needs refreshing
 		Items->display();
 	
-	SortDialogHeight = std::min(int(MainHeight), 17);
-	if (Items->getWidth() >= SortDialogWidth && MainHeight >= 5)
-	{
-		SortDialog->resize(SortDialogWidth, SortDialogHeight);
-		SortDialog->moveTo(x_offset+(width-SortDialogWidth)/2, (MainHeight-SortDialogHeight)/2+MainStartY);
-	}
-	else // if screen is too low to display sorting window, fall back to items list
-		w = Items;
+	SortDialogHeight = std::min(size_t(17), MainHeight);
+	SortDialog->resize(SortDialogWidth, SortDialogHeight);
+	SortDialog->moveTo(x_offset+(width-SortDialogWidth)/2, (MainHeight-SortDialogHeight)/2+MainStartY);
 	
 	hasToBeResized = 0;
 }
@@ -390,13 +385,8 @@ void Playlist::Sort()
 {
 	if (isFiltered())
 		return;
-	if (Items->getWidth() < SortDialogWidth || MainHeight < 5)
-		Statusbar::msg("Screen is too small to display dialog window");
-	else
-	{
-		SortDialog->reset();
-		w = SortDialog;
-	}
+	SortDialog->reset();
+	w = SortDialog;
 }
 
 void Playlist::Reverse()
