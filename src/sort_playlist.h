@@ -56,8 +56,8 @@ private:
 	size_t m_height;
 	size_t m_width;
 	
-	ScreenType::Item::Type m_sort_entry;
-	ScreenType::Item::Type m_cancel_entry;
+	const ScreenType::Item::Type m_sort_entry;
+	const ScreenType::Item::Type m_cancel_entry;
 };
 
 extern SortPlaylistDialog *mySortPlaylistDialog;

@@ -32,6 +32,8 @@ using Global::MainStartY;
 SortPlaylistDialog *mySortPlaylistDialog;
 
 SortPlaylistDialog::SortPlaylistDialog()
+: m_sort_entry(std::make_pair("Sort", static_cast<MPD::Song::GetFunction>(0)))
+, m_cancel_entry(std::make_pair("Cancel", static_cast<MPD::Song::GetFunction>(0)))
 {
 	setDimensions();
 	
@@ -52,8 +54,6 @@ SortPlaylistDialog::SortPlaylistDialog()
 	w->addItem(std::make_pair("Filename", &MPD::Song::getURI));
 	
 	m_sort_options = w->size();
-	m_sort_entry = std::make_pair("Sort", static_cast<MPD::Song::GetFunction>(0));
-	m_cancel_entry = std::make_pair("Cancel", static_cast<MPD::Song::GetFunction>(0));
 	
 	w->addSeparator();
 	w->addItem(m_sort_entry);
