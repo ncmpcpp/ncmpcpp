@@ -1262,6 +1262,8 @@ void writeXiphComments(const MPD::MutableSong &s, TagLib::Ogg::XiphComment *tag)
 		for (auto it = list.begin(); it != list.end(); ++it)
 			tag->addField(type, *it, false);
 	};
+	// remove field previously used as album artist
+	tag->removeField("ALBUM ARTIST");
 	writeXiph("TITLE", tagList(s, &MPD::Song::getTitle));
 	writeXiph("ARTIST", tagList(s, &MPD::Song::getArtist));
 	writeXiph("ALBUMARTIST", tagList(s, &MPD::Song::getAlbumArtist));
