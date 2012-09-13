@@ -93,7 +93,7 @@ class Playlist : public Screen<NC::Window>, public Filterable, public HasSongs, 
 		void registerHash(size_t hash);
 		void unregisterHash(size_t hash);
 		
-		NC::Menu< MPD::Song > *Items;
+		NC::Menu<MPD::Song> *Items;
 		
 		static bool ReloadTotalLength;
 		static bool ReloadRemaining;

@@ -28,6 +28,11 @@
 #include "status.h"
 #include "utility/wide_string.h"
 
+inline HasColumns *hasColumns(BasicScreen *screen)
+{
+	return dynamic_cast<HasColumns *>(screen);
+}
+
 inline HasSongs *hasSongs(BasicScreen *screen)
 {
 	return dynamic_cast<HasSongs *>(screen);

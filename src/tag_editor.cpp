@@ -646,8 +646,8 @@ void TagEditor::MouseButtonPressed(MEVENT me)
 		bool result = true;
 		if (w != Dirs)
 		{
-			if (isPrevColumnAvailable())
-				PrevColumn();
+			if (previousColumnAvailable())
+				previousColumn();
 			else
 				result = false;
 		}
@@ -657,8 +657,8 @@ void TagEditor::MouseButtonPressed(MEVENT me)
 		bool result = true;
 		if (w != Tags)
 		{
-			if (isNextColumnAvailable())
-				NextColumn();
+			if (nextColumnAvailable())
+				nextColumn();
 			else
 				result = false;
 		}
@@ -684,8 +684,8 @@ void TagEditor::MouseButtonPressed(MEVENT me)
 		{
 			if (w != FParser)
 			{
-				if (isPrevColumnAvailable())
-					PrevColumn();
+				if (previousColumnAvailable())
+					previousColumn();
 				else
 					return;
 			}
@@ -702,8 +702,8 @@ void TagEditor::MouseButtonPressed(MEVENT me)
 		{
 			if (w != FParserHelper)
 			{
-				if (isNextColumnAvailable())
-					NextColumn();
+				if (nextColumnAvailable())
+					nextColumn();
 				else
 					return;
 			}
@@ -880,63 +880,7 @@ MPD::SongList TagEditor::getSelectedSongs()
 
 /***********************************************************************/
 
-bool TagEditor::ifAnyModifiedAskForDiscarding()
-{
-	bool result = true;
-	if (isAnyModified(*Tags))
-		result = Action::AskYesNoQuestion("There are pending changes, are you sure?", Status::trace);
-	return result;
-}
-
-bool TagEditor::isNextColumnAvailable()
-{
-	bool result = false;
-	if (w == Dirs)
-	{
-		if (!TagTypes->reallyEmpty() && !Tags->reallyEmpty())
-			result = true;
-	}
-	else if (w == TagTypes)
-	{
-		if (!Tags->reallyEmpty())
-			result = true;
-	}
-	else if (w == FParser)
-		result = true;
-	return result;
-}
-
-bool TagEditor::NextColumn()
-{
-	if (w == Dirs)
-	{
-		Dirs->setHighlightColor(Config.main_highlight_color);
-		w->refresh();
-		w = TagTypes;
-		TagTypes->setHighlightColor(Config.active_column_color);
-		return true;
-	}
-	else if (w == TagTypes && TagTypes->choice() < 13 && !Tags->reallyEmpty())
-	{
-		TagTypes->setHighlightColor(Config.main_highlight_color);
-		w->refresh();
-		w = Tags;
-		Tags->setHighlightColor(Config.active_column_color);
-		return true;
-	}
-	else if (w == FParser)
-	{
-		FParser->setBorder(Config.window_border);
-		FParser->display();
-		w = FParserHelper;
-		FParserHelper->setBorder(Config.active_window_border);
-		FParserHelper->display();
-		return true;
-	}
-	return false;
-}
-
-bool TagEditor::isPrevColumnAvailable()
+bool TagEditor::previousColumnAvailable()
 {
 	bool result = false;
 	if (w == Tags)
@@ -954,7 +898,7 @@ bool TagEditor::isPrevColumnAvailable()
 	return result;
 }
 
-bool TagEditor::PrevColumn()
+void TagEditor::previousColumn()
 {
 	if (w == Tags)
 	{
@@ -962,7 +906,6 @@ bool TagEditor::PrevColumn()
 		w->refresh();
 		w = TagTypes;
 		TagTypes->setHighlightColor(Config.active_column_color);
-		return true;
 	}
 	else if (w == TagTypes)
 	{
@@ -970,7 +913,6 @@ bool TagEditor::PrevColumn()
 		w->refresh();
 		w = Dirs;
 		Dirs->setHighlightColor(Config.active_column_color);
-		return true;
 	}
 	else if (w == FParserHelper)
 	{
@@ -979,9 +921,61 @@ bool TagEditor::PrevColumn()
 		w = FParser;
 		FParser->setBorder(Config.active_window_border);
 		FParser->display();
-		return true;
 	}
-	return false;
+}
+
+bool TagEditor::nextColumnAvailable()
+{
+	bool result = false;
+	if (w == Dirs)
+	{
+		if (!TagTypes->reallyEmpty() && !Tags->reallyEmpty())
+			result = true;
+	}
+	else if (w == TagTypes)
+	{
+		if (!Tags->reallyEmpty())
+			result = true;
+	}
+	else if (w == FParser)
+		result = true;
+	return result;
+}
+
+void TagEditor::nextColumn()
+{
+	if (w == Dirs)
+	{
+		Dirs->setHighlightColor(Config.main_highlight_color);
+		w->refresh();
+		w = TagTypes;
+		TagTypes->setHighlightColor(Config.active_column_color);
+	}
+	else if (w == TagTypes && TagTypes->choice() < 13 && !Tags->reallyEmpty())
+	{
+		TagTypes->setHighlightColor(Config.main_highlight_color);
+		w->refresh();
+		w = Tags;
+		Tags->setHighlightColor(Config.active_column_color);
+	}
+	else if (w == FParser)
+	{
+		FParser->setBorder(Config.window_border);
+		FParser->display();
+		w = FParserHelper;
+		FParserHelper->setBorder(Config.active_window_border);
+		FParserHelper->display();
+	}
+}
+
+/***********************************************************************/
+
+bool TagEditor::ifAnyModifiedAskForDiscarding()
+{
+	bool result = true;
+	if (isAnyModified(*Tags))
+		result = Action::AskYesNoQuestion("There are pending changes, are you sure?", Status::trace);
+	return result;
 }
 
 void TagEditor::LocateSong(const MPD::Song &s)

@@ -24,7 +24,7 @@
 #include "interfaces.h"
 #include "screen.h"
 
-class PlaylistEditor : public Screen<NC::Window>, public Filterable, public HasSongs, public Searchable
+class PlaylistEditor : public Screen<NC::Window>, public Filterable, public HasColumns, public HasSongs, public Searchable
 {
 	public:
 		virtual void SwitchTo() OVERRIDE;
@@ -42,36 +42,37 @@ class PlaylistEditor : public Screen<NC::Window>, public Filterable, public HasS
 		virtual bool isTabbable() OVERRIDE { return true; }
 		virtual bool isMergable() OVERRIDE { return true; }
 		
-		/// Filterable implementation
+		// Filterable implementation
 		virtual bool allowsFiltering() OVERRIDE;
 		virtual std::string currentFilter() OVERRIDE;
 		virtual void applyFilter(const std::string &filter) OVERRIDE;
 		
-		/// Searchable implementation
+		// Searchable implementation
 		virtual bool allowsSearching() OVERRIDE;
 		virtual bool search(const std::string &constraint) OVERRIDE;
 		virtual void nextFound(bool wrap) OVERRIDE;
 		virtual void prevFound(bool wrap) OVERRIDE;
 		
-		/// HasSongs implementation
+		// HasSongs implementation
 		virtual std::shared_ptr<ProxySongList> getProxySongList() OVERRIDE;
 		
 		virtual bool allowsSelection() OVERRIDE;
 		virtual void reverseSelection() OVERRIDE;
 		virtual MPD::SongList getSelectedSongs() OVERRIDE;
 		
-		// private members
-		virtual void Locate(const std::string &);
+		// HasColumns implementation
+		virtual bool previousColumnAvailable() OVERRIDE;
+		virtual void previousColumn() OVERRIDE;
 		
+		virtual bool nextColumnAvailable() OVERRIDE;
+		virtual void nextColumn() OVERRIDE;
+		
+		// private members
 		void requestPlaylistsUpdate() { playlistsUpdateRequested = true; }
 		void requestContentsUpdate() { contentUpdateRequested = true; }
 		
+		virtual void Locate(const std::string &);
 		bool isContentFiltered();
-		bool isNextColumnAvailable();
-		bool NextColumn();
-		bool isPrevColumnAvailable();
-		bool PrevColumn();
-		
 		std::shared_ptr<ProxySongList> contentProxyList();
 		
 		NC::Menu<std::string> *Playlists;

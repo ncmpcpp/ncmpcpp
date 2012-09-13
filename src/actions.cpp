@@ -668,46 +668,24 @@ void PressSpace::Run()
 
 bool PreviousColumn::canBeRun() const
 {
-	return (myScreen == myLibrary && myLibrary->isPrevColumnAvailable())
-	    || (myScreen == myPlaylistEditor && myPlaylistEditor->isPrevColumnAvailable())
-#	ifdef HAVE_TAGLIB_H
-	    || (myScreen == myTagEditor && myTagEditor->isPrevColumnAvailable())
-#	endif // HAVE_TAGLIB_H
-	;
+	auto hc = hasColumns(myScreen);
+	return hc && hc->previousColumnAvailable();
 }
 
 void PreviousColumn::Run()
 {
-	if (myScreen == myLibrary)
-		myLibrary->PrevColumn();
-	else if (myScreen == myPlaylistEditor)
-		myPlaylistEditor->PrevColumn();
-#	ifdef HAVE_TAGLIB_H
-	else if (myScreen == myTagEditor)
-		myTagEditor->PrevColumn();
-#	endif // HAVE_TAGLIB_H
+	hasColumns(myScreen)->previousColumn();
 }
 
 bool NextColumn::canBeRun() const
 {
-	return (myScreen == myLibrary && myLibrary->isNextColumnAvailable())
-	    || (myScreen == myPlaylistEditor && myPlaylistEditor->isNextColumnAvailable())
-#	ifdef HAVE_TAGLIB_H
-	    || (myScreen == myTagEditor && myTagEditor->isNextColumnAvailable())
-#	endif // HAVE_TAGLIB_H
-	;
+	auto hc = hasColumns(myScreen);
+	return hc && hc->nextColumnAvailable();
 }
 
 void NextColumn::Run()
 {
-	if (myScreen == myLibrary)
-		myLibrary->NextColumn();
-	else if (myScreen == myPlaylistEditor)
-		myPlaylistEditor->NextColumn();
-#	ifdef HAVE_TAGLIB_H
-	else if (myScreen == myTagEditor)
-		myTagEditor->NextColumn();
-#	endif // HAVE_TAGLIB_H
+	hasColumns(myScreen)->nextColumn();
 }
 
 bool MasterScreen::canBeRun() const

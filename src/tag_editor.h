@@ -33,60 +33,59 @@
 #include "regex_filter.h"
 #include "screen.h"
 
-class TagEditor : public Screen<NC::Window>, public Filterable, public HasSongs, public Searchable
+class TagEditor : public Screen<NC::Window>, public Filterable, public HasColumns, public HasSongs, public Searchable
 {
 	public:
 		TagEditor() : FParser(0), FParserHelper(0), FParserLegend(0), FParserPreview(0), itsBrowsedDir("/") { }
 		
-		virtual void Resize();
-		virtual void SwitchTo();
+		virtual void Resize() OVERRIDE;
+		virtual void SwitchTo() OVERRIDE;
 		
-		virtual std::wstring Title();
+		virtual std::wstring Title() OVERRIDE;
 		
-		virtual void Refresh();
-		virtual void Update();
+		virtual void Refresh() OVERRIDE;
+		virtual void Update() OVERRIDE;
 		
-		virtual void EnterPressed();
-		virtual void SpacePressed();
-		virtual void MouseButtonPressed(MEVENT);
-		virtual bool isTabbable() { return true; }
+		virtual void EnterPressed() OVERRIDE;
+		virtual void SpacePressed() OVERRIDE;
+		virtual void MouseButtonPressed(MEVENT) OVERRIDE;
+		
+		virtual bool isTabbable() OVERRIDE { return true; }
+		virtual bool isMergable() OVERRIDE { return true; }
 		
 		// Filterable implementation
-		virtual bool allowsFiltering();
-		virtual std::string currentFilter();
-		virtual void applyFilter(const std::string &filter);
+		virtual bool allowsFiltering() OVERRIDE;
+		virtual std::string currentFilter() OVERRIDE;
+		virtual void applyFilter(const std::string &filter) OVERRIDE;
 		
 		// Searchable implementation
-		virtual bool allowsSearching();
-		virtual bool search(const std::string &constraint);
-		virtual void nextFound(bool wrap);
-		virtual void prevFound(bool wrap);
+		virtual bool allowsSearching() OVERRIDE;
+		virtual bool search(const std::string &constraint) OVERRIDE;
+		virtual void nextFound(bool wrap) OVERRIDE;
+		virtual void prevFound(bool wrap) OVERRIDE;
 		
 		// HasSongs implementation
-		virtual std::shared_ptr<ProxySongList> getProxySongList();
+		virtual std::shared_ptr<ProxySongList> getProxySongList() OVERRIDE;
 		
-		virtual bool allowsSelection();
-		virtual void reverseSelection();
-		virtual MPD::SongList getSelectedSongs();
+		virtual bool allowsSelection() OVERRIDE;
+		virtual void reverseSelection() OVERRIDE;
+		virtual MPD::SongList getSelectedSongs() OVERRIDE;
 		
-		virtual bool isMergable() { return true; }
+		// HasColumns implementation
+		virtual bool previousColumnAvailable() OVERRIDE;
+		virtual void previousColumn() OVERRIDE;
+		
+		virtual bool nextColumnAvailable() OVERRIDE;
+		virtual void nextColumn() OVERRIDE;
 		
 		// private members
 		bool ifAnyModifiedAskForDiscarding();
-		
-		bool isNextColumnAvailable();
-		bool NextColumn();
-		bool isPrevColumnAvailable();
-		bool PrevColumn();
-		
 		void LocateSong(const MPD::Song &s);
+		const std::string &CurrentDir() { return itsBrowsedDir; }
 		
 		NC::Menu< std::pair<std::string, std::string> > *Dirs;
 		NC::Menu<std::string> *TagTypes;
 		NC::Menu<MPD::MutableSong> *Tags;
-		
-		/// NOTICE: this string is always in utf8, no need to convert it
-		const std::string &CurrentDir() { return itsBrowsedDir; }
 		
 		static void ReadTags(MPD::MutableSong &);
 		static bool WriteTags(MPD::MutableSong &);

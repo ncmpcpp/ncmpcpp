@@ -414,8 +414,8 @@ void MediaLibrary::MouseButtonPressed(MEVENT me)
 		bool result = true;
 		if (w != Songs)
 		{
-			if (isNextColumnAvailable())
-				NextColumn();
+			if (nextColumnAvailable())
+				nextColumn();
 			else
 				result = false;
 		}
@@ -425,8 +425,8 @@ void MediaLibrary::MouseButtonPressed(MEVENT me)
 		bool result = true;
 		if (w != Tags)
 		{
-			if (isPrevColumnAvailable())
-				PrevColumn();
+			if (previousColumnAvailable())
+				previousColumn();
 			else
 				result = false;
 		}
@@ -683,15 +683,41 @@ MPD::SongList MediaLibrary::getSelectedSongs()
 
 /***********************************************************************/
 
-int MediaLibrary::Columns()
+bool MediaLibrary::previousColumnAvailable()
 {
-	if (hasTwoColumns)
-		return 2;
-	else
-		return 3;
+	assert(!hasTwoColumns || w != Tags);
+	if (w == Songs)
+	{
+		if (!Albums->reallyEmpty() && (hasTwoColumns || !Tags->reallyEmpty()))
+			return true;
+	}
+	else if (w == Albums)
+	{
+		if (!hasTwoColumns && !Tags->reallyEmpty())
+			return true;
+	}
+	return false;
 }
 
-bool MediaLibrary::isNextColumnAvailable()
+void MediaLibrary::previousColumn()
+{
+	if (w == Songs)
+	{
+		Songs->setHighlightColor(Config.main_highlight_color);
+		w->refresh();
+		w = Albums;
+		Albums->setHighlightColor(Config.active_column_color);
+	}
+	else if (w == Albums && !hasTwoColumns)
+	{
+		Albums->setHighlightColor(Config.main_highlight_color);
+		w->refresh();
+		w = Tags;
+		Tags->setHighlightColor(Config.active_column_color);
+	}
+}
+
+bool MediaLibrary::nextColumnAvailable()
 {
 	assert(!hasTwoColumns || w != Tags);
 	if (w == Tags)
@@ -707,7 +733,7 @@ bool MediaLibrary::isNextColumnAvailable()
 	return false;
 }
 
-void MediaLibrary::NextColumn()
+void MediaLibrary::nextColumn()
 {
 	if (w == Tags)
 	{
@@ -725,38 +751,14 @@ void MediaLibrary::NextColumn()
 	}
 }
 
-bool MediaLibrary::isPrevColumnAvailable()
-{
-	assert(!hasTwoColumns || w != Tags);
-	if (w == Songs)
-	{
-		if (!Albums->reallyEmpty() && (hasTwoColumns || !Tags->reallyEmpty()))
-			return true;
-	}
-	else if (w == Albums)
-	{
-		if (!hasTwoColumns && !Tags->reallyEmpty())
-			return true;
-	}
-	return false;
-}
+/***********************************************************************/
 
-void MediaLibrary::PrevColumn()
+int MediaLibrary::Columns()
 {
-	if (w == Songs)
-	{
-		Songs->setHighlightColor(Config.main_highlight_color);
-		w->refresh();
-		w = Albums;
-		Albums->setHighlightColor(Config.active_column_color);
-	}
-	else if (w == Albums && !hasTwoColumns)
-	{
-		Albums->setHighlightColor(Config.main_highlight_color);
-		w->refresh();
-		w = Tags;
-		Tags->setHighlightColor(Config.active_column_color);
-	}
+	if (hasTwoColumns)
+		return 2;
+	else
+		return 3;
 }
 
 std::shared_ptr<ProxySongList> MediaLibrary::songsProxyList()

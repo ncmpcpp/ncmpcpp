@@ -219,52 +219,6 @@ bool PlaylistEditor::isContentFiltered()
 	return false;
 }
 
-bool PlaylistEditor::isNextColumnAvailable()
-{
-	if (w == Playlists)
-	{
-		if (!Content->reallyEmpty())
-			return true;
-	}
-	return false;
-}
-
-bool PlaylistEditor::NextColumn()
-{
-	if (w == Playlists)
-	{
-		Playlists->setHighlightColor(Config.main_highlight_color);
-		w->refresh();
-		w = Content;
-		Content->setHighlightColor(Config.active_column_color);
-		return true;
-	}
-	return false;
-}
-
-bool PlaylistEditor::isPrevColumnAvailable()
-{
-	if (w == Content)
-	{
-		if (!Playlists->reallyEmpty())
-			return true;
-	}
-	return false;
-}
-
-bool PlaylistEditor::PrevColumn()
-{
-	if (w == Content)
-	{
-		Content->setHighlightColor(Config.main_highlight_color);
-		w->refresh();
-		w = Playlists;
-		Playlists->setHighlightColor(Config.active_column_color);
-		return true;
-	}
-	return false;
-}
-
 std::shared_ptr<ProxySongList> PlaylistEditor::contentProxyList()
 {
 	return mkProxySongList(*Content, [](NC::Menu<MPD::Song>::Item &item) {
@@ -328,8 +282,8 @@ void PlaylistEditor::MouseButtonPressed(MEVENT me)
 	{
 		if (w != Playlists)
 		{
-			if (isPrevColumnAvailable())
-				PrevColumn();
+			if (previousColumnAvailable())
+				previousColumn();
 			else
 				return;
 		}
@@ -352,8 +306,8 @@ void PlaylistEditor::MouseButtonPressed(MEVENT me)
 	{
 		if (w != Content)
 		{
-			if (isNextColumnAvailable())
-				NextColumn();
+			if (nextColumnAvailable())
+				nextColumn();
 			else
 				return;
 		}
@@ -507,6 +461,51 @@ MPD::SongList PlaylistEditor::getSelectedSongs()
 }
 
 /***********************************************************************/
+
+bool PlaylistEditor::previousColumnAvailable()
+{
+	if (w == Content)
+	{
+		if (!Playlists->reallyEmpty())
+			return true;
+	}
+	return false;
+}
+
+void PlaylistEditor::previousColumn()
+{
+	if (w == Content)
+	{
+		Content->setHighlightColor(Config.main_highlight_color);
+		w->refresh();
+		w = Playlists;
+		Playlists->setHighlightColor(Config.active_column_color);
+	}
+}
+
+bool PlaylistEditor::nextColumnAvailable()
+{
+	if (w == Playlists)
+	{
+		if (!Content->reallyEmpty())
+			return true;
+	}
+	return false;
+}
+
+void PlaylistEditor::nextColumn()
+{
+	if (w == Playlists)
+	{
+		Playlists->setHighlightColor(Config.main_highlight_color);
+		w->refresh();
+		w = Content;
+		Content->setHighlightColor(Config.active_column_color);
+	}
+}
+
+/***********************************************************************/
+
 
 void PlaylistEditor::Locate(const std::string &name)
 {

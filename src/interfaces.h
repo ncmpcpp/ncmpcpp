@@ -50,4 +50,13 @@ struct HasSongs
 	virtual MPD::SongList getSelectedSongs() = 0;
 };
 
+struct HasColumns
+{
+	virtual bool previousColumnAvailable() = 0;
+	virtual void previousColumn() = 0;
+	
+	virtual bool nextColumnAvailable() = 0;
+	virtual void nextColumn() = 0;
+};
+
 #endif // _INTERFACES_H
