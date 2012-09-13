@@ -257,13 +257,13 @@ bool write(MPD::MutableSong &s)
 			{
 				// if we rename local file, it won't get updated
 				// so just remove it from playlist and add again
-				size_t pos = myPlaylist->Items->choice();
+				size_t pos = myPlaylist->main()->choice();
 				Mpd.StartCommandsList();
 				Mpd.Delete(pos);
 				int id = Mpd.AddSong("file://" + new_name);
 				if (id >= 0)
 				{
-					s = myPlaylist->Items->back().value();
+					s = myPlaylist->main()->back().value();
 					Mpd.Move(s.getPosition(), pos);
 				}
 				Mpd.CommitCommandsList();

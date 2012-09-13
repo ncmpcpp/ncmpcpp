@@ -441,9 +441,9 @@ void Browser::GetDirectory(std::string dir, std::string subdir)
 			case itSong:
 			{
 				bool bold = 0;
-				for (size_t i = 0; i < myPlaylist->Items->size(); ++i)
+				for (size_t i = 0; i < myPlaylist->main()->size(); ++i)
 				{
-					if (myPlaylist->Items->at(i).value().getHash() == it->song->getHash())
+					if (myPlaylist->main()->at(i).value().getHash() == it->song->getHash())
 					{
 						bold = 1;
 						break;

@@ -203,7 +203,7 @@ int main(int argc, char **argv)
 		Status::trace();
 		int curr_pos = Mpd.GetCurrentSongPos();
 		if  (curr_pos >= 0)
-			myPlaylist->Items->highlight(curr_pos);
+			myPlaylist->main()->highlight(curr_pos);
 	}
 	
 	while (!Action::ExitMainLoop)

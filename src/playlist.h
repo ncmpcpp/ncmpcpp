@@ -27,13 +27,13 @@
 #include "screen.h"
 #include "song.h"
 
-class Playlist : public Screen<NC::Window>, public Filterable, public HasSongs, public Searchable
+class Playlist : public Screen<NC::Menu<MPD::Song>>, public Filterable, public HasSongs, public Searchable
 {
 	public:
 		Playlist() : itsTotalLength(0), itsRemainingTime(0), itsScrollBegin(0) { }
 		~Playlist() { }
 		
-		// Screen<NC::Window> implementation
+		// Screen<NC::Menu<MPD::Song>> implementation
 		virtual void switchTo() OVERRIDE;
 		virtual void resize() OVERRIDE;
 		
@@ -70,10 +70,7 @@ class Playlist : public Screen<NC::Window>, public Filterable, public HasSongs, 
 		MPD::Song nowPlayingSong();
 		
 		bool isFiltered();
-		
-		void Sort();
 		void Reverse();
-		bool SortingInProgress();
 		
 		void EnableHighlighting();
 		void UpdateTimer();
@@ -87,13 +84,8 @@ class Playlist : public Screen<NC::Window>, public Filterable, public HasSongs, 
 		
 		bool checkForSong(const MPD::Song &s);
 		
-		void moveSortOrderUp();
-		void moveSortOrderDown();
-		
 		void registerHash(size_t hash);
 		void unregisterHash(size_t hash);
-		
-		NC::Menu<MPD::Song> *Items;
 		
 		static bool ReloadTotalLength;
 		static bool ReloadRemaining;

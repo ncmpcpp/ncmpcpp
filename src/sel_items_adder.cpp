@@ -224,14 +224,14 @@ void SelectedItemsAdder::enterPressed()
 		{
 			std::string album = myPlaylist->nowPlayingSong().getAlbum();
 			int i;
-			for (i = Mpd.GetCurrentlyPlayingSongPos()+1; i < int(myPlaylist->Items->size()); ++i)
-				if ((*myPlaylist->Items)[i].value().getAlbum() != album)
+			for (i = Mpd.GetCurrentlyPlayingSongPos()+1; i < int(myPlaylist->main()->size()); ++i)
+				if ((*myPlaylist->main())[i].value().getAlbum() != album)
 					break;
 			successful_operation = myPlaylist->Add(list, 0, i);
 		}
 		else if (pos == 4) // after highlighted item
 		{
-			successful_operation = myPlaylist->Add(list, 0, std::min(myPlaylist->Items->choice()+1, myPlaylist->Items->size()));
+			successful_operation = myPlaylist->Add(list, 0, std::min(myPlaylist->main()->choice()+1, myPlaylist->main()->size()));
 		}
 		else
 		{

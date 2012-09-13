@@ -43,6 +43,8 @@ template <typename T> class Menu : public Window
 public:
 	struct Item
 	{
+		typedef T Type;
+		
 		friend class Menu<T>;
 		
 		Item()

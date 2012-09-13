@@ -127,6 +127,8 @@ bool isVisible(BasicScreen *screen);
 template <typename WindowT> class Screen : public BasicScreen
 {
 	public:
+		typedef WindowT ScreenType;
+		
 		Screen() : w(0) { }
 		virtual ~Screen() { }
 		

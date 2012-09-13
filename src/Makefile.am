@@ -37,6 +37,7 @@ ncmpcpp_SOURCES = \
 	settings.cpp \
 	song.cpp \
 	song_info.cpp \
+	sort_playlist.cpp \
 	status.cpp \
 	statusbar.cpp \
 	tag_editor.cpp \
@@ -92,6 +93,7 @@ noinst_HEADERS = \
 	settings.h \
 	song.h \
 	song_info.h \
+	sort_playlist.h \
 	status.h \
 	statusbar.h \
 	tag_editor.h \
