@@ -61,7 +61,7 @@ bool BrowserEntryMatcher(const Regex &rx, const MPD::Item &item, bool filter);
 
 }
 
-void Browser::Init()
+void Browser::init()
 {
 	w = new NC::Menu<MPD::Item>(0, MainStartY, COLS, MainHeight, Config.columns_in_browser && Config.titles_visibility ? Display::Columns(COLS) : "", Config.main_color, NC::brNone);
 	w->setHighlightColor(Config.main_highlight_color);
@@ -77,17 +77,17 @@ void Browser::Init()
 	isInitialized = 1;
 }
 
-void Browser::Resize()
+void Browser::resize()
 {
 	size_t x_offset, width;
-	GetWindowResizeParams(x_offset, width);
+	getWindowResizeParams(x_offset, width);
 	w->resize(width, MainHeight);
 	w->moveTo(x_offset, MainStartY);
 	w->setTitle(Config.columns_in_browser && Config.titles_visibility ? Display::Columns(w->getWidth()) : "");
 	hasToBeResized = 0;
 }
 
-void Browser::SwitchTo()
+void Browser::switchTo()
 {
 	using Global::myLockedScreen;
 	using Global::myInactiveScreen;
@@ -100,13 +100,13 @@ void Browser::SwitchTo()
 	}
 	
 	if (!isInitialized)
-		Init();
+		init();
 	
 	if (myLockedScreen)
-		UpdateInactiveScreen(this);
+		updateInactiveScreen(this);
 	
 	if (hasToBeResized || myLockedScreen)
-		Resize();
+		resize();
 	
 	if (isLocal() && Config.browser_sort_mode == smMTime) // local browser doesn't support sorting by mtime
 		Config.browser_sort_mode = smName;
@@ -122,14 +122,14 @@ void Browser::SwitchTo()
 	drawHeader();
 }
 
-std::wstring Browser::Title()
+std::wstring Browser::title()
 {
 	std::wstring result = L"Browse: ";
 	result += Scroller(ToWString(itsBrowsedDir), itsScrollBeginning, COLS-result.length()-(Config.new_design ? 2 : Global::VolumeState.length()));
 	return result;
 }
 
-void Browser::EnterPressed()
+void Browser::enterPressed()
 {
 	if (w->empty())
 		return;
@@ -162,7 +162,7 @@ void Browser::EnterPressed()
 	}
 }
 
-void Browser::SpacePressed()
+void Browser::spacePressed()
 {
 	if (w->empty())
 		return;
@@ -220,7 +220,7 @@ void Browser::SpacePressed()
 	w->scroll(NC::wDown);
 }
 
-void Browser::MouseButtonPressed(MEVENT me)
+void Browser::mouseButtonPressed(MEVENT me)
 {
 	if (w->empty() || !w->hasCoords(me.x, me.y) || size_t(me.y) >= w->size())
 		return;
@@ -238,7 +238,7 @@ void Browser::MouseButtonPressed(MEVENT me)
 				else
 				{
 					size_t pos = w->choice();
-					SpacePressed();
+					spacePressed();
 					if (pos < w->size()-1)
 						w->scroll(NC::wUp);
 				}
@@ -248,17 +248,17 @@ void Browser::MouseButtonPressed(MEVENT me)
 				if (me.bstate & BUTTON1_PRESSED)
 				{
 					size_t pos = w->choice();
-					SpacePressed();
+					spacePressed();
 					if (pos < w->size()-1)
 						w->scroll(NC::wUp);
 				}
 				else
-					EnterPressed();
+					enterPressed();
 				break;
 		}
 	}
 	else
-		Screen< NC::Menu<MPD::Item> >::MouseButtonPressed(me);
+		Screen< NC::Menu<MPD::Item> >::mouseButtonPressed(me);
 }
 
 /***********************************************************************/
@@ -373,7 +373,7 @@ void Browser::LocateSong(const MPD::Song &s)
 	itsBrowseLocally = !s.isFromDatabase();
 	
 	if (myScreen != this)
-		SwitchTo();
+		switchTo();
 	
 	if (itsBrowsedDir != s.getDirectory())
 		GetDirectory(s.getDirectory());

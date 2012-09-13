@@ -35,21 +35,22 @@
 class Visualizer : public Screen<NC::Window>
 {
 	public:
-		virtual void SwitchTo();
-		virtual void Resize();
+		virtual void switchTo() OVERRIDE;
+		virtual void resize() OVERRIDE;
 		
-		virtual std::wstring Title();
+		virtual std::wstring title() OVERRIDE;
 		
-		virtual void Update();
-		virtual void Scroll(NC::Where) { }
+		virtual void update() OVERRIDE;
+		virtual void scroll(NC::Where) OVERRIDE { }
 		
-		virtual void EnterPressed() { }
-		virtual void SpacePressed();
-		virtual void MouseButtonPressed(MEVENT) { }
-		virtual bool isTabbable() { return true; }
+		virtual void enterPressed() OVERRIDE { }
+		virtual void spacePressed() OVERRIDE;
+		virtual void mouseButtonPressed(MEVENT) OVERRIDE { }
 		
-		virtual bool isMergable() { return true; }
+		virtual bool isTabbable() OVERRIDE { return true; }
+		virtual bool isMergable() OVERRIDE { return true; }
 		
+		// private members
 		void SetFD();
 		void ResetFD();
 		void FindOutputID();
@@ -57,7 +58,7 @@ class Visualizer : public Screen<NC::Window>
 		static const int WindowTimeout;
 		
 	protected:
-		virtual void Init();
+		virtual void init();
 		virtual bool isLockable() { return true; }
 		
 	private:

@@ -55,7 +55,7 @@ bool SongEntryMatcher(const Regex &rx, const MPD::Song &s);
 
 }
 
-void PlaylistEditor::Init()
+void PlaylistEditor::init()
 {
 	LeftColumnWidth = COLS/3-1;
 	RightColumnStartX = LeftColumnWidth+1;
@@ -84,10 +84,10 @@ void PlaylistEditor::Init()
 	isInitialized = 1;
 }
 
-void PlaylistEditor::Resize()
+void PlaylistEditor::resize()
 {
 	size_t x_offset, width;
-	GetWindowResizeParams(x_offset, width);
+	getWindowResizeParams(x_offset, width);
 	
 	LeftColumnStartX = x_offset;
 	LeftColumnWidth = width/3-1;
@@ -103,19 +103,19 @@ void PlaylistEditor::Resize()
 	hasToBeResized = 0;
 }
 
-std::wstring PlaylistEditor::Title()
+std::wstring PlaylistEditor::title()
 {
 	return L"Playlist editor";
 }
 
-void PlaylistEditor::Refresh()
+void PlaylistEditor::refresh()
 {
 	Playlists->display();
 	mvvline(MainStartY, RightColumnStartX-1, 0, MainHeight);
 	Content->display();
 }
 
-void PlaylistEditor::SwitchTo()
+void PlaylistEditor::switchTo()
 {
 	using Global::myScreen;
 	using Global::myLockedScreen;
@@ -124,23 +124,23 @@ void PlaylistEditor::SwitchTo()
 		return;
 	
 	if (!isInitialized)
-		Init();
+		init();
 	
 	if (myLockedScreen)
-		UpdateInactiveScreen(this);
+		updateInactiveScreen(this);
 	
 	if (hasToBeResized || myLockedScreen)
-		Resize();
+		resize();
 	
 	if (myScreen != this && myScreen->isTabbable())
 		Global::myPrevScreen = myScreen;
 	myScreen = this;
 	drawHeader();
 	markSongsInPlaylist(contentProxyList());
-	Refresh();
+	refresh();
 }
 
-void PlaylistEditor::Update()
+void PlaylistEditor::update()
 {
 	if (Playlists->reallyEmpty() || playlistsUpdateRequested)
 	{
@@ -246,12 +246,12 @@ void PlaylistEditor::AddToPlaylist(bool add_n_play)
 		w->scroll(NC::wDown);
 }
 
-void PlaylistEditor::EnterPressed()
+void PlaylistEditor::enterPressed()
 {
 	AddToPlaylist(true);
 }
 
-void PlaylistEditor::SpacePressed()
+void PlaylistEditor::spacePressed()
 {
 	if (Config.space_selects)
 	{
@@ -276,7 +276,7 @@ void PlaylistEditor::SpacePressed()
 		AddToPlaylist(false);
 }
 
-void PlaylistEditor::MouseButtonPressed(MEVENT me)
+void PlaylistEditor::mouseButtonPressed(MEVENT me)
 {
 	if (!Playlists->empty() && Playlists->hasCoords(me.x, me.y))
 	{
@@ -293,13 +293,13 @@ void PlaylistEditor::MouseButtonPressed(MEVENT me)
 			if (me.bstate & BUTTON3_PRESSED)
 			{
 				size_t pos = Playlists->choice();
-				SpacePressed();
+				spacePressed();
 				if (pos < Playlists->size()-1)
 					Playlists->scroll(NC::wUp);
 			}
 		}
 		else
-			Screen<NC::Window>::MouseButtonPressed(me);
+			Screen<NC::Window>::mouseButtonPressed(me);
 		Content->clear();
 	}
 	else if (!Content->empty() && Content->hasCoords(me.x, me.y))
@@ -317,15 +317,15 @@ void PlaylistEditor::MouseButtonPressed(MEVENT me)
 			if (me.bstate & BUTTON1_PRESSED)
 			{
 				size_t pos = Content->choice();
-				SpacePressed();
+				spacePressed();
 				if (pos < Content->size()-1)
 					Content->scroll(NC::wUp);
 			}
 			else
-				EnterPressed();
+				enterPressed();
 		}
 		else
-			Screen<NC::Window>::MouseButtonPressed(me);
+			Screen<NC::Window>::mouseButtonPressed(me);
 	}
 }
 
@@ -510,8 +510,8 @@ void PlaylistEditor::nextColumn()
 void PlaylistEditor::Locate(const std::string &name)
 {
 	if (!isInitialized)
-		Init();
-	Update();
+		init();
+	update();
 	for (size_t i = 0; i < Playlists->size(); ++i)
 	{
 		if (name == (*Playlists)[i].value())
@@ -521,7 +521,7 @@ void PlaylistEditor::Locate(const std::string &name)
 			break;
 		}
 	}
-	SwitchTo();
+	switchTo();
 }
 
 namespace {//

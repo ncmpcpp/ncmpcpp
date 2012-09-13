@@ -45,7 +45,7 @@ void drawHeader()
 		return;
 	if (Config.new_design)
 	{
-		std::wstring title = myScreen->Title();
+		std::wstring title = myScreen->title();
 		*wHeader << NC::XY(0, 3) << wclrtoeol;
 		*wHeader << NC::fmtBold << Config.alternative_ui_separator_color;
 		mvwhline(wHeader->raw(), 2, 0, 0, COLS);
@@ -56,7 +56,7 @@ void drawHeader()
 	}
 	else
 	{
-		*wHeader << NC::XY(0, 0) << wclrtoeol << NC::fmtBold << myScreen->Title() << NC::fmtBoldEnd;
+		*wHeader << NC::XY(0, 0) << wclrtoeol << NC::fmtBold << myScreen->title() << NC::fmtBoldEnd;
 		*wHeader << Config.volume_color;
 		*wHeader << NC::XY(wHeader->getWidth()-VolumeState.length(), 0) << VolumeState;
 		*wHeader << NC::clEnd;

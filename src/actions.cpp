@@ -161,7 +161,7 @@ void Action::ResizeScreen(bool reload_main_window)
 	
 	SetResizeFlags();
 	
-	ApplyToVisibleWindows(&BasicScreen::Resize);
+	applyToVisibleWindows(&BasicScreen::resize);
 	
 	if (Config.header_visibility || Config.new_design)
 		wHeader->resize(COLS, HeaderHeight);
@@ -170,7 +170,7 @@ void Action::ResizeScreen(bool reload_main_window)
 	wFooter->moveTo(0, FooterStartY);
 	wFooter->resize(COLS, Config.statusbar_visibility ? 2 : 1);
 	
-	ApplyToVisibleWindows(&BasicScreen::Refresh);
+	applyToVisibleWindows(&BasicScreen::refresh);
 	
 	Status::Changes::elapsedTime();
 	if (!Mpd.isPlaying())
@@ -349,21 +349,21 @@ void Action::ListsChangeFinisher()
 #	endif // HAVE_TAGLIB_H
 	   )
 	{
-		if (myScreen->ActiveWindow() == myLibrary->Tags)
+		if (myScreen->activeWindow() == myLibrary->Tags)
 		{
 			myLibrary->Albums->clear();
 			myLibrary->Songs->clear();
 		}
-		else if (myScreen->ActiveWindow() == myLibrary->Albums)
+		else if (myScreen->activeWindow() == myLibrary->Albums)
 		{
 			myLibrary->Songs->clear();
 		}
-		else if (myScreen->ActiveWindow() == myPlaylistEditor->Playlists)
+		else if (myScreen->activeWindow() == myPlaylistEditor->Playlists)
 		{
 			myPlaylistEditor->Content->clear();
 		}
 #		ifdef HAVE_TAGLIB_H
-		else if (myScreen->ActiveWindow() == myTagEditor->Dirs)
+		else if (myScreen->activeWindow() == myTagEditor->Dirs)
 		{
 			myTagEditor->Tags->clear();
 		}
@@ -482,18 +482,18 @@ void MouseEvent::Run()
 			Mpd.SetVolume(Mpd.GetVolume()+2);
 	}
 	else if (itsMouseEvent.bstate & (BUTTON1_PRESSED | BUTTON2_PRESSED | BUTTON3_PRESSED | BUTTON4_PRESSED))
-		myScreen->MouseButtonPressed(itsMouseEvent);
+		myScreen->mouseButtonPressed(itsMouseEvent);
 }
 
 void ScrollUp::Run()
 {
-	myScreen->Scroll(NC::wUp);
+	myScreen->scroll(NC::wUp);
 	ListsChangeFinisher();
 }
 
 void ScrollDown::Run()
 {
-	myScreen->Scroll(NC::wDown);
+	myScreen->scroll(NC::wDown);
 	ListsChangeFinisher();
 }
 
@@ -591,25 +591,25 @@ void ScrollDownAlbum::Run()
 
 void PageUp::Run()
 {
-	myScreen->Scroll(NC::wPageUp);
+	myScreen->scroll(NC::wPageUp);
 	ListsChangeFinisher();
 }
 
 void PageDown::Run()
 {
-	myScreen->Scroll(NC::wPageDown);
+	myScreen->scroll(NC::wPageDown);
 	ListsChangeFinisher();
 }
 
 void MoveHome::Run()
 {
-	myScreen->Scroll(NC::wHome);
+	myScreen->scroll(NC::wHome);
 	ListsChangeFinisher();
 }
 
 void MoveEnd::Run()
 {
-	myScreen->Scroll(NC::wEnd);
+	myScreen->scroll(NC::wEnd);
 	ListsChangeFinisher();
 }
 
@@ -630,7 +630,7 @@ bool JumpToParentDirectory::canBeRun() const
 {
 	return (myScreen == myBrowser)
 #	ifdef HAVE_TAGLIB_H
-	    || (myScreen->ActiveWindow() == myTagEditor->Dirs)
+	    || (myScreen->activeWindow() == myTagEditor->Dirs)
 #	endif // HAVE_TAGLIB_H
 	;
 }
@@ -641,8 +641,8 @@ void JumpToParentDirectory::Run()
 	{
 		if (myBrowser->CurrentDir() != "/")
 		{
-			myBrowser->Main()->reset();
-			myBrowser->EnterPressed();
+			myBrowser->main()->reset();
+			myBrowser->enterPressed();
 		}
 	}
 #	ifdef HAVE_TAGLIB_H
@@ -651,7 +651,7 @@ void JumpToParentDirectory::Run()
 		if (myTagEditor->CurrentDir() != "/")
 		{
 			myTagEditor->Dirs->reset();
-			myTagEditor->EnterPressed();
+			myTagEditor->enterPressed();
 		}
 	}
 #	endif // HAVE_TAGLIB_H
@@ -659,12 +659,12 @@ void JumpToParentDirectory::Run()
 
 void PressEnter::Run()
 {
-	myScreen->EnterPressed();
+	myScreen->enterPressed();
 }
 
 void PressSpace::Run()
 {
-	myScreen->SpacePressed();
+	myScreen->spacePressed();
 }
 
 bool PreviousColumn::canBeRun() const
@@ -751,17 +751,17 @@ void Delete::Run()
 			Statusbar::msg("Item(s) deleted");
 	}
 #	ifndef WIN32
-	else if (myScreen == myBrowser && !myBrowser->Main()->empty())
+	else if (myScreen == myBrowser && !myBrowser->main()->empty())
 	{
 		if (!myBrowser->isLocal() && !isMPDMusicDirSet())
 			return;
 		
 		std::string question;
-		if (myBrowser->Main()->hasSelected())
+		if (myBrowser->main()->hasSelected())
 			question = "Delete selected items?";
 		else
 		{
-			MPD::Item &item = myBrowser->Main()->current().value();
+			MPD::Item &item = myBrowser->main()->current().value();
 			std::string name = item.type == MPD::itSong ? item.song->getName() : item.name;
 			question = "Delete ";
 			question += itemTypeToString(item.type);
@@ -773,7 +773,7 @@ void Delete::Run()
 		if (yes)
 		{
 			bool success = true;
-			auto list = getSelectedOrCurrent(myBrowser->Main()->begin(), myBrowser->Main()->end(), myBrowser->Main()->currentI());
+			auto list = getSelectedOrCurrent(myBrowser->main()->begin(), myBrowser->main()->end(), myBrowser->main()->currentI());
 			for (auto it = list.begin(); it != list.end(); ++it)
 			{
 				const MPD::Item &i = (*it)->value();
@@ -803,7 +803,7 @@ void Delete::Run()
 #	endif // !WIN32
 	else if (myScreen == myPlaylistEditor && !myPlaylistEditor->Content->empty())
 	{
-		if (myScreen->ActiveWindow() == myPlaylistEditor->Playlists)
+		if (myScreen->activeWindow() == myPlaylistEditor->Playlists)
 		{
 			std::string question;
 			if (myPlaylistEditor->Playlists->hasSelected())
@@ -827,7 +827,7 @@ void Delete::Run()
 			else
 				Statusbar::msg("Aborted");
 		}
-		else if (myScreen->ActiveWindow() == myPlaylistEditor->Content)
+		else if (myScreen->activeWindow() == myPlaylistEditor->Content)
 		{
 			std::string playlist = myPlaylistEditor->Playlists->current().value();
 			auto delete_fun = std::bind(&MPD::Connection::PlaylistDelete, _1, playlist, _2);
@@ -889,7 +889,7 @@ void SavePlaylist::Run()
 			if (result == MPD_ERROR_SUCCESS)
 			{
 				Statusbar::msg("Playlist saved as \"%s\"", playlist_name.c_str());
-				if (myPlaylistEditor->Main()) // check if initialized
+				if (myPlaylistEditor->main()) // check if initialized
 					myPlaylistEditor->Playlists->clear(); // make playlist's list update itself
 			}
 			else if (result == MPD_SERVER_ERROR_EXIST)
@@ -903,17 +903,17 @@ void SavePlaylist::Run()
 				}
 				else
 					Statusbar::msg("Aborted");
-				if (myPlaylistEditor->Main()) // check if initialized
+				if (myPlaylistEditor->main()) // check if initialized
 					myPlaylistEditor->Playlists->clear(); // make playlist's list update itself
 				if (myScreen == myPlaylist)
 					myPlaylist->EnableHighlighting();
 			}
 		}
 	}
-	if (myBrowser->Main()
+	if (myBrowser->main()
 	&&  !myBrowser->isLocal()
 	&&  myBrowser->CurrentDir() == "/"
-	&&  !myBrowser->Main()->empty())
+	&&  !myBrowser->main()->empty())
 		myBrowser->GetDirectory(myBrowser->CurrentDir());
 }
 
@@ -946,10 +946,10 @@ void MoveSortOrderDown::Run()
 
 bool MoveSelectedItemsUp::canBeRun() const
 {
-	return ((myScreen->ActiveWindow() == myPlaylist->Items
+	return ((myScreen->activeWindow() == myPlaylist->Items
 	    &&  !myPlaylist->Items->empty()
 	    &&  !myPlaylist->isFiltered())
-	 ||    (myScreen->ActiveWindow() == myPlaylistEditor->Content
+	 ||    (myScreen->activeWindow() == myPlaylistEditor->Content
 	    &&  !myPlaylistEditor->Content->empty()
 	    &&  !myPlaylistEditor->isContentFiltered()));
 }
@@ -971,10 +971,10 @@ void MoveSelectedItemsUp::Run()
 
 bool MoveSelectedItemsDown::canBeRun() const
 {
-	return ((myScreen->ActiveWindow() == myPlaylist->Items
+	return ((myScreen->activeWindow() == myPlaylist->Items
 	    &&  !myPlaylist->Items->empty()
 	    &&  !myPlaylist->isFiltered())
-	 ||    (myScreen->ActiveWindow() == myPlaylistEditor->Content
+	 ||    (myScreen->activeWindow() == myPlaylistEditor->Content
 	    &&  !myPlaylistEditor->Content->empty()
 	    &&  !myPlaylistEditor->isContentFiltered()));
 }
@@ -996,8 +996,8 @@ void MoveSelectedItemsDown::Run()
 
 bool MoveSelectedItemsTo::canBeRun() const
 {
-	return myScreen->ActiveWindow() == myPlaylist->Items
-	    || myScreen->ActiveWindow() == myPlaylistEditor->Content;
+	return myScreen->activeWindow() == myPlaylist->Items
+	    || myScreen->activeWindow() == myPlaylistEditor->Content;
 }
 
 void MoveSelectedItemsTo::Run()
@@ -1074,7 +1074,7 @@ bool ToggleDisplayMode::canBeRun() const
 	return myScreen == myPlaylist
 	    || myScreen == myBrowser
 	    || myScreen == mySearcher
-	    || myScreen->ActiveWindow() == myPlaylistEditor->Content;
+	    || myScreen->activeWindow() == myPlaylistEditor->Content;
 }
 
 void ToggleDisplayMode::Run()
@@ -1102,16 +1102,16 @@ void ToggleDisplayMode::Run()
 	{
 		Config.columns_in_browser = !Config.columns_in_browser;
 		Statusbar::msg("Browser display mode: %s", Config.columns_in_browser ? "Columns" : "Classic");
-		myBrowser->Main()->setTitle(Config.columns_in_browser && Config.titles_visibility ? Display::Columns(myBrowser->Main()->getWidth()) : "");
+		myBrowser->main()->setTitle(Config.columns_in_browser && Config.titles_visibility ? Display::Columns(myBrowser->main()->getWidth()) : "");
 	}
 	else if (myScreen == mySearcher)
 	{
 		Config.columns_in_search_engine = !Config.columns_in_search_engine;
 		Statusbar::msg("Search engine display mode: %s", Config.columns_in_search_engine ? "Columns" : "Classic");
-		if (mySearcher->Main()->size() > SearchEngine::StaticOptions)
-			mySearcher->Main()->setTitle(Config.columns_in_search_engine && Config.titles_visibility ? Display::Columns(mySearcher->Main()->getWidth()) : "");
+		if (mySearcher->main()->size() > SearchEngine::StaticOptions)
+			mySearcher->main()->setTitle(Config.columns_in_search_engine && Config.titles_visibility ? Display::Columns(mySearcher->main()->getWidth()) : "");
 	}
-	else if (myScreen->ActiveWindow() == myPlaylistEditor->Content)
+	else if (myScreen->activeWindow() == myPlaylistEditor->Content)
 	{
 		Config.columns_in_playlist_editor = !Config.columns_in_playlist_editor;
 		Statusbar::msg("Playlist editor display mode: %s", Config.columns_in_playlist_editor ? "Columns" : "Classic");
@@ -1222,23 +1222,23 @@ void ToggleRandom::Run()
 
 bool StartSearching::canBeRun() const
 {
-	return myScreen == mySearcher && !mySearcher->Main()->at(0).isInactive();
+	return myScreen == mySearcher && !mySearcher->main()->at(0).isInactive();
 }
 
 void StartSearching::Run()
 {
-	mySearcher->Main()->highlight(SearchEngine::SearchButton);
-	mySearcher->Main()->setHighlighting(0);
-	mySearcher->Main()->refresh();
-	mySearcher->Main()->setHighlighting(1);
-	mySearcher->EnterPressed();
+	mySearcher->main()->highlight(SearchEngine::SearchButton);
+	mySearcher->main()->setHighlighting(0);
+	mySearcher->main()->refresh();
+	mySearcher->main()->setHighlighting(1);
+	mySearcher->enterPressed();
 }
 
 bool SaveTagChanges::canBeRun() const
 {
 #	ifdef HAVE_TAGLIB_H
 	return myScreen == myTinyTagEditor
-	    || myScreen->ActiveWindow() == myTagEditor->TagTypes;
+	    || myScreen->activeWindow() == myTagEditor->TagTypes;
 #	else
 	return false;
 #	endif // HAVE_TAGLIB_H
@@ -1249,13 +1249,13 @@ void SaveTagChanges::Run()
 #	ifdef HAVE_TAGLIB_H
 	if (myScreen == myTinyTagEditor)
 	{
-		myTinyTagEditor->Main()->highlight(myTinyTagEditor->Main()->size()-2); // Save
-		myTinyTagEditor->EnterPressed();
+		myTinyTagEditor->main()->highlight(myTinyTagEditor->main()->size()-2); // Save
+		myTinyTagEditor->enterPressed();
 	}
-	else if (myScreen->ActiveWindow() == myTagEditor->TagTypes)
+	else if (myScreen->activeWindow() == myTagEditor->TagTypes)
 	{
 		myTagEditor->TagTypes->highlight(myTagEditor->TagTypes->size()-1); // Save
-		myTagEditor->EnterPressed();
+		myTagEditor->enterPressed();
 	}
 #	endif // HAVE_TAGLIB_H
 }
@@ -1305,7 +1305,7 @@ void EditSong::Run()
 #	ifdef HAVE_TAGLIB_H
 	auto s = currentSong(myScreen);
 	myTinyTagEditor->SetEdited(*s);
-	myTinyTagEditor->SwitchTo();
+	myTinyTagEditor->switchTo();
 #	endif // HAVE_TAGLIB_H
 }
 
@@ -1313,7 +1313,7 @@ bool EditLibraryTag::canBeRun() const
 {
 #	ifdef HAVE_TAGLIB_H
 	return isMPDMusicDirSet()
-	   &&  myScreen->ActiveWindow() == myLibrary->Tags
+	   &&  myScreen->activeWindow() == myLibrary->Tags
 	   && !myLibrary->Tags->empty();
 #	else
 	return false;
@@ -1365,7 +1365,7 @@ bool EditLibraryAlbum::canBeRun() const
 {
 #	ifdef HAVE_TAGLIB_H
 	return isMPDMusicDirSet()
-	    && myScreen->ActiveWindow() == myLibrary->Albums
+	    && myScreen->activeWindow() == myLibrary->Albums
 	    && !myLibrary->Albums->empty();
 #	else
 	return false;
@@ -1419,10 +1419,10 @@ bool EditDirectoryName::canBeRun() const
 {
 	return   isMPDMusicDirSet()
 	  &&     ((myScreen == myBrowser
-	      && !myBrowser->Main()->empty()
-		  && myBrowser->Main()->current().value().type == MPD::itDirectory)
+	      && !myBrowser->main()->empty()
+		  && myBrowser->main()->current().value().type == MPD::itDirectory)
 #	ifdef HAVE_TAGLIB_H
-	    ||   (myScreen->ActiveWindow() == myTagEditor->Dirs
+	    ||   (myScreen->activeWindow() == myTagEditor->Dirs
 	      && !myTagEditor->Dirs->empty()
 	      && myTagEditor->Dirs->choice() > 0)
 #	endif // HAVE_TAGLIB_H
@@ -1435,7 +1435,7 @@ void EditDirectoryName::Run()
 	
 	if (myScreen == myBrowser)
 	{
-		std::string old_dir = myBrowser->Main()->current().value().name;
+		std::string old_dir = myBrowser->main()->current().value().name;
 		Statusbar::lock();
 		Statusbar::put() << NC::fmtBold << "Directory: " << NC::fmtBoldEnd;
 		std::string new_dir = wFooter->getString(old_dir);
@@ -1467,7 +1467,7 @@ void EditDirectoryName::Run()
 		}
 	}
 #	ifdef HAVE_TAGLIB_H
-	else if (myScreen->ActiveWindow() == myTagEditor->Dirs)
+	else if (myScreen->activeWindow() == myTagEditor->Dirs)
 	{
 		std::string old_dir = myTagEditor->Dirs->current().value().first;
 		Statusbar::lock();
@@ -1496,11 +1496,11 @@ void EditDirectoryName::Run()
 
 bool EditPlaylistName::canBeRun() const
 {
-	return   (myScreen->ActiveWindow() == myPlaylistEditor->Playlists
+	return   (myScreen->activeWindow() == myPlaylistEditor->Playlists
 	      && !myPlaylistEditor->Playlists->empty())
 	    ||   (myScreen == myBrowser
-	      && !myBrowser->Main()->empty()
-		  && myBrowser->Main()->current().value().type == MPD::itPlaylist);
+	      && !myBrowser->main()->empty()
+		  && myBrowser->main()->current().value().type == MPD::itPlaylist);
 }
 
 void EditPlaylistName::Run()
@@ -1508,10 +1508,10 @@ void EditPlaylistName::Run()
 	using Global::wFooter;
 	
 	std::string old_name;
-	if (myScreen->ActiveWindow() == myPlaylistEditor->Playlists)
+	if (myScreen->activeWindow() == myPlaylistEditor->Playlists)
 		old_name = myPlaylistEditor->Playlists->current().value();
 	else
-		old_name = myBrowser->Main()->current().value().name;
+		old_name = myBrowser->main()->current().value().name;
 	Statusbar::lock();
 	Statusbar::put() << NC::fmtBold << "Playlist: " << NC::fmtBoldEnd;
 	std::string new_name = wFooter->getString(old_name);
@@ -1522,9 +1522,9 @@ void EditPlaylistName::Run()
 		{
 			const char msg[] = "Playlist renamed to \"%ls\"";
 			Statusbar::msg(msg, wideShorten(ToWString(new_name), COLS-const_strlen(msg)).c_str());
-			if (myBrowser->Main() && !myBrowser->isLocal())
+			if (myBrowser->main() && !myBrowser->isLocal())
 				myBrowser->GetDirectory("/");
-			if (myPlaylistEditor->Main())
+			if (myPlaylistEditor->main())
 				myPlaylistEditor->Playlists->clear();
 		}
 	}
@@ -1565,12 +1565,12 @@ void JumpToMediaLibrary::Run()
 bool JumpToPlaylistEditor::canBeRun() const
 {
 	return myScreen == myBrowser
-	    && myBrowser->Main()->current().value().type == MPD::itPlaylist;
+	    && myBrowser->main()->current().value().type == MPD::itPlaylist;
 }
 
 void JumpToPlaylistEditor::Run()
 {
-	myPlaylistEditor->Locate(myBrowser->Main()->current().value().name);
+	myPlaylistEditor->Locate(myBrowser->main()->current().value().name);
 }
 
 void ToggleScreenLock::Run()
@@ -1580,9 +1580,9 @@ void ToggleScreenLock::Run()
 	
 	if (myLockedScreen != 0)
 	{
-		BasicScreen::Unlock();
+		BasicScreen::unlock();
 		Action::SetResizeFlags();
-		myScreen->Resize();
+		myScreen->resize();
 		Statusbar::msg("Screen unlocked");
 	}
 	else
@@ -1604,7 +1604,7 @@ void ToggleScreenLock::Run()
 			return;
 		}
 		Config.locked_screen_width_part = part/100.0;
-		if (myScreen->Lock())
+		if (myScreen->lock())
 			Statusbar::msg("Screen locked (with %d%% width)", part);
 		else
 			Statusbar::msg("Current screen can't be locked");
@@ -1740,7 +1740,7 @@ void SelectAlbum::Run()
 
 void AddSelectedItems::Run()
 {
-	mySelectedItemsAdder->SwitchTo();
+	mySelectedItemsAdder->switchTo();
 }
 
 void CropMainPlaylist::Run()
@@ -1893,9 +1893,9 @@ void Find::Run()
 	
 	Statusbar::msg("Searching...");
 	Screen<NC::Scrollpad> *s = static_cast<Screen<NC::Scrollpad> *>(myScreen);
-	s->Main()->removeFormatting();
-	Statusbar::msg("%s", findme.empty() || s->Main()->setFormatting(NC::fmtReverse, ToWString(findme), NC::fmtReverseEnd, 0) ? "Done" : "No matching patterns found");
-	s->Main()->flush();
+	s->main()->removeFormatting();
+	Statusbar::msg("%s", findme.empty() || s->main()->setFormatting(NC::fmtReverse, ToWString(findme), NC::fmtReverseEnd, 0) ? "Done" : "No matching patterns found");
+	s->main()->flush();
 }
 
 bool FindItemBackward::canBeRun() const
@@ -2056,14 +2056,14 @@ void ToggleBrowserSortMode::Run()
 			Statusbar::msg("Sort songs by: Name");
 			break;
 	}
-	std::sort(myBrowser->Main()->begin()+(myBrowser->CurrentDir() != "/"), myBrowser->Main()->end(),
+	std::sort(myBrowser->main()->begin()+(myBrowser->CurrentDir() != "/"), myBrowser->main()->end(),
 		LocaleBasedItemSorting(std::locale(), Config.ignore_leading_the, Config.browser_sort_mode));
 }
 
 bool ToggleLibraryTagType::canBeRun() const
 {
-	return (myScreen->ActiveWindow() == myLibrary->Tags)
-	    || (myLibrary->Columns() == 2 && myScreen->ActiveWindow() == myLibrary->Albums);
+	return (myScreen->activeWindow() == myLibrary->Tags)
+	    || (myLibrary->Columns() == 2 && myScreen->activeWindow() == myLibrary->Albums);
 }
 
 void ToggleLibraryTagType::Run()
@@ -2145,7 +2145,7 @@ bool SetSelectedItemsPriority::canBeRun() const
 		Statusbar::msg("Priorities are supported in MPD >= 0.17.0");
 		return false;
 	}
-	return myScreen->ActiveWindow() == myPlaylist->Items && !myPlaylist->Items->empty();
+	return myScreen->activeWindow() == myPlaylist->Items && !myPlaylist->Items->empty();
 }
 
 void SetSelectedItemsPriority::Run()
@@ -2169,7 +2169,7 @@ void SetSelectedItemsPriority::Run()
 
 bool FilterPlaylistOnPriorities::canBeRun() const
 {
-	return myScreen->ActiveWindow() == myPlaylist->Items;
+	return myScreen->activeWindow() == myPlaylist->Items;
 }
 
 void FilterPlaylistOnPriorities::Run()
@@ -2192,14 +2192,14 @@ void FilterPlaylistOnPriorities::Run()
 
 void ShowSongInfo::Run()
 {
-	mySongInfo->SwitchTo();
+	mySongInfo->switchTo();
 }
 
 bool ShowArtistInfo::canBeRun() const
 {
 	#ifdef HAVE_CURL_CURL_H
 	return myScreen == myLastfm
-	  ||   (myScreen->ActiveWindow() == myLibrary->Tags
+	  ||   (myScreen->activeWindow() == myLibrary->Tags
 	    && !myLibrary->Tags->empty()
 	    && Config.media_lib_primary_tag == MPD_TAG_ARTIST)
 	  ||   currentSong(myScreen);
@@ -2213,12 +2213,12 @@ void ShowArtistInfo::Run()
 #	ifdef HAVE_CURL_CURL_H
 	if (myScreen == myLastfm || myLastfm->isDownloading())
 	{
-		myLastfm->SwitchTo();
+		myLastfm->switchTo();
 		return;
 	}
 	
 	std::string artist;
-	if (myScreen->ActiveWindow() == myLibrary->Tags)
+	if (myScreen->activeWindow() == myLibrary->Tags)
 	{
 		assert(!myLibrary->Tags->empty());
 		assert(Config.media_lib_primary_tag == MPD_TAG_ARTIST);
@@ -2232,13 +2232,13 @@ void ShowArtistInfo::Run()
 	}
 	
 	if (!artist.empty() && myLastfm->SetArtistInfoArgs(artist, Config.lastfm_preferred_language))
-		myLastfm->SwitchTo();
+		myLastfm->switchTo();
 #	endif // HAVE_CURL_CURL_H
 }
 
 void ShowLyrics::Run()
 {
-	myLyrics->SwitchTo();
+	myLyrics->switchTo();
 }
 
 void Quit::Run()
@@ -2254,17 +2254,17 @@ void NextScreen::Run()
 	if (Config.screen_switcher_previous)
 	{
 		if (myScreen->isTabbable())
-			myPrevScreen->SwitchTo();
+			myPrevScreen->switchTo();
 		else
-			myOldScreen->SwitchTo();
+			myOldScreen->switchTo();
 	}
 	else if (!Config.screens_seq.empty())
 	{
 		std::list<BasicScreen *>::const_iterator screen = std::find(Config.screens_seq.begin(), Config.screens_seq.end(), myScreen);
 		if (++screen == Config.screens_seq.end())
-			Config.screens_seq.front()->SwitchTo();
+			Config.screens_seq.front()->switchTo();
 		else
-			(*screen)->SwitchTo();
+			(*screen)->switchTo();
 	}
 }
 
@@ -2276,17 +2276,17 @@ void PreviousScreen::Run()
 	if (Config.screen_switcher_previous)
 	{
 		if (myScreen->isTabbable())
-			myPrevScreen->SwitchTo();
+			myPrevScreen->switchTo();
 		else
-			myOldScreen->SwitchTo();
+			myOldScreen->switchTo();
 	}
 	else if (!Config.screens_seq.empty())
 	{
 		std::list<BasicScreen *>::const_iterator screen = std::find(Config.screens_seq.begin(), Config.screens_seq.end(), myScreen);
 		if (screen == Config.screens_seq.begin())
-			Config.screens_seq.back()->SwitchTo();
+			Config.screens_seq.back()->switchTo();
 		else
-			(*--screen)->SwitchTo();
+			(*--screen)->switchTo();
 	}
 }
 
@@ -2299,7 +2299,7 @@ bool ShowHelp::canBeRun() const
 
 void ShowHelp::Run()
 {
-	myHelp->SwitchTo();
+	myHelp->switchTo();
 }
 
 #ifdef HAVE_TAGLIB_H
@@ -2311,7 +2311,7 @@ bool ShowPlaylist::canBeRun() const
 
 void ShowPlaylist::Run()
 {
-	myPlaylist->SwitchTo();
+	myPlaylist->switchTo();
 }
 
 #ifdef HAVE_TAGLIB_H
@@ -2323,7 +2323,7 @@ bool ShowBrowser::canBeRun() const
 
 void ShowBrowser::Run()
 {
-	myBrowser->SwitchTo();
+	myBrowser->switchTo();
 }
 
 #ifdef HAVE_TAGLIB_H
@@ -2335,7 +2335,7 @@ bool ShowSearchEngine::canBeRun() const
 
 void ShowSearchEngine::Run()
 {
-	mySearcher->SwitchTo();
+	mySearcher->switchTo();
 }
 
 #ifdef HAVE_TAGLIB_H
@@ -2347,7 +2347,7 @@ bool ShowMediaLibrary::canBeRun() const
 
 void ShowMediaLibrary::Run()
 {
-	myLibrary->SwitchTo();
+	myLibrary->switchTo();
 }
 
 #ifdef HAVE_TAGLIB_H
@@ -2359,7 +2359,7 @@ bool ShowPlaylistEditor::canBeRun() const
 
 void ShowPlaylistEditor::Run()
 {
-	myPlaylistEditor->SwitchTo();
+	myPlaylistEditor->switchTo();
 }
 
 bool ShowTagEditor::canBeRun() const
@@ -2375,7 +2375,7 @@ void ShowTagEditor::Run()
 {
 #	ifdef HAVE_TAGLIB_H
 	if (isMPDMusicDirSet())
-		myTagEditor->SwitchTo();
+		myTagEditor->switchTo();
 #	endif // HAVE_TAGLIB_H
 }
 
@@ -2395,7 +2395,7 @@ bool ShowOutputs::canBeRun() const
 void ShowOutputs::Run()
 {
 #	ifdef ENABLE_OUTPUTS
-	myOutputs->SwitchTo();
+	myOutputs->switchTo();
 #	endif // ENABLE_OUTPUTS
 }
 
@@ -2415,7 +2415,7 @@ bool ShowVisualizer::canBeRun() const
 void ShowVisualizer::Run()
 {
 #	ifdef ENABLE_VISUALIZER
-	myVisualizer->SwitchTo();
+	myVisualizer->switchTo();
 #	endif // ENABLE_VISUALIZER
 }
 
@@ -2435,7 +2435,7 @@ bool ShowClock::canBeRun() const
 void ShowClock::Run()
 {
 #	ifdef ENABLE_CLOCK
-	myClock->SwitchTo();
+	myClock->switchTo();
 #	endif // ENABLE_CLOCK
 }
 
@@ -2448,7 +2448,7 @@ bool ShowServerInfo::canBeRun() const
 
 void ShowServerInfo::Run()
 {
-	myServerInfo->SwitchTo();
+	myServerInfo->switchTo();
 }
 
 namespace {//

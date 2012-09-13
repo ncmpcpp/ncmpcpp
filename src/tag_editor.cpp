@@ -84,7 +84,7 @@ bool SongEntryMatcher(const Regex &rx, const MPD::MutableSong &s);
 
 }
 
-void TagEditor::Init()
+void TagEditor::init()
 {
 	PatternsFile = Config.ncmpcpp_directory + "patterns.list";
 	SetDimensions(0, COLS);
@@ -162,10 +162,10 @@ void TagEditor::SetDimensions(size_t x_offset, size_t width)
 	FParserWidthTwo = FParserWidth-FParserWidthOne;
 }
 
-void TagEditor::Resize()
+void TagEditor::resize()
 {
 	size_t x_offset, width;
-	GetWindowResizeParams(x_offset, width);
+	getWindowResizeParams(x_offset, width);
 	SetDimensions(x_offset, width);
 	
 	Dirs->resize(LeftColumnWidth, MainHeight);
@@ -191,12 +191,12 @@ void TagEditor::Resize()
 	hasToBeResized = 0;
 }
 
-std::wstring TagEditor::Title()
+std::wstring TagEditor::title()
 {
 	return L"Tag editor";
 }
 
-void TagEditor::SwitchTo()
+void TagEditor::switchTo()
 {
 	using Global::myLockedScreen;
 	
@@ -204,22 +204,22 @@ void TagEditor::SwitchTo()
 		return;
 	
 	if (!isInitialized)
-		Init();
+		init();
 	
 	if (myLockedScreen)
-		UpdateInactiveScreen(this);
+		updateInactiveScreen(this);
 	
 	if (hasToBeResized || myLockedScreen)
-		Resize();
+		resize();
 	
 	if (myScreen != this && myScreen->isTabbable())
 		Global::myPrevScreen = myScreen;
 	myScreen = this;
 	drawHeader();
-	Refresh();
+	refresh();
 }
 
-void TagEditor::Refresh()
+void TagEditor::refresh()
 {
 	Dirs->display();
 	mvvline(MainStartY, MiddleColumnStartX-1, 0, MainHeight);
@@ -238,7 +238,7 @@ void TagEditor::Refresh()
 	}
 }
 
-void TagEditor::Update()
+void TagEditor::update()
 {
 	if (Dirs->reallyEmpty())
 	{
@@ -292,7 +292,7 @@ void TagEditor::Update()
 	}
 }
 
-void TagEditor::EnterPressed()
+void TagEditor::enterPressed()
 {
 	using Global::wFooter;
 	
@@ -315,7 +315,7 @@ void TagEditor::EnterPressed()
 		if (choice == 3) // cancel
 		{
 			w = TagTypes;
-			Refresh();
+			refresh();
 			return;
 		}
 		GetPatternList();
@@ -461,7 +461,7 @@ void TagEditor::EnterPressed()
 		{
 			SavePatternList();
 			w = TagTypes;
-			Refresh();
+			refresh();
 			return;
 		}
 	}
@@ -609,7 +609,7 @@ void TagEditor::EnterPressed()
 	}
 }
 
-void TagEditor::SpacePressed()
+void TagEditor::spacePressed()
 {
 	if (w == Tags && !Tags->empty())
 	{
@@ -618,7 +618,7 @@ void TagEditor::SpacePressed()
 	}
 }
 
-void TagEditor::MouseButtonPressed(MEVENT me)
+void TagEditor::mouseButtonPressed(MEVENT me)
 {
 	auto tryPreviousColumn = [this]() -> bool {
 		bool result = true;
@@ -650,10 +650,10 @@ void TagEditor::MouseButtonPressed(MEVENT me)
 			{
 				FParserDialog->Goto(me.y);
 				if (me.bstate & BUTTON3_PRESSED)
-					EnterPressed();
+					enterPressed();
 			}
 			else
-				Screen<NC::Window>::MouseButtonPressed(me);
+				Screen<NC::Window>::mouseButtonPressed(me);
 		}
 	}
 	else if (w == FParser || w == FParserHelper)
@@ -671,10 +671,10 @@ void TagEditor::MouseButtonPressed(MEVENT me)
 			{
 				FParser->Goto(me.y);
 				if (me.bstate & BUTTON3_PRESSED)
-					EnterPressed();
+					enterPressed();
 			}
 			else
-				Screen<NC::Window>::MouseButtonPressed(me);
+				Screen<NC::Window>::mouseButtonPressed(me);
 		}
 		else if (FParserHelper->hasCoords(me.x, me.y))
 		{
@@ -685,7 +685,7 @@ void TagEditor::MouseButtonPressed(MEVENT me)
 				else
 					return;
 			}
-			ScrollpadMouseButtonPressed(FParserHelper, me);
+			scrollpadMouseButtonPressed(FParserHelper, me);
 		}
 	}
 	else if (!Dirs->empty() && Dirs->hasCoords(me.x, me.y))
@@ -696,12 +696,12 @@ void TagEditor::MouseButtonPressed(MEVENT me)
 		{
 			Dirs->Goto(me.y);
 			if (me.bstate & BUTTON1_PRESSED)
-				EnterPressed();
+				enterPressed();
 			else
-				SpacePressed();
+				spacePressed();
 		}
 		else
-			Screen<NC::Window>::MouseButtonPressed(me);
+			Screen<NC::Window>::mouseButtonPressed(me);
 		Tags->clear();
 	}
 	else if (!TagTypes->empty() && TagTypes->hasCoords(me.x, me.y))
@@ -723,10 +723,10 @@ void TagEditor::MouseButtonPressed(MEVENT me)
 			TagTypes->refresh();
 			Tags->refresh();
 			if (me.bstate & BUTTON3_PRESSED)
-				EnterPressed();
+				enterPressed();
 		}
 		else
-			Screen<NC::Window>::MouseButtonPressed(me);
+			Screen<NC::Window>::mouseButtonPressed(me);
 	}
 	else if (!Tags->empty() && Tags->hasCoords(me.x, me.y))
 	{
@@ -737,10 +737,10 @@ void TagEditor::MouseButtonPressed(MEVENT me)
 			Tags->Goto(me.y);
 			Tags->refresh();
 			if (me.bstate & BUTTON3_PRESSED)
-				EnterPressed();
+				enterPressed();
 		}
 		else
-			Screen<NC::Window>::MouseButtonPressed(me);
+			Screen<NC::Window>::mouseButtonPressed(me);
 	}
 }
 
@@ -965,7 +965,7 @@ void TagEditor::LocateSong(const MPD::Song &s)
 		return;
 	
 	if (Global::myScreen != this)
-		SwitchTo();
+		switchTo();
 	
 	// go to right directory
 	if (itsBrowsedDir != s.getDirectory())
@@ -979,7 +979,7 @@ void TagEditor::LocateSong(const MPD::Song &s)
 		if (itsBrowsedDir.empty())
 			itsBrowsedDir = "/";
 		Dirs->clear();
-		Update();
+		update();
 	}
 	if (itsBrowsedDir == "/")
 		Dirs->reset(); // go to the first pos, which is "." (music dir root)
@@ -998,7 +998,7 @@ void TagEditor::LocateSong(const MPD::Song &s)
 	Dirs->refresh();
 	
 	Tags->clear();
-	Update();
+	update();
 	
 	// reset TagTypes since it can be under Filename
 	// and then songs in right column are not visible.

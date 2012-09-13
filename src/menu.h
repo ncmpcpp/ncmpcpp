@@ -282,12 +282,12 @@ public:
 	void showFiltered() { m_options_ptr = &m_filtered_options; }
 	
 	/// Refreshes the menu window
-	/// @see Window::Refresh()
+	/// @see Window::refresh()
 	virtual void refresh() OVERRIDE;
 	
 	/// Scrolls by given amount of lines
 	/// @param where indicated where exactly one wants to go
-	/// @see Window::Scroll()
+	/// @see Window::scroll()
 	virtual void scroll(Where where) OVERRIDE;
 	
 	/// Cleares all options, used filters etc. It doesn't reset highlighted position though.
@@ -341,8 +341,8 @@ public:
 	size_t size() const { return m_options_ptr->size(); }
 	
 	/// @return currently drawn item. The result is defined only within
-	/// drawing function that is called by Refresh()
-	/// @see Refresh()
+	/// drawing function that is called by refresh()
+	/// @see refresh()
 	ConstIterator drawn() const { return begin() + m_drawn_position; }
 	
 	/// @return reference to last item on the list

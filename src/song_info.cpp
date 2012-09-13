@@ -50,47 +50,47 @@ const SongInfo::Metadata SongInfo::Tags[] =
  { 0,              0,                          0                                  }
 };
 
-void SongInfo::Init()
+void SongInfo::init()
 {
 	w = new NC::Scrollpad(0, MainStartY, COLS, MainHeight, "", Config.main_color, NC::brNone);
 	isInitialized = 1;
 }
 
-void SongInfo::Resize()
+void SongInfo::resize()
 {
 	size_t x_offset, width;
-	GetWindowResizeParams(x_offset, width);
+	getWindowResizeParams(x_offset, width);
 	w->resize(width, MainHeight);
 	w->moveTo(x_offset, MainStartY);
 	hasToBeResized = 0;
 }
 
-std::wstring SongInfo::Title()
+std::wstring SongInfo::title()
 {
 	return L"Song info";
 }
 
-void SongInfo::SwitchTo()
+void SongInfo::switchTo()
 {
 	using Global::myScreen;
 	using Global::myOldScreen;
 	using Global::myLockedScreen;
 	
 	if (myScreen == this)
-		return myOldScreen->SwitchTo();
+		return myOldScreen->switchTo();
 	
 	if (!isInitialized)
-		Init();
+		init();
 	
 	if (myLockedScreen)
-		UpdateInactiveScreen(this);
+		updateInactiveScreen(this);
 	
 	auto s = currentSong(myScreen);
 	if (!s)
 		return;
 	
 	if (hasToBeResized || myLockedScreen)
-		Resize();
+		resize();
 	
 	myOldScreen = myScreen;
 	myScreen = this;

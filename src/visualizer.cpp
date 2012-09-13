@@ -44,7 +44,7 @@ Visualizer *myVisualizer = new Visualizer;
 
 const int Visualizer::WindowTimeout = 1000/25; /* 25 fps */
 
-void Visualizer::Init()
+void Visualizer::init()
 {
 	w = new NC::Window(0, MainStartY, COLS, MainHeight, "", Config.visualizer_color, NC::brNone);
 	
@@ -63,7 +63,7 @@ void Visualizer::Init()
 	isInitialized = 1;
 }
 
-void Visualizer::SwitchTo()
+void Visualizer::switchTo()
 {
 	using Global::myScreen;
 	using Global::myLockedScreen;
@@ -72,13 +72,13 @@ void Visualizer::SwitchTo()
 		return;
 	
 	if (!isInitialized)
-		Init();
+		init();
 	
 	if (myLockedScreen)
-		UpdateInactiveScreen(this);
+		updateInactiveScreen(this);
 	
 	if (hasToBeResized || myLockedScreen)
-		Resize();
+		resize();
 	
 	if (myScreen != this && myScreen->isTabbable())
 		Global::myPrevScreen = myScreen;
@@ -95,21 +95,21 @@ void Visualizer::SwitchTo()
 		Global::wFooter->setTimeout(WindowTimeout);
 }
 
-void Visualizer::Resize()
+void Visualizer::resize()
 {
 	size_t x_offset, width;
-	GetWindowResizeParams(x_offset, width);
+	getWindowResizeParams(x_offset, width);
 	w->resize(width, MainHeight);
 	w->moveTo(x_offset, MainStartY);
 	hasToBeResized = 0;
 }
 
-std::wstring Visualizer::Title()
+std::wstring Visualizer::title()
 {
 	return L"Music visualizer";
 }
 
-void Visualizer::Update()
+void Visualizer::update()
 {
 	if (itsFifo < 0)
 		return;
@@ -155,7 +155,7 @@ void Visualizer::Update()
 	w->refresh();
 }
 
-void Visualizer::SpacePressed()
+void Visualizer::spacePressed()
 {
 #	ifdef HAVE_FFTW3_H
 	Config.visualizer_use_wave = !Config.visualizer_use_wave;

@@ -112,7 +112,7 @@ public:
 
 }
 
-void MediaLibrary::Init()
+void MediaLibrary::init()
 {
 	hasTwoColumns = 0;
 	itsLeftColWidth = COLS/3-1;
@@ -149,10 +149,10 @@ void MediaLibrary::Init()
 	isInitialized = 1;
 }
 
-void MediaLibrary::Resize()
+void MediaLibrary::resize()
 {
 	size_t x_offset, width;
-	GetWindowResizeParams(x_offset, width);
+	getWindowResizeParams(x_offset, width);
 	if (!hasTwoColumns)
 	{
 		itsLeftColStartX = x_offset;
@@ -181,7 +181,7 @@ void MediaLibrary::Resize()
 	hasToBeResized = 0;
 }
 
-void MediaLibrary::Refresh()
+void MediaLibrary::refresh()
 {
 	Tags->display();
 	mvvline(MainStartY, itsMiddleColStartX-1, 0, MainHeight);
@@ -195,7 +195,7 @@ void MediaLibrary::Refresh()
 	}
 }
 
-void MediaLibrary::SwitchTo()
+void MediaLibrary::switchTo()
 {
 	using Global::myLockedScreen;
 	
@@ -229,28 +229,28 @@ void MediaLibrary::SwitchTo()
 	}
 	
 	if (!isInitialized)
-		Init();
+		init();
 	
 	if (myLockedScreen)
-		UpdateInactiveScreen(this);
+		updateInactiveScreen(this);
 	
 	if (hasToBeResized || myLockedScreen)
-		Resize();
+		resize();
 	
 	if (myScreen != this && myScreen->isTabbable())
 		Global::myPrevScreen = myScreen;
 	myScreen = this;
 	drawHeader();
 	markSongsInPlaylist(songsProxyList());
-	Refresh();
+	refresh();
 }
 
-std::wstring MediaLibrary::Title()
+std::wstring MediaLibrary::title()
 {
 	return L"Media library";
 }
 
-void MediaLibrary::Update()
+void MediaLibrary::update()
 {
 	if (!hasTwoColumns && Tags->reallyEmpty())
 	{
@@ -372,12 +372,12 @@ void MediaLibrary::Update()
 	}
 }
 
-void MediaLibrary::EnterPressed()
+void MediaLibrary::enterPressed()
 {
 	AddToPlaylist(true);
 }
 
-void MediaLibrary::SpacePressed()
+void MediaLibrary::spacePressed()
 {
 	if (Config.space_selects)
 	{
@@ -408,7 +408,7 @@ void MediaLibrary::SpacePressed()
 		AddToPlaylist(0);
 }
 
-void MediaLibrary::MouseButtonPressed(MEVENT me)
+void MediaLibrary::mouseButtonPressed(MEVENT me)
 {
 	auto tryNextColumn = [this]() -> bool {
 		bool result = true;
@@ -442,13 +442,13 @@ void MediaLibrary::MouseButtonPressed(MEVENT me)
 			if (me.bstate & BUTTON3_PRESSED)
 			{
 				size_t pos = Tags->choice();
-				SpacePressed();
+				spacePressed();
 				if (pos < Tags->size()-1)
 					Tags->scroll(NC::wUp);
 			}
 		}
 		else
-			Screen<NC::Window>::MouseButtonPressed(me);
+			Screen<NC::Window>::mouseButtonPressed(me);
 		Albums->clear();
 		Songs->clear();
 	}
@@ -470,13 +470,13 @@ void MediaLibrary::MouseButtonPressed(MEVENT me)
 			if (me.bstate & BUTTON3_PRESSED)
 			{
 				size_t pos = Albums->choice();
-				SpacePressed();
+				spacePressed();
 				if (pos < Albums->size()-1)
 					Albums->scroll(NC::wUp);
 			}
 		}
 		else
-			Screen<NC::Window>::MouseButtonPressed(me);
+			Screen<NC::Window>::mouseButtonPressed(me);
 		Songs->clear();
 	}
 	else if (!Songs->empty() && Songs->hasCoords(me.x, me.y))
@@ -489,15 +489,15 @@ void MediaLibrary::MouseButtonPressed(MEVENT me)
 			if (me.bstate & BUTTON1_PRESSED)
 			{
 				size_t pos = Songs->choice();
-				SpacePressed();
+				spacePressed();
 				if (pos < Songs->size()-1)
 					Songs->scroll(NC::wUp);
 			}
 			else
-				EnterPressed();
+				enterPressed();
 		}
 		else
-			Screen<NC::Window>::MouseButtonPressed(me);
+			Screen<NC::Window>::mouseButtonPressed(me);
 	}
 }
 
@@ -800,7 +800,7 @@ void MediaLibrary::LocateSong(const MPD::Song &s)
 	}
 	
 	if (myScreen != this)
-		SwitchTo();
+		switchTo();
 	Statusbar::put() << "Jumping to song...";
 	Global::wFooter->refresh();
 	
@@ -808,7 +808,7 @@ void MediaLibrary::LocateSong(const MPD::Song &s)
 	{
 		Tags->showAll();
 		if (Tags->empty())
-			Update();
+			update();
 		if (primary_tag != Tags->current().value())
 		{
 			for (size_t i = 0; i < Tags->size(); ++i)
@@ -826,7 +826,7 @@ void MediaLibrary::LocateSong(const MPD::Song &s)
 	
 	Albums->showAll();
 	if (Albums->empty())
-		Update();
+		update();
 	
 	std::string album = s.getAlbum();
 	std::string date = s.getDate();
@@ -849,7 +849,7 @@ void MediaLibrary::LocateSong(const MPD::Song &s)
 	
 	Songs->showAll();
 	if (Songs->empty())
-		Update();
+		update();
 	
 	if (s.getHash() != Songs->current().value().getHash())
 	{
@@ -867,7 +867,7 @@ void MediaLibrary::LocateSong(const MPD::Song &s)
 	Albums->setHighlightColor(Config.main_highlight_color);
 	Songs->setHighlightColor(Config.active_column_color);
 	w = Songs;
-	Refresh();
+	refresh();
 }
 
 void MediaLibrary::AddToPlaylist(bool add_n_play)

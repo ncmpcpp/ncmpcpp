@@ -35,7 +35,7 @@ using Global::myScreen;
 
 Outputs *myOutputs = new Outputs;
 
-void Outputs::Init()
+void Outputs::init()
 {
 	w = new NC::Menu<MPD::Output>(0, MainStartY, COLS, MainHeight, "", Config.main_color, NC::brNone);
 	w->cyclicScrolling(Config.use_cyclic_scrolling);
@@ -47,7 +47,7 @@ void Outputs::Init()
 	FetchList();
 }
 
-void Outputs::SwitchTo()
+void Outputs::switchTo()
 {
 	using Global::myLockedScreen;
 	
@@ -55,13 +55,13 @@ void Outputs::SwitchTo()
 		return;
 	
 	if (!isInitialized)
-		Init();
+		init();
 	
 	if (myLockedScreen)
-		UpdateInactiveScreen(this);
+		updateInactiveScreen(this);
 	
 	if (hasToBeResized || myLockedScreen)
-		Resize();
+		resize();
 	
 	if (myScreen != this && myScreen->isTabbable())
 		Global::myPrevScreen = myScreen;
@@ -70,21 +70,21 @@ void Outputs::SwitchTo()
 	drawHeader();
 }
 
-void Outputs::Resize()
+void Outputs::resize()
 {
 	size_t x_offset, width;
-	GetWindowResizeParams(x_offset, width);
+	getWindowResizeParams(x_offset, width);
 	w->resize(width, MainHeight);
 	w->moveTo(x_offset, MainStartY);
 	hasToBeResized = 0;
 }
 
-std::wstring Outputs::Title()
+std::wstring Outputs::title()
 {
 	return L"Outputs";
 }
 
-void Outputs::EnterPressed()
+void Outputs::enterPressed()
 {
 	if (w->current().value().isEnabled())
 	{
@@ -100,7 +100,7 @@ void Outputs::EnterPressed()
 		FetchList();
 }
 
-void Outputs::MouseButtonPressed(MEVENT me)
+void Outputs::mouseButtonPressed(MEVENT me)
 {
 	if (w->empty() || !w->hasCoords(me.x, me.y) || size_t(me.y) >= w->size())
 		return;
@@ -108,10 +108,10 @@ void Outputs::MouseButtonPressed(MEVENT me)
 	{
 		w->Goto(me.y);
 		if (me.bstate & BUTTON3_PRESSED)
-			EnterPressed();
+			enterPressed();
 	}
 	else
-		Screen< NC::Menu<MPD::Output> >::MouseButtonPressed(me);
+		Screen< NC::Menu<MPD::Output> >::mouseButtonPressed(me);
 }
 
 void Outputs::FetchList()

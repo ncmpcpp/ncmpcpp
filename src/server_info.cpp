@@ -32,7 +32,7 @@ using Global::myOldScreen;
 
 ServerInfo *myServerInfo = new ServerInfo;
 
-void ServerInfo::Init()
+void ServerInfo::init()
 {
 	SetDimensions();
 	w = new NC::Scrollpad((COLS-itsWidth)/2, (MainHeight-itsHeight)/2+MainStartY, itsWidth, itsHeight, "MPD server info", Config.main_color, Config.window_border);
@@ -43,13 +43,13 @@ void ServerInfo::Init()
 	isInitialized = 1;
 }
 
-void ServerInfo::SwitchTo()
+void ServerInfo::switchTo()
 {
 	using Global::myScreen;
 	
 	if (myScreen == this)
 	{
-		myOldScreen->SwitchTo();
+		myOldScreen->switchTo();
 		return;
 	}
 	if (MainHeight < 5)
@@ -59,39 +59,39 @@ void ServerInfo::SwitchTo()
 	}
 	
 	if (!isInitialized)
-		Init();
+		init();
 	
-	// Resize() can fall back to old screen, so we need it updated
+	// resize() can fall back to old screen, so we need it updated
 	myOldScreen = myScreen;
 	
 	if (hasToBeResized)
-		Resize();
+		resize();
 	
 	myScreen = this;
 	//w->Window::clear();
 }
 
-void ServerInfo::Resize()
+void ServerInfo::resize()
 {
 	SetDimensions();
 	if (itsHeight < 5) // screen too low to display this window
-		return myOldScreen->SwitchTo();
+		return myOldScreen->switchTo();
 	w->resize(itsWidth, itsHeight);
 	w->moveTo((COLS-itsWidth)/2, (MainHeight-itsHeight)/2+MainStartY);
 	if (myOldScreen && myOldScreen->hasToBeResized) // resize background window
 	{
-		myOldScreen->Resize();
-		myOldScreen->Refresh();
+		myOldScreen->resize();
+		myOldScreen->refresh();
 	}
 	hasToBeResized = 0;
 }
 
-std::wstring ServerInfo::Title()
+std::wstring ServerInfo::title()
 {
-	return myOldScreen->Title();
+	return myOldScreen->title();
 }
 
-void ServerInfo::Update()
+void ServerInfo::update()
 {
 	static timeval past = { 0, 0 };
 	if (Global::Timer.tv_sec <= past.tv_sec)

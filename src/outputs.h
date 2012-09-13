@@ -34,16 +34,16 @@ class Outputs : public Screen< NC::Menu<MPD::Output> >
 	public:
 		
 		// Screen< NC::Menu<MPD::Output> > implementation
-		virtual void SwitchTo() OVERRIDE;
-		virtual void Resize() OVERRIDE;
+		virtual void switchTo() OVERRIDE;
+		virtual void resize() OVERRIDE;
 		
-		virtual std::wstring Title() OVERRIDE;
+		virtual std::wstring title() OVERRIDE;
 		
-		virtual void Update() OVERRIDE { }
+		virtual void update() OVERRIDE { }
 		
-		virtual void EnterPressed() OVERRIDE;
-		virtual void SpacePressed() OVERRIDE { }
-		virtual void MouseButtonPressed(MEVENT me) OVERRIDE;
+		virtual void enterPressed() OVERRIDE;
+		virtual void spacePressed() OVERRIDE { }
+		virtual void mouseButtonPressed(MEVENT me) OVERRIDE;
 		
 		virtual bool isTabbable() OVERRIDE { return true; }
 		virtual bool isMergable() OVERRIDE { return true; }
@@ -52,7 +52,7 @@ class Outputs : public Screen< NC::Menu<MPD::Output> >
 		void FetchList();
 		
 	protected:
-		virtual void Init() OVERRIDE;
+		virtual void init() OVERRIDE;
 		virtual bool isLockable() OVERRIDE { return true; }
 };
 

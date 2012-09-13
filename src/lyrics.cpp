@@ -50,22 +50,22 @@ size_t Lyrics::itsWorkersNumber = 0;
 
 Lyrics *myLyrics = new Lyrics;
 
-void Lyrics::Init()
+void Lyrics::init()
 {
 	w = new NC::Scrollpad(0, MainStartY, COLS, MainHeight, "", Config.main_color, NC::brNone);
 	isInitialized = 1;
 }
 
-void Lyrics::Resize()
+void Lyrics::resize()
 {
 	size_t x_offset, width;
-	GetWindowResizeParams(x_offset, width);
+	getWindowResizeParams(x_offset, width);
 	w->resize(width, MainHeight);
 	w->moveTo(x_offset, MainStartY);
 	hasToBeResized = 0;
 }
 
-void Lyrics::Update()
+void Lyrics::update()
 {
 #	ifdef HAVE_CURL_CURL_H
 	if (isReadyToTake)
@@ -91,19 +91,19 @@ void Lyrics::Update()
 	}
 }
 
-void Lyrics::SwitchTo()
+void Lyrics::switchTo()
 {
 	using Global::myLockedScreen;
 	using Global::myInactiveScreen;
 	
 	if (myScreen == this)
-		return myOldScreen->SwitchTo();
+		return myOldScreen->switchTo();
 	
 	if (!isInitialized)
-		Init();
+		init();
 	
 	if (hasToBeResized)
-		Resize();
+		resize();
 	
 	itsScrollBegin = 0;
 	
@@ -144,19 +144,19 @@ void Lyrics::SwitchTo()
 	// to adjust screen size then.
 	if (myLockedScreen) // BUG
 	{
-		UpdateInactiveScreen(this);
-		Resize();
+		updateInactiveScreen(this);
+		resize();
 	}
 }
 
-std::wstring Lyrics::Title()
+std::wstring Lyrics::title()
 {
 	std::wstring result = L"Lyrics: ";
 	result += Scroller(ToWString(itsSong.toString("{%a - %t}", ", ")), itsScrollBegin, COLS-result.length()-(Config.new_design ? 2 : Global::VolumeState.length()));
 	return result;
 }
 
-void Lyrics::SpacePressed()
+void Lyrics::spacePressed()
 {
 	Config.now_playing_lyrics = !Config.now_playing_lyrics;
 	Statusbar::msg("Reload lyrics if song changes: %s", Config.now_playing_lyrics ? "On" : "Off");

@@ -45,27 +45,27 @@ using Global::MainStartY;
 
 Lastfm *myLastfm = new Lastfm;
 
-void Lastfm::Init()
+void Lastfm::init()
 {
 	w = new NC::Scrollpad(0, MainStartY, COLS, MainHeight, "", Config.main_color, NC::brNone);
 	isInitialized = 1;
 }
 
-void Lastfm::Resize()
+void Lastfm::resize()
 {
 	size_t x_offset, width;
-	GetWindowResizeParams(x_offset, width);
+	getWindowResizeParams(x_offset, width);
 	w->resize(width, MainHeight);
 	w->moveTo(x_offset, MainStartY);
 	hasToBeResized = 0;
 }
 
-std::wstring Lastfm::Title()
+std::wstring Lastfm::title()
 {
 	return itsTitle;
 }
 
-void Lastfm::Update()
+void Lastfm::update()
 {
 	if (isReadyToTake)
 		Take();
@@ -81,23 +81,23 @@ void Lastfm::Take()
 	isReadyToTake = 0;
 }
 
-void Lastfm::SwitchTo()
+void Lastfm::switchTo()
 {
 	using Global::myScreen;
 	using Global::myOldScreen;
 	using Global::myLockedScreen;
 	
 	if (myScreen == this)
-		return myOldScreen->SwitchTo();
+		return myOldScreen->switchTo();
 	
 	if (!isInitialized)
-		Init();
+		init();
 	
 	if (myLockedScreen)
-		UpdateInactiveScreen(this);
+		updateInactiveScreen(this);
 	
 	if (hasToBeResized || myLockedScreen)
-		Resize();
+		resize();
 	
 	// get an old info if it waits
 	if (isReadyToTake)

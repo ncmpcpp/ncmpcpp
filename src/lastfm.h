@@ -37,15 +37,15 @@ class Lastfm : public Screen<NC::Scrollpad>
 		Lastfm() : isReadyToTake(0), isDownloadInProgress(0) { }
 		
 		// Screen<NC::Scrollpad>
-		virtual void SwitchTo() OVERRIDE;
-		virtual void Resize() OVERRIDE;
+		virtual void switchTo() OVERRIDE;
+		virtual void resize() OVERRIDE;
 		
-		virtual std::wstring Title() OVERRIDE;
+		virtual std::wstring title() OVERRIDE;
 		
-		virtual void Update() OVERRIDE;
+		virtual void update() OVERRIDE;
 		
-		virtual void EnterPressed() OVERRIDE { }
-		virtual void SpacePressed() OVERRIDE { }
+		virtual void enterPressed() OVERRIDE { }
+		virtual void spacePressed() OVERRIDE { }
 		
 		virtual bool isMergable() OVERRIDE { return true; }
 		virtual bool isTabbable() OVERRIDE { return false; }
@@ -57,7 +57,7 @@ class Lastfm : public Screen<NC::Scrollpad>
 		bool SetArtistInfoArgs(const std::string &artist, const std::string &lang = "");
 		
 	protected:
-		virtual void Init() OVERRIDE;
+		virtual void init() OVERRIDE;
 		virtual bool isLockable() OVERRIDE { return false; }
 		
 	private:

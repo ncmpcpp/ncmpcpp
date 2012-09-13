@@ -31,24 +31,24 @@
 class Clock : public Screen<NC::Window>
 {
 	public:
-		virtual void Resize();
-		virtual void SwitchTo();
+		virtual void resize() OVERRIDE;
+		virtual void switchTo() OVERRIDE;
 		
-		virtual std::wstring Title();
+		virtual std::wstring title() OVERRIDE;
 		
-		virtual void Update();
-		virtual void Scroll(NC::Where) { }
+		virtual void update() OVERRIDE;
+		virtual void scroll(NC::Where) OVERRIDE { }
 		
-		virtual void EnterPressed() { }
-		virtual void SpacePressed() { }
-		virtual void MouseButtonPressed(MEVENT) { }
-		virtual bool isTabbable() { return true; }
+		virtual void enterPressed() OVERRIDE { }
+		virtual void spacePressed() OVERRIDE { }
+		virtual void mouseButtonPressed(MEVENT) OVERRIDE { }
 		
-		virtual bool isMergable() { return true; }
+		virtual bool isTabbable() OVERRIDE { return true; }
+		virtual bool isMergable() OVERRIDE { return true; }
 		
 	protected:
-		virtual void Init();
-		virtual bool isLockable() { return false; }
+		virtual void init() OVERRIDE;
+		virtual bool isLockable() OVERRIDE { return false; }
 		
 	private:
 		NC::Window *itsPane;

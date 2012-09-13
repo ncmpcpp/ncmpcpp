@@ -39,7 +39,7 @@ using Global::myOldScreen;
 
 SelectedItemsAdder *mySelectedItemsAdder = new SelectedItemsAdder;
 
-void SelectedItemsAdder::Init()
+void SelectedItemsAdder::init()
 {
 	SetDimensions();
 	itsPlaylistSelector = new NC::Menu<std::string>((COLS-itsWidth)/2, (MainHeight-itsHeight)/2+MainStartY, itsWidth, itsHeight, "Add selected item(s) to...", Config.main_color, Config.window_border);
@@ -65,11 +65,11 @@ void SelectedItemsAdder::Init()
 	isInitialized = 1;
 }
 
-void SelectedItemsAdder::SwitchTo()
+void SelectedItemsAdder::switchTo()
 {
 	if (myScreen == this)
 	{
-		myOldScreen->SwitchTo();
+		myOldScreen->switchTo();
 		return;
 	}
 	auto hs = dynamic_cast<HasSongs *>(myScreen);
@@ -83,16 +83,16 @@ void SelectedItemsAdder::SwitchTo()
 	}
 	
 	if (!isInitialized)
-		Init();
+		init();
 	
 	// default to main window
 	w = itsPlaylistSelector;
 	
-	// Resize() can fall back to old screen, so we need it updated
+	// resize() can fall back to old screen, so we need it updated
 	myOldScreen = myScreen;
 	
 	if (hasToBeResized)
-		Resize();
+		resize();
 	
 	bool playlists_not_active = myScreen == myBrowser && myBrowser->isLocal();
 	if (playlists_not_active)
@@ -116,11 +116,11 @@ void SelectedItemsAdder::SwitchTo()
 	myScreen = this;
 }
 
-void SelectedItemsAdder::Resize()
+void SelectedItemsAdder::resize()
 {
 	SetDimensions();
 	if (itsHeight < 5) // screen too low to display this window
-		return myOldScreen->SwitchTo();
+		return myOldScreen->switchTo();
 	itsPlaylistSelector->resize(itsWidth, itsHeight);
 	itsPlaylistSelector->moveTo((COLS-itsWidth)/2, (MainHeight-itsHeight)/2+MainStartY);
 	size_t poss_width = std::min(itsPSWidth, size_t(COLS));
@@ -129,13 +129,13 @@ void SelectedItemsAdder::Resize()
 	itsPositionSelector->moveTo((COLS-poss_width)/2, (MainHeight-poss_height)/2+MainStartY);
 	if (myOldScreen && myOldScreen->hasToBeResized) // resize background window
 	{
-		myOldScreen->Resize();
-		myOldScreen->Refresh();
+		myOldScreen->resize();
+		myOldScreen->refresh();
 	}
 	hasToBeResized = 0;
 }
 
-void SelectedItemsAdder::Refresh()
+void SelectedItemsAdder::refresh()
 {
 	if (w == itsPositionSelector)
 	{
@@ -146,12 +146,12 @@ void SelectedItemsAdder::Refresh()
 		itsPlaylistSelector->display();
 }
 
-std::wstring SelectedItemsAdder::Title()
+std::wstring SelectedItemsAdder::title()
 {
-	return myOldScreen->Title();
+	return myOldScreen->title();
 }
 
-void SelectedItemsAdder::EnterPressed()
+void SelectedItemsAdder::enterPressed()
 {
 	size_t pos = w->choice();
 
@@ -198,9 +198,9 @@ void SelectedItemsAdder::EnterPressed()
 		if (pos != w->size()-1)
 		{
 			// refresh playlist's lists
-			if (myBrowser->Main() && !myBrowser->isLocal() && myBrowser->CurrentDir() == "/")
+			if (myBrowser->main() && !myBrowser->isLocal() && myBrowser->CurrentDir() == "/")
 				myBrowser->GetDirectory("/");
-			if (myPlaylistEditor->Main())
+			if (myPlaylistEditor->main())
 				myPlaylistEditor->Playlists->clear(); // make playlist editor update itself
 		}
 	}
@@ -248,10 +248,10 @@ void SelectedItemsAdder::EnterPressed()
 		if (successful_operation)
 			Statusbar::msg("Selected item(s) added");
 	}
-	SwitchTo();
+	switchTo();
 }
 
-void SelectedItemsAdder::MouseButtonPressed(MEVENT me)
+void SelectedItemsAdder::mouseButtonPressed(MEVENT me)
 {
 	if (w->empty() || !w->hasCoords(me.x, me.y) || size_t(me.y) >= w->size())
 		return;
@@ -259,10 +259,10 @@ void SelectedItemsAdder::MouseButtonPressed(MEVENT me)
 	{
 		w->Goto(me.y);
 		if (me.bstate & BUTTON3_PRESSED)
-			EnterPressed();
+			enterPressed();
 	}
 	else
-		Screen< NC::Menu<std::string> >::MouseButtonPressed(me);
+		Screen< NC::Menu<std::string> >::mouseButtonPressed(me);
 }
 
 void SelectedItemsAdder::SetDimensions()

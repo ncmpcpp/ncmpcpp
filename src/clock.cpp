@@ -52,7 +52,7 @@ long Clock::older[6], Clock::next[6], Clock::newer[6], Clock::mask;
 size_t Clock::Width;
 const size_t Clock::Height = 8;
 
-void Clock::Init()
+void Clock::init()
 {
 	Width = Config.clock_display_seconds ? 60 : 40;
 	
@@ -61,10 +61,10 @@ void Clock::Init()
 	isInitialized = 1;
 }
 
-void Clock::Resize()
+void Clock::resize()
 {
 	size_t x_offset, width;
-	GetWindowResizeParams(x_offset, width);
+	getWindowResizeParams(x_offset, width);
 	
 	// used for clearing area out of clock window while resizing terminal
 	itsPane->resize(width, MainHeight);
@@ -75,7 +75,7 @@ void Clock::Resize()
 		w->moveTo(x_offset+(width-Width)/2, MainStartY+(MainHeight-Height)/2);
 }
 
-void Clock::SwitchTo()
+void Clock::switchTo()
 {
 	using Global::myLockedScreen;
 	
@@ -83,23 +83,23 @@ void Clock::SwitchTo()
 		return;
 	
 	if (!isInitialized)
-		Init();
+		init();
 	
 	if (myLockedScreen)
-		UpdateInactiveScreen(this);
+		updateInactiveScreen(this);
 	
 	size_t x_offset, width;
-	GetWindowResizeParams(x_offset, width, false);
+	getWindowResizeParams(x_offset, width, false);
 	if (Width > width || Height > MainHeight)
 	{
 		Statusbar::msg("Screen is too small to display clock");
 		if (myLockedScreen)
-			UpdateInactiveScreen(myLockedScreen);
+			updateInactiveScreen(myLockedScreen);
 		return;
 	}
 	
 	if (hasToBeResized || myLockedScreen)
-		Resize();
+		resize();
 	
 	if (myScreen != this && myScreen->isTabbable())
 		Global::myPrevScreen = myScreen;
@@ -112,12 +112,12 @@ void Clock::SwitchTo()
 	w->display();
 }
 
-std::wstring Clock::Title()
+std::wstring Clock::title()
 {
 	return L"Clock";
 }
 
-void Clock::Update()
+void Clock::update()
 {
 	if (Width > itsPane->getWidth() || Height > MainHeight)
 	{
@@ -128,10 +128,10 @@ void Clock::Update()
 		{
 			if (myInactiveScreen != myLockedScreen)
 				myScreen = myInactiveScreen;
-			myLockedScreen->SwitchTo();
+			myLockedScreen->switchTo();
 		}
 		else
-			myPlaylist->SwitchTo();
+			myPlaylist->switchTo();
 	}
 	
 	tm *time = localtime(&Global::Timer.tv_sec);

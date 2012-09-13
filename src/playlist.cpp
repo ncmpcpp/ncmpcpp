@@ -56,7 +56,7 @@ bool playlistEntryMatcher(const Regex &rx, const MPD::Song &s);
 
 }
 
-void Playlist::Init()
+void Playlist::init()
 {
 	Items = new NC::Menu<MPD::Song>(0, MainStartY, COLS, MainHeight, Config.columns_in_playlist && Config.titles_visibility ? Display::Columns(COLS) : "", Config.main_color, NC::brNone);
 	Items->cyclicScrolling(Config.use_cyclic_scrolling);
@@ -97,7 +97,7 @@ void Playlist::Init()
 	isInitialized = 1;
 }
 
-void Playlist::SwitchTo()
+void Playlist::switchTo()
 {
 	using Global::myScreen;
 	using Global::myLockedScreen;
@@ -107,15 +107,15 @@ void Playlist::SwitchTo()
 		return;
 	
 	if (!isInitialized)
-		Init();
+		init();
 	
 	itsScrollBegin = 0;
 	
 	if (myLockedScreen)
-		UpdateInactiveScreen(this);
+		updateInactiveScreen(this);
 	
 	if (hasToBeResized || myLockedScreen)
-		Resize();
+		resize();
 	
 	if (myScreen != this && myScreen->isTabbable())
 		Global::myPrevScreen = myScreen;
@@ -126,10 +126,10 @@ void Playlist::SwitchTo()
 	drawHeader();
 }
 
-void Playlist::Resize()
+void Playlist::resize()
 {
 	size_t x_offset, width;
-	GetWindowResizeParams(x_offset, width);
+	getWindowResizeParams(x_offset, width);
 	Items->resize(width, MainHeight);
 	Items->moveTo(x_offset, MainStartY);
 
@@ -149,7 +149,7 @@ void Playlist::Resize()
 	hasToBeResized = 0;
 }
 
-std::wstring Playlist::Title()
+std::wstring Playlist::title()
 {
 	std::wstring result = L"Playlist ";
 	if (ReloadTotalLength || ReloadRemaining)
@@ -158,7 +158,7 @@ std::wstring Playlist::Title()
 	return result;
 }
 
-void Playlist::EnterPressed()
+void Playlist::enterPressed()
 {
 	if (w == Items)
 	{
@@ -238,7 +238,7 @@ void Playlist::EnterPressed()
 	}
 }
 
-void Playlist::SpacePressed()
+void Playlist::spacePressed()
 {
 	if (w == Items && !Items->empty())
 	{
@@ -247,7 +247,7 @@ void Playlist::SpacePressed()
 	}
 }
 
-void Playlist::MouseButtonPressed(MEVENT me)
+void Playlist::mouseButtonPressed(MEVENT me)
 {
 	if (w == Items && !Items->empty() && Items->hasCoords(me.x, me.y))
 	{
@@ -255,10 +255,10 @@ void Playlist::MouseButtonPressed(MEVENT me)
 		{
 			Items->Goto(me.y);
 			if (me.bstate & BUTTON3_PRESSED)
-				EnterPressed();
+				enterPressed();
 		}
 		else
-			Screen<NC::Window>::MouseButtonPressed(me);
+			Screen<NC::Window>::mouseButtonPressed(me);
 	}
 	else if (w == SortDialog && SortDialog->hasCoords(me.x, me.y))
 	{
@@ -266,10 +266,10 @@ void Playlist::MouseButtonPressed(MEVENT me)
 		{
 			SortDialog->Goto(me.y);
 			if (me.bstate & BUTTON3_PRESSED)
-				EnterPressed();
+				enterPressed();
 		}
 		else
-			Screen<NC::Window>::MouseButtonPressed(me);
+			Screen<NC::Window>::mouseButtonPressed(me);
 	}
 }
 

@@ -45,7 +45,7 @@ using Global::myOldScreen;
 
 TinyTagEditor *myTinyTagEditor = new TinyTagEditor;
 
-void TinyTagEditor::Init()
+void TinyTagEditor::init()
 {
 	w = new NC::Menu<NC::Buffer>(0, MainStartY, COLS, MainHeight, "", Config.main_color, NC::brNone);
 	w->setHighlightColor(Config.main_highlight_color);
@@ -55,16 +55,16 @@ void TinyTagEditor::Init()
 	isInitialized = 1;
 }
 
-void TinyTagEditor::Resize()
+void TinyTagEditor::resize()
 {
 	size_t x_offset, width;
-	GetWindowResizeParams(x_offset, width);
+	getWindowResizeParams(x_offset, width);
 	w->resize(width, MainHeight);
 	w->moveTo(x_offset, MainStartY);
 	hasToBeResized = 0;
 }
 
-void TinyTagEditor::SwitchTo()
+void TinyTagEditor::switchTo()
 {
 	using Global::myScreen;
 	using Global::myLockedScreen;
@@ -76,10 +76,10 @@ void TinyTagEditor::SwitchTo()
 	else if (getTags())
 	{
 		if (myLockedScreen)
-			UpdateInactiveScreen(this);
+			updateInactiveScreen(this);
 		
 		if (hasToBeResized || myLockedScreen)
-			Resize();
+			resize();
 		
 		myOldScreen = myScreen;
 		myScreen = this;
@@ -97,12 +97,12 @@ void TinyTagEditor::SwitchTo()
 	}
 }
 
-std::wstring TinyTagEditor::Title()
+std::wstring TinyTagEditor::title()
 {
 	return L"Tiny tag editor";
 }
 
-void TinyTagEditor::EnterPressed()
+void TinyTagEditor::enterPressed()
 {
 	size_t option = w->choice();
 	Statusbar::lock();
@@ -150,10 +150,10 @@ void TinyTagEditor::EnterPressed()
 			Statusbar::msg("Error while writing tags");
 	}
 	if (option > 21)
-		myOldScreen->SwitchTo();
+		myOldScreen->switchTo();
 }
 
-void TinyTagEditor::MouseButtonPressed(MEVENT me)
+void TinyTagEditor::mouseButtonPressed(MEVENT me)
 {
 	if (w->empty() || !w->hasCoords(me.x, me.y) || size_t(me.y) >= w->size())
 		return;
@@ -164,11 +164,11 @@ void TinyTagEditor::MouseButtonPressed(MEVENT me)
 		if (me.bstate & BUTTON3_PRESSED)
 		{
 			w->refresh();
-			EnterPressed();
+			enterPressed();
 		}
 	}
 	else
-		Screen< NC::Menu<NC::Buffer> >::MouseButtonPressed(me);
+		Screen< NC::Menu<NC::Buffer> >::mouseButtonPressed(me);
 }
 
 void TinyTagEditor::SetEdited(const MPD::Song &s)
@@ -192,7 +192,7 @@ bool TinyTagEditor::getTags()
 	ext = lowercase(ext.substr(ext.rfind(".")+1));
 	
 	if (!isInitialized)
-		Init();
+		init();
 	
 	w->clear();
 	w->reset();

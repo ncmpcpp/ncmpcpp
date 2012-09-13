@@ -268,7 +268,7 @@ bool write(MPD::MutableSong &s)
 				}
 				Mpd.CommitCommandsList();
 			}
-			else // only myBrowser->Main()
+			else // only myBrowser->main()
 				myBrowser->GetDirectory(myBrowser->CurrentDir());
 		}
 	}

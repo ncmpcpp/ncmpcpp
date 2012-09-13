@@ -30,7 +30,7 @@ using Global::myInactiveScreen;
 
 namespace {//
 
-void DrawScreenSeparator(int x)
+void drawScreenSeparator(int x)
 {
 	attron(COLOR_PAIR(Config.main_color));
 	mvvline(Global::MainStartY, x, 0, Global::MainHeight);
@@ -40,7 +40,7 @@ void DrawScreenSeparator(int x)
 
 }
 
-void GenericMouseButtonPressed(NC::Window *w, MEVENT me)
+void genericMouseButtonPressed(NC::Window *w, MEVENT me)
 {
 	if (me.bstate & BUTTON2_PRESSED)
 	{
@@ -60,7 +60,7 @@ void GenericMouseButtonPressed(NC::Window *w, MEVENT me)
 	}
 }
 
-void ScrollpadMouseButtonPressed(NC::Scrollpad *w, MEVENT me)
+void scrollpadMouseButtonPressed(NC::Scrollpad *w, MEVENT me)
 {
 	if (me.bstate & BUTTON2_PRESSED)
 	{
@@ -76,7 +76,7 @@ void ScrollpadMouseButtonPressed(NC::Scrollpad *w, MEVENT me)
 
 /***********************************************************************/
 
-void BasicScreen::GetWindowResizeParams(size_t &x_offset, size_t &width, bool adjust_locked_screen)
+void BasicScreen::getWindowResizeParams(size_t &x_offset, size_t &width, bool adjust_locked_screen)
 {
 	width = COLS;
 	x_offset = 0;
@@ -92,15 +92,15 @@ void BasicScreen::GetWindowResizeParams(size_t &x_offset, size_t &width, bool ad
 			
 			if (adjust_locked_screen)
 			{
-				myLockedScreen->Resize();
-				myLockedScreen->Refresh();
-				DrawScreenSeparator(x_offset-1);
+				myLockedScreen->resize();
+				myLockedScreen->refresh();
+				drawScreenSeparator(x_offset-1);
 			}
 		}
 	}
 }
 
-bool BasicScreen::Lock()
+bool BasicScreen::lock()
 {
 	if (myLockedScreen)
 		return false;
@@ -113,18 +113,18 @@ bool BasicScreen::Lock()
 		return false;
 }
 
-void BasicScreen::Unlock()
+void BasicScreen::unlock()
 {
 	if (myInactiveScreen && myInactiveScreen != myLockedScreen)
 		myScreen = myInactiveScreen;
-	myLockedScreen->SwitchTo();
+	myLockedScreen->switchTo();
 	myLockedScreen = 0;
 	myInactiveScreen = 0;
 }
 
 /***********************************************************************/
 
-void ApplyToVisibleWindows(void (BasicScreen::*f)())
+void applyToVisibleWindows(void (BasicScreen::*f)())
 {
 	if (myLockedScreen && myScreen->isMergable())
 	{
@@ -139,7 +139,7 @@ void ApplyToVisibleWindows(void (BasicScreen::*f)())
 	(myScreen->*f)();
 }
 
-void UpdateInactiveScreen(BasicScreen *screen_to_be_set)
+void updateInactiveScreen(BasicScreen *screen_to_be_set)
 {
 	if (myInactiveScreen && myLockedScreen != myInactiveScreen && myLockedScreen == screen_to_be_set)
 	{
@@ -151,8 +151,8 @@ void UpdateInactiveScreen(BasicScreen *screen_to_be_set)
 		// in such case we want to keep slave screen visible, so we never set it to null
 		// as in "else" case. we also need to refresh it and redraw separator between
 		// them as stacked screen probably has overwritten part ot it.
-		myInactiveScreen->Refresh();
-		DrawScreenSeparator(COLS*Config.locked_screen_width_part);
+		myInactiveScreen->refresh();
+		drawScreenSeparator(COLS*Config.locked_screen_width_part);
 	}
 	else
 	{

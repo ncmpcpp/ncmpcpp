@@ -95,7 +95,7 @@ std::string keyToString(const Key &key, bool *print_backspace)
 
 }
 
-void Help::Init()
+void Help::init()
 {
 	w = new NC::Scrollpad(0, MainStartY, COLS, MainHeight, "", Config.main_color, NC::brNone);
 	GetKeybindings();
@@ -103,16 +103,16 @@ void Help::Init()
 	isInitialized = 1;
 }
 
-void Help::Resize()
+void Help::resize()
 {
 	size_t x_offset, width;
-	GetWindowResizeParams(x_offset, width);
+	getWindowResizeParams(x_offset, width);
 	w->resize(width, MainHeight);
 	w->moveTo(x_offset, MainStartY);
 	hasToBeResized = 0;
 }
 
-void Help::SwitchTo()
+void Help::switchTo()
 {
 	using Global::myScreen;
 	using Global::myLockedScreen;
@@ -121,13 +121,13 @@ void Help::SwitchTo()
 		return;
 	
 	if (!isInitialized)
-		Init();
+		init();
 	
 	if (myLockedScreen)
-		UpdateInactiveScreen(this);
+		updateInactiveScreen(this);
 	
 	if (hasToBeResized || myLockedScreen)
-		Resize();
+		resize();
 	
 	if (myScreen != this && myScreen->isTabbable())
 		Global::myPrevScreen = myScreen;
@@ -135,7 +135,7 @@ void Help::SwitchTo()
 	drawHeader();
 }
 
-std::wstring Help::Title()
+std::wstring Help::title()
 {
 	return L"Help";
 }

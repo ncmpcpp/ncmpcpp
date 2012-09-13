@@ -38,17 +38,17 @@ class TagEditor : public Screen<NC::Window>, public Filterable, public HasColumn
 	public:
 		TagEditor() : FParser(0), FParserHelper(0), FParserLegend(0), FParserPreview(0), itsBrowsedDir("/") { }
 		
-		virtual void Resize() OVERRIDE;
-		virtual void SwitchTo() OVERRIDE;
+		virtual void resize() OVERRIDE;
+		virtual void switchTo() OVERRIDE;
 		
-		virtual std::wstring Title() OVERRIDE;
+		virtual std::wstring title() OVERRIDE;
 		
-		virtual void Refresh() OVERRIDE;
-		virtual void Update() OVERRIDE;
+		virtual void refresh() OVERRIDE;
+		virtual void update() OVERRIDE;
 		
-		virtual void EnterPressed() OVERRIDE;
-		virtual void SpacePressed() OVERRIDE;
-		virtual void MouseButtonPressed(MEVENT) OVERRIDE;
+		virtual void enterPressed() OVERRIDE;
+		virtual void spacePressed() OVERRIDE;
+		virtual void mouseButtonPressed(MEVENT) OVERRIDE;
 		
 		virtual bool isTabbable() OVERRIDE { return true; }
 		virtual bool isMergable() OVERRIDE { return true; }
@@ -88,7 +88,7 @@ class TagEditor : public Screen<NC::Window>, public Filterable, public HasColumn
 		NC::Menu<MPD::MutableSong> *Tags;
 		
 	protected:
-		virtual void Init();
+		virtual void init();
 		virtual bool isLockable() { return true; }
 		
 	private:

@@ -192,7 +192,7 @@ void Statusbar::Helpers::ApplyFilterImmediately::operator()(const std::wstring &
 		{
 			m_ws = ws;
 			m_f->applyFilter(ToString(m_ws));
-			myScreen->RefreshWindow();
+			myScreen->refreshWindow();
 		}
 		Status::trace();
 	}

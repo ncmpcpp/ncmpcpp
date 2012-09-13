@@ -101,7 +101,7 @@ size_t SearchEngine::StaticOptions = 20;
 size_t SearchEngine::ResetButton = 16;
 size_t SearchEngine::SearchButton = 15;
 
-void SearchEngine::Init()
+void SearchEngine::init()
 {
 	w = new NC::Menu<SEItem>(0, MainStartY, COLS, MainHeight, "", Config.main_color, NC::brNone);
 	w->setHighlightColor(Config.main_highlight_color);
@@ -114,17 +114,17 @@ void SearchEngine::Init()
 	isInitialized = 1;
 }
 
-void SearchEngine::Resize()
+void SearchEngine::resize()
 {
 	size_t x_offset, width;
-	GetWindowResizeParams(x_offset, width);
+	getWindowResizeParams(x_offset, width);
 	w->resize(width, MainHeight);
 	w->moveTo(x_offset, MainStartY);
 	w->setTitle(Config.columns_in_search_engine && Config.titles_visibility ? Display::Columns(w->getWidth()) : "");
 	hasToBeResized = 0;
 }
 
-void SearchEngine::SwitchTo()
+void SearchEngine::switchTo()
 {
 	using Global::myScreen;
 	using Global::myLockedScreen;
@@ -136,13 +136,13 @@ void SearchEngine::SwitchTo()
 	}
 	
 	if (!isInitialized)
-		Init();
+		init();
 	
 	if (myLockedScreen)
-		UpdateInactiveScreen(this);
+		updateInactiveScreen(this);
 	
 	if (hasToBeResized || myLockedScreen)
-		Resize();
+		resize();
 	
 	if (w->empty())
 		Prepare();
@@ -154,12 +154,12 @@ void SearchEngine::SwitchTo()
 	markSongsInPlaylist(getProxySongList());
 }
 
-std::wstring SearchEngine::Title()
+std::wstring SearchEngine::title()
 {
 	return L"Search engine";
 }
 
-void SearchEngine::EnterPressed()
+void SearchEngine::enterPressed()
 {
 	size_t option = w->choice();
 	if (option > ConstraintsNumber && option < SearchButton)
@@ -227,7 +227,7 @@ void SearchEngine::EnterPressed()
 		Statusbar::unlock();
 }
 
-void SearchEngine::SpacePressed()
+void SearchEngine::spacePressed()
 {
 	if (!w->current().value().isSong())
 		return;
@@ -243,7 +243,7 @@ void SearchEngine::SpacePressed()
 	w->scroll(NC::wDown);
 }
 
-void SearchEngine::MouseButtonPressed(MEVENT me)
+void SearchEngine::mouseButtonPressed(MEVENT me)
 {
 	if (w->empty() || !w->hasCoords(me.x, me.y) || size_t(me.y) >= w->size())
 		return;
@@ -253,22 +253,22 @@ void SearchEngine::MouseButtonPressed(MEVENT me)
 			return;
 		w->refresh();
 		if ((me.bstate & BUTTON3_PRESSED || w->choice() > ConstraintsNumber) && w->choice() < StaticOptions)
-			EnterPressed();
+			enterPressed();
 		else if (w->choice() >= StaticOptions)
 		{
 			if (me.bstate & BUTTON1_PRESSED)
 			{
 				size_t pos = w->choice();
-				SpacePressed();
+				spacePressed();
 				if (pos < w->size()-1)
 					w->scroll(NC::wUp);
 			}
 			else
-				EnterPressed();
+				enterPressed();
 		}
 	}
 	else
-		Screen< NC::Menu<SEItem> >::MouseButtonPressed(me);
+		Screen< NC::Menu<SEItem> >::mouseButtonPressed(me);
 }
 
 /***********************************************************************/

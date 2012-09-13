@@ -287,7 +287,7 @@ struct Window
 	void deleteHistory();
 	
 	/// Refreshed whole window and its border
-	/// @see Refresh()
+	/// @see refresh()
 	void display();
 	
 	/// Refreshes whole window, but not the border
@@ -424,20 +424,20 @@ protected:
 	///
 	void showBorder() const;
 	
-	/// Changes dimensions of window, called from Resize()
+	/// Changes dimensions of window, called from resize()
 	/// @param width new window's width
 	/// @param height new window's height
-	/// @see Resize()
+	/// @see resize()
 	///
 	void adjustDimensions(size_t width, size_t height);
 	
-	/// Deletes old window and creates new. It's called by Resize(),
+	/// Deletes old window and creates new. It's called by resize(),
 	/// SetBorder() or setTitle() since internally windows are
 	/// handled as curses pads and change in size requires to delete
 	/// them and create again, there is no way to change size of pad.
 	/// @see SetBorder()
 	/// @see setTitle()
-	/// @see Resize()
+	/// @see resize()
 	///
 	virtual void recreate(size_t width, size_t height);
 	

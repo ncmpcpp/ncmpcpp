@@ -173,12 +173,12 @@ int main(int argc, char **argv)
 	gettimeofday(&Timer, 0);
 	
 	// go to playlist
-	myPlaylist->SwitchTo();
+	myPlaylist->switchTo();
 	myPlaylist->UpdateTimer();
 	
 	// go to startup screen
 	if (Config.startup_screen != myScreen)
-		Config.startup_screen->SwitchTo();
+		Config.startup_screen->switchTo();
 	
 	Mpd.SetStatusUpdater(Status::update, 0);
 	Mpd.SetErrorHandler(Status::handleError, 0);
@@ -247,7 +247,7 @@ int main(int argc, char **argv)
 		// header stuff end
 		
 		if (input != Key::noOp)
-			myScreen->RefreshWindow();
+			myScreen->refreshWindow();
 		input = Key::read(*wFooter);
 		
 		if (input == Key::noOp)
