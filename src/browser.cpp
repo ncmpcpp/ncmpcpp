@@ -37,6 +37,7 @@
 #include "tag_editor.h"
 #include "utility/comparators.h"
 #include "title.h"
+#include "tags.h"
 
 using namespace std::placeholders;
 
@@ -507,7 +508,7 @@ void Browser::GetLocalDirectory(MPD::ItemList &v, const std::string &directory, 
 			new_item.song = std::shared_ptr<MPD::Song>(s);
 #			ifdef HAVE_TAGLIB_H
 			if (!recursively)
-				TagEditor::ReadTags(*s);
+				Tags::read(*s);
 #			endif // HAVE_TAGLIB_H
 			v.push_back(new_item);
 		}

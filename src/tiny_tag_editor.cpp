@@ -23,10 +23,8 @@
 #ifdef HAVE_TAGLIB_H
 
 // taglib includes
-#include "mpegfile.h"
-#include "vorbisfile.h"
-#include "flacfile.h"
-#include "fileref.h"
+#include <fileref.h>
+#include <tag.h>
 
 #include "browser.h"
 #include "charset.h"
@@ -39,6 +37,7 @@
 #include "statusbar.h"
 #include "tag_editor.h"
 #include "title.h"
+#include "tags.h"
 
 using Global::MainHeight;
 using Global::MainStartY;
@@ -134,7 +133,7 @@ void TinyTagEditor::EnterPressed()
 	if (option == 22)
 	{
 		Statusbar::msg("Updating tags...");
-		if (TagEditor::WriteTags(itsEdited))
+		if (Tags::write(itsEdited))
 		{
 			Statusbar::msg("Tags updated");
 			if (itsEdited.isFromDatabase())
@@ -207,7 +206,7 @@ bool TinyTagEditor::getTags()
 	w->at(19).setSeparator(true);
 	w->at(21).setSeparator(true);
 	
-	if (!extendedTagsSupported(f.file()))
+	if (!Tags::extendedSetSupported(f.file()))
 	{
 		w->at(10).setInactive(true);
 		for (size_t i = 15; i <= 17; ++i)
@@ -237,13 +236,6 @@ bool TinyTagEditor::getTags()
 	w->at(22).value() << "Save";
 	w->at(23).value() << "Cancel";
 	return true;
-}
-
-bool TinyTagEditor::extendedTagsSupported(TagLib::File *f)
-{
-	return	dynamic_cast<TagLib::MPEG::File *>(f)
-	||	dynamic_cast<TagLib::Ogg::Vorbis::File *>(f)
-	||	dynamic_cast<TagLib::FLAC::File *>(f);
 }
 
 #endif // HAVE_TAGLIB_H

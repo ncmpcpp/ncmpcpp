@@ -87,9 +87,6 @@ class TagEditor : public Screen<NC::Window>, public Filterable, public HasColumn
 		NC::Menu<std::string> *TagTypes;
 		NC::Menu<MPD::MutableSong> *Tags;
 		
-		static void ReadTags(MPD::MutableSong &);
-		static bool WriteTags(MPD::MutableSong &);
-		
 	protected:
 		virtual void Init();
 		virtual bool isLockable() { return true; }

@@ -18,49 +18,25 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
-#ifndef _TINY_TAG_EDITOR_H
-#define _TINY_TAG_EDITOR_H
+#ifndef _TAGS_H
+#define _TAGS_H
 
 #include "config.h"
 
 #ifdef HAVE_TAGLIB_H
 
+#include <tfile.h>
 #include "mutable_song.h"
-#include "screen.h"
 
-class TinyTagEditor : public Screen< NC::Menu<NC::Buffer> >
-{
-	public:
-		// Screen< NC::Menu<NC::Buffer> > implementation
-		virtual void Resize() OVERRIDE;
-		virtual void SwitchTo() OVERRIDE;
-		
-		virtual std::wstring Title() OVERRIDE;
-		
-		virtual void Update() OVERRIDE { }
-		
-		virtual void EnterPressed() OVERRIDE;
-		virtual void SpacePressed() OVERRIDE { }
-		virtual void MouseButtonPressed(MEVENT me) OVERRIDE;
-		
-		virtual bool isMergable() OVERRIDE { return true; }
-		virtual bool isTabbable() OVERRIDE { return false; }
-		
-		// private members
-		void SetEdited(const MPD::Song &);
-		
-	protected:
-		virtual void Init() OVERRIDE;
-		virtual bool isLockable() OVERRIDE { return true; }
-		
-	private:
-		bool getTags();
-		MPD::MutableSong itsEdited;
-};
+namespace Tags {//
 
-extern TinyTagEditor *myTinyTagEditor;
+bool extendedSetSupported(const TagLib::File *f);
+
+void read(MPD::MutableSong &);
+bool write(MPD::MutableSong &);
+
+}
 
 #endif // HAVE_TAGLIB_H
 
-#endif
-
+#endif // _TAGS_H

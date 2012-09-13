@@ -54,6 +54,7 @@
 #include "tiny_tag_editor.h"
 #include "visualizer.h"
 #include "title.h"
+#include "tags.h"
 
 #ifdef HAVE_TAGLIB_H
 # include "fileref.h"
@@ -1343,7 +1344,7 @@ void EditLibraryTag::Run()
 			es.setTags(set, new_tag, Config.tags_separator);
 			Statusbar::msg("Updating tags in \"%s\"...", es.getName().c_str());
 			std::string path = Config.mpd_music_dir + es.getURI();
-			if (!TagEditor::WriteTags(es))
+			if (!Tags::write(es))
 			{
 				const char msg[] = "Error while updating tags in \"%ls\"";
 				Statusbar::msg(msg, wideShorten(ToWString(es.getURI()), COLS-const_strlen(msg)).c_str());
