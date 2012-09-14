@@ -213,7 +213,7 @@ void MediaLibrary::switchTo()
 			if (hasTwoColumns)
 			{
 				if (w == Tags)
-					NextColumn();
+					nextColumn();
 				if (Config.titles_visibility)
 				{
 					std::string item_type = lowercase(tagTypeToString(Config.media_lib_primary_tag));

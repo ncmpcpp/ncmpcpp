@@ -992,8 +992,8 @@ void TagEditor::LocateSong(const MPD::Song &s)
 	// and then songs in right column are not visible.
 	TagTypes->reset();
 	// go to the right column
-	NextColumn();
-	NextColumn();
+	nextColumn();
+	nextColumn();
 	
 	// highlight our file
 	for (size_t i = 0; i < Tags->size(); ++i)
