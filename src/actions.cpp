@@ -681,7 +681,7 @@ void JumpToParentDirectory::Run()
 	{
 		if (myBrowser->CurrentDir() != "/")
 		{
-			myBrowser->main()->reset();
+			myBrowser->main().reset();
 			myBrowser->enterPressed();
 		}
 	}
@@ -791,17 +791,17 @@ void Delete::Run()
 			Statusbar::msg("Item(s) deleted");
 	}
 #	ifndef WIN32
-	else if (myScreen == myBrowser && !myBrowser->main()->empty())
+	else if (myScreen == myBrowser && !myBrowser->main().empty())
 	{
 		if (!myBrowser->isLocal() && !isMPDMusicDirSet())
 			return;
 		
 		std::string question;
-		if (myBrowser->main()->hasSelected())
+		if (myBrowser->main().hasSelected())
 			question = "Delete selected items?";
 		else
 		{
-			MPD::Item &item = myBrowser->main()->current().value();
+			MPD::Item &item = myBrowser->main().current().value();
 			std::string name = item.type == MPD::itSong ? item.song->getName() : item.name;
 			question = "Delete ";
 			question += itemTypeToString(item.type);
@@ -813,7 +813,7 @@ void Delete::Run()
 		if (yes)
 		{
 			bool success = true;
-			auto list = getSelectedOrCurrent(myBrowser->main()->begin(), myBrowser->main()->end(), myBrowser->main()->currentI());
+			auto list = getSelectedOrCurrent(myBrowser->main().begin(), myBrowser->main().end(), myBrowser->main().currentI());
 			for (auto it = list.begin(); it != list.end(); ++it)
 			{
 				const MPD::Item &i = (*it)->value();
@@ -948,7 +948,7 @@ void SavePlaylist::Run()
 	}
 	if (!myBrowser->isLocal()
 	&&  myBrowser->CurrentDir() == "/"
-	&&  !myBrowser->main()->empty())
+	&&  !myBrowser->main().empty())
 		myBrowser->GetDirectory(myBrowser->CurrentDir());
 }
 
@@ -1135,7 +1135,7 @@ void ToggleDisplayMode::Run()
 	{
 		Config.columns_in_browser = !Config.columns_in_browser;
 		Statusbar::msg("Browser display mode: %s", Config.columns_in_browser ? "Columns" : "Classic");
-		myBrowser->main()->setTitle(Config.columns_in_browser && Config.titles_visibility ? Display::Columns(myBrowser->main()->getWidth()) : "");
+		myBrowser->main().setTitle(Config.columns_in_browser && Config.titles_visibility ? Display::Columns(myBrowser->main().getWidth()) : "");
 	}
 	else if (myScreen == mySearcher)
 	{
@@ -1452,8 +1452,8 @@ bool EditDirectoryName::canBeRun() const
 {
 	return   isMPDMusicDirSet()
 	  &&     ((myScreen == myBrowser
-	      && !myBrowser->main()->empty()
-		  && myBrowser->main()->current().value().type == MPD::itDirectory)
+	      && !myBrowser->main().empty()
+		  && myBrowser->main().current().value().type == MPD::itDirectory)
 #	ifdef HAVE_TAGLIB_H
 	    ||   (myScreen->activeWindow() == myTagEditor->Dirs
 	      && !myTagEditor->Dirs->empty()
@@ -1468,7 +1468,7 @@ void EditDirectoryName::Run()
 	
 	if (myScreen == myBrowser)
 	{
-		std::string old_dir = myBrowser->main()->current().value().name;
+		std::string old_dir = myBrowser->main().current().value().name;
 		Statusbar::lock();
 		Statusbar::put() << NC::fmtBold << "Directory: " << NC::fmtBoldEnd;
 		std::string new_dir = wFooter->getString(old_dir);
@@ -1532,8 +1532,8 @@ bool EditPlaylistName::canBeRun() const
 	return   (myScreen->activeWindow() == myPlaylistEditor->Playlists
 	      && !myPlaylistEditor->Playlists->empty())
 	    ||   (myScreen == myBrowser
-	      && !myBrowser->main()->empty()
-		  && myBrowser->main()->current().value().type == MPD::itPlaylist);
+	      && !myBrowser->main().empty()
+		  && myBrowser->main().current().value().type == MPD::itPlaylist);
 }
 
 void EditPlaylistName::Run()
@@ -1544,7 +1544,7 @@ void EditPlaylistName::Run()
 	if (myScreen->activeWindow() == myPlaylistEditor->Playlists)
 		old_name = myPlaylistEditor->Playlists->current().value();
 	else
-		old_name = myBrowser->main()->current().value().name;
+		old_name = myBrowser->main().current().value().name;
 	Statusbar::lock();
 	Statusbar::put() << NC::fmtBold << "Playlist: " << NC::fmtBoldEnd;
 	std::string new_name = wFooter->getString(old_name);
@@ -1596,12 +1596,12 @@ void JumpToMediaLibrary::Run()
 bool JumpToPlaylistEditor::canBeRun() const
 {
 	return myScreen == myBrowser
-	    && myBrowser->main()->current().value().type == MPD::itPlaylist;
+	    && myBrowser->main().current().value().type == MPD::itPlaylist;
 }
 
 void JumpToPlaylistEditor::Run()
 {
-	myPlaylistEditor->Locate(myBrowser->main()->current().value().name);
+	myPlaylistEditor->Locate(myBrowser->main().current().value().name);
 }
 
 void ToggleScreenLock::Run()
@@ -2087,7 +2087,7 @@ void ToggleBrowserSortMode::Run()
 			Statusbar::msg("Sort songs by: Name");
 			break;
 	}
-	std::sort(myBrowser->main()->begin()+(myBrowser->CurrentDir() != "/"), myBrowser->main()->end(),
+	std::sort(myBrowser->main().begin()+(myBrowser->CurrentDir() != "/"), myBrowser->main().end(),
 		LocaleBasedItemSorting(std::locale(), Config.ignore_leading_the, Config.browser_sort_mode));
 }
 

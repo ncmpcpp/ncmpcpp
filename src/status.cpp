@@ -191,7 +191,7 @@ void Status::Changes::database()
 	if (isVisible(myBrowser))
 		myBrowser->GetDirectory(myBrowser->CurrentDir());
 	else
-		myBrowser->main()->clear();
+		myBrowser->main().clear();
 #	ifdef HAVE_TAGLIB_H
 	myTagEditor->Dirs->clear();
 #	endif // HAVE_TAGLIB_H

@@ -25,7 +25,7 @@
 #include "mpdpp.h"
 #include "screen.h"
 
-struct Browser : public Screen<NC::Menu<MPD::Item> *>, public Filterable, public HasSongs, public Searchable
+struct Browser : public Screen<NC::Menu<MPD::Item>>, public Filterable, public HasSongs, public Searchable
 {
 	Browser();
 	
