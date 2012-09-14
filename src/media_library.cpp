@@ -869,11 +869,11 @@ void MediaLibrary::LocateSong(const MPD::Song &s)
 void MediaLibrary::AddToPlaylist(bool add_n_play)
 {
 	if (isActiveWindow(Songs) && !Songs.empty())
-		myPlaylist->Add(Songs.current().value(), add_n_play);
+		addSongToPlaylist(Songs.current().value(), add_n_play);
 	else
 	{
 		auto list = getSelectedSongs();
-		if (myPlaylist->Add(list, add_n_play))
+		if (addSongsToPlaylist(list, add_n_play))
 		{
 			if ((!Tags.empty() && isActiveWindow(Tags))
 			||  (isActiveWindow(Albums) && Albums.current().value().Date == AllTracksMarker))

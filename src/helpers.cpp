@@ -18,8 +18,65 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
+#include <algorithm>
+
 #include "helpers.h"
 #include "playlist.h"
+#include "statusbar.h"
+
+bool addSongToPlaylist(const MPD::Song &s, bool play, size_t position)
+{
+	bool result = false;
+	if (Config.ncmpc_like_songs_adding && myPlaylist->checkForSong(s))
+	{
+		auto &w = myPlaylist->main();
+		if (play)
+		{
+			auto song = std::find(w.beginV(), w.endV(), s);
+			assert(song != w.endV());
+			Mpd.PlayID(song->getID());
+			result = true;
+		}
+		else
+		{
+			Mpd.StartCommandsList();
+			for (auto it = w.rbeginV(); it != w.rendV(); ++it)
+				if (*it == s)
+					Mpd.Delete(it->getPosition());
+			Mpd.CommitCommandsList();
+			// we return false in this case
+		}
+	}
+	else
+	{
+		position = std::min(position, Mpd.GetPlaylistLength());
+		int id = Mpd.AddSong(s, position);
+		if (id >= 0)
+		{
+			Statusbar::msg("Added to playlist: %s",
+				s.toString(Config.song_status_format_no_colors, Config.tags_separator).c_str()
+			);
+			if (play)
+				Mpd.PlayID(id);
+			result = true;
+		}
+	}
+	return result;
+}
+
+bool addSongsToPlaylist(const MPD::SongList &list, bool play, size_t position)
+{
+	if (list.empty())
+		return false;
+	position = std::min(position, Mpd.GetPlaylistLength());
+	Mpd.StartCommandsList();
+	for (auto s = list.rbegin(); s != list.rend(); ++s)
+		if (Mpd.AddSong(*s, position) < 0)
+			break;
+	if (play)
+		Mpd.Play(position);
+	return Mpd.CommitCommandsList();
+}
 
 std::string Timestamp(time_t t)
 {

@@ -236,7 +236,7 @@ void PlaylistEditor::AddToPlaylist(bool add_n_play)
 		}
 	}
 	else if (isActiveWindow(Content) && !Content.empty())
-		myPlaylist->Add(Content.current().value(), add_n_play);
+		addSongToPlaylist(Content.current().value(), add_n_play);
 	
 	if (!add_n_play)
 		w->scroll(NC::wDown);

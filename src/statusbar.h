@@ -62,6 +62,9 @@ NC::Window &put();
 /// displays message in statusbar for period of time set in configuration file
 void msg(const char *format, ...) GNUC_PRINTF(1, 2);
 
+/// displays message in statusbar for given period of time
+void msg(int time, const char *format, ...) GNUC_PRINTF(2, 3);
+
 namespace Helpers {//
 
 /// called when statusbar window detects incoming idle notification

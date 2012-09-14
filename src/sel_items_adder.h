@@ -21,13 +21,16 @@
 #ifndef _SEL_ITEMS_ADDER_H
 #define _SEL_ITEMS_ADDER_H
 
+#include "exec_item.h"
 #include "screen.h"
+#include "song.h"
 
-struct SelectedItemsAdder : public Screen<NC::Menu<std::string> *>
+struct SelectedItemsAdder : public Screen<NC::Menu<ExecItem<std::string, void()>> *>
 {
+	typedef typename std::remove_pointer<WindowType>::type Component;
+	
 	SelectedItemsAdder();
 	
-	// Screen< NC::Menu<std::string> > implementation
 	virtual void switchTo() OVERRIDE;
 	virtual void resize() OVERRIDE;
 	virtual void refresh() OVERRIDE;
@@ -47,16 +50,33 @@ protected:
 	virtual bool isLockable() OVERRIDE { return false; }
 	
 private:
-	void SetDimensions();
+	void populatePlaylistSelector(BasicScreen *screen);
 	
-	NC::Menu<std::string> *itsPlaylistSelector;
-	NC::Menu<std::string> *itsPositionSelector;
+	void addToCurrentPlaylist();
+	void addToNewPlaylist() const;
+	void addToExistingPlaylist(const std::string &playlist) const;
+	void addAtTheEndOfPlaylist() const;
+	void addAtTheBeginningOfPlaylist() const;
+	void addAfterCurrentSong() const;
+	void addAfterCurrentAlbum() const;
+	void addAfterHighlightedSong() const;
+	void cancel();
+	void exitSuccessfully() const;
 	
-	size_t itsPSWidth;
-	size_t itsPSHeight;
+	void setDimensions();
 	
-	size_t itsWidth;
-	size_t itsHeight;
+	BasicScreen *m_old_screen;
+	
+	size_t m_playlist_selector_width;
+	size_t m_playlist_selector_height;
+	
+	size_t m_position_selector_width;
+	size_t m_position_selector_height;
+	
+	Component m_playlist_selector;
+	Component m_position_selector;
+	
+	MPD::SongList m_selected_items;
 };
 
 extern SelectedItemsAdder *mySelectedItemsAdder;

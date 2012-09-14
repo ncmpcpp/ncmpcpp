@@ -466,6 +466,9 @@ template <typename T> void ShowTag(T &buf, const std::string &tag)
 		buf << tag;
 }
 
+bool addSongToPlaylist(const MPD::Song &s, bool play, size_t position = -1);
+bool addSongsToPlaylist(const MPD::SongList &list, bool play, size_t position = -1);
+
 std::string Timestamp(time_t t);
 
 void markSongsInPlaylist(std::shared_ptr<ProxySongList> pl);

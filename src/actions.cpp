@@ -1769,6 +1769,11 @@ void SelectAlbum::Run()
 	}
 }
 
+bool AddSelectedItems::canBeRun() const
+{
+	return myScreen != mySelectedItemsAdder;
+}
+
 void AddSelectedItems::Run()
 {
 	mySelectedItemsAdder->switchTo();

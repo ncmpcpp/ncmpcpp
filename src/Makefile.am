@@ -67,6 +67,7 @@ noinst_HEADERS = \
 	curl_handle.h \
 	display.h \
 	error.h \
+	exec_item.h \
 	global.h \
 	help.h \
 	helpers.h \

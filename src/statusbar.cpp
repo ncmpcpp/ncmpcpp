@@ -34,6 +34,25 @@ bool statusbarBlockUpdate = false;
 bool progressbarBlockUpdate = false;
 bool statusbarAllowUnlock = true;
 
+void showMessage(int time, const char *format, va_list list)
+{
+	if (Global::ShowMessages && statusbarAllowUnlock)
+	{
+		statusbarLockTime = Global::Timer;
+		statusbarLockDelay = time;
+		if (Config.statusbar_visibility)
+			statusbarBlockUpdate = true;
+		else
+			progressbarBlockUpdate = true;
+		wFooter->goToXY(0, Config.statusbar_visibility);
+		*wFooter << NC::fmtBoldEnd;
+		wmove(wFooter->raw(), Config.statusbar_visibility, 0);
+		vw_printw(wFooter->raw(), format, list);
+		wclrtoeol(wFooter->raw());
+		wFooter->refresh();
+	}
+}
+
 }
 
 void Progressbar::lock()
@@ -148,24 +167,18 @@ NC::Window &Statusbar::put()
 
 void Statusbar::msg(const char *format, ...)
 {
-	if (Global::ShowMessages && statusbarAllowUnlock)
-	{
-		statusbarLockTime = Global::Timer;
-		statusbarLockDelay = Config.message_delay_time;
-		if (Config.statusbar_visibility)
-			statusbarBlockUpdate = 1;
-		else
-			progressbarBlockUpdate = 1;
-		wFooter->goToXY(0, Config.statusbar_visibility);
-		*wFooter << NC::fmtBoldEnd;
-		va_list list;
-		va_start(list, format);
-		wmove(wFooter->raw(), Config.statusbar_visibility, 0);
-		vw_printw(wFooter->raw(), format, list);
-		wclrtoeol(wFooter->raw());
-		va_end(list);
-		wFooter->refresh();
-	}
+	va_list list;
+	va_start(list, format);
+	showMessage(Config.message_delay_time, format, list);
+	va_end(list);
+}
+
+void Statusbar::msg(int time, const char *format, ...)
+{
+	va_list list;
+	va_start(list, format);
+	showMessage(time, format, list);
+	va_end(list);
 }
 
 void Statusbar::Helpers::mpd()

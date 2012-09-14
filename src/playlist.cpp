@@ -318,75 +318,9 @@ std::string Playlist::TotalLength()
 	return result.str();
 }
 
-bool Playlist::Add(const MPD::Song &s, bool play, int position)
-{
-	if (Config.ncmpc_like_songs_adding && checkForSong(s))
-	{
-		size_t hash = s.getHash();
-		if (play)
-		{
-			for (size_t i = 0; i < w.size(); ++i)
-			{
-				if (w.at(i).value().getHash() == hash)
-				{
-					Mpd.Play(i);
-					break;
-				}
-			}
-			return true;
-		}
-		else
-		{
-			Mpd.StartCommandsList();
-			for (size_t i = 0; i < w.size(); ++i)
-				if (w[i].value().getHash() == hash)
-					Mpd.Delete(i);
-			Mpd.CommitCommandsList();
-			return false;
-		}
-	}
-	else
-	{
-		int id = Mpd.AddSong(s, position);
-		if (id >= 0)
-		{
-			Statusbar::msg("Added to playlist: %s", s.toString(Config.song_status_format_no_colors, Config.tags_separator).c_str());
-			if (play)
-				Mpd.PlayID(id);
-			return true;
-		}
-		else
-			return false;
-	}
-}
-
-bool Playlist::Add(const MPD::SongList &l, bool play, int position)
-{
-	if (l.empty())
-		return false;
-	
-	Mpd.StartCommandsList();
-	if (position < 0)
-	{
-		for (auto it = l.begin(); it != l.end(); ++it)
-			if (Mpd.AddSong(*it) < 0)
-				break;
-	}
-	else
-	{
-		for (auto j = l.rbegin(); j != l.rend(); ++j)
-			if (Mpd.AddSong(*j, position) < 0)
-				break;
-	}
-	if (!Mpd.CommitCommandsList())
-		return false;
-	if (play)
-		PlayNewlyAddedSongs();
-	return true;
-}
-
 void Playlist::PlayNewlyAddedSongs()
 {
+	// FIXME for removal
 	bool is_filtered = w.isFiltered();
 	w.showAll();
 	size_t old_size = w.size();

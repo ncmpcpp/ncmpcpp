@@ -217,7 +217,7 @@ void SearchEngine::enterPressed()
 		reset();
 	}
 	else
-		myPlaylist->Add(w.current().value().song(), 1);
+		addSongToPlaylist(w.current().value().song(), true);
 	
 	if (option < SearchButton)
 		Statusbar::unlock();
@@ -235,7 +235,7 @@ void SearchEngine::spacePressed()
 		return;
 	}
 	
-	myPlaylist->Add(w.current().value().song(), 0);
+	addSongToPlaylist(w.current().value().song(), false);
 	w.scroll(NC::wDown);
 }
 

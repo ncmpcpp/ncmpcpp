@@ -74,8 +74,6 @@ struct Playlist : public Screen<NC::Menu<MPD::Song>>, public Filterable, public 
 	void UpdateTimer();
 	timeval Timer() const { return itsTimer; }
 	
-	bool Add(const MPD::Song &s, bool play, int position = -1);
-	bool Add(const MPD::SongList &l, bool play, int position = -1);
 	void PlayNewlyAddedSongs();
 	
 	void SetSelectedItemsPriority(int prio);

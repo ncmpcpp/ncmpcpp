@@ -143,7 +143,7 @@ void Browser::enterPressed()
 		}
 		case itSong:
 		{
-			myPlaylist->Add(*item.song, 1);
+			addSongToPlaylist(*item.song, true, -1);
 			break;
 		}
 		case itPlaylist:
@@ -191,7 +191,7 @@ void Browser::spacePressed()
 				list.reserve(items.size());
 				for (MPD::ItemList::const_iterator it = items.begin(); it != items.end(); ++it)
 					list.push_back(*it->song);
-				result = myPlaylist->Add(list, 0);
+				result = addSongsToPlaylist(list, false, -1);
 			}
 			else
 #			endif // !WIN32
@@ -202,7 +202,7 @@ void Browser::spacePressed()
 		}
 		case itSong:
 		{
-			myPlaylist->Add(*item.song, 0);
+			addSongToPlaylist(*item.song, false);
 			break;
 		}
 		case itPlaylist:

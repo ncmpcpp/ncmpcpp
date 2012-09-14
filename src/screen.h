@@ -121,20 +121,20 @@ template <typename WindowT> struct Screen : public BasicScreen
 	typedef typename std::add_lvalue_reference<WindowType>::type WindowReference;
 	
 private:
-	template <bool IsPointer, typename Result> struct access { };
-	template <typename Result> struct access<true, Result> {
+	template <bool IsPointer, typename Result> struct getObject { };
+	template <typename Result> struct getObject<true, Result> {
 		static Result apply(WindowType w) { return *w; }
 	};
-	template <typename Result> struct access<false, Result> {
+	template <typename Result> struct getObject<false, Result> {
 		static Result apply(WindowReference w) { return w; }
 	};
 	
-	typedef access<
+	typedef getObject<
 		std::is_pointer<WindowT>::value,
 		typename std::add_lvalue_reference<
 			typename std::remove_pointer<WindowT>::type
 		>::type
-	> accessor;
+	> Accessor;
 	
 public:
 	Screen() { }
@@ -143,7 +143,7 @@ public:
 	virtual ~Screen() { }
 	
 	virtual bool isActiveWindow(const NC::Window &w_) OVERRIDE {
-		return &accessor::apply(w) == &w_;
+		return &Accessor::apply(w) == &w_;
 	}
 	
 	/// Since some screens contain more that one window
@@ -151,17 +151,17 @@ public:
 	/// active
 	/// @return address to window object cast to void *
 	virtual void *activeWindow() OVERRIDE {
-		return &accessor::apply(w);
+		return &Accessor::apply(w);
 	}
 	
 	/// Refreshes whole screen
 	virtual void refresh() OVERRIDE {
-		accessor::apply(w).display();
+		Accessor::apply(w).display();
 	}
 	
 	/// Refreshes active window of the screen
 	virtual void refreshWindow() OVERRIDE {
-		accessor::apply(w).display();
+		Accessor::apply(w).display();
 	}
 	
 	/// Scrolls the screen by given amount of lines and
@@ -169,14 +169,14 @@ public:
 	/// loop that holds main loop until user releases the key
 	/// @param where indicates where one wants to scroll
 	virtual void scroll(NC::Where where) OVERRIDE {
-		accessor::apply(w).scroll(where);
+		Accessor::apply(w).scroll(where);
 	}
 	
 	/// Invoked after there was one of mouse buttons pressed
 	/// @param me struct that contains coords of where the click
 	/// had its place and button actions
 	virtual void mouseButtonPressed(MEVENT me) OVERRIDE {
-		genericMouseButtonPressed(accessor::apply(w), me);
+		genericMouseButtonPressed(Accessor::apply(w), me);
 	}
 	
 	/// @return currently active window

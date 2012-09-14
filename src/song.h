@@ -74,6 +74,9 @@ struct Song
 	virtual std::string toString(const std::string &fmt, const std::string &tags_separator,
 	                             const std::string &escape_chars = "") const;
 	
+	bool operator==(const Song &rhs) const { return m_hash == rhs.m_hash; }
+	bool operator!=(const Song &rhs) const { return m_hash != rhs.m_hash; }
+	
 	static std::string ShowTime(unsigned length);
 	static bool isFormatOk(const std::string &type, const std::string &fmt);
 	

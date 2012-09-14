@@ -703,6 +703,7 @@ struct AddSelectedItems : public Action
 	AddSelectedItems() : Action(aAddSelectedItems, "add_selected_items") { }
 	
 protected:
+	virtual bool canBeRun() const;
 	virtual void Run();
 };
 
