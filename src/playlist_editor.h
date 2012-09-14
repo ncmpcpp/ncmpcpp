@@ -76,8 +76,8 @@ struct PlaylistEditor : public Screen<NC::Window *>, public Filterable, public H
 	bool isContentFiltered();
 	std::shared_ptr<ProxySongList> contentProxyList();
 	
-	NC::Menu<std::string> *Playlists;
-	NC::Menu<MPD::Song> *Content;
+	NC::Menu<std::string> Playlists;
+	NC::Menu<MPD::Song> Content;
 	
 protected:
 	virtual bool isLockable() OVERRIDE { return true; }

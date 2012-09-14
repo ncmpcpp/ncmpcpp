@@ -398,9 +398,9 @@ void Action::ListsChangeFinisher()
 		{
 			myLibrary->Songs.clear();
 		}
-		else if (myScreen->activeWindow() == myPlaylistEditor->Playlists)
+		else if (myScreen->isActiveWindow(myPlaylistEditor->Playlists))
 		{
-			myPlaylistEditor->Content->clear();
+			myPlaylistEditor->Content.clear();
 		}
 #		ifdef HAVE_TAGLIB_H
 		else if (myScreen->activeWindow() == myTagEditor->Dirs)
@@ -841,23 +841,23 @@ void Delete::Run()
 			Statusbar::msg("Aborted");
 	}
 #	endif // !WIN32
-	else if (myScreen == myPlaylistEditor && !myPlaylistEditor->Content->empty())
+	else if (myScreen == myPlaylistEditor && !myPlaylistEditor->Content.empty())
 	{
-		if (myScreen->activeWindow() == myPlaylistEditor->Playlists)
+		if (myScreen->isActiveWindow(myPlaylistEditor->Playlists))
 		{
 			std::string question;
-			if (myPlaylistEditor->Playlists->hasSelected())
+			if (myPlaylistEditor->Playlists.hasSelected())
 				question = "Delete selected playlists?";
 			else
 			{
 				question = "Delete playlist \"";
-				question += ToString(wideShorten(ToWString(myPlaylistEditor->Playlists->current().value()), COLS-question.size()-10));
+				question += ToString(wideShorten(ToWString(myPlaylistEditor->Playlists.current().value()), COLS-question.size()-10));
 				question += "\"?";
 			}
 			bool yes = AskYesNoQuestion(question, Status::trace);
 			if (yes)
 			{
-				auto list = getSelectedOrCurrent(myPlaylistEditor->Playlists->begin(), myPlaylistEditor->Playlists->end(), myPlaylistEditor->Playlists->currentI());
+				auto list = getSelectedOrCurrent(myPlaylistEditor->Playlists.begin(), myPlaylistEditor->Playlists.end(), myPlaylistEditor->Playlists.currentI());
 				Mpd.StartCommandsList();
 				for (auto it = list.begin(); it != list.end(); ++it)
 					Mpd.DeletePlaylist((*it)->value());
@@ -867,12 +867,12 @@ void Delete::Run()
 			else
 				Statusbar::msg("Aborted");
 		}
-		else if (myScreen->activeWindow() == myPlaylistEditor->Content)
+		else if (myScreen->isActiveWindow(myPlaylistEditor->Content))
 		{
-			std::string playlist = myPlaylistEditor->Playlists->current().value();
+			std::string playlist = myPlaylistEditor->Playlists.current().value();
 			auto delete_fun = std::bind(&MPD::Connection::PlaylistDelete, _1, playlist, _2);
 			Statusbar::msg("Deleting items...");
-			if (deleteSelectedSongs(*myPlaylistEditor->Content, delete_fun))
+			if (deleteSelectedSongs(myPlaylistEditor->Content, delete_fun))
 				Statusbar::msg("Item(s) deleted");
 		}
 	}
@@ -982,8 +982,8 @@ bool MoveSelectedItemsUp::canBeRun() const
 	return ((myScreen == myPlaylist
 	    &&  !myPlaylist->main().empty()
 	    &&  !myPlaylist->isFiltered())
-	 ||    (myScreen->activeWindow() == myPlaylistEditor->Content
-	    &&  !myPlaylistEditor->Content->empty()
+	 ||    (myScreen->isActiveWindow(myPlaylistEditor->Content)
+	    &&  !myPlaylistEditor->Content.empty()
 	    &&  !myPlaylistEditor->isContentFiltered()));
 }
 
@@ -995,10 +995,10 @@ void MoveSelectedItemsUp::Run()
 	}
 	else if (myScreen == myPlaylistEditor)
 	{
-		assert(!myPlaylistEditor->Playlists->empty());
-		std::string playlist = myPlaylistEditor->Playlists->current().value();
+		assert(!myPlaylistEditor->Playlists.empty());
+		std::string playlist = myPlaylistEditor->Playlists.current().value();
 		auto move_fun = std::bind(&MPD::Connection::PlaylistMove, _1, playlist, _2, _3);
-		moveSelectedItemsUp(*myPlaylistEditor->Content, move_fun);
+		moveSelectedItemsUp(myPlaylistEditor->Content, move_fun);
 	}
 }
 
@@ -1007,8 +1007,8 @@ bool MoveSelectedItemsDown::canBeRun() const
 	return ((myScreen == myPlaylist
 	    &&  !myPlaylist->main().empty()
 	    &&  !myPlaylist->isFiltered())
-	 ||    (myScreen->activeWindow() == myPlaylistEditor->Content
-	    &&  !myPlaylistEditor->Content->empty()
+	 ||    (myScreen->isActiveWindow(myPlaylistEditor->Content)
+	    &&  !myPlaylistEditor->Content.empty()
 	    &&  !myPlaylistEditor->isContentFiltered()));
 }
 
@@ -1020,17 +1020,17 @@ void MoveSelectedItemsDown::Run()
 	}
 	else if (myScreen == myPlaylistEditor)
 	{
-		assert(!myPlaylistEditor->Playlists->empty());
-		std::string playlist = myPlaylistEditor->Playlists->current().value();
+		assert(!myPlaylistEditor->Playlists.empty());
+		std::string playlist = myPlaylistEditor->Playlists.current().value();
 		auto move_fun = std::bind(&MPD::Connection::PlaylistMove, _1, playlist, _2, _3);
-		moveSelectedItemsDown(*myPlaylistEditor->Content, move_fun);
+		moveSelectedItemsDown(myPlaylistEditor->Content, move_fun);
 	}
 }
 
 bool MoveSelectedItemsTo::canBeRun() const
 {
 	return myScreen == myPlaylist
-	    || myScreen->activeWindow() == myPlaylistEditor->Content;
+	    || myScreen->isActiveWindow(myPlaylistEditor->Content);
 }
 
 void MoveSelectedItemsTo::Run()
@@ -1039,17 +1039,17 @@ void MoveSelectedItemsTo::Run()
 		moveSelectedItemsTo(myPlaylist->main(), std::bind(&MPD::Connection::Move, _1, _2, _3));
 	else
 	{
-		assert(!myPlaylistEditor->Playlists->empty());
-		std::string playlist = myPlaylistEditor->Playlists->current().value();
+		assert(!myPlaylistEditor->Playlists.empty());
+		std::string playlist = myPlaylistEditor->Playlists.current().value();
 		auto move_fun = std::bind(&MPD::Connection::PlaylistMove, _1, playlist, _2, _3);
-		moveSelectedItemsTo(*myPlaylistEditor->Content, move_fun);
+		moveSelectedItemsTo(myPlaylistEditor->Content, move_fun);
 	}
 }
 
 bool Add::canBeRun() const
 {
 	return myScreen != myPlaylistEditor
-	   || !myPlaylistEditor->Playlists->empty();
+	   || !myPlaylistEditor->Playlists.empty();
 }
 
 void Add::Run()
@@ -1065,7 +1065,7 @@ void Add::Run()
 		Statusbar::put() << "Adding...";
 		wFooter->refresh();
 		if (myScreen == myPlaylistEditor)
-			Mpd.AddToPlaylist(myPlaylistEditor->Playlists->current().value(), path);
+			Mpd.AddToPlaylist(myPlaylistEditor->Playlists.current().value(), path);
 		else
 		{
 			const char lastfm_url[] = "lastfm://";
@@ -1107,7 +1107,7 @@ bool ToggleDisplayMode::canBeRun() const
 	return myScreen == myPlaylist
 	    || myScreen == myBrowser
 	    || myScreen == mySearcher
-	    || myScreen->activeWindow() == myPlaylistEditor->Content;
+	    || myScreen->isActiveWindow(myPlaylistEditor->Content);
 }
 
 void ToggleDisplayMode::Run()
@@ -1144,14 +1144,14 @@ void ToggleDisplayMode::Run()
 		if (mySearcher->main().size() > SearchEngine::StaticOptions)
 			mySearcher->main().setTitle(Config.columns_in_search_engine && Config.titles_visibility ? Display::Columns(mySearcher->main().getWidth()) : "");
 	}
-	else if (myScreen->activeWindow() == myPlaylistEditor->Content)
+	else if (myScreen->isActiveWindow(myPlaylistEditor->Content))
 	{
 		Config.columns_in_playlist_editor = !Config.columns_in_playlist_editor;
 		Statusbar::msg("Playlist editor display mode: %s", Config.columns_in_playlist_editor ? "Columns" : "Classic");
 		if (Config.columns_in_playlist_editor)
-			myPlaylistEditor->Content->setItemDisplayer(std::bind(Display::SongsInColumns, _1, myPlaylistEditor));
+			myPlaylistEditor->Content.setItemDisplayer(std::bind(Display::SongsInColumns, _1, myPlaylistEditor));
 		else
-			myPlaylistEditor->Content->setItemDisplayer(std::bind(Display::Songs, _1, myPlaylistEditor, Config.song_list_format));
+			myPlaylistEditor->Content.setItemDisplayer(std::bind(Display::Songs, _1, myPlaylistEditor, Config.song_list_format));
 	}
 }
 
@@ -1529,8 +1529,8 @@ void EditDirectoryName::Run()
 
 bool EditPlaylistName::canBeRun() const
 {
-	return   (myScreen->activeWindow() == myPlaylistEditor->Playlists
-	      && !myPlaylistEditor->Playlists->empty())
+	return   (myScreen->isActiveWindow(myPlaylistEditor->Playlists)
+	      && !myPlaylistEditor->Playlists.empty())
 	    ||   (myScreen == myBrowser
 	      && !myBrowser->main().empty()
 		  && myBrowser->main().current().value().type == MPD::itPlaylist);
@@ -1541,8 +1541,8 @@ void EditPlaylistName::Run()
 	using Global::wFooter;
 	
 	std::string old_name;
-	if (myScreen->activeWindow() == myPlaylistEditor->Playlists)
-		old_name = myPlaylistEditor->Playlists->current().value();
+	if (myScreen->isActiveWindow(myPlaylistEditor->Playlists))
+		old_name = myPlaylistEditor->Playlists.current().value();
 	else
 		old_name = myBrowser->main().current().value().name;
 	Statusbar::lock();
@@ -1794,8 +1794,8 @@ bool CropPlaylist::canBeRun() const
 
 void CropPlaylist::Run()
 {
-	assert(!myPlaylistEditor->Playlists->empty());
-	std::string playlist = myPlaylistEditor->Playlists->current().value();
+	assert(!myPlaylistEditor->Playlists.empty());
+	std::string playlist = myPlaylistEditor->Playlists.current().value();
 	bool yes = true;
 	if (Config.ask_before_clearing_main_playlist)
 		yes = AskYesNoQuestion("Do you really want to crop playlist \"" + playlist + "\"?", Status::trace);
@@ -1803,7 +1803,7 @@ void CropPlaylist::Run()
 	{
 		auto delete_fun = std::bind(&MPD::Connection::PlaylistDelete, _1, playlist, _2);
 		Statusbar::msg("Cropping playlist \"%s\"...", playlist.c_str());
-		if (cropPlaylist(*myPlaylistEditor->Content, delete_fun))
+		if (cropPlaylist(myPlaylistEditor->Content, delete_fun))
 			Statusbar::msg("Playlist \"%s\" cropped", playlist.c_str());
 	}
 }
@@ -1830,8 +1830,8 @@ bool ClearPlaylist::canBeRun() const
 
 void ClearPlaylist::Run()
 {
-	assert(!myPlaylistEditor->Playlists->empty());
-	std::string playlist = myPlaylistEditor->Playlists->current().value();
+	assert(!myPlaylistEditor->Playlists.empty());
+	std::string playlist = myPlaylistEditor->Playlists.current().value();
 	bool yes = true;
 	if (Config.ask_before_clearing_main_playlist)
 		yes = AskYesNoQuestion("Do you really want to clear playlist \"" + playlist + "\"?", Status::trace);
@@ -1840,7 +1840,7 @@ void ClearPlaylist::Run()
 		auto delete_fun = std::bind(&MPD::Connection::PlaylistDelete, _1, playlist, _2);
 		auto clear_fun = std::bind(&MPD::Connection::ClearPlaylist, _1, playlist);
 		Statusbar::msg("Deleting items from \"%s\"...", playlist.c_str());
-		if (clearPlaylist(*myPlaylistEditor->Content, delete_fun, clear_fun))
+		if (clearPlaylist(myPlaylistEditor->Content, delete_fun, clear_fun))
 			Statusbar::msg("Items deleted from \"%s\"", playlist.c_str());
 	}
 }
