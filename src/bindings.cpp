@@ -119,7 +119,7 @@ Action *parseActionLine(const std::string &line, F error)
 			if (!arg.empty())
 			{
 				std::vector<int> queue(arg.begin(), arg.end());
-				// if char is signed, cancel 1s from char -> int conversion
+				// if char is signed, erase 1s from char -> int conversion
 				for (auto it = arg.begin(); it != arg.end(); ++it)
 					*it &= 0xff;
 				result = new PushCharacters(&Global::wFooter, std::move(queue));
