@@ -438,8 +438,8 @@ void SearchEngine::Search()
 		list = Mpd.GetDirectoryRecursive("/");
 	else
 	{
-		list.reserve(myPlaylist->main()->size());
-		for (auto s = myPlaylist->main()->beginV(); s != myPlaylist->main()->endV(); ++s)
+		list.reserve(myPlaylist->main().size());
+		for (auto s = myPlaylist->main().beginV(); s != myPlaylist->main().endV(); ++s)
 			list.push_back(*s);
 	}
 	

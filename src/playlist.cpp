@@ -52,16 +52,16 @@ bool playlistEntryMatcher(const Regex &rx, const MPD::Song &s);
 
 Playlist::Playlist() : itsTotalLength(0), itsRemainingTime(0), itsScrollBegin(0)
 {
-	w = new NC::Menu<MPD::Song>(0, MainStartY, COLS, MainHeight, Config.columns_in_playlist && Config.titles_visibility ? Display::Columns(COLS) : "", Config.main_color, NC::brNone);
-	w->cyclicScrolling(Config.use_cyclic_scrolling);
-	w->centeredCursor(Config.centered_cursor);
-	w->setHighlightColor(Config.main_highlight_color);
-	w->setSelectedPrefix(Config.selected_item_prefix);
-	w->setSelectedSuffix(Config.selected_item_suffix);
+	w = NC::Menu<MPD::Song>(0, MainStartY, COLS, MainHeight, Config.columns_in_playlist && Config.titles_visibility ? Display::Columns(COLS) : "", Config.main_color, NC::brNone);
+	w.cyclicScrolling(Config.use_cyclic_scrolling);
+	w.centeredCursor(Config.centered_cursor);
+	w.setHighlightColor(Config.main_highlight_color);
+	w.setSelectedPrefix(Config.selected_item_prefix);
+	w.setSelectedSuffix(Config.selected_item_suffix);
 	if (Config.columns_in_playlist)
-		w->setItemDisplayer(std::bind(Display::SongsInColumns, _1, this));
+		w.setItemDisplayer(std::bind(Display::SongsInColumns, _1, this));
 	else
-		w->setItemDisplayer(std::bind(Display::Songs, _1, this, Config.song_list_format));
+		w.setItemDisplayer(std::bind(Display::Songs, _1, this, Config.song_list_format));
 }
 
 void Playlist::switchTo()
@@ -92,13 +92,13 @@ void Playlist::resize()
 {
 	size_t x_offset, width;
 	getWindowResizeParams(x_offset, width);
-	w->resize(width, MainHeight);
-	w->moveTo(x_offset, MainStartY);
+	w.resize(width, MainHeight);
+	w.moveTo(x_offset, MainStartY);
 
 	if (Config.columns_in_playlist && Config.titles_visibility)
-		w->setTitle(Display::Columns(w->getWidth()));
+		w.setTitle(Display::Columns(w.getWidth()));
 	else
-		w->setTitle("");
+		w.setTitle("");
 	
 	hasToBeResized = 0;
 }
@@ -114,26 +114,26 @@ std::wstring Playlist::title()
 
 void Playlist::enterPressed()
 {
-	if (!w->empty())
-		Mpd.PlayID(w->current().value().getID());
+	if (!w.empty())
+		Mpd.PlayID(w.current().value().getID());
 }
 
 void Playlist::spacePressed()
 {
-	if (!w->empty())
+	if (!w.empty())
 	{
-		w->current().setSelected(!w->current().isSelected());
-		w->scroll(NC::wDown);
+		w.current().setSelected(!w.current().isSelected());
+		w.scroll(NC::wDown);
 	}
 }
 
 void Playlist::mouseButtonPressed(MEVENT me)
 {
-	if (!w->empty() && w->hasCoords(me.x, me.y))
+	if (!w.empty() && w.hasCoords(me.x, me.y))
 	{
-		if (size_t(me.y) < w->size() && (me.bstate & (BUTTON1_PRESSED | BUTTON3_PRESSED)))
+		if (size_t(me.y) < w.size() && (me.bstate & (BUTTON1_PRESSED | BUTTON3_PRESSED)))
 		{
-			w->Goto(me.y);
+			w.Goto(me.y);
 			if (me.bstate & BUTTON3_PRESSED)
 				enterPressed();
 		}
@@ -151,14 +151,14 @@ bool Playlist::allowsFiltering()
 
 std::string Playlist::currentFilter()
 {
-	return RegexFilter<MPD::Song>::currentFilter(*w);
+	return RegexFilter<MPD::Song>::currentFilter(w);
 }
 
 void Playlist::applyFilter(const std::string &filter)
 {
-	w->showAll();
+	w.showAll();
 	auto rx = RegexFilter<MPD::Song>(filter, Config.regex_type, playlistEntryMatcher);
-	w->filter(w->begin(), w->end(), rx);
+	w.filter(w.begin(), w.end(), rx);
 }
 
 /***********************************************************************/
@@ -171,24 +171,24 @@ bool Playlist::allowsSearching()
 bool Playlist::search(const std::string &constraint)
 {
 	auto rx = RegexFilter<MPD::Song>(constraint, Config.regex_type, playlistEntryMatcher);
-	return w->search(w->begin(), w->end(), rx);
+	return w.search(w.begin(), w.end(), rx);
 }
 
 void Playlist::nextFound(bool wrap)
 {
-	w->nextFound(wrap);
+	w.nextFound(wrap);
 }
 
 void Playlist::prevFound(bool wrap)
 {
-	w->prevFound(wrap);
+	w.prevFound(wrap);
 }
 
 /***********************************************************************/
 
 std::shared_ptr<ProxySongList> Playlist::getProxySongList()
 {
-	return mkProxySongList(*w, [](NC::Menu<MPD::Song>::Item &item) {
+	return mkProxySongList(w, [](NC::Menu<MPD::Song>::Item &item) {
 		return &item.value();
 	});
 }
@@ -200,17 +200,17 @@ bool Playlist::allowsSelection()
 
 void Playlist::reverseSelection()
 {
-	reverseSelectionHelper(w->begin(), w->end());
+	reverseSelectionHelper(w.begin(), w.end());
 }
 
 MPD::SongList Playlist::getSelectedSongs()
 {
 	MPD::SongList result;
-	for (auto it = w->begin(); it != w->end(); ++it)
+	for (auto it = w.begin(); it != w.end(); ++it)
 		if (it->isSelected())
 			result.push_back(it->value());
-	if (result.empty() && !w->empty())
-		result.push_back(w->current().value());
+	if (result.empty() && !w.empty())
+		result.push_back(w.current().value());
 	return result;
 }
 
@@ -220,15 +220,15 @@ MPD::Song Playlist::nowPlayingSong()
 {
 	MPD::Song s;
 	if (Mpd.isPlaying())
-		withUnfilteredMenu(*w, [this, &s]() {
-			s = w->at(Mpd.GetCurrentSongPos()).value();
+		withUnfilteredMenu(w, [this, &s]() {
+			s = w.at(Mpd.GetCurrentSongPos()).value();
 		});
 	return s;
 }
 
 bool Playlist::isFiltered()
 {
-	if (w->isFiltered())
+	if (w.isFiltered())
 	{
 		Statusbar::msg("Function currently unavailable due to filtered playlist");
 		return true;
@@ -242,9 +242,9 @@ void Playlist::Reverse()
 		return;
 	Statusbar::msg("Reversing playlist order...");
 	size_t beginning = -1, end = -1;
-	for (size_t i = 0; i < w->size(); ++i)
+	for (size_t i = 0; i < w.size(); ++i)
 	{
-		if (w->at(i).isSelected())
+		if (w.at(i).isSelected())
 		{
 			if (beginning == size_t(-1))
 				beginning = i;
@@ -254,7 +254,7 @@ void Playlist::Reverse()
 	if (beginning == size_t(-1)) // no selected items
 	{
 		beginning = 0;
-		end = w->size();
+		end = w.size();
 	}
 	Mpd.StartCommandsList();
 	for (size_t i = beginning, j = end-1; i < (beginning+end)/2; ++i, --j)
@@ -265,7 +265,7 @@ void Playlist::Reverse()
 
 void Playlist::EnableHighlighting()
 {
-	w->setHighlighting(true);
+	w.setHighlighting(true);
 	UpdateTimer();
 }
 
@@ -281,26 +281,26 @@ std::string Playlist::TotalLength()
 	if (ReloadTotalLength)
 	{
 		itsTotalLength = 0;
-		for (size_t i = 0; i < w->size(); ++i)
-			itsTotalLength += (*w)[i].value().getDuration();
+		for (size_t i = 0; i < w.size(); ++i)
+			itsTotalLength += w[i].value().getDuration();
 		ReloadTotalLength = 0;
 	}
-	if (Config.playlist_show_remaining_time && ReloadRemaining && !w->isFiltered())
+	if (Config.playlist_show_remaining_time && ReloadRemaining && !w.isFiltered())
 	{
 		itsRemainingTime = 0;
-		for (size_t i = Mpd.GetCurrentlyPlayingSongPos(); i < w->size(); ++i)
-			itsRemainingTime += (*w)[i].value().getDuration();
+		for (size_t i = Mpd.GetCurrentlyPlayingSongPos(); i < w.size(); ++i)
+			itsRemainingTime += w[i].value().getDuration();
 		ReloadRemaining = false;
 	}
 	
-	result << '(' << w->size() << (w->size() == 1 ? " item" : " items");
+	result << '(' << w.size() << (w.size() == 1 ? " item" : " items");
 	
-	if (w->isFiltered())
+	if (w.isFiltered())
 	{
-		w->showAll();
-		size_t real_size = w->size();
-		w->showFiltered();
-		if (w->size() != real_size)
+		w.showAll();
+		size_t real_size = w.size();
+		w.showFiltered();
+		if (w.size() != real_size)
 			result << " (out of " << Mpd.GetPlaylistLength() << ")";
 	}
 	
@@ -309,7 +309,7 @@ std::string Playlist::TotalLength()
 		result << ", length: ";
 		ShowTime(result, itsTotalLength, Config.playlist_shorten_total_times);
 	}
-	if (Config.playlist_show_remaining_time && itsRemainingTime && !w->isFiltered() && w->size() > 1)
+	if (Config.playlist_show_remaining_time && itsRemainingTime && !w.isFiltered() && w.size() > 1)
 	{
 		result << " :: remaining: ";
 		ShowTime(result, itsRemainingTime, Config.playlist_shorten_total_times);
@@ -325,9 +325,9 @@ bool Playlist::Add(const MPD::Song &s, bool play, int position)
 		size_t hash = s.getHash();
 		if (play)
 		{
-			for (size_t i = 0; i < w->size(); ++i)
+			for (size_t i = 0; i < w.size(); ++i)
 			{
-				if (w->at(i).value().getHash() == hash)
+				if (w.at(i).value().getHash() == hash)
 				{
 					Mpd.Play(i);
 					break;
@@ -338,8 +338,8 @@ bool Playlist::Add(const MPD::Song &s, bool play, int position)
 		else
 		{
 			Mpd.StartCommandsList();
-			for (size_t i = 0; i < w->size(); ++i)
-				if ((*w)[i].value().getHash() == hash)
+			for (size_t i = 0; i < w.size(); ++i)
+				if (w[i].value().getHash() == hash)
 					Mpd.Delete(i);
 			Mpd.CommitCommandsList();
 			return false;
@@ -387,19 +387,19 @@ bool Playlist::Add(const MPD::SongList &l, bool play, int position)
 
 void Playlist::PlayNewlyAddedSongs()
 {
-	bool is_filtered = w->isFiltered();
-	w->showAll();
-	size_t old_size = w->size();
+	bool is_filtered = w.isFiltered();
+	w.showAll();
+	size_t old_size = w.size();
 	Mpd.UpdateStatus();
-	if (old_size < w->size())
+	if (old_size < w.size())
 		Mpd.Play(old_size);
 	if (is_filtered)
-		w->showFiltered();
+		w.showFiltered();
 }
 
 void Playlist::SetSelectedItemsPriority(int prio)
 {
-	auto list = getSelectedOrCurrent(w->begin(), w->end(), w->currentI());
+	auto list = getSelectedOrCurrent(w.begin(), w.end(), w.currentI());
 	Mpd.StartCommandsList();
 	for (auto it = list.begin(); it != list.end(); ++it)
 		Mpd.SetPriority((*it)->value(), prio);

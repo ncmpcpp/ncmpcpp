@@ -783,11 +783,11 @@ void VolumeDown::Run()
 
 void Delete::Run()
 {
-	if (myScreen == myPlaylist && !myPlaylist->main()->empty())
+	if (myScreen == myPlaylist && !myPlaylist->main().empty())
 	{
 		Statusbar::msg("Deleting items...");
 		auto delete_fun = std::bind(&MPD::Connection::Delete, _1, _2);
-		if (deleteSelectedSongs(*myPlaylist->main(), delete_fun))
+		if (deleteSelectedSongs(myPlaylist->main(), delete_fun))
 			Statusbar::msg("Item(s) deleted");
 	}
 #	ifndef WIN32
@@ -914,11 +914,11 @@ void SavePlaylist::Run()
 	}
 	if (!playlist_name.empty())
 	{
-		if (myPlaylist->main()->isFiltered())
+		if (myPlaylist->main().isFiltered())
 		{
 			Mpd.StartCommandsList();
-			for (size_t i = 0; i < myPlaylist->main()->size(); ++i)
-				Mpd.AddToPlaylist(playlist_name, (*myPlaylist->main())[i].value());
+			for (size_t i = 0; i < myPlaylist->main().size(); ++i)
+				Mpd.AddToPlaylist(playlist_name, myPlaylist->main()[i].value());
 			Mpd.CommitCommandsList();
 			if (Mpd.GetErrorMessage().empty())
 				Statusbar::msg("Filtered items added to playlist \"%s\"", playlist_name.c_str());
@@ -979,8 +979,8 @@ void MoveSortOrderDown::Run()
 
 bool MoveSelectedItemsUp::canBeRun() const
 {
-	return ((myScreen->activeWindow() == myPlaylist->main()
-	    &&  !myPlaylist->main()->empty()
+	return ((myScreen == myPlaylist
+	    &&  !myPlaylist->main().empty()
 	    &&  !myPlaylist->isFiltered())
 	 ||    (myScreen->activeWindow() == myPlaylistEditor->Content
 	    &&  !myPlaylistEditor->Content->empty()
@@ -991,7 +991,7 @@ void MoveSelectedItemsUp::Run()
 {
 	if (myScreen == myPlaylist)
 	{
-		moveSelectedItemsUp(*myPlaylist->main(), std::bind(&MPD::Connection::Move, _1, _2, _3));
+		moveSelectedItemsUp(myPlaylist->main(), std::bind(&MPD::Connection::Move, _1, _2, _3));
 	}
 	else if (myScreen == myPlaylistEditor)
 	{
@@ -1004,8 +1004,8 @@ void MoveSelectedItemsUp::Run()
 
 bool MoveSelectedItemsDown::canBeRun() const
 {
-	return ((myScreen->activeWindow() == myPlaylist->main()
-	    &&  !myPlaylist->main()->empty()
+	return ((myScreen == myPlaylist
+	    &&  !myPlaylist->main().empty()
 	    &&  !myPlaylist->isFiltered())
 	 ||    (myScreen->activeWindow() == myPlaylistEditor->Content
 	    &&  !myPlaylistEditor->Content->empty()
@@ -1016,7 +1016,7 @@ void MoveSelectedItemsDown::Run()
 {
 	if (myScreen == myPlaylist)
 	{
-		moveSelectedItemsDown(*myPlaylist->main(), std::bind(&MPD::Connection::Move, _1, _2, _3));
+		moveSelectedItemsDown(myPlaylist->main(), std::bind(&MPD::Connection::Move, _1, _2, _3));
 	}
 	else if (myScreen == myPlaylistEditor)
 	{
@@ -1029,14 +1029,14 @@ void MoveSelectedItemsDown::Run()
 
 bool MoveSelectedItemsTo::canBeRun() const
 {
-	return myScreen->activeWindow() == myPlaylist->main()
+	return myScreen == myPlaylist
 	    || myScreen->activeWindow() == myPlaylistEditor->Content;
 }
 
 void MoveSelectedItemsTo::Run()
 {
 	if (myScreen == myPlaylist)
-		moveSelectedItemsTo(*myPlaylist->main(), std::bind(&MPD::Connection::Move, _1, _2, _3));
+		moveSelectedItemsTo(myPlaylist->main(), std::bind(&MPD::Connection::Move, _1, _2, _3));
 	else
 	{
 		assert(!myPlaylistEditor->Playlists->empty());
@@ -1119,16 +1119,16 @@ void ToggleDisplayMode::Run()
 		
 		if (Config.columns_in_playlist)
 		{
-			myPlaylist->main()->setItemDisplayer(std::bind(Display::SongsInColumns, _1, myPlaylist));
+			myPlaylist->main().setItemDisplayer(std::bind(Display::SongsInColumns, _1, myPlaylist));
 			if (Config.titles_visibility)
-				myPlaylist->main()->setTitle(Display::Columns(myPlaylist->main()->getWidth()));
+				myPlaylist->main().setTitle(Display::Columns(myPlaylist->main().getWidth()));
 			else
-				myPlaylist->main()->setTitle("");
+				myPlaylist->main().setTitle("");
 		}
 		else
 		{
-			myPlaylist->main()->setItemDisplayer(std::bind(Display::Songs, _1, myPlaylist, Config.song_list_format));
-			myPlaylist->main()->setTitle("");
+			myPlaylist->main().setItemDisplayer(std::bind(Display::Songs, _1, myPlaylist, Config.song_list_format));
+			myPlaylist->main().setTitle("");
 		}
 	}
 	else if (myScreen == myBrowser)
@@ -1199,8 +1199,8 @@ void TogglePlayingSongCentering::Run()
 {
 	Config.autocenter_mode = !Config.autocenter_mode;
 	Statusbar::msg("Centering playing song: %s", Config.autocenter_mode ? "On" : "Off");
-	if (Config.autocenter_mode && Mpd.isPlaying() && !myPlaylist->main()->isFiltered())
-		myPlaylist->main()->highlight(Mpd.GetCurrentlyPlayingSongPos());
+	if (Config.autocenter_mode && Mpd.isPlaying() && !myPlaylist->main().isFiltered())
+		myPlaylist->main().highlight(Mpd.GetCurrentlyPlayingSongPos());
 }
 
 void UpdateDatabase::Run()
@@ -1226,7 +1226,7 @@ bool JumpToPlayingSong::canBeRun() const
 void JumpToPlayingSong::Run()
 {
 	if (myScreen == myPlaylist)
-		myPlaylist->main()->highlight(Mpd.GetCurrentlyPlayingSongPos());
+		myPlaylist->main().highlight(Mpd.GetCurrentlyPlayingSongPos());
 	else if (myScreen == myBrowser)
 	{
 		myBrowser->LocateSong(myPlaylist->nowPlayingSong());
@@ -1782,7 +1782,7 @@ void CropMainPlaylist::Run()
 	if (yes)
 	{
 		Statusbar::msg("Cropping playlist...");
-		if (cropPlaylist(*myPlaylist->main(), std::bind(&MPD::Connection::Delete, _1, _2)))
+		if (cropPlaylist(myPlaylist->main(), std::bind(&MPD::Connection::Delete, _1, _2)))
 			Statusbar::msg("Cropping playlist...");
 	}
 }
@@ -1818,7 +1818,7 @@ void ClearMainPlaylist::Run()
 		auto delete_fun = std::bind(&MPD::Connection::Delete, _1, _2);
 		auto clear_fun = std::bind(&MPD::Connection::ClearMainPlaylist, _1);
 		Statusbar::msg("Deleting items...");
-		if (clearPlaylist(*myPlaylist->main(), delete_fun, clear_fun))
+		if (clearPlaylist(myPlaylist->main(), delete_fun, clear_fun))
 			Statusbar::msg("Items deleted");
 	}
 }
@@ -1888,7 +1888,7 @@ void ApplyFilter::Run()
 	filter = f->currentFilter();
  	if (filter.empty())
 	{
-		myPlaylist->main()->clearFilterResults();
+		myPlaylist->main().clearFilterResults();
 		Statusbar::msg("Filtering disabled");
 	}
  	else
@@ -2176,7 +2176,7 @@ bool SetSelectedItemsPriority::canBeRun() const
 		Statusbar::msg("Priorities are supported in MPD >= 0.17.0");
 		return false;
 	}
-	return myScreen == myPlaylist && !myPlaylist->main()->empty();
+	return myScreen == myPlaylist && !myPlaylist->main().empty();
 }
 
 void SetSelectedItemsPriority::Run()
@@ -2200,7 +2200,7 @@ void SetSelectedItemsPriority::Run()
 
 bool FilterPlaylistOnPriorities::canBeRun() const
 {
-	return myScreen->activeWindow() == myPlaylist->main();
+	return myScreen == myPlaylist;
 }
 
 void FilterPlaylistOnPriorities::Run()
@@ -2214,7 +2214,7 @@ void FilterPlaylistOnPriorities::Run()
 	if (!isInteger(strprio.c_str(), false))
 		return;
 	unsigned prio = stringToInt(strprio);
-	myPlaylist->main()->filter(myPlaylist->main()->begin(), myPlaylist->main()->end(),
+	myPlaylist->main().filter(myPlaylist->main().begin(), myPlaylist->main().end(),
 		[prio](const NC::Menu<MPD::Song>::Item &s) {
 			return s.value().getPrio() > prio;
 	});

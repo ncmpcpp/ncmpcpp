@@ -27,7 +27,7 @@
 #include "screen.h"
 #include "song.h"
 
-struct Playlist : public Screen<NC::Menu<MPD::Song> *>, public Filterable, public HasSongs, public Searchable
+struct Playlist : public Screen<NC::Menu<MPD::Song>>, public Filterable, public HasSongs, public Searchable
 {
 	Playlist();
 	

@@ -523,6 +523,7 @@ template <typename T> Menu<T>::Menu(Menu &&rhs)
 
 template <typename T> Menu<T> &Menu<T>::operator=(Menu rhs)
 {
+	std::swap(static_cast<Window &>(*this), static_cast<Window &>(rhs));
 	std::swap(m_item_displayer, rhs.m_item_displayer);
 	std::swap(m_filter, rhs.m_filter);
 	std::swap(m_searcher, rhs.m_searcher);

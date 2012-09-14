@@ -92,13 +92,13 @@ void Status::trace()
 	
 	applyToVisibleWindows(&BasicScreen::update);
 	
-	if (isVisible(myPlaylist) && myPlaylist->activeWindow() == myPlaylist->main()
+	if (isVisible(myPlaylist)
 	&&  Timer.tv_sec == myPlaylist->Timer().tv_sec+Config.playlist_disable_highlight_delay
-	&&  myPlaylist->main()->isHighlighted()
+	&&  myPlaylist->main().isHighlighted()
 	&&  Config.playlist_disable_highlight_delay)
 	{
-		myPlaylist->main()->setHighlighting(false);
-		myPlaylist->main()->refresh();
+		myPlaylist->main().setHighlighting(false);
+		myPlaylist->main().refresh();
 	}
 	
 	Statusbar::tryRedraw();
@@ -129,31 +129,31 @@ void Status::handleError(MPD::Connection * , int errorid, const char *msg, void 
 
 void Status::Changes::playlist()
 {
-	myPlaylist->main()->clearSearchResults();
-	withUnfilteredMenuReapplyFilter(*myPlaylist->main(), []() {
+	myPlaylist->main().clearSearchResults();
+	withUnfilteredMenuReapplyFilter(myPlaylist->main(), []() {
 		size_t playlist_length = Mpd.GetPlaylistLength();
-		if (playlist_length < myPlaylist->main()->size())
+		if (playlist_length < myPlaylist->main().size())
 		{
-			auto it = myPlaylist->main()->begin()+playlist_length;
-			auto end = myPlaylist->main()->end();
+			auto it = myPlaylist->main().begin()+playlist_length;
+			auto end = myPlaylist->main().end();
 			for (; it != end; ++it)
 				myPlaylist->unregisterHash(it->value().getHash());
-			myPlaylist->main()->resizeList(playlist_length);
+			myPlaylist->main().resizeList(playlist_length);
 		}
 		
 		auto songs = Mpd.GetPlaylistChanges(Mpd.GetOldPlaylistID());
 		for (auto s = songs.begin(); s != songs.end(); ++s)
 		{
 			size_t pos = s->getPosition();
-			if (pos < myPlaylist->main()->size())
+			if (pos < myPlaylist->main().size())
 			{
 				// if song's already in playlist, replace it with a new one
-				MPD::Song &old_s = (*myPlaylist->main())[pos].value();
+				MPD::Song &old_s = myPlaylist->main()[pos].value();
 				myPlaylist->unregisterHash(old_s.getHash());
 				old_s = *s;
 			}
 			else // otherwise just add it to playlist
-				myPlaylist->main()->addItem(*s);
+				myPlaylist->main().addItem(*s);
 			myPlaylist->registerHash(s->getHash());
 		}
 	});
@@ -287,8 +287,8 @@ void Status::Changes::songID()
 		
 		drawTitle(myPlaylist->nowPlayingSong());
 		
-		if (Config.autocenter_mode && !myPlaylist->main()->isFiltered())
-			myPlaylist->main()->highlight(Mpd.GetCurrentlyPlayingSongPos());
+		if (Config.autocenter_mode && !myPlaylist->main().isFiltered())
+			myPlaylist->main().highlight(Mpd.GetCurrentlyPlayingSongPos());
 		
 		if (Config.now_playing_lyrics && isVisible(myLyrics) && Global::myOldScreen == myPlaylist)
 			myLyrics->ReloadNP = 1;

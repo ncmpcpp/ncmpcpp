@@ -98,9 +98,9 @@ void SortPlaylistDialog::enterPressed()
 	auto option = w->currentVI();
 	if (*option == m_sort_entry)
 	{
-		auto begin = myPlaylist->main()->begin(), end = myPlaylist->main()->end();
+		auto begin = myPlaylist->main().begin(), end = myPlaylist->main().end();
 		// if songs are selected, sort range from first selected to last selected
-		if (myPlaylist->main()->hasSelected())
+		if (myPlaylist->main().hasSelected())
 		{
 			while (!begin->isSelected())
 				++begin;
@@ -108,7 +108,7 @@ void SortPlaylistDialog::enterPressed()
 				--end;
 		}
 		
-		size_t start_pos = begin - myPlaylist->main()->begin();
+		size_t start_pos = begin - myPlaylist->main().begin();
 		MPD::SongList playlist;
 		playlist.reserve(end - begin);
 		for (; begin != end; ++begin)
