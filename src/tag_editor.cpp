@@ -641,7 +641,7 @@ void TagEditor::mouseButtonPressed(MEVENT me)
 					enterPressed();
 			}
 			else
-				Screen<NC::Window>::mouseButtonPressed(me);
+				Screen<ScreenType>::mouseButtonPressed(me);
 		}
 	}
 	else if (w == FParser || w == FParserHelper)
@@ -662,7 +662,7 @@ void TagEditor::mouseButtonPressed(MEVENT me)
 					enterPressed();
 			}
 			else
-				Screen<NC::Window>::mouseButtonPressed(me);
+				Screen<ScreenType>::mouseButtonPressed(me);
 		}
 		else if (FParserHelper->hasCoords(me.x, me.y))
 		{
@@ -673,7 +673,7 @@ void TagEditor::mouseButtonPressed(MEVENT me)
 				else
 					return;
 			}
-			scrollpadMouseButtonPressed(FParserHelper, me);
+			scrollpadMouseButtonPressed(*FParserHelper, me);
 		}
 	}
 	else if (!Dirs->empty() && Dirs->hasCoords(me.x, me.y))
@@ -689,7 +689,7 @@ void TagEditor::mouseButtonPressed(MEVENT me)
 				spacePressed();
 		}
 		else
-			Screen<NC::Window>::mouseButtonPressed(me);
+			Screen<ScreenType>::mouseButtonPressed(me);
 		Tags->clear();
 	}
 	else if (!TagTypes->empty() && TagTypes->hasCoords(me.x, me.y))
@@ -714,7 +714,7 @@ void TagEditor::mouseButtonPressed(MEVENT me)
 				enterPressed();
 		}
 		else
-			Screen<NC::Window>::mouseButtonPressed(me);
+			Screen<ScreenType>::mouseButtonPressed(me);
 	}
 	else if (!Tags->empty() && Tags->hasCoords(me.x, me.y))
 	{
@@ -728,7 +728,7 @@ void TagEditor::mouseButtonPressed(MEVENT me)
 				enterPressed();
 		}
 		else
-			Screen<NC::Window>::mouseButtonPressed(me);
+			Screen<ScreenType>::mouseButtonPressed(me);
 	}
 }
 

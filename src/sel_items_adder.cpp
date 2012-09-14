@@ -244,7 +244,7 @@ void SelectedItemsAdder::mouseButtonPressed(MEVENT me)
 			enterPressed();
 	}
 	else
-		Screen< NC::Menu<std::string> >::mouseButtonPressed(me);
+		Screen<ScreenType>::mouseButtonPressed(me);
 }
 
 void SelectedItemsAdder::SetDimensions()

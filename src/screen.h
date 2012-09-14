@@ -24,8 +24,8 @@
 #include "menu.h"
 #include "scrollpad.h"
 
-void genericMouseButtonPressed(NC::Window *w, MEVENT me);
-void scrollpadMouseButtonPressed(NC::Scrollpad *w, MEVENT me);
+void genericMouseButtonPressed(NC::Window &w, MEVENT me);
+void scrollpadMouseButtonPressed(NC::Scrollpad &w, MEVENT me);
 
 /// An interface for various instantiations of Screen template class. Since C++ doesn't like
 /// comparison of two different instantiations of the same template class we need the most
@@ -36,7 +36,7 @@ struct BasicScreen
 	virtual ~BasicScreen() { }
 	
 	/// @see Screen::activeWindow()
-	virtual NC::Window *activeWindow() = 0;
+	virtual void *activeWindow() = 0;
 	
 	/// @see Screen::refresh()
 	virtual void refresh() = 0;
@@ -112,29 +112,47 @@ bool isVisible(BasicScreen *screen);
 /// for the screen to be working properly and assumes that we didn't forget
 /// about anything vital.
 ///
-template <typename WindowT> struct Screen : public BasicScreen
+template <typename WindowT> class Screen : public BasicScreen
 {
+	template <bool IsPointer, typename Result> struct access { };
+	template <typename Result> struct access<true, Result> {
+		static Result apply(WindowT w) { return *w; }
+	};
+	template <typename Result> struct access<false, Result> {
+		static Result apply(WindowT &w) { return w; }
+	};
+	
+	typedef access<
+		std::is_pointer<WindowT>::value,
+		typename std::add_lvalue_reference<
+			typename std::remove_pointer<WindowT>::type
+		>::type
+	> accessor;
+	
+public:
 	typedef WindowT ScreenType;
 	
-	Screen() : w(0) { }
+	Screen() { }
+	Screen(WindowT w_) : w(w_) { }
+	
 	virtual ~Screen() { }
 	
 	/// Since some screens contain more that one window
 	/// it's useful to determine the one that is being
 	/// active
 	/// @return address to window object cast to void *
-	virtual NC::Window *activeWindow() OVERRIDE {
-		return w;
+	virtual void *activeWindow() OVERRIDE {
+		return &accessor::apply(w);
 	}
 	
 	/// Refreshes whole screen
 	virtual void refresh() OVERRIDE {
-		w->display();
+		accessor::apply(w).display();
 	}
 	
 	/// Refreshes active window of the screen
 	virtual void refreshWindow() OVERRIDE {
-		w->display();
+		accessor::apply(w).display();
 	}
 	
 	/// Scrolls the screen by given amount of lines and
@@ -142,18 +160,18 @@ template <typename WindowT> struct Screen : public BasicScreen
 	/// loop that holds main loop until user releases the key
 	/// @param where indicates where one wants to scroll
 	virtual void scroll(NC::Where where) OVERRIDE {
-		w->scroll(where);
+		accessor::apply(w).scroll(where);
 	}
 	
 	/// Invoked after there was one of mouse buttons pressed
 	/// @param me struct that contains coords of where the click
 	/// had its place and button actions
 	virtual void mouseButtonPressed(MEVENT me) OVERRIDE {
-		genericMouseButtonPressed(w, me);
+		genericMouseButtonPressed(accessor::apply(w), me);
 	}
 	
-	/// @return pointer to currently active window
-	WindowT *main() {
+	/// @return currently active window
+	typename std::add_lvalue_reference<WindowT>::type main() {
 		return w;
 	}
 	
@@ -162,10 +180,10 @@ protected:
 	/// of window used by the screen. What is more, it should
 	/// always be assigned to the currently active window (if
 	/// acreen contains more that one)
-	WindowT *w;
+	WindowT w;
 };
 
-/// Specialization for Screen<Scrollpad>::mouseButtonPressed, that should
+/// Specialization for Screen<Scrollpad>::mouseButtonPressed that should
 /// not scroll whole page, but rather a few lines (the number of them is
 /// defined in the config)
 template <> inline void Screen<NC::Scrollpad>::mouseButtonPressed(MEVENT me) {

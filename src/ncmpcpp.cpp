@@ -189,11 +189,6 @@ int main(int argc, char **argv)
 	timeval past = { 0, 0 };
 	// local variables end
 	
-#	ifndef WIN32
-	signal(SIGPIPE, sighandler);
-	signal(SIGWINCH, sighandler);
-#	endif // !WIN32
-	
 	mouseinterval(0);
 	if (Config.mouse_support)
 		mousemask(ALL_MOUSE_EVENTS, 0);
@@ -206,6 +201,11 @@ int main(int argc, char **argv)
 		if  (curr_pos >= 0)
 			myPlaylist->main()->highlight(curr_pos);
 	}
+	
+#	ifndef WIN32
+	signal(SIGPIPE, sighandler);
+	signal(SIGWINCH, sighandler);
+#	endif // !WIN32
 	
 	while (!Action::ExitMainLoop)
 	{

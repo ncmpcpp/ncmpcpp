@@ -107,7 +107,7 @@ void Outputs::mouseButtonPressed(MEVENT me)
 			enterPressed();
 	}
 	else
-		Screen< NC::Menu<MPD::Output> >::mouseButtonPressed(me);
+		Screen<ScreenType>::mouseButtonPressed(me);
 }
 
 void Outputs::FetchList()

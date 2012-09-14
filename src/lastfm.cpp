@@ -45,17 +45,17 @@ using Global::MainStartY;
 
 Lastfm *myLastfm;
 
-Lastfm::Lastfm() : isReadyToTake(0), isDownloadInProgress(0)
-{
-	w = new NC::Scrollpad(0, MainStartY, COLS, MainHeight, "", Config.main_color, NC::brNone);
-}
+Lastfm::Lastfm()
+: Screen(NC::Scrollpad(0, MainStartY, COLS, MainHeight, "", Config.main_color, NC::brNone))
+, isReadyToTake(0), isDownloadInProgress(0)
+{ }
 
 void Lastfm::resize()
 {
 	size_t x_offset, width;
 	getWindowResizeParams(x_offset, width);
-	w->resize(width, MainHeight);
-	w->moveTo(x_offset, MainStartY);
+	w.resize(width, MainHeight);
+	w.moveTo(x_offset, MainStartY);
 	hasToBeResized = 0;
 }
 
@@ -74,8 +74,8 @@ void Lastfm::Take()
 {
 	assert(isReadyToTake);
 	pthread_join(itsDownloader, 0);
-	w->flush();
-	w->refresh();
+	w.flush();
+	w.refresh();
 	isDownloadInProgress = 0;
 	isReadyToTake = 0;
 }
@@ -116,8 +116,8 @@ void Lastfm::Load()
 	
 	SetTitleAndFolder();
 	
-	w->clear();
-	w->reset();
+	w.clear();
+	w.reset();
 	
 	std::string artist = itsArgs.find("artist")->second;
 	std::string file = lowercase(artist + ".txt");
@@ -139,21 +139,21 @@ void Lastfm::Load()
 		while (getline(input, line))
 		{
 			if (!first)
-				*w << '\n';
+				w << '\n';
 			IConv::utf8ToLocale_(line);
-			*w << line;
+			w << line;
 			first = 0;
 		}
 		input.close();
-		itsService->colorizeOutput(*w);
+		itsService->colorizeOutput(w);
 	}
 	else
 	{
-		*w << L"Fetching informations... ";
+		w << L"Fetching informations... ";
 		pthread_create(&itsDownloader, 0, DownloadWrapper, this);
 		isDownloadInProgress = 1;
 	}
-	w->flush();
+	w.flush();
 }
 
 void Lastfm::SetTitleAndFolder()
@@ -179,13 +179,13 @@ void Lastfm::Download()
 	if (result.first)
 	{
 		Save(result.second);
-		w->clear();
+		w.clear();
 		IConv::utf8ToLocale_(result.second);
-		*w << result.second;
-		itsService->colorizeOutput(*w);
+		w << result.second;
+		itsService->colorizeOutput(w);
 	}
 	else
-		*w << NC::clRed << result.second << NC::clEnd;
+		w << NC::clRed << result.second << NC::clEnd;
 	
 	isReadyToTake = 1;
 }

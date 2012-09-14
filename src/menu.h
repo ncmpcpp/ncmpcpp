@@ -176,6 +176,8 @@ public:
 	
 	typedef std::function<bool(const Item &)> FilterFunction;
 	
+	Menu() { }
+	
 	/// Constructs an empty menu with given parameters
 	/// @param startx X position of left upper corner of constructed menu
 	/// @param starty Y position of left upper corner of constructed menu
@@ -187,8 +189,9 @@ public:
 	Menu(size_t startx, size_t starty, size_t width, size_t height,
 			const std::string &title, Color color, Border border);
 	
-	Menu(const Menu &) = delete;
-	Menu &operator=(const Menu &) = delete;
+	Menu(const Menu &rhs);
+	Menu(Menu &&rhs);
+	Menu &operator=(Menu rhs);
 	
 	/// Sets helper function that is responsible for displaying items
 	/// @param ptr function pointer that matches the ItemDisplayer prototype
@@ -410,7 +413,7 @@ private:
 		typedef Item element_type;
 		
 		ItemProxy() { }
-		ItemProxy(Item &&item) : m_ptr(std::make_shared<Item>(item)) { }
+		ItemProxy(Item item) : m_ptr(std::make_shared<Item>(item)) { }
 		
 		Item &operator*() const { return *m_ptr; }
 		Item *operator->() const { return m_ptr.get(); }
@@ -468,6 +471,78 @@ template <typename T> Menu<T>::Menu(size_t startx,
 	m_cyclic_scroll_enabled(false),
 	m_autocenter_cursor(false)
 {
+}
+
+template <typename T> Menu<T>::Menu(const Menu &rhs)
+: Window(rhs)
+, m_item_displayer(rhs.m_item_displayer)
+, m_filter(rhs.m_filter)
+, m_searcher(rhs.m_searcher)
+, m_found_positions(rhs.m_found_positions)
+, m_beginning(rhs.m_beginning)
+, m_highlight(rhs.m_highlight)
+, m_highlight_color(rhs.m_highlight_color)
+, m_highlight_enabled(rhs.m_highlight_enabled)
+, m_cyclic_scroll_enabled(rhs.m_cyclic_scroll_enabled)
+, m_autocenter_cursor(rhs.m_autocenter_cursor)
+, m_drawn_position(rhs.m_drawn_position)
+, m_selected_prefix(rhs.m_selected_prefix)
+, m_selected_suffix(rhs.m_selected_suffix)
+{
+	// there is no way to properly fill m_filtered_options
+	// (if rhs is filtered), so we just don't do it.
+	m_options.reserve(rhs.m_options.size());
+	for (auto it = rhs.m_options.begin(); it != rhs.m_options.end(); ++it)
+		m_options.push_back(ItemProxy(**it));
+	m_options_ptr = &m_options;
+}
+
+template <typename T> Menu<T>::Menu(Menu &&rhs)
+: Window(rhs)
+, m_item_displayer(rhs.m_item_displayer)
+, m_filter(rhs.m_filter)
+, m_searcher(rhs.m_searcher)
+, m_options(std::move(rhs.m_options))
+, m_filtered_options(std::move(rhs.m_filtered_options))
+, m_found_positions(std::move(rhs.m_found_positions))
+, m_beginning(rhs.m_beginning)
+, m_highlight(rhs.m_highlight)
+, m_highlight_color(rhs.m_highlight_color)
+, m_highlight_enabled(rhs.m_highlight_enabled)
+, m_cyclic_scroll_enabled(rhs.m_cyclic_scroll_enabled)
+, m_autocenter_cursor(rhs.m_autocenter_cursor)
+, m_drawn_position(rhs.m_drawn_position)
+, m_selected_prefix(std::move(rhs.m_selected_prefix))
+, m_selected_suffix(std::move(rhs.m_selected_suffix))
+{
+	if (rhs.m_options_ptr == &rhs.m_options)
+		m_options_ptr = &m_options;
+	else
+		m_options_ptr = &m_filtered_options;
+}
+
+template <typename T> Menu<T> &Menu<T>::operator=(Menu rhs)
+{
+	std::swap(m_item_displayer, rhs.m_item_displayer);
+	std::swap(m_filter, rhs.m_filter);
+	std::swap(m_searcher, rhs.m_searcher);
+	std::swap(m_options, rhs.m_options);
+	std::swap(m_filtered_options, rhs.m_filtered_options);
+	std::swap(m_found_positions, rhs.m_found_positions);
+	std::swap(m_beginning, rhs.m_beginning);
+	std::swap(m_highlight, rhs.m_highlight);
+	std::swap(m_highlight_color, rhs.m_highlight_color);
+	std::swap(m_highlight_enabled, rhs.m_highlight_enabled);
+	std::swap(m_cyclic_scroll_enabled, rhs.m_cyclic_scroll_enabled);
+	std::swap(m_autocenter_cursor, rhs.m_autocenter_cursor);
+	std::swap(m_drawn_position, rhs.m_drawn_position);
+	std::swap(m_selected_prefix, rhs.m_selected_prefix);
+	std::swap(m_selected_suffix, rhs.m_selected_suffix);
+	if (rhs.m_options_ptr == &rhs.m_options)
+		m_options_ptr = &m_options;
+	else
+		m_options_ptr = &m_filtered_options;
+	return *this;
 }
 
 template <typename T> void Menu<T>::reserve(size_t size_)

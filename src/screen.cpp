@@ -40,37 +40,37 @@ void drawScreenSeparator(int x)
 
 }
 
-void genericMouseButtonPressed(NC::Window *w, MEVENT me)
+void genericMouseButtonPressed(NC::Window &w, MEVENT me)
 {
 	if (me.bstate & BUTTON2_PRESSED)
 	{
 		if (Config.mouse_list_scroll_whole_page)
-			w->scroll(NC::wPageDown);
+			w.scroll(NC::wPageDown);
 		else
 			for (size_t i = 0; i < Config.lines_scrolled; ++i)
-				w->scroll(NC::wDown);
+				w.scroll(NC::wDown);
 	}
 	else if (me.bstate & BUTTON4_PRESSED)
 	{
 		if (Config.mouse_list_scroll_whole_page)
-			w->scroll(NC::wPageUp);
+			w.scroll(NC::wPageUp);
 		else
 			for (size_t i = 0; i < Config.lines_scrolled; ++i)
-				w->scroll(NC::wUp);
+				w.scroll(NC::wUp);
 	}
 }
 
-void scrollpadMouseButtonPressed(NC::Scrollpad *w, MEVENT me)
+void scrollpadMouseButtonPressed(NC::Scrollpad &w, MEVENT me)
 {
 	if (me.bstate & BUTTON2_PRESSED)
 	{
 		for (size_t i = 0; i < Config.lines_scrolled; ++i)
-			w->scroll(NC::wDown);
+			w.scroll(NC::wDown);
 	}
 	else if (me.bstate & BUTTON4_PRESSED)
 	{
 		for (size_t i = 0; i < Config.lines_scrolled; ++i)
-			w->scroll(NC::wUp);
+			w.scroll(NC::wUp);
 	}
 }
 

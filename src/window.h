@@ -163,6 +163,8 @@ struct XY
 /// Main class of NCurses namespace, used as base for other specialized windows
 struct Window
 {
+	Window() : m_window(0), m_border_window(0), m_history(0) { }
+	
 	/// Constructs an empty window with given parameters
 	/// @param startx X position of left upper corner of constructed window
 	/// @param starty Y position of left upper corner of constructed window
@@ -174,11 +176,10 @@ struct Window
 	Window(size_t startx, size_t starty, size_t width, size_t height,
 			const std::string &title, Color color, Border border);
 	
-	/// Copies thw window
-	/// @param w copied window
-	Window(const Window &w);
+	Window(const Window &rhs);
+	Window(Window &&rhs);
+	Window &operator=(Window w);
 	
-	/// Destroys the window and frees memory
 	virtual ~Window();
 	
 	/// Allows for direct access to internal WINDOW pointer in case there

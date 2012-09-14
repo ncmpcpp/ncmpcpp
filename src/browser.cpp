@@ -253,7 +253,7 @@ void Browser::mouseButtonPressed(MEVENT me)
 		}
 	}
 	else
-		Screen< NC::Menu<MPD::Item> >::mouseButtonPressed(me);
+		Screen<ScreenType>::mouseButtonPressed(me);
 }
 
 /***********************************************************************/

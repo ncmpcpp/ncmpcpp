@@ -264,7 +264,7 @@ void SearchEngine::mouseButtonPressed(MEVENT me)
 		}
 	}
 	else
-		Screen< NC::Menu<SEItem> >::mouseButtonPressed(me);
+		Screen<ScreenType>::mouseButtonPressed(me);
 }
 
 /***********************************************************************/

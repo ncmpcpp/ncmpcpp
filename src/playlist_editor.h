@@ -24,7 +24,7 @@
 #include "interfaces.h"
 #include "screen.h"
 
-struct PlaylistEditor : public Screen<NC::Window>, public Filterable, public HasColumns, public HasSongs, public Searchable
+struct PlaylistEditor : public Screen<NC::Window *>, public Filterable, public HasColumns, public HasSongs, public Searchable
 {
 	PlaylistEditor();
 	

@@ -295,7 +295,7 @@ void PlaylistEditor::mouseButtonPressed(MEVENT me)
 			}
 		}
 		else
-			Screen<NC::Window>::mouseButtonPressed(me);
+			Screen<ScreenType>::mouseButtonPressed(me);
 		Content->clear();
 	}
 	else if (!Content->empty() && Content->hasCoords(me.x, me.y))
@@ -321,7 +321,7 @@ void PlaylistEditor::mouseButtonPressed(MEVENT me)
 				enterPressed();
 		}
 		else
-			Screen<NC::Window>::mouseButtonPressed(me);
+			Screen<ScreenType>::mouseButtonPressed(me);
 	}
 }
 

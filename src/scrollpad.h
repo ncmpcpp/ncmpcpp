@@ -30,6 +30,8 @@ namespace NC {//
 /// supports scrolling if the amount of it is bigger than the window area.
 struct Scrollpad: public Window
 {
+	Scrollpad() { }
+	
 	/// Constructs an empty scrollpad with given parameters
 	/// @param startx X position of left upper corner of constructed window
 	/// @param starty Y position of left upper corner of constructed window

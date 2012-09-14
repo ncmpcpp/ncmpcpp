@@ -35,7 +35,6 @@ struct Lastfm : public Screen<NC::Scrollpad>
 {
 	Lastfm();
 	
-	// Screen<NC::Scrollpad>
 	virtual void switchTo() OVERRIDE;
 	virtual void resize() OVERRIDE;
 	

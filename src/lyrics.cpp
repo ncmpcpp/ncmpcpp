@@ -50,21 +50,21 @@ size_t Lyrics::itsWorkersNumber = 0;
 
 Lyrics *myLyrics;
 
-Lyrics::Lyrics() : ReloadNP(0),
+Lyrics::Lyrics()
+: Screen(NC::Scrollpad(0, MainStartY, COLS, MainHeight, "", Config.main_color, NC::brNone))
+, ReloadNP(0),
 #ifdef HAVE_CURL_CURL_H
-	isReadyToTake(0), isDownloadInProgress(0),
+isReadyToTake(0), isDownloadInProgress(0),
 #endif // HAVE_CURL_CURL_H
 	itsScrollBegin(0)
-{
-	w = new NC::Scrollpad(0, MainStartY, COLS, MainHeight, "", Config.main_color, NC::brNone);
-}
+{ }
 
 void Lyrics::resize()
 {
 	size_t x_offset, width;
 	getWindowResizeParams(x_offset, width);
-	w->resize(width, MainHeight);
-	w->moveTo(x_offset, MainStartY);
+	w.resize(width, MainHeight);
+	w.moveTo(x_offset, MainStartY);
 	hasToBeResized = 0;
 }
 
@@ -76,8 +76,8 @@ void Lyrics::update()
 	
 	if (isDownloadInProgress)
 	{
-		w->flush();
-		w->refresh();
+		w.flush();
+		w.refresh();
 	}
 #	endif // HAVE_CURL_CURL_H
 	if (ReloadNP)
@@ -255,10 +255,10 @@ void *Lyrics::Download()
 	bool fetcher_defined = itsFetcher && *itsFetcher;
 	for (LyricsFetcher **plugin = fetcher_defined ? itsFetcher : lyricsPlugins; *plugin != 0; ++plugin)
 	{
-		*w << L"Fetching lyrics from " << NC::fmtBold << ToWString((*plugin)->name()) << NC::fmtBoldEnd << L"... ";
+		w << L"Fetching lyrics from " << NC::fmtBold << ToWString((*plugin)->name()) << NC::fmtBoldEnd << L"... ";
 		result = (*plugin)->fetch(artist, title_);
 		if (result.first == false)
-			*w << NC::clRed << ToWString(result.second) << NC::clEnd << '\n';
+			w << NC::clRed << ToWString(result.second) << NC::clEnd << '\n';
 		else
 			break;
 		if (fetcher_defined)
@@ -268,12 +268,12 @@ void *Lyrics::Download()
 	if (result.first == true)
 	{
 		Save(itsFilename, result.second);
-		w->clear();
+		w.clear();
 		IConv::utf8ToLocale_(result.second);
-		*w << result.second;
+		w << result.second;
 	}
 	else
-		*w << '\n' << L"Lyrics weren't found.";
+		w << '\n' << L"Lyrics weren't found.";
 	
 	isReadyToTake = 1;
 	pthread_exit(0);
@@ -332,8 +332,8 @@ void Lyrics::Load()
 	
 	CreateDir(Config.lyrics_directory);
 	
-	w->clear();
-	w->reset();
+	w.clear();
+	w.reset();
 	
 	std::ifstream input(itsFilename.c_str());
 	if (input.is_open())
@@ -343,14 +343,14 @@ void Lyrics::Load()
 		while (getline(input, line))
 		{
 			if (!first)
-				*w << '\n';
+				w << '\n';
 			IConv::utf8ToLocale_(line);
-			*w << line;
+			w << line;
 			first = 0;
 		}
-		w->flush();
+		w.flush();
 		if (ReloadNP)
-			w->refresh();
+			w.refresh();
 	}
 	else
 	{
@@ -358,8 +358,8 @@ void Lyrics::Load()
 		pthread_create(&itsDownloader, 0, DownloadWrapper, this);
 		isDownloadInProgress = 1;
 #		else
-		*w << U("Local lyrics not found. As ncmpcpp has been compiled without curl support, you can put appropriate lyrics into ") << TO_WSTRING(Config.lyrics_directory) << U(" directory (file syntax is \"$ARTIST - $TITLE.txt\") or recompile ncmpcpp with curl support.");
-		w->flush();
+		w << U("Local lyrics not found. As ncmpcpp has been compiled without curl support, you can put appropriate lyrics into ") << TO_WSTRING(Config.lyrics_directory) << U(" directory (file syntax is \"$ARTIST - $TITLE.txt\") or recompile ncmpcpp with curl support.");
+		w.flush();
 #		endif
 	}
 }
@@ -429,8 +429,8 @@ void Lyrics::Take()
 {
 	assert(isReadyToTake);
 	pthread_join(itsDownloader, 0);
-	w->flush();
-	w->refresh();
+	w.flush();
+	w.refresh();
 	isDownloadInProgress = 0;
 	isReadyToTake = 0;
 }

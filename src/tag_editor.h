@@ -33,7 +33,7 @@
 #include "regex_filter.h"
 #include "screen.h"
 
-struct TagEditor : public Screen<NC::Window>, public Filterable, public HasColumns, public HasSongs, public Searchable
+struct TagEditor : public Screen<NC::Window *>, public Filterable, public HasColumns, public HasSongs, public Searchable
 {
 	TagEditor();
 	

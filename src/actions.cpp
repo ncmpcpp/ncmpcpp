@@ -104,6 +104,7 @@ void Action::InitializeScreens()
 	myLyrics = new Lyrics;
 	mySelectedItemsAdder = new SelectedItemsAdder;
 	mySongInfo = new SongInfo;
+	myServerInfo = new ServerInfo;
 	mySortPlaylistDialog = new SortPlaylistDialog;
 	
 #	ifdef HAVE_CURL_CURL_H
@@ -140,6 +141,7 @@ void Action::SetResizeFlags()
 	myLyrics->hasToBeResized = 1;
 	mySelectedItemsAdder->hasToBeResized = 1;
 	mySongInfo->hasToBeResized = 1;
+	myServerInfo->hasToBeResized = 1;
 	mySortPlaylistDialog->hasToBeResized = 1;
 	
 #	ifdef HAVE_CURL_CURL_H
@@ -1921,10 +1923,10 @@ void Find::Run()
 	Statusbar::unlock();
 	
 	Statusbar::msg("Searching...");
-	Screen<NC::Scrollpad> *s = static_cast<Screen<NC::Scrollpad> *>(myScreen);
-	s->main()->removeFormatting();
-	Statusbar::msg("%s", findme.empty() || s->main()->setFormatting(NC::fmtReverse, ToWString(findme), NC::fmtReverseEnd, 0) ? "Done" : "No matching patterns found");
-	s->main()->flush();
+	auto s = static_cast<Screen<NC::Scrollpad> *>(myScreen);
+	s->main().removeFormatting();
+	Statusbar::msg("%s", findme.empty() || s->main().setFormatting(NC::fmtReverse, ToWString(findme), NC::fmtReverseEnd, 0) ? "Done" : "No matching patterns found");
+	s->main().flush();
 }
 
 bool FindItemBackward::canBeRun() const

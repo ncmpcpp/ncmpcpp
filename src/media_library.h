@@ -24,7 +24,7 @@
 #include "interfaces.h"
 #include "screen.h"
 
-struct MediaLibrary : public Screen<NC::Window>, public Filterable, public HasColumns, public HasSongs, public Searchable
+struct MediaLibrary : public Screen<NC::Window *>, public Filterable, public HasColumns, public HasSongs, public Searchable
 {
 	MediaLibrary();
 	

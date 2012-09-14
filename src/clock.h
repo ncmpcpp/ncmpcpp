@@ -28,7 +28,7 @@
 #include "window.h"
 #include "screen.h"
 
-struct Clock : public Screen<NC::Window>
+struct Clock : public Screen<NC::Window *>
 {
 	Clock();
 	

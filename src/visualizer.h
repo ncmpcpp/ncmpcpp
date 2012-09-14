@@ -32,7 +32,7 @@
 # include <fftw3.h>
 #endif
 
-struct Visualizer : public Screen<NC::Window>
+struct Visualizer : public Screen<NC::Window *>
 {
 	Visualizer();
 	

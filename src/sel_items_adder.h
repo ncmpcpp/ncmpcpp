@@ -23,7 +23,7 @@
 
 #include "screen.h"
 
-struct SelectedItemsAdder : public Screen< NC::Menu<std::string> >
+struct SelectedItemsAdder : public Screen<NC::Menu<std::string> *>
 {
 	SelectedItemsAdder();
 	

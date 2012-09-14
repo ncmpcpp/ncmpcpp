@@ -127,33 +127,93 @@ Window::Window(size_t startx,
 	keypad(m_window, 1);
 }
 
-Window::Window(const Window &w) : m_window(dupwin(w.m_window)),
-				m_border_window(dupwin(w.m_border_window)),
-				m_start_x(w.m_start_x),
-				m_start_y(w.m_start_y),
-				m_width(w.m_width),
-				m_height(w.m_height),
-				m_window_timeout(w.m_window_timeout),
-				m_color(w.m_color),
-				m_bg_color(w.m_bg_color),
-				m_base_color(w.m_base_color),
-				m_base_bg_color(w.m_base_bg_color),
-				m_border(w.m_border),
-				m_get_string_helper(w.m_get_string_helper),
-				m_title(w.m_title),
-				m_color_stack(w.m_color_stack),
-				m_history(w.m_history),
-				m_bold_counter(w.m_bold_counter),
-				m_underline_counter(w.m_underline_counter),
-				m_reverse_counter(w.m_reverse_counter),
-				m_alt_charset_counter(w.m_alt_charset_counter)
+Window::Window(const Window &rhs)
+: m_window(dupwin(rhs.m_window))
+, m_border_window(dupwin(rhs.m_border_window))
+, m_start_x(rhs.m_start_x)
+, m_start_y(rhs.m_start_y)
+, m_width(rhs.m_width)
+, m_height(rhs.m_height)
+, m_window_timeout(rhs.m_window_timeout)
+, m_color(rhs.m_color)
+, m_bg_color(rhs.m_bg_color)
+, m_base_color(rhs.m_base_color)
+, m_base_bg_color(rhs.m_base_bg_color)
+, m_border(rhs.m_border)
+, m_get_string_helper(rhs.m_get_string_helper)
+, m_title(rhs.m_title)
+, m_color_stack(rhs.m_color_stack)
+, m_input_queue(rhs.m_input_queue)
+, m_fds(rhs.m_fds)
+, m_history(rhs.m_history ? new std::list<std::wstring>(*rhs.m_history) : 0)
+, m_bold_counter(rhs.m_bold_counter)
+, m_underline_counter(rhs.m_underline_counter)
+, m_reverse_counter(rhs.m_reverse_counter)
+, m_alt_charset_counter(rhs.m_alt_charset_counter)
 {
+}
+
+Window::Window(Window &&rhs)
+: m_window(rhs.m_window)
+, m_border_window(rhs.m_border_window)
+, m_start_x(rhs.m_start_x)
+, m_start_y(rhs.m_start_y)
+, m_width(rhs.m_width)
+, m_height(rhs.m_height)
+, m_window_timeout(rhs.m_window_timeout)
+, m_color(rhs.m_color)
+, m_bg_color(rhs.m_bg_color)
+, m_base_color(rhs.m_base_color)
+, m_base_bg_color(rhs.m_base_bg_color)
+, m_border(rhs.m_border)
+, m_get_string_helper(rhs.m_get_string_helper)
+, m_title(std::move(rhs.m_title))
+, m_color_stack(std::move(rhs.m_color_stack))
+, m_input_queue(std::move(rhs.m_input_queue))
+, m_fds(std::move(rhs.m_fds))
+, m_history(rhs.m_history)
+, m_bold_counter(rhs.m_bold_counter)
+, m_underline_counter(rhs.m_underline_counter)
+, m_reverse_counter(rhs.m_reverse_counter)
+, m_alt_charset_counter(rhs.m_alt_charset_counter)
+{
+	rhs.m_window = 0;
+	rhs.m_border_window = 0;
+	rhs.m_history = 0;
+}
+
+Window &Window::operator=(Window rhs)
+{
+	std::swap(m_window, rhs.m_window);
+	std::swap(m_border_window, rhs.m_border_window);
+	std::swap(m_start_x, rhs.m_start_x);
+	std::swap(m_start_y, rhs.m_start_y);
+	std::swap(m_width, rhs.m_width);
+	std::swap(m_height, rhs.m_height);
+	std::swap(m_window_timeout, rhs.m_window_timeout);
+	std::swap(m_color, rhs.m_color);
+	std::swap(m_bg_color, rhs.m_bg_color);
+	std::swap(m_base_color, rhs.m_base_color);
+	std::swap(m_base_bg_color, rhs.m_base_bg_color);
+	std::swap(m_border, rhs.m_border);
+	std::swap(m_get_string_helper, rhs.m_get_string_helper);
+	std::swap(m_title, rhs.m_title);
+	std::swap(m_color_stack, rhs.m_color_stack);
+	std::swap(m_input_queue, rhs.m_input_queue);
+	std::swap(m_fds, rhs.m_fds);
+	std::swap(m_history, rhs.m_history);
+	std::swap(m_bold_counter, rhs.m_bold_counter);
+	std::swap(m_underline_counter, rhs.m_underline_counter);
+	std::swap(m_reverse_counter, rhs.m_reverse_counter);
+	std::swap(m_alt_charset_counter, rhs.m_alt_charset_counter);
+	return *this;
 }
 
 Window::~Window()
 {
 	delwin(m_window);
 	delwin(m_border_window);
+	delete m_history;
 }
 
 void Window::setColor(Color fg, Color bg)
