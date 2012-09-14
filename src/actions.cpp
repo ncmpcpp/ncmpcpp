@@ -1141,8 +1141,8 @@ void ToggleDisplayMode::Run()
 	{
 		Config.columns_in_search_engine = !Config.columns_in_search_engine;
 		Statusbar::msg("Search engine display mode: %s", Config.columns_in_search_engine ? "Columns" : "Classic");
-		if (mySearcher->main()->size() > SearchEngine::StaticOptions)
-			mySearcher->main()->setTitle(Config.columns_in_search_engine && Config.titles_visibility ? Display::Columns(mySearcher->main()->getWidth()) : "");
+		if (mySearcher->main().size() > SearchEngine::StaticOptions)
+			mySearcher->main().setTitle(Config.columns_in_search_engine && Config.titles_visibility ? Display::Columns(mySearcher->main().getWidth()) : "");
 	}
 	else if (myScreen->activeWindow() == myPlaylistEditor->Content)
 	{
@@ -1255,15 +1255,15 @@ void ToggleRandom::Run()
 
 bool StartSearching::canBeRun() const
 {
-	return myScreen == mySearcher && !mySearcher->main()->at(0).isInactive();
+	return myScreen == mySearcher && !mySearcher->main()[0].isInactive();
 }
 
 void StartSearching::Run()
 {
-	mySearcher->main()->highlight(SearchEngine::SearchButton);
-	mySearcher->main()->setHighlighting(0);
-	mySearcher->main()->refresh();
-	mySearcher->main()->setHighlighting(1);
+	mySearcher->main().highlight(SearchEngine::SearchButton);
+	mySearcher->main().setHighlighting(0);
+	mySearcher->main().refresh();
+	mySearcher->main().setHighlighting(1);
 	mySearcher->enterPressed();
 }
 

@@ -73,7 +73,7 @@ struct SEItem
 		MPD::Song itsSong;
 };
 
-struct SearchEngine : public Screen<NC::Menu<SEItem> *>, public Filterable, public HasSongs, public Searchable
+struct SearchEngine : public Screen<NC::Menu<SEItem>>, public Filterable, public HasSongs, public Searchable
 {
 	SearchEngine();
 	
