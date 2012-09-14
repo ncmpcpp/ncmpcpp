@@ -243,7 +243,10 @@ void SelectedItemsAdder::addToExistingPlaylist(const std::string &playlist) cons
 	for (auto s = m_selected_items.begin(); s != m_selected_items.end(); ++s)
 		Mpd.AddToPlaylist(playlist, *s);
 	if (Mpd.CommitCommandsList())
+	{
 		Statusbar::msg("Selected item(s) added to playlist \"%s\"", playlist.c_str());
+		m_old_screen->switchTo();
+	}
 }
 
 void SelectedItemsAdder::addAtTheEndOfPlaylist() const

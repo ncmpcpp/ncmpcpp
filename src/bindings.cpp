@@ -108,7 +108,7 @@ Action *parseActionLine(const std::string &line, F error)
 			std::string arg = getEnclosedString(line, '"', '"', 0);
 			Key k = stringToSpecialKey(arg);
 			if (k != Key::noOp)
-				result = new PushCharacters(&Global::wFooter, { k.getChar() });
+				result = new PushCharacters(&Global::wFooter, std::vector<int>{ k.getChar() });
 			else
 				error() << "invalid character passed to push_character: '" << arg << "'\n";
 		}

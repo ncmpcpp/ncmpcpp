@@ -75,16 +75,12 @@ void DisplayPrimaryTags(NC::Menu<std::string> &menu);
 bool SortSongsByTrack(const MPD::Song &a, const MPD::Song &b);
 
 struct SortAllTracks {
-	const std::array<MPD::Song::GetFunction, 3> m_gets;
+	static const std::array<MPD::Song::GetFunction, 3> GetFuns;
 	LocaleStringComparison m_cmp;
 public:
-	SortAllTracks() : m_gets({{
-		&MPD::Song::getDate,
-		&MPD::Song::getAlbum,
-		&MPD::Song::getDisc
-	}}), m_cmp(std::locale(), Config.ignore_leading_the) { }
+	SortAllTracks() : m_cmp(std::locale(), Config.ignore_leading_the) { }
 	bool operator()(const MPD::Song &a, const MPD::Song &b) {
-		for (auto get = m_gets.begin(); get != m_gets.end(); ++get) {
+		for (auto get = GetFuns.begin(); get != GetFuns.end(); ++get) {
 			int ret = m_cmp(a.getTags(*get, Config.tags_separator),
 			                b.getTags(*get, Config.tags_separator));
 			if (ret != 0)
@@ -93,6 +89,11 @@ public:
 		return a.getTrack() < b.getTrack();
 	}
 };
+const std::array<MPD::Song::GetFunction, 3> SortAllTracks::GetFuns = {{
+	&MPD::Song::getDate,
+	&MPD::Song::getAlbum,
+	&MPD::Song::getDisc
+}};
 
 class SortSearchConstraints {
 	LocaleStringComparison m_cmp;
@@ -408,7 +409,7 @@ void MediaLibrary::mouseButtonPressed(MEVENT me)
 {
 	auto tryNextColumn = [this]() -> bool {
 		bool result = true;
-		if (isActiveWindow(Songs))
+		if (this->isActiveWindow(Songs))
 		{
 			if (nextColumnAvailable())
 				nextColumn();
@@ -419,7 +420,7 @@ void MediaLibrary::mouseButtonPressed(MEVENT me)
 	};
 	auto tryPreviousColumn = [this]() -> bool {
 		bool result = true;
-		if (isActiveWindow(Tags))
+		if (this->isActiveWindow(Tags))
 		{
 			if (previousColumnAvailable())
 				previousColumn();
