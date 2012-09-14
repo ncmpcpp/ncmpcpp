@@ -28,7 +28,7 @@
 #include "mutable_song.h"
 #include "screen.h"
 
-struct TinyTagEditor : public Screen<NC::Menu<NC::Buffer> *>
+struct TinyTagEditor : public Screen<NC::Menu<NC::Buffer>>
 {
 	TinyTagEditor();
 	

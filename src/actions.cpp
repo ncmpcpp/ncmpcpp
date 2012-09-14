@@ -1282,7 +1282,7 @@ void SaveTagChanges::Run()
 #	ifdef HAVE_TAGLIB_H
 	if (myScreen == myTinyTagEditor)
 	{
-		myTinyTagEditor->main()->highlight(myTinyTagEditor->main()->size()-2); // Save
+		myTinyTagEditor->main().highlight(myTinyTagEditor->main().size()-2); // Save
 		myTinyTagEditor->enterPressed();
 	}
 	else if (myScreen->activeWindow() == myTagEditor->TagTypes)

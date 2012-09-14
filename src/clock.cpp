@@ -56,8 +56,8 @@ Clock::Clock()
 {
 	Width = Config.clock_display_seconds ? 60 : 40;
 	
-	itsPane = new NC::Window(0, MainStartY, COLS, MainHeight, "", Config.main_color, NC::brNone);
-	w = new NC::Window((COLS-Width)/2, (MainHeight-Height)/2+MainStartY, Width, Height-1, "", Config.main_color, NC::Border(Config.main_color));
+	m_pane = NC::Window(0, MainStartY, COLS, MainHeight, "", Config.main_color, NC::brNone);
+	w = NC::Window((COLS-Width)/2, (MainHeight-Height)/2+MainStartY, Width, Height-1, "", Config.main_color, NC::Border(Config.main_color));
 }
 
 void Clock::resize()
@@ -66,12 +66,12 @@ void Clock::resize()
 	getWindowResizeParams(x_offset, width);
 	
 	// used for clearing area out of clock window while resizing terminal
-	itsPane->resize(width, MainHeight);
-	itsPane->moveTo(x_offset, MainStartY);
-	itsPane->refresh();
+	m_pane.resize(width, MainHeight);
+	m_pane.moveTo(x_offset, MainStartY);
+	m_pane.refresh();
 	
 	if (Width <= width && Height <= MainHeight)
-		w->moveTo(x_offset+(width-Width)/2, MainStartY+(MainHeight-Height)/2);
+		w.moveTo(x_offset+(width-Width)/2, MainStartY+(MainHeight-Height)/2);
 }
 
 void Clock::switchTo()
@@ -102,10 +102,10 @@ void Clock::switchTo()
 	myScreen = this;
 	drawHeader();
 	Prepare();
-	itsPane->refresh();
+	m_pane.refresh();
 	// clearing screen apparently fixes the problem with last digits being misrendered
-	w->clear();
-	w->display();
+	w.clear();
+	w.display();
 }
 
 std::wstring Clock::title()
@@ -115,7 +115,7 @@ std::wstring Clock::title()
 
 void Clock::update()
 {
-	if (Width > itsPane->getWidth() || Height > MainHeight)
+	if (Width > m_pane.getWidth() || Height > MainHeight)
 	{
 		using Global::myLockedScreen;
 		using Global::myInactiveScreen;
@@ -145,7 +145,7 @@ void Clock::update()
 	char buf[64];
 	strftime(buf, 64, "%x", time);
 	attron(COLOR_PAIR(Config.main_color));
-	mvprintw(w->getStarty()+w->getHeight(), w->getStartX()+(w->getWidth()-strlen(buf))/2, "%s", buf);
+	mvprintw(w.getStarty()+w.getHeight(), w.getStartX()+(w.getWidth()-strlen(buf))/2, "%s", buf);
 	attroff(COLOR_PAIR(Config.main_color));
 	refresh();
 	
@@ -155,7 +155,7 @@ void Clock::update()
 		next[k] = 0;
 		for (int s = 1; s >= 0; --s)
 		{
-			*w << (s ? NC::fmtReverse : NC::fmtReverseEnd);
+			w << (s ? NC::fmtReverse : NC::fmtReverseEnd);
 			for (int i = 0; i < 6; ++i)
 			{
 				long a = (newer[i] ^ older[i]) & (s ? newer : older)[i];
@@ -168,10 +168,10 @@ void Clock::update()
 						{
 							if (!(a & (t << 1)))
 							{
-								w->goToXY(2*j+2, i);
+								w.goToXY(2*j+2, i);
 							}
 							if (Config.clock_display_seconds || j < 18)
-								*w << "  ";
+								w << "  ";
 						}
 					}
 				}
@@ -182,7 +182,7 @@ void Clock::update()
 			}
 		}
 	}
-	w->refresh();
+	w.refresh();
 }
 
 void Clock::Prepare()

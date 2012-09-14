@@ -242,7 +242,7 @@ void Status::Changes::playerState()
 				player_state.clear();
 #			ifdef ENABLE_VISUALIZER
 			if (isVisible(myVisualizer))
-				myVisualizer->main()->clear();
+				myVisualizer->main().clear();
 #			endif // ENABLE_VISUALIZER
 			break;
 		}

@@ -46,20 +46,20 @@ using Global::myOldScreen;
 TinyTagEditor *myTinyTagEditor;
 
 TinyTagEditor::TinyTagEditor()
+: Screen(NC::Menu<NC::Buffer>(0, MainStartY, COLS, MainHeight, "", Config.main_color, NC::brNone))
 {
-	w = new NC::Menu<NC::Buffer>(0, MainStartY, COLS, MainHeight, "", Config.main_color, NC::brNone);
-	w->setHighlightColor(Config.main_highlight_color);
-	w->cyclicScrolling(Config.use_cyclic_scrolling);
-	w->centeredCursor(Config.centered_cursor);
-	w->setItemDisplayer(Display::Default<NC::Buffer>);
+	w.setHighlightColor(Config.main_highlight_color);
+	w.cyclicScrolling(Config.use_cyclic_scrolling);
+	w.centeredCursor(Config.centered_cursor);
+	w.setItemDisplayer(Display::Default<NC::Buffer>);
 }
 
 void TinyTagEditor::resize()
 {
 	size_t x_offset, width;
 	getWindowResizeParams(x_offset, width);
-	w->resize(width, MainHeight);
-	w->moveTo(x_offset, MainStartY);
+	w.resize(width, MainHeight);
+	w.moveTo(x_offset, MainStartY);
 	hasToBeResized = 0;
 }
 
@@ -103,7 +103,7 @@ std::wstring TinyTagEditor::title()
 
 void TinyTagEditor::enterPressed()
 {
-	size_t option = w->choice();
+	size_t option = w.choice();
 	Statusbar::lock();
 	if (option < 19) // separator after comment
 	{
@@ -111,9 +111,9 @@ void TinyTagEditor::enterPressed()
 		Statusbar::put() << NC::fmtBold << SongInfo::Tags[pos].Name << ": " << NC::fmtBoldEnd;
 		itsEdited.setTags(SongInfo::Tags[pos].Set, Global::wFooter->getString(
 			itsEdited.getTags(SongInfo::Tags[pos].Get, Config.tags_separator)), Config.tags_separator);
-		w->at(option).value().clear();
-		w->at(option).value() << NC::fmtBold << SongInfo::Tags[pos].Name << ':' << NC::fmtBoldEnd << ' ';
-		ShowTag(w->at(option).value(), itsEdited.getTags(SongInfo::Tags[pos].Get, Config.tags_separator));
+		w.at(option).value().clear();
+		w.at(option).value() << NC::fmtBold << SongInfo::Tags[pos].Name << ':' << NC::fmtBoldEnd << ' ';
+		ShowTag(w.at(option).value(), itsEdited.getTags(SongInfo::Tags[pos].Get, Config.tags_separator));
 	}
 	else if (option == 20)
 	{
@@ -124,8 +124,8 @@ void TinyTagEditor::enterPressed()
 		filename = filename.substr(0, dot);
 		std::string new_name = Global::wFooter->getString(filename);
 		itsEdited.setNewURI(new_name + extension);
-		w->at(option).value().clear();
-		w->at(option).value() << NC::fmtBold << "Filename:" << NC::fmtBoldEnd << ' ' << (itsEdited.getNewURI().empty() ? itsEdited.getName() : itsEdited.getNewURI());
+		w.at(option).value().clear();
+		w.at(option).value() << NC::fmtBold << "Filename:" << NC::fmtBoldEnd << ' ' << (itsEdited.getNewURI().empty() ? itsEdited.getName() : itsEdited.getNewURI());
 	}
 	Statusbar::unlock();
 	
@@ -154,15 +154,15 @@ void TinyTagEditor::enterPressed()
 
 void TinyTagEditor::mouseButtonPressed(MEVENT me)
 {
-	if (w->empty() || !w->hasCoords(me.x, me.y) || size_t(me.y) >= w->size())
+	if (w.empty() || !w.hasCoords(me.x, me.y) || size_t(me.y) >= w.size())
 		return;
 	if (me.bstate & (BUTTON1_PRESSED | BUTTON3_PRESSED))
 	{
-		if (!w->Goto(me.y))
+		if (!w.Goto(me.y))
 			return;
 		if (me.bstate & BUTTON3_PRESSED)
 		{
-			w->refresh();
+			w.refresh();
 			enterPressed();
 		}
 	}
@@ -190,47 +190,47 @@ bool TinyTagEditor::getTags()
 	std::string ext = itsEdited.getURI();
 	ext = lowercase(ext.substr(ext.rfind(".")+1));
 	
-	w->clear();
-	w->reset();
+	w.clear();
+	w.reset();
 	
-	w->resizeList(24);
+	w.resizeList(24);
 	
 	for (size_t i = 0; i < 7; ++i)
-		w->at(i).setInactive(true);
+		w.at(i).setInactive(true);
 	
-	w->at(7).setSeparator(true);
-	w->at(19).setSeparator(true);
-	w->at(21).setSeparator(true);
+	w.at(7).setSeparator(true);
+	w.at(19).setSeparator(true);
+	w.at(21).setSeparator(true);
 	
 	if (!Tags::extendedSetSupported(f.file()))
 	{
-		w->at(10).setInactive(true);
+		w.at(10).setInactive(true);
 		for (size_t i = 15; i <= 17; ++i)
-			w->at(i).setInactive(true);
+			w.at(i).setInactive(true);
 	}
 	
-	w->highlight(8);
+	w.highlight(8);
 	
-	w->at(0).value() << NC::fmtBold << Config.color1 << "Song name: " << NC::fmtBoldEnd << Config.color2 << itsEdited.getName() << NC::clEnd;
-	w->at(1).value() << NC::fmtBold << Config.color1 << "Location in DB: " << NC::fmtBoldEnd << Config.color2;
-	ShowTag(w->at(1).value(), itsEdited.getDirectory());
-	w->at(1).value() << NC::clEnd;
-	w->at(3).value() << NC::fmtBold << Config.color1 << "Length: " << NC::fmtBoldEnd << Config.color2 << itsEdited.getLength() << NC::clEnd;
-	w->at(4).value() << NC::fmtBold << Config.color1 << "Bitrate: " << NC::fmtBoldEnd << Config.color2 << f.audioProperties()->bitrate() << " kbps" << NC::clEnd;
-	w->at(5).value() << NC::fmtBold << Config.color1 << "Sample rate: " << NC::fmtBoldEnd << Config.color2 << f.audioProperties()->sampleRate() << " Hz" << NC::clEnd;
-	w->at(6).value() << NC::fmtBold << Config.color1 << "Channels: " << NC::fmtBoldEnd << Config.color2 << (f.audioProperties()->channels() == 1 ? "Mono" : "Stereo") << NC::clDefault;
+	w.at(0).value() << NC::fmtBold << Config.color1 << "Song name: " << NC::fmtBoldEnd << Config.color2 << itsEdited.getName() << NC::clEnd;
+	w.at(1).value() << NC::fmtBold << Config.color1 << "Location in DB: " << NC::fmtBoldEnd << Config.color2;
+	ShowTag(w.at(1).value(), itsEdited.getDirectory());
+	w.at(1).value() << NC::clEnd;
+	w.at(3).value() << NC::fmtBold << Config.color1 << "Length: " << NC::fmtBoldEnd << Config.color2 << itsEdited.getLength() << NC::clEnd;
+	w.at(4).value() << NC::fmtBold << Config.color1 << "Bitrate: " << NC::fmtBoldEnd << Config.color2 << f.audioProperties()->bitrate() << " kbps" << NC::clEnd;
+	w.at(5).value() << NC::fmtBold << Config.color1 << "Sample rate: " << NC::fmtBoldEnd << Config.color2 << f.audioProperties()->sampleRate() << " Hz" << NC::clEnd;
+	w.at(6).value() << NC::fmtBold << Config.color1 << "Channels: " << NC::fmtBoldEnd << Config.color2 << (f.audioProperties()->channels() == 1 ? "Mono" : "Stereo") << NC::clDefault;
 	
 	unsigned pos = 8;
 	for (const SongInfo::Metadata *m = SongInfo::Tags; m->Name; ++m, ++pos)
 	{
-		w->at(pos).value() << NC::fmtBold << m->Name << ":" << NC::fmtBoldEnd << ' ';
-		ShowTag(w->at(pos).value(), itsEdited.getTags(m->Get, Config.tags_separator));
+		w.at(pos).value() << NC::fmtBold << m->Name << ":" << NC::fmtBoldEnd << ' ';
+		ShowTag(w.at(pos).value(), itsEdited.getTags(m->Get, Config.tags_separator));
 	}
 	
-	w->at(20).value() << NC::fmtBold << "Filename:" << NC::fmtBoldEnd << ' ' << itsEdited.getName();
+	w.at(20).value() << NC::fmtBold << "Filename:" << NC::fmtBoldEnd << ' ' << itsEdited.getName();
 	
-	w->at(22).value() << "Save";
-	w->at(23).value() << "Cancel";
+	w.at(22).value() << "Save";
+	w.at(23).value() << "Cancel";
 	return true;
 }
 

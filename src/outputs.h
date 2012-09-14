@@ -29,7 +29,7 @@
 #include "mpdpp.h"
 #include "screen.h"
 
-struct Outputs : public Screen<NC::Menu<MPD::Output> *>
+struct Outputs : public Screen<NC::Menu<MPD::Output>>
 {
 	Outputs();
 	

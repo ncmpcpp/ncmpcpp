@@ -36,13 +36,12 @@ using Global::myScreen;
 Outputs *myOutputs;
 
 Outputs::Outputs()
+: Screen(NC::Menu<MPD::Output>(0, MainStartY, COLS, MainHeight, "", Config.main_color, NC::brNone))
 {
-	w = new NC::Menu<MPD::Output>(0, MainStartY, COLS, MainHeight, "", Config.main_color, NC::brNone);
-	w->cyclicScrolling(Config.use_cyclic_scrolling);
-	w->centeredCursor(Config.centered_cursor);
-	w->setHighlightColor(Config.main_highlight_color);
-	w->setItemDisplayer(Display::Outputs);
-	
+	w.cyclicScrolling(Config.use_cyclic_scrolling);
+	w.centeredCursor(Config.centered_cursor);
+	w.setHighlightColor(Config.main_highlight_color);
+	w.setItemDisplayer(Display::Outputs);
 	FetchList();
 }
 
@@ -62,7 +61,7 @@ void Outputs::switchTo()
 	if (myScreen != this && myScreen->isTabbable())
 		Global::myPrevScreen = myScreen;
 	myScreen = this;
-	w->Window::clear();
+	w.Window::clear();
 	drawHeader();
 }
 
@@ -70,8 +69,8 @@ void Outputs::resize()
 {
 	size_t x_offset, width;
 	getWindowResizeParams(x_offset, width);
-	w->resize(width, MainHeight);
-	w->moveTo(x_offset, MainStartY);
+	w.resize(width, MainHeight);
+	w.moveTo(x_offset, MainStartY);
 	hasToBeResized = 0;
 }
 
@@ -82,15 +81,15 @@ std::wstring Outputs::title()
 
 void Outputs::enterPressed()
 {
-	if (w->current().value().isEnabled())
+	if (w.current().value().isEnabled())
 	{
-		if (Mpd.DisableOutput(w->choice()))
-			Statusbar::msg("Output \"%s\" disabled", w->current().value().name().c_str());
+		if (Mpd.DisableOutput(w.choice()))
+			Statusbar::msg("Output \"%s\" disabled", w.current().value().name().c_str());
 	}
 	else
 	{
-		if (Mpd.EnableOutput(w->choice()))
-			Statusbar::msg("Output \"%s\" enabled", w->current().value().name().c_str());
+		if (Mpd.EnableOutput(w.choice()))
+			Statusbar::msg("Output \"%s\" enabled", w.current().value().name().c_str());
 	}
 	if (!Mpd.SupportsIdle())
 		FetchList();
@@ -98,11 +97,11 @@ void Outputs::enterPressed()
 
 void Outputs::mouseButtonPressed(MEVENT me)
 {
-	if (w->empty() || !w->hasCoords(me.x, me.y) || size_t(me.y) >= w->size())
+	if (w.empty() || !w.hasCoords(me.x, me.y) || size_t(me.y) >= w.size())
 		return;
 	if (me.bstate & BUTTON1_PRESSED || me.bstate & BUTTON3_PRESSED)
 	{
-		w->Goto(me.y);
+		w.Goto(me.y);
 		if (me.bstate & BUTTON3_PRESSED)
 			enterPressed();
 	}
@@ -112,12 +111,12 @@ void Outputs::mouseButtonPressed(MEVENT me)
 
 void Outputs::FetchList()
 {
-	w->clear();
+	w.clear();
 	auto outputs = Mpd.GetOutputs();
 	for (auto o = outputs.begin(); o != outputs.end(); ++o)
-		w->addItem(*o, o->isEnabled());
+		w.addItem(*o, o->isEnabled());
 	if (myScreen == this)
-		w->refresh();
+		w.refresh();
 }
 
 #endif // ENABLE_OUTPUTS

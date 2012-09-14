@@ -32,7 +32,7 @@
 # include <fftw3.h>
 #endif
 
-struct Visualizer : public Screen<NC::Window *>
+struct Visualizer : public Screen<NC::Window>
 {
 	Visualizer();
 	
@@ -67,17 +67,17 @@ private:
 	void DrawFrequencySpectrum(int16_t *, ssize_t, size_t, size_t);
 #	endif // HAVE_FFTW3_H
 	
-	int itsOutputID;
-	timeval itsTimer;
+	int m_output_id;
+	timeval m_timer;
 	
-	int itsFifo;
-	unsigned itsSamples;
+	int m_fifo;
+	unsigned m_samples;
 #	ifdef HAVE_FFTW3_H
-	unsigned itsFFTResults;
-	unsigned *itsFreqsMagnitude;
-	double *itsInput;
-	fftw_complex *itsOutput;
-	fftw_plan itsPlan;
+	unsigned m_fftw_results;
+	unsigned *m_freq_magnitudes;
+	double *m_fftw_input;
+	fftw_complex *m_fftw_output;
+	fftw_plan m_fftw_plan;
 #	endif // HAVE_FFTW3_H
 };
 

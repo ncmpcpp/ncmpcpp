@@ -28,7 +28,7 @@
 #include "window.h"
 #include "screen.h"
 
-struct Clock : public Screen<NC::Window *>
+struct Clock : public Screen<NC::Window>
 {
 	Clock();
 	
@@ -51,7 +51,7 @@ protected:
 	virtual bool isLockable() OVERRIDE { return false; }
 	
 private:
-	NC::Window *itsPane;
+	NC::Window m_pane;
 	
 	static void Prepare();
 	static void Set(int, int);
