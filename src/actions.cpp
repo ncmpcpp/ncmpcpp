@@ -389,14 +389,14 @@ void Action::ListsChangeFinisher()
 #	endif // HAVE_TAGLIB_H
 	   )
 	{
-		if (myScreen->activeWindow() == myLibrary->Tags)
+		if (myScreen->activeWindow() == &myLibrary->Tags)
 		{
-			myLibrary->Albums->clear();
-			myLibrary->Songs->clear();
+			myLibrary->Albums.clear();
+			myLibrary->Songs.clear();
 		}
-		else if (myScreen->activeWindow() == myLibrary->Albums)
+		else if (myScreen->activeWindow() == &myLibrary->Albums)
 		{
-			myLibrary->Songs->clear();
+			myLibrary->Songs.clear();
 		}
 		else if (myScreen->activeWindow() == myPlaylistEditor->Playlists)
 		{
@@ -1346,8 +1346,8 @@ bool EditLibraryTag::canBeRun() const
 {
 #	ifdef HAVE_TAGLIB_H
 	return isMPDMusicDirSet()
-	   &&  myScreen->activeWindow() == myLibrary->Tags
-	   && !myLibrary->Tags->empty();
+	   &&  myScreen->isActiveWindow(myLibrary->Tags)
+	   && !myLibrary->Tags.empty();
 #	else
 	return false;
 #	endif // HAVE_TAGLIB_H
@@ -1360,13 +1360,13 @@ void EditLibraryTag::Run()
 	
 	Statusbar::lock();
 	Statusbar::put() << NC::fmtBold << tagTypeToString(Config.media_lib_primary_tag) << NC::fmtBoldEnd << ": ";
-	std::string new_tag = wFooter->getString(myLibrary->Tags->current().value());
+	std::string new_tag = wFooter->getString(myLibrary->Tags.current().value());
 	Statusbar::unlock();
-	if (!new_tag.empty() && new_tag != myLibrary->Tags->current().value())
+	if (!new_tag.empty() && new_tag != myLibrary->Tags.current().value())
 	{
 		Statusbar::msg("Updating tags...");
 		Mpd.StartSearch(1);
-		Mpd.AddSearch(Config.media_lib_primary_tag, myLibrary->Tags->current().value());
+		Mpd.AddSearch(Config.media_lib_primary_tag, myLibrary->Tags.current().value());
 		MPD::MutableSong::SetFunction set = tagTypeToSetFunction(Config.media_lib_primary_tag);
 		assert(set);
 		bool success = true;
@@ -1398,8 +1398,8 @@ bool EditLibraryAlbum::canBeRun() const
 {
 #	ifdef HAVE_TAGLIB_H
 	return isMPDMusicDirSet()
-	    && myScreen->activeWindow() == myLibrary->Albums
-	    && !myLibrary->Albums->empty();
+	    && myScreen->isActiveWindow(myLibrary->Albums)
+	    && !myLibrary->Albums.empty();
 #	else
 	return false;
 #	endif // HAVE_TAGLIB_H
@@ -1412,21 +1412,21 @@ void EditLibraryAlbum::Run()
 	
 	Statusbar::lock();
 	Statusbar::put() << NC::fmtBold << "Album: " << NC::fmtBoldEnd;
-	std::string new_album = wFooter->getString(myLibrary->Albums->current().value().Album);
+	std::string new_album = wFooter->getString(myLibrary->Albums.current().value().Album);
 	Statusbar::unlock();
-	if (!new_album.empty() && new_album != myLibrary->Albums->current().value().Album)
+	if (!new_album.empty() && new_album != myLibrary->Albums.current().value().Album)
 	{
 		bool success = 1;
 		Statusbar::msg("Updating tags...");
-		for (size_t i = 0;  i < myLibrary->Songs->size(); ++i)
+		for (size_t i = 0;  i < myLibrary->Songs.size(); ++i)
 		{
-			Statusbar::msg("Updating tags in \"%s\"...", (*myLibrary->Songs)[i].value().getName().c_str());
-			std::string path = Config.mpd_music_dir + (*myLibrary->Songs)[i].value().getURI();
+			Statusbar::msg("Updating tags in \"%s\"...", myLibrary->Songs[i].value().getName().c_str());
+			std::string path = Config.mpd_music_dir + myLibrary->Songs[i].value().getURI();
 			TagLib::FileRef f(path.c_str());
 			if (f.isNull())
 			{
 				const char msg[] = "Error while opening file \"%ls\"";
-				Statusbar::msg(msg, wideShorten(ToWString((*myLibrary->Songs)[i].value().getURI()), COLS-const_strlen(msg)).c_str());
+				Statusbar::msg(msg, wideShorten(ToWString(myLibrary->Songs[i].value().getURI()), COLS-const_strlen(msg)).c_str());
 				success = 0;
 				break;
 			}
@@ -1434,14 +1434,14 @@ void EditLibraryAlbum::Run()
 			if (!f.save())
 			{
 				const char msg[] = "Error while writing tags in \"%ls\"";
-				Statusbar::msg(msg, wideShorten(ToWString((*myLibrary->Songs)[i].value().getURI()), COLS-const_strlen(msg)).c_str());
+				Statusbar::msg(msg, wideShorten(ToWString(myLibrary->Songs[i].value().getURI()), COLS-const_strlen(msg)).c_str());
 				success = 0;
 				break;
 			}
 		}
 		if (success)
 		{
-			Mpd.UpdateDirectory(getSharedDirectory(myLibrary->Songs->beginV(), myLibrary->Songs->endV()));
+			Mpd.UpdateDirectory(getSharedDirectory(myLibrary->Songs.beginV(), myLibrary->Songs.endV()));
 			Statusbar::msg("Tags updated successfully");
 		}
 	}
@@ -2093,8 +2093,8 @@ void ToggleBrowserSortMode::Run()
 
 bool ToggleLibraryTagType::canBeRun() const
 {
-	return (myScreen->activeWindow() == myLibrary->Tags)
-	    || (myLibrary->Columns() == 2 && myScreen->activeWindow() == myLibrary->Albums);
+	return (myScreen->isActiveWindow(myLibrary->Tags))
+	    || (myLibrary->Columns() == 2 && myScreen->isActiveWindow(myLibrary->Albums));
 }
 
 void ToggleLibraryTagType::Run()
@@ -2117,21 +2117,21 @@ void ToggleLibraryTagType::Run()
 	{
 		Config.media_lib_primary_tag = new_tagitem;
 		std::string item_type = tagTypeToString(Config.media_lib_primary_tag);
-		myLibrary->Tags->setTitle(Config.titles_visibility ? item_type + "s" : "");
-		myLibrary->Tags->reset();
+		myLibrary->Tags.setTitle(Config.titles_visibility ? item_type + "s" : "");
+		myLibrary->Tags.reset();
 		item_type = lowercase(item_type);
 		if (myLibrary->Columns() == 2)
 		{
-			myLibrary->Songs->clear();
-			myLibrary->Albums->reset();
-			myLibrary->Albums->clear();
-			myLibrary->Albums->setTitle(Config.titles_visibility ? "Albums (sorted by " + item_type + ")" : "");
-			myLibrary->Albums->display();
+			myLibrary->Songs.clear();
+			myLibrary->Albums.reset();
+			myLibrary->Albums.clear();
+			myLibrary->Albums.setTitle(Config.titles_visibility ? "Albums (sorted by " + item_type + ")" : "");
+			myLibrary->Albums.display();
 		}
 		else
 		{
-			myLibrary->Tags->clear();
-			myLibrary->Tags->display();
+			myLibrary->Tags.clear();
+			myLibrary->Tags.display();
 		}
 		Statusbar::msg("Switched to list of %s tag", item_type.c_str());
 	}
@@ -2230,8 +2230,8 @@ bool ShowArtistInfo::canBeRun() const
 {
 	#ifdef HAVE_CURL_CURL_H
 	return myScreen == myLastfm
-	  ||   (myScreen->activeWindow() == myLibrary->Tags
-	    && !myLibrary->Tags->empty()
+	  ||   (myScreen->isActiveWindow(myLibrary->Tags)
+	    && !myLibrary->Tags.empty()
 	    && Config.media_lib_primary_tag == MPD_TAG_ARTIST)
 	  ||   currentSong(myScreen);
 #	else
@@ -2249,11 +2249,11 @@ void ShowArtistInfo::Run()
 	}
 	
 	std::string artist;
-	if (myScreen->activeWindow() == myLibrary->Tags)
+	if (myScreen->isActiveWindow(myLibrary->Tags))
 	{
-		assert(!myLibrary->Tags->empty());
+		assert(!myLibrary->Tags.empty());
 		assert(Config.media_lib_primary_tag == MPD_TAG_ARTIST);
-		artist = myLibrary->Tags->current().value();
+		artist = myLibrary->Tags.current().value();
 	}
 	else
 	{

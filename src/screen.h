@@ -35,6 +35,9 @@ struct BasicScreen
 	BasicScreen() : hasToBeResized(false) { }
 	virtual ~BasicScreen() { }
 	
+	/// @see Screen::isActiveWindow()
+	virtual bool isActiveWindow(const NC::Window &w_) = 0;
+	
 	/// @see Screen::activeWindow()
 	virtual void *activeWindow() = 0;
 	
@@ -136,6 +139,10 @@ public:
 	Screen(WindowT w_) : w(w_) { }
 	
 	virtual ~Screen() { }
+	
+	virtual bool isActiveWindow(const NC::Window &w_) OVERRIDE {
+		return &accessor::apply(w) == &w_;
+	}
 	
 	/// Since some screens contain more that one window
 	/// it's useful to determine the one that is being

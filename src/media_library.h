@@ -86,9 +86,9 @@ struct MediaLibrary : public Screen<NC::Window *>, public Filterable, public Has
 		std::string Date;
 	};
 	
-	NC::Menu<std::string> *Tags;
-	NC::Menu<SearchConstraints> *Albums;
-	NC::Menu<MPD::Song> *Songs;
+	NC::Menu<std::string> Tags;
+	NC::Menu<SearchConstraints> Albums;
+	NC::Menu<MPD::Song> Songs;
 	
 protected:
 	virtual bool isLockable() OVERRIDE { return true; }
