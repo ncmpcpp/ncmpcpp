@@ -138,7 +138,7 @@ void Playlist::mouseButtonPressed(MEVENT me)
 				enterPressed();
 		}
 		else
-			Screen<ScreenType>::mouseButtonPressed(me);
+			Screen<WindowType>::mouseButtonPressed(me);
 	}
 }
 

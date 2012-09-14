@@ -264,7 +264,7 @@ void SearchEngine::mouseButtonPressed(MEVENT me)
 		}
 	}
 	else
-		Screen<ScreenType>::mouseButtonPressed(me);
+		Screen<WindowType>::mouseButtonPressed(me);
 }
 
 /***********************************************************************/

@@ -115,14 +115,18 @@ bool isVisible(BasicScreen *screen);
 /// for the screen to be working properly and assumes that we didn't forget
 /// about anything vital.
 ///
-template <typename WindowT> class Screen : public BasicScreen
+template <typename WindowT> struct Screen : public BasicScreen
 {
+	typedef WindowT WindowType;
+	typedef typename std::add_lvalue_reference<WindowType>::type WindowReference;
+	
+private:
 	template <bool IsPointer, typename Result> struct access { };
 	template <typename Result> struct access<true, Result> {
-		static Result apply(WindowT w) { return *w; }
+		static Result apply(WindowType w) { return *w; }
 	};
 	template <typename Result> struct access<false, Result> {
-		static Result apply(WindowT &w) { return w; }
+		static Result apply(WindowReference w) { return w; }
 	};
 	
 	typedef access<
@@ -133,8 +137,6 @@ template <typename WindowT> class Screen : public BasicScreen
 	> accessor;
 	
 public:
-	typedef WindowT ScreenType;
-	
 	Screen() { }
 	Screen(WindowT w_) : w(w_) { }
 	
@@ -178,7 +180,7 @@ public:
 	}
 	
 	/// @return currently active window
-	typename std::add_lvalue_reference<WindowT>::type main() {
+	WindowReference main() {
 		return w;
 	}
 	

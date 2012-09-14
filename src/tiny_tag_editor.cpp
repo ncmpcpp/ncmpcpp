@@ -167,7 +167,7 @@ void TinyTagEditor::mouseButtonPressed(MEVENT me)
 		}
 	}
 	else
-		Screen<ScreenType>::mouseButtonPressed(me);
+		Screen<WindowType>::mouseButtonPressed(me);
 }
 
 void TinyTagEditor::SetEdited(const MPD::Song &s)

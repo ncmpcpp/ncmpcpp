@@ -56,8 +56,8 @@ private:
 	size_t m_height;
 	size_t m_width;
 	
-	const std::remove_pointer<ScreenType>::type::Item::Type m_sort_entry;
-	const std::remove_pointer<ScreenType>::type::Item::Type m_cancel_entry;
+	const std::remove_pointer<WindowType>::type::Item::Type m_sort_entry;
+	const std::remove_pointer<WindowType>::type::Item::Type m_cancel_entry;
 };
 
 extern SortPlaylistDialog *mySortPlaylistDialog;

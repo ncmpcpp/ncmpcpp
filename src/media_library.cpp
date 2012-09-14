@@ -444,7 +444,7 @@ void MediaLibrary::mouseButtonPressed(MEVENT me)
 			}
 		}
 		else
-			Screen<ScreenType>::mouseButtonPressed(me);
+			Screen<WindowType>::mouseButtonPressed(me);
 		Albums.clear();
 		Songs.clear();
 	}
@@ -472,7 +472,7 @@ void MediaLibrary::mouseButtonPressed(MEVENT me)
 			}
 		}
 		else
-			Screen<ScreenType>::mouseButtonPressed(me);
+			Screen<WindowType>::mouseButtonPressed(me);
 		Songs.clear();
 	}
 	else if (!Songs.empty() && Songs.hasCoords(me.x, me.y))
@@ -493,7 +493,7 @@ void MediaLibrary::mouseButtonPressed(MEVENT me)
 				enterPressed();
 		}
 		else
-			Screen<ScreenType>::mouseButtonPressed(me);
+			Screen<WindowType>::mouseButtonPressed(me);
 	}
 }
 
