@@ -24,7 +24,7 @@
 #include "screen.h"
 #include "song.h"
 
-struct SortPlaylistDialog : public Screen<NC::Menu< std::pair<std::string, MPD::Song::GetFunction> > *>
+struct SortPlaylistDialog : public Screen<NC::Menu<std::pair<std::string, MPD::Song::GetFunction>>>
 {
 	SortPlaylistDialog();
 	
@@ -56,8 +56,8 @@ private:
 	size_t m_height;
 	size_t m_width;
 	
-	const std::remove_pointer<WindowType>::type::Item::Type m_sort_entry;
-	const std::remove_pointer<WindowType>::type::Item::Type m_cancel_entry;
+	const WindowType::Item::Type m_sort_entry;
+	const WindowType::Item::Type m_cancel_entry;
 };
 
 extern SortPlaylistDialog *mySortPlaylistDialog;

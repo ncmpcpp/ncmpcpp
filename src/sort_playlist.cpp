@@ -37,27 +37,27 @@ SortPlaylistDialog::SortPlaylistDialog()
 {
 	setDimensions();
 	
-	w = new NC::Menu< std::pair<std::string, MPD::Song::GetFunction> >((COLS-m_width)/2, (MainHeight-m_height)/2+MainStartY, m_width, m_height, "Sort songs by...", Config.main_color, Config.window_border);
-	w->cyclicScrolling(Config.use_cyclic_scrolling);
-	w->centeredCursor(Config.centered_cursor);
-	w->setItemDisplayer(Display::Pair<std::string, MPD::Song::GetFunction>);
+	w = NC::Menu< std::pair<std::string, MPD::Song::GetFunction> >((COLS-m_width)/2, (MainHeight-m_height)/2+MainStartY, m_width, m_height, "Sort songs by...", Config.main_color, Config.window_border);
+	w.cyclicScrolling(Config.use_cyclic_scrolling);
+	w.centeredCursor(Config.centered_cursor);
+	w.setItemDisplayer(Display::Pair<std::string, MPD::Song::GetFunction>);
 	
-	w->addItem(std::make_pair("Artist", &MPD::Song::getArtist));
-	w->addItem(std::make_pair("Album", &MPD::Song::getAlbum));
-	w->addItem(std::make_pair("Disc", &MPD::Song::getDisc));
-	w->addItem(std::make_pair("Track", &MPD::Song::getTrack));
-	w->addItem(std::make_pair("Genre", &MPD::Song::getGenre));
-	w->addItem(std::make_pair("Date", &MPD::Song::getDate));
-	w->addItem(std::make_pair("Composer", &MPD::Song::getComposer));
-	w->addItem(std::make_pair("Performer", &MPD::Song::getPerformer));
-	w->addItem(std::make_pair("Title", &MPD::Song::getTitle));
-	w->addItem(std::make_pair("Filename", &MPD::Song::getURI));
+	w.addItem(std::make_pair("Artist", &MPD::Song::getArtist));
+	w.addItem(std::make_pair("Album", &MPD::Song::getAlbum));
+	w.addItem(std::make_pair("Disc", &MPD::Song::getDisc));
+	w.addItem(std::make_pair("Track", &MPD::Song::getTrack));
+	w.addItem(std::make_pair("Genre", &MPD::Song::getGenre));
+	w.addItem(std::make_pair("Date", &MPD::Song::getDate));
+	w.addItem(std::make_pair("Composer", &MPD::Song::getComposer));
+	w.addItem(std::make_pair("Performer", &MPD::Song::getPerformer));
+	w.addItem(std::make_pair("Title", &MPD::Song::getTitle));
+	w.addItem(std::make_pair("Filename", &MPD::Song::getURI));
 	
-	m_sort_options = w->size();
+	m_sort_options = w.size();
 	
-	w->addSeparator();
-	w->addItem(m_sort_entry);
-	w->addItem(m_cancel_entry);
+	w.addSeparator();
+	w.addItem(m_sort_entry);
+	w.addItem(m_cancel_entry);
 }
 
 void SortPlaylistDialog::switchTo()
@@ -75,15 +75,15 @@ void SortPlaylistDialog::switchTo()
 	myOldScreen = myScreen;
 	myScreen = this;
 	
-	w->reset();
+	w.reset();
 	refresh();
 }
 
 void SortPlaylistDialog::resize()
 {
 	setDimensions();
-	w->resize(m_width, m_height);
-	w->moveTo((COLS-m_width)/2, (MainHeight-m_height)/2+MainStartY);
+	w.resize(m_width, m_height);
+	w.moveTo((COLS-m_width)/2, (MainHeight-m_height)/2+MainStartY);
 	
 	hasToBeResized = false;
 }
@@ -95,7 +95,7 @@ std::wstring SortPlaylistDialog::title()
 
 void SortPlaylistDialog::enterPressed()
 {
-	auto option = w->currentVI();
+	auto option = w.currentVI();
 	if (*option == m_sort_entry)
 	{
 		auto begin = myPlaylist->main().begin(), end = myPlaylist->main().end();
@@ -119,8 +119,8 @@ void SortPlaylistDialog::enterPressed()
 		auto song_cmp = [this, &cmp](const MPD::Song &a, const MPD::Song &b) -> bool {
 			for (size_t i = 0; i < m_sort_options; ++i)
 			{
-				int res = cmp(a.getTags((*w)[i].value().second, Config.tags_separator),
-							b.getTags((*w)[i].value().second, Config.tags_separator));
+				int res = cmp(a.getTags(w[i].value().second, Config.tags_separator),
+				              b.getTags(w[i].value().second, Config.tags_separator));
 				if (res != 0)
 					return res < 0;
 			}
@@ -166,11 +166,11 @@ void SortPlaylistDialog::enterPressed()
 
 void SortPlaylistDialog::mouseButtonPressed(MEVENT me)
 {
-	if (w->hasCoords(me.x, me.y))
+	if (w.hasCoords(me.x, me.y))
 	{
 		if (me.bstate & (BUTTON1_PRESSED | BUTTON3_PRESSED))
 		{
-			w->Goto(me.y);
+			w.Goto(me.y);
 			if (me.bstate & BUTTON3_PRESSED)
 				enterPressed();
 		}
@@ -181,21 +181,21 @@ void SortPlaylistDialog::mouseButtonPressed(MEVENT me)
 
 void SortPlaylistDialog::moveSortOrderDown()
 {
-	size_t pos = w->choice();
+	size_t pos = w.choice();
 	if (pos < m_sort_options-1)
 	{
-		w->Swap(pos, pos+1);
-		w->scroll(NC::wDown);
+		w.Swap(pos, pos+1);
+		w.scroll(NC::wDown);
 	}
 }
 
 void SortPlaylistDialog::moveSortOrderUp()
 {
-	size_t pos = w->choice();
+	size_t pos = w.choice();
 	if (pos > 0 && pos < m_sort_options)
 	{
-		w->Swap(pos, pos-1);
-		w->scroll(NC::wUp);
+		w.Swap(pos, pos-1);
+		w.scroll(NC::wUp);
 	}
 }
 
