@@ -314,7 +314,10 @@ void BindingsConfiguration::generateDefaults()
 		bind(k, aChangeBrowseMode);
 	}
 	if (notBound(k = stringToKey("3")))
+	{
 		bind(k, aShowSearchEngine);
+		bind(k, aResetSearchEngine);
+	}
 	if (notBound(k = stringToKey("4")))
 		bind(k, aShowMediaLibrary);
 	if (notBound(k = stringToKey("5")))

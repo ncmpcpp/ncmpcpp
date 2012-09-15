@@ -308,7 +308,7 @@ void Help::GetKeybindings()
 	KeyDesc(aEditSong, "Edit song");
 #	endif // HAVE_TAGLIB_H
 	KeyDesc(aStartSearching, "Start searching");
-	KeyDesc(aShowSearchEngine, "Reset search constraints and clear results");
+	KeyDesc(aResetSearchEngine, "Reset search constraints and clear results");
 	
 	KeysSection("Media library");
 	if (!Config.media_library_disable_two_column_mode)

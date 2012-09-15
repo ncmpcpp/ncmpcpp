@@ -47,7 +47,7 @@ enum ActionType
 	aRefetchLyrics, aRefetchArtistInfo, aSetSelectedItemsPriority, aFilterPlaylistOnPriorities,
 	aShowSongInfo, aShowArtistInfo,
 	aShowLyrics, aQuit, aNextScreen, aPreviousScreen, aShowHelp, aShowPlaylist, aShowBrowser, aChangeBrowseMode,
-	aShowSearchEngine, aShowMediaLibrary, aShowPlaylistEditor, aShowTagEditor, aShowOutputs,
+	aShowSearchEngine, aResetSearchEngine, aShowMediaLibrary, aShowPlaylistEditor, aShowTagEditor, aShowOutputs,
 	aShowVisualizer, aShowClock, aShowServerInfo
 };
 
@@ -1015,9 +1015,16 @@ struct ShowSearchEngine : public Action
 	ShowSearchEngine() : Action(aShowSearchEngine, "show_search_engine") { }
 	
 protected:
-#	ifdef HAVE_TAGLIB_H
 	virtual bool canBeRun() const;
-#	endif // HAVE_TAGLIB_H
+	virtual void Run();
+};
+
+struct ResetSearchEngine : public Action
+{
+	ResetSearchEngine() : Action(aResetSearchEngine, "reset_search_engine") { }
+	
+protected:
+	virtual bool canBeRun() const;
 	virtual void Run();
 };
 

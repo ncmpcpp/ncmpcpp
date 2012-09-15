@@ -110,6 +110,8 @@ struct SearchEngine: Screen<NC::Menu<SEItem>>, Filterable, HasSongs, Searchable,
 	virtual MPD::SongList getSelectedSongs() OVERRIDE;
 	
 	// private members
+	void reset();
+	
 	static size_t StaticOptions;
 	static size_t SearchButton;
 	static size_t ResetButton;
@@ -120,7 +122,6 @@ protected:
 private:
 	void Prepare();
 	void Search();
-	void reset();
 	
 	const char **SearchMode;
 	

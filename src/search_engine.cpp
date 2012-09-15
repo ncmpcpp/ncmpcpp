@@ -126,16 +126,11 @@ void SearchEngine::resize()
 
 void SearchEngine::switchTo()
 {
-	if (Global::myScreen != this)
-	{
-		SwitchTo::execute(this);
-		if (w.empty())
-			Prepare();
-		markSongsInPlaylist(getProxySongList());
-		drawHeader();
-	}
-	else
-		reset();
+	SwitchTo::execute(this);
+	if (w.empty())
+		Prepare();
+	markSongsInPlaylist(getProxySongList());
+	drawHeader();
 }
 
 std::wstring SearchEngine::title()

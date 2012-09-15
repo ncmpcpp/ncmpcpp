@@ -184,6 +184,9 @@
 #def_key "3"
 #  show_search_engine
 #
+#def_key "3"
+#  reset_search_engine
+#
 #def_key "4"
 #  show_media_library
 #
