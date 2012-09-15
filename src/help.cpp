@@ -294,7 +294,7 @@ void Help::GetKeybindings()
 #	endif // HAVE_TAGLIB_H
 	KeyDesc(aEditDirectoryName, "Edit directory name");
 	KeyDesc(aEditPlaylistName, "Edit playlist name");
-	KeyDesc(aShowBrowser, "Browse MPD database/local filesystem");
+	KeyDesc(aChangeBrowseMode, "Browse MPD database/local filesystem");
 	KeyDesc(aToggleBrowserSortMode, "Toggle sort mode");
 	KeyDesc(aJumpToPlayingSong, "Locate playing song");
 	KeyDesc(aJumpToParentDirectory, "Jump to parent directory");

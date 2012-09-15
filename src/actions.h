@@ -46,7 +46,7 @@ enum ActionType
 	aToggleMouse, aToggleBitrateVisibility, aAddRandomItems, aToggleBrowserSortMode, aToggleLibraryTagType,
 	aRefetchLyrics, aRefetchArtistInfo, aSetSelectedItemsPriority, aFilterPlaylistOnPriorities,
 	aShowSongInfo, aShowArtistInfo,
-	aShowLyrics, aQuit, aNextScreen, aPreviousScreen, aShowHelp, aShowPlaylist, aShowBrowser,
+	aShowLyrics, aQuit, aNextScreen, aPreviousScreen, aShowHelp, aShowPlaylist, aShowBrowser, aChangeBrowseMode,
 	aShowSearchEngine, aShowMediaLibrary, aShowPlaylistEditor, aShowTagEditor, aShowOutputs,
 	aShowVisualizer, aShowClock, aShowServerInfo
 };
@@ -997,9 +997,16 @@ struct ShowBrowser : public Action
 	ShowBrowser() : Action(aShowBrowser, "show_browser") { }
 	
 protected:
-#	ifdef HAVE_TAGLIB_H
 	virtual bool canBeRun() const;
-#	endif // HAVE_TAGLIB_H
+	virtual void Run();
+};
+
+struct ChangeBrowseMode : public Action
+{
+	ChangeBrowseMode() : Action(aChangeBrowseMode, "change_browse_mode") { }
+	
+protected:
+	virtual bool canBeRun() const;
 	virtual void Run();
 };
 

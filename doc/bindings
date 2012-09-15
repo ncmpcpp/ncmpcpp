@@ -178,6 +178,9 @@
 #def_key "2"
 #  show_browser
 #
+#def_key "2"
+#  change_browse_mode
+#
 #def_key "3"
 #  show_search_engine
 #

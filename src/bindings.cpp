@@ -309,7 +309,10 @@ void BindingsConfiguration::generateDefaults()
 	if (notBound(k = stringToKey("1")))
 		bind(k, aShowPlaylist);
 	if (notBound(k = stringToKey("2")))
+	{
 		bind(k, aShowBrowser);
+		bind(k, aChangeBrowseMode);
+	}
 	if (notBound(k = stringToKey("3")))
 		bind(k, aShowSearchEngine);
 	if (notBound(k = stringToKey("4")))

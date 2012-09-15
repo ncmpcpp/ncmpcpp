@@ -88,26 +88,18 @@ void Browser::resize()
 
 void Browser::switchTo()
 {
-	if (myScreen == this)
-	{
-#		ifndef WIN32
-		ChangeBrowseMode();
-#		endif // !WIN32
-	}
+	SwitchTo::execute(this);
+	
+	// local browser doesn't support sorting by mtime
+	if (isLocal() && Config.browser_sort_mode == smMTime)
+		Config.browser_sort_mode = smName;
+	
+	if (w.empty())
+		GetDirectory(itsBrowsedDir);
 	else
-	{
-		SwitchTo::execute(this);
-		
-		if (isLocal() && Config.browser_sort_mode == smMTime) // local browser doesn't support sorting by mtime
-			Config.browser_sort_mode = smName;
-		
-		if (w.empty())
-			GetDirectory(itsBrowsedDir);
-		else
-			markSongsInPlaylist(getProxySongList());
-		
-		drawHeader();
-	}
+		markSongsInPlaylist(getProxySongList());
+	
+	drawHeader();
 }
 
 std::wstring Browser::title()

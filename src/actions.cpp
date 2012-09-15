@@ -2032,6 +2032,16 @@ void ToggleBitrateVisibility::Run()
 	Statusbar::msg("Bitrate visibility %s", Config.display_bitrate ? "enabled" : "disabled");
 }
 
+bool ChangeBrowseMode::canBeRun() const
+{
+	return myScreen == myBrowser;
+}
+
+void ChangeBrowseMode::Run()
+{
+	myBrowser->ChangeBrowseMode();
+}
+
 void AddRandomItems::Run()
 {
 	using Global::wFooter;
@@ -2334,8 +2344,9 @@ bool ShowPlaylist::canBeRun() const
 {
 	return myScreen != myPlaylist
 #	ifdef HAVE_TAGLIB_H
-	    && myScreen != myTinyTagEditor;
+	    && myScreen != myTinyTagEditor
 #	endif // HAVE_TAGLIB_H
+	;
 }
 
 void ShowPlaylist::Run()
@@ -2343,12 +2354,14 @@ void ShowPlaylist::Run()
 	myPlaylist->switchTo();
 }
 
-#ifdef HAVE_TAGLIB_H
 bool ShowBrowser::canBeRun() const
 {
-	return myScreen != myTinyTagEditor;
+	return myScreen != myBrowser
+#	ifdef HAVE_TAGLIB_H
+	    && myScreen != myTinyTagEditor
+#	endif // HAVE_TAGLIB_H
+	;
 }
-#endif // HAVE_TAGLIB_H
 
 void ShowBrowser::Run()
 {
@@ -2383,8 +2396,9 @@ bool ShowPlaylistEditor::canBeRun() const
 {
 	return myScreen != myPlaylistEditor
 #	ifdef HAVE_TAGLIB_H
-	    && myScreen != myTinyTagEditor;
+	    && myScreen != myTinyTagEditor
 #	endif // HAVE_TAGLIB_H
+	;
 }
 
 void ShowPlaylistEditor::Run()
@@ -2578,6 +2592,7 @@ void populateActions()
 	insertAction(new ToggleAddMode());
 	insertAction(new ToggleMouse());
 	insertAction(new ToggleBitrateVisibility());
+	insertAction(new ChangeBrowseMode());
 	insertAction(new AddRandomItems());
 	insertAction(new ToggleBrowserSortMode());
 	insertAction(new ToggleLibraryTagType());
