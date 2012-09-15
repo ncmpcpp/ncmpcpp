@@ -68,6 +68,7 @@ struct MediaLibrary: Screen<NC::Window *>, Filterable, HasColumns, HasSongs, Sea
 	virtual void nextColumn() OVERRIDE;
 	
 	// private members
+	void toggleColumnsMode();
 	int Columns();
 	void LocateSong(const MPD::Song &);
 	std::shared_ptr<ProxySongList> songsProxyList();

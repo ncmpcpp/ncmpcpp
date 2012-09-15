@@ -182,7 +182,6 @@ struct Configuration
 	bool tag_editor_extended_numeration;
 	bool media_library_display_date;
 	bool media_library_display_empty_tag;
-	bool media_library_disable_two_column_mode;
 	bool discard_colors_if_item_is_selected;
 	bool store_lyrics_in_song_dir;
 	bool ask_for_locked_screen_width_part;

@@ -47,7 +47,7 @@ enum ActionType
 	aRefetchLyrics, aRefetchArtistInfo, aSetSelectedItemsPriority, aFilterPlaylistOnPriorities,
 	aShowSongInfo, aShowArtistInfo,
 	aShowLyrics, aQuit, aNextScreen, aPreviousScreen, aShowHelp, aShowPlaylist, aShowBrowser, aChangeBrowseMode,
-	aShowSearchEngine, aResetSearchEngine, aShowMediaLibrary, aShowPlaylistEditor, aShowTagEditor, aShowOutputs,
+	aShowSearchEngine, aResetSearchEngine, aShowMediaLibrary, aToggleMediaLibraryColumnsMode, aShowPlaylistEditor, aShowTagEditor, aShowOutputs,
 	aShowVisualizer, aShowClock, aShowServerInfo
 };
 
@@ -1033,9 +1033,17 @@ struct ShowMediaLibrary : public Action
 	ShowMediaLibrary() : Action(aShowMediaLibrary, "show_media_library") { }
 	
 protected:
-#	ifdef HAVE_TAGLIB_H
 	virtual bool canBeRun() const;
-#	endif // HAVE_TAGLIB_H
+	virtual void Run();
+};
+
+struct ToggleMediaLibraryColumnsMode : public Action
+{
+	ToggleMediaLibraryColumnsMode()
+	: Action(aToggleMediaLibraryColumnsMode, "toggle_media_library_columns_mode") { }
+	
+protected:
+	virtual bool canBeRun() const;
 	virtual void Run();
 };
 

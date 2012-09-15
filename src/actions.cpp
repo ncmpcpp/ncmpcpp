@@ -2392,16 +2392,29 @@ void ResetSearchEngine::Run()
 	mySearcher->reset();
 }
 
-#ifdef HAVE_TAGLIB_H
 bool ShowMediaLibrary::canBeRun() const
 {
-	return myScreen != myTinyTagEditor;
+	return myScreen != myLibrary
+#	ifdef HAVE_TAGLIB_H
+	    && myScreen != myTinyTagEditor
+#	endif // HAVE_TAGLIB_H
+	;
 }
-#endif // HAVE_TAGLIB_H
 
 void ShowMediaLibrary::Run()
 {
 	myLibrary->switchTo();
+}
+
+bool ToggleMediaLibraryColumnsMode::canBeRun() const
+{
+	return myScreen == myLibrary;
+}
+
+void ToggleMediaLibraryColumnsMode::Run()
+{
+	myLibrary->toggleColumnsMode();
+	myLibrary->refresh();
 }
 
 bool ShowPlaylistEditor::canBeRun() const
@@ -2624,6 +2637,7 @@ void populateActions()
 	insertAction(new ShowSearchEngine());
 	insertAction(new ResetSearchEngine());
 	insertAction(new ShowMediaLibrary());
+	insertAction(new ToggleMediaLibraryColumnsMode());
 	insertAction(new ShowPlaylistEditor());
 	insertAction(new ShowTagEditor());
 	insertAction(new ShowOutputs());

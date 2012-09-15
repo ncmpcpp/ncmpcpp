@@ -319,7 +319,10 @@ void BindingsConfiguration::generateDefaults()
 		bind(k, aResetSearchEngine);
 	}
 	if (notBound(k = stringToKey("4")))
+	{
 		bind(k, aShowMediaLibrary);
+		bind(k, aToggleMediaLibraryColumnsMode);
+	}
 	if (notBound(k = stringToKey("5")))
 		bind(k, aShowPlaylistEditor);
 	if (notBound(k = stringToKey("6")))

@@ -190,6 +190,9 @@
 #def_key "4"
 #  show_media_library
 #
+#def_key "4"
+#  toggle_media_library_columns_mode
+#
 #def_key "5"
 #  show_playlist_editor
 #

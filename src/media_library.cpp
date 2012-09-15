@@ -198,40 +198,10 @@ void MediaLibrary::refresh()
 
 void MediaLibrary::switchTo()
 {
-	if (myScreen == this)
-	{
-		if (!Config.media_library_disable_two_column_mode)
-		{
-			hasTwoColumns = !hasTwoColumns;
-			Tags.clear();
-			Albums.clear();
-			Albums.reset();
-			Songs.clear();
-			if (hasTwoColumns)
-			{
-				if (isActiveWindow(Tags))
-					nextColumn();
-				if (Config.titles_visibility)
-				{
-					std::string item_type = lowercase(tagTypeToString(Config.media_lib_primary_tag));
-					Albums.setTitle("Albums (sorted by " + item_type + ")");
-				}
-				else
-					Albums.setTitle("");
-			}
-			else
-				Albums.setTitle(Config.titles_visibility ? "Albums" : "");
-			resize();
-			refresh();
-		}
-	}
-	else
-	{
-		SwitchTo::execute(this);
-		markSongsInPlaylist(songsProxyList());
-		drawHeader();
-		refresh();
-	}
+	SwitchTo::execute(this);
+	markSongsInPlaylist(songsProxyList());
+	drawHeader();
+	refresh();
 }
 
 std::wstring MediaLibrary::title()
@@ -741,6 +711,30 @@ void MediaLibrary::nextColumn()
 }
 
 /***********************************************************************/
+
+void MediaLibrary::toggleColumnsMode()
+{
+	hasTwoColumns = !hasTwoColumns;
+	Tags.clear();
+	Albums.clear();
+	Albums.reset();
+	Songs.clear();
+	if (hasTwoColumns)
+	{
+		if (isActiveWindow(Tags))
+			nextColumn();
+		if (Config.titles_visibility)
+		{
+			std::string item_type = lowercase(tagTypeToString(Config.media_lib_primary_tag));
+			Albums.setTitle("Albums (sorted by " + item_type + ")");
+		}
+		else
+			Albums.setTitle("");
+	}
+	else
+		Albums.setTitle(Config.titles_visibility ? "Albums" : "");
+	resize();
+}
 
 int MediaLibrary::Columns()
 {

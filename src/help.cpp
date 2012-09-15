@@ -311,8 +311,7 @@ void Help::GetKeybindings()
 	KeyDesc(aResetSearchEngine, "Reset search constraints and clear results");
 	
 	KeysSection("Media library");
-	if (!Config.media_library_disable_two_column_mode)
-		KeyDesc(aShowMediaLibrary, "Switch between two/three columns mode");
+	KeyDesc(aToggleMediaLibraryColumnsMode, "Switch between two/three columns mode");
 	KeyDesc(aPreviousColumn, "Previous column");
 	KeyDesc(aNextColumn, "Next column");
 	KeyDesc(aPressEnter, "Add item to playlist and play it");
