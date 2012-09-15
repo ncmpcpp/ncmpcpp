@@ -27,6 +27,7 @@
 #include "menu.h"
 #include "playlist.h"
 #include "regex_filter.h"
+#include "screen_switcher.h"
 #include "song.h"
 #include "status.h"
 #include "statusbar.h"
@@ -66,24 +67,8 @@ Playlist::Playlist() : itsTotalLength(0), itsRemainingTime(0), itsScrollBegin(0)
 
 void Playlist::switchTo()
 {
-	using Global::myScreen;
-	using Global::myLockedScreen;
-	using Global::myInactiveScreen;
-	
-	if (myScreen == this)
-		return;
-	
+	SwitchTo::execute(this);
 	itsScrollBegin = 0;
-	
-	if (myLockedScreen)
-		updateInactiveScreen(this);
-	
-	if (hasToBeResized || myLockedScreen)
-		resize();
-	
-	if (myScreen != this && myScreen->isTabbable())
-		Global::myPrevScreen = myScreen;
-	myScreen = this;
 	EnableHighlighting();
 	drawHeader();
 }

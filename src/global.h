@@ -31,12 +31,6 @@ namespace Global {//
 // currently active screen (displayed in main window)
 extern BasicScreen *myScreen;
 
-// for info, lyrics, popups to remember which screen return to
-extern BasicScreen *myOldScreen;
-
-// "real" screen switching (browser, search, etc.)
-extern BasicScreen *myPrevScreen;
-
 // points at the screen that was locked (or is null if no screen is locked)
 extern BasicScreen *myLockedScreen;
 

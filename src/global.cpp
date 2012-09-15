@@ -23,8 +23,6 @@
 namespace Global {//
 
 BasicScreen *myScreen;
-BasicScreen *myOldScreen;
-BasicScreen *myPrevScreen;
 BasicScreen *myLockedScreen;
 BasicScreen *myInactiveScreen;
 

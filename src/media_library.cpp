@@ -35,6 +35,7 @@
 #include "utility/comparators.h"
 #include "utility/type_conversions.h"
 #include "title.h"
+#include "screen_switcher.h"
 
 using namespace std::placeholders;
 
@@ -197,16 +198,11 @@ void MediaLibrary::refresh()
 
 void MediaLibrary::switchTo()
 {
-	using Global::myLockedScreen;
-	
 	if (myScreen == this)
 	{
-		if (Config.media_library_disable_two_column_mode)
-			return;
-		else
+		if (!Config.media_library_disable_two_column_mode)
 		{
 			hasTwoColumns = !hasTwoColumns;
-			hasToBeResized = 1;
 			Tags.clear();
 			Albums.clear();
 			Albums.reset();
@@ -225,21 +221,17 @@ void MediaLibrary::switchTo()
 			}
 			else
 				Albums.setTitle(Config.titles_visibility ? "Albums" : "");
+			resize();
+			refresh();
 		}
 	}
-	
-	if (myLockedScreen)
-		updateInactiveScreen(this);
-	
-	if (hasToBeResized || myLockedScreen)
-		resize();
-	
-	if (myScreen != this && myScreen->isTabbable())
-		Global::myPrevScreen = myScreen;
-	myScreen = this;
-	drawHeader();
-	markSongsInPlaylist(songsProxyList());
-	refresh();
+	else
+	{
+		SwitchTo::execute(this);
+		markSongsInPlaylist(songsProxyList());
+		drawHeader();
+		refresh();
+	}
 }
 
 std::wstring MediaLibrary::title()

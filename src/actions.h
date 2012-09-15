@@ -979,9 +979,7 @@ struct ShowHelp : public Action
 	ShowHelp() : Action(aShowHelp, "show_help") { }
 	
 protected:
-#	ifdef HAVE_TAGLIB_H
 	virtual bool canBeRun() const;
-#	endif // HAVE_TAGLIB_H
 	virtual void Run();
 };
 
@@ -990,9 +988,7 @@ struct ShowPlaylist : public Action
 	ShowPlaylist() : Action(aShowPlaylist, "show_playlist") { }
 	
 protected:
-#	ifdef HAVE_TAGLIB_H
 	virtual bool canBeRun() const;
-#	endif // HAVE_TAGLIB_H
 	virtual void Run();
 };
 
@@ -1034,9 +1030,7 @@ struct ShowPlaylistEditor : public Action
 	ShowPlaylistEditor() : Action(aShowPlaylistEditor, "show_playlist_editor") { }
 	
 protected:
-#	ifdef HAVE_TAGLIB_H
 	virtual bool canBeRun() const;
-#	endif // HAVE_TAGLIB_H
 	virtual void Run();
 };
 

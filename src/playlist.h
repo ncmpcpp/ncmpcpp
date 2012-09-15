@@ -27,7 +27,7 @@
 #include "screen.h"
 #include "song.h"
 
-struct Playlist : public Screen<NC::Menu<MPD::Song>>, public Filterable, public HasSongs, public Searchable
+struct Playlist: Screen<NC::Menu<MPD::Song>>, Filterable, HasSongs, Searchable, Tabbable
 {
 	Playlist();
 	
@@ -43,7 +43,6 @@ struct Playlist : public Screen<NC::Menu<MPD::Song>>, public Filterable, public 
 	virtual void spacePressed() OVERRIDE;
 	virtual void mouseButtonPressed(MEVENT me) OVERRIDE;
 	
-	virtual bool isTabbable() OVERRIDE { return true; }
 	virtual bool isMergable() OVERRIDE { return true; }
 	
 	// Filterable implementation

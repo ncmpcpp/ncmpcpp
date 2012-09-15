@@ -22,10 +22,11 @@
 #define _SEL_ITEMS_ADDER_H
 
 #include "exec_item.h"
+#include "interfaces.h"
 #include "screen.h"
 #include "song.h"
 
-struct SelectedItemsAdder : public Screen<NC::Menu<ExecItem<std::string, void()>> *>
+struct SelectedItemsAdder: Screen<NC::Menu<ExecItem<std::string, void()>> *>, Tabbable
 {
 	typedef typename std::remove_pointer<WindowType>::type Component;
 	
@@ -44,7 +45,6 @@ struct SelectedItemsAdder : public Screen<NC::Menu<ExecItem<std::string, void()>
 	virtual void mouseButtonPressed(MEVENT me) OVERRIDE;
 	
 	virtual bool isMergable() OVERRIDE { return false; }
-	virtual bool isTabbable() OVERRIDE { return false; }
 	
 protected:
 	virtual bool isLockable() OVERRIDE { return false; }
@@ -64,8 +64,6 @@ private:
 	void exitSuccessfully() const;
 	
 	void setDimensions();
-	
-	BasicScreen *m_old_screen;
 	
 	size_t m_playlist_selector_width;
 	size_t m_playlist_selector_height;

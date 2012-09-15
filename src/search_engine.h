@@ -73,7 +73,7 @@ struct SEItem
 		MPD::Song itsSong;
 };
 
-struct SearchEngine : public Screen<NC::Menu<SEItem>>, public Filterable, public HasSongs, public Searchable
+struct SearchEngine: Screen<NC::Menu<SEItem>>, Filterable, HasSongs, Searchable, Tabbable
 {
 	SearchEngine();
 	
@@ -89,7 +89,6 @@ struct SearchEngine : public Screen<NC::Menu<SEItem>>, public Filterable, public
 	virtual void spacePressed() OVERRIDE;
 	virtual void mouseButtonPressed(MEVENT me) OVERRIDE;
 	
-	virtual bool isTabbable() OVERRIDE { return true; }
 	virtual bool isMergable() OVERRIDE { return true; }
 	
 	// Filterable implementation
@@ -111,7 +110,6 @@ struct SearchEngine : public Screen<NC::Menu<SEItem>>, public Filterable, public
 	virtual MPD::SongList getSelectedSongs() OVERRIDE;
 	
 	// private members
-	
 	static size_t StaticOptions;
 	static size_t SearchButton;
 	static size_t ResetButton;

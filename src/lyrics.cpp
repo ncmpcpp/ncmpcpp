@@ -35,11 +35,10 @@
 #include "song.h"
 #include "statusbar.h"
 #include "title.h"
+#include "screen_switcher.h"
 
 using Global::MainHeight;
 using Global::MainStartY;
-using Global::myScreen;
-using Global::myOldScreen;
 
 #ifdef HAVE_CURL_CURL_H
 LyricsFetcher **Lyrics::itsFetcher = 0;
@@ -96,57 +95,38 @@ void Lyrics::update()
 
 void Lyrics::switchTo()
 {
-	using Global::myLockedScreen;
-	using Global::myInactiveScreen;
-	
-	if (myScreen == this)
-		return myOldScreen->switchTo();
-	
-	if (hasToBeResized)
-		resize();
-	
-	itsScrollBegin = 0;
-	
-#	ifdef HAVE_CURL_CURL_H
-	// take lyrics if they were downloaded
-	if (isReadyToTake)
-		Take();
-	
-	if (isDownloadInProgress || itsWorkersNumber > 0)
+	using Global::myScreen;
+	if (myScreen != this)
 	{
-		Statusbar::msg("Lyrics are being downloaded...");
-		return;
-	}
-#	endif // HAVE_CURL_CURL_H
-	
-	const MPD::Song *s = currentSong(myScreen);
-	if (!s)
-		return;
-	
-	if (!s->getArtist().empty() && !s->getTitle().empty())
-	{
-		myOldScreen = myScreen;
-		myScreen = this;
+#		ifdef HAVE_CURL_CURL_H
+		// take lyrics if they were downloaded
+		if (isReadyToTake)
+			Take();
 		
-		itsSong = *s;
-		Load();
+		if (isDownloadInProgress || itsWorkersNumber > 0)
+		{
+			Statusbar::msg("Lyrics are being downloaded...");
+			return;
+		}
+#		endif // HAVE_CURL_CURL_H
 		
-		drawHeader();
+		const MPD::Song *s = currentSong(myScreen);
+		if (!s)
+			return;
+		
+		if (!s->getArtist().empty() && !s->getTitle().empty())
+		{
+			SwitchTo::execute(this);
+			itsScrollBegin = 0;
+			itsSong = *s;
+			Load();
+			drawHeader();
+		}
+		else
+			Statusbar::msg("Song must have both artist and title tag set");
 	}
 	else
-	{
-		Statusbar::msg("Song must have both artist and title tag set");
-		return;
-	}
-	
-	// if we resize for locked screen, we have to do that in the end since
-	// fetching lyrics may fail (eg. if tags are missing) and we don't want
-	// to adjust screen size then.
-	if (myLockedScreen) // BUG
-	{
-		updateInactiveScreen(this);
-		resize();
-	}
+		switchToPreviousScreen();
 }
 
 std::wstring Lyrics::title()
@@ -366,8 +346,7 @@ void Lyrics::Load()
 
 void Lyrics::Edit()
 {
-	if (myScreen != this)
-		return;
+	assert(Global::myScreen == this);
 	
 	if (Config.external_editor.empty())
 	{

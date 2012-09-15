@@ -79,8 +79,6 @@ namespace
 int main(int argc, char **argv)
 {
 	using Global::myScreen;
-	using Global::myOldScreen;
-	using Global::myPrevScreen;
 	using Global::myLockedScreen;
 	using Global::myInactiveScreen;
 	
@@ -164,11 +162,6 @@ int main(int argc, char **argv)
 	if (Mpd.SupportsIdle())
 		wFooter->addFDCallback(Mpd.GetFD(), Statusbar::Helpers::mpd);
 	wFooter->createHistory();
-	
-	// initialize screens to browser as default previous screen
-	myScreen = myBrowser;
-	myPrevScreen = myBrowser;
-	myOldScreen = myBrowser;
 	
 	// initialize global timer
 	gettimeofday(&Timer, 0);

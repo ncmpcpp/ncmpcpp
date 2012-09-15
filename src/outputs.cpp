@@ -28,6 +28,7 @@
 #include "status.h"
 #include "statusbar.h"
 #include "title.h"
+#include "screen_switcher.h"
 
 using Global::MainHeight;
 using Global::MainStartY;
@@ -47,21 +48,7 @@ Outputs::Outputs()
 
 void Outputs::switchTo()
 {
-	using Global::myLockedScreen;
-	
-	if (myScreen == this)
-		return;
-	
-	if (myLockedScreen)
-		updateInactiveScreen(this);
-	
-	if (hasToBeResized || myLockedScreen)
-		resize();
-	
-	if (myScreen != this && myScreen->isTabbable())
-		Global::myPrevScreen = myScreen;
-	myScreen = this;
-	w.Window::clear();
+	SwitchTo::execute(this);
 	drawHeader();
 }
 

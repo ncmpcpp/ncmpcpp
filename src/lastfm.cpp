@@ -39,6 +39,7 @@
 #include "global.h"
 #include "statusbar.h"
 #include "title.h"
+#include "screen_switcher.h"
 
 using Global::MainHeight;
 using Global::MainStartY;
@@ -83,27 +84,17 @@ void Lastfm::Take()
 void Lastfm::switchTo()
 {
 	using Global::myScreen;
-	using Global::myOldScreen;
-	using Global::myLockedScreen;
-	
-	if (myScreen == this)
-		return myOldScreen->switchTo();
-	
-	if (myLockedScreen)
-		updateInactiveScreen(this);
-	
-	if (hasToBeResized || myLockedScreen)
-		resize();
-	
-	// get an old info if it waits
-	if (isReadyToTake)
-		Take();
-	
-	Load();
-	
-	myOldScreen = myScreen;
-	myScreen = this;
-	drawHeader();
+	if (myScreen != this)
+	{
+		SwitchTo::execute(this);
+		// get an old info if it waits
+		if (isReadyToTake)
+			Take();
+		Load();
+		drawHeader();
+	}
+	else
+		switchToPreviousScreen();
 }
 
 void Lastfm::Load()

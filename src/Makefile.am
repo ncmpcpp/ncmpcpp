@@ -87,6 +87,7 @@ noinst_HEADERS = \
 	regex_filter.h \
 	regexes.h \
 	screen.h \
+	screen_switcher.h \
 	scrollpad.h \
 	search_engine.h \
 	sel_items_adder.h \

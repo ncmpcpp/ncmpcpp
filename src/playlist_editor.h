@@ -24,7 +24,7 @@
 #include "interfaces.h"
 #include "screen.h"
 
-struct PlaylistEditor : public Screen<NC::Window *>, public Filterable, public HasColumns, public HasSongs, public Searchable
+struct PlaylistEditor: Screen<NC::Window *>, Filterable, HasColumns, HasSongs, Searchable, Tabbable
 {
 	PlaylistEditor();
 	
@@ -40,7 +40,6 @@ struct PlaylistEditor : public Screen<NC::Window *>, public Filterable, public H
 	virtual void spacePressed() OVERRIDE;
 	virtual void mouseButtonPressed(MEVENT me) OVERRIDE;
 	
-	virtual bool isTabbable() OVERRIDE { return true; }
 	virtual bool isMergable() OVERRIDE { return true; }
 	
 	// Filterable implementation

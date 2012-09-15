@@ -117,7 +117,8 @@ void BasicScreen::unlock()
 {
 	if (myInactiveScreen && myInactiveScreen != myLockedScreen)
 		myScreen = myInactiveScreen;
-	myLockedScreen->switchTo();
+	if (myScreen != myLockedScreen)
+		myLockedScreen->switchTo();
 	myLockedScreen = 0;
 	myInactiveScreen = 0;
 }

@@ -25,6 +25,7 @@
 #include "sort_playlist.h"
 #include "statusbar.h"
 #include "utility/comparators.h"
+#include "screen_switcher.h"
 
 using Global::MainHeight;
 using Global::MainStartY;
@@ -62,19 +63,7 @@ SortPlaylistDialog::SortPlaylistDialog()
 
 void SortPlaylistDialog::switchTo()
 {
-	using Global::myScreen;
-	using Global::myOldScreen;
-	using Global::myLockedScreen;
-	using Global::myInactiveScreen;
-	
-	assert(myScreen != this);
-	
-	if (hasToBeResized)
-		resize();
-	
-	myOldScreen = myScreen;
-	myScreen = this;
-	
+	SwitchTo::execute(this);
 	w.reset();
 	refresh();
 }
@@ -90,7 +79,7 @@ void SortPlaylistDialog::resize()
 
 std::wstring SortPlaylistDialog::title()
 {
-	return Global::myOldScreen->title();
+	return previousScreen()->title();
 }
 
 void SortPlaylistDialog::enterPressed()
@@ -154,11 +143,11 @@ void SortPlaylistDialog::enterPressed()
 		if (Mpd.CommitCommandsList())
 			Statusbar::msg("Playlist sorted");
 		
-		Global::myOldScreen->switchTo();
+		switchToPreviousScreen();
 	}
 	else if (*option == m_cancel_entry)
 	{
-		Global::myOldScreen->switchTo();
+		switchToPreviousScreen();
 	}
 	else
 		Statusbar::msg("Move tag types up and down to adjust sort order");

@@ -32,6 +32,7 @@
 #include "statusbar.h"
 #include "utility/comparators.h"
 #include "title.h"
+#include "screen_switcher.h"
 
 using namespace std::placeholders;
 
@@ -125,29 +126,16 @@ void SearchEngine::resize()
 
 void SearchEngine::switchTo()
 {
-	using Global::myScreen;
-	using Global::myLockedScreen;
-	
-	if (myScreen == this)
+	if (Global::myScreen != this)
 	{
-		reset();
-		return;
+		SwitchTo::execute(this);
+		if (w.empty())
+			Prepare();
+		markSongsInPlaylist(getProxySongList());
+		drawHeader();
 	}
-	
-	if (myLockedScreen)
-		updateInactiveScreen(this);
-	
-	if (hasToBeResized || myLockedScreen)
-		resize();
-	
-	if (w.empty())
-		Prepare();
-
-	if (myScreen != this && myScreen->isTabbable())
-		Global::myPrevScreen = myScreen;
-	myScreen = this;
-	drawHeader();
-	markSongsInPlaylist(getProxySongList());
+	else
+		reset();
 }
 
 std::wstring SearchEngine::title()

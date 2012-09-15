@@ -33,6 +33,7 @@
 #include "status.h"
 #include "statusbar.h"
 #include "title.h"
+#include "screen_switcher.h"
 
 using Global::MainHeight;
 using Global::MainStartY;
@@ -76,36 +77,20 @@ void Clock::resize()
 
 void Clock::switchTo()
 {
-	using Global::myLockedScreen;
-	
-	if (myScreen == this)
-		return;
-	
-	if (myLockedScreen)
-		updateInactiveScreen(this);
-	
 	size_t x_offset, width;
 	getWindowResizeParams(x_offset, width, false);
 	if (Width > width || Height > MainHeight)
-	{
 		Statusbar::msg("Screen is too small to display clock");
-		if (myLockedScreen)
-			updateInactiveScreen(myLockedScreen);
-		return;
+	else
+	{
+		SwitchTo::execute(this);
+		drawHeader();
+		Prepare();
+		m_pane.refresh();
+		// clearing screen apparently fixes the problem with last digits being misrendered
+		w.clear();
+		w.display();
 	}
-	
-	if (hasToBeResized || myLockedScreen)
-		resize();
-	
-	if (myScreen != this && myScreen->isTabbable())
-		Global::myPrevScreen = myScreen;
-	myScreen = this;
-	drawHeader();
-	Prepare();
-	m_pane.refresh();
-	// clearing screen apparently fixes the problem with last digits being misrendered
-	w.clear();
-	w.display();
 }
 
 std::wstring Clock::title()

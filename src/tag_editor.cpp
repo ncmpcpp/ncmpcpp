@@ -37,6 +37,7 @@
 #include "utility/comparators.h"
 #include "title.h"
 #include "tags.h"
+#include "screen_switcher.h"
 
 using namespace std::placeholders;
 
@@ -194,20 +195,7 @@ std::wstring TagEditor::title()
 
 void TagEditor::switchTo()
 {
-	using Global::myLockedScreen;
-	
-	if (myScreen == this)
-		return;
-	
-	if (myLockedScreen)
-		updateInactiveScreen(this);
-	
-	if (hasToBeResized || myLockedScreen)
-		resize();
-	
-	if (myScreen != this && myScreen->isTabbable())
-		Global::myPrevScreen = myScreen;
-	myScreen = this;
+	SwitchTo::execute(this);
 	drawHeader();
 	refresh();
 }

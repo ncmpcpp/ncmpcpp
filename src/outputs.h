@@ -25,11 +25,12 @@
 
 #ifdef ENABLE_OUTPUTS
 
+#include "interfaces.h"
 #include "menu.h"
 #include "mpdpp.h"
 #include "screen.h"
 
-struct Outputs : public Screen<NC::Menu<MPD::Output>>
+struct Outputs: Screen<NC::Menu<MPD::Output>>, Tabbable
 {
 	Outputs();
 	
@@ -45,7 +46,6 @@ struct Outputs : public Screen<NC::Menu<MPD::Output>>
 	virtual void spacePressed() OVERRIDE { }
 	virtual void mouseButtonPressed(MEVENT me) OVERRIDE;
 	
-	virtual bool isTabbable() OVERRIDE { return true; }
 	virtual bool isMergable() OVERRIDE { return true; }
 	
 	// private members

@@ -73,10 +73,6 @@ struct BasicScreen
 	/// @see Screen::mouseButtonPressed()
 	virtual void mouseButtonPressed(MEVENT me) = 0;
 	
-	/// When this is overwritten with a function returning true, the
-	/// screen will be used in tab switching.
-	virtual bool isTabbable() = 0;
-	
 	/// @return true if screen is mergable, ie. can be "proper" subwindow
 	/// if one of the screens is locked. Screens that somehow resemble popups
 	/// will want to return false here.

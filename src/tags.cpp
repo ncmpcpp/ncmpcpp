@@ -33,9 +33,6 @@
 #include <textidentificationframe.h>
 #include <xiphcomment.h>
 
-#include "browser.h"
-#include "playlist.h"
-
 #include "global.h"
 #include "settings.h"
 #include "utility/numeric_conversions.h"
@@ -253,7 +250,8 @@ bool write(MPD::MutableSong &s)
 		new_name += s.getDirectory() + "/" + s.getNewURI();
 		if (std::rename(old_name.c_str(), new_name.c_str()) == 0 && !s.isFromDatabase())
 		{
-			if (Global::myOldScreen == myPlaylist)
+			// FIXME
+			/*if (myTinyTagEditor == myPlaylist)
 			{
 				// if we rename local file, it won't get updated
 				// so just remove it from playlist and add again
@@ -269,7 +267,7 @@ bool write(MPD::MutableSong &s)
 				Mpd.CommitCommandsList();
 			}
 			else // only myBrowser->main()
-				myBrowser->GetDirectory(myBrowser->CurrentDir());
+				myBrowser->GetDirectory(myBrowser->CurrentDir());*/
 		}
 	}
 	return true;

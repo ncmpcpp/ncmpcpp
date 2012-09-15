@@ -25,10 +25,10 @@
 #include "helpers.h"
 #include "server_info.h"
 #include "statusbar.h"
+#include "screen_switcher.h"
 
 using Global::MainHeight;
 using Global::MainStartY;
-using Global::myOldScreen;
 
 ServerInfo *myServerInfo;
 
@@ -43,41 +43,28 @@ ServerInfo::ServerInfo()
 void ServerInfo::switchTo()
 {
 	using Global::myScreen;
-	
-	if (myScreen == this)
-	{
-		myOldScreen->switchTo();
-		return;
-	}
-	
-	// resize() can fall back to old screen, so we need it updated
-	myOldScreen = myScreen;
-	
-	if (hasToBeResized)
-		resize();
-	
-	myScreen = this;
-	//w.Window::clear();
+	if (myScreen != this)
+		SwitchTo::execute(this);
+	else
+		switchToPreviousScreen();
 }
 
 void ServerInfo::resize()
 {
 	SetDimensions();
-	if (itsHeight < 5) // screen too low to display this window
-		return myOldScreen->switchTo();
 	w.resize(itsWidth, itsHeight);
 	w.moveTo((COLS-itsWidth)/2, (MainHeight-itsHeight)/2+MainStartY);
-	if (myOldScreen && myOldScreen->hasToBeResized) // resize background window
+	if (previousScreen() && previousScreen()->hasToBeResized) // resize background window
 	{
-		myOldScreen->resize();
-		myOldScreen->refresh();
+		previousScreen()->resize();
+		previousScreen()->refresh();
 	}
 	hasToBeResized = 0;
 }
 
 std::wstring ServerInfo::title()
 {
-	return myOldScreen->title();
+	return previousScreen()->title();
 }
 
 void ServerInfo::update()

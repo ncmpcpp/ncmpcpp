@@ -28,12 +28,11 @@
 #include <list>
 
 #include "interfaces.h"
-#include "mpdpp.h"
 #include "mutable_song.h"
 #include "regex_filter.h"
 #include "screen.h"
 
-struct TagEditor : public Screen<NC::Window *>, public Filterable, public HasColumns, public HasSongs, public Searchable
+struct TagEditor: Screen<NC::Window *>, Filterable, HasColumns, HasSongs, Searchable, Tabbable
 {
 	TagEditor();
 	
@@ -49,7 +48,6 @@ struct TagEditor : public Screen<NC::Window *>, public Filterable, public HasCol
 	virtual void spacePressed() OVERRIDE;
 	virtual void mouseButtonPressed(MEVENT) OVERRIDE;
 	
-	virtual bool isTabbable() OVERRIDE { return true; }
 	virtual bool isMergable() OVERRIDE { return true; }
 	
 	// Filterable implementation

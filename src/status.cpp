@@ -290,7 +290,7 @@ void Status::Changes::songID()
 		if (Config.autocenter_mode && !myPlaylist->main().isFiltered())
 			myPlaylist->main().highlight(Mpd.GetCurrentlyPlayingSongPos());
 		
-		if (Config.now_playing_lyrics && isVisible(myLyrics) && Global::myOldScreen == myPlaylist)
+		if (Config.now_playing_lyrics && isVisible(myLyrics) && myLyrics->previousScreen() == myPlaylist)
 			myLyrics->ReloadNP = 1;
 		
 		elapsedTime();

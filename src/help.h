@@ -22,9 +22,10 @@
 #define _HELP_H
 
 #include "actions.h"
+#include "interfaces.h"
 #include "screen.h"
 
-struct Help : public Screen<NC::Scrollpad>
+struct Help: Screen<NC::Scrollpad>, Tabbable
 {
 	Help();
 	
@@ -38,7 +39,6 @@ struct Help : public Screen<NC::Scrollpad>
 	virtual void enterPressed() OVERRIDE { }
 	virtual void spacePressed() OVERRIDE { }
 	
-	virtual bool isTabbable() OVERRIDE { return true; }
 	virtual bool isMergable() OVERRIDE { return true; }
 	
 protected:

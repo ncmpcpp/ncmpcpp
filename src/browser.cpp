@@ -38,6 +38,7 @@
 #include "utility/comparators.h"
 #include "title.h"
 #include "tags.h"
+#include "screen_switcher.h"
 
 using namespace std::placeholders;
 
@@ -87,34 +88,26 @@ void Browser::resize()
 
 void Browser::switchTo()
 {
-	using Global::myLockedScreen;
-	using Global::myInactiveScreen;
-	
 	if (myScreen == this)
 	{
 #		ifndef WIN32
-		myBrowser->ChangeBrowseMode();
+		ChangeBrowseMode();
 #		endif // !WIN32
 	}
-	
-	if (myLockedScreen)
-		updateInactiveScreen(this);
-	
-	if (hasToBeResized || myLockedScreen)
-		resize();
-	
-	if (isLocal() && Config.browser_sort_mode == smMTime) // local browser doesn't support sorting by mtime
-		Config.browser_sort_mode = smName;
-	
-	if (w.empty())
-		myBrowser->GetDirectory(itsBrowsedDir);
 	else
-		markSongsInPlaylist(getProxySongList());
-
-	if (myScreen != this && myScreen->isTabbable())
-		Global::myPrevScreen = myScreen;
-	myScreen = this;
-	drawHeader();
+	{
+		SwitchTo::execute(this);
+		
+		if (isLocal() && Config.browser_sort_mode == smMTime) // local browser doesn't support sorting by mtime
+			Config.browser_sort_mode = smName;
+		
+		if (w.empty())
+			GetDirectory(itsBrowsedDir);
+		else
+			markSongsInPlaylist(getProxySongList());
+		
+		drawHeader();
+	}
 }
 
 std::wstring Browser::title()

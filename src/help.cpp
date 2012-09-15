@@ -27,6 +27,7 @@
 #include "status.h"
 #include "utility/wide_string.h"
 #include "title.h"
+#include "screen_switcher.h"
 
 using Global::MainHeight;
 using Global::MainStartY;
@@ -113,21 +114,7 @@ void Help::resize()
 
 void Help::switchTo()
 {
-	using Global::myScreen;
-	using Global::myLockedScreen;
-	
-	if (myScreen == this)
-		return;
-	
-	if (myLockedScreen)
-		updateInactiveScreen(this);
-	
-	if (hasToBeResized || myLockedScreen)
-		resize();
-	
-	if (myScreen != this && myScreen->isTabbable())
-		Global::myPrevScreen = myScreen;
-	myScreen = this;
+	SwitchTo::execute(this);
 	drawHeader();
 }
 

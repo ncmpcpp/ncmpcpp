@@ -23,6 +23,7 @@
 #include "song_info.h"
 #include "tag_editor.h"
 #include "title.h"
+#include "screen_switcher.h"
 
 #ifdef HAVE_TAGLIB_H
 # include "fileref.h"
@@ -71,34 +72,23 @@ std::wstring SongInfo::title()
 void SongInfo::switchTo()
 {
 	using Global::myScreen;
-	using Global::myOldScreen;
-	using Global::myLockedScreen;
-	
-	if (myScreen == this)
-		return myOldScreen->switchTo();
-	
-	if (myLockedScreen)
-		updateInactiveScreen(this);
-	
-	auto s = currentSong(myScreen);
-	if (!s)
-		return;
-	
-	if (hasToBeResized || myLockedScreen)
-		resize();
-	
-	myOldScreen = myScreen;
-	myScreen = this;
-	
-	w.clear();
-	w.reset();
-	PrepareSong(*s);
-	w.flush();
-	
-	// redraw header after we're done with the file, since reading it from disk
-	// takes a bit of time and having header updated before content of a window
-	// is displayed doesn't look nice.
-	drawHeader();
+	if (myScreen != this)
+	{
+		auto s = currentSong(myScreen);
+		if (!s)
+			return;
+		SwitchTo::execute(this);
+		w.clear();
+		w.reset();
+		PrepareSong(*s);
+		w.flush();
+		// redraw header after we're done with the file, since reading it from disk
+		// takes a bit of time and having header updated before content of a window
+		// is displayed doesn't look nice.
+		drawHeader();
+	}
+	else
+		switchToPreviousScreen();
 }
 
 void SongInfo::PrepareSong(MPD::Song &s)

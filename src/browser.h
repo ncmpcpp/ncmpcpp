@@ -25,7 +25,7 @@
 #include "mpdpp.h"
 #include "screen.h"
 
-struct Browser : public Screen<NC::Menu<MPD::Item>>, public Filterable, public HasSongs, public Searchable
+struct Browser: Screen<NC::Menu<MPD::Item>>, Filterable, HasSongs, Searchable, Tabbable
 {
 	Browser();
 	
@@ -41,7 +41,6 @@ struct Browser : public Screen<NC::Menu<MPD::Item>>, public Filterable, public H
 	virtual void spacePressed() OVERRIDE;
 	virtual void mouseButtonPressed(MEVENT me) OVERRIDE;
 	
-	virtual bool isTabbable() OVERRIDE { return true; }
 	virtual bool isMergable() OVERRIDE { return true; }
 	
 	// Filterable implementation

@@ -18,48 +18,43 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
-#ifndef _SORT_PLAYLIST
-#define _SORT_PLAYLIST
+#ifndef _SCREEN_SWITCHER_H
+#define _SCREEN_SWITCHER_H
 
-#include "interfaces.h"
-#include "screen.h"
-#include "song.h"
+#include "global.h"
 
-struct SortPlaylistDialog: Screen<NC::Menu<std::pair<std::string, MPD::Song::GetFunction>>>, Tabbable
+class SwitchTo
 {
-	SortPlaylistDialog();
+	template <bool ToBeExecuted, typename ScreenT> struct TabbableAction_ {
+		static void execute(ScreenT *) { }
+	};
+	template <typename ScreenT> struct TabbableAction_<true, ScreenT> {
+		static void execute(ScreenT *screen) {
+			using Global::myScreen;
+			// it has to work only if both current and previous screens are Tabbable
+			if (dynamic_cast<Tabbable *>(myScreen))
+				screen->setPreviousScreen(myScreen);
+		}
+	};
 	
-	virtual void switchTo() OVERRIDE;
-	virtual void resize() OVERRIDE;
-	
-	virtual std::wstring title() OVERRIDE;
-	
-	virtual void update() OVERRIDE { }
-	
-	virtual void enterPressed() OVERRIDE;
-	virtual void spacePressed() OVERRIDE { }
-	virtual void mouseButtonPressed(MEVENT me) OVERRIDE;
-	
-	virtual bool isMergable() OVERRIDE { return false; }
-	
-	// private members
-	void moveSortOrderUp();
-	void moveSortOrderDown();
-	
-protected:
-	virtual bool isLockable() OVERRIDE { return false; }
-	
-private:
-	void setDimensions();
-	
-	size_t m_sort_options;
-	size_t m_height;
-	size_t m_width;
-	
-	const WindowType::Item::Type m_sort_entry;
-	const WindowType::Item::Type m_cancel_entry;
+public:
+	template <typename ScreenT>
+	static void execute(ScreenT *screen)
+	{
+		using Global::myScreen;
+		using Global::myLockedScreen;
+		
+		const bool isScreenMergable = screen->isMergable() && myLockedScreen;
+		const bool isScreenTabbable = std::is_base_of<Tabbable, ScreenT>::value;
+		
+		assert(myScreen != screen);
+		if (isScreenMergable)
+			updateInactiveScreen(screen);
+		if (screen->hasToBeResized || isScreenMergable)
+			screen->resize();
+		TabbableAction_<isScreenTabbable, ScreenT>::execute(screen);
+		myScreen = screen;
+	}
 };
 
-extern SortPlaylistDialog *mySortPlaylistDialog;
-
-#endif // _SORT_PLAYLIST
+#endif // _SCREEN_SWITCHER_H

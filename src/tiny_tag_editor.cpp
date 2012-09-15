@@ -38,10 +38,10 @@
 #include "tag_editor.h"
 #include "title.h"
 #include "tags.h"
+#include "screen_switcher.h"
 
 using Global::MainHeight;
 using Global::MainStartY;
-using Global::myOldScreen;
 
 TinyTagEditor *myTinyTagEditor;
 
@@ -66,22 +66,14 @@ void TinyTagEditor::resize()
 void TinyTagEditor::switchTo()
 {
 	using Global::myScreen;
-	using Global::myLockedScreen;
-	
 	if (itsEdited.isStream())
 	{
 		Statusbar::msg("Streams can't be edited");
 	}
 	else if (getTags())
 	{
-		if (myLockedScreen)
-			updateInactiveScreen(this);
-		
-		if (hasToBeResized || myLockedScreen)
-			resize();
-		
-		myOldScreen = myScreen;
-		myScreen = this;
+		m_previous_screen = myScreen;
+		SwitchTo::execute(this);
 		drawHeader();
 	}
 	else
@@ -139,9 +131,9 @@ void TinyTagEditor::enterPressed()
 				Mpd.UpdateDirectory(itsEdited.getDirectory());
 			else
 			{
-				if (myOldScreen == myPlaylist)
+				if (m_previous_screen == myPlaylist)
 					myPlaylist->main().current().value() = itsEdited;
-				else if (myOldScreen == myBrowser)
+				else if (m_previous_screen == myBrowser)
 					myBrowser->GetDirectory(myBrowser->CurrentDir());
 			}
 		}
@@ -149,7 +141,7 @@ void TinyTagEditor::enterPressed()
 			Statusbar::msg("Error while writing tags");
 	}
 	if (option > 21)
-		myOldScreen->switchTo();
+		m_previous_screen->switchTo();
 }
 
 void TinyTagEditor::mouseButtonPressed(MEVENT me)

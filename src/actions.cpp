@@ -2284,15 +2284,10 @@ void Quit::Run()
 
 void NextScreen::Run()
 {
-	using Global::myOldScreen;
-	using Global::myPrevScreen;
-	
 	if (Config.screen_switcher_previous)
 	{
-		if (myScreen->isTabbable())
-			myPrevScreen->switchTo();
-		else
-			myOldScreen->switchTo();
+		if (auto tababble = dynamic_cast<Tabbable *>(myScreen))
+			tababble->switchToPreviousScreen();
 	}
 	else if (!Config.screens_seq.empty())
 	{
@@ -2306,15 +2301,10 @@ void NextScreen::Run()
 
 void PreviousScreen::Run()
 {
-	using Global::myOldScreen;
-	using Global::myPrevScreen;
-	
 	if (Config.screen_switcher_previous)
 	{
-		if (myScreen->isTabbable())
-			myPrevScreen->switchTo();
-		else
-			myOldScreen->switchTo();
+		if (auto tababble = dynamic_cast<Tabbable *>(myScreen))
+			tababble->switchToPreviousScreen();
 	}
 	else if (!Config.screens_seq.empty())
 	{
@@ -2326,24 +2316,27 @@ void PreviousScreen::Run()
 	}
 }
 
-#ifdef HAVE_TAGLIB_H
 bool ShowHelp::canBeRun() const
 {
-	return myScreen != myTinyTagEditor;
+	return myScreen != myHelp
+#	ifdef HAVE_TAGLIB_H
+	    && myScreen != myTinyTagEditor
+#	endif // HAVE_TAGLIB_H
+	;
 }
-#endif // HAVE_TAGLIB_H
 
 void ShowHelp::Run()
 {
 	myHelp->switchTo();
 }
 
-#ifdef HAVE_TAGLIB_H
 bool ShowPlaylist::canBeRun() const
 {
-	return myScreen != myTinyTagEditor;
+	return myScreen != myPlaylist
+#	ifdef HAVE_TAGLIB_H
+	    && myScreen != myTinyTagEditor;
+#	endif // HAVE_TAGLIB_H
 }
-#endif // HAVE_TAGLIB_H
 
 void ShowPlaylist::Run()
 {
@@ -2386,12 +2379,13 @@ void ShowMediaLibrary::Run()
 	myLibrary->switchTo();
 }
 
-#ifdef HAVE_TAGLIB_H
 bool ShowPlaylistEditor::canBeRun() const
 {
-	return myScreen != myTinyTagEditor;
+	return myScreen != myPlaylistEditor
+#	ifdef HAVE_TAGLIB_H
+	    && myScreen != myTinyTagEditor;
+#	endif // HAVE_TAGLIB_H
 }
-#endif // HAVE_TAGLIB_H
 
 void ShowPlaylistEditor::Run()
 {
@@ -2401,7 +2395,8 @@ void ShowPlaylistEditor::Run()
 bool ShowTagEditor::canBeRun() const
 {
 #	ifdef HAVE_TAGLIB_H
-	return myScreen != myTinyTagEditor;
+	return myScreen != myTagEditor
+	    && myScreen != myTinyTagEditor;
 #	else
 	return false;
 #	endif // HAVE_TAGLIB_H
@@ -2418,11 +2413,11 @@ void ShowTagEditor::Run()
 bool ShowOutputs::canBeRun() const
 {
 #	ifdef ENABLE_OUTPUTS
-#	ifdef HAVE_TAGLIB_H
-	return myScreen != myTinyTagEditor;
-#	else
-	return true;
+	return myScreen != myOutputs
+#	ifdef HAVE_TAGLIB_H	
+	    && myScreen != myTinyTagEditor
 #	endif // HAVE_TAGLIB_H
+	;
 #	else
 	return false;
 #	endif // ENABLE_OUTPUTS
@@ -2437,15 +2432,15 @@ void ShowOutputs::Run()
 
 bool ShowVisualizer::canBeRun() const
 {
-#	ifdef ENABLE_OUTPUTS
+#	ifdef ENABLE_VISUALIZER
+	return myScreen != myVisualizer
 #	ifdef HAVE_TAGLIB_H
-	return myScreen != myTinyTagEditor;
-#	else
-	return true;
+	    && myScreen != myTinyTagEditor
 #	endif // HAVE_TAGLIB_H
+	;
 #	else
 	return false;
-#	endif // ENABLE_OUTPUTS
+#	endif // ENABLE_VISUALIZER
 }
 
 void ShowVisualizer::Run()
@@ -2458,11 +2453,11 @@ void ShowVisualizer::Run()
 bool ShowClock::canBeRun() const
 {
 #	ifdef ENABLE_CLOCK
+	return myScreen != myClock
 #	ifdef HAVE_TAGLIB_H
-	return myScreen != myTinyTagEditor;
-#	else
-	return true;
+	    && myScreen != myTinyTagEditor
 #	endif // HAVE_TAGLIB_H
+	;
 #	else
 	return false;
 #	endif // ENABLE_CLOCK

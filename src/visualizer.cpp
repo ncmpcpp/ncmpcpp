@@ -36,6 +36,7 @@
 #include "status.h"
 #include "statusbar.h"
 #include "title.h"
+#include "screen_switcher.h"
 
 using Global::MainStartY;
 using Global::MainHeight;
@@ -62,31 +63,13 @@ Visualizer::Visualizer()
 
 void Visualizer::switchTo()
 {
-	using Global::myScreen;
-	using Global::myLockedScreen;
-	
-	if (myScreen == this)
-		return;
-	
-	if (myLockedScreen)
-		updateInactiveScreen(this);
-	
-	if (hasToBeResized || myLockedScreen)
-		resize();
-	
-	if (myScreen != this && myScreen->isTabbable())
-		Global::myPrevScreen = myScreen;
-	myScreen = this;
-	drawHeader();
+	SwitchTo::execute(this);
 	w.clear();
-	
 	SetFD();
-	
-	m_timer.tv_sec = 0;
-	m_timer.tv_usec = 0;
-	
+	m_timer = { 0, 0 };
 	if (m_fifo >= 0)
 		Global::wFooter->setTimeout(WindowTimeout);
+	drawHeader();
 }
 
 void Visualizer::resize()

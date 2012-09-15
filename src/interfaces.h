@@ -23,6 +23,7 @@
 
 #include <string>
 #include "gcc.h"
+#include "screen.h"
 #include "song.h"
 #include "proxy_song_list.h"
 
@@ -57,6 +58,25 @@ struct HasColumns
 	
 	virtual bool nextColumnAvailable() = 0;
 	virtual void nextColumn() = 0;
+};
+
+struct Tabbable
+{
+	Tabbable() : m_previous_screen(0) { }
+	
+	void switchToPreviousScreen() const {
+		if (m_previous_screen)
+			m_previous_screen->switchTo();
+	}
+	void setPreviousScreen(BasicScreen *screen) {
+		m_previous_screen = screen;
+	}
+	BasicScreen *previousScreen() const {
+		return m_previous_screen;
+	}
+	
+private:
+	BasicScreen *m_previous_screen;
 };
 
 #endif // _INTERFACES_H
