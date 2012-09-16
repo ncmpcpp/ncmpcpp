@@ -202,9 +202,9 @@ bool PlaylistEditor::isContentFiltered()
 	return false;
 }
 
-std::shared_ptr<ProxySongList> PlaylistEditor::contentProxyList()
+ProxySongList PlaylistEditor::contentProxyList()
 {
-	return mkProxySongList(Content, [](NC::Menu<MPD::Song>::Item &item) {
+	return ProxySongList(Content, [](NC::Menu<MPD::Song>::Item &item) {
 		return &item.value();
 	});
 }
@@ -386,9 +386,9 @@ void PlaylistEditor::prevFound(bool wrap)
 
 /***********************************************************************/
 
-std::shared_ptr<ProxySongList> PlaylistEditor::getProxySongList()
+ProxySongList PlaylistEditor::proxySongList()
 {
-	auto ptr = nullProxySongList();
+	auto ptr = ProxySongList();
 	if (isActiveWindow(Content))
 		ptr = contentProxyList();
 	return ptr;

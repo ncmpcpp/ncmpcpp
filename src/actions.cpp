@@ -539,93 +539,93 @@ void ScrollDown::Run()
 
 bool ScrollUpArtist::canBeRun() const
 {
-	return proxySongList(myScreen).get();
+	return proxySongList(myScreen);
 }
 
 void ScrollUpArtist::Run()
 {
 	auto pl = proxySongList(myScreen);
 	assert(pl);
-	size_t pos = pl->choice();
-	if (MPD::Song *s = pl->getSong(pos))
+	size_t pos = pl.choice();
+	if (MPD::Song *s = pl.getSong(pos))
 	{
 		std::string artist = s->getArtist();
 		while (pos > 0)
 		{
-			s = pl->getSong(--pos);
+			s = pl.getSong(--pos);
 			if (!s || s->getArtist() != artist)
 				break;
 		}
-		pl->highlight(pos);
+		pl.highlight(pos);
 	}
 }
 
 bool ScrollUpAlbum::canBeRun() const
 {
-	return proxySongList(myScreen).get();
+	return proxySongList(myScreen);
 }
 
 void ScrollUpAlbum::Run()
 {
 	auto pl = proxySongList(myScreen);
 	assert(pl);
-	size_t pos = pl->choice();
-	if (MPD::Song *s = pl->getSong(pos))
+	size_t pos = pl.choice();
+	if (MPD::Song *s = pl.getSong(pos))
 	{
 		std::string album = s->getAlbum();
 		while (pos > 0)
 		{
-			s = pl->getSong(--pos);
+			s = pl.getSong(--pos);
 			if (!s || s->getAlbum() != album)
 				break;
 		}
-		pl->highlight(pos);
+		pl.highlight(pos);
 	}
 }
 
 bool ScrollDownArtist::canBeRun() const
 {
-	return proxySongList(myScreen).get();
+	return proxySongList(myScreen);
 }
 
 void ScrollDownArtist::Run()
 {
 	auto pl = proxySongList(myScreen);
 	assert(pl);
-	size_t pos = pl->choice();
-	if (MPD::Song *s = pl->getSong(pos))
+	size_t pos = pl.choice();
+	if (MPD::Song *s = pl.getSong(pos))
 	{
 		std::string artist = s->getArtist();
-		while (pos < pl->size() - 1)
+		while (pos < pl.size() - 1)
 		{
-			s = pl->getSong(++pos);
+			s = pl.getSong(++pos);
 			if (!s || s->getArtist() != artist)
 				break;
 		}
-		pl->highlight(pos);
+		pl.highlight(pos);
 	}
 }
 
 bool ScrollDownAlbum::canBeRun() const
 {
-	return proxySongList(myScreen).get();
+	return proxySongList(myScreen);
 }
 
 void ScrollDownAlbum::Run()
 {
 	auto pl = proxySongList(myScreen);
 	assert(pl);
-	size_t pos = pl->choice();
-	if (MPD::Song *s = pl->getSong(pos))
+	size_t pos = pl.choice();
+	if (MPD::Song *s = pl.getSong(pos))
 	{
 		std::string album = s->getAlbum();
-		while (pos < pl->size() - 1)
+		while (pos < pl.size() - 1)
 		{
-			s = pl->getSong(++pos);
+			s = pl.getSong(++pos);
 			if (!s || s->getAlbum() != album)
 				break;
 		}
-		pl->highlight(pos);
+		pl.highlight(pos);
 	}
 }
 
@@ -1720,50 +1720,50 @@ void ReverseSelection::Run()
 
 bool RemoveSelection::canBeRun() const
 {
-	return proxySongList(myScreen).get();
+	return proxySongList(myScreen);
 }
 
 void RemoveSelection::Run()
 {
 	auto pl = proxySongList(myScreen);
-	for (size_t i = 0; i < pl->size(); ++i)
-		pl->setSelected(i, false);
+	for (size_t i = 0; i < pl.size(); ++i)
+		pl.setSelected(i, false);
 	Statusbar::msg("Selection removed");
 }
 
 bool SelectAlbum::canBeRun() const
 {
 	auto w = hasSongs(myScreen);
-	return w && w->allowsSelection() && w->getProxySongList().get();
+	return w && w->allowsSelection() && w->proxySongList();
 }
 
 void SelectAlbum::Run()
 {
 	auto pl = proxySongList(myScreen);
-	size_t pos = pl->choice();
-	if (MPD::Song *s = pl->getSong(pos))
+	size_t pos = pl.choice();
+	if (MPD::Song *s = pl.getSong(pos))
 	{
 		std::string album = s->getAlbum();
 		// select song under cursor
-		pl->setSelected(pos, true);
+		pl.setSelected(pos, true);
 		// go up
 		while (pos > 0)
 		{
-			s = pl->getSong(--pos);
+			s = pl.getSong(--pos);
 			if (!s || s->getAlbum() != album)
 				break;
 			else
-				pl->setSelected(pos, true);
+				pl.setSelected(pos, true);
 		}
 		// go down
-		pos = pl->choice();
-		while (pos < pl->size() - 1)
+		pos = pl.choice();
+		while (pos < pl.size() - 1)
 		{
-			s = pl->getSong(++pos);
+			s = pl.getSong(++pos);
 			if (!s || s->getAlbum() != album)
 				break;
 			else
-				pl->setSelected(pos, true);
+				pl.setSelected(pos, true);
 		}
 		Statusbar::msg("Album around cursor position selected");
 	}

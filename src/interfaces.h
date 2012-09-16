@@ -44,7 +44,7 @@ struct Searchable
 
 struct HasSongs
 {
-	virtual std::shared_ptr<ProxySongList> getProxySongList() = 0;
+	virtual ProxySongList proxySongList() = 0;
 	
 	virtual bool allowsSelection() = 0;
 	virtual void reverseSelection() = 0;

@@ -55,7 +55,7 @@ struct PlaylistEditor: Screen<NC::Window *>, Filterable, HasColumns, HasSongs, S
 	virtual void prevFound(bool wrap) OVERRIDE;
 	
 	// HasSongs implementation
-	virtual std::shared_ptr<ProxySongList> getProxySongList() OVERRIDE;
+	virtual ProxySongList proxySongList() OVERRIDE;
 	
 	virtual bool allowsSelection() OVERRIDE;
 	virtual void reverseSelection() OVERRIDE;
@@ -74,7 +74,7 @@ struct PlaylistEditor: Screen<NC::Window *>, Filterable, HasColumns, HasSongs, S
 	
 	virtual void Locate(const std::string &);
 	bool isContentFiltered();
-	std::shared_ptr<ProxySongList> contentProxyList();
+	ProxySongList contentProxyList();
 	
 	NC::Menu<std::string> Playlists;
 	NC::Menu<MPD::Song> Content;

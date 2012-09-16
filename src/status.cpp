@@ -165,9 +165,9 @@ void Status::Changes::playlist()
 	Playlist::ReloadRemaining = true;
 	
 	if (isVisible(myBrowser))
-		markSongsInPlaylist(myBrowser->getProxySongList());
+		markSongsInPlaylist(myBrowser->proxySongList());
 	if (isVisible(mySearcher))
-		markSongsInPlaylist(mySearcher->getProxySongList());
+		markSongsInPlaylist(mySearcher->proxySongList());
 	if (isVisible(myLibrary))
 		markSongsInPlaylist(myLibrary->songsProxyList());
 	if (isVisible(myPlaylistEditor))

@@ -553,9 +553,9 @@ void MediaLibrary::prevFound(bool wrap)
 
 /***********************************************************************/
 
-std::shared_ptr<ProxySongList> MediaLibrary::getProxySongList()
+ProxySongList MediaLibrary::proxySongList()
 {
-	auto ptr = nullProxySongList();
+	auto ptr = ProxySongList();
 	if (isActiveWindow(Songs))
 		ptr = songsProxyList();
 	return ptr;
@@ -744,9 +744,9 @@ int MediaLibrary::Columns()
 		return 3;
 }
 
-std::shared_ptr<ProxySongList> MediaLibrary::songsProxyList()
+ProxySongList MediaLibrary::songsProxyList()
 {
-	return mkProxySongList(Songs, [](NC::Menu<MPD::Song>::Item &item) {
+	return ProxySongList(Songs, [](NC::Menu<MPD::Song>::Item &item) {
 		return &item.value();
 	});
 }

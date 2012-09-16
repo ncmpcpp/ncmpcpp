@@ -171,9 +171,9 @@ void Playlist::prevFound(bool wrap)
 
 /***********************************************************************/
 
-std::shared_ptr<ProxySongList> Playlist::getProxySongList()
+ProxySongList Playlist::proxySongList()
 {
-	return mkProxySongList(w, [](NC::Menu<MPD::Song>::Item &item) {
+	return ProxySongList(w, [](NC::Menu<MPD::Song>::Item &item) {
 		return &item.value();
 	});
 }

@@ -97,7 +97,7 @@ void Browser::switchTo()
 	if (w.empty())
 		GetDirectory(itsBrowsedDir);
 	else
-		markSongsInPlaylist(getProxySongList());
+		markSongsInPlaylist(proxySongList());
 	
 	drawHeader();
 }
@@ -287,9 +287,9 @@ void Browser::prevFound(bool wrap)
 
 /***********************************************************************/
 
-std::shared_ptr<ProxySongList> Browser::getProxySongList()
+ProxySongList Browser::proxySongList()
 {
-	return mkProxySongList(w, [](NC::Menu<MPD::Item>::Item &item) -> MPD::Song * {
+	return ProxySongList(w, [](NC::Menu<MPD::Item>::Item &item) -> MPD::Song * {
 		MPD::Song *ptr = 0;
 		if (item.value().type == itSong)
 			ptr = item.value().song.get();

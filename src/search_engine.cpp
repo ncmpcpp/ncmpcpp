@@ -129,7 +129,7 @@ void SearchEngine::switchTo()
 	SwitchTo::execute(this);
 	if (w.empty())
 		Prepare();
-	markSongsInPlaylist(getProxySongList());
+	markSongsInPlaylist(proxySongList());
 	drawHeader();
 }
 
@@ -184,7 +184,7 @@ void SearchEngine::enterPressed()
 			w.insertItem(ResetButton+2, SEItem(), 1, 1);
 			w.at(ResetButton+2).value().mkBuffer() << Config.color1 << "Search results: " << Config.color2 << "Found " << found << (found > 1 ? " songs" : " song") << NC::clDefault;
 			w.insertSeparator(ResetButton+3);
-			markSongsInPlaylist(getProxySongList());
+			markSongsInPlaylist(proxySongList());
 			Statusbar::msg("Searching finished");
 			if (Config.block_search_constraints_change)
 				for (size_t i = 0; i < StaticOptions-4; ++i)
@@ -296,9 +296,9 @@ void SearchEngine::prevFound(bool wrap)
 
 /***********************************************************************/
 
-std::shared_ptr< ProxySongList > SearchEngine::getProxySongList()
+ProxySongList SearchEngine::proxySongList()
 {
-	return mkProxySongList(w, [](NC::Menu<SEItem>::Item &item) -> MPD::Song * {
+	return ProxySongList(w, [](NC::Menu<SEItem>::Item &item) -> MPD::Song * {
 		MPD::Song *ptr = 0;
 		if (!item.isSeparator() && item.value().isSong())
 			ptr = &item.value().song();

@@ -796,11 +796,11 @@ void TagEditor::prevFound(bool wrap)
 
 /***********************************************************************/
 
-std::shared_ptr<ProxySongList> TagEditor::getProxySongList()
+ProxySongList TagEditor::proxySongList()
 {
-	auto ptr = nullProxySongList();
+	auto ptr = ProxySongList();
 	if (w == Tags)
-		ptr = mkProxySongList(*Tags, [](NC::Menu<MPD::MutableSong>::Item &item) {
+		ptr = ProxySongList(*Tags, [](NC::Menu<MPD::MutableSong>::Item &item) {
 			return &item.value();
 		});
 	return ptr;

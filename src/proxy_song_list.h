@@ -99,6 +99,8 @@ class ProxySongList
 	std::shared_ptr<Interface> m_impl;
 	
 public:
+	ProxySongList() { }
+	
 	template <typename T, typename F>
 	ProxySongList(typename NC::Menu<T> &menu, F f) : m_impl(new Impl<T, F>(menu, f)) { }
 	
@@ -115,17 +117,9 @@ public:
 	
 	MPD::Song *getSong(size_t pos) { return m_impl->getSong(pos); }
 	MPD::Song *currentSong() { return m_impl->currentSong(); }
+	
+	/// @return true if there is no underlying menu object, false otherwise
+	operator bool() const { return m_impl.get() != 0; }
 };
-
-template <typename T, typename F>
-std::shared_ptr<ProxySongList> mkProxySongList(typename NC::Menu<T> &menu, F f)
-{
-	return std::make_shared<ProxySongList>(ProxySongList(menu, f));
-}
-
-inline std::shared_ptr<ProxySongList> nullProxySongList()
-{
-	return std::shared_ptr<ProxySongList>();
-}
 
 #endif

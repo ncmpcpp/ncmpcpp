@@ -55,7 +55,7 @@ struct MediaLibrary: Screen<NC::Window *>, Filterable, HasColumns, HasSongs, Sea
 	virtual void prevFound(bool wrap) OVERRIDE;
 	
 	// HasSongs implementation
-	virtual std::shared_ptr<ProxySongList> getProxySongList() OVERRIDE;
+	virtual ProxySongList proxySongList() OVERRIDE;
 	
 	virtual bool allowsSelection() OVERRIDE;
 	virtual void reverseSelection() OVERRIDE;
@@ -72,7 +72,7 @@ struct MediaLibrary: Screen<NC::Window *>, Filterable, HasColumns, HasSongs, Sea
 	void toggleColumnsMode();
 	int Columns();
 	void LocateSong(const MPD::Song &);
-	std::shared_ptr<ProxySongList> songsProxyList();
+	ProxySongList songsProxyList();
 	
 	struct SearchConstraints
 	{

@@ -104,7 +104,7 @@ struct SearchEngine: Screen<NC::Menu<SEItem>>, Filterable, HasSongs, Searchable,
 	virtual void prevFound(bool wrap) OVERRIDE;
 	
 	// HasSongs implementation
-	virtual std::shared_ptr<ProxySongList> getProxySongList() OVERRIDE;
+	virtual ProxySongList proxySongList() OVERRIDE;
 	
 	virtual bool allowsSelection() OVERRIDE;
 	virtual void reverseSelection() OVERRIDE;

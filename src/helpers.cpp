@@ -90,12 +90,12 @@ std::string Timestamp(time_t t)
 	return result;
 }
 
-void markSongsInPlaylist(std::shared_ptr<ProxySongList> pl)
+void markSongsInPlaylist(ProxySongList pl)
 {
-	size_t list_size = pl->size();
+	size_t list_size = pl.size();
 	for (size_t i = 0; i < list_size; ++i)
-		if (auto s = pl->getSong(i))
-			pl->setBold(i, myPlaylist->checkForSong(*s));
+		if (auto s = pl.getSong(i))
+			pl.setBold(i, myPlaylist->checkForSong(*s));
 }
 
 std::wstring Scroller(const std::wstring &str, size_t &pos, size_t width)
