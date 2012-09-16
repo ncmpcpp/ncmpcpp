@@ -27,53 +27,77 @@
 #include "utility/comparators.h"
 #include "screen_switcher.h"
 
-using Global::MainHeight;
-using Global::MainStartY;
-
 SortPlaylistDialog *mySortPlaylistDialog;
 
 SortPlaylistDialog::SortPlaylistDialog()
-: m_sort_entry(std::make_pair("Sort", static_cast<MPD::Song::GetFunction>(0)))
-, m_cancel_entry(std::make_pair("Cancel", static_cast<MPD::Song::GetFunction>(0)))
 {
-	setDimensions();
+	typedef SortPlaylistDialog Self;
+	typedef WindowType::Item::Type Entry;
 	
-	w = NC::Menu< std::pair<std::string, MPD::Song::GetFunction> >((COLS-m_width)/2, (MainHeight-m_height)/2+MainStartY, m_width, m_height, "Sort songs by...", Config.main_color, Config.window_border);
+	using Global::MainHeight;
+	using Global::MainStartY;
+	
+	setDimensions();
+	w = WindowType((COLS-m_width)/2, (MainHeight-m_height)/2+MainStartY, m_width, m_height, "Sort songs by...", Config.main_color, Config.window_border);
 	w.cyclicScrolling(Config.use_cyclic_scrolling);
 	w.centeredCursor(Config.centered_cursor);
-	w.setItemDisplayer(Display::Pair<std::string, MPD::Song::GetFunction>);
+	w.setItemDisplayer([](Self::WindowType &menu) {
+		menu << menu.drawn()->value().item().first;
+	});
 	
-	w.addItem(std::make_pair("Artist", &MPD::Song::getArtist));
-	w.addItem(std::make_pair("Album", &MPD::Song::getAlbum));
-	w.addItem(std::make_pair("Disc", &MPD::Song::getDisc));
-	w.addItem(std::make_pair("Track", &MPD::Song::getTrack));
-	w.addItem(std::make_pair("Genre", &MPD::Song::getGenre));
-	w.addItem(std::make_pair("Date", &MPD::Song::getDate));
-	w.addItem(std::make_pair("Composer", &MPD::Song::getComposer));
-	w.addItem(std::make_pair("Performer", &MPD::Song::getPerformer));
-	w.addItem(std::make_pair("Title", &MPD::Song::getTitle));
-	w.addItem(std::make_pair("Filename", &MPD::Song::getURI));
-	
+	w.addItem(Entry(std::make_pair("Artist", &MPD::Song::getArtist),
+		std::bind(&Self::moveSortOrderHint, this)
+	));
+	w.addItem(Entry(std::make_pair("Album", &MPD::Song::getAlbum),
+		std::bind(&Self::moveSortOrderHint, this)
+	));
+	w.addItem(Entry(std::make_pair("Disc", &MPD::Song::getDisc),
+		std::bind(&Self::moveSortOrderHint, this)
+	));
+	w.addItem(Entry(std::make_pair("Track", &MPD::Song::getTrack),
+		std::bind(&Self::moveSortOrderHint, this)
+	));
+	w.addItem(Entry(std::make_pair("Genre", &MPD::Song::getGenre),
+		std::bind(&Self::moveSortOrderHint, this)
+	));
+	w.addItem(Entry(std::make_pair("Date", &MPD::Song::getDate),
+		std::bind(&Self::moveSortOrderHint, this)
+	));
+	w.addItem(Entry(std::make_pair("Composer", &MPD::Song::getComposer),
+		std::bind(&Self::moveSortOrderHint, this)
+	));
+	w.addItem(Entry(std::make_pair("Performer", &MPD::Song::getPerformer),
+		std::bind(&Self::moveSortOrderHint, this)
+	));
+	w.addItem(Entry(std::make_pair("Title", &MPD::Song::getTitle),
+		std::bind(&Self::moveSortOrderHint, this)
+	));
+	w.addItem(Entry(std::make_pair("Filename", &MPD::Song::getURI),
+		std::bind(&Self::moveSortOrderHint, this)
+	));
 	m_sort_options = w.size();
-	
 	w.addSeparator();
-	w.addItem(m_sort_entry);
-	w.addItem(m_cancel_entry);
+	w.addItem(Entry(std::make_pair("Sort", static_cast<MPD::Song::GetFunction>(0)),
+		std::bind(&Self::sort, this)
+	));
+	w.addItem(Entry(std::make_pair("Cancel", static_cast<MPD::Song::GetFunction>(0)),
+		std::bind(&Self::cancel, this)
+	));
 }
 
 void SortPlaylistDialog::switchTo()
 {
 	SwitchTo::execute(this);
 	w.reset();
-	refresh();
 }
 
 void SortPlaylistDialog::resize()
 {
+	using Global::MainHeight;
+	using Global::MainStartY;
 	setDimensions();
 	w.resize(m_width, m_height);
 	w.moveTo((COLS-m_width)/2, (MainHeight-m_height)/2+MainStartY);
-	
 	hasToBeResized = false;
 }
 
@@ -84,73 +108,7 @@ std::wstring SortPlaylistDialog::title()
 
 void SortPlaylistDialog::enterPressed()
 {
-	auto option = w.currentVI();
-	if (*option == m_sort_entry)
-	{
-		auto begin = myPlaylist->main().begin(), end = myPlaylist->main().end();
-		// if songs are selected, sort range from first selected to last selected
-		if (myPlaylist->main().hasSelected())
-		{
-			while (!begin->isSelected())
-				++begin;
-			while (!(end-1)->isSelected())
-				--end;
-		}
-		
-		size_t start_pos = begin - myPlaylist->main().begin();
-		MPD::SongList playlist;
-		playlist.reserve(end - begin);
-		for (; begin != end; ++begin)
-			playlist.push_back(begin->value());
-		
-		LocaleStringComparison cmp(std::locale(), Config.ignore_leading_the);
-		std::function<void(MPD::SongList::iterator, MPD::SongList::iterator)> iter_swap, quick_sort;
-		auto song_cmp = [this, &cmp](const MPD::Song &a, const MPD::Song &b) -> bool {
-			for (size_t i = 0; i < m_sort_options; ++i)
-			{
-				int res = cmp(a.getTags(w[i].value().second, Config.tags_separator),
-				              b.getTags(w[i].value().second, Config.tags_separator));
-				if (res != 0)
-					return res < 0;
-			}
-			return a.getPosition() < b.getPosition();
-		};
-		iter_swap = [&playlist, &start_pos](MPD::SongList::iterator a, MPD::SongList::iterator b) {
-			std::iter_swap(a, b);
-			Mpd.Swap(start_pos+a-playlist.begin(), start_pos+b-playlist.begin());
-		};
-		quick_sort = [this, &song_cmp, &quick_sort, &iter_swap](MPD::SongList::iterator first, MPD::SongList::iterator last) {
-			if (last-first > 1)
-			{
-				MPD::SongList::iterator pivot = first+rand()%(last-first);
-				iter_swap(pivot, last-1);
-				pivot = last-1;
-				
-				MPD::SongList::iterator tmp = first;
-				for (MPD::SongList::iterator i = first; i != pivot; ++i)
-					if (song_cmp(*i, *pivot))
-						iter_swap(i, tmp++);
-					iter_swap(tmp, pivot);
-				
-				quick_sort(first, tmp);
-				quick_sort(tmp+1, last);
-			}
-		};
-		
-		Statusbar::msg("Sorting...");
-		Mpd.StartCommandsList();
-		quick_sort(playlist.begin(), playlist.end());
-		if (Mpd.CommitCommandsList())
-			Statusbar::msg("Playlist sorted");
-		
-		switchToPreviousScreen();
-	}
-	else if (*option == m_cancel_entry)
-	{
-		switchToPreviousScreen();
-	}
-	else
-		Statusbar::msg("Move tag types up and down to adjust sort order");
+	w.current().value().exec()();
 }
 
 void SortPlaylistDialog::mouseButtonPressed(MEVENT me)
@@ -188,8 +146,82 @@ void SortPlaylistDialog::moveSortOrderUp()
 	}
 }
 
+void SortPlaylistDialog::moveSortOrderHint() const
+{
+	Statusbar::msg("Move tag types up and down to adjust sort order");
+}
+
+void SortPlaylistDialog::sort() const
+{
+	auto &pl = myPlaylist->main();
+	auto begin = pl.begin(), end = pl.end();
+	// if songs are selected, sort range from first selected to last selected
+	if (pl.hasSelected())
+	{
+		while (!begin->isSelected())
+			++begin;
+		while (!(end-1)->isSelected())
+			--end;
+	}
+	
+	size_t start_pos = begin - pl.begin();
+	MPD::SongList playlist;
+	playlist.reserve(end - begin);
+	for (; begin != end; ++begin)
+		playlist.push_back(begin->value());
+	
+	typedef MPD::SongList::iterator Iterator;
+	LocaleStringComparison cmp(std::locale(), Config.ignore_leading_the);
+	std::function<void(Iterator, Iterator)> iter_swap, quick_sort;
+	auto song_cmp = [this, &cmp](const MPD::Song &a, const MPD::Song &b) -> bool {
+		for (size_t i = 0; i < m_sort_options; ++i)
+		{
+			int res = cmp(a.getTags(w[i].value().item().second, Config.tags_separator),
+			              b.getTags(w[i].value().item().second, Config.tags_separator));
+			if (res != 0)
+				return res < 0;
+		}
+		return a.getPosition() < b.getPosition();
+	};
+	iter_swap = [&playlist, &start_pos](Iterator a, Iterator b) {
+		std::iter_swap(a, b);
+		Mpd.Swap(start_pos+a-playlist.begin(), start_pos+b-playlist.begin());
+	};
+	quick_sort = [this, &song_cmp, &quick_sort, &iter_swap](Iterator first, Iterator last) {
+		if (last-first > 1)
+		{
+			Iterator pivot = first+rand()%(last-first);
+			iter_swap(pivot, last-1);
+			pivot = last-1;
+			
+			Iterator tmp = first;
+			for (Iterator i = first; i != pivot; ++i)
+				if (song_cmp(*i, *pivot))
+					iter_swap(i, tmp++);
+			iter_swap(tmp, pivot);
+			
+			quick_sort(first, tmp);
+			quick_sort(tmp+1, last);
+		}
+	};
+	
+	Statusbar::msg("Sorting...");
+	Mpd.StartCommandsList();
+	quick_sort(playlist.begin(), playlist.end());
+	if (Mpd.CommitCommandsList())
+	{
+		Statusbar::msg("Playlist sorted");	
+		switchToPreviousScreen();
+	}
+}
+
+void SortPlaylistDialog::cancel() const
+{
+	switchToPreviousScreen();
+}
+
 void SortPlaylistDialog::setDimensions()
 {
-	m_height = std::min(size_t(17), MainHeight);
+	m_height = std::min(size_t(17), Global::MainHeight);
 	m_width = 30;
 }

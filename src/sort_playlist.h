@@ -21,11 +21,13 @@
 #ifndef _SORT_PLAYLIST
 #define _SORT_PLAYLIST
 
+#include "exec_item.h"
 #include "interfaces.h"
 #include "screen.h"
 #include "song.h"
 
-struct SortPlaylistDialog: Screen<NC::Menu<std::pair<std::string, MPD::Song::GetFunction>>>, Tabbable
+struct SortPlaylistDialog
+: Screen<NC::Menu<ExecItem<std::pair<std::string, MPD::Song::GetFunction>, void()>>>, Tabbable
 {
 	SortPlaylistDialog();
 	
@@ -50,14 +52,15 @@ protected:
 	virtual bool isLockable() OVERRIDE { return false; }
 	
 private:
+	void moveSortOrderHint() const;
+	void sort() const;
+	void cancel() const;
+	
 	void setDimensions();
 	
 	size_t m_sort_options;
 	size_t m_height;
 	size_t m_width;
-	
-	const WindowType::Item::Type m_sort_entry;
-	const WindowType::Item::Type m_cancel_entry;
 };
 
 extern SortPlaylistDialog *mySortPlaylistDialog;
