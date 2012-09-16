@@ -94,6 +94,7 @@ void Status::trace()
 	
 	if (isVisible(myPlaylist)
 	&&  Timer.tv_sec == myPlaylist->Timer().tv_sec+Config.playlist_disable_highlight_delay
+	&&  Timer.tv_usec > myPlaylist->Timer().tv_usec
 	&&  myPlaylist->main().isHighlighted()
 	&&  Config.playlist_disable_highlight_delay)
 	{
