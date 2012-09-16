@@ -70,7 +70,7 @@ Browser::Browser() : itsBrowseLocally(0), itsScrollBeginning(0), itsBrowsedDir("
 	w.centeredCursor(Config.centered_cursor);
 	w.setSelectedPrefix(Config.selected_item_prefix);
 	w.setSelectedSuffix(Config.selected_item_suffix);
-	w.setItemDisplayer(Display::Items);
+	w.setItemDisplayer(std::bind(Display::Items, _1, proxySongList()));
 	
 	if (SupportedExtensions.empty())
 		Mpd.GetSupportedExtensions(SupportedExtensions);

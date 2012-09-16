@@ -784,6 +784,7 @@ template <typename T> bool Menu<T>::hasSelected() const
 
 template <typename T> void Menu<T>::highlight(size_t pos)
 {
+	assert(pos < m_options_ptr->size());
 	m_highlight = pos;
 	size_t half_height = m_height/2;
 	if (pos < half_height)

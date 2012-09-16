@@ -60,9 +60,9 @@ Playlist::Playlist() : itsTotalLength(0), itsRemainingTime(0), itsScrollBegin(0)
 	w.setSelectedPrefix(Config.selected_item_prefix);
 	w.setSelectedSuffix(Config.selected_item_suffix);
 	if (Config.columns_in_playlist)
-		w.setItemDisplayer(std::bind(Display::SongsInColumns, _1, this));
+		w.setItemDisplayer(std::bind(Display::SongsInColumns, _1, proxySongList()));
 	else
-		w.setItemDisplayer(std::bind(Display::Songs, _1, this, Config.song_list_format));
+		w.setItemDisplayer(std::bind(Display::Songs, _1, proxySongList(), Config.song_list_format));
 }
 
 void Playlist::switchTo()

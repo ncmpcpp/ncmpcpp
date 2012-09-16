@@ -68,20 +68,25 @@ class ProxySongList
 		virtual void highlight(size_t pos) { m_menu.highlight(pos); }
 		
 		virtual bool isSelected(size_t pos) {
+			assert(pos < m_menu.size());
 			return m_menu[pos].isSelected();
 		}
 		virtual void setSelected(size_t pos, bool selected) {
+			assert(pos < m_menu.size());
 			m_menu[pos].setSelected(selected);
 		}
 		
 		virtual bool isBold(size_t pos) {
+			assert(pos < m_menu.size());
 			return m_menu[pos].isBold();
 		}
 		virtual void setBold(size_t pos, bool bold) {
+			assert(pos < m_menu.size());
 			m_menu[pos].setBold(bold);
 		}
 		
 		virtual MPD::Song *getSong(size_t pos) {
+			assert(pos < m_menu.size());
 			return m_song_getter(m_menu[pos]);
 		}
 		virtual MPD::Song *currentSong() {
@@ -104,19 +109,19 @@ public:
 	template <typename T, typename F>
 	ProxySongList(typename NC::Menu<T> &menu, F f) : m_impl(new Impl<T, F>(menu, f)) { }
 	
-	bool empty() { return m_impl->empty(); }
-	size_t size() { return m_impl->size(); }
-	size_t choice() { return m_impl->choice(); }
-	void highlight(size_t pos) { m_impl->highlight(pos); }
+	bool empty() const { return m_impl->empty(); }
+	size_t size() const { return m_impl->size(); }
+	size_t choice() const { return m_impl->choice(); }
+	void highlight(size_t pos) const { m_impl->highlight(pos); }
 	
-	bool isSelected(size_t pos) { return m_impl->isSelected(pos); }
-	void setSelected(size_t pos, bool selected) { m_impl->setSelected(pos, selected); }
+	bool isSelected(size_t pos) const { return m_impl->isSelected(pos); }
+	void setSelected(size_t pos, bool selected) const { m_impl->setSelected(pos, selected); }
 	
-	bool isBold(size_t pos) { return m_impl->isBold(pos); }
-	void setBold(size_t pos, bool bold) { m_impl->setBold(pos, bold); }
+	bool isBold(size_t pos) const { return m_impl->isBold(pos); }
+	void setBold(size_t pos, bool bold) const{ m_impl->setBold(pos, bold); }
 	
-	MPD::Song *getSong(size_t pos) { return m_impl->getSong(pos); }
-	MPD::Song *currentSong() { return m_impl->currentSong(); }
+	MPD::Song *getSong(size_t pos) const { return m_impl->getSong(pos); }
+	MPD::Song *currentSong() const { return m_impl->currentSong(); }
 	
 	/// @return true if there is no underlying menu object, false otherwise
 	operator bool() const { return m_impl.get() != 0; }

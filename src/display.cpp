@@ -73,16 +73,15 @@ const wchar_t *toColumnName(char c)
 }
 
 template <typename T>
-void setProperties(NC::Menu<T> &menu, const MPD::Song &s, HasSongs &screen, bool &separate_albums,
+void setProperties(NC::Menu<T> &menu, const MPD::Song &s, const ProxySongList &pl, bool &separate_albums,
                    bool &is_now_playing, bool &is_selected, bool &discard_colors)
 {
 	size_t drawn_pos = menu.drawn() - menu.begin();
 	separate_albums = false;
 	if (Config.playlist_separate_albums)
 	{
-		auto pl = screen.proxySongList();
-		assert(pl);
-		auto next = pl.getSong(drawn_pos+1);
+		size_t next_pos = drawn_pos+1;
+		auto next = next_pos < pl.size() ? pl.getSong(next_pos) : 0;
 		if (next && next->getAlbum() != s.getAlbum())
 			separate_albums = true;
 	}
@@ -103,10 +102,10 @@ void setProperties(NC::Menu<T> &menu, const MPD::Song &s, HasSongs &screen, bool
 }
 
 template <typename T>
-void showSongs(NC::Menu<T> &menu, const MPD::Song &s, HasSongs &screen, const std::string &format)
+void showSongs(NC::Menu<T> &menu, const MPD::Song &s, const ProxySongList &pl, const std::string &format)
 {
 	bool separate_albums, is_now_playing, is_selected, discard_colors;
-	setProperties(menu, s, screen, separate_albums, is_now_playing, is_selected, discard_colors);
+	setProperties(menu, s, pl, separate_albums, is_now_playing, is_selected, discard_colors);
 	
 	size_t y = menu.getY();
 	std::string line = s.toString(format, Config.tags_separator, "$");
@@ -161,13 +160,13 @@ void showSongs(NC::Menu<T> &menu, const MPD::Song &s, HasSongs &screen, const st
 }
 
 template <typename T>
-void showSongsInColumns(NC::Menu<T> &menu, const MPD::Song &s, HasSongs &screen)
+void showSongsInColumns(NC::Menu<T> &menu, const MPD::Song &s, const ProxySongList &pl)
 {
 	if (Config.columns.empty())
 		return;
 	
 	bool separate_albums, is_now_playing, is_selected, discard_colors;
-	setProperties(menu, s, screen, separate_albums, is_now_playing, is_selected, discard_colors);
+	setProperties(menu, s, pl, separate_albums, is_now_playing, is_selected, discard_colors);
 	
 	int width;
 	int y = menu.getY();
@@ -346,14 +345,14 @@ std::string Display::Columns(size_t list_width)
 	return result;
 }
 
-void Display::SongsInColumns(NC::Menu<MPD::Song> &menu, HasSongs *screen)
+void Display::SongsInColumns(NC::Menu< MPD::Song >& menu, const ProxySongList &pl)
 {
-	showSongsInColumns(menu, menu.drawn()->value(), *screen);
+	showSongsInColumns(menu, menu.drawn()->value(), pl);
 }
 
-void Display::Songs(NC::Menu<MPD::Song> &menu, HasSongs *screen, const std::string &format)
+void Display::Songs(NC::Menu< MPD::Song >& menu, const ProxySongList &pl, const std::string &format)
 {
-	showSongs(menu, menu.drawn()->value(), *screen, format);
+	showSongs(menu, menu.drawn()->value(), pl, format);
 }
 
 #ifdef HAVE_TAGLIB_H
@@ -382,7 +381,7 @@ void Display::Outputs(NC::Menu<MPD::Output> &menu)
 	menu << menu.drawn()->value().name();
 }
 
-void Display::Items(NC::Menu<MPD::Item> &menu)
+void Display::Items(NC::Menu<MPD::Item> &menu, const ProxySongList &pl)
 {
 	const MPD::Item &item = menu.drawn()->value();
 	switch (item.type)
@@ -392,9 +391,9 @@ void Display::Items(NC::Menu<MPD::Item> &menu)
 			break;
 		case MPD::itSong:
 			if (!Config.columns_in_browser)
-				showSongs(menu, *item.song, *myBrowser, Config.song_list_format);
+				showSongs(menu, *item.song, pl, Config.song_list_format);
 			else
-				showSongsInColumns(menu, *item.song, *myBrowser);
+				showSongsInColumns(menu, *item.song, pl);
 			break;
 		case MPD::itPlaylist:
 			menu << Config.browser_playlist_prefix << getBasename(item.name);
@@ -402,15 +401,15 @@ void Display::Items(NC::Menu<MPD::Item> &menu)
 	}
 }
 
-void Display::SearchEngine(NC::Menu<SEItem> &menu)
+void Display::SearchEngine(NC::Menu<SEItem> &menu, const ProxySongList &pl)
 {
 	const SEItem &si = menu.drawn()->value();
 	if (si.isSong())
 	{
 		if (!Config.columns_in_search_engine)
-			showSongs(menu, si.song(), *mySearcher, Config.song_list_format);
+			showSongs(menu, si.song(), pl, Config.song_list_format);
 		else
-			showSongsInColumns(menu, si.song(), *mySearcher);
+			showSongsInColumns(menu, si.song(), pl);
 	}
 	else
 		menu << si.buffer();
