@@ -179,7 +179,7 @@ void SelectedItemsAdder::mouseButtonPressed(MEVENT me)
 		Screen<WindowType>::mouseButtonPressed(me);
 }
 
-void SelectedItemsAdder::populatePlaylistSelector(BasicScreen *old_screen)
+void SelectedItemsAdder::populatePlaylistSelector(BaseScreen *old_screen)
 {
 	typedef SelectedItemsAdder Self;
 	m_playlist_selector.reset();

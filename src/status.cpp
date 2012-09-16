@@ -90,7 +90,7 @@ void Status::trace()
 		Mpd.UpdateStatus();
 	}
 	
-	applyToVisibleWindows(&BasicScreen::update);
+	applyToVisibleWindows(&BaseScreen::update);
 	
 	if (isVisible(myPlaylist)
 	&&  Timer.tv_sec == myPlaylist->Timer().tv_sec+Config.playlist_disable_highlight_delay
@@ -553,5 +553,5 @@ void Status::update(MPD::Connection *, MPD::StatusChanges changes, void *)
 	if (changes.PlayerState || (changes.ElapsedTime && (!Config.new_design || Mpd.GetState() == MPD::psPlay)))
 		wFooter->refresh();
 	if (changes.Playlist || changes.Database || changes.PlayerState || changes.SongID)
-		applyToVisibleWindows(&BasicScreen::refreshWindow);
+		applyToVisibleWindows(&BaseScreen::refreshWindow);
 }

@@ -68,15 +68,15 @@ struct Tabbable
 		if (m_previous_screen)
 			m_previous_screen->switchTo();
 	}
-	void setPreviousScreen(BasicScreen *screen) {
+	void setPreviousScreen(BaseScreen *screen) {
 		m_previous_screen = screen;
 	}
-	BasicScreen *previousScreen() const {
+	BaseScreen *previousScreen() const {
 		return m_previous_screen;
 	}
 	
 private:
-	BasicScreen *m_previous_screen;
+	BaseScreen *m_previous_screen;
 };
 
 #endif // _INTERFACES_H

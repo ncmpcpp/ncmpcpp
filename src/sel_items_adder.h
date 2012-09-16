@@ -50,7 +50,7 @@ protected:
 	virtual bool isLockable() OVERRIDE { return false; }
 	
 private:
-	void populatePlaylistSelector(BasicScreen *screen);
+	void populatePlaylistSelector(BaseScreen *screen);
 	
 	void addToCurrentPlaylist();
 	void addToNewPlaylist() const;

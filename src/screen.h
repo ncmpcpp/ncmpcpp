@@ -30,10 +30,10 @@ void scrollpadMouseButtonPressed(NC::Scrollpad &w, MEVENT me);
 /// An interface for various instantiations of Screen template class. Since C++ doesn't like
 /// comparison of two different instantiations of the same template class we need the most
 /// basic class to be non-template to allow it.
-struct BasicScreen
+struct BaseScreen
 {
-	BasicScreen() : hasToBeResized(false) { }
-	virtual ~BasicScreen() { }
+	BaseScreen() : hasToBeResized(false) { }
+	virtual ~BaseScreen() { }
 	
 	/// @see Screen::isActiveWindow()
 	virtual bool isActiveWindow(const NC::Window &w_) = 0;
@@ -103,15 +103,15 @@ protected:
 	void getWindowResizeParams(size_t &x_offset, size_t &width, bool adjust_locked_screen = true);
 };
 
-void applyToVisibleWindows(void (BasicScreen::*f)());
-void updateInactiveScreen(BasicScreen *screen_to_be_set);
-bool isVisible(BasicScreen *screen);
+void applyToVisibleWindows(void (BaseScreen::*f)());
+void updateInactiveScreen(BaseScreen *screen_to_be_set);
+bool isVisible(BaseScreen *screen);
 
 /// Class that all screens should derive from. It provides basic interface
 /// for the screen to be working properly and assumes that we didn't forget
 /// about anything vital.
 ///
-template <typename WindowT> struct Screen : public BasicScreen
+template <typename WindowT> struct Screen : public BaseScreen
 {
 	typedef WindowT WindowType;
 	typedef typename std::add_lvalue_reference<WindowType>::type WindowReference;

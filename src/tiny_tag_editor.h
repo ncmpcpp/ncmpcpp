@@ -56,7 +56,7 @@ protected:
 private:
 	bool getTags();
 	MPD::MutableSong itsEdited;
-	BasicScreen *m_previous_screen;
+	BaseScreen *m_previous_screen;
 };
 
 extern TinyTagEditor *myTinyTagEditor;

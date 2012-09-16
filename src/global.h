@@ -29,13 +29,13 @@
 namespace Global {//
 
 // currently active screen (displayed in main window)
-extern BasicScreen *myScreen;
+extern BaseScreen *myScreen;
 
 // points at the screen that was locked (or is null if no screen is locked)
-extern BasicScreen *myLockedScreen;
+extern BaseScreen *myLockedScreen;
 
 // points at inactive screen, if locking was enabled and two screens are displayed
-extern BasicScreen *myInactiveScreen; 
+extern BaseScreen *myInactiveScreen; 
 
 // header window (above main window)
 extern NC::Window *wHeader;

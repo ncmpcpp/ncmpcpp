@@ -201,7 +201,7 @@ void Action::ResizeScreen(bool reload_main_window)
 	
 	SetResizeFlags();
 	
-	applyToVisibleWindows(&BasicScreen::resize);
+	applyToVisibleWindows(&BaseScreen::resize);
 	
 	if (Config.header_visibility || Config.new_design)
 		wHeader->resize(COLS, HeaderHeight);
@@ -210,7 +210,7 @@ void Action::ResizeScreen(bool reload_main_window)
 	wFooter->moveTo(0, FooterStartY);
 	wFooter->resize(COLS, Config.statusbar_visibility ? 2 : 1);
 	
-	applyToVisibleWindows(&BasicScreen::refresh);
+	applyToVisibleWindows(&BaseScreen::refresh);
 	
 	Status::Changes::elapsedTime();
 	if (!Mpd.isPlaying())
@@ -1611,7 +1611,7 @@ void ToggleScreenLock::Run()
 	
 	if (myLockedScreen != 0)
 	{
-		BasicScreen::unlock();
+		BaseScreen::unlock();
 		Action::SetResizeFlags();
 		myScreen->resize();
 		Statusbar::msg("Screen unlocked");

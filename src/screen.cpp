@@ -76,7 +76,7 @@ void scrollpadMouseButtonPressed(NC::Scrollpad &w, MEVENT me)
 
 /***********************************************************************/
 
-void BasicScreen::getWindowResizeParams(size_t &x_offset, size_t &width, bool adjust_locked_screen)
+void BaseScreen::getWindowResizeParams(size_t &x_offset, size_t &width, bool adjust_locked_screen)
 {
 	width = COLS;
 	x_offset = 0;
@@ -100,7 +100,7 @@ void BasicScreen::getWindowResizeParams(size_t &x_offset, size_t &width, bool ad
 	}
 }
 
-bool BasicScreen::lock()
+bool BaseScreen::lock()
 {
 	if (myLockedScreen)
 		return false;
@@ -113,7 +113,7 @@ bool BasicScreen::lock()
 		return false;
 }
 
-void BasicScreen::unlock()
+void BaseScreen::unlock()
 {
 	if (myInactiveScreen && myInactiveScreen != myLockedScreen)
 		myScreen = myInactiveScreen;
@@ -125,7 +125,7 @@ void BasicScreen::unlock()
 
 /***********************************************************************/
 
-void applyToVisibleWindows(void (BasicScreen::*f)())
+void applyToVisibleWindows(void (BaseScreen::*f)())
 {
 	if (myLockedScreen && myScreen->isMergable())
 	{
@@ -140,7 +140,7 @@ void applyToVisibleWindows(void (BasicScreen::*f)())
 	(myScreen->*f)();
 }
 
-void updateInactiveScreen(BasicScreen *screen_to_be_set)
+void updateInactiveScreen(BaseScreen *screen_to_be_set)
 {
 	if (myInactiveScreen && myLockedScreen != myInactiveScreen && myLockedScreen == screen_to_be_set)
 	{
@@ -164,7 +164,7 @@ void updateInactiveScreen(BasicScreen *screen_to_be_set)
 	}
 }
 
-bool isVisible(BasicScreen *screen)
+bool isVisible(BaseScreen *screen)
 {
 	assert(screen != 0);
 	if (myLockedScreen && myScreen->isMergable())

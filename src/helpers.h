@@ -28,17 +28,17 @@
 #include "status.h"
 #include "utility/wide_string.h"
 
-inline HasColumns *hasColumns(BasicScreen *screen)
+inline HasColumns *hasColumns(BaseScreen *screen)
 {
 	return dynamic_cast<HasColumns *>(screen);
 }
 
-inline HasSongs *hasSongs(BasicScreen *screen)
+inline HasSongs *hasSongs(BaseScreen *screen)
 {
 	return dynamic_cast<HasSongs *>(screen);
 }
 
-inline std::shared_ptr<ProxySongList> proxySongList(BasicScreen *screen)
+inline std::shared_ptr<ProxySongList> proxySongList(BaseScreen *screen)
 {
 	auto ptr = nullProxySongList();
 	auto hs = hasSongs(screen);
@@ -47,7 +47,7 @@ inline std::shared_ptr<ProxySongList> proxySongList(BasicScreen *screen)
 	return ptr;
 }
 
-inline MPD::Song *currentSong(BasicScreen *screen)
+inline MPD::Song *currentSong(BaseScreen *screen)
 {
 	MPD::Song *ptr = 0;
 	auto pl = proxySongList(screen);
