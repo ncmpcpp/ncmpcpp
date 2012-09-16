@@ -262,6 +262,7 @@ void SelectedItemsAdder::addAfterCurrentSong() const
 	if (!Mpd.isPlaying())
 		return;
 	size_t pos = Mpd.GetCurrentlyPlayingSongPos();
+	++pos;
 	bool success = addSongsToPlaylist(m_selected_items, false, pos);
 	if (success)
 		exitSuccessfully();
