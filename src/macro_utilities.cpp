@@ -18,50 +18,21 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
-#ifndef _MACRO_UTILITIES
-#define _MACRO_UTILITIES
+#include "global.h"
+#include "macro_utilities.h"
 
-#include <cassert>
-#include "actions.h"
-#include "screen_type.h"
-
-struct PushCharacters : public Action
+void PushCharacters::Run()
 {
-	PushCharacters(NC::Window **w, std::vector<int> &&queue)
-	: Action(aMacroUtility, ""), m_window(w), m_queue(queue) { }
-	
-protected:
-	virtual void Run();
-	
-private:
-	NC::Window **m_window;
-	std::vector<int> m_queue;
-};
+	for (auto it = m_queue.begin(); it != m_queue.end(); ++it)
+		(*m_window)->pushChar(*it);
+}
 
-struct RequireRunnable : public Action
+bool RequireRunnable::canBeRun() const
 {
-	RequireRunnable(Action *action)
-	: Action(aMacroUtility, ""), m_action(action) { assert(action); }
-	
-protected:
-	virtual bool canBeRun() const;
-	virtual void Run() { }
-	
-private:
-	Action *m_action;
-};
+	return m_action->canBeRun();
+}
 
-struct RequireScreen : public Action
+bool RequireScreen::canBeRun() const
 {
-	RequireScreen(ScreenType screen_type)
-	: Action(aMacroUtility, ""), m_screen_type(screen_type) { }
-	
-protected:
-	virtual bool canBeRun() const;
-	virtual void Run() { }
-	
-private:
-	ScreenType m_screen_type;
-};
-
-#endif // _MACRO_UTILITIES
+	return Global::myScreen->type() == m_screen_type;
+}

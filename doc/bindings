@@ -88,6 +88,13 @@
 ##      before we stuff characters into input queue, so if condition
 ##      is not met, whole chain is aborted and we're fine.
 ##
+##    - require_screen "screen" - checks whether given screen is
+##      currently active. accepted values: browser, clock, help,
+##      media_library, outputs, playlist, playlist_editor,
+##      search_engine, tag_editor, visualizer, last_fm, lyrics,
+##      selected_items_adder, server_info, song_info,
+##      sort_playlist_dialog, tiny_tag_editor.
+##
 ## Note: Both 'backspace' and 'backspace_2' are used because some
 ##       terminals interpret backspace using keycode of 'backspace'
 ##       and some the one of 'backspace_2'. You can get away with

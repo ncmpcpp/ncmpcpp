@@ -21,6 +21,7 @@ ncmpcpp_SOURCES = \
 	lastfm_service.cpp \
 	lyrics.cpp \
 	lyrics_fetcher.cpp \
+	macro_utilities.cpp \
 	media_library.cpp \
 	mpdpp.cpp \
 	mutable_song.cpp \

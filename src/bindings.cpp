@@ -127,6 +127,16 @@ Action *parseActionLine(const std::string &line, F error)
 			else
 				error() << "empty argument passed to push_characters\n";
 		}
+		else if (action_name == "require_screen")
+		{
+			// require screen of given type
+			std::string arg = getEnclosedString(line, '"', '"', 0);
+			ScreenType screen_type = stringToScreenType(arg);
+			if (screen_type != ScreenType::Unknown)
+				result = new RequireScreen(screen_type);
+			else
+				error() << "unknown screen passed to require_screen: '" << arg << "'\n";
+		}
 		else if (action_name == "require_runnable")
 		{
 			// require that given action is runnable
