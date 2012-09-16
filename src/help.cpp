@@ -139,9 +139,9 @@ std::string Help::DisplayKeys(const ActionType at)
 	return result;
 }
 
-void Help::Section(const char *type, const char *title_)
+void Help::Section(const char *type_, const char *title_)
 {
-	w << L"\n  " << NC::fmtBold << ToWString(type) << L" - ";
+	w << L"\n  " << NC::fmtBold << ToWString(type_) << L" - ";
 	w << ToWString(title_) << NC::fmtBoldEnd << L"\n\n";
 }
 
