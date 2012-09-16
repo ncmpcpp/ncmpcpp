@@ -37,6 +37,7 @@ struct SelectedItemsAdder: Screen<NC::Menu<ExecItem<std::string, void()>> *>, Ta
 	virtual void refresh() OVERRIDE;
 	
 	virtual std::wstring title() OVERRIDE;
+	virtual ScreenType type() OVERRIDE { return ScreenType::SelectedItemsAdder; }
 	
 	virtual void update() OVERRIDE { }
 	

@@ -32,6 +32,7 @@ struct PlaylistEditor: Screen<NC::Window *>, Filterable, HasColumns, HasSongs, S
 	virtual void resize() OVERRIDE;
 	
 	virtual std::wstring title() OVERRIDE;
+	virtual ScreenType type() OVERRIDE { return ScreenType::PlaylistEditor; }
 	
 	virtual void refresh() OVERRIDE;
 	virtual void update() OVERRIDE;

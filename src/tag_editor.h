@@ -40,6 +40,7 @@ struct TagEditor: Screen<NC::Window *>, Filterable, HasColumns, HasSongs, Search
 	virtual void switchTo() OVERRIDE;
 	
 	virtual std::wstring title() OVERRIDE;
+	virtual ScreenType type() OVERRIDE { return ScreenType::TagEditor; }
 	
 	virtual void refresh() OVERRIDE;
 	virtual void update() OVERRIDE;

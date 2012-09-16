@@ -18,52 +18,53 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
-#ifndef _SORT_PLAYLIST
-#define _SORT_PLAYLIST
+#include "screen_type.h"
 
-#include "exec_item.h"
-#include "interfaces.h"
-#include "screen.h"
-#include "song.h"
-
-struct SortPlaylistDialog
-: Screen<NC::Menu<ExecItem<std::pair<std::string, MPD::Song::GetFunction>, void()>>>, Tabbable
+ScreenType stringtoStarterScreenType(const std::string &s)
 {
-	SortPlaylistDialog();
-	
-	virtual void switchTo() OVERRIDE;
-	virtual void resize() OVERRIDE;
-	
-	virtual std::wstring title() OVERRIDE;
-	virtual ScreenType type() OVERRIDE { return ScreenType::SortPlaylistDialog; }
-	
-	virtual void update() OVERRIDE { }
-	
-	virtual void enterPressed() OVERRIDE;
-	virtual void spacePressed() OVERRIDE { }
-	virtual void mouseButtonPressed(MEVENT me) OVERRIDE;
-	
-	virtual bool isMergable() OVERRIDE { return false; }
-	
-	// private members
-	void moveSortOrderUp();
-	void moveSortOrderDown();
-	
-protected:
-	virtual bool isLockable() OVERRIDE { return false; }
-	
-private:
-	void moveSortOrderHint() const;
-	void sort() const;
-	void cancel() const;
-	
-	void setDimensions();
-	
-	size_t m_sort_options;
-	size_t m_height;
-	size_t m_width;
-};
+	ScreenType result = ScreenType::Unknown;
+	if (s == "browser")
+		result = ScreenType::Browser;
+	else if (s == "clock")
+		result = ScreenType::Clock;
+	else if (s == "help")
+		result = ScreenType::Help;
+	else if (s == "media_library")
+		result = ScreenType::MediaLibrary;
+	else if (s == "outputs")
+		result = ScreenType::Outputs;
+	else if (s == "playlist")
+		result = ScreenType::Playlist;
+	else if (s == "playlist_editor")
+		result = ScreenType::PlaylistEditor;
+	else if (s == "search_engine")
+		result = ScreenType::SearchEngine;
+	else if (s == "tag_editor")
+		result = ScreenType::TagEditor;
+	else if (s == "visualizer")
+		result = ScreenType::Visualizer;
+	return result;
+}
 
-extern SortPlaylistDialog *mySortPlaylistDialog;
-
-#endif // _SORT_PLAYLIST
+ScreenType stringToScreenType(const std::string &s)
+{
+	ScreenType result = stringtoStarterScreenType(s);
+	if (result == ScreenType::Unknown)
+	{
+		if (s == "last_fm")
+			result = ScreenType::Lastfm;
+		else if (s == "lyrics")
+			result = ScreenType::Lyrics;
+		else if (s == "selected_items_adder")
+			result = ScreenType::SelectedItemsAdder;
+		else if (s == "server_info")
+			result = ScreenType::ServerInfo;
+		else if (s == "song_info")
+			result = ScreenType::SongInfo;
+		else if (s == "sort_playlist_dialog")
+			result = ScreenType::SortPlaylistDialog;
+		else if (s == "tiny_tag_editor")
+			result = ScreenType::TinyTagEditor;
+	}
+	return result;
+}

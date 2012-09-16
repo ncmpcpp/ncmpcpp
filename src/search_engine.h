@@ -82,6 +82,7 @@ struct SearchEngine: Screen<NC::Menu<SEItem>>, Filterable, HasSongs, Searchable,
 	virtual void switchTo() OVERRIDE;
 	
 	virtual std::wstring title() OVERRIDE;
+	virtual ScreenType type() OVERRIDE { return ScreenType::SearchEngine; }
 	
 	virtual void update() OVERRIDE { }
 	

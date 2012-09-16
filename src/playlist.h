@@ -36,6 +36,7 @@ struct Playlist: Screen<NC::Menu<MPD::Song>>, Filterable, HasSongs, Searchable, 
 	virtual void resize() OVERRIDE;
 	
 	virtual std::wstring title() OVERRIDE;
+	virtual ScreenType type() OVERRIDE { return ScreenType::Playlist; }
 	
 	virtual void update() OVERRIDE { }
 	

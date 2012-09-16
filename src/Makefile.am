@@ -30,6 +30,7 @@ ncmpcpp_SOURCES = \
 	playlist_editor.cpp \
 	regexes.cpp \
 	screen.cpp \
+	screen_type.cpp \
 	scrollpad.cpp \
 	search_engine.cpp \
 	sel_items_adder.cpp \
@@ -88,6 +89,7 @@ noinst_HEADERS = \
 	regexes.h \
 	screen.h \
 	screen_switcher.h \
+	screen_type.h \
 	scrollpad.h \
 	search_engine.h \
 	sel_items_adder.h \

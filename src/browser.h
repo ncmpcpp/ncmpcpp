@@ -34,6 +34,7 @@ struct Browser: Screen<NC::Menu<MPD::Item>>, Filterable, HasSongs, Searchable, T
 	virtual void switchTo() OVERRIDE;
 	
 	virtual std::wstring title() OVERRIDE;
+	virtual ScreenType type() OVERRIDE { return ScreenType::Browser; }
 	
 	virtual void update() OVERRIDE { }
 	

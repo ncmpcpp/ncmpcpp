@@ -23,6 +23,7 @@
 
 #include "menu.h"
 #include "scrollpad.h"
+#include "screen_type.h"
 
 void genericMouseButtonPressed(NC::Window &w, MEVENT me);
 void scrollpadMouseButtonPressed(NC::Scrollpad &w, MEVENT me);
@@ -59,6 +60,9 @@ struct BaseScreen
 	
 	/// @return title of the screen
 	virtual std::wstring title() = 0;
+	
+	/// @return type of the screen
+	virtual ScreenType type() = 0;
 	
 	/// If the screen contantly has to update itself
 	/// somehow, it should be called by this function.

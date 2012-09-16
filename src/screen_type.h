@@ -18,52 +18,33 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
-#ifndef _SORT_PLAYLIST
-#define _SORT_PLAYLIST
+#ifndef NCMPCPP_SCREEN_TYPE_H
+#define NCMPCPP_SCREEN_TYPE_H
 
-#include "exec_item.h"
-#include "interfaces.h"
-#include "screen.h"
-#include "song.h"
+#include <string>
 
-struct SortPlaylistDialog
-: Screen<NC::Menu<ExecItem<std::pair<std::string, MPD::Song::GetFunction>, void()>>>, Tabbable
-{
-	SortPlaylistDialog();
-	
-	virtual void switchTo() OVERRIDE;
-	virtual void resize() OVERRIDE;
-	
-	virtual std::wstring title() OVERRIDE;
-	virtual ScreenType type() OVERRIDE { return ScreenType::SortPlaylistDialog; }
-	
-	virtual void update() OVERRIDE { }
-	
-	virtual void enterPressed() OVERRIDE;
-	virtual void spacePressed() OVERRIDE { }
-	virtual void mouseButtonPressed(MEVENT me) OVERRIDE;
-	
-	virtual bool isMergable() OVERRIDE { return false; }
-	
-	// private members
-	void moveSortOrderUp();
-	void moveSortOrderDown();
-	
-protected:
-	virtual bool isLockable() OVERRIDE { return false; }
-	
-private:
-	void moveSortOrderHint() const;
-	void sort() const;
-	void cancel() const;
-	
-	void setDimensions();
-	
-	size_t m_sort_options;
-	size_t m_height;
-	size_t m_width;
+enum class ScreenType {
+	Browser,
+	Clock,
+	Help,
+	Lastfm,
+	Lyrics,
+	MediaLibrary,
+	Outputs,
+	Playlist,
+	PlaylistEditor,
+	SearchEngine,
+	SelectedItemsAdder,
+	ServerInfo,
+	SongInfo,
+	SortPlaylistDialog,
+	TagEditor,
+	TinyTagEditor,
+	Unknown,
+	Visualizer,
 };
 
-extern SortPlaylistDialog *mySortPlaylistDialog;
+ScreenType stringtoStarterScreenType(const std::string &s);
+ScreenType stringToScreenType(const std::string &s);
 
-#endif // _SORT_PLAYLIST
+#endif // NCMPCPP_SCREEN_TYPE_H

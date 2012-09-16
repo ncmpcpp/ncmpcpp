@@ -39,6 +39,7 @@ struct Outputs: Screen<NC::Menu<MPD::Output>>, Tabbable
 	virtual void resize() OVERRIDE;
 	
 	virtual std::wstring title() OVERRIDE;
+	virtual ScreenType type() OVERRIDE { return ScreenType::Outputs; }
 	
 	virtual void update() OVERRIDE { }
 	

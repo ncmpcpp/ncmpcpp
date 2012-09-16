@@ -38,6 +38,7 @@ struct Lyrics: Screen<NC::Scrollpad>, Tabbable
 	virtual void switchTo() OVERRIDE;
 	
 	virtual std::wstring title() OVERRIDE;
+	virtual ScreenType type() OVERRIDE { return ScreenType::Lyrics; }
 	
 	virtual void update() OVERRIDE;
 	

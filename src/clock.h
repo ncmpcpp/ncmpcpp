@@ -37,6 +37,7 @@ struct Clock: Screen<NC::Window>, Tabbable
 	virtual void switchTo() OVERRIDE;
 	
 	virtual std::wstring title() OVERRIDE;
+	virtual ScreenType type() OVERRIDE { return ScreenType::Clock; }
 	
 	virtual void update() OVERRIDE;
 	virtual void scroll(NC::Where) OVERRIDE { }
