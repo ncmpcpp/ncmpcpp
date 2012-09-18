@@ -229,11 +229,6 @@ public:
 	/// @param pos given position of item to be deleted
 	void deleteItem(size_t pos);
 	
-	/// Swaps the content of two items
-	/// @param one position of first item
-	/// @param two position of second item
-	void Swap(size_t one, size_t two);
-	
 	/// Moves the highlighted position to the given line of window
 	/// @param y Y position of menu window to be highlighted
 	/// @return true if the position is reachable, false otherwise
@@ -586,11 +581,6 @@ template <typename T> void Menu<T>::deleteItem(size_t pos)
 	assert(pos < m_options.size());
 	delete m_options[pos];
 	m_options.erase(m_options.begin()+pos);
-}
-
-template <typename T> void Menu<T>::Swap(size_t one, size_t two)
-{
-	std::swap(m_options.at(one), m_options.at(two));
 }
 
 template <typename T> bool Menu<T>::Goto(size_t y)

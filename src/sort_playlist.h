@@ -59,7 +59,6 @@ private:
 	
 	void setDimensions();
 	
-	size_t m_sort_options;
 	size_t m_height;
 	size_t m_width;
 };

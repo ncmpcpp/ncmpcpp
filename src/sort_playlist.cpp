@@ -76,7 +76,6 @@ SortPlaylistDialog::SortPlaylistDialog()
 	w.addItem(Entry(std::make_pair("Filename", &MPD::Song::getURI),
 		std::bind(&Self::moveSortOrderHint, this)
 	));
-	m_sort_options = w.size();
 	w.addSeparator();
 	w.addItem(Entry(std::make_pair("Sort", static_cast<MPD::Song::GetFunction>(0)),
 		std::bind(&Self::sort, this)
@@ -129,20 +128,20 @@ void SortPlaylistDialog::mouseButtonPressed(MEVENT me)
 
 void SortPlaylistDialog::moveSortOrderDown()
 {
-	size_t pos = w.choice();
-	if (pos < m_sort_options-1)
+	auto cur = w.currentVI();
+	if ((cur+1)->item().second)
 	{
-		w.Swap(pos, pos+1);
+		std::iter_swap(cur, cur+1);
 		w.scroll(NC::wDown);
 	}
 }
 
 void SortPlaylistDialog::moveSortOrderUp()
 {
-	size_t pos = w.choice();
-	if (pos > 0 && pos < m_sort_options)
+	auto cur = w.currentVI();
+	if (cur > w.beginV() && cur->item().second)
 	{
-		w.Swap(pos, pos-1);
+		std::iter_swap(cur, cur-1);
 		w.scroll(NC::wUp);
 	}
 }
@@ -175,10 +174,10 @@ void SortPlaylistDialog::sort() const
 	LocaleStringComparison cmp(std::locale(), Config.ignore_leading_the);
 	std::function<void(Iterator, Iterator)> iter_swap, quick_sort;
 	auto song_cmp = [this, &cmp](const MPD::Song &a, const MPD::Song &b) -> bool {
-		for (size_t i = 0; i < m_sort_options; ++i)
+		for (auto it = w.beginV();  it->item().second; ++it)
 		{
-			int res = cmp(a.getTags(w[i].value().item().second, Config.tags_separator),
-			              b.getTags(w[i].value().item().second, Config.tags_separator));
+			int res = cmp(a.getTags(it->item().second, Config.tags_separator),
+			              b.getTags(it->item().second, Config.tags_separator));
 			if (res != 0)
 				return res < 0;
 		}
