@@ -1200,7 +1200,7 @@ void TogglePlayingSongCentering::Run()
 	Config.autocenter_mode = !Config.autocenter_mode;
 	Statusbar::msg("Centering playing song: %s", Config.autocenter_mode ? "On" : "Off");
 	if (Config.autocenter_mode && Mpd.isPlaying() && !myPlaylist->main().isFiltered())
-		myPlaylist->main().highlight(Mpd.GetCurrentlyPlayingSongPos());
+		myPlaylist->main().highlight(Mpd.GetCurrentSongPos());
 }
 
 void UpdateDatabase::Run()
@@ -1226,7 +1226,7 @@ bool JumpToPlayingSong::canBeRun() const
 void JumpToPlayingSong::Run()
 {
 	if (myScreen == myPlaylist)
-		myPlaylist->main().highlight(Mpd.GetCurrentlyPlayingSongPos());
+		myPlaylist->main().highlight(Mpd.GetCurrentSongPos());
 	else if (myScreen == myBrowser)
 	{
 		myBrowser->LocateSong(myPlaylist->nowPlayingSong());

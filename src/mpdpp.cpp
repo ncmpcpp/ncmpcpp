@@ -551,12 +551,12 @@ void Connection::Seek(unsigned where)
 	if (!isCommandsListEnabled)
 	{
 		GoBusy();
-		mpd_run_seek_pos(itsConnection, Mpd.GetCurrentlyPlayingSongPos(), where);
+		mpd_run_seek_pos(itsConnection, Mpd.GetCurrentSongPos(), where);
 	}
 	else
 	{
 		assert(!isIdle);
-		mpd_send_seek_pos(itsConnection, Mpd.GetCurrentlyPlayingSongPos(), where);
+		mpd_send_seek_pos(itsConnection, Mpd.GetCurrentSongPos(), where);
 	}
 }
 
@@ -693,11 +693,6 @@ Song Connection::GetSong(const std::string &path)
 int Connection::GetCurrentSongPos() const
 {
 	return itsCurrentStatus ? mpd_status_get_song_pos(itsCurrentStatus) : -1;
-}
-
-int Connection::GetCurrentlyPlayingSongPos() const
-{
-	return isPlaying() ? GetCurrentSongPos() : -1;
 }
 
 Song Connection::GetCurrentlyPlayingSong()

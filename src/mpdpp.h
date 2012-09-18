@@ -173,7 +173,6 @@ public:
 	const std::string &GetErrorMessage() const { return itsErrorMessage; }
 	
 	Song GetCurrentlyPlayingSong();
-	int GetCurrentlyPlayingSongPos() const;
 	int GetCurrentSongPos() const;
 	Song GetSong(const std::string &);
 	SongList GetPlaylistContent(const std::string &);

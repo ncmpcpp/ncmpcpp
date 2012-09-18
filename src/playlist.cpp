@@ -258,7 +258,7 @@ std::string Playlist::TotalLength()
 	if (Config.playlist_show_remaining_time && ReloadRemaining && !w.isFiltered())
 	{
 		itsRemainingTime = 0;
-		for (size_t i = Mpd.GetCurrentlyPlayingSongPos(); i < w.size(); ++i)
+		for (size_t i = Mpd.GetCurrentSongPos(); i < w.size(); ++i)
 			itsRemainingTime += w[i].value().getDuration();
 		ReloadRemaining = false;
 	}

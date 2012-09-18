@@ -95,8 +95,8 @@ void setProperties(NC::Menu<T> &menu, const MPD::Song &s, const ProxySongList &p
 	discard_colors = Config.discard_colors_if_item_is_selected && is_selected;
 	
 	int song_pos = menu.isFiltered() ? s.getPosition() : drawn_pos;
-	is_now_playing = &menu == myPlaylist->activeWindow()
-	              && song_pos == Mpd.GetCurrentlyPlayingSongPos();
+	is_now_playing = Mpd.isPlaying() && myPlaylist->isActiveWindow(menu)
+	              && song_pos == Mpd.GetCurrentSongPos();
 	if (is_now_playing)
 		menu << Config.now_playing_prefix;
 }
