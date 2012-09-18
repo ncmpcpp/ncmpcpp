@@ -223,27 +223,12 @@ bool Playlist::isFiltered()
 
 void Playlist::Reverse()
 {
-	if (isFiltered())
-		return;
 	Statusbar::msg("Reversing playlist order...");
-	size_t beginning = -1, end = -1;
-	for (size_t i = 0; i < w.size(); ++i)
-	{
-		if (w.at(i).isSelected())
-		{
-			if (beginning == size_t(-1))
-				beginning = i;
-			end = i;
-		}
-	}
-	if (beginning == size_t(-1)) // no selected items
-	{
-		beginning = 0;
-		end = w.size();
-	}
+	auto begin = w.begin(), end = w.end();
+	std::tie(begin, end) = getSelectedRange(begin, end);
 	Mpd.StartCommandsList();
-	for (size_t i = beginning, j = end-1; i < (beginning+end)/2; ++i, --j)
-		Mpd.Swap(i, j);
+	for (--end; begin < end; ++begin, --end)
+		Mpd.Swap(begin->value().getPosition(), end->value().getPosition());
 	if (Mpd.CommitCommandsList())
 		 Statusbar::msg("Playlist reversed");
 }

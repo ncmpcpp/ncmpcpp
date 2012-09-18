@@ -155,14 +155,7 @@ void SortPlaylistDialog::sort() const
 {
 	auto &pl = myPlaylist->main();
 	auto begin = pl.begin(), end = pl.end();
-	// if songs are selected, sort range from first selected to last selected
-	if (hasSelected(pl.begin(), pl.end()))
-	{
-		while (!begin->isSelected())
-			++begin;
-		while (!(end-1)->isSelected())
-			--end;
-	}
+	std::tie(begin, end) = getSelectedRange(begin, end);
 	
 	size_t start_pos = begin - pl.begin();
 	MPD::SongList playlist;

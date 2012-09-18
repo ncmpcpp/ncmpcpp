@@ -75,6 +75,21 @@ std::vector<Iterator> getSelected(Iterator first, Iterator last)
 	return result;
 }
 
+/// @return selected range within given range or original range if no item is selected
+template <typename Iterator>
+std::pair<Iterator, Iterator> getSelectedRange(Iterator first, Iterator second)
+{
+	auto result = std::make_pair(first, second);
+	if (hasSelected(first, second))
+	{
+		while (!result.first->isSelected())
+			++result.first;
+		while (!(result.second-1)->isSelected())
+			--result.second;
+	}
+	return result;
+}
+
 template <typename T>
 void selectCurrentIfNoneSelected(NC::Menu<T> &m)
 {
