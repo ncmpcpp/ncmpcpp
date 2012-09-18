@@ -93,8 +93,7 @@ void Status::trace()
 	applyToVisibleWindows(&BaseScreen::update);
 	
 	if (isVisible(myPlaylist)
-	&&  Timer.tv_sec == myPlaylist->Timer().tv_sec+Config.playlist_disable_highlight_delay
-	&&  Timer.tv_usec > myPlaylist->Timer().tv_usec
+	&&  Timer.tv_sec == myPlaylist->Timer()+Config.playlist_disable_highlight_delay
 	&&  myPlaylist->main().isHighlighted()
 	&&  Config.playlist_disable_highlight_delay)
 	{

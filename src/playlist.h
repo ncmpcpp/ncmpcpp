@@ -72,7 +72,7 @@ struct Playlist: Screen<NC::Menu<MPD::Song>>, Filterable, HasSongs, Searchable, 
 	
 	void EnableHighlighting();
 	void UpdateTimer();
-	timeval Timer() const { return itsTimer; }
+	time_t Timer() const { return itsTimer; }
 	
 	void PlayNewlyAddedSongs();
 	
@@ -99,7 +99,7 @@ private:
 	size_t itsRemainingTime;
 	size_t itsScrollBegin;
 	
-	timeval itsTimer;
+	time_t itsTimer;
 };
 
 extern Playlist *myPlaylist;

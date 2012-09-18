@@ -256,7 +256,7 @@ void Playlist::EnableHighlighting()
 
 void Playlist::UpdateTimer()
 {
-	itsTimer = Global::Timer;
+	std::time(&itsTimer);
 }
 
 std::string Playlist::TotalLength()
