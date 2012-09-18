@@ -579,7 +579,6 @@ template <typename T> void Menu<T>::deleteItem(size_t pos)
 {
 	assert(m_options_ptr != &m_filtered_options);
 	assert(pos < m_options.size());
-	delete m_options[pos];
 	m_options.erase(m_options.begin()+pos);
 }
 
