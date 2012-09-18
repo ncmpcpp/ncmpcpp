@@ -239,10 +239,6 @@ public:
 	/// @return true if the position is reachable, false otherwise
 	bool Goto(size_t y);
 	
-	/// Checks whether list contains selected positions
-	/// @return true if it contains them, false otherwise
-	bool hasSelected() const;
-	
 	/// Highlights given position
 	/// @param pos position to be highlighted
 	void highlight(size_t pos);
@@ -772,14 +768,6 @@ template <typename T> void Menu<T>::clear()
 	m_options.clear();
 	m_found_positions.clear();
 	m_options_ptr = &m_options;
-}
-
-template <typename T> bool Menu<T>::hasSelected() const
-{
-	for (auto it = begin(); it != end(); ++it)
-		if (it->isSelected())
-			return true;
-	return false;
 }
 
 template <typename T> void Menu<T>::highlight(size_t pos)

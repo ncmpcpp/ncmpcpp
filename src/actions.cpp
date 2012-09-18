@@ -797,7 +797,7 @@ void Delete::Run()
 			return;
 		
 		std::string question;
-		if (myBrowser->main().hasSelected())
+		if (hasSelected(myBrowser->main().begin(), myBrowser->main().end()))
 			question = "Delete selected items?";
 		else
 		{
@@ -846,7 +846,7 @@ void Delete::Run()
 		if (myScreen->isActiveWindow(myPlaylistEditor->Playlists))
 		{
 			std::string question;
-			if (myPlaylistEditor->Playlists.hasSelected())
+			if (hasSelected(myPlaylistEditor->Playlists.begin(), myPlaylistEditor->Playlists.end()))
 				question = "Delete selected playlists?";
 			else
 			{

@@ -20,6 +20,7 @@
 
 #include "display.h"
 #include "global.h"
+#include "helpers.h"
 #include "playlist.h"
 #include "settings.h"
 #include "sort_playlist.h"
@@ -156,7 +157,7 @@ void SortPlaylistDialog::sort() const
 	auto &pl = myPlaylist->main();
 	auto begin = pl.begin(), end = pl.end();
 	// if songs are selected, sort range from first selected to last selected
-	if (pl.hasSelected())
+	if (hasSelected(pl.begin(), pl.end()))
 	{
 		while (!begin->isSelected())
 			++begin;

@@ -451,7 +451,8 @@ void TagEditor::enterPressed()
 		return;
 	
 	EditedSongs.clear();
-	if (Tags->hasSelected()) // if there are selected songs, perform operations only on them
+	// if there are selected songs, perform operations only on them
+	if (hasSelected(Tags->begin(), Tags->end()))
 	{
 		for (auto it = Tags->begin(); it != Tags->end(); ++it)
 			if (it->isSelected())
