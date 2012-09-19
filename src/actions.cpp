@@ -1342,7 +1342,8 @@ void SetCrossfade::Run()
 bool EditSong::canBeRun() const
 {
 #	ifdef HAVE_TAGLIB_H
-	return isMPDMusicDirSet() && currentSong(myScreen);
+	return currentSong(myScreen)
+	    && isMPDMusicDirSet();
 #	else
 	return false;
 #	endif // HAVE_TAGLIB_H
@@ -1360,9 +1361,9 @@ void EditSong::Run()
 bool EditLibraryTag::canBeRun() const
 {
 #	ifdef HAVE_TAGLIB_H
-	return isMPDMusicDirSet()
-	   &&  myScreen->isActiveWindow(myLibrary->Tags)
-	   && !myLibrary->Tags.empty();
+	return myScreen->isActiveWindow(myLibrary->Tags)
+	    && !myLibrary->Tags.empty()
+	    && isMPDMusicDirSet();
 #	else
 	return false;
 #	endif // HAVE_TAGLIB_H
@@ -1412,9 +1413,9 @@ void EditLibraryTag::Run()
 bool EditLibraryAlbum::canBeRun() const
 {
 #	ifdef HAVE_TAGLIB_H
-	return isMPDMusicDirSet()
-	    && myScreen->isActiveWindow(myLibrary->Albums)
-	    && !myLibrary->Albums.empty();
+	return myScreen->isActiveWindow(myLibrary->Albums)
+	    && !myLibrary->Albums.empty()
+		&& isMPDMusicDirSet();
 #	else
 	return false;
 #	endif // HAVE_TAGLIB_H
@@ -1465,16 +1466,15 @@ void EditLibraryAlbum::Run()
 
 bool EditDirectoryName::canBeRun() const
 {
-	return   isMPDMusicDirSet()
-	  &&     ((myScreen == myBrowser
+	return  ((myScreen == myBrowser
 	      && !myBrowser->main().empty()
-		  && myBrowser->main().current().value().type == MPD::itDirectory)
+	      && myBrowser->main().current().value().type == MPD::itDirectory)
 #	ifdef HAVE_TAGLIB_H
 	    ||   (myScreen->activeWindow() == myTagEditor->Dirs
 	      && !myTagEditor->Dirs->empty()
 	      && myTagEditor->Dirs->choice() > 0)
 #	endif // HAVE_TAGLIB_H
-	);
+	) &&     isMPDMusicDirSet();
 }
 
 void EditDirectoryName::Run()
@@ -1660,7 +1660,8 @@ void ToggleScreenLock::Run()
 bool JumpToTagEditor::canBeRun() const
 {
 #	ifdef HAVE_TAGLIB_H
-	return isMPDMusicDirSet() && currentSong(myScreen);
+	return currentSong(myScreen)
+	    && isMPDMusicDirSet();
 #	else
 	return false;
 #	endif // HAVE_TAGLIB_H
