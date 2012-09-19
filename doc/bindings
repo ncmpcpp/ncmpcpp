@@ -101,6 +101,24 @@
 ##       binding once if all your terminal emulators use the same
 ##       value.
 ##
+## Note: There is a difference between:
+##
+##         def_key "key"
+##           action1
+##
+##         def_key "key"
+##           action2
+##
+##       and
+##
+##         def_key "key"
+##           action1
+##           action2
+##
+##      First one binds two single actions to the same key whilst
+##      second one defines a chain of actions. The behavior of
+##      these two is different and is described in (1) and (2).
+##
 ## Note: Function def_key accepts non-ascii characters.
 ##
 #
