@@ -453,16 +453,6 @@
 #
 #search_engine_default_search_mode = "1"
 #
-##
-## Note: Below variables can allow you to physically
-## remove files and directories from your hdd using
-## ncmpcpp's browser screen.
-##
-#
-#allow_physical_files_deletion = "no"
-#
-#allow_physical_directories_deletion = "no"
-#
 #external_editor = ""
 #
 #use_console_editor = "no" (set to yes, if your editor is console app)

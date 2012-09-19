@@ -171,8 +171,6 @@ struct Configuration
 	bool block_search_constraints_change;
 	bool use_console_editor;
 	bool use_cyclic_scrolling;
-	bool allow_physical_files_deletion;
-	bool allow_physical_directories_deletion;
 	bool ask_before_clearing_main_playlist;
 	bool mouse_support;
 	bool mouse_list_scroll_whole_page;

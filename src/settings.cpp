@@ -233,8 +233,6 @@ void Configuration::SetDefaults()
 	block_search_constraints_change = true;
 	use_console_editor = false;
 	use_cyclic_scrolling = false;
-	allow_physical_files_deletion = false;
-	allow_physical_directories_deletion = false;
 	ask_before_clearing_main_playlist = false;
 	mouse_support = true;
 	mouse_list_scroll_whole_page = true;
@@ -752,14 +750,6 @@ void Configuration::Read()
 			else if (name == "block_search_constraints_change_if_items_found")
 			{
 				block_search_constraints_change = v == "yes";
-			}
-			else if (name == "allow_physical_files_deletion")
-			{
-				allow_physical_files_deletion = v == "yes";
-			}
-			else if (name == "allow_physical_directories_deletion")
-			{
-				allow_physical_directories_deletion = v == "yes";
 			}
 			else if (name == "ask_before_clearing_main_playlist")
 			{

@@ -810,7 +810,7 @@ bool DeleteBrowserItems::canBeRun() const
 {
 	return myScreen == myBrowser
 	    && !myBrowser->main().empty()
-		&& isMPDMusicDirSet();
+	    && isMPDMusicDirSet();
 }
 
 void DeleteBrowserItems::Run()
