@@ -781,101 +781,116 @@ void VolumeDown::Run()
 	Mpd.SetVolume(Mpd.GetVolume()-1);
 }
 
-void Delete::Run()
+bool DeletePlaylistItems::canBeRun() const
 {
-	if (myScreen == myPlaylist && !myPlaylist->main().empty())
+	return (myScreen == myPlaylist && !myPlaylist->main().empty())
+	    || (myScreen->isActiveWindow(myPlaylistEditor->Content) && !myPlaylistEditor->Content.empty());
+}
+
+void DeletePlaylistItems::Run()
+{
+	if (myScreen == myPlaylist)
 	{
 		Statusbar::msg("Deleting items...");
 		auto delete_fun = std::bind(&MPD::Connection::Delete, _1, _2);
 		if (deleteSelectedSongs(myPlaylist->main(), delete_fun))
 			Statusbar::msg("Item(s) deleted");
 	}
-#	ifndef WIN32
-	else if (myScreen == myBrowser && !myBrowser->main().empty())
+	else if (myScreen->isActiveWindow(myPlaylistEditor->Content))
 	{
-		if (!myBrowser->isLocal() && !isMPDMusicDirSet())
-			return;
-		
-		std::string question;
-		if (hasSelected(myBrowser->main().begin(), myBrowser->main().end()))
-			question = "Delete selected items?";
-		else
-		{
-			MPD::Item &item = myBrowser->main().current().value();
-			std::string name = item.type == MPD::itSong ? item.song->getName() : item.name;
-			question = "Delete ";
-			question += itemTypeToString(item.type);
-			question += " \"";
-			question += ToString(wideShorten(ToWString(name), COLS-question.size()-10));
-			question += "\"?";
-		}
-		bool yes = AskYesNoQuestion(question, Status::trace);
-		if (yes)
-		{
-			bool success = true;
-			auto list = getSelectedOrCurrent(myBrowser->main().begin(), myBrowser->main().end(), myBrowser->main().currentI());
-			for (auto it = list.begin(); it != list.end(); ++it)
-			{
-				const MPD::Item &i = (*it)->value();
-				std::string name = i.type == MPD::itSong ? i.song->getName() : i.name;
-				if (myBrowser->deleteItem(i))
-				{
-					const char msg[] = "\"%ls\" deleted";
-					Statusbar::msg(msg, wideShorten(ToWString(name), COLS-const_strlen(msg)).c_str());
-				}
-				else
-				{
-					const char msg[] = "Couldn't delete \"%ls\": %s";
-					Statusbar::msg(msg, wideShorten(ToWString(name), COLS-const_strlen(msg)-25).c_str(), strerror(errno));
-					success = false;
-					break;
-				}
-			}
-			if (success)
-			{
-				if (!myBrowser->isLocal())
-					Mpd.UpdateDirectory(myBrowser->CurrentDir());
-			}
-		}
-		else
-			Statusbar::msg("Aborted");
+		std::string playlist = myPlaylistEditor->Playlists.current().value();
+		auto delete_fun = std::bind(&MPD::Connection::PlaylistDelete, _1, playlist, _2);
+		Statusbar::msg("Deleting items...");
+		if (deleteSelectedSongs(myPlaylistEditor->Content, delete_fun))
+			Statusbar::msg("Item(s) deleted");
 	}
-#	endif // !WIN32
-	else if (myScreen == myPlaylistEditor && !myPlaylistEditor->Content.empty())
+}
+
+bool DeleteBrowserItems::canBeRun() const
+{
+	return myScreen == myBrowser
+	    && !myBrowser->main().empty()
+		&& isMPDMusicDirSet();
+}
+
+void DeleteBrowserItems::Run()
+{
+	std::string question;
+	if (hasSelected(myBrowser->main().begin(), myBrowser->main().end()))
+		question = "Delete selected items?";
+	else
 	{
-		if (myScreen->isActiveWindow(myPlaylistEditor->Playlists))
+		MPD::Item &item = myBrowser->main().current().value();
+		std::string name = item.type == MPD::itSong ? item.song->getName() : item.name;
+		question = "Delete ";
+		question += itemTypeToString(item.type);
+		question += " \"";
+		question += ToString(wideShorten(ToWString(name), COLS-question.size()-10));
+		question += "\"?";
+	}
+	bool yes = AskYesNoQuestion(question, Status::trace);
+	if (yes)
+	{
+		bool success = true;
+		auto list = getSelectedOrCurrent(myBrowser->main().begin(), myBrowser->main().end(), myBrowser->main().currentI());
+		for (auto it = list.begin(); it != list.end(); ++it)
 		{
-			std::string question;
-			if (hasSelected(myPlaylistEditor->Playlists.begin(), myPlaylistEditor->Playlists.end()))
-				question = "Delete selected playlists?";
+			const MPD::Item &i = (*it)->value();
+			std::string name = i.type == MPD::itSong ? i.song->getName() : i.name;
+			if (myBrowser->deleteItem(i))
+			{
+				const char msg[] = "\"%ls\" deleted";
+				Statusbar::msg(msg, wideShorten(ToWString(name), COLS-const_strlen(msg)).c_str());
+			}
 			else
 			{
-				question = "Delete playlist \"";
-				question += ToString(wideShorten(ToWString(myPlaylistEditor->Playlists.current().value()), COLS-question.size()-10));
-				question += "\"?";
+				const char msg[] = "Couldn't delete \"%ls\": %s";
+				Statusbar::msg(msg, wideShorten(ToWString(name), COLS-const_strlen(msg)-25).c_str(), strerror(errno));
+				success = false;
+				break;
 			}
-			bool yes = AskYesNoQuestion(question, Status::trace);
-			if (yes)
-			{
-				auto list = getSelectedOrCurrent(myPlaylistEditor->Playlists.begin(), myPlaylistEditor->Playlists.end(), myPlaylistEditor->Playlists.currentI());
-				Mpd.StartCommandsList();
-				for (auto it = list.begin(); it != list.end(); ++it)
-					Mpd.DeletePlaylist((*it)->value());
-				if (Mpd.CommitCommandsList())
-					Statusbar::msg("Playlist%s deleted", list.size() == 1 ? "" : "s");
-			}
-			else
-				Statusbar::msg("Aborted");
 		}
-		else if (myScreen->isActiveWindow(myPlaylistEditor->Content))
+		if (success)
 		{
-			std::string playlist = myPlaylistEditor->Playlists.current().value();
-			auto delete_fun = std::bind(&MPD::Connection::PlaylistDelete, _1, playlist, _2);
-			Statusbar::msg("Deleting items...");
-			if (deleteSelectedSongs(myPlaylistEditor->Content, delete_fun))
-				Statusbar::msg("Item(s) deleted");
+			if (myBrowser->isLocal())
+				myBrowser->GetDirectory(myBrowser->CurrentDir());
+			else
+				Mpd.UpdateDirectory(myBrowser->CurrentDir());
 		}
 	}
+	else
+		Statusbar::msg("Aborted");
+}
+
+bool DeleteStoredPlaylist::canBeRun() const
+{
+	return myScreen->isActiveWindow(myPlaylistEditor->Playlists)
+	    && myPlaylistEditor->Playlists.empty();
+}
+
+void DeleteStoredPlaylist::Run()
+{
+	std::string question;
+	if (hasSelected(myPlaylistEditor->Playlists.begin(), myPlaylistEditor->Playlists.end()))
+		question = "Delete selected playlists?";
+	else
+	{
+		question = "Delete playlist \"";
+		question += ToString(wideShorten(ToWString(myPlaylistEditor->Playlists.current().value()), COLS-question.size()-10));
+		question += "\"?";
+	}
+	bool yes = AskYesNoQuestion(question, Status::trace);
+	if (yes)
+	{
+		auto list = getSelectedOrCurrent(myPlaylistEditor->Playlists.begin(), myPlaylistEditor->Playlists.end(), myPlaylistEditor->Playlists.currentI());
+		Mpd.StartCommandsList();
+		for (auto it = list.begin(); it != list.end(); ++it)
+			Mpd.DeletePlaylist((*it)->value());
+		if (Mpd.CommitCommandsList())
+			Statusbar::msg("Playlist%s deleted", list.size() == 1 ? "" : "s");
+	}
+	else
+		Statusbar::msg("Aborted");
 }
 
 void ReplaySong::Run()
@@ -2552,7 +2567,9 @@ void populateActions()
 	insertAction(new SlaveScreen());
 	insertAction(new VolumeUp());
 	insertAction(new VolumeDown());
-	insertAction(new Delete());
+	insertAction(new DeletePlaylistItems());
+	insertAction(new DeleteStoredPlaylist());
+	insertAction(new DeleteBrowserItems());
 	insertAction(new ReplaySong());
 	insertAction(new PreviousSong());
 	insertAction(new NextSong());

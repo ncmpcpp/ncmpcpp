@@ -268,7 +268,7 @@ void Help::GetKeybindings()
 	
 	KeysSection("Playlist");
 	KeyDesc(aPressEnter, "Play selected item");
-	KeyDesc(aDelete, "Delete selected item(s) from playlist");
+	KeyDesc(aDeletePlaylistItems, "Delete selected item(s) from playlist");
 	KeyDesc(aClearMainPlaylist, "Clear playlist");
 	KeyDesc(aCropMainPlaylist, "Clear playlist except selected item(s)");
 	KeyDesc(aSetSelectedItemsPriority, "Set priority of selected items");
@@ -298,7 +298,7 @@ void Help::GetKeybindings()
 	KeyDesc(aToggleBrowserSortMode, "Toggle sort mode");
 	KeyDesc(aJumpToPlayingSong, "Locate playing song");
 	KeyDesc(aJumpToParentDirectory, "Jump to parent directory");
-	KeyDesc(aDelete, "Delete item");
+	KeyDesc(aDeleteBrowserItems, "Delete selected items from disk");
 	KeyDesc(aJumpToPlaylistEditor, "Jump to playlist editor (playlists only)");
 	
 	KeysSection("Search engine");
@@ -333,6 +333,8 @@ void Help::GetKeybindings()
 	KeyDesc(aEditPlaylistName, "Edit playlist name");
 	KeyDesc(aMoveSelectedItemsUp, "Move selected item(s) up");
 	KeyDesc(aMoveSelectedItemsDown, "Move selected item(s) down");
+	KeyDesc(aDeleteStoredPlaylist, "Delete selected playlists (left column)");
+	KeyDesc(aDeletePlaylistItems, "Delete selected item(s) from playlist (right column)");
 	KeyDesc(aClearPlaylist, "Clear playlist");
 	KeyDesc(aCropPlaylist, "Clear playlist except selected items");
 	

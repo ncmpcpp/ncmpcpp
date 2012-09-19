@@ -27,6 +27,7 @@
 #include "browser.h"
 #include "charset.h"
 #include "display.h"
+#include "error.h"
 #include "global.h"
 #include "helpers.h"
 #include "playlist.h"
@@ -555,9 +556,8 @@ void Browser::ChangeBrowseMode()
 
 bool Browser::deleteItem(const MPD::Item &item)
 {
-	// parent dir
-	if (item.type == itDirectory && item.name == "..")
-		return false;
+	if (isParentDirectory((item)))
+		FatalError("Parent directory passed to Browser::deleteItem");
 	
 	// playlist created by mpd
 	if (!isLocal() && item.type == itPlaylist && CurrentDir() == "/")
@@ -571,7 +571,7 @@ bool Browser::deleteItem(const MPD::Item &item)
 	if (item.type == itDirectory)
 		ClearDirectory(path);
 	
-	return remove(path.c_str()) == 0;
+	return std::remove(path.c_str()) == 0;
 }
 #endif // !WIN32
 

@@ -144,7 +144,10 @@
 #  press_enter
 #
 #def_key "delete"
-#  delete
+#  delete_playlist_items
+#
+#def_key "delete"
+#  delete_stored_playlist
 #
 #def_key "right"
 #  next_column

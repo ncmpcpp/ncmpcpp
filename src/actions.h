@@ -31,7 +31,7 @@ enum ActionType
 	aDummy, aMouseEvent, aScrollUp, aScrollDown, aScrollUpArtist, aScrollUpAlbum, aScrollDownArtist,
 	aScrollDownAlbum, aPageUp, aPageDown, aMoveHome, aMoveEnd, aToggleInterface, aJumpToParentDirectory,
 	aPressEnter, aPressSpace, aPreviousColumn, aNextColumn, aMasterScreen, aSlaveScreen, aVolumeUp,
-	aVolumeDown, aDelete, aReplaySong, aPrevious, aNext, aPause, aStop, aSavePlaylist,
+	aVolumeDown, aDeletePlaylistItems, aDeleteStoredPlaylist, aDeleteBrowserItems, aReplaySong, aPrevious, aNext, aPause, aStop, aSavePlaylist,
 	aMoveSortOrderUp, aMoveSortOrderDown, aMoveSelectedItemsUp, aMoveSelectedItemsDown,
 	aMoveSelectedItemsTo, aAdd, aSeekForward, aSeekBackward, aToggleDisplayMode, aToggleSeparatorsBetweenAlbums,
 	aToggleLyricsFetcher, aToggleFetchingLyricsInBackground, aTogglePlayingSongCentering, aUpdateDatabase,
@@ -294,11 +294,30 @@ protected:
 	virtual void Run();
 };
 
-struct Delete : public Action
+struct DeletePlaylistItems : public Action
 {
-	Delete() : Action(aDelete, "delete") { }
+	DeletePlaylistItems() : Action(aDeletePlaylistItems, "delete_playlist_items") { }
 	
 protected:
+	virtual bool canBeRun() const;
+	virtual void Run();
+};
+
+struct DeleteStoredPlaylist : public Action
+{
+	DeleteStoredPlaylist() : Action(aDeleteStoredPlaylist, "delete_stored_playlist") { }
+	
+protected:
+	virtual bool canBeRun() const;
+	virtual void Run();
+};
+
+struct DeleteBrowserItems : public Action
+{
+	DeleteBrowserItems() : Action(aDeleteBrowserItems, "delete_browser_items") { }
+	
+protected:
+	virtual bool canBeRun() const;
 	virtual void Run();
 };
 

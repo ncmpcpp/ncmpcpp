@@ -256,6 +256,11 @@ bool BindingsConfiguration::read(const std::string &file)
 				break;
 			}
 		}
+		else
+		{
+			error() << "invalid line: '" << line << "'\n";
+			break;
+		}
 	}
 	if (key_def_in_progress)
 		bind_key_def();
@@ -293,7 +298,10 @@ void BindingsConfiguration::generateDefaults()
 	if (notBound(k = stringToKey("enter")))
 		bind(k, aPressEnter);
 	if (notBound(k = stringToKey("delete")))
-		bind(k, aDelete);
+	{
+		bind(k, aDeletePlaylistItems);
+		bind(k, aDeleteStoredPlaylist);
+	}
 	if (notBound(k = stringToKey("right")))
 	{
 		bind(k, aNextColumn);
