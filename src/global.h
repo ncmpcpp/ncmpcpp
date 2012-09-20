@@ -35,7 +35,7 @@ extern BaseScreen *myScreen;
 extern BaseScreen *myLockedScreen;
 
 // points at inactive screen, if locking was enabled and two screens are displayed
-extern BaseScreen *myInactiveScreen; 
+extern BaseScreen *myInactiveScreen;
 
 // header window (above main window)
 extern NC::Window *wHeader;

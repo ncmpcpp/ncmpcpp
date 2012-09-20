@@ -43,7 +43,7 @@ enum ActionType
 	aCropMainPlaylist, aCropPlaylist, aClearMainPlaylist, aClearPlaylist, aSortPlaylist, aReversePlaylist,
 	aApplyFilter, aFind, aFindItemForward, aFindItemBackward, aNextFoundItem,
 	aPreviousFoundItem, aToggleFindMode, aToggleReplayGainMode, aToggleSpaceMode, aToggleAddMode,
-	aToggleMouse, aToggleBitrateVisibility, aAddRandomItems, aToggleBrowserSortMode, aToggleLibraryTagType,
+	aToggleMouse, aToggleBitrateVisibility, aAddRandomItems, aToggleBrowserSortMode, aToggleLibraryTagType, aToggleMediaLibrarySortMode,
 	aRefetchLyrics, aRefetchArtistInfo, aSetSelectedItemsPriority, aFilterPlaylistOnPriorities,
 	aShowSongInfo, aShowArtistInfo,
 	aShowLyrics, aQuit, aNextScreen, aPreviousScreen, aShowHelp, aShowPlaylist, aShowBrowser, aChangeBrowseMode,
@@ -908,6 +908,16 @@ protected:
 struct ToggleLibraryTagType : public Action
 {
 	ToggleLibraryTagType() : Action(aToggleLibraryTagType, "toggle_library_tag_type") { }
+	
+protected:
+	virtual bool canBeRun() const;
+	virtual void Run();
+};
+
+struct ToggleMediaLibrarySortMode : public Action
+{
+	ToggleMediaLibrarySortMode()
+	: Action(aToggleMediaLibrarySortMode, "toggle_media_library_sort_mode") { }
 	
 protected:
 	virtual bool canBeRun() const;

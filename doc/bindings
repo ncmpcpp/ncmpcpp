@@ -431,6 +431,9 @@
 #def_key "m"
 #  move_selected_items_up
 #
+#def_key "m"
+#  toggle_media_library_sort_mode
+#
 #def_key "n"
 #  move_sort_order_down
 #

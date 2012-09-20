@@ -89,7 +89,7 @@ private:
 	};
 	
 	void replaceTag(mpd_tag_type tag_type, std::string &&orig_value,
-                    const std::string &value, unsigned idx);
+	                const std::string &value, unsigned idx);
 	
 	template <typename F>
 	std::string getTag(mpd_tag_type tag_type, F orig_value, unsigned idx) const {

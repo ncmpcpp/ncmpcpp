@@ -529,6 +529,7 @@ void BindingsConfiguration::generateDefaults()
 	{
 		bind(k, aMoveSortOrderUp);
 		bind(k, aMoveSelectedItemsUp);
+		bind(k, aToggleMediaLibrarySortMode);
 	}
 	if (notBound(k = stringToKey("n")))
 	{

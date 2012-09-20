@@ -239,6 +239,7 @@ void Configuration::SetDefaults()
 	new_design = false;
 	visualizer_use_wave = true;
 	visualizer_in_stereo = false;
+	media_library_sort_by_mtime = false;
 	tag_editor_extended_numeration = false;
 	media_library_display_date = true;
 	media_library_display_empty_tag = true;
@@ -952,6 +953,10 @@ void Configuration::Read()
 			{
 				if (!v.empty())
 					media_lib_primary_tag = charToTagType(v[0]);
+			}
+			else if (name == "media_library_sort_by_mtime")
+			{
+				media_library_sort_by_mtime = v == "yes";
 			}
 			else
 				std::cout << "Unknown option: " << name << ", ignoring.\n";

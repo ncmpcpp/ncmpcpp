@@ -1397,13 +1397,13 @@ void EditLibraryTag::Run()
 	
 	Statusbar::lock();
 	Statusbar::put() << NC::fmtBold << tagTypeToString(Config.media_lib_primary_tag) << NC::fmtBoldEnd << ": ";
-	std::string new_tag = wFooter->getString(myLibrary->Tags.current().value());
+	std::string new_tag = wFooter->getString(myLibrary->Tags.current().value().tag());
 	Statusbar::unlock();
-	if (!new_tag.empty() && new_tag != myLibrary->Tags.current().value())
+	if (!new_tag.empty() && new_tag != myLibrary->Tags.current().value().tag())
 	{
 		Statusbar::msg("Updating tags...");
 		Mpd.StartSearch(1);
-		Mpd.AddSearch(Config.media_lib_primary_tag, myLibrary->Tags.current().value());
+		Mpd.AddSearch(Config.media_lib_primary_tag, myLibrary->Tags.current().value().tag());
 		MPD::MutableSong::SetFunction set = tagTypeToSetFunction(Config.media_lib_primary_tag);
 		assert(set);
 		bool success = true;
@@ -2162,12 +2162,15 @@ void ToggleLibraryTagType::Run()
 		myLibrary->Tags.setTitle(Config.titles_visibility ? item_type + "s" : "");
 		myLibrary->Tags.reset();
 		item_type = lowercase(item_type);
+		std::string and_mtime = Config.media_library_sort_by_mtime ?
+		                        " and mtime" :
+		                        "";
 		if (myLibrary->Columns() == 2)
 		{
 			myLibrary->Songs.clear();
 			myLibrary->Albums.reset();
 			myLibrary->Albums.clear();
-			myLibrary->Albums.setTitle(Config.titles_visibility ? "Albums (sorted by " + item_type + ")" : "");
+			myLibrary->Albums.setTitle(Config.titles_visibility ? "Albums (sorted by " + item_type + and_mtime + ")" : "");
 			myLibrary->Albums.display();
 		}
 		else
@@ -2177,6 +2180,16 @@ void ToggleLibraryTagType::Run()
 		}
 		Statusbar::msg("Switched to list of %s tag", item_type.c_str());
 	}
+}
+
+bool ToggleMediaLibrarySortMode::canBeRun() const
+{
+	return myScreen == myLibrary;
+}
+
+void ToggleMediaLibrarySortMode::Run()
+{
+	myLibrary->toggleMTimeSort();
 }
 
 bool RefetchLyrics::canBeRun() const
@@ -2295,7 +2308,7 @@ void ShowArtistInfo::Run()
 	{
 		assert(!myLibrary->Tags.empty());
 		assert(Config.media_lib_primary_tag == MPD_TAG_ARTIST);
-		artist = myLibrary->Tags.current().value();
+		artist = myLibrary->Tags.current().value().tag();
 	}
 	else
 	{
@@ -2660,6 +2673,7 @@ void populateActions()
 	insertAction(new AddRandomItems());
 	insertAction(new ToggleBrowserSortMode());
 	insertAction(new ToggleLibraryTagType());
+	insertAction(new ToggleMediaLibrarySortMode());
 	insertAction(new RefetchLyrics());
 	insertAction(new RefetchArtistInfo());
 	insertAction(new SetSelectedItemsPriority());

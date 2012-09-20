@@ -93,6 +93,35 @@ private:
 	bool m_enabled;
 };
 
+struct TagMTime
+{
+	TagMTime(const std::string &tag_) : m_tag(tag_), m_mtime(0) { }
+	TagMTime(const std::string &tag_, time_t mtime_) : m_tag(tag_), m_mtime(mtime_) { }
+
+	const std::string &tag() const { return m_tag; }
+	time_t mtime() const { return m_mtime; }
+
+	void set_mtime(time_t mtime_)
+	{
+		m_mtime = mtime_;
+	}
+
+	void set_tag(std::string tag_)
+	{
+		m_tag = tag_;
+	}
+
+	bool hasMTime()
+	{
+		return (m_mtime != 0);
+	}
+
+private:
+	std::string m_tag;
+	time_t m_mtime;
+};
+
+typedef std::vector<TagMTime> TagMTimeList;
 typedef std::vector<Item> ItemList;
 typedef std::vector<std::string> StringList;
 typedef std::vector<Output> OutputList;
@@ -213,14 +242,17 @@ public:
 	
 	void StartSearch(bool);
 	void StartFieldSearch(mpd_tag_type);
+	void StartFieldSearchMTime(mpd_tag_type, bool);
 	void AddSearch(mpd_tag_type, const std::string &) const;
 	void AddSearchAny(const std::string &str) const;
 	void AddSearchURI(const std::string &str) const;
 	SongList CommitSearchSongs();
 	StringList CommitSearchTags();
+	TagMTimeList CommitSearchTagsMTime();
 	
 	StringList GetPlaylists();
 	StringList GetList(mpd_tag_type);
+	TagMTimeList GetListMTime(mpd_tag_type, bool);
 	ItemList GetDirectory(const std::string &);
 	SongList GetDirectoryRecursive(const std::string &);
 	SongList GetSongs(const std::string &);
@@ -240,7 +272,7 @@ private:
 	int GoBusy();
 	
 	int CheckForErrors();
-	
+
 	mpd_connection *itsConnection;
 	bool isCommandsListEnabled;
 	
@@ -272,6 +304,7 @@ private:
 	void *itsErrorHandlerUserdata;
 	
 	mpd_tag_type itsSearchedField;
+	bool itsSearchFieldMTime;
 };
 
 }
@@ -279,4 +312,3 @@ private:
 extern MPD::Connection Mpd;
 
 #endif
-

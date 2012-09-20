@@ -437,6 +437,8 @@
 #
 #media_library_display_empty_tag = "yes"
 #
+#media_library_sort_by_mtime = "no"
+#
 #enable_window_title = "yes"
 #
 ##
