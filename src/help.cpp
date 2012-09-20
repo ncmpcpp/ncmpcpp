@@ -238,6 +238,7 @@ void Help::GetKeybindings()
 	KeyDesc(aSetCrossfade, "Set crossfade");
 	KeyDesc(aUpdateDatabase, "Start music database update");
 	w << '\n';
+	KeyDesc(aExecuteCommand, "Execute command");
 	KeyDesc(aApplyFilter, "Apply filter");
 	KeyDesc(aFindItemForward, "Find item forward");
 	KeyDesc(aFindItemBackward, "Find item backward");

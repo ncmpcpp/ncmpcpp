@@ -71,7 +71,7 @@ namespace Helpers {//
 void mpd();
 
 /// called each time user types another character while inside Window::getString
-void getString(const std::wstring &);
+bool getString(const std::wstring &);
 
 /// called each time user changes current filter (while being inside Window::getString)
 struct ApplyFilterImmediately
@@ -79,10 +79,18 @@ struct ApplyFilterImmediately
 	ApplyFilterImmediately(Filterable *f, const std::wstring &filter)
 	: m_f(f), m_ws(filter) { }
 	
-	void operator()(const std::wstring &ws);
+	bool operator()(const std::wstring &ws);
 	
 private:
 	Filterable *m_f;
+	std::wstring m_ws;
+};
+
+struct TryExecuteImmediateCommand
+{
+	bool operator()(const std::wstring &ws);
+	
+private:
 	std::wstring m_ws;
 };
 

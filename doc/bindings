@@ -95,6 +95,24 @@
 ##      selected_items_adder, server_info, song_info,
 ##      sort_playlist_dialog, tiny_tag_editor.
 ##
+## 5) In addition to binding to a key, you can also bind actions
+##    or chains of actions to a command. If it comes to commands,
+##    syntax is very similar to defining keys. Here goes example
+##    definition of a command:
+##
+##      def_command "quit" [deferred]
+##        stop
+##        quit
+##
+##    If you execute the above command (which can be done by
+##    invoking action execute_command, typing 'quit' and pressing
+##    enter), ncmpcpp will stop the player and then quit. Note the
+##    presence of word 'deferred' enclosed in square brackets. It
+##    tells ncmpcpp to wait for confirmation (ie. pressing enter)
+##    after you typed quit. Instead of 'deferred', 'immediate'
+##    could be used. Then ncmpcpp will not wait for confirmation
+##    (enter) and will execute the command the moment it sees it.
+##
 ## Note: Both 'backspace' and 'backspace_2' are used because some
 ##       terminals interpret backspace using keycode of 'backspace'
 ##       and some the one of 'backspace_2'. You can get away with
@@ -190,6 +208,9 @@
 #
 #def_key "-"
 #  volume_down
+#
+#def_key ":"
+#  execute_command
 #
 #def_key "tab"
 #  next_screen

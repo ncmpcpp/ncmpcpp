@@ -189,38 +189,69 @@ Key Key::read(NC::Window &w)
 
 bool BindingsConfiguration::read(const std::string &file)
 {
+	enum class InProgress { None, Command, Key };
+	
 	bool result = true;
 	
 	std::ifstream f(file);
 	if (!f.is_open())
 		return result;
 	
+	// shared variables
+	InProgress in_progress = InProgress::None;
 	size_t line_no = 0;
-	bool key_def_in_progress = false;
-	Key key = Key::noOp;
+	std::string line;
 	Binding::ActionChain actions;
-	std::string line, strkey;
+	
+	// def_key specific variables
+	Key key = Key::noOp;
+	std::string strkey;
+	
+	// def_command specific variables
+	bool cmd_immediate = false;
+	std::string cmd_name;
 	
 	auto error = [&]() -> std::ostream & {
-		std::cerr << file << ":" << line_no << ": ";
-		key_def_in_progress = false;
+		std::cerr << file << ":" << line_no << ": error: ";
+		in_progress = InProgress::None;
 		result = false;
 		return std::cerr;
 	};
 	
-	auto bind_key_def = [&]() -> bool {
-		if (!actions.empty())
+	auto bind_in_progress = [&]() -> bool {
+		if (in_progress == InProgress::Command)
 		{
-			bind(key, actions);
-			actions.clear();
-			return true;
+			if (!actions.empty())
+			{
+				m_commands.insert(std::make_pair(cmd_name, Command(actions, cmd_immediate)));
+				actions.clear();
+				return true;
+			}
+			else
+			{
+				error() << "definition of command '" << cmd_name << "' cannot be empty\n";
+				return false;
+			}
 		}
-		else
+		else if (in_progress == InProgress::Key)
 		{
-			error() << "definition of key '" << strkey << "' cannot be empty.\n";
-			return false;
+			if (!actions.empty())
+			{
+				bind(key, actions);
+				actions.clear();
+				return true;
+			}
+			else
+			{
+				error() << "definition of key '" << strkey << "' cannot be empty\n";
+				return false;
+			}
 		}
+		return true;
 	};
+	
+	const char def_command[] = "def_command";
+	const char def_key[] = "def_key";
 	
 	while (!f.eof() && ++line_no)
 	{
@@ -228,14 +259,40 @@ bool BindingsConfiguration::read(const std::string &file)
 		if (line.empty() || line[0] == '#')
 			continue;
 		
-		if (!line.compare(0, 7, "def_key")) // beginning of key definition
+		// beginning of command definition
+		if (!line.compare(0, const_strlen(def_command), def_command))
 		{
-			if (key_def_in_progress)
+			if (!bind_in_progress())
+				break;
+			in_progress = InProgress::Command;
+			cmd_name = getEnclosedString(line, '"', '"', 0);
+			if (cmd_name.empty())
 			{
-				if (!bind_key_def())
-					break;
+				error() << "command must have non-empty name\n";
+				break;
 			}
-			key_def_in_progress = true;
+			if (m_commands.find(cmd_name) != m_commands.end())
+			{
+				error() << "redefinition of command '" << cmd_name << "'\n";
+				break;
+			}
+			std::string cmd_type = getEnclosedString(line, '[', ']', 0);
+			if (cmd_type == "immediate")
+				cmd_immediate = true;
+			else if (cmd_type == "deferred")
+				cmd_immediate = false;
+			else
+			{
+				error() << "invalid type of command: '" << cmd_type << "'\n";
+				break;
+			}
+		}
+		// beginning of key definition
+		else if (!line.compare(0, const_strlen(def_key), def_key))
+		{
+			if (!bind_in_progress())
+				break;
+			in_progress = InProgress::Key;
 			strkey = getEnclosedString(line, '"', '"', 0);
 			key = stringToKey(strkey);
 			if (key == Key::noOp)
@@ -262,8 +319,7 @@ bool BindingsConfiguration::read(const std::string &file)
 			break;
 		}
 	}
-	if (key_def_in_progress)
-		bind_key_def();
+	bind_in_progress();
 	f.close();
 	return result;
 }
@@ -318,6 +374,8 @@ void BindingsConfiguration::generateDefaults()
 	}
 	if (notBound(k = stringToKey("-")))
 		bind(k, aVolumeDown);
+	if (notBound(k = stringToKey(":")))
+		bind(k, aExecuteCommand);
 	if (notBound(k = stringToKey("tab")))
 		bind(k, aNextScreen);
 	if (notBound(k = stringToKey("shift_tab")))

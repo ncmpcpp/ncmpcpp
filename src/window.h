@@ -132,7 +132,7 @@ enum Where { wUp, wDown, wPageUp, wPageDown, wHome, wEnd };
 /// Helper function that is invoked each time one will want
 /// to obtain string from Window::getString() function
 /// @see Window::getString()
-typedef std::function<void(const std::wstring &)> GetStringHelper;
+typedef std::function<bool(const std::wstring &)> GetStringHelper;
 
 /// Initializes curses screen and sets some additional attributes
 /// @param window_title title of the window (has an effect only if pdcurses lib is used)

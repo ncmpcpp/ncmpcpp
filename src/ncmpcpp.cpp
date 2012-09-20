@@ -237,7 +237,6 @@ int main(int argc, char **argv)
 			drawHeader();
 			past = Timer;
 		}
-		
 		// header stuff end
 		
 		if (input != Key::noOp)
@@ -249,22 +248,8 @@ int main(int argc, char **argv)
 		
 		auto k = Bindings.get(input);
 		for (; k.first != k.second; ++k.first)
-		{
-			Binding &b = k.first->second;
-			if (b.isSingle())
-			{
-				if (b.action()->Execute())
-					break;
-			}
-			else
-			{
-				auto chain = b.chain();
-				for (auto it = chain->begin(); it != chain->end(); ++it)
-					if (!(*it)->Execute())
-						break;
+			if (k.first->second.execute())
 				break;
-			}
-		}
 		
 		if (myScreen == myPlaylist)
 			myPlaylist->EnableHighlighting();

@@ -22,6 +22,7 @@
 #include "settings.h"
 #include "status.h"
 #include "statusbar.h"
+#include "bindings.h"
 
 using Global::wFooter;
 
@@ -186,12 +187,13 @@ void Statusbar::Helpers::mpd()
 	Mpd.OrderDataFetching();
 }
 
-void Statusbar::Helpers::getString(const std::wstring &)
+bool Statusbar::Helpers::getString(const std::wstring &)
 {
 	Status::trace();
+	return true;
 }
 
-void Statusbar::Helpers::ApplyFilterImmediately::operator()(const std::wstring &ws)
+bool Statusbar::Helpers::ApplyFilterImmediately::operator()(const std::wstring &ws)
 {
 	using Global::myScreen;
 	// if input queue is not empty, we don't want to update filter since next
@@ -209,4 +211,19 @@ void Statusbar::Helpers::ApplyFilterImmediately::operator()(const std::wstring &
 		}
 		Status::trace();
 	}
+	return true;
+}
+
+bool Statusbar::Helpers::TryExecuteImmediateCommand::operator()(const std::wstring &ws)
+{
+	bool continue_ = true;
+	if (m_ws != ws)
+	{
+		m_ws = ws;
+		auto cmd = Bindings.findCommand(ToString(m_ws));
+		if (cmd && cmd->immediate())
+			continue_ = false;
+	}
+	Status::trace();
+	return continue_;
 }

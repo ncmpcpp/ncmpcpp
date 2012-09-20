@@ -972,6 +972,27 @@ void Stop::Run()
 	Mpd.Stop();
 }
 
+void ExecuteCommand::Run()
+{
+	using Global::wFooter;
+	Statusbar::lock();
+	Statusbar::put() << NC::fmtBold << ":" << NC::fmtBoldEnd;
+	wFooter->setGetStringHelper(Statusbar::Helpers::TryExecuteImmediateCommand());
+	std::string name = wFooter->getString();
+	wFooter->setGetStringHelper(Statusbar::Helpers::getString);
+	Statusbar::unlock();
+	if (name.empty())
+		return;
+	auto cmd = Bindings.findCommand(name);
+	if (cmd)
+	{
+		Statusbar::msg(1, "Executing %s...", name.c_str());
+		cmd->binding().execute();
+	}
+	else
+		Statusbar::msg("No command named \"%s\"", name.c_str());
+}
+
 bool MoveSortOrderUp::canBeRun() const
 {
 	return myScreen == mySortPlaylistDialog;
@@ -2576,6 +2597,7 @@ void populateActions()
 	insertAction(new NextSong());
 	insertAction(new Pause());
 	insertAction(new Stop());
+	insertAction(new ExecuteCommand());
 	insertAction(new SavePlaylist());
 	insertAction(new MoveSortOrderUp());
 	insertAction(new MoveSortOrderDown());

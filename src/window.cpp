@@ -552,7 +552,10 @@ std::string Window::getString(const std::string &base, size_t length_, size_t wi
 			mvwhline(m_window, y, minx, '*', maxx-minx);
 		
 		if (m_get_string_helper)
-			m_get_string_helper(*tmp);
+		{
+			if (!m_get_string_helper(*tmp))
+				break;
+		}
 		
 		wmove(m_window, y, x);
 		prefresh(m_window, 0, 0, m_start_y, m_start_x, m_start_y+m_height-1, m_start_x+m_width-1);

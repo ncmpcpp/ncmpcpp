@@ -31,7 +31,7 @@ enum ActionType
 	aDummy, aMouseEvent, aScrollUp, aScrollDown, aScrollUpArtist, aScrollUpAlbum, aScrollDownArtist,
 	aScrollDownAlbum, aPageUp, aPageDown, aMoveHome, aMoveEnd, aToggleInterface, aJumpToParentDirectory,
 	aPressEnter, aPressSpace, aPreviousColumn, aNextColumn, aMasterScreen, aSlaveScreen, aVolumeUp,
-	aVolumeDown, aDeletePlaylistItems, aDeleteStoredPlaylist, aDeleteBrowserItems, aReplaySong, aPrevious, aNext, aPause, aStop, aSavePlaylist,
+	aVolumeDown, aDeletePlaylistItems, aDeleteStoredPlaylist, aDeleteBrowserItems, aReplaySong, aPrevious, aNext, aPause, aStop, aExecuteCommand, aSavePlaylist,
 	aMoveSortOrderUp, aMoveSortOrderDown, aMoveSelectedItemsUp, aMoveSelectedItemsDown,
 	aMoveSelectedItemsTo, aAdd, aSeekForward, aSeekBackward, aToggleDisplayMode, aToggleSeparatorsBetweenAlbums,
 	aToggleLyricsFetcher, aToggleFetchingLyricsInBackground, aTogglePlayingSongCentering, aUpdateDatabase,
@@ -356,6 +356,14 @@ protected:
 struct Stop : public Action
 {
 	Stop() : Action(aStop, "stop") { }
+	
+protected:
+	virtual void Run();
+};
+
+struct ExecuteCommand : public Action
+{
+	ExecuteCommand() : Action(aExecuteCommand, "execute_command") { }
 	
 protected:
 	virtual void Run();

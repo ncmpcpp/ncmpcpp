@@ -22,6 +22,7 @@
 #define _BINDINGS_H
 
 #include <cassert>
+#include <unordered_map>
 #include "actions.h"
 #include "macro_utilities.h"
 
@@ -85,6 +86,20 @@ struct Binding
 		}
 	}
 	
+	bool execute() const {
+		bool result = false;
+		if (m_is_single) {
+			assert(m_action);
+			result = m_action->Execute();
+		} else {
+			for (auto it = m_chain->begin(); it != m_chain->end(); ++it)
+				if (!(*it)->Execute())
+					break;
+			result = true;
+		}
+		return result;
+	}
+	
 	bool isSingle() const {
 		return m_is_single;
 	}
@@ -105,15 +120,40 @@ private:
 	};
 };
 
-/// Keybindings configuration
-struct BindingsConfiguration
+/// Represents executable command
+struct Command
 {
+	Command(const Binding &binding_, bool immediate_)
+	: m_binding(binding_), m_immediate(immediate_) { }
+	
+	const Binding &binding() const { return m_binding; }
+	bool immediate() const { return m_immediate; }
+	
+private:
+	Binding m_binding;
+	bool m_immediate;
+};
+
+/// Keybindings configuration
+class BindingsConfiguration
+{
+	typedef std::unordered_map<std::string, Command> CommandsSet;
 	typedef std::multimap<Key, Binding> BindingsMap;
+	
+public:
 	typedef BindingsMap::iterator BindingIterator;
 	typedef BindingsMap::const_iterator ConstBindingIterator;
 	
 	bool read(const std::string &file);
 	void generateDefaults();
+	
+	const Command *findCommand(const std::string &name) {
+		const Command *ptr = 0;
+		auto it = m_commands.find(name);
+		if (it != m_commands.end())
+			ptr = &it->second;
+		return ptr;
+	}
 	
 	std::pair<BindingIterator, BindingIterator> get(const Key &k) {
 		return m_bindings.equal_range(k);
@@ -132,6 +172,7 @@ private:
 	}
 	
 	BindingsMap m_bindings;
+	CommandsSet m_commands;
 };
 
 extern BindingsConfiguration Bindings;
