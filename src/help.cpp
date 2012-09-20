@@ -129,10 +129,13 @@ std::string Help::DisplayKeys(const ActionType at)
 	std::string result;
 	for (auto it = Bindings.begin(); it != Bindings.end(); ++it)
 	{
-		if (it->second.isSingle() && it->second.action()->Type() == at)
+		for (auto j = it->second.begin(); j != it->second.end(); ++j)
 		{
-			result += keyToString(it->first, &print_backspace);
-			result += " ";
+			if (j->isSingle() && j->action()->Type() == at)
+			{
+				result += keyToString(it->first, &print_backspace);
+				result += " ";
+			}
 		}
 	}
 	result.resize(16, ' ');

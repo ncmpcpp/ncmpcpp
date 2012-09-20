@@ -277,9 +277,9 @@ void Action::Seek()
 		
 		Key input = Key::read(*wFooter);
 		auto k = Bindings.get(input);
-		if (k.first == k.second || !k.first->second.isSingle()) // no single action?
+		if (k.first == k.second || !k.first->isSingle()) // no single action?
 			break;
-		Action *a = k.first->second.action();
+		Action *a = k.first->action();
 		if (dynamic_cast<SeekForward *>(a))
 		{
 			if (songpos < Mpd.GetTotalTime())

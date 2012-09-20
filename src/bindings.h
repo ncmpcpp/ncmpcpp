@@ -137,12 +137,17 @@ private:
 /// Keybindings configuration
 class BindingsConfiguration
 {
+	struct KeyHash {
+		size_t operator()(const Key &k) const {
+			return (k.getChar() << 1) | (k.getType() == Key::Standard);
+		}
+	};
 	typedef std::unordered_map<std::string, Command> CommandsSet;
-	typedef std::multimap<Key, Binding> BindingsMap;
+	typedef std::unordered_map<Key, std::vector<Binding>, KeyHash> BindingsMap;
 	
 public:
-	typedef BindingsMap::iterator BindingIterator;
-	typedef BindingsMap::const_iterator ConstBindingIterator;
+	typedef BindingsMap::value_type::second_type::iterator BindingIterator;
+	typedef BindingsMap::value_type::second_type::const_iterator ConstBindingIterator;
 	
 	bool read(const std::string &file);
 	void generateDefaults();
@@ -156,19 +161,29 @@ public:
 	}
 	
 	std::pair<BindingIterator, BindingIterator> get(const Key &k) {
-		return m_bindings.equal_range(k);
+		std::pair<BindingIterator, BindingIterator> result;
+		auto it = m_bindings.find(k);
+		if (it != m_bindings.end()) {
+			result.first = it->second.begin();
+			result.second = it->second.end();
+		} else {
+			auto list_end = m_bindings.begin()->second.end();
+			result.first = list_end;
+			result.second = list_end;
+		}
+		return result;
 	}
 	
-	ConstBindingIterator begin() const { return m_bindings.begin(); }
-	ConstBindingIterator end() const { return m_bindings.end(); }
+	BindingsMap::const_iterator begin() const { return m_bindings.begin(); }
+	BindingsMap::const_iterator end() const { return m_bindings.end(); }
 	
 private:
 	bool notBound(const Key &k) const {
 		return k != Key::noOp && m_bindings.find(k) == m_bindings.end();
 	}
 	
-	template <typename T> void bind(Key k, T t) {
-		m_bindings.insert(std::make_pair(k, Binding(t)));
+	template <typename T> void bind(Key k, const T &t) {
+		m_bindings[k].push_back(Binding(t));
 	}
 	
 	BindingsMap m_bindings;

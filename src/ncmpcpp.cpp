@@ -248,7 +248,7 @@ int main(int argc, char **argv)
 		
 		auto k = Bindings.get(input);
 		for (; k.first != k.second; ++k.first)
-			if (k.first->second.execute())
+			if (k.first->execute())
 				break;
 		
 		if (myScreen == myPlaylist)
