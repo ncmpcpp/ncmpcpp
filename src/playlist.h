@@ -21,7 +21,7 @@
 #ifndef _PLAYLIST_H
 #define _PLAYLIST_H
 
-#include <map>
+#include <unordered_map>
 
 #include "interfaces.h"
 #include "screen.h"
@@ -93,7 +93,7 @@ private:
 	std::string TotalLength();
 	std::string itsBufferedStats;
 	
-	std::map<size_t, int> itsSongHashes;
+	std::unordered_map<size_t, int> itsSongHashes;
 	
 	size_t itsTotalLength;
 	size_t itsRemainingTime;
