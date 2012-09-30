@@ -17,7 +17,7 @@
 ## 2) It's possible to bind more that one action at once
 ##    to a key. It can be done using the following syntax:
 ##
-##    key_def "key"
+##    def_key "key"
 ##      action1
 ##      action2
 ##      ...
@@ -42,7 +42,7 @@
 ##    to crop playlists, you need to put the following
 ##    into configuration file:
 ##
-##    key_def "C"
+##    def_key "C"
 ##      dummy
 ##
 ##    After that ncmpcpp will not bind any default action
