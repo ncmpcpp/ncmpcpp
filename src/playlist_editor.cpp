@@ -125,9 +125,9 @@ void PlaylistEditor::switchTo()
 
 void PlaylistEditor::update()
 {
-	if (Playlists.reallyEmpty() || playlistsUpdateRequested)
+	if (Playlists.reallyEmpty() || m_playlists_update_requested)
 	{
-		playlistsUpdateRequested = false;
+		m_playlists_update_requested = false;
 		Playlists.clearSearchResults();
 		withUnfilteredMenuReapplyFilter(Playlists, [this]() {
 			size_t idx = 0;
@@ -146,9 +146,9 @@ void PlaylistEditor::update()
 		Playlists.refresh();
 	}
 	
-	if (!Playlists.empty() && (Content.reallyEmpty() || contentUpdateRequested))
+	if (!Playlists.empty() && (Content.reallyEmpty() || m_content_update_requested))
 	{
-		contentUpdateRequested = false;
+		m_content_update_requested = false;
 		Content.clearSearchResults();
 		withUnfilteredMenuReapplyFilter(Content, [this]() {
 			size_t idx = 0;

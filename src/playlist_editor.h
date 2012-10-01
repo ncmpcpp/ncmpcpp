@@ -69,8 +69,8 @@ struct PlaylistEditor: Screen<NC::Window *>, Filterable, HasColumns, HasSongs, S
 	virtual void nextColumn() OVERRIDE;
 	
 	// private members
-	void requestPlaylistsUpdate() { playlistsUpdateRequested = true; }
-	void requestContentsUpdate() { contentUpdateRequested = true; }
+	void requestPlaylistsUpdate() { m_playlists_update_requested = true; }
+	void requestContentsUpdate() { m_content_update_requested = true; }
 	
 	virtual void Locate(const std::string &);
 	bool isContentFiltered();
@@ -85,8 +85,8 @@ protected:
 private:
 	void AddToPlaylist(bool);
 	
-	bool playlistsUpdateRequested;
-	bool contentUpdateRequested;
+	bool m_playlists_update_requested;
+	bool m_content_update_requested;
 };
 
 extern PlaylistEditor *myPlaylistEditor;
