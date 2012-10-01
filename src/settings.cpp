@@ -831,7 +831,7 @@ void Configuration::Read()
 				if (interval)
 					visualizer_sync_interval = interval;
 			}
-			else if (name == "sort_mode")
+			else if (name == "browser_sort_mode")
 			{
 				if (v == "mtime")
 					browser_sort_mode = smMTime;
