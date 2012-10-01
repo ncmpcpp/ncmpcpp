@@ -325,16 +325,18 @@ MPD::SongList Browser::getSelectedSongs()
 			else
 #			endif // !WIN32
 			{
-				auto list = Mpd.GetDirectoryRecursive(item.name);
-				result.insert(result.end(), list.begin(), list.end());
+				Mpd.GetDirectoryRecursive(item.name, [&result](MPD::Song &&s) {
+					result.push_back(s);
+				});
 			}
 		}
 		else if (item.type == itSong)
 			result.push_back(*item.song);
 		else if (item.type == itPlaylist)
 		{
-			auto list = Mpd.GetPlaylistContent(item.name);
-			result.insert(result.end(), list.begin(), list.end());
+			Mpd.GetPlaylistContent(item.name, [&result](MPD::Song &&s) {
+				result.push_back(s);
+			});
 		}
 	};
 	for (auto it = w.begin(); it != w.end(); ++it)
@@ -395,7 +397,9 @@ void Browser::GetDirectory(std::string dir, std::string subdir)
 	if (isLocal())
 		GetLocalDirectory(list);
 	else
-		list = Mpd.GetDirectory(dir);
+		Mpd.GetDirectory(dir, [&list](MPD::Item &&item) {
+			list.push_back(item);
+		});
 #	else
 	list = Mpd.GetDirectory(dir);
 #	endif // !WIN32

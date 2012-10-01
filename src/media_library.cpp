@@ -324,9 +324,9 @@ void MediaLibrary::update()
 				Mpd.AddSearch(Config.media_lib_primary_tag,
 				              Tags.current().value().tag());
 				Mpd.AddSearch(MPD_TAG_ALBUM, album);
-				auto dates = Mpd.CommitSearchTags();
-				for (auto date = dates.begin(); date != dates.end(); ++date)
-					Albums.addItem(SearchConstraints(album, *date, mtime));
+				Mpd.CommitSearchTags([this, &album, &mtime](std::string &&date) {
+					Albums.addItem(SearchConstraints(album, date, mtime));
+				});
 			}
 			else
 				Albums.addItem(SearchConstraints(album, "", mtime));
@@ -347,7 +347,10 @@ void MediaLibrary::update()
 		Albums << NC::XY(0, 0) << "Fetching albums...";
 		Albums.Window::refresh();
 		Mpd.BlockIdle(true);
-		auto artists = Mpd.GetList(Config.media_lib_primary_tag);
+		MPD::StringList artists;
+		Mpd.GetList(Config.media_lib_primary_tag, [&artists](std::string &&artist) {
+			artists.push_back(artist);
+		});
 		for (auto artist = artists.begin(); artist != artists.end(); ++artist)
 		{
 			Mpd.StartFieldSearchMTime(MPD_TAG_ALBUM, Config.media_library_sort_by_mtime);
@@ -364,9 +367,9 @@ void MediaLibrary::update()
 						Mpd.StartFieldSearch(MPD_TAG_DATE);
 						Mpd.AddSearch(Config.media_lib_primary_tag, *artist);
 						Mpd.AddSearch(MPD_TAG_ALBUM, album);
-						auto dates = Mpd.CommitSearchTags();
-						for (auto date = dates.begin(); date != dates.end(); ++date)
-							Albums.addItem(SearchConstraints(*artist, album, *date, mtime));
+						Mpd.CommitSearchTags([this, &artist, &album, &mtime](std::string &&date) {
+							Albums.addItem(SearchConstraints(*artist, album, date, mtime));
+						});
 					}
 					else
 						Albums.addItem(SearchConstraints(*artist, album, *artist, mtime));
@@ -403,9 +406,9 @@ void MediaLibrary::update()
 			if (Config.media_library_display_date)
 				Mpd.AddSearch(MPD_TAG_DATE, Albums.current().value().Date);
 		}
-		auto songs = Mpd.CommitSearchSongs();
-		for (auto s = songs.begin(); s != songs.end(); ++s)
-			Songs.addItem(*s, myPlaylist->checkForSong(*s));
+		Mpd.CommitSearchSongs([this](MPD::Song &&s) {
+			Songs.addItem(s, myPlaylist->checkForSong(s));
+		});
 		
 		if (Albums.current().value().Date == AllTracksMarker)
 			std::sort(Songs.beginV(), Songs.endV(), SortAllTracks());
@@ -675,9 +678,9 @@ MPD::SongList MediaLibrary::getSelectedSongs()
 		auto tag_handler = [&result](const std::string &tag) {
 			Mpd.StartSearch(true);
 			Mpd.AddSearch(Config.media_lib_primary_tag, tag);
-			auto songs = Mpd.CommitSearchSongs();
-			std::sort(songs.begin(), songs.end(), SortAllTracks());
-			result.insert(result.end(), songs.begin(), songs.end());
+			Mpd.CommitSearchSongs([&result](MPD::Song &&s) {
+				result.push_back(s);
+			});
 		};
 		for (auto it = Tags.begin(); it != Tags.end(); ++it)
 			if (it->isSelected())
@@ -701,9 +704,11 @@ MPD::SongList MediaLibrary::getSelectedSongs()
 					              Tags.current().value().tag());
 				Mpd.AddSearch(MPD_TAG_ALBUM, sc.Album);
 				Mpd.AddSearch(MPD_TAG_DATE, sc.Date);
-				auto songs = Mpd.CommitSearchSongs();
-				std::sort(songs.begin(), songs.end(), SortSongsByTrack);
-				result.insert(result.end(), songs.begin(), songs.end());
+				size_t begin = result.size();
+				Mpd.CommitSearchSongs([&result](MPD::Song &&s) {
+					result.push_back(s);
+				});
+				std::sort(result.begin()+begin, result.end(), SortSongsByTrack);
 			}
 		}
 		// if no item is selected, add songs from right column

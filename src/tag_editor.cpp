@@ -226,39 +226,28 @@ void TagEditor::update()
 		Dirs->Window::clear();
 		Tags->clear();
 		
-		int highlightme = -1;
-		auto dirs = Mpd.GetDirectories(itsBrowsedDir);
-		std::sort(dirs.begin(), dirs.end(), LocaleBasedSorting(std::locale(), Config.ignore_leading_the));
 		if (itsBrowsedDir != "/")
-		{
-			size_t slash = itsBrowsedDir.rfind("/");
-			std::string parent = slash != std::string::npos ? itsBrowsedDir.substr(0, slash) : "/";
-			Dirs->addItem(make_pair("..", parent));
-		}
+			Dirs->addItem(std::make_pair("..", getParentDirectory(itsBrowsedDir)));
 		else
 			Dirs->addItem(std::make_pair(".", "/"));
-		for (auto dir = dirs.begin(); dir != dirs.end(); ++dir)
-		{
-			size_t slash = dir->rfind("/");
-			std::string to_display = slash != std::string::npos ? dir->substr(slash+1) : *dir;
-			Dirs->addItem(make_pair(to_display, *dir));
-			if (*dir == itsHighlightedDir)
-				highlightme = Dirs->size()-1;
-		}
-		if (highlightme != -1)
-			Dirs->highlight(highlightme);
-		
+		Mpd.GetDirectories(itsBrowsedDir, [this](std::string &&directory) {
+			Dirs->addItem(std::make_pair(getBasename(directory), directory));
+			if (directory == itsHighlightedDir)
+				Dirs->highlight(Dirs->size()-1);
+		});
+		std::sort(Dirs->beginV()+1, Dirs->endV(),
+			LocaleBasedSorting(std::locale(), Config.ignore_leading_the));
 		Dirs->display();
 	}
 	
 	if (Tags->reallyEmpty())
 	{
 		Tags->reset();
-		auto songs = Mpd.GetSongs(Dirs->current().value().second);
-		std::sort(songs.begin(), songs.end(),
+		Mpd.GetSongs(Dirs->current().value().second, [this](MPD::Song &&s) {
+			Tags->addItem(s);
+		});
+		std::sort(Tags->beginV(), Tags->endV(),
 			LocaleBasedSorting(std::locale(), Config.ignore_leading_the));
-		for (auto s = songs.begin(); s != songs.end(); ++s)
-			Tags->addItem(*s);
 		Tags->refresh();
 	}
 	
@@ -279,8 +268,11 @@ void TagEditor::enterPressed()
 	
 	if (w == Dirs)
 	{
-		auto dirs = Mpd.GetDirectories(Dirs->current().value().second);
-		if (!dirs.empty())
+		bool has_subdirs = false;
+		Mpd.GetDirectories(Dirs->current().value().second, [&has_subdirs](std::string &&) {
+			has_subdirs = true;
+		});
+		if (has_subdirs)
 		{
 			itsHighlightedDir = itsBrowsedDir;
 			itsBrowsedDir = Dirs->current().value().second;

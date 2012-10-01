@@ -128,10 +128,13 @@ typedef std::vector<Output> OutputList;
 
 class Connection
 {
-	friend struct Statistics;
-	
 	typedef void (*StatusUpdater) (Connection *, StatusChanges, void *);
 	typedef void (*ErrorHandler) (Connection *, int, const char *, void *);
+	
+	typedef std::function<void(Item &&)> ItemConsumer;
+	typedef std::function<void(Output &&)> OutputConsumer;
+	typedef std::function<void(Song &&)> SongConsumer;
+	typedef std::function<void(std::string &&)> StringConsumer;
 	
 public:
 	Connection();
@@ -197,14 +200,14 @@ public:
 	unsigned GetBitrate() const { return itsCurrentStatus ? mpd_status_get_kbit_rate(itsCurrentStatus) : 0; }
 	
 	size_t GetPlaylistLength() const { return itsCurrentStatus ? mpd_status_get_queue_length(itsCurrentStatus) : 0; }
-	SongList GetPlaylistChanges(unsigned);
+	void GetPlaylistChanges(unsigned, SongConsumer f);
 	
 	const std::string &GetErrorMessage() const { return itsErrorMessage; }
 	
 	Song GetCurrentlyPlayingSong();
 	int GetCurrentSongPos() const;
 	Song GetSong(const std::string &);
-	SongList GetPlaylistContent(const std::string &);
+	void GetPlaylistContent(const std::string &name, SongConsumer f);
 	
 	void GetSupportedExtensions(std::set<std::string> &);
 	
@@ -246,28 +249,26 @@ public:
 	void AddSearch(mpd_tag_type, const std::string &) const;
 	void AddSearchAny(const std::string &str) const;
 	void AddSearchURI(const std::string &str) const;
-	SongList CommitSearchSongs();
-	StringList CommitSearchTags();
+	void CommitSearchSongs(SongConsumer f);
+	void CommitSearchTags(StringConsumer f);
 	TagMTimeList CommitSearchTagsMTime();
 	
-	StringList GetPlaylists();
-	StringList GetList(mpd_tag_type);
+	void GetPlaylists(StringConsumer f);
+	void GetList(mpd_tag_type type, StringConsumer f);
 	TagMTimeList GetListMTime(mpd_tag_type, bool);
-	ItemList GetDirectory(const std::string &);
-	SongList GetDirectoryRecursive(const std::string &);
-	SongList GetSongs(const std::string &);
-	StringList GetDirectories(const std::string &);
+	void GetDirectory(const std::string &directory, ItemConsumer f);
+	void GetDirectoryRecursive(const std::string &directory, SongConsumer f);
+	void GetSongs(const std::string &directory, SongConsumer f);
+	void GetDirectories(const std::string &directory, StringConsumer f);
 	
-	OutputList GetOutputs();
+	void GetOutputs(OutputConsumer f);
 	bool EnableOutput(int);
 	bool DisableOutput(int);
 	
-	StringList GetURLHandlers();
-	StringList GetTagTypes();
+	void GetURLHandlers(StringConsumer f);
+	void GetTagTypes(StringConsumer f);
 	
 private:
-	//void check
-	
 	void GoIdle();
 	int GoBusy();
 	

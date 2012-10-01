@@ -22,6 +22,7 @@
 #define _UTILITY_COMPARATORS
 
 #include <string>
+#include "exec_item.h"
 #include "mpdpp.h"
 #include "settings.h"
 #include "menu.h"
@@ -56,6 +57,11 @@ public:
 	template <typename A, typename B>
 	bool operator()(const std::pair<A, B> &a, const std::pair<A, B> &b) const {
 		return m_cmp(a.first, b.first) < 0;
+	}
+	
+	template <typename ItemT, typename FunT>
+	bool operator()(const ExecItem<ItemT, FunT> &a, const ExecItem<ItemT, FunT> &b) const {
+		return m_cmp(a.item(), b.item());
 	}
 };
 

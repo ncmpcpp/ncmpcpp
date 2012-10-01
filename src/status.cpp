@@ -141,21 +141,19 @@ void Status::Changes::playlist()
 			myPlaylist->main().resizeList(playlist_length);
 		}
 		
-		auto songs = Mpd.GetPlaylistChanges(Mpd.GetOldPlaylistID());
-		for (auto s = songs.begin(); s != songs.end(); ++s)
-		{
-			size_t pos = s->getPosition();
+		Mpd.GetPlaylistChanges(Mpd.GetOldPlaylistID(), [](MPD::Song &&s) {
+			size_t pos = s.getPosition();
 			if (pos < myPlaylist->main().size())
 			{
 				// if song's already in playlist, replace it with a new one
 				MPD::Song &old_s = myPlaylist->main()[pos].value();
 				myPlaylist->unregisterHash(old_s.getHash());
-				old_s = *s;
+				old_s = s;
 			}
 			else // otherwise just add it to playlist
-				myPlaylist->main().addItem(*s);
-			myPlaylist->registerHash(s->getHash());
-		}
+				myPlaylist->main().addItem(s);
+			myPlaylist->registerHash(s.getHash());
+		});
 	});
 	
 	if (Mpd.isPlaying())

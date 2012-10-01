@@ -130,16 +130,18 @@ void PlaylistEditor::update()
 		playlistsUpdateRequested = false;
 		Playlists.clearSearchResults();
 		withUnfilteredMenuReapplyFilter(Playlists, [this]() {
-			auto list = Mpd.GetPlaylists();
-			std::sort(list.begin(), list.end(),
+			size_t idx = 0;
+			Mpd.GetPlaylists([this, &idx](std::string &&playlist) {
+				if (idx < Playlists.size())
+					Playlists[idx].value() = playlist;
+				else
+					Playlists.addItem(playlist);
+				++idx;
+			});
+			if (idx < Playlists.size())
+				Playlists.resizeList(idx);
+			std::sort(Playlists.beginV(), Playlists.endV(),
 				LocaleBasedSorting(std::locale(), Config.ignore_leading_the));
-			auto playlist = list.begin();
-			if (Playlists.size() > list.size())
-				Playlists.resizeList(list.size());
-			for (auto it = Playlists.begin(); it != Playlists.end(); ++it, ++playlist)
-				it->value() = *playlist;
-			for (; playlist != list.end(); ++playlist)
-				Playlists.addItem(*playlist);
 		});
 		Playlists.refresh();
 	}
@@ -149,25 +151,27 @@ void PlaylistEditor::update()
 		contentUpdateRequested = false;
 		Content.clearSearchResults();
 		withUnfilteredMenuReapplyFilter(Content, [this]() {
-			auto list = Mpd.GetPlaylistContent(Playlists.current().value());
-			auto song = list.begin();
-			if (Content.size() > list.size())
-				Content.resizeList(list.size());
-			for (auto it = Content.begin(); it != Content.end(); ++it, ++song)
-			{
-				it->value() = *song;
-				it->setBold(myPlaylist->checkForSong(*song));
-			}
-			for (; song != list.end(); ++song)
-				Content.addItem(*song, myPlaylist->checkForSong(*song));
+			size_t idx = 0;
+			Mpd.GetPlaylistContent(Playlists.current().value(), [this, &idx](MPD::Song &&s) {
+				if (idx < Content.size())
+				{
+					Content[idx].value() = s;
+					Content[idx].setBold(myPlaylist->checkForSong(s));
+				}
+				else
+					Content.addItem(s, myPlaylist->checkForSong(s));
+				++idx;
+			});
+			if (idx < Content.size())
+				Content.resizeList(idx);
 			std::string title;
 			if (Config.titles_visibility)
 			{
 				title = "Playlist content";
 				title += " (";
-				title += unsignedLongIntTo<std::string>::apply(list.size());
+				title += unsignedLongIntTo<std::string>::apply(Content.size());
 				title += " item";
-				if (list.size() == 1)
+				if (Content.size() == 1)
 					title += ")";
 				else
 					title += "s)";
@@ -418,8 +422,9 @@ MPD::SongList PlaylistEditor::getSelectedSongs()
 			if (it->isSelected())
 			{
 				any_selected = true;
-				auto songs = Mpd.GetPlaylistContent(it->value());
-				result.insert(result.end(), songs.begin(), songs.end());
+				Mpd.GetPlaylistContent(it->value(), [&result](MPD::Song &&s) {
+					result.push_back(s);
+				});
 			}
 		}
 		// we don't check for empty result here as it's possible that

@@ -410,21 +410,19 @@ void SearchEngine::Search()
 			Mpd.AddSearch(MPD_TAG_DATE, itsConstraints[9]);
 		if (!itsConstraints[10].empty())
 			Mpd.AddSearch(MPD_TAG_COMMENT, itsConstraints[10]);
-		auto songs = Mpd.CommitSearchSongs();
-		for (auto s = songs.begin(); s != songs.end(); ++s)
-			w.addItem(*s);
+		Mpd.CommitSearchSongs([this](MPD::Song &&s) {
+			w.addItem(s);
+		});
 		return;
 	}
 	
 	MPD::SongList list;
 	if (Config.search_in_db)
-		list = Mpd.GetDirectoryRecursive("/");
+		Mpd.GetDirectoryRecursive("/", [&list](MPD::Song &&s) {
+			list.push_back(s);
+		});
 	else
-	{
-		list.reserve(myPlaylist->main().size());
-		for (auto s = myPlaylist->main().beginV(); s != myPlaylist->main().endV(); ++s)
-			list.push_back(*s);
-	}
+		list.insert(list.end(), myPlaylist->main().beginV(), myPlaylist->main().endV());
 	
 	bool any_found = 1;
 	bool found = 1;

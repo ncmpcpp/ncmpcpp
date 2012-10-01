@@ -1407,24 +1407,28 @@ void EditLibraryTag::Run()
 		MPD::MutableSong::SetFunction set = tagTypeToSetFunction(Config.media_lib_primary_tag);
 		assert(set);
 		bool success = true;
-		MPD::SongList songs = Mpd.CommitSearchSongs();
-		for (auto s = songs.begin(); s != songs.end(); ++s)
-		{
-			MPD::MutableSong es = *s;
-			es.setTags(set, new_tag, Config.tags_separator);
-			Statusbar::msg("Updating tags in \"%s\"...", es.getName().c_str());
-			std::string path = Config.mpd_music_dir + es.getURI();
-			if (!Tags::write(es))
+		std::string dir_to_update;
+		Mpd.CommitSearchSongs([set, &dir_to_update, &new_tag, &success](MPD::Song &&s) {
+			if (!success)
+				return;
+			MPD::MutableSong ms = s;
+			ms.setTags(set, new_tag, Config.tags_separator);
+			Statusbar::msg("Updating tags in \"%s\"...", ms.getName().c_str());
+			std::string path = Config.mpd_music_dir + ms.getURI();
+			if (!Tags::write(ms))
 			{
 				const char msg[] = "Error while updating tags in \"%ls\"";
-				Statusbar::msg(msg, wideShorten(ToWString(es.getURI()), COLS-const_strlen(msg)).c_str());
+				Statusbar::msg(msg, wideShorten(ToWString(ms.getURI()), COLS-const_strlen(msg)).c_str());
 				success = false;
-				break;
 			}
-		}
+			if (dir_to_update.empty())
+				dir_to_update = s.getURI();
+			else
+				dir_to_update = getSharedDirectory(dir_to_update, s.getURI());
+		});
 		if (success)
 		{
-			Mpd.UpdateDirectory(getSharedDirectory(songs.begin(), songs.end()));
+			Mpd.UpdateDirectory(dir_to_update);
 			Statusbar::msg("Tags updated successfully");
 		}
 	}

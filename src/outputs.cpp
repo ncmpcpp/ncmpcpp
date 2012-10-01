@@ -99,9 +99,9 @@ void Outputs::mouseButtonPressed(MEVENT me)
 void Outputs::FetchList()
 {
 	w.clear();
-	auto outputs = Mpd.GetOutputs();
-	for (auto o = outputs.begin(); o != outputs.end(); ++o)
-		w.addItem(*o, o->isEnabled());
+	Mpd.GetOutputs([this](MPD::Output &&output) {
+		w.addItem(output, output.isEnabled());
+	});
 	if (myScreen == this)
 		w.refresh();
 }

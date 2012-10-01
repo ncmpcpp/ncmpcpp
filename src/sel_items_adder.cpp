@@ -198,16 +198,15 @@ void SelectedItemsAdder::populatePlaylistSelector(BaseScreen *old_screen)
 	// stored playlists don't support songs from outside of mpd database
 	if (old_screen != myBrowser || !myBrowser->isLocal())
 	{
-		auto playlists = Mpd.GetPlaylists();
-		std::sort(playlists.begin(), playlists.end(),
-			LocaleBasedSorting(std::locale(), Config.ignore_leading_the));
-		for (auto pl = playlists.begin(); pl != playlists.end(); ++pl)
-		{
-			m_playlist_selector.addItem(Component::Item::Type(*pl,
-				std::bind(&Self::addToExistingPlaylist, this, *pl)
+		size_t begin = m_playlist_selector.size();
+		Mpd.GetPlaylists([this](std::string &&playlist) {
+			m_playlist_selector.addItem(Component::Item::Type(playlist,
+				std::bind(&Self::addToExistingPlaylist, this, playlist)
 			));
-		}
-		if (!playlists.empty())
+		});
+		std::sort(m_playlist_selector.beginV()+begin, m_playlist_selector.endV(),
+			LocaleBasedSorting(std::locale(), Config.ignore_leading_the));
+		if (begin < m_playlist_selector.size())
 			m_playlist_selector.addSeparator();
 	}
 	m_playlist_selector.addItem(Component::Item::Type("Cancel",
