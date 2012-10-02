@@ -177,7 +177,6 @@ bool TinyTagEditor::getTags()
 	TagLib::FileRef f(path_to_file.c_str());
 	if (f.isNull())
 		return false;
-	itsEdited.setComment(f.tag()->comment().to8Bit(1));
 	
 	std::string ext = itsEdited.getURI();
 	ext = lowercase(ext.substr(ext.rfind(".")+1));
