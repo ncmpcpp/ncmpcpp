@@ -43,10 +43,13 @@ size_t calc_hash(const char* s, unsigned seed = 0)
 
 namespace MPD {//
 
-const char *Song::getTag(mpd_tag_type type, unsigned idx) const
+std::string Song::get(mpd_tag_type type, unsigned idx) const
 {
+	std::string result;
 	const char *tag = mpd_song_get_tag(m_song.get(), type, idx);
-	return tag ? tag : "";
+	if (tag)
+		result = tag;
+	return result;
 }
 
 Song::Song(mpd_song *s)
@@ -96,31 +99,31 @@ std::string Song::getDirectory(unsigned idx) const
 std::string Song::getArtist(unsigned idx) const
 {
 	assert(m_song);
-	return getTag(MPD_TAG_ARTIST, idx);
+	return get(MPD_TAG_ARTIST, idx);
 }
 
 std::string Song::getTitle(unsigned idx) const
 {
 	assert(m_song);
-	return getTag(MPD_TAG_TITLE, idx);
+	return get(MPD_TAG_TITLE, idx);
 }
 
 std::string Song::getAlbum(unsigned idx) const
 {
 	assert(m_song);
-	return getTag(MPD_TAG_ALBUM, idx);
+	return get(MPD_TAG_ALBUM, idx);
 }
 
 std::string Song::getAlbumArtist(unsigned idx) const
 {
 	assert(m_song);
-	return getTag(MPD_TAG_ALBUM_ARTIST, idx);
+	return get(MPD_TAG_ALBUM_ARTIST, idx);
 }
 
 std::string Song::getTrack(unsigned idx) const
 {
 	assert(m_song);
-	std::string track = getTag(MPD_TAG_TRACK, idx);
+	std::string track = get(MPD_TAG_TRACK, idx);
 	if ((track.length() == 1 && track[0] != '0')
 	||  (track.length() > 3  && track[1] == '/'))
 		track = "0"+track;
@@ -140,37 +143,37 @@ std::string Song::getTrackNumber(unsigned idx) const
 std::string Song::getDate(unsigned idx) const
 {
 	assert(m_song);
-	return getTag(MPD_TAG_DATE, idx);
+	return get(MPD_TAG_DATE, idx);
 }
 
 std::string Song::getGenre(unsigned idx) const
 {
 	assert(m_song);
-	return getTag(MPD_TAG_GENRE, idx);
+	return get(MPD_TAG_GENRE, idx);
 }
 
 std::string Song::getComposer(unsigned idx) const
 {
 	assert(m_song);
-	return getTag(MPD_TAG_COMPOSER, idx);
+	return get(MPD_TAG_COMPOSER, idx);
 }
 
 std::string Song::getPerformer(unsigned idx) const
 {
 	assert(m_song);
-	return getTag(MPD_TAG_PERFORMER, idx);
+	return get(MPD_TAG_PERFORMER, idx);
 }
 
 std::string Song::getDisc(unsigned idx) const
 {
 	assert(m_song);
-	return getTag(MPD_TAG_DISC, idx);
+	return get(MPD_TAG_DISC, idx);
 }
 
 std::string Song::getComment(unsigned idx) const
 {
 	assert(m_song);
-	return getTag(MPD_TAG_COMMENT, idx);
+	return get(MPD_TAG_COMMENT, idx);
 }
 
 std::string Song::getLength(unsigned idx) const
@@ -318,7 +321,7 @@ std::string Song::ParseFormat(std::string::const_iterator &it, const std::string
 {
 	std::string result;
 	bool has_some_tags = 0;
-	MPD::Song::GetFunction get = 0;
+	MPD::Song::GetFunction get_fun = 0;
 	while (*++it != '}')
 	{
 		while (*it == '{')
@@ -345,21 +348,21 @@ std::string Song::ParseFormat(std::string::const_iterator &it, const std::string
 			if (*it == '%')
 			{
 				result += *it;
-				get = 0;
+				get_fun = 0;
 			}
 			else
-				get = charToGetFunction(*it);
+				get_fun = charToGetFunction(*it);
 			
-			if (get)
+			if (get_fun)
 			{
-				std::string tag = getTags(get, tags_separator);
+				std::string tag = getTags(get_fun, tags_separator);
 				if (!escape_chars.empty()) // prepend format escape character to all given chars to escape
 				{
 					for (size_t i = 0; i < escape_chars.length(); ++i)
 						for (size_t j = 0; (j = tag.find(escape_chars[i], j)) != std::string::npos; j += 2)
 							tag.replace(j, 1, std::string(1, FormatEscapeCharacter) + escape_chars[i]);
 				}
-				if (!tag.empty() && (get != &MPD::Song::getLength || getDuration() > 0))
+				if (!tag.empty() && (get_fun != &MPD::Song::getLength || getDuration() > 0))
 				{
 					if (delimiter && tag.size() > delimiter)
 						tag = ToString(wideShorten(ToWString(tag), delimiter));

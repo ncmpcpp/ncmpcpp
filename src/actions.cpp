@@ -1453,9 +1453,9 @@ void EditLibraryAlbum::Run()
 	
 	Statusbar::lock();
 	Statusbar::put() << NC::fmtBold << "Album: " << NC::fmtBoldEnd;
-	std::string new_album = wFooter->getString(myLibrary->Albums.current().value().Album);
+	std::string new_album = wFooter->getString(myLibrary->Albums.current().value().entry().album());
 	Statusbar::unlock();
-	if (!new_album.empty() && new_album != myLibrary->Albums.current().value().Album)
+	if (!new_album.empty() && new_album != myLibrary->Albums.current().value().entry().album())
 	{
 		bool success = 1;
 		Statusbar::msg("Updating tags...");
@@ -2193,7 +2193,7 @@ bool ToggleMediaLibrarySortMode::canBeRun() const
 
 void ToggleMediaLibrarySortMode::Run()
 {
-	myLibrary->toggleMTimeSort();
+	myLibrary->toggleSortMode();
 }
 
 bool RefetchLyrics::canBeRun() const

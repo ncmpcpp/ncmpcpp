@@ -1139,52 +1139,6 @@ void Connection::GetList(mpd_tag_type type, StringConsumer f)
 	GoIdle();
 }
 
-TagMTimeList Connection::GetListMTime(mpd_tag_type type, bool get_mtime)
-{
-	TagMTimeList result;
-	if (!itsConnection)
-		return result;
-	assert(!isCommandsListEnabled);
-	GoBusy();
-
-	if (!get_mtime)
-	{
-		mpd_search_db_tags(itsConnection, type);
-		mpd_search_commit(itsConnection);
-		while (mpd_pair *item = mpd_recv_pair_tag(itsConnection, type))
-		{
-			result.push_back(TagMTime(item->value));
-			mpd_return_pair(itsConnection, item);
-		}
-		mpd_response_finish(itsConnection);
-	}
-	else
-	{
-		mpd_send_list_all_meta(itsConnection, "/");
-		std::map<std::string, time_t> max_mtimes;
-		while (mpd_song *s = mpd_recv_song(itsConnection))
-		{
-			Song song(s);
-			const std::string &tag = song.getTag(type);
-			time_t mtime = song.getMTime();
-			auto mt = max_mtimes.find(tag);
-			if (mt == max_mtimes.end())
-				max_mtimes.insert(std::make_pair(tag, mtime));
-			else
-				mt->second = std::max(mt->second, mtime);
-		}
-		mpd_response_finish(itsConnection);
-
-		for (auto it = max_mtimes.begin(); it != max_mtimes.end(); ++it)
-		{
-			result.push_back(TagMTime(it->first, it->second));
-		}
-	}
-
-	GoIdle();
-	return result;
-}
-
 void Connection::StartSearch(bool exact_match)
 {
 	if (itsConnection)
@@ -1197,18 +1151,6 @@ void Connection::StartFieldSearch(mpd_tag_type item)
 	{
 		itsSearchedField = item;
 		mpd_search_db_tags(itsConnection, item);
-	}
-}
-void Connection::StartFieldSearchMTime(mpd_tag_type item, bool get_mtime)
-{
-	if (itsConnection)
-	{
-		itsSearchedField = item;
-		itsSearchFieldMTime = get_mtime;
-		if (!get_mtime)
-			mpd_search_db_tags(itsConnection, item);
-		else
-			mpd_search_db_songs(itsConnection, 1);
 	}
 }
 
@@ -1262,50 +1204,6 @@ void Connection::CommitSearchTags(StringConsumer f)
 	}
 	mpd_response_finish(itsConnection);
 	GoIdle();
-}
-
-TagMTimeList Connection::CommitSearchTagsMTime()
-{
-	TagMTimeList result;
-	if (!itsConnection)
-		return result;
-
-	assert(!isCommandsListEnabled);
-	GoBusy();
-	mpd_search_commit(itsConnection);
-
-	if (!itsSearchFieldMTime)
-	{
-		while (mpd_pair *tag = mpd_recv_pair_tag(itsConnection, itsSearchedField))
-		{
-			result.push_back(TagMTime(tag->value));
-			mpd_return_pair(itsConnection, tag);
-		}
-	}
-	else
-	{
-		std::map<std::string, time_t> max_mtimes;
-		while (mpd_song *s = mpd_recv_song(itsConnection))
-		{
-			Song song(s);
-			const std::string &tag = song.getTag(itsSearchedField);
-			time_t mtime = song.getMTime();
-			auto mt = max_mtimes.find(tag);
-			if (mt == max_mtimes.end())
-				max_mtimes.insert(std::make_pair(tag, mtime));
-			else
-				mt->second = std::max(mt->second, mtime);
-		}
-
-		for (auto it = max_mtimes.begin(); it != max_mtimes.end(); ++it)
-		{
-			result.push_back(TagMTime(it->first, it->second));
-		}
-	}
-	mpd_response_finish(itsConnection);
-	GoIdle();
-
-	return result;
 }
 
 void Connection::GetDirectory(const std::string &directory, ItemConsumer f)

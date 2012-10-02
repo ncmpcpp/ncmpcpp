@@ -73,31 +73,60 @@ struct MediaLibrary: Screen<NC::Window *>, Filterable, HasColumns, HasSongs, Sea
 	int Columns();
 	void LocateSong(const MPD::Song &);
 	ProxySongList songsProxyList();
+	void toggleSortMode();
 
-	// mtimes
-	bool hasMTimes();
-	void toggleMTimeSort();
-
-	struct SearchConstraints
+	struct PrimaryTag
 	{
-		SearchConstraints() { }
-		SearchConstraints(const std::string &tag, const std::string &album, const std::string &date) : PrimaryTag(tag), Album(album), Date(date), MTime(0) { }
-		SearchConstraints(const std::string &album, const std::string &date) : Album(album), Date(date), MTime(0) { }
-		SearchConstraints(const std::string &tag, const std::string &album, const std::string &date, time_t mtime) : PrimaryTag(tag), Album(album), Date(date), MTime(mtime) { }
-		SearchConstraints(const std::string &album, const std::string &date, time_t mtime) : Album(album), Date(date), MTime(mtime) { }
-
-		std::string PrimaryTag;
-		std::string Album;
-		std::string Date;
-		time_t MTime;
-	
-		bool operator<(const SearchConstraints &a) const;
-
-		bool hasMTime() { return MTime != 0; }
+		PrimaryTag(std::string tag_, time_t mtime_)
+		: m_tag(std::move(tag_)), m_mtime(mtime_) { }
+		
+		const std::string &tag() const { return m_tag; }
+		time_t mtime() const { return m_mtime; }
+		
+	private:
+		std::string m_tag;
+		time_t m_mtime;
 	};
-
-	NC::Menu<MPD::TagMTime> Tags;
-	NC::Menu<SearchConstraints> Albums;
+	
+	struct Album
+	{
+		Album(std::string tag_, std::string album_, std::string date_, time_t mtime_)
+		: m_tag(std::move(tag_)), m_album(std::move(album_))
+		, m_date(std::move(date_)), m_mtime(mtime_) { }
+		
+		const std::string &tag() const { return m_tag; }
+		const std::string &album() const { return m_album; }
+		const std::string &date() const { return m_date; }
+		time_t mtime() const { return m_mtime; }
+		
+	private:
+		std::string m_tag;
+		std::string m_album;
+		std::string m_date;
+		time_t m_mtime;
+	};
+	
+	struct AlbumEntry
+	{
+		AlbumEntry() : m_all_tracks_entry(false), m_album("", "", "", 0) { }
+		AlbumEntry(Album album_) : m_all_tracks_entry(false), m_album(album_) { }
+		
+		const Album &entry() const { return m_album; }
+		bool isAllTracksEntry() const { return m_all_tracks_entry; }
+		
+		static AlbumEntry mkAllTracksEntry(std::string tag) {
+			auto result = AlbumEntry(Album(tag, "", "", 0));
+			result.m_all_tracks_entry = true;
+			return result;
+		}
+		
+	private:
+		bool m_all_tracks_entry;
+		Album m_album;
+	};
+	
+	NC::Menu<PrimaryTag> Tags;
+	NC::Menu<AlbumEntry> Albums;
 	NC::Menu<MPD::Song> Songs;
 	
 protected:

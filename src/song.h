@@ -39,6 +39,8 @@ struct Song
 	
 	Song(mpd_song *s);
 	
+	std::string get(mpd_tag_type type, unsigned idx = 0) const;
+	
 	virtual std::string getURI(unsigned idx = 0) const;
 	virtual std::string getName(unsigned idx = 0) const;
 	virtual std::string getDirectory(unsigned idx = 0) const;
@@ -81,8 +83,6 @@ struct Song
 	static bool isFormatOk(const std::string &type, const std::string &fmt);
 	
 	static const char FormatEscapeCharacter = 1;
-	
-	const char *getTag(mpd_tag_type type, unsigned idx = 0) const;
 
 private:
 	std::string ParseFormat(std::string::const_iterator &it, const std::string &tags_separator,
