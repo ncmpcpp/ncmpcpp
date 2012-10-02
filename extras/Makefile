@@ -1,5 +1,5 @@
 CXX=g++
-CXXFLAGS=-O2 -g
+CXXFLAGS=-O2 -march=native -pipe -std=c++0x -Wall -Wextra -Wshadow -Werror
 CPPFLAGS=`taglib-config --cflags`
 LDFLAGS=`taglib-config --libs`
 
