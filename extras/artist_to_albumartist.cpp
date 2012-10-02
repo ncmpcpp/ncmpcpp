@@ -31,12 +31,20 @@
 
 enum class CopyResult { Success, NoArtist, AlbumArtistAlreadyInPlace };
 
+bool is_framelist_empty(const TagLib::ID3v2::FrameList &list)
+{
+	for (auto it = list.begin(); it != list.end(); ++it)
+		if ((*it)->toString() != TagLib::String::null)
+			return false;
+	return true;
+}
+
 CopyResult copy_album_artist(TagLib::ID3v2::Tag *tag)
 {
 	typedef TagLib::ID3v2::TextIdentificationFrame TextFrame;
 	
 	TagLib::ByteVector album_artist = "TPE2";
-	if (!tag->frameList(album_artist).isEmpty())
+	if (!is_framelist_empty(tag->frameList(album_artist)))
 		return CopyResult::AlbumArtistAlreadyInPlace;
 	
 	auto artists = tag->frameList("TPE1");
@@ -45,8 +53,10 @@ CopyResult copy_album_artist(TagLib::ID3v2::Tag *tag)
 	
 	for (auto it = artists.begin(); it != artists.end(); ++it)
 	{
+		// this cast should always succeed.
+		auto &textIt = dynamic_cast<TextFrame &>(**it);
 		auto frame = new TextFrame(album_artist, TagLib::String::UTF8);
-		frame->setText((*it)->toString());
+		frame->setText(textIt.fieldList());
 		tag->addFrame(frame);
 	}
 	
@@ -63,7 +73,7 @@ CopyResult copy_album_artist(TagLib::Ogg::XiphComment *tag)
 		return CopyResult::NoArtist;
 	
 	for (auto it = artists.begin(); it != artists.end(); ++it)
-		tag->addField("ALBUMARTIST", *it, true);
+		tag->addField("ALBUMARTIST", *it, false);
 	
 	return CopyResult::Success;
 }
@@ -129,8 +139,12 @@ int main(int argc, char **argv)
 	if (argc < 2)
 	{
 		std::cout << "This little script copies Artist tag (if present) to\n";
-		std::cout << "AlbumArtist (if not present) for given mp3/ogg/flac files.\n\n";
+		std::cout << "AlbumArtist (if not present) for given mp3/ogg/flac files.\n";
+		std::cout << "\n";
 		std::cout << "Usage: " << argv[0] << " [--dry-run] files\n";
+		std::cout << "\n";
+		std::cout << "Note: to run it recursively for all your files, you can use:\n";
+		std::cout << "$ find DIRECTORY \\( -name \"*.flac\" -o -name \"*.mp3\" -o -name \"*.ogg\" \\) -exec ./artist_to_albumartist [--dry-run] {} \\;\n";
 	}
 	else
 	{
