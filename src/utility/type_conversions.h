@@ -18,8 +18,8 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
-#ifndef _UTILITY_TYPE_CONVERSIONS
-#define _UTILITY_TYPE_CONVERSIONS
+#ifndef NCMPCPP_UTILITY_TYPE_CONVERSIONS_H
+#define NCMPCPP_UTILITY_TYPE_CONVERSIONS_H
 
 #include "mpdpp.h"
 #include "mutable_song.h"
@@ -32,4 +32,4 @@ MPD::Song::GetFunction charToGetFunction(char c);
 
 std::string itemTypeToString(MPD::ItemType type);
 
-#endif // _UTILITY_TYPE_CONVERSIONS
+#endif // NCMPCPP_UTILITY_TYPE_CONVERSIONS_H

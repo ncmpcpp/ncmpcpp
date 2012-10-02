@@ -18,8 +18,8 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
-#ifndef _PLAYLIST_H
-#define _PLAYLIST_H
+#ifndef NCMPCPP_PLAYLIST_H
+#define NCMPCPP_PLAYLIST_H
 
 #include <unordered_map>
 
@@ -104,5 +104,5 @@ private:
 
 extern Playlist *myPlaylist;
 
-#endif
+#endif // NCMPCPP_PLAYLIST_H
 

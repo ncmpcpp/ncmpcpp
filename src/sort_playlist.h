@@ -18,8 +18,8 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
-#ifndef _SORT_PLAYLIST
-#define _SORT_PLAYLIST
+#ifndef NCMPCPP_SORT_PLAYLIST_H
+#define NCMPCPP_SORT_PLAYLIST_H
 
 #include "exec_item.h"
 #include "interfaces.h"
@@ -65,4 +65,4 @@ private:
 
 extern SortPlaylistDialog *mySortPlaylistDialog;
 
-#endif // _SORT_PLAYLIST
+#endif // NCMPCPP_SORT_PLAYLIST_H

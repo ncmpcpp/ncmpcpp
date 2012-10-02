@@ -18,8 +18,8 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
-#ifndef _UTILITY_WIDE_STRING
-#define _UTILITY_WIDE_STRING
+#ifndef NCMPCPP_UTILITY_WIDE_STRING_H
+#define NCMPCPP_UTILITY_WIDE_STRING_H
 
 #include <string>
 
@@ -31,4 +31,4 @@ size_t wideLength(const std::wstring &ws);
 void wideCut(std::wstring &ws, size_t max_length);
 std::wstring wideShorten(const std::wstring &ws, size_t max_length);
 
-#endif // _UTILITY_WIDE_STRING
+#endif // NCMPCPP_UTILITY_WIDE_STRING_h

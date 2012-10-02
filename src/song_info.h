@@ -18,8 +18,8 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
-#ifndef _SONG_INFO_H
-#define _SONG_INFO_H
+#ifndef NCMPCPP_SONG_INFO_H
+#define NCMPCPP_SONG_INFO_H
 
 #include "interfaces.h"
 #include "mutable_song.h"
@@ -62,5 +62,5 @@ private:
 
 extern SongInfo *mySongInfo;
 
-#endif
+#endif // NCMPCPP_SONG_INFO_H
 

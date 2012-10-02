@@ -18,8 +18,8 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
-#ifndef _TINY_TAG_EDITOR_H
-#define _TINY_TAG_EDITOR_H
+#ifndef NCMPCPP_TINY_TAG_EDITOR_H
+#define NCMPCPP_TINY_TAG_EDITOR_H
 
 #include "config.h"
 
@@ -64,5 +64,5 @@ extern TinyTagEditor *myTinyTagEditor;
 
 #endif // HAVE_TAGLIB_H
 
-#endif
+#endif // NCMPCPP_TINY_TAG_EDITOR_H
 

@@ -18,8 +18,8 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
-#ifndef _PLAYLIST_EDITOR_H
-#define _PLAYLIST_EDITOR_H
+#ifndef NCMPCPP_PLAYLIST_EDITOR_H
+#define NCMPCPP_PLAYLIST_EDITOR_H
 
 #include "interfaces.h"
 #include "screen.h"
@@ -91,5 +91,5 @@ private:
 
 extern PlaylistEditor *myPlaylistEditor;
 
-#endif
+#endif // NCMPCPP_PLAYLIST_EDITOR_H
 

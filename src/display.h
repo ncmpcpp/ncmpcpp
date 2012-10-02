@@ -18,8 +18,8 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
-#ifndef _DISPLAY_H
-#define _DISPLAY_H
+#ifndef NCMPCPP_DISPLAY_H
+#define NCMPCPP_DISPLAY_H
 
 #include "interfaces.h"
 #include "menu.h"
@@ -50,5 +50,5 @@ void Items(NC::Menu<MPD::Item> &menu, const ProxySongList &pl);
 
 }
 
-#endif
+#endif // NCMPCPP_DISPLAY_H
 

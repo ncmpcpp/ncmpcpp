@@ -18,8 +18,8 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
-#ifndef _SEL_ITEMS_ADDER_H
-#define _SEL_ITEMS_ADDER_H
+#ifndef NCMPCPP_SEL_ITEMS_ADDER_H
+#define NCMPCPP_SEL_ITEMS_ADDER_H
 
 #include "exec_item.h"
 #include "interfaces.h"
@@ -80,5 +80,5 @@ private:
 
 extern SelectedItemsAdder *mySelectedItemsAdder;
 
-#endif
+#endif // NCMPCPP_SEL_ITEMS_ADDER_H
 

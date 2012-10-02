@@ -18,8 +18,8 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
-#ifndef _SCREEN_SWITCHER_H
-#define _SCREEN_SWITCHER_H
+#ifndef NCMPCPP_SCREEN_SWITCHER_H
+#define NCMPCPP_SCREEN_SWITCHER_H
 
 #include "global.h"
 
@@ -57,4 +57,4 @@ public:
 	}
 };
 
-#endif // _SCREEN_SWITCHER_H
+#endif // NCMPCPP_SCREEN_SWITCHER_H

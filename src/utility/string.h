@@ -18,8 +18,8 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
-#ifndef _UTILITY_STRING
-#define _UTILITY_STRING
+#ifndef NCMPCPP_UTILITY_STRING_H
+#define NCMPCPP_UTILITY_STRING_H
 
 #include <cstdarg>
 #include <locale>
@@ -80,4 +80,4 @@ std::string getEnclosedString(const std::string &s, char a, char b, size_t *pos)
 
 void removeInvalidCharsFromFilename(std::string &filename);
 
-#endif // _UTILITY_STRING
+#endif // NCMPCPP_UTILITY_STRING_H

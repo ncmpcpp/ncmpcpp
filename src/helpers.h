@@ -18,8 +18,8 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
-#ifndef _HELPERS_H
-#define _HELPERS_H
+#ifndef NCMPCPP_HELPERS_H
+#define NCMPCPP_HELPERS_H
 
 #include "interfaces.h"
 #include "mpdpp.h"
@@ -490,4 +490,4 @@ void markSongsInPlaylist(ProxySongList pl);
 
 std::wstring Scroller(const std::wstring &str, size_t &pos, size_t width);
 
-#endif
+#endif // NCMPCPP_HELPERS_H

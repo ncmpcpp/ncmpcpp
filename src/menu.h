@@ -18,8 +18,8 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
-#ifndef _MENU_H
-#define _MENU_H
+#ifndef NCMPCPP_MENU_H
+#define NCMPCPP_MENU_H
 
 #include <cassert>
 #include <functional>
@@ -855,4 +855,4 @@ template <typename T> void Menu<T>::prevFound(bool wrap)
 
 }
 
-#endif
+#endif // NCMPCPP_MENU_H

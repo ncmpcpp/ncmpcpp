@@ -18,8 +18,8 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
-#ifndef _TAGS_H
-#define _TAGS_H
+#ifndef NCMPCPP_TAGS_H
+#define NCMPCPP_TAGS_H
 
 #include "config.h"
 
@@ -39,4 +39,4 @@ bool write(MPD::MutableSong &);
 
 #endif // HAVE_TAGLIB_H
 
-#endif // _TAGS_H
+#endif // NCMPCPP_TAGS_H

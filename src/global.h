@@ -18,8 +18,8 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
-#ifndef _GLOBAL_H
-#define _GLOBAL_H
+#ifndef NCMPCPP_GLOBAL_H
+#define NCMPCPP_GLOBAL_H
 
 #include <sys/time.h>
 
@@ -64,4 +64,4 @@ extern timeval Timer;
 
 }
 
-#endif
+#endif // NCMPCPP_GLOBAL_H

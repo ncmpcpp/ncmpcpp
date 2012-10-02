@@ -18,8 +18,8 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
-#ifndef _EXEC_ITEM_H
-#define _EXEC_ITEM_H
+#ifndef NCMPCPP_EXEC_ITEM_H
+#define NCMPCPP_EXEC_ITEM_H
 
 #include <functional>
 
@@ -42,4 +42,4 @@ private:
 	Function m_exec;
 };
 
-#endif // _EXEC_ITEM_H
+#endif // NCMPCPP_EXEC_ITEM_H

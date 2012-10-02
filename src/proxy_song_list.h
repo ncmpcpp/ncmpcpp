@@ -18,8 +18,8 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
-#ifndef _PROXY_SONG_LIST
-#define _PROXY_SONG_LIST
+#ifndef NCMPCPP_PROXY_SONG_LIST_H
+#define NCMPCPP_PROXY_SONG_LIST_H
 
 #include "menu.h"
 #include "song.h"
@@ -127,4 +127,4 @@ public:
 	operator bool() const { return m_impl.get() != 0; }
 };
 
-#endif
+#endif // NCMPCPP_PROXY_SONG_LIST_H

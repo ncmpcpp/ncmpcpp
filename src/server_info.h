@@ -18,8 +18,8 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
-#ifndef _SERVER_INFO
-#define _SERVER_INFO
+#ifndef NCMPCPP_SERVER_INFO_H
+#define NCMPCPP_SERVER_INFO_H
 
 #include "interfaces.h"
 #include "screen.h"
@@ -57,5 +57,5 @@ private:
 
 extern ServerInfo *myServerInfo;
 
-#endif
+#endif // NCMPCPP_SERVER_INFO_H
 

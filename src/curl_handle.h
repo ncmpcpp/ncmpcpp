@@ -18,8 +18,8 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
-#ifndef _CURL_HANDLE_H
-#define _CURL_HANDLE_H
+#ifndef NCMPCPP_CURL_HANDLE_H
+#define NCMPCPP_CURL_HANDLE_H
 
 #ifdef HAVE_CONFIG_H
 # include "config.h"
@@ -39,5 +39,5 @@ namespace Curl
 
 #endif // HAVE_CURL_CURL_H
 
-#endif
+#endif // NCMPCPP_CURL_HANDLE_H
 

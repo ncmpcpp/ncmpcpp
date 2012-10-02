@@ -18,8 +18,8 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
-#ifndef _HELP_H
-#define _HELP_H
+#ifndef NCMPCPP_HELP_H
+#define NCMPCPP_HELP_H
 
 #include "actions.h"
 #include "interfaces.h"
@@ -59,5 +59,5 @@ private:
 
 extern Help *myHelp;
 
-#endif
+#endif // NCMPCPP_HELP_H
 

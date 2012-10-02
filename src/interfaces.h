@@ -18,8 +18,8 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
-#ifndef _INTERFACES_H
-#define _INTERFACES_H
+#ifndef NCMPCPP_INTERFACES_H
+#define NCMPCPP_INTERFACES_H
 
 #include <string>
 #include "gcc.h"
@@ -79,4 +79,4 @@ private:
 	BaseScreen *m_previous_screen;
 };
 
-#endif // _INTERFACES_H
+#endif // NCMPCPP_INTERFACES_H

@@ -18,8 +18,8 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
-#ifndef _ERROR_H
-#define _ERROR_H
+#ifndef NCMPCPP_ERROR_H
+#define NCMPCPP_ERROR_H
 
 #include <string>
 #include "gcc.h"
@@ -28,4 +28,4 @@
 
 void FatalError(const std::string &msg) GNUC_NORETURN;
 
-#endif
+#endif // NCMPCPP_ERROR_H

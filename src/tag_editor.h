@@ -18,8 +18,8 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
-#ifndef _TAG_EDITOR_H
-#define _TAG_EDITOR_H
+#ifndef NCMPCPP_TAG_EDITOR_H
+#define NCMPCPP_TAG_EDITOR_H
 
 #include "config.h"
 
@@ -105,7 +105,7 @@ private:
 
 extern TagEditor *myTagEditor;
 
-#endif
+#endif // HAVE_TAGLIB_H
 
-#endif
+#endif // NCMPCPP_TAG_EDITOR_H
 

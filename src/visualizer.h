@@ -18,8 +18,8 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
-#ifndef _VISUALIZER_H
-#define _VISUALIZER_H
+#ifndef NCMPCPP_VISUALIZER_H
+#define NCMPCPP_VISUALIZER_H
 
 #include "config.h"
 
@@ -86,5 +86,5 @@ extern Visualizer *myVisualizer;
 
 #endif // ENABLE_VISUALIZER
 
-#endif
+#endif // NCMPCPP_VISUALIZER_H
 

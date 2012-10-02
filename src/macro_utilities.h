@@ -18,8 +18,8 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
-#ifndef _MACRO_UTILITIES
-#define _MACRO_UTILITIES
+#ifndef NCMPCPP_MACRO_UTILITIES_H
+#define NCMPCPP_MACRO_UTILITIES_H
 
 #include <cassert>
 #include "actions.h"
@@ -64,4 +64,4 @@ private:
 	ScreenType m_screen_type;
 };
 
-#endif // _MACRO_UTILITIES
+#endif // NCMPCPP_MACRO_UTILITIES_H

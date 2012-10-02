@@ -18,8 +18,8 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
-#ifndef _BINDINGS_H
-#define _BINDINGS_H
+#ifndef NCMPCPP_BINDINGS_H
+#define NCMPCPP_BINDINGS_H
 
 #include <cassert>
 #include <unordered_map>
@@ -192,4 +192,4 @@ private:
 
 extern BindingsConfiguration Bindings;
 
-#endif // _BINDINGS_H
+#endif // NCMPCPP_BINDINGS_H

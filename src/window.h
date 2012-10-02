@@ -18,8 +18,8 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
-#ifndef _WINDOW_H
-#define _WINDOW_H
+#ifndef NCMPCPP_WINDOW_H
+#define NCMPCPP_WINDOW_H
 
 #include "config.h"
 
@@ -521,4 +521,4 @@ private:
 
 }
 
-#endif
+#endif // NCMPCPP_WINDOW_H

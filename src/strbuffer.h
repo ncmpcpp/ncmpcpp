@@ -18,8 +18,8 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
-#ifndef _STRBUFFER_H
-#define _STRBUFFER_H
+#ifndef NCMPCPP_STRBUFFER_H
+#define NCMPCPP_STRBUFFER_H
 
 #include <list>
 #include "utility/numeric_conversions.h"
@@ -399,4 +399,4 @@ template <typename CharT> BasicBuffer<CharT> &BasicBuffer<CharT>::operator<<(con
 
 }
 
-#endif
+#endif // NCMPCPP_STRBUFFER_H

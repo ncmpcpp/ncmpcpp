@@ -18,8 +18,8 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
-#ifndef _SONG_H
-#define _SONG_H
+#ifndef NCMPCPP_SONG_H
+#define NCMPCPP_SONG_H
 
 #include <functional>
 #include <memory>
@@ -96,5 +96,5 @@ typedef std::vector<Song> SongList;
 
 }
 
-#endif
+#endif // NCMPCPP_SONG_H
 

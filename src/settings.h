@@ -18,8 +18,8 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
-#ifndef _SETTINGS_H
-#define _SETTINGS_H
+#ifndef NCMPCPP_SETTINGS_H
+#define NCMPCPP_SETTINGS_H
 
 #include <cassert>
 #include <vector>
@@ -222,5 +222,5 @@ extern Configuration Config;
 
 void CreateDir(const std::string &dir);
 
-#endif
+#endif // NCMPCPP_SETTINGS_H
 

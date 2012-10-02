@@ -18,8 +18,8 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
-#ifndef _STATUSBAR_H
-#define _STATUSBAR_H
+#ifndef NCMPCPP_STATUSBAR_H
+#define NCMPCPP_STATUSBAR_H
 
 #include "gcc.h"
 #include "interfaces.h"
@@ -98,4 +98,4 @@ private:
 
 }
 
-#endif // _STATUSBAR_H
+#endif // NCMPCPP_STATUSBAR_H

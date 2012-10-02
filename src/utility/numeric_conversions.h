@@ -21,8 +21,8 @@
 #include <string>
 #include "string.h"
 
-#ifndef _UTILITY_NUMERIC_CONVERSIONS_H
-#define _UTILITY_NUMERIC_CONVERSIONS_H
+#ifndef NCMPCPP_UTILITY_NUMERIC_CONVERSIONS_H
+#define NCMPCPP_UTILITY_NUMERIC_CONVERSIONS_H
 
 template <typename R> struct intTo { };
 template <> struct intTo<std::string> {
@@ -72,4 +72,4 @@ template <> struct unsignedLongIntTo<std::wstring> {
 	}
 };
 
-#endif // _UTILITY_NUMERIC_CONVERSIONS_H
+#endif // NCMPCPP_UTILITY_NUMERIC_CONVERSIONS_H

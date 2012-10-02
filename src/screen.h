@@ -18,8 +18,8 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
-#ifndef _SCREEN_H
-#define _SCREEN_H
+#ifndef NCMPCPP_SCREEN_H
+#define NCMPCPP_SCREEN_H
 
 #include "menu.h"
 #include "scrollpad.h"
@@ -199,5 +199,5 @@ template <> inline void Screen<NC::Scrollpad>::mouseButtonPressed(MEVENT me) {
 	scrollpadMouseButtonPressed(w, me);
 }
 
-#endif
+#endif // NCMPCPP_SCREEN_H
 

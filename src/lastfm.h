@@ -18,8 +18,8 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
-#ifndef _H_LASTFM
-#define _H_LASTFM
+#ifndef NCMPCPP_LASTFM_H
+#define NCMPCPP_LASTFM_H
 
 #include "config.h"
 
@@ -86,5 +86,5 @@ extern Lastfm *myLastfm;
 
 #endif // HAVE_CURL_CURL_H
 
-#endif
+#endif // NCMPCPP_LASTFM_H
 

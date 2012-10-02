@@ -18,8 +18,8 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
-#ifndef _CHARSET_H
-#define _CHARSET_H
+#ifndef NCMPCPP_CHARSET_H
+#define NCMPCPP_CHARSET_H
 
 #include "config.h"
 #include <string>
@@ -50,5 +50,5 @@ inline void localeToUtf8_(std::string &) { }
 
 }
 
-#endif
+#endif // NCMPCPP_CHARSET_H
 

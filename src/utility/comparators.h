@@ -18,8 +18,8 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
-#ifndef _UTILITY_COMPARATORS
-#define _UTILITY_COMPARATORS
+#ifndef NCMPCPP_UTILITY_COMPARATORS_H
+#define NCMPCPP_UTILITY_COMPARATORS_H
 
 #include <string>
 #include "exec_item.h"
@@ -81,4 +81,4 @@ public:
 	}
 };
 
-#endif // _UTILITY_COMPARATORS
+#endif // NCMPCPP_UTILITY_COMPARATORS_H

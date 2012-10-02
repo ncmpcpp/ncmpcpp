@@ -18,8 +18,8 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
-#ifndef _H_MEDIA_LIBRARY
-#define _H_MEDIA_LIBRARY
+#ifndef NCMPCPP_MEDIA_LIBRARY_H
+#define NCMPCPP_MEDIA_LIBRARY_H
 
 #include "interfaces.h"
 #include "screen.h"
@@ -138,5 +138,5 @@ private:
 
 extern MediaLibrary *myLibrary;
 
-#endif
+#endif // NCMPCPP_MEDIA_LIBRARY_H
 
