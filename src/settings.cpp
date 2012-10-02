@@ -241,8 +241,6 @@ void Configuration::SetDefaults()
 	visualizer_in_stereo = false;
 	media_library_sort_by_mtime = false;
 	tag_editor_extended_numeration = false;
-	media_library_display_date = true;
-	media_library_display_empty_tag = true;
 	discard_colors_if_item_is_selected = true;
 	store_lyrics_in_song_dir = false;
 	ask_for_locked_screen_width_part = true;
@@ -779,14 +777,6 @@ void Configuration::Read()
 			else if (name == "tag_editor_extended_numeration")
 			{
 				tag_editor_extended_numeration = v == "yes";
-			}
-			else if (name == "media_library_display_date")
-			{
-				media_library_display_date = v == "yes";
-			}
-			else if (name == "media_library_display_empty_tag")
-			{
-				media_library_display_empty_tag = v == "yes";
 			}
 			else if (name == "discard_colors_if_item_is_selected")
 			{

@@ -433,10 +433,6 @@
 #
 #tag_editor_extended_numeration = "no"
 #
-#media_library_display_date = "yes"
-#
-#media_library_display_empty_tag = "yes"
-#
 #media_library_sort_by_mtime = "no"
 #
 #enable_window_title = "yes"
