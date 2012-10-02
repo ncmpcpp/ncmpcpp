@@ -61,7 +61,7 @@ public:
 	
 	template <typename ItemT, typename FunT>
 	bool operator()(const ExecItem<ItemT, FunT> &a, const ExecItem<ItemT, FunT> &b) const {
-		return m_cmp(a.item(), b.item());
+		return m_cmp(a.item(), b.item()) < 0;
 	}
 };
 
