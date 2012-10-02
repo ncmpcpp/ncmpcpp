@@ -70,7 +70,16 @@ void readID3v2Tags(MPD::MutableSong &s, TagLib::ID3v2::Tag *tag)
 	auto readFrame = [&s](const TagLib::ID3v2::FrameList &list, MPD::MutableSong::SetFunction f) {
 		unsigned idx = 0;
 		for (auto it = list.begin(); it != list.end(); ++it, ++idx)
-			(s.*f)((*it)->toString().to8Bit(true), idx);
+		{
+			if (auto textFrame = dynamic_cast<TagLib::ID3v2::TextIdentificationFrame *>(*it))
+			{
+				auto values = textFrame->fieldList();
+				for (auto value = values.begin(); value != values.end(); ++value, ++idx)
+					(s.*f)(value->to8Bit(true), idx);
+			}
+			else
+				(s.*f)((*it)->toString().to8Bit(true), idx);
+		}
 	};
 	auto &frames = tag->frameListMap();
 	readFrame(frames["TIT2"], &MPD::MutableSong::setTitle);
@@ -90,7 +99,7 @@ void readXiphComments(MPD::MutableSong &s, TagLib::Ogg::XiphComment *tag)
 {
 	auto readField = [&s](const TagLib::StringList &list, MPD::MutableSong::SetFunction f) {
 		unsigned idx = 0;
-		for (auto it = list.begin(); it != list.end(); ++it)
+		for (auto it = list.begin(); it != list.end(); ++it, ++idx)
 			(s.*f)(it->to8Bit(true), idx);
 	};
 	auto &fields = tag->fieldListMap();
@@ -133,9 +142,12 @@ void writeID3v2Tags(const MPD::MutableSong &s, TagLib::ID3v2::Tag *tag)
 {
 	auto writeID3v2 = [&](const TagLib::ByteVector &type, const TagLib::StringList &list) {
 		tag->removeFrames(type);
-		auto frame = new TagLib::ID3v2::TextIdentificationFrame(type, TagLib::String::UTF8);
-		frame->setText(list);
-		tag->addFrame(frame);
+		if (!list.isEmpty())
+		{
+			auto frame = new TagLib::ID3v2::TextIdentificationFrame(type, TagLib::String::UTF8);
+			frame->setText(list);
+			tag->addFrame(frame);
+		}
 	};
 	writeID3v2("TIT2", tagList(s, &MPD::Song::getTitle));
 	writeID3v2("TPE1", tagList(s, &MPD::Song::getArtist));
