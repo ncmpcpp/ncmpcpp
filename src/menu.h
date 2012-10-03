@@ -49,7 +49,7 @@ public:
 		
 		Item()
 		: m_is_bold(false), m_is_selected(false), m_is_inactive(false), m_is_separator(false) { }
-		Item(const T &value_, bool is_bold, bool is_inactive)
+		Item(T value_, bool is_bold, bool is_inactive)
 		: m_value(value_), m_is_bold(is_bold), m_is_selected(false), m_is_inactive(is_inactive), m_is_separator(false) { }
 		
 		T &value() { return m_value; }
@@ -208,8 +208,8 @@ public:
 	/// Adds new option to list
 	/// @param item object that has to be added
 	/// @param is_bold defines the initial state of bold attribute
-	/// @param is_static defines the initial state of static attribute
-	void addItem(const T &item, bool is_bold = 0, bool is_static = 0);
+	/// @param is_inactive defines the initial state of static attribute
+	void addItem(T item, bool is_bold = 0, bool is_inactive = 0);
 	
 	/// Adds separator to list
 	void addSeparator();
@@ -218,8 +218,8 @@ public:
 	/// @param pos initial position of inserted item
 	/// @param item object that has to be inserted
 	/// @param is_bold defines the initial state of bold attribute
-	/// @param is_static defines the initial state of static attribute
-	void insertItem(size_t pos, const T &Item, bool is_bold = 0, bool is_static = 0);
+	/// @param is_inactive defines the initial state of static attribute
+	void insertItem(size_t pos, const T &Item, bool is_bold = 0, bool is_inactive = 0);
 	
 	/// Inserts separator to list at given position
 	/// @param pos initial position of inserted separator
@@ -555,9 +555,9 @@ template <typename T> void Menu<T>::resizeList(size_t new_size)
 		m_options.resize(new_size);
 }
 
-template <typename T> void Menu<T>::addItem(const T &item, bool is_bold, bool is_inactive)
+template <typename T> void Menu<T>::addItem(T item, bool is_bold, bool is_inactive)
 {
-	m_options.push_back(Item(item, is_bold, is_inactive));
+	m_options.push_back(Item(std::forward<T>(item), is_bold, is_inactive));
 }
 
 template <typename T> void Menu<T>::addSeparator()
