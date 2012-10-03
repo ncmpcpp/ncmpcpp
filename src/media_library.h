@@ -74,9 +74,14 @@ struct MediaLibrary: Screen<NC::Window *>, Filterable, HasColumns, HasSongs, Sea
 	void LocateSong(const MPD::Song &);
 	ProxySongList songsProxyList();
 	void toggleSortMode();
-
+	
+	void requestTagsUpdate() { m_tags_update_request = true; }
+	void requestAlbumsUpdate() { m_albums_update_request = true; }
+	void requestSongsUpdate() { m_songs_update_request = true; }
+	
 	struct PrimaryTag
 	{
+		PrimaryTag() : m_mtime(0) { }
 		PrimaryTag(std::string tag_, time_t mtime_)
 		: m_tag(std::move(tag_)), m_mtime(mtime_) { }
 		
@@ -134,6 +139,10 @@ protected:
 	
 private:
 	void AddToPlaylist(bool);
+	
+	bool m_tags_update_request;
+	bool m_albums_update_request;
+	bool m_songs_update_request;
 };
 
 extern MediaLibrary *myLibrary;

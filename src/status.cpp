@@ -193,10 +193,9 @@ void Status::Changes::database()
 #	ifdef HAVE_TAGLIB_H
 	myTagEditor->Dirs->clear();
 #	endif // HAVE_TAGLIB_H
-	if (myLibrary->Columns() == 2)
-		myLibrary->Albums.clear();
-	else
-		myLibrary->Tags.clear();
+	myLibrary->requestTagsUpdate();
+	myLibrary->requestAlbumsUpdate();
+	myLibrary->requestSongsUpdate();
 }
 
 void Status::Changes::playerState()
