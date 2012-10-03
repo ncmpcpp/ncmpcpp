@@ -36,3 +36,9 @@ bool RequireScreen::canBeRun() const
 {
 	return Global::myScreen->type() == m_screen_type;
 }
+
+void RunExternalCommand::Run()
+{
+	GNUC_UNUSED int res;
+	res = std::system(m_command.c_str());
+}

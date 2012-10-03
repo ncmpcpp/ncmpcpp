@@ -64,4 +64,16 @@ private:
 	ScreenType m_screen_type;
 };
 
+struct RunExternalCommand : public Action
+{
+	RunExternalCommand(std::string command)
+	: Action(aMacroUtility, ""), m_command(command) { }
+	
+protected:
+	virtual void Run();
+	
+private:
+	std::string m_command;
+};
+
 #endif // NCMPCPP_MACRO_UTILITIES_H

@@ -147,6 +147,14 @@ Action *parseActionLine(const std::string &line, F error)
 			else
 				error() << "unknown action passed to require_runnable: '" << arg << "'\n";
 		}
+		else if (action_name == "run_external_command")
+		{
+			std::string command = getEnclosedString(line, '"', '"', 0);
+			if (!command.empty())
+				result = new RunExternalCommand(std::move(command));
+			else
+				error() << "empty command passed to run_external_command\n";
+		}
 	}
 	return result;
 }

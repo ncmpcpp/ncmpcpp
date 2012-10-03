@@ -95,6 +95,9 @@
 ##      selected_items_adder, server_info, song_info,
 ##      sort_playlist_dialog, tiny_tag_editor.
 ##
+##    - run_external_command "command" - runs given command using
+##      system() function.
+##
 ## 5) In addition to binding to a key, you can also bind actions
 ##    or chains of actions to a command. If it comes to commands,
 ##    syntax is very similar to defining keys. Here goes example
