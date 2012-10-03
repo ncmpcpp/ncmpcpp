@@ -410,26 +410,28 @@ void MediaLibrary::spacePressed()
 	{
 		if (isActiveWindow(Tags))
 		{
-			size_t i = Tags.choice();
-			Tags.at(i).setSelected(!Tags.at(i).isSelected());
+			size_t idx = Tags.choice();
+			Tags[idx].setSelected(!Tags[idx].isSelected());
+			Tags.scroll(NC::wDown);
 			Albums.clear();
 			Songs.clear();
 		}
 		else if (isActiveWindow(Albums))
 		{
-			if (Albums.current().value().isAllTracksEntry())
+			if (!Albums.current().value().isAllTracksEntry())
 			{
-				size_t i = Albums.choice();
-				Albums.at(i).setSelected(!Albums.at(i).isSelected());
+				size_t idx = Albums.choice();
+				Albums[idx].setSelected(!Albums[idx].isSelected());
+				Albums.scroll(NC::wDown);
 				Songs.clear();
 			}
 		}
 		else if (isActiveWindow(Songs))
 		{
-			size_t i = Songs.choice();
-			Songs.at(i).setSelected(!Songs.at(i).isSelected());
+			size_t idx = Songs.choice();
+			Songs[idx].setSelected(!Songs[idx].isSelected());
+			Songs.scroll(NC::wDown);
 		}
-		w->scroll(NC::wDown);
 	}
 	else
 		AddToPlaylist(0);
