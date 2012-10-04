@@ -22,6 +22,8 @@
 
 #ifdef HAVE_TAGLIB_H
 
+#include <boost/locale/conversion.hpp>
+
 // taglib includes
 #include <fileref.h>
 #include <tag.h>
@@ -39,6 +41,7 @@
 #include "title.h"
 #include "tags.h"
 #include "screen_switcher.h"
+#include "utility/string.h"
 
 using Global::MainHeight;
 using Global::MainStartY;
@@ -181,7 +184,7 @@ bool TinyTagEditor::getTags()
 		return false;
 	
 	std::string ext = itsEdited.getURI();
-	ext = lowercase(ext.substr(ext.rfind(".")+1));
+	ext = boost::locale::to_lower(ext.substr(ext.rfind(".")+1));
 	
 	w.clear();
 	w.reset();

@@ -21,8 +21,8 @@
 #ifndef NCMPCPP_STRBUFFER_H
 #define NCMPCPP_STRBUFFER_H
 
+#include <boost/lexical_cast.hpp>
 #include <set>
-#include "utility/numeric_conversions.h"
 #include "window.h"
 
 namespace NC {//
@@ -130,25 +130,25 @@ public:
 	
 	BasicBuffer<CharT> &operator<<(int n)
 	{
-		m_string += intTo<StringType>::apply(n);
+		m_string += boost::lexical_cast<StringType>(n);
 		return *this;
 	}
 	
 	BasicBuffer<CharT> &operator<<(long int n)
 	{
-		m_string += longIntTo<StringType>::apply(n);
+		m_string += boost::lexical_cast<StringType>(n);
 		return *this;
 	}
 	
 	BasicBuffer<CharT> &operator<<(unsigned int n)
 	{
-		m_string += unsignedIntTo<StringType>::apply(n);
+		m_string += boost::lexical_cast<StringType>(n);
 		return *this;
 	}
 	
 	BasicBuffer<CharT> &operator<<(unsigned long int n)
 	{
-		m_string += unsignedLongIntTo<StringType>::apply(n);
+		m_string += boost::lexical_cast<StringType>(n);
 		return *this;
 	}
 	

@@ -18,6 +18,7 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
+#include <boost/algorithm/string/trim.hpp>
 #include <fstream>
 #include <iostream>
 #include "global.h"
@@ -312,7 +313,7 @@ bool BindingsConfiguration::read(const std::string &file)
 		}
 		else if (isspace(line[0])) // name of action to be bound
 		{
-			trim(line);
+			boost::trim(line);
 			auto action = parseActionLine(line, error);
 			if (action)
 				actions.push_back(action);

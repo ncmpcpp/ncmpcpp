@@ -21,6 +21,8 @@
 #include <cassert>
 #include <cerrno>
 #include <cstring>
+#include <boost/locale/conversion.hpp>
+#include <boost/lexical_cast.hpp>
 #include <algorithm>
 #include <iostream>
 
@@ -1192,7 +1194,7 @@ void SetCrossfade::run()
 	Statusbar::put() << "Set crossfade to: ";
 	std::string crossfade = wFooter->getString(3);
 	Statusbar::unlock();
-	int cf = stringToInt(crossfade);
+	int cf = boost::lexical_cast<int>(crossfade);
 	if (cf > 0)
 	{
 		Config.crossfade_time = cf;
@@ -1503,11 +1505,11 @@ void ToggleScreenLock::run()
 		{
 			Statusbar::lock();
 			Statusbar::put() << "% of the locked screen's width to be reserved (20-80): ";
-			std::string str_part = wFooter->getString(intTo<std::string>::apply(Config.locked_screen_width_part*100));
+			std::string str_part = wFooter->getString(boost::lexical_cast<std::string>(Config.locked_screen_width_part*100));
 			Statusbar::unlock();
 			if (str_part.empty())
 				return;
-			part = stringToInt(str_part);
+			part = boost::lexical_cast<int>(str_part);
 		}
 		if (part < 20 || part > 80)
 		{
@@ -1562,7 +1564,8 @@ void JumpToPositionInSong::run()
 	int newpos = 0;
 	if (position.find(':') != std::string::npos) // probably time in mm:ss
 	{
-		newpos = stringToInt(position)*60 + stringToInt(position.substr(position.find(':')+1));
+		newpos = boost::lexical_cast<int>(position)*60
+		       + boost::lexical_cast<int>(position.substr(position.find(':')+1));
 		if (newpos >= 0 && newpos <= Mpd.GetTotalTime())
 			Mpd.Seek(newpos);
 		else
@@ -1570,7 +1573,7 @@ void JumpToPositionInSong::run()
 	}
 	else if (position.find('s') != std::string::npos) // probably position in seconds
 	{
-		newpos = stringToInt(position);
+		newpos = boost::lexical_cast<int>(position);
 		if (newpos >= 0 && newpos <= Mpd.GetTotalTime())
 			Mpd.Seek(newpos);
 		else
@@ -1578,7 +1581,7 @@ void JumpToPositionInSong::run()
 	}
 	else
 	{
-		newpos = stringToInt(position);
+		newpos = boost::lexical_cast<int>(position);
 		if (newpos >= 0 && newpos <= 100)
 			Mpd.Seek(Mpd.GetTotalTime()*newpos/100.0);
 		else
@@ -1934,14 +1937,14 @@ void AddRandomItems::run()
 	if (answer != 's')
 	{
 		tag_type = charToTagType(answer);
-		tag_type_str = lowercase(tagTypeToString(tag_type));
+		tag_type_str = boost::locale::to_lower(tagTypeToString(tag_type));
 	}
 	else
 		tag_type_str = "song";
 	
 	Statusbar::lock();
 	Statusbar::put() << "Number of random " << tag_type_str << "s: ";
-	size_t number = stringToLongInt(wFooter->getString());
+	size_t number = boost::lexical_cast<size_t>(wFooter->getString());
 	Statusbar::unlock();
 	if (number && (answer == 's' ? Mpd.AddRandomSongs(number) : Mpd.AddRandomTag(tag_type, number)))
 		Statusbar::msg("%zu random %s%s added to playlist", number, tag_type_str.c_str(), number == 1 ? "" : "s");
@@ -2005,7 +2008,7 @@ void ToggleLibraryTagType::run()
 		std::string item_type = tagTypeToString(Config.media_lib_primary_tag);
 		myLibrary->Tags.setTitle(Config.titles_visibility ? item_type + "s" : "");
 		myLibrary->Tags.reset();
-		item_type = lowercase(item_type);
+		item_type = boost::locale::to_lower(item_type);
 		std::string and_mtime = Config.media_library_sort_by_mtime ?
 		                        " and mtime" :
 		                        "";
@@ -2088,7 +2091,7 @@ void SetSelectedItemsPriority::run()
 	Statusbar::unlock();
 	if (!isInteger(strprio.c_str(), true))
 		return;
-	int prio = stringToInt(strprio);
+	int prio = boost::lexical_cast<int>(strprio);
 	if (prio < 0 || prio > 255)
 	{
 		Statusbar::msg("Number is out of range");
@@ -2112,7 +2115,7 @@ void FilterPlaylistOnPriorities::run()
 	Statusbar::unlock();
 	if (!isInteger(strprio.c_str(), false))
 		return;
-	unsigned prio = stringToInt(strprio);
+	unsigned prio = boost::lexical_cast<unsigned>(strprio);
 	myPlaylist->main().filter(myPlaylist->main().begin(), myPlaylist->main().end(),
 		[prio](const NC::Menu<MPD::Song>::Item &s) {
 			return s.value().getPrio() > prio;

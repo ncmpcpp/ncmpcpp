@@ -22,6 +22,7 @@
 #include <sys/stat.h>
 #include <cerrno>
 #include <cstring>
+#include <boost/locale/conversion.hpp>
 #include <algorithm>
 
 #include "browser.h"
@@ -32,14 +33,15 @@
 #include "helpers.h"
 #include "playlist.h"
 #include "regex_filter.h"
+#include "screen_switcher.h"
 #include "settings.h"
 #include "status.h"
 #include "statusbar.h"
 #include "tag_editor.h"
-#include "utility/comparators.h"
 #include "title.h"
 #include "tags.h"
-#include "screen_switcher.h"
+#include "utility/comparators.h"
+#include "utility/string.h"
 
 using namespace std::placeholders;
 
@@ -587,7 +589,7 @@ bool hasSupportedExtension(const std::string &file)
 	if (last_dot > file.length())
 		return false;
 	
-	std::string ext = lowercase(file.substr(last_dot+1));
+	std::string ext = boost::locale::to_lower(file.substr(last_dot+1));
 	return SupportedExtensions.find(ext) != SupportedExtensions.end();
 }
 

@@ -18,6 +18,7 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
+#include <boost/locale/conversion.hpp>
 #include <algorithm>
 #include <array>
 #include <cassert>
@@ -809,7 +810,8 @@ void MediaLibrary::toggleColumnsMode()
 			nextColumn();
 		if (Config.titles_visibility)
 		{
-			std::string item_type = lowercase(tagTypeToString(Config.media_lib_primary_tag));
+			std::string item_type = boost::locale::to_lower(
+				tagTypeToString(Config.media_lib_primary_tag));
 			std::string and_mtime = Config.media_library_sort_by_mtime ? " and mtime" : "";
 			Albums.setTitle("Albums (sorted by " + item_type + and_mtime + ")");
 		}
@@ -846,7 +848,8 @@ void MediaLibrary::toggleSortMode()
 		Songs.clear();
 		if (Config.titles_visibility)
 		{
-			std::string item_type = lowercase(tagTypeToString(Config.media_lib_primary_tag));
+			std::string item_type = boost::locale::to_lower(
+				tagTypeToString(Config.media_lib_primary_tag));
 			std::string and_mtime = Config.media_library_sort_by_mtime ? " and mtime" : "";
 			Albums.setTitle("Albums (sorted by " + item_type + and_mtime + ")");
 		}
@@ -887,7 +890,8 @@ void MediaLibrary::LocateSong(const MPD::Song &s)
 	}
 	if (primary_tag.empty())
 	{
-		std::string item_type = lowercase(tagTypeToString(Config.media_lib_primary_tag));
+		std::string item_type = boost::locale::to_lower(
+			tagTypeToString(Config.media_lib_primary_tag));
 		Statusbar::msg("Can't use this function because the song has no %s tag set", item_type.c_str());
 		return;
 	}
@@ -975,7 +979,8 @@ void MediaLibrary::AddToPlaylist(bool add_n_play)
 			if ((!Tags.empty() && isActiveWindow(Tags))
 			||  (isActiveWindow(Albums) && Albums.current().value().isAllTracksEntry()))
 			{
-				std::string tag_type = lowercase(tagTypeToString(Config.media_lib_primary_tag));
+				std::string tag_type = boost::locale::to_lower(
+					tagTypeToString(Config.media_lib_primary_tag));
 				Statusbar::msg("Songs with %s = \"%s\" added", tag_type.c_str(), Tags.current().value().tag().c_str());
 			}
 			else if (isActiveWindow(Albums))

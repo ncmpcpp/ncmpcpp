@@ -18,8 +18,8 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
+#include <boost/algorithm/string/split.hpp>
 #include "mutable_song.h"
-#include "utility/string.h"
 
 namespace MPD {//
 
@@ -168,7 +168,8 @@ void MutableSong::setDuration(unsigned int duration)
 
 void MutableSong::setTags(SetFunction set, const std::string &value, const std::string &delimiter)
 {
-	auto tags = split(value, delimiter);
+	std::vector<std::string> tags;
+	boost::iter_split(tags, value, boost::first_finder(delimiter));
 	size_t i = 0;
 	for (; i < tags.size(); ++i)
 		(this->*set)(tags[i], i);

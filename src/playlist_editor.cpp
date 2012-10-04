@@ -171,7 +171,7 @@ void PlaylistEditor::update()
 			{
 				title = "Playlist content";
 				title += " (";
-				title += unsignedLongIntTo<std::string>::apply(Content.size());
+				title += boost::lexical_cast<std::string>(Content.size());
 				title += " item";
 				if (Content.size() == 1)
 					title += ")";

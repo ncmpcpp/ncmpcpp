@@ -75,7 +75,7 @@ std::string keyToString(const Key &key, bool *print_backspace)
 	else if (key >= Key(KEY_F1, Key::NCurses) && key <= Key(KEY_F12, Key::NCurses))
 	{
 		result += "F";
-		result += intTo<std::string>::apply(key.getChar()-264);
+		result += boost::lexical_cast<std::string>(key.getChar()-264);
 	}
 	else if ((key == Key(KEY_BACKSPACE, Key::NCurses) || key == Key(KEY_BACKSPACE_2, Key::Standard)))
 	{

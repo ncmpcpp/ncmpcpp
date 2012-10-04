@@ -58,7 +58,6 @@ noinst_HEADERS = \
 	utility/comparators.h \
 	utility/html.h \
 	utility/string.h \
-	utility/numeric_conversions.h \
 	utility/type_conversions.h \
 	utility/wide_string.h \
 	bindings.h \

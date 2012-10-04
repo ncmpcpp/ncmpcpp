@@ -88,6 +88,14 @@ dnl =============================
 AS_IF([test -z "${BOOST_LIB_SUFFIX+x}"], [BOOST_LIB_SUFFIX=-mt])
 AC_ARG_VAR([BOOST_LIB_SUFFIX], [Boost library name suffix [default=-mt]])
 
+dnl ======================================
+dnl = checking for various boost headers =
+dnl ======================================
+AC_CHECK_HEADERS([boost/lexical_cast.hpp], ,
+	AC_MSG_ERROR(boost/lexical_cast.hpp is missing))
+AC_CHECK_HEADERS([boost/algorithm/string.hpp], ,
+	AC_MSG_ERROR(boost/algorithm/string.hpp is missing))
+
 dnl =============================
 dnl = checking for boost.locale =
 dnl =============================

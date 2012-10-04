@@ -20,6 +20,7 @@
 
 #include <cassert>
 #include <cstring>
+#include <boost/algorithm/string/replace.hpp>
 #include <iostream>
 
 #include "actions.h"
@@ -181,12 +182,13 @@ void ParseArgv(int argc, char **argv)
 						now_playing_format = "{";
 						now_playing_format += argv[i];
 						now_playing_format += "}";
-						replace(now_playing_format, "\\n", "\n");
-						replace(now_playing_format, "\\t", "\t");
+						boost::replace_all(now_playing_format, "\\n", "\n");
+						boost::replace_all(now_playing_format, "\\t", "\t");
 					}
 				}
-				std::cout << Charset::utf8ToLocale(
-					Mpd.GetCurrentlyPlayingSong().toString(now_playing_format, Config.tags_separator)) << "\n";
+				std::string np = Mpd.GetCurrentlyPlayingSong().toString(
+					now_playing_format, Config.tags_separator);
+				std::cout << Charset::utf8ToLocale(np) << "\n";
 			}
 			exit(0);
 		}

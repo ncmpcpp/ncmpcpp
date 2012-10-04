@@ -20,6 +20,7 @@
 
 #include <locale>
 #include "comparators.h"
+#include "utility/string.h"
 
 namespace {//
 

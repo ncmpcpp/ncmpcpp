@@ -35,7 +35,6 @@
 
 #include "global.h"
 #include "settings.h"
-#include "utility/numeric_conversions.h"
 #include "utility/wide_string.h"
 
 namespace {//
@@ -54,8 +53,8 @@ void readCommonTags(MPD::MutableSong &s, TagLib::Tag *tag)
 	s.setTitle(tag->title().to8Bit(true));
 	s.setArtist(tag->artist().to8Bit(true));
 	s.setAlbum(tag->album().to8Bit(true));
-	s.setDate(intTo<std::string>::apply(tag->year()));
-	s.setTrack(intTo<std::string>::apply(tag->track()));
+	s.setDate(boost::lexical_cast<std::string>(tag->year()));
+	s.setTrack(boost::lexical_cast<std::string>(tag->track()));
 	s.setGenre(tag->genre().to8Bit(true));
 	s.setComment(tag->comment().to8Bit(true));
 }
@@ -132,8 +131,8 @@ void writeCommonTags(const MPD::MutableSong &s, TagLib::Tag *tag)
 	tag->setTitle(ToWString(s.getTitle()));
 	tag->setArtist(ToWString(s.getArtist()));
 	tag->setAlbum(ToWString(s.getAlbum()));
-	tag->setYear(stringToInt(s.getDate()));
-	tag->setTrack(stringToInt(s.getTrack()));
+	tag->setYear(boost::lexical_cast<TagLib::uint>(s.getDate()));
+	tag->setTrack(boost::lexical_cast<TagLib::uint>(s.getTrack()));
 	tag->setGenre(ToWString(s.getGenre()));
 	tag->setComment(ToWString(s.getComment()));
 }

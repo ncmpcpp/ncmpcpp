@@ -37,6 +37,7 @@
 #include "charset.h"
 #include "cmdargs.h"
 #include "global.h"
+#include "error.h"
 #include "helpers.h"
 #include "lyrics.h"
 #include "playlist.h"
@@ -45,6 +46,15 @@
 #include "statusbar.h"
 #include "visualizer.h"
 #include "title.h"
+
+namespace boost {//
+
+void throw_exception(const std::exception &e)
+{
+	FatalError(std::string("Exception thrown: ") + e.what());
+}
+
+}
 
 namespace
 {

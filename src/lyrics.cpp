@@ -36,6 +36,7 @@
 #include "statusbar.h"
 #include "title.h"
 #include "screen_switcher.h"
+#include "utility/string.h"
 
 using Global::MainHeight;
 using Global::MainStartY;

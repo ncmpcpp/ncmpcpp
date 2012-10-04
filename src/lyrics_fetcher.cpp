@@ -24,6 +24,8 @@
 
 #include <cstdlib>
 #include <cstring>
+#include <boost/algorithm/string/replace.hpp>
+#include <boost/algorithm/string/trim.hpp>
 
 #include "charset.h"
 #include "lyrics_fetcher.h"
@@ -55,8 +57,8 @@ LyricsFetcher::Result LyricsFetcher::fetch(const std::string &artist, const std:
 	result.first = false;
 	
 	std::string url = getURL();
-	replace(url, "%artist%", artist.c_str());
-	replace(url, "%title%", title.c_str());
+	boost::replace_all(url, "%artist%", artist.c_str());
+	boost::replace_all(url, "%title%", title.c_str());
 	
 	std::string data;
 	CURLcode code = Curl::perform(data, url);
@@ -101,7 +103,7 @@ bool LyricsFetcher::getContent(const char *open_tag, const char *close_tag, std:
 void LyricsFetcher::postProcess(std::string &data)
 {
 	stripHtmlTags(data);
-	trim(data);
+	boost::trim(data);
 }
 
 /***********************************************************************/
@@ -136,9 +138,9 @@ LyricsFetcher::Result LyricwikiFetcher::fetch(const std::string &artist, const s
 			return result;
 		}
 		
-		replace(data, "<br />", "\n");
+		boost::replace_all(data, "<br />", "\n");
 		stripHtmlTags(data);
-		trim(data);
+		boost::trim(data);
 		
 		result.second = data;
 		result.first = true;
@@ -227,8 +229,8 @@ void MetrolyricsFetcher::postProcess(std::string &data)
 	// some of lyrics have both \n chars and <br />, html tags
 	// are always present whereas \n chars are not, so we need to
 	// throw them away to avoid having line breaks doubled.
-	replace(data, "&#10;", "");
-	replace(data, "<br />", "\n");
+	boost::replace_all(data, "&#10;", "");
+	boost::replace_all(data, "<br />", "\n");
 	data = unescapeHtmlUtf8(data);
 	LyricsFetcher::postProcess(data);
 }

@@ -22,9 +22,11 @@
 
 #ifdef HAVE_CURL_CURL_H
 
+#include <boost/algorithm/string/trim.hpp>
 #include "curl_handle.h"
 #include "settings.h"
 #include "utility/html.h"
+#include "utility/string.h"
 
 const char *LastfmService::baseURL = "http://ws.audioscrobbler.com/2.0/?api_key=d94e5b6e26469a2d1ffae8ef20131b79&method=";
 
@@ -92,7 +94,7 @@ bool LastfmService::actionFailed(const std::string &data)
 void LastfmService::postProcess(std::string &data)
 {
 	stripHtmlTags(data);
-	trim(data);
+	boost::trim(data);
 }
 
 /***********************************************************************/

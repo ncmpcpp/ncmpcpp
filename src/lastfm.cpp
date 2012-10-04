@@ -31,6 +31,7 @@
 #include <cassert>
 #include <cerrno>
 #include <cstring>
+#include <boost/locale/conversion.hpp>
 #include <fstream>
 #include <iostream>
 
@@ -41,6 +42,7 @@
 #include "statusbar.h"
 #include "title.h"
 #include "screen_switcher.h"
+#include "utility/string.h"
 
 using Global::MainHeight;
 using Global::MainStartY;
@@ -112,7 +114,7 @@ void Lastfm::Load()
 	w.reset();
 	
 	std::string artist = itsArgs.find("artist")->second;
-	std::string file = lowercase(artist + ".txt");
+	std::string file = boost::locale::to_lower(artist + ".txt");
 	removeInvalidCharsFromFilename(file);
 	
 	itsFilename = itsFolder + "/" + file;

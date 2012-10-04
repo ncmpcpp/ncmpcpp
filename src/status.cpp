@@ -37,6 +37,7 @@
 #include "tag_editor.h"
 #include "visualizer.h"
 #include "title.h"
+#include "utility/string.h"
 
 using Global::myScreen;
 
@@ -325,7 +326,7 @@ void Status::Changes::elapsedTime()
 		if (Config.display_bitrate && Mpd.GetBitrate())
 		{
 			tracklength += " ";
-			tracklength += intTo<std::string>::apply(Mpd.GetBitrate());
+			tracklength += boost::lexical_cast<std::string>(Mpd.GetBitrate());
 			tracklength += " kbps";
 		}
 		
@@ -359,7 +360,7 @@ void Status::Changes::elapsedTime()
 		if (Config.display_bitrate && Mpd.GetBitrate())
 		{
 			tracklength += " [";
-			tracklength += intTo<std::string>::apply(Mpd.GetBitrate());
+			tracklength += boost::lexical_cast<std::string>(Mpd.GetBitrate());
 			tracklength += " kbps]";
 		}
 		tracklength += " [";
@@ -498,7 +499,7 @@ void Status::Changes::mixer()
 		VolumeState += "n/a";
 	else
 	{
-		VolumeState += intTo<std::string>::apply(volume);
+		VolumeState += boost::lexical_cast<std::string>(volume);
 		VolumeState += "%";
 	}
 	*wHeader << Config.volume_color;

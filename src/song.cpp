@@ -20,11 +20,12 @@
 
 #include <cassert>
 #include <cstring>
+#include <boost/format.hpp>
+#include <boost/lexical_cast.hpp>
 #include <iostream>
 #include <memory>
 
 #include "song.h"
-#include "utility/numeric_conversions.h"
 #include "utility/type_conversions.h"
 #include "utility/wide_string.h"
 #include "window.h"
@@ -193,7 +194,7 @@ std::string Song::getPriority(unsigned idx) const
 	assert(m_song);
 	if (idx > 0)
 		return "";
-	return unsignedIntTo<std::string>::apply(getPrio());
+	return boost::lexical_cast<std::string>(getPrio());
 }
 
 std::string MPD::Song::getTags(GetFunction f, const std::string &tags_separator) const
@@ -281,9 +282,9 @@ std::string Song::ShowTime(unsigned length)
 	
 	std::string result;
 	if (hours > 0)
-		result = print<32, std::string>::apply("%d:%02d:%02d", hours, minutes, seconds);
+		result = (boost::format("%d:%02d:%02d") % hours % minutes % seconds).str();
 	else
-		result = print<32, std::string>::apply("%d:%02d", minutes, seconds);
+		result = (boost::format("%d:%02d") % minutes % seconds).str();
 	return result;
 }
 
@@ -309,7 +310,7 @@ bool MPD::Song::isFormatOk(const std::string &type, const std::string &fmt)
 			while (isdigit(fmt[++i])) { }
 		if (!charToGetFunction(fmt[i]))
 		{
-			std::cerr << type << ": invalid character at position " << unsignedLongIntTo<std::string>::apply(i+1) << ": '" << fmt[i] << "'\n";
+			std::cerr << type << ": invalid character at position " << boost::lexical_cast<std::string>(i+1) << ": '" << fmt[i] << "'\n";
 			return false;
 		}
 	}

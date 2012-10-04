@@ -22,6 +22,7 @@
 
 #ifdef HAVE_TAGLIB_H
 
+#include <boost/locale/conversion.hpp>
 #include <algorithm>
 #include <fstream>
 #include <sstream>
@@ -475,9 +476,9 @@ void TagEditor::enterPressed()
 			for (unsigned i = 1; i <= EditedSongs.size(); ++i, ++it)
 			{
 				if (Config.tag_editor_extended_numeration)
-					(*it)->setTrack(unsignedIntTo<std::string>::apply(i) + "/" + unsignedIntTo<std::string>::apply(EditedSongs.size()));
+					(*it)->setTrack(boost::lexical_cast<std::string>(i) + "/" + boost::lexical_cast<std::string>(EditedSongs.size()));
 				else
-					(*it)->setTrack(unsignedIntTo<std::string>::apply(i));
+					(*it)->setTrack(boost::lexical_cast<std::string>(i));
 			}
 			Statusbar::msg("Tracks numbered");
 		}
@@ -1034,7 +1035,7 @@ void LowerAllLetters(MPD::MutableSong &s)
 	{
 		unsigned i = 0;
 		for (std::string tag; !(tag = (s.*m->Get)(i)).empty(); ++i)
-			(s.*m->Set)(ToString(lowercase(ToWString(tag))), i);
+			(s.*m->Set)(boost::locale::to_lower(tag), i);
 	}
 }
 
@@ -1046,7 +1047,7 @@ void GetPatternList()
 		if (input.is_open())
 		{
 			std::string line;
-			while (getline(input, line))
+			while (std::getline(input, line))
 				if (!line.empty())
 					Patterns.push_back(line);
 				input.close();

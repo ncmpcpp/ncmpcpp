@@ -31,46 +31,7 @@ template <size_t N> size_t const_strlen(const char (&)[N]) {
 	return N-1;
 }
 
-template <size_t N, typename T> struct print { };
-template <size_t N> struct print<N, std::string> {
-	static std::string apply(const char *format, ...) GNUC_PRINTF(1, 2) {
-		char buf[N];
-		va_list args;
-		va_start(args, format);
-		vsnprintf(buf, sizeof(buf)/sizeof(char), format, args);
-		va_end(args);
-		return buf;
-	}
-};
-template <size_t N> struct print<N, std::wstring> {
-	static std::wstring apply(const wchar_t *format, ...) {
-		wchar_t buf[N];
-		va_list args;
-		va_start(args, format);
-		vswprintf(buf, sizeof(buf)/sizeof(wchar_t), format, args);
-		va_end(args);
-		return buf;
-	}
-};
-
-template <typename CharT>
-std::basic_string<CharT> lowercase(std::basic_string<CharT> s)
-{
-	std::locale loc;
-	const std::ctype<CharT> &ct = std::use_facet< std::ctype<CharT> >(loc);
-	for (auto it = s.begin(); it != s.end(); ++it)
-		*it = ct.tolower(*it);
-	return s;
-}
-
-int stringToInt(const std::string &s);
-long stringToLongInt(const std::string &s);
 bool isInteger(const char *s, bool accept_signed);
-
-std::vector<std::string> split(const std::string &s, const std::string &delimiter);
-void replace(std::string &s, const std::string &from, const std::string &to);
-
-void trim(std::string &s);
 
 std::string getBasename(const std::string &path);
 std::string getParentDirectory(const std::string &path);

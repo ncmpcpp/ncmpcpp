@@ -26,6 +26,7 @@
 #include "screen.h"
 #include "settings.h"
 #include "status.h"
+#include "utility/string.h"
 #include "utility/wide_string.h"
 
 inline HasColumns *hasColumns(BaseScreen *screen)

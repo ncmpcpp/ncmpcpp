@@ -28,6 +28,7 @@
 #include "playlist.h"
 #include "global.h"
 #include "tag_editor.h"
+#include "utility/string.h"
 #include "utility/type_conversions.h"
 
 using Global::myScreen;

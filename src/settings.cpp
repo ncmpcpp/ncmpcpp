@@ -26,6 +26,7 @@
 # include <sys/stat.h>
 #endif // WIN32
 #include <algorithm>
+#include <boost/algorithm/string/trim.hpp>
 #include <cstdlib>
 #include <cstring>
 #include <string>
@@ -101,7 +102,7 @@ namespace
 		if (equal == std::string::npos)
 			return "";
 		std::string result = s.substr(0, equal);
-		trim(result);
+		boost::trim(result);
 		return result;
 	}
 	
@@ -346,33 +347,33 @@ void Configuration::Read()
 			}
 			else if (name == "mpd_port")
 			{
-				if (stringToInt(v))
-					mpd_port = stringToInt(v);
+				if (boost::lexical_cast<int>(v))
+					mpd_port = boost::lexical_cast<int>(v);
 			}
 			else if (name == "mpd_connection_timeout")
 			{
-				if (stringToInt(v))
-					mpd_connection_timeout = stringToInt(v);
+				if (boost::lexical_cast<int>(v))
+					mpd_connection_timeout = boost::lexical_cast<int>(v);
 			}
 			else if (name == "mpd_crossfade_time")
 			{
-				if (stringToInt(v) > 0)
-					crossfade_time = stringToInt(v);
+				if (boost::lexical_cast<int>(v) > 0)
+					crossfade_time = boost::lexical_cast<int>(v);
 			}
 			else if (name == "seek_time")
 			{
-				if (stringToInt(v) > 0)
-					seek_time = stringToInt(v);
+				if (boost::lexical_cast<int>(v) > 0)
+					seek_time = boost::lexical_cast<int>(v);
 			}
 			else if (name == "playlist_disable_highlight_delay")
 			{
-				if (stringToInt(v) >= 0)
-					playlist_disable_highlight_delay = stringToInt(v);
+				if (boost::lexical_cast<int>(v) >= 0)
+					playlist_disable_highlight_delay = boost::lexical_cast<int>(v);
 			}
 			else if (name == "message_delay_time")
 			{
-				if (stringToInt(v) > 0)
-					message_delay_time = stringToInt(v);
+				if (boost::lexical_cast<int>(v) > 0)
+					message_delay_time = boost::lexical_cast<int>(v);
 			}
 			else if (name == "song_list_format")
 			{
@@ -775,20 +776,20 @@ void Configuration::Read()
 			else if (name == "lines_scrolled")
 			{
 				if (!v.empty())
-					lines_scrolled = stringToInt(v);
+					lines_scrolled = boost::lexical_cast<int>(v);
 			}
 			else if (name == "search_engine_default_search_mode")
 			{
 				if (!v.empty())
 				{
-					unsigned mode = stringToInt(v);
+					unsigned mode = boost::lexical_cast<unsigned>(v);
 					if (--mode < 3)
 						search_engine_default_search_mode = mode;
 				}
 			}
 			else if (name == "visualizer_sync_interval")
 			{
-				unsigned interval = stringToInt(v);
+				unsigned interval = boost::lexical_cast<unsigned>(v);
 				if (interval)
 					visualizer_sync_interval = interval;
 			}
@@ -803,7 +804,7 @@ void Configuration::Read()
 			}
 			else if (name == "locked_screen_width_part")
 			{
-				int part = stringToInt(v);
+				int part = boost::lexical_cast<int>(v);
 				if (part)
 					locked_screen_width_part = part/100.0;
 			}
@@ -937,7 +938,13 @@ void Configuration::GenerateColumns()
 		col.color = stringToColor(getEnclosedString(song_list_columns_format, '[', ']', &pos));
 		std::string tag_type = getEnclosedString(song_list_columns_format, '{', '}', &pos);
 		
-		col.fixed = *width.rbegin() == 'f';
+		if (*width.rbegin() == 'f')
+		{
+			col.fixed = true;
+			width.resize(width.size()-1);
+		}
+		else
+			col.fixed = false;
 		
 		// alternative name
 		size_t tag_type_colon_pos = tag_type.find(':');
@@ -973,7 +980,7 @@ void Configuration::GenerateColumns()
 		else // empty column
 			col.display_empty_tag = 0;
 		
-		col.width = stringToInt(width);
+		col.width = boost::lexical_cast<int>(width);
 		columns.push_back(col);
 	}
 	

@@ -18,8 +18,9 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
+#include <boost/algorithm/string/replace.hpp>
 #include "utility/html.h"
-#include "utility/string.h"
+//#include "utility/string.h"
 
 std::string unescapeHtmlUtf8(const std::string &data)
 {
@@ -58,10 +59,10 @@ void stripHtmlTags(std::string &s)
 		size_t j = s.find(">", i)+1;
 		s.replace(i, j-i, "");
 	}
-	replace(s, "&#039;", "'");
-	replace(s, "&amp;", "&");
-	replace(s, "&quot;", "\"");
-	replace(s, "&nbsp;", " ");
+	boost::replace_all(s, "&#039;", "'");
+	boost::replace_all(s, "&amp;", "&");
+	boost::replace_all(s, "&quot;", "\"");
+	boost::replace_all(s, "&nbsp;", " ");
 	for (size_t i = 0; i < s.length(); ++i)
 	{
 		if (erase)
