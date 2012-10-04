@@ -23,8 +23,8 @@
 
 #include <string>
 
-std::string ToString(const std::wstring &ws);
-std::wstring ToWString(const std::string &s);
+std::string ToString(std::wstring ws);
+std::wstring ToWString(std::string s);
 
 size_t wideLength(const std::wstring &ws);
 

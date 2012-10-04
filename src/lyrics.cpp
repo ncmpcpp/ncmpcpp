@@ -249,8 +249,7 @@ void *Lyrics::Download()
 	{
 		Save(itsFilename, result.second);
 		w.clear();
-		IConv::utf8ToLocale_(result.second);
-		w << result.second;
+		w << Charset::utf8ToLocale(result.second);
 	}
 	else
 		w << '\n' << L"Lyrics weren't found.";
@@ -320,12 +319,11 @@ void Lyrics::Load()
 	{
 		bool first = 1;
 		std::string line;
-		while (getline(input, line))
+		while (std::getline(input, line))
 		{
 			if (!first)
 				w << '\n';
-			IConv::utf8ToLocale_(line);
-			w << line;
+			w << Charset::utf8ToLocale(line);
 			first = 0;
 		}
 		w.flush();

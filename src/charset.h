@@ -21,34 +21,16 @@
 #ifndef NCMPCPP_CHARSET_H
 #define NCMPCPP_CHARSET_H
 
-#include "config.h"
 #include <string>
 
-namespace IConv {//
+namespace Charset {//
 
-#ifdef HAVE_ICONV_H
-
-void convertFromTo(const char *from, const char *to, std::string &s);
+std::string toUtf8From(std::string s, const char *charset);
+std::string fromUtf8To(std::string s, const char *charset);
 
 std::string utf8ToLocale(std::string s);
 std::string localeToUtf8(std::string s);
 
-void utf8ToLocale_(std::string &s);
-void localeToUtf8_(std::string &s);
-
-#else
-
-inline void convertFromTo(const char *, const char *, std::string &) { }
-
-inline std::string utf8ToLocale(std::string s) { return s; }
-inline std::string localeToUtf8(std::string s) { return s; }
-
-inline void utf8ToLocale_(std::string &) { }
-inline void localeToUtf8_(std::string &) { }
-
-#endif // HAVE_ICONV_H
-
 }
 
 #endif // NCMPCPP_CHARSET_H
-

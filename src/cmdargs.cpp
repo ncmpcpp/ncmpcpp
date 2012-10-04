@@ -89,9 +89,6 @@ void ParseArgv(int argc, char **argv)
 #			ifdef HAVE_CURL_CURL_H
 			<< " curl"
 #			endif
-#			ifdef HAVE_ICONV_H
-			<< " iconv"
-#			endif
 #			ifdef HAVE_FFTW3_H
 			<< " fftw"
 #			endif
@@ -188,7 +185,7 @@ void ParseArgv(int argc, char **argv)
 						replace(now_playing_format, "\\t", "\t");
 					}
 				}
-				std::cout << IConv::utf8ToLocale(
+				std::cout << Charset::utf8ToLocale(
 					Mpd.GetCurrentlyPlayingSong().toString(now_playing_format, Config.tags_separator)) << "\n";
 			}
 			exit(0);

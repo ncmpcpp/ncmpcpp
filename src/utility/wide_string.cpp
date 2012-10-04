@@ -18,31 +18,17 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
+#include <boost/locale/encoding.hpp>
 #include "utility/wide_string.h"
 
-std::string ToString(const std::wstring &ws)
+std::string ToString(std::wstring ws)
 {
-	std::string result;
-	char s[MB_CUR_MAX];
-	for (size_t i = 0; i < ws.length(); ++i)
-	{
-		int n = wcrtomb(s, ws[i], 0);
-		if (n > 0)
-			result.append(s, n);
-	}
-	return result;
+	return boost::locale::conv::utf_to_utf<char>(ws);
 }
 
-std::wstring ToWString(const std::string &s)
+std::wstring ToWString(std::string s)
 {
-	std::wstring result;
-	wchar_t *ws = new wchar_t[s.length()];
-	const char *c_s = s.c_str();
-	int n = mbsrtowcs(ws, &c_s, s.length(), 0);
-	if (n > 0)
-		result.append(ws, n);
-	delete [] ws;
-	return result;
+	return boost::locale::conv::utf_to_utf<wchar_t>(s);
 }
 
 size_t wideLength(const std::wstring &ws)

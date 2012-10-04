@@ -314,6 +314,7 @@ void MediaLibrary::update()
 				}
 				if (idx < Tags.size())
 					Tags.resizeList(idx);
+				std::sort(Tags.beginV(), Tags.endV(), SortPrimaryTags());
 			});
 			Tags.refresh();
 		}

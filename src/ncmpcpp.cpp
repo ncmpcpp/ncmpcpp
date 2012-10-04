@@ -89,8 +89,8 @@ int main(int argc, char **argv)
 	using Global::VolumeState;
 	using Global::Timer;
 	
-	srand(time(0));
-	setlocale(LC_ALL, "");
+	std::srand(std::time(0));
+	std::setlocale(LC_ALL, "");
 	std::locale::global(std::locale(""));
 	
 	Config.CheckForCommandLineConfigFilePath(argv, argc);
