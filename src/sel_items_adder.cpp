@@ -68,7 +68,7 @@ SelectedItemsAdder::SelectedItemsAdder()
 		MainStartY+(MainHeight-m_position_selector_height)/2,
 		m_position_selector_width,
 		m_position_selector_height,
-		"Where?",
+		"Scroll?",
 		Config.main_color,
 		Config.window_border
 	);

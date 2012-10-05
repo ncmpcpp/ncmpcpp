@@ -44,7 +44,7 @@ struct Visualizer: Screen<NC::Window>, Tabbable
 	virtual ScreenType type() OVERRIDE { return ScreenType::Visualizer; }
 	
 	virtual void update() OVERRIDE;
-	virtual void scroll(NC::Where) OVERRIDE { }
+	virtual void scroll(NC::Scroll) OVERRIDE { }
 	
 	virtual void enterPressed() OVERRIDE { }
 	virtual void spacePressed() OVERRIDE;

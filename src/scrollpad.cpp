@@ -130,25 +130,25 @@ void Scrollpad::resize(size_t new_width, size_t new_height)
 	flush();
 }
 
-void Scrollpad::scroll(Where where)
+void Scrollpad::scroll(Scroll where)
 {
 	assert(m_real_height >= m_height);
 	size_t max_beginning = m_real_height - m_height;
 	switch (where)
 	{
-		case wUp:
+		case Scroll::Up:
 		{
 			if (m_beginning > 0)
 				--m_beginning;
 			break;
 		}
-		case wDown:
+		case Scroll::Down:
 		{
 			if (m_beginning < max_beginning)
 				++m_beginning;
 			break;
 		}
-		case wPageUp:
+		case Scroll::PageUp:
 		{
 			if (m_beginning > m_height)
 				m_beginning -= m_height;
@@ -156,17 +156,17 @@ void Scrollpad::scroll(Where where)
 				m_beginning = 0;
 			break;
 		}
-		case wPageDown:
+		case Scroll::PageDown:
 		{
 			m_beginning = std::min(m_beginning + m_height, max_beginning);
 			break;
 		}
-		case wHome:
+		case Scroll::Home:
 		{
 			m_beginning = 0;
 			break;
 		}
-		case wEnd:
+		case Scroll::End:
 		{
 			m_beginning = max_beginning;
 			break;

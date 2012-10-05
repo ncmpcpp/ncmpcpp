@@ -232,7 +232,7 @@ void PlaylistEditor::AddToPlaylist(bool add_n_play)
 		addSongToPlaylist(Content.current().value(), add_n_play);
 	
 	if (!add_n_play)
-		w->scroll(NC::wDown);
+		w->scroll(NC::Scroll::Down);
 }
 
 void PlaylistEditor::enterPressed()
@@ -249,7 +249,7 @@ void PlaylistEditor::spacePressed()
 			if (!Playlists.empty())
 			{
 				Playlists.current().setSelected(!Playlists.current().isSelected());
-				Playlists.scroll(NC::wDown);
+				Playlists.scroll(NC::Scroll::Down);
 			}
 		}
 		else if (isActiveWindow(Content))
@@ -257,7 +257,7 @@ void PlaylistEditor::spacePressed()
 			if (!Content.empty())
 			{
 				Content.current().setSelected(!Content.current().isSelected());
-				Content.scroll(NC::wDown);
+				Content.scroll(NC::Scroll::Down);
 			}
 		}
 	}
@@ -284,7 +284,7 @@ void PlaylistEditor::mouseButtonPressed(MEVENT me)
 				size_t pos = Playlists.choice();
 				spacePressed();
 				if (pos < Playlists.size()-1)
-					Playlists.scroll(NC::wUp);
+					Playlists.scroll(NC::Scroll::Up);
 			}
 		}
 		else
@@ -308,7 +308,7 @@ void PlaylistEditor::mouseButtonPressed(MEVENT me)
 				size_t pos = Content.choice();
 				spacePressed();
 				if (pos < Content.size()-1)
-					Content.scroll(NC::wUp);
+					Content.scroll(NC::Scroll::Up);
 			}
 			else
 				enterPressed();

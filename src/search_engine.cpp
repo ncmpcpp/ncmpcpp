@@ -189,8 +189,8 @@ void SearchEngine::enterPressed()
 			if (Config.block_search_constraints_change)
 				for (size_t i = 0; i < StaticOptions-4; ++i)
 					w.at(i).setInactive(true);
-			w.scroll(NC::wDown);
-			w.scroll(NC::wDown);
+			w.scroll(NC::Scroll::Down);
+			w.scroll(NC::Scroll::Down);
 		}
 		else
 			Statusbar::msg("No results found");
@@ -214,12 +214,12 @@ void SearchEngine::spacePressed()
 	if (Config.space_selects)
 	{
 		w.current().setSelected(!w.current().isSelected());
-		w.scroll(NC::wDown);
+		w.scroll(NC::Scroll::Down);
 		return;
 	}
 	
 	addSongToPlaylist(w.current().value().song(), false);
-	w.scroll(NC::wDown);
+	w.scroll(NC::Scroll::Down);
 }
 
 void SearchEngine::mouseButtonPressed(MEVENT me)
@@ -240,7 +240,7 @@ void SearchEngine::mouseButtonPressed(MEVENT me)
 				size_t pos = w.choice();
 				spacePressed();
 				if (pos < w.size()-1)
-					w.scroll(NC::wUp);
+					w.scroll(NC::Scroll::Up);
 			}
 			else
 				enterPressed();

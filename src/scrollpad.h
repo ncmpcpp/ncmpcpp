@@ -83,7 +83,7 @@ struct Scrollpad: public Window
 	/// @param where indicates where exactly one wants to go
 	/// @see Window::scroll()
 	///
-	virtual void scroll(Where where) OVERRIDE;
+	virtual void scroll(Scroll where) OVERRIDE;
 	
 	/// Resizes the window
 	/// @param new_width new window's width

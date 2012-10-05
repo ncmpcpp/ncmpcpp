@@ -40,7 +40,7 @@ struct Clock: Screen<NC::Window>, Tabbable
 	virtual ScreenType type() OVERRIDE { return ScreenType::Clock; }
 	
 	virtual void update() OVERRIDE;
-	virtual void scroll(NC::Where) OVERRIDE { }
+	virtual void scroll(NC::Scroll) OVERRIDE { }
 	
 	virtual void enterPressed() OVERRIDE { }
 	virtual void spacePressed() OVERRIDE { }

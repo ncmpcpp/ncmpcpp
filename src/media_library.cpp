@@ -418,7 +418,7 @@ void MediaLibrary::spacePressed()
 		{
 			size_t idx = Tags.choice();
 			Tags[idx].setSelected(!Tags[idx].isSelected());
-			Tags.scroll(NC::wDown);
+			Tags.scroll(NC::Scroll::Down);
 			Albums.clear();
 			Songs.clear();
 		}
@@ -428,7 +428,7 @@ void MediaLibrary::spacePressed()
 			{
 				size_t idx = Albums.choice();
 				Albums[idx].setSelected(!Albums[idx].isSelected());
-				Albums.scroll(NC::wDown);
+				Albums.scroll(NC::Scroll::Down);
 				Songs.clear();
 			}
 		}
@@ -436,7 +436,7 @@ void MediaLibrary::spacePressed()
 		{
 			size_t idx = Songs.choice();
 			Songs[idx].setSelected(!Songs[idx].isSelected());
-			Songs.scroll(NC::wDown);
+			Songs.scroll(NC::Scroll::Down);
 		}
 	}
 	else
@@ -479,7 +479,7 @@ void MediaLibrary::mouseButtonPressed(MEVENT me)
 				size_t pos = Tags.choice();
 				spacePressed();
 				if (pos < Tags.size()-1)
-					Tags.scroll(NC::wUp);
+					Tags.scroll(NC::Scroll::Up);
 			}
 		}
 		else
@@ -507,7 +507,7 @@ void MediaLibrary::mouseButtonPressed(MEVENT me)
 				size_t pos = Albums.choice();
 				spacePressed();
 				if (pos < Albums.size()-1)
-					Albums.scroll(NC::wUp);
+					Albums.scroll(NC::Scroll::Up);
 			}
 		}
 		else
@@ -526,7 +526,7 @@ void MediaLibrary::mouseButtonPressed(MEVENT me)
 				size_t pos = Songs.choice();
 				spacePressed();
 				if (pos < Songs.size()-1)
-					Songs.scroll(NC::wUp);
+					Songs.scroll(NC::Scroll::Up);
 			}
 			else
 				enterPressed();
@@ -981,7 +981,7 @@ void MediaLibrary::AddToPlaylist(bool add_n_play)
 
 	if (!add_n_play)
 	{
-		w->scroll(NC::wDown);
+		w->scroll(NC::Scroll::Down);
 		if (isActiveWindow(Tags))
 		{
 			Albums.clear();

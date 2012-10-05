@@ -133,7 +133,7 @@ void SortPlaylistDialog::moveSortOrderDown()
 	if ((cur+1)->item().second)
 	{
 		std::iter_swap(cur, cur+1);
-		w.scroll(NC::wDown);
+		w.scroll(NC::Scroll::Down);
 	}
 }
 
@@ -143,7 +143,7 @@ void SortPlaylistDialog::moveSortOrderUp()
 	if (cur > w.beginV() && cur->item().second)
 	{
 		std::iter_swap(cur, cur-1);
-		w.scroll(NC::wUp);
+		w.scroll(NC::Scroll::Up);
 	}
 }
 

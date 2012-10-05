@@ -795,22 +795,22 @@ int Window::getTimeout() const
 	return m_window_timeout;
 }
 
-void Window::scroll(Where where)
+void Window::scroll(Scroll where)
 {
 	idlok(m_window, 1);
 	scrollok(m_window, 1);
 	switch (where)
 	{
-		case wUp:
+		case Scroll::Up:
 			wscrl(m_window, 1);
 			break;
-		case wDown:
+		case Scroll::Down:
 			wscrl(m_window, -1);
 			break;
-		case wPageUp:
+		case Scroll::PageUp:
 			wscrl(m_window, m_width);
 			break;
-		case wPageDown:
+		case Scroll::PageDown:
 			wscrl(m_window, -m_width);
 			break;
 		default:

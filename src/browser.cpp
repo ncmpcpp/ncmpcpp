@@ -153,7 +153,7 @@ void Browser::spacePressed()
 	{
 		i = w.choice();
 		w.at(i).setSelected(!w.at(i).isSelected());
-		w.scroll(NC::wDown);
+		w.scroll(NC::Scroll::Down);
 		return;
 	}
 	
@@ -198,7 +198,7 @@ void Browser::spacePressed()
 			break;
 		}
 	}
-	w.scroll(NC::wDown);
+	w.scroll(NC::Scroll::Down);
 }
 
 void Browser::mouseButtonPressed(MEVENT me)
@@ -221,7 +221,7 @@ void Browser::mouseButtonPressed(MEVENT me)
 					size_t pos = w.choice();
 					spacePressed();
 					if (pos < w.size()-1)
-						w.scroll(NC::wUp);
+						w.scroll(NC::Scroll::Up);
 				}
 				break;
 			case itPlaylist:
@@ -231,7 +231,7 @@ void Browser::mouseButtonPressed(MEVENT me)
 					size_t pos = w.choice();
 					spacePressed();
 					if (pos < w.size()-1)
-						w.scroll(NC::wUp);
+						w.scroll(NC::Scroll::Up);
 				}
 				else
 					enterPressed();

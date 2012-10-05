@@ -127,7 +127,7 @@ enum Format {
 enum Border { brNone, brBlack, brRed, brGreen, brYellow, brBlue, brMagenta, brCyan, brWhite };
 
 /// This indicates how much the window has to be scrolled
-enum Where { wUp, wDown, wPageUp, wPageDown, wHome, wEnd };
+enum class Scroll { Up, Down, PageUp, PageDown, Home, End };
 
 /// Helper function that is invoked each time one will want
 /// to obtain string from Window::getString() function
@@ -334,7 +334,7 @@ struct Window
 	
 	/// Scrolls the window by amount of lines given in its parameter
 	/// @param where indicates how many lines it has to scroll
-	virtual void scroll(Where where);
+	virtual void scroll(Scroll where);
 	
 	/// Applies function of compatible prototype to internal WINDOW pointer
 	/// The mostly used function in this case seem to be wclrtoeol(), which

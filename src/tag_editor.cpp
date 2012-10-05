@@ -507,7 +507,7 @@ void TagEditor::enterPressed()
 			Statusbar::unlock();
 			if (new_tag != Tags->current().value().getTags(get, Config.tags_separator))
 				Tags->current().value().setTags(set, new_tag, Config.tags_separator);
-			Tags->scroll(NC::wDown);
+			Tags->scroll(NC::Scroll::Down);
 		}
 	}
 	else
@@ -532,7 +532,7 @@ void TagEditor::enterPressed()
 				Statusbar::unlock();
 				if (!new_name.empty() && new_name != old_name)
 					s.setNewURI(new_name + extension);
-				Tags->scroll(NC::wDown);
+				Tags->scroll(NC::Scroll::Down);
 			}
 		}
 		else if (id == 16) // capitalize first letters
@@ -591,7 +591,7 @@ void TagEditor::spacePressed()
 	if (w == Tags && !Tags->empty())
 	{
 		Tags->current().setSelected(!Tags->current().isSelected());
-		w->scroll(NC::wDown);
+		w->scroll(NC::Scroll::Down);
 	}
 }
 

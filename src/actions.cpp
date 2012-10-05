@@ -527,13 +527,13 @@ void MouseEvent::Run()
 
 void ScrollUp::Run()
 {
-	myScreen->scroll(NC::wUp);
+	myScreen->scroll(NC::Scroll::Up);
 	ListsChangeFinisher();
 }
 
 void ScrollDown::Run()
 {
-	myScreen->scroll(NC::wDown);
+	myScreen->scroll(NC::Scroll::Down);
 	ListsChangeFinisher();
 }
 
@@ -631,25 +631,25 @@ void ScrollDownAlbum::Run()
 
 void PageUp::Run()
 {
-	myScreen->scroll(NC::wPageUp);
+	myScreen->scroll(NC::Scroll::PageUp);
 	ListsChangeFinisher();
 }
 
 void PageDown::Run()
 {
-	myScreen->scroll(NC::wPageDown);
+	myScreen->scroll(NC::Scroll::PageDown);
 	ListsChangeFinisher();
 }
 
 void MoveHome::Run()
 {
-	myScreen->scroll(NC::wHome);
+	myScreen->scroll(NC::Scroll::Home);
 	ListsChangeFinisher();
 }
 
 void MoveEnd::Run()
 {
-	myScreen->scroll(NC::wEnd);
+	myScreen->scroll(NC::Scroll::End);
 	ListsChangeFinisher();
 }
 

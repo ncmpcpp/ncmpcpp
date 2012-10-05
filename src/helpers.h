@@ -167,7 +167,7 @@ void moveSelectedItemsUp(NC::Menu<MPD::Song> &m, F swap_fun)
 				// if we move only one item, do not select it. however, if single item
 				// was selected prior to move, it'll deselect it. oh well.
 				list[0]->setSelected(false);
-				m.scroll(NC::wUp);
+				m.scroll(NC::Scroll::Up);
 			}
 		}
 	}
@@ -201,7 +201,7 @@ void moveSelectedItemsDown(NC::Menu<MPD::Song> &m, F swap_fun)
 				// if we move only one item, do not select it. however, if single item
 				// was selected prior to move, it'll deselect it. oh well.
 				list[0]->setSelected(false);
-				m.scroll(NC::wDown);
+				m.scroll(NC::Scroll::Down);
 			}
 		}
 	}

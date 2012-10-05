@@ -284,7 +284,7 @@ public:
 	/// Scrolls by given amount of lines
 	/// @param where indicated where exactly one wants to go
 	/// @see Window::scroll()
-	virtual void scroll(Where where) OVERRIDE;
+	virtual void scroll(Scroll where) OVERRIDE;
 	
 	/// Cleares all options, used filters etc. It doesn't reset highlighted position though.
 	/// @see reset()
@@ -609,9 +609,9 @@ template <typename T> void Menu<T>::refresh()
 	
 	if (!isHighlightable(m_highlight))
 	{
-		scroll(wUp);
+		scroll(Scroll::Up);
 		if (!isHighlightable(m_highlight))
-			scroll(wDown);
+			scroll(Scroll::Down);
 	}
 	
 	size_t line = 0;
@@ -655,7 +655,7 @@ template <typename T> void Menu<T>::refresh()
 	Window::refresh();
 }
 
-template <typename T> void Menu<T>::scroll(Where where)
+template <typename T> void Menu<T>::scroll(Scroll where)
 {
 	if (m_options_ptr->empty())
 		return;
@@ -664,42 +664,42 @@ template <typename T> void Menu<T>::scroll(Where where)
 	size_t max_visible_highlight = m_beginning+m_height-1;
 	switch (where)
 	{
-		case wUp:
+		case Scroll::Up:
 		{
 			if (m_highlight <= m_beginning && m_highlight > 0)
 				--m_beginning;
 			if (m_highlight == 0)
 			{
 				if (m_cyclic_scroll_enabled)
-					return scroll(wEnd);
+					return scroll(Scroll::End);
 				break;
 			}
 			else
 				--m_highlight;
 			if (!isHighlightable(m_highlight))
-				scroll(m_highlight == 0 && !m_cyclic_scroll_enabled ? wDown : wUp);
+				scroll(m_highlight == 0 && !m_cyclic_scroll_enabled ? Scroll::Down : Scroll::Up);
 			break;
 		}
-		case wDown:
+		case Scroll::Down:
 		{
 			if (m_highlight >= max_visible_highlight && m_highlight < max_highlight)
 				++m_beginning;
 			if (m_highlight == max_highlight)
 			{
 				if (m_cyclic_scroll_enabled)
-					return scroll(wHome);
+					return scroll(Scroll::Home);
 				break;
 			}
 			else
 				++m_highlight;
 			if (!isHighlightable(m_highlight))
-				scroll(m_highlight == max_highlight && !m_cyclic_scroll_enabled ? wUp : wDown);
+				scroll(m_highlight == max_highlight && !m_cyclic_scroll_enabled ? Scroll::Up : Scroll::Down);
 			break;
 		}
-		case wPageUp:
+		case Scroll::PageUp:
 		{
 			if (m_cyclic_scroll_enabled && m_highlight == 0)
-				return scroll(wEnd);
+				return scroll(Scroll::End);
 			if (m_highlight < m_height)
 				m_highlight = 0;
 			else
@@ -709,35 +709,35 @@ template <typename T> void Menu<T>::scroll(Where where)
 			else
 				m_beginning -= m_height;
 			if (!isHighlightable(m_highlight))
-				scroll(m_highlight == 0 && !m_cyclic_scroll_enabled ? wDown : wUp);
+				scroll(m_highlight == 0 && !m_cyclic_scroll_enabled ? Scroll::Down : Scroll::Up);
 			break;
 		}
-		case wPageDown:
+		case Scroll::PageDown:
 		{
 			if (m_cyclic_scroll_enabled && m_highlight == max_highlight)
-				return scroll(wHome);
+				return scroll(Scroll::Home);
 			m_highlight += m_height;
 			m_beginning += m_height;
 			m_beginning = std::min(m_beginning, max_beginning);
 			m_highlight = std::min(m_highlight, max_highlight);
 			if (!isHighlightable(m_highlight))
-				scroll(m_highlight == max_highlight && !m_cyclic_scroll_enabled ? wUp : wDown);
+				scroll(m_highlight == max_highlight && !m_cyclic_scroll_enabled ? Scroll::Up : Scroll::Down);
 			break;
 		}
-		case wHome:
+		case Scroll::Home:
 		{
 			m_highlight = 0;
 			m_beginning = 0;
 			if (!isHighlightable(m_highlight))
-				scroll(wDown);
+				scroll(Scroll::Down);
 			break;
 		}
-		case wEnd:
+		case Scroll::End:
 		{
 			m_highlight = max_highlight;
 			m_beginning = max_beginning;
 			if (!isHighlightable(m_highlight))
-				scroll(wUp);
+				scroll(Scroll::Up);
 			break;
 		}
 	}

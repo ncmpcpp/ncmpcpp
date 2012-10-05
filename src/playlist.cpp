@@ -108,7 +108,7 @@ void Playlist::spacePressed()
 	if (!w.empty())
 	{
 		w.current().setSelected(!w.current().isSelected());
-		w.scroll(NC::wDown);
+		w.scroll(NC::Scroll::Down);
 	}
 }
 
