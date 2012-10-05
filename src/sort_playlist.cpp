@@ -18,6 +18,7 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
+#include "charset.h"
 #include "display.h"
 #include "global.h"
 #include "helpers.h"
@@ -43,7 +44,7 @@ SortPlaylistDialog::SortPlaylistDialog()
 	w.cyclicScrolling(Config.use_cyclic_scrolling);
 	w.centeredCursor(Config.centered_cursor);
 	w.setItemDisplayer([](Self::WindowType &menu) {
-		menu << menu.drawn()->value().item().first;
+		menu << Charset::utf8ToLocale(menu.drawn()->value().item().first);
 	});
 	
 	w.addItem(Entry(std::make_pair("Artist", &MPD::Song::getArtist),

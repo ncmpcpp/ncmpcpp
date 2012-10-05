@@ -51,7 +51,9 @@ TinyTagEditor::TinyTagEditor()
 	w.setHighlightColor(Config.main_highlight_color);
 	w.cyclicScrolling(Config.use_cyclic_scrolling);
 	w.centeredCursor(Config.centered_cursor);
-	w.setItemDisplayer(Display::Default<NC::Buffer>);
+	w.setItemDisplayer([](NC::Menu<NC::Buffer> &menu) {
+		menu << menu.drawn()->value();
+	});
 }
 
 void TinyTagEditor::resize()

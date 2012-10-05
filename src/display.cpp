@@ -21,6 +21,7 @@
 #include <cassert>
 
 #include "browser.h"
+#include "charset.h"
 #include "display.h"
 #include "helpers.h"
 #include "song_info.h"
@@ -108,7 +109,7 @@ void showSongs(NC::Menu<T> &menu, const MPD::Song &s, const ProxySongList &pl, c
 	setProperties(menu, s, pl, separate_albums, is_now_playing, is_selected, discard_colors);
 	
 	size_t y = menu.getY();
-	std::string line = s.toString(format, Config.tags_separator, "$");
+	std::string line = Charset::utf8ToLocale(s.toString(format, Config.tags_separator, "$"));
 	for (auto it = line.begin(); it != line.end(); ++it)
 	{
 		if (*it == '$')
@@ -222,7 +223,8 @@ void showSongsInColumns(NC::Menu<T> &menu, const MPD::Song &s, const ProxySongLi
 		for (size_t i = 0; i < it->type.length(); ++i)
 		{
 			MPD::Song::GetFunction get = charToGetFunction(it->type[i]);
-			tag = ToWString(get ? s.getTags(get, Config.tags_separator) : "");
+			assert(get);
+			tag = ToWString(Charset::utf8ToLocale(s.getTags(get, Config.tags_separator)));
 			if (!tag.empty())
 				break;
 		}
@@ -326,11 +328,11 @@ std::string Display::Columns(size_t list_width)
 		if (it->right_alignment)
 		{
 			result += std::string(x_off, KEY_SPACE);
-			result += ToString(name);
+			result += Charset::utf8ToLocale(ToString(name));
 		}
 		else
 		{
-			result += ToString(name);
+			result += Charset::utf8ToLocale(ToString(name));
 			result += std::string(x_off, KEY_SPACE);
 		}
 		
@@ -364,22 +366,19 @@ void Display::Tags(NC::Menu<MPD::MutableSong> &menu)
 	size_t i = myTagEditor->TagTypes->choice();
 	if (i < 11)
 	{
-		ShowTag(menu, s.getTags(SongInfo::Tags[i].Get, Config.tags_separator));
+		ShowTag(menu, Charset::utf8ToLocale(s.getTags(SongInfo::Tags[i].Get, Config.tags_separator)));
 	}
 	else if (i == 12)
 	{
 		if (s.getNewURI().empty())
-			menu << s.getName();
+			menu << Charset::utf8ToLocale(s.getName());
 		else
-			menu << s.getName() << Config.color2 << " -> " << NC::clEnd << s.getNewURI();
+			menu << Charset::utf8ToLocale(s.getName())
+			     << Config.color2 << " -> " << NC::clEnd
+			     << Charset::utf8ToLocale(s.getNewURI());
 	}
 }
 #endif // HAVE_TAGLIB_H
-
-void Display::Outputs(NC::Menu<MPD::Output> &menu)
-{
-	menu << menu.drawn()->value().name();
-}
 
 void Display::Items(NC::Menu<MPD::Item> &menu, const ProxySongList &pl)
 {
@@ -387,7 +386,9 @@ void Display::Items(NC::Menu<MPD::Item> &menu, const ProxySongList &pl)
 	switch (item.type)
 	{
 		case MPD::itDirectory:
-			menu << "[" << getBasename(item.name) << "]";
+			menu << "["
+			     << Charset::utf8ToLocale(getBasename(item.name))
+			     << "]";
 			break;
 		case MPD::itSong:
 			if (!Config.columns_in_browser)
@@ -396,12 +397,13 @@ void Display::Items(NC::Menu<MPD::Item> &menu, const ProxySongList &pl)
 				showSongsInColumns(menu, *item.song, pl);
 			break;
 		case MPD::itPlaylist:
-			menu << Config.browser_playlist_prefix << getBasename(item.name);
+			menu << Config.browser_playlist_prefix
+			     << Charset::utf8ToLocale(getBasename(item.name));
 			break;
 	}
 }
 
-void Display::SearchEngine(NC::Menu<SEItem> &menu, const ProxySongList &pl)
+void Display::SEItems(NC::Menu<SEItem> &menu, const ProxySongList &pl)
 {
 	const SEItem &si = menu.drawn()->value();
 	if (si.isSong())

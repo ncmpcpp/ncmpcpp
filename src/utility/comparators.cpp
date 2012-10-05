@@ -46,7 +46,7 @@ int LocaleStringComparison::operator()(const std::string &a, const std::string &
 		if (hasTheWord(b))
 			bc_off += 4;
 	}
-	return std::use_facet< std::collate<char> >(m_locale).compare(
+	return std::use_facet<std::collate<char>>(m_locale).compare(
 		ac+ac_off, ac+a.length(), bc+bc_off, bc+b.length()
 	);
 }

@@ -473,7 +473,7 @@ template <typename T> void ShowTime(T &buf, size_t length, bool short_names)
 		buf << length << cnv(short_names ? "s" : (length == 1 ? " second" : " seconds"));
 }
 
-template <typename T> void ShowTag(T &buf, const std::string &tag)
+template <typename BufferT> void ShowTag(BufferT &buf, const std::string &tag)
 {
 	if (tag.empty())
 		buf << Config.empty_tags_color << Config.empty_tag << NC::clEnd;

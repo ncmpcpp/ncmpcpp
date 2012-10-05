@@ -94,13 +94,17 @@ TagEditor::TagEditor() : FParser(0), FParserHelper(0), FParserLegend(0), FParser
 	Dirs->setHighlightColor(Config.active_column_color);
 	Dirs->cyclicScrolling(Config.use_cyclic_scrolling);
 	Dirs->centeredCursor(Config.centered_cursor);
-	Dirs->setItemDisplayer(Display::Pair<std::string, std::string>);
+	Dirs->setItemDisplayer([](NC::Menu<std::pair<std::string, std::string>> &menu) {
+		menu << Charset::utf8ToLocale(menu.drawn()->value().first);
+	});
 	
 	TagTypes = new NC::Menu<std::string>(MiddleColumnStartX, MainStartY, MiddleColumnWidth, MainHeight, Config.titles_visibility ? "Tag types" : "", Config.main_color, NC::brNone);
 	TagTypes->setHighlightColor(Config.main_highlight_color);
 	TagTypes->cyclicScrolling(Config.use_cyclic_scrolling);
 	TagTypes->centeredCursor(Config.centered_cursor);
-	TagTypes->setItemDisplayer(Display::Default<std::string>);
+	TagTypes->setItemDisplayer([](NC::Menu<std::string> &menu) {
+		menu << Charset::utf8ToLocale(menu.drawn()->value());
+	});
 	
 	for (const SongInfo::Metadata *m = SongInfo::Tags; m->Name; ++m)
 		TagTypes->addItem(m->Name);
@@ -124,10 +128,14 @@ TagEditor::TagEditor() : FParser(0), FParserHelper(0), FParserLegend(0), FParser
 	Tags->setSelectedSuffix(Config.selected_item_suffix);
 	Tags->setItemDisplayer(Display::Tags);
 	
+	auto parser_display = [](NC::Menu<std::string> &menu) {
+		menu << Charset::utf8ToLocale(menu.drawn()->value());
+	};
+	
 	FParserDialog = new NC::Menu<std::string>((COLS-FParserDialogWidth)/2, (MainHeight-FParserDialogHeight)/2+MainStartY, FParserDialogWidth, FParserDialogHeight, "", Config.main_color, Config.window_border);
 	FParserDialog->cyclicScrolling(Config.use_cyclic_scrolling);
 	FParserDialog->centeredCursor(Config.centered_cursor);
-	FParserDialog->setItemDisplayer(Display::Default<std::string>);
+	FParserDialog->setItemDisplayer(parser_display);
 	FParserDialog->addItem("Get tags from filename");
 	FParserDialog->addItem("Rename files");
 	FParserDialog->addSeparator();
@@ -136,7 +144,7 @@ TagEditor::TagEditor() : FParser(0), FParserHelper(0), FParserLegend(0), FParser
 	FParser = new NC::Menu<std::string>((COLS-FParserWidth)/2, (MainHeight-FParserHeight)/2+MainStartY, FParserWidthOne, FParserHeight, "_", Config.main_color, Config.active_window_border);
 	FParser->cyclicScrolling(Config.use_cyclic_scrolling);
 	FParser->centeredCursor(Config.centered_cursor);
-	FParser->setItemDisplayer(Display::Default<std::string>);
+	FParser->setItemDisplayer(parser_display);
 	
 	FParserLegend = new NC::Scrollpad((COLS-FParserWidth)/2+FParserWidthOne, (MainHeight-FParserHeight)/2+MainStartY, FParserWidthTwo, FParserHeight, "Legend", Config.main_color, Config.window_border);
 	

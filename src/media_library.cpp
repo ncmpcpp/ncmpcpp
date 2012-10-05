@@ -64,9 +64,6 @@ bool TagEntryMatcher(const Regex &rx, const MediaLibrary::PrimaryTag &tagmtime);
 bool AlbumEntryMatcher(const Regex &rx, const NC::Menu<AlbumEntry>::Item &item, bool filter);
 bool SongEntryMatcher(const Regex &rx, const MPD::Song &s);
 
-void DisplayAlbums(NC::Menu<AlbumEntry> &menu);
-void DisplayPrimaryTags(NC::Menu<MediaLibrary::PrimaryTag> &menu);
-
 struct SortSongs {
 	static const std::array<MPD::Song::GetFunction, 3> GetFuns;
 	
@@ -156,7 +153,13 @@ MediaLibrary::MediaLibrary()
 	Tags.centeredCursor(Config.centered_cursor);
 	Tags.setSelectedPrefix(Config.selected_item_prefix);
 	Tags.setSelectedSuffix(Config.selected_item_suffix);
-	Tags.setItemDisplayer(DisplayPrimaryTags);
+	Tags.setItemDisplayer([](NC::Menu<PrimaryTag> &menu) {
+		const std::string &tag = menu.drawn()->value().tag();
+		if (tag.empty())
+			menu << Config.empty_tag;
+		else
+			menu << Charset::utf8ToLocale(tag);
+	});
 	
 	Albums = NC::Menu<AlbumEntry>(itsMiddleColStartX, MainStartY, itsMiddleColWidth, MainHeight, Config.titles_visibility ? "Albums" : "", Config.main_color, NC::brNone);
 	Albums.setHighlightColor(Config.main_highlight_color);
@@ -164,7 +167,9 @@ MediaLibrary::MediaLibrary()
 	Albums.centeredCursor(Config.centered_cursor);
 	Albums.setSelectedPrefix(Config.selected_item_prefix);
 	Albums.setSelectedSuffix(Config.selected_item_suffix);
-	Albums.setItemDisplayer(DisplayAlbums);
+	Albums.setItemDisplayer([](NC::Menu<AlbumEntry> &menu) {
+		menu << Charset::utf8ToLocale(AlbumToString(menu.drawn()->value()));
+	});
 	
 	Songs = NC::Menu<MPD::Song>(itsRightColStartX, MainStartY, itsRightColWidth, MainHeight, Config.titles_visibility ? "Songs" : "", Config.main_color, NC::brNone);
 	Songs.setHighlightColor(Config.main_highlight_color);
@@ -1031,22 +1036,6 @@ bool AlbumEntryMatcher(const Regex &rx, const NC::Menu<AlbumEntry>::Item &item, 
 bool SongEntryMatcher(const Regex &rx, const MPD::Song &s)
 {
 	return rx.match(SongToString(s));
-}
-
-/***********************************************************************/
-
-void DisplayAlbums(NC::Menu<AlbumEntry> &menu)
-{
-	menu << AlbumToString(menu.drawn()->value());
-}
-
-void DisplayPrimaryTags(NC::Menu<MediaLibrary::PrimaryTag> &menu)
-{
-	const std::string &tag = menu.drawn()->value().tag();
-	if (tag.empty())
-		menu << Config.empty_tag;
-	else
-		menu << tag;
 }
 
 }

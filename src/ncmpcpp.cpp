@@ -24,6 +24,7 @@
 #include <cstring>
 #include <sys/time.h>
 
+#include <boost/locale.hpp>
 #include <iostream>
 #include <fstream>
 #include <stdexcept>
@@ -33,6 +34,7 @@
 #include "actions.h"
 #include "bindings.h"
 #include "browser.h"
+#include "charset.h"
 #include "cmdargs.h"
 #include "global.h"
 #include "helpers.h"
@@ -91,7 +93,7 @@ int main(int argc, char **argv)
 	
 	std::srand(std::time(0));
 	std::setlocale(LC_ALL, "");
-	std::locale::global(std::locale(""));
+	std::locale::global(Charset::internalLocale());
 	
 	Config.CheckForCommandLineConfigFilePath(argv, argc);
 	

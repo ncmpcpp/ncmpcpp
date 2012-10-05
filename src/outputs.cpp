@@ -22,6 +22,7 @@
 
 #ifdef ENABLE_OUTPUTS
 
+#include "charset.h"
 #include "display.h"
 #include "global.h"
 #include "settings.h"
@@ -42,7 +43,9 @@ Outputs::Outputs()
 	w.cyclicScrolling(Config.use_cyclic_scrolling);
 	w.centeredCursor(Config.centered_cursor);
 	w.setHighlightColor(Config.main_highlight_color);
-	w.setItemDisplayer(Display::Outputs);
+	w.setItemDisplayer([](NC::Menu<MPD::Output> &menu) {
+		menu << Charset::utf8ToLocale(menu.drawn()->value().name());
+	});
 	FetchList();
 }
 

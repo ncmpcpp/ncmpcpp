@@ -27,53 +27,7 @@
 #include "mpdpp.h"
 #include "screen.h"
 
-struct SEItem
-{
-	SEItem() : isThisSong(false), itsBuffer(0) { }
-	SEItem(NC::Buffer *buf) : isThisSong(false), itsBuffer(buf) { }
-	SEItem(const MPD::Song &s) : isThisSong(true), itsSong(s) { }
-	SEItem(const SEItem &ei) { *this = ei; }
-	~SEItem() {
-		if (!isThisSong)
-			delete itsBuffer;
-	}
-	
-	NC::Buffer &mkBuffer() {
-		assert(!isThisSong);
-		delete itsBuffer;
-		itsBuffer = new NC::Buffer();
-		return *itsBuffer;
-	}
-	
-	bool isSong() const { return isThisSong; }
-	
-	NC::Buffer &buffer() { assert(!isThisSong && itsBuffer); return *itsBuffer; }
-	MPD::Song &song() { assert(isThisSong); return itsSong; }
-	
-	const NC::Buffer &buffer() const { assert(!isThisSong && itsBuffer); return *itsBuffer; }
-	const MPD::Song &song() const { assert(isThisSong); return itsSong; }
-	
-	SEItem &operator=(const SEItem &se) {
-		if (this == &se)
-			return *this;
-		isThisSong = se.isThisSong;
-		if (se.isThisSong)
-			itsSong = se.itsSong;
-		else if (se.itsBuffer)
-			itsBuffer = new NC::Buffer(*se.itsBuffer);
-		else
-			itsBuffer = 0;
-		return *this;
-	}
-	
-	private:
-		bool isThisSong;
-		
-		NC::Buffer *itsBuffer;
-		MPD::Song itsSong;
-};
-
-struct SearchEngine: Screen<NC::Menu<SEItem>>, Filterable, HasSongs, Searchable, Tabbable
+struct SearchEngine: Screen<NC::Menu<struct SEItem>>, Filterable, HasSongs, Searchable, Tabbable
 {
 	SearchEngine();
 	
@@ -133,6 +87,52 @@ private:
 	std::string itsConstraints[ConstraintsNumber];
 	
 	static bool MatchToPattern;
+};
+
+struct SEItem
+{
+	SEItem() : m_is_song(false), m_buffer(0) { }
+	SEItem(NC::Buffer *buf) : m_is_song(false), m_buffer(buf) { }
+	SEItem(const MPD::Song &s) : m_is_song(true), m_song(s) { }
+	SEItem(const SEItem &ei) { *this = ei; }
+	~SEItem() {
+		if (!m_is_song)
+			delete m_buffer;
+	}
+	
+	NC::Buffer &mkBuffer() {
+		assert(!m_is_song);
+		delete m_buffer;
+		m_buffer = new NC::Buffer();
+		return *m_buffer;
+	}
+	
+	bool isSong() const { return m_is_song; }
+	
+	NC::Buffer &buffer() { assert(!m_is_song && m_buffer); return *m_buffer; }
+	MPD::Song &song() { assert(m_is_song); return m_song; }
+	
+	const NC::Buffer &buffer() const { assert(!m_is_song && m_buffer); return *m_buffer; }
+	const MPD::Song &song() const { assert(m_is_song); return m_song; }
+	
+	SEItem &operator=(const SEItem &se) {
+		if (this == &se)
+			return *this;
+		m_is_song = se.m_is_song;
+		if (se.m_is_song)
+			m_song = se.m_song;
+		else if (se.m_buffer)
+			m_buffer = new NC::Buffer(*se.m_buffer);
+		else
+			m_buffer = 0;
+		return *this;
+	}
+	
+private:
+	bool m_is_song;
+	
+	NC::Buffer *m_buffer;
+	MPD::Song m_song;
 };
 
 extern SearchEngine *mySearcher;

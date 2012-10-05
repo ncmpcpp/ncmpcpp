@@ -30,21 +30,13 @@ namespace Display {//
 
 std::string Columns(size_t);
 
-template <typename ItemT>
-void Default(NC::Menu<ItemT> &menu) { menu << menu.drawn()->value(); }
-
-template <typename A, typename B>
-void Pair(NC::Menu< std::pair<A, B> > &menu) { menu << menu.drawn()->value().first; }
-
 void SongsInColumns(NC::Menu<MPD::Song> &menu, const ProxySongList &pl);
 
 void Songs(NC::Menu<MPD::Song> &menu, const ProxySongList &pl, const std::string &format);
 
 void Tags(NC::Menu<MPD::MutableSong> &menu);
 
-void Outputs(NC::Menu<MPD::Output> &menu);
-
-void SearchEngine(NC::Menu<SEItem> &menu, const ProxySongList &pl);
+void SEItems(NC::Menu<SEItem> &menu, const ProxySongList &pl);
 
 void Items(NC::Menu<MPD::Item> &menu, const ProxySongList &pl);
 

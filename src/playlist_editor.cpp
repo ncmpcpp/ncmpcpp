@@ -68,7 +68,9 @@ PlaylistEditor::PlaylistEditor()
 	Playlists.centeredCursor(Config.centered_cursor);
 	Playlists.setSelectedPrefix(Config.selected_item_prefix);
 	Playlists.setSelectedSuffix(Config.selected_item_suffix);
-	Playlists.setItemDisplayer(Display::Default<std::string>);
+	Playlists.setItemDisplayer([](NC::Menu<std::string> &menu) {
+		menu << Charset::utf8ToLocale(menu.drawn()->value());
+	});
 	
 	Content = NC::Menu<MPD::Song>(RightColumnStartX, MainStartY, RightColumnWidth, MainHeight, Config.titles_visibility ? "Playlist content" : "", Config.main_color, NC::brNone);
 	Content.setHighlightColor(Config.main_highlight_color);

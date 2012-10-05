@@ -30,6 +30,7 @@
 #include "statusbar.h"
 #include "utility/comparators.h"
 #include "screen_switcher.h"
+#include "charset.h"
 
 SelectedItemsAdder *mySelectedItemsAdder;
 
@@ -37,7 +38,7 @@ namespace {//
 
 void DisplayComponent(SelectedItemsAdder::Component &menu)
 {
-	menu << menu.drawn()->value().item();
+	menu << Charset::utf8ToLocale(menu.drawn()->value().item());
 }
 
 }

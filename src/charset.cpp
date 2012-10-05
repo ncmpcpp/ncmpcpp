@@ -18,11 +18,31 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
-#include <boost/locale/encoding.hpp>
+#include <boost/locale.hpp>
 #include "charset.h"
 #include "settings.h"
 
 namespace Charset {//
+
+std::locale internalLocale()
+{
+	boost::locale::generator gen;
+	std::locale loc = gen("");
+	bool is_utf = std::use_facet<boost::locale::info>(loc).utf8();
+	std::string name = std::use_facet<boost::locale::info>(loc).name();
+	if (!is_utf && name != "C" && name != "POSIX")
+	{
+		// if current locale does not use unicode, use variant of this
+		// locale with utf8 as ncmpcpp uses utf8 internally and we need
+		// current locale for sorting, case conversions etc.
+		std::string new_name = std::use_facet<boost::locale::info>(loc).language()
+		                     + "_"
+		                     + std::use_facet<boost::locale::info>(loc).country()
+		                     + ".UTF-8";
+		loc = gen(new_name);
+	}
+	return loc;
+}
 
 std::string toUtf8From(std::string s, const char *charset)
 {
@@ -37,15 +57,15 @@ std::string fromUtf8To(std::string s, const char *charset)
 std::string utf8ToLocale(std::string s)
 {
 	return Config.system_encoding.empty()
-	? s
-	: boost::locale::conv::from_utf<char>(s, Config.system_encoding);
+	     ? s
+	     : boost::locale::conv::from_utf<char>(s, Config.system_encoding);
 }
 
 std::string localeToUtf8(std::string s)
 {
 	return Config.system_encoding.empty()
-	? s
-	: boost::locale::conv::to_utf<char>(s, Config.system_encoding);
+	     ? s
+	     : boost::locale::conv::to_utf<char>(s, Config.system_encoding);
 }
 
 }

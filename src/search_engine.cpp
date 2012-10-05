@@ -108,7 +108,7 @@ SearchEngine::SearchEngine()
 	w.setHighlightColor(Config.main_highlight_color);
 	w.cyclicScrolling(Config.use_cyclic_scrolling);
 	w.centeredCursor(Config.centered_cursor);
-	w.setItemDisplayer(std::bind(Display::SearchEngine, _1, proxySongList()));
+	w.setItemDisplayer(std::bind(Display::SEItems, _1, proxySongList()));
 	w.setSelectedPrefix(Config.selected_item_prefix);
 	w.setSelectedSuffix(Config.selected_item_suffix);
 	SearchMode = &SearchModes[Config.search_engine_default_search_mode];

@@ -21,9 +21,12 @@
 #ifndef NCMPCPP_CHARSET_H
 #define NCMPCPP_CHARSET_H
 
+#include <locale>
 #include <string>
 
 namespace Charset {//
+
+std::locale internalLocale();
 
 std::string toUtf8From(std::string s, const char *charset);
 std::string fromUtf8To(std::string s, const char *charset);
