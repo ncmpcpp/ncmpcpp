@@ -40,15 +40,11 @@ m_real_height(height)
 
 void Scrollpad::flush()
 {
-	recreate(m_width, m_height);
-	
 	auto &w = static_cast<Window &>(*this);
 	const auto &s = m_buffer.str();
 	const auto &ps = m_buffer.properties();
 	auto p = ps.begin();
-	auto old_p = p;
-	int x, y;
-	size_t i = 0, old_i;
+	size_t i = 0;
 	
 	auto load_properties = [&]() {
 		for (; p != ps.end() && p->position() == i; ++p)
@@ -71,10 +67,13 @@ void Scrollpad::flush()
 	auto write_buffer = [&](bool generate_height_only) -> size_t {
 		int new_y;
 		size_t height = 1;
+		size_t old_i;
+		auto old_p = p;
+		int x, y;
 		i = 0;
 		p = ps.begin();
 		y = getY();
-		while (true)
+		while (i < s.length())
 		{
 			// write all whitespaces.
 			write_whitespace();
@@ -135,9 +134,6 @@ void Scrollpad::flush()
 					height += new_y - y;
 				}
 			}
-			
-			if (i == s.length())
-				break;
 			
 			if (generate_height_only)
 			{
