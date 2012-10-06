@@ -131,7 +131,7 @@ std::string Help::DisplayKeys(const ActionType at)
 	{
 		for (auto j = it->second.begin(); j != it->second.end(); ++j)
 		{
-			if (j->isSingle() && j->action()->Type() == at)
+			if (j->isSingle() && j->action()->type() == at)
 			{
 				result += keyToString(it->first, &print_backspace);
 				result += " ";

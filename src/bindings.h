@@ -74,7 +74,7 @@ struct Binding
 {
 	typedef std::vector<Action *> ActionChain;
 	
-	Binding(ActionType at) : m_is_single(true), m_action(Action::Get(at)) { }
+	Binding(ActionType at) : m_is_single(true), m_action(Action::get(at)) { }
 	Binding(const ActionChain &actions) {
 		assert(actions.size() > 0);
 		if (actions.size() == 1) {
@@ -90,10 +90,10 @@ struct Binding
 		bool result = false;
 		if (m_is_single) {
 			assert(m_action);
-			result = m_action->Execute();
+			result = m_action->execute();
 		} else {
 			for (auto it = m_chain->begin(); it != m_chain->end(); ++it)
-				if (!(*it)->Execute())
+				if (!(*it)->execute())
 					break;
 			result = true;
 		}

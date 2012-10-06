@@ -121,7 +121,7 @@ void ParseArgv(int argc, char **argv)
 			exit(0);
 		}
 		
-		if (!Action::ConnectToMPD())
+		if (!Action::connectToMPD())
 			exit(1);
 		
 		if (!strcmp(argv[i], "-s") || !strcmp(argv[i], "--screen"))

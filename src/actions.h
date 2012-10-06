@@ -28,62 +28,68 @@
 enum ActionType
 {
 	aMacroUtility,
-	aDummy, aMouseEvent, aScrollUp, aScrollDown, aScrollUpArtist, aScrollUpAlbum, aScrollDownArtist,
-	aScrollDownAlbum, aPageUp, aPageDown, aMoveHome, aMoveEnd, aToggleInterface, aJumpToParentDirectory,
-	aPressEnter, aPressSpace, aPreviousColumn, aNextColumn, aMasterScreen, aSlaveScreen, aVolumeUp,
-	aVolumeDown, aDeletePlaylistItems, aDeleteStoredPlaylist, aDeleteBrowserItems, aReplaySong, aPrevious, aNext, aPause, aStop, aExecuteCommand, aSavePlaylist,
-	aMoveSortOrderUp, aMoveSortOrderDown, aMoveSelectedItemsUp, aMoveSelectedItemsDown,
-	aMoveSelectedItemsTo, aAdd, aSeekForward, aSeekBackward, aToggleDisplayMode, aToggleSeparatorsBetweenAlbums,
-	aToggleLyricsFetcher, aToggleFetchingLyricsInBackground, aTogglePlayingSongCentering, aUpdateDatabase,
-	aJumpToPlayingSong, aToggleRepeat, aShuffle, aToggleRandom, aStartSearching, aSaveTagChanges,
-	aToggleSingle, aToggleConsume, aToggleCrossfade, aSetCrossfade, aEditSong, aEditLibraryTag,
-	aEditLibraryAlbum, aEditDirectoryName, aEditPlaylistName, aEditLyrics, aJumpToBrowser,
-	aJumpToMediaLibrary, aJumpToPlaylistEditor, aToggleScreenLock, aJumpToTagEditor,
-	aJumpToPositionInSong, aReverseSelection, aRemoveSelection, aSelectAlbum, aAddSelectedItems,
-	aCropMainPlaylist, aCropPlaylist, aClearMainPlaylist, aClearPlaylist, aSortPlaylist, aReversePlaylist,
-	aApplyFilter, aFind, aFindItemForward, aFindItemBackward, aNextFoundItem,
-	aPreviousFoundItem, aToggleFindMode, aToggleReplayGainMode, aToggleSpaceMode, aToggleAddMode,
-	aToggleMouse, aToggleBitrateVisibility, aAddRandomItems, aToggleBrowserSortMode, aToggleLibraryTagType, aToggleMediaLibrarySortMode,
-	aRefetchLyrics, aRefetchArtistInfo, aSetSelectedItemsPriority, aFilterPlaylistOnPriorities,
-	aShowSongInfo, aShowArtistInfo,
-	aShowLyrics, aQuit, aNextScreen, aPreviousScreen, aShowHelp, aShowPlaylist, aShowBrowser, aChangeBrowseMode,
-	aShowSearchEngine, aResetSearchEngine, aShowMediaLibrary, aToggleMediaLibraryColumnsMode, aShowPlaylistEditor, aShowTagEditor, aShowOutputs,
-	aShowVisualizer, aShowClock, aShowServerInfo
+	aDummy, aMouseEvent, aScrollUp, aScrollDown, aScrollUpArtist, aScrollUpAlbum,
+	aScrollDownArtist, aScrollDownAlbum, aPageUp, aPageDown, aMoveHome, aMoveEnd,
+	aToggleInterface, aJumpToParentDirectory, aPressEnter, aPressSpace, aPreviousColumn,
+	aNextColumn, aMasterScreen, aSlaveScreen, aVolumeUp, aVolumeDown, aDeletePlaylistItems,
+	aDeleteStoredPlaylist, aDeleteBrowserItems, aReplaySong, aPrevious, aNext, aPause,
+	aStop, aExecuteCommand, aSavePlaylist, aMoveSortOrderUp, aMoveSortOrderDown,
+	aMoveSelectedItemsUp, aMoveSelectedItemsDown, aMoveSelectedItemsTo, aAdd,
+	aSeekForward, aSeekBackward, aToggleDisplayMode, aToggleSeparatorsBetweenAlbums,
+	aToggleLyricsFetcher, aToggleFetchingLyricsInBackground, aTogglePlayingSongCentering,
+	aUpdateDatabase, aJumpToPlayingSong, aToggleRepeat, aShuffle, aToggleRandom,
+	aStartSearching, aSaveTagChanges, aToggleSingle, aToggleConsume, aToggleCrossfade,
+	aSetCrossfade, aEditSong, aEditLibraryTag, aEditLibraryAlbum, aEditDirectoryName,
+	aEditPlaylistName, aEditLyrics, aJumpToBrowser, aJumpToMediaLibrary,
+	aJumpToPlaylistEditor, aToggleScreenLock, aJumpToTagEditor, aJumpToPositionInSong,
+	aReverseSelection, aRemoveSelection, aSelectAlbum, aAddSelectedItems,
+	aCropMainPlaylist, aCropPlaylist, aClearMainPlaylist, aClearPlaylist, aSortPlaylist,
+	aReversePlaylist, aApplyFilter, aFind, aFindItemForward, aFindItemBackward,
+	aNextFoundItem, aPreviousFoundItem, aToggleFindMode, aToggleReplayGainMode,
+	aToggleSpaceMode, aToggleAddMode, aToggleMouse, aToggleBitrateVisibility,
+	aAddRandomItems, aToggleBrowserSortMode, aToggleLibraryTagType,
+	aToggleMediaLibrarySortMode, aRefetchLyrics, aRefetchArtistInfo,
+	aSetSelectedItemsPriority, aFilterPlaylistOnPriorities, aShowSongInfo,
+	aShowArtistInfo, aShowLyrics, aQuit, aNextScreen, aPreviousScreen, aShowHelp,
+	aShowPlaylist, aShowBrowser, aChangeBrowseMode, aShowSearchEngine,
+	aResetSearchEngine, aShowMediaLibrary, aToggleMediaLibraryColumnsMode,
+	aShowPlaylistEditor, aShowTagEditor, aShowOutputs, aShowVisualizer,
+	aShowClock, aShowServerInfo
 };
 
 struct Action
 {
-	enum FindDirection { fdForward, fdBackward };
+	enum class Find { Forward, Backward };
 	
-	Action(ActionType type, const char *name) : itsType(type), itsName(name) { }
+	Action(ActionType type, const char *name) : m_type(type), m_name(name) { }
 	
-	const char *Name() const { return itsName; }
-	ActionType Type() const { return itsType; }
+	const char *name() const { return m_name; }
+	ActionType type() const { return m_type; }
 	
 	virtual bool canBeRun() const { return true; }
 	
-	bool Execute()
+	bool execute()
 	{
 		if (canBeRun())
 		{
-			Run();
+			run();
 			return true;
 		}
 		return false;
 	}
 	
-	static void ValidateScreenSize();
-	static void InitializeScreens();
-	static void SetResizeFlags();
-	static void ResizeScreen(bool reload_main_window);
-	static void SetWindowsDimensions();
+	static void validateScreenSize();
+	static void initializeScreens();
+	static void setResizeFlags();
+	static void resizeScreen(bool reload_main_window);
+	static void setWindowsDimensions();
 	
-	static bool ConnectToMPD();
-	static bool AskYesNoQuestion(const std::string &question, void (*callback)());
+	static bool connectToMPD();
+	static bool askYesNoQuestion(const std::string &question, void (*callback)());
 	static bool isMPDMusicDirSet();
 	
-	static Action *Get(ActionType at);
-	static Action *Get(const std::string &name);
+	static Action *get(ActionType at);
+	static Action *get(const std::string &name);
 	
 	static bool OriginalStatusbarVisibility;
 	static bool ExitMainLoop;
@@ -93,15 +99,15 @@ struct Action
 	static size_t FooterStartY;
 	
 protected:
-	virtual void Run() = 0;
+	virtual void run() = 0;
 	
-	static void Seek();
-	static void FindItem(const FindDirection);
-	static void ListsChangeFinisher();
+	static void seek();
+	static void findItem(const Find direction);
+	static void listsChangeFinisher();
 	
 private:
-	ActionType itsType;
-	const char *itsName;
+	ActionType m_type;
+	const char *m_name;
 };
 
 struct Dummy : public Action
@@ -109,7 +115,7 @@ struct Dummy : public Action
 	Dummy() : Action(aDummy, "dummy") { }
 	
 protected:
-	virtual void Run() { }
+	virtual void run() { }
 };
 
 struct MouseEvent : public Action
@@ -118,11 +124,11 @@ struct MouseEvent : public Action
 	
 protected:
 	virtual bool canBeRun() const;
-	virtual void Run();
+	virtual void run();
 	
 	private:
-		MEVENT itsMouseEvent;
-		MEVENT itsOldMouseEvent;
+		MEVENT m_mouse_event;
+		MEVENT m_old_mouse_event;
 };
 
 struct ScrollUp : public Action
@@ -130,7 +136,7 @@ struct ScrollUp : public Action
 	ScrollUp() : Action(aScrollUp, "scroll_up") { }
 	
 protected:
-	virtual void Run();
+	virtual void run();
 };
 
 struct ScrollDown : public Action
@@ -138,7 +144,7 @@ struct ScrollDown : public Action
 	ScrollDown() : Action(aScrollDown, "scroll_down") { }
 	
 protected:
-	virtual void Run();
+	virtual void run();
 };
 
 struct ScrollUpArtist : public Action
@@ -147,7 +153,7 @@ struct ScrollUpArtist : public Action
 	
 protected:
 	virtual bool canBeRun() const;
-	virtual void Run();
+	virtual void run();
 };
 
 struct ScrollUpAlbum : public Action
@@ -156,7 +162,7 @@ struct ScrollUpAlbum : public Action
 	
 protected:
 	virtual bool canBeRun() const;
-	virtual void Run();
+	virtual void run();
 };
 
 struct ScrollDownArtist : public Action
@@ -165,7 +171,7 @@ struct ScrollDownArtist : public Action
 	
 protected:
 	virtual bool canBeRun() const;
-	virtual void Run();
+	virtual void run();
 };
 
 struct ScrollDownAlbum : public Action
@@ -174,7 +180,7 @@ struct ScrollDownAlbum : public Action
 	
 protected:
 	virtual bool canBeRun() const;
-	virtual void Run();
+	virtual void run();
 };
 
 struct PageUp : public Action
@@ -182,7 +188,7 @@ struct PageUp : public Action
 	PageUp() : Action(aPageUp, "page_up") { }
 	
 protected:
-	virtual void Run();
+	virtual void run();
 };
 
 struct PageDown : public Action
@@ -190,7 +196,7 @@ struct PageDown : public Action
 	PageDown() : Action(aPageDown, "page_down") { }
 	
 protected:
-	virtual void Run();
+	virtual void run();
 };
 
 struct MoveHome : public Action
@@ -198,7 +204,7 @@ struct MoveHome : public Action
 	MoveHome() : Action(aMoveHome, "move_home") { }
 	
 protected:
-	virtual void Run();
+	virtual void run();
 };
 
 struct MoveEnd : public Action
@@ -206,7 +212,7 @@ struct MoveEnd : public Action
 	MoveEnd() : Action(aMoveEnd, "move_end") { }
 	
 protected:
-	virtual void Run();
+	virtual void run();
 };
 
 struct ToggleInterface : public Action
@@ -214,7 +220,7 @@ struct ToggleInterface : public Action
 	ToggleInterface() : Action(aToggleInterface, "toggle_interface") { }
 	
 protected:
-	virtual void Run();
+	virtual void run();
 };
 
 struct JumpToParentDirectory : public Action
@@ -223,7 +229,7 @@ struct JumpToParentDirectory : public Action
 	
 protected:
 	virtual bool canBeRun() const;
-	virtual void Run();
+	virtual void run();
 };
 
 struct PressEnter : public Action
@@ -231,7 +237,7 @@ struct PressEnter : public Action
 	PressEnter() : Action(aPressEnter, "press_enter") { }
 	
 protected:
-	virtual void Run();
+	virtual void run();
 };
 
 struct PressSpace : public Action
@@ -239,7 +245,7 @@ struct PressSpace : public Action
 	PressSpace() : Action(aPressSpace, "press_space") { }
 	
 protected:
-	virtual void Run();
+	virtual void run();
 };
 
 struct PreviousColumn : public Action
@@ -248,7 +254,7 @@ struct PreviousColumn : public Action
 	
 protected:
 	virtual bool canBeRun() const;
-	virtual void Run();
+	virtual void run();
 };
 
 struct NextColumn : public Action
@@ -257,7 +263,7 @@ struct NextColumn : public Action
 	
 protected:
 	virtual bool canBeRun() const;
-	virtual void Run();
+	virtual void run();
 };
 
 struct MasterScreen : public Action
@@ -266,7 +272,7 @@ struct MasterScreen : public Action
 	
 protected:
 	virtual bool canBeRun() const;
-	virtual void Run();
+	virtual void run();
 };
 
 struct SlaveScreen : public Action
@@ -275,7 +281,7 @@ struct SlaveScreen : public Action
 	
 protected:
 	virtual bool canBeRun() const;
-	virtual void Run();
+	virtual void run();
 };
 
 struct VolumeUp : public Action
@@ -283,7 +289,7 @@ struct VolumeUp : public Action
 	VolumeUp() : Action(aVolumeUp, "volume_up") { }
 	
 protected:
-	virtual void Run();
+	virtual void run();
 };
 
 struct VolumeDown : public Action
@@ -291,7 +297,7 @@ struct VolumeDown : public Action
 	VolumeDown() : Action(aVolumeDown, "volume_down") { }
 	
 protected:
-	virtual void Run();
+	virtual void run();
 };
 
 struct DeletePlaylistItems : public Action
@@ -300,7 +306,7 @@ struct DeletePlaylistItems : public Action
 	
 protected:
 	virtual bool canBeRun() const;
-	virtual void Run();
+	virtual void run();
 };
 
 struct DeleteStoredPlaylist : public Action
@@ -309,7 +315,7 @@ struct DeleteStoredPlaylist : public Action
 	
 protected:
 	virtual bool canBeRun() const;
-	virtual void Run();
+	virtual void run();
 };
 
 struct DeleteBrowserItems : public Action
@@ -318,7 +324,7 @@ struct DeleteBrowserItems : public Action
 	
 protected:
 	virtual bool canBeRun() const;
-	virtual void Run();
+	virtual void run();
 };
 
 struct ReplaySong : public Action
@@ -326,7 +332,7 @@ struct ReplaySong : public Action
 	ReplaySong() : Action(aReplaySong, "replay_song") { }
 	
 protected:
-	virtual void Run();
+	virtual void run();
 };
 
 struct PreviousSong : public Action
@@ -334,7 +340,7 @@ struct PreviousSong : public Action
 	PreviousSong() : Action(aPrevious, "previous") { }
 	
 protected:
-	virtual void Run();
+	virtual void run();
 };
 
 struct NextSong : public Action
@@ -342,7 +348,7 @@ struct NextSong : public Action
 	NextSong() : Action(aNext, "next") { }
 	
 protected:
-	virtual void Run();
+	virtual void run();
 };
 
 struct Pause : public Action
@@ -350,7 +356,7 @@ struct Pause : public Action
 	Pause() : Action(aPause, "pause") { }
 	
 protected:
-	virtual void Run();
+	virtual void run();
 };
 
 struct Stop : public Action
@@ -358,7 +364,7 @@ struct Stop : public Action
 	Stop() : Action(aStop, "stop") { }
 	
 protected:
-	virtual void Run();
+	virtual void run();
 };
 
 struct ExecuteCommand : public Action
@@ -366,7 +372,7 @@ struct ExecuteCommand : public Action
 	ExecuteCommand() : Action(aExecuteCommand, "execute_command") { }
 	
 protected:
-	virtual void Run();
+	virtual void run();
 };
 
 struct SavePlaylist : public Action
@@ -374,7 +380,7 @@ struct SavePlaylist : public Action
 	SavePlaylist() : Action(aSavePlaylist, "save_playlist") { }
 	
 protected:
-	virtual void Run();
+	virtual void run();
 };
 
 struct MoveSortOrderUp : public Action
@@ -383,7 +389,7 @@ struct MoveSortOrderUp : public Action
 	
 protected:
 	virtual bool canBeRun() const;
-	virtual void Run();
+	virtual void run();
 };
 
 struct MoveSortOrderDown : public Action
@@ -392,7 +398,7 @@ struct MoveSortOrderDown : public Action
 	
 protected:
 	virtual bool canBeRun() const;
-	virtual void Run();
+	virtual void run();
 };
 
 struct MoveSelectedItemsUp : public Action
@@ -401,7 +407,7 @@ struct MoveSelectedItemsUp : public Action
 	
 protected:
 	virtual bool canBeRun() const;
-	virtual void Run();
+	virtual void run();
 };
 
 struct MoveSelectedItemsDown : public Action
@@ -410,7 +416,7 @@ struct MoveSelectedItemsDown : public Action
 	
 protected:
 	virtual bool canBeRun() const;
-	virtual void Run();
+	virtual void run();
 };
 
 struct MoveSelectedItemsTo : public Action
@@ -419,7 +425,7 @@ struct MoveSelectedItemsTo : public Action
 	
 protected:
 	virtual bool canBeRun() const;
-	virtual void Run();
+	virtual void run();
 };
 
 struct Add : public Action
@@ -428,7 +434,7 @@ struct Add : public Action
 	
 protected:
 	virtual bool canBeRun() const;
-	virtual void Run();
+	virtual void run();
 };
 
 struct SeekForward : public Action
@@ -437,7 +443,7 @@ struct SeekForward : public Action
 	
 protected:
 	virtual bool canBeRun() const;
-	virtual void Run();
+	virtual void run();
 };
 
 struct SeekBackward : public Action
@@ -446,7 +452,7 @@ struct SeekBackward : public Action
 	
 protected:
 	virtual bool canBeRun() const;
-	virtual void Run();
+	virtual void run();
 };
 
 struct ToggleDisplayMode : public Action
@@ -455,7 +461,7 @@ struct ToggleDisplayMode : public Action
 	
 protected:
 	virtual bool canBeRun() const;
-	virtual void Run();
+	virtual void run();
 };
 
 struct ToggleSeparatorsBetweenAlbums : public Action
@@ -465,7 +471,7 @@ struct ToggleSeparatorsBetweenAlbums : public Action
 	
 protected:
 	virtual bool canBeRun() const;
-	virtual void Run();
+	virtual void run();
 };
 
 struct ToggleLyricsFetcher : public Action
@@ -476,7 +482,7 @@ protected:
 #	ifndef HAVE_CURL_CURL_H
 	virtual bool canBeRun() const;
 #	endif // NOT HAVE_CURL_CURL_H
-	virtual void Run();
+	virtual void run();
 };
 
 struct ToggleFetchingLyricsInBackground : public Action
@@ -488,7 +494,7 @@ protected:
 #	ifndef HAVE_CURL_CURL_H
 	virtual bool canBeRun() const;
 #	endif // NOT HAVE_CURL_CURL_H
-	virtual void Run();
+	virtual void run();
 };
 
 struct TogglePlayingSongCentering : public Action
@@ -497,7 +503,7 @@ struct TogglePlayingSongCentering : public Action
 	: Action(aTogglePlayingSongCentering, "toggle_playing_song_centering") { }
 	
 protected:
-	virtual void Run();
+	virtual void run();
 };
 
 struct UpdateDatabase : public Action
@@ -505,7 +511,7 @@ struct UpdateDatabase : public Action
 	UpdateDatabase() : Action(aUpdateDatabase, "update_database") { }
 	
 protected:
-	virtual void Run();
+	virtual void run();
 };
 
 struct JumpToPlayingSong : public Action
@@ -514,7 +520,7 @@ struct JumpToPlayingSong : public Action
 	
 protected:
 	virtual bool canBeRun() const;
-	virtual void Run();
+	virtual void run();
 };
 
 struct ToggleRepeat : public Action
@@ -522,7 +528,7 @@ struct ToggleRepeat : public Action
 	ToggleRepeat() : Action(aToggleRepeat, "toggle_repeat") { }
 	
 protected:
-	virtual void Run();
+	virtual void run();
 };
 
 struct Shuffle : public Action
@@ -530,7 +536,7 @@ struct Shuffle : public Action
 	Shuffle() : Action(aShuffle, "shuffle") { }
 	
 protected:
-	virtual void Run();
+	virtual void run();
 };
 
 struct ToggleRandom : public Action
@@ -538,7 +544,7 @@ struct ToggleRandom : public Action
 	ToggleRandom() : Action(aToggleRandom, "toggle_random") { }
 	
 protected:
-	virtual void Run();
+	virtual void run();
 };
 
 struct StartSearching : public Action
@@ -547,7 +553,7 @@ struct StartSearching : public Action
 	
 protected:
 	virtual bool canBeRun() const;
-	virtual void Run();
+	virtual void run();
 };
 
 struct SaveTagChanges : public Action
@@ -556,7 +562,7 @@ struct SaveTagChanges : public Action
 	
 protected:
 	virtual bool canBeRun() const;
-	virtual void Run();
+	virtual void run();
 };
 
 struct ToggleSingle : public Action
@@ -564,7 +570,7 @@ struct ToggleSingle : public Action
 	ToggleSingle() : Action(aToggleSingle, "toggle_single") { }
 	
 protected:
-	virtual void Run();
+	virtual void run();
 };
 
 struct ToggleConsume : public Action
@@ -572,7 +578,7 @@ struct ToggleConsume : public Action
 	ToggleConsume() : Action(aToggleConsume, "toggle_consume") { }
 	
 protected:
-	virtual void Run();
+	virtual void run();
 };
 
 struct ToggleCrossfade : public Action
@@ -580,7 +586,7 @@ struct ToggleCrossfade : public Action
 	ToggleCrossfade() : Action(aToggleCrossfade, "toggle_crossfade") { }
 	
 protected:
-	virtual void Run();
+	virtual void run();
 };
 
 struct SetCrossfade : public Action
@@ -588,7 +594,7 @@ struct SetCrossfade : public Action
 	SetCrossfade() : Action(aSetCrossfade, "set_crossfade") { }
 	
 protected:
-	virtual void Run();
+	virtual void run();
 };
 
 struct EditSong : public Action
@@ -597,7 +603,7 @@ struct EditSong : public Action
 	
 protected:
 	virtual bool canBeRun() const;
-	virtual void Run();
+	virtual void run();
 };
 
 struct EditLibraryTag : public Action
@@ -606,7 +612,7 @@ struct EditLibraryTag : public Action
 	
 protected:
 	virtual bool canBeRun() const;
-	virtual void Run();
+	virtual void run();
 };
 
 struct EditLibraryAlbum : public Action
@@ -615,7 +621,7 @@ struct EditLibraryAlbum : public Action
 	
 protected:
 	virtual bool canBeRun() const;
-	virtual void Run();
+	virtual void run();
 };
 
 struct EditDirectoryName : public Action
@@ -624,7 +630,7 @@ struct EditDirectoryName : public Action
 	
 protected:
 	virtual bool canBeRun() const;
-	virtual void Run();
+	virtual void run();
 };
 
 struct EditPlaylistName : public Action
@@ -633,7 +639,7 @@ struct EditPlaylistName : public Action
 	
 protected:
 	virtual bool canBeRun() const;
-	virtual void Run();
+	virtual void run();
 };
 
 struct EditLyrics : public Action
@@ -642,7 +648,7 @@ struct EditLyrics : public Action
 	
 protected:
 	virtual bool canBeRun() const;
-	virtual void Run();
+	virtual void run();
 };
 
 struct JumpToBrowser : public Action
@@ -651,7 +657,7 @@ struct JumpToBrowser : public Action
 	
 protected:
 	virtual bool canBeRun() const;
-	virtual void Run();
+	virtual void run();
 };
 
 struct JumpToMediaLibrary : public Action
@@ -660,7 +666,7 @@ struct JumpToMediaLibrary : public Action
 	
 protected:
 	virtual bool canBeRun() const;
-	virtual void Run();
+	virtual void run();
 };
 
 struct JumpToPlaylistEditor : public Action
@@ -669,7 +675,7 @@ struct JumpToPlaylistEditor : public Action
 	
 protected:
 	virtual bool canBeRun() const;
-	virtual void Run();
+	virtual void run();
 };
 
 struct ToggleScreenLock : public Action
@@ -677,7 +683,7 @@ struct ToggleScreenLock : public Action
 	ToggleScreenLock() : Action(aToggleScreenLock, "toggle_screen_lock") { }
 	
 protected:
-	virtual void Run();
+	virtual void run();
 };
 
 struct JumpToTagEditor : public Action
@@ -686,7 +692,7 @@ struct JumpToTagEditor : public Action
 	
 protected:
 	virtual bool canBeRun() const;
-	virtual void Run();
+	virtual void run();
 };
 
 struct JumpToPositionInSong : public Action
@@ -695,7 +701,7 @@ struct JumpToPositionInSong : public Action
 	
 protected:
 	virtual bool canBeRun() const;
-	virtual void Run();
+	virtual void run();
 };
 
 struct ReverseSelection : public Action
@@ -704,7 +710,7 @@ struct ReverseSelection : public Action
 	
 protected:
 	virtual bool canBeRun() const;
-	virtual void Run();
+	virtual void run();
 };
 
 struct RemoveSelection : public Action
@@ -713,7 +719,7 @@ struct RemoveSelection : public Action
 	
 protected:
 	virtual bool canBeRun() const;
-	virtual void Run();
+	virtual void run();
 };
 
 struct SelectAlbum : public Action
@@ -722,7 +728,7 @@ struct SelectAlbum : public Action
 	
 protected:
 	virtual bool canBeRun() const;
-	virtual void Run();
+	virtual void run();
 };
 
 struct AddSelectedItems : public Action
@@ -731,7 +737,7 @@ struct AddSelectedItems : public Action
 	
 protected:
 	virtual bool canBeRun() const;
-	virtual void Run();
+	virtual void run();
 };
 
 struct CropMainPlaylist : public Action
@@ -739,7 +745,7 @@ struct CropMainPlaylist : public Action
 	CropMainPlaylist() : Action(aCropMainPlaylist, "crop_main_playlist") { }
 	
 protected:
-	virtual void Run();
+	virtual void run();
 };
 
 struct CropPlaylist : public Action
@@ -748,7 +754,7 @@ struct CropPlaylist : public Action
 	
 protected:
 	virtual bool canBeRun() const;
-	virtual void Run();
+	virtual void run();
 };
 
 struct ClearMainPlaylist : public Action
@@ -756,7 +762,7 @@ struct ClearMainPlaylist : public Action
 	ClearMainPlaylist() : Action(aClearMainPlaylist, "clear_main_playlist") { }
 	
 protected:
-	virtual void Run();
+	virtual void run();
 };
 
 struct ClearPlaylist : public Action
@@ -765,7 +771,7 @@ struct ClearPlaylist : public Action
 	
 protected:
 	virtual bool canBeRun() const;
-	virtual void Run();
+	virtual void run();
 };
 
 struct SortPlaylist : public Action
@@ -774,7 +780,7 @@ struct SortPlaylist : public Action
 	
 protected:
 	virtual bool canBeRun() const;
-	virtual void Run();
+	virtual void run();
 };
 
 struct ReversePlaylist : public Action
@@ -783,7 +789,7 @@ struct ReversePlaylist : public Action
 	
 protected:
 	virtual bool canBeRun() const;
-	virtual void Run();
+	virtual void run();
 };
 
 struct ApplyFilter : public Action
@@ -792,7 +798,7 @@ struct ApplyFilter : public Action
 	
 protected:
 	virtual bool canBeRun() const;
-	virtual void Run();
+	virtual void run();
 };
 
 struct Find : public Action
@@ -801,7 +807,7 @@ struct Find : public Action
 	
 protected:
 	virtual bool canBeRun() const;
-	virtual void Run();
+	virtual void run();
 };
 
 struct FindItemForward : public Action
@@ -810,7 +816,7 @@ struct FindItemForward : public Action
 	
 protected:
 	virtual bool canBeRun() const;
-	virtual void Run();
+	virtual void run();
 };
 
 struct FindItemBackward : public Action
@@ -819,7 +825,7 @@ struct FindItemBackward : public Action
 	
 protected:
 	virtual bool canBeRun() const;
-	virtual void Run();
+	virtual void run();
 };
 
 struct NextFoundItem : public Action
@@ -828,7 +834,7 @@ struct NextFoundItem : public Action
 	
 protected:
 	virtual bool canBeRun() const;
-	virtual void Run();
+	virtual void run();
 };
 
 struct PreviousFoundItem : public Action
@@ -837,7 +843,7 @@ struct PreviousFoundItem : public Action
 	
 protected:
 	virtual bool canBeRun() const;
-	virtual void Run();
+	virtual void run();
 };
 
 struct ToggleFindMode : public Action
@@ -845,7 +851,7 @@ struct ToggleFindMode : public Action
 	ToggleFindMode() : Action(aToggleFindMode, "toggle_find_mode") { }
 	
 protected:
-	virtual void Run();
+	virtual void run();
 };
 
 struct ToggleReplayGainMode : public Action
@@ -853,7 +859,7 @@ struct ToggleReplayGainMode : public Action
 	ToggleReplayGainMode() : Action(aToggleReplayGainMode, "toggle_replay_gain_mode") { }
 	
 protected:
-	virtual void Run();
+	virtual void run();
 };
 
 struct ToggleSpaceMode : public Action
@@ -861,7 +867,7 @@ struct ToggleSpaceMode : public Action
 	ToggleSpaceMode() : Action(aToggleSpaceMode, "toggle_space_mode") { }
 	
 protected:
-	virtual void Run();
+	virtual void run();
 };
 
 struct ToggleAddMode : public Action
@@ -869,7 +875,7 @@ struct ToggleAddMode : public Action
 	ToggleAddMode() : Action(aToggleAddMode, "toggle_add_mode") { }
 	
 protected:
-	virtual void Run();
+	virtual void run();
 };
 
 struct ToggleMouse : public Action
@@ -877,7 +883,7 @@ struct ToggleMouse : public Action
 	ToggleMouse() : Action(aToggleMouse, "toggle_mouse") { }
 	
 protected:
-	virtual void Run();
+	virtual void run();
 };
 
 struct ToggleBitrateVisibility : public Action
@@ -885,7 +891,7 @@ struct ToggleBitrateVisibility : public Action
 	ToggleBitrateVisibility() : Action(aToggleBitrateVisibility, "toggle_bitrate_visibility") { }
 	
 protected:
-	virtual void Run();
+	virtual void run();
 };
 
 struct AddRandomItems : public Action
@@ -893,7 +899,7 @@ struct AddRandomItems : public Action
 	AddRandomItems() : Action(aAddRandomItems, "add_random_items") { }
 	
 protected:
-	virtual void Run();
+	virtual void run();
 };
 
 struct ToggleBrowserSortMode : public Action
@@ -902,7 +908,7 @@ struct ToggleBrowserSortMode : public Action
 	
 protected:
 	virtual bool canBeRun() const;
-	virtual void Run();
+	virtual void run();
 };
 
 struct ToggleLibraryTagType : public Action
@@ -911,7 +917,7 @@ struct ToggleLibraryTagType : public Action
 	
 protected:
 	virtual bool canBeRun() const;
-	virtual void Run();
+	virtual void run();
 };
 
 struct ToggleMediaLibrarySortMode : public Action
@@ -921,7 +927,7 @@ struct ToggleMediaLibrarySortMode : public Action
 	
 protected:
 	virtual bool canBeRun() const;
-	virtual void Run();
+	virtual void run();
 };
 
 struct RefetchLyrics : public Action
@@ -930,7 +936,7 @@ struct RefetchLyrics : public Action
 	
 protected:
 	virtual bool canBeRun() const;
-	virtual void Run();
+	virtual void run();
 };
 
 struct RefetchArtistInfo : public Action
@@ -939,7 +945,7 @@ struct RefetchArtistInfo : public Action
 	
 protected:
 	virtual bool canBeRun() const;
-	virtual void Run();
+	virtual void run();
 };
 
 struct SetSelectedItemsPriority : public Action
@@ -949,7 +955,7 @@ struct SetSelectedItemsPriority : public Action
 	
 protected:
 	virtual bool canBeRun() const;
-	virtual void Run();
+	virtual void run();
 };
 
 struct FilterPlaylistOnPriorities : public Action
@@ -959,7 +965,7 @@ struct FilterPlaylistOnPriorities : public Action
 	
 protected:
 	virtual bool canBeRun() const;
-	virtual void Run();
+	virtual void run();
 };
 
 struct ShowSongInfo : public Action
@@ -967,7 +973,7 @@ struct ShowSongInfo : public Action
 	ShowSongInfo() : Action(aShowSongInfo, "show_song_info") { }
 	
 protected:
-	virtual void Run();
+	virtual void run();
 };
 
 struct ShowArtistInfo : public Action
@@ -976,7 +982,7 @@ struct ShowArtistInfo : public Action
 	
 protected:
 	virtual bool canBeRun() const;
-	virtual void Run();
+	virtual void run();
 };
 
 struct ShowLyrics : public Action
@@ -984,7 +990,7 @@ struct ShowLyrics : public Action
 	ShowLyrics() : Action(aShowLyrics, "show_lyrics") { }
 	
 protected:
-	virtual void Run();
+	virtual void run();
 };
 
 struct Quit : public Action
@@ -992,7 +998,7 @@ struct Quit : public Action
 	Quit() : Action(aQuit, "quit") { }
 	
 protected:
-	virtual void Run();
+	virtual void run();
 };
 
 struct NextScreen : public Action
@@ -1000,7 +1006,7 @@ struct NextScreen : public Action
 	NextScreen() : Action(aNextScreen, "next_screen") { }
 	
 protected:
-	virtual void Run();
+	virtual void run();
 };
 
 struct PreviousScreen : public Action
@@ -1008,7 +1014,7 @@ struct PreviousScreen : public Action
 	PreviousScreen() : Action(aPreviousScreen, "previous_screen") { }
 	
 protected:
-	virtual void Run();
+	virtual void run();
 };
 
 struct ShowHelp : public Action
@@ -1017,7 +1023,7 @@ struct ShowHelp : public Action
 	
 protected:
 	virtual bool canBeRun() const;
-	virtual void Run();
+	virtual void run();
 };
 
 struct ShowPlaylist : public Action
@@ -1026,7 +1032,7 @@ struct ShowPlaylist : public Action
 	
 protected:
 	virtual bool canBeRun() const;
-	virtual void Run();
+	virtual void run();
 };
 
 struct ShowBrowser : public Action
@@ -1035,7 +1041,7 @@ struct ShowBrowser : public Action
 	
 protected:
 	virtual bool canBeRun() const;
-	virtual void Run();
+	virtual void run();
 };
 
 struct ChangeBrowseMode : public Action
@@ -1044,7 +1050,7 @@ struct ChangeBrowseMode : public Action
 	
 protected:
 	virtual bool canBeRun() const;
-	virtual void Run();
+	virtual void run();
 };
 
 struct ShowSearchEngine : public Action
@@ -1053,7 +1059,7 @@ struct ShowSearchEngine : public Action
 	
 protected:
 	virtual bool canBeRun() const;
-	virtual void Run();
+	virtual void run();
 };
 
 struct ResetSearchEngine : public Action
@@ -1062,7 +1068,7 @@ struct ResetSearchEngine : public Action
 	
 protected:
 	virtual bool canBeRun() const;
-	virtual void Run();
+	virtual void run();
 };
 
 struct ShowMediaLibrary : public Action
@@ -1071,7 +1077,7 @@ struct ShowMediaLibrary : public Action
 	
 protected:
 	virtual bool canBeRun() const;
-	virtual void Run();
+	virtual void run();
 };
 
 struct ToggleMediaLibraryColumnsMode : public Action
@@ -1081,7 +1087,7 @@ struct ToggleMediaLibraryColumnsMode : public Action
 	
 protected:
 	virtual bool canBeRun() const;
-	virtual void Run();
+	virtual void run();
 };
 
 struct ShowPlaylistEditor : public Action
@@ -1090,7 +1096,7 @@ struct ShowPlaylistEditor : public Action
 	
 protected:
 	virtual bool canBeRun() const;
-	virtual void Run();
+	virtual void run();
 };
 
 struct ShowTagEditor : public Action
@@ -1099,7 +1105,7 @@ struct ShowTagEditor : public Action
 	
 protected:
 	virtual bool canBeRun() const;
-	virtual void Run();
+	virtual void run();
 };
 
 struct ShowOutputs : public Action
@@ -1108,7 +1114,7 @@ struct ShowOutputs : public Action
 	
 protected:
 	virtual bool canBeRun() const;
-	virtual void Run();
+	virtual void run();
 };
 
 struct ShowVisualizer : public Action
@@ -1117,7 +1123,7 @@ struct ShowVisualizer : public Action
 	
 protected:
 	virtual bool canBeRun() const;
-	virtual void Run();
+	virtual void run();
 };
 
 struct ShowClock : public Action
@@ -1126,7 +1132,7 @@ struct ShowClock : public Action
 	
 protected:
 	virtual bool canBeRun() const;
-	virtual void Run();
+	virtual void run();
 };
 
 struct ShowServerInfo : public Action
@@ -1137,7 +1143,7 @@ protected:
 #	ifdef HAVE_TAGLIB_H
 	virtual bool canBeRun() const;
 #	endif // HAVE_TAGLIB_H
-	virtual void Run();
+	virtual void run();
 };
 
 #endif // NCMPCPP_ACTIONS_H

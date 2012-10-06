@@ -60,7 +60,7 @@ namespace
 		}
 		else if (signal == SIGWINCH)
 		{
-			Action::ResizeScreen(true);
+			Action::resizeScreen(true);
 		}
 	}
 #	endif // !WIN32
@@ -121,7 +121,7 @@ int main(int argc, char **argv)
 	if (argc > 1)
 		ParseArgv(argc, argv);
 	
-	if (!Action::ConnectToMPD())
+	if (!Action::connectToMPD())
 		exit(1);
 	
 	if (Mpd.Version() < 16)
@@ -150,9 +150,9 @@ int main(int argc, char **argv)
 	if (Config.new_design)
 		Config.statusbar_visibility = 0;
 	
-	Action::SetWindowsDimensions();
-	Action::ValidateScreenSize();
-	Action::InitializeScreens();
+	Action::setWindowsDimensions();
+	Action::validateScreenSize();
+	Action::initializeScreens();
 	
 	wHeader = new NC::Window(0, 0, COLS, Action::HeaderHeight, "", Config.header_color, NC::brNone);
 	if (Config.header_visibility || Config.new_design)

@@ -98,7 +98,7 @@ Action *parseActionLine(const std::string &line, F error)
 	size_t i = 0;
 	for (; i < line.size() && !isspace(line[i]); ++i) { }
 	if (i == line.size()) // only action name
-		result = Action::Get(line);
+		result = Action::get(line);
 	else // there is something else
 	{
 		std::string action_name = line.substr(0, i);
@@ -141,7 +141,7 @@ Action *parseActionLine(const std::string &line, F error)
 		{
 			// require that given action is runnable
 			std::string arg = getEnclosedString(line, '"', '"', 0);
-			Action *action = Action::Get(arg);
+			Action *action = Action::get(arg);
 			if (action)
 				result = new RequireRunnable(action);
 			else

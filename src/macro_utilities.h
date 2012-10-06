@@ -31,7 +31,7 @@ struct PushCharacters : public Action
 	: Action(aMacroUtility, ""), m_window(w), m_queue(queue) { }
 	
 protected:
-	virtual void Run();
+	virtual void run();
 	
 private:
 	NC::Window **m_window;
@@ -45,7 +45,7 @@ struct RequireRunnable : public Action
 	
 protected:
 	virtual bool canBeRun() const;
-	virtual void Run() { }
+	virtual void run() { }
 	
 private:
 	Action *m_action;
@@ -58,7 +58,7 @@ struct RequireScreen : public Action
 	
 protected:
 	virtual bool canBeRun() const;
-	virtual void Run() { }
+	virtual void run() { }
 	
 private:
 	ScreenType m_screen_type;
@@ -70,7 +70,7 @@ struct RunExternalCommand : public Action
 	: Action(aMacroUtility, ""), m_command(command) { }
 	
 protected:
-	virtual void Run();
+	virtual void run();
 	
 private:
 	std::string m_command;

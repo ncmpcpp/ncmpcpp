@@ -21,7 +21,7 @@
 #include "global.h"
 #include "macro_utilities.h"
 
-void PushCharacters::Run()
+void PushCharacters::run()
 {
 	for (auto it = m_queue.begin(); it != m_queue.end(); ++it)
 		(*m_window)->pushChar(*it);
@@ -37,7 +37,7 @@ bool RequireScreen::canBeRun() const
 	return Global::myScreen->type() == m_screen_type;
 }
 
-void RunExternalCommand::Run()
+void RunExternalCommand::run()
 {
 	GNUC_UNUSED int res;
 	res = std::system(m_command.c_str());
