@@ -183,9 +183,6 @@ public:
 		return *this;
 	}
 	
-	void write(GNUC_UNUSED Window &w, GNUC_UNUSED size_t &start_pos, GNUC_UNUSED size_t width,
-			   GNUC_UNUSED const std::basic_string<CharT> &separator) const { }
-	
 private:
 	StringType m_string;
 	Properties m_properties;
@@ -216,68 +213,6 @@ Window operator<<(Window &w, const BasicBuffer<CharT> &buffer)
 	}
 	return w;
 }
-
-/*
-
-template <typename CharT> void BasicBuffer<CharT>::write(
-	Window &w,
-	size_t &start_pos,
-	size_t width,
-	const std::basic_string<CharT> &separator
-	) const
-{
-	std::basic_string<CharT> s = m_string;
-	size_t len = wideLength(s);
-	
-	if (len > width)
-	{
-		s += separator;
-		len = 0;
-		
-		auto lb = m_properties.begin();
-		if (m_properties.back().Position > start_pos) // if there is no attributes from current position, don't load them
-		{
-			// load all attributes that are before start position
-			for (; lb->Position < start_pos; ++lb)
-				loadAttribute(w, lb->Value);
-		}
-		
-		for (size_t i = start_pos; i < s.length() && len < width; ++i)
-		{
-			while (i == lb->Position && lb != m_properties.end())
-			{
-				loadAttribute(w, lb->Value);
-				++lb;
-			}
-			if ((len += wcwidth(s[i])) > width)
-				break;
-			w << s[i];
-		}
-		if (++start_pos >= s.length())
-			start_pos = 0;
-		
-		if (len < width)
-			lb = m_properties.begin();
-		for (size_t i = 0; len < width; ++i)
-		{
-			while (i == lb->Position && lb != m_properties.end())
-			{
-				loadAttribute(w, lb->Value);
-				++lb;
-			}
-			if ((len += wcwidth(s[i])) > width)
-				break;
-			w << s[i];
-		}
-		// load all remained attributes to clean up
-		for (; lb != m_properties.end(); ++lb)
-			loadAttribute(w, lb->Value);
-	}
-	else
-		w << *this;
-}
-
-*/
 
 }
 

@@ -344,11 +344,11 @@ void Status::Changes::elapsedTime()
 		if (!Global::SeekingInProgress)
 			*wHeader << NC::XY(0, 0) << wclrtoeol << tracklength;
 		*wHeader << NC::XY(first_start, 0);
-		first.write(*wHeader, first_line_scroll_begin, COLS-tracklength.length()-VolumeState.length()-1, L" ** ");
+		writeCyclicBuffer(first, *wHeader, first_line_scroll_begin, COLS-tracklength.length()-VolumeState.length()-1, L" ** ");
 		
 		*wHeader << NC::XY(0, 1) << wclrtoeol << NC::fmtBold << player_state << NC::fmtBoldEnd;
 		*wHeader << NC::XY(second_start, 1);
-		second.write(*wHeader, second_line_scroll_begin, COLS-player_state.length()-8-2, L" ** ");
+		writeCyclicBuffer(second, *wHeader, second_line_scroll_begin, COLS-player_state.length()-8-2, L" ** ");
 		
 		*wHeader << NC::XY(wHeader->getWidth()-VolumeState.length(), 0) << Config.volume_color << VolumeState << NC::clEnd;
 		
@@ -384,7 +384,7 @@ void Status::Changes::elapsedTime()
 		NC::WBuffer np_song;
 		stringToBuffer(ToWString(Charset::utf8ToLocale(np.toString(Config.song_status_format, Config.tags_separator, "$"))), np_song);
 		*wFooter << NC::XY(0, 1) << wclrtoeol << NC::fmtBold << player_state << NC::fmtBoldEnd;
-		np_song.write(*wFooter, playing_song_scroll_begin, wFooter->getWidth()-player_state.length()-tracklength.length(), L" ** ");
+		writeCyclicBuffer(np_song, *wFooter, playing_song_scroll_begin, wFooter->getWidth()-player_state.length()-tracklength.length(), L" ** ");
 		*wFooter << NC::fmtBold << NC::XY(wFooter->getWidth()-tracklength.length(), 1) << tracklength << NC::fmtBoldEnd;
 	}
 	if (Progressbar::isUnlocked())

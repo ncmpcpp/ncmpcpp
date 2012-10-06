@@ -337,13 +337,6 @@ template <typename Iterator> std::string getSharedDirectory(Iterator first, Iter
 	return result;
 }
 
-template <typename T> struct StringConverter {
-	const char *operator()(const char *s) { return s; }
-};
-template <> struct StringConverter<NC::WBuffer> {
-	std::wstring operator()(const char *s) { return ToWString(s); }
-};
-
 template <typename Iterator>
 void stringToBuffer(Iterator first, Iterator last, NC::BasicBuffer<typename Iterator::value_type> &buf)
 {
@@ -427,8 +420,6 @@ void stringToBuffer(const std::basic_string<CharT> &s, NC::BasicBuffer<CharT> &b
 
 template <typename T> void ShowTime(T &buf, size_t length, bool short_names)
 {
-	StringConverter<T> cnv;
-	
 	const unsigned MINUTE = 60;
 	const unsigned HOUR = 60*MINUTE;
 	const unsigned DAY = 24*HOUR;
@@ -437,37 +428,37 @@ template <typename T> void ShowTime(T &buf, size_t length, bool short_names)
 	unsigned years = length/YEAR;
 	if (years)
 	{
-		buf << years << cnv(short_names ? "y" : (years == 1 ? " year" : " years"));
+		buf << years << (short_names ? "y" : (years == 1 ? " year" : " years"));
 		length -= years*YEAR;
 		if (length)
-			buf << cnv(", ");
+			buf << ", ";
 	}
 	unsigned days = length/DAY;
 	if (days)
 	{
-		buf << days << cnv(short_names ? "d" : (days == 1 ? " day" : " days"));
+		buf << days << (short_names ? "d" : (days == 1 ? " day" : " days"));
 		length -= days*DAY;
 		if (length)
-			buf << cnv(", ");
+			buf << ", ";
 	}
 	unsigned hours = length/HOUR;
 	if (hours)
 	{
-		buf << hours << cnv(short_names ? "h" : (hours == 1 ? " hour" : " hours"));
+		buf << hours << (short_names ? "h" : (hours == 1 ? " hour" : " hours"));
 		length -= hours*HOUR;
 		if (length)
-			buf << cnv(", ");
+			buf << ", ";
 	}
 	unsigned minutes = length/MINUTE;
 	if (minutes)
 	{
-		buf << minutes << cnv(short_names ? "m" : (minutes == 1 ? " minute" : " minutes"));
+		buf << minutes << (short_names ? "m" : (minutes == 1 ? " minute" : " minutes"));
 		length -= minutes*MINUTE;
 		if (length)
-			buf << cnv(", ");
+			buf << ", ";
 	}
 	if (length)
-		buf << length << cnv(short_names ? "s" : (length == 1 ? " second" : " seconds"));
+		buf << length << (short_names ? "s" : (length == 1 ? " second" : " seconds"));
 }
 
 template <typename BufferT> void ShowTag(BufferT &buf, const std::string &tag)
@@ -486,5 +477,7 @@ std::string Timestamp(time_t t);
 void markSongsInPlaylist(ProxySongList pl);
 
 std::wstring Scroller(const std::wstring &str, size_t &pos, size_t width);
+void writeCyclicBuffer(const NC::WBuffer &buf, NC::Window &w, size_t &start_pos,
+                       size_t width, const std::wstring &separator);
 
 #endif // NCMPCPP_HELPERS_H
