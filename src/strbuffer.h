@@ -48,6 +48,19 @@ template <typename CharT> class BasicBuffer
 		{
 			if (m_position != rhs.m_position)
 				return m_position < rhs.m_position;
+			if (m_type != rhs.m_type)
+				return m_type < rhs.m_type;
+			switch (m_type)
+			{
+				case Type::Color:
+					if (m_color != rhs.m_color)
+						return m_color < rhs.m_color;
+					break;
+				case Type::Format:
+					if (m_format != rhs.m_format)
+						return m_format < rhs.m_format;
+					break;
+			}
 			return m_id < rhs.m_id;
 		}
 		
