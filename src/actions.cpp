@@ -661,11 +661,11 @@ void DeleteBrowserItems::run()
 	else
 	{
 		MPD::Item &item = myBrowser->main().current().value();
-		std::string name = item.type == MPD::itSong ? item.song->getName() : item.name;
+		std::string iname = item.type == MPD::itSong ? item.song->getName() : item.name;
 		question = "Delete ";
 		question += itemTypeToString(item.type);
 		question += " \"";
-		question += ToString(wideShorten(ToWString(name), COLS-question.size()-10));
+		question += ToString(wideShorten(ToWString(iname), COLS-question.size()-10));
 		question += "\"?";
 	}
 	bool yes = askYesNoQuestion(question, Status::trace);
@@ -676,16 +676,16 @@ void DeleteBrowserItems::run()
 		for (auto it = list.begin(); it != list.end(); ++it)
 		{
 			const MPD::Item &i = (*it)->value();
-			std::string name = i.type == MPD::itSong ? i.song->getName() : i.name;
+			std::string iname = i.type == MPD::itSong ? i.song->getName() : i.name;
 			if (myBrowser->deleteItem(i))
 			{
 				const char msg[] = "\"%ls\" deleted";
-				Statusbar::msg(msg, wideShorten(ToWString(name), COLS-const_strlen(msg)).c_str());
+				Statusbar::msg(msg, wideShorten(ToWString(iname), COLS-const_strlen(msg)).c_str());
 			}
 			else
 			{
 				const char msg[] = "Couldn't delete \"%ls\": %s";
-				Statusbar::msg(msg, wideShorten(ToWString(name), COLS-const_strlen(msg)-25).c_str(), strerror(errno));
+				Statusbar::msg(msg, wideShorten(ToWString(iname), COLS-const_strlen(msg)-25).c_str(), strerror(errno));
 				success = false;
 				break;
 			}
@@ -818,19 +818,19 @@ void ExecuteCommand::run()
 	Statusbar::lock();
 	Statusbar::put() << NC::Format::Bold << ":" << NC::Format::NoBold;
 	wFooter->setGetStringHelper(Statusbar::Helpers::TryExecuteImmediateCommand());
-	std::string name = wFooter->getString();
+	std::string cmd_name = wFooter->getString();
 	wFooter->setGetStringHelper(Statusbar::Helpers::getString);
 	Statusbar::unlock();
-	if (name.empty())
+	if (cmd_name.empty())
 		return;
-	auto cmd = Bindings.findCommand(name);
+	auto cmd = Bindings.findCommand(cmd_name);
 	if (cmd)
 	{
-		Statusbar::msg(1, "Executing %s...", name.c_str());
+		Statusbar::msg(1, "Executing %s...", cmd_name.c_str());
 		cmd->binding().execute();
 	}
 	else
-		Statusbar::msg("No command named \"%s\"", name.c_str());
+		Statusbar::msg("No command named \"%s\"", cmd_name.c_str());
 }
 
 bool MoveSortOrderUp::canBeRun() const
