@@ -139,7 +139,7 @@ void Lastfm::Load()
 	}
 	else
 	{
-		w << L"Fetching informations... ";
+		w << "Fetching informations... ";
 		pthread_create(&itsDownloader, 0, DownloadWrapper, this);
 		isDownloadInProgress = 1;
 	}

@@ -235,10 +235,10 @@ void *Lyrics::Download()
 	bool fetcher_defined = itsFetcher && *itsFetcher;
 	for (LyricsFetcher **plugin = fetcher_defined ? itsFetcher : lyricsPlugins; *plugin != 0; ++plugin)
 	{
-		w << L"Fetching lyrics from " << NC::fmtBold << ToWString((*plugin)->name()) << NC::fmtBoldEnd << L"... ";
+		w << "Fetching lyrics from " << NC::fmtBold << (*plugin)->name() << NC::fmtBoldEnd << "... ";
 		result = (*plugin)->fetch(artist, title_);
 		if (result.first == false)
-			w << NC::clRed << ToWString(result.second) << NC::clEnd << '\n';
+			w << NC::clRed << result.second << NC::clEnd << '\n';
 		else
 			break;
 		if (fetcher_defined)
@@ -252,7 +252,7 @@ void *Lyrics::Download()
 		w << Charset::utf8ToLocale(result.second);
 	}
 	else
-		w << '\n' << L"Lyrics weren't found.";
+		w << '\n' << "Lyrics weren't found.";
 	
 	isReadyToTake = 1;
 	pthread_exit(0);

@@ -140,18 +140,12 @@ public:
 		return *this;
 	}
 	
-	BasicBuffer<CharT> &operator<<(char c)
+	BasicBuffer<CharT> &operator<<(CharT c)
 	{
 		m_string += c;
 		return *this;
 	}
-	
-	BasicBuffer<CharT> &operator<<(wchar_t wc)
-	{
-		m_string += wc;
-		return *this;
-	}
-	
+
 	BasicBuffer<CharT> &operator<<(const CharT *s)
 	{
 		m_string += s;

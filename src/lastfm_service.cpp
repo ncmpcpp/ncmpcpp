@@ -104,8 +104,8 @@ bool ArtistInfo::checkArgs(const Args &args)
 
 void ArtistInfo::colorizeOutput(NC::Scrollpad &w)
 {
-	w.setProperties(NC::fmtBold, L"\n\nSimilar artists:\n", NC::fmtBoldEnd, 0);
-	w.setProperties(Config.color2, L"\n * ", NC::clEnd, 0);
+	w.setProperties(NC::fmtBold, "\n\nSimilar artists:\n", NC::fmtBoldEnd, 0);
+	w.setProperties(Config.color2, "\n * ", NC::clEnd, 0);
 }
 
 bool ArtistInfo::parse(std::string &data)

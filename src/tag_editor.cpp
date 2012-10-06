@@ -304,20 +304,20 @@ void TagEditor::enterPressed()
 		// prepare additional windows
 		
 		FParserLegend->clear();
-		*FParserLegend << L"%a - artist\n";
-		*FParserLegend << L"%A - album artist\n";
-		*FParserLegend << L"%t - title\n";
-		*FParserLegend << L"%b - album\n";
-		*FParserLegend << L"%y - date\n";
-		*FParserLegend << L"%n - track number\n";
-		*FParserLegend << L"%g - genre\n";
-		*FParserLegend << L"%c - composer\n";
-		*FParserLegend << L"%p - performer\n";
-		*FParserLegend << L"%d - disc\n";
-		*FParserLegend << L"%C - comment\n\n";
-		*FParserLegend << NC::fmtBold << L"Files:\n" << NC::fmtBoldEnd;
+		*FParserLegend << "%a - artist\n";
+		*FParserLegend << "%A - album artist\n";
+		*FParserLegend << "%t - title\n";
+		*FParserLegend << "%b - album\n";
+		*FParserLegend << "%y - date\n";
+		*FParserLegend << "%n - track number\n";
+		*FParserLegend << "%g - genre\n";
+		*FParserLegend << "%c - composer\n";
+		*FParserLegend << "%p - performer\n";
+		*FParserLegend << "%d - disc\n";
+		*FParserLegend << "%C - comment\n\n";
+		*FParserLegend << NC::fmtBold << "Files:\n" << NC::fmtBoldEnd;
 		for (auto it = EditedSongs.begin(); it != EditedSongs.end(); ++it)
-			*FParserLegend << Config.color2 << L" * " << NC::clEnd << (*it)->getName() << '\n';
+			*FParserLegend << Config.color2 << " * " << NC::clEnd << (*it)->getName() << '\n';
 		FParserLegend->flush();
 		
 		if (!Patterns.empty())
@@ -378,7 +378,7 @@ void TagEditor::enterPressed()
 				{
 					if (FParserUsePreview)
 					{
-						*FParserPreview << NC::fmtBold << s.getName() << L":\n" << NC::fmtBoldEnd;
+						*FParserPreview << NC::fmtBold << s.getName() << ":\n" << NC::fmtBoldEnd;
 						*FParserPreview << ParseFilename(s, Config.pattern, FParserUsePreview) << '\n';
 					}
 					else
@@ -398,12 +398,12 @@ void TagEditor::enterPressed()
 					}
 					if (!FParserUsePreview)
 						s.setNewURI(new_file + extension);
-					*FParserPreview << file << Config.color2 << L" -> " << NC::clEnd;
+					*FParserPreview << file << Config.color2 << " -> " << NC::clEnd;
 					if (new_file.empty())
 						*FParserPreview << Config.empty_tags_color << Config.empty_tag << NC::clEnd;
 					else
 						*FParserPreview << new_file << extension;
-					*FParserPreview << '\n' << '\n';
+					*FParserPreview << "\n\n";
 					if (!success)
 						break;
 				}

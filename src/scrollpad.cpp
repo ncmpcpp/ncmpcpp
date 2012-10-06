@@ -231,10 +231,4 @@ void Scrollpad::reset()
 	m_beginning = 0;
 }
 
-Scrollpad &Scrollpad::operator<<(const std::string &s)
-{
-	m_buffer << ToWString(s);
-	return *this;
-}
-
 }

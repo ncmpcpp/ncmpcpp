@@ -101,24 +101,24 @@ void SongInfo::PrepareSong(MPD::Song &s)
 	TagLib::FileRef f(path_to_file.c_str());
 #	endif // HAVE_TAGLIB_H
 	
-	w << NC::fmtBold << Config.color1 << L"Filename: " << NC::fmtBoldEnd << Config.color2 << s.getName() << '\n' << NC::clEnd;
-	w << NC::fmtBold << L"Directory: " << NC::fmtBoldEnd << Config.color2;
+	w << NC::fmtBold << Config.color1 << "Filename: " << NC::fmtBoldEnd << Config.color2 << s.getName() << '\n' << NC::clEnd;
+	w << NC::fmtBold << "Directory: " << NC::fmtBoldEnd << Config.color2;
 	ShowTag(w, s.getDirectory());
-	w << L"\n\n" << NC::clEnd;
-	w << NC::fmtBold << L"Length: " << NC::fmtBoldEnd << Config.color2 << s.getLength() << '\n' << NC::clEnd;
+	w << "\n\n" << NC::clEnd;
+	w << NC::fmtBold << "Length: " << NC::fmtBoldEnd << Config.color2 << s.getLength() << '\n' << NC::clEnd;
 #	ifdef HAVE_TAGLIB_H
 	if (!f.isNull())
 	{
-		w << NC::fmtBold << L"Bitrate: " << NC::fmtBoldEnd << Config.color2 << f.audioProperties()->bitrate() << L" kbps\n" << NC::clEnd;
-		w << NC::fmtBold << L"Sample rate: " << NC::fmtBoldEnd << Config.color2 << f.audioProperties()->sampleRate() << L" Hz\n" << NC::clEnd;
-		w << NC::fmtBold << L"Channels: " << NC::fmtBoldEnd << Config.color2 << (f.audioProperties()->channels() == 1 ? L"Mono" : L"Stereo") << '\n' << NC::clDefault;
+		w << NC::fmtBold << "Bitrate: " << NC::fmtBoldEnd << Config.color2 << f.audioProperties()->bitrate() << " kbps\n" << NC::clEnd;
+		w << NC::fmtBold << "Sample rate: " << NC::fmtBoldEnd << Config.color2 << f.audioProperties()->sampleRate() << " Hz\n" << NC::clEnd;
+		w << NC::fmtBold << "Channels: " << NC::fmtBoldEnd << Config.color2 << (f.audioProperties()->channels() == 1 ? "Mono" : "Stereo") << '\n' << NC::clDefault;
 	}
 #	endif // HAVE_TAGLIB_H
 	w << NC::clDefault;
 	
 	for (const Metadata *m = Tags; m->Name; ++m)
 	{
-		w << NC::fmtBold << '\n' << ToWString(m->Name) << L": " << NC::fmtBoldEnd;
+		w << NC::fmtBold << '\n' << m->Name << ": " << NC::fmtBoldEnd;
 		ShowTag(w, s.getTags(m->Get, Config.tags_separator));
 	}
 }

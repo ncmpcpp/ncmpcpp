@@ -343,9 +343,6 @@ template <typename T> struct StringConverter {
 template <> struct StringConverter<NC::WBuffer> {
 	std::wstring operator()(const char *s) { return ToWString(s); }
 };
-template <> struct StringConverter<NC::Scrollpad> {
-	std::wstring operator()(const char *s) { return ToWString(s); }
-};
 
 template <typename Iterator>
 void stringToBuffer(Iterator first, Iterator last, NC::BasicBuffer<typename Iterator::value_type> &buf)

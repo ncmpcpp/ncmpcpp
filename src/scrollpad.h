@@ -35,13 +35,13 @@ struct Scrollpad: public Window
 	Scrollpad(size_t startx, size_t starty, size_t width, size_t height,
 	          const std::string &title, Color color, Border border);
 	
-	const std::wstring &buffer() { return m_buffer.str(); }
+	const std::string &buffer() { return m_buffer.str(); }
 
 	void flush();
 	void reset();
 	
 	template <typename PropertyT>
-	bool setProperties(PropertyT begin, const std::wstring &ws, PropertyT end, size_t id = -2)
+	bool setProperties(PropertyT begin, const std::string &ws, PropertyT end, size_t id = -2)
 	{
 		bool success = false;
 		for (size_t i = 0; (i = m_buffer.str().find(ws, i)) != std::string::npos;)
@@ -66,10 +66,9 @@ struct Scrollpad: public Window
 		m_buffer << obj;
 		return *this;
 	}
-	Scrollpad &operator<<(const std::string &s);
 	
 private:
-	WBuffer m_buffer;
+	Buffer m_buffer;
 	
 	size_t m_beginning;
 	size_t m_real_height;

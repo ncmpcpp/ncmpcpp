@@ -144,25 +144,25 @@ std::string Help::DisplayKeys(const ActionType at)
 
 void Help::Section(const char *type_, const char *title_)
 {
-	w << L"\n  " << NC::fmtBold << ToWString(type_) << L" - ";
-	w << ToWString(title_) << NC::fmtBoldEnd << L"\n\n";
+	w << "\n  " << NC::fmtBold << type_ << " - ";
+	w << title_ << NC::fmtBoldEnd << "\n\n";
 }
 
 void Help::KeyDesc(const ActionType at, const char *desc)
 {
-	w << L"    " << DisplayKeys(at) << L" : " << ToWString(desc) << '\n';
+	w << "    " << DisplayKeys(at) << " : " << desc << '\n';
 }
 
 void Help::MouseDesc(std::string action, const char *desc, bool indent)
 {
 	action.resize(31 - (indent ? 2 : 0), ' ');
-	w << L"    " << (indent ? L"  " : L"") << ToWString(action);
-	w << L": " << ToWString(desc) << '\n';
+	w << "    " << (indent ? "  " : "") << action;
+	w << ": " << desc << '\n';
 }
 
 void Help::MouseColumn(const char *column)
 {
-	w << NC::fmtBold << L"    " << ToWString(column) << L" column:\n" << NC::fmtBoldEnd;
+	w << NC::fmtBold << "    " << column << " column:\n" << NC::fmtBoldEnd;
 }
 
 void Help::GetKeybindings()

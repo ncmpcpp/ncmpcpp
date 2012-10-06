@@ -1971,7 +1971,7 @@ void Find::Run()
 	Statusbar::msg("Searching...");
 	auto s = static_cast<Screen<NC::Scrollpad> *>(myScreen);
 	s->main().removeProperties();
-	Statusbar::msg("%s", findme.empty() || s->main().setProperties(NC::fmtReverse, ToWString(findme), NC::fmtReverseEnd) ? "Done" : "No matching patterns found");
+	Statusbar::msg("%s", findme.empty() || s->main().setProperties(NC::fmtReverse, findme, NC::fmtReverseEnd) ? "Done" : "No matching patterns found");
 	s->main().flush();
 }
 

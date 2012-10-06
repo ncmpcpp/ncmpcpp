@@ -84,28 +84,28 @@ void ServerInfo::update()
 	
 	w.clear();
 	
-	w << NC::fmtBold << L"Version: " << NC::fmtBoldEnd << L"0." << Mpd.Version() << L".*\n";
-	w << NC::fmtBold << L"Uptime: " << NC::fmtBoldEnd;
+	w << NC::fmtBold << "Version: " << NC::fmtBoldEnd << "0." << Mpd.Version() << ".*\n";
+	w << NC::fmtBold << "Uptime: " << NC::fmtBoldEnd;
 	ShowTime(w, stats.uptime(), 1);
 	w << '\n';
-	w << NC::fmtBold << L"Time playing: " << NC::fmtBoldEnd << MPD::Song::ShowTime(stats.playTime()) << '\n';
+	w << NC::fmtBold << "Time playing: " << NC::fmtBoldEnd << MPD::Song::ShowTime(stats.playTime()) << '\n';
 	w << '\n';
-	w << NC::fmtBold << L"Total playtime: " << NC::fmtBoldEnd;
+	w << NC::fmtBold << "Total playtime: " << NC::fmtBoldEnd;
 	ShowTime(w, stats.dbPlayTime(), 1);
 	w << '\n';
-	w << NC::fmtBold << L"Artist names: " << NC::fmtBoldEnd << stats.artists() << '\n';
-	w << NC::fmtBold << L"Album names: " << NC::fmtBoldEnd << stats.albums() << '\n';
-	w << NC::fmtBold << L"Songs in database: " << NC::fmtBoldEnd << stats.songs() << '\n';
+	w << NC::fmtBold << "Artist names: " << NC::fmtBoldEnd << stats.artists() << '\n';
+	w << NC::fmtBold << "Album names: " << NC::fmtBoldEnd << stats.albums() << '\n';
+	w << NC::fmtBold << "Songs in database: " << NC::fmtBoldEnd << stats.songs() << '\n';
 	w << '\n';
-	w << NC::fmtBold << L"Last DB update: " << NC::fmtBoldEnd << Timestamp(stats.dbUpdateTime()) << '\n';
+	w << NC::fmtBold << "Last DB update: " << NC::fmtBoldEnd << Timestamp(stats.dbUpdateTime()) << '\n';
 	w << '\n';
-	w << NC::fmtBold << L"URL Handlers:" << NC::fmtBoldEnd;
+	w << NC::fmtBold << "URL Handlers:" << NC::fmtBoldEnd;
 	for (auto it = itsURLHandlers.begin(); it != itsURLHandlers.end(); ++it)
-		w << (it != itsURLHandlers.begin() ? L", " : L" ") << *it;
-	w << L"\n\n";
-	w << NC::fmtBold << L"Tag Types:" << NC::fmtBoldEnd;
+		w << (it != itsURLHandlers.begin() ? ", " : " ") << *it;
+	w << "\n\n";
+	w << NC::fmtBold << "Tag Types:" << NC::fmtBoldEnd;
 	for (auto it = itsTagTypes.begin(); it != itsTagTypes.end(); ++it)
-		w << (it != itsTagTypes.begin() ? L", " : L" ") << *it;
+		w << (it != itsTagTypes.begin() ? ", " : " ") << *it;
 	
 	w.flush();
 	w.refresh();
