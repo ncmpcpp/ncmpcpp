@@ -851,7 +851,12 @@ Window &Window::operator<<(Color color)
 				setColor(m_base_color, m_base_bg_color);
 			break;
 		default:
-			m_color_stack.push(Colors(color, Color::Default));
+			Color bg;
+			if (m_color_stack.empty())
+				bg = m_bg_color;
+			else
+				bg = m_color_stack.top().bg;
+			m_color_stack.push(Colors(color, bg));
 			setColor(m_color_stack.top().fg, m_color_stack.top().bg);
 	}
 	return *this;
