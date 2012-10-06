@@ -131,7 +131,7 @@ void showSongs(NC::Menu<T> &menu, const MPD::Song &s, const ProxySongList &pl, c
 				buf << " ";
 				stringToBuffer(++it, line.end(), buf);
 				if (discard_colors)
-					buf.removeFormatting();
+					buf.removeProperties();
 				size_t x_off = menu.getWidth() - wideLength(ToWString(buf.str()));
 				if (is_now_playing)
 					x_off -= Config.now_playing_suffix_length;

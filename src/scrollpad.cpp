@@ -26,99 +26,139 @@
 namespace NC {//
 
 Scrollpad::Scrollpad(size_t startx,
-			size_t starty,
-			size_t width,
-			size_t height,
-			const std::string &title,
-			Color color,
-			Border border)
-			: Window(startx, starty, width, height, title, color, border),
-			m_beginning(0),
-			m_found_value_begin(-1),
-			m_found_value_end(-1),
-			m_real_height(height)
+size_t starty,
+size_t width,
+size_t height,
+const std::string &title,
+Color color,
+Border border)
+: Window(startx, starty, width, height, title, color, border),
+m_beginning(0),
+m_real_height(height)
 {
 }
 
 void Scrollpad::flush()
 {
-	m_real_height = 1;
+	recreate(m_width, m_height);
 	
-	std::wstring s = m_buffer.str();
+	auto &w = static_cast<Window &>(*this);
+	const auto &s = m_buffer.str();
+	const auto &ps = m_buffer.properties();
+	auto p = ps.begin();
+	auto old_p = p;
+	int x, y;
+	size_t i = 0, old_i;
 	
-	size_t x = 0;
-	int x_pos = 0;
-	int space_pos = 0;
-	
-	for (size_t i = 0; i < s.length(); ++i)
-	{
-		x += s[i] != '\t' ? wcwidth(s[i]) : 8-x%8; // tab size
-		
-		if (s[i] == ' ') // if space, remember its position;
+	auto load_properties = [&]() {
+		for (; p != ps.end() && p->position() == i; ++p)
+			w << *p;
+	};
+	auto write_whitespace = [&]() {
+		for (; i < s.length() && iswspace(s[i]); ++i)
 		{
-			space_pos = i;
-			x_pos = x;
+			load_properties();
+			w << s[i];
 		}
-		
-		if (x >= m_width)
+	};
+	auto write_word = [&]() {
+		for (; i < s.length() && !iswspace(s[i]); ++i)
 		{
-			// if line is over, there was at least one space in this line and we are in the middle of the word, restore position to last known space and make it EOL
-			if (space_pos > 0 && (s[i] != ' ' || s[i+1] != ' '))
+			load_properties();
+			w << s[i];
+		}
+	};
+	auto write_buffer = [&](bool generate_height_only) -> size_t {
+		int new_y;
+		size_t height = 1;
+		i = 0;
+		p = ps.begin();
+		y = getY();
+		while (true)
+		{
+			// write all whitespaces.
+			write_whitespace();
+			
+			// if we are generating height, check difference
+			// between previous Y coord and current one and
+			// update height accordingly.
+			if (generate_height_only)
 			{
-				i = space_pos;
-				x = x_pos;
-				s[i] = '\n';
+				new_y = getY();
+				height += new_y - y;
+				y = new_y;
+			}
+			
+			if (i == s.length())
+				break;
+			
+			// save current string position state and get current
+			// coordinates as we are before the beginning of a word.
+			old_i = i;
+			old_p = p;
+			x = getX();
+			y = getY();
+			
+			write_word();
+			
+			// get new Y coord to see if word overflew into next line.
+			new_y = getY();
+			if (new_y != y)
+			{
+				if (generate_height_only)
+				{
+					// if it did, let's update height...
+					++height;
+				}
+				else
+				{
+					// ...or go to old coordinates, erase
+					// part of the string from previous line...
+					goToXY(x, y);
+					wclrtoeol(m_window);
+				}
+				
+				// ...start at the beginning of next line...
+				++y;
+				goToXY(0, y);
+				
+				i = old_i;
+				p = old_p;
+				// ...write this word again...
+				write_word();
+				
+				if (generate_height_only)
+				{
+					// ... and check for potential
+					// difference in Y coordinates again.
+					new_y = getY();
+					height += new_y - y;
+				}
+			}
+			
+			if (i == s.length())
+				break;
+			
+			if (generate_height_only)
+			{
+				// move to the first line, since when we do
+				// generation, m_real_height = m_height and we
+				// don't have many lines to use.
+				goToXY(getX(), 0);
+				y = 0;
 			}
 		}
-		
-		if (x >= m_width || s[i] == '\n')
-		{
-			m_real_height++;
-			x = 0;
-			space_pos = 0;
-		}
-	}
-	m_real_height = std::max(m_height, m_real_height);
+		return height;
+	};
+	
+	m_real_height = std::max(write_buffer(true), m_height);
 	recreate(m_width, m_real_height);
-	// print our modified string
-	std::swap(s, m_buffer.m_string);
-	static_cast<Window &>(*this) << m_buffer;
-	// restore original one
-	std::swap(s, m_buffer.m_string);
-}
-
-bool Scrollpad::setFormatting(short val_b, const std::wstring &s, short val_e, bool case_sensitive, bool for_each)
-{
-	bool result = m_buffer.setFormatting(val_b, s, val_e, case_sensitive, for_each);
-	if (result)
-	{
-		m_found_for_each = for_each;
-		m_found_case_sensitive = case_sensitive;
-		m_found_value_begin = val_b;
-		m_found_value_end = val_e;
-		m_found_pattern = s;
-	}
-	else
-		forgetFormatting();
-	return result;
-}
-
-void Scrollpad::forgetFormatting()
-{
-	m_found_value_begin = -1;
-	m_found_value_end = -1;
-	m_found_pattern.clear();
-}
-
-void Scrollpad::removeFormatting()
-{
-	if (m_found_value_begin >= 0 && m_found_value_end >= 0)
-		m_buffer.removeFormatting(m_found_value_begin, m_found_pattern, m_found_value_end, m_found_case_sensitive, m_found_for_each);
+	write_buffer(false);
 }
 
 void Scrollpad::refresh()
 {
-	assert(m_real_height >= m_real_height);
+	assert(m_real_height >= m_height);
 	size_t max_beginning = m_real_height - m_height;
 	m_beginning = std::min(m_beginning, max_beginning);
 	prefresh(m_window, m_beginning, 0, m_start_y, m_start_x, m_start_y+m_height-1, m_start_x+m_width-1);
@@ -183,7 +223,6 @@ void Scrollpad::clear()
 	m_window = newpad(m_height, m_width);
 	setTimeout(m_window_timeout);
 	setColor(m_color, m_bg_color);
-	forgetFormatting();
 	keypad(m_window, 1);
 }
 

@@ -104,10 +104,8 @@ bool ArtistInfo::checkArgs(const Args &args)
 
 void ArtistInfo::colorizeOutput(NC::Scrollpad &w)
 {
-	w.setFormatting(NC::fmtBold, L"\n\nSimilar artists:\n", NC::fmtBoldEnd, false);
-	w.setFormatting(Config.color2, L"\n * ", NC::clEnd, true);
-	// below is used so format won't be removed using removeFormatting() by accident.
-	w.forgetFormatting();
+	w.setProperties(NC::fmtBold, L"\n\nSimilar artists:\n", NC::fmtBoldEnd, 0);
+	w.setProperties(Config.color2, L"\n * ", NC::clEnd, 0);
 }
 
 bool ArtistInfo::parse(std::string &data)
