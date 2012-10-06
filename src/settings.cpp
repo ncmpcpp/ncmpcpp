@@ -173,7 +173,7 @@ void Configuration::SetDefaults()
 	tag_editor_album_format = "{{(%y) }%b}";
 	new_header_first_line = "{$b$1$aqqu$/a$9 {%t}|{%f} $1$atqq$/a$9$/b}";
 	new_header_second_line = "{{{$4$b%a$/b$9}{ - $7%b$9}{ ($4%y$9)}}|{%D}}";
-	browser_playlist_prefix << NC::clRed << "(playlist)" << NC::clEnd << ' ';
+	browser_playlist_prefix << NC::clRed << "playlist" << NC::clEnd << ' ';
 	progressbar = L"=>\0";
 	visualizer_chars = L"◆│";
 	pattern = "%n - %t";
