@@ -25,10 +25,12 @@
 #include "actions.h"
 #include "screen_type.h"
 
-struct PushCharacters : public Action
+namespace Actions {//
+
+struct PushCharacters : public BaseAction
 {
 	PushCharacters(NC::Window **w, std::vector<int> &&queue)
-	: Action(aMacroUtility, ""), m_window(w), m_queue(queue) { }
+	: BaseAction(aMacroUtility, ""), m_window(w), m_queue(queue) { }
 	
 protected:
 	virtual void run();
@@ -38,23 +40,23 @@ private:
 	std::vector<int> m_queue;
 };
 
-struct RequireRunnable : public Action
+struct RequireRunnable : public BaseAction
 {
-	RequireRunnable(Action *action)
-	: Action(aMacroUtility, ""), m_action(action) { assert(action); }
+	RequireRunnable(BaseAction *action)
+	: BaseAction(aMacroUtility, ""), m_action(action) { assert(action); }
 	
 protected:
 	virtual bool canBeRun() const;
 	virtual void run() { }
 	
 private:
-	Action *m_action;
+	BaseAction *m_action;
 };
 
-struct RequireScreen : public Action
+struct RequireScreen : public BaseAction
 {
 	RequireScreen(ScreenType screen_type)
-	: Action(aMacroUtility, ""), m_screen_type(screen_type) { }
+	: BaseAction(aMacroUtility, ""), m_screen_type(screen_type) { }
 	
 protected:
 	virtual bool canBeRun() const;
@@ -64,10 +66,10 @@ private:
 	ScreenType m_screen_type;
 };
 
-struct RunExternalCommand : public Action
+struct RunExternalCommand : public BaseAction
 {
 	RunExternalCommand(std::string command)
-	: Action(aMacroUtility, ""), m_command(command) { }
+	: BaseAction(aMacroUtility, ""), m_command(command) { }
 	
 protected:
 	virtual void run();
@@ -75,5 +77,7 @@ protected:
 private:
 	std::string m_command;
 };
+
+}
 
 #endif // NCMPCPP_MACRO_UTILITIES_H

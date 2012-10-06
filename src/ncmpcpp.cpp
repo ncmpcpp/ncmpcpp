@@ -60,7 +60,7 @@ namespace
 		}
 		else if (signal == SIGWINCH)
 		{
-			Action::resizeScreen(true);
+			Actions::resizeScreen(true);
 		}
 	}
 #	endif // !WIN32
@@ -121,7 +121,7 @@ int main(int argc, char **argv)
 	if (argc > 1)
 		ParseArgv(argc, argv);
 	
-	if (!Action::connectToMPD())
+	if (!Actions::connectToMPD())
 		exit(1);
 	
 	if (Mpd.Version() < 16)
@@ -142,7 +142,7 @@ int main(int argc, char **argv)
 	
 	NC::initScreen("ncmpcpp ver. " VERSION, Config.colors_enabled);
 	
-	Action::OriginalStatusbarVisibility = Config.statusbar_visibility;
+	Actions::OriginalStatusbarVisibility = Config.statusbar_visibility;
 	
 	if (!Config.titles_visibility)
 		wattron(stdscr, COLOR_PAIR(Config.main_color));
@@ -150,15 +150,15 @@ int main(int argc, char **argv)
 	if (Config.new_design)
 		Config.statusbar_visibility = 0;
 	
-	Action::setWindowsDimensions();
-	Action::validateScreenSize();
-	Action::initializeScreens();
+	Actions::setWindowsDimensions();
+	Actions::validateScreenSize();
+	Actions::initializeScreens();
 	
-	wHeader = new NC::Window(0, 0, COLS, Action::HeaderHeight, "", Config.header_color, NC::brNone);
+	wHeader = new NC::Window(0, 0, COLS, Actions::HeaderHeight, "", Config.header_color, NC::brNone);
 	if (Config.header_visibility || Config.new_design)
 		wHeader->display();
 	
-	wFooter = new NC::Window(0, Action::FooterStartY, COLS, Action::FooterHeight, "", Config.statusbar_color, NC::brNone);
+	wFooter = new NC::Window(0, Actions::FooterStartY, COLS, Actions::FooterHeight, "", Config.statusbar_color, NC::brNone);
 	wFooter->setTimeout(500);
 	wFooter->setGetStringHelper(Statusbar::Helpers::getString);
 	if (Mpd.SupportsIdle())
@@ -202,7 +202,7 @@ int main(int argc, char **argv)
 	signal(SIGWINCH, sighandler);
 #	endif // !WIN32
 	
-	while (!Action::ExitMainLoop)
+	while (!Actions::ExitMainLoop)
 	{
 		if (!Mpd.Connected())
 		{

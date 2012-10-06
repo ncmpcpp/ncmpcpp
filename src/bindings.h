@@ -72,9 +72,9 @@ struct Key
 /// Represents either single action or chain of actions bound to a certain key
 struct Binding
 {
-	typedef std::vector<Action *> ActionChain;
+	typedef std::vector<Actions::BaseAction *> ActionChain;
 	
-	Binding(ActionType at) : m_is_single(true), m_action(Action::get(at)) { }
+	Binding(ActionType at) : m_is_single(true), m_action(Actions::get(at)) { }
 	Binding(const ActionChain &actions) {
 		assert(actions.size() > 0);
 		if (actions.size() == 1) {
@@ -107,7 +107,7 @@ struct Binding
 		assert(!m_is_single);
 		return m_chain;
 	}
-	Action *action() const {
+	Actions::BaseAction *action() const {
 		assert(m_is_single);
 		return m_action;
 	}
@@ -115,7 +115,7 @@ struct Binding
 private:
 	bool m_is_single;
 	union {
-		Action *m_action;
+		Actions::BaseAction *m_action;
 		ActionChain *m_chain;
 	};
 };

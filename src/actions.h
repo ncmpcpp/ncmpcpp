@@ -57,11 +57,31 @@ enum ActionType
 	aShowClock, aShowServerInfo
 };
 
-struct Action
+namespace Actions {//
+
+void validateScreenSize();
+void initializeScreens();
+void setResizeFlags();
+void resizeScreen(bool reload_main_window);
+void setWindowsDimensions();
+
+bool connectToMPD();
+bool askYesNoQuestion(const std::string &question, void (*callback)());
+bool isMPDMusicDirSet();
+
+struct BaseAction *get(ActionType at);
+struct BaseAction *get(const std::string &name);
+
+extern bool OriginalStatusbarVisibility;
+extern bool ExitMainLoop;
+
+extern size_t HeaderHeight;
+extern size_t FooterHeight;
+extern size_t FooterStartY;
+
+struct BaseAction
 {
-	enum class Find { Forward, Backward };
-	
-	Action(ActionType type, const char *name) : m_type(type), m_name(name) { }
+	BaseAction(ActionType type, const char *name) : m_type(type), m_name(name) { }
 	
 	const char *name() const { return m_name; }
 	ActionType type() const { return m_type; }
@@ -78,49 +98,25 @@ struct Action
 		return false;
 	}
 	
-	static void validateScreenSize();
-	static void initializeScreens();
-	static void setResizeFlags();
-	static void resizeScreen(bool reload_main_window);
-	static void setWindowsDimensions();
-	
-	static bool connectToMPD();
-	static bool askYesNoQuestion(const std::string &question, void (*callback)());
-	static bool isMPDMusicDirSet();
-	
-	static Action *get(ActionType at);
-	static Action *get(const std::string &name);
-	
-	static bool OriginalStatusbarVisibility;
-	static bool ExitMainLoop;
-	
-	static size_t HeaderHeight;
-	static size_t FooterHeight;
-	static size_t FooterStartY;
-	
 protected:
 	virtual void run() = 0;
-	
-	static void seek();
-	static void findItem(const Find direction);
-	static void listsChangeFinisher();
 	
 private:
 	ActionType m_type;
 	const char *m_name;
 };
 
-struct Dummy : public Action
+struct Dummy : public BaseAction
 {
-	Dummy() : Action(aDummy, "dummy") { }
+	Dummy() : BaseAction(aDummy, "dummy") { }
 	
 protected:
 	virtual void run() { }
 };
 
-struct MouseEvent : public Action
+struct MouseEvent : public BaseAction
 {
-	MouseEvent() : Action(aMouseEvent, "mouse_event") { }
+	MouseEvent() : BaseAction(aMouseEvent, "mouse_event") { }
 	
 protected:
 	virtual bool canBeRun() const;
@@ -131,352 +127,352 @@ protected:
 		MEVENT m_old_mouse_event;
 };
 
-struct ScrollUp : public Action
+struct ScrollUp : public BaseAction
 {
-	ScrollUp() : Action(aScrollUp, "scroll_up") { }
+	ScrollUp() : BaseAction(aScrollUp, "scroll_up") { }
 	
 protected:
 	virtual void run();
 };
 
-struct ScrollDown : public Action
+struct ScrollDown : public BaseAction
 {
-	ScrollDown() : Action(aScrollDown, "scroll_down") { }
+	ScrollDown() : BaseAction(aScrollDown, "scroll_down") { }
 	
 protected:
 	virtual void run();
 };
 
-struct ScrollUpArtist : public Action
+struct ScrollUpArtist : public BaseAction
 {
-	ScrollUpArtist() : Action(aScrollUpArtist, "scroll_up_artist") { }
-	
-protected:
-	virtual bool canBeRun() const;
-	virtual void run();
-};
-
-struct ScrollUpAlbum : public Action
-{
-	ScrollUpAlbum() : Action(aScrollUpAlbum, "scroll_up_album") { }
+	ScrollUpArtist() : BaseAction(aScrollUpArtist, "scroll_up_artist") { }
 	
 protected:
 	virtual bool canBeRun() const;
 	virtual void run();
 };
 
-struct ScrollDownArtist : public Action
+struct ScrollUpAlbum : public BaseAction
 {
-	ScrollDownArtist() : Action(aScrollDownArtist, "scroll_down_artist") { }
+	ScrollUpAlbum() : BaseAction(aScrollUpAlbum, "scroll_up_album") { }
 	
 protected:
 	virtual bool canBeRun() const;
 	virtual void run();
 };
 
-struct ScrollDownAlbum : public Action
+struct ScrollDownArtist : public BaseAction
 {
-	ScrollDownAlbum() : Action(aScrollDownAlbum, "scroll_down_album") { }
+	ScrollDownArtist() : BaseAction(aScrollDownArtist, "scroll_down_artist") { }
 	
 protected:
 	virtual bool canBeRun() const;
 	virtual void run();
 };
 
-struct PageUp : public Action
+struct ScrollDownAlbum : public BaseAction
 {
-	PageUp() : Action(aPageUp, "page_up") { }
-	
-protected:
-	virtual void run();
-};
-
-struct PageDown : public Action
-{
-	PageDown() : Action(aPageDown, "page_down") { }
-	
-protected:
-	virtual void run();
-};
-
-struct MoveHome : public Action
-{
-	MoveHome() : Action(aMoveHome, "move_home") { }
-	
-protected:
-	virtual void run();
-};
-
-struct MoveEnd : public Action
-{
-	MoveEnd() : Action(aMoveEnd, "move_end") { }
-	
-protected:
-	virtual void run();
-};
-
-struct ToggleInterface : public Action
-{
-	ToggleInterface() : Action(aToggleInterface, "toggle_interface") { }
-	
-protected:
-	virtual void run();
-};
-
-struct JumpToParentDirectory : public Action
-{
-	JumpToParentDirectory() : Action(aJumpToParentDirectory, "jump_to_parent_directory") { }
+	ScrollDownAlbum() : BaseAction(aScrollDownAlbum, "scroll_down_album") { }
 	
 protected:
 	virtual bool canBeRun() const;
 	virtual void run();
 };
 
-struct PressEnter : public Action
+struct PageUp : public BaseAction
 {
-	PressEnter() : Action(aPressEnter, "press_enter") { }
+	PageUp() : BaseAction(aPageUp, "page_up") { }
 	
 protected:
 	virtual void run();
 };
 
-struct PressSpace : public Action
+struct PageDown : public BaseAction
 {
-	PressSpace() : Action(aPressSpace, "press_space") { }
+	PageDown() : BaseAction(aPageDown, "page_down") { }
 	
 protected:
 	virtual void run();
 };
 
-struct PreviousColumn : public Action
+struct MoveHome : public BaseAction
 {
-	PreviousColumn() : Action(aPreviousColumn, "previous_column") { }
+	MoveHome() : BaseAction(aMoveHome, "move_home") { }
 	
 protected:
-	virtual bool canBeRun() const;
 	virtual void run();
 };
 
-struct NextColumn : public Action
+struct MoveEnd : public BaseAction
 {
-	NextColumn() : Action(aNextColumn, "next_column") { }
+	MoveEnd() : BaseAction(aMoveEnd, "move_end") { }
 	
 protected:
-	virtual bool canBeRun() const;
 	virtual void run();
 };
 
-struct MasterScreen : public Action
+struct ToggleInterface : public BaseAction
 {
-	MasterScreen() : Action(aMasterScreen, "master_screen") { }
+	ToggleInterface() : BaseAction(aToggleInterface, "toggle_interface") { }
 	
 protected:
-	virtual bool canBeRun() const;
 	virtual void run();
 };
 
-struct SlaveScreen : public Action
+struct JumpToParentDirectory : public BaseAction
 {
-	SlaveScreen() : Action(aSlaveScreen, "slave_screen") { }
+	JumpToParentDirectory() : BaseAction(aJumpToParentDirectory, "jump_to_parent_directory") { }
 	
 protected:
 	virtual bool canBeRun() const;
 	virtual void run();
 };
 
-struct VolumeUp : public Action
+struct PressEnter : public BaseAction
 {
-	VolumeUp() : Action(aVolumeUp, "volume_up") { }
+	PressEnter() : BaseAction(aPressEnter, "press_enter") { }
 	
 protected:
 	virtual void run();
 };
 
-struct VolumeDown : public Action
+struct PressSpace : public BaseAction
 {
-	VolumeDown() : Action(aVolumeDown, "volume_down") { }
+	PressSpace() : BaseAction(aPressSpace, "press_space") { }
 	
 protected:
 	virtual void run();
 };
 
-struct DeletePlaylistItems : public Action
+struct PreviousColumn : public BaseAction
 {
-	DeletePlaylistItems() : Action(aDeletePlaylistItems, "delete_playlist_items") { }
-	
-protected:
-	virtual bool canBeRun() const;
-	virtual void run();
-};
-
-struct DeleteStoredPlaylist : public Action
-{
-	DeleteStoredPlaylist() : Action(aDeleteStoredPlaylist, "delete_stored_playlist") { }
+	PreviousColumn() : BaseAction(aPreviousColumn, "previous_column") { }
 	
 protected:
 	virtual bool canBeRun() const;
 	virtual void run();
 };
 
-struct DeleteBrowserItems : public Action
+struct NextColumn : public BaseAction
 {
-	DeleteBrowserItems() : Action(aDeleteBrowserItems, "delete_browser_items") { }
+	NextColumn() : BaseAction(aNextColumn, "next_column") { }
 	
 protected:
 	virtual bool canBeRun() const;
 	virtual void run();
 };
 
-struct ReplaySong : public Action
+struct MasterScreen : public BaseAction
 {
-	ReplaySong() : Action(aReplaySong, "replay_song") { }
-	
-protected:
-	virtual void run();
-};
-
-struct PreviousSong : public Action
-{
-	PreviousSong() : Action(aPrevious, "previous") { }
-	
-protected:
-	virtual void run();
-};
-
-struct NextSong : public Action
-{
-	NextSong() : Action(aNext, "next") { }
-	
-protected:
-	virtual void run();
-};
-
-struct Pause : public Action
-{
-	Pause() : Action(aPause, "pause") { }
-	
-protected:
-	virtual void run();
-};
-
-struct Stop : public Action
-{
-	Stop() : Action(aStop, "stop") { }
-	
-protected:
-	virtual void run();
-};
-
-struct ExecuteCommand : public Action
-{
-	ExecuteCommand() : Action(aExecuteCommand, "execute_command") { }
-	
-protected:
-	virtual void run();
-};
-
-struct SavePlaylist : public Action
-{
-	SavePlaylist() : Action(aSavePlaylist, "save_playlist") { }
-	
-protected:
-	virtual void run();
-};
-
-struct MoveSortOrderUp : public Action
-{
-	MoveSortOrderUp() : Action(aMoveSortOrderUp, "move_sort_order_up") { }
+	MasterScreen() : BaseAction(aMasterScreen, "master_screen") { }
 	
 protected:
 	virtual bool canBeRun() const;
 	virtual void run();
 };
 
-struct MoveSortOrderDown : public Action
+struct SlaveScreen : public BaseAction
 {
-	MoveSortOrderDown() : Action(aMoveSortOrderDown, "move_sort_order_down") { }
+	SlaveScreen() : BaseAction(aSlaveScreen, "slave_screen") { }
 	
 protected:
 	virtual bool canBeRun() const;
 	virtual void run();
 };
 
-struct MoveSelectedItemsUp : public Action
+struct VolumeUp : public BaseAction
 {
-	MoveSelectedItemsUp() : Action(aMoveSelectedItemsUp, "move_selected_items_up") { }
+	VolumeUp() : BaseAction(aVolumeUp, "volume_up") { }
+	
+protected:
+	virtual void run();
+};
+
+struct VolumeDown : public BaseAction
+{
+	VolumeDown() : BaseAction(aVolumeDown, "volume_down") { }
+	
+protected:
+	virtual void run();
+};
+
+struct DeletePlaylistItems : public BaseAction
+{
+	DeletePlaylistItems() : BaseAction(aDeletePlaylistItems, "delete_playlist_items") { }
 	
 protected:
 	virtual bool canBeRun() const;
 	virtual void run();
 };
 
-struct MoveSelectedItemsDown : public Action
+struct DeleteStoredPlaylist : public BaseAction
 {
-	MoveSelectedItemsDown() : Action(aMoveSelectedItemsDown, "move_selected_items_down") { }
+	DeleteStoredPlaylist() : BaseAction(aDeleteStoredPlaylist, "delete_stored_playlist") { }
 	
 protected:
 	virtual bool canBeRun() const;
 	virtual void run();
 };
 
-struct MoveSelectedItemsTo : public Action
+struct DeleteBrowserItems : public BaseAction
 {
-	MoveSelectedItemsTo() : Action(aMoveSelectedItemsTo, "move_selected_items_to") { }
+	DeleteBrowserItems() : BaseAction(aDeleteBrowserItems, "delete_browser_items") { }
 	
 protected:
 	virtual bool canBeRun() const;
 	virtual void run();
 };
 
-struct Add : public Action
+struct ReplaySong : public BaseAction
 {
-	Add() : Action(aAdd, "add") { }
+	ReplaySong() : BaseAction(aReplaySong, "replay_song") { }
+	
+protected:
+	virtual void run();
+};
+
+struct PreviousSong : public BaseAction
+{
+	PreviousSong() : BaseAction(aPrevious, "previous") { }
+	
+protected:
+	virtual void run();
+};
+
+struct NextSong : public BaseAction
+{
+	NextSong() : BaseAction(aNext, "next") { }
+	
+protected:
+	virtual void run();
+};
+
+struct Pause : public BaseAction
+{
+	Pause() : BaseAction(aPause, "pause") { }
+	
+protected:
+	virtual void run();
+};
+
+struct Stop : public BaseAction
+{
+	Stop() : BaseAction(aStop, "stop") { }
+	
+protected:
+	virtual void run();
+};
+
+struct ExecuteCommand : public BaseAction
+{
+	ExecuteCommand() : BaseAction(aExecuteCommand, "execute_command") { }
+	
+protected:
+	virtual void run();
+};
+
+struct SavePlaylist : public BaseAction
+{
+	SavePlaylist() : BaseAction(aSavePlaylist, "save_playlist") { }
+	
+protected:
+	virtual void run();
+};
+
+struct MoveSortOrderUp : public BaseAction
+{
+	MoveSortOrderUp() : BaseAction(aMoveSortOrderUp, "move_sort_order_up") { }
 	
 protected:
 	virtual bool canBeRun() const;
 	virtual void run();
 };
 
-struct SeekForward : public Action
+struct MoveSortOrderDown : public BaseAction
 {
-	SeekForward() : Action(aSeekForward, "seek_forward") { }
+	MoveSortOrderDown() : BaseAction(aMoveSortOrderDown, "move_sort_order_down") { }
 	
 protected:
 	virtual bool canBeRun() const;
 	virtual void run();
 };
 
-struct SeekBackward : public Action
+struct MoveSelectedItemsUp : public BaseAction
 {
-	SeekBackward() : Action(aSeekBackward, "seek_backward") { }
+	MoveSelectedItemsUp() : BaseAction(aMoveSelectedItemsUp, "move_selected_items_up") { }
 	
 protected:
 	virtual bool canBeRun() const;
 	virtual void run();
 };
 
-struct ToggleDisplayMode : public Action
+struct MoveSelectedItemsDown : public BaseAction
 {
-	ToggleDisplayMode() : Action(aToggleDisplayMode, "toggle_display_mode") { }
+	MoveSelectedItemsDown() : BaseAction(aMoveSelectedItemsDown, "move_selected_items_down") { }
 	
 protected:
 	virtual bool canBeRun() const;
 	virtual void run();
 };
 
-struct ToggleSeparatorsBetweenAlbums : public Action
+struct MoveSelectedItemsTo : public BaseAction
+{
+	MoveSelectedItemsTo() : BaseAction(aMoveSelectedItemsTo, "move_selected_items_to") { }
+	
+protected:
+	virtual bool canBeRun() const;
+	virtual void run();
+};
+
+struct Add : public BaseAction
+{
+	Add() : BaseAction(aAdd, "add") { }
+	
+protected:
+	virtual bool canBeRun() const;
+	virtual void run();
+};
+
+struct SeekForward : public BaseAction
+{
+	SeekForward() : BaseAction(aSeekForward, "seek_forward") { }
+	
+protected:
+	virtual bool canBeRun() const;
+	virtual void run();
+};
+
+struct SeekBackward : public BaseAction
+{
+	SeekBackward() : BaseAction(aSeekBackward, "seek_backward") { }
+	
+protected:
+	virtual bool canBeRun() const;
+	virtual void run();
+};
+
+struct ToggleDisplayMode : public BaseAction
+{
+	ToggleDisplayMode() : BaseAction(aToggleDisplayMode, "toggle_display_mode") { }
+	
+protected:
+	virtual bool canBeRun() const;
+	virtual void run();
+};
+
+struct ToggleSeparatorsBetweenAlbums : public BaseAction
 {
 	ToggleSeparatorsBetweenAlbums()
-	: Action(aToggleSeparatorsBetweenAlbums, "toggle_separators_between_albums") { }
+	: BaseAction(aToggleSeparatorsBetweenAlbums, "toggle_separators_between_albums") { }
 	
 protected:
 	virtual bool canBeRun() const;
 	virtual void run();
 };
 
-struct ToggleLyricsFetcher : public Action
+struct ToggleLyricsFetcher : public BaseAction
 {
-	ToggleLyricsFetcher() : Action(aToggleLyricsFetcher, "toggle_lyrics_fetcher") { }
+	ToggleLyricsFetcher() : BaseAction(aToggleLyricsFetcher, "toggle_lyrics_fetcher") { }
 	
 protected:
 #	ifndef HAVE_CURL_CURL_H
@@ -485,10 +481,10 @@ protected:
 	virtual void run();
 };
 
-struct ToggleFetchingLyricsInBackground : public Action
+struct ToggleFetchingLyricsInBackground : public BaseAction
 {
 	ToggleFetchingLyricsInBackground()
-	: Action(aToggleFetchingLyricsInBackground, "toggle_fetching_lyrics_in_background") { }
+	: BaseAction(aToggleFetchingLyricsInBackground, "toggle_fetching_lyrics_in_background") { }
 	
 protected:
 #	ifndef HAVE_CURL_CURL_H
@@ -497,647 +493,647 @@ protected:
 	virtual void run();
 };
 
-struct TogglePlayingSongCentering : public Action
+struct TogglePlayingSongCentering : public BaseAction
 {
 	TogglePlayingSongCentering()
-	: Action(aTogglePlayingSongCentering, "toggle_playing_song_centering") { }
+	: BaseAction(aTogglePlayingSongCentering, "toggle_playing_song_centering") { }
 	
 protected:
 	virtual void run();
 };
 
-struct UpdateDatabase : public Action
+struct UpdateDatabase : public BaseAction
 {
-	UpdateDatabase() : Action(aUpdateDatabase, "update_database") { }
+	UpdateDatabase() : BaseAction(aUpdateDatabase, "update_database") { }
 	
 protected:
 	virtual void run();
 };
 
-struct JumpToPlayingSong : public Action
+struct JumpToPlayingSong : public BaseAction
 {
-	JumpToPlayingSong() : Action(aJumpToPlayingSong, "jump_to_playing_song") { }
+	JumpToPlayingSong() : BaseAction(aJumpToPlayingSong, "jump_to_playing_song") { }
 	
 protected:
 	virtual bool canBeRun() const;
 	virtual void run();
 };
 
-struct ToggleRepeat : public Action
+struct ToggleRepeat : public BaseAction
 {
-	ToggleRepeat() : Action(aToggleRepeat, "toggle_repeat") { }
+	ToggleRepeat() : BaseAction(aToggleRepeat, "toggle_repeat") { }
 	
 protected:
 	virtual void run();
 };
 
-struct Shuffle : public Action
+struct Shuffle : public BaseAction
 {
-	Shuffle() : Action(aShuffle, "shuffle") { }
+	Shuffle() : BaseAction(aShuffle, "shuffle") { }
 	
 protected:
 	virtual void run();
 };
 
-struct ToggleRandom : public Action
+struct ToggleRandom : public BaseAction
 {
-	ToggleRandom() : Action(aToggleRandom, "toggle_random") { }
+	ToggleRandom() : BaseAction(aToggleRandom, "toggle_random") { }
 	
 protected:
 	virtual void run();
 };
 
-struct StartSearching : public Action
+struct StartSearching : public BaseAction
 {
-	StartSearching() : Action(aStartSearching, "start_searching") { }
-	
-protected:
-	virtual bool canBeRun() const;
-	virtual void run();
-};
-
-struct SaveTagChanges : public Action
-{
-	SaveTagChanges() : Action(aSaveTagChanges, "save_tag_changes") { }
+	StartSearching() : BaseAction(aStartSearching, "start_searching") { }
 	
 protected:
 	virtual bool canBeRun() const;
 	virtual void run();
 };
 
-struct ToggleSingle : public Action
+struct SaveTagChanges : public BaseAction
 {
-	ToggleSingle() : Action(aToggleSingle, "toggle_single") { }
-	
-protected:
-	virtual void run();
-};
-
-struct ToggleConsume : public Action
-{
-	ToggleConsume() : Action(aToggleConsume, "toggle_consume") { }
-	
-protected:
-	virtual void run();
-};
-
-struct ToggleCrossfade : public Action
-{
-	ToggleCrossfade() : Action(aToggleCrossfade, "toggle_crossfade") { }
-	
-protected:
-	virtual void run();
-};
-
-struct SetCrossfade : public Action
-{
-	SetCrossfade() : Action(aSetCrossfade, "set_crossfade") { }
-	
-protected:
-	virtual void run();
-};
-
-struct EditSong : public Action
-{
-	EditSong() : Action(aEditSong, "edit_song") { }
+	SaveTagChanges() : BaseAction(aSaveTagChanges, "save_tag_changes") { }
 	
 protected:
 	virtual bool canBeRun() const;
 	virtual void run();
 };
 
-struct EditLibraryTag : public Action
+struct ToggleSingle : public BaseAction
 {
-	EditLibraryTag() : Action(aEditLibraryTag, "edit_library_tag") { }
+	ToggleSingle() : BaseAction(aToggleSingle, "toggle_single") { }
+	
+protected:
+	virtual void run();
+};
+
+struct ToggleConsume : public BaseAction
+{
+	ToggleConsume() : BaseAction(aToggleConsume, "toggle_consume") { }
+	
+protected:
+	virtual void run();
+};
+
+struct ToggleCrossfade : public BaseAction
+{
+	ToggleCrossfade() : BaseAction(aToggleCrossfade, "toggle_crossfade") { }
+	
+protected:
+	virtual void run();
+};
+
+struct SetCrossfade : public BaseAction
+{
+	SetCrossfade() : BaseAction(aSetCrossfade, "set_crossfade") { }
+	
+protected:
+	virtual void run();
+};
+
+struct EditSong : public BaseAction
+{
+	EditSong() : BaseAction(aEditSong, "edit_song") { }
 	
 protected:
 	virtual bool canBeRun() const;
 	virtual void run();
 };
 
-struct EditLibraryAlbum : public Action
+struct EditLibraryTag : public BaseAction
 {
-	EditLibraryAlbum() : Action(aEditLibraryAlbum, "edit_library_album") { }
+	EditLibraryTag() : BaseAction(aEditLibraryTag, "edit_library_tag") { }
 	
 protected:
 	virtual bool canBeRun() const;
 	virtual void run();
 };
 
-struct EditDirectoryName : public Action
+struct EditLibraryAlbum : public BaseAction
 {
-	EditDirectoryName() : Action(aEditDirectoryName, "edit_directory_name") { }
+	EditLibraryAlbum() : BaseAction(aEditLibraryAlbum, "edit_library_album") { }
 	
 protected:
 	virtual bool canBeRun() const;
 	virtual void run();
 };
 
-struct EditPlaylistName : public Action
+struct EditDirectoryName : public BaseAction
 {
-	EditPlaylistName() : Action(aEditPlaylistName, "edit_playlist_name") { }
+	EditDirectoryName() : BaseAction(aEditDirectoryName, "edit_directory_name") { }
 	
 protected:
 	virtual bool canBeRun() const;
 	virtual void run();
 };
 
-struct EditLyrics : public Action
+struct EditPlaylistName : public BaseAction
 {
-	EditLyrics() : Action(aEditLyrics, "edit_lyrics") { }
+	EditPlaylistName() : BaseAction(aEditPlaylistName, "edit_playlist_name") { }
 	
 protected:
 	virtual bool canBeRun() const;
 	virtual void run();
 };
 
-struct JumpToBrowser : public Action
+struct EditLyrics : public BaseAction
 {
-	JumpToBrowser() : Action(aJumpToBrowser, "jump_to_browser") { }
+	EditLyrics() : BaseAction(aEditLyrics, "edit_lyrics") { }
 	
 protected:
 	virtual bool canBeRun() const;
 	virtual void run();
 };
 
-struct JumpToMediaLibrary : public Action
+struct JumpToBrowser : public BaseAction
 {
-	JumpToMediaLibrary() : Action(aJumpToMediaLibrary, "jump_to_media_library") { }
+	JumpToBrowser() : BaseAction(aJumpToBrowser, "jump_to_browser") { }
 	
 protected:
 	virtual bool canBeRun() const;
 	virtual void run();
 };
 
-struct JumpToPlaylistEditor : public Action
+struct JumpToMediaLibrary : public BaseAction
 {
-	JumpToPlaylistEditor() : Action(aJumpToPlaylistEditor, "jump_to_playlist_editor") { }
+	JumpToMediaLibrary() : BaseAction(aJumpToMediaLibrary, "jump_to_media_library") { }
 	
 protected:
 	virtual bool canBeRun() const;
 	virtual void run();
 };
 
-struct ToggleScreenLock : public Action
+struct JumpToPlaylistEditor : public BaseAction
 {
-	ToggleScreenLock() : Action(aToggleScreenLock, "toggle_screen_lock") { }
-	
-protected:
-	virtual void run();
-};
-
-struct JumpToTagEditor : public Action
-{
-	JumpToTagEditor() : Action(aJumpToTagEditor, "jump_to_tag_editor") { }
+	JumpToPlaylistEditor() : BaseAction(aJumpToPlaylistEditor, "jump_to_playlist_editor") { }
 	
 protected:
 	virtual bool canBeRun() const;
 	virtual void run();
 };
 
-struct JumpToPositionInSong : public Action
+struct ToggleScreenLock : public BaseAction
 {
-	JumpToPositionInSong() : Action(aJumpToPositionInSong, "jump_to_position_in_song") { }
+	ToggleScreenLock() : BaseAction(aToggleScreenLock, "toggle_screen_lock") { }
+	
+protected:
+	virtual void run();
+};
+
+struct JumpToTagEditor : public BaseAction
+{
+	JumpToTagEditor() : BaseAction(aJumpToTagEditor, "jump_to_tag_editor") { }
 	
 protected:
 	virtual bool canBeRun() const;
 	virtual void run();
 };
 
-struct ReverseSelection : public Action
+struct JumpToPositionInSong : public BaseAction
 {
-	ReverseSelection() : Action(aReverseSelection, "reverse_selection") { }
+	JumpToPositionInSong() : BaseAction(aJumpToPositionInSong, "jump_to_position_in_song") { }
 	
 protected:
 	virtual bool canBeRun() const;
 	virtual void run();
 };
 
-struct RemoveSelection : public Action
+struct ReverseSelection : public BaseAction
 {
-	RemoveSelection() : Action(aRemoveSelection, "remove_selection") { }
+	ReverseSelection() : BaseAction(aReverseSelection, "reverse_selection") { }
 	
 protected:
 	virtual bool canBeRun() const;
 	virtual void run();
 };
 
-struct SelectAlbum : public Action
+struct RemoveSelection : public BaseAction
 {
-	SelectAlbum() : Action(aSelectAlbum, "select_album") { }
+	RemoveSelection() : BaseAction(aRemoveSelection, "remove_selection") { }
 	
 protected:
 	virtual bool canBeRun() const;
 	virtual void run();
 };
 
-struct AddSelectedItems : public Action
+struct SelectAlbum : public BaseAction
 {
-	AddSelectedItems() : Action(aAddSelectedItems, "add_selected_items") { }
+	SelectAlbum() : BaseAction(aSelectAlbum, "select_album") { }
 	
 protected:
 	virtual bool canBeRun() const;
 	virtual void run();
 };
 
-struct CropMainPlaylist : public Action
+struct AddSelectedItems : public BaseAction
 {
-	CropMainPlaylist() : Action(aCropMainPlaylist, "crop_main_playlist") { }
-	
-protected:
-	virtual void run();
-};
-
-struct CropPlaylist : public Action
-{
-	CropPlaylist() : Action(aCropPlaylist, "crop_playlist") { }
+	AddSelectedItems() : BaseAction(aAddSelectedItems, "add_selected_items") { }
 	
 protected:
 	virtual bool canBeRun() const;
 	virtual void run();
 };
 
-struct ClearMainPlaylist : public Action
+struct CropMainPlaylist : public BaseAction
 {
-	ClearMainPlaylist() : Action(aClearMainPlaylist, "clear_main_playlist") { }
+	CropMainPlaylist() : BaseAction(aCropMainPlaylist, "crop_main_playlist") { }
 	
 protected:
 	virtual void run();
 };
 
-struct ClearPlaylist : public Action
+struct CropPlaylist : public BaseAction
 {
-	ClearPlaylist() : Action(aClearPlaylist, "clear_playlist") { }
-	
-protected:
-	virtual bool canBeRun() const;
-	virtual void run();
-};
-
-struct SortPlaylist : public Action
-{
-	SortPlaylist() : Action(aSortPlaylist, "sort_playlist") { }
+	CropPlaylist() : BaseAction(aCropPlaylist, "crop_playlist") { }
 	
 protected:
 	virtual bool canBeRun() const;
 	virtual void run();
 };
 
-struct ReversePlaylist : public Action
+struct ClearMainPlaylist : public BaseAction
 {
-	ReversePlaylist() : Action(aReversePlaylist, "reverse_playlist") { }
+	ClearMainPlaylist() : BaseAction(aClearMainPlaylist, "clear_main_playlist") { }
+	
+protected:
+	virtual void run();
+};
+
+struct ClearPlaylist : public BaseAction
+{
+	ClearPlaylist() : BaseAction(aClearPlaylist, "clear_playlist") { }
 	
 protected:
 	virtual bool canBeRun() const;
 	virtual void run();
 };
 
-struct ApplyFilter : public Action
+struct SortPlaylist : public BaseAction
 {
-	ApplyFilter() : Action(aApplyFilter, "apply_filter") { }
+	SortPlaylist() : BaseAction(aSortPlaylist, "sort_playlist") { }
 	
 protected:
 	virtual bool canBeRun() const;
 	virtual void run();
 };
 
-struct Find : public Action
+struct ReversePlaylist : public BaseAction
 {
-	Find() : Action(aFind, "find") { }
+	ReversePlaylist() : BaseAction(aReversePlaylist, "reverse_playlist") { }
 	
 protected:
 	virtual bool canBeRun() const;
 	virtual void run();
 };
 
-struct FindItemForward : public Action
+struct ApplyFilter : public BaseAction
 {
-	FindItemForward() : Action(aFindItemForward, "find_item_forward") { }
+	ApplyFilter() : BaseAction(aApplyFilter, "apply_filter") { }
 	
 protected:
 	virtual bool canBeRun() const;
 	virtual void run();
 };
 
-struct FindItemBackward : public Action
+struct Find : public BaseAction
 {
-	FindItemBackward() : Action(aFindItemBackward, "find_item_backward") { }
+	Find() : BaseAction(aFind, "find") { }
 	
 protected:
 	virtual bool canBeRun() const;
 	virtual void run();
 };
 
-struct NextFoundItem : public Action
+struct FindItemForward : public BaseAction
 {
-	NextFoundItem() : Action(aNextFoundItem, "next_found_item") { }
+	FindItemForward() : BaseAction(aFindItemForward, "find_item_forward") { }
 	
 protected:
 	virtual bool canBeRun() const;
 	virtual void run();
 };
 
-struct PreviousFoundItem : public Action
+struct FindItemBackward : public BaseAction
 {
-	PreviousFoundItem() : Action(aPreviousFoundItem, "previous_found_item") { }
+	FindItemBackward() : BaseAction(aFindItemBackward, "find_item_backward") { }
 	
 protected:
 	virtual bool canBeRun() const;
 	virtual void run();
 };
 
-struct ToggleFindMode : public Action
+struct NextFoundItem : public BaseAction
 {
-	ToggleFindMode() : Action(aToggleFindMode, "toggle_find_mode") { }
-	
-protected:
-	virtual void run();
-};
-
-struct ToggleReplayGainMode : public Action
-{
-	ToggleReplayGainMode() : Action(aToggleReplayGainMode, "toggle_replay_gain_mode") { }
-	
-protected:
-	virtual void run();
-};
-
-struct ToggleSpaceMode : public Action
-{
-	ToggleSpaceMode() : Action(aToggleSpaceMode, "toggle_space_mode") { }
-	
-protected:
-	virtual void run();
-};
-
-struct ToggleAddMode : public Action
-{
-	ToggleAddMode() : Action(aToggleAddMode, "toggle_add_mode") { }
-	
-protected:
-	virtual void run();
-};
-
-struct ToggleMouse : public Action
-{
-	ToggleMouse() : Action(aToggleMouse, "toggle_mouse") { }
-	
-protected:
-	virtual void run();
-};
-
-struct ToggleBitrateVisibility : public Action
-{
-	ToggleBitrateVisibility() : Action(aToggleBitrateVisibility, "toggle_bitrate_visibility") { }
-	
-protected:
-	virtual void run();
-};
-
-struct AddRandomItems : public Action
-{
-	AddRandomItems() : Action(aAddRandomItems, "add_random_items") { }
-	
-protected:
-	virtual void run();
-};
-
-struct ToggleBrowserSortMode : public Action
-{
-	ToggleBrowserSortMode() : Action(aToggleBrowserSortMode, "toggle_browser_sort_mode") { }
+	NextFoundItem() : BaseAction(aNextFoundItem, "next_found_item") { }
 	
 protected:
 	virtual bool canBeRun() const;
 	virtual void run();
 };
 
-struct ToggleLibraryTagType : public Action
+struct PreviousFoundItem : public BaseAction
 {
-	ToggleLibraryTagType() : Action(aToggleLibraryTagType, "toggle_library_tag_type") { }
+	PreviousFoundItem() : BaseAction(aPreviousFoundItem, "previous_found_item") { }
 	
 protected:
 	virtual bool canBeRun() const;
 	virtual void run();
 };
 
-struct ToggleMediaLibrarySortMode : public Action
+struct ToggleFindMode : public BaseAction
+{
+	ToggleFindMode() : BaseAction(aToggleFindMode, "toggle_find_mode") { }
+	
+protected:
+	virtual void run();
+};
+
+struct ToggleReplayGainMode : public BaseAction
+{
+	ToggleReplayGainMode() : BaseAction(aToggleReplayGainMode, "toggle_replay_gain_mode") { }
+	
+protected:
+	virtual void run();
+};
+
+struct ToggleSpaceMode : public BaseAction
+{
+	ToggleSpaceMode() : BaseAction(aToggleSpaceMode, "toggle_space_mode") { }
+	
+protected:
+	virtual void run();
+};
+
+struct ToggleAddMode : public BaseAction
+{
+	ToggleAddMode() : BaseAction(aToggleAddMode, "toggle_add_mode") { }
+	
+protected:
+	virtual void run();
+};
+
+struct ToggleMouse : public BaseAction
+{
+	ToggleMouse() : BaseAction(aToggleMouse, "toggle_mouse") { }
+	
+protected:
+	virtual void run();
+};
+
+struct ToggleBitrateVisibility : public BaseAction
+{
+	ToggleBitrateVisibility() : BaseAction(aToggleBitrateVisibility, "toggle_bitrate_visibility") { }
+	
+protected:
+	virtual void run();
+};
+
+struct AddRandomItems : public BaseAction
+{
+	AddRandomItems() : BaseAction(aAddRandomItems, "add_random_items") { }
+	
+protected:
+	virtual void run();
+};
+
+struct ToggleBrowserSortMode : public BaseAction
+{
+	ToggleBrowserSortMode() : BaseAction(aToggleBrowserSortMode, "toggle_browser_sort_mode") { }
+	
+protected:
+	virtual bool canBeRun() const;
+	virtual void run();
+};
+
+struct ToggleLibraryTagType : public BaseAction
+{
+	ToggleLibraryTagType() : BaseAction(aToggleLibraryTagType, "toggle_library_tag_type") { }
+	
+protected:
+	virtual bool canBeRun() const;
+	virtual void run();
+};
+
+struct ToggleMediaLibrarySortMode : public BaseAction
 {
 	ToggleMediaLibrarySortMode()
-	: Action(aToggleMediaLibrarySortMode, "toggle_media_library_sort_mode") { }
+	: BaseAction(aToggleMediaLibrarySortMode, "toggle_media_library_sort_mode") { }
 	
 protected:
 	virtual bool canBeRun() const;
 	virtual void run();
 };
 
-struct RefetchLyrics : public Action
+struct RefetchLyrics : public BaseAction
 {
-	RefetchLyrics() : Action(aRefetchLyrics, "refetch_lyrics") { }
+	RefetchLyrics() : BaseAction(aRefetchLyrics, "refetch_lyrics") { }
 	
 protected:
 	virtual bool canBeRun() const;
 	virtual void run();
 };
 
-struct RefetchArtistInfo : public Action
+struct RefetchArtistInfo : public BaseAction
 {
-	RefetchArtistInfo() : Action(aRefetchArtistInfo, "refetch_artist_info") { }
+	RefetchArtistInfo() : BaseAction(aRefetchArtistInfo, "refetch_artist_info") { }
 	
 protected:
 	virtual bool canBeRun() const;
 	virtual void run();
 };
 
-struct SetSelectedItemsPriority : public Action
+struct SetSelectedItemsPriority : public BaseAction
 {
 	SetSelectedItemsPriority()
-	: Action(aSetSelectedItemsPriority, "set_selected_items_priority") { }
+	: BaseAction(aSetSelectedItemsPriority, "set_selected_items_priority") { }
 	
 protected:
 	virtual bool canBeRun() const;
 	virtual void run();
 };
 
-struct FilterPlaylistOnPriorities : public Action
+struct FilterPlaylistOnPriorities : public BaseAction
 {
 	FilterPlaylistOnPriorities()
-	: Action(aFilterPlaylistOnPriorities, "filter_playlist_on_priorities") { }
+	: BaseAction(aFilterPlaylistOnPriorities, "filter_playlist_on_priorities") { }
 	
 protected:
 	virtual bool canBeRun() const;
 	virtual void run();
 };
 
-struct ShowSongInfo : public Action
+struct ShowSongInfo : public BaseAction
 {
-	ShowSongInfo() : Action(aShowSongInfo, "show_song_info") { }
+	ShowSongInfo() : BaseAction(aShowSongInfo, "show_song_info") { }
 	
 protected:
 	virtual void run();
 };
 
-struct ShowArtistInfo : public Action
+struct ShowArtistInfo : public BaseAction
 {
-	ShowArtistInfo() : Action(aShowArtistInfo, "show_artist_info") { }
-	
-protected:
-	virtual bool canBeRun() const;
-	virtual void run();
-};
-
-struct ShowLyrics : public Action
-{
-	ShowLyrics() : Action(aShowLyrics, "show_lyrics") { }
-	
-protected:
-	virtual void run();
-};
-
-struct Quit : public Action
-{
-	Quit() : Action(aQuit, "quit") { }
-	
-protected:
-	virtual void run();
-};
-
-struct NextScreen : public Action
-{
-	NextScreen() : Action(aNextScreen, "next_screen") { }
-	
-protected:
-	virtual void run();
-};
-
-struct PreviousScreen : public Action
-{
-	PreviousScreen() : Action(aPreviousScreen, "previous_screen") { }
-	
-protected:
-	virtual void run();
-};
-
-struct ShowHelp : public Action
-{
-	ShowHelp() : Action(aShowHelp, "show_help") { }
+	ShowArtistInfo() : BaseAction(aShowArtistInfo, "show_artist_info") { }
 	
 protected:
 	virtual bool canBeRun() const;
 	virtual void run();
 };
 
-struct ShowPlaylist : public Action
+struct ShowLyrics : public BaseAction
 {
-	ShowPlaylist() : Action(aShowPlaylist, "show_playlist") { }
+	ShowLyrics() : BaseAction(aShowLyrics, "show_lyrics") { }
+	
+protected:
+	virtual void run();
+};
+
+struct Quit : public BaseAction
+{
+	Quit() : BaseAction(aQuit, "quit") { }
+	
+protected:
+	virtual void run();
+};
+
+struct NextScreen : public BaseAction
+{
+	NextScreen() : BaseAction(aNextScreen, "next_screen") { }
+	
+protected:
+	virtual void run();
+};
+
+struct PreviousScreen : public BaseAction
+{
+	PreviousScreen() : BaseAction(aPreviousScreen, "previous_screen") { }
+	
+protected:
+	virtual void run();
+};
+
+struct ShowHelp : public BaseAction
+{
+	ShowHelp() : BaseAction(aShowHelp, "show_help") { }
 	
 protected:
 	virtual bool canBeRun() const;
 	virtual void run();
 };
 
-struct ShowBrowser : public Action
+struct ShowPlaylist : public BaseAction
 {
-	ShowBrowser() : Action(aShowBrowser, "show_browser") { }
+	ShowPlaylist() : BaseAction(aShowPlaylist, "show_playlist") { }
 	
 protected:
 	virtual bool canBeRun() const;
 	virtual void run();
 };
 
-struct ChangeBrowseMode : public Action
+struct ShowBrowser : public BaseAction
 {
-	ChangeBrowseMode() : Action(aChangeBrowseMode, "change_browse_mode") { }
+	ShowBrowser() : BaseAction(aShowBrowser, "show_browser") { }
 	
 protected:
 	virtual bool canBeRun() const;
 	virtual void run();
 };
 
-struct ShowSearchEngine : public Action
+struct ChangeBrowseMode : public BaseAction
 {
-	ShowSearchEngine() : Action(aShowSearchEngine, "show_search_engine") { }
+	ChangeBrowseMode() : BaseAction(aChangeBrowseMode, "change_browse_mode") { }
 	
 protected:
 	virtual bool canBeRun() const;
 	virtual void run();
 };
 
-struct ResetSearchEngine : public Action
+struct ShowSearchEngine : public BaseAction
 {
-	ResetSearchEngine() : Action(aResetSearchEngine, "reset_search_engine") { }
+	ShowSearchEngine() : BaseAction(aShowSearchEngine, "show_search_engine") { }
 	
 protected:
 	virtual bool canBeRun() const;
 	virtual void run();
 };
 
-struct ShowMediaLibrary : public Action
+struct ResetSearchEngine : public BaseAction
 {
-	ShowMediaLibrary() : Action(aShowMediaLibrary, "show_media_library") { }
+	ResetSearchEngine() : BaseAction(aResetSearchEngine, "reset_search_engine") { }
 	
 protected:
 	virtual bool canBeRun() const;
 	virtual void run();
 };
 
-struct ToggleMediaLibraryColumnsMode : public Action
+struct ShowMediaLibrary : public BaseAction
+{
+	ShowMediaLibrary() : BaseAction(aShowMediaLibrary, "show_media_library") { }
+	
+protected:
+	virtual bool canBeRun() const;
+	virtual void run();
+};
+
+struct ToggleMediaLibraryColumnsMode : public BaseAction
 {
 	ToggleMediaLibraryColumnsMode()
-	: Action(aToggleMediaLibraryColumnsMode, "toggle_media_library_columns_mode") { }
+	: BaseAction(aToggleMediaLibraryColumnsMode, "toggle_media_library_columns_mode") { }
 	
 protected:
 	virtual bool canBeRun() const;
 	virtual void run();
 };
 
-struct ShowPlaylistEditor : public Action
+struct ShowPlaylistEditor : public BaseAction
 {
-	ShowPlaylistEditor() : Action(aShowPlaylistEditor, "show_playlist_editor") { }
+	ShowPlaylistEditor() : BaseAction(aShowPlaylistEditor, "show_playlist_editor") { }
 	
 protected:
 	virtual bool canBeRun() const;
 	virtual void run();
 };
 
-struct ShowTagEditor : public Action
+struct ShowTagEditor : public BaseAction
 {
-	ShowTagEditor() : Action(aShowTagEditor, "show_tag_editor") { }
+	ShowTagEditor() : BaseAction(aShowTagEditor, "show_tag_editor") { }
 	
 protected:
 	virtual bool canBeRun() const;
 	virtual void run();
 };
 
-struct ShowOutputs : public Action
+struct ShowOutputs : public BaseAction
 {
-	ShowOutputs() : Action(aShowOutputs, "show_outputs") { }
+	ShowOutputs() : BaseAction(aShowOutputs, "show_outputs") { }
 	
 protected:
 	virtual bool canBeRun() const;
 	virtual void run();
 };
 
-struct ShowVisualizer : public Action
+struct ShowVisualizer : public BaseAction
 {
-	ShowVisualizer() : Action(aShowVisualizer, "show_visualizer") { }
+	ShowVisualizer() : BaseAction(aShowVisualizer, "show_visualizer") { }
 	
 protected:
 	virtual bool canBeRun() const;
 	virtual void run();
 };
 
-struct ShowClock : public Action
+struct ShowClock : public BaseAction
 {
-	ShowClock() : Action(aShowClock, "show_clock") { }
+	ShowClock() : BaseAction(aShowClock, "show_clock") { }
 	
 protected:
 	virtual bool canBeRun() const;
 	virtual void run();
 };
 
-struct ShowServerInfo : public Action
+struct ShowServerInfo : public BaseAction
 {
-	ShowServerInfo() : Action(aShowServerInfo, "show_server_info") { }
+	ShowServerInfo() : BaseAction(aShowServerInfo, "show_server_info") { }
 	
 protected:
 #	ifdef HAVE_TAGLIB_H
@@ -1145,5 +1141,7 @@ protected:
 #	endif // HAVE_TAGLIB_H
 	virtual void run();
 };
+
+}
 
 #endif // NCMPCPP_ACTIONS_H

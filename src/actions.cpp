@@ -65,23 +65,30 @@
 using namespace std::placeholders;
 using Global::myScreen;
 
-bool Action::OriginalStatusbarVisibility;
-bool Action::ExitMainLoop = false;
-
-size_t Action::HeaderHeight;
-size_t Action::FooterHeight;
-size_t Action::FooterStartY;
-
 namespace {//
 
-std::map<ActionType, Action *> Actions;
+enum class Find { Forward, Backward };
 
-void insertAction(Action *a);
+std::map<ActionType, Actions::BaseAction *> AvailableActions;
+
 void populateActions();
+
+void seek();
+void findItem(const Find direction);
+void listsChangeFinisher();
 
 }
 
-void Action::validateScreenSize()
+namespace Actions {//
+
+bool OriginalStatusbarVisibility;
+bool ExitMainLoop = false;
+
+size_t HeaderHeight;
+size_t FooterHeight;
+size_t FooterStartY;
+
+void validateScreenSize()
 {
 	using Global::MainHeight;
 	
@@ -93,7 +100,7 @@ void Action::validateScreenSize()
 	}
 }
 
-void Action::initializeScreens()
+void initializeScreens()
 {
 	myHelp = new Help;
 	myPlaylist = new Playlist;
@@ -130,7 +137,7 @@ void Action::initializeScreens()
 	
 }
 
-void Action::setResizeFlags()
+void setResizeFlags()
 {
 	myHelp->hasToBeResized = 1;
 	myPlaylist->hasToBeResized = 1;
@@ -166,7 +173,7 @@ void Action::setResizeFlags()
 #	endif // ENABLE_CLOCK
 }
 
-void Action::resizeScreen(bool reload_main_window)
+void resizeScreen(bool reload_main_window)
 {
 	using Global::MainHeight;
 	using Global::wHeader;
@@ -223,7 +230,7 @@ void Action::resizeScreen(bool reload_main_window)
 	refresh();
 }
 
-void Action::setWindowsDimensions()
+void setWindowsDimensions()
 {
 	using Global::MainStartY;
 	using Global::MainHeight;
@@ -244,173 +251,7 @@ void Action::setWindowsDimensions()
 	FooterHeight = Config.statusbar_visibility ? 2 : 1;
 }
 
-void Action::seek()
-{
-	using Global::wHeader;
-	using Global::wFooter;
-	using Global::Timer;
-	using Global::SeekingInProgress;
-	
-	if (!Mpd.GetTotalTime())
-	{
-		Statusbar::msg("Unknown item length");
-		return;
-	}
-	
-	Progressbar::lock();
-	Statusbar::lock();
-	
-	int songpos = Mpd.GetElapsedTime();
-	timeval t = Timer;
-	
-	int old_timeout = wFooter->getTimeout();
-	wFooter->setTimeout(500);
-	
-	SeekingInProgress = true;
-	while (true)
-	{
-		Status::trace();
-		myPlaylist->UpdateTimer();
-		
-		int howmuch = Config.incremental_seeking ? (Timer.tv_sec-t.tv_sec)/2+Config.seek_time : Config.seek_time;
-		
-		Key input = Key::read(*wFooter);
-		auto k = Bindings.get(input);
-		if (k.first == k.second || !k.first->isSingle()) // no single action?
-			break;
-		Action *a = k.first->action();
-		if (dynamic_cast<SeekForward *>(a))
-		{
-			if (songpos < Mpd.GetTotalTime())
-			{
-				songpos += howmuch;
-				if (songpos > Mpd.GetTotalTime())
-					songpos = Mpd.GetTotalTime();
-			}
-		}
-		else if (dynamic_cast<SeekBackward *>(a))
-		{
-			if (songpos > 0)
-			{
-				songpos -= howmuch;
-				if (songpos < 0)
-					songpos = 0;
-			}
-		}
-		else
-			break;
-		
-		*wFooter << NC::fmtBold;
-		std::string tracklength;
-		if (Config.new_design)
-		{
-			if (Config.display_remaining_time)
-			{
-				tracklength = "-";
-				tracklength += MPD::Song::ShowTime(Mpd.GetTotalTime()-songpos);
-			}
-			else
-				tracklength = MPD::Song::ShowTime(songpos);
-			tracklength += "/";
-			tracklength += MPD::Song::ShowTime(Mpd.GetTotalTime());
-			*wHeader << NC::XY(0, 0) << tracklength << " ";
-			wHeader->refresh();
-		}
-		else
-		{
-			tracklength = " [";
-			if (Config.display_remaining_time)
-			{
-				tracklength += "-";
-				tracklength += MPD::Song::ShowTime(Mpd.GetTotalTime()-songpos);
-			}
-			else
-				tracklength += MPD::Song::ShowTime(songpos);
-			tracklength += "/";
-			tracklength += MPD::Song::ShowTime(Mpd.GetTotalTime());
-			tracklength += "]";
-			*wFooter << NC::XY(wFooter->getWidth()-tracklength.length(), 1) << tracklength;
-		}
-		*wFooter << NC::fmtBoldEnd;
-		Progressbar::draw(songpos, Mpd.GetTotalTime());
-		wFooter->refresh();
-	}
-	SeekingInProgress = false;
-	Mpd.Seek(songpos);
-	
-	wFooter->setTimeout(old_timeout);
-	
-	Progressbar::unlock();
-	Statusbar::unlock();
-}
-
-void Action::findItem(const Find direction)
-{
-	using Global::wFooter;
-	
-	Searchable *w = dynamic_cast<Searchable *>(myScreen);
-	assert(w);
-	assert(w->allowsSearching());
-	
-	Statusbar::lock();
-	Statusbar::put() << "Find " << (direction == Find::Forward ? "forward" : "backward") << ": ";
-	std::string findme = wFooter->getString();
-	Statusbar::unlock();
-	
-	if (!findme.empty())
-		Statusbar::msg("Searching...");
-	
-	bool success = w->search(findme);
-	
-	if (findme.empty())
-		return;
-	
-	if (success)
-		Statusbar::msg("Searching finished");
-	else
-		Statusbar::msg("Unable to find \"%s\"", findme.c_str());
-	
-	if (direction == Find::Forward)
- 		w->nextFound(Config.wrapped_search);
- 	else
- 		w->prevFound(Config.wrapped_search);
-	
-	if (myScreen == myPlaylist)
-		myPlaylist->EnableHighlighting();
-}
-
-void Action::listsChangeFinisher()
-{
-	if (myScreen == myLibrary
-	||  myScreen == myPlaylistEditor
-#	ifdef HAVE_TAGLIB_H
-	||  myScreen == myTagEditor
-#	endif // HAVE_TAGLIB_H
-	   )
-	{
-		if (myScreen->activeWindow() == &myLibrary->Tags)
-		{
-			myLibrary->Albums.clear();
-			myLibrary->Songs.clear();
-		}
-		else if (myScreen->activeWindow() == &myLibrary->Albums)
-		{
-			myLibrary->Songs.clear();
-		}
-		else if (myScreen->isActiveWindow(myPlaylistEditor->Playlists))
-		{
-			myPlaylistEditor->Content.clear();
-		}
-#		ifdef HAVE_TAGLIB_H
-		else if (myScreen->activeWindow() == myTagEditor->Dirs)
-		{
-			myTagEditor->Tags->clear();
-		}
-#		endif // HAVE_TAGLIB_H
-	}
-}
-
-bool Action::connectToMPD()
+bool connectToMPD()
 {
 	if (!Mpd.Connect())
 	{
@@ -422,7 +263,7 @@ bool Action::connectToMPD()
 	return true;
 }
 
-bool Action::askYesNoQuestion(const std::string &question, void (*callback)())
+bool askYesNoQuestion(const std::string &question, void (*callback)())
 {
 	using Global::wFooter;
 	
@@ -441,7 +282,7 @@ bool Action::askYesNoQuestion(const std::string &question, void (*callback)())
 	return answer == 'y';
 }
 
-bool Action::isMPDMusicDirSet()
+bool isMPDMusicDirSet()
 {
 	if (Config.mpd_music_dir.empty())
 	{
@@ -451,19 +292,19 @@ bool Action::isMPDMusicDirSet()
 	return true;
 }
 
-Action *Action::get(ActionType at)
+BaseAction *get(ActionType at)
 {
-	if (Actions.empty())
+	if (AvailableActions.empty())
 		populateActions();
-	return Actions[at];
+	return AvailableActions[at];
 }
 
-Action *Action::get(const std::string &name)
+BaseAction *get(const std::string &name)
 {
-	Action *result = 0;
-	if (Actions.empty())
+	BaseAction *result = 0;
+	if (AvailableActions.empty())
 		populateActions();
-	for (auto it = Actions.begin(); it != Actions.end(); ++it)
+	for (auto it = AvailableActions.begin(); it != AvailableActions.end(); ++it)
 	{
 		if (it->second->name() == name)
 		{
@@ -1651,7 +1492,7 @@ void ToggleScreenLock::run()
 	if (myLockedScreen != 0)
 	{
 		BaseScreen::unlock();
-		Action::setResizeFlags();
+		Actions::setResizeFlags();
 		myScreen->resize();
 		Statusbar::msg("Screen unlocked");
 	}
@@ -1982,7 +1823,7 @@ bool FindItemBackward::canBeRun() const
 
 void FindItemForward::run()
 {
-	findItem(Find::Forward);
+	findItem(::Find::Forward);
 	listsChangeFinisher();
 }
 
@@ -1994,7 +1835,7 @@ bool FindItemForward::canBeRun() const
 
 void FindItemBackward::run()
 {
-	findItem(Find::Backward);
+	findItem(::Find::Backward);
 	listsChangeFinisher();
 }
 
@@ -2574,133 +2415,302 @@ void ShowServerInfo::run()
 	myServerInfo->switchTo();
 }
 
-namespace {//
-
-void insertAction(Action *a)
-{
-	Actions[a->type()] = a;
 }
+
+namespace {//
 
 void populateActions()
 {
-	insertAction(new Dummy());
-	insertAction(new MouseEvent());
-	insertAction(new ScrollUp());
-	insertAction(new ScrollDown());
-	insertAction(new ScrollUpArtist());
-	insertAction(new ScrollUpAlbum());
-	insertAction(new ScrollDownArtist());
-	insertAction(new ScrollDownAlbum());
-	insertAction(new PageUp());
-	insertAction(new PageDown());
-	insertAction(new MoveHome());
-	insertAction(new MoveEnd());
-	insertAction(new ToggleInterface());
-	insertAction(new JumpToParentDirectory());
-	insertAction(new PressEnter());
-	insertAction(new PressSpace());
-	insertAction(new PreviousColumn());
-	insertAction(new NextColumn());
-	insertAction(new MasterScreen());
-	insertAction(new SlaveScreen());
-	insertAction(new VolumeUp());
-	insertAction(new VolumeDown());
-	insertAction(new DeletePlaylistItems());
-	insertAction(new DeleteStoredPlaylist());
-	insertAction(new DeleteBrowserItems());
-	insertAction(new ReplaySong());
-	insertAction(new PreviousSong());
-	insertAction(new NextSong());
-	insertAction(new Pause());
-	insertAction(new Stop());
-	insertAction(new ExecuteCommand());
-	insertAction(new SavePlaylist());
-	insertAction(new MoveSortOrderUp());
-	insertAction(new MoveSortOrderDown());
-	insertAction(new MoveSelectedItemsUp());
-	insertAction(new MoveSelectedItemsDown());
-	insertAction(new MoveSelectedItemsTo());
-	insertAction(new Add());
-	insertAction(new SeekForward());
-	insertAction(new SeekBackward());
-	insertAction(new ToggleDisplayMode());
-	insertAction(new ToggleSeparatorsBetweenAlbums());
-	insertAction(new ToggleLyricsFetcher());
-	insertAction(new ToggleFetchingLyricsInBackground());
-	insertAction(new TogglePlayingSongCentering());
-	insertAction(new UpdateDatabase());
-	insertAction(new JumpToPlayingSong());
-	insertAction(new ToggleRepeat());
-	insertAction(new Shuffle());
-	insertAction(new ToggleRandom());
-	insertAction(new StartSearching());
-	insertAction(new SaveTagChanges());
-	insertAction(new ToggleSingle());
-	insertAction(new ToggleConsume());
-	insertAction(new ToggleCrossfade());
-	insertAction(new SetCrossfade());
-	insertAction(new EditSong());
-	insertAction(new EditLibraryTag());
-	insertAction(new EditLibraryAlbum());
-	insertAction(new EditDirectoryName());
-	insertAction(new EditPlaylistName());
-	insertAction(new EditLyrics());
-	insertAction(new JumpToBrowser());
-	insertAction(new JumpToMediaLibrary());
-	insertAction(new JumpToPlaylistEditor());
-	insertAction(new ToggleScreenLock());
-	insertAction(new JumpToTagEditor());
-	insertAction(new JumpToPositionInSong());
-	insertAction(new ReverseSelection());
-	insertAction(new RemoveSelection());
-	insertAction(new SelectAlbum());
-	insertAction(new AddSelectedItems());
-	insertAction(new CropMainPlaylist());
-	insertAction(new CropPlaylist());
-	insertAction(new ClearMainPlaylist());
-	insertAction(new ClearPlaylist());
-	insertAction(new SortPlaylist());
-	insertAction(new ReversePlaylist());
-	insertAction(new ApplyFilter());
-	insertAction(new Find());
-	insertAction(new FindItemForward());
-	insertAction(new FindItemBackward());
-	insertAction(new NextFoundItem());
-	insertAction(new PreviousFoundItem());
-	insertAction(new ToggleFindMode());
-	insertAction(new ToggleReplayGainMode());
-	insertAction(new ToggleSpaceMode());
-	insertAction(new ToggleAddMode());
-	insertAction(new ToggleMouse());
-	insertAction(new ToggleBitrateVisibility());
-	insertAction(new AddRandomItems());
-	insertAction(new ToggleBrowserSortMode());
-	insertAction(new ToggleLibraryTagType());
-	insertAction(new ToggleMediaLibrarySortMode());
-	insertAction(new RefetchLyrics());
-	insertAction(new RefetchArtistInfo());
-	insertAction(new SetSelectedItemsPriority());
-	insertAction(new FilterPlaylistOnPriorities());
-	insertAction(new ShowSongInfo());
-	insertAction(new ShowArtistInfo());
-	insertAction(new ShowLyrics());
-	insertAction(new Quit());
-	insertAction(new NextScreen());
-	insertAction(new PreviousScreen());
-	insertAction(new ShowHelp());
-	insertAction(new ShowPlaylist());
-	insertAction(new ShowBrowser());
-	insertAction(new ChangeBrowseMode());
-	insertAction(new ShowSearchEngine());
-	insertAction(new ResetSearchEngine());
-	insertAction(new ShowMediaLibrary());
-	insertAction(new ToggleMediaLibraryColumnsMode());
-	insertAction(new ShowPlaylistEditor());
-	insertAction(new ShowTagEditor());
-	insertAction(new ShowOutputs());
-	insertAction(new ShowVisualizer());
-	insertAction(new ShowClock());
-	insertAction(new ShowServerInfo());
+	auto insert_action = [](Actions::BaseAction *a) {
+		AvailableActions[a->type()] = a;
+	};
+	insert_action(new Actions::Dummy());
+	insert_action(new Actions::MouseEvent());
+	insert_action(new Actions::ScrollUp());
+	insert_action(new Actions::ScrollDown());
+	insert_action(new Actions::ScrollUpArtist());
+	insert_action(new Actions::ScrollUpAlbum());
+	insert_action(new Actions::ScrollDownArtist());
+	insert_action(new Actions::ScrollDownAlbum());
+	insert_action(new Actions::PageUp());
+	insert_action(new Actions::PageDown());
+	insert_action(new Actions::MoveHome());
+	insert_action(new Actions::MoveEnd());
+	insert_action(new Actions::ToggleInterface());
+	insert_action(new Actions::JumpToParentDirectory());
+	insert_action(new Actions::PressEnter());
+	insert_action(new Actions::PressSpace());
+	insert_action(new Actions::PreviousColumn());
+	insert_action(new Actions::NextColumn());
+	insert_action(new Actions::MasterScreen());
+	insert_action(new Actions::SlaveScreen());
+	insert_action(new Actions::VolumeUp());
+	insert_action(new Actions::VolumeDown());
+	insert_action(new Actions::DeletePlaylistItems());
+	insert_action(new Actions::DeleteStoredPlaylist());
+	insert_action(new Actions::DeleteBrowserItems());
+	insert_action(new Actions::ReplaySong());
+	insert_action(new Actions::PreviousSong());
+	insert_action(new Actions::NextSong());
+	insert_action(new Actions::Pause());
+	insert_action(new Actions::Stop());
+	insert_action(new Actions::ExecuteCommand());
+	insert_action(new Actions::SavePlaylist());
+	insert_action(new Actions::MoveSortOrderUp());
+	insert_action(new Actions::MoveSortOrderDown());
+	insert_action(new Actions::MoveSelectedItemsUp());
+	insert_action(new Actions::MoveSelectedItemsDown());
+	insert_action(new Actions::MoveSelectedItemsTo());
+	insert_action(new Actions::Add());
+	insert_action(new Actions::SeekForward());
+	insert_action(new Actions::SeekBackward());
+	insert_action(new Actions::ToggleDisplayMode());
+	insert_action(new Actions::ToggleSeparatorsBetweenAlbums());
+	insert_action(new Actions::ToggleLyricsFetcher());
+	insert_action(new Actions::ToggleFetchingLyricsInBackground());
+	insert_action(new Actions::TogglePlayingSongCentering());
+	insert_action(new Actions::UpdateDatabase());
+	insert_action(new Actions::JumpToPlayingSong());
+	insert_action(new Actions::ToggleRepeat());
+	insert_action(new Actions::Shuffle());
+	insert_action(new Actions::ToggleRandom());
+	insert_action(new Actions::StartSearching());
+	insert_action(new Actions::SaveTagChanges());
+	insert_action(new Actions::ToggleSingle());
+	insert_action(new Actions::ToggleConsume());
+	insert_action(new Actions::ToggleCrossfade());
+	insert_action(new Actions::SetCrossfade());
+	insert_action(new Actions::EditSong());
+	insert_action(new Actions::EditLibraryTag());
+	insert_action(new Actions::EditLibraryAlbum());
+	insert_action(new Actions::EditDirectoryName());
+	insert_action(new Actions::EditPlaylistName());
+	insert_action(new Actions::EditLyrics());
+	insert_action(new Actions::JumpToBrowser());
+	insert_action(new Actions::JumpToMediaLibrary());
+	insert_action(new Actions::JumpToPlaylistEditor());
+	insert_action(new Actions::ToggleScreenLock());
+	insert_action(new Actions::JumpToTagEditor());
+	insert_action(new Actions::JumpToPositionInSong());
+	insert_action(new Actions::ReverseSelection());
+	insert_action(new Actions::RemoveSelection());
+	insert_action(new Actions::SelectAlbum());
+	insert_action(new Actions::AddSelectedItems());
+	insert_action(new Actions::CropMainPlaylist());
+	insert_action(new Actions::CropPlaylist());
+	insert_action(new Actions::ClearMainPlaylist());
+	insert_action(new Actions::ClearPlaylist());
+	insert_action(new Actions::SortPlaylist());
+	insert_action(new Actions::ReversePlaylist());
+	insert_action(new Actions::ApplyFilter());
+	insert_action(new Actions::Find());
+	insert_action(new Actions::FindItemForward());
+	insert_action(new Actions::FindItemBackward());
+	insert_action(new Actions::NextFoundItem());
+	insert_action(new Actions::PreviousFoundItem());
+	insert_action(new Actions::ToggleFindMode());
+	insert_action(new Actions::ToggleReplayGainMode());
+	insert_action(new Actions::ToggleSpaceMode());
+	insert_action(new Actions::ToggleAddMode());
+	insert_action(new Actions::ToggleMouse());
+	insert_action(new Actions::ToggleBitrateVisibility());
+	insert_action(new Actions::AddRandomItems());
+	insert_action(new Actions::ToggleBrowserSortMode());
+	insert_action(new Actions::ToggleLibraryTagType());
+	insert_action(new Actions::ToggleMediaLibrarySortMode());
+	insert_action(new Actions::RefetchLyrics());
+	insert_action(new Actions::RefetchArtistInfo());
+	insert_action(new Actions::SetSelectedItemsPriority());
+	insert_action(new Actions::FilterPlaylistOnPriorities());
+	insert_action(new Actions::ShowSongInfo());
+	insert_action(new Actions::ShowArtistInfo());
+	insert_action(new Actions::ShowLyrics());
+	insert_action(new Actions::Quit());
+	insert_action(new Actions::NextScreen());
+	insert_action(new Actions::PreviousScreen());
+	insert_action(new Actions::ShowHelp());
+	insert_action(new Actions::ShowPlaylist());
+	insert_action(new Actions::ShowBrowser());
+	insert_action(new Actions::ChangeBrowseMode());
+	insert_action(new Actions::ShowSearchEngine());
+	insert_action(new Actions::ResetSearchEngine());
+	insert_action(new Actions::ShowMediaLibrary());
+	insert_action(new Actions::ToggleMediaLibraryColumnsMode());
+	insert_action(new Actions::ShowPlaylistEditor());
+	insert_action(new Actions::ShowTagEditor());
+	insert_action(new Actions::ShowOutputs());
+	insert_action(new Actions::ShowVisualizer());
+	insert_action(new Actions::ShowClock());
+	insert_action(new Actions::ShowServerInfo());
+}
+
+void seek()
+{
+	using Global::wHeader;
+	using Global::wFooter;
+	using Global::Timer;
+	using Global::SeekingInProgress;
+	
+	if (!Mpd.GetTotalTime())
+	{
+		Statusbar::msg("Unknown item length");
+		return;
+	}
+	
+	Progressbar::lock();
+	Statusbar::lock();
+	
+	int songpos = Mpd.GetElapsedTime();
+	timeval t = Timer;
+	
+	int old_timeout = wFooter->getTimeout();
+	wFooter->setTimeout(500);
+	
+	auto seekForward = Actions::get(aSeekForward);
+	auto seekBackward = Actions::get(aSeekBackward);
+	
+	SeekingInProgress = true;
+	while (true)
+	{
+		Status::trace();
+		myPlaylist->UpdateTimer();
+		
+		int howmuch = Config.incremental_seeking ? (Timer.tv_sec-t.tv_sec)/2+Config.seek_time : Config.seek_time;
+		
+		Key input = Key::read(*wFooter);
+		auto k = Bindings.get(input);
+		if (k.first == k.second || !k.first->isSingle()) // no single action?
+			break;
+		auto a = k.first->action();
+		if (a == seekForward)
+		{
+			if (songpos < Mpd.GetTotalTime())
+			{
+				songpos += howmuch;
+				if (songpos > Mpd.GetTotalTime())
+					songpos = Mpd.GetTotalTime();
+			}
+		}
+		else if (a == seekBackward)
+		{
+			if (songpos > 0)
+			{
+				songpos -= howmuch;
+				if (songpos < 0)
+					songpos = 0;
+			}
+		}
+		else
+			break;
+		
+		*wFooter << NC::fmtBold;
+		std::string tracklength;
+		if (Config.new_design)
+		{
+			if (Config.display_remaining_time)
+			{
+				tracklength = "-";
+				tracklength += MPD::Song::ShowTime(Mpd.GetTotalTime()-songpos);
+			}
+			else
+				tracklength = MPD::Song::ShowTime(songpos);
+			tracklength += "/";
+			tracklength += MPD::Song::ShowTime(Mpd.GetTotalTime());
+			*wHeader << NC::XY(0, 0) << tracklength << " ";
+			wHeader->refresh();
+		}
+		else
+		{
+			tracklength = " [";
+			if (Config.display_remaining_time)
+			{
+				tracklength += "-";
+				tracklength += MPD::Song::ShowTime(Mpd.GetTotalTime()-songpos);
+			}
+			else
+				tracklength += MPD::Song::ShowTime(songpos);
+			tracklength += "/";
+			tracklength += MPD::Song::ShowTime(Mpd.GetTotalTime());
+			tracklength += "]";
+			*wFooter << NC::XY(wFooter->getWidth()-tracklength.length(), 1) << tracklength;
+		}
+		*wFooter << NC::fmtBoldEnd;
+		Progressbar::draw(songpos, Mpd.GetTotalTime());
+		wFooter->refresh();
+	}
+	SeekingInProgress = false;
+	Mpd.Seek(songpos);
+	
+	wFooter->setTimeout(old_timeout);
+	
+	Progressbar::unlock();
+	Statusbar::unlock();
+}
+
+void findItem(const Find direction)
+{
+	using Global::wFooter;
+	
+	Searchable *w = dynamic_cast<Searchable *>(myScreen);
+	assert(w);
+	assert(w->allowsSearching());
+	
+	Statusbar::lock();
+	Statusbar::put() << "Find " << (direction == Find::Forward ? "forward" : "backward") << ": ";
+	std::string findme = wFooter->getString();
+	Statusbar::unlock();
+	
+	if (!findme.empty())
+		Statusbar::msg("Searching...");
+	
+	bool success = w->search(findme);
+	
+	if (findme.empty())
+		return;
+	
+	if (success)
+		Statusbar::msg("Searching finished");
+	else
+		Statusbar::msg("Unable to find \"%s\"", findme.c_str());
+	
+	if (direction == ::Find::Forward)
+ 		w->nextFound(Config.wrapped_search);
+ 	else
+ 		w->prevFound(Config.wrapped_search);
+	
+	if (myScreen == myPlaylist)
+		myPlaylist->EnableHighlighting();
+}
+
+void listsChangeFinisher()
+{
+	if (myScreen == myLibrary
+	||  myScreen == myPlaylistEditor
+#	ifdef HAVE_TAGLIB_H
+	||  myScreen == myTagEditor
+#	endif // HAVE_TAGLIB_H
+	   )
+	{
+		if (myScreen->activeWindow() == &myLibrary->Tags)
+		{
+			myLibrary->Albums.clear();
+			myLibrary->Songs.clear();
+		}
+		else if (myScreen->activeWindow() == &myLibrary->Albums)
+		{
+			myLibrary->Songs.clear();
+		}
+		else if (myScreen->isActiveWindow(myPlaylistEditor->Playlists))
+		{
+			myPlaylistEditor->Content.clear();
+		}
+#		ifdef HAVE_TAGLIB_H
+		else if (myScreen->activeWindow() == myTagEditor->Dirs)
+		{
+			myTagEditor->Tags->clear();
+		}
+#		endif // HAVE_TAGLIB_H
+	}
 }
 
 }

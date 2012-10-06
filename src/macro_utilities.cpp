@@ -21,6 +21,8 @@
 #include "global.h"
 #include "macro_utilities.h"
 
+namespace Actions {//
+
 void PushCharacters::run()
 {
 	for (auto it = m_queue.begin(); it != m_queue.end(); ++it)
@@ -41,4 +43,6 @@ void RunExternalCommand::run()
 {
 	GNUC_UNUSED int res;
 	res = std::system(m_command.c_str());
+}
+
 }

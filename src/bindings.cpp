@@ -92,13 +92,13 @@ Key stringToKey(const std::string &s)
 }
 
 template <typename F>
-Action *parseActionLine(const std::string &line, F error)
+Actions::BaseAction *parseActionLine(const std::string &line, F error)
 {
-	Action *result = 0;
+	Actions::BaseAction *result = 0;
 	size_t i = 0;
 	for (; i < line.size() && !isspace(line[i]); ++i) { }
 	if (i == line.size()) // only action name
-		result = Action::get(line);
+		result = Actions::get(line);
 	else // there is something else
 	{
 		std::string action_name = line.substr(0, i);
@@ -107,8 +107,9 @@ Action *parseActionLine(const std::string &line, F error)
 			// push single character into input queue
 			std::string arg = getEnclosedString(line, '"', '"', 0);
 			Key k = stringToSpecialKey(arg);
+			auto queue = std::vector<int>{ k.getChar() };
 			if (k != Key::noOp)
-				result = new PushCharacters(&Global::wFooter, std::vector<int>{ k.getChar() });
+				result = new Actions::PushCharacters(&Global::wFooter, std::move(queue));
 			else
 				error() << "invalid character passed to push_character: '" << arg << "'\n";
 		}
@@ -122,7 +123,7 @@ Action *parseActionLine(const std::string &line, F error)
 				// if char is signed, erase 1s from char -> int conversion
 				for (auto it = arg.begin(); it != arg.end(); ++it)
 					*it &= 0xff;
-				result = new PushCharacters(&Global::wFooter, std::move(queue));
+				result = new Actions::PushCharacters(&Global::wFooter, std::move(queue));
 			}
 			else
 				error() << "empty argument passed to push_characters\n";
@@ -133,7 +134,7 @@ Action *parseActionLine(const std::string &line, F error)
 			std::string arg = getEnclosedString(line, '"', '"', 0);
 			ScreenType screen_type = stringToScreenType(arg);
 			if (screen_type != ScreenType::Unknown)
-				result = new RequireScreen(screen_type);
+				result = new Actions::RequireScreen(screen_type);
 			else
 				error() << "unknown screen passed to require_screen: '" << arg << "'\n";
 		}
@@ -141,9 +142,9 @@ Action *parseActionLine(const std::string &line, F error)
 		{
 			// require that given action is runnable
 			std::string arg = getEnclosedString(line, '"', '"', 0);
-			Action *action = Action::get(arg);
+			auto action = Actions::get(arg);
 			if (action)
-				result = new RequireRunnable(action);
+				result = new Actions::RequireRunnable(action);
 			else
 				error() << "unknown action passed to require_runnable: '" << arg << "'\n";
 		}
@@ -151,7 +152,7 @@ Action *parseActionLine(const std::string &line, F error)
 		{
 			std::string command = getEnclosedString(line, '"', '"', 0);
 			if (!command.empty())
-				result = new RunExternalCommand(std::move(command));
+				result = new Actions::RunExternalCommand(std::move(command));
 			else
 				error() << "empty command passed to run_external_command\n";
 		}
@@ -312,7 +313,7 @@ bool BindingsConfiguration::read(const std::string &file)
 		else if (isspace(line[0])) // name of action to be bound
 		{
 			trim(line);
-			Action *action = parseActionLine(line, error);
+			auto action = parseActionLine(line, error);
 			if (action)
 				actions.push_back(action);
 			else
