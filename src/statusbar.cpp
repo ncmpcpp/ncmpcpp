@@ -46,7 +46,7 @@ void showMessage(int time, const char *format, va_list list)
 		else
 			progressbarBlockUpdate = true;
 		wFooter->goToXY(0, Config.statusbar_visibility);
-		*wFooter << NC::fmtBoldEnd;
+		*wFooter << NC::Format::NoBold;
 		wmove(wFooter->raw(), Config.statusbar_visibility, 0);
 		vw_printw(wFooter->raw(), format, list);
 		wclrtoeol(wFooter->raw());
@@ -76,7 +76,7 @@ void Progressbar::draw(unsigned int elapsed, unsigned int time)
 	unsigned pb_width = wFooter->getWidth();
 	unsigned howlong = time ? pb_width*elapsed/time : 0;
 	if (Config.progressbar_boldness)
-		*wFooter << NC::fmtBold;
+		*wFooter << NC::Format::Bold;
 	*wFooter << Config.progressbar_color;
 	if (Config.progressbar[2] != '\0')
 	{
@@ -95,11 +95,11 @@ void Progressbar::draw(unsigned int elapsed, unsigned int time)
 			*wFooter << Config.progressbar[0];
 		if (howlong < wFooter->getWidth())
 			*wFooter << Config.progressbar[1];
-		*wFooter << NC::clEnd;
+		*wFooter << NC::Color::End;
 	}
-	*wFooter << NC::clEnd;
+	*wFooter << NC::Color::End;
 	if (Config.progressbar_boldness)
-		*wFooter << NC::fmtBoldEnd;
+		*wFooter << NC::Format::NoBold;
 }
 
 void Statusbar::lock()

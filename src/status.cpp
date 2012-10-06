@@ -252,7 +252,7 @@ void Status::Changes::playerState()
 	
 	if (Config.new_design)
 	{
-		*wHeader << NC::XY(0, 1) << NC::fmtBold << player_state << NC::fmtBoldEnd;
+		*wHeader << NC::XY(0, 1) << NC::Format::Bold << player_state << NC::Format::NoBold;
 		wHeader->refresh();
 	}
 	else if (Statusbar::isUnlocked() && Config.statusbar_visibility)
@@ -261,7 +261,7 @@ void Status::Changes::playerState()
 		if (player_state.empty())
 			*wFooter << wclrtoeol;
 		else
-			*wFooter << NC::fmtBold << player_state << NC::fmtBoldEnd;
+			*wFooter << NC::Format::Bold << player_state << NC::Format::NoBold;
 	}
 }
 
@@ -346,11 +346,11 @@ void Status::Changes::elapsedTime()
 		*wHeader << NC::XY(first_start, 0);
 		writeCyclicBuffer(first, *wHeader, first_line_scroll_begin, COLS-tracklength.length()-VolumeState.length()-1, L" ** ");
 		
-		*wHeader << NC::XY(0, 1) << wclrtoeol << NC::fmtBold << player_state << NC::fmtBoldEnd;
+		*wHeader << NC::XY(0, 1) << wclrtoeol << NC::Format::Bold << player_state << NC::Format::NoBold;
 		*wHeader << NC::XY(second_start, 1);
 		writeCyclicBuffer(second, *wHeader, second_line_scroll_begin, COLS-player_state.length()-8-2, L" ** ");
 		
-		*wHeader << NC::XY(wHeader->getWidth()-VolumeState.length(), 0) << Config.volume_color << VolumeState << NC::clEnd;
+		*wHeader << NC::XY(wHeader->getWidth()-VolumeState.length(), 0) << Config.volume_color << VolumeState << NC::Color::End;
 		
 		flags();
 	}
@@ -383,9 +383,9 @@ void Status::Changes::elapsedTime()
 		}
 		NC::WBuffer np_song;
 		stringToBuffer(ToWString(Charset::utf8ToLocale(np.toString(Config.song_status_format, Config.tags_separator, "$"))), np_song);
-		*wFooter << NC::XY(0, 1) << wclrtoeol << NC::fmtBold << player_state << NC::fmtBoldEnd;
+		*wFooter << NC::XY(0, 1) << wclrtoeol << NC::Format::Bold << player_state << NC::Format::NoBold;
 		writeCyclicBuffer(np_song, *wFooter, playing_song_scroll_begin, wFooter->getWidth()-player_state.length()-tracklength.length(), L" ** ");
-		*wFooter << NC::fmtBold << NC::XY(wFooter->getWidth()-tracklength.length(), 1) << tracklength << NC::fmtBoldEnd;
+		*wFooter << NC::Format::Bold << NC::XY(wFooter->getWidth()-tracklength.length(), 1) << tracklength << NC::Format::NoBold;
 	}
 	if (Progressbar::isUnlocked())
 		Progressbar::draw(Mpd.GetElapsedTime(), Mpd.GetTotalTime());
@@ -444,12 +444,12 @@ void Status::Changes::flags()
 		switch_state += mpd_crossfade ? mpd_crossfade : '-';
 		switch_state += mpd_db_updating ? mpd_db_updating : '-';
 		switch_state += ']';
-		*wHeader << NC::XY(COLS-switch_state.length(), 1) << NC::fmtBold << Config.state_flags_color << switch_state << NC::clEnd << NC::fmtBoldEnd;
+		*wHeader << NC::XY(COLS-switch_state.length(), 1) << NC::Format::Bold << Config.state_flags_color << switch_state << NC::Color::End << NC::Format::NoBold;
 		if (Config.new_design && !Config.header_visibility) // in this case also draw separator
 		{
-			*wHeader << NC::fmtBold << NC::clBlack;
+			*wHeader << NC::Format::Bold << NC::Color::Black;
 			mvwhline(wHeader->raw(), 2, 0, 0, COLS);
-			*wHeader << NC::clEnd << NC::fmtBoldEnd;
+			*wHeader << NC::Color::End << NC::Format::NoBold;
 		}
 		wHeader->refresh();
 	}
@@ -470,19 +470,19 @@ void Status::Changes::flags()
 		
 		// this is done by raw ncurses because creating another
 		// window only for handling this is quite silly
-		attrset(A_BOLD|COLOR_PAIR(Config.state_line_color));
+		attrset(A_BOLD|COLOR_PAIR(int(Config.state_line_color)));
 		mvhline(1, 0, 0, COLS);
 		if (!switch_state.empty())
 		{
 			mvprintw(1, COLS-switch_state.length()-3, "[");
-			attroff(COLOR_PAIR(Config.state_line_color));
-			attron(COLOR_PAIR(Config.state_flags_color));
+			attroff(COLOR_PAIR(int(Config.state_line_color)));
+			attron(COLOR_PAIR(int(Config.state_flags_color)));
 			mvprintw(1, COLS-switch_state.length()-2, "%s", switch_state.c_str());
-			attroff(COLOR_PAIR(Config.state_flags_color));
-			attron(COLOR_PAIR(Config.state_line_color));
+			attroff(COLOR_PAIR(int(Config.state_flags_color)));
+			attron(COLOR_PAIR(int(Config.state_line_color)));
 			mvprintw(1, COLS-2, "]");
 		}
-		attroff(A_BOLD|COLOR_PAIR(Config.state_line_color));
+		attroff(A_BOLD|COLOR_PAIR(int(Config.state_line_color)));
 		refresh();
 	}
 }
@@ -503,7 +503,7 @@ void Status::Changes::mixer()
 	}
 	*wHeader << Config.volume_color;
 	*wHeader << NC::XY(wHeader->getWidth()-VolumeState.length(), 0) << VolumeState;
-	*wHeader << NC::clEnd;
+	*wHeader << NC::Color::End;
 	wHeader->refresh();
 }
 

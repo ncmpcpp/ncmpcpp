@@ -112,19 +112,19 @@
 namespace NC {//
 
 /// Colors used by NCurses
-enum Color { clDefault, clBlack, clRed, clGreen, clYellow, clBlue, clMagenta, clCyan, clWhite, clEnd };
+enum class Color { Default, Black, Red, Green, Yellow, Blue, Magenta, Cyan, White, End };
 
 /// Format flags used by NCurses
-enum Format {
-	fmtNone = clEnd+1,
-	fmtBold, fmtBoldEnd,
-	fmtUnderline, fmtUnderlineEnd,
-	fmtReverse, fmtReverseEnd,
-	fmtAltCharset, fmtAltCharsetEnd
+enum class Format {
+	None,
+	Bold, NoBold,
+	Underline, NoUnderline,
+	Reverse, NoReverse,
+	AltCharset, NoAltCharset
 };
 
 /// Available border colors for window
-enum Border { brNone, brBlack, brRed, brGreen, brYellow, brBlue, brMagenta, brCyan, brWhite };
+enum class Border { None, Black, Red, Green, Yellow, Blue, Magenta, Cyan, White };
 
 /// This indicates how much the window has to be scrolled
 enum class Scroll { Up, Down, PageUp, PageDown, Home, End };
@@ -146,7 +146,7 @@ void destroyScreen();
 /// @see Window::operator<<()
 struct Colors
 {
-	Colors(Color one, Color two = clDefault) : fg(one), bg(two) { }
+	Colors(Color one, Color two = Color::Default) : fg(one), bg(two) { }
 	Color fg;
 	Color bg;
 };
@@ -266,7 +266,7 @@ struct Window
 	/// Sets window's base color
 	/// @param fg foregound base color
 	/// @param bg background base color
-	void setBaseColor(Color fg, Color bg = clDefault);
+	void setBaseColor(Color fg, Color bg = Color::Default);
 	
 	/// Sets window's border
 	/// @param border new window's border
@@ -351,16 +351,16 @@ struct Window
 	Window &operator<<(Colors colors);
 	
 	/// Applies foregound color to window. Note that colors applied
-	/// that way are stacked, i.e if you applied clRed, then clGreen
-	/// and clEnd, current color would be clRed. If you want to discard
-	/// all colors and fall back to base one, pass clDefault.
+	/// that way are stacked, i.e if you applied Color::Red, then Color::Green
+	/// and Color::End, current color would be Color::Red. If you want to discard
+	/// all colors and fall back to base one, pass Color::Default.
 	/// @param color new color value
 	/// @return reference to itself
 	Window &operator<<(Color color);
 	
 	/// Applies format flag to window. Note that these attributes are
-	/// also stacked, so if you applied fmtBold twice, to get rid of
-	/// it you have to pass fmtBoldEnd also twice.
+	/// also stacked, so if you applied Format::Bold twice, to get rid of
+	/// it you have to pass Format::NoBold also twice.
 	/// @param format format flag
 	/// @return reference to itself
 	Window &operator<<(Format format);
@@ -419,7 +419,7 @@ protected:
 	/// @param fg foregound color
 	/// @param bg background color
 	///
-	void setColor(Color fg, Color bg = clDefault);
+	void setColor(Color fg, Color bg = Color::Default);
 	
 	/// Refreshes window's border
 	///

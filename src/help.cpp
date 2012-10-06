@@ -97,7 +97,7 @@ std::string keyToString(const Key &key, bool *print_backspace)
 }
 
 Help::Help()
-: Screen(NC::Scrollpad(0, MainStartY, COLS, MainHeight, "", Config.main_color, NC::brNone))
+: Screen(NC::Scrollpad(0, MainStartY, COLS, MainHeight, "", Config.main_color, NC::Border::None))
 {
 	GetKeybindings();
 	w.flush();
@@ -144,8 +144,8 @@ std::string Help::DisplayKeys(const Actions::Type at)
 
 void Help::Section(const char *type_, const char *title_)
 {
-	w << "\n  " << NC::fmtBold << type_ << " - ";
-	w << title_ << NC::fmtBoldEnd << "\n\n";
+	w << "\n  " << NC::Format::Bold << type_ << " - ";
+	w << title_ << NC::Format::NoBold << "\n\n";
 }
 
 void Help::KeyDesc(const Actions::Type at, const char *desc)
@@ -162,7 +162,7 @@ void Help::MouseDesc(std::string action, const char *desc, bool indent)
 
 void Help::MouseColumn(const char *column)
 {
-	w << NC::fmtBold << "    " << column << " column:\n" << NC::fmtBoldEnd;
+	w << NC::Format::Bold << "    " << column << " column:\n" << NC::Format::NoBold;
 }
 
 void Help::GetKeybindings()

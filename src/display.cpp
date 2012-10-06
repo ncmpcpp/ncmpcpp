@@ -88,7 +88,7 @@ void setProperties(NC::Menu<T> &menu, const MPD::Song &s, const ProxySongList &p
 	}
 	if (separate_albums)
 	{
-		menu << NC::fmtUnderline;
+		menu << NC::Format::Underline;
 		mvwhline(menu.raw(), menu.getY(), 0, KEY_SPACE, menu.getWidth());
 	}
 	
@@ -157,7 +157,7 @@ void showSongs(NC::Menu<T> &menu, const MPD::Song &s, const ProxySongList &pl, c
 	if (is_now_playing)
 		menu << Config.now_playing_suffix;
 	if (separate_albums)
-		menu << NC::fmtUnderlineEnd;
+		menu << NC::Format::NoUnderline;
 }
 
 template <typename T>
@@ -232,7 +232,7 @@ void showSongsInColumns(NC::Menu<T> &menu, const MPD::Song &s, const ProxySongLi
 			tag = ToWString(Config.empty_tag);
 		wideCut(tag, width);
 		
-		if (!discard_colors && it->color != NC::clDefault)
+		if (!discard_colors && it->color != NC::Color::Default)
 			menu << it->color;
 		
 		int x_off = 0;
@@ -252,8 +252,8 @@ void showSongsInColumns(NC::Menu<T> &menu, const MPD::Song &s, const ProxySongLi
 			remained_width -= width+1;
 		}
 		
-		if (!discard_colors && it->color != NC::clDefault)
-			menu << NC::clEnd;
+		if (!discard_colors && it->color != NC::Color::Default)
+			menu << NC::Color::End;
 	}
 	
 	// here comes the shitty part, second chapter. here we apply
@@ -272,7 +272,7 @@ void showSongsInColumns(NC::Menu<T> &menu, const MPD::Song &s, const ProxySongLi
 		menu.goToXY(menu.getWidth() - Config.selected_item_suffix_length, y);
 	
 	if (separate_albums)
-		menu << NC::fmtUnderlineEnd;
+		menu << NC::Format::NoUnderline;
 }
 
 }
@@ -374,7 +374,7 @@ void Display::Tags(NC::Menu<MPD::MutableSong> &menu)
 			menu << Charset::utf8ToLocale(s.getName());
 		else
 			menu << Charset::utf8ToLocale(s.getName())
-			     << Config.color2 << " -> " << NC::clEnd
+			     << Config.color2 << " -> " << NC::Color::End
 			     << Charset::utf8ToLocale(s.getNewURI());
 	}
 }

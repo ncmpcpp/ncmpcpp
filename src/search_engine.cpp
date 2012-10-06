@@ -103,7 +103,7 @@ size_t SearchEngine::ResetButton = 16;
 size_t SearchEngine::SearchButton = 15;
 
 SearchEngine::SearchEngine()
-: Screen(NC::Menu<SEItem>(0, MainStartY, COLS, MainHeight, "", Config.main_color, NC::brNone))
+: Screen(NC::Menu<SEItem>(0, MainStartY, COLS, MainHeight, "", Config.main_color, NC::Border::None))
 {
 	w.setHighlightColor(Config.main_highlight_color);
 	w.cyclicScrolling(Config.use_cyclic_scrolling);
@@ -149,23 +149,23 @@ void SearchEngine::enterPressed()
 	if (option < ConstraintsNumber)
 	{
 		std::string constraint = ConstraintsNames[option];
-		Statusbar::put() << NC::fmtBold << constraint << NC::fmtBoldEnd << ": ";
+		Statusbar::put() << NC::Format::Bold << constraint << NC::Format::NoBold << ": ";
 		itsConstraints[option] = Global::wFooter->getString(itsConstraints[option]);
 		w.current().value().buffer().clear();
 		constraint.resize(13, ' ');
-		w.current().value().buffer() << NC::fmtBold << constraint << NC::fmtBoldEnd << ": ";
+		w.current().value().buffer() << NC::Format::Bold << constraint << NC::Format::NoBold << ": ";
 		ShowTag(w.current().value().buffer(), itsConstraints[option]);
 	}
 	else if (option == ConstraintsNumber+1)
 	{
 		Config.search_in_db = !Config.search_in_db;
-		w.current().value().buffer() << NC::fmtBold << "Search in:" << NC::fmtBoldEnd << ' ' << (Config.search_in_db ? "Database" : "Current playlist");
+		w.current().value().buffer() << NC::Format::Bold << "Search in:" << NC::Format::NoBold << ' ' << (Config.search_in_db ? "Database" : "Current playlist");
 	}
 	else if (option == ConstraintsNumber+2)
 	{
 		if (!*++SearchMode)
 			SearchMode = &SearchModes[0];
-		w.current().value().buffer() << NC::fmtBold << "Search mode:" << NC::fmtBoldEnd << ' ' << *SearchMode;
+		w.current().value().buffer() << NC::Format::Bold << "Search mode:" << NC::Format::NoBold << ' ' << *SearchMode;
 	}
 	else if (option == SearchButton)
 	{
@@ -182,7 +182,7 @@ void SearchEngine::enterPressed()
 			found += 3; // don't count options inserted below
 			w.insertSeparator(ResetButton+1);
 			w.insertItem(ResetButton+2, SEItem(), 1, 1);
-			w.at(ResetButton+2).value().mkBuffer() << Config.color1 << "Search results: " << Config.color2 << "Found " << found << (found > 1 ? " songs" : " song") << NC::clDefault;
+			w.at(ResetButton+2).value().mkBuffer() << Config.color1 << "Search results: " << Config.color2 << "Found " << found << (found > 1 ? " songs" : " song") << NC::Color::Default;
 			w.insertSeparator(ResetButton+3);
 			markSongsInPlaylist(proxySongList());
 			Statusbar::msg("Searching finished");
@@ -351,12 +351,12 @@ void SearchEngine::Prepare()
 	{
 		std::string constraint = ConstraintsNames[i];
 		constraint.resize(13, ' ');
-		w[i].value().mkBuffer() << NC::fmtBold << constraint << NC::fmtBoldEnd << ": ";
+		w[i].value().mkBuffer() << NC::Format::Bold << constraint << NC::Format::NoBold << ": ";
 		ShowTag(w[i].value().buffer(), itsConstraints[i]);
 	}
 	
-	w.at(ConstraintsNumber+1).value().mkBuffer() << NC::fmtBold << "Search in:" << NC::fmtBoldEnd << ' ' << (Config.search_in_db ? "Database" : "Current playlist");
-	w.at(ConstraintsNumber+2).value().mkBuffer() << NC::fmtBold << "Search mode:" << NC::fmtBoldEnd << ' ' << *SearchMode;
+	w.at(ConstraintsNumber+1).value().mkBuffer() << NC::Format::Bold << "Search in:" << NC::Format::NoBold << ' ' << (Config.search_in_db ? "Database" : "Current playlist");
+	w.at(ConstraintsNumber+2).value().mkBuffer() << NC::Format::Bold << "Search mode:" << NC::Format::NoBold << ' ' << *SearchMode;
 	
 	w.at(SearchButton).value().mkBuffer() << "Search";
 	w.at(ResetButton).value().mkBuffer() << "Reset";

@@ -87,9 +87,9 @@ Window::Window(size_t startx,
 		m_height(height),
 		m_window_timeout(-1),
 		m_color(color),
-		m_bg_color(clDefault),
+		m_bg_color(Color::Default),
 		m_base_color(color),
-		m_base_bg_color(clDefault),
+		m_base_bg_color(Color::Default),
 		m_border(border),
 		m_get_string_helper(0),
 		m_title(title),
@@ -105,10 +105,10 @@ Window::Window(size_t startx,
 	||  m_height+m_start_y > size_t(LINES))
 		FatalError("Constructed window is bigger than terminal size");
 	
-	if (m_border != brNone)
+	if (m_border != Border::None)
 	{
 		m_border_window = newpad(m_height, m_width);
-		wattron(m_border_window, COLOR_PAIR(m_border));
+		wattron(m_border_window, COLOR_PAIR(int(m_border)));
 		box(m_border_window, 0, 0);
 		m_start_x++;
 		m_start_y++;
@@ -218,13 +218,13 @@ Window::~Window()
 
 void Window::setColor(Color fg, Color bg)
 {
-	if (fg == clDefault)
+	if (fg == Color::Default)
 		fg = m_base_color;
 	
-	if (fg != clDefault)
-		wattron(m_window, COLOR_PAIR(bg*8+fg));
+	if (fg != Color::Default)
+		wattron(m_window, COLOR_PAIR(int(bg)*8+int(fg)));
 	else
-		wattroff(m_window, COLOR_PAIR(m_color));
+		wattroff(m_window, COLOR_PAIR(int(m_color)));
 	m_color = fg;
 	m_bg_color = bg;
 }
@@ -237,7 +237,7 @@ void Window::setBaseColor(Color fg, Color bg)
 
 void Window::setBorder(Border border)
 {
-	if (border == brNone && m_border != brNone)
+	if (border == Border::None && m_border != Border::None)
 	{
 		delwin(m_border_window);
 		m_start_x--;
@@ -246,10 +246,10 @@ void Window::setBorder(Border border)
 		m_width += 2;
 		recreate(m_width, m_height);
 	}
-	else if (border != brNone && m_border == brNone)
+	else if (border != Border::None && m_border == Border::None)
 	{
 		m_border_window = newpad(m_height, m_width);
-		wattron(m_border_window, COLOR_PAIR(border));
+		wattron(m_border_window, COLOR_PAIR(int(border)));
 		box(m_border_window,0,0);
 		m_start_x++;
 		m_start_y++;
@@ -259,7 +259,7 @@ void Window::setBorder(Border border)
 	}
 	else
 	{
-		wattron(m_border_window,COLOR_PAIR(border));
+		wattron(m_border_window,COLOR_PAIR(int(border)));
 		box(m_border_window, 0, 0);
 	}
 	m_border = border;
@@ -311,7 +311,7 @@ void Window::moveTo(size_t new_x, size_t new_y)
 {
 	m_start_x = new_x;
 	m_start_y = new_y;
-	if (m_border != brNone)
+	if (m_border != Border::None)
 	{
 		m_start_x++;
 		m_start_y++;
@@ -322,11 +322,11 @@ void Window::moveTo(size_t new_x, size_t new_y)
 
 void Window::adjustDimensions(size_t width, size_t height)
 {
-	if (m_border != brNone)
+	if (m_border != Border::None)
 	{
 		delwin(m_border_window);
 		m_border_window = newpad(height, width);
-		wattron(m_border_window, COLOR_PAIR(m_border));
+		wattron(m_border_window, COLOR_PAIR(int(m_border)));
 		box(m_border_window, 0, 0);
 		width -= 2;
 		height -= 2;
@@ -345,22 +345,22 @@ void Window::resize(size_t new_width, size_t new_height)
 
 void Window::showBorder() const
 {
-	if (m_border != brNone)
+	if (m_border != Border::None)
 	{
 		::refresh();
 		prefresh(m_border_window, 0, 0, getStarty(), getStartX(), m_start_y+m_height, m_start_x+m_width);
 	}
 	if (!m_title.empty())
 	{
-		if (m_border != brNone)
-			attron(COLOR_PAIR(m_border));
+		if (m_border != Border::None)
+			attron(COLOR_PAIR(int(m_border)));
 		else
-			attron(COLOR_PAIR(m_base_color));
+			attron(COLOR_PAIR(int(m_base_color)));
 		mvhline(m_start_y-1, m_start_x, 0, m_width);
 		attron(A_BOLD);
 		mvhline(m_start_y-2, m_start_x, 32, m_width); // clear title line
 		mvaddstr(m_start_y-2, m_start_x, m_title.c_str());
-		attroff(COLOR_PAIR(m_border) | A_BOLD);
+		attroff(COLOR_PAIR(int(m_border)) | A_BOLD);
 	}
 	::refresh();
 }
@@ -741,7 +741,7 @@ bool Window::hasCoords(int &x, int &y)
 
 size_t Window::getWidth() const
 {
-	if (m_border != brNone)
+	if (m_border != Border::None)
 		return m_width+2;
 	else
 		return m_width;
@@ -750,7 +750,7 @@ size_t Window::getWidth() const
 size_t Window::getHeight() const
 {
 	size_t height = m_height;
-	if (m_border != brNone)
+	if (m_border != Border::None)
 		height += 2;
 	if (!m_title.empty())
 		height += 2;
@@ -759,7 +759,7 @@ size_t Window::getHeight() const
 
 size_t Window::getStartX() const
 {
-	if (m_border != brNone)
+	if (m_border != Border::None)
 		return m_start_x-1;
 	else
 		return m_start_x;
@@ -768,7 +768,7 @@ size_t Window::getStartX() const
 size_t Window::getStarty() const
 {
 	size_t starty = m_start_y;
-	if (m_border != brNone)
+	if (m_border != Border::None)
 		starty--;
 	if (!m_title.empty())
 		starty -= 2;
@@ -823,9 +823,9 @@ void Window::scroll(Scroll where)
 
 Window &Window::operator<<(Colors colors)
 {
-	if (colors.fg == clEnd || colors.bg == clEnd)
+	if (colors.fg == Color::End || colors.bg == Color::End)
 	{
-		*this << clEnd;
+		*this << Color::End;
 		return *this;
 	}
 	m_color_stack.push(colors);
@@ -837,12 +837,12 @@ Window &Window::operator<<(Color color)
 {
 	switch (color)
 	{
-		case clDefault:
+		case Color::Default:
 			while (!m_color_stack.empty())
 				m_color_stack.pop();
 			setColor(m_base_color, m_base_bg_color);
 			break;
-		case clEnd:
+		case Color::End:
 			if (!m_color_stack.empty())
 				m_color_stack.pop();
 			if (!m_color_stack.empty())
@@ -851,7 +851,7 @@ Window &Window::operator<<(Color color)
 				setColor(m_base_color, m_base_bg_color);
 			break;
 		default:
-			m_color_stack.push(Colors(color, clDefault));
+			m_color_stack.push(Colors(color, Color::Default));
 			setColor(m_color_stack.top().fg, m_color_stack.top().bg);
 	}
 	return *this;
@@ -861,36 +861,36 @@ Window &Window::operator<<(Format format)
 {
 	switch (format)
 	{
-		case fmtNone:
+		case Format::None:
 			bold((m_bold_counter = 0));
 			reverse((m_reverse_counter = 0));
 			altCharset((m_alt_charset_counter = 0));
 			break;
-		case fmtBold:
+		case Format::Bold:
 			bold(++m_bold_counter);
 			break;
-		case fmtBoldEnd:
+		case Format::NoBold:
 			if (--m_bold_counter <= 0)
 				bold((m_bold_counter = 0));
 			break;
-		case fmtUnderline:
+		case Format::Underline:
 			underline(++m_underline_counter);
 			break;
-		case fmtUnderlineEnd:
+		case Format::NoUnderline:
 			if (--m_underline_counter <= 0)
 				underline((m_underline_counter = 0));
 			break;
-		case fmtReverse:
+		case Format::Reverse:
 			reverse(++m_reverse_counter);
 			break;
-		case fmtReverseEnd:
+		case Format::NoReverse:
 			if (--m_reverse_counter <= 0)
 				reverse((m_reverse_counter = 0));
 			break;
-		case fmtAltCharset:
+		case Format::AltCharset:
 			altCharset(++m_alt_charset_counter);
 			break;
-		case fmtAltCharsetEnd:
+		case Format::NoAltCharset:
 			if (--m_alt_charset_counter <= 0)
 				altCharset((m_alt_charset_counter = 0));
 			break;

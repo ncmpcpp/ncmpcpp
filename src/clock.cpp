@@ -57,7 +57,7 @@ Clock::Clock()
 {
 	Width = Config.clock_display_seconds ? 60 : 40;
 	
-	m_pane = NC::Window(0, MainStartY, COLS, MainHeight, "", Config.main_color, NC::brNone);
+	m_pane = NC::Window(0, MainStartY, COLS, MainHeight, "", Config.main_color, NC::Border::None);
 	w = NC::Window((COLS-Width)/2, (MainHeight-Height)/2+MainStartY, Width, Height-1, "", Config.main_color, NC::Border(Config.main_color));
 }
 
@@ -115,7 +115,7 @@ void Clock::update()
 			myPlaylist->switchTo();
 	}
 	
-	tm *time = localtime(&Global::Timer.tv_sec);
+	std::tm *time = std::localtime(&Global::Timer.tv_sec);
 	
 	mask = 0;
 	Set(time->tm_sec % 10, 0);
@@ -128,10 +128,10 @@ void Clock::update()
 	Set(10, 17);
 	
 	char buf[64];
-	strftime(buf, 64, "%x", time);
-	attron(COLOR_PAIR(Config.main_color));
+	std::strftime(buf, 64, "%x", time);
+	attron(COLOR_PAIR(int(Config.main_color)));
 	mvprintw(w.getStarty()+w.getHeight(), w.getStartX()+(w.getWidth()-strlen(buf))/2, "%s", buf);
-	attroff(COLOR_PAIR(Config.main_color));
+	attroff(COLOR_PAIR(int(Config.main_color)));
 	refresh();
 	
 	for (int k = 0; k < 6; ++k)
@@ -140,7 +140,7 @@ void Clock::update()
 		next[k] = 0;
 		for (int s = 1; s >= 0; --s)
 		{
-			w << (s ? NC::fmtReverse : NC::fmtReverseEnd);
+			w << (s ? NC::Format::Reverse : NC::Format::NoReverse);
 			for (int i = 0; i < 6; ++i)
 			{
 				long a = (newer[i] ^ older[i]) & (s ? newer : older)[i];

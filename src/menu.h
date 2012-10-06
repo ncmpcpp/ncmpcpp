@@ -631,10 +631,10 @@ template <typename T> void Menu<T>::refresh()
 			continue;
 		}
 		if ((*m_options_ptr)[i]->isBold())
-			*this << fmtBold;
+			*this << Format::Bold;
 		if (m_highlight_enabled && i == m_highlight)
 		{
-			*this << fmtReverse;
+			*this << Format::Reverse;
 			*this << m_highlight_color;
 		}
 		mvwhline(m_window, line, 0, KEY_SPACE, m_width);
@@ -646,11 +646,11 @@ template <typename T> void Menu<T>::refresh()
 			*this << m_selected_suffix;
 		if (m_highlight_enabled && i == m_highlight)
 		{
-			*this << clEnd;
-			*this << fmtReverseEnd;
+			*this << Color::End;
+			*this << Format::NoReverse;
 		}
 		if ((*m_options_ptr)[i]->isBold())
-			*this << fmtBoldEnd;
+			*this << Format::NoBold;
 	}
 	Window::refresh();
 }

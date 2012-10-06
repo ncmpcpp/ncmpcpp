@@ -46,7 +46,7 @@ using Global::MainStartY;
 TinyTagEditor *myTinyTagEditor;
 
 TinyTagEditor::TinyTagEditor()
-: Screen(NC::Menu<NC::Buffer>(0, MainStartY, COLS, MainHeight, "", Config.main_color, NC::brNone))
+: Screen(NC::Menu<NC::Buffer>(0, MainStartY, COLS, MainHeight, "", Config.main_color, NC::Border::None))
 {
 	w.setHighlightColor(Config.main_highlight_color);
 	w.cyclicScrolling(Config.use_cyclic_scrolling);
@@ -102,16 +102,16 @@ void TinyTagEditor::enterPressed()
 	if (option < 19) // separator after comment
 	{
 		size_t pos = option-8;
-		Statusbar::put() << NC::fmtBold << SongInfo::Tags[pos].Name << ": " << NC::fmtBoldEnd;
+		Statusbar::put() << NC::Format::Bold << SongInfo::Tags[pos].Name << ": " << NC::Format::NoBold;
 		itsEdited.setTags(SongInfo::Tags[pos].Set, Global::wFooter->getString(
 			itsEdited.getTags(SongInfo::Tags[pos].Get, Config.tags_separator)), Config.tags_separator);
 		w.at(option).value().clear();
-		w.at(option).value() << NC::fmtBold << SongInfo::Tags[pos].Name << ':' << NC::fmtBoldEnd << ' ';
+		w.at(option).value() << NC::Format::Bold << SongInfo::Tags[pos].Name << ':' << NC::Format::NoBold << ' ';
 		ShowTag(w.at(option).value(), itsEdited.getTags(SongInfo::Tags[pos].Get, Config.tags_separator));
 	}
 	else if (option == 20)
 	{
-		Statusbar::put() << NC::fmtBold << "Filename: " << NC::fmtBoldEnd;
+		Statusbar::put() << NC::Format::Bold << "Filename: " << NC::Format::NoBold;
 		std::string filename = itsEdited.getNewURI().empty() ? itsEdited.getName() : itsEdited.getNewURI();
 		size_t dot = filename.rfind(".");
 		std::string extension = filename.substr(dot);
@@ -119,7 +119,7 @@ void TinyTagEditor::enterPressed()
 		std::string new_name = Global::wFooter->getString(filename);
 		itsEdited.setNewURI(new_name + extension);
 		w.at(option).value().clear();
-		w.at(option).value() << NC::fmtBold << "Filename:" << NC::fmtBoldEnd << ' ' << (itsEdited.getNewURI().empty() ? itsEdited.getName() : itsEdited.getNewURI());
+		w.at(option).value() << NC::Format::Bold << "Filename:" << NC::Format::NoBold << ' ' << (itsEdited.getNewURI().empty() ? itsEdited.getName() : itsEdited.getNewURI());
 	}
 	Statusbar::unlock();
 	
@@ -204,23 +204,23 @@ bool TinyTagEditor::getTags()
 	
 	w.highlight(8);
 	
-	w.at(0).value() << NC::fmtBold << Config.color1 << "Song name: " << NC::fmtBoldEnd << Config.color2 << itsEdited.getName() << NC::clEnd;
-	w.at(1).value() << NC::fmtBold << Config.color1 << "Location in DB: " << NC::fmtBoldEnd << Config.color2;
+	w.at(0).value() << NC::Format::Bold << Config.color1 << "Song name: " << NC::Format::NoBold << Config.color2 << itsEdited.getName() << NC::Color::End;
+	w.at(1).value() << NC::Format::Bold << Config.color1 << "Location in DB: " << NC::Format::NoBold << Config.color2;
 	ShowTag(w.at(1).value(), itsEdited.getDirectory());
-	w.at(1).value() << NC::clEnd;
-	w.at(3).value() << NC::fmtBold << Config.color1 << "Length: " << NC::fmtBoldEnd << Config.color2 << itsEdited.getLength() << NC::clEnd;
-	w.at(4).value() << NC::fmtBold << Config.color1 << "Bitrate: " << NC::fmtBoldEnd << Config.color2 << f.audioProperties()->bitrate() << " kbps" << NC::clEnd;
-	w.at(5).value() << NC::fmtBold << Config.color1 << "Sample rate: " << NC::fmtBoldEnd << Config.color2 << f.audioProperties()->sampleRate() << " Hz" << NC::clEnd;
-	w.at(6).value() << NC::fmtBold << Config.color1 << "Channels: " << NC::fmtBoldEnd << Config.color2 << (f.audioProperties()->channels() == 1 ? "Mono" : "Stereo") << NC::clDefault;
+	w.at(1).value() << NC::Color::End;
+	w.at(3).value() << NC::Format::Bold << Config.color1 << "Length: " << NC::Format::NoBold << Config.color2 << itsEdited.getLength() << NC::Color::End;
+	w.at(4).value() << NC::Format::Bold << Config.color1 << "Bitrate: " << NC::Format::NoBold << Config.color2 << f.audioProperties()->bitrate() << " kbps" << NC::Color::End;
+	w.at(5).value() << NC::Format::Bold << Config.color1 << "Sample rate: " << NC::Format::NoBold << Config.color2 << f.audioProperties()->sampleRate() << " Hz" << NC::Color::End;
+	w.at(6).value() << NC::Format::Bold << Config.color1 << "Channels: " << NC::Format::NoBold << Config.color2 << (f.audioProperties()->channels() == 1 ? "Mono" : "Stereo") << NC::Color::Default;
 	
 	unsigned pos = 8;
 	for (const SongInfo::Metadata *m = SongInfo::Tags; m->Name; ++m, ++pos)
 	{
-		w.at(pos).value() << NC::fmtBold << m->Name << ":" << NC::fmtBoldEnd << ' ';
+		w.at(pos).value() << NC::Format::Bold << m->Name << ":" << NC::Format::NoBold << ' ';
 		ShowTag(w.at(pos).value(), itsEdited.getTags(m->Get, Config.tags_separator));
 	}
 	
-	w.at(20).value() << NC::fmtBold << "Filename:" << NC::fmtBoldEnd << ' ' << itsEdited.getName();
+	w.at(20).value() << NC::Format::Bold << "Filename:" << NC::Format::NoBold << ' ' << itsEdited.getName();
 	
 	w.at(22).value() << "Save";
 	w.at(23).value() << "Cancel";

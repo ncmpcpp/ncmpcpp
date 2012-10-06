@@ -21,6 +21,50 @@
 #include <cassert>
 #include "utility/type_conversions.h"
 
+NC::Color stringToColor(const std::string &color)
+{
+	NC::Color result = NC::Color::Default;
+	if (color == "black")
+		result = NC::Color::Black;
+	else if (color == "red")
+		result = NC::Color::Red;
+	else if (color == "green")
+		result = NC::Color::Green;
+	else if (color == "yellow")
+		result = NC::Color::Yellow;
+	else if (color == "blue")
+		result = NC::Color::Blue;
+	else if (color == "magenta")
+		result = NC::Color::Magenta;
+	else if (color == "cyan")
+		result = NC::Color::Cyan;
+	else if (color == "white")
+		result = NC::Color::White;
+	return result;
+}
+
+NC::Border stringToBorder(const std::string &border)
+{
+	NC::Border result = NC::Border::None;
+	if (border == "black")
+		result = NC::Border::Black;
+	else if (border == "red")
+		result = NC::Border::Red;
+	else if (border == "green")
+		result = NC::Border::Green;
+	else if (border == "yellow")
+		result = NC::Border::Yellow;
+	else if (border == "blue")
+		result = NC::Border::Blue;
+	else if (border == "magenta")
+		result = NC::Border::Magenta;
+	else if (border == "cyan")
+		result = NC::Border::Cyan;
+	else if (border == "white")
+		result = NC::Border::White;
+	return result;
+}
+
 std::string tagTypeToString(mpd_tag_type tag)
 {
 	switch (tag)

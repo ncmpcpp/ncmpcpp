@@ -46,7 +46,7 @@ Visualizer *myVisualizer;
 const int Visualizer::WindowTimeout = 1000/25; /* 25 fps */
 
 Visualizer::Visualizer()
-: Screen(NC::Window(0, MainStartY, COLS, MainHeight, "", Config.visualizer_color, NC::brNone))
+: Screen(NC::Window(0, MainStartY, COLS, MainHeight, "", Config.visualizer_color, NC::Border::None))
 {
 	ResetFD();
 	m_samples = Config.visualizer_in_stereo ? 4096 : 2048;

@@ -53,7 +53,7 @@ bool playlistEntryMatcher(const Regex &rx, const MPD::Song &s);
 
 Playlist::Playlist() : itsTotalLength(0), itsRemainingTime(0), itsScrollBegin(0)
 {
-	w = NC::Menu<MPD::Song>(0, MainStartY, COLS, MainHeight, Config.columns_in_playlist && Config.titles_visibility ? Display::Columns(COLS) : "", Config.main_color, NC::brNone);
+	w = NC::Menu<MPD::Song>(0, MainStartY, COLS, MainHeight, Config.columns_in_playlist && Config.titles_visibility ? Display::Columns(COLS) : "", Config.main_color, NC::Border::None);
 	w.cyclicScrolling(Config.use_cyclic_scrolling);
 	w.centeredCursor(Config.centered_cursor);
 	w.setHighlightColor(Config.main_highlight_color);

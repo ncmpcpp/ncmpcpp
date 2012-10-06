@@ -147,7 +147,7 @@ MediaLibrary::MediaLibrary()
 	itsRightColWidth = COLS-COLS/3*2-1;
 	itsRightColStartX = itsLeftColWidth+itsMiddleColWidth+2;
 	
-	Tags = NC::Menu<PrimaryTag>(0, MainStartY, itsLeftColWidth, MainHeight, Config.titles_visibility ? tagTypeToString(Config.media_lib_primary_tag) + "s" : "", Config.main_color, NC::brNone);
+	Tags = NC::Menu<PrimaryTag>(0, MainStartY, itsLeftColWidth, MainHeight, Config.titles_visibility ? tagTypeToString(Config.media_lib_primary_tag) + "s" : "", Config.main_color, NC::Border::None);
 	Tags.setHighlightColor(Config.active_column_color);
 	Tags.cyclicScrolling(Config.use_cyclic_scrolling);
 	Tags.centeredCursor(Config.centered_cursor);
@@ -161,7 +161,7 @@ MediaLibrary::MediaLibrary()
 			menu << Charset::utf8ToLocale(tag);
 	});
 	
-	Albums = NC::Menu<AlbumEntry>(itsMiddleColStartX, MainStartY, itsMiddleColWidth, MainHeight, Config.titles_visibility ? "Albums" : "", Config.main_color, NC::brNone);
+	Albums = NC::Menu<AlbumEntry>(itsMiddleColStartX, MainStartY, itsMiddleColWidth, MainHeight, Config.titles_visibility ? "Albums" : "", Config.main_color, NC::Border::None);
 	Albums.setHighlightColor(Config.main_highlight_color);
 	Albums.cyclicScrolling(Config.use_cyclic_scrolling);
 	Albums.centeredCursor(Config.centered_cursor);
@@ -171,7 +171,7 @@ MediaLibrary::MediaLibrary()
 		menu << Charset::utf8ToLocale(AlbumToString(menu.drawn()->value()));
 	});
 	
-	Songs = NC::Menu<MPD::Song>(itsRightColStartX, MainStartY, itsRightColWidth, MainHeight, Config.titles_visibility ? "Songs" : "", Config.main_color, NC::brNone);
+	Songs = NC::Menu<MPD::Song>(itsRightColStartX, MainStartY, itsRightColWidth, MainHeight, Config.titles_visibility ? "Songs" : "", Config.main_color, NC::Border::None);
 	Songs.setHighlightColor(Config.main_highlight_color);
 	Songs.cyclicScrolling(Config.use_cyclic_scrolling);
 	Songs.centeredCursor(Config.centered_cursor);

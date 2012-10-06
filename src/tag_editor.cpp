@@ -90,7 +90,7 @@ TagEditor::TagEditor() : FParser(0), FParserHelper(0), FParserLegend(0), FParser
 	PatternsFile = Config.ncmpcpp_directory + "patterns.list";
 	SetDimensions(0, COLS);
 	
-	Dirs = new NC::Menu< std::pair<std::string, std::string> >(0, MainStartY, LeftColumnWidth, MainHeight, Config.titles_visibility ? "Directories" : "", Config.main_color, NC::brNone);
+	Dirs = new NC::Menu< std::pair<std::string, std::string> >(0, MainStartY, LeftColumnWidth, MainHeight, Config.titles_visibility ? "Directories" : "", Config.main_color, NC::Border::None);
 	Dirs->setHighlightColor(Config.active_column_color);
 	Dirs->cyclicScrolling(Config.use_cyclic_scrolling);
 	Dirs->centeredCursor(Config.centered_cursor);
@@ -98,7 +98,7 @@ TagEditor::TagEditor() : FParser(0), FParserHelper(0), FParserLegend(0), FParser
 		menu << Charset::utf8ToLocale(menu.drawn()->value().first);
 	});
 	
-	TagTypes = new NC::Menu<std::string>(MiddleColumnStartX, MainStartY, MiddleColumnWidth, MainHeight, Config.titles_visibility ? "Tag types" : "", Config.main_color, NC::brNone);
+	TagTypes = new NC::Menu<std::string>(MiddleColumnStartX, MainStartY, MiddleColumnWidth, MainHeight, Config.titles_visibility ? "Tag types" : "", Config.main_color, NC::Border::None);
 	TagTypes->setHighlightColor(Config.main_highlight_color);
 	TagTypes->cyclicScrolling(Config.use_cyclic_scrolling);
 	TagTypes->centeredCursor(Config.centered_cursor);
@@ -120,7 +120,7 @@ TagEditor::TagEditor() : FParser(0), FParserHelper(0), FParserLegend(0), FParser
 	TagTypes->addItem("Reset");
 	TagTypes->addItem("Save");
 	
-	Tags = new NC::Menu<MPD::MutableSong>(RightColumnStartX, MainStartY, RightColumnWidth, MainHeight, Config.titles_visibility ? "Tags" : "", Config.main_color, NC::brNone);
+	Tags = new NC::Menu<MPD::MutableSong>(RightColumnStartX, MainStartY, RightColumnWidth, MainHeight, Config.titles_visibility ? "Tags" : "", Config.main_color, NC::Border::None);
 	Tags->setHighlightColor(Config.main_highlight_color);
 	Tags->cyclicScrolling(Config.use_cyclic_scrolling);
 	Tags->centeredCursor(Config.centered_cursor);
@@ -315,9 +315,9 @@ void TagEditor::enterPressed()
 		*FParserLegend << "%p - performer\n";
 		*FParserLegend << "%d - disc\n";
 		*FParserLegend << "%C - comment\n\n";
-		*FParserLegend << NC::fmtBold << "Files:\n" << NC::fmtBoldEnd;
+		*FParserLegend << NC::Format::Bold << "Files:\n" << NC::Format::NoBold;
 		for (auto it = EditedSongs.begin(); it != EditedSongs.end(); ++it)
-			*FParserLegend << Config.color2 << " * " << NC::clEnd << (*it)->getName() << '\n';
+			*FParserLegend << Config.color2 << " * " << NC::Color::End << (*it)->getName() << '\n';
 		FParserLegend->flush();
 		
 		if (!Patterns.empty())
@@ -378,7 +378,7 @@ void TagEditor::enterPressed()
 				{
 					if (FParserUsePreview)
 					{
-						*FParserPreview << NC::fmtBold << s.getName() << ":\n" << NC::fmtBoldEnd;
+						*FParserPreview << NC::Format::Bold << s.getName() << ":\n" << NC::Format::NoBold;
 						*FParserPreview << ParseFilename(s, Config.pattern, FParserUsePreview) << '\n';
 					}
 					else
@@ -398,9 +398,9 @@ void TagEditor::enterPressed()
 					}
 					if (!FParserUsePreview)
 						s.setNewURI(new_file + extension);
-					*FParserPreview << file << Config.color2 << " -> " << NC::clEnd;
+					*FParserPreview << file << Config.color2 << " -> " << NC::Color::End;
 					if (new_file.empty())
-						*FParserPreview << Config.empty_tags_color << Config.empty_tag << NC::clEnd;
+						*FParserPreview << Config.empty_tags_color << Config.empty_tag << NC::Color::End;
 					else
 						*FParserPreview << new_file << extension;
 					*FParserPreview << "\n\n";
@@ -493,7 +493,7 @@ void TagEditor::enterPressed()
 		if (id > 0 && w == TagTypes)
 		{
 			Statusbar::lock();
-			Statusbar::put() << NC::fmtBold << TagTypes->current().value() << NC::fmtBoldEnd << ": ";
+			Statusbar::put() << NC::Format::Bold << TagTypes->current().value() << NC::Format::NoBold << ": ";
 			std::string new_tag = wFooter->getString(Tags->current().value().getTags(get, Config.tags_separator));
 			Statusbar::unlock();
 			for (auto it = EditedSongs.begin(); it != EditedSongs.end(); ++it)
@@ -502,7 +502,7 @@ void TagEditor::enterPressed()
 		else if (w == Tags)
 		{
 			Statusbar::lock();
-			Statusbar::put() << NC::fmtBold << TagTypes->current().value() << NC::fmtBoldEnd << ": ";
+			Statusbar::put() << NC::Format::Bold << TagTypes->current().value() << NC::Format::NoBold << ": ";
 			std::string new_tag = wFooter->getString(Tags->current().value().getTags(get, Config.tags_separator));
 			Statusbar::unlock();
 			if (new_tag != Tags->current().value().getTags(get, Config.tags_separator))
@@ -527,7 +527,7 @@ void TagEditor::enterPressed()
 				std::string extension = old_name.substr(last_dot);
 				old_name = old_name.substr(0, last_dot);
 				Statusbar::lock();
-				Statusbar::put() << NC::fmtBold << "New filename: " << NC::fmtBoldEnd;
+				Statusbar::put() << NC::Format::Bold << "New filename: " << NC::Format::NoBold;
 				std::string new_name = wFooter->getString(old_name);
 				Statusbar::unlock();
 				if (!new_name.empty() && new_name != old_name)

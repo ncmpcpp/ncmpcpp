@@ -50,7 +50,7 @@ size_t Lyrics::itsWorkersNumber = 0;
 Lyrics *myLyrics;
 
 Lyrics::Lyrics()
-: Screen(NC::Scrollpad(0, MainStartY, COLS, MainHeight, "", Config.main_color, NC::brNone))
+: Screen(NC::Scrollpad(0, MainStartY, COLS, MainHeight, "", Config.main_color, NC::Border::None))
 , ReloadNP(0),
 #ifdef HAVE_CURL_CURL_H
 isReadyToTake(0), isDownloadInProgress(0),
@@ -235,10 +235,10 @@ void *Lyrics::Download()
 	bool fetcher_defined = itsFetcher && *itsFetcher;
 	for (LyricsFetcher **plugin = fetcher_defined ? itsFetcher : lyricsPlugins; *plugin != 0; ++plugin)
 	{
-		w << "Fetching lyrics from " << NC::fmtBold << (*plugin)->name() << NC::fmtBoldEnd << "... ";
+		w << "Fetching lyrics from " << NC::Format::Bold << (*plugin)->name() << NC::Format::NoBold << "... ";
 		result = (*plugin)->fetch(artist, title_);
 		if (result.first == false)
-			w << NC::clRed << result.second << NC::clEnd << '\n';
+			w << NC::Color::Red << result.second << NC::Color::End << '\n';
 		else
 			break;
 		if (fetcher_defined)

@@ -358,16 +358,16 @@ void stringToBuffer(Iterator first, Iterator last, NC::BasicBuffer<typename Iter
 				switch (*it)
 				{
 					case 'b':
-						buf << NC::fmtBold;
+						buf << NC::Format::Bold;
 						break;
 					case 'u':
-						buf << NC::fmtUnderline;
+						buf << NC::Format::Underline;
 						break;
 					case 'a':
-						buf << NC::fmtAltCharset;
+						buf << NC::Format::AltCharset;
 						break;
 					case 'r':
-						buf << NC::fmtReverse;
+						buf << NC::Format::Reverse;
 						break;
 					case '/':
 						if (++it == last)
@@ -378,16 +378,16 @@ void stringToBuffer(Iterator first, Iterator last, NC::BasicBuffer<typename Iter
 						switch (*it)
 						{
 							case 'b':
-								buf << NC::fmtBoldEnd;
+								buf << NC::Format::NoBold;
 								break;
 							case 'u':
-								buf << NC::fmtUnderlineEnd;
+								buf << NC::Format::NoUnderline;
 								break;
 							case 'a':
-								buf << NC::fmtAltCharsetEnd;
+								buf << NC::Format::NoAltCharset;
 								break;
 							case 'r':
-								buf << NC::fmtReverseEnd;
+								buf << NC::Format::NoReverse;
 								break;
 							default:
 								buf << '$' << *--it;
@@ -464,7 +464,7 @@ template <typename T> void ShowTime(T &buf, size_t length, bool short_names)
 template <typename BufferT> void ShowTag(BufferT &buf, const std::string &tag)
 {
 	if (tag.empty())
-		buf << Config.empty_tags_color << Config.empty_tag << NC::clEnd;
+		buf << Config.empty_tags_color << Config.empty_tag << NC::Color::End;
 	else
 		buf << tag;
 }

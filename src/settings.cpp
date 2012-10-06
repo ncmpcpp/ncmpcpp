@@ -58,35 +58,6 @@ Configuration Config;
 
 namespace
 {
-	NC::Color stringToColor(const std::string &color)
-	{
-		NC::Color result = NC::clDefault;
-		
-		if (color == "black")
-			result = NC::clBlack;
-		else if (color == "red")
-			result = NC::clRed;
-		else if (color == "green")
-			result = NC::clGreen;
-		else if (color == "yellow")
-			result = NC::clYellow;
-		else if (color == "blue")
-			result = NC::clBlue;
-		else if (color == "magenta")
-			result = NC::clMagenta;
-		else if (color == "cyan")
-			result = NC::clCyan;
-		else if (color == "white")
-			result = NC::clWhite;
-		
-		return result;
-	}
-	
-	NC::Border stringToBorder(const std::string &border)
-	{
-		return NC::Border(stringToColor(border));
-	}
-	
 	ScreenRef intToScreen(int n)
 	{
 		switch (n)
@@ -173,32 +144,32 @@ void Configuration::SetDefaults()
 	tag_editor_album_format = "{{(%y) }%b}";
 	new_header_first_line = "{$b$1$aqqu$/a$9 {%t}|{%f} $1$atqq$/a$9$/b}";
 	new_header_second_line = "{{{$4$b%a$/b$9}{ - $7%b$9}{ ($4%y$9)}}|{%D}}";
-	browser_playlist_prefix << NC::clRed << "playlist" << NC::clEnd << ' ';
+	browser_playlist_prefix << NC::Color::Red << "playlist" << NC::Color::End << ' ';
 	progressbar = L"=>\0";
 	visualizer_chars = L"◆│";
 	pattern = "%n - %t";
-	selected_item_prefix << NC::clMagenta;
-	selected_item_suffix << NC::clEnd;
-	now_playing_prefix << NC::fmtBold;
-	now_playing_suffix << NC::fmtBoldEnd;
-	modified_item_prefix << NC::clGreen << "> " << NC::clEnd;
-	color1 = NC::clWhite;
-	color2 = NC::clGreen;
-	empty_tags_color = NC::clCyan;
-	header_color = NC::clDefault;
-	volume_color = NC::clDefault;
-	state_line_color = NC::clDefault;
-	state_flags_color = NC::clDefault;
-	main_color = NC::clYellow;
+	selected_item_prefix << NC::Color::Magenta;
+	selected_item_suffix << NC::Color::End;
+	now_playing_prefix << NC::Format::Bold;
+	now_playing_suffix << NC::Format::NoBold;
+	modified_item_prefix << NC::Color::Green << "> " << NC::Color::End;
+	color1 = NC::Color::White;
+	color2 = NC::Color::Green;
+	empty_tags_color = NC::Color::Cyan;
+	header_color = NC::Color::Default;
+	volume_color = NC::Color::Default;
+	state_line_color = NC::Color::Default;
+	state_flags_color = NC::Color::Default;
+	main_color = NC::Color::Yellow;
 	main_highlight_color = main_color;
-	progressbar_color = NC::clDefault;
-	progressbar_elapsed_color = NC::clDefault;
-	statusbar_color = NC::clDefault;
-	alternative_ui_separator_color = NC::clBlack;
-	active_column_color = NC::clRed;
-	window_border = NC::brGreen;
-	active_window_border = NC::brRed;
-	visualizer_color = NC::clYellow;
+	progressbar_color = NC::Color::Default;
+	progressbar_elapsed_color = NC::Color::Default;
+	statusbar_color = NC::Color::Default;
+	alternative_ui_separator_color = NC::Color::Black;
+	active_column_color = NC::Color::Red;
+	window_border = NC::Border::Green;
+	active_window_border = NC::Border::Red;
+	visualizer_color = NC::Color::Yellow;
 	media_lib_primary_tag = MPD_TAG_ARTIST;
 	enable_idle_notifications = true;
 	colors_enabled = true;

@@ -47,19 +47,19 @@ void drawHeader()
 	{
 		std::wstring title = myScreen->title();
 		*wHeader << NC::XY(0, 3) << wclrtoeol;
-		*wHeader << NC::fmtBold << Config.alternative_ui_separator_color;
+		*wHeader << NC::Format::Bold << Config.alternative_ui_separator_color;
 		mvwhline(wHeader->raw(), 2, 0, 0, COLS);
 		mvwhline(wHeader->raw(), 4, 0, 0, COLS);
 		*wHeader << NC::XY((COLS-wideLength(title))/2, 3);
-		*wHeader << Config.header_color << title << NC::clEnd;
-		*wHeader << NC::clEnd << NC::fmtBoldEnd;
+		*wHeader << Config.header_color << title << NC::Color::End;
+		*wHeader << NC::Color::End << NC::Format::NoBold;
 	}
 	else
 	{
-		*wHeader << NC::XY(0, 0) << wclrtoeol << NC::fmtBold << myScreen->title() << NC::fmtBoldEnd;
+		*wHeader << NC::XY(0, 0) << wclrtoeol << NC::Format::Bold << myScreen->title() << NC::Format::NoBold;
 		*wHeader << Config.volume_color;
 		*wHeader << NC::XY(wHeader->getWidth()-VolumeState.length(), 0) << VolumeState;
-		*wHeader << NC::clEnd;
+		*wHeader << NC::Color::End;
 	}
 	wHeader->refresh();
 }

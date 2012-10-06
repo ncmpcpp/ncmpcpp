@@ -145,7 +145,7 @@ int main(int argc, char **argv)
 	Actions::OriginalStatusbarVisibility = Config.statusbar_visibility;
 	
 	if (!Config.titles_visibility)
-		wattron(stdscr, COLOR_PAIR(Config.main_color));
+		wattron(stdscr, COLOR_PAIR(int(Config.main_color)));
 	
 	if (Config.new_design)
 		Config.statusbar_visibility = 0;
@@ -154,11 +154,11 @@ int main(int argc, char **argv)
 	Actions::validateScreenSize();
 	Actions::initializeScreens();
 	
-	wHeader = new NC::Window(0, 0, COLS, Actions::HeaderHeight, "", Config.header_color, NC::brNone);
+	wHeader = new NC::Window(0, 0, COLS, Actions::HeaderHeight, "", Config.header_color, NC::Border::None);
 	if (Config.header_visibility || Config.new_design)
 		wHeader->display();
 	
-	wFooter = new NC::Window(0, Actions::FooterStartY, COLS, Actions::FooterHeight, "", Config.statusbar_color, NC::brNone);
+	wFooter = new NC::Window(0, Actions::FooterStartY, COLS, Actions::FooterHeight, "", Config.statusbar_color, NC::Border::None);
 	wFooter->setTimeout(500);
 	wFooter->setGetStringHelper(Statusbar::Helpers::getString);
 	if (Mpd.SupportsIdle())

@@ -65,7 +65,7 @@ bool BrowserEntryMatcher(const Regex &rx, const MPD::Item &item, bool filter);
 
 Browser::Browser() : itsBrowseLocally(0), itsScrollBeginning(0), itsBrowsedDir("/")
 {
-	w = NC::Menu<MPD::Item>(0, MainStartY, COLS, MainHeight, Config.columns_in_browser && Config.titles_visibility ? Display::Columns(COLS) : "", Config.main_color, NC::brNone);
+	w = NC::Menu<MPD::Item>(0, MainStartY, COLS, MainHeight, Config.columns_in_browser && Config.titles_visibility ? Display::Columns(COLS) : "", Config.main_color, NC::Border::None);
 	w.setHighlightColor(Config.main_highlight_color);
 	w.cyclicScrolling(Config.use_cyclic_scrolling);
 	w.centeredCursor(Config.centered_cursor);

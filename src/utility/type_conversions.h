@@ -23,6 +23,10 @@
 
 #include "mpdpp.h"
 #include "mutable_song.h"
+#include "window.h"
+
+NC::Color stringToColor(const std::string &color);
+NC::Border stringToBorder(const std::string &border);
 
 std::string tagTypeToString(mpd_tag_type tag);
 MPD::MutableSong::SetFunction tagTypeToSetFunction(mpd_tag_type tag);

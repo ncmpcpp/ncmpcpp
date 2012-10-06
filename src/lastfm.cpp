@@ -47,7 +47,7 @@ using Global::MainStartY;
 Lastfm *myLastfm;
 
 Lastfm::Lastfm()
-: Screen(NC::Scrollpad(0, MainStartY, COLS, MainHeight, "", Config.main_color, NC::brNone))
+: Screen(NC::Scrollpad(0, MainStartY, COLS, MainHeight, "", Config.main_color, NC::Border::None))
 , isReadyToTake(0), isDownloadInProgress(0)
 { }
 
@@ -174,7 +174,7 @@ void Lastfm::Download()
 		itsService->colorizeOutput(w);
 	}
 	else
-		w << NC::clRed << result.second << NC::clEnd;
+		w << NC::Color::Red << result.second << NC::Color::End;
 	
 	isReadyToTake = 1;
 }

@@ -32,9 +32,9 @@ namespace {//
 
 void drawScreenSeparator(int x)
 {
-	attron(COLOR_PAIR(Config.main_color));
+	attron(COLOR_PAIR(int(Config.main_color)));
 	mvvline(Global::MainStartY, x, 0, Global::MainHeight);
-	attroff(COLOR_PAIR(Config.main_color));
+	attroff(COLOR_PAIR(int(Config.main_color)));
 	refresh();
 }
 

@@ -268,7 +268,7 @@ bool askYesNoQuestion(const std::string &question, void (*callback)())
 	using Global::wFooter;
 	
 	Statusbar::lock();
-	Statusbar::put() << question << " [" << NC::fmtBold << 'y' << NC::fmtBoldEnd << '/' << NC::fmtBold << 'n' << NC::fmtBoldEnd << "]";
+	Statusbar::put() << question << " [" << NC::Format::Bold << 'y' << NC::Format::NoBold << '/' << NC::Format::Bold << 'n' << NC::Format::NoBold << "]";
 	wFooter->refresh();
 	int answer = 0;
 	do
@@ -816,7 +816,7 @@ void ExecuteCommand::run()
 {
 	using Global::wFooter;
 	Statusbar::lock();
-	Statusbar::put() << NC::fmtBold << ":" << NC::fmtBoldEnd;
+	Statusbar::put() << NC::Format::Bold << ":" << NC::Format::NoBold;
 	wFooter->setGetStringHelper(Statusbar::Helpers::TryExecuteImmediateCommand());
 	std::string name = wFooter->getString();
 	wFooter->setGetStringHelper(Statusbar::Helpers::getString);
@@ -1236,7 +1236,7 @@ void EditLibraryTag::run()
 	using Global::wFooter;
 	
 	Statusbar::lock();
-	Statusbar::put() << NC::fmtBold << tagTypeToString(Config.media_lib_primary_tag) << NC::fmtBoldEnd << ": ";
+	Statusbar::put() << NC::Format::Bold << tagTypeToString(Config.media_lib_primary_tag) << NC::Format::NoBold << ": ";
 	std::string new_tag = wFooter->getString(myLibrary->Tags.current().value().tag());
 	Statusbar::unlock();
 	if (!new_tag.empty() && new_tag != myLibrary->Tags.current().value().tag())
@@ -1292,7 +1292,7 @@ void EditLibraryAlbum::run()
 	using Global::wFooter;
 	
 	Statusbar::lock();
-	Statusbar::put() << NC::fmtBold << "Album: " << NC::fmtBoldEnd;
+	Statusbar::put() << NC::Format::Bold << "Album: " << NC::Format::NoBold;
 	std::string new_album = wFooter->getString(myLibrary->Albums.current().value().entry().album());
 	Statusbar::unlock();
 	if (!new_album.empty() && new_album != myLibrary->Albums.current().value().entry().album())
@@ -1350,7 +1350,7 @@ void EditDirectoryName::run()
 	{
 		std::string old_dir = myBrowser->main().current().value().name;
 		Statusbar::lock();
-		Statusbar::put() << NC::fmtBold << "Directory: " << NC::fmtBoldEnd;
+		Statusbar::put() << NC::Format::Bold << "Directory: " << NC::Format::NoBold;
 		std::string new_dir = wFooter->getString(old_dir);
 		Statusbar::unlock();
 		if (!new_dir.empty() && new_dir != old_dir)
@@ -1384,7 +1384,7 @@ void EditDirectoryName::run()
 	{
 		std::string old_dir = myTagEditor->Dirs->current().value().first;
 		Statusbar::lock();
-		Statusbar::put() << NC::fmtBold << "Directory: " << NC::fmtBoldEnd;
+		Statusbar::put() << NC::Format::Bold << "Directory: " << NC::Format::NoBold;
 		std::string new_dir = wFooter->getString(old_dir);
 		Statusbar::unlock();
 		if (!new_dir.empty() && new_dir != old_dir)
@@ -1426,7 +1426,7 @@ void EditPlaylistName::run()
 	else
 		old_name = myBrowser->main().current().value().name;
 	Statusbar::lock();
-	Statusbar::put() << NC::fmtBold << "Playlist: " << NC::fmtBoldEnd;
+	Statusbar::put() << NC::Format::Bold << "Playlist: " << NC::Format::NoBold;
 	std::string new_name = wFooter->getString(old_name);
 	Statusbar::unlock();
 	if (!new_name.empty() && new_name != old_name)
@@ -1765,7 +1765,7 @@ void ApplyFilter::run()
 	std::string filter = f->currentFilter();
 	
 	Statusbar::lock();
-	Statusbar::put() << NC::fmtBold << "Apply filter: " << NC::fmtBoldEnd;
+	Statusbar::put() << NC::Format::Bold << "Apply filter: " << NC::Format::NoBold;
 	wFooter->setGetStringHelper(Statusbar::Helpers::ApplyFilterImmediately(f, ToWString(filter)));
 	wFooter->getString(filter);
 	wFooter->setGetStringHelper(Statusbar::Helpers::getString);
@@ -1811,7 +1811,7 @@ void Find::run()
 	Statusbar::msg("Searching...");
 	auto s = static_cast<Screen<NC::Scrollpad> *>(myScreen);
 	s->main().removeProperties();
-	Statusbar::msg("%s", findme.empty() || s->main().setProperties(NC::fmtReverse, findme, NC::fmtReverseEnd) ? "Done" : "No matching patterns found");
+	Statusbar::msg("%s", findme.empty() || s->main().setProperties(NC::Format::Reverse, findme, NC::Format::NoReverse) ? "Done" : "No matching patterns found");
 	s->main().flush();
 }
 
@@ -1874,7 +1874,7 @@ void ToggleReplayGainMode::run()
 	using Global::wFooter;
 	
 	Statusbar::lock();
-	Statusbar::put() << "Replay gain mode? [" << NC::fmtBold << 'o' << NC::fmtBoldEnd << "ff/" << NC::fmtBold << 't' << NC::fmtBoldEnd << "rack/" << NC::fmtBold << 'a' << NC::fmtBoldEnd << "lbum]";
+	Statusbar::put() << "Replay gain mode? [" << NC::Format::Bold << 'o' << NC::Format::NoBold << "ff/" << NC::Format::Bold << 't' << NC::Format::NoBold << "rack/" << NC::Format::Bold << 'a' << NC::Format::NoBold << "lbum]";
 	wFooter->refresh();
 	int answer = 0;
 	do
@@ -1918,7 +1918,7 @@ void AddRandomItems::run()
 	using Global::wFooter;
 	
 	Statusbar::lock();
-	Statusbar::put() << "Add random? [" << NC::fmtBold << 's' << NC::fmtBoldEnd << "ongs/" << NC::fmtBold << 'a' << NC::fmtBoldEnd << "rtists/al" << NC::fmtBold << 'b' << NC::fmtBoldEnd << "ums] ";
+	Statusbar::put() << "Add random? [" << NC::Format::Bold << 's' << NC::Format::NoBold << "ongs/" << NC::Format::Bold << 'a' << NC::Format::NoBold << "rtists/al" << NC::Format::Bold << 'b' << NC::Format::NoBold << "ums] ";
 	wFooter->refresh();
 	int answer = 0;
 	do
@@ -1988,7 +1988,7 @@ void ToggleLibraryTagType::run()
 	using Global::wFooter;
 	
 	Statusbar::lock();
-	Statusbar::put() << "Tag type? [" << NC::fmtBold << 'a' << NC::fmtBoldEnd << "rtist/album" << NC::fmtBold << 'A' << NC::fmtBoldEnd << "rtist/" << NC::fmtBold << 'y' << NC::fmtBoldEnd << "ear/" << NC::fmtBold << 'g' << NC::fmtBoldEnd << "enre/" << NC::fmtBold << 'c' << NC::fmtBoldEnd << "omposer/" << NC::fmtBold << 'p' << NC::fmtBoldEnd << "erformer] ";
+	Statusbar::put() << "Tag type? [" << NC::Format::Bold << 'a' << NC::Format::NoBold << "rtist/album" << NC::Format::Bold << 'A' << NC::Format::NoBold << "rtist/" << NC::Format::Bold << 'y' << NC::Format::NoBold << "ear/" << NC::Format::Bold << 'g' << NC::Format::NoBold << "enre/" << NC::Format::Bold << 'c' << NC::Format::NoBold << "omposer/" << NC::Format::Bold << 'p' << NC::Format::NoBold << "erformer] ";
 	wFooter->refresh();
 	int answer = 0;
 	do
@@ -2603,7 +2603,7 @@ void seek()
 		else
 			break;
 		
-		*wFooter << NC::fmtBold;
+		*wFooter << NC::Format::Bold;
 		std::string tracklength;
 		if (Config.new_design)
 		{
@@ -2634,7 +2634,7 @@ void seek()
 			tracklength += "]";
 			*wFooter << NC::XY(wFooter->getWidth()-tracklength.length(), 1) << tracklength;
 		}
-		*wFooter << NC::fmtBoldEnd;
+		*wFooter << NC::Format::NoBold;
 		Progressbar::draw(songpos, Mpd.GetTotalTime());
 		wFooter->refresh();
 	}

@@ -52,7 +52,7 @@ const SongInfo::Metadata SongInfo::Tags[] =
 };
 
 SongInfo::SongInfo()
-: Screen(NC::Scrollpad(0, MainStartY, COLS, MainHeight, "", Config.main_color, NC::brNone))
+: Screen(NC::Scrollpad(0, MainStartY, COLS, MainHeight, "", Config.main_color, NC::Border::None))
 { }
 
 void SongInfo::resize()
@@ -101,24 +101,24 @@ void SongInfo::PrepareSong(MPD::Song &s)
 	TagLib::FileRef f(path_to_file.c_str());
 #	endif // HAVE_TAGLIB_H
 	
-	w << NC::fmtBold << Config.color1 << "Filename: " << NC::fmtBoldEnd << Config.color2 << s.getName() << '\n' << NC::clEnd;
-	w << NC::fmtBold << "Directory: " << NC::fmtBoldEnd << Config.color2;
+	w << NC::Format::Bold << Config.color1 << "Filename: " << NC::Format::NoBold << Config.color2 << s.getName() << '\n' << NC::Color::End;
+	w << NC::Format::Bold << "Directory: " << NC::Format::NoBold << Config.color2;
 	ShowTag(w, s.getDirectory());
-	w << "\n\n" << NC::clEnd;
-	w << NC::fmtBold << "Length: " << NC::fmtBoldEnd << Config.color2 << s.getLength() << '\n' << NC::clEnd;
+	w << "\n\n" << NC::Color::End;
+	w << NC::Format::Bold << "Length: " << NC::Format::NoBold << Config.color2 << s.getLength() << '\n' << NC::Color::End;
 #	ifdef HAVE_TAGLIB_H
 	if (!f.isNull())
 	{
-		w << NC::fmtBold << "Bitrate: " << NC::fmtBoldEnd << Config.color2 << f.audioProperties()->bitrate() << " kbps\n" << NC::clEnd;
-		w << NC::fmtBold << "Sample rate: " << NC::fmtBoldEnd << Config.color2 << f.audioProperties()->sampleRate() << " Hz\n" << NC::clEnd;
-		w << NC::fmtBold << "Channels: " << NC::fmtBoldEnd << Config.color2 << (f.audioProperties()->channels() == 1 ? "Mono" : "Stereo") << '\n' << NC::clDefault;
+		w << NC::Format::Bold << "Bitrate: " << NC::Format::NoBold << Config.color2 << f.audioProperties()->bitrate() << " kbps\n" << NC::Color::End;
+		w << NC::Format::Bold << "Sample rate: " << NC::Format::NoBold << Config.color2 << f.audioProperties()->sampleRate() << " Hz\n" << NC::Color::End;
+		w << NC::Format::Bold << "Channels: " << NC::Format::NoBold << Config.color2 << (f.audioProperties()->channels() == 1 ? "Mono" : "Stereo") << '\n' << NC::Color::Default;
 	}
 #	endif // HAVE_TAGLIB_H
-	w << NC::clDefault;
+	w << NC::Color::Default;
 	
 	for (const Metadata *m = Tags; m->Name; ++m)
 	{
-		w << NC::fmtBold << '\n' << m->Name << ": " << NC::fmtBoldEnd;
+		w << NC::Format::Bold << '\n' << m->Name << ": " << NC::Format::NoBold;
 		ShowTag(w, s.getTags(m->Get, Config.tags_separator));
 	}
 }
