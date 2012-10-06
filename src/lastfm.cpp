@@ -34,6 +34,7 @@
 #include <fstream>
 #include <iostream>
 
+#include "error.h"
 #include "helpers.h"
 #include "charset.h"
 #include "global.h"

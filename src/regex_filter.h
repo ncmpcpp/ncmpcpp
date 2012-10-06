@@ -22,6 +22,7 @@
 #define NCMPCPP_REGEX_FILTER_H
 
 #include "menu.h"
+#include "regexes.h"
 
 template <typename T> struct RegexFilter
 {

@@ -27,8 +27,6 @@
 #include <memory>
 #include <set>
 
-#include "error.h"
-#include "regexes.h"
 #include "strbuffer.h"
 #include "window.h"
 
