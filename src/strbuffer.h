@@ -192,7 +192,7 @@ typedef BasicBuffer<char> Buffer;
 typedef BasicBuffer<wchar_t> WBuffer;
 
 template <typename CharT>
-Window operator<<(Window &w, const BasicBuffer<CharT> &buffer)
+Window &operator<<(Window &w, const BasicBuffer<CharT> &buffer)
 {
 	if (buffer.properties().empty())
 		w << buffer.str();
