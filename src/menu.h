@@ -36,24 +36,24 @@ namespace NC {
 
 /// This template class is generic menu capable of
 /// holding any std::vector compatible values.
-template <typename T> class Menu : public Window
+template <typename ItemT> class Menu : public Window
 {
 	struct ItemProxy;
 	
 public:
 	struct Item
 	{
-		typedef T Type;
+		typedef ItemT Type;
 		
-		friend class Menu<T>;
+		friend class Menu<ItemT>;
 		
 		Item()
 		: m_is_bold(false), m_is_selected(false), m_is_inactive(false), m_is_separator(false) { }
-		Item(T value_, bool is_bold, bool is_inactive)
+		Item(ItemT value_, bool is_bold, bool is_inactive)
 		: m_value(value_), m_is_bold(is_bold), m_is_selected(false), m_is_inactive(is_inactive), m_is_separator(false) { }
 		
-		T &value() { return m_value; }
-		const T &value() const { return m_value; }
+		ItemT &value() { return m_value; }
+		const ItemT &value() const { return m_value; }
 		
 		void setBold(bool is_bold) { m_is_bold = is_bold; }
 		void setSelected(bool is_selected) { m_is_selected = is_selected; }
@@ -73,7 +73,7 @@ public:
 			return item;
 		}
 		
-		T m_value;
+		ItemT m_value;
 		bool m_is_bold;
 		bool m_is_selected;
 		bool m_is_inactive;
@@ -83,7 +83,7 @@ public:
 	template <typename ValueT, typename BaseIterator> class ItemIterator
 		: public std::iterator<std::random_access_iterator_tag, ValueT>
 	{
-		friend class Menu<T>;
+		friend class Menu<ItemT>;
 		
 		BaseIterator m_it;
 		explicit ItemIterator(BaseIterator it) : m_it(it) { }
@@ -160,10 +160,10 @@ public:
 	typedef std::reverse_iterator<ConstIterator> ConstReverseIterator;
 	
 	typedef ItemIterator<
-		T, typename std::vector<ItemProxy>::iterator
+		ItemT, typename std::vector<ItemProxy>::iterator
 	> ValueIterator;
 	typedef ItemIterator<
-		typename std::add_const<T>::type, typename std::vector<ItemProxy>::const_iterator
+		typename std::add_const<ItemT>::type, typename std::vector<ItemProxy>::const_iterator
 	> ConstValueIterator;
 	
 	typedef std::reverse_iterator<ValueIterator> ReverseValueIterator;
@@ -172,20 +172,12 @@ public:
 	/// Function helper prototype used to display each option on the screen.
 	/// If not set by setItemDisplayer(), menu won't display anything.
 	/// @see setItemDisplayer()
-	typedef std::function<void(Menu<T> &)> ItemDisplayer;
+	typedef std::function<void(Menu<ItemT> &)> ItemDisplayer;
 	
 	typedef std::function<bool(const Item &)> FilterFunction;
 	
 	Menu() { }
 	
-	/// Constructs an empty menu with given parameters
-	/// @param startx X position of left upper corner of constructed menu
-	/// @param starty Y position of left upper corner of constructed menu
-	/// @param width width of constructed menu
-	/// @param height height of constructed menu
-	/// @param title title of constructed menu
-	/// @param color base color of constructed menu
-	/// @param border border of constructed menu
 	Menu(size_t startx, size_t starty, size_t width, size_t height,
 			const std::string &title, Color color, Border border);
 	
@@ -209,7 +201,7 @@ public:
 	/// @param item object that has to be added
 	/// @param is_bold defines the initial state of bold attribute
 	/// @param is_inactive defines the initial state of static attribute
-	void addItem(T item, bool is_bold = 0, bool is_inactive = 0);
+	void addItem(ItemT item, bool is_bold = 0, bool is_inactive = 0);
 	
 	/// Adds separator to list
 	void addSeparator();
@@ -219,7 +211,7 @@ public:
 	/// @param item object that has to be inserted
 	/// @param is_bold defines the initial state of bold attribute
 	/// @param is_inactive defines the initial state of static attribute
-	void insertItem(size_t pos, const T &Item, bool is_bold = 0, bool is_inactive = 0);
+	void insertItem(size_t pos, const ItemT &Item, bool is_bold = 0, bool is_inactive = 0);
 	
 	/// Inserts separator to list at given position
 	/// @param pos initial position of inserted separator
@@ -343,35 +335,35 @@ public:
 	
 	/// @return reference to last item on the list
 	/// @throw List::InvalidItem if requested item is separator
-	Menu<T>::Item &back() { return *m_options_ptr->back(); }
+	Menu<ItemT>::Item &back() { return *m_options_ptr->back(); }
 	
 	/// @return const reference to last item on the list
 	/// @throw List::InvalidItem if requested item is separator
-	const Menu<T>::Item &back() const { return *m_options_ptr->back(); }
+	const Menu<ItemT>::Item &back() const { return *m_options_ptr->back(); }
 	
 	/// @return reference to curently highlighted object
-	Menu<T>::Item &current() { return *(*m_options_ptr)[m_highlight]; }
+	Menu<ItemT>::Item &current() { return *(*m_options_ptr)[m_highlight]; }
 	
 	/// @return const reference to curently highlighted object
-	const Menu<T>::Item &current() const { return *(*m_options_ptr)[m_highlight]; }
+	const Menu<ItemT>::Item &current() const { return *(*m_options_ptr)[m_highlight]; }
 	
 	/// @param pos requested position
 	/// @return reference to item at given position
 	/// @throw std::out_of_range if given position is out of range
-	Menu<T>::Item &at(size_t pos) { return *m_options_ptr->at(pos); }
+	Menu<ItemT>::Item &at(size_t pos) { return *m_options_ptr->at(pos); }
 	
 	/// @param pos requested position
 	/// @return const reference to item at given position
 	/// @throw std::out_of_range if given position is out of range
-	const Menu<T>::Item &at(size_t pos) const { return *m_options_ptr->at(pos); }
+	const Menu<ItemT>::Item &at(size_t pos) const { return *m_options_ptr->at(pos); }
 	
 	/// @param pos requested position
 	/// @return const reference to item at given position
-	const Menu<T>::Item &operator[](size_t pos) const  { return *(*m_options_ptr)[pos]; }
+	const Menu<ItemT>::Item &operator[](size_t pos) const  { return *(*m_options_ptr)[pos]; }
 	
 	/// @param pos requested position
 	/// @return const reference to item at given position
-	Menu<T>::Item &operator[](size_t pos) { return *(*m_options_ptr)[pos]; }
+	Menu<ItemT>::Item &operator[](size_t pos) { return *(*m_options_ptr)[pos]; }
 	
 	Iterator currentI() { return Iterator(m_options_ptr->begin() + m_highlight); }
 	ConstIterator currentI() const { return ConstIterator(m_options_ptr->begin() + m_highlight); }
@@ -417,7 +409,8 @@ private:
 	
 	bool isHighlightable(size_t pos)
 	{
-		return !(*m_options_ptr)[pos]->isSeparator() && !(*m_options_ptr)[pos]->isInactive();
+		return !(*m_options_ptr)[pos]->isSeparator()
+		    && !(*m_options_ptr)[pos]->isInactive();
 	}
 	
 	ItemDisplayer m_item_displayer;
@@ -445,7 +438,8 @@ private:
 	Buffer m_selected_suffix;
 };
 
-template <typename T> Menu<T>::Menu(size_t startx,
+template <typename ItemT>
+Menu<ItemT>::Menu(size_t startx,
 	size_t starty,
 	size_t width,
 	size_t height,
@@ -464,7 +458,8 @@ template <typename T> Menu<T>::Menu(size_t startx,
 {
 }
 
-template <typename T> Menu<T>::Menu(const Menu &rhs)
+template <typename ItemT>
+Menu<ItemT>::Menu(const Menu &rhs)
 : Window(rhs)
 , m_item_displayer(rhs.m_item_displayer)
 , m_filter(rhs.m_filter)
@@ -488,7 +483,8 @@ template <typename T> Menu<T>::Menu(const Menu &rhs)
 	m_options_ptr = &m_options;
 }
 
-template <typename T> Menu<T>::Menu(Menu &&rhs)
+template <typename ItemT>
+Menu<ItemT>::Menu(Menu &&rhs)
 : Window(rhs)
 , m_item_displayer(rhs.m_item_displayer)
 , m_filter(rhs.m_filter)
@@ -512,7 +508,8 @@ template <typename T> Menu<T>::Menu(Menu &&rhs)
 		m_options_ptr = &m_filtered_options;
 }
 
-template <typename T> Menu<T> &Menu<T>::operator=(Menu rhs)
+template <typename ItemT>
+Menu<ItemT> &Menu<ItemT>::operator=(Menu rhs)
 {
 	std::swap(static_cast<Window &>(*this), static_cast<Window &>(rhs));
 	std::swap(m_item_displayer, rhs.m_item_displayer);
@@ -537,12 +534,14 @@ template <typename T> Menu<T> &Menu<T>::operator=(Menu rhs)
 	return *this;
 }
 
-template <typename T> void Menu<T>::reserve(size_t size_)
+template <typename ItemT>
+void Menu<ItemT>::reserve(size_t size_)
 {
 	m_options.reserve(size_);
 }
 
-template <typename T> void Menu<T>::resizeList(size_t new_size)
+template <typename ItemT>
+void Menu<ItemT>::resizeList(size_t new_size)
 {
 	if (new_size > m_options.size())
 	{
@@ -555,34 +554,40 @@ template <typename T> void Menu<T>::resizeList(size_t new_size)
 		m_options.resize(new_size);
 }
 
-template <typename T> void Menu<T>::addItem(T item, bool is_bold, bool is_inactive)
+template <typename ItemT>
+void Menu<ItemT>::addItem(ItemT item, bool is_bold, bool is_inactive)
 {
-	m_options.push_back(Item(std::forward<T>(item), is_bold, is_inactive));
+	m_options.push_back(Item(std::forward<ItemT>(item), is_bold, is_inactive));
 }
 
-template <typename T> void Menu<T>::addSeparator()
+template <typename ItemT>
+void Menu<ItemT>::addSeparator()
 {
 	m_options.push_back(Item::mkSeparator());
 }
 
-template <typename T> void Menu<T>::insertItem(size_t pos, const T &item, bool is_bold, bool is_inactive)
+template <typename ItemT>
+void Menu<ItemT>::insertItem(size_t pos, const ItemT &item, bool is_bold, bool is_inactive)
 {
 	m_options.insert(m_options.begin()+pos, Item(item, is_bold, is_inactive));
 }
 
-template <typename T> void Menu<T>::insertSeparator(size_t pos)
+template <typename ItemT>
+void Menu<ItemT>::insertSeparator(size_t pos)
 {
 	m_options.insert(m_options.begin()+pos, Item::mkSeparator());
 }
 
-template <typename T> void Menu<T>::deleteItem(size_t pos)
+template <typename ItemT>
+void Menu<ItemT>::deleteItem(size_t pos)
 {
 	assert(m_options_ptr != &m_filtered_options);
 	assert(pos < m_options.size());
 	m_options.erase(m_options.begin()+pos);
 }
 
-template <typename T> bool Menu<T>::Goto(size_t y)
+template <typename ItemT>
+bool Menu<ItemT>::Goto(size_t y)
 {
 	if (!isHighlightable(m_beginning+y))
 		return false;
@@ -590,7 +595,8 @@ template <typename T> bool Menu<T>::Goto(size_t y)
 	return true;
 }
 
-template <typename T> void Menu<T>::refresh()
+template <typename ItemT>
+void Menu<ItemT>::refresh()
 {
 	if (m_options_ptr->empty())
 	{
@@ -599,7 +605,9 @@ template <typename T> void Menu<T>::refresh()
 		return;
 	}
 	
-	size_t max_beginning = m_options_ptr->size() < m_height ? 0 : m_options_ptr->size()-m_height;
+	size_t max_beginning = 0;
+	if (m_options_ptr->size() > m_height)
+		max_beginning = m_options_ptr->size() - m_height;
 	m_beginning = std::min(m_beginning, max_beginning);
 	
 	// if highlighted position is off the screen, make it visible
@@ -655,7 +663,8 @@ template <typename T> void Menu<T>::refresh()
 	Window::refresh();
 }
 
-template <typename T> void Menu<T>::scroll(Scroll where)
+template <typename ItemT>
+void Menu<ItemT>::scroll(Scroll where)
 {
 	if (m_options_ptr->empty())
 		return;
@@ -745,13 +754,15 @@ template <typename T> void Menu<T>::scroll(Scroll where)
 		highlight(m_highlight);
 }
 
-template <typename T> void Menu<T>::reset()
+template <typename ItemT>
+void Menu<ItemT>::reset()
 {
 	m_highlight = 0;
 	m_beginning = 0;
 }
 
-template <typename T> void Menu<T>::clear()
+template <typename ItemT>
+void Menu<ItemT>::clear()
 {
 	clearFilterResults();
 	m_options.clear();
@@ -759,7 +770,8 @@ template <typename T> void Menu<T>::clear()
 	m_options_ptr = &m_options;
 }
 
-template <typename T> void Menu<T>::highlight(size_t pos)
+template <typename ItemT>
+void Menu<ItemT>::highlight(size_t pos)
 {
 	assert(pos < m_options_ptr->size());
 	m_highlight = pos;
@@ -770,14 +782,15 @@ template <typename T> void Menu<T>::highlight(size_t pos)
 		m_beginning = pos-half_height;
 }
 
-template <typename T> size_t Menu<T>::choice() const
+template <typename ItemT>
+size_t Menu<ItemT>::choice() const
 {
 	assert(!empty());
 	return m_highlight;
 }
 
-template <typename T>
-void Menu<T>::filter(ConstIterator first, ConstIterator last, const FilterFunction &f)
+template <typename ItemT>
+void Menu<ItemT>::filter(ConstIterator first, ConstIterator last, const FilterFunction &f)
 {
 	assert(m_options_ptr != &m_filtered_options);
 	clearFilterResults();
@@ -791,27 +804,29 @@ void Menu<T>::filter(ConstIterator first, ConstIterator last, const FilterFuncti
 		m_options_ptr = &m_filtered_options;
 }
 
-template <typename T>
-void Menu<T>::applyCurrentFilter(ConstIterator first, ConstIterator last)
+template <typename ItemT>
+void Menu<ItemT>::applyCurrentFilter(ConstIterator first, ConstIterator last)
 {
 	assert(m_filter);
 	filter(first, last, m_filter);
 }
 
 
-template <typename T> void Menu<T>::clearFilterResults()
+template <typename ItemT>
+void Menu<ItemT>::clearFilterResults()
 {
 	m_filtered_options.clear();
 	m_options_ptr = &m_options;
 }
 
-template <typename T> void Menu<T>::clearFilter()
+template <typename ItemT>
+void Menu<ItemT>::clearFilter()
 {
 	m_filter = 0;
 }
 
-template <typename T>
-bool Menu<T>::search(ConstIterator first, ConstIterator last, const FilterFunction &f)
+template <typename ItemT>
+bool Menu<ItemT>::search(ConstIterator first, ConstIterator last, const FilterFunction &f)
 {
 	m_found_positions.clear();
 	m_searcher = f;
@@ -826,12 +841,14 @@ bool Menu<T>::search(ConstIterator first, ConstIterator last, const FilterFuncti
 	return !m_found_positions.empty();
 }
 
-template <typename T> void Menu<T>::clearSearchResults()
+template <typename ItemT>
+void Menu<ItemT>::clearSearchResults()
 {
 	m_found_positions.clear();
 }
 
-template <typename T> void Menu<T>::nextFound(bool wrap)
+template <typename ItemT>
+void Menu<ItemT>::nextFound(bool wrap)
 {
 	if (m_found_positions.empty())
 		return;
@@ -842,7 +859,8 @@ template <typename T> void Menu<T>::nextFound(bool wrap)
 		highlight(*m_found_positions.begin());
 }
 
-template <typename T> void Menu<T>::prevFound(bool wrap)
+template <typename ItemT>
+void Menu<ItemT>::prevFound(bool wrap)
 {
 	if (m_found_positions.empty())
 		return;
