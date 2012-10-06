@@ -25,39 +25,39 @@
 #include <string>
 #include "window.h"
 
-enum ActionType
-{
-	aMacroUtility,
-	aDummy, aMouseEvent, aScrollUp, aScrollDown, aScrollUpArtist, aScrollUpAlbum,
-	aScrollDownArtist, aScrollDownAlbum, aPageUp, aPageDown, aMoveHome, aMoveEnd,
-	aToggleInterface, aJumpToParentDirectory, aPressEnter, aPressSpace, aPreviousColumn,
-	aNextColumn, aMasterScreen, aSlaveScreen, aVolumeUp, aVolumeDown, aDeletePlaylistItems,
-	aDeleteStoredPlaylist, aDeleteBrowserItems, aReplaySong, aPrevious, aNext, aPause,
-	aStop, aExecuteCommand, aSavePlaylist, aMoveSortOrderUp, aMoveSortOrderDown,
-	aMoveSelectedItemsUp, aMoveSelectedItemsDown, aMoveSelectedItemsTo, aAdd,
-	aSeekForward, aSeekBackward, aToggleDisplayMode, aToggleSeparatorsBetweenAlbums,
-	aToggleLyricsFetcher, aToggleFetchingLyricsInBackground, aTogglePlayingSongCentering,
-	aUpdateDatabase, aJumpToPlayingSong, aToggleRepeat, aShuffle, aToggleRandom,
-	aStartSearching, aSaveTagChanges, aToggleSingle, aToggleConsume, aToggleCrossfade,
-	aSetCrossfade, aEditSong, aEditLibraryTag, aEditLibraryAlbum, aEditDirectoryName,
-	aEditPlaylistName, aEditLyrics, aJumpToBrowser, aJumpToMediaLibrary,
-	aJumpToPlaylistEditor, aToggleScreenLock, aJumpToTagEditor, aJumpToPositionInSong,
-	aReverseSelection, aRemoveSelection, aSelectAlbum, aAddSelectedItems,
-	aCropMainPlaylist, aCropPlaylist, aClearMainPlaylist, aClearPlaylist, aSortPlaylist,
-	aReversePlaylist, aApplyFilter, aFind, aFindItemForward, aFindItemBackward,
-	aNextFoundItem, aPreviousFoundItem, aToggleFindMode, aToggleReplayGainMode,
-	aToggleSpaceMode, aToggleAddMode, aToggleMouse, aToggleBitrateVisibility,
-	aAddRandomItems, aToggleBrowserSortMode, aToggleLibraryTagType,
-	aToggleMediaLibrarySortMode, aRefetchLyrics, aRefetchArtistInfo,
-	aSetSelectedItemsPriority, aFilterPlaylistOnPriorities, aShowSongInfo,
-	aShowArtistInfo, aShowLyrics, aQuit, aNextScreen, aPreviousScreen, aShowHelp,
-	aShowPlaylist, aShowBrowser, aChangeBrowseMode, aShowSearchEngine,
-	aResetSearchEngine, aShowMediaLibrary, aToggleMediaLibraryColumnsMode,
-	aShowPlaylistEditor, aShowTagEditor, aShowOutputs, aShowVisualizer,
-	aShowClock, aShowServerInfo
-};
-
 namespace Actions {//
+
+enum class Type
+{
+	MacroUtility,
+	Dummy, MouseEvent, ScrollUp, ScrollDown, ScrollUpArtist, ScrollUpAlbum,
+	ScrollDownArtist, ScrollDownAlbum, PageUp, PageDown, MoveHome, MoveEnd,
+	ToggleInterface, JumpToParentDirectory, PressEnter, PressSpace, PreviousColumn,
+	NextColumn, MasterScreen, SlaveScreen, VolumeUp, VolumeDown, DeletePlaylistItems,
+	DeleteStoredPlaylist, DeleteBrowserItems, ReplaySong, Previous, Next, Pause,
+	Stop, ExecuteCommand, SavePlaylist, MoveSortOrderUp, MoveSortOrderDown,
+	MoveSelectedItemsUp, MoveSelectedItemsDown, MoveSelectedItemsTo, Add,
+	SeekForward, SeekBackward, ToggleDisplayMode, ToggleSeparatorsBetweenAlbums,
+	ToggleLyricsFetcher, ToggleFetchingLyricsInBackground, TogglePlayingSongCentering,
+	UpdateDatabase, JumpToPlayingSong, ToggleRepeat, Shuffle, ToggleRandom,
+	StartSearching, SaveTagChanges, ToggleSingle, ToggleConsume, ToggleCrossfade,
+	SetCrossfade, EditSong, EditLibraryTag, EditLibraryAlbum, EditDirectoryName,
+	EditPlaylistName, EditLyrics, JumpToBrowser, JumpToMediaLibrary,
+	JumpToPlaylistEditor, ToggleScreenLock, JumpToTagEditor, JumpToPositionInSong,
+	ReverseSelection, RemoveSelection, SelectAlbum, AddSelectedItems,
+	CropMainPlaylist, CropPlaylist, ClearMainPlaylist, ClearPlaylist, SortPlaylist,
+	ReversePlaylist, ApplyFilter, Find, FindItemForward, FindItemBackward,
+	NextFoundItem, PreviousFoundItem, ToggleFindMode, ToggleReplayGainMode,
+	ToggleSpaceMode, ToggleAddMode, ToggleMouse, ToggleBitrateVisibility,
+	AddRandomItems, ToggleBrowserSortMode, ToggleLibraryTagType,
+	ToggleMediaLibrarySortMode, RefetchLyrics, RefetchArtistInfo,
+	SetSelectedItemsPriority, FilterPlaylistOnPriorities, ShowSongInfo,
+	ShowArtistInfo, ShowLyrics, Quit, NextScreen, PreviousScreen, ShowHelp,
+	ShowPlaylist, ShowBrowser, ChangeBrowseMode, ShowSearchEngine,
+	ResetSearchEngine, ShowMediaLibrary, ToggleMediaLibraryColumnsMode,
+	ShowPlaylistEditor, ShowTagEditor, ShowOutputs, ShowVisualizer,
+	ShowClock, ShowServerInfo
+};
 
 void validateScreenSize();
 void initializeScreens();
@@ -69,7 +69,7 @@ bool connectToMPD();
 bool askYesNoQuestion(const std::string &question, void (*callback)());
 bool isMPDMusicDirSet();
 
-struct BaseAction *get(ActionType at);
+struct BaseAction *get(Type at);
 struct BaseAction *get(const std::string &name);
 
 extern bool OriginalStatusbarVisibility;
@@ -81,10 +81,10 @@ extern size_t FooterStartY;
 
 struct BaseAction
 {
-	BaseAction(ActionType type, const char *name) : m_type(type), m_name(name) { }
+	BaseAction(Type type, const char *name) : m_type(type), m_name(name) { }
 	
 	const char *name() const { return m_name; }
-	ActionType type() const { return m_type; }
+	Type type() const { return m_type; }
 	
 	virtual bool canBeRun() const { return true; }
 	
@@ -102,13 +102,13 @@ protected:
 	virtual void run() = 0;
 	
 private:
-	ActionType m_type;
+	Type m_type;
 	const char *m_name;
 };
 
 struct Dummy : public BaseAction
 {
-	Dummy() : BaseAction(aDummy, "dummy") { }
+	Dummy() : BaseAction(Type::Dummy, "dummy") { }
 	
 protected:
 	virtual void run() { }
@@ -116,7 +116,7 @@ protected:
 
 struct MouseEvent : public BaseAction
 {
-	MouseEvent() : BaseAction(aMouseEvent, "mouse_event") { }
+	MouseEvent() : BaseAction(Type::MouseEvent, "mouse_event") { }
 	
 protected:
 	virtual bool canBeRun() const;
@@ -129,7 +129,7 @@ protected:
 
 struct ScrollUp : public BaseAction
 {
-	ScrollUp() : BaseAction(aScrollUp, "scroll_up") { }
+	ScrollUp() : BaseAction(Type::ScrollUp, "scroll_up") { }
 	
 protected:
 	virtual void run();
@@ -137,7 +137,7 @@ protected:
 
 struct ScrollDown : public BaseAction
 {
-	ScrollDown() : BaseAction(aScrollDown, "scroll_down") { }
+	ScrollDown() : BaseAction(Type::ScrollDown, "scroll_down") { }
 	
 protected:
 	virtual void run();
@@ -145,7 +145,7 @@ protected:
 
 struct ScrollUpArtist : public BaseAction
 {
-	ScrollUpArtist() : BaseAction(aScrollUpArtist, "scroll_up_artist") { }
+	ScrollUpArtist() : BaseAction(Type::ScrollUpArtist, "scroll_up_artist") { }
 	
 protected:
 	virtual bool canBeRun() const;
@@ -154,7 +154,7 @@ protected:
 
 struct ScrollUpAlbum : public BaseAction
 {
-	ScrollUpAlbum() : BaseAction(aScrollUpAlbum, "scroll_up_album") { }
+	ScrollUpAlbum() : BaseAction(Type::ScrollUpAlbum, "scroll_up_album") { }
 	
 protected:
 	virtual bool canBeRun() const;
@@ -163,7 +163,7 @@ protected:
 
 struct ScrollDownArtist : public BaseAction
 {
-	ScrollDownArtist() : BaseAction(aScrollDownArtist, "scroll_down_artist") { }
+	ScrollDownArtist() : BaseAction(Type::ScrollDownArtist, "scroll_down_artist") { }
 	
 protected:
 	virtual bool canBeRun() const;
@@ -172,7 +172,7 @@ protected:
 
 struct ScrollDownAlbum : public BaseAction
 {
-	ScrollDownAlbum() : BaseAction(aScrollDownAlbum, "scroll_down_album") { }
+	ScrollDownAlbum() : BaseAction(Type::ScrollDownAlbum, "scroll_down_album") { }
 	
 protected:
 	virtual bool canBeRun() const;
@@ -181,7 +181,7 @@ protected:
 
 struct PageUp : public BaseAction
 {
-	PageUp() : BaseAction(aPageUp, "page_up") { }
+	PageUp() : BaseAction(Type::PageUp, "page_up") { }
 	
 protected:
 	virtual void run();
@@ -189,7 +189,7 @@ protected:
 
 struct PageDown : public BaseAction
 {
-	PageDown() : BaseAction(aPageDown, "page_down") { }
+	PageDown() : BaseAction(Type::PageDown, "page_down") { }
 	
 protected:
 	virtual void run();
@@ -197,7 +197,7 @@ protected:
 
 struct MoveHome : public BaseAction
 {
-	MoveHome() : BaseAction(aMoveHome, "move_home") { }
+	MoveHome() : BaseAction(Type::MoveHome, "move_home") { }
 	
 protected:
 	virtual void run();
@@ -205,7 +205,7 @@ protected:
 
 struct MoveEnd : public BaseAction
 {
-	MoveEnd() : BaseAction(aMoveEnd, "move_end") { }
+	MoveEnd() : BaseAction(Type::MoveEnd, "move_end") { }
 	
 protected:
 	virtual void run();
@@ -213,7 +213,7 @@ protected:
 
 struct ToggleInterface : public BaseAction
 {
-	ToggleInterface() : BaseAction(aToggleInterface, "toggle_interface") { }
+	ToggleInterface() : BaseAction(Type::ToggleInterface, "toggle_interface") { }
 	
 protected:
 	virtual void run();
@@ -221,7 +221,7 @@ protected:
 
 struct JumpToParentDirectory : public BaseAction
 {
-	JumpToParentDirectory() : BaseAction(aJumpToParentDirectory, "jump_to_parent_directory") { }
+	JumpToParentDirectory() : BaseAction(Type::JumpToParentDirectory, "jump_to_parent_directory") { }
 	
 protected:
 	virtual bool canBeRun() const;
@@ -230,7 +230,7 @@ protected:
 
 struct PressEnter : public BaseAction
 {
-	PressEnter() : BaseAction(aPressEnter, "press_enter") { }
+	PressEnter() : BaseAction(Type::PressEnter, "press_enter") { }
 	
 protected:
 	virtual void run();
@@ -238,7 +238,7 @@ protected:
 
 struct PressSpace : public BaseAction
 {
-	PressSpace() : BaseAction(aPressSpace, "press_space") { }
+	PressSpace() : BaseAction(Type::PressSpace, "press_space") { }
 	
 protected:
 	virtual void run();
@@ -246,7 +246,7 @@ protected:
 
 struct PreviousColumn : public BaseAction
 {
-	PreviousColumn() : BaseAction(aPreviousColumn, "previous_column") { }
+	PreviousColumn() : BaseAction(Type::PreviousColumn, "previous_column") { }
 	
 protected:
 	virtual bool canBeRun() const;
@@ -255,7 +255,7 @@ protected:
 
 struct NextColumn : public BaseAction
 {
-	NextColumn() : BaseAction(aNextColumn, "next_column") { }
+	NextColumn() : BaseAction(Type::NextColumn, "next_column") { }
 	
 protected:
 	virtual bool canBeRun() const;
@@ -264,7 +264,7 @@ protected:
 
 struct MasterScreen : public BaseAction
 {
-	MasterScreen() : BaseAction(aMasterScreen, "master_screen") { }
+	MasterScreen() : BaseAction(Type::MasterScreen, "master_screen") { }
 	
 protected:
 	virtual bool canBeRun() const;
@@ -273,7 +273,7 @@ protected:
 
 struct SlaveScreen : public BaseAction
 {
-	SlaveScreen() : BaseAction(aSlaveScreen, "slave_screen") { }
+	SlaveScreen() : BaseAction(Type::SlaveScreen, "slave_screen") { }
 	
 protected:
 	virtual bool canBeRun() const;
@@ -282,7 +282,7 @@ protected:
 
 struct VolumeUp : public BaseAction
 {
-	VolumeUp() : BaseAction(aVolumeUp, "volume_up") { }
+	VolumeUp() : BaseAction(Type::VolumeUp, "volume_up") { }
 	
 protected:
 	virtual void run();
@@ -290,7 +290,7 @@ protected:
 
 struct VolumeDown : public BaseAction
 {
-	VolumeDown() : BaseAction(aVolumeDown, "volume_down") { }
+	VolumeDown() : BaseAction(Type::VolumeDown, "volume_down") { }
 	
 protected:
 	virtual void run();
@@ -298,7 +298,7 @@ protected:
 
 struct DeletePlaylistItems : public BaseAction
 {
-	DeletePlaylistItems() : BaseAction(aDeletePlaylistItems, "delete_playlist_items") { }
+	DeletePlaylistItems() : BaseAction(Type::DeletePlaylistItems, "delete_playlist_items") { }
 	
 protected:
 	virtual bool canBeRun() const;
@@ -307,7 +307,7 @@ protected:
 
 struct DeleteStoredPlaylist : public BaseAction
 {
-	DeleteStoredPlaylist() : BaseAction(aDeleteStoredPlaylist, "delete_stored_playlist") { }
+	DeleteStoredPlaylist() : BaseAction(Type::DeleteStoredPlaylist, "delete_stored_playlist") { }
 	
 protected:
 	virtual bool canBeRun() const;
@@ -316,7 +316,7 @@ protected:
 
 struct DeleteBrowserItems : public BaseAction
 {
-	DeleteBrowserItems() : BaseAction(aDeleteBrowserItems, "delete_browser_items") { }
+	DeleteBrowserItems() : BaseAction(Type::DeleteBrowserItems, "delete_browser_items") { }
 	
 protected:
 	virtual bool canBeRun() const;
@@ -325,7 +325,7 @@ protected:
 
 struct ReplaySong : public BaseAction
 {
-	ReplaySong() : BaseAction(aReplaySong, "replay_song") { }
+	ReplaySong() : BaseAction(Type::ReplaySong, "replay_song") { }
 	
 protected:
 	virtual void run();
@@ -333,7 +333,7 @@ protected:
 
 struct PreviousSong : public BaseAction
 {
-	PreviousSong() : BaseAction(aPrevious, "previous") { }
+	PreviousSong() : BaseAction(Type::Previous, "previous") { }
 	
 protected:
 	virtual void run();
@@ -341,7 +341,7 @@ protected:
 
 struct NextSong : public BaseAction
 {
-	NextSong() : BaseAction(aNext, "next") { }
+	NextSong() : BaseAction(Type::Next, "next") { }
 	
 protected:
 	virtual void run();
@@ -349,7 +349,7 @@ protected:
 
 struct Pause : public BaseAction
 {
-	Pause() : BaseAction(aPause, "pause") { }
+	Pause() : BaseAction(Type::Pause, "pause") { }
 	
 protected:
 	virtual void run();
@@ -357,7 +357,7 @@ protected:
 
 struct Stop : public BaseAction
 {
-	Stop() : BaseAction(aStop, "stop") { }
+	Stop() : BaseAction(Type::Stop, "stop") { }
 	
 protected:
 	virtual void run();
@@ -365,7 +365,7 @@ protected:
 
 struct ExecuteCommand : public BaseAction
 {
-	ExecuteCommand() : BaseAction(aExecuteCommand, "execute_command") { }
+	ExecuteCommand() : BaseAction(Type::ExecuteCommand, "execute_command") { }
 	
 protected:
 	virtual void run();
@@ -373,7 +373,7 @@ protected:
 
 struct SavePlaylist : public BaseAction
 {
-	SavePlaylist() : BaseAction(aSavePlaylist, "save_playlist") { }
+	SavePlaylist() : BaseAction(Type::SavePlaylist, "save_playlist") { }
 	
 protected:
 	virtual void run();
@@ -381,7 +381,7 @@ protected:
 
 struct MoveSortOrderUp : public BaseAction
 {
-	MoveSortOrderUp() : BaseAction(aMoveSortOrderUp, "move_sort_order_up") { }
+	MoveSortOrderUp() : BaseAction(Type::MoveSortOrderUp, "move_sort_order_up") { }
 	
 protected:
 	virtual bool canBeRun() const;
@@ -390,7 +390,7 @@ protected:
 
 struct MoveSortOrderDown : public BaseAction
 {
-	MoveSortOrderDown() : BaseAction(aMoveSortOrderDown, "move_sort_order_down") { }
+	MoveSortOrderDown() : BaseAction(Type::MoveSortOrderDown, "move_sort_order_down") { }
 	
 protected:
 	virtual bool canBeRun() const;
@@ -399,7 +399,7 @@ protected:
 
 struct MoveSelectedItemsUp : public BaseAction
 {
-	MoveSelectedItemsUp() : BaseAction(aMoveSelectedItemsUp, "move_selected_items_up") { }
+	MoveSelectedItemsUp() : BaseAction(Type::MoveSelectedItemsUp, "move_selected_items_up") { }
 	
 protected:
 	virtual bool canBeRun() const;
@@ -408,7 +408,7 @@ protected:
 
 struct MoveSelectedItemsDown : public BaseAction
 {
-	MoveSelectedItemsDown() : BaseAction(aMoveSelectedItemsDown, "move_selected_items_down") { }
+	MoveSelectedItemsDown() : BaseAction(Type::MoveSelectedItemsDown, "move_selected_items_down") { }
 	
 protected:
 	virtual bool canBeRun() const;
@@ -417,7 +417,7 @@ protected:
 
 struct MoveSelectedItemsTo : public BaseAction
 {
-	MoveSelectedItemsTo() : BaseAction(aMoveSelectedItemsTo, "move_selected_items_to") { }
+	MoveSelectedItemsTo() : BaseAction(Type::MoveSelectedItemsTo, "move_selected_items_to") { }
 	
 protected:
 	virtual bool canBeRun() const;
@@ -426,7 +426,7 @@ protected:
 
 struct Add : public BaseAction
 {
-	Add() : BaseAction(aAdd, "add") { }
+	Add() : BaseAction(Type::Add, "add") { }
 	
 protected:
 	virtual bool canBeRun() const;
@@ -435,7 +435,7 @@ protected:
 
 struct SeekForward : public BaseAction
 {
-	SeekForward() : BaseAction(aSeekForward, "seek_forward") { }
+	SeekForward() : BaseAction(Type::SeekForward, "seek_forward") { }
 	
 protected:
 	virtual bool canBeRun() const;
@@ -444,7 +444,7 @@ protected:
 
 struct SeekBackward : public BaseAction
 {
-	SeekBackward() : BaseAction(aSeekBackward, "seek_backward") { }
+	SeekBackward() : BaseAction(Type::SeekBackward, "seek_backward") { }
 	
 protected:
 	virtual bool canBeRun() const;
@@ -453,7 +453,7 @@ protected:
 
 struct ToggleDisplayMode : public BaseAction
 {
-	ToggleDisplayMode() : BaseAction(aToggleDisplayMode, "toggle_display_mode") { }
+	ToggleDisplayMode() : BaseAction(Type::ToggleDisplayMode, "toggle_display_mode") { }
 	
 protected:
 	virtual bool canBeRun() const;
@@ -463,7 +463,7 @@ protected:
 struct ToggleSeparatorsBetweenAlbums : public BaseAction
 {
 	ToggleSeparatorsBetweenAlbums()
-	: BaseAction(aToggleSeparatorsBetweenAlbums, "toggle_separators_between_albums") { }
+	: BaseAction(Type::ToggleSeparatorsBetweenAlbums, "toggle_separators_between_albums") { }
 	
 protected:
 	virtual bool canBeRun() const;
@@ -472,7 +472,7 @@ protected:
 
 struct ToggleLyricsFetcher : public BaseAction
 {
-	ToggleLyricsFetcher() : BaseAction(aToggleLyricsFetcher, "toggle_lyrics_fetcher") { }
+	ToggleLyricsFetcher() : BaseAction(Type::ToggleLyricsFetcher, "toggle_lyrics_fetcher") { }
 	
 protected:
 #	ifndef HAVE_CURL_CURL_H
@@ -484,7 +484,7 @@ protected:
 struct ToggleFetchingLyricsInBackground : public BaseAction
 {
 	ToggleFetchingLyricsInBackground()
-	: BaseAction(aToggleFetchingLyricsInBackground, "toggle_fetching_lyrics_in_background") { }
+	: BaseAction(Type::ToggleFetchingLyricsInBackground, "toggle_fetching_lyrics_in_background") { }
 	
 protected:
 #	ifndef HAVE_CURL_CURL_H
@@ -496,7 +496,7 @@ protected:
 struct TogglePlayingSongCentering : public BaseAction
 {
 	TogglePlayingSongCentering()
-	: BaseAction(aTogglePlayingSongCentering, "toggle_playing_song_centering") { }
+	: BaseAction(Type::TogglePlayingSongCentering, "toggle_playing_song_centering") { }
 	
 protected:
 	virtual void run();
@@ -504,7 +504,7 @@ protected:
 
 struct UpdateDatabase : public BaseAction
 {
-	UpdateDatabase() : BaseAction(aUpdateDatabase, "update_database") { }
+	UpdateDatabase() : BaseAction(Type::UpdateDatabase, "update_database") { }
 	
 protected:
 	virtual void run();
@@ -512,7 +512,7 @@ protected:
 
 struct JumpToPlayingSong : public BaseAction
 {
-	JumpToPlayingSong() : BaseAction(aJumpToPlayingSong, "jump_to_playing_song") { }
+	JumpToPlayingSong() : BaseAction(Type::JumpToPlayingSong, "jump_to_playing_song") { }
 	
 protected:
 	virtual bool canBeRun() const;
@@ -521,7 +521,7 @@ protected:
 
 struct ToggleRepeat : public BaseAction
 {
-	ToggleRepeat() : BaseAction(aToggleRepeat, "toggle_repeat") { }
+	ToggleRepeat() : BaseAction(Type::ToggleRepeat, "toggle_repeat") { }
 	
 protected:
 	virtual void run();
@@ -529,7 +529,7 @@ protected:
 
 struct Shuffle : public BaseAction
 {
-	Shuffle() : BaseAction(aShuffle, "shuffle") { }
+	Shuffle() : BaseAction(Type::Shuffle, "shuffle") { }
 	
 protected:
 	virtual void run();
@@ -537,7 +537,7 @@ protected:
 
 struct ToggleRandom : public BaseAction
 {
-	ToggleRandom() : BaseAction(aToggleRandom, "toggle_random") { }
+	ToggleRandom() : BaseAction(Type::ToggleRandom, "toggle_random") { }
 	
 protected:
 	virtual void run();
@@ -545,7 +545,7 @@ protected:
 
 struct StartSearching : public BaseAction
 {
-	StartSearching() : BaseAction(aStartSearching, "start_searching") { }
+	StartSearching() : BaseAction(Type::StartSearching, "start_searching") { }
 	
 protected:
 	virtual bool canBeRun() const;
@@ -554,7 +554,7 @@ protected:
 
 struct SaveTagChanges : public BaseAction
 {
-	SaveTagChanges() : BaseAction(aSaveTagChanges, "save_tag_changes") { }
+	SaveTagChanges() : BaseAction(Type::SaveTagChanges, "save_tag_changes") { }
 	
 protected:
 	virtual bool canBeRun() const;
@@ -563,7 +563,7 @@ protected:
 
 struct ToggleSingle : public BaseAction
 {
-	ToggleSingle() : BaseAction(aToggleSingle, "toggle_single") { }
+	ToggleSingle() : BaseAction(Type::ToggleSingle, "toggle_single") { }
 	
 protected:
 	virtual void run();
@@ -571,7 +571,7 @@ protected:
 
 struct ToggleConsume : public BaseAction
 {
-	ToggleConsume() : BaseAction(aToggleConsume, "toggle_consume") { }
+	ToggleConsume() : BaseAction(Type::ToggleConsume, "toggle_consume") { }
 	
 protected:
 	virtual void run();
@@ -579,7 +579,7 @@ protected:
 
 struct ToggleCrossfade : public BaseAction
 {
-	ToggleCrossfade() : BaseAction(aToggleCrossfade, "toggle_crossfade") { }
+	ToggleCrossfade() : BaseAction(Type::ToggleCrossfade, "toggle_crossfade") { }
 	
 protected:
 	virtual void run();
@@ -587,7 +587,7 @@ protected:
 
 struct SetCrossfade : public BaseAction
 {
-	SetCrossfade() : BaseAction(aSetCrossfade, "set_crossfade") { }
+	SetCrossfade() : BaseAction(Type::SetCrossfade, "set_crossfade") { }
 	
 protected:
 	virtual void run();
@@ -595,7 +595,7 @@ protected:
 
 struct EditSong : public BaseAction
 {
-	EditSong() : BaseAction(aEditSong, "edit_song") { }
+	EditSong() : BaseAction(Type::EditSong, "edit_song") { }
 	
 protected:
 	virtual bool canBeRun() const;
@@ -604,7 +604,7 @@ protected:
 
 struct EditLibraryTag : public BaseAction
 {
-	EditLibraryTag() : BaseAction(aEditLibraryTag, "edit_library_tag") { }
+	EditLibraryTag() : BaseAction(Type::EditLibraryTag, "edit_library_tag") { }
 	
 protected:
 	virtual bool canBeRun() const;
@@ -613,7 +613,7 @@ protected:
 
 struct EditLibraryAlbum : public BaseAction
 {
-	EditLibraryAlbum() : BaseAction(aEditLibraryAlbum, "edit_library_album") { }
+	EditLibraryAlbum() : BaseAction(Type::EditLibraryAlbum, "edit_library_album") { }
 	
 protected:
 	virtual bool canBeRun() const;
@@ -622,7 +622,7 @@ protected:
 
 struct EditDirectoryName : public BaseAction
 {
-	EditDirectoryName() : BaseAction(aEditDirectoryName, "edit_directory_name") { }
+	EditDirectoryName() : BaseAction(Type::EditDirectoryName, "edit_directory_name") { }
 	
 protected:
 	virtual bool canBeRun() const;
@@ -631,7 +631,7 @@ protected:
 
 struct EditPlaylistName : public BaseAction
 {
-	EditPlaylistName() : BaseAction(aEditPlaylistName, "edit_playlist_name") { }
+	EditPlaylistName() : BaseAction(Type::EditPlaylistName, "edit_playlist_name") { }
 	
 protected:
 	virtual bool canBeRun() const;
@@ -640,7 +640,7 @@ protected:
 
 struct EditLyrics : public BaseAction
 {
-	EditLyrics() : BaseAction(aEditLyrics, "edit_lyrics") { }
+	EditLyrics() : BaseAction(Type::EditLyrics, "edit_lyrics") { }
 	
 protected:
 	virtual bool canBeRun() const;
@@ -649,7 +649,7 @@ protected:
 
 struct JumpToBrowser : public BaseAction
 {
-	JumpToBrowser() : BaseAction(aJumpToBrowser, "jump_to_browser") { }
+	JumpToBrowser() : BaseAction(Type::JumpToBrowser, "jump_to_browser") { }
 	
 protected:
 	virtual bool canBeRun() const;
@@ -658,7 +658,7 @@ protected:
 
 struct JumpToMediaLibrary : public BaseAction
 {
-	JumpToMediaLibrary() : BaseAction(aJumpToMediaLibrary, "jump_to_media_library") { }
+	JumpToMediaLibrary() : BaseAction(Type::JumpToMediaLibrary, "jump_to_media_library") { }
 	
 protected:
 	virtual bool canBeRun() const;
@@ -667,7 +667,7 @@ protected:
 
 struct JumpToPlaylistEditor : public BaseAction
 {
-	JumpToPlaylistEditor() : BaseAction(aJumpToPlaylistEditor, "jump_to_playlist_editor") { }
+	JumpToPlaylistEditor() : BaseAction(Type::JumpToPlaylistEditor, "jump_to_playlist_editor") { }
 	
 protected:
 	virtual bool canBeRun() const;
@@ -676,7 +676,7 @@ protected:
 
 struct ToggleScreenLock : public BaseAction
 {
-	ToggleScreenLock() : BaseAction(aToggleScreenLock, "toggle_screen_lock") { }
+	ToggleScreenLock() : BaseAction(Type::ToggleScreenLock, "toggle_screen_lock") { }
 	
 protected:
 	virtual void run();
@@ -684,7 +684,7 @@ protected:
 
 struct JumpToTagEditor : public BaseAction
 {
-	JumpToTagEditor() : BaseAction(aJumpToTagEditor, "jump_to_tag_editor") { }
+	JumpToTagEditor() : BaseAction(Type::JumpToTagEditor, "jump_to_tag_editor") { }
 	
 protected:
 	virtual bool canBeRun() const;
@@ -693,7 +693,7 @@ protected:
 
 struct JumpToPositionInSong : public BaseAction
 {
-	JumpToPositionInSong() : BaseAction(aJumpToPositionInSong, "jump_to_position_in_song") { }
+	JumpToPositionInSong() : BaseAction(Type::JumpToPositionInSong, "jump_to_position_in_song") { }
 	
 protected:
 	virtual bool canBeRun() const;
@@ -702,7 +702,7 @@ protected:
 
 struct ReverseSelection : public BaseAction
 {
-	ReverseSelection() : BaseAction(aReverseSelection, "reverse_selection") { }
+	ReverseSelection() : BaseAction(Type::ReverseSelection, "reverse_selection") { }
 	
 protected:
 	virtual bool canBeRun() const;
@@ -711,7 +711,7 @@ protected:
 
 struct RemoveSelection : public BaseAction
 {
-	RemoveSelection() : BaseAction(aRemoveSelection, "remove_selection") { }
+	RemoveSelection() : BaseAction(Type::RemoveSelection, "remove_selection") { }
 	
 protected:
 	virtual bool canBeRun() const;
@@ -720,7 +720,7 @@ protected:
 
 struct SelectAlbum : public BaseAction
 {
-	SelectAlbum() : BaseAction(aSelectAlbum, "select_album") { }
+	SelectAlbum() : BaseAction(Type::SelectAlbum, "select_album") { }
 	
 protected:
 	virtual bool canBeRun() const;
@@ -729,7 +729,7 @@ protected:
 
 struct AddSelectedItems : public BaseAction
 {
-	AddSelectedItems() : BaseAction(aAddSelectedItems, "add_selected_items") { }
+	AddSelectedItems() : BaseAction(Type::AddSelectedItems, "add_selected_items") { }
 	
 protected:
 	virtual bool canBeRun() const;
@@ -738,7 +738,7 @@ protected:
 
 struct CropMainPlaylist : public BaseAction
 {
-	CropMainPlaylist() : BaseAction(aCropMainPlaylist, "crop_main_playlist") { }
+	CropMainPlaylist() : BaseAction(Type::CropMainPlaylist, "crop_main_playlist") { }
 	
 protected:
 	virtual void run();
@@ -746,7 +746,7 @@ protected:
 
 struct CropPlaylist : public BaseAction
 {
-	CropPlaylist() : BaseAction(aCropPlaylist, "crop_playlist") { }
+	CropPlaylist() : BaseAction(Type::CropPlaylist, "crop_playlist") { }
 	
 protected:
 	virtual bool canBeRun() const;
@@ -755,7 +755,7 @@ protected:
 
 struct ClearMainPlaylist : public BaseAction
 {
-	ClearMainPlaylist() : BaseAction(aClearMainPlaylist, "clear_main_playlist") { }
+	ClearMainPlaylist() : BaseAction(Type::ClearMainPlaylist, "clear_main_playlist") { }
 	
 protected:
 	virtual void run();
@@ -763,7 +763,7 @@ protected:
 
 struct ClearPlaylist : public BaseAction
 {
-	ClearPlaylist() : BaseAction(aClearPlaylist, "clear_playlist") { }
+	ClearPlaylist() : BaseAction(Type::ClearPlaylist, "clear_playlist") { }
 	
 protected:
 	virtual bool canBeRun() const;
@@ -772,7 +772,7 @@ protected:
 
 struct SortPlaylist : public BaseAction
 {
-	SortPlaylist() : BaseAction(aSortPlaylist, "sort_playlist") { }
+	SortPlaylist() : BaseAction(Type::SortPlaylist, "sort_playlist") { }
 	
 protected:
 	virtual bool canBeRun() const;
@@ -781,7 +781,7 @@ protected:
 
 struct ReversePlaylist : public BaseAction
 {
-	ReversePlaylist() : BaseAction(aReversePlaylist, "reverse_playlist") { }
+	ReversePlaylist() : BaseAction(Type::ReversePlaylist, "reverse_playlist") { }
 	
 protected:
 	virtual bool canBeRun() const;
@@ -790,7 +790,7 @@ protected:
 
 struct ApplyFilter : public BaseAction
 {
-	ApplyFilter() : BaseAction(aApplyFilter, "apply_filter") { }
+	ApplyFilter() : BaseAction(Type::ApplyFilter, "apply_filter") { }
 	
 protected:
 	virtual bool canBeRun() const;
@@ -799,7 +799,7 @@ protected:
 
 struct Find : public BaseAction
 {
-	Find() : BaseAction(aFind, "find") { }
+	Find() : BaseAction(Type::Find, "find") { }
 	
 protected:
 	virtual bool canBeRun() const;
@@ -808,7 +808,7 @@ protected:
 
 struct FindItemForward : public BaseAction
 {
-	FindItemForward() : BaseAction(aFindItemForward, "find_item_forward") { }
+	FindItemForward() : BaseAction(Type::FindItemForward, "find_item_forward") { }
 	
 protected:
 	virtual bool canBeRun() const;
@@ -817,7 +817,7 @@ protected:
 
 struct FindItemBackward : public BaseAction
 {
-	FindItemBackward() : BaseAction(aFindItemBackward, "find_item_backward") { }
+	FindItemBackward() : BaseAction(Type::FindItemBackward, "find_item_backward") { }
 	
 protected:
 	virtual bool canBeRun() const;
@@ -826,7 +826,7 @@ protected:
 
 struct NextFoundItem : public BaseAction
 {
-	NextFoundItem() : BaseAction(aNextFoundItem, "next_found_item") { }
+	NextFoundItem() : BaseAction(Type::NextFoundItem, "next_found_item") { }
 	
 protected:
 	virtual bool canBeRun() const;
@@ -835,7 +835,7 @@ protected:
 
 struct PreviousFoundItem : public BaseAction
 {
-	PreviousFoundItem() : BaseAction(aPreviousFoundItem, "previous_found_item") { }
+	PreviousFoundItem() : BaseAction(Type::PreviousFoundItem, "previous_found_item") { }
 	
 protected:
 	virtual bool canBeRun() const;
@@ -844,7 +844,7 @@ protected:
 
 struct ToggleFindMode : public BaseAction
 {
-	ToggleFindMode() : BaseAction(aToggleFindMode, "toggle_find_mode") { }
+	ToggleFindMode() : BaseAction(Type::ToggleFindMode, "toggle_find_mode") { }
 	
 protected:
 	virtual void run();
@@ -852,7 +852,7 @@ protected:
 
 struct ToggleReplayGainMode : public BaseAction
 {
-	ToggleReplayGainMode() : BaseAction(aToggleReplayGainMode, "toggle_replay_gain_mode") { }
+	ToggleReplayGainMode() : BaseAction(Type::ToggleReplayGainMode, "toggle_replay_gain_mode") { }
 	
 protected:
 	virtual void run();
@@ -860,7 +860,7 @@ protected:
 
 struct ToggleSpaceMode : public BaseAction
 {
-	ToggleSpaceMode() : BaseAction(aToggleSpaceMode, "toggle_space_mode") { }
+	ToggleSpaceMode() : BaseAction(Type::ToggleSpaceMode, "toggle_space_mode") { }
 	
 protected:
 	virtual void run();
@@ -868,7 +868,7 @@ protected:
 
 struct ToggleAddMode : public BaseAction
 {
-	ToggleAddMode() : BaseAction(aToggleAddMode, "toggle_add_mode") { }
+	ToggleAddMode() : BaseAction(Type::ToggleAddMode, "toggle_add_mode") { }
 	
 protected:
 	virtual void run();
@@ -876,7 +876,7 @@ protected:
 
 struct ToggleMouse : public BaseAction
 {
-	ToggleMouse() : BaseAction(aToggleMouse, "toggle_mouse") { }
+	ToggleMouse() : BaseAction(Type::ToggleMouse, "toggle_mouse") { }
 	
 protected:
 	virtual void run();
@@ -884,7 +884,7 @@ protected:
 
 struct ToggleBitrateVisibility : public BaseAction
 {
-	ToggleBitrateVisibility() : BaseAction(aToggleBitrateVisibility, "toggle_bitrate_visibility") { }
+	ToggleBitrateVisibility() : BaseAction(Type::ToggleBitrateVisibility, "toggle_bitrate_visibility") { }
 	
 protected:
 	virtual void run();
@@ -892,7 +892,7 @@ protected:
 
 struct AddRandomItems : public BaseAction
 {
-	AddRandomItems() : BaseAction(aAddRandomItems, "add_random_items") { }
+	AddRandomItems() : BaseAction(Type::AddRandomItems, "add_random_items") { }
 	
 protected:
 	virtual void run();
@@ -900,7 +900,7 @@ protected:
 
 struct ToggleBrowserSortMode : public BaseAction
 {
-	ToggleBrowserSortMode() : BaseAction(aToggleBrowserSortMode, "toggle_browser_sort_mode") { }
+	ToggleBrowserSortMode() : BaseAction(Type::ToggleBrowserSortMode, "toggle_browser_sort_mode") { }
 	
 protected:
 	virtual bool canBeRun() const;
@@ -909,7 +909,7 @@ protected:
 
 struct ToggleLibraryTagType : public BaseAction
 {
-	ToggleLibraryTagType() : BaseAction(aToggleLibraryTagType, "toggle_library_tag_type") { }
+	ToggleLibraryTagType() : BaseAction(Type::ToggleLibraryTagType, "toggle_library_tag_type") { }
 	
 protected:
 	virtual bool canBeRun() const;
@@ -919,7 +919,7 @@ protected:
 struct ToggleMediaLibrarySortMode : public BaseAction
 {
 	ToggleMediaLibrarySortMode()
-	: BaseAction(aToggleMediaLibrarySortMode, "toggle_media_library_sort_mode") { }
+	: BaseAction(Type::ToggleMediaLibrarySortMode, "toggle_media_library_sort_mode") { }
 	
 protected:
 	virtual bool canBeRun() const;
@@ -928,7 +928,7 @@ protected:
 
 struct RefetchLyrics : public BaseAction
 {
-	RefetchLyrics() : BaseAction(aRefetchLyrics, "refetch_lyrics") { }
+	RefetchLyrics() : BaseAction(Type::RefetchLyrics, "refetch_lyrics") { }
 	
 protected:
 	virtual bool canBeRun() const;
@@ -937,7 +937,7 @@ protected:
 
 struct RefetchArtistInfo : public BaseAction
 {
-	RefetchArtistInfo() : BaseAction(aRefetchArtistInfo, "refetch_artist_info") { }
+	RefetchArtistInfo() : BaseAction(Type::RefetchArtistInfo, "refetch_artist_info") { }
 	
 protected:
 	virtual bool canBeRun() const;
@@ -947,7 +947,7 @@ protected:
 struct SetSelectedItemsPriority : public BaseAction
 {
 	SetSelectedItemsPriority()
-	: BaseAction(aSetSelectedItemsPriority, "set_selected_items_priority") { }
+	: BaseAction(Type::SetSelectedItemsPriority, "set_selected_items_priority") { }
 	
 protected:
 	virtual bool canBeRun() const;
@@ -957,7 +957,7 @@ protected:
 struct FilterPlaylistOnPriorities : public BaseAction
 {
 	FilterPlaylistOnPriorities()
-	: BaseAction(aFilterPlaylistOnPriorities, "filter_playlist_on_priorities") { }
+	: BaseAction(Type::FilterPlaylistOnPriorities, "filter_playlist_on_priorities") { }
 	
 protected:
 	virtual bool canBeRun() const;
@@ -966,7 +966,7 @@ protected:
 
 struct ShowSongInfo : public BaseAction
 {
-	ShowSongInfo() : BaseAction(aShowSongInfo, "show_song_info") { }
+	ShowSongInfo() : BaseAction(Type::ShowSongInfo, "show_song_info") { }
 	
 protected:
 	virtual void run();
@@ -974,7 +974,7 @@ protected:
 
 struct ShowArtistInfo : public BaseAction
 {
-	ShowArtistInfo() : BaseAction(aShowArtistInfo, "show_artist_info") { }
+	ShowArtistInfo() : BaseAction(Type::ShowArtistInfo, "show_artist_info") { }
 	
 protected:
 	virtual bool canBeRun() const;
@@ -983,7 +983,7 @@ protected:
 
 struct ShowLyrics : public BaseAction
 {
-	ShowLyrics() : BaseAction(aShowLyrics, "show_lyrics") { }
+	ShowLyrics() : BaseAction(Type::ShowLyrics, "show_lyrics") { }
 	
 protected:
 	virtual void run();
@@ -991,7 +991,7 @@ protected:
 
 struct Quit : public BaseAction
 {
-	Quit() : BaseAction(aQuit, "quit") { }
+	Quit() : BaseAction(Type::Quit, "quit") { }
 	
 protected:
 	virtual void run();
@@ -999,7 +999,7 @@ protected:
 
 struct NextScreen : public BaseAction
 {
-	NextScreen() : BaseAction(aNextScreen, "next_screen") { }
+	NextScreen() : BaseAction(Type::NextScreen, "next_screen") { }
 	
 protected:
 	virtual void run();
@@ -1007,7 +1007,7 @@ protected:
 
 struct PreviousScreen : public BaseAction
 {
-	PreviousScreen() : BaseAction(aPreviousScreen, "previous_screen") { }
+	PreviousScreen() : BaseAction(Type::PreviousScreen, "previous_screen") { }
 	
 protected:
 	virtual void run();
@@ -1015,7 +1015,7 @@ protected:
 
 struct ShowHelp : public BaseAction
 {
-	ShowHelp() : BaseAction(aShowHelp, "show_help") { }
+	ShowHelp() : BaseAction(Type::ShowHelp, "show_help") { }
 	
 protected:
 	virtual bool canBeRun() const;
@@ -1024,7 +1024,7 @@ protected:
 
 struct ShowPlaylist : public BaseAction
 {
-	ShowPlaylist() : BaseAction(aShowPlaylist, "show_playlist") { }
+	ShowPlaylist() : BaseAction(Type::ShowPlaylist, "show_playlist") { }
 	
 protected:
 	virtual bool canBeRun() const;
@@ -1033,7 +1033,7 @@ protected:
 
 struct ShowBrowser : public BaseAction
 {
-	ShowBrowser() : BaseAction(aShowBrowser, "show_browser") { }
+	ShowBrowser() : BaseAction(Type::ShowBrowser, "show_browser") { }
 	
 protected:
 	virtual bool canBeRun() const;
@@ -1042,7 +1042,7 @@ protected:
 
 struct ChangeBrowseMode : public BaseAction
 {
-	ChangeBrowseMode() : BaseAction(aChangeBrowseMode, "change_browse_mode") { }
+	ChangeBrowseMode() : BaseAction(Type::ChangeBrowseMode, "change_browse_mode") { }
 	
 protected:
 	virtual bool canBeRun() const;
@@ -1051,7 +1051,7 @@ protected:
 
 struct ShowSearchEngine : public BaseAction
 {
-	ShowSearchEngine() : BaseAction(aShowSearchEngine, "show_search_engine") { }
+	ShowSearchEngine() : BaseAction(Type::ShowSearchEngine, "show_search_engine") { }
 	
 protected:
 	virtual bool canBeRun() const;
@@ -1060,7 +1060,7 @@ protected:
 
 struct ResetSearchEngine : public BaseAction
 {
-	ResetSearchEngine() : BaseAction(aResetSearchEngine, "reset_search_engine") { }
+	ResetSearchEngine() : BaseAction(Type::ResetSearchEngine, "reset_search_engine") { }
 	
 protected:
 	virtual bool canBeRun() const;
@@ -1069,7 +1069,7 @@ protected:
 
 struct ShowMediaLibrary : public BaseAction
 {
-	ShowMediaLibrary() : BaseAction(aShowMediaLibrary, "show_media_library") { }
+	ShowMediaLibrary() : BaseAction(Type::ShowMediaLibrary, "show_media_library") { }
 	
 protected:
 	virtual bool canBeRun() const;
@@ -1079,7 +1079,7 @@ protected:
 struct ToggleMediaLibraryColumnsMode : public BaseAction
 {
 	ToggleMediaLibraryColumnsMode()
-	: BaseAction(aToggleMediaLibraryColumnsMode, "toggle_media_library_columns_mode") { }
+	: BaseAction(Type::ToggleMediaLibraryColumnsMode, "toggle_media_library_columns_mode") { }
 	
 protected:
 	virtual bool canBeRun() const;
@@ -1088,7 +1088,7 @@ protected:
 
 struct ShowPlaylistEditor : public BaseAction
 {
-	ShowPlaylistEditor() : BaseAction(aShowPlaylistEditor, "show_playlist_editor") { }
+	ShowPlaylistEditor() : BaseAction(Type::ShowPlaylistEditor, "show_playlist_editor") { }
 	
 protected:
 	virtual bool canBeRun() const;
@@ -1097,7 +1097,7 @@ protected:
 
 struct ShowTagEditor : public BaseAction
 {
-	ShowTagEditor() : BaseAction(aShowTagEditor, "show_tag_editor") { }
+	ShowTagEditor() : BaseAction(Type::ShowTagEditor, "show_tag_editor") { }
 	
 protected:
 	virtual bool canBeRun() const;
@@ -1106,7 +1106,7 @@ protected:
 
 struct ShowOutputs : public BaseAction
 {
-	ShowOutputs() : BaseAction(aShowOutputs, "show_outputs") { }
+	ShowOutputs() : BaseAction(Type::ShowOutputs, "show_outputs") { }
 	
 protected:
 	virtual bool canBeRun() const;
@@ -1115,7 +1115,7 @@ protected:
 
 struct ShowVisualizer : public BaseAction
 {
-	ShowVisualizer() : BaseAction(aShowVisualizer, "show_visualizer") { }
+	ShowVisualizer() : BaseAction(Type::ShowVisualizer, "show_visualizer") { }
 	
 protected:
 	virtual bool canBeRun() const;
@@ -1124,7 +1124,7 @@ protected:
 
 struct ShowClock : public BaseAction
 {
-	ShowClock() : BaseAction(aShowClock, "show_clock") { }
+	ShowClock() : BaseAction(Type::ShowClock, "show_clock") { }
 	
 protected:
 	virtual bool canBeRun() const;
@@ -1133,7 +1133,7 @@ protected:
 
 struct ShowServerInfo : public BaseAction
 {
-	ShowServerInfo() : BaseAction(aShowServerInfo, "show_server_info") { }
+	ShowServerInfo() : BaseAction(Type::ShowServerInfo, "show_server_info") { }
 	
 protected:
 #	ifdef HAVE_TAGLIB_H

@@ -337,258 +337,258 @@ void BindingsConfiguration::generateDefaults()
 {
 	Key k = Key::noOp;
 	if (notBound(k = stringToKey("mouse")))
-		bind(k, aMouseEvent);
+		bind(k, Actions::Type::MouseEvent);
 	if (notBound(k = stringToKey("up")))
-		bind(k, aScrollUp);
+		bind(k, Actions::Type::ScrollUp);
 	if (notBound(k = stringToKey("down")))
-		bind(k, aScrollDown);
+		bind(k, Actions::Type::ScrollDown);
 	if (notBound(k = stringToKey("[")))
-		bind(k, aScrollUpAlbum);
+		bind(k, Actions::Type::ScrollUpAlbum);
 	if (notBound(k = stringToKey("]")))
-		bind(k, aScrollDownAlbum);
+		bind(k, Actions::Type::ScrollDownAlbum);
 	if (notBound(k = stringToKey("{")))
-		bind(k, aScrollUpArtist);
+		bind(k, Actions::Type::ScrollUpArtist);
 	if (notBound(k = stringToKey("}")))
-		bind(k, aScrollDownArtist);
+		bind(k, Actions::Type::ScrollDownArtist);
 	if (notBound(k = stringToKey("page_up")))
-		bind(k, aPageUp);
+		bind(k, Actions::Type::PageUp);
 	if (notBound(k = stringToKey("page_down")))
-		bind(k, aPageDown);
+		bind(k, Actions::Type::PageDown);
 	if (notBound(k = stringToKey("home")))
-		bind(k, aMoveHome);
+		bind(k, Actions::Type::MoveHome);
 	if (notBound(k = stringToKey("end")))
-		bind(k, aMoveEnd);
+		bind(k, Actions::Type::MoveEnd);
 	if (notBound(k = stringToKey("space")))
-		bind(k, aPressSpace);
+		bind(k, Actions::Type::PressSpace);
 	if (notBound(k = stringToKey("enter")))
-		bind(k, aPressEnter);
+		bind(k, Actions::Type::PressEnter);
 	if (notBound(k = stringToKey("delete")))
 	{
-		bind(k, aDeletePlaylistItems);
-		bind(k, aDeleteStoredPlaylist);
+		bind(k, Actions::Type::DeletePlaylistItems);
+		bind(k, Actions::Type::DeleteStoredPlaylist);
 	}
 	if (notBound(k = stringToKey("right")))
 	{
-		bind(k, aNextColumn);
-		bind(k, aSlaveScreen);
-		bind(k, aVolumeUp);
+		bind(k, Actions::Type::NextColumn);
+		bind(k, Actions::Type::SlaveScreen);
+		bind(k, Actions::Type::VolumeUp);
 	}
 	if (notBound(k = stringToKey("+")))
-		bind(k, aVolumeUp);
+		bind(k, Actions::Type::VolumeUp);
 	if (notBound(k = stringToKey("left")))
 	{
-		bind(k, aPreviousColumn);
-		bind(k, aMasterScreen);
-		bind(k, aVolumeDown);
+		bind(k, Actions::Type::PreviousColumn);
+		bind(k, Actions::Type::MasterScreen);
+		bind(k, Actions::Type::VolumeDown);
 	}
 	if (notBound(k = stringToKey("-")))
-		bind(k, aVolumeDown);
+		bind(k, Actions::Type::VolumeDown);
 	if (notBound(k = stringToKey(":")))
-		bind(k, aExecuteCommand);
+		bind(k, Actions::Type::ExecuteCommand);
 	if (notBound(k = stringToKey("tab")))
-		bind(k, aNextScreen);
+		bind(k, Actions::Type::NextScreen);
 	if (notBound(k = stringToKey("shift_tab")))
-		bind(k, aPreviousScreen);
+		bind(k, Actions::Type::PreviousScreen);
 	if (notBound(k = stringToKey("f1")))
-		bind(k, aShowHelp);
+		bind(k, Actions::Type::ShowHelp);
 	if (notBound(k = stringToKey("1")))
-		bind(k, aShowPlaylist);
+		bind(k, Actions::Type::ShowPlaylist);
 	if (notBound(k = stringToKey("2")))
 	{
-		bind(k, aShowBrowser);
-		bind(k, aChangeBrowseMode);
+		bind(k, Actions::Type::ShowBrowser);
+		bind(k, Actions::Type::ChangeBrowseMode);
 	}
 	if (notBound(k = stringToKey("3")))
 	{
-		bind(k, aShowSearchEngine);
-		bind(k, aResetSearchEngine);
+		bind(k, Actions::Type::ShowSearchEngine);
+		bind(k, Actions::Type::ResetSearchEngine);
 	}
 	if (notBound(k = stringToKey("4")))
 	{
-		bind(k, aShowMediaLibrary);
-		bind(k, aToggleMediaLibraryColumnsMode);
+		bind(k, Actions::Type::ShowMediaLibrary);
+		bind(k, Actions::Type::ToggleMediaLibraryColumnsMode);
 	}
 	if (notBound(k = stringToKey("5")))
-		bind(k, aShowPlaylistEditor);
+		bind(k, Actions::Type::ShowPlaylistEditor);
 	if (notBound(k = stringToKey("6")))
-		bind(k, aShowTagEditor);
+		bind(k, Actions::Type::ShowTagEditor);
 	if (notBound(k = stringToKey("7")))
-		bind(k, aShowOutputs);
+		bind(k, Actions::Type::ShowOutputs);
 	if (notBound(k = stringToKey("8")))
-		bind(k, aShowVisualizer);
+		bind(k, Actions::Type::ShowVisualizer);
 	if (notBound(k = stringToKey("=")))
-		bind(k, aShowClock);
+		bind(k, Actions::Type::ShowClock);
 	if (notBound(k = stringToKey("@")))
-		bind(k, aShowServerInfo);
+		bind(k, Actions::Type::ShowServerInfo);
 	if (notBound(k = stringToKey("s")))
-		bind(k, aStop);
+		bind(k, Actions::Type::Stop);
 	if (notBound(k = stringToKey("p")))
-		bind(k, aPause);
+		bind(k, Actions::Type::Pause);
 	if (notBound(k = stringToKey(">")))
-		bind(k, aNext);
+		bind(k, Actions::Type::Next);
 	if (notBound(k = stringToKey("<")))
-		bind(k, aPrevious);
+		bind(k, Actions::Type::Previous);
 	if (notBound(k = stringToKey("ctrl_h")))
 	{
-		bind(k, aJumpToParentDirectory);
-		bind(k, aReplaySong);
+		bind(k, Actions::Type::JumpToParentDirectory);
+		bind(k, Actions::Type::ReplaySong);
 	}
 	if (notBound(k = stringToKey("backspace")))
 	{
-		bind(k, aJumpToParentDirectory);
-		bind(k, aReplaySong);
+		bind(k, Actions::Type::JumpToParentDirectory);
+		bind(k, Actions::Type::ReplaySong);
 	}
 	if (notBound(k = stringToKey("backspace_2")))
 	{
-		bind(k, aJumpToParentDirectory);
-		bind(k, aReplaySong);
+		bind(k, Actions::Type::JumpToParentDirectory);
+		bind(k, Actions::Type::ReplaySong);
 	}
 	if (notBound(k = stringToKey("f")))
-		bind(k, aSeekForward);
+		bind(k, Actions::Type::SeekForward);
 	if (notBound(k = stringToKey("b")))
-		bind(k, aSeekBackward);
+		bind(k, Actions::Type::SeekBackward);
 	if (notBound(k = stringToKey("r")))
-		bind(k, aToggleRepeat);
+		bind(k, Actions::Type::ToggleRepeat);
 	if (notBound(k = stringToKey("z")))
-		bind(k, aToggleRandom);
+		bind(k, Actions::Type::ToggleRandom);
 	if (notBound(k = stringToKey("y")))
 	{
-		bind(k, aSaveTagChanges);
-		bind(k, aStartSearching);
-		bind(k, aToggleSingle);
+		bind(k, Actions::Type::SaveTagChanges);
+		bind(k, Actions::Type::StartSearching);
+		bind(k, Actions::Type::ToggleSingle);
 	}
 	if (notBound(k = stringToKey("R")))
-		bind(k, aToggleConsume);
+		bind(k, Actions::Type::ToggleConsume);
 	if (notBound(k = stringToKey("Y")))
-		bind(k, aToggleReplayGainMode);
+		bind(k, Actions::Type::ToggleReplayGainMode);
 	if (notBound(k = stringToKey("t")))
-		bind(k, aToggleSpaceMode);
+		bind(k, Actions::Type::ToggleSpaceMode);
 	if (notBound(k = stringToKey("T")))
-		bind(k, aToggleAddMode);
+		bind(k, Actions::Type::ToggleAddMode);
 	if (notBound(k = stringToKey("|")))
-		bind(k, aToggleMouse);
+		bind(k, Actions::Type::ToggleMouse);
 	if (notBound(k = stringToKey("#")))
-		bind(k, aToggleBitrateVisibility);
+		bind(k, Actions::Type::ToggleBitrateVisibility);
 	if (notBound(k = stringToKey("Z")))
-		bind(k, aShuffle);
+		bind(k, Actions::Type::Shuffle);
 	if (notBound(k = stringToKey("x")))
-		bind(k, aToggleCrossfade);
+		bind(k, Actions::Type::ToggleCrossfade);
 	if (notBound(k = stringToKey("X")))
-		bind(k, aSetCrossfade);
+		bind(k, Actions::Type::SetCrossfade);
 	if (notBound(k = stringToKey("u")))
-		bind(k, aUpdateDatabase);
+		bind(k, Actions::Type::UpdateDatabase);
 	if (notBound(k = stringToKey("ctrl_v")))
-		bind(k, aSortPlaylist);
+		bind(k, Actions::Type::SortPlaylist);
 	if (notBound(k = stringToKey("ctrl_r")))
-		bind(k, aReversePlaylist);
+		bind(k, Actions::Type::ReversePlaylist);
 	if (notBound(k = stringToKey("ctrl_f")))
-		bind(k, aApplyFilter);
+		bind(k, Actions::Type::ApplyFilter);
 	if (notBound(k = stringToKey("/")))
 	{
-		bind(k, aFind);
-		bind(k, aFindItemForward);
+		bind(k, Actions::Type::Find);
+		bind(k, Actions::Type::FindItemForward);
 	}
 	if (notBound(k = stringToKey("?")))
 	{
-		bind(k, aFind);
-		bind(k, aFindItemBackward);
+		bind(k, Actions::Type::Find);
+		bind(k, Actions::Type::FindItemBackward);
 	}
 	if (notBound(k = stringToKey(".")))
-		bind(k, aNextFoundItem);
+		bind(k, Actions::Type::NextFoundItem);
 	if (notBound(k = stringToKey(",")))
-		bind(k, aPreviousFoundItem);
+		bind(k, Actions::Type::PreviousFoundItem);
 	if (notBound(k = stringToKey("w")))
-		bind(k, aToggleFindMode);
+		bind(k, Actions::Type::ToggleFindMode);
 	if (notBound(k = stringToKey("e")))
 	{
-		bind(k, aEditSong);
-		bind(k, aEditLibraryTag);
-		bind(k, aEditLibraryAlbum);
-		bind(k, aEditDirectoryName);
-		bind(k, aEditPlaylistName);
-		bind(k, aEditLyrics);
+		bind(k, Actions::Type::EditSong);
+		bind(k, Actions::Type::EditLibraryTag);
+		bind(k, Actions::Type::EditLibraryAlbum);
+		bind(k, Actions::Type::EditDirectoryName);
+		bind(k, Actions::Type::EditPlaylistName);
+		bind(k, Actions::Type::EditLyrics);
 	}
 	if (notBound(k = stringToKey("i")))
-		bind(k, aShowSongInfo);
+		bind(k, Actions::Type::ShowSongInfo);
 	if (notBound(k = stringToKey("I")))
-		bind(k, aShowArtistInfo);
+		bind(k, Actions::Type::ShowArtistInfo);
 	if (notBound(k = stringToKey("g")))
-		bind(k, aJumpToPositionInSong);
+		bind(k, Actions::Type::JumpToPositionInSong);
 	if (notBound(k = stringToKey("l")))
-		bind(k, aShowLyrics);
+		bind(k, Actions::Type::ShowLyrics);
 	if (notBound(k = stringToKey("v")))
-		bind(k, aReverseSelection);
+		bind(k, Actions::Type::ReverseSelection);
 	if (notBound(k = stringToKey("V")))
-		bind(k, aRemoveSelection);
+		bind(k, Actions::Type::RemoveSelection);
 	if (notBound(k = stringToKey("B")))
-		bind(k, aSelectAlbum);
+		bind(k, Actions::Type::SelectAlbum);
 	if (notBound(k = stringToKey("a")))
-		bind(k, aAddSelectedItems);
+		bind(k, Actions::Type::AddSelectedItems);
 	if (notBound(k = stringToKey("c")))
 	{
-		bind(k, aClearPlaylist);
-		bind(k, aClearMainPlaylist);
+		bind(k, Actions::Type::ClearPlaylist);
+		bind(k, Actions::Type::ClearMainPlaylist);
 	}
 	if (notBound(k = stringToKey("C")))
 	{
-		bind(k, aCropPlaylist);
-		bind(k, aCropMainPlaylist);
+		bind(k, Actions::Type::CropPlaylist);
+		bind(k, Actions::Type::CropMainPlaylist);
 	}
 	if (notBound(k = stringToKey("m")))
 	{
-		bind(k, aMoveSortOrderUp);
-		bind(k, aMoveSelectedItemsUp);
-		bind(k, aToggleMediaLibrarySortMode);
+		bind(k, Actions::Type::MoveSortOrderUp);
+		bind(k, Actions::Type::MoveSelectedItemsUp);
+		bind(k, Actions::Type::ToggleMediaLibrarySortMode);
 	}
 	if (notBound(k = stringToKey("n")))
 	{
-		bind(k, aMoveSortOrderDown);
-		bind(k, aMoveSelectedItemsDown);
+		bind(k, Actions::Type::MoveSortOrderDown);
+		bind(k, Actions::Type::MoveSelectedItemsDown);
 	}
 	if (notBound(k = stringToKey("M")))
-		bind(k, aMoveSelectedItemsTo);
+		bind(k, Actions::Type::MoveSelectedItemsTo);
 	if (notBound(k = stringToKey("A")))
-		bind(k, aAdd);
+		bind(k, Actions::Type::Add);
 	if (notBound(k = stringToKey("S")))
-		bind(k, aSavePlaylist);
+		bind(k, Actions::Type::SavePlaylist);
 	if (notBound(k = stringToKey("o")))
-		bind(k, aJumpToPlayingSong);
+		bind(k, Actions::Type::JumpToPlayingSong);
 	if (notBound(k = stringToKey("G")))
 	{
-		bind(k, aJumpToBrowser);
-		bind(k, aJumpToPlaylistEditor);
+		bind(k, Actions::Type::JumpToBrowser);
+		bind(k, Actions::Type::JumpToPlaylistEditor);
 	}
 	if (notBound(k = stringToKey("~")))
-		bind(k, aJumpToMediaLibrary);
+		bind(k, Actions::Type::JumpToMediaLibrary);
 	if (notBound(k = stringToKey("E")))
-		bind(k, aJumpToTagEditor);
+		bind(k, Actions::Type::JumpToTagEditor);
 	if (notBound(k = stringToKey("U")))
-		bind(k, aTogglePlayingSongCentering);
+		bind(k, Actions::Type::TogglePlayingSongCentering);
 	if (notBound(k = stringToKey("P")))
-		bind(k, aToggleDisplayMode);
+		bind(k, Actions::Type::ToggleDisplayMode);
 	if (notBound(k = stringToKey("\\")))
-		bind(k, aToggleInterface);
+		bind(k, Actions::Type::ToggleInterface);
 	if (notBound(k = stringToKey("!")))
-		bind(k, aToggleSeparatorsBetweenAlbums);
+		bind(k, Actions::Type::ToggleSeparatorsBetweenAlbums);
 	if (notBound(k = stringToKey("L")))
-		bind(k, aToggleLyricsFetcher);
+		bind(k, Actions::Type::ToggleLyricsFetcher);
 	if (notBound(k = stringToKey("F")))
-		bind(k, aToggleFetchingLyricsInBackground);
+		bind(k, Actions::Type::ToggleFetchingLyricsInBackground);
 	if (notBound(k = stringToKey("ctrl_l")))
-		bind(k, aToggleScreenLock);
+		bind(k, Actions::Type::ToggleScreenLock);
 	if (notBound(k = stringToKey("`")))
 	{
-		bind(k, aToggleBrowserSortMode);
-		bind(k, aToggleLibraryTagType);
-		bind(k, aRefetchLyrics);
-		bind(k, aRefetchArtistInfo);
-		bind(k, aAddRandomItems);
+		bind(k, Actions::Type::ToggleBrowserSortMode);
+		bind(k, Actions::Type::ToggleLibraryTagType);
+		bind(k, Actions::Type::RefetchLyrics);
+		bind(k, Actions::Type::RefetchArtistInfo);
+		bind(k, Actions::Type::AddRandomItems);
 	}
 	if (notBound(k = stringToKey("ctrl_p")))
-		bind(k, aSetSelectedItemsPriority);
+		bind(k, Actions::Type::SetSelectedItemsPriority);
 	if (notBound(k = stringToKey("q")))
-		bind(k, aQuit);
+		bind(k, Actions::Type::Quit);
 	
 	if (notBound(k = stringToKey("-")))
-		bind(k, aVolumeDown);
+		bind(k, Actions::Type::VolumeDown);
 }

@@ -30,7 +30,7 @@ namespace Actions {//
 struct PushCharacters : public BaseAction
 {
 	PushCharacters(NC::Window **w, std::vector<int> &&queue)
-	: BaseAction(aMacroUtility, ""), m_window(w), m_queue(queue) { }
+	: BaseAction(Type::MacroUtility, ""), m_window(w), m_queue(queue) { }
 	
 protected:
 	virtual void run();
@@ -43,7 +43,7 @@ private:
 struct RequireRunnable : public BaseAction
 {
 	RequireRunnable(BaseAction *action)
-	: BaseAction(aMacroUtility, ""), m_action(action) { assert(action); }
+	: BaseAction(Type::MacroUtility, ""), m_action(action) { assert(action); }
 	
 protected:
 	virtual bool canBeRun() const;
@@ -56,7 +56,7 @@ private:
 struct RequireScreen : public BaseAction
 {
 	RequireScreen(ScreenType screen_type)
-	: BaseAction(aMacroUtility, ""), m_screen_type(screen_type) { }
+	: BaseAction(Type::MacroUtility, ""), m_screen_type(screen_type) { }
 	
 protected:
 	virtual bool canBeRun() const;
@@ -69,7 +69,7 @@ private:
 struct RunExternalCommand : public BaseAction
 {
 	RunExternalCommand(std::string command)
-	: BaseAction(aMacroUtility, ""), m_command(command) { }
+	: BaseAction(Type::MacroUtility, ""), m_command(command) { }
 	
 protected:
 	virtual void run();

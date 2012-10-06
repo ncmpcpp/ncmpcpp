@@ -123,7 +123,7 @@ std::wstring Help::title()
 	return L"Help";
 }
 
-std::string Help::DisplayKeys(const ActionType at)
+std::string Help::DisplayKeys(const Actions::Type at)
 {
 	bool print_backspace = true;
 	std::string result;
@@ -148,7 +148,7 @@ void Help::Section(const char *type_, const char *title_)
 	w << title_ << NC::fmtBoldEnd << "\n\n";
 }
 
-void Help::KeyDesc(const ActionType at, const char *desc)
+void Help::KeyDesc(const Actions::Type at, const char *desc)
 {
 	w << "    " << DisplayKeys(at) << " : " << desc << '\n';
 }
@@ -168,212 +168,212 @@ void Help::MouseColumn(const char *column)
 void Help::GetKeybindings()
 {
 	KeysSection("Movement");
-	KeyDesc(aScrollUp, "Move cursor up");
-	KeyDesc(aScrollDown, "Move cursor down");
-	KeyDesc(aScrollUpAlbum, "Move cursor up one album");
-	KeyDesc(aScrollDownAlbum, "Move cursor down one album");
-	KeyDesc(aScrollUpArtist, "Move cursor up one artist");
-	KeyDesc(aScrollDownArtist, "Move cursor down one artist");
-	KeyDesc(aPageUp, "Page up");
-	KeyDesc(aPageDown, "Page down");
-	KeyDesc(aMoveHome, "Home");
-	KeyDesc(aMoveEnd, "End");
+	KeyDesc(Actions::Type::ScrollUp, "Move cursor up");
+	KeyDesc(Actions::Type::ScrollDown, "Move cursor down");
+	KeyDesc(Actions::Type::ScrollUpAlbum, "Move cursor up one album");
+	KeyDesc(Actions::Type::ScrollDownAlbum, "Move cursor down one album");
+	KeyDesc(Actions::Type::ScrollUpArtist, "Move cursor up one artist");
+	KeyDesc(Actions::Type::ScrollDownArtist, "Move cursor down one artist");
+	KeyDesc(Actions::Type::PageUp, "Page up");
+	KeyDesc(Actions::Type::PageDown, "Page down");
+	KeyDesc(Actions::Type::MoveHome, "Home");
+	KeyDesc(Actions::Type::MoveEnd, "End");
 	w << '\n';
 	if (Config.screen_switcher_previous)
 	{
-		KeyDesc(aNextScreen, "Switch between current and last screen");
-		KeyDesc(aPreviousScreen, "Switch between current and last screen");
+		KeyDesc(Actions::Type::NextScreen, "Switch between current and last screen");
+		KeyDesc(Actions::Type::PreviousScreen, "Switch between current and last screen");
 	}
 	else
 	{
-		KeyDesc(aNextScreen, "Switch to next screen in sequence");
-		KeyDesc(aPreviousScreen, "Switch to previous screen in sequence");
+		KeyDesc(Actions::Type::NextScreen, "Switch to next screen in sequence");
+		KeyDesc(Actions::Type::PreviousScreen, "Switch to previous screen in sequence");
 	}
-	KeyDesc(aShowHelp, "Show help");
-	KeyDesc(aShowPlaylist, "Show playlist");
-	KeyDesc(aShowBrowser, "Show browser");
-	KeyDesc(aShowSearchEngine, "Show search engine");
-	KeyDesc(aShowMediaLibrary, "Show media library");
-	KeyDesc(aShowPlaylistEditor, "Show playlist editor");
+	KeyDesc(Actions::Type::ShowHelp, "Show help");
+	KeyDesc(Actions::Type::ShowPlaylist, "Show playlist");
+	KeyDesc(Actions::Type::ShowBrowser, "Show browser");
+	KeyDesc(Actions::Type::ShowSearchEngine, "Show search engine");
+	KeyDesc(Actions::Type::ShowMediaLibrary, "Show media library");
+	KeyDesc(Actions::Type::ShowPlaylistEditor, "Show playlist editor");
 #	ifdef HAVE_TAGLIB_H
-	KeyDesc(aShowTagEditor, "Show tag editor");
+	KeyDesc(Actions::Type::ShowTagEditor, "Show tag editor");
 #	endif // HAVE_TAGLIB_H
 #	ifdef ENABLE_OUTPUTS
-	KeyDesc(aShowOutputs, "Show outputs");
+	KeyDesc(Actions::Type::ShowOutputs, "Show outputs");
 #	endif // ENABLE_OUTPUTS
 #	ifdef ENABLE_VISUALIZER
-	KeyDesc(aShowVisualizer, "Show music visualizer");
+	KeyDesc(Actions::Type::ShowVisualizer, "Show music visualizer");
 #	endif // ENABLE_VISUALIZER
 #	ifdef ENABLE_CLOCK
-	KeyDesc(aShowClock, "Show clock");
+	KeyDesc(Actions::Type::ShowClock, "Show clock");
 #	endif // ENABLE_CLOCK
 	w << '\n';
-	KeyDesc(aShowServerInfo, "Show server info");
+	KeyDesc(Actions::Type::ShowServerInfo, "Show server info");
 	
 	KeysSection("Global");
-	KeyDesc(aStop, "Stop");
-	KeyDesc(aPause, "Pause");
-	KeyDesc(aNext, "Next track");
-	KeyDesc(aPrevious, "Previous track");
-	KeyDesc(aReplaySong, "Replay playing song");
-	KeyDesc(aSeekForward, "Seek forward in playing song");
-	KeyDesc(aSeekBackward, "Seek backward in playing song");
-	KeyDesc(aVolumeDown, "Decrease volume by 2%");
-	KeyDesc(aVolumeUp, "Increase volume by 2%");
+	KeyDesc(Actions::Type::Stop, "Stop");
+	KeyDesc(Actions::Type::Pause, "Pause");
+	KeyDesc(Actions::Type::Next, "Next track");
+	KeyDesc(Actions::Type::Previous, "Previous track");
+	KeyDesc(Actions::Type::ReplaySong, "Replay playing song");
+	KeyDesc(Actions::Type::SeekForward, "Seek forward in playing song");
+	KeyDesc(Actions::Type::SeekBackward, "Seek backward in playing song");
+	KeyDesc(Actions::Type::VolumeDown, "Decrease volume by 2%");
+	KeyDesc(Actions::Type::VolumeUp, "Increase volume by 2%");
 	w << '\n';
-	KeyDesc(aToggleSpaceMode, "Toggle space mode (select/add)");
-	KeyDesc(aToggleAddMode, "Toggle add mode (add or remove/always add)");
-	KeyDesc(aToggleMouse, "Toggle mouse support");
-	KeyDesc(aReverseSelection, "Reverse selection");
-	KeyDesc(aRemoveSelection, "Remove selection");
-	KeyDesc(aSelectAlbum, "Select songs of album around the cursor");
-	KeyDesc(aAddSelectedItems, "Add selected items to playlist");
-	KeyDesc(aAddRandomItems, "Add random items to playlist");
+	KeyDesc(Actions::Type::ToggleSpaceMode, "Toggle space mode (select/add)");
+	KeyDesc(Actions::Type::ToggleAddMode, "Toggle add mode (add or remove/always add)");
+	KeyDesc(Actions::Type::ToggleMouse, "Toggle mouse support");
+	KeyDesc(Actions::Type::ReverseSelection, "Reverse selection");
+	KeyDesc(Actions::Type::RemoveSelection, "Remove selection");
+	KeyDesc(Actions::Type::SelectAlbum, "Select songs of album around the cursor");
+	KeyDesc(Actions::Type::AddSelectedItems, "Add selected items to playlist");
+	KeyDesc(Actions::Type::AddRandomItems, "Add random items to playlist");
 	w << '\n';
-	KeyDesc(aToggleRepeat, "Toggle repeat mode");
-	KeyDesc(aToggleRandom, "Toggle random mode");
-	KeyDesc(aToggleSingle, "Toggle single mode");
-	KeyDesc(aToggleConsume, "Toggle consume mode");
-	KeyDesc(aToggleReplayGainMode, "Toggle replay gain mode");
-	KeyDesc(aToggleBitrateVisibility, "Toggle bitrate visibility");
-	KeyDesc(aShuffle, "Shuffle playlist");
-	KeyDesc(aToggleCrossfade, "Toggle crossfade mode");
-	KeyDesc(aSetCrossfade, "Set crossfade");
-	KeyDesc(aUpdateDatabase, "Start music database update");
+	KeyDesc(Actions::Type::ToggleRepeat, "Toggle repeat mode");
+	KeyDesc(Actions::Type::ToggleRandom, "Toggle random mode");
+	KeyDesc(Actions::Type::ToggleSingle, "Toggle single mode");
+	KeyDesc(Actions::Type::ToggleConsume, "Toggle consume mode");
+	KeyDesc(Actions::Type::ToggleReplayGainMode, "Toggle replay gain mode");
+	KeyDesc(Actions::Type::ToggleBitrateVisibility, "Toggle bitrate visibility");
+	KeyDesc(Actions::Type::Shuffle, "Shuffle playlist");
+	KeyDesc(Actions::Type::ToggleCrossfade, "Toggle crossfade mode");
+	KeyDesc(Actions::Type::SetCrossfade, "Set crossfade");
+	KeyDesc(Actions::Type::UpdateDatabase, "Start music database update");
 	w << '\n';
-	KeyDesc(aExecuteCommand, "Execute command");
-	KeyDesc(aApplyFilter, "Apply filter");
-	KeyDesc(aFindItemForward, "Find item forward");
-	KeyDesc(aFindItemBackward, "Find item backward");
-	KeyDesc(aPreviousFoundItem, "Jump to previous found item");
-	KeyDesc(aNextFoundItem, "Jump to next found item");
-	KeyDesc(aToggleFindMode, "Toggle find mode (normal/wrapped)");
-	KeyDesc(aJumpToBrowser, "Locate song in browser");
-	KeyDesc(aJumpToMediaLibrary, "Locate song in media library");
-	KeyDesc(aToggleScreenLock, "Lock/unlock current screen");
-	KeyDesc(aMasterScreen, "Switch to master screen (left one)");
-	KeyDesc(aSlaveScreen, "Switch to slave screen (right one)");
+	KeyDesc(Actions::Type::ExecuteCommand, "Execute command");
+	KeyDesc(Actions::Type::ApplyFilter, "Apply filter");
+	KeyDesc(Actions::Type::FindItemForward, "Find item forward");
+	KeyDesc(Actions::Type::FindItemBackward, "Find item backward");
+	KeyDesc(Actions::Type::PreviousFoundItem, "Jump to previous found item");
+	KeyDesc(Actions::Type::NextFoundItem, "Jump to next found item");
+	KeyDesc(Actions::Type::ToggleFindMode, "Toggle find mode (normal/wrapped)");
+	KeyDesc(Actions::Type::JumpToBrowser, "Locate song in browser");
+	KeyDesc(Actions::Type::JumpToMediaLibrary, "Locate song in media library");
+	KeyDesc(Actions::Type::ToggleScreenLock, "Lock/unlock current screen");
+	KeyDesc(Actions::Type::MasterScreen, "Switch to master screen (left one)");
+	KeyDesc(Actions::Type::SlaveScreen, "Switch to slave screen (right one)");
 #	ifdef HAVE_TAGLIB_H
-	KeyDesc(aJumpToTagEditor, "Locate song in tag editor");
+	KeyDesc(Actions::Type::JumpToTagEditor, "Locate song in tag editor");
 #	endif // HAVE_TAGLIB_H
-	KeyDesc(aToggleDisplayMode, "Toggle display mode");
-	KeyDesc(aToggleInterface, "Toggle user interface");
-	KeyDesc(aToggleSeparatorsBetweenAlbums, "Toggle displaying separators between albums");
-	KeyDesc(aJumpToPositionInSong, "Jump to given position in playing song (formats: mm:ss, x%)");
-	KeyDesc(aShowSongInfo, "Show song info");
+	KeyDesc(Actions::Type::ToggleDisplayMode, "Toggle display mode");
+	KeyDesc(Actions::Type::ToggleInterface, "Toggle user interface");
+	KeyDesc(Actions::Type::ToggleSeparatorsBetweenAlbums, "Toggle displaying separators between albums");
+	KeyDesc(Actions::Type::JumpToPositionInSong, "Jump to given position in playing song (formats: mm:ss, x%)");
+	KeyDesc(Actions::Type::ShowSongInfo, "Show song info");
 #	ifdef HAVE_CURL_CURL_H
-	KeyDesc(aShowArtistInfo, "Show artist info");
-	KeyDesc(aToggleLyricsFetcher, "Toggle lyrics fetcher");
-	KeyDesc(aToggleFetchingLyricsInBackground, "Toggle fetching lyrics for playing songs in background");
+	KeyDesc(Actions::Type::ShowArtistInfo, "Show artist info");
+	KeyDesc(Actions::Type::ToggleLyricsFetcher, "Toggle lyrics fetcher");
+	KeyDesc(Actions::Type::ToggleFetchingLyricsInBackground, "Toggle fetching lyrics for playing songs in background");
 #	endif // HAVE_CURL_CURL_H
-	KeyDesc(aShowLyrics, "Show/hide song lyrics");
+	KeyDesc(Actions::Type::ShowLyrics, "Show/hide song lyrics");
 	w << '\n';
-	KeyDesc(aQuit, "Quit");
+	KeyDesc(Actions::Type::Quit, "Quit");
 	
 	KeysSection("Playlist");
-	KeyDesc(aPressEnter, "Play selected item");
-	KeyDesc(aDeletePlaylistItems, "Delete selected item(s) from playlist");
-	KeyDesc(aClearMainPlaylist, "Clear playlist");
-	KeyDesc(aCropMainPlaylist, "Clear playlist except selected item(s)");
-	KeyDesc(aSetSelectedItemsPriority, "Set priority of selected items");
-	KeyDesc(aMoveSelectedItemsUp, "Move selected item(s) up");
-	KeyDesc(aMoveSelectedItemsDown, "Move selected item(s) down");
-	KeyDesc(aMoveSelectedItemsTo, "Move selected item(s) to cursor position");
-	KeyDesc(aAdd, "Add item to playlist");
+	KeyDesc(Actions::Type::PressEnter, "Play selected item");
+	KeyDesc(Actions::Type::DeletePlaylistItems, "Delete selected item(s) from playlist");
+	KeyDesc(Actions::Type::ClearMainPlaylist, "Clear playlist");
+	KeyDesc(Actions::Type::CropMainPlaylist, "Clear playlist except selected item(s)");
+	KeyDesc(Actions::Type::SetSelectedItemsPriority, "Set priority of selected items");
+	KeyDesc(Actions::Type::MoveSelectedItemsUp, "Move selected item(s) up");
+	KeyDesc(Actions::Type::MoveSelectedItemsDown, "Move selected item(s) down");
+	KeyDesc(Actions::Type::MoveSelectedItemsTo, "Move selected item(s) to cursor position");
+	KeyDesc(Actions::Type::Add, "Add item to playlist");
 #	ifdef HAVE_TAGLIB_H
-	KeyDesc(aEditSong, "Edit song");
+	KeyDesc(Actions::Type::EditSong, "Edit song");
 #	endif // HAVE_TAGLIB_H
-	KeyDesc(aSavePlaylist, "Save playlist");
-	KeyDesc(aSortPlaylist, "Sort playlist");
-	KeyDesc(aReversePlaylist, "Reverse playlist");
-	KeyDesc(aFilterPlaylistOnPriorities, "Filter playlist on priorities");
-	KeyDesc(aJumpToPlayingSong, "Jump to playing song");
-	KeyDesc(aTogglePlayingSongCentering, "Toggle playing song centering");
+	KeyDesc(Actions::Type::SavePlaylist, "Save playlist");
+	KeyDesc(Actions::Type::SortPlaylist, "Sort playlist");
+	KeyDesc(Actions::Type::ReversePlaylist, "Reverse playlist");
+	KeyDesc(Actions::Type::FilterPlaylistOnPriorities, "Filter playlist on priorities");
+	KeyDesc(Actions::Type::JumpToPlayingSong, "Jump to playing song");
+	KeyDesc(Actions::Type::TogglePlayingSongCentering, "Toggle playing song centering");
 	
 	KeysSection("Browser");
-	KeyDesc(aPressEnter, "Enter directory/Add item to playlist and play it");
-	KeyDesc(aPressSpace, "Add item to playlist/select it");
+	KeyDesc(Actions::Type::PressEnter, "Enter directory/Add item to playlist and play it");
+	KeyDesc(Actions::Type::PressSpace, "Add item to playlist/select it");
 #	ifdef HAVE_TAGLIB_H
-	KeyDesc(aEditSong, "Edit song");
+	KeyDesc(Actions::Type::EditSong, "Edit song");
 #	endif // HAVE_TAGLIB_H
-	KeyDesc(aEditDirectoryName, "Edit directory name");
-	KeyDesc(aEditPlaylistName, "Edit playlist name");
-	KeyDesc(aChangeBrowseMode, "Browse MPD database/local filesystem");
-	KeyDesc(aToggleBrowserSortMode, "Toggle sort mode");
-	KeyDesc(aJumpToPlayingSong, "Locate playing song");
-	KeyDesc(aJumpToParentDirectory, "Jump to parent directory");
-	KeyDesc(aDeleteBrowserItems, "Delete selected items from disk");
-	KeyDesc(aJumpToPlaylistEditor, "Jump to playlist editor (playlists only)");
+	KeyDesc(Actions::Type::EditDirectoryName, "Edit directory name");
+	KeyDesc(Actions::Type::EditPlaylistName, "Edit playlist name");
+	KeyDesc(Actions::Type::ChangeBrowseMode, "Browse MPD database/local filesystem");
+	KeyDesc(Actions::Type::ToggleBrowserSortMode, "Toggle sort mode");
+	KeyDesc(Actions::Type::JumpToPlayingSong, "Locate playing song");
+	KeyDesc(Actions::Type::JumpToParentDirectory, "Jump to parent directory");
+	KeyDesc(Actions::Type::DeleteBrowserItems, "Delete selected items from disk");
+	KeyDesc(Actions::Type::JumpToPlaylistEditor, "Jump to playlist editor (playlists only)");
 	
 	KeysSection("Search engine");
-	KeyDesc(aPressEnter, "Add item to playlist and play it/change option");
-	KeyDesc(aPressSpace, "Add item to playlist");
+	KeyDesc(Actions::Type::PressEnter, "Add item to playlist and play it/change option");
+	KeyDesc(Actions::Type::PressSpace, "Add item to playlist");
 #	ifdef HAVE_TAGLIB_H
-	KeyDesc(aEditSong, "Edit song");
+	KeyDesc(Actions::Type::EditSong, "Edit song");
 #	endif // HAVE_TAGLIB_H
-	KeyDesc(aStartSearching, "Start searching");
-	KeyDesc(aResetSearchEngine, "Reset search constraints and clear results");
+	KeyDesc(Actions::Type::StartSearching, "Start searching");
+	KeyDesc(Actions::Type::ResetSearchEngine, "Reset search constraints and clear results");
 	
 	KeysSection("Media library");
-	KeyDesc(aToggleMediaLibraryColumnsMode, "Switch between two/three columns mode");
-	KeyDesc(aPreviousColumn, "Previous column");
-	KeyDesc(aNextColumn, "Next column");
-	KeyDesc(aPressEnter, "Add item to playlist and play it");
-	KeyDesc(aPressSpace, "Add item to playlist");
+	KeyDesc(Actions::Type::ToggleMediaLibraryColumnsMode, "Switch between two/three columns mode");
+	KeyDesc(Actions::Type::PreviousColumn, "Previous column");
+	KeyDesc(Actions::Type::NextColumn, "Next column");
+	KeyDesc(Actions::Type::PressEnter, "Add item to playlist and play it");
+	KeyDesc(Actions::Type::PressSpace, "Add item to playlist");
 #	ifdef HAVE_TAGLIB_H
-	KeyDesc(aEditSong, "Edit song");
+	KeyDesc(Actions::Type::EditSong, "Edit song");
 #	endif // HAVE_TAGLIB_H
-	KeyDesc(aEditLibraryTag, "Edit tag (left column)/album (middle/right column)");
-	KeyDesc(aToggleLibraryTagType, "Toggle type of tag used in left column");
-	KeyDesc(aToggleMediaLibrarySortMode, "Toggle sort mode");
+	KeyDesc(Actions::Type::EditLibraryTag, "Edit tag (left column)/album (middle/right column)");
+	KeyDesc(Actions::Type::ToggleLibraryTagType, "Toggle type of tag used in left column");
+	KeyDesc(Actions::Type::ToggleMediaLibrarySortMode, "Toggle sort mode");
 	
 	KeysSection("Playlist editor");
-	KeyDesc(aPreviousColumn, "Previous column");
-	KeyDesc(aNextColumn, "Next column");
-	KeyDesc(aPressEnter, "Add item to playlist and play it");
-	KeyDesc(aPressSpace, "Add item to playlist/select it");
+	KeyDesc(Actions::Type::PreviousColumn, "Previous column");
+	KeyDesc(Actions::Type::NextColumn, "Next column");
+	KeyDesc(Actions::Type::PressEnter, "Add item to playlist and play it");
+	KeyDesc(Actions::Type::PressSpace, "Add item to playlist/select it");
 #	ifdef HAVE_TAGLIB_H
-	KeyDesc(aEditSong, "Edit song");
+	KeyDesc(Actions::Type::EditSong, "Edit song");
 #	endif // HAVE_TAGLIB_H
-	KeyDesc(aEditPlaylistName, "Edit playlist name");
-	KeyDesc(aMoveSelectedItemsUp, "Move selected item(s) up");
-	KeyDesc(aMoveSelectedItemsDown, "Move selected item(s) down");
-	KeyDesc(aDeleteStoredPlaylist, "Delete selected playlists (left column)");
-	KeyDesc(aDeletePlaylistItems, "Delete selected item(s) from playlist (right column)");
-	KeyDesc(aClearPlaylist, "Clear playlist");
-	KeyDesc(aCropPlaylist, "Clear playlist except selected items");
+	KeyDesc(Actions::Type::EditPlaylistName, "Edit playlist name");
+	KeyDesc(Actions::Type::MoveSelectedItemsUp, "Move selected item(s) up");
+	KeyDesc(Actions::Type::MoveSelectedItemsDown, "Move selected item(s) down");
+	KeyDesc(Actions::Type::DeleteStoredPlaylist, "Delete selected playlists (left column)");
+	KeyDesc(Actions::Type::DeletePlaylistItems, "Delete selected item(s) from playlist (right column)");
+	KeyDesc(Actions::Type::ClearPlaylist, "Clear playlist");
+	KeyDesc(Actions::Type::CropPlaylist, "Clear playlist except selected items");
 	
 	KeysSection("Lyrics");
-	KeyDesc(aPressSpace, "Toggle reloading lyrics upon song change");
-	KeyDesc(aEditLyrics, "Open lyrics in external editor");
-	KeyDesc(aRefetchLyrics, "Refetch lyrics");
+	KeyDesc(Actions::Type::PressSpace, "Toggle reloading lyrics upon song change");
+	KeyDesc(Actions::Type::EditLyrics, "Open lyrics in external editor");
+	KeyDesc(Actions::Type::RefetchLyrics, "Refetch lyrics");
 	
 	KeysSection("Artist info");
-	KeyDesc(aRefetchArtistInfo, "Refetch artist info");
+	KeyDesc(Actions::Type::RefetchArtistInfo, "Refetch artist info");
 	
 #	ifdef HAVE_TAGLIB_H
 	KeysSection("Tiny tag editor");
-	KeyDesc(aPressEnter, "Edit tag");
-	KeyDesc(aSaveTagChanges, "Save");
+	KeyDesc(Actions::Type::PressEnter, "Edit tag");
+	KeyDesc(Actions::Type::SaveTagChanges, "Save");
 	
 	KeysSection("Tag editor");
-	KeyDesc(aPressEnter, "Edit tag/filename of selected item (left column)");
-	KeyDesc(aPressEnter, "Perform operation on all/selected items (middle column)");
-	KeyDesc(aPressSpace, "Switch to albums/directories view (left column)");
-	KeyDesc(aPressSpace, "Select item (right column)");
-	KeyDesc(aPreviousColumn, "Previous column");
-	KeyDesc(aNextColumn, "Next column");
-	KeyDesc(aJumpToParentDirectory, "Jump to parent directory (left column, directories view)");
+	KeyDesc(Actions::Type::PressEnter, "Edit tag/filename of selected item (left column)");
+	KeyDesc(Actions::Type::PressEnter, "Perform operation on all/selected items (middle column)");
+	KeyDesc(Actions::Type::PressSpace, "Switch to albums/directories view (left column)");
+	KeyDesc(Actions::Type::PressSpace, "Select item (right column)");
+	KeyDesc(Actions::Type::PreviousColumn, "Previous column");
+	KeyDesc(Actions::Type::NextColumn, "Next column");
+	KeyDesc(Actions::Type::JumpToParentDirectory, "Jump to parent directory (left column, directories view)");
 #	endif // HAVE_TAGLIB_H
 	
 #	ifdef ENABLE_OUTPUTS
 	KeysSection("Outputs");
-	KeyDesc(aPressEnter, "Toggle output");
+	KeyDesc(Actions::Type::PressEnter, "Toggle output");
 #	endif // ENABLE_OUTPUTS
 	
 #	if defined(ENABLE_VISUALIZER) && defined(HAVE_FFTW3_H)
 	KeysSection("Music visualizer");
-	KeyDesc(aPressSpace, "Toggle visualization type");
+	KeyDesc(Actions::Type::PressSpace, "Toggle visualization type");
 #	endif // ENABLE_VISUALIZER && HAVE_FFTW3_H
 	
 	MouseSection("Global");

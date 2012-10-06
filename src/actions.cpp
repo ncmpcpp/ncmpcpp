@@ -69,7 +69,7 @@ namespace {//
 
 enum class Find { Forward, Backward };
 
-std::map<ActionType, Actions::BaseAction *> AvailableActions;
+std::map<Actions::Type, Actions::BaseAction *> AvailableActions;
 
 void populateActions();
 
@@ -292,7 +292,7 @@ bool isMPDMusicDirSet()
 	return true;
 }
 
-BaseAction *get(ActionType at)
+BaseAction *get(Actions::Type at)
 {
 	if (AvailableActions.empty())
 		populateActions();
@@ -2566,8 +2566,8 @@ void seek()
 	int old_timeout = wFooter->getTimeout();
 	wFooter->setTimeout(500);
 	
-	auto seekForward = Actions::get(aSeekForward);
-	auto seekBackward = Actions::get(aSeekBackward);
+	auto seekForward = Actions::get(Actions::Type::SeekForward);
+	auto seekBackward = Actions::get(Actions::Type::SeekBackward);
 	
 	SeekingInProgress = true;
 	while (true)
