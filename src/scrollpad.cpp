@@ -19,9 +19,33 @@
  ***************************************************************************/
 
 #include <cassert>
+#include <boost/regex.hpp>
 
 #include "scrollpad.h"
-#include "utility/wide_string.h"
+
+namespace {//
+
+template <typename PropT>
+bool regexSearch(NC::Buffer &buf, PropT begin, const std::string &ws, PropT end, size_t id)
+{
+	try {
+		boost::regex rx(ws, boost::regex::icase);
+		auto first = boost::sregex_iterator(buf.str().begin(), buf.str().end(), rx);
+		auto last = boost::sregex_iterator();
+		bool success = first != last;
+		for (; first != last; ++first)
+		{
+			buf.setProperty(first->position(), begin, id);
+			buf.setProperty(first->position() + first->length(), end, id);
+		}
+		return success;
+	} catch (boost::bad_expression &e) {
+		std::cerr << "regexSearch: bad_expression: " << e.what() << "\n";
+		return false;
+	}
+}
+
+}
 
 namespace NC {//
 
@@ -36,6 +60,82 @@ Border border)
 m_beginning(0),
 m_real_height(height)
 {
+}
+
+
+void Scrollpad::refresh()
+{
+	assert(m_real_height >= m_height);
+	size_t max_beginning = m_real_height - m_height;
+	m_beginning = std::min(m_beginning, max_beginning);
+	prefresh(m_window, m_beginning, 0, m_start_y, m_start_x, m_start_y+m_height-1, m_start_x+m_width-1);
+}
+
+void Scrollpad::resize(size_t new_width, size_t new_height)
+{
+	adjustDimensions(new_width, new_height);
+	flush();
+}
+
+void Scrollpad::scroll(Scroll where)
+{
+	assert(m_real_height >= m_height);
+	size_t max_beginning = m_real_height - m_height;
+	switch (where)
+	{
+		case Scroll::Up:
+		{
+			if (m_beginning > 0)
+				--m_beginning;
+			break;
+		}
+		case Scroll::Down:
+		{
+			if (m_beginning < max_beginning)
+				++m_beginning;
+			break;
+		}
+		case Scroll::PageUp:
+		{
+			if (m_beginning > m_height)
+				m_beginning -= m_height;
+			else
+				m_beginning = 0;
+			break;
+		}
+		case Scroll::PageDown:
+		{
+			m_beginning = std::min(m_beginning + m_height, max_beginning);
+			break;
+		}
+		case Scroll::Home:
+		{
+			m_beginning = 0;
+			break;
+		}
+		case Scroll::End:
+		{
+			m_beginning = max_beginning;
+			break;
+		}
+	}
+}
+
+void Scrollpad::clear()
+{
+	m_real_height = m_height;
+	m_buffer.clear();
+	wclear(m_window);
+	delwin(m_window);
+	m_window = newpad(m_height, m_width);
+	setTimeout(m_window_timeout);
+	setColor(m_color, m_bg_color);
+	keypad(m_window, 1);
+}
+
+const std::string &Scrollpad::buffer()
+{
+	return m_buffer.str();
 }
 
 void Scrollpad::flush()
@@ -152,79 +252,24 @@ void Scrollpad::flush()
 	write_buffer(false);
 }
 
-void Scrollpad::refresh()
-{
-	assert(m_real_height >= m_height);
-	size_t max_beginning = m_real_height - m_height;
-	m_beginning = std::min(m_beginning, max_beginning);
-	prefresh(m_window, m_beginning, 0, m_start_y, m_start_x, m_start_y+m_height-1, m_start_x+m_width-1);
-}
-
-void Scrollpad::resize(size_t new_width, size_t new_height)
-{
-	adjustDimensions(new_width, new_height);
-	flush();
-}
-
-void Scrollpad::scroll(Scroll where)
-{
-	assert(m_real_height >= m_height);
-	size_t max_beginning = m_real_height - m_height;
-	switch (where)
-	{
-		case Scroll::Up:
-		{
-			if (m_beginning > 0)
-				--m_beginning;
-			break;
-		}
-		case Scroll::Down:
-		{
-			if (m_beginning < max_beginning)
-				++m_beginning;
-			break;
-		}
-		case Scroll::PageUp:
-		{
-			if (m_beginning > m_height)
-				m_beginning -= m_height;
-			else
-				m_beginning = 0;
-			break;
-		}
-		case Scroll::PageDown:
-		{
-			m_beginning = std::min(m_beginning + m_height, max_beginning);
-			break;
-		}
-		case Scroll::Home:
-		{
-			m_beginning = 0;
-			break;
-		}
-		case Scroll::End:
-		{
-			m_beginning = max_beginning;
-			break;
-		}
-	}
-}
-
-void Scrollpad::clear()
-{
-	m_real_height = m_height;
-	m_buffer.clear();
-	wclear(m_window);
-	delwin(m_window);
-	m_window = newpad(m_height, m_width);
-	setTimeout(m_window_timeout);
-	setColor(m_color, m_bg_color);
-	keypad(m_window, 1);
-}
-
 void Scrollpad::reset()
 {
 	m_beginning = 0;
+}
+
+bool Scrollpad::setProperties(Color begin, const std::string &s, Color end, size_t id)
+{
+	return regexSearch(m_buffer, begin, s, end, id);
+}
+
+bool Scrollpad::setProperties(Format begin, const std::string &s, Format end, size_t id)
+{
+	return regexSearch(m_buffer, begin, s, end, id);
+}
+
+void Scrollpad::removeProperties(size_t id)
+{
+	m_buffer.removeProperties(id);
 }
 
 }

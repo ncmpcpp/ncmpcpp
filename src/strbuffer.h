@@ -23,7 +23,6 @@
 
 #include <set>
 #include "utility/numeric_conversions.h"
-#include "utility/wide_string.h"
 #include "window.h"
 
 namespace NC {//

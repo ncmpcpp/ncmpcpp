@@ -24,6 +24,7 @@
 #include "global.h"
 #include "settings.h"
 #include "title.h"
+#include "utility/wide_string.h"
 
 #ifdef USE_PDCURSES
 void windowTitle(const std::string &) { }

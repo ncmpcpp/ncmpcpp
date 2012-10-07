@@ -91,11 +91,21 @@ AC_ARG_VAR([BOOST_LIB_SUFFIX], [Boost library name suffix [default=-mt]])
 dnl =============================
 dnl = checking for boost.locale =
 dnl =============================
-AC_CHECK_HEADERS([boost/locale/encoding.hpp], ,
-	AC_MSG_ERROR(boost/locale/encoding.hpp is missing)
+AC_CHECK_HEADERS([boost/locale.hpp], ,
+	AC_MSG_ERROR(boost/locale.hpp is missing)
 )
 AC_CHECK_LIB(boost_locale$BOOST_LIB_SUFFIX, main, LDFLAGS="$LDFLAGS -lboost_locale$BOOST_LIB_SUFFIX",
 	AC_MSG_ERROR([no boost.locale library found])
+)
+
+dnl ============================
+dnl = checking for boost.regex =
+dnl ============================
+AC_CHECK_HEADERS([boost/regex.hpp], ,
+	AC_MSG_ERROR(boost/regex.hpp is missing)
+)
+AC_CHECK_LIB(boost_regex$BOOST_LIB_SUFFIX, main, LDFLAGS="$LDFLAGS -lboost_regex$BOOST_LIB_SUFFIX",
+	AC_MSG_ERROR([no boost.regex library found])
 )
 
 dnl ==============================

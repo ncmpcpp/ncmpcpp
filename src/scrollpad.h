@@ -35,35 +35,25 @@ struct Scrollpad: public Window
 	Scrollpad(size_t startx, size_t starty, size_t width, size_t height,
 	          const std::string &title, Color color, Border border);
 	
-	const std::string &buffer() { return m_buffer.str(); }
-
-	void flush();
-	void reset();
-	
-	template <typename PropertyT>
-	bool setProperties(PropertyT begin, const std::string &ws, PropertyT end, size_t id = -2)
-	{
-		bool success = false;
-		for (size_t i = 0; (i = m_buffer.str().find(ws, i)) != std::string::npos;)
-		{
-			success = true;
-			m_buffer.setProperty(i, begin, id);
-			i += ws.length();
-			m_buffer.setProperty(i, end, id);
-		}
-		return success;
-	}
-	
-	void removeProperties(size_t id = -2) { m_buffer.removeProperties(id); }
-	
+	// override a few Window functions
 	virtual void refresh() OVERRIDE;
 	virtual void scroll(Scroll where) OVERRIDE;
 	virtual void resize(size_t new_width, size_t new_height) OVERRIDE;
 	virtual void clear() OVERRIDE;
 	
-	template <typename T> Scrollpad &operator<<(const T &obj)
+	const std::string &buffer();
+	
+	void flush();
+	void reset();
+	
+	bool setProperties(Color begin, const std::string &s, Color end, size_t id = -2);
+	bool setProperties(Format begin, const std::string &s, Format end, size_t id = -2);
+	void removeProperties(size_t id = -2);
+	
+	template <typename ItemT>
+	Scrollpad &operator<<(const ItemT &item)
 	{
-		m_buffer << obj;
+		m_buffer << item;
 		return *this;
 	}
 	

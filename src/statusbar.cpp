@@ -23,6 +23,7 @@
 #include "status.h"
 #include "statusbar.h"
 #include "bindings.h"
+#include "utility/wide_string.h"
 
 using Global::wFooter;
 
