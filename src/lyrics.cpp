@@ -359,6 +359,7 @@ void Lyrics::Edit()
 	if (Config.use_console_editor)
 	{
 		res = system(("/bin/sh -c \"" + Config.external_editor + " \\\"" + itsFilename + "\\\"\"").c_str());
+		Load();
 		// below is needed as screen gets cleared, but apparently
 		// ncurses doesn't know about it, so we need to reload main screen
 		endwin();
