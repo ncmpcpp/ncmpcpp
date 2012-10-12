@@ -162,7 +162,10 @@ void writeCyclicBuffer(const NC::WBuffer &buf, NC::Window &w, size_t &start_pos,
 		};
 		
 		write_buffer(start_pos);
-		for (size_t i = 0; i < separator.length() && len < width; ++i)
+		size_t i = 0;
+		if (start_pos > s.length())
+			i = start_pos - s.length();
+		for (; i < separator.length() && len < width; ++i)
 		{
 			len += wcwidth(separator[i]);
 			if (len > width)
@@ -172,7 +175,7 @@ void writeCyclicBuffer(const NC::WBuffer &buf, NC::Window &w, size_t &start_pos,
 		write_buffer(0);
 		
 		++start_pos;
-		if (start_pos >= s.length())
+		if (start_pos >= s.length() + separator.length())
 			start_pos = 0;
 	}
 	else
