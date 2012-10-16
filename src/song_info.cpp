@@ -93,25 +93,25 @@ void SongInfo::switchTo()
 
 void SongInfo::PrepareSong(MPD::Song &s)
 {
-#	ifdef HAVE_TAGLIB_H
-	std::string path_to_file;
-	if (s.isFromDatabase())
-		path_to_file += Config.mpd_music_dir;
-	path_to_file += s.getURI();
-	TagLib::FileRef f(path_to_file.c_str());
-#	endif // HAVE_TAGLIB_H
-	
 	w << NC::Format::Bold << Config.color1 << "Filename: " << NC::Format::NoBold << Config.color2 << s.getName() << '\n' << NC::Color::End;
 	w << NC::Format::Bold << "Directory: " << NC::Format::NoBold << Config.color2;
 	ShowTag(w, s.getDirectory());
 	w << "\n\n" << NC::Color::End;
 	w << NC::Format::Bold << "Length: " << NC::Format::NoBold << Config.color2 << s.getLength() << '\n' << NC::Color::End;
 #	ifdef HAVE_TAGLIB_H
-	if (!f.isNull())
+	if (!Config.mpd_music_dir.empty())
 	{
-		w << NC::Format::Bold << "Bitrate: " << NC::Format::NoBold << Config.color2 << f.audioProperties()->bitrate() << " kbps\n" << NC::Color::End;
-		w << NC::Format::Bold << "Sample rate: " << NC::Format::NoBold << Config.color2 << f.audioProperties()->sampleRate() << " Hz\n" << NC::Color::End;
-		w << NC::Format::Bold << "Channels: " << NC::Format::NoBold << Config.color2 << (f.audioProperties()->channels() == 1 ? "Mono" : "Stereo") << '\n' << NC::Color::Default;
+		std::string path_to_file;
+		if (s.isFromDatabase())
+			path_to_file += Config.mpd_music_dir;
+		path_to_file += s.getURI();
+		TagLib::FileRef f(path_to_file.c_str());
+		if (!f.isNull())
+		{
+			w << NC::Format::Bold << "Bitrate: " << NC::Format::NoBold << Config.color2 << f.audioProperties()->bitrate() << " kbps\n" << NC::Color::End;
+			w << NC::Format::Bold << "Sample rate: " << NC::Format::NoBold << Config.color2 << f.audioProperties()->sampleRate() << " Hz\n" << NC::Color::End;
+			w << NC::Format::Bold << "Channels: " << NC::Format::NoBold << Config.color2 << (f.audioProperties()->channels() == 1 ? "Mono" : "Stereo") << '\n' << NC::Color::Default;
+		}
 	}
 #	endif // HAVE_TAGLIB_H
 	w << NC::Color::Default;
