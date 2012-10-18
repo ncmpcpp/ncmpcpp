@@ -29,6 +29,8 @@
 struct SortPlaylistDialog
 : Screen<NC::Menu<ExecItem<std::pair<std::string, MPD::Song::GetFunction>, void()>>>, Tabbable
 {
+	typedef SortPlaylistDialog Self;
+	
 	SortPlaylistDialog();
 	
 	virtual void switchTo() OVERRIDE;

@@ -28,7 +28,9 @@
 
 struct SelectedItemsAdder: Screen<NC::Menu<ExecItem<std::string, void()>> *>, Tabbable
 {
+	typedef SelectedItemsAdder Self;
 	typedef typename std::remove_pointer<WindowType>::type Component;
+	typedef Component::Item::Type Entry;
 	
 	SelectedItemsAdder();
 	

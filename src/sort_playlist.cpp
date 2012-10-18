@@ -33,7 +33,6 @@ SortPlaylistDialog *mySortPlaylistDialog;
 
 SortPlaylistDialog::SortPlaylistDialog()
 {
-	typedef SortPlaylistDialog Self;
 	typedef WindowType::Item::Type Entry;
 	
 	using Global::MainHeight;

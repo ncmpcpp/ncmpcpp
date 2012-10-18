@@ -77,24 +77,23 @@ SelectedItemsAdder::SelectedItemsAdder()
 	m_position_selector.setHighlightColor(Config.main_highlight_color);
 	m_position_selector.setItemDisplayer(DisplayComponent);
 	
-	typedef SelectedItemsAdder Self;
-	m_position_selector.addItem(Component::Item::Type("At the end of playlist",
+	m_position_selector.addItem(Entry("At the end of playlist",
 		std::bind(&Self::addAtTheEndOfPlaylist, this)
 	));
-	m_position_selector.addItem(Component::Item::Type("At the beginning of playlist",
+	m_position_selector.addItem(Entry("At the beginning of playlist",
 		std::bind(&Self::addAtTheBeginningOfPlaylist, this)
 	));
-	m_position_selector.addItem(Component::Item::Type("After current song",
+	m_position_selector.addItem(Entry("After current song",
 		std::bind(&Self::addAfterCurrentSong, this)
 	));
-	m_position_selector.addItem(Component::Item::Type("After current album",
+	m_position_selector.addItem(Entry("After current album",
 		std::bind(&Self::addAfterCurrentAlbum, this)
 	));
-	m_position_selector.addItem(Component::Item::Type("After highlighted item",
+	m_position_selector.addItem(Entry("After highlighted item",
 		std::bind(&Self::addAfterHighlightedSong, this)
 	));
 	m_position_selector.addSeparator();
-	m_position_selector.addItem(Component::Item::Type("Cancel",
+	m_position_selector.addItem(Entry("Cancel",
 		std::bind(&Self::cancel, this)
 	));
 	
@@ -182,16 +181,15 @@ void SelectedItemsAdder::mouseButtonPressed(MEVENT me)
 
 void SelectedItemsAdder::populatePlaylistSelector(BaseScreen *old_screen)
 {
-	typedef SelectedItemsAdder Self;
 	m_playlist_selector.reset();
 	m_playlist_selector.clear();
 	if (old_screen != myPlaylist)
 	{
-		m_playlist_selector.addItem(Component::Item::Type("Current playlist",
+		m_playlist_selector.addItem(Entry("Current playlist",
 			std::bind(&Self::addToCurrentPlaylist, this)
 		));
 	}
-	m_playlist_selector.addItem(Component::Item::Type("New playlist",
+	m_playlist_selector.addItem(Entry("New playlist",
 		std::bind(&Self::addToNewPlaylist, this)
 	));
 	m_playlist_selector.addSeparator();
@@ -201,7 +199,7 @@ void SelectedItemsAdder::populatePlaylistSelector(BaseScreen *old_screen)
 	{
 		size_t begin = m_playlist_selector.size();
 		Mpd.GetPlaylists([this](std::string &&playlist) {
-			m_playlist_selector.addItem(Component::Item::Type(playlist,
+			m_playlist_selector.addItem(Entry(playlist,
 				std::bind(&Self::addToExistingPlaylist, this, playlist)
 			));
 		});
@@ -210,7 +208,7 @@ void SelectedItemsAdder::populatePlaylistSelector(BaseScreen *old_screen)
 		if (begin < m_playlist_selector.size())
 			m_playlist_selector.addSeparator();
 	}
-	m_playlist_selector.addItem(Component::Item::Type("Cancel",
+	m_playlist_selector.addItem(Entry("Cancel",
 		std::bind(&Self::cancel, this)
 	));
 }
