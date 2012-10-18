@@ -65,6 +65,8 @@ bool AlbumEntryMatcher(const Regex &rx, const NC::Menu<AlbumEntry>::Item &item, 
 bool SongEntryMatcher(const Regex &rx, const MPD::Song &s);
 
 struct SortSongs {
+	typedef NC::Menu<MPD::Song>::Item SongItem;
+	
 	static const std::array<MPD::Song::GetFunction, 3> GetFuns;
 	
 	LocaleStringComparison m_cmp;
@@ -74,6 +76,9 @@ public:
 	SortSongs(bool disc_only)
 	: m_cmp(std::locale(), Config.ignore_leading_the), m_offset(disc_only ? 2 : 0) { }
 	
+	bool operator()(const SongItem &a, const SongItem &b) {
+		return (*this)(a.value(), b.value());
+	}
 	bool operator()(const MPD::Song &a, const MPD::Song &b) {
 		for (auto get = GetFuns.begin()+m_offset; get != GetFuns.end(); ++get) {
 			int ret = m_cmp(a.getTags(*get, Config.tags_separator),
@@ -397,7 +402,7 @@ void MediaLibrary::update()
 			});
 			if (idx < Songs.size())
 				Songs.resizeList(idx);
-			std::sort(Songs.beginV(), Songs.endV(), SortSongs(!album.isAllTracksEntry()));
+			std::sort(Songs.begin(), Songs.end(), SortSongs(!album.isAllTracksEntry()));
 		});
 		Songs.refresh();
 	}
