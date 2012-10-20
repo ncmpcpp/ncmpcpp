@@ -139,7 +139,6 @@ TagEditor::TagEditor() : FParser(0), FParserHelper(0), FParserLegend(0), FParser
 	FParserDialog->setItemDisplayer(parser_display);
 	FParserDialog->addItem("Get tags from filename");
 	FParserDialog->addItem("Rename files");
-	FParserDialog->addSeparator();
 	FParserDialog->addItem("Cancel");
 	
 	FParser = new NC::Menu<std::string>((COLS-FParserWidth)/2, (MainHeight-FParserHeight)/2+MainStartY, FParserWidthOne, FParserHeight, "_", Config.main_color, Config.active_window_border);
@@ -294,7 +293,7 @@ void TagEditor::enterPressed()
 	else if (w == FParserDialog)
 	{
 		size_t choice = FParserDialog->choice();
-		if (choice == 3) // cancel
+		if (choice == 2) // cancel
 		{
 			w = TagTypes;
 			refresh();
