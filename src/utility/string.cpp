@@ -23,16 +23,6 @@
 #include <algorithm>
 #include "utility/string.h"
 
-int stringToInt(const std::string &s)
-{
-	return atoi(s.c_str());
-}
-
-long stringToLongInt(const std::string &s)
-{
-	return atol(s.c_str());
-}
-
 bool isInteger(const char *s, bool accept_signed)
 {
 	assert(s);
@@ -42,62 +32,6 @@ bool isInteger(const char *s, bool accept_signed)
 		if (!(isdigit(*it) || (accept_signed && it == s && *it == '-')))
 			return false;
 		return true;
-}
-
-std::vector<std::string> split(const std::string &s, const std::string &delimiter)
-{
-	if (delimiter.empty())
-		return { s };
-	std::vector<std::string> result;
-	size_t i = 0, j = 0;
-	while (true)
-	{
-		i = j;
-		j = s.find(delimiter, i);
-		if (j == std::string::npos)
-			break;
-		else
-			result.push_back(s.substr(i, j-i));
-		j += delimiter.length();
-	}
-	result.push_back(s.substr(i));
-	return result;
-}
-
-void replace(std::string &s, const std::string &from, const std::string &to)
-{
-	for (size_t i = 0; (i = s.find(from, i)) != std::string::npos; i += to.length())
-		s.replace(i, from.length(), to);
-}
-
-void lowercase(std::string &s)
-{
-	std::transform(s.begin(), s.end(), s.begin(), tolower);
-}
-
-void lowercase(std::wstring &ws)
-{
-	std::transform(ws.begin(), ws.end(), ws.begin(), towlower);
-}
-
-void trim(std::string &s)
-{
-	if (s.empty())
-		return;
-	
-	size_t b = 0;
-	size_t e = s.length()-1;
-	
-	while (s[e] == ' ' || s[e] == '\n' || s[e] == '\t')
-		--e;
-	++e;
-	if (e != s.length())
-		s.resize(e);
-	
-	while (s[b] == ' ' || s[b] == '\n' || s[e] == '\t')
-		++b;
-	if (b != 0)
-		s = s.substr(b);
 }
 
 std::string getBasename(const std::string &path)
