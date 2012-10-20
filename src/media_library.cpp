@@ -866,28 +866,7 @@ void MediaLibrary::toggleSortMode()
 
 void MediaLibrary::LocateSong(const MPD::Song &s)
 {
-	std::string primary_tag;
-	switch (Config.media_lib_primary_tag)
-	{
-		case MPD_TAG_ARTIST:
-			primary_tag = s.getArtist();
-			break;
-		case MPD_TAG_DATE:
-			primary_tag = s.getDate();
-			break;
-		case MPD_TAG_GENRE:
-			primary_tag = s.getGenre();
-			break;
-		case MPD_TAG_COMPOSER:
-			primary_tag = s.getComposer();
-			break;
-		case MPD_TAG_PERFORMER:
-			primary_tag = s.getPerformer();
-			break;
-		default: // shouldn't happen
-			assert(false);
-			return;
-	}
+	std::string primary_tag = s.get(Config.media_lib_primary_tag);
 	if (primary_tag.empty())
 	{
 		std::string item_type = boost::locale::to_lower(
