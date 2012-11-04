@@ -28,6 +28,7 @@
 #ifdef HAVE_TAGLIB_H
 # include "fileref.h"
 # include "tag.h"
+# include "boost/lexical_cast.hpp"
 #endif // HAVE_TAGLIB_H
 
 using Global::MainHeight;
@@ -108,9 +109,22 @@ void SongInfo::PrepareSong(MPD::Song &s)
 		TagLib::FileRef f(path_to_file.c_str());
 		if (!f.isNull())
 		{
+			std::string channels;
+			switch (f.audioProperties()->channels())
+			{
+				case 1:
+					channels = "Mono";
+					break;
+				case 2:
+					channels = "Stereo";
+					break;
+				default:
+					channels = boost::lexical_cast<std::string>(f.audioProperties()->channels());
+					break;
+			}
 			w << NC::Format::Bold << "Bitrate: " << NC::Format::NoBold << Config.color2 << f.audioProperties()->bitrate() << " kbps\n" << NC::Color::End;
 			w << NC::Format::Bold << "Sample rate: " << NC::Format::NoBold << Config.color2 << f.audioProperties()->sampleRate() << " Hz\n" << NC::Color::End;
-			w << NC::Format::Bold << "Channels: " << NC::Format::NoBold << Config.color2 << (f.audioProperties()->channels() == 1 ? "Mono" : "Stereo") << '\n' << NC::Color::Default;
+			w << NC::Format::Bold << "Channels: " << NC::Format::NoBold << Config.color2 << channels << '\n' << NC::Color::Default;
 		}
 	}
 #	endif // HAVE_TAGLIB_H
