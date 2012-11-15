@@ -366,7 +366,13 @@ std::string Song::ParseFormat(std::string::const_iterator &it, const std::string
 				if (!tag.empty() && (get_fun != &MPD::Song::getLength || getDuration() > 0))
 				{
 					if (delimiter && tag.size() > delimiter)
-						tag = ToString(wideShorten(ToWString(tag), delimiter));
+					{
+						// Shorten length string by just chopping off the tail
+						if (get_fun == &MPD::Song::getLength)
+							tag = tag.substr(0, delimiter);
+						else
+							tag = ToString(wideShorten(ToWString(tag), delimiter));
+					}
 					has_some_tags = 1;
 					result += tag;
 				}
