@@ -80,7 +80,7 @@ void Status::trace()
 		{
 			past = Timer;
 		}
-		else if (Config.display_bitrate && Global::Timer.tv_sec > past.tv_sec && Mpd.isPlaying())
+		else if (Config.display_bitrate && Global::Timer.tv_sec > past.tv_sec &&  Mpd.GetState() == MPD::psPlay)
 		{
 			// ncmpcpp doesn't fetch status constantly if mpd supports
 			// idle mode so current song's bitrate is never updated.
