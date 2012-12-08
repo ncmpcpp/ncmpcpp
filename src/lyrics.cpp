@@ -290,7 +290,7 @@ std::string Lyrics::GenerateFilename(const MPD::Song &s)
 		file += " - ";
 		file += s.getTitle();
 		file += ".txt";
-		removeInvalidCharsFromFilename(file);
+		removeInvalidCharsFromFilename(file, Config.generate_win32_compatible_filenames);
 		filename = Config.lyrics_directory;
 		filename += "/";
 		filename += file;

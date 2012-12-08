@@ -91,9 +91,9 @@ std::string getEnclosedString(const std::string &s, char a, char b, size_t *pos)
 	return result;
 }
 
-void removeInvalidCharsFromFilename(std::string &filename)
+void removeInvalidCharsFromFilename(std::string &filename, bool win32_compatible)
 {
-	const char *unallowed_chars = "\"*/:<>?\\|";
+	const char *unallowed_chars = win32_compatible ? "\"*/:<>?\\|" : "/";
 	for (const char *c = unallowed_chars; *c; ++c)
 	{
 		for (size_t i = 0; i < filename.length(); ++i)

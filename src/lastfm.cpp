@@ -115,7 +115,7 @@ void Lastfm::Load()
 	
 	std::string artist = itsArgs.find("artist")->second;
 	std::string file = boost::locale::to_lower(artist + ".txt");
-	removeInvalidCharsFromFilename(file);
+	removeInvalidCharsFromFilename(file, Config.generate_win32_compatible_filenames);
 	
 	itsFilename = itsFolder + "/" + file;
 	

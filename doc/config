@@ -345,6 +345,8 @@
 #
 #store_lyrics_in_song_dir = "no"
 #
+#generate_win32_compatible_filenames = "yes"
+#
 ##
 ## Note: If you set this variable, ncmpcpp will try to
 ## get info from last.fm in language you set and if it

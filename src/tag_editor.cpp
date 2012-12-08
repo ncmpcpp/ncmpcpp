@@ -1099,7 +1099,7 @@ MPD::MutableSong::SetFunction IntoSetFunction(char c)
 std::string GenerateFilename(const MPD::MutableSong &s, const std::string &pattern)
 {
 	std::string result = s.toString(pattern, Config.tags_separator);
-	removeInvalidCharsFromFilename(result);
+	removeInvalidCharsFromFilename(result, Config.generate_win32_compatible_filenames);
 	return result;
 }
 

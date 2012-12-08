@@ -215,6 +215,7 @@ void Configuration::SetDefaults()
 	tag_editor_extended_numeration = false;
 	discard_colors_if_item_is_selected = true;
 	store_lyrics_in_song_dir = false;
+	generate_win32_compatible_filenames = true;
 	ask_for_locked_screen_width_part = true;
 	progressbar_boldness = true;
 	set_window_title = true;
@@ -763,6 +764,10 @@ void Configuration::Read()
 				}
 				else
 					store_lyrics_in_song_dir = v == "yes";
+			}
+			else if (name == "generate_win32_compatible_filenames")
+			{
+				generate_win32_compatible_filenames = v == "yes";
 			}
 			else if (name == "enable_window_title")
 			{

@@ -181,6 +181,7 @@ struct Configuration
 	bool tag_editor_extended_numeration;
 	bool discard_colors_if_item_is_selected;
 	bool store_lyrics_in_song_dir;
+	bool generate_win32_compatible_filenames;
 	bool ask_for_locked_screen_width_part;
 	bool progressbar_boldness;
 	
