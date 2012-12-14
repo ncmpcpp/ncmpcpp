@@ -453,7 +453,7 @@ void MediaLibrary::mouseButtonPressed(MEVENT me)
 {
 	auto tryNextColumn = [this]() -> bool {
 		bool result = true;
-		if (this->isActiveWindow(Songs))
+		if (isActiveWindow(Songs))
 		{
 			if (nextColumnAvailable())
 				nextColumn();
@@ -464,7 +464,7 @@ void MediaLibrary::mouseButtonPressed(MEVENT me)
 	};
 	auto tryPreviousColumn = [this]() -> bool {
 		bool result = true;
-		if (this->isActiveWindow(Tags))
+		if (isActiveWindow(Tags))
 		{
 			if (previousColumnAvailable())
 				previousColumn();

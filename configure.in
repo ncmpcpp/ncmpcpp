@@ -36,7 +36,7 @@ AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[ ]])],
 	AC_MSG_RESULT([yes])
 		std_cpp0x="-std=c++0x",
 	AC_MSG_RESULT([no])
-		AC_MSG_ERROR([[Your compiler doesn't seem to support C++0x, please upgrade (GCC >= 4.5)]])
+		AC_MSG_ERROR([[Your compiler doesn't seem to support C++0x, please upgrade (GCC >= 4.6)]])
 )
 CXXFLAGS="$old_CXXFLAGS $std_cpp0x"
 
@@ -47,7 +47,7 @@ AC_MSG_CHECKING([whether compiler supports initializer lists])
 AC_COMPILE_IFELSE([AC_LANG_PROGRAM([#include <vector>], [[std::vector<int> test = { 1, 2, 3 }; test.push_back(4);]])],
 	AC_MSG_RESULT([yes]),
 	AC_MSG_RESULT([no])
-		AC_MSG_ERROR([[Your compiler doesn't seem to support initializer lists, please upgrade (GCC >= 4.5)]])
+		AC_MSG_ERROR([[Your compiler doesn't seem to support initializer lists, please upgrade (GCC >= 4.6)]])
 )
 
 dnl =====================================
@@ -57,7 +57,7 @@ AC_MSG_CHECKING([whether compiler supports auto keyword])
 AC_COMPILE_IFELSE([AC_LANG_PROGRAM([], [[auto test = new int; *test = 1;]])],
 	AC_MSG_RESULT([yes]),
 	AC_MSG_RESULT([no])
-		AC_MSG_ERROR([[Your compiler doesn't seem to support auto keyword, please upgrade (GCC >= 4.5)]])
+		AC_MSG_ERROR([[Your compiler doesn't seem to support auto keyword, please upgrade (GCC >= 4.6)]])
 )
 
 dnl =========================================
@@ -67,7 +67,18 @@ AC_MSG_CHECKING([whether compiler supports lambda functions])
 AC_COMPILE_IFELSE([AC_LANG_PROGRAM([#include <functional>], [[int a = 5; std::function<int(int)> f = [&a](int b) { return a + b; }; f(8);]])],
 	AC_MSG_RESULT([yes]),
 	AC_MSG_RESULT([no])
-		AC_MSG_ERROR([[Your compiler doesn't seem to support lambda functions, please upgrade (GCC >= 4.5)]])
+		AC_MSG_ERROR([[Your compiler doesn't seem to support lambda functions, please upgrade (GCC >= 4.6)]])
+)
+
+dnl ================================================================
+dnl = checking whether calling derived member function of object   =
+dnl = passed to lambda without explicit 'this' usage works         =
+dnl ================================================================
+AC_MSG_CHECKING([whether calling derived member function passed to lambda without explicit this usage works ])
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([#include <functional>], [[struct A { void foo() { } };  struct B : public A { void bar() { std::function<void()> f = [this]() { foo(); }; f();  } } foo; foo.bar();]])],
+	AC_MSG_RESULT([yes]),
+	AC_MSG_RESULT([no])
+		AC_MSG_ERROR([[Your compiler doesn't seem to support calling derived member function of an object passed to lambda as 'this' without explicit 'this' usage, please upgrade (GCC >= 4.6)]])
 )
 
 dnl =========================================
