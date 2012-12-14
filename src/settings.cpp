@@ -33,6 +33,7 @@
 #include <fstream>
 #include <iostream>
 #include <stdexcept>
+#include <regex.h>
 
 #include "actions.h"
 #include "browser.h"
