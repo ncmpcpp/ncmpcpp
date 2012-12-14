@@ -157,10 +157,11 @@ void Scrollpad::flush()
 			w << s[i];
 		}
 	};
-	auto write_word = [&]() {
+	auto write_word = [&](bool load_properties_) {
 		for (; i < s.length() && !iswspace(s[i]); ++i)
 		{
-			load_properties();
+			if (load_properties_)
+				load_properties();
 			w << s[i];
 		}
 	};
@@ -198,7 +199,13 @@ void Scrollpad::flush()
 			x = getX();
 			y = getY();
 			
-			write_word();
+			// write word to test if it overflows, but do not load properties
+			// yet since if it overflows, we do not want to load them twice.
+			write_word(false);
+			
+			// restore previous indexes state
+			i = old_i;
+			p = old_p;
 			
 			// get new Y coord to see if word overflew into next line.
 			new_y = getY();
@@ -221,10 +228,8 @@ void Scrollpad::flush()
 				++y;
 				goToXY(0, y);
 				
-				i = old_i;
-				p = old_p;
-				// ...write this word again...
-				write_word();
+				// ...write word again, this time with properties...
+				write_word(true);
 				
 				if (generate_height_only)
 				{
@@ -233,6 +238,12 @@ void Scrollpad::flush()
 					new_y = getY();
 					height += new_y - y;
 				}
+			}
+			else
+			{
+				// word didn't overflow, rewrite it with properties.
+				goToXY(x, y);
+				write_word(true);
 			}
 			
 			if (generate_height_only)
