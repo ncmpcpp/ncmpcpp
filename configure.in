@@ -1,6 +1,6 @@
 AC_INIT(configure.in)
 
-AM_CONFIG_HEADER(config.h)
+AC_CONFIG_HEADERS(config.h)
 AM_INIT_AUTOMAKE(ncmpcpp, 0.6_pre)
 
 AC_PREREQ(2.59)
