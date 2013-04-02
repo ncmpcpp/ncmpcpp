@@ -1027,10 +1027,10 @@ void Configuration::GenerateColumns()
 
 void Configuration::MakeProperPath(std::string &dir)
 {
-	if (dir.empty())
+	if (dir.length() < 2)
 		return;
-	if (dir[0] == '~')
-		dir.replace(0, 1, home_directory);
+	if (dir[0] == '~' && dir[1] == '/')
+		dir.replace(0, 2, home_directory);
 	std::replace(dir.begin(), dir.end(), '\\', '/');
 	if (*dir.rbegin() != '/')
 		dir += '/';
