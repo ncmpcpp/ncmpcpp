@@ -354,7 +354,7 @@ void MouseEvent::run()
 		Mpd.Toggle();
 	}
 	else if ((m_mouse_event.bstate & BUTTON2_PRESSED || m_mouse_event.bstate & BUTTON4_PRESSED)
-	     &&	 Config.header_visibility
+	     &&	 (Config.header_visibility || Config.new_design)
 	     &&	 m_mouse_event.y == 0 && size_t(m_mouse_event.x) > COLS-VolumeState.length()
 	) // volume
 	{
