@@ -1781,7 +1781,12 @@ void ApplyFilter::run()
 		Statusbar::msg("Filtering disabled");
 	}
  	else
+	{
+		// apply filter here so even if old one wasn't modified
+		// (and callback wasn't invoked), it still gets applied.
+		f->applyFilter(filter);
 		Statusbar::msg("Using filter \"%s\"", filter.c_str());
+	}
 	
 	if (myScreen == myPlaylist)
 	{
