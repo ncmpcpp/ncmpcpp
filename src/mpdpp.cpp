@@ -799,14 +799,16 @@ void Connection::SetConsume(bool mode)
 	}
 }
 
-void Connection::SetVolume(unsigned vol)
+bool Connection::SetVolume(unsigned vol)
 {
 	if (!itsConnection || vol > 100)
-		return;
+		return false;
 	assert(!isCommandsListEnabled);
 	GoBusy();
-	if (mpd_run_set_volume(itsConnection, vol) && !supportsIdle)
+	bool success = mpd_run_set_volume(itsConnection, vol);
+	if (success && !supportsIdle)
 		UpdateStatus();
+	return success;
 }
 
 std::string Connection::GetReplayGainMode()

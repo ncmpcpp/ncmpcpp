@@ -41,7 +41,7 @@ enum class Type
 	ToggleLyricsFetcher, ToggleFetchingLyricsInBackground, TogglePlayingSongCentering,
 	UpdateDatabase, JumpToPlayingSong, ToggleRepeat, Shuffle, ToggleRandom,
 	StartSearching, SaveTagChanges, ToggleSingle, ToggleConsume, ToggleCrossfade,
-	SetCrossfade, EditSong, EditLibraryTag, EditLibraryAlbum, EditDirectoryName,
+	SetCrossfade, SetVolume, EditSong, EditLibraryTag, EditLibraryAlbum, EditDirectoryName,
 	EditPlaylistName, EditLyrics, JumpToBrowser, JumpToMediaLibrary,
 	JumpToPlaylistEditor, ToggleScreenLock, JumpToTagEditor, JumpToPositionInSong,
 	ReverseSelection, RemoveSelection, SelectAlbum, AddSelectedItems,
@@ -588,6 +588,14 @@ protected:
 struct SetCrossfade : public BaseAction
 {
 	SetCrossfade() : BaseAction(Type::SetCrossfade, "set_crossfade") { }
+	
+protected:
+	virtual void run();
+};
+
+struct SetVolume : public BaseAction
+{
+	SetVolume() : BaseAction(Type::SetVolume, "set_volume") { }
 	
 protected:
 	virtual void run();

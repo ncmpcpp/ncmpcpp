@@ -1204,6 +1204,22 @@ void SetCrossfade::run()
 	}
 }
 
+void SetVolume::run()
+{
+	using Global::wFooter;
+	
+	Statusbar::lock();
+	Statusbar::put() << "Set volume to: ";
+	std::string strvolume = wFooter->getString(3);
+	Statusbar::unlock();
+	int volume = boost::lexical_cast<int>(strvolume);
+	if (volume >= 0 && volume <= 100)
+	{
+		if (Mpd.SetVolume(volume))
+			Statusbar::msg("Volume set to %d%%", volume);
+	}
+}
+
 bool EditSong::canBeRun() const
 {
 #	ifdef HAVE_TAGLIB_H
@@ -2490,6 +2506,7 @@ void populateActions()
 	insert_action(new Actions::ToggleConsume());
 	insert_action(new Actions::ToggleCrossfade());
 	insert_action(new Actions::SetCrossfade());
+	insert_action(new Actions::SetVolume());
 	insert_action(new Actions::EditSong());
 	insert_action(new Actions::EditLibraryTag());
 	insert_action(new Actions::EditLibraryAlbum());

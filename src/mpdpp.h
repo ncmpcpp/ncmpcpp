@@ -187,7 +187,7 @@ public:
 	void SetSingle(bool);
 	void SetConsume(bool);
 	void SetCrossfade(unsigned);
-	void SetVolume(unsigned);
+	bool SetVolume(unsigned);
 	
 	std::string GetReplayGainMode();
 	void SetReplayGainMode(ReplayGainMode);
