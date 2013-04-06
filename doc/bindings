@@ -142,6 +142,13 @@
 ##
 ## Note: Function def_key accepts non-ascii characters.
 ##
+##### List of unbound actions #####
+##
+## The following actions are not bound to any key/command:
+##
+##  - set_volume
+##  - filter_playlist_on_priorities
+##
 #
 #def_key "mouse"
 #  mouse_event
