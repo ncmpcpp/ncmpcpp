@@ -615,12 +615,14 @@ void SlaveScreen::run()
 
 void VolumeUp::run()
 {
-	Mpd.SetVolume(Mpd.GetVolume()+1);
+	int volume = std::min(Mpd.GetVolume()+Config.volume_change_step, 100);
+	Mpd.SetVolume(volume);
 }
 
 void VolumeDown::run()
 {
-	Mpd.SetVolume(Mpd.GetVolume()-1);
+	int volume = std::max(Mpd.GetVolume()-Config.volume_change_step, 0);
+	Mpd.SetVolume(volume);
 }
 
 bool DeletePlaylistItems::canBeRun() const

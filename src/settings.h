@@ -189,6 +189,7 @@ struct Configuration
 	int mpd_connection_timeout;
 	int crossfade_time;
 	int seek_time;
+	int volume_change_step;
 	int playlist_disable_highlight_delay;
 	int message_delay_time;
 	int lyrics_db;

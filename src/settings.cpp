@@ -224,6 +224,7 @@ void Configuration::SetDefaults()
 	mpd_connection_timeout = 15;
 	crossfade_time = 5;
 	seek_time = 1;
+	volume_change_step = 1;
 	playlist_disable_highlight_delay = 5;
 	message_delay_time = 4;
 	lyrics_db = 0;
@@ -366,6 +367,11 @@ void Configuration::Read()
 			{
 				if (boost::lexical_cast<int>(v) > 0)
 					seek_time = boost::lexical_cast<int>(v);
+			}
+			else if (name == "volume_change_step")
+			{
+				if (boost::lexical_cast<int>(v) > 0)
+					volume_change_step = boost::lexical_cast<int>(v);
 			}
 			else if (name == "playlist_disable_highlight_delay")
 			{
