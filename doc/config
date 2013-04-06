@@ -416,7 +416,7 @@
 #
 #display_remaining_time = "no"
 #
-#regular_expressions = "basic" (basic/extended)
+#regular_expressions = "none" (none/basic/extended)
 #
 ##
 ## Note: If below is enabled, ncmpcpp will ignore leading

@@ -228,7 +228,7 @@ void Configuration::SetDefaults()
 	playlist_disable_highlight_delay = 5;
 	message_delay_time = 4;
 	lyrics_db = 0;
-	regex_type = boost::regex::icase;
+	regex_type = boost::regex::literal | boost::regex::icase;
 	lines_scrolled = 2;
 	search_engine_default_search_mode = 0;
 	visualizer_sync_interval = 30;
@@ -783,11 +783,11 @@ void Configuration::Read()
 			else if (name == "regular_expressions")
 			{
 				if (v == "none")
-					regex_type |= boost::regex::literal;
+					regex_type = boost::regex::literal | boost::regex::icase;
 				else if (v == "basic")
-					regex_type |= boost::regex::basic;
+					regex_type = boost::regex::basic | boost::regex::icase;
 				else if (v == "extended")
-					regex_type |= boost::regex::extended;
+					regex_type = boost::regex::extended | boost::regex::icase;
 			}
 			else if (name == "lines_scrolled")
 			{
