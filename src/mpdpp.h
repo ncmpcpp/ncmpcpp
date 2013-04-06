@@ -273,7 +273,6 @@ private:
 	void *itsErrorHandlerUserdata;
 	
 	mpd_tag_type itsSearchedField;
-	bool itsSearchFieldMTime;
 };
 
 }
