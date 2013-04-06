@@ -61,7 +61,7 @@ std::set<std::string> SupportedExtensions;
 bool hasSupportedExtension(const std::string &file);
 
 std::string ItemToString(const MPD::Item &item);
-bool BrowserEntryMatcher(const Regex &rx, const MPD::Item &item, bool filter);
+bool BrowserEntryMatcher(const boost::regex &rx, const MPD::Item &item, bool filter);
 
 }
 
@@ -258,10 +258,15 @@ std::string Browser::currentFilter()
 
 void Browser::applyFilter(const std::string &filter)
 {
-	w.showAll();
-	auto fun = std::bind(BrowserEntryMatcher, _1, _2, true);
-	auto rx = RegexFilter<MPD::Item>(filter, Config.regex_type, fun);
-	w.filter(w.begin(), w.end(), rx);
+	try
+	{
+		w.showAll();
+		auto fun = std::bind(BrowserEntryMatcher, _1, _2, true);
+		auto rx = RegexFilter<MPD::Item>(
+			boost::regex(filter, Config.regex_type), fun);
+		w.filter(w.begin(), w.end(), rx);
+	}
+	catch (boost::bad_expression &) { }
 }
 
 /***********************************************************************/
@@ -273,9 +278,17 @@ bool Browser::allowsSearching()
 
 bool Browser::search(const std::string &constraint)
 {
-	auto fun = std::bind(BrowserEntryMatcher, _1, _2, false);
-	auto rx = RegexFilter<MPD::Item>(constraint, Config.regex_type, fun);
-	return w.search(w.begin(), w.end(), rx);
+	try
+	{
+		auto fun = std::bind(BrowserEntryMatcher, _1, _2, false);
+		auto rx = RegexFilter<MPD::Item>(
+			boost::regex(constraint, Config.regex_type), fun);
+		return w.search(w.begin(), w.end(), rx);
+	}
+	catch (boost::bad_expression &)
+	{
+		return false;
+	}
 }
 
 void Browser::nextFound(bool wrap)
@@ -614,11 +627,11 @@ std::string ItemToString(const MPD::Item &item)
 	return result;
 }
 
-bool BrowserEntryMatcher(const Regex &rx, const MPD::Item &item, bool filter)
+bool BrowserEntryMatcher(const boost::regex &rx, const MPD::Item &item, bool filter)
 {
 	if (Browser::isParentDirectory(item))
 		return filter;
-	return rx.match(ItemToString(item));
+	return boost::regex_search(ItemToString(item), rx);
 }
 
 }

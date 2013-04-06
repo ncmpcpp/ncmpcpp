@@ -51,8 +51,8 @@ size_t RightColumnStartX;
 size_t RightColumnWidth;
 
 std::string SongToString(const MPD::Song &s);
-bool PlaylistEntryMatcher(const Regex &rx, const std::string &playlist);
-bool SongEntryMatcher(const Regex &rx, const MPD::Song &s);
+bool PlaylistEntryMatcher(const boost::regex &rx, const std::string &playlist);
+bool SongEntryMatcher(const boost::regex &rx, const MPD::Song &s);
 
 }
 
@@ -337,18 +337,24 @@ std::string PlaylistEditor::currentFilter()
 
 void PlaylistEditor::applyFilter(const std::string &filter)
 {
-	if (isActiveWindow(Playlists))
+	try
 	{
-		Playlists.showAll();
-		auto rx = RegexFilter<std::string>(filter, Config.regex_type, PlaylistEntryMatcher);
-		Playlists.filter(Playlists.begin(), Playlists.end(), rx);
+		if (isActiveWindow(Playlists))
+		{
+			Playlists.showAll();
+			auto rx = RegexFilter<std::string>(
+				boost::regex(filter, Config.regex_type), PlaylistEntryMatcher);
+			Playlists.filter(Playlists.begin(), Playlists.end(), rx);
+		}
+		else if (isActiveWindow(Content))
+		{
+			Content.showAll();
+			auto rx = RegexFilter<MPD::Song>(
+				boost::regex(filter, Config.regex_type), SongEntryMatcher);
+			Content.filter(Content.begin(), Content.end(), rx);
+		}
 	}
-	else if (isActiveWindow(Content))
-	{
-		Content.showAll();
-		auto rx = RegexFilter<MPD::Song>(filter, Config.regex_type, SongEntryMatcher);
-		Content.filter(Content.begin(), Content.end(), rx);
-	}
+	catch (boost::bad_expression &) { }
 }
 
 /***********************************************************************/
@@ -360,18 +366,27 @@ bool PlaylistEditor::allowsSearching()
 
 bool PlaylistEditor::search(const std::string &constraint)
 {
-	bool result = false;
-	if (isActiveWindow(Playlists))
+	try
 	{
-		auto rx = RegexFilter<std::string>(constraint, Config.regex_type, PlaylistEntryMatcher);
-		result = Playlists.search(Playlists.begin(), Playlists.end(), rx);
+		bool result = false;
+		if (isActiveWindow(Playlists))
+		{
+			auto rx = RegexFilter<std::string>(
+				boost::regex(constraint, Config.regex_type), PlaylistEntryMatcher);
+			result = Playlists.search(Playlists.begin(), Playlists.end(), rx);
+		}
+		else if (isActiveWindow(Content))
+		{
+			auto rx = RegexFilter<MPD::Song>(
+				boost::regex(constraint, Config.regex_type), SongEntryMatcher);
+			result = Content.search(Content.begin(), Content.end(), rx);
+		}
+		return result;
 	}
-	else if (isActiveWindow(Content))
+	catch (boost::bad_expression &)
 	{
-		auto rx = RegexFilter<MPD::Song>(constraint, Config.regex_type, SongEntryMatcher);
-		result = Content.search(Content.begin(), Content.end(), rx);
+		return false;
 	}
-	return result;
 }
 
 void PlaylistEditor::nextFound(bool wrap)
@@ -523,14 +538,14 @@ std::string SongToString(const MPD::Song &s)
 	return result;
 }
 
-bool PlaylistEntryMatcher(const Regex &rx, const std::string &playlist)
+bool PlaylistEntryMatcher(const boost::regex &rx, const std::string &playlist)
 {
-	return rx.match(playlist);
+	return boost::regex_search(playlist, rx);
 }
 
-bool SongEntryMatcher(const Regex &rx, const MPD::Song &s)
+bool SongEntryMatcher(const boost::regex &rx, const MPD::Song &s)
 {
-	return rx.match(SongToString(s));
+	return boost::regex_search(SongToString(s), rx);
 }
 
 }

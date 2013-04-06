@@ -21,6 +21,7 @@
 #ifndef NCMPCPP_SETTINGS_H
 #define NCMPCPP_SETTINGS_H
 
+#include <boost/regex.hpp>
 #include <cassert>
 #include <vector>
 #include <mpd/client.h>
@@ -193,7 +194,8 @@ struct Configuration
 	int playlist_disable_highlight_delay;
 	int message_delay_time;
 	int lyrics_db;
-	int regex_type;
+	
+	boost::regex::flag_type regex_type;
 	
 	unsigned lines_scrolled;
 	unsigned search_engine_default_search_mode;

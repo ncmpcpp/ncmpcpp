@@ -20,6 +20,7 @@
 
 #include <array>
 #include <iomanip>
+#include <regex.h>
 
 #include "display.h"
 #include "global.h"
@@ -71,7 +72,7 @@ namespace pos {//
 }*/
 
 std::string SEItemToString(const SEItem &ei);
-bool SEItemEntryMatcher(const Regex &rx, const NC::Menu<SEItem>::Item &item, bool filter);
+bool SEItemEntryMatcher(const boost::regex &rx, const NC::Menu<SEItem>::Item &item, bool filter);
 
 }
 
@@ -264,10 +265,15 @@ std::string SearchEngine::currentFilter()
 
 void SearchEngine::applyFilter(const std::string &filter)
 {
-	w.showAll();
-	auto fun = std::bind(SEItemEntryMatcher, _1, _2, true);
-	auto rx = RegexItemFilter<SEItem>(filter, Config.regex_type, fun);
-	w.filter(w.begin(), w.end(), rx);
+	try
+	{
+		w.showAll();
+		auto fun = std::bind(SEItemEntryMatcher, _1, _2, true);
+		auto rx = RegexItemFilter<SEItem>(
+			boost::regex(filter, Config.regex_type), fun);
+		w.filter(w.begin(), w.end(), rx);
+	}
+	catch (boost::bad_expression &) { }
 }
 
 /***********************************************************************/
@@ -279,9 +285,17 @@ bool SearchEngine::allowsSearching()
 
 bool SearchEngine::search(const std::string &constraint)
 {
-	auto fun = std::bind(SEItemEntryMatcher, _1, _2, false);
-	auto rx = RegexItemFilter<SEItem>(constraint, Config.regex_type, fun);
-	return w.search(w.begin(), w.end(), rx);
+	try
+	{
+		auto fun = std::bind(SEItemEntryMatcher, _1, _2, false);
+		auto rx = RegexItemFilter<SEItem>(
+			boost::regex(constraint, Config.regex_type), fun);
+		return w.search(w.begin(), w.end(), rx);
+	}
+	catch (boost::bad_expression &)
+	{
+		return false;
+	}
 }
 
 void SearchEngine::nextFound(bool wrap)
@@ -574,11 +588,11 @@ std::string SEItemToString(const SEItem &ei)
 	return result;
 }
 
-bool SEItemEntryMatcher(const Regex &rx, const NC::Menu<SEItem>::Item &item, bool filter)
+bool SEItemEntryMatcher(const boost::regex &rx, const NC::Menu<SEItem>::Item &item, bool filter)
 {
 	if (item.isSeparator() || !item.value().isSong())
 		return filter;
-	return rx.match(SEItemToString(item.value()));
+	return boost::regex_search(SEItemToString(item.value()), rx);
 }
 
 }

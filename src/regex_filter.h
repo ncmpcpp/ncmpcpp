@@ -21,23 +21,19 @@
 #ifndef NCMPCPP_REGEX_FILTER_H
 #define NCMPCPP_REGEX_FILTER_H
 
+#include <boost/regex.hpp>
 #include "menu.h"
-#include "regexes.h"
 
 template <typename T> struct RegexFilter
 {
 	typedef NC::Menu<T> MenuT;
 	typedef typename NC::Menu<T>::Item Item;
-	typedef std::function<bool(const Regex &, const T &)> FilterFunction;
+	typedef std::function<bool(const boost::regex &, const T &)> FilterFunction;
 	
-	RegexFilter(const std::string &regex_, int cflags, FilterFunction filter)
-	: m_rx(regex_, cflags), m_filter(filter) { }
+	RegexFilter(boost::regex rx, FilterFunction filter)
+	: m_rx(rx), m_filter(filter) { }
 	
 	bool operator()(const Item &item) {
-		if (m_rx.regex().empty())
-			return true;
-		if (!m_rx.compiled() || !m_rx.error().empty())
-			return false;
 		return m_filter(m_rx, item.value());
 	}
 	
@@ -46,12 +42,12 @@ template <typename T> struct RegexFilter
 		std::string filter;
 		auto rf = menu.getFilter().template target< RegexFilter<T> >();
 		if (rf)
-			filter = rf->m_rx.regex();
+			filter = rf->m_rx.str();
 		return filter;
 	}
 	
 private:
-	Regex m_rx;
+	boost::regex m_rx;
 	FilterFunction m_filter;
 };
 
@@ -59,16 +55,12 @@ template <typename T> struct RegexItemFilter
 {
 	typedef NC::Menu<T> MenuT;
 	typedef typename NC::Menu<T>::Item Item;
-	typedef std::function<bool(const Regex &, const Item &)> FilterFunction;
+	typedef std::function<bool(const boost::regex &, const Item &)> FilterFunction;
 	
-	RegexItemFilter(const std::string &regex_, int cflags, FilterFunction filter)
-	: m_rx(regex_, cflags), m_filter(filter) { }
+	RegexItemFilter(boost::regex rx, FilterFunction filter)
+	: m_rx(rx), m_filter(filter) { }
 	
 	bool operator()(const Item &item) {
-		if (m_rx.regex().empty())
-			return true;
-		if (!m_rx.compiled() || !m_rx.error().empty())
-			return false;
 		return m_filter(m_rx, item);
 	}
 	
@@ -77,12 +69,12 @@ template <typename T> struct RegexItemFilter
 		std::string filter;
 		auto rf = menu.getFilter().template target< RegexItemFilter<T> >();
 		if (rf)
-			filter = rf->m_rx.regex();
+			filter = rf->m_rx.str();
 		return filter;
 	}
 	
 private:
-	Regex m_rx;
+	boost::regex m_rx;
 	FilterFunction m_filter;
 };
 

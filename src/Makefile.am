@@ -29,7 +29,6 @@ ncmpcpp_SOURCES = \
 	outputs.cpp \
 	playlist.cpp \
 	playlist_editor.cpp \
-	regexes.cpp \
 	screen.cpp \
 	screen_type.cpp \
 	scrollpad.cpp \
@@ -86,7 +85,6 @@ noinst_HEADERS = \
 	playlist_editor.h \
 	proxy_song_list.h \
 	regex_filter.h \
-	regexes.h \
 	screen.h \
 	screen_switcher.h \
 	screen_type.h \

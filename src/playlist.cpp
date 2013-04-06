@@ -47,7 +47,7 @@ bool Playlist::ReloadRemaining = false;
 namespace {//
 
 std::string songToString(const MPD::Song &s);
-bool playlistEntryMatcher(const Regex &rx, const MPD::Song &s);
+bool playlistEntryMatcher(const boost::regex &rx, const MPD::Song &s);
 
 }
 
@@ -141,9 +141,14 @@ std::string Playlist::currentFilter()
 
 void Playlist::applyFilter(const std::string &filter)
 {
-	w.showAll();
-	auto rx = RegexFilter<MPD::Song>(filter, Config.regex_type, playlistEntryMatcher);
-	w.filter(w.begin(), w.end(), rx);
+	try
+	{
+		w.showAll();
+		auto rx = RegexFilter<MPD::Song>(
+			boost::regex(filter, Config.regex_type), playlistEntryMatcher);
+		w.filter(w.begin(), w.end(), rx);
+	}
+	catch (boost::bad_expression &) { }
 }
 
 /***********************************************************************/
@@ -155,8 +160,16 @@ bool Playlist::allowsSearching()
 
 bool Playlist::search(const std::string &constraint)
 {
-	auto rx = RegexFilter<MPD::Song>(constraint, Config.regex_type, playlistEntryMatcher);
-	return w.search(w.begin(), w.end(), rx);
+	try
+	{
+		auto rx = RegexFilter<MPD::Song>(
+			boost::regex(constraint, Config.regex_type), playlistEntryMatcher);
+		return w.search(w.begin(), w.end(), rx);
+	}
+	catch (boost::bad_expression &)
+	{
+		return false;
+	}
 }
 
 void Playlist::nextFound(bool wrap)
@@ -343,9 +356,9 @@ std::string songToString(const MPD::Song &s)
 	return result;
 }
 
-bool playlistEntryMatcher(const Regex &rx, const MPD::Song &s)
+bool playlistEntryMatcher(const boost::regex &rx, const MPD::Song &s)
 {
-	return rx.match(songToString(s));
+	return boost::regex_search(songToString(s), rx);
 }
 
 }

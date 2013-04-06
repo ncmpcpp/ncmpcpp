@@ -81,8 +81,8 @@ std::string GenerateFilename(const MPD::MutableSong &s, const std::string &patte
 std::string ParseFilename(MPD::MutableSong &s, std::string mask, bool preview);
 
 std::string SongToString(const MPD::MutableSong &s);
-bool DirEntryMatcher(const Regex &rx, const std::pair<std::string, std::string> &dir, bool filter);
-bool SongEntryMatcher(const Regex &rx, const MPD::MutableSong &s);
+bool DirEntryMatcher(const boost::regex &rx, const std::pair<std::string, std::string> &dir, bool filter);
+bool SongEntryMatcher(const boost::regex &rx, const MPD::MutableSong &s);
 
 }
 
@@ -740,19 +740,25 @@ std::string TagEditor::currentFilter()
 
 void TagEditor::applyFilter(const std::string &filter)
 {
-	if (w == Dirs)
+	try
 	{
-		Dirs->showAll();
-		auto fun = std::bind(DirEntryMatcher, _1, _2, true);
-		auto rx = RegexFilter< std::pair<std::string, std::string> >(filter, Config.regex_type, fun);
-		Dirs->filter(Dirs->begin(), Dirs->end(), rx);
+		if (w == Dirs)
+		{
+			Dirs->showAll();
+			auto fun = std::bind(DirEntryMatcher, _1, _2, true);
+			auto rx = RegexFilter< std::pair<std::string, std::string> >(
+				boost::regex(filter, Config.regex_type), fun);
+			Dirs->filter(Dirs->begin(), Dirs->end(), rx);
+		}
+		else if (w == Tags)
+		{
+			Tags->showAll();
+			auto rx = RegexFilter<MPD::MutableSong>(
+				boost::regex(filter, Config.regex_type), SongEntryMatcher);
+			Tags->filter(Tags->begin(), Tags->end(), rx);
+		}
 	}
-	else if (w == Tags)
-	{
-		Tags->showAll();
-		auto rx = RegexFilter<MPD::MutableSong>(filter, Config.regex_type, SongEntryMatcher);
-		Tags->filter(Tags->begin(), Tags->end(), rx);
-	}
+	catch (boost::bad_expression &) { }
 }
 
 /***********************************************************************/
@@ -764,19 +770,28 @@ bool TagEditor::allowsSearching()
 
 bool TagEditor::search(const std::string &constraint)
 {
-	bool result = false;
-	if (w == Dirs)
+	try
 	{
-		auto fun = std::bind(DirEntryMatcher, _1, _2, false);
-		auto rx = RegexFilter< std::pair<std::string, std::string> >(constraint, Config.regex_type, fun);
-		result = Dirs->search(Dirs->begin(), Dirs->end(), rx);
+		bool result = false;
+		if (w == Dirs)
+		{
+			auto fun = std::bind(DirEntryMatcher, _1, _2, false);
+			auto rx = RegexFilter< std::pair<std::string, std::string> >(
+				boost::regex(constraint, Config.regex_type), fun);
+			result = Dirs->search(Dirs->begin(), Dirs->end(), rx);
+		}
+		else if (w == Tags)
+		{
+			auto rx = RegexFilter<MPD::MutableSong>(
+				boost::regex(constraint, Config.regex_type), SongEntryMatcher);
+			result = Tags->search(Tags->begin(), Tags->end(), rx);
+		}
+		return result;
 	}
-	else if (w == Tags)
+	catch (boost::bad_expression &)
 	{
-		auto rx = RegexFilter<MPD::MutableSong>(constraint, Config.regex_type, SongEntryMatcher);
-		result = Tags->search(Tags->begin(), Tags->end(), rx);
+		return false;
 	}
-	return result;
 }
 
 void TagEditor::nextFound(bool wrap)
@@ -1169,16 +1184,16 @@ std::string SongToString(const MPD::MutableSong &s)
 	return result.empty() ? Config.empty_tag : result;
 }
 
-bool DirEntryMatcher(const Regex &rx, const std::pair<std::string, std::string> &dir, bool filter)
+bool DirEntryMatcher(const boost::regex &rx, const std::pair<std::string, std::string> &dir, bool filter)
 {
 	if (dir.first == "." || dir.first == "..")
 		return filter;
-	return rx.match(dir.first);
+	return boost::regex_search(dir.first, rx);
 }
 
-bool SongEntryMatcher(const Regex &rx, const MPD::MutableSong &s)
+bool SongEntryMatcher(const boost::regex &rx, const MPD::MutableSong &s)
 {
-	return rx.match(SongToString(s));
+	return boost::regex_search(SongToString(s), rx);
 }
 
 }
