@@ -20,7 +20,6 @@
 
 #include <array>
 #include <iomanip>
-#include <regex.h>
 
 #include "display.h"
 #include "global.h"
@@ -446,85 +445,116 @@ void SearchEngine::Search()
 	{
 		if (SearchMode != &SearchModes[2]) // match to pattern
 		{
-			regex_t rx;
+			boost::regex rx;
 			if (!itsConstraints[0].empty())
 			{
-				if (regcomp(&rx, itsConstraints[0].c_str(), REG_ICASE | Config.regex_type) == 0)
+				try
 				{
+					rx.assign(itsConstraints[0], Config.regex_type);
 					any_found =
-						!regexec(&rx, it->getArtist().c_str(), 0, 0, 0)
-					||	!regexec(&rx, it->getAlbumArtist().c_str(), 0, 0, 0)
-					||	!regexec(&rx, it->getTitle().c_str(), 0, 0, 0)
-					||	!regexec(&rx, it->getAlbum().c_str(), 0, 0, 0)
-					||	!regexec(&rx, it->getName().c_str(), 0, 0, 0)
-					||	!regexec(&rx, it->getComposer().c_str(), 0, 0, 0)
-					||	!regexec(&rx, it->getPerformer().c_str(), 0, 0, 0)
-					||	!regexec(&rx, it->getGenre().c_str(), 0, 0, 0)
-					||	!regexec(&rx, it->getDate().c_str(), 0, 0, 0)
-					||	!regexec(&rx, it->getComment().c_str(), 0, 0, 0);
+						!boost::regex_search(it->getArtist(), rx)
+					||	!boost::regex_search(it->getAlbumArtist(), rx)
+					||	!boost::regex_search(it->getTitle(), rx)
+					||	!boost::regex_search(it->getAlbum(), rx)
+					||	!boost::regex_search(it->getName(), rx)
+					||	!boost::regex_search(it->getComposer(), rx)
+					||	!boost::regex_search(it->getPerformer(), rx)
+					||	!boost::regex_search(it->getGenre(), rx)
+					||	!boost::regex_search(it->getDate(), rx)
+					||	!boost::regex_search(it->getComment(), rx);
 				}
-				regfree(&rx);
+				catch (boost::bad_expression &) { }
 			}
 			
 			if (found && !itsConstraints[1].empty())
 			{
-				if (!regcomp(&rx, itsConstraints[1].c_str(), REG_ICASE | Config.regex_type))
-					found = !regexec(&rx, it->getArtist().c_str(), 0, 0, 0);
-				regfree(&rx);
+				try
+				{
+					rx.assign(itsConstraints[1], Config.regex_type);
+					found = !boost::regex_search(it->getArtist(), rx);
+				}
+				catch (boost::bad_expression &) { }
 			}
 			if (found && !itsConstraints[2].empty())
 			{
-				if (!regcomp(&rx, itsConstraints[2].c_str(), REG_ICASE | Config.regex_type))
-					found = !regexec(&rx, it->getAlbumArtist().c_str(), 0, 0, 0);
-				regfree(&rx);
+				try
+				{
+					rx.assign(itsConstraints[2], Config.regex_type);
+					found = !boost::regex_search(it->getAlbumArtist(), rx);
+				}
+				catch (boost::bad_expression &) { }
 			}
 			if (found && !itsConstraints[3].empty())
 			{
-				if(!regcomp(&rx, itsConstraints[3].c_str(), REG_ICASE | Config.regex_type))
-					found = !regexec(&rx, it->getTitle().c_str(), 0, 0, 0);
-				regfree(&rx);
+				try
+				{
+					rx.assign(itsConstraints[3], Config.regex_type);
+					found = !boost::regex_search(it->getTitle(), rx);
+				}
+				catch (boost::bad_expression &) { }
 			}
 			if (found && !itsConstraints[4].empty())
 			{
-				if (!regcomp(&rx, itsConstraints[4].c_str(), REG_ICASE | Config.regex_type))
-					found = !regexec(&rx, it->getAlbum().c_str(), 0, 0, 0);
-				regfree(&rx);
+				try
+				{
+					rx.assign(itsConstraints[4], Config.regex_type);
+					found = !boost::regex_search(it->getAlbum(), rx);
+				}
+				catch (boost::bad_expression &) { }
 			}
 			if (found && !itsConstraints[5].empty())
 			{
-				if (!regcomp(&rx, itsConstraints[5].c_str(), REG_ICASE | Config.regex_type))
-					found = !regexec(&rx, it->getName().c_str(), 0, 0, 0);
-				regfree(&rx);
+				try
+				{
+					rx.assign(itsConstraints[5], Config.regex_type);
+					found = !boost::regex_search(it->getName(), rx);
+				}
+				catch (boost::bad_expression &) { }
 			}
 			if (found && !itsConstraints[6].empty())
 			{
-				if (!regcomp(&rx, itsConstraints[6].c_str(), REG_ICASE | Config.regex_type))
-					found = !regexec(&rx, it->getComposer().c_str(), 0, 0, 0);
-				regfree(&rx);
+				try
+				{
+					rx.assign(itsConstraints[6], Config.regex_type);
+					found = !boost::regex_search(it->getComposer(), rx);
+				}
+				catch (boost::bad_expression &) { }
 			}
 			if (found && !itsConstraints[7].empty())
 			{
-				if (!regcomp(&rx, itsConstraints[7].c_str(), REG_ICASE | Config.regex_type))
-					found = !regexec(&rx, it->getPerformer().c_str(), 0, 0, 0);
-				regfree(&rx);
+				try
+				{
+					rx.assign(itsConstraints[7], Config.regex_type);
+					found = !boost::regex_search(it->getPerformer(), rx);
+				}
+				catch (boost::bad_expression &) { }
 			}
 			if (found && !itsConstraints[8].empty())
 			{
-				if (!regcomp(&rx, itsConstraints[8].c_str(), REG_ICASE | Config.regex_type))
-					found = !regexec(&rx, it->getGenre().c_str(), 0, 0, 0);
-				regfree(&rx);
+				try
+				{
+					rx.assign(itsConstraints[8], Config.regex_type);
+					found = !boost::regex_search(it->getGenre(), rx);
+				}
+				catch (boost::bad_expression &) { }
 			}
 			if (found && !itsConstraints[9].empty())
 			{
-				if (!regcomp(&rx, itsConstraints[9].c_str(), REG_ICASE | Config.regex_type))
-					found = !regexec(&rx, it->getDate().c_str(), 0, 0, 0);
-				regfree(&rx);
+				try
+				{
+					rx.assign(itsConstraints[9], Config.regex_type);
+					found = !boost::regex_search(it->getDate(), rx);
+				}
+				catch (boost::bad_expression &) { }
 			}
 			if (found && !itsConstraints[10].empty())
 			{
-				if (!regcomp(&rx, itsConstraints[10].c_str(), REG_ICASE | Config.regex_type))
-					found = !regexec(&rx, it->getComment().c_str(), 0, 0, 0);
-				regfree(&rx);
+				try
+				{
+					rx.assign(itsConstraints[10], Config.regex_type);
+					found = !boost::regex_search(it->getComment(), rx);
+				}
+				catch (boost::bad_expression &) { }
 			}
 		}
 		else // match only if values are equal
