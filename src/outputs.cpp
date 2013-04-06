@@ -46,7 +46,6 @@ Outputs::Outputs()
 	w.setItemDisplayer([](NC::Menu<MPD::Output> &menu) {
 		menu << Charset::utf8ToLocale(menu.drawn()->value().name());
 	});
-	FetchList();
 }
 
 void Outputs::switchTo()
@@ -73,16 +72,14 @@ void Outputs::enterPressed()
 {
 	if (w.current().value().isEnabled())
 	{
-		if (Mpd.DisableOutput(w.choice()))
-			Statusbar::msg("Output \"%s\" disabled", w.current().value().name().c_str());
+		Mpd.DisableOutput(w.choice());
+		Statusbar::msg("Output \"%s\" disabled", w.current().value().name().c_str());
 	}
 	else
 	{
-		if (Mpd.EnableOutput(w.choice()))
-			Statusbar::msg("Output \"%s\" enabled", w.current().value().name().c_str());
+		Mpd.EnableOutput(w.choice());
+		Statusbar::msg("Output \"%s\" enabled", w.current().value().name().c_str());
 	}
-	if (!Mpd.SupportsIdle())
-		FetchList();
 }
 
 void Outputs::mouseButtonPressed(MEVENT me)

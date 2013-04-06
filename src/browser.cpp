@@ -74,9 +74,6 @@ Browser::Browser() : itsBrowseLocally(0), itsScrollBeginning(0), itsBrowsedDir("
 	w.setSelectedPrefix(Config.selected_item_prefix);
 	w.setSelectedSuffix(Config.selected_item_suffix);
 	w.setItemDisplayer(std::bind(Display::Items, _1, proxySongList()));
-	
-	if (SupportedExtensions.empty())
-		Mpd.GetSupportedExtensions(SupportedExtensions);
 }
 
 void Browser::resize()
@@ -136,11 +133,9 @@ void Browser::enterPressed()
 		}
 		case itPlaylist:
 		{
-			if (Mpd.LoadPlaylist(item.name))
-			{
-				Statusbar::msg("Playlist \"%s\" loaded", item.name.c_str());
-				myPlaylist->PlayNewlyAddedSongs();
-			}
+			Mpd.LoadPlaylist(item.name);
+			Statusbar::msg("Playlist \"%s\" loaded", item.name.c_str());
+			myPlaylist->PlayNewlyAddedSongs();
 		}
 	}
 }
@@ -168,7 +163,6 @@ void Browser::spacePressed()
 	{
 		case itDirectory:
 		{
-			bool result;
 #			ifndef WIN32
 			if (isLocal())
 			{
@@ -179,13 +173,12 @@ void Browser::spacePressed()
 				list.reserve(items.size());
 				for (MPD::ItemList::const_iterator it = items.begin(); it != items.end(); ++it)
 					list.push_back(*it->song);
-				result = addSongsToPlaylist(list, false, -1);
+				addSongsToPlaylist(list, false, -1);
 			}
 			else
 #			endif // !WIN32
-				result = Mpd.Add(item.name);
-			if (result)
-				Statusbar::msg("Directory \"%s\" added", item.name.c_str());
+				Mpd.Add(item.name);
+			Statusbar::msg("Directory \"%s\" added", item.name.c_str());
 			break;
 		}
 		case itSong:
@@ -195,8 +188,8 @@ void Browser::spacePressed()
 		}
 		case itPlaylist:
 		{
-			if (Mpd.LoadPlaylist(item.name))
-				Statusbar::msg("Playlist \"%s\" loaded", item.name.c_str());
+			Mpd.LoadPlaylist(item.name);
+			Statusbar::msg("Playlist \"%s\" loaded", item.name.c_str());
 			break;
 		}
 	}
@@ -361,6 +354,12 @@ MPD::SongList Browser::getSelectedSongs()
 	if (result.empty() && !w.empty())
 		item_handler(w.current().value());
 	return result;
+}
+
+void Browser::fetchSupportedExtensions()
+{
+	SupportedExtensions.clear();
+	Mpd.GetSupportedExtensions(SupportedExtensions);
 }
 
 void Browser::LocateSong(const MPD::Song &s)
@@ -580,7 +579,7 @@ bool Browser::deleteItem(const MPD::Item &item)
 	
 	// playlist created by mpd
 	if (!isLocal() && item.type == itPlaylist && CurrentDir() == "/")
-		return Mpd.DeletePlaylist(item.name);
+		Mpd.DeletePlaylist(item.name);
 	
 	std::string path;
 	if (!isLocal())

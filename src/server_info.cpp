@@ -36,19 +36,25 @@ ServerInfo::ServerInfo()
 {
 	SetDimensions();
 	w = NC::Scrollpad((COLS-itsWidth)/2, (MainHeight-itsHeight)/2+MainStartY, itsWidth, itsHeight, "MPD server info", Config.main_color, Config.window_border);
-	Mpd.GetURLHandlers([this](std::string &&handler) {
-		itsURLHandlers.push_back(handler);
-	});
-	Mpd.GetTagTypes([this](std::string &&tag_type) {
-		itsTagTypes.push_back(tag_type);
-	});
 }
 
 void ServerInfo::switchTo()
 {
 	using Global::myScreen;
 	if (myScreen != this)
+	{
 		SwitchTo::execute(this);
+		
+		itsURLHandlers.clear();
+		itsTagTypes.clear();
+		
+		Mpd.GetURLHandlers([this](std::string &&handler) {
+			itsURLHandlers.push_back(handler);
+		});
+		Mpd.GetTagTypes([this](std::string &&tag_type) {
+			itsTagTypes.push_back(tag_type);
+		});
+	}
 	else
 		switchToPreviousScreen();
 }

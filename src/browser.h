@@ -65,6 +65,8 @@ struct Browser: Screen<NC::Menu<MPD::Item>>, Filterable, HasSongs, Searchable, T
 	// private members
 	const std::string &CurrentDir() { return itsBrowsedDir; }
 	
+	void fetchSupportedExtensions();
+	
 	bool isLocal() { return itsBrowseLocally; }
 	void LocateSong(const MPD::Song &);
 	void GetDirectory(std::string, std::string = "/");

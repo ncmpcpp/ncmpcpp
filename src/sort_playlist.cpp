@@ -201,11 +201,9 @@ void SortPlaylistDialog::sort() const
 	Statusbar::msg("Sorting...");
 	Mpd.StartCommandsList();
 	quick_sort(playlist.begin(), playlist.end());
-	if (Mpd.CommitCommandsList())
-	{
-		Statusbar::msg("Playlist sorted");	
-		switchToPreviousScreen();
-	}
+	Mpd.CommitCommandsList();
+	Statusbar::msg("Playlist sorted");
+	switchToPreviousScreen();
 }
 
 void SortPlaylistDialog::cancel() const

@@ -40,6 +40,7 @@
 #include "error.h"
 #include "helpers.h"
 #include "lyrics.h"
+#include "outputs.h"
 #include "playlist.h"
 #include "settings.h"
 #include "status.h"
@@ -97,7 +98,6 @@ int main(int argc, char **argv)
 	using Global::wHeader;
 	using Global::wFooter;
 	
-	using Global::ShowMessages;
 	using Global::VolumeState;
 	using Global::Timer;
 	
@@ -126,19 +126,9 @@ int main(int argc, char **argv)
 		Mpd.SetPort(Config.mpd_port);
 	
 	Mpd.SetTimeout(Config.mpd_connection_timeout);
-	Mpd.SetIdleEnabled(Config.enable_idle_notifications);
 	
 	if (argc > 1)
 		ParseArgv(argc, argv);
-	
-	if (!Actions::connectToMPD())
-		exit(1);
-	
-	if (Mpd.Version() < 16)
-	{
-		std::cout << "MPD < 0.16.0 is not supported, please upgrade.\n";
-		exit(1);
-	}
 	
 	CreateDir(Config.ncmpcpp_directory);
 	
@@ -171,8 +161,6 @@ int main(int argc, char **argv)
 	wFooter = new NC::Window(0, Actions::FooterStartY, COLS, Actions::FooterHeight, "", Config.statusbar_color, NC::Border::None);
 	wFooter->setTimeout(500);
 	wFooter->setGetStringHelper(Statusbar::Helpers::getString);
-	if (Mpd.SupportsIdle())
-		wFooter->addFDCallback(Mpd.GetFD(), Statusbar::Helpers::mpd);
 	wFooter->createHistory();
 	
 	// initialize global timer
@@ -186,9 +174,6 @@ int main(int argc, char **argv)
 	if (Config.startup_screen != myScreen)
 		Config.startup_screen->switchTo();
 	
-	Mpd.SetStatusUpdater(Status::update, 0);
-	Mpd.SetErrorHandler(Status::handleError, 0);
-	
 	// local variables
 	Key input(0, Key::Standard);
 	timeval past = { 0, 0 };
@@ -198,15 +183,6 @@ int main(int argc, char **argv)
 	if (Config.mouse_support)
 		mousemask(ALL_MOUSE_EVENTS, 0);
 	
-	Mpd.OrderDataFetching();
-	if (Config.jump_to_now_playing_song_at_start)
-	{
-		Status::trace();
-		int curr_pos = Mpd.GetCurrentSongPos();
-		if  (curr_pos >= 0)
-			myPlaylist->main().highlight(curr_pos);
-	}
-	
 #	ifndef WIN32
 	signal(SIGPIPE, sighandler);
 	signal(SIGWINCH, sighandler);
@@ -214,66 +190,95 @@ int main(int argc, char **argv)
 	
 	while (!Actions::ExitMainLoop)
 	{
-		if (!Mpd.Connected())
+		try
 		{
-			if (!wFooter->FDCallbacksListEmpty())
-				wFooter->clearFDCallbacksList();
-			Statusbar::msg("Attempting to reconnect...");
-			if (Mpd.Connect())
+			if (!Mpd.Connected())
 			{
-				Statusbar::msg("Connected to %s", Mpd.GetHostname().c_str());
-				if (Mpd.SupportsIdle())
+				wFooter->clearFDCallbacksList();
+				try
 				{
+					Mpd.Connect();
+					if (Mpd.Version() < 16)
+					{
+						// FIXME workaround so we won't get assertion fails
+						MpdStatus = Mpd.getStatus();
+						Mpd.Disconnect();
+						throw MPD::ClientError(MPD_ERROR_STATE, "MPD < 0.16.0 is not supported", false);
+					}
+					MpdStatus.clear();
 					wFooter->addFDCallback(Mpd.GetFD(), Statusbar::Helpers::mpd);
-					Mpd.OrderDataFetching(); // we need info about new connection
+					Status::update(-1); // we need info about new connection
+					
+					if (Config.jump_to_now_playing_song_at_start)
+					{
+						int curr_pos = MpdStatus.currentSongPosition();
+						if  (curr_pos >= 0)
+							myPlaylist->main().highlight(curr_pos);
+					}
+					
+					myBrowser->fetchSupportedExtensions();
+#					ifdef ENABLE_OUTPUTS
+					myOutputs->FetchList();
+#					endif // ENABLE_OUTPUTS
+#					ifdef ENABLE_VISUALIZER
+					myVisualizer->ResetFD();
+					if (myScreen == myVisualizer)
+						myVisualizer->SetFD();
+					myVisualizer->FindOutputID();
+#					endif // ENABLE_VISUALIZER
+					
+					Statusbar::msg("Connected to %s", Mpd.GetHostname().c_str());
 				}
-				ShowMessages = false;
-#				ifdef ENABLE_VISUALIZER
-				myVisualizer->ResetFD();
-				if (myScreen == myVisualizer)
-					myVisualizer->SetFD();
-				myVisualizer->FindOutputID();
-#				endif // ENABLE_VISUALIZER
+				catch (MPD::ClientError &e)
+				{
+					Status::handleClientError(e);
+				}
 			}
+			
+			Status::trace();
+			
+			// header stuff
+			if (((Timer.tv_sec == past.tv_sec && Timer.tv_usec >= past.tv_usec+500000) || Timer.tv_sec > past.tv_sec)
+			&&   (myScreen == myPlaylist || myScreen == myBrowser || myScreen == myLyrics)
+			)
+			{
+				drawHeader();
+				past = Timer;
+			}
+			// header stuff end
+			
+			if (input != Key::noOp)
+				myScreen->refreshWindow();
+			input = Key::read(*wFooter);
+			
+			if (input == Key::noOp)
+				continue;
+			
+			auto k = Bindings.get(input);
+			for (; k.first != k.second; ++k.first)
+				if (k.first->execute())
+					break;
+			
+			if (myScreen == myPlaylist)
+				myPlaylist->EnableHighlighting();
+			
+#			ifdef ENABLE_VISUALIZER
+			// visualizer sets timeout to 40ms, but since only it needs such small
+			// value, we should restore defalt one after switching to another screen.
+			if (wFooter->getTimeout() < 500
+			&&  !(myScreen == myVisualizer || myLockedScreen == myVisualizer || myInactiveScreen == myVisualizer)
+			)
+				wFooter->setTimeout(500);
+#			endif // ENABLE_VISUALIZER
 		}
-		
-		Status::trace();
-		
-		ShowMessages = true;
-		
-		// header stuff
-		if (((Timer.tv_sec == past.tv_sec && Timer.tv_usec >= past.tv_usec+500000) || Timer.tv_sec > past.tv_sec)
-		&&   (myScreen == myPlaylist || myScreen == myBrowser || myScreen == myLyrics)
-		   )
+		catch (MPD::ClientError &e)
 		{
-			drawHeader();
-			past = Timer;
+			Status::handleClientError(e);
 		}
-		// header stuff end
-		
-		if (input != Key::noOp)
-			myScreen->refreshWindow();
-		input = Key::read(*wFooter);
-		
-		if (input == Key::noOp)
-			continue;
-		
-		auto k = Bindings.get(input);
-		for (; k.first != k.second; ++k.first)
-			if (k.first->execute())
-				break;
-		
-		if (myScreen == myPlaylist)
-			myPlaylist->EnableHighlighting();
-		
-#		ifdef ENABLE_VISUALIZER
-		// visualizer sets timeout to 40ms, but since only it needs such small
-		// value, we should restore defalt one after switching to another screen.
-		if (wFooter->getTimeout() < 500
-		&&  !(myScreen == myVisualizer || myLockedScreen == myVisualizer || myInactiveScreen == myVisualizer)
-		   )
-			wFooter->setTimeout(500);
-#		endif // ENABLE_VISUALIZER
+		catch (MPD::ServerError &e)
+		{
+			Status::handleServerError(e);
+		}
 	}
 	return 0;
 }

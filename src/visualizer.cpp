@@ -57,8 +57,6 @@ Visualizer::Visualizer()
 	m_fftw_output = static_cast<fftw_complex *>(fftw_malloc(sizeof(fftw_complex)*m_fftw_results));
 	m_fftw_plan = fftw_plan_dft_r2c_1d(m_samples, m_fftw_input, m_fftw_output, FFTW_ESTIMATE);
 #	endif // HAVE_FFTW3_H
-	
-	FindOutputID();
 }
 
 void Visualizer::switchTo()

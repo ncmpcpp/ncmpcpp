@@ -152,24 +152,22 @@ void moveSelectedItemsUp(NC::Menu<MPD::Song> &m, F swap_fun)
 		Mpd.StartCommandsList();
 		for (auto it = list.begin(); it != list.end(); ++it)
 			swap_fun(Mpd, *it - begin, *it - begin - 1);
-		if (Mpd.CommitCommandsList())
+		Mpd.CommitCommandsList();
+		if (list.size() > 1)
 		{
-			if (list.size() > 1)
+			for (auto it = list.begin(); it != list.end(); ++it)
 			{
-				for (auto it = list.begin(); it != list.end(); ++it)
-				{
-					(*it)->setSelected(false);
-					(*it-1)->setSelected(true);
-				}
-				m.highlight(list[(list.size())/2] - begin - 1);
+				(*it)->setSelected(false);
+				(*it-1)->setSelected(true);
 			}
-			else
-			{
-				// if we move only one item, do not select it. however, if single item
-				// was selected prior to move, it'll deselect it. oh well.
-				list[0]->setSelected(false);
-				m.scroll(NC::Scroll::Up);
-			}
+			m.highlight(list[(list.size())/2] - begin - 1);
+		}
+		else
+		{
+			// if we move only one item, do not select it. however, if single item
+			// was selected prior to move, it'll deselect it. oh well.
+			list[0]->setSelected(false);
+			m.scroll(NC::Scroll::Up);
 		}
 	}
 }
@@ -186,24 +184,22 @@ void moveSelectedItemsDown(NC::Menu<MPD::Song> &m, F swap_fun)
 		Mpd.StartCommandsList();
 		for (auto it = list.begin(); it != list.end(); ++it)
 			swap_fun(Mpd, it->base() - begin, it->base() - begin + 1);
-		if (Mpd.CommitCommandsList())
+		Mpd.CommitCommandsList();
+		if (list.size() > 1)
 		{
-			if (list.size() > 1)
+			for (auto it = list.begin(); it != list.end(); ++it)
 			{
-				for (auto it = list.begin(); it != list.end(); ++it)
-				{
-					(*it)->setSelected(false);
-					(*it-1)->setSelected(true);
-				}
-				m.highlight(list[(list.size())/2].base() - begin + 1);
+				(*it)->setSelected(false);
+				(*it-1)->setSelected(true);
 			}
-			else
-			{
-				// if we move only one item, do not select it. however, if single item
-				// was selected prior to move, it'll deselect it. oh well.
-				list[0]->setSelected(false);
-				m.scroll(NC::Scroll::Down);
-			}
+			m.highlight(list[(list.size())/2].base() - begin + 1);
+		}
+		else
+		{
+			// if we move only one item, do not select it. however, if single item
+			// was selected prior to move, it'll deselect it. oh well.
+			list[0]->setSelected(false);
+			m.scroll(NC::Scroll::Down);
 		}
 	}
 }
@@ -236,14 +232,12 @@ void moveSelectedItemsTo(NC::Menu<MPD::Song> &m, F move_fun)
 			size_t i = list.size()-1;
 			for (auto it = list.rbegin(); it != list.rend(); ++it, --i)
 				move_fun(Mpd, *it - begin, pos+i);
-			if (Mpd.CommitCommandsList())
+			Mpd.CommitCommandsList();
+			i = list.size()-1;
+			for (auto it = list.rbegin(); it != list.rend(); ++it, --i)
 			{
-				i = list.size()-1;
-				for (auto it = list.rbegin(); it != list.rend(); ++it, --i)
-				{
-					(*it)->setSelected(false);
-					m[pos+i].setSelected(true);
-				}
+				(*it)->setSelected(false);
+				m[pos+i].setSelected(true);
 			}
 		}
 		else if (diff < 0) // move up
@@ -251,23 +245,20 @@ void moveSelectedItemsTo(NC::Menu<MPD::Song> &m, F move_fun)
 			size_t i = 0;
 			for (auto it = list.begin(); it != list.end(); ++it, ++i)
 				move_fun(Mpd, *it - begin, pos+i);
-			if (Mpd.CommitCommandsList())
+			Mpd.CommitCommandsList();
+			i = 0;
+			for (auto it = list.begin(); it != list.end(); ++it, ++i)
 			{
-				i = 0;
-				for (auto it = list.begin(); it != list.end(); ++it, ++i)
-				{
-					(*it)->setSelected(false);
-					m[pos+i].setSelected(true);
-				}
+				(*it)->setSelected(false);
+				m[pos+i].setSelected(true);
 			}
 		}
 	});
 }
 
 template <typename F>
-bool deleteSelectedSongs(NC::Menu<MPD::Song> &m, F delete_fun)
+void deleteSelectedSongs(NC::Menu<MPD::Song> &m, F delete_fun)
 {
-	bool result = false;
 	selectCurrentIfNoneSelected(m);
 	// ok, this is tricky. we need to operate on whole playlist
 	// to get positions right, but at the same time we need to
@@ -298,31 +289,27 @@ bool deleteSelectedSongs(NC::Menu<MPD::Song> &m, F delete_fun)
 			++cur_filtered;
 		}
 	}
-	if (Mpd.CommitCommandsList())
-		result = true;
-	return result;
+	Mpd.CommitCommandsList();
 }
 
 template <typename F>
-bool cropPlaylist(NC::Menu<MPD::Song> &m, F delete_fun)
+void cropPlaylist(NC::Menu<MPD::Song> &m, F delete_fun)
 {
 	reverseSelectionHelper(m.begin(), m.end());
-	return deleteSelectedSongs(m, delete_fun);
+	deleteSelectedSongs(m, delete_fun);
 }
 
 template <typename F, typename G>
-bool clearPlaylist(NC::Menu<MPD::Song> &m, F delete_fun, G clear_fun)
+void clearPlaylist(NC::Menu<MPD::Song> &m, F delete_fun, G clear_fun)
 {
-	bool result = false;
 	if (m.isFiltered())
 	{
 		for (auto it = m.begin(); it != m.end(); ++it)
 			it->setSelected(true);
-		result = deleteSelectedSongs(m, delete_fun);
+		deleteSelectedSongs(m, delete_fun);
 	}
 	else
-		result = clear_fun(Mpd);
-	return result;
+		clear_fun(Mpd);
 }
 
 template <typename Iterator> std::string getSharedDirectory(Iterator first, Iterator last)
@@ -471,7 +458,7 @@ template <typename BufferT> void ShowTag(BufferT &buf, const std::string &tag)
 }
 
 bool addSongToPlaylist(const MPD::Song &s, bool play, size_t position = -1);
-bool addSongsToPlaylist(const MPD::SongList &list, bool play, size_t position = -1);
+void addSongsToPlaylist(const MPD::SongList &list, bool play, size_t position = -1);
 
 std::string Timestamp(time_t t);
 

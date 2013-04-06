@@ -26,11 +26,11 @@
 
 namespace Status {//
 
+void handleClientError(MPD::ClientError &e);
+void handleServerError(MPD::ServerError &e);
+
 void trace();
-
-void handleError(MPD::Connection * , int errorid, const char *msg, void *);
-
-void update(MPD::Connection *, MPD::StatusChanges changes, void *);
+void update(int event);
 
 namespace Changes {//
 
@@ -40,12 +40,12 @@ void database();
 void playerState();
 void songID();
 void elapsedTime();
-void repeat();
-void random();
-void single();
-void consume();
-void crossfade();
-void dbUpdateState();
+void repeat(bool show_msg);
+void random(bool show_msg);
+void single(bool show_msg);
+void consume(bool show_msg);
+void crossfade(bool show_msg);
+void dbUpdateState(bool show_msg);
 void flags();
 void mixer();
 void outputs();

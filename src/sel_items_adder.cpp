@@ -234,61 +234,54 @@ void SelectedItemsAdder::addToExistingPlaylist(const std::string &playlist) cons
 	Mpd.StartCommandsList();
 	for (auto s = m_selected_items.begin(); s != m_selected_items.end(); ++s)
 		Mpd.AddToPlaylist(playlist, *s);
-	if (Mpd.CommitCommandsList())
-	{
-		Statusbar::msg("Selected item(s) added to playlist \"%s\"", playlist.c_str());
-		switchToPreviousScreen();
-	}
+	Mpd.CommitCommandsList();
+	Statusbar::msg("Selected item(s) added to playlist \"%s\"", playlist.c_str());
+	switchToPreviousScreen();
 }
 
 void SelectedItemsAdder::addAtTheEndOfPlaylist() const
 {
-	bool success = addSongsToPlaylist(m_selected_items, false);
-	if (success)
-		exitSuccessfully();
+	addSongsToPlaylist(m_selected_items, false);
+	exitSuccessfully();
 }
 
 void SelectedItemsAdder::addAtTheBeginningOfPlaylist() const
 {
-	bool success = addSongsToPlaylist(m_selected_items, false, 0);
-	if (success)
-		exitSuccessfully();
+	addSongsToPlaylist(m_selected_items, false, 0);
+	exitSuccessfully();
 }
 
 void SelectedItemsAdder::addAfterCurrentSong() const
 {
-	if (!Mpd.isPlaying())
+	if (MpdStatus.playerState() == MPD::psStop)
 		return;
-	size_t pos = Mpd.GetCurrentSongPos();
+	size_t pos = MpdStatus.currentSongPosition();
 	++pos;
-	bool success = addSongsToPlaylist(m_selected_items, false, pos);
-	if (success)
-		exitSuccessfully();
+	addSongsToPlaylist(m_selected_items, false, pos);
+	exitSuccessfully();
 }
 
 void SelectedItemsAdder::addAfterCurrentAlbum() const
 {
-	if (!Mpd.isPlaying())
+	if (MpdStatus.playerState() == MPD::psStop)
 		return;
 	auto &pl = myPlaylist->main();
-	size_t pos = Mpd.GetCurrentSongPos();
+	size_t pos = MpdStatus.currentSongPosition();
 	withUnfilteredMenu(pl, [&pos, &pl]() {
 		std::string album =  pl[pos].value().getAlbum();
 		while (pos < pl.size() && pl[pos].value().getAlbum() == album)
 			++pos;
 	});
-	bool success = addSongsToPlaylist(m_selected_items, false, pos);
-	if (success)
-		exitSuccessfully();
+	addSongsToPlaylist(m_selected_items, false, pos);
+	exitSuccessfully();
 }
 
 void SelectedItemsAdder::addAfterHighlightedSong() const
 {
 	size_t pos = myPlaylist->main().current().value().getPosition();
 	++pos;
-	bool success = addSongsToPlaylist(m_selected_items, false, pos);
-	if (success)
-		exitSuccessfully();
+	addSongsToPlaylist(m_selected_items, false, pos);
+	exitSuccessfully();
 }
 
 void SelectedItemsAdder::cancel()

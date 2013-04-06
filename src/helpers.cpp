@@ -49,7 +49,7 @@ bool addSongToPlaylist(const MPD::Song &s, bool play, size_t position)
 	}
 	else
 	{
-		position = std::min(position, Mpd.GetPlaylistLength());
+		position = std::min(position, myPlaylist->main().size());
 		int id = Mpd.AddSong(s, position);
 		if (id >= 0)
 		{
@@ -64,18 +64,18 @@ bool addSongToPlaylist(const MPD::Song &s, bool play, size_t position)
 	return result;
 }
 
-bool addSongsToPlaylist(const MPD::SongList &list, bool play, size_t position)
+void addSongsToPlaylist(const MPD::SongList &list, bool play, size_t position)
 {
 	if (list.empty())
-		return false;
-	position = std::min(position, Mpd.GetPlaylistLength());
+		return;
+	position = std::min(position, myPlaylist->main().size());
 	Mpd.StartCommandsList();
 	for (auto s = list.rbegin(); s != list.rend(); ++s)
 		if (Mpd.AddSong(*s, position) < 0)
 			break;
 	if (play)
 		Mpd.Play(position);
-	return Mpd.CommitCommandsList();
+	Mpd.CommitCommandsList();
 }
 
 std::string Timestamp(time_t t)

@@ -191,7 +191,7 @@ void Lastfm::Save(const std::string &data)
 		output.close();
 	}
 	else
-		Error("couldn't save file \"" << itsFilename << "\"");
+		std::cerr << "ncmpcpp: couldn't save file \"" << itsFilename << "\"\n";
 }
 
 void Lastfm::Refetch()

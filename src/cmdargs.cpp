@@ -117,13 +117,11 @@ void ParseArgv(int argc, char **argv)
 			<< "  -s, --screen <name>       specify the startup screen\n"
 			<< "  -?, --help                show help message\n"
 			<< "  -v, --version             display version information\n"
-			<< "  --now-playing             display now playing song [" << now_playing_format << "]\n"
 			;
 			exit(0);
 		}
 		
-		if (!Actions::connectToMPD())
-			exit(1);
+		Actions::connectToMPD();
 		
 		if (!strcmp(argv[i], "-s") || !strcmp(argv[i], "--screen"))
 		{
@@ -164,34 +162,6 @@ void ParseArgv(int argc, char **argv)
 				exit(1);
 			}
 		}
-		else if (!strcmp(argv[i], "--now-playing"))
-		{
-			Mpd.UpdateStatus();
-			if (!Mpd.GetErrorMessage().empty())
-			{
-				std::cerr << "MPD error: " << Mpd.GetErrorMessage() << std::endl;
-				exit(1);
-			}
-			if (Mpd.isPlaying())
-			{
-				if (argc > ++i)
-				{
-					if (MPD::Song::isFormatOk("now-playing format", argv[i]))
-					{
-						// apply additional pair of braces
-						now_playing_format = "{";
-						now_playing_format += argv[i];
-						now_playing_format += "}";
-						boost::replace_all(now_playing_format, "\\n", "\n");
-						boost::replace_all(now_playing_format, "\\t", "\t");
-					}
-				}
-				std::string np = Mpd.GetCurrentlyPlayingSong().toString(
-					now_playing_format, Config.tags_separator);
-				std::cout << Charset::utf8ToLocale(np) << "\n";
-			}
-			exit(0);
-		}
 		else if (!strcmp(argv[i], "-c") || !strcmp(argv[i], "--config"))
 		{
 			// this is used in Configuration::CheckForCommandLineConfigFilePath, ignoring here.
@@ -200,11 +170,6 @@ void ParseArgv(int argc, char **argv)
 		else
 		{
 			std::cerr << "Invalid option: " << argv[i] << std::endl;
-			exit(1);
-		}
-		if (!Mpd.GetErrorMessage().empty())
-		{
-			std::cerr << "Error: " << Mpd.GetErrorMessage() << std::endl;
 			exit(1);
 		}
 	}

@@ -249,8 +249,6 @@ std::wstring MediaLibrary::title()
 
 void MediaLibrary::update()
 {
-	Mpd.BlockIdle(true);
-	
 	if (hasTwoColumns)
 	{
 		if (Albums.reallyEmpty() || m_albums_update_request)
@@ -407,8 +405,6 @@ void MediaLibrary::update()
 		});
 		Songs.refresh();
 	}
-	
-	Mpd.BlockIdle(false);
 }
 
 void MediaLibrary::enterPressed()
@@ -969,22 +965,20 @@ void MediaLibrary::AddToPlaylist(bool add_n_play)
 		addSongToPlaylist(Songs.current().value(), add_n_play);
 	else
 	{
-		auto list = getSelectedSongs();
-		if (addSongsToPlaylist(list, add_n_play))
+		addSongsToPlaylist(getSelectedSongs(), add_n_play);
+		if ((!Tags.empty() && isActiveWindow(Tags))
+		||  (isActiveWindow(Albums) && Albums.current().value().isAllTracksEntry()))
 		{
-			if ((!Tags.empty() && isActiveWindow(Tags))
-			||  (isActiveWindow(Albums) && Albums.current().value().isAllTracksEntry()))
-			{
-				std::string tag_type = boost::locale::to_lower(
-					tagTypeToString(Config.media_lib_primary_tag));
-				Statusbar::msg("Songs with %s = \"%s\" added", tag_type.c_str(), Tags.current().value().tag().c_str());
-			}
-			else if (isActiveWindow(Albums))
-				Statusbar::msg("Songs from album \"%s\" added",
-					Albums.current().value().entry().album().c_str());
+			std::string tag_type = boost::locale::to_lower(
+				tagTypeToString(Config.media_lib_primary_tag));
+			Statusbar::msg("Songs with %s = \"%s\" added",
+				tag_type.c_str(), Tags.current().value().tag().c_str());
 		}
+		else if (isActiveWindow(Albums))
+			Statusbar::msg("Songs from album \"%s\" added",
+				Albums.current().value().entry().album().c_str());
 	}
-
+	
 	if (!add_n_play)
 	{
 		w->scroll(NC::Scroll::Down);

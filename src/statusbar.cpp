@@ -38,7 +38,7 @@ bool statusbarAllowUnlock = true;
 
 void showMessage(int time, const char *format, va_list list)
 {
-	if (Global::ShowMessages && statusbarAllowUnlock)
+	if (statusbarAllowUnlock)
 	{
 		statusbarLockTime = Global::Timer;
 		statusbarLockDelay = time;
@@ -122,10 +122,10 @@ void Statusbar::unlock()
 		else
 			progressbarBlockUpdate = false;
 	}
-	if (!Mpd.isPlaying())
+	if (MpdStatus.playerState() == MPD::psStop)
 	{
 		if (Config.new_design)
-			Progressbar::draw(Mpd.GetElapsedTime(), Mpd.GetTotalTime());
+			Progressbar::draw(MpdStatus.elapsedTime(), MpdStatus.totalTime());
 		else
 			put() << wclrtoeol;
 		wFooter->refresh();
@@ -150,12 +150,12 @@ void Statusbar::tryRedraw()
 		else
 			progressbarBlockUpdate = !statusbarAllowUnlock;
 		
-		if (Mpd.GetState() != MPD::psPlay && !statusbarBlockUpdate && !progressbarBlockUpdate)
+		if (MpdStatus.playerState() != MPD::psStop && !statusbarBlockUpdate && !progressbarBlockUpdate)
 		{
 			if (Config.new_design)
-				Progressbar::draw(Mpd.GetElapsedTime(), Mpd.GetTotalTime());
+				Progressbar::draw(MpdStatus.elapsedTime(), MpdStatus.totalTime());
 			else
-				put() << wclrtoeol;
+				Status::Changes::elapsedTime();
 			wFooter->refresh();
 		}
 	}
@@ -185,7 +185,7 @@ void Statusbar::msg(int time, const char *format, ...)
 
 void Statusbar::Helpers::mpd()
 {
-	Mpd.OrderDataFetching();
+	Status::update(Mpd.noidle());
 }
 
 bool Statusbar::Helpers::getString(const std::wstring &)

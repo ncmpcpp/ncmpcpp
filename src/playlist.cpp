@@ -43,6 +43,7 @@ Playlist *myPlaylist;
 
 bool Playlist::ReloadTotalLength = 0;
 bool Playlist::ReloadRemaining = false;
+unsigned Playlist::Version = 0;
 
 namespace {//
 
@@ -217,9 +218,9 @@ MPD::SongList Playlist::getSelectedSongs()
 MPD::Song Playlist::nowPlayingSong()
 {
 	MPD::Song s;
-	if (Mpd.isPlaying())
+	if (MpdStatus.playerState() != MPD::psStop)
 		withUnfilteredMenu(w, [this, &s]() {
-			s = w.at(Mpd.GetCurrentSongPos()).value();
+			s = w.at(MpdStatus.currentSongPosition()).value();
 		});
 	return s;
 }
@@ -242,8 +243,8 @@ void Playlist::Reverse()
 	Mpd.StartCommandsList();
 	for (--end; begin < end; ++begin, --end)
 		Mpd.Swap(begin->value().getPosition(), end->value().getPosition());
-	if (Mpd.CommitCommandsList())
-		 Statusbar::msg("Playlist reversed");
+	Mpd.CommitCommandsList();
+	Statusbar::msg("Playlist reversed");
 }
 
 void Playlist::EnableHighlighting()
@@ -271,7 +272,7 @@ std::string Playlist::TotalLength()
 	if (Config.playlist_show_remaining_time && ReloadRemaining && !w.isFiltered())
 	{
 		itsRemainingTime = 0;
-		for (size_t i = Mpd.GetCurrentSongPos(); i < w.size(); ++i)
+		for (size_t i = MpdStatus.currentSongPosition(); i < w.size(); ++i)
 			itsRemainingTime += w[i].value().getDuration();
 		ReloadRemaining = false;
 	}
@@ -284,7 +285,7 @@ std::string Playlist::TotalLength()
 		size_t real_size = w.size();
 		w.showFiltered();
 		if (w.size() != real_size)
-			result << " (out of " << Mpd.GetPlaylistLength() << ")";
+			result << " (out of " << real_size << ")";
 	}
 	
 	if (itsTotalLength)
@@ -307,7 +308,7 @@ void Playlist::PlayNewlyAddedSongs()
 	bool is_filtered = w.isFiltered();
 	w.showAll();
 	size_t old_size = w.size();
-	Mpd.UpdateStatus();
+	//Mpd.UpdateStatus();
 	if (old_size < w.size())
 		Mpd.Play(old_size);
 	if (is_filtered)
@@ -320,8 +321,8 @@ void Playlist::SetSelectedItemsPriority(int prio)
 	Mpd.StartCommandsList();
 	for (auto it = list.begin(); it != list.end(); ++it)
 		Mpd.SetPriority((*it)->value(), prio);
-	if (Mpd.CommitCommandsList())
-		Statusbar::msg("Priority set");
+	Mpd.CommitCommandsList();
+	Statusbar::msg("Priority set");
 }
 
 bool Playlist::checkForSong(const MPD::Song &s)

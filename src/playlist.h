@@ -83,6 +83,7 @@ struct Playlist: Screen<NC::Menu<MPD::Song>>, Filterable, HasSongs, Searchable, 
 	void registerHash(size_t hash);
 	void unregisterHash(size_t hash);
 	
+	static unsigned Version;
 	static bool ReloadTotalLength;
 	static bool ReloadRemaining;
 	

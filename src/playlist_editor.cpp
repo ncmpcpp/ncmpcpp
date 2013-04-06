@@ -221,12 +221,10 @@ void PlaylistEditor::AddToPlaylist(bool add_n_play)
 	
 	if (isActiveWindow(Playlists) && !Playlists.empty())
 	{
-		if (Mpd.LoadPlaylist(Playlists.current().value()))
-		{
-			Statusbar::msg("Playlist \"%s\" loaded", Playlists.current().value().c_str());
-			if (add_n_play)
-				myPlaylist->PlayNewlyAddedSongs();
-		}
+		Mpd.LoadPlaylist(Playlists.current().value());
+		Statusbar::msg("Playlist \"%s\" loaded", Playlists.current().value().c_str());
+		if (add_n_play)
+			myPlaylist->PlayNewlyAddedSongs();
 	}
 	else if (isActiveWindow(Content) && !Content.empty())
 		addSongToPlaylist(Content.current().value(), add_n_play);
