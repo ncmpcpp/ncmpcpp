@@ -200,18 +200,15 @@ int main(int argc, char **argv)
 					Mpd.Connect();
 					if (Mpd.Version() < 16)
 					{
-						// FIXME workaround so we won't get assertion fails
-						MpdStatus = Mpd.getStatus();
 						Mpd.Disconnect();
 						throw MPD::ClientError(MPD_ERROR_STATE, "MPD < 0.16.0 is not supported", false);
 					}
-					MpdStatus.clear();
 					wFooter->addFDCallback(Mpd.GetFD(), Statusbar::Helpers::mpd);
 					Status::update(-1); // we need info about new connection
 					
 					if (Config.jump_to_now_playing_song_at_start)
 					{
-						int curr_pos = MpdStatus.currentSongPosition();
+						int curr_pos = myPlaylist->currentSongPosition();
 						if  (curr_pos >= 0)
 							myPlaylist->main().highlight(curr_pos);
 					}

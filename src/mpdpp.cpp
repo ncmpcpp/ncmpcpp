@@ -28,7 +28,6 @@
 #include "mpdpp.h"
 
 MPD::Connection Mpd;
-MPD::Status MpdStatus;
 
 namespace MPD {//
 
@@ -399,10 +398,10 @@ void Connection::Swap(unsigned from, unsigned to)
 	}
 }
 
-void Connection::Seek(unsigned where)
+void Connection::Seek(unsigned pos, unsigned where)
 {
 	prechecksNoCommandsList();
-	mpd_run_seek_pos(m_connection, MpdStatus.currentSongPosition(), where);
+	mpd_run_seek_pos(m_connection, pos, where);
 	checkErrors();
 }
 

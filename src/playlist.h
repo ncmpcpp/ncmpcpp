@@ -78,8 +78,12 @@ struct Playlist: Screen<NC::Menu<MPD::Song>>, Filterable, HasSongs, Searchable, 
 	
 	void SetSelectedItemsPriority(int prio);
 	
-	bool checkForSong(const MPD::Song &s);
+	void setStatus(MPD::Status status);
+	unsigned version() const;
+	int currentSongPosition() const;
+	unsigned currentSongLength() const;
 	
+	bool checkForSong(const MPD::Song &s);
 	void registerHash(size_t hash);
 	void unregisterHash(size_t hash);
 	
@@ -101,6 +105,8 @@ private:
 	size_t itsScrollBegin;
 	
 	time_t itsTimer;
+	
+	MPD::Status m_status;
 };
 
 extern Playlist *myPlaylist;

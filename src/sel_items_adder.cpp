@@ -253,9 +253,9 @@ void SelectedItemsAdder::addAtTheBeginningOfPlaylist() const
 
 void SelectedItemsAdder::addAfterCurrentSong() const
 {
-	if (MpdStatus.playerState() == MPD::psStop)
+	if (Status::State::player() == MPD::psStop)
 		return;
-	size_t pos = MpdStatus.currentSongPosition();
+	size_t pos = myPlaylist->currentSongPosition();
 	++pos;
 	addSongsToPlaylist(m_selected_items, false, pos);
 	exitSuccessfully();
@@ -263,10 +263,10 @@ void SelectedItemsAdder::addAfterCurrentSong() const
 
 void SelectedItemsAdder::addAfterCurrentAlbum() const
 {
-	if (MpdStatus.playerState() == MPD::psStop)
+	if (Status::State::player() == MPD::psStop)
 		return;
 	auto &pl = myPlaylist->main();
-	size_t pos = MpdStatus.currentSongPosition();
+	size_t pos = myPlaylist->currentSongPosition();
 	withUnfilteredMenu(pl, [&pos, &pl]() {
 		std::string album =  pl[pos].value().getAlbum();
 		while (pos < pl.size() && pl[pos].value().getAlbum() == album)

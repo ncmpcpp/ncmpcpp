@@ -221,7 +221,7 @@ void resizeScreen(bool reload_main_window)
 	
 	applyToVisibleWindows(&BaseScreen::refresh);
 	
-	Status::Changes::elapsedTime();
+	Status::Changes::elapsedTime(false);
 	Status::Changes::playerState();
 	// Note: routines for drawing separator if alternative user
 	// interface is active and header is hidden are placed in
@@ -350,13 +350,14 @@ void MouseEvent::run()
 	&&  m_mouse_event.y == LINES-(Config.statusbar_visibility ? 2 : 1)
 	   ) // progressbar
 	{
-		if (MpdStatus.playerState() == MPD::psStop)
+		if (Status::State::player() == MPD::psStop)
 			return;
-		Mpd.Seek(MpdStatus.totalTime()*m_mouse_event.x/double(COLS));
+		Mpd.Seek(myPlaylist->currentSongPosition(),
+			myPlaylist->currentSongLength()*m_mouse_event.x/double(COLS));
 	}
 	else if (m_mouse_event.bstate & BUTTON1_PRESSED
 	     &&	 (Config.statusbar_visibility || Config.new_design)
-	     &&	 MpdStatus.playerState() != MPD::psStop
+	     &&	 Status::State::player() != MPD::psStop
 	     &&	 m_mouse_event.y == (Config.new_design ? 1 : LINES-1) && m_mouse_event.x < 9
 		) // playing/paused
 	{
@@ -368,9 +369,9 @@ void MouseEvent::run()
 	) // volume
 	{
 		if (m_mouse_event.bstate & BUTTON2_PRESSED)
-			Mpd.SetVolume(MpdStatus.volume()-2);
+			get(Type::VolumeDown)->execute();
 		else
-			Mpd.SetVolume(MpdStatus.volume()+2);
+			get(Type::VolumeUp)->execute();
 	}
 	else if (m_mouse_event.bstate & (BUTTON1_PRESSED | BUTTON2_PRESSED | BUTTON3_PRESSED | BUTTON4_PRESSED))
 		myScreen->mouseButtonPressed(m_mouse_event);
@@ -513,7 +514,7 @@ void ToggleInterface::run()
 	Statusbar::unlock();
 	resizeScreen(false);
 	Status::Changes::mixer();
-	Status::Changes::elapsedTime();
+	Status::Changes::elapsedTime(false);
 	Statusbar::msg("User interface: %s", Config.new_design ? "Alternative" : "Classic");
 }
 
@@ -624,13 +625,13 @@ void SlaveScreen::run()
 
 void VolumeUp::run()
 {
-	int volume = std::min(MpdStatus.volume()+Config.volume_change_step, 100);
+	int volume = std::min(Status::State::volume()+Config.volume_change_step, 100);
 	Mpd.SetVolume(volume);
 }
 
 void VolumeDown::run()
 {
-	int volume = std::max(MpdStatus.volume()-Config.volume_change_step, 0);
+	int volume = std::max(Status::State::volume()-Config.volume_change_step, 0);
 	Mpd.SetVolume(volume);
 }
 
@@ -748,8 +749,8 @@ void DeleteStoredPlaylist::run()
 
 void ReplaySong::run()
 {
-	if (MpdStatus.playerState() != MPD::psStop)
-		Mpd.Seek(0);
+	if (Status::State::player() != MPD::psStop)
+		Mpd.Seek(myPlaylist->currentSongPosition(), 0);
 }
 
 void PreviousSong::run()
@@ -977,7 +978,7 @@ void Add::run()
 
 bool SeekForward::canBeRun() const
 {
-	return MpdStatus.playerState() != MPD::psStop && MpdStatus.totalTime() > 0;
+	return Status::State::player() != MPD::psStop && myPlaylist->currentSongLength() > 0;
 }
 
 void SeekForward::run()
@@ -987,7 +988,7 @@ void SeekForward::run()
 
 bool SeekBackward::canBeRun() const
 {
-	return MpdStatus.playerState() != MPD::psStop && MpdStatus.totalTime() > 0;
+	return Status::State::player() != MPD::psStop && myPlaylist->currentSongLength() > 0;
 }
 
 void SeekBackward::run()
@@ -1093,9 +1094,9 @@ void TogglePlayingSongCentering::run()
 	Config.autocenter_mode = !Config.autocenter_mode;
 	Statusbar::msg("Centering playing song: %s", Config.autocenter_mode ? "On" : "Off");
 	if (Config.autocenter_mode
-	&& MpdStatus.playerState() != MPD::psStop
+	&& Status::State::player() != MPD::psStop
 	&& !myPlaylist->main().isFiltered())
-		myPlaylist->main().highlight(MpdStatus.currentSongPosition());
+		myPlaylist->main().highlight(myPlaylist->currentSongPosition());
 }
 
 void UpdateDatabase::run()
@@ -1115,13 +1116,13 @@ bool JumpToPlayingSong::canBeRun() const
 	return ((myScreen == myPlaylist && !myPlaylist->isFiltered())
 	    ||  myScreen == myBrowser
 	    ||  myScreen == myLibrary)
-	  &&   MpdStatus.playerState() != MPD::psStop;
+	  &&   Status::State::player() != MPD::psStop;
 }
 
 void JumpToPlayingSong::run()
 {
 	if (myScreen == myPlaylist)
-		myPlaylist->main().highlight(MpdStatus.currentSongPosition());
+		myPlaylist->main().highlight(myPlaylist->currentSongPosition());
 	else if (myScreen == myBrowser)
 	{
 		myBrowser->LocateSong(myPlaylist->nowPlayingSong());
@@ -1135,7 +1136,7 @@ void JumpToPlayingSong::run()
 
 void ToggleRepeat::run()
 {
-	Mpd.SetRepeat(!MpdStatus.repeat());
+	Mpd.SetRepeat(!Status::State::repeat());
 }
 
 void Shuffle::run()
@@ -1145,7 +1146,7 @@ void Shuffle::run()
 
 void ToggleRandom::run()
 {
-	Mpd.SetRandom(!MpdStatus.random());
+	Mpd.SetRandom(!Status::State::random());
 }
 
 bool StartSearching::canBeRun() const
@@ -1190,17 +1191,17 @@ void SaveTagChanges::run()
 
 void ToggleSingle::run()
 {
-	Mpd.SetSingle(!MpdStatus.single());
+	Mpd.SetSingle(!Status::State::single());
 }
 
 void ToggleConsume::run()
 {
-	Mpd.SetConsume(!MpdStatus.consume());
+	Mpd.SetConsume(!Status::State::consume());
 }
 
 void ToggleCrossfade::run()
 {
-	Mpd.SetCrossfade(MpdStatus.crossfade() ? 0 : Config.crossfade_time);
+	Mpd.SetCrossfade(Status::State::crossfade() ? 0 : Config.crossfade_time);
 }
 
 void SetCrossfade::run()
@@ -1575,7 +1576,7 @@ void JumpToTagEditor::run()
 
 bool JumpToPositionInSong::canBeRun() const
 {
-	return MpdStatus.playerState() != MPD::psStop && MpdStatus.totalTime() > 0;
+	return Status::State::player() != MPD::psStop && myPlaylist->currentSongLength() > 0;
 }
 
 void JumpToPositionInSong::run()
@@ -1597,16 +1598,16 @@ void JumpToPositionInSong::run()
 	{
 		newpos = boost::lexical_cast<int>(position)*60
 		       + boost::lexical_cast<int>(position.substr(position.find(':')+1));
-		if (newpos <= MpdStatus.totalTime())
-			Mpd.Seek(newpos);
+		if (newpos <= myPlaylist->currentSongLength())
+			Mpd.Seek(s.getPosition(), newpos);
 		else
 			Statusbar::msg("Out of bounds, 0:00-%s possible for mm:ss, %s given", s.getLength().c_str(), MPD::Song::ShowTime(newpos).c_str());
 	}
 	else if (position.find('s') != std::string::npos) // probably position in seconds
 	{
 		newpos = boost::lexical_cast<int>(position);
-		if (newpos <= MpdStatus.totalTime())
-			Mpd.Seek(newpos);
+		if (newpos <= s.getDuration())
+			Mpd.Seek(s.getPosition(), newpos);
 		else
 			Statusbar::msg("Out of bounds, 0-%d possible for seconds, %d given", s.getDuration(), newpos);
 	}
@@ -1614,7 +1615,7 @@ void JumpToPositionInSong::run()
 	{
 		newpos = boost::lexical_cast<int>(position);
 		if (newpos <= 100)
-			Mpd.Seek(MpdStatus.totalTime()*newpos/100.0);
+			Mpd.Seek(s.getPosition(), s.getDuration()*newpos/100.0);
 		else
 			Statusbar::msg("Out of bounds, 0-100 possible for %%, %d given", newpos);
 	}
@@ -2591,7 +2592,7 @@ void seek()
 	using Global::Timer;
 	using Global::SeekingInProgress;
 	
-	if (!MpdStatus.totalTime())
+	if (!myPlaylist->currentSongLength())
 	{
 		Statusbar::msg("Unknown item length");
 		return;
@@ -2600,7 +2601,7 @@ void seek()
 	Progressbar::lock();
 	Statusbar::lock();
 	
-	unsigned songpos = MpdStatus.elapsedTime();
+	unsigned songpos = Status::State::elapsedTime();
 	timeval t = Timer;
 	
 	int old_timeout = wFooter->getTimeout();
@@ -2624,8 +2625,8 @@ void seek()
 		auto a = k.first->action();
 		if (a == seekForward)
 		{
-			if (songpos < MpdStatus.totalTime())
-				songpos = std::min(songpos + howmuch, MpdStatus.totalTime());
+			if (songpos < myPlaylist->currentSongLength())
+				songpos = std::min(songpos + howmuch, myPlaylist->currentSongLength());
 		}
 		else if (a == seekBackward)
 		{
@@ -2647,12 +2648,12 @@ void seek()
 			if (Config.display_remaining_time)
 			{
 				tracklength = "-";
-				tracklength += MPD::Song::ShowTime(MpdStatus.totalTime()-songpos);
+				tracklength += MPD::Song::ShowTime(myPlaylist->currentSongLength()-songpos);
 			}
 			else
 				tracklength = MPD::Song::ShowTime(songpos);
 			tracklength += "/";
-			tracklength += MPD::Song::ShowTime(MpdStatus.totalTime());
+			tracklength += MPD::Song::ShowTime(myPlaylist->currentSongLength());
 			*wHeader << NC::XY(0, 0) << tracklength << " ";
 			wHeader->refresh();
 		}
@@ -2662,21 +2663,21 @@ void seek()
 			if (Config.display_remaining_time)
 			{
 				tracklength += "-";
-				tracklength += MPD::Song::ShowTime(MpdStatus.totalTime()-songpos);
+				tracklength += MPD::Song::ShowTime(myPlaylist->currentSongLength()-songpos);
 			}
 			else
 				tracklength += MPD::Song::ShowTime(songpos);
 			tracklength += "/";
-			tracklength += MPD::Song::ShowTime(MpdStatus.totalTime());
+			tracklength += MPD::Song::ShowTime(myPlaylist->currentSongLength());
 			tracklength += "]";
 			*wFooter << NC::XY(wFooter->getWidth()-tracklength.length(), 1) << tracklength;
 		}
 		*wFooter << NC::Format::NoBold;
-		Progressbar::draw(songpos, MpdStatus.totalTime());
+		Progressbar::draw(songpos, myPlaylist->currentSongLength());
 		wFooter->refresh();
 	}
 	SeekingInProgress = false;
-	Mpd.Seek(songpos);
+	Mpd.Seek(myPlaylist->currentSongPosition(), songpos);
 	
 	wFooter->setTimeout(old_timeout);
 	

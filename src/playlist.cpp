@@ -223,9 +223,9 @@ MPD::SongList Playlist::getSelectedSongs()
 MPD::Song Playlist::nowPlayingSong()
 {
 	MPD::Song s;
-	if (MpdStatus.playerState() != MPD::psStop)
+	if (Status::State::player() != MPD::psStop)
 		withUnfilteredMenu(w, [this, &s]() {
-			s = w.at(MpdStatus.currentSongPosition()).value();
+			s = w.at(currentSongPosition()).value();
 		});
 	return s;
 }
@@ -277,7 +277,7 @@ std::string Playlist::TotalLength()
 	if (Config.playlist_show_remaining_time && ReloadRemaining && !w.isFiltered())
 	{
 		itsRemainingTime = 0;
-		for (size_t i = MpdStatus.currentSongPosition(); i < w.size(); ++i)
+		for (size_t i = currentSongPosition(); i < w.size(); ++i)
 			itsRemainingTime += w[i].value().getDuration();
 		ReloadRemaining = false;
 	}
@@ -330,6 +330,26 @@ void Playlist::SetSelectedItemsPriority(int prio)
 	Statusbar::msg("Priority set");
 }
 
+void Playlist::setStatus(MPD::Status status)
+{
+	m_status = status;
+}
+
+unsigned int Playlist::version() const
+{
+	return m_status.empty() ? 0 : m_status.playlistVersion();
+}
+
+int Playlist::currentSongPosition() const
+{
+	return m_status.empty() ? -1 : m_status.currentSongPosition();
+}
+
+unsigned Playlist::currentSongLength() const
+{
+	return m_status.empty() ? 0 : m_status.totalTime();
+}
+
 bool Playlist::checkForSong(const MPD::Song &s)
 {
 	return itsSongHashes.find(s.getHash()) != itsSongHashes.end();
@@ -337,7 +357,7 @@ bool Playlist::checkForSong(const MPD::Song &s)
 
 void Playlist::registerHash(size_t hash)
 {
-	itsSongHashes[hash] += 1;
+	++itsSongHashes[hash];
 }
 
 void Playlist::unregisterHash(size_t hash)
@@ -347,7 +367,7 @@ void Playlist::unregisterHash(size_t hash)
 	if (it->second == 1)
 		itsSongHashes.erase(it);
 	else
-		it->second -= 1;
+		--it->second;
 }
 
 namespace {//

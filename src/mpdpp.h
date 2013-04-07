@@ -187,7 +187,7 @@ public:
 	void Prev();
 	void Move(unsigned int from, unsigned int to);
 	void Swap(unsigned, unsigned);
-	void Seek(unsigned);
+	void Seek(unsigned int pos, unsigned int where);
 	void Shuffle();
 	void ClearMainPlaylist();
 	
@@ -279,6 +279,5 @@ private:
 }
 
 extern MPD::Connection Mpd;
-extern MPD::Status MpdStatus;
 
 #endif // NCMPCPP_MPDPP_H

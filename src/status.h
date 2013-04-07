@@ -32,6 +32,20 @@ void handleServerError(MPD::ServerError &e);
 void trace();
 void update(int event);
 
+namespace State {//
+
+bool repeat();
+bool random();
+bool single();
+bool consume();
+bool crossfade();
+
+MPD::PlayerState player();
+int volume();
+unsigned elapsedTime();
+
+}
+
 namespace Changes {//
 
 void playlist();
@@ -39,7 +53,7 @@ void storedPlaylists();
 void database();
 void playerState();
 void songID();
-void elapsedTime();
+void elapsedTime(bool update_elapsed);
 void repeat(bool show_msg);
 void random(bool show_msg);
 void single(bool show_msg);

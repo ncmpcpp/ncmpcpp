@@ -23,6 +23,7 @@
 #include "status.h"
 #include "statusbar.h"
 #include "bindings.h"
+#include "playlist.h"
 #include "utility/wide_string.h"
 
 using Global::wFooter;
@@ -122,10 +123,10 @@ void Statusbar::unlock()
 		else
 			progressbarBlockUpdate = false;
 	}
-	if (MpdStatus.playerState() == MPD::psStop)
+	if (Status::State::player() == MPD::psStop)
 	{
 		if (Config.new_design)
-			Progressbar::draw(MpdStatus.elapsedTime(), MpdStatus.totalTime());
+			Progressbar::draw(Status::State::elapsedTime(), myPlaylist->currentSongLength());
 		else
 			put() << wclrtoeol;
 		wFooter->refresh();
@@ -150,12 +151,12 @@ void Statusbar::tryRedraw()
 		else
 			progressbarBlockUpdate = !statusbarAllowUnlock;
 		
-		if (MpdStatus.playerState() != MPD::psStop && !statusbarBlockUpdate && !progressbarBlockUpdate)
+		if (Status::State::player() != MPD::psStop && !statusbarBlockUpdate && !progressbarBlockUpdate)
 		{
 			if (Config.new_design)
-				Progressbar::draw(MpdStatus.elapsedTime(), MpdStatus.totalTime());
+				Progressbar::draw(Status::State::elapsedTime(), myPlaylist->currentSongLength());
 			else
-				Status::Changes::elapsedTime();
+				Status::Changes::elapsedTime(false);
 			wFooter->refresh();
 		}
 	}
