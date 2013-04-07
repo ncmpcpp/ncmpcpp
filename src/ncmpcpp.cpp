@@ -170,10 +170,6 @@ int main(int argc, char **argv)
 	myPlaylist->switchTo();
 	myPlaylist->UpdateTimer();
 	
-	// go to startup screen
-	if (Config.startup_screen != myScreen)
-		Config.startup_screen->switchTo();
-	
 	// local variables
 	Key input(0, Key::Standard);
 	timeval past = { 0, 0 };
@@ -212,6 +208,10 @@ int main(int argc, char **argv)
 						if  (curr_pos >= 0)
 							myPlaylist->main().highlight(curr_pos);
 					}
+					
+					// go to startup screen
+					if (Config.startup_screen != myScreen)
+						Config.startup_screen->switchTo();
 					
 					myBrowser->fetchSupportedExtensions();
 #					ifdef ENABLE_OUTPUTS

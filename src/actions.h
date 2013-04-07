@@ -65,7 +65,6 @@ void setResizeFlags();
 void resizeScreen(bool reload_main_window);
 void setWindowsDimensions();
 
-bool connectToMPD();
 bool askYesNoQuestion(const std::string &question, void (*callback)());
 bool isMPDMusicDirSet();
 

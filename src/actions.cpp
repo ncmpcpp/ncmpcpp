@@ -253,27 +253,6 @@ void setWindowsDimensions()
 	FooterHeight = Config.statusbar_visibility ? 2 : 1;
 }
 
-bool connectToMPD()
-{
-	try
-	{
-		Mpd.Connect();
-		if (Mpd.Version() < 16)
-		{
-			std::cout << "MPD < 0.16.0 is not supported, please upgrade\n";
-			return false;
-		}
-	}
-	catch (std::exception &e)
-	{
-		std::cout << "Couldn't connect to MPD ";
-		std::cout << "(host = " << Mpd.GetHostname() << ", port = " << Mpd.GetPort() << ")";
-		std::cout << ": " << e.what() << std::endl;
-		return false;
-	}
-	return true;
-}
-
 bool askYesNoQuestion(const std::string &question, void (*callback)())
 {
 	using Global::wFooter;
