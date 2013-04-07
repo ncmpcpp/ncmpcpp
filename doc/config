@@ -36,8 +36,6 @@
 #
 #mpd_crossfade_time = "5"
 #
-#mpd_communication_mode = "notifications" (polling/notifications)
-#
 ##### music visualizer #####
 ##
 ## Note: In order to make music visualizer work you'll

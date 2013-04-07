@@ -173,7 +173,6 @@ void Configuration::SetDefaults()
 	active_window_border = NC::Border::Red;
 	visualizer_color = NC::Color::Yellow;
 	media_lib_primary_tag = MPD_TAG_ARTIST;
-	enable_idle_notifications = true;
 	colors_enabled = true;
 	playlist_show_remaining_time = false;
 	playlist_shorten_total_times = false;
@@ -570,10 +569,6 @@ void Configuration::Read()
 			{
 				if (!v.empty())
 					color2 = stringToColor(v);
-			}
-			else if (name == "mpd_communication_mode")
-			{
-				enable_idle_notifications = v == "notifications";
 			}
 			else if (name == "colors_enabled")
 			{

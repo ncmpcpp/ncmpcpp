@@ -81,9 +81,6 @@ Set connection timeout to MPD to given value.
 .B mpd_crossfade_time = SECONDS
 Default number of seconds to crossfade, if enabled by ncmpcpp.
 .TP
-.B mpd_communication_mode = MODE
-If set to 'polling', ncmpcpp will constantly poll mpd for its status. If set to 'notifications', ncmppcp will make use of 'idle' command and wait for events. This is more efficient and responsive, but may cause some trouble with <mpd-0.15, so if you run such version and encounter strange bugs (e.g. current track time not being updated), you will either have to use 'polling' or upgrade your mpd.
-.TP
 .B visualizer_in_stereo = yes/no
 Should be set to 'yes', if fifo output's format was set to 44100:16:2.
 .TP
