@@ -377,6 +377,10 @@ void Status::Changes::playerState()
 		else
 			*wFooter << NC::Format::Bold << state << NC::Format::NoBold;
 	}
+	
+	// needed for immediate display after starting
+	// player from stopped state or seeking
+	elapsedTime(false);
 }
 
 void Status::Changes::songID()
