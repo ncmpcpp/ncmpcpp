@@ -770,6 +770,14 @@ bool TagEditor::allowsSearching()
 
 bool TagEditor::search(const std::string &constraint)
 {
+	if (constraint.empty())
+	{
+		if (w == Dirs)
+			Dirs->clearSearchResults();
+		else if (w == Tags)
+			Tags->clearSearchResults();
+		return false;
+	}
 	try
 	{
 		bool result = false;

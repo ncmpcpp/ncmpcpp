@@ -161,6 +161,11 @@ bool Playlist::allowsSearching()
 
 bool Playlist::search(const std::string &constraint)
 {
+	if (constraint.empty())
+	{
+		w.clearSearchResults();
+		return false;
+	}
 	try
 	{
 		auto rx = RegexFilter<MPD::Song>(

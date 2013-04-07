@@ -596,6 +596,16 @@ bool MediaLibrary::allowsSearching()
 
 bool MediaLibrary::search(const std::string &constraint)
 {
+	if (constraint.empty())
+	{
+		if (isActiveWindow(Tags))
+			Tags.clearSearchResults();
+		else if (isActiveWindow(Albums))
+			Albums.clearSearchResults();
+		else if (isActiveWindow(Songs))
+			Songs.clearSearchResults();
+		return false;
+	}
 	try
 	{
 		bool result = false;

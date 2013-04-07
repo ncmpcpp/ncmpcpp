@@ -364,6 +364,14 @@ bool PlaylistEditor::allowsSearching()
 
 bool PlaylistEditor::search(const std::string &constraint)
 {
+	if (constraint.empty())
+	{
+		if (isActiveWindow(Playlists))
+			Playlists.clearSearchResults();
+		else if (isActiveWindow(Content))
+			Content.clearSearchResults();
+		return false;
+	}
 	try
 	{
 		bool result = false;

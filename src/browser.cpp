@@ -271,6 +271,11 @@ bool Browser::allowsSearching()
 
 bool Browser::search(const std::string &constraint)
 {
+	if (constraint.empty())
+	{
+		w.clearSearchResults();
+		return false;
+	}
 	try
 	{
 		auto fun = std::bind(BrowserEntryMatcher, _1, _2, false);

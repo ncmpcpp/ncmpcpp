@@ -284,6 +284,11 @@ bool SearchEngine::allowsSearching()
 
 bool SearchEngine::search(const std::string &constraint)
 {
+	if (constraint.empty())
+	{
+		w.clearSearchResults();
+		return false;
+	}
 	try
 	{
 		auto fun = std::bind(SEItemEntryMatcher, _1, _2, false);
