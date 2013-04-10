@@ -167,6 +167,9 @@ void Status::update(int event)
 {
 	MPD::Status old_status = m_status;
 	m_status = Mpd.getStatus();
+	m_player_state = m_status.playerState();
+	m_volume = m_status.volume();
+	myPlaylist->setStatus(m_status);
 	
 	if (event & MPD_IDLE_DATABASE)
 		Changes::database();
@@ -269,7 +272,7 @@ void Status::Changes::playlist()
 			myPlaylist->main().resizeList(playlist_length);
 		}
 		
-		Mpd.GetPlaylistChanges(myPlaylist->version(), [](MPD::Song &&s) {
+		Mpd.GetPlaylistChanges(myPlaylist->oldVersion(), [](MPD::Song &&s) {
 			size_t pos = s.getPosition();
 			if (pos < myPlaylist->main().size())
 			{
@@ -282,8 +285,6 @@ void Status::Changes::playlist()
 				myPlaylist->main().addItem(s);
 			myPlaylist->registerHash(s.getHash());
 		});
-		
-		myPlaylist->setStatus(m_status);
 	});
 	
 	if (State::player() != MPD::psStop)
@@ -330,8 +331,6 @@ void Status::Changes::database()
 
 void Status::Changes::playerState()
 {
-	m_player_state = m_status.playerState();
-	
 	switch (State::player())
 	{
 		case MPD::psPlay:
@@ -622,7 +621,6 @@ void Status::Changes::flags()
 
 void Status::Changes::mixer()
 {
-	m_volume = m_status.volume();
 	if (!Config.display_volume_level || (!Config.header_visibility && !Config.new_design))
 		return;
 	

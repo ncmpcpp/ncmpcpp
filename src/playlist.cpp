@@ -43,7 +43,6 @@ Playlist *myPlaylist;
 
 bool Playlist::ReloadTotalLength = 0;
 bool Playlist::ReloadRemaining = false;
-unsigned Playlist::Version = 0;
 
 namespace {//
 
@@ -52,7 +51,8 @@ bool playlistEntryMatcher(const boost::regex &rx, const MPD::Song &s);
 
 }
 
-Playlist::Playlist() : itsTotalLength(0), itsRemainingTime(0), itsScrollBegin(0)
+Playlist::Playlist()
+: itsTotalLength(0), itsRemainingTime(0), itsScrollBegin(0), m_old_playlist_version(0)
 {
 	w = NC::Menu<MPD::Song>(0, MainStartY, COLS, MainHeight, Config.columns_in_playlist && Config.titles_visibility ? Display::Columns(COLS) : "", Config.main_color, NC::Border::None);
 	w.cyclicScrolling(Config.use_cyclic_scrolling);
@@ -335,9 +335,9 @@ void Playlist::setStatus(MPD::Status status)
 	m_status = status;
 }
 
-unsigned int Playlist::version() const
+unsigned Playlist::oldVersion() const
 {
-	return m_status.empty() ? 0 : m_status.playlistVersion();
+	return m_old_playlist_version;
 }
 
 int Playlist::currentSongPosition() const

@@ -79,7 +79,7 @@ struct Playlist: Screen<NC::Menu<MPD::Song>>, Filterable, HasSongs, Searchable, 
 	void SetSelectedItemsPriority(int prio);
 	
 	void setStatus(MPD::Status status);
-	unsigned version() const;
+	unsigned oldVersion() const;
 	int currentSongPosition() const;
 	unsigned currentSongLength() const;
 	
@@ -87,7 +87,6 @@ struct Playlist: Screen<NC::Menu<MPD::Song>>, Filterable, HasSongs, Searchable, 
 	void registerHash(size_t hash);
 	void unregisterHash(size_t hash);
 	
-	static unsigned Version;
 	static bool ReloadTotalLength;
 	static bool ReloadRemaining;
 	
@@ -107,6 +106,7 @@ private:
 	time_t itsTimer;
 	
 	MPD::Status m_status;
+	unsigned m_old_playlist_version;
 };
 
 extern Playlist *myPlaylist;
