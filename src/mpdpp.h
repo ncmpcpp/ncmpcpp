@@ -39,6 +39,7 @@ struct ClientError: public std::exception
 {
 	ClientError(mpd_error code_, std::string msg, bool clearable_)
 	: m_code(code_), m_msg(msg), m_clearable(clearable_) { }
+	virtual ~ClientError() noexcept { }
 	
 	virtual const char *what() const noexcept { return m_msg.c_str(); }
 	mpd_error code() const { return m_code; }
@@ -54,6 +55,7 @@ struct ServerError: public std::exception
 {
 	ServerError(mpd_server_error code_, std::string msg, bool clearable_)
 	: m_code(code_), m_msg(msg), m_clearable(clearable_) { }
+	virtual ~ServerError() noexcept { }
 	
 	virtual const char *what() const noexcept { return m_msg.c_str(); }
 	mpd_server_error code() const { return m_code; }
