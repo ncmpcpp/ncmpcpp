@@ -714,9 +714,13 @@ void Connection::Delete(unsigned pos)
 
 void Connection::PlaylistDelete(const std::string &playlist, unsigned pos)
 {
-	prechecksNoCommandsList();
-	mpd_run_playlist_delete(m_connection, playlist.c_str(), pos);
-	checkErrors();
+	prechecks();
+	mpd_send_playlist_delete(m_connection, playlist.c_str(), pos);
+	if (!m_command_list_active)
+	{
+		mpd_response_finish(m_connection);
+		checkErrors();
+	}
 }
 
 void Connection::StartCommandsList()
