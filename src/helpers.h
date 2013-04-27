@@ -457,8 +457,8 @@ template <typename BufferT> void ShowTag(BufferT &buf, const std::string &tag)
 		buf << tag;
 }
 
-bool addSongToPlaylist(const MPD::Song &s, bool play, size_t position = -1);
-void addSongsToPlaylist(const MPD::SongList &list, bool play, size_t position = -1);
+bool addSongToPlaylist(const MPD::Song &s, bool play, int position = -1);
+void addSongsToPlaylist(const MPD::SongList &list, bool play, int position = -1);
 
 std::string Timestamp(time_t t);
 

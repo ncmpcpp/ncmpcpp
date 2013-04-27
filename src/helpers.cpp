@@ -24,7 +24,7 @@
 #include "playlist.h"
 #include "statusbar.h"
 
-bool addSongToPlaylist(const MPD::Song &s, bool play, size_t position)
+bool addSongToPlaylist(const MPD::Song &s, bool play, int position)
 {
 	bool result = false;
 	if (Config.ncmpc_like_songs_adding && myPlaylist->checkForSong(s))
@@ -49,7 +49,6 @@ bool addSongToPlaylist(const MPD::Song &s, bool play, size_t position)
 	}
 	else
 	{
-		position = std::min(position, myPlaylist->main().size());
 		int id = Mpd.AddSong(s, position);
 		if (id >= 0)
 		{
@@ -64,18 +63,32 @@ bool addSongToPlaylist(const MPD::Song &s, bool play, size_t position)
 	return result;
 }
 
-void addSongsToPlaylist(const MPD::SongList &list, bool play, size_t position)
+void addSongsToPlaylist(const MPD::SongList &list, bool play, int position)
 {
-	if (list.empty())
-		return;
-	position = std::min(position, myPlaylist->main().size());
-	Mpd.StartCommandsList();
-	for (auto s = list.rbegin(); s != list.rend(); ++s)
-		if (Mpd.AddSong(*s, position) < 0)
-			break;
-	if (play)
-		Mpd.Play(position);
-	Mpd.CommitCommandsList();
+	if (list.size() >= 1)
+	{
+		int id = Mpd.AddSong(list.front(), position);
+		if (id > 0)
+		{
+			Mpd.StartCommandsList();
+			if (position == -1)
+			{
+				for (auto s = list.begin()+1; s != list.end(); ++s)
+					if (Mpd.AddSong(*s) < 0)
+						break;
+			}
+			else
+			{
+				auto end = list.rend()-1;
+				for (auto s = list.rbegin(); s != end; ++s)
+					if (Mpd.AddSong(*s, position) < 0)
+						break;
+			}
+			Mpd.CommitCommandsList();
+			if (play)
+				Mpd.PlayID(id);
+		}
+	}
 }
 
 std::string Timestamp(time_t t)

@@ -298,9 +298,15 @@ void Status::Changes::playlist()
 	if (isVisible(mySearcher))
 		markSongsInPlaylist(mySearcher->proxySongList());
 	if (isVisible(myLibrary))
+	{
 		markSongsInPlaylist(myLibrary->songsProxyList());
+		myLibrary->Songs.refresh();
+	}
 	if (isVisible(myPlaylistEditor))
+	{
 		markSongsInPlaylist(myPlaylistEditor->contentProxyList());
+		myPlaylistEditor->Content.refresh();
+	}
 }
 
 void Status::Changes::storedPlaylists()
