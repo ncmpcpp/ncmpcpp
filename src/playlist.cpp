@@ -142,6 +142,12 @@ std::string Playlist::currentFilter()
 
 void Playlist::applyFilter(const std::string &filter)
 {
+	if (filter.empty())
+	{
+		w.clearFilter();
+		w.clearFilterResults();
+		return;
+	}
 	try
 	{
 		w.showAll();

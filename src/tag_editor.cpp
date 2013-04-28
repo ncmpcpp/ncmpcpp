@@ -740,6 +740,20 @@ std::string TagEditor::currentFilter()
 
 void TagEditor::applyFilter(const std::string &filter)
 {
+	if (filter.empty())
+	{
+		if (w == Dirs)
+		{
+			Dirs->clearFilter();
+			Dirs->clearFilterResults();
+		}
+		else if (w == Tags)
+		{
+			Tags->clearFilter();
+			Tags->clearFilterResults();
+		}
+		return;
+	}
 	try
 	{
 		if (w == Dirs)

@@ -251,6 +251,12 @@ std::string Browser::currentFilter()
 
 void Browser::applyFilter(const std::string &filter)
 {
+	if (filter.empty())
+	{
+		w.clearFilter();
+		w.clearFilterResults();
+		return;
+	}
 	try
 	{
 		w.showAll();

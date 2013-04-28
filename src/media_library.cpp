@@ -559,6 +559,25 @@ std::string MediaLibrary::currentFilter()
 
 void MediaLibrary::applyFilter(const std::string &filter)
 {
+	if (filter.empty())
+	{
+		if (isActiveWindow(Tags))
+		{
+			Tags.clearFilter();
+			Tags.clearFilterResults();
+		}
+		else if (isActiveWindow(Albums))
+		{
+			Albums.clearFilter();
+			Albums.clearFilterResults();
+		}
+		else if (isActiveWindow(Songs))
+		{
+			Songs.clearFilter();
+			Songs.clearFilterResults();
+		}
+		return;
+	}
 	try
 	{
 		if (isActiveWindow(Tags))

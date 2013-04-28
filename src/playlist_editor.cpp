@@ -335,6 +335,20 @@ std::string PlaylistEditor::currentFilter()
 
 void PlaylistEditor::applyFilter(const std::string &filter)
 {
+	if (filter.empty())
+	{
+		if (isActiveWindow(Playlists))
+		{
+			Playlists.clearFilter();
+			Playlists.clearFilterResults();
+		}
+		else if (isActiveWindow(Content))
+		{
+			Content.clearFilter();
+			Content.clearFilterResults();
+		}
+		return;
+	}
 	try
 	{
 		if (isActiveWindow(Playlists))
