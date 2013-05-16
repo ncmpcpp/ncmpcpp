@@ -71,7 +71,7 @@ struct Browser: Screen<NC::Menu<MPD::Item>>, Filterable, HasSongs, Searchable, T
 	void LocateSong(const MPD::Song &);
 	void GetDirectory(std::string, std::string = "/");
 #	ifndef WIN32
-	void GetLocalDirectory(MPD::ItemList &, const std::string & = "", bool = 0) const;
+	void GetLocalDirectory(MPD::ItemList &, const std::string &, bool) const;
 	void ClearDirectory(const std::string &) const;
 	void ChangeBrowseMode();
 	bool deleteItem(const MPD::Item &);

@@ -22,6 +22,7 @@
 #include <sys/stat.h>
 #include <cerrno>
 #include <cstring>
+#include <boost/filesystem.hpp>
 #include <boost/locale/conversion.hpp>
 #include <algorithm>
 
@@ -89,10 +90,6 @@ void Browser::resize()
 void Browser::switchTo()
 {
 	SwitchTo::execute(this);
-	
-	// local browser doesn't support sorting by mtime
-	if (isLocal() && Config.browser_sort_mode == smMTime)
-		Config.browser_sort_mode = smName;
 	
 	if (w.empty())
 		GetDirectory(itsBrowsedDir);
@@ -420,7 +417,7 @@ void Browser::GetDirectory(std::string dir, std::string subdir)
 	MPD::ItemList list;
 #	ifndef WIN32
 	if (isLocal())
-		GetLocalDirectory(list);
+		GetLocalDirectory(list, itsBrowsedDir, false);
 	else
 		Mpd.GetDirectory(dir, [&list](MPD::Item &&item) {
 			list.push_back(item);
@@ -471,61 +468,44 @@ void Browser::GetDirectory(std::string dir, std::string subdir)
 #ifndef WIN32
 void Browser::GetLocalDirectory(MPD::ItemList &v, const std::string &directory, bool recursively) const
 {
-	DIR *dir = opendir((directory.empty() ? itsBrowsedDir : directory).c_str());
+	namespace fs = boost::filesystem;
 	
-	if (!dir)
-		return;
-	
-	dirent *file;
-	
-	struct stat file_stat;
-	std::string full_path;
-	
-	size_t old_size = v.size();
-	while ((file = readdir(dir)))
-	{
-		// omit . and ..
-		if (file->d_name[0] == '.' && (file->d_name[1] == '\0' || (file->d_name[1] == '.' && file->d_name[2] == '\0')))
-			continue;
-		
-		if (!Config.local_browser_show_hidden_files && file->d_name[0] == '.')
-			continue;
-		MPD::Item new_item;
-		full_path = directory.empty() ? itsBrowsedDir : directory;
-		if (itsBrowsedDir != "/")
-			full_path += "/";
-		full_path += file->d_name;
-		stat(full_path.c_str(), &file_stat);
-		if (S_ISDIR(file_stat.st_mode))
+	size_t start_size = v.size();
+	fs::path dir(directory);
+	std::for_each(fs::directory_iterator(dir), fs::directory_iterator(), [&](fs::directory_entry &e) {
+		if (!Config.local_browser_show_hidden_files && e.path().filename().native()[0] == '.')
+			return;
+		MPD::Item item;
+		if (fs::is_directory(e))
 		{
 			if (recursively)
 			{
-				GetLocalDirectory(v, full_path, 1);
-				old_size = v.size();
+				GetLocalDirectory(v, e.path().native(), true);
+				start_size = v.size();
 			}
 			else
 			{
-				new_item.type = itDirectory;
-				new_item.name = full_path;
-				v.push_back(new_item);
+				item.type = itDirectory;
+				item.name = e.path().native();
+				v.push_back(item);
 			}
 		}
-		else if (hasSupportedExtension(file->d_name))
+		else if (hasSupportedExtension(e.path().native()))
 		{
-			new_item.type = itSong;
-			mpd_pair file_pair = { "file", full_path.c_str() };
+			item.type = itSong;
+			mpd_pair file_pair = { "file", e.path().native().c_str() };
 			MPD::MutableSong *s = new MPD::MutableSong(mpd_song_begin(&file_pair));
-			new_item.song = std::shared_ptr<MPD::Song>(s);
+			item.song = std::shared_ptr<MPD::Song>(s);
 #			ifdef HAVE_TAGLIB_H
 			if (!recursively)
 				Tags::read(*s);
 #			endif // HAVE_TAGLIB_H
-			v.push_back(new_item);
+			v.push_back(item);
 		}
-	}
-	closedir(dir);
-	std::sort(v.begin()+old_size, v.end(),
-		LocaleBasedItemSorting(std::locale(), Config.ignore_leading_the, Config.browser_sort_mode));
+	});
+	
+	std::sort(v.begin()+start_size, v.end(), LocaleBasedItemSorting(std::locale(),
+		Config.ignore_leading_the, Config.browser_sort_mode));
 }
 
 void Browser::ClearDirectory(const std::string &path) const

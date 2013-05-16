@@ -1976,13 +1976,9 @@ void ToggleBrowserSortMode::run()
 	switch (Config.browser_sort_mode)
 	{
 		case smName:
-			if (!myBrowser->isLocal())
-			{
-				Config.browser_sort_mode = smMTime;
-				Statusbar::msg("Sort songs by: Modification time");
-				break;
-			}
-		// local browser doesn't support sorting by mtime, so we just skip it.
+			Config.browser_sort_mode = smMTime;
+			Statusbar::msg("Sort songs by: Modification time");
+			break;
 		case smMTime:
 			Config.browser_sort_mode = smCustomFormat;
 			Statusbar::msg("Sort songs by: Custom format");
