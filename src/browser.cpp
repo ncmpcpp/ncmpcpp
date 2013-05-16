@@ -18,10 +18,6 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
-#include <dirent.h>
-#include <sys/stat.h>
-#include <cerrno>
-#include <cstring>
 #include <boost/filesystem.hpp>
 #include <boost/locale/conversion.hpp>
 #include <algorithm>
