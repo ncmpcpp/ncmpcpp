@@ -498,7 +498,10 @@ void Browser::GetLocalDirectory(MPD::ItemList &v, const std::string &directory, 
 			item.song = std::shared_ptr<MPD::Song>(s);
 #			ifdef HAVE_TAGLIB_H
 			if (!recursively)
+			{
+				s->setMTime(fs::last_write_time(e.path()));
 				Tags::read(*s);
+			}
 #			endif // HAVE_TAGLIB_H
 			v.push_back(item);
 		}

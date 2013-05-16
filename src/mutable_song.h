@@ -30,8 +30,8 @@ struct MutableSong : public Song
 {
 	typedef void (MutableSong::*SetFunction)(const std::string &, unsigned);
 	
-	MutableSong() : m_duration(0) { }
-	MutableSong(Song s) : Song(s), m_duration(0) { }
+	MutableSong() : m_mtime(0), m_duration(0) { }
+	MutableSong(Song s) : Song(s), m_mtime(0), m_duration(0) { }
 	
 	virtual std::string getArtist(unsigned idx = 0) const;
 	virtual std::string getTitle(unsigned idx = 0) const;
@@ -61,7 +61,9 @@ struct MutableSong : public Song
 	void setNewURI(const std::string &value);
 	
 	virtual unsigned getDuration() const;
+	virtual time_t getMTime() const;
 	void setDuration(unsigned duration);
+	void setMTime(time_t mtime);
 	
 	void setTags(SetFunction set, const std::string &value, const std::string &delimiter);
 	
@@ -103,6 +105,7 @@ private:
 	}
 	
 	std::string m_uri;
+	time_t m_mtime;
 	unsigned m_duration;
 	std::map<Tag, std::string> m_tags;
 };

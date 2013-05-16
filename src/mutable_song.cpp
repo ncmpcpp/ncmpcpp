@@ -160,10 +160,22 @@ unsigned MutableSong::getDuration() const
 		return Song::getDuration();
 }
 
+time_t MutableSong::getMTime() const
+{
+	if (m_mtime > 0)
+		return m_mtime;
+	else
+		return Song::getMTime();
+}
 
 void MutableSong::setDuration(unsigned int duration)
 {
 	m_duration = duration;
+}
+
+void MutableSong::setMTime(time_t mtime)
+{
+	m_mtime = mtime;
 }
 
 void MutableSong::setTags(SetFunction set, const std::string &value, const std::string &delimiter)
