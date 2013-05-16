@@ -169,7 +169,10 @@ void TinyTagEditor::mouseButtonPressed(MEVENT me)
 
 void TinyTagEditor::SetEdited(const MPD::Song &s)
 {
-	itsEdited = s;
+	if (auto ms = dynamic_cast<const MPD::MutableSong *>(&s))
+		itsEdited = *ms;
+	else
+		itsEdited = s;
 }
 
 bool TinyTagEditor::getTags()
