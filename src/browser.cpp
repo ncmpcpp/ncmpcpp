@@ -513,39 +513,16 @@ void Browser::GetLocalDirectory(MPD::ItemList &v, const std::string &directory, 
 
 void Browser::ClearDirectory(const std::string &path) const
 {
-	DIR *dir = opendir(path.c_str());
-	if (!dir)
-		return;
+	namespace fs = boost::filesystem;
 	
-	dirent *file;
-	struct stat file_stat;
-	std::string full_path;
-	
-	while ((file = readdir(dir)))
-	{
-		// omit . and ..
-		if (file->d_name[0] == '.' && (file->d_name[1] == '\0' || (file->d_name[1] == '.' && file->d_name[2] == '\0')))
-			continue;
-		
-		full_path = path;
-		if (*full_path.rbegin() != '/')
-			full_path += '/';
-		full_path += file->d_name;
-		lstat(full_path.c_str(), &file_stat);
-		if (S_ISDIR(file_stat.st_mode))
-			ClearDirectory(full_path);
-		if (remove(full_path.c_str()) == 0)
-		{
-			const char msg[] = "Deleting \"%ls\"...";
-			Statusbar::msg(msg, wideShorten(ToWString(full_path), COLS-const_strlen(msg)).c_str());
-		}
-		else
-		{
-			const char msg[] = "Couldn't remove \"%ls\": %s";
-			Statusbar::msg(msg, wideShorten(ToWString(full_path), COLS-const_strlen(msg)-25).c_str(), strerror(errno));
-		}
-	}
-	closedir(dir);
+	fs::path dir(path);
+	std::for_each(fs::directory_iterator(dir), fs::directory_iterator(), [&](fs::directory_entry &e) {
+		if (!fs::is_symlink(e) && fs::is_directory(e))
+			ClearDirectory(e.path().native());
+		const char msg[] = "Deleting \"%ls\"...";
+		Statusbar::msg(msg, wideShorten(ToWString(e.path().native()), COLS-const_strlen(msg)).c_str());
+		fs::remove(e.path());
+	});
 }
 
 void Browser::ChangeBrowseMode()
