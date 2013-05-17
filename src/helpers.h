@@ -118,26 +118,48 @@ template <typename T, typename F>
 void withUnfilteredMenu(NC::Menu<T> &m, F action)
 {
 	bool is_filtered = m.isFiltered();
+	auto cleanup = [&]() {
+		if (is_filtered)
+			m.showFiltered();
+	};
 	m.showAll();
-	action();
-	if (is_filtered)
-		m.showFiltered();
+	try
+	{
+		action();
+	}
+	catch (...)
+	{
+		cleanup();
+		throw;
+	}
+	cleanup();
 }
 
 template <typename T, typename F>
 void withUnfilteredMenuReapplyFilter(NC::Menu<T> &m, F action)
 {
-	m.showAll();
-	action();
-	if (m.getFilter())
-	{
-		m.applyCurrentFilter(m.begin(), m.end());
-		if (m.empty())
+	auto cleanup = [&]() {
+		if (m.getFilter())
 		{
-			m.clearFilter();
-			m.clearFilterResults();
+			m.applyCurrentFilter(m.begin(), m.end());
+			if (m.empty())
+			{
+				m.clearFilter();
+				m.clearFilterResults();
+			}
 		}
+	};
+	m.showAll();
+	try
+	{
+		action();
 	}
+	catch (...)
+	{
+		cleanup();
+		throw;
+	}
+	cleanup();
 }
 
 template <typename F>
