@@ -48,12 +48,8 @@ void ServerInfo::switchTo()
 		itsURLHandlers.clear();
 		itsTagTypes.clear();
 		
-		Mpd.GetURLHandlers([this](std::string &&handler) {
-			itsURLHandlers.push_back(handler);
-		});
-		Mpd.GetTagTypes([this](std::string &&tag_type) {
-			itsTagTypes.push_back(tag_type);
-		});
+		Mpd.GetURLHandlers(vectorMoveInserter(itsURLHandlers));
+		Mpd.GetTagTypes(vectorMoveInserter(itsTagTypes));
 	}
 	else
 		switchToPreviousScreen();

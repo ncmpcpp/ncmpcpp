@@ -99,7 +99,7 @@ void Outputs::mouseButtonPressed(MEVENT me)
 void Outputs::FetchList()
 {
 	w.clear();
-	Mpd.GetOutputs([this](MPD::Output &&output) {
+	Mpd.GetOutputs([this](MPD::Output output) {
 		w.addItem(output, output.isEnabled());
 	});
 	if (myScreen == this)

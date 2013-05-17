@@ -148,10 +148,10 @@ class Connection
 {
 	typedef void (*ErrorHandler) (Connection *, int, const char *, void *);
 	
-	typedef std::function<void(Item &&)> ItemConsumer;
-	typedef std::function<void(Output &&)> OutputConsumer;
-	typedef std::function<void(Song &&)> SongConsumer;
-	typedef std::function<void(std::string &&)> StringConsumer;
+	typedef std::function<void(Item)> ItemConsumer;
+	typedef std::function<void(Output)> OutputConsumer;
+	typedef std::function<void(Song)> SongConsumer;
+	typedef std::function<void(std::string)> StringConsumer;
 	
 public:
 	Connection();

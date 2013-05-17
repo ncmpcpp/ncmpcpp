@@ -640,7 +640,7 @@ void Connection::Add(const std::string &path)
 bool Connection::AddRandomTag(mpd_tag_type tag, size_t number)
 {
 	StringList tags;
-	GetList(tag, [&tags](std::string &&tag_name) {
+	GetList(tag, [&tags](std::string tag_name) {
 		tags.push_back(tag_name);
 	});
 	if (number > tags.size())
@@ -658,7 +658,7 @@ bool Connection::AddRandomTag(mpd_tag_type tag, size_t number)
 			StartSearch(1);
 			AddSearch(tag, *it++);
 			SongList songs;
-			CommitSearchSongs([&songs](MPD::Song &&s) {
+			CommitSearchSongs([&songs](MPD::Song s) {
 				songs.push_back(s);
 			});
 			StartCommandsList();

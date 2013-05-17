@@ -1263,7 +1263,7 @@ void EditLibraryTag::run()
 		assert(set);
 		bool success = true;
 		std::string dir_to_update;
-		Mpd.CommitSearchSongs([set, &dir_to_update, &new_tag, &success](MPD::Song &&s) {
+		Mpd.CommitSearchSongs([set, &dir_to_update, &new_tag, &success](MPD::Song s) {
 			if (!success)
 				return;
 			MPD::MutableSong ms = s;

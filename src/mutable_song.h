@@ -91,7 +91,7 @@ private:
 		unsigned m_idx;
 	};
 	
-	void replaceTag(mpd_tag_type tag_type, std::string &&orig_value,
+	void replaceTag(mpd_tag_type tag_type, std::string orig_value,
 	                const std::string &value, unsigned idx);
 	
 	template <typename F>

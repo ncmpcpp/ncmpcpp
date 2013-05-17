@@ -198,7 +198,7 @@ void SelectedItemsAdder::populatePlaylistSelector(BaseScreen *old_screen)
 	if (old_screen != myBrowser || !myBrowser->isLocal())
 	{
 		size_t begin = m_playlist_selector.size();
-		Mpd.GetPlaylists([this](std::string &&playlist) {
+		Mpd.GetPlaylists([this](std::string playlist) {
 			m_playlist_selector.addItem(Entry(playlist,
 				std::bind(&Self::addToExistingPlaylist, this, playlist)
 			));

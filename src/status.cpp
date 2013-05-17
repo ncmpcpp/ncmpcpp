@@ -272,7 +272,7 @@ void Status::Changes::playlist()
 			myPlaylist->main().resizeList(playlist_length);
 		}
 		
-		Mpd.GetPlaylistChanges(myPlaylist->oldVersion(), [](MPD::Song &&s) {
+		Mpd.GetPlaylistChanges(myPlaylist->oldVersion(), [](MPD::Song s) {
 			size_t pos = s.getPosition();
 			if (pos < myPlaylist->main().size())
 			{

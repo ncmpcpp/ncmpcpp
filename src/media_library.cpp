@@ -256,7 +256,7 @@ void MediaLibrary::update()
 			Albums.clearSearchResults();
 			m_albums_update_request = false;
 			std::map<std::tuple<std::string, std::string, std::string>, time_t> albums;
-			Mpd.GetDirectoryRecursive("/", [&albums](MPD::Song &&s) {
+			Mpd.GetDirectoryRecursive("/", [&albums](MPD::Song s) {
 				unsigned idx = 0;
 				std::string tag = s.get(Config.media_lib_primary_tag, idx);
 				do
@@ -298,7 +298,7 @@ void MediaLibrary::update()
 			Tags.clearSearchResults();
 			m_tags_update_request = false;
 			std::map<std::string, time_t> tags;
-			Mpd.GetDirectoryRecursive("/", [&tags](MPD::Song &&s) {
+			Mpd.GetDirectoryRecursive("/", [&tags](MPD::Song s) {
 				unsigned idx = 0;
 				std::string tag = s.get(Config.media_lib_primary_tag, idx);
 				do
@@ -336,7 +336,7 @@ void MediaLibrary::update()
 			Mpd.StartSearch(true);
 			Mpd.AddSearch(Config.media_lib_primary_tag, primary_tag);
 			std::map<std::tuple<std::string, std::string>, time_t> albums;
-			Mpd.CommitSearchSongs([&albums](MPD::Song &&s) {
+			Mpd.CommitSearchSongs([&albums](MPD::Song s) {
 				auto key = std::make_tuple(s.getAlbum(), s.getDate());
 				auto it = albums.find(key);
 				if (it == albums.end())
@@ -388,7 +388,7 @@ void MediaLibrary::update()
 		}
 		withUnfilteredMenuReapplyFilter(Songs, [this, &album]() {
 			size_t idx = 0;
-			Mpd.CommitSearchSongs([this, &idx](MPD::Song &&s) {
+			Mpd.CommitSearchSongs([this, &idx](MPD::Song s) {
 				bool is_playlist = myPlaylist->checkForSong(s);
 				if (idx < Songs.size())
 				{
@@ -714,9 +714,7 @@ MPD::SongList MediaLibrary::getSelectedSongs()
 		auto tag_handler = [&result](const std::string &tag) {
 			Mpd.StartSearch(true);
 			Mpd.AddSearch(Config.media_lib_primary_tag, tag);
-			Mpd.CommitSearchSongs([&result](MPD::Song &&s) {
-				result.push_back(s);
-			});
+			Mpd.CommitSearchSongs(vectorMoveInserter(result));
 		};
 		for (auto it = Tags.begin(); it != Tags.end(); ++it)
 			if (it->isSelected())
@@ -741,9 +739,7 @@ MPD::SongList MediaLibrary::getSelectedSongs()
 					Mpd.AddSearch(MPD_TAG_ALBUM, sc.entry().album());
 				Mpd.AddSearch(MPD_TAG_DATE, sc.entry().date());
 				size_t begin = result.size();
-				Mpd.CommitSearchSongs([&result](MPD::Song &&s) {
-					result.push_back(s);
-				});
+				Mpd.CommitSearchSongs(vectorMoveInserter(result));
 				std::sort(result.begin()+begin, result.end(), SortSongs(false));
 			}
 		}

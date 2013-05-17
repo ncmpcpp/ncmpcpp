@@ -216,7 +216,7 @@ void Visualizer::FindOutputID()
 	if (!Config.visualizer_output_name.empty())
 	{
 		size_t idx = 0;
-		Mpd.GetOutputs([this, &idx](MPD::Output &&output) {
+		Mpd.GetOutputs([this, &idx](MPD::Output output) {
 			if (output.name() == Config.visualizer_output_name)
 				m_output_id = idx;
 			++idx;

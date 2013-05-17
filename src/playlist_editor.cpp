@@ -133,7 +133,7 @@ void PlaylistEditor::update()
 		Playlists.clearSearchResults();
 		withUnfilteredMenuReapplyFilter(Playlists, [this]() {
 			size_t idx = 0;
-			Mpd.GetPlaylists([this, &idx](std::string &&playlist) {
+			Mpd.GetPlaylists([this, &idx](std::string playlist) {
 				if (idx < Playlists.size())
 					Playlists[idx].value() = playlist;
 				else
@@ -154,7 +154,7 @@ void PlaylistEditor::update()
 		Content.clearSearchResults();
 		withUnfilteredMenuReapplyFilter(Content, [this]() {
 			size_t idx = 0;
-			Mpd.GetPlaylistContent(Playlists.current().value(), [this, &idx](MPD::Song &&s) {
+			Mpd.GetPlaylistContent(Playlists.current().value(), [this, &idx](MPD::Song s) {
 				if (idx < Content.size())
 				{
 					Content[idx].value() = s;
@@ -459,9 +459,7 @@ MPD::SongList PlaylistEditor::getSelectedSongs()
 			if (it->isSelected())
 			{
 				any_selected = true;
-				Mpd.GetPlaylistContent(it->value(), [&result](MPD::Song &&s) {
-					result.push_back(s);
-				});
+				Mpd.GetPlaylistContent(it->value(), vectorMoveInserter(result));
 			}
 		}
 		// we don't check for empty result here as it's possible that

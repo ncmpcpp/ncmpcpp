@@ -434,7 +434,7 @@ void SearchEngine::Search()
 			Mpd.AddSearch(MPD_TAG_DATE, itsConstraints[9]);
 		if (!itsConstraints[10].empty())
 			Mpd.AddSearch(MPD_TAG_COMMENT, itsConstraints[10]);
-		Mpd.CommitSearchSongs([this](MPD::Song &&s) {
+		Mpd.CommitSearchSongs([this](MPD::Song s) {
 			w.addItem(s);
 		});
 		return;
@@ -442,9 +442,7 @@ void SearchEngine::Search()
 	
 	MPD::SongList list;
 	if (Config.search_in_db)
-		Mpd.GetDirectoryRecursive("/", [&list](MPD::Song &&s) {
-			list.push_back(s);
-		});
+		Mpd.GetDirectoryRecursive("/", vectorMoveInserter(list));
 	else
 		list.insert(list.end(), myPlaylist->main().beginV(), myPlaylist->main().endV());
 	

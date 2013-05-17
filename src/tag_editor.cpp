@@ -238,7 +238,7 @@ void TagEditor::update()
 			Dirs->addItem(std::make_pair("..", getParentDirectory(itsBrowsedDir)));
 		else
 			Dirs->addItem(std::make_pair(".", "/"));
-		Mpd.GetDirectories(itsBrowsedDir, [this](std::string &&directory) {
+		Mpd.GetDirectories(itsBrowsedDir, [this](std::string directory) {
 			Dirs->addItem(std::make_pair(getBasename(directory), directory));
 			if (directory == itsHighlightedDir)
 				Dirs->highlight(Dirs->size()-1);
@@ -251,7 +251,7 @@ void TagEditor::update()
 	if (Tags->reallyEmpty())
 	{
 		Tags->reset();
-		Mpd.GetSongs(Dirs->current().value().second, [this](MPD::Song &&s) {
+		Mpd.GetSongs(Dirs->current().value().second, [this](MPD::Song s) {
 			Tags->addItem(s);
 		});
 		std::sort(Tags->beginV(), Tags->endV(),
@@ -277,7 +277,7 @@ void TagEditor::enterPressed()
 	if (w == Dirs)
 	{
 		bool has_subdirs = false;
-		Mpd.GetDirectories(Dirs->current().value().second, [&has_subdirs](std::string &&) {
+		Mpd.GetDirectories(Dirs->current().value().second, [&has_subdirs](std::string) {
 			has_subdirs = true;
 		});
 		if (has_subdirs)

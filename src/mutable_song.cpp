@@ -200,7 +200,7 @@ void MutableSong::clearModifications()
 	m_tags.clear();
 }
 
-void MutableSong::replaceTag(mpd_tag_type tag_type, std::string &&orig_value, const std::string &value, unsigned idx)
+void MutableSong::replaceTag(mpd_tag_type tag_type, std::string orig_value, const std::string &value, unsigned idx)
 {
 	Tag tag(tag_type, idx);
 	if (value == orig_value)

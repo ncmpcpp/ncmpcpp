@@ -334,6 +334,12 @@ void clearPlaylist(NC::Menu<MPD::Song> &m, F delete_fun, G clear_fun)
 		clear_fun(Mpd);
 }
 
+template <typename ItemT>
+std::function<void (ItemT)> vectorMoveInserter(std::vector<ItemT> &v)
+{
+	return [&](ItemT item) { v.push_back(std::move(item)); };
+}
+
 template <typename Iterator> std::string getSharedDirectory(Iterator first, Iterator last)
 {
 	assert(first != last);
