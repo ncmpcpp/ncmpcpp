@@ -493,6 +493,16 @@ void Connection::GetPlaylistContent(const std::string &path, SongConsumer f)
 	checkErrors();
 }
 
+void Connection::GetPlaylistContentNoInfo(const std::string &path, SongConsumer f)
+{
+	prechecksNoCommandsList();
+	mpd_send_list_playlist(m_connection, path.c_str());
+	while (mpd_song *s = mpd_recv_song(m_connection))
+		f(Song(s));
+	mpd_response_finish(m_connection);
+	checkErrors();
+}
+
 void Connection::GetSupportedExtensions(std::set<std::string> &acc)
 {
 	prechecksNoCommandsList();

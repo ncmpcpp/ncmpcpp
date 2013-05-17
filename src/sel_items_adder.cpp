@@ -241,13 +241,13 @@ void SelectedItemsAdder::addToExistingPlaylist(const std::string &playlist) cons
 
 void SelectedItemsAdder::addAtTheEndOfPlaylist() const
 {
-	addSongsToPlaylist(m_selected_items, false);
+	addSongsToPlaylist(m_selected_items.begin(), m_selected_items.end(), false, -1);
 	exitSuccessfully();
 }
 
 void SelectedItemsAdder::addAtTheBeginningOfPlaylist() const
 {
-	addSongsToPlaylist(m_selected_items, false, 0);
+	addSongsToPlaylist(m_selected_items.begin(), m_selected_items.end(), false, 0);
 	exitSuccessfully();
 }
 
@@ -257,7 +257,7 @@ void SelectedItemsAdder::addAfterCurrentSong() const
 		return;
 	size_t pos = myPlaylist->currentSongPosition();
 	++pos;
-	addSongsToPlaylist(m_selected_items, false, pos);
+	addSongsToPlaylist(m_selected_items.begin(), m_selected_items.end(), false, pos);
 	exitSuccessfully();
 }
 
@@ -272,7 +272,7 @@ void SelectedItemsAdder::addAfterCurrentAlbum() const
 		while (pos < pl.size() && pl[pos].value().getAlbum() == album)
 			++pos;
 	});
-	addSongsToPlaylist(m_selected_items, false, pos);
+	addSongsToPlaylist(m_selected_items.begin(), m_selected_items.end(), false, pos);
 	exitSuccessfully();
 }
 
@@ -280,7 +280,7 @@ void SelectedItemsAdder::addAfterHighlightedSong() const
 {
 	size_t pos = myPlaylist->main().current().value().getPosition();
 	++pos;
-	addSongsToPlaylist(m_selected_items, false, pos);
+	addSongsToPlaylist(m_selected_items.begin(), m_selected_items.end(), false, pos);
 	exitSuccessfully();
 }
 

@@ -126,9 +126,10 @@ void Browser::enterPressed()
 		}
 		case itPlaylist:
 		{
-			Mpd.LoadPlaylist(item.name);
+			MPD::SongList list;
+			Mpd.GetPlaylistContentNoInfo(item.name, vectorMoveInserter(list));
+			addSongsToPlaylist(list.begin(), list.end(), true, -1);
 			Statusbar::msg("Playlist \"%s\" loaded", item.name.c_str());
-			myPlaylist->PlayNewlyAddedSongs();
 		}
 	}
 }
@@ -166,7 +167,7 @@ void Browser::spacePressed()
 				list.reserve(items.size());
 				for (MPD::ItemList::const_iterator it = items.begin(); it != items.end(); ++it)
 					list.push_back(*it->song);
-				addSongsToPlaylist(list, false, -1);
+				addSongsToPlaylist(list.begin(), list.end(), false, -1);
 			}
 			else
 #			endif // !WIN32

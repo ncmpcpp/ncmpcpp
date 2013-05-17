@@ -74,8 +74,6 @@ struct Playlist: Screen<NC::Menu<MPD::Song>>, Filterable, HasSongs, Searchable, 
 	void UpdateTimer();
 	time_t Timer() const { return itsTimer; }
 	
-	void PlayNewlyAddedSongs();
-	
 	void SetSelectedItemsPriority(int prio);
 	
 	void setStatus(MPD::Status status);

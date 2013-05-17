@@ -442,7 +442,7 @@ void MediaLibrary::spacePressed()
 		}
 	}
 	else
-		AddToPlaylist(0);
+		AddToPlaylist(false);
 }
 
 void MediaLibrary::mouseButtonPressed(MEVENT me)
@@ -716,19 +716,27 @@ MPD::SongList MediaLibrary::getSelectedSongs()
 			Mpd.AddSearch(Config.media_lib_primary_tag, tag);
 			Mpd.CommitSearchSongs(vectorMoveInserter(result));
 		};
-		for (auto it = Tags.begin(); it != Tags.end(); ++it)
-			if (it->isSelected())
-				tag_handler(it->value().tag());
+		bool any_selected = false;
+		for (auto &e : Tags)
+		{
+			if (e.isSelected())
+			{
+				any_selected = true;
+				tag_handler(e.value().tag());
+			}
+		}
 		// if no item is selected, add current one
-		if (result.empty() && !Tags.empty())
+		if (!any_selected && !Tags.empty())
 			tag_handler(Tags.current().value().tag());
 	}
 	else if (isActiveWindow(Albums))
 	{
+		bool any_selected = false;
 		for (auto it = Albums.begin(); it != Albums.end() && !it->isSeparator(); ++it)
 		{
 			if (it->isSelected())
 			{
+				any_selected = true;
 				auto &sc = it->value();
 				Mpd.StartSearch(true);
 				if (hasTwoColumns)
@@ -744,7 +752,7 @@ MPD::SongList MediaLibrary::getSelectedSongs()
 			}
 		}
 		// if no item is selected, add songs from right column
-		if (result.empty() && !Albums.empty())
+		if (!any_selected && !Albums.empty())
 		{
 			withUnfilteredMenu(Songs, [this, &result]() {
 				result.insert(result.end(), Songs.beginV(), Songs.endV());
@@ -990,18 +998,27 @@ void MediaLibrary::AddToPlaylist(bool add_n_play)
 		addSongToPlaylist(Songs.current().value(), add_n_play);
 	else
 	{
-		addSongsToPlaylist(getSelectedSongs(), add_n_play);
 		if ((!Tags.empty() && isActiveWindow(Tags))
 		||  (isActiveWindow(Albums) && Albums.current().value().isAllTracksEntry()))
 		{
+			MPD::SongList list;
+			Mpd.StartSearch(true);
+			Mpd.AddSearch(Config.media_lib_primary_tag, Tags.current().value().tag());
+			Mpd.CommitSearchSongs(vectorMoveInserter(list));
+			addSongsToPlaylist(list.begin(), list.end(), add_n_play, -1);
 			std::string tag_type = boost::locale::to_lower(
 				tagTypeToString(Config.media_lib_primary_tag));
 			Statusbar::msg("Songs with %s = \"%s\" added",
 				tag_type.c_str(), Tags.current().value().tag().c_str());
 		}
 		else if (isActiveWindow(Albums))
+		{
+			withUnfilteredMenu(Songs, [&]() {
+				addSongsToPlaylist(Songs.beginV(), Songs.endV(), add_n_play, -1);
+			});
 			Statusbar::msg("Songs from album \"%s\" added",
 				Albums.current().value().entry().album().c_str());
+		}
 	}
 	
 	if (!add_n_play)

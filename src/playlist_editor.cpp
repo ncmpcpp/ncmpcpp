@@ -221,10 +221,10 @@ void PlaylistEditor::AddToPlaylist(bool add_n_play)
 	
 	if (isActiveWindow(Playlists) && !Playlists.empty())
 	{
-		Mpd.LoadPlaylist(Playlists.current().value());
+		withUnfilteredMenu(Content, [&]() {
+			addSongsToPlaylist(Content.beginV(), Content.endV(), add_n_play, -1);
+		});
 		Statusbar::msg("Playlist \"%s\" loaded", Playlists.current().value().c_str());
-		if (add_n_play)
-			myPlaylist->PlayNewlyAddedSongs();
 	}
 	else if (isActiveWindow(Content) && !Content.empty())
 		addSongToPlaylist(Content.current().value(), add_n_play);
@@ -454,16 +454,15 @@ MPD::SongList PlaylistEditor::getSelectedSongs()
 	if (isActiveWindow(Playlists))
 	{
 		bool any_selected = false;
-		for (auto it = Playlists.begin(); it != Playlists.end(); ++it)
+		for (auto &e : Playlists)
 		{
-			if (it->isSelected())
+			if (e.isSelected())
 			{
 				any_selected = true;
-				Mpd.GetPlaylistContent(it->value(), vectorMoveInserter(result));
+				Mpd.GetPlaylistContent(e.value(), vectorMoveInserter(result));
 			}
 		}
-		// we don't check for empty result here as it's possible that
-		// all selected playlists are empty.
+		// if no item is selected, add songs from right column
 		if (!any_selected && !Content.empty())
 		{
 			withUnfilteredMenu(Content, [this, &result]() {
@@ -473,9 +472,9 @@ MPD::SongList PlaylistEditor::getSelectedSongs()
 	}
 	else if (isActiveWindow(Content))
 	{
-		for (auto it = Content.begin(); it != Content.end(); ++it)
-			if (it->isSelected())
-				result.push_back(it->value());
+		for (auto &e : Content)
+			if (e.isSelected())
+				result.push_back(e.value());
 		// if no item is selected, add current one
 		if (result.empty() && !Content.empty())
 			result.push_back(Content.current().value());

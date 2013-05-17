@@ -198,6 +198,7 @@ public:
 	Song GetCurrentlyPlayingSong();
 	Song GetSong(const std::string &);
 	void GetPlaylistContent(const std::string &name, SongConsumer f);
+	void GetPlaylistContentNoInfo(const std::string &name, SongConsumer f);
 	
 	void GetSupportedExtensions(std::set<std::string> &);
 	

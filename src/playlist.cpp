@@ -313,19 +313,6 @@ std::string Playlist::TotalLength()
 	return result.str();
 }
 
-void Playlist::PlayNewlyAddedSongs()
-{
-	// FIXME for removal
-	bool is_filtered = w.isFiltered();
-	w.showAll();
-	size_t old_size = w.size();
-	//Mpd.UpdateStatus();
-	if (old_size < w.size())
-		Mpd.Play(old_size);
-	if (is_filtered)
-		w.showFiltered();
-}
-
 void Playlist::SetSelectedItemsPriority(int prio)
 {
 	auto list = getSelectedOrCurrent(w.begin(), w.end(), w.currentI());
