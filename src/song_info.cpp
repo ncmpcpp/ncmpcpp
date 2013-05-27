@@ -22,6 +22,7 @@
 #include "helpers.h"
 #include "song_info.h"
 #include "tag_editor.h"
+#include "tags.h"
 #include "title.h"
 #include "screen_switcher.h"
 
@@ -124,7 +125,17 @@ void SongInfo::PrepareSong(MPD::Song &s)
 			}
 			w << NC::Format::Bold << "Bitrate: " << NC::Format::NoBold << Config.color2 << f.audioProperties()->bitrate() << " kbps\n" << NC::Color::End;
 			w << NC::Format::Bold << "Sample rate: " << NC::Format::NoBold << Config.color2 << f.audioProperties()->sampleRate() << " Hz\n" << NC::Color::End;
-			w << NC::Format::Bold << "Channels: " << NC::Format::NoBold << Config.color2 << channels << '\n' << NC::Color::Default;
+			w << NC::Format::Bold << "Channels: " << NC::Format::NoBold << Config.color2 << channels << NC::Color::End << "\n";
+			
+			auto rginfo = Tags::readReplayGain(f.file());
+			if (!rginfo.empty())
+			{
+				w << NC::Format::Bold << "\nReference loudness: " << NC::Format::NoBold << Config.color2 << rginfo.referenceLoudness() << NC::Color::End << "\n";
+				w << NC::Format::Bold << "Track gain: " << NC::Format::NoBold << Config.color2 << rginfo.trackGain() << NC::Color::End << "\n";
+				w << NC::Format::Bold << "Track peak: " << NC::Format::NoBold << Config.color2 << rginfo.trackPeak() << NC::Color::End << "\n";
+				w << NC::Format::Bold << "Album gain: " << NC::Format::NoBold << Config.color2 << rginfo.albumGain() << NC::Color::End << "\n";
+				w << NC::Format::Bold << "Album peak: " << NC::Format::NoBold << Config.color2 << rginfo.albumPeak() << NC::Color::End << "\n";
+			}
 		}
 	}
 #	endif // HAVE_TAGLIB_H

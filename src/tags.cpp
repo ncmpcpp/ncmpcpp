@@ -187,6 +187,24 @@ void writeXiphComments(const MPD::MutableSong &s, TagLib::Ogg::XiphComment *tag)
 	writeXiph("COMMENT", tagList(s, &MPD::Song::getComment));
 }
 
+Tags::ReplayGainInfo getReplayGain(TagLib::Ogg::XiphComment *tag)
+{
+	auto first_or_empty = [](const TagLib::StringList &list) {
+		std::string result;
+		if (!list.isEmpty())
+			result = list.front().to8Bit(true);
+		return result;
+	};
+	auto &fields = tag->fieldListMap();
+	return Tags::ReplayGainInfo(
+		first_or_empty(fields["REPLAYGAIN_REFERENCE_LOUDNESS"]),
+		first_or_empty(fields["REPLAYGAIN_TRACK_GAIN"]),
+		first_or_empty(fields["REPLAYGAIN_TRACK_PEAK"]),
+		first_or_empty(fields["REPLAYGAIN_ALBUM_GAIN"]),
+		first_or_empty(fields["REPLAYGAIN_ALBUM_PEAK"])
+	);
+}
+
 }
 
 namespace Tags {//
@@ -196,6 +214,22 @@ bool extendedSetSupported(const TagLib::File *f)
 	return dynamic_cast<const TagLib::MPEG::File *>(f)
 	||     dynamic_cast<const TagLib::Ogg::Vorbis::File *>(f)
 	||     dynamic_cast<const TagLib::FLAC::File *>(f);
+}
+
+ReplayGainInfo readReplayGain(TagLib::File *f)
+{
+	ReplayGainInfo result;
+	if (auto ogg_file = dynamic_cast<TagLib::Ogg::Vorbis::File *>(f))
+	{
+		if (auto xiph = ogg_file->tag())
+			result = getReplayGain(xiph);
+	}
+	else if (auto flac_file = dynamic_cast<TagLib::FLAC::File *>(f))
+	{
+		if (auto xiph = flac_file->xiphComment())
+			result = getReplayGain(xiph);
+	}
+	return result;
 }
 
 void read(MPD::MutableSong &s)
