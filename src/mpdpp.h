@@ -71,15 +71,15 @@ struct Statistics
 {
 	friend class Connection;
 	
-	bool empty() const;
+	bool empty() const { return m_stats.get() == nullptr; }
 	
-	unsigned artists() const;
-	unsigned albums() const;
-	unsigned songs() const;
-	unsigned long playTime() const;
-	unsigned long uptime() const;
-	unsigned long dbUpdateTime() const;
-	unsigned long dbPlayTime() const;
+	unsigned artists() const { return mpd_stats_get_number_of_artists(m_stats.get()); }
+	unsigned albums() const { return mpd_stats_get_number_of_albums(m_stats.get()); }
+	unsigned songs() const { return mpd_stats_get_number_of_songs(m_stats.get()); }
+	unsigned long playTime() const { return mpd_stats_get_play_time(m_stats.get()); }
+	unsigned long uptime() const { return mpd_stats_get_uptime(m_stats.get()); }
+	unsigned long dbUpdateTime() const { return mpd_stats_get_db_update_time(m_stats.get()); }
+	unsigned long dbPlayTime() const { return mpd_stats_get_db_play_time(m_stats.get()); }
 	
 private:
 	Statistics(mpd_stats *stats) : m_stats(stats, mpd_stats_free) { }
@@ -93,27 +93,27 @@ struct Status
 	
 	Status() { }
 	
-	void clear();
-	bool empty() const;
+	void clear() { m_status.reset(); }
+	bool empty() const { return m_status.get() == nullptr; }
 	
-	int volume() const;
-	bool repeat() const;
-	bool random() const;
-	bool single() const;
-	bool consume() const;
-	unsigned playlistLength() const;
-	unsigned playlistVersion() const;
-	PlayerState playerState() const;
-	unsigned crossfade() const;
-	int currentSongPosition() const;
-	int currentSongID() const;
-	int nextSongPosition() const;
-	int nextSongID() const;
-	unsigned elapsedTime() const;
-	unsigned totalTime() const;
-	unsigned kbps() const;
-	unsigned updateID() const;
-	const char *error() const;
+	int volume() const { return mpd_status_get_volume(m_status.get()); }
+	bool repeat() const { return mpd_status_get_repeat(m_status.get()); }
+	bool random() const { return mpd_status_get_random(m_status.get()); }
+	bool single() const { return mpd_status_get_single(m_status.get()); }
+	bool consume() const { return mpd_status_get_consume(m_status.get()); }
+	unsigned playlistLength() const { return mpd_status_get_queue_length(m_status.get()); }
+	unsigned playlistVersion() const { return mpd_status_get_queue_version(m_status.get()); }
+	PlayerState playerState() const { return PlayerState(mpd_status_get_state(m_status.get())); }
+	unsigned crossfade() const { return mpd_status_get_crossfade(m_status.get()); }
+	int currentSongPosition() const { return mpd_status_get_song_pos(m_status.get()); }
+	int currentSongID() const { return mpd_status_get_song_id(m_status.get()); }
+	int nextSongPosition() const { return mpd_status_get_next_song_pos(m_status.get()); }
+	int nextSongID() const { return mpd_status_get_next_song_id(m_status.get()); }
+	unsigned elapsedTime() const { return mpd_status_get_elapsed_time(m_status.get()); }
+	unsigned totalTime() const { return mpd_status_get_total_time(m_status.get()); }
+	unsigned kbps() const { return mpd_status_get_kbit_rate(m_status.get()); }
+	unsigned updateID() const { return mpd_status_get_update_id(m_status.get()); }
+	const char *error() const { return mpd_status_get_error(m_status.get()); }
 	
 private:
 	Status(mpd_status *status) : m_status(status, mpd_status_free) { }
