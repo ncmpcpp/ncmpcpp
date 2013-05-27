@@ -107,15 +107,19 @@ AC_CHECK_HEADERS([boost/lexical_cast.hpp], ,
 AC_CHECK_HEADERS([boost/algorithm/string.hpp], ,
 	AC_MSG_ERROR(boost/algorithm/string.hpp is missing))
 
-dnl =============================
-dnl = checking for boost.locale =
-dnl =============================
+dnl =================================
+dnl = checking for boost.filesystem =
+dnl =================================
 AC_CHECK_HEADERS([boost/filesystem.hpp], ,
 	AC_MSG_ERROR(boost/filesystem.hpp is missing)
 )
 AC_CHECK_LIB(boost_filesystem$BOOST_LIB_SUFFIX, main, LDFLAGS="$LDFLAGS -lboost_filesystem$BOOST_LIB_SUFFIX",
 	AC_MSG_ERROR([no boost.filesystem library found])
 )
+AC_CHECK_LIB(boost_system$BOOST_LIB_SUFFIX, main, LDFLAGS="$LDFLAGS -lboost_system$BOOST_LIB_SUFFIX",
+	AC_MSG_ERROR([no boost.system library found])
+)
+
 
 dnl =============================
 dnl = checking for boost.locale =
