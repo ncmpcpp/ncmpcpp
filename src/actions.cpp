@@ -1573,17 +1573,19 @@ void JumpToPositionInSong::run()
 		return;
 	
 	unsigned newpos = 0;
-	if (position.find(':') != std::string::npos) // probably time in mm:ss
+	size_t special_pos;
+	if ((special_pos = position.find(':')) != std::string::npos) // probably time in mm:ss
 	{
-		newpos = boost::lexical_cast<int>(position)*60
-		       + boost::lexical_cast<int>(position.substr(position.find(':')+1));
+		newpos = boost::lexical_cast<int>(position.substr(0, special_pos))*60
+		       + boost::lexical_cast<int>(position.substr(special_pos +1));
 		if (newpos <= myPlaylist->currentSongLength())
 			Mpd.Seek(s.getPosition(), newpos);
 		else
 			Statusbar::msg("Out of bounds, 0:00-%s possible for mm:ss, %s given", s.getLength().c_str(), MPD::Song::ShowTime(newpos).c_str());
 	}
-	else if (position.find('s') != std::string::npos) // probably position in seconds
+	else if ((special_pos = position.find('s')) != std::string::npos) // probably position in seconds
 	{
+		position.resize(special_pos);
 		newpos = boost::lexical_cast<int>(position);
 		if (newpos <= s.getDuration())
 			Mpd.Seek(s.getPosition(), newpos);
@@ -1592,6 +1594,9 @@ void JumpToPositionInSong::run()
 	}
 	else
 	{
+		special_pos = position.find('%');
+		if (special_pos != std::string::npos)
+			position.resize(special_pos);
 		newpos = boost::lexical_cast<int>(position);
 		if (newpos <= 100)
 			Mpd.Seek(s.getPosition(), s.getDuration()*newpos/100.0);
