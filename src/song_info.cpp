@@ -101,7 +101,7 @@ void SongInfo::PrepareSong(MPD::Song &s)
 	w << "\n\n" << NC::Color::End;
 	w << NC::Format::Bold << "Length: " << NC::Format::NoBold << Config.color2 << s.getLength() << '\n' << NC::Color::End;
 #	ifdef HAVE_TAGLIB_H
-	if (!Config.mpd_music_dir.empty())
+	if (!Config.mpd_music_dir.empty() && !s.isStream())
 	{
 		std::string path_to_file;
 		if (s.isFromDatabase())
