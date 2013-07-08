@@ -53,7 +53,7 @@ LyricsFetcher::Result LyricsFetcher::fetch(const std::string &artist, const std:
 	Result result;
 	result.first = false;
 	
-	std::string url = this->url();
+	std::string url = urlTemplate();
 	boost::replace_all(url, "%artist%", artist.c_str());
 	boost::replace_all(url, "%title%", title.c_str());
 	
@@ -91,10 +91,10 @@ LyricsFetcher::Result LyricsFetcher::fetch(const std::string &artist, const std:
 	return result;
 }
 
-std::vector<std::string> LyricsFetcher::getContent(const char *regex, const std::string &data)
+std::vector<std::string> LyricsFetcher::getContent(const char *regex_, const std::string &data)
 {
 	std::vector<std::string> result;
-	boost::regex rx(regex);
+	boost::regex rx(regex_);
 	auto first = boost::sregex_iterator(data.begin(), data.end(), rx);
 	auto last = boost::sregex_iterator();
 	for (; first != last; ++first)

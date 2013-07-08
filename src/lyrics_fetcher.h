@@ -35,7 +35,7 @@ struct LyricsFetcher
 	virtual Result fetch(const std::string &artist, const std::string &title);
 	
 protected:
-	virtual const char *url() = 0;
+	virtual const char *urlTemplate() = 0;
 	virtual const char *regex() = 0;
 	
 	virtual bool notLyrics(const std::string &) { return false; }
@@ -52,7 +52,7 @@ struct LyricwikiFetcher : public LyricsFetcher
 	virtual Result fetch(const std::string &artist, const std::string &title);
 	
 protected:
-	virtual const char *url() { return "http://lyrics.wikia.com/api.php?action=lyrics&fmt=xml&func=getSong&artist=%artist%&song=%title%"; }
+	virtual const char *urlTemplate() { return "http://lyrics.wikia.com/api.php?action=lyrics&fmt=xml&func=getSong&artist=%artist%&song=%title%"; }
 	virtual const char *regex() { return "<url>(.*?)</url>"; }
 	
 	virtual bool notLyrics(const std::string &data);
@@ -65,7 +65,7 @@ struct GoogleLyricsFetcher : public LyricsFetcher
 	virtual Result fetch(const std::string &artist, const std::string &title);
 	
 protected:
-	virtual const char *url() { return URL; }
+	virtual const char *urlTemplate() { return URL; }
 	virtual const char *siteKeyword() { return name(); }
 	
 	virtual bool isURLOk(const std::string &url);
