@@ -111,6 +111,14 @@ protected:
 	virtual const char *regex() { return "<p class=\"lyrics\">(.*?)</p>"; }
 };
 
+struct AzLyricsFetcher : public GoogleLyricsFetcher
+{
+	virtual const char *name() { return "azlyrics.com"; }
+	
+protected:
+	virtual const char *regex() { return "<!-- start of lyrics -->(.*?)<!-- end of lyrics -->"; }
+};
+
 struct InternetLyricsFetcher : public GoogleLyricsFetcher
 {
 	virtual const char *name() { return "the Internet"; }
