@@ -26,10 +26,10 @@
 namespace {//
 
 template <typename PropT>
-bool regexSearch(NC::Buffer &buf, PropT begin, const std::string &ws, PropT end, size_t id)
+bool regexSearch(NC::Buffer &buf, PropT begin, const std::string &ws, PropT end, size_t id, boost::regex::flag_type flags)
 {
 	try {
-		boost::regex rx(ws, boost::regex::icase);
+		boost::regex rx(ws, flags);
 		auto first = boost::sregex_iterator(buf.str().begin(), buf.str().end(), rx);
 		auto last = boost::sregex_iterator();
 		bool success = first != last;
@@ -268,14 +268,14 @@ void Scrollpad::reset()
 	m_beginning = 0;
 }
 
-bool Scrollpad::setProperties(Color begin, const std::string &s, Color end, size_t id)
+bool Scrollpad::setProperties(Color begin, const std::string &s, Color end, size_t id, boost::regex::flag_type flags)
 {
-	return regexSearch(m_buffer, begin, s, end, id);
+	return regexSearch(m_buffer, begin, s, end, id, flags);
 }
 
-bool Scrollpad::setProperties(Format begin, const std::string &s, Format end, size_t id)
+bool Scrollpad::setProperties(Format begin, const std::string &s, Format end, size_t id, boost::regex::flag_type flags)
 {
-	return regexSearch(m_buffer, begin, s, end, id);
+	return regexSearch(m_buffer, begin, s, end, id, flags);
 }
 
 void Scrollpad::removeProperties(size_t id)
