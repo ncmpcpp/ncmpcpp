@@ -18,6 +18,7 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
+#include <boost/bind.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/locale/conversion.hpp>
 #include <algorithm>
@@ -39,8 +40,6 @@
 #include "tags.h"
 #include "utility/comparators.h"
 #include "utility/string.h"
-
-using namespace std::placeholders;
 
 using Global::MainHeight;
 using Global::MainStartY;
@@ -70,7 +69,7 @@ Browser::Browser() : itsBrowseLocally(0), itsScrollBeginning(0), itsBrowsedDir("
 	w.centeredCursor(Config.centered_cursor);
 	w.setSelectedPrefix(Config.selected_item_prefix);
 	w.setSelectedSuffix(Config.selected_item_suffix);
-	w.setItemDisplayer(std::bind(Display::Items, _1, proxySongList()));
+	w.setItemDisplayer(boost::bind(Display::Items, _1, proxySongList()));
 }
 
 void Browser::resize()
@@ -254,7 +253,7 @@ void Browser::applyFilter(const std::string &filter)
 	try
 	{
 		w.showAll();
-		auto fun = std::bind(BrowserEntryMatcher, _1, _2, true);
+		auto fun = boost::bind(BrowserEntryMatcher, _1, _2, true);
 		auto rx = RegexFilter<MPD::Item>(
 			boost::regex(filter, Config.regex_type), fun);
 		w.filter(w.begin(), w.end(), rx);
@@ -278,7 +277,7 @@ bool Browser::search(const std::string &constraint)
 	}
 	try
 	{
-		auto fun = std::bind(BrowserEntryMatcher, _1, _2, false);
+		auto fun = boost::bind(BrowserEntryMatcher, _1, _2, false);
 		auto rx = RegexFilter<MPD::Item>(
 			boost::regex(constraint, Config.regex_type), fun);
 		return w.search(w.begin(), w.end(), rx);

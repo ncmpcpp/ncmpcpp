@@ -18,6 +18,8 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
+#include <boost/bind.hpp>
+
 #include "charset.h"
 #include "display.h"
 #include "global.h"
@@ -47,41 +49,41 @@ SortPlaylistDialog::SortPlaylistDialog()
 	});
 	
 	w.addItem(Entry(std::make_pair("Artist", &MPD::Song::getArtist),
-		std::bind(&Self::moveSortOrderHint, this)
+		boost::bind(&Self::moveSortOrderHint, this)
 	));
 	w.addItem(Entry(std::make_pair("Album", &MPD::Song::getAlbum),
-		std::bind(&Self::moveSortOrderHint, this)
+		boost::bind(&Self::moveSortOrderHint, this)
 	));
 	w.addItem(Entry(std::make_pair("Disc", &MPD::Song::getDisc),
-		std::bind(&Self::moveSortOrderHint, this)
+		boost::bind(&Self::moveSortOrderHint, this)
 	));
 	w.addItem(Entry(std::make_pair("Track", &MPD::Song::getTrack),
-		std::bind(&Self::moveSortOrderHint, this)
+		boost::bind(&Self::moveSortOrderHint, this)
 	));
 	w.addItem(Entry(std::make_pair("Genre", &MPD::Song::getGenre),
-		std::bind(&Self::moveSortOrderHint, this)
+		boost::bind(&Self::moveSortOrderHint, this)
 	));
 	w.addItem(Entry(std::make_pair("Date", &MPD::Song::getDate),
-		std::bind(&Self::moveSortOrderHint, this)
+		boost::bind(&Self::moveSortOrderHint, this)
 	));
 	w.addItem(Entry(std::make_pair("Composer", &MPD::Song::getComposer),
-		std::bind(&Self::moveSortOrderHint, this)
+		boost::bind(&Self::moveSortOrderHint, this)
 	));
 	w.addItem(Entry(std::make_pair("Performer", &MPD::Song::getPerformer),
-		std::bind(&Self::moveSortOrderHint, this)
+		boost::bind(&Self::moveSortOrderHint, this)
 	));
 	w.addItem(Entry(std::make_pair("Title", &MPD::Song::getTitle),
-		std::bind(&Self::moveSortOrderHint, this)
+		boost::bind(&Self::moveSortOrderHint, this)
 	));
 	w.addItem(Entry(std::make_pair("Filename", &MPD::Song::getURI),
-		std::bind(&Self::moveSortOrderHint, this)
+		boost::bind(&Self::moveSortOrderHint, this)
 	));
 	w.addSeparator();
 	w.addItem(Entry(std::make_pair("Sort", static_cast<MPD::Song::GetFunction>(0)),
-		std::bind(&Self::sort, this)
+		boost::bind(&Self::sort, this)
 	));
 	w.addItem(Entry(std::make_pair("Cancel", static_cast<MPD::Song::GetFunction>(0)),
-		std::bind(&Self::cancel, this)
+		boost::bind(&Self::cancel, this)
 	));
 }
 

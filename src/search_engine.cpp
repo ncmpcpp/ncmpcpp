@@ -19,6 +19,7 @@
  ***************************************************************************/
 
 #include <array>
+#include <boost/bind.hpp>
 #include <iomanip>
 
 #include "display.h"
@@ -33,8 +34,6 @@
 #include "utility/comparators.h"
 #include "title.h"
 #include "screen_switcher.h"
-
-using namespace std::placeholders;
 
 using Global::MainHeight;
 using Global::MainStartY;
@@ -108,7 +107,7 @@ SearchEngine::SearchEngine()
 	w.setHighlightColor(Config.main_highlight_color);
 	w.cyclicScrolling(Config.use_cyclic_scrolling);
 	w.centeredCursor(Config.centered_cursor);
-	w.setItemDisplayer(std::bind(Display::SEItems, _1, proxySongList()));
+	w.setItemDisplayer(boost::bind(Display::SEItems, _1, proxySongList()));
 	w.setSelectedPrefix(Config.selected_item_prefix);
 	w.setSelectedSuffix(Config.selected_item_suffix);
 	SearchMode = &SearchModes[Config.search_engine_default_search_mode];
@@ -273,7 +272,7 @@ void SearchEngine::applyFilter(const std::string &filter)
 	try
 	{
 		w.showAll();
-		auto fun = std::bind(SEItemEntryMatcher, _1, _2, true);
+		auto fun = boost::bind(SEItemEntryMatcher, _1, _2, true);
 		auto rx = RegexItemFilter<SEItem>(
 			boost::regex(filter, Config.regex_type), fun);
 		w.filter(w.begin(), w.end(), rx);
@@ -297,7 +296,7 @@ bool SearchEngine::search(const std::string &constraint)
 	}
 	try
 	{
-		auto fun = std::bind(SEItemEntryMatcher, _1, _2, false);
+		auto fun = boost::bind(SEItemEntryMatcher, _1, _2, false);
 		auto rx = RegexItemFilter<SEItem>(
 			boost::regex(constraint, Config.regex_type), fun);
 		return w.search(w.begin(), w.end(), rx);

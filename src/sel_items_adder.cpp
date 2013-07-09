@@ -18,6 +18,7 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
+#include <boost/bind.hpp>
 #include <algorithm>
 
 #include "browser.h"
@@ -78,23 +79,23 @@ SelectedItemsAdder::SelectedItemsAdder()
 	m_position_selector.setItemDisplayer(DisplayComponent);
 	
 	m_position_selector.addItem(Entry("At the end of playlist",
-		std::bind(&Self::addAtTheEndOfPlaylist, this)
+		boost::bind(&Self::addAtTheEndOfPlaylist, this)
 	));
 	m_position_selector.addItem(Entry("At the beginning of playlist",
-		std::bind(&Self::addAtTheBeginningOfPlaylist, this)
+		boost::bind(&Self::addAtTheBeginningOfPlaylist, this)
 	));
 	m_position_selector.addItem(Entry("After current song",
-		std::bind(&Self::addAfterCurrentSong, this)
+		boost::bind(&Self::addAfterCurrentSong, this)
 	));
 	m_position_selector.addItem(Entry("After current album",
-		std::bind(&Self::addAfterCurrentAlbum, this)
+		boost::bind(&Self::addAfterCurrentAlbum, this)
 	));
 	m_position_selector.addItem(Entry("After highlighted item",
-		std::bind(&Self::addAfterHighlightedSong, this)
+		boost::bind(&Self::addAfterHighlightedSong, this)
 	));
 	m_position_selector.addSeparator();
 	m_position_selector.addItem(Entry("Cancel",
-		std::bind(&Self::cancel, this)
+		boost::bind(&Self::cancel, this)
 	));
 	
 	w = &m_playlist_selector;
@@ -186,11 +187,11 @@ void SelectedItemsAdder::populatePlaylistSelector(BaseScreen *old_screen)
 	if (old_screen != myPlaylist)
 	{
 		m_playlist_selector.addItem(Entry("Current playlist",
-			std::bind(&Self::addToCurrentPlaylist, this)
+			boost::bind(&Self::addToCurrentPlaylist, this)
 		));
 	}
 	m_playlist_selector.addItem(Entry("New playlist",
-		std::bind(&Self::addToNewPlaylist, this)
+		boost::bind(&Self::addToNewPlaylist, this)
 	));
 	m_playlist_selector.addSeparator();
 	
@@ -200,7 +201,7 @@ void SelectedItemsAdder::populatePlaylistSelector(BaseScreen *old_screen)
 		size_t begin = m_playlist_selector.size();
 		Mpd.GetPlaylists([this](std::string playlist) {
 			m_playlist_selector.addItem(Entry(playlist,
-				std::bind(&Self::addToExistingPlaylist, this, playlist)
+				boost::bind(&Self::addToExistingPlaylist, this, playlist)
 			));
 		});
 		std::sort(m_playlist_selector.beginV()+begin, m_playlist_selector.endV(),
@@ -209,7 +210,7 @@ void SelectedItemsAdder::populatePlaylistSelector(BaseScreen *old_screen)
 			m_playlist_selector.addSeparator();
 	}
 	m_playlist_selector.addItem(Entry("Cancel",
-		std::bind(&Self::cancel, this)
+		boost::bind(&Self::cancel, this)
 	));
 }
 

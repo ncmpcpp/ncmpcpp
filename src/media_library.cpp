@@ -18,6 +18,7 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
+#include <boost/bind.hpp>
 #include <boost/locale/conversion.hpp>
 #include <algorithm>
 #include <array>
@@ -37,8 +38,6 @@
 #include "utility/type_conversions.h"
 #include "title.h"
 #include "screen_switcher.h"
-
-using namespace std::placeholders;
 
 using Global::MainHeight;
 using Global::MainStartY;
@@ -183,7 +182,7 @@ MediaLibrary::MediaLibrary()
 	Songs.centeredCursor(Config.centered_cursor);
 	Songs.setSelectedPrefix(Config.selected_item_prefix);
 	Songs.setSelectedSuffix(Config.selected_item_suffix);
-	Songs.setItemDisplayer(std::bind(Display::Songs, _1, songsProxyList(), Config.song_library_format));
+	Songs.setItemDisplayer(boost::bind(Display::Songs, _1, songsProxyList(), Config.song_library_format));
 	
 	w = &Tags;
 }
@@ -590,7 +589,7 @@ void MediaLibrary::applyFilter(const std::string &filter)
 		else if (isActiveWindow(Albums))
 		{
 			Albums.showAll();
-			auto fun = std::bind(AlbumEntryMatcher, _1, _2, true);
+			auto fun = boost::bind(AlbumEntryMatcher, _1, _2, true);
 			auto rx = RegexItemFilter<AlbumEntry>(
 				boost::regex(filter, Config.regex_type), fun);
 			Albums.filter(Albums.begin(), Albums.end(), rx);
@@ -636,7 +635,7 @@ bool MediaLibrary::search(const std::string &constraint)
 		}
 		else if (isActiveWindow(Albums))
 		{
-			auto fun = std::bind(AlbumEntryMatcher, _1, _2, false);
+			auto fun = boost::bind(AlbumEntryMatcher, _1, _2, false);
 			auto rx = RegexItemFilter<AlbumEntry>(
 				boost::regex(constraint, Config.regex_type), fun);
 			result = Albums.search(Albums.begin(), Albums.end(), rx);

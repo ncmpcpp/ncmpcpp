@@ -173,7 +173,7 @@ void moveSelectedItemsUp(NC::Menu<MPD::Song> &m, F swap_fun)
 	{
 		Mpd.StartCommandsList();
 		for (auto it = list.begin(); it != list.end(); ++it)
-			swap_fun(Mpd, *it - begin, *it - begin - 1);
+			swap_fun(&Mpd, *it - begin, *it - begin - 1);
 		Mpd.CommitCommandsList();
 		if (list.size() > 1)
 		{
@@ -205,7 +205,7 @@ void moveSelectedItemsDown(NC::Menu<MPD::Song> &m, F swap_fun)
 	{
 		Mpd.StartCommandsList();
 		for (auto it = list.begin(); it != list.end(); ++it)
-			swap_fun(Mpd, it->base() - begin, it->base() - begin + 1);
+			swap_fun(&Mpd, it->base() - begin, it->base() - begin + 1);
 		Mpd.CommitCommandsList();
 		if (list.size() > 1)
 		{
@@ -253,7 +253,7 @@ void moveSelectedItemsTo(NC::Menu<MPD::Song> &m, F move_fun)
 			pos -= list.size();
 			size_t i = list.size()-1;
 			for (auto it = list.rbegin(); it != list.rend(); ++it, --i)
-				move_fun(Mpd, *it - begin, pos+i);
+				move_fun(&Mpd, *it - begin, pos+i);
 			Mpd.CommitCommandsList();
 			i = list.size()-1;
 			for (auto it = list.rbegin(); it != list.rend(); ++it, --i)
@@ -266,7 +266,7 @@ void moveSelectedItemsTo(NC::Menu<MPD::Song> &m, F move_fun)
 		{
 			size_t i = 0;
 			for (auto it = list.begin(); it != list.end(); ++it, ++i)
-				move_fun(Mpd, *it - begin, pos+i);
+				move_fun(&Mpd, *it - begin, pos+i);
 			Mpd.CommitCommandsList();
 			i = 0;
 			for (auto it = list.begin(); it != list.end(); ++it, ++i)

@@ -102,6 +102,8 @@ AC_ARG_VAR([BOOST_LIB_SUFFIX], [Boost library name suffix [default=-mt]])
 dnl ======================================
 dnl = checking for various boost headers =
 dnl ======================================
+AC_CHECK_HEADERS([boost/bind.hpp], ,
+	AC_MSG_ERROR(boost/bind.hpp is missing))
 AC_CHECK_HEADERS([boost/lexical_cast.hpp], ,
 	AC_MSG_ERROR(boost/lexical_cast.hpp is missing))
 AC_CHECK_HEADERS([boost/algorithm/string.hpp], ,

@@ -19,6 +19,7 @@
  ***************************************************************************/
 
 #include <algorithm>
+#include <boost/bind.hpp>
 #include <sstream>
 
 #include "display.h"
@@ -33,8 +34,6 @@
 #include "statusbar.h"
 #include "utility/comparators.h"
 #include "title.h"
-
-using namespace std::placeholders;
 
 using Global::MainHeight;
 using Global::MainStartY;
@@ -61,9 +60,9 @@ Playlist::Playlist()
 	w.setSelectedPrefix(Config.selected_item_prefix);
 	w.setSelectedSuffix(Config.selected_item_suffix);
 	if (Config.columns_in_playlist)
-		w.setItemDisplayer(std::bind(Display::SongsInColumns, _1, proxySongList()));
+		w.setItemDisplayer(boost::bind(Display::SongsInColumns, _1, proxySongList()));
 	else
-		w.setItemDisplayer(std::bind(Display::Songs, _1, proxySongList(), Config.song_list_format));
+		w.setItemDisplayer(boost::bind(Display::Songs, _1, proxySongList(), Config.song_list_format));
 }
 
 void Playlist::switchTo()

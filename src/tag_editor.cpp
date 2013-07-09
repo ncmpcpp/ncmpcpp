@@ -22,6 +22,7 @@
 
 #ifdef HAVE_TAGLIB_H
 
+#include <boost/bind.hpp>
 #include <boost/locale/conversion.hpp>
 #include <algorithm>
 #include <fstream>
@@ -39,8 +40,6 @@
 #include "title.h"
 #include "tags.h"
 #include "screen_switcher.h"
-
-using namespace std::placeholders;
 
 using Global::myScreen;
 using Global::MainHeight;
@@ -759,7 +758,7 @@ void TagEditor::applyFilter(const std::string &filter)
 		if (w == Dirs)
 		{
 			Dirs->showAll();
-			auto fun = std::bind(DirEntryMatcher, _1, _2, true);
+			auto fun = boost::bind(DirEntryMatcher, _1, _2, true);
 			auto rx = RegexFilter< std::pair<std::string, std::string> >(
 				boost::regex(filter, Config.regex_type), fun);
 			Dirs->filter(Dirs->begin(), Dirs->end(), rx);
@@ -797,7 +796,7 @@ bool TagEditor::search(const std::string &constraint)
 		bool result = false;
 		if (w == Dirs)
 		{
-			auto fun = std::bind(DirEntryMatcher, _1, _2, false);
+			auto fun = boost::bind(DirEntryMatcher, _1, _2, false);
 			auto rx = RegexFilter< std::pair<std::string, std::string> >(
 				boost::regex(constraint, Config.regex_type), fun);
 			result = Dirs->search(Dirs->begin(), Dirs->end(), rx);
