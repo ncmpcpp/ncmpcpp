@@ -255,6 +255,9 @@ void Scrollpad::flush()
 				y = 0;
 			}
 		}
+		// load remaining properties if there are any
+		for (; p != ps.end(); ++p)
+			w << *p;
 		return height;
 	};
 	
