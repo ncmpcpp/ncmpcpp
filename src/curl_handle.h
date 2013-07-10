@@ -21,9 +21,7 @@
 #ifndef NCMPCPP_CURL_HANDLE_H
 #define NCMPCPP_CURL_HANDLE_H
 
-#ifdef HAVE_CONFIG_H
-# include "config.h"
-#endif
+#include "config.h"
 
 #ifdef HAVE_CURL_CURL_H
 

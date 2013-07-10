@@ -505,9 +505,6 @@
 #  refetch_lyrics
 #
 #def_key "`"
-#  refetch_artist_info
-#
-#def_key "`"
 #  add_random_items
 #
 #def_key "ctrl_p"

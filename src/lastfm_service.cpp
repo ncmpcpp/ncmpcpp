@@ -23,152 +23,190 @@
 #ifdef HAVE_CURL_CURL_H
 
 #include <boost/algorithm/string/trim.hpp>
+#include <boost/locale/conversion.hpp>
+#include <fstream>
+#include "charset.h"
 #include "curl_handle.h"
 #include "settings.h"
 #include "utility/html.h"
 #include "utility/string.h"
 
-const char *LastfmService::baseURL = "http://ws.audioscrobbler.com/2.0/?api_key=d94e5b6e26469a2d1ffae8ef20131b79&method=";
+namespace {
 
-const char *LastfmService::msgParseFailed = "Fetched data could not be parsed";
+const char *apiUrl = "http://ws.audioscrobbler.com/2.0/?api_key=d94e5b6e26469a2d1ffae8ef20131b79&method=";
+const char *msgInvalidResponse = "Invalid response";
 
-LastfmService::Result LastfmService::fetch(Args &args)
+}
+
+namespace LastFm {
+
+Service::Result Service::fetch()
 {
 	Result result;
+	result.first = false;
 	
-	std::string url = baseURL;
+	std::string url = apiUrl;
 	url += methodName();
-	for (Args::const_iterator it = args.begin(); it != args.end(); ++it)
+	for (auto &arg : m_arguments)
 	{
 		url += "&";
-		url += it->first;
+		url += arg.first;
 		url += "=";
-		url += Curl::escape(it->second);
+		url += Curl::escape(arg.second);
 	}
 	
 	std::string data;
 	CURLcode code = Curl::perform(data, url);
 	
 	if (code != CURLE_OK)
-	{
 		result.second = curl_easy_strerror(code);
-		return result;
-	}
-	
-	if (actionFailed(data))
+	else if (actionFailed(data))
+		result.second = msgInvalidResponse;
+	else
 	{
-		stripHtmlTags(data);
-		result.second = data;
-		return result;
-	}
-	
-	if (!parse(data))
-	{
+		result = processData(data);
+		
 		// if relevant part of data was not found and one of arguments
 		// was language, try to fetch it again without that parameter.
 		// otherwise just report failure.
-		Args::iterator lang = args.find("lang");
-		if (lang != args.end())
+		if (!result.first && !m_arguments["lang"].empty())
 		{
-			args.erase(lang);
-			return fetch(args);
-		}
-		else
-		{
-			// parse should change data to error msg, if it fails
-			result.second = data;
-			return result;
+			m_arguments.erase("lang");
+			result = fetch();
 		}
 	}
 	
-	result.first = true;
-	result.second = data;
 	return result;
 }
 
-bool LastfmService::actionFailed(const std::string &data)
+bool Service::actionFailed(const std::string &data)
 {
 	return data.find("status=\"failed\"") != std::string::npos;
 }
 
-void LastfmService::postProcess(std::string &data)
-{
-	stripHtmlTags(data);
-	boost::trim(data);
-}
-
 /***********************************************************************/
 
-bool ArtistInfo::checkArgs(const Args &args)
+bool ArtistInfo::argumentsOk()
 {
-	return args.find("artist") != args.end();
+	return !m_arguments["artist"].empty();
 }
 
-void ArtistInfo::colorizeOutput(NC::Scrollpad &w)
+void ArtistInfo::beautifyOutput(NC::Scrollpad &w)
 {
-	w.setProperties(NC::Format::Bold, "\n\nSimilar artists:\n", NC::Format::NoBold, 0, boost::regex::literal);
+	w.setProperties(NC::Format::Bold, "\n\nSimilar artists:\n", NC::Format::NoBold, 0);
+	w.setProperties(NC::Format::Bold, "\n\nSimilar tags:\n", NC::Format::NoBold, 0);
 	w.setProperties(Config.color2, "\n * ", NC::Color::End, 0, boost::regex::literal);
 }
 
-bool ArtistInfo::parse(std::string &data)
+Service::Result ArtistInfo::processData(const std::string &data)
 {
 	size_t a, b;
-	bool parse_failed = false;
+	Service::Result result;
+	result.first = false;
 	
-	if ((a = data.find("<content>")) != std::string::npos)
+	boost::regex rx("<content>(.*?)</content>");
+	boost::smatch what;
+	if (boost::regex_search(data, what, rx))
 	{
-		a += const_strlen("<content>");
-		if ((b = data.find("</content>")) == std::string::npos)
-			parse_failed = true;
+		std::string desc = what[1];
+		// if there is a description...
+		if (desc.length() > 0)
+		{
+			// ...locate the link to wiki on last.fm...
+			rx.assign("<link rel=\"original\" href=\"(.*?)\"");
+			if (boost::regex_search(data, what, rx))
+			{
+				// ...try to get the content of it...
+				std::string wiki;
+				CURLcode code = Curl::perform(wiki, what[1]);
+				
+				if (code != CURLE_OK)
+				{
+					result.second = curl_easy_strerror(code);
+					return result;
+				}
+				else
+				{
+					// ...and filter it to get the whole description.
+					rx.assign("<div id=\"wiki\">(.*?)</div>");
+					if (boost::regex_search(wiki, what, rx))
+						desc = unescapeHtmlUtf8(what[1]);
+				}
+			}
+			else
+			{
+				// otherwise, get rid of CDATA wrapper.
+				rx.assign("<!\\[CDATA\\[(.*)\\]\\]>");
+				desc = boost::regex_replace(desc, rx, "\\1");
+			}
+			stripHtmlTags(desc);
+			boost::trim(desc);
+			result.second += desc;
+		}
+		else
+			result.second += "No description available for this artist.";
 	}
 	else
-		parse_failed = true;
-	
-	if (parse_failed)
 	{
-		data = msgParseFailed;
-		return false;
+		result.second = msgInvalidResponse;
+		return result;
 	}
 	
-	if (a == b)
+	auto add_similars = [&result](boost::sregex_iterator &it, const boost::sregex_iterator &last) {
+		for (; it != last; ++it)
+		{
+			std::string name = it->str(1);
+			std::string url = it->str(2);
+			stripHtmlTags(name);
+			stripHtmlTags(url);
+			result.second += "\n * ";
+			result.second += name;
+			result.second += " (";
+			result.second += url;
+			result.second += ")";
+		}
+	};
+	
+	a = data.find("<similar>");
+	b = data.find("</similar>");
+	if (a != std::string::npos && b != std::string::npos)
 	{
-		data = "No description available for this artist.";
-		return false;
+		rx.assign("<artist>.*?<name>(.*?)</name>.*?<url>(.*?)</url>.*?</artist>");
+		auto it = boost::sregex_iterator(data.begin()+a, data.begin()+b, rx);
+		auto last = boost::sregex_iterator();
+		if (it != last)
+			result.second += "\n\nSimilar artists:\n";
+		add_similars(it, last);
 	}
 	
-	std::vector< std::pair<std::string, std::string> > similars;
-	for (size_t i = data.find("<name>"), j, k = data.find("<url>"), l;
-		    i != std::string::npos; i = data.find("<name>", i), k = data.find("<url>", k))
+	a = data.find("<tags>");
+	b = data.find("</tags>");
+	if (a != std::string::npos && b != std::string::npos)
 	{
-		j = data.find("</name>", i);
-		i += const_strlen("<name>");
-		
-		l = data.find("</url>", k);
-		k += const_strlen("<url>");
-		
-		similars.push_back(std::make_pair(data.substr(i, j-i), data.substr(k, l-k)));
-		stripHtmlTags(similars.back().first);
+		rx.assign("<tag>.*?<name>(.*?)</name>.*?<url>(.*?)</url>.*?</tag>");
+		auto it = boost::sregex_iterator(data.begin()+a, data.begin()+b, rx);
+		auto last = boost::sregex_iterator();
+		if (it != last)
+			result.second += "\n\nSimilar tags:\n";
+		add_similars(it, last);
 	}
 	
-	a += const_strlen("<![CDATA[");
-	b -= const_strlen("]]>");
-	data = data.substr(a, b-a);
+	// get artist we look for, it's the one before similar artists
+	rx.assign("<name>.*?</name>.*?<url>(.*?)</url>.*?<similar>");
 	
-	postProcess(data);
-	
-	data += "\n\nSimilar artists:\n";
-	for (size_t i = 1; i < similars.size(); ++i)
+	if (boost::regex_search(data, what, rx))
 	{
-		 data += "\n * ";
-		 data += similars[i].first;
-		 data += " (";
-		 data += similars[i].second;
-		 data += ")";
+		std::string url = what[1];
+		stripHtmlTags(url);
+		result.second += "\n\n";
+		// add only url
+		result.second += url;
 	}
-	data += "\n\n";
-	data += similars.front().second;
 	
-	return true;
+	result.first = true;
+	return result;
+}
+
 }
 
 #endif

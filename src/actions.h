@@ -942,15 +942,6 @@ protected:
 	virtual void run();
 };
 
-struct RefetchArtistInfo : public BaseAction
-{
-	RefetchArtistInfo() : BaseAction(Type::RefetchArtistInfo, "refetch_artist_info") { }
-	
-protected:
-	virtual bool canBeRun() const;
-	virtual void run();
-};
-
 struct SetSelectedItemsPriority : public BaseAction
 {
 	SetSelectedItemsPriority()

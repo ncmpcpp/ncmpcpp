@@ -26,11 +26,12 @@
 #ifdef HAVE_CURL_CURL_H
 
 #include <memory>
-#include <pthread.h>
+#include <boost/thread/future.hpp>
 
 #include "interfaces.h"
 #include "lastfm_service.h"
 #include "screen.h"
+#include "utility/wide_string.h"
 
 struct Lastfm: Screen<NC::Scrollpad>, Tabbable
 {
@@ -49,37 +50,39 @@ struct Lastfm: Screen<NC::Scrollpad>, Tabbable
 	
 	virtual bool isMergable() OVERRIDE { return true; }
 	
-	// private members
-	void Refetch();
-	
-	bool isDownloading() { return isDownloadInProgress && !isReadyToTake; }
-	bool SetArtistInfoArgs(const std::string &artist, const std::string &lang = "");
+	template <typename ServiceT>
+	bool queueJob(ServiceT service)
+	{
+		auto old_service = dynamic_cast<ServiceT *>(m_service.get());
+		// if the same service and arguments were used, leave old info
+		if (old_service != nullptr && *old_service == service)
+			return true;
+		
+		// download in progress
+		if (m_worker.valid() && !m_worker.is_ready())
+			return false;
+		
+		m_service = std::make_shared<ServiceT>(std::forward<ServiceT>(service));
+		m_worker = boost::async(boost::launch::async, boost::bind(&LastFm::Service::fetch, m_service.get()));
+		
+		w.clear();
+		w << "Fetching information...";
+		w.flush();
+		m_title = ToWString(m_service->name());
+		
+		return true;
+	}
 	
 protected:
 	virtual bool isLockable() OVERRIDE { return false; }
 	
 private:
-	std::wstring itsTitle;
+	void getResult();
 	
-	std::string itsArtist;
-	std::string itsFilename;
+	std::wstring m_title;
 	
-	std::string itsFolder;
-	
-	std::auto_ptr<LastfmService> itsService;
-	LastfmService::Args itsArgs;
-	
-	void Load();
-	void Save(const std::string &data);
-	void SetTitleAndFolder();
-	
-	void Download();
-	static void *DownloadWrapper(void *);
-	
-	void Take();
-	bool isReadyToTake;
-	bool isDownloadInProgress;
-	pthread_t itsDownloader;
+	std::shared_ptr<LastFm::Service> m_service;
+	boost::unique_future<LastFm::Service::Result> m_worker;
 };
 
 extern Lastfm *myLastfm;

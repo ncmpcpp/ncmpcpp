@@ -2072,22 +2072,6 @@ void RefetchLyrics::run()
 #	endif // HAVE_CURL_CURL_H
 }
 
-bool RefetchArtistInfo::canBeRun() const
-{
-#	ifdef HAVE_CURL_CURL_H
-	return myScreen == myLastfm;
-#	else
-	return false;
-#	endif // HAVE_CURL_CURL_H
-}
-
-void RefetchArtistInfo::run()
-{
-#	ifdef HAVE_CURL_CURL_H
-	myLastfm->Refetch();
-#	endif // HAVE_CURL_CURL_H
-}
-
 bool SetSelectedItemsPriority::canBeRun() const
 {
 	if (Mpd.Version() < 17)
@@ -2161,7 +2145,7 @@ bool ShowArtistInfo::canBeRun() const
 void ShowArtistInfo::run()
 {
 #	ifdef HAVE_CURL_CURL_H
-	if (myScreen == myLastfm || myLastfm->isDownloading())
+	if (myScreen == myLastfm)
 	{
 		myLastfm->switchTo();
 		return;
@@ -2181,8 +2165,11 @@ void ShowArtistInfo::run()
 		artist = s->getArtist();
 	}
 	
-	if (!artist.empty() && myLastfm->SetArtistInfoArgs(artist, Config.lastfm_preferred_language))
+	if (!artist.empty())
+	{
+		myLastfm->queueJob(LastFm::ArtistInfo(artist, Config.lastfm_preferred_language));
 		myLastfm->switchTo();
+	}
 #	endif // HAVE_CURL_CURL_H
 }
 
@@ -2540,7 +2527,6 @@ void populateActions()
 	insert_action(new Actions::ToggleLibraryTagType());
 	insert_action(new Actions::ToggleMediaLibrarySortMode());
 	insert_action(new Actions::RefetchLyrics());
-	insert_action(new Actions::RefetchArtistInfo());
 	insert_action(new Actions::SetSelectedItemsPriority());
 	insert_action(new Actions::FilterPlaylistOnPriorities());
 	insert_action(new Actions::ShowSongInfo());

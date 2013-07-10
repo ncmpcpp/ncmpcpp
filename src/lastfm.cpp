@@ -22,27 +22,12 @@
 
 #ifdef HAVE_CURL_CURL_H
 
-#ifdef WIN32
-# include <io.h>
-#else
-# include <sys/stat.h>
-#endif // WIN32
-
-#include <cassert>
-#include <cerrno>
-#include <cstring>
-#include <boost/locale/conversion.hpp>
-#include <fstream>
-#include <iostream>
-
-#include "error.h"
 #include "helpers.h"
 #include "charset.h"
 #include "global.h"
 #include "statusbar.h"
 #include "title.h"
 #include "screen_switcher.h"
-#include "utility/string.h"
 
 using Global::MainHeight;
 using Global::MainStartY;
@@ -51,7 +36,6 @@ Lastfm *myLastfm;
 
 Lastfm::Lastfm()
 : Screen(NC::Scrollpad(0, MainStartY, COLS, MainHeight, "", Config.main_color, NC::Border::None))
-, isReadyToTake(0), isDownloadInProgress(0)
 { }
 
 void Lastfm::resize()
@@ -65,23 +49,13 @@ void Lastfm::resize()
 
 std::wstring Lastfm::title()
 {
-	return itsTitle;
+	return m_title;
 }
 
 void Lastfm::update()
 {
-	if (isReadyToTake)
-		Take();
-}
-
-void Lastfm::Take()
-{
-	assert(isReadyToTake);
-	pthread_join(itsDownloader, 0);
-	w.flush();
-	w.refresh();
-	isDownloadInProgress = 0;
-	isReadyToTake = 0;
+	if (m_worker.valid() && m_worker.is_ready())
+		getResult();
 }
 
 void Lastfm::switchTo()
@@ -90,134 +64,27 @@ void Lastfm::switchTo()
 	if (myScreen != this)
 	{
 		SwitchTo::execute(this);
-		// get an old info if it waits
-		if (isReadyToTake)
-			Take();
-		Load();
 		drawHeader();
 	}
 	else
 		switchToPreviousScreen();
 }
 
-void Lastfm::Load()
+void Lastfm::getResult()
 {
-	if (isDownloadInProgress)
-		return;
-	
-	assert(itsService.get());
-	assert(itsService->checkArgs(itsArgs));
-	
-	SetTitleAndFolder();
-	
-	w.clear();
-	w.reset();
-	
-	std::string artist = itsArgs.find("artist")->second;
-	std::string file = boost::locale::to_lower(artist + ".txt");
-	removeInvalidCharsFromFilename(file, Config.generate_win32_compatible_filenames);
-	
-	itsFilename = itsFolder + "/" + file;
-	
-	mkdir(itsFolder.c_str()
-#	ifndef WIN32
-	, 0755
-#	endif // !WIN32
-	     );
-	
-	std::ifstream input(itsFilename.c_str());
-	if (input.is_open())
-	{
-		bool first = 1;
-		std::string line;
-		while (std::getline(input, line))
-		{
-			if (!first)
-				w << '\n';
-			w << Charset::utf8ToLocale(line);
-			first = 0;
-		}
-		input.close();
-		itsService->colorizeOutput(w);
-	}
-	else
-	{
-		w << "Fetching informations... ";
-		pthread_create(&itsDownloader, 0, DownloadWrapper, this);
-		isDownloadInProgress = 1;
-	}
-	w.flush();
-}
-
-void Lastfm::SetTitleAndFolder()
-{
-	if (dynamic_cast<ArtistInfo *>(itsService.get()))
-	{
-		itsTitle = L"Artist info - ";
-		itsTitle += ToWString(itsArgs.find("artist")->second);
-		itsFolder = Config.ncmpcpp_directory + "artists";
-	}
-}
-
-void *Lastfm::DownloadWrapper(void *this_ptr)
-{
-	static_cast<Lastfm *>(this_ptr)->Download();
-	pthread_exit(0);
-}
-
-void Lastfm::Download()
-{
-	LastfmService::Result result = itsService->fetch(itsArgs);
-	
+	auto result = m_worker.get();
 	if (result.first)
 	{
-		Save(result.second);
 		w.clear();
 		w << Charset::utf8ToLocale(result.second);
-		itsService->colorizeOutput(w);
+		m_service->beautifyOutput(w);
 	}
 	else
-		w << NC::Color::Red << result.second << NC::Color::End;
-	
-	isReadyToTake = 1;
-}
-
-void Lastfm::Save(const std::string &data)
-{
-	std::ofstream output(itsFilename.c_str());
-	if (output.is_open())
-	{
-		output << data;
-		output.close();
-	}
-	else
-		std::cerr << "ncmpcpp: couldn't save file \"" << itsFilename << "\"\n";
-}
-
-void Lastfm::Refetch()
-{
-	if (remove(itsFilename.c_str()) && errno != ENOENT)
-	{
-		const char msg[] = "Couldn't remove \"%ls\": %s";
-		Statusbar::msg(msg, wideShorten(ToWString(itsFilename), COLS-const_strlen(msg)-25).c_str(), strerror(errno));
-		return;
-	}
-	Load();
-}
-
-bool Lastfm::SetArtistInfoArgs(const std::string &artist, const std::string &lang)
-{
-	if (isDownloading())
-		return false;
-	
-	itsService.reset(new ArtistInfo);
-	itsArgs.clear();
-	itsArgs["artist"] = artist;
-	if (!lang.empty())
-		itsArgs["lang"] = lang;
-	
-	return true;
+		w << " " << NC::Color::Red << result.second << NC::Color::End;
+	w.flush();
+	w.refresh();
+	// reset m_worker so it's no longer valid
+	m_worker = boost::unique_future<LastFm::Service::Result>();
 }
 
 #endif // HVAE_CURL_CURL_H
-
