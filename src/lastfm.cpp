@@ -84,7 +84,7 @@ void Lastfm::getResult()
 	w.flush();
 	w.refresh();
 	// reset m_worker so it's no longer valid
-	m_worker = boost::unique_future<LastFm::Service::Result>();
+	m_worker = boost::future<LastFm::Service::Result>();
 }
 
 #endif // HVAE_CURL_CURL_H

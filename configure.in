@@ -146,9 +146,9 @@ AC_CHECK_LIB(boost_regex$BOOST_LIB_SUFFIX, main, LDFLAGS="$LDFLAGS -lboost_regex
 dnl =============================
 dnl = checking for boost.thread =
 dnl =============================
-CPPFLAGS="$CPPFLAGS -DBOOST_THREAD_VERSION=2"
+AC_DEFINE([BOOST_THREAD_VERSION], [3], [require boost.thread v3])
 AC_CHECK_HEADERS([boost/thread.hpp], ,
-	AC_MSG_ERROR([boost/thread.hpp is missing or your boost version is too old (boost.thread v2 is required)])
+	AC_MSG_ERROR([boost/thread.hpp is missing or your boost version is too old (boost.thread v3 is required)])
 )
 AC_CHECK_LIB(boost_thread$BOOST_LIB_SUFFIX, main, LDFLAGS="$LDFLAGS -lboost_thread$BOOST_LIB_SUFFIX",
 	AC_MSG_ERROR([no boost.thread library found])

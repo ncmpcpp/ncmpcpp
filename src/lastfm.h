@@ -82,7 +82,7 @@ private:
 	std::wstring m_title;
 	
 	std::shared_ptr<LastFm::Service> m_service;
-	boost::unique_future<LastFm::Service::Result> m_worker;
+	boost::future<LastFm::Service::Result> m_worker;
 };
 
 extern Lastfm *myLastfm;
