@@ -348,9 +348,6 @@ void Help::GetKeybindings()
 	KeyDesc(Actions::Type::EditLyrics, "Open lyrics in external editor");
 	KeyDesc(Actions::Type::RefetchLyrics, "Refetch lyrics");
 	
-	KeysSection("Artist info");
-	KeyDesc(Actions::Type::RefetchArtistInfo, "Refetch artist info");
-	
 #	ifdef HAVE_TAGLIB_H
 	KeysSection("Tiny tag editor");
 	KeyDesc(Actions::Type::PressEnter, "Edit tag");

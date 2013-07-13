@@ -582,7 +582,6 @@ void BindingsConfiguration::generateDefaults()
 		bind(k, Actions::Type::ToggleBrowserSortMode);
 		bind(k, Actions::Type::ToggleLibraryTagType);
 		bind(k, Actions::Type::RefetchLyrics);
-		bind(k, Actions::Type::RefetchArtistInfo);
 		bind(k, Actions::Type::AddRandomItems);
 	}
 	if (notBound(k = stringToKey("ctrl_p")))

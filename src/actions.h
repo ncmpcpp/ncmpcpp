@@ -50,7 +50,7 @@ enum class Type
 	NextFoundItem, PreviousFoundItem, ToggleFindMode, ToggleReplayGainMode,
 	ToggleSpaceMode, ToggleAddMode, ToggleMouse, ToggleBitrateVisibility,
 	AddRandomItems, ToggleBrowserSortMode, ToggleLibraryTagType,
-	ToggleMediaLibrarySortMode, RefetchLyrics, RefetchArtistInfo,
+	ToggleMediaLibrarySortMode, RefetchLyrics,
 	SetSelectedItemsPriority, FilterPlaylistOnPriorities, ShowSongInfo,
 	ShowArtistInfo, ShowLyrics, Quit, NextScreen, PreviousScreen, ShowHelp,
 	ShowPlaylist, ShowBrowser, ChangeBrowseMode, ShowSearchEngine,
@@ -67,9 +67,6 @@ void setWindowsDimensions();
 
 bool askYesNoQuestion(const std::string &question, void (*callback)());
 bool isMPDMusicDirSet();
-
-struct BaseAction *get(Type at);
-struct BaseAction *get(const std::string &name);
 
 extern bool OriginalStatusbarVisibility;
 extern bool ExitMainLoop;
@@ -104,6 +101,9 @@ private:
 	Type m_type;
 	const char *m_name;
 };
+
+BaseAction &get(Type at);
+BaseAction *get(const std::string &name);
 
 struct Dummy : public BaseAction
 {

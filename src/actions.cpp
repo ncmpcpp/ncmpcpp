@@ -282,11 +282,14 @@ bool isMPDMusicDirSet()
 	return true;
 }
 
-BaseAction *get(Actions::Type at)
+BaseAction &get(Actions::Type at)
 {
 	if (AvailableActions.empty())
 		populateActions();
-	return AvailableActions[at];
+	BaseAction *action = AvailableActions[at];
+	// action should be always present if action type in queried
+	assert(action != nullptr);
+	return *action;
 }
 
 BaseAction *get(const std::string &name)
@@ -348,9 +351,9 @@ void MouseEvent::run()
 	) // volume
 	{
 		if (m_mouse_event.bstate & BUTTON2_PRESSED)
-			get(Type::VolumeDown)->execute();
+			get(Type::VolumeDown).execute();
 		else
-			get(Type::VolumeUp)->execute();
+			get(Type::VolumeUp).execute();
 	}
 	else if (m_mouse_event.bstate & (BUTTON1_PRESSED | BUTTON2_PRESSED | BUTTON3_PRESSED | BUTTON4_PRESSED))
 		myScreen->mouseButtonPressed(m_mouse_event);
@@ -2573,8 +2576,8 @@ void seek()
 	int old_timeout = wFooter->getTimeout();
 	wFooter->setTimeout(500);
 	
-	auto seekForward = Actions::get(Actions::Type::SeekForward);
-	auto seekBackward = Actions::get(Actions::Type::SeekBackward);
+	auto seekForward = &Actions::get(Actions::Type::SeekForward);
+	auto seekBackward = &Actions::get(Actions::Type::SeekBackward);
 	
 	SeekingInProgress = true;
 	while (true)
