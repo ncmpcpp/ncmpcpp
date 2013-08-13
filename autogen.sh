@@ -52,7 +52,7 @@ do
 
 	case "$c" in
 	autoconf|autoheader)
-		VERNEEDED=`fgrep AC_PREREQ configure.in | $AC_VERSIONGREP`
+		VERNEEDED=`fgrep AC_PREREQ configure.ac | $AC_VERSIONGREP`
 		VERSIONS="$AC_VERSIONS"
 		pkg=autoconf
 		;;

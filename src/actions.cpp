@@ -1968,7 +1968,9 @@ void AddRandomItems::run()
 	
 	Statusbar::lock();
 	Statusbar::put() << "Number of random " << tag_type_str << "s: ";
-	size_t number = boost::lexical_cast<size_t>(wFooter->getString());
+	size_t number = 0;
+	std::string number_s = wFooter->getString();
+	if (number_s.length() > 0) number = boost::lexical_cast<size_t>(number_s);
 	Statusbar::unlock();
 	if (number && (answer == 's' ? Mpd.AddRandomSongs(number) : Mpd.AddRandomTag(tag_type, number)))
 		Statusbar::msg("%zu random %s%s added to playlist", number, tag_type_str.c_str(), number == 1 ? "" : "s");
