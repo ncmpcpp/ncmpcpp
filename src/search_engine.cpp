@@ -460,16 +460,16 @@ void SearchEngine::Search()
 				{
 					rx.assign(itsConstraints[0], Config.regex_type);
 					any_found =
-						!boost::regex_search(it->getArtist(), rx)
-					||	!boost::regex_search(it->getAlbumArtist(), rx)
-					||	!boost::regex_search(it->getTitle(), rx)
-					||	!boost::regex_search(it->getAlbum(), rx)
-					||	!boost::regex_search(it->getName(), rx)
-					||	!boost::regex_search(it->getComposer(), rx)
-					||	!boost::regex_search(it->getPerformer(), rx)
-					||	!boost::regex_search(it->getGenre(), rx)
-					||	!boost::regex_search(it->getDate(), rx)
-					||	!boost::regex_search(it->getComment(), rx);
+						boost::regex_search(it->getArtist(), rx)
+					||	boost::regex_search(it->getAlbumArtist(), rx)
+					||	boost::regex_search(it->getTitle(), rx)
+					||	boost::regex_search(it->getAlbum(), rx)
+					||	boost::regex_search(it->getName(), rx)
+					||	boost::regex_search(it->getComposer(), rx)
+					||	boost::regex_search(it->getPerformer(), rx)
+					||	boost::regex_search(it->getGenre(), rx)
+					||	boost::regex_search(it->getDate(), rx)
+					||	boost::regex_search(it->getComment(), rx);
 				}
 				catch (boost::bad_expression &) { }
 			}
@@ -479,7 +479,7 @@ void SearchEngine::Search()
 				try
 				{
 					rx.assign(itsConstraints[1], Config.regex_type);
-					found = !boost::regex_search(it->getArtist(), rx);
+					found = boost::regex_search(it->getArtist(), rx);
 				}
 				catch (boost::bad_expression &) { }
 			}
@@ -488,7 +488,7 @@ void SearchEngine::Search()
 				try
 				{
 					rx.assign(itsConstraints[2], Config.regex_type);
-					found = !boost::regex_search(it->getAlbumArtist(), rx);
+					found = boost::regex_search(it->getAlbumArtist(), rx);
 				}
 				catch (boost::bad_expression &) { }
 			}
@@ -497,7 +497,7 @@ void SearchEngine::Search()
 				try
 				{
 					rx.assign(itsConstraints[3], Config.regex_type);
-					found = !boost::regex_search(it->getTitle(), rx);
+					found = boost::regex_search(it->getTitle(), rx);
 				}
 				catch (boost::bad_expression &) { }
 			}
@@ -506,7 +506,7 @@ void SearchEngine::Search()
 				try
 				{
 					rx.assign(itsConstraints[4], Config.regex_type);
-					found = !boost::regex_search(it->getAlbum(), rx);
+					found = boost::regex_search(it->getAlbum(), rx);
 				}
 				catch (boost::bad_expression &) { }
 			}
@@ -515,7 +515,7 @@ void SearchEngine::Search()
 				try
 				{
 					rx.assign(itsConstraints[5], Config.regex_type);
-					found = !boost::regex_search(it->getName(), rx);
+					found = boost::regex_search(it->getName(), rx);
 				}
 				catch (boost::bad_expression &) { }
 			}
@@ -524,7 +524,7 @@ void SearchEngine::Search()
 				try
 				{
 					rx.assign(itsConstraints[6], Config.regex_type);
-					found = !boost::regex_search(it->getComposer(), rx);
+					found = boost::regex_search(it->getComposer(), rx);
 				}
 				catch (boost::bad_expression &) { }
 			}
@@ -533,16 +533,16 @@ void SearchEngine::Search()
 				try
 				{
 					rx.assign(itsConstraints[7], Config.regex_type);
-					found = !boost::regex_search(it->getPerformer(), rx);
+					found = boost::regex_search(it->getPerformer(), rx);
 				}
 				catch (boost::bad_expression &) { }
 			}
-			if (found && !itsConstraints[8].empty())
+			if (found && itsConstraints[8].empty())
 			{
 				try
 				{
 					rx.assign(itsConstraints[8], Config.regex_type);
-					found = !boost::regex_search(it->getGenre(), rx);
+					found = boost::regex_search(it->getGenre(), rx);
 				}
 				catch (boost::bad_expression &) { }
 			}
@@ -551,7 +551,7 @@ void SearchEngine::Search()
 				try
 				{
 					rx.assign(itsConstraints[9], Config.regex_type);
-					found = !boost::regex_search(it->getDate(), rx);
+					found = boost::regex_search(it->getDate(), rx);
 				}
 				catch (boost::bad_expression &) { }
 			}
@@ -560,7 +560,7 @@ void SearchEngine::Search()
 				try
 				{
 					rx.assign(itsConstraints[10], Config.regex_type);
-					found = !boost::regex_search(it->getComment(), rx);
+					found = boost::regex_search(it->getComment(), rx);
 				}
 				catch (boost::bad_expression &) { }
 			}
