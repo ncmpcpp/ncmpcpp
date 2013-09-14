@@ -460,16 +460,16 @@ void SearchEngine::Search()
 				{
 					rx.assign(itsConstraints[0], Config.regex_type);
 					any_found =
-						boost::regex_search(it->getArtist(), rx)
-					||	boost::regex_search(it->getAlbumArtist(), rx)
-					||	boost::regex_search(it->getTitle(), rx)
-					||	boost::regex_search(it->getAlbum(), rx)
-					||	boost::regex_search(it->getName(), rx)
-					||	boost::regex_search(it->getComposer(), rx)
-					||	boost::regex_search(it->getPerformer(), rx)
-					||	boost::regex_search(it->getGenre(), rx)
-					||	boost::regex_search(it->getDate(), rx)
-					||	boost::regex_search(it->getComment(), rx);
+					   boost::regex_search(it->getArtist(), rx)
+					|| boost::regex_search(it->getAlbumArtist(), rx)
+					|| boost::regex_search(it->getTitle(), rx)
+					|| boost::regex_search(it->getAlbum(), rx)
+					|| boost::regex_search(it->getName(), rx)
+					|| boost::regex_search(it->getComposer(), rx)
+					|| boost::regex_search(it->getPerformer(), rx)
+					|| boost::regex_search(it->getGenre(), rx)
+					|| boost::regex_search(it->getDate(), rx)
+					|| boost::regex_search(it->getComment(), rx);
 				}
 				catch (boost::bad_expression &) { }
 			}
@@ -569,16 +569,16 @@ void SearchEngine::Search()
 		{
 			if (!itsConstraints[0].empty())
 				any_found =
-					!cmp(it->getArtist(), itsConstraints[0])
-				||	!cmp(it->getAlbumArtist(), itsConstraints[0])
-				||	!cmp(it->getTitle(), itsConstraints[0])
-				||	!cmp(it->getAlbum(), itsConstraints[0])
-				||	!cmp(it->getName(), itsConstraints[0])
-				||	!cmp(it->getComposer(), itsConstraints[0])
-				||	!cmp(it->getPerformer(), itsConstraints[0])
-				||	!cmp(it->getGenre(), itsConstraints[0])
-				||	!cmp(it->getDate(), itsConstraints[0])
-				||	!cmp(it->getComment(), itsConstraints[0]);
+				   !cmp(it->getArtist(), itsConstraints[0])
+				|| !cmp(it->getAlbumArtist(), itsConstraints[0])
+				|| !cmp(it->getTitle(), itsConstraints[0])
+				|| !cmp(it->getAlbum(), itsConstraints[0])
+				|| !cmp(it->getName(), itsConstraints[0])
+				|| !cmp(it->getComposer(), itsConstraints[0])
+				|| !cmp(it->getPerformer(), itsConstraints[0])
+				|| !cmp(it->getGenre(), itsConstraints[0])
+				|| !cmp(it->getDate(), itsConstraints[0])
+				|| !cmp(it->getComment(), itsConstraints[0]);
 			
 			if (found && !itsConstraints[1].empty())
 				found = !cmp(it->getArtist(), itsConstraints[1]);
