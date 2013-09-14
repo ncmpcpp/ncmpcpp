@@ -31,8 +31,6 @@ template <size_t N> size_t const_strlen(const char (&)[N]) {
 	return N-1;
 }
 
-bool isInteger(const char *s, bool accept_signed);
-
 std::string getBasename(const std::string &path);
 std::string getParentDirectory(const std::string &path);
 std::string getSharedDirectory(const std::string &dir1, const std::string &dir2);

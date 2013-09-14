@@ -23,17 +23,6 @@
 #include <algorithm>
 #include "utility/string.h"
 
-bool isInteger(const char *s, bool accept_signed)
-{
-	assert(s);
-	if (*s == '\0')
-		return false;
-	for (const char *it = s; *it != '\0'; ++it)
-		if (!(isdigit(*it) || (accept_signed && it == s && *it == '-')))
-			return false;
-		return true;
-}
-
 std::string getBasename(const std::string &path)
 {
 	size_t slash = path.rfind("/");

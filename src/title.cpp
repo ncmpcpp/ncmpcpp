@@ -32,7 +32,7 @@ void windowTitle(const std::string &) { }
 void windowTitle(const std::string &status)
 {
 	if (strcmp(getenv("TERM"), "linux") && Config.set_window_title)
-		std::cout << "\033]0;" << status << "\7";
+		std::cout << "\033]0;" << status << "\7" << std::flush;
 }
 #endif // USE_PDCURSES
 

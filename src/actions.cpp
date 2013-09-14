@@ -36,6 +36,7 @@
 #include "helpers.h"
 #include "statusbar.h"
 #include "utility/comparators.h"
+#include "utility/conversion.h"
 
 #include "bindings.h"
 #include "browser.h"
@@ -1194,12 +1195,10 @@ void SetCrossfade::run()
 	Statusbar::put() << "Set crossfade to: ";
 	std::string crossfade = wFooter->getString(3);
 	Statusbar::unlock();
-	int cf = boost::lexical_cast<int>(crossfade);
-	if (cf > 0)
-	{
-		Config.crossfade_time = cf;
-		Mpd.SetCrossfade(cf);
-	}
+	int cf = fromString<unsigned>(crossfade);
+	lowerBoundCheck(cf, 1);
+	Config.crossfade_time = cf;
+	Mpd.SetCrossfade(cf);
 }
 
 void SetVolume::run()
@@ -1210,12 +1209,10 @@ void SetVolume::run()
 	Statusbar::put() << "Set volume to: ";
 	std::string strvolume = wFooter->getString(3);
 	Statusbar::unlock();
-	int volume = boost::lexical_cast<int>(strvolume);
-	if (volume >= 0 && volume <= 100)
-	{
-		Mpd.SetVolume(volume);
-		Statusbar::msg("Volume set to %d%%", volume);
-	}
+	int volume = fromString<unsigned>(strvolume);
+	boundsCheck(volume, 0, 100);
+	Mpd.SetVolume(volume);
+	Statusbar::msg("Volume set to %d%%", volume);
 }
 
 bool EditSong::canBeRun() const
@@ -1519,17 +1516,11 @@ void ToggleScreenLock::run()
 		{
 			Statusbar::lock();
 			Statusbar::put() << "% of the locked screen's width to be reserved (20-80): ";
-			std::string str_part = wFooter->getString(boost::lexical_cast<std::string>(Config.locked_screen_width_part*100));
+			std::string strpart = wFooter->getString(boost::lexical_cast<std::string>(part));
 			Statusbar::unlock();
-			if (str_part.empty())
-				return;
-			part = boost::lexical_cast<int>(str_part);
+			part = fromString<unsigned>(strpart);
 		}
-		if (part < 20 || part > 80)
-		{
-			Statusbar::msg("Number is out of range");
-			return;
-		}
+		boundsCheck(part, 20, 80);
 		Config.locked_screen_width_part = part/100.0;
 		if (myScreen->lock())
 			Statusbar::msg("Screen locked (with %d%% width)", part);
@@ -1568,44 +1559,34 @@ void JumpToPositionInSong::run()
 	const MPD::Song s = myPlaylist->nowPlayingSong();
 	
 	Statusbar::lock();
-	Statusbar::put() << "Position to go (in %/mm:ss/seconds(s)): ";
-	std::string position = wFooter->getString();
+	Statusbar::put() << "Position to go (in %/m:ss/seconds(s)): ";
+	std::string strpos = wFooter->getString();
 	Statusbar::unlock();
 	
-	if (position.empty())
-		return;
+	boost::regex rx;
+	boost::smatch what;
 	
-	unsigned newpos = 0;
-	size_t special_pos;
-	if ((special_pos = position.find(':')) != std::string::npos) // probably time in mm:ss
+	if (boost::regex_match(strpos, what, rx.assign("([0-9]+):([0-9]{2})"))) // mm:ss
 	{
-		newpos = boost::lexical_cast<int>(position.substr(0, special_pos))*60
-		       + boost::lexical_cast<int>(position.substr(special_pos +1));
-		if (newpos <= myPlaylist->currentSongLength())
-			Mpd.Seek(s.getPosition(), newpos);
-		else
-			Statusbar::msg("Out of bounds, 0:00-%s possible for mm:ss, %s given", s.getLength().c_str(), MPD::Song::ShowTime(newpos).c_str());
+		int mins = fromString<int>(what[1]);
+		int secs = fromString<int>(what[2]);
+		boundsCheck(secs, 0, 60);
+		Mpd.Seek(s.getPosition(), mins * 60 + secs);
 	}
-	else if ((special_pos = position.find('s')) != std::string::npos) // probably position in seconds
+	else if (boost::regex_match(strpos, what, rx.assign("([0-9]+)s"))) // position in seconds
 	{
-		position.resize(special_pos);
-		newpos = boost::lexical_cast<int>(position);
-		if (newpos <= s.getDuration())
-			Mpd.Seek(s.getPosition(), newpos);
-		else
-			Statusbar::msg("Out of bounds, 0-%d possible for seconds, %d given", s.getDuration(), newpos);
+		int secs = fromString<int>(what[1]);
+		Mpd.Seek(s.getPosition(), secs);
+	}
+	else if (boost::regex_match(strpos, what, rx.assign("([0-9]+)[%]{0,1}"))) // position in %
+	{
+		int percent = fromString<int>(what[1]);
+		boundsCheck(percent, 0, 100);
+		int secs = (percent * s.getDuration()) / 100.0;
+		Mpd.Seek(s.getPosition(), secs);
 	}
 	else
-	{
-		special_pos = position.find('%');
-		if (special_pos != std::string::npos)
-			position.resize(special_pos);
-		newpos = boost::lexical_cast<int>(position);
-		if (newpos <= 100)
-			Mpd.Seek(s.getPosition(), s.getDuration()*newpos/100.0);
-		else
-			Statusbar::msg("Out of bounds, 0-100 possible for %%, %d given", newpos);
-	}
+		Statusbar::msg("Invalid format ([m]:[ss], [s]s, [%%]%%, [%%] accepted)");
 }
 
 bool ReverseSelection::canBeRun() const
@@ -1968,8 +1949,9 @@ void AddRandomItems::run()
 	
 	Statusbar::lock();
 	Statusbar::put() << "Number of random " << tag_type_str << "s: ";
-	size_t number = boost::lexical_cast<size_t>(wFooter->getString());
+	std::string strnum = wFooter->getString();
 	Statusbar::unlock();
+	size_t number = fromString<size_t>(strnum);
 	if (number && (answer == 's' ? Mpd.AddRandomSongs(number) : Mpd.AddRandomTag(tag_type, number)))
 		Statusbar::msg("%zu random %s%s added to playlist", number, tag_type_str.c_str(), number == 1 ? "" : "s");
 }
@@ -2093,14 +2075,8 @@ void SetSelectedItemsPriority::run()
 	Statusbar::put() << "Set priority [0-255]: ";
 	std::string strprio = wFooter->getString();
 	Statusbar::unlock();
-	if (!isInteger(strprio.c_str(), true))
-		return;
-	int prio = boost::lexical_cast<int>(strprio);
-	if (prio < 0 || prio > 255)
-	{
-		Statusbar::msg("Number is out of range");
-		return;
-	}
+	unsigned prio = fromString<unsigned>(strprio);
+	boundsCheck(prio, 0u, 255u);
 	myPlaylist->SetSelectedItemsPriority(prio);
 }
 
@@ -2117,9 +2093,8 @@ void FilterPlaylistOnPriorities::run()
 	Statusbar::put() << "Show songs with priority higher than: ";
 	std::string strprio = wFooter->getString();
 	Statusbar::unlock();
-	if (!isInteger(strprio.c_str(), false))
-		return;
-	unsigned prio = boost::lexical_cast<unsigned>(strprio);
+	unsigned prio = fromString<unsigned>(strprio);
+	boundsCheck(prio, 0u, 255u);
 	myPlaylist->main().filter(myPlaylist->main().begin(), myPlaylist->main().end(),
 		[prio](const NC::Menu<MPD::Song>::Item &s) {
 			return s.value().getPrio() > prio;

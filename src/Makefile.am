@@ -55,6 +55,7 @@ INCLUDES= $(all_includes)
 ncmpcpp_LDFLAGS = $(all_libraries)
 noinst_HEADERS = \
 	utility/comparators.h \
+	utility/conversion.h \
 	utility/html.h \
 	utility/string.h \
 	utility/type_conversions.h \

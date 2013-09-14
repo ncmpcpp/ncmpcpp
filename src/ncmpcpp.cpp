@@ -47,6 +47,7 @@
 #include "statusbar.h"
 #include "visualizer.h"
 #include "title.h"
+#include "utility/conversion.h"
 
 namespace boost {//
 
@@ -251,10 +252,21 @@ int main(int argc, char **argv)
 			if (input == Key::noOp)
 				continue;
 			
-			auto k = Bindings.get(input);
-			for (; k.first != k.second; ++k.first)
-				if (k.first->execute())
-					break;
+			try
+			{
+				auto k = Bindings.get(input);
+				for (; k.first != k.second; ++k.first)
+					if (k.first->execute())
+						break;
+			}
+			catch (ConversionError &e)
+			{
+				Statusbar::msg("Couldn't convert value '%s' to target type", e.value().c_str());
+			}
+			catch (OutOfBounds &e)
+			{
+				Statusbar::msg("%s", e.errorMessage().c_str());
+			}
 			
 			if (myScreen == myPlaylist)
 				myPlaylist->EnableHighlighting();
