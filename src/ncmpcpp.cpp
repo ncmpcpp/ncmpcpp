@@ -49,15 +49,6 @@
 #include "title.h"
 #include "utility/conversion.h"
 
-namespace boost {//
-
-void throw_exception(const std::exception &e)
-{
-	FatalError(std::string("Exception thrown: ") + e.what());
-}
-
-}
-
 namespace
 {
 	std::ofstream errorlog;
