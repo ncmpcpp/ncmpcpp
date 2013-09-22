@@ -51,16 +51,12 @@ struct Lastfm: Screen<NC::Scrollpad>, Tabbable
 	virtual bool isMergable() OVERRIDE { return true; }
 	
 	template <typename ServiceT>
-	bool queueJob(ServiceT service)
+	void queueJob(ServiceT service)
 	{
 		auto old_service = dynamic_cast<ServiceT *>(m_service.get());
 		// if the same service and arguments were used, leave old info
 		if (old_service != nullptr && *old_service == service)
-			return true;
-		
-		// download in progress
-		if (m_worker.valid() && !m_worker.is_ready())
-			return false;
+			return;
 		
 		m_service = std::make_shared<ServiceT>(std::forward<ServiceT>(service));
 		m_worker = boost::async(boost::launch::async, boost::bind(&LastFm::Service::fetch, m_service.get()));
@@ -69,8 +65,6 @@ struct Lastfm: Screen<NC::Scrollpad>, Tabbable
 		w << "Fetching information...";
 		w.flush();
 		m_title = ToWString(m_service->name());
-		
-		return true;
 	}
 	
 protected:
