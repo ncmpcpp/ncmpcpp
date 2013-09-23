@@ -29,7 +29,7 @@ namespace Actions {//
 
 enum class Type
 {
-	MacroUtility,
+	MacroUtility = 0,
 	Dummy, MouseEvent, ScrollUp, ScrollDown, ScrollUpArtist, ScrollUpAlbum,
 	ScrollDownArtist, ScrollDownAlbum, PageUp, PageDown, MoveHome, MoveEnd,
 	ToggleInterface, JumpToParentDirectory, PressEnter, PressSpace, PreviousColumn,
@@ -56,7 +56,8 @@ enum class Type
 	ShowPlaylist, ShowBrowser, ChangeBrowseMode, ShowSearchEngine,
 	ResetSearchEngine, ShowMediaLibrary, ToggleMediaLibraryColumnsMode,
 	ShowPlaylistEditor, ShowTagEditor, ShowOutputs, ShowVisualizer,
-	ShowClock, ShowServerInfo
+	ShowClock, ShowServerInfo,
+	_numberOfActions // needed to dynamically calculate size of action array
 };
 
 void validateScreenSize();

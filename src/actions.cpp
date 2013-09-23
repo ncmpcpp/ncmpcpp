@@ -21,6 +21,7 @@
 #include <cassert>
 #include <cerrno>
 #include <cstring>
+#include <boost/array.hpp>
 #include <boost/bind.hpp>
 #include <boost/locale/conversion.hpp>
 #include <boost/lexical_cast.hpp>
@@ -72,7 +73,9 @@ namespace {//
 
 enum class Find { Forward, Backward };
 
-std::map<Actions::Type, Actions::BaseAction *> AvailableActions;
+boost::array<
+	Actions::BaseAction *, static_cast<size_t>(Actions::Type::_numberOfActions)
+> AvailableActions;
 
 void populateActions();
 
@@ -285,9 +288,9 @@ bool isMPDMusicDirSet()
 
 BaseAction &get(Actions::Type at)
 {
-	if (AvailableActions.empty())
+	if (AvailableActions[1] == nullptr)
 		populateActions();
-	BaseAction *action = AvailableActions[at];
+	BaseAction *action = AvailableActions[static_cast<size_t>(at)];
 	// action should be always present if action type in queried
 	assert(action != nullptr);
 	return *action;
@@ -296,13 +299,13 @@ BaseAction &get(Actions::Type at)
 BaseAction *get(const std::string &name)
 {
 	BaseAction *result = 0;
-	if (AvailableActions.empty())
+	if (AvailableActions[1] == nullptr)
 		populateActions();
 	for (auto it = AvailableActions.begin(); it != AvailableActions.end(); ++it)
 	{
-		if (it->second->name() == name)
+		if (*it != nullptr && (*it)->name() == name)
 		{
-			result = it->second;
+			result = *it;
 			break;
 		}
 	}
@@ -2407,7 +2410,7 @@ namespace {//
 void populateActions()
 {
 	auto insert_action = [](Actions::BaseAction *a) {
-		AvailableActions[a->type()] = a;
+		AvailableActions[static_cast<size_t>(a->type())] = a;
 	};
 	insert_action(new Actions::Dummy());
 	insert_action(new Actions::MouseEvent());
