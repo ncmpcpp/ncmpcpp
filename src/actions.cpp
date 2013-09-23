@@ -193,13 +193,6 @@ void resizeScreen(bool reload_main_window)
 	{
 		endwin();
 		refresh();
-		// get rid of KEY_RESIZE as it sometimes
-		// corrupts our new cool ReadKey() function
-		// because KEY_RESIZE doesn't come from stdin
-		// and thus select cannot detect it
-		timeout(10);
-		getch();
-		timeout(-1);
 	}
 #	endif
 	
