@@ -112,8 +112,10 @@ TagEditor::TagEditor() : FParser(0), FParserHelper(0), FParserLegend(0), FParser
 	TagTypes->addItem("Filename");
 	TagTypes->addSeparator();
 	if (Config.titles_visibility)
+	{
 		TagTypes->addItem("Options", 1, 1);
-	TagTypes->addSeparator();
+		TagTypes->addSeparator();
+	}
 	TagTypes->addItem("Capitalize First Letters");
 	TagTypes->addItem("lower all letters");
 	TagTypes->addSeparator();
@@ -534,27 +536,27 @@ void TagEditor::enterPressed()
 				Tags->scroll(NC::Scroll::Down);
 			}
 		}
-		else if (id == 16) // capitalize first letters
+		else if (id == TagTypes->size()-5) // capitalize first letters
 		{
 			Statusbar::msg("Processing...");
 			for (auto it = EditedSongs.begin(); it != EditedSongs.end(); ++it)
 				CapitalizeFirstLetters(**it);
 			Statusbar::msg("Done");
 		}
-		else if (id == 17) // lower all letters
+		else if (id == TagTypes->size()-4) // lower all letters
 		{
 			Statusbar::msg("Processing...");
 			for (auto it = EditedSongs.begin(); it != EditedSongs.end(); ++it)
 				LowerAllLetters(**it);
 			Statusbar::msg("Done");
 		}
-		else if (id == 19) // reset
+		else if (id == TagTypes->size()-2) // reset
 		{
 			for (auto it = Tags->beginV(); it != Tags->endV(); ++it)
 				it->clearModifications();
 			Statusbar::msg("Changes reset");
 		}
-		else if (id == 20) // save
+		else if (id == TagTypes->size()-1) // save
 		{
 			bool success = 1;
 			Statusbar::msg("Writing changes...");
