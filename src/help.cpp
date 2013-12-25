@@ -239,6 +239,7 @@ void Help::GetKeybindings()
 	KeyDesc(Actions::Type::Shuffle, "Shuffle playlist");
 	KeyDesc(Actions::Type::ToggleCrossfade, "Toggle crossfade mode");
 	KeyDesc(Actions::Type::SetCrossfade, "Set crossfade");
+	KeyDesc(Actions::Type::SetVolume, "Set volume");
 	KeyDesc(Actions::Type::UpdateDatabase, "Start music database update");
 	w << '\n';
 	KeyDesc(Actions::Type::ExecuteCommand, "Execute command");
