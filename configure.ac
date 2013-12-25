@@ -181,6 +181,16 @@ PKG_CHECK_MODULES([libmpdclient], [libmpdclient >= 2.8], [
 	AC_MSG_ERROR([libmpdclient >= 2.8 is required!])
 )
 
+dnl =========================
+dnl = checking for readline =
+dnl =========================
+AC_CHECK_HEADERS([readline/readline.h readline/history.h],
+	AC_CHECK_LIB(readline, rl_initialize, LDFLAGS="$LDFLAGS -lreadline",
+		AC_MSG_ERROR([readline headers found but there is no readline library to make use of])
+	),
+)
+
+
 dnl ========================
 dnl = checking for pthread =
 dnl ========================

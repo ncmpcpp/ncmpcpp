@@ -118,7 +118,7 @@ void Status::handleServerError(MPD::ServerError &e)
 	{
 		wFooter->setGetStringHelper(nullptr);
 		Statusbar::put() << "Password: ";
-		Mpd.SetPassword(wFooter->getString(-1, 0, 1));
+		Mpd.SetPassword(wFooter->getString(0, true));
 		Mpd.SendPassword();
 		Statusbar::msg("Password accepted");
 		wFooter->setGetStringHelper(Statusbar::Helpers::getString);

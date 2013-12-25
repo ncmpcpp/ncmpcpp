@@ -189,13 +189,13 @@ void Statusbar::Helpers::mpd()
 	Status::update(Mpd.noidle());
 }
 
-bool Statusbar::Helpers::getString(const std::wstring &)
+bool Statusbar::Helpers::getString(const char *)
 {
 	Status::trace();
 	return true;
 }
 
-bool Statusbar::Helpers::ApplyFilterImmediately::operator()(const std::wstring &ws)
+bool Statusbar::Helpers::ApplyFilterImmediately::operator()(const char *s)
 {
 	using Global::myScreen;
 	// if input queue is not empty, we don't want to update filter since next
@@ -205,10 +205,10 @@ bool Statusbar::Helpers::ApplyFilterImmediately::operator()(const std::wstring &
 	// is next in queue, so its effects will be seen.
 	if (wFooter->inputQueue().empty() || wFooter->inputQueue().front() == KEY_ENTER)
 	{
-		if (m_ws != ws)
+		if (m_s != s)
 		{
-			m_ws = ws;
-			m_f->applyFilter(ToString(m_ws));
+			m_s = s;
+			m_f->applyFilter(m_s);
 			myScreen->refreshWindow();
 		}
 		Status::trace();
@@ -216,13 +216,13 @@ bool Statusbar::Helpers::ApplyFilterImmediately::operator()(const std::wstring &
 	return true;
 }
 
-bool Statusbar::Helpers::TryExecuteImmediateCommand::operator()(const std::wstring &ws)
+bool Statusbar::Helpers::TryExecuteImmediateCommand::operator()(const char *s)
 {
 	bool continue_ = true;
-	if (m_ws != ws)
+	if (m_s != s)
 	{
-		m_ws = ws;
-		auto cmd = Bindings.findCommand(ToString(m_ws));
+		m_s = s;
+		auto cmd = Bindings.findCommand(m_s);
 		if (cmd && cmd->immediate())
 			continue_ = false;
 	}

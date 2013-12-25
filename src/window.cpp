@@ -18,8 +18,12 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
+#include <cassert>
 #include <cstring>
+#include <cstdio>
 #include <cstdlib>
+#include <readline/history.h>
+#include <readline/readline.h>
 
 #ifdef WIN32
 # include <winsock.h>
@@ -32,6 +36,111 @@
 #include "utility/string.h"
 #include "utility/wide_string.h"
 #include "window.h"
+
+namespace {
+namespace rl {
+
+NC::Window *w;
+size_t start_x;
+size_t start_y;
+size_t width;
+bool encrypted;
+const char *base;
+
+int read_key(FILE *)
+{
+	int result;
+	do
+	{
+		w->runGetStringHelper(rl_line_buffer);
+		w->refresh();
+		result = w->readKey();
+	}
+	while (result == ERR);
+	return result;
+}
+
+void display_string()
+{
+	auto print_char = [](wchar_t wc) {
+		if (encrypted)
+			*w << '*';
+		else
+			*w << wc;
+	};
+	auto print_string = [](wchar_t *ws, size_t len) {
+		if (encrypted)
+			for (size_t i = 0; i < len; ++i)
+				*w << '*';
+		else
+			*w << ws;
+	};
+
+	char pt = rl_line_buffer[rl_point];
+	rl_line_buffer[rl_point] = 0;
+	wchar_t pre_pos[rl_point+1];
+	pre_pos[mbstowcs(pre_pos, rl_line_buffer, rl_point)] = 0;
+	rl_line_buffer[rl_point] = pt;
+
+	int pos = wcswidth(pre_pos, rl_point);
+	assert(pos >= 0);
+	if (pos < 0)
+		pos = rl_point;
+
+	mvwhline(w->raw(), start_y, start_x, ' ', width+1);
+	w->goToXY(start_x, start_y);
+	if (size_t(pos) <= width)
+	{
+		print_string(pre_pos, pos);
+
+		wchar_t post_pos[rl_end-rl_point+1];
+		post_pos[mbstowcs(post_pos, rl_line_buffer+rl_point, rl_end-rl_point)] = 0;
+
+		size_t cpos = pos;
+		for (wchar_t *c = post_pos; *c != 0; ++c)
+		{
+			int n = wcwidth(*c);
+			if (n < 0)
+			{
+				print_char(L'.');
+				++cpos;
+			}
+			else
+			{
+				if (cpos+n > width)
+					break;
+				cpos += n;
+				print_char(*c);
+			}
+		}
+	}
+	else
+	{
+		wchar_t *mod_pre_pos = pre_pos;
+		while (*mod_pre_pos != 0)
+		{
+			++mod_pre_pos;
+			int n = wcwidth(*mod_pre_pos);
+			if (n < 0)
+				--pos;
+			else
+				pos -= n;
+			if (size_t(pos) <= width)
+				break;
+		}
+		print_string(mod_pre_pos, pos);
+	}
+	w->goToXY(start_x+pos, start_y);
+}
+
+int add_base()
+{
+	rl_insert_text(base);
+	return 0;
+}
+
+}
+}
 
 namespace NC {//
 
@@ -64,6 +173,12 @@ void initScreen(GNUC_UNUSED const char *window_title, bool enable_colors)
 	noecho();
 	cbreak();
 	curs_set(0);
+
+	rl_initialize();
+	// overwrite readline callbacks
+	rl_getc_function = rl::read_key;
+	rl_redisplay_function = rl::display_string;
+	rl_startup_hook = rl::add_base;
 }
 
 void destroyScreen()
@@ -93,7 +208,6 @@ Window::Window(size_t startx,
 		m_border(border),
 		m_get_string_helper(0),
 		m_title(title),
-		m_history(0),
 		m_bold_counter(0),
 		m_underline_counter(0),
 		m_reverse_counter(0),
@@ -145,7 +259,6 @@ Window::Window(const Window &rhs)
 , m_color_stack(rhs.m_color_stack)
 , m_input_queue(rhs.m_input_queue)
 , m_fds(rhs.m_fds)
-, m_history(rhs.m_history ? new std::list<std::wstring>(*rhs.m_history) : 0)
 , m_bold_counter(rhs.m_bold_counter)
 , m_underline_counter(rhs.m_underline_counter)
 , m_reverse_counter(rhs.m_reverse_counter)
@@ -171,7 +284,6 @@ Window::Window(Window &&rhs)
 , m_color_stack(std::move(rhs.m_color_stack))
 , m_input_queue(std::move(rhs.m_input_queue))
 , m_fds(std::move(rhs.m_fds))
-, m_history(rhs.m_history)
 , m_bold_counter(rhs.m_bold_counter)
 , m_underline_counter(rhs.m_underline_counter)
 , m_reverse_counter(rhs.m_reverse_counter)
@@ -179,7 +291,6 @@ Window::Window(Window &&rhs)
 {
 	rhs.m_window = 0;
 	rhs.m_border_window = 0;
-	rhs.m_history = 0;
 }
 
 Window &Window::operator=(Window rhs)
@@ -201,7 +312,6 @@ Window &Window::operator=(Window rhs)
 	std::swap(m_color_stack, rhs.m_color_stack);
 	std::swap(m_input_queue, rhs.m_input_queue);
 	std::swap(m_fds, rhs.m_fds);
-	std::swap(m_history, rhs.m_history);
 	std::swap(m_bold_counter, rhs.m_bold_counter);
 	std::swap(m_underline_counter, rhs.m_underline_counter);
 	std::swap(m_reverse_counter, rhs.m_reverse_counter);
@@ -213,7 +323,6 @@ Window::~Window()
 {
 	delwin(m_window);
 	delwin(m_border_window);
-	delete m_history;
 }
 
 void Window::setColor(Color fg, Color bg)
@@ -284,18 +393,6 @@ void Window::setTitle(const std::string &new_title)
 		recreate(m_width, m_height);
 	}
 	m_title = new_title;
-}
-
-void Window::createHistory()
-{
-	if (!m_history)
-		m_history = new std::list<std::wstring>;
-}
-
-void Window::deleteHistory()
-{
-	delete m_history;
-	m_history = 0;
 }
 
 void Window::recreate(size_t width, size_t height)
@@ -481,229 +578,39 @@ void Window::pushChar(int ch)
 	m_input_queue.push(ch);
 }
 
-std::string Window::getString(const std::string &base, size_t length_, size_t width, bool encrypted)
+std::string Window::getString(const std::string &base, size_t width, bool encrypted)
 {
-	int input;
-	size_t beginning, maxbeginning, minx, x, real_x, y, maxx, real_maxx;
-	
-	getyx(m_window, y, x);
-	minx = real_maxx = maxx = real_x = x;
-	
+	rl::w = this;
+	getyx(m_window, rl::start_y, rl::start_x);
+	rl::width = width;
+	rl::encrypted = encrypted;
+	rl::base = base.c_str();
+
 	width--;
 	if (width == size_t(-1))
-		width = m_width-x-1;
-	
+		rl::width = m_width-rl::start_x-1;
+	else
+		rl::width = width;
+
+	mmask_t oldmask;
+	std::string result;
+
 	curs_set(1);
-	
-	std::wstring wbase = ToWString(base);
-	std::wstring *tmp = &wbase;
-	std::list<std::wstring>::iterator history_it = m_history->end();
-	
-	std::string tmp_in;
-	wchar_t wc_in;
-	bool gotoend = 1;
-	bool block_scrolling = 0;
-	
-	// disable scrolling if wide chars are used
-	for (std::wstring::const_iterator it = tmp->begin(); it != tmp->end(); ++it)
-		if (wcwidth(*it) > 1)
-			block_scrolling = 1;
-	
-	beginning = -1;
-	
-	do
-	{
-		if (tmp->empty())
-			block_scrolling = 0;
-		
-		maxbeginning = block_scrolling ? 0 : (tmp->length() < width ? 0 : tmp->length()-width);
-		maxx = minx + (wideLength(*tmp) < width ? wideLength(*tmp) : width);
-		
-		real_maxx = minx + (tmp->length() < width ? tmp->length() : width);
-		
-		if (beginning > maxbeginning)
-			beginning = maxbeginning;
-		
-		if (gotoend)
-		{
-			size_t real_real_maxx = minx;
-			size_t biggest_x = minx+width;
-				
-			if (block_scrolling && maxx >= biggest_x)
-			{
-				size_t i = 0;
-				for (std::wstring::const_iterator it = tmp->begin(); i < width; ++it, ++real_real_maxx)
-					i += wcwidth(*it);
-			}
-			else
-				real_real_maxx = real_maxx;
-				
-			real_x = real_real_maxx;
-			x = block_scrolling ? (maxx > biggest_x ? biggest_x : maxx) : maxx;
-			beginning = maxbeginning;
-			gotoend = 0;
-		}
-		
-		mvwhline(m_window, y, minx, ' ', width+1);
-		
-		if (!encrypted)
-			mvwprintw(m_window, y, minx, "%ls", tmp->substr(beginning, width+1).c_str());
-		else
-			mvwhline(m_window, y, minx, '*', maxx-minx);
-		
-		if (m_get_string_helper)
-		{
-			if (!m_get_string_helper(*tmp))
-				break;
-		}
-		
-		wmove(m_window, y, x);
-		prefresh(m_window, 0, 0, m_start_y, m_start_x, m_start_y+m_height-1, m_start_x+m_width-1);
-		input = readKey();
-		
-		switch (input)
-		{
-			case ERR:
-			case KEY_MOUSE:
-				break;
-			case KEY_UP:
-				if (m_history && !encrypted && history_it != m_history->begin())
-				{
-					while (--history_it != m_history->begin())
-						if (!history_it->empty())
-							break;
-					tmp = &*history_it;
-					gotoend = 1;
-				}
-				break;
-			case KEY_DOWN:
-				if (m_history && !encrypted && history_it != m_history->end())
-				{
-					while (++history_it != m_history->end())
-						if (!history_it->empty())
-							break;
-					tmp = &(history_it == m_history->end() ? wbase : *history_it);
-					gotoend = 1;
-				}
-				break;
-			case KEY_RIGHT:
-			{
-				if (x < maxx)
-				{
-					real_x++;
-					x += std::max(wcwidth((*tmp)[beginning+real_x-minx-1]), 1);
-				}
-				else if (beginning < maxbeginning)
-					beginning++;
-				break;
-			}
-			case KEY_CTRL_H:
-			case KEY_BACKSPACE:
-			case KEY_BACKSPACE_2:
-			{
-				if (x <= minx && !beginning)
-					break;
-			}
-			case KEY_LEFT:
-			{
-				if (x > minx)
-				{
-					real_x--;
-					x -= std::max(wcwidth((*tmp)[beginning+real_x-minx]), 1);
-				}
-				else if (beginning > 0)
-					beginning--;
-				if (input != KEY_CTRL_H && input != KEY_BACKSPACE && input != KEY_BACKSPACE_2)
-					break; // backspace = left & delete.
-			}
-			case KEY_DC:
-			{
-				if ((real_x-minx)+beginning == tmp->length())
-					break;
-				tmp->erase(tmp->begin()+(real_x-minx)+beginning);
-				if (beginning && beginning == maxbeginning && real_x < maxx)
-				{
-					real_x++;
-					x++;
-				}
-				break;
-			}
-			case KEY_HOME:
-			{
-				real_x = x = minx;
-				beginning = 0;
-				break;
-			}
-			case KEY_END:
-			{
-				gotoend = 1;
-				break;
-			}
-			case KEY_ENTER:
-				break;
-			case KEY_CTRL_U:
-				tmp->clear();
-				real_maxx = maxx = real_x = x = minx;
-				maxbeginning = beginning = 0;
-				break;
-			default:
-			{
-				if (tmp->length() >= length_)
-					break;
-				
-				tmp_in += input;
-				if (int(mbrtowc(&wc_in, tmp_in.c_str(), MB_CUR_MAX, 0)) < 0)
-					break;
-				
-				int wcwidth_res = wcwidth(wc_in);
-				if (wcwidth_res > 1)
-					block_scrolling = 1;
-				
-				if (wcwidth_res > 0) // is char printable? we want to ignore things like Ctrl-?, Fx etc.
-				{
-					if ((real_x-minx)+beginning >= tmp->length())
-					{
-						tmp->push_back(wc_in);
-						if (!beginning)
-						{
-							real_x++;
-							x += wcwidth(wc_in);
-						}
-						beginning++;
-						gotoend = 1;
-					}
-					else
-					{
-						tmp->insert(tmp->begin()+(real_x-minx)+beginning, wc_in);
-						if (x < maxx)
-						{
-							real_x++;
-							x += wcwidth(wc_in);
-						}
-						else if (beginning < maxbeginning)
-							beginning++;
-					}
-				}
-				tmp_in.clear();
-			}
-		}
-	}
-	while (input != KEY_ENTER);
+	keypad(m_window, 0);
+	mousemask(0, &oldmask);
+	char *input = readline(nullptr);
+	mousemask(oldmask, nullptr);
+	keypad(m_window, 1);
 	curs_set(0);
-	
-	if (m_history && !encrypted)
+	if (input != nullptr)
 	{
-		if (history_it != m_history->end())
-		{
-			m_history->push_back(*history_it);
-			tmp = &m_history->back();
-			m_history->erase(history_it);
-		}
-		else
-			m_history->push_back(*tmp);
+		if (input[0] != 0)
+			add_history(input);
+		result = input;
+		free(input);
 	}
-	
-	return ToString(*tmp);
+
+	return result;
 }
 
 void Window::goToXY(int x, int y)
@@ -737,6 +644,17 @@ bool Window::hasCoords(int &x, int &y)
 	}
 	return false;
 #	endif
+}
+
+bool Window::runGetStringHelper(const char *arg) const
+{
+	if (m_get_string_helper)
+	{
+		m_get_string_helper(arg);
+		return true;
+	}
+	else
+		return false;
 }
 
 size_t Window::getWidth() const

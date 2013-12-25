@@ -27,6 +27,7 @@
 #include <boost/lexical_cast.hpp>
 #include <algorithm>
 #include <iostream>
+#include <readline/readline.h>
 
 #include "actions.h"
 #include "charset.h"
@@ -191,6 +192,7 @@ void resizeScreen(bool reload_main_window)
 	// update internal screen dimensions
 	if (reload_main_window)
 	{
+		rl_resize_terminal();
 		endwin();
 		refresh();
 	}
@@ -1189,7 +1191,7 @@ void SetCrossfade::run()
 	
 	Statusbar::lock();
 	Statusbar::put() << "Set crossfade to: ";
-	std::string crossfade = wFooter->getString(3);
+	std::string crossfade = wFooter->getString();
 	Statusbar::unlock();
 	int cf = fromString<unsigned>(crossfade);
 	lowerBoundCheck(cf, 1);
@@ -1203,7 +1205,7 @@ void SetVolume::run()
 	
 	Statusbar::lock();
 	Statusbar::put() << "Set volume to: ";
-	std::string strvolume = wFooter->getString(3);
+	std::string strvolume = wFooter->getString();
 	Statusbar::unlock();
 	int volume = fromString<unsigned>(strvolume);
 	boundsCheck(volume, 0, 100);
@@ -1765,7 +1767,7 @@ void ApplyFilter::run()
 	
 	Statusbar::lock();
 	Statusbar::put() << NC::Format::Bold << "Apply filter: " << NC::Format::NoBold;
-	wFooter->setGetStringHelper(Statusbar::Helpers::ApplyFilterImmediately(f, ToWString(filter)));
+	wFooter->setGetStringHelper(Statusbar::Helpers::ApplyFilterImmediately(f, filter));
 	wFooter->getString(filter);
 	wFooter->setGetStringHelper(Statusbar::Helpers::getString);
 	Statusbar::unlock();

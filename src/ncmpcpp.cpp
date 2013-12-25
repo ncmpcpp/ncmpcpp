@@ -53,6 +53,7 @@ namespace
 {
 	std::ofstream errorlog;
 	std::streambuf *cerr_buffer;
+	bool run_resize_screen = false;
 	
 #	if !defined(WIN32)
 	void sighandler(int signal)
@@ -63,7 +64,7 @@ namespace
 		}
 		else if (signal == SIGWINCH)
 		{
-			Actions::resizeScreen(true);
+			run_resize_screen = true;
 		}
 	}
 #	endif // !WIN32
@@ -153,7 +154,6 @@ int main(int argc, char **argv)
 	wFooter = new NC::Window(0, Actions::FooterStartY, COLS, Actions::FooterHeight, "", Config.statusbar_color, NC::Border::None);
 	wFooter->setTimeout(500);
 	wFooter->setGetStringHelper(Statusbar::Helpers::getString);
-	wFooter->createHistory();
 	
 	// initialize global timer
 	gettimeofday(&Timer, 0);
@@ -225,6 +225,12 @@ int main(int argc, char **argv)
 			}
 			
 			Status::trace();
+
+			if (run_resize_screen)
+			{
+				Actions::resizeScreen(true);
+				run_resize_screen = false;
+			}
 			
 			// header stuff
 			if (((Timer.tv_sec == past.tv_sec && Timer.tv_usec >= past.tv_usec+500000) || Timer.tv_sec > past.tv_sec)

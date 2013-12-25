@@ -132,7 +132,7 @@ enum class Scroll { Up, Down, PageUp, PageDown, Home, End };
 /// Helper function that is invoked each time one will want
 /// to obtain string from Window::getString() function
 /// @see Window::getString()
-typedef std::function<bool(const std::wstring &)> GetStringHelper;
+typedef std::function<bool(const char *)> GetStringHelper;
 
 /// Initializes curses screen and sets some additional attributes
 /// @param window_title title of the window (has an effect only if pdcurses lib is used)
@@ -163,7 +163,7 @@ struct XY
 /// Main class of NCurses namespace, used as base for other specialized windows
 struct Window
 {
-	Window() : m_window(0), m_border_window(0), m_history(0) { }
+	Window() : m_window(0), m_border_window(0) { }
 	
 	/// Constructs an empty window with given parameters
 	/// @param startx X position of left upper corner of constructed window
@@ -229,14 +229,13 @@ struct Window
 	/// @see setGetStringHelper()
 	/// @see SetTimeout()
 	/// @see CreateHistory()
-	std::string getString(const std::string &base, size_t length_ = -1,
-	                      size_t width = 0, bool encrypted = 0);
+	std::string getString(const std::string &base, size_t width = 0, bool encrypted = 0);
 	
 	/// Wrapper for above function that doesn't take base string (it will be empty).
 	/// Taken parameters are the same as for above.
-	std::string getString(size_t length_ = -1, size_t width = 0, bool encrypted = 0)
+	std::string getString(size_t width = 0, bool encrypted = 0)
 	{
-		return getString("", length_, width, encrypted);
+		return getString("", width, encrypted);
 	}
 	
 	/// Moves cursor to given coordinates
@@ -262,6 +261,11 @@ struct Window
 	/// @param helper pointer to function that matches getStringHelper prototype
 	/// @see getString()
 	void setGetStringHelper(GetStringHelper helper) { m_get_string_helper = helper; }
+
+	/// Run current GetString helper function (if defined).
+	/// @see getString()
+	/// @return true if helper was run, false otherwise
+	bool runGetStringHelper(const char *arg) const;
 	
 	/// Sets window's base color
 	/// @param fg foregound base color
@@ -279,13 +283,6 @@ struct Window
 	/// Sets window's title
 	/// @param new_title new title for window
 	void setTitle(const std::string &new_title);
-	
-	/// Creates internal container that stores all previous
-	/// strings that were edited using this window.
-	void createHistory();
-	
-	/// Deletes container with all previous history entries
-	void deleteHistory();
 	
 	/// Refreshed whole window and its border
 	/// @see refresh()
@@ -508,9 +505,6 @@ private:
 	/// are invoked if there is data available in them
 	typedef std::vector< std::pair<int, void (*)()> > FDCallbacks;
 	FDCallbacks m_fds;
-	
-	/// pointer to container used as history
-	std::list<std::wstring> *m_history;
 	
 	/// counters for format flags
 	int m_bold_counter;
