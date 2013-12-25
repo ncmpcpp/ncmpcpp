@@ -18,7 +18,6 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
-#include <cassert>
 #include <cstring>
 #include <cstdio>
 #include <cstdlib>
@@ -83,7 +82,6 @@ void display_string()
 	rl_line_buffer[rl_point] = pt;
 
 	int pos = wcswidth(pre_pos, rl_point);
-	assert(pos >= 0);
 	if (pos < 0)
 		pos = rl_point;
 
@@ -175,6 +173,8 @@ void initScreen(GNUC_UNUSED const char *window_title, bool enable_colors)
 	curs_set(0);
 
 	rl_initialize();
+	// disable autocompletion
+	rl_bind_key('\t', nullptr);
 	// overwrite readline callbacks
 	rl_getc_function = rl::read_key;
 	rl_redisplay_function = rl::display_string;
