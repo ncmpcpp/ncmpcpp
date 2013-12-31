@@ -488,31 +488,41 @@ template <typename BufferT> void ShowTag(BufferT &buf, const std::string &tag)
 template <typename SongIterator>
 void addSongsToPlaylist(SongIterator first, SongIterator last, bool play, int position)
 {
+	auto addSongNoError = [&](SongIterator song) -> int {
+		try
+		{
+			return Mpd.AddSong(*song, position);
+		}
+		catch (...)
+		{
+			return -1;
+		}
+	};
+
 	if (last-first >= 1)
 	{
-		int id = Mpd.AddSong(*first, position);
-		if (id > 0)
-		{
-			Mpd.StartCommandsList();
-			if (position == -1)
-			{
-				++first;
-				for(; first != last; ++first)
-					if (Mpd.AddSong(*first) < 0)
-						break;
-			}
-			else
-			{
-				++position;
-				--last;
-				for (; first != last; --last)
-					if (Mpd.AddSong(*last, position) < 0)
-						break;
-			}
-			Mpd.CommitCommandsList();
-			if (play)
-				Mpd.PlayID(id);
+		int id = addSongNoError(first);
+		while (id < 0) {
+			if (++first == last)
+				return;
+			id = addSongNoError(first);
 		}
+
+		if (position == -1)
+		{
+			++first;
+			for(; first != last; ++first)
+				addSongNoError(first);
+		}
+		else
+		{
+			++position;
+			--last;
+			for (; first != last; --last)
+				addSongNoError(last);
+		}
+		if (play)
+			Mpd.PlayID(id);
 	}
 }
 
