@@ -48,10 +48,13 @@ const char *base;
 
 int read_key(FILE *)
 {
+	size_t x;
 	int result;
 	do
 	{
+		x = w->getX();
 		w->runGetStringHelper(rl_line_buffer);
+		w->goToXY(x, start_y);
 		w->refresh();
 		result = w->readKey();
 	}
