@@ -53,10 +53,17 @@ int read_key(FILE *)
 	do
 	{
 		x = w->getX();
-		w->runGetStringHelper(rl_line_buffer);
-		w->goToXY(x, start_y);
-		w->refresh();
+		if (w->runGetStringHelper(rl_line_buffer))
+		{
+			w->goToXY(x, start_y);
+			w->refresh();
+		}
 		result = w->readKey();
+		if (!w->FDCallbacksListEmpty())
+		{
+			w->goToXY(x, start_y);
+			w->refresh();
+		}
 	}
 	while (result == ERR);
 	return result;
