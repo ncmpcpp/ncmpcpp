@@ -1707,6 +1707,7 @@ void ClearMainPlaylist::run()
 		Statusbar::msg("Deleting items...");
 		clearPlaylist(myPlaylist->main(), delete_fun, clear_fun);
 		Statusbar::msg("Items deleted");
+		myPlaylist->main().highlight(0);
 	}
 }
 
