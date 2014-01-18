@@ -220,10 +220,13 @@ void PlaylistEditor::AddToPlaylist(bool add_n_play)
 	
 	if (isActiveWindow(Playlists) && !Playlists.empty())
 	{
+		bool success;
 		withUnfilteredMenu(Content, [&]() {
-			addSongsToPlaylist(Content.beginV(), Content.endV(), add_n_play, -1);
+			success = addSongsToPlaylist(Content.beginV(), Content.endV(), add_n_play, -1);
 		});
-		Statusbar::msg("Playlist \"%s\" loaded", Playlists.current().value().c_str());
+		Statusbar::msg("Playlist \"%s\" loaded%s",
+			Playlists.current().value().c_str(), withErrors(success)
+		);
 	}
 	else if (isActiveWindow(Content) && !Content.empty())
 		addSongToPlaylist(Content.current().value(), add_n_play);

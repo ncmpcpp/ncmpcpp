@@ -127,8 +127,10 @@ void Browser::enterPressed()
 		{
 			MPD::SongList list;
 			Mpd.GetPlaylistContentNoInfo(item.name, vectorMoveInserter(list));
-			addSongsToPlaylist(list.begin(), list.end(), true, -1);
-			Statusbar::msg("Playlist \"%s\" loaded", item.name.c_str());
+			bool success = addSongsToPlaylist(list.begin(), list.end(), true, -1);
+			Statusbar::msg("Playlist \"%s\" loaded%s",
+				item.name.c_str(), withErrors(success)
+			);
 		}
 	}
 }
@@ -156,6 +158,7 @@ void Browser::spacePressed()
 	{
 		case itDirectory:
 		{
+			bool success;
 #			ifndef WIN32
 			if (isLocal())
 			{
@@ -166,12 +169,17 @@ void Browser::spacePressed()
 				list.reserve(items.size());
 				for (MPD::ItemList::const_iterator it = items.begin(); it != items.end(); ++it)
 					list.push_back(*it->song);
-				addSongsToPlaylist(list.begin(), list.end(), false, -1);
+				success = addSongsToPlaylist(list.begin(), list.end(), false, -1);
 			}
 			else
 #			endif // !WIN32
+			{
 				Mpd.Add(item.name);
-			Statusbar::msg("Directory \"%s\" added", item.name.c_str());
+				success = true;
+			}
+			Statusbar::msg("Directory \"%s\" added%s",
+				item.name.c_str(), withErrors(success)
+			);
 			break;
 		}
 		case itSong:

@@ -1004,19 +1004,22 @@ void MediaLibrary::AddToPlaylist(bool add_n_play)
 			Mpd.StartSearch(true);
 			Mpd.AddSearch(Config.media_lib_primary_tag, Tags.current().value().tag());
 			Mpd.CommitSearchSongs(vectorMoveInserter(list));
-			addSongsToPlaylist(list.begin(), list.end(), add_n_play, -1);
+			bool success = addSongsToPlaylist(list.begin(), list.end(), add_n_play, -1);
 			std::string tag_type = boost::locale::to_lower(
 				tagTypeToString(Config.media_lib_primary_tag));
-			Statusbar::msg("Songs with %s = \"%s\" added",
-				tag_type.c_str(), Tags.current().value().tag().c_str());
+			Statusbar::msg("Songs with %s = \"%s\" added%s",
+				tag_type.c_str(), Tags.current().value().tag().c_str(), withErrors(success)
+			);
 		}
 		else if (isActiveWindow(Albums))
 		{
+			bool success;
 			withUnfilteredMenu(Songs, [&]() {
-				addSongsToPlaylist(Songs.beginV(), Songs.endV(), add_n_play, -1);
+				success = addSongsToPlaylist(Songs.beginV(), Songs.endV(), add_n_play, -1);
 			});
-			Statusbar::msg("Songs from album \"%s\" added",
-				Albums.current().value().entry().album().c_str());
+			Statusbar::msg("Songs from album \"%s\" added%s",
+				Albums.current().value().entry().album().c_str(), withErrors(success)
+			);
 		}
 	}
 	

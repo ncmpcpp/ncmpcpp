@@ -242,14 +242,14 @@ void SelectedItemsAdder::addToExistingPlaylist(const std::string &playlist) cons
 
 void SelectedItemsAdder::addAtTheEndOfPlaylist() const
 {
-	addSongsToPlaylist(m_selected_items.begin(), m_selected_items.end(), false, -1);
-	exitSuccessfully();
+	bool success = addSongsToPlaylist(m_selected_items.begin(), m_selected_items.end(), false, -1);
+	exitSuccessfully(success);
 }
 
 void SelectedItemsAdder::addAtTheBeginningOfPlaylist() const
 {
-	addSongsToPlaylist(m_selected_items.begin(), m_selected_items.end(), false, 0);
-	exitSuccessfully();
+	bool success = addSongsToPlaylist(m_selected_items.begin(), m_selected_items.end(), false, 0);
+	exitSuccessfully(success);
 }
 
 void SelectedItemsAdder::addAfterCurrentSong() const
@@ -258,8 +258,8 @@ void SelectedItemsAdder::addAfterCurrentSong() const
 		return;
 	size_t pos = myPlaylist->currentSongPosition();
 	++pos;
-	addSongsToPlaylist(m_selected_items.begin(), m_selected_items.end(), false, pos);
-	exitSuccessfully();
+	bool success = addSongsToPlaylist(m_selected_items.begin(), m_selected_items.end(), false, pos);
+	exitSuccessfully(success);
 }
 
 void SelectedItemsAdder::addAfterCurrentAlbum() const
@@ -273,16 +273,16 @@ void SelectedItemsAdder::addAfterCurrentAlbum() const
 		while (pos < pl.size() && pl[pos].value().getAlbum() == album)
 			++pos;
 	});
-	addSongsToPlaylist(m_selected_items.begin(), m_selected_items.end(), false, pos);
-	exitSuccessfully();
+	bool success = addSongsToPlaylist(m_selected_items.begin(), m_selected_items.end(), false, pos);
+	exitSuccessfully(success);
 }
 
 void SelectedItemsAdder::addAfterHighlightedSong() const
 {
 	size_t pos = myPlaylist->main().current().value().getPosition();
 	++pos;
-	addSongsToPlaylist(m_selected_items.begin(), m_selected_items.end(), false, pos);
-	exitSuccessfully();
+	bool success = addSongsToPlaylist(m_selected_items.begin(), m_selected_items.end(), false, pos);
+	exitSuccessfully(success);
 }
 
 void SelectedItemsAdder::cancel()
@@ -293,9 +293,9 @@ void SelectedItemsAdder::cancel()
 		w = &m_playlist_selector;
 }
 
-void SelectedItemsAdder::exitSuccessfully() const
+void SelectedItemsAdder::exitSuccessfully(bool success) const
 {
-	Statusbar::msg("Selected items added");
+	Statusbar::msg("Selected items added%s", withErrors(success));
 	switchToPreviousScreen();
 }
 

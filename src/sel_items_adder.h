@@ -64,7 +64,7 @@ private:
 	void addAfterCurrentAlbum() const;
 	void addAfterHighlightedSong() const;
 	void cancel();
-	void exitSuccessfully() const;
+	void exitSuccessfully(bool success) const;
 	
 	void setDimensions();
 	
