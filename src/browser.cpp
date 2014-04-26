@@ -541,7 +541,7 @@ void Browser::ChangeBrowseMode()
 	drawHeader();
 }
 
-bool Browser::deleteItem(const MPD::Item &item)
+bool Browser::deleteItem(const MPD::Item &item, std::string &errmsg)
 {
 	if (isParentDirectory((item)))
 		FatalError("Parent directory passed to Browser::deleteItem");
@@ -555,10 +555,28 @@ bool Browser::deleteItem(const MPD::Item &item)
 		path = Config.mpd_music_dir;
 	path += item.type == itSong ? item.song->getURI() : item.name;
 	
-	if (item.type == itDirectory)
-		ClearDirectory(path);
-	
-	return std::remove(path.c_str()) == 0;
+	bool rv;
+	try
+	{
+		if (item.type == itDirectory)
+			ClearDirectory(path);
+		if (!boost::filesystem::exists(path))
+		{
+			errmsg = "No such item: " + path;
+			rv = false;
+		}
+		else
+		{
+			boost::filesystem::remove(path);
+			rv = true;
+		}
+	}
+	catch (boost::filesystem::filesystem_error &err)
+	{
+		errmsg = err.what();
+		rv = false;
+	}
+	return rv;
 }
 #endif // !WIN32
 

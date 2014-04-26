@@ -672,15 +672,15 @@ void DeleteBrowserItems::run()
 		{
 			const MPD::Item &i = (*it)->value();
 			std::string iname = i.type == MPD::itSong ? i.song->getName() : i.name;
-			if (myBrowser->deleteItem(i))
+			std::string errmsg;
+			if (myBrowser->deleteItem(i, errmsg))
 			{
 				const char msg[] = "\"%ls\" deleted";
 				Statusbar::msg(msg, wideShorten(ToWString(iname), COLS-const_strlen(msg)).c_str());
 			}
 			else
 			{
-				const char msg[] = "Couldn't delete \"%ls\": %s";
-				Statusbar::msg(msg, wideShorten(ToWString(iname), COLS-const_strlen(msg)-25).c_str(), strerror(errno));
+				Statusbar::msg("%s", errmsg.c_str());
 				success = false;
 				break;
 			}
