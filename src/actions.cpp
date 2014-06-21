@@ -1973,12 +1973,17 @@ void ToggleBrowserSortMode::run()
 			Statusbar::msg("Sort songs by: Custom format");
 			break;
 		case smCustomFormat:
+			Config.browser_sort_mode = smUnsorted;
+			Statusbar::msg("Sort songs by: Unsorted");
+			break;
+		case smUnsorted:
 			Config.browser_sort_mode = smName;
 			Statusbar::msg("Sort songs by: Name");
 			break;
 	}
-	std::sort(myBrowser->main().begin()+(myBrowser->CurrentDir() != "/"), myBrowser->main().end(),
-		LocaleBasedItemSorting(std::locale(), Config.ignore_leading_the, Config.browser_sort_mode));
+	if (Config.browser_sort_mode != smUnsorted)
+		std::sort(myBrowser->main().begin()+(myBrowser->CurrentDir() != "/"), myBrowser->main().end(),
+			LocaleBasedItemSorting(std::locale(), Config.ignore_leading_the, Config.browser_sort_mode));
 }
 
 bool ToggleLibraryTagType::canBeRun() const

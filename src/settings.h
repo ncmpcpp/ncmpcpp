@@ -30,7 +30,7 @@
 
 struct BaseScreen; // forward declaration for screens sequence
 
-enum SortMode { smName, smMTime, smCustomFormat };
+enum SortMode { smName, smMTime, smCustomFormat, smUnsorted };
 
 struct Column
 {
