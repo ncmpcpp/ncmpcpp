@@ -297,19 +297,28 @@ void MediaLibrary::update()
 			Tags.clearSearchResults();
 			m_tags_update_request = false;
 			std::map<std::string, time_t> tags;
-			Mpd.GetDirectoryRecursive("/", [&tags](MPD::Song s) {
-				unsigned idx = 0;
-				std::string tag = s.get(Config.media_lib_primary_tag, idx);
-				do
-				{
-					auto it = tags.find(tag);
-					if (it == tags.end())
-						tags[tag] = s.getMTime();
-					else
-						it->second = std::max(it->second, s.getMTime());
-				}
-				while (!(tag = s.get(Config.media_lib_primary_tag, ++idx)).empty());
-			});
+			if (Config.media_library_sort_by_mtime)
+			{
+				Mpd.GetDirectoryRecursive("/", [&tags](MPD::Song s) {
+					unsigned idx = 0;
+					std::string tag = s.get(Config.media_lib_primary_tag, idx);
+					do
+					{
+						auto it = tags.find(tag);
+						if (it == tags.end())
+							tags[tag] = s.getMTime();
+						else
+							it->second = std::max(it->second, s.getMTime());
+					}
+					while (!(tag = s.get(Config.media_lib_primary_tag, ++idx)).empty());
+				});
+			}
+			else
+			{
+				Mpd.GetList(Config.media_lib_primary_tag, [&tags](std::string tag) {
+					tags[tag] = 0;
+				});
+			}
 			withUnfilteredMenuReapplyFilter(Tags, [this, &tags]() {
 				size_t idx = 0;
 				for (auto it = tags.begin(); it != tags.end(); ++it, ++idx)
@@ -901,8 +910,7 @@ void MediaLibrary::toggleSortMode()
 	}
 	else
 	{
-		std::sort(Tags.beginV(), Tags.endV(), SortPrimaryTags());
-		Tags.refresh();
+		Tags.clear();
 		Albums.clear();
 		Songs.clear();
 	}
