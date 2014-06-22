@@ -930,43 +930,15 @@ void MediaLibrary::LocateSong(const MPD::Song &s)
 		Tags.showAll();
 		if (Tags.empty())
 			update();
-		if (primary_tag != Tags.current().value().tag())
-		{
-			for (size_t i = 0; i < Tags.size(); ++i)
-			{
-				if (primary_tag == Tags[i].value().tag())
-				{
-					Tags.highlight(i);
-					Albums.clear();
-					Songs.clear();
-					break;
-				}
-			}
-		}
+
+		MoveToTag(primary_tag);
 	}
 	
 	Albums.showAll();
 	if (Albums.empty())
 		update();
 	
-	std::string album = s.getAlbum();
-	std::string date = s.getDate();
-	if ((hasTwoColumns && Albums.current().value().entry().tag() != primary_tag)
-	||  album != Albums.current().value().entry().album()
-	||  date != Albums.current().value().entry().date())
-	{
-		for (size_t i = 0; i < Albums.size(); ++i)
-		{
-			if ((!hasTwoColumns || Albums[i].value().entry().tag() == primary_tag)
-			&&   album == Albums[i].value().entry().album()
-			&&   date == Albums[i].value().entry().date())
-			{
-				Albums.highlight(i);
-				Songs.clear();
-				break;
-			}
-		}
-	}
+	MoveToAlbum(primary_tag, s);
 	
 	Songs.showAll();
 	if (Songs.empty())
@@ -1034,6 +1006,50 @@ void MediaLibrary::AddToPlaylist(bool add_n_play)
 		else if (isActiveWindow(Albums))
 			Songs.clear();
 	}
+}
+
+bool MediaLibrary::MoveToTag(const std::string primary_tag)
+{
+	if (primary_tag == Tags.current().value().tag())
+		return true;
+
+	for (size_t i = 0; i < Tags.size(); ++i)
+	{
+		if (primary_tag == Tags[i].value().tag())
+		{
+			Tags.highlight(i);
+			Albums.clear();
+			Songs.clear();
+			return true;
+		}
+	}
+
+	return false;
+}
+
+bool MediaLibrary::MoveToAlbum(const std::string primary_tag, const MPD::Song &s)
+{
+	std::string album = s.getAlbum();
+	std::string date = s.getDate();
+	if ((!hasTwoColumns || Albums.current().value().entry().tag() == primary_tag)
+	&&   album == Albums.current().value().entry().album()
+	&&   date == Albums.current().value().entry().date())
+		return true;
+
+	for (size_t i = 0; i < Albums.size(); ++i)
+	{
+		if ((!hasTwoColumns || Albums[i].value().entry().tag() == primary_tag)
+		&&   album == Albums[i].value().entry().album()
+		&&   date == Albums[i].value().entry().date())
+		{
+			Albums.highlight(i);
+			Songs.clear();
+			return true;
+			break;
+		}
+	}
+
+	return false;
 }
 
 namespace {//
