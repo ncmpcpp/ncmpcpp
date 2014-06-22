@@ -931,19 +931,43 @@ void MediaLibrary::LocateSong(const MPD::Song &s)
 		if (Tags.empty())
 			update();
 
-		MoveToTag(primary_tag);
+		if (!MoveToTag(primary_tag, false))
+		{
+			withUnfilteredMenuReapplyFilter(Tags, [this, &primary_tag, &s]() {
+				auto &&tag = PrimaryTag(primary_tag, s.getMTime());
+				Tags.addItem(tag);
+				std::sort(Tags.beginV(), Tags.endV(), SortPrimaryTags());
+			});
+			Tags.refresh();
+			MoveToTag(primary_tag, true);
+		}
 	}
 	
 	Albums.showAll();
 	if (Albums.empty())
 		update();
-	
-	MoveToAlbum(primary_tag, s);
+
+	if (Albums.empty())
+		return;
+
+	if (!MoveToAlbum(primary_tag, s, false) && hasTwoColumns)
+	{
+		withUnfilteredMenuReapplyFilter(Albums, [this, &primary_tag, &s]() {
+			auto &&entry = AlbumEntry(Album(primary_tag, s.getAlbum(), s.getDate(), s.getMTime()));
+			Albums.addItem(entry);
+			std::sort(Albums.beginV(), Albums.endV(), SortAlbumEntries());
+		});
+		Albums.refresh();
+		MoveToAlbum(primary_tag, s, true);
+	}
 	
 	Songs.showAll();
 	if (Songs.empty())
 		update();
-	
+
+	if (Songs.empty())
+		return;
+
 	if (s.getHash() != Songs.current().value().getHash())
 	{
 		for (size_t i = 0; i < Songs.size(); ++i)
@@ -1008,10 +1032,17 @@ void MediaLibrary::AddToPlaylist(bool add_n_play)
 	}
 }
 
-bool MediaLibrary::MoveToTag(const std::string primary_tag)
+bool MediaLibrary::MoveToTag(const std::string primary_tag, bool tags_changed)
 {
 	if (primary_tag == Tags.current().value().tag())
+	{
+		if (tags_changed)
+		{
+			Albums.clear();
+			Songs.clear();
+		}
 		return true;
+	}
 
 	for (size_t i = 0; i < Tags.size(); ++i)
 	{
@@ -1027,14 +1058,20 @@ bool MediaLibrary::MoveToTag(const std::string primary_tag)
 	return false;
 }
 
-bool MediaLibrary::MoveToAlbum(const std::string primary_tag, const MPD::Song &s)
+bool MediaLibrary::MoveToAlbum(const std::string primary_tag, const MPD::Song &s, bool albums_changed)
 {
 	std::string album = s.getAlbum();
 	std::string date = s.getDate();
 	if ((!hasTwoColumns || Albums.current().value().entry().tag() == primary_tag)
 	&&   album == Albums.current().value().entry().album()
 	&&   date == Albums.current().value().entry().date())
+	{
+		if (albums_changed)
+		{
+			Songs.clear();
+		}
 		return true;
+	}
 
 	for (size_t i = 0; i < Albums.size(); ++i)
 	{
