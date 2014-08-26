@@ -56,16 +56,20 @@ namespace
 	bool run_resize_screen = false;
 	
 #	if !defined(WIN32)
-	void sighandler(int signal)
+	void sighandler(int sig)
 	{
-		if (signal == SIGPIPE)
+		if (sig == SIGPIPE)
 		{
 			Statusbar::msg("SIGPIPE (broken pipe signal) received");
 		}
-		else if (signal == SIGWINCH)
+		else if (sig == SIGWINCH)
 		{
 			run_resize_screen = true;
 		}
+#		if defined(__sun) && defined(__SVR4)
+		// in solaris it is needed to reinstall the handler each time it's executed
+		signal(sig, sighandler);
+#		endif // __sun && __SVR4
 	}
 #	endif // !WIN32
 	
