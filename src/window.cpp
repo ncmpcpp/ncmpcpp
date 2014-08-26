@@ -49,12 +49,18 @@ const char *base;
 int read_key(FILE *)
 {
 	size_t x;
+	bool done;
 	int result;
 	do
 	{
 		x = w->getX();
-		if (w->runGetStringHelper(rl_line_buffer))
+		if (w->runGetStringHelper(rl_line_buffer, &done))
 		{
+			if (done)
+			{
+				rl_done = 1;
+				return 0;
+			}
 			w->goToXY(x, start_y);
 			w->refresh();
 		}
@@ -656,11 +662,13 @@ bool Window::hasCoords(int &x, int &y)
 #	endif
 }
 
-bool Window::runGetStringHelper(const char *arg) const
+bool Window::runGetStringHelper(const char *arg, bool *done) const
 {
 	if (m_get_string_helper)
 	{
-		m_get_string_helper(arg);
+		bool continue_ = m_get_string_helper(arg);
+		if (done != nullptr)
+			*done = !continue_;
 		return true;
 	}
 	else

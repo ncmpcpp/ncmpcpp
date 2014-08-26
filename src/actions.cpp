@@ -827,7 +827,7 @@ void ExecuteCommand::run()
 	{
 		Statusbar::msg(1, "Executing %s...", cmd_name.c_str());
 		bool res = cmd->binding().execute();
-		Statusbar::msg("Execution %s.", res ? "successful" : "unsuccessful");
+		Statusbar::msg("Execution of command '%s' %s.", cmd_name.c_str(), res ? "successful" : "unsuccessful");
 	}
 	else
 		Statusbar::msg("No command named \"%s\"", cmd_name.c_str());

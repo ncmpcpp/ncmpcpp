@@ -265,8 +265,8 @@ struct Window
 	/// Run current GetString helper function (if defined).
 	/// @see getString()
 	/// @return true if helper was run, false otherwise
-	bool runGetStringHelper(const char *arg) const;
-	
+	bool runGetStringHelper(const char *arg, bool *done) const;
+
 	/// Sets window's base color
 	/// @param fg foregound base color
 	/// @param bg background base color
