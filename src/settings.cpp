@@ -810,6 +810,8 @@ void Configuration::Read()
 					browser_sort_mode = smMTime;
 				else if (v == "format")
 					browser_sort_mode = smCustomFormat;
+				else if (v == "unsorted")
+					browser_sort_mode = smUnsorted;
 				else
 					browser_sort_mode = smName; // "name" or invalid
 			}

@@ -423,7 +423,7 @@ void Browser::GetDirectory(std::string dir, std::string subdir)
 #	else
 	list = Mpd.GetDirectory(dir);
 #	endif // !WIN32
-	if (!isLocal()) // local directory is already sorted
+	if (Config.browser_sort_mode != smUnsorted && !isLocal()) // local directory is already sorted
 		std::sort(list.begin(), list.end(),
 			LocaleBasedItemSorting(std::locale(), Config.ignore_leading_the, Config.browser_sort_mode));
 	
@@ -505,8 +505,9 @@ void Browser::GetLocalDirectory(MPD::ItemList &v, const std::string &directory, 
 		}
 	});
 	
-	std::sort(v.begin()+start_size, v.end(), LocaleBasedItemSorting(std::locale(),
-		Config.ignore_leading_the, Config.browser_sort_mode));
+	if (Config.browser_sort_mode != smUnsorted)
+		std::sort(v.begin()+start_size, v.end(), LocaleBasedItemSorting(std::locale(),
+			Config.ignore_leading_the, Config.browser_sort_mode));
 }
 
 void Browser::ClearDirectory(const std::string &path) const
