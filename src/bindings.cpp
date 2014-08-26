@@ -233,7 +233,7 @@ bool BindingsConfiguration::read(const std::string &file)
 		{
 			if (!actions.empty())
 			{
-				m_commands.insert(std::make_pair(cmd_name, Command(actions, cmd_immediate)));
+				m_commands.insert(std::make_pair(cmd_name, Command(std::move(actions), cmd_immediate)));
 				actions.clear();
 				return true;
 			}

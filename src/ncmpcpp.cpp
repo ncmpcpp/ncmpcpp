@@ -256,9 +256,7 @@ int main(int argc, char **argv)
 			try
 			{
 				auto k = Bindings.get(input);
-				for (; k.first != k.second; ++k.first)
-					if (k.first->execute())
-						break;
+				std::any_of(k.first, k.second, boost::bind(&Binding::execute, _1));
 			}
 			catch (ConversionError &e)
 			{

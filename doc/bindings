@@ -22,17 +22,12 @@
 ##      action2
 ##      ...
 ##
-##    This creates chain of actions. When such chain is
+##    This creates a chain of actions. When such chain is
 ##    executed, each action in chain is run until the end of
-##    chain is reached or one of actions failed to execute
-##    due to its requirements not being met. Note that
-##    execution of chain of actions ALWAYS succeeds, no
-##    matter if one of actions from the chain failed (even
-##    if it was the first one in order and thus nothing
-##    was really executed). Because of that, if you decide
-##    to bind both actions and chains to a single key, make
-##    sure that chain is defined in the end. Otherwise, all
-##    actions bound to the key after chain will never be run.
+##    chain is reached or one of its actions fails to execute
+##    due to its requirements not being met. If multiple actions
+##    and/or chains are bound to the same key, they will be
+##    consecutively run until one of them gets fully executed.
 ##
 ## 3) When ncmpcpp starts, bindings configuration file is
 ##    parsed and then ncmpcpp provides "missing pieces"
