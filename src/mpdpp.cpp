@@ -721,6 +721,7 @@ void Connection::GetDirectoryRecursive(const std::string &directory, SongConsume
 	while (mpd_entity *e = mpd_recv_entity(m_connection)) {
 		if (mpd_entity_get_type(e) == MPD_ENTITY_TYPE_SONG)
 			f(Song(mpd_song_dup(mpd_entity_get_song(e))));
+		mpd_entity_free(e);
 	}
 	mpd_response_finish(m_connection);
 	checkErrors();
