@@ -30,8 +30,8 @@ using Global::wFooter;
 
 namespace {//
 
-timeval statusbarLockTime;
-int statusbarLockDelay = -1;
+boost::posix_time::ptime statusbarLockTime;
+boost::posix_time::seconds statusbarLockDelay(-1);
 
 bool statusbarBlockUpdate = false;
 bool progressbarBlockUpdate = false;
@@ -97,7 +97,7 @@ void Statusbar::lock()
 void Statusbar::unlock()
 {
 	statusbarAllowUnlock = true;
-	if (statusbarLockDelay < 0)
+	if (statusbarLockDelay.is_negative())
 	{
 		if (Config.statusbar_visibility)
 			statusbarBlockUpdate = false;
@@ -122,10 +122,10 @@ bool Statusbar::isUnlocked()
 void Statusbar::tryRedraw()
 {
 	using Global::Timer;
-	if (statusbarLockDelay > 0
-	&&  Timer.tv_sec >= statusbarLockTime.tv_sec+statusbarLockDelay)
+	if (statusbarLockDelay > boost::posix_time::seconds(0)
+	&&  Timer - statusbarLockTime > statusbarLockDelay)
 	{
-		statusbarLockDelay = -1;
+		statusbarLockDelay = boost::posix_time::seconds(-1);
 		
 		if (Config.statusbar_visibility)
 			statusbarBlockUpdate = !statusbarAllowUnlock;
@@ -149,12 +149,12 @@ NC::Window &Statusbar::put()
 	return *wFooter;
 }
 
-void Statusbar::print(int time, const std::string &message)
+void Statusbar::print(int delay, const std::string &message)
 {
 	if (statusbarAllowUnlock)
 	{
 		statusbarLockTime = Global::Timer;
-		statusbarLockDelay = time;
+		statusbarLockDelay = boost::posix_time::seconds(delay);
 		if (Config.statusbar_visibility)
 			statusbarBlockUpdate = true;
 		else

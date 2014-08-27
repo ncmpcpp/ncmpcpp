@@ -36,6 +36,6 @@ bool ShowMessages = false;
 bool SeekingInProgress = false;
 
 std::string VolumeState;
-timeval Timer;
+boost::posix_time::ptime Timer;
 
 }

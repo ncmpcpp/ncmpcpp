@@ -18,7 +18,6 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
-#include <sys/time.h>
 #include <iomanip>
 
 #include "global.h"
@@ -75,10 +74,10 @@ std::wstring ServerInfo::title()
 
 void ServerInfo::update()
 {
-	static timeval past = { 0, 0 };
-	if (Global::Timer.tv_sec <= past.tv_sec)
+	Statusbar::printf("%1%, %2%", Global::Timer, m_timer);
+	if (Global::Timer - m_timer < boost::posix_time::seconds(1))
 		return;
-	past = Global::Timer;
+	m_timer = Global::Timer;
 	
 	MPD::Statistics stats = Mpd.getStatistics();
 	if (stats.empty())

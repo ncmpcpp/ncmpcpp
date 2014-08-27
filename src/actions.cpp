@@ -2593,7 +2593,7 @@ void seek()
 	Statusbar::lock();
 	
 	unsigned songpos = Status::State::elapsedTime();
-	timeval t = Timer;
+	auto t = Timer;
 	
 	int old_timeout = wFooter->getTimeout();
 	wFooter->setTimeout(500);
@@ -2605,9 +2605,10 @@ void seek()
 	while (true)
 	{
 		Status::trace();
-		myPlaylist->UpdateTimer();
 		
-		unsigned howmuch = Config.incremental_seeking ? (Timer.tv_sec-t.tv_sec)/2+Config.seek_time : Config.seek_time;
+		unsigned howmuch = Config.incremental_seeking
+		                 ? (Timer-t).seconds()/2+Config.seek_time
+		                 : Config.seek_time;
 		
 		Key input = Key::read(*wFooter);
 		auto k = Bindings.get(input);

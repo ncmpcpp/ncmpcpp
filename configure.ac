@@ -139,6 +139,13 @@ AC_CHECK_LIB(boost_locale$BOOST_LIB_SUFFIX, main, LDFLAGS="$LDFLAGS -lboost_loca
 	AC_MSG_ERROR([no boost.locale library found])
 )
 
+dnl =================================
+dnl = checking for boost.posix_time =
+dnl =================================
+AC_CHECK_HEADERS([boost/date_time/posix_time/posix_time.hpp], ,
+	AC_MSG_ERROR(boost/date_time/posix_time/posix_time.hpp is missing)
+)
+
 dnl ============================
 dnl = checking for boost.regex =
 dnl ============================

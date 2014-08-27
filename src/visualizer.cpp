@@ -28,8 +28,6 @@
 #include <fstream>
 #include <limits>
 #include <fcntl.h>
-#include <sys/time.h>
-#include <unistd.h>
 
 #include "global.h"
 #include "settings.h"
@@ -64,7 +62,6 @@ void Visualizer::switchTo()
 	SwitchTo::execute(this);
 	w.clear();
 	SetFD();
-	m_timer = { 0, 0 };
 	if (m_fifo >= 0)
 		Global::wFooter->setTimeout(WindowTimeout);
 	drawHeader();
@@ -95,7 +92,7 @@ void Visualizer::update()
 	if (data < 0) // no data available in fifo
 		return;
 	
-	if (m_output_id != -1 && Global::Timer.tv_sec > m_timer.tv_sec+Config.visualizer_sync_interval)
+	if (m_output_id != -1 && Global::Timer - m_timer > Config.visualizer_sync_interval)
 	{
 		Mpd.DisableOutput(m_output_id);
 		usleep(50000);

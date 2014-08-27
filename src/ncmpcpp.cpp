@@ -22,7 +22,6 @@
 #include <clocale>
 #include <csignal>
 #include <cstring>
-#include <sys/time.h>
 
 #include <boost/locale.hpp>
 #include <iostream>
@@ -160,15 +159,14 @@ int main(int argc, char **argv)
 	wFooter->setGetStringHelper(Statusbar::Helpers::getString);
 	
 	// initialize global timer
-	gettimeofday(&Timer, 0);
+	Timer = boost::posix_time::microsec_clock::local_time();
 	
 	// go to playlist
 	myPlaylist->switchTo();
-	myPlaylist->UpdateTimer();
 	
 	// local variables
 	Key input(0, Key::Standard);
-	timeval past = { 0, 0 };
+	boost::posix_time::ptime past = boost::posix_time::from_time_t(0);
 	// local variables end
 	
 	mouseinterval(0);
@@ -237,14 +235,13 @@ int main(int argc, char **argv)
 			}
 			
 			// header stuff
-			if (((Timer.tv_sec == past.tv_sec && Timer.tv_usec >= past.tv_usec+500000) || Timer.tv_sec > past.tv_sec)
-			&&   (myScreen == myPlaylist || myScreen == myBrowser || myScreen == myLyrics)
+			if ((myScreen == myPlaylist || myScreen == myBrowser || myScreen == myLyrics)
+			&&  (Timer - past > boost::posix_time::milliseconds(500))
 			)
 			{
 				drawHeader();
 				past = Timer;
 			}
-			// header stuff end
 			
 			if (input != Key::noOp)
 				myScreen->refreshWindow();
@@ -272,7 +269,7 @@ int main(int argc, char **argv)
 			
 #			ifdef ENABLE_VISUALIZER
 			// visualizer sets timeout to 40ms, but since only it needs such small
-			// value, we should restore defalt one after switching to another screen.
+			// value, we should restore default one after switching to another screen.
 			if (wFooter->getTimeout() < 500
 			&&  !(myScreen == myVisualizer || myLockedScreen == myVisualizer || myInactiveScreen == myVisualizer)
 			)

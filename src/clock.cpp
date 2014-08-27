@@ -25,7 +25,6 @@
 #ifdef ENABLE_CLOCK
 
 #include <cstring>
-#include <sys/time.h>
 
 #include "global.h"
 #include "playlist.h"
@@ -115,20 +114,20 @@ void Clock::update()
 			myPlaylist->switchTo();
 	}
 	
-	std::tm *time = std::localtime(&Global::Timer.tv_sec);
+	auto time = boost::posix_time::to_tm(Global::Timer);
 	
 	mask = 0;
-	Set(time->tm_sec % 10, 0);
-	Set(time->tm_sec / 10, 4);
-	Set(time->tm_min % 10, 10);
-	Set(time->tm_min / 10, 14);
-	Set(time->tm_hour % 10, 20);
-	Set(time->tm_hour / 10, 24);
+	Set(time.tm_sec % 10, 0);
+	Set(time.tm_sec / 10, 4);
+	Set(time.tm_min % 10, 10);
+	Set(time.tm_min / 10, 14);
+	Set(time.tm_hour % 10, 20);
+	Set(time.tm_hour / 10, 24);
 	Set(10, 7);
 	Set(10, 17);
 	
 	char buf[64];
-	std::strftime(buf, 64, "%x", time);
+	std::strftime(buf, 64, "%x", &time);
 	attron(COLOR_PAIR(int(Config.main_color)));
 	mvprintw(w.getStarty()+w.getHeight(), w.getStartX()+(w.getWidth()-strlen(buf))/2, "%s", buf);
 	attroff(COLOR_PAIR(int(Config.main_color)));

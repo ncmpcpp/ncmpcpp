@@ -21,6 +21,7 @@
 #ifndef NCMPCPP_SETTINGS_H
 #define NCMPCPP_SETTINGS_H
 
+#include <boost/date_time/posix_time/posix_time_types.hpp>
 #include <boost/regex.hpp>
 #include <cassert>
 #include <vector>
@@ -171,7 +172,6 @@ struct Configuration
 	int crossfade_time;
 	int seek_time;
 	int volume_change_step;
-	int playlist_disable_highlight_delay;
 	int message_delay_time;
 	int lyrics_db;
 	
@@ -179,7 +179,9 @@ struct Configuration
 	
 	unsigned lines_scrolled;
 	unsigned search_engine_default_search_mode;
-	unsigned visualizer_sync_interval;
+	
+	boost::posix_time::seconds playlist_disable_highlight_delay;
+	boost::posix_time::seconds visualizer_sync_interval;
 	
 	double locked_screen_width_part;
 	

@@ -18,8 +18,6 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
-#include <sys/time.h>
-
 #include "browser.h"
 #include "charset.h"
 #include "global.h"
@@ -49,7 +47,7 @@ using Global::VolumeState;
 
 namespace {//
 
-timeval past = { 0, 0 };
+boost::posix_time::ptime past = boost::posix_time::from_time_t(0);
 
 size_t playing_song_scroll_begin = 0;
 size_t first_line_scroll_begin = 0;
@@ -135,10 +133,11 @@ void Status::handleServerError(MPD::ServerError &e)
 
 void Status::trace()
 {
-	gettimeofday(&Timer, 0);
+	Timer = boost::posix_time::microsec_clock::local_time();
 	if (Mpd.Connected())
 	{
-		if (State::player() == MPD::psPlay && Global::Timer.tv_sec > past.tv_sec)
+		if (State::player() == MPD::psPlay
+		&&  Global::Timer - past > boost::posix_time::seconds(1))
 		{
 			// update elapsed time/bitrate of the current song
 			Status::Changes::elapsedTime(true);
@@ -147,16 +146,6 @@ void Status::trace()
 		}
 		
 		applyToVisibleWindows(&BaseScreen::update);
-		
-		if (isVisible(myPlaylist)
-			&&  Timer.tv_sec == myPlaylist->Timer()+Config.playlist_disable_highlight_delay
-			&&  myPlaylist->main().isHighlighted()
-			&&  Config.playlist_disable_highlight_delay)
-		{
-			myPlaylist->main().setHighlighting(false);
-			myPlaylist->main().refresh();
-		}
-		
 		Statusbar::tryRedraw();
 		
 		Mpd.idle();

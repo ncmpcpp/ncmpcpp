@@ -97,6 +97,17 @@ std::wstring Playlist::title()
 	return result;
 }
 
+void Playlist::update()
+{
+	if (Config.playlist_disable_highlight_delay.time_duration::seconds() > 0
+	&&  w.isHighlighted()
+	&&  Global::Timer - itsTimer > Config.playlist_disable_highlight_delay)
+	{
+		w.setHighlighting(false);
+		w.refresh();
+	}
+}
+
 void Playlist::enterPressed()
 {
 	if (!w.empty())
@@ -260,12 +271,7 @@ void Playlist::Reverse()
 void Playlist::EnableHighlighting()
 {
 	w.setHighlighting(true);
-	UpdateTimer();
-}
-
-void Playlist::UpdateTimer()
-{
-	std::time(&itsTimer);
+	itsTimer = Global::Timer;
 }
 
 std::string Playlist::TotalLength()

@@ -38,7 +38,7 @@ struct Playlist: Screen<NC::Menu<MPD::Song>>, Filterable, HasSongs, Searchable, 
 	virtual std::wstring title() OVERRIDE;
 	virtual ScreenType type() OVERRIDE { return ScreenType::Playlist; }
 	
-	virtual void update() OVERRIDE { }
+	virtual void update() OVERRIDE;
 	
 	virtual void enterPressed() OVERRIDE;
 	virtual void spacePressed() OVERRIDE;
@@ -71,8 +71,6 @@ struct Playlist: Screen<NC::Menu<MPD::Song>>, Filterable, HasSongs, Searchable, 
 	void Reverse();
 	
 	void EnableHighlighting();
-	void UpdateTimer();
-	time_t Timer() const { return itsTimer; }
 	
 	void SetSelectedItemsPriority(int prio);
 	
@@ -101,7 +99,7 @@ private:
 	size_t itsRemainingTime;
 	size_t itsScrollBegin;
 	
-	time_t itsTimer;
+	boost::posix_time::ptime itsTimer;
 	
 	MPD::Status m_status;
 	unsigned m_old_playlist_version;

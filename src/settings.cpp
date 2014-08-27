@@ -188,13 +188,13 @@ void Configuration::SetDefaults()
 	crossfade_time = 5;
 	seek_time = 1;
 	volume_change_step = 1;
-	playlist_disable_highlight_delay = 5;
+	playlist_disable_highlight_delay = boost::posix_time::seconds(5);
 	message_delay_time = 4;
 	lyrics_db = 0;
 	regex_type = boost::regex::literal | boost::regex::icase;
 	lines_scrolled = 2;
 	search_engine_default_search_mode = 0;
-	visualizer_sync_interval = 30;
+	visualizer_sync_interval = boost::posix_time::seconds(30);
 	locked_screen_width_part = 0.5;
 	selected_item_prefix_length = 0;
 	selected_item_suffix_length = 0;
@@ -212,6 +212,7 @@ void Configuration::SetDefaults()
 }
 
 Configuration::Configuration()
+: playlist_disable_highlight_delay(0), visualizer_sync_interval(0)
 {
 #	ifdef WIN32
 	ncmpcpp_directory = GetHomeDirectory() + "ncmpcpp/";
@@ -338,8 +339,7 @@ void Configuration::Read()
 			}
 			else if (name == "playlist_disable_highlight_delay")
 			{
-				if (boost::lexical_cast<int>(v) >= 0)
-					playlist_disable_highlight_delay = boost::lexical_cast<int>(v);
+				playlist_disable_highlight_delay = boost::posix_time::seconds(boost::lexical_cast<int>(v));
 			}
 			else if (name == "message_delay_time")
 			{
@@ -762,7 +762,7 @@ void Configuration::Read()
 			{
 				unsigned interval = boost::lexical_cast<unsigned>(v);
 				if (interval)
-					visualizer_sync_interval = interval;
+					visualizer_sync_interval = boost::posix_time::seconds(interval);
 			}
 			else if (name == "browser_sort_mode")
 			{

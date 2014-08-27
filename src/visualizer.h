@@ -25,6 +25,7 @@
 
 #ifdef ENABLE_VISUALIZER
 
+#include <boost/date_time/posix_time/posix_time_types.hpp>
 #include "interfaces.h"
 #include "screen.h"
 #include "window.h"
@@ -69,7 +70,7 @@ private:
 #	endif // HAVE_FFTW3_H
 	
 	int m_output_id;
-	timeval m_timer;
+	boost::posix_time::ptime m_timer;
 	
 	int m_fifo;
 	unsigned m_samples;

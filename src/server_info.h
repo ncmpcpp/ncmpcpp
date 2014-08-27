@@ -48,6 +48,8 @@ protected:
 private:
 	void SetDimensions();
 	
+	boost::posix_time::ptime m_timer;
+
 	MPD::StringList itsURLHandlers;
 	MPD::StringList itsTagTypes;
 	

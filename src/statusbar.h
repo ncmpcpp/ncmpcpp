@@ -94,7 +94,7 @@ private:
 }
 
 /// displays message in statusbar for a given period of time
-void print(int time, const std::string &message);
+void print(int delay, const std::string& message);
 
 /// displays message in statusbar for period of time set in configuration file
 inline void print(const std::string &message)
@@ -118,14 +118,14 @@ void printf(FormatT &&fmt, ArgT &&arg, Args&&... args)
 
 /// displays formatted message in statusbar for a given period of time
 template <typename FormatT>
-void printf(int time, FormatT &&fmt)
+void printf(int delay, FormatT &&fmt)
 {
-	print(time, boost::format(std::forward<FormatT>(fmt)).str());
+	print(delay, boost::format(std::forward<FormatT>(fmt)).str());
 }
 template <typename FormatT, typename ArgT, typename... Args>
-void printf(int time, FormatT &&fmt, ArgT &&arg, Args&&... args)
+void printf(int delay, FormatT &&fmt, ArgT &&arg, Args&&... args)
 {
-	printf(time, boost::format(std::forward<FormatT>(fmt)) % std::forward<ArgT>(arg),
+	printf(delay, boost::format(std::forward<FormatT>(fmt)) % std::forward<ArgT>(arg),
 		std::forward<Args>(args)...
 	);
 }
