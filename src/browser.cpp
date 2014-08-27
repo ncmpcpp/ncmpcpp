@@ -543,6 +543,8 @@ void Browser::ChangeBrowseMode()
 
 bool Browser::deleteItem(const MPD::Item &item, std::string &errmsg)
 {
+	if (!Config.allow_for_physical_item_deletion)
+		FatalError("Browser::deleteItem invoked with allow_for_physical_item_deletion = false");
 	if (isParentDirectory((item)))
 		FatalError("Parent directory passed to Browser::deleteItem");
 	

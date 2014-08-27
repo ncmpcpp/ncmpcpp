@@ -643,9 +643,19 @@ void DeletePlaylistItems::run()
 
 bool DeleteBrowserItems::canBeRun() const
 {
+	auto check_if_deletion_allowed = []() {
+		if (Config.allow_for_physical_item_deletion)
+			return true;
+		else
+		{
+			Statusbar::msg("Flag 'allow_for_physical_item_deletion' needs to be enabled in configuration file");
+			return false;
+		}
+	};
 	return myScreen == myBrowser
 	    && !myBrowser->main().empty()
-	    && isMPDMusicDirSet();
+	    && isMPDMusicDirSet()
+	    && check_if_deletion_allowed();
 }
 
 void DeleteBrowserItems::run()

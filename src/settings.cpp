@@ -217,6 +217,7 @@ void Configuration::SetDefaults()
 	store_lyrics_in_song_dir = false;
 	generate_win32_compatible_filenames = true;
 	ask_for_locked_screen_width_part = true;
+	allow_for_physical_item_deletion = false;
 	progressbar_boldness = true;
 	set_window_title = true;
 	mpd_port = 6600;
@@ -823,6 +824,11 @@ void Configuration::Read()
 			{
 				if (!v.empty())
 					ask_for_locked_screen_width_part = v == "yes";
+			}
+			else if (name == "allow_for_physical_item_deletion")
+			{
+				if (!v.empty())
+					allow_for_physical_item_deletion = v == "yes";
 			}
 			else if (name == "progressbar_boldness")
 			{
