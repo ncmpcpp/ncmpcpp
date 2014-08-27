@@ -62,7 +62,6 @@ m_real_height(height)
 {
 }
 
-
 void Scrollpad::refresh()
 {
 	assert(m_real_height >= m_height);
@@ -74,6 +73,7 @@ void Scrollpad::refresh()
 void Scrollpad::resize(size_t new_width, size_t new_height)
 {
 	adjustDimensions(new_width, new_height);
+	recreate(new_width, new_height);
 	flush();
 }
 
@@ -125,7 +125,7 @@ void Scrollpad::clear()
 {
 	m_real_height = m_height;
 	m_buffer.clear();
-	wclear(m_window);
+	werase(m_window);
 	delwin(m_window);
 	m_window = newpad(m_height, m_width);
 	setTimeout(m_window_timeout);
@@ -260,9 +260,11 @@ void Scrollpad::flush()
 			w << *p;
 		return height;
 	};
-	
 	m_real_height = std::max(write_buffer(true), m_height);
-	recreate(m_width, m_real_height);
+	if (m_real_height > m_height)
+		recreate(m_width, m_real_height);
+	else
+		werase(m_window);
 	write_buffer(false);
 }
 
