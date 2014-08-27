@@ -18,28 +18,12 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
-#include <cassert>
-#include <cstring>
-#include <boost/algorithm/string/replace.hpp>
 #include <iostream>
 
-#include "actions.h"
-#include "charset.h"
 #include "cmdargs.h"
 #include "config.h"
 #include "mpdpp.h"
 #include "settings.h"
-
-#include "help.h"
-#include "playlist.h"
-#include "browser.h"
-#include "search_engine.h"
-#include "media_library.h"
-#include "playlist_editor.h"
-#include "tag_editor.h"
-#include "outputs.h"
-#include "visualizer.h"
-#include "clock.h"
 
 void ParseArgv(int argc, char **argv)
 {
@@ -122,39 +106,14 @@ void ParseArgv(int argc, char **argv)
 		
 		if (!strcmp(argv[i], "-s") || !strcmp(argv[i], "--screen"))
 		{
-			if (++i == argc) {
+			if (++i == argc)
+			{
 				std::cerr << "No screen specified" << std::endl;
 				exit(1);
 			}
-			if (!strcmp(argv[i], "help"))
-				Config.startup_screen = myHelp;
-			else if (!strcmp(argv[i], "playlist"))
-				Config.startup_screen = myPlaylist;
-			else if (!strcmp(argv[i], "browser"))
-				Config.startup_screen = myBrowser;
-			else if (!strcmp(argv[i], "search-engine"))
-				Config.startup_screen = mySearcher;
-			else if (!strcmp(argv[i], "media-library"))
-				Config.startup_screen = myLibrary;
-			else if (!strcmp(argv[i], "playlist-editor"))
-				Config.startup_screen = myPlaylistEditor;
-#			ifdef HAVE_TAGLIB_H
-			else if (!strcmp(argv[i], "tag-editor"))
-				Config.startup_screen = myTagEditor;
-#			endif // HAVE_TAGLIB_H
-#			ifdef ENABLE_OUTPUTS
-			else if (!strcmp(argv[i], "outputs"))
-				Config.startup_screen = myOutputs;
-#			endif // ENABLE_OUTPUTS
-#			ifdef ENABLE_VISUALIZER
-			else if (!strcmp(argv[i], "visualizer"))
-				Config.startup_screen = myVisualizer;
-#			endif // ENABLE_VISUALIZER
-#			ifdef ENABLE_CLOCK
-			else if (!strcmp(argv[i], "clock"))
-				Config.startup_screen = myClock;
-#			endif // ENABLE_CLOCK
-			else {
+			Config.startup_screen_type = stringtoStartupScreenType(argv[i]);
+			if (Config.startup_screen_type == ScreenType::Unknown)
+			{
 				std::cerr << "Invalid screen: " << argv[i] << std::endl;
 				exit(1);
 			}

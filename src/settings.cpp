@@ -60,43 +60,6 @@ Configuration Config;
 
 namespace
 {
-	ScreenRef intToScreen(int n)
-	{
-		switch (n)
-		{
-			case 1:
-				return myHelp;
-			case 2:
-				return myPlaylist;
-			case 3:
-				return myBrowser;
-			case 4:
-				return mySearcher;
-			case 5:
-				return myLibrary;
-			case 6:
-				return myPlaylistEditor;
-#			ifdef HAVE_TAGLIB_H
-			case 7:
-				return myTagEditor;
-#			endif // HAVE_TAGLIB_H
-#			ifdef ENABLE_OUTPUTS
-			case 8:
-				return myOutputs;
-#			endif // ENABLE_OUTPUTS
-#			ifdef ENABLE_VISUALIZER
-			case 9:
-				return myVisualizer;
-#			endif // ENABLE_VISUALIZER
-#			ifdef ENABLE_CLOCK
-			case 10:
-				return myClock;
-#			endif // ENABLE_CLOCK
-			default:
-				return ScreenRef();
-		}
-	}
-	
 	std::string GetOptionName(const std::string &s)
 	{
 		size_t equal = s.find('=');
@@ -241,11 +204,11 @@ void Configuration::SetDefaults()
 	if (system_encoding == "UTF-8") // mpd uses utf-8 by default so no need to convert
 		system_encoding.clear();
 #	endif // HAVE_LANGINFO_H
-	startup_screen = myPlaylist;
+	startup_screen_type = ScreenType::Playlist;
 	browser_sort_mode = smName;
 	// default screens sequence
-	screens_seq.push_back(myPlaylist);
-	screens_seq.push_back(myBrowser);
+	screens_seq.push_back(ScreenType::Playlist);
+	screens_seq.push_back(ScreenType::Browser);
 }
 
 Configuration::Configuration()
@@ -625,24 +588,20 @@ void Configuration::Read()
 			}
 			else if (name == "screen_switcher_mode")
 			{
-				if (v.find("previous") != std::string::npos)
-				{
+				if (v == "previous")
 					screen_switcher_previous = true;
-				}
-				else if (v.find("sequence") != std::string::npos)
+				else
 				{
 					screen_switcher_previous = false;
 					screens_seq.clear();
-					for (std::string::const_iterator it = v.begin(); it != v.end(); )
+					boost::sregex_token_iterator i(v.begin(), v.end(), boost::regex("\\w+")), j;
+					for (; i != j; ++i)
 					{
-						while (it != v.end() && !isdigit(*it))
-							++it;
-						if (it == v.end())
-							break;
-						if (auto screen = intToScreen(atoi(&*it)))
+						auto screen = stringtoStartupScreenType(*i);
+						if (screen != ScreenType::Unknown)
 							screens_seq.push_back(screen);
-						while (it != v.end() && isdigit(*it))
-							++it;
+						else
+							std::cerr << "screen_switcher_mode: unknown screen: " << *i << "\n";
 					}
 					// throw away duplicates
 					screens_seq.unique();
@@ -650,9 +609,9 @@ void Configuration::Read()
 			}
 			else if (name == "startup_screen")
 			{
-				startup_screen = intToScreen(atoi(v.c_str()));
-				if (!startup_screen)
-					startup_screen = myPlaylist;
+				startup_screen_type = stringtoStartupScreenType(v);
+				if (startup_screen_type == ScreenType::Unknown)
+					startup_screen_type = ScreenType::Playlist;
 			}
 			else if (name == "autocenter_mode")
 			{

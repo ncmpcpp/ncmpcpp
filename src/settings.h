@@ -26,6 +26,7 @@
 #include <vector>
 #include <mpd/client.h>
 #include "actions.h"
+#include "screen_type.h"
 #include "strbuffer.h"
 
 struct BaseScreen; // forward declaration for screens sequence
@@ -44,27 +45,6 @@ struct Column
 	bool fixed;
 	bool right_alignment;
 	bool display_empty_tag;
-};
-
-// FIXME: temporary hack
-struct ScreenRef
-{
-	ScreenRef() : m_ptr(0) { }
-	template <typename ScreenT>
-	ScreenRef(ScreenT *&ptr) : m_ptr(reinterpret_cast<BaseScreen **>(&ptr)) { }
-	
-	BaseScreen &operator*() const { return **m_ptr; }
-	BaseScreen *operator->() const { return *m_ptr; }
-	
-	bool operator==(const ScreenRef &rhs) const { return m_ptr == rhs.m_ptr; }
-	bool operator!=(const ScreenRef &rhs) const { return m_ptr != rhs.m_ptr; }
-	bool operator==(const BaseScreen *rhs) const { return *m_ptr == rhs; }
-	bool operator!=(const BaseScreen *rhs) const { return *m_ptr != rhs; }
-	
-	operator bool() { return m_ptr != 0; }
-	
-private:
-	BaseScreen **m_ptr;
 };
 
 struct Configuration
@@ -208,8 +188,8 @@ struct Configuration
 	size_t now_playing_prefix_length;
 	size_t now_playing_suffix_length;
 	
-	ScreenRef startup_screen;
-	std::list<ScreenRef> screens_seq;
+	ScreenType startup_screen_type;
+	std::list<ScreenType> screens_seq;
 	
 	SortMode browser_sort_mode;
 	

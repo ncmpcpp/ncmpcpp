@@ -206,8 +206,8 @@ int main(int argc, char **argv)
 					}
 					
 					// go to startup screen
-					if (Config.startup_screen != myScreen)
-						Config.startup_screen->switchTo();
+					if (Config.startup_screen_type != myScreen->type())
+						toScreen(Config.startup_screen_type)->switchTo();
 					
 					myBrowser->fetchSupportedExtensions();
 #					ifdef ENABLE_OUTPUTS

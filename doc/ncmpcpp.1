@@ -19,7 +19,7 @@ Connect to server at port [6600]
 Use alternative configuration file
 .TP
 .B \-s, \-\-screen <name>
-Specify the startup screen (<name> may be: help, playlist, browser, search-engine, media-library, playlist-editor, tag-editor, outputs, visualizer, clock)
+Specify the startup screen (<name> may be: help, playlist, browser, search_engine, media_library, playlist_editor, tag_editor, outputs, visualizer, clock)
 .TP
 .B \-?, \-\-help
 Display help.
@@ -256,16 +256,16 @@ If set to "playlist", Search engine will perform searching in current MPD playli
 If enabled, screens' names and their keybindings will be shown in header window until key is pressed, otherwise they won't be displayed at all.
 .TP 
 .B screen_switcher_mode = SWITCHER_MODE
-If set to "previous", key_screen_switcher will switch between current and last used screen. If set to "sequence: user_defined_sequence", it will switch between given sequence of screens. Syntax clarification can be found in example config file.
+If set to "previous", key_screen_switcher will switch between current and last used screen. If set to "screen1,...screenN" (a list of screens) it will switch between them in a sequence. Syntax clarification can be found in example config file.
+.TP 
+.B startup_screen = SCREEN_NAME
+Screen that has to be displayed at start (playlist by default).
 .TP 
 .B locked_screen_width_part = 20-80
 If you want to lock a screen, ncmpcpp asks for % of locked screen's width to be reserved before that and provides a default value, which is the one you can set here.
 .TP 
 .B ask_for_locked_screen_width_part = yes/no
 If enabled, ncmpcpp will ask for % of locked screen's width each time you want to lock a screen. If you disable that, it'll silently attempt to use default value.
-.TP 
-.B startup_screen = SCREEN_NUMBER
-Screen that has to be displayed at start (playlist by default).
 .TP 
 .B jump_to_now_playing_song_at_start = yes/no
 If enabled, ncmpcpp will jump at start to now playing song if mpd is playing or paused.

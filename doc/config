@@ -366,28 +366,21 @@
 #display_screens_numbers_on_start = "yes"
 #
 ##
-## How shall key_screen_switcher work?
+## How shall screen switcher work?
 ##
-## - "previous" - switch between current and last used screen
-## - "sequence: 2 -> 9 -> 5" - switch between given sequence of screens.
+## - "previous" - switch between the current and previous screen.
+## - "screen1,...,screenN" - switch between given sequence of screens.
 ##
-## Screen numbers you can use after 'sequence' keyword are:
+## Screens available for use: help, playlist, browser, search_engine,
+## media_library, playlist_editor, tag_editor, outputs, visualizer, clock.
 ##
-## - 1 - help
-## - 2 - playlist
-## - 3 - browser
-## - 4 - search engine
-## - 5 - media library
-## - 6 - playlist editor
-## - 7 - tag editor
-## - 8 - outputs
-## - 9 - visualizer
-## - 10 - clock
+#screen_switcher_mode = "playlist, browser"
+#
 ##
-## As you can see, above example will switch between
-## playlist, visualizer and media library screens.
+## Note: You can define startup screen for ncmpcpp
+## by choosing screen from the list above.
 ##
-#screen_switcher_mode = "sequence: 2 -> 3"
+#startup_screen = "playlist"
 #
 ##
 ## Default width of locked screen (in %).
@@ -397,12 +390,6 @@
 #locked_screen_width_part = "50"
 #
 #ask_for_locked_screen_width_part = "yes"
-#
-##
-## Note: You can define startup screen for ncmpcpp
-## by choosing screen number from the list above.
-##
-#startup_screen = "2"
 #
 #jump_to_now_playing_song_at_start = "yes"
 #

@@ -2213,11 +2213,13 @@ void NextScreen::run()
 	}
 	else if (!Config.screens_seq.empty())
 	{
-		auto screen = std::find(Config.screens_seq.begin(), Config.screens_seq.end(), myScreen);
-		if (++screen == Config.screens_seq.end())
-			Config.screens_seq.front()->switchTo();
+		auto screen_type = std::find(Config.screens_seq.begin(), Config.screens_seq.end(),
+			myScreen->type()
+		);
+		if (++screen_type == Config.screens_seq.end())
+			toScreen(Config.screens_seq.front())->switchTo();
 		else
-			(*screen)->switchTo();
+			toScreen(*screen_type)->switchTo();
 	}
 }
 
@@ -2230,11 +2232,13 @@ void PreviousScreen::run()
 	}
 	else if (!Config.screens_seq.empty())
 	{
-		auto screen = std::find(Config.screens_seq.begin(), Config.screens_seq.end(), myScreen);
-		if (screen == Config.screens_seq.begin())
-			Config.screens_seq.back()->switchTo();
+		auto screen_type = std::find(Config.screens_seq.begin(), Config.screens_seq.end(),
+			myScreen->type()
+		);
+		if (screen_type == Config.screens_seq.begin())
+			toScreen(Config.screens_seq.back())->switchTo();
 		else
-			(*--screen)->switchTo();
+			toScreen(*--screen_type)->switchTo();
 	}
 }
 
