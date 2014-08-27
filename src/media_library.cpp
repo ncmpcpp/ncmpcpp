@@ -884,7 +884,7 @@ ProxySongList MediaLibrary::songsProxyList()
 void MediaLibrary::toggleSortMode()
 {
 	Config.media_library_sort_by_mtime = !Config.media_library_sort_by_mtime;
-	Statusbar::msg("Sorting library by: %s",
+	Statusbar::printf("Sorting library by: %1%",
 		Config.media_library_sort_by_mtime ? "Modification time" : "Name");
 	if (hasTwoColumns)
 	{
@@ -916,7 +916,7 @@ void MediaLibrary::LocateSong(const MPD::Song &s)
 	{
 		std::string item_type = boost::locale::to_lower(
 			tagTypeToString(Config.media_lib_primary_tag));
-		Statusbar::msg("Can't use this function because the song has no %s tag set", item_type.c_str());
+		Statusbar::printf("Can't use this function because the song has no %s tag set", item_type);
 		return;
 	}
 	
@@ -1007,8 +1007,8 @@ void MediaLibrary::AddToPlaylist(bool add_n_play)
 			bool success = addSongsToPlaylist(list.begin(), list.end(), add_n_play, -1);
 			std::string tag_type = boost::locale::to_lower(
 				tagTypeToString(Config.media_lib_primary_tag));
-			Statusbar::msg("Songs with %s = \"%s\" added%s",
-				tag_type.c_str(), Tags.current().value().tag().c_str(), withErrors(success)
+			Statusbar::printf("Songs with %1% \"%2%\" added%3%",
+				tag_type, Tags.current().value().tag(), withErrors(success)
 			);
 		}
 		else if (isActiveWindow(Albums))
@@ -1017,8 +1017,8 @@ void MediaLibrary::AddToPlaylist(bool add_n_play)
 			withUnfilteredMenu(Songs, [&]() {
 				success = addSongsToPlaylist(Songs.beginV(), Songs.endV(), add_n_play, -1);
 			});
-			Statusbar::msg("Songs from album \"%s\" added%s",
-				Albums.current().value().entry().album().c_str(), withErrors(success)
+			Statusbar::printf("Songs from album \"%1%\" added%2%",
+				Albums.current().value().entry().album(), withErrors(success)
 			);
 		}
 	}

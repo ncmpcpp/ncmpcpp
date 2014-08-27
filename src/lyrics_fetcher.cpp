@@ -54,8 +54,8 @@ LyricsFetcher::Result LyricsFetcher::fetch(const std::string &artist, const std:
 	result.first = false;
 	
 	std::string url = urlTemplate();
-	boost::replace_all(url, "%artist%", artist.c_str());
-	boost::replace_all(url, "%title%", title.c_str());
+	boost::replace_all(url, "%artist%", artist);
+	boost::replace_all(url, "%title%", title);
 	
 	std::string data;
 	CURLcode code = Curl::perform(data, url);

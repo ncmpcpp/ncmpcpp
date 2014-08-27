@@ -109,11 +109,11 @@ void SelectedItemsAdder::switchTo()
 	if (!hs || !hs->allowsSelection())
 		return;
 	
-	Statusbar::msg(1, "Fetching selected songs...");
+	Statusbar::print(1, "Fetching selected songs...");
 	m_selected_items = hs->getSelectedSongs();
 	if (m_selected_items.empty())
 	{
-		Statusbar::msg("List of selected items is empty");
+		Statusbar::print("List of selected items is empty");
 		return;
 	}
 	populatePlaylistSelector(myScreen);
@@ -236,7 +236,7 @@ void SelectedItemsAdder::addToExistingPlaylist(const std::string &playlist) cons
 	for (auto s = m_selected_items.begin(); s != m_selected_items.end(); ++s)
 		Mpd.AddToPlaylist(playlist, *s);
 	Mpd.CommitCommandsList();
-	Statusbar::msg("Selected item(s) added to playlist \"%s\"", playlist.c_str());
+	Statusbar::printf("Selected item(s) added to playlist \"%1%\"", playlist);
 	switchToPreviousScreen();
 }
 
@@ -295,7 +295,7 @@ void SelectedItemsAdder::cancel()
 
 void SelectedItemsAdder::exitSuccessfully(bool success) const
 {
-	Statusbar::msg("Selected items added%s", withErrors(success));
+	Statusbar::printf("Selected items added%1%", withErrors(success));
 	switchToPreviousScreen();
 }
 

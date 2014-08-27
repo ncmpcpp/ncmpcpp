@@ -109,7 +109,7 @@ void Status::handleClientError(MPD::ClientError &e)
 {
 	if (!e.clearable())
 		Mpd.Disconnect();
-	Statusbar::msg("NCMPCPP: %s", e.what());
+	Statusbar::printf("ncmpcpp: %1%", e.what());
 }
 
 void Status::handleServerError(MPD::ServerError &e)
@@ -120,7 +120,7 @@ void Status::handleServerError(MPD::ServerError &e)
 		Statusbar::put() << "Password: ";
 		Mpd.SetPassword(wFooter->getString(0, true));
 		Mpd.SendPassword();
-		Statusbar::msg("Password accepted");
+		Statusbar::print("Password accepted");
 		wFooter->setGetStringHelper(Statusbar::Helpers::getString);
 	}
 	else if (e.code() == MPD_SERVER_ERROR_NO_EXIST && myScreen == myBrowser)
@@ -128,7 +128,7 @@ void Status::handleServerError(MPD::ServerError &e)
 		myBrowser->GetDirectory(getParentDirectory(myBrowser->CurrentDir()));
 		myBrowser->refresh();
 	}
-	Statusbar::msg("MPD: %s", e.what());
+	Statusbar::printf("MPD: %1%", e.what());
 }
 
 /*************************************************************************/
@@ -527,28 +527,28 @@ void Status::Changes::repeat(bool show_msg)
 {
 	m_repeat = m_status.repeat() ? 'r' : 0;
 	if (show_msg)
-		Statusbar::msg("Repeat mode is %s", !m_repeat ? "off" : "on");
+		Statusbar::printf("Repeat mode is %1%", !m_repeat ? "off" : "on");
 }
 
 void Status::Changes::random(bool show_msg)
 {
 	m_random = m_status.random() ? 'z' : 0;
 	if (show_msg)
-		Statusbar::msg("Random mode is %s", !m_random ? "off" : "on");
+		Statusbar::printf("Random mode is %1%", !m_random ? "off" : "on");
 }
 
 void Status::Changes::single(bool show_msg)
 {
 	m_single = m_status.single() ? 's' : 0;
 	if (show_msg)
-		Statusbar::msg("Single mode is %s", !m_single ? "off" : "on");
+		Statusbar::printf("Single mode is %1%", !m_single ? "off" : "on");
 }
 
 void Status::Changes::consume(bool show_msg)
 {
 	m_consume = m_status.consume() ? 'c' : 0;
 	if (show_msg)
-		Statusbar::msg("Consume mode is %s", !m_consume ? "off" : "on");
+		Statusbar::printf("Consume mode is %1%", !m_consume ? "off" : "on");
 }
 
 void Status::Changes::crossfade(bool show_msg)
@@ -556,14 +556,14 @@ void Status::Changes::crossfade(bool show_msg)
 	int crossfade = m_status.crossfade();
 	m_crossfade = crossfade ? 'x' : 0;
 	if (show_msg)
-		Statusbar::msg("Crossfade set to %d seconds", crossfade);
+		Statusbar::printf("Crossfade set to %1% seconds", crossfade);
 }
 
 void Status::Changes::dbUpdateState(bool show_msg)
 {
 	m_db_updating = m_status.updateID() ? 'U' : 0;
 	if (show_msg)
-		Statusbar::msg("Database update %s", m_status.updateID() ? "started" : "finished");
+		Statusbar::printf("Database update %1%", m_status.updateID() ? "started" : "finished");
 }
 
 void Status::Changes::flags()

@@ -122,6 +122,12 @@ AC_CHECK_LIB(boost_system$BOOST_LIB_SUFFIX, main, LDFLAGS="$LDFLAGS -lboost_syst
 	AC_MSG_ERROR([no boost.system library found])
 )
 
+dnl =============================
+dnl = checking for boost.format =
+dnl =============================
+AC_CHECK_HEADERS([boost/format.hpp], ,
+	AC_MSG_ERROR(boost/format.hpp is missing)
+)
 
 dnl =============================
 dnl = checking for boost.locale =

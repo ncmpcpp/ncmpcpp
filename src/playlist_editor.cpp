@@ -201,7 +201,7 @@ bool PlaylistEditor::isContentFiltered()
 {
 	if (Content.isFiltered())
 	{
-		Statusbar::msg("Function currently unavailable due to filtered playlist content");
+		Statusbar::print("Function currently unavailable due to filtered playlist content");
 		return true;
 	}
 	return false;
@@ -224,8 +224,8 @@ void PlaylistEditor::AddToPlaylist(bool add_n_play)
 		withUnfilteredMenu(Content, [&]() {
 			success = addSongsToPlaylist(Content.beginV(), Content.endV(), add_n_play, -1);
 		});
-		Statusbar::msg("Playlist \"%s\" loaded%s",
-			Playlists.current().value().c_str(), withErrors(success)
+		Statusbar::printf("Playlist \"%1%\" loaded%2%",
+			Playlists.current().value(), withErrors(success)
 		);
 	}
 	else if (isActiveWindow(Content) && !Content.empty())

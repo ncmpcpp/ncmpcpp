@@ -150,7 +150,7 @@ void SortPlaylistDialog::moveSortOrderUp()
 
 void SortPlaylistDialog::moveSortOrderHint() const
 {
-	Statusbar::msg("Move tag types up and down to adjust sort order");
+	Statusbar::print("Move tag types up and down to adjust sort order");
 }
 
 void SortPlaylistDialog::sort() const
@@ -200,11 +200,11 @@ void SortPlaylistDialog::sort() const
 		}
 	};
 	
-	Statusbar::msg("Sorting...");
+	Statusbar::print("Sorting...");
 	Mpd.StartCommandsList();
 	quick_sort(playlist.begin(), playlist.end());
 	Mpd.CommitCommandsList();
-	Statusbar::msg("Playlist sorted");
+	Statusbar::print("Playlist sorted");
 	switchToPreviousScreen();
 }
 

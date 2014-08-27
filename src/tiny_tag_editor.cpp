@@ -73,7 +73,7 @@ void TinyTagEditor::switchTo()
 	using Global::myScreen;
 	if (itsEdited.isStream())
 	{
-		Statusbar::msg("Streams can't be edited");
+		Statusbar::print("Streams can't be edited");
 	}
 	else if (getTags())
 	{
@@ -88,8 +88,8 @@ void TinyTagEditor::switchTo()
 			full_path += Config.mpd_music_dir;
 		full_path += itsEdited.getURI();
 		
-		const char msg[] = "Couldn't read file \"%ls\"";
-		Statusbar::msg(msg, wideShorten(ToWString(full_path), COLS-const_strlen(msg)).c_str());
+		const char msg[] = "Couldn't read file \"%1%\"";
+		Statusbar::printf(msg, wideShorten(full_path, COLS-const_strlen(msg)));
 	}
 }
 
@@ -128,10 +128,10 @@ void TinyTagEditor::enterPressed()
 	
 	if (option == 22)
 	{
-		Statusbar::msg("Updating tags...");
+		Statusbar::print("Updating tags...");
 		if (Tags::write(itsEdited))
 		{
-			Statusbar::msg("Tags updated");
+			Statusbar::print("Tags updated");
 			if (itsEdited.isFromDatabase())
 				Mpd.UpdateDirectory(itsEdited.getDirectory());
 			else
@@ -143,7 +143,7 @@ void TinyTagEditor::enterPressed()
 			}
 		}
 		else
-			Statusbar::msg("Error while writing tags");
+			Statusbar::print("Error while writing tags");
 	}
 	if (option > 21)
 		m_previous_screen->switchTo();

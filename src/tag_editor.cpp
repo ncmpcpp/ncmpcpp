@@ -289,7 +289,7 @@ void TagEditor::enterPressed()
 			Dirs->reset();
 		}
 		else
-			Statusbar::msg("No subdirectories found");
+			Statusbar::print("No subdirectories found");
 	}
 	else if (w == FParserDialog)
 	{
@@ -370,7 +370,7 @@ void TagEditor::enterPressed()
 		else if (pos == 1 || pos == 4) // preview or proceed
 		{
 			bool success = 1;
-			Statusbar::msg("Parsing...");
+			Statusbar::print("Parsing...");
 			FParserPreview->clear();
 			for (auto it = EditedSongs.begin(); it != EditedSongs.end(); ++it)
 			{
@@ -393,7 +393,7 @@ void TagEditor::enterPressed()
 					std::string new_file = GenerateFilename(s, "{" + Config.pattern + "}");
 					if (new_file.empty() && !FParserUsePreview)
 					{
-						Statusbar::msg("File \"%s\" would have an empty name", s.getName().c_str());
+						Statusbar::printf("File \"%1%\" would have an empty name", s.getName());
 						FParserUsePreview = 1;
 						success = 0;
 					}
@@ -422,7 +422,7 @@ void TagEditor::enterPressed()
 				quit = 1;
 			}
 			if (pos != 4 || success)
-				Statusbar::msg("Operation finished");
+				Statusbar::print("Operation finished");
 		}
 		else if (pos == 2) // show legend
 		{
@@ -480,10 +480,10 @@ void TagEditor::enterPressed()
 				else
 					(*it)->setTrack(boost::lexical_cast<std::string>(i));
 			}
-			Statusbar::msg("Tracks numbered");
+			Statusbar::print("Tracks numbered");
 		}
 		else
-			Statusbar::msg("Aborted");
+			Statusbar::print("Aborted");
 		return;
 	}
 	
@@ -538,42 +538,42 @@ void TagEditor::enterPressed()
 		}
 		else if (id == TagTypes->size()-5) // capitalize first letters
 		{
-			Statusbar::msg("Processing...");
+			Statusbar::print("Processing...");
 			for (auto it = EditedSongs.begin(); it != EditedSongs.end(); ++it)
 				CapitalizeFirstLetters(**it);
-			Statusbar::msg("Done");
+			Statusbar::print("Done");
 		}
 		else if (id == TagTypes->size()-4) // lower all letters
 		{
-			Statusbar::msg("Processing...");
+			Statusbar::print("Processing...");
 			for (auto it = EditedSongs.begin(); it != EditedSongs.end(); ++it)
 				LowerAllLetters(**it);
-			Statusbar::msg("Done");
+			Statusbar::print("Done");
 		}
 		else if (id == TagTypes->size()-2) // reset
 		{
 			for (auto it = Tags->beginV(); it != Tags->endV(); ++it)
 				it->clearModifications();
-			Statusbar::msg("Changes reset");
+			Statusbar::print("Changes reset");
 		}
 		else if (id == TagTypes->size()-1) // save
 		{
 			bool success = 1;
-			Statusbar::msg("Writing changes...");
+			Statusbar::print("Writing changes...");
 			for (auto it = EditedSongs.begin(); it != EditedSongs.end(); ++it)
 			{
-				Statusbar::msg("Writing tags in \"%s\"...", (*it)->getName().c_str());
+				Statusbar::printf("Writing tags in \"%1%\"...", (*it)->getName());
 				if (!Tags::write(**it))
 				{
-					const char msg[] = "Error while writing tags in \"%ls\"";
-					Statusbar::msg(msg, wideShorten(ToWString((*it)->getURI()), COLS-const_strlen(msg)).c_str());
+					const char msg[] = "Error while writing tags in \"%1%\"";
+					Statusbar::printf(msg, wideShorten((*it)->getURI(), COLS-const_strlen(msg)).c_str());
 					success = 0;
 					break;
 				}
 			}
 			if (success)
 			{
-				Statusbar::msg("Tags updated");
+				Statusbar::print("Tags updated");
 				TagTypes->setHighlightColor(Config.main_highlight_color);
 				TagTypes->reset();
 				w->refresh();

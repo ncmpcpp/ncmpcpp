@@ -128,8 +128,8 @@ void Browser::enterPressed()
 			MPD::SongList list;
 			Mpd.GetPlaylistContentNoInfo(item.name, vectorMoveInserter(list));
 			bool success = addSongsToPlaylist(list.begin(), list.end(), true, -1);
-			Statusbar::msg("Playlist \"%s\" loaded%s",
-				item.name.c_str(), withErrors(success)
+			Statusbar::printf("Playlist \"%1%\" loaded%2%",
+				item.name, withErrors(success)
 			);
 		}
 	}
@@ -164,7 +164,7 @@ void Browser::spacePressed()
 			{
 				MPD::SongList list;
 				MPD::ItemList items;
-				Statusbar::msg("Scanning directory \"%s\"...", item.name.c_str());
+				Statusbar::printf("Scanning directory \"%1%\"...", item.name);
 				myBrowser->GetLocalDirectory(items, item.name, 1);
 				list.reserve(items.size());
 				for (MPD::ItemList::const_iterator it = items.begin(); it != items.end(); ++it)
@@ -177,8 +177,8 @@ void Browser::spacePressed()
 				Mpd.Add(item.name);
 				success = true;
 			}
-			Statusbar::msg("Directory \"%s\" added%s",
-				item.name.c_str(), withErrors(success)
+			Statusbar::printf("Directory \"%1%\" added%2%",
+				item.name, withErrors(success)
 			);
 			break;
 		}
@@ -190,7 +190,7 @@ void Browser::spacePressed()
 		case itPlaylist:
 		{
 			Mpd.LoadPlaylist(item.name);
-			Statusbar::msg("Playlist \"%s\" loaded", item.name.c_str());
+			Statusbar::printf("Playlist \"%1%\" loaded", item.name);
 			break;
 		}
 	}
@@ -517,8 +517,8 @@ void Browser::ClearDirectory(const std::string &path) const
 	std::for_each(fs::directory_iterator(dir), fs::directory_iterator(), [&](fs::directory_entry &e) {
 		if (!fs::is_symlink(e) && fs::is_directory(e))
 			ClearDirectory(e.path().native());
-		const char msg[] = "Deleting \"%ls\"...";
-		Statusbar::msg(msg, wideShorten(ToWString(e.path().native()), COLS-const_strlen(msg)).c_str());
+		const char msg[] = "Deleting \"%1%\"...";
+		Statusbar::printf(msg, wideShorten(e.path().native(), COLS-const_strlen(msg)));
 		fs::remove(e.path());
 	});
 }
@@ -527,12 +527,14 @@ void Browser::ChangeBrowseMode()
 {
 	if (Mpd.GetHostname()[0] != '/')
 	{
-		Statusbar::msg("For browsing local filesystem connection to MPD via UNIX Socket is required");
+		Statusbar::print("For browsing local filesystem connection to MPD via UNIX Socket is required");
 		return;
 	}
 	
 	itsBrowseLocally = !itsBrowseLocally;
-	Statusbar::msg("Browse mode: %s", itsBrowseLocally ? "Local filesystem" : "MPD database");
+	Statusbar::printf("Browse mode: %1%",
+		itsBrowseLocally ? "Local filesystem" : "MPD database"
+	);
 	itsBrowsedDir = itsBrowseLocally ? Config.GetHomeDirectory() : "/";
 	if (itsBrowseLocally && *itsBrowsedDir.rbegin() == '/')
 		itsBrowsedDir.resize(itsBrowsedDir.length()-1);

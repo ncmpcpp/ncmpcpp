@@ -80,7 +80,7 @@ void Clock::switchTo()
 	size_t x_offset, width;
 	getWindowResizeParams(x_offset, width, false);
 	if (Width > width || Height > MainHeight)
-		Statusbar::msg("Screen is too small to display clock");
+		Statusbar::print("Screen is too small to display clock");
 	else
 	{
 		SwitchTo::execute(this);

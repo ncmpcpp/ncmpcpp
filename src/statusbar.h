@@ -21,6 +21,8 @@
 #ifndef NCMPCPP_STATUSBAR_H
 #define NCMPCPP_STATUSBAR_H
 
+#include <boost/format.hpp>
+#include "settings.h"
 #include "gcc.h"
 #include "interfaces.h"
 #include "window.h"
@@ -52,18 +54,12 @@ void unlock();
 /// @return true if statusbar is unlocked
 bool isUnlocked();
 
-/// tries to clear current message put there using Statusbar::msg if there is any
+/// tries to clear current message put there using Statusbar::printf if there is any
 void tryRedraw();
 
 /// clears statusbar and move cursor to beginning of line
 /// @return window object that represents statusbar
 NC::Window &put();
-
-/// displays message in statusbar for period of time set in configuration file
-void msg(const char *format, ...) GNUC_PRINTF(1, 2);
-
-/// displays message in statusbar for given period of time
-void msg(int time, const char *format, ...) GNUC_PRINTF(2, 3);
 
 namespace Helpers {//
 
@@ -95,6 +91,43 @@ private:
 	std::string m_s;
 };
 
+}
+
+/// displays message in statusbar for a given period of time
+void print(int time, const std::string &message);
+
+/// displays message in statusbar for period of time set in configuration file
+inline void print(const std::string &message)
+{
+	print(Config.message_delay_time, message);
+}
+
+/// displays formatted message in statusbar for period of time set in configuration file
+template <typename FormatT>
+void printf(FormatT &&fmt)
+{
+	print(Config.message_delay_time, boost::format(std::forward<FormatT>(fmt)).str());
+}
+template <typename FormatT, typename ArgT, typename... Args>
+void printf(FormatT &&fmt, ArgT &&arg, Args&&... args)
+{
+	printf(boost::format(std::forward<FormatT>(fmt)) % std::forward<ArgT>(arg),
+		std::forward<Args>(args)...
+	);
+}
+
+/// displays formatted message in statusbar for a given period of time
+template <typename FormatT>
+void printf(int time, FormatT &&fmt)
+{
+	print(time, boost::format(std::forward<FormatT>(fmt)).str());
+}
+template <typename FormatT, typename ArgT, typename... Args>
+void printf(int time, FormatT &&fmt, ArgT &&arg, Args&&... args)
+{
+	printf(time, boost::format(std::forward<FormatT>(fmt)) % std::forward<ArgT>(arg),
+		std::forward<Args>(args)...
+	);
 }
 
 }

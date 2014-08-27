@@ -19,6 +19,7 @@
  ***************************************************************************/
 
 #include <boost/locale/encoding.hpp>
+#include <cassert>
 #include "utility/wide_string.h"
 
 std::string ToString(std::wstring ws)
@@ -34,10 +35,8 @@ std::wstring ToWString(std::string s)
 size_t wideLength(const std::wstring &ws)
 {
 	int len = wcswidth(ws.c_str(), -1);
-	if (len < 0)
-		return ws.length();
-	else
-		return len;
+	assert(len >= 0);
+	return len;
 }
 
 void wideCut(std::wstring &ws, size_t max_length)

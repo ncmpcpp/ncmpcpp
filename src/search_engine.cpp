@@ -169,7 +169,7 @@ void SearchEngine::enterPressed()
 	else if (option == SearchButton)
 	{
 		w.showAll();
-		Statusbar::msg("Searching...");
+		Statusbar::print("Searching...");
 		if (w.size() > StaticOptions)
 			Prepare();
 		Search();
@@ -184,7 +184,7 @@ void SearchEngine::enterPressed()
 			w.at(ResetButton+2).value().mkBuffer() << Config.color1 << "Search results: " << Config.color2 << "Found " << found << (found > 1 ? " songs" : " song") << NC::Color::Default;
 			w.insertSeparator(ResetButton+3);
 			markSongsInPlaylist(proxySongList());
-			Statusbar::msg("Searching finished");
+			Statusbar::print("Searching finished");
 			if (Config.block_search_constraints_change)
 				for (size_t i = 0; i < StaticOptions-4; ++i)
 					w.at(i).setInactive(true);
@@ -192,7 +192,7 @@ void SearchEngine::enterPressed()
 			w.scroll(NC::Scroll::Down);
 		}
 		else
-			Statusbar::msg("No results found");
+			Statusbar::print("No results found");
 	}
 	else if (option == ResetButton)
 	{
@@ -391,7 +391,7 @@ void SearchEngine::reset()
 		itsConstraints[i].clear();
 	w.reset();
 	Prepare();
-	Statusbar::msg("Search state reset");
+	Statusbar::print("Search state reset");
 }
 
 void SearchEngine::Search()

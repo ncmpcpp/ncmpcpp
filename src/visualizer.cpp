@@ -134,7 +134,9 @@ void Visualizer::spacePressed()
 {
 #	ifdef HAVE_FFTW3_H
 	Config.visualizer_use_wave = !Config.visualizer_use_wave;
-	Statusbar::msg("Visualization type: %s", Config.visualizer_use_wave ? "Sound wave" : "Frequency spectrum");
+	Statusbar::printf("Visualization type: %1%",
+		Config.visualizer_use_wave ? "Sound wave" : "Frequency spectrum"
+	);
 #	endif // HAVE_FFTW3_H
 }
 
@@ -202,7 +204,9 @@ void Visualizer::DrawFrequencySpectrum(int16_t *buf, ssize_t samples, size_t y_o
 void Visualizer::SetFD()
 {
 	if (m_fifo < 0 && (m_fifo = open(Config.visualizer_fifo_path.c_str(), O_RDONLY | O_NONBLOCK)) < 0)
-		Statusbar::msg("Couldn't open \"%s\" for reading PCM data: %s", Config.visualizer_fifo_path.c_str(), strerror(errno));
+		Statusbar::printf("Couldn't open \"%1%\" for reading PCM data: %2%",
+			Config.visualizer_fifo_path, strerror(errno)
+		);
 }
 
 void Visualizer::ResetFD()
@@ -222,7 +226,7 @@ void Visualizer::FindOutputID()
 			++idx;
 		});
 		if (m_output_id == -1)
-			Statusbar::msg("There is no output named \"%s\"", Config.visualizer_output_name.c_str());
+			Statusbar::printf("There is no output named \"%s\"", Config.visualizer_output_name);
 	}
 }
 

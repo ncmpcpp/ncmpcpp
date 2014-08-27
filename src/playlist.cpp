@@ -239,7 +239,7 @@ bool Playlist::isFiltered()
 {
 	if (w.isFiltered())
 	{
-		Statusbar::msg("Function currently unavailable due to filtered playlist");
+		Statusbar::print("Function currently unavailable due to filtered playlist");
 		return true;
 	}
 	return false;
@@ -247,14 +247,14 @@ bool Playlist::isFiltered()
 
 void Playlist::Reverse()
 {
-	Statusbar::msg("Reversing playlist order...");
+	Statusbar::print("Reversing playlist order...");
 	auto begin = w.begin(), end = w.end();
 	std::tie(begin, end) = getSelectedRange(begin, end);
 	Mpd.StartCommandsList();
 	for (--end; begin < end; ++begin, --end)
 		Mpd.Swap(begin->value().getPosition(), end->value().getPosition());
 	Mpd.CommitCommandsList();
-	Statusbar::msg("Playlist reversed");
+	Statusbar::print("Playlist reversed");
 }
 
 void Playlist::EnableHighlighting()
@@ -319,7 +319,7 @@ void Playlist::SetSelectedItemsPriority(int prio)
 	for (auto it = list.begin(); it != list.end(); ++it)
 		Mpd.SetPriority((*it)->value(), prio);
 	Mpd.CommitCommandsList();
-	Statusbar::msg("Priority set");
+	Statusbar::print("Priority set");
 }
 
 void Playlist::setStatus(MPD::Status status)

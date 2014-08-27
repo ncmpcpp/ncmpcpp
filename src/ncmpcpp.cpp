@@ -60,7 +60,7 @@ namespace
 	{
 		if (sig == SIGPIPE)
 		{
-			Statusbar::msg("SIGPIPE (broken pipe signal) received");
+			Statusbar::print("SIGPIPE (broken pipe signal) received");
 		}
 		else if (sig == SIGWINCH)
 		{
@@ -220,7 +220,7 @@ int main(int argc, char **argv)
 					myVisualizer->FindOutputID();
 #					endif // ENABLE_VISUALIZER
 					
-					Statusbar::msg("Connected to %s", Mpd.GetHostname().c_str());
+					Statusbar::printf("Connected to \"%1%\"", Mpd.GetHostname());
 				}
 				catch (MPD::ClientError &e)
 				{
@@ -260,11 +260,11 @@ int main(int argc, char **argv)
 			}
 			catch (ConversionError &e)
 			{
-				Statusbar::msg("Couldn't convert value '%s' to target type", e.value().c_str());
+				Statusbar::printf("Couldn't convert value \"%1%\" to target type", e.value());
 			}
 			catch (OutOfBounds &e)
 			{
-				Statusbar::msg("%s", e.errorMessage().c_str());
+				Statusbar::print(e.errorMessage());
 			}
 			
 			if (myScreen == myPlaylist)
