@@ -120,9 +120,12 @@ void TinyTagEditor::enterPressed()
 		std::string extension = filename.substr(dot);
 		filename = filename.substr(0, dot);
 		std::string new_name = Global::wFooter->getString(filename);
-		itsEdited.setNewName(new_name + extension);
-		w.at(option).value().clear();
-		w.at(option).value() << NC::Format::Bold << "Filename:" << NC::Format::NoBold << ' ' << (itsEdited.getNewName().empty() ? itsEdited.getName() : itsEdited.getNewName());
+		if (!new_name.empty())
+		{
+			itsEdited.setNewName(new_name + extension);
+			w.at(option).value().clear();
+			w.at(option).value() << NC::Format::Bold << "Filename:" << NC::Format::NoBold << ' ' << (itsEdited.getNewName().empty() ? itsEdited.getName() : itsEdited.getNewName());
+		}
 	}
 	Statusbar::unlock();
 	
