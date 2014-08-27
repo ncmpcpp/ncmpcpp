@@ -252,12 +252,12 @@ void setWindowsDimensions()
 	FooterHeight = Config.statusbar_visibility ? 2 : 1;
 }
 
-bool askYesNoQuestion(const std::string &question, void (*callback)())
+bool askYesNoQuestion(const boost::format &fmt, void (*callback)())
 {
 	using Global::wFooter;
 	
 	Statusbar::lock();
-	Statusbar::put() << question << " [" << NC::Format::Bold << 'y' << NC::Format::NoBold << '/' << NC::Format::Bold << 'n' << NC::Format::NoBold << "]";
+	Statusbar::put() << fmt.str() << " [" << NC::Format::Bold << 'y' << NC::Format::NoBold << '/' << NC::Format::Bold << 'n' << NC::Format::NoBold << "]";
 	wFooter->refresh();
 	int answer = 0;
 	do
@@ -660,18 +660,15 @@ bool DeleteBrowserItems::canBeRun() const
 
 void DeleteBrowserItems::run()
 {
-	std::string question;
+	boost::format question;
 	if (hasSelected(myBrowser->main().begin(), myBrowser->main().end()))
-		question = "Delete selected items?";
+		question = boost::format("Delete selected items?");
 	else
 	{
 		MPD::Item &item = myBrowser->main().current().value();
 		std::string iname = item.type == MPD::itSong ? item.song->getName() : item.name;
-		question = "Delete ";
-		question += itemTypeToString(item.type);
-		question += " \"";
-		question += ToString(wideShorten(ToWString(iname), COLS-question.size()-10));
-		question += "\"?";
+		question = boost::format("Delete %1% \"%2%\"?")
+			% itemTypeToString(item.type) % wideShorten(iname, COLS-question.size()-10);
 	}
 	bool yes = askYesNoQuestion(question, Status::trace);
 	if (yes)
@@ -715,15 +712,12 @@ bool DeleteStoredPlaylist::canBeRun() const
 
 void DeleteStoredPlaylist::run()
 {
-	std::string question;
+	boost::format question;
 	if (hasSelected(myPlaylistEditor->Playlists.begin(), myPlaylistEditor->Playlists.end()))
-		question = "Delete selected playlists?";
+		question = boost::format("Delete selected playlists?");
 	else
-	{
-		question = "Delete playlist \"";
-		question += ToString(wideShorten(ToWString(myPlaylistEditor->Playlists.current().value()), COLS-question.size()-10));
-		question += "\"?";
-	}
+		question = boost::format("Delete playlist \"%1%\"?")
+			% wideShorten(myPlaylistEditor->Playlists.current().value(), COLS-question.size()-10);
 	bool yes = askYesNoQuestion(question, Status::trace);
 	if (yes)
 	{
@@ -793,7 +787,10 @@ void SavePlaylist::run()
 			{
 				if (e.code() == MPD_SERVER_ERROR_EXIST)
 				{
-					bool yes = askYesNoQuestion("Playlist \"" + playlist_name + "\" already exists, overwrite?", Status::trace);
+					bool yes = askYesNoQuestion(
+						boost::format("Playlist \"%1%\" already exists, overwrite?") % playlist_name,
+						Status::trace
+					);
 					if (yes)
 					{
 						Mpd.DeletePlaylist(playlist_name);
@@ -1711,7 +1708,10 @@ void CropPlaylist::run()
 	std::string playlist = myPlaylistEditor->Playlists.current().value();
 	bool yes = true;
 	if (Config.ask_before_clearing_main_playlist)
-		yes = askYesNoQuestion("Do you really want to crop playlist \"" + playlist + "\"?", Status::trace);
+		yes = askYesNoQuestion(
+			boost::format("Do you really want to crop playlist \"%1%\"?") % playlist,
+			Status::trace
+		);
 	if (yes)
 	{
 		auto delete_fun = boost::bind(&MPD::Connection::PlaylistDelete, _1, playlist, _2);
@@ -1748,7 +1748,10 @@ void ClearPlaylist::run()
 	std::string playlist = myPlaylistEditor->Playlists.current().value();
 	bool yes = true;
 	if (Config.ask_before_clearing_main_playlist)
-		yes = askYesNoQuestion("Do you really want to clear playlist \"" + playlist + "\"?", Status::trace);
+		yes = askYesNoQuestion(
+			boost::format("Do you really want to clear playlist \"%1%\"?") % playlist,
+			Status::trace
+		);
 	if (yes)
 	{
 		auto delete_fun = boost::bind(&MPD::Connection::PlaylistDelete, _1, playlist, _2);

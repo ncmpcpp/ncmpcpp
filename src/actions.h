@@ -21,6 +21,7 @@
 #ifndef NCMPCPP_ACTIONS_H
 #define NCMPCPP_ACTIONS_H
 
+#include <boost/format.hpp>
 #include <map>
 #include <string>
 #include "window.h"
@@ -66,7 +67,12 @@ void setResizeFlags();
 void resizeScreen(bool reload_main_window);
 void setWindowsDimensions();
 
-bool askYesNoQuestion(const std::string &question, void (*callback)());
+bool askYesNoQuestion(const boost::format &question, void (*callback)());
+inline bool askYesNoQuestion(const std::string &question, void (*callback)())
+{
+	return askYesNoQuestion(boost::format(question), callback);
+}
+
 bool isMPDMusicDirSet();
 
 extern bool OriginalStatusbarVisibility;
