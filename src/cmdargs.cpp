@@ -43,7 +43,6 @@
 
 void ParseArgv(int argc, char **argv)
 {
-	std::string now_playing_format = "{{{(%l) }{{%a - }%t}}|{%f}}";
 	for (int i = 1; i < argc; ++i)
 	{
 		if (!strcmp(argv[i], "-h") || !strcmp(argv[i], "--host"))
