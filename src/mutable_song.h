@@ -58,8 +58,8 @@ struct MutableSong : public Song
 	void setDisc(const std::string &value, unsigned idx = 0);
 	void setComment(const std::string &value, unsigned idx = 0);
 	
-	const std::string &getNewURI() const;
-	void setNewURI(const std::string &value);
+	const std::string &getNewName() const;
+	void setNewName(const std::string &value);
 	
 	virtual unsigned getDuration() const OVERRIDE;
 	virtual time_t getMTime() const OVERRIDE;
@@ -105,7 +105,7 @@ private:
 		return result;
 	}
 	
-	std::string m_uri;
+	std::string m_name;
 	time_t m_mtime;
 	unsigned m_duration;
 	std::map<Tag, std::string> m_tags;

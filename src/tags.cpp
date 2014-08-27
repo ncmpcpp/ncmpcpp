@@ -299,12 +299,12 @@ bool write(MPD::MutableSong &s)
 	if (!f.save())
 		return false;
 	
-	if (!s.getNewURI().empty())
+	if (!s.getNewName().empty())
 	{
 		std::string new_name;
 		if (s.isFromDatabase())
 			new_name += Config.mpd_music_dir;
-		new_name += s.getDirectory() + "/" + s.getNewURI();
+		new_name += s.getDirectory() + "/" + s.getNewName();
 		if (std::rename(old_name.c_str(), new_name.c_str()) == 0 && !s.isFromDatabase())
 		{
 			// FIXME

@@ -398,7 +398,7 @@ void TagEditor::enterPressed()
 						success = 0;
 					}
 					if (!FParserUsePreview)
-						s.setNewURI(new_file + extension);
+						s.setNewName(new_file + extension);
 					*FParserPreview << file << Config.color2 << " -> " << NC::Color::End;
 					if (new_file.empty())
 						*FParserPreview << Config.empty_tags_color << Config.empty_tag << NC::Color::End;
@@ -523,7 +523,7 @@ void TagEditor::enterPressed()
 			else if (w == Tags)
 			{
 				MPD::MutableSong &s = Tags->current().value();
-				std::string old_name = s.getNewURI().empty() ? s.getName() : s.getNewURI();
+				std::string old_name = s.getNewName().empty() ? s.getName() : s.getNewName();
 				size_t last_dot = old_name.rfind(".");
 				std::string extension = old_name.substr(last_dot);
 				old_name = old_name.substr(0, last_dot);
@@ -531,8 +531,8 @@ void TagEditor::enterPressed()
 				Statusbar::put() << NC::Format::Bold << "New filename: " << NC::Format::NoBold;
 				std::string new_name = wFooter->getString(old_name);
 				Statusbar::unlock();
-				if (!new_name.empty() && new_name != old_name)
-					s.setNewURI(new_name + extension);
+				if (!new_name.empty())
+					s.setNewName(new_name + extension);
 				Tags->scroll(NC::Scroll::Down);
 			}
 		}
@@ -1203,7 +1203,7 @@ std::string SongToString(const MPD::MutableSong &s)
 	if (i < 11)
 		result = (s.*SongInfo::Tags[i].Get)(0);
 	else if (i == 12)
-		result = s.getNewURI().empty() ? s.getName() : s.getName() + " -> " + s.getNewURI();
+		result = s.getNewName().empty() ? s.getName() : s.getName() + " -> " + s.getNewName();
 	return result.empty() ? Config.empty_tag : result;
 }
 

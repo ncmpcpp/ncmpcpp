@@ -115,14 +115,14 @@ void TinyTagEditor::enterPressed()
 	else if (option == 20)
 	{
 		Statusbar::put() << NC::Format::Bold << "Filename: " << NC::Format::NoBold;
-		std::string filename = itsEdited.getNewURI().empty() ? itsEdited.getName() : itsEdited.getNewURI();
+		std::string filename = itsEdited.getNewName().empty() ? itsEdited.getName() : itsEdited.getNewName();
 		size_t dot = filename.rfind(".");
 		std::string extension = filename.substr(dot);
 		filename = filename.substr(0, dot);
 		std::string new_name = Global::wFooter->getString(filename);
-		itsEdited.setNewURI(new_name + extension);
+		itsEdited.setNewName(new_name + extension);
 		w.at(option).value().clear();
-		w.at(option).value() << NC::Format::Bold << "Filename:" << NC::Format::NoBold << ' ' << (itsEdited.getNewURI().empty() ? itsEdited.getName() : itsEdited.getNewURI());
+		w.at(option).value() << NC::Format::Bold << "Filename:" << NC::Format::NoBold << ' ' << (itsEdited.getNewName().empty() ? itsEdited.getName() : itsEdited.getNewName());
 	}
 	Statusbar::unlock();
 	

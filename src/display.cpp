@@ -371,12 +371,12 @@ void Display::Tags(NC::Menu<MPD::MutableSong> &menu)
 	}
 	else if (i == 12)
 	{
-		if (s.getNewURI().empty())
+		if (s.getNewName().empty())
 			menu << Charset::utf8ToLocale(s.getName());
 		else
 			menu << Charset::utf8ToLocale(s.getName())
 			     << Config.color2 << " -> " << NC::Color::End
-			     << Charset::utf8ToLocale(s.getNewURI());
+			     << Charset::utf8ToLocale(s.getNewName());
 	}
 }
 #endif // HAVE_TAGLIB_H
