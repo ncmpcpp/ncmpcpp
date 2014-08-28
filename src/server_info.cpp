@@ -74,7 +74,6 @@ std::wstring ServerInfo::title()
 
 void ServerInfo::update()
 {
-	Statusbar::printf("%1%, %2%", Global::Timer, m_timer);
 	if (Global::Timer - m_timer < boost::posix_time::seconds(1))
 		return;
 	m_timer = Global::Timer;
