@@ -99,8 +99,8 @@ std::wstring Playlist::title()
 
 void Playlist::update()
 {
-	if (Config.playlist_disable_highlight_delay.time_duration::seconds() > 0
-	&&  w.isHighlighted()
+	if (w.isHighlighted()
+	&&  Config.playlist_disable_highlight_delay.time_duration::seconds() > 0
 	&&  Global::Timer - itsTimer > Config.playlist_disable_highlight_delay)
 	{
 		w.setHighlighting(false);
