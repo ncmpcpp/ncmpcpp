@@ -18,11 +18,12 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
+#include <boost/filesystem/operations.hpp>
 #include <boost/program_options.hpp>
 #include <iostream>
 
 #include "bindings.h"
-#include "cmdargs.h"
+#include "configuration.h"
 #include "config.h"
 #include "mpdpp.h"
 #include "settings.h"
@@ -36,25 +37,25 @@ namespace {
 
 const char *env_home;
 
-void replace_tilda_with_home(std::string &s)
+}
+
+void expand_home(std::string &path)
 {
-	if (!s.empty() && s[0] == '~')
-		s.replace(0, 1, env_home);
+	if (!path.empty() && path[0] == '~')
+		path.replace(0, 1, env_home);
 }
 
-}
-
-bool ParseArguments(int argc, char **argv)
+bool configure(int argc, char **argv)
 {
 	std::string bindings_path, config_path;
 
-	po::options_description desc("Options");
-	desc.add_options()
+	po::options_description options("Options");
+	options.add_options()
 		("host,h", po::value<std::string>()->default_value("localhost"), "connect to server at host")
 		("port,p", po::value<int>()->default_value(6600), "connect to server at port")
 		("config,c", po::value<std::string>(&config_path)->default_value("~/.ncmpcpp/config"), "specify configuration file")
 		("bindigs,b", po::value<std::string>(&bindings_path)->default_value("~/.ncmpcpp/bindings"), "specify bindings file")
-		("screen,s", po::value<std::string>(), "specify the startup screen")
+		("screen,s", po::value<std::string>(), "specify initial screen")
 		("help,?", "show help message")
 		("version,v", "display version information")
 	;
@@ -62,11 +63,11 @@ bool ParseArguments(int argc, char **argv)
 	po::variables_map vm;
 	try
 	{
-		po::store(po::parse_command_line(argc, argv, desc), vm);
+		po::store(po::parse_command_line(argc, argv, options), vm);
 
 		if (vm.count("help"))
 		{
-			cout << "Usage: " << argv[0] << " [options]...\n" << desc << "\n";
+			cout << "Usage: " << argv[0] << " [options]...\n" << options << "\n";
 			return false;
 		}
 		if (vm.count("version"))
@@ -119,30 +120,33 @@ bool ParseArguments(int argc, char **argv)
 
 		po::notify(vm);
 
+		// get home directory
 		env_home = getenv("HOME");
 		if (env_home == nullptr)
 		{
 			cerr << "Fatal error: HOME environment variable is not defined\n";
 			return false;
 		}
-		replace_tilda_with_home(config_path);
-		replace_tilda_with_home(bindings_path);
+		expand_home(config_path);
+		expand_home(bindings_path);
 
 		// read configuration
-		Config.SetDefaults();
-		Config.Read(config_path);
-		Config.GenerateColumns();
+		if (Config.read(config_path) == false)
+			exit(1);
 
 		// read bindings
 		if (Bindings.read(bindings_path) == false)
-			return false;
+			exit(1);
 		Bindings.generateDefaults();
+
+		// create directories
+		boost::filesystem::create_directory(Config.ncmpcpp_directory);
+		boost::filesystem::create_directory(Config.lyrics_directory);
 
 		// try to get MPD connection details from environment variables
 		// as they take precedence over these from the configuration.
 		auto env_host = getenv("MPD_HOST");
 		auto env_port = getenv("MPD_PORT");
-
 		if (env_host != nullptr)
 			Mpd.SetHostname(env_host);
 		if (env_port != nullptr)
@@ -150,10 +154,11 @@ bool ParseArguments(int argc, char **argv)
 
 		// if MPD connection details are provided as command line
 		// parameters, use them as their priority is the highest.
-		if (vm.count("host"))
+		if (!vm["host"].defaulted())
 			Mpd.SetHostname(vm["host"].as<std::string>());
-		if (vm.count("port"))
+		if (!vm["port"].defaulted())
 			Mpd.SetPort(vm["port"].as<int>());
+		Mpd.SetTimeout(Config.mpd_connection_timeout);
 
 		// custom startup screen
 		if (vm.count("screen"))
@@ -162,15 +167,15 @@ bool ParseArguments(int argc, char **argv)
 			Config.startup_screen_type = stringtoStartupScreenType(screen);
 			if (Config.startup_screen_type == ScreenType::Unknown)
 			{
-				std::cerr << "Invalid screen: " << screen << "\n";
-				return false;
+				std::cerr << "Unknown screen: " << screen << "\n";
+				exit(1);
 			}
 		}
 	}
 	catch (std::exception &e)
 	{
-		cerr << "Error while parsing command line options: " << e.what() << "\n";
-		return false;
+		cerr << "Error while processing configuration: " << e.what() << "\n";
+		exit(1);
 	}
 	return true;
 }

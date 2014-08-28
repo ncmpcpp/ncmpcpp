@@ -63,18 +63,19 @@ template <typename CharT> class BasicBuffer
 			return m_id < rhs.m_id;
 		}
 		
-		friend Window &operator<<(Window &w, const Property &p)
+		template <typename OutputStreamT>
+		friend OutputStreamT &operator<<(OutputStreamT &os, const Property &p)
 		{
 			switch (p.m_type)
 			{
 				case Type::Color:
-					w << p.m_color;
+					os << p.m_color;
 					break;
 				case Type::Format:
-					w << p.m_format;
+					os << p.m_format;
 					break;
 			}
-			return w;
+			return os;
 		}
 		
 	private:
@@ -89,8 +90,12 @@ public:
 	typedef std::basic_string<CharT> StringType;
 	typedef std::set<Property> Properties;
 	
-	BasicBuffer() { }
-	
+	template <typename... Args>
+	BasicBuffer(Args... args)
+	{
+		construct(std::forward<Args>(args)...);
+	}
+
 	const StringType &str() const { return m_string; }
 	const Properties &properties() const { return m_properties; }
 	
@@ -183,6 +188,14 @@ public:
 	}
 	
 private:
+	void construct() { }
+	template <typename ArgT, typename... Args>
+	void construct(ArgT &&arg, Args... args)
+	{
+		*this << std::forward<ArgT>(arg);
+		construct(std::forward<Args>(args)...);
+	}
+
 	StringType m_string;
 	Properties m_properties;
 };
@@ -190,11 +203,11 @@ private:
 typedef BasicBuffer<char> Buffer;
 typedef BasicBuffer<wchar_t> WBuffer;
 
-template <typename CharT>
-Window &operator<<(Window &w, const BasicBuffer<CharT> &buffer)
+template <typename OutputStreamT, typename CharT>
+OutputStreamT &operator<<(OutputStreamT &os, const BasicBuffer<CharT> &buffer)
 {
 	if (buffer.properties().empty())
-		w << buffer.str();
+		os << buffer.str();
 	else
 	{
 		auto &s = buffer.str();
@@ -203,14 +216,14 @@ Window &operator<<(Window &w, const BasicBuffer<CharT> &buffer)
 		for (size_t i = 0; i < s.size(); ++i)
 		{
 			for (; p != ps.end() && p->position() == i; ++p)
-				w << *p;
-			w << s[i];
+				os << *p;
+			os << s[i];
 		}
 		// load remaining properties
 		for (; p != ps.end(); ++p)
-			w << *p;
+			os << *p;
 	}
-	return w;
+	return os;
 }
 
 }

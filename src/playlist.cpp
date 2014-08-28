@@ -53,16 +53,21 @@ bool playlistEntryMatcher(const boost::regex &rx, const MPD::Song &s);
 Playlist::Playlist()
 : itsTotalLength(0), itsRemainingTime(0), itsScrollBegin(0), m_old_playlist_version(0)
 {
-	w = NC::Menu<MPD::Song>(0, MainStartY, COLS, MainHeight, Config.columns_in_playlist && Config.titles_visibility ? Display::Columns(COLS) : "", Config.main_color, NC::Border::None);
+	w = NC::Menu<MPD::Song>(0, MainStartY, COLS, MainHeight, Config.playlist_display_mode == DisplayMode::Columns && Config.titles_visibility ? Display::Columns(COLS) : "", Config.main_color, NC::Border::None);
 	w.cyclicScrolling(Config.use_cyclic_scrolling);
 	w.centeredCursor(Config.centered_cursor);
 	w.setHighlightColor(Config.main_highlight_color);
 	w.setSelectedPrefix(Config.selected_item_prefix);
 	w.setSelectedSuffix(Config.selected_item_suffix);
-	if (Config.columns_in_playlist)
-		w.setItemDisplayer(boost::bind(Display::SongsInColumns, _1, proxySongList()));
-	else
-		w.setItemDisplayer(boost::bind(Display::Songs, _1, proxySongList(), Config.song_list_format));
+	switch (Config.playlist_display_mode)
+	{
+		case DisplayMode::Classic:
+			w.setItemDisplayer(boost::bind(Display::Songs, _1, proxySongList(), Config.song_list_format));
+			break;
+		case DisplayMode::Columns:
+			w.setItemDisplayer(boost::bind(Display::SongsInColumns, _1, proxySongList()));
+			break;
+	}
 }
 
 void Playlist::switchTo()
@@ -80,11 +85,18 @@ void Playlist::resize()
 	w.resize(width, MainHeight);
 	w.moveTo(x_offset, MainStartY);
 
-	if (Config.columns_in_playlist && Config.titles_visibility)
-		w.setTitle(Display::Columns(w.getWidth()));
-	else
-		w.setTitle("");
-	
+	switch (Config.playlist_display_mode)
+	{
+		case DisplayMode::Columns:
+			if (Config.titles_visibility)
+			{
+				w.setTitle(Display::Columns(w.getWidth()));
+				break;
+			}
+		case DisplayMode::Classic:
+			w.setTitle("");
+	}
+
 	hasToBeResized = 0;
 }
 
@@ -93,7 +105,7 @@ std::wstring Playlist::title()
 	std::wstring result = L"Playlist ";
 	if (ReloadTotalLength || ReloadRemaining)
 		itsBufferedStats = TotalLength();
-	result += Scroller(ToWString(itsBufferedStats), itsScrollBegin, COLS-result.length()-(Config.new_design ? 2 : Global::VolumeState.length()));
+	result += Scroller(ToWString(itsBufferedStats), itsScrollBegin, COLS-result.length()-(Config.design == Design::Alternative ? 2 : Global::VolumeState.length()));
 	return result;
 }
 
@@ -373,10 +385,14 @@ namespace {//
 std::string songToString(const MPD::Song &s)
 {
 	std::string result;
-	if (Config.columns_in_playlist)
-		result = s.toString(Config.song_in_columns_to_string_format, Config.tags_separator);
-	else
-		result = s.toString(Config.song_list_format_dollar_free, Config.tags_separator);
+	switch (Config.playlist_display_mode)
+	{
+		case DisplayMode::Classic:
+			result = s.toString(Config.song_list_format_dollar_free, Config.tags_separator);
+			break;
+		case DisplayMode::Columns:
+			result = s.toString(Config.song_in_columns_to_string_format, Config.tags_separator);
+	}
 	return result;
 }
 

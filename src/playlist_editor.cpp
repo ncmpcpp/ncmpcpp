@@ -77,10 +77,15 @@ PlaylistEditor::PlaylistEditor()
 	Content.centeredCursor(Config.centered_cursor);
 	Content.setSelectedPrefix(Config.selected_item_prefix);
 	Content.setSelectedSuffix(Config.selected_item_suffix);
-	if (Config.columns_in_playlist_editor)
-		Content.setItemDisplayer(boost::bind(Display::SongsInColumns, _1, contentProxyList()));
-	else
-		Content.setItemDisplayer(boost::bind(Display::Songs, _1, contentProxyList(), Config.song_list_format));
+	switch (Config.playlist_editor_display_mode)
+	{
+		case DisplayMode::Classic:
+			Content.setItemDisplayer(boost::bind(Display::Songs, _1, contentProxyList(), Config.song_list_format));
+			break;
+		case DisplayMode::Columns:
+			Content.setItemDisplayer(boost::bind(Display::SongsInColumns, _1, contentProxyList()));
+			break;
+	}
 	
 	w = &Playlists;
 }
@@ -550,10 +555,15 @@ namespace {//
 std::string SongToString(const MPD::Song &s)
 {
 	std::string result;
-	if (Config.columns_in_playlist_editor)
-		result = s.toString(Config.song_in_columns_to_string_format, Config.tags_separator);
-	else
-		result = s.toString(Config.song_list_format_dollar_free, Config.tags_separator);
+	switch (Config.playlist_display_mode)
+	{
+		case DisplayMode::Classic:
+			result = s.toString(Config.song_list_format_dollar_free, Config.tags_separator);
+			break;
+		case DisplayMode::Columns:
+			result = s.toString(Config.song_in_columns_to_string_format, Config.tags_separator);
+			break;
+	}
 	return result;
 }
 

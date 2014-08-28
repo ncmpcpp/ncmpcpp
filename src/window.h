@@ -114,6 +114,9 @@ namespace NC {//
 /// Colors used by NCurses
 enum class Color { Default, Black, Red, Green, Yellow, Blue, Magenta, Cyan, White, End };
 
+std::ostream &operator<<(std::ostream &os, Color c);
+std::istream &operator>>(std::istream &is, Color &c);
+
 /// Format flags used by NCurses
 enum class Format {
 	None,
@@ -123,11 +126,18 @@ enum class Format {
 	AltCharset, NoAltCharset
 };
 
+std::ostream &operator<<(std::ostream &os, Format f);
+
 /// Available border colors for window
 enum class Border { None, Black, Red, Green, Yellow, Blue, Magenta, Cyan, White };
 
+std::ostream &operator<<(std::ostream &os, Border b);
+std::istream &operator>>(std::istream &is, Border &b);
+
 /// This indicates how much the window has to be scrolled
 enum class Scroll { Up, Down, PageUp, PageDown, Home, End };
+
+std::ostream &operator<<(std::ostream &os, Scroll s);
 
 /// Helper function that is invoked each time one will want
 /// to obtain string from Window::getString() function

@@ -18,50 +18,20 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
-#include <cstring>
-#include <iostream>
+#ifndef NCMPCPP_UTILITY_FUNCTIONAL_H
+#define NCMPCPP_UTILITY_FUNCTIONAL_H
 
-#include "global.h"
-#include "settings.h"
-#include "title.h"
-#include "utility/wide_string.h"
+#include <utility>
 
-#ifdef USE_PDCURSES
-void windowTitle(const std::string &) { }
-#else
-void windowTitle(const std::string &status)
+// identity function object
+struct id_
 {
-	if (strcmp(getenv("TERM"), "linux") && Config.set_window_title)
-		std::cout << "\033]0;" << status << "\7" << std::flush;
-}
-#endif // USE_PDCURSES
-
-void drawHeader()
-{
-	using Global::myScreen;
-	using Global::wHeader;
-	using Global::VolumeState;
-	
-	if (!Config.header_visibility)
-		return;
-	switch (Config.design)
+	template <typename ValueT>
+	constexpr auto operator()(ValueT &&v) const noexcept
+		-> decltype(std::forward<ValueT>(v))
 	{
-		case Design::Classic:
-			*wHeader << NC::XY(0, 0) << wclrtoeol << NC::Format::Bold << myScreen->title() << NC::Format::NoBold;
-			*wHeader << Config.volume_color;
-			*wHeader << NC::XY(wHeader->getWidth()-VolumeState.length(), 0) << VolumeState;
-			*wHeader << NC::Color::End;
-			break;
-		case Design::Alternative:
-			std::wstring title = myScreen->title();
-			*wHeader << NC::XY(0, 3) << wclrtoeol;
-			*wHeader << NC::Format::Bold << Config.alternative_ui_separator_color;
-			mvwhline(wHeader->raw(), 2, 0, 0, COLS);
-			mvwhline(wHeader->raw(), 4, 0, 0, COLS);
-			*wHeader << NC::XY((COLS-wideLength(title))/2, 3);
-			*wHeader << Config.header_color << title << NC::Color::End;
-			*wHeader << NC::Color::End << NC::Format::NoBold;
-			break;
+		return std::forward<ValueT>(v);
 	}
-	wHeader->refresh();
-}
+};
+
+#endif // NCMPCPP_UTILITY_FUNCTIONAL_H

@@ -119,7 +119,17 @@ void SearchEngine::resize()
 	getWindowResizeParams(x_offset, width);
 	w.resize(width, MainHeight);
 	w.moveTo(x_offset, MainStartY);
-	w.setTitle(Config.columns_in_search_engine && Config.titles_visibility ? Display::Columns(w.getWidth()) : "");
+	switch (Config.search_engine_display_mode)
+	{
+		case DisplayMode::Columns:
+			if (Config.titles_visibility)
+			{
+				w.setTitle(Display::Columns(w.getWidth()));
+				break;
+			}
+		case DisplayMode::Classic:
+			w.setTitle("");
+	}
 	hasToBeResized = 0;
 }
 
@@ -175,7 +185,7 @@ void SearchEngine::enterPressed()
 		Search();
 		if (w.back().value().isSong())
 		{
-			if (Config.columns_in_search_engine)
+			if (Config.search_engine_display_mode == DisplayMode::Columns)
 				w.setTitle(Config.titles_visibility ? Display::Columns(w.getWidth()) : "");
 			size_t found = w.size()-SearchEngine::StaticOptions;
 			found += 3; // don't count options inserted below
@@ -616,10 +626,15 @@ std::string SEItemToString(const SEItem &ei)
 	std::string result;
 	if (ei.isSong())
 	{
-		if (Config.columns_in_search_engine)
-			result = ei.song().toString(Config.song_in_columns_to_string_format, Config.tags_separator);
-		else
-			result = ei.song().toString(Config.song_list_format_dollar_free, Config.tags_separator);
+		switch (Config.search_engine_display_mode)
+		{
+			case DisplayMode::Classic:
+				result = ei.song().toString(Config.song_list_format_dollar_free, Config.tags_separator);
+				break;
+			case DisplayMode::Columns:
+				result = ei.song().toString(Config.song_in_columns_to_string_format, Config.tags_separator);
+				break;
+		}
 	}
 	else
 		result = ei.buffer().str();

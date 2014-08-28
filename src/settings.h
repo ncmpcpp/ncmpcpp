@@ -26,11 +26,10 @@
 #include <cassert>
 #include <vector>
 #include <mpd/client.h>
-#include "actions.h"
+
+#include "enums.h"
 #include "screen_type.h"
 #include "strbuffer.h"
-
-enum SortMode { smName, smMTime, smCustomFormat };
 
 struct Column
 {
@@ -48,25 +47,20 @@ struct Column
 
 struct Configuration
 {
-	Configuration();
+	Configuration()
+	: playlist_disable_highlight_delay(0), visualizer_sync_interval(0)
+	{ }
 	
-	const std::string &GetHomeDirectory();
-	void CheckForCommandLineConfigFilePath(char **argv, int argc);
-	
-	void SetDefaults();
-	void Read(const std::string& config_path);
-	void GenerateColumns();
+	bool read(const std::string &config_path);
 	
 	std::string ncmpcpp_directory;
 	std::string lyrics_directory;
 	
-	std::string mpd_host;
 	std::string mpd_music_dir;
 	std::string visualizer_fifo_path;
 	std::string visualizer_output_name;
 	std::string empty_tag;
 	std::string tags_separator;
-	std::string song_list_columns_format;
 	std::string song_list_format;
 	std::string song_list_format_dollar_free;
 	std::string song_status_format;
@@ -86,9 +80,14 @@ struct Configuration
 	std::wstring visualizer_chars;
 	
 	std::string pattern;
-	
+
 	std::vector<Column> columns;
-	
+
+	DisplayMode playlist_display_mode;
+	DisplayMode browser_display_mode;
+	DisplayMode search_engine_display_mode;
+	DisplayMode playlist_editor_display_mode;
+
 	NC::Buffer browser_playlist_prefix;
 	NC::Buffer selected_item_prefix;
 	NC::Buffer selected_item_suffix;
@@ -115,16 +114,16 @@ struct Configuration
 	NC::Border window_border;
 	NC::Border active_window_border;
 	
+	Design design;
+
+	SpaceAddMode space_add_mode;
+
 	mpd_tag_type media_lib_primary_tag;
 	
 	bool colors_enabled;
 	bool playlist_show_remaining_time;
 	bool playlist_shorten_total_times;
 	bool playlist_separate_albums;
-	bool columns_in_playlist;
-	bool columns_in_browser;
-	bool columns_in_search_engine;
-	bool columns_in_playlist_editor;
 	bool set_window_title;
 	bool header_visibility;
 	bool header_text_scrolling;
@@ -135,7 +134,6 @@ struct Configuration
 	bool autocenter_mode;
 	bool wrapped_search;
 	bool space_selects;
-	bool ncmpc_like_songs_adding;
 	bool incremental_seeking;
 	bool now_playing_lyrics;
 	bool fetch_lyrics_in_background;
@@ -150,10 +148,9 @@ struct Configuration
 	bool block_search_constraints_change;
 	bool use_console_editor;
 	bool use_cyclic_scrolling;
-	bool ask_before_clearing_main_playlist;
+	bool ask_before_clearing_playlists;
 	bool mouse_support;
 	bool mouse_list_scroll_whole_page;
-	bool new_design;
 	bool visualizer_use_wave;
 	bool visualizer_in_stereo;
 	bool media_library_sort_by_mtime;
@@ -165,18 +162,16 @@ struct Configuration
 	bool allow_for_physical_item_deletion;
 	bool progressbar_boldness;
 	
-	int mpd_port;
-	int mpd_connection_timeout;
-	int crossfade_time;
-	int seek_time;
-	int volume_change_step;
-	int message_delay_time;
-	int lyrics_db;
-	
-	boost::regex::flag_type regex_type;
-	
+	unsigned mpd_connection_timeout;
+	unsigned crossfade_time;
+	unsigned seek_time;
+	unsigned volume_change_step;
+	unsigned message_delay_time;
+	unsigned lyrics_db;
 	unsigned lines_scrolled;
 	unsigned search_engine_default_search_mode;
+
+	boost::regex::flag_type regex_type;
 	
 	boost::posix_time::seconds playlist_disable_highlight_delay;
 	boost::posix_time::seconds visualizer_sync_interval;
@@ -189,19 +184,12 @@ struct Configuration
 	size_t now_playing_suffix_length;
 	
 	ScreenType startup_screen_type;
-	std::list<ScreenType> screens_seq;
+	std::list<ScreenType> screen_sequence;
 	
 	SortMode browser_sort_mode;
-	
-private:
-	void MakeProperPath(std::string &dir);
-
-	std::string home_directory;
 };
 
 extern Configuration Config;
-
-void CreateDir(const std::string &dir);
 
 #endif // NCMPCPP_SETTINGS_H
 

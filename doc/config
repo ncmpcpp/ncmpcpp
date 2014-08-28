@@ -12,7 +12,7 @@
 ## file which defines that while launching ncmpcpp.
 ##
 #
-#ncmpcpp_directory = "~/.ncmpcpp"
+#ncmpcpp_directory = ~/.ncmpcpp
 #
 ##
 ## Directory for storing downloaded lyrics. It
@@ -20,21 +20,21 @@
 ## (eg. ncmpc) also use that location.
 ##
 #
-#lyrics_directory = "~/.lyrics"
+#lyrics_directory = ~/.lyrics
 #
 ##### connection settings #####
 #
-## set it in order to make tag editor and renaming files work properly
+#mpd_host = localhost
 #
-#mpd_host = "localhost"
+#mpd_port = 6600
 #
-#mpd_port = "6600"
+#mpd_connection_timeout = 5
 #
-#mpd_music_dir = ""
+## Needed for tag editor and file operations to work.
+##
+#mpd_music_dir = ~/music
 #
-#mpd_connection_timeout = "5"
-#
-#mpd_crossfade_time = "5"
+#mpd_crossfade_time = 5
 #
 ##### music visualizer #####
 ##
@@ -46,19 +46,13 @@
 ##
 ## audio_output {
 ##        type            "fifo"
-##        name            "My FIFO"
+##        name            "Visualizer feed"
 ##        path            "/tmp/mpd.fifo"
 ##        format          "44100:16:2"
 ## }
 ##
 #
-##
-## If you set format to 44100:16:2, make it 'yes'.
-##
-#
-#visualizer_in_stereo = "no"
-#
-#visualizer_fifo_path = ""
+#visualizer_fifo_path = /tmp/mpd.fifo
 #
 ##
 ## Note: Below parameter is needed for ncmpcpp
@@ -68,7 +62,12 @@
 ## are some problems with it.
 ##
 #
-#visualizer_output_name = ""
+#visualizer_output_name = Visualizer feed
+#
+##
+## If you set format to 44100:16:2, make it 'yes'.
+##
+#visualizer_in_stereo = yes
 #
 ##
 ## Note: Below parameter defines how often ncmpcpp
@@ -78,14 +77,16 @@
 ## Keep in mind that sane values start with >=10.
 ##
 #
-#visualizer_sync_interval = "30"
+#visualizer_sync_interval = 30
 #
 ##
 ## Note: To enable spectrum frequency visualization
 ## you need to compile ncmpcpp with fftw3 support.
 ##
 #
-#visualizer_type = "wave" (spectrum/wave)
+## Available values: spectrum, wave.
+##
+#visualizer_type = wave
 #
 #visualizer_look = "◆│"
 #
@@ -99,7 +100,7 @@
 ## supports charset detection by checking output
 ## of `ncmpcpp --version`.
 ##
-## Note: Since MPD uses utf8 by default, setting
+## Note: Since MPD uses UTF-8 by default, setting
 ## this option makes sense only if your encoding
 ## is different.
 ##
@@ -108,13 +109,14 @@
 #
 ##### delays #####
 #
-## delay after playlist highlighting will be disabled (0 = don't disable)
+## Time of inactivity (in seconds) after playlist
+## highlighting will be disabled (0 = always on).
+##
+#playlist_disable_highlight_delay = 5
 #
-#playlist_disable_highlight_delay = "5"
-#
-## defines how long various messages are supposed to be visible
-#
-#message_delay_time = "4"
+## Defines how long messages are supposed to be visible.
+##
+#message_delay_time = 5
 #
 ##### song format #####
 ##
@@ -151,9 +153,9 @@
 ## you'll get nothing.
 ##
 ## text can also have different color than the main window has,
-## eg. if you want length to be green, write $3%l$9
+## eg. if you want length to be green, write "$3%l$9".
 ##
-## available values:
+## Available values:
 ##
 ## - 0 - default window color (discards all other colors)
 ## - 1 - black
@@ -169,24 +171,24 @@
 ## Note: colors can be nested.
 ##
 #
-#song_list_format = "{%a - }{%t}|{$8%f$9}$R{$3(%l)$9}"
+#song_list_format = {%a - }{%t}|{$8%f$9}$R{$3(%l)$9}
 #
-#song_status_format = "{{%a{ \"%b\"{ (%y)}} - }{%t}}|{%f}"
+#song_status_format = {{%a{ \"%b\"{ (%y)}} - }{%t}}|{%f}
 #
-#song_library_format = "{%n - }{%t}|{%f}"
+#song_library_format = {%n - }{%t}|{%f}
 #
-#tag_editor_album_format = "{(%y) }%b"
+#tag_editor_album_format = {(%y) }%b
 #
 ##
 ## Note: Below variables are used for sorting songs in browser.
 ## The sort mode determines how songs are sorted, and can be used
 ## in combination with a sort format to specify a custom sorting format.
-## Possible values for browser_sort_mode are "name", "mtime" and "format".
+## Available values for browser_sort_mode are "name", "mtime" and "format".
 ##
 #
-#browser_sort_mode = "name"
+#browser_sort_mode = name
 #
-#browser_sort_format = "{%a - }{%t}|{%f} {(%l)}"
+#browser_sort_format = {%a - }{%t}|{%f} {(%l)}
 #
 ##
 ## Note: Below variables are for alternative version of user's interface.
@@ -205,30 +207,29 @@
 ## with reversed colors.
 ##
 #
-#alternative_header_first_line_format = "$b$1$aqqu$/a$9 {%t}|{%f} $1$atqq$/a$9$/b"
+#alternative_header_first_line_format = $b$1$aqqu$/a$9 {%t}|{%f} $1$atqq$/a$9$/b
 #
-#alternative_header_second_line_format = "{{$4$b%a$/b$9}{ - $7%b$9}{ ($4%y$9)}}|{%D}"
+#alternative_header_second_line_format = {{$4$b%a$/b$9}{ - $7%b$9}{ ($4%y$9)}}|{%D}
 #
 ##
-## Note: Below variables also supports
-## text attributes listed above.
+## Note: below variables also support text attributes listed above.
 ##
 #
-#now_playing_prefix = "$b"
+#now_playing_prefix = $b
 #
-#now_playing_suffix = "$/b"
+#now_playing_suffix = $/b
 #
 #browser_playlist_prefix = "$2playlist$9 "
 #
-#selected_item_prefix = "$6"
+#selected_item_prefix = $6
 #
-#selected_item_suffix = "$9"
+#selected_item_suffix = $9
 #
-#modified_item_prefix = "$3> $9"
+#modified_item_prefix = $3> $9
 #
-## colors are not supported for below variable
-#
-#song_window_title_format = "{%a - }{%t}|{%f}"
+## Note: colors are not supported for below variable.
+##
+#song_window_title_format = {%a - }{%t}|{%f}
 #
 ##### columns settings #####
 ##
@@ -266,7 +267,7 @@
 ##   not available.
 ##
 #
-#song_columns_list_format = "(7f)[green]{l} (25)[cyan]{a} (40)[]{t|f} (30)[red]{b}"
+#song_columns_list_format = (7f)[green]{l} (25)[cyan]{a} (40)[]{t|f} (30)[red]{b}
 #
 ##### various settings #####
 #
@@ -279,75 +280,86 @@
 ##
 #execute_on_song_change = ""
 #
-#playlist_show_remaining_time = "no"
+#playlist_show_remaining_time = no
 #
-#playlist_shorten_total_times = "no"
+#playlist_shorten_total_times = no
 #
-#playlist_separate_albums = "no"
+#playlist_separate_albums = no
 #
-#playlist_display_mode = "classic" (classic/columns)
+##
+## Note: Possible display modes: classic, columns.
+##
+#playlist_display_mode = classic
 #
-#browser_display_mode = "classic" (classic/columns)
+#browser_display_mode = classic
 #
-#search_engine_display_mode = "classic" (classic/columns)
+#search_engine_display_mode = classic
 #
-#playlist_editor_display_mode = "classic" (classic/columns)
+#playlist_editor_display_mode = classic
 #
-#discard_colors_if_item_is_selected = "yes"
+#discard_colors_if_item_is_selected = yes
 #
-#incremental_seeking = "yes"
+#incremental_seeking = yes
 #
-#seek_time = "1"
+#seek_time = 1
 #
-#volume_change_step = "1"
+#volume_change_step = 1
 #
-#autocenter_mode = "no"
+#autocenter_mode = no
 #
-#centered_cursor = "no"
+#centered_cursor = no
 #
 ##
 ## Note: You can specify third character which will
 ## be used to build 'empty' part of progressbar.
 ##
-#progressbar_look = "=>"
+#progressbar_look = =>
 #
-#progressbar_boldness = "yes"
+#progressbar_boldness = yes
 #
-#default_place_to_search_in = "database" (database/playlist)
+## Available values: database, playlist.
+##
+#default_place_to_search_in = database
 #
-#user_interface = "classic" (classic/alternative)
+## Available values: classic, alternative.
+##
+#user_interface = classic
 #
-#media_library_left_column = "a" (possible values: a,y,g,c,p, legend above)
+## Available values: artist, date, genre, composer, performer.
+##
+#media_library_primary_tag = artist
 #
-#default_find_mode = "wrapped" (wrapped/normal)
+## Available values: wrapped, normal.
+##
+#default_find_mode = wrapped
 #
-#default_space_mode = "add" (add/select)
+## Available values: add, select.
+##
+#default_space_mode = add
 #
-#default_tag_editor_pattern = "%n - %t"
+#default_tag_editor_pattern = %n - %t
 #
-#header_visibility = "yes"
+#header_visibility = yes
 #
-#statusbar_visibility = "yes"
+#statusbar_visibility = yes
 #
-#titles_visibility = "yes"
+#titles_visibility = yes
 #
-#header_text_scrolling = "yes"
+#header_text_scrolling = yes
 #
-#fancy_scrolling = "yes"
+#cyclic_scrolling = no
 #
-#cyclic_scrolling = "no"
+#lines_scrolled = 2
 #
-#lines_scrolled = "2"
+#follow_now_playing_lyrics = no
 #
-#follow_now_playing_lyrics = "no"
+#fetch_lyrics_for_current_song_in_background = no
 #
-#fetch_lyrics_for_current_song_in_background = "no"
+#store_lyrics_in_song_dir = no
 #
-#store_lyrics_in_song_dir = "no"
+#generate_win32_compatible_filenames = yes
 #
-#generate_win32_compatible_filenames = "yes"
-#
-#allow_for_physical_item_deletion = "no"
+#allow_for_physical_item_deletion = no
 #
 ##
 ## Note: If you set this variable, ncmpcpp will try to
@@ -357,13 +369,13 @@
 ##
 ## Note: Language has to be expressed as an ISO 639 alpha-2 code.
 ##
-#lastfm_preferred_language = ""
+#lastfm_preferred_language = en
 #
-#ncmpc_like_songs_adding = "no" (enabled - add/remove, disabled - always add)
+## Available values: add_remove, always_add.
+##
+#space_add_mode = always_add
 #
-#show_hidden_files_in_local_browser = "no"
-#
-#display_screens_numbers_on_start = "yes"
+#show_hidden_files_in_local_browser = no
 #
 ##
 ## How shall screen switcher work?
@@ -374,59 +386,61 @@
 ## Screens available for use: help, playlist, browser, search_engine,
 ## media_library, playlist_editor, tag_editor, outputs, visualizer, clock.
 ##
-#screen_switcher_mode = "playlist, browser"
+#screen_switcher_mode = playlist, browser
 #
 ##
 ## Note: You can define startup screen for ncmpcpp
 ## by choosing screen from the list above.
 ##
-#startup_screen = "playlist"
+#startup_screen = playlist
 #
 ##
 ## Default width of locked screen (in %).
 ## Acceptable values are from 20 to 80.
 ##
 #
-#locked_screen_width_part = "50"
+#locked_screen_width_part = 50
 #
-#ask_for_locked_screen_width_part = "yes"
+#ask_for_locked_screen_width_part = yes
 #
-#jump_to_now_playing_song_at_start = "yes"
+#jump_to_now_playing_song_at_start = yes
 #
-#ask_before_clearing_main_playlist = "no"
+#ask_before_clearing_playlists = yes
 #
-#clock_display_seconds = "no"
+#clock_display_seconds = no
 #
-#display_volume_level = "yes"
+#display_volume_level = yes
 #
-#display_bitrate = "no"
+#display_bitrate = no
 #
-#display_remaining_time = "no"
+#display_remaining_time = no
 #
-#regular_expressions = "none" (none/basic/extended)
+## Available values: none, basic, extended.
+##
+#regular_expressions = none
 #
 ##
 ## Note: If below is enabled, ncmpcpp will ignore leading
 ## "The" word while sorting items in browser, tags in
 ## media library, etc.
 ##
-#ignore_leading_the = "no"
+#ignore_leading_the = no
 #
-#block_search_constraints_change_if_items_found = "yes"
+#block_search_constraints_change_if_items_found = yes
 #
-#mouse_support = "yes"
+#mouse_support = yes
 #
-#mouse_list_scroll_whole_page = "yes"
+#mouse_list_scroll_whole_page = yes
 #
-#empty_tag_marker = "<empty>"
+#empty_tag_marker = <empty>
 #
 #tags_separator = " | "
 #
-#tag_editor_extended_numeration = "no"
+#tag_editor_extended_numeration = no
 #
-#media_library_sort_by_mtime = "no"
+#media_library_sort_by_mtime = no
 #
-#enable_window_title = "yes"
+#enable_window_title = yes
 #
 ##
 ## Note: You can choose default search mode for search
@@ -440,47 +454,49 @@
 ##       in database and local one for searching in current playlist)
 ##
 #
-#search_engine_default_search_mode = "1"
+#search_engine_default_search_mode = 1
 #
-#external_editor = ""
+#external_editor = nano
 #
-#use_console_editor = "no" (set to yes, if your editor is console app)
+## Note: set to yes if external editor is a console application.
+##
+#use_console_editor = yes
 #
 ##### colors definitions #####
 #
-#colors_enabled = "yes"
+#colors_enabled = yes
 #
-#empty_tag_color = "cyan"
+#empty_tag_color = cyan
 #
-#header_window_color = "default"
+#header_window_color = default
 #
-#volume_color = "default"
+#volume_color = default
 #
-#state_line_color = "default"
+#state_line_color = default
 #
-#state_flags_color = "default"
+#state_flags_color = default
 #
-#main_window_color = "yellow"
+#main_window_color = yellow
 #
-#color1 = "white"
+#color1 = white
 #
-#color2 = "green"
+#color2 = green
 #
-#main_window_highlight_color = "yellow"
+#main_window_highlight_color = yellow
 #
-#progressbar_color = "default"
+#progressbar_color = default
 #
-#progressbar_elapsed_color = "default"
+#progressbar_elapsed_color = default
 #
-#statusbar_color = "default"
+#statusbar_color = default
 #
-#alternative_ui_separator_color = "black"
+#alternative_ui_separator_color = black
 #
-#active_column_color = "red"
+#active_column_color = red
 #
-#visualizer_color = "yellow"
+#visualizer_color = yellow
 #
-#window_border_color = "green"
+#window_border_color = green
 #
-#active_window_border = "red"
+#active_window_border = red
 #

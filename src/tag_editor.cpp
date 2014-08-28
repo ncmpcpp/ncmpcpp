@@ -26,8 +26,8 @@
 #include <boost/locale/conversion.hpp>
 #include <algorithm>
 #include <fstream>
-#include <sstream>
 
+#include "actions.h"
 #include "browser.h"
 #include "charset.h"
 #include "display.h"

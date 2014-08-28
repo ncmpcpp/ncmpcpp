@@ -18,50 +18,65 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
-#include <cstring>
+#include <boost/regex.hpp>
 #include <iostream>
 
-#include "global.h"
-#include "settings.h"
-#include "title.h"
-#include "utility/wide_string.h"
+#include "utility/option_parser.h"
 
-#ifdef USE_PDCURSES
-void windowTitle(const std::string &) { }
-#else
-void windowTitle(const std::string &status)
+bool option_parser::run(std::istream &is)
 {
-	if (strcmp(getenv("TERM"), "linux") && Config.set_window_title)
-		std::cout << "\033]0;" << status << "\7" << std::flush;
-}
-#endif // USE_PDCURSES
-
-void drawHeader()
-{
-	using Global::myScreen;
-	using Global::wHeader;
-	using Global::VolumeState;
-	
-	if (!Config.header_visibility)
-		return;
-	switch (Config.design)
+	// quoted value. leftmost and rightmost quotation marks are the delimiters.
+	boost::regex quoted("(\\w+)\\h*=\\h*\"(.*)\"[^\"]*");
+	// unquoted value. whitespaces get trimmed.
+	boost::regex unquoted("(\\w+)\\h*=\\h*(.*?)\\h*");
+	boost::smatch match;
+	std::string line;
+	while (std::getline(is, line))
 	{
-		case Design::Classic:
-			*wHeader << NC::XY(0, 0) << wclrtoeol << NC::Format::Bold << myScreen->title() << NC::Format::NoBold;
-			*wHeader << Config.volume_color;
-			*wHeader << NC::XY(wHeader->getWidth()-VolumeState.length(), 0) << VolumeState;
-			*wHeader << NC::Color::End;
-			break;
-		case Design::Alternative:
-			std::wstring title = myScreen->title();
-			*wHeader << NC::XY(0, 3) << wclrtoeol;
-			*wHeader << NC::Format::Bold << Config.alternative_ui_separator_color;
-			mvwhline(wHeader->raw(), 2, 0, 0, COLS);
-			mvwhline(wHeader->raw(), 4, 0, 0, COLS);
-			*wHeader << NC::XY((COLS-wideLength(title))/2, 3);
-			*wHeader << Config.header_color << title << NC::Color::End;
-			*wHeader << NC::Color::End << NC::Format::NoBold;
-			break;
+		if (boost::regex_match(line, match, quoted)
+		||  boost::regex_match(line, match, unquoted))
+		{
+			std::string option = match[1];
+			auto it = m_parsers.find(option);
+			if (it != m_parsers.end())
+			{
+				try {
+					it->second.parse(match[2]);
+				} catch (std::exception &e) {
+					std::cerr << "Error while processing option \"" << option << "\": " << e.what() << "\n";
+					return false;
+				}
+			}
+			else
+			{
+				std::cerr << "Unknown option: " << option << "\n";
+				return false;
+			}
+		}
 	}
-	wHeader->refresh();
+	for (auto &p : m_parsers)
+	{
+		if (!p.second.defined())
+		{
+			try {
+				p.second.run_default();
+			} catch (std::exception &e) {
+				std::cerr << "Error while finalizing option \"" << p.first << "\": " << e.what() << "\n";
+				return false;
+			}
+		}
+	}
+	return true;
+}
+
+option_parser::worker yes_no(bool &arg, bool value)
+{
+	return option_parser::worker([&arg](std::string &&v) {
+		if (v == "yes")
+			arg = true;
+		else if (v == "no")
+			arg = false;
+		else
+			throw std::runtime_error("invalid argument: " + v);
+	}, defaults_to(arg, value));
 }

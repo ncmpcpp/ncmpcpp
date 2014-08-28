@@ -18,9 +18,11 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
-#ifndef NCMPCPP_CMDARGS_H
-#define NCMPCPP_CMDARGS_H
+#ifndef NCMPCPP_CONFIGURATION_H
+#define NCMPCPP_CONFIGURATION_H
 
-bool ParseArguments(int argc, char **argv);
+void expand_home(std::string &path);
 
-#endif // NCMPCPP_CMDARGS_H
+bool configure(int argc, char **argv);
+
+#endif // NCMPCPP_CONFIGURATION_H

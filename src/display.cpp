@@ -392,10 +392,15 @@ void Display::Items(NC::Menu<MPD::Item> &menu, const ProxySongList &pl)
 			     << "]";
 			break;
 		case MPD::itSong:
-			if (!Config.columns_in_browser)
-				showSongs(menu, *item.song, pl, Config.song_list_format);
-			else
-				showSongsInColumns(menu, *item.song, pl);
+			switch (Config.browser_display_mode)
+			{
+				case DisplayMode::Classic:
+					showSongs(menu, *item.song, pl, Config.song_list_format);
+					break;
+				case DisplayMode::Columns:
+					showSongsInColumns(menu, *item.song, pl);
+					break;
+			}
 			break;
 		case MPD::itPlaylist:
 			menu << Config.browser_playlist_prefix
@@ -409,10 +414,15 @@ void Display::SEItems(NC::Menu<SEItem> &menu, const ProxySongList &pl)
 	const SEItem &si = menu.drawn()->value();
 	if (si.isSong())
 	{
-		if (!Config.columns_in_search_engine)
-			showSongs(menu, si.song(), pl, Config.song_list_format);
-		else
-			showSongsInColumns(menu, si.song(), pl);
+		switch (Config.search_engine_display_mode)
+		{
+			case DisplayMode::Classic:
+				showSongs(menu, si.song(), pl, Config.song_list_format);
+				break;
+			case DisplayMode::Columns:
+				showSongsInColumns(menu, si.song(), pl);
+				break;
+		}
 	}
 	else
 		menu << si.buffer();

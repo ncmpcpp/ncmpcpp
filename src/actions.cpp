@@ -198,7 +198,7 @@ void resizeScreen(bool reload_main_window)
 	}
 #	endif
 	
-	MainHeight = LINES-(Config.new_design ? 7 : 4);
+	MainHeight = LINES-(Config.design == Design::Alternative ? 7 : 4);
 	
 	validateScreenSize();
 	
@@ -211,7 +211,7 @@ void resizeScreen(bool reload_main_window)
 	
 	applyToVisibleWindows(&BaseScreen::resize);
 	
-	if (Config.header_visibility || Config.new_design)
+	if (Config.header_visibility || Config.design == Design::Alternative)
 		wHeader->resize(COLS, HeaderHeight);
 	
 	FooterStartY = LINES-(Config.statusbar_visibility ? 2 : 1);
@@ -236,8 +236,8 @@ void setWindowsDimensions()
 	using Global::MainStartY;
 	using Global::MainHeight;
 	
-	MainStartY = Config.new_design ? 5 : 2;
-	MainHeight = LINES-(Config.new_design ? 7 : 4);
+	MainStartY = Config.design == Design::Alternative ? 5 : 2;
+	MainHeight = LINES-(Config.design == Design::Alternative ? 7 : 4);
 	
 	if (!Config.header_visibility)
 	{
@@ -247,7 +247,7 @@ void setWindowsDimensions()
 	if (!Config.statusbar_visibility)
 		++MainHeight;
 	
-	HeaderHeight = Config.new_design ? (Config.header_visibility ? 5 : 3) : 1;
+	HeaderHeight = Config.design == Design::Alternative ? (Config.header_visibility ? 5 : 3) : 1;
 	FooterStartY = LINES-(Config.statusbar_visibility ? 2 : 1);
 	FooterHeight = Config.statusbar_visibility ? 2 : 1;
 }
@@ -337,15 +337,16 @@ void MouseEvent::run()
 			myPlaylist->currentSongLength()*m_mouse_event.x/double(COLS));
 	}
 	else if (m_mouse_event.bstate & BUTTON1_PRESSED
-	     &&	 (Config.statusbar_visibility || Config.new_design)
-	     &&	 Status::State::player() != MPD::psStop
-	     &&	 m_mouse_event.y == (Config.new_design ? 1 : LINES-1) && m_mouse_event.x < 9
+	     &&  (Config.statusbar_visibility || Config.design == Design::Alternative)
+	     &&  Status::State::player() != MPD::psStop
+	     &&  m_mouse_event.y == (Config.design == Design::Alternative ? 1 : LINES-1)
+			 &&  m_mouse_event.x < 9
 		) // playing/paused
 	{
 		Mpd.Toggle();
 	}
 	else if ((m_mouse_event.bstate & BUTTON2_PRESSED || m_mouse_event.bstate & BUTTON4_PRESSED)
-	     &&	 (Config.header_visibility || Config.new_design)
+	     &&	 (Config.header_visibility || Config.design == Design::Alternative)
 	     &&	 m_mouse_event.y == 0 && size_t(m_mouse_event.x) > COLS-VolumeState.length()
 	) // volume
 	{
@@ -488,15 +489,24 @@ void MoveEnd::run()
 
 void ToggleInterface::run()
 {
-	Config.new_design = !Config.new_design;
-	Config.statusbar_visibility = Config.new_design ? 0 : OriginalStatusbarVisibility;
+	switch (Config.design)
+	{
+		case Design::Classic:
+			Config.design = Design::Alternative;
+			Config.statusbar_visibility = false;
+			break;
+		case Design::Alternative:
+			Config.design = Design::Classic;
+			Config.statusbar_visibility = OriginalStatusbarVisibility;
+			break;
+	}
 	setWindowsDimensions();
 	Progressbar::unlock();
 	Statusbar::unlock();
 	resizeScreen(false);
 	Status::Changes::mixer();
 	Status::Changes::elapsedTime(false);
-	Statusbar::printf("User interface: %1%", Config.new_design ? "Alternative" : "Classic");
+	Statusbar::printf("User interface: %1%", Config.design);
 }
 
 bool JumpToParentDirectory::canBeRun() const
@@ -606,13 +616,13 @@ void SlaveScreen::run()
 
 void VolumeUp::run()
 {
-	int volume = std::min(Status::State::volume()+Config.volume_change_step, 100);
+	int volume = std::min(Status::State::volume()+Config.volume_change_step, 100u);
 	Mpd.SetVolume(volume);
 }
 
 void VolumeDown::run()
 {
-	int volume = std::max(Status::State::volume()-Config.volume_change_step, 0);
+	int volume = std::max(int(Status::State::volume()-Config.volume_change_step), 0);
 	Mpd.SetVolume(volume);
 }
 
@@ -999,52 +1009,83 @@ void ToggleDisplayMode::run()
 {
 	if (myScreen == myPlaylist)
 	{
-		Config.columns_in_playlist = !Config.columns_in_playlist;
-		Statusbar::printf("Playlist display mode: %1%",
-			Config.columns_in_playlist ? "Columns" : "Classic"
-		);
-		
-		if (Config.columns_in_playlist)
+		switch (Config.playlist_display_mode)
 		{
-			myPlaylist->main().setItemDisplayer(boost::bind(Display::SongsInColumns, _1, myPlaylist->proxySongList()));
-			if (Config.titles_visibility)
-				myPlaylist->main().setTitle(Display::Columns(myPlaylist->main().getWidth()));
-			else
+			case DisplayMode::Classic:
+				Config.playlist_display_mode = DisplayMode::Columns;
+				myPlaylist->main().setItemDisplayer(boost::bind(
+					Display::SongsInColumns, _1, myPlaylist->proxySongList()
+				));
+				if (Config.titles_visibility)
+					myPlaylist->main().setTitle(Display::Columns(myPlaylist->main().getWidth()));
+				else
+					myPlaylist->main().setTitle("");
+				break;
+			case DisplayMode::Columns:
+				Config.playlist_display_mode = DisplayMode::Classic;
+				myPlaylist->main().setItemDisplayer(boost::bind(
+					Display::Songs, _1, myPlaylist->proxySongList(), Config.song_list_format
+				));
 				myPlaylist->main().setTitle("");
 		}
-		else
-		{
-			myPlaylist->main().setItemDisplayer(boost::bind(Display::Songs, _1, myPlaylist->proxySongList(), Config.song_list_format));
-			myPlaylist->main().setTitle("");
-		}
+		Statusbar::printf("Playlist display mode: %1%", Config.playlist_display_mode);
 	}
 	else if (myScreen == myBrowser)
 	{
-		Config.columns_in_browser = !Config.columns_in_browser;
-		Statusbar::printf("Browser display mode: %1%",
-			Config.columns_in_browser ? "Columns" : "Classic"
-		);
-		myBrowser->main().setTitle(Config.columns_in_browser && Config.titles_visibility ? Display::Columns(myBrowser->main().getWidth()) : "");
+		switch (Config.browser_display_mode)
+		{
+			case DisplayMode::Classic:
+				Config.browser_display_mode = DisplayMode::Columns;
+				if (Config.titles_visibility)
+					myBrowser->main().setTitle(Display::Columns(myBrowser->main().getWidth()));
+				else
+					myBrowser->main().setTitle("");
+				break;
+			case DisplayMode::Columns:
+				Config.browser_display_mode = DisplayMode::Classic;
+				myBrowser->main().setTitle("");
+				break;
+		}
+		Statusbar::printf("Browser display mode: %1%", Config.browser_display_mode);
 	}
 	else if (myScreen == mySearcher)
 	{
-		Config.columns_in_search_engine = !Config.columns_in_search_engine;
-		Statusbar::printf("Search engine display mode: %1%",
-			Config.columns_in_search_engine ? "Columns" : "Classic"
-		);
+		switch (Config.search_engine_display_mode)
+		{
+			case DisplayMode::Classic:
+				Config.search_engine_display_mode = DisplayMode::Columns;
+				break;
+			case DisplayMode::Columns:
+				Config.search_engine_display_mode = DisplayMode::Classic;
+				break;
+		}
+		Statusbar::printf("Search engine display mode: %1%", Config.search_engine_display_mode);
 		if (mySearcher->main().size() > SearchEngine::StaticOptions)
-			mySearcher->main().setTitle(Config.columns_in_search_engine && Config.titles_visibility ? Display::Columns(mySearcher->main().getWidth()) : "");
+			mySearcher->main().setTitle(
+				   Config.search_engine_display_mode == DisplayMode::Columns
+				&& Config.titles_visibility
+				? Display::Columns(mySearcher->main().getWidth())
+				: ""
+			);
 	}
 	else if (myScreen->isActiveWindow(myPlaylistEditor->Content))
 	{
-		Config.columns_in_playlist_editor = !Config.columns_in_playlist_editor;
-		Statusbar::printf("Playlist editor display mode: %1%",
-			Config.columns_in_playlist_editor ? "Columns" : "Classic"
-		);
-		if (Config.columns_in_playlist_editor)
-			myPlaylistEditor->Content.setItemDisplayer(boost::bind(Display::SongsInColumns, _1, myPlaylistEditor->contentProxyList()));
-		else
-			myPlaylistEditor->Content.setItemDisplayer(boost::bind(Display::Songs, _1, myPlaylistEditor->contentProxyList(), Config.song_list_format));
+		switch (Config.playlist_editor_display_mode)
+		{
+			case DisplayMode::Classic:
+				Config.playlist_editor_display_mode = DisplayMode::Columns;
+				myPlaylistEditor->Content.setItemDisplayer(boost::bind(
+					Display::SongsInColumns, _1, myPlaylistEditor->contentProxyList()
+				));
+				break;
+			case DisplayMode::Columns:
+				Config.playlist_editor_display_mode = DisplayMode::Classic;
+				myPlaylistEditor->Content.setItemDisplayer(boost::bind(
+					Display::Songs, _1, myPlaylistEditor->contentProxyList(), Config.song_list_format
+				));
+				break;
+		}
+		Statusbar::printf("Playlist editor display mode: %1%", Config.playlist_editor_display_mode);
 	}
 }
 
@@ -1688,7 +1729,7 @@ void AddSelectedItems::run()
 void CropMainPlaylist::run()
 {
 	bool yes = true;
-	if (Config.ask_before_clearing_main_playlist)
+	if (Config.ask_before_clearing_playlists)
 		yes = askYesNoQuestion("Do you really want to crop main playlist?", Status::trace);
 	if (yes)
 	{
@@ -1707,7 +1748,7 @@ void CropPlaylist::run()
 	assert(!myPlaylistEditor->Playlists.empty());
 	std::string playlist = myPlaylistEditor->Playlists.current().value();
 	bool yes = true;
-	if (Config.ask_before_clearing_main_playlist)
+	if (Config.ask_before_clearing_playlists)
 		yes = askYesNoQuestion(
 			boost::format("Do you really want to crop playlist \"%1%\"?") % playlist,
 			Status::trace
@@ -1724,7 +1765,7 @@ void CropPlaylist::run()
 void ClearMainPlaylist::run()
 {
 	bool yes = true;
-	if (Config.ask_before_clearing_main_playlist)
+	if (Config.ask_before_clearing_playlists)
 		yes = askYesNoQuestion("Do you really want to clear main playlist?", Status::trace);
 	if (yes)
 	{
@@ -1747,7 +1788,7 @@ void ClearPlaylist::run()
 	assert(!myPlaylistEditor->Playlists.empty());
 	std::string playlist = myPlaylistEditor->Playlists.current().value();
 	bool yes = true;
-	if (Config.ask_before_clearing_main_playlist)
+	if (Config.ask_before_clearing_playlists)
 		yes = askYesNoQuestion(
 			boost::format("Do you really want to clear playlist \"%1%\"?") % playlist,
 			Status::trace
@@ -1937,10 +1978,19 @@ void ToggleSpaceMode::run()
 
 void ToggleAddMode::run()
 {
-	Config.ncmpc_like_songs_adding = !Config.ncmpc_like_songs_adding;
-	Statusbar::printf("Add mode: %1%",
-		Config.ncmpc_like_songs_adding ? "Add item to playlist or remove if already added" : "Always add item to playlist"
-	);
+	std::string mode_desc;
+	switch (Config.space_add_mode)
+	{
+		case SpaceAddMode::AddRemove:
+			Config.space_add_mode = SpaceAddMode::AlwaysAdd;
+			mode_desc = "Always add an item to playlist";
+			break;
+		case SpaceAddMode::AlwaysAdd:
+			Config.space_add_mode = SpaceAddMode::AddRemove;
+			mode_desc = "Add an item to playlist or remove if already added";
+			break;
+	}
+	Statusbar::printf("Add mode: %1%", mode_desc);
 }
 
 void ToggleMouse::run()
@@ -2008,16 +2058,16 @@ void ToggleBrowserSortMode::run()
 {
 	switch (Config.browser_sort_mode)
 	{
-		case smName:
-			Config.browser_sort_mode = smMTime;
+		case SortMode::Name:
+			Config.browser_sort_mode = SortMode::ModificationTime;
 			Statusbar::print("Sort songs by: Modification time");
 			break;
-		case smMTime:
-			Config.browser_sort_mode = smCustomFormat;
+		case SortMode::ModificationTime:
+			Config.browser_sort_mode = SortMode::CustomFormat;
 			Statusbar::print("Sort songs by: Custom format");
 			break;
-		case smCustomFormat:
-			Config.browser_sort_mode = smName;
+		case SortMode::CustomFormat:
+			Config.browser_sort_mode = SortMode::Name;
 			Statusbar::print("Sort songs by: Name");
 			break;
 	}
@@ -2211,13 +2261,12 @@ void NextScreen::run()
 		if (auto tababble = dynamic_cast<Tabbable *>(myScreen))
 			tababble->switchToPreviousScreen();
 	}
-	else if (!Config.screens_seq.empty())
+	else if (!Config.screen_sequence.empty())
 	{
-		auto screen_type = std::find(Config.screens_seq.begin(), Config.screens_seq.end(),
-			myScreen->type()
-		);
-		if (++screen_type == Config.screens_seq.end())
-			toScreen(Config.screens_seq.front())->switchTo();
+		const auto &seq = Config.screen_sequence;
+		auto screen_type = std::find(seq.begin(), seq.end(), myScreen->type());
+		if (++screen_type == seq.end())
+			toScreen(seq.front())->switchTo();
 		else
 			toScreen(*screen_type)->switchTo();
 	}
@@ -2230,13 +2279,12 @@ void PreviousScreen::run()
 		if (auto tababble = dynamic_cast<Tabbable *>(myScreen))
 			tababble->switchToPreviousScreen();
 	}
-	else if (!Config.screens_seq.empty())
+	else if (!Config.screen_sequence.empty())
 	{
-		auto screen_type = std::find(Config.screens_seq.begin(), Config.screens_seq.end(),
-			myScreen->type()
-		);
-		if (screen_type == Config.screens_seq.begin())
-			toScreen(Config.screens_seq.back())->switchTo();
+		const auto &seq = Config.screen_sequence;
+		auto screen_type = std::find(seq.begin(), seq.end(), myScreen->type());
+		if (screen_type == seq.begin())
+			toScreen(seq.back())->switchTo();
 		else
 			toScreen(*--screen_type)->switchTo();
 	}
@@ -2635,34 +2683,35 @@ void seek()
 		
 		*wFooter << NC::Format::Bold;
 		std::string tracklength;
-		if (Config.new_design)
+		switch (Config.design)
 		{
-			if (Config.display_remaining_time)
-			{
-				tracklength = "-";
-				tracklength += MPD::Song::ShowTime(myPlaylist->currentSongLength()-songpos);
-			}
-			else
-				tracklength = MPD::Song::ShowTime(songpos);
-			tracklength += "/";
-			tracklength += MPD::Song::ShowTime(myPlaylist->currentSongLength());
-			*wHeader << NC::XY(0, 0) << tracklength << " ";
-			wHeader->refresh();
-		}
-		else
-		{
-			tracklength = " [";
-			if (Config.display_remaining_time)
-			{
-				tracklength += "-";
-				tracklength += MPD::Song::ShowTime(myPlaylist->currentSongLength()-songpos);
-			}
-			else
-				tracklength += MPD::Song::ShowTime(songpos);
-			tracklength += "/";
-			tracklength += MPD::Song::ShowTime(myPlaylist->currentSongLength());
-			tracklength += "]";
-			*wFooter << NC::XY(wFooter->getWidth()-tracklength.length(), 1) << tracklength;
+			case Design::Classic:
+				tracklength = " [";
+				if (Config.display_remaining_time)
+				{
+					tracklength += "-";
+					tracklength += MPD::Song::ShowTime(myPlaylist->currentSongLength()-songpos);
+				}
+				else
+					tracklength += MPD::Song::ShowTime(songpos);
+				tracklength += "/";
+				tracklength += MPD::Song::ShowTime(myPlaylist->currentSongLength());
+				tracklength += "]";
+				*wFooter << NC::XY(wFooter->getWidth()-tracklength.length(), 1) << tracklength;
+				break;
+			case Design::Alternative:
+				if (Config.display_remaining_time)
+				{
+					tracklength = "-";
+					tracklength += MPD::Song::ShowTime(myPlaylist->currentSongLength()-songpos);
+				}
+				else
+					tracklength = MPD::Song::ShowTime(songpos);
+				tracklength += "/";
+				tracklength += MPD::Song::ShowTime(myPlaylist->currentSongLength());
+				*wHeader << NC::XY(0, 0) << tracklength << " ";
+				wHeader->refresh();
+				break;
 		}
 		*wFooter << NC::Format::NoBold;
 		Progressbar::draw(songpos, myPlaylist->currentSongLength());

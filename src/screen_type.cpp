@@ -112,8 +112,10 @@ BaseScreen *toScreen(ScreenType st)
 #		endif // ENABLE_CLOCK
 		case ScreenType::Help:
 			return myHelp;
+#		ifdef HAVE_CURL_CURL_H
 		case ScreenType::Lastfm:
 			return myLastfm;
+#		endif // HAVE_CURL_CURL_H
 		case ScreenType::Lyrics:
 			return myLyrics;
 		case ScreenType::MediaLibrary:

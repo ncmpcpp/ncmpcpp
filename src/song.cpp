@@ -288,7 +288,7 @@ std::string Song::ShowTime(unsigned length)
 	return result;
 }
 
-bool MPD::Song::isFormatOk(const std::string &type, const std::string &fmt)
+void MPD::Song::validateFormat(const std::string &fmt)
 {
 	int braces = 0;
 	for (std::string::const_iterator it = fmt.begin(); it != fmt.end(); ++it)
@@ -299,22 +299,17 @@ bool MPD::Song::isFormatOk(const std::string &type, const std::string &fmt)
 			--braces;
 	}
 	if (braces)
-	{
-		std::cerr << type << ": number of opening and closing braces does not equal\n";
-		return false;
-	}
+		throw std::runtime_error("number of opening and closing braces is not equal");
 	
 	for (size_t i = fmt.find('%'); i != std::string::npos; i = fmt.find('%', i))
 	{
 		if (isdigit(fmt[++i]))
 			while (isdigit(fmt[++i])) { }
 		if (!charToGetFunction(fmt[i]))
-		{
-			std::cerr << type << ": invalid character at position " << boost::lexical_cast<std::string>(i+1) << ": '" << fmt[i] << "'\n";
-			return false;
-		}
+			throw std::runtime_error(
+				(boost::format("invalid character at position %1%: %2%") % (i+1) % fmt[i]).str()
+			);
 	}
-	return true;
 }
 
 std::string Song::ParseFormat(std::string::const_iterator &it, const std::string &tags_separator,

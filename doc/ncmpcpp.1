@@ -156,9 +156,6 @@ No need to describe it, huh?
 .B header_text_scrolling = yes/no
 If enabled, text in header window will scroll if its length is longer then actual screen width, otherwise it won't.
 .TP 
-.B fancy_scrolling = yes/no
-If enabled, content of other columns will be updated immediately while scrolling, otherwise only after you stop scrolling.
-.TP 
 .B cyclic_scrolling = yes/no
 If enabled, cyclic scrolling is used (e.g. if you press down arrow being at the end of list, it'll take you to the beginning)
 .TP 
@@ -243,8 +240,8 @@ If set to yes, it will be possible to physically delete files and directories fr
 .B lastfm_preferred_language = ISO 639 alpha-2 language code
 If set, ncmpcpp will try to get info from last.fm in language you set and if it fails, it will fall back to english. Otherwise it will use english the first time.
 .TP
-.B ncmpc_like_songs_adding = yes/no
-If enabled, pressing space on item, which is already in playlist will remove it, otherwise add it again.
+.B space_add_mode = add_remove/always_add
+If set to add_remove, pressing space on item which is already in playlist will remove it, otherwise add it again.
 .TP 
 .B show_hidden_files_in_local_browser = yes/no
 Trigger for displaying in local browser files and directories that begin with '.'
@@ -309,8 +306,8 @@ Type of currently used regular expressions.
 .B user_interface = classic/alternative
 Default user interface used by ncmpcpp at start.
 .TP 
-.B media_library_left_column = a/y/g/c/p
-Default tag type for left column in media library. Legend for possible letters is in  SONG FORMAT section.
+.B media_library_primary_tag = artist/date/genre/composer/performer
+Default tag type for leftmost column in media library.
 .TP 
 .B empty_tag_marker = TEXT
 Text that will be displayed, if requested tag is not set.

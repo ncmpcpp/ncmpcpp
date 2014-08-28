@@ -133,7 +133,7 @@ void Lyrics::switchTo()
 std::wstring Lyrics::title()
 {
 	std::wstring result = L"Lyrics: ";
-	result += Scroller(ToWString(itsSong.toString("{%a - %t}", ", ")), itsScrollBegin, COLS-result.length()-(Config.new_design ? 2 : Global::VolumeState.length()));
+	result += Scroller(ToWString(itsSong.toString("{%a - %t}", ", ")), itsScrollBegin, COLS-result.length()-(Config.design == Design::Alternative ? 2 : Global::VolumeState.length()));
 	return result;
 }
 
@@ -313,8 +313,6 @@ void Lyrics::Load()
 	assert(!itsSong.getTitle().empty());
 	
 	itsFilename = GenerateFilename(itsSong);
-	
-	CreateDir(Config.lyrics_directory);
 	
 	w.clear();
 	w.reset();

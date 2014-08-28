@@ -99,10 +99,6 @@ struct Binding
 		return m_actions[0];
 	}
 
-	const ActionChain &actions() const {
-		return m_actions;
-	}
-
 private:
 	ActionChain m_actions;
 };

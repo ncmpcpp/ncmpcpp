@@ -434,6 +434,14 @@ void stringToBuffer(const std::basic_string<CharT> &s, NC::BasicBuffer<CharT> &b
 	stringToBuffer(s.begin(), s.end(), buf);
 }
 
+template <typename CharT>
+NC::BasicBuffer<CharT> stringToBuffer(const std::basic_string<CharT> &s)
+{
+	NC::BasicBuffer<CharT> result;
+	stringToBuffer(s, result);
+	return result;
+}
+
 template <typename T> void ShowTime(T &buf, size_t length, bool short_names)
 {
 	const unsigned MINUTE = 60;

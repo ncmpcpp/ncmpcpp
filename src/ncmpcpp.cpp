@@ -34,7 +34,7 @@
 #include "bindings.h"
 #include "browser.h"
 #include "charset.h"
-#include "cmdargs.h"
+#include "configuration.h"
 #include "global.h"
 #include "error.h"
 #include "helpers.h"
@@ -101,11 +101,8 @@ int main(int argc, char **argv)
 	std::setlocale(LC_ALL, "");
 	std::locale::global(Charset::internalLocale());
 	
-	if (!ParseArguments(argc, argv))
+	if (!configure(argc, argv))
 		return 0;
-	
-	Mpd.SetTimeout(Config.mpd_connection_timeout);
-	CreateDir(Config.ncmpcpp_directory);
 	
 	// always execute these commands, even if ncmpcpp use exit function
 	atexit(do_at_exit);
@@ -122,7 +119,7 @@ int main(int argc, char **argv)
 	if (!Config.titles_visibility)
 		wattron(stdscr, COLOR_PAIR(int(Config.main_color)));
 	
-	if (Config.new_design)
+	if (Config.design == Design::Alternative)
 		Config.statusbar_visibility = 0;
 	
 	Actions::setWindowsDimensions();
@@ -130,7 +127,7 @@ int main(int argc, char **argv)
 	Actions::initializeScreens();
 	
 	wHeader = new NC::Window(0, 0, COLS, Actions::HeaderHeight, "", Config.header_color, NC::Border::None);
-	if (Config.header_visibility || Config.new_design)
+	if (Config.header_visibility || Config.design == Design::Alternative)
 		wHeader->display();
 	
 	wFooter = new NC::Window(0, Actions::FooterStartY, COLS, Actions::FooterHeight, "", Config.statusbar_color, NC::Border::None);
@@ -140,14 +137,14 @@ int main(int argc, char **argv)
 	// initialize global timer
 	Timer = boost::posix_time::microsec_clock::local_time();
 	
-	// go to playlist
+	// initialize playlist
 	myPlaylist->switchTo();
 	
 	// local variables
 	Key input(0, Key::Standard);
-	boost::posix_time::ptime past = boost::posix_time::from_time_t(0);
-	// local variables end
+	auto past = boost::posix_time::from_time_t(0);
 	
+	/// enable mouse
 	mouseinterval(0);
 	if (Config.mouse_support)
 		mousemask(ALL_MOUSE_EVENTS, 0);
@@ -240,7 +237,7 @@ int main(int argc, char **argv)
 			}
 			catch (OutOfBounds &e)
 			{
-				Statusbar::print(e.errorMessage());
+				Statusbar::printf("Error: %1%", e.errorMessage());
 			}
 			
 			if (myScreen == myPlaylist)

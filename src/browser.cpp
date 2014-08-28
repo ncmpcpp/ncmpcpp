@@ -40,6 +40,7 @@
 #include "tags.h"
 #include "utility/comparators.h"
 #include "utility/string.h"
+#include "configuration.h"
 
 using Global::MainHeight;
 using Global::MainStartY;
@@ -48,6 +49,8 @@ using Global::myScreen;
 using MPD::itDirectory;
 using MPD::itSong;
 using MPD::itPlaylist;
+
+namespace fs = boost::filesystem;
 
 Browser *myBrowser;
 
@@ -63,7 +66,7 @@ bool BrowserEntryMatcher(const boost::regex &rx, const MPD::Item &item, bool fil
 
 Browser::Browser() : itsBrowseLocally(0), itsScrollBeginning(0), itsBrowsedDir("/")
 {
-	w = NC::Menu<MPD::Item>(0, MainStartY, COLS, MainHeight, Config.columns_in_browser && Config.titles_visibility ? Display::Columns(COLS) : "", Config.main_color, NC::Border::None);
+	w = NC::Menu<MPD::Item>(0, MainStartY, COLS, MainHeight, Config.browser_display_mode == DisplayMode::Columns && Config.titles_visibility ? Display::Columns(COLS) : "", Config.main_color, NC::Border::None);
 	w.setHighlightColor(Config.main_highlight_color);
 	w.cyclicScrolling(Config.use_cyclic_scrolling);
 	w.centeredCursor(Config.centered_cursor);
@@ -78,7 +81,18 @@ void Browser::resize()
 	getWindowResizeParams(x_offset, width);
 	w.resize(width, MainHeight);
 	w.moveTo(x_offset, MainStartY);
-	w.setTitle(Config.columns_in_browser && Config.titles_visibility ? Display::Columns(w.getWidth()) : "");
+	switch (Config.browser_display_mode)
+	{
+		case DisplayMode::Columns:
+			if (Config.titles_visibility)
+			{
+				w.setTitle(Display::Columns(w.getWidth()));
+				break;
+			}
+		case DisplayMode::Classic:
+			w.setTitle("");
+			break;
+	}
 	hasToBeResized = 0;
 }
 
@@ -97,7 +111,7 @@ void Browser::switchTo()
 std::wstring Browser::title()
 {
 	std::wstring result = L"Browse: ";
-	result += Scroller(ToWString(itsBrowsedDir), itsScrollBeginning, COLS-result.length()-(Config.new_design ? 2 : Global::VolumeState.length()));
+	result += Scroller(ToWString(itsBrowsedDir), itsScrollBeginning, COLS-result.length()-(Config.design == Design::Alternative ? 2 : Global::VolumeState.length()));
 	return result;
 }
 
@@ -466,8 +480,6 @@ void Browser::GetDirectory(std::string dir, std::string subdir)
 #ifndef WIN32
 void Browser::GetLocalDirectory(MPD::ItemList &v, const std::string &directory, bool recursively) const
 {
-	namespace fs = boost::filesystem;
-	
 	size_t start_size = v.size();
 	fs::path dir(directory);
 	std::for_each(fs::directory_iterator(dir), fs::directory_iterator(), [&](fs::directory_entry &e) {
@@ -511,8 +523,6 @@ void Browser::GetLocalDirectory(MPD::ItemList &v, const std::string &directory, 
 
 void Browser::ClearDirectory(const std::string &path) const
 {
-	namespace fs = boost::filesystem;
-	
 	fs::path dir(path);
 	std::for_each(fs::directory_iterator(dir), fs::directory_iterator(), [&](fs::directory_entry &e) {
 		if (!fs::is_symlink(e) && fs::is_directory(e))
@@ -535,9 +545,15 @@ void Browser::ChangeBrowseMode()
 	Statusbar::printf("Browse mode: %1%",
 		itsBrowseLocally ? "Local filesystem" : "MPD database"
 	);
-	itsBrowsedDir = itsBrowseLocally ? Config.GetHomeDirectory() : "/";
-	if (itsBrowseLocally && *itsBrowsedDir.rbegin() == '/')
-		itsBrowsedDir.resize(itsBrowsedDir.length()-1);
+	if (itsBrowseLocally)
+	{
+		itsBrowsedDir = "~";
+		expand_home(itsBrowsedDir);
+		if (*itsBrowsedDir.rbegin() == '/')
+			itsBrowsedDir.resize(itsBrowsedDir.length()-1);
+	}
+	else
+		itsBrowsedDir = "/";
 	w.reset();
 	GetDirectory(itsBrowsedDir);
 	drawHeader();
@@ -605,10 +621,15 @@ std::string ItemToString(const MPD::Item &item)
 			result = "[" + getBasename(item.name) + "]";
 			break;
 		case MPD::itSong:
-			if (Config.columns_in_browser)
-				result = item.song->toString(Config.song_in_columns_to_string_format, Config.tags_separator);
-			else
-				result = item.song->toString(Config.song_list_format_dollar_free, Config.tags_separator);
+			switch (Config.browser_display_mode)
+			{
+				case DisplayMode::Classic:
+					result = item.song->toString(Config.song_list_format_dollar_free, Config.tags_separator);
+					break;
+				case DisplayMode::Columns:
+					result = item.song->toString(Config.song_in_columns_to_string_format, Config.tags_separator);
+					break;
+			}
 			break;
 		case MPD::itPlaylist:
 			result = Config.browser_playlist_prefix.str() + getBasename(item.name);

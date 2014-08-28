@@ -68,13 +68,13 @@ bool LocaleBasedItemSorting::operator()(const MPD::Item &a, const MPD::Item &b) 
 			case MPD::itSong:
 				switch (m_sort_mode)
 				{
-					case smName:
+					case SortMode::Name:
 						result = m_cmp(*a.song, *b.song);
 						break;
-					case smMTime:
+					case SortMode::ModificationTime:
 						result = a.song->getMTime() > b.song->getMTime();
 						break;
-					case smCustomFormat:
+					case SortMode::CustomFormat:
 						result = m_cmp(a.song->toString(Config.browser_sort_format, Config.tags_separator),
 						               b.song->toString(Config.browser_sort_format, Config.tags_separator));
 						break;

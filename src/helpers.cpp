@@ -27,7 +27,7 @@
 bool addSongToPlaylist(const MPD::Song &s, bool play, int position)
 {
 	bool result = false;
-	if (Config.ncmpc_like_songs_adding && myPlaylist->checkForSong(s))
+	if (Config.space_add_mode == SpaceAddMode::AddRemove && myPlaylist->checkForSong(s))
 	{
 		auto &w = myPlaylist->main();
 		if (play)
