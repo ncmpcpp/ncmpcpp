@@ -101,31 +101,10 @@ int main(int argc, char **argv)
 	std::setlocale(LC_ALL, "");
 	std::locale::global(Charset::internalLocale());
 	
-	Config.CheckForCommandLineConfigFilePath(argv, argc);
-	
-	Config.SetDefaults();
-	Config.Read();
-	Config.GenerateColumns();
-	
-	if (!Bindings.read(Config.ncmpcpp_directory + "bindings"))
-		return 1;
-	Bindings.generateDefaults();
-	
-	if (getenv("MPD_HOST"))
-		Mpd.SetHostname(getenv("MPD_HOST"));
-	if (getenv("MPD_PORT"))
-		Mpd.SetPort(atoi(getenv("MPD_PORT")));
-	
-	if (Config.mpd_host != "localhost")
-		Mpd.SetHostname(Config.mpd_host);
-	if (Config.mpd_port != 6600)
-		Mpd.SetPort(Config.mpd_port);
+	if (!ParseArguments(argc, argv))
+		return 0;
 	
 	Mpd.SetTimeout(Config.mpd_connection_timeout);
-	
-	if (argc > 1)
-		ParseArgv(argc, argv);
-	
 	CreateDir(Config.ncmpcpp_directory);
 	
 	// always execute these commands, even if ncmpcpp use exit function

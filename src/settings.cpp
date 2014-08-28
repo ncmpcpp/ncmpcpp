@@ -221,7 +221,6 @@ Configuration::Configuration()
 	ncmpcpp_directory = GetHomeDirectory() + ".ncmpcpp/";
 	lyrics_directory = GetHomeDirectory() + ".lyrics/";
 #	endif // WIN32
-	config_file_path = ncmpcpp_directory + "config";
 }
 
 const std::string &Configuration::GetHomeDirectory()
@@ -242,24 +241,9 @@ const std::string &Configuration::GetHomeDirectory()
 	return home_directory;
 }
 
-void Configuration::CheckForCommandLineConfigFilePath(char **argv, int argc)
+void Configuration::Read(const std::string &config_path)
 {
-	if (argc < 3)
-		return;
-	for (int i = 1; i < argc; ++i)
-	{
-		if (!strcmp(argv[i], "-c") || !strcmp(argv[i], "--config"))
-		{
-			if (++i >= argc)
-				continue;
-			config_file_path = argv[i];
-		}
-	}
-}
-
-void Configuration::Read()
-{
-	std::ifstream f(config_file_path.c_str());
+	std::ifstream f(config_path.c_str());
 	std::string cl, v, name;
 	
 	if (!f.is_open())

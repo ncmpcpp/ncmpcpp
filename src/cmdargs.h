@@ -21,6 +21,6 @@
 #ifndef NCMPCPP_CMDARGS_H
 #define NCMPCPP_CMDARGS_H
 
-void ParseArgv(int argc, char **argv);
+bool ParseArguments(int argc, char **argv);
 
 #endif // NCMPCPP_CMDARGS_H

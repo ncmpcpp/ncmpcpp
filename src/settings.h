@@ -30,8 +30,6 @@
 #include "screen_type.h"
 #include "strbuffer.h"
 
-struct BaseScreen; // forward declaration for screens sequence
-
 enum SortMode { smName, smMTime, smCustomFormat };
 
 struct Column
@@ -56,7 +54,7 @@ struct Configuration
 	void CheckForCommandLineConfigFilePath(char **argv, int argc);
 	
 	void SetDefaults();
-	void Read();
+	void Read(const std::string& config_path);
 	void GenerateColumns();
 	
 	std::string ncmpcpp_directory;
@@ -197,9 +195,8 @@ struct Configuration
 	
 private:
 	void MakeProperPath(std::string &dir);
-	
+
 	std::string home_directory;
-	std::string config_file_path;
 };
 
 extern Configuration Config;

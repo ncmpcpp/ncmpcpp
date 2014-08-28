@@ -146,6 +146,16 @@ AC_CHECK_HEADERS([boost/date_time/posix_time/posix_time.hpp], ,
 	AC_MSG_ERROR(boost/date_time/posix_time/posix_time.hpp is missing)
 )
 
+dnl ======================================
+dnl = checking for boost.program_options =
+dnl ======================================
+AC_CHECK_HEADERS([boost/program_options.hpp], ,
+	AC_MSG_ERROR(boost/program_options.hpp is missing)
+)
+AC_CHECK_LIB(boost_program_options$BOOST_LIB_SUFFIX, main, LDFLAGS="$LDFLAGS -lboost_program_options$BOOST_LIB_SUFFIX",
+	AC_MSG_ERROR([no boost.program_options library found])
+)
+
 dnl ============================
 dnl = checking for boost.regex =
 dnl ============================
