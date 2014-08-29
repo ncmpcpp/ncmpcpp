@@ -388,6 +388,8 @@ bool Configuration::read(const std::string &config_path)
 	p.add("media_library_primary_tag", option_parser::worker([this](std::string &&v) {
 		if (v == "artist")
 			media_lib_primary_tag = MPD_TAG_ARTIST;
+		else if (v == "album_artist")
+			media_lib_primary_tag = MPD_TAG_ALBUM_ARTIST;
 		else if (v == "date")
 			media_lib_primary_tag = MPD_TAG_DATE;
 		else if (v == "genre")
