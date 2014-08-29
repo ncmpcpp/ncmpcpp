@@ -1860,7 +1860,7 @@ void ApplyFilter::run()
 	if (myScreen == myPlaylist)
 	{
 		myPlaylist->EnableHighlighting();
-		Playlist::ReloadTotalLength = true;
+		myPlaylist->reloadTotalLength();
 		drawHeader();
 	}
 	listsChangeFinisher();

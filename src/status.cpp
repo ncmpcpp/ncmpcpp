@@ -279,8 +279,8 @@ void Status::Changes::playlist()
 	if (State::player() != MPD::psStop)
 		drawTitle(myPlaylist->nowPlayingSong());
 	
-	Playlist::ReloadTotalLength = true;
-	Playlist::ReloadRemaining = true;
+	myPlaylist->reloadTotalLength();
+	myPlaylist->reloadRemaining();
 	
 	if (isVisible(myBrowser))
 		markSongsInPlaylist(myBrowser->proxySongList());
@@ -330,13 +330,13 @@ void Status::Changes::playerState()
 	{
 		case MPD::psPlay:
 			drawTitle(myPlaylist->nowPlayingSong());
-			Playlist::ReloadRemaining = true;
+			myPlaylist->reloadRemaining();
 			break;
 		case MPD::psStop:
 			windowTitle("ncmpcpp " VERSION);
 			if (Progressbar::isUnlocked())
 				Progressbar::draw(0, 0);
-			Playlist::ReloadRemaining = true;
+			myPlaylist->reloadRemaining();
 			if (Config.design == Design::Alternative)
 			{
 				*wHeader << NC::XY(0, 0) << wclrtoeol << NC::XY(0, 1) << wclrtoeol;
@@ -381,7 +381,7 @@ void Status::Changes::songID()
 {
 	// update information about current song
 	myPlaylist->setStatus(m_status);
-	Playlist::ReloadRemaining = true;
+	myPlaylist->reloadRemaining();
 	playing_song_scroll_begin = 0;
 	first_line_scroll_begin = 0;
 	second_line_scroll_begin = 0;

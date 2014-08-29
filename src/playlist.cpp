@@ -40,10 +40,7 @@ using Global::MainStartY;
 
 Playlist *myPlaylist;
 
-bool Playlist::ReloadTotalLength = 0;
-bool Playlist::ReloadRemaining = false;
-
-namespace {//
+namespace {
 
 std::string songToString(const MPD::Song &s);
 bool playlistEntryMatcher(const boost::regex &rx, const MPD::Song &s);
@@ -51,7 +48,8 @@ bool playlistEntryMatcher(const boost::regex &rx, const MPD::Song &s);
 }
 
 Playlist::Playlist()
-: itsTotalLength(0), itsRemainingTime(0), itsScrollBegin(0), m_old_playlist_version(0)
+: m_total_length(0), m_remaining_time(0), m_scroll_begin(0), m_old_playlist_version(0)
+, m_reload_total_length(false), m_reload_remaining(false)
 {
 	w = NC::Menu<MPD::Song>(0, MainStartY, COLS, MainHeight, Config.playlist_display_mode == DisplayMode::Columns && Config.titles_visibility ? Display::Columns(COLS) : "", Config.main_color, NC::Border::None);
 	w.cyclicScrolling(Config.use_cyclic_scrolling);
@@ -73,7 +71,7 @@ Playlist::Playlist()
 void Playlist::switchTo()
 {
 	SwitchTo::execute(this);
-	itsScrollBegin = 0;
+	m_scroll_begin = 0;
 	EnableHighlighting();
 	drawHeader();
 }
@@ -103,9 +101,9 @@ void Playlist::resize()
 std::wstring Playlist::title()
 {
 	std::wstring result = L"Playlist ";
-	if (ReloadTotalLength || ReloadRemaining)
-		itsBufferedStats = TotalLength();
-	result += Scroller(ToWString(itsBufferedStats), itsScrollBegin, COLS-result.length()-(Config.design == Design::Alternative ? 2 : Global::VolumeState.length()));
+	if (m_reload_total_length || m_reload_remaining)
+		m_stats = getTotalLength();
+	result += Scroller(ToWString(m_stats), m_scroll_begin, COLS-result.length()-(Config.design == Design::Alternative ? 2 : Global::VolumeState.length()));
 	return result;
 }
 
@@ -113,7 +111,7 @@ void Playlist::update()
 {
 	if (w.isHighlighted()
 	&&  Config.playlist_disable_highlight_delay.time_duration::seconds() > 0
-	&&  Global::Timer - itsTimer > Config.playlist_disable_highlight_delay)
+	&&  Global::Timer - m_timer > Config.playlist_disable_highlight_delay)
 	{
 		w.setHighlighting(false);
 		w.refresh();
@@ -283,26 +281,26 @@ void Playlist::Reverse()
 void Playlist::EnableHighlighting()
 {
 	w.setHighlighting(true);
-	itsTimer = Global::Timer;
+	m_timer = Global::Timer;
 }
 
-std::string Playlist::TotalLength()
+std::string Playlist::getTotalLength()
 {
 	std::ostringstream result;
 	
-	if (ReloadTotalLength)
+	if (m_reload_total_length)
 	{
-		itsTotalLength = 0;
-		for (size_t i = 0; i < w.size(); ++i)
-			itsTotalLength += w[i].value().getDuration();
-		ReloadTotalLength = 0;
+		m_total_length = 0;
+		for (const auto &s : w)
+			m_total_length += s.value().getDuration();
+		m_reload_total_length = false;
 	}
-	if (Config.playlist_show_remaining_time && ReloadRemaining && !w.isFiltered())
+	if (Config.playlist_show_remaining_time && m_reload_remaining && !w.isFiltered())
 	{
-		itsRemainingTime = 0;
+		m_remaining_time = 0;
 		for (size_t i = currentSongPosition(); i < w.size(); ++i)
-			itsRemainingTime += w[i].value().getDuration();
-		ReloadRemaining = false;
+			m_remaining_time += w[i].value().getDuration();
+		m_reload_remaining = false;
 	}
 	
 	result << '(' << w.size() << (w.size() == 1 ? " item" : " items");
@@ -316,15 +314,15 @@ std::string Playlist::TotalLength()
 			result << " (out of " << real_size << ")";
 	}
 	
-	if (itsTotalLength)
+	if (m_total_length)
 	{
 		result << ", length: ";
-		ShowTime(result, itsTotalLength, Config.playlist_shorten_total_times);
+		ShowTime(result, m_total_length, Config.playlist_shorten_total_times);
 	}
-	if (Config.playlist_show_remaining_time && itsRemainingTime && !w.isFiltered() && w.size() > 1)
+	if (Config.playlist_show_remaining_time && m_remaining_time && !w.isFiltered() && w.size() > 1)
 	{
 		result << " :: remaining: ";
-		ShowTime(result, itsRemainingTime, Config.playlist_shorten_total_times);
+		ShowTime(result, m_remaining_time, Config.playlist_shorten_total_times);
 	}
 	result << ')';
 	return result.str();
@@ -362,20 +360,20 @@ unsigned Playlist::currentSongLength() const
 
 bool Playlist::checkForSong(const MPD::Song &s)
 {
-	return itsSongHashes.find(s.getHash()) != itsSongHashes.end();
+	return m_song_hashes.find(s.getHash()) != m_song_hashes.end();
 }
 
 void Playlist::registerHash(size_t hash)
 {
-	++itsSongHashes[hash];
+	++m_song_hashes[hash];
 }
 
 void Playlist::unregisterHash(size_t hash)
 {
-	auto it = itsSongHashes.find(hash);
-	assert(it != itsSongHashes.end());
+	auto it = m_song_hashes.find(hash);
+	assert(it != m_song_hashes.end());
 	if (it->second == 1)
-		itsSongHashes.erase(it);
+		m_song_hashes.erase(it);
 	else
 		--it->second;
 }

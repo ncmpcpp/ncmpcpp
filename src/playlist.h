@@ -84,26 +84,30 @@ struct Playlist: Screen<NC::Menu<MPD::Song>>, Filterable, HasSongs, Searchable, 
 	void registerHash(size_t hash);
 	void unregisterHash(size_t hash);
 	
-	static bool ReloadTotalLength;
-	static bool ReloadRemaining;
+	void reloadTotalLength() { m_reload_total_length = true; }
+	void reloadRemaining() { m_reload_remaining = true; }
 	
 protected:
 	virtual bool isLockable() OVERRIDE { return true; }
 	
 private:
-	std::string TotalLength();
-	std::string itsBufferedStats;
+	std::string getTotalLength();
+
+	std::string m_stats;
 	
-	std::unordered_map<size_t, int> itsSongHashes;
+	std::unordered_map<size_t, int> m_song_hashes;
 	
-	size_t itsTotalLength;
-	size_t itsRemainingTime;
-	size_t itsScrollBegin;
+	size_t m_total_length;;
+	size_t m_remaining_time;
+	size_t m_scroll_begin;
 	
-	boost::posix_time::ptime itsTimer;
+	boost::posix_time::ptime m_timer;
 	
 	MPD::Status m_status;
 	unsigned m_old_playlist_version;
+
+	bool m_reload_total_length;
+	bool m_reload_remaining;
 };
 
 extern Playlist *myPlaylist;
