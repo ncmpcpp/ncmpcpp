@@ -78,6 +78,8 @@ bool LocaleBasedItemSorting::operator()(const MPD::Item &a, const MPD::Item &b) 
 						result = m_cmp(a.song->toString(Config.browser_sort_format, Config.tags_separator),
 						               b.song->toString(Config.browser_sort_format, Config.tags_separator));
 						break;
+					case SortMode::NoOp:
+						throw std::logic_error("can't sort with NoOp sorting mode");
 				}
 				break;
 		}

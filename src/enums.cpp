@@ -60,6 +60,9 @@ std::ostream &operator<<(std::ostream &os, SortMode sm)
 		case SortMode::CustomFormat:
 			os << "format";
 			break;
+		case SortMode::NoOp:
+			os << "noop";
+			break;
 	}
 	return os;
 }
@@ -74,6 +77,8 @@ std::istream &operator>>(std::istream &is, SortMode &sm)
 		sm = SortMode::ModificationTime;
 	else if (ssm == "format")
 		sm = SortMode::CustomFormat;
+	else if (ssm == "noop")
+		sm = SortMode::NoOp;
 	else
 		is.setstate(std::ios::failbit);
 	return is;

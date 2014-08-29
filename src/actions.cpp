@@ -2060,19 +2060,24 @@ void ToggleBrowserSortMode::run()
 	{
 		case SortMode::Name:
 			Config.browser_sort_mode = SortMode::ModificationTime;
-			Statusbar::print("Sort songs by: Modification time");
+			Statusbar::print("Sort songs by: modification time");
 			break;
 		case SortMode::ModificationTime:
 			Config.browser_sort_mode = SortMode::CustomFormat;
-			Statusbar::print("Sort songs by: Custom format");
+			Statusbar::print("Sort songs by: custom format");
 			break;
 		case SortMode::CustomFormat:
-			Config.browser_sort_mode = SortMode::Name;
-			Statusbar::print("Sort songs by: Name");
+			Config.browser_sort_mode = SortMode::NoOp;
+			Statusbar::print("Do not sort songs");
 			break;
+		case SortMode::NoOp:
+			Config.browser_sort_mode = SortMode::Name;
+			Statusbar::print("Sort songs by: name");
 	}
-	std::sort(myBrowser->main().begin()+(myBrowser->CurrentDir() != "/"), myBrowser->main().end(),
-		LocaleBasedItemSorting(std::locale(), Config.ignore_leading_the, Config.browser_sort_mode));
+	if (Config.browser_sort_mode != SortMode::NoOp)
+		std::sort(myBrowser->main().begin()+(myBrowser->CurrentDir() != "/"), myBrowser->main().end(),
+			LocaleBasedItemSorting(std::locale(), Config.ignore_leading_the, Config.browser_sort_mode)
+		);
 }
 
 bool ToggleLibraryTagType::canBeRun() const

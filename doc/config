@@ -183,7 +183,8 @@
 ## Note: Below variables are used for sorting songs in browser.
 ## The sort mode determines how songs are sorted, and can be used
 ## in combination with a sort format to specify a custom sorting format.
-## Available values for browser_sort_mode are "name", "mtime" and "format".
+## Available values for browser_sort_mode are "name", "mtime", "format"
+## and "noop".
 ##
 #
 #browser_sort_mode = name
