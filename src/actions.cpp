@@ -1098,7 +1098,7 @@ void ToggleSeparatorsBetweenAlbums::run()
 {
 	Config.playlist_separate_albums = !Config.playlist_separate_albums;
 	Statusbar::printf("Separators between albums: %1%",
-		Config.playlist_separate_albums ? "On" : "Off"
+		Config.playlist_separate_albums ? "on" : "off"
 	);
 }
 
@@ -1128,7 +1128,7 @@ void ToggleFetchingLyricsInBackground::run()
 #	ifdef HAVE_CURL_CURL_H
 	Config.fetch_lyrics_in_background = !Config.fetch_lyrics_in_background;
 	Statusbar::printf("Fetching lyrics for playing songs in background: %1%",
-		Config.fetch_lyrics_in_background ? "On" : "Off"
+		Config.fetch_lyrics_in_background ? "on" : "off"
 	);
 #	endif // HAVE_CURL_CURL_H
 }
@@ -1137,7 +1137,7 @@ void TogglePlayingSongCentering::run()
 {
 	Config.autocenter_mode = !Config.autocenter_mode;
 	Statusbar::printf("Centering playing song: %1%",
-		Config.autocenter_mode ? "On" : "Off"
+		Config.autocenter_mode ? "on" : "off"
 	);
 	if (Config.autocenter_mode
 	&& Status::State::player() != MPD::psStop
@@ -1973,7 +1973,7 @@ void ToggleReplayGainMode::run()
 void ToggleSpaceMode::run()
 {
 	Config.space_selects = !Config.space_selects;
-	Statusbar::printf("Space mode: %1% item", Config.space_selects ? "Select" : "Add");
+	Statusbar::printf("Space mode: %1% item", Config.space_selects ? "select" : "add");
 }
 
 void ToggleAddMode::run()
@@ -1983,11 +1983,11 @@ void ToggleAddMode::run()
 	{
 		case SpaceAddMode::AddRemove:
 			Config.space_add_mode = SpaceAddMode::AlwaysAdd;
-			mode_desc = "Always add an item to playlist";
+			mode_desc = "always add an item to playlist";
 			break;
 		case SpaceAddMode::AlwaysAdd:
 			Config.space_add_mode = SpaceAddMode::AddRemove;
-			mode_desc = "Add an item to playlist or remove if already added";
+			mode_desc = "add an item to playlist or remove if already added";
 			break;
 	}
 	Statusbar::printf("Add mode: %1%", mode_desc);

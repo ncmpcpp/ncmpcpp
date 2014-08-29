@@ -132,7 +132,7 @@ void Visualizer::spacePressed()
 #	ifdef HAVE_FFTW3_H
 	Config.visualizer_use_wave = !Config.visualizer_use_wave;
 	Statusbar::printf("Visualization type: %1%",
-		Config.visualizer_use_wave ? "Sound wave" : "Frequency spectrum"
+		Config.visualizer_use_wave ? "sound wave" : "frequency spectrum"
 	);
 #	endif // HAVE_FFTW3_H
 }

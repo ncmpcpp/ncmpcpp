@@ -546,7 +546,7 @@ void Browser::ChangeBrowseMode()
 	
 	itsBrowseLocally = !itsBrowseLocally;
 	Statusbar::printf("Browse mode: %1%",
-		itsBrowseLocally ? "Local filesystem" : "MPD database"
+		itsBrowseLocally ? "local filesystem" : "MPD database"
 	);
 	if (itsBrowseLocally)
 	{

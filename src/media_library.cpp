@@ -894,7 +894,7 @@ void MediaLibrary::toggleSortMode()
 {
 	Config.media_library_sort_by_mtime = !Config.media_library_sort_by_mtime;
 	Statusbar::printf("Sorting library by: %1%",
-		Config.media_library_sort_by_mtime ? "Modification time" : "Name");
+		Config.media_library_sort_by_mtime ? "modification time" : "name");
 	if (hasTwoColumns)
 	{
 		std::sort(Albums.beginV(), Albums.endV(), SortAlbumEntries());

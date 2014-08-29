@@ -394,8 +394,6 @@ std::string Connection::GetReplayGainMode()
 	if (mpd_pair *pair = mpd_recv_pair_named(m_connection, "replay_gain_mode"))
 	{
 		result = pair->value;
-		if (!result.empty())
-			result[0] = toupper(result[0]);
 		mpd_return_pair(m_connection, pair);
 	}
 	mpd_response_finish(m_connection);

@@ -141,7 +141,7 @@ void Lyrics::spacePressed()
 {
 	Config.now_playing_lyrics = !Config.now_playing_lyrics;
 	Statusbar::printf("Reload lyrics if song changes: %1%",
-		Config.now_playing_lyrics ? "On" : "Off"
+		Config.now_playing_lyrics ? "on" : "off"
 	);
 }
 
