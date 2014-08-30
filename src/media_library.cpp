@@ -45,7 +45,9 @@ using Global::myScreen;
 
 MediaLibrary *myLibrary;
 
-namespace {//
+namespace {
+
+const auto fetch_delay = boost::posix_time::milliseconds(500);
 
 bool hasTwoColumns;
 size_t itsLeftColStartX;
@@ -144,6 +146,7 @@ public:
 }
 
 MediaLibrary::MediaLibrary()
+: m_timer(boost::posix_time::from_time_t(0))
 {
 	hasTwoColumns = 0;
 	itsLeftColWidth = COLS/3-1;
@@ -336,7 +339,9 @@ void MediaLibrary::update()
 			Tags.refresh();
 		}
 		
-		if ((!Tags.empty() && Albums.reallyEmpty()) || m_albums_update_request)
+		if (!Tags.empty()
+		&& ((Albums.reallyEmpty() && Global::Timer - m_timer > fetch_delay) || m_albums_update_request)
+		)
 		{
 			Albums.clearSearchResults();
 			m_albums_update_request = false;
@@ -382,7 +387,9 @@ void MediaLibrary::update()
 		}
 	}
 	
-	if ((!Albums.empty() && Songs.reallyEmpty()) || m_songs_update_request)
+	if (!Albums.empty()
+	&& ((Songs.reallyEmpty() && Global::Timer - m_timer > fetch_delay) || m_songs_update_request)
+	)
 	{
 		Songs.clearSearchResults();
 		m_songs_update_request = false;
@@ -850,6 +857,11 @@ void MediaLibrary::nextColumn()
 }
 
 /***********************************************************************/
+
+void MediaLibrary::updateTimer()
+{
+	m_timer = Global::Timer;
+}
 
 void MediaLibrary::toggleColumnsMode()
 {

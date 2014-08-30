@@ -2784,11 +2784,16 @@ void listsChangeFinisher()
 		if (myScreen->activeWindow() == &myLibrary->Tags)
 		{
 			myLibrary->Albums.clear();
+			myLibrary->Albums.refresh();
 			myLibrary->Songs.clear();
+			myLibrary->Songs.refresh();
+			myLibrary->updateTimer();
 		}
 		else if (myScreen->activeWindow() == &myLibrary->Albums)
 		{
 			myLibrary->Songs.clear();
+			myLibrary->Songs.refresh();
+			myLibrary->updateTimer();
 		}
 		else if (myScreen->isActiveWindow(myPlaylistEditor->Playlists))
 		{

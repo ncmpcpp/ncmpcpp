@@ -69,6 +69,7 @@ struct MediaLibrary: Screen<NC::Window *>, Filterable, HasColumns, HasSongs, Sea
 	virtual void nextColumn() OVERRIDE;
 	
 	// private members
+	void updateTimer();
 	void toggleColumnsMode();
 	int Columns();
 	void LocateSong(const MPD::Song &);
@@ -143,6 +144,8 @@ private:
 	bool m_tags_update_request;
 	bool m_albums_update_request;
 	bool m_songs_update_request;
+
+	boost::posix_time::ptime m_timer;
 };
 
 extern MediaLibrary *myLibrary;
