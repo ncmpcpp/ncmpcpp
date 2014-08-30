@@ -353,7 +353,7 @@ bool Configuration::read(const std::string &config_path)
 		seek_time, 1
 	));
 	p.add("volume_change_step", assign_default(
-		volume_change_step, 1
+		volume_change_step, 2
 	));
 	p.add("autocenter_mode", yes_no(
 		titles_visibility, false
