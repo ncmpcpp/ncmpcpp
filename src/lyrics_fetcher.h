@@ -108,7 +108,7 @@ struct JustSomeLyricsFetcher : public GoogleLyricsFetcher
 	virtual const char *name() { return "justsomelyrics.com"; }
 	
 protected:
-	virtual const char *regex() { return "<p class=\"lyrics\">(.*?)</p>"; }
+	virtual const char *regex() { return "<div class=\"core-left\">(.*?)</div>"; }
 };
 
 struct AzLyricsFetcher : public GoogleLyricsFetcher
