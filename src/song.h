@@ -21,6 +21,7 @@
 #ifndef NCMPCPP_SONG_H
 #define NCMPCPP_SONG_H
 
+#include <cstring>
 #include <functional>
 #include <memory>
 #include <string>
@@ -32,6 +33,10 @@ namespace MPD {//
 
 struct Song
 {
+	struct Hash {
+		size_t operator()(const Song &s) const { return s.m_hash; }
+	};
+
 	typedef std::string (Song::*GetFunction)(unsigned) const;
 	
 	Song() { }
@@ -61,7 +66,6 @@ struct Song
 	
 	virtual std::string getTags(GetFunction f, const std::string &tags_separator) const;
 	
-	virtual unsigned getHash() const;
 	virtual unsigned getDuration() const;
 	virtual unsigned getPosition() const;
 	virtual unsigned getID() const;
@@ -76,9 +80,19 @@ struct Song
 	virtual std::string toString(const std::string &fmt, const std::string &tags_separator,
 	                             const std::string &escape_chars = "") const;
 	
-	bool operator==(const Song &rhs) const { return m_hash == rhs.m_hash; }
-	bool operator!=(const Song &rhs) const { return m_hash != rhs.m_hash; }
+	bool operator==(const Song &rhs) const {
+		if (m_hash != rhs.m_hash)
+			return false;
+		return strcmp(c_uri(), rhs.c_uri()) == 0;
+	}
+	bool operator!=(const Song &rhs) const {
+		if (m_hash != rhs.m_hash)
+			return true;
+		return strcmp(c_uri(), rhs.c_uri()) != 0;
+	}
 	
+	const char *c_uri() const { return m_song ? mpd_song_get_uri(m_song.get()) : ""; }
+
 	static std::string ShowTime(unsigned length);
 	static void validateFormat(const std::string &fmt);
 	

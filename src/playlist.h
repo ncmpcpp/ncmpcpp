@@ -81,8 +81,8 @@ struct Playlist: Screen<NC::Menu<MPD::Song>>, Filterable, HasSongs, Searchable, 
 	unsigned currentSongLength() const;
 	
 	bool checkForSong(const MPD::Song &s);
-	void registerHash(size_t hash);
-	void unregisterHash(size_t hash);
+	void registerSong(const MPD::Song &s);
+	void unregisterSong(const MPD::Song &s);
 	
 	void reloadTotalLength() { m_reload_total_length = true; }
 	void reloadRemaining() { m_reload_remaining = true; }
@@ -95,7 +95,7 @@ private:
 
 	std::string m_stats;
 	
-	std::unordered_map<size_t, int> m_song_hashes;
+	std::unordered_map<MPD::Song, int, MPD::Song::Hash> m_song_refs;
 	
 	size_t m_total_length;;
 	size_t m_remaining_time;

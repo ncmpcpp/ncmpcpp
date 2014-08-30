@@ -30,13 +30,13 @@
 #include "utility/wide_string.h"
 #include "window.h"
 
-namespace {//
+namespace {
 
 size_t calc_hash(const char* s, unsigned seed = 0)
 {
 	size_t hash = seed;
 	while (*s)
-		hash = hash * 101  +  *s++;
+		hash = hash * 101 + *s++;
 	return hash;
 }
 
@@ -209,12 +209,6 @@ std::string MPD::Song::getTags(GetFunction f, const std::string &tags_separator)
 		result += tag;
 	}
 	return result;
-}
-
-unsigned Song::getHash() const
-{
-	assert(m_song);
-	return m_hash;
 }
 
 unsigned Song::getDuration() const

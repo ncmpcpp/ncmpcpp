@@ -980,11 +980,11 @@ void MediaLibrary::LocateSong(const MPD::Song &s)
 	if (Songs.empty())
 		update();
 	
-	if (s.getHash() != Songs.current().value().getHash())
+	if (s != Songs.current().value())
 	{
 		for (size_t i = 0; i < Songs.size(); ++i)
 		{
-			if (s.getHash()  == Songs[i].value().getHash())
+			if (s == Songs[i].value())
 			{
 				Songs.highlight(i);
 				break;

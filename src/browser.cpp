@@ -398,7 +398,7 @@ void Browser::LocateSong(const MPD::Song &s)
 		GetDirectory(s.getDirectory());
 	for (size_t i = 0; i < w.size(); ++i)
 	{
-		if (w[i].value().type == itSong && s.getHash() == w[i].value().song->getHash())
+		if (w[i].value().type == itSong && s == *w[i].value().song)
 		{
 			w.highlight(i);
 			break;
@@ -460,16 +460,7 @@ void Browser::GetDirectory(std::string dir, std::string subdir)
 			}
 			case itSong:
 			{
-				bool bold = 0;
-				for (size_t i = 0; i < myPlaylist->main().size(); ++i)
-				{
-					if (myPlaylist->main().at(i).value().getHash() == it->song->getHash())
-					{
-						bold = 1;
-						break;
-					}
-				}
-				w.addItem(*it, bold);
+				w.addItem(*it, myPlaylist->checkForSong(*it->song));
 				break;
 			}
 		}

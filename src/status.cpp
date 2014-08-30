@@ -257,7 +257,7 @@ void Status::Changes::playlist()
 			auto it = myPlaylist->main().begin()+playlist_length;
 			auto end = myPlaylist->main().end();
 			for (; it != end; ++it)
-				myPlaylist->unregisterHash(it->value().getHash());
+				myPlaylist->unregisterSong(it->value());
 			myPlaylist->main().resizeList(playlist_length);
 		}
 		
@@ -267,12 +267,12 @@ void Status::Changes::playlist()
 			{
 				// if song's already in playlist, replace it with a new one
 				MPD::Song &old_s = myPlaylist->main()[pos].value();
-				myPlaylist->unregisterHash(old_s.getHash());
+				myPlaylist->unregisterSong(old_s);
 				old_s = s;
 			}
 			else // otherwise just add it to playlist
 				myPlaylist->main().addItem(s);
-			myPlaylist->registerHash(s.getHash());
+			myPlaylist->registerSong(s);
 		});
 	});
 	

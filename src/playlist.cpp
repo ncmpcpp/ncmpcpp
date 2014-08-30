@@ -360,20 +360,20 @@ unsigned Playlist::currentSongLength() const
 
 bool Playlist::checkForSong(const MPD::Song &s)
 {
-	return m_song_hashes.find(s.getHash()) != m_song_hashes.end();
+	return m_song_refs.find(s) != m_song_refs.end();
 }
 
-void Playlist::registerHash(size_t hash)
+void Playlist::registerSong(const MPD::Song &s)
 {
-	++m_song_hashes[hash];
+	++m_song_refs[s];
 }
 
-void Playlist::unregisterHash(size_t hash)
+void Playlist::unregisterSong(const MPD::Song &s)
 {
-	auto it = m_song_hashes.find(hash);
-	assert(it != m_song_hashes.end());
+	auto it = m_song_refs.find(s);
+	assert(it != m_song_refs.end());
 	if (it->second == 1)
-		m_song_hashes.erase(it);
+		m_song_refs.erase(it);
 	else
 		--it->second;
 }

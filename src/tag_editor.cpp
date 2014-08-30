@@ -1025,7 +1025,7 @@ void TagEditor::LocateSong(const MPD::Song &s)
 	// highlight our file
 	for (size_t i = 0; i < Tags->size(); ++i)
 	{
-		if ((*Tags)[i].value().getHash() == s.getHash())
+		if ((*Tags)[i].value() == s)
 		{
 			Tags->highlight(i);
 			break;
