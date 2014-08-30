@@ -69,6 +69,8 @@ struct PlaylistEditor: Screen<NC::Window *>, Filterable, HasColumns, HasSongs, S
 	virtual void nextColumn() OVERRIDE;
 	
 	// private members
+	void updateTimer();
+
 	void requestPlaylistsUpdate() { m_playlists_update_requested = true; }
 	void requestContentsUpdate() { m_content_update_requested = true; }
 	
@@ -87,6 +89,8 @@ private:
 	
 	bool m_playlists_update_requested;
 	bool m_content_update_requested;
+
+	boost::posix_time::ptime m_timer;
 };
 
 extern PlaylistEditor *myPlaylistEditor;

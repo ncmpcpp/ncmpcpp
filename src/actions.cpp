@@ -2798,6 +2798,8 @@ void listsChangeFinisher()
 		else if (myScreen->isActiveWindow(myPlaylistEditor->Playlists))
 		{
 			myPlaylistEditor->Content.clear();
+			myPlaylistEditor->Content.refresh();
+			myPlaylistEditor->updateTimer();
 		}
 #		ifdef HAVE_TAGLIB_H
 		else if (myScreen->activeWindow() == myTagEditor->Dirs)

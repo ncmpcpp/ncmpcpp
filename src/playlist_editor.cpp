@@ -42,7 +42,9 @@ using Global::MainStartY;
 
 PlaylistEditor *myPlaylistEditor;
 
-namespace {//
+namespace {
+
+const auto fetch_delay = boost::posix_time::milliseconds(500);
 
 size_t LeftColumnStartX;
 size_t LeftColumnWidth;
@@ -56,6 +58,7 @@ bool SongEntryMatcher(const boost::regex &rx, const MPD::Song &s);
 }
 
 PlaylistEditor::PlaylistEditor()
+: m_timer(boost::posix_time::from_time_t(0))
 {
 	LeftColumnWidth = COLS/3-1;
 	RightColumnStartX = LeftColumnWidth+1;
@@ -152,7 +155,9 @@ void PlaylistEditor::update()
 		Playlists.refresh();
 	}
 	
-	if (!Playlists.empty() && (Content.reallyEmpty() || m_content_update_requested))
+	if (!Playlists.empty()
+	&& ((Content.reallyEmpty() && Global::Timer - m_timer > fetch_delay) || m_content_update_requested)
+	)
 	{
 		m_content_update_requested = false;
 		Content.clearSearchResults();
@@ -534,6 +539,11 @@ void PlaylistEditor::nextColumn()
 }
 
 /***********************************************************************/
+
+void PlaylistEditor::updateTimer()
+{
+	m_timer = Global::Timer;
+}
 
 void PlaylistEditor::Locate(const std::string &name)
 {
