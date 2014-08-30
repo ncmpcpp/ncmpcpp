@@ -194,7 +194,7 @@ int main(int argc, char **argv)
 					myVisualizer->FindOutputID();
 #					endif // ENABLE_VISUALIZER
 					
-					Statusbar::printf("Connected to \"%1%\"", Mpd.GetHostname());
+					Statusbar::printf("Connected to %1%", Mpd.GetHostname());
 				}
 				catch (MPD::ClientError &e)
 				{
