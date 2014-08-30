@@ -203,8 +203,6 @@ LyricsFetcher::Result GoogleLyricsFetcher::fetch(const std::string &artist, cons
 	}
 	
 	data = unescapeHtmlUtf8(urls[0]);
-	//result.second = data;
-	//return result;
 	
 	URL = data.c_str();
 	return LyricsFetcher::fetch("", "");
@@ -213,6 +211,15 @@ LyricsFetcher::Result GoogleLyricsFetcher::fetch(const std::string &artist, cons
 bool GoogleLyricsFetcher::isURLOk(const std::string &url)
 {
 	return url.find(siteKeyword()) != std::string::npos;
+}
+
+/**********************************************************************/
+
+void Sing365Fetcher::postProcess(std::string &data)
+{
+	// throw away ad
+	data = boost::regex_replace(data, boost::regex("<div.*</div>"), "");
+	LyricsFetcher::postProcess(data);
 }
 
 /**********************************************************************/

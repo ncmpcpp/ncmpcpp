@@ -100,7 +100,9 @@ struct Sing365Fetcher : public GoogleLyricsFetcher
 	virtual const char *name() { return "sing365.com"; }
 	
 protected:
-	virtual const char *regex() { return "<div style=\"font-size: 14px;\">(.*?)</div>"; }
+	virtual const char *regex() { return "<script src=\"//srv.tonefuse.com/showads/showad.js\"></script>(.*?)<script>\n/\\* Sing365 - Below Lyrics"; }
+
+	virtual void postProcess(std::string &data);
 };
 
 struct JustSomeLyricsFetcher : public GoogleLyricsFetcher
