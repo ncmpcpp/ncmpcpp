@@ -1835,7 +1835,13 @@ void ApplyFilter::run()
 	
 	Filterable *f = dynamic_cast<Filterable *>(myScreen);
 	std::string filter = f->currentFilter();
-	
+	// if filter is already here, apply it
+	if (!filter.empty())
+	{
+		f->applyFilter(filter);
+		myScreen->refreshWindow();
+	}
+
 	Statusbar::lock();
 	Statusbar::put() << NC::Format::Bold << "Apply filter: " << NC::Format::NoBold;
 	wFooter->setGetStringHelper(Statusbar::Helpers::ApplyFilterImmediately(f, filter));
