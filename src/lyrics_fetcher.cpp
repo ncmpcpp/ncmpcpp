@@ -247,16 +247,6 @@ bool MetrolyricsFetcher::isURLOk(const std::string &url)
 
 /**********************************************************************/
 
-void LyricsmaniaFetcher::postProcess(std::string &data)
-{
-	// lyricsmania.com uses iso-8859-1 as the encoding
-	// so we need to convert obtained lyrics to utf-8
-	data = Charset::toUtf8From(data, "iso-8859-1");
-	LyricsFetcher::postProcess(data);
-}
-
-/**********************************************************************/
-
 LyricsFetcher::Result InternetLyricsFetcher::fetch(const std::string &artist, const std::string &title)
 {
 	GoogleLyricsFetcher::fetch(artist, title);

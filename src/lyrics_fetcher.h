@@ -90,9 +90,7 @@ struct LyricsmaniaFetcher : public GoogleLyricsFetcher
 	virtual const char *name() { return "lyricsmania.com"; }
 	
 protected:
-	virtual const char *regex() { return "<div id='songlyrics_h' class='dn'>(.*?)</div>"; }
-	
-	virtual void postProcess(std::string &data);
+	virtual const char *regex() { return "<div class=\"lyrics-body\".*?</strong>(.*?)</div>"; }
 };
 
 struct Sing365Fetcher : public GoogleLyricsFetcher
