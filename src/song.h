@@ -39,7 +39,7 @@ struct Song
 
 	typedef std::string (Song::*GetFunction)(unsigned) const;
 	
-	Song() { }
+	Song() : m_hash(0) { }
 	virtual ~Song() { }
 	
 	Song(mpd_song *s);
