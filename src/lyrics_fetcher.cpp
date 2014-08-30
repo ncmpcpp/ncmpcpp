@@ -226,10 +226,6 @@ void Sing365Fetcher::postProcess(std::string &data)
 
 void MetrolyricsFetcher::postProcess(std::string &data)
 {
-	// throw away [ from ... ] info
-	size_t i = data.find('['), j = data.find(']');
-	if (i != std::string::npos && j != std::string::npos)
-		data.replace(i, j-i+1, "");
 	// some of lyrics have both \n chars and <br />, html tags
 	// are always present whereas \n chars are not, so we need to
 	// throw them away to avoid having line breaks doubled.
