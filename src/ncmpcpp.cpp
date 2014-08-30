@@ -116,9 +116,9 @@ int main(int argc, char **argv)
 	
 	Actions::OriginalStatusbarVisibility = Config.statusbar_visibility;
 	
-	if (!Config.titles_visibility)
-		wattron(stdscr, COLOR_PAIR(int(Config.main_color)));
-	
+	// for column separators
+	attron(COLOR_PAIR(int(Config.main_color)));
+
 	if (Config.design == Design::Alternative)
 		Config.statusbar_visibility = 0;
 	
@@ -242,7 +242,7 @@ int main(int argc, char **argv)
 			
 			if (myScreen == myPlaylist)
 				myPlaylist->EnableHighlighting();
-			
+
 #			ifdef ENABLE_VISUALIZER
 			// visualizer sets timeout to 40ms, but since only it needs such small
 			// value, we should restore default one after switching to another screen.
