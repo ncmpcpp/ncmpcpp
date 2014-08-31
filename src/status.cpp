@@ -412,12 +412,12 @@ void Status::Changes::songID()
 
 void Status::Changes::elapsedTime(bool update_elapsed)
 {
-	MPD::Status st = m_status;
 	if (update_elapsed)
 	{
-		st = Mpd.getStatus();
-		m_elapsed_time = st.elapsedTime();
+		m_status = Mpd.getStatus();
+		m_elapsed_time = m_status.elapsedTime();
 	}
+	const auto &st = m_status;
 	
 	if (st.playerState() == MPD::psStop)
 	{
