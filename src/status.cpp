@@ -131,9 +131,10 @@ void Status::handleServerError(MPD::ServerError &e)
 
 /*************************************************************************/
 
-void Status::trace()
+void Status::trace(bool update_timer)
 {
-	Timer = boost::posix_time::microsec_clock::local_time();
+	if (update_timer)
+		Timer = boost::posix_time::microsec_clock::local_time();
 	if (Mpd.Connected())
 	{
 		if (State::player() == MPD::psPlay
@@ -144,9 +145,16 @@ void Status::trace()
 			wFooter->refresh();
 			past = Timer;
 		}
-		
+
 		applyToVisibleWindows(&BaseScreen::update);
 		Statusbar::tryRedraw();
+
+		// set appropriate window timeout
+		int nc_wtimeout = std::numeric_limits<int>::max();
+		applyToVisibleWindows([&nc_wtimeout](BaseScreen *s) {
+			nc_wtimeout = std::min(nc_wtimeout, s->windowTimeout());
+		});
+		wFooter->setTimeout(nc_wtimeout);
 		
 		Mpd.idle();
 	}

@@ -88,8 +88,6 @@ namespace
 int main(int argc, char **argv)
 {
 	using Global::myScreen;
-	using Global::myLockedScreen;
-	using Global::myInactiveScreen;
 	
 	using Global::wHeader;
 	using Global::wFooter;
@@ -97,7 +95,7 @@ int main(int argc, char **argv)
 	using Global::VolumeState;
 	using Global::Timer;
 	
-	std::srand(std::time(0));
+	srand(time(nullptr));
 	std::setlocale(LC_ALL, "");
 	std::locale::global(Charset::internalLocale());
 	
@@ -131,7 +129,6 @@ int main(int argc, char **argv)
 		wHeader->display();
 	
 	wFooter = new NC::Window(0, Actions::FooterStartY, COLS, Actions::FooterHeight, "", Config.statusbar_color, NC::Border::None);
-	wFooter->setTimeout(500);
 	wFooter->setGetStringHelper(Statusbar::Helpers::getString);
 	
 	// initialize global timer
@@ -141,8 +138,8 @@ int main(int argc, char **argv)
 	myPlaylist->switchTo();
 	
 	// local variables
-	int nc_wtimeout;
-	Key input(0, Key::Standard);
+	bool key_pressed = false;
+	Key input = Key::noOp;
 	auto past = boost::posix_time::from_time_t(0);
 	
 	/// enable mouse
@@ -183,6 +180,7 @@ int main(int argc, char **argv)
 					// go to startup screen
 					if (Config.startup_screen_type != myScreen->type())
 						toScreen(Config.startup_screen_type)->switchTo();
+					myScreen->refresh();
 					
 					myBrowser->fetchSupportedExtensions();
 #					ifdef ENABLE_OUTPUTS
@@ -203,7 +201,8 @@ int main(int argc, char **argv)
 				}
 			}
 			
-			Status::trace();
+			// update timer, status if necessary etc.
+			Status::trace(!key_pressed);
 
 			if (run_resize_screen)
 			{
@@ -220,13 +219,22 @@ int main(int argc, char **argv)
 				past = Timer;
 			}
 			
-			if (input != Key::noOp)
+			if (key_pressed)
 				myScreen->refreshWindow();
 			input = Key::read(*wFooter);
+			key_pressed = input != Key::noOp;
 			
-			if (input == Key::noOp)
+			if (!key_pressed)
 				continue;
-			
+
+			// The reason we want to update timer here is that if the timer is updated
+			// in Status::trace, then Key::read usually blocks for 500ms and if key is
+			// pressed 400ms after Key::read was called, we end up with Timer that is
+			// ~400ms inaccurate. On the other hand, if keys are being pressed, we don't
+			// want to update timer in both Status::trace and here. Therefore we update
+			// timer in Status::trace only if there was no recent input.
+			Timer = boost::posix_time::microsec_clock::local_time();
+
 			try
 			{
 				auto k = Bindings.get(input);
@@ -244,13 +252,6 @@ int main(int argc, char **argv)
 			{
 				Statusbar::printf("Unexpected error: %1%", e.what());
 			}
-
-			// set appropriate window timeout
-			nc_wtimeout = std::numeric_limits<int>::max();
-			applyToVisibleWindows([&nc_wtimeout](BaseScreen *s) {
-				nc_wtimeout = std::min(nc_wtimeout, s->windowTimeout());
-			});
-			wFooter->setTimeout(nc_wtimeout);
 
 			if (myScreen == myPlaylist)
 				myPlaylist->EnableHighlighting();

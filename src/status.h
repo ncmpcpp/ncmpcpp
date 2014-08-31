@@ -29,7 +29,8 @@ namespace Status {//
 void handleClientError(MPD::ClientError &e);
 void handleServerError(MPD::ServerError &e);
 
-void trace();
+void trace(bool update_timer);
+inline void trace() { trace(true); }
 void update(int event);
 
 namespace State {//
