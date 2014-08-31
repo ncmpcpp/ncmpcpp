@@ -37,6 +37,8 @@ struct PlaylistEditor: Screen<NC::Window *>, Filterable, HasColumns, HasSongs, S
 	virtual void refresh() OVERRIDE;
 	virtual void update() OVERRIDE;
 	
+	virtual int windowTimeout() OVERRIDE;
+
 	virtual void enterPressed() OVERRIDE;
 	virtual void spacePressed() OVERRIDE;
 	virtual void mouseButtonPressed(MEVENT me) OVERRIDE;

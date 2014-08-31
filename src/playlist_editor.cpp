@@ -44,7 +44,8 @@ PlaylistEditor *myPlaylistEditor;
 
 namespace {
 
-const auto fetch_delay = boost::posix_time::milliseconds(500);
+const int pe_timeout = 250;
+const auto fetch_delay = boost::posix_time::milliseconds(pe_timeout);
 
 size_t LeftColumnStartX;
 size_t LeftColumnWidth;
@@ -205,6 +206,14 @@ void PlaylistEditor::update()
 		Content.Window::clear();
 		Content.Window::display();
 	}
+}
+
+int PlaylistEditor::windowTimeout()
+{
+	if (Content.reallyEmpty())
+		return pe_timeout;
+	else
+		return Screen<WindowType>::windowTimeout();
 }
 
 bool PlaylistEditor::isContentFiltered()
