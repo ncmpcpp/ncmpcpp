@@ -37,6 +37,8 @@ struct MediaLibrary: Screen<NC::Window *>, Filterable, HasColumns, HasSongs, Sea
 	virtual void refresh() OVERRIDE;
 	virtual void update() OVERRIDE;
 	
+	virtual int windowTimeout() OVERRIDE;
+
 	virtual void enterPressed() OVERRIDE;
 	virtual void spacePressed() OVERRIDE;
 	virtual void mouseButtonPressed(MEVENT me) OVERRIDE;

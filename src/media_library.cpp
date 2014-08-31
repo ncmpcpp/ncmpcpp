@@ -47,7 +47,8 @@ MediaLibrary *myLibrary;
 
 namespace {
 
-const auto fetch_delay = boost::posix_time::milliseconds(500);
+const auto ml_wtimeout = 250;
+const auto fetch_delay = boost::posix_time::milliseconds(ml_wtimeout);
 
 bool hasTwoColumns;
 size_t itsLeftColStartX;
@@ -420,6 +421,14 @@ void MediaLibrary::update()
 		});
 		Songs.refresh();
 	}
+}
+
+int MediaLibrary::windowTimeout()
+{
+	if (Albums.reallyEmpty() || Songs.reallyEmpty())
+		return ml_wtimeout;
+	else
+		return Screen<WindowType>::windowTimeout();
 }
 
 void MediaLibrary::enterPressed()
