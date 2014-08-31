@@ -352,11 +352,6 @@ void Status::Changes::playerState()
 			break;
 	}
 	
-#	ifdef ENABLE_VISUALIZER
-	if (myScreen == myVisualizer)
-		wFooter->setTimeout(State::player() == MPD::psPlay ? Visualizer::WindowTimeout : 500);
-#	endif // ENABLE_VISUALIZER
-	
 	std::string state = playerStateToString(State::player());
 	if (Config.design == Design::Alternative)
 	{

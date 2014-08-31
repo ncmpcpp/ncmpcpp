@@ -141,6 +141,7 @@ int main(int argc, char **argv)
 	myPlaylist->switchTo();
 	
 	// local variables
+	int nc_wtimeout;
 	Key input(0, Key::Standard);
 	auto past = boost::posix_time::from_time_t(0);
 	
@@ -243,18 +244,16 @@ int main(int argc, char **argv)
 			{
 				Statusbar::printf("Unexpected error: %1%", e.what());
 			}
-			
+
+			// set appropriate window timeout
+			nc_wtimeout = std::numeric_limits<int>::max();
+			applyToVisibleWindows([&nc_wtimeout](BaseScreen *s) {
+				nc_wtimeout = std::min(nc_wtimeout, s->windowTimeout());
+			});
+			wFooter->setTimeout(nc_wtimeout);
+
 			if (myScreen == myPlaylist)
 				myPlaylist->EnableHighlighting();
-
-#			ifdef ENABLE_VISUALIZER
-			// visualizer sets timeout to 40ms, but since only it needs such small
-			// value, we should restore default one after switching to another screen.
-			if (wFooter->getTimeout() < 500
-			&&  !(myScreen == myVisualizer || myLockedScreen == myVisualizer || myInactiveScreen == myVisualizer)
-			)
-				wFooter->setTimeout(500);
-#			endif // ENABLE_VISUALIZER
 		}
 		catch (MPD::ClientError &e)
 		{

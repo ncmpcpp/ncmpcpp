@@ -35,13 +35,12 @@
 #include "statusbar.h"
 #include "title.h"
 #include "screen_switcher.h"
+#include "status.h"
 
 using Global::MainStartY;
 using Global::MainHeight;
 
 Visualizer *myVisualizer;
-
-const int Visualizer::WindowTimeout = 1000/25; /* 25 fps */
 
 Visualizer::Visualizer()
 : Screen(NC::Window(0, MainStartY, COLS, MainHeight, "", Config.visualizer_color, NC::Border::None))
@@ -62,8 +61,6 @@ void Visualizer::switchTo()
 	SwitchTo::execute(this);
 	w.clear();
 	SetFD();
-	if (m_fifo >= 0)
-		Global::wFooter->setTimeout(WindowTimeout);
 	drawHeader();
 }
 
@@ -125,6 +122,14 @@ void Visualizer::update()
 	else
 		(this->*draw)(buf, samples_read, 0, MainHeight);
 	w.refresh();
+}
+
+int Visualizer::windowTimeout()
+{
+	if (m_fifo >= 0 && Status::State::player() == MPD::psPlay)
+		return 1000/25; // 25 fps
+	else
+		return Screen<WindowType>::windowTimeout();
 }
 
 void Visualizer::spacePressed()

@@ -46,6 +46,8 @@ struct Visualizer: Screen<NC::Window>, Tabbable
 	
 	virtual void update() OVERRIDE;
 	virtual void scroll(NC::Scroll) OVERRIDE { }
+
+	virtual int windowTimeout() OVERRIDE;
 	
 	virtual void enterPressed() OVERRIDE { }
 	virtual void spacePressed() OVERRIDE;
@@ -57,8 +59,6 @@ struct Visualizer: Screen<NC::Window>, Tabbable
 	void SetFD();
 	void ResetFD();
 	void FindOutputID();
-	
-	static const int WindowTimeout;
 	
 protected:
 	virtual bool isLockable() OVERRIDE { return true; }

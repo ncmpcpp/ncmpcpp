@@ -125,19 +125,19 @@ void BaseScreen::unlock()
 
 /***********************************************************************/
 
-void applyToVisibleWindows(void (BaseScreen::*f)())
+void applyToVisibleWindows(std::function<void(BaseScreen *)> f)
 {
 	if (myLockedScreen && myScreen->isMergable())
 	{
 		if (myScreen == myLockedScreen)
 		{
 			if (myInactiveScreen)
-				(myInactiveScreen->*f)();
+				f(myInactiveScreen);
 		}
 		else
-			(myLockedScreen->*f)();
+			f(myLockedScreen);
 	}
-	(myScreen->*f)();
+	f(myScreen);
 }
 
 void updateInactiveScreen(BaseScreen *screen_to_be_set)

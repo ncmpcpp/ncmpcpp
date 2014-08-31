@@ -57,6 +57,9 @@ struct BaseScreen
 	/// Method that should resize screen
 	/// if requested by hasToBeResized
 	virtual void resize() = 0;
+
+	/// @return ncurses timeout parameter for the screen
+	virtual int windowTimeout() = 0;
 	
 	/// @return title of the screen
 	virtual std::wstring title() = 0;
@@ -107,7 +110,7 @@ protected:
 	void getWindowResizeParams(size_t &x_offset, size_t &width, bool adjust_locked_screen = true);
 };
 
-void applyToVisibleWindows(void (BaseScreen::*f)());
+void applyToVisibleWindows(std::function<void(BaseScreen *)> f);
 void updateInactiveScreen(BaseScreen *screen_to_be_set);
 bool isVisible(BaseScreen *screen);
 
@@ -172,6 +175,12 @@ public:
 		Accessor::apply(w).scroll(where);
 	}
 	
+	/// @return timeout parameter used for the screen (in ms)
+	/// @default 500
+	virtual int windowTimeout() OVERRIDE {
+		return 500;
+	}
+
 	/// Invoked after there was one of mouse buttons pressed
 	/// @param me struct that contains coords of where the click
 	/// had its place and button actions

@@ -707,8 +707,11 @@ void Window::altCharset(bool altcharset_state) const
 
 void Window::setTimeout(int timeout)
 {
-	m_window_timeout = timeout;
-	wtimeout(m_window, timeout);
+	if (timeout != m_window_timeout)
+	{
+		m_window_timeout = timeout;
+		wtimeout(m_window, timeout);
+	}
 }
 
 void Window::addFDCallback(int fd, void (*callback)())
