@@ -254,10 +254,6 @@ int main(int argc, char **argv)
 			{
 				Statusbar::printf("Error: %1%", e.errorMessage());
 			}
-			catch (std::exception &e)
-			{
-				Statusbar::printf("Unexpected error: %1%", e.what());
-			}
 
 			if (myScreen == myPlaylist)
 				myPlaylist->EnableHighlighting();
@@ -269,6 +265,10 @@ int main(int argc, char **argv)
 		catch (MPD::ServerError &e)
 		{
 			Status::handleServerError(e);
+		}
+		catch (std::exception &e)
+		{
+			Statusbar::printf("Unexpected error: %1%", e.what());
 		}
 	}
 	return 0;
