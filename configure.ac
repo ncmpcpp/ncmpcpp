@@ -185,7 +185,7 @@ AC_CHECK_LIB(regex, regcomp, LDFLAGS="$LDFLAGS -lregex", )
 dnl ================================
 dnl = checking for various headers =
 dnl ================================
-AC_CHECK_HEADERS([dirent.h regex.h], , AC_MSG_ERROR(vital headers missing))
+AC_CHECK_HEADERS([netinet/tcp.h netinet/in.h], , AC_MSG_ERROR(vital headers missing))
 AC_CHECK_HEADERS([langinfo.h], , AC_MSG_WARN(locale detection disabled))
 
 dnl ==============================

@@ -22,6 +22,8 @@
 #include <clocale>
 #include <csignal>
 #include <cstring>
+#include <netinet/tcp.h>
+#include <netinet/in.h>
 
 #include <boost/locale.hpp>
 #include <iostream>
@@ -177,6 +179,10 @@ int main(int argc, char **argv)
 							myPlaylist->main().highlight(curr_pos);
 					}
 					
+					// Set TCP_NODELAY on the tcp socket as this significantly speeds up operations.
+					int flag = 1;
+					setsockopt(Mpd.GetFD(), IPPROTO_TCP, TCP_NODELAY, &flag, sizeof(flag));
+
 					// go to startup screen
 					if (Config.startup_screen_type != myScreen->type())
 						toScreen(Config.startup_screen_type)->switchTo();
