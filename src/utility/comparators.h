@@ -22,7 +22,7 @@
 #define NCMPCPP_UTILITY_COMPARATORS_H
 
 #include <string>
-#include "exec_item.h"
+#include "runnable_item.h"
 #include "mpdpp.h"
 #include "settings.h"
 #include "menu.h"
@@ -60,7 +60,7 @@ public:
 	}
 	
 	template <typename ItemT, typename FunT>
-	bool operator()(const ExecItem<ItemT, FunT> &a, const ExecItem<ItemT, FunT> &b) const {
+	bool operator()(const RunnableItem<ItemT, FunT> &a, const RunnableItem<ItemT, FunT> &b) const {
 		return m_cmp(a.item(), b.item()) < 0;
 	}
 };

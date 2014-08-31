@@ -73,7 +73,6 @@ noinst_HEADERS = \
 	display.h \
 	enums.h \
 	error.h \
-	exec_item.h \
 	global.h \
 	help.h \
 	helpers.h \
@@ -91,6 +90,7 @@ noinst_HEADERS = \
 	playlist_editor.h \
 	proxy_song_list.h \
 	regex_filter.h \
+	runnable_item.h \
 	screen.h \
 	screen_switcher.h \
 	screen_type.h \

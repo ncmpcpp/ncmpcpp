@@ -21,12 +21,12 @@
 #ifndef NCMPCPP_SEL_ITEMS_ADDER_H
 #define NCMPCPP_SEL_ITEMS_ADDER_H
 
-#include "exec_item.h"
+#include "runnable_item.h"
 #include "interfaces.h"
 #include "screen.h"
 #include "song.h"
 
-struct SelectedItemsAdder: Screen<NC::Menu<ExecItem<std::string, void()>> *>, Tabbable
+struct SelectedItemsAdder: Screen<NC::Menu<RunnableItem<std::string, void()>> *>, Tabbable
 {
 	typedef SelectedItemsAdder Self;
 	typedef typename std::remove_pointer<WindowType>::type Component;

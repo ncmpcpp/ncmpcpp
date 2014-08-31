@@ -110,7 +110,7 @@ std::wstring SortPlaylistDialog::title()
 
 void SortPlaylistDialog::enterPressed()
 {
-	w.current().value().exec()();
+	w.current().value().run();
 }
 
 void SortPlaylistDialog::mouseButtonPressed(MEVENT me)

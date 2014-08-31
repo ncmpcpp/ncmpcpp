@@ -23,23 +23,29 @@
 
 #include <functional>
 
-template <typename ItemT, typename FunType> struct ExecItem
+template <typename ItemT, typename FunctionT>
+struct RunnableItem
 {
 	typedef ItemT Item;
-	typedef std::function<FunType> Function;
+	typedef std::function<FunctionT> Function;
 	
-	ExecItem() { }
-	ExecItem(const Item &item_, Function f) : m_item(item_), m_exec(f) { }
+	RunnableItem() { }
+	template <typename Arg1, typename Arg2>
+	RunnableItem(Arg1 &&opt, Arg2 &&f)
+	: m_item(std::forward<Arg1>(opt)), m_f(std::forward<Arg2>(f)) { }
 	
-	Function &exec() { return m_exec; }
-	const Function &exec() const { return m_exec; }
+	template <typename... Args>
+	typename Function::result_type run(Args&&... args) const
+	{
+		return m_f(std::forward<Args>(args)...);
+	}
 	
 	Item &item() { return m_item; }
 	const Item &item() const { return m_item; }
 	
 private:
 	Item m_item;
-	Function m_exec;
+	Function m_f;
 };
 
 #endif // NCMPCPP_EXEC_ITEM_H

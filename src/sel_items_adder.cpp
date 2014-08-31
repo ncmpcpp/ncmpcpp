@@ -163,7 +163,7 @@ std::wstring SelectedItemsAdder::title()
 
 void SelectedItemsAdder::enterPressed()
 {
-	w->current().value().exec()();
+	w->current().value().run();
 }
 
 void SelectedItemsAdder::mouseButtonPressed(MEVENT me)
