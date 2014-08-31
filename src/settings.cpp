@@ -314,7 +314,7 @@ bool Configuration::read(const std::string &config_path)
 		song_window_title_format, "{%a - }{%t}|{%f}", adjust_and_validate_format
 	));
 	p.add("song_columns_list_format", assign_default<std::string>(
-		columns_format, "(7f)[green]{l} (25)[cyan]{a} (40)[]{t|f} (30)[red]{b}",
+		columns_format, "(20)[]{a} (6f)[green]{NE} (50)[white]{t|f:Title} (20)[cyan]{b} (7f)[magenta]{l}",
 			[this](std::string &&v) {
 				boost::tie(columns, song_in_columns_to_string_format) = generate_columns(v);
 				return v;
@@ -332,7 +332,7 @@ bool Configuration::read(const std::string &config_path)
 		playlist_separate_albums, false
 	));
 	p.add("playlist_display_mode", assign_default(
-		playlist_display_mode, DisplayMode::Classic
+		playlist_display_mode, DisplayMode::Columns
 	));
 	p.add("browser_display_mode", assign_default(
 		browser_display_mode, DisplayMode::Classic
@@ -598,10 +598,10 @@ bool Configuration::read(const std::string &config_path)
 		main_highlight_color, NC::Color::Yellow
 	));
 	p.add("progressbar_color", assign_default(
-		progressbar_color, NC::Color::Default
+		progressbar_color, NC::Color::Black
 	));
 	p.add("progressbar_elapsed_color", assign_default(
-		progressbar_elapsed_color, NC::Color::Default
+		progressbar_elapsed_color, NC::Color::Green
 	));
 	p.add("statusbar_color", assign_default(
 		statusbar_color, NC::Color::Default

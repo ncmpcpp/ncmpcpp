@@ -173,7 +173,7 @@
 #
 #song_list_format = {%a - }{%t}|{$8%f$9}$R{$3(%l)$9}
 #
-#song_status_format = {{%a{ \"%b\"{ (%y)}} - }{%t}}|{%f}
+#song_status_format = {{%a{ "%b"{ (%y)}} - }{%t}}|{%f}
 #
 #song_library_format = {%n - }{%t}|{%f}
 #
@@ -268,7 +268,7 @@
 ##   not available.
 ##
 #
-#song_columns_list_format = (7f)[green]{l} (25)[cyan]{a} (40)[]{t|f} (30)[red]{b}
+#song_columns_list_format = (20)[]{a} (6f)[green]{NE} (50)[white]{t|f:Title} (20)[cyan]{b} (7f)[magenta]{l}
 #
 ##### various settings #####
 #
@@ -290,7 +290,7 @@
 ##
 ## Note: Possible display modes: classic, columns.
 ##
-#playlist_display_mode = classic
+#playlist_display_mode = columns
 #
 #browser_display_mode = classic
 #
@@ -485,9 +485,9 @@
 #
 #main_window_highlight_color = yellow
 #
-#progressbar_color = default
+#progressbar_color = black
 #
-#progressbar_elapsed_color = default
+#progressbar_elapsed_color = green
 #
 #statusbar_color = default
 #
