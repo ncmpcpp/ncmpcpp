@@ -54,7 +54,7 @@ bool configure(int argc, char **argv)
 		("host,h", po::value<std::string>()->default_value("localhost"), "connect to server at host")
 		("port,p", po::value<int>()->default_value(6600), "connect to server at port")
 		("config,c", po::value<std::string>(&config_path)->default_value("~/.ncmpcpp/config"), "specify configuration file")
-		("bindigs,b", po::value<std::string>(&bindings_path)->default_value("~/.ncmpcpp/bindings"), "specify bindings file")
+		("bindings,b", po::value<std::string>(&bindings_path)->default_value("~/.ncmpcpp/bindings"), "specify bindings file")
 		("screen,s", po::value<std::string>(), "specify initial screen")
 		("help,?", "show help message")
 		("version,v", "display version information")
@@ -127,12 +127,17 @@ bool configure(int argc, char **argv)
 			cerr << "Fatal error: HOME environment variable is not defined\n";
 			return false;
 		}
-		expand_home(config_path);
-		expand_home(bindings_path);
 
 		// read configuration
+		expand_home(config_path);
 		if (Config.read(config_path) == false)
 			exit(1);
+
+		// if bindings file was not specified, use the one from main directory.
+		if (vm["bindings"].defaulted())
+			bindings_path = Config.ncmpcpp_directory + "bindings";
+		else
+			expand_home(bindings_path);
 
 		// read bindings
 		if (Bindings.read(bindings_path) == false)
