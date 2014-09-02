@@ -221,6 +221,11 @@ bool Configuration::read(const std::string &config_path)
 	p.add("visualizer_in_stereo", yes_no(
 		visualizer_in_stereo, true
 	));
+	p.add("visualizer_sample_multiplier", assign_default<double>(
+		visualizer_sample_multiplier, 1.0, [](double v) {
+			lowerBoundCheck(v, 1.0);
+			return v;
+	}));
 	p.add("visualizer_sync_interval", assign_default<unsigned>(
 		visualizer_sync_interval, 30, [](unsigned v) {
 			return boost::posix_time::seconds(v);

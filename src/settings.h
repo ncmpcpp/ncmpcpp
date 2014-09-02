@@ -176,6 +176,7 @@ struct Configuration
 	boost::posix_time::seconds playlist_disable_highlight_delay;
 	boost::posix_time::seconds visualizer_sync_interval;
 	
+	double visualizer_sample_multiplier;
 	double locked_screen_width_part;
 	
 	size_t selected_item_prefix_length;

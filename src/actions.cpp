@@ -2184,6 +2184,31 @@ void SetSelectedItemsPriority::run()
 	myPlaylist->SetSelectedItemsPriority(prio);
 }
 
+bool SetVisualizerSampleMultiplier::canBeRun() const
+{
+#	ifdef ENABLE_VISUALIZER
+	return myScreen == myVisualizer;
+#	else
+	return false;
+#	endif // ENABLE_VISUALIZER
+}
+
+void SetVisualizerSampleMultiplier::run()
+{
+#	ifdef ENABLE_VISUALIZER
+	using Global::wFooter;
+
+	Statusbar::lock();
+	Statusbar::put() << "Set visualizer sample multiplier: ";
+	std::string smultiplier = wFooter->getString();
+	Statusbar::unlock();
+
+	double multiplier = fromString<double>(smultiplier);
+	lowerBoundCheck(multiplier, 1.0);
+	Config.visualizer_sample_multiplier = multiplier;
+#	endif // ENABLE_VISUALIZER
+}
+
 bool FilterPlaylistOnPriorities::canBeRun() const
 {
 	return myScreen == myPlaylist;
@@ -2612,6 +2637,7 @@ void populateActions()
 	insert_action(new Actions::ToggleMediaLibrarySortMode());
 	insert_action(new Actions::RefetchLyrics());
 	insert_action(new Actions::SetSelectedItemsPriority());
+	insert_action(new Actions::SetVisualizerSampleMultiplier());
 	insert_action(new Actions::FilterPlaylistOnPriorities());
 	insert_action(new Actions::ShowSongInfo());
 	insert_action(new Actions::ShowArtistInfo());

@@ -52,9 +52,9 @@ enum class Type
 	ToggleSpaceMode, ToggleAddMode, ToggleMouse, ToggleBitrateVisibility,
 	AddRandomItems, ToggleBrowserSortMode, ToggleLibraryTagType,
 	ToggleMediaLibrarySortMode, RefetchLyrics,
-	SetSelectedItemsPriority, FilterPlaylistOnPriorities, ShowSongInfo,
-	ShowArtistInfo, ShowLyrics, Quit, NextScreen, PreviousScreen, ShowHelp,
-	ShowPlaylist, ShowBrowser, ChangeBrowseMode, ShowSearchEngine,
+	SetSelectedItemsPriority, SetVisualizerSampleMultiplier, FilterPlaylistOnPriorities,
+	ShowSongInfo, ShowArtistInfo, ShowLyrics, Quit, NextScreen, PreviousScreen,
+	ShowHelp, ShowPlaylist, ShowBrowser, ChangeBrowseMode, ShowSearchEngine,
 	ResetSearchEngine, ShowMediaLibrary, ToggleMediaLibraryColumnsMode,
 	ShowPlaylistEditor, ShowTagEditor, ShowOutputs, ShowVisualizer,
 	ShowClock, ShowServerInfo,
@@ -954,6 +954,16 @@ struct SetSelectedItemsPriority : public BaseAction
 	SetSelectedItemsPriority()
 	: BaseAction(Type::SetSelectedItemsPriority, "set_selected_items_priority") { }
 	
+protected:
+	virtual bool canBeRun() const;
+	virtual void run();
+};
+
+struct SetVisualizerSampleMultiplier : public BaseAction
+{
+	SetVisualizerSampleMultiplier()
+	: BaseAction(Type::SetVisualizerSampleMultiplier, "set_visualizer_sample_multiplier") { }
+
 protected:
 	virtual bool canBeRun() const;
 	virtual void run();

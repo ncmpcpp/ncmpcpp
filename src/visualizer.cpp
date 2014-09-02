@@ -113,9 +113,19 @@ void Visualizer::update()
 	else
 #	endif // HAVE_FFTW3_H
 		draw = &Visualizer::DrawSoundWave;
-	
+
+	const ssize_t samples_read = data/sizeof(int16_t);
+	std::for_each(buf, buf+samples_read, [](int16_t &sample) {
+		int32_t tmp = sample * Config.visualizer_sample_multiplier;
+		if (tmp < std::numeric_limits<int16_t>::min())
+			sample = std::numeric_limits<int16_t>::min();
+		else if (tmp > std::numeric_limits<int16_t>::max())
+			sample = std::numeric_limits<int16_t>::max();
+		else
+			sample = tmp;
+	});
+
 	w.clear();
-	ssize_t samples_read = data/sizeof(int16_t);
 	if (Config.visualizer_in_stereo)
 	{
 		int16_t buf_left[samples_read/2], buf_right[samples_read/2];

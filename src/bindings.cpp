@@ -540,6 +540,7 @@ void BindingsConfiguration::generateDefaults()
 		bind(k, Actions::Type::MoveSortOrderUp);
 		bind(k, Actions::Type::MoveSelectedItemsUp);
 		bind(k, Actions::Type::ToggleMediaLibrarySortMode);
+		bind(k, Actions::Type::SetVisualizerSampleMultiplier);
 	}
 	if (notBound(k = stringToKey("n")))
 	{
