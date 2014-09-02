@@ -23,6 +23,7 @@
 #include <stdexcept>
 
 #include "configuration.h"
+#include "helpers.h"
 #include "settings.h"
 #include "utility/conversion.h"
 #include "utility/option_parser.h"
@@ -165,6 +166,15 @@ std::string adjust_and_validate_format(std::string &&format)
 	MPD::Song::validateFormat(format);
 	format = "{" + format + "}";
 	return format;
+}
+
+// parser worker for buffer
+template <typename ValueT, typename TransformT>
+option_parser::worker buffer(NC::Buffer &arg, ValueT &&value, TransformT &&map)
+{
+	return option_parser::worker(assign<std::string>(arg, [&arg, map](std::string &&s) {
+		return map(stringToBuffer(s));
+	}), defaults_to(arg, map(std::forward<ValueT>(value))));
 }
 
 }

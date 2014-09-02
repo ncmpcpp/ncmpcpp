@@ -26,14 +26,56 @@
 #include <stdexcept>
 #include <unordered_map>
 
-#include "helpers.h"
-#include "strbuffer.h"
 #include "utility/functional.h"
 
 struct option_parser
 {
 	typedef std::function<void(std::string &&)> parser_t;
 	typedef std::function<void()> default_t;
+
+	template <typename DestT, typename SourceT>
+	struct assign_value_once
+	{
+		typedef DestT dest_type;
+		typedef typename std::decay<SourceT>::type source_type;
+
+		template <typename ArgT>
+		assign_value_once(DestT &dest, ArgT &&value)
+		: m_assigned(false), m_dest(dest), m_source(std::forward<ArgT>(value)) { }
+
+		void operator()()
+		{
+			assert(m_assigned == false);
+			m_dest = std::move(m_source);
+			m_assigned = true;
+		}
+
+	private:
+		bool m_assigned;
+		dest_type &m_dest;
+		source_type m_source;
+	};
+
+	template <typename IntermediateT, typename DestT, typename TransformT>
+	struct parse_and_transform
+	{
+		template <typename ArgT>
+		parse_and_transform(DestT &dest, ArgT &&map)
+		: m_dest(dest), m_map(std::forward<ArgT>(map)) { }
+
+		void operator()(std::string &&v)
+		{
+			try {
+				m_dest = m_map(boost::lexical_cast<IntermediateT>(v));
+			} catch (boost::bad_lexical_cast &) {
+				throw std::runtime_error("invalid value: " + v);
+			}
+		}
+
+	private:
+		DestT &m_dest;
+		TransformT m_map;
+	};
 
 	struct worker
 	{
@@ -83,30 +125,27 @@ private:
 };
 
 template <typename IntermediateT, typename ArgT, typename TransformT>
-option_parser::parser_t assign(ArgT &arg, TransformT map = id_())
+option_parser::parser_t assign(ArgT &arg, TransformT &&map = id_())
 {
-	return [&arg, map](std::string &&v) {
-		try {
-			arg = map(boost::lexical_cast<IntermediateT>(v));
-		} catch (boost::bad_lexical_cast &) {
-			throw std::runtime_error("invalid value: " + v);
-		}
-	};
+	return option_parser::parse_and_transform<IntermediateT, ArgT, TransformT>(
+		arg, std::forward<TransformT>(map)
+	);
 }
 
 template <typename ArgT, typename ValueT>
 option_parser::default_t defaults_to(ArgT &arg, ValueT &&value)
 {
-	return [&arg, value] {
-		arg = std::move(value);
-	};
+	return option_parser::assign_value_once<ArgT, ValueT>(
+		arg, std::forward<ValueT>(value)
+	);
 }
 
 template <typename IntermediateT, typename ArgT, typename ValueT, typename TransformT>
-option_parser::worker assign_default(ArgT &arg, ValueT &&value, TransformT map)
+option_parser::worker assign_default(ArgT &arg, ValueT &&value, TransformT &&map)
 {
 	return option_parser::worker(
-		assign<IntermediateT>(arg, map), defaults_to(arg, map(std::forward<ValueT>(value)))
+		assign<IntermediateT>(arg, std::forward<TransformT>(map)),
+		defaults_to(arg, map(std::forward<ValueT>(value)))
 	);
 }
 
@@ -117,14 +156,6 @@ option_parser::worker assign_default(ArgT &arg, ValueT &&value)
 }
 
 // workers for specific types
-
-template <typename ValueT, typename TransformT>
-option_parser::worker buffer(NC::Buffer &arg, ValueT &&value, TransformT map)
-{
-	return option_parser::worker(assign<std::string>(arg, [&arg, map](std::string &&s) {
-		return map(stringToBuffer(s));
-	}), defaults_to(arg, map(std::forward<ValueT>(value))));
-}
 
 option_parser::worker yes_no(bool &arg, bool value);
 
