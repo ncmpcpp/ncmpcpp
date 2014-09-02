@@ -208,7 +208,7 @@ int main(int argc, char **argv)
 			}
 			
 			// update timer, status if necessary etc.
-			Status::trace(!key_pressed);
+			Status::trace(!key_pressed, true);
 
 			if (run_resize_screen)
 			{

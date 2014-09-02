@@ -131,7 +131,7 @@ void Status::handleServerError(MPD::ServerError &e)
 
 /*************************************************************************/
 
-void Status::trace(bool update_timer)
+void Status::trace(bool update_timer, bool update_window_timeout)
 {
 	if (update_timer)
 		Timer = boost::posix_time::microsec_clock::local_time();
@@ -149,13 +149,16 @@ void Status::trace(bool update_timer)
 		applyToVisibleWindows(&BaseScreen::update);
 		Statusbar::tryRedraw();
 
-		// set appropriate window timeout
-		int nc_wtimeout = std::numeric_limits<int>::max();
-		applyToVisibleWindows([&nc_wtimeout](BaseScreen *s) {
-			nc_wtimeout = std::min(nc_wtimeout, s->windowTimeout());
-		});
-		wFooter->setTimeout(nc_wtimeout);
-		
+		if (update_window_timeout)
+		{
+			// set appropriate window timeout
+			int nc_wtimeout = std::numeric_limits<int>::max();
+			applyToVisibleWindows([&nc_wtimeout](BaseScreen *s) {
+				nc_wtimeout = std::min(nc_wtimeout, s->windowTimeout());
+			});
+			wFooter->setTimeout(nc_wtimeout);
+		}
+
 		Mpd.idle();
 	}
 }
