@@ -42,14 +42,22 @@ using Global::MainHeight;
 
 Visualizer *myVisualizer;
 
+namespace {
+
+const int fps = 25;
+
+}
+
 Visualizer::Visualizer()
 : Screen(NC::Window(0, MainStartY, COLS, MainHeight, "", Config.visualizer_color, NC::Border::None))
 {
 	ResetFD();
-	m_samples = Config.visualizer_in_stereo ? 4096 : 2048;
+	m_samples = 44100/fps;
+	if (Config.visualizer_in_stereo)
+		m_samples *= 2;
 #	ifdef HAVE_FFTW3_H
 	m_fftw_results = m_samples/2+1;
-	m_freq_magnitudes = new unsigned[m_fftw_results];
+	m_freq_magnitudes = new double[m_fftw_results];
 	m_fftw_input = static_cast<double *>(fftw_malloc(sizeof(double)*m_samples));
 	m_fftw_output = static_cast<fftw_complex *>(fftw_malloc(sizeof(fftw_complex)*m_fftw_results));
 	m_fftw_plan = fftw_plan_dft_r2c_1d(m_samples, m_fftw_input, m_fftw_output, FFTW_ESTIMATE);
@@ -61,6 +69,7 @@ void Visualizer::switchTo()
 	SwitchTo::execute(this);
 	w.clear();
 	SetFD();
+	m_timer = boost::posix_time::from_time_t(0);
 	drawHeader();
 }
 
@@ -127,7 +136,7 @@ void Visualizer::update()
 int Visualizer::windowTimeout()
 {
 	if (m_fifo >= 0 && Status::State::player() == MPD::psPlay)
-		return 1000/25; // 25 fps
+		return 1000/fps;
 	else
 		return Screen<WindowType>::windowTimeout();
 }
@@ -185,18 +194,25 @@ void Visualizer::DrawFrequencySpectrum(int16_t *buf, ssize_t samples, size_t y_o
 	
 	// count magnitude of each frequency and scale it to fit the screen
 	for (unsigned i = 0; i < m_fftw_results; ++i)
-		m_freq_magnitudes[i] = sqrt(m_fftw_output[i][0]*m_fftw_output[i][0] + m_fftw_output[i][1]*m_fftw_output[i][1])/1e5*height/5;
+		m_freq_magnitudes[i] = sqrt(m_fftw_output[i][0]*m_fftw_output[i][0] + m_fftw_output[i][1]*m_fftw_output[i][1])/1e5*height;
 	
 	const size_t win_width = w.getWidth();
-	const int freqs_per_col = m_fftw_results/win_width /* cut bandwidth a little to achieve better look */ * 7/10;
+	// cut bandwidth a little to achieve better look
+	const int freqs_per_col = m_fftw_results/win_width * 7/10;
+	double bar_height;
+	size_t bar_real_height;
 	for (size_t i = 0; i < win_width; ++i)
 	{
-		size_t bar_height = 0;
+		bar_height = 0;
 		for (int j = 0; j < freqs_per_col; ++j)
 			bar_height += m_freq_magnitudes[i*freqs_per_col+j];
-		bar_height = std::min(bar_height/freqs_per_col, height);
-		const size_t start_y = y_offset > 0 ? y_offset : height-bar_height;
-		const size_t stop_y = std::min(bar_height+start_y, w.getHeight());
+		// buff higher frequencies
+		bar_height *= log2(2 + i);
+		// moderately normalize the heights
+		bar_height = pow(bar_height, 0.6);
+		bar_real_height = std::min(size_t(bar_height/freqs_per_col), height);
+		const size_t start_y = y_offset > 0 ? y_offset : height-bar_real_height;
+		const size_t stop_y = std::min(bar_real_height+start_y, w.getHeight());
 		for (size_t j = start_y; j < stop_y; ++j)
 			w << NC::XY(i, j) << Config.visualizer_chars[1];
 	}

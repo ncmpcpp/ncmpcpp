@@ -76,7 +76,7 @@ private:
 	unsigned m_samples;
 #	ifdef HAVE_FFTW3_H
 	unsigned m_fftw_results;
-	unsigned *m_freq_magnitudes;
+	double *m_freq_magnitudes;
 	double *m_fftw_input;
 	fftw_complex *m_fftw_output;
 	fftw_plan m_fftw_plan;

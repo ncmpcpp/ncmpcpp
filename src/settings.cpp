@@ -235,7 +235,7 @@ bool Configuration::read(const std::string &config_path)
 	}, defaults_to(visualizer_use_wave, true)
 	));
 	p.add("visualizer_look", assign_default<std::string>(
-		visualizer_chars, "◆│", [](std::string &&s) {
+		visualizer_chars, "●▮", [](std::string &&s) {
 			auto result = ToWString(std::move(s));
 			typedef std::wstring::size_type size_type;
 			boundsCheck(result.size(), size_type(2), size_type(2));
