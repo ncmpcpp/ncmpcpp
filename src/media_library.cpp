@@ -948,6 +948,11 @@ void MediaLibrary::LocateSong(const MPD::Song &s)
 		Statusbar::printf("Can't use this function because the song has no %s tag set", item_type);
 		return;
 	}
+	if (!s.isFromDatabase())
+	{
+		Statusbar::print("Song is not from the database");
+		return;
+	}
 	
 	if (myScreen != this)
 		switchTo();
