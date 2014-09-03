@@ -187,7 +187,6 @@ void SelectedItemsAdder::populatePlaylistSelector(BaseScreen *old_screen)
 
 	m_playlist_selector.reset();
 	m_playlist_selector.clear();
-	if (old_screen != myPlaylist)
 	m_playlist_selector.addItem(Entry("Current playlist",
 		boost::bind(&Self::addToCurrentPlaylist, this)
 	));
