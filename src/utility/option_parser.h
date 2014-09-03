@@ -41,19 +41,18 @@ struct option_parser
 
 		template <typename ArgT>
 		assign_value_once(DestT &dest, ArgT &&value)
-		: m_assigned(false), m_dest(dest), m_source(std::forward<ArgT>(value)) { }
+		: m_dest(dest), m_source(std::make_shared<source_type>(std::forward<ArgT>(value))) { }
 
 		void operator()()
 		{
-			assert(m_assigned == false);
-			m_dest = std::move(m_source);
-			m_assigned = true;
+			assert(m_source.get() != nullptr);
+			m_dest = std::move(*m_source);
+			m_source.reset();
 		}
 
 	private:
-		bool m_assigned;
-		dest_type &m_dest;
-		source_type m_source;
+		DestT &m_dest;
+		std::shared_ptr<source_type> m_source;
 	};
 
 	template <typename IntermediateT, typename DestT, typename TransformT>
