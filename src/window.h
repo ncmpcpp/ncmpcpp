@@ -89,7 +89,7 @@
 
 // KEY_ENTER is 343, which doesn't make any sense. This makes it useful.
 #undef KEY_ENTER
-#define KEY_ENTER 10
+#define KEY_ENTER 13
 
 // undefine scroll macro as it collides with Window::scroll
 #undef scroll

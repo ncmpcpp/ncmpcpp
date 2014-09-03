@@ -375,10 +375,12 @@ void initScreen(GNUC_UNUSED const char *window_title, bool enable_colors)
 			for (int j = 0; j < 8; ++j)
 				init_pair(num++, ColorsTable[j], i < 0 ? i : ColorsTable[i]);
 	}
+	raw();
+	nonl();
 	noecho();
-	cbreak();
 	curs_set(0);
 
+	rl_catch_signals = 0;
 	rl_initialize();
 	// disable autocompletion
 	rl_bind_key('\t', nullptr);
