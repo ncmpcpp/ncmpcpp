@@ -945,7 +945,7 @@ void MediaLibrary::LocateSong(const MPD::Song &s)
 	{
 		std::string item_type = boost::locale::to_lower(
 			tagTypeToString(Config.media_lib_primary_tag));
-		Statusbar::printf("Can't use this function because the song has no %s tag set", item_type);
+		Statusbar::printf("Can't use this function because the song has no %s tag", item_type);
 		return;
 	}
 	if (!s.isFromDatabase())
