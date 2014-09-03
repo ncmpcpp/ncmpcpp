@@ -212,9 +212,9 @@ void TagEditor::switchTo()
 void TagEditor::refresh()
 {
 	Dirs->display();
-	mvvline(MainStartY, MiddleColumnStartX-1, 0, MainHeight);
+	drawSeparator(MiddleColumnStartX-1);
 	TagTypes->display();
-	mvvline(MainStartY, RightColumnStartX-1, 0, MainHeight);
+	drawSeparator(RightColumnStartX-1);
 	Tags->display();
 	
 	if (w == FParserDialog)

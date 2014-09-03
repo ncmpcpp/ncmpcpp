@@ -121,7 +121,7 @@ std::wstring PlaylistEditor::title()
 void PlaylistEditor::refresh()
 {
 	Playlists.display();
-	mvvline(MainStartY, RightColumnStartX-1, 0, MainHeight);
+	drawSeparator(RightColumnStartX-1);
 	Content.display();
 }
 

@@ -28,16 +28,12 @@ using Global::myScreen;
 using Global::myLockedScreen;
 using Global::myInactiveScreen;
 
-namespace {//
-
-void drawScreenSeparator(int x)
+void drawSeparator(int x)
 {
 	attron(COLOR_PAIR(int(Config.main_color)));
 	mvvline(Global::MainStartY, x, 0, Global::MainHeight);
 	attroff(COLOR_PAIR(int(Config.main_color)));
 	refresh();
-}
-
 }
 
 void genericMouseButtonPressed(NC::Window &w, MEVENT me)
@@ -94,7 +90,7 @@ void BaseScreen::getWindowResizeParams(size_t &x_offset, size_t &width, bool adj
 			{
 				myLockedScreen->resize();
 				myLockedScreen->refresh();
-				drawScreenSeparator(x_offset-1);
+				drawSeparator(x_offset-1);
 			}
 		}
 	}
@@ -153,7 +149,7 @@ void updateInactiveScreen(BaseScreen *screen_to_be_set)
 		// as in "else" case. we also need to refresh it and redraw separator between
 		// them as stacked screen probably has overwritten part ot it.
 		myInactiveScreen->refresh();
-		drawScreenSeparator(COLS*Config.locked_screen_width_part);
+		drawSeparator(COLS*Config.locked_screen_width_part);
 	}
 	else
 	{

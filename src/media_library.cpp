@@ -226,9 +226,9 @@ void MediaLibrary::resize()
 void MediaLibrary::refresh()
 {
 	Tags.display();
-	mvvline(MainStartY, itsMiddleColStartX-1, 0, MainHeight);
+	drawSeparator(itsMiddleColStartX-1);
 	Albums.display();
-	mvvline(MainStartY, itsRightColStartX-1, 0, MainHeight);
+	drawSeparator(itsRightColStartX-1);
 	Songs.display();
 	if (Albums.empty())
 	{

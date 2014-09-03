@@ -25,6 +25,7 @@
 #include "scrollpad.h"
 #include "screen_type.h"
 
+void drawSeparator(int x);
 void genericMouseButtonPressed(NC::Window &w, MEVENT me);
 void scrollpadMouseButtonPressed(NC::Scrollpad &w, MEVENT me);
 

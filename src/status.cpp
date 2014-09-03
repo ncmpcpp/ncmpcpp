@@ -567,7 +567,7 @@ void Status::Changes::flags()
 				attron(COLOR_PAIR(int(Config.state_line_color)));
 				mvprintw(1, COLS-2, "]");
 			}
-			attrset(COLOR_PAIR(int(Config.main_color)));
+			attrset(0);
 			refresh();
 			break;
 		case Design::Alternative:

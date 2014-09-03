@@ -115,9 +115,6 @@ int main(int argc, char **argv)
 	NC::initScreen("ncmpcpp ver. " VERSION, Config.colors_enabled);
 	
 	Actions::OriginalStatusbarVisibility = Config.statusbar_visibility;
-	
-	// for column separators
-	attron(COLOR_PAIR(int(Config.main_color)));
 
 	if (Config.design == Design::Alternative)
 		Config.statusbar_visibility = 0;
