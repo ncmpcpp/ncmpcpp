@@ -1,3 +1,12 @@
+ncmpcpp-0.6_beta2
+
+* Fixed the issue that prevented MPD flags toggling from working properly.
+* Song change event is now properly handled after song ends with consume flag active.
+* ncmpcpp now operates in raw terminal mode and ignores SIGINT.
+* Separators between columns in media library, playlist editor and tag editor are now reliably colored.
+* Build failures due to the missing include are now fixed.
+* Playlist cropping now works as expected if no item is selected.
+
 ncmpcpp-0.6_beta1
 
 * Support for polling communication mode has been removed. Additionally, MPD version >= 0.16 is required.
