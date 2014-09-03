@@ -18,6 +18,7 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
+#include <boost/date_time/posix_time/posix_time.hpp>
 #include <iomanip>
 
 #include "global.h"

@@ -21,6 +21,8 @@
 #ifndef NCMPCPP_MEDIA_LIBRARY_H
 #define NCMPCPP_MEDIA_LIBRARY_H
 
+#include <boost/date_time/posix_time/posix_time_types.hpp>
+
 #include "interfaces.h"
 #include "screen.h"
 

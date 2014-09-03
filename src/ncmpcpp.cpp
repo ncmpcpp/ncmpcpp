@@ -25,6 +25,7 @@
 #include <netinet/tcp.h>
 #include <netinet/in.h>
 
+#include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/locale.hpp>
 #include <iostream>
 #include <fstream>

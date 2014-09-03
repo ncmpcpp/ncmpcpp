@@ -22,6 +22,7 @@
 
 #ifdef ENABLE_VISUALIZER
 
+#include <boost/date_time/posix_time/posix_time.hpp>
 #include <cerrno>
 #include <cmath>
 #include <cstring>

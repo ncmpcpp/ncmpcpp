@@ -21,7 +21,7 @@
 #ifndef NCMPCPP_GLOBAL_H
 #define NCMPCPP_GLOBAL_H
 
-#include <boost/date_time/posix_time/posix_time.hpp>
+#include <boost/date_time/posix_time/posix_time_types.hpp>
 #include "mpdpp.h"
 #include "screen.h"
 

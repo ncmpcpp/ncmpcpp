@@ -24,6 +24,7 @@
 
 #ifdef ENABLE_CLOCK
 
+#include <boost/date_time/posix_time/posix_time.hpp>
 #include <cstring>
 
 #include "global.h"
