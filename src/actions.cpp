@@ -1734,7 +1734,11 @@ void CropMainPlaylist::run()
 	if (yes)
 	{
 		Statusbar::print("Cropping playlist...");
-		cropPlaylist(myPlaylist->main(), boost::bind(&MPD::Connection::Delete, _1, _2));
+		auto &w = myPlaylist->main();
+		// if no item is selected, select the current one
+		if (!w.empty() && !hasSelected(w.begin(), w.end()))
+			w.current().setSelected(true);
+		cropPlaylist(w, boost::bind(&MPD::Connection::Delete, _1, _2));
 	}
 }
 
