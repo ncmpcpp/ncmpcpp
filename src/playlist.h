@@ -75,11 +75,6 @@ struct Playlist: Screen<NC::Menu<MPD::Song>>, Filterable, HasSongs, Searchable, 
 	
 	void SetSelectedItemsPriority(int prio);
 	
-	void setStatus(MPD::Status status);
-	unsigned oldVersion() const;
-	int currentSongPosition() const;
-	unsigned currentSongLength() const;
-	
 	bool checkForSong(const MPD::Song &s);
 	void registerSong(const MPD::Song &s);
 	void unregisterSong(const MPD::Song &s);
@@ -102,9 +97,6 @@ private:
 	size_t m_scroll_begin;
 	
 	boost::posix_time::ptime m_timer;
-	
-	MPD::Status m_status;
-	unsigned m_old_playlist_version;
 
 	bool m_reload_total_length;
 	bool m_reload_remaining;

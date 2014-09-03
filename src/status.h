@@ -33,23 +33,12 @@ void trace(bool update_timer, bool update_window_timeout);
 inline void trace() { trace(true, false); }
 void update(int event);
 
-namespace State {//
-
-bool repeat();
-bool random();
-bool single();
-bool consume();
-bool crossfade();
-
-MPD::PlayerState player();
-int volume();
+const MPD::Status &get();
 unsigned elapsedTime();
-
-}
 
 namespace Changes {//
 
-void playlist();
+void playlist(unsigned previous_version);
 void storedPlaylists();
 void database();
 void playerState();

@@ -174,7 +174,7 @@ int main(int argc, char **argv)
 					
 					if (Config.jump_to_now_playing_song_at_start)
 					{
-						int curr_pos = myPlaylist->currentSongPosition();
+						int curr_pos = Status::get().currentSongPosition();
 						if  (curr_pos >= 0)
 							myPlaylist->main().highlight(curr_pos);
 					}

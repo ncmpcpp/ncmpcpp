@@ -48,7 +48,7 @@ bool playlistEntryMatcher(const boost::regex &rx, const MPD::Song &s);
 }
 
 Playlist::Playlist()
-: m_total_length(0), m_remaining_time(0), m_scroll_begin(0), m_old_playlist_version(0)
+: m_total_length(0), m_remaining_time(0), m_scroll_begin(0)
 , m_reload_total_length(false), m_reload_remaining(false)
 {
 	w = NC::Menu<MPD::Song>(0, MainStartY, COLS, MainHeight, Config.playlist_display_mode == DisplayMode::Columns && Config.titles_visibility ? Display::Columns(COLS) : "", Config.main_color, NC::Border::None);
@@ -249,9 +249,9 @@ MPD::SongList Playlist::getSelectedSongs()
 MPD::Song Playlist::nowPlayingSong()
 {
 	MPD::Song s;
-	if (Status::State::player() != MPD::psStop)
+	if (Status::get().playerState() != MPD::psStop)
 		withUnfilteredMenu(w, [this, &s]() {
-			s = w.at(currentSongPosition()).value();
+			s = w.at(Status::get().currentSongPosition()).value();
 		});
 	return s;
 }
@@ -298,7 +298,7 @@ std::string Playlist::getTotalLength()
 	if (Config.playlist_show_remaining_time && m_reload_remaining && !w.isFiltered())
 	{
 		m_remaining_time = 0;
-		for (size_t i = currentSongPosition(); i < w.size(); ++i)
+		for (size_t i = Status::get().currentSongPosition(); i < w.size(); ++i)
 			m_remaining_time += w[i].value().getDuration();
 		m_reload_remaining = false;
 	}
@@ -336,26 +336,6 @@ void Playlist::SetSelectedItemsPriority(int prio)
 		Mpd.SetPriority((*it)->value(), prio);
 	Mpd.CommitCommandsList();
 	Statusbar::print("Priority set");
-}
-
-void Playlist::setStatus(MPD::Status status)
-{
-	m_status = status;
-}
-
-unsigned Playlist::oldVersion() const
-{
-	return m_old_playlist_version;
-}
-
-int Playlist::currentSongPosition() const
-{
-	return m_status.empty() ? -1 : m_status.currentSongPosition();
-}
-
-unsigned Playlist::currentSongLength() const
-{
-	return m_status.empty() ? 0 : m_status.totalTime();
 }
 
 bool Playlist::checkForSong(const MPD::Song &s)

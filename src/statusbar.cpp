@@ -104,7 +104,7 @@ void Statusbar::unlock()
 		else
 			progressbarBlockUpdate = false;
 	}
-	if (Status::State::player() == MPD::psStop)
+	if (Status::get().playerState() == MPD::psStop)
 	{
 		switch (Config.design)
 		{
@@ -112,7 +112,7 @@ void Statusbar::unlock()
 				put() << wclrtoeol;
 				break;
 			case Design::Alternative:
-				Progressbar::draw(Status::State::elapsedTime(), myPlaylist->currentSongLength());
+				Progressbar::draw(Status::elapsedTime(), Status::get().totalTime());
 				break;
 		}
 		wFooter->refresh();
@@ -137,7 +137,7 @@ void Statusbar::tryRedraw()
 		else
 			progressbarBlockUpdate = !statusbarAllowUnlock;
 		
-		if (Status::State::player() != MPD::psStop && !statusbarBlockUpdate && !progressbarBlockUpdate)
+		if (Status::get().playerState() != MPD::psStop && !statusbarBlockUpdate && !progressbarBlockUpdate)
 		{
 			switch (Config.design)
 			{
@@ -145,7 +145,7 @@ void Statusbar::tryRedraw()
 					Status::Changes::elapsedTime(false);
 					break;
 				case Design::Alternative:
-					Progressbar::draw(Status::State::elapsedTime(), myPlaylist->currentSongLength());
+					Progressbar::draw(Status::elapsedTime(), Status::get().totalTime());
 					break;
 			}
 			wFooter->refresh();
