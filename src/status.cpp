@@ -61,6 +61,8 @@ char m_crossfade = 0;
 char m_db_updating = 0;
 
 MPD::Status m_status;
+// needed for the way events are emitted in consume mode after song ends
+int m_current_song_id = 0;
 unsigned m_elapsed_time = 0;
 
 void drawTitle(const MPD::Song &np)
@@ -176,8 +178,11 @@ void Status::update(int event)
 	if (event & MPD_IDLE_PLAYER)
 	{
 		Changes::playerState();
-		if (old_status.empty() || old_status.currentSongID() != m_status.currentSongID())
+		if (m_current_song_id != m_status.currentSongID())
+		{
+			m_current_song_id = m_status.currentSongID();
 			Changes::songID();
+		}
 	}
 	if (event & MPD_IDLE_MIXER)
 		Changes::mixer();
