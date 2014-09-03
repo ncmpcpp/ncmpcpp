@@ -32,6 +32,7 @@ using Global::MainStartY;
 ServerInfo *myServerInfo;
 
 ServerInfo::ServerInfo()
+: m_timer(boost::posix_time::from_time_t(0))
 {
 	SetDimensions();
 	w = NC::Scrollpad((COLS-itsWidth)/2, (MainHeight-itsHeight)/2+MainStartY, itsWidth, itsHeight, "MPD server info", Config.main_color, Config.window_border);
