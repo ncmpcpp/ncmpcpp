@@ -182,6 +182,9 @@ void SelectedItemsAdder::mouseButtonPressed(MEVENT me)
 
 void SelectedItemsAdder::populatePlaylistSelector(BaseScreen *old_screen)
 {
+	// stored playlists don't support songs from outside of mpd database
+	bool in_local_browser = old_screen == myBrowser && myBrowser->isLocal();
+
 	m_playlist_selector.reset();
 	m_playlist_selector.clear();
 	if (old_screen != myPlaylist)
@@ -190,13 +193,14 @@ void SelectedItemsAdder::populatePlaylistSelector(BaseScreen *old_screen)
 			boost::bind(&Self::addToCurrentPlaylist, this)
 		));
 	}
-	m_playlist_selector.addItem(Entry("New playlist",
-		boost::bind(&Self::addToNewPlaylist, this)
-	));
+	if (!in_local_browser)
+	{
+		m_playlist_selector.addItem(Entry("New playlist",
+			boost::bind(&Self::addToNewPlaylist, this)
+		));
+	}
 	m_playlist_selector.addSeparator();
-	
-	// stored playlists don't support songs from outside of mpd database
-	if (old_screen != myBrowser || !myBrowser->isLocal())
+	if (!in_local_browser)
 	{
 		size_t begin = m_playlist_selector.size();
 		Mpd.GetPlaylists([this](std::string playlist) {
