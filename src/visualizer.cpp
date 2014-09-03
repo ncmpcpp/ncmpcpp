@@ -204,7 +204,7 @@ void Visualizer::DrawFrequencySpectrum(int16_t *buf, ssize_t samples, size_t y_o
 	
 	// count magnitude of each frequency and scale it to fit the screen
 	for (unsigned i = 0; i < m_fftw_results; ++i)
-		m_freq_magnitudes[i] = sqrt(m_fftw_output[i][0]*m_fftw_output[i][0] + m_fftw_output[i][1]*m_fftw_output[i][1])/1e5*height;
+		m_freq_magnitudes[i] = sqrt(m_fftw_output[i][0]*m_fftw_output[i][0] + m_fftw_output[i][1]*m_fftw_output[i][1])/2e4*height;
 	
 	const size_t win_width = w.getWidth();
 	// cut bandwidth a little to achieve better look
@@ -219,7 +219,7 @@ void Visualizer::DrawFrequencySpectrum(int16_t *buf, ssize_t samples, size_t y_o
 		// buff higher frequencies
 		bar_height *= log2(2 + i);
 		// moderately normalize the heights
-		bar_height = pow(bar_height, 0.6);
+		bar_height = pow(bar_height, 0.5);
 		bar_real_height = std::min(size_t(bar_height/freqs_per_col), height);
 		const size_t start_y = y_offset > 0 ? y_offset : height-bar_real_height;
 		const size_t stop_y = std::min(bar_real_height+start_y, w.getHeight());
