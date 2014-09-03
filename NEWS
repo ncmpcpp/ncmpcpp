@@ -1,3 +1,14 @@
+ncmpcpp-0.6_beta1
+
+* Support for polling communication mode has been removed. Additionally, MPD version >= 0.16 is required.
+* Keybinding system has been redesigned: "keys" file is now deprecated; "bindings" file is used instead. It has support for many features, including binding to non-ascii characters and macros.
+* Browser has support for custom sort format.
+* Playlist has support for MPD priorities.
+* Media library can be sorted by modification time.
+* Visualizer's frequency spectrum was adjusted to look more pleasant.
+* Broken compatibility of various actions with filtered lists has been corrected.
+* Tons of other small changes and improvements were made.
+
 ncmpcpp-0.5.10
 
 * fix compilation with gcc 4.7
