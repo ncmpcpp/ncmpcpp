@@ -2681,7 +2681,7 @@ void seek()
 	Progressbar::lock();
 	Statusbar::lock();
 
-	unsigned songpos = Status::elapsedTime();
+	unsigned songpos = Status::get().elapsedTime();
 	auto t = Timer;
 	
 	int old_timeout = wFooter->getTimeout();

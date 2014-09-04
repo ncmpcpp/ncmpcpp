@@ -55,17 +55,18 @@ size_t playing_song_scroll_begin = 0;
 size_t first_line_scroll_begin = 0;
 size_t second_line_scroll_begin = 0;
 
+MPD::Status m_status;
+
+// local copies of these are needed to be independent
+// of the order of idle events incoming from MPD.
 char m_repeat = 0;
 char m_random = 0;
 char m_single = 0;
 char m_consume = 0;
 char m_crossfade = 0;
 char m_db_updating = 0;
-
-MPD::Status m_status;
-// needed for the way events are emitted in consume mode after song ends
 int m_current_song_id = 0;
-unsigned m_elapsed_time = 0;
+unsigned m_playlist_version = 0;
 
 void drawTitle(const MPD::Song &np)
 {
@@ -169,21 +170,23 @@ void Status::update(int event)
 {
 	MPD::Status old_status = m_status;
 	m_status = Mpd.getStatus();
-	m_elapsed_time = m_status.elapsedTime();
 	
 	if (event & MPD_IDLE_DATABASE)
 		Changes::database();
 	if (event & MPD_IDLE_STORED_PLAYLIST)
 		Changes::storedPlaylists();
 	if (event & MPD_IDLE_PLAYLIST)
-		Changes::playlist(old_status.empty() ? 0 : old_status.playlistVersion());
+	{
+		Changes::playlist(m_playlist_version);
+		m_playlist_version = m_status.playlistVersion();
+	}
 	if (event & MPD_IDLE_PLAYER)
 	{
 		Changes::playerState();
 		if (m_current_song_id != m_status.currentSongID())
 		{
-			m_current_song_id = m_status.currentSongID();
 			Changes::songID();
+			m_current_song_id = m_status.currentSongID();
 		}
 	}
 	if (event & MPD_IDLE_MIXER)
@@ -192,20 +195,21 @@ void Status::update(int event)
 		Changes::outputs();
 	if (event & (MPD_IDLE_UPDATE | MPD_IDLE_OPTIONS))
 	{
+		bool show_msg = !old_status.empty();
 		if (event & MPD_IDLE_UPDATE)
-			Changes::dbUpdateState(!old_status.empty());
+			Changes::dbUpdateState(show_msg);
 		if (event & MPD_IDLE_OPTIONS)
 		{
-			if (old_status.empty() || old_status.repeat() != m_status.repeat())
-				Changes::repeat(!old_status.empty());
-			if (old_status.empty() || old_status.random() != m_status.random())
-				Changes::random(!old_status.empty());
-			if (old_status.empty() || old_status.single() != m_status.single())
-				Changes::single(!old_status.empty());
-			if (old_status.empty() || old_status.consume() != m_status.consume())
-				Changes::consume(!old_status.empty());
-			if (old_status.empty() || old_status.crossfade() != m_status.crossfade())
-				Changes::crossfade(!old_status.empty());
+			if (('r' == m_repeat) != m_status.repeat())
+				Changes::repeat(show_msg);
+			if (('z' == m_random) != m_status.random())
+				Changes::random(show_msg);
+			if (('s' == m_single) != m_status.single())
+				Changes::single(show_msg);
+			if (('c' == m_consume) != m_status.consume())
+				Changes::consume(show_msg);
+			if (('x' == m_crossfade) != m_status.crossfade())
+				Changes::crossfade(show_msg);
 		}
 		Changes::flags();
 	}
@@ -217,16 +221,23 @@ void Status::update(int event)
 		applyToVisibleWindows(&BaseScreen::refreshWindow);
 }
 
-/*************************************************************************/
+void Status::clear()
+{
+	// reset local variables
+	m_status.clear();
+	m_repeat = 0;
+	m_random = 0;
+	m_single = 0;
+	m_consume = 0;
+	m_crossfade = 0;
+	m_db_updating = 0;
+	m_current_song_id = 0;
+	m_playlist_version = 0;
+}
 
 const MPD::Status &Status::get()
 {
 	return m_status;
-}
-
-unsigned Status::elapsedTime()
-{
-	return m_elapsed_time;
 }
 
 /*************************************************************************/
@@ -388,7 +399,7 @@ void Status::Changes::songID()
 void Status::Changes::elapsedTime(bool update_elapsed)
 {
 	if (update_elapsed)
-		m_elapsed_time = Mpd.getStatus().elapsedTime();
+		m_status = Mpd.getStatus();
 	const auto &st = m_status;
 	
 	if (st.playerState() == MPD::psStop)
@@ -420,17 +431,17 @@ void Status::Changes::elapsedTime(bool update_elapsed)
 					if (Config.display_remaining_time)
 					{
 						tracklength += "-";
-						tracklength += MPD::Song::ShowTime(st.totalTime()-m_elapsed_time);
+						tracklength += MPD::Song::ShowTime(st.totalTime()-st.elapsedTime());
 					}
 					else
-						tracklength += MPD::Song::ShowTime(m_elapsed_time);
+						tracklength += MPD::Song::ShowTime(st.elapsedTime());
 					tracklength += "/";
 					tracklength += MPD::Song::ShowTime(st.totalTime());
 					tracklength += "]";
 				}
 				else
 				{
-					tracklength += MPD::Song::ShowTime(m_elapsed_time);
+					tracklength += MPD::Song::ShowTime(st.elapsedTime());
 					tracklength += "]";
 				}
 				NC::WBuffer np_song;
@@ -444,10 +455,10 @@ void Status::Changes::elapsedTime(bool update_elapsed)
 			if (Config.display_remaining_time)
 			{
 				tracklength = "-";
-				tracklength += MPD::Song::ShowTime(st.totalTime()-m_elapsed_time);
+				tracklength += MPD::Song::ShowTime(st.totalTime()-st.elapsedTime());
 			}
 			else
-				tracklength = MPD::Song::ShowTime(m_elapsed_time);
+				tracklength = MPD::Song::ShowTime(st.elapsedTime());
 			if (st.totalTime())
 			{
 				tracklength += "/";
@@ -487,7 +498,7 @@ void Status::Changes::elapsedTime(bool update_elapsed)
 			flags();
 	}
 	if (Progressbar::isUnlocked())
-		Progressbar::draw(m_elapsed_time, st.totalTime());
+		Progressbar::draw(st.elapsedTime(), st.totalTime());
 }
 
 void Status::Changes::repeat(bool show_msg)

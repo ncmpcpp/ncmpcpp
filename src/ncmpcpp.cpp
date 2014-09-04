@@ -170,6 +170,7 @@ int main(int argc, char **argv)
 						throw MPD::ClientError(MPD_ERROR_STATE, "MPD < 0.16.0 is not supported", false);
 					}
 					wFooter->addFDCallback(Mpd.GetFD(), Statusbar::Helpers::mpd);
+					Status::clear(); // reset local status info
 					Status::update(-1); // we need info about new connection
 					
 					if (Config.jump_to_now_playing_song_at_start)
@@ -179,7 +180,9 @@ int main(int argc, char **argv)
 							myPlaylist->main().highlight(curr_pos);
 					}
 					
-					// Set TCP_NODELAY on the tcp socket as this significantly speeds up operations.
+					// Set TCP_NODELAY on the tcp socket as we are using write-write-read pattern
+					// a lot (idle - write, noidle - write, then read the result of noidle), which
+					// kills the performance.
 					int flag = 1;
 					setsockopt(Mpd.GetFD(), IPPROTO_TCP, TCP_NODELAY, &flag, sizeof(flag));
 
