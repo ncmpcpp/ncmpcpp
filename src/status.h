@@ -36,6 +36,10 @@ void clear();
 
 const MPD::Status &get();
 
+// get current elapsed time (the one from
+// the status is outdated most of the time).
+unsigned elapsedTime();
+
 namespace Changes {//
 
 void playlist(unsigned previous_version);

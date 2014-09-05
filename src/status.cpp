@@ -56,6 +56,7 @@ size_t first_line_scroll_begin = 0;
 size_t second_line_scroll_begin = 0;
 
 MPD::Status m_status;
+unsigned m_elapsed_time = 0;
 
 // local copies of these are needed to be independent
 // of the order of idle events incoming from MPD.
@@ -240,6 +241,11 @@ const MPD::Status &Status::get()
 	return m_status;
 }
 
+unsigned Status::elapsedTime()
+{
+	return m_elapsed_time;
+}
+
 /*************************************************************************/
 
 void Status::Changes::playlist(unsigned previous_version)
@@ -399,7 +405,7 @@ void Status::Changes::songID()
 void Status::Changes::elapsedTime(bool update_elapsed)
 {
 	if (update_elapsed)
-		m_status = Mpd.getStatus();
+		m_elapsed_time = Mpd.getStatus().elapsedTime();
 	const auto &st = m_status;
 	
 	if (st.playerState() == MPD::psStop)
@@ -431,17 +437,17 @@ void Status::Changes::elapsedTime(bool update_elapsed)
 					if (Config.display_remaining_time)
 					{
 						tracklength += "-";
-						tracklength += MPD::Song::ShowTime(st.totalTime()-st.elapsedTime());
+						tracklength += MPD::Song::ShowTime(st.totalTime()-m_elapsed_time);
 					}
 					else
-						tracklength += MPD::Song::ShowTime(st.elapsedTime());
+						tracklength += MPD::Song::ShowTime(m_elapsed_time);
 					tracklength += "/";
 					tracklength += MPD::Song::ShowTime(st.totalTime());
 					tracklength += "]";
 				}
 				else
 				{
-					tracklength += MPD::Song::ShowTime(st.elapsedTime());
+					tracklength += MPD::Song::ShowTime(m_elapsed_time);
 					tracklength += "]";
 				}
 				NC::WBuffer np_song;
@@ -455,10 +461,10 @@ void Status::Changes::elapsedTime(bool update_elapsed)
 			if (Config.display_remaining_time)
 			{
 				tracklength = "-";
-				tracklength += MPD::Song::ShowTime(st.totalTime()-st.elapsedTime());
+				tracklength += MPD::Song::ShowTime(st.totalTime()-m_elapsed_time);
 			}
 			else
-				tracklength = MPD::Song::ShowTime(st.elapsedTime());
+				tracklength = MPD::Song::ShowTime(m_elapsed_time);
 			if (st.totalTime())
 			{
 				tracklength += "/";
@@ -498,7 +504,7 @@ void Status::Changes::elapsedTime(bool update_elapsed)
 			flags();
 	}
 	if (Progressbar::isUnlocked())
-		Progressbar::draw(st.elapsedTime(), st.totalTime());
+		Progressbar::draw(m_elapsed_time, st.totalTime());
 }
 
 void Status::Changes::repeat(bool show_msg)

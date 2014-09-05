@@ -112,7 +112,7 @@ void Statusbar::unlock()
 				put() << wclrtoeol;
 				break;
 			case Design::Alternative:
-				Progressbar::draw(Status::get().elapsedTime(), Status::get().totalTime());
+				Progressbar::draw(Status::elapsedTime(), Status::get().totalTime());
 				break;
 		}
 		wFooter->refresh();
@@ -145,7 +145,7 @@ void Statusbar::tryRedraw()
 					Status::Changes::elapsedTime(false);
 					break;
 				case Design::Alternative:
-					Progressbar::draw(Status::get().elapsedTime(), Status::get().totalTime());
+					Progressbar::draw(Status::elapsedTime(), Status::get().totalTime());
 					break;
 			}
 			wFooter->refresh();
