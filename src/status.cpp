@@ -171,6 +171,7 @@ void Status::update(int event)
 {
 	MPD::Status old_status = m_status;
 	m_status = Mpd.getStatus();
+	m_elapsed_time = m_status.elapsedTime();
 	
 	if (event & MPD_IDLE_DATABASE)
 		Changes::database();
