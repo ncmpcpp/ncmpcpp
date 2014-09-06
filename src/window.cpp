@@ -380,10 +380,12 @@ void initScreen(GNUC_UNUSED const char *window_title, bool enable_colors)
 	noecho();
 	curs_set(0);
 
-	rl_catch_signals = 0;
 	rl_initialize();
 	// disable autocompletion
 	rl_bind_key('\t', nullptr);
+	rl_bind_key(KEY_ESCAPE, nullptr);
+	// do not catch signals
+	rl_catch_signals = 0;
 	// overwrite readline callbacks
 	rl_getc_function = rl::read_key;
 	rl_redisplay_function = rl::display_string;

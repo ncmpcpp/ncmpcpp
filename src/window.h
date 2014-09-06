@@ -80,6 +80,7 @@
 #define KEY_F12 276
 
 // other handy keys
+#define KEY_ESCAPE 27
 #define KEY_SHIFT_TAB 353
 #define KEY_SPACE 32
 #define KEY_TAB 9
