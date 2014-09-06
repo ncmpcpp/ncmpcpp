@@ -919,20 +919,32 @@ void MediaLibrary::toggleSortMode()
 		Config.media_library_sort_by_mtime ? "modification time" : "name");
 	if (hasTwoColumns)
 	{
-		std::sort(Albums.beginV(), Albums.endV(), SortAlbumEntries());
+		withUnfilteredMenuReapplyFilter(Albums, [this]() {
+			std::sort(Albums.beginV(), Albums.endV(), SortAlbumEntries());
+		});
 		Albums.refresh();
 		Songs.clear();
 		if (Config.titles_visibility)
 		{
 			std::string item_type = boost::locale::to_lower(
 				tagTypeToString(Config.media_lib_primary_tag));
-			std::string and_mtime = Config.media_library_sort_by_mtime ? " and mtime" : "";
+			std::string and_mtime = Config.media_library_sort_by_mtime ? (" " "and mtime") : "";
 			Albums.setTitle("Albums (sorted by " + item_type + and_mtime + ")");
 		}
 	}
 	else
 	{
-		Tags.clear();
+		withUnfilteredMenuReapplyFilter(Tags, [this]() {
+			// if we already have modification times,
+			// just resort. otherwise refetch the list.
+			if (!Tags.empty() && Tags[0].value().mtime() > 0)
+			{
+				std::sort(Tags.beginV(), Tags.endV(), SortPrimaryTags());
+				Tags.refresh();
+			}
+			else
+				Tags.clear();
+		});
 		Albums.clear();
 		Songs.clear();
 	}
