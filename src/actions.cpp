@@ -1728,17 +1728,19 @@ void AddSelectedItems::run()
 
 void CropMainPlaylist::run()
 {
+	auto &w = myPlaylist->main();
+	// cropping doesn't make sense in this case
+	if (w.size() <= 1)
+		return;
 	bool yes = true;
 	if (Config.ask_before_clearing_playlists)
 		yes = askYesNoQuestion("Do you really want to crop main playlist?", Status::trace);
 	if (yes)
 	{
 		Statusbar::print("Cropping playlist...");
-		auto &w = myPlaylist->main();
-		// if no item is selected, select the current one
-		if (!w.empty() && !hasSelected(w.begin(), w.end()))
-			w.current().setSelected(true);
+		selectCurrentIfNoneSelected(w);
 		cropPlaylist(w, boost::bind(&MPD::Connection::Delete, _1, _2));
+		Statusbar::print("Playlist cropped");
 	}
 }
 
@@ -1749,6 +1751,10 @@ bool CropPlaylist::canBeRun() const
 
 void CropPlaylist::run()
 {
+	auto &w = myPlaylistEditor->Content;
+	// cropping doesn't make sense in this case
+	if (w.size() <= 1)
+		return;
 	assert(!myPlaylistEditor->Playlists.empty());
 	std::string playlist = myPlaylistEditor->Playlists.current().value();
 	bool yes = true;
@@ -1759,9 +1765,9 @@ void CropPlaylist::run()
 		);
 	if (yes)
 	{
-		auto delete_fun = boost::bind(&MPD::Connection::PlaylistDelete, _1, playlist, _2);
+		selectCurrentIfNoneSelected(w);
 		Statusbar::printf("Cropping playlist \"%1%\"...", playlist);
-		cropPlaylist(myPlaylistEditor->Content, delete_fun);
+		cropPlaylist(w, boost::bind(&MPD::Connection::PlaylistDelete, _1, playlist, _2));
 		Statusbar::printf("Playlist \"%1%\" cropped", playlist);
 	}
 }
