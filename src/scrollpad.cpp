@@ -20,6 +20,7 @@
 
 #include <cassert>
 #include <boost/regex.hpp>
+#include <iostream>
 
 #include "scrollpad.h"
 
