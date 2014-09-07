@@ -233,7 +233,7 @@ bool Configuration::read(const std::string &config_path)
 	p.add("visualizer_type", option_parser::worker([this](std::string &&v) {
 		if (v == "wave")
 			visualizer_use_wave = true;
-		else if (v == "frequency")
+		else if (v == "spectrum")
 			visualizer_use_wave = false;
 		else
 			throw std::runtime_error("invalid argument: " + v);
