@@ -371,7 +371,7 @@ bool Configuration::read(const std::string &config_path)
 		volume_change_step, 2
 	));
 	p.add("autocenter_mode", yes_no(
-		titles_visibility, false
+		autocenter_mode, false
 	));
 	p.add("centered_cursor", yes_no(
 		centered_cursor, false
