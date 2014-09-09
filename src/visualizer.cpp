@@ -50,7 +50,7 @@ const int fps = 25;
 }
 
 Visualizer::Visualizer()
-: Screen(NC::Window(0, MainStartY, COLS, MainHeight, "", Config.visualizer_color, NC::Border::None))
+: Screen(NC::Window(0, MainStartY, COLS, MainHeight, "", NC::Color::Default, NC::Border::None))
 {
 	ResetFD();
 	m_samples = 44100/fps;
@@ -176,7 +176,14 @@ void Visualizer::DrawSoundWave(int16_t *buf, ssize_t samples, size_t y_offset, s
 		point_pos /= samples_per_col;
 		point_pos /= std::numeric_limits<int16_t>::max();
 		point_pos *= half_height;
-		w << NC::XY(i, y_offset+half_height+point_pos) << Config.visualizer_chars[0];
+		point_pos  = std::round(point_pos);
+
+		w << NC::XY(i, y_offset+half_height+point_pos)
+		<< Config.visualizer_colors[std::min(size_t(std::abs(point_pos) / (double)half_height *
+											Config.visualizer_colors.size()), Config.visualizer_colors.size() - 1)]
+		<< Config.visualizer_chars[0]
+		<< NC::Color::End;
+		
 		if (i && abs(prev_point_pos-point_pos) > 2)
 		{
 			// if gap is too big. intermediate values are needed
@@ -184,7 +191,11 @@ void Visualizer::DrawSoundWave(int16_t *buf, ssize_t samples, size_t y_offset, s
 			const int breakpoint = std::max(prev_point_pos, point_pos);
 			const int half = (prev_point_pos+point_pos)/2;
 			for (int k = std::min(prev_point_pos, point_pos)+1; k < breakpoint; k += 2)
-				w << NC::XY(i-(k < half), y_offset+half_height+k) << Config.visualizer_chars[0];
+				w << NC::XY(i-(k < half), y_offset+half_height+k)
+				<< Config.visualizer_colors[std::min(size_t(std::abs(k) / (double)half_height *
+													Config.visualizer_colors.size()), Config.visualizer_colors.size() - 1)]
+				<< Config.visualizer_chars[0]
+				<< NC::Color::End;
 		}
 		prev_point_pos = point_pos;
 	}
@@ -225,7 +236,17 @@ void Visualizer::DrawFrequencySpectrum(int16_t *buf, ssize_t samples, size_t y_o
 		const size_t start_y = y_offset > 0 ? y_offset : height-bar_real_height;
 		const size_t stop_y = std::min(bar_real_height+start_y, w.getHeight());
 		for (size_t j = start_y; j < stop_y; ++j)
-			w << NC::XY(i, j) << Config.visualizer_chars[1];
+		{
+			w << NC::XY(i, j);
+			if (Config.visualizer_in_stereo)
+				w << Config.visualizer_colors[std::abs(int(j - w.getHeight() / 2)) /
+												((double)w.getHeight() / 2) * Config.visualizer_colors.size()];
+			else
+				w << Config.visualizer_colors[std::abs(int((double)j / stop_y * Config.visualizer_colors.size()) -
+												int(Config.visualizer_colors.size() - 1))];
+			w << Config.visualizer_chars[1]
+			<< NC::Color::End;
+		}
 	}
 }
 #endif // HAVE_FFTW3_H
