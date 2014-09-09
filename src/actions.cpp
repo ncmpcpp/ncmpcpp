@@ -2216,7 +2216,7 @@ void SetVisualizerSampleMultiplier::run()
 	Statusbar::unlock();
 
 	double multiplier = fromString<double>(smultiplier);
-	lowerBoundCheck(multiplier, 1.0);
+	lowerBoundCheck(multiplier, 0.0);
 	Config.visualizer_sample_multiplier = multiplier;
 #	endif // ENABLE_VISUALIZER
 }
