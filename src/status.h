@@ -34,11 +34,24 @@ inline void trace() { trace(true, false); }
 void update(int event);
 void clear();
 
-const MPD::Status &get();
+namespace State {
 
-// get current elapsed time (the one from
-// the status is outdated most of the time).
+// flags
+bool consume();
+bool crossfade();
+bool repeat();
+bool random();
+bool single();
+
+// misc
+int currentSongID();
+int currentSongPosition();
 unsigned elapsedTime();
+MPD::PlayerState player();
+unsigned totalTime();
+int volume();
+
+}
 
 namespace Changes {//
 
@@ -48,12 +61,6 @@ void database();
 void playerState();
 void songID();
 void elapsedTime(bool update_elapsed);
-void repeat(bool show_msg);
-void random(bool show_msg);
-void single(bool show_msg);
-void consume(bool show_msg);
-void crossfade(bool show_msg);
-void dbUpdateState(bool show_msg);
 void flags();
 void mixer();
 void outputs();

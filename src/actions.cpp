@@ -331,14 +331,14 @@ void MouseEvent::run()
 	&&  m_mouse_event.y == LINES-(Config.statusbar_visibility ? 2 : 1)
 	   ) // progressbar
 	{
-		if (Status::get().playerState() == MPD::psStop)
+		if (Status::State::player() == MPD::psStop)
 			return;
-		Mpd.Seek(Status::get().currentSongPosition(),
-			Status::get().totalTime()*m_mouse_event.x/double(COLS));
+		Mpd.Seek(Status::State::currentSongPosition(),
+			Status::State::totalTime()*m_mouse_event.x/double(COLS));
 	}
 	else if (m_mouse_event.bstate & BUTTON1_PRESSED
 	     &&  (Config.statusbar_visibility || Config.design == Design::Alternative)
-	     &&  Status::get().playerState() != MPD::psStop
+	     &&  Status::State::player() != MPD::psStop
 	     &&  m_mouse_event.y == (Config.design == Design::Alternative ? 1 : LINES-1)
 			 &&  m_mouse_event.x < 9
 		) // playing/paused
@@ -616,13 +616,13 @@ void SlaveScreen::run()
 
 void VolumeUp::run()
 {
-	int volume = std::min(Status::get().volume()+Config.volume_change_step, 100u);
+	int volume = std::min(Status::State::volume()+Config.volume_change_step, 100u);
 	Mpd.SetVolume(volume);
 }
 
 void VolumeDown::run()
 {
-	int volume = std::max(int(Status::get().volume()-Config.volume_change_step), 0);
+	int volume = std::max(int(Status::State::volume()-Config.volume_change_step), 0);
 	Mpd.SetVolume(volume);
 }
 
@@ -744,8 +744,8 @@ void DeleteStoredPlaylist::run()
 
 void ReplaySong::run()
 {
-	if (Status::get().playerState() != MPD::psStop)
-		Mpd.Seek(Status::get().currentSongPosition(), 0);
+	if (Status::State::player() != MPD::psStop)
+		Mpd.Seek(Status::State::currentSongPosition(), 0);
 }
 
 void PreviousSong::run()
@@ -979,7 +979,7 @@ void Add::run()
 
 bool SeekForward::canBeRun() const
 {
-	return Status::get().playerState() != MPD::psStop && Status::get().totalTime() > 0;
+	return Status::State::player() != MPD::psStop && Status::State::totalTime() > 0;
 }
 
 void SeekForward::run()
@@ -989,7 +989,7 @@ void SeekForward::run()
 
 bool SeekBackward::canBeRun() const
 {
-	return Status::get().playerState() != MPD::psStop && Status::get().totalTime() > 0;
+	return Status::State::player() != MPD::psStop && Status::State::totalTime() > 0;
 }
 
 void SeekBackward::run()
@@ -1140,9 +1140,9 @@ void TogglePlayingSongCentering::run()
 		Config.autocenter_mode ? "on" : "off"
 	);
 	if (Config.autocenter_mode
-	&& Status::get().playerState() != MPD::psStop
+	&& Status::State::player() != MPD::psStop
 	&& !myPlaylist->main().isFiltered())
-		myPlaylist->main().highlight(Status::get().currentSongPosition());
+		myPlaylist->main().highlight(Status::State::currentSongPosition());
 }
 
 void UpdateDatabase::run()
@@ -1162,13 +1162,13 @@ bool JumpToPlayingSong::canBeRun() const
 	return ((myScreen == myPlaylist && !myPlaylist->isFiltered())
 	    ||  myScreen == myBrowser
 	    ||  myScreen == myLibrary)
-	  &&   Status::get().playerState() != MPD::psStop;
+	  &&   Status::State::player() != MPD::psStop;
 }
 
 void JumpToPlayingSong::run()
 {
 	if (myScreen == myPlaylist)
-		myPlaylist->main().highlight(Status::get().currentSongPosition());
+		myPlaylist->main().highlight(Status::State::currentSongPosition());
 	else if (myScreen == myBrowser)
 	{
 		myBrowser->LocateSong(myPlaylist->nowPlayingSong());
@@ -1182,7 +1182,7 @@ void JumpToPlayingSong::run()
 
 void ToggleRepeat::run()
 {
-	Mpd.SetRepeat(!Status::get().repeat());
+	Mpd.SetRepeat(!Status::State::repeat());
 }
 
 void Shuffle::run()
@@ -1192,7 +1192,7 @@ void Shuffle::run()
 
 void ToggleRandom::run()
 {
-	Mpd.SetRandom(!Status::get().random());
+	Mpd.SetRandom(!Status::State::random());
 }
 
 bool StartSearching::canBeRun() const
@@ -1237,17 +1237,17 @@ void SaveTagChanges::run()
 
 void ToggleSingle::run()
 {
-	Mpd.SetSingle(!Status::get().single());
+	Mpd.SetSingle(!Status::State::single());
 }
 
 void ToggleConsume::run()
 {
-	Mpd.SetConsume(!Status::get().consume());
+	Mpd.SetConsume(!Status::State::consume());
 }
 
 void ToggleCrossfade::run()
 {
-	Mpd.SetCrossfade(Status::get().crossfade() ? 0 : Config.crossfade_time);
+	Mpd.SetCrossfade(Status::State::crossfade() ? 0 : Config.crossfade_time);
 }
 
 void SetCrossfade::run()
@@ -1612,7 +1612,7 @@ void JumpToTagEditor::run()
 
 bool JumpToPositionInSong::canBeRun() const
 {
-	return Status::get().playerState() != MPD::psStop && Status::get().totalTime() > 0;
+	return Status::State::player() != MPD::psStop && Status::State::totalTime() > 0;
 }
 
 void JumpToPositionInSong::run()
@@ -2680,7 +2680,7 @@ void seek()
 	using Global::Timer;
 	using Global::SeekingInProgress;
 	
-	if (!Status::get().totalTime())
+	if (!Status::State::totalTime())
 	{
 		Statusbar::print("Unknown item length");
 		return;
@@ -2689,7 +2689,7 @@ void seek()
 	Progressbar::lock();
 	Statusbar::lock();
 
-	unsigned songpos = Status::elapsedTime();
+	unsigned songpos = Status::State::elapsedTime();
 	auto t = Timer;
 	
 	int old_timeout = wFooter->getTimeout();
@@ -2714,8 +2714,8 @@ void seek()
 		auto a = k.first->action();
 		if (a == seekForward)
 		{
-			if (songpos < Status::get().totalTime())
-				songpos = std::min(songpos + howmuch, Status::get().totalTime());
+			if (songpos < Status::State::totalTime())
+				songpos = std::min(songpos + howmuch, Status::State::totalTime());
 		}
 		else if (a == seekBackward)
 		{
@@ -2739,12 +2739,12 @@ void seek()
 				if (Config.display_remaining_time)
 				{
 					tracklength += "-";
-					tracklength += MPD::Song::ShowTime(Status::get().totalTime()-songpos);
+					tracklength += MPD::Song::ShowTime(Status::State::totalTime()-songpos);
 				}
 				else
 					tracklength += MPD::Song::ShowTime(songpos);
 				tracklength += "/";
-				tracklength += MPD::Song::ShowTime(Status::get().totalTime());
+				tracklength += MPD::Song::ShowTime(Status::State::totalTime());
 				tracklength += "]";
 				*wFooter << NC::XY(wFooter->getWidth()-tracklength.length(), 1) << tracklength;
 				break;
@@ -2752,22 +2752,22 @@ void seek()
 				if (Config.display_remaining_time)
 				{
 					tracklength = "-";
-					tracklength += MPD::Song::ShowTime(Status::get().totalTime()-songpos);
+					tracklength += MPD::Song::ShowTime(Status::State::totalTime()-songpos);
 				}
 				else
 					tracklength = MPD::Song::ShowTime(songpos);
 				tracklength += "/";
-				tracklength += MPD::Song::ShowTime(Status::get().totalTime());
+				tracklength += MPD::Song::ShowTime(Status::State::totalTime());
 				*wHeader << NC::XY(0, 0) << tracklength << " ";
 				wHeader->refresh();
 				break;
 		}
 		*wFooter << NC::Format::NoBold;
-		Progressbar::draw(songpos, Status::get().totalTime());
+		Progressbar::draw(songpos, Status::State::totalTime());
 		wFooter->refresh();
 	}
 	SeekingInProgress = false;
-	Mpd.Seek(Status::get().currentSongPosition(), songpos);
+	Mpd.Seek(Status::State::currentSongPosition(), songpos);
 	
 	wFooter->setTimeout(old_timeout);
 	

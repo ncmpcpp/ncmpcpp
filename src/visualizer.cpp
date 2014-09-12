@@ -146,7 +146,7 @@ void Visualizer::update()
 
 int Visualizer::windowTimeout()
 {
-	if (m_fifo >= 0 && Status::get().playerState() == MPD::psPlay)
+	if (m_fifo >= 0 && Status::State::player() == MPD::psPlay)
 		return 1000/fps;
 	else
 		return Screen<WindowType>::windowTimeout();
