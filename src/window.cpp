@@ -63,8 +63,8 @@ int read_key(FILE *)
 				return 0;
 			}
 			w->goToXY(x, start_y);
-			w->refresh();
 		}
+		w->refresh();
 		result = w->readKey();
 		if (!w->FDCallbacksListEmpty())
 		{
