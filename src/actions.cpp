@@ -1140,7 +1140,7 @@ void TogglePlayingSongCentering::run()
 		Config.autocenter_mode ? "on" : "off"
 	);
 	if (Config.autocenter_mode
-	&& Status::State::player() != MPD::psStop
+	&& Status::State::player() != MPD::psUnknown
 	&& !myPlaylist->main().isFiltered())
 		myPlaylist->main().highlight(Status::State::currentSongPosition());
 }
@@ -1162,7 +1162,7 @@ bool JumpToPlayingSong::canBeRun() const
 	return ((myScreen == myPlaylist && !myPlaylist->isFiltered())
 	    ||  myScreen == myBrowser
 	    ||  myScreen == myLibrary)
-	  &&   Status::State::player() != MPD::psStop;
+	  &&   Status::State::player() != MPD::psUnknown;
 }
 
 void JumpToPlayingSong::run()

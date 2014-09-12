@@ -290,7 +290,7 @@ void write_bindings(NC::Scrollpad &w)
 	key(w, Type::SortPlaylist, "Sort playlist");
 	key(w, Type::ReversePlaylist, "Reverse playlist");
 	key(w, Type::FilterPlaylistOnPriorities, "Filter playlist on priorities");
-	key(w, Type::JumpToPlayingSong, "Jump to playing song");
+	key(w, Type::JumpToPlayingSong, "Jump to current song");
 	key(w, Type::TogglePlayingSongCentering, "Toggle playing song centering");
 
 	key_section(w, "Browser");
