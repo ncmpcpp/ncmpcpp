@@ -414,9 +414,6 @@ void Status::Changes::playlist(unsigned previous_version)
 		});
 	});
 	
-	if (m_player_state == MPD::psStop)
-		drawTitle(myPlaylist->nowPlayingSong());
-	
 	myPlaylist->reloadTotalLength();
 	myPlaylist->reloadRemaining();
 	
