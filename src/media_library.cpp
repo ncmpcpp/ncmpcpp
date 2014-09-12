@@ -474,7 +474,7 @@ void MediaLibrary::mouseButtonPressed(MEVENT me)
 {
 	auto tryNextColumn = [this]() -> bool {
 		bool result = true;
-		if (isActiveWindow(Songs))
+		if (!isActiveWindow(Songs))
 		{
 			if (nextColumnAvailable())
 				nextColumn();
@@ -485,7 +485,7 @@ void MediaLibrary::mouseButtonPressed(MEVENT me)
 	};
 	auto tryPreviousColumn = [this]() -> bool {
 		bool result = true;
-		if (isActiveWindow(Tags))
+		if (!isActiveWindow(Tags))
 		{
 			if (previousColumnAvailable())
 				previousColumn();
@@ -516,7 +516,7 @@ void MediaLibrary::mouseButtonPressed(MEVENT me)
 	}
 	else if (!Albums.empty() && Albums.hasCoords(me.x, me.y))
 	{
-		if (isActiveWindow(Albums))
+		if (!isActiveWindow(Albums))
 		{
 			bool success;
 			if (isActiveWindow(Tags))
