@@ -137,12 +137,22 @@ void Statusbar::tryRedraw()
 		else
 			progressbarBlockUpdate = !statusbarAllowUnlock;
 		
-		if (Status::State::player() != MPD::psStop && !statusbarBlockUpdate && !progressbarBlockUpdate)
+		if (!statusbarBlockUpdate && !progressbarBlockUpdate)
 		{
 			switch (Config.design)
 			{
 				case Design::Classic:
-					Status::Changes::elapsedTime(false);
+					switch (Status::State::player())
+					{
+						case MPD::psUnknown:
+						case MPD::psStop:
+							put() << wclrtoeol;
+							break;
+						case MPD::psPlay:
+						case MPD::psPause:
+							Status::Changes::elapsedTime(false);
+						break;
+					}
 					break;
 				case Design::Alternative:
 					Progressbar::draw(Status::State::elapsedTime(), Status::State::totalTime());
