@@ -7,7 +7,7 @@ ncmpcpp-0.6_beta3
 * Compilation with boost-1.56 has been fixed.
 * Configuration option visualizer_type now accepts "spectrum" value.
 * Configuration option autocenter_mode is now properly read.
-* Configutation option visualizer_sample_multiplier now accepts all positive numbers.
+* Configuration option visualizer_sample_multiplier now accepts all positive numbers.
 * Documentation was updated to reflect the changes.
 * Mouse event handling in media library now works properly.
 * ncmpcpp now works properly with password protected server.
