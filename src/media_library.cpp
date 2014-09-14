@@ -48,9 +48,6 @@ MediaLibrary *myLibrary;
 
 namespace {
 
-const auto ml_wtimeout = 250;
-const auto fetch_delay = boost::posix_time::milliseconds(ml_wtimeout);
-
 bool hasTwoColumns;
 size_t itsLeftColStartX;
 size_t itsLeftColWidth;
@@ -149,6 +146,8 @@ public:
 
 MediaLibrary::MediaLibrary()
 : m_timer(boost::posix_time::from_time_t(0))
+, m_window_timeout(Config.data_fetching_delay ? 250 : 500)
+, m_fetching_delay(boost::posix_time::milliseconds(Config.data_fetching_delay ? 250 : -1))
 {
 	hasTwoColumns = 0;
 	itsLeftColWidth = COLS/3-1;
@@ -342,7 +341,7 @@ void MediaLibrary::update()
 		}
 		
 		if (!Tags.empty()
-		&& ((Albums.reallyEmpty() && Global::Timer - m_timer > fetch_delay) || m_albums_update_request)
+		&& ((Albums.reallyEmpty() && Global::Timer - m_timer > m_fetching_delay) || m_albums_update_request)
 		)
 		{
 			Albums.clearSearchResults();
@@ -390,7 +389,7 @@ void MediaLibrary::update()
 	}
 	
 	if (!Albums.empty()
-	&& ((Songs.reallyEmpty() && Global::Timer - m_timer > fetch_delay) || m_songs_update_request)
+	&& ((Songs.reallyEmpty() && Global::Timer - m_timer > m_fetching_delay) || m_songs_update_request)
 	)
 	{
 		Songs.clearSearchResults();
@@ -427,7 +426,7 @@ void MediaLibrary::update()
 int MediaLibrary::windowTimeout()
 {
 	if (Albums.reallyEmpty() || Songs.reallyEmpty())
-		return ml_wtimeout;
+		return m_window_timeout;
 	else
 		return Screen<WindowType>::windowTimeout();
 }

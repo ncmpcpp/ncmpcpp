@@ -95,6 +95,9 @@ private:
 	bool m_content_update_requested;
 
 	boost::posix_time::ptime m_timer;
+
+	const int m_window_timeout;
+	const boost::posix_time::time_duration m_fetching_delay;
 };
 
 extern PlaylistEditor *myPlaylistEditor;

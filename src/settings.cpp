@@ -400,6 +400,9 @@ bool Configuration::read(const std::string &config_path)
 	p.add("user_interface", assign_default(
 		design, Design::Classic
 	));
+	p.add("data_fetching_delay", yes_no(
+		data_fetching_delay, true
+	));
 	p.add("media_library_primary_tag", option_parser::worker([this](std::string &&v) {
 		if (v == "artist")
 			media_lib_primary_tag = MPD_TAG_ARTIST;

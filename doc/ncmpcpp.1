@@ -309,6 +309,9 @@ Type of currently used regular expressions.
 .B user_interface = classic/alternative
 Default user interface used by ncmpcpp at start.
 .TP 
+.B data_fetching_delay = yes/no
+If enabled, there will be a 250ms delay between refreshing position in media library or playlist editor and fetching appropriate data from MPD. This limits data fetched from the server and is particularly useful if ncmpcpp is connected to a remote host.
+.TP
 .B media_library_primary_tag = artist/date/genre/composer/performer
 Default tag type for leftmost column in media library.
 .TP 

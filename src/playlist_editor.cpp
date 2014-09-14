@@ -45,9 +45,6 @@ PlaylistEditor *myPlaylistEditor;
 
 namespace {
 
-const int pe_timeout = 250;
-const auto fetch_delay = boost::posix_time::milliseconds(pe_timeout);
-
 size_t LeftColumnStartX;
 size_t LeftColumnWidth;
 size_t RightColumnStartX;
@@ -61,6 +58,8 @@ bool SongEntryMatcher(const boost::regex &rx, const MPD::Song &s);
 
 PlaylistEditor::PlaylistEditor()
 : m_timer(boost::posix_time::from_time_t(0))
+, m_window_timeout(Config.data_fetching_delay ? 250 : 500)
+, m_fetching_delay(boost::posix_time::milliseconds(Config.data_fetching_delay ? 250 : -1))
 {
 	LeftColumnWidth = COLS/3-1;
 	RightColumnStartX = LeftColumnWidth+1;
@@ -158,7 +157,7 @@ void PlaylistEditor::update()
 	}
 	
 	if (!Playlists.empty()
-	&& ((Content.reallyEmpty() && Global::Timer - m_timer > fetch_delay) || m_content_update_requested)
+	&& ((Content.reallyEmpty() && Global::Timer - m_timer > m_fetching_delay) || m_content_update_requested)
 	)
 	{
 		m_content_update_requested = false;
@@ -212,7 +211,7 @@ void PlaylistEditor::update()
 int PlaylistEditor::windowTimeout()
 {
 	if (Content.reallyEmpty())
-		return pe_timeout;
+		return m_window_timeout;
 	else
 		return Screen<WindowType>::windowTimeout();
 }
