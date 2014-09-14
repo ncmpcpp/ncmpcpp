@@ -1,3 +1,18 @@
+ncmpcpp-0.6_beta3
+
+* Handling of server events has been improved.
+* Readline now ignores escape key.
+* Cropping a playlist now works only if its length is bigger than 1.
+* Browser and media library sorting now works properly with filtering.
+* Compilation with boost-1.56 has been fixed.
+* Configuration option visualizer_type now accepts "spectrum" value.
+* Configuration option autocenter_mode is now properly read.
+* Configutation option visualizer_sample_multiplier now accepts all positive numbers.
+* Documentation was updated to reflect the changes.
+* Mouse event handling in media library now works properly.
+* ncmpcpp now works properly with password protected server.
+* Data fetching delay in media library and playlist editor is now optional.
+
 ncmpcpp-0.6_beta2
 
 * Fixed the issue that prevented MPD flags toggling from working properly.
