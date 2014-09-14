@@ -30,7 +30,11 @@ Display version information.
 .SH "CONFIGURATION"
 When ncmpcpp starts, it tries to read user's settings from the ~/.ncmpcpp/config file. If no user's configuration is found, ncmpcpp uses its default configuration. An example configuration file containing all default values is provided with ncmpcpp and can be usually found in /usr/share/doc/ncmpcpp (exact location may depend on used distribution or configure prefix).
 
-Note: Each config option value must be enclosed in quotation marks (var = "example"). If you want to use quotation mark inside config option, prepend character '\\' to it.
+Note: Configuration option values can either be enclosed in quotation marks or not.
+ - If they are enclosed, the leftmost and the rightmost quotation marks are treated as delimiters, therefore it is not necessary to escape quotation marks you use within the value itself.
+ - If they are not, any whitespace characters between = and the first printable character of the value, as well as whitespace characters after the last printable character of the value are trimmed.
+
+Therefore the rule of thumb is: if you need whitespaces at the beginning or at the end of the value, enclose it in quotation marks. Otherwise, don't.
 
 Note: COLOR has to be the name (not a number) of one of colors 1-8 from SONG FORMAT section.
 
