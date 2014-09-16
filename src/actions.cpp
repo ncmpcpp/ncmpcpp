@@ -1168,7 +1168,11 @@ bool JumpToPlayingSong::canBeRun() const
 void JumpToPlayingSong::run()
 {
 	if (myScreen == myPlaylist)
-		myPlaylist->main().highlight(Status::State::currentSongPosition());
+	{
+		auto sp = Status::State::currentSongPosition();
+		if (sp >= 0 && size_t(sp) < myPlaylist->main().size())
+			myPlaylist->main().highlight(Status::State::currentSongPosition());
+	}
 	else if (myScreen == myBrowser)
 	{
 		myBrowser->LocateSong(myPlaylist->nowPlayingSong());
