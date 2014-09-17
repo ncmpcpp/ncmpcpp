@@ -382,8 +382,10 @@ void initScreen(GNUC_UNUSED const char *window_title, bool enable_colors)
 
 	rl_initialize();
 	// disable autocompletion
-	rl_bind_key('\t', nullptr);
-	rl_bind_key(KEY_ESCAPE, nullptr);
+	rl_attempted_completion_function = [](const char *, int, int) -> char ** {
+		rl_attempted_completion_over = 1;
+		return nullptr;
+	};
 	// do not catch signals
 	rl_catch_signals = 0;
 	// overwrite readline callbacks
