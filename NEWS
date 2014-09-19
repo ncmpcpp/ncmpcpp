@@ -1,3 +1,8 @@
+ncmpcpp-0.6_beta4
+
+* Jumping to current song in playlist doesn't trigger assertion failures anymore.
+* Readline's completion feature is now properly disabled.
+
 ncmpcpp-0.6_beta3
 
 * Handling of server events has been improved.
