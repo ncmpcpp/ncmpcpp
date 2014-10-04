@@ -563,8 +563,16 @@ bool Browser::deleteItem(const MPD::Item &item, std::string &errmsg)
 	// playlist created by mpd
 	if (!isLocal() && item.type == itPlaylist && CurrentDir() == "/")
 	{
-		Mpd.DeletePlaylist(item.name);
-		return true;
+		try
+		{
+			Mpd.DeletePlaylist(item.name);
+			return true;
+		}
+		catch (MPD::ServerError &e)
+		{
+			if (e.code() != MPD_SERVER_ERROR_NO_EXIST)
+				throw;
+		}
 	}
 	
 	std::string path;
