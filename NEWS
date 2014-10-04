@@ -1,3 +1,10 @@
+ncmpcpp-0.6_beta5
+
+* Corrupted tags no longer cause assertion failures.
+* MPD connection attempts are now made at most once per second.
+* Deletion of playlists in both browser and playlist editor is now properly handled.
+* Various actions no longer cause the program to crash when invoked with empty playlist.
+
 ncmpcpp-0.6_beta4
 
 * Jumping to current song in playlist doesn't trigger assertion failures anymore.

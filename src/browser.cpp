@@ -570,6 +570,7 @@ bool Browser::deleteItem(const MPD::Item &item, std::string &errmsg)
 		}
 		catch (MPD::ServerError &e)
 		{
+			// if there is no such mpd playlist, we assume it's users's playlist.
 			if (e.code() != MPD_SERVER_ERROR_NO_EXIST)
 				throw;
 		}
