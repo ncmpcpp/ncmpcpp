@@ -156,41 +156,45 @@ void PlaylistEditor::update()
 		Playlists.refresh();
 	}
 	
-	if (!Playlists.empty()
-	&& ((Content.reallyEmpty() && Global::Timer - m_timer > m_fetching_delay) || m_content_update_requested)
-	)
+	if ((Content.reallyEmpty() && Global::Timer - m_timer > m_fetching_delay)
+	||  m_content_update_requested)
 	{
 		m_content_update_requested = false;
-		Content.clearSearchResults();
-		withUnfilteredMenuReapplyFilter(Content, [this]() {
-			size_t idx = 0;
-			Mpd.GetPlaylistContent(Playlists.current().value(), [this, &idx](MPD::Song s) {
+		if (Playlists.empty())
+			Content.clear();
+		else
+		{
+			Content.clearSearchResults();
+			withUnfilteredMenuReapplyFilter(Content, [this]() {
+				size_t idx = 0;
+				Mpd.GetPlaylistContent(Playlists.current().value(), [this, &idx](MPD::Song s) {
+					if (idx < Content.size())
+					{
+						Content[idx].value() = s;
+						Content[idx].setBold(myPlaylist->checkForSong(s));
+					}
+					else
+						Content.addItem(s, myPlaylist->checkForSong(s));
+					++idx;
+				});
 				if (idx < Content.size())
+					Content.resizeList(idx);
+				std::string title;
+				if (Config.titles_visibility)
 				{
-					Content[idx].value() = s;
-					Content[idx].setBold(myPlaylist->checkForSong(s));
+					title = "Playlist content";
+					title += " (";
+					title += boost::lexical_cast<std::string>(Content.size());
+					title += " item";
+					if (Content.size() == 1)
+						title += ")";
+					else
+						title += "s)";
+					title.resize(Content.getWidth());
 				}
-				else
-					Content.addItem(s, myPlaylist->checkForSong(s));
-				++idx;
+				Content.setTitle(title);
 			});
-			if (idx < Content.size())
-				Content.resizeList(idx);
-			std::string title;
-			if (Config.titles_visibility)
-			{
-				title = "Playlist content";
-				title += " (";
-				title += boost::lexical_cast<std::string>(Content.size());
-				title += " item";
-				if (Content.size() == 1)
-					title += ")";
-				else
-					title += "s)";
-				title.resize(Content.getWidth());
-			}
-			Content.setTitle(title);
-		});
+		}
 		Content.display();
 	}
 	

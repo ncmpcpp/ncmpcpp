@@ -724,12 +724,13 @@ void DeleteBrowserItems::run()
 
 bool DeleteStoredPlaylist::canBeRun() const
 {
-	return myScreen->isActiveWindow(myPlaylistEditor->Playlists)
-	    && myPlaylistEditor->Playlists.empty();
+	return myScreen->isActiveWindow(myPlaylistEditor->Playlists);
 }
 
 void DeleteStoredPlaylist::run()
 {
+	if (myPlaylistEditor->Playlists.empty())
+		return;
 	boost::format question;
 	if (hasSelected(myPlaylistEditor->Playlists.begin(), myPlaylistEditor->Playlists.end()))
 		question = boost::format("Delete selected playlists?");
@@ -740,10 +741,8 @@ void DeleteStoredPlaylist::run()
 	if (yes)
 	{
 		auto list = getSelectedOrCurrent(myPlaylistEditor->Playlists.begin(), myPlaylistEditor->Playlists.end(), myPlaylistEditor->Playlists.currentI());
-		Mpd.StartCommandsList();
 		for (auto it = list.begin(); it != list.end(); ++it)
 			Mpd.DeletePlaylist((*it)->value());
-		Mpd.CommitCommandsList();
 		Statusbar::printf("%1% deleted", list.size() == 1 ? "Playlist" : "Playlists");
 	}
 	else
