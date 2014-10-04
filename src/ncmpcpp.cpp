@@ -138,6 +138,7 @@ int main(int argc, char **argv)
 	// local variables
 	bool key_pressed = false;
 	Key input = Key::noOp;
+	auto connect_attempt = boost::posix_time::from_time_t(0);
 	auto past = boost::posix_time::from_time_t(0);
 	
 	/// enable mouse
@@ -156,8 +157,9 @@ int main(int argc, char **argv)
 	{
 		try
 		{
-			if (!Mpd.Connected())
+			if (!Mpd.Connected() && Timer - connect_attempt > boost::posix_time::seconds(1))
 			{
+				connect_attempt = Timer;
 				// reset local status info
 				Status::clear();
 				// clear mpd callback
