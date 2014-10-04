@@ -380,6 +380,8 @@ void ScrollUpArtist::run()
 {
 	auto pl = proxySongList(myScreen);
 	assert(pl);
+	if (pl.empty())
+		return;
 	size_t pos = pl.choice();
 	if (MPD::Song *s = pl.getSong(pos))
 	{
@@ -403,6 +405,8 @@ void ScrollUpAlbum::run()
 {
 	auto pl = proxySongList(myScreen);
 	assert(pl);
+	if (pl.empty())
+		return;
 	size_t pos = pl.choice();
 	if (MPD::Song *s = pl.getSong(pos))
 	{
@@ -426,6 +430,8 @@ void ScrollDownArtist::run()
 {
 	auto pl = proxySongList(myScreen);
 	assert(pl);
+	if (pl.empty())
+		return;
 	size_t pos = pl.choice();
 	if (MPD::Song *s = pl.getSong(pos))
 	{
@@ -449,6 +455,8 @@ void ScrollDownAlbum::run()
 {
 	auto pl = proxySongList(myScreen);
 	assert(pl);
+	if (pl.empty())
+		return;
 	size_t pos = pl.choice();
 	if (MPD::Song *s = pl.getSong(pos))
 	{
@@ -931,7 +939,10 @@ bool MoveSelectedItemsTo::canBeRun() const
 void MoveSelectedItemsTo::run()
 {
 	if (myScreen == myPlaylist)
-		moveSelectedItemsTo(myPlaylist->main(), boost::bind(&MPD::Connection::Move, _1, _2, _3));
+	{
+		if (!myPlaylist->main().empty())
+			moveSelectedItemsTo(myPlaylist->main(), boost::bind(&MPD::Connection::Move, _1, _2, _3));
+	}
 	else
 	{
 		assert(!myPlaylistEditor->Playlists.empty());
@@ -1142,7 +1153,11 @@ void TogglePlayingSongCentering::run()
 	if (Config.autocenter_mode
 	&& Status::State::player() != MPD::psUnknown
 	&& !myPlaylist->main().isFiltered())
-		myPlaylist->main().highlight(Status::State::currentSongPosition());
+	{
+		auto sp = Status::State::currentSongPosition();
+		if (sp >= 0 && size_t(sp) < myPlaylist->main().size())
+			myPlaylist->main().highlight(Status::State::currentSongPosition());
+	}
 }
 
 void UpdateDatabase::run()
@@ -1691,6 +1706,9 @@ bool SelectAlbum::canBeRun() const
 void SelectAlbum::run()
 {
 	auto pl = proxySongList(myScreen);
+	assert(pl);
+	if (pl.empty())
+		return;
 	size_t pos = pl.choice();
 	if (MPD::Song *s = pl.getSong(pos))
 	{
