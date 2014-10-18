@@ -177,7 +177,7 @@ void Visualizer::DrawSoundWave(int16_t *buf, ssize_t samples, size_t y_offset, s
 		point_pos /= std::numeric_limits<int16_t>::max();
 		point_pos *= half_height;
 		w << NC::XY(i, y_offset+half_height+point_pos) << Config.visualizer_chars[0];
-		if (i && abs(prev_point_pos-point_pos) > 2)
+		if (i && fabs(prev_point_pos-point_pos) > 2)
 		{
 			// if gap is too big. intermediate values are needed
 			// since without them all we see are blinking points
