@@ -249,9 +249,11 @@ MPD::SongList Playlist::getSelectedSongs()
 MPD::Song Playlist::nowPlayingSong()
 {
 	MPD::Song s;
-	if (Status::State::player() != MPD::psStop)
+	if (Status::State::player() != MPD::psUnknown)
 		withUnfilteredMenu(w, [this, &s]() {
-			s = w.at(Status::State::currentSongPosition()).value();
+			auto sp = Status::State::currentSongPosition();
+			if (sp >= 0 && size_t(sp) < w.size())
+				s = w.at(sp).value();
 		});
 	return s;
 }

@@ -1149,13 +1149,11 @@ void TogglePlayingSongCentering::run()
 	Statusbar::printf("Centering playing song: %1%",
 		Config.autocenter_mode ? "on" : "off"
 	);
-	if (Config.autocenter_mode
-	&& Status::State::player() != MPD::psUnknown
-	&& !myPlaylist->main().isFiltered())
+	if (Config.autocenter_mode && !myPlaylist->main().isFiltered())
 	{
-		auto sp = Status::State::currentSongPosition();
-		if (sp >= 0 && size_t(sp) < myPlaylist->main().size())
-			myPlaylist->main().highlight(Status::State::currentSongPosition());
+		auto s = myPlaylist->nowPlayingSong();
+		if (!s.empty())
+			myPlaylist->main().highlight(s.getPosition());
 	}
 }
 
@@ -1176,25 +1174,24 @@ bool JumpToPlayingSong::canBeRun() const
 	return ((myScreen == myPlaylist && !myPlaylist->isFiltered())
 	    ||  myScreen == myBrowser
 	    ||  myScreen == myLibrary)
-	  &&   Status::State::player() != MPD::psUnknown;
+	  &&   !myPlaylist->nowPlayingSong().empty();
 }
 
 void JumpToPlayingSong::run()
 {
+	auto s = myPlaylist->nowPlayingSong();
 	if (myScreen == myPlaylist)
 	{
-		auto sp = Status::State::currentSongPosition();
-		if (sp >= 0 && size_t(sp) < myPlaylist->main().size())
-			myPlaylist->main().highlight(Status::State::currentSongPosition());
+		myPlaylist->main().highlight(s.getPosition());
 	}
 	else if (myScreen == myBrowser)
 	{
-		myBrowser->LocateSong(myPlaylist->nowPlayingSong());
+		myBrowser->LocateSong(s);
 		drawHeader();
 	}
 	else if (myScreen == myLibrary)
 	{
-		myLibrary->LocateSong(myPlaylist->nowPlayingSong());
+		myLibrary->LocateSong(s);
 	}
 }
 
