@@ -52,7 +52,7 @@ Lyrics *myLyrics;
 
 Lyrics::Lyrics()
 : Screen(NC::Scrollpad(0, MainStartY, COLS, MainHeight, "", Config.main_color, NC::Border::None))
-, ReloadNP(0),
+, Reload(0),
 #ifdef HAVE_CURL_CURL_H
 isReadyToTake(0), isDownloadInProgress(0),
 #endif // HAVE_CURL_CURL_H
@@ -80,17 +80,12 @@ void Lyrics::update()
 		w.refresh();
 	}
 #	endif // HAVE_CURL_CURL_H
-	if (ReloadNP)
+	if (Reload)
 	{
-		const MPD::Song s = myPlaylist->nowPlayingSong();
-		if (!s.empty() && !s.getArtist().empty() && !s.getTitle().empty())
-		{
-			drawHeader();
-			itsScrollBegin = 0;
-			itsSong = s;
-			Load();
-		}
-		ReloadNP = 0;
+		drawHeader();
+		itsScrollBegin = 0;
+		Load();
+		Reload = 0;
 	}
 }
 
@@ -111,15 +106,11 @@ void Lyrics::switchTo()
 		}
 #		endif // HAVE_CURL_CURL_H
 		
-		const MPD::Song *s = currentSong(myScreen);
-		if (!s)
-			return;
-		
-		if (!s->getArtist().empty() && !s->getTitle().empty())
+		auto s = currentSong(myScreen);
+		if (SetSong(*s))
 		{
 			SwitchTo::execute(this);
 			itsScrollBegin = 0;
-			itsSong = *s;
 			Load();
 			drawHeader();
 		}
@@ -330,7 +321,7 @@ void Lyrics::Load()
 			first = 0;
 		}
 		w.flush();
-		if (ReloadNP)
+		if (Reload)
 			w.refresh();
 	}
 	else
@@ -370,6 +361,17 @@ void Lyrics::Edit()
 	}
 	else
 		res = system(("nohup " + Config.external_editor + " \"" + itsFilename + "\" > /dev/null 2>&1 &").c_str());
+}
+
+bool Lyrics::SetSong(const MPD::Song &s)
+{
+	if (!s.getArtist().empty() && !s.getTitle().empty())
+	{
+		itsSong = s;
+		return true;
+	}
+	else
+		return false;
 }
 
 #ifdef HAVE_CURL_CURL_H

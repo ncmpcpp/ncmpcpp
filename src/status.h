@@ -59,7 +59,7 @@ void playlist(unsigned previous_version);
 void storedPlaylists();
 void database();
 void playerState();
-void songID();
+void songID(int song_id);
 void elapsedTime(bool update_elapsed);
 void flags();
 void mixer();

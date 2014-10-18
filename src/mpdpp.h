@@ -195,7 +195,7 @@ public:
 	
 	void GetPlaylistChanges(unsigned, SongConsumer f);
 	
-	Song GetCurrentlyPlayingSong();
+	Song GetCurrentSong();
 	Song GetSong(const std::string &);
 	void GetPlaylistContent(const std::string &name, SongConsumer f);
 	void GetPlaylistContentNoInfo(const std::string &name, SongConsumer f);

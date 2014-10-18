@@ -246,7 +246,7 @@ void Status::update(int event)
 		Changes::playerState();
 		if (m_current_song_id != st.currentSongID())
 		{
-			Changes::songID();
+			Changes::songID(st.currentSongID());
 			m_current_song_id = st.currentSongID();
 		}
 	}
@@ -507,7 +507,7 @@ void Status::Changes::playerState()
 	elapsedTime(false);
 }
 
-void Status::Changes::songID()
+void Status::Changes::songID(int song_id)
 {
 	// update information about current song
 	myPlaylist->reloadRemaining();
@@ -516,22 +516,34 @@ void Status::Changes::songID()
 	second_line_scroll_begin = 0;
 	if (m_player_state != MPD::psStop)
 	{
+		auto &pl = myPlaylist->main();
+
+		// try to find the song with new id in the playlist
+		auto it = std::find_if(pl.beginV(), pl.endV(), [song_id](const MPD::Song &s) {
+			return s.getID() == unsigned(song_id);
+		});
+		// if it's not there (playlist may be outdated), fetch it
+		const auto &s = it != pl.endV() ? *it : Mpd.GetCurrentSong();
+
 		GNUC_UNUSED int res;
 		if (!Config.execute_on_song_change.empty())
 			res = system(Config.execute_on_song_change.c_str());
 		
 #		ifdef HAVE_CURL_CURL_H
 		if (Config.fetch_lyrics_in_background)
-			Lyrics::DownloadInBackground(myPlaylist->nowPlayingSong());
+			Lyrics::DownloadInBackground(s);
 #		endif // HAVE_CURL_CURL_H
 		
-		drawTitle(myPlaylist->nowPlayingSong());
+		drawTitle(s);
 		
-		if (Config.autocenter_mode && !myPlaylist->main().isFiltered())
-			myPlaylist->main().highlight(Status::State::currentSongPosition());
+		if (Config.autocenter_mode && !pl.isFiltered())
+			pl.highlight(Status::State::currentSongPosition());
 		
 		if (Config.now_playing_lyrics && isVisible(myLyrics) && myLyrics->previousScreen() == myPlaylist)
-			myLyrics->ReloadNP = 1;
+		{
+			if (myLyrics->SetSong(s))
+				myLyrics->Reload = 1;
+		}
 	}
 	elapsedTime(false);
 }
