@@ -744,6 +744,10 @@ void DeleteStoredPlaylist::run()
 		for (auto it = list.begin(); it != list.end(); ++it)
 			Mpd.DeletePlaylist((*it)->value());
 		Statusbar::printf("%1% deleted", list.size() == 1 ? "Playlist" : "Playlists");
+		// force playlists update. this happens automatically, but only after call
+		// to Key::read, therefore when we call PlaylistEditor::Update, it won't
+		// yet see it, so let's point that it needs to update it.
+		myPlaylistEditor->requestPlaylistsUpdate();
 	}
 	else
 		Statusbar::print("Aborted");
@@ -1814,7 +1818,8 @@ bool ClearPlaylist::canBeRun() const
 
 void ClearPlaylist::run()
 {
-	assert(!myPlaylistEditor->Playlists.empty());
+	if (myPlaylistEditor->Playlists.empty())
+		return;
 	std::string playlist = myPlaylistEditor->Playlists.current().value();
 	bool yes = true;
 	if (Config.ask_before_clearing_playlists)
