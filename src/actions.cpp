@@ -1171,15 +1171,16 @@ void UpdateDatabase::run()
 
 bool JumpToPlayingSong::canBeRun() const
 {
-	return ((myScreen == myPlaylist && !myPlaylist->isFiltered())
+	return (myScreen == myPlaylist && !myPlaylist->isFiltered())
 	    ||  myScreen == myBrowser
-	    ||  myScreen == myLibrary)
-	  &&   !myPlaylist->nowPlayingSong().empty();
+	    ||  myScreen == myLibrary;
 }
 
 void JumpToPlayingSong::run()
 {
 	auto s = myPlaylist->nowPlayingSong();
+	if (s.empty())
+		return;
 	if (myScreen == myPlaylist)
 	{
 		myPlaylist->main().highlight(s.getPosition());
