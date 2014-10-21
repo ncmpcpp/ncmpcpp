@@ -37,41 +37,43 @@
 struct Visualizer: Screen<NC::Window>, Tabbable
 {
 	Visualizer();
-	
+
 	virtual void switchTo() OVERRIDE;
 	virtual void resize() OVERRIDE;
-	
+
 	virtual std::wstring title() OVERRIDE;
 	virtual ScreenType type() OVERRIDE { return ScreenType::Visualizer; }
-	
+
 	virtual void update() OVERRIDE;
 	virtual void scroll(NC::Scroll) OVERRIDE { }
 
 	virtual int windowTimeout() OVERRIDE;
-	
+
 	virtual void enterPressed() OVERRIDE { }
 	virtual void spacePressed() OVERRIDE;
 	virtual void mouseButtonPressed(MEVENT) OVERRIDE { }
-	
+
 	virtual bool isMergable() OVERRIDE { return true; }
-	
+
 	// private members
 	void SetFD();
 	void ResetFD();
 	void FindOutputID();
-	
+
 protected:
 	virtual bool isLockable() OVERRIDE { return true; }
-	
+
 private:
+	NC::Color toColor(int, int);
 	void DrawSoundWave(int16_t *, ssize_t, size_t, size_t);
+	void DrawSoundWaveFill(int16_t *, ssize_t, size_t, size_t);
 #	ifdef HAVE_FFTW3_H
 	void DrawFrequencySpectrum(int16_t *, ssize_t, size_t, size_t);
 #	endif // HAVE_FFTW3_H
-	
+
 	int m_output_id;
 	boost::posix_time::ptime m_timer;
-	
+
 	int m_fifo;
 	unsigned m_samples;
 #	ifdef HAVE_FFTW3_H
@@ -89,3 +91,4 @@ extern Visualizer *myVisualizer;
 
 #endif // NCMPCPP_VISUALIZER_H
 
+/* vim: set tabstop=4 softtabstop=4 shiftwidth=4 noexpandtab : */

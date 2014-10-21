@@ -37,6 +37,7 @@
 #include "title.h"
 #include "screen_switcher.h"
 #include "status.h"
+#include "enums.h"
 
 using Global::MainStartY;
 using Global::MainHeight;
@@ -92,13 +93,13 @@ void Visualizer::update()
 {
 	if (m_fifo < 0)
 		return;
-	
+
 	// PCM in format 44100:16:1 (for mono visualization) and 44100:16:2 (for stereo visualization) is supported
 	int16_t buf[m_samples];
 	ssize_t data = read(m_fifo, buf, sizeof(buf));
 	if (data < 0) // no data available in fifo
 		return;
-	
+
 	if (m_output_id != -1 && Global::Timer - m_timer > Config.visualizer_sync_interval)
 	{
 		Mpd.DisableOutput(m_output_id);
@@ -106,13 +107,16 @@ void Visualizer::update()
 		Mpd.EnableOutput(m_output_id);
 		m_timer = Global::Timer;
 	}
-	
+
 	void (Visualizer::*draw)(int16_t *, ssize_t, size_t, size_t);
 #	ifdef HAVE_FFTW3_H
-	if (!Config.visualizer_use_wave)
+	if (Config.visualizer_type == VisualizerType::Spectrum)
 		draw = &Visualizer::DrawFrequencySpectrum;
 	else
 #	endif // HAVE_FFTW3_H
+	if (Config.visualizer_type == VisualizerType::WaveFilled)
+		draw = &Visualizer::DrawSoundWaveFill;
+	else
 		draw = &Visualizer::DrawSoundWave;
 
 	const ssize_t samples_read = data/sizeof(int16_t);
@@ -137,7 +141,7 @@ void Visualizer::update()
 		}
 		size_t half_height = MainHeight/2;
 		(this->*draw)(buf_left, samples_read/2, 0, half_height);
-		(this->*draw)(buf_right, samples_read/2, half_height+(draw == &Visualizer::DrawSoundWave ? 1 : 0), half_height+(draw != &Visualizer::DrawSoundWave ? 1 : 0));
+		(this->*draw)(buf_right, samples_read/2, half_height+(draw == &Visualizer::DrawFrequencySpectrum ? 0 : 1), half_height+(draw != &Visualizer::DrawFrequencySpectrum ? 0 : 1));
 	}
 	else
 		(this->*draw)(buf, samples_read, 0, MainHeight);
@@ -154,12 +158,63 @@ int Visualizer::windowTimeout()
 
 void Visualizer::spacePressed()
 {
+	std::string visualizerName;
+	if (Config.visualizer_type == VisualizerType::Wave)
+	{
+		Config.visualizer_type = VisualizerType::WaveFilled;
+		visualizerName = "sound wave filled";
+	}
 #	ifdef HAVE_FFTW3_H
-	Config.visualizer_use_wave = !Config.visualizer_use_wave;
-	Statusbar::printf("Visualization type: %1%",
-		Config.visualizer_use_wave ? "sound wave" : "frequency spectrum"
-	);
+	else if (Config.visualizer_type == VisualizerType::WaveFilled)
+	{
+		Config.visualizer_type = VisualizerType::Spectrum;
+		visualizerName = "frequency spectrum";
+	}
 #	endif // HAVE_FFTW3_H
+	else
+	{
+		Config.visualizer_type = VisualizerType::Wave;
+		visualizerName = "sound wave";
+	}
+
+	Statusbar::printf("Visualization type: %1%", visualizerName.c_str());
+}
+
+NC::Color Visualizer::toColor( int number, int max )
+{
+	const int colorMapSize = Config.visualizer_colors.size();
+	const int normalizedNumber = ( ( number * colorMapSize ) / max ) % colorMapSize;
+	return Config.visualizer_colors[normalizedNumber];
+}
+
+void Visualizer::DrawSoundWaveFill(int16_t *buf, ssize_t samples, size_t y_offset, size_t height)
+{
+	const int samples_per_col = samples/w.getWidth();
+	const int half_height = height/2;
+	double prev_point_pos = 0;
+	const size_t win_width = w.getWidth();
+	const bool left = y_offset > 0;
+	int x = 0;
+	for (size_t i = 0; i < win_width; ++i)
+	{
+		double point_pos = 0;
+		for (int j = 0; j < samples_per_col; ++j)
+			point_pos += buf[i*samples_per_col+j];
+		point_pos /= samples_per_col;
+		point_pos /= std::numeric_limits<int16_t>::max();
+		point_pos *= half_height;
+		for (int k = 0; k < point_pos * 2; k += 1)
+		{
+			x = left ? height + k : height - k;
+			if ( x > 0 && x < w.getHeight() && (i-(k < half_height + point_pos)) > 0 && (i-(k < half_height + point_pos)) < w.getWidth() )
+			{
+				w << toColor( k, height )
+				<< NC::XY(i-(k < half_height + point_pos), x)
+				<< Config.visualizer_chars[1]
+				<< NC::Color::End;
+			}
+		}
+	}
 }
 
 void Visualizer::DrawSoundWave(int16_t *buf, ssize_t samples, size_t y_offset, size_t height)
@@ -183,7 +238,7 @@ void Visualizer::DrawSoundWave(int16_t *buf, ssize_t samples, size_t y_offset, s
 											Config.visualizer_colors.size()), Config.visualizer_colors.size() - 1)]
 		<< Config.visualizer_chars[0]
 		<< NC::Color::End;
-		
+
 		if (i && abs(prev_point_pos-point_pos) > 2)
 		{
 			// if gap is too big. intermediate values are needed
@@ -211,13 +266,13 @@ void Visualizer::DrawFrequencySpectrum(int16_t *buf, ssize_t samples, size_t y_o
 		else
 			m_fftw_input[i] = 0;
 	}
-	
+
 	fftw_execute(m_fftw_plan);
-	
+
 	// count magnitude of each frequency and scale it to fit the screen
 	for (unsigned i = 0; i < m_fftw_results; ++i)
 		m_freq_magnitudes[i] = sqrt(m_fftw_output[i][0]*m_fftw_output[i][0] + m_fftw_output[i][1]*m_fftw_output[i][1])/2e4*height;
-	
+
 	const size_t win_width = w.getWidth();
 	// cut bandwidth a little to achieve better look
 	const int freqs_per_col = m_fftw_results/win_width * 7/10;
@@ -282,3 +337,4 @@ void Visualizer::FindOutputID()
 
 #endif // ENABLE_VISUALIZER
 
+/* vim: set tabstop=4 softtabstop=4 shiftwidth=4 noexpandtab : */

@@ -34,7 +34,7 @@
 struct Column
 {
 	Column() : stretch_limit(-1), right_alignment(0), display_empty_tag(1) { }
-	
+
 	std::wstring name;
 	std::string type;
 	int width;
@@ -50,12 +50,12 @@ struct Configuration
 	Configuration()
 	: playlist_disable_highlight_delay(0), visualizer_sync_interval(0)
 	{ }
-	
+
 	bool read(const std::string &config_path);
-	
+
 	std::string ncmpcpp_directory;
 	std::string lyrics_directory;
-	
+
 	std::string mpd_music_dir;
 	std::string visualizer_fifo_path;
 	std::string visualizer_output_name;
@@ -78,7 +78,7 @@ struct Configuration
 	std::string lastfm_preferred_language;
 	std::wstring progressbar;
 	std::wstring visualizer_chars;
-	
+
 	std::string pattern;
 
 	std::vector<Column> columns;
@@ -94,7 +94,7 @@ struct Configuration
 	NC::Buffer now_playing_prefix;
 	NC::Buffer now_playing_suffix;
 	NC::Buffer modified_item_prefix;
-	
+
 	NC::Color color1;
 	NC::Color color2;
 	NC::Color empty_tags_color;
@@ -109,17 +109,19 @@ struct Configuration
 	NC::Color statusbar_color;
 	NC::Color alternative_ui_separator_color;
 	NC::Color active_column_color;
+
 	std::vector<NC::Color> visualizer_colors;
-	
+	VisualizerType visualizer_type;
+
 	NC::Border window_border;
 	NC::Border active_window_border;
-	
+
 	Design design;
 
 	SpaceAddMode space_add_mode;
 
 	mpd_tag_type media_lib_primary_tag;
-	
+
 	bool colors_enabled;
 	bool playlist_show_remaining_time;
 	bool playlist_shorten_total_times;
@@ -151,7 +153,6 @@ struct Configuration
 	bool ask_before_clearing_playlists;
 	bool mouse_support;
 	bool mouse_list_scroll_whole_page;
-	bool visualizer_use_wave;
 	bool visualizer_in_stereo;
 	bool data_fetching_delay;
 	bool media_library_sort_by_mtime;
@@ -162,7 +163,7 @@ struct Configuration
 	bool ask_for_locked_screen_width_part;
 	bool allow_for_physical_item_deletion;
 	bool progressbar_boldness;
-	
+
 	unsigned mpd_connection_timeout;
 	unsigned crossfade_time;
 	unsigned seek_time;
@@ -173,21 +174,21 @@ struct Configuration
 	unsigned search_engine_default_search_mode;
 
 	boost::regex::flag_type regex_type;
-	
+
 	boost::posix_time::seconds playlist_disable_highlight_delay;
 	boost::posix_time::seconds visualizer_sync_interval;
-	
+
 	double visualizer_sample_multiplier;
 	double locked_screen_width_part;
-	
+
 	size_t selected_item_prefix_length;
 	size_t selected_item_suffix_length;
 	size_t now_playing_prefix_length;
 	size_t now_playing_suffix_length;
-	
+
 	ScreenType startup_screen_type;
 	std::list<ScreenType> screen_sequence;
-	
+
 	SortMode browser_sort_mode;
 };
 

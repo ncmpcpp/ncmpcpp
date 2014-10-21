@@ -231,13 +231,8 @@ bool Configuration::read(const std::string &config_path)
 			return boost::posix_time::seconds(v);
 	}));
 	p.add("visualizer_type", option_parser::worker([this](std::string &&v) {
-		if (v == "wave")
-			visualizer_use_wave = true;
-		else if (v == "spectrum")
-			visualizer_use_wave = false;
-		else
-			throw std::runtime_error("invalid argument: " + v);
-	}, defaults_to(visualizer_use_wave, true)
+		visualizer_type = stringToVisualizerType( v );
+	}, defaults_to(visualizer_type, VisualizerType::Wave)
 	));
 	p.add("visualizer_look", assign_default<std::string>(
 		visualizer_chars, "●▮", [](std::string &&s) {
@@ -649,3 +644,5 @@ bool Configuration::read(const std::string &config_path)
 	std::ifstream f(config_path);
 	return p.run(f);
 }
+
+/* vim: set tabstop=4 softtabstop=4 shiftwidth=4 noexpandtab : */
