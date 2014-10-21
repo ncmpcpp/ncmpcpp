@@ -48,6 +48,7 @@ struct Lyrics: Screen<NC::Scrollpad>, Tabbable
 	virtual bool isMergable() OVERRIDE { return true; }
 	
 	// private members
+	bool SetSong(const MPD::Song &s);
 	void Edit();
 	
 #	ifdef HAVE_CURL_CURL_H
@@ -57,7 +58,7 @@ struct Lyrics: Screen<NC::Scrollpad>, Tabbable
 	static void DownloadInBackground(const MPD::Song &s);
 #	endif // HAVE_CURL_CURL_H
 	
-	bool ReloadNP;
+	bool Reload;
 	
 protected:
 	virtual bool isLockable() OVERRIDE { return false; }

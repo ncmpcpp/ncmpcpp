@@ -223,7 +223,7 @@ bool Configuration::read(const std::string &config_path)
 	));
 	p.add("visualizer_sample_multiplier", assign_default<double>(
 		visualizer_sample_multiplier, 1.0, [](double v) {
-			lowerBoundCheck(v, 1.0);
+			lowerBoundCheck(v, 0.0);
 			return v;
 	}));
 	p.add("visualizer_sync_interval", assign_default<unsigned>(
@@ -399,6 +399,9 @@ bool Configuration::read(const std::string &config_path)
 	));
 	p.add("user_interface", assign_default(
 		design, Design::Classic
+	));
+	p.add("data_fetching_delay", yes_no(
+		data_fetching_delay, true
 	));
 	p.add("media_library_primary_tag", option_parser::worker([this](std::string &&v) {
 		if (v == "artist")

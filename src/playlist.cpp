@@ -249,9 +249,11 @@ MPD::SongList Playlist::getSelectedSongs()
 MPD::Song Playlist::nowPlayingSong()
 {
 	MPD::Song s;
-	if (Status::get().playerState() != MPD::psStop)
+	if (Status::State::player() != MPD::psUnknown)
 		withUnfilteredMenu(w, [this, &s]() {
-			s = w.at(Status::get().currentSongPosition()).value();
+			auto sp = Status::State::currentSongPosition();
+			if (sp >= 0 && size_t(sp) < w.size())
+				s = w.at(sp).value();
 		});
 	return s;
 }
@@ -298,7 +300,7 @@ std::string Playlist::getTotalLength()
 	if (Config.playlist_show_remaining_time && m_reload_remaining && !w.isFiltered())
 	{
 		m_remaining_time = 0;
-		for (size_t i = Status::get().currentSongPosition(); i < w.size(); ++i)
+		for (size_t i = Status::State::currentSongPosition(); i < w.size(); ++i)
 			m_remaining_time += w[i].value().getDuration();
 		m_reload_remaining = false;
 	}

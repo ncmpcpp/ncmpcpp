@@ -19,6 +19,8 @@
  ***************************************************************************/
 
 #include <boost/date_time/posix_time/posix_time.hpp>
+#include <netinet/tcp.h>
+#include <netinet/in.h>
 
 #include "browser.h"
 #include "charset.h"
@@ -47,7 +49,7 @@ using Global::wHeader;
 using Global::Timer;
 using Global::VolumeState;
 
-namespace {//
+namespace {
 
 boost::posix_time::ptime past = boost::posix_time::from_time_t(0);
 
@@ -55,19 +57,24 @@ size_t playing_song_scroll_begin = 0;
 size_t first_line_scroll_begin = 0;
 size_t second_line_scroll_begin = 0;
 
-MPD::Status m_status;
-unsigned m_elapsed_time = 0;
+bool m_status_initialized;
 
-// local copies of these are needed to be independent
-// of the order of idle events incoming from MPD.
-char m_repeat = 0;
-char m_random = 0;
-char m_single = 0;
-char m_consume = 0;
-char m_crossfade = 0;
-char m_db_updating = 0;
-int m_current_song_id = 0;
-unsigned m_playlist_version = 0;
+char m_consume;
+char m_crossfade;
+char m_db_updating;
+char m_repeat;
+char m_random;
+char m_single;
+
+int m_current_song_id;
+int m_current_song_pos;
+unsigned m_elapsed_time;
+unsigned m_kbps;
+MPD::PlayerState m_player_state;
+unsigned m_playlist_version;
+unsigned m_playlist_length;
+unsigned m_total_time;
+int m_volume;
 
 void drawTitle(const MPD::Song &np)
 {
@@ -105,7 +112,48 @@ std::string playerStateToString(MPD::PlayerState ps)
 	return result;
 }
 
+void initialize_status()
+{
+	// get full info about new connection
+	Status::update(-1);
+
+	if (Config.jump_to_now_playing_song_at_start)
+	{
+		int curr_pos = Status::State::currentSongPosition();
+		if  (curr_pos >= 0)
+			myPlaylist->main().highlight(curr_pos);
+	}
+
+	// Set TCP_NODELAY on the tcp socket as we are using write-write-read pattern
+	// a lot (noidle - write, command - write, then read the result of command),
+	// which kills the performance.
+	int flag = 1;
+	setsockopt(Mpd.GetFD(), IPPROTO_TCP, TCP_NODELAY, &flag, sizeof(flag));
+
+	// go to startup screen
+	if (Config.startup_screen_type != myScreen->type())
+		toScreen(Config.startup_screen_type)->switchTo();
+	myScreen->refresh();
+
+	myBrowser->fetchSupportedExtensions();
+#	ifdef ENABLE_OUTPUTS
+	myOutputs->FetchList();
+#	endif // ENABLE_OUTPUTS
+#	ifdef ENABLE_VISUALIZER
+	myVisualizer->ResetFD();
+	if (myScreen == myVisualizer)
+		myVisualizer->SetFD();
+	myVisualizer->FindOutputID();
+#	endif // ENABLE_VISUALIZER
+
+	m_status_initialized = true;
+	wFooter->addFDCallback(Mpd.GetFD(), Statusbar::Helpers::mpd);
+	Statusbar::printf("Connected to %1%", Mpd.GetHostname());
 }
+
+}
+
+/*************************************************************************/
 
 void Status::handleClientError(MPD::ClientError &e)
 {
@@ -116,13 +164,18 @@ void Status::handleClientError(MPD::ClientError &e)
 
 void Status::handleServerError(MPD::ServerError &e)
 {
+	Statusbar::printf("MPD: %1%", e.what());
 	if (e.code() == MPD_SERVER_ERROR_PERMISSION)
 	{
 		wFooter->setGetStringHelper(nullptr);
 		Statusbar::put() << "Password: ";
 		Mpd.SetPassword(wFooter->getString(0, true));
-		Mpd.SendPassword();
-		Statusbar::print("Password accepted");
+		try {
+			Mpd.SendPassword();
+			Statusbar::print("Password accepted");
+		} catch (MPD::ServerError &e_prim) {
+			handleServerError(e_prim);
+		}
 		wFooter->setGetStringHelper(Statusbar::Helpers::getString);
 	}
 	else if (e.code() == MPD_SERVER_ERROR_NO_EXIST && myScreen == myBrowser)
@@ -130,7 +183,6 @@ void Status::handleServerError(MPD::ServerError &e)
 		myBrowser->GetDirectory(getParentDirectory(myBrowser->CurrentDir()));
 		myBrowser->refresh();
 	}
-	Statusbar::printf("MPD: %1%", e.what());
 }
 
 /*************************************************************************/
@@ -139,9 +191,21 @@ void Status::trace(bool update_timer, bool update_window_timeout)
 {
 	if (update_timer)
 		Timer = boost::posix_time::microsec_clock::local_time();
+	if (update_window_timeout)
+	{
+		// set appropriate window timeout
+		int nc_wtimeout = std::numeric_limits<int>::max();
+		applyToVisibleWindows([&nc_wtimeout](BaseScreen *s) {
+			nc_wtimeout = std::min(nc_wtimeout, s->windowTimeout());
+		});
+		wFooter->setTimeout(nc_wtimeout);
+	}
 	if (Mpd.Connected())
 	{
-		if (m_status.playerState() == MPD::psPlay
+		if (!m_status_initialized)
+			initialize_status();
+
+		if (m_player_state == MPD::psPlay
 		&&  Global::Timer - past > boost::posix_time::seconds(1))
 		{
 			// update elapsed time/bitrate of the current song
@@ -153,25 +217,20 @@ void Status::trace(bool update_timer, bool update_window_timeout)
 		applyToVisibleWindows(&BaseScreen::update);
 		Statusbar::tryRedraw();
 
-		if (update_window_timeout)
-		{
-			// set appropriate window timeout
-			int nc_wtimeout = std::numeric_limits<int>::max();
-			applyToVisibleWindows([&nc_wtimeout](BaseScreen *s) {
-				nc_wtimeout = std::min(nc_wtimeout, s->windowTimeout());
-			});
-			wFooter->setTimeout(nc_wtimeout);
-		}
-
 		Mpd.idle();
 	}
 }
 
 void Status::update(int event)
 {
-	MPD::Status old_status = m_status;
-	m_status = Mpd.getStatus();
-	m_elapsed_time = m_status.elapsedTime();
+	auto st = Mpd.getStatus();
+	m_current_song_pos = st.currentSongPosition();
+	m_elapsed_time = st.elapsedTime();
+	m_kbps = st.kbps();
+	m_player_state = st.playerState();
+	m_playlist_length = st.playlistLength();
+	m_total_time = st.totalTime();
+	m_volume = st.volume();
 	
 	if (event & MPD_IDLE_DATABASE)
 		Changes::database();
@@ -180,15 +239,15 @@ void Status::update(int event)
 	if (event & MPD_IDLE_PLAYLIST)
 	{
 		Changes::playlist(m_playlist_version);
-		m_playlist_version = m_status.playlistVersion();
+		m_playlist_version = st.playlistVersion();
 	}
 	if (event & MPD_IDLE_PLAYER)
 	{
 		Changes::playerState();
-		if (m_current_song_id != m_status.currentSongID())
+		if (m_current_song_id != st.currentSongID())
 		{
-			Changes::songID();
-			m_current_song_id = m_status.currentSongID();
+			Changes::songID(st.currentSongID());
+			m_current_song_id = st.currentSongID();
 		}
 	}
 	if (event & MPD_IDLE_MIXER)
@@ -197,28 +256,53 @@ void Status::update(int event)
 		Changes::outputs();
 	if (event & (MPD_IDLE_UPDATE | MPD_IDLE_OPTIONS))
 	{
-		bool show_msg = !old_status.empty();
 		if (event & MPD_IDLE_UPDATE)
-			Changes::dbUpdateState(show_msg);
+		{
+			m_db_updating = st.updateID() ? 'U' : 0;
+			if (m_status_initialized)
+				Statusbar::printf("Database update %1%", m_db_updating ? "started" : "finished");
+		}
 		if (event & MPD_IDLE_OPTIONS)
 		{
-			if (('r' == m_repeat) != m_status.repeat())
-				Changes::repeat(show_msg);
-			if (('z' == m_random) != m_status.random())
-				Changes::random(show_msg);
-			if (('s' == m_single) != m_status.single())
-				Changes::single(show_msg);
-			if (('c' == m_consume) != m_status.consume())
-				Changes::consume(show_msg);
-			if (('x' == m_crossfade) != m_status.crossfade())
-				Changes::crossfade(show_msg);
+			if (('r' == m_repeat) != st.repeat())
+			{
+				m_repeat = st.repeat() ? 'r' : 0;
+				if (m_status_initialized)
+					Statusbar::printf("Repeat mode is %1%", !m_repeat ? "off" : "on");
+			}
+			if (('z' == m_random) != st.random())
+			{
+				m_random = st.random() ? 'z' : 0;
+				if (m_status_initialized)
+					Statusbar::printf("Random mode is %1%", !m_random ? "off" : "on");
+			}
+			if (('s' == m_single) != st.single())
+			{
+				m_single = st.single() ? 's' : 0;
+				if (m_status_initialized)
+					Statusbar::printf("Single mode is %1%", !m_single ? "off" : "on");
+			}
+			if (('c' == m_consume) != st.consume())
+			{
+				m_consume = st.consume() ? 'c' : 0;
+				if (m_status_initialized)
+					Statusbar::printf("Consume mode is %1%", !m_consume ? "off" : "on");
+			}
+			if (('x' == m_crossfade) != st.crossfade())
+			{
+				int crossfade = st.crossfade();
+				m_crossfade = crossfade ? 'x' : 0;
+				if (m_status_initialized)
+					Statusbar::printf("Crossfade set to %1% seconds", crossfade);
+			}
 		}
 		Changes::flags();
 	}
-	
+	m_status_initialized = true;
+
 	if (event & MPD_IDLE_PLAYER)
 		wFooter->refresh();
-	
+
 	if (event & (MPD_IDLE_PLAYLIST | MPD_IDLE_DATABASE | MPD_IDLE_PLAYER))
 		applyToVisibleWindows(&BaseScreen::refreshWindow);
 }
@@ -226,25 +310,78 @@ void Status::update(int event)
 void Status::clear()
 {
 	// reset local variables
-	m_status.clear();
+	m_status_initialized = false;
 	m_repeat = 0;
 	m_random = 0;
 	m_single = 0;
 	m_consume = 0;
 	m_crossfade = 0;
 	m_db_updating = 0;
-	m_current_song_id = 0;
+	m_current_song_id = -1;
+	m_current_song_pos = -1;
+	m_kbps = 0;
+	m_player_state = MPD::psUnknown;
+	m_playlist_length = 0;
 	m_playlist_version = 0;
+	m_total_time = 0;
+	m_volume = -1;
 }
 
-const MPD::Status &Status::get()
+/*************************************************************************/
+
+bool Status::State::consume()
 {
-	return m_status;
+	return m_consume != 0;
 }
 
-unsigned Status::elapsedTime()
+bool Status::State::crossfade()
+{
+	return m_crossfade != 0;
+}
+
+bool Status::State::repeat()
+{
+	return m_repeat != 0;
+}
+
+bool Status::State::random()
+{
+	return m_random != 0;
+}
+
+bool Status::State::single()
+{
+	return m_single != 0;
+}
+
+int Status::State::currentSongID()
+{
+	return m_current_song_id;
+}
+
+int Status::State::currentSongPosition()
+{
+	return m_current_song_pos;
+}
+
+unsigned Status::State::elapsedTime()
 {
 	return m_elapsed_time;
+}
+
+MPD::PlayerState Status::State::player()
+{
+	return m_player_state;
+}
+
+unsigned Status::State::totalTime()
+{
+	return m_total_time;
+}
+
+int Status::State::volume()
+{
+	return m_volume;
 }
 
 /*************************************************************************/
@@ -253,14 +390,13 @@ void Status::Changes::playlist(unsigned previous_version)
 {
 	myPlaylist->main().clearSearchResults();
 	withUnfilteredMenuReapplyFilter(myPlaylist->main(), [previous_version]() {
-		size_t playlist_length = m_status.playlistLength();
-		if (playlist_length < myPlaylist->main().size())
+		if (m_playlist_length < myPlaylist->main().size())
 		{
-			auto it = myPlaylist->main().begin()+playlist_length;
+			auto it = myPlaylist->main().begin()+m_playlist_length;
 			auto end = myPlaylist->main().end();
 			for (; it != end; ++it)
 				myPlaylist->unregisterSong(it->value());
-			myPlaylist->main().resizeList(playlist_length);
+			myPlaylist->main().resizeList(m_playlist_length);
 		}
 		
 		Mpd.GetPlaylistChanges(previous_version, [](MPD::Song s) {
@@ -277,9 +413,6 @@ void Status::Changes::playlist(unsigned previous_version)
 			myPlaylist->registerSong(s);
 		});
 	});
-	
-	if (m_status.playerState() != MPD::psStop)
-		drawTitle(myPlaylist->nowPlayingSong());
 	
 	myPlaylist->reloadTotalLength();
 	myPlaylist->reloadRemaining();
@@ -328,7 +461,7 @@ void Status::Changes::database()
 
 void Status::Changes::playerState()
 {
-	switch (m_status.playerState())
+	switch (m_player_state)
 	{
 		case MPD::psPlay:
 			drawTitle(myPlaylist->nowPlayingSong());
@@ -354,7 +487,7 @@ void Status::Changes::playerState()
 			break;
 	}
 	
-	std::string state = playerStateToString(m_status.playerState());
+	std::string state = playerStateToString(m_player_state);
 	if (Config.design == Design::Alternative)
 	{
 		*wHeader << NC::XY(0, 1) << NC::Format::Bold << state << NC::Format::NoBold;
@@ -374,31 +507,43 @@ void Status::Changes::playerState()
 	elapsedTime(false);
 }
 
-void Status::Changes::songID()
+void Status::Changes::songID(int song_id)
 {
 	// update information about current song
 	myPlaylist->reloadRemaining();
 	playing_song_scroll_begin = 0;
 	first_line_scroll_begin = 0;
 	second_line_scroll_begin = 0;
-	if (m_status.playerState() != MPD::psStop)
+	if (m_player_state != MPD::psStop)
 	{
+		auto &pl = myPlaylist->main();
+
+		// try to find the song with new id in the playlist
+		auto it = std::find_if(pl.beginV(), pl.endV(), [song_id](const MPD::Song &s) {
+			return s.getID() == unsigned(song_id);
+		});
+		// if it's not there (playlist may be outdated), fetch it
+		const auto &s = it != pl.endV() ? *it : Mpd.GetCurrentSong();
+
 		GNUC_UNUSED int res;
 		if (!Config.execute_on_song_change.empty())
 			res = system(Config.execute_on_song_change.c_str());
 		
 #		ifdef HAVE_CURL_CURL_H
 		if (Config.fetch_lyrics_in_background)
-			Lyrics::DownloadInBackground(myPlaylist->nowPlayingSong());
+			Lyrics::DownloadInBackground(s);
 #		endif // HAVE_CURL_CURL_H
 		
-		drawTitle(myPlaylist->nowPlayingSong());
+		drawTitle(s);
 		
-		if (Config.autocenter_mode && !myPlaylist->main().isFiltered())
-			myPlaylist->main().highlight(Status::get().currentSongPosition());
+		if (Config.autocenter_mode && !pl.isFiltered())
+			pl.highlight(Status::State::currentSongPosition());
 		
 		if (Config.now_playing_lyrics && isVisible(myLyrics) && myLyrics->previousScreen() == myPlaylist)
-			myLyrics->ReloadNP = 1;
+		{
+			if (myLyrics->SetSong(s))
+				myLyrics->Reload = 1;
+		}
 	}
 	elapsedTime(false);
 }
@@ -406,17 +551,20 @@ void Status::Changes::songID()
 void Status::Changes::elapsedTime(bool update_elapsed)
 {
 	if (update_elapsed)
-		m_elapsed_time = Mpd.getStatus().elapsedTime();
-	const auto &st = m_status;
-	
-	if (st.playerState() == MPD::psStop)
+	{
+		auto st = Mpd.getStatus();
+		m_elapsed_time = st.elapsedTime();
+		m_kbps = st.kbps();
+	}
+
+	if (m_player_state == MPD::psStop)
 	{
 		if (Statusbar::isUnlocked() && Config.statusbar_visibility)
 			*wFooter << NC::XY(0, 1) << wclrtoeol;
 		return;
 	}
 	
-	std::string ps = playerStateToString(st.playerState());
+	std::string ps = playerStateToString(m_player_state);
 	MPD::Song np = myPlaylist->nowPlayingSong();
 	drawTitle(np);
 	
@@ -426,24 +574,24 @@ void Status::Changes::elapsedTime(bool update_elapsed)
 		case Design::Classic:
 			if (Statusbar::isUnlocked() && Config.statusbar_visibility)
 			{
-				if (Config.display_bitrate && st.kbps())
+				if (Config.display_bitrate && m_kbps)
 				{
 					tracklength += " [";
-					tracklength += boost::lexical_cast<std::string>(st.kbps());
+					tracklength += boost::lexical_cast<std::string>(m_kbps);
 					tracklength += " kbps]";
 				}
 				tracklength += " [";
-				if (st.totalTime())
+				if (m_total_time)
 				{
 					if (Config.display_remaining_time)
 					{
 						tracklength += "-";
-						tracklength += MPD::Song::ShowTime(st.totalTime()-m_elapsed_time);
+						tracklength += MPD::Song::ShowTime(m_total_time-m_elapsed_time);
 					}
 					else
 						tracklength += MPD::Song::ShowTime(m_elapsed_time);
 					tracklength += "/";
-					tracklength += MPD::Song::ShowTime(st.totalTime());
+					tracklength += MPD::Song::ShowTime(m_total_time);
 					tracklength += "]";
 				}
 				else
@@ -462,20 +610,20 @@ void Status::Changes::elapsedTime(bool update_elapsed)
 			if (Config.display_remaining_time)
 			{
 				tracklength = "-";
-				tracklength += MPD::Song::ShowTime(st.totalTime()-m_elapsed_time);
+				tracklength += MPD::Song::ShowTime(m_total_time-m_elapsed_time);
 			}
 			else
 				tracklength = MPD::Song::ShowTime(m_elapsed_time);
-			if (st.totalTime())
+			if (m_total_time)
 			{
 				tracklength += "/";
-				tracklength += MPD::Song::ShowTime(st.totalTime());
+				tracklength += MPD::Song::ShowTime(m_total_time);
 			}
 			// bitrate here doesn't look good, but it can be moved somewhere else later
-			if (Config.display_bitrate && st.kbps())
+			if (Config.display_bitrate && m_kbps)
 			{
 				tracklength += " ";
-				tracklength += boost::lexical_cast<std::string>(st.kbps());
+				tracklength += boost::lexical_cast<std::string>(m_kbps);
 				tracklength += " kbps";
 			}
 
@@ -505,50 +653,7 @@ void Status::Changes::elapsedTime(bool update_elapsed)
 			flags();
 	}
 	if (Progressbar::isUnlocked())
-		Progressbar::draw(m_elapsed_time, st.totalTime());
-}
-
-void Status::Changes::repeat(bool show_msg)
-{
-	m_repeat = m_status.repeat() ? 'r' : 0;
-	if (show_msg)
-		Statusbar::printf("Repeat mode is %1%", !m_repeat ? "off" : "on");
-}
-
-void Status::Changes::random(bool show_msg)
-{
-	m_random = m_status.random() ? 'z' : 0;
-	if (show_msg)
-		Statusbar::printf("Random mode is %1%", !m_random ? "off" : "on");
-}
-
-void Status::Changes::single(bool show_msg)
-{
-	m_single = m_status.single() ? 's' : 0;
-	if (show_msg)
-		Statusbar::printf("Single mode is %1%", !m_single ? "off" : "on");
-}
-
-void Status::Changes::consume(bool show_msg)
-{
-	m_consume = m_status.consume() ? 'c' : 0;
-	if (show_msg)
-		Statusbar::printf("Consume mode is %1%", !m_consume ? "off" : "on");
-}
-
-void Status::Changes::crossfade(bool show_msg)
-{
-	int crossfade = m_status.crossfade();
-	m_crossfade = crossfade ? 'x' : 0;
-	if (show_msg)
-		Statusbar::printf("Crossfade set to %1% seconds", crossfade);
-}
-
-void Status::Changes::dbUpdateState(bool show_msg)
-{
-	m_db_updating = m_status.updateID() ? 'U' : 0;
-	if (show_msg)
-		Statusbar::printf("Database update %1%", m_status.updateID() ? "started" : "finished");
+		Progressbar::draw(m_elapsed_time, m_total_time);
 }
 
 void Status::Changes::flags()
@@ -625,11 +730,11 @@ void Status::Changes::mixer()
 			VolumeState = " " "Vol" ": ";
 			break;
 	}
-	if (m_status.volume() < 0)
+	if (m_volume < 0)
 		VolumeState += "n/a";
 	else
 	{
-		VolumeState += boost::lexical_cast<std::string>(m_status.volume());
+		VolumeState += boost::lexical_cast<std::string>(m_volume);
 		VolumeState += "%";
 	}
 	*wHeader << Config.volume_color;

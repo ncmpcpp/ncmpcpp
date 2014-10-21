@@ -24,19 +24,26 @@
 
 std::string ToString(std::wstring ws)
 {
-	return boost::locale::conv::utf_to_utf<char>(ws);
+	return boost::locale::conv::utf_to_utf<char>(std::move(ws));
 }
 
 std::wstring ToWString(std::string s)
 {
-	return boost::locale::conv::utf_to_utf<wchar_t>(s);
+	return boost::locale::conv::utf_to_utf<wchar_t>(std::move(s));
 }
 
 size_t wideLength(const std::wstring &ws)
 {
-	int len = wcswidth(ws.c_str(), -1);
-	assert(len >= 0);
-	return len;
+	size_t result = 0;
+	for (const auto &wc : ws)
+	{
+		int len = wcwidth(wc);
+		if (len < 0)
+			++result;
+		else
+			result += len;
+	}
+	return result;
 }
 
 void wideCut(std::wstring &ws, size_t max_length)

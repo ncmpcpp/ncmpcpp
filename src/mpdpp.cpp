@@ -308,6 +308,16 @@ void Connection::GetPlaylistChanges(unsigned version, SongConsumer f)
 	checkErrors();
 }
 
+Song Connection::GetCurrentSong()
+{
+	prechecksNoCommandsList();
+	mpd_send_current_song(m_connection);
+	mpd_song *s = mpd_recv_song(m_connection);
+	mpd_response_finish(m_connection);
+	checkErrors();
+	return Song(s);
+}
+
 Song Connection::GetSong(const std::string &path)
 {
 	prechecksNoCommandsList();

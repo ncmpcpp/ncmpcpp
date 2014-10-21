@@ -45,9 +45,6 @@ PlaylistEditor *myPlaylistEditor;
 
 namespace {
 
-const int pe_timeout = 250;
-const auto fetch_delay = boost::posix_time::milliseconds(pe_timeout);
-
 size_t LeftColumnStartX;
 size_t LeftColumnWidth;
 size_t RightColumnStartX;
@@ -61,6 +58,8 @@ bool SongEntryMatcher(const boost::regex &rx, const MPD::Song &s);
 
 PlaylistEditor::PlaylistEditor()
 : m_timer(boost::posix_time::from_time_t(0))
+, m_window_timeout(Config.data_fetching_delay ? 250 : 500)
+, m_fetching_delay(boost::posix_time::milliseconds(Config.data_fetching_delay ? 250 : -1))
 {
 	LeftColumnWidth = COLS/3-1;
 	RightColumnStartX = LeftColumnWidth+1;
@@ -157,41 +156,45 @@ void PlaylistEditor::update()
 		Playlists.refresh();
 	}
 	
-	if (!Playlists.empty()
-	&& ((Content.reallyEmpty() && Global::Timer - m_timer > fetch_delay) || m_content_update_requested)
-	)
+	if ((Content.reallyEmpty() && Global::Timer - m_timer > m_fetching_delay)
+	||  m_content_update_requested)
 	{
 		m_content_update_requested = false;
-		Content.clearSearchResults();
-		withUnfilteredMenuReapplyFilter(Content, [this]() {
-			size_t idx = 0;
-			Mpd.GetPlaylistContent(Playlists.current().value(), [this, &idx](MPD::Song s) {
+		if (Playlists.empty())
+			Content.clear();
+		else
+		{
+			Content.clearSearchResults();
+			withUnfilteredMenuReapplyFilter(Content, [this]() {
+				size_t idx = 0;
+				Mpd.GetPlaylistContent(Playlists.current().value(), [this, &idx](MPD::Song s) {
+					if (idx < Content.size())
+					{
+						Content[idx].value() = s;
+						Content[idx].setBold(myPlaylist->checkForSong(s));
+					}
+					else
+						Content.addItem(s, myPlaylist->checkForSong(s));
+					++idx;
+				});
 				if (idx < Content.size())
+					Content.resizeList(idx);
+				std::string title;
+				if (Config.titles_visibility)
 				{
-					Content[idx].value() = s;
-					Content[idx].setBold(myPlaylist->checkForSong(s));
+					title = "Playlist content";
+					title += " (";
+					title += boost::lexical_cast<std::string>(Content.size());
+					title += " item";
+					if (Content.size() == 1)
+						title += ")";
+					else
+						title += "s)";
+					title.resize(Content.getWidth());
 				}
-				else
-					Content.addItem(s, myPlaylist->checkForSong(s));
-				++idx;
+				Content.setTitle(title);
 			});
-			if (idx < Content.size())
-				Content.resizeList(idx);
-			std::string title;
-			if (Config.titles_visibility)
-			{
-				title = "Playlist content";
-				title += " (";
-				title += boost::lexical_cast<std::string>(Content.size());
-				title += " item";
-				if (Content.size() == 1)
-					title += ")";
-				else
-					title += "s)";
-				title.resize(Content.getWidth());
-			}
-			Content.setTitle(title);
-		});
+		}
 		Content.display();
 	}
 	
@@ -212,7 +215,7 @@ void PlaylistEditor::update()
 int PlaylistEditor::windowTimeout()
 {
 	if (Content.reallyEmpty())
-		return pe_timeout;
+		return m_window_timeout;
 	else
 		return Screen<WindowType>::windowTimeout();
 }

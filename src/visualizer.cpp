@@ -146,7 +146,7 @@ void Visualizer::update()
 
 int Visualizer::windowTimeout()
 {
-	if (m_fifo >= 0 && Status::get().playerState() == MPD::psPlay)
+	if (m_fifo >= 0 && Status::State::player() == MPD::psPlay)
 		return 1000/fps;
 	else
 		return Screen<WindowType>::windowTimeout();
@@ -184,7 +184,7 @@ void Visualizer::DrawSoundWave(int16_t *buf, ssize_t samples, size_t y_offset, s
 		<< Config.visualizer_chars[0]
 		<< NC::Color::End;
 		
-		if (i && abs(prev_point_pos-point_pos) > 2)
+		if (i && fabs(prev_point_pos-point_pos) > 2)
 		{
 			// if gap is too big. intermediate values are needed
 			// since without them all we see are blinking points

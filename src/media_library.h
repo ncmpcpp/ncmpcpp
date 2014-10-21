@@ -150,6 +150,9 @@ private:
 	bool m_songs_update_request;
 
 	boost::posix_time::ptime m_timer;
+
+	const int m_window_timeout;
+	const boost::posix_time::time_duration m_fetching_delay;
 };
 
 extern MediaLibrary *myLibrary;
