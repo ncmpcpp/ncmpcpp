@@ -109,7 +109,7 @@ struct Configuration
 	NC::Color statusbar_color;
 	NC::Color alternative_ui_separator_color;
 	NC::Color active_column_color;
-	NC::Color visualizer_color;
+	std::vector<NC::Color> visualizer_colors;
 	
 	NC::Border window_border;
 	NC::Border active_window_border;
