@@ -231,13 +231,8 @@ bool Configuration::read(const std::string &config_path)
 			return boost::posix_time::seconds(v);
 	}));
 	p.add("visualizer_type", option_parser::worker([this](std::string &&v) {
-		if (v == "wave")
-			visualizer_use_wave = true;
-		else if (v == "spectrum")
-			visualizer_use_wave = false;
-		else
-			throw std::runtime_error("invalid argument: " + v);
-	}, defaults_to(visualizer_use_wave, true)
+		visualizer_type = stringToVisualizerType( v );
+	}, defaults_to(visualizer_type, VisualizerType::Wave)
 	));
 	p.add("visualizer_look", assign_default<std::string>(
 		visualizer_chars, "●▮", [](std::string &&s) {
@@ -630,9 +625,16 @@ bool Configuration::read(const std::string &config_path)
 	p.add("active_column_color", assign_default(
 		active_column_color, NC::Color::Red
 	));
-	p.add("visualizer_color", assign_default(
-		visualizer_color, NC::Color::Yellow
-	));
+	p.add("visualizer_color", option_parser::worker([this](std::string &&v) {
+		boost::sregex_token_iterator i(v.begin(), v.end(), boost::regex("\\w+")), j;
+		for (; i != j; ++i)
+		{
+			auto color = stringToColor(*i);
+			visualizer_colors.push_back(color);
+		}
+	}, [this] {
+			visualizer_colors = { NC::Color::Blue, NC::Color::Cyan, NC::Color::Green, NC::Color::Yellow, NC::Color::Red };
+	}));
 	p.add("window_border_color", assign_default(
 		window_border, NC::Border::Green
 	));
@@ -643,3 +645,5 @@ bool Configuration::read(const std::string &config_path)
 	std::ifstream f(config_path);
 	return p.run(f);
 }
+
+/* vim: set tabstop=4 softtabstop=4 shiftwidth=4 noexpandtab : */

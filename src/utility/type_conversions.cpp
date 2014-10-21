@@ -43,6 +43,18 @@ NC::Color stringToColor(const std::string &color)
 	return result;
 }
 
+VisualizerType stringToVisualizerType(const std::string &visualizerType)
+{
+	VisualizerType result = VisualizerType::Wave;
+	if (visualizerType == "wave")
+		result = VisualizerType::Wave;
+	else if (visualizerType == "spectrum")
+		result = VisualizerType::Spectrum;
+	else if (visualizerType == "wave_filled")
+		result = VisualizerType::WaveFilled;
+	return result;
+}
+
 NC::Border stringToBorder(const std::string &border)
 {
 	NC::Border result = NC::Border::None;
