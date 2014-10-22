@@ -39,6 +39,6 @@ enum class Design { Classic, Alternative };
 std::ostream &operator<<(std::ostream &os, Design ui);
 std::istream &operator>>(std::istream &is, Design &ui);
 
-enum class VisualizerType { Wave, WaveFilled, Spectrum };
+enum class VisualizerType { Wave, WaveFilled, Spectrum, Ellipse };
 
 #endif // NCMPCPP_ENUMS_H
