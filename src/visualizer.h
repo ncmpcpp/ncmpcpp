@@ -64,7 +64,7 @@ protected:
 	virtual bool isLockable() OVERRIDE { return true; }
 
 private:
-	NC::Color toColor(int, int);
+	NC::Color toColor( size_t, size_t);
 	void DrawSoundWave(int16_t *, ssize_t, size_t, size_t);
 	void DrawSoundWaveFill(int16_t *, ssize_t, size_t, size_t);
 	void DrawSoundWaveStereo(int16_t *, int16_t *, ssize_t, size_t);
