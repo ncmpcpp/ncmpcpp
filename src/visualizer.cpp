@@ -109,15 +109,31 @@ void Visualizer::update()
 	}
 
 	void (Visualizer::*draw)(int16_t *, ssize_t, size_t, size_t);
+	void (Visualizer::*drawStereo)(int16_t *, int16_t *, ssize_t, size_t);
 #	ifdef HAVE_FFTW3_H
 	if (Config.visualizer_type == VisualizerType::Spectrum)
+	{
 		draw = &Visualizer::DrawFrequencySpectrum;
+		drawStereo = &Visualizer::DrawFrequencySpectrumStereo;
+	}
 	else
 #	endif // HAVE_FFTW3_H
 	if (Config.visualizer_type == VisualizerType::WaveFilled)
+	{
 		draw = &Visualizer::DrawSoundWaveFill;
-	else
+		drawStereo = &Visualizer::DrawSoundWaveFillStereo;
+	}
+	else if (Config.visualizer_type == VisualizerType::Ellipse)
+	{
+		//Ellipse only works with stereo
 		draw = &Visualizer::DrawSoundWave;
+		drawStereo = &Visualizer::DrawSoundEllipseStereo;
+	}
+	else
+	{
+		draw = &Visualizer::DrawSoundWave;
+		drawStereo = &Visualizer::DrawSoundWaveStereo;
+	}
 
 	const ssize_t samples_read = data/sizeof(int16_t);
 	std::for_each(buf, buf+samples_read, [](int16_t &sample) {
@@ -140,11 +156,13 @@ void Visualizer::update()
 			buf_right[j] = buf[i+1];
 		}
 		size_t half_height = MainHeight/2;
-		(this->*draw)(buf_left, samples_read/2, 0, half_height);
-		(this->*draw)(buf_right, samples_read/2, half_height+(draw == &Visualizer::DrawFrequencySpectrum ? 0 : 1), half_height+(draw != &Visualizer::DrawFrequencySpectrum ? 0 : 1));
+
+		(this->*drawStereo)(buf_left, buf_right, samples_read/2, half_height);
 	}
 	else
+	{
 		(this->*draw)(buf, samples_read, 0, MainHeight);
+	}
 	w.refresh();
 }
 
@@ -164,8 +182,13 @@ void Visualizer::spacePressed()
 		Config.visualizer_type = VisualizerType::WaveFilled;
 		visualizerName = "sound wave filled";
 	}
+	else if (Config.visualizer_type == VisualizerType::WaveFilled && Config.visualizer_in_stereo)
+	{
+		Config.visualizer_type = VisualizerType::Ellipse;
+		visualizerName = "sound ellipse";
+	}
 #	ifdef HAVE_FFTW3_H
-	else if (Config.visualizer_type == VisualizerType::WaveFilled)
+	else if (Config.visualizer_type == VisualizerType::Ellipse || Config.visualizer_type == VisualizerType::WaveFilled)
 	{
 		Config.visualizer_type = VisualizerType::Spectrum;
 		visualizerName = "frequency spectrum";
@@ -185,6 +208,34 @@ NC::Color Visualizer::toColor( int number, int max )
 	const int colorMapSize = Config.visualizer_colors.size();
 	const int normalizedNumber = ( ( number * colorMapSize ) / max ) % colorMapSize;
 	return Config.visualizer_colors[normalizedNumber];
+}
+
+void Visualizer::DrawSoundWaveStereo(int16_t *buf_left, int16_t *buf_right, ssize_t samples, size_t height)
+{
+	DrawSoundWave(buf_left, samples, 0, height);
+	DrawSoundWave(buf_right, samples, height + 1, height);
+}
+
+void Visualizer::DrawSoundWaveFillStereo(int16_t *buf_left, int16_t *buf_right, ssize_t samples, size_t height)
+{
+	DrawSoundWaveFill(buf_left, samples, 0, height);
+	DrawSoundWaveFill(buf_right, samples, height + 1, height);
+}
+
+void Visualizer::DrawSoundEllipseStereo(int16_t *buf_left, int16_t *buf_right, ssize_t samples, size_t height)
+{
+	const int width = w.getWidth()/2;
+	for (size_t i = 0; i < samples; ++i)
+	{
+		int x = width + ((double) buf_left[i] * 2 * ((double)width / 65536.0));
+		int y = height + ((double) buf_right[i] * 2 * ((double)height / 65536.0));
+		int c = abs(buf_right[i] - buf_left[i]) % Config.visualizer_colors.size();
+
+		w << Config.visualizer_colors[c]
+		<< NC::XY(x, y)
+		<< Config.visualizer_chars[1]
+		<< NC::Color::End;
+	}
 }
 
 void Visualizer::DrawSoundWaveFill(int16_t *buf, ssize_t samples, size_t y_offset, size_t height)
@@ -257,6 +308,11 @@ void Visualizer::DrawSoundWave(int16_t *buf, ssize_t samples, size_t y_offset, s
 }
 
 #ifdef HAVE_FFTW3_H
+void Visualizer::DrawFrequencySpectrumStereo(int16_t *buf_left, int16_t *buf_right, ssize_t samples, size_t height)
+{
+	DrawFrequencySpectrum(buf_left, samples, 0, height);
+	DrawFrequencySpectrum(buf_right, samples, height, height + 1);
+}
 void Visualizer::DrawFrequencySpectrum(int16_t *buf, ssize_t samples, size_t y_offset, size_t height)
 {
 	for (unsigned i = 0, j = 0; i < m_samples; ++i)

@@ -67,8 +67,12 @@ private:
 	NC::Color toColor(int, int);
 	void DrawSoundWave(int16_t *, ssize_t, size_t, size_t);
 	void DrawSoundWaveFill(int16_t *, ssize_t, size_t, size_t);
+	void DrawSoundWaveStereo(int16_t *, int16_t *, ssize_t, size_t);
+	void DrawSoundWaveFillStereo(int16_t *, int16_t *, ssize_t, size_t);
+	void DrawSoundEllipseStereo(int16_t *, int16_t *, ssize_t, size_t);
 #	ifdef HAVE_FFTW3_H
 	void DrawFrequencySpectrum(int16_t *, ssize_t, size_t, size_t);
+	void DrawFrequencySpectrumStereo(int16_t *, int16_t *, ssize_t, size_t);
 #	endif // HAVE_FFTW3_H
 
 	int m_output_id;

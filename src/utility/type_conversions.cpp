@@ -52,6 +52,8 @@ VisualizerType stringToVisualizerType(const std::string &visualizerType)
 		result = VisualizerType::Spectrum;
 	else if (visualizerType == "wave_filled")
 		result = VisualizerType::WaveFilled;
+	else if (visualizerType == "ellipse")
+		result = VisualizerType::Ellipse;
 	return result;
 }
 
