@@ -203,7 +203,7 @@ void Visualizer::spacePressed()
 	Statusbar::printf("Visualization type: %1%", visualizerName.c_str());
 }
 
-NC::Color Visualizer::toColor( int number, int max )
+NC::Color Visualizer::toColor( size_t number, size_t max )
 {
 	const int colorMapSize = Config.visualizer_colors.size();
 	const int normalizedNumber = ( ( number * colorMapSize ) / max ) % colorMapSize;
@@ -224,14 +224,13 @@ void Visualizer::DrawSoundWaveFillStereo(int16_t *buf_left, int16_t *buf_right, 
 
 void Visualizer::DrawSoundEllipseStereo(int16_t *buf_left, int16_t *buf_right, ssize_t samples, size_t height)
 {
-	const int width = w.getWidth()/2;
+	const size_t width = w.getWidth()/2;
 	for (size_t i = 0; i < samples; ++i)
 	{
 		int x = width + ((double) buf_left[i] * 2 * ((double)width / 65536.0));
 		int y = height + ((double) buf_right[i] * 2 * ((double)height / 65536.0));
-		int c = abs(buf_right[i] - buf_left[i]) % Config.visualizer_colors.size();
 
-		w << Config.visualizer_colors[c]
+		w << toColor(buf_right[i] * buf_right[i] + buf_left[i] * buf_left[i], pow(width, 2) * pow(height,2))
 		<< NC::XY(x, y)
 		<< Config.visualizer_chars[1]
 		<< NC::Color::End;
