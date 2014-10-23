@@ -288,7 +288,7 @@ void Status::update(int event)
 				if (m_status_initialized)
 					Statusbar::printf("Consume mode is %1%", !m_consume ? "off" : "on");
 			}
-			if (('x' == m_crossfade) != st.crossfade())
+			if (('x' == m_crossfade) != (st.crossfade() != 0))
 			{
 				int crossfade = st.crossfade();
 				m_crossfade = crossfade ? 'x' : 0;
