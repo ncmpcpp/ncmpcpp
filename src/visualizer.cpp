@@ -224,13 +224,14 @@ void Visualizer::DrawSoundWaveFillStereo(int16_t *buf_left, int16_t *buf_right, 
 
 void Visualizer::DrawSoundEllipseStereo(int16_t *buf_left, int16_t *buf_right, ssize_t samples, size_t height)
 {
-	const size_t width = w.getWidth()/2;
+	const long width = w.getWidth()/2;
+	const long scaledRadius = std::max(pow(width,2), pow(height,2))/Config.visualizer_colors.size();
 	for (size_t i = 0; i < samples; ++i)
 	{
-		int x = width + ((double) buf_left[i] * 2 * ((double)width / 65536.0));
-		int y = height + ((double) buf_right[i] * 2 * ((double)height / 65536.0));
+		long x = width + ((double) buf_left[i] * 2 * ((double)width / 65536.0));
+		long y = height + ((double) buf_right[i] * 2 * ((double)height / 65536.0));
 
-		w << toColor(buf_right[i] * buf_right[i] + buf_left[i] * buf_left[i], pow(width, 2) * pow(height,2))
+		w << toColor(pow(x - width, 2) + pow(y - ((long)height),2), scaledRadius)
 		<< NC::XY(x, y)
 		<< Config.visualizer_chars[1]
 		<< NC::Color::End;
