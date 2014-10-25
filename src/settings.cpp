@@ -418,8 +418,7 @@ bool Configuration::read(const std::string &config_path)
 			media_lib_primary_tag = MPD_TAG_PERFORMER;
 		else
 			throw std::runtime_error("invalid argument: " + v);
-		regex_type |= boost::regex::icase;
-	}, defaults_to(regex_type, boost::regex::literal | boost::regex::icase)
+	}, defaults_to(media_lib_primary_tag, MPD_TAG_ARTIST)
 	));
 	p.add("default_find_mode", option_parser::worker([this](std::string &&v) {
 		if (v == "wrapped")
