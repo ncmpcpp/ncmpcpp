@@ -332,7 +332,7 @@
 ##
 #user_interface = classic
 #
-data_fetching_delay = yes
+#data_fetching_delay = yes
 #
 ## Available values: artist, album_artist, date, genre, composer, performer.
 ##
