@@ -1,8 +1,9 @@
-ncmpcpp-0.6 (2014-??-??)
+ncmpcpp-0.6 (2014-10-25)
 * Feature 'locate song' no more has a chance to crash the program.
 * Following lyrics of current song now works properly with consume mode active.
 * Deletion of empty playlists in playlist editor now works properly.
 * Toggling consume mode with crossfade mode active displays proper info.
+* Support for regular expressions works properly now.
 
 ncmpcpp-0.6_beta5 (2014-10-04)
 
