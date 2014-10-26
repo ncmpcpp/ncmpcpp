@@ -27,7 +27,6 @@
 #include "enums.h"
 
 NC::Color stringToColor(const std::string &color);
-VisualizerType stringToVisualizerType(const std::string &visualizerType);
 NC::Border stringToBorder(const std::string &border);
 
 std::string tagTypeToString(mpd_tag_type tag);

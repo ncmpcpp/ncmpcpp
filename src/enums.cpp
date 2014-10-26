@@ -137,3 +137,40 @@ std::istream &operator>>(std::istream &is, Design &ui)
 		is.setstate(std::ios::failbit);
 	return is;
 }
+
+std::ostream &operator<<(std::ostream& os, VisualizerType vt)
+{
+	switch (vt)
+	{
+		case VisualizerType::Wave:
+			os << "sound wave";
+			break;
+		case VisualizerType::WaveFilled:
+			os << "sound wave filled";
+			break;
+		case VisualizerType::Spectrum:
+			os << "frequency spectrum";
+			break;
+		case VisualizerType::Ellipse:
+			os << "sound ellipse";
+			break;
+	}
+	return os;
+}
+
+std::istream &operator>>(std::istream& is, VisualizerType &vt)
+{
+	std::string svt;
+	is >> svt;
+	if (svt == "wave")
+		vt = VisualizerType::Wave;
+	else if (svt == "wave_filled")
+		vt = VisualizerType::WaveFilled;
+	else if (svt == "spectrum")
+		vt = VisualizerType::Spectrum;
+	else if (svt == "ellipse")
+		vt = VisualizerType::Ellipse;
+	else
+		is.setstate(std::ios::failbit);
+	return is;
+}

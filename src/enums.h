@@ -40,5 +40,7 @@ std::ostream &operator<<(std::ostream &os, Design ui);
 std::istream &operator>>(std::istream &is, Design &ui);
 
 enum class VisualizerType { Wave, WaveFilled, Spectrum, Ellipse };
+std::ostream &operator<<(std::ostream &os, VisualizerType vt);
+std::istream &operator>>(std::istream &is, VisualizerType &vt);
 
 #endif // NCMPCPP_ENUMS_H

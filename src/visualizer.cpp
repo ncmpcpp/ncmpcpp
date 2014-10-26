@@ -189,31 +189,22 @@ int Visualizer::windowTimeout()
 
 void Visualizer::spacePressed()
 {
-	std::string visualizerName;
-	if (Config.visualizer_type == VisualizerType::Wave)
+	switch (Config.visualizer_type)
 	{
-		Config.visualizer_type = VisualizerType::WaveFilled;
-		visualizerName = "sound wave filled";
+		case VisualizerType::Wave:
+			Config.visualizer_type = VisualizerType::WaveFilled;
+			break;
+		case VisualizerType::WaveFilled:
+			Config.visualizer_type = VisualizerType::Spectrum;
+			break;
+		case VisualizerType::Spectrum:
+			Config.visualizer_type = VisualizerType::Ellipse;
+			break;
+		case VisualizerType::Ellipse:
+			Config.visualizer_type = VisualizerType::Wave;
+			break;
 	}
-	else if (Config.visualizer_type == VisualizerType::WaveFilled && Config.visualizer_in_stereo)
-	{
-		Config.visualizer_type = VisualizerType::Ellipse;
-		visualizerName = "sound ellipse";
-	}
-#	ifdef HAVE_FFTW3_H
-	else if (Config.visualizer_type == VisualizerType::Ellipse || Config.visualizer_type == VisualizerType::WaveFilled)
-	{
-		Config.visualizer_type = VisualizerType::Spectrum;
-		visualizerName = "frequency spectrum";
-	}
-#	endif // HAVE_FFTW3_H
-	else
-	{
-		Config.visualizer_type = VisualizerType::Wave;
-		visualizerName = "sound wave";
-	}
-
-	Statusbar::printf("Visualization type: %1%", visualizerName.c_str());
+	Statusbar::printf("Visualization type: %1%", Config.visualizer_type);
 }
 
 void Visualizer::DrawSoundWaveStereo(int16_t *buf_left, int16_t *buf_right, ssize_t samples, size_t height)

@@ -230,9 +230,8 @@ bool Configuration::read(const std::string &config_path)
 		visualizer_sync_interval, 30, [](unsigned v) {
 			return boost::posix_time::seconds(v);
 	}));
-	p.add("visualizer_type", option_parser::worker([this](std::string &&v) {
-		visualizer_type = stringToVisualizerType( v );
-	}, defaults_to(visualizer_type, VisualizerType::Wave)
+	p.add("visualizer_type", assign_default(
+		visualizer_type, VisualizerType::Wave
 	));
 	p.add("visualizer_look", assign_default<std::string>(
 		visualizer_chars, "●▮", [](std::string &&s) {
