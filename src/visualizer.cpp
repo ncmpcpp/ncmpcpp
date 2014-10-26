@@ -23,6 +23,7 @@
 #ifdef ENABLE_VISUALIZER
 
 #include <boost/date_time/posix_time/posix_time.hpp>
+#include <boost/math/constants/constants.hpp>
 #include <cerrno>
 #include <cmath>
 #include <cstring>
@@ -312,9 +313,37 @@ void Visualizer::DrawSoundWaveFillStereo(int16_t *buf_left, int16_t *buf_right, 
 
 /**********************************************************************/
 
-void Visualizer::DrawSoundEllipse(int16_t *, ssize_t, size_t, size_t)
+// draws the sound wave as an ellipse with origin in the center of the screen
+void Visualizer::DrawSoundEllipse(int16_t *buf, ssize_t samples, size_t, size_t height)
 {
+	const size_t half_width = w.getWidth()/2;
+	const size_t half_height = height/2;
 
+	// make it so that the loop goes around the ellipse exactly once
+	const double deg_multiplier = 2*boost::math::constants::pi<double>()/samples;
+
+	int32_t x, y;
+	double radius, max_radius;
+	for (ssize_t i = 0; i < samples; ++i)
+	{
+		x = half_width * std::cos(i*deg_multiplier);
+		y = half_height * std::sin(i*deg_multiplier);
+		max_radius = sqrt(x*x + y*y);
+
+		// calculate the distance of the sample from the center,
+		// where 0 is the center of the ellipse and 1 is its border
+		radius = std::abs(buf[i]);
+		radius /= 32768.0;
+
+		// appropriately scale the position
+		x *= radius;
+		y *= radius;
+
+		w << NC::XY(half_width + x, half_height + y)
+		<< toColor(sqrt(x*x + y*y), max_radius, false)
+		<< Config.visualizer_chars[0]
+		<< NC::Color::End;
+	}
 }
 
 // DrawSoundEllipseStereo: This visualizer only works in stereo. The colors form concentric
