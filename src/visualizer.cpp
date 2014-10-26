@@ -48,6 +48,17 @@ namespace {
 
 const int fps = 25;
 
+// toColor: a scaling function for coloring. For numbers 0 to max this function returns
+// a coloring from the lowest color to the highest, and colors will not loop from 0 to max.
+NC::Color toColor(size_t number, size_t max, bool wrap = true)
+{
+	const auto colors_size = Config.visualizer_colors.size();
+	const auto index = (number * colors_size) / max;
+	return Config.visualizer_colors[
+		wrap ? index % colors_size : std::min(index, colors_size-1)
+	];
+}
+
 }
 
 Visualizer::Visualizer()
@@ -204,19 +215,10 @@ void Visualizer::spacePressed()
 	Statusbar::printf("Visualization type: %1%", visualizerName.c_str());
 }
 
-// toColor: a scaling function for coloring. For numbers 0 to max this function returns
-// a coloring from the lowest color to the highest, and colors will not loop from 0 to max.
-NC::Color Visualizer::toColor( size_t number, size_t max )
-{
-	const int colorMapSize = Config.visualizer_colors.size();
-	const int normalizedNumber = ( ( number * colorMapSize ) / max ) % colorMapSize;
-	return Config.visualizer_colors[normalizedNumber];
-}
-
 void Visualizer::DrawSoundWaveStereo(int16_t *buf_left, int16_t *buf_right, ssize_t samples, size_t height)
 {
 	DrawSoundWave(buf_left, samples, 0, height);
-	DrawSoundWave(buf_right, samples, height + 1, height);
+	DrawSoundWave(buf_right, samples, height, w.getHeight() - height);
 }
 
 void Visualizer::DrawSoundWaveFillStereo(int16_t *buf_left, int16_t *buf_right, ssize_t samples, size_t height)
@@ -290,40 +292,52 @@ void Visualizer::DrawSoundWaveFill(int16_t *buf, ssize_t samples, size_t y_offse
 
 void Visualizer::DrawSoundWave(int16_t *buf, ssize_t samples, size_t y_offset, size_t height)
 {
-	const int samples_per_col = samples/w.getWidth();
-	const int half_height = height/2;
-	double prev_point_pos = 0;
+	const size_t half_height = height/2;
+	const size_t base_y = y_offset+half_height;
 	const size_t win_width = w.getWidth();
-	for (size_t i = 0; i < win_width; ++i)
-	{
-		double point_pos = 0;
-		for (int j = 0; j < samples_per_col; ++j)
-			point_pos += buf[i*samples_per_col+j];
-		point_pos /= samples_per_col;
-		point_pos /= std::numeric_limits<int16_t>::max();
-		point_pos *= half_height;
-		point_pos  = std::round(point_pos);
+	const int samples_per_column = samples/win_width;
 
-		w << NC::XY(i, y_offset+half_height+point_pos)
-		<< Config.visualizer_colors[std::min(size_t(std::abs(point_pos) / (double)half_height *
-											Config.visualizer_colors.size()), Config.visualizer_colors.size() - 1)]
+	// too little samples
+	if (samples_per_column == 0)
+		return;
+
+	auto draw_point = [&](size_t x, int32_t y) {
+		w << NC::XY(x, base_y+y)
+		<< toColor(std::abs(y), half_height, false)
 		<< Config.visualizer_chars[0]
 		<< NC::Color::End;
+	};
 
-		if (i && abs(prev_point_pos-point_pos) > 2)
+	int32_t point_y, prev_point_y = 0;
+	for (size_t x = 0; x < win_width; ++x)
+	{
+		point_y = 0;
+		// calculate mean from the relevant points
+		for (int j = 0; j < samples_per_column; ++j)
+			point_y += buf[x*samples_per_column+j];
+		point_y /= samples_per_column;
+		// normalize it to fit the screen
+		point_y *= height / 65536.0;
+
+		draw_point(x, point_y);
+
+		// if the gap between two consecutive points is too big,
+		// intermediate values are needed for the wave to be watchable.
+		if (x > 0 && std::abs(prev_point_y-point_y) > 1)
 		{
-			// if gap is too big. intermediate values are needed
-			// since without them all we see are blinking points
-			const int breakpoint = std::max(prev_point_pos, point_pos);
-			const int half = (prev_point_pos+point_pos)/2;
-			for (int k = std::min(prev_point_pos, point_pos)+1; k < breakpoint; k += 2)
-				w << NC::XY(i-(k < half), y_offset+half_height+k)
-				<< Config.visualizer_colors[std::min(size_t(std::abs(k) / (double)half_height *
-													Config.visualizer_colors.size()), Config.visualizer_colors.size() - 1)]
-				<< Config.visualizer_chars[0]
-				<< NC::Color::End;
+			const int32_t half = (prev_point_y+point_y)/2;
+			if (prev_point_y < point_y)
+			{
+				for (auto y = prev_point_y; y < point_y; ++y)
+					draw_point(x-(y < half), y);
+			}
+			else
+			{
+				for (auto y = prev_point_y; y > point_y; --y)
+					draw_point(x-(y > half), y);
+			}
 		}
-		prev_point_pos = point_pos;
+		prev_point_y = point_y;
 	}
 }
 
