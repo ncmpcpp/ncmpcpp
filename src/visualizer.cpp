@@ -137,8 +137,7 @@ void Visualizer::update()
 	}
 	else if (Config.visualizer_type == VisualizerType::Ellipse)
 	{
-		//Ellipse only works with stereo
-		draw = &Visualizer::DrawSoundWave;
+		draw = &Visualizer::DrawSoundEllipse;
 		drawStereo = &Visualizer::DrawSoundEllipseStereo;
 	}
 	else
@@ -207,85 +206,7 @@ void Visualizer::spacePressed()
 	Statusbar::printf("Visualization type: %1%", Config.visualizer_type);
 }
 
-void Visualizer::DrawSoundWaveStereo(int16_t *buf_left, int16_t *buf_right, ssize_t samples, size_t height)
-{
-	DrawSoundWave(buf_left, samples, 0, height);
-	DrawSoundWave(buf_right, samples, height, w.getHeight() - height);
-}
-
-void Visualizer::DrawSoundWaveFillStereo(int16_t *buf_left, int16_t *buf_right, ssize_t samples, size_t height)
-{
-	DrawSoundWaveFill(buf_left, samples, 0, height);
-	DrawSoundWaveFill(buf_right, samples, height, w.getHeight() - height);
-}
-
-// DrawSoundEllipseStereo: This visualizer only works in stereo. The colors form concentric
-// rings originating from the center (width/2, height/2). For any given point, the width is
-// scaled with the left channel and height is scaled with the right channel. For example,
-// if a song is entirely in the right channel, then it would just be a vertical line.
-//
-// Since every font/terminal is different, the visualizer is never a perfect circle. This
-// visualizer assume the font height is twice the length of the font's width. If the font
-// is skinner or wider than this, instead of a circle it will be an ellipse.
-void Visualizer::DrawSoundEllipseStereo(int16_t *buf_left, int16_t *buf_right, ssize_t samples, size_t height)
-{
-	const long width = w.getWidth()/2;
-
-	// Makes the radius of the color circle proportional to max of height or width.
-	// Divide by colors size so that there are multiple color rings instead of just a few.
-	const long scaledRadius = std::max(pow(width,2), pow(height,2))/pow(Config.visualizer_colors.size(),2);
-	for (size_t i = 0; i < samples; ++i)
-	{
-		long x = width + ((double) buf_left[i] * 2 * ((double)width / 65536.0));
-		long y = height + ((double) buf_right[i] * 2 * ((double)height / 65536.0));
-
-		// The arguments to the toColor function roughly follow a circle equation where
-		// the center is not centered around (0,0). For example (x - w)^2 + (y-h)+2 = r^2
-		// centers the circle around the point (w,h). Because fonts are not all the same
-		// size, this will not always generate a perfect circle.
-		w << toColor(pow((x - width)*1, 2) + pow((y - ((long)height)) * 2,2), scaledRadius)
-		<< NC::XY(x, y)
-		<< Config.visualizer_chars[1]
-		<< NC::Color::End;
-	}
-}
-
-// DrawSoundWaveFill: This visualizer is very similar to DrawSoundWave, but instead of
-// a single line the entire height is filled. In stereo mode, the top half of the screen
-// is dedicated to the right channel, the bottom the left channel.
-void Visualizer::DrawSoundWaveFill(int16_t *buf, ssize_t samples, size_t y_offset, size_t height)
-{
-	// if right channel is drawn, bars descend from the top to the bottom
-	const bool flipped = y_offset > 0;
-	const size_t win_width = w.getWidth();
-	const int samples_per_column = samples/win_width;
-
-	// too little samples
-	if (samples_per_column == 0)
-		return;
-
-	int32_t point_y;
-	for (size_t x = 0; x < win_width; ++x)
-	{
-		point_y = 0;
-		// calculate mean from the relevant points
-		for (int j = 0; j < samples_per_column; ++j)
-			point_y += buf[x*samples_per_column+j];
-		point_y /= samples_per_column;
-		// normalize it to fit the screen
-		point_y = std::abs(point_y);
-		point_y *= height / 32768.0;
-
-		for (int32_t j = 0; j < point_y; ++j)
-		{
-			size_t y = flipped ? y_offset+j : y_offset+height-j-1;
-			w << NC::XY(x, y)
-			<< toColor(j, height)
-			<< Config.visualizer_chars[1]
-			<< NC::Color::End;
-		}
-	}
-}
+/**********************************************************************/
 
 void Visualizer::DrawSoundWave(int16_t *buf, ssize_t samples, size_t y_offset, size_t height)
 {
@@ -338,13 +259,98 @@ void Visualizer::DrawSoundWave(int16_t *buf, ssize_t samples, size_t y_offset, s
 	}
 }
 
-#ifdef HAVE_FFTW3_H
-void Visualizer::DrawFrequencySpectrumStereo(int16_t *buf_left, int16_t *buf_right, ssize_t samples, size_t height)
+void Visualizer::DrawSoundWaveStereo(int16_t *buf_left, int16_t *buf_right, ssize_t samples, size_t height)
 {
-	DrawFrequencySpectrum(buf_left, samples, 0, height);
-	DrawFrequencySpectrum(buf_right, samples, height, w.getHeight() - height);
+	DrawSoundWave(buf_left, samples, 0, height);
+	DrawSoundWave(buf_right, samples, height, w.getHeight() - height);
 }
 
+/**********************************************************************/
+
+// DrawSoundWaveFill: This visualizer is very similar to DrawSoundWave, but instead of
+// a single line the entire height is filled. In stereo mode, the top half of the screen
+// is dedicated to the right channel, the bottom the left channel.
+void Visualizer::DrawSoundWaveFill(int16_t *buf, ssize_t samples, size_t y_offset, size_t height)
+{
+	// if right channel is drawn, bars descend from the top to the bottom
+	const bool flipped = y_offset > 0;
+	const size_t win_width = w.getWidth();
+	const int samples_per_column = samples/win_width;
+
+	// too little samples
+	if (samples_per_column == 0)
+		return;
+
+	int32_t point_y;
+	for (size_t x = 0; x < win_width; ++x)
+	{
+		point_y = 0;
+		// calculate mean from the relevant points
+		for (int j = 0; j < samples_per_column; ++j)
+			point_y += buf[x*samples_per_column+j];
+		point_y /= samples_per_column;
+		// normalize it to fit the screen
+		point_y = std::abs(point_y);
+		point_y *= height / 32768.0;
+
+		for (int32_t j = 0; j < point_y; ++j)
+		{
+			size_t y = flipped ? y_offset+j : y_offset+height-j-1;
+			w << NC::XY(x, y)
+			<< toColor(j, height)
+			<< Config.visualizer_chars[1]
+			<< NC::Color::End;
+		}
+	}
+}
+
+void Visualizer::DrawSoundWaveFillStereo(int16_t *buf_left, int16_t *buf_right, ssize_t samples, size_t height)
+{
+	DrawSoundWaveFill(buf_left, samples, 0, height);
+	DrawSoundWaveFill(buf_right, samples, height, w.getHeight() - height);
+}
+
+/**********************************************************************/
+
+void Visualizer::DrawSoundEllipse(int16_t *, ssize_t, size_t, size_t)
+{
+
+}
+
+// DrawSoundEllipseStereo: This visualizer only works in stereo. The colors form concentric
+// rings originating from the center (width/2, height/2). For any given point, the width is
+// scaled with the left channel and height is scaled with the right channel. For example,
+// if a song is entirely in the right channel, then it would just be a vertical line.
+//
+// Since every font/terminal is different, the visualizer is never a perfect circle. This
+// visualizer assume the font height is twice the length of the font's width. If the font
+// is skinner or wider than this, instead of a circle it will be an ellipse.
+void Visualizer::DrawSoundEllipseStereo(int16_t *buf_left, int16_t *buf_right, ssize_t samples, size_t height)
+{
+	const long width = w.getWidth()/2;
+
+	// Makes the radius of the color circle proportional to max of height or width.
+	// Divide by colors size so that there are multiple color rings instead of just a few.
+	const long scaledRadius = std::max(pow(width,2), pow(height,2))/pow(Config.visualizer_colors.size(),2);
+	for (ssize_t i = 0; i < samples; ++i)
+	{
+		long x = width + ((double) buf_left[i] * 2 * ((double)width / 65536.0));
+		long y = height + ((double) buf_right[i] * 2 * ((double)height / 65536.0));
+
+		// The arguments to the toColor function roughly follow a circle equation where
+		// the center is not centered around (0,0). For example (x - w)^2 + (y-h)+2 = r^2
+		// centers the circle around the point (w,h). Because fonts are not all the same
+		// size, this will not always generate a perfect circle.
+		w << toColor(pow((x - width)*1, 2) + pow((y - ((long)height)) * 2,2), scaledRadius)
+		<< NC::XY(x, y)
+		<< Config.visualizer_chars[1]
+		<< NC::Color::End;
+	}
+}
+
+/**********************************************************************/
+
+#ifdef HAVE_FFTW3_H
 void Visualizer::DrawFrequencySpectrum(int16_t *buf, ssize_t samples, size_t y_offset, size_t height)
 {
 	// if right channel is drawn, bars descend from the top to the bottom
@@ -388,7 +394,15 @@ void Visualizer::DrawFrequencySpectrum(int16_t *buf, ssize_t samples, size_t y_o
 		}
 	}
 }
+
+void Visualizer::DrawFrequencySpectrumStereo(int16_t *buf_left, int16_t *buf_right, ssize_t samples, size_t height)
+{
+	DrawFrequencySpectrum(buf_left, samples, 0, height);
+	DrawFrequencySpectrum(buf_right, samples, height, w.getHeight() - height);
+}
 #endif // HAVE_FFTW3_H
+
+/**********************************************************************/
 
 void Visualizer::SetFD()
 {
