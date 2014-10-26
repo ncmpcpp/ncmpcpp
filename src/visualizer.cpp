@@ -203,6 +203,8 @@ void Visualizer::spacePressed()
 	Statusbar::printf("Visualization type: %1%", visualizerName.c_str());
 }
 
+// toColor: a scaling function for coloring. For numbers 0 to max this function returns
+// a coloring from the lowest color to the highest, and colors will not loop from 0 to max.
 NC::Color Visualizer::toColor( size_t number, size_t max )
 {
 	const int colorMapSize = Config.visualizer_colors.size();
@@ -222,15 +224,30 @@ void Visualizer::DrawSoundWaveFillStereo(int16_t *buf_left, int16_t *buf_right, 
 	DrawSoundWaveFill(buf_right, samples, height + 1, height);
 }
 
+// DrawSoundEllipseStereo: This visualizer only works in stereo. The colors form concentric
+// rings originating from the center (width/2, height/2). For any given point, the width is
+// scaled with the left channel and height is scaled with the right channel. For example,
+// if a song is entirely in the right channel, then it would just be a vertical line.
+//
+// Since every font/terminal is different, the visualizer is never a perfect circle. This
+// visualizer assume the font height is twice the length of the font's width. If the font
+// is skinner or wider than this, instead of a circle it will be an ellipse.
 void Visualizer::DrawSoundEllipseStereo(int16_t *buf_left, int16_t *buf_right, ssize_t samples, size_t height)
 {
 	const long width = w.getWidth()/2;
+
+	// Makes the radius of the color circle proportional to max of height or width.
+	// Divide by colors size so that there are multiple color rings instead of just a few.
 	const long scaledRadius = std::max(pow(width,2), pow(height,2))/pow(Config.visualizer_colors.size(),2);
 	for (size_t i = 0; i < samples; ++i)
 	{
 		long x = width + ((double) buf_left[i] * 2 * ((double)width / 65536.0));
 		long y = height + ((double) buf_right[i] * 2 * ((double)height / 65536.0));
 
+		// The arguments to the toColor function roughly follow a circle equation where
+		// the center is not centered around (0,0). For example (x - w)^2 + (y-h)+2 = r^2
+		// centers the circle around the point (w,h) Because fonts are not all the same
+		// size, this will not always generate a perfect circle.
 		w << toColor(pow((x - width)*1, 2) + pow((y - ((long)height)) * 2,2), scaledRadius)
 		<< NC::XY(x, y)
 		<< Config.visualizer_chars[1]
@@ -238,6 +255,9 @@ void Visualizer::DrawSoundEllipseStereo(int16_t *buf_left, int16_t *buf_right, s
 	}
 }
 
+// DrawSoundWaveFill: This visualizer is very similar to DrawSoundWave, but instead of
+// a single line the entire height is filled. In stereo mode, the top half of the screen
+// is dedicated to the right channel, the bottom the left channel.
 void Visualizer::DrawSoundWaveFill(int16_t *buf, ssize_t samples, size_t y_offset, size_t height)
 {
 	const int samples_per_col = samples/w.getWidth();
