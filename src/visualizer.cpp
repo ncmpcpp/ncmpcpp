@@ -195,11 +195,17 @@ void Visualizer::spacePressed()
 			Config.visualizer_type = VisualizerType::WaveFilled;
 			break;
 		case VisualizerType::WaveFilled:
+#			ifdef HAVE_FFTW3_H
 			Config.visualizer_type = VisualizerType::Spectrum;
+#			else
+			Config.visualizer_type = VisualizerType::Ellipse;
+#			endif // HAVE_FFTW3_H
 			break;
+#		ifdef HAVE_FFTW3_H
 		case VisualizerType::Spectrum:
 			Config.visualizer_type = VisualizerType::Ellipse;
 			break;
+#		endif // HAVE_FFTW3_H
 		case VisualizerType::Ellipse:
 			Config.visualizer_type = VisualizerType::Wave;
 			break;

@@ -21,6 +21,7 @@
 #ifndef NCMPCPP_ENUMS_H
 #define NCMPCPP_ENUMS_H
 
+#include "config.h"
 #include <iostream>
 
 enum class SpaceAddMode { AddRemove, AlwaysAdd };
@@ -39,7 +40,14 @@ enum class Design { Classic, Alternative };
 std::ostream &operator<<(std::ostream &os, Design ui);
 std::istream &operator>>(std::istream &is, Design &ui);
 
-enum class VisualizerType { Wave, WaveFilled, Spectrum, Ellipse };
+enum class VisualizerType {
+	Wave,
+	WaveFilled,
+#	ifdef HAVE_FFTW3_H
+	Spectrum,
+#	endif // HAVE_FFTW3_H
+	Ellipse
+};
 std::ostream &operator<<(std::ostream &os, VisualizerType vt);
 std::istream &operator>>(std::istream &is, VisualizerType &vt);
 
