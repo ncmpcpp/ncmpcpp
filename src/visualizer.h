@@ -79,13 +79,14 @@ private:
 	boost::posix_time::ptime m_timer;
 
 	int m_fifo;
-	unsigned m_samples;
+	size_t m_samples;
 #	ifdef HAVE_FFTW3_H
-	unsigned m_fftw_results;
-	double *m_freq_magnitudes;
+	size_t m_fftw_results;
 	double *m_fftw_input;
 	fftw_complex *m_fftw_output;
 	fftw_plan m_fftw_plan;
+
+	std::vector<double> m_freq_magnitudes;
 #	endif // HAVE_FFTW3_H
 };
 

@@ -59,7 +59,7 @@ Visualizer::Visualizer()
 		m_samples *= 2;
 #	ifdef HAVE_FFTW3_H
 	m_fftw_results = m_samples/2+1;
-	m_freq_magnitudes = new double[m_fftw_results];
+	m_freq_magnitudes.resize(m_fftw_results);
 	m_fftw_input = static_cast<double *>(fftw_malloc(sizeof(double)*m_samples));
 	m_fftw_output = static_cast<fftw_complex *>(fftw_malloc(sizeof(fftw_complex)*m_fftw_results));
 	m_fftw_plan = fftw_plan_dft_r2c_1d(m_samples, m_fftw_input, m_fftw_output, FFTW_ESTIMATE);
@@ -149,19 +149,20 @@ void Visualizer::update()
 	w.clear();
 	if (Config.visualizer_in_stereo)
 	{
-		int16_t buf_left[samples_read/2], buf_right[samples_read/2];
+		auto chan_samples = samples_read/2;
+		int16_t buf_left[chan_samples], buf_right[chan_samples];
 		for (ssize_t i = 0, j = 0; i < samples_read; i += 2, ++j)
 		{
 			buf_left[j] = buf[i];
 			buf_right[j] = buf[i+1];
 		}
-		size_t half_height = MainHeight/2;
+		size_t half_height = w.getHeight()/2;
 
-		(this->*drawStereo)(buf_left, buf_right, samples_read/2, half_height);
+		(this->*drawStereo)(buf_left, buf_right, chan_samples, half_height);
 	}
 	else
 	{
-		(this->*draw)(buf, samples_read, 0, MainHeight);
+		(this->*draw)(buf, samples_read, 0, w.getHeight());
 	}
 	w.refresh();
 }
@@ -262,7 +263,6 @@ void Visualizer::DrawSoundWaveFill(int16_t *buf, ssize_t samples, size_t y_offse
 {
 	const int samples_per_col = samples/w.getWidth();
 	const int half_height = height/2;
-	double prev_point_pos = 0;
 	const size_t win_width = w.getWidth();
 	const bool left = y_offset > 0;
 	int x = 0;
@@ -331,51 +331,48 @@ void Visualizer::DrawSoundWave(int16_t *buf, ssize_t samples, size_t y_offset, s
 void Visualizer::DrawFrequencySpectrumStereo(int16_t *buf_left, int16_t *buf_right, ssize_t samples, size_t height)
 {
 	DrawFrequencySpectrum(buf_left, samples, 0, height);
-	DrawFrequencySpectrum(buf_right, samples, height, height + 1);
+	DrawFrequencySpectrum(buf_right, samples, height, w.getHeight() - height);
 }
+
 void Visualizer::DrawFrequencySpectrum(int16_t *buf, ssize_t samples, size_t y_offset, size_t height)
 {
-	for (unsigned i = 0, j = 0; i < m_samples; ++i)
-	{
-		if (j < samples)
-			m_fftw_input[i] = buf[j++];
-		else
-			m_fftw_input[i] = 0;
-	}
+	// if right channel is drawn, bars descend from the top to the bottom
+	const bool flipped = y_offset > 0;
 
+	// copy samples to fftw input array
+	for (unsigned i = 0; i < m_samples; ++i)
+		m_fftw_input[i] = i < samples ? buf[i] : 0;
 	fftw_execute(m_fftw_plan);
 
 	// count magnitude of each frequency and scale it to fit the screen
-	for (unsigned i = 0; i < m_fftw_results; ++i)
-		m_freq_magnitudes[i] = sqrt(m_fftw_output[i][0]*m_fftw_output[i][0] + m_fftw_output[i][1]*m_fftw_output[i][1])/2e4*height;
+	for (size_t i = 0; i < m_fftw_results; ++i)
+		m_freq_magnitudes[i] = sqrt(
+			m_fftw_output[i][0]*m_fftw_output[i][0]
+		+	m_fftw_output[i][1]*m_fftw_output[i][1]
+		)/2e4*height;
 
 	const size_t win_width = w.getWidth();
 	// cut bandwidth a little to achieve better look
-	const int freqs_per_col = m_fftw_results/win_width * 7/10;
+	const double bins_per_bar = m_fftw_results/win_width * 7/10;
 	double bar_height;
-	size_t bar_real_height;
-	for (size_t i = 0; i < win_width; ++i)
+	size_t bar_bound_height;
+	for (size_t x = 0; x < win_width; ++x)
 	{
 		bar_height = 0;
-		for (int j = 0; j < freqs_per_col; ++j)
-			bar_height += m_freq_magnitudes[i*freqs_per_col+j];
+		for (int j = 0; j < bins_per_bar; ++j)
+			bar_height += m_freq_magnitudes[x*bins_per_bar+j];
 		// buff higher frequencies
-		bar_height *= log2(2 + i);
+		bar_height *= log2(2 + x);
 		// moderately normalize the heights
 		bar_height = pow(bar_height, 0.5);
-		bar_real_height = std::min(size_t(bar_height/freqs_per_col), height);
-		const size_t start_y = y_offset > 0 ? y_offset : height-bar_real_height;
-		const size_t stop_y = std::min(bar_real_height+start_y, w.getHeight());
-		for (size_t j = start_y; j < stop_y; ++j)
+
+		bar_bound_height = std::min(std::size_t(bar_height/bins_per_bar), height);
+		for (size_t j = 0; j < bar_bound_height; ++j)
 		{
-			w << NC::XY(i, j);
-			if (Config.visualizer_in_stereo)
-				w << Config.visualizer_colors[std::abs(int(j - w.getHeight() / 2)) /
-												((double)w.getHeight() / 2) * Config.visualizer_colors.size()];
-			else
-				w << Config.visualizer_colors[std::abs(int((double)j / stop_y * Config.visualizer_colors.size()) -
-												int(Config.visualizer_colors.size() - 1))];
-			w << Config.visualizer_chars[1]
+			size_t y = flipped ? y_offset+j : y_offset+height-j-1;
+			w << NC::XY(x, y)
+			<< toColor(j, height)
+			<< Config.visualizer_chars[1]
 			<< NC::Color::End;
 		}
 	}
