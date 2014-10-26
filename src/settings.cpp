@@ -247,6 +247,8 @@ bool Configuration::read(const std::string &config_path)
 			auto color = stringToColor(*i);
 			visualizer_colors.push_back(color);
 		}
+		if (visualizer_colors.empty())
+			throw std::runtime_error("empty list");
 	}, [this] {
 		visualizer_colors = { NC::Color::Blue, NC::Color::Cyan, NC::Color::Green, NC::Color::Yellow, NC::Color::Magenta, NC::Color::Red };
 	}));
