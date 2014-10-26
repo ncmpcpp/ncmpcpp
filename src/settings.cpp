@@ -241,6 +241,16 @@ bool Configuration::read(const std::string &config_path)
 			boundsCheck(result.size(), size_type(2), size_type(2));
 			return result;
 	}));
+	p.add("visualizer_color", option_parser::worker([this](std::string &&v) {
+		boost::sregex_token_iterator i(v.begin(), v.end(), boost::regex("\\w+")), j;
+		for (; i != j; ++i)
+		{
+			auto color = stringToColor(*i);
+			visualizer_colors.push_back(color);
+		}
+	}, [this] {
+		visualizer_colors = { NC::Color::Blue, NC::Color::Cyan, NC::Color::Green, NC::Color::Yellow, NC::Color::Magenta, NC::Color::Red };
+	}));
 	p.add("system_encoding", assign_default<std::string>(
 		system_encoding, "", [](std::string &&enc) {
 #			ifdef HAVE_LANGINFO_H
@@ -624,16 +634,6 @@ bool Configuration::read(const std::string &config_path)
 	p.add("active_column_color", assign_default(
 		active_column_color, NC::Color::Red
 	));
-	p.add("visualizer_colors", option_parser::worker([this](std::string &&v) {
-		boost::sregex_token_iterator i(v.begin(), v.end(), boost::regex("\\w+")), j;
-		for (; i != j; ++i)
-		{
-			auto color = stringToColor(*i);
-			visualizer_colors.push_back(color);
-		}
-	}, [this] {
-		visualizer_colors = { NC::Color::Blue, NC::Color::Cyan, NC::Color::Green, NC::Color::Yellow, NC::Color::Red };
-	}));
 	p.add("window_border_color", assign_default(
 		window_border, NC::Border::Green
 	));

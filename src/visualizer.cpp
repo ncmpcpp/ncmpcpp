@@ -246,7 +246,7 @@ void Visualizer::DrawSoundEllipseStereo(int16_t *buf_left, int16_t *buf_right, s
 
 		// The arguments to the toColor function roughly follow a circle equation where
 		// the center is not centered around (0,0). For example (x - w)^2 + (y-h)+2 = r^2
-		// centers the circle around the point (w,h) Because fonts are not all the same
+		// centers the circle around the point (w,h). Because fonts are not all the same
 		// size, this will not always generate a perfect circle.
 		w << toColor(pow((x - width)*1, 2) + pow((y - ((long)height)) * 2,2), scaledRadius)
 		<< NC::XY(x, y)

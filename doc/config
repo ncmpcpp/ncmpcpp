@@ -90,11 +90,13 @@
 ## you need to compile ncmpcpp with fftw3 support.
 ##
 #
-## Available values: spectrum, wave.
+## Available values: spectrum, wave, wave_filled, ellipse.
 ##
 #visualizer_type = wave
 #
 #visualizer_look = ●▮
+#
+#visualizer_color = blue, cyan, green, yellow, magenta, red
 #
 ##### system encoding #####
 ##
@@ -502,8 +504,6 @@
 #alternative_ui_separator_color = black
 #
 #active_column_color = red
-#
-#visualizer_color = yellow
 #
 #window_border_color = green
 #
