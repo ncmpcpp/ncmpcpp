@@ -105,7 +105,8 @@ void Visualizer::update()
 	if (m_fifo < 0)
 		return;
 
-	// PCM in format 44100:16:1 (for mono visualization) and 44100:16:2 (for stereo visualization) is supported
+	// PCM in format 44100:16:1 (for mono visualization) and
+	// 44100:16:2 (for stereo visualization) is supported.
 	int16_t buf[m_samples];
 	ssize_t data = read(m_fifo, buf, sizeof(buf));
 	if (data < 0) // no data available in fifo
@@ -224,7 +225,7 @@ void Visualizer::DrawSoundWaveStereo(int16_t *buf_left, int16_t *buf_right, ssiz
 void Visualizer::DrawSoundWaveFillStereo(int16_t *buf_left, int16_t *buf_right, ssize_t samples, size_t height)
 {
 	DrawSoundWaveFill(buf_left, samples, 0, height);
-	DrawSoundWaveFill(buf_right, samples, height + 1, height);
+	DrawSoundWaveFill(buf_right, samples, height, w.getHeight() - height);
 }
 
 // DrawSoundEllipseStereo: This visualizer only works in stereo. The colors form concentric
@@ -263,29 +264,34 @@ void Visualizer::DrawSoundEllipseStereo(int16_t *buf_left, int16_t *buf_right, s
 // is dedicated to the right channel, the bottom the left channel.
 void Visualizer::DrawSoundWaveFill(int16_t *buf, ssize_t samples, size_t y_offset, size_t height)
 {
-	const int samples_per_col = samples/w.getWidth();
-	const int half_height = height/2;
+	// if right channel is drawn, bars descend from the top to the bottom
+	const bool flipped = y_offset > 0;
 	const size_t win_width = w.getWidth();
-	const bool left = y_offset > 0;
-	int x = 0;
-	for (size_t i = 0; i < win_width; ++i)
+	const int samples_per_column = samples/win_width;
+
+	// too little samples
+	if (samples_per_column == 0)
+		return;
+
+	int32_t point_y;
+	for (size_t x = 0; x < win_width; ++x)
 	{
-		double point_pos = 0;
-		for (int j = 0; j < samples_per_col; ++j)
-			point_pos += buf[i*samples_per_col+j];
-		point_pos /= samples_per_col;
-		point_pos /= std::numeric_limits<int16_t>::max();
-		point_pos *= half_height;
-		for (int k = 0; k < point_pos * 2; k += 1)
+		point_y = 0;
+		// calculate mean from the relevant points
+		for (int j = 0; j < samples_per_column; ++j)
+			point_y += buf[x*samples_per_column+j];
+		point_y /= samples_per_column;
+		// normalize it to fit the screen
+		point_y = std::abs(point_y);
+		point_y *= height / 32768.0;
+
+		for (int32_t j = 0; j < point_y; ++j)
 		{
-			x = left ? height + k : height - k;
-			if ( x > 0 && x < w.getHeight() && (i-(k < half_height + point_pos)) > 0 && (i-(k < half_height + point_pos)) < w.getWidth() )
-			{
-				w << toColor( k, height )
-				<< NC::XY(i-(k < half_height + point_pos), x)
-				<< Config.visualizer_chars[1]
-				<< NC::Color::End;
-			}
+			size_t y = flipped ? y_offset+j : y_offset+height-j-1;
+			w << NC::XY(x, y)
+			<< toColor(j, height)
+			<< Config.visualizer_chars[1]
+			<< NC::Color::End;
 		}
 	}
 }
