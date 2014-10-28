@@ -31,10 +31,12 @@
 #include <vorbisfile.h>
 #include <tag.h>
 #include <textidentificationframe.h>
+#include <commentsframe.h>
 #include <xiphcomment.h>
 
 #include "global.h"
 #include "settings.h"
+#include "utility/string.h"
 #include "utility/wide_string.h"
 
 namespace {//
@@ -151,9 +153,20 @@ void writeID3v2Tags(const MPD::MutableSong &s, TagLib::ID3v2::Tag *tag)
 		tag->removeFrames(type);
 		if (!list.isEmpty())
 		{
-			auto frame = new TagLib::ID3v2::TextIdentificationFrame(type, TagLib::String::UTF8);
-			frame->setText(list);
-			tag->addFrame(frame);
+			if (type == "COMM") // comment needs to be handled separately
+			{
+				auto frame = new TagLib::ID3v2::CommentsFrame(TagLib::String::UTF8);
+				// apparently there can't be multiple comments,
+				// so if there is more than one, join them.
+				frame->setText(join(list, TagLib::String(Config.tags_separator, TagLib::String::UTF8)));
+				tag->addFrame(frame);
+			}
+			else
+			{
+				auto frame = new TagLib::ID3v2::TextIdentificationFrame(type, TagLib::String::UTF8);
+				frame->setText(list);
+				tag->addFrame(frame);
+			}
 		}
 	};
 	writeID3v2("TIT2", tagList(s, &MPD::Song::getTitle));
