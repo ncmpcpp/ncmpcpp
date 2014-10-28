@@ -1,4 +1,9 @@
+ncmpcpp-0.6.1 (????-??-??)
+
+* Comment tag is now properly written to mp3 files.
+
 ncmpcpp-0.6 (2014-10-25)
+
 * Feature 'locate song' no more has a chance to crash the program.
 * Following lyrics of current song now works properly with consume mode active.
 * Deletion of empty playlists in playlist editor now works properly.

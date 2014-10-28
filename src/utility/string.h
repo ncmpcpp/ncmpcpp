@@ -31,6 +31,27 @@ template <size_t N> size_t const_strlen(const char (&)[N]) {
 	return N-1;
 }
 
+// it's present in boost for std::string, but we want more general version.
+template <typename CollectionT, typename StringT>
+StringT join(CollectionT &&collection, StringT &&separator)
+{
+	StringT result;
+	auto first = std::begin(collection), last = std::end(collection);
+	if (first != last)
+	{
+		while (true)
+		{
+			result += *first;
+			++first;
+			if (first != last)
+				result += separator;
+			else
+				break;
+		}
+	}
+	return result;
+}
+
 std::string getBasename(const std::string &path);
 std::string getParentDirectory(const std::string &path);
 std::string getSharedDirectory(const std::string &dir1, const std::string &dir2);
