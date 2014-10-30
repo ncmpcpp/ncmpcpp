@@ -226,6 +226,10 @@ int main(int argc, char **argv)
 			{
 				Statusbar::printf("Error: %1%", e.errorMessage());
 			}
+			catch (NC::PromptAborted &)
+			{
+				Statusbar::printf("Action aborted");
+			}
 
 			if (myScreen == myPlaylist)
 				myPlaylist->EnableHighlighting();

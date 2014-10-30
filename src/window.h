@@ -112,6 +112,20 @@
 /// wrappers over original curses library
 namespace NC {//
 
+/// Thrown if Ctrl-G is pressed during the call to Window::getString().
+/// @see Window::getString()
+struct PromptAborted : std::exception
+{
+	template <typename ArgT>
+	PromptAborted(ArgT &&prompt)
+	: m_prompt(std::forward<ArgT>(prompt)) { }
+
+	virtual const char *what() const noexcept OVERRIDE { return m_prompt.c_str(); }
+
+private:
+	std::string m_prompt;
+};
+
 /// Colors used by NCurses
 enum class Color { Default, Black, Red, Green, Yellow, Blue, Magenta, Cyan, White, End };
 

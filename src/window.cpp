@@ -40,6 +40,8 @@
 namespace {
 namespace rl {
 
+bool aborted;
+
 NC::Window *w;
 size_t start_x;
 size_t start_y;
@@ -380,12 +382,22 @@ void initScreen(GNUC_UNUSED const char *window_title, bool enable_colors)
 	noecho();
 	curs_set(0);
 
-	rl_initialize();
 	// disable autocompletion
 	rl_attempted_completion_function = [](const char *, int, int) -> char ** {
 		rl_attempted_completion_over = 1;
 		return nullptr;
 	};
+	auto abort_prompt = [](int, int) -> int {
+		rl::aborted = true;
+		rl_done = 1;
+		return 0;
+	};
+	// if ctrl-c or ctrl-g is pressed, abort the prompt
+	rl_bind_key(KEY_CTRL_C, abort_prompt);
+	rl_bind_key(KEY_CTRL_G, abort_prompt);
+	// do not change the state of the terminal
+	rl_prep_term_function = nullptr;
+	rl_deprep_term_function = nullptr;
 	// do not catch signals
 	rl_catch_signals = 0;
 	// overwrite readline callbacks
@@ -796,6 +808,7 @@ void Window::pushChar(int ch)
 
 std::string Window::getString(const std::string &base, size_t width, bool encrypted)
 {
+	rl::aborted = false;
 	rl::w = this;
 	getyx(m_window, rl::start_y, rl::start_x);
 	rl::width = width;
@@ -825,6 +838,9 @@ std::string Window::getString(const std::string &base, size_t width, bool encryp
 		result = input;
 		free(input);
 	}
+
+	if (rl::aborted)
+		throw PromptAborted(std::move(result));
 
 	return result;
 }
