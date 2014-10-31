@@ -29,11 +29,11 @@
 
 namespace Progressbar {//
 
-/// locks progressbar (usually used for seeking)
-void lock();
-
-/// unlocks progressbar (usually right after seeking is done)
-void unlock();
+struct ScopedLock
+{
+	ScopedLock() noexcept;
+	~ScopedLock() noexcept;
+};
 
 /// @return true if progressbar is unlocked
 bool isUnlocked();
@@ -43,13 +43,13 @@ void draw(unsigned elapsed, unsigned time);
 
 }
 
-namespace Statusbar{//
+namespace Statusbar {
 
-/// locks statusbar (usually for prompting the user)
-void lock();
-
-/// unlocks statusbar (usually after prompting the user)
-void unlock();
+struct ScopedLock
+{
+	ScopedLock() noexcept;
+	~ScopedLock() noexcept;
+};
 
 /// @return true if statusbar is unlocked
 bool isUnlocked();

@@ -28,30 +28,31 @@
 
 using Global::wFooter;
 
-namespace {//
+namespace {
 
-boost::posix_time::ptime statusbarLockTime;
-boost::posix_time::seconds statusbarLockDelay(-1);
+bool progressbar_block_update = false;
 
-bool statusbarBlockUpdate = false;
-bool progressbarBlockUpdate = false;
-bool statusbarAllowUnlock = true;
+boost::posix_time::ptime statusbar_lock_time;
+boost::posix_time::seconds statusbar_lock_delay(-1);
+
+bool statusbar_block_update = false;
+bool statusbar_allow_unlock = true;
 
 }
 
-void Progressbar::lock()
+Progressbar::ScopedLock::ScopedLock() noexcept
 {
-	progressbarBlockUpdate = true;
+	progressbar_block_update = true;
 }
 
-void Progressbar::unlock()
+Progressbar::ScopedLock::~ScopedLock() noexcept
 {
-	progressbarBlockUpdate = false;
+	progressbar_block_update = false;
 }
 
 bool Progressbar::isUnlocked()
 {
-	return !progressbarBlockUpdate;
+	return !progressbar_block_update;
 }
 
 void Progressbar::draw(unsigned int elapsed, unsigned int time)
@@ -85,24 +86,26 @@ void Progressbar::draw(unsigned int elapsed, unsigned int time)
 		*wFooter << NC::Format::NoBold;
 }
 
-void Statusbar::lock()
+Statusbar::ScopedLock::ScopedLock() noexcept
 {
+	// lock
 	if (Config.statusbar_visibility)
-		statusbarBlockUpdate = true;
+		statusbar_block_update = true;
 	else
-		progressbarBlockUpdate = true;
-	statusbarAllowUnlock = false;
+		progressbar_block_update = true;
+	statusbar_allow_unlock = false;
 }
 
-void Statusbar::unlock()
+Statusbar::ScopedLock::~ScopedLock() noexcept
 {
-	statusbarAllowUnlock = true;
-	if (statusbarLockDelay.is_negative())
+	// unlock
+	statusbar_allow_unlock = true;
+	if (statusbar_lock_delay.is_negative())
 	{
 		if (Config.statusbar_visibility)
-			statusbarBlockUpdate = false;
+			statusbar_block_update = false;
 		else
-			progressbarBlockUpdate = false;
+			progressbar_block_update = false;
 	}
 	if (Status::State::player() == MPD::psStop)
 	{
@@ -121,23 +124,23 @@ void Statusbar::unlock()
 
 bool Statusbar::isUnlocked()
 {
-	return !statusbarBlockUpdate;
+	return !statusbar_block_update;
 }
 
 void Statusbar::tryRedraw()
 {
 	using Global::Timer;
-	if (statusbarLockDelay > boost::posix_time::seconds(0)
-	&&  Timer - statusbarLockTime > statusbarLockDelay)
+	if (statusbar_lock_delay > boost::posix_time::seconds(0)
+	&&  Timer - statusbar_lock_time > statusbar_lock_delay)
 	{
-		statusbarLockDelay = boost::posix_time::seconds(-1);
+		statusbar_lock_delay = boost::posix_time::seconds(-1);
 		
 		if (Config.statusbar_visibility)
-			statusbarBlockUpdate = !statusbarAllowUnlock;
+			statusbar_block_update = !statusbar_allow_unlock;
 		else
-			progressbarBlockUpdate = !statusbarAllowUnlock;
+			progressbar_block_update = !statusbar_allow_unlock;
 		
-		if (!statusbarBlockUpdate && !progressbarBlockUpdate)
+		if (!statusbar_block_update && !progressbar_block_update)
 		{
 			switch (Config.design)
 			{
@@ -171,14 +174,14 @@ NC::Window &Statusbar::put()
 
 void Statusbar::print(int delay, const std::string &message)
 {
-	if (statusbarAllowUnlock)
+	if (statusbar_allow_unlock)
 	{
-		statusbarLockTime = Global::Timer;
-		statusbarLockDelay = boost::posix_time::seconds(delay);
+		statusbar_lock_time = Global::Timer;
+		statusbar_lock_delay = boost::posix_time::seconds(delay);
 		if (Config.statusbar_visibility)
-			statusbarBlockUpdate = true;
+			statusbar_block_update = true;
 		else
-			progressbarBlockUpdate = true;
+			progressbar_block_update = true;
 		wFooter->goToXY(0, Config.statusbar_visibility);
 		*wFooter << message << wclrtoeol;
 		wFooter->refresh();

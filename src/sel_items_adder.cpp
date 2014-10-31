@@ -223,12 +223,13 @@ void SelectedItemsAdder::addToCurrentPlaylist()
 
 void SelectedItemsAdder::addToNewPlaylist() const
 {
-	Statusbar::lock();
-	Statusbar::put() << "Save playlist as: ";
-	std::string playlist = Global::wFooter->getString();
-	Statusbar::unlock();
-	if (!playlist.empty())
-		addToExistingPlaylist(playlist);
+	std::string playlist;
+	{
+		Statusbar::ScopedLock lock;
+		Statusbar::put() << "Save playlist as: ";
+		playlist = Global::wFooter->getString();
+	}
+	addToExistingPlaylist(playlist);
 }
 
 void SelectedItemsAdder::addToExistingPlaylist(const std::string &playlist) const

@@ -356,16 +356,15 @@ void TagEditor::enterPressed()
 		
 		if (pos == 0) // change pattern
 		{
-			Statusbar::lock();
-			Statusbar::put() << "Pattern: ";
-			std::string new_pattern = wFooter->getString(Config.pattern);
-			Statusbar::unlock();
-			if (!new_pattern.empty())
+			std::string new_pattern;
 			{
-				Config.pattern = new_pattern;
-				FParser->at(0).value() = "Pattern: ";
-				FParser->at(0).value() += Config.pattern;
+				Statusbar::ScopedLock lock;
+				Statusbar::put() << "Pattern: ";
+				new_pattern = wFooter->getString(Config.pattern);
 			}
+			Config.pattern = new_pattern;
+			FParser->at(0).value() = "Pattern: ";
+			FParser->at(0).value() += Config.pattern;
 		}
 		else if (pos == 1 || pos == 4) // preview or proceed
 		{
@@ -493,19 +492,17 @@ void TagEditor::enterPressed()
 		MPD::MutableSong::SetFunction set = SongInfo::Tags[id].Set;
 		if (id > 0 && w == TagTypes)
 		{
-			Statusbar::lock();
+			Statusbar::ScopedLock lock;
 			Statusbar::put() << NC::Format::Bold << TagTypes->current().value() << NC::Format::NoBold << ": ";
 			std::string new_tag = wFooter->getString(Tags->current().value().getTags(get, Config.tags_separator));
-			Statusbar::unlock();
 			for (auto it = EditedSongs.begin(); it != EditedSongs.end(); ++it)
 				(*it)->setTags(set, new_tag, Config.tags_separator);
 		}
 		else if (w == Tags)
 		{
-			Statusbar::lock();
+			Statusbar::ScopedLock lock;
 			Statusbar::put() << NC::Format::Bold << TagTypes->current().value() << NC::Format::NoBold << ": ";
 			std::string new_tag = wFooter->getString(Tags->current().value().getTags(get, Config.tags_separator));
-			Statusbar::unlock();
 			if (new_tag != Tags->current().value().getTags(get, Config.tags_separator))
 				Tags->current().value().setTags(set, new_tag, Config.tags_separator);
 			Tags->scroll(NC::Scroll::Down);
@@ -522,15 +519,14 @@ void TagEditor::enterPressed()
 			}
 			else if (w == Tags)
 			{
+				Statusbar::ScopedLock lock;
 				MPD::MutableSong &s = Tags->current().value();
 				std::string old_name = s.getNewName().empty() ? s.getName() : s.getNewName();
 				size_t last_dot = old_name.rfind(".");
 				std::string extension = old_name.substr(last_dot);
 				old_name = old_name.substr(0, last_dot);
-				Statusbar::lock();
 				Statusbar::put() << NC::Format::Bold << "New filename: " << NC::Format::NoBold;
 				std::string new_name = wFooter->getString(old_name);
-				Statusbar::unlock();
 				if (!new_name.empty())
 					s.setNewName(new_name + extension);
 				Tags->scroll(NC::Scroll::Down);

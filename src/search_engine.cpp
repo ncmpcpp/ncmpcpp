@@ -152,11 +152,10 @@ void SearchEngine::enterPressed()
 	size_t option = w.choice();
 	if (option > ConstraintsNumber && option < SearchButton)
 		w.current().value().buffer().clear();
-	if (option < SearchButton)
-		Statusbar::lock();
 	
 	if (option < ConstraintsNumber)
 	{
+		Statusbar::ScopedLock lock;
 		std::string constraint = ConstraintsNames[option];
 		Statusbar::put() << NC::Format::Bold << constraint << NC::Format::NoBold << ": ";
 		itsConstraints[option] = Global::wFooter->getString(itsConstraints[option]);
@@ -210,9 +209,6 @@ void SearchEngine::enterPressed()
 	}
 	else
 		addSongToPlaylist(w.current().value().song(), true);
-	
-	if (option < SearchButton)
-		Statusbar::unlock();
 }
 
 void SearchEngine::spacePressed()
