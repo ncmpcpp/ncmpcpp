@@ -1968,14 +1968,12 @@ void ToggleReplayGainMode::run()
 	char rgm = 0;
 	{
 		Statusbar::ScopedLock lock;
-		Statusbar::put() << "Replay gain mode? [" << NC::Format::Bold << 'o' << NC::Format::NoBold << "ff/" << NC::Format::Bold << 't' << NC::Format::NoBold << "rack/" << NC::Format::Bold << 'a' << NC::Format::NoBold << "lbum]";
-		wFooter->refresh();
-		do
-		{
-			Status::trace();
-			rgm = wFooter->readKey();
-		}
-		while (rgm != 't' && rgm != 'a' && rgm != 'o');
+		Statusbar::put() << "Replay gain mode? "
+		<< "[" << NC::Format::Bold << 'o' << NC::Format::NoBold << "ff"
+		<< "/" << NC::Format::Bold << 't' << NC::Format::NoBold << "rack"
+		<< "/" << NC::Format::Bold << 'a' << NC::Format::NoBold << "lbum"
+		<< "] ";
+		rgm = Statusbar::Helpers::promptReturnOneOf({"t", "a", "o"})[0];
 	}
 	switch (rgm)
 	{
@@ -2039,18 +2037,15 @@ void ToggleBitrateVisibility::run()
 void AddRandomItems::run()
 {
 	using Global::wFooter;
-	// FIXME: generalize this type of prompt
 	char rnd_type = 0;
 	{
 		Statusbar::ScopedLock lock;
-		Statusbar::put() << "Add random? [" << NC::Format::Bold << 's' << NC::Format::NoBold << "ongs/" << NC::Format::Bold << 'a' << NC::Format::NoBold << "rtists/al" << NC::Format::Bold << 'b' << NC::Format::NoBold << "ums] ";
-		wFooter->refresh();
-		do
-		{
-			Status::trace();
-			rnd_type = wFooter->readKey();
-		}
-		while (rnd_type != 's' && rnd_type != 'a' && rnd_type != 'b');
+		Statusbar::put() << "Add random? "
+		<< "[" << NC::Format::Bold << 's' << NC::Format::NoBold << "ongs"
+		<< "/" << NC::Format::Bold << 'a' << NC::Format::NoBold << "rtists"
+		<< "/" << "al" << NC::Format::Bold << 'b' << NC::Format::NoBold << "ums"
+		<< "] ";
+		rnd_type = Statusbar::Helpers::promptReturnOneOf({"s", "a", "b"})[0];
 	}
 
 	mpd_tag_type tag_type = MPD_TAG_ARTIST;
@@ -2123,14 +2118,15 @@ void ToggleLibraryTagType::run()
 	char tag_type = 0;
 	{
 		Statusbar::ScopedLock lock;
-		Statusbar::put() << "Tag type? [" << NC::Format::Bold << 'a' << NC::Format::NoBold << "rtist/album" << NC::Format::Bold << 'A' << NC::Format::NoBold << "rtist/" << NC::Format::Bold << 'y' << NC::Format::NoBold << "ear/" << NC::Format::Bold << 'g' << NC::Format::NoBold << "enre/" << NC::Format::Bold << 'c' << NC::Format::NoBold << "omposer/" << NC::Format::Bold << 'p' << NC::Format::NoBold << "erformer] ";
-		wFooter->refresh();
-		do
-		{
-			Status::trace();
-			tag_type = wFooter->readKey();
-		}
-		while (tag_type != 'a' && tag_type != 'A' && tag_type != 'y' && tag_type != 'g' && tag_type != 'c' && tag_type != 'p');
+		Statusbar::put() << "Tag type? "
+		<< "[" << NC::Format::Bold << 'a' << NC::Format::NoBold << "rtist"
+		<< "/" << "album" << NC::Format::Bold << 'A' << NC::Format::NoBold << "rtist"
+		<< "/" << NC::Format::Bold << 'y' << NC::Format::NoBold << "ear"
+		<< "/" << NC::Format::Bold << 'g' << NC::Format::NoBold << "enre"
+		<< "/" << NC::Format::Bold << 'c' << NC::Format::NoBold << "omposer"
+		<< "/" << NC::Format::Bold << 'p' << NC::Format::NoBold << "erformer"
+		<< "] ";
+		tag_type = Statusbar::Helpers::promptReturnOneOf({"a", "A", "y", "g", "c", "p"})[0];
 	}
 	mpd_tag_type new_tagitem = charToTagType(tag_type);
 	if (new_tagitem != Config.media_lib_primary_tag)
