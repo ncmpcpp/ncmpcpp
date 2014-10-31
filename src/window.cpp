@@ -93,12 +93,34 @@ void display_string()
 		else
 			*w << ws;
 	};
+	auto narrow_to_wide = [](wchar_t *dest, const char *src, size_t n) {
+		size_t result = 0;
+		// convert the string and substitute invalid multibyte chars with dots.
+		for (size_t i = 0; i < n;)
+		{
+			int ret = mbtowc(&dest[result], &src[i], n-i);
+			if (ret > 0)
+			{
+				i += ret;
+				++result;
+			}
+			else if (ret == -1)
+			{
+				dest[result] = L'.';
+				++i;
+				++result;
+			}
+			else
+				throw std::runtime_error("mbtowc: unexpected return value");
+		}
+		return result;
+	};
 
 	// copy the part of the string that is before the cursor to pre_pos
 	char pt = rl_line_buffer[rl_point];
 	rl_line_buffer[rl_point] = 0;
 	wchar_t pre_pos[rl_point+1];
-	pre_pos[mbstowcs(pre_pos, rl_line_buffer, rl_point)] = 0;
+	pre_pos[narrow_to_wide(pre_pos, rl_line_buffer, rl_point)] = 0;
 	rl_line_buffer[rl_point] = pt;
 
 	int pos = wcswidth(pre_pos, rl_point);
@@ -118,7 +140,7 @@ void display_string()
 
 		// ...and then print the rest char-by-char until there is no more area
 		wchar_t post_pos[rl_end-rl_point+1];
-		post_pos[mbstowcs(post_pos, rl_line_buffer+rl_point, rl_end-rl_point)] = 0;
+		post_pos[narrow_to_wide(post_pos, rl_line_buffer+rl_point, rl_end-rl_point)] = 0;
 
 		size_t cpos = pos;
 		for (wchar_t *c = post_pos; *c != 0; ++c)
