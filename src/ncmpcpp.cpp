@@ -149,8 +149,6 @@ int main(int argc, char **argv)
 #	ifndef WIN32
 	signal(SIGPIPE, sighandler);
 	signal(SIGWINCH, sighandler);
-	// ignore Ctrl-C
-	sigignore(SIGINT);
 #	endif // !WIN32
 	
 	while (!Actions::ExitMainLoop)
