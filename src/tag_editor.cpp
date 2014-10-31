@@ -468,7 +468,7 @@ void TagEditor::enterPressed()
 	
 	if (w == TagTypes && id == 5)
 	{
-		bool yes = Actions::askYesNoQuestion("Number tracks?", Status::trace);
+		bool yes = Actions::askYesNoQuestion("Number tracks?");
 		if (yes)
 		{
 			auto it = EditedSongs.begin();
@@ -963,7 +963,7 @@ bool TagEditor::ifAnyModifiedAskForDiscarding()
 {
 	bool result = true;
 	if (isAnyModified(*Tags))
-		result = Actions::askYesNoQuestion("There are pending changes, are you sure?", Status::trace);
+		result = Actions::askYesNoQuestion("There are pending changes, are you sure?");
 	return result;
 }
 

@@ -252,22 +252,15 @@ void setWindowsDimensions()
 	FooterHeight = Config.statusbar_visibility ? 2 : 1;
 }
 
-bool askYesNoQuestion(const boost::format &fmt, void (*callback)())
+bool askYesNoQuestion(const boost::format &fmt)
 {
-	using Global::wFooter;
-	
 	Statusbar::ScopedLock lock;
-	Statusbar::put() << fmt.str() << " [" << NC::Format::Bold << 'y' << NC::Format::NoBold << '/' << NC::Format::Bold << 'n' << NC::Format::NoBold << "]";
-	wFooter->refresh();
-	int answer = 0;
-	do
-	{
-		if (callback)
-			callback();
-		answer = wFooter->readKey();
-	}
-	while (answer != 'y' && answer != 'n');
-	return answer == 'y';
+	Statusbar::put() << fmt.str()
+	<< " [" << NC::Format::Bold << 'y' << NC::Format::NoBold
+	<< '/' << NC::Format::Bold << 'n' << NC::Format::NoBold
+	<< "] ";
+	auto answer = Statusbar::Helpers::promptReturnOneOf({"y", "n"});
+	return answer == "y";
 }
 
 bool isMPDMusicDirSet()
@@ -685,7 +678,7 @@ void DeleteBrowserItems::run()
 		question = boost::format("Delete %1% \"%2%\"?")
 			% itemTypeToString(item.type) % wideShorten(iname, COLS-question.size()-10);
 	}
-	bool yes = askYesNoQuestion(question, Status::trace);
+	bool yes = askYesNoQuestion(question);
 	if (yes)
 	{
 		bool success = true;
@@ -734,7 +727,7 @@ void DeleteStoredPlaylist::run()
 	else
 		question = boost::format("Delete playlist \"%1%\"?")
 			% wideShorten(myPlaylistEditor->Playlists.current().value(), COLS-question.size()-10);
-	bool yes = askYesNoQuestion(question, Status::trace);
+	bool yes = askYesNoQuestion(question);
 	if (yes)
 	{
 		auto list = getSelectedOrCurrent(myPlaylistEditor->Playlists.begin(), myPlaylistEditor->Playlists.end(), myPlaylistEditor->Playlists.currentI());
@@ -806,8 +799,7 @@ void SavePlaylist::run()
 			if (e.code() == MPD_SERVER_ERROR_EXIST)
 			{
 				bool yes = askYesNoQuestion(
-					boost::format("Playlist \"%1%\" already exists, overwrite?") % playlist_name,
-					Status::trace
+					boost::format("Playlist \"%1%\" already exists, overwrite?") % playlist_name
 				);
 				if (yes)
 				{
@@ -1761,7 +1753,7 @@ void CropMainPlaylist::run()
 		return;
 	bool yes = true;
 	if (Config.ask_before_clearing_playlists)
-		yes = askYesNoQuestion("Do you really want to crop main playlist?", Status::trace);
+		yes = askYesNoQuestion("Do you really want to crop main playlist?");
 	if (yes)
 	{
 		Statusbar::print("Cropping playlist...");
@@ -1787,8 +1779,7 @@ void CropPlaylist::run()
 	bool yes = true;
 	if (Config.ask_before_clearing_playlists)
 		yes = askYesNoQuestion(
-			boost::format("Do you really want to crop playlist \"%1%\"?") % playlist,
-			Status::trace
+			boost::format("Do you really want to crop playlist \"%1%\"?") % playlist
 		);
 	if (yes)
 	{
@@ -1803,7 +1794,7 @@ void ClearMainPlaylist::run()
 {
 	bool yes = true;
 	if (Config.ask_before_clearing_playlists)
-		yes = askYesNoQuestion("Do you really want to clear main playlist?", Status::trace);
+		yes = askYesNoQuestion("Do you really want to clear main playlist?");
 	if (yes)
 	{
 		auto delete_fun = boost::bind(&MPD::Connection::Delete, _1, _2);
@@ -1828,8 +1819,7 @@ void ClearPlaylist::run()
 	bool yes = true;
 	if (Config.ask_before_clearing_playlists)
 		yes = askYesNoQuestion(
-			boost::format("Do you really want to clear playlist \"%1%\"?") % playlist,
-			Status::trace
+			boost::format("Do you really want to clear playlist \"%1%\"?") % playlist
 		);
 	if (yes)
 	{

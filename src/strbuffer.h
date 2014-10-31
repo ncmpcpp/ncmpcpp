@@ -91,7 +91,7 @@ public:
 	typedef std::set<Property> Properties;
 	
 	template <typename... Args>
-	BasicBuffer(Args... args)
+	BasicBuffer(Args&&... args)
 	{
 		construct(std::forward<Args>(args)...);
 	}
@@ -190,7 +190,7 @@ public:
 private:
 	void construct() { }
 	template <typename ArgT, typename... Args>
-	void construct(ArgT &&arg, Args... args)
+	void construct(ArgT &&arg, Args&&... args)
 	{
 		*this << std::forward<ArgT>(arg);
 		construct(std::forward<Args>(args)...);

@@ -69,6 +69,26 @@ void mpd();
 /// called each time user types another character while inside Window::getString
 bool mainHook(const char *);
 
+/// prompt and return one of the strings specified in the vector
+std::string promptReturnOneOf(std::vector<std::string> &&values);
+
+struct ImmediatelyReturnOneOf
+{
+	ImmediatelyReturnOneOf(std::vector<std::string> arg)
+	: m_values(std::move(arg))
+	{ }
+
+	bool operator()(const char *s) const;
+
+	template <typename StringT>
+	bool isOneOf(StringT &&s) const {
+		return std::find(m_values.begin(), m_values.end(), std::forward<StringT>(s)) != m_values.end();
+	}
+
+private:
+	std::vector<std::string> m_values;
+};
+
 /// called each time user changes current filter (while being inside Window::getString)
 struct ApplyFilterImmediately
 {

@@ -199,6 +199,27 @@ bool Statusbar::Helpers::mainHook(const char *)
 	return true;
 }
 
+std::string Statusbar::Helpers::promptReturnOneOf(std::vector<std::string> &&values)
+{
+	Statusbar::Helpers::ImmediatelyReturnOneOf prompt_hook(std::move(values));
+	NC::Window::ScopedPromptHook hook(*wFooter, prompt_hook);
+	int x = wFooter->getX(), y = wFooter->getY();
+	std::string result;
+	do
+	{
+		wFooter->goToXY(x, y);
+		result = wFooter->prompt();
+	}
+	while (!prompt_hook.isOneOf(result));
+	return result;
+}
+
+bool Statusbar::Helpers::ImmediatelyReturnOneOf::operator()(const char *s) const
+{
+	Status::trace();
+	return !isOneOf(s);
+}
+
 bool Statusbar::Helpers::ApplyFilterImmediately::operator()(const char *s)
 {
 	using Global::myScreen;
