@@ -58,11 +58,7 @@ namespace
 #	if !defined(WIN32)
 	void sighandler(int sig)
 	{
-		if (sig == SIGPIPE)
-		{
-			Statusbar::print("SIGPIPE (broken pipe signal) received");
-		}
-		else if (sig == SIGWINCH)
+		if (sig == SIGWINCH)
 		{
 			run_resize_screen = true;
 		}
@@ -147,8 +143,11 @@ int main(int argc, char **argv)
 		mousemask(ALL_MOUSE_EVENTS, 0);
 	
 #	ifndef WIN32
-	signal(SIGPIPE, sighandler);
 	signal(SIGWINCH, sighandler);
+	// we get it after connection with mpd is broken.
+	// just ignore it and wait for the connection to
+	// be reestablished.
+	sigignore(SIGPIPE);
 #	endif // !WIN32
 	
 	while (!Actions::ExitMainLoop)
