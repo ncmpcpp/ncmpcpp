@@ -158,7 +158,7 @@ void SearchEngine::enterPressed()
 		Statusbar::ScopedLock lock;
 		std::string constraint = ConstraintsNames[option];
 		Statusbar::put() << NC::Format::Bold << constraint << NC::Format::NoBold << ": ";
-		itsConstraints[option] = Global::wFooter->getString(itsConstraints[option]);
+		itsConstraints[option] = Global::wFooter->prompt(itsConstraints[option]);
 		w.current().value().buffer().clear();
 		constraint.resize(13, ' ');
 		w.current().value().buffer() << NC::Format::Bold << constraint << NC::Format::NoBold << ": ";

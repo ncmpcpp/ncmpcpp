@@ -167,9 +167,9 @@ void Status::handleServerError(MPD::ServerError &e)
 	Statusbar::printf("MPD: %1%", e.what());
 	if (e.code() == MPD_SERVER_ERROR_PERMISSION)
 	{
-		NC::Window::ScopedStringHelper helper(*wFooter, nullptr);
+		NC::Window::ScopedPromptHook helper(*wFooter, nullptr);
 		Statusbar::put() << "Password: ";
-		Mpd.SetPassword(wFooter->getString(0, true));
+		Mpd.SetPassword(wFooter->prompt("", -1, true));
 		try {
 			Mpd.SendPassword();
 			Statusbar::print("Password accepted");

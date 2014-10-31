@@ -109,10 +109,10 @@
 #endif
 
 /// NC namespace provides set of easy-to-use
-/// wrappers over original curses library
-namespace NC {//
+/// wrappers over original curses library.
+namespace NC {
 
-/// Thrown if Ctrl-G is pressed during the call to Window::getString().
+/// Thrown if Ctrl-C or Ctrl-G is pressed during the call to Window::getString()
 /// @see Window::getString()
 struct PromptAborted : std::exception
 {
@@ -154,11 +154,6 @@ enum class Scroll { Up, Down, PageUp, PageDown, Home, End };
 
 std::ostream &operator<<(std::ostream &os, Scroll s);
 
-/// Helper function that is invoked each time one will want
-/// to obtain string from Window::getString() function
-/// @see Window::getString()
-typedef std::function<bool(const char *)> GetStringHelper;
-
 /// Initializes curses screen and sets some additional attributes
 /// @param window_title title of the window (has an effect only if pdcurses lib is used)
 /// @param enable_colors enables colors
@@ -188,21 +183,26 @@ struct XY
 /// Main class of NCurses namespace, used as base for other specialized windows
 struct Window
 {
+	/// Helper function that is periodically invoked
+	// inside Window::getString() function
+	/// @see Window::getString()
+	typedef std::function<bool(const char *)> PromptHook;
+
 	/// Sets helper to a specific value for the current scope
-	struct ScopedStringHelper
+	struct ScopedPromptHook
 	{
 		template <typename HelperT>
-		ScopedStringHelper(Window &w, HelperT &&helper) noexcept
-		: m_w(w), m_helper(std::move(w.m_get_string_helper)) {
-			m_w.m_get_string_helper = std::forward<HelperT>(helper);
+		ScopedPromptHook(Window &w, HelperT &&helper) noexcept
+		: m_w(w), m_hook(std::move(w.m_prompt_hook)) {
+			m_w.m_prompt_hook = std::forward<HelperT>(helper);
 		}
-		~ScopedStringHelper() noexcept {
-			m_w.m_get_string_helper = std::move(m_helper);
+		~ScopedPromptHook() noexcept {
+			m_w.m_prompt_hook = std::move(m_hook);
 		}
 
 	private:
 		Window &m_w;
-		GetStringHelper m_helper;
+		PromptHook m_hook;
 	};
 
 	Window() : m_window(0), m_border_window(0) { }
@@ -253,14 +253,9 @@ struct Window
 	/// @return current window's timeout
 	int getTimeout() const;
 	
-	/// Reads the string from standard input. Note that this is much more complex
-	/// function than getstr() from curses library. It allows for moving through
-	/// letters with arrows, supports scrolling if string's length is bigger than
-	/// given area, supports history of previous strings and each time it receives
-	/// an input from the keyboard or the timeout is reached, it calls helper function
-	/// (if it's set) that takes as an argument currently edited string.
+	/// Reads the string from standard input using readline library.
 	/// @param base base string that has to be edited
-	/// @param length max length of string, unlimited by default
+	/// @param length max length of the string, unlimited by default
 	/// @param width width of area that entry field can take. if it's reached, string
 	/// will be scrolled. if value is 0, field will be from cursor position to the end
 	/// of current line wide.
@@ -268,17 +263,9 @@ struct Window
 	/// actual text.
 	/// @return edited string
 	///
-	/// @see setGetStringHelper()
+	/// @see setPromptHook()
 	/// @see SetTimeout()
-	/// @see CreateHistory()
-	std::string getString(const std::string &base, size_t width = 0, bool encrypted = false);
-	
-	/// Wrapper for above function that doesn't take base string (it will be empty).
-	/// Taken parameters are the same as for above.
-	std::string getString(size_t width = 0, bool encrypted = false)
-	{
-		return getString("", width, encrypted);
-	}
+	std::string prompt(const std::string &base = "", size_t width = -1, bool encrypted = false);
 	
 	/// Moves cursor to given coordinates
 	/// @param x given X position
@@ -299,19 +286,18 @@ struct Window
 	/// @return true if it transformed variables, false otherwise
 	bool hasCoords(int &x, int &y);
 	
-	/// Sets helper function used in getString()
-	/// @param helper pointer to function that matches getStringHelper prototype
+	/// Sets hook used in getString()
+	/// @param hook pointer to function that matches getStringHelper prototype
 	/// @see getString()
-	template <typename HelperT>
-	void setGetStringHelper(HelperT &&helper)
-	{
-		m_get_string_helper = std::forward<HelperT>(helper);
+	template <typename HookT>
+	void setPromptHook(HookT &&hook) {
+		m_prompt_hook = std::forward<HookT>(hook);
 	}
 
 	/// Run current GetString helper function (if defined).
 	/// @see getString()
 	/// @return true if helper was run, false otherwise
-	bool runGetStringHelper(const char *arg, bool *done) const;
+	bool runPromptHook(const char *arg, bool *done) const;
 
 	/// Sets window's base color
 	/// @param fg foregound base color
@@ -352,7 +338,7 @@ struct Window
 	virtual void clear();
 	
 	/// Adds given file descriptor to the list that will be polled in
-	/// ReadKey() along with stdin and callback that will be invoked
+	/// readKey() along with stdin and callback that will be invoked
 	/// when there is data waiting for reading in it
 	/// @param fd file descriptor
 	/// @param callback callback
@@ -466,7 +452,7 @@ protected:
 	
 	/// Refreshes window's border
 	///
-	void showBorder() const;
+	void refreshBorder() const;
 	
 	/// Changes dimensions of window, called from resize()
 	/// @param width new window's width
@@ -533,7 +519,7 @@ private:
 	/// pointer to helper function used by getString()
 	/// @see getString()
 	///
-	GetStringHelper m_get_string_helper;
+	PromptHook m_prompt_hook;
 	
 	/// window title
 	std::string m_title;

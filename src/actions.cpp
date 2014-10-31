@@ -779,7 +779,7 @@ void SavePlaylist::run()
 	{
 		Statusbar::ScopedLock lock;
 		Statusbar::put() << "Save playlist as: ";
-		playlist_name = wFooter->getString();
+		playlist_name = wFooter->prompt();
 	}
 	if (playlist_name.find("/") != std::string::npos)
 	{
@@ -842,11 +842,11 @@ void ExecuteCommand::run()
 	std::string cmd_name;
 	{
 		Statusbar::ScopedLock lock;
-		NC::Window::ScopedStringHelper helper(*wFooter,
+		NC::Window::ScopedPromptHook helper(*wFooter,
 			Statusbar::Helpers::TryExecuteImmediateCommand()
 		);
 		Statusbar::put() << NC::Format::Bold << ":" << NC::Format::NoBold;
-		cmd_name = wFooter->getString();
+		cmd_name = wFooter->prompt();
 	}
 
 	auto cmd = Bindings.findCommand(cmd_name);
@@ -968,7 +968,7 @@ void Add::run()
 	{
 		Statusbar::ScopedLock lock;
 		Statusbar::put() << (myScreen == myPlaylistEditor ? "Add to playlist: " : "Add: ");
-		path = wFooter->getString();
+		path = wFooter->prompt();
 	}
 
 	Statusbar::put() << "Adding...";
@@ -1275,7 +1275,7 @@ void SetCrossfade::run()
 	
 	Statusbar::ScopedLock lock;
 	Statusbar::put() << "Set crossfade to: ";
-	auto crossfade = fromString<unsigned>(wFooter->getString());
+	auto crossfade = fromString<unsigned>(wFooter->prompt());
 	lowerBoundCheck(crossfade, 0u);
 	Config.crossfade_time = crossfade;
 	Mpd.SetCrossfade(crossfade);
@@ -1289,7 +1289,7 @@ void SetVolume::run()
 	{
 		Statusbar::ScopedLock lock;
 		Statusbar::put() << "Set volume to: ";
-		volume = fromString<unsigned>(wFooter->getString());
+		volume = fromString<unsigned>(wFooter->prompt());
 		boundsCheck(volume, 0u, 100u);
 		Mpd.SetVolume(volume);
 	}
@@ -1335,7 +1335,7 @@ void EditLibraryTag::run()
 	{
 		Statusbar::ScopedLock lock;
 		Statusbar::put() << NC::Format::Bold << tagTypeToString(Config.media_lib_primary_tag) << NC::Format::NoBold << ": ";
-		new_tag = wFooter->getString(myLibrary->Tags.current().value().tag());
+		new_tag = wFooter->prompt(myLibrary->Tags.current().value().tag());
 	}
 	if (!new_tag.empty() && new_tag != myLibrary->Tags.current().value().tag())
 	{
@@ -1393,7 +1393,7 @@ void EditLibraryAlbum::run()
 	{
 		Statusbar::ScopedLock lock;
 		Statusbar::put() << NC::Format::Bold << "Album: " << NC::Format::NoBold;
-		new_album = wFooter->getString(myLibrary->Albums.current().value().entry().album());
+		new_album = wFooter->prompt(myLibrary->Albums.current().value().entry().album());
 	}
 	if (!new_album.empty() && new_album != myLibrary->Albums.current().value().entry().album())
 	{
@@ -1452,7 +1452,7 @@ void EditDirectoryName::run()
 		{
 			Statusbar::ScopedLock lock;
 			Statusbar::put() << NC::Format::Bold << "Directory: " << NC::Format::NoBold;
-			new_dir = wFooter->getString(old_dir);
+			new_dir = wFooter->prompt(old_dir);
 		}
 		if (!new_dir.empty() && new_dir != old_dir)
 		{
@@ -1487,7 +1487,7 @@ void EditDirectoryName::run()
 		{
 			Statusbar::ScopedLock lock;
 			Statusbar::put() << NC::Format::Bold << "Directory: " << NC::Format::NoBold;
-			new_dir = wFooter->getString(old_dir);
+			new_dir = wFooter->prompt(old_dir);
 		}
 		if (!new_dir.empty() && new_dir != old_dir)
 		{
@@ -1530,7 +1530,7 @@ void EditPlaylistName::run()
 	{
 		Statusbar::ScopedLock lock;
 		Statusbar::put() << NC::Format::Bold << "Playlist: " << NC::Format::NoBold;
-		new_name = wFooter->getString(old_name);
+		new_name = wFooter->prompt(old_name);
 	}
 	if (!new_name.empty() && new_name != old_name)
 	{
@@ -1604,7 +1604,7 @@ void ToggleScreenLock::run()
 		{
 			Statusbar::ScopedLock lock;
 			Statusbar::put() << "% of the locked screen's width to be reserved (20-80): ";
-			part = fromString<unsigned>(wFooter->getString(boost::lexical_cast<std::string>(part)));
+			part = fromString<unsigned>(wFooter->prompt(boost::lexical_cast<std::string>(part)));
 		}
 		boundsCheck(part, 20u, 80u);
 		Config.locked_screen_width_part = part/100.0;
@@ -1648,7 +1648,7 @@ void JumpToPositionInSong::run()
 	{
 		Statusbar::ScopedLock lock;
 		Statusbar::put() << "Position to go (in %/m:ss/seconds(s)): ";
-		spos = wFooter->getString();
+		spos = wFooter->prompt();
 	}
 	
 	boost::regex rx;
@@ -1883,11 +1883,11 @@ void ApplyFilter::run()
 	try
 	{
 		Statusbar::ScopedLock lock;
-		NC::Window::ScopedStringHelper helper(*wFooter,
+		NC::Window::ScopedPromptHook helper(*wFooter,
 			Statusbar::Helpers::ApplyFilterImmediately(f, filter)
 		);
 		Statusbar::put() << NC::Format::Bold << "Apply filter: " << NC::Format::NoBold;
-		wFooter->getString(filter);
+		wFooter->prompt(filter);
 	}
 	catch (NC::PromptAborted &)
 	{
@@ -1935,7 +1935,7 @@ void Find::run()
 	{
 		Statusbar::ScopedLock lock;
 		Statusbar::put() << "Find: ";
-		token = wFooter->getString();
+		token = wFooter->prompt();
 	}
 	
 	Statusbar::print("Searching...");
@@ -2110,7 +2110,7 @@ void AddRandomItems::run()
 	{
 		Statusbar::ScopedLock lock;
 		Statusbar::put() << "Number of random " << tag_type_str << "s: ";
-		number = fromString<unsigned>(wFooter->getString());
+		number = fromString<unsigned>(wFooter->prompt());
 	}
 	if (number && (rnd_type == 's' ? Mpd.AddRandomSongs(number) : Mpd.AddRandomTag(tag_type, number)))
 	{
@@ -2247,7 +2247,7 @@ void SetSelectedItemsPriority::run()
 	{
 		Statusbar::ScopedLock lock;
 		Statusbar::put() << "Set priority [0-255]: ";
-		prio = fromString<unsigned>(wFooter->getString());
+		prio = fromString<unsigned>(wFooter->prompt());
 		boundsCheck(prio, 0u, 255u);
 	}
 	myPlaylist->SetSelectedItemsPriority(prio);
@@ -2271,7 +2271,7 @@ void SetVisualizerSampleMultiplier::run()
 	{
 		Statusbar::ScopedLock lock;
 		Statusbar::put() << "Set visualizer sample multiplier: ";
-		multiplier = fromString<double>(wFooter->getString());
+		multiplier = fromString<double>(wFooter->prompt());
 		lowerBoundCheck(multiplier, 0.0);
 		Config.visualizer_sample_multiplier = multiplier;
 	}
@@ -2292,7 +2292,7 @@ void FilterPlaylistOnPriorities::run()
 	{
 		Statusbar::ScopedLock lock;
 		Statusbar::put() << "Show songs with priority higher than: ";
-		prio = fromString<unsigned>(wFooter->getString());
+		prio = fromString<unsigned>(wFooter->prompt());
 		boundsCheck(prio, 0u, 255u);
 		myPlaylist->main().filter(myPlaylist->main().begin(), myPlaylist->main().end(),
 			[prio](const NC::Menu<MPD::Song>::Item &s) {
@@ -2844,7 +2844,7 @@ void findItem(const Find direction)
 	{
 		Statusbar::ScopedLock lock;
 		Statusbar::put() << "Find " << (direction == Find::Forward ? "forward" : "backward") << ": ";
-		token = wFooter->getString();
+		token = wFooter->prompt();
 	}
 	
 	Statusbar::print("Searching...");

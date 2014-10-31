@@ -360,7 +360,7 @@ void TagEditor::enterPressed()
 			{
 				Statusbar::ScopedLock lock;
 				Statusbar::put() << "Pattern: ";
-				new_pattern = wFooter->getString(Config.pattern);
+				new_pattern = wFooter->prompt(Config.pattern);
 			}
 			Config.pattern = new_pattern;
 			FParser->at(0).value() = "Pattern: ";
@@ -494,7 +494,7 @@ void TagEditor::enterPressed()
 		{
 			Statusbar::ScopedLock lock;
 			Statusbar::put() << NC::Format::Bold << TagTypes->current().value() << NC::Format::NoBold << ": ";
-			std::string new_tag = wFooter->getString(Tags->current().value().getTags(get, Config.tags_separator));
+			std::string new_tag = wFooter->prompt(Tags->current().value().getTags(get, Config.tags_separator));
 			for (auto it = EditedSongs.begin(); it != EditedSongs.end(); ++it)
 				(*it)->setTags(set, new_tag, Config.tags_separator);
 		}
@@ -502,7 +502,7 @@ void TagEditor::enterPressed()
 		{
 			Statusbar::ScopedLock lock;
 			Statusbar::put() << NC::Format::Bold << TagTypes->current().value() << NC::Format::NoBold << ": ";
-			std::string new_tag = wFooter->getString(Tags->current().value().getTags(get, Config.tags_separator));
+			std::string new_tag = wFooter->prompt(Tags->current().value().getTags(get, Config.tags_separator));
 			if (new_tag != Tags->current().value().getTags(get, Config.tags_separator))
 				Tags->current().value().setTags(set, new_tag, Config.tags_separator);
 			Tags->scroll(NC::Scroll::Down);
@@ -526,7 +526,7 @@ void TagEditor::enterPressed()
 				std::string extension = old_name.substr(last_dot);
 				old_name = old_name.substr(0, last_dot);
 				Statusbar::put() << NC::Format::Bold << "New filename: " << NC::Format::NoBold;
-				std::string new_name = wFooter->getString(old_name);
+				std::string new_name = wFooter->prompt(old_name);
 				if (!new_name.empty())
 					s.setNewName(new_name + extension);
 				Tags->scroll(NC::Scroll::Down);

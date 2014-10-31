@@ -106,7 +106,7 @@ void TinyTagEditor::enterPressed()
 		Statusbar::ScopedLock lock;
 		size_t pos = option-8;
 		Statusbar::put() << NC::Format::Bold << SongInfo::Tags[pos].Name << ": " << NC::Format::NoBold;
-		itsEdited.setTags(SongInfo::Tags[pos].Set, Global::wFooter->getString(
+		itsEdited.setTags(SongInfo::Tags[pos].Set, Global::wFooter->prompt(
 			itsEdited.getTags(SongInfo::Tags[pos].Get, Config.tags_separator)), Config.tags_separator);
 		w.at(option).value().clear();
 		w.at(option).value() << NC::Format::Bold << SongInfo::Tags[pos].Name << ':' << NC::Format::NoBold << ' ';
@@ -120,7 +120,7 @@ void TinyTagEditor::enterPressed()
 		size_t dot = filename.rfind(".");
 		std::string extension = filename.substr(dot);
 		filename = filename.substr(0, dot);
-		std::string new_name = Global::wFooter->getString(filename);
+		std::string new_name = Global::wFooter->prompt(filename);
 		if (!new_name.empty())
 		{
 			itsEdited.setNewName(new_name + extension);

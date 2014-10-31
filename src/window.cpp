@@ -57,7 +57,7 @@ int read_key(FILE *)
 	do
 	{
 		x = w->getX();
-		if (w->runGetStringHelper(rl_line_buffer, &done))
+		if (w->runPromptHook(rl_line_buffer, &done))
 		{
 			if (done)
 			{
@@ -431,7 +431,7 @@ Window::Window(size_t startx,
 		m_base_color(color),
 		m_base_bg_color(Color::Default),
 		m_border(border),
-		m_get_string_helper(0),
+		m_prompt_hook(0),
 		m_title(title),
 		m_bold_counter(0),
 		m_underline_counter(0),
@@ -479,7 +479,7 @@ Window::Window(const Window &rhs)
 , m_base_color(rhs.m_base_color)
 , m_base_bg_color(rhs.m_base_bg_color)
 , m_border(rhs.m_border)
-, m_get_string_helper(rhs.m_get_string_helper)
+, m_prompt_hook(rhs.m_prompt_hook)
 , m_title(rhs.m_title)
 , m_color_stack(rhs.m_color_stack)
 , m_input_queue(rhs.m_input_queue)
@@ -504,7 +504,7 @@ Window::Window(Window &&rhs)
 , m_base_color(rhs.m_base_color)
 , m_base_bg_color(rhs.m_base_bg_color)
 , m_border(rhs.m_border)
-, m_get_string_helper(rhs.m_get_string_helper)
+, m_prompt_hook(rhs.m_prompt_hook)
 , m_title(std::move(rhs.m_title))
 , m_color_stack(std::move(rhs.m_color_stack))
 , m_input_queue(std::move(rhs.m_input_queue))
@@ -532,7 +532,7 @@ Window &Window::operator=(Window rhs)
 	std::swap(m_base_color, rhs.m_base_color);
 	std::swap(m_base_bg_color, rhs.m_base_bg_color);
 	std::swap(m_border, rhs.m_border);
-	std::swap(m_get_string_helper, rhs.m_get_string_helper);
+	std::swap(m_prompt_hook, rhs.m_prompt_hook);
 	std::swap(m_title, rhs.m_title);
 	std::swap(m_color_stack, rhs.m_color_stack);
 	std::swap(m_input_queue, rhs.m_input_queue);
@@ -665,13 +665,10 @@ void Window::resize(size_t new_width, size_t new_height)
 	recreate(m_width, m_height);
 }
 
-void Window::showBorder() const
+void Window::refreshBorder() const
 {
 	if (m_border != Border::None)
-	{
-		::refresh();
 		prefresh(m_border_window, 0, 0, getStarty(), getStartX(), m_start_y+m_height, m_start_x+m_width);
-	}
 	if (!m_title.empty())
 	{
 		if (m_border != Border::None)
@@ -689,7 +686,7 @@ void Window::showBorder() const
 
 void Window::display()
 {
-	showBorder();
+	refreshBorder();
 	refresh();
 }
 
@@ -806,20 +803,14 @@ void Window::pushChar(int ch)
 	m_input_queue.push(ch);
 }
 
-std::string Window::getString(const std::string &base, size_t width, bool encrypted)
+std::string Window::prompt(const std::string &base, size_t width, bool encrypted)
 {
 	rl::aborted = false;
 	rl::w = this;
 	getyx(m_window, rl::start_y, rl::start_x);
-	rl::width = width;
+	rl::width = std::min(m_width-rl::start_x-1, width-1);
 	rl::encrypted = encrypted;
 	rl::base = base.c_str();
-
-	width--;
-	if (width == size_t(-1))
-		rl::width = m_width-rl::start_x-1;
-	else
-		rl::width = width;
 
 	mmask_t oldmask;
 	std::string result;
@@ -878,11 +869,11 @@ bool Window::hasCoords(int &x, int &y)
 #	endif
 }
 
-bool Window::runGetStringHelper(const char *arg, bool *done) const
+bool Window::runPromptHook(const char *arg, bool *done) const
 {
-	if (m_get_string_helper)
+	if (m_prompt_hook)
 	{
-		bool continue_ = m_get_string_helper(arg);
+		bool continue_ = m_prompt_hook(arg);
 		if (done != nullptr)
 			*done = !continue_;
 		return true;

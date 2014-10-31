@@ -227,7 +227,7 @@ void SelectedItemsAdder::addToNewPlaylist() const
 	{
 		Statusbar::ScopedLock lock;
 		Statusbar::put() << "Save playlist as: ";
-		playlist = Global::wFooter->getString();
+		playlist = Global::wFooter->prompt();
 	}
 	addToExistingPlaylist(playlist);
 }
