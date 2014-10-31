@@ -67,7 +67,7 @@ namespace Helpers {//
 void mpd();
 
 /// called each time user types another character while inside Window::getString
-bool getString(const char *);
+bool mainHook(const char *);
 
 /// called each time user changes current filter (while being inside Window::getString)
 struct ApplyFilterImmediately

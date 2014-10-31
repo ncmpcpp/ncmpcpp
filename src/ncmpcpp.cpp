@@ -123,7 +123,7 @@ int main(int argc, char **argv)
 		wHeader->display();
 	
 	wFooter = new NC::Window(0, Actions::FooterStartY, COLS, Actions::FooterHeight, "", Config.statusbar_color, NC::Border::None);
-	wFooter->setPromptHook(Statusbar::Helpers::getString);
+	wFooter->setPromptHook(Statusbar::Helpers::mainHook);
 	
 	// initialize global timer
 	Timer = boost::posix_time::microsec_clock::local_time();

@@ -193,7 +193,7 @@ void Statusbar::Helpers::mpd()
 	Status::update(Mpd.noidle());
 }
 
-bool Statusbar::Helpers::getString(const char *)
+bool Statusbar::Helpers::mainHook(const char *)
 {
 	Status::trace();
 	return true;
