@@ -468,21 +468,16 @@ void TagEditor::enterPressed()
 	
 	if (w == TagTypes && id == 5)
 	{
-		bool yes = Actions::askYesNoQuestion("Number tracks?");
-		if (yes)
+		Actions::confirmAction("Number tracks?");
+		auto it = EditedSongs.begin();
+		for (unsigned i = 1; i <= EditedSongs.size(); ++i, ++it)
 		{
-			auto it = EditedSongs.begin();
-			for (unsigned i = 1; i <= EditedSongs.size(); ++i, ++it)
-			{
-				if (Config.tag_editor_extended_numeration)
-					(*it)->setTrack(boost::lexical_cast<std::string>(i) + "/" + boost::lexical_cast<std::string>(EditedSongs.size()));
-				else
-					(*it)->setTrack(boost::lexical_cast<std::string>(i));
-			}
-			Statusbar::print("Tracks numbered");
+			if (Config.tag_editor_extended_numeration)
+				(*it)->setTrack(boost::lexical_cast<std::string>(i) + "/" + boost::lexical_cast<std::string>(EditedSongs.size()));
+			else
+				(*it)->setTrack(boost::lexical_cast<std::string>(i));
 		}
-		else
-			Statusbar::print("Aborted");
+		Statusbar::print("Tracks numbered");
 		return;
 	}
 	
@@ -879,8 +874,9 @@ bool TagEditor::previousColumnAvailable()
 	}
 	else if (w == TagTypes)
 	{
-		if (!Dirs->reallyEmpty())
-			result = ifAnyModifiedAskForDiscarding();
+		if (!Dirs->reallyEmpty() && isAnyModified(*Tags))
+			Actions::confirmAction("There are pending changes, are you sure?");
+		result = true;
 	}
 	else if (w == FParserHelper)
 		result = true;
@@ -958,14 +954,6 @@ void TagEditor::nextColumn()
 }
 
 /***********************************************************************/
-
-bool TagEditor::ifAnyModifiedAskForDiscarding()
-{
-	bool result = true;
-	if (isAnyModified(*Tags))
-		result = Actions::askYesNoQuestion("There are pending changes, are you sure?");
-	return result;
-}
 
 void TagEditor::LocateSong(const MPD::Song &s)
 {

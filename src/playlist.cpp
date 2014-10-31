@@ -72,7 +72,6 @@ void Playlist::switchTo()
 {
 	SwitchTo::execute(this);
 	m_scroll_begin = 0;
-	EnableHighlighting();
 	drawHeader();
 }
 

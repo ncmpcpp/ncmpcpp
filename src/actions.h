@@ -67,10 +67,10 @@ void setResizeFlags();
 void resizeScreen(bool reload_main_window);
 void setWindowsDimensions();
 
-bool askYesNoQuestion(const boost::format &question);
-inline bool askYesNoQuestion(const std::string &question)
+void confirmAction(const boost::format &description);
+inline void confirmAction(const std::string &description)
 {
-	return askYesNoQuestion(boost::format(question));
+	confirmAction(boost::format(description));
 }
 
 bool isMPDMusicDirSet();

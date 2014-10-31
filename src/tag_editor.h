@@ -77,7 +77,6 @@ struct TagEditor: Screen<NC::Window *>, Filterable, HasColumns, HasSongs, Search
 	virtual void nextColumn() OVERRIDE;
 	
 	// private members
-	bool ifAnyModifiedAskForDiscarding();
 	void LocateSong(const MPD::Song &s);
 	const std::string &CurrentDir() { return itsBrowsedDir; }
 	

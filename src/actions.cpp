@@ -252,15 +252,16 @@ void setWindowsDimensions()
 	FooterHeight = Config.statusbar_visibility ? 2 : 1;
 }
 
-bool askYesNoQuestion(const boost::format &fmt)
+void confirmAction(const boost::format &description)
 {
 	Statusbar::ScopedLock lock;
-	Statusbar::put() << fmt.str()
+	Statusbar::put() << description.str()
 	<< " [" << NC::Format::Bold << 'y' << NC::Format::NoBold
 	<< '/' << NC::Format::Bold << 'n' << NC::Format::NoBold
 	<< "] ";
 	auto answer = Statusbar::Helpers::promptReturnOneOf({"y", "n"});
-	return answer == "y";
+	if (answer == "n")
+		throw NC::PromptAborted(std::move(answer));
 }
 
 bool isMPDMusicDirSet()
@@ -678,38 +679,37 @@ void DeleteBrowserItems::run()
 		question = boost::format("Delete %1% \"%2%\"?")
 			% itemTypeToString(item.type) % wideShorten(iname, COLS-question.size()-10);
 	}
-	bool yes = askYesNoQuestion(question);
-	if (yes)
+	confirmAction(question);
+	bool success = true;
+	auto list = getSelectedOrCurrent(
+		myBrowser->main().begin(),
+		myBrowser->main().end(),
+		myBrowser->main().currentI()
+	);
+	for (const auto &item : list)
 	{
-		bool success = true;
-		auto list = getSelectedOrCurrent(myBrowser->main().begin(), myBrowser->main().end(), myBrowser->main().currentI());
-		for (auto it = list.begin(); it != list.end(); ++it)
+		const MPD::Item &i = item->value();
+		std::string iname = i.type == MPD::itSong ? i.song->getName() : i.name;
+		std::string errmsg;
+		if (myBrowser->deleteItem(i, errmsg))
 		{
-			const MPD::Item &i = (*it)->value();
-			std::string iname = i.type == MPD::itSong ? i.song->getName() : i.name;
-			std::string errmsg;
-			if (myBrowser->deleteItem(i, errmsg))
-			{
-				const char msg[] = "\"%1%\" deleted";
-				Statusbar::printf(msg, wideShorten(iname, COLS-const_strlen(msg)));
-			}
-			else
-			{
-				Statusbar::print(errmsg);
-				success = false;
-				break;
-			}
+			const char msg[] = "\"%1%\" deleted";
+			Statusbar::printf(msg, wideShorten(iname, COLS-const_strlen(msg)));
 		}
-		if (success)
+		else
 		{
-			if (myBrowser->isLocal())
-				myBrowser->GetDirectory(myBrowser->CurrentDir());
-			else
-				Mpd.UpdateDirectory(myBrowser->CurrentDir());
+			Statusbar::print(errmsg);
+			success = false;
+			break;
 		}
 	}
-	else
-		Statusbar::print("Aborted");
+	if (success)
+	{
+		if (myBrowser->isLocal())
+			myBrowser->GetDirectory(myBrowser->CurrentDir());
+		else
+			Mpd.UpdateDirectory(myBrowser->CurrentDir());
+	}
 }
 
 bool DeleteStoredPlaylist::canBeRun() const
@@ -727,20 +727,19 @@ void DeleteStoredPlaylist::run()
 	else
 		question = boost::format("Delete playlist \"%1%\"?")
 			% wideShorten(myPlaylistEditor->Playlists.current().value(), COLS-question.size()-10);
-	bool yes = askYesNoQuestion(question);
-	if (yes)
-	{
-		auto list = getSelectedOrCurrent(myPlaylistEditor->Playlists.begin(), myPlaylistEditor->Playlists.end(), myPlaylistEditor->Playlists.currentI());
-		for (auto it = list.begin(); it != list.end(); ++it)
-			Mpd.DeletePlaylist((*it)->value());
-		Statusbar::printf("%1% deleted", list.size() == 1 ? "Playlist" : "Playlists");
-		// force playlists update. this happens automatically, but only after call
-		// to Key::read, therefore when we call PlaylistEditor::Update, it won't
-		// yet see it, so let's point that it needs to update it.
-		myPlaylistEditor->requestPlaylistsUpdate();
-	}
-	else
-		Statusbar::print("Aborted");
+	confirmAction(question);
+	auto list = getSelectedOrCurrent(
+		myPlaylistEditor->Playlists.begin(),
+		myPlaylistEditor->Playlists.end(),
+		myPlaylistEditor->Playlists.currentI()
+	);
+	for (const auto &item : list)
+		Mpd.DeletePlaylist(item->value());
+	Statusbar::printf("%1% deleted", list.size() == 1 ? "Playlist" : "Playlists");
+	// force playlists update. this happens automatically, but only after call
+	// to Key::read, therefore when we call PlaylistEditor::Update, it won't
+	// yet see it, so let's point that it needs to update it.
+	myPlaylistEditor->requestPlaylistsUpdate();
 }
 
 void ReplaySong::run()
@@ -774,16 +773,11 @@ void SavePlaylist::run()
 		Statusbar::put() << "Save playlist as: ";
 		playlist_name = wFooter->prompt();
 	}
-	if (playlist_name.find("/") != std::string::npos)
-	{
-		Statusbar::print("Playlist name must not contain slashes");
-		return;
-	}
 	if (myPlaylist->main().isFiltered())
 	{
 		Mpd.StartCommandsList();
-		for (size_t i = 0; i < myPlaylist->main().size(); ++i)
-			Mpd.AddToPlaylist(playlist_name, myPlaylist->main()[i].value());
+		for (const auto &item : myPlaylist->main())
+			Mpd.AddToPlaylist(playlist_name, item.value());
 		Mpd.CommitCommandsList();
 		Statusbar::printf("Filtered items added to playlist \"%1%\"", playlist_name);
 	}
@@ -798,19 +792,12 @@ void SavePlaylist::run()
 		{
 			if (e.code() == MPD_SERVER_ERROR_EXIST)
 			{
-				bool yes = askYesNoQuestion(
+				confirmAction(
 					boost::format("Playlist \"%1%\" already exists, overwrite?") % playlist_name
 				);
-				if (yes)
-				{
-					Mpd.DeletePlaylist(playlist_name);
-					Mpd.SavePlaylist(playlist_name);
-					Statusbar::print("Playlist overwritten");
-				}
-				else
-					Statusbar::print("Aborted");
-				if (myScreen == myPlaylist)
-					myPlaylist->EnableHighlighting();
+				Mpd.DeletePlaylist(playlist_name);
+				Mpd.SavePlaylist(playlist_name);
+				Statusbar::print("Playlist overwritten");
 			}
 			else
 				throw e;
@@ -1751,16 +1738,12 @@ void CropMainPlaylist::run()
 	// cropping doesn't make sense in this case
 	if (w.size() <= 1)
 		return;
-	bool yes = true;
 	if (Config.ask_before_clearing_playlists)
-		yes = askYesNoQuestion("Do you really want to crop main playlist?");
-	if (yes)
-	{
-		Statusbar::print("Cropping playlist...");
-		selectCurrentIfNoneSelected(w);
-		cropPlaylist(w, boost::bind(&MPD::Connection::Delete, _1, _2));
-		Statusbar::print("Playlist cropped");
-	}
+		confirmAction("Do you really want to crop main playlist?");
+	Statusbar::print("Cropping playlist...");
+	selectCurrentIfNoneSelected(w);
+	cropPlaylist(w, boost::bind(&MPD::Connection::Delete, _1, _2));
+	Statusbar::print("Playlist cropped");
 }
 
 bool CropPlaylist::canBeRun() const
@@ -1776,34 +1759,24 @@ void CropPlaylist::run()
 		return;
 	assert(!myPlaylistEditor->Playlists.empty());
 	std::string playlist = myPlaylistEditor->Playlists.current().value();
-	bool yes = true;
 	if (Config.ask_before_clearing_playlists)
-		yes = askYesNoQuestion(
-			boost::format("Do you really want to crop playlist \"%1%\"?") % playlist
-		);
-	if (yes)
-	{
-		selectCurrentIfNoneSelected(w);
-		Statusbar::printf("Cropping playlist \"%1%\"...", playlist);
-		cropPlaylist(w, boost::bind(&MPD::Connection::PlaylistDelete, _1, playlist, _2));
-		Statusbar::printf("Playlist \"%1%\" cropped", playlist);
-	}
+		confirmAction(boost::format("Do you really want to crop playlist \"%1%\"?") % playlist);
+	selectCurrentIfNoneSelected(w);
+	Statusbar::printf("Cropping playlist \"%1%\"...", playlist);
+	cropPlaylist(w, boost::bind(&MPD::Connection::PlaylistDelete, _1, playlist, _2));
+	Statusbar::printf("Playlist \"%1%\" cropped", playlist);
 }
 
 void ClearMainPlaylist::run()
 {
-	bool yes = true;
 	if (Config.ask_before_clearing_playlists)
-		yes = askYesNoQuestion("Do you really want to clear main playlist?");
-	if (yes)
-	{
-		auto delete_fun = boost::bind(&MPD::Connection::Delete, _1, _2);
-		auto clear_fun = boost::bind(&MPD::Connection::ClearMainPlaylist, _1);
-		Statusbar::printf("Deleting items...");
-		clearPlaylist(myPlaylist->main(), delete_fun, clear_fun);
-		Statusbar::printf("Items deleted");
-		myPlaylist->main().reset();
-	}
+		confirmAction("Do you really want to clear main playlist?");
+	auto delete_fun = boost::bind(&MPD::Connection::Delete, _1, _2);
+	auto clear_fun = boost::bind(&MPD::Connection::ClearMainPlaylist, _1);
+	Statusbar::printf("Deleting items...");
+	clearPlaylist(myPlaylist->main(), delete_fun, clear_fun);
+	Statusbar::printf("Items deleted");
+	myPlaylist->main().reset();
 }
 
 bool ClearPlaylist::canBeRun() const
@@ -1816,19 +1789,13 @@ void ClearPlaylist::run()
 	if (myPlaylistEditor->Playlists.empty())
 		return;
 	std::string playlist = myPlaylistEditor->Playlists.current().value();
-	bool yes = true;
 	if (Config.ask_before_clearing_playlists)
-		yes = askYesNoQuestion(
-			boost::format("Do you really want to clear playlist \"%1%\"?") % playlist
-		);
-	if (yes)
-	{
-		auto delete_fun = boost::bind(&MPD::Connection::PlaylistDelete, _1, playlist, _2);
-		auto clear_fun = boost::bind(&MPD::Connection::ClearPlaylist, _1, playlist);
-		Statusbar::printf("Deleting items from \"%1%\"...", playlist);
-		clearPlaylist(myPlaylistEditor->Content, delete_fun, clear_fun);
-		Statusbar::printf("Items deleted from \"%1%\"", playlist);
-	}
+		confirmAction(boost::format("Do you really want to clear playlist \"%1%\"?") % playlist);
+	auto delete_fun = boost::bind(&MPD::Connection::PlaylistDelete, _1, playlist, _2);
+	auto clear_fun = boost::bind(&MPD::Connection::ClearPlaylist, _1, playlist);
+	Statusbar::printf("Deleting items from \"%1%\"...", playlist);
+	clearPlaylist(myPlaylistEditor->Content, delete_fun, clear_fun);
+	Statusbar::printf("Items deleted from \"%1%\"", playlist);
 }
 
 bool SortPlaylist::canBeRun() const
