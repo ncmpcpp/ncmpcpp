@@ -167,7 +167,7 @@ void Status::handleServerError(MPD::ServerError &e)
 	Statusbar::printf("MPD: %1%", e.what());
 	if (e.code() == MPD_SERVER_ERROR_PERMISSION)
 	{
-		wFooter->setGetStringHelper(nullptr);
+		NC::Window::ScopedStringHelper helper(*wFooter, nullptr);
 		Statusbar::put() << "Password: ";
 		Mpd.SetPassword(wFooter->getString(0, true));
 		try {
@@ -176,7 +176,6 @@ void Status::handleServerError(MPD::ServerError &e)
 		} catch (MPD::ServerError &e_prim) {
 			handleServerError(e_prim);
 		}
-		wFooter->setGetStringHelper(Statusbar::Helpers::getString);
 	}
 	else if (e.code() == MPD_SERVER_ERROR_NO_EXIST && myScreen == myBrowser)
 	{

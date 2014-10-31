@@ -842,10 +842,11 @@ void ExecuteCommand::run()
 	std::string cmd_name;
 	{
 		Statusbar::ScopedLock lock;
+		NC::Window::ScopedStringHelper helper(*wFooter,
+			Statusbar::Helpers::TryExecuteImmediateCommand()
+		);
 		Statusbar::put() << NC::Format::Bold << ":" << NC::Format::NoBold;
-		wFooter->setGetStringHelper(Statusbar::Helpers::TryExecuteImmediateCommand());
 		cmd_name = wFooter->getString();
-		wFooter->setGetStringHelper(Statusbar::Helpers::getString);
 	}
 
 	auto cmd = Bindings.findCommand(cmd_name);
@@ -1882,10 +1883,11 @@ void ApplyFilter::run()
 	try
 	{
 		Statusbar::ScopedLock lock;
+		NC::Window::ScopedStringHelper helper(*wFooter,
+			Statusbar::Helpers::ApplyFilterImmediately(f, filter)
+		);
 		Statusbar::put() << NC::Format::Bold << "Apply filter: " << NC::Format::NoBold;
-		wFooter->setGetStringHelper(Statusbar::Helpers::ApplyFilterImmediately(f, filter));
 		wFooter->getString(filter);
-		wFooter->setGetStringHelper(Statusbar::Helpers::getString);
 	}
 	catch (NC::PromptAborted &)
 	{

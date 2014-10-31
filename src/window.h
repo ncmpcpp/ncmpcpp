@@ -188,6 +188,23 @@ struct XY
 /// Main class of NCurses namespace, used as base for other specialized windows
 struct Window
 {
+	/// Sets helper to a specific value for the current scope
+	struct ScopedStringHelper
+	{
+		template <typename HelperT>
+		ScopedStringHelper(Window &w, HelperT &&helper) noexcept
+		: m_w(w), m_helper(std::move(w.m_get_string_helper)) {
+			m_w.m_get_string_helper = std::forward<HelperT>(helper);
+		}
+		~ScopedStringHelper() noexcept {
+			m_w.m_get_string_helper = std::move(m_helper);
+		}
+
+	private:
+		Window &m_w;
+		GetStringHelper m_helper;
+	};
+
 	Window() : m_window(0), m_border_window(0) { }
 	
 	/// Constructs an empty window with given parameters
@@ -254,11 +271,11 @@ struct Window
 	/// @see setGetStringHelper()
 	/// @see SetTimeout()
 	/// @see CreateHistory()
-	std::string getString(const std::string &base, size_t width = 0, bool encrypted = 0);
+	std::string getString(const std::string &base, size_t width = 0, bool encrypted = false);
 	
 	/// Wrapper for above function that doesn't take base string (it will be empty).
 	/// Taken parameters are the same as for above.
-	std::string getString(size_t width = 0, bool encrypted = 0)
+	std::string getString(size_t width = 0, bool encrypted = false)
 	{
 		return getString("", width, encrypted);
 	}
@@ -285,7 +302,11 @@ struct Window
 	/// Sets helper function used in getString()
 	/// @param helper pointer to function that matches getStringHelper prototype
 	/// @see getString()
-	void setGetStringHelper(GetStringHelper helper) { m_get_string_helper = helper; }
+	template <typename HelperT>
+	void setGetStringHelper(HelperT &&helper)
+	{
+		m_get_string_helper = std::forward<HelperT>(helper);
+	}
 
 	/// Run current GetString helper function (if defined).
 	/// @see getString()
