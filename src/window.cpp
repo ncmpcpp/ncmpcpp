@@ -94,6 +94,7 @@ void display_string()
 			*w << ws;
 	};
 
+	// copy the part of the string that is before the cursor to pre_pos
 	char pt = rl_line_buffer[rl_point];
 	rl_line_buffer[rl_point] = 0;
 	wchar_t pre_pos[rl_point+1];
@@ -104,12 +105,18 @@ void display_string()
 	if (pos < 0)
 		pos = rl_point;
 
+	// clear the area for the string
 	mvwhline(w->raw(), start_y, start_x, ' ', width+1);
+
 	w->goToXY(start_x, start_y);
 	if (size_t(pos) <= width)
 	{
+		// if the current position in the string is not bigger than allowed
+		// width, print the part of the string before cursor position...
+
 		print_string(pre_pos, pos);
 
+		// ...and then print the rest char-by-char until there is no more area
 		wchar_t post_pos[rl_end-rl_point+1];
 		post_pos[mbstowcs(post_pos, rl_line_buffer+rl_point, rl_end-rl_point)] = 0;
 
@@ -133,6 +140,12 @@ void display_string()
 	}
 	else
 	{
+		// if the current position in the string is bigger than allowed
+		// width, we always keep the cursor at the end of the line (it
+		// would be nice to have more flexible scrolling, but for now
+		// let's stick to that) by cutting the beginning of the part
+		// of the string before the cursor until it fits the area.
+
 		wchar_t *mod_pre_pos = pre_pos;
 		while (*mod_pre_pos != 0)
 		{
