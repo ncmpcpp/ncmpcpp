@@ -306,30 +306,30 @@ bool Configuration::read(const std::string &config_path)
 		new_header_second_line, "{{$4$b%a$/b$9}{ - $7%b$9}{ ($4%y$9)}}|{%D}", adjust_and_validate_format
 	));
 	p.add("now_playing_prefix", buffer(
-		now_playing_prefix, NC::Buffer(NC::Format::Bold), [this](NC::Buffer buf) {
+		now_playing_prefix, NC::Buffer::init(NC::Format::Bold), [this](NC::Buffer buf) {
 			now_playing_prefix_length = wideLength(ToWString(buf.str()));
 			return buf;
 	}));
 	p.add("now_playing_suffix", buffer(
-		now_playing_suffix, NC::Buffer(NC::Format::NoBold), [this](NC::Buffer buf) {
+		now_playing_suffix, NC::Buffer::init(NC::Format::NoBold), [this](NC::Buffer buf) {
 			now_playing_suffix_length = wideLength(ToWString(buf.str()));
 			return buf;
 	}));
 	p.add("browser_playlist_prefix", buffer(
-		browser_playlist_prefix, NC::Buffer(NC::Color::Red, "playlist", NC::Color::End, ' '), id_()
+		browser_playlist_prefix, NC::Buffer::init(NC::Color::Red, "playlist", NC::Color::End, ' '), id_()
 	));
 	p.add("selected_item_prefix", buffer(
-		selected_item_prefix, NC::Buffer(NC::Color::Magenta), [this](NC::Buffer buf) {
+		selected_item_prefix, NC::Buffer::init(NC::Color::Magenta), [this](NC::Buffer buf) {
 			selected_item_prefix_length = wideLength(ToWString(buf.str()));
 			return buf;
 	}));
 	p.add("selected_item_suffix", buffer(
-		selected_item_suffix, NC::Buffer(NC::Color::End), [this](NC::Buffer buf) {
+		selected_item_suffix, NC::Buffer::init(NC::Color::End), [this](NC::Buffer buf) {
 			selected_item_suffix_length = wideLength(ToWString(buf.str()));
 			return buf;
 	}));
 	p.add("modified_item_prefix", buffer(
-		modified_item_prefix, NC::Buffer(NC::Color::Green, "> ", NC::Color::End), id_()
+		modified_item_prefix, NC::Buffer::init(NC::Color::Green, "> ", NC::Color::End), id_()
 	));
 	p.add("song_window_title_format", assign_default<std::string>(
 		song_window_title_format, "{%a - }{%t}|{%f}", adjust_and_validate_format

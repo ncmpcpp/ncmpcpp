@@ -90,12 +90,6 @@ public:
 	typedef std::basic_string<CharT> StringType;
 	typedef std::set<Property> Properties;
 	
-	template <typename... Args>
-	BasicBuffer(Args&&... args)
-	{
-		construct(std::forward<Args>(args)...);
-	}
-
 	const StringType &str() const { return m_string; }
 	const Properties &properties() const { return m_properties; }
 	
@@ -187,6 +181,16 @@ public:
 		return *this;
 	}
 	
+	// static variadic initializer. used instead of a proper constructor because
+	// it's too polymorphic and would end up invoked as a copy/move constructor.
+	template <typename... Args>
+	static BasicBuffer init(Args&&... args)
+	{
+		BasicBuffer result;
+		result.construct(std::forward<Args>(args)...);
+		return result;
+	}
+
 private:
 	void construct() { }
 	template <typename ArgT, typename... Args>
