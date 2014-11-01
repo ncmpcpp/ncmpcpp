@@ -159,29 +159,23 @@ struct Output
 
 	unsigned id() const
 	{
-		checkNonEmpty();
+		assert(m_output.get() != nullptr);
 		return mpd_output_get_id(m_output.get());
 	}
 	const char *name() const
 	{
-		checkNonEmpty();
+		assert(m_output.get() != nullptr);
 		return mpd_output_get_name(m_output.get());
 	}
 	bool enabled() const
 	{
-		checkNonEmpty();
+		assert(m_output.get() != nullptr);
 		return mpd_output_get_enabled(m_output.get());
 	}
 
 	bool empty() const { return m_output.get() == nullptr; }
 
 private:
-	void checkNonEmpty() const
-	{
-		if (empty())
-			throw std::runtime_error("No associated mpd_output object");
-	}
-
 	std::shared_ptr<mpd_output> m_output;
 };
 
