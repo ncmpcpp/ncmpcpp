@@ -168,7 +168,7 @@ private:
 
 struct Item
 {
-	std::shared_ptr<Song> song;
+	Song song;
 	ItemType type;
 	std::string name;
 };

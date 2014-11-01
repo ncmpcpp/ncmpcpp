@@ -134,7 +134,7 @@ void Browser::enterPressed()
 		}
 		case itSong:
 		{
-			addSongToPlaylist(*item.song, true, -1);
+			addSongToPlaylist(item.song, true, -1);
 			break;
 		}
 		case itPlaylist:
@@ -184,7 +184,7 @@ void Browser::spacePressed()
 				myBrowser->GetLocalDirectory(items, item.name, 1);
 				list.reserve(items.size());
 				for (MPD::ItemList::const_iterator it = items.begin(); it != items.end(); ++it)
-					list.push_back(*it->song);
+					list.push_back(it->song);
 				success = addSongsToPlaylist(list.begin(), list.end(), false, -1);
 			}
 			else
@@ -200,7 +200,7 @@ void Browser::spacePressed()
 		}
 		case itSong:
 		{
-			addSongToPlaylist(*item.song, false);
+			addSongToPlaylist(item.song, false);
 			break;
 		}
 		case itPlaylist:
@@ -329,7 +329,7 @@ ProxySongList Browser::proxySongList()
 	return ProxySongList(w, [](NC::Menu<MPD::Item>::Item &item) -> MPD::Song * {
 		MPD::Song *ptr = 0;
 		if (item.value().type == itSong)
-			ptr = item.value().song.get();
+			ptr = &item.value().song;
 		return ptr;
 	});
 }
@@ -356,7 +356,7 @@ MPD::SongList Browser::getSelectedSongs()
 				MPD::ItemList list;
 				GetLocalDirectory(list, item.name, true);
 				for (auto it = list.begin(); it != list.end(); ++it)
-					result.push_back(*it->song);
+					result.push_back(it->song);
 			}
 			else
 #			endif // !WIN32
@@ -365,7 +365,7 @@ MPD::SongList Browser::getSelectedSongs()
 			}
 		}
 		else if (item.type == itSong)
-			result.push_back(*item.song);
+			result.push_back(item.song);
 		else if (item.type == itPlaylist)
 		{
 			std::copy(
@@ -404,7 +404,7 @@ void Browser::LocateSong(const MPD::Song &s)
 		GetDirectory(s.getDirectory());
 	for (size_t i = 0; i < w.size(); ++i)
 	{
-		if (w[i].value().type == itSong && s == *w[i].value().song)
+		if (w[i].value().type == itSong && s == w[i].value().song)
 		{
 			w.highlight(i);
 			break;
@@ -466,7 +466,7 @@ void Browser::GetDirectory(std::string dir, std::string subdir)
 			}
 			case itSong:
 			{
-				w.addItem(*it, myPlaylist->checkForSong(*it->song));
+				w.addItem(*it, myPlaylist->checkForSong(it->song));
 				break;
 			}
 		}
@@ -502,8 +502,9 @@ void Browser::GetLocalDirectory(MPD::ItemList &v, const std::string &directory, 
 		{
 			item.type = itSong;
 			mpd_pair file_pair = { "file", e.path().native().c_str() };
-			MPD::MutableSong *s = new MPD::MutableSong(mpd_song_begin(&file_pair));
-			item.song = std::shared_ptr<MPD::Song>(s);
+			item.song = mpd_song_begin(&file_pair);
+			// FIXME no tag reading for now
+			/*
 #			ifdef HAVE_TAGLIB_H
 			if (!recursively)
 			{
@@ -511,6 +512,7 @@ void Browser::GetLocalDirectory(MPD::ItemList &v, const std::string &directory, 
 				Tags::read(*s);
 			}
 #			endif // HAVE_TAGLIB_H
+			*/
 			v.push_back(item);
 		}
 	});
@@ -585,8 +587,8 @@ bool Browser::deleteItem(const MPD::Item &item, std::string &errmsg)
 	std::string path;
 	if (!isLocal())
 		path = Config.mpd_music_dir;
-	path += item.type == itSong ? item.song->getURI() : item.name;
-	
+	path += item.type == itSong ? item.song.getURI() : item.name;
+
 	bool rv;
 	try
 	{
@@ -636,10 +638,10 @@ std::string ItemToString(const MPD::Item &item)
 			switch (Config.browser_display_mode)
 			{
 				case DisplayMode::Classic:
-					result = item.song->toString(Config.song_list_format_dollar_free, Config.tags_separator);
+					result = item.song.toString(Config.song_list_format_dollar_free, Config.tags_separator);
 					break;
 				case DisplayMode::Columns:
-					result = item.song->toString(Config.song_in_columns_to_string_format, Config.tags_separator);
+					result = item.song.toString(Config.song_in_columns_to_string_format, Config.tags_separator);
 					break;
 			}
 			break;

@@ -691,7 +691,7 @@ void Connection::GetDirectory(const std::string &directory, ItemConsumer f)
 				it.type = itDirectory;
 				break;
 			case MPD_ENTITY_TYPE_SONG:
-				it.song = std::make_shared<Song>(Song(mpd_song_dup(mpd_entity_get_song(item))));
+				it.song = Song(mpd_song_dup(mpd_entity_get_song(item)));
 				it.type = itSong;
 				break;
 			case MPD_ENTITY_TYPE_PLAYLIST:

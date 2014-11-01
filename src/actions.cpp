@@ -675,7 +675,7 @@ void DeleteBrowserItems::run()
 	else
 	{
 		MPD::Item &item = myBrowser->main().current().value();
-		std::string iname = item.type == MPD::itSong ? item.song->getName() : item.name;
+		std::string iname = item.type == MPD::itSong ? item.song.getName() : item.name;
 		question = boost::format("Delete %1% \"%2%\"?")
 			% itemTypeToString(item.type) % wideShorten(iname, COLS-question.size()-10);
 	}
@@ -689,7 +689,7 @@ void DeleteBrowserItems::run()
 	for (const auto &item : list)
 	{
 		const MPD::Item &i = item->value();
-		std::string iname = i.type == MPD::itSong ? i.song->getName() : i.name;
+		std::string iname = i.type == MPD::itSong ? i.song.getName() : i.name;
 		std::string errmsg;
 		if (myBrowser->deleteItem(i, errmsg))
 		{

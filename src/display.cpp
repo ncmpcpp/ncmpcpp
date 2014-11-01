@@ -395,10 +395,10 @@ void Display::Items(NC::Menu<MPD::Item> &menu, const ProxySongList &pl)
 			switch (Config.browser_display_mode)
 			{
 				case DisplayMode::Classic:
-					showSongs(menu, *item.song, pl, Config.song_list_format);
+					showSongs(menu, item.song, pl, Config.song_list_format);
 					break;
 				case DisplayMode::Columns:
-					showSongsInColumns(menu, *item.song, pl);
+					showSongsInColumns(menu, item.song, pl);
 					break;
 			}
 			break;

@@ -69,14 +69,14 @@ bool LocaleBasedItemSorting::operator()(const MPD::Item &a, const MPD::Item &b) 
 				switch (m_sort_mode)
 				{
 					case SortMode::Name:
-						result = m_cmp(*a.song, *b.song);
+						result = m_cmp(a.song, b.song);
 						break;
 					case SortMode::ModificationTime:
-						result = a.song->getMTime() > b.song->getMTime();
+						result = a.song.getMTime() > b.song.getMTime();
 						break;
 					case SortMode::CustomFormat:
-						result = m_cmp(a.song->toString(Config.browser_sort_format, Config.tags_separator),
-						               b.song->toString(Config.browser_sort_format, Config.tags_separator));
+						result = m_cmp(a.song.toString(Config.browser_sort_format, Config.tags_separator),
+						               b.song.toString(Config.browser_sort_format, Config.tags_separator));
 						break;
 					case SortMode::NoOp:
 						throw std::logic_error("can't sort with NoOp sorting mode");
