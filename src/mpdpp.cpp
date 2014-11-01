@@ -31,62 +31,6 @@ MPD::Connection Mpd;
 
 namespace MPD {
 
-SongIterator::~SongIterator()
-{
-	if (m_connection)
-		finish();
-}
-
-void SongIterator::finish()
-{
-	// clean up
-	assert(m_connection);
-	mpd_response_finish(m_connection.get());
-	m_song = Song();
-	m_connection = nullptr;
-}
-
-Song &SongIterator::operator*() const
-{
-	assert(m_connection);
-	assert(!m_song.empty());
-	// we could make m_song a pointer to a Song and dereference here,
-	// but it's retarded as Song itself is essentially wrapper to
-	// std::shared_ptr. on the other hand, we need constness for the
-	// iterator to be able to play along with std::move_iterator.
-	return const_cast<Song &>(m_song);
-}
-
-Song *SongIterator::operator->() const
-{
-	return &**this;
-}
-
-SongIterator &SongIterator::operator++()
-{
-	assert(m_connection);
-	mpd_song *s = mpd_recv_song(m_connection.get());
-	if (s != nullptr)
-		m_song = Song(s);
-	else
-		finish();
-	return *this;
-}
-
-SongIterator SongIterator::operator++(int)
-{
-	SongIterator it(*this);
-	++*this;
-	return it;
-}
-
-SongIterator::SongIterator(std::shared_ptr<mpd_connection> conn)
-: m_connection(std::move(conn))
-{
-	// get the first element
-	++*this;
-}
-
 Connection::Connection() : m_connection(nullptr),
 				m_command_list_active(false),
 				m_idle(false),
@@ -354,7 +298,7 @@ SongIterator Connection::GetPlaylistChanges(unsigned version)
 	prechecksNoCommandsList();
 	mpd_send_queue_changes_meta(m_connection.get(), version);
 	checkErrors();
-	return SongIterator(m_connection);
+	return SongIterator(m_connection, mpd_recv_song);
 }
 
 Song Connection::GetCurrentSong()
@@ -381,7 +325,7 @@ SongIterator Connection::GetPlaylistContent(const std::string &path)
 {
 	prechecksNoCommandsList();
 	mpd_send_list_playlist_meta(m_connection.get(), path.c_str());
-	SongIterator result(m_connection);
+	SongIterator result(m_connection, mpd_recv_song);
 	checkErrors();
 	return result;
 }
@@ -390,7 +334,7 @@ SongIterator Connection::GetPlaylistContentNoInfo(const std::string &path)
 {
 	prechecksNoCommandsList();
 	mpd_send_list_playlist(m_connection.get(), path.c_str());
-	SongIterator result(m_connection);
+	SongIterator result(m_connection, mpd_recv_song);
 	checkErrors();
 	return result;
 }
@@ -720,7 +664,7 @@ SongIterator Connection::CommitSearchSongs()
 	prechecksNoCommandsList();
 	mpd_search_commit(m_connection.get());
 	checkErrors();
-	return SongIterator(m_connection);
+	return SongIterator(m_connection, mpd_recv_song);
 }
 
 void Connection::CommitSearchTags(StringConsumer f)
@@ -798,20 +742,15 @@ SongIterator Connection::GetSongs(const std::string &directory)
 	prechecksNoCommandsList();
 	mpd_send_list_meta(m_connection.get(), directory.c_str());
 	checkErrors();
-	return SongIterator(m_connection);
+	return SongIterator(m_connection, mpd_recv_song);
 }
 
-void Connection::GetOutputs(OutputConsumer f)
+OutputIterator Connection::GetOutputs()
 {
 	prechecksNoCommandsList();
 	mpd_send_outputs(m_connection.get());
-	while (mpd_output *output = mpd_recv_output(m_connection.get()))
-	{
-		f(Output(mpd_output_get_name(output), mpd_output_get_enabled(output)));
-		mpd_output_free(output);
-	}
-	mpd_response_finish(m_connection.get());
 	checkErrors();
+	return OutputIterator(m_connection, mpd_recv_output);
 }
 
 void Connection::EnableOutput(int id)

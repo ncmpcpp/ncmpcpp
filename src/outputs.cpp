@@ -70,7 +70,7 @@ std::wstring Outputs::title()
 
 void Outputs::enterPressed()
 {
-	if (w.current().value().isEnabled())
+	if (w.current().value().enabled())
 	{
 		Mpd.DisableOutput(w.choice());
 		Statusbar::printf("Output \"%s\" disabled", w.current().value().name());
@@ -99,9 +99,11 @@ void Outputs::mouseButtonPressed(MEVENT me)
 void Outputs::FetchList()
 {
 	w.clear();
-	Mpd.GetOutputs([this](MPD::Output output) {
-		w.addItem(output, output.isEnabled());
-	});
+	for (MPD::OutputIterator out = Mpd.GetOutputs(), end; out != end; ++out)
+	{
+		bool enabled = out->enabled();
+		w.addItem(std::move(*out), enabled);
+	}
 	if (myScreen == this)
 		w.refresh();
 }

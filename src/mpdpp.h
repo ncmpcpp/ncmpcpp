@@ -131,49 +131,143 @@ struct Item
 
 struct Output
 {
-	Output(const std::string &name_, bool enabled) : m_name(name_), m_enabled(enabled) { }
-	
-	const std::string &name() const { return m_name; }
-	bool isEnabled() const { return m_enabled; }
-	
+	Output() { }
+	Output(mpd_output *output) : m_output(output, mpd_output_free) { }
+
+	Output(const Output &rhs) : m_output(rhs.m_output) { }
+	Output(Output &&rhs) : m_output(std::move(rhs.m_output)) { }
+	Output &operator=(Output rhs)
+	{
+		m_output = std::move(rhs.m_output);
+		return *this;
+	}
+
+	bool operator==(const Output &rhs) const
+	{
+		if (empty() && rhs.empty())
+			return true;
+		else if (!empty() && !rhs.empty())
+			return id() == rhs.id()
+			    && std::strcmp(name(), rhs.name()) == 0
+			    && enabled() == rhs.enabled();
+		else
+			return false;
+	}
+	bool operator!=(const Output &rhs) const
+	{
+		return !(*this == rhs);
+	}
+
+	unsigned id() const
+	{
+		checkNonEmpty();
+		return mpd_output_get_id(m_output.get());
+	}
+	const char *name() const
+	{
+		checkNonEmpty();
+		return mpd_output_get_name(m_output.get());
+	}
+	bool enabled() const
+	{
+		checkNonEmpty();
+		return mpd_output_get_enabled(m_output.get());
+	}
+
+	bool empty() const { return m_output.get() == nullptr; }
+
 private:
-	std::string m_name;
-	bool m_enabled;
+	void checkNonEmpty() const
+	{
+		if (empty())
+			throw std::runtime_error("No associated mpd_output object");
+	}
+
+	std::shared_ptr<mpd_output> m_output;
 };
 
 typedef std::vector<Item> ItemList;
 typedef std::vector<std::string> StringList;
 typedef std::vector<Output> OutputList;
 
-struct SongIterator : std::iterator<std::forward_iterator_tag, Song>
+template <typename DestT, typename SourceT>
+struct Iterator : std::iterator<std::forward_iterator_tag, DestT>
 {
+	typedef SourceT *(*SourceFetcher)(mpd_connection *);
+
 	friend class Connection;
 
-	SongIterator() : m_connection(nullptr) { }
-	~SongIterator();
-
-	void finish();
-
-	Song &operator*() const;
-	Song *operator->() const;
-
-	SongIterator &operator++();
-	SongIterator operator++(int);
-
-	bool operator==(const SongIterator &rhs) {
-		return m_connection == rhs.m_connection
-		    && m_song == rhs.m_song;
+	Iterator() : m_connection(nullptr), m_fetch_source(nullptr) { }
+	~Iterator()
+	{
+		if (m_connection)
+			finish();
 	}
-	bool operator!=(const SongIterator &rhs) {
+
+	void finish()
+	{
+		// clean up
+		assert(m_connection);
+		mpd_response_finish(m_connection.get());
+		m_object = DestT();
+		m_connection = nullptr;
+	}
+
+	DestT &operator*() const
+	{
+		assert(m_connection);
+		if (m_object.empty())
+			throw std::runtime_error("empty object");
+		return const_cast<DestT &>(m_object);
+	}
+	DestT *operator->() const
+	{
+		return &**this;
+	}
+
+	Iterator &operator++()
+	{
+		assert(m_connection);
+		assert(m_fetch_source != nullptr);
+		auto src = m_fetch_source(m_connection.get());
+		if (src != nullptr)
+			m_object = DestT(src);
+		else
+			finish();
+		return *this;
+	}
+	Iterator operator++(int)
+	{
+		Iterator it(*this);
+		++*this;
+		return it;
+	}
+
+	bool operator==(const Iterator &rhs)
+	{
+		return m_connection == rhs.m_connection
+		    && m_object == rhs.m_object;
+	}
+	bool operator!=(const Iterator &rhs)
+	{
 		return !(*this == rhs);
 	}
 
 private:
-	SongIterator(std::shared_ptr<mpd_connection> conn);
+	Iterator(std::shared_ptr<mpd_connection> conn, SourceFetcher fetch_source)
+	: m_connection(std::move(conn)), m_fetch_source(fetch_source)
+	{
+		// get the first element
+		++*this;
+	}
 
 	std::shared_ptr<mpd_connection> m_connection;
-	Song m_song;
+	SourceFetcher m_fetch_source;
+	DestT m_object;
 };
+
+typedef Iterator<Song, mpd_song> SongIterator;
+typedef Iterator<Output, mpd_output> OutputIterator;
 
 class Connection : private boost::noncopyable
 {
@@ -276,7 +370,7 @@ public:
 	SongIterator GetSongs(const std::string &directory);
 	void GetDirectories(const std::string &directory, StringConsumer f);
 	
-	void GetOutputs(OutputConsumer f);
+	OutputIterator GetOutputs();
 	void EnableOutput(int id);
 	void DisableOutput(int id);
 	
