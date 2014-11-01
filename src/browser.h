@@ -63,31 +63,25 @@ struct Browser: Screen<NC::Menu<MPD::Item>>, Filterable, HasSongs, Searchable, T
 	virtual MPD::SongList getSelectedSongs() OVERRIDE;
 	
 	// private members
-	const std::string &CurrentDir() { return itsBrowsedDir; }
+	bool inRootDirectory();
+	bool isParentDirectory(const MPD::Item &item);
+	const std::string &currentDirectory();
 	
-	void fetchSupportedExtensions();
-	
-	bool isLocal() { return itsBrowseLocally; }
-	void LocateSong(const MPD::Song &);
-	void GetDirectory(std::string, std::string = "/");
-#	ifndef WIN32
-	void GetLocalDirectory(MPD::ItemList &, const std::string &, bool) const;
-	void ClearDirectory(const std::string &) const;
-	void ChangeBrowseMode();
-	bool deleteItem(const MPD::Item &, std::string &errmsg);
-#	endif // !WIN32
-	
-	static bool isParentDirectory(const MPD::Item &item) {
-		return item.type == MPD::Item::Type::Directory && item.name == "..";
-	}
-	
+	bool isLocal() { return m_local_browser; }
+	void locateSong(const MPD::Song &s);
+	void getDirectory(std::string directory);
+	void changeBrowseMode();
+	void remove(const MPD::Item &item);
+
+	static void fetchSupportedExtensions();
+
 protected:
 	virtual bool isLockable() OVERRIDE { return true; }
 	
 private:
-	bool itsBrowseLocally;
-	size_t itsScrollBeginning;
-	std::string itsBrowsedDir;
+	bool m_local_browser;
+	size_t m_scroll_beginning;
+	std::string m_current_directory;
 };
 
 extern Browser *myBrowser;

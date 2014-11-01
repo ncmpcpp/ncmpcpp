@@ -179,7 +179,7 @@ void Status::handleServerError(MPD::ServerError &e)
 	}
 	else if (e.code() == MPD_SERVER_ERROR_NO_EXIST && myScreen == myBrowser)
 	{
-		myBrowser->GetDirectory(getParentDirectory(myBrowser->CurrentDir()));
+		myBrowser->getDirectory(getParentDirectory(myBrowser->currentDirectory()));
 		myBrowser->refresh();
 	}
 }
@@ -438,9 +438,9 @@ void Status::Changes::storedPlaylists()
 {
 	myPlaylistEditor->requestPlaylistsUpdate();
 	myPlaylistEditor->requestContentsUpdate();
-	if (myBrowser->CurrentDir() == "/")
+	if (!myBrowser->isLocal() && myBrowser->inRootDirectory())
 	{
-		myBrowser->GetDirectory("/");
+		myBrowser->getDirectory("/");
 		if (isVisible(myBrowser))
 			myBrowser->refresh();
 	}
@@ -449,7 +449,7 @@ void Status::Changes::storedPlaylists()
 void Status::Changes::database()
 {
 	if (isVisible(myBrowser))
-		myBrowser->GetDirectory(myBrowser->CurrentDir());
+		myBrowser->getDirectory(myBrowser->currentDirectory());
 	else
 		myBrowser->main().clear();
 #	ifdef HAVE_TAGLIB_H

@@ -336,13 +336,13 @@ SongIterator Connection::GetPlaylistContentNoInfo(const std::string &path)
 	return result;
 }
 
-void Connection::GetSupportedExtensions(std::set<std::string> &acc)
+void Connection::GetSupportedExtensions(StringConsumer f)
 {
 	prechecksNoCommandsList();
 	mpd_send_command(m_connection.get(), "decoders", NULL);
 	while (mpd_pair *pair = mpd_recv_pair_named(m_connection.get(), "suffix"))
 	{
-		acc.insert(pair->value);
+		f(pair->value);
 		mpd_return_pair(m_connection.get(), pair);
 	}
 	mpd_response_finish(m_connection.get());
@@ -677,48 +677,20 @@ void Connection::CommitSearchTags(StringConsumer f)
 	checkErrors();
 }
 
-void Connection::GetDirectory(const std::string &directory, ItemConsumer f)
+ItemIterator Connection::GetDirectory(const std::string &directory)
 {
 	prechecksNoCommandsList();
 	mpd_send_list_meta(m_connection.get(), directory.c_str());
-	while (mpd_entity *item = mpd_recv_entity(m_connection.get()))
-	{
-		Item it;
-		switch (mpd_entity_get_type(item))
-		{
-			case MPD_ENTITY_TYPE_DIRECTORY:
-				it.name = mpd_directory_get_path(mpd_entity_get_directory(item));
-				it.type = MPD::Item::Type::Directory;
-				break;
-			case MPD_ENTITY_TYPE_SONG:
-				it.song = Song(mpd_song_dup(mpd_entity_get_song(item)));
-				it.type = MPD::Item::Type::Song;
-				break;
-			case MPD_ENTITY_TYPE_PLAYLIST:
-				it.name = mpd_playlist_get_path(mpd_entity_get_playlist(item));
-				it.type = MPD::Item::Type::Playlist;
-				break;
-			default:
-				assert(false);
-		}
-		mpd_entity_free(item);
-		f(std::move(it));
-	}
-	mpd_response_finish(m_connection.get());
 	checkErrors();
+	return ItemIterator(m_connection.get(), mpd_recv_entity);
 }
 
-void Connection::GetDirectoryRecursive(const std::string &directory, SongConsumer f)
+ItemIterator Connection::GetDirectoryRecursive(const std::string &directory)
 {
 	prechecksNoCommandsList();
 	mpd_send_list_all_meta(m_connection.get(), directory.c_str());
-	while (mpd_entity *e = mpd_recv_entity(m_connection.get())) {
-		if (mpd_entity_get_type(e) == MPD_ENTITY_TYPE_SONG)
-			f(Song(mpd_song_dup(mpd_entity_get_song(e))));
-		mpd_entity_free(e);
-	}
-	mpd_response_finish(m_connection.get());
 	checkErrors();
+	return ItemIterator(m_connection.get(), mpd_recv_entity);
 }
 
 void Connection::GetDirectories(const std::string &directory, StringConsumer f)

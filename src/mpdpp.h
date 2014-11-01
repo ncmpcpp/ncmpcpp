@@ -120,72 +120,172 @@ private:
 	std::shared_ptr<mpd_status> m_status;
 };
 
-struct Playlist
+struct Directory
 {
-	Playlist() { }
-	Playlist(mpd_playlist *playlist) : m_playlist(playlist, mpd_playlist_free) { }
-
-	Playlist(const Playlist &rhs) : m_playlist(rhs.m_playlist) { }
-	Playlist(Playlist &&rhs) : m_playlist(std::move(rhs.m_playlist)) { }
-	Playlist &operator=(Playlist rhs)
+	Directory()
+	: m_last_modified(0)
+	{ }
+	Directory(const mpd_directory *directory)
 	{
-		m_playlist = std::move(rhs.m_playlist);
-		return *this;
+		assert(directory != nullptr);
+		m_path = mpd_directory_get_path(directory);
+		m_last_modified = mpd_directory_get_last_modified(directory);
 	}
+	Directory(std::string path, time_t last_modified = 0)
+	: m_path(std::move(path))
+	, m_last_modified(last_modified)
+	{ }
 
-	bool operator==(const Playlist &rhs)
+	bool operator==(const Directory &rhs) const
 	{
-		if (empty() && rhs.empty())
-			return true;
-		else if (!empty() && !rhs.empty())
-			return strcmp(path(), rhs.path()) == 0
-			    && lastModified() == rhs.lastModified();
-		else
-			return false;
+		return m_path == rhs.m_path
+		    && m_last_modified == rhs.m_last_modified;
 	}
-	bool operator!=(const Playlist &rhs)
+	bool operator!=(const Directory &rhs) const
 	{
 		return !(*this == rhs);
 	}
 
-	const char *path() const
+	const std::string &path() const
 	{
-		assert(m_playlist.get() != nullptr);
-		return mpd_playlist_get_path(m_playlist.get());
+		return m_path;
 	}
 	time_t lastModified() const
 	{
-		assert(m_playlist.get() != nullptr);
-		return mpd_playlist_get_last_modified(m_playlist.get());
+		return m_last_modified;
 	}
 
-	bool empty() const { return m_playlist.get() == nullptr; }
+private:
+	std::string m_path;
+	time_t m_last_modified;
+};
+
+struct Playlist
+{
+	Playlist()
+	: m_last_modified(0)
+	{ }
+	Playlist(const mpd_playlist *playlist)
+	{
+		assert(playlist != nullptr);
+		m_path = mpd_playlist_get_path(playlist);
+		m_last_modified = mpd_playlist_get_last_modified(playlist);
+	}
+	Playlist(std::string path, time_t last_modified = 0)
+	: m_path(std::move(path))
+	, m_last_modified(last_modified)
+	{
+		if (m_path.empty())
+			throw std::runtime_error("empty path");
+	}
+
+	bool operator==(const Playlist &rhs) const
+	{
+		return m_path == rhs.m_path
+		    && m_last_modified == rhs.m_last_modified;
+	}
+	bool operator!=(const Playlist &rhs) const
+	{
+		return !(*this == rhs);
+	}
+
+	const std::string &path() const
+	{
+		return m_path;
+	}
+	time_t lastModified() const
+	{
+		return m_last_modified;
+	}
 
 private:
-	std::shared_ptr<mpd_playlist> m_playlist;
+	std::string m_path;
+	time_t m_last_modified;
 };
 
 struct Item
 {
-	enum class Type { Directory, Playlist, Song };
+	enum class Type { Directory, Song, Playlist };
 
-	Song song;
-	Type type;
-	std::string name;
+	Item(mpd_entity *entity)
+	{
+		assert(entity != nullptr);
+		switch (mpd_entity_get_type(entity))
+		{
+			case MPD_ENTITY_TYPE_DIRECTORY:
+				m_type = Type::Directory;
+				m_directory = Directory(mpd_entity_get_directory(entity));
+				break;
+			case MPD_ENTITY_TYPE_SONG:
+				m_type = Type::Song;
+				m_song = Song(mpd_song_dup(mpd_entity_get_song(entity)));
+				break;
+			case MPD_ENTITY_TYPE_PLAYLIST:
+				m_type = Type::Playlist;
+				m_playlist = Playlist(mpd_entity_get_playlist(entity));
+				break;
+			default:
+				throw std::runtime_error("unknown mpd_entity type");
+		}
+		mpd_entity_free(entity);
+	}
+	Item(Directory directory_)
+	: m_type(Type::Directory)
+	, m_directory(std::move(directory_))
+	{ }
+	Item(Song song_)
+	: m_type(Type::Song)
+	, m_song(std::move(song_))
+	{ }
+	Item(Playlist playlist_)
+	: m_type(Type::Playlist)
+	, m_playlist(std::move(playlist_))
+	{ }
+
+	bool operator==(const Item &rhs) const
+	{
+		return m_directory == rhs.m_directory
+		    && m_song == rhs.m_song
+		    && m_playlist == rhs.m_playlist;
+	}
+	bool operator!=(const Item &rhs) const
+	{
+		return !(*this == rhs);
+	}
+
+	Type type() const
+	{
+		return m_type;
+	}
+	const Directory &directory() const
+	{
+		assert(m_type == Type::Directory);
+		return m_directory;
+	}
+	const Song &song() const
+	{
+		assert(m_type == Type::Song);
+		return m_song;
+	}
+	const Playlist &playlist() const
+	{
+		assert(m_type == Type::Playlist);
+		return m_playlist;
+	}
+
+private:
+	Type m_type;
+	Directory m_directory;
+	Song m_song;
+	Playlist m_playlist;
 };
 
 struct Output
 {
 	Output() { }
-	Output(mpd_output *output) : m_output(output, mpd_output_free) { }
-
-	Output(const Output &rhs) : m_output(rhs.m_output) { }
-	Output(Output &&rhs) : m_output(std::move(rhs.m_output)) { }
-	Output &operator=(Output rhs)
-	{
-		m_output = std::move(rhs.m_output);
-		return *this;
-	}
+	Output(mpd_output *output)
+	: m_output(output, mpd_output_free)
+	{ }
 
 	bool operator==(const Output &rhs) const
 	{
@@ -230,34 +330,32 @@ typedef std::vector<std::string> StringList;
 typedef std::vector<Output> OutputList;
 
 template <typename DestT, typename SourceT>
-struct Iterator : std::iterator<std::forward_iterator_tag, DestT>
+struct Iterator: std::iterator<std::input_iterator_tag, DestT>
 {
 	typedef SourceT *(*SourceFetcher)(mpd_connection *);
 
-	friend class Connection;
-
-	Iterator() : m_connection(nullptr), m_fetch_source(nullptr) { }
-	~Iterator()
+	Iterator()
+	: m_state(nullptr)
+	{ }
+	Iterator(mpd_connection *connection, SourceFetcher fetch_source)
+	: m_state(std::make_shared<State>(connection, fetch_source))
 	{
-		if (m_connection != nullptr)
-			finish();
+		// get the first element
+		++*this;
 	}
 
 	void finish()
 	{
-		// clean up
-		assert(m_connection != nullptr);
-		mpd_response_finish(m_connection);
-		m_object = DestT();
-		m_connection = nullptr;
+		// change the iterator into end iterator
+		m_state = nullptr;
 	}
 
 	DestT &operator*() const
 	{
-		assert(m_connection != nullptr);
-		if (m_object.empty())
-			throw std::runtime_error("empty object");
-		return const_cast<DestT &>(m_object);
+		if (!m_state)
+			throw std::runtime_error("no object associated with the iterator");
+		assert(m_state->hasObject());
+		return m_state->getObject();
 	}
 	DestT *operator->() const
 	{
@@ -266,11 +364,10 @@ struct Iterator : std::iterator<std::forward_iterator_tag, DestT>
 
 	Iterator &operator++()
 	{
-		assert(m_connection != nullptr);
-		assert(m_fetch_source != nullptr);
-		auto src = m_fetch_source(m_connection);
+		assert(m_state);
+		auto src = m_state->fetchSource();
 		if (src != nullptr)
-			m_object = DestT(src);
+			m_state->setObject(src);
 		else
 			finish();
 		return *this;
@@ -284,8 +381,7 @@ struct Iterator : std::iterator<std::forward_iterator_tag, DestT>
 
 	bool operator==(const Iterator &rhs)
 	{
-		return m_connection == rhs.m_connection
-		    && m_object == rhs.m_object;
+		return m_state == rhs.m_state;
 	}
 	bool operator!=(const Iterator &rhs)
 	{
@@ -293,27 +389,66 @@ struct Iterator : std::iterator<std::forward_iterator_tag, DestT>
 	}
 
 private:
-	Iterator(mpd_connection *connection, SourceFetcher fetch_source)
-	: m_connection(connection), m_fetch_source(fetch_source)
+	struct State
 	{
-		// get the first element
-		++*this;
-	}
+		State(mpd_connection *conn, SourceFetcher fetch_source)
+		: m_connection(conn)
+		, m_fetch_source(fetch_source)
+		{
+			assert(m_connection != nullptr);
+			assert(m_fetch_source != nullptr);
+		}
+		~State()
+		{
+			mpd_response_finish(m_connection);
+		}
 
-	mpd_connection *m_connection;
-	SourceFetcher m_fetch_source;
-	DestT m_object;
+		bool operator==(const State &rhs) const
+		{
+			return m_connection == rhs.m_connection
+			    && m_object == m_object;
+		}
+		bool operator!=(const State &rhs) const
+		{
+			return !(*this == rhs);
+		}
+
+		SourceT *fetchSource() const
+		{
+			return m_fetch_source(m_connection);
+		}
+		DestT &getObject() const
+		{
+			return *m_object;
+		}
+		bool hasObject() const
+		{
+			return m_object.get() != nullptr;
+		}
+		void setObject(DestT object)
+		{
+			if (hasObject())
+				*m_object = std::move(object);
+			else
+				m_object.reset(new DestT(std::move(object)));
+		}
+
+	private:
+		mpd_connection *m_connection;
+		SourceFetcher m_fetch_source;
+		std::unique_ptr<DestT> m_object;
+	};
+
+	std::shared_ptr<State> m_state;
 };
 
+typedef Iterator<Item, mpd_entity> ItemIterator;
 typedef Iterator<Output, mpd_output> OutputIterator;
 typedef Iterator<Playlist, mpd_playlist> PlaylistIterator;
 typedef Iterator<Song, mpd_song> SongIterator;
 
 class Connection
 {
-	typedef std::function<void(Item)> ItemConsumer;
-	typedef std::function<void(Output)> OutputConsumer;
-	typedef std::function<void(Song)> SongConsumer;
 	typedef std::function<void(std::string)> StringConsumer;
 	
 public:
@@ -362,7 +497,7 @@ public:
 	SongIterator GetPlaylistContent(const std::string &name);
 	SongIterator GetPlaylistContentNoInfo(const std::string &name);
 	
-	void GetSupportedExtensions(std::set<std::string> &);
+	void GetSupportedExtensions(StringConsumer f);
 	
 	void SetRepeat(bool);
 	void SetRandom(bool);
@@ -405,8 +540,8 @@ public:
 	
 	PlaylistIterator GetPlaylists();
 	void GetList(mpd_tag_type type, StringConsumer f);
-	void GetDirectory(const std::string &directory, ItemConsumer f);
-	void GetDirectoryRecursive(const std::string &directory, SongConsumer f);
+	ItemIterator GetDirectory(const std::string &directory);
+	ItemIterator GetDirectoryRecursive(const std::string &directory);
 	SongIterator GetSongs(const std::string &directory);
 	void GetDirectories(const std::string &directory, StringConsumer f);
 	

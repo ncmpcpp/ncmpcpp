@@ -32,13 +32,14 @@ std::string getBasename(const std::string &path)
 		return path.substr(slash+1);
 }
 
-std::string getParentDirectory(const std::string &path)
+std::string getParentDirectory(std::string path)
 {
 	size_t slash = path.rfind('/');
 	if (slash == std::string::npos)
-		return "/";
+		path = "";
 	else
-		return path.substr(0, slash);
+		path.resize(slash);
+	return path;
 }
 
 std::string getSharedDirectory(const std::string &dir1, const std::string &dir2)

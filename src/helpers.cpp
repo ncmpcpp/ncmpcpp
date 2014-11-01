@@ -19,6 +19,7 @@
  ***************************************************************************/
 
 #include <algorithm>
+#include <time.h>
 
 #include "helpers.h"
 #include "playlist.h"
@@ -60,6 +61,15 @@ bool addSongToPlaylist(const MPD::Song &s, bool play, int position)
 			result = true;
 		}
 	}
+	return result;
+}
+
+std::string timeFormat(const char *format, time_t t)
+{
+	char result[32];
+	tm tinfo;
+	localtime_r(&t, &tinfo);
+	strftime(result, sizeof(result), format, &tinfo);
 	return result;
 }
 

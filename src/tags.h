@@ -62,11 +62,13 @@ private:
 	std::string m_album_peak;
 };
 
+void setAttribute(mpd_song *s, const char *name, const std::string &value);
+
 ReplayGainInfo readReplayGain(TagLib::File *f);
 
 bool extendedSetSupported(const TagLib::File *f);
 
-void read(MPD::MutableSong &);
+void read(mpd_song *s);
 bool write(MPD::MutableSong &);
 
 }

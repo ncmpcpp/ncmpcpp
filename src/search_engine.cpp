@@ -446,9 +446,18 @@ void SearchEngine::Search()
 	
 	MPD::SongList list;
 	if (Config.search_in_db)
-		Mpd.GetDirectoryRecursive("/", vectorMoveInserter(list));
+	{
+		MPD::ItemIterator item = Mpd.GetDirectoryRecursive("/"), end;
+		for (; item != end; ++item)
+			if (item->type() != MPD::Item::Type::Song)
+				list.push_back(std::move(item->song()));
+	}
 	else
-		list.insert(list.end(), myPlaylist->main().beginV(), myPlaylist->main().endV());
+		std::copy(
+			myPlaylist->main().beginV(),
+			myPlaylist->main().endV(),
+			std::back_inserter(list)
+		);
 	
 	bool any_found = 1;
 	bool found = 1;

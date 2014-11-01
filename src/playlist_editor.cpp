@@ -564,19 +564,17 @@ void PlaylistEditor::updateTimer()
 	m_timer = Global::Timer;
 }
 
-void PlaylistEditor::Locate(const std::string &name)
+void PlaylistEditor::Locate(const MPD::Playlist &playlist)
 {
 	update();
-	for (size_t i = 0; i < Playlists.size(); ++i)
+	auto begin = Playlists.beginV(), end = Playlists.endV();
+	auto it = std::find(begin, end, playlist);
+	if (it != end)
 	{
-		if (name == Playlists[i].value().path())
-		{
-			Playlists.highlight(i);
-			Content.clear();
-			break;
-		}
+		Playlists.highlight(it-begin);
+		Content.clear();
+		switchTo();
 	}
-	switchTo();
 }
 
 namespace {//

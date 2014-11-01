@@ -53,7 +53,7 @@ StringT join(CollectionT &&collection, StringT &&separator)
 }
 
 std::string getBasename(const std::string &path);
-std::string getParentDirectory(const std::string &path);
+std::string getParentDirectory(std::string path);
 std::string getSharedDirectory(const std::string &dir1, const std::string &dir2);
 
 std::string getEnclosedString(const std::string &s, char a, char b, size_t *pos);

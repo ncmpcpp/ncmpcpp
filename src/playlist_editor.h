@@ -78,7 +78,7 @@ struct PlaylistEditor: Screen<NC::Window *>, Filterable, HasColumns, HasSongs, S
 	void requestPlaylistsUpdate() { m_playlists_update_requested = true; }
 	void requestContentsUpdate() { m_content_update_requested = true; }
 	
-	virtual void Locate(const std::string &);
+	virtual void Locate(const MPD::Playlist &playlist);
 	bool isContentFiltered();
 	ProxySongList contentProxyList();
 	

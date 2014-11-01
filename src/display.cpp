@@ -384,27 +384,27 @@ void Display::Tags(NC::Menu<MPD::MutableSong> &menu)
 void Display::Items(NC::Menu<MPD::Item> &menu, const ProxySongList &pl)
 {
 	const MPD::Item &item = menu.drawn()->value();
-	switch (item.type)
+	switch (item.type())
 	{
 		case MPD::Item::Type::Directory:
 			menu << "["
-			     << Charset::utf8ToLocale(getBasename(item.name))
+			     << Charset::utf8ToLocale(getBasename(item.directory().path()))
 			     << "]";
 			break;
 		case MPD::Item::Type::Song:
 			switch (Config.browser_display_mode)
 			{
 				case DisplayMode::Classic:
-					showSongs(menu, item.song, pl, Config.song_list_format);
+					showSongs(menu, item.song(), pl, Config.song_list_format);
 					break;
 				case DisplayMode::Columns:
-					showSongsInColumns(menu, item.song, pl);
+					showSongsInColumns(menu, item.song(), pl);
 					break;
 			}
 			break;
 		case MPD::Item::Type::Playlist:
 			menu << Config.browser_playlist_prefix
-			     << Charset::utf8ToLocale(getBasename(item.name));
+			     << Charset::utf8ToLocale(getBasename(item.playlist().path()));
 			break;
 	}
 }

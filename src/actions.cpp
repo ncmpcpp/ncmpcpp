@@ -521,7 +521,7 @@ void JumpToParentDirectory::run()
 {
 	if (myScreen == myBrowser)
 	{
-		if (myBrowser->CurrentDir() != "/")
+		if (!myBrowser->inRootDirectory())
 		{
 			myBrowser->main().reset();
 			myBrowser->enterPressed();
@@ -669,47 +669,59 @@ bool DeleteBrowserItems::canBeRun() const
 
 void DeleteBrowserItems::run()
 {
+	auto get_name = [](const MPD::Item &item) -> std::string {
+		std::string name;
+		switch (item.type())
+		{
+			case MPD::Item::Type::Directory:
+				name = getBasename(item.directory().path());
+				break;
+			case MPD::Item::Type::Song:
+				name = item.song().getName();
+				break;
+			case MPD::Item::Type::Playlist:
+				name = getBasename(item.playlist().path());
+				break;
+		}
+		return name;
+	};
+
 	boost::format question;
 	if (hasSelected(myBrowser->main().begin(), myBrowser->main().end()))
 		question = boost::format("Delete selected items?");
 	else
 	{
-		MPD::Item &item = myBrowser->main().current().value();
-		std::string iname = item.type == MPD::Item::Type::Song ? item.song.getName() : item.name;
-		question = boost::format("Delete %1% \"%2%\"?")
-			% itemTypeToString(item.type) % wideShorten(iname, COLS-question.size()-10);
+		const auto &item = myBrowser->main().current().value();
+		// parent directories are not accepted (and they
+		// can't be selected, so in other cases it's fine).
+		if (myBrowser->isParentDirectory(item))
+			return;
+		const char msg[] = "Delete \"%1%\"?";
+		question = boost::format(msg) % wideShorten(
+			get_name(item), COLS-const_strlen(msg)-5
+		);
 	}
 	confirmAction(question);
-	bool success = true;
-	auto list = getSelectedOrCurrent(
+
+	auto items = getSelectedOrCurrent(
 		myBrowser->main().begin(),
 		myBrowser->main().end(),
 		myBrowser->main().currentI()
 	);
-	for (const auto &item : list)
+	for (const auto &item : items)
 	{
-		const MPD::Item &i = item->value();
-		std::string iname = i.type == MPD::Item::Type::Song ? i.song.getName() : i.name;
-		std::string errmsg;
-		if (myBrowser->deleteItem(i, errmsg))
-		{
-			const char msg[] = "\"%1%\" deleted";
-			Statusbar::printf(msg, wideShorten(iname, COLS-const_strlen(msg)));
-		}
-		else
-		{
-			Statusbar::print(errmsg);
-			success = false;
-			break;
-		}
+		myBrowser->remove(item->value());
+		const char msg[] = "Deleted %1% \"%2%\"";
+		Statusbar::printf(msg,
+			itemTypeToString(item->value().type()),
+			wideShorten(get_name(item->value()), COLS-const_strlen(msg))
+		);
 	}
-	if (success)
-	{
-		if (myBrowser->isLocal())
-			myBrowser->GetDirectory(myBrowser->CurrentDir());
-		else
-			Mpd.UpdateDirectory(myBrowser->CurrentDir());
-	}
+
+	if (myBrowser->isLocal())
+		myBrowser->getDirectory(myBrowser->currentDirectory());
+	else
+		Mpd.UpdateDirectory(myBrowser->currentDirectory());
 }
 
 bool DeleteStoredPlaylist::canBeRun() const
@@ -803,10 +815,6 @@ void SavePlaylist::run()
 				throw e;
 		}
 	}
-	if (!myBrowser->isLocal()
-	&&  myBrowser->CurrentDir() == "/"
-	&&  !myBrowser->main().empty())
-		myBrowser->GetDirectory(myBrowser->CurrentDir());
 }
 
 void Stop::run()
@@ -1142,7 +1150,7 @@ void TogglePlayingSongCentering::run()
 void UpdateDatabase::run()
 {
 	if (myScreen == myBrowser)
-		Mpd.UpdateDirectory(myBrowser->CurrentDir());
+		Mpd.UpdateDirectory(myBrowser->currentDirectory());
 #	ifdef HAVE_TAGLIB_H
 	else if (myScreen == myTagEditor)
 		Mpd.UpdateDirectory(myTagEditor->CurrentDir());
@@ -1169,8 +1177,7 @@ void JumpToPlayingSong::run()
 	}
 	else if (myScreen == myBrowser)
 	{
-		myBrowser->LocateSong(s);
-		drawHeader();
+		myBrowser->locateSong(s);
 	}
 	else if (myScreen == myLibrary)
 	{
@@ -1413,7 +1420,7 @@ bool EditDirectoryName::canBeRun() const
 {
 	return  ((myScreen == myBrowser
 	      && !myBrowser->main().empty()
-	      && myBrowser->main().current().value().type == MPD::Item::Type::Directory)
+	      && myBrowser->main().current().value().type() == MPD::Item::Type::Directory)
 #	ifdef HAVE_TAGLIB_H
 	    ||   (myScreen->activeWindow() == myTagEditor->Dirs
 	      && !myTagEditor->Dirs->empty()
@@ -1428,7 +1435,7 @@ void EditDirectoryName::run()
 	// FIXME: use boost::filesystem and better error reporting
 	if (myScreen == myBrowser)
 	{
-		std::string old_dir = myBrowser->main().current().value().name, new_dir;
+		std::string old_dir = myBrowser->main().current().value().directory().path(), new_dir;
 		{
 			Statusbar::ScopedLock lock;
 			Statusbar::put() << NC::Format::Bold << "Directory: " << NC::Format::NoBold;
@@ -1451,7 +1458,7 @@ void EditDirectoryName::run()
 				Statusbar::printf(msg, wideShorten(new_dir, COLS-const_strlen(msg)));
 				if (!myBrowser->isLocal())
 					Mpd.UpdateDirectory(getSharedDirectory(old_dir, new_dir));
-				myBrowser->GetDirectory(myBrowser->CurrentDir());
+				myBrowser->getDirectory(myBrowser->currentDirectory());
 			}
 			else
 			{
@@ -1495,18 +1502,17 @@ bool EditPlaylistName::canBeRun() const
 	      && !myPlaylistEditor->Playlists.empty())
 	    ||   (myScreen == myBrowser
 	      && !myBrowser->main().empty()
-		  && myBrowser->main().current().value().type == MPD::Item::Type::Playlist);
+		  && myBrowser->main().current().value().type() == MPD::Item::Type::Playlist);
 }
 
 void EditPlaylistName::run()
 {
 	using Global::wFooter;
-	// FIXME: support local browser more generally
 	std::string old_name, new_name;
 	if (myScreen->isActiveWindow(myPlaylistEditor->Playlists))
 		old_name = myPlaylistEditor->Playlists.current().value().path();
 	else
-		old_name = myBrowser->main().current().value().name;
+		old_name = myBrowser->main().current().value().playlist().path();
 	{
 		Statusbar::ScopedLock lock;
 		Statusbar::put() << NC::Format::Bold << "Playlist: " << NC::Format::NoBold;
@@ -1517,8 +1523,6 @@ void EditPlaylistName::run()
 		Mpd.Rename(old_name, new_name);
 		const char msg[] = "Playlist renamed to \"%1%\"";
 		Statusbar::printf(msg, wideShorten(new_name, COLS-const_strlen(msg)));
-		if (!myBrowser->isLocal())
-			myBrowser->GetDirectory("/");
 	}
 }
 
@@ -1540,7 +1544,7 @@ bool JumpToBrowser::canBeRun() const
 void JumpToBrowser::run()
 {
 	auto s = currentSong(myScreen);
-	myBrowser->LocateSong(*s);
+	myBrowser->locateSong(*s);
 }
 
 bool JumpToMediaLibrary::canBeRun() const
@@ -1557,12 +1561,12 @@ void JumpToMediaLibrary::run()
 bool JumpToPlaylistEditor::canBeRun() const
 {
 	return myScreen == myBrowser
-	    && myBrowser->main().current().value().type == MPD::Item::Type::Playlist;
+	    && myBrowser->main().current().value().type() == MPD::Item::Type::Playlist;
 }
 
 void JumpToPlaylistEditor::run()
 {
-	myPlaylistEditor->Locate(myBrowser->main().current().value().name);
+	myPlaylistEditor->Locate(myBrowser->main().current().value().playlist());
 }
 
 void ToggleScreenLock::run()
@@ -2100,9 +2104,12 @@ void ToggleBrowserSortMode::run()
 	}
 	withUnfilteredMenuReapplyFilter(myBrowser->main(), [] {
 		if (Config.browser_sort_mode != SortMode::NoOp)
-			std::sort(myBrowser->main().begin()+(myBrowser->CurrentDir() != "/"), myBrowser->main().end(),
+		{
+			size_t sort_offset = myBrowser->inRootDirectory() ? 0 : 1;
+			std::sort(myBrowser->main().begin()+sort_offset, myBrowser->main().end(),
 				LocaleBasedItemSorting(std::locale(), Config.ignore_leading_the, Config.browser_sort_mode)
 			);
+		}
 	});
 }
 
@@ -2400,7 +2407,7 @@ bool ChangeBrowseMode::canBeRun() const
 
 void ChangeBrowseMode::run()
 {
-	myBrowser->ChangeBrowseMode();
+	myBrowser->changeBrowseMode();
 }
 
 bool ShowSearchEngine::canBeRun() const

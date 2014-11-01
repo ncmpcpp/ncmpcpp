@@ -259,8 +259,13 @@ void MediaLibrary::update()
 			Albums.clearSearchResults();
 			m_albums_update_request = false;
 			std::map<std::tuple<std::string, std::string, std::string>, time_t> albums;
-			Mpd.GetDirectoryRecursive("/", [&albums](MPD::Song s) {
+			MPD::ItemIterator item = Mpd.GetDirectoryRecursive("/"), end;
+			for (; item != end; ++item)
+			{
+				if (item->type() != MPD::Item::Type::Song)
+					continue;
 				unsigned idx = 0;
+				const MPD::Song &s = item->song();
 				std::string tag = s.get(Config.media_lib_primary_tag, idx);
 				do
 				{
@@ -272,7 +277,7 @@ void MediaLibrary::update()
 						it->second = s.getMTime();
 				}
 				while (!(tag = s.get(Config.media_lib_primary_tag, ++idx)).empty());
-			});
+			}
 			withUnfilteredMenuReapplyFilter(Albums, [this, &albums]() {
 				size_t idx = 0;
 				for (auto it = albums.begin(); it != albums.end(); ++it, ++idx)
@@ -303,8 +308,13 @@ void MediaLibrary::update()
 			std::map<std::string, time_t> tags;
 			if (Config.media_library_sort_by_mtime)
 			{
-				Mpd.GetDirectoryRecursive("/", [&tags](MPD::Song s) {
+				MPD::ItemIterator item = Mpd.GetDirectoryRecursive("/"), end;
+				for (; item != end; ++item)
+				{
+					if (item->type() != MPD::Item::Type::Song)
+						continue;
 					unsigned idx = 0;
+					const MPD::Song &s = item->song();
 					std::string tag = s.get(Config.media_lib_primary_tag, idx);
 					do
 					{
@@ -315,7 +325,7 @@ void MediaLibrary::update()
 							it->second = std::max(it->second, s.getMTime());
 					}
 					while (!(tag = s.get(Config.media_lib_primary_tag, ++idx)).empty());
-				});
+				}
 			}
 			else
 			{
