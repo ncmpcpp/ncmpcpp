@@ -439,6 +439,9 @@ void initScreen(GNUC_UNUSED const char *window_title, bool enable_colors)
 	rl_getc_function = rl::read_key;
 	rl_redisplay_function = rl::display_string;
 	rl_startup_hook = rl::add_base;
+	// initialize readline (needed, otherwise
+	// we get segmentation fault on SIGWINCH).
+	rl_initialize();
 }
 
 void destroyScreen()
