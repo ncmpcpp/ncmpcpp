@@ -70,7 +70,7 @@ void mpd();
 bool mainHook(const char *);
 
 /// prompt and return one of the strings specified in the vector
-std::string promptReturnOneOf(std::vector<std::string> &&values);
+std::string promptReturnOneOf(std::vector<std::string> values);
 
 struct ImmediatelyReturnOneOf
 {

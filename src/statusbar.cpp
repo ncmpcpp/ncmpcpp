@@ -199,7 +199,7 @@ bool Statusbar::Helpers::mainHook(const char *)
 	return true;
 }
 
-std::string Statusbar::Helpers::promptReturnOneOf(std::vector<std::string> &&values)
+std::string Statusbar::Helpers::promptReturnOneOf(std::vector<std::string> values)
 {
 	Statusbar::Helpers::ImmediatelyReturnOneOf prompt_hook(std::move(values));
 	NC::Window::ScopedPromptHook hook(*wFooter, prompt_hook);
