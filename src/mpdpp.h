@@ -21,7 +21,6 @@
 #ifndef NCMPCPP_MPDPP_H
 #define NCMPCPP_MPDPP_H
 
-#include <boost/noncopyable.hpp>
 #include <cassert>
 #include <exception>
 #include <set>
@@ -148,7 +147,7 @@ struct Output
 			return true;
 		else if (!empty() && !rhs.empty())
 			return id() == rhs.id()
-			    && std::strcmp(name(), rhs.name()) == 0
+			    && strcmp(name(), rhs.name()) == 0
 			    && enabled() == rhs.enabled();
 		else
 			return false;
@@ -200,22 +199,22 @@ struct Iterator : std::iterator<std::forward_iterator_tag, DestT>
 	Iterator() : m_connection(nullptr), m_fetch_source(nullptr) { }
 	~Iterator()
 	{
-		if (m_connection)
+		if (m_connection != nullptr)
 			finish();
 	}
 
 	void finish()
 	{
 		// clean up
-		assert(m_connection);
-		mpd_response_finish(m_connection.get());
+		assert(m_connection != nullptr);
+		mpd_response_finish(m_connection);
 		m_object = DestT();
 		m_connection = nullptr;
 	}
 
 	DestT &operator*() const
 	{
-		assert(m_connection);
+		assert(m_connection != nullptr);
 		if (m_object.empty())
 			throw std::runtime_error("empty object");
 		return const_cast<DestT &>(m_object);
@@ -227,9 +226,9 @@ struct Iterator : std::iterator<std::forward_iterator_tag, DestT>
 
 	Iterator &operator++()
 	{
-		assert(m_connection);
+		assert(m_connection != nullptr);
 		assert(m_fetch_source != nullptr);
-		auto src = m_fetch_source(m_connection.get());
+		auto src = m_fetch_source(m_connection);
 		if (src != nullptr)
 			m_object = DestT(src);
 		else
@@ -254,14 +253,14 @@ struct Iterator : std::iterator<std::forward_iterator_tag, DestT>
 	}
 
 private:
-	Iterator(std::shared_ptr<mpd_connection> conn, SourceFetcher fetch_source)
-	: m_connection(std::move(conn)), m_fetch_source(fetch_source)
+	Iterator(mpd_connection *connection, SourceFetcher fetch_source)
+	: m_connection(connection), m_fetch_source(fetch_source)
 	{
 		// get the first element
 		++*this;
 	}
 
-	std::shared_ptr<mpd_connection> m_connection;
+	mpd_connection *m_connection;
 	SourceFetcher m_fetch_source;
 	DestT m_object;
 };
@@ -269,7 +268,7 @@ private:
 typedef Iterator<Song, mpd_song> SongIterator;
 typedef Iterator<Output, mpd_output> OutputIterator;
 
-class Connection : private boost::noncopyable
+class Connection
 {
 	typedef std::function<void(Item)> ItemConsumer;
 	typedef std::function<void(Output)> OutputConsumer;
@@ -381,13 +380,18 @@ public:
 	int noidle();
 	
 private:
-	
+	struct ConnectionDeleter {
+		void operator()(mpd_connection *connection) {
+			mpd_connection_free(connection);
+		}
+	};
+
 	void checkConnection() const;
 	void prechecks();
 	void prechecksNoCommandsList();
 	void checkErrors() const;
 
-	std::shared_ptr<mpd_connection> m_connection;
+	std::unique_ptr<mpd_connection, ConnectionDeleter> m_connection;
 	bool m_command_list_active;
 	
 	int m_fd;

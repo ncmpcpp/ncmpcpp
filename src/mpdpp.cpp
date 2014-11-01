@@ -45,10 +45,7 @@ void Connection::Connect()
 	assert(!m_connection);
 	try
 	{
-		m_connection = std::shared_ptr<mpd_connection>(
-			mpd_connection_new(m_host.c_str(), m_port, m_timeout * 1000),
-			mpd_connection_free
-		);
+		m_connection.reset(mpd_connection_new(m_host.c_str(), m_port, m_timeout * 1000));
 		checkErrors();
 		if (!m_password.empty())
 			SendPassword();
@@ -298,7 +295,7 @@ SongIterator Connection::GetPlaylistChanges(unsigned version)
 	prechecksNoCommandsList();
 	mpd_send_queue_changes_meta(m_connection.get(), version);
 	checkErrors();
-	return SongIterator(m_connection, mpd_recv_song);
+	return SongIterator(m_connection.get(), mpd_recv_song);
 }
 
 Song Connection::GetCurrentSong()
@@ -325,7 +322,7 @@ SongIterator Connection::GetPlaylistContent(const std::string &path)
 {
 	prechecksNoCommandsList();
 	mpd_send_list_playlist_meta(m_connection.get(), path.c_str());
-	SongIterator result(m_connection, mpd_recv_song);
+	SongIterator result(m_connection.get(), mpd_recv_song);
 	checkErrors();
 	return result;
 }
@@ -334,7 +331,7 @@ SongIterator Connection::GetPlaylistContentNoInfo(const std::string &path)
 {
 	prechecksNoCommandsList();
 	mpd_send_list_playlist(m_connection.get(), path.c_str());
-	SongIterator result(m_connection, mpd_recv_song);
+	SongIterator result(m_connection.get(), mpd_recv_song);
 	checkErrors();
 	return result;
 }
@@ -664,7 +661,7 @@ SongIterator Connection::CommitSearchSongs()
 	prechecksNoCommandsList();
 	mpd_search_commit(m_connection.get());
 	checkErrors();
-	return SongIterator(m_connection, mpd_recv_song);
+	return SongIterator(m_connection.get(), mpd_recv_song);
 }
 
 void Connection::CommitSearchTags(StringConsumer f)
@@ -742,7 +739,7 @@ SongIterator Connection::GetSongs(const std::string &directory)
 	prechecksNoCommandsList();
 	mpd_send_list_meta(m_connection.get(), directory.c_str());
 	checkErrors();
-	return SongIterator(m_connection, mpd_recv_song);
+	return SongIterator(m_connection.get(), mpd_recv_song);
 }
 
 OutputIterator Connection::GetOutputs()
@@ -750,7 +747,7 @@ OutputIterator Connection::GetOutputs()
 	prechecksNoCommandsList();
 	mpd_send_outputs(m_connection.get());
 	checkErrors();
-	return OutputIterator(m_connection, mpd_recv_output);
+	return OutputIterator(m_connection.get(), mpd_recv_output);
 }
 
 void Connection::EnableOutput(int id)
