@@ -35,10 +35,8 @@ bool hasTheWord(const std::string &s)
 
 }
 
-int LocaleStringComparison::operator()(const std::string &a, const std::string &b) const
+int LocaleStringComparison::compare(const char *a, size_t a_len, const char *b, size_t b_len) const
 {
-	const char *ac = a.c_str();
-	const char *bc = b.c_str();
 	size_t ac_off = 0, bc_off = 0;
 	if (m_ignore_the)
 	{
@@ -48,7 +46,7 @@ int LocaleStringComparison::operator()(const std::string &a, const std::string &
 			bc_off += 4;
 	}
 	return std::use_facet<std::collate<char>>(m_locale).compare(
-		ac+ac_off, ac+a.length(), bc+bc_off, bc+b.length()
+		a+ac_off, a+a_len, b+bc_off, b+b_len
 	);
 }
 

@@ -200,11 +200,12 @@ void SelectedItemsAdder::populatePlaylistSelector(BaseScreen *old_screen)
 	if (!in_local_browser)
 	{
 		size_t begin = m_playlist_selector.size();
-		Mpd.GetPlaylists([this](std::string playlist) {
-			m_playlist_selector.addItem(Entry(playlist,
-				boost::bind(&Self::addToExistingPlaylist, this, playlist)
+		for (MPD::PlaylistIterator it = Mpd.GetPlaylists(), end; it != end; ++it)
+		{
+			m_playlist_selector.addItem(Entry(it->path(),
+				boost::bind(&Self::addToExistingPlaylist, this, it->path())
 			));
-		});
+		};
 		std::sort(m_playlist_selector.beginV()+begin, m_playlist_selector.endV(),
 			LocaleBasedSorting(std::locale(), Config.ignore_leading_the));
 		if (begin < m_playlist_selector.size())

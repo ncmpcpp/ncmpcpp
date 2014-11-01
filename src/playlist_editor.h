@@ -82,7 +82,7 @@ struct PlaylistEditor: Screen<NC::Window *>, Filterable, HasColumns, HasSongs, S
 	bool isContentFiltered();
 	ProxySongList contentProxyList();
 	
-	NC::Menu<std::string> Playlists;
+	NC::Menu<MPD::Playlist> Playlists;
 	NC::Menu<MPD::Song> Content;
 	
 protected:

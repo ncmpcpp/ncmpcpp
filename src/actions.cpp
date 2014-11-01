@@ -642,7 +642,7 @@ void DeletePlaylistItems::run()
 	}
 	else if (myScreen->isActiveWindow(myPlaylistEditor->Content))
 	{
-		std::string playlist = myPlaylistEditor->Playlists.current().value();
+		std::string playlist = myPlaylistEditor->Playlists.current().value().path();
 		auto delete_fun = boost::bind(&MPD::Connection::PlaylistDelete, _1, playlist, _2);
 		Statusbar::print("Deleting items...");
 		deleteSelectedSongs(myPlaylistEditor->Content, delete_fun);
@@ -726,7 +726,7 @@ void DeleteStoredPlaylist::run()
 		question = boost::format("Delete selected playlists?");
 	else
 		question = boost::format("Delete playlist \"%1%\"?")
-			% wideShorten(myPlaylistEditor->Playlists.current().value(), COLS-question.size()-10);
+			% wideShorten(myPlaylistEditor->Playlists.current().value().path(), COLS-question.size()-10);
 	confirmAction(question);
 	auto list = getSelectedOrCurrent(
 		myPlaylistEditor->Playlists.begin(),
@@ -734,7 +734,7 @@ void DeleteStoredPlaylist::run()
 		myPlaylistEditor->Playlists.currentI()
 	);
 	for (const auto &item : list)
-		Mpd.DeletePlaylist(item->value());
+		Mpd.DeletePlaylist(item->value().path());
 	Statusbar::printf("%1% deleted", list.size() == 1 ? "Playlist" : "Playlists");
 	// force playlists update. this happens automatically, but only after call
 	// to Key::read, therefore when we call PlaylistEditor::Update, it won't
@@ -880,7 +880,7 @@ void MoveSelectedItemsUp::run()
 	else if (myScreen == myPlaylistEditor)
 	{
 		assert(!myPlaylistEditor->Playlists.empty());
-		std::string playlist = myPlaylistEditor->Playlists.current().value();
+		std::string playlist = myPlaylistEditor->Playlists.current().value().path();
 		auto move_fun = boost::bind(&MPD::Connection::PlaylistMove, _1, playlist, _2, _3);
 		moveSelectedItemsUp(myPlaylistEditor->Content, move_fun);
 	}
@@ -905,7 +905,7 @@ void MoveSelectedItemsDown::run()
 	else if (myScreen == myPlaylistEditor)
 	{
 		assert(!myPlaylistEditor->Playlists.empty());
-		std::string playlist = myPlaylistEditor->Playlists.current().value();
+		std::string playlist = myPlaylistEditor->Playlists.current().value().path();
 		auto move_fun = boost::bind(&MPD::Connection::PlaylistMove, _1, playlist, _2, _3);
 		moveSelectedItemsDown(myPlaylistEditor->Content, move_fun);
 	}
@@ -927,7 +927,7 @@ void MoveSelectedItemsTo::run()
 	else
 	{
 		assert(!myPlaylistEditor->Playlists.empty());
-		std::string playlist = myPlaylistEditor->Playlists.current().value();
+		std::string playlist = myPlaylistEditor->Playlists.current().value().path();
 		auto move_fun = boost::bind(&MPD::Connection::PlaylistMove, _1, playlist, _2, _3);
 		moveSelectedItemsTo(myPlaylistEditor->Content, move_fun);
 	}
@@ -953,7 +953,7 @@ void Add::run()
 	Statusbar::put() << "Adding...";
 	wFooter->refresh();
 	if (myScreen == myPlaylistEditor)
-		Mpd.AddToPlaylist(myPlaylistEditor->Playlists.current().value(), path);
+		Mpd.AddToPlaylist(myPlaylistEditor->Playlists.current().value().path(), path);
 	else
 	{
 		const char lastfm_url[] = "lastfm://";
@@ -1504,7 +1504,7 @@ void EditPlaylistName::run()
 	// FIXME: support local browser more generally
 	std::string old_name, new_name;
 	if (myScreen->isActiveWindow(myPlaylistEditor->Playlists))
-		old_name = myPlaylistEditor->Playlists.current().value();
+		old_name = myPlaylistEditor->Playlists.current().value().path();
 	else
 		old_name = myBrowser->main().current().value().name;
 	{
@@ -1759,7 +1759,7 @@ void CropPlaylist::run()
 	if (w.size() <= 1)
 		return;
 	assert(!myPlaylistEditor->Playlists.empty());
-	std::string playlist = myPlaylistEditor->Playlists.current().value();
+	std::string playlist = myPlaylistEditor->Playlists.current().value().path();
 	if (Config.ask_before_clearing_playlists)
 		confirmAction(boost::format("Do you really want to crop playlist \"%1%\"?") % playlist);
 	selectCurrentIfNoneSelected(w);
@@ -1789,7 +1789,7 @@ void ClearPlaylist::run()
 {
 	if (myPlaylistEditor->Playlists.empty())
 		return;
-	std::string playlist = myPlaylistEditor->Playlists.current().value();
+	std::string playlist = myPlaylistEditor->Playlists.current().value().path();
 	if (Config.ask_before_clearing_playlists)
 		confirmAction(boost::format("Do you really want to clear playlist \"%1%\"?") % playlist);
 	auto delete_fun = boost::bind(&MPD::Connection::PlaylistDelete, _1, playlist, _2);

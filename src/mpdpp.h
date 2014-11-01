@@ -305,8 +305,9 @@ private:
 	DestT m_object;
 };
 
-typedef Iterator<Song, mpd_song> SongIterator;
 typedef Iterator<Output, mpd_output> OutputIterator;
+typedef Iterator<Playlist, mpd_playlist> PlaylistIterator;
+typedef Iterator<Song, mpd_song> SongIterator;
 
 class Connection
 {
@@ -402,7 +403,7 @@ public:
 	SongIterator CommitSearchSongs();
 	void CommitSearchTags(StringConsumer f);
 	
-	void GetPlaylists(StringConsumer f);
+	PlaylistIterator GetPlaylists();
 	void GetList(mpd_tag_type type, StringConsumer f);
 	void GetDirectory(const std::string &directory, ItemConsumer f);
 	void GetDirectoryRecursive(const std::string &directory, SongConsumer f);

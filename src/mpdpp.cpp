@@ -604,12 +604,12 @@ void Connection::SavePlaylist(const std::string &name)
 	checkErrors();
 }
 
-void Connection::GetPlaylists(StringConsumer f)
+PlaylistIterator Connection::GetPlaylists()
 {
-	GetDirectory("/", [&f](Item &&item) {
-		if (item.type == MPD::Item::Type::Playlist)
-			f(std::move(item.name));
-	});
+	prechecksNoCommandsList();
+	mpd_send_list_playlists(m_connection.get());
+	checkErrors();
+	return PlaylistIterator(m_connection.get(), mpd_recv_playlist);
 }
 
 void Connection::GetList(mpd_tag_type type, StringConsumer f)
