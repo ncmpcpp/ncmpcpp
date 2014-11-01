@@ -152,8 +152,10 @@ struct SongIterator : std::iterator<std::forward_iterator_tag, Song>
 	SongIterator() : m_connection(nullptr) { }
 	~SongIterator();
 
-	Song &operator*();
-	Song *operator->();
+	void finish();
+
+	Song &operator*() const;
+	Song *operator->() const;
 
 	SongIterator &operator++();
 	SongIterator operator++(int);
@@ -167,7 +169,7 @@ struct SongIterator : std::iterator<std::forward_iterator_tag, Song>
 	}
 
 private:
-	SongIterator(std::shared_ptr<mpd_connection> conn) : m_connection(std::move(conn)) { }
+	SongIterator(std::shared_ptr<mpd_connection> conn);
 
 	std::shared_ptr<mpd_connection> m_connection;
 	Song m_song;
@@ -175,8 +177,6 @@ private:
 
 class Connection : private boost::noncopyable
 {
-	typedef void (*ErrorHandler) (Connection *, int, const char *, void *);
-	
 	typedef std::function<void(Item)> ItemConsumer;
 	typedef std::function<void(Output)> OutputConsumer;
 	typedef std::function<void(Song)> SongConsumer;
@@ -221,12 +221,12 @@ public:
 	void Shuffle();
 	void ClearMainPlaylist();
 	
-	void GetPlaylistChanges(unsigned, SongConsumer f);
+	SongIterator GetPlaylistChanges(unsigned);
 	
 	Song GetCurrentSong();
 	Song GetSong(const std::string &);
-	void GetPlaylistContent(const std::string &name, SongConsumer f);
-	void GetPlaylistContentNoInfo(const std::string &name, SongConsumer f);
+	SongIterator GetPlaylistContent(const std::string &name);
+	SongIterator GetPlaylistContentNoInfo(const std::string &name);
 	
 	void GetSupportedExtensions(std::set<std::string> &);
 	
@@ -266,14 +266,14 @@ public:
 	void AddSearch(mpd_tag_type item, const std::string &str) const;
 	void AddSearchAny(const std::string &str) const;
 	void AddSearchURI(const std::string &str) const;
-	void CommitSearchSongs(SongConsumer f);
+	SongIterator CommitSearchSongs();
 	void CommitSearchTags(StringConsumer f);
 	
 	void GetPlaylists(StringConsumer f);
 	void GetList(mpd_tag_type type, StringConsumer f);
 	void GetDirectory(const std::string &directory, ItemConsumer f);
 	void GetDirectoryRecursive(const std::string &directory, SongConsumer f);
-	void GetSongs(const std::string &directory, SongConsumer f);
+	SongIterator GetSongs(const std::string &directory);
 	void GetDirectories(const std::string &directory, StringConsumer f);
 	
 	void GetOutputs(OutputConsumer f);

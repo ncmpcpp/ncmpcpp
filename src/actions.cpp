@@ -1319,30 +1319,31 @@ void EditLibraryTag::run()
 	if (!new_tag.empty() && new_tag != myLibrary->Tags.current().value().tag())
 	{
 		Statusbar::print("Updating tags...");
-		Mpd.StartSearch(1);
+		Mpd.StartSearch(true);
 		Mpd.AddSearch(Config.media_lib_primary_tag, myLibrary->Tags.current().value().tag());
 		MPD::MutableSong::SetFunction set = tagTypeToSetFunction(Config.media_lib_primary_tag);
 		assert(set);
 		bool success = true;
 		std::string dir_to_update;
-		Mpd.CommitSearchSongs([set, &dir_to_update, &new_tag, &success](MPD::Song s) {
-			if (!success)
-				return;
-			MPD::MutableSong ms = s;
+		for (MPD::SongIterator s = Mpd.CommitSearchSongs(), end; s != end; ++s)
+		{
+			MPD::MutableSong ms = std::move(*s);
 			ms.setTags(set, new_tag, Config.tags_separator);
 			Statusbar::printf("Updating tags in \"%1%\"...", ms.getName());
 			std::string path = Config.mpd_music_dir + ms.getURI();
 			if (!Tags::write(ms))
 			{
+				success = false;
 				const char msg[] = "Error while updating tags in \"%1%\"";
 				Statusbar::printf(msg, wideShorten(ms.getURI(), COLS-const_strlen(msg)));
-				success = false;
+				s.finish();
+				break;
 			}
 			if (dir_to_update.empty())
-				dir_to_update = s.getURI();
+				dir_to_update = ms.getURI();
 			else
-				dir_to_update = getSharedDirectory(dir_to_update, s.getURI());
-		});
+				dir_to_update = getSharedDirectory(dir_to_update, ms.getURI());
+		};
 		if (success)
 		{
 			Mpd.UpdateDirectory(dir_to_update);

@@ -398,19 +398,21 @@ void Status::Changes::playlist(unsigned previous_version)
 			myPlaylist->main().resizeList(m_playlist_length);
 		}
 		
-		Mpd.GetPlaylistChanges(previous_version, [](MPD::Song s) {
-			size_t pos = s.getPosition();
+		MPD::SongIterator s = Mpd.GetPlaylistChanges(previous_version), end;
+		for (; s != end; ++s)
+		{
+			size_t pos = s->getPosition();
+			myPlaylist->registerSong(*s);
 			if (pos < myPlaylist->main().size())
 			{
 				// if song's already in playlist, replace it with a new one
 				MPD::Song &old_s = myPlaylist->main()[pos].value();
 				myPlaylist->unregisterSong(old_s);
-				old_s = s;
+				old_s = std::move(*s);
 			}
 			else // otherwise just add it to playlist
-				myPlaylist->main().addItem(s);
-			myPlaylist->registerSong(s);
-		});
+				myPlaylist->main().addItem(std::move(*s));
+		}
 	});
 	
 	myPlaylist->reloadTotalLength();

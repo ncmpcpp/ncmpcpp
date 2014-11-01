@@ -252,9 +252,9 @@ void TagEditor::update()
 	if (Tags->reallyEmpty())
 	{
 		Tags->reset();
-		Mpd.GetSongs(Dirs->current().value().second, [this](MPD::Song s) {
-			Tags->addItem(s);
-		});
+		MPD::SongIterator s = Mpd.GetSongs(Dirs->current().value().second), end;
+		for (; s != end; ++s)
+			Tags->addItem(std::move(*s));
 		std::sort(Tags->beginV(), Tags->endV(),
 			LocaleBasedSorting(std::locale(), Config.ignore_leading_the));
 		Tags->refresh();

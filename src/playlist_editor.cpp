@@ -167,16 +167,18 @@ void PlaylistEditor::update()
 			Content.clearSearchResults();
 			withUnfilteredMenuReapplyFilter(Content, [this]() {
 				size_t idx = 0;
-				Mpd.GetPlaylistContent(Playlists.current().value(), [this, &idx](MPD::Song s) {
+				MPD::SongIterator s = Mpd.GetPlaylistContent(Playlists.current().value()), end;
+				for (; s != end; ++s, ++idx)
+				{
+					bool is_bold = myPlaylist->checkForSong(*s);
 					if (idx < Content.size())
 					{
-						Content[idx].value() = s;
-						Content[idx].setBold(myPlaylist->checkForSong(s));
+						Content[idx].setBold(is_bold);
+						Content[idx].value() = std::move(*s);
 					}
 					else
-						Content.addItem(s, myPlaylist->checkForSong(s));
-					++idx;
-				});
+						Content.addItem(std::move(*s), is_bold);
+				}
 				if (idx < Content.size())
 					Content.resizeList(idx);
 				std::string title;
@@ -484,14 +486,18 @@ MPD::SongList PlaylistEditor::getSelectedSongs()
 			if (e.isSelected())
 			{
 				any_selected = true;
-				Mpd.GetPlaylistContent(e.value(), vectorMoveInserter(result));
+				std::copy(
+					std::make_move_iterator(Mpd.GetPlaylistContent(e.value())),
+					std::make_move_iterator(MPD::SongIterator()),
+					std::back_inserter(result)
+				);
 			}
 		}
 		// if no item is selected, add songs from right column
 		if (!any_selected && !Content.empty())
 		{
 			withUnfilteredMenu(Content, [this, &result]() {
-				result.insert(result.end(), Content.beginV(), Content.endV());
+				std::copy(Content.beginV(), Content.endV(), std::back_inserter(result));
 			});
 		}
 	}

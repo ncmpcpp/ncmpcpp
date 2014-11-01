@@ -33,37 +33,43 @@ namespace MPD {
 
 SongIterator::~SongIterator()
 {
-	// if iterator wasn't fully traversed, clean up
-	if (m_connection.get() != nullptr)
-		mpd_response_finish(m_connection.get());
+	if (m_connection)
+		finish();
 }
 
-Song &SongIterator::operator*()
+void SongIterator::finish()
 {
-	assert(m_connection.get() != nullptr);
-	assert(!m_song.empty());
-	return m_song;
+	// clean up
+	assert(m_connection);
+	mpd_response_finish(m_connection.get());
+	m_song = Song();
+	m_connection = nullptr;
 }
 
-Song *SongIterator::operator->()
+Song &SongIterator::operator*() const
 {
-	assert(m_connection.get() != nullptr);
+	assert(m_connection);
 	assert(!m_song.empty());
-	return &m_song;
+	// we could make m_song a pointer to a Song and dereference here,
+	// but it's retarded as Song itself is essentially wrapper to
+	// std::shared_ptr. on the other hand, we need constness for the
+	// iterator to be able to play along with std::move_iterator.
+	return const_cast<Song &>(m_song);
+}
+
+Song *SongIterator::operator->() const
+{
+	return &**this;
 }
 
 SongIterator &SongIterator::operator++()
 {
-	assert(m_connection.get() != nullptr);
+	assert(m_connection);
 	mpd_song *s = mpd_recv_song(m_connection.get());
 	if (s != nullptr)
 		m_song = Song(s);
 	else
-	{
-		mpd_response_finish(m_connection.get());
-		m_song = Song();
-		m_connection = nullptr;
-	}
+		finish();
 	return *this;
 }
 
@@ -72,6 +78,13 @@ SongIterator SongIterator::operator++(int)
 	SongIterator it(*this);
 	++*this;
 	return it;
+}
+
+SongIterator::SongIterator(std::shared_ptr<mpd_connection> conn)
+: m_connection(std::move(conn))
+{
+	// get the first element
+	++*this;
 }
 
 Connection::Connection() : m_connection(nullptr),
@@ -336,14 +349,12 @@ void Connection::Rename(const std::string &from, const std::string &to)
 	checkErrors();
 }
 
-void Connection::GetPlaylistChanges(unsigned version, SongConsumer f)
+SongIterator Connection::GetPlaylistChanges(unsigned version)
 {
 	prechecksNoCommandsList();
 	mpd_send_queue_changes_meta(m_connection.get(), version);
-	while (mpd_song *s = mpd_recv_song(m_connection.get()))
-		f(Song(s));
-	mpd_response_finish(m_connection.get());
 	checkErrors();
+	return SongIterator(m_connection);
 }
 
 Song Connection::GetCurrentSong()
@@ -366,24 +377,22 @@ Song Connection::GetSong(const std::string &path)
 	return Song(s);
 }
 
-void Connection::GetPlaylistContent(const std::string &path, SongConsumer f)
+SongIterator Connection::GetPlaylistContent(const std::string &path)
 {
 	prechecksNoCommandsList();
 	mpd_send_list_playlist_meta(m_connection.get(), path.c_str());
-	while (mpd_song *s = mpd_recv_song(m_connection.get()))
-		f(Song(s));
-	mpd_response_finish(m_connection.get());
+	SongIterator result(m_connection);
 	checkErrors();
+	return result;
 }
 
-void Connection::GetPlaylistContentNoInfo(const std::string &path, SongConsumer f)
+SongIterator Connection::GetPlaylistContentNoInfo(const std::string &path)
 {
 	prechecksNoCommandsList();
 	mpd_send_list_playlist(m_connection.get(), path.c_str());
-	while (mpd_song *s = mpd_recv_song(m_connection.get()))
-		f(Song(s));
-	mpd_response_finish(m_connection.get());
+	SongIterator result(m_connection);
 	checkErrors();
+	return result;
 }
 
 void Connection::GetSupportedExtensions(std::set<std::string> &acc)
@@ -546,15 +555,15 @@ bool Connection::AddRandomTag(mpd_tag_type tag, size_t number)
 		auto it = tags.begin()+rand()%(tags.size()-number);
 		for (size_t i = 0; i < number && it != tags.end(); ++i)
 		{
-			StartSearch(1);
+			StartSearch(true);
 			AddSearch(tag, *it++);
-			SongList songs;
-			CommitSearchSongs([&songs](MPD::Song s) {
-				songs.push_back(s);
-			});
+			std::vector<std::string> paths;
+			MPD::SongIterator s = CommitSearchSongs(), end;
+			for (; s != end; ++s)
+				paths.push_back(s->getURI());
 			StartCommandsList();
-			for (auto s = songs.begin(); s != songs.end(); ++s)
-				AddSong(*s);
+			for (const auto &path : paths)
+				AddSong(path);
 			CommitCommandsList();
 		}
 	}
@@ -706,14 +715,12 @@ void Connection::AddSearchURI(const std::string &str) const
 	mpd_search_add_uri_constraint(m_connection.get(), MPD_OPERATOR_DEFAULT, str.c_str());
 }
 
-void Connection::CommitSearchSongs(SongConsumer f)
+SongIterator Connection::CommitSearchSongs()
 {
 	prechecksNoCommandsList();
 	mpd_search_commit(m_connection.get());
-	while (mpd_song *s = mpd_recv_song(m_connection.get()))
-		f(Song(s));
-	mpd_response_finish(m_connection.get());
 	checkErrors();
+	return SongIterator(m_connection);
 }
 
 void Connection::CommitSearchTags(StringConsumer f)
@@ -786,14 +793,12 @@ void Connection::GetDirectories(const std::string &directory, StringConsumer f)
 	checkErrors();
 }
 
-void Connection::GetSongs(const std::string &directory, SongConsumer f)
+SongIterator Connection::GetSongs(const std::string &directory)
 {
 	prechecksNoCommandsList();
 	mpd_send_list_meta(m_connection.get(), directory.c_str());
-	while (mpd_song *s = mpd_recv_song(m_connection.get()))
-		f(Song(s));
-	mpd_response_finish(m_connection.get());
 	checkErrors();
+	return SongIterator(m_connection);
 }
 
 void Connection::GetOutputs(OutputConsumer f)

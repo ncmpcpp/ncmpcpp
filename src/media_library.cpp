@@ -350,14 +350,15 @@ void MediaLibrary::update()
 			Mpd.StartSearch(true);
 			Mpd.AddSearch(Config.media_lib_primary_tag, primary_tag);
 			std::map<std::tuple<std::string, std::string>, time_t> albums;
-			Mpd.CommitSearchSongs([&albums](MPD::Song s) {
-				auto key = std::make_tuple(s.getAlbum(), s.getDate());
+			for (MPD::SongIterator s = Mpd.CommitSearchSongs(), end; s != end; ++s)
+			{
+				auto key = std::make_tuple(s->getAlbum(), s->getDate());
 				auto it = albums.find(key);
 				if (it == albums.end())
-					albums[key] = s.getMTime();
+					albums[key] = s->getMTime();
 				else
-					it->second = s.getMTime();
-			});
+					it->second = s->getMTime();
+			};
 			withUnfilteredMenuReapplyFilter(Albums, [this, &albums, &primary_tag]() {
 				size_t idx = 0;
 				for (auto it = albums.begin(); it != albums.end(); ++it, ++idx)
@@ -404,17 +405,17 @@ void MediaLibrary::update()
 		}
 		withUnfilteredMenuReapplyFilter(Songs, [this, &album]() {
 			size_t idx = 0;
-			Mpd.CommitSearchSongs([this, &idx](MPD::Song s) {
-				bool is_playlist = myPlaylist->checkForSong(s);
+			for (MPD::SongIterator s = Mpd.CommitSearchSongs(), end; s != end; ++s, ++idx)
+			{
+				bool is_playlist = myPlaylist->checkForSong(*s);
 				if (idx < Songs.size())
 				{
-					Songs[idx].value() = s;
+					Songs[idx].value() = std::move(*s);
 					Songs[idx].setBold(is_playlist);
 				}
 				else
-					Songs.addItem(s, is_playlist);
-				++idx;
-			});
+					Songs.addItem(std::move(*s), is_playlist);
+			};
 			if (idx < Songs.size())
 				Songs.resizeList(idx);
 			std::sort(Songs.begin(), Songs.end(), SortSongs(!album.isAllTracksEntry()));
@@ -738,7 +739,11 @@ MPD::SongList MediaLibrary::getSelectedSongs()
 		auto tag_handler = [&result](const std::string &tag) {
 			Mpd.StartSearch(true);
 			Mpd.AddSearch(Config.media_lib_primary_tag, tag);
-			Mpd.CommitSearchSongs(vectorMoveInserter(result));
+			std::copy(
+				std::make_move_iterator(Mpd.CommitSearchSongs()),
+				std::make_move_iterator(MPD::SongIterator()),
+				std::back_inserter(result)
+			);
 		};
 		bool any_selected = false;
 		for (auto &e : Tags)
@@ -771,7 +776,11 @@ MPD::SongList MediaLibrary::getSelectedSongs()
 					Mpd.AddSearch(MPD_TAG_ALBUM, sc.entry().album());
 				Mpd.AddSearch(MPD_TAG_DATE, sc.entry().date());
 				size_t begin = result.size();
-				Mpd.CommitSearchSongs(vectorMoveInserter(result));
+				std::copy(
+					std::make_move_iterator(Mpd.CommitSearchSongs()),
+					std::make_move_iterator(MPD::SongIterator()),
+					std::back_inserter(result)
+				);
 				std::sort(result.begin()+begin, result.end(), SortSongs(false));
 			}
 		}
@@ -1046,10 +1055,12 @@ void MediaLibrary::AddToPlaylist(bool add_n_play)
 		if ((!Tags.empty() && isActiveWindow(Tags))
 		||  (isActiveWindow(Albums) && Albums.current().value().isAllTracksEntry()))
 		{
-			MPD::SongList list;
 			Mpd.StartSearch(true);
 			Mpd.AddSearch(Config.media_lib_primary_tag, Tags.current().value().tag());
-			Mpd.CommitSearchSongs(vectorMoveInserter(list));
+			MPD::SongList list(
+				std::make_move_iterator(Mpd.CommitSearchSongs()),
+				std::make_move_iterator(MPD::SongIterator())
+			);
 			bool success = addSongsToPlaylist(list.begin(), list.end(), add_n_play, -1);
 			std::string tag_type = boost::locale::to_lower(
 				tagTypeToString(Config.media_lib_primary_tag));

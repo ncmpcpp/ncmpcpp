@@ -439,9 +439,8 @@ void SearchEngine::Search()
 			Mpd.AddSearch(MPD_TAG_DATE, itsConstraints[9]);
 		if (!itsConstraints[10].empty())
 			Mpd.AddSearch(MPD_TAG_COMMENT, itsConstraints[10]);
-		Mpd.CommitSearchSongs([this](MPD::Song s) {
-			w.addItem(s);
-		});
+		for (MPD::SongIterator s = Mpd.CommitSearchSongs(), end; s != end; ++s)
+			w.addItem(std::move(*s));
 		return;
 	}
 	

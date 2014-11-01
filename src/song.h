@@ -43,6 +43,14 @@ struct Song
 	virtual ~Song() { }
 	
 	Song(mpd_song *s);
+
+	Song(const Song &rhs) : m_song(rhs.m_song), m_hash(rhs.m_hash) { }
+	Song(Song &&rhs) : m_song(std::move(rhs.m_song)), m_hash(rhs.m_hash) { }
+	Song &operator=(Song rhs) {
+		m_song = std::move(rhs.m_song);
+		m_hash = rhs.m_hash;
+		return *this;
+	}
 	
 	std::string get(mpd_tag_type type, unsigned idx = 0) const;
 	

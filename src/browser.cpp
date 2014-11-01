@@ -139,8 +139,10 @@ void Browser::enterPressed()
 		}
 		case itPlaylist:
 		{
-			MPD::SongList list;
-			Mpd.GetPlaylistContentNoInfo(item.name, vectorMoveInserter(list));
+			MPD::SongList list(
+				std::make_move_iterator(Mpd.GetPlaylistContentNoInfo(item.name)),
+				std::make_move_iterator(MPD::SongIterator())
+			);
 			bool success = addSongsToPlaylist(list.begin(), list.end(), true, -1);
 			Statusbar::printf("Playlist \"%1%\" loaded%2%",
 				item.name, withErrors(success)
@@ -366,7 +368,11 @@ MPD::SongList Browser::getSelectedSongs()
 			result.push_back(*item.song);
 		else if (item.type == itPlaylist)
 		{
-			Mpd.GetPlaylistContent(item.name, vectorMoveInserter(result));
+			std::copy(
+				std::make_move_iterator(Mpd.GetPlaylistContent(item.name)),
+				std::make_move_iterator(MPD::SongIterator()),
+				std::back_inserter(result)
+			);
 		}
 	};
 	for (auto it = w.begin(); it != w.end(); ++it)
