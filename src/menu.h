@@ -84,7 +84,7 @@ public:
 		friend class Menu<ItemT>;
 		
 		BaseIterator m_it;
-		explicit ItemIterator(BaseIterator it) : m_it(it) { }
+		explicit ItemIterator(BaseIterator it) : m_it(std::move(it)) { }
 		
 		// base iterator's value_type doesn't change between const and non-const
 		// version, so we need to strip const off ValueT too for proper template
@@ -394,7 +394,7 @@ private:
 		typedef Item element_type;
 		
 		ItemProxy() { }
-		ItemProxy(Item item) : m_ptr(std::make_shared<Item>(item)) { }
+		ItemProxy(Item item) : m_ptr(std::make_shared<Item>(std::move(item))) { }
 		
 		Item &operator*() const { return *m_ptr; }
 		Item *operator->() const { return m_ptr.get(); }
