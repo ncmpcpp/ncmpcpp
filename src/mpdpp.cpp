@@ -607,7 +607,7 @@ void Connection::SavePlaylist(const std::string &name)
 void Connection::GetPlaylists(StringConsumer f)
 {
 	GetDirectory("/", [&f](Item &&item) {
-		if (item.type == itPlaylist)
+		if (item.type == MPD::Item::Type::Playlist)
 			f(std::move(item.name));
 	});
 }
@@ -688,15 +688,15 @@ void Connection::GetDirectory(const std::string &directory, ItemConsumer f)
 		{
 			case MPD_ENTITY_TYPE_DIRECTORY:
 				it.name = mpd_directory_get_path(mpd_entity_get_directory(item));
-				it.type = itDirectory;
+				it.type = MPD::Item::Type::Directory;
 				break;
 			case MPD_ENTITY_TYPE_SONG:
 				it.song = Song(mpd_song_dup(mpd_entity_get_song(item)));
-				it.type = itSong;
+				it.type = MPD::Item::Type::Song;
 				break;
 			case MPD_ENTITY_TYPE_PLAYLIST:
 				it.name = mpd_playlist_get_path(mpd_entity_get_playlist(item));
-				it.type = itPlaylist;
+				it.type = MPD::Item::Type::Playlist;
 				break;
 			default:
 				assert(false);

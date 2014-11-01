@@ -31,7 +31,6 @@
 
 namespace MPD {
 
-enum ItemType { itDirectory, itSong, itPlaylist };
 enum PlayerState { psUnknown, psStop, psPlay, psPause };
 enum ReplayGainMode { rgmOff, rgmTrack, rgmAlbum };
 
@@ -168,8 +167,10 @@ private:
 
 struct Item
 {
+	enum class Type { Directory, Playlist, Song };
+
 	Song song;
-	ItemType type;
+	Type type;
 	std::string name;
 };
 

@@ -59,13 +59,13 @@ bool LocaleBasedItemSorting::operator()(const MPD::Item &a, const MPD::Item &b) 
 	{
 		switch (a.type)
 		{
-			case MPD::itDirectory:
+			case MPD::Item::Type::Directory:
 				result = m_cmp(getBasename(a.name), getBasename(b.name));
 				break;
-			case MPD::itPlaylist:
+			case MPD::Item::Type::Playlist:
 				result = m_cmp(a.name, b.name);
 				break;
-			case MPD::itSong:
+			case MPD::Item::Type::Song:
 				switch (m_sort_mode)
 				{
 					case SortMode::Name:

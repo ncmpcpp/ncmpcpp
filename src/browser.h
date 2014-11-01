@@ -78,7 +78,7 @@ struct Browser: Screen<NC::Menu<MPD::Item>>, Filterable, HasSongs, Searchable, T
 #	endif // !WIN32
 	
 	static bool isParentDirectory(const MPD::Item &item) {
-		return item.type == MPD::itDirectory && item.name == "..";
+		return item.type == MPD::Item::Type::Directory && item.name == "..";
 	}
 	
 protected:

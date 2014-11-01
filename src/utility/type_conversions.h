@@ -35,6 +35,6 @@ MPD::MutableSong::SetFunction tagTypeToSetFunction(mpd_tag_type tag);
 mpd_tag_type charToTagType(char c);
 MPD::Song::GetFunction charToGetFunction(char c);
 
-std::string itemTypeToString(MPD::ItemType type);
+std::string itemTypeToString(MPD::Item::Type type);
 
 #endif // NCMPCPP_UTILITY_TYPE_CONVERSIONS_H

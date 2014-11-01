@@ -675,7 +675,7 @@ void DeleteBrowserItems::run()
 	else
 	{
 		MPD::Item &item = myBrowser->main().current().value();
-		std::string iname = item.type == MPD::itSong ? item.song.getName() : item.name;
+		std::string iname = item.type == MPD::Item::Type::Song ? item.song.getName() : item.name;
 		question = boost::format("Delete %1% \"%2%\"?")
 			% itemTypeToString(item.type) % wideShorten(iname, COLS-question.size()-10);
 	}
@@ -689,7 +689,7 @@ void DeleteBrowserItems::run()
 	for (const auto &item : list)
 	{
 		const MPD::Item &i = item->value();
-		std::string iname = i.type == MPD::itSong ? i.song.getName() : i.name;
+		std::string iname = i.type == MPD::Item::Type::Song ? i.song.getName() : i.name;
 		std::string errmsg;
 		if (myBrowser->deleteItem(i, errmsg))
 		{
@@ -1413,7 +1413,7 @@ bool EditDirectoryName::canBeRun() const
 {
 	return  ((myScreen == myBrowser
 	      && !myBrowser->main().empty()
-	      && myBrowser->main().current().value().type == MPD::itDirectory)
+	      && myBrowser->main().current().value().type == MPD::Item::Type::Directory)
 #	ifdef HAVE_TAGLIB_H
 	    ||   (myScreen->activeWindow() == myTagEditor->Dirs
 	      && !myTagEditor->Dirs->empty()
@@ -1495,7 +1495,7 @@ bool EditPlaylistName::canBeRun() const
 	      && !myPlaylistEditor->Playlists.empty())
 	    ||   (myScreen == myBrowser
 	      && !myBrowser->main().empty()
-		  && myBrowser->main().current().value().type == MPD::itPlaylist);
+		  && myBrowser->main().current().value().type == MPD::Item::Type::Playlist);
 }
 
 void EditPlaylistName::run()
@@ -1557,7 +1557,7 @@ void JumpToMediaLibrary::run()
 bool JumpToPlaylistEditor::canBeRun() const
 {
 	return myScreen == myBrowser
-	    && myBrowser->main().current().value().type == MPD::itPlaylist;
+	    && myBrowser->main().current().value().type == MPD::Item::Type::Playlist;
 }
 
 void JumpToPlaylistEditor::run()

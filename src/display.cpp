@@ -386,12 +386,12 @@ void Display::Items(NC::Menu<MPD::Item> &menu, const ProxySongList &pl)
 	const MPD::Item &item = menu.drawn()->value();
 	switch (item.type)
 	{
-		case MPD::itDirectory:
+		case MPD::Item::Type::Directory:
 			menu << "["
 			     << Charset::utf8ToLocale(getBasename(item.name))
 			     << "]";
 			break;
-		case MPD::itSong:
+		case MPD::Item::Type::Song:
 			switch (Config.browser_display_mode)
 			{
 				case DisplayMode::Classic:
@@ -402,7 +402,7 @@ void Display::Items(NC::Menu<MPD::Item> &menu, const ProxySongList &pl)
 					break;
 			}
 			break;
-		case MPD::itPlaylist:
+		case MPD::Item::Type::Playlist:
 			menu << Config.browser_playlist_prefix
 			     << Charset::utf8ToLocale(getBasename(item.name));
 			break;

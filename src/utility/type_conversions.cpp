@@ -200,18 +200,18 @@ MPD::Song::GetFunction charToGetFunction(char c)
 	}
 }
 
-std::string itemTypeToString(MPD::ItemType type)
+std::string itemTypeToString(MPD::Item::Type type)
 {
 	std::string result;
 	switch (type)
 	{
-		case MPD::itDirectory:
+		case MPD::Item::Type::Directory:
 			result = "directory";
 			break;
-		case MPD::itSong:
+		case MPD::Item::Type::Song:
 			result = "song";
 			break;
-		case MPD::itPlaylist:
+		case MPD::Item::Type::Playlist:
 			result = "playlist";
 			break;
 	}

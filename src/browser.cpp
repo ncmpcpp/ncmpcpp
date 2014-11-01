@@ -46,10 +46,6 @@ using Global::MainHeight;
 using Global::MainStartY;
 using Global::myScreen;
 
-using MPD::itDirectory;
-using MPD::itSong;
-using MPD::itPlaylist;
-
 namespace fs = boost::filesystem;
 
 Browser *myBrowser;
@@ -123,7 +119,7 @@ void Browser::enterPressed()
 	const MPD::Item &item = w.current().value();
 	switch (item.type)
 	{
-		case itDirectory:
+		case MPD::Item::Type::Directory:
 		{
 			if (isParentDirectory(item))
 				GetDirectory(getParentDirectory(itsBrowsedDir), itsBrowsedDir);
@@ -132,12 +128,12 @@ void Browser::enterPressed()
 			drawHeader();
 			break;
 		}
-		case itSong:
+		case MPD::Item::Type::Song:
 		{
 			addSongToPlaylist(item.song, true, -1);
 			break;
 		}
-		case itPlaylist:
+		case MPD::Item::Type::Playlist:
 		{
 			MPD::SongList list(
 				std::make_move_iterator(Mpd.GetPlaylistContentNoInfo(item.name)),
@@ -172,7 +168,7 @@ void Browser::spacePressed()
 	
 	switch (item.type)
 	{
-		case itDirectory:
+		case MPD::Item::Type::Directory:
 		{
 			bool success;
 #			ifndef WIN32
@@ -198,12 +194,12 @@ void Browser::spacePressed()
 			);
 			break;
 		}
-		case itSong:
+		case MPD::Item::Type::Song:
 		{
 			addSongToPlaylist(item.song, false);
 			break;
 		}
-		case itPlaylist:
+		case MPD::Item::Type::Playlist:
 		{
 			Mpd.LoadPlaylist(item.name);
 			Statusbar::printf("Playlist \"%1%\" loaded", item.name);
@@ -222,7 +218,7 @@ void Browser::mouseButtonPressed(MEVENT me)
 		w.Goto(me.y);
 		switch (w.current().value().type)
 		{
-			case itDirectory:
+			case MPD::Item::Type::Directory:
 				if (me.bstate & BUTTON1_PRESSED)
 				{
 					GetDirectory(w.current().value().name);
@@ -236,8 +232,8 @@ void Browser::mouseButtonPressed(MEVENT me)
 						w.scroll(NC::Scroll::Up);
 				}
 				break;
-			case itPlaylist:
-			case itSong:
+			case MPD::Item::Type::Playlist:
+			case MPD::Item::Type::Song:
 				if (me.bstate & BUTTON1_PRESSED)
 				{
 					size_t pos = w.choice();
@@ -328,7 +324,7 @@ ProxySongList Browser::proxySongList()
 {
 	return ProxySongList(w, [](NC::Menu<MPD::Item>::Item &item) -> MPD::Song * {
 		MPD::Song *ptr = 0;
-		if (item.value().type == itSong)
+		if (item.value().type == MPD::Item::Type::Song)
 			ptr = &item.value().song;
 		return ptr;
 	});
@@ -348,7 +344,7 @@ MPD::SongList Browser::getSelectedSongs()
 {
 	MPD::SongList result;
 	auto item_handler = [this, &result](const MPD::Item &item) {
-		if (item.type == itDirectory)
+		if (item.type == MPD::Item::Type::Directory)
 		{
 #			ifndef WIN32
 			if (isLocal())
@@ -364,9 +360,9 @@ MPD::SongList Browser::getSelectedSongs()
 				Mpd.GetDirectoryRecursive(item.name, vectorMoveInserter(result));
 			}
 		}
-		else if (item.type == itSong)
+		else if (item.type == MPD::Item::Type::Song)
 			result.push_back(item.song);
-		else if (item.type == itPlaylist)
+		else if (item.type == MPD::Item::Type::Playlist)
 		{
 			std::copy(
 				std::make_move_iterator(Mpd.GetPlaylistContent(item.name)),
@@ -404,7 +400,7 @@ void Browser::LocateSong(const MPD::Song &s)
 		GetDirectory(s.getDirectory());
 	for (size_t i = 0; i < w.size(); ++i)
 	{
-		if (w[i].value().type == itSong && s == w[i].value().song)
+		if (w[i].value().type == MPD::Item::Type::Song && s == w[i].value().song)
 		{
 			w.highlight(i);
 			break;
@@ -430,7 +426,7 @@ void Browser::GetDirectory(std::string dir, std::string subdir)
 	{
 		MPD::Item parent;
 		parent.name = "..";
-		parent.type = itDirectory;
+		parent.type = MPD::Item::Type::Directory;
 		w.addItem(parent);
 	}
 	
@@ -452,19 +448,19 @@ void Browser::GetDirectory(std::string dir, std::string subdir)
 	{
 		switch (it->type)
 		{
-			case itPlaylist:
+			case MPD::Item::Type::Playlist:
 			{
 				w.addItem(*it);
 				break;
 			}
-			case itDirectory:
+			case MPD::Item::Type::Directory:
 			{
 				if (it->name == subdir)
 					highlightme = w.size();
 				w.addItem(*it);
 				break;
 			}
-			case itSong:
+			case MPD::Item::Type::Song:
 			{
 				w.addItem(*it, myPlaylist->checkForSong(it->song));
 				break;
@@ -493,14 +489,14 @@ void Browser::GetLocalDirectory(MPD::ItemList &v, const std::string &directory, 
 			}
 			else
 			{
-				item.type = itDirectory;
+				item.type = MPD::Item::Type::Directory;
 				item.name = e.path().native();
 				v.push_back(item);
 			}
 		}
 		else if (hasSupportedExtension(e.path().native()))
 		{
-			item.type = itSong;
+			item.type = MPD::Item::Type::Song;
 			mpd_pair file_pair = { "file", e.path().native().c_str() };
 			item.song = mpd_song_begin(&file_pair);
 			// FIXME no tag reading for now
@@ -569,7 +565,7 @@ bool Browser::deleteItem(const MPD::Item &item, std::string &errmsg)
 		FatalError("Parent directory passed to Browser::deleteItem");
 	
 	// playlist created by mpd
-	if (!isLocal() && item.type == itPlaylist && CurrentDir() == "/")
+	if (!isLocal() && item.type == MPD::Item::Type::Playlist && CurrentDir() == "/")
 	{
 		try
 		{
@@ -587,12 +583,12 @@ bool Browser::deleteItem(const MPD::Item &item, std::string &errmsg)
 	std::string path;
 	if (!isLocal())
 		path = Config.mpd_music_dir;
-	path += item.type == itSong ? item.song.getURI() : item.name;
+	path += item.type == MPD::Item::Type::Song ? item.song.getURI() : item.name;
 
 	bool rv;
 	try
 	{
-		if (item.type == itDirectory)
+		if (item.type == MPD::Item::Type::Directory)
 			ClearDirectory(path);
 		if (!boost::filesystem::exists(path))
 		{
@@ -631,10 +627,10 @@ std::string ItemToString(const MPD::Item &item)
 	std::string result;
 	switch (item.type)
 	{
-		case MPD::itDirectory:
+		case MPD::Item::Type::Directory:
 			result = "[" + getBasename(item.name) + "]";
 			break;
-		case MPD::itSong:
+		case MPD::Item::Type::Song:
 			switch (Config.browser_display_mode)
 			{
 				case DisplayMode::Classic:
@@ -645,7 +641,7 @@ std::string ItemToString(const MPD::Item &item)
 					break;
 			}
 			break;
-		case MPD::itPlaylist:
+		case MPD::Item::Type::Playlist:
 			result = Config.browser_playlist_prefix.str() + getBasename(item.name);
 			break;
 	}
