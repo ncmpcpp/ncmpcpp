@@ -121,6 +121,51 @@ private:
 	std::shared_ptr<mpd_status> m_status;
 };
 
+struct Playlist
+{
+	Playlist() { }
+	Playlist(mpd_playlist *playlist) : m_playlist(playlist, mpd_playlist_free) { }
+
+	Playlist(const Playlist &rhs) : m_playlist(rhs.m_playlist) { }
+	Playlist(Playlist &&rhs) : m_playlist(std::move(rhs.m_playlist)) { }
+	Playlist &operator=(Playlist rhs)
+	{
+		m_playlist = std::move(rhs.m_playlist);
+		return *this;
+	}
+
+	bool operator==(const Playlist &rhs)
+	{
+		if (empty() && rhs.empty())
+			return true;
+		else if (!empty() && !rhs.empty())
+			return strcmp(path(), rhs.path()) == 0
+			    && lastModified() == rhs.lastModified();
+		else
+			return false;
+	}
+	bool operator!=(const Playlist &rhs)
+	{
+		return !(*this == rhs);
+	}
+
+	const char *path() const
+	{
+		assert(m_playlist.get() != nullptr);
+		return mpd_playlist_get_path(m_playlist.get());
+	}
+	time_t lastModified() const
+	{
+		assert(m_playlist.get() != nullptr);
+		return mpd_playlist_get_last_modified(m_playlist.get());
+	}
+
+	bool empty() const { return m_playlist.get() == nullptr; }
+
+private:
+	std::shared_ptr<mpd_playlist> m_playlist;
+};
+
 struct Item
 {
 	std::shared_ptr<Song> song;
