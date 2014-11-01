@@ -21,6 +21,7 @@
 #ifndef NCMPCPP_MPDPP_H
 #define NCMPCPP_MPDPP_H
 
+#include <boost/noncopyable.hpp>
 #include <cassert>
 #include <exception>
 #include <set>
@@ -29,8 +30,8 @@
 #include <mpd/client.h>
 #include "song.h"
 
-namespace MPD {//
-	
+namespace MPD {
+
 enum ItemType { itDirectory, itSong, itPlaylist };
 enum PlayerState { psUnknown, psStop, psPlay, psPause };
 enum ReplayGainMode { rgmOff, rgmTrack, rgmAlbum };
@@ -144,7 +145,35 @@ typedef std::vector<Item> ItemList;
 typedef std::vector<std::string> StringList;
 typedef std::vector<Output> OutputList;
 
-class Connection
+struct SongIterator : std::iterator<std::forward_iterator_tag, Song>
+{
+	friend class Connection;
+
+	SongIterator() : m_connection(nullptr) { }
+	~SongIterator();
+
+	Song &operator*();
+	Song *operator->();
+
+	SongIterator &operator++();
+	SongIterator operator++(int);
+
+	bool operator==(const SongIterator &rhs) {
+		return m_connection == rhs.m_connection
+		    && m_song == rhs.m_song;
+	}
+	bool operator!=(const SongIterator &rhs) {
+		return !(*this == rhs);
+	}
+
+private:
+	SongIterator(std::shared_ptr<mpd_connection> conn) : m_connection(std::move(conn)) { }
+
+	std::shared_ptr<mpd_connection> m_connection;
+	Song m_song;
+};
+
+class Connection : private boost::noncopyable
 {
 	typedef void (*ErrorHandler) (Connection *, int, const char *, void *);
 	
@@ -155,7 +184,6 @@ class Connection
 	
 public:
 	Connection();
-	~Connection();
 	
 	void Connect();
 	bool Connected() const;
@@ -265,7 +293,7 @@ private:
 	void prechecksNoCommandsList();
 	void checkErrors() const;
 
-	mpd_connection *m_connection;
+	std::shared_ptr<mpd_connection> m_connection;
 	bool m_command_list_active;
 	
 	int m_fd;
