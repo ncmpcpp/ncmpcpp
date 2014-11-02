@@ -103,7 +103,7 @@ void TinyTagEditor::enterPressed()
 	size_t option = w.choice();
 	if (option < 19) // separator after comment
 	{
-		Statusbar::ScopedLock lock;
+		Statusbar::ScopedLock slock;
 		size_t pos = option-8;
 		Statusbar::put() << NC::Format::Bold << SongInfo::Tags[pos].Name << ": " << NC::Format::NoBold;
 		itsEdited.setTags(SongInfo::Tags[pos].Set, Global::wFooter->prompt(
@@ -114,7 +114,7 @@ void TinyTagEditor::enterPressed()
 	}
 	else if (option == 20)
 	{
-		Statusbar::ScopedLock lock;
+		Statusbar::ScopedLock slock;
 		Statusbar::put() << NC::Format::Bold << "Filename: " << NC::Format::NoBold;
 		std::string filename = itsEdited.getNewName().empty() ? itsEdited.getName() : itsEdited.getNewName();
 		size_t dot = filename.rfind(".");

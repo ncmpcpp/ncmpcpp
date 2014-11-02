@@ -131,8 +131,8 @@ struct Directory
 		m_path = mpd_directory_get_path(directory);
 		m_last_modified = mpd_directory_get_last_modified(directory);
 	}
-	Directory(std::string path, time_t last_modified = 0)
-	: m_path(std::move(path))
+	Directory(std::string path_, time_t last_modified = 0)
+	: m_path(std::move(path_))
 	, m_last_modified(last_modified)
 	{ }
 
@@ -171,8 +171,8 @@ struct Playlist
 		m_path = mpd_playlist_get_path(playlist);
 		m_last_modified = mpd_playlist_get_last_modified(playlist);
 	}
-	Playlist(std::string path, time_t last_modified = 0)
-	: m_path(std::move(path))
+	Playlist(std::string path_, time_t last_modified = 0)
+	: m_path(std::move(path_))
 	, m_last_modified(last_modified)
 	{
 		if (m_path.empty())
@@ -339,8 +339,8 @@ struct Iterator: std::iterator<std::input_iterator_tag, ObjectT>
 
 		typedef std::function<bool(State &)> Fetcher;
 
-		State(mpd_connection *connection, Fetcher fetcher)
-		: m_connection(connection)
+		State(mpd_connection *connection_, Fetcher fetcher)
+		: m_connection(connection_)
 		, m_fetcher(fetcher)
 		{
 			assert(m_connection != nullptr);

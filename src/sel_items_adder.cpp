@@ -226,7 +226,7 @@ void SelectedItemsAdder::addToNewPlaylist() const
 {
 	std::string playlist;
 	{
-		Statusbar::ScopedLock lock;
+		Statusbar::ScopedLock slock;
 		Statusbar::put() << "Save playlist as: ";
 		playlist = Global::wFooter->prompt();
 	}

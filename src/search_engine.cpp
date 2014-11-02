@@ -155,7 +155,7 @@ void SearchEngine::enterPressed()
 	
 	if (option < ConstraintsNumber)
 	{
-		Statusbar::ScopedLock lock;
+		Statusbar::ScopedLock slock;
 		std::string constraint = ConstraintsNames[option];
 		Statusbar::put() << NC::Format::Bold << constraint << NC::Format::NoBold << ": ";
 		itsConstraints[option] = Global::wFooter->prompt(itsConstraints[option]);

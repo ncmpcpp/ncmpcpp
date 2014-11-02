@@ -254,7 +254,7 @@ void setWindowsDimensions()
 
 void confirmAction(const boost::format &description)
 {
-	Statusbar::ScopedLock lock;
+	Statusbar::ScopedLock slock;
 	Statusbar::put() << description.str()
 	<< " [" << NC::Format::Bold << 'y' << NC::Format::NoBold
 	<< '/' << NC::Format::Bold << 'n' << NC::Format::NoBold
@@ -781,7 +781,7 @@ void SavePlaylist::run()
 	
 	std::string playlist_name;
 	{
-		Statusbar::ScopedLock lock;
+		Statusbar::ScopedLock slock;
 		Statusbar::put() << "Save playlist as: ";
 		playlist_name = wFooter->prompt();
 	}
@@ -828,7 +828,7 @@ void ExecuteCommand::run()
 
 	std::string cmd_name;
 	{
-		Statusbar::ScopedLock lock;
+		Statusbar::ScopedLock slock;
 		NC::Window::ScopedPromptHook helper(*wFooter,
 			Statusbar::Helpers::TryExecuteImmediateCommand()
 		);
@@ -953,7 +953,7 @@ void Add::run()
 	
 	std::string path;
 	{
-		Statusbar::ScopedLock lock;
+		Statusbar::ScopedLock slock;
 		Statusbar::put() << (myScreen == myPlaylistEditor ? "Add to playlist: " : "Add: ");
 		path = wFooter->prompt();
 	}
@@ -1259,7 +1259,7 @@ void SetCrossfade::run()
 {
 	using Global::wFooter;
 	
-	Statusbar::ScopedLock lock;
+	Statusbar::ScopedLock slock;
 	Statusbar::put() << "Set crossfade to: ";
 	auto crossfade = fromString<unsigned>(wFooter->prompt());
 	lowerBoundCheck(crossfade, 0u);
@@ -1273,7 +1273,7 @@ void SetVolume::run()
 	
 	unsigned volume;
 	{
-		Statusbar::ScopedLock lock;
+		Statusbar::ScopedLock slock;
 		Statusbar::put() << "Set volume to: ";
 		volume = fromString<unsigned>(wFooter->prompt());
 		boundsCheck(volume, 0u, 100u);
@@ -1319,7 +1319,7 @@ void EditLibraryTag::run()
 
 	std::string new_tag;
 	{
-		Statusbar::ScopedLock lock;
+		Statusbar::ScopedLock slock;
 		Statusbar::put() << NC::Format::Bold << tagTypeToString(Config.media_lib_primary_tag) << NC::Format::NoBold << ": ";
 		new_tag = wFooter->prompt(myLibrary->Tags.current().value().tag());
 	}
@@ -1378,7 +1378,7 @@ void EditLibraryAlbum::run()
 	// FIXME: merge this and EditLibraryTag. also, prompt on failure if user wants to continue
 	std::string new_album;
 	{
-		Statusbar::ScopedLock lock;
+		Statusbar::ScopedLock slock;
 		Statusbar::put() << NC::Format::Bold << "Album: " << NC::Format::NoBold;
 		new_album = wFooter->prompt(myLibrary->Albums.current().value().entry().album());
 	}
@@ -1437,7 +1437,7 @@ void EditDirectoryName::run()
 	{
 		std::string old_dir = myBrowser->main().current().value().directory().path(), new_dir;
 		{
-			Statusbar::ScopedLock lock;
+			Statusbar::ScopedLock slock;
 			Statusbar::put() << NC::Format::Bold << "Directory: " << NC::Format::NoBold;
 			new_dir = wFooter->prompt(old_dir);
 		}
@@ -1472,7 +1472,7 @@ void EditDirectoryName::run()
 	{
 		std::string old_dir = myTagEditor->Dirs->current().value().first, new_dir;
 		{
-			Statusbar::ScopedLock lock;
+			Statusbar::ScopedLock slock;
 			Statusbar::put() << NC::Format::Bold << "Directory: " << NC::Format::NoBold;
 			new_dir = wFooter->prompt(old_dir);
 		}
@@ -1514,7 +1514,7 @@ void EditPlaylistName::run()
 	else
 		old_name = myBrowser->main().current().value().playlist().path();
 	{
-		Statusbar::ScopedLock lock;
+		Statusbar::ScopedLock slock;
 		Statusbar::put() << NC::Format::Bold << "Playlist: " << NC::Format::NoBold;
 		new_name = wFooter->prompt(old_name);
 	}
@@ -1586,7 +1586,7 @@ void ToggleScreenLock::run()
 		unsigned part = Config.locked_screen_width_part*100;
 		if (Config.ask_for_locked_screen_width_part)
 		{
-			Statusbar::ScopedLock lock;
+			Statusbar::ScopedLock slock;
 			Statusbar::put() << "% of the locked screen's width to be reserved (20-80): ";
 			part = fromString<unsigned>(wFooter->prompt(boost::lexical_cast<std::string>(part)));
 		}
@@ -1630,7 +1630,7 @@ void JumpToPositionInSong::run()
 	
 	std::string spos;
 	{
-		Statusbar::ScopedLock lock;
+		Statusbar::ScopedLock slock;
 		Statusbar::put() << "Position to go (in %/m:ss/seconds(s)): ";
 		spos = wFooter->prompt();
 	}
@@ -1844,7 +1844,7 @@ void ApplyFilter::run()
 
 	try
 	{
-		Statusbar::ScopedLock lock;
+		Statusbar::ScopedLock slock;
 		NC::Window::ScopedPromptHook helper(*wFooter,
 			Statusbar::Helpers::ApplyFilterImmediately(f, filter)
 		);
@@ -1895,7 +1895,7 @@ void Find::run()
 	
 	std::string token;
 	{
-		Statusbar::ScopedLock lock;
+		Statusbar::ScopedLock slock;
 		Statusbar::put() << "Find: ";
 		token = wFooter->prompt();
 	}
@@ -1972,7 +1972,7 @@ void ToggleReplayGainMode::run()
 	
 	char rgm = 0;
 	{
-		Statusbar::ScopedLock lock;
+		Statusbar::ScopedLock slock;
 		Statusbar::put() << "Replay gain mode? "
 		<< "[" << NC::Format::Bold << 'o' << NC::Format::NoBold << "ff"
 		<< "/" << NC::Format::Bold << 't' << NC::Format::NoBold << "rack"
@@ -2044,7 +2044,7 @@ void AddRandomItems::run()
 	using Global::wFooter;
 	char rnd_type = 0;
 	{
-		Statusbar::ScopedLock lock;
+		Statusbar::ScopedLock slock;
 		Statusbar::put() << "Add random? "
 		<< "[" << NC::Format::Bold << 's' << NC::Format::NoBold << "ongs"
 		<< "/" << NC::Format::Bold << 'a' << NC::Format::NoBold << "rtists"
@@ -2065,7 +2065,7 @@ void AddRandomItems::run()
 	
 	unsigned number;
 	{
-		Statusbar::ScopedLock lock;
+		Statusbar::ScopedLock slock;
 		Statusbar::put() << "Number of random " << tag_type_str << "s: ";
 		number = fromString<unsigned>(wFooter->prompt());
 	}
@@ -2125,7 +2125,7 @@ void ToggleLibraryTagType::run()
 	
 	char tag_type = 0;
 	{
-		Statusbar::ScopedLock lock;
+		Statusbar::ScopedLock slock;
 		Statusbar::put() << "Tag type? "
 		<< "[" << NC::Format::Bold << 'a' << NC::Format::NoBold << "rtist"
 		<< "/" << "album" << NC::Format::Bold << 'A' << NC::Format::NoBold << "rtist"
@@ -2206,7 +2206,7 @@ void SetSelectedItemsPriority::run()
 	
 	unsigned prio;
 	{
-		Statusbar::ScopedLock lock;
+		Statusbar::ScopedLock slock;
 		Statusbar::put() << "Set priority [0-255]: ";
 		prio = fromString<unsigned>(wFooter->prompt());
 		boundsCheck(prio, 0u, 255u);
@@ -2230,7 +2230,7 @@ void SetVisualizerSampleMultiplier::run()
 
 	double multiplier;
 	{
-		Statusbar::ScopedLock lock;
+		Statusbar::ScopedLock slock;
 		Statusbar::put() << "Set visualizer sample multiplier: ";
 		multiplier = fromString<double>(wFooter->prompt());
 		lowerBoundCheck(multiplier, 0.0);
@@ -2251,7 +2251,7 @@ void FilterPlaylistOnPriorities::run()
 	
 	unsigned prio;
 	{
-		Statusbar::ScopedLock lock;
+		Statusbar::ScopedLock slock;
 		Statusbar::put() << "Show songs with priority higher than: ";
 		prio = fromString<unsigned>(wFooter->prompt());
 		boundsCheck(prio, 0u, 255u);
@@ -2803,7 +2803,7 @@ void findItem(const Find direction)
 	
 	std::string token;
 	{
-		Statusbar::ScopedLock lock;
+		Statusbar::ScopedLock slock;
 		Statusbar::put() << "Find " << (direction == Find::Forward ? "forward" : "backward") << ": ";
 		token = wFooter->prompt();
 	}

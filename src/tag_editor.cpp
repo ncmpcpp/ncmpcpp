@@ -359,7 +359,7 @@ void TagEditor::enterPressed()
 		{
 			std::string new_pattern;
 			{
-				Statusbar::ScopedLock lock;
+				Statusbar::ScopedLock slock;
 				Statusbar::put() << "Pattern: ";
 				new_pattern = wFooter->prompt(Config.pattern);
 			}
@@ -488,7 +488,7 @@ void TagEditor::enterPressed()
 		MPD::MutableSong::SetFunction set = SongInfo::Tags[id].Set;
 		if (id > 0 && w == TagTypes)
 		{
-			Statusbar::ScopedLock lock;
+			Statusbar::ScopedLock slock;
 			Statusbar::put() << NC::Format::Bold << TagTypes->current().value() << NC::Format::NoBold << ": ";
 			std::string new_tag = wFooter->prompt(Tags->current().value().getTags(get, Config.tags_separator));
 			for (auto it = EditedSongs.begin(); it != EditedSongs.end(); ++it)
@@ -496,7 +496,7 @@ void TagEditor::enterPressed()
 		}
 		else if (w == Tags)
 		{
-			Statusbar::ScopedLock lock;
+			Statusbar::ScopedLock slock;
 			Statusbar::put() << NC::Format::Bold << TagTypes->current().value() << NC::Format::NoBold << ": ";
 			std::string new_tag = wFooter->prompt(Tags->current().value().getTags(get, Config.tags_separator));
 			if (new_tag != Tags->current().value().getTags(get, Config.tags_separator))
@@ -515,7 +515,7 @@ void TagEditor::enterPressed()
 			}
 			else if (w == Tags)
 			{
-				Statusbar::ScopedLock lock;
+				Statusbar::ScopedLock slock;
 				MPD::MutableSong &s = Tags->current().value();
 				std::string old_name = s.getNewName().empty() ? s.getName() : s.getNewName();
 				size_t last_dot = old_name.rfind(".");
