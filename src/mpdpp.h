@@ -547,7 +547,7 @@ public:
 	PlaylistIterator GetPlaylists();
 	void GetList(mpd_tag_type type, StringConsumer f);
 	ItemIterator GetDirectory(const std::string &directory);
-	ItemIterator GetDirectoryRecursive(const std::string &directory);
+	SongIterator GetDirectoryRecursive(const std::string &directory);
 	SongIterator GetSongs(const std::string &directory);
 	void GetDirectories(const std::string &directory, StringConsumer f);
 	

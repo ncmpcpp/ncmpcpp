@@ -259,24 +259,20 @@ void MediaLibrary::update()
 			Albums.clearSearchResults();
 			m_albums_update_request = false;
 			std::map<std::tuple<std::string, std::string, std::string>, time_t> albums;
-			MPD::ItemIterator item = Mpd.GetDirectoryRecursive("/"), end;
-			for (; item != end; ++item)
+			for (MPD::SongIterator s = Mpd.GetDirectoryRecursive("/"), end; s != end; ++s)
 			{
-				if (item->type() != MPD::Item::Type::Song)
-					continue;
 				unsigned idx = 0;
-				const MPD::Song &s = item->song();
-				std::string tag = s.get(Config.media_lib_primary_tag, idx);
+				std::string tag = s->get(Config.media_lib_primary_tag, idx);
 				do
 				{
-					auto key = std::make_tuple(tag, s.getAlbum(), s.getDate());
+					auto key = std::make_tuple(tag, s->getAlbum(), s->getDate());
 					auto it = albums.find(key);
 					if (it == albums.end())
-						albums[key] = s.getMTime();
+						albums[key] = s->getMTime();
 					else
-						it->second = s.getMTime();
+						it->second = s->getMTime();
 				}
-				while (!(tag = s.get(Config.media_lib_primary_tag, ++idx)).empty());
+				while (!(tag = s->get(Config.media_lib_primary_tag, ++idx)).empty());
 			}
 			withUnfilteredMenuReapplyFilter(Albums, [this, &albums]() {
 				size_t idx = 0;
@@ -308,23 +304,19 @@ void MediaLibrary::update()
 			std::map<std::string, time_t> tags;
 			if (Config.media_library_sort_by_mtime)
 			{
-				MPD::ItemIterator item = Mpd.GetDirectoryRecursive("/"), end;
-				for (; item != end; ++item)
+				for (MPD::SongIterator s = Mpd.GetDirectoryRecursive("/"), end; s != end; ++s)
 				{
-					if (item->type() != MPD::Item::Type::Song)
-						continue;
 					unsigned idx = 0;
-					const MPD::Song &s = item->song();
-					std::string tag = s.get(Config.media_lib_primary_tag, idx);
+					std::string tag = s->get(Config.media_lib_primary_tag, idx);
 					do
 					{
 						auto it = tags.find(tag);
 						if (it == tags.end())
-							tags[tag] = s.getMTime();
+							tags[tag] = s->getMTime();
 						else
-							it->second = std::max(it->second, s.getMTime());
+							it->second = std::max(it->second, s->getMTime());
 					}
-					while (!(tag = s.get(Config.media_lib_primary_tag, ++idx)).empty());
+					while (!(tag = s->get(Config.media_lib_primary_tag, ++idx)).empty());
 				}
 			}
 			else

@@ -346,16 +346,14 @@ MPD::SongList Browser::getSelectedSongs()
 		{
 			case MPD::Item::Type::Directory:
 				if (m_local_browser)
-				{
-					MPD::ItemList items;
 					getLocalDirectoryRecursively(songs, item.directory().path());
-				}
 				else
 				{
-					MPD::ItemIterator it = Mpd.GetDirectoryRecursive(item.directory().path()), end;
-					for (; it != end; ++it)
-						if (it->type() == MPD::Item::Type::Song)
-							songs.push_back(std::move(it->song()));
+					std::copy(
+						std::make_move_iterator(Mpd.GetDirectoryRecursive(item.directory().path())),
+						std::make_move_iterator(MPD::SongIterator()),
+						std::back_inserter(songs)
+					);
 				}
 				break;
 			case MPD::Item::Type::Song:

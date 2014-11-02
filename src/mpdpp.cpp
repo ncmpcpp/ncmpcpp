@@ -43,6 +43,24 @@ bool fetchItem(MPD::ItemIterator::State &state)
 		return false;
 }
 
+bool fetchItemSong(MPD::SongIterator::State &state)
+{
+	auto src = mpd_recv_entity(state.connection());
+	while (src != nullptr && mpd_entity_get_type(src) != MPD_ENTITY_TYPE_SONG)
+	{
+		mpd_entity_free(src);
+		src = mpd_recv_entity(state.connection());
+	}
+	if (src != nullptr)
+	{
+		state.setObject(mpd_song_dup(mpd_entity_get_song(src)));
+		mpd_entity_free(src);
+		return true;
+	}
+	else
+		return false;
+}
+
 bool fetchPlaylist(MPD::PlaylistIterator::State &state)
 {
 	auto src = mpd_recv_playlist(state.connection());
@@ -737,12 +755,12 @@ ItemIterator Connection::GetDirectory(const std::string &directory)
 	return ItemIterator(m_connection.get(), fetchItem);
 }
 
-ItemIterator Connection::GetDirectoryRecursive(const std::string &directory)
+SongIterator Connection::GetDirectoryRecursive(const std::string &directory)
 {
 	prechecksNoCommandsList();
 	mpd_send_list_all_meta(m_connection.get(), directory.c_str());
 	checkErrors();
-	return ItemIterator(m_connection.get(), fetchItem);
+	return SongIterator(m_connection.get(), fetchItemSong);
 }
 
 void Connection::GetDirectories(const std::string &directory, StringConsumer f)
