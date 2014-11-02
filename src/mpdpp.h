@@ -68,7 +68,7 @@ private:
 
 struct Statistics
 {
-	friend class Connection;
+	friend struct Connection;
 	
 	bool empty() const { return m_stats.get() == nullptr; }
 	
@@ -88,7 +88,7 @@ private:
 
 struct Status
 {
-	friend class Connection;
+	friend struct Connection;
 	
 	Status() { }
 	
@@ -337,7 +337,7 @@ struct Iterator: std::iterator<std::input_iterator_tag, ObjectT>
 	{
 		friend Iterator;
 
-		typedef bool (*Fetcher)(State &);
+		typedef std::function<bool(State &)> Fetcher;
 
 		State(mpd_connection *connection, Fetcher fetcher)
 		: m_connection(connection)
@@ -448,16 +448,15 @@ private:
 	std::shared_ptr<State> m_state;
 };
 
+typedef Iterator<Directory> DirectoryIterator;
 typedef Iterator<Item> ItemIterator;
 typedef Iterator<Output> OutputIterator;
 typedef Iterator<Playlist> PlaylistIterator;
 typedef Iterator<Song> SongIterator;
+typedef Iterator<std::string> StringIterator;
 
-class Connection
+struct Connection
 {
-	typedef std::function<void(std::string)> StringConsumer;
-	
-public:
 	Connection();
 	
 	void Connect();
@@ -503,7 +502,7 @@ public:
 	SongIterator GetPlaylistContent(const std::string &name);
 	SongIterator GetPlaylistContentNoInfo(const std::string &name);
 	
-	void GetSupportedExtensions(StringConsumer f);
+	StringIterator GetSupportedExtensions();
 	
 	void SetRepeat(bool);
 	void SetRandom(bool);
@@ -542,21 +541,20 @@ public:
 	void AddSearchAny(const std::string &str) const;
 	void AddSearchURI(const std::string &str) const;
 	SongIterator CommitSearchSongs();
-	void CommitSearchTags(StringConsumer f);
 	
 	PlaylistIterator GetPlaylists();
-	void GetList(mpd_tag_type type, StringConsumer f);
+	StringIterator GetList(mpd_tag_type type);
 	ItemIterator GetDirectory(const std::string &directory);
 	SongIterator GetDirectoryRecursive(const std::string &directory);
 	SongIterator GetSongs(const std::string &directory);
-	void GetDirectories(const std::string &directory, StringConsumer f);
+	DirectoryIterator GetDirectories(const std::string &directory);
 	
 	OutputIterator GetOutputs();
 	void EnableOutput(int id);
 	void DisableOutput(int id);
 	
-	void GetURLHandlers(StringConsumer f);
-	void GetTagTypes(StringConsumer f);
+	StringIterator GetURLHandlers();
+	StringIterator GetTagTypes();
 	
 	void idle();
 	int noidle();
@@ -583,8 +581,6 @@ private:
 	int m_port;
 	int m_timeout;
 	std::string m_password;
-	
-	mpd_tag_type m_searched_field;
 };
 
 }

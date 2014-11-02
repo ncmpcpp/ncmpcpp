@@ -321,9 +321,9 @@ void MediaLibrary::update()
 			}
 			else
 			{
-				Mpd.GetList(Config.media_lib_primary_tag, [&tags](std::string tag) {
-					tags[tag] = 0;
-				});
+				MPD::StringIterator tag = Mpd.GetList(Config.media_lib_primary_tag), end;
+				for (; tag != end; ++tag)
+					tags[std::move(*tag)] = 0;
 			}
 			withUnfilteredMenuReapplyFilter(Tags, [this, &tags]() {
 				size_t idx = 0;

@@ -239,11 +239,13 @@ void TagEditor::update()
 			Dirs->addItem(std::make_pair("..", getParentDirectory(itsBrowsedDir)));
 		else
 			Dirs->addItem(std::make_pair(".", "/"));
-		Mpd.GetDirectories(itsBrowsedDir, [this](std::string directory) {
-			Dirs->addItem(std::make_pair(getBasename(directory), directory));
-			if (directory == itsHighlightedDir)
+		MPD::DirectoryIterator directory = Mpd.GetDirectories(itsBrowsedDir), end;
+		for (; directory != end; ++directory)
+		{
+			Dirs->addItem(std::make_pair(getBasename(directory->path()), directory->path()));
+			if (directory->path() == itsHighlightedDir)
 				Dirs->highlight(Dirs->size()-1);
-		});
+		};
 		std::sort(Dirs->beginV()+1, Dirs->endV(),
 			LocaleBasedSorting(std::locale(), Config.ignore_leading_the));
 		Dirs->display();
@@ -277,10 +279,9 @@ void TagEditor::enterPressed()
 	
 	if (w == Dirs)
 	{
-		bool has_subdirs = false;
-		Mpd.GetDirectories(Dirs->current().value().second, [&has_subdirs](std::string) {
-			has_subdirs = true;
-		});
+		MPD::DirectoryIterator directory = Mpd.GetDirectories(Dirs->current().value().second), end;
+		bool has_subdirs = directory != end;
+		directory.finish();
 		if (has_subdirs)
 		{
 			itsHighlightedDir = itsBrowsedDir;

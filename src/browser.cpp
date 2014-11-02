@@ -558,9 +558,9 @@ void Browser::remove(const MPD::Item &item)
 void Browser::fetchSupportedExtensions()
 {
 	lm_supported_extensions.clear();
-	Mpd.GetSupportedExtensions([&](std::string extension) {
-		lm_supported_extensions.insert("." + std::move(extension));
-	});
+	MPD::StringIterator extension = Mpd.GetSupportedExtensions(), end;
+	for (; extension != end; ++extension)
+		lm_supported_extensions.insert("." + std::move(*extension));
 }
 
 /***********************************************************************/

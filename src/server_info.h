@@ -52,11 +52,11 @@ private:
 	
 	boost::posix_time::ptime m_timer;
 
-	MPD::StringList itsURLHandlers;
-	MPD::StringList itsTagTypes;
+	std::vector<std::string> m_url_handlers;
+	std::vector<std::string> m_tag_types;
 	
-	size_t itsWidth;
-	size_t itsHeight;
+	size_t m_width;
+	size_t m_height;
 };
 
 extern ServerInfo *myServerInfo;

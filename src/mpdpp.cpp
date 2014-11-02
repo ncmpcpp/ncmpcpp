@@ -31,16 +31,20 @@ MPD::Connection Mpd;
 
 namespace {
 
-bool fetchItem(MPD::ItemIterator::State &state)
+template <typename ObjectT, typename SourceT>
+std::function<bool(typename MPD::Iterator<ObjectT>::State &)>
+defaultFetcher(SourceT *(fetcher)(mpd_connection *))
 {
-	auto src = mpd_recv_entity(state.connection());
-	if (src != nullptr)
-	{
-		state.setObject(src);
-		return true;
-	}
-	else
-		return false;
+	return [fetcher](typename MPD::Iterator<ObjectT>::State &state) {
+		auto src = fetcher(state.connection());
+		if (src != nullptr)
+		{
+			state.setObject(src);
+			return true;
+		}
+		else
+			return false;
+	};
 }
 
 bool fetchItemSong(MPD::SongIterator::State &state)
@@ -55,42 +59,6 @@ bool fetchItemSong(MPD::SongIterator::State &state)
 	{
 		state.setObject(mpd_song_dup(mpd_entity_get_song(src)));
 		mpd_entity_free(src);
-		return true;
-	}
-	else
-		return false;
-}
-
-bool fetchPlaylist(MPD::PlaylistIterator::State &state)
-{
-	auto src = mpd_recv_playlist(state.connection());
-	if (src != nullptr)
-	{
-		state.setObject(src);
-		return true;
-	}
-	else
-		return false;
-}
-
-bool fetchSong(MPD::SongIterator::State &state)
-{
-	auto src = mpd_recv_song(state.connection());
-	if (src != nullptr)
-	{
-		state.setObject(src);
-		return true;
-	}
-	else
-		return false;
-}
-
-bool fetchOutput(MPD::OutputIterator::State &state)
-{
-	auto src = mpd_recv_output(state.connection());
-	if (src != nullptr)
-	{
-		state.setObject(src);
 		return true;
 	}
 	else
@@ -365,7 +333,7 @@ SongIterator Connection::GetPlaylistChanges(unsigned version)
 	prechecksNoCommandsList();
 	mpd_send_queue_changes_meta(m_connection.get(), version);
 	checkErrors();
-	return SongIterator(m_connection.get(), fetchSong);
+	return SongIterator(m_connection.get(), defaultFetcher<Song>(mpd_recv_song));
 }
 
 Song Connection::GetCurrentSong()
@@ -392,7 +360,7 @@ SongIterator Connection::GetPlaylistContent(const std::string &path)
 {
 	prechecksNoCommandsList();
 	mpd_send_list_playlist_meta(m_connection.get(), path.c_str());
-	SongIterator result(m_connection.get(), fetchSong);
+	SongIterator result(m_connection.get(), defaultFetcher<Song>(mpd_recv_song));
 	checkErrors();
 	return result;
 }
@@ -401,22 +369,27 @@ SongIterator Connection::GetPlaylistContentNoInfo(const std::string &path)
 {
 	prechecksNoCommandsList();
 	mpd_send_list_playlist(m_connection.get(), path.c_str());
-	SongIterator result(m_connection.get(), fetchSong);
+	SongIterator result(m_connection.get(), defaultFetcher<Song>(mpd_recv_song));
 	checkErrors();
 	return result;
 }
 
-void Connection::GetSupportedExtensions(StringConsumer f)
+StringIterator Connection::GetSupportedExtensions()
 {
 	prechecksNoCommandsList();
 	mpd_send_command(m_connection.get(), "decoders", NULL);
-	while (mpd_pair *pair = mpd_recv_pair_named(m_connection.get(), "suffix"))
-	{
-		f(pair->value);
-		mpd_return_pair(m_connection.get(), pair);
-	}
-	mpd_response_finish(m_connection.get());
 	checkErrors();
+	return StringIterator(m_connection.get(), [](StringIterator::State &state) {
+		auto src = mpd_recv_pair_named(state.connection(), "suffix");
+		if (src != nullptr)
+		{
+			state.setObject(src->value);
+			mpd_return_pair(state.connection(), src);
+			return true;
+		}
+		else
+			return false;
+	});
 }
 
 void Connection::SetRepeat(bool mode)
@@ -550,33 +523,27 @@ void Connection::Add(const std::string &path)
 
 bool Connection::AddRandomTag(mpd_tag_type tag, size_t number)
 {
-	StringList tags;
-	GetList(tag, [&tags](std::string tag_name) {
-		tags.push_back(tag_name);
-	});
+	std::vector<std::string> tags(
+		std::make_move_iterator(GetList(tag)),
+		std::make_move_iterator(StringIterator())
+	);
 	if (number > tags.size())
-	{
-		//if (itsErrorHandler)
-		//	itsErrorHandler(this, 0, "Requested number is out of range", itsErrorHandlerUserdata);
 		return false;
-	}
-	else
+
+	std::random_shuffle(tags.begin(), tags.end());
+	auto it = tags.begin()+rand()%(tags.size()-number);
+	for (size_t i = 0; i < number && it != tags.end(); ++i)
 	{
-		std::random_shuffle(tags.begin(), tags.end());
-		auto it = tags.begin()+rand()%(tags.size()-number);
-		for (size_t i = 0; i < number && it != tags.end(); ++i)
-		{
-			StartSearch(true);
-			AddSearch(tag, *it++);
-			std::vector<std::string> paths;
-			MPD::SongIterator s = CommitSearchSongs(), end;
-			for (; s != end; ++s)
-				paths.push_back(s->getURI());
-			StartCommandsList();
-			for (const auto &path : paths)
-				AddSong(path);
-			CommitCommandsList();
-		}
+		StartSearch(true);
+		AddSearch(tag, *it++);
+		std::vector<std::string> paths;
+		MPD::SongIterator s = CommitSearchSongs(), end;
+		for (; s != end; ++s)
+			paths.push_back(s->getURI());
+		StartCommandsList();
+		for (const auto &path : paths)
+			AddSong(path);
+		CommitCommandsList();
 	}
 	return true;
 }
@@ -679,21 +646,26 @@ PlaylistIterator Connection::GetPlaylists()
 	prechecksNoCommandsList();
 	mpd_send_list_playlists(m_connection.get());
 	checkErrors();
-	return PlaylistIterator(m_connection.get(), fetchPlaylist);
+	return PlaylistIterator(m_connection.get(), defaultFetcher<Playlist>(mpd_recv_playlist));
 }
 
-void Connection::GetList(mpd_tag_type type, StringConsumer f)
+StringIterator Connection::GetList(mpd_tag_type type)
 {
 	prechecksNoCommandsList();
 	mpd_search_db_tags(m_connection.get(), type);
 	mpd_search_commit(m_connection.get());
-	while (mpd_pair *item = mpd_recv_pair_tag(m_connection.get(), type))
-	{
-		f(std::string(item->value));
-		mpd_return_pair(m_connection.get(), item);
-	}
-	mpd_response_finish(m_connection.get());
 	checkErrors();
+	return StringIterator(m_connection.get(), [type](StringIterator::State &state) {
+		auto src = mpd_recv_pair_tag(state.connection(), type);
+		if (src != nullptr)
+		{
+			state.setObject(src->value);
+			mpd_return_pair(state.connection(), src);
+			return true;
+		}
+		else
+			return false;
+	});
 }
 
 void Connection::StartSearch(bool exact_match)
@@ -731,20 +703,7 @@ SongIterator Connection::CommitSearchSongs()
 	prechecksNoCommandsList();
 	mpd_search_commit(m_connection.get());
 	checkErrors();
-	return SongIterator(m_connection.get(), fetchSong);
-}
-
-void Connection::CommitSearchTags(StringConsumer f)
-{
-	prechecksNoCommandsList();
-	mpd_search_commit(m_connection.get());
-	while (mpd_pair *tag = mpd_recv_pair_tag(m_connection.get(), m_searched_field))
-	{
-		f(std::string(tag->value));
-		mpd_return_pair(m_connection.get(), tag);
-	}
-	mpd_response_finish(m_connection.get());
-	checkErrors();
+	return SongIterator(m_connection.get(), defaultFetcher<Song>(mpd_recv_song));
 }
 
 ItemIterator Connection::GetDirectory(const std::string &directory)
@@ -752,7 +711,7 @@ ItemIterator Connection::GetDirectory(const std::string &directory)
 	prechecksNoCommandsList();
 	mpd_send_list_meta(m_connection.get(), directory.c_str());
 	checkErrors();
-	return ItemIterator(m_connection.get(), fetchItem);
+	return ItemIterator(m_connection.get(), defaultFetcher<Item>(mpd_recv_entity));
 }
 
 SongIterator Connection::GetDirectoryRecursive(const std::string &directory)
@@ -763,17 +722,12 @@ SongIterator Connection::GetDirectoryRecursive(const std::string &directory)
 	return SongIterator(m_connection.get(), fetchItemSong);
 }
 
-void Connection::GetDirectories(const std::string &directory, StringConsumer f)
+DirectoryIterator Connection::GetDirectories(const std::string &directory)
 {
 	prechecksNoCommandsList();
 	mpd_send_list_meta(m_connection.get(), directory.c_str());
-	while (mpd_directory *dir = mpd_recv_directory(m_connection.get()))
-	{
-		f(std::string(mpd_directory_get_path(dir)));
-		mpd_directory_free(dir);
-	}
-	mpd_response_finish(m_connection.get());
 	checkErrors();
+	return DirectoryIterator(m_connection.get(), defaultFetcher<Directory>(mpd_recv_directory));
 }
 
 SongIterator Connection::GetSongs(const std::string &directory)
@@ -781,7 +735,7 @@ SongIterator Connection::GetSongs(const std::string &directory)
 	prechecksNoCommandsList();
 	mpd_send_list_meta(m_connection.get(), directory.c_str());
 	checkErrors();
-	return SongIterator(m_connection.get(), fetchSong);
+	return SongIterator(m_connection.get(), defaultFetcher<Song>(mpd_recv_song));
 }
 
 OutputIterator Connection::GetOutputs()
@@ -789,7 +743,7 @@ OutputIterator Connection::GetOutputs()
 	prechecksNoCommandsList();
 	mpd_send_outputs(m_connection.get());
 	checkErrors();
-	return OutputIterator(m_connection.get(), fetchOutput);
+	return OutputIterator(m_connection.get(), defaultFetcher<Output>(mpd_recv_output));
 }
 
 void Connection::EnableOutput(int id)
@@ -806,31 +760,41 @@ void Connection::DisableOutput(int id)
 	checkErrors();
 }
 
-void Connection::GetURLHandlers(StringConsumer f)
+StringIterator Connection::GetURLHandlers()
 {
 	prechecksNoCommandsList();
 	mpd_send_list_url_schemes(m_connection.get());
-	while (mpd_pair *handler = mpd_recv_pair_named(m_connection.get(), "handler"))
-	{
-		f(std::string(handler->value));
-		mpd_return_pair(m_connection.get(), handler);
-	}
-	mpd_response_finish(m_connection.get());
 	checkErrors();
+	return StringIterator(m_connection.get(), [](StringIterator::State &state) {
+		auto src = mpd_recv_pair_named(state.connection(), "handler");
+		if (src != nullptr)
+		{
+			state.setObject(src->value);
+			mpd_return_pair(state.connection(), src);
+			return true;
+		}
+		else
+			return false;
+	});
 }
 
-void Connection::GetTagTypes(StringConsumer f)
+StringIterator Connection::GetTagTypes()
 {
 	
 	prechecksNoCommandsList();
 	mpd_send_list_tag_types(m_connection.get());
-	while (mpd_pair *tag_type = mpd_recv_pair_named(m_connection.get(), "tagtype"))
-	{
-		f(std::string(tag_type->value));
-		mpd_return_pair(m_connection.get(), tag_type);
-	}
-	mpd_response_finish(m_connection.get());
 	checkErrors();
+	return StringIterator(m_connection.get(), [](StringIterator::State &state) {
+		auto src = mpd_recv_pair_named(state.connection(), "tagtype");
+		if (src != nullptr)
+		{
+			state.setObject(src->value);
+			mpd_return_pair(state.connection(), src);
+			return true;
+		}
+		else
+			return false;
+	});
 }
 
 void Connection::checkConnection() const
