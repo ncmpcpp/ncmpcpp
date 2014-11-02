@@ -29,6 +29,58 @@
 
 MPD::Connection Mpd;
 
+namespace {
+
+bool fetchItem(MPD::ItemIterator::State &state)
+{
+	auto src = mpd_recv_entity(state.connection());
+	if (src != nullptr)
+	{
+		state.setObject(src);
+		return true;
+	}
+	else
+		return false;
+}
+
+bool fetchPlaylist(MPD::PlaylistIterator::State &state)
+{
+	auto src = mpd_recv_playlist(state.connection());
+	if (src != nullptr)
+	{
+		state.setObject(src);
+		return true;
+	}
+	else
+		return false;
+}
+
+bool fetchSong(MPD::SongIterator::State &state)
+{
+	auto src = mpd_recv_song(state.connection());
+	if (src != nullptr)
+	{
+		state.setObject(src);
+		return true;
+	}
+	else
+		return false;
+}
+
+bool fetchOutput(MPD::OutputIterator::State &state)
+{
+	auto src = mpd_recv_output(state.connection());
+	if (src != nullptr)
+	{
+		state.setObject(src);
+		return true;
+	}
+	else
+		return false;
+}
+
+}
+
 namespace MPD {
 
 Connection::Connection() : m_connection(nullptr),
@@ -295,7 +347,7 @@ SongIterator Connection::GetPlaylistChanges(unsigned version)
 	prechecksNoCommandsList();
 	mpd_send_queue_changes_meta(m_connection.get(), version);
 	checkErrors();
-	return SongIterator(m_connection.get(), mpd_recv_song);
+	return SongIterator(m_connection.get(), fetchSong);
 }
 
 Song Connection::GetCurrentSong()
@@ -322,7 +374,7 @@ SongIterator Connection::GetPlaylistContent(const std::string &path)
 {
 	prechecksNoCommandsList();
 	mpd_send_list_playlist_meta(m_connection.get(), path.c_str());
-	SongIterator result(m_connection.get(), mpd_recv_song);
+	SongIterator result(m_connection.get(), fetchSong);
 	checkErrors();
 	return result;
 }
@@ -331,7 +383,7 @@ SongIterator Connection::GetPlaylistContentNoInfo(const std::string &path)
 {
 	prechecksNoCommandsList();
 	mpd_send_list_playlist(m_connection.get(), path.c_str());
-	SongIterator result(m_connection.get(), mpd_recv_song);
+	SongIterator result(m_connection.get(), fetchSong);
 	checkErrors();
 	return result;
 }
@@ -609,7 +661,7 @@ PlaylistIterator Connection::GetPlaylists()
 	prechecksNoCommandsList();
 	mpd_send_list_playlists(m_connection.get());
 	checkErrors();
-	return PlaylistIterator(m_connection.get(), mpd_recv_playlist);
+	return PlaylistIterator(m_connection.get(), fetchPlaylist);
 }
 
 void Connection::GetList(mpd_tag_type type, StringConsumer f)
@@ -661,7 +713,7 @@ SongIterator Connection::CommitSearchSongs()
 	prechecksNoCommandsList();
 	mpd_search_commit(m_connection.get());
 	checkErrors();
-	return SongIterator(m_connection.get(), mpd_recv_song);
+	return SongIterator(m_connection.get(), fetchSong);
 }
 
 void Connection::CommitSearchTags(StringConsumer f)
@@ -682,7 +734,7 @@ ItemIterator Connection::GetDirectory(const std::string &directory)
 	prechecksNoCommandsList();
 	mpd_send_list_meta(m_connection.get(), directory.c_str());
 	checkErrors();
-	return ItemIterator(m_connection.get(), mpd_recv_entity);
+	return ItemIterator(m_connection.get(), fetchItem);
 }
 
 ItemIterator Connection::GetDirectoryRecursive(const std::string &directory)
@@ -690,7 +742,7 @@ ItemIterator Connection::GetDirectoryRecursive(const std::string &directory)
 	prechecksNoCommandsList();
 	mpd_send_list_all_meta(m_connection.get(), directory.c_str());
 	checkErrors();
-	return ItemIterator(m_connection.get(), mpd_recv_entity);
+	return ItemIterator(m_connection.get(), fetchItem);
 }
 
 void Connection::GetDirectories(const std::string &directory, StringConsumer f)
@@ -711,7 +763,7 @@ SongIterator Connection::GetSongs(const std::string &directory)
 	prechecksNoCommandsList();
 	mpd_send_list_meta(m_connection.get(), directory.c_str());
 	checkErrors();
-	return SongIterator(m_connection.get(), mpd_recv_song);
+	return SongIterator(m_connection.get(), fetchSong);
 }
 
 OutputIterator Connection::GetOutputs()
@@ -719,7 +771,7 @@ OutputIterator Connection::GetOutputs()
 	prechecksNoCommandsList();
 	mpd_send_outputs(m_connection.get());
 	checkErrors();
-	return OutputIterator(m_connection.get(), mpd_recv_output);
+	return OutputIterator(m_connection.get(), fetchOutput);
 }
 
 void Connection::EnableOutput(int id)

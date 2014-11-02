@@ -329,16 +329,75 @@ typedef std::vector<Item> ItemList;
 typedef std::vector<std::string> StringList;
 typedef std::vector<Output> OutputList;
 
-template <typename DestT, typename SourceT>
-struct Iterator: std::iterator<std::input_iterator_tag, DestT>
+template <typename ObjectT>
+struct Iterator: std::iterator<std::input_iterator_tag, ObjectT>
 {
-	typedef SourceT *(*SourceFetcher)(mpd_connection *);
+	// shared state of the iterator
+	struct State
+	{
+		friend Iterator;
+
+		typedef bool (*Fetcher)(State &);
+
+		State(mpd_connection *connection, Fetcher fetcher)
+		: m_connection(connection)
+		, m_fetcher(fetcher)
+		{
+			assert(m_connection != nullptr);
+			assert(m_fetcher != nullptr);
+		}
+		~State()
+		{
+			mpd_response_finish(m_connection);
+		}
+
+		mpd_connection *connection() const
+		{
+			return m_connection;
+		}
+
+		void setObject(ObjectT object)
+		{
+			if (hasObject())
+				*m_object = std::move(object);
+			else
+				m_object.reset(new ObjectT(std::move(object)));
+		}
+
+	private:
+		bool operator==(const State &rhs) const
+		{
+			return m_connection == rhs.m_connection
+			    && m_object == m_object;
+		}
+		bool operator!=(const State &rhs) const
+		{
+			return !(*this == rhs);
+		}
+
+		bool fetch()
+		{
+			return m_fetcher(*this);
+		}
+		ObjectT &getObject() const
+		{
+			return *m_object;
+		}
+		bool hasObject() const
+		{
+			return m_object.get() != nullptr;
+		}
+
+		mpd_connection *m_connection;
+		Fetcher m_fetcher;
+		std::unique_ptr<ObjectT> m_object;
+	};
 
 	Iterator()
 	: m_state(nullptr)
 	{ }
-	Iterator(mpd_connection *connection, SourceFetcher fetch_source)
-	: m_state(std::make_shared<State>(connection, fetch_source))
+	Iterator(mpd_connection *connection, typename State::Fetcher fetcher)
+	: m_state(std::make_shared<State>(connection, std::move(fetcher)))
 	{
 		// get the first element
 		++*this;
@@ -350,14 +409,14 @@ struct Iterator: std::iterator<std::input_iterator_tag, DestT>
 		m_state = nullptr;
 	}
 
-	DestT &operator*() const
+	ObjectT &operator*() const
 	{
 		if (!m_state)
 			throw std::runtime_error("no object associated with the iterator");
 		assert(m_state->hasObject());
 		return m_state->getObject();
 	}
-	DestT *operator->() const
+	ObjectT *operator->() const
 	{
 		return &**this;
 	}
@@ -365,10 +424,7 @@ struct Iterator: std::iterator<std::input_iterator_tag, DestT>
 	Iterator &operator++()
 	{
 		assert(m_state);
-		auto src = m_state->fetchSource();
-		if (src != nullptr)
-			m_state->setObject(src);
-		else
+		if (!m_state->fetch())
 			finish();
 		return *this;
 	}
@@ -389,63 +445,13 @@ struct Iterator: std::iterator<std::input_iterator_tag, DestT>
 	}
 
 private:
-	struct State
-	{
-		State(mpd_connection *conn, SourceFetcher fetch_source)
-		: m_connection(conn)
-		, m_fetch_source(fetch_source)
-		{
-			assert(m_connection != nullptr);
-			assert(m_fetch_source != nullptr);
-		}
-		~State()
-		{
-			mpd_response_finish(m_connection);
-		}
-
-		bool operator==(const State &rhs) const
-		{
-			return m_connection == rhs.m_connection
-			    && m_object == m_object;
-		}
-		bool operator!=(const State &rhs) const
-		{
-			return !(*this == rhs);
-		}
-
-		SourceT *fetchSource() const
-		{
-			return m_fetch_source(m_connection);
-		}
-		DestT &getObject() const
-		{
-			return *m_object;
-		}
-		bool hasObject() const
-		{
-			return m_object.get() != nullptr;
-		}
-		void setObject(DestT object)
-		{
-			if (hasObject())
-				*m_object = std::move(object);
-			else
-				m_object.reset(new DestT(std::move(object)));
-		}
-
-	private:
-		mpd_connection *m_connection;
-		SourceFetcher m_fetch_source;
-		std::unique_ptr<DestT> m_object;
-	};
-
 	std::shared_ptr<State> m_state;
 };
 
-typedef Iterator<Item, mpd_entity> ItemIterator;
-typedef Iterator<Output, mpd_output> OutputIterator;
-typedef Iterator<Playlist, mpd_playlist> PlaylistIterator;
-typedef Iterator<Song, mpd_song> SongIterator;
+typedef Iterator<Item> ItemIterator;
+typedef Iterator<Output> OutputIterator;
+typedef Iterator<Playlist> PlaylistIterator;
+typedef Iterator<Song> SongIterator;
 
 class Connection
 {
