@@ -21,6 +21,7 @@
 #ifndef NCMPCPP_MENU_H
 #define NCMPCPP_MENU_H
 
+#include <boost/iterator/indirect_iterator.hpp>
 #include <cassert>
 #include <functional>
 #include <iterator>
@@ -53,6 +54,9 @@ public:
 		ItemT &value() { return m_value; }
 		const ItemT &value() const { return m_value; }
 		
+		ItemT &operator*() { return m_value; }
+		const ItemT &operator*() const { return m_value; }
+
 		void setBold(bool is_bold) { m_is_bold = is_bold; }
 		void setSelected(bool is_selected) { m_is_selected = is_selected; }
 		void setInactive(bool is_inactive) { m_is_inactive = is_inactive; }
@@ -78,92 +82,29 @@ public:
 		bool m_is_separator;
 	};
 	
-	template <typename ValueT, typename BaseIterator> class ItemIterator
-		: public std::iterator<std::random_access_iterator_tag, ValueT>
-	{
-		friend class Menu<ItemT>;
-		
-		BaseIterator m_it;
-		explicit ItemIterator(BaseIterator it) : m_it(std::move(it)) { }
-		
-		// base iterator's value_type doesn't change between const and non-const
-		// version, so we need to strip const off ValueT too for proper template
-		// version to be instantiated.
-		static const bool referenceValue = !std::is_same<
-			typename std::remove_const<ValueT>::type,
-			typename BaseIterator::value_type::element_type
-		>::value;
-		template <typename Result, bool referenceValue> struct getObject { };
-		template <typename Result> struct getObject<Result, true> {
-			static Result &apply(BaseIterator it) { return (*it)->value(); }
-		};
-		template <typename Result> struct getObject<Result, false> {
-			static Result &apply(BaseIterator it) { return **it; }
-		};
-		
-	public:
-		ItemIterator() { }
-		
-		ValueT &operator*() const { return getObject<ValueT, referenceValue>::apply(m_it); }
-		ValueT *operator->() const { return &getObject<ValueT, referenceValue>::apply(m_it); }
-		
-		ItemIterator &operator++() { ++m_it; return *this; }
-		ItemIterator operator++(int) { return ItemIterator(m_it++); }
-		
-		ItemIterator &operator--() { --m_it; return *this; }
-		ItemIterator operator--(int) { return ItemIterator(m_it--); }
-		
-		ValueT &operator[](ptrdiff_t n) const {
-			return getObject<ValueT, referenceValue>::apply(m_it + n);
-		}
-		
-		ItemIterator &operator+=(ptrdiff_t n) { m_it += n; return *this; }
-		ItemIterator operator+(ptrdiff_t n) const { return ItemIterator(m_it + n); }
-		
-		ItemIterator &operator-=(ptrdiff_t n) { m_it -= n; return *this; }
-		ItemIterator operator-(ptrdiff_t n) const { return ItemIterator(m_it - n); }
-		
-		ptrdiff_t operator-(const ItemIterator &rhs) const { return m_it - rhs.m_it; }
-		
-		template <typename Iterator>
-		bool operator==(const Iterator &rhs) const { return m_it == rhs.m_it; }
-		template <typename Iterator>
-		bool operator!=(const Iterator &rhs) const { return m_it != rhs.m_it; }
-		template <typename Iterator>
-		bool operator<(const Iterator &rhs) const { return m_it < rhs.m_it; }
-		template <typename Iterator>
-		bool operator<=(const Iterator &rhs) const { return m_it <= rhs.m_it; }
-		template <typename Iterator>
-		bool operator>(const Iterator &rhs) const { return m_it > rhs.m_it; }
-		template <typename Iterator>
-		bool operator>=(const Iterator &rhs) const { return m_it >= rhs.m_it; }
-		
-		/// non-const to const conversion
-		template <typename Iterator>
-		operator ItemIterator<typename std::add_const<ValueT>::type, Iterator>() {
-			return ItemIterator<typename std::add_const<ValueT>::type, Iterator>(m_it);
-		}
-		
-		const BaseIterator &base() const { return m_it; }
-	};
-	
-	typedef ItemIterator<
-		Item, typename std::vector<ItemProxy>::iterator
+	typedef boost::indirect_iterator<
+		typename std::vector<ItemProxy>::iterator,
+		Item,
+		boost::random_access_traversal_tag
 	> Iterator;
-	typedef ItemIterator<
-		const Item, typename std::vector<ItemProxy>::const_iterator
+	typedef boost::indirect_iterator<
+		typename std::vector<ItemProxy>::const_iterator,
+		const Item,
+		boost::random_access_traversal_tag
 	> ConstIterator;
-	
 	typedef std::reverse_iterator<Iterator> ReverseIterator;
 	typedef std::reverse_iterator<ConstIterator> ConstReverseIterator;
 	
-	typedef ItemIterator<
-		ItemT, typename std::vector<ItemProxy>::iterator
+	typedef boost::indirect_iterator<
+		Iterator,
+		ItemT,
+		boost::random_access_traversal_tag
 	> ValueIterator;
-	typedef ItemIterator<
-		typename std::add_const<ItemT>::type, typename std::vector<ItemProxy>::const_iterator
+	typedef boost::indirect_iterator<
+		ConstIterator,
+		const ItemT,
+		boost::random_access_traversal_tag
 	> ConstValueIterator;
-	
 	typedef std::reverse_iterator<ValueIterator> ReverseValueIterator;
 	typedef std::reverse_iterator<ConstValueIterator> ConstReverseValueIterator;
 	
@@ -378,10 +319,10 @@ public:
 	ReverseIterator rend() { return ReverseIterator(begin()); }
 	ConstReverseIterator rend() const { return ConstReverseIterator(begin()); }
 	
-	ValueIterator beginV() { return ValueIterator(m_options_ptr->begin()); }
-	ConstValueIterator beginV() const { return ConstValueIterator(m_options_ptr->begin()); }
-	ValueIterator endV() { return ValueIterator(m_options_ptr->end()); }
-	ConstValueIterator endV() const { return ConstValueIterator(m_options_ptr->end()); }
+	ValueIterator beginV() { return ValueIterator(begin()); }
+	ConstValueIterator beginV() const { return ConstValueIterator(begin()); }
+	ValueIterator endV() { return ValueIterator(end()); }
+	ConstValueIterator endV() const { return ConstValueIterator(end()); }
 	
 	ReverseValueIterator rbeginV() { return ReverseValueIterator(endV()); }
 	ConstReverseIterator rbeginV() const { return ConstReverseValueIterator(endV()); }
