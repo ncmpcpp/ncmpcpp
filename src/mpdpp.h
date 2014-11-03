@@ -325,10 +325,6 @@ private:
 	std::shared_ptr<mpd_output> m_output;
 };
 
-typedef std::vector<Item> ItemList;
-typedef std::vector<std::string> StringList;
-typedef std::vector<Output> OutputList;
-
 template <typename ObjectT>
 struct Iterator: std::iterator<std::input_iterator_tag, ObjectT>
 {

@@ -67,7 +67,7 @@ struct TagEditor: Screen<NC::Window *>, Filterable, HasColumns, HasSongs, Search
 	
 	virtual bool allowsSelection() OVERRIDE;
 	virtual void reverseSelection() OVERRIDE;
-	virtual MPD::SongList getSelectedSongs() OVERRIDE;
+	virtual std::vector<MPD::Song> getSelectedSongs() OVERRIDE;
 	
 	// HasColumns implementation
 	virtual bool previousColumnAvailable() OVERRIDE;

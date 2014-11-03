@@ -733,9 +733,9 @@ void MediaLibrary::reverseSelection()
 		reverseSelectionHelper(Songs.begin(), Songs.end());
 }
 
-MPD::SongList MediaLibrary::getSelectedSongs()
+std::vector<MPD::Song> MediaLibrary::getSelectedSongs()
 {
-	MPD::SongList result;
+	std::vector<MPD::Song> result;
 	if (isActiveWindow(Tags))
 	{
 		auto tag_handler = [&result](const std::string &tag) {
@@ -1059,7 +1059,7 @@ void MediaLibrary::AddToPlaylist(bool add_n_play)
 		{
 			Mpd.StartSearch(true);
 			Mpd.AddSearch(Config.media_lib_primary_tag, Tags.current().value().tag());
-			MPD::SongList list(
+			std::vector<MPD::Song> list(
 				std::make_move_iterator(Mpd.CommitSearchSongs()),
 				std::make_move_iterator(MPD::SongIterator())
 			);

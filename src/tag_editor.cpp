@@ -848,9 +848,9 @@ void TagEditor::reverseSelection()
 		reverseSelectionHelper(Tags->begin(), Tags->end());
 }
 
-MPD::SongList TagEditor::getSelectedSongs()
+std::vector<MPD::Song> TagEditor::getSelectedSongs()
 {
-	MPD::SongList result;
+	std::vector<MPD::Song> result;
 	if (w == Tags)
 	{
 		for (auto it = Tags->begin(); it != Tags->end(); ++it)

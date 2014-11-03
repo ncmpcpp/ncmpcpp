@@ -114,8 +114,6 @@ private:
 	size_t m_hash;
 };
 
-typedef std::vector<Song> SongList;
-
 }
 
 #endif // NCMPCPP_SONG_H

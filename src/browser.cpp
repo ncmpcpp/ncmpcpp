@@ -63,8 +63,8 @@ bool isRootDirectory(const std::string &directory);
 bool isHidden(const fs::directory_iterator &entry);
 bool hasSupportedExtension(const fs::directory_entry &entry);
 MPD::Song getLocalSong(const fs::directory_entry &entry, bool read_tags);
-void getLocalDirectory(MPD::ItemList &items, const std::string &directory);
-void getLocalDirectoryRecursively(MPD::SongList &songs, const std::string &directory);
+void getLocalDirectory(std::vector<MPD::Item> &items, const std::string &directory);
+void getLocalDirectoryRecursively(std::vector<MPD::Song> &songs, const std::string &directory);
 void clearDirectory(const std::string &directory);
 
 std::string itemToString(const MPD::Item &item);
@@ -144,7 +144,7 @@ void Browser::enterPressed()
 		}
 		case MPD::Item::Type::Playlist:
 		{
-			MPD::SongList list(
+			std::vector<MPD::Song> list(
 				std::make_move_iterator(Mpd.GetPlaylistContentNoInfo(item.playlist().path())),
 				std::make_move_iterator(MPD::SongIterator())
 			);
@@ -183,7 +183,7 @@ void Browser::spacePressed()
 			bool success = true;
 			if (m_local_browser)
 			{
-				MPD::SongList songs;
+				std::vector<MPD::Song> songs;
 				getLocalDirectoryRecursively(songs, item.directory().path());
 				success = addSongsToPlaylist(songs.begin(), songs.end(), false, -1);
 			}
@@ -338,9 +338,9 @@ void Browser::reverseSelection()
 	reverseSelectionHelper(w.begin()+offset, w.end());
 }
 
-MPD::SongList Browser::getSelectedSongs()
+std::vector<MPD::Song> Browser::getSelectedSongs()
 {
-	MPD::SongList songs;
+	std::vector<MPD::Song> songs;
 	auto item_handler = [this, &songs](const MPD::Item &item) {
 		switch (item.type())
 		{
@@ -437,7 +437,7 @@ void Browser::getDirectory(std::string directory)
 	if (directory.empty())
 		directory = "/";
 
-	MPD::ItemList items;
+	std::vector<MPD::Item> items;
 	if (m_local_browser)
 		getLocalDirectory(items, directory);
 	else
@@ -620,7 +620,7 @@ MPD::Song getLocalSong(const fs::directory_entry &entry, bool read_tags)
 	return s;
 }
 
-void getLocalDirectory(MPD::ItemList &items, const std::string &directory)
+void getLocalDirectory(std::vector<MPD::Item> &items, const std::string &directory)
 {
 	for (fs::directory_iterator entry(directory), end; entry != end; ++entry)
 	{
@@ -639,7 +639,7 @@ void getLocalDirectory(MPD::ItemList &items, const std::string &directory)
 	}
 }
 
-void getLocalDirectoryRecursively(MPD::SongList &songs, const std::string &directory)
+void getLocalDirectoryRecursively(std::vector<MPD::Song> &songs, const std::string &directory)
 {
 	size_t sort_offset = songs.size();
 	for (fs::directory_iterator entry(directory), end; entry != end; ++entry)

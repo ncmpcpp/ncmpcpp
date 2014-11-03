@@ -232,9 +232,9 @@ void Playlist::reverseSelection()
 	reverseSelectionHelper(w.begin(), w.end());
 }
 
-MPD::SongList Playlist::getSelectedSongs()
+std::vector<MPD::Song> Playlist::getSelectedSongs()
 {
-	MPD::SongList result;
+	std::vector<MPD::Song> result;
 	for (auto it = w.begin(); it != w.end(); ++it)
 		if (it->isSelected())
 			result.push_back(it->value());

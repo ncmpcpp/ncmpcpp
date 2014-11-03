@@ -345,9 +345,9 @@ void SearchEngine::reverseSelection()
 	reverseSelectionHelper(w.begin()+std::min(StaticOptions, w.size()), w.end());
 }
 
-MPD::SongList SearchEngine::getSelectedSongs()
+std::vector<MPD::Song> SearchEngine::getSelectedSongs()
 {
-	MPD::SongList result;
+	std::vector<MPD::Song> result;
 	for (auto it = w.begin(); it != w.end(); ++it)
 	{
 		if (it->isSelected())
@@ -444,7 +444,7 @@ void SearchEngine::Search()
 		return;
 	}
 	
-	MPD::SongList list;
+	std::vector<MPD::Song> list;
 	if (Config.search_in_db)
 	{
 		std::copy(

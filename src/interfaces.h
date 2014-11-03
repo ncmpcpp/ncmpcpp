@@ -48,7 +48,7 @@ struct HasSongs
 	
 	virtual bool allowsSelection() = 0;
 	virtual void reverseSelection() = 0;
-	virtual MPD::SongList getSelectedSongs() = 0;
+	virtual std::vector<MPD::Song> getSelectedSongs() = 0;
 };
 
 struct HasColumns

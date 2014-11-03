@@ -60,7 +60,7 @@ struct Browser: Screen<NC::Menu<MPD::Item>>, Filterable, HasSongs, Searchable, T
 	
 	virtual bool allowsSelection() OVERRIDE;
 	virtual void reverseSelection() OVERRIDE;
-	virtual MPD::SongList getSelectedSongs() OVERRIDE;
+	virtual std::vector<MPD::Song> getSelectedSongs() OVERRIDE;
 	
 	// private members
 	bool inRootDirectory();

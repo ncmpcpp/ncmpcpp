@@ -77,7 +77,7 @@ private:
 	Component m_playlist_selector;
 	Component m_position_selector;
 	
-	MPD::SongList m_selected_items;
+	std::vector<MPD::Song> m_selected_items;
 };
 
 extern SelectedItemsAdder *mySelectedItemsAdder;

@@ -160,12 +160,12 @@ void SortPlaylistDialog::sort() const
 	std::tie(begin, end) = getSelectedRange(begin, end);
 	
 	size_t start_pos = begin - pl.begin();
-	MPD::SongList playlist;
+	std::vector<MPD::Song> playlist;
 	playlist.reserve(end - begin);
 	for (; begin != end; ++begin)
 		playlist.push_back(begin->value());
 	
-	typedef MPD::SongList::iterator Iterator;
+	typedef std::vector<MPD::Song>::iterator Iterator;
 	LocaleStringComparison cmp(std::locale(), Config.ignore_leading_the);
 	std::function<void(Iterator, Iterator)> iter_swap, quick_sort;
 	auto song_cmp = [this, &cmp](const MPD::Song &a, const MPD::Song &b) -> bool {

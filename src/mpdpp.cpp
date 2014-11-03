@@ -551,7 +551,7 @@ bool Connection::AddRandomTag(mpd_tag_type tag, size_t number)
 bool Connection::AddRandomSongs(size_t number)
 {
 	prechecksNoCommandsList();
-	StringList files;
+	std::vector<std::string> files;
 	mpd_send_list_all(m_connection.get(), "/");
 	while (mpd_pair *item = mpd_recv_pair_named(m_connection.get(), "file"))
 	{

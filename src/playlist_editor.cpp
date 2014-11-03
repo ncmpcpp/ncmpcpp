@@ -241,7 +241,7 @@ ProxySongList PlaylistEditor::contentProxyList()
 
 void PlaylistEditor::AddToPlaylist(bool add_n_play)
 {
-	MPD::SongList list;
+	std::vector<MPD::Song> list;
 	
 	if (isActiveWindow(Playlists) && !Playlists.empty())
 	{
@@ -475,9 +475,9 @@ void PlaylistEditor::reverseSelection()
 		reverseSelectionHelper(Content.begin(), Content.end());
 }
 
-MPD::SongList PlaylistEditor::getSelectedSongs()
+std::vector<MPD::Song> PlaylistEditor::getSelectedSongs()
 {
-	MPD::SongList result;
+	std::vector<MPD::Song> result;
 	if (isActiveWindow(Playlists))
 	{
 		bool any_selected = false;
