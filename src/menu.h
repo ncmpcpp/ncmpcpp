@@ -37,7 +37,7 @@ namespace NC {
 template <typename ItemT> class Menu : public Window
 {
 	struct ItemProxy;
-	
+
 public:
 	struct Item
 	{
@@ -555,7 +555,7 @@ void Menu<ItemT>::resizeList(size_t new_size)
 template <typename ItemT>
 void Menu<ItemT>::addItem(ItemT item, bool is_bold, bool is_inactive)
 {
-	m_options.push_back(Item(std::forward<ItemT>(item), is_bold, is_inactive));
+	m_options.push_back(Item(std::move(item), is_bold, is_inactive));
 }
 
 template <typename ItemT>
