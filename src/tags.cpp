@@ -115,17 +115,6 @@ void readXiphComments(mpd_song *s, TagLib::Ogg::XiphComment *tag)
 	readField(fields["COMMENT"], "Comment");
 }
 
-void clearID3v1Tags(TagLib::ID3v1::Tag *tag)
-{
-	tag->setTitle(TagLib::String::null);
-	tag->setArtist(TagLib::String::null);
-	tag->setAlbum(TagLib::String::null);
-	tag->setYear(0);
-	tag->setTrack(0);
-	tag->setGenre(TagLib::String::null);
-	tag->setComment(TagLib::String::null);
-}
-
 void writeCommonTags(const MPD::MutableSong &s, TagLib::Tag *tag)
 {
 	tag->setTitle(ToWString(s.getTitle()));
@@ -298,10 +287,15 @@ bool write(MPD::MutableSong &s)
 	if (f.isNull())
 		return false;
 	
-	if (auto mp3_file = dynamic_cast<TagLib::MPEG::File *>(f.file()))
+	bool saved = false;
+	if (auto mpeg_file = dynamic_cast<TagLib::MPEG::File *>(f.file()))
 	{
-		clearID3v1Tags(mp3_file->ID3v1Tag());
-		writeID3v2Tags(s, mp3_file->ID3v2Tag(true));
+		writeID3v2Tags(s, mpeg_file->ID3v2Tag(true));
+		// write id3v2.4 tags only
+		if (!mpeg_file->save(TagLib::MPEG::File::ID3v2, true, 4, false))
+			return false;
+		// do not call generic save() as it will duplicate tags
+		saved = true;
 	}
 	else if (auto ogg_file = dynamic_cast<TagLib::Ogg::Vorbis::File *>(f.file()))
 	{
@@ -314,9 +308,9 @@ bool write(MPD::MutableSong &s)
 	else
 		writeCommonTags(s, f.tag());
 	
-	if (!f.save())
+	if (!saved && !f.save())
 		return false;
-	
+
 	if (!s.getNewName().empty())
 	{
 		std::string new_name;
