@@ -47,12 +47,12 @@ enum class Type
 	JumpToPlaylistEditor, ToggleScreenLock, JumpToTagEditor, JumpToPositionInSong,
 	ReverseSelection, RemoveSelection, SelectAlbum, AddSelectedItems,
 	CropMainPlaylist, CropPlaylist, ClearMainPlaylist, ClearPlaylist, SortPlaylist,
-	ReversePlaylist, ApplyFilter, Find, FindItemForward, FindItemBackward,
+	ReversePlaylist, Find, FindItemForward, FindItemBackward,
 	NextFoundItem, PreviousFoundItem, ToggleFindMode, ToggleReplayGainMode,
 	ToggleSpaceMode, ToggleAddMode, ToggleMouse, ToggleBitrateVisibility,
 	AddRandomItems, ToggleBrowserSortMode, ToggleLibraryTagType,
 	ToggleMediaLibrarySortMode, RefetchLyrics,
-	SetSelectedItemsPriority, SetVisualizerSampleMultiplier, FilterPlaylistOnPriorities,
+	SetSelectedItemsPriority, SetVisualizerSampleMultiplier,
 	ShowSongInfo, ShowArtistInfo, ShowLyrics, Quit, NextScreen, PreviousScreen,
 	ShowHelp, ShowPlaylist, ShowBrowser, ChangeBrowseMode, ShowSearchEngine,
 	ResetSearchEngine, ShowMediaLibrary, ToggleMediaLibraryColumnsMode,
@@ -802,15 +802,6 @@ protected:
 	virtual void run();
 };
 
-struct ApplyFilter : public BaseAction
-{
-	ApplyFilter() : BaseAction(Type::ApplyFilter, "apply_filter") { }
-	
-protected:
-	virtual bool canBeRun() const;
-	virtual void run();
-};
-
 struct Find : public BaseAction
 {
 	Find() : BaseAction(Type::Find, "find") { }
@@ -964,16 +955,6 @@ struct SetVisualizerSampleMultiplier : public BaseAction
 	SetVisualizerSampleMultiplier()
 	: BaseAction(Type::SetVisualizerSampleMultiplier, "set_visualizer_sample_multiplier") { }
 
-protected:
-	virtual bool canBeRun() const;
-	virtual void run();
-};
-
-struct FilterPlaylistOnPriorities : public BaseAction
-{
-	FilterPlaylistOnPriorities()
-	: BaseAction(Type::FilterPlaylistOnPriorities, "filter_playlist_on_priorities") { }
-	
 protected:
 	virtual bool canBeRun() const;
 	virtual void run();

@@ -27,7 +27,7 @@
 #include "regex_filter.h"
 #include "screen.h"
 
-struct MediaLibrary: Screen<NC::Window *>, Filterable, HasColumns, HasSongs, Searchable, Tabbable
+struct MediaLibrary: Screen<NC::Window *>, HasColumns, HasSongs, Searchable, Tabbable
 {
 	MediaLibrary();
 	
@@ -47,11 +47,6 @@ struct MediaLibrary: Screen<NC::Window *>, Filterable, HasColumns, HasSongs, Sea
 	virtual void mouseButtonPressed(MEVENT me) OVERRIDE;
 	
 	virtual bool isMergable() OVERRIDE { return true; }
-	
-	// Filterable implementation
-	virtual bool allowsFiltering() OVERRIDE;
-	virtual std::string currentFilter() OVERRIDE;
-	virtual void applyFilter(const std::string &filter) OVERRIDE;
 	
 	// Searchable implementation
 	virtual bool allowsSearching() OVERRIDE;

@@ -800,35 +800,24 @@ void SavePlaylist::run()
 		Statusbar::put() << "Save playlist as: ";
 		playlist_name = wFooter->prompt();
 	}
-	if (myPlaylist->main().isFiltered())
+	try
 	{
-		Mpd.StartCommandsList();
-		for (const auto &item : myPlaylist->main())
-			Mpd.AddToPlaylist(playlist_name, item.value());
-		Mpd.CommitCommandsList();
-		Statusbar::printf("Filtered items added to playlist \"%1%\"", playlist_name);
+		Mpd.SavePlaylist(playlist_name);
+		Statusbar::printf("Playlist saved as \"%1%\"", playlist_name);
 	}
-	else
+	catch (MPD::ServerError &e)
 	{
-		try
+		if (e.code() == MPD_SERVER_ERROR_EXIST)
 		{
+			confirmAction(
+				boost::format("Playlist \"%1%\" already exists, overwrite?") % playlist_name
+			);
+			Mpd.DeletePlaylist(playlist_name);
 			Mpd.SavePlaylist(playlist_name);
-			Statusbar::printf("Playlist saved as \"%1%\"", playlist_name);
+			Statusbar::print("Playlist overwritten");
 		}
-		catch (MPD::ServerError &e)
-		{
-			if (e.code() == MPD_SERVER_ERROR_EXIST)
-			{
-				confirmAction(
-					boost::format("Playlist \"%1%\" already exists, overwrite?") % playlist_name
-				);
-				Mpd.DeletePlaylist(playlist_name);
-				Mpd.SavePlaylist(playlist_name);
-				Statusbar::print("Playlist overwritten");
-			}
-			else
-				throw e;
-		}
+		else
+			throw;
 	}
 }
 
@@ -887,11 +876,9 @@ void MoveSortOrderDown::run()
 bool MoveSelectedItemsUp::canBeRun() const
 {
 	return ((myScreen == myPlaylist
-	    &&  !myPlaylist->main().empty()
-	    &&  !myPlaylist->isFiltered())
+	    &&  !myPlaylist->main().empty())
 	 ||    (myScreen->isActiveWindow(myPlaylistEditor->Content)
-	    &&  !myPlaylistEditor->Content.empty()
-	    &&  !myPlaylistEditor->isContentFiltered()));
+	    &&  !myPlaylistEditor->Content.empty()));
 }
 
 void MoveSelectedItemsUp::run()
@@ -912,11 +899,9 @@ void MoveSelectedItemsUp::run()
 bool MoveSelectedItemsDown::canBeRun() const
 {
 	return ((myScreen == myPlaylist
-	    &&  !myPlaylist->main().empty()
-	    &&  !myPlaylist->isFiltered())
+	    &&  !myPlaylist->main().empty())
 	 ||    (myScreen->isActiveWindow(myPlaylistEditor->Content)
-	    &&  !myPlaylistEditor->Content.empty()
-	    &&  !myPlaylistEditor->isContentFiltered()));
+	    &&  !myPlaylistEditor->Content.empty()));
 }
 
 void MoveSelectedItemsDown::run()
@@ -1154,7 +1139,7 @@ void TogglePlayingSongCentering::run()
 	Statusbar::printf("Centering playing song: %1%",
 		Config.autocenter_mode ? "on" : "off"
 	);
-	if (Config.autocenter_mode && !myPlaylist->main().isFiltered())
+	if (Config.autocenter_mode)
 	{
 		auto s = myPlaylist->nowPlayingSong();
 		if (!s.empty())
@@ -1176,9 +1161,9 @@ void UpdateDatabase::run()
 
 bool JumpToPlayingSong::canBeRun() const
 {
-	return (myScreen == myPlaylist && !myPlaylist->isFiltered())
-	    ||  myScreen == myBrowser
-	    ||  myScreen == myLibrary;
+	return myScreen == myPlaylist
+	    || myScreen == myBrowser
+	    || myScreen == myLibrary;
 }
 
 void JumpToPlayingSong::run()
@@ -1791,11 +1776,8 @@ void ClearMainPlaylist::run()
 {
 	if (Config.ask_before_clearing_playlists)
 		confirmAction("Do you really want to clear main playlist?");
-	auto delete_fun = boost::bind(&MPD::Connection::Delete, _1, _2);
-	auto clear_fun = boost::bind(&MPD::Connection::ClearMainPlaylist, _1);
-	Statusbar::printf("Deleting items...");
-	clearPlaylist(myPlaylist->main(), delete_fun, clear_fun);
-	Statusbar::printf("Items deleted");
+	Mpd.ClearMainPlaylist();
+	Statusbar::print("Playlist cleared");
 	myPlaylist->main().reset();
 }
 
@@ -1811,11 +1793,8 @@ void ClearPlaylist::run()
 	std::string playlist = myPlaylistEditor->Playlists.current()->value().path();
 	if (Config.ask_before_clearing_playlists)
 		confirmAction(boost::format("Do you really want to clear playlist \"%1%\"?") % playlist);
-	auto delete_fun = boost::bind(&MPD::Connection::PlaylistDelete, _1, playlist, _2);
-	auto clear_fun = boost::bind(&MPD::Connection::ClearPlaylist, _1, playlist);
-	Statusbar::printf("Deleting items from \"%1%\"...", playlist);
-	clearPlaylist(myPlaylistEditor->Content, delete_fun, clear_fun);
-	Statusbar::printf("Items deleted from \"%1%\"", playlist);
+	Mpd.ClearPlaylist(playlist);
+	Statusbar::printf("Playlist \"%1%\" cleared", playlist);
 }
 
 bool SortPlaylist::canBeRun() const
@@ -1836,62 +1815,6 @@ bool ReversePlaylist::canBeRun() const
 void ReversePlaylist::run()
 {
 	myPlaylist->Reverse();
-}
-
-bool ApplyFilter::canBeRun() const
-{
-	auto w = dynamic_cast<Filterable *>(myScreen);
-	return w && w->allowsFiltering();
-}
-
-void ApplyFilter::run()
-{
-	using Global::wFooter;
-	
-	Filterable *f = dynamic_cast<Filterable *>(myScreen);
-	std::string filter = f->currentFilter();
-	// if filter is already here, apply it
-	if (!filter.empty())
-	{
-		f->applyFilter(filter);
-		myScreen->refreshWindow();
-	}
-
-	try
-	{
-		Statusbar::ScopedLock slock;
-		NC::Window::ScopedPromptHook helper(*wFooter,
-			Statusbar::Helpers::ApplyFilterImmediately(f, filter)
-		);
-		Statusbar::put() << NC::Format::Bold << "Apply filter: " << NC::Format::NoBold;
-		wFooter->prompt(filter);
-	}
-	catch (NC::PromptAborted &)
-	{
-		// restore previous filter
-		f->applyFilter(filter);
-		throw;
-	}
-	
-	filter = f->currentFilter();
- 	if (filter.empty())
-	{
-		myPlaylist->main().clearFilterResults();
-		Statusbar::printf("Filtering disabled");
-	}
- 	else
-	{
-		// apply filter here so even if old one wasn't modified
-		// (and callback wasn't invoked), it still gets applied.
-		f->applyFilter(filter);
-		Statusbar::printf("Using filter \"%1%\"", filter);
-	}
-	
-	// recalculate total length of songs in playlist as it probably changed.
-	// TODO: check where drawHeader is invoked.
-	if (myScreen == myPlaylist)
-		myPlaylist->reloadTotalLength();
-	listsChangeFinisher();
 }
 
 bool Find::canBeRun() const
@@ -2119,15 +2042,13 @@ void ToggleBrowserSortMode::run()
 			Config.browser_sort_mode = SortMode::Name;
 			Statusbar::print("Sort songs by: name");
 	}
-	withUnfilteredMenuReapplyFilter(myBrowser->main(), [] {
-		if (Config.browser_sort_mode != SortMode::NoOp)
-		{
-			size_t sort_offset = myBrowser->inRootDirectory() ? 0 : 1;
-			std::sort(myBrowser->main().begin()+sort_offset, myBrowser->main().end(),
-				LocaleBasedItemSorting(std::locale(), Config.ignore_leading_the, Config.browser_sort_mode)
-			);
-		}
-	});
+	if (Config.browser_sort_mode != SortMode::NoOp)
+	{
+		size_t sort_offset = myBrowser->inRootDirectory() ? 0 : 1;
+		std::sort(myBrowser->main().begin()+sort_offset, myBrowser->main().end(),
+			LocaleBasedItemSorting(std::locale(), Config.ignore_leading_the, Config.browser_sort_mode)
+		);
+	}
 }
 
 bool ToggleLibraryTagType::canBeRun() const
@@ -2255,29 +2176,6 @@ void SetVisualizerSampleMultiplier::run()
 	}
 	Statusbar::printf("Visualizer sample multiplier set to %1%", multiplier);
 #	endif // ENABLE_VISUALIZER
-}
-
-bool FilterPlaylistOnPriorities::canBeRun() const
-{
-	return myScreen == myPlaylist;
-}
-
-void FilterPlaylistOnPriorities::run()
-{
-	using Global::wFooter;
-	
-	unsigned prio;
-	{
-		Statusbar::ScopedLock slock;
-		Statusbar::put() << "Show songs with priority higher than: ";
-		prio = fromString<unsigned>(wFooter->prompt());
-		boundsCheck(prio, 0u, 255u);
-		myPlaylist->main().filter(myPlaylist->main().begin(), myPlaylist->main().end(),
-			[prio](const NC::Menu<MPD::Song>::Item &s) {
-				return s.value().getPrio() > prio;
-		});
-	}
-	Statusbar::printf("Playlist filtered (songs with priority higher than %1%)", prio);
 }
 
 void ShowSongInfo::run()
@@ -2668,7 +2566,6 @@ void populateActions()
 	insert_action(new Actions::ClearPlaylist());
 	insert_action(new Actions::SortPlaylist());
 	insert_action(new Actions::ReversePlaylist());
-	insert_action(new Actions::ApplyFilter());
 	insert_action(new Actions::Find());
 	insert_action(new Actions::FindItemForward());
 	insert_action(new Actions::FindItemBackward());
@@ -2687,7 +2584,6 @@ void populateActions()
 	insert_action(new Actions::RefetchLyrics());
 	insert_action(new Actions::SetSelectedItemsPriority());
 	insert_action(new Actions::SetVisualizerSampleMultiplier());
-	insert_action(new Actions::FilterPlaylistOnPriorities());
 	insert_action(new Actions::ShowSongInfo());
 	insert_action(new Actions::ShowArtistInfo());
 	insert_action(new Actions::ShowLyrics());

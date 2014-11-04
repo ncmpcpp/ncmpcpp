@@ -61,7 +61,7 @@ void searchBackward(NC::Menu<ItemT> &m, const PredicateT &pred, bool wrap)
 			return;
 	auto it = wrappedSearch(m.rbegin(), m.rcurrent(), m.rend(), pred, wrap);
 	if (it != m.rend())
-		m.highlight(m.size()-1-(it-m.rbegin()));
+		m.highlight(it.base()-m.begin()-1);
 }
 
 inline HasColumns *hasColumns(BaseScreen *screen)
@@ -149,54 +149,6 @@ void reverseSelectionHelper(Iterator first, Iterator last)
 		first->setSelected(!first->isSelected());
 }
 
-template <typename T, typename F>
-void withUnfilteredMenu(NC::Menu<T> &m, F action)
-{
-	bool is_filtered = m.isFiltered();
-	auto cleanup = [&]() {
-		if (is_filtered)
-			m.showFiltered();
-	};
-	m.showAll();
-	try
-	{
-		action();
-	}
-	catch (...)
-	{
-		cleanup();
-		throw;
-	}
-	cleanup();
-}
-
-template <typename T, typename F>
-void withUnfilteredMenuReapplyFilter(NC::Menu<T> &m, F action)
-{
-	auto cleanup = [&]() {
-		if (m.getFilter())
-		{
-			m.applyCurrentFilter(m.begin(), m.end());
-			if (m.empty())
-			{
-				m.clearFilter();
-				m.clearFilterResults();
-			}
-		}
-	};
-	m.showAll();
-	try
-	{
-		action();
-	}
-	catch (...)
-	{
-		cleanup();
-		throw;
-	}
-	cleanup();
-}
-
 template <typename F>
 void moveSelectedItemsUp(NC::Menu<MPD::Song> &m, F swap_fun)
 {
@@ -264,53 +216,52 @@ void moveSelectedItemsDown(NC::Menu<MPD::Song> &m, F swap_fun)
 template <typename F>
 void moveSelectedItemsTo(NC::Menu<MPD::Song> &m, F move_fun)
 {
+	// FIXME: make it not look like shit
 	auto cur_ptr = &m.current()->value();
-	withUnfilteredMenu(m, [&]() {
-		// this is kinda shitty, but there is no other way to know
-		// what position current item has in unfiltered menu.
-		ptrdiff_t pos = 0;
-		for (auto it = m.begin(); it != m.end(); ++it, ++pos)
-			if (&it->value() == cur_ptr)
-				break;
-		auto begin = m.begin();
-		auto list = getSelected(m.begin(), m.end());
-		// we move only truly selected items
-		if (list.empty())
-			return;
-		// we can't move to the middle of selected items
-		//(this also handles case when list.size() == 1)
-		if (pos >= (list.front() - begin) && pos <= (list.back() - begin))
-			return;
-		int diff = pos - (list.front() - begin);
-		Mpd.StartCommandsList();
-		if (diff > 0) // move down
+	// this is kinda shitty, but there is no other way to know
+	// what position current item has in unfiltered menu.
+	ptrdiff_t pos = 0;
+	for (auto it = m.begin(); it != m.end(); ++it, ++pos)
+		if (&it->value() == cur_ptr)
+			break;
+	auto begin = m.begin();
+	auto list = getSelected(m.begin(), m.end());
+	// we move only truly selected items
+	if (list.empty())
+		return;
+	// we can't move to the middle of selected items
+	//(this also handles case when list.size() == 1)
+	if (pos >= (list.front() - begin) && pos <= (list.back() - begin))
+		return;
+	int diff = pos - (list.front() - begin);
+	Mpd.StartCommandsList();
+	if (diff > 0) // move down
+	{
+		pos -= list.size();
+		size_t i = list.size()-1;
+		for (auto it = list.rbegin(); it != list.rend(); ++it, --i)
+			move_fun(&Mpd, *it - begin, pos+i);
+		Mpd.CommitCommandsList();
+		i = list.size()-1;
+		for (auto it = list.rbegin(); it != list.rend(); ++it, --i)
 		{
-			pos -= list.size();
-			size_t i = list.size()-1;
-			for (auto it = list.rbegin(); it != list.rend(); ++it, --i)
-				move_fun(&Mpd, *it - begin, pos+i);
-			Mpd.CommitCommandsList();
-			i = list.size()-1;
-			for (auto it = list.rbegin(); it != list.rend(); ++it, --i)
-			{
-				(*it)->setSelected(false);
-				m[pos+i].setSelected(true);
-			}
+			(*it)->setSelected(false);
+			m[pos+i].setSelected(true);
 		}
-		else if (diff < 0) // move up
+	}
+	else if (diff < 0) // move up
+	{
+		size_t i = 0;
+		for (auto it = list.begin(); it != list.end(); ++it, ++i)
+			move_fun(&Mpd, *it - begin, pos+i);
+		Mpd.CommitCommandsList();
+		i = 0;
+		for (auto it = list.begin(); it != list.end(); ++it, ++i)
 		{
-			size_t i = 0;
-			for (auto it = list.begin(); it != list.end(); ++it, ++i)
-				move_fun(&Mpd, *it - begin, pos+i);
-			Mpd.CommitCommandsList();
-			i = 0;
-			for (auto it = list.begin(); it != list.end(); ++it, ++i)
-			{
-				(*it)->setSelected(false);
-				m[pos+i].setSelected(true);
-			}
+			(*it)->setSelected(false);
+			m[pos+i].setSelected(true);
 		}
-	});
+	}
 }
 
 template <typename F>
@@ -322,28 +273,14 @@ void deleteSelectedSongs(NC::Menu<MPD::Song> &m, F delete_fun)
 	// ignore all songs that are not filtered. we use the fact
 	// that both ranges share the same values, ie. we can compare
 	// pointers to check whether an item belongs to filtered range.
-	NC::Menu<MPD::Song>::Iterator begin;
-	NC::Menu<MPD::Song>::ReverseIterator real_begin, real_end;
-	withUnfilteredMenu(m, [&]() {
-		// obtain iterators for unfiltered range
-		begin = m.begin() + 1; // cancel reverse iterator's offset
-		real_begin = m.rbegin();
-		real_end = m.rend();
-	});
-	// get iterator to filtered range
-	auto cur_filtered = m.rbegin();
+	auto begin = ++m.begin();
 	Mpd.StartCommandsList();
-	for (auto it = real_begin; it != real_end; ++it)
+	for (auto it = m.rbegin(); it != m.rend(); ++it)
 	{
-		// current iterator belongs to filtered range, proceed
-		if (&*it == &*cur_filtered)
+		if (it->isSelected())
 		{
-			if (it->isSelected())
-			{
-				it->setSelected(false);
-				delete_fun(Mpd, it.base() - begin);
-			}
-			++cur_filtered;
+			it->setSelected(false);
+			delete_fun(Mpd, it.base() - begin);
 		}
 	}
 	Mpd.CommitCommandsList();
@@ -354,19 +291,6 @@ void cropPlaylist(NC::Menu<MPD::Song> &m, F delete_fun)
 {
 	reverseSelectionHelper(m.begin(), m.end());
 	deleteSelectedSongs(m, delete_fun);
-}
-
-template <typename F, typename G>
-void clearPlaylist(NC::Menu<MPD::Song> &m, F delete_fun, G clear_fun)
-{
-	if (m.isFiltered())
-	{
-		for (auto it = m.begin(); it != m.end(); ++it)
-			it->setSelected(true);
-		deleteSelectedSongs(m, delete_fun);
-	}
-	else
-		clear_fun(Mpd);
 }
 
 template <typename ItemT>

@@ -271,11 +271,9 @@ void SelectedItemsAdder::addAfterCurrentAlbum() const
 		return;
 	auto &pl = myPlaylist->main();
 	size_t pos = Status::State::currentSongPosition();
-	withUnfilteredMenu(pl, [&pos, &pl]() {
-		std::string album =  pl[pos].value().getAlbum();
-		while (pos < pl.size() && pl[pos].value().getAlbum() == album)
-			++pos;
-	});
+	std::string album =  pl[pos].value().getAlbum();
+	while (pos < pl.size() && pl[pos].value().getAlbum() == album)
+		++pos;
 	bool success = addSongsToPlaylist(m_selected_items.begin(), m_selected_items.end(), false, pos);
 	exitSuccessfully(success);
 }

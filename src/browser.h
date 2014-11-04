@@ -26,7 +26,7 @@
 #include "regex_filter.h"
 #include "screen.h"
 
-struct Browser: Screen<NC::Menu<MPD::Item>>, Filterable, HasSongs, Searchable, Tabbable
+struct Browser: Screen<NC::Menu<MPD::Item>>, HasSongs, Searchable, Tabbable
 {
 	Browser();
 	
@@ -44,11 +44,6 @@ struct Browser: Screen<NC::Menu<MPD::Item>>, Filterable, HasSongs, Searchable, T
 	virtual void mouseButtonPressed(MEVENT me) OVERRIDE;
 	
 	virtual bool isMergable() OVERRIDE { return true; }
-	
-	// Filterable implementation
-	virtual bool allowsFiltering() OVERRIDE;
-	virtual std::string currentFilter() OVERRIDE;
-	virtual void applyFilter(const std::string &filter) OVERRIDE;
 	
 	// Searchable implementation
 	virtual bool allowsSearching() OVERRIDE;

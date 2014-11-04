@@ -27,7 +27,7 @@
 #include "regex_filter.h"
 #include "screen.h"
 
-struct PlaylistEditor: Screen<NC::Window *>, Filterable, HasColumns, HasSongs, Searchable, Tabbable
+struct PlaylistEditor: Screen<NC::Window *>, HasColumns, HasSongs, Searchable, Tabbable
 {
 	PlaylistEditor();
 	
@@ -47,11 +47,6 @@ struct PlaylistEditor: Screen<NC::Window *>, Filterable, HasColumns, HasSongs, S
 	virtual void mouseButtonPressed(MEVENT me) OVERRIDE;
 	
 	virtual bool isMergable() OVERRIDE { return true; }
-	
-	// Filterable implementation
-	virtual bool allowsFiltering() OVERRIDE;
-	virtual std::string currentFilter() OVERRIDE;
-	virtual void applyFilter(const std::string &filter) OVERRIDE;
 	
 	// Searchable implementation
 	virtual bool allowsSearching() OVERRIDE;
@@ -80,7 +75,6 @@ struct PlaylistEditor: Screen<NC::Window *>, Filterable, HasColumns, HasSongs, S
 	void requestContentsUpdate() { m_content_update_requested = true; }
 	
 	virtual void Locate(const MPD::Playlist &playlist);
-	bool isContentFiltered();
 	ProxySongList contentProxyList();
 	
 	NC::Menu<MPD::Playlist> Playlists;

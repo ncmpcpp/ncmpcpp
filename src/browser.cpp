@@ -248,37 +248,6 @@ void Browser::mouseButtonPressed(MEVENT me)
 
 /***********************************************************************/
 
-bool Browser::allowsFiltering()
-{
-	return true;
-}
-
-std::string Browser::currentFilter()
-{
-	return RegexFilter<MPD::Item>::currentFilter(w);
-}
-
-void Browser::applyFilter(const std::string &filter)
-{
-	if (filter.empty())
-	{
-		w.clearFilter();
-		w.clearFilterResults();
-		return;
-	}
-	try
-	{
-		w.showAll();
-		auto fun = boost::bind(browserEntryMatcher, _1, _2, true);
-		auto rx = RegexFilter<MPD::Item>(
-			boost::regex(filter, Config.regex_type), fun);
-		w.filter(w.begin(), w.end(), rx);
-	}
-	catch (boost::bad_expression &) { }
-}
-
-/***********************************************************************/
-
 bool Browser::allowsSearching()
 {
 	return true;

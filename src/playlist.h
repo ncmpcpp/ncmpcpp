@@ -29,7 +29,7 @@
 #include "screen.h"
 #include "song.h"
 
-struct Playlist: Screen<NC::Menu<MPD::Song>>, Filterable, HasSongs, Searchable, Tabbable
+struct Playlist: Screen<NC::Menu<MPD::Song>>, HasSongs, Searchable, Tabbable
 {
 	Playlist();
 	
@@ -48,11 +48,6 @@ struct Playlist: Screen<NC::Menu<MPD::Song>>, Filterable, HasSongs, Searchable, 
 	
 	virtual bool isMergable() OVERRIDE { return true; }
 	
-	// Filterable implementation
-	virtual bool allowsFiltering() OVERRIDE;
-	virtual std::string currentFilter() OVERRIDE;
-	virtual void applyFilter(const std::string &filter) OVERRIDE;
-	
 	// Searchable implementation
 	virtual bool allowsSearching();
 	virtual bool setSearchConstraint(const std::string &constraint) OVERRIDE;
@@ -69,7 +64,6 @@ struct Playlist: Screen<NC::Menu<MPD::Song>>, Filterable, HasSongs, Searchable, 
 	// private members
 	MPD::Song nowPlayingSong();
 	
-	bool isFiltered();
 	void Reverse();
 	
 	void EnableHighlighting();

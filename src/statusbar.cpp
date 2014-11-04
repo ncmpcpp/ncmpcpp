@@ -220,27 +220,6 @@ bool Statusbar::Helpers::ImmediatelyReturnOneOf::operator()(const char *s) const
 	return !isOneOf(s);
 }
 
-bool Statusbar::Helpers::ApplyFilterImmediately::operator()(const char *s)
-{
-	using Global::myScreen;
-	// if input queue is not empty, we don't want to update filter since next
-	// character will be taken from queue immediately, trigering this function
-	// again and thus making it inefficient, so let's apply filter only if
-	// "real" user input arrived. however, we want to apply filter if ENTER
-	// is next in queue, so its effects will be seen.
-	if (wFooter->inputQueue().empty() || wFooter->inputQueue().front() == KEY_ENTER)
-	{
-		if (m_s != s)
-		{
-			m_s = s;
-			m_f->applyFilter(m_s);
-			myScreen->refreshWindow();
-		}
-		Status::trace();
-	}
-	return true;
-}
-
 bool Statusbar::Helpers::TryExecuteImmediateCommand::operator()(const char *s)
 {
 	bool continue_ = true;

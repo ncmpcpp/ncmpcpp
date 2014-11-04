@@ -176,7 +176,6 @@ void SearchEngine::enterPressed()
 	}
 	else if (option == SearchButton)
 	{
-		w.showAll();
 		Statusbar::print("Searching...");
 		if (w.size() > StaticOptions)
 			Prepare();
@@ -252,37 +251,6 @@ void SearchEngine::mouseButtonPressed(MEVENT me)
 	}
 	else
 		Screen<WindowType>::mouseButtonPressed(me);
-}
-
-/***********************************************************************/
-
-bool SearchEngine::allowsFiltering()
-{
-	return w.rbegin()->value().isSong();
-}
-
-std::string SearchEngine::currentFilter()
-{
-	return RegexItemFilter<SEItem>::currentFilter(w);
-}
-
-void SearchEngine::applyFilter(const std::string &filter)
-{
-	if (filter.empty())
-	{
-		w.clearFilter();
-		w.clearFilterResults();
-		return;
-	}
-	try
-	{
-		w.showAll();
-		auto fun = boost::bind(SEItemEntryMatcher, _1, _2, true);
-		auto rx = RegexItemFilter<SEItem>(
-			boost::regex(filter, Config.regex_type), fun);
-		w.filter(w.begin(), w.end(), rx);
-	}
-	catch (boost::bad_expression &) { }
 }
 
 /***********************************************************************/

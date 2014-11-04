@@ -142,7 +142,6 @@
 ## The following actions are not bound to any key/command:
 ##
 ##  - set_volume
-##  - filter_playlist_on_priorities
 ##
 #
 #def_key "mouse"
@@ -351,9 +350,6 @@
 #
 #def_key "ctrl_r"
 #  reverse_playlist
-#
-#def_key "ctrl_f"
-#  apply_filter
 #
 #def_key "/"
 #  find

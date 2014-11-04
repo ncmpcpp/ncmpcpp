@@ -27,13 +27,6 @@
 #include "song.h"
 #include "proxy_song_list.h"
 
-struct Filterable
-{
-	virtual bool allowsFiltering() = 0;
-	virtual std::string currentFilter() = 0;
-	virtual void applyFilter(const std::string &filter) = 0;
-};
-
 struct Searchable
 {
 	virtual bool allowsSearching() = 0;

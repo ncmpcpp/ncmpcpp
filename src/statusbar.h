@@ -89,20 +89,6 @@ private:
 	std::vector<std::string> m_values;
 };
 
-/// called each time user changes current filter (while being inside Window::getString)
-struct ApplyFilterImmediately
-{
-	template <typename StringT>
-	ApplyFilterImmediately(Filterable *f, StringT &&filter)
-	: m_f(f), m_s(std::forward<StringT>(filter)) { }
-	
-	bool operator()(const char *s);
-	
-private:
-	Filterable *m_f;
-	std::string m_s;
-};
-
 struct TryExecuteImmediateCommand
 {
 	bool operator()(const char *s);

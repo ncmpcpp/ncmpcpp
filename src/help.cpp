@@ -245,7 +245,6 @@ void write_bindings(NC::Scrollpad &w)
 	key(w, Type::UpdateDatabase, "Start music database update");
 	w << '\n';
 	key(w, Type::ExecuteCommand, "Execute command");
-	key(w, Type::ApplyFilter, "Apply filter");
 	key(w, Type::FindItemForward, "Find item forward");
 	key(w, Type::FindItemBackward, "Find item backward");
 	key(w, Type::PreviousFoundItem, "Jump to previous found item");
@@ -289,7 +288,6 @@ void write_bindings(NC::Scrollpad &w)
 	key(w, Type::SavePlaylist, "Save playlist");
 	key(w, Type::SortPlaylist, "Sort playlist");
 	key(w, Type::ReversePlaylist, "Reverse playlist");
-	key(w, Type::FilterPlaylistOnPriorities, "Filter playlist on priorities");
 	key(w, Type::JumpToPlayingSong, "Jump to current song");
 	key(w, Type::TogglePlayingSongCentering, "Toggle playing song centering");
 

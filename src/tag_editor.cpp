@@ -230,7 +230,7 @@ void TagEditor::refresh()
 
 void TagEditor::update()
 {
-	if (Dirs->reallyEmpty())
+	if (Dirs->empty())
 	{
 		Dirs->Window::clear();
 		Tags->clear();
@@ -251,7 +251,7 @@ void TagEditor::update()
 		Dirs->display();
 	}
 	
-	if (Tags->reallyEmpty())
+	if (Tags->empty())
 	{
 		Tags->reset();
 		MPD::SongIterator s = Mpd.GetSongs(Dirs->current()->value().second), end;
@@ -716,60 +716,6 @@ void TagEditor::mouseButtonPressed(MEVENT me)
 
 /***********************************************************************/
 
-bool TagEditor::allowsFiltering()
-{
-	return w == Dirs || w == Tags;
-}
-
-std::string TagEditor::currentFilter()
-{
-	std::string filter;
-	if (w == Dirs)
-		filter = RegexFilter< std::pair<std::string, std::string> >::currentFilter(*Dirs);
-	else if (w == Tags)
-		filter = RegexFilter<MPD::MutableSong>::currentFilter(*Tags);
-	return filter;
-}
-
-void TagEditor::applyFilter(const std::string &filter)
-{
-	if (filter.empty())
-	{
-		if (w == Dirs)
-		{
-			Dirs->clearFilter();
-			Dirs->clearFilterResults();
-		}
-		else if (w == Tags)
-		{
-			Tags->clearFilter();
-			Tags->clearFilterResults();
-		}
-		return;
-	}
-	try
-	{
-		if (w == Dirs)
-		{
-			Dirs->showAll();
-			auto fun = boost::bind(DirEntryMatcher, _1, _2, true);
-			auto rx = RegexFilter< std::pair<std::string, std::string> >(
-				boost::regex(filter, Config.regex_type), fun);
-			Dirs->filter(Dirs->begin(), Dirs->end(), rx);
-		}
-		else if (w == Tags)
-		{
-			Tags->showAll();
-			auto rx = RegexFilter<MPD::MutableSong>(
-				boost::regex(filter, Config.regex_type), SongEntryMatcher);
-			Tags->filter(Tags->begin(), Tags->end(), rx);
-		}
-	}
-	catch (boost::bad_expression &) { }
-}
-
-/***********************************************************************/
-
 bool TagEditor::allowsSearching()
 {
 	return w == Dirs || w == Tags;
@@ -866,12 +812,12 @@ bool TagEditor::previousColumnAvailable()
 	bool result = false;
 	if (w == Tags)
 	{
-		if (!TagTypes->reallyEmpty() && !Dirs->reallyEmpty())
+		if (!TagTypes->empty() && !Dirs->empty())
 			result = true;
 	}
 	else if (w == TagTypes)
 	{
-		if (!Dirs->reallyEmpty() && isAnyModified(*Tags))
+		if (!Dirs->empty() && isAnyModified(*Tags))
 			Actions::confirmAction("There are pending changes, are you sure?");
 		result = true;
 	}
@@ -911,12 +857,12 @@ bool TagEditor::nextColumnAvailable()
 	bool result = false;
 	if (w == Dirs)
 	{
-		if (!TagTypes->reallyEmpty() && !Tags->reallyEmpty())
+		if (!TagTypes->empty() && !Tags->empty())
 			result = true;
 	}
 	else if (w == TagTypes)
 	{
-		if (!Tags->reallyEmpty())
+		if (!Tags->empty())
 			result = true;
 	}
 	else if (w == FParser)
@@ -933,7 +879,7 @@ void TagEditor::nextColumn()
 		w = TagTypes;
 		TagTypes->setHighlightColor(Config.active_column_color);
 	}
-	else if (w == TagTypes && TagTypes->choice() < 13 && !Tags->reallyEmpty())
+	else if (w == TagTypes && TagTypes->choice() < 13 && !Tags->empty())
 	{
 		TagTypes->setHighlightColor(Config.main_highlight_color);
 		w->refresh();

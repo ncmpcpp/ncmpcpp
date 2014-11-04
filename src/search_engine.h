@@ -74,7 +74,7 @@ private:
 	MPD::Song m_song;
 };
 
-struct SearchEngine: Screen<NC::Menu<SEItem>>, Filterable, HasSongs, Searchable, Tabbable
+struct SearchEngine: Screen<NC::Menu<SEItem>>, HasSongs, Searchable, Tabbable
 {
 	SearchEngine();
 	
@@ -92,11 +92,6 @@ struct SearchEngine: Screen<NC::Menu<SEItem>>, Filterable, HasSongs, Searchable,
 	virtual void mouseButtonPressed(MEVENT me) OVERRIDE;
 	
 	virtual bool isMergable() OVERRIDE { return true; }
-	
-	// Filterable implementation
-	virtual bool allowsFiltering() OVERRIDE;
-	virtual std::string currentFilter() OVERRIDE;
-	virtual void applyFilter(const std::string &filter) OVERRIDE;
 	
 	// Searchable implementation
 	virtual bool allowsSearching() OVERRIDE;

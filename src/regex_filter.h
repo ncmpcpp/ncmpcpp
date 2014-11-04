@@ -23,7 +23,6 @@
 
 #include <boost/regex.hpp>
 #include <cassert>
-#include "menu.h"
 
 template <typename T>
 struct RegexFilter
@@ -51,15 +50,6 @@ struct RegexFilter
 		return m_filter.operator bool();
 	}
 
-	static std::string currentFilter(MenuT &menu)
-	{
-		std::string filter;
-		auto rf = menu.getFilter().template target< RegexFilter<T> >();
-		if (rf)
-			filter = rf->m_rx.str();
-		return filter;
-	}
-	
 private:
 	boost::regex m_rx;
 	FilterFunction m_filter;
@@ -89,15 +79,6 @@ template <typename T> struct RegexItemFilter
 		return m_filter.operator bool();
 	}
 
-	static std::string currentFilter(MenuT &menu)
-	{
-		std::string filter;
-		auto rf = menu.getFilter().template target< RegexItemFilter<T> >();
-		if (rf)
-			filter = rf->m_rx.str();
-		return filter;
-	}
-	
 private:
 	boost::regex m_rx;
 	FilterFunction m_filter;

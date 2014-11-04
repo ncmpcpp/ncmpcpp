@@ -148,36 +148,6 @@ void Playlist::mouseButtonPressed(MEVENT me)
 
 /***********************************************************************/
 
-bool Playlist::allowsFiltering()
-{
-	return true;
-}
-
-std::string Playlist::currentFilter()
-{
-	return RegexFilter<MPD::Song>::currentFilter(w);
-}
-
-void Playlist::applyFilter(const std::string &filter)
-{
-	if (filter.empty())
-	{
-		w.clearFilter();
-		w.clearFilterResults();
-		return;
-	}
-	try
-	{
-		w.showAll();
-		auto rx = RegexFilter<MPD::Song>(
-			boost::regex(filter, Config.regex_type), playlistEntryMatcher);
-		w.filter(w.begin(), w.end(), rx);
-	}
-	catch (boost::bad_expression &) { }
-}
-
-/***********************************************************************/
-
 bool Playlist::allowsSearching()
 {
 	return true;
@@ -245,22 +215,12 @@ MPD::Song Playlist::nowPlayingSong()
 {
 	MPD::Song s;
 	if (Status::State::player() != MPD::psUnknown)
-		withUnfilteredMenu(w, [this, &s]() {
-			auto sp = Status::State::currentSongPosition();
-			if (sp >= 0 && size_t(sp) < w.size())
-				s = w.at(sp).value();
-		});
-	return s;
-}
-
-bool Playlist::isFiltered()
-{
-	if (w.isFiltered())
 	{
-		Statusbar::print("Function currently unavailable due to filtered playlist");
-		return true;
+		auto sp = Status::State::currentSongPosition();
+		if (sp >= 0 && size_t(sp) < w.size())
+			s = w.at(sp).value();
 	}
-	return false;
+	return s;
 }
 
 void Playlist::Reverse()
@@ -292,7 +252,7 @@ std::string Playlist::getTotalLength()
 			m_total_length += s.value().getDuration();
 		m_reload_total_length = false;
 	}
-	if (Config.playlist_show_remaining_time && m_reload_remaining && !w.isFiltered())
+	if (Config.playlist_show_remaining_time && m_reload_remaining)
 	{
 		m_remaining_time = 0;
 		for (size_t i = Status::State::currentSongPosition(); i < w.size(); ++i)
@@ -302,21 +262,12 @@ std::string Playlist::getTotalLength()
 	
 	result << '(' << w.size() << (w.size() == 1 ? " item" : " items");
 	
-	if (w.isFiltered())
-	{
-		w.showAll();
-		size_t real_size = w.size();
-		w.showFiltered();
-		if (w.size() != real_size)
-			result << " (out of " << real_size << ")";
-	}
-	
 	if (m_total_length)
 	{
 		result << ", length: ";
 		ShowTime(result, m_total_length, Config.playlist_shorten_total_times);
 	}
-	if (Config.playlist_show_remaining_time && m_remaining_time && !w.isFiltered() && w.size() > 1)
+	if (Config.playlist_show_remaining_time && m_remaining_time && w.size() > 1)
 	{
 		result << " :: remaining: ";
 		ShowTime(result, m_remaining_time, Config.playlist_shorten_total_times);

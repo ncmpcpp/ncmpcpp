@@ -32,7 +32,7 @@
 #include "regex_filter.h"
 #include "screen.h"
 
-struct TagEditor: Screen<NC::Window *>, Filterable, HasColumns, HasSongs, Searchable, Tabbable
+struct TagEditor: Screen<NC::Window *>, HasColumns, HasSongs, Searchable, Tabbable
 {
 	TagEditor();
 	
@@ -50,11 +50,6 @@ struct TagEditor: Screen<NC::Window *>, Filterable, HasColumns, HasSongs, Search
 	virtual void mouseButtonPressed(MEVENT) OVERRIDE;
 	
 	virtual bool isMergable() OVERRIDE { return true; }
-	
-	// Filterable implementation
-	virtual bool allowsFiltering() OVERRIDE;
-	virtual std::string currentFilter() OVERRIDE;
-	virtual void applyFilter(const std::string &filter) OVERRIDE;
 	
 	// Searchable implementation
 	virtual bool allowsSearching() OVERRIDE;
