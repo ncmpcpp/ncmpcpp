@@ -27,7 +27,6 @@
 #include "helpers.h"
 #include "menu.h"
 #include "playlist.h"
-#include "regex_filter.h"
 #include "screen_switcher.h"
 #include "song.h"
 #include "status.h"
@@ -184,33 +183,30 @@ bool Playlist::allowsSearching()
 	return true;
 }
 
-bool Playlist::search(const std::string &constraint)
+bool Playlist::setSearchConstraint(const std::string &constraint)
 {
 	if (constraint.empty())
 	{
-		w.clearSearchResults();
+		m_search_predicate.clear();
 		return false;
 	}
-	try
+	else
 	{
-		auto rx = RegexFilter<MPD::Song>(
-			boost::regex(constraint, Config.regex_type), playlistEntryMatcher);
-		return w.search(w.begin(), w.end(), rx);
-	}
-	catch (boost::bad_expression &)
-	{
-		return false;
+		m_search_predicate = RegexFilter<MPD::Song>(
+			boost::regex(constraint, Config.regex_type), playlistEntryMatcher
+		);
+		return true;
 	}
 }
 
-void Playlist::nextFound(bool wrap)
+void Playlist::findForward(bool wrap)
 {
-	w.nextFound(wrap);
+	searchForward(w, m_search_predicate, wrap);
 }
 
-void Playlist::prevFound(bool wrap)
+void Playlist::findBackward(bool wrap)
 {
-	w.prevFound(wrap);
+	searchBackward(w, m_search_predicate, wrap);
 }
 
 /***********************************************************************/

@@ -26,7 +26,6 @@
 #include "global.h"
 #include "helpers.h"
 #include "playlist.h"
-#include "regex_filter.h"
 #include "search_engine.h"
 #include "settings.h"
 #include "status.h"
@@ -293,34 +292,31 @@ bool SearchEngine::allowsSearching()
 	return w.back().value().isSong();
 }
 
-bool SearchEngine::search(const std::string &constraint)
+bool SearchEngine::setSearchConstraint(const std::string &constraint)
 {
 	if (constraint.empty())
 	{
-		w.clearSearchResults();
+		m_search_predicate.clear();
 		return false;
 	}
-	try
+	else
 	{
-		auto fun = boost::bind(SEItemEntryMatcher, _1, _2, false);
-		auto rx = RegexItemFilter<SEItem>(
-			boost::regex(constraint, Config.regex_type), fun);
-		return w.search(w.begin(), w.end(), rx);
-	}
-	catch (boost::bad_expression &)
-	{
-		return false;
+		m_search_predicate = RegexItemFilter<SEItem>(
+			boost::regex(constraint, Config.regex_type),
+			boost::bind(SEItemEntryMatcher, _1, _2, false)
+		);
+		return true;
 	}
 }
 
-void SearchEngine::nextFound(bool wrap)
+void SearchEngine::findForward(bool wrap)
 {
-	w.nextFound(wrap);
+	searchForward(w, m_search_predicate, wrap);
 }
 
-void SearchEngine::prevFound(bool wrap)
+void SearchEngine::findBackward(bool wrap)
 {
-	w.prevFound(wrap);
+	searchBackward(w, m_search_predicate, wrap);
 }
 
 /***********************************************************************/

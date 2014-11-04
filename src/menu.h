@@ -176,25 +176,10 @@ public:
 	
 	void applyCurrentFilter(ConstIterator first, ConstIterator last);
 	
-	bool search(ConstIterator first, ConstIterator last, const FilterFunction &f);
-	
 	/// Clears filter results
 	void clearFilterResults();
 	
 	void clearFilter();
-	
-	/// Clears search results
-	void clearSearchResults();
-	
-	/// Moves current position in the list to the next found one
-	/// @param wrap if true, this function will go to the first
-	/// found pos after the last one, otherwise it'll do nothing.
-	void nextFound(bool wrap);
-	
-	/// Moves current position in the list to the previous found one
-	/// @param wrap if true, this function will go to the last
-	/// found pos after the first one, otherwise it'll do nothing.
-	void prevFound(bool wrap);
 	
 	/// @return const reference to currently used filter function
 	const FilterFunction &getFilter() { return m_filter; }
@@ -306,8 +291,13 @@ public:
 	
 	Iterator currentI() { return Iterator(m_options_ptr->begin() + m_highlight); }
 	ConstIterator currentI() const { return ConstIterator(m_options_ptr->begin() + m_highlight); }
+	ReverseIterator currentRI() { return ReverseIterator(++currentI()); }
+	ConstReverseIterator currentRI() const { return ReverseIterator(++currentI()); }
+
 	ValueIterator currentVI() { return ValueIterator(m_options_ptr->begin() + m_highlight); }
 	ConstValueIterator currentVI() const { return ConstValueIterator(m_options_ptr->begin() + m_highlight); }
+	ReverseValueIterator currentRVI() { return ReverseValueIterator(++currentVI()); }
+	ConstReverseValueIterator currentRVI() const { return ConstReverseValueIterator(++currentVI()); }
 	
 	Iterator begin() { return Iterator(m_options_ptr->begin()); }
 	ConstIterator begin() const { return ConstIterator(m_options_ptr->begin()); }
@@ -360,7 +350,6 @@ private:
 	std::vector<ItemProxy> *m_options_ptr;
 	std::vector<ItemProxy> m_options;
 	std::vector<ItemProxy> m_filtered_options;
-	std::set<size_t> m_found_positions;
 	
 	size_t m_beginning;
 	size_t m_highlight;
@@ -403,7 +392,6 @@ Menu<ItemT>::Menu(const Menu &rhs)
 , m_item_displayer(rhs.m_item_displayer)
 , m_filter(rhs.m_filter)
 , m_searcher(rhs.m_searcher)
-, m_found_positions(rhs.m_found_positions)
 , m_beginning(rhs.m_beginning)
 , m_highlight(rhs.m_highlight)
 , m_highlight_color(rhs.m_highlight_color)
@@ -430,7 +418,6 @@ Menu<ItemT>::Menu(Menu &&rhs)
 , m_searcher(rhs.m_searcher)
 , m_options(std::move(rhs.m_options))
 , m_filtered_options(std::move(rhs.m_filtered_options))
-, m_found_positions(std::move(rhs.m_found_positions))
 , m_beginning(rhs.m_beginning)
 , m_highlight(rhs.m_highlight)
 , m_highlight_color(rhs.m_highlight_color)
@@ -456,7 +443,6 @@ Menu<ItemT> &Menu<ItemT>::operator=(Menu rhs)
 	std::swap(m_searcher, rhs.m_searcher);
 	std::swap(m_options, rhs.m_options);
 	std::swap(m_filtered_options, rhs.m_filtered_options);
-	std::swap(m_found_positions, rhs.m_found_positions);
 	std::swap(m_beginning, rhs.m_beginning);
 	std::swap(m_highlight, rhs.m_highlight);
 	std::swap(m_highlight_color, rhs.m_highlight_color);
@@ -705,7 +691,6 @@ void Menu<ItemT>::clear()
 {
 	clearFilterResults();
 	m_options.clear();
-	m_found_positions.clear();
 	m_options_ptr = &m_options;
 }
 
@@ -762,52 +747,6 @@ template <typename ItemT>
 void Menu<ItemT>::clearFilter()
 {
 	m_filter = 0;
-}
-
-template <typename ItemT>
-bool Menu<ItemT>::search(ConstIterator first, ConstIterator last, const FilterFunction &f)
-{
-	m_found_positions.clear();
-	m_searcher = f;
-	for (auto it = first; it != last; ++it)
-	{
-		if (m_searcher(*it))
-		{
-			size_t pos = it-begin();
-			m_found_positions.insert(pos);
-		}
-	}
-	return !m_found_positions.empty();
-}
-
-template <typename ItemT>
-void Menu<ItemT>::clearSearchResults()
-{
-	m_found_positions.clear();
-}
-
-template <typename ItemT>
-void Menu<ItemT>::nextFound(bool wrap)
-{
-	if (m_found_positions.empty())
-		return;
-	auto next = m_found_positions.upper_bound(m_highlight);
-	if (next != m_found_positions.end())
-		highlight(*next);
-	else if (wrap)
-		highlight(*m_found_positions.begin());
-}
-
-template <typename ItemT>
-void Menu<ItemT>::prevFound(bool wrap)
-{
-	if (m_found_positions.empty())
-		return;
-	auto prev = m_found_positions.lower_bound(m_highlight);
-	if (prev != m_found_positions.begin())
-		highlight(*--prev);
-	else if (wrap)
-		highlight(*m_found_positions.rbegin());
 }
 
 }

@@ -25,9 +25,56 @@
 
 #include "interfaces.h"
 #include "mpdpp.h"
+#include "regex_filter.h"
 #include "screen.h"
 
-struct SearchEngine: Screen<NC::Menu<struct SEItem>>, Filterable, HasSongs, Searchable, Tabbable
+struct SEItem
+{
+	SEItem() : m_is_song(false), m_buffer(0) { }
+	SEItem(NC::Buffer *buf) : m_is_song(false), m_buffer(buf) { }
+	SEItem(const MPD::Song &s) : m_is_song(true), m_song(s) { }
+	SEItem(const SEItem &ei) { *this = ei; }
+	~SEItem() {
+		if (!m_is_song)
+			delete m_buffer;
+	}
+
+	NC::Buffer &mkBuffer() {
+		assert(!m_is_song);
+		delete m_buffer;
+		m_buffer = new NC::Buffer();
+		return *m_buffer;
+	}
+
+	bool isSong() const { return m_is_song; }
+
+	NC::Buffer &buffer() { assert(!m_is_song && m_buffer); return *m_buffer; }
+	MPD::Song &song() { assert(m_is_song); return m_song; }
+
+	const NC::Buffer &buffer() const { assert(!m_is_song && m_buffer); return *m_buffer; }
+	const MPD::Song &song() const { assert(m_is_song); return m_song; }
+
+	SEItem &operator=(const SEItem &se) {
+		if (this == &se)
+			return *this;
+		m_is_song = se.m_is_song;
+		if (se.m_is_song)
+			m_song = se.m_song;
+		else if (se.m_buffer)
+			m_buffer = new NC::Buffer(*se.m_buffer);
+		else
+			m_buffer = 0;
+		return *this;
+	}
+
+private:
+	bool m_is_song;
+
+	NC::Buffer *m_buffer;
+	MPD::Song m_song;
+};
+
+struct SearchEngine: Screen<NC::Menu<SEItem>>, Filterable, HasSongs, Searchable, Tabbable
 {
 	SearchEngine();
 	
@@ -53,9 +100,9 @@ struct SearchEngine: Screen<NC::Menu<struct SEItem>>, Filterable, HasSongs, Sear
 	
 	// Searchable implementation
 	virtual bool allowsSearching() OVERRIDE;
-	virtual bool search(const std::string &constraint) OVERRIDE;
-	virtual void nextFound(bool wrap) OVERRIDE;
-	virtual void prevFound(bool wrap) OVERRIDE;
+	virtual bool setSearchConstraint(const std::string &constraint) OVERRIDE;
+	virtual void findForward(bool wrap) OVERRIDE;
+	virtual void findBackward(bool wrap) OVERRIDE;
 	
 	// HasSongs implementation
 	virtual ProxySongList proxySongList() OVERRIDE;
@@ -77,6 +124,8 @@ protected:
 private:
 	void Prepare();
 	void Search();
+
+	RegexItemFilter<SEItem> m_search_predicate;
 	
 	const char **SearchMode;
 	
@@ -87,52 +136,6 @@ private:
 	std::string itsConstraints[ConstraintsNumber];
 	
 	static bool MatchToPattern;
-};
-
-struct SEItem
-{
-	SEItem() : m_is_song(false), m_buffer(0) { }
-	SEItem(NC::Buffer *buf) : m_is_song(false), m_buffer(buf) { }
-	SEItem(const MPD::Song &s) : m_is_song(true), m_song(s) { }
-	SEItem(const SEItem &ei) { *this = ei; }
-	~SEItem() {
-		if (!m_is_song)
-			delete m_buffer;
-	}
-	
-	NC::Buffer &mkBuffer() {
-		assert(!m_is_song);
-		delete m_buffer;
-		m_buffer = new NC::Buffer();
-		return *m_buffer;
-	}
-	
-	bool isSong() const { return m_is_song; }
-	
-	NC::Buffer &buffer() { assert(!m_is_song && m_buffer); return *m_buffer; }
-	MPD::Song &song() { assert(m_is_song); return m_song; }
-	
-	const NC::Buffer &buffer() const { assert(!m_is_song && m_buffer); return *m_buffer; }
-	const MPD::Song &song() const { assert(m_is_song); return m_song; }
-	
-	SEItem &operator=(const SEItem &se) {
-		if (this == &se)
-			return *this;
-		m_is_song = se.m_is_song;
-		if (se.m_is_song)
-			m_song = se.m_song;
-		else if (se.m_buffer)
-			m_buffer = new NC::Buffer(*se.m_buffer);
-		else
-			m_buffer = 0;
-		return *this;
-	}
-	
-private:
-	bool m_is_song;
-	
-	NC::Buffer *m_buffer;
-	MPD::Song m_song;
 };
 
 extern SearchEngine *mySearcher;

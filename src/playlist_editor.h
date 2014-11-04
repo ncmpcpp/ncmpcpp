@@ -24,6 +24,7 @@
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 
 #include "interfaces.h"
+#include "regex_filter.h"
 #include "screen.h"
 
 struct PlaylistEditor: Screen<NC::Window *>, Filterable, HasColumns, HasSongs, Searchable, Tabbable
@@ -54,9 +55,9 @@ struct PlaylistEditor: Screen<NC::Window *>, Filterable, HasColumns, HasSongs, S
 	
 	// Searchable implementation
 	virtual bool allowsSearching() OVERRIDE;
-	virtual bool search(const std::string &constraint) OVERRIDE;
-	virtual void nextFound(bool wrap) OVERRIDE;
-	virtual void prevFound(bool wrap) OVERRIDE;
+	virtual bool setSearchConstraint(const std::string &constraint) OVERRIDE;
+	virtual void findForward(bool wrap) OVERRIDE;
+	virtual void findBackward(bool wrap) OVERRIDE;
 	
 	// HasSongs implementation
 	virtual ProxySongList proxySongList() OVERRIDE;
@@ -98,6 +99,9 @@ private:
 
 	const int m_window_timeout;
 	const boost::posix_time::time_duration m_fetching_delay;
+
+	RegexFilter<MPD::Playlist> m_playlists_search_predicate;
+	RegexFilter<MPD::Song> m_content_search_predicate;
 };
 
 extern PlaylistEditor *myPlaylistEditor;

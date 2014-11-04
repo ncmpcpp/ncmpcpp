@@ -23,6 +23,7 @@
 
 #include "interfaces.h"
 #include "mpdpp.h"
+#include "regex_filter.h"
 #include "screen.h"
 
 struct Browser: Screen<NC::Menu<MPD::Item>>, Filterable, HasSongs, Searchable, Tabbable
@@ -51,9 +52,9 @@ struct Browser: Screen<NC::Menu<MPD::Item>>, Filterable, HasSongs, Searchable, T
 	
 	// Searchable implementation
 	virtual bool allowsSearching() OVERRIDE;
-	virtual bool search(const std::string &constraint) OVERRIDE;
-	virtual void nextFound(bool wrap) OVERRIDE;
-	virtual void prevFound(bool wrap) OVERRIDE;
+	virtual bool setSearchConstraint(const std::string &constraint) OVERRIDE;
+	virtual void findForward(bool wrap) OVERRIDE;
+	virtual void findBackward(bool wrap) OVERRIDE;
 	
 	// HasSongs implementation
 	virtual ProxySongList proxySongList() OVERRIDE;
@@ -82,6 +83,7 @@ private:
 	bool m_local_browser;
 	size_t m_scroll_beginning;
 	std::string m_current_directory;
+	RegexFilter<MPD::Item> m_search_predicate;
 };
 
 extern Browser *myBrowser;

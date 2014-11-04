@@ -58,9 +58,9 @@ struct TagEditor: Screen<NC::Window *>, Filterable, HasColumns, HasSongs, Search
 	
 	// Searchable implementation
 	virtual bool allowsSearching() OVERRIDE;
-	virtual bool search(const std::string &constraint) OVERRIDE;
-	virtual void nextFound(bool wrap) OVERRIDE;
-	virtual void prevFound(bool wrap) OVERRIDE;
+	virtual bool setSearchConstraint(const std::string &constraint) OVERRIDE;
+	virtual void findForward(bool wrap) OVERRIDE;
+	virtual void findBackward(bool wrap) OVERRIDE;
 	
 	// HasSongs implementation
 	virtual ProxySongList proxySongList() OVERRIDE;
@@ -100,6 +100,9 @@ private:
 	
 	std::string itsBrowsedDir;
 	std::string itsHighlightedDir;
+
+	RegexFilter<std::pair<std::string, std::string>> m_directories_search_predicate;
+	RegexFilter<MPD::MutableSong> m_songs_search_predicate;
 };
 
 extern TagEditor *myTagEditor;

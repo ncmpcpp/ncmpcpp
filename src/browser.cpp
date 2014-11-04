@@ -32,7 +32,6 @@
 #include "global.h"
 #include "helpers.h"
 #include "playlist.h"
-#include "regex_filter.h"
 #include "screen_switcher.h"
 #include "settings.h"
 #include "status.h"
@@ -285,34 +284,31 @@ bool Browser::allowsSearching()
 	return true;
 }
 
-bool Browser::search(const std::string &constraint)
+bool Browser::setSearchConstraint(const std::string &constraint)
 {
 	if (constraint.empty())
 	{
-		w.clearSearchResults();
+		m_search_predicate.clear();
 		return false;
 	}
-	try
+	else
 	{
-		auto fun = boost::bind(browserEntryMatcher, _1, _2, false);
-		auto rx = RegexFilter<MPD::Item>(
-			boost::regex(constraint, Config.regex_type), fun);
-		return w.search(w.begin(), w.end(), rx);
-	}
-	catch (boost::bad_expression &)
-	{
-		return false;
+		m_search_predicate = RegexFilter<MPD::Item>(
+			boost::regex(constraint, Config.regex_type),
+			boost::bind(browserEntryMatcher, _1, _2, false)
+		);
+		return true;
 	}
 }
 
-void Browser::nextFound(bool wrap)
+void Browser::findForward(bool wrap)
 {
-	w.nextFound(wrap);
+	searchForward(w, m_search_predicate, wrap);
 }
 
-void Browser::prevFound(bool wrap)
+void Browser::findBackward(bool wrap)
 {
-	w.prevFound(wrap);
+	searchBackward(w, m_search_predicate, wrap);
 }
 
 /***********************************************************************/

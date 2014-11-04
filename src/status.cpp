@@ -387,7 +387,6 @@ int Status::State::volume()
 
 void Status::Changes::playlist(unsigned previous_version)
 {
-	myPlaylist->main().clearSearchResults();
 	withUnfilteredMenuReapplyFilter(myPlaylist->main(), [previous_version]() {
 		if (m_playlist_length < myPlaylist->main().size())
 		{

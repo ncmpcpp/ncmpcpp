@@ -37,9 +37,9 @@ struct Filterable
 struct Searchable
 {
 	virtual bool allowsSearching() = 0;
-	virtual bool search(const std::string &constraint) = 0;
-	virtual void nextFound(bool wrap) = 0;
-	virtual void prevFound(bool wrap) = 0;
+	virtual bool setSearchConstraint(const std::string &constraint) = 0;
+	virtual void findForward(bool wrap) = 0;
+	virtual void findBackward(bool wrap) = 0;
 };
 
 struct HasSongs

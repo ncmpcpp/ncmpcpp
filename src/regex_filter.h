@@ -22,21 +22,35 @@
 #define NCMPCPP_REGEX_FILTER_H
 
 #include <boost/regex.hpp>
+#include <cassert>
 #include "menu.h"
 
-template <typename T> struct RegexFilter
+template <typename T>
+struct RegexFilter
 {
 	typedef NC::Menu<T> MenuT;
 	typedef typename NC::Menu<T>::Item Item;
 	typedef std::function<bool(const boost::regex &, const T &)> FilterFunction;
 	
+	RegexFilter() { }
 	RegexFilter(boost::regex rx, FilterFunction filter)
-	: m_rx(rx), m_filter(filter) { }
-	
-	bool operator()(const Item &item) {
+	: m_rx(std::move(rx)), m_filter(std::move(filter)) { }
+
+	void clear()
+	{
+		m_filter = nullptr;
+	}
+
+	bool operator()(const Item &item) const {
+		assert(defined());
 		return m_filter(m_rx, item.value());
 	}
-	
+
+	bool defined() const
+	{
+		return m_filter.operator bool();
+	}
+
 	static std::string currentFilter(MenuT &menu)
 	{
 		std::string filter;
@@ -57,13 +71,24 @@ template <typename T> struct RegexItemFilter
 	typedef typename NC::Menu<T>::Item Item;
 	typedef std::function<bool(const boost::regex &, const Item &)> FilterFunction;
 	
+	RegexItemFilter() { }
 	RegexItemFilter(boost::regex rx, FilterFunction filter)
-	: m_rx(rx), m_filter(filter) { }
+	: m_rx(std::move(rx)), m_filter(std::move(filter)) { }
 	
+	void clear()
+	{
+		m_filter = nullptr;
+	}
+
 	bool operator()(const Item &item) {
 		return m_filter(m_rx, item);
 	}
 	
+	bool defined() const
+	{
+		return m_filter.operator bool();
+	}
+
 	static std::string currentFilter(MenuT &menu)
 	{
 		std::string filter;

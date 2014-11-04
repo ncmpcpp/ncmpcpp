@@ -29,10 +29,9 @@
 #include "display.h"
 #include "helpers.h"
 #include "global.h"
-#include "media_library.h"
 #include "mpdpp.h"
 #include "playlist.h"
-#include "regex_filter.h"
+#include "media_library.h"
 #include "status.h"
 #include "statusbar.h"
 #include "utility/comparators.h"
@@ -256,7 +255,6 @@ void MediaLibrary::update()
 	{
 		if (Albums.reallyEmpty() || m_albums_update_request)
 		{
-			Albums.clearSearchResults();
 			m_albums_update_request = false;
 			std::map<std::tuple<std::string, std::string, std::string>, time_t> albums;
 			for (MPD::SongIterator s = Mpd.GetDirectoryRecursive("/"), end; s != end; ++s)
@@ -299,7 +297,6 @@ void MediaLibrary::update()
 	{
 		if (Tags.reallyEmpty() || m_tags_update_request)
 		{
-			Tags.clearSearchResults();
 			m_tags_update_request = false;
 			std::map<std::string, time_t> tags;
 			if (Config.media_library_sort_by_mtime)
@@ -346,7 +343,6 @@ void MediaLibrary::update()
 		&& ((Albums.reallyEmpty() && Global::Timer - m_timer > m_fetching_delay) || m_albums_update_request)
 		)
 		{
-			Albums.clearSearchResults();
 			m_albums_update_request = false;
 			auto &primary_tag = Tags.current().value().tag();
 			Mpd.StartSearch(true);
@@ -395,7 +391,6 @@ void MediaLibrary::update()
 	&& ((Songs.reallyEmpty() && Global::Timer - m_timer > m_fetching_delay) || m_songs_update_request)
 	)
 	{
-		Songs.clearSearchResults();
 		m_songs_update_request = false;
 		auto &album = Albums.current().value();
 		Mpd.StartSearch(true);
@@ -640,66 +635,63 @@ bool MediaLibrary::allowsSearching()
 	return true;
 }
 
-bool MediaLibrary::search(const std::string &constraint)
+bool MediaLibrary::setSearchConstraint(const std::string &constraint)
 {
 	if (constraint.empty())
 	{
 		if (isActiveWindow(Tags))
-			Tags.clearSearchResults();
+			m_tags_search_predicate.clear();
 		else if (isActiveWindow(Albums))
-			Albums.clearSearchResults();
+			m_albums_search_predicate.clear();
 		else if (isActiveWindow(Songs))
-			Songs.clearSearchResults();
+			m_songs_search_predicate.clear();
 		return false;
 	}
-	try
+	else
 	{
-		bool result = false;
 		if (isActiveWindow(Tags))
 		{
-			auto rx = RegexFilter<PrimaryTag>(
-				boost::regex(constraint, Config.regex_type), TagEntryMatcher);
-			result = Tags.search(Tags.begin(), Tags.end(), rx);
+			m_tags_search_predicate = RegexFilter<PrimaryTag>(
+				boost::regex(constraint, Config.regex_type),
+				TagEntryMatcher
+			);
 		}
 		else if (isActiveWindow(Albums))
 		{
-			auto fun = boost::bind(AlbumEntryMatcher, _1, _2, false);
-			auto rx = RegexItemFilter<AlbumEntry>(
-				boost::regex(constraint, Config.regex_type), fun);
-			result = Albums.search(Albums.begin(), Albums.end(), rx);
+			m_albums_search_predicate = RegexItemFilter<AlbumEntry>(
+				boost::regex(constraint, Config.regex_type),
+				boost::bind(AlbumEntryMatcher, _1, _2, false)
+			);
 		}
 		else if (isActiveWindow(Songs))
 		{
-			auto rx = RegexFilter<MPD::Song>(
-				boost::regex(constraint, Config.regex_type), SongEntryMatcher);
-			result = Songs.search(Songs.begin(), Songs.end(), rx);
+			m_songs_search_predicate = RegexFilter<MPD::Song>(
+				boost::regex(constraint, Config.regex_type),
+				SongEntryMatcher
+			);
 		}
-		return result;
-	}
-	catch (boost::bad_expression &)
-	{
-		return false;
+		return true;
 	}
 }
 
-void MediaLibrary::nextFound(bool wrap)
+void MediaLibrary::findForward(bool wrap)
 {
 	if (isActiveWindow(Tags))
-		Tags.nextFound(wrap);
+		searchForward(Tags, m_tags_search_predicate, wrap);
 	else if (isActiveWindow(Albums))
-		Albums.nextFound(wrap);
+		searchForward(Albums, m_albums_search_predicate, wrap);
 	else if (isActiveWindow(Songs))
-		Songs.nextFound(wrap);
+		searchForward(Songs, m_songs_search_predicate, wrap);
 }
 
-void MediaLibrary::prevFound(bool wrap)
+void MediaLibrary::findBackward(bool wrap)
 {
 	if (isActiveWindow(Tags))
-		Tags.prevFound(wrap);
+		searchBackward(Tags, m_tags_search_predicate, wrap);
 	else if (isActiveWindow(Albums))
-		Albums.prevFound(wrap);
+		searchBackward(Albums, m_albums_search_predicate, wrap);
 	else if (isActiveWindow(Songs))
-		Songs.prevFound(wrap);
+		searchBackward(Songs, m_songs_search_predicate, wrap);
 }
 
 /***********************************************************************/

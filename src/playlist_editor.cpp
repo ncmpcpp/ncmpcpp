@@ -30,7 +30,6 @@
 #include "playlist.h"
 #include "playlist_editor.h"
 #include "mpdpp.h"
-#include "regex_filter.h"
 #include "status.h"
 #include "statusbar.h"
 #include "tag_editor.h"
@@ -138,7 +137,6 @@ void PlaylistEditor::update()
 	if (Playlists.reallyEmpty() || m_playlists_update_requested)
 	{
 		m_playlists_update_requested = false;
-		Playlists.clearSearchResults();
 		withUnfilteredMenuReapplyFilter(Playlists, [this]() {
 			size_t idx = 0;
 			for (MPD::PlaylistIterator it = Mpd.GetPlaylists(), end; it != end; ++it, ++idx)
@@ -164,7 +162,6 @@ void PlaylistEditor::update()
 			Content.clear();
 		else
 		{
-			Content.clearSearchResults();
 			withUnfilteredMenuReapplyFilter(Content, [this]() {
 				size_t idx = 0;
 				MPD::SongIterator s = Mpd.GetPlaylistContent(Playlists.current().value().path()), end;
@@ -403,53 +400,50 @@ bool PlaylistEditor::allowsSearching()
 	return true;
 }
 
-bool PlaylistEditor::search(const std::string &constraint)
+bool PlaylistEditor::setSearchConstraint(const std::string &constraint)
 {
 	if (constraint.empty())
 	{
 		if (isActiveWindow(Playlists))
-			Playlists.clearSearchResults();
+			m_playlists_search_predicate.clear();
 		else if (isActiveWindow(Content))
-			Content.clearSearchResults();
+			m_content_search_predicate.clear();
 		return false;
 	}
-	try
+	else
 	{
-		bool result = false;
 		if (isActiveWindow(Playlists))
 		{
-			auto rx = RegexFilter<MPD::Playlist>(
-				boost::regex(constraint, Config.regex_type), PlaylistEntryMatcher);
-			result = Playlists.search(Playlists.begin(), Playlists.end(), rx);
+			m_playlists_search_predicate = RegexFilter<MPD::Playlist>(
+				boost::regex(constraint, Config.regex_type),
+				PlaylistEntryMatcher
+			);
 		}
 		else if (isActiveWindow(Content))
 		{
-			auto rx = RegexFilter<MPD::Song>(
-				boost::regex(constraint, Config.regex_type), SongEntryMatcher);
-			result = Content.search(Content.begin(), Content.end(), rx);
+			m_content_search_predicate = RegexFilter<MPD::Song>(
+				boost::regex(constraint, Config.regex_type),
+				SongEntryMatcher
+			);
 		}
-		return result;
-	}
-	catch (boost::bad_expression &)
-	{
-		return false;
+		return true;
 	}
 }
 
-void PlaylistEditor::nextFound(bool wrap)
+void PlaylistEditor::findForward(bool wrap)
 {
 	if (isActiveWindow(Playlists))
-		Playlists.nextFound(wrap);
+		searchForward(Playlists, m_playlists_search_predicate, wrap);
 	else if (isActiveWindow(Content))
-		Content.nextFound(wrap);
+		searchForward(Content, m_content_search_predicate, wrap);
 }
 
-void PlaylistEditor::prevFound(bool wrap)
+void PlaylistEditor::findBackward(bool wrap)
 {
 	if (isActiveWindow(Playlists))
-		Playlists.prevFound(wrap);
+		searchBackward(Playlists, m_playlists_search_predicate, wrap);
 	else if (isActiveWindow(Content))
-		Content.prevFound(wrap);
+		searchBackward(Content, m_content_search_predicate, wrap);
 }
 
 /***********************************************************************/

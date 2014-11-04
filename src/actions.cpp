@@ -70,9 +70,24 @@
 
 using Global::myScreen;
 
-namespace {//
+namespace {
 
 enum class Find { Forward, Backward };
+
+std::string findToString(Find find)
+{
+	std::string result;
+	switch (find)
+	{
+		case Find::Forward:
+			result = "forward";
+			break;
+		case Find::Backward:
+			result = "backward";
+			break;
+	}
+	return result;
+}
 
 boost::array<
 	Actions::BaseAction *, static_cast<size_t>(Actions::Type::_numberOfActions)
@@ -1942,7 +1957,8 @@ bool NextFoundItem::canBeRun() const
 void NextFoundItem::run()
 {
 	Searchable *w = dynamic_cast<Searchable *>(myScreen);
-	w->nextFound(Config.wrapped_search);
+	assert(w != nullptr);
+	w->findForward(Config.wrapped_search);
 	listsChangeFinisher();
 }
 
@@ -1954,7 +1970,8 @@ bool PreviousFoundItem::canBeRun() const
 void PreviousFoundItem::run()
 {
 	Searchable *w = dynamic_cast<Searchable *>(myScreen);
-	w->prevFound(Config.wrapped_search);
+	assert(w != nullptr);
+	w->findBackward(Config.wrapped_search);
 	listsChangeFinisher();
 }
 
@@ -2798,28 +2815,38 @@ void findItem(const Find direction)
 	using Global::wFooter;
 	
 	Searchable *w = dynamic_cast<Searchable *>(myScreen);
-	assert(w);
+	assert(w != nullptr);
 	assert(w->allowsSearching());
 	
-	std::string token;
+	std::string constraint;
 	{
 		Statusbar::ScopedLock slock;
-		Statusbar::put() << "Find " << (direction == Find::Forward ? "forward" : "backward") << ": ";
-		token = wFooter->prompt();
+		Statusbar::put() << "Find " << findToString(direction) << ": ";
+		constraint = wFooter->prompt();
 	}
 	
-	Statusbar::print("Searching...");
-	bool success = w->search(token);
-	
-	if (success)
-		Statusbar::print("Searching finished");
-	else
-		Statusbar::printf("Unable to find \"%1%\"", token);
-	
-	if (direction == Find::Forward)
- 		w->nextFound(Config.wrapped_search);
- 	else
- 		w->prevFound(Config.wrapped_search);
+	try
+	{
+		bool success = w->setSearchConstraint(constraint);
+		if (success)
+			Statusbar::printf("Using constraint \"%1%\"", constraint);
+		else
+			Statusbar::printf("Constraint unset");
+	}
+	catch (boost::bad_expression &e)
+	{
+		Statusbar::printf("%1%", e.what());
+	}
+
+	switch (direction)
+	{
+		case Find::Forward:
+			w->findForward(Config.wrapped_search);
+			break;
+		case Find::Backward:
+			w->findBackward(Config.wrapped_search);
+			break;
+	}
 }
 
 void listsChangeFinisher()

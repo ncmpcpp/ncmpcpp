@@ -29,6 +29,41 @@
 #include "utility/string.h"
 #include "utility/wide_string.h"
 
+template <typename Iterator, typename PredicateT>
+Iterator wrappedSearch(Iterator begin, Iterator current, Iterator end,
+                       const PredicateT &pred, bool wrap)
+{
+	++current;
+	auto it = std::find_if(current, end, pred);
+	if (it == end && wrap)
+	{
+		it = std::find_if(begin, current, pred);
+		if (it == current)
+			it = end;
+	}
+	return it;
+}
+
+template <typename ItemT, typename PredicateT>
+void searchForward(NC::Menu<ItemT> &m, const PredicateT &pred, bool wrap)
+{
+if (!pred.defined())
+		return;
+	auto it = wrappedSearch(m.begin(), m.currentI(), m.end(), pred, wrap);
+	if (it != m.end())
+		m.highlight(it-m.begin());
+}
+
+template <typename ItemT, typename PredicateT>
+void searchBackward(NC::Menu<ItemT> &m, const PredicateT &pred, bool wrap)
+{
+	if (!pred.defined())
+			return;
+	auto it = wrappedSearch(m.rbegin(), m.currentRI(), m.rend(), pred, wrap);
+	if (it != m.rend())
+		m.highlight(m.size()-1-(it-m.rbegin()));
+}
+
 inline HasColumns *hasColumns(BaseScreen *screen)
 {
 	return dynamic_cast<HasColumns *>(screen);
