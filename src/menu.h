@@ -128,10 +128,6 @@ public:
 	/// @param ptr function pointer that matches the ItemDisplayer prototype
 	void setItemDisplayer(const ItemDisplayer &f) { m_item_displayer = f; }
 	
-	/// Reserves the size for internal container (this just calls std::vector::reserve())
-	/// @param size requested size
-	void reserve(size_t size);
-	
 	/// Resizes the list to given size (adequate to std::vector::resize())
 	/// @param size requested size
 	void resizeList(size_t size);
@@ -257,14 +253,6 @@ public:
 	/// @see refresh()
 	ConstIterator drawn() const { return begin() + m_drawn_position; }
 	
-	/// @return reference to last item on the list
-	/// @throw List::InvalidItem if requested item is separator
-	Menu<ItemT>::Item &back() { return *m_options_ptr->back(); }
-	
-	/// @return const reference to last item on the list
-	/// @throw List::InvalidItem if requested item is separator
-	const Menu<ItemT>::Item &back() const { return *m_options_ptr->back(); }
-	
 	/// @param pos requested position
 	/// @return reference to item at given position
 	/// @throw std::out_of_range if given position is out of range
@@ -339,7 +327,6 @@ private:
 	ItemDisplayer m_item_displayer;
 	
 	FilterFunction m_filter;
-	FilterFunction m_searcher;
 	
 	std::vector<ItemProxy> *m_options_ptr;
 	std::vector<ItemProxy> m_options;
@@ -385,7 +372,6 @@ Menu<ItemT>::Menu(const Menu &rhs)
 : Window(rhs)
 , m_item_displayer(rhs.m_item_displayer)
 , m_filter(rhs.m_filter)
-, m_searcher(rhs.m_searcher)
 , m_beginning(rhs.m_beginning)
 , m_highlight(rhs.m_highlight)
 , m_highlight_color(rhs.m_highlight_color)
@@ -409,7 +395,6 @@ Menu<ItemT>::Menu(Menu &&rhs)
 : Window(rhs)
 , m_item_displayer(rhs.m_item_displayer)
 , m_filter(rhs.m_filter)
-, m_searcher(rhs.m_searcher)
 , m_options(std::move(rhs.m_options))
 , m_filtered_options(std::move(rhs.m_filtered_options))
 , m_beginning(rhs.m_beginning)
@@ -434,7 +419,6 @@ Menu<ItemT> &Menu<ItemT>::operator=(Menu rhs)
 	std::swap(static_cast<Window &>(*this), static_cast<Window &>(rhs));
 	std::swap(m_item_displayer, rhs.m_item_displayer);
 	std::swap(m_filter, rhs.m_filter);
-	std::swap(m_searcher, rhs.m_searcher);
 	std::swap(m_options, rhs.m_options);
 	std::swap(m_filtered_options, rhs.m_filtered_options);
 	std::swap(m_beginning, rhs.m_beginning);
@@ -451,12 +435,6 @@ Menu<ItemT> &Menu<ItemT>::operator=(Menu rhs)
 	else
 		m_options_ptr = &m_filtered_options;
 	return *this;
-}
-
-template <typename ItemT>
-void Menu<ItemT>::reserve(size_t size_)
-{
-	m_options.reserve(size_);
 }
 
 template <typename ItemT>

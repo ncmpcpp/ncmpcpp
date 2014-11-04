@@ -181,7 +181,7 @@ void SearchEngine::enterPressed()
 		if (w.size() > StaticOptions)
 			Prepare();
 		Search();
-		if (w.back().value().isSong())
+		if (w.rbegin()->value().isSong())
 		{
 			if (Config.search_engine_display_mode == DisplayMode::Columns)
 				w.setTitle(Config.titles_visibility ? Display::Columns(w.getWidth()) : "");
@@ -258,7 +258,7 @@ void SearchEngine::mouseButtonPressed(MEVENT me)
 
 bool SearchEngine::allowsFiltering()
 {
-	return w.back().value().isSong();
+	return w.rbegin()->value().isSong();
 }
 
 std::string SearchEngine::currentFilter()
@@ -289,7 +289,7 @@ void SearchEngine::applyFilter(const std::string &filter)
 
 bool SearchEngine::allowsSearching()
 {
-	return w.back().value().isSong();
+	return w.rbegin()->value().isSong();
 }
 
 bool SearchEngine::setSearchConstraint(const std::string &constraint)
