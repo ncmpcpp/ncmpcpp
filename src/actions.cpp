@@ -657,7 +657,7 @@ void DeletePlaylistItems::run()
 	}
 	else if (myScreen->isActiveWindow(myPlaylistEditor->Content))
 	{
-		std::string playlist = myPlaylistEditor->Playlists.current().value().path();
+		std::string playlist = myPlaylistEditor->Playlists.current()->value().path();
 		auto delete_fun = boost::bind(&MPD::Connection::PlaylistDelete, _1, playlist, _2);
 		Statusbar::print("Deleting items...");
 		deleteSelectedSongs(myPlaylistEditor->Content, delete_fun);
@@ -706,7 +706,7 @@ void DeleteBrowserItems::run()
 		question = boost::format("Delete selected items?");
 	else
 	{
-		const auto &item = myBrowser->main().current().value();
+		const auto &item = myBrowser->main().current()->value();
 		// parent directories are not accepted (and they
 		// can't be selected, so in other cases it's fine).
 		if (myBrowser->isParentDirectory(item))
@@ -721,7 +721,7 @@ void DeleteBrowserItems::run()
 	auto items = getSelectedOrCurrent(
 		myBrowser->main().begin(),
 		myBrowser->main().end(),
-		myBrowser->main().currentI()
+		myBrowser->main().current()
 	);
 	for (const auto &item : items)
 	{
@@ -753,12 +753,12 @@ void DeleteStoredPlaylist::run()
 		question = boost::format("Delete selected playlists?");
 	else
 		question = boost::format("Delete playlist \"%1%\"?")
-			% wideShorten(myPlaylistEditor->Playlists.current().value().path(), COLS-question.size()-10);
+			% wideShorten(myPlaylistEditor->Playlists.current()->value().path(), COLS-question.size()-10);
 	confirmAction(question);
 	auto list = getSelectedOrCurrent(
 		myPlaylistEditor->Playlists.begin(),
 		myPlaylistEditor->Playlists.end(),
-		myPlaylistEditor->Playlists.currentI()
+		myPlaylistEditor->Playlists.current()
 	);
 	for (const auto &item : list)
 		Mpd.DeletePlaylist(item->value().path());
@@ -903,7 +903,7 @@ void MoveSelectedItemsUp::run()
 	else if (myScreen == myPlaylistEditor)
 	{
 		assert(!myPlaylistEditor->Playlists.empty());
-		std::string playlist = myPlaylistEditor->Playlists.current().value().path();
+		std::string playlist = myPlaylistEditor->Playlists.current()->value().path();
 		auto move_fun = boost::bind(&MPD::Connection::PlaylistMove, _1, playlist, _2, _3);
 		moveSelectedItemsUp(myPlaylistEditor->Content, move_fun);
 	}
@@ -928,7 +928,7 @@ void MoveSelectedItemsDown::run()
 	else if (myScreen == myPlaylistEditor)
 	{
 		assert(!myPlaylistEditor->Playlists.empty());
-		std::string playlist = myPlaylistEditor->Playlists.current().value().path();
+		std::string playlist = myPlaylistEditor->Playlists.current()->value().path();
 		auto move_fun = boost::bind(&MPD::Connection::PlaylistMove, _1, playlist, _2, _3);
 		moveSelectedItemsDown(myPlaylistEditor->Content, move_fun);
 	}
@@ -950,7 +950,7 @@ void MoveSelectedItemsTo::run()
 	else
 	{
 		assert(!myPlaylistEditor->Playlists.empty());
-		std::string playlist = myPlaylistEditor->Playlists.current().value().path();
+		std::string playlist = myPlaylistEditor->Playlists.current()->value().path();
 		auto move_fun = boost::bind(&MPD::Connection::PlaylistMove, _1, playlist, _2, _3);
 		moveSelectedItemsTo(myPlaylistEditor->Content, move_fun);
 	}
@@ -976,7 +976,7 @@ void Add::run()
 	Statusbar::put() << "Adding...";
 	wFooter->refresh();
 	if (myScreen == myPlaylistEditor)
-		Mpd.AddToPlaylist(myPlaylistEditor->Playlists.current().value().path(), path);
+		Mpd.AddToPlaylist(myPlaylistEditor->Playlists.current()->value().path(), path);
 	else
 	{
 		const char lastfm_url[] = "lastfm://";
@@ -1336,13 +1336,13 @@ void EditLibraryTag::run()
 	{
 		Statusbar::ScopedLock slock;
 		Statusbar::put() << NC::Format::Bold << tagTypeToString(Config.media_lib_primary_tag) << NC::Format::NoBold << ": ";
-		new_tag = wFooter->prompt(myLibrary->Tags.current().value().tag());
+		new_tag = wFooter->prompt(myLibrary->Tags.current()->value().tag());
 	}
-	if (!new_tag.empty() && new_tag != myLibrary->Tags.current().value().tag())
+	if (!new_tag.empty() && new_tag != myLibrary->Tags.current()->value().tag())
 	{
 		Statusbar::print("Updating tags...");
 		Mpd.StartSearch(true);
-		Mpd.AddSearch(Config.media_lib_primary_tag, myLibrary->Tags.current().value().tag());
+		Mpd.AddSearch(Config.media_lib_primary_tag, myLibrary->Tags.current()->value().tag());
 		MPD::MutableSong::SetFunction set = tagTypeToSetFunction(Config.media_lib_primary_tag);
 		assert(set);
 		bool success = true;
@@ -1395,9 +1395,9 @@ void EditLibraryAlbum::run()
 	{
 		Statusbar::ScopedLock slock;
 		Statusbar::put() << NC::Format::Bold << "Album: " << NC::Format::NoBold;
-		new_album = wFooter->prompt(myLibrary->Albums.current().value().entry().album());
+		new_album = wFooter->prompt(myLibrary->Albums.current()->value().entry().album());
 	}
-	if (!new_album.empty() && new_album != myLibrary->Albums.current().value().entry().album())
+	if (!new_album.empty() && new_album != myLibrary->Albums.current()->value().entry().album())
 	{
 		bool success = 1;
 		Statusbar::print("Updating tags...");
@@ -1435,7 +1435,7 @@ bool EditDirectoryName::canBeRun() const
 {
 	return  ((myScreen == myBrowser
 	      && !myBrowser->main().empty()
-	      && myBrowser->main().current().value().type() == MPD::Item::Type::Directory)
+	      && myBrowser->main().current()->value().type() == MPD::Item::Type::Directory)
 #	ifdef HAVE_TAGLIB_H
 	    ||   (myScreen->activeWindow() == myTagEditor->Dirs
 	      && !myTagEditor->Dirs->empty()
@@ -1450,7 +1450,7 @@ void EditDirectoryName::run()
 	// FIXME: use boost::filesystem and better error reporting
 	if (myScreen == myBrowser)
 	{
-		std::string old_dir = myBrowser->main().current().value().directory().path(), new_dir;
+		std::string old_dir = myBrowser->main().current()->value().directory().path(), new_dir;
 		{
 			Statusbar::ScopedLock slock;
 			Statusbar::put() << NC::Format::Bold << "Directory: " << NC::Format::NoBold;
@@ -1485,7 +1485,7 @@ void EditDirectoryName::run()
 #	ifdef HAVE_TAGLIB_H
 	else if (myScreen->activeWindow() == myTagEditor->Dirs)
 	{
-		std::string old_dir = myTagEditor->Dirs->current().value().first, new_dir;
+		std::string old_dir = myTagEditor->Dirs->current()->value().first, new_dir;
 		{
 			Statusbar::ScopedLock slock;
 			Statusbar::put() << NC::Format::Bold << "Directory: " << NC::Format::NoBold;
@@ -1517,7 +1517,7 @@ bool EditPlaylistName::canBeRun() const
 	      && !myPlaylistEditor->Playlists.empty())
 	    ||   (myScreen == myBrowser
 	      && !myBrowser->main().empty()
-		  && myBrowser->main().current().value().type() == MPD::Item::Type::Playlist);
+		  && myBrowser->main().current()->value().type() == MPD::Item::Type::Playlist);
 }
 
 void EditPlaylistName::run()
@@ -1525,9 +1525,9 @@ void EditPlaylistName::run()
 	using Global::wFooter;
 	std::string old_name, new_name;
 	if (myScreen->isActiveWindow(myPlaylistEditor->Playlists))
-		old_name = myPlaylistEditor->Playlists.current().value().path();
+		old_name = myPlaylistEditor->Playlists.current()->value().path();
 	else
-		old_name = myBrowser->main().current().value().playlist().path();
+		old_name = myBrowser->main().current()->value().playlist().path();
 	{
 		Statusbar::ScopedLock slock;
 		Statusbar::put() << NC::Format::Bold << "Playlist: " << NC::Format::NoBold;
@@ -1576,12 +1576,12 @@ void JumpToMediaLibrary::run()
 bool JumpToPlaylistEditor::canBeRun() const
 {
 	return myScreen == myBrowser
-	    && myBrowser->main().current().value().type() == MPD::Item::Type::Playlist;
+	    && myBrowser->main().current()->value().type() == MPD::Item::Type::Playlist;
 }
 
 void JumpToPlaylistEditor::run()
 {
-	myPlaylistEditor->Locate(myBrowser->main().current().value().playlist());
+	myPlaylistEditor->Locate(myBrowser->main().current()->value().playlist());
 }
 
 void ToggleScreenLock::run()
@@ -1778,7 +1778,7 @@ void CropPlaylist::run()
 	if (w.size() <= 1)
 		return;
 	assert(!myPlaylistEditor->Playlists.empty());
-	std::string playlist = myPlaylistEditor->Playlists.current().value().path();
+	std::string playlist = myPlaylistEditor->Playlists.current()->value().path();
 	if (Config.ask_before_clearing_playlists)
 		confirmAction(boost::format("Do you really want to crop playlist \"%1%\"?") % playlist);
 	selectCurrentIfNoneSelected(w);
@@ -1808,7 +1808,7 @@ void ClearPlaylist::run()
 {
 	if (myPlaylistEditor->Playlists.empty())
 		return;
-	std::string playlist = myPlaylistEditor->Playlists.current().value().path();
+	std::string playlist = myPlaylistEditor->Playlists.current()->value().path();
 	if (Config.ask_before_clearing_playlists)
 		confirmAction(boost::format("Do you really want to clear playlist \"%1%\"?") % playlist);
 	auto delete_fun = boost::bind(&MPD::Connection::PlaylistDelete, _1, playlist, _2);
@@ -2312,7 +2312,7 @@ void ShowArtistInfo::run()
 	{
 		assert(!myLibrary->Tags.empty());
 		assert(Config.media_lib_primary_tag == MPD_TAG_ARTIST);
-		artist = myLibrary->Tags.current().value().tag();
+		artist = myLibrary->Tags.current()->value().tag();
 	}
 	else
 	{

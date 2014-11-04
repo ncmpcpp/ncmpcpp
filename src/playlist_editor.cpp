@@ -164,7 +164,7 @@ void PlaylistEditor::update()
 		{
 			withUnfilteredMenuReapplyFilter(Content, [this]() {
 				size_t idx = 0;
-				MPD::SongIterator s = Mpd.GetPlaylistContent(Playlists.current().value().path()), end;
+				MPD::SongIterator s = Mpd.GetPlaylistContent(Playlists.current()->value().path()), end;
 				for (; s != end; ++s, ++idx)
 				{
 					bool is_bold = myPlaylist->checkForSong(*s);
@@ -247,11 +247,11 @@ void PlaylistEditor::AddToPlaylist(bool add_n_play)
 			success = addSongsToPlaylist(Content.beginV(), Content.endV(), add_n_play, -1);
 		});
 		Statusbar::printf("Playlist \"%1%\" loaded%2%",
-			Playlists.current().value().path(), withErrors(success)
+			Playlists.current()->value().path(), withErrors(success)
 		);
 	}
 	else if (isActiveWindow(Content) && !Content.empty())
-		addSongToPlaylist(Content.current().value(), add_n_play);
+		addSongToPlaylist(Content.current()->value(), add_n_play);
 	
 	if (!add_n_play)
 		w->scroll(NC::Scroll::Down);
@@ -270,7 +270,7 @@ void PlaylistEditor::spacePressed()
 		{
 			if (!Playlists.empty())
 			{
-				Playlists.current().setSelected(!Playlists.current().isSelected());
+				Playlists.current()->setSelected(!Playlists.current()->isSelected());
 				Playlists.scroll(NC::Scroll::Down);
 			}
 		}
@@ -278,7 +278,7 @@ void PlaylistEditor::spacePressed()
 		{
 			if (!Content.empty())
 			{
-				Content.current().setSelected(!Content.current().isSelected());
+				Content.current()->setSelected(!Content.current()->isSelected());
 				Content.scroll(NC::Scroll::Down);
 			}
 		}
@@ -502,7 +502,7 @@ std::vector<MPD::Song> PlaylistEditor::getSelectedSongs()
 				result.push_back(e.value());
 		// if no item is selected, add current one
 		if (result.empty() && !Content.empty())
-			result.push_back(Content.current().value());
+			result.push_back(Content.current()->value());
 	}
 	return result;
 }

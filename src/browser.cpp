@@ -127,7 +127,7 @@ void Browser::enterPressed()
 	if (w.empty())
 		return;
 	
-	const MPD::Item &item = w.current().value();
+	const MPD::Item &item = w.current()->value();
 	switch (item.type())
 	{
 		case MPD::Item::Type::Directory:
@@ -170,7 +170,7 @@ void Browser::spacePressed()
 		return;
 	}
 
-	const MPD::Item &item = w.current().value();
+	const MPD::Item &item = w.current()->value();
 	// ignore parent directory
 	if (isParentDirectory(item))
 		return;
@@ -212,12 +212,12 @@ void Browser::mouseButtonPressed(MEVENT me)
 	if (me.bstate & (BUTTON1_PRESSED | BUTTON3_PRESSED))
 	{
 		w.Goto(me.y);
-		switch (w.current().value().type())
+		switch (w.current()->value().type())
 		{
 			case MPD::Item::Type::Directory:
 				if (me.bstate & BUTTON1_PRESSED)
 				{
-					getDirectory(w.current().value().directory().path());
+					getDirectory(w.current()->value().directory().path());
 					drawHeader();
 				}
 				else
@@ -369,7 +369,7 @@ std::vector<MPD::Song> Browser::getSelectedSongs()
 			item_handler(item.value());
 	// if no item is selected, add current one
 	if (songs.empty() && !w.empty())
-		item_handler(w.current().value());
+		item_handler(w.current()->value());
 	return songs;
 }
 

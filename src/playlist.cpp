@@ -119,14 +119,14 @@ void Playlist::update()
 void Playlist::enterPressed()
 {
 	if (!w.empty())
-		Mpd.PlayID(w.current().value().getID());
+		Mpd.PlayID(w.current()->value().getID());
 }
 
 void Playlist::spacePressed()
 {
 	if (!w.empty())
 	{
-		w.current().setSelected(!w.current().isSelected());
+		w.current()->setSelected(!w.current()->isSelected());
 		w.scroll(NC::Scroll::Down);
 	}
 }
@@ -235,7 +235,7 @@ std::vector<MPD::Song> Playlist::getSelectedSongs()
 		if (it->isSelected())
 			result.push_back(it->value());
 	if (result.empty() && !w.empty())
-		result.push_back(w.current().value());
+		result.push_back(w.current()->value());
 	return result;
 }
 
@@ -327,7 +327,7 @@ std::string Playlist::getTotalLength()
 
 void Playlist::SetSelectedItemsPriority(int prio)
 {
-	auto list = getSelectedOrCurrent(w.begin(), w.end(), w.currentI());
+	auto list = getSelectedOrCurrent(w.begin(), w.end(), w.current());
 	Mpd.StartCommandsList();
 	for (auto it = list.begin(); it != list.end(); ++it)
 		Mpd.SetPriority((*it)->value(), prio);

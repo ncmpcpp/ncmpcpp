@@ -344,7 +344,7 @@ void MediaLibrary::update()
 		)
 		{
 			m_albums_update_request = false;
-			auto &primary_tag = Tags.current().value().tag();
+			auto &primary_tag = Tags.current()->value().tag();
 			Mpd.StartSearch(true);
 			Mpd.AddSearch(Config.media_lib_primary_tag, primary_tag);
 			std::map<std::tuple<std::string, std::string>, time_t> albums;
@@ -392,7 +392,7 @@ void MediaLibrary::update()
 	)
 	{
 		m_songs_update_request = false;
-		auto &album = Albums.current().value();
+		auto &album = Albums.current()->value();
 		Mpd.StartSearch(true);
 		Mpd.AddSearch(Config.media_lib_primary_tag, album.entry().tag());
 		if (!album.isAllTracksEntry())
@@ -448,7 +448,7 @@ void MediaLibrary::spacePressed()
 		}
 		else if (isActiveWindow(Albums))
 		{
-			if (!Albums.current().value().isAllTracksEntry())
+			if (!Albums.current()->value().isAllTracksEntry())
 			{
 				size_t idx = Albums.choice();
 				Albums[idx].setSelected(!Albums[idx].isSelected());
@@ -750,7 +750,7 @@ std::vector<MPD::Song> MediaLibrary::getSelectedSongs()
 		}
 		// if no item is selected, add current one
 		if (!any_selected && !Tags.empty())
-			tag_handler(Tags.current().value().tag());
+			tag_handler(Tags.current()->value().tag());
 	}
 	else if (isActiveWindow(Albums))
 	{
@@ -766,7 +766,7 @@ std::vector<MPD::Song> MediaLibrary::getSelectedSongs()
 					Mpd.AddSearch(Config.media_lib_primary_tag, sc.entry().tag());
 				else
 					Mpd.AddSearch(Config.media_lib_primary_tag,
-					              Tags.current().value().tag());
+					              Tags.current()->value().tag());
 					Mpd.AddSearch(MPD_TAG_ALBUM, sc.entry().album());
 				Mpd.AddSearch(MPD_TAG_DATE, sc.entry().date());
 				size_t begin = result.size();
@@ -793,7 +793,7 @@ std::vector<MPD::Song> MediaLibrary::getSelectedSongs()
 				result.push_back(it->value());
 		// if no item is selected, add current one
 		if (result.empty() && !Songs.empty())
-			result.push_back(Songs.current().value());
+			result.push_back(Songs.current()->value());
 	}
 	return result;
 }
@@ -979,7 +979,7 @@ void MediaLibrary::LocateSong(const MPD::Song &s)
 		Tags.showAll();
 		if (Tags.empty())
 			update();
-		if (primary_tag != Tags.current().value().tag())
+		if (primary_tag != Tags.current()->value().tag())
 		{
 			for (size_t i = 0; i < Tags.size(); ++i)
 			{
@@ -1000,9 +1000,9 @@ void MediaLibrary::LocateSong(const MPD::Song &s)
 	
 	std::string album = s.getAlbum();
 	std::string date = s.getDate();
-	if ((hasTwoColumns && Albums.current().value().entry().tag() != primary_tag)
-	||  album != Albums.current().value().entry().album()
-	||  date != Albums.current().value().entry().date())
+	if ((hasTwoColumns && Albums.current()->value().entry().tag() != primary_tag)
+	||  album != Albums.current()->value().entry().album()
+	||  date != Albums.current()->value().entry().date())
 	{
 		for (size_t i = 0; i < Albums.size(); ++i)
 		{
@@ -1021,7 +1021,7 @@ void MediaLibrary::LocateSong(const MPD::Song &s)
 	if (Songs.empty())
 		update();
 	
-	if (s != Songs.current().value())
+	if (s != Songs.current()->value())
 	{
 		for (size_t i = 0; i < Songs.size(); ++i)
 		{
@@ -1043,14 +1043,14 @@ void MediaLibrary::LocateSong(const MPD::Song &s)
 void MediaLibrary::AddToPlaylist(bool add_n_play)
 {
 	if (isActiveWindow(Songs) && !Songs.empty())
-		addSongToPlaylist(Songs.current().value(), add_n_play);
+		addSongToPlaylist(Songs.current()->value(), add_n_play);
 	else
 	{
 		if ((!Tags.empty() && isActiveWindow(Tags))
-		||  (isActiveWindow(Albums) && Albums.current().value().isAllTracksEntry()))
+		||  (isActiveWindow(Albums) && Albums.current()->value().isAllTracksEntry()))
 		{
 			Mpd.StartSearch(true);
-			Mpd.AddSearch(Config.media_lib_primary_tag, Tags.current().value().tag());
+			Mpd.AddSearch(Config.media_lib_primary_tag, Tags.current()->value().tag());
 			std::vector<MPD::Song> list(
 				std::make_move_iterator(Mpd.CommitSearchSongs()),
 				std::make_move_iterator(MPD::SongIterator())
@@ -1059,7 +1059,7 @@ void MediaLibrary::AddToPlaylist(bool add_n_play)
 			std::string tag_type = boost::locale::to_lower(
 				tagTypeToString(Config.media_lib_primary_tag));
 			Statusbar::printf("Songs with %1% \"%2%\" added%3%",
-				tag_type, Tags.current().value().tag(), withErrors(success)
+				tag_type, Tags.current()->value().tag(), withErrors(success)
 			);
 		}
 		else if (isActiveWindow(Albums))
@@ -1069,7 +1069,7 @@ void MediaLibrary::AddToPlaylist(bool add_n_play)
 				success = addSongsToPlaylist(Songs.beginV(), Songs.endV(), add_n_play, -1);
 			});
 			Statusbar::printf("Songs from album \"%1%\" added%2%",
-				Albums.current().value().entry().album(), withErrors(success)
+				Albums.current()->value().entry().album(), withErrors(success)
 			);
 		}
 	}

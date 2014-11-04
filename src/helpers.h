@@ -49,7 +49,7 @@ void searchForward(NC::Menu<ItemT> &m, const PredicateT &pred, bool wrap)
 {
 if (!pred.defined())
 		return;
-	auto it = wrappedSearch(m.begin(), m.currentI(), m.end(), pred, wrap);
+	auto it = wrappedSearch(m.begin(), m.current(), m.end(), pred, wrap);
 	if (it != m.end())
 		m.highlight(it-m.begin());
 }
@@ -59,7 +59,7 @@ void searchBackward(NC::Menu<ItemT> &m, const PredicateT &pred, bool wrap)
 {
 	if (!pred.defined())
 			return;
-	auto it = wrappedSearch(m.rbegin(), m.currentRI(), m.rend(), pred, wrap);
+	auto it = wrappedSearch(m.rbegin(), m.rcurrent(), m.rend(), pred, wrap);
 	if (it != m.rend())
 		m.highlight(m.size()-1-(it-m.rbegin()));
 }
@@ -130,7 +130,7 @@ template <typename T>
 void selectCurrentIfNoneSelected(NC::Menu<T> &m)
 {
 	if (!hasSelected(m.begin(), m.end()))
-		m.current().setSelected(true);
+		m.current()->setSelected(true);
 }
 
 template <typename Iterator>
@@ -264,7 +264,7 @@ void moveSelectedItemsDown(NC::Menu<MPD::Song> &m, F swap_fun)
 template <typename F>
 void moveSelectedItemsTo(NC::Menu<MPD::Song> &m, F move_fun)
 {
-	auto cur_ptr = &m.current().value();
+	auto cur_ptr = &m.current()->value();
 	withUnfilteredMenu(m, [&]() {
 		// this is kinda shitty, but there is no other way to know
 		// what position current item has in unfiltered menu.

@@ -70,15 +70,15 @@ std::wstring Outputs::title()
 
 void Outputs::enterPressed()
 {
-	if (w.current().value().enabled())
+	if (w.current()->value().enabled())
 	{
 		Mpd.DisableOutput(w.choice());
-		Statusbar::printf("Output \"%s\" disabled", w.current().value().name());
+		Statusbar::printf("Output \"%s\" disabled", w.current()->value().name());
 	}
 	else
 	{
 		Mpd.EnableOutput(w.choice());
-		Statusbar::printf("Output \"%s\" enabled", w.current().value().name());
+		Statusbar::printf("Output \"%s\" enabled", w.current()->value().name());
 	}
 }
 

@@ -150,7 +150,7 @@ void SearchEngine::enterPressed()
 {
 	size_t option = w.choice();
 	if (option > ConstraintsNumber && option < SearchButton)
-		w.current().value().buffer().clear();
+		w.current()->value().buffer().clear();
 	
 	if (option < ConstraintsNumber)
 	{
@@ -158,21 +158,21 @@ void SearchEngine::enterPressed()
 		std::string constraint = ConstraintsNames[option];
 		Statusbar::put() << NC::Format::Bold << constraint << NC::Format::NoBold << ": ";
 		itsConstraints[option] = Global::wFooter->prompt(itsConstraints[option]);
-		w.current().value().buffer().clear();
+		w.current()->value().buffer().clear();
 		constraint.resize(13, ' ');
-		w.current().value().buffer() << NC::Format::Bold << constraint << NC::Format::NoBold << ": ";
-		ShowTag(w.current().value().buffer(), itsConstraints[option]);
+		w.current()->value().buffer() << NC::Format::Bold << constraint << NC::Format::NoBold << ": ";
+		ShowTag(w.current()->value().buffer(), itsConstraints[option]);
 	}
 	else if (option == ConstraintsNumber+1)
 	{
 		Config.search_in_db = !Config.search_in_db;
-		w.current().value().buffer() << NC::Format::Bold << "Search in:" << NC::Format::NoBold << ' ' << (Config.search_in_db ? "Database" : "Current playlist");
+		w.current()->value().buffer() << NC::Format::Bold << "Search in:" << NC::Format::NoBold << ' ' << (Config.search_in_db ? "Database" : "Current playlist");
 	}
 	else if (option == ConstraintsNumber+2)
 	{
 		if (!*++SearchMode)
 			SearchMode = &SearchModes[0];
-		w.current().value().buffer() << NC::Format::Bold << "Search mode:" << NC::Format::NoBold << ' ' << *SearchMode;
+		w.current()->value().buffer() << NC::Format::Bold << "Search mode:" << NC::Format::NoBold << ' ' << *SearchMode;
 	}
 	else if (option == SearchButton)
 	{
@@ -207,22 +207,22 @@ void SearchEngine::enterPressed()
 		reset();
 	}
 	else
-		addSongToPlaylist(w.current().value().song(), true);
+		addSongToPlaylist(w.current()->value().song(), true);
 }
 
 void SearchEngine::spacePressed()
 {
-	if (!w.current().value().isSong())
+	if (!w.current()->value().isSong())
 		return;
 	
 	if (Config.space_selects)
 	{
-		w.current().setSelected(!w.current().isSelected());
+		w.current()->setSelected(!w.current()->isSelected());
 		w.scroll(NC::Scroll::Down);
 		return;
 	}
 	
-	addSongToPlaylist(w.current().value().song(), false);
+	addSongToPlaylist(w.current()->value().song(), false);
 	w.scroll(NC::Scroll::Down);
 }
 
@@ -333,7 +333,7 @@ ProxySongList SearchEngine::proxySongList()
 
 bool SearchEngine::allowsSelection()
 {
-	return w.current().value().isSong();
+	return w.current()->value().isSong();
 }
 
 void SearchEngine::reverseSelection()
@@ -355,8 +355,8 @@ std::vector<MPD::Song> SearchEngine::getSelectedSongs()
 	// if no item is selected, add current one
 	if (result.empty() && !w.empty())
 	{
-		assert(w.current().value().isSong());
-		result.push_back(w.current().value().song());
+		assert(w.current()->value().isSong());
+		result.push_back(w.current()->value().song());
 	}
 	return result;
 }

@@ -110,7 +110,7 @@ std::wstring SortPlaylistDialog::title()
 
 void SortPlaylistDialog::enterPressed()
 {
-	w.current().value().run();
+	w.current()->value().run();
 }
 
 void SortPlaylistDialog::mouseButtonPressed(MEVENT me)
@@ -130,7 +130,7 @@ void SortPlaylistDialog::mouseButtonPressed(MEVENT me)
 
 void SortPlaylistDialog::moveSortOrderDown()
 {
-	auto cur = w.currentVI();
+	auto cur = w.currentV();
 	if ((cur+1)->item().second)
 	{
 		std::iter_swap(cur, cur+1);
@@ -140,7 +140,7 @@ void SortPlaylistDialog::moveSortOrderDown()
 
 void SortPlaylistDialog::moveSortOrderUp()
 {
-	auto cur = w.currentVI();
+	auto cur = w.currentV();
 	if (cur > w.beginV() && cur->item().second)
 	{
 		std::iter_swap(cur, cur-1);

@@ -140,7 +140,7 @@ void TinyTagEditor::enterPressed()
 			else
 			{
 				if (m_previous_screen == myPlaylist)
-					myPlaylist->main().current().value() = itsEdited;
+					myPlaylist->main().current()->value() = itsEdited;
 				else if (m_previous_screen == myBrowser)
 					myBrowser->getDirectory(myBrowser->currentDirectory());
 			}

@@ -163,7 +163,7 @@ std::wstring SelectedItemsAdder::title()
 
 void SelectedItemsAdder::enterPressed()
 {
-	w->current().value().run();
+	w->current()->value().run();
 }
 
 void SelectedItemsAdder::mouseButtonPressed(MEVENT me)
@@ -282,7 +282,7 @@ void SelectedItemsAdder::addAfterCurrentAlbum() const
 
 void SelectedItemsAdder::addAfterHighlightedSong() const
 {
-	size_t pos = myPlaylist->main().current().value().getPosition();
+	size_t pos = myPlaylist->main().current()->value().getPosition();
 	++pos;
 	bool success = addSongsToPlaylist(m_selected_items.begin(), m_selected_items.end(), false, pos);
 	exitSuccessfully(success);

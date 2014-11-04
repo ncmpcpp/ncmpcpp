@@ -254,7 +254,7 @@ void TagEditor::update()
 	if (Tags->reallyEmpty())
 	{
 		Tags->reset();
-		MPD::SongIterator s = Mpd.GetSongs(Dirs->current().value().second), end;
+		MPD::SongIterator s = Mpd.GetSongs(Dirs->current()->value().second), end;
 		for (; s != end; ++s)
 			Tags->addItem(std::move(*s));
 		std::sort(Tags->beginV(), Tags->endV(),
@@ -279,13 +279,13 @@ void TagEditor::enterPressed()
 	
 	if (w == Dirs)
 	{
-		MPD::DirectoryIterator directory = Mpd.GetDirectories(Dirs->current().value().second), end;
+		MPD::DirectoryIterator directory = Mpd.GetDirectories(Dirs->current()->value().second), end;
 		bool has_subdirs = directory != end;
 		directory.finish();
 		if (has_subdirs)
 		{
 			itsHighlightedDir = itsBrowsedDir;
-			itsBrowsedDir = Dirs->current().value().second;
+			itsBrowsedDir = Dirs->current()->value().second;
 			Dirs->clear();
 			Dirs->reset();
 		}
@@ -435,7 +435,7 @@ void TagEditor::enterPressed()
 		}
 		else // list of patterns
 		{
-			Config.pattern = FParser->current().value();
+			Config.pattern = FParser->current()->value();
 			FParser->at(0).value() = "Pattern: " + Config.pattern;
 		}
 		
@@ -489,18 +489,18 @@ void TagEditor::enterPressed()
 		if (id > 0 && w == TagTypes)
 		{
 			Statusbar::ScopedLock slock;
-			Statusbar::put() << NC::Format::Bold << TagTypes->current().value() << NC::Format::NoBold << ": ";
-			std::string new_tag = wFooter->prompt(Tags->current().value().getTags(get, Config.tags_separator));
+			Statusbar::put() << NC::Format::Bold << TagTypes->current()->value() << NC::Format::NoBold << ": ";
+			std::string new_tag = wFooter->prompt(Tags->current()->value().getTags(get, Config.tags_separator));
 			for (auto it = EditedSongs.begin(); it != EditedSongs.end(); ++it)
 				(*it)->setTags(set, new_tag, Config.tags_separator);
 		}
 		else if (w == Tags)
 		{
 			Statusbar::ScopedLock slock;
-			Statusbar::put() << NC::Format::Bold << TagTypes->current().value() << NC::Format::NoBold << ": ";
-			std::string new_tag = wFooter->prompt(Tags->current().value().getTags(get, Config.tags_separator));
-			if (new_tag != Tags->current().value().getTags(get, Config.tags_separator))
-				Tags->current().value().setTags(set, new_tag, Config.tags_separator);
+			Statusbar::put() << NC::Format::Bold << TagTypes->current()->value() << NC::Format::NoBold << ": ";
+			std::string new_tag = wFooter->prompt(Tags->current()->value().getTags(get, Config.tags_separator));
+			if (new_tag != Tags->current()->value().getTags(get, Config.tags_separator))
+				Tags->current()->value().setTags(set, new_tag, Config.tags_separator);
 			Tags->scroll(NC::Scroll::Down);
 		}
 	}
@@ -516,7 +516,7 @@ void TagEditor::enterPressed()
 			else if (w == Tags)
 			{
 				Statusbar::ScopedLock slock;
-				MPD::MutableSong &s = Tags->current().value();
+				MPD::MutableSong &s = Tags->current()->value();
 				std::string old_name = s.getNewName().empty() ? s.getName() : s.getNewName();
 				size_t last_dot = old_name.rfind(".");
 				std::string extension = old_name.substr(last_dot);
@@ -583,7 +583,7 @@ void TagEditor::spacePressed()
 {
 	if (w == Tags && !Tags->empty())
 	{
-		Tags->current().setSelected(!Tags->current().isSelected());
+		Tags->current()->setSelected(!Tags->current()->isSelected());
 		w->scroll(NC::Scroll::Down);
 	}
 }
@@ -854,7 +854,7 @@ std::vector<MPD::Song> TagEditor::getSelectedSongs()
 				result.push_back(it->value());
 		// if no song was selected, add current one
 		if (result.empty() && !Tags->empty())
-			result.push_back(Tags->current().value());
+			result.push_back(Tags->current()->value());
 	}
 	return result;
 }

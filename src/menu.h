@@ -265,12 +265,6 @@ public:
 	/// @throw List::InvalidItem if requested item is separator
 	const Menu<ItemT>::Item &back() const { return *m_options_ptr->back(); }
 	
-	/// @return reference to curently highlighted object
-	Menu<ItemT>::Item &current() { return *(*m_options_ptr)[m_highlight]; }
-	
-	/// @return const reference to curently highlighted object
-	const Menu<ItemT>::Item &current() const { return *(*m_options_ptr)[m_highlight]; }
-	
 	/// @param pos requested position
 	/// @return reference to item at given position
 	/// @throw std::out_of_range if given position is out of range
@@ -289,15 +283,15 @@ public:
 	/// @return const reference to item at given position
 	Menu<ItemT>::Item &operator[](size_t pos) { return *(*m_options_ptr)[pos]; }
 	
-	Iterator currentI() { return Iterator(m_options_ptr->begin() + m_highlight); }
-	ConstIterator currentI() const { return ConstIterator(m_options_ptr->begin() + m_highlight); }
-	ReverseIterator currentRI() { return ReverseIterator(++currentI()); }
-	ConstReverseIterator currentRI() const { return ReverseIterator(++currentI()); }
+	Iterator current() { return Iterator(m_options_ptr->begin() + m_highlight); }
+	ConstIterator current() const { return ConstIterator(m_options_ptr->begin() + m_highlight); }
+	ReverseIterator rcurrent() { return ReverseIterator(++current()); }
+	ConstReverseIterator rcurrent() const { return ReverseIterator(++current()); }
 
-	ValueIterator currentVI() { return ValueIterator(m_options_ptr->begin() + m_highlight); }
-	ConstValueIterator currentVI() const { return ConstValueIterator(m_options_ptr->begin() + m_highlight); }
-	ReverseValueIterator currentRVI() { return ReverseValueIterator(++currentVI()); }
-	ConstReverseValueIterator currentRVI() const { return ConstReverseValueIterator(++currentVI()); }
+	ValueIterator currentV() { return ValueIterator(m_options_ptr->begin() + m_highlight); }
+	ConstValueIterator currentV() const { return ConstValueIterator(m_options_ptr->begin() + m_highlight); }
+	ReverseValueIterator rcurrentV() { return ReverseValueIterator(++currentV()); }
+	ConstReverseValueIterator rcurrentV() const { return ConstReverseValueIterator(++currentV()); }
 	
 	Iterator begin() { return Iterator(m_options_ptr->begin()); }
 	ConstIterator begin() const { return ConstIterator(m_options_ptr->begin()); }
