@@ -38,7 +38,7 @@ void drawSeparator(int x)
 
 void genericMouseButtonPressed(NC::Window &w, MEVENT me)
 {
-	if (me.bstate & BUTTON2_PRESSED)
+	if (me.bstate & BUTTON5_PRESSED)
 	{
 		if (Config.mouse_list_scroll_whole_page)
 			w.scroll(NC::Scroll::PageDown);
@@ -58,7 +58,7 @@ void genericMouseButtonPressed(NC::Window &w, MEVENT me)
 
 void scrollpadMouseButtonPressed(NC::Scrollpad &w, MEVENT me)
 {
-	if (me.bstate & BUTTON2_PRESSED)
+	if (me.bstate & BUTTON5_PRESSED)
 	{
 		for (size_t i = 0; i < Config.lines_scrolled; ++i)
 			w.scroll(NC::Scroll::Down);

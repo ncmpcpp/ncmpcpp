@@ -2,6 +2,7 @@ ncmpcpp-0.6.1 (????-??-??)
 
 * Comment tag is now properly written to mp3 files.
 * Only ID3v2.4 tags are now saved to mp3 files.
+* Mouse scrolling with newer ncurses API now works properly.
 
 ncmpcpp-0.6 (2014-10-25)
 
