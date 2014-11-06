@@ -130,6 +130,15 @@ int main(int argc, char **argv)
 	
 	// initialize playlist
 	myPlaylist->switchTo();
+
+	// go to startup screen
+	if (Config.startup_screen_type != myScreen->type())
+		toScreen(Config.startup_screen_type)->switchTo();
+
+	// lock current screen and go to the slave one
+	if (Config.startup_slave_screen_type != myScreen->type())
+		if (myScreen->lock())
+			toScreen(Config.startup_slave_screen_type)->switchTo();
 	
 	// local variables
 	bool key_pressed = false;

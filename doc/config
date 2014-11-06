@@ -400,10 +400,16 @@
 #screen_switcher_mode = playlist, browser
 #
 ##
-## Note: You can define startup screen for ncmpcpp
+## Note: You can define startup screen
 ## by choosing screen from the list above.
 ##
 #startup_screen = playlist
+#
+##
+## Note: You can define startup slave screen
+## by choosing screen from the list above.
+##
+#startup_slave_screen = playlist
 #
 ##
 ## Default width of locked screen (in %).

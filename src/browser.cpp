@@ -106,12 +106,7 @@ void Browser::resize()
 void Browser::switchTo()
 {
 	SwitchTo::execute(this);
-	
-	if (w.empty())
-		getDirectory(m_current_directory);
-	else
-		markSongsInPlaylist(proxySongList());
-	
+	markSongsInPlaylist(proxySongList());
 	drawHeader();
 }
 

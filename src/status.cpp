@@ -121,7 +121,11 @@ void initialize_status()
 	{
 		int curr_pos = Status::State::currentSongPosition();
 		if  (curr_pos >= 0)
+		{
 			myPlaylist->main().highlight(curr_pos);
+			if (isVisible(myPlaylist))
+				myPlaylist->refresh();
+		}
 	}
 
 	// Set TCP_NODELAY on the tcp socket as we are using write-write-read pattern
@@ -129,11 +133,6 @@ void initialize_status()
 	// which kills the performance.
 	int flag = 1;
 	setsockopt(Mpd.GetFD(), IPPROTO_TCP, TCP_NODELAY, &flag, sizeof(flag));
-
-	// go to startup screen
-	if (Config.startup_screen_type != myScreen->type())
-		toScreen(Config.startup_screen_type)->switchTo();
-	myScreen->refresh();
 
 	myBrowser->fetchSupportedExtensions();
 #	ifdef ENABLE_OUTPUTS

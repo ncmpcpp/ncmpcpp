@@ -56,6 +56,7 @@ bool configure(int argc, char **argv)
 		("config,c", po::value<std::string>(&config_path)->default_value("~/.ncmpcpp/config"), "specify configuration file")
 		("bindings,b", po::value<std::string>(&bindings_path)->default_value("~/.ncmpcpp/bindings"), "specify bindings file")
 		("screen,s", po::value<std::string>(), "specify initial screen")
+		("slave-screen,S", po::value<std::string>(), "specify initial slave screen")
 		("help,?", "show help message")
 		("version,v", "display version information")
 	;
@@ -173,6 +174,18 @@ bool configure(int argc, char **argv)
 			if (Config.startup_screen_type == ScreenType::Unknown)
 			{
 				std::cerr << "Unknown screen: " << screen << "\n";
+				exit(1);
+			}
+		}
+
+		// custom startup slave screen
+		if (vm.count("slave-screen"))
+		{
+			auto screen = vm["slave-screen"].as<std::string>();
+			Config.startup_slave_screen_type = stringtoStartupScreenType(screen);
+			if (Config.startup_slave_screen_type == ScreenType::Unknown)
+			{
+				std::cerr << "Unknown slave screen: " << screen << "\n";
 				exit(1);
 			}
 		}
