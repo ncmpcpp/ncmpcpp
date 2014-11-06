@@ -52,7 +52,7 @@ inline MPD::Song *currentSong(BaseScreen *screen)
 {
 	MPD::Song *ptr = 0;
 	auto pl = proxySongList(screen);
-	if (pl)
+	if (pl && !pl.empty())
 		ptr = pl.currentSong();
 	return ptr;
 }

@@ -107,6 +107,9 @@ void Lyrics::switchTo()
 #		endif // HAVE_CURL_CURL_H
 		
 		auto s = currentSong(myScreen);
+		if (!s)
+			return;
+
 		if (SetSong(*s))
 		{
 			SwitchTo::execute(this);
