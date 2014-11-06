@@ -20,6 +20,7 @@
 
 #include <algorithm>
 #include <boost/bind.hpp>
+#include <boost/date_time/posix_time/posix_time.hpp>
 #include <sstream>
 
 #include "display.h"
@@ -48,6 +49,7 @@ bool playlistEntryMatcher(const boost::regex &rx, const MPD::Song &s);
 
 Playlist::Playlist()
 : m_total_length(0), m_remaining_time(0), m_scroll_begin(0)
+, m_timer(boost::posix_time::from_time_t(0))
 , m_reload_total_length(false), m_reload_remaining(false)
 {
 	w = NC::Menu<MPD::Song>(0, MainStartY, COLS, MainHeight, Config.playlist_display_mode == DisplayMode::Columns && Config.titles_visibility ? Display::Columns(COLS) : "", Config.main_color, NC::Border::None);
