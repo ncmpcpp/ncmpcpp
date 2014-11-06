@@ -239,14 +239,11 @@ ProxySongList PlaylistEditor::contentProxyList()
 
 void PlaylistEditor::AddToPlaylist(bool add_n_play)
 {
-	MPD::SongList list;
-	
 	if (isActiveWindow(Playlists) && !Playlists.empty())
 	{
-		bool success;
-		withUnfilteredMenu(Content, [&]() {
-			success = addSongsToPlaylist(Content.beginV(), Content.endV(), add_n_play, -1);
-		});
+		MPD::SongList list;
+		Mpd.GetPlaylistContent(Playlists.current().value(), vectorMoveInserter(list));
+		bool success = addSongsToPlaylist(list.begin(), list.end(), add_n_play, -1);
 		Statusbar::printf("Playlist \"%1%\" loaded%2%",
 			Playlists.current().value(), withErrors(success)
 		);
@@ -488,12 +485,8 @@ MPD::SongList PlaylistEditor::getSelectedSongs()
 			}
 		}
 		// if no item is selected, add songs from right column
-		if (!any_selected && !Content.empty())
-		{
-			withUnfilteredMenu(Content, [this, &result]() {
-				result.insert(result.end(), Content.beginV(), Content.endV());
-			});
-		}
+		if (!any_selected && !Playlists.empty())
+			Mpd.GetPlaylistContent(Playlists.current().value(), vectorMoveInserter(result));
 	}
 	else if (isActiveWindow(Content))
 	{

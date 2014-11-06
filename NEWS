@@ -4,6 +4,7 @@ ncmpcpp-0.6.1 (????-??-??)
 * Only ID3v2.4 tags are now saved to mp3 files.
 * Mouse scrolling with newer ncurses API now works properly.
 * Adding songs from an album in media library now works properly with fetch delay.
+* Adding songs from a playlist in playlist editor now works properly with fetch delay.
 
 ncmpcpp-0.6 (2014-10-25)
 
