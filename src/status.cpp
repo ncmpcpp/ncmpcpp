@@ -176,11 +176,6 @@ void Status::handleServerError(MPD::ServerError &e)
 			handleServerError(e_prim);
 		}
 	}
-	else if (e.code() == MPD_SERVER_ERROR_NO_EXIST && myScreen == myBrowser)
-	{
-		myBrowser->getDirectory(getParentDirectory(myBrowser->currentDirectory()));
-		myBrowser->refresh();
-	}
 }
 
 /*************************************************************************/
