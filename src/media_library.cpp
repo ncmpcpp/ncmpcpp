@@ -58,6 +58,19 @@ size_t itsRightColStartX;
 
 typedef MediaLibrary::AlbumEntry AlbumEntry;
 
+template <typename FunT>
+void withSongsFromAlbum(const AlbumEntry &album, FunT &&f)
+{
+	Mpd.StartSearch(true);
+	Mpd.AddSearch(Config.media_lib_primary_tag, album.entry().tag());
+	if (!album.isAllTracksEntry())
+	{
+		Mpd.AddSearch(MPD_TAG_ALBUM, album.entry().album());
+		Mpd.AddSearch(MPD_TAG_DATE, album.entry().date());
+	}
+	Mpd.CommitSearchSongs(std::forward<FunT>(f));
+}
+
 std::string AlbumToString(const AlbumEntry &ae);
 std::string SongToString(const MPD::Song &s);
 
@@ -778,9 +791,9 @@ MPD::SongList MediaLibrary::getSelectedSongs()
 		// if no item is selected, add songs from right column
 		if (!any_selected && !Albums.empty())
 		{
-			withUnfilteredMenu(Songs, [this, &result]() {
-				result.insert(result.end(), Songs.beginV(), Songs.endV());
-			});
+			size_t begin = result.size();
+			withSongsFromAlbum(Albums.current().value().entry(), vectorMoveInserter(result));
+			std::sort(result.begin()+begin, result.end(), SortSongs(false));
 		}
 	}
 	else if (isActiveWindow(Songs))
@@ -1059,10 +1072,9 @@ void MediaLibrary::AddToPlaylist(bool add_n_play)
 		}
 		else if (isActiveWindow(Albums))
 		{
-			bool success;
-			withUnfilteredMenu(Songs, [&]() {
-				success = addSongsToPlaylist(Songs.beginV(), Songs.endV(), add_n_play, -1);
-			});
+			MPD::SongList list;
+			withSongsFromAlbum(Albums.current().value(), vectorMoveInserter(list));
+			bool success = addSongsToPlaylist(list.begin(), list.end(), add_n_play, -1);
 			Statusbar::printf("Songs from album \"%1%\" added%2%",
 				Albums.current().value().entry().album(), withErrors(success)
 			);
