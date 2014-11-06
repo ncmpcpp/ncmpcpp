@@ -5,10 +5,14 @@ ncmpcpp-0.7 (????-??-??)
 * It is now possible to abort the current action using Ctrl-C or Ctrl-G in prompt mode. As a result, empty value is no longer a special value that aborts most of the actions.
 * Directories and playlists in browser can now be sorted by modification time.
 
-ncmpcpp-0.6.1 (????-??-??)
+ncmpcpp-0.6.1 (2014-11-06)
 
 * Comment tag is now properly written to mp3 files.
 * Only ID3v2.4 tags are now saved to mp3 files.
+* Mouse scrolling with newer ncurses API now works properly.
+* Adding songs from an album in media library now works properly with fetch delay.
+* Adding songs from a playlist in playlist editor now works properly with fetch delay.
+* Trying to fetch lyrics from an empty list doesn't crash the application anymore.
 
 ncmpcpp-0.6 (2014-10-25)
 

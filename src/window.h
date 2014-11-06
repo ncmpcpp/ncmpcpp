@@ -95,13 +95,12 @@
 // undefine scroll macro as it collides with Window::scroll
 #undef scroll
 
-#ifndef USE_PDCURSES
-// NOTICE: redefine BUTTON2_PRESSED as it doesn't always work, I noticed
-// that it sometimes returns 134217728 (2^27) instead of expected mask, so the
-// modified define does it right but is rather experimental.
-# undef BUTTON2_PRESSED
-# define BUTTON2_PRESSED (NCURSES_MOUSE_MASK(2, NCURSES_BUTTON_PRESSED) | (1U << 27))
-#endif // USE_PDCURSES
+#if !defined(USE_PDCURSES) && NCURSES_MOUSE_VERSION == 1
+// NOTICE: define BUTTON5_PRESSED to be BUTTON2_PRESSED with additional mask
+// (I noticed that it sometimes returns 134217728 (2^27) instead of expected
+// mask, so the modified define does it right.
+# define BUTTON5_PRESSED (BUTTON2_PRESSED | (1U << 27))
+#endif // !defined(USE_PDCURSES) && NCURSES_MOUSE_VERSION == 1
 
 // workaraund for win32
 #ifdef WIN32

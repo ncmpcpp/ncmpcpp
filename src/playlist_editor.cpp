@@ -220,11 +220,13 @@ ProxySongList PlaylistEditor::contentProxyList()
 
 void PlaylistEditor::AddToPlaylist(bool add_n_play)
 {
-	std::vector<MPD::Song> list;
-	
 	if (isActiveWindow(Playlists) && !Playlists.empty())
 	{
-		bool success = addSongsToPlaylist(Content.beginV(), Content.endV(), add_n_play, -1);
+		std::vector<MPD::Song> list(
+			std::make_move_iterator(Mpd.GetPlaylistContent(Playlists.current()->value().path())),
+			std::make_move_iterator(MPD::SongIterator())
+		);
+		bool success = addSongsToPlaylist(list.begin(), list.end(), add_n_play, -1);
 		Statusbar::printf("Playlist \"%1%\" loaded%2%",
 			Playlists.current()->value().path(), withErrors(success)
 		);
@@ -414,8 +416,14 @@ std::vector<MPD::Song> PlaylistEditor::getSelectedSongs()
 			}
 		}
 		// if no item is selected, add songs from right column
-		if (!any_selected && !Content.empty())
-			std::copy(Content.beginV(), Content.endV(), std::back_inserter(result));
+		if (!any_selected && !Playlists.empty())
+		{
+			std::copy(
+				std::make_move_iterator(Mpd.GetPlaylistContent(Playlists.current()->value().path())),
+				std::make_move_iterator(MPD::SongIterator()),
+				std::back_inserter(result)
+			);
+		}
 	}
 	else if (isActiveWindow(Content))
 	{

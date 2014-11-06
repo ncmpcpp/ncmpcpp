@@ -122,7 +122,11 @@ protected:
 
 struct MouseEvent : public BaseAction
 {
-	MouseEvent() : BaseAction(Type::MouseEvent, "mouse_event") { }
+	MouseEvent() : BaseAction(Type::MouseEvent, "mouse_event")
+	{
+		m_old_mouse_event.bstate = 0;
+		m_mouse_event.bstate = 0;
+	}
 	
 protected:
 	virtual bool canBeRun() const;

@@ -326,15 +326,19 @@ void MouseEvent::run()
 	
 	m_old_mouse_event = m_mouse_event;
 	getmouse(&m_mouse_event);
+
+#	if NCURSES_MOUSE_VERSION == 1
 	// workaround shitty ncurses behavior introduced in >=5.8, when we mysteriously get
 	// a few times after ncmpcpp startup 2^27 code instead of BUTTON{1,3}_RELEASED. since that
 	// 2^27 thing shows constantly instead of BUTTON2_PRESSED, it was redefined to be recognized
-	// as BUTTON2_PRESSED. but clearly we don't want to trigger behavior bound to BUTTON2
+	// as BUTTON5_PRESSED. but clearly we don't want to trigger behavior bound to BUTTON5
 	// after BUTTON{1,3} was pressed. so, here is the workaround: if last event was BUTTON{1,3}_PRESSED,
-	// we MUST get BUTTON{1,3}_RELEASED afterwards. if we get BUTTON2_PRESSED, erroneus behavior
+	// we MUST get BUTTON{1,3}_RELEASED afterwards. if we get BUTTON5_PRESSED, erroneus behavior
 	// is about to occur and we need to prevent that.
-	if (m_old_mouse_event.bstate & (BUTTON1_PRESSED | BUTTON3_PRESSED) && m_mouse_event.bstate & BUTTON2_PRESSED)
+	if (m_old_mouse_event.bstate & (BUTTON1_PRESSED | BUTTON3_PRESSED) && m_mouse_event.bstate & BUTTON5_PRESSED)
 		return;
+#	endif // NCURSES_MOUSE_VERSION == 1
+
 	if (m_mouse_event.bstate & BUTTON1_PRESSED
 	&&  m_mouse_event.y == LINES-(Config.statusbar_visibility ? 2 : 1)
 	   ) // progressbar
@@ -353,17 +357,17 @@ void MouseEvent::run()
 	{
 		Mpd.Toggle();
 	}
-	else if ((m_mouse_event.bstate & BUTTON2_PRESSED || m_mouse_event.bstate & BUTTON4_PRESSED)
+	else if ((m_mouse_event.bstate & BUTTON5_PRESSED || m_mouse_event.bstate & BUTTON4_PRESSED)
 	     &&	 (Config.header_visibility || Config.design == Design::Alternative)
 	     &&	 m_mouse_event.y == 0 && size_t(m_mouse_event.x) > COLS-VolumeState.length()
 	) // volume
 	{
-		if (m_mouse_event.bstate & BUTTON2_PRESSED)
+		if (m_mouse_event.bstate & BUTTON5_PRESSED)
 			get(Type::VolumeDown).execute();
 		else
 			get(Type::VolumeUp).execute();
 	}
-	else if (m_mouse_event.bstate & (BUTTON1_PRESSED | BUTTON2_PRESSED | BUTTON3_PRESSED | BUTTON4_PRESSED))
+	else if (m_mouse_event.bstate & (BUTTON1_PRESSED | BUTTON3_PRESSED | BUTTON4_PRESSED | BUTTON5_PRESSED))
 		myScreen->mouseButtonPressed(m_mouse_event);
 }
 
