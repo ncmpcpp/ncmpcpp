@@ -95,9 +95,9 @@ struct SearchEngine: Screen<NC::Menu<SEItem>>, HasSongs, Searchable, Tabbable
 	
 	// Searchable implementation
 	virtual bool allowsSearching() OVERRIDE;
-	virtual bool setSearchConstraint(const std::string &constraint) OVERRIDE;
-	virtual void findForward(bool wrap) OVERRIDE;
-	virtual void findBackward(bool wrap) OVERRIDE;
+	virtual void setSearchConstraint(const std::string &constraint) OVERRIDE;
+	virtual void clearConstraint() OVERRIDE;
+	virtual bool find(SearchDirection direction, bool wrap, bool skip_current) OVERRIDE;
 	
 	// HasSongs implementation
 	virtual ProxySongList proxySongList() OVERRIDE;

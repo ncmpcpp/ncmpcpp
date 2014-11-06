@@ -328,50 +328,40 @@ bool PlaylistEditor::allowsSearching()
 	return true;
 }
 
-bool PlaylistEditor::setSearchConstraint(const std::string &constraint)
+void PlaylistEditor::setSearchConstraint(const std::string &constraint)
 {
-	if (constraint.empty())
+	if (isActiveWindow(Playlists))
 	{
-		if (isActiveWindow(Playlists))
-			m_playlists_search_predicate.clear();
-		else if (isActiveWindow(Content))
-			m_content_search_predicate.clear();
-		return false;
+		m_playlists_search_predicate = RegexFilter<MPD::Playlist>(
+			boost::regex(constraint, Config.regex_type),
+			PlaylistEntryMatcher
+		);
 	}
-	else
+	else if (isActiveWindow(Content))
 	{
-		if (isActiveWindow(Playlists))
-		{
-			m_playlists_search_predicate = RegexFilter<MPD::Playlist>(
-				boost::regex(constraint, Config.regex_type),
-				PlaylistEntryMatcher
-			);
-		}
-		else if (isActiveWindow(Content))
-		{
-			m_content_search_predicate = RegexFilter<MPD::Song>(
-				boost::regex(constraint, Config.regex_type),
-				SongEntryMatcher
-			);
-		}
-		return true;
+		m_content_search_predicate = RegexFilter<MPD::Song>(
+			boost::regex(constraint, Config.regex_type),
+			SongEntryMatcher
+		);
 	}
 }
 
-void PlaylistEditor::findForward(bool wrap)
+void PlaylistEditor::clearConstraint()
 {
 	if (isActiveWindow(Playlists))
-		searchForward(Playlists, m_playlists_search_predicate, wrap);
+		m_playlists_search_predicate.clear();
 	else if (isActiveWindow(Content))
-		searchForward(Content, m_content_search_predicate, wrap);
+		m_content_search_predicate.clear();
 }
 
-void PlaylistEditor::findBackward(bool wrap)
+bool PlaylistEditor::find(SearchDirection direction, bool wrap, bool skip_current)
 {
+	bool result = false;
 	if (isActiveWindow(Playlists))
-		searchBackward(Playlists, m_playlists_search_predicate, wrap);
+		result = search(Playlists, m_playlists_search_predicate, direction, wrap, skip_current);
 	else if (isActiveWindow(Content))
-		searchBackward(Content, m_content_search_predicate, wrap);
+		result = search(Content, m_content_search_predicate, direction, wrap, skip_current);
+	return result;
 }
 
 /***********************************************************************/

@@ -6,6 +6,8 @@ ncmpcpp-0.7 (????-??-??)
 * Directories and playlists in browser can now be sorted by modification time.
 * ~ is now expanded to home directory in mpd_host configuration variable.
 * It is now possible to define startup slave screen using -S/--slave-screen command line option or startup_slave_screen configuration variable.
+* List filtering has been removed due to the major part of its functionality overlapping with find forward/backward.
+* Find backward/forward function is now incremental.
 
 ncmpcpp-0.6.1 (2014-11-06)
 

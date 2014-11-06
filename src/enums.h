@@ -24,6 +24,10 @@
 #include "config.h"
 #include <iostream>
 
+enum class SearchDirection { Backward, Forward };
+std::ostream &operator<<(std::ostream &os, SearchDirection sd);
+std::istream &operator>>(std::istream &is, SearchDirection &sd);
+
 enum class SpaceAddMode { AddRemove, AlwaysAdd };
 std::ostream &operator<<(std::ostream &os, SpaceAddMode sam);
 std::istream &operator>>(std::istream &is, SpaceAddMode &sam);

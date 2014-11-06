@@ -721,50 +721,40 @@ bool TagEditor::allowsSearching()
 	return w == Dirs || w == Tags;
 }
 
-bool TagEditor::setSearchConstraint(const std::string &constraint)
+void TagEditor::setSearchConstraint(const std::string &constraint)
 {
-	if (constraint.empty())
+	if (w == Dirs)
 	{
-		if (w == Dirs)
-			m_directories_search_predicate.clear();
-		else if (w == Tags)
-			m_songs_search_predicate.clear();
-		return false;
+		m_directories_search_predicate = RegexFilter<std::pair<std::string, std::string>>(
+			boost::regex(constraint, Config.regex_type),
+			boost::bind(DirEntryMatcher, _1, _2, false)
+		);
 	}
-	else
+	else if (w == Tags)
 	{
-		if (w == Dirs)
-		{
-			m_directories_search_predicate = RegexFilter<std::pair<std::string, std::string>>(
-				boost::regex(constraint, Config.regex_type),
-				boost::bind(DirEntryMatcher, _1, _2, false)
-			);
-		}
-		else if (w == Tags)
-		{
-			m_songs_search_predicate = RegexFilter<MPD::MutableSong>(
-				boost::regex(constraint, Config.regex_type),
-				SongEntryMatcher
-			);
-		}
-		return true;
+		m_songs_search_predicate = RegexFilter<MPD::MutableSong>(
+			boost::regex(constraint, Config.regex_type),
+			SongEntryMatcher
+		);
 	}
 }
 
-void TagEditor::findForward(bool wrap)
+void TagEditor::clearConstraint()
 {
 	if (w == Dirs)
-		searchForward(*Dirs, m_directories_search_predicate, wrap);
+		m_directories_search_predicate.clear();
 	else if (w == Tags)
-		searchForward(*Tags, m_songs_search_predicate, wrap);
+		m_songs_search_predicate.clear();
 }
 
-void TagEditor::findBackward(bool wrap)
+bool TagEditor::find(SearchDirection direction, bool wrap, bool skip_current)
 {
+	bool result = false;
 	if (w == Dirs)
-		searchBackward(*Dirs, m_directories_search_predicate, wrap);
+		result = search(*Dirs, m_directories_search_predicate, direction, wrap, skip_current);
 	else if (w == Tags)
-		searchBackward(*Tags, m_songs_search_predicate, wrap);
+		result = search(*Tags, m_songs_search_predicate, direction, wrap, skip_current);
+	return result;
 }
 
 /***********************************************************************/

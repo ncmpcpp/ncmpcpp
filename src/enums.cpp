@@ -20,6 +20,33 @@
 
 #include "enums.h"
 
+std::ostream &operator<<(std::ostream &os, SearchDirection sd)
+{
+	switch (sd)
+	{
+		case SearchDirection::Backward:
+			os << "backward";
+			break;
+		case SearchDirection::Forward:
+			os << "forward";
+			break;
+	}
+	return os;
+}
+
+std::istream &operator>>(std::istream &is, SearchDirection &sd)
+{
+	std::string ssd;
+	is >> ssd;
+	if (ssd == "backward")
+		sd = SearchDirection::Backward;
+	else if (ssd == "forward")
+		sd = SearchDirection::Forward;
+	else
+		is.setstate(std::ios::failbit);
+	return is;
+}
+
 std::ostream &operator<<(std::ostream &os, SpaceAddMode sam)
 {
 	switch (sam)

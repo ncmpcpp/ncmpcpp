@@ -31,9 +31,10 @@
 
 template <typename Iterator, typename PredicateT>
 Iterator wrappedSearch(Iterator begin, Iterator current, Iterator end,
-                       const PredicateT &pred, bool wrap)
+                       const PredicateT &pred, bool wrap, bool skip_current)
 {
-	++current;
+	if (skip_current)
+		++current;
 	auto it = std::find_if(current, end, pred);
 	if (it == end && wrap)
 	{
@@ -45,23 +46,40 @@ Iterator wrappedSearch(Iterator begin, Iterator current, Iterator end,
 }
 
 template <typename ItemT, typename PredicateT>
-void searchForward(NC::Menu<ItemT> &m, const PredicateT &pred, bool wrap)
+bool search(NC::Menu<ItemT> &m, const PredicateT &pred,
+            SearchDirection direction, bool wrap, bool skip_current)
 {
-if (!pred.defined())
-		return;
-	auto it = wrappedSearch(m.begin(), m.current(), m.end(), pred, wrap);
-	if (it != m.end())
-		m.highlight(it-m.begin());
-}
-
-template <typename ItemT, typename PredicateT>
-void searchBackward(NC::Menu<ItemT> &m, const PredicateT &pred, bool wrap)
-{
-	if (!pred.defined())
-			return;
-	auto it = wrappedSearch(m.rbegin(), m.rcurrent(), m.rend(), pred, wrap);
-	if (it != m.rend())
-		m.highlight(it.base()-m.begin()-1);
+	bool result = false;
+	if (pred.defined())
+	{
+		switch (direction)
+		{
+			case SearchDirection::Backward:
+			{
+				auto it = wrappedSearch(m.rbegin(), m.rcurrent(), m.rend(),
+					pred, wrap, skip_current
+				);
+				if (it != m.rend())
+				{
+					m.highlight(it.base()-m.begin()-1);
+					result = true;
+				}
+				break;
+			}
+			case SearchDirection::Forward:
+			{
+				auto it = wrappedSearch(m.begin(), m.current(), m.end(),
+					pred, wrap, skip_current
+				);
+				if (it != m.end())
+				{
+					m.highlight(it-m.begin());
+					result = true;
+				}
+			}
+		}
+	}
+	return result;
 }
 
 inline HasColumns *hasColumns(BaseScreen *screen)

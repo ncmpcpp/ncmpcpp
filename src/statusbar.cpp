@@ -220,6 +220,24 @@ bool Statusbar::Helpers::ImmediatelyReturnOneOf::operator()(const char *s) const
 	return !isOneOf(s);
 }
 
+bool Statusbar::Helpers::FindImmediately::operator()(const char *s)
+{
+	using Global::myScreen;
+	Status::trace();
+	try {
+		if (m_w->allowsSearching() && m_s != s)
+		{
+			m_w->setSearchConstraint(s);
+			m_found = m_w->find(m_direction, Config.wrapped_search, false);
+			if (myScreen == myPlaylist)
+				myPlaylist->EnableHighlighting();
+			myScreen->refreshWindow();
+			m_s = s;
+		}
+	} catch (boost::bad_expression &) { }
+	return true;
+}
+
 bool Statusbar::Helpers::TryExecuteImmediateCommand::operator()(const char *s)
 {
 	bool continue_ = true;

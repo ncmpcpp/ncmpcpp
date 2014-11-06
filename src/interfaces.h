@@ -22,6 +22,7 @@
 #define NCMPCPP_INTERFACES_H
 
 #include <string>
+#include "enums.h"
 #include "gcc.h"
 #include "screen.h"
 #include "song.h"
@@ -30,9 +31,9 @@
 struct Searchable
 {
 	virtual bool allowsSearching() = 0;
-	virtual bool setSearchConstraint(const std::string &constraint) = 0;
-	virtual void findForward(bool wrap) = 0;
-	virtual void findBackward(bool wrap) = 0;
+	virtual void setSearchConstraint(const std::string &constraint) = 0;
+	virtual void clearConstraint() = 0;
+	virtual bool find(SearchDirection direction, bool wrap, bool skip_current) = 0;
 };
 
 struct HasSongs

@@ -574,63 +574,51 @@ bool MediaLibrary::allowsSearching()
 	return true;
 }
 
-bool MediaLibrary::setSearchConstraint(const std::string &constraint)
+void MediaLibrary::setSearchConstraint(const std::string &constraint)
 {
-	if (constraint.empty())
+	if (isActiveWindow(Tags))
 	{
-		if (isActiveWindow(Tags))
-			m_tags_search_predicate.clear();
-		else if (isActiveWindow(Albums))
-			m_albums_search_predicate.clear();
-		else if (isActiveWindow(Songs))
-			m_songs_search_predicate.clear();
-		return false;
+		m_tags_search_predicate = RegexFilter<PrimaryTag>(
+			boost::regex(constraint, Config.regex_type),
+			TagEntryMatcher
+		);
 	}
-	else
+	else if (isActiveWindow(Albums))
 	{
-		if (isActiveWindow(Tags))
-		{
-			m_tags_search_predicate = RegexFilter<PrimaryTag>(
-				boost::regex(constraint, Config.regex_type),
-				TagEntryMatcher
-			);
-		}
-		else if (isActiveWindow(Albums))
-		{
-			m_albums_search_predicate = RegexItemFilter<AlbumEntry>(
-				boost::regex(constraint, Config.regex_type),
-				boost::bind(AlbumEntryMatcher, _1, _2, false)
-			);
-		}
-		else if (isActiveWindow(Songs))
-		{
-			m_songs_search_predicate = RegexFilter<MPD::Song>(
-				boost::regex(constraint, Config.regex_type),
-				SongEntryMatcher
-			);
-		}
-		return true;
+		m_albums_search_predicate = RegexItemFilter<AlbumEntry>(
+			boost::regex(constraint, Config.regex_type),
+			boost::bind(AlbumEntryMatcher, _1, _2, false)
+		);
+	}
+	else if (isActiveWindow(Songs))
+	{
+		m_songs_search_predicate = RegexFilter<MPD::Song>(
+			boost::regex(constraint, Config.regex_type),
+			SongEntryMatcher
+		);
 	}
 }
 
-void MediaLibrary::findForward(bool wrap)
+void MediaLibrary::clearConstraint()
 {
 	if (isActiveWindow(Tags))
-		searchForward(Tags, m_tags_search_predicate, wrap);
+		m_tags_search_predicate.clear();
 	else if (isActiveWindow(Albums))
-		searchForward(Albums, m_albums_search_predicate, wrap);
+		m_albums_search_predicate.clear();
 	else if (isActiveWindow(Songs))
-		searchForward(Songs, m_songs_search_predicate, wrap);
+		m_songs_search_predicate.clear();
 }
 
-void MediaLibrary::findBackward(bool wrap)
+bool MediaLibrary::find(SearchDirection direction, bool wrap, bool skip_current)
 {
+	bool result = false;
 	if (isActiveWindow(Tags))
-		searchBackward(Tags, m_tags_search_predicate, wrap);
+		result = search(Tags, m_tags_search_predicate, direction, wrap, skip_current);
 	else if (isActiveWindow(Albums))
-		searchBackward(Albums, m_albums_search_predicate, wrap);
+		result = search(Albums, m_albums_search_predicate, direction, wrap, skip_current);
 	else if (isActiveWindow(Songs))
-		searchBackward(Songs, m_songs_search_predicate, wrap);
+		result = search(Songs, m_songs_search_predicate, direction, wrap, skip_current);
+	return result;
 }
 
 /***********************************************************************/

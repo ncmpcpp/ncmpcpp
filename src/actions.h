@@ -26,7 +26,7 @@
 #include <string>
 #include "window.h"
 
-namespace Actions {//
+namespace Actions {
 
 enum class Type
 {

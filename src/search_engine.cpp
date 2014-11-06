@@ -260,31 +260,22 @@ bool SearchEngine::allowsSearching()
 	return w.rbegin()->value().isSong();
 }
 
-bool SearchEngine::setSearchConstraint(const std::string &constraint)
+void SearchEngine::setSearchConstraint(const std::string &constraint)
 {
-	if (constraint.empty())
-	{
-		m_search_predicate.clear();
-		return false;
-	}
-	else
-	{
-		m_search_predicate = RegexItemFilter<SEItem>(
-			boost::regex(constraint, Config.regex_type),
-			boost::bind(SEItemEntryMatcher, _1, _2, false)
-		);
-		return true;
-	}
+	m_search_predicate = RegexItemFilter<SEItem>(
+		boost::regex(constraint, Config.regex_type),
+		boost::bind(SEItemEntryMatcher, _1, _2, false)
+	);
 }
 
-void SearchEngine::findForward(bool wrap)
+void SearchEngine::clearConstraint()
 {
-	searchForward(w, m_search_predicate, wrap);
+	m_search_predicate.clear();
 }
 
-void SearchEngine::findBackward(bool wrap)
+bool SearchEngine::find(SearchDirection direction, bool wrap, bool skip_current)
 {
-	searchBackward(w, m_search_predicate, wrap);
+	return search(w, m_search_predicate, direction, wrap, skip_current);
 }
 
 /***********************************************************************/

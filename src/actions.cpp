@@ -72,23 +72,6 @@ using Global::myScreen;
 
 namespace {
 
-enum class Find { Forward, Backward };
-
-std::string findToString(Find find)
-{
-	std::string result;
-	switch (find)
-	{
-		case Find::Forward:
-			result = "forward";
-			break;
-		case Find::Backward:
-			result = "backward";
-			break;
-	}
-	return result;
-}
-
 boost::array<
 	Actions::BaseAction *, static_cast<size_t>(Actions::Type::_numberOfActions)
 > AvailableActions;
@@ -96,7 +79,7 @@ boost::array<
 void populateActions();
 
 void seek();
-void findItem(const Find direction);
+void findItem(const SearchDirection direction);
 void listsChangeFinisher();
 
 }
@@ -1860,7 +1843,7 @@ bool FindItemBackward::canBeRun() const
 
 void FindItemForward::run()
 {
-	findItem(::Find::Forward);
+	findItem(SearchDirection::Forward);
 	listsChangeFinisher();
 }
 
@@ -1872,7 +1855,7 @@ bool FindItemForward::canBeRun() const
 
 void FindItemBackward::run()
 {
-	findItem(::Find::Backward);
+	findItem(SearchDirection::Backward);
 	listsChangeFinisher();
 }
 
@@ -1885,7 +1868,7 @@ void NextFoundItem::run()
 {
 	Searchable *w = dynamic_cast<Searchable *>(myScreen);
 	assert(w != nullptr);
-	w->findForward(Config.wrapped_search);
+	w->find(SearchDirection::Forward, Config.wrapped_search, true);
 	listsChangeFinisher();
 }
 
@@ -1898,7 +1881,7 @@ void PreviousFoundItem::run()
 {
 	Searchable *w = dynamic_cast<Searchable *>(myScreen);
 	assert(w != nullptr);
-	w->findBackward(Config.wrapped_search);
+	w->find(SearchDirection::Backward, Config.wrapped_search, true);
 	listsChangeFinisher();
 }
 
@@ -2710,7 +2693,7 @@ void seek()
 	wFooter->setTimeout(old_timeout);
 }
 
-void findItem(const Find direction)
+void findItem(const SearchDirection direction)
 {
 	using Global::wFooter;
 	
@@ -2721,31 +2704,29 @@ void findItem(const Find direction)
 	std::string constraint;
 	{
 		Statusbar::ScopedLock slock;
-		Statusbar::put() << "Find " << findToString(direction) << ": ";
+		NC::Window::ScopedPromptHook prompt_hook(*wFooter,
+			Statusbar::Helpers::FindImmediately(w, direction)
+		);
+		Statusbar::put() << (boost::format("Find %1%: ") % direction).str();
 		constraint = wFooter->prompt();
 	}
 	
 	try
 	{
-		bool success = w->setSearchConstraint(constraint);
-		if (success)
-			Statusbar::printf("Using constraint \"%1%\"", constraint);
-		else
+		if (constraint.empty())
+		{
 			Statusbar::printf("Constraint unset");
+			w->clearConstraint();
+		}
+		else
+		{
+			w->setSearchConstraint(constraint);
+			Statusbar::printf("Using constraint \"%1%\"", constraint);
+		}
 	}
 	catch (boost::bad_expression &e)
 	{
 		Statusbar::printf("%1%", e.what());
-	}
-
-	switch (direction)
-	{
-		case Find::Forward:
-			w->findForward(Config.wrapped_search);
-			break;
-		case Find::Backward:
-			w->findBackward(Config.wrapped_search);
-			break;
 	}
 }
 

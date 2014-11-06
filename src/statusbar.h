@@ -89,6 +89,21 @@ private:
 	std::vector<std::string> m_values;
 };
 
+struct FindImmediately
+{
+	FindImmediately(Searchable *w, SearchDirection direction)
+	: m_w(w), m_direction(direction), m_found(true)
+	{ }
+
+	bool operator()(const char *s);
+
+private:
+	Searchable *m_w;
+	const SearchDirection m_direction;
+	std::string m_s;
+	bool m_found;
+};
+
 struct TryExecuteImmediateCommand
 {
 	bool operator()(const char *s);
