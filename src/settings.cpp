@@ -195,6 +195,8 @@ bool Configuration::read(const std::string &config_path)
 	));
 	p.add("mpd_host", assign_default<std::string>(
 		mpd_host, "localhost", [](std::string host) {
+			// host can be a path to ipc socket, relative to home directory
+			expand_home(host);
 			Mpd.SetHostname(host);
 			return host;
 	}));

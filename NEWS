@@ -4,6 +4,7 @@ ncmpcpp-0.7 (????-??-??)
 * Visualizer has now support for two more modes: sound wave filled and sound ellipse.
 * It is now possible to abort the current action using Ctrl-C or Ctrl-G in prompt mode. As a result, empty value is no longer a special value that aborts most of the actions.
 * Directories and playlists in browser can now be sorted by modification time.
+* ~ is now expanded to home directory in mpd_host configuration variable.
 
 ncmpcpp-0.6.1 (2014-11-06)
 
