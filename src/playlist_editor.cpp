@@ -175,16 +175,16 @@ void PlaylistEditor::update()
 			}
 			if (idx < Content.size())
 				Content.resizeList(idx);
-			std::string title;
+			std::string wtitle;
 			if (Config.titles_visibility)
 			{
-				title = (boost::format("Playlist content (%1%) %2%")
+				wtitle = (boost::format("Playlist content (%1%) %2%")
 					% boost::lexical_cast<std::string>(Content.size())
 					% (Content.size() == 1 ? "item" : "items")
 					).str();
-				title.resize(Content.getWidth());
+				wtitle.resize(Content.getWidth());
 			}
-			Content.setTitle(title);
+			Content.setTitle(wtitle);
 		}
 		Content.display();
 	}
