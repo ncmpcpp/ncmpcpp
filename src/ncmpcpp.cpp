@@ -135,10 +135,14 @@ int main(int argc, char **argv)
 	if (Config.startup_screen_type != myScreen->type())
 		toScreen(Config.startup_screen_type)->switchTo();
 
-	// lock current screen and go to the slave one
-	if (Config.startup_slave_screen_type != myScreen->type())
-		if (myScreen->lock())
-			toScreen(Config.startup_slave_screen_type)->switchTo();
+	// lock current screen and go to the slave one if applicable
+	if (Config.startup_slave_screen_type)
+	{
+		auto slave_screen = *Config.startup_slave_screen_type;
+		bool screen_locked = myScreen->lock();
+		if (screen_locked && slave_screen != myScreen->type())
+			toScreen(slave_screen)->switchTo();
+	}
 	
 	// local variables
 	bool key_pressed = false;

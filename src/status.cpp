@@ -140,8 +140,7 @@ void initialize_status()
 #	endif // ENABLE_OUTPUTS
 #	ifdef ENABLE_VISUALIZER
 	myVisualizer->ResetFD();
-	if (myScreen == myVisualizer)
-		myVisualizer->SetFD();
+	myVisualizer->SetFD();
 	myVisualizer->FindOutputID();
 #	endif // ENABLE_VISUALIZER
 

@@ -407,9 +407,10 @@
 #
 ##
 ## Note: You can define startup slave screen
-## by choosing screen from the list above.
+## by choosing screen from the list above or
+## an empty value for no slave screen.
 ##
-#startup_slave_screen = playlist
+#startup_slave_screen = ""
 #
 ##
 ## Default width of locked screen (in %).

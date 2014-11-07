@@ -22,6 +22,7 @@
 #define NCMPCPP_SETTINGS_H
 
 #include <boost/date_time/posix_time/posix_time_types.hpp>
+#include <boost/optional.hpp>
 #include <boost/regex.hpp>
 #include <cassert>
 #include <vector>
@@ -187,7 +188,7 @@ struct Configuration
 	size_t now_playing_suffix_length;
 
 	ScreenType startup_screen_type;
-	ScreenType startup_slave_screen_type;
+	boost::optional<ScreenType> startup_slave_screen_type;
 	std::list<ScreenType> screen_sequence;
 
 	SortMode browser_sort_mode;

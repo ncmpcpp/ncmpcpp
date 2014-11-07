@@ -518,10 +518,13 @@ bool Configuration::read(const std::string &config_path)
 	}, defaults_to(startup_screen_type, ScreenType::Playlist)
 	));
 	p.add("startup_slave_screen", option_parser::worker([this](std::string v) {
-		startup_slave_screen_type = stringtoStartupScreenType(v);
-		if (startup_slave_screen_type == ScreenType::Unknown)
-			throw std::runtime_error("unknown slave screen: " + v);
-	}, defaults_to(startup_slave_screen_type, ScreenType::Playlist)
+		if (!v.empty())
+		{
+			startup_slave_screen_type = stringtoStartupScreenType(v);
+			if (startup_slave_screen_type == ScreenType::Unknown)
+				throw std::runtime_error("unknown slave screen: " + v);
+		}
+	}, defaults_to(startup_slave_screen_type, boost::none)
 	));
 	p.add("locked_screen_width_part", assign_default<double>(
 		locked_screen_width_part, 50.0, [](double v) {
