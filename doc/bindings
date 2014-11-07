@@ -188,6 +188,9 @@
 #  delete_playlist_items
 #
 #def_key "delete"
+#  delete_browser_items
+#
+#def_key "delete"
 #  delete_stored_playlist
 #
 #def_key "right"

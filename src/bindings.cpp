@@ -366,6 +366,7 @@ void BindingsConfiguration::generateDefaults()
 	if (notBound(k = stringToKey("delete")))
 	{
 		bind(k, Actions::Type::DeletePlaylistItems);
+		bind(k, Actions::Type::DeleteBrowserItems);
 		bind(k, Actions::Type::DeleteStoredPlaylist);
 	}
 	if (notBound(k = stringToKey("right")))
