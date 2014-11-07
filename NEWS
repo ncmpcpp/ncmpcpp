@@ -9,6 +9,10 @@ ncmpcpp-0.7 (????-??-??)
 * List filtering has been removed due to the major part of its functionality overlapping with find forward/backward.
 * Find backward/forward function is now incremental.
 
+ncmpcpp-0.6.2 (????-??-??)
+
+* Delete key now aditionally binds by default to action that deletes files in browser.
+
 ncmpcpp-0.6.1 (2014-11-06)
 
 * Comment tag is now properly written to mp3 files.
