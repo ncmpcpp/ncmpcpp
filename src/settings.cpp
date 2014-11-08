@@ -58,8 +58,11 @@ std::pair<std::vector<Column>, std::string> generate_columns(const std::string &
 	while (!(width = getEnclosedString(format, '(', ')', &pos)).empty())
 	{
 		Column col;
-		col.color = stringToColor(getEnclosedString(format, '[', ']', &pos));
-		std::string tag_type = getEnclosedString(format, '{', '}', &pos);
+		auto scolor = getEnclosedString(format, '[', ']', &pos);
+		if (scolor.empty())
+			col.color = NC::Color::Default;
+		else
+			col.color = boost::lexical_cast<NC::Color>(scolor);
 
 		if (*width.rbegin() == 'f')
 		{
@@ -69,6 +72,7 @@ std::pair<std::vector<Column>, std::string> generate_columns(const std::string &
 		else
 			col.fixed = false;
 
+		auto tag_type = getEnclosedString(format, '{', '}', &pos);
 		// alternative name
 		size_t tag_type_colon_pos = tag_type.find(':');
 		if (tag_type_colon_pos != std::string::npos)
@@ -243,11 +247,14 @@ bool Configuration::read(const std::string &config_path)
 			return result;
 	}));
 	p.add("visualizer_color", option_parser::worker([this](std::string v) {
-		boost::sregex_token_iterator i(v.begin(), v.end(), boost::regex("\\w+")), j;
-		for (; i != j; ++i)
+		boost::sregex_token_iterator color(v.begin(), v.end(), boost::regex("\\w+")), end;
+		for (; color != end; ++color)
 		{
-			auto color = stringToColor(*i);
-			visualizer_colors.push_back(color);
+			try {
+				visualizer_colors.push_back(boost::lexical_cast<NC::Color>(*color));
+			} catch (boost::bad_lexical_cast &) {
+				throw std::runtime_error("invalid color: " + *color);
+			}
 		}
 		if (visualizer_colors.empty())
 			throw std::runtime_error("empty list");

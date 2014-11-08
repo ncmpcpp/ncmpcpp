@@ -28,7 +28,6 @@
 
 NC::Color charToColor(char c);
 
-NC::Color stringToColor(const std::string &color);
 NC::Border stringToBorder(const std::string &border);
 
 std::string tagTypeToString(mpd_tag_type tag);

@@ -18,6 +18,7 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
+#include <algorithm>
 #include <cstring>
 #include <cstdio>
 #include <cstdlib>
@@ -229,38 +230,70 @@ std::ostream &operator<<(std::ostream &os, const Color &c)
 	else if (c == Color::White)
 		os << "white";
 	else if (c.isEnd())
-		os << "color_end";
+		os << "end";
 	else
-		os << "color_" << c.foreground() << "_" << c.background();
+		os << c.foreground() << "_" << c.background();
 	return os;
 }
 
 std::istream &operator>>(std::istream &is, Color &c)
 {
+	auto get_single_color = [](const std::string &s) {
+		std::cerr << "s: " << s << "\n";
+		short result = -1;
+		if (s == "black")
+			result = COLOR_BLACK;
+		else if (s == "red")
+			result = COLOR_RED;
+		else if (s == "green")
+			result = COLOR_GREEN;
+		else if (s == "yellow")
+			result = COLOR_YELLOW;
+		else if (s == "blue")
+			result = COLOR_BLUE;
+		else if (s == "magenta")
+			result = COLOR_MAGENTA;
+		else if (s == "cyan")
+			result = COLOR_CYAN;
+		else if (s == "white")
+			result = COLOR_WHITE;
+		else if (std::all_of(s.begin(), s.end(), isdigit))
+		{
+			result = atoi(s.c_str());
+			if (result < 1 || result > 256)
+				result = -1;
+			else
+				--result;
+		}
+		return result;
+	};
 	std::string sc;
 	is >> sc;
 	if (sc == "default")
-		c = Color::Default;
-	else if (sc == "black")
-		c = Color::Black;
-	else if (sc == "red")
-		c = Color::Red;
-	else if (sc == "green")
-		c = Color::Green;
-	else if (sc == "yellow")
-		c = Color::Yellow;
-	else if (sc == "blue")
-		c = Color::Blue;
-	else if (sc == "magenta")
-		c = Color::Magenta;
-	else if (sc == "cyan")
-		c = Color::Cyan;
-	else if (sc == "white")
-		c = Color::White;
-	else if (sc == "color_end")
+			c = Color::Default;
+	else if (sc == "end")
 		c = Color::End;
 	else
-		is.setstate(std::ios::failbit);
+	{
+		short value = get_single_color(sc);
+		if (value != -1)
+			c = Color(value);
+		else
+		{
+			size_t underscore = sc.find('_');
+			if (underscore != std::string::npos)
+			{
+				short fg = get_single_color(sc.substr(0, underscore));
+				short bg = get_single_color(sc.substr(underscore+1));
+				if (fg != -1 && bg != -1)
+					c = Color(fg, bg);
+				else
+					is.setstate(std::ios::failbit);
+			}
+			else
+				is.setstate(std::ios::failbit);
+		}
+	}
 	return is;
 }
 

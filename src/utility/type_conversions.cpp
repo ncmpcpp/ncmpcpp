@@ -50,28 +50,6 @@ NC::Color charToColor(char c)
 	}
 }
 
-NC::Color stringToColor(const std::string &color)
-{
-	NC::Color result = NC::Color::Default;
-	if (color == "black")
-		result = NC::Color::Black;
-	else if (color == "red")
-		result = NC::Color::Red;
-	else if (color == "green")
-		result = NC::Color::Green;
-	else if (color == "yellow")
-		result = NC::Color::Yellow;
-	else if (color == "blue")
-		result = NC::Color::Blue;
-	else if (color == "magenta")
-		result = NC::Color::Magenta;
-	else if (color == "cyan")
-		result = NC::Color::Cyan;
-	else if (color == "white")
-		result = NC::Color::White;
-	return result;
-}
-
 NC::Border stringToBorder(const std::string &border)
 {
 	NC::Border result = NC::Border::None;
