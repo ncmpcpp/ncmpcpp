@@ -119,7 +119,9 @@ std::string display_keys(const Actions::Type at)
 
 void section(NC::Scrollpad &w, const char *type_, const char *title_)
 {
-	w << "\n  " << NC::Format::Bold << type_ << " - ";
+	w << "\n  " << NC::Format::Bold;
+	if (type_[0] != '\0')
+		w << type_ << " - ";
 	w << title_ << NC::Format::NoBold << "\n\n";
 }
 
@@ -440,6 +442,9 @@ void write_bindings(NC::Scrollpad &w)
 	mouse(w, "Right click", "Toggle output");
 #	endif // ENABLE_OUTPUTS
 
+	section(w, "", "List of available colors");
+	for (int i = 0; i < COLORS; ++i)
+		w << NC::Color(i) << i+1 << NC::Color::End << " ";
 }
 
 }
