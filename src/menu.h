@@ -196,7 +196,7 @@ public:
 	
 	/// Sets custom color of highlighted position
 	/// @param col custom color
-	void setHighlightColor(Color color) { m_highlight_color = color; }
+	void setHighlightColor(Color color) { m_highlight_color = std::move(color); }
 	
 	/// @return state of highlighting
 	bool isHighlighted() { return m_highlight_enabled; }
@@ -323,7 +323,7 @@ Menu<ItemT>::Menu(size_t startx,
 	const std::string &title,
 	Color color,
 	Border border)
-	: Window(startx, starty, width, height, title, color, border),
+	: Window(startx, starty, width, height, title, std::move(color), border),
 	m_item_displayer(0),
 	m_beginning(0),
 	m_highlight(0),

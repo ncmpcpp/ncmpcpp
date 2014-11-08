@@ -124,7 +124,7 @@ void showSongs(NC::Menu<T> &menu, const MPD::Song &s, const ProxySongList &pl, c
 			else if (isdigit(*it)) // color
 			{
 				if (!discard_colors)
-					menu << NC::Color(*it-'0');
+					menu << charToColor(*it);
 			}
 			else if (*it == 'R') // right align
 			{

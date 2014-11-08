@@ -38,6 +38,7 @@
 #include "window.h"
 
 namespace {
+
 namespace rl {
 
 bool aborted;
@@ -194,43 +195,43 @@ int add_base()
 }
 }
 
-namespace NC {//
+namespace NC {
 
-std::ostream &operator<<(std::ostream &os, Color c)
+Color Color::Default(0, -1, true, false);
+Color Color::Black(COLOR_BLACK, -1);
+Color Color::Red(COLOR_RED, -1);
+Color Color::Green(COLOR_GREEN, -1);
+Color Color::Yellow(COLOR_YELLOW, -1);
+Color Color::Blue(COLOR_BLUE, -1);
+Color Color::Magenta(COLOR_MAGENTA, -1);
+Color Color::Cyan(COLOR_CYAN, -1);
+Color Color::White(COLOR_WHITE, -1);
+Color Color::End(0, 0, false, true);
+
+std::ostream &operator<<(std::ostream &os, const Color &c)
 {
-	switch (c)
-	{
-		case Color::Default:
-			os << "default";
-			break;
-		case Color::Black:
-			os << "black";
-			break;
-		case Color::Red:
-			os << "red";
-			break;
-		case Color::Green:
-			os << "green";
-			break;
-		case Color::Yellow:
-			os << "yellow";
-			break;
-		case Color::Blue:
-			os << "blue";
-			break;
-		case Color::Magenta:
-			os << "magenta";
-			break;
-		case Color::Cyan:
-			os << "cyan";
-			break;
-		case Color::White:
-			os << "white";
-			break;
-		case Color::End:
-			os << "color_end";
-			break;
-	}
+	if (c.isDefault())
+		os << "default";
+	else if (c == Color::Black)
+		os << "black";
+	else if (c == Color::Red)
+		os << "red";
+	else if (c == Color::Green)
+		os << "green";
+	else if (c == Color::Yellow)
+		os << "yellow";
+	else if (c == Color::Blue)
+		os << "blue";
+	else if (c == Color::Magenta)
+		os << "magenta";
+	else if (c == Color::Cyan)
+		os << "cyan";
+	else if (c == Color::White)
+		os << "white";
+	else if (c.isEnd())
+		os << "color_end";
+	else
+		os << "color_" << c.foreground() << "_" << c.background();
 	return os;
 }
 
@@ -386,31 +387,19 @@ std::ostream &operator<<(std::ostream &os, Scroll s)
 	return os;
 }
 
-void initScreen(GNUC_UNUSED const char *window_title, bool enable_colors)
+void initScreen(bool enable_colors)
 {
-	const int ColorsTable[] =
-	{
-		COLOR_BLACK, COLOR_RED, COLOR_GREEN, COLOR_YELLOW,
-		COLOR_BLUE, COLOR_MAGENTA, COLOR_CYAN, COLOR_WHITE
-	};
-#	ifdef XCURSES
-	Xinitscr(1, const_cast<char **>(&window_title));
-#	else
 	initscr();
-#	endif // XCURSES
 	if (has_colors() && enable_colors)
 	{
 		start_color();
 		use_default_colors();
-		int num = 1;
-#		ifdef USE_PDCURSES
-		int i = 0;
-#		else
-		int i = -1;
-#		endif // USE_PDCURSES
-		for (; i < 8; ++i)
-			for (int j = 0; j < 8; ++j)
-				init_pair(num++, ColorsTable[j], i < 0 ? i : ColorsTable[i]);
+		int npair = 1;
+		for (int bg = -1; bg < COLORS; ++bg)
+		{
+			for (int fg = 0; npair < COLOR_PAIRS && fg < COLORS; ++fg, ++npair)
+				init_pair(npair, fg, bg);
+		}
 	}
 	raw();
 	nonl();
@@ -450,6 +439,22 @@ void destroyScreen()
 	endwin();
 }
 
+int Color::pairNumber() const
+{
+	int result;
+	if (isDefault())
+		result = 0;
+	else if (isEnd())
+		throw std::logic_error("'end' doesn't have a corresponding pair number");
+	else
+	{
+		result = background();
+		result *= COLORS;
+		result += foreground();
+	}
+	return result;
+}
+
 Window::Window(size_t startx,
 		size_t starty,
 		size_t width,
@@ -465,9 +470,7 @@ Window::Window(size_t startx,
 		m_height(height),
 		m_window_timeout(-1),
 		m_color(color),
-		m_bg_color(Color::Default),
 		m_base_color(color),
-		m_base_bg_color(Color::Default),
 		m_border(border),
 		m_prompt_hook(0),
 		m_title(title),
@@ -513,9 +516,7 @@ Window::Window(const Window &rhs)
 , m_height(rhs.m_height)
 , m_window_timeout(rhs.m_window_timeout)
 , m_color(rhs.m_color)
-, m_bg_color(rhs.m_bg_color)
 , m_base_color(rhs.m_base_color)
-, m_base_bg_color(rhs.m_base_bg_color)
 , m_border(rhs.m_border)
 , m_prompt_hook(rhs.m_prompt_hook)
 , m_title(rhs.m_title)
@@ -538,9 +539,7 @@ Window::Window(Window &&rhs)
 , m_height(rhs.m_height)
 , m_window_timeout(rhs.m_window_timeout)
 , m_color(rhs.m_color)
-, m_bg_color(rhs.m_bg_color)
 , m_base_color(rhs.m_base_color)
-, m_base_bg_color(rhs.m_base_bg_color)
 , m_border(rhs.m_border)
 , m_prompt_hook(rhs.m_prompt_hook)
 , m_title(std::move(rhs.m_title))
@@ -566,9 +565,7 @@ Window &Window::operator=(Window rhs)
 	std::swap(m_height, rhs.m_height);
 	std::swap(m_window_timeout, rhs.m_window_timeout);
 	std::swap(m_color, rhs.m_color);
-	std::swap(m_bg_color, rhs.m_bg_color);
 	std::swap(m_base_color, rhs.m_base_color);
-	std::swap(m_base_bg_color, rhs.m_base_bg_color);
 	std::swap(m_border, rhs.m_border);
 	std::swap(m_prompt_hook, rhs.m_prompt_hook);
 	std::swap(m_title, rhs.m_title);
@@ -588,23 +585,20 @@ Window::~Window()
 	delwin(m_border_window);
 }
 
-void Window::setColor(Color fg, Color bg)
+void Window::setColor(Color c)
 {
-	if (fg == Color::Default)
-		fg = m_base_color;
-	
-	if (fg != Color::Default)
-		wattron(m_window, COLOR_PAIR(int(bg)*8+int(fg)));
+	if (c.isDefault())
+		c = m_base_color;
+	if (c != Color::Default)
+		wcolor_set(m_window, c.pairNumber(), nullptr);
 	else
-		wattroff(m_window, COLOR_PAIR(int(m_color)));
-	m_color = fg;
-	m_bg_color = bg;
+		wcolor_set(m_window, m_base_color.pairNumber(), nullptr);
+	m_color = std::move(c);
 }
 
-void Window::setBaseColor(Color fg, Color bg)
+void Window::setBaseColor(Color c)
 {
-	m_base_color = fg;
-	m_base_bg_color = bg;
+	m_base_color = std::move(c);
 }
 
 void Window::setBorder(Border border)
@@ -663,7 +657,7 @@ void Window::recreate(size_t width, size_t height)
 	delwin(m_window);
 	m_window = newpad(height, width);
 	setTimeout(m_window_timeout);
-	setColor(m_color, m_bg_color);
+	setColor(m_color);
 	keypad(m_window, 1);
 }
 
@@ -712,7 +706,7 @@ void Window::refreshBorder() const
 		if (m_border != Border::None)
 			attron(COLOR_PAIR(int(m_border)));
 		else
-			attron(COLOR_PAIR(int(m_base_color)));
+			wcolor_set(m_border_window, m_base_color.pairNumber(), nullptr);
 		mvhline(m_start_y-1, m_start_x, 0, m_width);
 		attron(A_BOLD);
 		mvhline(m_start_y-2, m_start_x, 32, m_width); // clear title line
@@ -961,7 +955,7 @@ const std::string &Window::getTitle() const
 	return m_title;
 }
 
-Color Window::getColor() const
+const Color &Window::getColor() const
 {
 	return m_color;
 }
@@ -1002,43 +996,27 @@ void Window::scroll(Scroll where)
 }
 
 
-Window &Window::operator<<(Colors colors)
+Window &Window::operator<<(const Color &c)
 {
-	if (colors.fg == Color::End || colors.bg == Color::End)
+	if (c.isDefault())
 	{
-		*this << Color::End;
-		return *this;
+		while (!m_color_stack.empty())
+			m_color_stack.pop();
+		setColor(m_base_color);
 	}
-	m_color_stack.push(colors);
-	setColor(colors.fg, colors.bg);
-	return *this;
-}
-
-Window &Window::operator<<(Color color)
-{
-	switch (color)
+	else if (c.isEnd())
 	{
-		case Color::Default:
-			while (!m_color_stack.empty())
-				m_color_stack.pop();
-			setColor(m_base_color, m_base_bg_color);
-			break;
-		case Color::End:
-			if (!m_color_stack.empty())
-				m_color_stack.pop();
-			if (!m_color_stack.empty())
-				setColor(m_color_stack.top().fg, m_color_stack.top().bg);
-			else
-				setColor(m_base_color, m_base_bg_color);
-			break;
-		default:
-			Color bg;
-			if (m_color_stack.empty())
-				bg = m_bg_color;
-			else
-				bg = m_color_stack.top().bg;
-			m_color_stack.push(Colors(color, bg));
-			setColor(m_color_stack.top().fg, m_color_stack.top().bg);
+		if (!m_color_stack.empty())
+			m_color_stack.pop();
+		if (!m_color_stack.empty())
+			setColor(m_color_stack.top());
+		else
+			setColor(m_base_color);
+	}
+	else
+	{
+		setColor(c);
+		m_color_stack.push(c);
 	}
 	return *this;
 }
@@ -1090,7 +1068,7 @@ Window &Window::operator<<(int (*f)(WINDOW *))
 	return *this;
 }
 
-Window &Window::operator<<(XY coords)
+Window &Window::operator<<(const XY &coords)
 {
 	goToXY(coords.x, coords.y);
 	return *this;

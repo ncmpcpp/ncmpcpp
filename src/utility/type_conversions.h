@@ -26,6 +26,8 @@
 #include "window.h"
 #include "enums.h"
 
+NC::Color charToColor(char c);
+
 NC::Color stringToColor(const std::string &color);
 NC::Border stringToBorder(const std::string &border);
 

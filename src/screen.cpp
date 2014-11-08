@@ -30,9 +30,9 @@ using Global::myInactiveScreen;
 
 void drawSeparator(int x)
 {
-	attron(COLOR_PAIR(int(Config.main_color)));
+	color_set(Config.main_color.pairNumber(), nullptr);
 	mvvline(Global::MainStartY, x, 0, Global::MainHeight);
-	attroff(COLOR_PAIR(int(Config.main_color)));
+	standend();
 	refresh();
 }
 

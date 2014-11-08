@@ -27,6 +27,7 @@
 #include "settings.h"
 #include "status.h"
 #include "utility/string.h"
+#include "utility/type_conversions.h"
 #include "utility/wide_string.h"
 
 template <typename Iterator, typename PredicateT>
@@ -344,7 +345,7 @@ void stringToBuffer(Iterator first, Iterator last, NC::BasicBuffer<typename Iter
 			}
 			else if (isdigit(*it))
 			{
-				buf << NC::Color(*it-'0');
+				buf << charToColor(*it);
 			}
 			else
 			{

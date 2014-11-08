@@ -36,7 +36,7 @@ template <typename CharT> class BasicBuffer
 		enum class Type { Color, Format };
 		
 		Property(size_t position_, NC::Color color_, int id_)
-		: m_type(Type::Color), m_position(position_), m_color(color_), m_id(id_) { }
+		: m_type(Type::Color), m_position(position_), m_color(std::move(color_)), m_id(id_) { }
 		Property(size_t position_, NC::Format format_, int id_)
 		: m_type(Type::Format), m_position(position_), m_format(format_), m_id(id_) { }
 		
@@ -94,15 +94,15 @@ public:
 	const Properties &properties() const { return m_properties; }
 	
 	template <typename PropertyT>
-	void setProperty(size_t position, PropertyT property, size_t id = -1)
+	void setProperty(size_t position, PropertyT &&property, size_t id = -1)
 	{
-		m_properties.insert(Property(position, property, id));
+		m_properties.insert(Property(position, std::forward<PropertyT>(property), id));
 	}
 	
 	template <typename PropertyT>
-	bool removeProperty(size_t position, PropertyT property, size_t id = -1)
+	bool removeProperty(size_t position, PropertyT &&property, size_t id = -1)
 	{
-		auto it = m_properties.find(Property(position, property, id));
+		auto it = m_properties.find(Property(position, std::forward<PropertyT>(property), id));
 		bool found = it != m_properties.end();
 		if (found)
 			m_properties.erase(it);

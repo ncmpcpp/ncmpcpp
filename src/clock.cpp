@@ -58,7 +58,7 @@ Clock::Clock()
 	Width = Config.clock_display_seconds ? 60 : 40;
 	
 	m_pane = NC::Window(0, MainStartY, COLS, MainHeight, "", Config.main_color, NC::Border::None);
-	w = NC::Window((COLS-Width)/2, (MainHeight-Height)/2+MainStartY, Width, Height-1, "", Config.main_color, NC::Border(Config.main_color));
+	w = NC::Window((COLS-Width)/2, (MainHeight-Height)/2+MainStartY, Width, Height-1, "", Config.main_color, NC::Border(Config.main_color.foreground()));
 }
 
 void Clock::resize()
@@ -129,9 +129,9 @@ void Clock::update()
 	
 	char buf[64];
 	std::strftime(buf, 64, "%x", &time);
-	attron(COLOR_PAIR(int(Config.main_color)));
+	color_set(Config.main_color.pairNumber(), nullptr);
 	mvprintw(w.getStarty()+w.getHeight(), w.getStartX()+(w.getWidth()-strlen(buf))/2, "%s", buf);
-	attroff(COLOR_PAIR(int(Config.main_color)));
+	standend();
 	refresh();
 	
 	for (int k = 0; k < 6; ++k)

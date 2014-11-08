@@ -21,6 +21,35 @@
 #include <cassert>
 #include "utility/type_conversions.h"
 
+NC::Color charToColor(char c)
+{
+	switch (c)
+	{
+		case '0':
+			return NC::Color::Default;
+		case '1':
+			return NC::Color::Black;
+		case '2':
+			return NC::Color::Red;
+		case '3':
+			return NC::Color::Green;
+		case '4':
+			return NC::Color::Yellow;
+		case '5':
+			return NC::Color::Blue;
+		case '6':
+			return NC::Color::Magenta;
+		case '7':
+			return NC::Color::Cyan;
+		case '8':
+			return NC::Color::White;
+		case '9':
+			return NC::Color::End;
+		default:
+			throw std::runtime_error("invalid character");
+	}
+}
+
 NC::Color stringToColor(const std::string &color)
 {
 	NC::Color result = NC::Color::Default;

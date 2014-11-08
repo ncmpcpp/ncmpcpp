@@ -51,7 +51,7 @@ const int fps = 25;
 
 // toColor: a scaling function for coloring. For numbers 0 to max this function returns
 // a coloring from the lowest color to the highest, and colors will not loop from 0 to max.
-NC::Color toColor(size_t number, size_t max, bool wrap = true)
+const NC::Color &toColor(size_t number, size_t max, bool wrap = true)
 {
 	const auto colors_size = Config.visualizer_colors.size();
 	const auto index = (number * colors_size) / max;

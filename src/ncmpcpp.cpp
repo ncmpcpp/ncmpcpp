@@ -107,7 +107,7 @@ int main(int argc, char **argv)
 	cerr_buffer = std::cerr.rdbuf();
 	std::cerr.rdbuf(errorlog.rdbuf());
 	
-	NC::initScreen("ncmpcpp ver. " VERSION, Config.colors_enabled);
+	NC::initScreen(Config.colors_enabled);
 	
 	Actions::OriginalStatusbarVisibility = Config.statusbar_visibility;
 

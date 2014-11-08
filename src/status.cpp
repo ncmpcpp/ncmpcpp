@@ -671,19 +671,18 @@ void Status::Changes::flags()
 
 			// this is done by raw ncurses because creating another
 			// window only for handling this is quite silly
-			attrset(A_BOLD|COLOR_PAIR(int(Config.state_line_color)));
+			attrset(A_BOLD);
+			color_set(Config.state_line_color.pairNumber(), nullptr);
 			mvhline(1, 0, 0, COLS);
 			if (!switch_state.empty())
 			{
 				mvprintw(1, COLS-switch_state.length()-3, "[");
-				attroff(COLOR_PAIR(int(Config.state_line_color)));
-				attron(COLOR_PAIR(int(Config.state_flags_color)));
+				color_set(Config.state_flags_color.pairNumber(), nullptr);
 				mvprintw(1, COLS-switch_state.length()-2, "%s", switch_state.c_str());
-				attroff(COLOR_PAIR(int(Config.state_flags_color)));
-				attron(COLOR_PAIR(int(Config.state_line_color)));
+				color_set(Config.state_line_color.pairNumber(), nullptr);
 				mvprintw(1, COLS-2, "]");
 			}
-			attrset(0);
+			standend();
 			refresh();
 			break;
 		case Design::Alternative:

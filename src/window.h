@@ -35,6 +35,7 @@
 #include <stack>
 #include <vector>
 #include <string>
+#include <tuple>
 #include <queue>
 
 // define some Ctrl-? keys
@@ -125,11 +126,66 @@ private:
 	std::string m_prompt;
 };
 
-/// Colors used by NCurses
-enum class Color { Default, Black, Red, Green, Yellow, Blue, Magenta, Cyan, White, End };
+struct Color
+{
+	Color() : m_rep(0, -1, true, false) { }
+	Color(short foregound_value, short background_value = -1,
+			 bool is_default = false, bool is_end = false)
+	: m_rep(foregound_value + 1, background_value + 1, is_default, is_end)
+	{
+		if (isDefault() && isEnd())
+			throw std::logic_error("Color flag can't be marked as both 'default' and 'end'");
+	}
 
-std::ostream &operator<<(std::ostream &os, Color c);
-std::istream &operator>>(std::istream &is, Color &c);
+	bool operator==(const Color &rhs) const
+	{
+		return m_rep == rhs.m_rep;
+	}
+	bool operator!=(const Color &rhs) const
+	{
+		return m_rep != rhs.m_rep;
+	}
+	bool operator<(const Color &rhs) const
+	{
+		return m_rep < rhs.m_rep;
+	}
+
+	short foreground() const
+	{
+		return std::get<0>(m_rep);
+	}
+	short background() const
+	{
+		return std::get<1>(m_rep);
+	}
+	bool isDefault() const
+	{
+		return std::get<2>(m_rep);
+	}
+	bool isEnd() const
+	{
+		return std::get<3>(m_rep);
+	}
+
+	int pairNumber() const;
+
+	static Color Default;
+	static Color Black;
+	static Color Red;
+	static Color Green;
+	static Color Yellow;
+	static Color Blue;
+	static Color Magenta;
+	static Color Cyan;
+	static Color White;
+	static Color End;
+
+private:
+	std::tuple<short, short, bool, bool> m_rep;
+};
+
+std::ostream &operator<<(std::ostream &os, const Color &c);
+std::istream &operator>>(std::istream &is, Color &f);
 
 /// Format flags used by NCurses
 enum class Format {
@@ -154,21 +210,11 @@ enum class Scroll { Up, Down, PageUp, PageDown, Home, End };
 std::ostream &operator<<(std::ostream &os, Scroll s);
 
 /// Initializes curses screen and sets some additional attributes
-/// @param window_title title of the window (has an effect only if pdcurses lib is used)
 /// @param enable_colors enables colors
-void initScreen(const char *window_title, bool enable_colors);
+void initScreen(bool enable_colors);
 
 /// Destroys the screen
 void destroyScreen();
-
-/// Struct used to set color of both foreground and background of window
-/// @see Window::operator<<()
-struct Colors
-{
-	Colors(Color one, Color two = Color::Default) : fg(one), bg(two) { }
-	Color fg;
-	Color bg;
-};
 
 /// Struct used for going to given coordinates
 /// @see Window::operator<<()
@@ -244,7 +290,7 @@ struct Window
 	const std::string &getTitle() const;
 	
 	/// @return current window's color
-	Color getColor() const;
+	const Color &getColor() const;
 	
 	/// @return current window's border
 	Border getBorder() const;
@@ -301,7 +347,7 @@ struct Window
 	/// Sets window's base color
 	/// @param fg foregound base color
 	/// @param bg background base color
-	void setBaseColor(Color fg, Color bg = Color::Default);
+	void setBaseColor(Color c);
 	
 	/// Sets window's border
 	/// @param border new window's border
@@ -365,89 +411,25 @@ struct Window
 	virtual void scroll(Scroll where);
 	
 	/// Applies function of compatible prototype to internal WINDOW pointer
-	/// The mostly used function in this case seem to be wclrtoeol(), which
-	/// clears the window from current cursor position to the end of line.
-	/// Note that delwin() also matches that prototype, but I wouldn't
-	/// recommend anyone passing this pointer here ;)
-	/// @param f pointer to function to call with internal WINDOW pointer
-	/// @return reference to itself
 	Window &operator<<(int (*f)(WINDOW *));
-	
-	/// Applies foreground and background colors to window
-	/// @param colors struct that holds new colors information
-	/// @return reference to itself
-	Window &operator<<(Colors colors);
-	
-	/// Applies foregound color to window. Note that colors applied
-	/// that way are stacked, i.e if you applied Color::Red, then Color::Green
-	/// and Color::End, current color would be Color::Red. If you want to discard
-	/// all colors and fall back to base one, pass Color::Default.
-	/// @param color new color value
-	/// @return reference to itself
-	Window &operator<<(Color color);
-	
-	/// Applies format flag to window. Note that these attributes are
-	/// also stacked, so if you applied Format::Bold twice, to get rid of
-	/// it you have to pass Format::NoBold also twice.
-	/// @param format format flag
-	/// @return reference to itself
+	Window &operator<<(const Color &color);
 	Window &operator<<(Format format);
-	
-	/// Moves current cursor position to given coordinates.
-	/// @param coords struct that holds information about new coordinations
-	/// @return reference to itself
-	Window &operator<<(XY coords);
-	
-	/// Prints string to window
-	/// @param s const pointer to char array to be printed
-	/// @return reference to itself
+	Window &operator<<(const XY &coords);
 	Window &operator<<(const char *s);
-	
-	/// Prints single character to window
-	/// @param c character to be printed
-	/// @return reference to itself
 	Window &operator<<(char c);
-	
-	/// Prints wide string to window
-	/// @param ws const pointer to wchar_t array to be printed
-	/// @return reference to itself
 	Window &operator<<(const wchar_t *ws);
-	
-	/// Prints single wide character to window
-	/// @param wc wide character to be printed
-	/// @return reference to itself
 	Window &operator<<(wchar_t wc);
-	
-	/// Prints int to window
-	/// @param i integer value to be printed
-	/// @return reference to itself
 	Window &operator<<(int i);
-	
-	/// Prints double to window
-	/// @param d double value to be printed
-	/// @return reference to itself
 	Window &operator<<(double d);
-	
-	/// Prints size_t to window
-	/// @param s size value to be printed
-	/// @return reference to itself
 	Window &operator<<(size_t s);
-	
-	/// Prints std::string to window
-	/// @param s string to be printed
-	/// @return reference to itself
 	Window &operator<<(const std::string &s);
-	
-	/// Prints std::wstring to window
-	/// @param ws wide string to be printed
-	/// @return reference to itself
 	Window &operator<<(const std::wstring &ws);
 protected:
 	/// Sets colors of window (interal use only)
 	/// @param fg foregound color
 	/// @param bg background color
 	///
-	void setColor(Color fg, Color bg = Color::Default);
+	void setColor(Color c);
 	
 	/// Refreshes window's border
 	///
@@ -485,11 +467,9 @@ protected:
 	
 	/// current colors
 	Color m_color;
-	Color m_bg_color;
 	
 	/// base colors
 	Color m_base_color;
-	Color m_base_bg_color;
 	
 	/// current border
 	Border m_border;
@@ -524,7 +504,7 @@ private:
 	std::string m_title;
 	
 	/// stack of colors
-	std::stack<Colors> m_color_stack;
+	std::stack<Color> m_color_stack;
 	
 	/// input queue of a window. you can put characters there using
 	/// PushChar and they will be immediately consumed and
