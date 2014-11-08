@@ -364,9 +364,8 @@ void Visualizer::DrawSoundEllipseStereo(int16_t *buf_left, int16_t *buf_right, s
 {
 	const size_t half_width = w.getWidth()/2;
 
-	// Makes the radius of the color circle proportional to max of height or width.
-	// Divide by colors size so that there are multiple color rings instead of just a few.
-	const int32_t radius = std::max(half_width, half_height)/Config.visualizer_colors.size();
+	// Makes the radius of each ring be approximately 2 cells wide.
+	const int32_t radius = 2*Config.visualizer_colors.size();
 	int32_t x, y;
 	for (ssize_t i = 0; i < samples; ++i)
 	{
