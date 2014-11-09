@@ -18,7 +18,7 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
-#include <boost/locale/encoding.hpp>
+#include <boost/locale/encoding_utf.hpp>
 #include <cassert>
 #include "utility/wide_string.h"
 

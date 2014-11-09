@@ -83,10 +83,14 @@ PlaylistEditor::PlaylistEditor()
 	switch (Config.playlist_editor_display_mode)
 	{
 		case DisplayMode::Classic:
-			Content.setItemDisplayer(boost::bind(Display::Songs, _1, contentProxyList(), Config.song_list_format));
+			Content.setItemDisplayer(
+				boost::bind(Display::Songs, _1, contentProxyList(), Config.song_list_format
+			));
 			break;
 		case DisplayMode::Columns:
-			Content.setItemDisplayer(boost::bind(Display::SongsInColumns, _1, contentProxyList()));
+			Content.setItemDisplayer(
+				boost::bind(Display::SongsInColumns, _1, contentProxyList())
+			);
 			break;
 	}
 	
@@ -491,7 +495,7 @@ void PlaylistEditor::Locate(const MPD::Playlist &playlist)
 	}
 }
 
-namespace {//
+namespace {
 
 std::string SongToString(const MPD::Song &s)
 {
@@ -499,10 +503,10 @@ std::string SongToString(const MPD::Song &s)
 	switch (Config.playlist_display_mode)
 	{
 		case DisplayMode::Classic:
-			result = s.toString(Config.song_list_format_dollar_free, Config.tags_separator);
+			result = Format::stringify<char>(Config.song_list_format, &s);
 			break;
 		case DisplayMode::Columns:
-			result = s.toString(Config.song_in_columns_to_string_format, Config.tags_separator);
+			result = Format::stringify<char>(Config.song_columns_mode_format, &s);
 			break;
 	}
 	return result;

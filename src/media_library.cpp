@@ -93,8 +93,8 @@ public:
 	}
 	bool operator()(const MPD::Song &a, const MPD::Song &b) {
 		for (auto get = GetFuns.begin()+m_offset; get != GetFuns.end(); ++get) {
-			int ret = m_cmp(a.getTags(*get, Config.tags_separator),
-			                b.getTags(*get, Config.tags_separator));
+			int ret = m_cmp(a.getTags(*get),
+			                b.getTags(*get));
 			if (ret != 0)
 				return ret < 0;
 		}
@@ -197,7 +197,9 @@ MediaLibrary::MediaLibrary()
 	Songs.centeredCursor(Config.centered_cursor);
 	Songs.setSelectedPrefix(Config.selected_item_prefix);
 	Songs.setSelectedSuffix(Config.selected_item_suffix);
-	Songs.setItemDisplayer(boost::bind(Display::Songs, _1, songsProxyList(), Config.song_library_format));
+	Songs.setItemDisplayer(boost::bind(
+		Display::Songs, _1, songsProxyList(), Config.song_library_format
+	));
 	
 	w = &Tags;
 }
@@ -1037,7 +1039,9 @@ std::string AlbumToString(const AlbumEntry &ae)
 
 std::string SongToString(const MPD::Song &s)
 {
-	return s.toString(Config.song_library_format, Config.tags_separator);
+	return Format::stringify<char>(
+		Config.song_library_format, &s//FIXME, Config.tags_separator
+	);
 }
 
 bool TagEntryMatcher(const boost::regex &rx, const MediaLibrary::PrimaryTag &pt)

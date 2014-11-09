@@ -81,8 +81,8 @@ bool LocaleBasedItemSorting::operator()(const MPD::Item &a, const MPD::Item &b) 
 						result = m_cmp(a.playlist().path(), b.playlist().path());
 						break;
 					case MPD::Item::Type::Song:
-						result = m_cmp(a.song().toString(Config.browser_sort_format, Config.tags_separator),
-						               b.song().toString(Config.browser_sort_format, Config.tags_separator));
+						result = m_cmp(Format::stringify<char>(Config.browser_sort_format, &a.song()),
+						               Format::stringify<char>(Config.browser_sort_format, &b.song()));
 						break;
 				}
 				break;

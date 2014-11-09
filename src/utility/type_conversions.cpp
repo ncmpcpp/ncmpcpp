@@ -203,7 +203,7 @@ MPD::Song::GetFunction charToGetFunction(char c)
 		case 'P':
 			return &MPD::Song::getPriority;
 		default:
-			return 0;
+			return nullptr;
 	}
 }
 

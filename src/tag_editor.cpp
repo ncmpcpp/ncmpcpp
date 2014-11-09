@@ -490,17 +490,17 @@ void TagEditor::enterPressed()
 		{
 			Statusbar::ScopedLock slock;
 			Statusbar::put() << NC::Format::Bold << TagTypes->current()->value() << NC::Format::NoBold << ": ";
-			std::string new_tag = wFooter->prompt(Tags->current()->value().getTags(get, Config.tags_separator));
+			std::string new_tag = wFooter->prompt(Tags->current()->value().getTags(get));
 			for (auto it = EditedSongs.begin(); it != EditedSongs.end(); ++it)
-				(*it)->setTags(set, new_tag, Config.tags_separator);
+				(*it)->setTags(set, new_tag);
 		}
 		else if (w == Tags)
 		{
 			Statusbar::ScopedLock slock;
 			Statusbar::put() << NC::Format::Bold << TagTypes->current()->value() << NC::Format::NoBold << ": ";
-			std::string new_tag = wFooter->prompt(Tags->current()->value().getTags(get, Config.tags_separator));
-			if (new_tag != Tags->current()->value().getTags(get, Config.tags_separator))
-				Tags->current()->value().setTags(set, new_tag, Config.tags_separator);
+			std::string new_tag = wFooter->prompt(Tags->current()->value().getTags(get));
+			if (new_tag != Tags->current()->value().getTags(get))
+				Tags->current()->value().setTags(set, new_tag);
 			Tags->scroll(NC::Scroll::Down);
 		}
 	}
@@ -1053,7 +1053,7 @@ MPD::MutableSong::SetFunction IntoSetFunction(char c)
 
 std::string GenerateFilename(const MPD::MutableSong &s, const std::string &pattern)
 {
-	std::string result = s.toString(pattern, Config.tags_separator);
+	std::string result = Format::stringify<char>(Format::parse(pattern), &s);
 	removeInvalidCharsFromFilename(result, Config.generate_win32_compatible_filenames);
 	return result;
 }
@@ -1105,7 +1105,7 @@ std::string ParseFilename(MPD::MutableSong &s, std::string mask, bool preview)
 			{
 				MPD::MutableSong::SetFunction set = IntoSetFunction(it->first);
 				if (set)
-					s.setTags(set, it->second, Config.tags_separator);
+					s.setTags(set, it->second);
 			}
 			else
 				result << "%" << it->first << ": " << it->second << "\n";

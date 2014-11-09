@@ -171,8 +171,8 @@ void SortPlaylistDialog::sort() const
 	auto song_cmp = [this, &cmp](const MPD::Song &a, const MPD::Song &b) -> bool {
 		for (auto it = w.beginV();  it->item().second; ++it)
 		{
-			int res = cmp(a.getTags(it->item().second, Config.tags_separator),
-			              b.getTags(it->item().second, Config.tags_separator));
+			int res = cmp(a.getTags(it->item().second),
+			              b.getTags(it->item().second));
 			if (res != 0)
 				return res < 0;
 		}

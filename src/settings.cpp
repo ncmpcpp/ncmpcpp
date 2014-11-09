@@ -37,20 +37,7 @@ Configuration Config;
 
 namespace {
 
-std::string remove_dollar_formatting(const std::string &s)
-{
-	std::string result;
-	for (size_t i = 0; i < s.size(); ++i)
-	{
-		if (s[i] != '$')
-			result += s[i];
-		else
-			++i;
-	}
-	return result;
-}
-
-std::pair<std::vector<Column>, std::string> generate_columns(const std::string &format)
+std::vector<Column> generate_columns(const std::string &format)
 {
 	std::vector<Column> result;
 	std::string width;
@@ -128,25 +115,32 @@ std::pair<std::vector<Column>, std::string> generate_columns(const std::string &
 			it->stretch_limit = stretch_limit;
 	}
 
-	std::string string_format;
-	// generate format for converting tags in columns to string for Playlist::SongInColumnsToString()
-	char tag[] = "{% }|";
-	string_format = "{";
-	for (auto it = result.begin(); it != result.end(); ++it)
-	{
-		for (std::string::const_iterator j = it->type.begin(); j != it->type.end(); ++j)
-		{
-			tag[2] = *j;
-			string_format += tag;
-		}
-		*string_format.rbegin() = ' ';
-	}
-	if (string_format.length() == 1) // only '{'
-		string_format += '}';
-	else
-		*string_format.rbegin() = '}';
+	return result;
+}
 
-	return std::make_pair(std::move(result), std::move(string_format));
+Format::AST<char> columns_to_format(const std::vector<Column> &columns)
+{
+	std::vector<Format::Expression<char>> result;
+
+	auto column = columns.begin();
+	while (true)
+	{
+		Format::Any<char> any;
+		for (const auto &type : column->type)
+		{
+			auto f = charToGetFunction(type);
+			assert(f != nullptr);
+			any.base().push_back(f);
+		}
+		result.push_back(std::move(any));
+
+		if (++column != columns.end())
+			result.push_back(" ");
+		else
+			break;
+	}
+
+	return Format::AST<char>(std::move(result));
 }
 
 void add_slash_at_the_end(std::string &s)
@@ -165,19 +159,14 @@ std::string adjust_directory(std::string s)
 	return s;
 }
 
-std::string adjust_and_validate_format(std::string format)
-{
-	MPD::Song::validateFormat(format);
-	format = "{" + format + "}";
-	return format;
-}
-
 // parser worker for buffer
 template <typename ValueT, typename TransformT>
 option_parser::worker buffer(NC::Buffer &arg, ValueT &&value, TransformT &&map)
 {
 	return option_parser::worker(assign<std::string>(arg, [&arg, map](std::string s) {
-		return map(stringToBuffer(std::move(s)));
+		NC::Buffer result;
+		Format::print(Format::parse(s), result, nullptr);
+		return result;
 	}), defaults_to(arg, map(std::forward<ValueT>(value))));
 }
 
@@ -282,38 +271,31 @@ bool Configuration::read(const std::string &config_path)
 		message_delay_time, 5
 	));
 	p.add("song_list_format", assign_default<std::string>(
-		song_list_format, "{%a - }{%t}|{$8%f$9}$R{$3(%l)$9}", [this](std::string s) {
-			auto result = adjust_and_validate_format(std::move(s));
-			song_list_format_dollar_free = remove_dollar_formatting(result);
-			return result;
-	}));
+		song_list_format, "{%a - }{%t}|{$8%f$9}$R{$3(%l)$9}", Format::parse
+	));
 	p.add("song_status_format", assign_default<std::string>(
-		song_status_format, "{{%a{ \"%b\"{ (%y)}} - }{%t}}|{%f}", [this](std::string s) {
-			auto result = adjust_and_validate_format(std::move(s));
-			if (result.find("$") != std::string::npos)
-				song_status_format_no_colors = stringToBuffer(result).str();
-			else
-				song_status_format_no_colors = result;
-			return result;
+		song_status_format, "{{%a{ \"%b\"{ (%y)}} - }{%t}}|{%f}", [this](std::string v) {
+			// precompute wide format for status display
+			song_status_wformat = Format::wparse(ToWString(v));
+			return Format::parse(v);
 	}));
 	p.add("song_library_format", assign_default<std::string>(
-		song_library_format, "{%n - }{%t}|{%f}", adjust_and_validate_format
-	));
-	p.add("tag_editor_album_format", assign_default<std::string>(
-		tag_editor_album_format, "{(%y) }%b", adjust_and_validate_format
+		song_library_format, "{%n - }{%t}|{%f}", Format::parse
 	));
 	p.add("browser_sort_mode", assign_default(
 		browser_sort_mode, SortMode::Name
 	));
 	p.add("browser_sort_format", assign_default<std::string>(
-		browser_sort_format, "{%a - }{%t}|{%f} {(%l)}", adjust_and_validate_format
+		browser_sort_format, "{%a - }{%t}|{%f} {(%l)}", Format::parse
 	));
 	p.add("alternative_header_first_line_format", assign_default<std::string>(
-		new_header_first_line, "$b$1$aqqu$/a$9 {%t}|{%f} $1$atqq$/a$9$/b", adjust_and_validate_format
-	));
+		new_header_first_line, "$b$1$aqqu$/a$9 {%t}|{%f} $1$atqq$/a$9$/b", [this](std::string v) {
+			return Format::wparse(ToWString(std::move(v)));
+	}));
 	p.add("alternative_header_second_line_format", assign_default<std::string>(
-		new_header_second_line, "{{$4$b%a$/b$9}{ - $7%b$9}{ ($4%y$9)}}|{%D}", adjust_and_validate_format
-	));
+		new_header_second_line, "{{$4$b%a$/b$9}{ - $7%b$9}{ ($4%y$9)}}|{%D}", [this](std::string v) {
+			return Format::wparse(ToWString(std::move(v)));
+	}));
 	p.add("now_playing_prefix", buffer(
 		now_playing_prefix, NC::Buffer::init(NC::Format::Bold), [this](NC::Buffer buf) {
 			now_playing_prefix_length = wideLength(ToWString(buf.str()));
@@ -341,12 +323,13 @@ bool Configuration::read(const std::string &config_path)
 		modified_item_prefix, NC::Buffer::init(NC::Color::Green, "> ", NC::Color::End), id_()
 	));
 	p.add("song_window_title_format", assign_default<std::string>(
-		song_window_title_format, "{%a - }{%t}|{%f}", adjust_and_validate_format
+		song_window_title_format, "{%a - }{%t}|{%f}", Format::parse
 	));
 	p.add("song_columns_list_format", assign_default<std::string>(
 		columns_format, "(20)[]{a} (6f)[green]{NE} (50)[white]{t|f:Title} (20)[cyan]{b} (7f)[magenta]{l}",
 			[this](std::string v) {
-				boost::tie(columns, song_in_columns_to_string_format) = generate_columns(v);
+				columns = generate_columns(v);
+				song_columns_mode_format = columns_to_format(columns);
 				return v;
 	}));
 	p.add("execute_on_song_change", assign_default(
@@ -586,7 +569,7 @@ bool Configuration::read(const std::string &config_path)
 		empty_tag, "<empty>"
 	));
 	p.add("tags_separator", assign_default(
-		tags_separator, " | "
+		MPD::Song::TagsSeparator, " | "
 	));
 	p.add("tag_editor_extended_numeration", yes_no(
 		tag_editor_extended_numeration, false

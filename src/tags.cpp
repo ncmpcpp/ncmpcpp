@@ -145,7 +145,7 @@ void writeID3v2Tags(const MPD::MutableSong &s, TagLib::ID3v2::Tag *tag)
 				auto frame = new TagLib::ID3v2::CommentsFrame(TagLib::String::UTF8);
 				// apparently there can't be multiple comments,
 				// so if there is more than one, join them.
-				frame->setText(join(list, TagLib::String(Config.tags_separator, TagLib::String::UTF8)));
+				frame->setText(join(list, TagLib::String(MPD::Song::TagsSeparator, TagLib::String::UTF8)));
 				tag->addFrame(frame);
 			}
 			else

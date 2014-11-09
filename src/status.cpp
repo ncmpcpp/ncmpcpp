@@ -79,7 +79,7 @@ int m_volume;
 void drawTitle(const MPD::Song &np)
 {
 	assert(!np.empty());
-	windowTitle(np.toString(Config.song_window_title_format, Config.tags_separator));
+	windowTitle(Format::stringify<char>(Config.song_window_title_format, &np));
 }
 
 std::string playerStateToString(MPD::PlayerState ps)
@@ -591,7 +591,7 @@ void Status::Changes::elapsedTime(bool update_elapsed)
 					tracklength += "]";
 				}
 				NC::WBuffer np_song;
-				stringToBuffer(ToWString(Charset::utf8ToLocale(np.toString(Config.song_status_format, Config.tags_separator, "$"))), np_song);
+				Format::print(Config.song_status_wformat, np_song, &np);
 				*wFooter << NC::XY(0, 1) << wclrtoeol << NC::Format::Bold << ps << NC::Format::NoBold;
 				writeCyclicBuffer(np_song, *wFooter, playing_song_scroll_begin, wFooter->getWidth()-ps.length()-tracklength.length(), L" ** ");
 				*wFooter << NC::Format::Bold << NC::XY(wFooter->getWidth()-tracklength.length(), 1) << tracklength << NC::Format::NoBold;
@@ -619,8 +619,8 @@ void Status::Changes::elapsedTime(bool update_elapsed)
 			}
 
 			NC::WBuffer first, second;
-			stringToBuffer(ToWString(Charset::utf8ToLocale(np.toString(Config.new_header_first_line, Config.tags_separator, "$"))), first);
-			stringToBuffer(ToWString(Charset::utf8ToLocale(np.toString(Config.new_header_second_line, Config.tags_separator, "$"))), second);
+			Format::print(Config.new_header_first_line, first, &np);
+			Format::print(Config.new_header_second_line, second, &np);
 
 			size_t first_len = wideLength(first.str());
 			size_t first_margin = (std::max(tracklength.length()+1, VolumeState.length()))*2;

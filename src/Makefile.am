@@ -16,6 +16,7 @@ ncmpcpp_SOURCES = \
 	display.cpp \
 	enums.cpp \
 	error.cpp \
+	format.cpp \
 	global.cpp \
 	help.cpp \
 	helpers.cpp \
@@ -73,6 +74,7 @@ noinst_HEADERS = \
 	display.h \
 	enums.h \
 	error.h \
+	format.h \
 	global.h \
 	help.h \
 	helpers.h \

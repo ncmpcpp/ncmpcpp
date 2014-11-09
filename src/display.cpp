@@ -104,57 +104,25 @@ void setProperties(NC::Menu<T> &menu, const MPD::Song &s, const ProxySongList &p
 }
 
 template <typename T>
-void showSongs(NC::Menu<T> &menu, const MPD::Song &s, const ProxySongList &pl, const std::string &format)
+void showSongs(NC::Menu<T> &menu, const MPD::Song &s,
+               const ProxySongList &pl, const Format::AST<char> &ast)
 {
 	bool separate_albums, is_now_playing, is_selected, discard_colors;
 	setProperties(menu, s, pl, separate_albums, is_now_playing, is_selected, discard_colors);
-	
+
 	size_t y = menu.getY();
-	std::string line = Charset::utf8ToLocale(s.toString(format, Config.tags_separator, "$"));
-	for (auto it = line.begin(); it != line.end(); ++it)
+	NC::Buffer right_aligned;
+	Format::print(ast, menu, &s, &right_aligned);
+	if (!right_aligned.str().empty())
 	{
-		if (*it == '$')
-		{
-			++it;
-			if (it == line.end()) // end of format
-			{
-				menu << '$';
-				break;
-			}
-			else if (isdigit(*it)) // color
-			{
-				if (!discard_colors)
-					menu << charToColor(*it);
-			}
-			else if (*it == 'R') // right align
-			{
-				NC::Buffer buf;
-				buf << " ";
-				stringToBuffer(++it, line.end(), buf);
-				if (discard_colors)
-					buf.removeProperties();
-				size_t x_off = menu.getWidth() - wideLength(ToWString(buf.str()));
-				if (is_now_playing)
-					x_off -= Config.now_playing_suffix_length;
-				if (is_selected)
-					x_off -= Config.selected_item_suffix_length;
-				menu << NC::XY(x_off, y) << buf;
-				break;
-			}
-			else // not a color nor right align, just a random character
-				menu << *--it;
-		}
-		else if (*it == MPD::Song::FormatEscapeCharacter)
-		{
-			++it;
-			// treat '$' as a normal character if song format escape char is prepended to it
-			if (it == line.end() || *it != '$')
-				--it;
-			menu << *it;
-		}
-		else
-			menu << *it;
+		size_t x_off = menu.getWidth() - wideLength(ToWString(right_aligned.str()));
+		if (is_now_playing)
+			x_off -= Config.now_playing_suffix_length;
+		if (is_selected)
+			x_off -= Config.selected_item_suffix_length;
+		menu << NC::XY(x_off, y) << right_aligned;
 	}
+
 	if (is_now_playing)
 		menu << Config.now_playing_suffix;
 	if (separate_albums)
@@ -225,7 +193,7 @@ void showSongsInColumns(NC::Menu<T> &menu, const MPD::Song &s, const ProxySongLi
 		{
 			MPD::Song::GetFunction get = charToGetFunction(it->type[i]);
 			assert(get);
-			tag = ToWString(Charset::utf8ToLocale(s.getTags(get, Config.tags_separator)));
+			tag = ToWString(Charset::utf8ToLocale(s.getTags(get)));
 			if (!tag.empty())
 				break;
 		}
@@ -353,9 +321,10 @@ void Display::SongsInColumns(NC::Menu< MPD::Song >& menu, const ProxySongList &p
 	showSongsInColumns(menu, menu.drawn()->value(), pl);
 }
 
-void Display::Songs(NC::Menu< MPD::Song >& menu, const ProxySongList &pl, const std::string &format)
+void Display::Songs(NC::Menu< MPD::Song >& menu,
+                    const ProxySongList &pl, const Format::AST<char> &ast)
 {
-	showSongs(menu, menu.drawn()->value(), pl, format);
+	showSongs(menu, menu.drawn()->value(), pl, ast);
 }
 
 #ifdef HAVE_TAGLIB_H
@@ -367,7 +336,7 @@ void Display::Tags(NC::Menu<MPD::MutableSong> &menu)
 	size_t i = myTagEditor->TagTypes->choice();
 	if (i < 11)
 	{
-		ShowTag(menu, Charset::utf8ToLocale(s.getTags(SongInfo::Tags[i].Get, Config.tags_separator)));
+		ShowTag(menu, Charset::utf8ToLocale(s.getTags(SongInfo::Tags[i].Get)));
 	}
 	else if (i == 12)
 	{

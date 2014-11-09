@@ -42,7 +42,9 @@ size_t calc_hash(const char* s, unsigned seed = 0)
 
 }
 
-namespace MPD {//
+namespace MPD {
+
+std::string Song::TagsSeparator = " | ";
 
 std::string Song::get(mpd_tag_type type, unsigned idx) const
 {
@@ -197,7 +199,7 @@ std::string Song::getPriority(unsigned idx) const
 	return boost::lexical_cast<std::string>(getPrio());
 }
 
-std::string MPD::Song::getTags(GetFunction f, const std::string &tags_separator) const
+std::string MPD::Song::getTags(GetFunction f) const
 {
 	assert(m_song);
 	unsigned idx = 0;
@@ -205,7 +207,7 @@ std::string MPD::Song::getTags(GetFunction f, const std::string &tags_separator)
 	for (std::string tag; !(tag = (this->*f)(idx)).empty(); ++idx)
 	{
 		if (!result.empty())
-			result += tags_separator;
+			result += TagsSeparator;
 		result += tag;
 	}
 	return result;
@@ -259,13 +261,6 @@ bool Song::empty() const
 	return m_song.get() == 0;
 }
 
-std::string Song::toString(const std::string &fmt, const std::string &tags_separator, const std::string &escape_chars) const
-{
-	assert(m_song);
-	std::string::const_iterator it = fmt.begin();
-	return ParseFormat(it, tags_separator, escape_chars);
-}
-
 std::string Song::ShowTime(unsigned length)
 {
 	int hours = length/3600;
@@ -280,128 +275,6 @@ std::string Song::ShowTime(unsigned length)
 	else
 		result = (boost::format("%d:%02d") % minutes % seconds).str();
 	return result;
-}
-
-void MPD::Song::validateFormat(const std::string &fmt)
-{
-	int braces = 0;
-	for (std::string::const_iterator it = fmt.begin(); it != fmt.end(); ++it)
-	{
-		if (*it == '{')
-			++braces;
-		else if (*it == '}')
-			--braces;
-	}
-	if (braces)
-		throw std::runtime_error("number of opening and closing braces is not equal");
-	
-	for (size_t i = fmt.find('%'); i != std::string::npos; i = fmt.find('%', i))
-	{
-		if (isdigit(fmt[++i]))
-			while (isdigit(fmt[++i])) { }
-		if (!charToGetFunction(fmt[i]))
-			throw std::runtime_error(
-				(boost::format("invalid character at position %1%: %2%") % (i+1) % fmt[i]).str()
-			);
-	}
-}
-
-std::string Song::ParseFormat(std::string::const_iterator &it, const std::string &tags_separator,
-                              const std::string &escape_chars) const
-{
-	std::string result;
-	bool has_some_tags = 0;
-	MPD::Song::GetFunction get_fun = 0;
-	while (*++it != '}')
-	{
-		while (*it == '{')
-		{
-			std::string tags = ParseFormat(it, tags_separator, escape_chars);
-			if (!tags.empty())
-			{
-				has_some_tags = 1;
-				result += tags;
-			}
-		}
-		if (*it == '}')
-			break;
-		
-		if (*it == '%')
-		{
-			size_t delimiter = 0;
-			if (isdigit(*++it))
-			{
-				delimiter = atol(&*it);
-				while (isdigit(*++it)) { }
-			}
-			
-			if (*it == '%')
-			{
-				result += *it;
-				get_fun = 0;
-			}
-			else
-				get_fun = charToGetFunction(*it);
-			
-			if (get_fun)
-			{
-				std::string tag = getTags(get_fun, tags_separator);
-				if (!escape_chars.empty()) // prepend format escape character to all given chars to escape
-				{
-					for (size_t i = 0; i < escape_chars.length(); ++i)
-						for (size_t j = 0; (j = tag.find(escape_chars[i], j)) != std::string::npos; j += 2)
-							tag.replace(j, 1, std::string(1, FormatEscapeCharacter) + escape_chars[i]);
-				}
-				if (!tag.empty() && (get_fun != &MPD::Song::getLength || getDuration() > 0))
-				{
-					if (delimiter && tag.size() > delimiter)
-					{
-						// Shorten length string by just chopping off the tail
-						if (get_fun == &MPD::Song::getLength)
-							tag = tag.substr(0, delimiter);
-						else
-							tag = ToString(wideShorten(ToWString(tag), delimiter));
-					}
-					has_some_tags = 1;
-					result += tag;
-				}
-				else
-					break;
-			}
-		}
-		else
-			result += *it;
-	}
-	int brace_counter = 0;
-	if (*it != '}' || !has_some_tags)
-	{
-		for (; *it != '}' || brace_counter; ++it)
-		{
-			if (*it == '{')
-				++brace_counter;
-			else if (*it == '}')
-				--brace_counter;
-		}
-		if (*++it == '|')
-			return ParseFormat(++it, tags_separator, escape_chars);
-		else
-			return "";
-	}
-	else
-	{
-		if (*(it+1) == '|')
-		{
-			for (; *it != '}' || *(it+1) == '|' || brace_counter; ++it)
-			{
-				if (*it == '{')
-					++brace_counter;
-				else if (*it == '}')
-					--brace_counter;
-			}
-		}
-		++it;
-		return result;
-	}
 }
 
 }

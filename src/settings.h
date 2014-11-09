@@ -29,6 +29,7 @@
 #include <mpd/client.h>
 
 #include "enums.h"
+#include "format.h"
 #include "screen_type.h"
 #include "strbuffer.h"
 
@@ -61,21 +62,20 @@ struct Configuration
 	std::string visualizer_fifo_path;
 	std::string visualizer_output_name;
 	std::string empty_tag;
-	std::string tags_separator;
-	std::string song_list_format;
-	std::string song_list_format_dollar_free;
-	std::string song_status_format;
-	std::string song_status_format_no_colors;
-	std::string song_window_title_format;
-	std::string song_library_format;
-	std::string tag_editor_album_format;
-	std::string song_in_columns_to_string_format;
-	std::string browser_sort_format;
+
+	Format::AST<char> song_list_format;
+	Format::AST<char> song_window_title_format;
+	Format::AST<char> song_library_format;
+	Format::AST<char> song_columns_mode_format;
+	Format::AST<char> browser_sort_format;
+	Format::AST<char> song_status_format;
+	Format::AST<wchar_t> song_status_wformat;
+	Format::AST<wchar_t> new_header_first_line;
+	Format::AST<wchar_t> new_header_second_line;
+
 	std::string external_editor;
 	std::string system_encoding;
 	std::string execute_on_song_change;
-	std::string new_header_first_line;
-	std::string new_header_second_line;
 	std::string lastfm_preferred_language;
 	std::wstring progressbar;
 	std::wstring visualizer_chars;

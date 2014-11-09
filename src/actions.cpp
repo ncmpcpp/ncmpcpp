@@ -1322,7 +1322,7 @@ void EditLibraryTag::run()
 		for (MPD::SongIterator s = Mpd.CommitSearchSongs(), end; s != end; ++s)
 		{
 			MPD::MutableSong ms = std::move(*s);
-			ms.setTags(set, new_tag, Config.tags_separator);
+			ms.setTags(set, new_tag);
 			Statusbar::printf("Updating tags in \"%1%\"...", ms.getName());
 			std::string path = Config.mpd_music_dir + ms.getURI();
 			if (!Tags::write(ms))

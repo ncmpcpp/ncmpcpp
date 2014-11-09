@@ -107,10 +107,10 @@ void TinyTagEditor::enterPressed()
 		size_t pos = option-8;
 		Statusbar::put() << NC::Format::Bold << SongInfo::Tags[pos].Name << ": " << NC::Format::NoBold;
 		itsEdited.setTags(SongInfo::Tags[pos].Set, Global::wFooter->prompt(
-			itsEdited.getTags(SongInfo::Tags[pos].Get, Config.tags_separator)), Config.tags_separator);
+			itsEdited.getTags(SongInfo::Tags[pos].Get)));
 		w.at(option).value().clear();
 		w.at(option).value() << NC::Format::Bold << SongInfo::Tags[pos].Name << ':' << NC::Format::NoBold << ' ';
-		ShowTag(w.at(option).value(), itsEdited.getTags(SongInfo::Tags[pos].Get, Config.tags_separator));
+		ShowTag(w.at(option).value(), itsEdited.getTags(SongInfo::Tags[pos].Get));
 	}
 	else if (option == 20)
 	{
@@ -226,7 +226,7 @@ bool TinyTagEditor::getTags()
 	for (const SongInfo::Metadata *m = SongInfo::Tags; m->Name; ++m, ++pos)
 	{
 		w.at(pos).value() << NC::Format::Bold << m->Name << ":" << NC::Format::NoBold << ' ';
-		ShowTag(w.at(pos).value(), itsEdited.getTags(m->Get, Config.tags_separator));
+		ShowTag(w.at(pos).value(), itsEdited.getTags(m->Get));
 	}
 	
 	w.at(20).value() << NC::Format::Bold << "Filename:" << NC::Format::NoBold << ' ' << itsEdited.getName();

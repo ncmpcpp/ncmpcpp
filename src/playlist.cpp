@@ -61,10 +61,14 @@ Playlist::Playlist()
 	switch (Config.playlist_display_mode)
 	{
 		case DisplayMode::Classic:
-			w.setItemDisplayer(boost::bind(Display::Songs, _1, proxySongList(), Config.song_list_format));
+			w.setItemDisplayer(boost::bind(
+				Display::Songs, _1, proxySongList(), Config.song_list_format
+			));
 			break;
 		case DisplayMode::Columns:
-			w.setItemDisplayer(boost::bind(Display::SongsInColumns, _1, proxySongList()));
+			w.setItemDisplayer(boost::bind(
+				Display::SongsInColumns, _1, proxySongList()
+			));
 			break;
 	}
 }
@@ -307,10 +311,10 @@ std::string songToString(const MPD::Song &s)
 	switch (Config.playlist_display_mode)
 	{
 		case DisplayMode::Classic:
-			result = s.toString(Config.song_list_format_dollar_free, Config.tags_separator);
+			result = Format::stringify<char>(Config.song_list_format, &s);
 			break;
 		case DisplayMode::Columns:
-			result = s.toString(Config.song_in_columns_to_string_format, Config.tags_separator);
+			result = Format::stringify<char>(Config.song_columns_mode_format, &s);
 	}
 	return result;
 }

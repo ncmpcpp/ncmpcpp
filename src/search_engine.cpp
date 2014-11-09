@@ -591,10 +591,10 @@ std::string SEItemToString(const SEItem &ei)
 		switch (Config.search_engine_display_mode)
 		{
 			case DisplayMode::Classic:
-				result = ei.song().toString(Config.song_list_format_dollar_free, Config.tags_separator);
+				result = Format::stringify<char>(Config.song_list_format, &ei.song());
 				break;
 			case DisplayMode::Columns:
-				result = ei.song().toString(Config.song_in_columns_to_string_format, Config.tags_separator);
+				result = Format::stringify<char>(Config.song_columns_mode_format, &ei.song());
 				break;
 		}
 	}
