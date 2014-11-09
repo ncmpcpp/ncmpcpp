@@ -362,22 +362,26 @@ void Visualizer::DrawSoundEllipse(int16_t *buf, ssize_t samples, size_t, size_t 
 // is skinner or wider than this, instead of a circle it will be an ellipse.
 void Visualizer::DrawSoundEllipseStereo(int16_t *buf_left, int16_t *buf_right, ssize_t samples, size_t half_height)
 {
-	const size_t half_width = w.getWidth()/2;
+	const size_t width = w.getWidth();
+	const size_t left_half_width = width/2;
+	const size_t right_half_width = width - left_half_width;
+	const size_t top_half_height = half_height;
+	const size_t bottom_half_height = w.getHeight() - half_height;
 
 	// Makes the radius of each ring be approximately 2 cells wide.
 	const int32_t radius = 2*Config.visualizer_colors.size();
 	int32_t x, y;
 	for (ssize_t i = 0; i < samples; ++i)
 	{
-		x = double(buf_left[i]) * half_width / 32768.0;
-		y = double(buf_right[i]) * half_height / 32768.0;
+		x = buf_left[i]/32768.0 * (buf_left[i] < 0 ? left_half_width : right_half_width);
+		y = buf_right[i]/32768.0 * (buf_right[i] < 0 ? top_half_height : bottom_half_height);
 
 		// The arguments to the toColor function roughly follow a circle equation where
 		// the center is not centered around (0,0). For example (x - w)^2 + (y-h)+2 = r^2
 		// centers the circle around the point (w,h). Because fonts are not all the same
 		// size, this will not always generate a perfect circle.
 		w << toColor(sqrt(x*x + 4*y*y), radius)
-		<< NC::XY(half_width + x, half_height + y)
+		<< NC::XY(left_half_width + x, top_half_height + y)
 		<< Config.visualizer_chars[1]
 		<< NC::Color::End;
 	}
