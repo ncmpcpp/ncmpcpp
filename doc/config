@@ -98,6 +98,10 @@
 #
 #visualizer_color = blue, cyan, green, yellow, magenta, red
 #
+## Alternative subset of 256 colors for terminals that support it.
+##
+#visualizer_color = 41, 83, 119, 155, 185, 215, 216, 209, 203, 197, 161
+#
 ##### system encoding #####
 ##
 ## ncmpcpp should detect your charset encoding
@@ -481,6 +485,24 @@
 #use_console_editor = yes
 #
 ##### colors definitions #####
+##
+## It is possible to set a background color by setting a color
+## value "<foreground>_<background>", e.g. red_black will set
+## foregound color to red and background color to black.
+##
+## In addition, for terminals that support 256 colors it
+## is possible to set one of them by using a number in range
+## [1, 256] instead of color name, e.g. numerical value
+## corresponding to red_black is 2_1. To find out if the
+## terminal supports 256 colors, run ncmpcpp and check out
+## the bottom of the help screen for list of available colors
+## and their numerical values.
+##
+## Note: due to technical limitations of ncurses, if 256 colors
+## are used, it is possible to either use only the colors with
+## default background color, or all pairs from 1_1 up to 254_127,
+## depending on the ncurses version used.
+##
 #
 #colors_enabled = yes
 #

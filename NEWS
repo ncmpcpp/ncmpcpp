@@ -8,6 +8,7 @@ ncmpcpp-0.7 (????-??-??)
 * It is now possible to define startup slave screen using -S/--slave-screen command line option or startup_slave_screen configuration variable.
 * List filtering has been removed due to the major part of its functionality overlapping with find forward/backward.
 * Find backward/forward function is now incremental.
+* Support for 256 colors and customization of background colors has been added.
 
 ncmpcpp-0.6.2 (????-??-??)
 
