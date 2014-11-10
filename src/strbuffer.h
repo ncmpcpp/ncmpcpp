@@ -25,7 +25,7 @@
 #include <set>
 #include "window.h"
 
-namespace NC {//
+namespace NC {
 
 /// Buffer template class that stores text
 /// along with its properties (colors/formatting).

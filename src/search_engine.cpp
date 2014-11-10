@@ -39,7 +39,7 @@ using Global::MainStartY;
 
 SearchEngine *mySearcher;
 
-namespace {//
+namespace {
 
 /*const std::array<const std::string, 11> constraintsNames = {{
 	"Any",
@@ -61,7 +61,7 @@ const std::array<const char *, 3> searchModes = {{
 	"Match only if both values are the same"
 }};
 
-namespace pos {//
+namespace pos {
 	const size_t searchIn = constraintsNames.size()-1+1+1; // separated
 	const size_t searchMode = searchIn+1;
 	const size_t search = searchMode+1+1; // separated
@@ -581,7 +581,7 @@ void SearchEngine::Search()
 	}
 }
 
-namespace {//
+namespace {
 
 std::string SEItemToString(const SEItem &ei)
 {

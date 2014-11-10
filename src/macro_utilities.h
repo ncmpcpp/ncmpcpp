@@ -25,7 +25,7 @@
 #include "actions.h"
 #include "screen_type.h"
 
-namespace Actions {//
+namespace Actions {
 
 struct PushCharacters : public BaseAction
 {

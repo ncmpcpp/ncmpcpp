@@ -215,7 +215,7 @@ Tags::ReplayGainInfo getReplayGain(TagLib::Ogg::XiphComment *tag)
 
 }
 
-namespace Tags {//
+namespace Tags {
 
 void setAttribute(mpd_song *s, const char *name, const std::string &value)
 {

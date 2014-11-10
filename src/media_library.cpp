@@ -1013,7 +1013,7 @@ void MediaLibrary::AddToPlaylist(bool add_n_play)
 	}
 }
 
-namespace {//
+namespace {
 
 std::string AlbumToString(const AlbumEntry &ae)
 {

@@ -47,7 +47,7 @@ using Global::MainStartY;
 
 TagEditor *myTagEditor;
 
-namespace {//
+namespace {
 
 size_t LeftColumnWidth;
 size_t LeftColumnStartX;
@@ -950,7 +950,7 @@ void TagEditor::LocateSong(const MPD::Song &s)
 	}
 }
 
-namespace {//
+namespace {
 
 bool isAnyModified(const NC::Menu<MPD::MutableSong> &m)
 {

@@ -25,7 +25,7 @@
 #include "mpdpp.h"
 #include "screen.h"
 
-namespace Global {//
+namespace Global {
 
 // currently active screen (displayed in main window)
 extern BaseScreen *myScreen;

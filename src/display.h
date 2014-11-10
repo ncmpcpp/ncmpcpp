@@ -27,7 +27,7 @@
 #include "mutable_song.h"
 #include "search_engine.h"
 
-namespace Display {//
+namespace Display {
 
 std::string Columns(size_t);
 

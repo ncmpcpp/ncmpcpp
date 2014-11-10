@@ -303,7 +303,7 @@ void Playlist::unregisterSong(const MPD::Song &s)
 		--it->second;
 }
 
-namespace {//
+namespace {
 
 std::string songToString(const MPD::Song &s)
 {

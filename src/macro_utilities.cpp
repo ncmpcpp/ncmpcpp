@@ -21,7 +21,7 @@
 #include "global.h"
 #include "macro_utilities.h"
 
-namespace Actions {//
+namespace Actions {
 
 void PushCharacters::run()
 {

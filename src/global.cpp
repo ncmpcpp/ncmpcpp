@@ -20,7 +20,7 @@
 
 #include "global.h"
 
-namespace Global {//
+namespace Global {
 
 BaseScreen *myScreen;
 BaseScreen *myLockedScreen;

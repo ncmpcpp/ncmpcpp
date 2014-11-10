@@ -25,7 +25,7 @@
 #include "window.h"
 #include "strbuffer.h"
 
-namespace NC {//
+namespace NC {
 
 /// Scrollpad is specialized window that holds large portions of text and
 /// supports scrolling if the amount of it is bigger than the window area.

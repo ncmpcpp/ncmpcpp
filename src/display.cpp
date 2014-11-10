@@ -33,7 +33,7 @@
 
 using Global::myScreen;
 
-namespace {//
+namespace {
 
 const wchar_t *toColumnName(char c)
 {

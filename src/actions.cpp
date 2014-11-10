@@ -84,7 +84,7 @@ void listsChangeFinisher();
 
 }
 
-namespace Actions {//
+namespace Actions {
 
 bool OriginalStatusbarVisibility;
 bool ExitMainLoop = false;
@@ -2467,7 +2467,7 @@ void ShowServerInfo::run()
 
 }
 
-namespace {//
+namespace {
 
 void populateActions()
 {

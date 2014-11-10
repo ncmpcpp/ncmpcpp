@@ -27,7 +27,7 @@
 #include "interfaces.h"
 #include "window.h"
 
-namespace Progressbar {//
+namespace Progressbar {
 
 struct ScopedLock
 {
@@ -61,7 +61,7 @@ void tryRedraw();
 /// @return window object that represents statusbar
 NC::Window &put();
 
-namespace Helpers {//
+namespace Helpers {
 
 /// called when statusbar window detects incoming idle notification
 void mpd();

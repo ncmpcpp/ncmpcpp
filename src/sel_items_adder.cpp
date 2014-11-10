@@ -35,7 +35,7 @@
 
 SelectedItemsAdder *mySelectedItemsAdder;
 
-namespace {//
+namespace {
 
 void DisplayComponent(SelectedItemsAdder::Component &menu)
 {

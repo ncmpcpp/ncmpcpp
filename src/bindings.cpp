@@ -30,7 +30,7 @@ BindingsConfiguration Bindings;
 
 Key Key::noOp = Key(ERR, NCurses);
 
-namespace {//
+namespace {
 
 Key stringToSpecialKey(const std::string &s)
 {

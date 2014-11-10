@@ -24,7 +24,7 @@
 #include "interfaces.h"
 #include "mpdpp.h"
 
-namespace Status {//
+namespace Status {
 
 void handleClientError(MPD::ClientError &e);
 void handleServerError(MPD::ServerError &e);
@@ -53,7 +53,7 @@ int volume();
 
 }
 
-namespace Changes {//
+namespace Changes {
 
 void playlist(unsigned previous_version);
 void storedPlaylists();

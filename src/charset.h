@@ -24,7 +24,7 @@
 #include <locale>
 #include <string>
 
-namespace Charset {//
+namespace Charset {
 
 std::locale internalLocale();
 

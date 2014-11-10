@@ -22,7 +22,7 @@
 #include <boost/algorithm/string/split.hpp>
 #include "mutable_song.h"
 
-namespace MPD {//
+namespace MPD {
 
 std::string MutableSong::getArtist(unsigned idx) const
 {

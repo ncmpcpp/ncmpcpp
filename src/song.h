@@ -29,7 +29,7 @@
 
 #include <mpd/client.h>
 
-namespace MPD {//
+namespace MPD {
 
 struct Song
 {

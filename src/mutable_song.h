@@ -25,7 +25,7 @@
 #include "config.h"
 #include "song.h"
 
-namespace MPD {//
+namespace MPD {
 
 struct MutableSong : public Song
 {

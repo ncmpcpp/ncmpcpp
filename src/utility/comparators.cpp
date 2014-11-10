@@ -22,7 +22,7 @@
 #include "comparators.h"
 #include "utility/string.h"
 
-namespace {//
+namespace {
 
 bool hasTheWord(const std::string &s)
 {

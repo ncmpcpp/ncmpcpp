@@ -28,7 +28,7 @@
 #include <tfile.h>
 #include "mutable_song.h"
 
-namespace Tags {//
+namespace Tags {
 
 struct ReplayGainInfo
 {

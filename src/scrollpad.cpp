@@ -24,7 +24,7 @@
 
 #include "scrollpad.h"
 
-namespace {//
+namespace {
 
 template <typename PropT>
 bool regexSearch(NC::Buffer &buf, PropT begin, const std::string &ws, PropT end, size_t id, boost::regex::flag_type flags)
@@ -48,7 +48,7 @@ bool regexSearch(NC::Buffer &buf, PropT begin, const std::string &ws, PropT end,
 
 }
 
-namespace NC {//
+namespace NC {
 
 Scrollpad::Scrollpad(size_t startx,
 size_t starty,

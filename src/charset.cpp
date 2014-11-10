@@ -22,7 +22,7 @@
 #include "charset.h"
 #include "settings.h"
 
-namespace Charset {//
+namespace Charset {
 
 std::locale internalLocale()
 {
