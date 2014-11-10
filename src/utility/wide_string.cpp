@@ -22,14 +22,14 @@
 #include <cassert>
 #include "utility/wide_string.h"
 
-std::string ToString(std::wstring ws)
+std::string ToString(const std::wstring &ws)
 {
-	return boost::locale::conv::utf_to_utf<char>(std::move(ws));
+	return boost::locale::conv::utf_to_utf<char>(ws);
 }
 
-std::wstring ToWString(std::string s)
+std::wstring ToWString(const std::string &s)
 {
-	return boost::locale::conv::utf_to_utf<wchar_t>(std::move(s));
+	return boost::locale::conv::utf_to_utf<wchar_t>(s);
 }
 
 size_t wideLength(const std::wstring &ws)
@@ -52,7 +52,7 @@ void wideCut(std::wstring &ws, size_t max_length)
 	int remained_len = max_length;
 	for (; i < ws.length(); ++i)
 	{
-		remained_len -= wcwidth(ws[i]);
+		remained_len -= std::max(wcwidth(ws[i]), 1);
 		if (remained_len < 0)
 		{
 			ws.resize(i);

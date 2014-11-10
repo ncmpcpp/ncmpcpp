@@ -23,14 +23,13 @@
 
 #include <string>
 
-std::string ToString(std::wstring ws);
-std::wstring ToWString(std::string s);
+std::string ToString(const std::wstring &ws);
+std::wstring ToWString(const std::string &s);
 
 size_t wideLength(const std::wstring &ws);
-
 void wideCut(std::wstring &ws, size_t max_length);
-std::wstring wideShorten(const std::wstring &ws, size_t max_length);
 
+std::wstring wideShorten(const std::wstring &ws, size_t max_length);
 inline std::string wideShorten(const std::string &s, size_t max_length)
 {
 	return ToString(wideShorten(ToWString(s), max_length));

@@ -129,7 +129,7 @@ std::wstring Lyrics::title()
 	std::wstring result = L"Lyrics: ";
 	
 	result += Scroller(
-		Format::stringify<wchar_t>(Format::wparse(L"{%a - %t}"), &itsSong),
+		Format::stringify<wchar_t>(Format::wparse(L"%a - %t"), &itsSong),
 		itsScrollBegin,
 		COLS-result.length()-(Config.design == Design::Alternative ? 2 : Global::VolumeState.length())
 	);
