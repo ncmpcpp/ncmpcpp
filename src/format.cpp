@@ -29,9 +29,12 @@ template <typename CharT> using string = std::basic_string<CharT>;
 template <typename CharT> using iterator = typename std::basic_string<CharT>::const_iterator;
 template <typename CharT> using expressions = std::vector<Format::Expression<CharT>>;
 
-std::string invalidCharacter(char c)
+template <typename CharT>
+std::string invalidCharacter(CharT c)
 {
-	return "invalid character '" + boost::lexical_cast<std::string>(c) + "'";
+	return "invalid character '"
+	     + convertString<char, CharT>::apply(boost::lexical_cast<string<CharT>>(c))
+	     + "'";
 }
 
 template <typename CharT>

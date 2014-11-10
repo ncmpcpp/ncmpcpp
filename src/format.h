@@ -21,12 +21,12 @@
 #ifndef NCMPCPP_HAVE_FORMAT_H
 #define NCMPCPP_HAVE_FORMAT_H
 
-#include <boost/locale/encoding_utf.hpp>
 #include <boost/variant.hpp>
 
 #include "menu.h"
 #include "song.h"
 #include "strbuffer.h"
+#include "utility/functional.h"
 #include "utility/wide_string.h"
 
 namespace Format {
@@ -125,7 +125,7 @@ struct Printer: boost::static_visitor<bool>
 		StringT tags;
 		if (m_song != nullptr)
 		{
-			tags = convertString<std::is_same<char, CharT>::value, std::string>::apply(
+			tags = convertString<CharT, char>::apply(
 				m_song->getTags(st.function())
 			);
 		}
@@ -177,20 +177,6 @@ struct Printer: boost::static_visitor<bool>
 	}
 
 private:
-	// convert string to appropriate type
-	template <bool AreSame, typename ValueT>
-	struct convertString {
-		static const StringT &apply(const ValueT &s) {
-			return s;
-		}
-	};
-	template <typename ValueT>
-	struct convertString<false, ValueT> {
-		static StringT apply(const ValueT &s) {
-			return boost::locale::conv::utf_to_utf<CharT>(s);
-		}
-	};
-
 	// generic version for streams (buffers, menus)
 	template <typename ValueT, typename OutputStreamT>
 	struct output_ {

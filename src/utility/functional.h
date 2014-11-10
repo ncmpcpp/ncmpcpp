@@ -21,6 +21,7 @@
 #ifndef NCMPCPP_UTILITY_FUNCTIONAL_H
 #define NCMPCPP_UTILITY_FUNCTIONAL_H
 
+#include <boost/locale/encoding_utf.hpp>
 #include <utility>
 
 // identity function object
@@ -33,5 +34,24 @@ struct id_
 		return std::forward<ValueT>(v);
 	}
 };
+
+// convert string to appropriate type
+template <typename TargetT, typename SourceT>
+struct convertString
+{
+	static std::basic_string<TargetT> apply(const std::basic_string<SourceT> &s)
+	{
+		return boost::locale::conv::utf_to_utf<TargetT>(s);
+	}
+};
+template <typename TargetT>
+struct convertString<TargetT, TargetT>
+{
+	static const std::basic_string<TargetT> &apply(const std::basic_string<TargetT> &s)
+	{
+		return s;
+	}
+};
+
 
 #endif // NCMPCPP_UTILITY_FUNCTIONAL_H
