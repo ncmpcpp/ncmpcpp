@@ -1109,27 +1109,33 @@ Window &Window::operator<<(const XY &coords)
 
 Window &Window::operator<<(const char *s)
 {
-	for (const char *c = s; *c != '\0'; ++c)
-		wprintw(m_window, "%c", *c);
+	waddstr(m_window, s);
 	return *this;
 }
 
 Window &Window::operator<<(char c)
 {
-	wprintw(m_window, "%c", c);
+	waddch(m_window, c);
 	return *this;
 }
 
 Window &Window::operator<<(const wchar_t *ws)
 {
-	for (const wchar_t *wc = ws; *wc != L'\0'; ++wc)
-		wprintw(m_window, "%lc", *wc);
+#	ifdef NCMPCPP_UNICODE
+	waddwstr(m_window, ws);
+#	else
+	wprintw(m_window, "%ls", ws);
+#	endif // NCMPCPP_UNICODE
 	return *this;
 }
 
 Window &Window::operator<<(wchar_t wc)
 {
+#	ifdef NCMPCPP_UNICODE
+	waddnwstr(m_window, &wc, 1);
+#	else
 	wprintw(m_window, "%lc", wc);
+#	endif // NCMPCPP_UNICODE
 	return *this;
 }
 
@@ -1147,18 +1153,17 @@ Window &Window::operator<<(double d)
 
 Window &Window::operator<<(const std::string &s)
 {
-	// for some reason passing whole string at once with "%s" doesn't work
-	// (string is cut in the middle, probably due to limitation of ncurses'
-	// internal buffer?), so we need to pass characters in a loop.
-	for (auto it = s.begin(); it != s.end(); ++it)
-		wprintw(m_window, "%c", *it);
+	waddnstr(m_window, s.c_str(), s.length());
 	return *this;
 }
 
 Window &Window::operator<<(const std::wstring &ws)
 {
-	for (auto it = ws.begin(); it != ws.end(); ++it)
-		wprintw(m_window, "%lc", *it);
+#	ifdef NCMPCPP_UNICODE
+	waddnwstr(m_window, ws.c_str(), ws.length());
+#	else
+	wprintw(m_window, "%lc", ws.c_str());
+#	endif // NCMPCPP_UNICODE
 	return *this;
 }
 
