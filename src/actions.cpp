@@ -505,6 +505,8 @@ void ToggleInterface::run()
 	}
 	setWindowsDimensions();
 	resizeScreen(false);
+	// unlock progressbar
+	Progressbar::ScopedLock();
 	Status::Changes::mixer();
 	Status::Changes::elapsedTime(false);
 	Statusbar::printf("User interface: %1%", Config.design);
