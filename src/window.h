@@ -128,10 +128,15 @@ private:
 
 struct Color
 {
-	Color() : m_rep(0, -1, true, false) { }
-	Color(short foregound_value, short background_value = -1,
+	friend struct Window;
+
+	static const short transparent;
+	static const short previous;
+
+	Color() : m_rep(0, transparent, true, false) { }
+	Color(short foreground_value, short background_value,
 			 bool is_default = false, bool is_end = false)
-	: m_rep(foregound_value + 1, background_value + 1, is_default, is_end)
+	: m_rep(foreground_value, background_value, is_default, is_end)
 	{
 		if (isDefault() && isEnd())
 			throw std::logic_error("Color flag can't be marked as both 'default' and 'end'");
@@ -150,14 +155,6 @@ struct Color
 		return m_rep < rhs.m_rep;
 	}
 
-	short foreground() const
-	{
-		return std::get<0>(m_rep);
-	}
-	short background() const
-	{
-		return std::get<1>(m_rep);
-	}
 	bool isDefault() const
 	{
 		return std::get<2>(m_rep);
@@ -181,10 +178,22 @@ struct Color
 	static Color End;
 
 private:
+	short foreground() const
+	{
+		return std::get<0>(m_rep);
+	}
+	short background() const
+	{
+		return std::get<1>(m_rep);
+	}
+	bool previousBackground() const
+	{
+		return background() == previous;
+	}
+
 	std::tuple<short, short, bool, bool> m_rep;
 };
 
-std::ostream &operator<<(std::ostream &os, const Color &c);
 std::istream &operator>>(std::istream &is, Color &f);
 
 /// Terminal manipulation functions

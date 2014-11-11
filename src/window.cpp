@@ -198,47 +198,45 @@ int add_base()
 
 namespace NC {
 
-Color Color::Default(0, -1, true, false);
-Color Color::Black(COLOR_BLACK, -1);
-Color Color::Red(COLOR_RED, -1);
-Color Color::Green(COLOR_GREEN, -1);
-Color Color::Yellow(COLOR_YELLOW, -1);
-Color Color::Blue(COLOR_BLUE, -1);
-Color Color::Magenta(COLOR_MAGENTA, -1);
-Color Color::Cyan(COLOR_CYAN, -1);
-Color Color::White(COLOR_WHITE, -1);
+const short Color::transparent = -1;
+const short Color::previous = -2;
+
+Color Color::Default(0, 0, true, false);
+Color Color::Black(COLOR_BLACK, Color::transparent);
+Color Color::Red(COLOR_RED, Color::transparent);
+Color Color::Green(COLOR_GREEN, Color::transparent);
+Color Color::Yellow(COLOR_YELLOW, Color::transparent);
+Color Color::Blue(COLOR_BLUE, Color::transparent);
+Color Color::Magenta(COLOR_MAGENTA, Color::transparent);
+Color Color::Cyan(COLOR_CYAN, Color::transparent);
+Color Color::White(COLOR_WHITE, Color::transparent);
 Color Color::End(0, 0, false, true);
 
-std::ostream &operator<<(std::ostream &os, const Color &c)
+int Color::pairNumber() const
 {
-	if (c.isDefault())
-		os << "default";
-	else if (c == Color::Black)
-		os << "black";
-	else if (c == Color::Red)
-		os << "red";
-	else if (c == Color::Green)
-		os << "green";
-	else if (c == Color::Yellow)
-		os << "yellow";
-	else if (c == Color::Blue)
-		os << "blue";
-	else if (c == Color::Magenta)
-		os << "magenta";
-	else if (c == Color::Cyan)
-		os << "cyan";
-	else if (c == Color::White)
-		os << "white";
-	else if (c.isEnd())
-		os << "end";
+	int result;
+	if (isDefault())
+		result = 0;
+	else if (previousBackground())
+		throw std::logic_error("color depends on the previous background value");
+	else if (isEnd())
+		throw std::logic_error("'end' doesn't have a corresponding pair number");
 	else
-		os << c.foreground() << "_" << c.background();
-	return os;
+	{
+		// colors start with 0, but pairs start with 1. additionally
+		// first pairs are for transparent background, which has a
+		// value of -1, so we need to add 1 to both foreground and
+		// background value.
+		result = background() + 1;
+		result *= COLORS;
+		result += foreground() + 1;
+	}
+	return result;
 }
 
 std::istream &operator>>(std::istream &is, Color &c)
 {
-	auto get_single_color = [](const std::string &s) {
+	auto get_single_color = [](const std::string &s, bool background) {
 		short result = -1;
 		if (s == "black")
 			result = COLOR_BLACK;
@@ -256,6 +254,8 @@ std::istream &operator>>(std::istream &is, Color &c)
 			result = COLOR_CYAN;
 		else if (s == "white")
 			result = COLOR_WHITE;
+		else if (background && s == "previous")
+			result = NC::Color::previous;
 		else if (std::all_of(s.begin(), s.end(), isdigit))
 		{
 			result = atoi(s.c_str());
@@ -274,16 +274,16 @@ std::istream &operator>>(std::istream &is, Color &c)
 		c = Color::End;
 	else
 	{
-		short value = get_single_color(sc);
+		short value = get_single_color(sc, false);
 		if (value != -1)
-			c = Color(value);
+			c = Color(value, NC::Color::transparent);
 		else
 		{
 			size_t underscore = sc.find('_');
 			if (underscore != std::string::npos)
 			{
-				short fg = get_single_color(sc.substr(0, underscore));
-				short bg = get_single_color(sc.substr(underscore+1));
+				short fg = get_single_color(sc.substr(0, underscore), false);
+				short bg = get_single_color(sc.substr(underscore+1), true);
 				if (fg != -1 && bg != -1)
 					c = Color(fg, bg);
 				else
@@ -471,22 +471,6 @@ void destroyScreen()
 	endwin();
 }
 
-int Color::pairNumber() const
-{
-	int result;
-	if (isDefault())
-		result = 0;
-	else if (isEnd())
-		throw std::logic_error("'end' doesn't have a corresponding pair number");
-	else
-	{
-		result = background();
-		result *= COLORS;
-		result += foreground();
-	}
-	return result;
-}
-
 Window::Window(size_t startx,
 		size_t starty,
 		size_t width,
@@ -622,7 +606,11 @@ void Window::setColor(Color c)
 	if (c.isDefault())
 		c = m_base_color;
 	if (c != Color::Default)
+	{
+		if (c.previousBackground())
+			c = Color(c.foreground(), m_color.background());
 		wcolor_set(m_window, c.pairNumber(), nullptr);
+	}
 	else
 		wcolor_set(m_window, m_base_color.pairNumber(), nullptr);
 	m_color = std::move(c);

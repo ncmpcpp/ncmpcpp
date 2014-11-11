@@ -189,14 +189,18 @@ expressions<CharT> parseBracket(const string<CharT> &s,
 			{
 				++it;
 				rangeCheck(s, it, end);
+				auto jt = it;
 				string<CharT> scolor;
 				do
 					scolor += *it++;
 				while (it != end && *it != ')');
 				rangeCheck(s, it, end);
-				result.push_back(boost::lexical_cast<NC::Color>(
-					convertString<char, CharT>::apply(scolor)
-				));
+				auto value = convertString<char, CharT>::apply(scolor);
+				try {
+					result.push_back(boost::lexical_cast<NC::Color>(value));
+				} catch (boost::bad_lexical_cast &) {
+					throwError(s, jt, "invalid color \"" + value + "\"");
+				}
 			}
 			else
 				throwError(s, it, invalidCharacter(*it));

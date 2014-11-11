@@ -120,7 +120,7 @@ void showSongs(NC::Menu<T> &menu, const MPD::Song &s,
 			x_off -= Config.now_playing_suffix_length;
 		if (is_selected)
 			x_off -= Config.selected_item_suffix_length;
-		menu << NC::XY(x_off, y) << right_aligned;
+		menu << NC::TermManip::ClearToEOL << NC::XY(x_off, y) << right_aligned;
 	}
 
 	if (is_now_playing)
