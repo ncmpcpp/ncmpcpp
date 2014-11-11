@@ -166,7 +166,7 @@ option_parser::worker buffer(NC::Buffer &arg, ValueT &&value, TransformT &&map)
 	return option_parser::worker(assign<std::string>(arg, [&arg, map](std::string s) {
 		NC::Buffer result;
 		Format::print(Format::parse(s), result, nullptr);
-		return result;
+		return map(std::move(result));
 	}), defaults_to(arg, map(std::forward<ValueT>(value))));
 }
 
