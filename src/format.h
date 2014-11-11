@@ -31,6 +31,15 @@
 
 namespace Format {
 
+namespace Flags {
+const unsigned None = 0;
+const unsigned Color = 1;
+const unsigned Format = 2;
+const unsigned OutputSwitch = 4;
+const unsigned Tag = 8;
+const unsigned All = Color | Format | OutputSwitch | Tag;
+}
+
 enum class ListType { All, Any, AST };
 
 template <ListType, typename> struct List;
@@ -38,7 +47,7 @@ template <typename CharT> using All = List<ListType::All, CharT>;
 template <typename CharT> using Any = List<ListType::Any, CharT>;
 template <typename CharT> using AST = List<ListType::AST, CharT>;
 
-struct AlignRight { };
+struct OutputSwitch { };
 
 struct SongTag
 {
@@ -59,7 +68,7 @@ using Expression = boost::variant<
 	std::basic_string<CharT>,
 	NC::Color,
 	NC::Format,
-	AlignRight,
+	OutputSwitch,
 	SongTag,
 	boost::recursive_wrapper<Any<CharT>>,
 	boost::recursive_wrapper<All<CharT>>
@@ -82,17 +91,18 @@ private:
 	Base m_base;
 };
 
-template <typename CharT, typename OutputT, typename OutputAfterAlignmentT = OutputT>
+template <typename CharT, typename OutputT, typename SecondOutputT = OutputT>
 struct Printer: boost::static_visitor<bool>
 {
 	typedef std::basic_string<CharT> StringT;
 
-	Printer(OutputT &os, const MPD::Song *song, OutputAfterAlignmentT *os_after_alignment)
+	Printer(OutputT &os, const MPD::Song *song, SecondOutputT *second_os, const unsigned flags)
 	: m_output(os)
 	, m_song(song)
-	, m_after_alignment(false)
-	, m_output_after_alignment(os_after_alignment)
+	, m_output_switched(false)
+	, m_second_os(second_os)
 	, m_no_output(0)
+	, m_flags(flags)
 	{ }
 
 	bool operator()(const StringT &s)
@@ -103,27 +113,29 @@ struct Printer: boost::static_visitor<bool>
 
 	bool operator()(const NC::Color &c)
 	{
-		output(c);
+		if (m_flags & Flags::Color)
+			output(c);
 		return true;
 	}
 
 	bool operator()(NC::Format fmt)
 	{
-		output(fmt);
+		if (m_flags & Flags::Format)
+			output(fmt);
 		return true;
 	}
 
-	bool operator()(AlignRight)
+	bool operator()(OutputSwitch)
 	{
 		if (!m_no_output)
-			m_after_alignment = true;
+			m_output_switched = true;
 		return true;
 	}
 
 	bool operator()(const SongTag &st)
 	{
 		StringT tags;
-		if (m_song != nullptr)
+		if (m_flags & Flags::Tag && m_song != nullptr)
 		{
 			tags = convertString<CharT, char>::apply(
 				m_song->getTags(st.function())
@@ -198,11 +210,13 @@ private:
 			result += s;
 		}
 	};
-	// when writing to a string, ignore all properties
+	// when writing to a string, we should ignore all other
+	// properties. if this code is reached, throw an exception.
 	template <typename ValueT, typename SomeCharT>
-	struct output_<ValueT, std::basic_string<SomeCharT>>
-	{
-		static void exec(std::basic_string<CharT> &, const ValueT &) { }
+	struct output_<ValueT, std::basic_string<SomeCharT>> {
+		static void exec(std::basic_string<CharT> &, const ValueT &) {
+			throw std::logic_error("non-string property can't be appended to the string");
+		}
 	};
 
 	template <typename ValueT>
@@ -210,8 +224,8 @@ private:
 	{
 		if (!m_no_output)
 		{
-			if (m_after_alignment && m_output_after_alignment != nullptr)
-				output_<ValueT, OutputAfterAlignmentT>::exec(*m_output_after_alignment, value);
+			if (m_output_switched && m_second_os != nullptr)
+				output_<ValueT, SecondOutputT>::exec(*m_second_os, value);
 			else
 				output_<ValueT, OutputT>::exec(m_output, value);
 		}
@@ -220,10 +234,11 @@ private:
 	OutputT &m_output;
 	const MPD::Song *m_song;
 
-	bool m_after_alignment;
-	OutputAfterAlignmentT *m_output_after_alignment;
+	bool m_output_switched;
+	SecondOutputT *m_second_os;
 
 	unsigned m_no_output;
+	const unsigned m_flags;
 };
 
 template <typename CharT, typename VisitorT>
@@ -234,17 +249,18 @@ void visit(VisitorT &visitor, const AST<CharT> &ast)
 }
 
 template <typename CharT, typename ItemT>
-void print(const AST<CharT> &ast, NC::Menu<ItemT> &menu,
-           const MPD::Song *song, NC::BasicBuffer<CharT> *buffer)
+void print(const AST<CharT> &ast, NC::Menu<ItemT> &menu, const MPD::Song *song,
+           NC::BasicBuffer<CharT> *buffer, const unsigned flags = Flags::All)
 {
-	Printer<CharT, NC::Menu<ItemT>, NC::Buffer> printer(menu, song, buffer);
+	Printer<CharT, NC::Menu<ItemT>, NC::Buffer> printer(menu, song, buffer, flags);
 	visit(printer, ast);
 }
 
 template <typename CharT>
-void print(const AST<CharT> &ast, NC::BasicBuffer<CharT> &buffer, const MPD::Song *song)
+void print(const AST<CharT> &ast, NC::BasicBuffer<CharT> &buffer,
+           const MPD::Song *song, const unsigned flags = Flags::All)
 {
-	Printer<CharT, NC::BasicBuffer<CharT>> printer(buffer, song, &buffer);
+	Printer<CharT, NC::BasicBuffer<CharT>> printer(buffer, song, &buffer, flags);
 	visit(printer, ast);
 }
 
@@ -252,13 +268,13 @@ template <typename CharT>
 std::basic_string<CharT> stringify(const AST<CharT> &ast, const MPD::Song *song)
 {
 	std::basic_string<CharT> result;
-	Printer<CharT, std::basic_string<CharT>> printer(result, song, &result);
+	Printer<CharT, std::basic_string<CharT>> printer(result, song, &result, Flags::Tag);
 	visit(printer, ast);
 	return result;
 }
 
-AST<char> parse(const std::string &s);
-AST<wchar_t> wparse(const std::wstring &ws);
+AST<char> parse(const std::string &s, const unsigned flags = Flags::All);
+AST<wchar_t> parse(const std::wstring &ws, const unsigned flags = Flags::All);
 
 }
 

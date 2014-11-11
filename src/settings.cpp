@@ -165,7 +165,8 @@ option_parser::worker buffer(NC::Buffer &arg, ValueT &&value, TransformT &&map)
 {
 	return option_parser::worker(assign<std::string>(arg, [&arg, map](std::string s) {
 		NC::Buffer result;
-		Format::print(Format::parse(s), result, nullptr);
+		auto ast = Format::parse(s, Format::Flags::Color | Format::Flags::Format);
+		Format::print(ast, result, nullptr);
 		return map(std::move(result));
 	}), defaults_to(arg, map(std::forward<ValueT>(value))));
 }
@@ -271,30 +272,37 @@ bool Configuration::read(const std::string &config_path)
 		message_delay_time, 5
 	));
 	p.add("song_list_format", assign_default<std::string>(
-		song_list_format, "{%a - }{%t}|{$8%f$9}$R{$3(%l)$9}", Format::parse
-	));
+		song_list_format, "{%a - }{%t}|{$8%f$9}$R{$3(%l)$9}", [](std::string v) {
+			return Format::parse(v);
+	}));
 	p.add("song_status_format", assign_default<std::string>(
 		song_status_format, "{{%a{ \"%b\"{ (%y)}} - }{%t}}|{%f}", [this](std::string v) {
 			// precompute wide format for status display
-			song_status_wformat = Format::wparse(ToWString(v));
+			song_status_wformat = Format::parse(ToWString(v));
 			return Format::parse(v);
 	}));
 	p.add("song_library_format", assign_default<std::string>(
-		song_library_format, "{%n - }{%t}|{%f}", Format::parse
-	));
+		song_library_format, "{%n - }{%t}|{%f}", [](std::string v) {
+			return Format::parse(v);
+	}));
 	p.add("browser_sort_mode", assign_default(
 		browser_sort_mode, SortMode::Name
 	));
 	p.add("browser_sort_format", assign_default<std::string>(
-		browser_sort_format, "{%a - }{%t}|{%f} {(%l)}", Format::parse
-	));
+		browser_sort_format, "{%a - }{%t}|{%f} {(%l)}", [](std::string v) {
+			return Format::parse(v, Format::Flags::Tag);
+	}));
 	p.add("alternative_header_first_line_format", assign_default<std::string>(
-		new_header_first_line, "$b$1$aqqu$/a$9 {%t}|{%f} $1$atqq$/a$9$/b", [this](std::string v) {
-			return Format::wparse(ToWString(std::move(v)));
+		new_header_first_line, "$b$1$aqqu$/a$9 {%t}|{%f} $1$atqq$/a$9$/b", [](std::string v) {
+			return Format::parse(ToWString(std::move(v)),
+				Format::Flags::All ^ Format::Flags::OutputSwitch
+			);
 	}));
 	p.add("alternative_header_second_line_format", assign_default<std::string>(
-		new_header_second_line, "{{$4$b%a$/b$9}{ - $7%b$9}{ ($4%y$9)}}|{%D}", [this](std::string v) {
-			return Format::wparse(ToWString(std::move(v)));
+		new_header_second_line, "{{$4$b%a$/b$9}{ - $7%b$9}{ ($4%y$9)}}|{%D}", [](std::string v) {
+			return Format::parse(ToWString(std::move(v)),
+				Format::Flags::All ^ Format::Flags::OutputSwitch
+			);
 	}));
 	p.add("now_playing_prefix", buffer(
 		now_playing_prefix, NC::Buffer::init(NC::Format::Bold), [this](NC::Buffer buf) {
@@ -323,8 +331,9 @@ bool Configuration::read(const std::string &config_path)
 		modified_item_prefix, NC::Buffer::init(NC::Color::Green, "> ", NC::Color::End), id_()
 	));
 	p.add("song_window_title_format", assign_default<std::string>(
-		song_window_title_format, "{%a - }{%t}|{%f}", Format::parse
-	));
+		song_window_title_format, "{%a - }{%t}|{%f}", [](std::string v) {
+			return Format::parse(v, Format::Flags::Tag);
+	}));
 	p.add("song_columns_list_format", assign_default<std::string>(
 		columns_format, "(20)[]{a} (6f)[green]{NE} (50)[white]{t|f:Title} (20)[cyan]{b} (7f)[magenta]{l}",
 			[this](std::string v) {

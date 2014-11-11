@@ -110,9 +110,11 @@ void showSongs(NC::Menu<T> &menu, const MPD::Song &s,
 	bool separate_albums, is_now_playing, is_selected, discard_colors;
 	setProperties(menu, s, pl, separate_albums, is_now_playing, is_selected, discard_colors);
 
-	size_t y = menu.getY();
+	const size_t y = menu.getY();
 	NC::Buffer right_aligned;
-	Format::print(ast, menu, &s, &right_aligned);
+	Format::print(ast, menu, &s, &right_aligned,
+		discard_colors ? Format::Flags::Tag | Format::Flags::OutputSwitch : Format::Flags::All
+	);
 	if (!right_aligned.str().empty())
 	{
 		size_t x_off = menu.getWidth() - wideLength(ToWString(right_aligned.str()));

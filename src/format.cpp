@@ -25,6 +25,10 @@
 
 namespace {
 
+const unsigned properties = Format::Flags::Color
+                          | Format::Flags::Format
+                          | Format::Flags::OutputSwitch;
+
 template <typename CharT> using string = std::basic_string<CharT>;
 template <typename CharT> using iterator = typename std::basic_string<CharT>::const_iterator;
 template <typename CharT> using expressions = std::vector<Format::Expression<CharT>>;
@@ -54,7 +58,8 @@ void rangeCheck(const string<CharT> &s, iterator<CharT> current, iterator<CharT>
 
 template <typename CharT>
 expressions<CharT> parseBracket(const string<CharT> &s,
-                                iterator<CharT> it, iterator<CharT> end)
+                                iterator<CharT> it, iterator<CharT> end,
+                                const unsigned flags)
 {
 	string<CharT> token;
 	expressions<CharT> tmp, result;
@@ -88,7 +93,7 @@ expressions<CharT> parseBracket(const string<CharT> &s,
 				// skip the opening bracket
 				++it;
 				// recursively parse the bracket
-				tmp = parseBracket(s, it, jt);
+				tmp = parseBracket(s, it, jt, flags);
 				// if the inner bracket contains only one expression,
 				// put it as is. otherwise require all of them.
 				if (tmp.size() == 1)
@@ -117,7 +122,7 @@ expressions<CharT> parseBracket(const string<CharT> &s,
 				any.base().push_back(string<CharT>());
 			result.push_back(std::move(any));
 		}
-		else if (*it == '%')
+		else if (flags & Format::Flags::Tag && *it == '%')
 		{
 			++it;
 			rangeCheck(s, it, end);
@@ -144,7 +149,7 @@ expressions<CharT> parseBracket(const string<CharT> &s,
 				throwError(s, it, invalidCharacter(*it));
 			result.push_back(Format::SongTag(f, delimiter));
 		}
-		else if (*it == '$')
+		else if (flags & properties && *it == '$')
 		{
 			++it;
 			rangeCheck(s, it, end);
@@ -155,37 +160,14 @@ expressions<CharT> parseBracket(const string<CharT> &s,
 				continue;
 			}
 			push_token();
-			if (isdigit(*it))
+			// legacy colors
+			if (flags & Format::Flags::Color && isdigit(*it))
 			{
 				auto color = charToColor(*it);
 				result.push_back(color);
 			}
-			else if (*it == 'R')
-				result.push_back(Format::AlignRight());
-			else if (*it == 'b')
-				result.push_back(NC::Format::Bold);
-			else if (*it == 'u')
-				result.push_back(NC::Format::Underline);
-			else if (*it == 'a')
-				result.push_back(NC::Format::AltCharset);
-			else if (*it == 'r')
-				result.push_back(NC::Format::Reverse);
-			else if (*it == '/')
-			{
-				++it;
-				rangeCheck(s, it, end);
-				if (*it == 'b')
-					result.push_back(NC::Format::NoBold);
-				else if (*it == 'u')
-					result.push_back(NC::Format::NoUnderline);
-				else if (*it == 'a')
-					result.push_back(NC::Format::NoAltCharset);
-				else if (*it == 'r')
-					result.push_back(NC::Format::NoReverse);
-				else
-					throwError(s, it, invalidCharacter(*it));
-			}
-			else if (*it == '(')
+			// new colors
+			else if (flags & Format::Flags::Color && *it == '(')
 			{
 				++it;
 				rangeCheck(s, it, end);
@@ -202,6 +184,33 @@ expressions<CharT> parseBracket(const string<CharT> &s,
 					throwError(s, jt, "invalid color \"" + value + "\"");
 				}
 			}
+			// output switch
+			else if (flags & Format::Flags::OutputSwitch && *it == 'R')
+				result.push_back(Format::OutputSwitch());
+			// format
+			else if (flags & Format::Flags::Format && *it == 'b')
+				result.push_back(NC::Format::Bold);
+			else if (flags & Format::Flags::Format && *it == 'u')
+				result.push_back(NC::Format::Underline);
+			else if (flags & Format::Flags::Format && *it == 'a')
+				result.push_back(NC::Format::AltCharset);
+			else if (flags & Format::Flags::Format && *it == 'r')
+				result.push_back(NC::Format::Reverse);
+			else if (flags & Format::Flags::Format && *it == '/')
+			{
+				++it;
+				rangeCheck(s, it, end);
+				if (*it == 'b')
+					result.push_back(NC::Format::NoBold);
+				else if (*it == 'u')
+					result.push_back(NC::Format::NoUnderline);
+				else if (*it == 'a')
+					result.push_back(NC::Format::NoAltCharset);
+				else if (*it == 'r')
+					result.push_back(NC::Format::NoReverse);
+				else
+					throwError(s, it, invalidCharacter(*it));
+			}
 			else
 				throwError(s, it, invalidCharacter(*it));
 		}
@@ -216,14 +225,14 @@ expressions<CharT> parseBracket(const string<CharT> &s,
 
 namespace Format {
 
-AST<char> parse(const std::string &s)
+AST<char> parse(const std::string &s, const unsigned flags)
 {
-	return AST<char>(parseBracket(s, s.begin(), s.end()));
+	return AST<char>(parseBracket(s, s.begin(), s.end(), flags));
 }
 
-AST<wchar_t> wparse(const std::wstring &s)
+AST<wchar_t> parse(const std::wstring &s, const unsigned flags)
 {
-	return AST<wchar_t>(parseBracket(s, s.begin(), s.end()));
+	return AST<wchar_t>(parseBracket(s, s.begin(), s.end(), flags));
 }
 
 }
