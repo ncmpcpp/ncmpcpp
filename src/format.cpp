@@ -132,7 +132,7 @@ expressions<CharT> parseBracket(const string<CharT> &s,
 			unsigned delimiter = 0;
 			if (isdigit(*it))
 			{
-				std::string sdelimiter;
+				string<CharT> sdelimiter;
 				do
 					sdelimiter += *it++;
 				while (it != end && isdigit(*it));
@@ -184,6 +184,19 @@ expressions<CharT> parseBracket(const string<CharT> &s,
 					result.push_back(NC::Format::NoReverse);
 				else
 					throwError(s, it, invalidCharacter(*it));
+			}
+			else if (*it == '(')
+			{
+				++it;
+				rangeCheck(s, it, end);
+				string<CharT> scolor;
+				do
+					scolor += *it++;
+				while (it != end && *it != ')');
+				rangeCheck(s, it, end);
+				result.push_back(boost::lexical_cast<NC::Color>(
+					convertString<char, CharT>::apply(scolor)
+				));
 			}
 			else
 				throwError(s, it, invalidCharacter(*it));
