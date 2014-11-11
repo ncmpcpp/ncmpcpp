@@ -239,7 +239,6 @@ std::ostream &operator<<(std::ostream &os, const Color &c)
 std::istream &operator>>(std::istream &is, Color &c)
 {
 	auto get_single_color = [](const std::string &s) {
-		std::cerr << "s: " << s << "\n";
 		short result = -1;
 		if (s == "black")
 			result = COLOR_BLACK;
