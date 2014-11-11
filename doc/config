@@ -152,22 +152,17 @@
 ## %P - priority
 ## $R - begin right alignment
 ##
-## you can also put them in { } and then it will be displayed
+## You can also put them in { } and then it will be displayed
 ## only if all requested values are available and/or define alternate
-## value with { }|{ } eg. {%a - %t}|{%f}
+## value with { }|{ } eg. {%a - %t}|{%f}. It is worth noting that
+## a single bracket {..} is equivalent to the alternative {..}|{}.
 ##
 ## Note: If you want to set limit on maximal length of a tag, just
 ## put the appropriate number between % and character that defines
 ## tag type, e.g. to make album take max. 20 terminal cells, use '%20b'.
 ##
-## Note: Format that is similar to "%a - %t" (i.e. without any additional
-## braces) is equal to "{%a - %t}", so if one of the tags is missing,
-## you'll get nothing.
-##
-## text can also have different color than the main window has,
-## eg. if you want length to be green, write "$3%l$9".
-##
-## Available values:
+## In addition, formats support markers used for text attributes.
+## They are followed by character '$'. After that you can put:
 ##
 ## - 0 - default window color (discards all other colors)
 ## - 1 - black
@@ -179,6 +174,23 @@
 ## - 7 - cyan
 ## - 8 - white
 ## - 9 - end of current color
+## - b - bold text
+## - u - underline text
+## - r - reverse colors
+## - a - use alternative character set
+##
+## If you don't want to use a non-color attribute anymore, just put it
+## again, but this time insert character '/' between '$' and attribute
+## character, e.g. {$b%t$/b}|{$r%f$/r} will display bolded title tag
+## or filename with reversed colors.
+##
+## If you want to use 256 colors and/or background colors in formats
+## (the naming scheme is described below in section about color
+## definitions), it can be done with the syntax $(COLOR), e.g. to set
+## the artist tag to one of the non-standard colors and make it have
+## yellow background, you need to write $(197_yellow)%a$(end). Note
+## that for standard colors this is interchangable with attributes
+## listed above.
 ##
 ## Note: colors can be nested.
 ##
@@ -201,30 +213,9 @@
 #
 #browser_sort_format = {%a - }{%t}|{%f} {(%l)}
 #
-##
-## Note: Below variables are for alternative version of user's interface.
-## Their syntax supports all tags and colors listed above plus some extra
-## markers used for text attributes. They are followed by character '$'.
-## After that you can put:
-##
-## - b - bold text
-## - u - underline text
-## - r - reverse colors
-## - a - use alternative character set
-##
-## If you don't want to use an attribute anymore, just put it again, but
-## this time insert character '/' between '$' and attribute character,
-## e.g. {$b%t$/b}|{$r%f$/r} will display bolded title tag or filename
-## with reversed colors.
-##
-#
 #alternative_header_first_line_format = $b$1$aqqu$/a$9 {%t}|{%f} $1$atqq$/a$9$/b
 #
 #alternative_header_second_line_format = {{$4$b%a$/b$9}{ - $7%b$9}{ ($4%y$9)}}|{%D}
-#
-##
-## Note: below variables also support text attributes listed above.
-##
 #
 #now_playing_prefix = $b
 #
@@ -238,7 +229,7 @@
 #
 #modified_item_prefix = $3> $9
 #
-## Note: colors are not supported for below variable.
+## Note: attributes are not supported for the following variable.
 ##
 #song_window_title_format = {%a - }{%t}|{%f}
 #
@@ -248,15 +239,16 @@
 ##
 ## - syntax for each column is:
 ##
-## (width of column)[column's color]{displayed tag}
+## (width of the column)[color of the column]{displayed tag}
 ##
 ## Note: Width is by default in %, if you want a column to
 ## have fixed size, add 'f' after the value, e.g. (10)[white]{a}
-## will be the column that take 10% of screen (so the real column's
-## width will depend on actual screen size), whereas (10f)[white]{a}
+## will be the column that take 10% of screen (so the real width
+## will depend on actual screen size), whereas (10f)[white]{a}
 ## will take 10 terminal cells, no matter how wide the screen is.
 ##
-## - color is optional (if you want the default one, type [])
+## - color is optional (if you want the default one,
+##   leave the field empty).
 ##
 ## Note: You can give a column additional attributes by putting appropriate
 ## character after displayed tag character. Available attributes are:
