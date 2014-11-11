@@ -277,9 +277,10 @@ bool Configuration::read(const std::string &config_path)
 	}));
 	p.add("song_status_format", assign_default<std::string>(
 		song_status_format, "{{%a{ \"%b\"{ (%y)}} - }{%t}}|{%f}", [this](std::string v) {
+			const unsigned flags = Format::Flags::All ^ Format::Flags::OutputSwitch;
 			// precompute wide format for status display
-			song_status_wformat = Format::parse(ToWString(v));
-			return Format::parse(v);
+			song_status_wformat = Format::parse(ToWString(v), flags);
+			return Format::parse(v, flags);
 	}));
 	p.add("song_library_format", assign_default<std::string>(
 		song_library_format, "{%n - }{%t}|{%f}", [](std::string v) {
