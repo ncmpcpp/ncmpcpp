@@ -187,6 +187,9 @@ private:
 std::ostream &operator<<(std::ostream &os, const Color &c);
 std::istream &operator>>(std::istream &is, Color &f);
 
+/// Terminal manipulation functions
+enum class TermManip { ClearToEOL };
+
 /// Format flags used by NCurses
 enum class Format {
 	None,
@@ -410,8 +413,7 @@ struct Window
 	/// @param where indicates how many lines it has to scroll
 	virtual void scroll(Scroll where);
 	
-	/// Applies function of compatible prototype to internal WINDOW pointer
-	Window &operator<<(int (*f)(WINDOW *));
+	Window &operator<<(TermManip tm);
 	Window &operator<<(const Color &color);
 	Window &operator<<(Format format);
 	Window &operator<<(const XY &coords);

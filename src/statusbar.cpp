@@ -112,7 +112,7 @@ Statusbar::ScopedLock::~ScopedLock() noexcept
 		switch (Config.design)
 		{
 			case Design::Classic:
-				put() << wclrtoeol;
+				put(); // clear statusbar
 				break;
 			case Design::Alternative:
 				Progressbar::draw(Status::State::elapsedTime(), Status::State::totalTime());
@@ -149,7 +149,7 @@ void Statusbar::tryRedraw()
 					{
 						case MPD::psUnknown:
 						case MPD::psStop:
-							put() << wclrtoeol;
+							put(); // clear statusbar
 							break;
 						case MPD::psPlay:
 						case MPD::psPause:
@@ -168,7 +168,7 @@ void Statusbar::tryRedraw()
 
 NC::Window &Statusbar::put()
 {
-	*wFooter << NC::XY(0, Config.statusbar_visibility ? 1 : 0) << wclrtoeol;
+	*wFooter << NC::XY(0, Config.statusbar_visibility ? 1 : 0) << NC::TermManip::ClearToEOL;
 	return *wFooter;
 }
 
@@ -183,7 +183,7 @@ void Statusbar::print(int delay, const std::string &message)
 		else
 			progressbar_block_update = true;
 		wFooter->goToXY(0, Config.statusbar_visibility);
-		*wFooter << message << wclrtoeol;
+		*wFooter << message << NC::TermManip::ClearToEOL;
 		wFooter->refresh();
 	}
 }

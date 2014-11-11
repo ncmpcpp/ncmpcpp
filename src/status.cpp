@@ -465,7 +465,8 @@ void Status::Changes::playerState()
 			myPlaylist->reloadRemaining();
 			if (Config.design == Design::Alternative)
 			{
-				*wHeader << NC::XY(0, 0) << wclrtoeol << NC::XY(0, 1) << wclrtoeol;
+				*wHeader << NC::XY(0, 0) << NC::TermManip::ClearToEOL;
+				*wHeader << NC::XY(0, 1) << NC::TermManip::ClearToEOL;
 				mixer();
 				flags();
 			}
@@ -488,7 +489,7 @@ void Status::Changes::playerState()
 	{
 		*wFooter << NC::XY(0, 1);
 		if (state.empty())
-			*wFooter << wclrtoeol;
+			*wFooter << NC::TermManip::ClearToEOL;
 		else
 			*wFooter << NC::Format::Bold << state << NC::Format::NoBold;
 	}
@@ -551,7 +552,7 @@ void Status::Changes::elapsedTime(bool update_elapsed)
 	if (m_player_state == MPD::psStop)
 	{
 		if (Statusbar::isUnlocked() && Config.statusbar_visibility)
-			*wFooter << NC::XY(0, 1) << wclrtoeol;
+			*wFooter << NC::XY(0, 1) << NC::TermManip::ClearToEOL;
 		return;
 	}
 	
@@ -592,7 +593,7 @@ void Status::Changes::elapsedTime(bool update_elapsed)
 				}
 				NC::WBuffer np_song;
 				Format::print(Config.song_status_wformat, np_song, &np);
-				*wFooter << NC::XY(0, 1) << wclrtoeol << NC::Format::Bold << ps << NC::Format::NoBold;
+				*wFooter << NC::XY(0, 1) << NC::TermManip::ClearToEOL << NC::Format::Bold << ps << NC::Format::NoBold;
 				writeCyclicBuffer(np_song, *wFooter, playing_song_scroll_begin, wFooter->getWidth()-ps.length()-tracklength.length(), L" ** ");
 				*wFooter << NC::Format::Bold << NC::XY(wFooter->getWidth()-tracklength.length(), 1) << tracklength << NC::Format::NoBold;
 			}
@@ -631,11 +632,11 @@ void Status::Changes::elapsedTime(bool update_elapsed)
 			size_t second_start = second_len < COLS-second_margin ? (COLS-second_len)/2 : ps.length()+1;
 
 			if (!Global::SeekingInProgress)
-				*wHeader << NC::XY(0, 0) << wclrtoeol << tracklength;
+				*wHeader << NC::XY(0, 0) << NC::TermManip::ClearToEOL << tracklength;
 			*wHeader << NC::XY(first_start, 0);
 			writeCyclicBuffer(first, *wHeader, first_line_scroll_begin, COLS-tracklength.length()-VolumeState.length()-1, L" ** ");
 
-			*wHeader << NC::XY(0, 1) << wclrtoeol << NC::Format::Bold << ps << NC::Format::NoBold;
+			*wHeader << NC::XY(0, 1) << NC::TermManip::ClearToEOL << NC::Format::Bold << ps << NC::Format::NoBold;
 			*wHeader << NC::XY(second_start, 1);
 			writeCyclicBuffer(second, *wHeader, second_line_scroll_begin, COLS-ps.length()-8-2, L" ** ");
 

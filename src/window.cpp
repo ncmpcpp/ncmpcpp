@@ -1094,9 +1094,18 @@ Window &Window::operator<<(Format format)
 	return *this;
 }
 
-Window &Window::operator<<(int (*f)(WINDOW *))
+Window &Window::operator<<(TermManip tm)
 {
-	f(m_window);
+	switch (tm)
+	{
+		case TermManip::ClearToEOL:
+		{
+			auto x = getX(), y = getY();
+			mvwhline(m_window, y, x, ' ', m_width-x);
+			goToXY(x, y);
+		}
+		break;
+	}
 	return *this;
 }
 
