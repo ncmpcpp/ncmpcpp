@@ -672,30 +672,19 @@ bool Window::FDCallbacksListEmpty() const
 int Window::readKey()
 {
 	int result;
-	// if there are characters in input queue, get them and
-	// return immediately.
+	// if there are characters in input queue,
+	// get them and return immediately.
 	if (!m_input_queue.empty())
 	{
 		result = m_input_queue.front();
 		m_input_queue.pop();
 		return result;
 	}
-	// in pdcurses polling stdin doesn't work, so we can't poll
-	// both stdin and other file descriptors in one select. the
-	// workaround is to set the timeout of select to 0, poll
-	// other file descriptors and then wait for stdin input with
-	// the given timeout. unfortunately, this results in delays
-	// since ncmpcpp doesn't see that data arrived while waiting
-	// for input from stdin, but it seems there is no better option.
 	
 	fd_set fdset;
 	FD_ZERO(&fdset);
-#	if !defined(USE_PDCURSES)
 	FD_SET(STDIN_FILENO, &fdset);
 	timeval timeout = { m_window_timeout/1000, (m_window_timeout%1000)*1000 };
-#	else
-	timeval timeout = { 0, 0 };
-#	endif
 	
 	int fd_max = STDIN_FILENO;
 	for (FDCallbacks::const_iterator it = m_fds.begin(); it != m_fds.end(); ++it)
@@ -707,19 +696,13 @@ int Window::readKey()
 	
 	if (select(fd_max+1, &fdset, 0, 0, m_window_timeout < 0 ? 0 : &timeout) > 0)
 	{
-#		if !defined(USE_PDCURSES)
 		result = FD_ISSET(STDIN_FILENO, &fdset) ? wgetch(m_window) : ERR;
-#		endif // !USE_PDCURSES
 		for (FDCallbacks::const_iterator it = m_fds.begin(); it != m_fds.end(); ++it)
 			if (FD_ISSET(it->first, &fdset))
 				it->second();
 	}
-#	if !defined(USE_PDCURSES)
 	else
 		result = ERR;
-#	else
-	result = wgetch(m_window);
-#	endif
 	return result;
 }
 
@@ -778,20 +761,7 @@ int Window::getY()
 
 bool Window::hasCoords(int &x, int &y)
 {
-#	ifndef USE_PDCURSES
 	return wmouse_trafo(m_window, &y, &x, 0);
-#	else
-	// wmouse_trafo is broken in pdcurses, use our own implementation
-	size_t u_x = x, u_y = y;
-	if (u_x >= m_start_x && u_x < m_start_x+m_width
-	&&  u_y >= m_start_y && u_y < m_start_y+m_height)
-	{
-		x -= m_start_x;
-		y -= m_start_y;
-		return true;
-	}
-	return false;
-#	endif
 }
 
 bool Window::runPromptHook(const char *arg, bool *done) const

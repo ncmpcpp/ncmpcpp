@@ -26,15 +26,11 @@
 #include "title.h"
 #include "utility/wide_string.h"
 
-#ifdef USE_PDCURSES
-void windowTitle(const std::string &) { }
-#else
 void windowTitle(const std::string &status)
 {
 	if (strcmp(getenv("TERM"), "linux") && Config.set_window_title)
 		std::cout << "\033]0;" << status << "\7" << std::flush;
 }
-#endif // USE_PDCURSES
 
 void drawHeader()
 {

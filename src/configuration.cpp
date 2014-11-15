@@ -128,11 +128,7 @@ bool configure(int argc, char **argv)
 	#		ifdef HAVE_FFTW3_H
 			<< " fftw"
 	#		endif
-	#		ifdef USE_PDCURSES
-			<< " pdcurses"
-	#		else
 			<< " ncurses"
-	#		endif
 	#		ifdef HAVE_TAGLIB_H
 			<< " taglib"
 	#		endif

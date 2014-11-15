@@ -75,9 +75,7 @@ namespace
 		std::cerr.rdbuf(cerr_buffer);
 		errorlog.close();
 		Mpd.Disconnect();
-#		ifndef USE_PDCURSES // destroying screen somehow crashes pdcurses
 		NC::destroyScreen();
-#		endif // USE_PDCURSES
 		windowTitle("");
 	}
 }

@@ -184,9 +184,6 @@ void resizeScreen(bool reload_main_window)
 	using Global::wHeader;
 	using Global::wFooter;
 	
-#	if defined(USE_PDCURSES)
-	resize_term(0, 0);
-#	else
 	// update internal screen dimensions
 	if (reload_main_window)
 	{
@@ -194,7 +191,6 @@ void resizeScreen(bool reload_main_window)
 		endwin();
 		refresh();
 	}
-#	endif
 	
 	MainHeight = LINES-(Config.design == Design::Alternative ? 7 : 4);
 	

@@ -23,10 +23,6 @@
 
 #include "config.h"
 
-#ifdef USE_PDCURSES
-# define NCURSES_MOUSE_VERSION 1
-#endif
-
 #include "curses.h"
 #include "gcc.h"
 
@@ -94,12 +90,12 @@
 #undef KEY_ENTER
 #define KEY_ENTER 13
 
-#if !defined(USE_PDCURSES) && NCURSES_MOUSE_VERSION == 1
+#if NCURSES_MOUSE_VERSION == 1
 // NOTICE: define BUTTON5_PRESSED to be BUTTON2_PRESSED with additional mask
 // (I noticed that it sometimes returns 134217728 (2^27) instead of expected
 // mask, so the modified define does it right.
 # define BUTTON5_PRESSED (BUTTON2_PRESSED | (1U << 27))
-#endif // !defined(USE_PDCURSES) && NCURSES_MOUSE_VERSION == 1
+#endif // NCURSES_MOUSE_VERSION == 1
 
 // undefine macros with colliding names
 #undef border
