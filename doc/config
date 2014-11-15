@@ -202,17 +202,6 @@
 #
 #song_library_format = {%n - }{%t}|{%f}
 #
-##
-## Note: Below variables are used for sorting songs in browser.
-## The sort mode determines how songs are sorted, and can be used
-## in combination with a sort format to specify a custom sorting format.
-## Available values for browser_sort_mode are "name", "mtime", "format"
-## and "noop".
-##
-#
-#browser_sort_mode = name
-#
-#browser_sort_format = {%a - }{%t}|{%f} {(%l)}
 #
 #alternative_header_first_line_format = $b$1$aqqu$/a$9 {%t}|{%f} $1$atqq$/a$9$/b
 #
@@ -230,9 +219,21 @@
 #
 #modified_item_prefix = $3> $9
 #
-## Note: attributes are not supported for the following variable.
+##
+## Note: attributes are not supported for the following variables.
 ##
 #song_window_title_format = {%a - }{%t}|{%f}
+##
+## Note: Below variables are used for sorting songs in browser.
+## The sort mode determines how songs are sorted, and can be used
+## in combination with a sort format to specify a custom sorting format.
+## Available values for browser_sort_mode are "name", "mtime", "format"
+## and "noop".
+##
+#
+#browser_sort_mode = name
+#
+#browser_sort_format = {%a - }{%t}|{%f} {(%l)}
 #
 ##### columns settings #####
 ##
@@ -278,9 +279,6 @@
 ##
 ## Note: Custom command that will be executed each
 ## time song changes. Useful for notifications etc.
-##
-## Attention: It doesn't support song format anymore.
-## Use `ncmpcpp --now-playing SONG_FORMAT` instead.
 ##
 #execute_on_song_change = ""
 #

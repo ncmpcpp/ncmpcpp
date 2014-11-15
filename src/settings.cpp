@@ -302,13 +302,6 @@ bool Configuration::read(const std::vector<std::string> &config_paths)
 		song_library_format, "{%n - }{%t}|{%f}", [](std::string v) {
 			return Format::parse(v);
 	}));
-	p.add("browser_sort_mode", assign_default(
-		browser_sort_mode, SortMode::Name
-	));
-	p.add("browser_sort_format", assign_default<std::string>(
-		browser_sort_format, "{%a - }{%t}|{%f} {(%l)}", [](std::string v) {
-			return Format::parse(v, Format::Flags::Tag);
-	}));
 	p.add("alternative_header_first_line_format", assign_default<std::string>(
 		new_header_first_line, "$b$1$aqqu$/a$9 {%t}|{%f} $1$atqq$/a$9$/b", [](std::string v) {
 			return Format::parse(ToWString(std::move(v)),
@@ -347,6 +340,13 @@ bool Configuration::read(const std::vector<std::string> &config_paths)
 	p.add("modified_item_prefix", buffer(
 		modified_item_prefix, NC::Buffer::init(NC::Color::Green, "> ", NC::Color::End), id_()
 	));
+	p.add("browser_sort_mode", assign_default(
+		browser_sort_mode, SortMode::Name
+	));
+	p.add("browser_sort_format", assign_default<std::string>(
+		browser_sort_format, "{%a - }{%t}|{%f} {(%l)}", [](std::string v) {
+			return Format::parse(v, Format::Flags::Tag);
+	}));
 	p.add("song_window_title_format", assign_default<std::string>(
 		song_window_title_format, "{%a - }{%t}|{%f}", [](std::string v) {
 			return Format::parse(v, Format::Flags::Tag);
