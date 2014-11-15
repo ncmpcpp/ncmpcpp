@@ -44,24 +44,24 @@ std::locale internalLocale()
 	return loc;
 }
 
-std::string toUtf8From(std::string s, const char *charset)
+std::string toUtf8From(const std::string &s, const char *charset)
 {
 	return boost::locale::conv::to_utf<char>(s, charset);
 }
 
-std::string fromUtf8To(std::string s, const char *charset)
+std::string fromUtf8To(const std::string &s, const char *charset)
 {
 	return boost::locale::conv::to_utf<char>(s, charset);
 }
 
-std::string utf8ToLocale(std::string s)
+std::string utf8ToLocale(const std::string &s)
 {
 	return Config.system_encoding.empty()
 	     ? s
 	     : boost::locale::conv::from_utf<char>(s, Config.system_encoding);
 }
 
-std::string localeToUtf8(std::string s)
+std::string localeToUtf8(const std::string &s)
 {
 	return Config.system_encoding.empty()
 	     ? s
