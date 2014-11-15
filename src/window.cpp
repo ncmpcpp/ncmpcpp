@@ -984,7 +984,8 @@ Window &Window::operator<<(const char *s)
 
 Window &Window::operator<<(char c)
 {
-	waddch(m_window, c);
+	// waddchr doesn't display non-ascii multibyte characters properly
+	waddnstr(m_window, &c, 1);
 	return *this;
 }
 
