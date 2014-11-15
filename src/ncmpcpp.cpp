@@ -143,7 +143,7 @@ int main(int argc, char **argv)
 		if (screen_locked && slave_screen != myScreen->type())
 			toScreen(slave_screen)->switchTo();
 	}
-	
+
 	// local variables
 	bool key_pressed = false;
 	Key input = Key::noOp;
@@ -230,7 +230,7 @@ int main(int argc, char **argv)
 			}
 			catch (ConversionError &e)
 			{
-				Statusbar::printf("Couldn't convert value \"%1%\" to target type", e.value());
+				Statusbar::printf("Invalid value: %1%", e.value());
 			}
 			catch (OutOfBounds &e)
 			{
