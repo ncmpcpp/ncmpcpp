@@ -57,8 +57,8 @@ Clock::Clock()
 {
 	Width = Config.clock_display_seconds ? 60 : 40;
 	
-	m_pane = NC::Window(0, MainStartY, COLS, MainHeight, "", Config.main_color, NC::Border::None);
-	w = NC::Window((COLS-Width)/2, (MainHeight-Height)/2+MainStartY, Width, Height-1, "", Config.main_color, NC::Border::None);
+	m_pane = NC::Window(0, MainStartY, COLS, MainHeight, "", Config.main_color, NC::Border());
+	w = NC::Window((COLS-Width)/2, (MainHeight-Height)/2+MainStartY, Width, Height-1, "", Config.main_color, Config.main_color);
 }
 
 void Clock::resize()

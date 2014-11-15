@@ -171,6 +171,22 @@ option_parser::worker buffer(NC::Buffer &arg, ValueT &&value, TransformT &&map)
 	}), defaults_to(arg, map(std::forward<ValueT>(value))));
 }
 
+option_parser::worker border(NC::Border &arg, NC::Border value)
+{
+	return option_parser::worker(assign<std::string>(arg, [&arg](std::string s) {
+		NC::Border result;
+		if (!s.empty())
+		{
+			try {
+				result = boost::lexical_cast<NC::Color>(s);
+			} catch (boost::bad_lexical_cast &) {
+				throw std::runtime_error("invalid border: " + s);
+			}
+		}
+		return result;
+	}), defaults_to(arg, std::move(value)));
+}
+
 }
 
 bool Configuration::read(const std::vector<std::string> &config_paths)
@@ -646,11 +662,11 @@ bool Configuration::read(const std::vector<std::string> &config_paths)
 	p.add("active_column_color", assign_default(
 		active_column_color, NC::Color::Red
 	));
-	p.add("window_border_color", assign_default(
-		window_border, NC::Border::Green
+	p.add("window_border_color", border(
+		window_border, NC::Color::Green
 	));
-	p.add("active_window_border", assign_default(
-		active_window_border, NC::Border::Red
+	p.add("active_window_border", border(
+		active_window_border, NC::Color::Red
 	));
 
 	return std::all_of(

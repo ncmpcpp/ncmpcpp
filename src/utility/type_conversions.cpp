@@ -50,28 +50,6 @@ NC::Color charToColor(char c)
 	}
 }
 
-NC::Border stringToBorder(const std::string &border)
-{
-	NC::Border result = NC::Border::None;
-	if (border == "black")
-		result = NC::Border::Black;
-	else if (border == "red")
-		result = NC::Border::Red;
-	else if (border == "green")
-		result = NC::Border::Green;
-	else if (border == "yellow")
-		result = NC::Border::Yellow;
-	else if (border == "blue")
-		result = NC::Border::Blue;
-	else if (border == "magenta")
-		result = NC::Border::Magenta;
-	else if (border == "cyan")
-		result = NC::Border::Cyan;
-	else if (border == "white")
-		result = NC::Border::White;
-	return result;
-}
-
 std::string tagTypeToString(mpd_tag_type tag)
 {
 	switch (tag)

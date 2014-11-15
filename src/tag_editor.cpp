@@ -90,7 +90,7 @@ TagEditor::TagEditor() : FParser(0), FParserHelper(0), FParserLegend(0), FParser
 	PatternsFile = Config.ncmpcpp_directory + "patterns.list";
 	SetDimensions(0, COLS);
 	
-	Dirs = new NC::Menu< std::pair<std::string, std::string> >(0, MainStartY, LeftColumnWidth, MainHeight, Config.titles_visibility ? "Directories" : "", Config.main_color, NC::Border::None);
+	Dirs = new NC::Menu< std::pair<std::string, std::string> >(0, MainStartY, LeftColumnWidth, MainHeight, Config.titles_visibility ? "Directories" : "", Config.main_color, NC::Border());
 	Dirs->setHighlightColor(Config.active_column_color);
 	Dirs->cyclicScrolling(Config.use_cyclic_scrolling);
 	Dirs->centeredCursor(Config.centered_cursor);
@@ -98,7 +98,7 @@ TagEditor::TagEditor() : FParser(0), FParserHelper(0), FParserLegend(0), FParser
 		menu << Charset::utf8ToLocale(menu.drawn()->value().first);
 	});
 	
-	TagTypes = new NC::Menu<std::string>(MiddleColumnStartX, MainStartY, MiddleColumnWidth, MainHeight, Config.titles_visibility ? "Tag types" : "", Config.main_color, NC::Border::None);
+	TagTypes = new NC::Menu<std::string>(MiddleColumnStartX, MainStartY, MiddleColumnWidth, MainHeight, Config.titles_visibility ? "Tag types" : "", Config.main_color, NC::Border());
 	TagTypes->setHighlightColor(Config.main_highlight_color);
 	TagTypes->cyclicScrolling(Config.use_cyclic_scrolling);
 	TagTypes->centeredCursor(Config.centered_cursor);
@@ -122,7 +122,7 @@ TagEditor::TagEditor() : FParser(0), FParserHelper(0), FParserLegend(0), FParser
 	TagTypes->addItem("Reset");
 	TagTypes->addItem("Save");
 	
-	Tags = new NC::Menu<MPD::MutableSong>(RightColumnStartX, MainStartY, RightColumnWidth, MainHeight, Config.titles_visibility ? "Tags" : "", Config.main_color, NC::Border::None);
+	Tags = new NC::Menu<MPD::MutableSong>(RightColumnStartX, MainStartY, RightColumnWidth, MainHeight, Config.titles_visibility ? "Tags" : "", Config.main_color, NC::Border());
 	Tags->setHighlightColor(Config.main_highlight_color);
 	Tags->cyclicScrolling(Config.use_cyclic_scrolling);
 	Tags->centeredCursor(Config.centered_cursor);

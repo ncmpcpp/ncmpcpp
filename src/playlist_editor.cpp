@@ -64,7 +64,7 @@ PlaylistEditor::PlaylistEditor()
 	RightColumnStartX = LeftColumnWidth+1;
 	RightColumnWidth = COLS-LeftColumnWidth-1;
 	
-	Playlists = NC::Menu<MPD::Playlist>(0, MainStartY, LeftColumnWidth, MainHeight, Config.titles_visibility ? "Playlists" : "", Config.main_color, NC::Border::None);
+	Playlists = NC::Menu<MPD::Playlist>(0, MainStartY, LeftColumnWidth, MainHeight, Config.titles_visibility ? "Playlists" : "", Config.main_color, NC::Border());
 	Playlists.setHighlightColor(Config.active_column_color);
 	Playlists.cyclicScrolling(Config.use_cyclic_scrolling);
 	Playlists.centeredCursor(Config.centered_cursor);
@@ -74,7 +74,7 @@ PlaylistEditor::PlaylistEditor()
 		menu << Charset::utf8ToLocale(menu.drawn()->value().path());
 	});
 	
-	Content = NC::Menu<MPD::Song>(RightColumnStartX, MainStartY, RightColumnWidth, MainHeight, Config.titles_visibility ? "Playlist content" : "", Config.main_color, NC::Border::None);
+	Content = NC::Menu<MPD::Song>(RightColumnStartX, MainStartY, RightColumnWidth, MainHeight, Config.titles_visibility ? "Playlist content" : "", Config.main_color, NC::Border());
 	Content.setHighlightColor(Config.main_highlight_color);
 	Content.cyclicScrolling(Config.use_cyclic_scrolling);
 	Content.centeredCursor(Config.centered_cursor);

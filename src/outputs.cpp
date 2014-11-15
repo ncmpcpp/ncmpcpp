@@ -38,7 +38,7 @@ using Global::myScreen;
 Outputs *myOutputs;
 
 Outputs::Outputs()
-: Screen(NC::Menu<MPD::Output>(0, MainStartY, COLS, MainHeight, "", Config.main_color, NC::Border::None))
+: Screen(NC::Menu<MPD::Output>(0, MainStartY, COLS, MainHeight, "", Config.main_color, NC::Border()))
 {
 	w.cyclicScrolling(Config.use_cyclic_scrolling);
 	w.centeredCursor(Config.centered_cursor);

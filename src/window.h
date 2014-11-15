@@ -30,6 +30,7 @@
 #include "curses.h"
 #include "gcc.h"
 
+#include <boost/optional.hpp>
 #include <functional>
 #include <list>
 #include <stack>
@@ -93,9 +94,6 @@
 #undef KEY_ENTER
 #define KEY_ENTER 13
 
-// undefine scroll macro as it collides with Window::scroll
-#undef scroll
-
 #if !defined(USE_PDCURSES) && NCURSES_MOUSE_VERSION == 1
 // NOTICE: define BUTTON5_PRESSED to be BUTTON2_PRESSED with additional mask
 // (I noticed that it sometimes returns 134217728 (2^27) instead of expected
@@ -103,10 +101,9 @@
 # define BUTTON5_PRESSED (BUTTON2_PRESSED | (1U << 27))
 #endif // !defined(USE_PDCURSES) && NCURSES_MOUSE_VERSION == 1
 
-// workaraund for win32
-#ifdef WIN32
-# define wcwidth(x) int(!iscntrl(x))
-#endif
+// undefine macros with colliding names
+#undef border
+#undef scroll
 
 /// NC namespace provides set of easy-to-use
 /// wrappers over original curses library.
@@ -196,6 +193,8 @@ private:
 
 std::istream &operator>>(std::istream &is, Color &f);
 
+typedef boost::optional<Color> Border;
+
 /// Terminal manipulation functions
 enum class TermManip { ClearToEOL };
 
@@ -208,18 +207,8 @@ enum class Format {
 	AltCharset, NoAltCharset
 };
 
-std::ostream &operator<<(std::ostream &os, Format f);
-
-/// Available border colors for window
-enum class Border { None, Black, Red, Green, Yellow, Blue, Magenta, Cyan, White };
-
-std::ostream &operator<<(std::ostream &os, Border b);
-std::istream &operator>>(std::istream &is, Border &b);
-
 /// This indicates how much the window has to be scrolled
 enum class Scroll { Up, Down, PageUp, PageDown, Home, End };
-
-std::ostream &operator<<(std::ostream &os, Scroll s);
 
 /// Initializes curses screen and sets some additional attributes
 /// @param enable_colors enables colors
@@ -262,7 +251,7 @@ struct Window
 		PromptHook m_hook;
 	};
 
-	Window() : m_window(0), m_border_window(0) { }
+	Window() : m_window(nullptr) { }
 	
 	/// Constructs an empty window with given parameters
 	/// @param startx X position of left upper corner of constructed window
@@ -273,7 +262,7 @@ struct Window
 	/// @param color base color of constructed window
 	/// @param border border of constructed window
 	Window(size_t startx, size_t starty, size_t width, size_t height,
-			const std::string &title, Color color, Border border);
+			std::string title, Color color, Border border);
 	
 	Window(const Window &rhs);
 	Window(Window &&rhs);
@@ -305,7 +294,7 @@ struct Window
 	const Color &getColor() const;
 	
 	/// @return current window's border
-	Border getBorder() const;
+	const Border &getBorder() const;
 	
 	/// @return current window's timeout
 	int getTimeout() const;
@@ -465,7 +454,6 @@ protected:
 	
 	/// internal WINDOW pointers
 	WINDOW *m_window;
-	WINDOW *m_border_window;
 	
 	/// start points and dimensions
 	size_t m_start_x;

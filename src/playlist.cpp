@@ -52,7 +52,7 @@ Playlist::Playlist()
 , m_timer(boost::posix_time::from_time_t(0))
 , m_reload_total_length(false), m_reload_remaining(false)
 {
-	w = NC::Menu<MPD::Song>(0, MainStartY, COLS, MainHeight, Config.playlist_display_mode == DisplayMode::Columns && Config.titles_visibility ? Display::Columns(COLS) : "", Config.main_color, NC::Border::None);
+	w = NC::Menu<MPD::Song>(0, MainStartY, COLS, MainHeight, Config.playlist_display_mode == DisplayMode::Columns && Config.titles_visibility ? Display::Columns(COLS) : "", Config.main_color, NC::Border());
 	w.cyclicScrolling(Config.use_cyclic_scrolling);
 	w.centeredCursor(Config.centered_cursor);
 	w.setHighlightColor(Config.main_highlight_color);

@@ -101,7 +101,7 @@ size_t SearchEngine::ResetButton = 16;
 size_t SearchEngine::SearchButton = 15;
 
 SearchEngine::SearchEngine()
-: Screen(NC::Menu<SEItem>(0, MainStartY, COLS, MainHeight, "", Config.main_color, NC::Border::None))
+: Screen(NC::Menu<SEItem>(0, MainStartY, COLS, MainHeight, "", Config.main_color, NC::Border()))
 {
 	w.setHighlightColor(Config.main_highlight_color);
 	w.cyclicScrolling(Config.use_cyclic_scrolling);

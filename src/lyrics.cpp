@@ -51,7 +51,7 @@ size_t Lyrics::itsWorkersNumber = 0;
 Lyrics *myLyrics;
 
 Lyrics::Lyrics()
-: Screen(NC::Scrollpad(0, MainStartY, COLS, MainHeight, "", Config.main_color, NC::Border::None))
+: Screen(NC::Scrollpad(0, MainStartY, COLS, MainHeight, "", Config.main_color, NC::Border()))
 , Reload(0),
 #ifdef HAVE_CURL_CURL_H
 isReadyToTake(0), isDownloadInProgress(0),

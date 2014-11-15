@@ -54,7 +54,7 @@ const SongInfo::Metadata SongInfo::Tags[] =
 };
 
 SongInfo::SongInfo()
-: Screen(NC::Scrollpad(0, MainStartY, COLS, MainHeight, "", Config.main_color, NC::Border::None))
+: Screen(NC::Scrollpad(0, MainStartY, COLS, MainHeight, "", Config.main_color, NC::Border()))
 { }
 
 void SongInfo::resize()

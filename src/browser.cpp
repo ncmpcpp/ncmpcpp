@@ -73,7 +73,7 @@ bool browserEntryMatcher(const boost::regex &rx, const MPD::Item &item, bool fil
 
 Browser::Browser() : m_local_browser(false), m_scroll_beginning(0), m_current_directory("/")
 {
-	w = NC::Menu<MPD::Item>(0, MainStartY, COLS, MainHeight, Config.browser_display_mode == DisplayMode::Columns && Config.titles_visibility ? Display::Columns(COLS) : "", Config.main_color, NC::Border::None);
+	w = NC::Menu<MPD::Item>(0, MainStartY, COLS, MainHeight, Config.browser_display_mode == DisplayMode::Columns && Config.titles_visibility ? Display::Columns(COLS) : "", Config.main_color, NC::Border());
 	w.setHighlightColor(Config.main_highlight_color);
 	w.cyclicScrolling(Config.use_cyclic_scrolling);
 	w.centeredCursor(Config.centered_cursor);

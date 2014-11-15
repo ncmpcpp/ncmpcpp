@@ -28,8 +28,6 @@
 
 NC::Color charToColor(char c);
 
-NC::Border stringToBorder(const std::string &border);
-
 std::string tagTypeToString(mpd_tag_type tag);
 MPD::MutableSong::SetFunction tagTypeToSetFunction(mpd_tag_type tag);
 

@@ -49,7 +49,7 @@ using Global::MainStartY;
 TinyTagEditor *myTinyTagEditor;
 
 TinyTagEditor::TinyTagEditor()
-: Screen(NC::Menu<NC::Buffer>(0, MainStartY, COLS, MainHeight, "", Config.main_color, NC::Border::None))
+: Screen(NC::Menu<NC::Buffer>(0, MainStartY, COLS, MainHeight, "", Config.main_color, NC::Border()))
 {
 	w.setHighlightColor(Config.main_highlight_color);
 	w.cyclicScrolling(Config.use_cyclic_scrolling);

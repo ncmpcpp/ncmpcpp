@@ -296,129 +296,6 @@ std::istream &operator>>(std::istream &is, Color &c)
 	return is;
 }
 
-std::ostream &operator<<(std::ostream &os, Format f)
-{
-	switch (f)
-	{
-		case Format::None:
-			os << "none";
-			break;
-		case Format::Bold:
-			os << "bold";
-			break;
-		case Format::NoBold:
-			os << "bold";
-			break;
-		case Format::Underline:
-			os << "underline";
-			break;
-		case Format::NoUnderline:
-			os << "no_underline";
-			break;
-		case Format::Reverse:
-			os << "reverse";
-			break;
-		case Format::NoReverse:
-			os << "no_reverse";
-			break;
-		case Format::AltCharset:
-			os << "alt_charset";
-			break;
-		case Format::NoAltCharset:
-			os << "no_alt_charset";
-			break;
-	}
-	return os;
-}
-
-std::ostream &operator<<(std::ostream &os, Border b)
-{
-	switch (b)
-	{
-		case Border::None:
-			os << "none";
-			break;
-		case Border::Black:
-			os << "black";
-			break;
-		case Border::Red:
-			os << "red";
-			break;
-		case Border::Green:
-			os << "green";
-			break;
-		case Border::Yellow:
-			os << "yellow";
-			break;
-		case Border::Blue:
-			os << "blue";
-			break;
-		case Border::Magenta:
-			os << "magenta";
-			break;
-		case Border::Cyan:
-			os << "cyan";
-			break;
-		case Border::White:
-			os << "white";
-			break;
-	}
-	return os;
-}
-
-std::istream &operator>>(std::istream &is, Border &b)
-{
-	std::string sb;
-	is >> sb;
-	if (sb == "none")
-		b = Border::None;
-	else if (sb == "black")
-		b = Border::Black;
-	else if (sb == "red")
-		b = Border::Red;
-	else if (sb == "green")
-		b = Border::Green;
-	else if (sb == "yellow")
-		b = Border::Yellow;
-	else if (sb == "blue")
-		b = Border::Blue;
-	else if (sb == "magenta")
-		b = Border::Magenta;
-	else if (sb == "cyan")
-		b = Border::Cyan;
-	else if (sb == "white")
-		b = Border::White;
-	else
-		is.setstate(std::ios::failbit);
-	return is;
-}
-
-std::ostream &operator<<(std::ostream &os, Scroll s)
-{
-	switch (s)
-	{
-		case Scroll::Up:
-			os << "scroll_up";
-			break;
-		case Scroll::Down:
-			os << "scroll_down";
-			break;
-		case Scroll::PageUp:
-			os << "scroll_page_up";
-			break;
-		case Scroll::PageDown:
-			os << "scroll_page_down";
-			break;
-		case Scroll::Home:
-			os << "scroll_home";
-			break;
-		case Scroll::End:
-			os << "scroll_end";
-			break;
-	}
-	return os;
-}
-
 void initScreen(bool enable_colors)
 {
 	initscr();
@@ -475,11 +352,10 @@ Window::Window(size_t startx,
 		size_t starty,
 		size_t width,
 		size_t height,
-		const std::string &title,
+		std::string title,
 		Color color,
 		Border border)
-		: m_window(0),
-		m_border_window(0),
+		: m_window(nullptr),
 		m_start_x(startx),
 		m_start_y(starty),
 		m_width(width),
@@ -487,9 +363,9 @@ Window::Window(size_t startx,
 		m_window_timeout(-1),
 		m_color(color),
 		m_base_color(color),
-		m_border(border),
+		m_border(std::move(border)),
 		m_prompt_hook(0),
-		m_title(title),
+		m_title(std::move(title)),
 		m_bold_counter(0),
 		m_underline_counter(0),
 		m_reverse_counter(0),
@@ -499,15 +375,12 @@ Window::Window(size_t startx,
 	||  m_start_y > size_t(LINES)
 	||  m_width+m_start_x > size_t(COLS)
 	||  m_height+m_start_y > size_t(LINES))
-		FatalError("Constructed window is bigger than terminal size");
+		throw std::logic_error("constructed window doesn't fit into the terminal");
 	
-	if (m_border != Border::None)
+	if (m_border)
 	{
-		m_border_window = newpad(m_height, m_width);
-		wattron(m_border_window, COLOR_PAIR(int(m_border)));
-		box(m_border_window, 0, 0);
-		m_start_x++;
-		m_start_y++;
+		++m_start_x;
+		++m_start_y;
 		m_width -= 2;
 		m_height -= 2;
 	}
@@ -525,7 +398,6 @@ Window::Window(size_t startx,
 
 Window::Window(const Window &rhs)
 : m_window(dupwin(rhs.m_window))
-, m_border_window(dupwin(rhs.m_border_window))
 , m_start_x(rhs.m_start_x)
 , m_start_y(rhs.m_start_y)
 , m_width(rhs.m_width)
@@ -548,7 +420,6 @@ Window::Window(const Window &rhs)
 
 Window::Window(Window &&rhs)
 : m_window(rhs.m_window)
-, m_border_window(rhs.m_border_window)
 , m_start_x(rhs.m_start_x)
 , m_start_y(rhs.m_start_y)
 , m_width(rhs.m_width)
@@ -567,14 +438,12 @@ Window::Window(Window &&rhs)
 , m_reverse_counter(rhs.m_reverse_counter)
 , m_alt_charset_counter(rhs.m_alt_charset_counter)
 {
-	rhs.m_window = 0;
-	rhs.m_border_window = 0;
+	rhs.m_window = nullptr;
 }
 
 Window &Window::operator=(Window rhs)
 {
 	std::swap(m_window, rhs.m_window);
-	std::swap(m_border_window, rhs.m_border_window);
 	std::swap(m_start_x, rhs.m_start_x);
 	std::swap(m_start_y, rhs.m_start_y);
 	std::swap(m_width, rhs.m_width);
@@ -598,7 +467,6 @@ Window &Window::operator=(Window rhs)
 Window::~Window()
 {
 	delwin(m_window);
-	delwin(m_border_window);
 }
 
 void Window::setColor(Color c)
@@ -623,41 +491,28 @@ void Window::setBaseColor(Color c)
 
 void Window::setBorder(Border border)
 {
-	if (border == Border::None && m_border != Border::None)
+	if (!border && m_border)
 	{
-		delwin(m_border_window);
-		m_start_x--;
-		m_start_y--;
+		--m_start_x;
+		--m_start_y;
 		m_height += 2;
 		m_width += 2;
 		recreate(m_width, m_height);
 	}
-	else if (border != Border::None && m_border == Border::None)
+	else if (border && !m_border)
 	{
-		m_border_window = newpad(m_height, m_width);
-		wattron(m_border_window, COLOR_PAIR(int(border)));
-		box(m_border_window,0,0);
-		m_start_x++;
-		m_start_y++;
+		++m_start_x;
+		++m_start_y;
 		m_height -= 2;
 		m_width -= 2;
 		recreate(m_width, m_height);
-	}
-	else
-	{
-		wattron(m_border_window,COLOR_PAIR(int(border)));
-		box(m_border_window, 0, 0);
 	}
 	m_border = border;
 }
 
 void Window::setTitle(const std::string &new_title)
 {
-	if (m_title == new_title)
-	{
-		return;
-	}
-	else if (!new_title.empty() && m_title.empty())
+	if (!new_title.empty() && m_title.empty())
 	{
 		m_start_y += 2;
 		m_height -= 2;
@@ -685,10 +540,10 @@ void Window::moveTo(size_t new_x, size_t new_y)
 {
 	m_start_x = new_x;
 	m_start_y = new_y;
-	if (m_border != Border::None)
+	if (m_border)
 	{
-		m_start_x++;
-		m_start_y++;
+		++m_start_x;
+		++m_start_y;
 	}
 	if (!m_title.empty())
 		m_start_y += 2;
@@ -696,12 +551,8 @@ void Window::moveTo(size_t new_x, size_t new_y)
 
 void Window::adjustDimensions(size_t width, size_t height)
 {
-	if (m_border != Border::None)
+	if (m_border)
 	{
-		delwin(m_border_window);
-		m_border_window = newpad(height, width);
-		wattron(m_border_window, COLOR_PAIR(int(m_border)));
-		box(m_border_window, 0, 0);
 		width -= 2;
 		height -= 2;
 	}
@@ -719,20 +570,42 @@ void Window::resize(size_t new_width, size_t new_height)
 
 void Window::refreshBorder() const
 {
-	if (m_border != Border::None)
-		prefresh(m_border_window, 0, 0, getStarty(), getStartX(), m_start_y+m_height, m_start_x+m_width);
+	if (m_border)
+	{
+		size_t start_x = getStartX(), start_y = getStarty();
+		size_t width = getWidth(), height = getHeight();
+		color_set(m_border->pairNumber(), nullptr);
+		attron(A_ALTCHARSET);
+		// corners
+		mvaddch(start_y, start_x, 'l');
+		mvaddch(start_y, start_x+width-1, 'k');
+		mvaddch(start_y+height-1, start_x, 'm');
+		mvaddch(start_y+height-1, start_x+width-1, 'j');
+		// lines
+		mvhline(start_y, start_x+1, 'q', width-2);
+		mvhline(start_y+height-1, start_x+1, 'q', width-2);
+		mvvline(start_y+1, start_x, 'x', height-2);
+		mvvline(start_y+1, start_x+width-1, 'x', height-2);
+		if (!m_title.empty())
+		{
+			mvaddch(start_y+2, start_x, 't');
+			mvaddch(start_y+2, start_x+width-1, 'u');
+		}
+		attroff(A_ALTCHARSET);
+	}
+	else
+		color_set(m_base_color.pairNumber(), nullptr);
 	if (!m_title.empty())
 	{
-		if (m_border != Border::None)
-			attron(COLOR_PAIR(int(m_border)));
-		else
-			wcolor_set(m_border_window, m_base_color.pairNumber(), nullptr);
-		mvhline(m_start_y-1, m_start_x, 0, m_width);
+		// clear title line
+		mvhline(m_start_y-2, m_start_x, ' ', m_width);
 		attron(A_BOLD);
-		mvhline(m_start_y-2, m_start_x, 32, m_width); // clear title line
 		mvaddstr(m_start_y-2, m_start_x, m_title.c_str());
-		attroff(COLOR_PAIR(int(m_border)) | A_BOLD);
+		attroff(A_BOLD);
+		// add separator
+		mvhline(m_start_y-1, m_start_x, 0, m_width);
 	}
+	standend();
 	::refresh();
 }
 
@@ -936,7 +809,7 @@ bool Window::runPromptHook(const char *arg, bool *done) const
 
 size_t Window::getWidth() const
 {
-	if (m_border != Border::None)
+	if (m_border)
 		return m_width+2;
 	else
 		return m_width;
@@ -945,7 +818,7 @@ size_t Window::getWidth() const
 size_t Window::getHeight() const
 {
 	size_t height = m_height;
-	if (m_border != Border::None)
+	if (m_border)
 		height += 2;
 	if (!m_title.empty())
 		height += 2;
@@ -954,7 +827,7 @@ size_t Window::getHeight() const
 
 size_t Window::getStartX() const
 {
-	if (m_border != Border::None)
+	if (m_border)
 		return m_start_x-1;
 	else
 		return m_start_x;
@@ -963,8 +836,8 @@ size_t Window::getStartX() const
 size_t Window::getStarty() const
 {
 	size_t starty = m_start_y;
-	if (m_border != Border::None)
-		starty--;
+	if (m_border)
+		--starty;
 	if (!m_title.empty())
 		starty -= 2;
 	return starty;
@@ -980,7 +853,7 @@ const Color &Window::getColor() const
 	return m_color;
 }
 
-Border Window::getBorder() const
+const Border &Window::getBorder() const
 {
 	return m_border;
 }

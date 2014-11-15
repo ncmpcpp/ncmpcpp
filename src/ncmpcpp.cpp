@@ -118,11 +118,11 @@ int main(int argc, char **argv)
 	Actions::validateScreenSize();
 	Actions::initializeScreens();
 	
-	wHeader = new NC::Window(0, 0, COLS, Actions::HeaderHeight, "", Config.header_color, NC::Border::None);
+	wHeader = new NC::Window(0, 0, COLS, Actions::HeaderHeight, "", Config.header_color, NC::Border());
 	if (Config.header_visibility || Config.design == Design::Alternative)
 		wHeader->display();
 	
-	wFooter = new NC::Window(0, Actions::FooterStartY, COLS, Actions::FooterHeight, "", Config.statusbar_color, NC::Border::None);
+	wFooter = new NC::Window(0, Actions::FooterStartY, COLS, Actions::FooterHeight, "", Config.statusbar_color, NC::Border());
 	wFooter->setPromptHook(Statusbar::Helpers::mainHook);
 	
 	// initialize global timer

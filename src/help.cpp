@@ -450,7 +450,7 @@ void write_bindings(NC::Scrollpad &w)
 }
 
 Help::Help()
-: Screen(NC::Scrollpad(0, MainStartY, COLS, MainHeight, "", Config.main_color, NC::Border::None))
+: Screen(NC::Scrollpad(0, MainStartY, COLS, MainHeight, "", Config.main_color, NC::Border()))
 {
 	write_bindings(w);
 	w.flush();

@@ -63,7 +63,7 @@ const NC::Color &toColor(size_t number, size_t max, bool wrap = true)
 }
 
 Visualizer::Visualizer()
-: Screen(NC::Window(0, MainStartY, COLS, MainHeight, "", NC::Color::Default, NC::Border::None))
+: Screen(NC::Window(0, MainStartY, COLS, MainHeight, "", NC::Color::Default, NC::Border()))
 {
 	ResetFD();
 	m_samples = 44100/fps;
