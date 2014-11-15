@@ -173,7 +173,7 @@ option_parser::worker buffer(NC::Buffer &arg, ValueT &&value, TransformT &&map)
 
 }
 
-bool Configuration::read(const std::string &config_path)
+bool Configuration::read(const std::vector<std::string> &config_paths)
 {
 	std::string mpd_host;
 	unsigned mpd_port;
@@ -653,8 +653,16 @@ bool Configuration::read(const std::string &config_path)
 		active_window_border, NC::Border::Red
 	));
 
-	std::ifstream f(config_path);
-	return p.run(f);
+	return std::all_of(
+		config_paths.begin(),
+		config_paths.end(),
+		[&p](const std::string &config_path) {
+			std::ifstream f(config_path);
+			if (f.is_open())
+				std::clog << "Reading configuration from " << config_path << "...\n";
+			return p.run(f);
+		}
+	);
 }
 
 /* vim: set tabstop=4 softtabstop=4 shiftwidth=4 noexpandtab : */

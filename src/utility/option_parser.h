@@ -106,8 +106,18 @@ struct option_parser
 			m_defined = true;
 		}
 
-		bool defined() const { return m_defined; }
-		void run_default() const { m_default(); }
+		bool defined() const
+		{
+			return m_defined;
+		}
+
+		void run_default()
+		{
+			if (m_defined)
+				throw std::runtime_error("option already defined");
+			m_default();
+			m_defined = true;
+		}
 
 	private:
 		bool m_defined;

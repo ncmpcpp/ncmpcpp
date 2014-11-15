@@ -18,6 +18,7 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
+#include <algorithm>
 #include <boost/filesystem/operations.hpp>
 #include <boost/program_options.hpp>
 #include <iostream>
@@ -27,6 +28,7 @@
 #include "config.h"
 #include "mpdpp.h"
 #include "settings.h"
+#include "utility/string.h"
 
 namespace po = boost::program_options;
 
@@ -37,23 +39,45 @@ namespace {
 
 const char *env_home;
 
+std::string xdg_config_home()
+{
+	std::string result;
+	const char *env_xdg_config_home = getenv("XDG_CONFIG_HOME");
+	if (env_xdg_config_home == nullptr)
+		result = "~/.config/ncmpcpp/";
+	else
+	{
+		result = env_xdg_config_home;
+		if (!result.empty() && result.back() != '/')
+			result += "/";
+	}
+	return result;
+}
+
 }
 
 void expand_home(std::string &path)
 {
+	assert(env_home != nullptr);
 	if (!path.empty() && path[0] == '~')
 		path.replace(0, 1, env_home);
 }
 
 bool configure(int argc, char **argv)
 {
-	std::string bindings_path, config_path;
+	const std::vector<std::string> default_config_paths = {
+		"~/.ncmpcpp/config",
+		xdg_config_home() + "config"
+	};
+
+	std::string bindings_path;
+	std::vector<std::string> config_paths;
 
 	po::options_description options("Options");
 	options.add_options()
 		("host,h", po::value<std::string>()->default_value("localhost"), "connect to server at host")
 		("port,p", po::value<int>()->default_value(6600), "connect to server at port")
-		("config,c", po::value<std::string>(&config_path)->default_value("~/.ncmpcpp/config"), "specify configuration file")
+		("config,c", po::value<std::vector<std::string>>(&config_paths)->default_value(default_config_paths, join<std::string>(default_config_paths, " AND ")), "specify configuration file(s)")
 		("bindings,b", po::value<std::string>(&bindings_path)->default_value("~/.ncmpcpp/bindings"), "specify bindings file")
 		("screen,s", po::value<std::string>(), "specify initial screen")
 		("slave-screen,S", po::value<std::string>(), "specify initial slave screen")
@@ -120,7 +144,6 @@ bool configure(int argc, char **argv)
 		}
 
 		po::notify(vm);
-
 		// get home directory
 		env_home = getenv("HOME");
 		if (env_home == nullptr)
@@ -130,8 +153,8 @@ bool configure(int argc, char **argv)
 		}
 
 		// read configuration
-		expand_home(config_path);
-		if (Config.read(config_path) == false)
+		std::for_each(config_paths.begin(), config_paths.end(), expand_home);
+		if (Config.read(config_paths) == false)
 			exit(1);
 
 		// if bindings file was not specified, use the one from main directory.

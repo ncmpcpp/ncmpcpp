@@ -9,6 +9,7 @@ ncmpcpp-0.7 (????-??-??)
 * List filtering has been removed due to the major part of its functionality overlapping with find forward/backward.
 * Find backward/forward function is now incremental.
 * Support for 256 colors and customization of background colors has been added.
+* Multiple configuration files via command line arguments are now accepted. In addition, by default ncmpcpp attempts to read both $HOME/.ncmpcpp/config and $XDG_CONFIG_HOME/ncmpcpp/config (in this order).
 
 ncmpcpp-0.6.2 (????-??-??)
 

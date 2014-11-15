@@ -32,8 +32,8 @@ template <size_t N> size_t const_strlen(const char (&)[N]) {
 }
 
 // it's present in boost for std::string, but we want more general version.
-template <typename CollectionT, typename StringT>
-StringT join(CollectionT &&collection, StringT &&separator)
+template <typename StringT, typename CollectionT>
+StringT join(const CollectionT &collection, const StringT &separator)
 {
 	StringT result;
 	auto first = std::begin(collection), last = std::end(collection);

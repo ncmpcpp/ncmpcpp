@@ -31,7 +31,7 @@ Display help.
 Display version information.
 .TP
 .SH "CONFIGURATION"
-When ncmpcpp starts, it tries to read user's settings from the ~/.ncmpcpp/config file. If no user's configuration is found, ncmpcpp uses its default configuration. An example configuration file containing all default values is provided with ncmpcpp and can be usually found in /usr/share/doc/ncmpcpp (exact location may depend on used distribution or configure prefix).
+When ncmpcpp starts, it tries to read user's settings from $HOME/.ncmpcpp/config and $XDG_CONFIG_HOME/ncmpcpp/config files. If no configuration is found, ncmpcpp uses its default configuration. An example configuration file containing all default values is provided with ncmpcpp and can be usually found in /usr/share/doc/ncmpcpp (exact location may depend on used distribution or configure prefix).
 
 Note: Configuration option values can either be enclosed in quotation marks or not.
  - If they are enclosed, the leftmost and the rightmost quotation marks are treated as delimiters, therefore it is not necessary to escape quotation marks you use within the value itself.
