@@ -1973,9 +1973,10 @@ void AddRandomItems::run()
 		Statusbar::put() << "Add random? "
 		<< "[" << NC::Format::Bold << 's' << NC::Format::NoBold << "ongs"
 		<< "/" << NC::Format::Bold << 'a' << NC::Format::NoBold << "rtists"
+		<< "/" << "album" << NC::Format::Bold << 'A' << NC::Format::NoBold << "rtists"
 		<< "/" << "al" << NC::Format::Bold << 'b' << NC::Format::NoBold << "ums"
 		<< "] ";
-		rnd_type = Statusbar::Helpers::promptReturnOneOf({"s", "a", "b"})[0];
+		rnd_type = Statusbar::Helpers::promptReturnOneOf({"s", "a", "A", "b"})[0];
 	}
 
 	mpd_tag_type tag_type = MPD_TAG_ARTIST;
