@@ -1,4 +1,4 @@
-ncmpcpp-0.6.2 (????-??-??)
+ncmpcpp-0.6.2 (2014-12-13)
 
 * Delete key now aditionally binds by default to action that deletes files in browser.
 * Fix incremental seeking so that it doesn't reset after 30 seconds.
