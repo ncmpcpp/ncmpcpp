@@ -88,25 +88,46 @@ std::string playerStateToString(MPD::PlayerState ps)
 	switch (ps)
 	{
 		case MPD::psUnknown:
-			result = "[unknown]";
+			switch (Config.design)
+			{
+				case Design::Alternative:
+					result = "[unknown]";
+					break;
+				case Design::Classic:
+					break;
+			}
 			break;
 		case MPD::psPlay:
-			if (Config.design == Design::Alternative)
-				result = "[playing]";
-			else
-				result = "Playing: ";
+			switch (Config.design)
+			{
+				case Design::Alternative:
+					result = "[playing]";
+					break;
+				case Design::Classic:
+					result = "Playing:";
+					break;
+			}
 			break;
 		case MPD::psPause:
-			if (Config.design == Design::Alternative)
-				result = "[paused] ";
-			else
-				result = "[Paused] ";
+			switch (Config.design)
+			{
+				case Design::Alternative:
+					result = "[paused]";
+					break;
+				case Design::Classic:
+					result = "Paused:";
+					break;
+			}
 			break;
 		case MPD::psStop:
-			if (Config.design == Design::Alternative)
-				result = "[stopped]";
-			break;
-		default:
+			switch (Config.design)
+			{
+				case Design::Alternative:
+					result = "[stopped]";
+					break;
+				case Design::Classic:
+					break;
+			}
 			break;
 	}
 	return result;
@@ -568,11 +589,11 @@ void Status::Changes::elapsedTime(bool update_elapsed)
 			{
 				if (Config.display_bitrate && m_kbps)
 				{
-					tracklength += " [";
+					tracklength += "(";
 					tracklength += boost::lexical_cast<std::string>(m_kbps);
-					tracklength += " kbps]";
+					tracklength += " kbps) ";
 				}
-				tracklength += " [";
+				tracklength += "[";
 				if (m_total_time)
 				{
 					if (Config.display_remaining_time)
@@ -584,17 +605,14 @@ void Status::Changes::elapsedTime(bool update_elapsed)
 						tracklength += MPD::Song::ShowTime(m_elapsed_time);
 					tracklength += "/";
 					tracklength += MPD::Song::ShowTime(m_total_time);
-					tracklength += "]";
 				}
 				else
-				{
 					tracklength += MPD::Song::ShowTime(m_elapsed_time);
-					tracklength += "]";
-				}
+				tracklength += "]";
 				NC::WBuffer np_song;
 				Format::print(Config.song_status_wformat, np_song, &np);
-				*wFooter << NC::XY(0, 1) << NC::TermManip::ClearToEOL << NC::Format::Bold << ps << NC::Format::NoBold;
-				writeCyclicBuffer(np_song, *wFooter, playing_song_scroll_begin, wFooter->getWidth()-ps.length()-tracklength.length(), L" ** ");
+				*wFooter << NC::XY(0, 1) << NC::TermManip::ClearToEOL << NC::Format::Bold << ps << ' ' << NC::Format::NoBold;
+				writeCyclicBuffer(np_song, *wFooter, playing_song_scroll_begin, wFooter->getWidth()-ps.length()-tracklength.length()-2, L" ** ");
 				*wFooter << NC::Format::Bold << NC::XY(wFooter->getWidth()-tracklength.length(), 1) << tracklength << NC::Format::NoBold;
 			}
 			break;
@@ -614,9 +632,9 @@ void Status::Changes::elapsedTime(bool update_elapsed)
 			// bitrate here doesn't look good, but it can be moved somewhere else later
 			if (Config.display_bitrate && m_kbps)
 			{
-				tracklength += " ";
+				tracklength += " (";
 				tracklength += boost::lexical_cast<std::string>(m_kbps);
-				tracklength += " kbps";
+				tracklength += " kbps)";
 			}
 
 			NC::WBuffer first, second;
@@ -715,10 +733,10 @@ void Status::Changes::mixer()
 	switch (Config.design)
 	{
 		case Design::Classic:
-			VolumeState = " " "Volume" ": ";
+			VolumeState = " Volume: ";
 			break;
 		case Design::Alternative:
-			VolumeState = " " "Vol" ": ";
+			VolumeState = " Vol: ";
 			break;
 	}
 	if (m_volume < 0)
