@@ -1,3 +1,7 @@
+ncmpcpp-0.6.3 (????-??-??)
+
+* Fix floating point exception when adding a specific number of random items.
+
 ncmpcpp-0.6.2 (2014-12-13)
 
 * Delete key now aditionally binds by default to action that deletes files in browser.
