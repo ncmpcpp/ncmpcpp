@@ -531,7 +531,7 @@ bool Connection::AddRandomTag(mpd_tag_type tag, size_t number)
 		return false;
 
 	std::random_shuffle(tags.begin(), tags.end());
-	auto it = tags.begin()+rand()%(tags.size()-number);
+    auto it = tags.begin();
 	for (size_t i = 0; i < number && it != tags.end(); ++i)
 	{
 		StartSearch(true);
