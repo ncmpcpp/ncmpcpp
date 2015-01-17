@@ -418,7 +418,7 @@ void Visualizer::DrawFrequencySpectrum(int16_t *buf, ssize_t samples, size_t y_o
 		for (int j = 0; j < bins_per_bar; ++j)
 			bar_height += m_freq_magnitudes[x*bins_per_bar+j];
 		// buff higher frequencies
-		bar_height *= log2(2 + x);
+		bar_height *= log2(2 + x) * 100.0/win_width;
 		// moderately normalize the heights
 		bar_height = pow(bar_height, 0.5);
 

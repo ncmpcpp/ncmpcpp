@@ -2,6 +2,7 @@ ncmpcpp-0.7 (????-??-??)
 
 * Visualizer has now support for multiple colors (visualizer_color configuration variable takes the list of colors to be used).
 * Visualizer has now support for two more modes: sound wave filled and sound ellipse.
+* Visualizer's spectrum mode now scales better along with window's width.
 * It is now possible to abort the current action using Ctrl-C or Ctrl-G in prompt mode. As a result, empty value is no longer a special value that aborts most of the actions.
 * Directories and playlists in browser can now be sorted by modification time.
 * ~ is now expanded to home directory in mpd_host configuration variable.
