@@ -13,9 +13,14 @@ ncmpcpp-0.7 (????-??-??)
 * Multiple configuration files via command line arguments are now accepted. In addition, by default ncmpcpp attempts to read both $HOME/.ncmpcpp/config and $XDG_CONFIG_HOME/ncmpcpp/config (in this order).
 * Support for PDCurses has been removed due to the library being unmaintained and buggy.
 
-ncmpcpp-0.6.2 (????-??-??)
+ncmpcpp-0.6.3 (????-??-??)
+
+* Fix floating point exception when adding a specific number of random items.
+
+ncmpcpp-0.6.2 (2014-12-13)
 
 * Delete key now aditionally binds by default to action that deletes files in browser.
+* Fix incremental seeking so that it doesn't reset after 30 seconds.
 
 ncmpcpp-0.6.1 (2014-11-06)
 

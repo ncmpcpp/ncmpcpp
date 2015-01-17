@@ -2623,7 +2623,7 @@ void seek()
 		Status::trace();
 		
 		unsigned howmuch = Config.incremental_seeking
-		                 ? (Timer-t).seconds()/2+Config.seek_time
+		                 ? (Timer-t).total_seconds()/2+Config.seek_time
 		                 : Config.seek_time;
 		
 		Key input = Key::read(*wFooter);
