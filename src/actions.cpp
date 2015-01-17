@@ -379,11 +379,11 @@ void ScrollUpArtist::run()
 		std::string artist = s->getArtist();
 		while (pos > 0)
 		{
-			myScreen->scroll(NC::Scroll::Up);
 			s = pl.getSong(--pos);
 			if (!s || s->getArtist() != artist)
 				break;
 		}
+		pl.highlight(pos);
 	}
 }
 
@@ -404,11 +404,11 @@ void ScrollUpAlbum::run()
 		std::string album = s->getAlbum();
 		while (pos > 0)
 		{
-			myScreen->scroll(NC::Scroll::Up);
 			s = pl.getSong(--pos);
 			if (!s || s->getAlbum() != album)
 				break;
 		}
+		pl.highlight(pos);
 	}
 }
 
@@ -429,11 +429,11 @@ void ScrollDownArtist::run()
 		std::string artist = s->getArtist();
 		while (pos < pl.size() - 1)
 		{
-			myScreen->scroll(NC::Scroll::Down);
 			s = pl.getSong(++pos);
 			if (!s || s->getArtist() != artist)
 				break;
 		}
+		pl.highlight(pos);
 	}
 }
 
@@ -454,11 +454,11 @@ void ScrollDownAlbum::run()
 		std::string album = s->getAlbum();
 		while (pos < pl.size() - 1)
 		{
-			myScreen->scroll(NC::Scroll::Down);
 			s = pl.getSong(++pos);
 			if (!s || s->getAlbum() != album)
 				break;
 		}
+		pl.highlight(pos);
 	}
 }
 

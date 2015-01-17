@@ -43,6 +43,7 @@ class ProxySongList
 		virtual bool empty() = 0;
 		virtual size_t size() = 0;
 		virtual size_t choice() = 0;
+		virtual void highlight(size_t pos) = 0;
 		
 		virtual bool isSelected(size_t pos) = 0;
 		virtual void setSelected(size_t pos, bool selected) = 0;
@@ -64,6 +65,7 @@ class ProxySongList
 		virtual bool empty() { return m_menu.empty(); }
 		virtual size_t size() { return m_menu.size(); }
 		virtual size_t choice() { return m_menu.choice(); }
+		virtual void highlight(size_t pos) { m_menu.highlight(pos); }
 		
 		virtual bool isSelected(size_t pos) {
 			assert(pos < m_menu.size());
@@ -110,6 +112,7 @@ public:
 	bool empty() const { return m_impl->empty(); }
 	size_t size() const { return m_impl->size(); }
 	size_t choice() const { return m_impl->choice(); }
+	void highlight(size_t pos) const { m_impl->highlight(pos); }
 	
 	bool isSelected(size_t pos) const { return m_impl->isSelected(pos); }
 	void setSelected(size_t pos, bool selected) const { m_impl->setSelected(pos, selected); }
