@@ -44,7 +44,7 @@ std::string xdg_config_home()
 	std::string result;
 	const char *env_xdg_config_home = getenv("XDG_CONFIG_HOME");
 	if (env_xdg_config_home == nullptr)
-		result = "~/.config/ncmpcpp/";
+		result = "~/.config/";
 	else
 	{
 		result = env_xdg_config_home;
@@ -67,7 +67,7 @@ bool configure(int argc, char **argv)
 {
 	const std::vector<std::string> default_config_paths = {
 		"~/.ncmpcpp/config",
-		xdg_config_home() + "config"
+		xdg_config_home() + "ncmpcpp/config"
 	};
 
 	std::string bindings_path;
