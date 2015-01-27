@@ -140,6 +140,7 @@ struct option_parser
 	}
 
 	bool run(std::istream &is);
+	bool initialize_undefined();
 
 private:
 	std::unordered_map<std::string, worker> m_parsers;

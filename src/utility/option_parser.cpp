@@ -66,6 +66,11 @@ bool option_parser::run(std::istream &is)
 			}
 		}
 	}
+	return true;
+}
+
+bool option_parser::initialize_undefined()
+{
 	for (auto &p : m_parsers)
 	{
 		if (!p.second.defined())
@@ -73,7 +78,7 @@ bool option_parser::run(std::istream &is)
 			try {
 				p.second.run_default();
 			} catch (std::exception &e) {
-				std::cerr << "Error while finalizing option \"" << p.first << "\": " << e.what() << "\n";
+				std::cerr << "Error while initializing option \"" << p.first << "\": " << e.what() << "\n";
 				return false;
 			}
 		}

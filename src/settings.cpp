@@ -678,7 +678,7 @@ bool Configuration::read(const std::vector<std::string> &config_paths)
 				std::clog << "Reading configuration from " << config_path << "...\n";
 			return p.run(f);
 		}
-	);
+	) && p.initialize_undefined();
 }
 
 /* vim: set tabstop=4 softtabstop=4 shiftwidth=4 noexpandtab : */
