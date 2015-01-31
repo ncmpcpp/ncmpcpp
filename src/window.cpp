@@ -64,7 +64,7 @@ int read_key(FILE *)
 			if (done)
 			{
 				rl_done = 1;
-				return 0;
+				return EOF;
 			}
 			w->goToXY(x, start_y);
 		}
