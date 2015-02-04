@@ -315,6 +315,10 @@ void initScreen(bool enable_colors)
 	noecho();
 	curs_set(0);
 
+	// initialize readline (needed, otherwise we get segmentation
+	// fault on SIGWINCH). also, initialize first as doing this
+	// later erases keys bound with rl_bind_key for some users.
+	rl_initialize();
 	// disable autocompletion
 	rl_attempted_completion_function = [](const char *, int, int) -> char ** {
 		rl_attempted_completion_over = 1;
@@ -337,9 +341,6 @@ void initScreen(bool enable_colors)
 	rl_getc_function = rl::read_key;
 	rl_redisplay_function = rl::display_string;
 	rl_startup_hook = rl::add_base;
-	// initialize readline (needed, otherwise
-	// we get segmentation fault on SIGWINCH).
-	rl_initialize();
 }
 
 void destroyScreen()
