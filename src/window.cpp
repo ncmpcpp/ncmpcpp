@@ -820,7 +820,7 @@ std::string Window::getString(const std::string &base, size_t width, bool encryp
 	curs_set(0);
 	if (input != nullptr)
 	{
-		if (input[0] != 0)
+		if (!encrypted && input[0] != 0)
 			add_history(input);
 		result = input;
 		free(input);

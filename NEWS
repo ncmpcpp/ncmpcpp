@@ -1,6 +1,7 @@
 ncmpcpp-0.6.3 (????-??-??)
 
 * Fix floating point exception when adding a specific number of random items.
+* Passwords are no longer added to the input history.
 
 ncmpcpp-0.6.2 (2014-12-13)
 
