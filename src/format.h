@@ -40,11 +40,11 @@ const unsigned Tag = 8;
 const unsigned All = Color | Format | OutputSwitch | Tag;
 }
 
-enum class ListType { All, Any, AST };
+enum class ListType { Group, FirstOf, AST };
 
 template <ListType, typename> struct List;
-template <typename CharT> using All = List<ListType::All, CharT>;
-template <typename CharT> using Any = List<ListType::Any, CharT>;
+template <typename CharT> using Group = List<ListType::Group, CharT>;
+template <typename CharT> using FirstOf = List<ListType::FirstOf, CharT>;
 template <typename CharT> using AST = List<ListType::AST, CharT>;
 
 struct OutputSwitch { };
@@ -63,6 +63,41 @@ private:
 	unsigned m_delimiter;
 };
 
+enum class Result { Empty, Missing, Ok };
+
+// Commutative binary operation such that:
+// - Empty + Empty = Empty
+// - Empty + Missing = Missing
+// - Empty + Ok = Ok
+// - Missing + Missing = Missing
+// - Missing + Ok = Missing
+// - Ok + Ok = Ok
+inline Result &operator+=(Result &base, Result result)
+{
+	if (base == Result::Missing || result == Result::Missing)
+		base = Result::Missing;
+	else if (base == Result::Ok || result == Result::Ok)
+		base = Result::Ok;
+	return base;
+}
+
+/*inline std::ostream &operator<<(std::ostream &os, Result r)
+{
+	switch (r)
+	{
+		case Result::Empty:
+			os << "empty";
+			break;
+		case Result::Missing:
+			os << "missing";
+			break;
+		case Result::Ok:
+			os << "ok";
+			break;
+	}
+	return os;
+}*/
+
 template <typename CharT>
 using Expression = boost::variant<
 	std::basic_string<CharT>,
@@ -70,8 +105,8 @@ using Expression = boost::variant<
 	NC::Format,
 	OutputSwitch,
 	SongTag,
-	boost::recursive_wrapper<Any<CharT>>,
-	boost::recursive_wrapper<All<CharT>>
+	boost::recursive_wrapper<FirstOf<CharT>>,
+	boost::recursive_wrapper<Group<CharT>>
 >;
 
 template <ListType Type, typename CharT>
@@ -92,7 +127,7 @@ private:
 };
 
 template <typename CharT, typename OutputT, typename SecondOutputT = OutputT>
-struct Printer: boost::static_visitor<bool>
+struct Printer: boost::static_visitor<Result>
 {
 	typedef std::basic_string<CharT> StringT;
 
@@ -105,34 +140,39 @@ struct Printer: boost::static_visitor<bool>
 	, m_flags(flags)
 	{ }
 
-	bool operator()(const StringT &s)
+	Result operator()(const StringT &s)
 	{
-		output(s);
-		return true;
+		if (!s.empty())
+		{
+			output(s);
+			return Result::Ok;
+		}
+		else
+			return Result::Empty;
 	}
 
-	bool operator()(const NC::Color &c)
+	Result operator()(const NC::Color &c)
 	{
 		if (m_flags & Flags::Color)
 			output(c);
-		return true;
+		return Result::Empty;
 	}
 
-	bool operator()(NC::Format fmt)
+	Result operator()(NC::Format fmt)
 	{
 		if (m_flags & Flags::Format)
 			output(fmt);
-		return true;
+		return Result::Empty;
 	}
 
-	bool operator()(OutputSwitch)
+	Result operator()(OutputSwitch)
 	{
 		if (!m_no_output)
 			m_output_switched = true;
-		return true;
+		return Result::Ok;
 	}
 
-	bool operator()(const SongTag &st)
+	Result operator()(const SongTag &st)
 	{
 		StringT tags;
 		if (m_flags & Flags::Tag && m_song != nullptr)
@@ -152,40 +192,46 @@ struct Printer: boost::static_visitor<bool>
 					tags = wideShorten(tags, st.delimiter());
 			}
 			output(tags);
-			return true;
+			return Result::Ok;
 		}
 		else
-			return false;
+			return Result::Missing;
 	}
 
-	bool operator()(const All<CharT> &all)
+	// If all Empty -> Empty, if any Ok -> continue with Ok, if any Missing -> stop with Empty.
+	Result operator()(const Group<CharT> &group)
 	{
-		auto visit = [this, &all] {
-			return std::all_of(
-				all.base().begin(),
-				all.base().end(),
-				[this](const Expression<CharT> &ex) {
-					return boost::apply_visitor(*this, ex);
+		auto visit = [this, &group] {
+			Result result = Result::Empty;
+			for (const auto &ex : group.base())
+			{
+				result += boost::apply_visitor(*this, ex);
+				if (result == Result::Missing)
+				{
+					result = Result::Empty;
+					break;
 				}
-			);
+			}
+			return result;
 		};
+
 		++m_no_output;
-		bool all_ok = visit();
+		Result result = visit();
 		--m_no_output;
-		if (!m_no_output && all_ok)
+		if (!m_no_output && result == Result::Ok)
 			visit();
-		return all_ok;
+		return result;
 	}
 
-	bool operator()(const Any<CharT> &any)
+	// If all Empty or Missing -> Empty, if any Ok -> stop with Ok.
+	Result operator()(const FirstOf<CharT> &first_of)
 	{
-		return std::any_of(
-			any.base().begin(),
-			any.base().end(),
-			[this](const Expression<CharT> &ex) {
-				return boost::apply_visitor(*this, ex);
-			}
-		);
+		for (const auto &ex : first_of.base())
+		{
+			if (boost::apply_visitor(*this, ex) == Result::Ok)
+				return Result::Ok;
+		}
+		return Result::Empty;
 	}
 
 private:

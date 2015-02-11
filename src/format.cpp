@@ -64,7 +64,8 @@ expressions<CharT> parseBracket(const string<CharT> &s,
 	string<CharT> token;
 	expressions<CharT> tmp, result;
 	auto push_token = [&] {
-		result.push_back(std::move(token));
+		if (!token.empty())
+			result.push_back(std::move(token));
 	};
 	for (; it != end; ++it)
 	{
@@ -72,7 +73,7 @@ expressions<CharT> parseBracket(const string<CharT> &s,
 		{
 			push_token();
 			bool done;
-			Format::Any<CharT> any;
+			Format::FirstOf<CharT> first_of;
 			do
 			{
 				auto jt = it;
@@ -95,11 +96,11 @@ expressions<CharT> parseBracket(const string<CharT> &s,
 				// recursively parse the bracket
 				tmp = parseBracket(s, it, jt, flags);
 				// if the inner bracket contains only one expression,
-				// put it as is. otherwise require all of them.
+				// put it as is. otherwise make a group out of them.
 				if (tmp.size() == 1)
-					any.base().push_back(std::move(tmp[0]));
+					first_of.base().push_back(std::move(tmp[0]));
 				else
-					any.base().push_back(Format::All<CharT>(std::move(tmp)));
+					first_of.base().push_back(Format::Group<CharT>(std::move(tmp)));
 				it = jt;
 				// check for the alternative
 				++jt;
@@ -114,13 +115,8 @@ expressions<CharT> parseBracket(const string<CharT> &s,
 				}
 			}
 			while (!done);
-			assert(!any.base().empty());
-			// if there was only one bracket, append empty branch
-			// so that it always evaluates to true. otherwise put
-			// it as is.
-			if (any.base().size() == 1)
-				any.base().push_back(string<CharT>());
-			result.push_back(std::move(any));
+			assert(!first_of.base().empty());
+			result.push_back(std::move(first_of));
 		}
 		else if (flags & Format::Flags::Tag && *it == '%')
 		{

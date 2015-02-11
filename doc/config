@@ -133,7 +133,7 @@
 #
 ##### song format #####
 ##
-## for song format you can use:
+## For a song format you can use:
 ##
 ## %l - length
 ## %f - filename
@@ -153,10 +153,14 @@
 ## %P - priority
 ## $R - begin right alignment
 ##
-## You can also put them in { } and then it will be displayed
-## only if all requested values are available and/or define alternate
-## value with { }|{ } eg. {%a - %t}|{%f}. It is worth noting that
-## a single bracket {..} is equivalent to the alternative {..}|{}.
+## If you want to make sure that a part of the format is displayed
+## only when certain tags are present, you can archieve it by
+## grouping them with brackets, e.g. '{%a - %t}' will be evaluated
+## to 'ARTIST - TITLE' if both tags are present or '' otherwise.
+## It is also possible to define a list of alternatives by providing
+## several groups and separating them with '|', e.g. '{%t}|{%f}'
+## will be evaluated to 'TITLE' or 'FILENAME' if the former is not
+## present.
 ##
 ## Note: If you want to set limit on maximal length of a tag, just
 ## put the appropriate number between % and character that defines

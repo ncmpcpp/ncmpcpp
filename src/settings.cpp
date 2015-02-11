@@ -125,14 +125,14 @@ Format::AST<char> columns_to_format(const std::vector<Column> &columns)
 	auto column = columns.begin();
 	while (true)
 	{
-		Format::Any<char> any;
+		Format::FirstOf<char> first_of;
 		for (const auto &type : column->type)
 		{
 			auto f = charToGetFunction(type);
 			assert(f != nullptr);
-			any.base().push_back(f);
+			first_of.base().push_back(f);
 		}
-		result.push_back(std::move(any));
+		result.push_back(std::move(first_of));
 
 		if (++column != columns.end())
 			result.push_back(" ");
