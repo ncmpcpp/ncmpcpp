@@ -733,7 +733,7 @@ std::string Window::prompt(const std::string &base, size_t width, bool encrypted
 	curs_set(0);
 	if (input != nullptr)
 	{
-		if (input[0] != 0)
+		if (!encrypted && input[0] != 0)
 			add_history(input);
 		result = input;
 		free(input);
