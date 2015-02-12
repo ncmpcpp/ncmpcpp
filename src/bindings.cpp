@@ -30,6 +30,11 @@ BindingsConfiguration Bindings;
 
 Key Key::noOp = Key(ERR, NCurses);
 
+bool operator==(const KeySequence &k1, const KeySequence &k2) {
+    return k1.sequence == k2.sequence;
+    return true;
+}
+
 namespace {
 
 Key stringToSpecialKey(const std::string &s)
@@ -90,6 +95,17 @@ Key stringToKey(const std::string &s)
 			result = Key(ws[0], Key::Standard);
 	}
 	return result;
+}
+
+KeySequence stringToKeySequence(const std::string &s)
+{
+	std::vector<Key> sequence;
+	for (auto c : s)
+	{
+		std::string x(&c, 1);
+		sequence.push_back(stringToKey(x));
+	}
+	return KeySequence(sequence);
 }
 
 template <typename F>
@@ -214,7 +230,7 @@ bool BindingsConfiguration::read(const std::string &file)
 	Binding::ActionChain actions;
 	
 	// def_key specific variables
-	Key key = Key::noOp;
+	KeySequence keySequence;
 	std::string strkey;
 	
 	// def_command specific variables
@@ -247,7 +263,7 @@ bool BindingsConfiguration::read(const std::string &file)
 		{
 			if (!actions.empty())
 			{
-				bind(key, actions);
+				bind(keySequence, actions);
 				actions.clear();
 				return true;
 			}
@@ -304,8 +320,8 @@ bool BindingsConfiguration::read(const std::string &file)
 				break;
 			in_progress = InProgress::Key;
 			strkey = getEnclosedString(line, '"', '"', 0);
-			key = stringToKey(strkey);
-			if (key == Key::noOp)
+			keySequence = stringToKeySequence(strkey);
+			if (keySequence.empty())
 			{
 				error() << "invalid key: '" << strkey << "'\n";
 				break;

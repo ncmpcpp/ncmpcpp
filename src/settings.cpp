@@ -668,6 +668,10 @@ bool Configuration::read(const std::vector<std::string> &config_paths)
 	p.add("active_window_border", border(
 		active_window_border, NC::Color::Red
 	));
+	p.add("keybinding_timeout", assign_default<unsigned>(
+		keybinding_timeout, 500, [](unsigned v) {
+			return boost::posix_time::milliseconds(v);
+	}));
 
 	return std::all_of(
 		config_paths.begin(),
