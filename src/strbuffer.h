@@ -88,7 +88,7 @@ template <typename CharT> class BasicBuffer
 	
 public:
 	typedef std::basic_string<CharT> StringType;
-	typedef std::set<Property> Properties;
+	typedef std::multiset<Property> Properties;
 	
 	template <typename... Args>
 	BasicBuffer(Args... args)
