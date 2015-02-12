@@ -1759,6 +1759,8 @@ void CropPlaylist::run()
 
 void ClearMainPlaylist::run()
 {
+	if (myPlaylist->proxySongList().empty())
+		return;
 	if (Config.ask_before_clearing_playlists)
 		confirmAction("Do you really want to clear main playlist?");
 	Mpd.ClearMainPlaylist();
