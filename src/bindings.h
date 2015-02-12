@@ -159,13 +159,13 @@ public:
 
 	size_t hash() const
 	{
-		size_t h = 0;
+		size_t hash = 5381;
 		for (auto k : sequence)
 		{
-			h <<= 16;
-			h |= (k.getChar() << 1) | (k.getType() == Key::Standard);
+			auto value = (k.getChar() << 1) | (k.getType() == Key::Standard);
+			hash = ((hash << 5) + hash) + value;
 		}
-		return h;
+		return hash;
 	}
 
 	std::string toString(bool *print_backspace) const

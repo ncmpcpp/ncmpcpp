@@ -32,7 +32,6 @@ Key Key::noOp = Key(ERR, NCurses);
 
 bool operator==(const KeySequence &k1, const KeySequence &k2) {
     return k1.sequence == k2.sequence;
-    return true;
 }
 
 namespace {
