@@ -1759,7 +1759,7 @@ void CropPlaylist::run()
 
 void ClearMainPlaylist::run()
 {
-	if (Config.ask_before_clearing_playlists)
+	if (!myPlaylist->main().empty() && Config.ask_before_clearing_playlists)
 		confirmAction("Do you really want to clear main playlist?");
 	Mpd.ClearMainPlaylist();
 	Statusbar::print("Playlist cleared");
