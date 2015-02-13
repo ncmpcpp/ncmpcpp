@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2008-2013 by Andrzej Rybczak                            *
+ *   Copyright (C) 2008-2014 by Andrzej Rybczak                            *
  *   electricityispower@gmail.com                                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -24,15 +24,15 @@
 #include <locale>
 #include <string>
 
-namespace Charset {//
+namespace Charset {
 
 std::locale internalLocale();
 
-std::string toUtf8From(std::string s, const char *charset);
-std::string fromUtf8To(std::string s, const char *charset);
+std::string toUtf8From(const std::string &s, const char *charset);
+std::string fromUtf8To(const std::string &s, const char *charset);
 
-std::string utf8ToLocale(std::string s);
-std::string localeToUtf8(std::string s);
+std::string utf8ToLocale(const std::string &s);
+std::string localeToUtf8(const std::string &s);
 
 }
 

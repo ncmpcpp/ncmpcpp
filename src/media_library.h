@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2008-2013 by Andrzej Rybczak                            *
+ *   Copyright (C) 2008-2014 by Andrzej Rybczak                            *
  *   electricityispower@gmail.com                                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -21,10 +21,13 @@
 #ifndef NCMPCPP_MEDIA_LIBRARY_H
 #define NCMPCPP_MEDIA_LIBRARY_H
 
+#include <boost/date_time/posix_time/posix_time_types.hpp>
+
 #include "interfaces.h"
+#include "regex_filter.h"
 #include "screen.h"
 
-struct MediaLibrary: Screen<NC::Window *>, Filterable, HasColumns, HasSongs, Searchable, Tabbable
+struct MediaLibrary: Screen<NC::Window *>, HasColumns, HasSongs, Searchable, Tabbable
 {
 	MediaLibrary();
 	
@@ -37,29 +40,26 @@ struct MediaLibrary: Screen<NC::Window *>, Filterable, HasColumns, HasSongs, Sea
 	virtual void refresh() OVERRIDE;
 	virtual void update() OVERRIDE;
 	
+	virtual int windowTimeout() OVERRIDE;
+
 	virtual void enterPressed() OVERRIDE;
 	virtual void spacePressed() OVERRIDE;
 	virtual void mouseButtonPressed(MEVENT me) OVERRIDE;
 	
 	virtual bool isMergable() OVERRIDE { return true; }
 	
-	// Filterable implementation
-	virtual bool allowsFiltering() OVERRIDE;
-	virtual std::string currentFilter() OVERRIDE;
-	virtual void applyFilter(const std::string &filter) OVERRIDE;
-	
 	// Searchable implementation
 	virtual bool allowsSearching() OVERRIDE;
-	virtual bool search(const std::string &constraint) OVERRIDE;
-	virtual void nextFound(bool wrap) OVERRIDE;
-	virtual void prevFound(bool wrap) OVERRIDE;
+	virtual void setSearchConstraint(const std::string &constraint) OVERRIDE;
+	virtual void clearConstraint() OVERRIDE;
+	virtual bool find(SearchDirection direction, bool wrap, bool skip_current) OVERRIDE;
 	
 	// HasSongs implementation
 	virtual ProxySongList proxySongList() OVERRIDE;
 	
 	virtual bool allowsSelection() OVERRIDE;
 	virtual void reverseSelection() OVERRIDE;
-	virtual MPD::SongList getSelectedSongs() OVERRIDE;
+	virtual std::vector<MPD::Song> getSelectedSongs() OVERRIDE;
 	
 	// HasColumns implementation
 	virtual bool previousColumnAvailable() OVERRIDE;
@@ -69,6 +69,7 @@ struct MediaLibrary: Screen<NC::Window *>, Filterable, HasColumns, HasSongs, Sea
 	virtual void nextColumn() OVERRIDE;
 	
 	// private members
+	void updateTimer();
 	void toggleColumnsMode();
 	int Columns();
 	void LocateSong(const MPD::Song &);
@@ -145,6 +146,16 @@ private:
 	bool m_tags_update_request;
 	bool m_albums_update_request;
 	bool m_songs_update_request;
+
+	boost::posix_time::ptime m_timer;
+
+	const int m_window_timeout;
+	const boost::posix_time::time_duration m_fetching_delay;
+
+	RegexFilter<PrimaryTag> m_tags_search_predicate;
+	RegexItemFilter<AlbumEntry> m_albums_search_predicate;
+	RegexFilter<MPD::Song> m_songs_search_predicate;
+
 };
 
 extern MediaLibrary *myLibrary;

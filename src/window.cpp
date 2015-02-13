@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2008-2013 by Andrzej Rybczak                            *
+ *   Copyright (C) 2008-2014 by Andrzej Rybczak                            *
  *   electricityispower@gmail.com                                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -18,9 +18,11 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
+#include <algorithm>
 #include <cstring>
 #include <cstdio>
 #include <cstdlib>
+#include <iostream>
 #include <readline/history.h>
 #include <readline/readline.h>
 
@@ -37,7 +39,10 @@
 #include "window.h"
 
 namespace {
+
 namespace rl {
+
+bool aborted;
 
 NC::Window *w;
 size_t start_x;
@@ -49,15 +54,21 @@ const char *base;
 int read_key(FILE *)
 {
 	size_t x;
+	bool done;
 	int result;
 	do
 	{
 		x = w->getX();
-		if (w->runGetStringHelper(rl_line_buffer))
+		if (w->runPromptHook(rl_line_buffer, &done))
 		{
+			if (done)
+			{
+				rl_done = 1;
+				return EOF;
+			}
 			w->goToXY(x, start_y);
-			w->refresh();
 		}
+		w->refresh();
 		result = w->readKey();
 		if (!w->FDCallbacksListEmpty())
 		{
@@ -84,25 +95,54 @@ void display_string()
 		else
 			*w << ws;
 	};
+	auto narrow_to_wide = [](wchar_t *dest, const char *src, size_t n) {
+		size_t result = 0;
+		// convert the string and substitute invalid multibyte chars with dots.
+		for (size_t i = 0; i < n;)
+		{
+			int ret = mbtowc(&dest[result], &src[i], n-i);
+			if (ret > 0)
+			{
+				i += ret;
+				++result;
+			}
+			else if (ret == -1)
+			{
+				dest[result] = L'.';
+				++i;
+				++result;
+			}
+			else
+				throw std::runtime_error("mbtowc: unexpected return value");
+		}
+		return result;
+	};
 
+	// copy the part of the string that is before the cursor to pre_pos
 	char pt = rl_line_buffer[rl_point];
 	rl_line_buffer[rl_point] = 0;
 	wchar_t pre_pos[rl_point+1];
-	pre_pos[mbstowcs(pre_pos, rl_line_buffer, rl_point)] = 0;
+	pre_pos[narrow_to_wide(pre_pos, rl_line_buffer, rl_point)] = 0;
 	rl_line_buffer[rl_point] = pt;
 
 	int pos = wcswidth(pre_pos, rl_point);
 	if (pos < 0)
 		pos = rl_point;
 
+	// clear the area for the string
 	mvwhline(w->raw(), start_y, start_x, ' ', width+1);
+
 	w->goToXY(start_x, start_y);
 	if (size_t(pos) <= width)
 	{
+		// if the current position in the string is not bigger than allowed
+		// width, print the part of the string before cursor position...
+
 		print_string(pre_pos, pos);
 
+		// ...and then print the rest char-by-char until there is no more area
 		wchar_t post_pos[rl_end-rl_point+1];
-		post_pos[mbstowcs(post_pos, rl_line_buffer+rl_point, rl_end-rl_point)] = 0;
+		post_pos[narrow_to_wide(post_pos, rl_line_buffer+rl_point, rl_end-rl_point)] = 0;
 
 		size_t cpos = pos;
 		for (wchar_t *c = post_pos; *c != 0; ++c)
@@ -124,6 +164,12 @@ void display_string()
 	}
 	else
 	{
+		// if the current position in the string is bigger than allowed
+		// width, we always keep the cursor at the end of the line (it
+		// would be nice to have more flexible scrolling, but for now
+		// let's stick to that) by cutting the beginning of the part
+		// of the string before the cursor until it fits the area.
+
 		wchar_t *mod_pre_pos = pre_pos;
 		while (*mod_pre_pos != 0)
 		{
@@ -150,41 +196,147 @@ int add_base()
 }
 }
 
-namespace NC {//
+namespace NC {
 
-void initScreen(GNUC_UNUSED const char *window_title, bool enable_colors)
+const short Color::transparent = -1;
+const short Color::previous = -2;
+
+Color Color::Default(0, 0, true, false);
+Color Color::Black(COLOR_BLACK, Color::transparent);
+Color Color::Red(COLOR_RED, Color::transparent);
+Color Color::Green(COLOR_GREEN, Color::transparent);
+Color Color::Yellow(COLOR_YELLOW, Color::transparent);
+Color Color::Blue(COLOR_BLUE, Color::transparent);
+Color Color::Magenta(COLOR_MAGENTA, Color::transparent);
+Color Color::Cyan(COLOR_CYAN, Color::transparent);
+Color Color::White(COLOR_WHITE, Color::transparent);
+Color Color::End(0, 0, false, true);
+
+int Color::pairNumber() const
 {
-	const int ColorsTable[] =
+	int result;
+	if (isDefault())
+		result = 0;
+	else if (previousBackground())
+		throw std::logic_error("color depends on the previous background value");
+	else if (isEnd())
+		throw std::logic_error("'end' doesn't have a corresponding pair number");
+	else
 	{
-		COLOR_BLACK, COLOR_RED, COLOR_GREEN, COLOR_YELLOW,
-		COLOR_BLUE, COLOR_MAGENTA, COLOR_CYAN, COLOR_WHITE
+		// colors start with 0, but pairs start with 1. additionally
+		// first pairs are for transparent background, which has a
+		// value of -1, so we need to add 1 to both foreground and
+		// background value.
+		result = background() + 1;
+		result *= COLORS;
+		result += foreground() + 1;
+	}
+	return result;
+}
+
+std::istream &operator>>(std::istream &is, Color &c)
+{
+	auto get_single_color = [](const std::string &s, bool background) {
+		short result = -1;
+		if (s == "black")
+			result = COLOR_BLACK;
+		else if (s == "red")
+			result = COLOR_RED;
+		else if (s == "green")
+			result = COLOR_GREEN;
+		else if (s == "yellow")
+			result = COLOR_YELLOW;
+		else if (s == "blue")
+			result = COLOR_BLUE;
+		else if (s == "magenta")
+			result = COLOR_MAGENTA;
+		else if (s == "cyan")
+			result = COLOR_CYAN;
+		else if (s == "white")
+			result = COLOR_WHITE;
+		else if (background && s == "previous")
+			result = NC::Color::previous;
+		else if (std::all_of(s.begin(), s.end(), isdigit))
+		{
+			result = atoi(s.c_str());
+			if (result < 1 || result > 256)
+				result = -1;
+			else
+				--result;
+		}
+		return result;
 	};
-#	ifdef XCURSES
-	Xinitscr(1, const_cast<char **>(&window_title));
-#	else
+	std::string sc;
+	is >> sc;
+	if (sc == "default")
+			c = Color::Default;
+	else if (sc == "end")
+		c = Color::End;
+	else
+	{
+		short value = get_single_color(sc, false);
+		if (value != -1)
+			c = Color(value, NC::Color::transparent);
+		else
+		{
+			size_t underscore = sc.find('_');
+			if (underscore != std::string::npos)
+			{
+				short fg = get_single_color(sc.substr(0, underscore), false);
+				short bg = get_single_color(sc.substr(underscore+1), true);
+				if (fg != -1 && bg != -1)
+					c = Color(fg, bg);
+				else
+					is.setstate(std::ios::failbit);
+			}
+			else
+				is.setstate(std::ios::failbit);
+		}
+	}
+	return is;
+}
+
+void initScreen(bool enable_colors)
+{
 	initscr();
-#	endif // XCURSES
 	if (has_colors() && enable_colors)
 	{
 		start_color();
 		use_default_colors();
-		int num = 1;
-#		ifdef USE_PDCURSES
-		int i = 0;
-#		else
-		int i = -1;
-#		endif // USE_PDCURSES
-		for (; i < 8; ++i)
-			for (int j = 0; j < 8; ++j)
-				init_pair(num++, ColorsTable[j], i < 0 ? i : ColorsTable[i]);
+		int npair = 1;
+		for (int bg = -1; bg < COLORS; ++bg)
+		{
+			for (int fg = 0; npair < COLOR_PAIRS && fg < COLORS; ++fg, ++npair)
+				init_pair(npair, fg, bg);
+		}
 	}
+	raw();
+	nonl();
 	noecho();
-	cbreak();
 	curs_set(0);
 
+	// initialize readline (needed, otherwise we get segmentation
+	// fault on SIGWINCH). also, initialize first as doing this
+	// later erases keys bound with rl_bind_key for some users.
 	rl_initialize();
 	// disable autocompletion
-	rl_bind_key('\t', nullptr);
+	rl_attempted_completion_function = [](const char *, int, int) -> char ** {
+		rl_attempted_completion_over = 1;
+		return nullptr;
+	};
+	auto abort_prompt = [](int, int) -> int {
+		rl::aborted = true;
+		rl_done = 1;
+		return 0;
+	};
+	// if ctrl-c or ctrl-g is pressed, abort the prompt
+	rl_bind_key(KEY_CTRL_C, abort_prompt);
+	rl_bind_key(KEY_CTRL_G, abort_prompt);
+	// do not change the state of the terminal
+	rl_prep_term_function = nullptr;
+	rl_deprep_term_function = nullptr;
+	// do not catch signals
+	rl_catch_signals = 0;
 	// overwrite readline callbacks
 	rl_getc_function = rl::read_key;
 	rl_redisplay_function = rl::display_string;
@@ -201,23 +353,20 @@ Window::Window(size_t startx,
 		size_t starty,
 		size_t width,
 		size_t height,
-		const std::string &title,
+		std::string title,
 		Color color,
 		Border border)
-		: m_window(0),
-		m_border_window(0),
+		: m_window(nullptr),
 		m_start_x(startx),
 		m_start_y(starty),
 		m_width(width),
 		m_height(height),
 		m_window_timeout(-1),
 		m_color(color),
-		m_bg_color(Color::Default),
 		m_base_color(color),
-		m_base_bg_color(Color::Default),
-		m_border(border),
-		m_get_string_helper(0),
-		m_title(title),
+		m_border(std::move(border)),
+		m_prompt_hook(0),
+		m_title(std::move(title)),
 		m_bold_counter(0),
 		m_underline_counter(0),
 		m_reverse_counter(0),
@@ -227,15 +376,12 @@ Window::Window(size_t startx,
 	||  m_start_y > size_t(LINES)
 	||  m_width+m_start_x > size_t(COLS)
 	||  m_height+m_start_y > size_t(LINES))
-		FatalError("Constructed window is bigger than terminal size");
+		throw std::logic_error("constructed window doesn't fit into the terminal");
 	
-	if (m_border != Border::None)
+	if (m_border)
 	{
-		m_border_window = newpad(m_height, m_width);
-		wattron(m_border_window, COLOR_PAIR(int(m_border)));
-		box(m_border_window, 0, 0);
-		m_start_x++;
-		m_start_y++;
+		++m_start_x;
+		++m_start_y;
 		m_width -= 2;
 		m_height -= 2;
 	}
@@ -253,18 +399,15 @@ Window::Window(size_t startx,
 
 Window::Window(const Window &rhs)
 : m_window(dupwin(rhs.m_window))
-, m_border_window(dupwin(rhs.m_border_window))
 , m_start_x(rhs.m_start_x)
 , m_start_y(rhs.m_start_y)
 , m_width(rhs.m_width)
 , m_height(rhs.m_height)
 , m_window_timeout(rhs.m_window_timeout)
 , m_color(rhs.m_color)
-, m_bg_color(rhs.m_bg_color)
 , m_base_color(rhs.m_base_color)
-, m_base_bg_color(rhs.m_base_bg_color)
 , m_border(rhs.m_border)
-, m_get_string_helper(rhs.m_get_string_helper)
+, m_prompt_hook(rhs.m_prompt_hook)
 , m_title(rhs.m_title)
 , m_color_stack(rhs.m_color_stack)
 , m_input_queue(rhs.m_input_queue)
@@ -278,18 +421,15 @@ Window::Window(const Window &rhs)
 
 Window::Window(Window &&rhs)
 : m_window(rhs.m_window)
-, m_border_window(rhs.m_border_window)
 , m_start_x(rhs.m_start_x)
 , m_start_y(rhs.m_start_y)
 , m_width(rhs.m_width)
 , m_height(rhs.m_height)
 , m_window_timeout(rhs.m_window_timeout)
 , m_color(rhs.m_color)
-, m_bg_color(rhs.m_bg_color)
 , m_base_color(rhs.m_base_color)
-, m_base_bg_color(rhs.m_base_bg_color)
 , m_border(rhs.m_border)
-, m_get_string_helper(rhs.m_get_string_helper)
+, m_prompt_hook(rhs.m_prompt_hook)
 , m_title(std::move(rhs.m_title))
 , m_color_stack(std::move(rhs.m_color_stack))
 , m_input_queue(std::move(rhs.m_input_queue))
@@ -299,25 +439,21 @@ Window::Window(Window &&rhs)
 , m_reverse_counter(rhs.m_reverse_counter)
 , m_alt_charset_counter(rhs.m_alt_charset_counter)
 {
-	rhs.m_window = 0;
-	rhs.m_border_window = 0;
+	rhs.m_window = nullptr;
 }
 
 Window &Window::operator=(Window rhs)
 {
 	std::swap(m_window, rhs.m_window);
-	std::swap(m_border_window, rhs.m_border_window);
 	std::swap(m_start_x, rhs.m_start_x);
 	std::swap(m_start_y, rhs.m_start_y);
 	std::swap(m_width, rhs.m_width);
 	std::swap(m_height, rhs.m_height);
 	std::swap(m_window_timeout, rhs.m_window_timeout);
 	std::swap(m_color, rhs.m_color);
-	std::swap(m_bg_color, rhs.m_bg_color);
 	std::swap(m_base_color, rhs.m_base_color);
-	std::swap(m_base_bg_color, rhs.m_base_bg_color);
 	std::swap(m_border, rhs.m_border);
-	std::swap(m_get_string_helper, rhs.m_get_string_helper);
+	std::swap(m_prompt_hook, rhs.m_prompt_hook);
 	std::swap(m_title, rhs.m_title);
 	std::swap(m_color_stack, rhs.m_color_stack);
 	std::swap(m_input_queue, rhs.m_input_queue);
@@ -332,65 +468,52 @@ Window &Window::operator=(Window rhs)
 Window::~Window()
 {
 	delwin(m_window);
-	delwin(m_border_window);
 }
 
-void Window::setColor(Color fg, Color bg)
+void Window::setColor(Color c)
 {
-	if (fg == Color::Default)
-		fg = m_base_color;
-	
-	if (fg != Color::Default)
-		wattron(m_window, COLOR_PAIR(int(bg)*8+int(fg)));
+	if (c.isDefault())
+		c = m_base_color;
+	if (c != Color::Default)
+	{
+		if (c.previousBackground())
+			c = Color(c.foreground(), m_color.background());
+		wcolor_set(m_window, c.pairNumber(), nullptr);
+	}
 	else
-		wattroff(m_window, COLOR_PAIR(int(m_color)));
-	m_color = fg;
-	m_bg_color = bg;
+		wcolor_set(m_window, m_base_color.pairNumber(), nullptr);
+	m_color = std::move(c);
 }
 
-void Window::setBaseColor(Color fg, Color bg)
+void Window::setBaseColor(Color c)
 {
-	m_base_color = fg;
-	m_base_bg_color = bg;
+	m_base_color = std::move(c);
 }
 
 void Window::setBorder(Border border)
 {
-	if (border == Border::None && m_border != Border::None)
+	if (!border && m_border)
 	{
-		delwin(m_border_window);
-		m_start_x--;
-		m_start_y--;
+		--m_start_x;
+		--m_start_y;
 		m_height += 2;
 		m_width += 2;
 		recreate(m_width, m_height);
 	}
-	else if (border != Border::None && m_border == Border::None)
+	else if (border && !m_border)
 	{
-		m_border_window = newpad(m_height, m_width);
-		wattron(m_border_window, COLOR_PAIR(int(border)));
-		box(m_border_window,0,0);
-		m_start_x++;
-		m_start_y++;
+		++m_start_x;
+		++m_start_y;
 		m_height -= 2;
 		m_width -= 2;
 		recreate(m_width, m_height);
-	}
-	else
-	{
-		wattron(m_border_window,COLOR_PAIR(int(border)));
-		box(m_border_window, 0, 0);
 	}
 	m_border = border;
 }
 
 void Window::setTitle(const std::string &new_title)
 {
-	if (m_title == new_title)
-	{
-		return;
-	}
-	else if (!new_title.empty() && m_title.empty())
+	if (!new_title.empty() && m_title.empty())
 	{
 		m_start_y += 2;
 		m_height -= 2;
@@ -410,7 +533,7 @@ void Window::recreate(size_t width, size_t height)
 	delwin(m_window);
 	m_window = newpad(height, width);
 	setTimeout(m_window_timeout);
-	setColor(m_color, m_bg_color);
+	setColor(m_color);
 	keypad(m_window, 1);
 }
 
@@ -418,10 +541,10 @@ void Window::moveTo(size_t new_x, size_t new_y)
 {
 	m_start_x = new_x;
 	m_start_y = new_y;
-	if (m_border != Border::None)
+	if (m_border)
 	{
-		m_start_x++;
-		m_start_y++;
+		++m_start_x;
+		++m_start_y;
 	}
 	if (!m_title.empty())
 		m_start_y += 2;
@@ -429,12 +552,8 @@ void Window::moveTo(size_t new_x, size_t new_y)
 
 void Window::adjustDimensions(size_t width, size_t height)
 {
-	if (m_border != Border::None)
+	if (m_border)
 	{
-		delwin(m_border_window);
-		m_border_window = newpad(height, width);
-		wattron(m_border_window, COLOR_PAIR(int(m_border)));
-		box(m_border_window, 0, 0);
 		width -= 2;
 		height -= 2;
 	}
@@ -450,31 +569,50 @@ void Window::resize(size_t new_width, size_t new_height)
 	recreate(m_width, m_height);
 }
 
-void Window::showBorder() const
+void Window::refreshBorder() const
 {
-	if (m_border != Border::None)
+	if (m_border)
 	{
-		::refresh();
-		prefresh(m_border_window, 0, 0, getStarty(), getStartX(), m_start_y+m_height, m_start_x+m_width);
+		size_t start_x = getStartX(), start_y = getStarty();
+		size_t width = getWidth(), height = getHeight();
+		color_set(m_border->pairNumber(), nullptr);
+		attron(A_ALTCHARSET);
+		// corners
+		mvaddch(start_y, start_x, 'l');
+		mvaddch(start_y, start_x+width-1, 'k');
+		mvaddch(start_y+height-1, start_x, 'm');
+		mvaddch(start_y+height-1, start_x+width-1, 'j');
+		// lines
+		mvhline(start_y, start_x+1, 'q', width-2);
+		mvhline(start_y+height-1, start_x+1, 'q', width-2);
+		mvvline(start_y+1, start_x, 'x', height-2);
+		mvvline(start_y+1, start_x+width-1, 'x', height-2);
+		if (!m_title.empty())
+		{
+			mvaddch(start_y+2, start_x, 't');
+			mvaddch(start_y+2, start_x+width-1, 'u');
+		}
+		attroff(A_ALTCHARSET);
 	}
+	else
+		color_set(m_base_color.pairNumber(), nullptr);
 	if (!m_title.empty())
 	{
-		if (m_border != Border::None)
-			attron(COLOR_PAIR(int(m_border)));
-		else
-			attron(COLOR_PAIR(int(m_base_color)));
-		mvhline(m_start_y-1, m_start_x, 0, m_width);
+		// clear title line
+		mvhline(m_start_y-2, m_start_x, ' ', m_width);
 		attron(A_BOLD);
-		mvhline(m_start_y-2, m_start_x, 32, m_width); // clear title line
 		mvaddstr(m_start_y-2, m_start_x, m_title.c_str());
-		attroff(COLOR_PAIR(int(m_border)) | A_BOLD);
+		attroff(A_BOLD);
+		// add separator
+		mvhline(m_start_y-1, m_start_x, 0, m_width);
 	}
+	standend();
 	::refresh();
 }
 
 void Window::display()
 {
-	showBorder();
+	refreshBorder();
 	refresh();
 }
 
@@ -510,8 +648,11 @@ void Window::altCharset(bool altcharset_state) const
 
 void Window::setTimeout(int timeout)
 {
-	m_window_timeout = timeout;
-	wtimeout(m_window, timeout);
+	if (timeout != m_window_timeout)
+	{
+		m_window_timeout = timeout;
+		wtimeout(m_window, timeout);
+	}
 }
 
 void Window::addFDCallback(int fd, void (*callback)())
@@ -532,30 +673,19 @@ bool Window::FDCallbacksListEmpty() const
 int Window::readKey()
 {
 	int result;
-	// if there are characters in input queue, get them and
-	// return immediately.
+	// if there are characters in input queue,
+	// get them and return immediately.
 	if (!m_input_queue.empty())
 	{
 		result = m_input_queue.front();
 		m_input_queue.pop();
 		return result;
 	}
-	// in pdcurses polling stdin doesn't work, so we can't poll
-	// both stdin and other file descriptors in one select. the
-	// workaround is to set the timeout of select to 0, poll
-	// other file descriptors and then wait for stdin input with
-	// the given timeout. unfortunately, this results in delays
-	// since ncmpcpp doesn't see that data arrived while waiting
-	// for input from stdin, but it seems there is no better option.
 	
 	fd_set fdset;
 	FD_ZERO(&fdset);
-#	if !defined(USE_PDCURSES)
 	FD_SET(STDIN_FILENO, &fdset);
 	timeval timeout = { m_window_timeout/1000, (m_window_timeout%1000)*1000 };
-#	else
-	timeval timeout = { 0, 0 };
-#	endif
 	
 	int fd_max = STDIN_FILENO;
 	for (FDCallbacks::const_iterator it = m_fds.begin(); it != m_fds.end(); ++it)
@@ -567,19 +697,13 @@ int Window::readKey()
 	
 	if (select(fd_max+1, &fdset, 0, 0, m_window_timeout < 0 ? 0 : &timeout) > 0)
 	{
-#		if !defined(USE_PDCURSES)
 		result = FD_ISSET(STDIN_FILENO, &fdset) ? wgetch(m_window) : ERR;
-#		endif // !USE_PDCURSES
 		for (FDCallbacks::const_iterator it = m_fds.begin(); it != m_fds.end(); ++it)
 			if (FD_ISSET(it->first, &fdset))
 				it->second();
 	}
-#	if !defined(USE_PDCURSES)
 	else
 		result = ERR;
-#	else
-	result = wgetch(m_window);
-#	endif
 	return result;
 }
 
@@ -588,19 +712,14 @@ void Window::pushChar(int ch)
 	m_input_queue.push(ch);
 }
 
-std::string Window::getString(const std::string &base, size_t width, bool encrypted)
+std::string Window::prompt(const std::string &base, size_t width, bool encrypted)
 {
+	rl::aborted = false;
 	rl::w = this;
 	getyx(m_window, rl::start_y, rl::start_x);
-	rl::width = width;
+	rl::width = std::min(m_width-rl::start_x-1, width-1);
 	rl::encrypted = encrypted;
 	rl::base = base.c_str();
-
-	width--;
-	if (width == size_t(-1))
-		rl::width = m_width-rl::start_x-1;
-	else
-		rl::width = width;
 
 	mmask_t oldmask;
 	std::string result;
@@ -614,11 +733,14 @@ std::string Window::getString(const std::string &base, size_t width, bool encryp
 	curs_set(0);
 	if (input != nullptr)
 	{
-		if (input[0] != 0)
+		if (!encrypted && input[0] != 0)
 			add_history(input);
 		result = input;
 		free(input);
 	}
+
+	if (rl::aborted)
+		throw PromptAborted(std::move(result));
 
 	return result;
 }
@@ -640,27 +762,16 @@ int Window::getY()
 
 bool Window::hasCoords(int &x, int &y)
 {
-#	ifndef USE_PDCURSES
 	return wmouse_trafo(m_window, &y, &x, 0);
-#	else
-	// wmouse_trafo is broken in pdcurses, use our own implementation
-	size_t u_x = x, u_y = y;
-	if (u_x >= m_start_x && u_x < m_start_x+m_width
-	&&  u_y >= m_start_y && u_y < m_start_y+m_height)
-	{
-		x -= m_start_x;
-		y -= m_start_y;
-		return true;
-	}
-	return false;
-#	endif
 }
 
-bool Window::runGetStringHelper(const char *arg) const
+bool Window::runPromptHook(const char *arg, bool *done) const
 {
-	if (m_get_string_helper)
+	if (m_prompt_hook)
 	{
-		m_get_string_helper(arg);
+		bool continue_ = m_prompt_hook(arg);
+		if (done != nullptr)
+			*done = !continue_;
 		return true;
 	}
 	else
@@ -669,7 +780,7 @@ bool Window::runGetStringHelper(const char *arg) const
 
 size_t Window::getWidth() const
 {
-	if (m_border != Border::None)
+	if (m_border)
 		return m_width+2;
 	else
 		return m_width;
@@ -678,7 +789,7 @@ size_t Window::getWidth() const
 size_t Window::getHeight() const
 {
 	size_t height = m_height;
-	if (m_border != Border::None)
+	if (m_border)
 		height += 2;
 	if (!m_title.empty())
 		height += 2;
@@ -687,7 +798,7 @@ size_t Window::getHeight() const
 
 size_t Window::getStartX() const
 {
-	if (m_border != Border::None)
+	if (m_border)
 		return m_start_x-1;
 	else
 		return m_start_x;
@@ -696,8 +807,8 @@ size_t Window::getStartX() const
 size_t Window::getStarty() const
 {
 	size_t starty = m_start_y;
-	if (m_border != Border::None)
-		starty--;
+	if (m_border)
+		--starty;
 	if (!m_title.empty())
 		starty -= 2;
 	return starty;
@@ -708,12 +819,12 @@ const std::string &Window::getTitle() const
 	return m_title;
 }
 
-Color Window::getColor() const
+const Color &Window::getColor() const
 {
 	return m_color;
 }
 
-Border Window::getBorder() const
+const Border &Window::getBorder() const
 {
 	return m_border;
 }
@@ -749,43 +860,27 @@ void Window::scroll(Scroll where)
 }
 
 
-Window &Window::operator<<(Colors colors)
+Window &Window::operator<<(const Color &c)
 {
-	if (colors.fg == Color::End || colors.bg == Color::End)
+	if (c.isDefault())
 	{
-		*this << Color::End;
-		return *this;
+		while (!m_color_stack.empty())
+			m_color_stack.pop();
+		setColor(m_base_color);
 	}
-	m_color_stack.push(colors);
-	setColor(colors.fg, colors.bg);
-	return *this;
-}
-
-Window &Window::operator<<(Color color)
-{
-	switch (color)
+	else if (c.isEnd())
 	{
-		case Color::Default:
-			while (!m_color_stack.empty())
-				m_color_stack.pop();
-			setColor(m_base_color, m_base_bg_color);
-			break;
-		case Color::End:
-			if (!m_color_stack.empty())
-				m_color_stack.pop();
-			if (!m_color_stack.empty())
-				setColor(m_color_stack.top().fg, m_color_stack.top().bg);
-			else
-				setColor(m_base_color, m_base_bg_color);
-			break;
-		default:
-			Color bg;
-			if (m_color_stack.empty())
-				bg = m_bg_color;
-			else
-				bg = m_color_stack.top().bg;
-			m_color_stack.push(Colors(color, bg));
-			setColor(m_color_stack.top().fg, m_color_stack.top().bg);
+		if (!m_color_stack.empty())
+			m_color_stack.pop();
+		if (!m_color_stack.empty())
+			setColor(m_color_stack.top());
+		else
+			setColor(m_base_color);
+	}
+	else
+	{
+		setColor(c);
+		m_color_stack.push(c);
 	}
 	return *this;
 }
@@ -831,13 +926,22 @@ Window &Window::operator<<(Format format)
 	return *this;
 }
 
-Window &Window::operator<<(int (*f)(WINDOW *))
+Window &Window::operator<<(TermManip tm)
 {
-	f(m_window);
+	switch (tm)
+	{
+		case TermManip::ClearToEOL:
+		{
+			auto x = getX(), y = getY();
+			mvwhline(m_window, y, x, ' ', m_width-x);
+			goToXY(x, y);
+		}
+		break;
+	}
 	return *this;
 }
 
-Window &Window::operator<<(XY coords)
+Window &Window::operator<<(const XY &coords)
 {
 	goToXY(coords.x, coords.y);
 	return *this;
@@ -845,27 +949,34 @@ Window &Window::operator<<(XY coords)
 
 Window &Window::operator<<(const char *s)
 {
-	for (const char *c = s; *c != '\0'; ++c)
-		wprintw(m_window, "%c", *c);
+	waddstr(m_window, s);
 	return *this;
 }
 
 Window &Window::operator<<(char c)
 {
-	wprintw(m_window, "%c", c);
+	// waddchr doesn't display non-ascii multibyte characters properly
+	waddnstr(m_window, &c, 1);
 	return *this;
 }
 
 Window &Window::operator<<(const wchar_t *ws)
 {
-	for (const wchar_t *wc = ws; *wc != L'\0'; ++wc)
-		wprintw(m_window, "%lc", *wc);
+#	ifdef NCMPCPP_UNICODE
+	waddwstr(m_window, ws);
+#	else
+	wprintw(m_window, "%ls", ws);
+#	endif // NCMPCPP_UNICODE
 	return *this;
 }
 
 Window &Window::operator<<(wchar_t wc)
 {
+#	ifdef NCMPCPP_UNICODE
+	waddnwstr(m_window, &wc, 1);
+#	else
 	wprintw(m_window, "%lc", wc);
+#	endif // NCMPCPP_UNICODE
 	return *this;
 }
 
@@ -883,18 +994,17 @@ Window &Window::operator<<(double d)
 
 Window &Window::operator<<(const std::string &s)
 {
-	// for some reason passing whole string at once with "%s" doesn't work
-	// (string is cut in the middle, probably due to limitation of ncurses'
-	// internal buffer?), so we need to pass characters in a loop.
-	for (auto it = s.begin(); it != s.end(); ++it)
-		wprintw(m_window, "%c", *it);
+	waddnstr(m_window, s.c_str(), s.length());
 	return *this;
 }
 
 Window &Window::operator<<(const std::wstring &ws)
 {
-	for (auto it = ws.begin(); it != ws.end(); ++it)
-		wprintw(m_window, "%lc", *it);
+#	ifdef NCMPCPP_UNICODE
+	waddnwstr(m_window, ws.c_str(), ws.length());
+#	else
+	wprintw(m_window, "%lc", ws.c_str());
+#	endif // NCMPCPP_UNICODE
 	return *this;
 }
 

@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2008-2013 by Andrzej Rybczak                            *
+ *   Copyright (C) 2008-2014 by Andrzej Rybczak                            *
  *   electricityispower@gmail.com                                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -31,13 +31,15 @@
 #include <vorbisfile.h>
 #include <tag.h>
 #include <textidentificationframe.h>
+#include <commentsframe.h>
 #include <xiphcomment.h>
 
 #include "global.h"
 #include "settings.h"
+#include "utility/string.h"
 #include "utility/wide_string.h"
 
-namespace {//
+namespace {
 
 TagLib::StringList tagList(const MPD::MutableSong &s, MPD::Song::GetFunction f)
 {
@@ -48,82 +50,69 @@ TagLib::StringList tagList(const MPD::MutableSong &s, MPD::Song::GetFunction f)
 	return result;
 }
 
-void readCommonTags(MPD::MutableSong &s, TagLib::Tag *tag)
+void readCommonTags(mpd_song *s, TagLib::Tag *tag)
 {
-	s.setTitle(tag->title().to8Bit(true));
-	s.setArtist(tag->artist().to8Bit(true));
-	s.setAlbum(tag->album().to8Bit(true));
-	s.setDate(boost::lexical_cast<std::string>(tag->year()));
-	s.setTrack(boost::lexical_cast<std::string>(tag->track()));
-	s.setGenre(tag->genre().to8Bit(true));
-	s.setComment(tag->comment().to8Bit(true));
+	Tags::setAttribute(s, "Title", tag->title().to8Bit(true));
+	Tags::setAttribute(s, "Artist", tag->artist().to8Bit(true));
+	Tags::setAttribute(s, "Album", tag->album().to8Bit(true));
+	Tags::setAttribute(s, "Date", boost::lexical_cast<std::string>(tag->year()));
+	Tags::setAttribute(s, "Track", boost::lexical_cast<std::string>(tag->track()));
+	Tags::setAttribute(s, "Genre", tag->genre().to8Bit(true));
+	Tags::setAttribute(s, "Comment", tag->comment().to8Bit(true));
 }
 
-void readID3v1Tags(MPD::MutableSong &s, TagLib::ID3v1::Tag *tag)
+void readID3v1Tags(mpd_song *s, TagLib::ID3v1::Tag *tag)
 {
 	readCommonTags(s, tag);
 }
 
-void readID3v2Tags(MPD::MutableSong &s, TagLib::ID3v2::Tag *tag)
+void readID3v2Tags(mpd_song *s, TagLib::ID3v2::Tag *tag)
 {
-	auto readFrame = [&s](const TagLib::ID3v2::FrameList &list, MPD::MutableSong::SetFunction f) {
-		unsigned idx = 0;
-		for (auto it = list.begin(); it != list.end(); ++it, ++idx)
+	auto readFrame = [s](const TagLib::ID3v2::FrameList &fields, const char *name) {
+		for (const auto &field : fields)
 		{
-			if (auto textFrame = dynamic_cast<TagLib::ID3v2::TextIdentificationFrame *>(*it))
+			if (auto textFrame = dynamic_cast<TagLib::ID3v2::TextIdentificationFrame *>(field))
 			{
 				auto values = textFrame->fieldList();
-				for (auto value = values.begin(); value != values.end(); ++value, ++idx)
-					(s.*f)(value->to8Bit(true), idx);
+				for (const auto &value : values)
+					Tags::setAttribute(s, name, value.to8Bit(true));
 			}
 			else
-				(s.*f)((*it)->toString().to8Bit(true), idx);
+				Tags::setAttribute(s, name, field->toString().to8Bit(true));
 		}
 	};
 	auto &frames = tag->frameListMap();
-	readFrame(frames["TIT2"], &MPD::MutableSong::setTitle);
-	readFrame(frames["TPE1"], &MPD::MutableSong::setArtist);
-	readFrame(frames["TPE2"], &MPD::MutableSong::setAlbumArtist);
-	readFrame(frames["TALB"], &MPD::MutableSong::setAlbum);
-	readFrame(frames["TDRC"], &MPD::MutableSong::setDate);
-	readFrame(frames["TRCK"], &MPD::MutableSong::setTrack);
-	readFrame(frames["TCON"], &MPD::MutableSong::setGenre);
-	readFrame(frames["TCOM"], &MPD::MutableSong::setComposer);
-	readFrame(frames["TPE3"], &MPD::MutableSong::setPerformer);
-	readFrame(frames["TPOS"], &MPD::MutableSong::setDisc);
-	readFrame(frames["COMM"], &MPD::MutableSong::setComment);
+	readFrame(frames["TIT2"], "Title");
+	readFrame(frames["TPE1"], "Artist");
+	readFrame(frames["TPE2"], "AlbumArtist");
+	readFrame(frames["TALB"], "Album");
+	readFrame(frames["TDRC"], "Date");
+	readFrame(frames["TRCK"], "Track");
+	readFrame(frames["TCON"], "Genre");
+	readFrame(frames["TCOM"], "Composer");
+	readFrame(frames["TPE3"], "Performer");
+	readFrame(frames["TPOS"], "Disc");
+	readFrame(frames["COMM"], "Comment");
 }
 
-void readXiphComments(MPD::MutableSong &s, TagLib::Ogg::XiphComment *tag)
+void readXiphComments(mpd_song *s, TagLib::Ogg::XiphComment *tag)
 {
-	auto readField = [&s](const TagLib::StringList &list, MPD::MutableSong::SetFunction f) {
-		unsigned idx = 0;
-		for (auto it = list.begin(); it != list.end(); ++it, ++idx)
-			(s.*f)(it->to8Bit(true), idx);
+	auto readField = [s](const TagLib::StringList &fields, const char *name) {
+		for (const auto &field : fields)
+			Tags::setAttribute(s, name, field.to8Bit(true));
 	};
 	auto &fields = tag->fieldListMap();
-	readField(fields["TITLE"], &MPD::MutableSong::setTitle);
-	readField(fields["ARTIST"], &MPD::MutableSong::setArtist);
-	readField(fields["ALBUMARTIST"], &MPD::MutableSong::setAlbumArtist);
-	readField(fields["ALBUM"], &MPD::MutableSong::setAlbum);
-	readField(fields["DATE"], &MPD::MutableSong::setDate);
-	readField(fields["TRACKNUMBER"], &MPD::MutableSong::setTrack);
-	readField(fields["GENRE"], &MPD::MutableSong::setGenre);
-	readField(fields["COMPOSER"], &MPD::MutableSong::setComposer);
-	readField(fields["PERFORMER"], &MPD::MutableSong::setPerformer);
-	readField(fields["DISCNUMBER"], &MPD::MutableSong::setDisc);
-	readField(fields["COMMENT"], &MPD::MutableSong::setComment);
-}
-
-void clearID3v1Tags(TagLib::ID3v1::Tag *tag)
-{
-	tag->setTitle(TagLib::String::null);
-	tag->setArtist(TagLib::String::null);
-	tag->setAlbum(TagLib::String::null);
-	tag->setYear(0);
-	tag->setTrack(0);
-	tag->setGenre(TagLib::String::null);
-	tag->setComment(TagLib::String::null);
+	readField(fields["TITLE"], "Title");
+	readField(fields["ARTIST"], "Artist");
+	readField(fields["ALBUMARTIST"], "AlbumArtist");
+	readField(fields["ALBUM"], "Album");
+	readField(fields["DATE"], "Date");
+	readField(fields["TRACKNUMBER"], "Track");
+	readField(fields["GENRE"], "Genre");
+	readField(fields["COMPOSER"], "Composer");
+	readField(fields["PERFORMER"], "Performer");
+	readField(fields["DISCNUMBER"], "Disc");
+	readField(fields["COMMENT"], "Comment");
 }
 
 void writeCommonTags(const MPD::MutableSong &s, TagLib::Tag *tag)
@@ -151,9 +140,20 @@ void writeID3v2Tags(const MPD::MutableSong &s, TagLib::ID3v2::Tag *tag)
 		tag->removeFrames(type);
 		if (!list.isEmpty())
 		{
-			auto frame = new TagLib::ID3v2::TextIdentificationFrame(type, TagLib::String::UTF8);
-			frame->setText(list);
-			tag->addFrame(frame);
+			if (type == "COMM") // comment needs to be handled separately
+			{
+				auto frame = new TagLib::ID3v2::CommentsFrame(TagLib::String::UTF8);
+				// apparently there can't be multiple comments,
+				// so if there is more than one, join them.
+				frame->setText(join(list, TagLib::String(MPD::Song::TagsSeparator, TagLib::String::UTF8)));
+				tag->addFrame(frame);
+			}
+			else
+			{
+				auto frame = new TagLib::ID3v2::TextIdentificationFrame(type, TagLib::String::UTF8);
+				frame->setText(list);
+				tag->addFrame(frame);
+			}
 		}
 	};
 	writeID3v2("TIT2", tagList(s, &MPD::Song::getTitle));
@@ -215,7 +215,13 @@ Tags::ReplayGainInfo getReplayGain(TagLib::Ogg::XiphComment *tag)
 
 }
 
-namespace Tags {//
+namespace Tags {
+
+void setAttribute(mpd_song *s, const char *name, const std::string &value)
+{
+	mpd_pair pair = { name, value.c_str() };
+	mpd_song_feed(s, &pair);
+}
 
 bool extendedSetSupported(const TagLib::File *f)
 {
@@ -240,20 +246,21 @@ ReplayGainInfo readReplayGain(TagLib::File *f)
 	return result;
 }
 
-void read(MPD::MutableSong &s)
+void read(mpd_song *s)
 {
-	TagLib::FileRef f(s.getURI().c_str());
+	TagLib::FileRef f(mpd_song_get_uri(s));
 	if (f.isNull())
 		return;
 	
-	s.setDuration(f.audioProperties()->length());
+	setAttribute(s, "Time", boost::lexical_cast<std::string>(f.audioProperties()->length()));
 	
 	if (auto mpeg_file = dynamic_cast<TagLib::MPEG::File *>(f.file()))
 	{
-		if (auto id3v1 = mpeg_file->ID3v1Tag())
-			readID3v1Tags(s, id3v1);
+		// prefer id3v2 only if available
 		if (auto id3v2 = mpeg_file->ID3v2Tag())
 			readID3v2Tags(s, id3v2);
+		else if (auto id3v1 = mpeg_file->ID3v1Tag())
+			readID3v1Tags(s, id3v1);
 	}
 	else if (auto ogg_file = dynamic_cast<TagLib::Ogg::Vorbis::File *>(f.file()))
 	{
@@ -280,10 +287,15 @@ bool write(MPD::MutableSong &s)
 	if (f.isNull())
 		return false;
 	
-	if (auto mp3_file = dynamic_cast<TagLib::MPEG::File *>(f.file()))
+	bool saved = false;
+	if (auto mpeg_file = dynamic_cast<TagLib::MPEG::File *>(f.file()))
 	{
-		clearID3v1Tags(mp3_file->ID3v1Tag());
-		writeID3v2Tags(s, mp3_file->ID3v2Tag(true));
+		writeID3v2Tags(s, mpeg_file->ID3v2Tag(true));
+		// write id3v2.4 tags only
+		if (!mpeg_file->save(TagLib::MPEG::File::ID3v2, true, 4, false))
+			return false;
+		// do not call generic save() as it will duplicate tags
+		saved = true;
 	}
 	else if (auto ogg_file = dynamic_cast<TagLib::Ogg::Vorbis::File *>(f.file()))
 	{
@@ -296,15 +308,15 @@ bool write(MPD::MutableSong &s)
 	else
 		writeCommonTags(s, f.tag());
 	
-	if (!f.save())
+	if (!saved && !f.save())
 		return false;
-	
-	if (!s.getNewURI().empty())
+
+	if (!s.getNewName().empty())
 	{
 		std::string new_name;
 		if (s.isFromDatabase())
 			new_name += Config.mpd_music_dir;
-		new_name += s.getDirectory() + "/" + s.getNewURI();
+		new_name += s.getDirectory() + "/" + s.getNewName();
 		if (std::rename(old_name.c_str(), new_name.c_str()) == 0 && !s.isFromDatabase())
 		{
 			// FIXME

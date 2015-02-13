@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2008-2013 by Andrzej Rybczak                            *
+ *   Copyright (C) 2008-2014 by Andrzej Rybczak                            *
  *   electricityispower@gmail.com                                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -21,12 +21,11 @@
 #ifndef NCMPCPP_GLOBAL_H
 #define NCMPCPP_GLOBAL_H
 
-#include <sys/time.h>
-
+#include <boost/date_time/posix_time/posix_time_types.hpp>
 #include "mpdpp.h"
 #include "screen.h"
 
-namespace Global {//
+namespace Global {
 
 // currently active screen (displayed in main window)
 extern BaseScreen *myScreen;
@@ -57,7 +56,7 @@ extern bool SeekingInProgress;
 extern std::string VolumeState;
 
 // global timer
-extern timeval Timer;
+extern boost::posix_time::ptime Timer;
 
 }
 

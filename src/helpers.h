@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2008-2013 by Andrzej Rybczak                            *
+ *   Copyright (C) 2008-2014 by Andrzej Rybczak                            *
  *   electricityispower@gmail.com                                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -27,7 +27,61 @@
 #include "settings.h"
 #include "status.h"
 #include "utility/string.h"
+#include "utility/type_conversions.h"
 #include "utility/wide_string.h"
+
+template <typename Iterator, typename PredicateT>
+Iterator wrappedSearch(Iterator begin, Iterator current, Iterator end,
+                       const PredicateT &pred, bool wrap, bool skip_current)
+{
+	if (skip_current)
+		++current;
+	auto it = std::find_if(current, end, pred);
+	if (it == end && wrap)
+	{
+		it = std::find_if(begin, current, pred);
+		if (it == current)
+			it = end;
+	}
+	return it;
+}
+
+template <typename ItemT, typename PredicateT>
+bool search(NC::Menu<ItemT> &m, const PredicateT &pred,
+            SearchDirection direction, bool wrap, bool skip_current)
+{
+	bool result = false;
+	if (pred.defined())
+	{
+		switch (direction)
+		{
+			case SearchDirection::Backward:
+			{
+				auto it = wrappedSearch(m.rbegin(), m.rcurrent(), m.rend(),
+					pred, wrap, skip_current
+				);
+				if (it != m.rend())
+				{
+					m.highlight(it.base()-m.begin()-1);
+					result = true;
+				}
+				break;
+			}
+			case SearchDirection::Forward:
+			{
+				auto it = wrappedSearch(m.begin(), m.current(), m.end(),
+					pred, wrap, skip_current
+				);
+				if (it != m.end())
+				{
+					m.highlight(it-m.begin());
+					result = true;
+				}
+			}
+		}
+	}
+	return result;
+}
 
 inline HasColumns *hasColumns(BaseScreen *screen)
 {
@@ -52,7 +106,7 @@ inline MPD::Song *currentSong(BaseScreen *screen)
 {
 	MPD::Song *ptr = 0;
 	auto pl = proxySongList(screen);
-	if (pl)
+	if (pl && !pl.empty())
 		ptr = pl.currentSong();
 	return ptr;
 }
@@ -95,7 +149,7 @@ template <typename T>
 void selectCurrentIfNoneSelected(NC::Menu<T> &m)
 {
 	if (!hasSelected(m.begin(), m.end()))
-		m.current().setSelected(true);
+		m.current()->setSelected(true);
 }
 
 template <typename Iterator>
@@ -112,54 +166,6 @@ void reverseSelectionHelper(Iterator first, Iterator last)
 {
 	for (; first != last; ++first)
 		first->setSelected(!first->isSelected());
-}
-
-template <typename T, typename F>
-void withUnfilteredMenu(NC::Menu<T> &m, F action)
-{
-	bool is_filtered = m.isFiltered();
-	auto cleanup = [&]() {
-		if (is_filtered)
-			m.showFiltered();
-	};
-	m.showAll();
-	try
-	{
-		action();
-	}
-	catch (...)
-	{
-		cleanup();
-		throw;
-	}
-	cleanup();
-}
-
-template <typename T, typename F>
-void withUnfilteredMenuReapplyFilter(NC::Menu<T> &m, F action)
-{
-	auto cleanup = [&]() {
-		if (m.getFilter())
-		{
-			m.applyCurrentFilter(m.begin(), m.end());
-			if (m.empty())
-			{
-				m.clearFilter();
-				m.clearFilterResults();
-			}
-		}
-	};
-	m.showAll();
-	try
-	{
-		action();
-	}
-	catch (...)
-	{
-		cleanup();
-		throw;
-	}
-	cleanup();
 }
 
 template <typename F>
@@ -229,53 +235,52 @@ void moveSelectedItemsDown(NC::Menu<MPD::Song> &m, F swap_fun)
 template <typename F>
 void moveSelectedItemsTo(NC::Menu<MPD::Song> &m, F move_fun)
 {
-	auto cur_ptr = &m.current().value();
-	withUnfilteredMenu(m, [&]() {
-		// this is kinda shitty, but there is no other way to know
-		// what position current item has in unfiltered menu.
-		ptrdiff_t pos = 0;
-		for (auto it = m.begin(); it != m.end(); ++it, ++pos)
-			if (&it->value() == cur_ptr)
-				break;
-		auto begin = m.begin();
-		auto list = getSelected(m.begin(), m.end());
-		// we move only truly selected items
-		if (list.empty())
-			return;
-		// we can't move to the middle of selected items
-		//(this also handles case when list.size() == 1)
-		if (pos >= (list.front() - begin) && pos <= (list.back() - begin))
-			return;
-		int diff = pos - (list.front() - begin);
-		Mpd.StartCommandsList();
-		if (diff > 0) // move down
+	// FIXME: make it not look like shit
+	auto cur_ptr = &m.current()->value();
+	// this is kinda shitty, but there is no other way to know
+	// what position current item has in unfiltered menu.
+	ptrdiff_t pos = 0;
+	for (auto it = m.begin(); it != m.end(); ++it, ++pos)
+		if (&it->value() == cur_ptr)
+			break;
+	auto begin = m.begin();
+	auto list = getSelected(m.begin(), m.end());
+	// we move only truly selected items
+	if (list.empty())
+		return;
+	// we can't move to the middle of selected items
+	//(this also handles case when list.size() == 1)
+	if (pos >= (list.front() - begin) && pos <= (list.back() - begin))
+		return;
+	int diff = pos - (list.front() - begin);
+	Mpd.StartCommandsList();
+	if (diff > 0) // move down
+	{
+		pos -= list.size();
+		size_t i = list.size()-1;
+		for (auto it = list.rbegin(); it != list.rend(); ++it, --i)
+			move_fun(&Mpd, *it - begin, pos+i);
+		Mpd.CommitCommandsList();
+		i = list.size()-1;
+		for (auto it = list.rbegin(); it != list.rend(); ++it, --i)
 		{
-			pos -= list.size();
-			size_t i = list.size()-1;
-			for (auto it = list.rbegin(); it != list.rend(); ++it, --i)
-				move_fun(&Mpd, *it - begin, pos+i);
-			Mpd.CommitCommandsList();
-			i = list.size()-1;
-			for (auto it = list.rbegin(); it != list.rend(); ++it, --i)
-			{
-				(*it)->setSelected(false);
-				m[pos+i].setSelected(true);
-			}
+			(*it)->setSelected(false);
+			m[pos+i].setSelected(true);
 		}
-		else if (diff < 0) // move up
+	}
+	else if (diff < 0) // move up
+	{
+		size_t i = 0;
+		for (auto it = list.begin(); it != list.end(); ++it, ++i)
+			move_fun(&Mpd, *it - begin, pos+i);
+		Mpd.CommitCommandsList();
+		i = 0;
+		for (auto it = list.begin(); it != list.end(); ++it, ++i)
 		{
-			size_t i = 0;
-			for (auto it = list.begin(); it != list.end(); ++it, ++i)
-				move_fun(&Mpd, *it - begin, pos+i);
-			Mpd.CommitCommandsList();
-			i = 0;
-			for (auto it = list.begin(); it != list.end(); ++it, ++i)
-			{
-				(*it)->setSelected(false);
-				m[pos+i].setSelected(true);
-			}
+			(*it)->setSelected(false);
+			m[pos+i].setSelected(true);
 		}
-	});
+	}
 }
 
 template <typename F>
@@ -287,28 +292,14 @@ void deleteSelectedSongs(NC::Menu<MPD::Song> &m, F delete_fun)
 	// ignore all songs that are not filtered. we use the fact
 	// that both ranges share the same values, ie. we can compare
 	// pointers to check whether an item belongs to filtered range.
-	NC::Menu<MPD::Song>::Iterator begin;
-	NC::Menu<MPD::Song>::ReverseIterator real_begin, real_end;
-	withUnfilteredMenu(m, [&]() {
-		// obtain iterators for unfiltered range
-		begin = m.begin() + 1; // cancel reverse iterator's offset
-		real_begin = m.rbegin();
-		real_end = m.rend();
-	});
-	// get iterator to filtered range
-	auto cur_filtered = m.rbegin();
+	auto begin = ++m.begin();
 	Mpd.StartCommandsList();
-	for (auto it = real_begin; it != real_end; ++it)
+	for (auto it = m.rbegin(); it != m.rend(); ++it)
 	{
-		// current iterator belongs to filtered range, proceed
-		if (&*it == &*cur_filtered)
+		if (it->isSelected())
 		{
-			if (it->isSelected())
-			{
-				it->setSelected(false);
-				delete_fun(Mpd, it.base() - begin);
-			}
-			++cur_filtered;
+			it->setSelected(false);
+			delete_fun(Mpd, it.base() - begin);
 		}
 	}
 	Mpd.CommitCommandsList();
@@ -319,19 +310,6 @@ void cropPlaylist(NC::Menu<MPD::Song> &m, F delete_fun)
 {
 	reverseSelectionHelper(m.begin(), m.end());
 	deleteSelectedSongs(m, delete_fun);
-}
-
-template <typename F, typename G>
-void clearPlaylist(NC::Menu<MPD::Song> &m, F delete_fun, G clear_fun)
-{
-	if (m.isFiltered())
-	{
-		for (auto it = m.begin(); it != m.end(); ++it)
-			it->setSelected(true);
-		deleteSelectedSongs(m, delete_fun);
-	}
-	else
-		clear_fun(Mpd);
 }
 
 template <typename ItemT>
@@ -351,87 +329,6 @@ template <typename Iterator> std::string getSharedDirectory(Iterator first, Iter
 			break;
 	}
 	return result;
-}
-
-template <typename Iterator>
-void stringToBuffer(Iterator first, Iterator last, NC::BasicBuffer<typename Iterator::value_type> &buf)
-{
-	for (auto it = first; it != last; ++it)
-	{
-		if (*it == '$')
-		{
-			if (++it == last)
-			{
-				buf << '$';
-				break;
-			}
-			else if (isdigit(*it))
-			{
-				buf << NC::Color(*it-'0');
-			}
-			else
-			{
-				switch (*it)
-				{
-					case 'b':
-						buf << NC::Format::Bold;
-						break;
-					case 'u':
-						buf << NC::Format::Underline;
-						break;
-					case 'a':
-						buf << NC::Format::AltCharset;
-						break;
-					case 'r':
-						buf << NC::Format::Reverse;
-						break;
-					case '/':
-						if (++it == last)
-						{
-							buf << '$' << '/';
-							break;
-						}
-						switch (*it)
-						{
-							case 'b':
-								buf << NC::Format::NoBold;
-								break;
-							case 'u':
-								buf << NC::Format::NoUnderline;
-								break;
-							case 'a':
-								buf << NC::Format::NoAltCharset;
-								break;
-							case 'r':
-								buf << NC::Format::NoReverse;
-								break;
-							default:
-								buf << '$' << *--it;
-								break;
-						}
-						break;
-					default:
-						buf << *--it;
-						break;
-				}
-			}
-		}
-		else if (*it == MPD::Song::FormatEscapeCharacter)
-		{
-			// treat '$' as a normal character if song format escape char is prepended to it
-			if (++it == last || *it != '$')
-				--it;
-			buf << *it;
-		}
-		else
-			buf << *it;
-	}
-}
-
-template <typename CharT>
-void stringToBuffer(const std::basic_string<CharT> &s, NC::BasicBuffer<CharT> &buf)
-{
-	stringToBuffer(s.begin(), s.end(), buf);
 }
 
 template <typename T> void ShowTime(T &buf, size_t length, bool short_names)
@@ -541,6 +438,8 @@ inline const char *withErrors(bool success)
 }
 
 bool addSongToPlaylist(const MPD::Song &s, bool play, int position = -1);
+
+std::string timeFormat(const char *format, time_t t);
 
 std::string Timestamp(time_t t);
 

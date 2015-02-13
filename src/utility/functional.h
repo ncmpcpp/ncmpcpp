@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2008-2013 by Andrzej Rybczak                            *
+ *   Copyright (C) 2008-2014 by Andrzej Rybczak                            *
  *   electricityispower@gmail.com                                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -18,28 +18,40 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
-#ifndef NCMPCPP_EXEC_ITEM_H
-#define NCMPCPP_EXEC_ITEM_H
+#ifndef NCMPCPP_UTILITY_FUNCTIONAL_H
+#define NCMPCPP_UTILITY_FUNCTIONAL_H
 
-#include <functional>
+#include <boost/locale/encoding_utf.hpp>
+#include <utility>
 
-template <typename ItemT, typename FunType> struct ExecItem
+// identity function object
+struct id_
 {
-	typedef ItemT Item;
-	typedef std::function<FunType> Function;
-	
-	ExecItem() { }
-	ExecItem(const Item &item_, Function f) : m_item(item_), m_exec(f) { }
-	
-	Function &exec() { return m_exec; }
-	const Function &exec() const { return m_exec; }
-	
-	Item &item() { return m_item; }
-	const Item &item() const { return m_item; }
-	
-private:
-	Item m_item;
-	Function m_exec;
+	template <typename ValueT>
+	constexpr auto operator()(ValueT &&v) const noexcept
+		-> decltype(std::forward<ValueT>(v))
+	{
+		return std::forward<ValueT>(v);
+	}
 };
 
-#endif // NCMPCPP_EXEC_ITEM_H
+// convert string to appropriate type
+template <typename TargetT, typename SourceT>
+struct convertString
+{
+	static std::basic_string<TargetT> apply(const std::basic_string<SourceT> &s)
+	{
+		return boost::locale::conv::utf_to_utf<TargetT>(s);
+	}
+};
+template <typename TargetT>
+struct convertString<TargetT, TargetT>
+{
+	static const std::basic_string<TargetT> &apply(const std::basic_string<TargetT> &s)
+	{
+		return s;
+	}
+};
+
+
+#endif // NCMPCPP_UTILITY_FUNCTIONAL_H

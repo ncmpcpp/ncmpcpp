@@ -2,6 +2,7 @@ bin_PROGRAMS = ncmpcpp
 ncmpcpp_SOURCES = \
 	utility/comparators.cpp \
 	utility/html.cpp \
+	utility/option_parser.cpp \
 	utility/string.cpp \
 	utility/type_conversions.cpp \
 	utility/wide_string.cpp \
@@ -10,10 +11,11 @@ ncmpcpp_SOURCES = \
 	browser.cpp \
 	charset.cpp \
 	clock.cpp \
-	cmdargs.cpp \
+	configuration.cpp \
 	curl_handle.cpp \
 	display.cpp \
-	error.cpp \
+	enums.cpp \
+	format.cpp \
 	global.cpp \
 	help.cpp \
 	helpers.cpp \
@@ -56,7 +58,9 @@ ncmpcpp_LDFLAGS = $(all_libraries)
 noinst_HEADERS = \
 	utility/comparators.h \
 	utility/conversion.h \
+	utility/functional.h \
 	utility/html.h \
+	utility/option_parser.h \
 	utility/string.h \
 	utility/type_conversions.h \
 	utility/wide_string.h \
@@ -64,11 +68,11 @@ noinst_HEADERS = \
 	browser.h \
 	charset.h \
 	clock.h \
-	cmdargs.h \
+	configuration.h \
 	curl_handle.h \
 	display.h \
-	error.h \
-	exec_item.h \
+	enums.h \
+	format.h \
 	global.h \
 	help.h \
 	helpers.h \
@@ -86,6 +90,7 @@ noinst_HEADERS = \
 	playlist_editor.h \
 	proxy_song_list.h \
 	regex_filter.h \
+	runnable_item.h \
 	screen.h \
 	screen_switcher.h \
 	screen_type.h \

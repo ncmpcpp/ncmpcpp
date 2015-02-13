@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2008-2013 by Andrzej Rybczak                            *
+ *   Copyright (C) 2008-2014 by Andrzej Rybczak                            *
  *   electricityispower@gmail.com                                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -21,13 +21,13 @@
 #ifndef NCMPCPP_SORT_PLAYLIST_H
 #define NCMPCPP_SORT_PLAYLIST_H
 
-#include "exec_item.h"
+#include "runnable_item.h"
 #include "interfaces.h"
 #include "screen.h"
 #include "song.h"
 
 struct SortPlaylistDialog
-: Screen<NC::Menu<ExecItem<std::pair<std::string, MPD::Song::GetFunction>, void()>>>, Tabbable
+: Screen<NC::Menu<RunnableItem<std::pair<std::string, MPD::Song::GetFunction>, void()>>>, Tabbable
 {
 	typedef SortPlaylistDialog Self;
 	

@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2008-2013 by Andrzej Rybczak                            *
+ *   Copyright (C) 2008-2014 by Andrzej Rybczak                            *
  *   electricityispower@gmail.com                                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -19,6 +19,7 @@
  ***************************************************************************/
 
 #include <algorithm>
+#include <time.h>
 
 #include "helpers.h"
 #include "playlist.h"
@@ -27,7 +28,7 @@
 bool addSongToPlaylist(const MPD::Song &s, bool play, int position)
 {
 	bool result = false;
-	if (Config.ncmpc_like_songs_adding && myPlaylist->checkForSong(s))
+	if (Config.space_add_mode == SpaceAddMode::AddRemove && myPlaylist->checkForSong(s))
 	{
 		auto &w = myPlaylist->main();
 		if (play)
@@ -52,14 +53,23 @@ bool addSongToPlaylist(const MPD::Song &s, bool play, int position)
 		int id = Mpd.AddSong(s, position);
 		if (id >= 0)
 		{
-			Statusbar::msg("Added to playlist: %s",
-				s.toString(Config.song_status_format_no_colors, Config.tags_separator).c_str()
+			Statusbar::printf("Added to playlist: %s",
+				Format::stringify<char>(Config.song_status_format, &s)
 			);
 			if (play)
 				Mpd.PlayID(id);
 			result = true;
 		}
 	}
+	return result;
+}
+
+std::string timeFormat(const char *format, time_t t)
+{
+	char result[32];
+	tm tinfo;
+	localtime_r(&t, &tinfo);
+	strftime(result, sizeof(result), format, &tinfo);
 	return result;
 }
 

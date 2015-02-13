@@ -1,7 +1,7 @@
 AC_INIT(configure.ac)
 
 AC_CONFIG_HEADERS(config.h)
-AM_INIT_AUTOMAKE(ncmpcpp, 0.6_pre)
+AM_INIT_AUTOMAKE(ncmpcpp, 0.7_pre)
 
 AC_PREREQ(2.59)
 
@@ -15,7 +15,6 @@ AC_ARG_ENABLE(clock, AS_HELP_STRING([--enable-clock], [Enable clock screen @<:@d
 AC_ARG_ENABLE(unicode, AS_HELP_STRING([--enable-unicode], [Enable utf8 support @<:@default=yes@:>@]), [unicode=$enableval], [unicode=yes])
 AC_ARG_WITH(curl, AS_HELP_STRING([--with-curl], [Enable fetching lyrics from the Internet @<:@default=auto@:>@]), [curl=$withval], [curl=auto])
 AC_ARG_WITH(fftw, AS_HELP_STRING([--with-fftw], [Enable fftw support (required for frequency spectrum vizualization) @<:@default=auto@:>@]), [fftw=$withval], [fftw=auto])
-AC_ARG_WITH(pdcurses, AS_HELP_STRING([--with-pdcurses[=LIBNAME]], [Link against pdcurses instead of ncurses @<:@default=XCurses@:>@]), [pdcurses=$withval], [pdcurses=no])
 AC_ARG_WITH(taglib, AS_HELP_STRING([--with-taglib], [Enable tag editor @<:@default=auto@:>@]), [taglib=$withval], [taglib=auto])
 
 if test "$outputs" = "yes"; then
@@ -122,6 +121,12 @@ AC_CHECK_LIB(boost_system$BOOST_LIB_SUFFIX, main, LDFLAGS="$LDFLAGS -lboost_syst
 	AC_MSG_ERROR([no boost.system library found])
 )
 
+dnl =============================
+dnl = checking for boost.format =
+dnl =============================
+AC_CHECK_HEADERS([boost/format.hpp], ,
+	AC_MSG_ERROR(boost/format.hpp is missing)
+)
 
 dnl =============================
 dnl = checking for boost.locale =
@@ -131,6 +136,23 @@ AC_CHECK_HEADERS([boost/locale.hpp], ,
 )
 AC_CHECK_LIB(boost_locale$BOOST_LIB_SUFFIX, main, LDFLAGS="$LDFLAGS -lboost_locale$BOOST_LIB_SUFFIX",
 	AC_MSG_ERROR([no boost.locale library found])
+)
+
+dnl =================================
+dnl = checking for boost.posix_time =
+dnl =================================
+AC_CHECK_HEADERS([boost/date_time/posix_time/posix_time.hpp], ,
+	AC_MSG_ERROR(boost/date_time/posix_time/posix_time.hpp is missing)
+)
+
+dnl ======================================
+dnl = checking for boost.program_options =
+dnl ======================================
+AC_CHECK_HEADERS([boost/program_options.hpp], ,
+	AC_MSG_ERROR(boost/program_options.hpp is missing)
+)
+AC_CHECK_LIB(boost_program_options$BOOST_LIB_SUFFIX, main, LDFLAGS="$LDFLAGS -lboost_program_options$BOOST_LIB_SUFFIX",
+	AC_MSG_ERROR([no boost.program_options library found])
 )
 
 dnl ============================
@@ -162,7 +184,7 @@ AC_CHECK_LIB(regex, regcomp, LDFLAGS="$LDFLAGS -lregex", )
 dnl ================================
 dnl = checking for various headers =
 dnl ================================
-AC_CHECK_HEADERS([dirent.h regex.h], , AC_MSG_ERROR(vital headers missing))
+AC_CHECK_HEADERS([netinet/tcp.h netinet/in.h], , AC_MSG_ERROR(vital headers missing))
 AC_CHECK_HEADERS([langinfo.h], , AC_MSG_WARN(locale detection disabled))
 
 dnl ==============================
@@ -203,35 +225,23 @@ AC_CHECK_HEADERS([pthread.h],
 dnl ========================
 dnl = checking for ncurses =
 dnl ========================
-if test "$pdcurses" = "no" ; then
-	if test "$unicode" = "yes" ; then
-		curses_config_bin="ncursesw6-config ncursesw5-config"
-		AC_DEFINE([NCMPCPP_UNICODE], [1], [enables unicode support])
-	else
-		curses_config_bin="ncurses6-config ncurses5-config"
-	fi
+if test "$unicode" = "yes" ; then
+	curses_config_bin="ncursesw6-config ncursesw5-config"
+	AC_DEFINE([NCMPCPP_UNICODE], [1], [enables unicode support])
 else
-	if test "$pdcurses" = "yes" ; then
-		pdcurses_lib=XCurses
-		curses_config_bin=xcurses-config
-	else
-		pdcurses_lib=$pdcurses
-	fi
-	AC_DEFINE([USE_PDCURSES], [1], [enables pdcurses support])
+	curses_config_bin="ncurses6-config ncurses5-config"
 fi
+
 AC_PATH_PROGS(CURSES_CONFIG, $curses_config_bin)
 if test "$CURSES_CONFIG" != "" ; then
 	CPPFLAGS="$CPPFLAGS `$CURSES_CONFIG --cflags`"
 	LDFLAGS="$LDFLAGS `$CURSES_CONFIG --libs`"
 fi
-if test "$pdcurses" = "no" ; then
-	AC_CHECK_LIB(ncursesw, initscr,
-		curses_lib=ncursesw,
-		curses_lib=ncurses
-	)
-else
-	curses_lib=$pdcurses_lib
-fi
+AC_CHECK_LIB(ncursesw, initscr,
+	curses_lib=ncursesw,
+	curses_lib=ncurses
+)
+
 AC_CHECK_LIB($curses_lib, initscr,
 	if test "$CURSES_CONFIG" = "" ; then
 		LDFLAGS="$LDFLAGS -l$curses_lib"
@@ -239,9 +249,6 @@ AC_CHECK_LIB($curses_lib, initscr,
 	,
 	AC_MSG_ERROR([$curses_lib library is required])
 	)
-if test "$pdcurses" != "no" ; then
-	AC_CHECK_LIB($curses_lib, Xinitscr, AC_DEFINE([XCURSES], [1], [x11 pdcurses available]), )
-fi
 AC_CHECK_HEADERS([curses.h], , AC_MSG_ERROR([missing curses.h header]))
 
 dnl ======================

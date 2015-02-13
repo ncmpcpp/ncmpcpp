@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2008-2013 by Andrzej Rybczak                            *
+ *   Copyright (C) 2008-2014 by Andrzej Rybczak                            *
  *   electricityispower@gmail.com                                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -18,10 +18,14 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
+#ifndef NCMPCPP_UTILITY_CONVERSION_H
+#define NCMPCPP_UTILITY_CONVERSION_H
+
 #include <boost/format.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/type_traits/is_unsigned.hpp>
 
+#include "config.h"
 #include "gcc.h"
 
 struct ConversionError
@@ -35,7 +39,7 @@ private:
 	std::string m_source_value;
 };
 
-struct OutOfBounds
+struct OutOfBounds : std::exception
 {
 	const std::string &errorMessage() { return m_error_message; }
 	
@@ -43,23 +47,25 @@ struct OutOfBounds
 	GNUC_NORETURN static void raise(const Type &value, const Type &lbound, const Type &ubound)
 	{
 		throw OutOfBounds((boost::format(
-			"Value is out of bounds ([%1%, %2%] expected, %3% given)") % lbound % ubound % value).str());
+			"value is out of bounds ([%1%, %2%] expected, %3% given)") % lbound % ubound % value).str());
 	}
 	
 	template <typename Type>
 	GNUC_NORETURN static void raiseLower(const Type &value, const Type &lbound)
 	{
 		throw OutOfBounds((boost::format(
-			"Value is out of bounds ([%1%, ->) expected, %2% given)") % lbound % value).str());
+			"value is out of bounds ([%1%, ->) expected, %2% given)") % lbound % value).str());
 	}
 	
 	template <typename Type>
 	GNUC_NORETURN static void raiseUpper(const Type &value, const Type &ubound)
 	{
 		throw OutOfBounds((boost::format(
-			"Value is out of bounds ((<-, %1%] expected, %2% given)") % ubound % value).str());
+			"value is out of bounds ((<-, %1%] expected, %2% given)") % ubound % value).str());
 	}
 	
+	virtual const char *what() const noexcept OVERRIDE { return m_error_message.c_str(); }
+
 private:
 	OutOfBounds(std::string msg) : m_error_message(msg) { }
 	
@@ -115,3 +121,5 @@ void upperBoundCheck(const Type &value, const Type &ubound)
 	if (value > ubound)
 		OutOfBounds::raiseUpper(value, ubound);
 }
+
+#endif // NCMPCPP_UTILITY_CONVERSION_H

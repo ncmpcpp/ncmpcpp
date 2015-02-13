@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2008-2013 by Andrzej Rybczak                            *
+ *   Copyright (C) 2008-2014 by Andrzej Rybczak                            *
  *   electricityispower@gmail.com                                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -21,12 +21,12 @@
 #ifndef NCMPCPP_SEL_ITEMS_ADDER_H
 #define NCMPCPP_SEL_ITEMS_ADDER_H
 
-#include "exec_item.h"
+#include "runnable_item.h"
 #include "interfaces.h"
 #include "screen.h"
 #include "song.h"
 
-struct SelectedItemsAdder: Screen<NC::Menu<ExecItem<std::string, void()>> *>, Tabbable
+struct SelectedItemsAdder: Screen<NC::Menu<RunnableItem<std::string, void()>> *>, Tabbable
 {
 	typedef SelectedItemsAdder Self;
 	typedef typename std::remove_pointer<WindowType>::type Component;
@@ -77,7 +77,7 @@ private:
 	Component m_playlist_selector;
 	Component m_position_selector;
 	
-	MPD::SongList m_selected_items;
+	std::vector<MPD::Song> m_selected_items;
 };
 
 extern SelectedItemsAdder *mySelectedItemsAdder;

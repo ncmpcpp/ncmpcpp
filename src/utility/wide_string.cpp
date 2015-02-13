@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2008-2013 by Andrzej Rybczak                            *
+ *   Copyright (C) 2008-2014 by Andrzej Rybczak                            *
  *   electricityispower@gmail.com                                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -18,26 +18,32 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
-#include <boost/locale/encoding.hpp>
+#include <boost/locale/encoding_utf.hpp>
+#include <cassert>
 #include "utility/wide_string.h"
 
-std::string ToString(std::wstring ws)
+std::string ToString(const std::wstring &ws)
 {
 	return boost::locale::conv::utf_to_utf<char>(ws);
 }
 
-std::wstring ToWString(std::string s)
+std::wstring ToWString(const std::string &s)
 {
 	return boost::locale::conv::utf_to_utf<wchar_t>(s);
 }
 
 size_t wideLength(const std::wstring &ws)
 {
-	int len = wcswidth(ws.c_str(), -1);
-	if (len < 0)
-		return ws.length();
-	else
-		return len;
+	size_t result = 0;
+	for (const auto &wc : ws)
+	{
+		int len = wcwidth(wc);
+		if (len < 0)
+			++result;
+		else
+			result += len;
+	}
+	return result;
 }
 
 void wideCut(std::wstring &ws, size_t max_length)
@@ -46,7 +52,7 @@ void wideCut(std::wstring &ws, size_t max_length)
 	int remained_len = max_length;
 	for (; i < ws.length(); ++i)
 	{
-		remained_len -= wcwidth(ws[i]);
+		remained_len -= std::max(wcwidth(ws[i]), 1);
 		if (remained_len < 0)
 		{
 			ws.resize(i);

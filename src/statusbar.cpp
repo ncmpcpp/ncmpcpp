@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2008-2013 by Andrzej Rybczak                            *
+ *   Copyright (C) 2008-2014 by Andrzej Rybczak                            *
  *   electricityispower@gmail.com                                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -28,49 +28,31 @@
 
 using Global::wFooter;
 
-namespace {//
+namespace {
 
-timeval statusbarLockTime;
-int statusbarLockDelay = -1;
+bool progressbar_block_update = false;
 
-bool statusbarBlockUpdate = false;
-bool progressbarBlockUpdate = false;
-bool statusbarAllowUnlock = true;
+boost::posix_time::ptime statusbar_lock_time;
+boost::posix_time::seconds statusbar_lock_delay(-1);
 
-void showMessage(int time, const char *format, va_list list)
-{
-	if (statusbarAllowUnlock)
-	{
-		statusbarLockTime = Global::Timer;
-		statusbarLockDelay = time;
-		if (Config.statusbar_visibility)
-			statusbarBlockUpdate = true;
-		else
-			progressbarBlockUpdate = true;
-		wFooter->goToXY(0, Config.statusbar_visibility);
-		*wFooter << NC::Format::NoBold;
-		wmove(wFooter->raw(), Config.statusbar_visibility, 0);
-		vw_printw(wFooter->raw(), format, list);
-		wclrtoeol(wFooter->raw());
-		wFooter->refresh();
-	}
-}
+bool statusbar_block_update = false;
+bool statusbar_allow_unlock = true;
 
 }
 
-void Progressbar::lock()
+Progressbar::ScopedLock::ScopedLock() noexcept
 {
-	progressbarBlockUpdate = true;
+	progressbar_block_update = true;
 }
 
-void Progressbar::unlock()
+Progressbar::ScopedLock::~ScopedLock() noexcept
 {
-	progressbarBlockUpdate = false;
+	progressbar_block_update = false;
 }
 
 bool Progressbar::isUnlocked()
 {
-	return !progressbarBlockUpdate;
+	return !progressbar_block_update;
 }
 
 void Progressbar::draw(unsigned int elapsed, unsigned int time)
@@ -104,59 +86,81 @@ void Progressbar::draw(unsigned int elapsed, unsigned int time)
 		*wFooter << NC::Format::NoBold;
 }
 
-void Statusbar::lock()
+Statusbar::ScopedLock::ScopedLock() noexcept
 {
+	// lock
 	if (Config.statusbar_visibility)
-		statusbarBlockUpdate = true;
+		statusbar_block_update = true;
 	else
-		progressbarBlockUpdate = true;
-	statusbarAllowUnlock = false;
+		progressbar_block_update = true;
+	statusbar_allow_unlock = false;
 }
 
-void Statusbar::unlock()
+Statusbar::ScopedLock::~ScopedLock() noexcept
 {
-	statusbarAllowUnlock = true;
-	if (statusbarLockDelay < 0)
+	// unlock
+	statusbar_allow_unlock = true;
+	if (statusbar_lock_delay.is_negative())
 	{
 		if (Config.statusbar_visibility)
-			statusbarBlockUpdate = false;
+			statusbar_block_update = false;
 		else
-			progressbarBlockUpdate = false;
+			progressbar_block_update = false;
 	}
 	if (Status::State::player() == MPD::psStop)
 	{
-		if (Config.new_design)
-			Progressbar::draw(Status::State::elapsedTime(), myPlaylist->currentSongLength());
-		else
-			put() << wclrtoeol;
+		switch (Config.design)
+		{
+			case Design::Classic:
+				put(); // clear statusbar
+				break;
+			case Design::Alternative:
+				Progressbar::draw(Status::State::elapsedTime(), Status::State::totalTime());
+				break;
+		}
 		wFooter->refresh();
 	}
 }
 
 bool Statusbar::isUnlocked()
 {
-	return !statusbarBlockUpdate;
+	return !statusbar_block_update;
 }
 
 void Statusbar::tryRedraw()
 {
 	using Global::Timer;
-	if (statusbarLockDelay > 0
-	&&  Timer.tv_sec >= statusbarLockTime.tv_sec+statusbarLockDelay)
+	if (statusbar_lock_delay > boost::posix_time::seconds(0)
+	&&  Timer - statusbar_lock_time > statusbar_lock_delay)
 	{
-		statusbarLockDelay = -1;
+		statusbar_lock_delay = boost::posix_time::seconds(-1);
 		
 		if (Config.statusbar_visibility)
-			statusbarBlockUpdate = !statusbarAllowUnlock;
+			statusbar_block_update = !statusbar_allow_unlock;
 		else
-			progressbarBlockUpdate = !statusbarAllowUnlock;
+			progressbar_block_update = !statusbar_allow_unlock;
 		
-		if (Status::State::player() != MPD::psStop && !statusbarBlockUpdate && !progressbarBlockUpdate)
+		if (!statusbar_block_update && !progressbar_block_update)
 		{
-			if (Config.new_design)
-				Progressbar::draw(Status::State::elapsedTime(), myPlaylist->currentSongLength());
-			else
-				Status::Changes::elapsedTime(false);
+			switch (Config.design)
+			{
+				case Design::Classic:
+					switch (Status::State::player())
+					{
+						case MPD::psUnknown:
+						case MPD::psStop:
+							put(); // clear statusbar
+							break;
+						case MPD::psPlay:
+						case MPD::psPause:
+							Status::Changes::elapsedTime(false);
+						break;
+					}
+					break;
+				case Design::Alternative:
+					Progressbar::draw(Status::State::elapsedTime(), Status::State::totalTime());
+					break;
+			}
 			wFooter->refresh();
 		}
 	}
@@ -164,24 +168,24 @@ void Statusbar::tryRedraw()
 
 NC::Window &Statusbar::put()
 {
-	*wFooter << NC::XY(0, Config.statusbar_visibility ? 1 : 0) << wclrtoeol;
+	*wFooter << NC::XY(0, Config.statusbar_visibility ? 1 : 0) << NC::TermManip::ClearToEOL;
 	return *wFooter;
 }
 
-void Statusbar::msg(const char *format, ...)
+void Statusbar::print(int delay, const std::string &message)
 {
-	va_list list;
-	va_start(list, format);
-	showMessage(Config.message_delay_time, format, list);
-	va_end(list);
-}
-
-void Statusbar::msg(int time, const char *format, ...)
-{
-	va_list list;
-	va_start(list, format);
-	showMessage(time, format, list);
-	va_end(list);
+	if (statusbar_allow_unlock)
+	{
+		statusbar_lock_time = Global::Timer;
+		statusbar_lock_delay = boost::posix_time::seconds(delay);
+		if (Config.statusbar_visibility)
+			statusbar_block_update = true;
+		else
+			progressbar_block_update = true;
+		wFooter->goToXY(0, Config.statusbar_visibility);
+		*wFooter << message << NC::TermManip::ClearToEOL;
+		wFooter->refresh();
+	}
 }
 
 void Statusbar::Helpers::mpd()
@@ -189,30 +193,48 @@ void Statusbar::Helpers::mpd()
 	Status::update(Mpd.noidle());
 }
 
-bool Statusbar::Helpers::getString(const char *)
+bool Statusbar::Helpers::mainHook(const char *)
 {
 	Status::trace();
 	return true;
 }
 
-bool Statusbar::Helpers::ApplyFilterImmediately::operator()(const char *s)
+std::string Statusbar::Helpers::promptReturnOneOf(std::vector<std::string> values)
+{
+	Statusbar::Helpers::ImmediatelyReturnOneOf prompt_hook(std::move(values));
+	NC::Window::ScopedPromptHook hook(*wFooter, prompt_hook);
+	int x = wFooter->getX(), y = wFooter->getY();
+	std::string result;
+	do
+	{
+		wFooter->goToXY(x, y);
+		result = wFooter->prompt();
+	}
+	while (!prompt_hook.isOneOf(result));
+	return result;
+}
+
+bool Statusbar::Helpers::ImmediatelyReturnOneOf::operator()(const char *s) const
+{
+	Status::trace();
+	return !isOneOf(s);
+}
+
+bool Statusbar::Helpers::FindImmediately::operator()(const char *s)
 {
 	using Global::myScreen;
-	// if input queue is not empty, we don't want to update filter since next
-	// character will be taken from queue immediately, trigering this function
-	// again and thus making it inefficient, so let's apply filter only if
-	// "real" user input arrived. however, we want to apply filter if ENTER
-	// is next in queue, so its effects will be seen.
-	if (wFooter->inputQueue().empty() || wFooter->inputQueue().front() == KEY_ENTER)
-	{
-		if (m_s != s)
+	Status::trace();
+	try {
+		if (m_w->allowsSearching() && m_s != s)
 		{
-			m_s = s;
-			m_f->applyFilter(m_s);
+			m_w->setSearchConstraint(s);
+			m_found = m_w->find(m_direction, Config.wrapped_search, false);
+			if (myScreen == myPlaylist)
+				myPlaylist->EnableHighlighting();
 			myScreen->refreshWindow();
+			m_s = s;
 		}
-		Status::trace();
-	}
+	} catch (boost::bad_expression &) { }
 	return true;
 }
 

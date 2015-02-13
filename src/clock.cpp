@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2008-2013 by Andrzej Rybczak                            *
+ *   Copyright (C) 2008-2014 by Andrzej Rybczak                            *
  *   electricityispower@gmail.com                                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -24,8 +24,8 @@
 
 #ifdef ENABLE_CLOCK
 
+#include <boost/date_time/posix_time/posix_time.hpp>
 #include <cstring>
-#include <sys/time.h>
 
 #include "global.h"
 #include "playlist.h"
@@ -57,8 +57,8 @@ Clock::Clock()
 {
 	Width = Config.clock_display_seconds ? 60 : 40;
 	
-	m_pane = NC::Window(0, MainStartY, COLS, MainHeight, "", Config.main_color, NC::Border::None);
-	w = NC::Window((COLS-Width)/2, (MainHeight-Height)/2+MainStartY, Width, Height-1, "", Config.main_color, NC::Border(Config.main_color));
+	m_pane = NC::Window(0, MainStartY, COLS, MainHeight, "", Config.main_color, NC::Border());
+	w = NC::Window((COLS-Width)/2, (MainHeight-Height)/2+MainStartY, Width, Height-1, "", Config.main_color, Config.main_color);
 }
 
 void Clock::resize()
@@ -80,7 +80,7 @@ void Clock::switchTo()
 	size_t x_offset, width;
 	getWindowResizeParams(x_offset, width, false);
 	if (Width > width || Height > MainHeight)
-		Statusbar::msg("Screen is too small to display clock");
+		Statusbar::print("Screen is too small to display clock");
 	else
 	{
 		SwitchTo::execute(this);
@@ -115,23 +115,23 @@ void Clock::update()
 			myPlaylist->switchTo();
 	}
 	
-	std::tm *time = std::localtime(&Global::Timer.tv_sec);
+	auto time = boost::posix_time::to_tm(Global::Timer);
 	
 	mask = 0;
-	Set(time->tm_sec % 10, 0);
-	Set(time->tm_sec / 10, 4);
-	Set(time->tm_min % 10, 10);
-	Set(time->tm_min / 10, 14);
-	Set(time->tm_hour % 10, 20);
-	Set(time->tm_hour / 10, 24);
+	Set(time.tm_sec % 10, 0);
+	Set(time.tm_sec / 10, 4);
+	Set(time.tm_min % 10, 10);
+	Set(time.tm_min / 10, 14);
+	Set(time.tm_hour % 10, 20);
+	Set(time.tm_hour / 10, 24);
 	Set(10, 7);
 	Set(10, 17);
 	
 	char buf[64];
-	std::strftime(buf, 64, "%x", time);
-	attron(COLOR_PAIR(int(Config.main_color)));
+	std::strftime(buf, 64, "%x", &time);
+	color_set(Config.main_color.pairNumber(), nullptr);
 	mvprintw(w.getStarty()+w.getHeight(), w.getStartX()+(w.getWidth()-strlen(buf))/2, "%s", buf);
-	attroff(COLOR_PAIR(int(Config.main_color)));
+	standend();
 	refresh();
 	
 	for (int k = 0; k < 6; ++k)

@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2008-2013 by Andrzej Rybczak                            *
+ *   Copyright (C) 2008-2014 by Andrzej Rybczak                            *
  *   electricityispower@gmail.com                                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -21,17 +21,19 @@
 #ifndef NCMPCPP_STATUSBAR_H
 #define NCMPCPP_STATUSBAR_H
 
+#include <boost/format.hpp>
+#include "settings.h"
 #include "gcc.h"
 #include "interfaces.h"
 #include "window.h"
 
-namespace Progressbar {//
+namespace Progressbar {
 
-/// locks progressbar (usually used for seeking)
-void lock();
-
-/// unlocks progressbar (usually right after seeking is done)
-void unlock();
+struct ScopedLock
+{
+	ScopedLock() noexcept;
+	~ScopedLock() noexcept;
+};
 
 /// @return true if progressbar is unlocked
 bool isUnlocked();
@@ -41,50 +43,65 @@ void draw(unsigned elapsed, unsigned time);
 
 }
 
-namespace Statusbar{//
+namespace Statusbar {
 
-/// locks statusbar (usually for prompting the user)
-void lock();
-
-/// unlocks statusbar (usually after prompting the user)
-void unlock();
+struct ScopedLock
+{
+	ScopedLock() noexcept;
+	~ScopedLock() noexcept;
+};
 
 /// @return true if statusbar is unlocked
 bool isUnlocked();
 
-/// tries to clear current message put there using Statusbar::msg if there is any
+/// tries to clear current message put there using Statusbar::printf if there is any
 void tryRedraw();
 
 /// clears statusbar and move cursor to beginning of line
 /// @return window object that represents statusbar
 NC::Window &put();
 
-/// displays message in statusbar for period of time set in configuration file
-void msg(const char *format, ...) GNUC_PRINTF(1, 2);
-
-/// displays message in statusbar for given period of time
-void msg(int time, const char *format, ...) GNUC_PRINTF(2, 3);
-
-namespace Helpers {//
+namespace Helpers {
 
 /// called when statusbar window detects incoming idle notification
 void mpd();
 
 /// called each time user types another character while inside Window::getString
-bool getString(const char *);
+bool mainHook(const char *);
 
-/// called each time user changes current filter (while being inside Window::getString)
-struct ApplyFilterImmediately
+/// prompt and return one of the strings specified in the vector
+std::string promptReturnOneOf(std::vector<std::string> values);
+
+struct ImmediatelyReturnOneOf
 {
+	ImmediatelyReturnOneOf(std::vector<std::string> arg)
+	: m_values(std::move(arg))
+	{ }
+
+	bool operator()(const char *s) const;
+
 	template <typename StringT>
-	ApplyFilterImmediately(Filterable *f, StringT &&filter)
-	: m_f(f), m_s(std::forward<StringT>(filter)) { }
-	
-	bool operator()(const char *s);
-	
+	bool isOneOf(StringT &&s) const {
+		return std::find(m_values.begin(), m_values.end(), std::forward<StringT>(s)) != m_values.end();
+	}
+
 private:
-	Filterable *m_f;
+	std::vector<std::string> m_values;
+};
+
+struct FindImmediately
+{
+	FindImmediately(Searchable *w, SearchDirection direction)
+	: m_w(w), m_direction(direction), m_found(true)
+	{ }
+
+	bool operator()(const char *s);
+
+private:
+	Searchable *m_w;
+	const SearchDirection m_direction;
 	std::string m_s;
+	bool m_found;
 };
 
 struct TryExecuteImmediateCommand
@@ -95,6 +112,43 @@ private:
 	std::string m_s;
 };
 
+}
+
+/// displays message in statusbar for a given period of time
+void print(int delay, const std::string& message);
+
+/// displays message in statusbar for period of time set in configuration file
+inline void print(const std::string &message)
+{
+	print(Config.message_delay_time, message);
+}
+
+/// displays formatted message in statusbar for period of time set in configuration file
+template <typename FormatT>
+void printf(FormatT &&fmt)
+{
+	print(Config.message_delay_time, boost::format(std::forward<FormatT>(fmt)).str());
+}
+template <typename FormatT, typename ArgT, typename... Args>
+void printf(FormatT &&fmt, ArgT &&arg, Args&&... args)
+{
+	printf(boost::format(std::forward<FormatT>(fmt)) % std::forward<ArgT>(arg),
+		std::forward<Args>(args)...
+	);
+}
+
+/// displays formatted message in statusbar for a given period of time
+template <typename FormatT>
+void printf(int delay, FormatT &&fmt)
+{
+	print(delay, boost::format(std::forward<FormatT>(fmt)).str());
+}
+template <typename FormatT, typename ArgT, typename... Args>
+void printf(int delay, FormatT &&fmt, ArgT &&arg, Args&&... args)
+{
+	printf(delay, boost::format(std::forward<FormatT>(fmt)) % std::forward<ArgT>(arg),
+		std::forward<Args>(args)...
+	);
 }
 
 }

@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2008-2013 by Andrzej Rybczak                            *
+ *   Copyright (C) 2008-2014 by Andrzej Rybczak                            *
  *   electricityispower@gmail.com                                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -18,7 +18,7 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
-#include <sys/time.h>
+#include <boost/date_time/posix_time/posix_time.hpp>
 #include <iomanip>
 
 #include "global.h"
@@ -33,9 +33,10 @@ using Global::MainStartY;
 ServerInfo *myServerInfo;
 
 ServerInfo::ServerInfo()
+: m_timer(boost::posix_time::from_time_t(0))
 {
 	SetDimensions();
-	w = NC::Scrollpad((COLS-itsWidth)/2, (MainHeight-itsHeight)/2+MainStartY, itsWidth, itsHeight, "MPD server info", Config.main_color, Config.window_border);
+	w = NC::Scrollpad((COLS-m_width)/2, (MainHeight-m_height)/2+MainStartY, m_width, m_height, "MPD server info", Config.main_color, Config.window_border);
 }
 
 void ServerInfo::switchTo()
@@ -45,11 +46,19 @@ void ServerInfo::switchTo()
 	{
 		SwitchTo::execute(this);
 		
-		itsURLHandlers.clear();
-		itsTagTypes.clear();
-		
-		Mpd.GetURLHandlers(vectorMoveInserter(itsURLHandlers));
-		Mpd.GetTagTypes(vectorMoveInserter(itsTagTypes));
+		m_url_handlers.clear();
+		std::copy(
+			std::make_move_iterator(Mpd.GetURLHandlers()),
+			std::make_move_iterator(MPD::StringIterator()),
+			std::back_inserter(m_url_handlers)
+		);
+
+		m_tag_types.clear();
+		std::copy(
+			std::make_move_iterator(Mpd.GetTagTypes()),
+			std::make_move_iterator(MPD::StringIterator()),
+			std::back_inserter(m_tag_types)
+		);
 	}
 	else
 		switchToPreviousScreen();
@@ -58,8 +67,8 @@ void ServerInfo::switchTo()
 void ServerInfo::resize()
 {
 	SetDimensions();
-	w.resize(itsWidth, itsHeight);
-	w.moveTo((COLS-itsWidth)/2, (MainHeight-itsHeight)/2+MainStartY);
+	w.resize(m_width, m_height);
+	w.moveTo((COLS-m_width)/2, (MainHeight-m_height)/2+MainStartY);
 	if (previousScreen() && previousScreen()->hasToBeResized) // resize background window
 	{
 		previousScreen()->resize();
@@ -75,10 +84,9 @@ std::wstring ServerInfo::title()
 
 void ServerInfo::update()
 {
-	static timeval past = { 0, 0 };
-	if (Global::Timer.tv_sec <= past.tv_sec)
+	if (Global::Timer - m_timer < boost::posix_time::seconds(1))
 		return;
-	past = Global::Timer;
+	m_timer = Global::Timer;
 	
 	MPD::Statistics stats = Mpd.getStatistics();
 	if (stats.empty())
@@ -102,12 +110,12 @@ void ServerInfo::update()
 	w << NC::Format::Bold << "Last DB update: " << NC::Format::NoBold << Timestamp(stats.dbUpdateTime()) << '\n';
 	w << '\n';
 	w << NC::Format::Bold << "URL Handlers:" << NC::Format::NoBold;
-	for (auto it = itsURLHandlers.begin(); it != itsURLHandlers.end(); ++it)
-		w << (it != itsURLHandlers.begin() ? ", " : " ") << *it;
+	for (auto it = m_url_handlers.begin(); it != m_url_handlers.end(); ++it)
+		w << (it != m_url_handlers.begin() ? ", " : " ") << *it;
 	w << "\n\n";
 	w << NC::Format::Bold << "Tag Types:" << NC::Format::NoBold;
-	for (auto it = itsTagTypes.begin(); it != itsTagTypes.end(); ++it)
-		w << (it != itsTagTypes.begin() ? ", " : " ") << *it;
+	for (auto it = m_tag_types.begin(); it != m_tag_types.end(); ++it)
+		w << (it != m_tag_types.begin() ? ", " : " ") << *it;
 	
 	w.flush();
 	w.refresh();
@@ -115,7 +123,7 @@ void ServerInfo::update()
 
 void ServerInfo::SetDimensions()
 {
-	itsWidth = COLS*0.6;
-	itsHeight = std::min(size_t(LINES*0.7), MainHeight);
+	m_width = COLS*0.6;
+	m_height = std::min(size_t(LINES*0.7), MainHeight);
 }
 

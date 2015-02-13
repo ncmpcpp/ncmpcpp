@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2008-2013 by Andrzej Rybczak                            *
+ *   Copyright (C) 2008-2014 by Andrzej Rybczak                            *
  *   electricityispower@gmail.com                                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -35,7 +35,7 @@
 
 SelectedItemsAdder *mySelectedItemsAdder;
 
-namespace {//
+namespace {
 
 void DisplayComponent(SelectedItemsAdder::Component &menu)
 {
@@ -109,11 +109,11 @@ void SelectedItemsAdder::switchTo()
 	if (!hs || !hs->allowsSelection())
 		return;
 	
-	Statusbar::msg(1, "Fetching selected songs...");
+	Statusbar::print(1, "Fetching selected songs...");
 	m_selected_items = hs->getSelectedSongs();
 	if (m_selected_items.empty())
 	{
-		Statusbar::msg("List of selected items is empty");
+		Statusbar::print("List of selected items is empty");
 		return;
 	}
 	populatePlaylistSelector(myScreen);
@@ -163,7 +163,7 @@ std::wstring SelectedItemsAdder::title()
 
 void SelectedItemsAdder::enterPressed()
 {
-	w->current().value().exec()();
+	w->current()->value().run();
 }
 
 void SelectedItemsAdder::mouseButtonPressed(MEVENT me)
@@ -182,28 +182,30 @@ void SelectedItemsAdder::mouseButtonPressed(MEVENT me)
 
 void SelectedItemsAdder::populatePlaylistSelector(BaseScreen *old_screen)
 {
+	// stored playlists don't support songs from outside of mpd database
+	bool in_local_browser = old_screen == myBrowser && myBrowser->isLocal();
+
 	m_playlist_selector.reset();
 	m_playlist_selector.clear();
-	if (old_screen != myPlaylist)
+	m_playlist_selector.addItem(Entry("Current playlist",
+		boost::bind(&Self::addToCurrentPlaylist, this)
+	));
+	if (!in_local_browser)
 	{
-		m_playlist_selector.addItem(Entry("Current playlist",
-			boost::bind(&Self::addToCurrentPlaylist, this)
+		m_playlist_selector.addItem(Entry("New playlist",
+			boost::bind(&Self::addToNewPlaylist, this)
 		));
 	}
-	m_playlist_selector.addItem(Entry("New playlist",
-		boost::bind(&Self::addToNewPlaylist, this)
-	));
 	m_playlist_selector.addSeparator();
-	
-	// stored playlists don't support songs from outside of mpd database
-	if (old_screen != myBrowser || !myBrowser->isLocal())
+	if (!in_local_browser)
 	{
 		size_t begin = m_playlist_selector.size();
-		Mpd.GetPlaylists([this](std::string playlist) {
-			m_playlist_selector.addItem(Entry(playlist,
-				boost::bind(&Self::addToExistingPlaylist, this, playlist)
+		for (MPD::PlaylistIterator it = Mpd.GetPlaylists(), end; it != end; ++it)
+		{
+			m_playlist_selector.addItem(Entry(it->path(),
+				boost::bind(&Self::addToExistingPlaylist, this, it->path())
 			));
-		});
+		};
 		std::sort(m_playlist_selector.beginV()+begin, m_playlist_selector.endV(),
 			LocaleBasedSorting(std::locale(), Config.ignore_leading_the));
 		if (begin < m_playlist_selector.size())
@@ -222,12 +224,13 @@ void SelectedItemsAdder::addToCurrentPlaylist()
 
 void SelectedItemsAdder::addToNewPlaylist() const
 {
-	Statusbar::lock();
-	Statusbar::put() << "Save playlist as: ";
-	std::string playlist = Global::wFooter->getString();
-	Statusbar::unlock();
-	if (!playlist.empty())
-		addToExistingPlaylist(playlist);
+	std::string playlist;
+	{
+		Statusbar::ScopedLock slock;
+		Statusbar::put() << "Save playlist as: ";
+		playlist = Global::wFooter->prompt();
+	}
+	addToExistingPlaylist(playlist);
 }
 
 void SelectedItemsAdder::addToExistingPlaylist(const std::string &playlist) const
@@ -236,7 +239,7 @@ void SelectedItemsAdder::addToExistingPlaylist(const std::string &playlist) cons
 	for (auto s = m_selected_items.begin(); s != m_selected_items.end(); ++s)
 		Mpd.AddToPlaylist(playlist, *s);
 	Mpd.CommitCommandsList();
-	Statusbar::msg("Selected item(s) added to playlist \"%s\"", playlist.c_str());
+	Statusbar::printf("Selected item(s) added to playlist \"%1%\"", playlist);
 	switchToPreviousScreen();
 }
 
@@ -256,7 +259,7 @@ void SelectedItemsAdder::addAfterCurrentSong() const
 {
 	if (Status::State::player() == MPD::psStop)
 		return;
-	size_t pos = myPlaylist->currentSongPosition();
+	size_t pos = Status::State::currentSongPosition();
 	++pos;
 	bool success = addSongsToPlaylist(m_selected_items.begin(), m_selected_items.end(), false, pos);
 	exitSuccessfully(success);
@@ -267,19 +270,17 @@ void SelectedItemsAdder::addAfterCurrentAlbum() const
 	if (Status::State::player() == MPD::psStop)
 		return;
 	auto &pl = myPlaylist->main();
-	size_t pos = myPlaylist->currentSongPosition();
-	withUnfilteredMenu(pl, [&pos, &pl]() {
-		std::string album =  pl[pos].value().getAlbum();
-		while (pos < pl.size() && pl[pos].value().getAlbum() == album)
-			++pos;
-	});
+	size_t pos = Status::State::currentSongPosition();
+	std::string album =  pl[pos].value().getAlbum();
+	while (pos < pl.size() && pl[pos].value().getAlbum() == album)
+		++pos;
 	bool success = addSongsToPlaylist(m_selected_items.begin(), m_selected_items.end(), false, pos);
 	exitSuccessfully(success);
 }
 
 void SelectedItemsAdder::addAfterHighlightedSong() const
 {
-	size_t pos = myPlaylist->main().current().value().getPosition();
+	size_t pos = myPlaylist->main().current()->value().getPosition();
 	++pos;
 	bool success = addSongsToPlaylist(m_selected_items.begin(), m_selected_items.end(), false, pos);
 	exitSuccessfully(success);
@@ -295,7 +296,7 @@ void SelectedItemsAdder::cancel()
 
 void SelectedItemsAdder::exitSuccessfully(bool success) const
 {
-	Statusbar::msg("Selected items added%s", withErrors(success));
+	Statusbar::printf("Selected items added%1%", withErrors(success));
 	switchToPreviousScreen();
 }
 

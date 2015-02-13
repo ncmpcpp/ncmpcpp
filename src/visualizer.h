@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2008-2013 by Andrzej Rybczak                            *
+ *   Copyright (C) 2008-2014 by Andrzej Rybczak                            *
  *   electricityispower@gmail.com                                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -25,6 +25,7 @@
 
 #ifdef ENABLE_VISUALIZER
 
+#include <boost/date_time/posix_time/posix_time_types.hpp>
 #include "interfaces.h"
 #include "screen.h"
 #include "window.h"
@@ -36,49 +37,56 @@
 struct Visualizer: Screen<NC::Window>, Tabbable
 {
 	Visualizer();
-	
+
 	virtual void switchTo() OVERRIDE;
 	virtual void resize() OVERRIDE;
-	
+
 	virtual std::wstring title() OVERRIDE;
 	virtual ScreenType type() OVERRIDE { return ScreenType::Visualizer; }
-	
+
 	virtual void update() OVERRIDE;
 	virtual void scroll(NC::Scroll) OVERRIDE { }
-	
+
+	virtual int windowTimeout() OVERRIDE;
+
 	virtual void enterPressed() OVERRIDE { }
 	virtual void spacePressed() OVERRIDE;
 	virtual void mouseButtonPressed(MEVENT) OVERRIDE { }
-	
+
 	virtual bool isMergable() OVERRIDE { return true; }
-	
+
 	// private members
 	void SetFD();
 	void ResetFD();
 	void FindOutputID();
-	
-	static const int WindowTimeout;
-	
+
 protected:
 	virtual bool isLockable() OVERRIDE { return true; }
-	
+
 private:
 	void DrawSoundWave(int16_t *, ssize_t, size_t, size_t);
+	void DrawSoundWaveStereo(int16_t *, int16_t *, ssize_t, size_t);
+	void DrawSoundWaveFill(int16_t *, ssize_t, size_t, size_t);
+	void DrawSoundWaveFillStereo(int16_t *, int16_t *, ssize_t, size_t);
+	void DrawSoundEllipse(int16_t *, ssize_t, size_t, size_t);
+	void DrawSoundEllipseStereo(int16_t *, int16_t *, ssize_t, size_t);
 #	ifdef HAVE_FFTW3_H
 	void DrawFrequencySpectrum(int16_t *, ssize_t, size_t, size_t);
+	void DrawFrequencySpectrumStereo(int16_t *, int16_t *, ssize_t, size_t);
 #	endif // HAVE_FFTW3_H
-	
+
 	int m_output_id;
-	timeval m_timer;
-	
+	boost::posix_time::ptime m_timer;
+
 	int m_fifo;
-	unsigned m_samples;
+	size_t m_samples;
 #	ifdef HAVE_FFTW3_H
-	unsigned m_fftw_results;
-	unsigned *m_freq_magnitudes;
+	size_t m_fftw_results;
 	double *m_fftw_input;
 	fftw_complex *m_fftw_output;
 	fftw_plan m_fftw_plan;
+
+	std::vector<double> m_freq_magnitudes;
 #	endif // HAVE_FFTW3_H
 };
 
@@ -88,3 +96,4 @@ extern Visualizer *myVisualizer;
 
 #endif // NCMPCPP_VISUALIZER_H
 
+/* vim: set tabstop=4 softtabstop=4 shiftwidth=4 noexpandtab : */

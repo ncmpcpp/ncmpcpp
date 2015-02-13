@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2008-2013 by Andrzej Rybczak                            *
+ *   Copyright (C) 2008-2014 by Andrzej Rybczak                            *
  *   electricityispower@gmail.com                                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -24,42 +24,43 @@
 #include "interfaces.h"
 #include "mpdpp.h"
 
-namespace Status {//
+namespace Status {
 
 void handleClientError(MPD::ClientError &e);
 void handleServerError(MPD::ServerError &e);
 
-void trace();
+void trace(bool update_timer, bool update_window_timeout);
+inline void trace() { trace(true, false); }
 void update(int event);
+void clear();
 
-namespace State {//
+namespace State {
 
+// flags
+bool consume();
+bool crossfade();
 bool repeat();
 bool random();
 bool single();
-bool consume();
-bool crossfade();
 
-MPD::PlayerState player();
-int volume();
+// misc
+int currentSongID();
+int currentSongPosition();
 unsigned elapsedTime();
+MPD::PlayerState player();
+unsigned totalTime();
+int volume();
 
 }
 
-namespace Changes {//
+namespace Changes {
 
-void playlist();
+void playlist(unsigned previous_version);
 void storedPlaylists();
 void database();
 void playerState();
-void songID();
+void songID(int song_id);
 void elapsedTime(bool update_elapsed);
-void repeat(bool show_msg);
-void random(bool show_msg);
-void single(bool show_msg);
-void consume(bool show_msg);
-void crossfade(bool show_msg);
-void dbUpdateState(bool show_msg);
 void flags();
 void mixer();
 void outputs();

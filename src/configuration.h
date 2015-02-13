@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2008-2013 by Andrzej Rybczak                            *
+ *   Copyright (C) 2008-2014 by Andrzej Rybczak                            *
  *   electricityispower@gmail.com                                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -18,12 +18,11 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
-#ifndef NCMPCPP_ERROR_H
-#define NCMPCPP_ERROR_H
+#ifndef NCMPCPP_CONFIGURATION_H
+#define NCMPCPP_CONFIGURATION_H
 
-#include <string>
-#include "gcc.h"
+void expand_home(std::string &path);
 
-void FatalError(const std::string &msg) GNUC_NORETURN;
+bool configure(int argc, char **argv);
 
-#endif // NCMPCPP_ERROR_H
+#endif // NCMPCPP_CONFIGURATION_H

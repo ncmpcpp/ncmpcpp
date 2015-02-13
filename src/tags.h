@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2008-2013 by Andrzej Rybczak                            *
+ *   Copyright (C) 2008-2014 by Andrzej Rybczak                            *
  *   electricityispower@gmail.com                                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -28,7 +28,7 @@
 #include <tfile.h>
 #include "mutable_song.h"
 
-namespace Tags {//
+namespace Tags {
 
 struct ReplayGainInfo
 {
@@ -62,11 +62,13 @@ private:
 	std::string m_album_peak;
 };
 
+void setAttribute(mpd_song *s, const char *name, const std::string &value);
+
 ReplayGainInfo readReplayGain(TagLib::File *f);
 
 bool extendedSetSupported(const TagLib::File *f);
 
-void read(MPD::MutableSong &);
+void read(mpd_song *s);
 bool write(MPD::MutableSong &);
 
 }

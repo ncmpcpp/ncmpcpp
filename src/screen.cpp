@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2008-2013 by Andrzej Rybczak                            *
+ *   Copyright (C) 2008-2014 by Andrzej Rybczak                            *
  *   electricityispower@gmail.com                                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -28,21 +28,17 @@ using Global::myScreen;
 using Global::myLockedScreen;
 using Global::myInactiveScreen;
 
-namespace {//
-
-void drawScreenSeparator(int x)
+void drawSeparator(int x)
 {
-	attron(COLOR_PAIR(int(Config.main_color)));
+	color_set(Config.main_color.pairNumber(), nullptr);
 	mvvline(Global::MainStartY, x, 0, Global::MainHeight);
-	attroff(COLOR_PAIR(int(Config.main_color)));
+	standend();
 	refresh();
-}
-
 }
 
 void genericMouseButtonPressed(NC::Window &w, MEVENT me)
 {
-	if (me.bstate & BUTTON2_PRESSED)
+	if (me.bstate & BUTTON5_PRESSED)
 	{
 		if (Config.mouse_list_scroll_whole_page)
 			w.scroll(NC::Scroll::PageDown);
@@ -62,7 +58,7 @@ void genericMouseButtonPressed(NC::Window &w, MEVENT me)
 
 void scrollpadMouseButtonPressed(NC::Scrollpad &w, MEVENT me)
 {
-	if (me.bstate & BUTTON2_PRESSED)
+	if (me.bstate & BUTTON5_PRESSED)
 	{
 		for (size_t i = 0; i < Config.lines_scrolled; ++i)
 			w.scroll(NC::Scroll::Down);
@@ -94,7 +90,7 @@ void BaseScreen::getWindowResizeParams(size_t &x_offset, size_t &width, bool adj
 			{
 				myLockedScreen->resize();
 				myLockedScreen->refresh();
-				drawScreenSeparator(x_offset-1);
+				drawSeparator(x_offset-1);
 			}
 		}
 	}
@@ -125,19 +121,19 @@ void BaseScreen::unlock()
 
 /***********************************************************************/
 
-void applyToVisibleWindows(void (BaseScreen::*f)())
+void applyToVisibleWindows(std::function<void(BaseScreen *)> f)
 {
 	if (myLockedScreen && myScreen->isMergable())
 	{
 		if (myScreen == myLockedScreen)
 		{
 			if (myInactiveScreen)
-				(myInactiveScreen->*f)();
+				f(myInactiveScreen);
 		}
 		else
-			(myLockedScreen->*f)();
+			f(myLockedScreen);
 	}
-	(myScreen->*f)();
+	f(myScreen);
 }
 
 void updateInactiveScreen(BaseScreen *screen_to_be_set)
@@ -153,7 +149,7 @@ void updateInactiveScreen(BaseScreen *screen_to_be_set)
 		// as in "else" case. we also need to refresh it and redraw separator between
 		// them as stacked screen probably has overwritten part ot it.
 		myInactiveScreen->refresh();
-		drawScreenSeparator(COLS*Config.locked_screen_width_part);
+		drawSeparator(COLS*Config.locked_screen_width_part);
 	}
 	else
 	{

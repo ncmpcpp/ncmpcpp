@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2008-2013 by Andrzej Rybczak                            *
+ *   Copyright (C) 2008-2014 by Andrzej Rybczak                            *
  *   electricityispower@gmail.com                                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -22,30 +22,34 @@
 #define NCMPCPP_REGEX_FILTER_H
 
 #include <boost/regex.hpp>
-#include "menu.h"
+#include <cassert>
 
-template <typename T> struct RegexFilter
+template <typename T>
+struct RegexFilter
 {
 	typedef NC::Menu<T> MenuT;
 	typedef typename NC::Menu<T>::Item Item;
 	typedef std::function<bool(const boost::regex &, const T &)> FilterFunction;
 	
+	RegexFilter() { }
 	RegexFilter(boost::regex rx, FilterFunction filter)
-	: m_rx(rx), m_filter(filter) { }
-	
-	bool operator()(const Item &item) {
+	: m_rx(std::move(rx)), m_filter(std::move(filter)) { }
+
+	void clear()
+	{
+		m_filter = nullptr;
+	}
+
+	bool operator()(const Item &item) const {
+		assert(defined());
 		return m_filter(m_rx, item.value());
 	}
-	
-	static std::string currentFilter(MenuT &menu)
+
+	bool defined() const
 	{
-		std::string filter;
-		auto rf = menu.getFilter().template target< RegexFilter<T> >();
-		if (rf)
-			filter = rf->m_rx.str();
-		return filter;
+		return m_filter.operator bool();
 	}
-	
+
 private:
 	boost::regex m_rx;
 	FilterFunction m_filter;
@@ -57,22 +61,24 @@ template <typename T> struct RegexItemFilter
 	typedef typename NC::Menu<T>::Item Item;
 	typedef std::function<bool(const boost::regex &, const Item &)> FilterFunction;
 	
+	RegexItemFilter() { }
 	RegexItemFilter(boost::regex rx, FilterFunction filter)
-	: m_rx(rx), m_filter(filter) { }
+	: m_rx(std::move(rx)), m_filter(std::move(filter)) { }
 	
+	void clear()
+	{
+		m_filter = nullptr;
+	}
+
 	bool operator()(const Item &item) {
 		return m_filter(m_rx, item);
 	}
 	
-	static std::string currentFilter(MenuT &menu)
+	bool defined() const
 	{
-		std::string filter;
-		auto rf = menu.getFilter().template target< RegexItemFilter<T> >();
-		if (rf)
-			filter = rf->m_rx.str();
-		return filter;
+		return m_filter.operator bool();
 	}
-	
+
 private:
 	boost::regex m_rx;
 	FilterFunction m_filter;

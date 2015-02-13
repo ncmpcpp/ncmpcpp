@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2008-2013 by Andrzej Rybczak                            *
+ *   Copyright (C) 2008-2014 by Andrzej Rybczak                            *
  *   electricityispower@gmail.com                                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -25,7 +25,7 @@
 #include <set>
 #include "window.h"
 
-namespace NC {//
+namespace NC {
 
 /// Buffer template class that stores text
 /// along with its properties (colors/formatting).
@@ -36,7 +36,7 @@ template <typename CharT> class BasicBuffer
 		enum class Type { Color, Format };
 		
 		Property(size_t position_, NC::Color color_, int id_)
-		: m_type(Type::Color), m_position(position_), m_color(color_), m_id(id_) { }
+		: m_type(Type::Color), m_position(position_), m_color(std::move(color_)), m_id(id_) { }
 		Property(size_t position_, NC::Format format_, int id_)
 		: m_type(Type::Format), m_position(position_), m_format(format_), m_id(id_) { }
 		
@@ -63,18 +63,19 @@ template <typename CharT> class BasicBuffer
 			return m_id < rhs.m_id;
 		}
 		
-		friend Window &operator<<(Window &w, const Property &p)
+		template <typename OutputStreamT>
+		friend OutputStreamT &operator<<(OutputStreamT &os, const Property &p)
 		{
 			switch (p.m_type)
 			{
 				case Type::Color:
-					w << p.m_color;
+					os << p.m_color;
 					break;
 				case Type::Format:
-					w << p.m_format;
+					os << p.m_format;
 					break;
 			}
-			return w;
+			return os;
 		}
 		
 	private:
@@ -89,21 +90,19 @@ public:
 	typedef std::basic_string<CharT> StringType;
 	typedef std::set<Property> Properties;
 	
-	BasicBuffer() { }
-	
 	const StringType &str() const { return m_string; }
 	const Properties &properties() const { return m_properties; }
 	
 	template <typename PropertyT>
-	void setProperty(size_t position, PropertyT property, size_t id = -1)
+	void setProperty(size_t position, PropertyT &&property, size_t id = -1)
 	{
-		m_properties.insert(Property(position, property, id));
+		m_properties.insert(Property(position, std::forward<PropertyT>(property), id));
 	}
 	
 	template <typename PropertyT>
-	bool removeProperty(size_t position, PropertyT property, size_t id = -1)
+	bool removeProperty(size_t position, PropertyT &&property, size_t id = -1)
 	{
-		auto it = m_properties.find(Property(position, property, id));
+		auto it = m_properties.find(Property(position, std::forward<PropertyT>(property), id));
 		bool found = it != m_properties.end();
 		if (found)
 			m_properties.erase(it);
@@ -182,7 +181,25 @@ public:
 		return *this;
 	}
 	
+	// static variadic initializer. used instead of a proper constructor because
+	// it's too polymorphic and would end up invoked as a copy/move constructor.
+	template <typename... Args>
+	static BasicBuffer init(Args&&... args)
+	{
+		BasicBuffer result;
+		result.construct(std::forward<Args>(args)...);
+		return result;
+	}
+
 private:
+	void construct() { }
+	template <typename ArgT, typename... Args>
+	void construct(ArgT &&arg, Args&&... args)
+	{
+		*this << std::forward<ArgT>(arg);
+		construct(std::forward<Args>(args)...);
+	}
+
 	StringType m_string;
 	Properties m_properties;
 };
@@ -190,11 +207,11 @@ private:
 typedef BasicBuffer<char> Buffer;
 typedef BasicBuffer<wchar_t> WBuffer;
 
-template <typename CharT>
-Window &operator<<(Window &w, const BasicBuffer<CharT> &buffer)
+template <typename OutputStreamT, typename CharT>
+OutputStreamT &operator<<(OutputStreamT &os, const BasicBuffer<CharT> &buffer)
 {
 	if (buffer.properties().empty())
-		w << buffer.str();
+		os << buffer.str();
 	else
 	{
 		auto &s = buffer.str();
@@ -203,14 +220,14 @@ Window &operator<<(Window &w, const BasicBuffer<CharT> &buffer)
 		for (size_t i = 0; i < s.size(); ++i)
 		{
 			for (; p != ps.end() && p->position() == i; ++p)
-				w << *p;
-			w << s[i];
+				os << *p;
+			os << s[i];
 		}
 		// load remaining properties
 		for (; p != ps.end(); ++p)
-			w << *p;
+			os << *p;
 	}
-	return w;
+	return os;
 }
 
 }

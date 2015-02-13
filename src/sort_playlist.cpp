@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2008-2013 by Andrzej Rybczak                            *
+ *   Copyright (C) 2008-2014 by Andrzej Rybczak                            *
  *   electricityispower@gmail.com                                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -110,7 +110,7 @@ std::wstring SortPlaylistDialog::title()
 
 void SortPlaylistDialog::enterPressed()
 {
-	w.current().value().exec()();
+	w.current()->value().run();
 }
 
 void SortPlaylistDialog::mouseButtonPressed(MEVENT me)
@@ -130,7 +130,7 @@ void SortPlaylistDialog::mouseButtonPressed(MEVENT me)
 
 void SortPlaylistDialog::moveSortOrderDown()
 {
-	auto cur = w.currentVI();
+	auto cur = w.currentV();
 	if ((cur+1)->item().second)
 	{
 		std::iter_swap(cur, cur+1);
@@ -140,7 +140,7 @@ void SortPlaylistDialog::moveSortOrderDown()
 
 void SortPlaylistDialog::moveSortOrderUp()
 {
-	auto cur = w.currentVI();
+	auto cur = w.currentV();
 	if (cur > w.beginV() && cur->item().second)
 	{
 		std::iter_swap(cur, cur-1);
@@ -150,7 +150,7 @@ void SortPlaylistDialog::moveSortOrderUp()
 
 void SortPlaylistDialog::moveSortOrderHint() const
 {
-	Statusbar::msg("Move tag types up and down to adjust sort order");
+	Statusbar::print("Move tag types up and down to adjust sort order");
 }
 
 void SortPlaylistDialog::sort() const
@@ -160,19 +160,19 @@ void SortPlaylistDialog::sort() const
 	std::tie(begin, end) = getSelectedRange(begin, end);
 	
 	size_t start_pos = begin - pl.begin();
-	MPD::SongList playlist;
+	std::vector<MPD::Song> playlist;
 	playlist.reserve(end - begin);
 	for (; begin != end; ++begin)
 		playlist.push_back(begin->value());
 	
-	typedef MPD::SongList::iterator Iterator;
+	typedef std::vector<MPD::Song>::iterator Iterator;
 	LocaleStringComparison cmp(std::locale(), Config.ignore_leading_the);
 	std::function<void(Iterator, Iterator)> iter_swap, quick_sort;
 	auto song_cmp = [this, &cmp](const MPD::Song &a, const MPD::Song &b) -> bool {
 		for (auto it = w.beginV();  it->item().second; ++it)
 		{
-			int res = cmp(a.getTags(it->item().second, Config.tags_separator),
-			              b.getTags(it->item().second, Config.tags_separator));
+			int res = cmp(a.getTags(it->item().second),
+			              b.getTags(it->item().second));
 			if (res != 0)
 				return res < 0;
 		}
@@ -200,11 +200,11 @@ void SortPlaylistDialog::sort() const
 		}
 	};
 	
-	Statusbar::msg("Sorting...");
+	Statusbar::print("Sorting...");
 	Mpd.StartCommandsList();
 	quick_sort(playlist.begin(), playlist.end());
 	Mpd.CommitCommandsList();
-	Statusbar::msg("Playlist sorted");
+	Statusbar::print("Playlist sorted");
 	switchToPreviousScreen();
 }
 

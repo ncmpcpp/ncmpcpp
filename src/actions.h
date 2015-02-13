@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2008-2013 by Andrzej Rybczak                            *
+ *   Copyright (C) 2008-2014 by Andrzej Rybczak                            *
  *   electricityispower@gmail.com                                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -21,11 +21,12 @@
 #ifndef NCMPCPP_ACTIONS_H
 #define NCMPCPP_ACTIONS_H
 
+#include <boost/format.hpp>
 #include <map>
 #include <string>
 #include "window.h"
 
-namespace Actions {//
+namespace Actions {
 
 enum class Type
 {
@@ -46,14 +47,14 @@ enum class Type
 	JumpToPlaylistEditor, ToggleScreenLock, JumpToTagEditor, JumpToPositionInSong,
 	ReverseSelection, RemoveSelection, SelectAlbum, AddSelectedItems,
 	CropMainPlaylist, CropPlaylist, ClearMainPlaylist, ClearPlaylist, SortPlaylist,
-	ReversePlaylist, ApplyFilter, Find, FindItemForward, FindItemBackward,
+	ReversePlaylist, Find, FindItemForward, FindItemBackward,
 	NextFoundItem, PreviousFoundItem, ToggleFindMode, ToggleReplayGainMode,
 	ToggleSpaceMode, ToggleAddMode, ToggleMouse, ToggleBitrateVisibility,
 	AddRandomItems, ToggleBrowserSortMode, ToggleLibraryTagType,
 	ToggleMediaLibrarySortMode, RefetchLyrics,
-	SetSelectedItemsPriority, FilterPlaylistOnPriorities, ShowSongInfo,
-	ShowArtistInfo, ShowLyrics, Quit, NextScreen, PreviousScreen, ShowHelp,
-	ShowPlaylist, ShowBrowser, ChangeBrowseMode, ShowSearchEngine,
+	SetSelectedItemsPriority, SetVisualizerSampleMultiplier,
+	ShowSongInfo, ShowArtistInfo, ShowLyrics, Quit, NextScreen, PreviousScreen,
+	ShowHelp, ShowPlaylist, ShowBrowser, ChangeBrowseMode, ShowSearchEngine,
 	ResetSearchEngine, ShowMediaLibrary, ToggleMediaLibraryColumnsMode,
 	ShowPlaylistEditor, ShowTagEditor, ShowOutputs, ShowVisualizer,
 	ShowClock, ShowServerInfo,
@@ -66,7 +67,12 @@ void setResizeFlags();
 void resizeScreen(bool reload_main_window);
 void setWindowsDimensions();
 
-bool askYesNoQuestion(const std::string &question, void (*callback)());
+void confirmAction(const boost::format &description);
+inline void confirmAction(const std::string &description)
+{
+	confirmAction(boost::format(description));
+}
+
 bool isMPDMusicDirSet();
 
 extern bool OriginalStatusbarVisibility;
@@ -116,7 +122,11 @@ protected:
 
 struct MouseEvent : public BaseAction
 {
-	MouseEvent() : BaseAction(Type::MouseEvent, "mouse_event") { }
+	MouseEvent() : BaseAction(Type::MouseEvent, "mouse_event")
+	{
+		m_old_mouse_event.bstate = 0;
+		m_mouse_event.bstate = 0;
+	}
 	
 protected:
 	virtual bool canBeRun() const;
@@ -796,15 +806,6 @@ protected:
 	virtual void run();
 };
 
-struct ApplyFilter : public BaseAction
-{
-	ApplyFilter() : BaseAction(Type::ApplyFilter, "apply_filter") { }
-	
-protected:
-	virtual bool canBeRun() const;
-	virtual void run();
-};
-
 struct Find : public BaseAction
 {
 	Find() : BaseAction(Type::Find, "find") { }
@@ -953,11 +954,11 @@ protected:
 	virtual void run();
 };
 
-struct FilterPlaylistOnPriorities : public BaseAction
+struct SetVisualizerSampleMultiplier : public BaseAction
 {
-	FilterPlaylistOnPriorities()
-	: BaseAction(Type::FilterPlaylistOnPriorities, "filter_playlist_on_priorities") { }
-	
+	SetVisualizerSampleMultiplier()
+	: BaseAction(Type::SetVisualizerSampleMultiplier, "set_visualizer_sample_multiplier") { }
+
 protected:
 	virtual bool canBeRun() const;
 	virtual void run();

@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2008-2013 by Andrzej Rybczak                            *
+ *   Copyright (C) 2008-2014 by Andrzej Rybczak                            *
  *   electricityispower@gmail.com                                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -90,9 +90,7 @@ struct LyricsmaniaFetcher : public GoogleLyricsFetcher
 	virtual const char *name() { return "lyricsmania.com"; }
 	
 protected:
-	virtual const char *regex() { return "<div id='songlyrics_h' class='dn'>(.*?)</div>"; }
-	
-	virtual void postProcess(std::string &data);
+	virtual const char *regex() { return "<div class=\"lyrics-body\".*?</strong>(.*?)</div>"; }
 };
 
 struct Sing365Fetcher : public GoogleLyricsFetcher
@@ -100,7 +98,9 @@ struct Sing365Fetcher : public GoogleLyricsFetcher
 	virtual const char *name() { return "sing365.com"; }
 	
 protected:
-	virtual const char *regex() { return "<div style=\"font-size: 14px;\">(.*?)</div>"; }
+	virtual const char *regex() { return "<script src=\"//srv.tonefuse.com/showads/showad.js\"></script>(.*?)<script>\n/\\* Sing365 - Below Lyrics"; }
+
+	virtual void postProcess(std::string &data);
 };
 
 struct JustSomeLyricsFetcher : public GoogleLyricsFetcher
@@ -108,7 +108,7 @@ struct JustSomeLyricsFetcher : public GoogleLyricsFetcher
 	virtual const char *name() { return "justsomelyrics.com"; }
 	
 protected:
-	virtual const char *regex() { return "<p class=\"lyrics\">(.*?)</p>"; }
+	virtual const char *regex() { return "<div class=\"core-left\">(.*?)</div>"; }
 };
 
 struct AzLyricsFetcher : public GoogleLyricsFetcher

@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2008-2013 by Andrzej Rybczak                            *
+ *   Copyright (C) 2008-2014 by Andrzej Rybczak                            *
  *   electricityispower@gmail.com                                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -54,8 +54,8 @@ LyricsFetcher::Result LyricsFetcher::fetch(const std::string &artist, const std:
 	result.first = false;
 	
 	std::string url = urlTemplate();
-	boost::replace_all(url, "%artist%", artist.c_str());
-	boost::replace_all(url, "%title%", title.c_str());
+	boost::replace_all(url, "%artist%", artist);
+	boost::replace_all(url, "%title%", title);
 	
 	std::string data;
 	CURLcode code = Curl::perform(data, url);
@@ -126,7 +126,7 @@ LyricsFetcher::Result LyricwikiFetcher::fetch(const std::string &artist, const s
 			return result;
 		}
 		
-		auto lyrics = getContent("<div class='lyricbox'><div class='rtMatcher'>.*?</div>(.*?)<!--", data);
+		auto lyrics = getContent("<div class='lyricbox'><script>.*?</script>(.*?)<!--", data);
 		
 		if (lyrics.empty())
 		{
@@ -203,8 +203,6 @@ LyricsFetcher::Result GoogleLyricsFetcher::fetch(const std::string &artist, cons
 	}
 	
 	data = unescapeHtmlUtf8(urls[0]);
-	//result.second = data;
-	//return result;
 	
 	URL = data.c_str();
 	return LyricsFetcher::fetch("", "");
@@ -217,12 +215,17 @@ bool GoogleLyricsFetcher::isURLOk(const std::string &url)
 
 /**********************************************************************/
 
+void Sing365Fetcher::postProcess(std::string &data)
+{
+	// throw away ad
+	data = boost::regex_replace(data, boost::regex("<div.*</div>"), "");
+	LyricsFetcher::postProcess(data);
+}
+
+/**********************************************************************/
+
 void MetrolyricsFetcher::postProcess(std::string &data)
 {
-	// throw away [ from ... ] info
-	size_t i = data.find('['), j = data.find(']');
-	if (i != std::string::npos && i != std::string::npos)
-		data.replace(i, j-i+1, "");
 	// some of lyrics have both \n chars and <br />, html tags
 	// are always present whereas \n chars are not, so we need to
 	// throw them away to avoid having line breaks doubled.
@@ -236,16 +239,6 @@ bool MetrolyricsFetcher::isURLOk(const std::string &url)
 {
 	// it sometimes return link to sitemap.xml, which is huge so we need to discard it
 	return GoogleLyricsFetcher::isURLOk(url) && url.find("sitemap") == std::string::npos;
-}
-
-/**********************************************************************/
-
-void LyricsmaniaFetcher::postProcess(std::string &data)
-{
-	// lyricsmania.com uses iso-8859-1 as the encoding
-	// so we need to convert obtained lyrics to utf-8
-	data = Charset::toUtf8From(data, "iso-8859-1");
-	LyricsFetcher::postProcess(data);
 }
 
 /**********************************************************************/

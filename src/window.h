@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2008-2013 by Andrzej Rybczak                            *
+ *   Copyright (C) 2008-2014 by Andrzej Rybczak                            *
  *   electricityispower@gmail.com                                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -23,18 +23,16 @@
 
 #include "config.h"
 
-#ifdef USE_PDCURSES
-# define NCURSES_MOUSE_VERSION 1
-#endif
-
 #include "curses.h"
 #include "gcc.h"
 
+#include <boost/optional.hpp>
 #include <functional>
 #include <list>
 #include <stack>
 #include <vector>
 #include <string>
+#include <tuple>
 #include <queue>
 
 // define some Ctrl-? keys
@@ -80,6 +78,7 @@
 #define KEY_F12 276
 
 // other handy keys
+#define KEY_ESCAPE 27
 #define KEY_SHIFT_TAB 353
 #define KEY_SPACE 32
 #define KEY_TAB 9
@@ -89,30 +88,111 @@
 
 // KEY_ENTER is 343, which doesn't make any sense. This makes it useful.
 #undef KEY_ENTER
-#define KEY_ENTER 10
+#define KEY_ENTER 13
 
-// undefine scroll macro as it collides with Window::scroll
+#if NCURSES_MOUSE_VERSION == 1
+// NOTICE: define BUTTON5_PRESSED to be BUTTON2_PRESSED with additional mask
+// (I noticed that it sometimes returns 134217728 (2^27) instead of expected
+// mask, so the modified define does it right.
+# define BUTTON5_PRESSED (BUTTON2_PRESSED | (1U << 27))
+#endif // NCURSES_MOUSE_VERSION == 1
+
+// undefine macros with colliding names
+#undef border
 #undef scroll
 
-#ifndef USE_PDCURSES
-// NOTICE: redefine BUTTON2_PRESSED as it doesn't always work, I noticed
-// that it sometimes returns 134217728 (2^27) instead of expected mask, so the
-// modified define does it right but is rather experimental.
-# undef BUTTON2_PRESSED
-# define BUTTON2_PRESSED (NCURSES_MOUSE_MASK(2, NCURSES_BUTTON_PRESSED) | (1U << 27))
-#endif // USE_PDCURSES
-
-// workaraund for win32
-#ifdef WIN32
-# define wcwidth(x) int(!iscntrl(x))
-#endif
-
 /// NC namespace provides set of easy-to-use
-/// wrappers over original curses library
-namespace NC {//
+/// wrappers over original curses library.
+namespace NC {
 
-/// Colors used by NCurses
-enum class Color { Default, Black, Red, Green, Yellow, Blue, Magenta, Cyan, White, End };
+/// Thrown if Ctrl-C or Ctrl-G is pressed during the call to Window::getString()
+/// @see Window::getString()
+struct PromptAborted : std::exception
+{
+	template <typename ArgT>
+	PromptAborted(ArgT &&prompt)
+	: m_prompt(std::forward<ArgT>(prompt)) { }
+
+	virtual const char *what() const noexcept OVERRIDE { return m_prompt.c_str(); }
+
+private:
+	std::string m_prompt;
+};
+
+struct Color
+{
+	friend struct Window;
+
+	static const short transparent;
+	static const short previous;
+
+	Color() : m_rep(0, transparent, true, false) { }
+	Color(short foreground_value, short background_value,
+			 bool is_default = false, bool is_end = false)
+	: m_rep(foreground_value, background_value, is_default, is_end)
+	{
+		if (isDefault() && isEnd())
+			throw std::logic_error("Color flag can't be marked as both 'default' and 'end'");
+	}
+
+	bool operator==(const Color &rhs) const
+	{
+		return m_rep == rhs.m_rep;
+	}
+	bool operator!=(const Color &rhs) const
+	{
+		return m_rep != rhs.m_rep;
+	}
+	bool operator<(const Color &rhs) const
+	{
+		return m_rep < rhs.m_rep;
+	}
+
+	bool isDefault() const
+	{
+		return std::get<2>(m_rep);
+	}
+	bool isEnd() const
+	{
+		return std::get<3>(m_rep);
+	}
+
+	int pairNumber() const;
+
+	static Color Default;
+	static Color Black;
+	static Color Red;
+	static Color Green;
+	static Color Yellow;
+	static Color Blue;
+	static Color Magenta;
+	static Color Cyan;
+	static Color White;
+	static Color End;
+
+private:
+	short foreground() const
+	{
+		return std::get<0>(m_rep);
+	}
+	short background() const
+	{
+		return std::get<1>(m_rep);
+	}
+	bool previousBackground() const
+	{
+		return background() == previous;
+	}
+
+	std::tuple<short, short, bool, bool> m_rep;
+};
+
+std::istream &operator>>(std::istream &is, Color &f);
+
+typedef boost::optional<Color> Border;
+
+/// Terminal manipulation functions
+enum class TermManip { ClearToEOL };
 
 /// Format flags used by NCurses
 enum class Format {
@@ -123,33 +203,15 @@ enum class Format {
 	AltCharset, NoAltCharset
 };
 
-/// Available border colors for window
-enum class Border { None, Black, Red, Green, Yellow, Blue, Magenta, Cyan, White };
-
 /// This indicates how much the window has to be scrolled
 enum class Scroll { Up, Down, PageUp, PageDown, Home, End };
 
-/// Helper function that is invoked each time one will want
-/// to obtain string from Window::getString() function
-/// @see Window::getString()
-typedef std::function<bool(const char *)> GetStringHelper;
-
 /// Initializes curses screen and sets some additional attributes
-/// @param window_title title of the window (has an effect only if pdcurses lib is used)
 /// @param enable_colors enables colors
-void initScreen(const char *window_title, bool enable_colors);
+void initScreen(bool enable_colors);
 
 /// Destroys the screen
 void destroyScreen();
-
-/// Struct used to set color of both foreground and background of window
-/// @see Window::operator<<()
-struct Colors
-{
-	Colors(Color one, Color two = Color::Default) : fg(one), bg(two) { }
-	Color fg;
-	Color bg;
-};
 
 /// Struct used for going to given coordinates
 /// @see Window::operator<<()
@@ -163,7 +225,29 @@ struct XY
 /// Main class of NCurses namespace, used as base for other specialized windows
 struct Window
 {
-	Window() : m_window(0), m_border_window(0) { }
+	/// Helper function that is periodically invoked
+	// inside Window::getString() function
+	/// @see Window::getString()
+	typedef std::function<bool(const char *)> PromptHook;
+
+	/// Sets helper to a specific value for the current scope
+	struct ScopedPromptHook
+	{
+		template <typename HelperT>
+		ScopedPromptHook(Window &w, HelperT &&helper) noexcept
+		: m_w(w), m_hook(std::move(w.m_prompt_hook)) {
+			m_w.m_prompt_hook = std::forward<HelperT>(helper);
+		}
+		~ScopedPromptHook() noexcept {
+			m_w.m_prompt_hook = std::move(m_hook);
+		}
+
+	private:
+		Window &m_w;
+		PromptHook m_hook;
+	};
+
+	Window() : m_window(nullptr) { }
 	
 	/// Constructs an empty window with given parameters
 	/// @param startx X position of left upper corner of constructed window
@@ -174,7 +258,7 @@ struct Window
 	/// @param color base color of constructed window
 	/// @param border border of constructed window
 	Window(size_t startx, size_t starty, size_t width, size_t height,
-			const std::string &title, Color color, Border border);
+			std::string title, Color color, Border border);
 	
 	Window(const Window &rhs);
 	Window(Window &&rhs);
@@ -203,22 +287,17 @@ struct Window
 	const std::string &getTitle() const;
 	
 	/// @return current window's color
-	Color getColor() const;
+	const Color &getColor() const;
 	
 	/// @return current window's border
-	Border getBorder() const;
+	const Border &getBorder() const;
 	
 	/// @return current window's timeout
 	int getTimeout() const;
 	
-	/// Reads the string from standard input. Note that this is much more complex
-	/// function than getstr() from curses library. It allows for moving through
-	/// letters with arrows, supports scrolling if string's length is bigger than
-	/// given area, supports history of previous strings and each time it receives
-	/// an input from the keyboard or the timeout is reached, it calls helper function
-	/// (if it's set) that takes as an argument currently edited string.
+	/// Reads the string from standard input using readline library.
 	/// @param base base string that has to be edited
-	/// @param length max length of string, unlimited by default
+	/// @param length max length of the string, unlimited by default
 	/// @param width width of area that entry field can take. if it's reached, string
 	/// will be scrolled. if value is 0, field will be from cursor position to the end
 	/// of current line wide.
@@ -226,17 +305,9 @@ struct Window
 	/// actual text.
 	/// @return edited string
 	///
-	/// @see setGetStringHelper()
+	/// @see setPromptHook()
 	/// @see SetTimeout()
-	/// @see CreateHistory()
-	std::string getString(const std::string &base, size_t width = 0, bool encrypted = 0);
-	
-	/// Wrapper for above function that doesn't take base string (it will be empty).
-	/// Taken parameters are the same as for above.
-	std::string getString(size_t width = 0, bool encrypted = 0)
-	{
-		return getString("", width, encrypted);
-	}
+	std::string prompt(const std::string &base = "", size_t width = -1, bool encrypted = false);
 	
 	/// Moves cursor to given coordinates
 	/// @param x given X position
@@ -257,20 +328,23 @@ struct Window
 	/// @return true if it transformed variables, false otherwise
 	bool hasCoords(int &x, int &y);
 	
-	/// Sets helper function used in getString()
-	/// @param helper pointer to function that matches getStringHelper prototype
+	/// Sets hook used in getString()
+	/// @param hook pointer to function that matches getStringHelper prototype
 	/// @see getString()
-	void setGetStringHelper(GetStringHelper helper) { m_get_string_helper = helper; }
+	template <typename HookT>
+	void setPromptHook(HookT &&hook) {
+		m_prompt_hook = std::forward<HookT>(hook);
+	}
 
 	/// Run current GetString helper function (if defined).
 	/// @see getString()
 	/// @return true if helper was run, false otherwise
-	bool runGetStringHelper(const char *arg) const;
-	
+	bool runPromptHook(const char *arg, bool *done) const;
+
 	/// Sets window's base color
 	/// @param fg foregound base color
 	/// @param bg background base color
-	void setBaseColor(Color fg, Color bg = Color::Default);
+	void setBaseColor(Color c);
 	
 	/// Sets window's border
 	/// @param border new window's border
@@ -306,7 +380,7 @@ struct Window
 	virtual void clear();
 	
 	/// Adds given file descriptor to the list that will be polled in
-	/// ReadKey() along with stdin and callback that will be invoked
+	/// readKey() along with stdin and callback that will be invoked
 	/// when there is data waiting for reading in it
 	/// @param fd file descriptor
 	/// @param callback callback
@@ -333,94 +407,29 @@ struct Window
 	/// @param where indicates how many lines it has to scroll
 	virtual void scroll(Scroll where);
 	
-	/// Applies function of compatible prototype to internal WINDOW pointer
-	/// The mostly used function in this case seem to be wclrtoeol(), which
-	/// clears the window from current cursor position to the end of line.
-	/// Note that delwin() also matches that prototype, but I wouldn't
-	/// recommend anyone passing this pointer here ;)
-	/// @param f pointer to function to call with internal WINDOW pointer
-	/// @return reference to itself
-	Window &operator<<(int (*f)(WINDOW *));
-	
-	/// Applies foreground and background colors to window
-	/// @param colors struct that holds new colors information
-	/// @return reference to itself
-	Window &operator<<(Colors colors);
-	
-	/// Applies foregound color to window. Note that colors applied
-	/// that way are stacked, i.e if you applied Color::Red, then Color::Green
-	/// and Color::End, current color would be Color::Red. If you want to discard
-	/// all colors and fall back to base one, pass Color::Default.
-	/// @param color new color value
-	/// @return reference to itself
-	Window &operator<<(Color color);
-	
-	/// Applies format flag to window. Note that these attributes are
-	/// also stacked, so if you applied Format::Bold twice, to get rid of
-	/// it you have to pass Format::NoBold also twice.
-	/// @param format format flag
-	/// @return reference to itself
+	Window &operator<<(TermManip tm);
+	Window &operator<<(const Color &color);
 	Window &operator<<(Format format);
-	
-	/// Moves current cursor position to given coordinates.
-	/// @param coords struct that holds information about new coordinations
-	/// @return reference to itself
-	Window &operator<<(XY coords);
-	
-	/// Prints string to window
-	/// @param s const pointer to char array to be printed
-	/// @return reference to itself
+	Window &operator<<(const XY &coords);
 	Window &operator<<(const char *s);
-	
-	/// Prints single character to window
-	/// @param c character to be printed
-	/// @return reference to itself
 	Window &operator<<(char c);
-	
-	/// Prints wide string to window
-	/// @param ws const pointer to wchar_t array to be printed
-	/// @return reference to itself
 	Window &operator<<(const wchar_t *ws);
-	
-	/// Prints single wide character to window
-	/// @param wc wide character to be printed
-	/// @return reference to itself
 	Window &operator<<(wchar_t wc);
-	
-	/// Prints int to window
-	/// @param i integer value to be printed
-	/// @return reference to itself
 	Window &operator<<(int i);
-	
-	/// Prints double to window
-	/// @param d double value to be printed
-	/// @return reference to itself
 	Window &operator<<(double d);
-	
-	/// Prints size_t to window
-	/// @param s size value to be printed
-	/// @return reference to itself
 	Window &operator<<(size_t s);
-	
-	/// Prints std::string to window
-	/// @param s string to be printed
-	/// @return reference to itself
 	Window &operator<<(const std::string &s);
-	
-	/// Prints std::wstring to window
-	/// @param ws wide string to be printed
-	/// @return reference to itself
 	Window &operator<<(const std::wstring &ws);
 protected:
 	/// Sets colors of window (interal use only)
 	/// @param fg foregound color
 	/// @param bg background color
 	///
-	void setColor(Color fg, Color bg = Color::Default);
+	void setColor(Color c);
 	
 	/// Refreshes window's border
 	///
-	void showBorder() const;
+	void refreshBorder() const;
 	
 	/// Changes dimensions of window, called from resize()
 	/// @param width new window's width
@@ -441,7 +450,6 @@ protected:
 	
 	/// internal WINDOW pointers
 	WINDOW *m_window;
-	WINDOW *m_border_window;
 	
 	/// start points and dimensions
 	size_t m_start_x;
@@ -454,11 +462,9 @@ protected:
 	
 	/// current colors
 	Color m_color;
-	Color m_bg_color;
 	
 	/// base colors
 	Color m_base_color;
-	Color m_base_bg_color;
 	
 	/// current border
 	Border m_border;
@@ -487,13 +493,13 @@ private:
 	/// pointer to helper function used by getString()
 	/// @see getString()
 	///
-	GetStringHelper m_get_string_helper;
+	PromptHook m_prompt_hook;
 	
 	/// window title
 	std::string m_title;
 	
 	/// stack of colors
-	std::stack<Colors> m_color_stack;
+	std::stack<Color> m_color_stack;
 	
 	/// input queue of a window. you can put characters there using
 	/// PushChar and they will be immediately consumed and

@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2008-2013 by Andrzej Rybczak                            *
+ *   Copyright (C) 2008-2014 by Andrzej Rybczak                            *
  *   electricityispower@gmail.com                                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -30,7 +30,7 @@ BindingsConfiguration Bindings;
 
 Key Key::noOp = Key(ERR, NCurses);
 
-namespace {//
+namespace {
 
 Key stringToSpecialKey(const std::string &s)
 {
@@ -233,7 +233,7 @@ bool BindingsConfiguration::read(const std::string &file)
 		{
 			if (!actions.empty())
 			{
-				m_commands.insert(std::make_pair(cmd_name, Command(actions, cmd_immediate)));
+				m_commands.insert(std::make_pair(cmd_name, Command(std::move(actions), cmd_immediate)));
 				actions.clear();
 				return true;
 			}
@@ -366,6 +366,7 @@ void BindingsConfiguration::generateDefaults()
 	if (notBound(k = stringToKey("delete")))
 	{
 		bind(k, Actions::Type::DeletePlaylistItems);
+		bind(k, Actions::Type::DeleteBrowserItems);
 		bind(k, Actions::Type::DeleteStoredPlaylist);
 	}
 	if (notBound(k = stringToKey("right")))
@@ -482,8 +483,6 @@ void BindingsConfiguration::generateDefaults()
 		bind(k, Actions::Type::SortPlaylist);
 	if (notBound(k = stringToKey("ctrl_r")))
 		bind(k, Actions::Type::ReversePlaylist);
-	if (notBound(k = stringToKey("ctrl_f")))
-		bind(k, Actions::Type::ApplyFilter);
 	if (notBound(k = stringToKey("/")))
 	{
 		bind(k, Actions::Type::Find);
@@ -540,6 +539,7 @@ void BindingsConfiguration::generateDefaults()
 		bind(k, Actions::Type::MoveSortOrderUp);
 		bind(k, Actions::Type::MoveSelectedItemsUp);
 		bind(k, Actions::Type::ToggleMediaLibrarySortMode);
+		bind(k, Actions::Type::SetVisualizerSampleMultiplier);
 	}
 	if (notBound(k = stringToKey("n")))
 	{

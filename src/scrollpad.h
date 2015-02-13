@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2008-2013 by Andrzej Rybczak                            *
+ *   Copyright (C) 2008-2014 by Andrzej Rybczak                            *
  *   electricityispower@gmail.com                                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -25,7 +25,7 @@
 #include "window.h"
 #include "strbuffer.h"
 
-namespace NC {//
+namespace NC {
 
 /// Scrollpad is specialized window that holds large portions of text and
 /// supports scrolling if the amount of it is bigger than the window area.

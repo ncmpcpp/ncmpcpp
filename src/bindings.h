@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2008-2013 by Andrzej Rybczak                            *
+ *   Copyright (C) 2008-2014 by Andrzej Rybczak                            *
  *   electricityispower@gmail.com                                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -21,6 +21,8 @@
 #ifndef NCMPCPP_BINDINGS_H
 #define NCMPCPP_BINDINGS_H
 
+#include <algorithm>
+#include <boost/bind.hpp>
 #include <cassert>
 #include <unordered_map>
 #include "actions.h"
@@ -74,57 +76,39 @@ struct Binding
 {
 	typedef std::vector<Actions::BaseAction *> ActionChain;
 	
-	Binding(Actions::Type at) : m_is_single(true), m_action(&Actions::get(at)) { }
-	Binding(const ActionChain &actions) {
-		assert(actions.size() > 0);
-		if (actions.size() == 1) {
-			m_is_single = true;
-			m_action = actions[0];
-		} else {
-			m_is_single = false;
-			m_chain = new ActionChain(actions);
-		}
+	template <typename ArgT>
+	Binding(ArgT &&actions)
+	: m_actions(std::forward<ArgT>(actions)) {
+		assert(!m_actions.empty());
 	}
+	Binding(Actions::Type at)
+	: Binding(ActionChain({&Actions::get(at)})) { }
 	
 	bool execute() const {
-		bool result = false;
-		if (m_is_single) {
-			assert(m_action);
-			result = m_action->execute();
-		} else {
-			for (auto it = m_chain->begin(); it != m_chain->end(); ++it)
-				if (!(*it)->execute())
-					break;
-			result = true;
-		}
-		return result;
+		return std::all_of(m_actions.begin(), m_actions.end(),
+			boost::bind(&Actions::BaseAction::execute, _1)
+		);
 	}
 	
 	bool isSingle() const {
-		return m_is_single;
+		return m_actions.size() == 1;
 	}
-	ActionChain *chain() const {
-		assert(!m_is_single);
-		return m_chain;
-	}
+
 	Actions::BaseAction *action() const {
-		assert(m_is_single);
-		return m_action;
+		assert(isSingle());
+		return m_actions[0];
 	}
-	
+
 private:
-	bool m_is_single;
-	union {
-		Actions::BaseAction *m_action;
-		ActionChain *m_chain;
-	};
+	ActionChain m_actions;
 };
 
 /// Represents executable command
 struct Command
 {
-	Command(const Binding &binding_, bool immediate_)
-	: m_binding(binding_), m_immediate(immediate_) { }
+	template <typename ArgT>
+	Command(ArgT &&binding_, bool immediate_)
+	: m_binding(std::forward<ArgT>(binding_)), m_immediate(immediate_) { }
 	
 	const Binding &binding() const { return m_binding; }
 	bool immediate() const { return m_immediate; }
@@ -182,8 +166,9 @@ private:
 		return k != Key::noOp && m_bindings.find(k) == m_bindings.end();
 	}
 	
-	template <typename T> void bind(Key k, const T &t) {
-		m_bindings[k].push_back(Binding(t));
+	template <typename ArgT>
+	void bind(Key k, ArgT &&t) {
+		m_bindings[k].push_back(std::forward<ArgT>(t));
 	}
 	
 	BindingsMap m_bindings;

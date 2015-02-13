@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2008-2013 by Andrzej Rybczak                            *
+ *   Copyright (C) 2008-2014 by Andrzej Rybczak                            *
  *   electricityispower@gmail.com                                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -21,48 +21,33 @@
 #include <cassert>
 #include "utility/type_conversions.h"
 
-NC::Color stringToColor(const std::string &color)
+NC::Color charToColor(char c)
 {
-	NC::Color result = NC::Color::Default;
-	if (color == "black")
-		result = NC::Color::Black;
-	else if (color == "red")
-		result = NC::Color::Red;
-	else if (color == "green")
-		result = NC::Color::Green;
-	else if (color == "yellow")
-		result = NC::Color::Yellow;
-	else if (color == "blue")
-		result = NC::Color::Blue;
-	else if (color == "magenta")
-		result = NC::Color::Magenta;
-	else if (color == "cyan")
-		result = NC::Color::Cyan;
-	else if (color == "white")
-		result = NC::Color::White;
-	return result;
-}
-
-NC::Border stringToBorder(const std::string &border)
-{
-	NC::Border result = NC::Border::None;
-	if (border == "black")
-		result = NC::Border::Black;
-	else if (border == "red")
-		result = NC::Border::Red;
-	else if (border == "green")
-		result = NC::Border::Green;
-	else if (border == "yellow")
-		result = NC::Border::Yellow;
-	else if (border == "blue")
-		result = NC::Border::Blue;
-	else if (border == "magenta")
-		result = NC::Border::Magenta;
-	else if (border == "cyan")
-		result = NC::Border::Cyan;
-	else if (border == "white")
-		result = NC::Border::White;
-	return result;
+	switch (c)
+	{
+		case '0':
+			return NC::Color::Default;
+		case '1':
+			return NC::Color::Black;
+		case '2':
+			return NC::Color::Red;
+		case '3':
+			return NC::Color::Green;
+		case '4':
+			return NC::Color::Yellow;
+		case '5':
+			return NC::Color::Blue;
+		case '6':
+			return NC::Color::Magenta;
+		case '7':
+			return NC::Color::Cyan;
+		case '8':
+			return NC::Color::White;
+		case '9':
+			return NC::Color::End;
+		default:
+			throw std::runtime_error("invalid character");
+	}
 }
 
 std::string tagTypeToString(mpd_tag_type tag)
@@ -196,22 +181,22 @@ MPD::Song::GetFunction charToGetFunction(char c)
 		case 'P':
 			return &MPD::Song::getPriority;
 		default:
-			return 0;
+			return nullptr;
 	}
 }
 
-std::string itemTypeToString(MPD::ItemType type)
+std::string itemTypeToString(MPD::Item::Type type)
 {
 	std::string result;
 	switch (type)
 	{
-		case MPD::itDirectory:
+		case MPD::Item::Type::Directory:
 			result = "directory";
 			break;
-		case MPD::itSong:
+		case MPD::Item::Type::Song:
 			result = "song";
 			break;
-		case MPD::itPlaylist:
+		case MPD::Item::Type::Playlist:
 			result = "playlist";
 			break;
 	}

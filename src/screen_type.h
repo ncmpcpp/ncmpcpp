@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2008-2013 by Andrzej Rybczak                            *
+ *   Copyright (C) 2008-2014 by Andrzej Rybczak                            *
  *   electricityispower@gmail.com                                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -22,15 +22,25 @@
 #define NCMPCPP_SCREEN_TYPE_H
 
 #include <string>
+#include "config.h"
+
+// forward declaration
+struct BaseScreen;
 
 enum class ScreenType {
 	Browser,
+#	ifdef ENABLE_CLOCK
 	Clock,
+#	endif // ENABLE_CLOCK
 	Help,
+#	ifdef HAVE_CURL_CURL_H
 	Lastfm,
+#	endif // HAVE_CURL_CURL_H
 	Lyrics,
 	MediaLibrary,
+#	ifdef ENABLE_OUTPUTS
 	Outputs,
+#	endif // ENABLE_OUTPUTS
 	Playlist,
 	PlaylistEditor,
 	SearchEngine,
@@ -38,13 +48,19 @@ enum class ScreenType {
 	ServerInfo,
 	SongInfo,
 	SortPlaylistDialog,
+#	ifdef HAVE_TAGLIB_H
 	TagEditor,
 	TinyTagEditor,
+#	endif // HAVE_TAGLIB_H
 	Unknown,
+#	ifdef ENABLE_VISUALIZER
 	Visualizer,
+#	endif // ENABLE_VISUALIZER
 };
 
-ScreenType stringtoStarterScreenType(const std::string &s);
+ScreenType stringtoStartupScreenType(const std::string &s);
 ScreenType stringToScreenType(const std::string &s);
+
+BaseScreen *toScreen(ScreenType st);
 
 #endif // NCMPCPP_SCREEN_TYPE_H

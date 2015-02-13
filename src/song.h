@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2008-2013 by Andrzej Rybczak                            *
+ *   Copyright (C) 2008-2014 by Andrzej Rybczak                            *
  *   electricityispower@gmail.com                                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -21,6 +21,7 @@
 #ifndef NCMPCPP_SONG_H
 #define NCMPCPP_SONG_H
 
+#include <cstring>
 #include <functional>
 #include <memory>
 #include <string>
@@ -28,16 +29,28 @@
 
 #include <mpd/client.h>
 
-namespace MPD {//
+namespace MPD {
 
 struct Song
 {
+	struct Hash {
+		size_t operator()(const Song &s) const { return s.m_hash; }
+	};
+
 	typedef std::string (Song::*GetFunction)(unsigned) const;
 	
-	Song() { }
+	Song() : m_hash(0) { }
 	virtual ~Song() { }
 	
 	Song(mpd_song *s);
+
+	Song(const Song &rhs) : m_song(rhs.m_song), m_hash(rhs.m_hash) { }
+	Song(Song &&rhs) : m_song(std::move(rhs.m_song)), m_hash(rhs.m_hash) { }
+	Song &operator=(Song rhs) {
+		m_song = std::move(rhs.m_song);
+		m_hash = rhs.m_hash;
+		return *this;
+	}
 	
 	std::string get(mpd_tag_type type, unsigned idx = 0) const;
 	
@@ -59,9 +72,8 @@ struct Song
 	virtual std::string getLength(unsigned idx = 0) const;
 	virtual std::string getPriority(unsigned idx = 0) const;
 	
-	virtual std::string getTags(GetFunction f, const std::string &tags_separator) const;
+	virtual std::string getTags(GetFunction f) const;
 	
-	virtual unsigned getHash() const;
 	virtual unsigned getDuration() const;
 	virtual unsigned getPosition() const;
 	virtual unsigned getID() const;
@@ -73,26 +85,27 @@ struct Song
 	
 	virtual bool empty() const;
 	
-	virtual std::string toString(const std::string &fmt, const std::string &tags_separator,
-	                             const std::string &escape_chars = "") const;
+	bool operator==(const Song &rhs) const {
+		if (m_hash != rhs.m_hash)
+			return false;
+		return strcmp(c_uri(), rhs.c_uri()) == 0;
+	}
+	bool operator!=(const Song &rhs) const {
+		if (m_hash != rhs.m_hash)
+			return true;
+		return strcmp(c_uri(), rhs.c_uri()) != 0;
+	}
 	
-	bool operator==(const Song &rhs) const { return m_hash == rhs.m_hash; }
-	bool operator!=(const Song &rhs) const { return m_hash != rhs.m_hash; }
-	
+	const char *c_uri() const { return m_song ? mpd_song_get_uri(m_song.get()) : ""; }
+
 	static std::string ShowTime(unsigned length);
-	static bool isFormatOk(const std::string &type, const std::string &fmt);
-	
-	static const char FormatEscapeCharacter = 1;
+
+	static std::string TagsSeparator;
 
 private:
-	std::string ParseFormat(std::string::const_iterator &it, const std::string &tags_separator,
-							const std::string &escape_chars) const;
-	
 	std::shared_ptr<mpd_song> m_song;
 	size_t m_hash;
 };
-
-typedef std::vector<Song> SongList;
 
 }
 

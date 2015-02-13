@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2008-2013 by Andrzej Rybczak                            *
+ *   Copyright (C) 2008-2014 by Andrzej Rybczak                            *
  *   electricityispower@gmail.com                                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -18,10 +18,11 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
+#include "statusbar.h"
 #include <boost/algorithm/string/split.hpp>
 #include "mutable_song.h"
 
-namespace MPD {//
+namespace MPD {
 
 std::string MutableSong::getArtist(unsigned idx) const
 {
@@ -138,18 +139,17 @@ void MutableSong::setComment(const std::string &value, unsigned idx)
 	replaceTag(MPD_TAG_COMMENT, Song::getComment(idx), value, idx);
 }
 
-const std::string &MutableSong::getNewURI() const
+const std::string &MutableSong::getNewName() const
 {
-	return m_uri;
+	return m_name;
 }
 
-void MutableSong::setNewURI(const std::string &value)
+void MutableSong::setNewName(const std::string &value)
 {
-	std::string orig_uri = getURI();
-	if (orig_uri == value)
-		m_uri.clear();
+	if (getName() == value)
+		m_name.clear();
 	else
-		m_uri = value;
+		m_name = value;
 }
 
 unsigned MutableSong::getDuration() const
@@ -178,10 +178,10 @@ void MutableSong::setMTime(time_t mtime)
 	m_mtime = mtime;
 }
 
-void MutableSong::setTags(SetFunction set, const std::string &value, const std::string &delimiter)
+void MutableSong::setTags(SetFunction set, const std::string &value)
 {
 	std::vector<std::string> tags;
-	boost::iter_split(tags, value, boost::first_finder(delimiter));
+	boost::iter_split(tags, value, boost::first_finder(Song::TagsSeparator));
 	size_t i = 0;
 	for (; i < tags.size(); ++i)
 		(this->*set)(tags[i], i);
@@ -191,12 +191,12 @@ void MutableSong::setTags(SetFunction set, const std::string &value, const std::
 
 bool MutableSong::isModified() const
 {
-	return !m_uri.empty() || !m_tags.empty();
+	return !m_name.empty() || !m_tags.empty();
 }
 
 void MutableSong::clearModifications()
 {
-	m_uri.clear();
+	m_name.clear();
 	m_tags.clear();
 }
 

@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2008-2013 by Andrzej Rybczak                            *
+ *   Copyright (C) 2008-2014 by Andrzej Rybczak                            *
  *   electricityispower@gmail.com                                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -22,7 +22,7 @@
 #define NCMPCPP_UTILITY_COMPARATORS_H
 
 #include <string>
-#include "exec_item.h"
+#include "runnable_item.h"
 #include "mpdpp.h"
 #include "settings.h"
 #include "menu.h"
@@ -35,8 +35,15 @@ class LocaleStringComparison
 public:
 	LocaleStringComparison(const std::locale &loc, bool ignore_the)
 	: m_locale(loc), m_ignore_the(ignore_the) { }
-	
-	int operator()(const std::string &a, const std::string &b) const;
+
+	int operator()(const char *a, const char *b) const {
+		return compare(a, strlen(a), b, strlen(b));
+	}
+	int operator()(const std::string &a, const std::string &b) const {
+		return compare(a.c_str(), a.length(), b.c_str(), b.length());
+	}
+
+	int compare(const char *a, size_t a_len, const char *b, size_t b_len) const;
 };
 
 class LocaleBasedSorting
@@ -50,6 +57,10 @@ public:
 		return m_cmp(a, b) < 0;
 	}
 	
+	bool operator()(const MPD::Playlist &a, const MPD::Playlist &b) const {
+		return m_cmp(a.path(), b.path()) < 0;
+	}
+
 	bool operator()(const MPD::Song &a, const MPD::Song &b) const {
 		return m_cmp(a.getName(), b.getName()) < 0;
 	}
@@ -60,7 +71,7 @@ public:
 	}
 	
 	template <typename ItemT, typename FunT>
-	bool operator()(const ExecItem<ItemT, FunT> &a, const ExecItem<ItemT, FunT> &b) const {
+	bool operator()(const RunnableItem<ItemT, FunT> &a, const RunnableItem<ItemT, FunT> &b) const {
 		return m_cmp(a.item(), b.item()) < 0;
 	}
 };

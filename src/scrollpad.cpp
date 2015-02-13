@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2008-2013 by Andrzej Rybczak                            *
+ *   Copyright (C) 2008-2014 by Andrzej Rybczak                            *
  *   electricityispower@gmail.com                                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -20,10 +20,11 @@
 
 #include <cassert>
 #include <boost/regex.hpp>
+#include <iostream>
 
 #include "scrollpad.h"
 
-namespace {//
+namespace {
 
 template <typename PropT>
 bool regexSearch(NC::Buffer &buf, PropT begin, const std::string &ws, PropT end, size_t id, boost::regex::flag_type flags)
@@ -47,7 +48,7 @@ bool regexSearch(NC::Buffer &buf, PropT begin, const std::string &ws, PropT end,
 
 }
 
-namespace NC {//
+namespace NC {
 
 Scrollpad::Scrollpad(size_t startx,
 size_t starty,
@@ -62,7 +63,6 @@ m_real_height(height)
 {
 }
 
-
 void Scrollpad::refresh()
 {
 	assert(m_real_height >= m_height);
@@ -74,6 +74,7 @@ void Scrollpad::refresh()
 void Scrollpad::resize(size_t new_width, size_t new_height)
 {
 	adjustDimensions(new_width, new_height);
+	recreate(new_width, new_height);
 	flush();
 }
 
@@ -125,11 +126,11 @@ void Scrollpad::clear()
 {
 	m_real_height = m_height;
 	m_buffer.clear();
-	wclear(m_window);
+	werase(m_window);
 	delwin(m_window);
 	m_window = newpad(m_height, m_width);
 	setTimeout(m_window_timeout);
-	setColor(m_color, m_bg_color);
+	setColor(m_color);
 	keypad(m_window, 1);
 }
 
@@ -260,9 +261,11 @@ void Scrollpad::flush()
 			w << *p;
 		return height;
 	};
-	
 	m_real_height = std::max(write_buffer(true), m_height);
-	recreate(m_width, m_real_height);
+	if (m_real_height > m_height)
+		recreate(m_width, m_real_height);
+	else
+		werase(m_window);
 	write_buffer(false);
 }
 
@@ -273,7 +276,7 @@ void Scrollpad::reset()
 
 bool Scrollpad::setProperties(Color begin, const std::string &s, Color end, size_t id, boost::regex::flag_type flags)
 {
-	return regexSearch(m_buffer, begin, s, end, id, flags);
+	return regexSearch(m_buffer, std::move(begin), s, std::move(end), id, flags);
 }
 
 bool Scrollpad::setProperties(Format begin, const std::string &s, Format end, size_t id, boost::regex::flag_type flags)

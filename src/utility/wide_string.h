@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2008-2013 by Andrzej Rybczak                            *
+ *   Copyright (C) 2008-2014 by Andrzej Rybczak                            *
  *   electricityispower@gmail.com                                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -23,12 +23,16 @@
 
 #include <string>
 
-std::string ToString(std::wstring ws);
-std::wstring ToWString(std::string s);
+std::string ToString(const std::wstring &ws);
+std::wstring ToWString(const std::string &s);
 
 size_t wideLength(const std::wstring &ws);
-
 void wideCut(std::wstring &ws, size_t max_length);
+
 std::wstring wideShorten(const std::wstring &ws, size_t max_length);
+inline std::string wideShorten(const std::string &s, size_t max_length)
+{
+	return ToString(wideShorten(ToWString(s), max_length));
+}
 
 #endif // NCMPCPP_UTILITY_WIDE_STRING_h

@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2008-2013 by Andrzej Rybczak                            *
+ *   Copyright (C) 2008-2014 by Andrzej Rybczak                            *
  *   electricityispower@gmail.com                                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -25,7 +25,7 @@
 #include "config.h"
 #include "song.h"
 
-namespace MPD {//
+namespace MPD {
 
 struct MutableSong : public Song
 {
@@ -58,15 +58,15 @@ struct MutableSong : public Song
 	void setDisc(const std::string &value, unsigned idx = 0);
 	void setComment(const std::string &value, unsigned idx = 0);
 	
-	const std::string &getNewURI() const;
-	void setNewURI(const std::string &value);
+	const std::string &getNewName() const;
+	void setNewName(const std::string &value);
 	
 	virtual unsigned getDuration() const OVERRIDE;
 	virtual time_t getMTime() const OVERRIDE;
 	void setDuration(unsigned duration);
 	void setMTime(time_t mtime);
 	
-	void setTags(SetFunction set, const std::string &value, const std::string &delimiter);
+	void setTags(SetFunction set, const std::string &value);
 	
 	bool isModified() const;
 	void clearModifications();
@@ -105,7 +105,7 @@ private:
 		return result;
 	}
 	
-	std::string m_uri;
+	std::string m_name;
 	time_t m_mtime;
 	unsigned m_duration;
 	std::map<Tag, std::string> m_tags;

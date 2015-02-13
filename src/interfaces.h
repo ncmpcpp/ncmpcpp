@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2008-2013 by Andrzej Rybczak                            *
+ *   Copyright (C) 2008-2014 by Andrzej Rybczak                            *
  *   electricityispower@gmail.com                                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -22,24 +22,18 @@
 #define NCMPCPP_INTERFACES_H
 
 #include <string>
+#include "enums.h"
 #include "gcc.h"
 #include "screen.h"
 #include "song.h"
 #include "proxy_song_list.h"
 
-struct Filterable
-{
-	virtual bool allowsFiltering() = 0;
-	virtual std::string currentFilter() = 0;
-	virtual void applyFilter(const std::string &filter) = 0;
-};
-
 struct Searchable
 {
 	virtual bool allowsSearching() = 0;
-	virtual bool search(const std::string &constraint) = 0;
-	virtual void nextFound(bool wrap) = 0;
-	virtual void prevFound(bool wrap) = 0;
+	virtual void setSearchConstraint(const std::string &constraint) = 0;
+	virtual void clearConstraint() = 0;
+	virtual bool find(SearchDirection direction, bool wrap, bool skip_current) = 0;
 };
 
 struct HasSongs
@@ -48,7 +42,7 @@ struct HasSongs
 	
 	virtual bool allowsSelection() = 0;
 	virtual void reverseSelection() = 0;
-	virtual MPD::SongList getSelectedSongs() = 0;
+	virtual std::vector<MPD::Song> getSelectedSongs() = 0;
 };
 
 struct HasColumns

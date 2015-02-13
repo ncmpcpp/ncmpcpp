@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2008-2013 by Andrzej Rybczak                            *
+ *   Copyright (C) 2008-2014 by Andrzej Rybczak                            *
  *   electricityispower@gmail.com                                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -44,17 +44,6 @@ struct Help: Screen<NC::Scrollpad>, Tabbable
 	
 protected:
 	virtual bool isLockable() OVERRIDE { return true; }
-	
-private:
-	void KeysSection(const char *title_) { Section("Keys", title_); }
-	void MouseSection(const char *title_) { Section("Mouse", title_); }
-	void Section(const char *type_, const char *title_);
-	void KeyDesc(const Actions::Type at, const char *desc);
-	void MouseDesc(std::string action, const char *desc, bool indent = false);
-	void MouseColumn(const char *column);
-	
-	std::string DisplayKeys(const Actions::Type at);
-	void GetKeybindings();
 };
 
 extern Help *myHelp;

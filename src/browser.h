@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2008-2013 by Andrzej Rybczak                            *
+ *   Copyright (C) 2008-2014 by Andrzej Rybczak                            *
  *   electricityispower@gmail.com                                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -23,9 +23,10 @@
 
 #include "interfaces.h"
 #include "mpdpp.h"
+#include "regex_filter.h"
 #include "screen.h"
 
-struct Browser: Screen<NC::Menu<MPD::Item>>, Filterable, HasSongs, Searchable, Tabbable
+struct Browser: Screen<NC::Menu<MPD::Item>>, HasSongs, Searchable, Tabbable
 {
 	Browser();
 	
@@ -44,50 +45,40 @@ struct Browser: Screen<NC::Menu<MPD::Item>>, Filterable, HasSongs, Searchable, T
 	
 	virtual bool isMergable() OVERRIDE { return true; }
 	
-	// Filterable implementation
-	virtual bool allowsFiltering() OVERRIDE;
-	virtual std::string currentFilter() OVERRIDE;
-	virtual void applyFilter(const std::string &filter) OVERRIDE;
-	
 	// Searchable implementation
 	virtual bool allowsSearching() OVERRIDE;
-	virtual bool search(const std::string &constraint) OVERRIDE;
-	virtual void nextFound(bool wrap) OVERRIDE;
-	virtual void prevFound(bool wrap) OVERRIDE;
+	virtual void setSearchConstraint(const std::string &constraint) OVERRIDE;
+	virtual void clearConstraint() OVERRIDE;
+	virtual bool find(SearchDirection direction, bool wrap, bool skip_current) OVERRIDE;
 	
 	// HasSongs implementation
 	virtual ProxySongList proxySongList() OVERRIDE;
 	
 	virtual bool allowsSelection() OVERRIDE;
 	virtual void reverseSelection() OVERRIDE;
-	virtual MPD::SongList getSelectedSongs() OVERRIDE;
+	virtual std::vector<MPD::Song> getSelectedSongs() OVERRIDE;
 	
 	// private members
-	const std::string &CurrentDir() { return itsBrowsedDir; }
+	bool inRootDirectory();
+	bool isParentDirectory(const MPD::Item &item);
+	const std::string &currentDirectory();
 	
-	void fetchSupportedExtensions();
-	
-	bool isLocal() { return itsBrowseLocally; }
-	void LocateSong(const MPD::Song &);
-	void GetDirectory(std::string, std::string = "/");
-#	ifndef WIN32
-	void GetLocalDirectory(MPD::ItemList &, const std::string &, bool) const;
-	void ClearDirectory(const std::string &) const;
-	void ChangeBrowseMode();
-	bool deleteItem(const MPD::Item &);
-#	endif // !WIN32
-	
-	static bool isParentDirectory(const MPD::Item &item) {
-		return item.type == MPD::itDirectory && item.name == "..";
-	}
-	
+	bool isLocal() { return m_local_browser; }
+	void locateSong(const MPD::Song &s);
+	void getDirectory(std::string directory);
+	void changeBrowseMode();
+	void remove(const MPD::Item &item);
+
+	static void fetchSupportedExtensions();
+
 protected:
 	virtual bool isLockable() OVERRIDE { return true; }
 	
 private:
-	bool itsBrowseLocally;
-	size_t itsScrollBeginning;
-	std::string itsBrowsedDir;
+	bool m_local_browser;
+	size_t m_scroll_beginning;
+	std::string m_current_directory;
+	RegexFilter<MPD::Item> m_search_predicate;
 };
 
 extern Browser *myBrowser;

@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2008-2013 by Andrzej Rybczak                            *
+ *   Copyright (C) 2008-2014 by Andrzej Rybczak                            *
  *   electricityispower@gmail.com                                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -22,8 +22,8 @@
 #include <clocale>
 #include <csignal>
 #include <cstring>
-#include <sys/time.h>
 
+#include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/locale.hpp>
 #include <iostream>
 #include <fstream>
@@ -35,7 +35,7 @@
 #include "bindings.h"
 #include "browser.h"
 #include "charset.h"
-#include "cmdargs.h"
+#include "configuration.h"
 #include "global.h"
 #include "error.h"
 #include "helpers.h"
@@ -56,16 +56,16 @@ namespace
 	bool run_resize_screen = false;
 	
 #	if !defined(WIN32)
-	void sighandler(int signal)
+	void sighandler(int sig)
 	{
-		if (signal == SIGPIPE)
-		{
-			Statusbar::msg("SIGPIPE (broken pipe signal) received");
-		}
-		else if (signal == SIGWINCH)
+		if (sig == SIGWINCH)
 		{
 			run_resize_screen = true;
 		}
+#		if defined(__sun) && defined(__SVR4)
+		// in solaris it is needed to reinstall the handler each time it's executed
+		signal(sig, sighandler);
+#		endif // __sun && __SVR4
 	}
 #	endif // !WIN32
 	
@@ -75,9 +75,7 @@ namespace
 		std::cerr.rdbuf(cerr_buffer);
 		errorlog.close();
 		Mpd.Disconnect();
-#		ifndef USE_PDCURSES // destroying screen somehow crashes pdcurses
 		NC::destroyScreen();
-#		endif // USE_PDCURSES
 		windowTitle("");
 	}
 }
@@ -85,8 +83,6 @@ namespace
 int main(int argc, char **argv)
 {
 	using Global::myScreen;
-	using Global::myLockedScreen;
-	using Global::myInactiveScreen;
 	
 	using Global::wHeader;
 	using Global::wFooter;
@@ -94,36 +90,12 @@ int main(int argc, char **argv)
 	using Global::VolumeState;
 	using Global::Timer;
 	
-	std::srand(std::time(0));
+	srand(time(nullptr));
 	std::setlocale(LC_ALL, "");
 	std::locale::global(Charset::internalLocale());
 	
-	Config.CheckForCommandLineConfigFilePath(argv, argc);
-	
-	Config.SetDefaults();
-	Config.Read();
-	Config.GenerateColumns();
-	
-	if (!Bindings.read(Config.ncmpcpp_directory + "bindings"))
-		return 1;
-	Bindings.generateDefaults();
-	
-	if (getenv("MPD_HOST"))
-		Mpd.SetHostname(getenv("MPD_HOST"));
-	if (getenv("MPD_PORT"))
-		Mpd.SetPort(atoi(getenv("MPD_PORT")));
-	
-	if (Config.mpd_host != "localhost")
-		Mpd.SetHostname(Config.mpd_host);
-	if (Config.mpd_port != 6600)
-		Mpd.SetPort(Config.mpd_port);
-	
-	Mpd.SetTimeout(Config.mpd_connection_timeout);
-	
-	if (argc > 1)
-		ParseArgv(argc, argv);
-	
-	CreateDir(Config.ncmpcpp_directory);
+	if (!configure(argc, argv))
+		return 0;
 	
 	// always execute these commands, even if ncmpcpp use exit function
 	atexit(do_at_exit);
@@ -133,90 +105,81 @@ int main(int argc, char **argv)
 	cerr_buffer = std::cerr.rdbuf();
 	std::cerr.rdbuf(errorlog.rdbuf());
 	
-	NC::initScreen("ncmpcpp ver. " VERSION, Config.colors_enabled);
+	NC::initScreen(Config.colors_enabled);
 	
 	Actions::OriginalStatusbarVisibility = Config.statusbar_visibility;
-	
-	if (!Config.titles_visibility)
-		wattron(stdscr, COLOR_PAIR(int(Config.main_color)));
-	
-	if (Config.new_design)
+
+	if (Config.design == Design::Alternative)
 		Config.statusbar_visibility = 0;
 	
 	Actions::setWindowsDimensions();
 	Actions::validateScreenSize();
 	Actions::initializeScreens();
 	
-	wHeader = new NC::Window(0, 0, COLS, Actions::HeaderHeight, "", Config.header_color, NC::Border::None);
-	if (Config.header_visibility || Config.new_design)
+	wHeader = new NC::Window(0, 0, COLS, Actions::HeaderHeight, "", Config.header_color, NC::Border());
+	if (Config.header_visibility || Config.design == Design::Alternative)
 		wHeader->display();
 	
-	wFooter = new NC::Window(0, Actions::FooterStartY, COLS, Actions::FooterHeight, "", Config.statusbar_color, NC::Border::None);
-	wFooter->setTimeout(500);
-	wFooter->setGetStringHelper(Statusbar::Helpers::getString);
+	wFooter = new NC::Window(0, Actions::FooterStartY, COLS, Actions::FooterHeight, "", Config.statusbar_color, NC::Border());
+	wFooter->setPromptHook(Statusbar::Helpers::mainHook);
 	
 	// initialize global timer
-	gettimeofday(&Timer, 0);
+	Timer = boost::posix_time::microsec_clock::local_time();
 	
-	// go to playlist
+	// initialize playlist
 	myPlaylist->switchTo();
-	myPlaylist->UpdateTimer();
-	
+
+	// go to startup screen
+	if (Config.startup_screen_type != myScreen->type())
+		toScreen(Config.startup_screen_type)->switchTo();
+
+	// lock current screen and go to the slave one if applicable
+	if (Config.startup_slave_screen_type)
+	{
+		auto slave_screen = *Config.startup_slave_screen_type;
+		bool screen_locked = myScreen->lock();
+		if (screen_locked && slave_screen != myScreen->type())
+			toScreen(slave_screen)->switchTo();
+	}
+
 	// local variables
-	Key input(0, Key::Standard);
-	timeval past = { 0, 0 };
-	// local variables end
+	bool key_pressed = false;
+	Key input = Key::noOp;
+	auto connect_attempt = boost::posix_time::from_time_t(0);
+	auto past = boost::posix_time::from_time_t(0);
 	
+	/// enable mouse
 	mouseinterval(0);
 	if (Config.mouse_support)
 		mousemask(ALL_MOUSE_EVENTS, 0);
 	
 #	ifndef WIN32
-	signal(SIGPIPE, sighandler);
 	signal(SIGWINCH, sighandler);
+	// we get it after connection with mpd is broken.
+	// just ignore it and wait for the connection to
+	// be reestablished.
+	sigignore(SIGPIPE);
 #	endif // !WIN32
 	
 	while (!Actions::ExitMainLoop)
 	{
 		try
 		{
-			if (!Mpd.Connected())
+			if (!Mpd.Connected() && Timer - connect_attempt > boost::posix_time::seconds(1))
 			{
+				connect_attempt = Timer;
+				// reset local status info
+				Status::clear();
+				// clear mpd callback
 				wFooter->clearFDCallbacksList();
 				try
 				{
 					Mpd.Connect();
 					if (Mpd.Version() < 16)
 					{
-						Mpd.Disconnect();
-						throw MPD::ClientError(MPD_ERROR_STATE, "MPD < 0.16.0 is not supported", false);
+							Mpd.Disconnect();
+							throw MPD::ClientError(MPD_ERROR_STATE, "MPD < 0.16.0 is not supported", false);
 					}
-					wFooter->addFDCallback(Mpd.GetFD(), Statusbar::Helpers::mpd);
-					Status::update(-1); // we need info about new connection
-					
-					if (Config.jump_to_now_playing_song_at_start)
-					{
-						int curr_pos = myPlaylist->currentSongPosition();
-						if  (curr_pos >= 0)
-							myPlaylist->main().highlight(curr_pos);
-					}
-					
-					// go to startup screen
-					if (Config.startup_screen != myScreen)
-						Config.startup_screen->switchTo();
-					
-					myBrowser->fetchSupportedExtensions();
-#					ifdef ENABLE_OUTPUTS
-					myOutputs->FetchList();
-#					endif // ENABLE_OUTPUTS
-#					ifdef ENABLE_VISUALIZER
-					myVisualizer->ResetFD();
-					if (myScreen == myVisualizer)
-						myVisualizer->SetFD();
-					myVisualizer->FindOutputID();
-#					endif // ENABLE_VISUALIZER
-					
-					Statusbar::msg("Connected to %s", Mpd.GetHostname().c_str());
 				}
 				catch (MPD::ClientError &e)
 				{
@@ -224,7 +187,8 @@ int main(int argc, char **argv)
 				}
 			}
 			
-			Status::trace();
+			// update timer, status if necessary etc.
+			Status::trace(!key_pressed, true);
 
 			if (run_resize_screen)
 			{
@@ -233,49 +197,50 @@ int main(int argc, char **argv)
 			}
 			
 			// header stuff
-			if (((Timer.tv_sec == past.tv_sec && Timer.tv_usec >= past.tv_usec+500000) || Timer.tv_sec > past.tv_sec)
-			&&   (myScreen == myPlaylist || myScreen == myBrowser || myScreen == myLyrics)
+			if ((myScreen == myPlaylist || myScreen == myBrowser || myScreen == myLyrics)
+			&&  (Timer - past > boost::posix_time::milliseconds(500))
 			)
 			{
 				drawHeader();
 				past = Timer;
 			}
-			// header stuff end
 			
-			if (input != Key::noOp)
+			if (key_pressed)
 				myScreen->refreshWindow();
 			input = Key::read(*wFooter);
+			key_pressed = input != Key::noOp;
 			
-			if (input == Key::noOp)
+			if (!key_pressed)
 				continue;
-			
+
+			// The reason we want to update timer here is that if the timer is updated
+			// in Status::trace, then Key::read usually blocks for 500ms and if key is
+			// pressed 400ms after Key::read was called, we end up with Timer that is
+			// ~400ms inaccurate. On the other hand, if keys are being pressed, we don't
+			// want to update timer in both Status::trace and here. Therefore we update
+			// timer in Status::trace only if there was no recent input.
+			Timer = boost::posix_time::microsec_clock::local_time();
+
 			try
 			{
 				auto k = Bindings.get(input);
-				for (; k.first != k.second; ++k.first)
-					if (k.first->execute())
-						break;
+				std::any_of(k.first, k.second, boost::bind(&Binding::execute, _1));
 			}
 			catch (ConversionError &e)
 			{
-				Statusbar::msg("Couldn't convert value '%s' to target type", e.value().c_str());
+				Statusbar::printf("Invalid value: %1%", e.value());
 			}
 			catch (OutOfBounds &e)
 			{
-				Statusbar::msg("%s", e.errorMessage().c_str());
+				Statusbar::printf("Error: %1%", e.errorMessage());
 			}
-			
+			catch (NC::PromptAborted &)
+			{
+				Statusbar::printf("Action aborted");
+			}
+
 			if (myScreen == myPlaylist)
 				myPlaylist->EnableHighlighting();
-			
-#			ifdef ENABLE_VISUALIZER
-			// visualizer sets timeout to 40ms, but since only it needs such small
-			// value, we should restore defalt one after switching to another screen.
-			if (wFooter->getTimeout() < 500
-			&&  !(myScreen == myVisualizer || myLockedScreen == myVisualizer || myInactiveScreen == myVisualizer)
-			)
-				wFooter->setTimeout(500);
-#			endif // ENABLE_VISUALIZER
 		}
 		catch (MPD::ClientError &e)
 		{
@@ -284,6 +249,10 @@ int main(int argc, char **argv)
 		catch (MPD::ServerError &e)
 		{
 			Status::handleServerError(e);
+		}
+		catch (std::exception &e)
+		{
+			Statusbar::printf("Unexpected error: %1%", e.what());
 		}
 	}
 	return 0;

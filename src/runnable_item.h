@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2008-2013 by Andrzej Rybczak                            *
+ *   Copyright (C) 2008-2014 by Andrzej Rybczak                            *
  *   electricityispower@gmail.com                                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -18,29 +18,34 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
-#include <ctime>
-#include <cstdlib>
-#include <iostream>
+#ifndef NCMPCPP_EXEC_ITEM_H
+#define NCMPCPP_EXEC_ITEM_H
 
-#include "error.h"
+#include <functional>
 
-namespace
+template <typename ItemT, typename FunctionT>
+struct RunnableItem
 {
-	const char *Timestamp()
+	typedef ItemT Item;
+	typedef std::function<FunctionT> Function;
+	
+	RunnableItem() { }
+	template <typename Arg1, typename Arg2>
+	RunnableItem(Arg1 &&opt, Arg2 &&f)
+	: m_item(std::forward<Arg1>(opt)), m_f(std::forward<Arg2>(f)) { }
+	
+	template <typename... Args>
+	typename Function::result_type run(Args&&... args) const
 	{
-		static char result[32];
-		time_t raw;
-		tm *t;
-		time(&raw);
-		t = localtime(&raw);
-		result[strftime(result, 31, "%Y/%m/%d %X", t)] = 0;
-		return result;
+		return m_f(std::forward<Args>(args)...);
 	}
-}
+	
+	Item &item() { return m_item; }
+	const Item &item() const { return m_item; }
+	
+private:
+	Item m_item;
+	Function m_f;
+};
 
-void FatalError(const std::string &msg)
-{
-	std::cerr << "[" << Timestamp() << "] " << msg << std::endl;
-	abort();
-}
-
+#endif // NCMPCPP_EXEC_ITEM_H

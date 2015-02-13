@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2008-2013 by Andrzej Rybczak                            *
+ *   Copyright (C) 2008-2014 by Andrzej Rybczak                            *
  *   electricityispower@gmail.com                                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -31,8 +31,29 @@ template <size_t N> size_t const_strlen(const char (&)[N]) {
 	return N-1;
 }
 
+// it's present in boost for std::string, but we want more general version.
+template <typename StringT, typename CollectionT>
+StringT join(const CollectionT &collection, const StringT &separator)
+{
+	StringT result;
+	auto first = std::begin(collection), last = std::end(collection);
+	if (first != last)
+	{
+		while (true)
+		{
+			result += *first;
+			++first;
+			if (first != last)
+				result += separator;
+			else
+				break;
+		}
+	}
+	return result;
+}
+
 std::string getBasename(const std::string &path);
-std::string getParentDirectory(const std::string &path);
+std::string getParentDirectory(std::string path);
 std::string getSharedDirectory(const std::string &dir1, const std::string &dir2);
 
 std::string getEnclosedString(const std::string &s, char a, char b, size_t *pos);

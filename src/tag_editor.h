@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2008-2013 by Andrzej Rybczak                            *
+ *   Copyright (C) 2008-2014 by Andrzej Rybczak                            *
  *   electricityispower@gmail.com                                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -32,7 +32,7 @@
 #include "regex_filter.h"
 #include "screen.h"
 
-struct TagEditor: Screen<NC::Window *>, Filterable, HasColumns, HasSongs, Searchable, Tabbable
+struct TagEditor: Screen<NC::Window *>, HasColumns, HasSongs, Searchable, Tabbable
 {
 	TagEditor();
 	
@@ -51,23 +51,18 @@ struct TagEditor: Screen<NC::Window *>, Filterable, HasColumns, HasSongs, Search
 	
 	virtual bool isMergable() OVERRIDE { return true; }
 	
-	// Filterable implementation
-	virtual bool allowsFiltering() OVERRIDE;
-	virtual std::string currentFilter() OVERRIDE;
-	virtual void applyFilter(const std::string &filter) OVERRIDE;
-	
 	// Searchable implementation
 	virtual bool allowsSearching() OVERRIDE;
-	virtual bool search(const std::string &constraint) OVERRIDE;
-	virtual void nextFound(bool wrap) OVERRIDE;
-	virtual void prevFound(bool wrap) OVERRIDE;
+	virtual void setSearchConstraint(const std::string &constraint) OVERRIDE;
+	virtual void clearConstraint() OVERRIDE;
+	virtual bool find(SearchDirection direction, bool wrap, bool skip_current) OVERRIDE;
 	
 	// HasSongs implementation
 	virtual ProxySongList proxySongList() OVERRIDE;
 	
 	virtual bool allowsSelection() OVERRIDE;
 	virtual void reverseSelection() OVERRIDE;
-	virtual MPD::SongList getSelectedSongs() OVERRIDE;
+	virtual std::vector<MPD::Song> getSelectedSongs() OVERRIDE;
 	
 	// HasColumns implementation
 	virtual bool previousColumnAvailable() OVERRIDE;
@@ -77,7 +72,6 @@ struct TagEditor: Screen<NC::Window *>, Filterable, HasColumns, HasSongs, Search
 	virtual void nextColumn() OVERRIDE;
 	
 	// private members
-	bool ifAnyModifiedAskForDiscarding();
 	void LocateSong(const MPD::Song &s);
 	const std::string &CurrentDir() { return itsBrowsedDir; }
 	
@@ -101,6 +95,9 @@ private:
 	
 	std::string itsBrowsedDir;
 	std::string itsHighlightedDir;
+
+	RegexFilter<std::pair<std::string, std::string>> m_directories_search_predicate;
+	RegexFilter<MPD::MutableSong> m_songs_search_predicate;
 };
 
 extern TagEditor *myTagEditor;

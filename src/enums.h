@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2008-2013 by Andrzej Rybczak                            *
+ *   Copyright (C) 2008-2014 by Andrzej Rybczak                            *
  *   electricityispower@gmail.com                                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -18,9 +18,41 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
-#ifndef NCMPCPP_CMDARGS_H
-#define NCMPCPP_CMDARGS_H
+#ifndef NCMPCPP_ENUMS_H
+#define NCMPCPP_ENUMS_H
 
-void ParseArgv(int argc, char **argv);
+#include "config.h"
+#include <iostream>
 
-#endif // NCMPCPP_CMDARGS_H
+enum class SearchDirection { Backward, Forward };
+std::ostream &operator<<(std::ostream &os, SearchDirection sd);
+std::istream &operator>>(std::istream &is, SearchDirection &sd);
+
+enum class SpaceAddMode { AddRemove, AlwaysAdd };
+std::ostream &operator<<(std::ostream &os, SpaceAddMode sam);
+std::istream &operator>>(std::istream &is, SpaceAddMode &sam);
+
+enum class SortMode { Name, ModificationTime, CustomFormat, NoOp };
+std::ostream &operator<<(std::ostream &os, SortMode sm);
+std::istream &operator>>(std::istream &is, SortMode &sm);
+
+enum class DisplayMode { Classic, Columns };
+std::ostream &operator<<(std::ostream &os, DisplayMode dm);
+std::istream &operator>>(std::istream &is, DisplayMode &dm);
+
+enum class Design { Classic, Alternative };
+std::ostream &operator<<(std::ostream &os, Design ui);
+std::istream &operator>>(std::istream &is, Design &ui);
+
+enum class VisualizerType {
+	Wave,
+	WaveFilled,
+#	ifdef HAVE_FFTW3_H
+	Spectrum,
+#	endif // HAVE_FFTW3_H
+	Ellipse
+};
+std::ostream &operator<<(std::ostream &os, VisualizerType vt);
+std::istream &operator>>(std::istream &is, VisualizerType &vt);
+
+#endif // NCMPCPP_ENUMS_H
