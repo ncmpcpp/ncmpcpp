@@ -909,6 +909,9 @@ void MediaLibrary::LocateSong(const MPD::Song &s)
 
 		if (!MoveToTag(primary_tag, false))
 		{
+			// The tag could not be found. Since this was called from an existing song, the tag should exist in the library, but it was not listed by list/listallinfo.
+			// This is the case with some players where it is not possible to list all of the library, e.g. mopidy with mopidy-spotify.
+			// To workaround this we simply insert the missing tag.
 			auto &&tag = PrimaryTag(primary_tag, s.getMTime());
 			Tags.addItem(tag);
 			std::sort(Tags.beginV(), Tags.endV(), SortPrimaryTags());
@@ -931,6 +934,8 @@ void MediaLibrary::LocateSong(const MPD::Song &s)
 
 	if (!MoveToAlbum(primary_tag, s, false) && hasTwoColumns)
 	{
+		// The album could not be found, insert it if in two column mode.
+		// See comment about tags not found above. This is the equivalent for two column mode.
 		auto &&entry = AlbumEntry(Album(primary_tag, s.getAlbum(), s.getDate(), s.getMTime()));
 		Albums.addItem(entry);
 		std::sort(Albums.beginV(), Albums.endV(), SortAlbumEntries());
