@@ -920,8 +920,14 @@ void MediaLibrary::LocateSong(const MPD::Song &s)
 	if (Albums.empty())
 		update();
 
-	if (Albums.empty())
+	if (Albums.empty() && !hasTwoColumns) {
+		Tags.setHighlightColor(Config.active_column_color);
+		Albums.setHighlightColor(Config.main_highlight_color);
+		Songs.setHighlightColor(Config.main_highlight_color);
+		w = &Tags;
+		refresh();
 		return;
+	}
 
 	if (!MoveToAlbum(primary_tag, s, false) && hasTwoColumns)
 	{
@@ -935,8 +941,14 @@ void MediaLibrary::LocateSong(const MPD::Song &s)
 	if (Songs.empty())
 		update();
 
-	if (Songs.empty())
+	if (Songs.empty()) {
+		Tags.setHighlightColor(Config.main_highlight_color);
+		Albums.setHighlightColor(Config.active_column_color);
+		Songs.setHighlightColor(Config.main_highlight_color);
+		w = &Albums;
+		refresh();
 		return;
+	}
 
 	if (s != Songs.current()->value())
 	{
