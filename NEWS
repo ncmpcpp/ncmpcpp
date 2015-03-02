@@ -14,10 +14,13 @@ ncmpcpp-0.7 (????-??-??)
 * Support for PDCurses has been removed due to the library being unmaintained and buggy.
 * Random album artists can now be added to the playlist.
 
-ncmpcpp-0.6.3 (????-??-??)
+ncmpcpp-0.6.3 (2015-03-02)
 
 * Fix floating point exception when adding a specific number of random items.
 * Passwords are no longer added to the input history.
+* It is now possible to put more than one specific flag consecutively in formats.
+* Bash completion file was removed as it no longer works.
+* Description of available configuration options in man page was updated.
 
 ncmpcpp-0.6.2 (2014-12-13)
 
