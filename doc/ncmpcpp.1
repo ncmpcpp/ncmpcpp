@@ -49,11 +49,11 @@ Directory for storing downloaded lyrics. It defaults to ~/.lyrics since other MP
 .B mpd_host = HOST
 Connect to MPD running on specified host/unix socket. When HOST starts with a '/', it is assumed to be a unix socket.
 .TP
-.B mpd_music_dir = PATH
-Search for files in specified directory. This is needed for tag editor to work.
-.TP
 .B mpd_port = PORT
 Connect to MPD on the specified port.
+.TP
+.B mpd_music_dir = PATH
+Search for files in specified directory. This is needed for tag editor to work.
 .TP
 .B mpd_connection_timeout = SECONDS
 Set connection timeout to MPD to given value.
@@ -61,14 +61,14 @@ Set connection timeout to MPD to given value.
 .B mpd_crossfade_time = SECONDS
 Default number of seconds to crossfade, if enabled by ncmpcpp.
 .TP
-.B visualizer_in_stereo = yes/no
-Should be set to 'yes', if fifo output's format was set to 44100:16:2.
-.TP
 .B visualizer_fifo_path = PATH
 Path to mpd fifo output. This is needed to make music visualizer work (note that output sound format of this fifo has to be either 44100:16:1 or 44100:16:2, depending on whether you want mono or stereo visualization)
 .TP
 .B visualizer_output_name = NAME
 Name of output that provides data for visualizer. Needed to keep sound and visualization in sync.
+.TP
+.B visualizer_in_stereo = yes/no
+Should be set to 'yes', if fifo output's format was set to 44100:16:2.
 .TP
 .B visualizer_sample_multiplier = NUMBER
 Multiply received samples by given value. Very useful for proper visualization of quiet music.
@@ -85,12 +85,6 @@ Defines visualizer's look (string has to be exactly 2 characters long: first one
 .B system_encoding = ENCODING
 If you use encoding other than utf8, set it in order to handle utf8 encoded strings properly.
 .TP
-.B seek_time = SECONDS
-Base seek time to begin with.
-.TP
-.B volume_change_step = NUMBER
-Number of percents volume has to be increased/decreased by in volume_up/volume_down.
-.TP
 .B playlist_disable_highlight_delay = SECONDS
 Delay for highlighting playlist since the last key was pressed. If set to 0, highlighting never fades away.
 .TP
@@ -99,9 +93,6 @@ Delay for displayed messages to remain visible.
 .TP
 .B song_list_format
 Format for songs' list.
-.TP
-.B song_columns_list_format
-Format for songs' list displayed in columns.
 .TP
 .B song_status_format
 Song's format for statusbar.
@@ -112,29 +103,26 @@ Format for songs in Media library.
 .B tag_editor_album_format
 Format for albums' list in Tag editor.
 .TP
-.B song_window_title_format
-Song format for window title.
-.TP
 .B browser_sort_mode
 Determines sort mode for browser. Possible values are "name", "mtime", "format" and "noop".
 .TP
 .B browser_sort_format
 Format to use for sorting songs in browser. For this option to be effective, browser_sort_mode must be set to "format".
 .TP
-.B external_editor = PATH
-Path to external editor used to edit lyrics.
+.B alternative_header_first_line_format = TEXT
+Now playing song format for the first line in alternative user interface header window.
 .TP
-.B browser_playlist_prefix = TEXT
-Prefix for playlists in Browser.
-.TP
-.B default_tag_editor_pattern = TEXT
-Default pattern used by Tag editor's parser.
+.B alternative_header_second_line_format = TEXT
+Now playing song format for the second line in alternative user interface header window.
 .TP
 .B now_playing_prefix = TEXT
 Prefix for currently playing song.
 .TP
 .B now_playing_suffix = TEXT
 Suffix for currently playing song.
+.TP
+.B browser_playlist_prefix = TEXT
+Prefix for playlists in Browser.
 .TP
 .B selected_item_prefix = TEXT
 Prefix for selected items.
@@ -145,35 +133,14 @@ Suffix for selected items.
 .B modified_item_prefix = TEXT
 Prefix for modified item (tag editor).
 .TP
-.B alternative_header_first_line_format = TEXT
-Now playing song format for the first line in alternative user interface header window.
+.B song_window_title_format
+Song format for window title.
 .TP
-.B alternative_header_second_line_format = TEXT
-Now playing song format for the second line in alternative user interface header window.
+.B song_columns_list_format
+Format for songs' list displayed in columns.
 .TP
-.B color1 = COLOR
-One of colors used in Song info, Tiny tag editor and Search engine.
-.TP
-.B color2 = COLOR
-One of colors used in Song info, Tiny tag editor and Search engine.
-.TP
-.B colors_enabled = yes/no
-No need to describe it, huh?
-.TP
-.B header_text_scrolling = yes/no
-If enabled, text in header window will scroll if its length is longer then actual screen width, otherwise it won't.
-.TP
-.B cyclic_scrolling = yes/no
-If enabled, cyclic scrolling is used (e.g. if you press down arrow being at the end of list, it'll take you to the beginning)
-.TP
-.B mouse_list_scroll_whole_page = yes/no
-If enabled, mouse wheel will scroll the whole page of item list at a time, otherwise the number of lines specified by lines_scrolled variable.
-.TP
-.B lines_scrolled = NUMBER
-Number of lines that are scrolled with mouse wheel.
-.TP
-.B search_engine_default_search_mode = MODE_NUMBER
-Number of default mode used in search engine.
+.B execute_on_song_change = COMMAND
+Shell command to execute on song change.
 .TP
 .B playlist_show_remaining_time = yes/no
 If enabled, time remaining to end of playlist will be shown after playlist's statistics.
@@ -199,14 +166,14 @@ Default display mode for Playlist editor.
 .B discard_colors_if_item_is_selected = yes/no
 Indicates whether custom colors of tags have to be discarded if item is selected or not.
 .TP
-.B header_visibility = yes/no
-If enabled, header window will be displayed, otherwise hidden.
+.B incremental_seeking = yes/no
+If enabled, seek time will increment by one each second of seeking.
 .TP
-.B statusbar_visibility = yes/no
-If enabled, statusbar will be displayed, otherwise hidden.
+.B seek_time = SECONDS
+Base seek time to begin with.
 .TP
-.B titles_visibility = yes/no
-If enabled, column titles will be displayed, otherwise hidden.
+.B volume_change_step = NUMBER
+Number of percents volume has to be increased/decreased by in volume_up/volume_down.
 .TP
 .B autocenter_mode = yes/no
 Default state for autocenter mode at start.
@@ -220,14 +187,44 @@ This variable defines the look of progressbar. Note that it has to be exactly tw
 .B progressbar_boldness = yes/no
 This variable defines whether progressbar should be displayed in bold or not.
 .TP
+.B default_place_to_search_in = database/playlist
+If set to "playlist", Search engine will perform searching in current MPD playlist rather than in music database.
+.TP
+.B user_interface = classic/alternative
+Default user interface used by ncmpcpp at start.
+.TP
+.B data_fetching_delay = yes/no
+If enabled, there will be a 250ms delay between refreshing position in media library or playlist editor and fetching appropriate data from MPD. This limits data fetched from the server and is particularly useful if ncmpcpp is connected to a remote host.
+.TP
+.B media_library_primary_tag = artist/date/genre/composer/performer
+Default tag type for leftmost column in media library.
+.TP
 .B default_find_mode = wrapped/normal
 If set to "wrapped", going from last found position to next will take you to the first one (same goes for the first position and going to previous one), otherwise no actions will be performed.
 .TP
 .B default_space_mode = select/add
 If set to "select", space will select items instead of adding them to playlist (although selecting by space is default and the only one action for space in Playlist).
 .TP
-.B incremental_seeking = yes/no
-If enabled, seek time will increment by one each second of seeking.
+.B default_tag_editor_pattern = TEXT
+Default pattern used by Tag editor's parser.
+.TP
+.B header_visibility = yes/no
+If enabled, header window will be displayed, otherwise hidden.
+.TP
+.B statusbar_visibility = yes/no
+If enabled, statusbar will be displayed, otherwise hidden.
+.TP
+.B titles_visibility = yes/no
+If enabled, column titles will be displayed, otherwise hidden.
+.TP
+.B header_text_scrolling = yes/no
+If enabled, text in header window will scroll if its length is longer then actual screen width, otherwise it won't.
+.TP
+.B cyclic_scrolling = yes/no
+If enabled, cyclic scrolling is used (e.g. if you press down arrow being at the end of list, it'll take you to the beginning)
+.TP
+.B lines_scrolled = NUMBER
+Number of lines that are scrolled with mouse wheel.
 .TP
 .B follow_now_playing_lyrics = yes/no
 If enabled, lyrics will be switched at song's change to currently playing one's (Note: this works only if you are viewing lyrics of item from Playlist).
@@ -252,12 +249,6 @@ If set to add_remove, pressing space on item which is already in playlist will r
 .TP
 .B show_hidden_files_in_local_browser = yes/no
 Trigger for displaying in local browser files and directories that begin with '.'
-.TP
-.B default_place_to_search_in = database/playlist
-If set to "playlist", Search engine will perform searching in current MPD playlist rather than in music database.
-.TP
-.B display_screens_numbers_on_start = yes/no
-If enabled, screens' names and their keybindings will be shown in header window until key is pressed, otherwise they won't be displayed at all.
 .TP
 .B screen_switcher_mode = SWITCHER_MODE
 If set to "previous", key_screen_switcher will switch between current and last used screen. If set to "screen1,...screenN" (a list of screens) it will switch between them in a sequence. Syntax clarification can be found in example config file.
@@ -289,41 +280,47 @@ If enabled, bitrate of currently playing song will be displayed in statusbar.
 .B display_remaining_time = yes/no
 If enabled, remaining time of currently playing song will be be displayed in statusbar instead of elapsed time.
 .TP
+.B regular_expressions = basic/extended
+Type of currently used regular expressions.
+.TP
 .B ignore_leading_the = yes/no
 If enabled, word "the" at the beginning of tags/filenames/sort format will be ignored while sorting items.
-.TP
-.B use_console_editor = yes/no
-If your external editor is console application, you need to enable it.
 .TP
 .B block_search_constraints_change_if_items_found = yes/no
 If enabled, fields in Search engine above "Reset" button will be blocked after successful searching, otherwise they won't.
 .TP
 .B mouse_support = yes/no
-Self-descriptive, isn't it?
+If set to yes, mouse support will be enabled.
 .TP
-.B tag_editor_extended_numeration  = yes/no
-If enabled, tag editor will number tracks using format xx/yy (where xx is the current track and yy is total amount of all numbered tracks), not plain xx.
-.TP
-.B enable_window_title = yes/no
-If enabled, ncmpcpp will override current window title with its own one.
-.TP
-.B regular_expressions = basic/extended
-Type of currently used regular expressions.
-.TP
-.B user_interface = classic/alternative
-Default user interface used by ncmpcpp at start.
-.TP
-.B data_fetching_delay = yes/no
-If enabled, there will be a 250ms delay between refreshing position in media library or playlist editor and fetching appropriate data from MPD. This limits data fetched from the server and is particularly useful if ncmpcpp is connected to a remote host.
-.TP
-.B media_library_primary_tag = artist/date/genre/composer/performer
-Default tag type for leftmost column in media library.
+.B mouse_list_scroll_whole_page = yes/no
+If enabled, mouse wheel will scroll the whole page of item list at a time, otherwise the number of lines specified by lines_scrolled variable.
 .TP
 .B empty_tag_marker = TEXT
 Text that will be displayed, if requested tag is not set.
 .TP
 .B tags_separator = TEXT
 Separator that is placed between tags. Also interpreted by tag editor which splits input string into separate tags using it.
+.TP
+.B tag_editor_extended_numeration = yes/no
+If enabled, tag editor will number tracks using format xx/yy (where xx is the current track and yy is total amount of all numbered tracks), not plain xx.
+.TP
+.B media_library_sort_by_mtime = yes/no
+If enabled, media library will be sorted by modification time. Otherwise lexicographic sorting is used.
+.TP
+.B enable_window_title = yes/no
+If enabled, ncmpcpp will override current window title with its own one.
+.TP
+.B search_engine_default_search_mode = MODE_NUMBER
+Number of default mode used in search engine.
+.TP
+.B external_editor = PATH
+Path to external editor used to edit lyrics.
+.TP
+.B use_console_editor = yes/no
+If your external editor is console application, you need to enable it.
+.TP
+.B colors_enabled = yes/no
+No need to describe it, huh?
 .TP
 .B empty_tag_color = COLOR
 Color of empty tag marker.
@@ -342,6 +339,12 @@ Color of MPD status flags.
 .TP
 .B main_window_color = COLOR
 Color of main window.
+.TP
+.B color1 = COLOR
+One of colors used in Song info, Tiny tag editor and Search engine.
+.TP
+.B color2 = COLOR
+One of colors used in Song info, Tiny tag editor and Search engine.
 .TP
 .B main_window_highlight_color = COLOR
 Color of main window's highlight.
@@ -364,6 +367,8 @@ Color of active column's highlight.
 .B visualizer_color = COLOR
 Color of visualization.
 .TP
+.B window_border_color = BORDER
+Border color of pop-up windows. If set to empty, no border will be shown.
 .B active_window_border = COLOR
 Color of active window's border.
 .TP
