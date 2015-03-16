@@ -50,7 +50,8 @@ enum class VisualizerType {
 #	ifdef HAVE_FFTW3_H
 	Spectrum,
 #	endif // HAVE_FFTW3_H
-	Ellipse
+	Ellipse,
+	Lorenz
 };
 std::ostream &operator<<(std::ostream &os, VisualizerType vt);
 std::istream &operator>>(std::istream &is, VisualizerType &vt);

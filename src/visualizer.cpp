@@ -141,6 +141,11 @@ void Visualizer::update()
 		draw = &Visualizer::DrawSoundEllipse;
 		drawStereo = &Visualizer::DrawSoundEllipseStereo;
 	}
+	else if (Config.visualizer_type == VisualizerType::Lorenz)
+	{
+		draw = &Visualizer::DrawSoundLorenz;
+		drawStereo = &Visualizer::DrawSoundLorenzStereo;
+	}
 	else
 	{
 		draw = &Visualizer::DrawSoundWave;
@@ -207,6 +212,9 @@ void Visualizer::spacePressed()
 			break;
 #		endif // HAVE_FFTW3_H
 		case VisualizerType::Ellipse:
+			Config.visualizer_type = VisualizerType::Lorenz;
+			break;
+		case VisualizerType::Lorenz:
 			Config.visualizer_type = VisualizerType::Wave;
 			break;
 	}
@@ -385,6 +393,114 @@ void Visualizer::DrawSoundEllipseStereo(int16_t *buf_left, int16_t *buf_right, s
 		<< Config.visualizer_chars[1]
 		<< NC::Color::End;
 	}
+}
+
+void Visualizer::DrawSoundLorenz(int16_t *buf, ssize_t samples, size_t, size_t height)
+{
+	DrawSoundLorenzStereo(buf, buf, samples, height/2);
+}
+
+double rotation_count_left = 0;
+double rotation_count_right = 0;
+
+void Visualizer::DrawSoundLorenzStereo(int16_t *buf_left, int16_t *buf_right, ssize_t samples, size_t half_height)
+{
+	double lorenz_h = 0.01;
+	double lorenz_a = 10.0;
+	double lorenz_c = 8.0 / 3.0;
+
+	rotation_count_left = rotation_count_left >= 1000.0 ? 0 : rotation_count_left;
+	rotation_count_right = rotation_count_right >= 1000.0 ? 0 : rotation_count_right;
+
+	double win_width = w.getWidth();
+	double height = half_height;
+	int i=0;
+	double x0,y0,z0,x1,y1,z1;
+
+	x0 = 0.1;
+	y0 = 0;
+	z0 = 0;
+
+	double average_left = 0, average_right = 0;
+	for (i=0;i<samples;i++) {
+		average_left += std::abs(buf_left[i]);
+		average_right += std::abs(buf_right[i]);
+	}
+
+	average_left = average_left / samples * 2.0;
+	average_right = average_right / samples;
+
+	double rotation_interval_left = ( average_left * ( 30.0 / 65536.0 ) );
+	double rotation_interval_right = ( average_right * ( 30.0 / 65536.0 ) );
+	double average = (average_left + average_right)/2.0;
+
+	//lorenz_b will range from 11.7 to 64.4. Below 10 the lorenz is pretty much just a disc and after 64.4 the size increases dramatically.
+	//The equation was generated using linear curve fitting http://www.wolframalpha.com/input/?i=quadratic+fit+%7B10%2C1%7D%2C%7B18000%2C32%7D%2C%7B45000%2C48%7D%2C%7B65536%2C64.4%7D
+	double lorenz_b =  7.1429+0.000908845 * average;
+
+	//Calculate the center of the lorenz. Described here under the heading Equilibria http://www.me.rochester.edu/courses/ME406/webexamp5/loreq.pdf
+	double z_center = -1 + lorenz_b;
+	double equilbria = sqrt(lorenz_c * lorenz_b - lorenz_c);
+
+	//Calculate the scaling factor. The bounds for the complete lorenz are given here http://www.me.rochester.edu/courses/ME406/webexamp5/loreq.pdf
+	//Approximately the first 100 points of the lorenz are usually outliers from the main body of the lorenz, so multiplying by 1.25
+	//adjusts the bounds so that the main body takes up most of the height of the screen.
+	//Only consider max y coordinate since both max z and max x will be much smaller than the max y.
+	double scaling_multiplier = 1.25 * (height)/sqrt(lorenz_c * lorenz_b * lorenz_b - pow(z_center-lorenz_b,2)/pow(lorenz_b,2));
+
+	double rotation_angle_x = ( rotation_count_left * 2.0 * boost::math::constants::pi<double>() ) / 1000.0;
+	double rotation_angle_y = ( rotation_count_right * 2.0 * boost::math::constants::pi<double>() ) / 1000.0;
+
+	double deg_multiplier_cos_x = std::cos(rotation_angle_x);
+	double deg_multiplier_sin_x = std::sin(rotation_angle_x);
+
+	double deg_multiplier_cos_y = std::cos(rotation_angle_y);
+	double deg_multiplier_sin_y = std::sin(rotation_angle_y);
+
+	double x, y, z;
+
+	for (i=0;i< samples;i++) {
+		x1 = x0 + lorenz_h * lorenz_a * (y0 - x0);
+		y1 = y0 + lorenz_h * (x0 * (lorenz_b - z0) - y0);
+		z1 = z0 + lorenz_h * (x0 * y0 - lorenz_c * z0);
+		x0 = x1;
+		y0 = y1;
+		z0 = z1;
+
+		//color points based on distance from equiliria. This must be done before rotation
+		double distance_p1 = sqrt( pow(x0 - equilbria, 2) + pow(y0 - equilbria, 2) + pow(z0 - z_center, 2) );
+		double distance_p2 = sqrt( pow(x0 + equilbria, 2) + pow(y0 + equilbria, 2) + pow(z0 - z_center, 2) );
+		NC::Color color_distance = toColor( std::min(distance_p1, distance_p2), 16);
+
+		//We want to rotate around the center of the lorenz. so we offset zaxis so that the center of the lorenz is at point (0,0,0)
+		x = x0;
+		y = y0;
+		z = z0 - z_center;
+
+		//Rotate around X and Y axis.
+		double xRxy = x * deg_multiplier_cos_y + z * deg_multiplier_sin_y;
+		double yRxy = x * deg_multiplier_sin_x * deg_multiplier_sin_y + y * deg_multiplier_cos_x - z * deg_multiplier_cos_y * deg_multiplier_sin_x;
+		double zRxy = -1 * y * deg_multiplier_cos_x * deg_multiplier_sin_y + y * deg_multiplier_sin_x + z * deg_multiplier_cos_x * deg_multiplier_cos_y;
+
+		x = xRxy * scaling_multiplier;
+		y = yRxy * scaling_multiplier;
+		z = zRxy;
+
+		//Throw out any points outside the window
+		if ( y > (height * -1 ) && y < height && x > (win_width/2 * -1 ) && x < win_width/2 )
+		{
+			//skip the first 100 since values under 100 stick out too much from the reset of the points
+			if (i > 100)
+			{
+				w << color_distance;
+				w << NC::XY((int32_t)(x + win_width/2.0), (int32_t) (y + height)) << Config.visualizer_chars[0];
+				w << NC::Color::End;
+			}
+		}
+	}
+
+	rotation_count_left += rotation_interval_left;
+	rotation_count_right += rotation_interval_right;
 }
 
 /**********************************************************************/

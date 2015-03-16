@@ -70,6 +70,8 @@ private:
 	void DrawSoundWaveFillStereo(int16_t *, int16_t *, ssize_t, size_t);
 	void DrawSoundEllipse(int16_t *, ssize_t, size_t, size_t);
 	void DrawSoundEllipseStereo(int16_t *, int16_t *, ssize_t, size_t);
+	void DrawSoundLorenz(int16_t *, ssize_t, size_t, size_t);
+	void DrawSoundLorenzStereo(int16_t *, int16_t *, ssize_t, size_t);
 #	ifdef HAVE_FFTW3_H
 	void DrawFrequencySpectrum(int16_t *, ssize_t, size_t, size_t);
 	void DrawFrequencySpectrumStereo(int16_t *, int16_t *, ssize_t, size_t);
