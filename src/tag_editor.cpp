@@ -1148,7 +1148,12 @@ std::string ParseFilename(MPD::MutableSong &s, std::string mask, bool preview)
 	std::vector< std::pair<char, std::string> > tags;
 	std::string file = s.getName().substr(0, s.getName().rfind("."));
 	
-	for (size_t i = mask.find("%"); i != std::string::npos; i = mask.find("%"))
+	size_t i = mask.find("%");
+
+	if (!mask.substr(0, i).empty())
+		file = file.substr(i);
+
+	for (; i != std::string::npos; i = mask.find("%"))
 	{
 		tags.push_back(std::make_pair(mask.at(i+1), ""));
 		mask = mask.substr(i+2);
@@ -1156,7 +1161,7 @@ std::string ParseFilename(MPD::MutableSong &s, std::string mask, bool preview)
 		if (!mask.empty())
 			separators.push_back(mask.substr(0, i));
 	}
-	size_t i = 0;
+	i = 0;
 	for (auto it = separators.begin(); it != separators.end(); ++it, ++i)
 	{
 		size_t j = file.find(*it);
