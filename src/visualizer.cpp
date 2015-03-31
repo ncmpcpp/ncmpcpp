@@ -400,8 +400,8 @@ void Visualizer::DrawSoundLorenz(int16_t *buf, ssize_t samples, size_t, size_t h
 	DrawSoundLorenzStereo(buf, buf, samples, height/2);
 }
 
-double rotation_count_left = 0;
-double rotation_count_right = 0;
+double lorenz_rotation_count_left = 0;
+double lorenz_rotation_count_right = 0;
 
 void Visualizer::DrawSoundLorenzStereo(int16_t *buf_left, int16_t *buf_right, ssize_t samples, size_t half_height)
 {
@@ -409,8 +409,8 @@ void Visualizer::DrawSoundLorenzStereo(int16_t *buf_left, int16_t *buf_right, ss
 	double lorenz_a = 10.0;
 	double lorenz_c = 8.0 / 3.0;
 
-	rotation_count_left = rotation_count_left >= 1000.0 ? 0 : rotation_count_left;
-	rotation_count_right = rotation_count_right >= 1000.0 ? 0 : rotation_count_right;
+	lorenz_rotation_count_left = lorenz_rotation_count_left >= 1000.0 ? 0 : lorenz_rotation_count_left;
+	lorenz_rotation_count_right = lorenz_rotation_count_right >= 1000.0 ? 0 : lorenz_rotation_count_right;
 
 	double win_width = w.getWidth();
 	double height = half_height;
@@ -446,10 +446,10 @@ void Visualizer::DrawSoundLorenzStereo(int16_t *buf_left, int16_t *buf_right, ss
 	//Approximately the first 100 points of the lorenz are usually outliers from the main body of the lorenz, so multiplying by 1.25
 	//adjusts the bounds so that the main body takes up most of the height of the screen.
 	//Only consider max y coordinate since both max z and max x will be much smaller than the max y.
-	double scaling_multiplier = 1.25 * (height)/sqrt(lorenz_c * lorenz_b * lorenz_b - pow(z_center-lorenz_b,2)/pow(lorenz_b,2));
+	double scaling_multiplier = 2.0 * height/sqrt(lorenz_c * pow(lorenz_b,2) - pow(z_center-lorenz_b,2)/pow(lorenz_b,2));
 
-	double rotation_angle_x = ( rotation_count_left * 2.0 * boost::math::constants::pi<double>() ) / 1000.0;
-	double rotation_angle_y = ( rotation_count_right * 2.0 * boost::math::constants::pi<double>() ) / 1000.0;
+	double rotation_angle_x = ( lorenz_rotation_count_left * boost::math::constants::pi<double>() ) / 500.0;
+	double rotation_angle_y = ( lorenz_rotation_count_right * boost::math::constants::pi<double>() ) / 500.0;
 
 	double deg_multiplier_cos_x = std::cos(rotation_angle_x);
 	double deg_multiplier_sin_x = std::sin(rotation_angle_x);
@@ -499,8 +499,12 @@ void Visualizer::DrawSoundLorenzStereo(int16_t *buf_left, int16_t *buf_right, ss
 		}
 	}
 
-	rotation_count_left += rotation_interval_left;
-	rotation_count_right += rotation_interval_right;
+	//cap the rotation speed at pi so that it doesn't spin too fast
+	rotation_interval_left = std::min(rotation_interval_left, boost::math::constants::pi<double>());
+	rotation_interval_right = std::min(rotation_interval_right, boost::math::constants::pi<double>());
+
+	lorenz_rotation_count_left += rotation_interval_left;
+	lorenz_rotation_count_right += rotation_interval_right;
 }
 
 /**********************************************************************/
