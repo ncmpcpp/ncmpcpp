@@ -20,6 +20,7 @@
 
 #include <array>
 #include <boost/bind.hpp>
+#include <boost/range/detail/any_iterator.hpp>
 #include <iomanip>
 
 #include "display.h"
@@ -398,31 +399,11 @@ void SearchEngine::Search()
 			w.addItem(std::move(*s));
 		return;
 	}
-	
-	std::vector<MPD::Song> list;
-	if (Config.search_in_db)
-	{
-		std::copy(
-			std::make_move_iterator(Mpd.GetDirectoryRecursive("/")),
-			std::make_move_iterator(MPD::SongIterator()),
-			std::back_inserter(list)
-		);
-	}
-	else
-	{
-		std::copy(
-			myPlaylist->main().beginV(),
-			myPlaylist->main().endV(),
-			std::back_inserter(list)
-		);
-	}
-	
-	bool any_found = 1;
-	bool found = 1;
-	boost::regex rx[11];
+
+	boost::regex rx[ConstraintsNumber];
 	if (SearchMode != &SearchModes[2]) // match to pattern
 	{
-		for (int i = 0; i < 11; ++i)
+		for (size_t i = 0; i < ConstraintsNumber; ++i)
 		{
 			if (!itsConstraints[i].empty())
 			{
@@ -434,86 +415,104 @@ void SearchEngine::Search()
 			}
 		}
 	}
-	
-	LocaleStringComparison cmp(std::locale(), Config.ignore_leading_the);
-	for (auto it = list.begin(); it != list.end(); ++it)
+
+	typedef boost::range_detail::any_iterator<
+		const MPD::Song,
+		boost::single_pass_traversal_tag,
+		const MPD::Song &,
+		std::ptrdiff_t
+	> input_song_iterator;
+	input_song_iterator s, end;
+	if (Config.search_in_db)
 	{
+		s = input_song_iterator(Mpd.GetDirectoryRecursive("/"));
+		end = input_song_iterator(MPD::SongIterator());
+	}
+	else
+	{
+		s = input_song_iterator(myPlaylist->main().beginV());
+		end = input_song_iterator(myPlaylist->main().endV());
+	}
+
+	LocaleStringComparison cmp(std::locale(), Config.ignore_leading_the);
+	for (; s != end; ++s)
+	{
+		bool any_found = true, found = true;
+
 		if (SearchMode != &SearchModes[2]) // match to pattern
 		{
 			if (!rx[0].empty())
 				any_found =
-				   boost::regex_search(it->getArtist(), rx[0])
-				|| boost::regex_search(it->getAlbumArtist(), rx[0])
-				|| boost::regex_search(it->getTitle(), rx[0])
-				|| boost::regex_search(it->getAlbum(), rx[0])
-				|| boost::regex_search(it->getName(), rx[0])
-				|| boost::regex_search(it->getComposer(), rx[0])
-				|| boost::regex_search(it->getPerformer(), rx[0])
-				|| boost::regex_search(it->getGenre(), rx[0])
-				|| boost::regex_search(it->getDate(), rx[0])
-				|| boost::regex_search(it->getComment(), rx[0]);
+				   boost::regex_search(s->getArtist(), rx[0])
+				|| boost::regex_search(s->getAlbumArtist(), rx[0])
+				|| boost::regex_search(s->getTitle(), rx[0])
+				|| boost::regex_search(s->getAlbum(), rx[0])
+				|| boost::regex_search(s->getName(), rx[0])
+				|| boost::regex_search(s->getComposer(), rx[0])
+				|| boost::regex_search(s->getPerformer(), rx[0])
+				|| boost::regex_search(s->getGenre(), rx[0])
+				|| boost::regex_search(s->getDate(), rx[0])
+				|| boost::regex_search(s->getComment(), rx[0]);
 			if (found && !rx[1].empty())
-				found = boost::regex_search(it->getArtist(), rx[1]);
+				found = boost::regex_search(s->getArtist(), rx[1]);
 			if (found && !rx[2].empty())
-				found = boost::regex_search(it->getAlbumArtist(), rx[2]);
+				found = boost::regex_search(s->getAlbumArtist(), rx[2]);
 			if (found && !rx[3].empty())
-				found = boost::regex_search(it->getTitle(), rx[3]);
+				found = boost::regex_search(s->getTitle(), rx[3]);
 			if (found && !rx[4].empty())
-				found = boost::regex_search(it->getAlbum(), rx[4]);
+				found = boost::regex_search(s->getAlbum(), rx[4]);
 			if (found && !rx[5].empty())
-				found = boost::regex_search(it->getName(), rx[5]);
+				found = boost::regex_search(s->getName(), rx[5]);
 			if (found && !rx[6].empty())
-				found = boost::regex_search(it->getComposer(), rx[6]);
+				found = boost::regex_search(s->getComposer(), rx[6]);
 			if (found && !rx[7].empty())
-				found = boost::regex_search(it->getPerformer(), rx[7]);
+				found = boost::regex_search(s->getPerformer(), rx[7]);
 			if (found && !rx[8].empty())
-				found = boost::regex_search(it->getGenre(), rx[8]);
+				found = boost::regex_search(s->getGenre(), rx[8]);
 			if (found && !rx[9].empty())
-				found = boost::regex_search(it->getDate(), rx[9]);
+				found = boost::regex_search(s->getDate(), rx[9]);
 			if (found && !rx[10].empty())
-				found = boost::regex_search(it->getComment(), rx[10]);
+				found = boost::regex_search(s->getComment(), rx[10]);
 		}
 		else // match only if values are equal
 		{
 			if (!itsConstraints[0].empty())
 				any_found =
-				   !cmp(it->getArtist(), itsConstraints[0])
-				|| !cmp(it->getAlbumArtist(), itsConstraints[0])
-				|| !cmp(it->getTitle(), itsConstraints[0])
-				|| !cmp(it->getAlbum(), itsConstraints[0])
-				|| !cmp(it->getName(), itsConstraints[0])
-				|| !cmp(it->getComposer(), itsConstraints[0])
-				|| !cmp(it->getPerformer(), itsConstraints[0])
-				|| !cmp(it->getGenre(), itsConstraints[0])
-				|| !cmp(it->getDate(), itsConstraints[0])
-				|| !cmp(it->getComment(), itsConstraints[0]);
+				   !cmp(s->getArtist(), itsConstraints[0])
+				|| !cmp(s->getAlbumArtist(), itsConstraints[0])
+				|| !cmp(s->getTitle(), itsConstraints[0])
+				|| !cmp(s->getAlbum(), itsConstraints[0])
+				|| !cmp(s->getName(), itsConstraints[0])
+				|| !cmp(s->getComposer(), itsConstraints[0])
+				|| !cmp(s->getPerformer(), itsConstraints[0])
+				|| !cmp(s->getGenre(), itsConstraints[0])
+				|| !cmp(s->getDate(), itsConstraints[0])
+				|| !cmp(s->getComment(), itsConstraints[0]);
 			
 			if (found && !itsConstraints[1].empty())
-				found = !cmp(it->getArtist(), itsConstraints[1]);
+				found = !cmp(s->getArtist(), itsConstraints[1]);
 			if (found && !itsConstraints[2].empty())
-				found = !cmp(it->getAlbumArtist(), itsConstraints[2]);
+				found = !cmp(s->getAlbumArtist(), itsConstraints[2]);
 			if (found && !itsConstraints[3].empty())
-				found = !cmp(it->getTitle(), itsConstraints[3]);
+				found = !cmp(s->getTitle(), itsConstraints[3]);
 			if (found && !itsConstraints[4].empty())
-				found = !cmp(it->getAlbum(), itsConstraints[4]);
+				found = !cmp(s->getAlbum(), itsConstraints[4]);
 			if (found && !itsConstraints[5].empty())
-				found = !cmp(it->getName(), itsConstraints[5]);
+				found = !cmp(s->getName(), itsConstraints[5]);
 			if (found && !itsConstraints[6].empty())
-				found = !cmp(it->getComposer(), itsConstraints[6]);
+				found = !cmp(s->getComposer(), itsConstraints[6]);
 			if (found && !itsConstraints[7].empty())
-				found = !cmp(it->getPerformer(), itsConstraints[7]);
+				found = !cmp(s->getPerformer(), itsConstraints[7]);
 			if (found && !itsConstraints[8].empty())
-				found = !cmp(it->getGenre(), itsConstraints[8]);
+				found = !cmp(s->getGenre(), itsConstraints[8]);
 			if (found && !itsConstraints[9].empty())
-				found = !cmp(it->getDate(), itsConstraints[9]);
+				found = !cmp(s->getDate(), itsConstraints[9]);
 			if (found && !itsConstraints[10].empty())
-				found = !cmp(it->getComment(), itsConstraints[10]);
+				found = !cmp(s->getComment(), itsConstraints[10]);
 		}
 		
-		if (found && any_found)
-			w.addItem(*it);
-		found = 1;
-		any_found = 1;
+		if (any_found && found)
+			w.addItem(*s);
 	}
 }
 

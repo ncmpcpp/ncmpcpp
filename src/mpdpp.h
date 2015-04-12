@@ -440,11 +440,11 @@ struct Iterator: std::iterator<std::input_iterator_tag, ObjectT>
 		return it;
 	}
 
-	bool operator==(const Iterator &rhs)
+	bool operator==(const Iterator &rhs) const
 	{
 		return m_state == rhs.m_state;
 	}
-	bool operator!=(const Iterator &rhs)
+	bool operator!=(const Iterator &rhs) const
 	{
 		return !(*this == rhs);
 	}
