@@ -419,123 +419,59 @@ void SearchEngine::Search()
 	
 	bool any_found = 1;
 	bool found = 1;
+	boost::regex rx[11];
+	if (SearchMode != &SearchModes[2]) // match to pattern
+	{
+		for (int i = 0; i < 11; ++i)
+		{
+			if (!itsConstraints[i].empty())
+			{
+				try
+				{
+					rx[i].assign(itsConstraints[i], Config.regex_type);
+				}
+				catch (boost::bad_expression &) { }
+			}
+		}
+	}
 	
 	LocaleStringComparison cmp(std::locale(), Config.ignore_leading_the);
 	for (auto it = list.begin(); it != list.end(); ++it)
 	{
 		if (SearchMode != &SearchModes[2]) // match to pattern
 		{
-			boost::regex rx;
-			if (!itsConstraints[0].empty())
-			{
-				try
-				{
-					rx.assign(itsConstraints[0], Config.regex_type);
-					any_found =
-					   boost::regex_search(it->getArtist(), rx)
-					|| boost::regex_search(it->getAlbumArtist(), rx)
-					|| boost::regex_search(it->getTitle(), rx)
-					|| boost::regex_search(it->getAlbum(), rx)
-					|| boost::regex_search(it->getName(), rx)
-					|| boost::regex_search(it->getComposer(), rx)
-					|| boost::regex_search(it->getPerformer(), rx)
-					|| boost::regex_search(it->getGenre(), rx)
-					|| boost::regex_search(it->getDate(), rx)
-					|| boost::regex_search(it->getComment(), rx);
-				}
-				catch (boost::bad_expression &) { }
-			}
-			
-			if (found && !itsConstraints[1].empty())
-			{
-				try
-				{
-					rx.assign(itsConstraints[1], Config.regex_type);
-					found = boost::regex_search(it->getArtist(), rx);
-				}
-				catch (boost::bad_expression &) { }
-			}
-			if (found && !itsConstraints[2].empty())
-			{
-				try
-				{
-					rx.assign(itsConstraints[2], Config.regex_type);
-					found = boost::regex_search(it->getAlbumArtist(), rx);
-				}
-				catch (boost::bad_expression &) { }
-			}
-			if (found && !itsConstraints[3].empty())
-			{
-				try
-				{
-					rx.assign(itsConstraints[3], Config.regex_type);
-					found = boost::regex_search(it->getTitle(), rx);
-				}
-				catch (boost::bad_expression &) { }
-			}
-			if (found && !itsConstraints[4].empty())
-			{
-				try
-				{
-					rx.assign(itsConstraints[4], Config.regex_type);
-					found = boost::regex_search(it->getAlbum(), rx);
-				}
-				catch (boost::bad_expression &) { }
-			}
-			if (found && !itsConstraints[5].empty())
-			{
-				try
-				{
-					rx.assign(itsConstraints[5], Config.regex_type);
-					found = boost::regex_search(it->getName(), rx);
-				}
-				catch (boost::bad_expression &) { }
-			}
-			if (found && !itsConstraints[6].empty())
-			{
-				try
-				{
-					rx.assign(itsConstraints[6], Config.regex_type);
-					found = boost::regex_search(it->getComposer(), rx);
-				}
-				catch (boost::bad_expression &) { }
-			}
-			if (found && !itsConstraints[7].empty())
-			{
-				try
-				{
-					rx.assign(itsConstraints[7], Config.regex_type);
-					found = boost::regex_search(it->getPerformer(), rx);
-				}
-				catch (boost::bad_expression &) { }
-			}
-			if (found && itsConstraints[8].empty())
-			{
-				try
-				{
-					rx.assign(itsConstraints[8], Config.regex_type);
-					found = boost::regex_search(it->getGenre(), rx);
-				}
-				catch (boost::bad_expression &) { }
-			}
-			if (found && !itsConstraints[9].empty())
-			{
-				try
-				{
-					rx.assign(itsConstraints[9], Config.regex_type);
-					found = boost::regex_search(it->getDate(), rx);
-				}
-				catch (boost::bad_expression &) { }
-			}
-			if (found && !itsConstraints[10].empty())
-			{
-				try
-				{
-					rx.assign(itsConstraints[10], Config.regex_type);
-					found = boost::regex_search(it->getComment(), rx);
-				}
-				catch (boost::bad_expression &) { }
-			}
+			if (!rx[0].empty())
+				any_found =
+				   boost::regex_search(it->getArtist(), rx[0])
+				|| boost::regex_search(it->getAlbumArtist(), rx[0])
+				|| boost::regex_search(it->getTitle(), rx[0])
+				|| boost::regex_search(it->getAlbum(), rx[0])
+				|| boost::regex_search(it->getName(), rx[0])
+				|| boost::regex_search(it->getComposer(), rx[0])
+				|| boost::regex_search(it->getPerformer(), rx[0])
+				|| boost::regex_search(it->getGenre(), rx[0])
+				|| boost::regex_search(it->getDate(), rx[0])
+				|| boost::regex_search(it->getComment(), rx[0]);
+			if (found && !rx[1].empty())
+				found = boost::regex_search(it->getArtist(), rx[1]);
+			if (found && !rx[2].empty())
+				found = boost::regex_search(it->getAlbumArtist(), rx[2]);
+			if (found && !rx[3].empty())
+				found = boost::regex_search(it->getTitle(), rx[3]);
+			if (found && !rx[4].empty())
+				found = boost::regex_search(it->getAlbum(), rx[4]);
+			if (found && !rx[5].empty())
+				found = boost::regex_search(it->getName(), rx[5]);
+			if (found && !rx[6].empty())
+				found = boost::regex_search(it->getComposer(), rx[6]);
+			if (found && !rx[7].empty())
+				found = boost::regex_search(it->getPerformer(), rx[7]);
+			if (found && !rx[8].empty())
+				found = boost::regex_search(it->getGenre(), rx[8]);
+			if (found && !rx[9].empty())
+				found = boost::regex_search(it->getDate(), rx[9]);
+			if (found && !rx[10].empty())
+				found = boost::regex_search(it->getComment(), rx[10]);
 		}
 		else // match only if values are equal
 		{
