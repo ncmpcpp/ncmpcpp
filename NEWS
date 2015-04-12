@@ -1,3 +1,5 @@
+ncmpcpp-0.6.4 (????-??-??)
+
 ncmpcpp-0.6.3 (2015-03-02)
 
 * Fix floating point exception when adding a specific number of random items.
