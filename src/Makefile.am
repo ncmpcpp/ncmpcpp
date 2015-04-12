@@ -73,6 +73,7 @@ noinst_HEADERS = \
 	display.h \
 	enums.h \
 	format.h \
+	format_impl.h \
 	global.h \
 	help.h \
 	helpers.h \

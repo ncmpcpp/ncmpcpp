@@ -26,6 +26,7 @@
 #include "browser.h"
 #include "charset.h"
 #include "curl_handle.h"
+#include "format_impl.h"
 #include "global.h"
 #include "helpers.h"
 #include "lyrics.h"

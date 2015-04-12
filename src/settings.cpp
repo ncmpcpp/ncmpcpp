@@ -23,6 +23,7 @@
 #include <stdexcept>
 
 #include "configuration.h"
+#include "format_impl.h"
 #include "helpers.h"
 #include "settings.h"
 #include "utility/conversion.h"

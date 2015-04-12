@@ -24,6 +24,7 @@
 
 #include "browser.h"
 #include "charset.h"
+#include "format_impl.h"
 #include "global.h"
 #include "helpers.h"
 #include "lyrics.h"

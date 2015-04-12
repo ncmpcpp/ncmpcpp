@@ -20,7 +20,7 @@
 
 #include <stdexcept>
 
-#include "format.h"
+#include "format_impl.h"
 #include "utility/type_conversions.h"
 
 namespace {
