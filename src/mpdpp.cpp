@@ -69,6 +69,26 @@ bool fetchItemSong(MPD::SongIterator::State &state)
 
 namespace MPD {
 
+void checkConnectionErrors(mpd_connection *conn)
+{
+	mpd_error code = mpd_connection_get_error(conn);
+	if (code != MPD_ERROR_SUCCESS)
+	{
+		std::string msg = mpd_connection_get_error_message(conn);
+		if (code == MPD_ERROR_SERVER)
+		{
+			mpd_server_error server_code = mpd_connection_get_server_error(conn);
+			bool clearable = mpd_connection_clear_error(conn);
+			throw ServerError(server_code, msg, clearable);
+		}
+		else
+		{
+			bool clearable = mpd_connection_clear_error(conn);
+			throw ClientError(code, msg, clearable);
+		}
+	}
+}
+
 Connection::Connection() : m_connection(nullptr),
 				m_command_list_active(false),
 				m_idle(false),
@@ -817,22 +837,7 @@ void Connection::prechecksNoCommandsList()
 
 void Connection::checkErrors() const
 {
-	mpd_error code = mpd_connection_get_error(m_connection.get());
-	if (code != MPD_ERROR_SUCCESS)
-	{
-		std::string msg = mpd_connection_get_error_message(m_connection.get());
-		if (code == MPD_ERROR_SERVER)
-		{
-			mpd_server_error server_code = mpd_connection_get_server_error(m_connection.get());
-			bool clearable = mpd_connection_clear_error(m_connection.get());
-			throw ServerError(server_code, msg, clearable);
-		}
-		else
-		{
-			bool clearable = mpd_connection_clear_error(m_connection.get());
-			throw ClientError(code, msg, clearable);
-		}
-	}
+	checkConnectionErrors(m_connection.get());
 }
 
 }

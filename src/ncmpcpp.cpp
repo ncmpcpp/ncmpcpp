@@ -66,7 +66,7 @@ namespace
 		signal(sig, sighandler);
 #		endif // __sun && __SVR4
 	}
-	
+
 	void do_at_exit()
 	{
 		// restore old cerr buffer
@@ -156,7 +156,7 @@ int main(int argc, char **argv)
 	// just ignore it and wait for the connection to
 	// be reestablished.
 	sigignore(SIGPIPE);
-	
+
 	while (!Actions::ExitMainLoop)
 	{
 		try

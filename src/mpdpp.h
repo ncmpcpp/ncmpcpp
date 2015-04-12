@@ -31,6 +31,8 @@
 
 namespace MPD {
 
+void checkConnectionErrors(mpd_connection *conn);
+
 enum PlayerState { psUnknown, psStop, psPlay, psPause };
 enum ReplayGainMode { rgmOff, rgmTrack, rgmAlbum };
 
@@ -398,10 +400,17 @@ struct Iterator: std::iterator<std::input_iterator_tag, ObjectT>
 		// get the first element
 		++*this;
 	}
+	~Iterator()
+	{
+		if (m_state)
+			checkConnectionErrors(m_state->connection());
+	}
 
 	void finish()
 	{
-		// change the iterator into end iterator
+		assert(m_state);
+		// check errors and change the iterator into end iterator
+		checkConnectionErrors(m_state->connection());
 		m_state = nullptr;
 	}
 

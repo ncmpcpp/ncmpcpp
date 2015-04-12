@@ -718,10 +718,9 @@ void DeleteBrowserItems::run()
 		);
 	}
 
-	if (myBrowser->isLocal())
-		myBrowser->getDirectory(myBrowser->currentDirectory());
-	else
+	if (!myBrowser->isLocal())
 		Mpd.UpdateDirectory(myBrowser->currentDirectory());
+	myBrowser->requestUpdate();
 }
 
 bool DeleteStoredPlaylist::canBeRun() const
@@ -1443,7 +1442,7 @@ void EditDirectoryName::run()
 				Statusbar::printf(msg, wideShorten(new_dir, COLS-const_strlen(msg)));
 				if (!myBrowser->isLocal())
 					Mpd.UpdateDirectory(getSharedDirectory(old_dir, new_dir));
-				myBrowser->getDirectory(myBrowser->currentDirectory());
+				myBrowser->requestUpdate();
 			}
 			else
 			{

@@ -71,7 +71,11 @@ bool browserEntryMatcher(const boost::regex &rx, const MPD::Item &item, bool fil
 
 }
 
-Browser::Browser() : m_local_browser(false), m_scroll_beginning(0), m_current_directory("/")
+Browser::Browser()
+: m_update_request(true)
+, m_local_browser(false)
+, m_scroll_beginning(0)
+, m_current_directory("/")
 {
 	w = NC::Menu<MPD::Item>(0, MainStartY, COLS, MainHeight, Config.browser_display_mode == DisplayMode::Columns && Config.titles_visibility ? Display::Columns(COLS) : "", Config.main_color, NC::Border());
 	w.setHighlightColor(Config.main_highlight_color);
@@ -115,6 +119,38 @@ std::wstring Browser::title()
 	std::wstring result = L"Browse: ";
 	result += Scroller(ToWString(m_current_directory), m_scroll_beginning, COLS-result.length()-(Config.design == Design::Alternative ? 2 : Global::VolumeState.length()));
 	return result;
+}
+
+void Browser::update()
+{
+	if (m_update_request)
+	{
+		m_update_request = false;
+		bool directory_changed = false;
+		do
+		{
+			try
+			{
+				getDirectory(m_current_directory);
+				w.refresh();
+			}
+			catch (MPD::ServerError &err)
+			{
+				// If current directory doesn't exist, try getting its
+				// parent until we either succeed or reach the root.
+				if (err.code() == MPD_SERVER_ERROR_NO_EXIST)
+				{
+					m_current_directory = getParentDirectory(m_current_directory);
+					directory_changed = true;
+				}
+				else
+					throw;
+			}
+		}
+		while (w.empty() && !inRootDirectory());
+		if (directory_changed)
+			drawHeader();
+	}
 }
 
 void Browser::enterPressed()

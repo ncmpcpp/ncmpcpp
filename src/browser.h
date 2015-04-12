@@ -37,7 +37,7 @@ struct Browser: Screen<NC::Menu<MPD::Item>>, HasSongs, Searchable, Tabbable
 	virtual std::wstring title() OVERRIDE;
 	virtual ScreenType type() OVERRIDE { return ScreenType::Browser; }
 	
-	virtual void update() OVERRIDE { }
+	virtual void update() OVERRIDE;
 	
 	virtual void enterPressed() OVERRIDE;
 	virtual void spacePressed() OVERRIDE;
@@ -59,6 +59,8 @@ struct Browser: Screen<NC::Menu<MPD::Item>>, HasSongs, Searchable, Tabbable
 	virtual std::vector<MPD::Song> getSelectedSongs() OVERRIDE;
 	
 	// private members
+	void requestUpdate() { m_update_request = true; }
+
 	bool inRootDirectory();
 	bool isParentDirectory(const MPD::Item &item);
 	const std::string &currentDirectory();
@@ -75,6 +77,7 @@ protected:
 	virtual bool isLockable() OVERRIDE { return true; }
 	
 private:
+	bool m_update_request;
 	bool m_local_browser;
 	size_t m_scroll_beginning;
 	std::string m_current_directory;

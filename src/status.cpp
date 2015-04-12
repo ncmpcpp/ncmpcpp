@@ -450,19 +450,12 @@ void Status::Changes::storedPlaylists()
 	myPlaylistEditor->requestPlaylistsUpdate();
 	myPlaylistEditor->requestContentsUpdate();
 	if (!myBrowser->isLocal() && myBrowser->inRootDirectory())
-	{
-		myBrowser->getDirectory("/");
-		if (isVisible(myBrowser))
-			myBrowser->refresh();
-	}
+		myBrowser->requestUpdate();
 }
 
 void Status::Changes::database()
 {
-	if (isVisible(myBrowser))
-		myBrowser->getDirectory(myBrowser->currentDirectory());
-	else
-		myBrowser->main().clear();
+	myBrowser->requestUpdate();
 #	ifdef HAVE_TAGLIB_H
 	myTagEditor->Dirs->clear();
 #	endif // HAVE_TAGLIB_H
