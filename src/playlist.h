@@ -49,7 +49,7 @@ struct Playlist: Screen<NC::Menu<MPD::Song>>, HasSongs, Searchable, Tabbable
 	virtual bool isMergable() OVERRIDE { return true; }
 	
 	// Searchable implementation
-	virtual bool allowsSearching();
+	virtual bool allowsSearching() OVERRIDE;
 	virtual void setSearchConstraint(const std::string &constraint) OVERRIDE;
 	virtual void clearConstraint() OVERRIDE;
 	virtual bool find(SearchDirection direction, bool wrap, bool skip_current) OVERRIDE;
