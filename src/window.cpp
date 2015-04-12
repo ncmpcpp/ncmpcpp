@@ -26,12 +26,8 @@
 #include <readline/history.h>
 #include <readline/readline.h>
 
-#ifdef WIN32
-# include <winsock.h>
-#else
-# include <sys/select.h>
-# include <unistd.h>
-#endif
+#include <sys/select.h>
+#include <unistd.h>
 
 #include "error.h"
 #include "utility/string.h"

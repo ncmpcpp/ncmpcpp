@@ -55,7 +55,6 @@ namespace
 	std::streambuf *cerr_buffer;
 	bool run_resize_screen = false;
 	
-#	if !defined(WIN32)
 	void sighandler(int sig)
 	{
 		if (sig == SIGWINCH)
@@ -67,7 +66,6 @@ namespace
 		signal(sig, sighandler);
 #		endif // __sun && __SVR4
 	}
-#	endif // !WIN32
 	
 	void do_at_exit()
 	{
@@ -153,13 +151,11 @@ int main(int argc, char **argv)
 	if (Config.mouse_support)
 		mousemask(ALL_MOUSE_EVENTS, 0);
 	
-#	ifndef WIN32
 	signal(SIGWINCH, sighandler);
 	// we get it after connection with mpd is broken.
 	// just ignore it and wait for the connection to
 	// be reestablished.
 	sigignore(SIGPIPE);
-#	endif // !WIN32
 	
 	while (!Actions::ExitMainLoop)
 	{
