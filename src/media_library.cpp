@@ -1075,7 +1075,7 @@ std::string AlbumToString(const AlbumEntry &ae)
 std::string SongToString(const MPD::Song &s)
 {
 	return Format::stringify<char>(
-		Config.song_library_format, &s//FIXME, Config.tags_separator
+		Config.song_library_format, &s
 	);
 }
 
