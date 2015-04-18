@@ -46,7 +46,8 @@ struct Song
 
 	Song(const Song &rhs) : m_song(rhs.m_song), m_hash(rhs.m_hash) { }
 	Song(Song &&rhs) : m_song(std::move(rhs.m_song)), m_hash(rhs.m_hash) { }
-	Song &operator=(Song rhs) {
+	Song &operator=(Song rhs)
+	{
 		m_song = std::move(rhs.m_song);
 		m_hash = rhs.m_hash;
 		return *this;
@@ -85,15 +86,15 @@ struct Song
 	
 	virtual bool empty() const;
 	
-	bool operator==(const Song &rhs) const {
+	bool operator==(const Song &rhs) const
+	{
 		if (m_hash != rhs.m_hash)
 			return false;
 		return strcmp(c_uri(), rhs.c_uri()) == 0;
 	}
-	bool operator!=(const Song &rhs) const {
-		if (m_hash != rhs.m_hash)
-			return true;
-		return strcmp(c_uri(), rhs.c_uri()) != 0;
+	bool operator!=(const Song &rhs) const
+	{
+		return !(operator==(rhs));
 	}
 	
 	const char *c_uri() const { return m_song ? mpd_song_get_uri(m_song.get()) : ""; }

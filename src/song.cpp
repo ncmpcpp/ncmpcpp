@@ -21,6 +21,7 @@
 #include <cassert>
 #include <cstring>
 #include <boost/format.hpp>
+#include <boost/functional/hash.hpp>
 #include <boost/lexical_cast.hpp>
 #include <iostream>
 #include <memory>
@@ -32,12 +33,11 @@
 
 namespace {
 
-size_t calc_hash(const char* s, unsigned seed = 0)
+size_t calc_hash(const char *s, size_t seed = 0)
 {
-	size_t hash = seed;
-	while (*s)
-		hash = hash * 101 + *s++;
-	return hash;
+	for (; *s != '\0'; ++s)
+		boost::hash_combine(seed, *s);
+	return seed;
 }
 
 }
