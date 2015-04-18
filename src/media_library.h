@@ -140,7 +140,7 @@ protected:
 	
 private:
 	void AddToPlaylist(bool);
-	
+
 	bool m_tags_update_request;
 	bool m_albums_update_request;
 	bool m_songs_update_request;

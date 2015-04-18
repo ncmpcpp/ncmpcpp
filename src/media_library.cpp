@@ -77,6 +77,9 @@ bool TagEntryMatcher(const boost::regex &rx, const MediaLibrary::PrimaryTag &tag
 bool AlbumEntryMatcher(const boost::regex &rx, const NC::Menu<AlbumEntry>::Item &item, bool filter);
 bool SongEntryMatcher(const boost::regex &rx, const MPD::Song &s);
 
+bool MoveToTag(MediaLibrary &ml, const std::string &primary_tag, bool tags_changed);
+bool MoveToAlbum(MediaLibrary &ml, const std::string &primary_tag, const MPD::Song &s, bool albums_changed);
+
 struct SortSongs {
 	typedef NC::Menu<MPD::Song>::Item SongItem;
 	
@@ -907,46 +910,77 @@ void MediaLibrary::LocateSong(const MPD::Song &s)
 	{
 		if (Tags.empty())
 			update();
-		if (primary_tag != Tags.current()->value().tag())
+
+		if (!MoveToTag(*this, primary_tag, false))
 		{
-			for (size_t i = 0; i < Tags.size(); ++i)
-			{
-				if (primary_tag == Tags[i].value().tag())
-				{
-					Tags.highlight(i);
-					Albums.clear();
-					Songs.clear();
-					break;
-				}
-			}
+			// The tag could not be found. Since this was called from an existing
+			// song, the tag should exist in the library, but it was not listed by
+			// list/listallinfo. This is the case with some players where it is not
+			// possible to list all of the library, e.g. mopidy with mopidy-spotify.
+			// To workaround this we simply insert the missing tag.
+			Tags.addItem(PrimaryTag(primary_tag, s.getMTime()));
+			std::sort(Tags.beginV(), Tags.endV(), SortPrimaryTags());
+			Tags.refresh();
+			MoveToTag(*this, primary_tag, true);
 		}
 	}
 	
 	if (Albums.empty())
 		update();
-	
-	std::string album = s.getAlbum();
-	std::string date = s.getDate();
-	if ((hasTwoColumns && Albums.current()->value().entry().tag() != primary_tag)
-	||  album != Albums.current()->value().entry().album()
-	||  date != Albums.current()->value().entry().date())
+
+	// When you locate a song in the media library, if no albums or no songs
+	// are found, set the active column to the previous one (tags if no albums,
+	// and albums if no songs). This makes sure that the active column is not
+	// empty, which may make it impossible to move out of.
+	//
+	// The problem was if you highlight some song in the rightmost column in
+	// the media browser and then go to some other window and select locate
+	// song. If the tag or album it looked up in the media library was
+	// empty, the selection would stay in the songs column while it was empty.
+	// This made the selection impossible to change.
+	//
+	// This only is a problem if a song has some tag or album for which the
+	// find command doesn't return any results. This should never really happen
+	// unless there is some inconsistency in the player. However, it may
+	// happen, so we need to handle it.
+	//
+	// Note: We don't want to return when no albums are found in two column
+	// mode. In this case, we try to insert the album, as we do with tags when
+	// they are not found.
+	if (!hasTwoColumns && Albums.empty())
 	{
-		for (size_t i = 0; i < Albums.size(); ++i)
-		{
-			if ((!hasTwoColumns || Albums[i].value().entry().tag() == primary_tag)
-			&&   album == Albums[i].value().entry().album()
-			&&   date == Albums[i].value().entry().date())
-			{
-				Albums.highlight(i);
-				Songs.clear();
-				break;
-			}
-		}
+		Tags.setHighlightColor(Config.active_column_color);
+		Albums.setHighlightColor(Config.main_highlight_color);
+		Songs.setHighlightColor(Config.main_highlight_color);
+		w = &Tags;
+		refresh();
+		return;
+	}
+
+	if (hasTwoColumns && !MoveToAlbum(*this, primary_tag, s, false))
+	{
+		// The album could not be found, insert it if in two column mode.
+		// See comment about tags not found above. This is the equivalent
+		// for two column mode.
+		Albums.addItem(AlbumEntry(Album(primary_tag, s.getAlbum(), s.getDate(), s.getMTime())));
+		std::sort(Albums.beginV(), Albums.endV(), SortAlbumEntries());
+		Albums.refresh();
+		MoveToAlbum(*this, primary_tag, s, true);
 	}
 	
 	if (Songs.empty())
 		update();
-	
+
+	if (Songs.empty())
+	{
+		Tags.setHighlightColor(Config.main_highlight_color);
+		Albums.setHighlightColor(Config.active_column_color);
+		Songs.setHighlightColor(Config.main_highlight_color);
+		w = &Albums;
+		refresh();
+		return;
+	}
+
 	if (s != Songs.current()->value())
 	{
 		for (size_t i = 0; i < Songs.size(); ++i)
@@ -1060,6 +1094,61 @@ bool AlbumEntryMatcher(const boost::regex &rx, const NC::Menu<AlbumEntry>::Item 
 bool SongEntryMatcher(const boost::regex &rx, const MPD::Song &s)
 {
 	return boost::regex_search(SongToString(s), rx);
+}
+
+bool MoveToTag(MediaLibrary &ml, const std::string &primary_tag, bool tags_changed)
+{
+	if (primary_tag == ml.Tags.current()->value().tag())
+	{
+		if (tags_changed)
+		{
+			ml.Albums.clear();
+			ml.Songs.clear();
+		}
+		return true;
+	}
+
+	for (size_t i = 0; i < ml.Tags.size(); ++i)
+	{
+		if (primary_tag == ml.Tags[i].value().tag())
+		{
+			ml.Tags.highlight(i);
+			ml.Albums.clear();
+			ml.Songs.clear();
+			return true;
+		}
+	}
+
+	return false;
+}
+
+bool MoveToAlbum(MediaLibrary &ml, const std::string &primary_tag, const MPD::Song &s, bool albums_changed)
+{
+	std::string album = s.getAlbum();
+	std::string date = s.getDate();
+
+	if ((!hasTwoColumns || ml.Albums.current()->value().entry().tag() == primary_tag)
+	&&   album == ml.Albums.current()->value().entry().album()
+	&&   date == ml.Albums.current()->value().entry().date())
+	{
+		if (albums_changed)
+			ml.Songs.clear();
+		return true;
+	}
+
+	for (size_t i = 0; i < ml.Albums.size(); ++i)
+	{
+		if ((!hasTwoColumns || ml.Albums[i].value().entry().tag() == primary_tag)
+		&&   album == ml.Albums[i].value().entry().album()
+		&&   date == ml.Albums[i].value().entry().date())
+		{
+			ml.Albums.highlight(i);
+			ml.Songs.clear();
+			return true;
+		}
+	}
+
+	return false;
 }
 
 }
