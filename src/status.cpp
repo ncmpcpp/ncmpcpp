@@ -574,6 +574,11 @@ void Status::Changes::elapsedTime(bool update_elapsed)
 	
 	std::string ps = playerStateToString(m_player_state);
 	MPD::Song np = myPlaylist->nowPlayingSong();
+	// It may happen that playlist wasn't yet updated
+	// and current song is not there yet. In such case
+	// try fetching it from the server.
+	if (np.empty() && (m_player_state == MPD::psPlay || m_player_state == MPD::psPause))
+		np = Mpd.GetCurrentSong();
 	drawTitle(np);
 	
 	std::string tracklength;
