@@ -26,7 +26,7 @@
 #include "display.h"
 #include "global.h"
 #include "helpers.h"
-#include "menu.h"
+#include "menu_impl.h"
 #include "playlist.h"
 #include "screen_switcher.h"
 #include "song.h"

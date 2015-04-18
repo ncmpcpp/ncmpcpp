@@ -25,6 +25,7 @@
 #include "charset.h"
 #include "display.h"
 #include "global.h"
+#include "menu_impl.h"
 #include "settings.h"
 #include "status.h"
 #include "statusbar.h"

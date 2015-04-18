@@ -45,6 +45,7 @@
 #include "clock.h"
 #include "help.h"
 #include "media_library.h"
+#include "menu_impl.h"
 #include "lastfm.h"
 #include "lyrics.h"
 #include "playlist.h"

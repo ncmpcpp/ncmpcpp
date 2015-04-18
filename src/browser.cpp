@@ -32,6 +32,7 @@
 #include "global.h"
 #include "helpers.h"
 #include "playlist.h"
+#include "menu_impl.h"
 #include "screen_switcher.h"
 #include "settings.h"
 #include "status.h"

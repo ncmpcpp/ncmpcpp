@@ -29,6 +29,7 @@
 #include "display.h"
 #include "helpers.h"
 #include "global.h"
+#include "menu_impl.h"
 #include "mpdpp.h"
 #include "playlist.h"
 #include "media_library.h"

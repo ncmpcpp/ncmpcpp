@@ -24,6 +24,7 @@
 #include "browser.h"
 #include "global.h"
 #include "helpers.h"
+#include "menu_impl.h"
 #include "mpdpp.h"
 #include "playlist.h"
 #include "sel_items_adder.h"

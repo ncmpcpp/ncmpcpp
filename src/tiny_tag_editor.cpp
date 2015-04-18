@@ -33,6 +33,7 @@
 #include "display.h"
 #include "helpers.h"
 #include "global.h"
+#include "menu_impl.h"
 #include "song_info.h"
 #include "playlist.h"
 #include "search_engine.h"

@@ -29,6 +29,7 @@
 #include "helpers.h"
 #include "playlist.h"
 #include "playlist_editor.h"
+#include "menu_impl.h"
 #include "mpdpp.h"
 #include "status.h"
 #include "statusbar.h"

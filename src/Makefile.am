@@ -85,6 +85,7 @@ noinst_HEADERS = \
 	macro_utilities.h \
 	media_library.h \
 	menu.h \
+	menu_impl.h \
 	mpdpp.h \
 	mutable_song.h \
 	outputs.h \

@@ -29,6 +29,7 @@
 #include "helpers.h"
 #include "lyrics.h"
 #include "media_library.h"
+#include "menu_impl.h"
 #include "outputs.h"
 #include "playlist.h"
 #include "playlist_editor.h"

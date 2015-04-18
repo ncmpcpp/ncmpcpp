@@ -26,6 +26,7 @@
 #include "display.h"
 #include "global.h"
 #include "helpers.h"
+#include "menu_impl.h"
 #include "playlist.h"
 #include "search_engine.h"
 #include "settings.h"

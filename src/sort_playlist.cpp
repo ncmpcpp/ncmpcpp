@@ -25,6 +25,7 @@
 #include "global.h"
 #include "helpers.h"
 #include "playlist.h"
+#include "menu_impl.h"
 #include "settings.h"
 #include "sort_playlist.h"
 #include "statusbar.h"
