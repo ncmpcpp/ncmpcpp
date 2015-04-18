@@ -671,20 +671,20 @@ bool DeleteBrowserItems::canBeRun() const
 void DeleteBrowserItems::run()
 {
 	auto get_name = [](const MPD::Item &item) -> std::string {
-		std::string name;
+		std::string iname;
 		switch (item.type())
 		{
 			case MPD::Item::Type::Directory:
-				name = getBasename(item.directory().path());
+				iname = getBasename(item.directory().path());
 				break;
 			case MPD::Item::Type::Song:
-				name = item.song().getName();
+				iname = item.song().getName();
 				break;
 			case MPD::Item::Type::Playlist:
-				name = getBasename(item.playlist().path());
+				iname = getBasename(item.playlist().path());
 				break;
 		}
-		return name;
+		return iname;
 	};
 
 	boost::format question;

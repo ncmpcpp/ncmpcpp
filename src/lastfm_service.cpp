@@ -155,12 +155,12 @@ Service::Result ArtistInfo::processData(const std::string &data)
 	auto add_similars = [&result](boost::sregex_iterator &it, const boost::sregex_iterator &last) {
 		for (; it != last; ++it)
 		{
-			std::string name = it->str(1);
+			std::string value = it->str(1);
 			std::string url = it->str(2);
-			stripHtmlTags(name);
+			stripHtmlTags(value);
 			stripHtmlTags(url);
 			result.second += "\n * ";
-			result.second += name;
+			result.second += value;
 			result.second += " (";
 			result.second += url;
 			result.second += ")";
