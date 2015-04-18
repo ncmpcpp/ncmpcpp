@@ -286,6 +286,8 @@
 ##
 #execute_on_song_change = ""
 #
+#playlist_show_mpd_host = no
+#
 #playlist_show_remaining_time = no
 #
 #playlist_shorten_total_times = no

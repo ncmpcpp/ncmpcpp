@@ -12,6 +12,7 @@ ncmpcpp-0.7 (????-??-??)
 * Support for 256 colors and customization of background colors has been added.
 * Multiple configuration files via command line arguments are now accepted. In addition, by default ncmpcpp attempts to read both $HOME/.ncmpcpp/config and $XDG_CONFIG_HOME/ncmpcpp/config (in this order).
 * Support for PDCurses has been removed due to the library being unmaintained and buggy.
+* Current MPD host may now be shown in playlist (playlist_show_mpd_host configuration variable, disabled by default).
 * Random album artists can now be added to the playlist.
 
 ncmpcpp-0.6.3 (2015-03-02)

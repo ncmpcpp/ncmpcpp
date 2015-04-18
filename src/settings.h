@@ -124,6 +124,7 @@ struct Configuration
 	mpd_tag_type media_lib_primary_tag;
 
 	bool colors_enabled;
+	bool playlist_show_mpd_host;
 	bool playlist_show_remaining_time;
 	bool playlist_shorten_total_times;
 	bool playlist_separate_albums;
