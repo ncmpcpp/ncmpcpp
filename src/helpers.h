@@ -139,8 +139,10 @@ std::pair<Iterator, Iterator> getSelectedRange(Iterator first, Iterator second)
 	{
 		while (!result.first->isSelected())
 			++result.first;
-		while (!(result.second-1)->isSelected())
+		do
 			--result.second;
+		while (!result.second->isSelected());
+		++result.second;
 	}
 	return result;
 }
