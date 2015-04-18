@@ -907,46 +907,55 @@ void MediaLibrary::LocateSong(const MPD::Song &s)
 	{
 		if (Tags.empty())
 			update();
-		if (primary_tag != Tags.current()->value().tag())
+
+		if (!MoveToTag(primary_tag, false))
 		{
-			for (size_t i = 0; i < Tags.size(); ++i)
-			{
-				if (primary_tag == Tags[i].value().tag())
-				{
-					Tags.highlight(i);
-					Albums.clear();
-					Songs.clear();
-					break;
-				}
-			}
+			// The tag could not be found. Since this was called from an existing song, the tag should exist in the library, but it was not listed by list/listallinfo.
+			// This is the case with some players where it is not possible to list all of the library, e.g. mopidy with mopidy-spotify.
+			// To workaround this we simply insert the missing tag.
+			auto &&tag = PrimaryTag(primary_tag, s.getMTime());
+			Tags.addItem(tag);
+			std::sort(Tags.beginV(), Tags.endV(), SortPrimaryTags());
+			Tags.refresh();
+			MoveToTag(primary_tag, true);
 		}
 	}
 	
 	if (Albums.empty())
 		update();
-	
-	std::string album = s.getAlbum();
-	std::string date = s.getDate();
-	if ((hasTwoColumns && Albums.current()->value().entry().tag() != primary_tag)
-	||  album != Albums.current()->value().entry().album()
-	||  date != Albums.current()->value().entry().date())
+
+	if (Albums.empty() && !hasTwoColumns) {
+		Tags.setHighlightColor(Config.active_column_color);
+		Albums.setHighlightColor(Config.main_highlight_color);
+		Songs.setHighlightColor(Config.main_highlight_color);
+		w = &Tags;
+		refresh();
+		return;
+	}
+
+	if (!MoveToAlbum(primary_tag, s, false) && hasTwoColumns)
 	{
-		for (size_t i = 0; i < Albums.size(); ++i)
-		{
-			if ((!hasTwoColumns || Albums[i].value().entry().tag() == primary_tag)
-			&&   album == Albums[i].value().entry().album()
-			&&   date == Albums[i].value().entry().date())
-			{
-				Albums.highlight(i);
-				Songs.clear();
-				break;
-			}
-		}
+		// The album could not be found, insert it if in two column mode.
+		// See comment about tags not found above. This is the equivalent for two column mode.
+		auto &&entry = AlbumEntry(Album(primary_tag, s.getAlbum(), s.getDate(), s.getMTime()));
+		Albums.addItem(entry);
+		std::sort(Albums.beginV(), Albums.endV(), SortAlbumEntries());
+		Albums.refresh();
+		MoveToAlbum(primary_tag, s, true);
 	}
 	
 	if (Songs.empty())
 		update();
-	
+
+	if (Songs.empty()) {
+		Tags.setHighlightColor(Config.main_highlight_color);
+		Albums.setHighlightColor(Config.active_column_color);
+		Songs.setHighlightColor(Config.main_highlight_color);
+		w = &Albums;
+		refresh();
+		return;
+	}
+
 	if (s != Songs.current()->value())
 	{
 		for (size_t i = 0; i < Songs.size(); ++i)
@@ -1012,6 +1021,63 @@ void MediaLibrary::AddToPlaylist(bool add_n_play)
 		else if (isActiveWindow(Albums))
 			Songs.clear();
 	}
+}
+
+bool MediaLibrary::MoveToTag(const std::string primary_tag, bool tags_changed)
+{
+	if (primary_tag == Tags.current()->value().tag())
+	{
+		if (tags_changed)
+		{
+			Albums.clear();
+			Songs.clear();
+		}
+		return true;
+	}
+
+	for (size_t i = 0; i < Tags.size(); ++i)
+	{
+		if (primary_tag == Tags[i].value().tag())
+		{
+			Tags.highlight(i);
+			Albums.clear();
+			Songs.clear();
+			return true;
+		}
+	}
+
+	return false;
+}
+
+bool MediaLibrary::MoveToAlbum(const std::string primary_tag, const MPD::Song &s, bool albums_changed)
+{
+	std::string album = s.getAlbum();
+	std::string date = s.getDate();
+	if ((!hasTwoColumns || Albums.current()->value().entry().tag() == primary_tag)
+	&&   album == Albums.current()->value().entry().album()
+	&&   date == Albums.current()->value().entry().date())
+	{
+		if (albums_changed)
+		{
+			Songs.clear();
+		}
+		return true;
+	}
+
+	for (size_t i = 0; i < Albums.size(); ++i)
+	{
+		if ((!hasTwoColumns || Albums[i].value().entry().tag() == primary_tag)
+		&&   album == Albums[i].value().entry().album()
+		&&   date == Albums[i].value().entry().date())
+		{
+			Albums.highlight(i);
+			Songs.clear();
+			return true;
+			break;
+		}
+	}
+
+	return false;
 }
 
 namespace {

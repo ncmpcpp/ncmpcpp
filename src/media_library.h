@@ -140,6 +140,8 @@ protected:
 	
 private:
 	void AddToPlaylist(bool);
+	bool MoveToTag(const std::string primary_tag, bool tags_changed);
+	bool MoveToAlbum(const std::string primary_tag, const MPD::Song &s, bool albums_changed);
 	
 	bool m_tags_update_request;
 	bool m_albums_update_request;
