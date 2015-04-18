@@ -943,6 +943,10 @@ void Add::run()
 		path = wFooter->prompt();
 	}
 
+	// confirm when one wants to add the whole database
+	if (path.empty())
+		confirmAction("Are you sure you want to add the whole database?");
+
 	Statusbar::put() << "Adding...";
 	wFooter->refresh();
 	if (myScreen == myPlaylistEditor)
