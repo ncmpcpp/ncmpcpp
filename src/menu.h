@@ -113,8 +113,6 @@ public:
 	/// @see setItemDisplayer()
 	typedef std::function<void(Menu<ItemT> &)> ItemDisplayer;
 	
-	typedef std::function<bool(const Item &)> FilterFunction;
-	
 	Menu() { }
 	
 	Menu(size_t startx, size_t starty, size_t width, size_t height,
