@@ -34,6 +34,7 @@
 #include <commentsframe.h>
 #include <xiphcomment.h>
 
+#include <boost/filesystem.hpp>
 #include "global.h"
 #include "settings.h"
 #include "utility/string.h"
@@ -311,33 +312,16 @@ bool write(MPD::MutableSong &s)
 	if (!saved && !f.save())
 		return false;
 
+	// TODO: move this somewhere else
 	if (!s.getNewName().empty())
 	{
 		std::string new_name;
 		if (s.isFromDatabase())
 			new_name += Config.mpd_music_dir;
-		new_name += s.getDirectory() + "/" + s.getNewName();
-		if (std::rename(old_name.c_str(), new_name.c_str()) == 0 && !s.isFromDatabase())
-		{
-			// FIXME
-			/*if (myTinyTagEditor == myPlaylist)
-			{
-				// if we rename local file, it won't get updated
-				// so just remove it from playlist and add again
-				size_t pos = myPlaylist->main().choice();
-				Mpd.StartCommandsList();
-				Mpd.Delete(pos);
-				int id = Mpd.AddSong("file://" + new_name);
-				if (id >= 0)
-				{
-					s = myPlaylist->main().back().value();
-					Mpd.Move(s.getPosition(), pos);
-				}
-				Mpd.CommitCommandsList();
-			}
-			else // only myBrowser->main()
-				myBrowser->GetDirectory(myBrowser->CurrentDir());*/
-		}
+		new_name += s.getDirectory();
+		new_name += "/";
+		new_name += s.getNewName();
+		boost::filesystem::rename(old_name, new_name);
 	}
 	return true;
 }
