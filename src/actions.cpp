@@ -23,6 +23,7 @@
 #include <cstring>
 #include <boost/array.hpp>
 #include <boost/bind.hpp>
+#include <boost/filesystem/operations.hpp>
 #include <boost/locale/conversion.hpp>
 #include <boost/lexical_cast.hpp>
 #include <algorithm>
@@ -1423,10 +1424,10 @@ bool EditDirectoryName::canBeRun() const
 void EditDirectoryName::run()
 {
 	using Global::wFooter;
-	// FIXME: use boost::filesystem and better error reporting
 	if (myScreen == myBrowser)
 	{
-		std::string old_dir = myBrowser->main().current()->value().directory().path(), new_dir;
+		std::string old_dir = myBrowser->main().current()->value().directory().path();
+		std::string new_dir;
 		{
 			Statusbar::ScopedLock slock;
 			Statusbar::put() << NC::Format::Bold << "Directory: " << NC::Format::NoBold;
@@ -1442,20 +1443,12 @@ void EditDirectoryName::run()
 			if (!myBrowser->isLocal())
 				full_new_dir += Config.mpd_music_dir;
 			full_new_dir += new_dir;
-			int rename_result = rename(full_old_dir.c_str(), full_new_dir.c_str());
-			if (rename_result == 0)
-			{
-				const char msg[] = "Directory renamed to \"%1%\"";
-				Statusbar::printf(msg, wideShorten(new_dir, COLS-const_strlen(msg)));
-				if (!myBrowser->isLocal())
-					Mpd.UpdateDirectory(getSharedDirectory(old_dir, new_dir));
-				myBrowser->requestUpdate();
-			}
-			else
-			{
-				const char msg[] = "Couldn't rename \"%1%\": %s";
-				Statusbar::printf(msg, wideShorten(old_dir, COLS-const_strlen(msg)-25), strerror(errno));
-			}
+			boost::filesystem::rename(full_old_dir, full_new_dir);
+			const char msg[] = "Directory renamed to \"%1%\"";
+			Statusbar::printf(msg, wideShorten(new_dir, COLS-const_strlen(msg)));
+			if (!myBrowser->isLocal())
+				Mpd.UpdateDirectory(getSharedDirectory(old_dir, new_dir));
+			myBrowser->requestUpdate();
 		}
 	}
 #	ifdef HAVE_TAGLIB_H
