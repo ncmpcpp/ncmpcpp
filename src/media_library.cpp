@@ -56,6 +56,7 @@ size_t itsMiddleColStartX;
 size_t itsRightColWidth;
 size_t itsRightColStartX;
 
+typedef MediaLibrary::PrimaryTag PrimaryTag;
 typedef MediaLibrary::AlbumEntry AlbumEntry;
 
 MPD::SongIterator getSongsFromAlbum(const AlbumEntry &album)
@@ -77,8 +78,8 @@ bool TagEntryMatcher(const boost::regex &rx, const MediaLibrary::PrimaryTag &tag
 bool AlbumEntryMatcher(const boost::regex &rx, const NC::Menu<AlbumEntry>::Item &item, bool filter);
 bool SongEntryMatcher(const boost::regex &rx, const MPD::Song &s);
 
-bool MoveToTag(MediaLibrary &ml, const std::string &primary_tag, bool tags_changed);
-bool MoveToAlbum(MediaLibrary &ml, const std::string &primary_tag, const MPD::Song &s, bool albums_changed);
+bool MoveToTag(NC::Menu<PrimaryTag> &tags, const std::string &primary_tag);
+bool MoveToAlbum(NC::Menu<AlbumEntry> &albums, const std::string &primary_tag, const MPD::Song &s);
 
 struct SortSongs {
 	typedef NC::Menu<MPD::Song>::Item SongItem;
@@ -142,8 +143,6 @@ public:
 };
 
 class SortPrimaryTags {
-	typedef MediaLibrary::PrimaryTag PrimaryTag;
-	
 	LocaleStringComparison m_cmp;
 	
 public:
@@ -895,6 +894,7 @@ void MediaLibrary::LocateSong(const MPD::Song &s)
 		Statusbar::printf("Can't use this function because the song has no %s tag", item_type);
 		return;
 	}
+
 	if (!s.isFromDatabase())
 	{
 		Statusbar::print("Song is not from the database");
@@ -905,13 +905,13 @@ void MediaLibrary::LocateSong(const MPD::Song &s)
 		switchTo();
 	Statusbar::put() << "Jumping to song...";
 	Global::wFooter->refresh();
-	// FIXME: use std::find
+
 	if (!hasTwoColumns)
 	{
 		if (Tags.empty())
 			update();
 
-		if (!MoveToTag(*this, primary_tag, false))
+		if (!MoveToTag(Tags, primary_tag))
 		{
 			// The tag could not be found. Since this was called from an existing
 			// song, the tag should exist in the library, but it was not listed by
@@ -921,8 +921,9 @@ void MediaLibrary::LocateSong(const MPD::Song &s)
 			Tags.addItem(PrimaryTag(primary_tag, s.getMTime()));
 			std::sort(Tags.beginV(), Tags.endV(), SortPrimaryTags());
 			Tags.refresh();
-			MoveToTag(*this, primary_tag, true);
+			MoveToTag(Tags, primary_tag);
 		}
+		Albums.clear();
 	}
 	
 	if (Albums.empty())
@@ -947,56 +948,41 @@ void MediaLibrary::LocateSong(const MPD::Song &s)
 	// Note: We don't want to return when no albums are found in two column
 	// mode. In this case, we try to insert the album, as we do with tags when
 	// they are not found.
-	if (!hasTwoColumns && Albums.empty())
+	if (hasTwoColumns || !Albums.empty())
 	{
-		Tags.setHighlightColor(Config.active_column_color);
-		Albums.setHighlightColor(Config.main_highlight_color);
-		Songs.setHighlightColor(Config.main_highlight_color);
-		w = &Tags;
-		refresh();
-		return;
-	}
+		if (!MoveToAlbum(Albums, primary_tag, s))
+		{
+			// The album could not be found, insert it if in two column mode.
+			// See comment about tags not found above. This is the equivalent
+			// for two column mode.
+			Albums.addItem(AlbumEntry(
+				Album(primary_tag, s.getAlbum(), s.getDate(), s.getMTime())
+			));
+			std::sort(Albums.beginV(), Albums.endV(), SortAlbumEntries());
+			Albums.refresh();
+			MoveToAlbum(Albums, primary_tag, s);
+		}
 
-	if (hasTwoColumns && !MoveToAlbum(*this, primary_tag, s, false))
-	{
-		// The album could not be found, insert it if in two column mode.
-		// See comment about tags not found above. This is the equivalent
-		// for two column mode.
-		Albums.addItem(AlbumEntry(Album(primary_tag, s.getAlbum(), s.getDate(), s.getMTime())));
-		std::sort(Albums.beginV(), Albums.endV(), SortAlbumEntries());
-		Albums.refresh();
-		MoveToAlbum(*this, primary_tag, s, true);
-	}
-	
-	if (Songs.empty())
+		Songs.clear();
 		update();
 
-	if (Songs.empty())
-	{
-		Tags.setHighlightColor(Config.main_highlight_color);
-		Albums.setHighlightColor(Config.active_column_color);
-		Songs.setHighlightColor(Config.main_highlight_color);
-		w = &Albums;
-		refresh();
-		return;
-	}
-
-	if (s != Songs.current()->value())
-	{
-		for (size_t i = 0; i < Songs.size(); ++i)
+		if (!Songs.empty())
 		{
-			if (s == Songs[i].value())
+			if (s != Songs.current()->value())
 			{
-				Songs.highlight(i);
-				break;
+				auto begin = Songs.beginV(), end = Songs.endV();
+				auto it = std::find(begin, end, s);
+				if (it != end)
+					Songs.highlight(it-begin);
 			}
+			nextColumn();
+			nextColumn();
 		}
+		else // invalid album was added, clear the list
+			Albums.clear();
 	}
-	
-	Tags.setHighlightColor(Config.main_highlight_color);
-	Albums.setHighlightColor(Config.main_highlight_color);
-	Songs.setHighlightColor(Config.active_column_color);
-	w = &Songs;
+	else // invalid tag was added, clear the list
+		Tags.clear();
 	refresh();
 }
 
@@ -1079,7 +1065,7 @@ std::string SongToString(const MPD::Song &s)
 	);
 }
 
-bool TagEntryMatcher(const boost::regex &rx, const MediaLibrary::PrimaryTag &pt)
+bool TagEntryMatcher(const boost::regex &rx, const PrimaryTag &pt)
 {
 	return boost::regex_search(pt.tag(), rx);
 }
@@ -1096,56 +1082,52 @@ bool SongEntryMatcher(const boost::regex &rx, const MPD::Song &s)
 	return boost::regex_search(SongToString(s), rx);
 }
 
-bool MoveToTag(MediaLibrary &ml, const std::string &primary_tag, bool tags_changed)
+bool MoveToTag(NC::Menu<PrimaryTag> &tags, const std::string &primary_tag)
 {
-	if (primary_tag == ml.Tags.current()->value().tag())
-	{
-		if (tags_changed)
-		{
-			ml.Albums.clear();
-			ml.Songs.clear();
-		}
-		return true;
-	}
+	if (tags.empty())
+		return false;
 
-	for (size_t i = 0; i < ml.Tags.size(); ++i)
+	auto equals_fun_argument = [&](PrimaryTag &e) {
+		return e.tag() == primary_tag;
+	};
+
+	if (equals_fun_argument(*tags.currentV()))
+		return true;
+
+	auto begin = tags.beginV(), end = tags.endV();
+	auto it = std::find_if(begin, end, equals_fun_argument);
+	if (it != end)
 	{
-		if (primary_tag == ml.Tags[i].value().tag())
-		{
-			ml.Tags.highlight(i);
-			ml.Albums.clear();
-			ml.Songs.clear();
-			return true;
-		}
+		tags.highlight(it-begin);
+		return true;
 	}
 
 	return false;
 }
 
-bool MoveToAlbum(MediaLibrary &ml, const std::string &primary_tag, const MPD::Song &s, bool albums_changed)
+bool MoveToAlbum(NC::Menu<AlbumEntry> &albums, const std::string &primary_tag, const MPD::Song &s)
 {
+	if (albums.empty())
+		return false;
+
 	std::string album = s.getAlbum();
 	std::string date = s.getDate();
 
-	if ((!hasTwoColumns || ml.Albums.current()->value().entry().tag() == primary_tag)
-	&&   album == ml.Albums.current()->value().entry().album()
-	&&   date == ml.Albums.current()->value().entry().date())
-	{
-		if (albums_changed)
-			ml.Songs.clear();
-		return true;
-	}
+	auto equals_fun_argument = [&](AlbumEntry &e) {
+		return (!hasTwoColumns || e.entry().tag() == primary_tag)
+		    && e.entry().album() == album
+		    && e.entry().date() == date;
+	};
 
-	for (size_t i = 0; i < ml.Albums.size(); ++i)
+	if (equals_fun_argument(*albums.currentV()))
+		return true;
+
+	auto begin = albums.beginV(), end = albums.endV();
+	auto it = std::find_if(begin, end, equals_fun_argument);
+	if (it != end)
 	{
-		if ((!hasTwoColumns || ml.Albums[i].value().entry().tag() == primary_tag)
-		&&   album == ml.Albums[i].value().entry().album()
-		&&   date == ml.Albums[i].value().entry().date())
-		{
-			ml.Albums.highlight(i);
-			ml.Songs.clear();
-			return true;
-		}
+		albums.highlight(it-begin);
+		return true;
 	}
 
 	return false;
