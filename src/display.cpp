@@ -25,6 +25,7 @@
 #include "display.h"
 #include "format_impl.h"
 #include "helpers.h"
+#include "menu_impl.h"
 #include "song_info.h"
 #include "playlist.h"
 #include "global.h"
