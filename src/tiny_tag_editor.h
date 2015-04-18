@@ -46,13 +46,11 @@ struct TinyTagEditor: Screen<NC::Menu<NC::Buffer>>
 	virtual void spacePressed() OVERRIDE { }
 	virtual void mouseButtonPressed(MEVENT me) OVERRIDE;
 	
+	virtual bool isLockable() OVERRIDE { return false; }
 	virtual bool isMergable() OVERRIDE { return true; }
 	
 	// private members
 	void SetEdited(const MPD::Song &);
-	
-protected:
-	virtual bool isLockable() OVERRIDE { return false; }
 	
 private:
 	bool getTags();

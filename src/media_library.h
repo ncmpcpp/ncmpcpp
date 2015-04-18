@@ -46,6 +46,7 @@ struct MediaLibrary: Screen<NC::Window *>, HasColumns, HasSongs, Searchable, Tab
 	virtual void spacePressed() OVERRIDE;
 	virtual void mouseButtonPressed(MEVENT me) OVERRIDE;
 	
+	virtual bool isLockable() OVERRIDE { return true; }
 	virtual bool isMergable() OVERRIDE { return true; }
 	
 	// Searchable implementation
@@ -134,9 +135,6 @@ struct MediaLibrary: Screen<NC::Window *>, HasColumns, HasSongs, Searchable, Tab
 	NC::Menu<PrimaryTag> Tags;
 	NC::Menu<AlbumEntry> Albums;
 	NC::Menu<MPD::Song> Songs;
-	
-protected:
-	virtual bool isLockable() OVERRIDE { return true; }
 	
 private:
 	void AddToPlaylist(bool);

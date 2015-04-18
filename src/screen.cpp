@@ -98,8 +98,7 @@ void BaseScreen::getWindowResizeParams(size_t &x_offset, size_t &width, bool adj
 
 bool BaseScreen::lock()
 {
-	if (myLockedScreen)
-		return false;
+	assert(myLockedScreen == nullptr);
 	if (isLockable())
 	{
 		myLockedScreen = this;

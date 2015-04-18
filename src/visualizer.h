@@ -53,15 +53,13 @@ struct Visualizer: Screen<NC::Window>, Tabbable
 	virtual void spacePressed() OVERRIDE;
 	virtual void mouseButtonPressed(MEVENT) OVERRIDE { }
 
+	virtual bool isLockable() OVERRIDE { return true; }
 	virtual bool isMergable() OVERRIDE { return true; }
 
 	// private members
 	void SetFD();
 	void ResetFD();
 	void FindOutputID();
-
-protected:
-	virtual bool isLockable() OVERRIDE { return true; }
 
 private:
 	void DrawSoundWave(int16_t *, ssize_t, size_t, size_t);

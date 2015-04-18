@@ -46,6 +46,7 @@ struct PlaylistEditor: Screen<NC::Window *>, HasColumns, HasSongs, Searchable, T
 	virtual void spacePressed() OVERRIDE;
 	virtual void mouseButtonPressed(MEVENT me) OVERRIDE;
 	
+	virtual bool isLockable() OVERRIDE { return true; }
 	virtual bool isMergable() OVERRIDE { return true; }
 	
 	// Searchable implementation
@@ -79,9 +80,6 @@ struct PlaylistEditor: Screen<NC::Window *>, HasColumns, HasSongs, Searchable, T
 	
 	NC::Menu<MPD::Playlist> Playlists;
 	NC::Menu<MPD::Song> Content;
-	
-protected:
-	virtual bool isLockable() OVERRIDE { return true; }
 	
 private:
 	void AddToPlaylist(bool);

@@ -91,6 +91,7 @@ struct SearchEngine: Screen<NC::Menu<SEItem>>, HasSongs, Searchable, Tabbable
 	virtual void spacePressed() OVERRIDE;
 	virtual void mouseButtonPressed(MEVENT me) OVERRIDE;
 	
+	virtual bool isLockable() OVERRIDE { return true; }
 	virtual bool isMergable() OVERRIDE { return true; }
 	
 	// Searchable implementation
@@ -112,9 +113,6 @@ struct SearchEngine: Screen<NC::Menu<SEItem>>, HasSongs, Searchable, Tabbable
 	static size_t StaticOptions;
 	static size_t SearchButton;
 	static size_t ResetButton;
-	
-protected:
-	virtual bool isLockable() OVERRIDE { return true; }
 	
 private:
 	void Prepare();

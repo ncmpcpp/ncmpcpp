@@ -47,13 +47,11 @@ struct Outputs: Screen<NC::Menu<MPD::Output>>, Tabbable
 	virtual void spacePressed() OVERRIDE { }
 	virtual void mouseButtonPressed(MEVENT me) OVERRIDE;
 	
+	virtual bool isLockable() OVERRIDE { return true; }
 	virtual bool isMergable() OVERRIDE { return true; }
 	
 	// private members
 	void FetchList();
-	
-protected:
-	virtual bool isLockable() OVERRIDE { return true; }
 };
 
 extern Outputs *myOutputs;

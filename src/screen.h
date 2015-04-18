@@ -80,6 +80,12 @@ struct BaseScreen
 	
 	/// @see Screen::mouseButtonPressed()
 	virtual void mouseButtonPressed(MEVENT me) = 0;
+
+	/// @return true if screen can be locked. Note that returning
+	/// false here doesn't neccesarily mean that screen is also not
+	/// mergable (eg. lyrics screen is not lockable since that wouldn't
+	/// make much sense, but it's perfectly fine to merge it).
+	virtual bool isLockable() = 0;
 	
 	/// @return true if screen is mergable, ie. can be "proper" subwindow
 	/// if one of the screens is locked. Screens that somehow resemble popups
@@ -98,12 +104,6 @@ struct BaseScreen
 	static void unlock();
 	
 protected:
-	/// @return true if screen can be locked. Note that returning
-	/// false here doesn't neccesarily mean that screen is also not
-	/// mergable (eg. lyrics screen is not lockable since that wouldn't
-	/// make much sense, but it's perfectly fine to merge it).
-	virtual bool isLockable() = 0;
-	
 	/// Gets X offset and width of current screen to be used eg. in resize() function.
 	/// @param adjust_locked_screen indicates whether this function should
 	/// automatically adjust locked screen's dimensions (if there is one set)

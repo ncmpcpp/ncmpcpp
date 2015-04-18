@@ -43,6 +43,7 @@ struct Browser: Screen<NC::Menu<MPD::Item>>, HasSongs, Searchable, Tabbable
 	virtual void spacePressed() OVERRIDE;
 	virtual void mouseButtonPressed(MEVENT me) OVERRIDE;
 	
+	virtual bool isLockable() OVERRIDE { return true; }
 	virtual bool isMergable() OVERRIDE { return true; }
 	
 	// Searchable implementation
@@ -73,9 +74,6 @@ struct Browser: Screen<NC::Menu<MPD::Item>>, HasSongs, Searchable, Tabbable
 
 	static void fetchSupportedExtensions();
 
-protected:
-	virtual bool isLockable() OVERRIDE { return true; }
-	
 private:
 	bool m_update_request;
 	bool m_local_browser;

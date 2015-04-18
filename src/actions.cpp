@@ -1564,13 +1564,17 @@ void ToggleScreenLock::run()
 {
 	using Global::wFooter;
 	using Global::myLockedScreen;
-	// FIXME: check if screen can be locked before prompting for width
-	if (myLockedScreen != 0)
+	const char *msg_unlockable_screen = "Current screen can't be locked";
+	if (myLockedScreen != nullptr)
 	{
 		BaseScreen::unlock();
 		Actions::setResizeFlags();
 		myScreen->resize();
 		Statusbar::print("Screen unlocked");
+	}
+	else if (!myScreen->isLockable())
+	{
+		Statusbar::print(msg_unlockable_screen);
 	}
 	else
 	{
@@ -1586,7 +1590,7 @@ void ToggleScreenLock::run()
 		if (myScreen->lock())
 			Statusbar::printf("Screen locked (with %1%%% width)", part);
 		else
-			Statusbar::print("Current screen can't be locked");
+			Statusbar::print(msg_unlockable_screen);
 	}
 }
 

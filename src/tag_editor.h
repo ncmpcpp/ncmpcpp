@@ -49,6 +49,7 @@ struct TagEditor: Screen<NC::Window *>, HasColumns, HasSongs, Searchable, Tabbab
 	virtual void spacePressed() OVERRIDE;
 	virtual void mouseButtonPressed(MEVENT) OVERRIDE;
 	
+	virtual bool isLockable() OVERRIDE { return true; }
 	virtual bool isMergable() OVERRIDE { return true; }
 	
 	// Searchable implementation
@@ -78,9 +79,6 @@ struct TagEditor: Screen<NC::Window *>, HasColumns, HasSongs, Searchable, Tabbab
 	NC::Menu< std::pair<std::string, std::string> > *Dirs;
 	NC::Menu<std::string> *TagTypes;
 	NC::Menu<MPD::MutableSong> *Tags;
-	
-protected:
-	virtual bool isLockable() OVERRIDE { return true; }
 	
 private:
 	void SetDimensions(size_t, size_t);

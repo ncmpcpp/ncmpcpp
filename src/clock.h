@@ -46,10 +46,8 @@ struct Clock: Screen<NC::Window>, Tabbable
 	virtual void spacePressed() OVERRIDE { }
 	virtual void mouseButtonPressed(MEVENT) OVERRIDE { }
 	
-	virtual bool isMergable() OVERRIDE { return true; }
-	
-protected:
 	virtual bool isLockable() OVERRIDE { return false; }
+	virtual bool isMergable() OVERRIDE { return true; }
 	
 private:
 	NC::Window m_pane;

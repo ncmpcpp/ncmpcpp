@@ -45,6 +45,7 @@ struct Lyrics: Screen<NC::Scrollpad>, Tabbable
 	virtual void enterPressed() OVERRIDE { }
 	virtual void spacePressed() OVERRIDE;
 	
+	virtual bool isLockable() OVERRIDE { return false; }
 	virtual bool isMergable() OVERRIDE { return true; }
 	
 	// private members
@@ -59,9 +60,6 @@ struct Lyrics: Screen<NC::Scrollpad>, Tabbable
 #	endif // HAVE_CURL_CURL_H
 	
 	bool Reload;
-	
-protected:
-	virtual bool isLockable() OVERRIDE { return false; }
 	
 private:
 	void Load();

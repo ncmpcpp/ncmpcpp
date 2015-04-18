@@ -45,14 +45,12 @@ struct SortPlaylistDialog
 	virtual void spacePressed() OVERRIDE { }
 	virtual void mouseButtonPressed(MEVENT me) OVERRIDE;
 	
+	virtual bool isLockable() OVERRIDE { return false; }
 	virtual bool isMergable() OVERRIDE { return false; }
 	
 	// private members
 	void moveSortOrderUp();
 	void moveSortOrderDown();
-	
-protected:
-	virtual bool isLockable() OVERRIDE { return false; }
 	
 private:
 	void moveSortOrderHint() const;

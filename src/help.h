@@ -40,10 +40,8 @@ struct Help: Screen<NC::Scrollpad>, Tabbable
 	virtual void enterPressed() OVERRIDE { }
 	virtual void spacePressed() OVERRIDE { }
 	
-	virtual bool isMergable() OVERRIDE { return true; }
-	
-protected:
 	virtual bool isLockable() OVERRIDE { return true; }
+	virtual bool isMergable() OVERRIDE { return true; }
 };
 
 extern Help *myHelp;

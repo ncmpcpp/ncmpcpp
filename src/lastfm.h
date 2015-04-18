@@ -48,6 +48,7 @@ struct Lastfm: Screen<NC::Scrollpad>, Tabbable
 	virtual void enterPressed() OVERRIDE { }
 	virtual void spacePressed() OVERRIDE { }
 	
+	virtual bool isLockable() OVERRIDE { return false; }
 	virtual bool isMergable() OVERRIDE { return true; }
 	
 	template <typename ServiceT>
@@ -68,9 +69,6 @@ struct Lastfm: Screen<NC::Scrollpad>, Tabbable
 		w.flush();
 		m_title = ToWString(m_service->name());
 	}
-	
-protected:
-	virtual bool isLockable() OVERRIDE { return false; }
 	
 private:
 	void getResult();

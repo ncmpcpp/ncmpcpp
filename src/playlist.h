@@ -46,6 +46,7 @@ struct Playlist: Screen<NC::Menu<MPD::Song>>, HasSongs, Searchable, Tabbable
 	virtual void spacePressed() OVERRIDE;
 	virtual void mouseButtonPressed(MEVENT me) OVERRIDE;
 	
+	virtual bool isLockable() OVERRIDE { return true; }
 	virtual bool isMergable() OVERRIDE { return true; }
 	
 	// Searchable implementation
@@ -76,9 +77,6 @@ struct Playlist: Screen<NC::Menu<MPD::Song>>, HasSongs, Searchable, Tabbable
 	
 	void reloadTotalLength() { m_reload_total_length = true; }
 	void reloadRemaining() { m_reload_remaining = true; }
-	
-protected:
-	virtual bool isLockable() OVERRIDE { return true; }
 	
 private:
 	std::string getTotalLength();

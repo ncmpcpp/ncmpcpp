@@ -47,10 +47,8 @@ struct SelectedItemsAdder: Screen<NC::Menu<RunnableItem<std::string, void()>> *>
 	virtual void spacePressed() OVERRIDE { }
 	virtual void mouseButtonPressed(MEVENT me) OVERRIDE;
 	
-	virtual bool isMergable() OVERRIDE { return false; }
-	
-protected:
 	virtual bool isLockable() OVERRIDE { return false; }
+	virtual bool isMergable() OVERRIDE { return false; }
 	
 private:
 	void populatePlaylistSelector(BaseScreen *screen);

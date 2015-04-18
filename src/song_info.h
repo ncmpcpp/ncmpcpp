@@ -48,13 +48,11 @@ struct SongInfo: Screen<NC::Scrollpad>, Tabbable
 	virtual void enterPressed() OVERRIDE { }
 	virtual void spacePressed() OVERRIDE { }
 	
+	virtual bool isLockable() OVERRIDE { return false; }
 	virtual bool isMergable() OVERRIDE { return true; }
 	
 	// private members
 	static const Metadata Tags[];
-	
-protected:
-	virtual bool isLockable() OVERRIDE { return false; }
 	
 private:
 	void PrepareSong(MPD::Song &);
