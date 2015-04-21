@@ -78,6 +78,17 @@ unsigned m_playlist_length;
 unsigned m_total_time;
 int m_volume;
 
+MPD::Song getCurrentSong()
+{
+	MPD::Song result = myPlaylist->nowPlayingSong();
+	// It may happen that playlist wasn't yet updated
+	// and current song is not there yet. In such case
+	// try fetching it from the server.
+	if (result.empty() && m_player_state != MPD::psUnknown)
+		result = Mpd.GetCurrentSong();
+	return result;
+}
+
 void drawTitle(const MPD::Song &np)
 {
 	assert(!np.empty());
@@ -478,7 +489,7 @@ void Status::Changes::playerState()
 	switch (m_player_state)
 	{
 		case MPD::psPlay:
-			drawTitle(myPlaylist->nowPlayingSong());
+			drawTitle(getCurrentSong());
 			myPlaylist->reloadRemaining();
 			break;
 		case MPD::psStop:
@@ -578,17 +589,12 @@ void Status::Changes::elapsedTime(bool update_elapsed)
 			*wFooter << NC::XY(0, 1) << NC::TermManip::ClearToEOL;
 		return;
 	}
-	
+
+	MPD::Song np = getCurrentSong();
 	std::string ps = playerStateToString(m_player_state);
-	MPD::Song np = myPlaylist->nowPlayingSong();
-	// It may happen that playlist wasn't yet updated
-	// and current song is not there yet. In such case
-	// try fetching it from the server.
-	if (np.empty() && (m_player_state == MPD::psPlay || m_player_state == MPD::psPause))
-		np = Mpd.GetCurrentSong();
-	drawTitle(np);
-	
 	std::string tracklength;
+
+	drawTitle(np);
 	switch (Config.design)
 	{
 		case Design::Classic:
