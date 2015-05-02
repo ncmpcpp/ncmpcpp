@@ -92,8 +92,8 @@ private:
 	const int m_window_timeout;
 	const boost::posix_time::time_duration m_fetching_delay;
 
-	RegexFilter<MPD::Playlist> m_playlists_search_predicate;
-	RegexFilter<MPD::Song> m_content_search_predicate;
+	Regex::Filter<MPD::Playlist> m_playlists_search_predicate;
+	Regex::Filter<MPD::Song> m_content_search_predicate;
 };
 
 extern PlaylistEditor *myPlaylistEditor;

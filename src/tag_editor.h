@@ -94,8 +94,8 @@ private:
 	std::string itsBrowsedDir;
 	std::string itsHighlightedDir;
 
-	RegexFilter<std::pair<std::string, std::string>> m_directories_search_predicate;
-	RegexFilter<MPD::MutableSong> m_songs_search_predicate;
+	Regex::Filter<std::pair<std::string, std::string>> m_directories_search_predicate;
+	Regex::Filter<MPD::MutableSong> m_songs_search_predicate;
 };
 
 extern TagEditor *myTagEditor;

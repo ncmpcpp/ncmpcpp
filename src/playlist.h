@@ -94,7 +94,7 @@ private:
 	bool m_reload_total_length;
 	bool m_reload_remaining;
 
-	RegexFilter<MPD::Song> m_search_predicate;
+	Regex::Filter<MPD::Song> m_search_predicate;
 };
 
 extern Playlist *myPlaylist;

@@ -68,7 +68,7 @@ void getLocalDirectoryRecursively(std::vector<MPD::Song> &songs, const std::stri
 void clearDirectory(const std::string &directory);
 
 std::string itemToString(const MPD::Item &item);
-bool browserEntryMatcher(const boost::regex &rx, const MPD::Item &item, bool filter);
+bool browserEntryMatcher(const Regex::Regex &rx, const MPD::Item &item, bool filter);
 
 }
 
@@ -287,8 +287,8 @@ bool Browser::allowsSearching()
 
 void Browser::setSearchConstraint(const std::string &constraint)
 {
-	m_search_predicate = RegexFilter<MPD::Item>(
-		boost::regex(constraint, Config.regex_type),
+	m_search_predicate = Regex::Filter<MPD::Item>(
+		Regex::make(constraint, Config.regex_type),
 		boost::bind(browserEntryMatcher, _1, _2, false)
 	);
 }
@@ -693,11 +693,11 @@ std::string itemToString(const MPD::Item &item)
 	return result;
 }
 
-bool browserEntryMatcher(const boost::regex &rx, const MPD::Item &item, bool filter)
+bool browserEntryMatcher(const Regex::Regex &rx, const MPD::Item &item, bool filter)
 {
 	if (isItemParentDirectory(item))
 		return filter;
-	return boost::regex_search(itemToString(item), rx);
+	return Regex::search(itemToString(item), rx);
 }
 
 }

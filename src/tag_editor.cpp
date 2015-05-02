@@ -81,8 +81,8 @@ std::string GenerateFilename(const MPD::MutableSong &s, const std::string &patte
 std::string ParseFilename(MPD::MutableSong &s, std::string mask, bool preview);
 
 std::string SongToString(const MPD::MutableSong &s);
-bool DirEntryMatcher(const boost::regex &rx, const std::pair<std::string, std::string> &dir, bool filter);
-bool SongEntryMatcher(const boost::regex &rx, const MPD::MutableSong &s);
+bool DirEntryMatcher(const Regex::Regex &rx, const std::pair<std::string, std::string> &dir, bool filter);
+bool SongEntryMatcher(const Regex::Regex &rx, const MPD::MutableSong &s);
 
 }
 
@@ -726,15 +726,15 @@ void TagEditor::setSearchConstraint(const std::string &constraint)
 {
 	if (w == Dirs)
 	{
-		m_directories_search_predicate = RegexFilter<std::pair<std::string, std::string>>(
-			boost::regex(constraint, Config.regex_type),
+		m_directories_search_predicate = Regex::Filter<std::pair<std::string, std::string>>(
+			Regex::make(constraint, Config.regex_type),
 			boost::bind(DirEntryMatcher, _1, _2, false)
 		);
 	}
 	else if (w == Tags)
 	{
-		m_songs_search_predicate = RegexFilter<MPD::MutableSong>(
-			boost::regex(constraint, Config.regex_type),
+		m_songs_search_predicate = Regex::Filter<MPD::MutableSong>(
+			Regex::make(constraint, Config.regex_type),
 			SongEntryMatcher
 		);
 	}
@@ -1125,16 +1125,16 @@ std::string SongToString(const MPD::MutableSong &s)
 	return result.empty() ? Config.empty_tag : result;
 }
 
-bool DirEntryMatcher(const boost::regex &rx, const std::pair<std::string, std::string> &dir, bool filter)
+bool DirEntryMatcher(const Regex::Regex &rx, const std::pair<std::string, std::string> &dir, bool filter)
 {
 	if (dir.first == "." || dir.first == "..")
 		return filter;
-	return boost::regex_search(dir.first, rx);
+	return Regex::search(dir.first, rx);
 }
 
-bool SongEntryMatcher(const boost::regex &rx, const MPD::MutableSong &s)
+bool SongEntryMatcher(const Regex::Regex &rx, const MPD::MutableSong &s)
 {
-	return boost::regex_search(SongToString(s), rx);
+	return Regex::search(SongToString(s), rx);
 }
 
 }

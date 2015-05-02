@@ -118,7 +118,7 @@ private:
 	void Prepare();
 	void Search();
 
-	RegexItemFilter<SEItem> m_search_predicate;
+	Regex::ItemFilter<SEItem> m_search_predicate;
 	
 	const char **SearchMode;
 	

@@ -71,7 +71,7 @@ namespace pos {
 }*/
 
 std::string SEItemToString(const SEItem &ei);
-bool SEItemEntryMatcher(const boost::regex &rx, const NC::Menu<SEItem>::Item &item, bool filter);
+bool SEItemEntryMatcher(const Regex::Regex &rx, const NC::Menu<SEItem>::Item &item, bool filter);
 
 }
 
@@ -264,8 +264,8 @@ bool SearchEngine::allowsSearching()
 
 void SearchEngine::setSearchConstraint(const std::string &constraint)
 {
-	m_search_predicate = RegexItemFilter<SEItem>(
-		boost::regex(constraint, Config.regex_type),
+	m_search_predicate = Regex::ItemFilter<SEItem>(
+		Regex::make(constraint, Config.regex_type),
 		boost::bind(SEItemEntryMatcher, _1, _2, false)
 	);
 }
@@ -401,7 +401,7 @@ void SearchEngine::Search()
 		return;
 	}
 
-	boost::regex rx[ConstraintsNumber];
+	Regex::Regex rx[ConstraintsNumber];
 	if (SearchMode != &SearchModes[2]) // match to pattern
 	{
 		for (size_t i = 0; i < ConstraintsNumber; ++i)
@@ -410,7 +410,7 @@ void SearchEngine::Search()
 			{
 				try
 				{
-					rx[i].assign(itsConstraints[i], Config.regex_type);
+					rx[i] = Regex::make(itsConstraints[i], Config.regex_type);
 				}
 				catch (boost::bad_expression &) { }
 			}
@@ -444,36 +444,36 @@ void SearchEngine::Search()
 		{
 			if (!rx[0].empty())
 				any_found =
-				   boost::regex_search(s->getArtist(), rx[0])
-				|| boost::regex_search(s->getAlbumArtist(), rx[0])
-				|| boost::regex_search(s->getTitle(), rx[0])
-				|| boost::regex_search(s->getAlbum(), rx[0])
-				|| boost::regex_search(s->getName(), rx[0])
-				|| boost::regex_search(s->getComposer(), rx[0])
-				|| boost::regex_search(s->getPerformer(), rx[0])
-				|| boost::regex_search(s->getGenre(), rx[0])
-				|| boost::regex_search(s->getDate(), rx[0])
-				|| boost::regex_search(s->getComment(), rx[0]);
+				   Regex::search(s->getArtist(), rx[0])
+				|| Regex::search(s->getAlbumArtist(), rx[0])
+				|| Regex::search(s->getTitle(), rx[0])
+				|| Regex::search(s->getAlbum(), rx[0])
+				|| Regex::search(s->getName(), rx[0])
+				|| Regex::search(s->getComposer(), rx[0])
+				|| Regex::search(s->getPerformer(), rx[0])
+				|| Regex::search(s->getGenre(), rx[0])
+				|| Regex::search(s->getDate(), rx[0])
+				|| Regex::search(s->getComment(), rx[0]);
 			if (found && !rx[1].empty())
-				found = boost::regex_search(s->getArtist(), rx[1]);
+				found = Regex::search(s->getArtist(), rx[1]);
 			if (found && !rx[2].empty())
-				found = boost::regex_search(s->getAlbumArtist(), rx[2]);
+				found = Regex::search(s->getAlbumArtist(), rx[2]);
 			if (found && !rx[3].empty())
-				found = boost::regex_search(s->getTitle(), rx[3]);
+				found = Regex::search(s->getTitle(), rx[3]);
 			if (found && !rx[4].empty())
-				found = boost::regex_search(s->getAlbum(), rx[4]);
+				found = Regex::search(s->getAlbum(), rx[4]);
 			if (found && !rx[5].empty())
-				found = boost::regex_search(s->getName(), rx[5]);
+				found = Regex::search(s->getName(), rx[5]);
 			if (found && !rx[6].empty())
-				found = boost::regex_search(s->getComposer(), rx[6]);
+				found = Regex::search(s->getComposer(), rx[6]);
 			if (found && !rx[7].empty())
-				found = boost::regex_search(s->getPerformer(), rx[7]);
+				found = Regex::search(s->getPerformer(), rx[7]);
 			if (found && !rx[8].empty())
-				found = boost::regex_search(s->getGenre(), rx[8]);
+				found = Regex::search(s->getGenre(), rx[8]);
 			if (found && !rx[9].empty())
-				found = boost::regex_search(s->getDate(), rx[9]);
+				found = Regex::search(s->getDate(), rx[9]);
 			if (found && !rx[10].empty())
-				found = boost::regex_search(s->getComment(), rx[10]);
+				found = Regex::search(s->getComment(), rx[10]);
 		}
 		else // match only if values are equal
 		{
@@ -539,11 +539,11 @@ std::string SEItemToString(const SEItem &ei)
 	return result;
 }
 
-bool SEItemEntryMatcher(const boost::regex &rx, const NC::Menu<SEItem>::Item &item, bool filter)
+bool SEItemEntryMatcher(const Regex::Regex &rx, const NC::Menu<SEItem>::Item &item, bool filter)
 {
 	if (item.isSeparator() || !item.value().isSong())
 		return filter;
-	return boost::regex_search(SEItemToString(item.value()), rx);
+	return Regex::search(SEItemToString(item.value()), rx);
 }
 
 }

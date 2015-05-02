@@ -74,9 +74,9 @@ MPD::SongIterator getSongsFromAlbum(const AlbumEntry &album)
 std::string AlbumToString(const AlbumEntry &ae);
 std::string SongToString(const MPD::Song &s);
 
-bool TagEntryMatcher(const boost::regex &rx, const MediaLibrary::PrimaryTag &tagmtime);
-bool AlbumEntryMatcher(const boost::regex &rx, const NC::Menu<AlbumEntry>::Item &item, bool filter);
-bool SongEntryMatcher(const boost::regex &rx, const MPD::Song &s);
+bool TagEntryMatcher(const Regex::Regex &rx, const MediaLibrary::PrimaryTag &tagmtime);
+bool AlbumEntryMatcher(const Regex::Regex &rx, const NC::Menu<AlbumEntry>::Item &item, bool filter);
+bool SongEntryMatcher(const Regex::Regex &rx, const MPD::Song &s);
 
 bool MoveToTag(NC::Menu<PrimaryTag> &tags, const std::string &primary_tag);
 bool MoveToAlbum(NC::Menu<AlbumEntry> &albums, const std::string &primary_tag, const MPD::Song &s);
@@ -583,22 +583,22 @@ void MediaLibrary::setSearchConstraint(const std::string &constraint)
 {
 	if (isActiveWindow(Tags))
 	{
-		m_tags_search_predicate = RegexFilter<PrimaryTag>(
-			boost::regex(constraint, Config.regex_type),
+		m_tags_search_predicate = Regex::Filter<PrimaryTag>(
+			Regex::make(constraint, Config.regex_type),
 			TagEntryMatcher
 		);
 	}
 	else if (isActiveWindow(Albums))
 	{
-		m_albums_search_predicate = RegexItemFilter<AlbumEntry>(
-			boost::regex(constraint, Config.regex_type),
+		m_albums_search_predicate = Regex::ItemFilter<AlbumEntry>(
+			Regex::make(constraint, Config.regex_type),
 			boost::bind(AlbumEntryMatcher, _1, _2, false)
 		);
 	}
 	else if (isActiveWindow(Songs))
 	{
-		m_songs_search_predicate = RegexFilter<MPD::Song>(
-			boost::regex(constraint, Config.regex_type),
+		m_songs_search_predicate = Regex::Filter<MPD::Song>(
+			Regex::make(constraint, Config.regex_type),
 			SongEntryMatcher
 		);
 	}
@@ -1065,21 +1065,21 @@ std::string SongToString(const MPD::Song &s)
 	);
 }
 
-bool TagEntryMatcher(const boost::regex &rx, const PrimaryTag &pt)
+bool TagEntryMatcher(const Regex::Regex &rx, const PrimaryTag &pt)
 {
-	return boost::regex_search(pt.tag(), rx);
+	return Regex::search(pt.tag(), rx);
 }
 
-bool AlbumEntryMatcher(const boost::regex &rx, const NC::Menu<AlbumEntry>::Item &item, bool filter)
+bool AlbumEntryMatcher(const Regex::Regex &rx, const NC::Menu<AlbumEntry>::Item &item, bool filter)
 {
 	if (item.isSeparator() || item.value().isAllTracksEntry())
 		return filter;
-	return boost::regex_search(AlbumToString(item.value()), rx);
+	return Regex::search(AlbumToString(item.value()), rx);
 }
 
-bool SongEntryMatcher(const boost::regex &rx, const MPD::Song &s)
+bool SongEntryMatcher(const Regex::Regex &rx, const MPD::Song &s)
 {
-	return boost::regex_search(SongToString(s), rx);
+	return Regex::search(SongToString(s), rx);
 }
 
 bool MoveToTag(NC::Menu<PrimaryTag> &tags, const std::string &primary_tag)

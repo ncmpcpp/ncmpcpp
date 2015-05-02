@@ -79,7 +79,7 @@ private:
 	bool m_local_browser;
 	size_t m_scroll_beginning;
 	std::string m_current_directory;
-	RegexFilter<MPD::Item> m_search_predicate;
+	Regex::Filter<MPD::Item> m_search_predicate;
 };
 
 extern Browser *myBrowser;

@@ -51,8 +51,8 @@ size_t RightColumnStartX;
 size_t RightColumnWidth;
 
 std::string SongToString(const MPD::Song &s);
-bool PlaylistEntryMatcher(const boost::regex &rx, const MPD::Playlist &playlist);
-bool SongEntryMatcher(const boost::regex &rx, const MPD::Song &s);
+bool PlaylistEntryMatcher(const Regex::Regex &rx, const MPD::Playlist &playlist);
+bool SongEntryMatcher(const Regex::Regex &rx, const MPD::Song &s);
 
 }
 
@@ -337,15 +337,15 @@ void PlaylistEditor::setSearchConstraint(const std::string &constraint)
 {
 	if (isActiveWindow(Playlists))
 	{
-		m_playlists_search_predicate = RegexFilter<MPD::Playlist>(
-			boost::regex(constraint, Config.regex_type),
+		m_playlists_search_predicate = Regex::Filter<MPD::Playlist>(
+			Regex::make(constraint, Config.regex_type),
 			PlaylistEntryMatcher
 		);
 	}
 	else if (isActiveWindow(Content))
 	{
-		m_content_search_predicate = RegexFilter<MPD::Song>(
-			boost::regex(constraint, Config.regex_type),
+		m_content_search_predicate = Regex::Filter<MPD::Song>(
+			Regex::make(constraint, Config.regex_type),
 			SongEntryMatcher
 		);
 	}
@@ -513,14 +513,14 @@ std::string SongToString(const MPD::Song &s)
 	return result;
 }
 
-bool PlaylistEntryMatcher(const boost::regex &rx, const MPD::Playlist &playlist)
+bool PlaylistEntryMatcher(const Regex::Regex &rx, const MPD::Playlist &playlist)
 {
-	return boost::regex_search(playlist.path(), rx);
+	return Regex::search(playlist.path(), rx);
 }
 
-bool SongEntryMatcher(const boost::regex &rx, const MPD::Song &s)
+bool SongEntryMatcher(const Regex::Regex &rx, const MPD::Song &s)
 {
-	return boost::regex_search(SongToString(s), rx);
+	return Regex::search(SongToString(s), rx);
 }
 
 }

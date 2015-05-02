@@ -114,10 +114,10 @@ dnl =================================
 AC_CHECK_HEADERS([boost/filesystem.hpp], ,
 	AC_MSG_ERROR(boost/filesystem.hpp is missing)
 )
-AC_CHECK_LIB(boost_filesystem$BOOST_LIB_SUFFIX, main, LDFLAGS="$LDFLAGS -lboost_filesystem$BOOST_LIB_SUFFIX",
+AC_CHECK_LIB(boost_filesystem$BOOST_LIB_SUFFIX, main, LIBS="$LIBS -lboost_filesystem$BOOST_LIB_SUFFIX",
 	AC_MSG_ERROR([no boost.filesystem library found])
 )
-AC_CHECK_LIB(boost_system$BOOST_LIB_SUFFIX, main, LDFLAGS="$LDFLAGS -lboost_system$BOOST_LIB_SUFFIX",
+AC_CHECK_LIB(boost_system$BOOST_LIB_SUFFIX, main, LIBS="$LIBS -lboost_system$BOOST_LIB_SUFFIX",
 	AC_MSG_ERROR([no boost.system library found])
 )
 
@@ -134,7 +134,7 @@ dnl =============================
 AC_CHECK_HEADERS([boost/locale.hpp], ,
 	AC_MSG_ERROR(boost/locale.hpp is missing)
 )
-AC_CHECK_LIB(boost_locale$BOOST_LIB_SUFFIX, main, LDFLAGS="$LDFLAGS -lboost_locale$BOOST_LIB_SUFFIX",
+AC_CHECK_LIB(boost_locale$BOOST_LIB_SUFFIX, main, LIBS="$LIBS -lboost_locale$BOOST_LIB_SUFFIX",
 	AC_MSG_ERROR([no boost.locale library found])
 )
 
@@ -151,7 +151,7 @@ dnl ======================================
 AC_CHECK_HEADERS([boost/program_options.hpp], ,
 	AC_MSG_ERROR(boost/program_options.hpp is missing)
 )
-AC_CHECK_LIB(boost_program_options$BOOST_LIB_SUFFIX, main, LDFLAGS="$LDFLAGS -lboost_program_options$BOOST_LIB_SUFFIX",
+AC_CHECK_LIB(boost_program_options$BOOST_LIB_SUFFIX, main, LIBS="$LIBS -lboost_program_options$BOOST_LIB_SUFFIX",
 	AC_MSG_ERROR([no boost.program_options library found])
 )
 
@@ -161,9 +161,30 @@ dnl ============================
 AC_CHECK_HEADERS([boost/regex.hpp], ,
 	AC_MSG_ERROR(boost/regex.hpp is missing)
 )
-AC_CHECK_LIB(boost_regex$BOOST_LIB_SUFFIX, main, LDFLAGS="$LDFLAGS -lboost_regex$BOOST_LIB_SUFFIX",
+AC_CHECK_LIB(boost_regex$BOOST_LIB_SUFFIX, main, LIBS="$LIBS -lboost_regex$BOOST_LIB_SUFFIX",
 	AC_MSG_ERROR([no boost.regex library found])
 )
+
+dnl ====================
+dnl = checking for icu =
+dnl ====================
+AH_TEMPLATE([BOOST_REGEX_ICU], [boost.regex was compiled with ICU support])
+PKG_CHECK_MODULES([ICU], [icu-uc], [
+	old_CPPFLAGS="$CPPFLAGS"
+	old_LIBS="$LIBS"
+	AC_SUBST(ICU_CFLAGS)
+	AC_SUBST(ICU_LIBS)
+	CPPFLAGS="$CPPFLAGS $ICU_CFLAGS"
+	LIBS="$LIBS $ICU_LIBS"
+	AC_MSG_CHECKING([whether boost.regex was compiled with ICU support])
+	AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <boost/regex/icu.hpp>]], [[boost::u32regex rx = boost::make_u32regex("foo"); if (boost::u32regex_search("foobar", rx)) { }]])],
+	AC_MSG_RESULT([yes])
+		AC_DEFINE([BOOST_REGEX_ICU], [1]),
+	AC_MSG_RESULT([no])
+		CPPFLAGS="$old_CPPFLAGS"
+		LIBS="$old_LIBS",
+	)
+],)
 
 dnl =============================
 dnl = checking for boost.thread =
@@ -172,14 +193,9 @@ AC_DEFINE([BOOST_THREAD_VERSION], [3], [require boost.thread v3])
 AC_CHECK_HEADERS([boost/thread.hpp], ,
 	AC_MSG_ERROR([boost/thread.hpp is missing or your boost version is too old (boost.thread v3 is required)])
 )
-AC_CHECK_LIB(boost_thread$BOOST_LIB_SUFFIX, main, LDFLAGS="$LDFLAGS -lboost_thread$BOOST_LIB_SUFFIX",
+AC_CHECK_LIB(boost_thread$BOOST_LIB_SUFFIX, main, LIBS="$LIBS -lboost_thread$BOOST_LIB_SUFFIX",
 	AC_MSG_ERROR([no boost.thread library found])
 )
-
-dnl ==============================
-dnl = checking for regex (win32) =
-dnl ==============================
-AC_CHECK_LIB(regex, regcomp, LDFLAGS="$LDFLAGS -lregex", )
 
 dnl ================================
 dnl = checking for various headers =
@@ -191,11 +207,11 @@ dnl ==============================
 dnl = checking for libmpdclient2 =
 dnl ==============================
 PKG_CHECK_MODULES([libmpdclient], [libmpdclient >= 2.8], [
-	AC_SUBST(libmpdclient_LIBS)
 	AC_SUBST(libmpdclient_CFLAGS)
+	AC_SUBST(libmpdclient_LIBS)
 	CPPFLAGS="$CPPFLAGS $libmpdclient_CFLAGS"
 	AC_CHECK_HEADERS([mpd/client.h],
-		LDFLAGS="$LDFLAGS $libmpdclient_LIBS"
+		LIBS="$LIBS $libmpdclient_LIBS"
 	,
 		AC_MSG_ERROR([missing mpd/client.h header])
 	)
@@ -207,7 +223,7 @@ dnl =========================
 dnl = checking for readline =
 dnl =========================
 AC_CHECK_HEADERS([readline/readline.h readline/history.h],
-	AC_CHECK_LIB(readline, rl_initialize, LDFLAGS="$LDFLAGS -lreadline",
+	AC_CHECK_LIB(readline, rl_initialize, LIBS="$LIBS -lreadline",
 		AC_MSG_ERROR([readline headers found but there is no readline library to make use of])
 	),
 )
@@ -217,7 +233,7 @@ dnl ========================
 dnl = checking for pthread =
 dnl ========================
 AC_CHECK_HEADERS([pthread.h],
-	AC_CHECK_LIB(pthread, pthread_create, LDFLAGS="$LDFLAGS -lpthread",
+	AC_CHECK_LIB(pthread, pthread_create, LIBS="$LIBS -lpthread",
 		AC_MSG_ERROR([pthread.h found but there is no pthread library to make use of])
 	),
 )
@@ -235,7 +251,7 @@ fi
 AC_PATH_PROGS(CURSES_CONFIG, $curses_config_bin)
 if test "$CURSES_CONFIG" != "" ; then
 	CPPFLAGS="$CPPFLAGS `$CURSES_CONFIG --cflags`"
-	LDFLAGS="$LDFLAGS `$CURSES_CONFIG --libs`"
+	LIBS="$LIBS `$CURSES_CONFIG --libs`"
 fi
 AC_CHECK_LIB(ncursesw, initscr,
 	curses_lib=ncursesw,
@@ -244,7 +260,7 @@ AC_CHECK_LIB(ncursesw, initscr,
 
 AC_CHECK_LIB($curses_lib, initscr,
 	if test "$CURSES_CONFIG" = "" ; then
-		LDFLAGS="$LDFLAGS -l$curses_lib"
+		LIBS="$LIBS -l$curses_lib"
 	fi
 	,
 	AC_MSG_ERROR([$curses_lib library is required])
@@ -261,7 +277,7 @@ if test "$visualizer" = "yes" ; then
 			AC_SUBST(fftw3_CFLAGS)
 			CPPFLAGS="$CPPFLAGS $fftw3_CFLAGS"
 			AC_CHECK_HEADERS([fftw3.h],
-				LDFLAGS="$LDFLAGS $fftw3_LIBS"
+				LIBS="$LIBS $fftw3_LIBS"
 			,
 				if test "$fftw" = "yes" ; then
 					AC_MSG_ERROR([missing fftw3.h header])
@@ -283,7 +299,7 @@ if test "$curl" != "no" ; then
 	AC_PATH_PROG(CURL_CONFIG, curl-config)
 	if test "$CURL_CONFIG" != "" ; then
 		CPPFLAGS="$CPPFLAGS `$CURL_CONFIG --cflags`"
-		AC_CHECK_LIB(curl, curl_easy_init, LDFLAGS="$LDFLAGS `$CURL_CONFIG --libs`",
+		AC_CHECK_LIB(curl, curl_easy_init, LIBS="$LIBS `$CURL_CONFIG --libs`",
 			if test "$curl" = "yes" ; then
 				AC_MSG_ERROR([curl library is required])
 			fi
@@ -294,7 +310,7 @@ if test "$curl" != "no" ; then
 			fi
 		)
 	else
-		AC_CHECK_LIB(curl, curl_easy_init, LDFLAGS="$LDFLAGS -lcurl",
+		AC_CHECK_LIB(curl, curl_easy_init, LIBS="$LIBS -lcurl",
 			if test "$curl" = "yes" ; then
 				AC_MSG_ERROR([curl library is required])
 			fi
@@ -309,7 +325,7 @@ if test "$taglib" != "no" ; then
 	AC_PATH_PROG(TAGLIB_CONFIG, taglib-config)
 	if test "$TAGLIB_CONFIG" != "" ; then
 		CPPFLAGS="$CPPFLAGS `$TAGLIB_CONFIG --cflags`"
-		LDFLAGS="$LDFLAGS `$TAGLIB_CONFIG --libs`"
+		LIBS="$LIBS `$TAGLIB_CONFIG --libs`"
 		AC_CHECK_HEADERS([taglib.h], ,
 			if test "$taglib" = "yes" ; then
 				AC_MSG_ERROR([missing taglib.h header])

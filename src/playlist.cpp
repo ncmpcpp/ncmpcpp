@@ -43,7 +43,7 @@ Playlist *myPlaylist;
 namespace {
 
 std::string songToString(const MPD::Song &s);
-bool playlistEntryMatcher(const boost::regex &rx, const MPD::Song &s);
+bool playlistEntryMatcher(const Regex::Regex &rx, const MPD::Song &s);
 
 }
 
@@ -167,8 +167,8 @@ bool Playlist::allowsSearching()
 
 void Playlist::setSearchConstraint(const std::string &constraint)
 {
-	m_search_predicate = RegexFilter<MPD::Song>(
-		boost::regex(constraint, Config.regex_type), playlistEntryMatcher
+	m_search_predicate = Regex::Filter<MPD::Song>(
+		Regex::make(constraint, Config.regex_type), playlistEntryMatcher
 	);
 }
 
@@ -325,9 +325,9 @@ std::string songToString(const MPD::Song &s)
 	return result;
 }
 
-bool playlistEntryMatcher(const boost::regex &rx, const MPD::Song &s)
+bool playlistEntryMatcher(const Regex::Regex &rx, const MPD::Song &s)
 {
-	return boost::regex_search(songToString(s), rx);
+	return Regex::search(songToString(s), rx);
 }
 
 }

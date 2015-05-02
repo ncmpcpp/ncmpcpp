@@ -21,18 +21,59 @@
 #ifndef NCMPCPP_REGEX_FILTER_H
 #define NCMPCPP_REGEX_FILTER_H
 
-#include <boost/regex.hpp>
+#include "config.h"
+
+#ifdef BOOST_REGEX_ICU
+# include <boost/regex/icu.hpp>
+#else
+# include <boost/regex.hpp>
+#endif // BOOST_REGEX_ICU
+
 #include <cassert>
 
+namespace Regex {
+
+typedef
+#ifdef BOOST_REGEX_ICU
+	boost::u32regex
+#else
+	boost::regex
+#endif // BOOST_REGEX_ICU
+Regex;
+
+template <typename StringT>
+inline Regex make(StringT &&s, boost::regex_constants::syntax_option_type flags)
+{
+	return
+#	ifdef BOOST_REGEX_ICU
+	boost::make_u32regex
+#	else
+	boost::regex
+#	endif // BOOST_REGEX_ICU
+	(std::forward<StringT>(s), flags);
+}
+
+template <typename StringT>
+inline bool search(StringT &&s, const Regex &rx)
+{
+	return
+#	ifdef BOOST_REGEX_ICU
+	boost::u32regex_search
+#	else
+	boost::regex_search
+#	endif // BOOST_REGEX_ICU
+	(std::forward<StringT>(s), rx);
+}
+
 template <typename T>
-struct RegexFilter
+struct Filter
 {
 	typedef NC::Menu<T> MenuT;
 	typedef typename NC::Menu<T>::Item Item;
-	typedef std::function<bool(const boost::regex &, const T &)> FilterFunction;
-	
-	RegexFilter() { }
-	RegexFilter(boost::regex rx, FilterFunction filter)
+	typedef std::function<bool(const Regex &, const T &)> FilterFunction;
+
+	Filter() { }
+	Filter(Regex rx, FilterFunction filter)
 	: m_rx(std::move(rx)), m_filter(std::move(filter)) { }
 
 	void clear()
@@ -51,18 +92,18 @@ struct RegexFilter
 	}
 
 private:
-	boost::regex m_rx;
+	Regex m_rx;
 	FilterFunction m_filter;
 };
 
-template <typename T> struct RegexItemFilter
+template <typename T> struct ItemFilter
 {
 	typedef NC::Menu<T> MenuT;
 	typedef typename NC::Menu<T>::Item Item;
-	typedef std::function<bool(const boost::regex &, const Item &)> FilterFunction;
+	typedef std::function<bool(const Regex &, const Item &)> FilterFunction;
 	
-	RegexItemFilter() { }
-	RegexItemFilter(boost::regex rx, FilterFunction filter)
+	ItemFilter() { }
+	ItemFilter(Regex rx, FilterFunction filter)
 	: m_rx(std::move(rx)), m_filter(std::move(filter)) { }
 	
 	void clear()
@@ -80,8 +121,10 @@ template <typename T> struct RegexItemFilter
 	}
 
 private:
-	boost::regex m_rx;
+	Regex m_rx;
 	FilterFunction m_filter;
 };
+
+}
 
 #endif // NCMPCPP_REGEX_FILTER_H

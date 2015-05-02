@@ -148,9 +148,9 @@ private:
 	const int m_window_timeout;
 	const boost::posix_time::time_duration m_fetching_delay;
 
-	RegexFilter<PrimaryTag> m_tags_search_predicate;
-	RegexItemFilter<AlbumEntry> m_albums_search_predicate;
-	RegexFilter<MPD::Song> m_songs_search_predicate;
+	Regex::Filter<PrimaryTag> m_tags_search_predicate;
+	Regex::ItemFilter<AlbumEntry> m_albums_search_predicate;
+	Regex::Filter<MPD::Song> m_songs_search_predicate;
 
 };
 
