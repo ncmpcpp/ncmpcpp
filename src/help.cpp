@@ -240,7 +240,7 @@ void write_bindings(NC::Scrollpad &w)
 	key(w, Type::ToggleConsume, "Toggle consume mode");
 	key(w, Type::ToggleReplayGainMode, "Toggle replay gain mode");
 	key(w, Type::ToggleBitrateVisibility, "Toggle bitrate visibility");
-	key(w, Type::Shuffle, "Shuffle playlist");
+	key(w, Type::Shuffle, "Shuffle selected range in playlist");
 	key(w, Type::ToggleCrossfade, "Toggle crossfade mode");
 	key(w, Type::SetCrossfade, "Set crossfade");
 	key(w, Type::SetVolume, "Set volume");

@@ -297,6 +297,13 @@ void Connection::Shuffle()
 	checkErrors();
 }
 
+void Connection::ShuffleRange(unsigned start, unsigned end)
+{
+	prechecksNoCommandsList();
+	mpd_run_shuffle_range(m_connection.get(), start, end);
+	checkErrors();
+}
+
 void Connection::ClearMainPlaylist()
 {
 	prechecksNoCommandsList();

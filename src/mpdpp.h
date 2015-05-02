@@ -498,6 +498,7 @@ struct Connection
 	void Swap(unsigned, unsigned);
 	void Seek(unsigned int pos, unsigned int where);
 	void Shuffle();
+	void ShuffleRange(unsigned start, unsigned end);
 	void ClearMainPlaylist();
 	
 	SongIterator GetPlaylistChanges(unsigned);

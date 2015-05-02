@@ -1184,7 +1184,10 @@ void ToggleRepeat::run()
 
 void Shuffle::run()
 {
-	Mpd.Shuffle();
+	auto begin = myPlaylist->main().begin(), end = myPlaylist->main().end();
+	auto range = getSelectedRange(begin, end);
+	Mpd.ShuffleRange(range.first-begin, range.second-begin);
+	Statusbar::print("Range shuffled");
 }
 
 void ToggleRandom::run()

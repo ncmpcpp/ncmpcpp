@@ -18,6 +18,7 @@ ncmpcpp-0.7 (????-??-??)
 * Searching with regular expressions are now enabled by default.
 * Support for the Perl regular expression syntax was added.
 * BOOST_LIB_SUFFIX configure variable is now empty by default.
+* Shuffle function now shuffles only selected range if selection in playlist is active.
 
 ncmpcpp-0.6.3 (2015-03-02)
 
