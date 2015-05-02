@@ -432,9 +432,9 @@
 #
 #display_remaining_time = no
 #
-## Available values: none, basic, extended.
+## Available values: none, basic, extended, perl.
 ##
-#regular_expressions = none
+#regular_expressions = basic
 #
 ##
 ## Note: If below is enabled, ncmpcpp will ignore leading

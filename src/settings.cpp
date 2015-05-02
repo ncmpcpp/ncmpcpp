@@ -578,10 +578,12 @@ bool Configuration::read(const std::vector<std::string> &config_paths)
 			regex_type = boost::regex::basic;
 		else if (v == "extended")
 			regex_type = boost::regex::extended;
+		else if (v == "perl")
+			regex_type = boost::regex::perl;
 		else
 			throw std::runtime_error("invalid argument: " + v);
 		regex_type |= boost::regex::icase;
-	}, defaults_to(regex_type, boost::regex::literal | boost::regex::icase)
+	}, defaults_to(regex_type, boost::regex::basic | boost::regex::icase)
 	));
 	p.add("ignore_leading_the", yes_no(
 		ignore_leading_the, false
