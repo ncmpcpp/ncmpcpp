@@ -70,7 +70,7 @@ SelectedItemsAdder::SelectedItemsAdder()
 		MainStartY+(MainHeight-m_position_selector_height)/2,
 		m_position_selector_width,
 		m_position_selector_height,
-		"Scroll?",
+		"Where?",
 		Config.main_color,
 		Config.window_border
 	);

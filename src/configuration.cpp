@@ -78,6 +78,7 @@ bool configure(int argc, char **argv)
 		("host,h", po::value<std::string>()->default_value("localhost"), "connect to server at host")
 		("port,p", po::value<int>()->default_value(6600), "connect to server at port")
 		("config,c", po::value<std::vector<std::string>>(&config_paths)->default_value(default_config_paths, join<std::string>(default_config_paths, " AND ")), "specify configuration file(s)")
+		("ignore-config-errors", po::value<bool>()->default_value(false), "ignore unknown and invalid options in configuration files")
 		("bindings,b", po::value<std::string>(&bindings_path)->default_value("~/.ncmpcpp/bindings"), "specify bindings file")
 		("screen,s", po::value<std::string>(), "specify initial screen")
 		("slave-screen,S", po::value<std::string>(), "specify initial slave screen")
@@ -150,7 +151,7 @@ bool configure(int argc, char **argv)
 
 		// read configuration
 		std::for_each(config_paths.begin(), config_paths.end(), expand_home);
-		if (Config.read(config_paths) == false)
+		if (Config.read(config_paths, vm["ignore-config-errors"].as<bool>()) == false)
 			exit(1);
 
 		// if bindings file was not specified, use the one from main directory.

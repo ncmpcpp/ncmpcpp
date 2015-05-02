@@ -20,6 +20,13 @@ ncmpcpp-0.7 (????-??-??)
 * BOOST_LIB_SUFFIX configure variable is now empty by default.
 * Shuffle function now shuffles only selected range if selection in playlist is active.
 
+ncmpcpp-0.6.4 (2015-05-02)
+
+* Fix title of a pop-up which shows during adding selected items to the current playlist.
+* Correctly deal with leading separator while parsing filenames in tag editor.
+* Fix initial incorrect window size that was occuring in some cases.
+* Unknown and invalid configuration options can now be ignored using command line option 'ignore-config-errors'.
+
 ncmpcpp-0.6.3 (2015-03-02)
 
 * Fix floating point exception when adding a specific number of random items.

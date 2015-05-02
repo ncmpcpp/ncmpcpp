@@ -103,6 +103,13 @@ int main(int argc, char **argv)
 	cerr_buffer = std::cerr.rdbuf();
 	std::cerr.rdbuf(errorlog.rdbuf());
 	
+#	ifndef WIN32
+	signal(SIGPIPE, sighandler);
+	signal(SIGWINCH, sighandler);
+	// ignore Ctrl-C
+	sigignore(SIGINT);
+#	endif // !WIN32
+
 	NC::initScreen(Config.colors_enabled);
 	
 	Actions::OriginalStatusbarVisibility = Config.statusbar_visibility;
@@ -151,12 +158,6 @@ int main(int argc, char **argv)
 	if (Config.mouse_support)
 		mousemask(ALL_MOUSE_EVENTS, 0);
 	
-	signal(SIGWINCH, sighandler);
-	// we get it after connection with mpd is broken.
-	// just ignore it and wait for the connection to
-	// be reestablished.
-	sigignore(SIGPIPE);
-
 	while (!Actions::ExitMainLoop)
 	{
 		try

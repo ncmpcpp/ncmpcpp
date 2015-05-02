@@ -53,7 +53,7 @@ struct Configuration
 	: playlist_disable_highlight_delay(0), visualizer_sync_interval(0)
 	{ }
 
-	bool read(const std::vector<std::string> &config_paths);
+	bool read(const std::vector<std::string> &config_paths, bool ignore_errors);
 
 	std::string ncmpcpp_directory;
 	std::string lyrics_directory;
