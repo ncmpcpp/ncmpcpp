@@ -111,6 +111,13 @@ int main(int argc, char **argv)
 	cerr_buffer = std::cerr.rdbuf();
 	std::cerr.rdbuf(errorlog.rdbuf());
 	
+#	ifndef WIN32
+	signal(SIGPIPE, sighandler);
+	signal(SIGWINCH, sighandler);
+	// ignore Ctrl-C
+	sigignore(SIGINT);
+#	endif // !WIN32
+
 	NC::initScreen("ncmpcpp ver. " VERSION, Config.colors_enabled);
 	
 	Actions::OriginalStatusbarVisibility = Config.statusbar_visibility;
@@ -145,13 +152,6 @@ int main(int argc, char **argv)
 	mouseinterval(0);
 	if (Config.mouse_support)
 		mousemask(ALL_MOUSE_EVENTS, 0);
-	
-#	ifndef WIN32
-	signal(SIGPIPE, sighandler);
-	signal(SIGWINCH, sighandler);
-	// ignore Ctrl-C
-	sigignore(SIGINT);
-#	endif // !WIN32
 	
 	while (!Actions::ExitMainLoop)
 	{
