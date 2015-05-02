@@ -1,4 +1,4 @@
-ncmpcpp-0.6.4 (????-??-??)
+ncmpcpp-0.6.4 (2015-05-02)
 
 * Fix title of a pop-up which shows during adding selected items to the current playlist.
 * Correctly deal with leading separator while parsing filenames in tag editor.
