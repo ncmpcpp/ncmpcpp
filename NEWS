@@ -17,6 +17,7 @@ ncmpcpp-0.7 (????-??-??)
 * Case insensitive searching is now Unicode aware as long as boost was compiled with ICU support.
 * Searching with regular expressions are now enabled by default.
 * Support for the Perl regular expression syntax was added.
+* BOOST_LIB_SUFFIX configure variable is now empty by default.
 
 ncmpcpp-0.6.3 (2015-03-02)
 

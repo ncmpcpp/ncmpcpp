@@ -95,8 +95,8 @@ AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[struct A { virtual void foo() { } }; struct
 dnl =============================
 dnl = setting boost environment =
 dnl =============================
-AS_IF([test -z "${BOOST_LIB_SUFFIX+x}"], [BOOST_LIB_SUFFIX=-mt])
-AC_ARG_VAR([BOOST_LIB_SUFFIX], [Boost library name suffix [default=-mt]])
+AS_IF([test -z "${BOOST_LIB_SUFFIX+x}"], [BOOST_LIB_SUFFIX=])
+AC_ARG_VAR([BOOST_LIB_SUFFIX], [Boost library name suffix [default=]])
 
 dnl ======================================
 dnl = checking for various boost headers =
