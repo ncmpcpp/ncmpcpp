@@ -35,7 +35,7 @@
 
 #include "utility/option_parser.h"
 
-bool option_parser::run(std::istream &is)
+bool option_parser::run(std::istream &is, bool ignore_errors)
 {
 	// quoted value. leftmost and rightmost quotation marks are the delimiters.
 	boost::regex quoted("(\\w+)\\h*=\\h*\"(.*)\"[^\"]*");
@@ -56,13 +56,15 @@ bool option_parser::run(std::istream &is)
 					it->second.parse(match[2]);
 				} catch (std::exception &e) {
 					std::cerr << "Error while processing option \"" << option << "\": " << e.what() << "\n";
-					return false;
+					if (!ignore_errors)
+						return false;
 				}
 			}
 			else
 			{
 				std::cerr << "Unknown option: " << option << "\n";
-				return false;
+				if (!ignore_errors)
+					return false;
 			}
 		}
 	}
@@ -74,7 +76,8 @@ bool option_parser::run(std::istream &is)
 				p.second.run_default();
 			} catch (std::exception &e) {
 				std::cerr << "Error while finalizing option \"" << p.first << "\": " << e.what() << "\n";
-				return false;
+				if (ignore_errors)
+					return false;
 			}
 		}
 	}

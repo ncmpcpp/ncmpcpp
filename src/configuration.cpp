@@ -54,6 +54,7 @@ bool configure(int argc, char **argv)
 		("host,h", po::value<std::string>()->default_value("localhost"), "connect to server at host")
 		("port,p", po::value<int>()->default_value(6600), "connect to server at port")
 		("config,c", po::value<std::string>(&config_path)->default_value("~/.ncmpcpp/config"), "specify configuration file")
+		("ignore-config-errors", po::value<bool>()->default_value(false), "ignore unknown and invalid options in configuration file")
 		("bindings,b", po::value<std::string>(&bindings_path)->default_value("~/.ncmpcpp/bindings"), "specify bindings file")
 		("screen,s", po::value<std::string>(), "specify initial screen")
 		("help,?", "show help message")
@@ -130,7 +131,7 @@ bool configure(int argc, char **argv)
 
 		// read configuration
 		expand_home(config_path);
-		if (Config.read(config_path) == false)
+		if (Config.read(config_path, vm["ignore-config-errors"].as<bool>()) == false)
 			exit(1);
 
 		// if bindings file was not specified, use the one from main directory.

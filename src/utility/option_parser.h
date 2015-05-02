@@ -129,7 +129,7 @@ struct option_parser
 		m_parsers[option] = std::forward<WorkerT>(w);
 	}
 
-	bool run(std::istream &is);
+	bool run(std::istream &is, bool ignore_errors);
 
 private:
 	std::unordered_map<std::string, worker> m_parsers;

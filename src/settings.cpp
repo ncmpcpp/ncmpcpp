@@ -179,7 +179,7 @@ option_parser::worker buffer(NC::Buffer &arg, ValueT &&value, TransformT &&map)
 
 }
 
-bool Configuration::read(const std::string &config_path)
+bool Configuration::read(const std::string &config_path, bool ignore_errors)
 {
 	std::string mpd_host;
 	unsigned mpd_port;
@@ -640,5 +640,5 @@ bool Configuration::read(const std::string &config_path)
 	));
 
 	std::ifstream f(config_path);
-	return p.run(f);
+	return p.run(f, ignore_errors);
 }
