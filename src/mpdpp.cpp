@@ -24,7 +24,6 @@
 #include <map>
 
 #include "charset.h"
-#include "error.h"
 #include "mpdpp.h"
 
 MPD::Connection Mpd;

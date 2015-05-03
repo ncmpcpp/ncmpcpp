@@ -28,7 +28,6 @@
 #include "browser.h"
 #include "charset.h"
 #include "display.h"
-#include "error.h"
 #include "global.h"
 #include "helpers.h"
 #include "playlist.h"

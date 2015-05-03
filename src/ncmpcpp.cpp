@@ -37,7 +37,6 @@
 #include "charset.h"
 #include "configuration.h"
 #include "global.h"
-#include "error.h"
 #include "helpers.h"
 #include "lyrics.h"
 #include "outputs.h"
