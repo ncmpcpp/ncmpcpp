@@ -152,10 +152,12 @@ int main(int argc, char **argv)
 	auto connect_attempt = boost::posix_time::from_time_t(0);
 	auto past = boost::posix_time::from_time_t(0);
 	
-	/// enable mouse
+	// enable mouse
+#	if NCURSES_SEQUENCE_ESCAPING
 	mouseinterval(0);
+#	endif // NCURSES_SEQUENCE_ESCAPING
 	if (Config.mouse_support)
-		mousemask(ALL_MOUSE_EVENTS, 0);
+		mousemask(ALL_MOUSE_EVENTS, nullptr);
 	
 	while (!Actions::ExitMainLoop)
 	{

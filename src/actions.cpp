@@ -304,11 +304,11 @@ bool MouseEvent::canBeRun() const
 void MouseEvent::run()
 {
 	using Global::VolumeState;
-	
-	m_old_mouse_event = m_mouse_event;
-	getmouse(&m_mouse_event);
+	using Global::wFooter;
 
-#	if NCURSES_MOUSE_VERSION == 1
+	m_old_mouse_event = m_mouse_event;
+	m_mouse_event = wFooter->getMouseEvent();
+#	if NCURSES_SEQUENCE_ESCAPING && NCURSES_MOUSE_VERSION == 1
 	// workaround shitty ncurses behavior introduced in >=5.8, when we mysteriously get
 	// a few times after ncmpcpp startup 2^27 code instead of BUTTON{1,3}_RELEASED. since that
 	// 2^27 thing shows constantly instead of BUTTON2_PRESSED, it was redefined to be recognized
@@ -318,7 +318,9 @@ void MouseEvent::run()
 	// is about to occur and we need to prevent that.
 	if (m_old_mouse_event.bstate & (BUTTON1_PRESSED | BUTTON3_PRESSED) && m_mouse_event.bstate & BUTTON5_PRESSED)
 		return;
-#	endif // NCURSES_MOUSE_VERSION == 1
+#	endif // NCURSES_SEQUENCE_ESCAPING && NCURSES_MOUSE_VERSION == 1
+
+	//Statusbar::printf("(%1%, %2%, %3%)", m_mouse_event.bstate, m_mouse_event.x, m_mouse_event.y);
 
 	if (m_mouse_event.bstate & BUTTON1_PRESSED
 	&&  m_mouse_event.y == LINES-(Config.statusbar_visibility ? 2 : 1)

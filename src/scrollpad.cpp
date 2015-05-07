@@ -131,7 +131,9 @@ void Scrollpad::clear()
 	m_window = newpad(m_height, m_width);
 	setTimeout(m_window_timeout);
 	setColor(m_color);
+#	if NCURSES_SEQUENCE_ESCAPING
 	keypad(m_window, 1);
+#	endif // NCURSES_SEQUENCE_ESCAPING
 }
 
 const std::string &Scrollpad::buffer()

@@ -362,6 +362,7 @@ Window::Window(size_t startx,
 		m_border(std::move(border)),
 		m_prompt_hook(0),
 		m_title(std::move(title)),
+		m_escape_terminal_sequences(true),
 		m_bold_counter(0),
 		m_underline_counter(0),
 		m_reverse_counter(0),
@@ -389,7 +390,9 @@ Window::Window(size_t startx,
 	m_window = newpad(m_height, m_width);
 	
 	setColor(m_color);
+#	if NCURSES_SEQUENCE_ESCAPING
 	keypad(m_window, 1);
+#	endif // NCURSES_SEQUENCE_ESCAPING
 }
 
 Window::Window(const Window &rhs)
@@ -407,6 +410,7 @@ Window::Window(const Window &rhs)
 , m_color_stack(rhs.m_color_stack)
 , m_input_queue(rhs.m_input_queue)
 , m_fds(rhs.m_fds)
+, m_escape_terminal_sequences(rhs.m_escape_terminal_sequences)
 , m_bold_counter(rhs.m_bold_counter)
 , m_underline_counter(rhs.m_underline_counter)
 , m_reverse_counter(rhs.m_reverse_counter)
@@ -429,6 +433,7 @@ Window::Window(Window &&rhs)
 , m_color_stack(std::move(rhs.m_color_stack))
 , m_input_queue(std::move(rhs.m_input_queue))
 , m_fds(std::move(rhs.m_fds))
+, m_escape_terminal_sequences(rhs.m_escape_terminal_sequences)
 , m_bold_counter(rhs.m_bold_counter)
 , m_underline_counter(rhs.m_underline_counter)
 , m_reverse_counter(rhs.m_reverse_counter)
@@ -453,6 +458,7 @@ Window &Window::operator=(Window rhs)
 	std::swap(m_color_stack, rhs.m_color_stack);
 	std::swap(m_input_queue, rhs.m_input_queue);
 	std::swap(m_fds, rhs.m_fds);
+	std::swap(m_escape_terminal_sequences, rhs.m_escape_terminal_sequences);
 	std::swap(m_bold_counter, rhs.m_bold_counter);
 	std::swap(m_underline_counter, rhs.m_underline_counter);
 	std::swap(m_reverse_counter, rhs.m_reverse_counter);
@@ -529,7 +535,9 @@ void Window::recreate(size_t width, size_t height)
 	m_window = newpad(height, width);
 	setTimeout(m_window_timeout);
 	setColor(m_color);
+#	if NCURSES_SEQUENCE_ESCAPING
 	keypad(m_window, 1);
+#	endif // NCURSES_SEQUENCE_ESCAPING
 }
 
 void Window::moveTo(size_t new_x, size_t new_y)
@@ -665,6 +673,198 @@ bool Window::FDCallbacksListEmpty() const
 	return m_fds.empty();
 }
 
+int Window::getInputChar()
+{
+#	if NCURSES_SEQUENCE_ESCAPING
+	return wgetch(m_window);
+#	else
+	int key = wgetch(m_window);
+	if (!m_escape_terminal_sequences || key != KEY_ESCAPE)
+		return key;
+	key = wgetch(m_window);
+	switch (key)
+	{
+		case '\t': // tty
+			return KEY_SHIFT_TAB;
+		case 'O': // F1 to F4 in xterm
+			key = wgetch(m_window);
+			switch (key)
+			{
+				case 'P':
+					key = KEY_F1;
+					break;
+				case 'Q':
+					key = KEY_F2;
+					break;
+				case 'R':
+					key = KEY_F3;
+					break;
+				case 'S':
+					key = KEY_F4;
+					break;
+				default:
+					key = ERR;
+					break;
+			}
+			return key;
+		case '[':
+			key = wgetch(m_window);
+			switch (key)
+			{
+				case 'A':
+					return KEY_UP;
+				case 'B':
+					return KEY_DOWN;
+				case 'C':
+					return KEY_RIGHT;
+				case 'D':
+					return KEY_LEFT;
+				case 'F': // xterm
+					return KEY_END;
+				case 'H': // xterm
+					return KEY_HOME;
+				case 'M':
+					key = wgetch(m_window);
+					m_mouse_event.x = wgetch(m_window);
+					m_mouse_event.y = wgetch(m_window);
+					switch (key & ~24)
+					{
+						case ' ':
+							m_mouse_event.bstate = BUTTON1_PRESSED;
+							break;
+						case '!':
+							m_mouse_event.bstate = BUTTON2_PRESSED;
+							break;
+						case '"':
+							m_mouse_event.bstate = BUTTON3_PRESSED;
+							break;
+						case '`':
+							m_mouse_event.bstate = BUTTON4_PRESSED;
+							break;
+						case 'a':
+							m_mouse_event.bstate = BUTTON5_PRESSED;
+							break;
+						default:
+							return ERR;
+					}
+					if (key & 8)
+						m_mouse_event.bstate |= BUTTON_ALT;
+					if (key & 16)
+						m_mouse_event.bstate |= BUTTON_CTRL;
+					m_mouse_event.x -= 33;
+					if (m_mouse_event.x < 0 || m_mouse_event.x >= COLS)
+						return ERR;
+					m_mouse_event.y -= 33;
+					if (m_mouse_event.y < 0 || m_mouse_event.y >= LINES)
+						return ERR;
+					return KEY_MOUSE;
+				case 'Z':
+					return KEY_SHIFT_TAB;
+				case '[': // F1 to F5 in tty
+					key = wgetch(m_window);
+					switch (key)
+					{
+						case 'A':
+							key = KEY_F1;
+							break;
+						case 'B':
+							key = KEY_F2;
+							break;
+						case 'C':
+							key = KEY_F3;
+							break;
+						case 'D':
+							key = KEY_F4;
+							break;
+						case 'E':
+							key = KEY_F5;
+							break;
+						default:
+							key = ERR;
+							break;
+					}
+					return key;
+				case '1': // HOME in tty, F1 to F8
+					key = wgetch(m_window);
+					switch (key)
+					{
+						case '~':
+							return KEY_HOME;
+						case '1':
+							key = KEY_F1;
+							break;
+						case '2':
+							key = KEY_F2;
+							break;
+						case '3':
+							key = KEY_F3;
+							break;
+						case '4':
+							key = KEY_F4;
+							break;
+						case '5':
+							key = KEY_F5;
+							break;
+						case '7': // not a typo
+							key = KEY_F6;
+							break;
+						case '8':
+							key = KEY_F7;
+							break;
+						case '9':
+							key = KEY_F8;
+							break;
+						default:
+							key = ERR;
+							break;
+					}
+					return wgetch(m_window) == '~' ? key : ERR;
+				case '2': // INSERT, F9 to F12
+					key = wgetch(m_window);
+					switch (key)
+					{
+						case '~':
+							return KEY_IC;
+						case '0':
+							key = KEY_F9;
+							break;
+						case '1':
+							key = KEY_F10;
+							break;
+						case '3': // not a typo
+							key = KEY_F11;
+							break;
+						case '4':
+							key = KEY_F12;
+							break;
+						default:
+							key = ERR;
+							break;
+					}
+					return wgetch(m_window) == '~' ? key : ERR;
+				case '3':
+					return wgetch(m_window) == '~' ? KEY_DC : ERR;
+				case '4': // tty
+					return wgetch(m_window) == '~' ? KEY_END : ERR;
+				case '5':
+					return wgetch(m_window) == '~' ? KEY_PPAGE : ERR;
+				case '6':
+					return wgetch(m_window) == '~' ? KEY_NPAGE : ERR;
+				case '7':
+					return wgetch(m_window) == '~' ? KEY_HOME : ERR;
+				case '8':
+					return wgetch(m_window) == '~' ? KEY_END : ERR;
+				default:
+					return ERR;
+			}
+			break;
+		default:
+			m_input_queue.push(key);
+			return KEY_ESCAPE;
+	}
+#	endif // NCURSES_SEQUENCE_ESCAPING
+}
+
 int Window::readKey()
 {
 	int result;
@@ -692,7 +892,8 @@ int Window::readKey()
 	
 	if (select(fd_max+1, &fdset, 0, 0, m_window_timeout < 0 ? 0 : &timeout) > 0)
 	{
-		result = FD_ISSET(STDIN_FILENO, &fdset) ? wgetch(m_window) : ERR;
+		result = FD_ISSET(STDIN_FILENO, &fdset) ? getInputChar() : ERR;
+
 		for (FDCallbacks::const_iterator it = m_fds.begin(); it != m_fds.end(); ++it)
 			if (FD_ISSET(it->first, &fdset))
 				it->second();
@@ -709,6 +910,8 @@ void Window::pushChar(int ch)
 
 std::string Window::prompt(const std::string &base, size_t width, bool encrypted)
 {
+	std::string result;
+
 	rl::aborted = false;
 	rl::w = this;
 	getyx(m_window, rl::start_y, rl::start_x);
@@ -716,15 +919,19 @@ std::string Window::prompt(const std::string &base, size_t width, bool encrypted
 	rl::encrypted = encrypted;
 	rl::base = base.c_str();
 
-	mmask_t oldmask;
-	std::string result;
-
 	curs_set(1);
+#	if NCURSES_SEQUENCE_ESCAPING
+	mmask_t oldmask;
 	keypad(m_window, 0);
 	mousemask(0, &oldmask);
+#	endif // NCURSES_SEQUENCE_ESCAPING
+	m_escape_terminal_sequences = false;
 	char *input = readline(nullptr);
+	m_escape_terminal_sequences = true;
+#	if NCURSES_SEQUENCE_ESCAPING
 	mousemask(oldmask, nullptr);
 	keypad(m_window, 1);
+#	endif // NCURSES_SEQUENCE_ESCAPING
 	curs_set(0);
 	if (input != nullptr)
 	{
@@ -827,6 +1034,14 @@ const Border &Window::getBorder() const
 int Window::getTimeout() const
 {
 	return m_window_timeout;
+}
+
+const MEVENT &Window::getMouseEvent()
+{
+#	if NCURSES_SEQUENCE_ESCAPING
+	getmouse(&m_mouse_event);
+#	endif // NCURSES_SEQUENCE_ESCAPING
+	return m_mouse_event;
 }
 
 void Window::scroll(Scroll where)

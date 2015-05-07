@@ -36,66 +36,75 @@
 #include <queue>
 
 // define some Ctrl-? keys
-#define KEY_CTRL_A 1
-#define KEY_CTRL_B 2
-#define KEY_CTRL_C 3
-#define KEY_CTRL_D 4
-#define KEY_CTRL_E 5
-#define KEY_CTRL_F 6
-#define KEY_CTRL_G 7
-#define KEY_CTRL_H 8
-#define KEY_CTRL_I 9
-#define KEY_CTRL_J 10
-#define KEY_CTRL_K 11
-#define KEY_CTRL_L 12
-#define KEY_CTRL_M 13
-#define KEY_CTRL_N 14
-#define KEY_CTRL_O 15
-#define KEY_CTRL_P 16
-#define KEY_CTRL_Q 17
-#define KEY_CTRL_R 18
-#define KEY_CTRL_S 19
-#define KEY_CTRL_T 20
-#define KEY_CTRL_U 21
-#define KEY_CTRL_V 22
-#define KEY_CTRL_W 23
-#define KEY_CTRL_X 24
-#define KEY_CTRL_Y 25
-#define KEY_CTRL_Z 26
+const int KEY_CTRL_A = 1;
+const int KEY_CTRL_B = 2;
+const int KEY_CTRL_C = 3;
+const int KEY_CTRL_D = 4;
+const int KEY_CTRL_E = 5;
+const int KEY_CTRL_F = 6;
+const int KEY_CTRL_G = 7;
+const int KEY_CTRL_H = 8;
+const int KEY_CTRL_I = 9;
+const int KEY_CTRL_J = 10;
+const int KEY_CTRL_K = 11;
+const int KEY_CTRL_L = 12;
+const int KEY_CTRL_M = 13;
+const int KEY_CTRL_N = 14;
+const int KEY_CTRL_O = 15;
+const int KEY_CTRL_P = 16;
+const int KEY_CTRL_Q = 17;
+const int KEY_CTRL_R = 18;
+const int KEY_CTRL_S = 19;
+const int KEY_CTRL_T = 20;
+const int KEY_CTRL_U = 21;
+const int KEY_CTRL_V = 22;
+const int KEY_CTRL_W = 23;
+const int KEY_CTRL_X = 24;
+const int KEY_CTRL_Y = 25;
+const int KEY_CTRL_Z = 26;
+
+inline int KEY_ALT(int key)
+{
+	return key << 8;
+}
 
 // define F? keys
-#define KEY_F1 265
-#define KEY_F2 266
-#define KEY_F3 267
-#define KEY_F4 268
-#define KEY_F5 269
-#define KEY_F6 270
-#define KEY_F7 271
-#define KEY_F8 272
-#define KEY_F9 273
-#define KEY_F10 274
-#define KEY_F11 275
-#define KEY_F12 276
+const int KEY_F1 = 265;
+const int KEY_F2 = 266;
+const int KEY_F3 = 267;
+const int KEY_F4 = 268;
+const int KEY_F5 = 269;
+const int KEY_F6 = 270;
+const int KEY_F7 = 271;
+const int KEY_F8 = 272;
+const int KEY_F9 = 273;
+const int KEY_F10 = 274;
+const int KEY_F11 = 275;
+const int KEY_F12 = 276;
 
 // other handy keys
-#define KEY_ESCAPE 27
-#define KEY_SHIFT_TAB 353
-#define KEY_SPACE 32
-#define KEY_TAB 9
+const int KEY_ESCAPE = 27;
+const int KEY_SHIFT_TAB = 353;
+const int KEY_SPACE = 32;
+const int KEY_TAB = 9;
 
 // define alternative KEY_BACKSPACE (used in some terminal emulators)
-#define KEY_BACKSPACE_2 127
+const int KEY_BACKSPACE_2 = 127;
 
 // KEY_ENTER is 343, which doesn't make any sense. This makes it useful.
 #undef KEY_ENTER
-#define KEY_ENTER 13
+const int KEY_ENTER = 13;
 
-#if NCURSES_MOUSE_VERSION == 1
+#if NCURSES_SEQUENCE_ESCAPING
+# if NCURSES_MOUSE_VERSION == 1
 // NOTICE: define BUTTON5_PRESSED to be BUTTON2_PRESSED with additional mask
 // (I noticed that it sometimes returns 134217728 (2^27) instead of expected
 // mask, so the modified define does it right.
-# define BUTTON5_PRESSED (BUTTON2_PRESSED | (1U << 27))
-#endif // NCURSES_MOUSE_VERSION == 1
+#  define BUTTON5_PRESSED (BUTTON2_PRESSED | (1U << 27))
+# endif // NCURSES_MOUSE_VERSION == 1
+#else
+# define BUTTON5_PRESSED (1U << 27)
+#endif // NCURSES_SEQUENCE_ESCAPING
 
 // undefine macros with colliding names
 #undef border
@@ -295,6 +304,9 @@ struct Window
 	/// @return current window's timeout
 	int getTimeout() const;
 	
+	/// @return current mouse event if readKey() returned KEY_MOUSE
+	const MEVENT &getMouseEvent();
+
 	/// Reads the string from standard input using readline library.
 	/// @param base base string that has to be edited
 	/// @param length max length of the string, unlimited by default
@@ -470,6 +482,8 @@ protected:
 	Border m_border;
 	
 private:
+	int getInputChar();
+
 	/// Sets state of bold attribute (internal use only)
 	/// @param bold_state state of bold attribute
 	///
@@ -512,6 +526,9 @@ private:
 	typedef std::vector< std::pair<int, void (*)()> > FDCallbacks;
 	FDCallbacks m_fds;
 	
+	MEVENT m_mouse_event;
+	bool m_escape_terminal_sequences;
+
 	/// counters for format flags
 	int m_bold_counter;
 	int m_underline_counter;
