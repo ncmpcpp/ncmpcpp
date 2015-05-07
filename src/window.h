@@ -95,16 +95,16 @@ const int KEY_BACKSPACE_2 = 127;
 #undef KEY_ENTER
 const int KEY_ENTER = 13;
 
-#if NCURSES_SEQUENCE_ESCAPING
-# if NCURSES_MOUSE_VERSION == 1
+#if NCURSES_MOUSE_VERSION == 1
+# if NCURSES_SEQUENCE_ESCAPING
 // NOTICE: define BUTTON5_PRESSED to be BUTTON2_PRESSED with additional mask
 // (I noticed that it sometimes returns 134217728 (2^27) instead of expected
 // mask, so the modified define does it right.
 #  define BUTTON5_PRESSED (BUTTON2_PRESSED | (1U << 27))
-# endif // NCURSES_MOUSE_VERSION == 1
-#else
-# define BUTTON5_PRESSED (1U << 27)
-#endif // NCURSES_SEQUENCE_ESCAPING
+# else
+#  define BUTTON5_PRESSED (1U << 27)
+# endif // NCURSES_SEQUENCE_ESCAPING
+#endif // NCURSES_MOUSE_VERSION == 1
 
 // undefine macros with colliding names
 #undef border
