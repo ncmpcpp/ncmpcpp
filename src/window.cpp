@@ -35,6 +35,21 @@
 
 namespace {
 
+struct ScopedWindowTimeout
+{
+	ScopedWindowTimeout(WINDOW *w, int init_timeout, int term_timeout)
+	: m_w(w), m_term_timeout(term_timeout) {
+		wtimeout(w, init_timeout);
+	}
+	~ScopedWindowTimeout() {
+		wtimeout(m_w, m_term_timeout);
+	}
+
+private:
+	WINDOW *m_w;
+	int m_term_timeout;
+};
+
 namespace rl {
 
 bool aborted;
@@ -678,6 +693,7 @@ int Window::getInputChar()
 #	if NCURSES_SEQUENCE_ESCAPING
 	return wgetch(m_window);
 #	else
+	ScopedWindowTimeout swt(m_window, 0, m_window_timeout);
 	int key = wgetch(m_window);
 	if (!m_escape_terminal_sequences || key != KEY_ESCAPE)
 		return key;
@@ -858,6 +874,8 @@ int Window::getInputChar()
 					return ERR;
 			}
 			break;
+		case ERR:
+			return KEY_ESCAPE;
 		default:
 			m_input_queue.push(key);
 			return KEY_ESCAPE;
