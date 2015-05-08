@@ -741,8 +741,8 @@ int Window::getInputChar()
 					return KEY_HOME;
 				case 'M':
 					key = wgetch(m_window);
-					m_mouse_event.x = wgetch(m_window);
-					m_mouse_event.y = wgetch(m_window);
+					m_mouse_event.x = (wgetch(m_window) - 33) & 0xff;
+					m_mouse_event.y = (wgetch(m_window) - 33) & 0xff;
 					switch (key & ~24)
 					{
 						case ' ':
@@ -767,10 +767,8 @@ int Window::getInputChar()
 						m_mouse_event.bstate |= BUTTON_ALT;
 					if (key & 16)
 						m_mouse_event.bstate |= BUTTON_CTRL;
-					m_mouse_event.x -= 33;
 					if (m_mouse_event.x < 0 || m_mouse_event.x >= COLS)
 						return ERR;
-					m_mouse_event.y -= 33;
 					if (m_mouse_event.y < 0 || m_mouse_event.y >= LINES)
 						return ERR;
 					return KEY_MOUSE;
