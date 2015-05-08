@@ -109,7 +109,7 @@ int main(int argc, char **argv)
 	sigignore(SIGINT);
 #	endif // !WIN32
 
-	NC::initScreen(Config.colors_enabled);
+	NC::initScreen(Config.colors_enabled, Config.mouse_support);
 	
 	Actions::OriginalStatusbarVisibility = Config.statusbar_visibility;
 
@@ -151,13 +151,6 @@ int main(int argc, char **argv)
 	Key input = Key::noOp;
 	auto connect_attempt = boost::posix_time::from_time_t(0);
 	auto past = boost::posix_time::from_time_t(0);
-	
-	// enable mouse
-#	if NCURSES_SEQUENCE_ESCAPING
-	mouseinterval(0);
-#	endif // NCURSES_SEQUENCE_ESCAPING
-	if (Config.mouse_support)
-		mousemask(ALL_MOUSE_EVENTS, nullptr);
 	
 	while (!Actions::ExitMainLoop)
 	{

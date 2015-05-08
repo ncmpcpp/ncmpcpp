@@ -1958,7 +1958,10 @@ void ToggleAddMode::run()
 void ToggleMouse::run()
 {
 	Config.mouse_support = !Config.mouse_support;
-	mousemask(Config.mouse_support ? ALL_MOUSE_EVENTS : 0, 0);
+	if (Config.mouse_support)
+		NC::Mouse::enable();
+	else
+		NC::Mouse::disable();
 	Statusbar::printf("Mouse support %1%",
 		Config.mouse_support ? "enabled" : "disabled"
 	);

@@ -215,9 +215,16 @@ enum class Format {
 /// This indicates how much the window has to be scrolled
 enum class Scroll { Up, Down, PageUp, PageDown, Home, End };
 
+namespace Mouse {
+
+void enable();
+void disable();
+
+}
+
 /// Initializes curses screen and sets some additional attributes
 /// @param enable_colors enables colors
-void initScreen(bool enable_colors);
+void initScreen(bool enable_colors, bool enable_mouse);
 
 /// Destroys the screen
 void destroyScreen();

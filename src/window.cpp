@@ -306,7 +306,51 @@ std::istream &operator>>(std::istream &is, Color &c)
 	return is;
 }
 
-void initScreen(bool enable_colors)
+namespace Mouse {
+
+namespace {
+
+bool mouseEnabled = false;
+
+}
+
+void enable()
+{
+	if (mouseEnabled)
+		return;
+#	if NCURSES_SEQUENCE_ESCAPING
+	mousemask(ALL_MOUSE_EVENTS, nullptr);
+#	else
+	// save old highlight mouse tracking
+	printf("\e[?1001s");
+	// enable mouse tracking
+	printf("\e[?1000h");
+	// try to enable extended (urxvt) mouse tracking
+	printf("\e[?1015h");
+#	endif // NCURSES_SEQUENCE_ESCAPING
+	mouseEnabled = true;
+}
+
+void disable()
+{
+	if (!mouseEnabled)
+		return;
+#	if NCURSES_SEQUENCE_ESCAPING
+	mousemask(0, nullptr);
+#	else
+	// disable extended (urxvt) mouse tracking
+	printf("\e[?1015l");
+	// disable mouse tracking
+	printf("\e[?1000l");
+	// restore old highlight mouse tracking
+	printf("\e[?1001r");
+#	endif // NCURSES_SEQUENCE_ESCAPING
+	mouseEnabled = false;
+}
+
+}
+
+void initScreen(bool enable_colors, bool enable_mouse)
 {
 	initscr();
 	if (has_colors() && enable_colors)
@@ -324,6 +368,13 @@ void initScreen(bool enable_colors)
 	nonl();
 	noecho();
 	curs_set(0);
+
+	// setup mouse
+#	if NCURSES_SEQUENCE_ESCAPING
+	mouseinterval(0);
+#	endif // NCURSES_SEQUENCE_ESCAPING
+	if (enable_mouse)
+		Mouse::enable();
 
 	// initialize readline (needed, otherwise we get segmentation
 	// fault on SIGWINCH). also, initialize first as doing this
@@ -355,6 +406,7 @@ void initScreen(bool enable_colors)
 
 void destroyScreen()
 {
+	Mouse::disable();
 	curs_set(1);
 	endwin();
 }
@@ -693,190 +745,210 @@ int Window::getInputChar()
 #	if NCURSES_SEQUENCE_ESCAPING
 	return wgetch(m_window);
 #	else
-	ScopedWindowTimeout swt(m_window, 0, m_window_timeout);
 	int key = wgetch(m_window);
 	if (!m_escape_terminal_sequences || key != KEY_ESCAPE)
 		return key;
+	auto define_mouse_event = [this](int type) {
+		switch (type & ~28)
+		{
+		case 32:
+			m_mouse_event.bstate = BUTTON1_PRESSED;
+			break;
+		case 33:
+			m_mouse_event.bstate = BUTTON2_PRESSED;
+			break;
+		case 34:
+			m_mouse_event.bstate = BUTTON3_PRESSED;
+			break;
+		case 96:
+			m_mouse_event.bstate = BUTTON4_PRESSED;
+			break;
+		case 97:
+			m_mouse_event.bstate = BUTTON5_PRESSED;
+			break;
+		default:
+			return ERR;
+		}
+		if (type & 4)
+			m_mouse_event.bstate |= BUTTON_SHIFT;
+		if (type & 8)
+			m_mouse_event.bstate |= BUTTON_ALT;
+		if (type & 16)
+			m_mouse_event.bstate |= BUTTON_CTRL;
+		if (m_mouse_event.x < 0 || m_mouse_event.x >= COLS)
+			return ERR;
+		if (m_mouse_event.y < 0 || m_mouse_event.y >= LINES)
+			return ERR;
+		return KEY_MOUSE;
+	};
+	auto parse_number = [this](int &result) {
+		int x;
+		while (true)
+		{
+			x = wgetch(m_window);
+			if (!isdigit(x))
+				return x;
+			result = result*10 + x - '0';
+		}
+	};
+	ScopedWindowTimeout swt(m_window, 0, m_window_timeout);
 	key = wgetch(m_window);
 	switch (key)
 	{
-		case '\t': // tty
+	case '\t': // tty
+		return KEY_SHIFT_TAB;
+	case 'O': // F1 to F4 in xterm
+		key = wgetch(m_window);
+		switch (key)
+		{
+		case 'P':
+			key = KEY_F1;
+			break;
+		case 'Q':
+			key = KEY_F2;
+			break;
+		case 'R':
+			key = KEY_F3;
+			break;
+		case 'S':
+			key = KEY_F4;
+			break;
+		default:
+			key = ERR;
+			break;
+		}
+		return key;
+	case '[':
+		key = wgetch(m_window);
+		switch (key)
+		{
+		case 'A':
+			return KEY_UP;
+		case 'B':
+			return KEY_DOWN;
+		case 'C':
+			return KEY_RIGHT;
+		case 'D':
+			return KEY_LEFT;
+		case 'F': // xterm
+			return KEY_END;
+		case 'H': // xterm
+			return KEY_HOME;
+		case 'M':
+		{
+			key = wgetch(m_window);
+			int raw_x = wgetch(m_window);
+			int raw_y = wgetch(m_window);
+			// support coordinates up to 255
+			m_mouse_event.x = (raw_x - 33) & 0xff;
+			m_mouse_event.y = (raw_y - 33) & 0xff;
+			return define_mouse_event(key);
+		}
+		case 'Z':
 			return KEY_SHIFT_TAB;
-		case 'O': // F1 to F4 in xterm
+		case '[': // F1 to F5 in tty
 			key = wgetch(m_window);
 			switch (key)
 			{
-				case 'P':
-					key = KEY_F1;
-					break;
-				case 'Q':
-					key = KEY_F2;
-					break;
-				case 'R':
-					key = KEY_F3;
-					break;
-				case 'S':
-					key = KEY_F4;
-					break;
-				default:
-					key = ERR;
-					break;
+			case 'A':
+				key = KEY_F1;
+				break;
+			case 'B':
+				key = KEY_F2;
+				break;
+			case 'C':
+				key = KEY_F3;
+				break;
+			case 'D':
+				key = KEY_F4;
+				break;
+			case 'E':
+				key = KEY_F5;
+				break;
+			default:
+				key = ERR;
+				break;
 			}
 			return key;
-		case '[':
-			key = wgetch(m_window);
-			switch (key)
+		case '1': case '2': case '3':
+		case '4': case '5': case '6':
+		case '7': case '8': case '9':
+		{
+			key -= '0';
+			int delim = parse_number(key);
+			switch (delim)
 			{
-				case 'A':
-					return KEY_UP;
-				case 'B':
-					return KEY_DOWN;
-				case 'C':
-					return KEY_RIGHT;
-				case 'D':
-					return KEY_LEFT;
-				case 'F': // xterm
-					return KEY_END;
-				case 'H': // xterm
+			case '~':
+				switch (key)
+				{
+				case 1: // tty
 					return KEY_HOME;
-				case 'M':
-					key = wgetch(m_window);
-					m_mouse_event.x = (wgetch(m_window) - 33) & 0xff;
-					m_mouse_event.y = (wgetch(m_window) - 33) & 0xff;
-					switch (key & ~24)
-					{
-						case ' ':
-							m_mouse_event.bstate = BUTTON1_PRESSED;
-							break;
-						case '!':
-							m_mouse_event.bstate = BUTTON2_PRESSED;
-							break;
-						case '"':
-							m_mouse_event.bstate = BUTTON3_PRESSED;
-							break;
-						case '`':
-							m_mouse_event.bstate = BUTTON4_PRESSED;
-							break;
-						case 'a':
-							m_mouse_event.bstate = BUTTON5_PRESSED;
-							break;
-						default:
-							return ERR;
-					}
-					if (key & 8)
-						m_mouse_event.bstate |= BUTTON_ALT;
-					if (key & 16)
-						m_mouse_event.bstate |= BUTTON_CTRL;
-					if (m_mouse_event.x < 0 || m_mouse_event.x >= COLS)
-						return ERR;
-					if (m_mouse_event.y < 0 || m_mouse_event.y >= LINES)
-						return ERR;
-					return KEY_MOUSE;
-				case 'Z':
-					return KEY_SHIFT_TAB;
-				case '[': // F1 to F5 in tty
-					key = wgetch(m_window);
-					switch (key)
-					{
-						case 'A':
-							key = KEY_F1;
-							break;
-						case 'B':
-							key = KEY_F2;
-							break;
-						case 'C':
-							key = KEY_F3;
-							break;
-						case 'D':
-							key = KEY_F4;
-							break;
-						case 'E':
-							key = KEY_F5;
-							break;
-						default:
-							key = ERR;
-							break;
-					}
-					return key;
-				case '1': // HOME in tty, F1 to F8
-					key = wgetch(m_window);
-					switch (key)
-					{
-						case '~':
-							return KEY_HOME;
-						case '1':
-							key = KEY_F1;
-							break;
-						case '2':
-							key = KEY_F2;
-							break;
-						case '3':
-							key = KEY_F3;
-							break;
-						case '4':
-							key = KEY_F4;
-							break;
-						case '5':
-							key = KEY_F5;
-							break;
-						case '7': // not a typo
-							key = KEY_F6;
-							break;
-						case '8':
-							key = KEY_F7;
-							break;
-						case '9':
-							key = KEY_F8;
-							break;
-						default:
-							key = ERR;
-							break;
-					}
-					return wgetch(m_window) == '~' ? key : ERR;
-				case '2': // INSERT, F9 to F12
-					key = wgetch(m_window);
-					switch (key)
-					{
-						case '~':
-							return KEY_IC;
-						case '0':
-							key = KEY_F9;
-							break;
-						case '1':
-							key = KEY_F10;
-							break;
-						case '3': // not a typo
-							key = KEY_F11;
-							break;
-						case '4':
-							key = KEY_F12;
-							break;
-						default:
-							key = ERR;
-							break;
-					}
-					return wgetch(m_window) == '~' ? key : ERR;
-				case '3':
-					return wgetch(m_window) == '~' ? KEY_DC : ERR;
-				case '4': // tty
-					return wgetch(m_window) == '~' ? KEY_END : ERR;
-				case '5':
-					return wgetch(m_window) == '~' ? KEY_PPAGE : ERR;
-				case '6':
-					return wgetch(m_window) == '~' ? KEY_NPAGE : ERR;
-				case '7':
-					return wgetch(m_window) == '~' ? KEY_HOME : ERR;
-				case '8':
-					return wgetch(m_window) == '~' ? KEY_END : ERR;
+				case 11:
+					return KEY_F1;
+				case 12:
+					return KEY_F2;
+				case 13:
+					return KEY_F3;
+				case 14:
+					return KEY_F4;
+				case 15:
+					return KEY_F5;
+				case 17: // not a typo
+					return KEY_F6;
+				case 18:
+					return KEY_F7;
+				case 19:
+					return KEY_F8;
+				case 2:
+					return KEY_IC;
+				case 20:
+					return KEY_F9;
+				case 21:
+					return KEY_F10;
+				case 23: // not a typo
+					return KEY_F11;
+				case 24:
+					return KEY_F12;
+				case 3:
+					return KEY_DC;
+				case 4:
+					return KEY_END;
+				case 5:
+					return KEY_PPAGE;
+				case 6:
+					return KEY_NPAGE;
+				case 7:
+					return KEY_HOME;
+				case 8:
+					return KEY_END;
 				default:
 					return ERR;
+				}
+			case ';': // urxvt mouse
+				m_mouse_event.x = 0;
+				delim = parse_number(m_mouse_event.x);
+				if (delim != ';')
+					return ERR;
+				m_mouse_event.y = 0;
+				delim = parse_number(m_mouse_event.y);
+				if (delim != 'M')
+					return ERR;
+				--m_mouse_event.x;
+				--m_mouse_event.y;
+				return define_mouse_event(key);
+			default:
+				return ERR;
 			}
-			break;
-		case ERR:
-			return KEY_ESCAPE;
+		}
 		default:
-			m_input_queue.push(key);
-			return KEY_ESCAPE;
+			return ERR;
+		}
+		break;
+	case ERR:
+		return KEY_ESCAPE;
+	default:
+		m_input_queue.push(key);
+		return KEY_ESCAPE;
 	}
 #	endif // NCURSES_SEQUENCE_ESCAPING
 }
@@ -935,17 +1007,15 @@ std::string Window::prompt(const std::string &base, size_t width, bool encrypted
 	rl::encrypted = encrypted;
 	rl::base = base.c_str();
 
-	mmask_t oldmask;
-
 	curs_set(1);
 #	if NCURSES_SEQUENCE_ESCAPING
 	keypad(m_window, 0);
 #	endif // NCURSES_SEQUENCE_ESCAPING
-	mousemask(0, &oldmask);
+	Mouse::disable();
 	m_escape_terminal_sequences = false;
 	char *input = readline(nullptr);
 	m_escape_terminal_sequences = true;
-	mousemask(oldmask, nullptr);
+	Mouse::enable();
 #	if NCURSES_SEQUENCE_ESCAPING
 	keypad(m_window, 1);
 #	endif // NCURSES_SEQUENCE_ESCAPING
