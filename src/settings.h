@@ -50,7 +50,8 @@ struct Column
 struct Configuration
 {
 	Configuration()
-	: playlist_disable_highlight_delay(0), visualizer_sync_interval(0)
+	: playlist_disable_highlight_delay(0), visualizer_sync_interval(0),
+	  keybinding_timeout(0)
 	{ }
 
 	bool read(const std::vector<std::string> &config_paths, bool ignore_errors);
@@ -193,6 +194,8 @@ struct Configuration
 	std::list<ScreenType> screen_sequence;
 
 	SortMode browser_sort_mode;
+
+	boost::posix_time::milliseconds keybinding_timeout;
 };
 
 extern Configuration Config;

@@ -23,10 +23,12 @@
 
 #include <algorithm>
 #include <boost/bind.hpp>
+#include <boost/lexical_cast.hpp>
 #include <cassert>
 #include <unordered_map>
 #include "actions.h"
 #include "macro_utilities.h"
+#include "utility/wide_string.h"
 
 /// Key for binding actions to it. Supports non-ascii characters.
 struct Key
@@ -118,6 +120,131 @@ private:
 	bool m_immediate;
 };
 
+class KeySequence
+{
+protected:
+	std::vector<Key> sequence;
+
+public:
+	KeySequence() { }
+
+	KeySequence(std::vector<Key> sequence) : sequence(std::move(sequence)) { }
+
+	KeySequence(const Key &key)
+	{
+		sequence.push_back(key);
+	}
+
+	bool startsWith(const KeySequence &ks) const
+	{
+		if (ks.count() > count())
+			return false;
+		for (auto i = 0, e = ks.count(); i < e; ++i)
+		{
+			if (sequence[i] != ks.sequence[i])
+				return false;
+		}
+		return true;
+	}
+
+	bool empty() const
+	{
+		return sequence.empty();
+	}
+
+	int count() const
+	{
+		return sequence.size();
+	}
+
+	size_t hash() const
+	{
+		size_t hash = 5381;
+		for (auto k : sequence)
+		{
+			auto value = (k.getChar() << 1) | (k.getType() == Key::Standard);
+			hash = ((hash << 5) + hash) + value;
+		}
+		return hash;
+	}
+
+	std::string toString(bool *print_backspace) const
+	{
+		std::string result;
+		for (auto key : sequence) {
+			if (key == Key(KEY_UP, Key::NCurses))
+				result += "Up";
+			else if (key == Key(KEY_DOWN, Key::NCurses))
+				result += "Down";
+			else if (key == Key(KEY_PPAGE, Key::NCurses))
+				result += "Page Up";
+			else if (key == Key(KEY_NPAGE, Key::NCurses))
+				result += "Page Down";
+			else if (key == Key(KEY_HOME, Key::NCurses))
+				result += "Home";
+			else if (key == Key(KEY_END, Key::NCurses))
+				result += "End";
+			else if (key == Key(KEY_SPACE, Key::Standard))
+				result += "Space";
+			else if (key == Key(KEY_ENTER, Key::Standard))
+				result += "Enter";
+			else if (key == Key(KEY_IC, Key::NCurses))
+				result += "Insert";
+			else if (key == Key(KEY_DC, Key::NCurses))
+				result += "Delete";
+			else if (key == Key(KEY_RIGHT, Key::NCurses))
+				result += "Right";
+			else if (key == Key(KEY_LEFT, Key::NCurses))
+				result += "Left";
+			else if (key == Key(KEY_TAB, Key::Standard))
+				result += "Tab";
+			else if (key == Key(KEY_SHIFT_TAB, Key::NCurses))
+				result += "Shift-Tab";
+			else if (key >= Key(KEY_CTRL_A, Key::Standard) && key <= Key(KEY_CTRL_Z, Key::Standard))
+			{
+				result += "Ctrl-";
+				result += key.getChar()+64;
+			}
+			else if (key >= Key(KEY_F1, Key::NCurses) && key <= Key(KEY_F12, Key::NCurses))
+			{
+				result += "F";
+				result += boost::lexical_cast<std::string>(key.getChar()-264);
+			}
+			else if ((key == Key(KEY_BACKSPACE, Key::NCurses) || key == Key(KEY_BACKSPACE_2, Key::Standard)))
+			{
+				// since some terminals interpret KEY_BACKSPACE as backspace and other need KEY_BACKSPACE_2,
+				// actions have to be bound to either of them, but we want to display "Backspace" only once,
+				// hance this 'print_backspace' switch.
+				if (!print_backspace || *print_backspace)
+				{
+					result += "Backspace";
+					if (print_backspace)
+						*print_backspace = false;
+				}
+			}
+			else
+				result += ToString(std::wstring(1, key.getChar()));
+		}
+		return result;
+	}
+
+	friend bool operator==(const KeySequence &k1, const KeySequence &k2);
+};
+
+class MutableKeySequence : public KeySequence
+{
+public:
+	void append(const Key &key)
+	{
+		sequence.push_back(key);
+	}
+
+	void reset()
+	{
+		sequence.clear();
+	}
+};
+
 /// Keybindings configuration
 class BindingsConfiguration
 {
@@ -125,9 +252,12 @@ class BindingsConfiguration
 		size_t operator()(const Key &k) const {
 			return (k.getChar() << 1) | (k.getType() == Key::Standard);
 		}
+		size_t operator()(const KeySequence &ks) const {
+            return ks.hash();
+		}
 	};
 	typedef std::unordered_map<std::string, Command> CommandsSet;
-	typedef std::unordered_map<Key, std::vector<Binding>, KeyHash> BindingsMap;
+	typedef std::unordered_map<KeySequence, std::vector<Binding>, KeyHash> BindingsMap;
 	
 public:
 	typedef BindingsMap::value_type::second_type::iterator BindingIterator;
@@ -145,8 +275,12 @@ public:
 	}
 	
 	std::pair<BindingIterator, BindingIterator> get(const Key &k) {
+		return get(KeySequence(k));
+	}
+
+	std::pair<BindingIterator, BindingIterator> get(const KeySequence &ks) {
 		std::pair<BindingIterator, BindingIterator> result;
-		auto it = m_bindings.find(k);
+		auto it = m_bindings.find(ks);
 		if (it != m_bindings.end()) {
 			result.first = it->second.begin();
 			result.second = it->second.end();
@@ -157,18 +291,38 @@ public:
 		}
 		return result;
 	}
-	
+
 	BindingsMap::const_iterator begin() const { return m_bindings.begin(); }
 	BindingsMap::const_iterator end() const { return m_bindings.end(); }
+
+	std::vector<KeySequence> getPrefix(KeySequence &ks)
+	{
+		std::vector<KeySequence> prefixSet;
+		for (auto s : m_bindings) {
+			if (s.first.startsWith(ks)) {
+				prefixSet.push_back(ks);
+			}
+		}
+		return prefixSet;
+	}
 	
 private:
 	bool notBound(const Key &k) const {
 		return k != Key::noOp && m_bindings.find(k) == m_bindings.end();
 	}
+
+	bool notBound(const KeySequence &ks) const {
+		return !ks.empty() && m_bindings.find(ks) == m_bindings.end();
+	}
 	
 	template <typename ArgT>
 	void bind(Key k, ArgT &&t) {
-		m_bindings[k].push_back(std::forward<ArgT>(t));
+		m_bindings[KeySequence(k)].push_back(std::forward<ArgT>(t));
+	}
+
+	template <typename ArgT>
+	void bind(KeySequence ks, ArgT &&t) {
+		m_bindings[ks].push_back(std::forward<ArgT>(t));
 	}
 	
 	BindingsMap m_bindings;

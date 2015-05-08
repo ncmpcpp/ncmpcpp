@@ -533,3 +533,5 @@
 #
 #active_window_border = red
 #
+#keybinding_timeout = 500
+#

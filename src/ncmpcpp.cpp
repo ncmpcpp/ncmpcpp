@@ -148,6 +148,8 @@ int main(int argc, char **argv)
 
 	// local variables
 	bool key_pressed = false;
+	MutableKeySequence command;
+	auto last_key_press = boost::posix_time::from_time_t(0);
 	Key input = Key::noOp;
 	auto connect_attempt = boost::posix_time::from_time_t(0);
 	auto past = boost::posix_time::from_time_t(0);
@@ -209,7 +211,18 @@ int main(int argc, char **argv)
 			key_pressed = input != Key::noOp;
 			
 			if (!key_pressed)
+			{
+				// Timeout on keybinding. Execute the last matched binding.
+				if (!command.empty()
+				&& ((Timer - last_key_press) > Config.keybinding_timeout))
+				{
+					// Use this binding.
+					auto k = Bindings.get(command);
+					std::any_of(k.first, k.second, boost::bind(&Binding::execute, _1));
+					command.reset();
+				}
 				continue;
+			}
 
 			// The reason we want to update timer here is that if the timer is updated
 			// in Status::trace, then Key::read usually blocks for 500ms and if key is
@@ -219,10 +232,27 @@ int main(int argc, char **argv)
 			// timer in Status::trace only if there was no recent input.
 			Timer = boost::posix_time::microsec_clock::local_time();
 
+
 			try
 			{
-				auto k = Bindings.get(input);
-				std::any_of(k.first, k.second, boost::bind(&Binding::execute, _1));
+				command.append(input);
+				std::vector<KeySequence> sequences = Bindings.getPrefix(command);
+				if (sequences.size() == 1)
+				{
+					if (sequences.front() == command)
+					{
+						// Use this binding.
+						auto k = Bindings.get(command);
+						std::any_of(k.first, k.second, boost::bind(&Binding::execute, _1));
+						command.reset();
+					}
+				}
+				else if (!sequences.empty())
+				{
+					// There is more than one binding prefixed with the current
+					// command. Wait for a timeout to register.
+					last_key_press = Timer;
+				}
 			}
 			catch (ConversionError &e)
 			{

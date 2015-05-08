@@ -36,62 +36,9 @@ Help *myHelp;
 
 namespace {
 
-std::string key_to_string(const Key &key, bool *print_backspace)
+std::string key_to_string(const KeySequence &ks, bool *print_backspace)
 {
-	std::string result;
-	if (key == Key(KEY_UP, Key::NCurses))
-		result += "Up";
-	else if (key == Key(KEY_DOWN, Key::NCurses))
-		result += "Down";
-	else if (key == Key(KEY_PPAGE, Key::NCurses))
-		result += "Page Up";
-	else if (key == Key(KEY_NPAGE, Key::NCurses))
-		result += "Page Down";
-	else if (key == Key(KEY_HOME, Key::NCurses))
-		result += "Home";
-	else if (key == Key(KEY_END, Key::NCurses))
-		result += "End";
-	else if (key == Key(KEY_SPACE, Key::Standard))
-		result += "Space";
-	else if (key == Key(KEY_ENTER, Key::Standard))
-		result += "Enter";
-	else if (key == Key(KEY_IC, Key::NCurses))
-		result += "Insert";
-	else if (key == Key(KEY_DC, Key::NCurses))
-		result += "Delete";
-	else if (key == Key(KEY_RIGHT, Key::NCurses))
-		result += "Right";
-	else if (key == Key(KEY_LEFT, Key::NCurses))
-		result += "Left";
-	else if (key == Key(KEY_TAB, Key::Standard))
-		result += "Tab";
-	else if (key == Key(KEY_SHIFT_TAB, Key::NCurses))
-		result += "Shift-Tab";
-	else if (key >= Key(KEY_CTRL_A, Key::Standard) && key <= Key(KEY_CTRL_Z, Key::Standard))
-	{
-		result += "Ctrl-";
-		result += key.getChar()+64;
-	}
-	else if (key >= Key(KEY_F1, Key::NCurses) && key <= Key(KEY_F12, Key::NCurses))
-	{
-		result += "F";
-		result += boost::lexical_cast<std::string>(key.getChar()-264);
-	}
-	else if ((key == Key(KEY_BACKSPACE, Key::NCurses) || key == Key(KEY_BACKSPACE_2, Key::Standard)))
-	{
-		// since some terminals interpret KEY_BACKSPACE as backspace and other need KEY_BACKSPACE_2,
-		// actions have to be bound to either of them, but we want to display "Backspace" only once,
-		// hance this 'print_backspace' switch.
-		if (!print_backspace || *print_backspace)
-		{
-			result += "Backspace";
-			if (print_backspace)
-				*print_backspace = false;
-		}
-	}
-	else
-		result += ToString(std::wstring(1, key.getChar()));
-	return result;
+	return ks.toString(print_backspace);
 }
 
 std::string display_keys(const Actions::Type at)
