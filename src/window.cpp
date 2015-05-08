@@ -937,17 +937,18 @@ std::string Window::prompt(const std::string &base, size_t width, bool encrypted
 	rl::encrypted = encrypted;
 	rl::base = base.c_str();
 
+	mmask_t oldmask;
+
 	curs_set(1);
 #	if NCURSES_SEQUENCE_ESCAPING
-	mmask_t oldmask;
 	keypad(m_window, 0);
-	mousemask(0, &oldmask);
 #	endif // NCURSES_SEQUENCE_ESCAPING
+	mousemask(0, &oldmask);
 	m_escape_terminal_sequences = false;
 	char *input = readline(nullptr);
 	m_escape_terminal_sequences = true;
-#	if NCURSES_SEQUENCE_ESCAPING
 	mousemask(oldmask, nullptr);
+#	if NCURSES_SEQUENCE_ESCAPING
 	keypad(m_window, 1);
 #	endif // NCURSES_SEQUENCE_ESCAPING
 	curs_set(0);
