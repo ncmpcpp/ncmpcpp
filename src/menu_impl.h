@@ -191,12 +191,12 @@ void Menu<ItemT>::refresh()
 				mvwhline(m_window, line, 0, KEY_SPACE, m_width);
 			break;
 		}
-		if (m_items[i]->isSeparator())
+		if (m_items[i].isSeparator())
 		{
 			mvwhline(m_window, line, 0, 0, m_width);
 			continue;
 		}
-		if (m_items[i]->isBold())
+		if (m_items[i].isBold())
 			*this << Format::Bold;
 		if (m_highlight_enabled && i == m_highlight)
 		{
@@ -204,18 +204,18 @@ void Menu<ItemT>::refresh()
 			*this << m_highlight_color;
 		}
 		mvwhline(m_window, line, 0, KEY_SPACE, m_width);
-		if (m_items[i]->isSelected())
+		if (m_items[i].isSelected())
 			*this << m_selected_prefix;
 		if (m_item_displayer)
 			m_item_displayer(*this);
-		if (m_items[i]->isSelected())
+		if (m_items[i].isSelected())
 			*this << m_selected_suffix;
 		if (m_highlight_enabled && i == m_highlight)
 		{
 			*this << Color::End;
 			*this << Format::NoReverse;
 		}
-		if (m_items[i]->isBold())
+		if (m_items[i].isBold())
 			*this << Format::NoBold;
 	}
 	Window::refresh();

@@ -37,8 +37,6 @@ namespace NC {
 /// holding any std::vector compatible values.
 template <typename ItemT> class Menu : public Window
 {
-	struct ItemProxy;
-
 public:
 	struct Item
 	{
@@ -82,16 +80,8 @@ public:
 		bool m_is_separator;
 	};
 	
-	typedef boost::indirect_iterator<
-		typename std::vector<ItemProxy>::iterator,
-		Item,
-		boost::random_access_traversal_tag
-	> Iterator;
-	typedef boost::indirect_iterator<
-		typename std::vector<ItemProxy>::const_iterator,
-		const Item,
-		boost::random_access_traversal_tag
-	> ConstIterator;
+	typedef typename std::vector<Item>::iterator Iterator;
+	typedef typename std::vector<Item>::const_iterator ConstIterator;
 	typedef std::reverse_iterator<Iterator> ReverseIterator;
 	typedef std::reverse_iterator<ConstIterator> ConstReverseIterator;
 	
@@ -226,20 +216,20 @@ public:
 	/// @param pos requested position
 	/// @return reference to item at given position
 	/// @throw std::out_of_range if given position is out of range
-	Menu<ItemT>::Item &at(size_t pos) { return *m_items.at(pos); }
+	Menu<ItemT>::Item &at(size_t pos) { return m_items.at(pos); }
 	
 	/// @param pos requested position
 	/// @return const reference to item at given position
 	/// @throw std::out_of_range if given position is out of range
-	const Menu<ItemT>::Item &at(size_t pos) const { return *m_items.at(pos); }
+	const Menu<ItemT>::Item &at(size_t pos) const { return m_items.at(pos); }
 	
 	/// @param pos requested position
 	/// @return const reference to item at given position
-	const Menu<ItemT>::Item &operator[](size_t pos) const  { return *m_items[pos]; }
+	const Menu<ItemT>::Item &operator[](size_t pos) const { return m_items[pos]; }
 	
 	/// @param pos requested position
 	/// @return const reference to item at given position
-	Menu<ItemT>::Item &operator[](size_t pos) { return *m_items[pos]; }
+	Menu<ItemT>::Item &operator[](size_t pos) { return m_items[pos]; }
 	
 	Iterator current() { return Iterator(m_items.begin() + m_highlight); }
 	ConstIterator current() const { return ConstIterator(m_items.begin() + m_highlight); }
@@ -272,31 +262,16 @@ public:
 	ConstReverseValueIterator rendV() const { return ConstReverseValueIterator(beginV()); }
 	
 private:
-	struct ItemProxy
-	{
-		typedef Item element_type;
-		
-		ItemProxy() { }
-		ItemProxy(Item item) : m_ptr(std::make_shared<Item>(std::move(item))) { }
-		
-		Item &operator*() const { return *m_ptr; }
-		Item *operator->() const { return m_ptr.get(); }
-		
-		bool operator==(const ItemProxy &rhs) const { return m_ptr == rhs.m_ptr; }
-		
-	private:
-		std::shared_ptr<Item> m_ptr;
-	};
-	
+
 	bool isHighlightable(size_t pos)
 	{
-		return !m_items[pos]->isSeparator()
-		    && !m_items[pos]->isInactive();
+		return !m_items[pos].isSeparator()
+		    && !m_items[pos].isInactive();
 	}
 	
 	ItemDisplayer m_item_displayer;
 	
-	std::vector<ItemProxy> m_items;
+	std::vector<Item> m_items;
 	
 	size_t m_beginning;
 	size_t m_highlight;
