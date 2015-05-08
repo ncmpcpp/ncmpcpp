@@ -181,41 +181,42 @@ void Menu<ItemT>::refresh()
 	}
 
 	size_t line = 0;
+	const size_t end = m_beginning+m_height;
 	m_drawn_position = m_beginning;
-	for (size_t &i = m_drawn_position; i < m_beginning+m_height; ++i, ++line)
+	for (; m_drawn_position < end; ++m_drawn_position, ++line)
 	{
 		goToXY(0, line);
-		if (i >= m_items.size())
+		if (m_drawn_position >= m_items.size())
 		{
 			for (; line < m_height; ++line)
 				mvwhline(m_window, line, 0, KEY_SPACE, m_width);
 			break;
 		}
-		if (m_items[i].isSeparator())
+		if (m_items[m_drawn_position].isSeparator())
 		{
 			mvwhline(m_window, line, 0, 0, m_width);
 			continue;
 		}
-		if (m_items[i].isBold())
+		if (m_items[m_drawn_position].isBold())
 			*this << Format::Bold;
-		if (m_highlight_enabled && i == m_highlight)
+		if (m_highlight_enabled && m_drawn_position == m_highlight)
 		{
 			*this << Format::Reverse;
 			*this << m_highlight_color;
 		}
 		mvwhline(m_window, line, 0, KEY_SPACE, m_width);
-		if (m_items[i].isSelected())
+		if (m_items[m_drawn_position].isSelected())
 			*this << m_selected_prefix;
 		if (m_item_displayer)
 			m_item_displayer(*this);
-		if (m_items[i].isSelected())
+		if (m_items[m_drawn_position].isSelected())
 			*this << m_selected_suffix;
-		if (m_highlight_enabled && i == m_highlight)
+		if (m_highlight_enabled && m_drawn_position == m_highlight)
 		{
 			*this << Color::End;
 			*this << Format::NoReverse;
 		}
-		if (m_items[i].isBold())
+		if (m_items[m_drawn_position].isBold())
 			*this << Format::NoBold;
 	}
 	Window::refresh();
