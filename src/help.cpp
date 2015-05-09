@@ -381,7 +381,7 @@ void write_bindings(NC::Scrollpad &w)
 	mouse(w, "Left click on \"Playing/Paused\"", "Play/pause");
 	mouse(w, "Left click on progressbar", "Jump to pointed position in playing song");
 	w << '\n';
-	mouse(w, "Mouse wheel on \"Volume: xx\"", "Play/pause");
+	mouse(w, "Mouse wheel on \"Volume: xx\"", "Adjust volume");
 	mouse(w, "Mouse wheel on main window", "Scroll");
 
 	mouse_section(w, "Playlist");

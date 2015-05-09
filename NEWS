@@ -1,3 +1,7 @@
+ncmpcpp-0.6.5 (????-??-??)
+
+* Description of mouse wheel usage on volume is now correct.
+
 ncmpcpp-0.6.4 (2015-05-02)
 
 * Fix title of a pop-up which shows during adding selected items to the current playlist.
