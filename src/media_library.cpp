@@ -448,35 +448,7 @@ void MediaLibrary::enterPressed()
 
 void MediaLibrary::spacePressed()
 {
-	if (Config.space_selects)
-	{
-		if (isActiveWindow(Tags))
-		{
-			size_t idx = Tags.choice();
-			Tags[idx].setSelected(!Tags[idx].isSelected());
-			Tags.scroll(NC::Scroll::Down);
-			Albums.clear();
-			Songs.clear();
-		}
-		else if (isActiveWindow(Albums))
-		{
-			if (!Albums.current()->value().isAllTracksEntry())
-			{
-				size_t idx = Albums.choice();
-				Albums[idx].setSelected(!Albums[idx].isSelected());
-				Albums.scroll(NC::Scroll::Down);
-				Songs.clear();
-			}
-		}
-		else if (isActiveWindow(Songs))
-		{
-			size_t idx = Songs.choice();
-			Songs[idx].setSelected(!Songs[idx].isSelected());
-			Songs.scroll(NC::Scroll::Down);
-		}
-	}
-	else
-		AddToPlaylist(false);
+	AddToPlaylist(false);
 }
 
 void MediaLibrary::mouseButtonPressed(MEVENT me)
@@ -638,7 +610,28 @@ ProxySongList MediaLibrary::proxySongList()
 
 bool MediaLibrary::allowsSelection()
 {
-	return true;
+	return (isActiveWindow(Tags) && !Tags.empty())
+	    || (isActiveWindow(Albums) && !Albums.empty() && !Albums.current()->value().isAllTracksEntry())
+	    || (isActiveWindow(Songs) && !Songs.empty());
+}
+
+void MediaLibrary::selectCurrent()
+{
+	if (isActiveWindow(Tags))
+	{
+		size_t idx = Tags.choice();
+		Tags[idx].setSelected(!Tags[idx].isSelected());
+	}
+	else if (isActiveWindow(Albums))
+	{
+		size_t idx = Albums.choice();
+		Albums[idx].setSelected(!Albums[idx].isSelected());
+	}
+	else if (isActiveWindow(Songs))
+	{
+		size_t idx = Songs.choice();
+		Songs[idx].setSelected(!Songs[idx].isSelected());
+	}
 }
 
 void MediaLibrary::reverseSelection()

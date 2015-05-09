@@ -250,27 +250,7 @@ void PlaylistEditor::enterPressed()
 
 void PlaylistEditor::spacePressed()
 {
-	if (Config.space_selects)
-	{
-		if (isActiveWindow(Playlists))
-		{
-			if (!Playlists.empty())
-			{
-				Playlists.current()->setSelected(!Playlists.current()->isSelected());
-				Playlists.scroll(NC::Scroll::Down);
-			}
-		}
-		else if (isActiveWindow(Content))
-		{
-			if (!Content.empty())
-			{
-				Content.current()->setSelected(!Content.current()->isSelected());
-				Content.scroll(NC::Scroll::Down);
-			}
-		}
-	}
-	else
-		AddToPlaylist(false);
+	AddToPlaylist(false);
 }
 
 void PlaylistEditor::mouseButtonPressed(MEVENT me)
@@ -381,7 +361,16 @@ ProxySongList PlaylistEditor::proxySongList()
 
 bool PlaylistEditor::allowsSelection()
 {
-	return true;
+	return (isActiveWindow(Playlists) && !Playlists.empty())
+	    || (isActiveWindow(Content) && !Content.empty());
+}
+
+void PlaylistEditor::selectCurrent()
+{
+if (isActiveWindow(Playlists))
+		Playlists.current()->setSelected(!Playlists.current()->isSelected());
+	else if (isActiveWindow(Content))
+		Content.current()->setSelected(!Content.current()->isSelected());
 }
 
 void PlaylistEditor::reverseSelection()

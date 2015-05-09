@@ -457,15 +457,6 @@ bool Configuration::read(const std::vector<std::string> &config_paths, bool igno
 			throw std::runtime_error("invalid argument: " + v);
 	}, defaults_to(wrapped_search, true)
 	));
-	p.add("default_space_mode", option_parser::worker([this](std::string v) {
-		if (v == "add")
-			space_selects = false;
-		else if (v == "select")
-			space_selects = true;
-		else
-			throw std::runtime_error("invalid argument: " + v);
-	}, defaults_to(wrapped_search, true)
-	));
 	p.add("default_tag_editor_pattern", assign_default(
 		pattern, "%n - %t"
 	));

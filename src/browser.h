@@ -56,6 +56,7 @@ struct Browser: Screen<NC::Menu<MPD::Item>>, HasSongs, Searchable, Tabbable
 	virtual ProxySongList proxySongList() OVERRIDE;
 	
 	virtual bool allowsSelection() OVERRIDE;
+	virtual void selectCurrent() OVERRIDE;
 	virtual void reverseSelection() OVERRIDE;
 	virtual std::vector<MPD::Song> getSelectedSongs() OVERRIDE;
 	

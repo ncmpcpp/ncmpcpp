@@ -359,6 +359,8 @@ void BindingsConfiguration::generateDefaults()
 		bind(k, Actions::Type::MoveHome);
 	if (notBound(k = stringToKey("end")))
 		bind(k, Actions::Type::MoveEnd);
+	if (notBound(k = stringToKey("insert")))
+		bind(k, Actions::Type::SelectItem);
 	if (notBound(k = stringToKey("space")))
 		bind(k, Actions::Type::PressSpace);
 	if (notBound(k = stringToKey("enter")))
@@ -463,8 +465,6 @@ void BindingsConfiguration::generateDefaults()
 		bind(k, Actions::Type::ToggleConsume);
 	if (notBound(k = stringToKey("Y")))
 		bind(k, Actions::Type::ToggleReplayGainMode);
-	if (notBound(k = stringToKey("t")))
-		bind(k, Actions::Type::ToggleSpaceMode);
 	if (notBound(k = stringToKey("T")))
 		bind(k, Actions::Type::ToggleAddMode);
 	if (notBound(k = stringToKey("|")))

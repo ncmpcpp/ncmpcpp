@@ -137,7 +137,6 @@ struct Configuration
 	bool screen_switcher_previous;
 	bool autocenter_mode;
 	bool wrapped_search;
-	bool space_selects;
 	bool incremental_seeking;
 	bool now_playing_lyrics;
 	bool fetch_lyrics_in_background;

@@ -192,15 +192,6 @@ void Browser::spacePressed()
 	if (w.empty())
 		return;
 	
-	size_t i = inRootDirectory() ? 0 : 1;
-	if (Config.space_selects && w.choice() >= i)
-	{
-		i = w.choice();
-		w[i].setSelected(!w[i].isSelected());
-		w.scroll(NC::Scroll::Down);
-		return;
-	}
-
 	const MPD::Item &item = w.current()->value();
 	// ignore parent directory
 	if (isParentDirectory(item))
@@ -316,7 +307,14 @@ ProxySongList Browser::proxySongList()
 
 bool Browser::allowsSelection()
 {
-	return true;
+	size_t root = inRootDirectory() ? 0 : 1;
+	return !w.empty() && w.choice() >= root;
+}
+
+void Browser::selectCurrent()
+{
+	size_t current = w.choice();
+	w[current].setSelected(!w[current].isSelected());
 }
 
 void Browser::reverseSelection()

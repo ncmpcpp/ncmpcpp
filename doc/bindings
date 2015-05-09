@@ -177,6 +177,9 @@
 #def_key "end"
 #  move_end
 #
+#def_key "insert"
+#  select_item
+#
 #def_key "space"
 #  press_space
 #
@@ -323,9 +326,6 @@
 #
 #def_key "Y"
 #  toggle_replay_gain_mode
-#
-#def_key "t"
-#  toggle_space_mode
 #
 #def_key "T"
 #  toggle_add_mode

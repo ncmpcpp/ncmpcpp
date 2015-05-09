@@ -46,7 +46,7 @@ struct RequireRunnable : public BaseAction
 	: BaseAction(Type::MacroUtility, ""), m_action(action) { assert(action); }
 	
 protected:
-	virtual bool canBeRun() const;
+	virtual bool canBeRun();
 	virtual void run() { }
 	
 private:
@@ -59,7 +59,7 @@ struct RequireScreen : public BaseAction
 	: BaseAction(Type::MacroUtility, ""), m_screen_type(screen_type) { }
 	
 protected:
-	virtual bool canBeRun() const;
+	virtual bool canBeRun();
 	virtual void run() { }
 	
 private:

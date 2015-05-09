@@ -580,15 +580,6 @@ void TagEditor::enterPressed()
 	}
 }
 
-void TagEditor::spacePressed()
-{
-	if (w == Tags && !Tags->empty())
-	{
-		Tags->current()->setSelected(!Tags->current()->isSelected());
-		w->scroll(NC::Scroll::Down);
-	}
-}
-
 void TagEditor::mouseButtonPressed(MEVENT me)
 {
 	auto tryPreviousColumn = [this]() -> bool {
@@ -772,13 +763,17 @@ ProxySongList TagEditor::proxySongList()
 
 bool TagEditor::allowsSelection()
 {
-	return w == Tags;
+	return w == Tags && !Tags->empty();
+}
+
+void TagEditor::selectCurrent()
+{
+	Tags->current()->setSelected(!Tags->current()->isSelected());
 }
 
 void TagEditor::reverseSelection()
 {
-	if (w == Tags)
-		reverseSelectionHelper(Tags->begin(), Tags->end());
+	reverseSelectionHelper(Tags->begin(), Tags->end());
 }
 
 std::vector<MPD::Song> TagEditor::getSelectedSongs()

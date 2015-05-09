@@ -213,18 +213,11 @@ void SearchEngine::enterPressed()
 
 void SearchEngine::spacePressed()
 {
-	if (!w.current()->value().isSong())
-		return;
-	
-	if (Config.space_selects)
+	if (w.current()->value().isSong())
 	{
-		w.current()->setSelected(!w.current()->isSelected());
+		addSongToPlaylist(w.current()->value().song(), false);
 		w.scroll(NC::Scroll::Down);
-		return;
 	}
-	
-	addSongToPlaylist(w.current()->value().song(), false);
-	w.scroll(NC::Scroll::Down);
 }
 
 void SearchEngine::mouseButtonPressed(MEVENT me)
@@ -295,6 +288,11 @@ ProxySongList SearchEngine::proxySongList()
 bool SearchEngine::allowsSelection()
 {
 	return w.current()->value().isSong();
+}
+
+void SearchEngine::selectCurrent()
+{
+	w.current()->setSelected(!w.current()->isSelected());
 }
 
 void SearchEngine::reverseSelection()

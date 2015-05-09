@@ -296,7 +296,7 @@ BaseAction *get(const std::string &name)
 	return result;
 }
 
-bool MouseEvent::canBeRun() const
+bool MouseEvent::canBeRun()
 {
 	return Config.mouse_support;
 }
@@ -355,7 +355,7 @@ void ScrollDown::run()
 	listsChangeFinisher();
 }
 
-bool ScrollUpArtist::canBeRun() const
+bool ScrollUpArtist::canBeRun()
 {
 	return proxySongList(myScreen);
 }
@@ -380,7 +380,7 @@ void ScrollUpArtist::run()
 	}
 }
 
-bool ScrollUpAlbum::canBeRun() const
+bool ScrollUpAlbum::canBeRun()
 {
 	return proxySongList(myScreen);
 }
@@ -405,7 +405,7 @@ void ScrollUpAlbum::run()
 	}
 }
 
-bool ScrollDownArtist::canBeRun() const
+bool ScrollDownArtist::canBeRun()
 {
 	return proxySongList(myScreen);
 }
@@ -430,7 +430,7 @@ void ScrollDownArtist::run()
 	}
 }
 
-bool ScrollDownAlbum::canBeRun() const
+bool ScrollDownAlbum::canBeRun()
 {
 	return proxySongList(myScreen);
 }
@@ -501,7 +501,7 @@ void ToggleInterface::run()
 	Statusbar::printf("User interface: %1%", Config.design);
 }
 
-bool JumpToParentDirectory::canBeRun() const
+bool JumpToParentDirectory::canBeRun()
 {
 	return (myScreen == myBrowser)
 #	ifdef HAVE_TAGLIB_H
@@ -542,7 +542,20 @@ void PressSpace::run()
 	myScreen->spacePressed();
 }
 
-bool PreviousColumn::canBeRun() const
+bool SelectItem::canBeRun()
+{
+	hs = hasSongs(myScreen);
+	return hs != nullptr && hs->allowsSelection();
+}
+
+void SelectItem::run()
+{
+	hs->selectCurrent();
+	myScreen->scroll(NC::Scroll::Down);
+	listsChangeFinisher();
+}
+
+bool PreviousColumn::canBeRun()
 {
 	auto hc = hasColumns(myScreen);
 	return hc && hc->previousColumnAvailable();
@@ -553,7 +566,7 @@ void PreviousColumn::run()
 	hasColumns(myScreen)->previousColumn();
 }
 
-bool NextColumn::canBeRun() const
+bool NextColumn::canBeRun()
 {
 	auto hc = hasColumns(myScreen);
 	return hc && hc->nextColumnAvailable();
@@ -564,7 +577,7 @@ void NextColumn::run()
 	hasColumns(myScreen)->nextColumn();
 }
 
-bool MasterScreen::canBeRun() const
+bool MasterScreen::canBeRun()
 {
 	using Global::myLockedScreen;
 	using Global::myInactiveScreen;
@@ -585,7 +598,7 @@ void MasterScreen::run()
 	drawHeader();
 }
 
-bool SlaveScreen::canBeRun() const
+bool SlaveScreen::canBeRun()
 {
 	using Global::myLockedScreen;
 	using Global::myInactiveScreen;
@@ -618,7 +631,7 @@ void VolumeDown::run()
 	Mpd.SetVolume(volume);
 }
 
-bool DeletePlaylistItems::canBeRun() const
+bool DeletePlaylistItems::canBeRun()
 {
 	return (myScreen == myPlaylist && !myPlaylist->main().empty())
 	    || (myScreen->isActiveWindow(myPlaylistEditor->Content) && !myPlaylistEditor->Content.empty());
@@ -643,7 +656,7 @@ void DeletePlaylistItems::run()
 	}
 }
 
-bool DeleteBrowserItems::canBeRun() const
+bool DeleteBrowserItems::canBeRun()
 {
 	auto check_if_deletion_allowed = []() {
 		if (Config.allow_for_physical_item_deletion)
@@ -716,7 +729,7 @@ void DeleteBrowserItems::run()
 	myBrowser->requestUpdate();
 }
 
-bool DeleteStoredPlaylist::canBeRun() const
+bool DeleteStoredPlaylist::canBeRun()
 {
 	return myScreen->isActiveWindow(myPlaylistEditor->Playlists);
 }
@@ -830,7 +843,7 @@ void ExecuteCommand::run()
 		Statusbar::printf("No command named \"%1%\"", cmd_name);
 }
 
-bool MoveSortOrderUp::canBeRun() const
+bool MoveSortOrderUp::canBeRun()
 {
 	return myScreen == mySortPlaylistDialog;
 }
@@ -840,7 +853,7 @@ void MoveSortOrderUp::run()
 	mySortPlaylistDialog->moveSortOrderUp();
 }
 
-bool MoveSortOrderDown::canBeRun() const
+bool MoveSortOrderDown::canBeRun()
 {
 	return myScreen == mySortPlaylistDialog;
 }
@@ -850,7 +863,7 @@ void MoveSortOrderDown::run()
 	mySortPlaylistDialog->moveSortOrderDown();
 }
 
-bool MoveSelectedItemsUp::canBeRun() const
+bool MoveSelectedItemsUp::canBeRun()
 {
 	return ((myScreen == myPlaylist
 	    &&  !myPlaylist->main().empty())
@@ -873,7 +886,7 @@ void MoveSelectedItemsUp::run()
 	}
 }
 
-bool MoveSelectedItemsDown::canBeRun() const
+bool MoveSelectedItemsDown::canBeRun()
 {
 	return ((myScreen == myPlaylist
 	    &&  !myPlaylist->main().empty())
@@ -896,7 +909,7 @@ void MoveSelectedItemsDown::run()
 	}
 }
 
-bool MoveSelectedItemsTo::canBeRun() const
+bool MoveSelectedItemsTo::canBeRun()
 {
 	return myScreen == myPlaylist
 	    || myScreen->isActiveWindow(myPlaylistEditor->Content);
@@ -918,7 +931,7 @@ void MoveSelectedItemsTo::run()
 	}
 }
 
-bool Add::canBeRun() const
+bool Add::canBeRun()
 {
 	return myScreen != myPlaylistEditor
 	   || !myPlaylistEditor->Playlists.empty();
@@ -960,7 +973,7 @@ void Add::run()
 	}
 }
 
-bool SeekForward::canBeRun() const
+bool SeekForward::canBeRun()
 {
 	return Status::State::player() != MPD::psStop && Status::State::totalTime() > 0;
 }
@@ -970,7 +983,7 @@ void SeekForward::run()
 	seek();
 }
 
-bool SeekBackward::canBeRun() const
+bool SeekBackward::canBeRun()
 {
 	return Status::State::player() != MPD::psStop && Status::State::totalTime() > 0;
 }
@@ -980,7 +993,7 @@ void SeekBackward::run()
 	seek();
 }
 
-bool ToggleDisplayMode::canBeRun() const
+bool ToggleDisplayMode::canBeRun()
 {
 	return myScreen == myPlaylist
 	    || myScreen == myBrowser
@@ -1072,7 +1085,7 @@ void ToggleDisplayMode::run()
 	}
 }
 
-bool ToggleSeparatorsBetweenAlbums::canBeRun() const
+bool ToggleSeparatorsBetweenAlbums::canBeRun()
 {
 	return true;
 }
@@ -1086,7 +1099,7 @@ void ToggleSeparatorsBetweenAlbums::run()
 }
 
 #ifndef HAVE_CURL_CURL_H
-bool ToggleLyricsFetcher::canBeRun() const
+bool ToggleLyricsFetcher::canBeRun()
 {
 	return false;
 }
@@ -1100,7 +1113,7 @@ void ToggleLyricsFetcher::run()
 }
 
 #ifndef HAVE_CURL_CURL_H
-bool ToggleFetchingLyricsInBackground::canBeRun() const
+bool ToggleFetchingLyricsInBackground::canBeRun()
 {
 	return false;
 }
@@ -1142,7 +1155,7 @@ void UpdateDatabase::run()
 		Mpd.UpdateDirectory("/");
 }
 
-bool JumpToPlayingSong::canBeRun() const
+bool JumpToPlayingSong::canBeRun()
 {
 	return myScreen == myPlaylist
 	    || myScreen == myBrowser
@@ -1186,7 +1199,7 @@ void ToggleRandom::run()
 	Mpd.SetRandom(!Status::State::random());
 }
 
-bool StartSearching::canBeRun() const
+bool StartSearching::canBeRun()
 {
 	return myScreen == mySearcher && !mySearcher->main()[0].isInactive();
 }
@@ -1200,7 +1213,7 @@ void StartSearching::run()
 	mySearcher->enterPressed();
 }
 
-bool SaveTagChanges::canBeRun() const
+bool SaveTagChanges::canBeRun()
 {
 #	ifdef HAVE_TAGLIB_H
 	return myScreen == myTinyTagEditor
@@ -1268,7 +1281,7 @@ void SetVolume::run()
 	Statusbar::printf("Volume set to %1%%%", volume);
 }
 
-bool EditSong::canBeRun() const
+bool EditSong::canBeRun()
 {
 #	ifdef HAVE_TAGLIB_H
 	return currentSong(myScreen)
@@ -1287,7 +1300,7 @@ void EditSong::run()
 #	endif // HAVE_TAGLIB_H
 }
 
-bool EditLibraryTag::canBeRun() const
+bool EditLibraryTag::canBeRun()
 {
 #	ifdef HAVE_TAGLIB_H
 	return myScreen->isActiveWindow(myLibrary->Tags)
@@ -1346,7 +1359,7 @@ void EditLibraryTag::run()
 #	endif // HAVE_TAGLIB_H
 }
 
-bool EditLibraryAlbum::canBeRun() const
+bool EditLibraryAlbum::canBeRun()
 {
 #	ifdef HAVE_TAGLIB_H
 	return myScreen->isActiveWindow(myLibrary->Albums)
@@ -1402,7 +1415,7 @@ void EditLibraryAlbum::run()
 #	endif // HAVE_TAGLIB_H
 }
 
-bool EditDirectoryName::canBeRun() const
+bool EditDirectoryName::canBeRun()
 {
 	return  ((myScreen == myBrowser
 	      && !myBrowser->main().empty()
@@ -1474,7 +1487,7 @@ void EditDirectoryName::run()
 #	endif // HAVE_TAGLIB_H
 }
 
-bool EditPlaylistName::canBeRun() const
+bool EditPlaylistName::canBeRun()
 {
 	return   (myScreen->isActiveWindow(myPlaylistEditor->Playlists)
 	      && !myPlaylistEditor->Playlists.empty())
@@ -1504,7 +1517,7 @@ void EditPlaylistName::run()
 	}
 }
 
-bool EditLyrics::canBeRun() const
+bool EditLyrics::canBeRun()
 {
 	return myScreen == myLyrics;
 }
@@ -1514,7 +1527,7 @@ void EditLyrics::run()
 	myLyrics->Edit();
 }
 
-bool JumpToBrowser::canBeRun() const
+bool JumpToBrowser::canBeRun()
 {
 	return currentSong(myScreen);
 }
@@ -1525,7 +1538,7 @@ void JumpToBrowser::run()
 	myBrowser->locateSong(*s);
 }
 
-bool JumpToMediaLibrary::canBeRun() const
+bool JumpToMediaLibrary::canBeRun()
 {
 	return currentSong(myScreen);
 }
@@ -1536,7 +1549,7 @@ void JumpToMediaLibrary::run()
 	myLibrary->LocateSong(*s);
 }
 
-bool JumpToPlaylistEditor::canBeRun() const
+bool JumpToPlaylistEditor::canBeRun()
 {
 	return myScreen == myBrowser
 	    && myBrowser->main().current()->value().type() == MPD::Item::Type::Playlist;
@@ -1581,7 +1594,7 @@ void ToggleScreenLock::run()
 	}
 }
 
-bool JumpToTagEditor::canBeRun() const
+bool JumpToTagEditor::canBeRun()
 {
 #	ifdef HAVE_TAGLIB_H
 	return currentSong(myScreen)
@@ -1599,7 +1612,7 @@ void JumpToTagEditor::run()
 #	endif // HAVE_TAGLIB_H
 }
 
-bool JumpToPositionInSong::canBeRun() const
+bool JumpToPositionInSong::canBeRun()
 {
 	return Status::State::player() != MPD::psStop && Status::State::totalTime() > 0;
 }
@@ -1642,7 +1655,7 @@ void JumpToPositionInSong::run()
 		Statusbar::print("Invalid format ([m]:[ss], [s]s, [%]%, [%] accepted)");
 }
 
-bool ReverseSelection::canBeRun() const
+bool ReverseSelection::canBeRun()
 {
 	auto w = hasSongs(myScreen);
 	return w && w->allowsSelection();
@@ -1655,7 +1668,7 @@ void ReverseSelection::run()
 	Statusbar::print("Selection reversed");
 }
 
-bool RemoveSelection::canBeRun() const
+bool RemoveSelection::canBeRun()
 {
 	return proxySongList(myScreen);
 }
@@ -1668,7 +1681,7 @@ void RemoveSelection::run()
 	Statusbar::print("Selection removed");
 }
 
-bool SelectAlbum::canBeRun() const
+bool SelectAlbum::canBeRun()
 {
 	auto w = hasSongs(myScreen);
 	return w && w->allowsSelection() && w->proxySongList();
@@ -1709,7 +1722,7 @@ void SelectAlbum::run()
 	}
 }
 
-bool AddSelectedItems::canBeRun() const
+bool AddSelectedItems::canBeRun()
 {
 	return myScreen != mySelectedItemsAdder;
 }
@@ -1733,7 +1746,7 @@ void CropMainPlaylist::run()
 	Statusbar::print("Playlist cropped");
 }
 
-bool CropPlaylist::canBeRun() const
+bool CropPlaylist::canBeRun()
 {
 	return myScreen == myPlaylistEditor;
 }
@@ -1763,7 +1776,7 @@ void ClearMainPlaylist::run()
 	myPlaylist->main().reset();
 }
 
-bool ClearPlaylist::canBeRun() const
+bool ClearPlaylist::canBeRun()
 {
 	return myScreen == myPlaylistEditor;
 }
@@ -1779,7 +1792,7 @@ void ClearPlaylist::run()
 	Statusbar::printf("Playlist \"%1%\" cleared", playlist);
 }
 
-bool SortPlaylist::canBeRun() const
+bool SortPlaylist::canBeRun()
 {
 	return myScreen == myPlaylist;
 }
@@ -1789,7 +1802,7 @@ void SortPlaylist::run()
 	mySortPlaylistDialog->switchTo();
 }
 
-bool ReversePlaylist::canBeRun() const
+bool ReversePlaylist::canBeRun()
 {
 	return myScreen == myPlaylist;
 }
@@ -1799,7 +1812,7 @@ void ReversePlaylist::run()
 	myPlaylist->Reverse();
 }
 
-bool Find::canBeRun() const
+bool Find::canBeRun()
 {
 	return myScreen == myHelp
 	    || myScreen == myLyrics
@@ -1830,7 +1843,7 @@ void Find::run()
 	s->main().flush();
 }
 
-bool FindItemBackward::canBeRun() const
+bool FindItemBackward::canBeRun()
 {
 	auto w = dynamic_cast<Searchable *>(myScreen);
 	return w && w->allowsSearching();
@@ -1842,7 +1855,7 @@ void FindItemForward::run()
 	listsChangeFinisher();
 }
 
-bool FindItemForward::canBeRun() const
+bool FindItemForward::canBeRun()
 {
 	auto w = dynamic_cast<Searchable *>(myScreen);
 	return w && w->allowsSearching();
@@ -1854,7 +1867,7 @@ void FindItemBackward::run()
 	listsChangeFinisher();
 }
 
-bool NextFoundItem::canBeRun() const
+bool NextFoundItem::canBeRun()
 {
 	return dynamic_cast<Searchable *>(myScreen);
 }
@@ -1867,7 +1880,7 @@ void NextFoundItem::run()
 	listsChangeFinisher();
 }
 
-bool PreviousFoundItem::canBeRun() const
+bool PreviousFoundItem::canBeRun()
 {
 	return dynamic_cast<Searchable *>(myScreen);
 }
@@ -1919,12 +1932,6 @@ void ToggleReplayGainMode::run()
 			);
 	}
 	Statusbar::printf("Replay gain mode: %1%", Mpd.GetReplayGainMode());
-}
-
-void ToggleSpaceMode::run()
-{
-	Config.space_selects = !Config.space_selects;
-	Statusbar::printf("Space mode: %1% item", Config.space_selects ? "select" : "add");
 }
 
 void ToggleAddMode::run()
@@ -2003,7 +2010,7 @@ void AddRandomItems::run()
 	}
 }
 
-bool ToggleBrowserSortMode::canBeRun() const
+bool ToggleBrowserSortMode::canBeRun()
 {
 	return myScreen == myBrowser;
 }
@@ -2037,7 +2044,7 @@ void ToggleBrowserSortMode::run()
 	}
 }
 
-bool ToggleLibraryTagType::canBeRun() const
+bool ToggleLibraryTagType::canBeRun()
 {
 	return (myScreen->isActiveWindow(myLibrary->Tags))
 	    || (myLibrary->Columns() == 2 && myScreen->isActiveWindow(myLibrary->Albums));
@@ -2088,7 +2095,7 @@ void ToggleLibraryTagType::run()
 	}
 }
 
-bool ToggleMediaLibrarySortMode::canBeRun() const
+bool ToggleMediaLibrarySortMode::canBeRun()
 {
 	return myScreen == myLibrary;
 }
@@ -2098,7 +2105,7 @@ void ToggleMediaLibrarySortMode::run()
 	myLibrary->toggleSortMode();
 }
 
-bool RefetchLyrics::canBeRun() const
+bool RefetchLyrics::canBeRun()
 {
 #	ifdef HAVE_CURL_CURL_H
 	return myScreen == myLyrics;
@@ -2114,7 +2121,7 @@ void RefetchLyrics::run()
 #	endif // HAVE_CURL_CURL_H
 }
 
-bool SetSelectedItemsPriority::canBeRun() const
+bool SetSelectedItemsPriority::canBeRun()
 {
 	if (Mpd.Version() < 17)
 	{
@@ -2138,7 +2145,7 @@ void SetSelectedItemsPriority::run()
 	myPlaylist->SetSelectedItemsPriority(prio);
 }
 
-bool SetVisualizerSampleMultiplier::canBeRun() const
+bool SetVisualizerSampleMultiplier::canBeRun()
 {
 #	ifdef ENABLE_VISUALIZER
 	return myScreen == myVisualizer;
@@ -2169,7 +2176,7 @@ void ShowSongInfo::run()
 	mySongInfo->switchTo();
 }
 
-bool ShowArtistInfo::canBeRun() const
+bool ShowArtistInfo::canBeRun()
 {
 	#ifdef HAVE_CURL_CURL_H
 	return myScreen == myLastfm
@@ -2259,7 +2266,7 @@ void PreviousScreen::run()
 	}
 }
 
-bool ShowHelp::canBeRun() const
+bool ShowHelp::canBeRun()
 {
 	return myScreen != myHelp
 #	ifdef HAVE_TAGLIB_H
@@ -2273,7 +2280,7 @@ void ShowHelp::run()
 	myHelp->switchTo();
 }
 
-bool ShowPlaylist::canBeRun() const
+bool ShowPlaylist::canBeRun()
 {
 	return myScreen != myPlaylist
 #	ifdef HAVE_TAGLIB_H
@@ -2287,7 +2294,7 @@ void ShowPlaylist::run()
 	myPlaylist->switchTo();
 }
 
-bool ShowBrowser::canBeRun() const
+bool ShowBrowser::canBeRun()
 {
 	return myScreen != myBrowser
 #	ifdef HAVE_TAGLIB_H
@@ -2301,7 +2308,7 @@ void ShowBrowser::run()
 	myBrowser->switchTo();
 }
 
-bool ChangeBrowseMode::canBeRun() const
+bool ChangeBrowseMode::canBeRun()
 {
 	return myScreen == myBrowser;
 }
@@ -2311,7 +2318,7 @@ void ChangeBrowseMode::run()
 	myBrowser->changeBrowseMode();
 }
 
-bool ShowSearchEngine::canBeRun() const
+bool ShowSearchEngine::canBeRun()
 {
 	return myScreen != mySearcher
 #	ifdef HAVE_TAGLIB_H
@@ -2325,7 +2332,7 @@ void ShowSearchEngine::run()
 	mySearcher->switchTo();
 }
 
-bool ResetSearchEngine::canBeRun() const
+bool ResetSearchEngine::canBeRun()
 {
 	return myScreen == mySearcher;
 }
@@ -2335,7 +2342,7 @@ void ResetSearchEngine::run()
 	mySearcher->reset();
 }
 
-bool ShowMediaLibrary::canBeRun() const
+bool ShowMediaLibrary::canBeRun()
 {
 	return myScreen != myLibrary
 #	ifdef HAVE_TAGLIB_H
@@ -2349,7 +2356,7 @@ void ShowMediaLibrary::run()
 	myLibrary->switchTo();
 }
 
-bool ToggleMediaLibraryColumnsMode::canBeRun() const
+bool ToggleMediaLibraryColumnsMode::canBeRun()
 {
 	return myScreen == myLibrary;
 }
@@ -2360,7 +2367,7 @@ void ToggleMediaLibraryColumnsMode::run()
 	myLibrary->refresh();
 }
 
-bool ShowPlaylistEditor::canBeRun() const
+bool ShowPlaylistEditor::canBeRun()
 {
 	return myScreen != myPlaylistEditor
 #	ifdef HAVE_TAGLIB_H
@@ -2374,7 +2381,7 @@ void ShowPlaylistEditor::run()
 	myPlaylistEditor->switchTo();
 }
 
-bool ShowTagEditor::canBeRun() const
+bool ShowTagEditor::canBeRun()
 {
 #	ifdef HAVE_TAGLIB_H
 	return myScreen != myTagEditor
@@ -2392,7 +2399,7 @@ void ShowTagEditor::run()
 #	endif // HAVE_TAGLIB_H
 }
 
-bool ShowOutputs::canBeRun() const
+bool ShowOutputs::canBeRun()
 {
 #	ifdef ENABLE_OUTPUTS
 	return myScreen != myOutputs
@@ -2412,7 +2419,7 @@ void ShowOutputs::run()
 #	endif // ENABLE_OUTPUTS
 }
 
-bool ShowVisualizer::canBeRun() const
+bool ShowVisualizer::canBeRun()
 {
 #	ifdef ENABLE_VISUALIZER
 	return myScreen != myVisualizer
@@ -2432,7 +2439,7 @@ void ShowVisualizer::run()
 #	endif // ENABLE_VISUALIZER
 }
 
-bool ShowClock::canBeRun() const
+bool ShowClock::canBeRun()
 {
 #	ifdef ENABLE_CLOCK
 	return myScreen != myClock
@@ -2453,7 +2460,7 @@ void ShowClock::run()
 }
 
 #ifdef HAVE_TAGLIB_H
-bool ShowServerInfo::canBeRun() const
+bool ShowServerInfo::canBeRun()
 {
 	return myScreen != myTinyTagEditor;
 }
@@ -2489,6 +2496,7 @@ void populateActions()
 	insert_action(new Actions::JumpToParentDirectory());
 	insert_action(new Actions::PressEnter());
 	insert_action(new Actions::PressSpace());
+	insert_action(new Actions::SelectItem());
 	insert_action(new Actions::PreviousColumn());
 	insert_action(new Actions::NextColumn());
 	insert_action(new Actions::MasterScreen());
@@ -2559,7 +2567,6 @@ void populateActions()
 	insert_action(new Actions::PreviousFoundItem());
 	insert_action(new Actions::ToggleFindMode());
 	insert_action(new Actions::ToggleReplayGainMode());
-	insert_action(new Actions::ToggleSpaceMode());
 	insert_action(new Actions::ToggleAddMode());
 	insert_action(new Actions::ToggleMouse());
 	insert_action(new Actions::ToggleBitrateVisibility());

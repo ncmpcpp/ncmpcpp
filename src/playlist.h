@@ -43,7 +43,7 @@ struct Playlist: Screen<NC::Menu<MPD::Song>>, HasSongs, Searchable, Tabbable
 	virtual void update() OVERRIDE;
 	
 	virtual void enterPressed() OVERRIDE;
-	virtual void spacePressed() OVERRIDE;
+	virtual void spacePressed() OVERRIDE { }
 	virtual void mouseButtonPressed(MEVENT me) OVERRIDE;
 	
 	virtual bool isLockable() OVERRIDE { return true; }
@@ -59,6 +59,7 @@ struct Playlist: Screen<NC::Menu<MPD::Song>>, HasSongs, Searchable, Tabbable
 	virtual ProxySongList proxySongList() OVERRIDE;
 	
 	virtual bool allowsSelection() OVERRIDE;
+	virtual void selectCurrent() OVERRIDE;
 	virtual void reverseSelection() OVERRIDE;
 	virtual std::vector<MPD::Song> getSelectedSongs() OVERRIDE;
 	

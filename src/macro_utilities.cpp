@@ -29,12 +29,12 @@ void PushCharacters::run()
 		(*m_window)->pushChar(*it);
 }
 
-bool RequireRunnable::canBeRun() const
+bool RequireRunnable::canBeRun()
 {
 	return m_action->canBeRun();
 }
 
-bool RequireScreen::canBeRun() const
+bool RequireScreen::canBeRun()
 {
 	return Global::myScreen->type() == m_screen_type;
 }

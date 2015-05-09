@@ -343,10 +343,6 @@
 ##
 #default_find_mode = wrapped
 #
-## Available values: add, select.
-##
-#default_space_mode = add
-#
 #default_tag_editor_pattern = %n - %t
 #
 #header_visibility = yes

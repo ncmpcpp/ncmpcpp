@@ -24,6 +24,7 @@
 #include <boost/format.hpp>
 #include <map>
 #include <string>
+#include "interfaces.h"
 #include "window.h"
 
 namespace Actions {
@@ -33,7 +34,7 @@ enum class Type
 	MacroUtility = 0,
 	Dummy, MouseEvent, ScrollUp, ScrollDown, ScrollUpArtist, ScrollUpAlbum,
 	ScrollDownArtist, ScrollDownAlbum, PageUp, PageDown, MoveHome, MoveEnd,
-	ToggleInterface, JumpToParentDirectory, PressEnter, PressSpace, PreviousColumn,
+	ToggleInterface, JumpToParentDirectory, PressEnter, PressSpace, SelectItem, PreviousColumn,
 	NextColumn, MasterScreen, SlaveScreen, VolumeUp, VolumeDown, DeletePlaylistItems,
 	DeleteStoredPlaylist, DeleteBrowserItems, ReplaySong, Previous, Next, Pause,
 	Stop, ExecuteCommand, SavePlaylist, MoveSortOrderUp, MoveSortOrderDown,
@@ -49,7 +50,7 @@ enum class Type
 	CropMainPlaylist, CropPlaylist, ClearMainPlaylist, ClearPlaylist, SortPlaylist,
 	ReversePlaylist, Find, FindItemForward, FindItemBackward,
 	NextFoundItem, PreviousFoundItem, ToggleFindMode, ToggleReplayGainMode,
-	ToggleSpaceMode, ToggleAddMode, ToggleMouse, ToggleBitrateVisibility,
+	ToggleAddMode, ToggleMouse, ToggleBitrateVisibility,
 	AddRandomItems, ToggleBrowserSortMode, ToggleLibraryTagType,
 	ToggleMediaLibrarySortMode, RefetchLyrics,
 	SetSelectedItemsPriority, SetVisualizerSampleMultiplier,
@@ -89,7 +90,7 @@ struct BaseAction
 	const char *name() const { return m_name; }
 	Type type() const { return m_type; }
 	
-	virtual bool canBeRun() const { return true; }
+	virtual bool canBeRun() { return true; }
 	
 	bool execute()
 	{
@@ -129,7 +130,7 @@ struct MouseEvent : public BaseAction
 	}
 	
 protected:
-	virtual bool canBeRun() const;
+	virtual bool canBeRun();
 	virtual void run();
 	
 	private:
@@ -158,7 +159,7 @@ struct ScrollUpArtist : public BaseAction
 	ScrollUpArtist() : BaseAction(Type::ScrollUpArtist, "scroll_up_artist") { }
 	
 protected:
-	virtual bool canBeRun() const;
+	virtual bool canBeRun();
 	virtual void run();
 };
 
@@ -167,7 +168,7 @@ struct ScrollUpAlbum : public BaseAction
 	ScrollUpAlbum() : BaseAction(Type::ScrollUpAlbum, "scroll_up_album") { }
 	
 protected:
-	virtual bool canBeRun() const;
+	virtual bool canBeRun();
 	virtual void run();
 };
 
@@ -176,7 +177,7 @@ struct ScrollDownArtist : public BaseAction
 	ScrollDownArtist() : BaseAction(Type::ScrollDownArtist, "scroll_down_artist") { }
 	
 protected:
-	virtual bool canBeRun() const;
+	virtual bool canBeRun();
 	virtual void run();
 };
 
@@ -185,7 +186,7 @@ struct ScrollDownAlbum : public BaseAction
 	ScrollDownAlbum() : BaseAction(Type::ScrollDownAlbum, "scroll_down_album") { }
 	
 protected:
-	virtual bool canBeRun() const;
+	virtual bool canBeRun();
 	virtual void run();
 };
 
@@ -234,7 +235,7 @@ struct JumpToParentDirectory : public BaseAction
 	JumpToParentDirectory() : BaseAction(Type::JumpToParentDirectory, "jump_to_parent_directory") { }
 	
 protected:
-	virtual bool canBeRun() const;
+	virtual bool canBeRun();
 	virtual void run();
 };
 
@@ -254,12 +255,24 @@ protected:
 	virtual void run();
 };
 
+struct SelectItem : public BaseAction
+{
+	SelectItem() : BaseAction(Type::SelectItem, "select_item") { }
+
+protected:
+	virtual bool canBeRun();
+	virtual void run();
+
+private:
+	HasSongs *hs;
+};
+
 struct PreviousColumn : public BaseAction
 {
 	PreviousColumn() : BaseAction(Type::PreviousColumn, "previous_column") { }
 	
 protected:
-	virtual bool canBeRun() const;
+	virtual bool canBeRun();
 	virtual void run();
 };
 
@@ -268,7 +281,7 @@ struct NextColumn : public BaseAction
 	NextColumn() : BaseAction(Type::NextColumn, "next_column") { }
 	
 protected:
-	virtual bool canBeRun() const;
+	virtual bool canBeRun();
 	virtual void run();
 };
 
@@ -277,7 +290,7 @@ struct MasterScreen : public BaseAction
 	MasterScreen() : BaseAction(Type::MasterScreen, "master_screen") { }
 	
 protected:
-	virtual bool canBeRun() const;
+	virtual bool canBeRun();
 	virtual void run();
 };
 
@@ -286,7 +299,7 @@ struct SlaveScreen : public BaseAction
 	SlaveScreen() : BaseAction(Type::SlaveScreen, "slave_screen") { }
 	
 protected:
-	virtual bool canBeRun() const;
+	virtual bool canBeRun();
 	virtual void run();
 };
 
@@ -311,7 +324,7 @@ struct DeletePlaylistItems : public BaseAction
 	DeletePlaylistItems() : BaseAction(Type::DeletePlaylistItems, "delete_playlist_items") { }
 	
 protected:
-	virtual bool canBeRun() const;
+	virtual bool canBeRun();
 	virtual void run();
 };
 
@@ -320,7 +333,7 @@ struct DeleteStoredPlaylist : public BaseAction
 	DeleteStoredPlaylist() : BaseAction(Type::DeleteStoredPlaylist, "delete_stored_playlist") { }
 	
 protected:
-	virtual bool canBeRun() const;
+	virtual bool canBeRun();
 	virtual void run();
 };
 
@@ -329,7 +342,7 @@ struct DeleteBrowserItems : public BaseAction
 	DeleteBrowserItems() : BaseAction(Type::DeleteBrowserItems, "delete_browser_items") { }
 	
 protected:
-	virtual bool canBeRun() const;
+	virtual bool canBeRun();
 	virtual void run();
 };
 
@@ -394,7 +407,7 @@ struct MoveSortOrderUp : public BaseAction
 	MoveSortOrderUp() : BaseAction(Type::MoveSortOrderUp, "move_sort_order_up") { }
 	
 protected:
-	virtual bool canBeRun() const;
+	virtual bool canBeRun();
 	virtual void run();
 };
 
@@ -403,7 +416,7 @@ struct MoveSortOrderDown : public BaseAction
 	MoveSortOrderDown() : BaseAction(Type::MoveSortOrderDown, "move_sort_order_down") { }
 	
 protected:
-	virtual bool canBeRun() const;
+	virtual bool canBeRun();
 	virtual void run();
 };
 
@@ -412,7 +425,7 @@ struct MoveSelectedItemsUp : public BaseAction
 	MoveSelectedItemsUp() : BaseAction(Type::MoveSelectedItemsUp, "move_selected_items_up") { }
 	
 protected:
-	virtual bool canBeRun() const;
+	virtual bool canBeRun();
 	virtual void run();
 };
 
@@ -421,7 +434,7 @@ struct MoveSelectedItemsDown : public BaseAction
 	MoveSelectedItemsDown() : BaseAction(Type::MoveSelectedItemsDown, "move_selected_items_down") { }
 	
 protected:
-	virtual bool canBeRun() const;
+	virtual bool canBeRun();
 	virtual void run();
 };
 
@@ -430,7 +443,7 @@ struct MoveSelectedItemsTo : public BaseAction
 	MoveSelectedItemsTo() : BaseAction(Type::MoveSelectedItemsTo, "move_selected_items_to") { }
 	
 protected:
-	virtual bool canBeRun() const;
+	virtual bool canBeRun();
 	virtual void run();
 };
 
@@ -439,7 +452,7 @@ struct Add : public BaseAction
 	Add() : BaseAction(Type::Add, "add") { }
 	
 protected:
-	virtual bool canBeRun() const;
+	virtual bool canBeRun();
 	virtual void run();
 };
 
@@ -448,7 +461,7 @@ struct SeekForward : public BaseAction
 	SeekForward() : BaseAction(Type::SeekForward, "seek_forward") { }
 	
 protected:
-	virtual bool canBeRun() const;
+	virtual bool canBeRun();
 	virtual void run();
 };
 
@@ -457,7 +470,7 @@ struct SeekBackward : public BaseAction
 	SeekBackward() : BaseAction(Type::SeekBackward, "seek_backward") { }
 	
 protected:
-	virtual bool canBeRun() const;
+	virtual bool canBeRun();
 	virtual void run();
 };
 
@@ -466,7 +479,7 @@ struct ToggleDisplayMode : public BaseAction
 	ToggleDisplayMode() : BaseAction(Type::ToggleDisplayMode, "toggle_display_mode") { }
 	
 protected:
-	virtual bool canBeRun() const;
+	virtual bool canBeRun();
 	virtual void run();
 };
 
@@ -476,7 +489,7 @@ struct ToggleSeparatorsBetweenAlbums : public BaseAction
 	: BaseAction(Type::ToggleSeparatorsBetweenAlbums, "toggle_separators_between_albums") { }
 	
 protected:
-	virtual bool canBeRun() const;
+	virtual bool canBeRun();
 	virtual void run();
 };
 
@@ -486,7 +499,7 @@ struct ToggleLyricsFetcher : public BaseAction
 	
 protected:
 #	ifndef HAVE_CURL_CURL_H
-	virtual bool canBeRun() const;
+	virtual bool canBeRun();
 #	endif // NOT HAVE_CURL_CURL_H
 	virtual void run();
 };
@@ -498,7 +511,7 @@ struct ToggleFetchingLyricsInBackground : public BaseAction
 	
 protected:
 #	ifndef HAVE_CURL_CURL_H
-	virtual bool canBeRun() const;
+	virtual bool canBeRun();
 #	endif // NOT HAVE_CURL_CURL_H
 	virtual void run();
 };
@@ -525,7 +538,7 @@ struct JumpToPlayingSong : public BaseAction
 	JumpToPlayingSong() : BaseAction(Type::JumpToPlayingSong, "jump_to_playing_song") { }
 	
 protected:
-	virtual bool canBeRun() const;
+	virtual bool canBeRun();
 	virtual void run();
 };
 
@@ -558,7 +571,7 @@ struct StartSearching : public BaseAction
 	StartSearching() : BaseAction(Type::StartSearching, "start_searching") { }
 	
 protected:
-	virtual bool canBeRun() const;
+	virtual bool canBeRun();
 	virtual void run();
 };
 
@@ -567,7 +580,7 @@ struct SaveTagChanges : public BaseAction
 	SaveTagChanges() : BaseAction(Type::SaveTagChanges, "save_tag_changes") { }
 	
 protected:
-	virtual bool canBeRun() const;
+	virtual bool canBeRun();
 	virtual void run();
 };
 
@@ -616,7 +629,7 @@ struct EditSong : public BaseAction
 	EditSong() : BaseAction(Type::EditSong, "edit_song") { }
 	
 protected:
-	virtual bool canBeRun() const;
+	virtual bool canBeRun();
 	virtual void run();
 };
 
@@ -625,7 +638,7 @@ struct EditLibraryTag : public BaseAction
 	EditLibraryTag() : BaseAction(Type::EditLibraryTag, "edit_library_tag") { }
 	
 protected:
-	virtual bool canBeRun() const;
+	virtual bool canBeRun();
 	virtual void run();
 };
 
@@ -634,7 +647,7 @@ struct EditLibraryAlbum : public BaseAction
 	EditLibraryAlbum() : BaseAction(Type::EditLibraryAlbum, "edit_library_album") { }
 	
 protected:
-	virtual bool canBeRun() const;
+	virtual bool canBeRun();
 	virtual void run();
 };
 
@@ -643,7 +656,7 @@ struct EditDirectoryName : public BaseAction
 	EditDirectoryName() : BaseAction(Type::EditDirectoryName, "edit_directory_name") { }
 	
 protected:
-	virtual bool canBeRun() const;
+	virtual bool canBeRun();
 	virtual void run();
 };
 
@@ -652,7 +665,7 @@ struct EditPlaylistName : public BaseAction
 	EditPlaylistName() : BaseAction(Type::EditPlaylistName, "edit_playlist_name") { }
 	
 protected:
-	virtual bool canBeRun() const;
+	virtual bool canBeRun();
 	virtual void run();
 };
 
@@ -661,7 +674,7 @@ struct EditLyrics : public BaseAction
 	EditLyrics() : BaseAction(Type::EditLyrics, "edit_lyrics") { }
 	
 protected:
-	virtual bool canBeRun() const;
+	virtual bool canBeRun();
 	virtual void run();
 };
 
@@ -670,7 +683,7 @@ struct JumpToBrowser : public BaseAction
 	JumpToBrowser() : BaseAction(Type::JumpToBrowser, "jump_to_browser") { }
 	
 protected:
-	virtual bool canBeRun() const;
+	virtual bool canBeRun();
 	virtual void run();
 };
 
@@ -679,7 +692,7 @@ struct JumpToMediaLibrary : public BaseAction
 	JumpToMediaLibrary() : BaseAction(Type::JumpToMediaLibrary, "jump_to_media_library") { }
 	
 protected:
-	virtual bool canBeRun() const;
+	virtual bool canBeRun();
 	virtual void run();
 };
 
@@ -688,7 +701,7 @@ struct JumpToPlaylistEditor : public BaseAction
 	JumpToPlaylistEditor() : BaseAction(Type::JumpToPlaylistEditor, "jump_to_playlist_editor") { }
 	
 protected:
-	virtual bool canBeRun() const;
+	virtual bool canBeRun();
 	virtual void run();
 };
 
@@ -705,7 +718,7 @@ struct JumpToTagEditor : public BaseAction
 	JumpToTagEditor() : BaseAction(Type::JumpToTagEditor, "jump_to_tag_editor") { }
 	
 protected:
-	virtual bool canBeRun() const;
+	virtual bool canBeRun();
 	virtual void run();
 };
 
@@ -714,7 +727,7 @@ struct JumpToPositionInSong : public BaseAction
 	JumpToPositionInSong() : BaseAction(Type::JumpToPositionInSong, "jump_to_position_in_song") { }
 	
 protected:
-	virtual bool canBeRun() const;
+	virtual bool canBeRun();
 	virtual void run();
 };
 
@@ -723,7 +736,7 @@ struct ReverseSelection : public BaseAction
 	ReverseSelection() : BaseAction(Type::ReverseSelection, "reverse_selection") { }
 	
 protected:
-	virtual bool canBeRun() const;
+	virtual bool canBeRun();
 	virtual void run();
 };
 
@@ -732,7 +745,7 @@ struct RemoveSelection : public BaseAction
 	RemoveSelection() : BaseAction(Type::RemoveSelection, "remove_selection") { }
 	
 protected:
-	virtual bool canBeRun() const;
+	virtual bool canBeRun();
 	virtual void run();
 };
 
@@ -741,7 +754,7 @@ struct SelectAlbum : public BaseAction
 	SelectAlbum() : BaseAction(Type::SelectAlbum, "select_album") { }
 	
 protected:
-	virtual bool canBeRun() const;
+	virtual bool canBeRun();
 	virtual void run();
 };
 
@@ -750,7 +763,7 @@ struct AddSelectedItems : public BaseAction
 	AddSelectedItems() : BaseAction(Type::AddSelectedItems, "add_selected_items") { }
 	
 protected:
-	virtual bool canBeRun() const;
+	virtual bool canBeRun();
 	virtual void run();
 };
 
@@ -767,7 +780,7 @@ struct CropPlaylist : public BaseAction
 	CropPlaylist() : BaseAction(Type::CropPlaylist, "crop_playlist") { }
 	
 protected:
-	virtual bool canBeRun() const;
+	virtual bool canBeRun();
 	virtual void run();
 };
 
@@ -784,7 +797,7 @@ struct ClearPlaylist : public BaseAction
 	ClearPlaylist() : BaseAction(Type::ClearPlaylist, "clear_playlist") { }
 	
 protected:
-	virtual bool canBeRun() const;
+	virtual bool canBeRun();
 	virtual void run();
 };
 
@@ -793,7 +806,7 @@ struct SortPlaylist : public BaseAction
 	SortPlaylist() : BaseAction(Type::SortPlaylist, "sort_playlist") { }
 	
 protected:
-	virtual bool canBeRun() const;
+	virtual bool canBeRun();
 	virtual void run();
 };
 
@@ -802,7 +815,7 @@ struct ReversePlaylist : public BaseAction
 	ReversePlaylist() : BaseAction(Type::ReversePlaylist, "reverse_playlist") { }
 	
 protected:
-	virtual bool canBeRun() const;
+	virtual bool canBeRun();
 	virtual void run();
 };
 
@@ -811,7 +824,7 @@ struct Find : public BaseAction
 	Find() : BaseAction(Type::Find, "find") { }
 	
 protected:
-	virtual bool canBeRun() const;
+	virtual bool canBeRun();
 	virtual void run();
 };
 
@@ -820,7 +833,7 @@ struct FindItemForward : public BaseAction
 	FindItemForward() : BaseAction(Type::FindItemForward, "find_item_forward") { }
 	
 protected:
-	virtual bool canBeRun() const;
+	virtual bool canBeRun();
 	virtual void run();
 };
 
@@ -829,7 +842,7 @@ struct FindItemBackward : public BaseAction
 	FindItemBackward() : BaseAction(Type::FindItemBackward, "find_item_backward") { }
 	
 protected:
-	virtual bool canBeRun() const;
+	virtual bool canBeRun();
 	virtual void run();
 };
 
@@ -838,7 +851,7 @@ struct NextFoundItem : public BaseAction
 	NextFoundItem() : BaseAction(Type::NextFoundItem, "next_found_item") { }
 	
 protected:
-	virtual bool canBeRun() const;
+	virtual bool canBeRun();
 	virtual void run();
 };
 
@@ -847,7 +860,7 @@ struct PreviousFoundItem : public BaseAction
 	PreviousFoundItem() : BaseAction(Type::PreviousFoundItem, "previous_found_item") { }
 	
 protected:
-	virtual bool canBeRun() const;
+	virtual bool canBeRun();
 	virtual void run();
 };
 
@@ -862,14 +875,6 @@ protected:
 struct ToggleReplayGainMode : public BaseAction
 {
 	ToggleReplayGainMode() : BaseAction(Type::ToggleReplayGainMode, "toggle_replay_gain_mode") { }
-	
-protected:
-	virtual void run();
-};
-
-struct ToggleSpaceMode : public BaseAction
-{
-	ToggleSpaceMode() : BaseAction(Type::ToggleSpaceMode, "toggle_space_mode") { }
 	
 protected:
 	virtual void run();
@@ -912,7 +917,7 @@ struct ToggleBrowserSortMode : public BaseAction
 	ToggleBrowserSortMode() : BaseAction(Type::ToggleBrowserSortMode, "toggle_browser_sort_mode") { }
 	
 protected:
-	virtual bool canBeRun() const;
+	virtual bool canBeRun();
 	virtual void run();
 };
 
@@ -921,7 +926,7 @@ struct ToggleLibraryTagType : public BaseAction
 	ToggleLibraryTagType() : BaseAction(Type::ToggleLibraryTagType, "toggle_library_tag_type") { }
 	
 protected:
-	virtual bool canBeRun() const;
+	virtual bool canBeRun();
 	virtual void run();
 };
 
@@ -931,7 +936,7 @@ struct ToggleMediaLibrarySortMode : public BaseAction
 	: BaseAction(Type::ToggleMediaLibrarySortMode, "toggle_media_library_sort_mode") { }
 	
 protected:
-	virtual bool canBeRun() const;
+	virtual bool canBeRun();
 	virtual void run();
 };
 
@@ -940,7 +945,7 @@ struct RefetchLyrics : public BaseAction
 	RefetchLyrics() : BaseAction(Type::RefetchLyrics, "refetch_lyrics") { }
 	
 protected:
-	virtual bool canBeRun() const;
+	virtual bool canBeRun();
 	virtual void run();
 };
 
@@ -950,7 +955,7 @@ struct SetSelectedItemsPriority : public BaseAction
 	: BaseAction(Type::SetSelectedItemsPriority, "set_selected_items_priority") { }
 	
 protected:
-	virtual bool canBeRun() const;
+	virtual bool canBeRun();
 	virtual void run();
 };
 
@@ -960,7 +965,7 @@ struct SetVisualizerSampleMultiplier : public BaseAction
 	: BaseAction(Type::SetVisualizerSampleMultiplier, "set_visualizer_sample_multiplier") { }
 
 protected:
-	virtual bool canBeRun() const;
+	virtual bool canBeRun();
 	virtual void run();
 };
 
@@ -977,7 +982,7 @@ struct ShowArtistInfo : public BaseAction
 	ShowArtistInfo() : BaseAction(Type::ShowArtistInfo, "show_artist_info") { }
 	
 protected:
-	virtual bool canBeRun() const;
+	virtual bool canBeRun();
 	virtual void run();
 };
 
@@ -1018,7 +1023,7 @@ struct ShowHelp : public BaseAction
 	ShowHelp() : BaseAction(Type::ShowHelp, "show_help") { }
 	
 protected:
-	virtual bool canBeRun() const;
+	virtual bool canBeRun();
 	virtual void run();
 };
 
@@ -1027,7 +1032,7 @@ struct ShowPlaylist : public BaseAction
 	ShowPlaylist() : BaseAction(Type::ShowPlaylist, "show_playlist") { }
 	
 protected:
-	virtual bool canBeRun() const;
+	virtual bool canBeRun();
 	virtual void run();
 };
 
@@ -1036,7 +1041,7 @@ struct ShowBrowser : public BaseAction
 	ShowBrowser() : BaseAction(Type::ShowBrowser, "show_browser") { }
 	
 protected:
-	virtual bool canBeRun() const;
+	virtual bool canBeRun();
 	virtual void run();
 };
 
@@ -1045,7 +1050,7 @@ struct ChangeBrowseMode : public BaseAction
 	ChangeBrowseMode() : BaseAction(Type::ChangeBrowseMode, "change_browse_mode") { }
 	
 protected:
-	virtual bool canBeRun() const;
+	virtual bool canBeRun();
 	virtual void run();
 };
 
@@ -1054,7 +1059,7 @@ struct ShowSearchEngine : public BaseAction
 	ShowSearchEngine() : BaseAction(Type::ShowSearchEngine, "show_search_engine") { }
 	
 protected:
-	virtual bool canBeRun() const;
+	virtual bool canBeRun();
 	virtual void run();
 };
 
@@ -1063,7 +1068,7 @@ struct ResetSearchEngine : public BaseAction
 	ResetSearchEngine() : BaseAction(Type::ResetSearchEngine, "reset_search_engine") { }
 	
 protected:
-	virtual bool canBeRun() const;
+	virtual bool canBeRun();
 	virtual void run();
 };
 
@@ -1072,7 +1077,7 @@ struct ShowMediaLibrary : public BaseAction
 	ShowMediaLibrary() : BaseAction(Type::ShowMediaLibrary, "show_media_library") { }
 	
 protected:
-	virtual bool canBeRun() const;
+	virtual bool canBeRun();
 	virtual void run();
 };
 
@@ -1082,7 +1087,7 @@ struct ToggleMediaLibraryColumnsMode : public BaseAction
 	: BaseAction(Type::ToggleMediaLibraryColumnsMode, "toggle_media_library_columns_mode") { }
 	
 protected:
-	virtual bool canBeRun() const;
+	virtual bool canBeRun();
 	virtual void run();
 };
 
@@ -1091,7 +1096,7 @@ struct ShowPlaylistEditor : public BaseAction
 	ShowPlaylistEditor() : BaseAction(Type::ShowPlaylistEditor, "show_playlist_editor") { }
 	
 protected:
-	virtual bool canBeRun() const;
+	virtual bool canBeRun();
 	virtual void run();
 };
 
@@ -1100,7 +1105,7 @@ struct ShowTagEditor : public BaseAction
 	ShowTagEditor() : BaseAction(Type::ShowTagEditor, "show_tag_editor") { }
 	
 protected:
-	virtual bool canBeRun() const;
+	virtual bool canBeRun();
 	virtual void run();
 };
 
@@ -1109,7 +1114,7 @@ struct ShowOutputs : public BaseAction
 	ShowOutputs() : BaseAction(Type::ShowOutputs, "show_outputs") { }
 	
 protected:
-	virtual bool canBeRun() const;
+	virtual bool canBeRun();
 	virtual void run();
 };
 
@@ -1118,7 +1123,7 @@ struct ShowVisualizer : public BaseAction
 	ShowVisualizer() : BaseAction(Type::ShowVisualizer, "show_visualizer") { }
 	
 protected:
-	virtual bool canBeRun() const;
+	virtual bool canBeRun();
 	virtual void run();
 };
 
@@ -1127,7 +1132,7 @@ struct ShowClock : public BaseAction
 	ShowClock() : BaseAction(Type::ShowClock, "show_clock") { }
 	
 protected:
-	virtual bool canBeRun() const;
+	virtual bool canBeRun();
 	virtual void run();
 };
 
@@ -1137,7 +1142,7 @@ struct ShowServerInfo : public BaseAction
 	
 protected:
 #	ifdef HAVE_TAGLIB_H
-	virtual bool canBeRun() const;
+	virtual bool canBeRun();
 #	endif // HAVE_TAGLIB_H
 	virtual void run();
 };

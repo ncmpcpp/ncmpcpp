@@ -59,6 +59,7 @@ struct MediaLibrary: Screen<NC::Window *>, HasColumns, HasSongs, Searchable, Tab
 	virtual ProxySongList proxySongList() OVERRIDE;
 	
 	virtual bool allowsSelection() OVERRIDE;
+	virtual void selectCurrent() OVERRIDE;
 	virtual void reverseSelection() OVERRIDE;
 	virtual std::vector<MPD::Song> getSelectedSongs() OVERRIDE;
 	

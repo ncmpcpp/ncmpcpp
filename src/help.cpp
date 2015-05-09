@@ -225,11 +225,11 @@ void write_bindings(NC::Scrollpad &w)
 		boost::format("Increase volume by %1%%%") % Config.volume_change_step
 	);
 	w << '\n';
-	key(w, Type::ToggleSpaceMode, "Toggle space mode (select/add)");
 	key(w, Type::ToggleAddMode, "Toggle add mode (add or remove/always add)");
 	key(w, Type::ToggleMouse, "Toggle mouse support");
 	key(w, Type::ReverseSelection, "Reverse selection");
 	key(w, Type::RemoveSelection, "Remove selection");
+	key(w, Type::SelectItem, "Select current item");
 	key(w, Type::SelectAlbum, "Select songs of album around the cursor");
 	key(w, Type::AddSelectedItems, "Add selected items to playlist");
 	key(w, Type::AddRandomItems, "Add random items to playlist");
@@ -295,7 +295,7 @@ void write_bindings(NC::Scrollpad &w)
 
 	key_section(w, "Browser");
 	key(w, Type::PressEnter, "Enter directory/Add item to playlist and play it");
-	key(w, Type::PressSpace, "Add item to playlist/select it");
+	key(w, Type::PressSpace, "Add item to playlist");
 #	ifdef HAVE_TAGLIB_H
 	key(w, Type::EditSong, "Edit song");
 #	endif // HAVE_TAGLIB_H
@@ -334,7 +334,7 @@ void write_bindings(NC::Scrollpad &w)
 	key(w, Type::PreviousColumn, "Previous column");
 	key(w, Type::NextColumn, "Next column");
 	key(w, Type::PressEnter, "Add item to playlist and play it");
-	key(w, Type::PressSpace, "Add item to playlist/select it");
+	key(w, Type::PressSpace, "Add item to playlist");
 #	ifdef HAVE_TAGLIB_H
 	key(w, Type::EditSong, "Edit song");
 #	endif // HAVE_TAGLIB_H
@@ -359,8 +359,6 @@ void write_bindings(NC::Scrollpad &w)
 	key_section(w, "Tag editor");
 	key(w, Type::PressEnter, "Edit tag/filename of selected item (left column)");
 	key(w, Type::PressEnter, "Perform operation on all/selected items (middle column)");
-	key(w, Type::PressSpace, "Switch to albums/directories view (left column)");
-	key(w, Type::PressSpace, "Select item (right column)");
 	key(w, Type::PreviousColumn, "Previous column");
 	key(w, Type::NextColumn, "Next column");
 	key(w, Type::JumpToParentDirectory, "Jump to parent directory (left column, directories view)");

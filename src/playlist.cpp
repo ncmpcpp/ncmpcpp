@@ -134,15 +134,6 @@ void Playlist::enterPressed()
 		Mpd.PlayID(w.current()->value().getID());
 }
 
-void Playlist::spacePressed()
-{
-	if (!w.empty())
-	{
-		w.current()->setSelected(!w.current()->isSelected());
-		w.scroll(NC::Scroll::Down);
-	}
-}
-
 void Playlist::mouseButtonPressed(MEVENT me)
 {
 	if (!w.empty() && w.hasCoords(me.x, me.y))
@@ -193,7 +184,12 @@ ProxySongList Playlist::proxySongList()
 
 bool Playlist::allowsSelection()
 {
-	return true;
+	return !w.empty();
+}
+
+void Playlist::selectCurrent()
+{
+	w.current()->setSelected(!w.current()->isSelected());
 }
 
 void Playlist::reverseSelection()
