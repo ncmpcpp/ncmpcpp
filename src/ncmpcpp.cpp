@@ -135,7 +135,11 @@ int main(int argc, char **argv)
 
 	// go to startup screen
 	if (Config.startup_screen_type != myScreen->type())
-		toScreen(Config.startup_screen_type)->switchTo();
+	{
+		auto startup_screen = toScreen(Config.startup_screen_type);
+		assert(startup_screen != nullptr);
+		startup_screen->switchTo();
+	}
 
 	// lock current screen and go to the slave one if applicable
 	if (Config.startup_slave_screen_type)
