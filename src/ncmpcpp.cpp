@@ -144,10 +144,16 @@ int main(int argc, char **argv)
 	// lock current screen and go to the slave one if applicable
 	if (Config.startup_slave_screen_type)
 	{
-		auto slave_screen = *Config.startup_slave_screen_type;
+		auto slave_screen_type = *Config.startup_slave_screen_type;
 		bool screen_locked = myScreen->lock();
-		if (screen_locked && slave_screen != myScreen->type())
-			toScreen(slave_screen)->switchTo();
+		if (screen_locked && slave_screen_type != myScreen->type())
+		{
+			auto slave_screen = toScreen(slave_screen_type);
+			assert(slave_screen != nullptr);
+			slave_screen->switchTo();
+			if (!Config.startup_slave_screen_focus)
+				Actions::get(Actions::Type::MasterScreen).execute();
+		}
 	}
 
 	// local variables

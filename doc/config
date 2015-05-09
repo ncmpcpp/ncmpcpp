@@ -411,6 +411,8 @@
 ##
 #startup_slave_screen = ""
 #
+#startup_slave_screen_focus = no
+#
 ##
 ## Default width of locked screen (in %).
 ## Acceptable values are from 20 to 80.

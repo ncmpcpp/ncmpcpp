@@ -165,6 +165,7 @@ struct Configuration
 	bool ask_for_locked_screen_width_part;
 	bool allow_for_physical_item_deletion;
 	bool progressbar_boldness;
+	bool startup_slave_screen_focus;
 
 	unsigned mpd_connection_timeout;
 	unsigned crossfade_time;

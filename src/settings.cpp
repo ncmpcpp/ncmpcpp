@@ -546,6 +546,9 @@ bool Configuration::read(const std::vector<std::string> &config_paths, bool igno
 		}
 	}, defaults_to(startup_slave_screen_type, boost::none)
 	));
+	p.add("startup_slave_screen_focus", yes_no(
+		startup_slave_screen_focus, false
+	));
 	p.add("locked_screen_width_part", assign_default<double>(
 		locked_screen_width_part, 50.0, [](double v) {
 			return v / 100;
