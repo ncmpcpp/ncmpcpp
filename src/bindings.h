@@ -33,42 +33,23 @@ struct Key
 {
 	enum Type { Standard, NCurses };
 	
-	Key(wchar_t ch, Type ct) : m_char(ch), m_type(ct) { }
+	Key(wchar_t ch, Type ct) : m_impl(ch, ct) { }
 	
-	wchar_t getChar() const {
-		return m_char;
-	}
-	Type getType() const {
-		return m_type;
-	}
+	wchar_t getChar() const { return std::get<0>(m_impl); }
+	Type getType() const { return std::get<1>(m_impl); }
 	
-#	define KEYS_DEFINE_OPERATOR(CMP) \
-	bool operator CMP (const Key &k) const { \
-		if (m_char CMP k.m_char) \
-			return true; \
-		if (m_char != k.m_char) \
-			return false; \
-		return m_type CMP k.m_type; \
-	}
-	KEYS_DEFINE_OPERATOR(<);
-	KEYS_DEFINE_OPERATOR(<=);
-	KEYS_DEFINE_OPERATOR(>);
-	KEYS_DEFINE_OPERATOR(>=);
-#	undef KEYS_DEFINE_OPERATOR
-	
-	bool operator==(const Key &k) const {
-		return m_char == k.m_char && m_type == k.m_type;
-	}
-	bool operator!=(const Key &k) const {
-		return !(*this == k);
-	}
-	
+	bool operator< (const Key &rhs) const { return m_impl <  rhs.m_impl; }
+	bool operator<=(const Key &rhs) const { return m_impl <= rhs.m_impl; }
+	bool operator> (const Key &rhs) const { return m_impl >  rhs.m_impl; }
+	bool operator>=(const Key &rhs) const { return m_impl >= rhs.m_impl; }
+	bool operator==(const Key &rhs) const { return m_impl == rhs.m_impl; }
+	bool operator!=(const Key &rhs) const { return m_impl != rhs.m_impl; }
+
 	static Key read(NC::Window &w);
 	static Key noOp;
 	
-	private:
-		wchar_t m_char;
-		Type m_type;
+private:
+	std::tuple<wchar_t, Type> m_impl;
 };
 
 /// Represents either single action or chain of actions bound to a certain key
@@ -108,14 +89,13 @@ struct Command
 {
 	template <typename ArgT>
 	Command(ArgT &&binding_, bool immediate_)
-	: m_binding(std::forward<ArgT>(binding_)), m_immediate(immediate_) { }
+	: m_impl(std::forward<ArgT>(binding_), immediate_) { }
 	
-	const Binding &binding() const { return m_binding; }
-	bool immediate() const { return m_immediate; }
+	const Binding &binding() const { return std::get<0>(m_impl); }
+	bool immediate() const { return std::get<1>(m_impl); }
 	
 private:
-	Binding m_binding;
-	bool m_immediate;
+	std::tuple<Binding, bool> m_impl;
 };
 
 /// Keybindings configuration
