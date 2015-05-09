@@ -135,36 +135,21 @@ struct Color
 	static const short transparent;
 	static const short previous;
 
-	Color() : m_rep(0, transparent, true, false) { }
+	Color() : m_impl(0, transparent, true, false) { }
 	Color(short foreground_value, short background_value,
 			 bool is_default = false, bool is_end = false)
-	: m_rep(foreground_value, background_value, is_default, is_end)
+	: m_impl(foreground_value, background_value, is_default, is_end)
 	{
 		if (isDefault() && isEnd())
 			throw std::logic_error("Color flag can't be marked as both 'default' and 'end'");
 	}
 
-	bool operator==(const Color &rhs) const
-	{
-		return m_rep == rhs.m_rep;
-	}
-	bool operator!=(const Color &rhs) const
-	{
-		return m_rep != rhs.m_rep;
-	}
-	bool operator<(const Color &rhs) const
-	{
-		return m_rep < rhs.m_rep;
-	}
+	bool operator==(const Color &rhs) const { return m_impl == rhs.m_impl; }
+	bool operator!=(const Color &rhs) const { return m_impl != rhs.m_impl; }
+	bool operator<(const Color &rhs) const { return m_impl < rhs.m_impl; }
 
-	bool isDefault() const
-	{
-		return std::get<2>(m_rep);
-	}
-	bool isEnd() const
-	{
-		return std::get<3>(m_rep);
-	}
+	bool isDefault() const { return std::get<2>(m_impl); }
+	bool isEnd() const { return std::get<3>(m_impl); }
 
 	int pairNumber() const;
 
@@ -180,20 +165,11 @@ struct Color
 	static Color End;
 
 private:
-	short foreground() const
-	{
-		return std::get<0>(m_rep);
-	}
-	short background() const
-	{
-		return std::get<1>(m_rep);
-	}
-	bool previousBackground() const
-	{
-		return background() == previous;
-	}
+	short foreground() const { return std::get<0>(m_impl); }
+	short background() const { return std::get<1>(m_impl); }
+	bool previousBackground() const { return background() == previous; }
 
-	std::tuple<short, short, bool, bool> m_rep;
+	std::tuple<short, short, bool, bool> m_impl;
 };
 
 std::istream &operator>>(std::istream &is, Color &f);
