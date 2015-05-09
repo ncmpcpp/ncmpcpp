@@ -318,16 +318,12 @@ void enable()
 {
 	if (mouseEnabled)
 		return;
-#	if NCURSES_SEQUENCE_ESCAPING
-	mousemask(ALL_MOUSE_EVENTS, nullptr);
-#	else
 	// save old highlight mouse tracking
 	printf("\e[?1001s");
 	// enable mouse tracking
 	printf("\e[?1000h");
 	// try to enable extended (urxvt) mouse tracking
 	printf("\e[?1015h");
-#	endif // NCURSES_SEQUENCE_ESCAPING
 	mouseEnabled = true;
 }
 
@@ -335,16 +331,12 @@ void disable()
 {
 	if (!mouseEnabled)
 		return;
-#	if NCURSES_SEQUENCE_ESCAPING
-	mousemask(0, nullptr);
-#	else
 	// disable extended (urxvt) mouse tracking
 	printf("\e[?1015l");
 	// disable mouse tracking
 	printf("\e[?1000l");
 	// restore old highlight mouse tracking
 	printf("\e[?1001r");
-#	endif // NCURSES_SEQUENCE_ESCAPING
 	mouseEnabled = false;
 }
 
@@ -370,9 +362,6 @@ void initScreen(bool enable_colors, bool enable_mouse)
 	curs_set(0);
 
 	// setup mouse
-#	if NCURSES_SEQUENCE_ESCAPING
-	mouseinterval(0);
-#	endif // NCURSES_SEQUENCE_ESCAPING
 	if (enable_mouse)
 		Mouse::enable();
 
@@ -457,9 +446,6 @@ Window::Window(size_t startx,
 	m_window = newpad(m_height, m_width);
 	
 	setColor(m_color);
-#	if NCURSES_SEQUENCE_ESCAPING
-	keypad(m_window, 1);
-#	endif // NCURSES_SEQUENCE_ESCAPING
 }
 
 Window::Window(const Window &rhs)
@@ -602,9 +588,6 @@ void Window::recreate(size_t width, size_t height)
 	m_window = newpad(height, width);
 	setTimeout(m_window_timeout);
 	setColor(m_color);
-#	if NCURSES_SEQUENCE_ESCAPING
-	keypad(m_window, 1);
-#	endif // NCURSES_SEQUENCE_ESCAPING
 }
 
 void Window::moveTo(size_t new_x, size_t new_y)
@@ -742,9 +725,6 @@ bool Window::FDCallbacksListEmpty() const
 
 int Window::getInputChar()
 {
-#	if NCURSES_SEQUENCE_ESCAPING
-	return wgetch(m_window);
-#	else
 	int key = wgetch(m_window);
 	if (!m_escape_terminal_sequences || key != KEY_ESCAPE)
 		return key;
@@ -950,7 +930,6 @@ int Window::getInputChar()
 		m_input_queue.push(key);
 		return KEY_ESCAPE;
 	}
-#	endif // NCURSES_SEQUENCE_ESCAPING
 }
 
 int Window::readKey()
@@ -1008,17 +987,11 @@ std::string Window::prompt(const std::string &base, size_t width, bool encrypted
 	rl::base = base.c_str();
 
 	curs_set(1);
-#	if NCURSES_SEQUENCE_ESCAPING
-	keypad(m_window, 0);
-#	endif // NCURSES_SEQUENCE_ESCAPING
 	Mouse::disable();
 	m_escape_terminal_sequences = false;
 	char *input = readline(nullptr);
 	m_escape_terminal_sequences = true;
 	Mouse::enable();
-#	if NCURSES_SEQUENCE_ESCAPING
-	keypad(m_window, 1);
-#	endif // NCURSES_SEQUENCE_ESCAPING
 	curs_set(0);
 	if (input != nullptr)
 	{
@@ -1125,9 +1098,6 @@ int Window::getTimeout() const
 
 const MEVENT &Window::getMouseEvent()
 {
-#	if NCURSES_SEQUENCE_ESCAPING
-	getmouse(&m_mouse_event);
-#	endif // NCURSES_SEQUENCE_ESCAPING
 	return m_mouse_event;
 }
 

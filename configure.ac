@@ -14,7 +14,6 @@ AC_ARG_ENABLE(visualizer, AS_HELP_STRING([--enable-visualizer], [Enable music vi
 AC_ARG_ENABLE(clock, AS_HELP_STRING([--enable-clock], [Enable clock screen @<:@default=no@:>@]), [clock=$enableval], [clock=no])
 AC_ARG_ENABLE(unicode, AS_HELP_STRING([--enable-unicode], [Enable utf8 support @<:@default=yes@:>@]), [unicode=$enableval], [unicode=yes])
 
-AC_ARG_WITH(ncurses-sequence-escaping, AS_HELP_STRING([--with-ncurses-sequence-escaping], [Use built-in ncurses terminal sequence escaping @<:@default=no@:>@]), [ncurses_sequence_escaping=$withval], [ncurses_sequence_escaping=no])
 AC_ARG_WITH(curl, AS_HELP_STRING([--with-curl], [Enable fetching lyrics from the Internet @<:@default=auto@:>@]), [curl=$withval], [curl=auto])
 AC_ARG_WITH(fftw, AS_HELP_STRING([--with-fftw], [Enable fftw support (required for frequency spectrum vizualization) @<:@default=auto@:>@]), [fftw=$withval], [fftw=auto])
 AC_ARG_WITH(taglib, AS_HELP_STRING([--with-taglib], [Enable tag editor @<:@default=auto@:>@]), [taglib=$withval], [taglib=auto])
@@ -25,13 +24,6 @@ fi
 
 if test "$clock" = "yes"; then
 	AC_DEFINE([ENABLE_CLOCK], [1], [enables clock screen])
-fi
-
-AH_TEMPLATE([NCURSES_SEQUENCE_ESCAPING], [Use built-in ncurses terminal sequence escaping])
-if test "$ncurses_sequence_escaping" = "yes"; then
-	AC_DEFINE([NCURSES_SEQUENCE_ESCAPING], [1])
-else
-	AC_DEFINE([NCURSES_SEQUENCE_ESCAPING], [0])
 fi
 
 dnl ================================

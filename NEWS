@@ -19,7 +19,7 @@ ncmpcpp-0.7 (????-??-??)
 * Support for the Perl regular expression syntax was added.
 * BOOST_LIB_SUFFIX configure variable is now empty by default.
 * Shuffle function now shuffles only selected range if selection in playlist is active.
-* Do not use ncurses terminal sequence escaping by default as it doesn't have enough support for mouse events.
+* NCurses terminal sequence escaping is no longer used as it's not accurate enough.
 
 ncmpcpp-0.6.4 (2015-05-02)
 
