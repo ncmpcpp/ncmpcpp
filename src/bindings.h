@@ -132,31 +132,13 @@ class BindingsConfiguration
 public:
 	typedef BindingsMap::value_type::second_type::iterator BindingIterator;
 	typedef BindingsMap::value_type::second_type::const_iterator ConstBindingIterator;
-	
+	typedef std::pair<BindingIterator, BindingIterator> BindingIteratorPair;
+
 	bool read(const std::string &file);
 	void generateDefaults();
 	
-	const Command *findCommand(const std::string &name) {
-		const Command *ptr = 0;
-		auto it = m_commands.find(name);
-		if (it != m_commands.end())
-			ptr = &it->second;
-		return ptr;
-	}
-	
-	std::pair<BindingIterator, BindingIterator> get(const Key &k) {
-		std::pair<BindingIterator, BindingIterator> result;
-		auto it = m_bindings.find(k);
-		if (it != m_bindings.end()) {
-			result.first = it->second.begin();
-			result.second = it->second.end();
-		} else {
-			auto list_end = m_bindings.begin()->second.end();
-			result.first = list_end;
-			result.second = list_end;
-		}
-		return result;
-	}
+	const Command *findCommand(const std::string &name);
+	BindingIteratorPair get(const Key &k);
 	
 	BindingsMap::const_iterator begin() const { return m_bindings.begin(); }
 	BindingsMap::const_iterator end() const { return m_bindings.end(); }
