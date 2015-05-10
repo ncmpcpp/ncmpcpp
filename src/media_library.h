@@ -26,6 +26,7 @@
 #include "interfaces.h"
 #include "regex_filter.h"
 #include "screen.h"
+#include "song_list.h"
 
 struct MediaLibrary: Screen<NC::Window *>, HasColumns, HasSongs, Searchable, Tabbable
 {
@@ -56,11 +57,6 @@ struct MediaLibrary: Screen<NC::Window *>, HasColumns, HasSongs, Searchable, Tab
 	virtual bool find(SearchDirection direction, bool wrap, bool skip_current) OVERRIDE;
 	
 	// HasSongs implementation
-	virtual ProxySongList proxySongList() OVERRIDE;
-	
-	virtual bool allowsSelection() OVERRIDE;
-	virtual void selectCurrent() OVERRIDE;
-	virtual void reverseSelection() OVERRIDE;
 	virtual std::vector<MPD::Song> getSelectedSongs() OVERRIDE;
 	
 	// HasColumns implementation
@@ -75,7 +71,6 @@ struct MediaLibrary: Screen<NC::Window *>, HasColumns, HasSongs, Searchable, Tab
 	void toggleColumnsMode();
 	int Columns();
 	void LocateSong(const MPD::Song &);
-	ProxySongList songsProxyList();
 	void toggleSortMode();
 	
 	void requestTagsUpdate() { m_tags_update_request = true; }
@@ -135,7 +130,7 @@ struct MediaLibrary: Screen<NC::Window *>, HasColumns, HasSongs, Searchable, Tab
 	
 	NC::Menu<PrimaryTag> Tags;
 	NC::Menu<AlbumEntry> Albums;
-	NC::Menu<MPD::Song> Songs;
+	SongMenu Songs;
 	
 private:
 	void AddToPlaylist(bool);

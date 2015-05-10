@@ -450,17 +450,17 @@ void Status::Changes::playlist(unsigned previous_version)
 	myPlaylist->reloadRemaining();
 	
 	if (isVisible(myBrowser))
-		markSongsInPlaylist(myBrowser->proxySongList());
+		markSongsInPlaylist(myBrowser->main());
 	if (isVisible(mySearcher))
-		markSongsInPlaylist(mySearcher->proxySongList());
+		markSongsInPlaylist(mySearcher->main());
 	if (isVisible(myLibrary))
 	{
-		markSongsInPlaylist(myLibrary->songsProxyList());
+		markSongsInPlaylist(myLibrary->Songs);
 		myLibrary->Songs.refresh();
 	}
 	if (isVisible(myPlaylistEditor))
 	{
-		markSongsInPlaylist(myPlaylistEditor->contentProxyList());
+		markSongsInPlaylist(myPlaylistEditor->Content);
 		myPlaylistEditor->Content.refresh();
 	}
 }

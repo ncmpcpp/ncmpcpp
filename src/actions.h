@@ -27,6 +27,8 @@
 #include "interfaces.h"
 #include "window.h"
 
+struct SongList;
+
 namespace Actions {
 
 enum class Type
@@ -34,7 +36,7 @@ enum class Type
 	MacroUtility = 0,
 	Dummy, MouseEvent, ScrollUp, ScrollDown, ScrollUpArtist, ScrollUpAlbum,
 	ScrollDownArtist, ScrollDownAlbum, PageUp, PageDown, MoveHome, MoveEnd,
-	ToggleInterface, JumpToParentDirectory, PressEnter, PressSpace, SelectItem, PreviousColumn,
+	ToggleInterface, JumpToParentDirectory, PressEnter, PressSpace, PreviousColumn,
 	NextColumn, MasterScreen, SlaveScreen, VolumeUp, VolumeDown, DeletePlaylistItems,
 	DeleteStoredPlaylist, DeleteBrowserItems, ReplaySong, Previous, Next, Pause,
 	Stop, ExecuteCommand, SavePlaylist, MoveSortOrderUp, MoveSortOrderDown,
@@ -46,7 +48,7 @@ enum class Type
 	SetCrossfade, SetVolume, EditSong, EditLibraryTag, EditLibraryAlbum, EditDirectoryName,
 	EditPlaylistName, EditLyrics, JumpToBrowser, JumpToMediaLibrary,
 	JumpToPlaylistEditor, ToggleScreenLock, JumpToTagEditor, JumpToPositionInSong,
-	ReverseSelection, RemoveSelection, SelectAlbum, AddSelectedItems,
+	SelectItem, ReverseSelection, RemoveSelection, SelectAlbum, AddSelectedItems,
 	CropMainPlaylist, CropPlaylist, ClearMainPlaylist, ClearPlaylist, SortPlaylist,
 	ReversePlaylist, Find, FindItemForward, FindItemBackward,
 	NextFoundItem, PreviousFoundItem, ToggleFindMode, ToggleReplayGainMode,
@@ -161,6 +163,10 @@ struct ScrollUpArtist : public BaseAction
 protected:
 	virtual bool canBeRun();
 	virtual void run();
+
+private:
+	NC::List *m_list;
+	SongList *m_songs;
 };
 
 struct ScrollUpAlbum : public BaseAction
@@ -170,6 +176,10 @@ struct ScrollUpAlbum : public BaseAction
 protected:
 	virtual bool canBeRun();
 	virtual void run();
+
+private:
+	NC::List *m_list;
+	SongList *m_songs;
 };
 
 struct ScrollDownArtist : public BaseAction
@@ -179,6 +189,10 @@ struct ScrollDownArtist : public BaseAction
 protected:
 	virtual bool canBeRun();
 	virtual void run();
+
+private:
+	NC::List *m_list;
+	SongList *m_songs;
 };
 
 struct ScrollDownAlbum : public BaseAction
@@ -188,6 +202,10 @@ struct ScrollDownAlbum : public BaseAction
 protected:
 	virtual bool canBeRun();
 	virtual void run();
+
+private:
+	NC::List *m_list;
+	SongList *m_songs;
 };
 
 struct PageUp : public BaseAction
@@ -253,18 +271,6 @@ struct PressSpace : public BaseAction
 	
 protected:
 	virtual void run();
-};
-
-struct SelectItem : public BaseAction
-{
-	SelectItem() : BaseAction(Type::SelectItem, "select_item") { }
-
-protected:
-	virtual bool canBeRun();
-	virtual void run();
-
-private:
-	HasSongs *hs;
 };
 
 struct PreviousColumn : public BaseAction
@@ -631,6 +637,9 @@ struct EditSong : public BaseAction
 protected:
 	virtual bool canBeRun();
 	virtual void run();
+
+private:
+	const MPD::Song *m_song;
 };
 
 struct EditLibraryTag : public BaseAction
@@ -685,6 +694,9 @@ struct JumpToBrowser : public BaseAction
 protected:
 	virtual bool canBeRun();
 	virtual void run();
+
+private:
+	const MPD::Song *m_song;
 };
 
 struct JumpToMediaLibrary : public BaseAction
@@ -694,6 +706,9 @@ struct JumpToMediaLibrary : public BaseAction
 protected:
 	virtual bool canBeRun();
 	virtual void run();
+
+private:
+	const MPD::Song *m_song;
 };
 
 struct JumpToPlaylistEditor : public BaseAction
@@ -720,6 +735,9 @@ struct JumpToTagEditor : public BaseAction
 protected:
 	virtual bool canBeRun();
 	virtual void run();
+
+private:
+	const MPD::Song *m_song;
 };
 
 struct JumpToPositionInSong : public BaseAction
@@ -731,6 +749,18 @@ protected:
 	virtual void run();
 };
 
+struct SelectItem : public BaseAction
+{
+	SelectItem() : BaseAction(Type::SelectItem, "select_item") { }
+
+protected:
+	virtual bool canBeRun();
+	virtual void run();
+
+private:
+	NC::List *m_list;
+};
+
 struct ReverseSelection : public BaseAction
 {
 	ReverseSelection() : BaseAction(Type::ReverseSelection, "reverse_selection") { }
@@ -738,6 +768,9 @@ struct ReverseSelection : public BaseAction
 protected:
 	virtual bool canBeRun();
 	virtual void run();
+
+private:
+	NC::List *m_list;
 };
 
 struct RemoveSelection : public BaseAction
@@ -747,6 +780,9 @@ struct RemoveSelection : public BaseAction
 protected:
 	virtual bool canBeRun();
 	virtual void run();
+
+private:
+	NC::List *m_list;
 };
 
 struct SelectAlbum : public BaseAction
@@ -756,6 +792,10 @@ struct SelectAlbum : public BaseAction
 protected:
 	virtual bool canBeRun();
 	virtual void run();
+
+private:
+	NC::List *m_list;
+	SongList *m_songs;
 };
 
 struct AddSelectedItems : public BaseAction

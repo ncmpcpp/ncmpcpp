@@ -38,10 +38,11 @@ struct BaseScreen
 	virtual ~BaseScreen() { }
 	
 	/// @see Screen::isActiveWindow()
-	virtual bool isActiveWindow(const NC::Window &w_) = 0;
+	virtual bool isActiveWindow(const NC::Window &w_) const = 0;
 	
 	/// @see Screen::activeWindow()
-	virtual void *activeWindow() = 0;
+	virtual NC::Window *activeWindow() = 0;
+	virtual const NC::Window *activeWindow() const = 0;
 	
 	/// @see Screen::refresh()
 	virtual void refresh() = 0;
@@ -123,19 +124,26 @@ template <typename WindowT> struct Screen : public BaseScreen
 {
 	typedef WindowT WindowType;
 	typedef typename std::add_lvalue_reference<WindowType>::type WindowReference;
+	typedef typename std::add_lvalue_reference<
+		typename std::add_const<WindowType>::type
+	>::type ConstWindowReference;
 	
 private:
-	template <bool IsPointer, typename Result> struct getObject { };
-	template <typename Result> struct getObject<true, Result> {
-		static Result apply(WindowType w) { return *w; }
+	template <bool IsPointer, typename Result, typename ConstResult>
+	struct getObject {
+		static Result &apply(WindowReference w) { return w; }
+		static ConstResult &constApply(ConstWindowReference w) { return w; }
 	};
-	template <typename Result> struct getObject<false, Result> {
-		static Result apply(WindowReference w) { return w; }
+	template <typename Result, typename ConstResult>
+	struct getObject<true, Result, ConstResult> {
+		static Result &apply(WindowType w) { return *w; }
+		static ConstResult &constApply(const WindowType w) { return *w; }
 	};
 	
 	typedef getObject<
 		std::is_pointer<WindowT>::value,
-		typename std::add_lvalue_reference<
+		typename std::remove_pointer<WindowT>::type,
+		typename std::add_const<
 			typename std::remove_pointer<WindowT>::type
 		>::type
 	> Accessor;
@@ -146,16 +154,19 @@ public:
 	
 	virtual ~Screen() { }
 	
-	virtual bool isActiveWindow(const NC::Window &w_) OVERRIDE {
-		return &Accessor::apply(w) == &w_;
+	virtual bool isActiveWindow(const NC::Window &w_) const OVERRIDE {
+		return &Accessor::constApply(w) == &w_;
 	}
 	
 	/// Since some screens contain more that one window
 	/// it's useful to determine the one that is being
 	/// active
 	/// @return address to window object cast to void *
-	virtual void *activeWindow() OVERRIDE {
+	virtual NC::Window *activeWindow() OVERRIDE {
 		return &Accessor::apply(w);
+	}
+	virtual const NC::Window *activeWindow() const OVERRIDE {
+		return &Accessor::constApply(w);
 	}
 	
 	/// Refreshes whole screen

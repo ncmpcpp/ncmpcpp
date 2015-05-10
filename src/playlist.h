@@ -28,12 +28,13 @@
 #include "regex_filter.h"
 #include "screen.h"
 #include "song.h"
+#include "song_list.h"
 
-struct Playlist: Screen<NC::Menu<MPD::Song>>, HasSongs, Searchable, Tabbable
+struct Playlist: Screen<SongMenu>, HasSongs, Searchable, Tabbable
 {
 	Playlist();
 	
-	// Screen<NC::Menu<MPD::Song>> implementation
+	// Screen<SongMenu> implementation
 	virtual void switchTo() OVERRIDE;
 	virtual void resize() OVERRIDE;
 	
@@ -56,11 +57,6 @@ struct Playlist: Screen<NC::Menu<MPD::Song>>, HasSongs, Searchable, Tabbable
 	virtual bool find(SearchDirection direction, bool wrap, bool skip_current) OVERRIDE;
 	
 	// HasSongs implementation
-	virtual ProxySongList proxySongList() OVERRIDE;
-	
-	virtual bool allowsSelection() OVERRIDE;
-	virtual void selectCurrent() OVERRIDE;
-	virtual void reverseSelection() OVERRIDE;
 	virtual std::vector<MPD::Song> getSelectedSongs() OVERRIDE;
 	
 	// private members

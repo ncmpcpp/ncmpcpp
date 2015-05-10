@@ -18,47 +18,30 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
-#ifndef NCMPCPP_SONG_INFO_H
-#define NCMPCPP_SONG_INFO_H
+#ifndef NCMPCPP_HELPERS_SONG_ITERATOR_MAKER_H
+#define NCMPCPP_HELPERS_SONG_ITERATOR_MAKER_H
 
-#include "interfaces.h"
-#include "mutable_song.h"
-#include "screen.h"
+#include <boost/iterator/transform_iterator.hpp>
+#include <boost/iterator/zip_iterator.hpp>
+#include "menu.h"
+#include "song_list.h"
 
-struct SongInfo: Screen<NC::Scrollpad>, Tabbable
+template <typename ItemT, typename TransformT>
+SongIterator makeSongIterator_(typename NC::Menu<ItemT>::Iterator it, TransformT &&map)
 {
-	struct Metadata
-	{
-		const char *Name;
-		MPD::Song::GetFunction Get;
-		MPD::MutableSong::SetFunction Set;
-	};
-	
-	SongInfo();
-	
-	// Screen<NC::Scrollpad> implementation
-	virtual void switchTo() OVERRIDE;
-	virtual void resize() OVERRIDE;
-	
-	virtual std::wstring title() OVERRIDE;
-	virtual ScreenType type() OVERRIDE { return ScreenType::SongInfo; }
-	
-	virtual void update() OVERRIDE { }
-	
-	virtual void enterPressed() OVERRIDE { }
-	virtual void spacePressed() OVERRIDE { }
-	
-	virtual bool isLockable() OVERRIDE { return false; }
-	virtual bool isMergable() OVERRIDE { return true; }
-	
-	// private members
-	static const Metadata Tags[];
-	
-private:
-	void PrepareSong(const MPD::Song &s);
-};
+	return SongIterator(boost::make_zip_iterator(boost::make_tuple(
+		typename NC::Menu<ItemT>::PropertiesIterator(it),
+		boost::make_transform_iterator(it, std::forward<TransformT>(map))
+	)));
+}
 
-extern SongInfo *mySongInfo;
+template <typename ItemT, typename TransformT>
+ConstSongIterator makeConstSongIterator_(typename NC::Menu<ItemT>::ConstIterator it, TransformT &&map)
+{
+	return ConstSongIterator(boost::make_zip_iterator(boost::make_tuple(
+		typename NC::Menu<ItemT>::ConstPropertiesIterator(it),
+		boost::make_transform_iterator(it, std::forward<TransformT>(map))
+	)));
+}
 
-#endif // NCMPCPP_SONG_INFO_H
-
+#endif // NCMPCPP_HELPERS_SONG_ITERATOR_MAKER_H

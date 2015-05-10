@@ -34,6 +34,8 @@
 #include "status.h"
 #include "statusbar.h"
 #include "tag_editor.h"
+#include "helpers/song_iterator_maker.h"
+#include "utility/functional.h"
 #include "utility/comparators.h"
 #include "title.h"
 #include "screen_switcher.h"
@@ -86,14 +88,14 @@ PlaylistEditor::PlaylistEditor()
 	switch (Config.playlist_editor_display_mode)
 	{
 		case DisplayMode::Classic:
-			Content.setItemDisplayer(
-				std::bind(Display::Songs, ph::_1, contentProxyList(), std::cref(Config.song_list_format)
+			Content.setItemDisplayer(std::bind(
+				Display::Songs, ph::_1, std::cref(Content), std::cref(Config.song_list_format)
 			));
 			break;
 		case DisplayMode::Columns:
-			Content.setItemDisplayer(
-				std::bind(Display::SongsInColumns, ph::_1, contentProxyList())
-			);
+			Content.setItemDisplayer(std::bind(
+				Display::SongsInColumns, ph::_1, std::cref(Content)
+			));
 			break;
 	}
 	
@@ -134,7 +136,7 @@ void PlaylistEditor::refresh()
 void PlaylistEditor::switchTo()
 {
 	SwitchTo::execute(this);
-	markSongsInPlaylist(contentProxyList());
+	markSongsInPlaylist(Content);
 	drawHeader();
 	refresh();
 }
@@ -171,14 +173,19 @@ void PlaylistEditor::update()
 			MPD::SongIterator s = Mpd.GetPlaylistContent(Playlists.current()->value().path()), end;
 			for (; s != end; ++s, ++idx)
 			{
-				bool is_bold = myPlaylist->checkForSong(*s);
+				bool in_playlist = myPlaylist->checkForSong(*s);
 				if (idx < Content.size())
 				{
-					Content[idx].setBold(is_bold);
+					Content[idx].setBold(in_playlist);
 					Content[idx].value() = std::move(*s);
 				}
 				else
-					Content.addItem(std::move(*s), is_bold);
+				{
+					auto properties = NC::List::Properties::Selectable;
+					if (in_playlist)
+						properties |= NC::List::Properties::Bold;
+					Content.addItem(std::move(*s), properties);
+				}
 			}
 			if (idx < Content.size())
 				Content.resizeList(idx);
@@ -216,13 +223,6 @@ int PlaylistEditor::windowTimeout()
 		return m_window_timeout;
 	else
 		return Screen<WindowType>::windowTimeout();
-}
-
-ProxySongList PlaylistEditor::contentProxyList()
-{
-	return ProxySongList(Content, [](NC::Menu<MPD::Song>::Item &item) {
-		return &item.value();
-	});
 }
 
 void PlaylistEditor::AddToPlaylist(bool add_n_play)
@@ -353,36 +353,6 @@ bool PlaylistEditor::find(SearchDirection direction, bool wrap, bool skip_curren
 
 /***********************************************************************/
 
-ProxySongList PlaylistEditor::proxySongList()
-{
-	auto ptr = ProxySongList();
-	if (isActiveWindow(Content))
-		ptr = contentProxyList();
-	return ptr;
-}
-
-bool PlaylistEditor::allowsSelection()
-{
-	return (isActiveWindow(Playlists) && !Playlists.empty())
-	    || (isActiveWindow(Content) && !Content.empty());
-}
-
-void PlaylistEditor::selectCurrent()
-{
-if (isActiveWindow(Playlists))
-		Playlists.current()->setSelected(!Playlists.current()->isSelected());
-	else if (isActiveWindow(Content))
-		Content.current()->setSelected(!Content.current()->isSelected());
-}
-
-void PlaylistEditor::reverseSelection()
-{
-	if (isActiveWindow(Playlists))
-		reverseSelectionHelper(Playlists.begin(), Playlists.end());
-	else if (isActiveWindow(Content))
-		reverseSelectionHelper(Content.begin(), Content.end());
-}
-
 std::vector<MPD::Song> PlaylistEditor::getSelectedSongs()
 {
 	std::vector<MPD::Song> result;
@@ -412,14 +382,7 @@ std::vector<MPD::Song> PlaylistEditor::getSelectedSongs()
 		}
 	}
 	else if (isActiveWindow(Content))
-	{
-		for (auto &e : Content)
-			if (e.isSelected())
-				result.push_back(e.value());
-		// if no item is selected, add current one
-		if (result.empty() && !Content.empty())
-			result.push_back(Content.current()->value());
-	}
+		result = Content.getSelectedSongs();
 	return result;
 }
 

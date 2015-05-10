@@ -25,6 +25,69 @@
 #include "playlist.h"
 #include "statusbar.h"
 
+const MPD::Song *currentSong(const BaseScreen *screen)
+{
+	const MPD::Song *ptr = nullptr;
+	const auto *list = dynamic_cast<const SongList *>(screen->activeWindow());
+	if (list != nullptr)
+	{
+		const auto it = list->currentS();
+		if (it != list->endS())
+			ptr = it->get<Bit::Song>();
+	}
+	return ptr;
+}
+
+typedef std::vector<MPD::Song>::const_iterator VectorSongIterator;
+bool addSongsToPlaylist(VectorSongIterator first, VectorSongIterator last, bool play, int position)
+{
+	bool result = true;
+	auto addSongNoError = [&](VectorSongIterator song) -> int {
+		try
+		{
+			return Mpd.AddSong(*song, position);
+		}
+		catch (MPD::ServerError &e)
+		{
+			Status::handleServerError(e);
+			result = false;
+			return -1;
+		}
+	};
+
+	if (last-first >= 1)
+	{
+		int id;
+		while (true)
+		{
+			id = addSongNoError(first);
+			if (id >= 0)
+				break;
+			++first;
+			if (first == last)
+				return result;
+		}
+
+		if (position == -1)
+		{
+			++first;
+			for(; first != last; ++first)
+				addSongNoError(first);
+		}
+		else
+		{
+			++position;
+			--last;
+			for (; first != last; --last)
+				addSongNoError(last);
+		}
+		if (play)
+			Mpd.PlayID(id);
+	}
+
+	return result;
+}
+
 bool addSongToPlaylist(const MPD::Song &s, bool play, int position)
 {
 	bool result = false;
@@ -81,12 +144,15 @@ std::string Timestamp(time_t t)
 	return result;
 }
 
-void markSongsInPlaylist(ProxySongList pl)
+void markSongsInPlaylist(SongList &list)
 {
-	size_t list_size = pl.size();
-	for (size_t i = 0; i < list_size; ++i)
-		if (auto s = pl.getSong(i))
-			pl.setBold(i, myPlaylist->checkForSong(*s));
+	MPD::Song *s;
+	for (auto &p : list)
+	{
+		s = p.get<Bit::Song>();
+		if (s != nullptr)
+			p.get<Bit::Properties>().setBold(myPlaylist->checkForSong(*s));
+	}
 }
 
 std::wstring Scroller(const std::wstring &str, size_t &pos, size_t width)

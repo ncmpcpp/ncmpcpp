@@ -31,6 +31,7 @@
 #include "settings.h"
 #include "status.h"
 #include "statusbar.h"
+#include "helpers/song_iterator_maker.h"
 #include "utility/comparators.h"
 #include "title.h"
 #include "screen_switcher.h"
@@ -74,7 +75,62 @@ namespace pos {
 std::string SEItemToString(const SEItem &ei);
 bool SEItemEntryMatcher(const Regex::Regex &rx, const NC::Menu<SEItem>::Item &item, bool filter);
 
+template <bool Const>
+struct SongExtractor
+{
+	typedef SongExtractor type;
+
+	typedef typename NC::Menu<SEItem>::Item MenuItem;
+	typedef typename std::conditional<Const, const MenuItem, MenuItem>::type Item;
+	typedef typename std::conditional<Const, const MPD::Song, MPD::Song>::type Song;
+
+	Song *operator()(Item &item) const
+	{
+		Song *ptr = nullptr;
+		if (!item.isSeparator() && item.value().isSong())
+			ptr = &item.value().song();
+		return ptr;
+	}
+};
+
 }
+
+SongIterator SearchEngineWindow::currentS()
+{
+	return makeSongIterator_<SEItem>(current(), SongExtractor<false>());
+}
+
+ConstSongIterator SearchEngineWindow::currentS() const
+{
+	return makeConstSongIterator_<SEItem>(current(), SongExtractor<true>());
+}
+
+SongIterator SearchEngineWindow::beginS()
+{
+	return makeSongIterator_<SEItem>(begin(), SongExtractor<false>());
+}
+
+ConstSongIterator SearchEngineWindow::beginS() const
+{
+	return makeConstSongIterator_<SEItem>(begin(), SongExtractor<true>());
+}
+
+SongIterator SearchEngineWindow::endS()
+{
+	return makeSongIterator_<SEItem>(end(), SongExtractor<false>());
+}
+
+ConstSongIterator SearchEngineWindow::endS() const
+{
+	return makeConstSongIterator_<SEItem>(end(), SongExtractor<true>());
+}
+
+std::vector<MPD::Song> SearchEngineWindow::getSelectedSongs()
+{
+	return {}; // TODO
+}
+
+/**********************************************************************/
 
 const char *SearchEngine::ConstraintsNames[] =
 {
@@ -109,7 +165,7 @@ SearchEngine::SearchEngine()
 	w.setHighlightColor(Config.main_highlight_color);
 	w.cyclicScrolling(Config.use_cyclic_scrolling);
 	w.centeredCursor(Config.centered_cursor);
-	w.setItemDisplayer(std::bind(Display::SEItems, ph::_1, proxySongList()));
+	w.setItemDisplayer(std::bind(Display::SEItems, ph::_1, std::cref(w)));
 	w.setSelectedPrefix(Config.selected_item_prefix);
 	w.setSelectedSuffix(Config.selected_item_suffix);
 	SearchMode = &SearchModes[Config.search_engine_default_search_mode];
@@ -140,7 +196,7 @@ void SearchEngine::switchTo()
 	SwitchTo::execute(this);
 	if (w.empty())
 		Prepare();
-	markSongsInPlaylist(proxySongList());
+	markSongsInPlaylist(w);
 	drawHeader();
 }
 
@@ -190,10 +246,10 @@ void SearchEngine::enterPressed()
 			size_t found = w.size()-SearchEngine::StaticOptions;
 			found += 3; // don't count options inserted below
 			w.insertSeparator(ResetButton+1);
-			w.insertItem(ResetButton+2, SEItem(), 1, 1);
+			w.insertItem(ResetButton+2, SEItem(), NC::List::Properties::Bold | NC::List::Properties::Inactive);
 			w.at(ResetButton+2).value().mkBuffer() << Config.color1 << "Search results: " << Config.color2 << "Found " << found << (found > 1 ? " songs" : " song") << NC::Color::Default;
 			w.insertSeparator(ResetButton+3);
-			markSongsInPlaylist(proxySongList());
+			markSongsInPlaylist(w);
 			Statusbar::print("Searching finished");
 			if (Config.block_search_constraints_change)
 				for (size_t i = 0; i < StaticOptions-4; ++i)
@@ -276,31 +332,6 @@ bool SearchEngine::find(SearchDirection direction, bool wrap, bool skip_current)
 
 /***********************************************************************/
 
-ProxySongList SearchEngine::proxySongList()
-{
-	return ProxySongList(w, [](NC::Menu<SEItem>::Item &item) -> MPD::Song * {
-		MPD::Song *ptr = 0;
-		if (!item.isSeparator() && item.value().isSong())
-			ptr = &item.value().song();
-		return ptr;
-	});
-}
-
-bool SearchEngine::allowsSelection()
-{
-	return w.current()->value().isSong();
-}
-
-void SearchEngine::selectCurrent()
-{
-	w.current()->setSelected(!w.current()->isSelected());
-}
-
-void SearchEngine::reverseSelection()
-{
-	reverseSelectionHelper(w.begin()+std::min(StaticOptions, w.size()), w.end());
-}
-
 std::vector<MPD::Song> SearchEngine::getSelectedSongs()
 {
 	std::vector<MPD::Song> result;
@@ -328,6 +359,9 @@ void SearchEngine::Prepare()
 	w.setTitle("");
 	w.clear();
 	w.resizeList(StaticOptions-3);
+
+	for (auto &item : w)
+		item.setSelectable(false);
 	
 	w.at(ConstraintsNumber).setSeparator(true);
 	w.at(SearchButton-1).setSeparator(true);

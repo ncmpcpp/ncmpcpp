@@ -31,7 +31,9 @@
 #include "song.h"
 #include "status.h"
 #include "statusbar.h"
+#include "helpers/song_iterator_maker.h"
 #include "utility/comparators.h"
+#include "utility/functional.h"
 #include "title.h"
 
 using Global::MainHeight;
@@ -63,12 +65,12 @@ Playlist::Playlist()
 	{
 		case DisplayMode::Classic:
 			w.setItemDisplayer(std::bind(
-				Display::Songs, ph::_1, proxySongList(), std::cref(Config.song_list_format)
+				Display::Songs, ph::_1, std::cref(w), std::cref(Config.song_list_format)
 			));
 			break;
 		case DisplayMode::Columns:
 			w.setItemDisplayer(std::bind(
-				Display::SongsInColumns, ph::_1, proxySongList()
+				Display::SongsInColumns, ph::_1, std::cref(w)
 			));
 			break;
 	}
@@ -176,37 +178,9 @@ bool Playlist::find(SearchDirection direction, bool wrap, bool skip_current)
 
 /***********************************************************************/
 
-ProxySongList Playlist::proxySongList()
-{
-	return ProxySongList(w, [](NC::Menu<MPD::Song>::Item &item) {
-		return &item.value();
-	});
-}
-
-bool Playlist::allowsSelection()
-{
-	return !w.empty();
-}
-
-void Playlist::selectCurrent()
-{
-	w.current()->setSelected(!w.current()->isSelected());
-}
-
-void Playlist::reverseSelection()
-{
-	reverseSelectionHelper(w.begin(), w.end());
-}
-
 std::vector<MPD::Song> Playlist::getSelectedSongs()
 {
-	std::vector<MPD::Song> result;
-	for (auto it = w.begin(); it != w.end(); ++it)
-		if (it->isSelected())
-			result.push_back(it->value());
-	if (result.empty() && !w.empty())
-		result.push_back(w.current()->value());
-	return result;
+	return w.getSelectedSongs();
 }
 
 /***********************************************************************/

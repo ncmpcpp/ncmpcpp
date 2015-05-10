@@ -38,6 +38,7 @@
 #include "tag_editor.h"
 #include "title.h"
 #include "tags.h"
+#include "helpers/song_iterator_maker.h"
 #include "utility/comparators.h"
 #include "utility/string.h"
 #include "configuration.h"
@@ -69,7 +70,62 @@ void clearDirectory(const std::string &directory);
 std::string itemToString(const MPD::Item &item);
 bool browserEntryMatcher(const Regex::Regex &rx, const MPD::Item &item, bool filter);
 
+template <bool Const>
+struct SongExtractor
+{
+	typedef SongExtractor type;
+
+	typedef typename NC::Menu<MPD::Item>::Item MenuItem;
+	typedef typename std::conditional<Const, const MenuItem, MenuItem>::type Item;
+	typedef typename std::conditional<Const, const MPD::Song, MPD::Song>::type Song;
+
+	Song *operator()(Item &item) const
+	{
+		Song *ptr = nullptr;
+		if (item.value().type() == MPD::Item::Type::Song)
+			ptr = const_cast<Song *>(&item.value().song());
+		return ptr;
+	}
+};
+
 }
+
+SongIterator BrowserWindow::currentS()
+{
+	return makeSongIterator_<MPD::Item>(current(), SongExtractor<false>());
+}
+
+ConstSongIterator BrowserWindow::currentS() const
+{
+	return makeConstSongIterator_<MPD::Item>(current(), SongExtractor<true>());
+}
+
+SongIterator BrowserWindow::beginS()
+{
+	return makeSongIterator_<MPD::Item>(begin(), SongExtractor<false>());
+}
+
+ConstSongIterator BrowserWindow::beginS() const
+{
+	return makeConstSongIterator_<MPD::Item>(begin(), SongExtractor<true>());
+}
+
+SongIterator BrowserWindow::endS()
+{
+	return makeSongIterator_<MPD::Item>(end(), SongExtractor<false>());
+}
+
+ConstSongIterator BrowserWindow::endS() const
+{
+	return makeConstSongIterator_<MPD::Item>(end(), SongExtractor<true>());
+}
+
+std::vector<MPD::Song> BrowserWindow::getSelectedSongs()
+{
+	return {}; // TODO
+}
+
+/**********************************************************************/
 
 Browser::Browser()
 : m_update_request(true)
@@ -83,7 +139,7 @@ Browser::Browser()
 	w.centeredCursor(Config.centered_cursor);
 	w.setSelectedPrefix(Config.selected_item_prefix);
 	w.setSelectedSuffix(Config.selected_item_suffix);
-	w.setItemDisplayer(std::bind(Display::Items, ph::_1, proxySongList()));
+	w.setItemDisplayer(std::bind(Display::Items, ph::_1, std::cref(w)));
 }
 
 void Browser::resize()
@@ -110,7 +166,7 @@ void Browser::resize()
 void Browser::switchTo()
 {
 	SwitchTo::execute(this);
-	markSongsInPlaylist(proxySongList());
+	markSongsInPlaylist(w);
 	drawHeader();
 }
 
@@ -295,34 +351,6 @@ bool Browser::find(SearchDirection direction, bool wrap, bool skip_current)
 
 /***********************************************************************/
 
-ProxySongList Browser::proxySongList()
-{
-	return ProxySongList(w, [](NC::Menu<MPD::Item>::Item &item) -> MPD::Song * {
-		MPD::Song *ptr = 0;
-		if (item.value().type() == MPD::Item::Type::Song)
-			ptr = const_cast<MPD::Song *>(&item.value().song());
-		return ptr;
-	});
-}
-
-bool Browser::allowsSelection()
-{
-	size_t root = inRootDirectory() ? 0 : 1;
-	return !w.empty() && w.choice() >= root;
-}
-
-void Browser::selectCurrent()
-{
-	size_t current = w.choice();
-	w[current].setSelected(!w[current].isSelected());
-}
-
-void Browser::reverseSelection()
-{
-	size_t offset = inRootDirectory() ? 0 : 1;
-	reverseSelectionHelper(w.begin()+offset, w.end());
-}
-
 std::vector<MPD::Song> Browser::getSelectedSongs()
 {
 	std::vector<MPD::Song> songs;
@@ -446,7 +474,7 @@ void Browser::getDirectory(std::string directory)
 	if (!isRootDirectory(directory))
 	{
 		// make it so that display function doesn't have to handle special cases
-		w.addItem(MPD::Directory(directory + "/.."));
+		w.addItem(MPD::Directory(directory + "/.."), NC::List::Properties::None);
 	}
 
 	for (const auto &item : items)
@@ -468,8 +496,10 @@ void Browser::getDirectory(std::string directory)
 			}
 			case MPD::Item::Type::Song:
 			{
-				bool is_bold = myPlaylist->checkForSong(item.song());
-				w.addItem(std::move(item), is_bold);
+				auto properties = NC::List::Properties::Selectable;
+				if (myPlaylist->checkForSong(item.song()))
+					properties |= NC::List::Properties::Bold;
+				w.addItem(std::move(item), properties);
 				break;
 			}
 		}

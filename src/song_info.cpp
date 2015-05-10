@@ -93,7 +93,7 @@ void SongInfo::switchTo()
 		switchToPreviousScreen();
 }
 
-void SongInfo::PrepareSong(MPD::Song &s)
+void SongInfo::PrepareSong(const MPD::Song &s)
 {
 	w << NC::Format::Bold << Config.color1 << "Filename: " << NC::Format::NoBold << Config.color2 << s.getName() << '\n' << NC::Color::End;
 	w << NC::Format::Bold << "Directory: " << NC::Format::NoBold << Config.color2;

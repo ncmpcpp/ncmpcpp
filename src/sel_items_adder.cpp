@@ -106,14 +106,14 @@ void SelectedItemsAdder::switchTo()
 	using Global::myScreen;
 	
 	auto hs = hasSongs(myScreen);
-	if (!hs || !hs->allowsSelection())
+	if (!hs)
 		return;
 	
 	Statusbar::print(1, "Fetching selected songs...");
 	m_selected_items = hs->getSelectedSongs();
 	if (m_selected_items.empty())
 	{
-		Statusbar::print("List of selected items is empty");
+		Statusbar::print("No selected songs");
 		return;
 	}
 	populatePlaylistSelector(myScreen);

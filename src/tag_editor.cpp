@@ -36,6 +36,8 @@
 #include "playlist.h"
 #include "song_info.h"
 #include "statusbar.h"
+#include "helpers/song_iterator_maker.h"
+#include "utility/functional.h"
 #include "utility/comparators.h"
 #include "title.h"
 #include "tags.h"
@@ -85,7 +87,59 @@ std::string SongToString(const MPD::MutableSong &s);
 bool DirEntryMatcher(const Regex::Regex &rx, const std::pair<std::string, std::string> &dir, bool filter);
 bool SongEntryMatcher(const Regex::Regex &rx, const MPD::MutableSong &s);
 
+template <bool Const>
+struct SongExtractor
+{
+	typedef SongExtractor type;
+
+	typedef typename NC::Menu<MPD::MutableSong>::Item MenuItem;
+	typedef typename std::conditional<Const, const MenuItem, MenuItem>::type Item;
+	typedef typename std::conditional<Const, const MPD::Song, MPD::Song>::type Song;
+
+	Song *operator()(Item &item) const
+	{
+		return &item.value();
+	}
+};
+
 }
+
+SongIterator TagsWindow::currentS()
+{
+	return makeSongIterator_<MPD::MutableSong>(current(), SongExtractor<false>());
+}
+
+ConstSongIterator TagsWindow::currentS() const
+{
+	return makeConstSongIterator_<MPD::MutableSong>(current(), SongExtractor<true>());
+}
+
+SongIterator TagsWindow::beginS()
+{
+	return makeSongIterator_<MPD::MutableSong>(begin(), SongExtractor<false>());
+}
+
+ConstSongIterator TagsWindow::beginS() const
+{
+	return makeConstSongIterator_<MPD::MutableSong>(begin(), SongExtractor<true>());
+}
+
+SongIterator TagsWindow::endS()
+{
+	return makeSongIterator_<MPD::MutableSong>(end(), SongExtractor<false>());
+}
+
+ConstSongIterator TagsWindow::endS() const
+{
+	return makeConstSongIterator_<MPD::MutableSong>(end(), SongExtractor<true>());
+}
+
+std::vector<MPD::Song> TagsWindow::getSelectedSongs()
+{
+	return {}; // TODO
+}
+
+/**********************************************************************/
 
 TagEditor::TagEditor() : FParser(0), FParserHelper(0), FParserLegend(0), FParserPreview(0), itsBrowsedDir("/")
 {
@@ -115,7 +169,7 @@ TagEditor::TagEditor() : FParser(0), FParserHelper(0), FParserLegend(0), FParser
 	TagTypes->addSeparator();
 	if (Config.titles_visibility)
 	{
-		TagTypes->addItem("Options", 1, 1);
+		TagTypes->addItem("Options", NC::List::Properties::Bold | NC::List::Properties::Inactive);
 		TagTypes->addSeparator();
 	}
 	TagTypes->addItem("Capitalize First Letters");
@@ -124,7 +178,7 @@ TagEditor::TagEditor() : FParser(0), FParserHelper(0), FParserLegend(0), FParser
 	TagTypes->addItem("Reset");
 	TagTypes->addItem("Save");
 	
-	Tags = new NC::Menu<MPD::MutableSong>(RightColumnStartX, MainStartY, RightColumnWidth, MainHeight, Config.titles_visibility ? "Tags" : "", Config.main_color, NC::Border());
+	Tags = new TagsWindow(NC::Menu<MPD::MutableSong>(RightColumnStartX, MainStartY, RightColumnWidth, MainHeight, Config.titles_visibility ? "Tags" : "", Config.main_color, NC::Border()));
 	Tags->setHighlightColor(Config.main_highlight_color);
 	Tags->cyclicScrolling(Config.use_cyclic_scrolling);
 	Tags->centeredCursor(Config.centered_cursor);
@@ -337,7 +391,7 @@ void TagEditor::enterPressed()
 		if (!Patterns.empty())
 		{
 			FParser->addSeparator();
-			FParser->addItem("Recent patterns", 1, 1);
+			FParser->addItem("Recent patterns", NC::List::Properties::Bold | NC::List::Properties::Inactive);
 			FParser->addSeparator();
 			for (std::list<std::string>::const_iterator it = Patterns.begin(); it != Patterns.end(); ++it)
 				FParser->addItem(*it);
@@ -751,31 +805,6 @@ bool TagEditor::find(SearchDirection direction, bool wrap, bool skip_current)
 }
 
 /***********************************************************************/
-
-ProxySongList TagEditor::proxySongList()
-{
-	auto ptr = ProxySongList();
-	if (w == Tags)
-		ptr = ProxySongList(*Tags, [](NC::Menu<MPD::MutableSong>::Item &item) {
-			return &item.value();
-		});
-	return ptr;
-}
-
-bool TagEditor::allowsSelection()
-{
-	return w == Tags && !Tags->empty();
-}
-
-void TagEditor::selectCurrent()
-{
-	Tags->current()->setSelected(!Tags->current()->isSelected());
-}
-
-void TagEditor::reverseSelection()
-{
-	reverseSelectionHelper(Tags->begin(), Tags->end());
-}
 
 std::vector<MPD::Song> TagEditor::getSelectedSongs()
 {

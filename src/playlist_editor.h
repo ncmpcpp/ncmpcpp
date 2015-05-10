@@ -26,6 +26,7 @@
 #include "interfaces.h"
 #include "regex_filter.h"
 #include "screen.h"
+#include "song_list.h"
 
 struct PlaylistEditor: Screen<NC::Window *>, HasColumns, HasSongs, Searchable, Tabbable
 {
@@ -56,11 +57,6 @@ struct PlaylistEditor: Screen<NC::Window *>, HasColumns, HasSongs, Searchable, T
 	virtual bool find(SearchDirection direction, bool wrap, bool skip_current) OVERRIDE;
 	
 	// HasSongs implementation
-	virtual ProxySongList proxySongList() OVERRIDE;
-	
-	virtual bool allowsSelection() OVERRIDE;
-	virtual void selectCurrent() OVERRIDE;
-	virtual void reverseSelection() OVERRIDE;
 	virtual std::vector<MPD::Song> getSelectedSongs() OVERRIDE;
 	
 	// HasColumns implementation
@@ -77,10 +73,9 @@ struct PlaylistEditor: Screen<NC::Window *>, HasColumns, HasSongs, Searchable, T
 	void requestContentsUpdate() { m_content_update_requested = true; }
 	
 	virtual void Locate(const MPD::Playlist &playlist);
-	ProxySongList contentProxyList();
 	
 	NC::Menu<MPD::Playlist> Playlists;
-	NC::Menu<MPD::Song> Content;
+	SongMenu Content;
 	
 private:
 	void AddToPlaylist(bool);

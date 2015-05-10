@@ -81,6 +81,10 @@ boost::array<
 
 void populateActions();
 
+bool scrollTagCanBeRun(NC::List *&list, SongList *&songs);
+void scrollTagUpRun(NC::List *list, SongList *songs, MPD::Song::GetFunction get);
+void scrollTagDownRun(NC::List *list, SongList *songs, MPD::Song::GetFunction get);
+
 void seek();
 void findItem(const SearchDirection direction);
 void listsChangeFinisher();
@@ -358,102 +362,42 @@ void ScrollDown::run()
 
 bool ScrollUpArtist::canBeRun()
 {
-	return proxySongList(myScreen);
+	return scrollTagCanBeRun(m_list, m_songs);
 }
 
 void ScrollUpArtist::run()
 {
-	auto pl = proxySongList(myScreen);
-	assert(pl);
-	if (pl.empty())
-		return;
-	size_t pos = pl.choice();
-	if (MPD::Song *s = pl.getSong(pos))
-	{
-		std::string artist = s->getArtist();
-		while (pos > 0)
-		{
-			s = pl.getSong(--pos);
-			if (!s || s->getArtist() != artist)
-				break;
-		}
-		pl.highlight(pos);
-	}
+	scrollTagUpRun(m_list, m_songs, &MPD::Song::getArtist);
 }
 
 bool ScrollUpAlbum::canBeRun()
 {
-	return proxySongList(myScreen);
+	return scrollTagCanBeRun(m_list, m_songs);
 }
 
 void ScrollUpAlbum::run()
 {
-	auto pl = proxySongList(myScreen);
-	assert(pl);
-	if (pl.empty())
-		return;
-	size_t pos = pl.choice();
-	if (MPD::Song *s = pl.getSong(pos))
-	{
-		std::string album = s->getAlbum();
-		while (pos > 0)
-		{
-			s = pl.getSong(--pos);
-			if (!s || s->getAlbum() != album)
-				break;
-		}
-		pl.highlight(pos);
-	}
+	scrollTagUpRun(m_list, m_songs, &MPD::Song::getAlbum);
 }
 
 bool ScrollDownArtist::canBeRun()
 {
-	return proxySongList(myScreen);
+	return scrollTagCanBeRun(m_list, m_songs);
 }
 
 void ScrollDownArtist::run()
 {
-	auto pl = proxySongList(myScreen);
-	assert(pl);
-	if (pl.empty())
-		return;
-	size_t pos = pl.choice();
-	if (MPD::Song *s = pl.getSong(pos))
-	{
-		std::string artist = s->getArtist();
-		while (pos < pl.size() - 1)
-		{
-			s = pl.getSong(++pos);
-			if (!s || s->getArtist() != artist)
-				break;
-		}
-		pl.highlight(pos);
-	}
+	scrollTagDownRun(m_list, m_songs, &MPD::Song::getArtist);
 }
 
 bool ScrollDownAlbum::canBeRun()
 {
-	return proxySongList(myScreen);
+	return scrollTagCanBeRun(m_list, m_songs);
 }
 
 void ScrollDownAlbum::run()
 {
-	auto pl = proxySongList(myScreen);
-	assert(pl);
-	if (pl.empty())
-		return;
-	size_t pos = pl.choice();
-	if (MPD::Song *s = pl.getSong(pos))
-	{
-		std::string album = s->getAlbum();
-		while (pos < pl.size() - 1)
-		{
-			s = pl.getSong(++pos);
-			if (!s || s->getAlbum() != album)
-				break;
-		}
-		pl.highlight(pos);
-	}
+	scrollTagDownRun(m_list, m_songs, &MPD::Song::getAlbum);
 }
 
 void PageUp::run()
@@ -541,19 +485,6 @@ void PressEnter::run()
 void PressSpace::run()
 {
 	myScreen->spacePressed();
-}
-
-bool SelectItem::canBeRun()
-{
-	hs = hasSongs(myScreen);
-	return hs != nullptr && hs->allowsSelection();
-}
-
-void SelectItem::run()
-{
-	hs->selectCurrent();
-	myScreen->scroll(NC::Scroll::Down);
-	listsChangeFinisher();
 }
 
 bool PreviousColumn::canBeRun()
@@ -1011,7 +942,7 @@ void ToggleDisplayMode::run()
 			case DisplayMode::Classic:
 				Config.playlist_display_mode = DisplayMode::Columns;
 				myPlaylist->main().setItemDisplayer(std::bind(
-					Display::SongsInColumns, ph::_1, myPlaylist->proxySongList()
+					Display::SongsInColumns, ph::_1, std::cref(myPlaylist->main())
 				));
 				if (Config.titles_visibility)
 					myPlaylist->main().setTitle(Display::Columns(myPlaylist->main().getWidth()));
@@ -1021,7 +952,7 @@ void ToggleDisplayMode::run()
 			case DisplayMode::Columns:
 				Config.playlist_display_mode = DisplayMode::Classic;
 				myPlaylist->main().setItemDisplayer(std::bind(
-					Display::Songs, ph::_1, myPlaylist->proxySongList(), std::cref(Config.song_list_format)
+					Display::Songs, ph::_1, std::cref(myPlaylist->main()), std::cref(Config.song_list_format)
 				));
 				myPlaylist->main().setTitle("");
 		}
@@ -1072,13 +1003,13 @@ void ToggleDisplayMode::run()
 			case DisplayMode::Classic:
 				Config.playlist_editor_display_mode = DisplayMode::Columns;
 				myPlaylistEditor->Content.setItemDisplayer(std::bind(
-					Display::SongsInColumns, ph::_1, myPlaylistEditor->contentProxyList()
+					Display::SongsInColumns, ph::_1, std::cref(myPlaylistEditor->Content)
 				));
 				break;
 			case DisplayMode::Columns:
 				Config.playlist_editor_display_mode = DisplayMode::Classic;
 				myPlaylistEditor->Content.setItemDisplayer(std::bind(
-					Display::Songs, ph::_1, myPlaylistEditor->contentProxyList(), std::cref(Config.song_list_format)
+					Display::Songs, ph::_1, std::cref(myPlaylistEditor->Content), std::cref(Config.song_list_format)
 				));
 				break;
 		}
@@ -1285,8 +1216,8 @@ void SetVolume::run()
 bool EditSong::canBeRun()
 {
 #	ifdef HAVE_TAGLIB_H
-	return currentSong(myScreen)
-	    && isMPDMusicDirSet();
+	m_song = currentSong(myScreen);
+	return m_song != nullptr && isMPDMusicDirSet();
 #	else
 	return false;
 #	endif // HAVE_TAGLIB_H
@@ -1295,8 +1226,7 @@ bool EditSong::canBeRun()
 void EditSong::run()
 {
 #	ifdef HAVE_TAGLIB_H
-	auto s = currentSong(myScreen);
-	myTinyTagEditor->SetEdited(*s);
+	myTinyTagEditor->SetEdited(*m_song);
 	myTinyTagEditor->switchTo();
 #	endif // HAVE_TAGLIB_H
 }
@@ -1530,24 +1460,24 @@ void EditLyrics::run()
 
 bool JumpToBrowser::canBeRun()
 {
-	return currentSong(myScreen);
+	m_song = currentSong(myScreen);
+	return m_song != nullptr;
 }
 
 void JumpToBrowser::run()
 {
-	auto s = currentSong(myScreen);
-	myBrowser->locateSong(*s);
+	myBrowser->locateSong(*m_song);
 }
 
 bool JumpToMediaLibrary::canBeRun()
 {
-	return currentSong(myScreen);
+	m_song = currentSong(myScreen);
+	return m_song != nullptr;
 }
 
 void JumpToMediaLibrary::run()
 {
-	auto s = currentSong(myScreen);
-	myLibrary->LocateSong(*s);
+	myLibrary->LocateSong(*m_song);
 }
 
 bool JumpToPlaylistEditor::canBeRun()
@@ -1598,8 +1528,8 @@ void ToggleScreenLock::run()
 bool JumpToTagEditor::canBeRun()
 {
 #	ifdef HAVE_TAGLIB_H
-	return currentSong(myScreen)
-	    && isMPDMusicDirSet();
+	m_song = currentSong(myScreen);
+	return m_song != nullptr && isMPDMusicDirSet();
 #	else
 	return false;
 #	endif // HAVE_TAGLIB_H
@@ -1608,8 +1538,7 @@ bool JumpToTagEditor::canBeRun()
 void JumpToTagEditor::run()
 {
 #	ifdef HAVE_TAGLIB_H
-	auto s = currentSong(myScreen);
-	myTagEditor->LocateSong(*s);
+	myTagEditor->LocateSong(*m_song);
 #	endif // HAVE_TAGLIB_H
 }
 
@@ -1656,71 +1585,87 @@ void JumpToPositionInSong::run()
 		Statusbar::print("Invalid format ([m]:[ss], [s]s, [%]%, [%] accepted)");
 }
 
+bool SelectItem::canBeRun()
+{
+	m_list = dynamic_cast<NC::List *>(myScreen->activeWindow());
+	return m_list != nullptr
+	    && !m_list->empty()
+	    && m_list->currentP()->isSelectable();
+}
+
+void SelectItem::run()
+{
+	auto current = m_list->currentP();
+	current->setSelected(!current->isSelected());
+	myScreen->scroll(NC::Scroll::Down);
+	listsChangeFinisher();
+}
+
 bool ReverseSelection::canBeRun()
 {
-	auto w = hasSongs(myScreen);
-	return w && w->allowsSelection();
+	m_list = dynamic_cast<NC::List *>(myScreen->activeWindow());
+	return m_list != nullptr;
 }
 
 void ReverseSelection::run()
 {
-	auto w = hasSongs(myScreen);
-	w->reverseSelection();
+	for (auto &p : *m_list)
+		p.setSelected(!p.isSelected());
 	Statusbar::print("Selection reversed");
 }
 
 bool RemoveSelection::canBeRun()
 {
-	return proxySongList(myScreen);
+	m_list = dynamic_cast<NC::List *>(myScreen->activeWindow());
+	return m_list != nullptr;
 }
 
 void RemoveSelection::run()
 {
-	auto pl = proxySongList(myScreen);
-	for (size_t i = 0; i < pl.size(); ++i)
-		pl.setSelected(i, false);
+	for (auto &p : *m_list)
+		p.setSelected(false);
 	Statusbar::print("Selection removed");
 }
 
 bool SelectAlbum::canBeRun()
 {
-	auto w = hasSongs(myScreen);
-	return w && w->allowsSelection() && w->proxySongList();
+	auto *w = myScreen->activeWindow();
+	if (m_list != static_cast<void *>(w))
+		m_list = dynamic_cast<NC::List *>(w);
+	if (m_songs != static_cast<void *>(w))
+		m_songs = dynamic_cast<SongList *>(w);
+	return m_list != nullptr && !m_list->empty()
+	    && m_songs != nullptr;
 }
 
 void SelectAlbum::run()
 {
-	auto pl = proxySongList(myScreen);
-	assert(pl);
-	if (pl.empty())
+	const auto front = m_songs->beginS(), current = m_songs->currentS(), end = m_songs->endS();
+	auto *s = current->get<Bit::Song>();
+	if (s == nullptr)
 		return;
-	size_t pos = pl.choice();
-	if (MPD::Song *s = pl.getSong(pos))
+	auto get = &MPD::Song::getAlbum;
+	const std::string tag = s->getTags(get);
+	// go up
+	for (auto it = current; it != front;)
 	{
-		std::string album = s->getAlbum();
-		// select song under cursor
-		pl.setSelected(pos, true);
-		// go up
-		while (pos > 0)
-		{
-			s = pl.getSong(--pos);
-			if (!s || s->getAlbum() != album)
-				break;
-			else
-				pl.setSelected(pos, true);
-		}
-		// go down
-		pos = pl.choice();
-		while (pos < pl.size() - 1)
-		{
-			s = pl.getSong(++pos);
-			if (!s || s->getAlbum() != album)
-				break;
-			else
-				pl.setSelected(pos, true);
-		}
-		Statusbar::print("Album around cursor position selected");
+		--it;
+		s = it->get<Bit::Song>();
+		if (s == nullptr || s->getTags(get) != tag)
+			break;
+		it->get<Bit::Properties>().setSelected(true);
 	}
+	// go down
+	for (auto it = current;;)
+	{
+		it->get<Bit::Properties>().setSelected(true);
+		if (++it == end)
+			break;
+		s = it->get<Bit::Song>();
+		if (s == nullptr || s->getTags(get) != tag)
+			break;
+	}
+	Statusbar::print("Album around cursor position selected");
 }
 
 bool AddSelectedItems::canBeRun()
@@ -2598,6 +2543,53 @@ void populateActions()
 	insert_action(new Actions::ShowVisualizer());
 	insert_action(new Actions::ShowClock());
 	insert_action(new Actions::ShowServerInfo());
+}
+
+bool scrollTagCanBeRun(NC::List *&list, SongList *&songs)
+{
+	auto w = myScreen->activeWindow();
+	if (list != static_cast<void *>(w))
+		list = dynamic_cast<NC::List *>(w);
+	if (songs != static_cast<void *>(w))
+		songs = dynamic_cast<SongList *>(w);
+	return list != nullptr && !list->empty()
+	    && songs != nullptr;
+}
+
+void scrollTagUpRun(NC::List *list, SongList *songs, MPD::Song::GetFunction get)
+{
+	const auto front = songs->beginS();
+	auto it = songs->currentS();
+	if (auto *s = it->get<Bit::Song>())
+	{
+		const std::string tag = s->getTags(get);
+		while (it != front)
+		{
+			--it;
+			s = it->get<Bit::Song>();
+			if (s == nullptr || s->getTags(get) != tag)
+				break;
+		}
+		list->highlight(it-front);
+	}
+}
+
+void scrollTagDownRun(NC::List *list, SongList *songs, MPD::Song::GetFunction get)
+{
+	const auto front = songs->beginS(), back = --songs->endS();
+	auto it = songs->currentS();
+	if (auto *s = it->get<Bit::Song>())
+	{
+		const std::string tag = s->getTags(get);
+		while (it != back)
+		{
+			++it;
+			s = it->get<Bit::Song>();
+			if (s == nullptr || s->getTags(get) != tag)
+				break;
+		}
+		list->highlight(it-front);
+	}
 }
 
 void seek()

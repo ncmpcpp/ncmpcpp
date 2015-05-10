@@ -102,8 +102,10 @@ void Outputs::FetchList()
 	w.clear();
 	for (MPD::OutputIterator out = Mpd.GetOutputs(), end; out != end; ++out)
 	{
-		bool enabled = out->enabled();
-		w.addItem(std::move(*out), enabled);
+		auto properties = NC::List::Properties::Selectable;
+		if (out->enabled())
+			properties |= NC::List::Properties::Bold;
+		w.addItem(std::move(*out), properties);
 	}
 	if (myScreen == this)
 		w.refresh();

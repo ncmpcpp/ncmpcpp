@@ -18,47 +18,66 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
-#ifndef NCMPCPP_SONG_INFO_H
-#define NCMPCPP_SONG_INFO_H
+#include "helpers/song_iterator_maker.h"
+#include "song_info.h"
+#include "utility/functional.h"
 
-#include "interfaces.h"
-#include "mutable_song.h"
-#include "screen.h"
+namespace {
 
-struct SongInfo: Screen<NC::Scrollpad>, Tabbable
+template <bool Const>
+struct SongExtractor
 {
-	struct Metadata
+	typedef SongExtractor type;
+
+	typedef typename NC::Menu<MPD::Song>::Item MenuItem;
+	typedef typename std::conditional<Const, const MenuItem, MenuItem>::type Item;
+	typedef typename std::conditional<Const, const MPD::Song, MPD::Song>::type Song;
+
+	Song *operator()(Item &item) const
 	{
-		const char *Name;
-		MPD::Song::GetFunction Get;
-		MPD::MutableSong::SetFunction Set;
-	};
-	
-	SongInfo();
-	
-	// Screen<NC::Scrollpad> implementation
-	virtual void switchTo() OVERRIDE;
-	virtual void resize() OVERRIDE;
-	
-	virtual std::wstring title() OVERRIDE;
-	virtual ScreenType type() OVERRIDE { return ScreenType::SongInfo; }
-	
-	virtual void update() OVERRIDE { }
-	
-	virtual void enterPressed() OVERRIDE { }
-	virtual void spacePressed() OVERRIDE { }
-	
-	virtual bool isLockable() OVERRIDE { return false; }
-	virtual bool isMergable() OVERRIDE { return true; }
-	
-	// private members
-	static const Metadata Tags[];
-	
-private:
-	void PrepareSong(const MPD::Song &s);
+		return &item.value();
+	}
 };
 
-extern SongInfo *mySongInfo;
+}
 
-#endif // NCMPCPP_SONG_INFO_H
+SongIterator SongMenu::currentS()
+{
+	return makeSongIterator_<MPD::Song>(current(), SongExtractor<false>());
+}
 
+ConstSongIterator SongMenu::currentS() const
+{
+	return makeConstSongIterator_<MPD::Song>(current(), SongExtractor<true>());
+}
+
+SongIterator SongMenu::beginS()
+{
+	return makeSongIterator_<MPD::Song>(begin(), SongExtractor<false>());
+}
+
+ConstSongIterator SongMenu::beginS() const
+{
+	return makeConstSongIterator_<MPD::Song>(begin(), SongExtractor<true>());
+}
+
+SongIterator SongMenu::endS()
+{
+	return makeSongIterator_<MPD::Song>(end(), SongExtractor<false>());
+}
+
+ConstSongIterator SongMenu::endS() const
+{
+	return makeConstSongIterator_<MPD::Song>(end(), SongExtractor<true>());
+}
+
+std::vector<MPD::Song> SongMenu::getSelectedSongs()
+{
+	std::vector<MPD::Song> result;
+	for (auto it = begin(); it != end(); ++it)
+		if (it->isSelected())
+			result.push_back(it->value());
+	if (result.empty() && !empty())
+		result.push_back(current()->value());
+	return result;
+}

@@ -31,6 +31,23 @@
 #include "mutable_song.h"
 #include "regex_filter.h"
 #include "screen.h"
+#include "song_list.h"
+
+struct TagsWindow: NC::Menu<MPD::MutableSong>, SongList
+{
+	TagsWindow() { }
+	TagsWindow(NC::Menu<MPD::MutableSong> &&base)
+	: NC::Menu<MPD::MutableSong>(std::move(base)) { }
+
+	virtual SongIterator currentS() OVERRIDE;
+	virtual ConstSongIterator currentS() const OVERRIDE;
+	virtual SongIterator beginS() OVERRIDE;
+	virtual ConstSongIterator beginS() const OVERRIDE;
+	virtual SongIterator endS() OVERRIDE;
+	virtual ConstSongIterator endS() const OVERRIDE;
+
+	virtual std::vector<MPD::Song> getSelectedSongs() OVERRIDE;
+};
 
 struct TagEditor: Screen<NC::Window *>, HasColumns, HasSongs, Searchable, Tabbable
 {
@@ -59,11 +76,6 @@ struct TagEditor: Screen<NC::Window *>, HasColumns, HasSongs, Searchable, Tabbab
 	virtual bool find(SearchDirection direction, bool wrap, bool skip_current) OVERRIDE;
 	
 	// HasSongs implementation
-	virtual ProxySongList proxySongList() OVERRIDE;
-	
-	virtual bool allowsSelection() OVERRIDE;
-	virtual void selectCurrent() OVERRIDE;
-	virtual void reverseSelection() OVERRIDE;
 	virtual std::vector<MPD::Song> getSelectedSongs() OVERRIDE;
 	
 	// HasColumns implementation
@@ -79,7 +91,7 @@ struct TagEditor: Screen<NC::Window *>, HasColumns, HasSongs, Searchable, Tabbab
 	
 	NC::Menu< std::pair<std::string, std::string> > *Dirs;
 	NC::Menu<std::string> *TagTypes;
-	NC::Menu<MPD::MutableSong> *Tags;
+	TagsWindow *Tags;
 	
 private:
 	void SetDimensions(size_t, size_t);

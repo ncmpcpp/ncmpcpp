@@ -21,12 +21,13 @@
 #ifndef NCMPCPP_INTERFACES_H
 #define NCMPCPP_INTERFACES_H
 
+#include <boost/range/detail/any_iterator.hpp>
+#include <boost/tuple/tuple.hpp>
 #include <string>
 #include "enums.h"
 #include "gcc.h"
 #include "screen.h"
 #include "song.h"
-#include "proxy_song_list.h"
 
 struct Searchable
 {
@@ -38,11 +39,6 @@ struct Searchable
 
 struct HasSongs
 {
-	virtual ProxySongList proxySongList() = 0;
-	
-	virtual bool allowsSelection() = 0;
-	virtual void reverseSelection() = 0;
-	virtual void selectCurrent() = 0;
 	virtual std::vector<MPD::Song> getSelectedSongs() = 0;
 };
 

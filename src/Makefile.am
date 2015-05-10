@@ -40,6 +40,7 @@ ncmpcpp_SOURCES = \
 	settings.cpp \
 	song.cpp \
 	song_info.cpp \
+	song_list.cpp \
 	sort_playlist.cpp \
 	status.cpp \
 	statusbar.cpp \
@@ -56,6 +57,7 @@ INCLUDES= $(all_includes)
 # the library search path.
 ncmpcpp_LDFLAGS = $(all_libraries)
 noinst_HEADERS = \
+	helpers/song_iterator_maker.h \
 	utility/comparators.h \
 	utility/conversion.h \
 	utility/functional.h \
@@ -90,7 +92,6 @@ noinst_HEADERS = \
 	mutable_song.h \
 	outputs.h \
 	playlist_editor.h \
-	proxy_song_list.h \
 	regex_filter.h \
 	runnable_item.h \
 	screen.h \
@@ -103,6 +104,7 @@ noinst_HEADERS = \
 	settings.h \
 	song.h \
 	song_info.h \
+	song_list.h \
 	sort_playlist.h \
 	status.h \
 	statusbar.h \

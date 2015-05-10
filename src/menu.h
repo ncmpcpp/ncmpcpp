@@ -22,6 +22,8 @@
 #define NCMPCPP_MENU_H
 
 #include <boost/iterator/indirect_iterator.hpp>
+#include <boost/iterator/transform_iterator.hpp>
+#include <boost/range/detail/any_iterator.hpp>
 #include <cassert>
 #include <functional>
 #include <iterator>
@@ -33,21 +35,150 @@
 
 namespace NC {
 
+struct List
+{
+	struct Properties
+	{
+		enum Type {
+			None       = 0,
+			Bold       = (1 << 0),
+			Selectable = (1 << 1),
+			Selected   = (1 << 2),
+			Inactive   = (1 << 3),
+			Separator  = (1 << 4)
+		};
+
+		Properties(Type properties = Selectable)
+		: m_properties(properties)
+		{ }
+
+		void setBold(bool is_bold)
+		{
+			if (is_bold)
+				m_properties |= Bold;
+			else
+				m_properties &= ~Bold;
+		}
+		void setSelectable(bool is_selectable)
+		{
+			if (is_selectable)
+				m_properties |= Selectable;
+			else
+				m_properties &= ~(Selectable | Selected);
+		}
+		void setSelected(bool is_selected)
+		{
+			if (!isSelectable())
+				return;
+			if (is_selected)
+				m_properties |= Selected;
+			else
+				m_properties &= ~Selected;
+		}
+		void setInactive(bool is_inactive)
+		{
+			if (is_inactive)
+				m_properties |= Inactive;
+			else
+				m_properties &= ~Inactive;
+		}
+		void setSeparator(bool is_separator)
+		{
+			if (is_separator)
+				m_properties |= Separator;
+			else
+				m_properties &= ~Separator;
+		}
+
+		bool isBold() const { return m_properties & Bold; }
+		bool isSelectable() const { return m_properties & Selectable; }
+		bool isSelected() const { return m_properties & Selected; }
+		bool isInactive() const { return m_properties & Inactive; }
+		bool isSeparator() const { return m_properties & Separator; }
+
+	private:
+		unsigned m_properties;
+	};
+
+	template <typename ValueT>
+	using PropertiesIterator = boost::range_detail::any_iterator<
+		ValueT,
+		boost::random_access_traversal_tag,
+		ValueT &,
+		std::ptrdiff_t
+	>;
+
+	typedef PropertiesIterator<Properties> Iterator;
+	typedef PropertiesIterator<const Properties> ConstIterator;
+
+	virtual ~List() { }
+
+	virtual bool empty() const = 0;
+	virtual size_t size() const = 0;
+	virtual size_t choice() const = 0;
+	virtual void highlight(size_t pos) = 0;
+
+	virtual Iterator currentP() = 0;
+	virtual ConstIterator currentP() const = 0;
+	virtual Iterator beginP() = 0;
+	virtual ConstIterator beginP() const = 0;
+	virtual Iterator endP() = 0;
+	virtual ConstIterator endP() const = 0;
+};
+
+inline List::Properties::Type operator|(List::Properties::Type lhs, List::Properties::Type rhs)
+{
+	return List::Properties::Type(unsigned(lhs) | unsigned(rhs));
+}
+inline List::Properties::Type &operator|=(List::Properties::Type &lhs, List::Properties::Type rhs)
+{
+	lhs = lhs | rhs;
+	return lhs;
+}
+inline List::Properties::Type operator&(List::Properties::Type lhs, List::Properties::Type rhs)
+{
+	return List::Properties::Type(unsigned(lhs) & unsigned(rhs));
+}
+inline List::Properties::Type &operator&=(List::Properties::Type &lhs, List::Properties::Type rhs)
+{
+	lhs = lhs & rhs;
+	return lhs;
+}
+
+// for range-based for loop
+inline List::Iterator begin(List &list) { return list.beginP(); }
+inline List::ConstIterator begin(const List &list) { return list.beginP(); }
+inline List::Iterator end(List &list) { return list.endP(); }
+inline List::ConstIterator end(const List &list) { return list.endP(); }
+
 /// This template class is generic menu capable of
 /// holding any std::vector compatible values.
-template <typename ItemT> class Menu : public Window
+template <typename ItemT> struct Menu : Window, List
 {
-public:
-	struct Item
+	struct Item : List::Properties
 	{
+		template <bool Const>
+		struct PropertiesExtractor
+		{
+			typedef PropertiesExtractor type;
+
+			typedef typename std::conditional<Const, const Properties, Properties>::type Properties_;
+			typedef typename std::conditional<Const, const Item, Item>::type Item_;
+
+			Properties_ &operator()(Item_ &i) const {
+				return static_cast<Properties_ &>(i);
+			}
+		};
+
 		typedef ItemT Type;
 		
-		friend class Menu<ItemT>;
+		friend struct Menu<ItemT>;
 		
-		Item()
-		: m_is_bold(false), m_is_selected(false), m_is_inactive(false), m_is_separator(false) { }
-		Item(ItemT value_, bool is_bold, bool is_inactive)
-		: m_value(value_), m_is_bold(is_bold), m_is_selected(false), m_is_inactive(is_inactive), m_is_separator(false) { }
+		Item() { }
+		Item(ItemT value_, Properties::Type properties)
+		: Properties(properties)
+		, m_value(value_)
+		{ }
 		
 		ItemT &value() { return m_value; }
 		const ItemT &value() const { return m_value; }
@@ -55,29 +186,16 @@ public:
 		ItemT &operator*() { return m_value; }
 		const ItemT &operator*() const { return m_value; }
 
-		void setBold(bool is_bold) { m_is_bold = is_bold; }
-		void setSelected(bool is_selected) { m_is_selected = is_selected; }
-		void setInactive(bool is_inactive) { m_is_inactive = is_inactive; }
-		void setSeparator(bool is_separator) { m_is_separator = is_separator; }
-		
-		bool isBold() const { return m_is_bold; }
-		bool isSelected() const { return m_is_selected; }
-		bool isInactive() const { return m_is_inactive; }
-		bool isSeparator() const { return m_is_separator; }
-		
 	private:
 		static Item mkSeparator()
 		{
 			Item item;
-			item.m_is_separator = true;
+			item.setSelectable(false);
+			item.setSeparator(true);
 			return item;
 		}
 		
 		ItemT m_value;
-		bool m_is_bold;
-		bool m_is_selected;
-		bool m_is_inactive;
-		bool m_is_separator;
 	};
 	
 	typedef typename std::vector<Item>::iterator Iterator;
@@ -98,6 +216,15 @@ public:
 	typedef std::reverse_iterator<ValueIterator> ReverseValueIterator;
 	typedef std::reverse_iterator<ConstValueIterator> ConstReverseValueIterator;
 	
+	typedef boost::transform_iterator<
+		typename Item::template PropertiesExtractor<false>,
+		Iterator
+	> PropertiesIterator;
+	typedef boost::transform_iterator<
+		typename Item::template PropertiesExtractor<true>,
+		ConstIterator
+	> ConstPropertiesIterator;
+
 	/// Function helper prototype used to display each option on the screen.
 	/// If not set by setItemDisplayer(), menu won't display anything.
 	/// @see setItemDisplayer()
@@ -120,21 +247,14 @@ public:
 	/// @param size requested size
 	void resizeList(size_t new_size);
 	
-	/// Adds new option to list
-	/// @param item object that has to be added
-	/// @param is_bold defines the initial state of bold attribute
-	/// @param is_inactive defines the initial state of static attribute
-	void addItem(ItemT item, bool is_bold = false, bool is_inactive = false);
+	/// Adds a new option to list
+	void addItem(ItemT item, Properties::Type properties = Properties::Selectable);
 	
 	/// Adds separator to list
 	void addSeparator();
 	
-	/// Inserts new option to list at given position
-	/// @param pos initial position of inserted item
-	/// @param item object that has to be inserted
-	/// @param is_bold defines the initial state of bold attribute
-	/// @param is_inactive defines the initial state of static attribute
-	void insertItem(size_t pos, const ItemT &Item, bool is_bold = false, bool is_inactive = false);
+	/// Inserts a new option to the list at given position
+	void insertItem(size_t pos, ItemT item, Properties::Type properties = Properties::Selectable);
 	
 	/// Inserts separator to list at given position
 	/// @param pos initial position of inserted separator
@@ -149,12 +269,19 @@ public:
 	/// @return true if the position is reachable, false otherwise
 	bool Goto(size_t y);
 	
+	/// Checks if list is empty
+	/// @return true if list is empty, false otherwise
+	virtual bool empty() const OVERRIDE { return m_items.empty(); }
+
+	/// @return size of the list
+	virtual size_t size() const OVERRIDE { return m_items.size(); }
+
+	/// @return currently highlighted position
+	virtual size_t choice() const OVERRIDE;
+
 	/// Highlights given position
 	/// @param pos position to be highlighted
-	void highlight(size_t pos);
-	
-	/// @return currently highlighted position
-	size_t choice() const;
+	virtual void highlight(size_t position) OVERRIDE;
 	
 	/// Refreshes the menu window
 	/// @see Window::refresh()
@@ -200,13 +327,6 @@ public:
 	/// Turns on/off centered cursor
 	/// @param state state of centered cursor
 	void centeredCursor(bool state) { m_autocenter_cursor = state; }
-	
-	/// Checks if list is empty
-	/// @return true if list is empty, false otherwise
-	bool empty() const { return m_items.empty(); }
-	
-	/// @return size of the list
-	size_t size() const { return m_items.size(); }
 	
 	/// @return currently drawn item. The result is defined only within
 	/// drawing function that is called by refresh()
@@ -261,8 +381,26 @@ public:
 	ReverseValueIterator rendV() { return ReverseValueIterator(beginV()); }
 	ConstReverseValueIterator rendV() const { return ConstReverseValueIterator(beginV()); }
 	
-private:
+	virtual List::Iterator currentP() OVERRIDE {
+		return List::Iterator(PropertiesIterator(m_items.begin() + m_highlight));
+	}
+	virtual List::ConstIterator currentP() const OVERRIDE {
+		return List::ConstIterator(ConstPropertiesIterator(m_items.begin() + m_highlight));
+	}
+	virtual List::Iterator beginP() OVERRIDE {
+		return List::Iterator(PropertiesIterator(m_items.begin()));
+	}
+	virtual List::ConstIterator beginP() const OVERRIDE {
+		return List::ConstIterator(ConstPropertiesIterator(m_items.begin()));
+	}
+	virtual List::Iterator endP() OVERRIDE {
+		return List::Iterator(PropertiesIterator(m_items.end()));
+	}
+	virtual List::ConstIterator endP() const OVERRIDE {
+		return List::ConstIterator(ConstPropertiesIterator(m_items.end()));
+	}
 
+private:
 	bool isHighlightable(size_t pos)
 	{
 		return !m_items[pos].isSeparator()

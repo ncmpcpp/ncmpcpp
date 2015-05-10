@@ -27,6 +27,7 @@
 #include "mpdpp.h"
 #include "regex_filter.h"
 #include "screen.h"
+#include "song_list.h"
 
 struct SEItem
 {
@@ -74,11 +75,27 @@ private:
 	MPD::Song m_song;
 };
 
-struct SearchEngine: Screen<NC::Menu<SEItem>>, HasSongs, Searchable, Tabbable
+struct SearchEngineWindow: NC::Menu<SEItem>, SongList
+{
+	SearchEngineWindow() { }
+	SearchEngineWindow(NC::Menu<SEItem> &&base)
+	: NC::Menu<SEItem>(std::move(base)) { }
+
+	virtual SongIterator currentS() OVERRIDE;
+	virtual ConstSongIterator currentS() const OVERRIDE;
+	virtual SongIterator beginS() OVERRIDE;
+	virtual ConstSongIterator beginS() const OVERRIDE;
+	virtual SongIterator endS() OVERRIDE;
+	virtual ConstSongIterator endS() const OVERRIDE;
+
+	virtual std::vector<MPD::Song> getSelectedSongs() OVERRIDE;
+};
+
+struct SearchEngine: Screen<SearchEngineWindow>, HasSongs, Searchable, Tabbable
 {
 	SearchEngine();
 	
-	// Screen< NC::Menu<SEItem> > implementation
+	// Screen<SearchEngineWindow> implementation
 	virtual void resize() OVERRIDE;
 	virtual void switchTo() OVERRIDE;
 	
@@ -101,11 +118,6 @@ struct SearchEngine: Screen<NC::Menu<SEItem>>, HasSongs, Searchable, Tabbable
 	virtual bool find(SearchDirection direction, bool wrap, bool skip_current) OVERRIDE;
 	
 	// HasSongs implementation
-	virtual ProxySongList proxySongList() OVERRIDE;
-	
-	virtual bool allowsSelection() OVERRIDE;
-	virtual void selectCurrent() OVERRIDE;
-	virtual void reverseSelection() OVERRIDE;
 	virtual std::vector<MPD::Song> getSelectedSongs() OVERRIDE;
 	
 	// private members

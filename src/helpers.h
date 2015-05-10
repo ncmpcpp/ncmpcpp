@@ -25,6 +25,7 @@
 #include "mpdpp.h"
 #include "screen.h"
 #include "settings.h"
+#include "song_list.h"
 #include "status.h"
 #include "utility/string.h"
 #include "utility/type_conversions.h"
@@ -91,24 +92,6 @@ inline HasColumns *hasColumns(BaseScreen *screen)
 inline HasSongs *hasSongs(BaseScreen *screen)
 {
 	return dynamic_cast<HasSongs *>(screen);
-}
-
-inline ProxySongList proxySongList(BaseScreen *screen)
-{
-	auto pl = ProxySongList();
-	auto hs = hasSongs(screen);
-	if (hs)
-		pl = hs->proxySongList();
-	return pl;
-}
-
-inline MPD::Song *currentSong(BaseScreen *screen)
-{
-	MPD::Song *ptr = 0;
-	auto pl = proxySongList(screen);
-	if (pl && !pl.empty())
-		ptr = pl.currentSong();
-	return ptr;
 }
 
 template <typename Iterator>
@@ -314,12 +297,6 @@ void cropPlaylist(NC::Menu<MPD::Song> &m, F delete_fun)
 	deleteSelectedSongs(m, delete_fun);
 }
 
-template <typename ItemT>
-std::function<void (ItemT)> vectorMoveInserter(std::vector<ItemT> &v)
-{
-	return [&](ItemT item) { v.push_back(std::move(item)); };
-}
-
 template <typename Iterator> std::string getSharedDirectory(Iterator first, Iterator last)
 {
 	assert(first != last);
@@ -384,68 +361,25 @@ template <typename BufferT> void ShowTag(BufferT &buf, const std::string &tag)
 		buf << tag;
 }
 
-template <typename SongIterator>
-bool addSongsToPlaylist(SongIterator first, SongIterator last, bool play, int position)
-{
-	bool result = true;
-	auto addSongNoError = [&](SongIterator song) -> int {
-		try
-		{
-			return Mpd.AddSong(*song, position);
-		}
-		catch (MPD::ServerError &e)
-		{
-			Status::handleServerError(e);
-			result = false;
-			return -1;
-		}
-	};
-
-	if (last-first >= 1)
-	{
-		int id;
-		while (true)
-		{
-			id = addSongNoError(first);
-			if (id >= 0)
-				break;
-			++first;
-			if (first == last)
-				return result;
-		}
-
-		if (position == -1)
-		{
-			++first;
-			for(; first != last; ++first)
-				addSongNoError(first);
-		}
-		else
-		{
-			++position;
-			--last;
-			for (; first != last; --last)
-				addSongNoError(last);
-		}
-		if (play)
-			Mpd.PlayID(id);
-	}
-
-	return result;
-}
-
 inline const char *withErrors(bool success)
 {
 	return success ? "" : " " "(with errors)";
 }
 
+
+bool addSongsToPlaylist(std::vector<MPD::Song>::const_iterator first,
+                        std::vector<MPD::Song>::const_iterator last,
+                        bool play, int position);
+
 bool addSongToPlaylist(const MPD::Song &s, bool play, int position = -1);
+
+const MPD::Song *currentSong(const BaseScreen *screen);
 
 std::string timeFormat(const char *format, time_t t);
 
 std::string Timestamp(time_t t);
 
-void markSongsInPlaylist(ProxySongList pl);
+void markSongsInPlaylist(SongList &list);
 
 std::wstring Scroller(const std::wstring &str, size_t &pos, size_t width);
 void writeCyclicBuffer(const NC::WBuffer &buf, NC::Window &w, size_t &start_pos,

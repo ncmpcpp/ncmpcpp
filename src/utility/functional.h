@@ -24,6 +24,13 @@
 #include <boost/locale/encoding_utf.hpp>
 #include <utility>
 
+template <typename ValueT>
+struct pointer_extractor
+{
+	typedef pointer_extractor type;
+	ValueT *operator()(ValueT &v) const { return &v; }
+};
+
 // identity function object
 struct id_
 {

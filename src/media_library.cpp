@@ -34,7 +34,9 @@
 #include "media_library.h"
 #include "status.h"
 #include "statusbar.h"
+#include "helpers/song_iterator_maker.h"
 #include "utility/comparators.h"
+#include "utility/functional.h"
 #include "utility/type_conversions.h"
 #include "title.h"
 #include "screen_switcher.h"
@@ -202,7 +204,7 @@ MediaLibrary::MediaLibrary()
 	Songs.setSelectedPrefix(Config.selected_item_prefix);
 	Songs.setSelectedSuffix(Config.selected_item_suffix);
 	Songs.setItemDisplayer(std::bind(
-		Display::Songs, ph::_1, songsProxyList(), std::cref(Config.song_library_format)
+		Display::Songs, ph::_1, std::cref(Songs), std::cref(Config.song_library_format)
 	));
 	
 	w = &Tags;
@@ -257,7 +259,7 @@ void MediaLibrary::refresh()
 void MediaLibrary::switchTo()
 {
 	SwitchTo::execute(this);
-	markSongsInPlaylist(songsProxyList());
+	markSongsInPlaylist(Songs);
 	drawHeader();
 	refresh();
 }
@@ -418,14 +420,19 @@ void MediaLibrary::update()
 		size_t idx = 0;
 		for (MPD::SongIterator s = Mpd.CommitSearchSongs(), end; s != end; ++s, ++idx)
 		{
-			bool is_playlist = myPlaylist->checkForSong(*s);
+			bool in_playlist = myPlaylist->checkForSong(*s);
 			if (idx < Songs.size())
 			{
 				Songs[idx].value() = std::move(*s);
-				Songs[idx].setBold(is_playlist);
+				Songs[idx].setBold(in_playlist);
 			}
 			else
-				Songs.addItem(std::move(*s), is_playlist);
+			{
+				auto properties = NC::List::Properties::Selectable;
+				if (in_playlist)
+					properties |= NC::List::Properties::Bold;
+				Songs.addItem(std::move(*s), properties);
+			}
 		};
 		if (idx < Songs.size())
 			Songs.resizeList(idx);
@@ -601,56 +608,6 @@ bool MediaLibrary::find(SearchDirection direction, bool wrap, bool skip_current)
 
 /***********************************************************************/
 
-ProxySongList MediaLibrary::proxySongList()
-{
-	auto ptr = ProxySongList();
-	if (isActiveWindow(Songs))
-		ptr = songsProxyList();
-	return ptr;
-}
-
-bool MediaLibrary::allowsSelection()
-{
-	return (isActiveWindow(Tags) && !Tags.empty())
-	    || (isActiveWindow(Albums) && !Albums.empty() && !Albums.current()->value().isAllTracksEntry())
-	    || (isActiveWindow(Songs) && !Songs.empty());
-}
-
-void MediaLibrary::selectCurrent()
-{
-	if (isActiveWindow(Tags))
-	{
-		size_t idx = Tags.choice();
-		Tags[idx].setSelected(!Tags[idx].isSelected());
-	}
-	else if (isActiveWindow(Albums))
-	{
-		size_t idx = Albums.choice();
-		Albums[idx].setSelected(!Albums[idx].isSelected());
-	}
-	else if (isActiveWindow(Songs))
-	{
-		size_t idx = Songs.choice();
-		Songs[idx].setSelected(!Songs[idx].isSelected());
-	}
-}
-
-void MediaLibrary::reverseSelection()
-{
-	if (isActiveWindow(Tags))
-		reverseSelectionHelper(Tags.begin(), Tags.end());
-	else if (isActiveWindow(Albums))
-	{
-		// omit "All tracks"
-		if (Albums.size() > 1)
-			reverseSelectionHelper(Albums.begin(), Albums.end()-2);
-		else
-			reverseSelectionHelper(Albums.begin(), Albums.end());
-	}
-	else if (isActiveWindow(Songs))
-		reverseSelectionHelper(Songs.begin(), Songs.end());
-}
-
 std::vector<MPD::Song> MediaLibrary::getSelectedSongs()
 {
 	std::vector<MPD::Song> result;
@@ -717,14 +674,7 @@ std::vector<MPD::Song> MediaLibrary::getSelectedSongs()
 		}
 	}
 	else if (isActiveWindow(Songs))
-	{
-		for (const auto &s : Songs)
-			if (s.isSelected())
-				result.push_back(s.value());
-		// if no item is selected, add current one
-		if (result.empty() && !Songs.empty())
-			result.push_back(Songs.current()->value());
-	}
+		Songs.getSelectedSongs();
 	return result;
 }
 
@@ -835,13 +785,6 @@ int MediaLibrary::Columns()
 		return 2;
 	else
 		return 3;
-}
-
-ProxySongList MediaLibrary::songsProxyList()
-{
-	return ProxySongList(Songs, [](NC::Menu<MPD::Song>::Item &item) {
-		return &item.value();
-	});
 }
 
 void MediaLibrary::toggleSortMode()

@@ -26,20 +26,21 @@
 #include "menu.h"
 #include "mutable_song.h"
 #include "search_engine.h"
+#include "song_list.h"
 
 namespace Display {
 
 std::string Columns(size_t);
 
-void SongsInColumns(NC::Menu<MPD::Song> &menu, const ProxySongList &pl);
+void SongsInColumns(NC::Menu<MPD::Song> &menu, const SongList &list);
 
-void Songs(NC::Menu<MPD::Song> &menu, const ProxySongList &pl, const Format::AST<char> &ast);
+void Songs(NC::Menu<MPD::Song> &menu, const SongList &list, const Format::AST<char> &ast);
 
 void Tags(NC::Menu<MPD::MutableSong> &menu);
 
-void SEItems(NC::Menu<SEItem> &menu, const ProxySongList &pl);
+void SEItems(NC::Menu<SEItem> &menu, const SongList &list);
 
-void Items(NC::Menu<MPD::Item> &menu, const ProxySongList &pl);
+void Items(NC::Menu<MPD::Item> &menu, const SongList &list);
 
 }
 

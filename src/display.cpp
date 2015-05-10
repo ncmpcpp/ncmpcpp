@@ -77,27 +77,30 @@ const wchar_t *toColumnName(char c)
 }
 
 template <typename T>
-void setProperties(NC::Menu<T> &menu, const MPD::Song &s, const ProxySongList &pl, bool &separate_albums,
-                   bool &is_now_playing, bool &is_selected, bool &discard_colors)
+void setProperties(NC::Menu<T> &menu, const MPD::Song &s, const SongList &list,
+	bool &separate_albums, bool &is_now_playing, bool &is_selected, bool &discard_colors)
 {
 	size_t drawn_pos = menu.drawn() - menu.begin();
 	separate_albums = false;
 	if (Config.playlist_separate_albums)
 	{
-		size_t next_pos = drawn_pos+1;
-		auto next = next_pos < pl.size() ? pl.getSong(next_pos) : 0;
-		if (next && next->getAlbum() != s.getAlbum())
-			separate_albums = true;
+		auto next = list.beginS() + drawn_pos + 1;
+		if (next != list.endS())
+		{
+			auto next_s = next->get<Bit::Song>();
+			if (next_s != nullptr && next_s->getAlbum() != s.getAlbum())
+				separate_albums = true;
+		}
 	}
 	if (separate_albums)
 	{
 		menu << NC::Format::Underline;
 		mvwhline(menu.raw(), menu.getY(), 0, KEY_SPACE, menu.getWidth());
 	}
-	
+
 	is_selected = menu.drawn()->isSelected();
 	discard_colors = Config.discard_colors_if_item_is_selected && is_selected;
-	
+
 	int song_pos = drawn_pos;
 	is_now_playing = Status::State::player() != MPD::psStop && myPlaylist->isActiveWindow(menu)
 	              && song_pos == Status::State::currentSongPosition();
@@ -106,11 +109,10 @@ void setProperties(NC::Menu<T> &menu, const MPD::Song &s, const ProxySongList &p
 }
 
 template <typename T>
-void showSongs(NC::Menu<T> &menu, const MPD::Song &s,
-               const ProxySongList &pl, const Format::AST<char> &ast)
+void showSongs(NC::Menu<T> &menu, const MPD::Song &s, const SongList &list, const Format::AST<char> &ast)
 {
 	bool separate_albums, is_now_playing, is_selected, discard_colors;
-	setProperties(menu, s, pl, separate_albums, is_now_playing, is_selected, discard_colors);
+	setProperties(menu, s, list, separate_albums, is_now_playing, is_selected, discard_colors);
 
 	const size_t y = menu.getY();
 	NC::Buffer right_aligned;
@@ -134,14 +136,14 @@ void showSongs(NC::Menu<T> &menu, const MPD::Song &s,
 }
 
 template <typename T>
-void showSongsInColumns(NC::Menu<T> &menu, const MPD::Song &s, const ProxySongList &pl)
+void showSongsInColumns(NC::Menu<T> &menu, const MPD::Song &s, const SongList &list)
 {
 	if (Config.columns.empty())
 		return;
-	
+
 	bool separate_albums, is_now_playing, is_selected, discard_colors;
-	setProperties(menu, s, pl, separate_albums, is_now_playing, is_selected, discard_colors);
-	
+	setProperties(menu, s, list, separate_albums, is_now_playing, is_selected, discard_colors);
+
 	int width;
 	int y = menu.getY();
 	int remained_width = menu.getWidth();
@@ -163,7 +165,7 @@ void showSongsInColumns(NC::Menu<T> &menu, const MPD::Song &s, const ProxySongLi
 		// and next column, so we substract it now and restore later.
 		if (it != last)
 			--width;
-		
+
 		if (it == Config.columns.begin() && (is_now_playing || is_selected))
 		{
 			// here comes the shitty part. if we applied now playing or selected
@@ -187,11 +189,11 @@ void showSongsInColumns(NC::Menu<T> &menu, const MPD::Song &s, const ProxySongLi
 			width -= offset;
 			remained_width -= offset;
 		}
-		
+
 		// if column doesn't fit into screen, discard it and any other after it.
 		if (remained_width-width < 0 || width < 0 /* this one may come from (*) */)
 			break;
-		
+
 		std::wstring tag;
 		for (size_t i = 0; i < it->type.length(); ++i)
 		{
@@ -204,16 +206,16 @@ void showSongsInColumns(NC::Menu<T> &menu, const MPD::Song &s, const ProxySongLi
 		if (tag.empty() && it->display_empty_tag)
 			tag = ToWString(Config.empty_tag);
 		wideCut(tag, width);
-		
+
 		if (!discard_colors && it->color != NC::Color::Default)
 			menu << it->color;
-		
+
 		int x_off = 0;
 		// if column uses right alignment, calculate proper offset.
 		// otherwise just assume offset is 0, ie. we start from the left.
 		if (it->right_alignment)
 			x_off = std::max(0, width - int(wideLength(tag)));
-		
+
 		whline(menu.raw(), KEY_SPACE, width);
 		menu.goToXY(x + x_off, y);
 		menu << tag;
@@ -224,11 +226,11 @@ void showSongsInColumns(NC::Menu<T> &menu, const MPD::Song &s, const ProxySongLi
 			menu << ' ';
 			remained_width -= width+1;
 		}
-		
+
 		if (!discard_colors && it->color != NC::Color::Default)
 			menu << NC::Color::End;
 	}
-	
+
 	// here comes the shitty part, second chapter. here we apply
 	// now playing suffix or/and make room for selected suffix
 	// (as it will be applied in Menu::Refresh when this function
@@ -243,7 +245,7 @@ void showSongsInColumns(NC::Menu<T> &menu, const MPD::Song &s, const ProxySongLi
 	}
 	if (is_selected)
 		menu.goToXY(menu.getWidth() - Config.selected_item_suffix_length, y);
-	
+
 	if (separate_albums)
 		menu << NC::Format::NoUnderline;
 }
@@ -320,15 +322,14 @@ std::string Display::Columns(size_t list_width)
 	return result;
 }
 
-void Display::SongsInColumns(NC::Menu< MPD::Song >& menu, const ProxySongList &pl)
+void Display::SongsInColumns(NC::Menu<MPD::Song> &menu, const SongList &list)
 {
-	showSongsInColumns(menu, menu.drawn()->value(), pl);
+	showSongsInColumns(menu, menu.drawn()->value(), list);
 }
 
-void Display::Songs(NC::Menu< MPD::Song >& menu,
-                    const ProxySongList &pl, const Format::AST<char> &ast)
+void Display::Songs(NC::Menu<MPD::Song> &menu, const SongList &list, const Format::AST<char> &ast)
 {
-	showSongs(menu, menu.drawn()->value(), pl, ast);
+	showSongs(menu, menu.drawn()->value(), list, ast);
 }
 
 #ifdef HAVE_TAGLIB_H
@@ -354,7 +355,7 @@ void Display::Tags(NC::Menu<MPD::MutableSong> &menu)
 }
 #endif // HAVE_TAGLIB_H
 
-void Display::Items(NC::Menu<MPD::Item> &menu, const ProxySongList &pl)
+void Display::Items(NC::Menu<MPD::Item> &menu, const SongList &list)
 {
 	const MPD::Item &item = menu.drawn()->value();
 	switch (item.type())
@@ -368,10 +369,10 @@ void Display::Items(NC::Menu<MPD::Item> &menu, const ProxySongList &pl)
 			switch (Config.browser_display_mode)
 			{
 				case DisplayMode::Classic:
-					showSongs(menu, item.song(), pl, Config.song_list_format);
+					showSongs(menu, item.song(), list, Config.song_list_format);
 					break;
 				case DisplayMode::Columns:
-					showSongsInColumns(menu, item.song(), pl);
+					showSongsInColumns(menu, item.song(), list);
 					break;
 			}
 			break;
@@ -382,7 +383,7 @@ void Display::Items(NC::Menu<MPD::Item> &menu, const ProxySongList &pl)
 	}
 }
 
-void Display::SEItems(NC::Menu<SEItem> &menu, const ProxySongList &pl)
+void Display::SEItems(NC::Menu<SEItem> &menu, const SongList &list)
 {
 	const SEItem &si = menu.drawn()->value();
 	if (si.isSong())
@@ -390,10 +391,10 @@ void Display::SEItems(NC::Menu<SEItem> &menu, const ProxySongList &pl)
 		switch (Config.search_engine_display_mode)
 		{
 			case DisplayMode::Classic:
-				showSongs(menu, si.song(), pl, Config.song_list_format);
+				showSongs(menu, si.song(), list, Config.song_list_format);
 				break;
 			case DisplayMode::Columns:
-				showSongsInColumns(menu, si.song(), pl);
+				showSongsInColumns(menu, si.song(), list);
 				break;
 		}
 	}

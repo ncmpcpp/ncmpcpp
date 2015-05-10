@@ -114,9 +114,9 @@ void Menu<ItemT>::resizeList(size_t new_size)
 }
 
 template <typename ItemT>
-void Menu<ItemT>::addItem(ItemT item, bool is_bold, bool is_inactive)
+void Menu<ItemT>::addItem(ItemT item, Properties::Type properties)
 {
-	m_items.push_back(Item(std::move(item), is_bold, is_inactive));
+	m_items.push_back(Item(std::move(item), properties));
 }
 
 template <typename ItemT>
@@ -126,9 +126,9 @@ void Menu<ItemT>::addSeparator()
 }
 
 template <typename ItemT>
-void Menu<ItemT>::insertItem(size_t pos, const ItemT &item, bool is_bold, bool is_inactive)
+void Menu<ItemT>::insertItem(size_t pos, ItemT item, Properties::Type properties)
 {
-	m_items.insert(m_items.begin()+pos, Item(item, is_bold, is_inactive));
+	m_items.insert(m_items.begin()+pos, Item(std::move(item), properties));
 }
 
 template <typename ItemT>
@@ -181,9 +181,9 @@ void Menu<ItemT>::refresh()
 	}
 
 	size_t line = 0;
-	const size_t end = m_beginning+m_height;
+	const size_t end_ = m_beginning+m_height;
 	m_drawn_position = m_beginning;
-	for (; m_drawn_position < end; ++m_drawn_position, ++line)
+	for (; m_drawn_position < end_; ++m_drawn_position, ++line)
 	{
 		goToXY(0, line);
 		if (m_drawn_position >= m_items.size())
