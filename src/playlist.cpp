@@ -19,7 +19,6 @@
  ***************************************************************************/
 
 #include <algorithm>
-#include <boost/bind.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <sstream>
 
@@ -37,6 +36,8 @@
 
 using Global::MainHeight;
 using Global::MainStartY;
+
+namespace ph = std::placeholders;
 
 Playlist *myPlaylist;
 
@@ -61,13 +62,13 @@ Playlist::Playlist()
 	switch (Config.playlist_display_mode)
 	{
 		case DisplayMode::Classic:
-			w.setItemDisplayer(boost::bind(
-				Display::Songs, _1, proxySongList(), Config.song_list_format
+			w.setItemDisplayer(std::bind(
+				Display::Songs, ph::_1, proxySongList(), std::cref(Config.song_list_format)
 			));
 			break;
 		case DisplayMode::Columns:
-			w.setItemDisplayer(boost::bind(
-				Display::SongsInColumns, _1, proxySongList()
+			w.setItemDisplayer(std::bind(
+				Display::SongsInColumns, ph::_1, proxySongList()
 			));
 			break;
 	}

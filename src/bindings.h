@@ -22,7 +22,6 @@
 #define NCMPCPP_BINDINGS_H
 
 #include <algorithm>
-#include <boost/bind.hpp>
 #include <cassert>
 #include <unordered_map>
 #include "actions.h"
@@ -67,7 +66,7 @@ struct Binding
 	
 	bool execute() const {
 		return std::all_of(m_actions.begin(), m_actions.end(),
-			boost::bind(&Actions::BaseAction::execute, _1)
+			std::bind(&Actions::BaseAction::execute, std::placeholders::_1)
 		);
 	}
 	

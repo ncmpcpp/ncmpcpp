@@ -19,7 +19,7 @@
  ***************************************************************************/
 
 #include <algorithm>
-#include <boost/bind.hpp>
+#include <boost/lambda/bind.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <cassert>
 
@@ -40,6 +40,8 @@
 
 using Global::MainHeight;
 using Global::MainStartY;
+
+namespace ph = std::placeholders;
 
 PlaylistEditor *myPlaylistEditor;
 
@@ -85,12 +87,12 @@ PlaylistEditor::PlaylistEditor()
 	{
 		case DisplayMode::Classic:
 			Content.setItemDisplayer(
-				boost::bind(Display::Songs, _1, contentProxyList(), Config.song_list_format
+				std::bind(Display::Songs, ph::_1, contentProxyList(), std::cref(Config.song_list_format)
 			));
 			break;
 		case DisplayMode::Columns:
 			Content.setItemDisplayer(
-				boost::bind(Display::SongsInColumns, _1, contentProxyList())
+				std::bind(Display::SongsInColumns, ph::_1, contentProxyList())
 			);
 			break;
 	}

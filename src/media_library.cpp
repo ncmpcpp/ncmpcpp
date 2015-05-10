@@ -18,7 +18,6 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
-#include <boost/bind.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/locale/conversion.hpp>
 #include <algorithm>
@@ -43,6 +42,8 @@
 using Global::MainHeight;
 using Global::MainStartY;
 using Global::myScreen;
+
+namespace ph = std::placeholders;
 
 MediaLibrary *myLibrary;
 
@@ -200,8 +201,8 @@ MediaLibrary::MediaLibrary()
 	Songs.centeredCursor(Config.centered_cursor);
 	Songs.setSelectedPrefix(Config.selected_item_prefix);
 	Songs.setSelectedSuffix(Config.selected_item_suffix);
-	Songs.setItemDisplayer(boost::bind(
-		Display::Songs, _1, songsProxyList(), Config.song_library_format
+	Songs.setItemDisplayer(std::bind(
+		Display::Songs, ph::_1, songsProxyList(), std::cref(Config.song_library_format)
 	));
 	
 	w = &Tags;
@@ -564,7 +565,7 @@ void MediaLibrary::setSearchConstraint(const std::string &constraint)
 	{
 		m_albums_search_predicate = Regex::ItemFilter<AlbumEntry>(
 			Regex::make(constraint, Config.regex_type),
-			boost::bind(AlbumEntryMatcher, _1, _2, false)
+			std::bind(AlbumEntryMatcher, ph::_1, ph::_2, false)
 		);
 	}
 	else if (isActiveWindow(Songs))

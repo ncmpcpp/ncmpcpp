@@ -22,7 +22,6 @@
 
 #ifdef HAVE_TAGLIB_H
 
-#include <boost/bind.hpp>
 #include <boost/locale/conversion.hpp>
 #include <algorithm>
 #include <fstream>
@@ -45,6 +44,8 @@
 using Global::myScreen;
 using Global::MainHeight;
 using Global::MainStartY;
+
+namespace ph = std::placeholders;
 
 TagEditor *myTagEditor;
 
@@ -719,7 +720,7 @@ void TagEditor::setSearchConstraint(const std::string &constraint)
 	{
 		m_directories_search_predicate = Regex::Filter<std::pair<std::string, std::string>>(
 			Regex::make(constraint, Config.regex_type),
-			boost::bind(DirEntryMatcher, _1, _2, false)
+			std::bind(DirEntryMatcher, ph::_1, ph::_2, false)
 		);
 	}
 	else if (w == Tags)

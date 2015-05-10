@@ -19,7 +19,6 @@
  ***************************************************************************/
 
 #include <array>
-#include <boost/bind.hpp>
 #include <boost/range/detail/any_iterator.hpp>
 #include <iomanip>
 
@@ -38,6 +37,8 @@
 
 using Global::MainHeight;
 using Global::MainStartY;
+
+namespace ph = std::placeholders;
 
 SearchEngine *mySearcher;
 
@@ -108,7 +109,7 @@ SearchEngine::SearchEngine()
 	w.setHighlightColor(Config.main_highlight_color);
 	w.cyclicScrolling(Config.use_cyclic_scrolling);
 	w.centeredCursor(Config.centered_cursor);
-	w.setItemDisplayer(boost::bind(Display::SEItems, _1, proxySongList()));
+	w.setItemDisplayer(std::bind(Display::SEItems, ph::_1, proxySongList()));
 	w.setSelectedPrefix(Config.selected_item_prefix);
 	w.setSelectedSuffix(Config.selected_item_suffix);
 	SearchMode = &SearchModes[Config.search_engine_default_search_mode];
@@ -259,7 +260,7 @@ void SearchEngine::setSearchConstraint(const std::string &constraint)
 {
 	m_search_predicate = Regex::ItemFilter<SEItem>(
 		Regex::make(constraint, Config.regex_type),
-		boost::bind(SEItemEntryMatcher, _1, _2, false)
+		std::bind(SEItemEntryMatcher, ph::_1, ph::_2, false)
 	);
 }
 

@@ -20,7 +20,6 @@
 
 #include <algorithm>
 #include <boost/algorithm/string/predicate.hpp>
-#include <boost/bind.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/locale/conversion.hpp>
 #include <time.h>
@@ -48,6 +47,7 @@ using Global::MainStartY;
 using Global::myScreen;
 
 namespace fs = boost::filesystem;
+namespace ph = std::placeholders;
 
 Browser *myBrowser;
 
@@ -83,7 +83,7 @@ Browser::Browser()
 	w.centeredCursor(Config.centered_cursor);
 	w.setSelectedPrefix(Config.selected_item_prefix);
 	w.setSelectedSuffix(Config.selected_item_suffix);
-	w.setItemDisplayer(boost::bind(Display::Items, _1, proxySongList()));
+	w.setItemDisplayer(std::bind(Display::Items, ph::_1, proxySongList()));
 }
 
 void Browser::resize()
@@ -279,7 +279,7 @@ void Browser::setSearchConstraint(const std::string &constraint)
 {
 	m_search_predicate = Regex::Filter<MPD::Item>(
 		Regex::make(constraint, Config.regex_type),
-		boost::bind(browserEntryMatcher, _1, _2, false)
+		std::bind(browserEntryMatcher, ph::_1, ph::_2, false)
 	);
 }
 

@@ -62,7 +62,7 @@ struct Lastfm: Screen<NC::Scrollpad>, Tabbable
 			return;
 		
 		m_service = std::make_shared<ServiceNoRef>(std::forward<ServiceT>(service));
-		m_worker = boost::async(boost::launch::async, boost::bind(&LastFm::Service::fetch, m_service.get()));
+		m_worker = boost::async(boost::launch::async, std::bind(&LastFm::Service::fetch, m_service.get()));
 		
 		w.clear();
 		w << "Fetching information...";

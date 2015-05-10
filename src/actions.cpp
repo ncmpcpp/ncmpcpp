@@ -22,7 +22,6 @@
 #include <cerrno>
 #include <cstring>
 #include <boost/array.hpp>
-#include <boost/bind.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/locale/conversion.hpp>
 #include <boost/lexical_cast.hpp>
@@ -71,6 +70,8 @@
 #endif // HAVE_TAGLIB_H
 
 using Global::myScreen;
+
+namespace ph = std::placeholders;
 
 namespace {
 
@@ -642,14 +643,14 @@ void DeletePlaylistItems::run()
 	if (myScreen == myPlaylist)
 	{
 		Statusbar::print("Deleting items...");
-		auto delete_fun = boost::bind(&MPD::Connection::Delete, _1, _2);
+		auto delete_fun = std::bind(&MPD::Connection::Delete, ph::_1, ph::_2);
 		deleteSelectedSongs(myPlaylist->main(), delete_fun);
 		Statusbar::print("Item(s) deleted");
 	}
 	else if (myScreen->isActiveWindow(myPlaylistEditor->Content))
 	{
 		std::string playlist = myPlaylistEditor->Playlists.current()->value().path();
-		auto delete_fun = boost::bind(&MPD::Connection::PlaylistDelete, _1, playlist, _2);
+		auto delete_fun = std::bind(&MPD::Connection::PlaylistDelete, ph::_1, playlist, ph::_2);
 		Statusbar::print("Deleting items...");
 		deleteSelectedSongs(myPlaylistEditor->Content, delete_fun);
 		Statusbar::print("Item(s) deleted");
@@ -875,13 +876,13 @@ void MoveSelectedItemsUp::run()
 {
 	if (myScreen == myPlaylist)
 	{
-		moveSelectedItemsUp(myPlaylist->main(), boost::bind(&MPD::Connection::Move, _1, _2, _3));
+		moveSelectedItemsUp(myPlaylist->main(), std::bind(&MPD::Connection::Move, ph::_1, ph::_2, ph::_3));
 	}
 	else if (myScreen == myPlaylistEditor)
 	{
 		assert(!myPlaylistEditor->Playlists.empty());
 		std::string playlist = myPlaylistEditor->Playlists.current()->value().path();
-		auto move_fun = boost::bind(&MPD::Connection::PlaylistMove, _1, playlist, _2, _3);
+		auto move_fun = std::bind(&MPD::Connection::PlaylistMove, ph::_1, playlist, ph::_2, ph::_3);
 		moveSelectedItemsUp(myPlaylistEditor->Content, move_fun);
 	}
 }
@@ -898,13 +899,13 @@ void MoveSelectedItemsDown::run()
 {
 	if (myScreen == myPlaylist)
 	{
-		moveSelectedItemsDown(myPlaylist->main(), boost::bind(&MPD::Connection::Move, _1, _2, _3));
+		moveSelectedItemsDown(myPlaylist->main(), std::bind(&MPD::Connection::Move, ph::_1, ph::_2, ph::_3));
 	}
 	else if (myScreen == myPlaylistEditor)
 	{
 		assert(!myPlaylistEditor->Playlists.empty());
 		std::string playlist = myPlaylistEditor->Playlists.current()->value().path();
-		auto move_fun = boost::bind(&MPD::Connection::PlaylistMove, _1, playlist, _2, _3);
+		auto move_fun = std::bind(&MPD::Connection::PlaylistMove, ph::_1, playlist, ph::_2, ph::_3);
 		moveSelectedItemsDown(myPlaylistEditor->Content, move_fun);
 	}
 }
@@ -920,13 +921,13 @@ void MoveSelectedItemsTo::run()
 	if (myScreen == myPlaylist)
 	{
 		if (!myPlaylist->main().empty())
-			moveSelectedItemsTo(myPlaylist->main(), boost::bind(&MPD::Connection::Move, _1, _2, _3));
+			moveSelectedItemsTo(myPlaylist->main(), std::bind(&MPD::Connection::Move, ph::_1, ph::_2, ph::_3));
 	}
 	else
 	{
 		assert(!myPlaylistEditor->Playlists.empty());
 		std::string playlist = myPlaylistEditor->Playlists.current()->value().path();
-		auto move_fun = boost::bind(&MPD::Connection::PlaylistMove, _1, playlist, _2, _3);
+		auto move_fun = std::bind(&MPD::Connection::PlaylistMove, ph::_1, playlist, ph::_2, ph::_3);
 		moveSelectedItemsTo(myPlaylistEditor->Content, move_fun);
 	}
 }
@@ -1009,8 +1010,8 @@ void ToggleDisplayMode::run()
 		{
 			case DisplayMode::Classic:
 				Config.playlist_display_mode = DisplayMode::Columns;
-				myPlaylist->main().setItemDisplayer(boost::bind(
-					Display::SongsInColumns, _1, myPlaylist->proxySongList()
+				myPlaylist->main().setItemDisplayer(std::bind(
+					Display::SongsInColumns, ph::_1, myPlaylist->proxySongList()
 				));
 				if (Config.titles_visibility)
 					myPlaylist->main().setTitle(Display::Columns(myPlaylist->main().getWidth()));
@@ -1019,8 +1020,8 @@ void ToggleDisplayMode::run()
 				break;
 			case DisplayMode::Columns:
 				Config.playlist_display_mode = DisplayMode::Classic;
-				myPlaylist->main().setItemDisplayer(boost::bind(
-					Display::Songs, _1, myPlaylist->proxySongList(), Config.song_list_format
+				myPlaylist->main().setItemDisplayer(std::bind(
+					Display::Songs, ph::_1, myPlaylist->proxySongList(), std::cref(Config.song_list_format)
 				));
 				myPlaylist->main().setTitle("");
 		}
@@ -1070,14 +1071,14 @@ void ToggleDisplayMode::run()
 		{
 			case DisplayMode::Classic:
 				Config.playlist_editor_display_mode = DisplayMode::Columns;
-				myPlaylistEditor->Content.setItemDisplayer(boost::bind(
-					Display::SongsInColumns, _1, myPlaylistEditor->contentProxyList()
+				myPlaylistEditor->Content.setItemDisplayer(std::bind(
+					Display::SongsInColumns, ph::_1, myPlaylistEditor->contentProxyList()
 				));
 				break;
 			case DisplayMode::Columns:
 				Config.playlist_editor_display_mode = DisplayMode::Classic;
-				myPlaylistEditor->Content.setItemDisplayer(boost::bind(
-					Display::Songs, _1, myPlaylistEditor->contentProxyList(), Config.song_list_format
+				myPlaylistEditor->Content.setItemDisplayer(std::bind(
+					Display::Songs, ph::_1, myPlaylistEditor->contentProxyList(), std::cref(Config.song_list_format)
 				));
 				break;
 		}
@@ -1742,7 +1743,7 @@ void CropMainPlaylist::run()
 		confirmAction("Do you really want to crop main playlist?");
 	Statusbar::print("Cropping playlist...");
 	selectCurrentIfNoneSelected(w);
-	cropPlaylist(w, boost::bind(&MPD::Connection::Delete, _1, _2));
+	cropPlaylist(w, std::bind(&MPD::Connection::Delete, ph::_1, ph::_2));
 	Statusbar::print("Playlist cropped");
 }
 
@@ -1763,7 +1764,7 @@ void CropPlaylist::run()
 		confirmAction(boost::format("Do you really want to crop playlist \"%1%\"?") % playlist);
 	selectCurrentIfNoneSelected(w);
 	Statusbar::printf("Cropping playlist \"%1%\"...", playlist);
-	cropPlaylist(w, boost::bind(&MPD::Connection::PlaylistDelete, _1, playlist, _2));
+	cropPlaylist(w, std::bind(&MPD::Connection::PlaylistDelete, ph::_1, playlist, ph::_2));
 	Statusbar::printf("Playlist \"%1%\" cropped", playlist);
 }
 
