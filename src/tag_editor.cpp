@@ -337,9 +337,9 @@ void TagEditor::enterPressed()
 	{
 		MPD::DirectoryIterator directory = Mpd.GetDirectories(Dirs->current()->value().second), end;
 		bool has_subdirs = directory != end;
-		directory.finish();
 		if (has_subdirs)
 		{
+			directory.finish();
 			itsHighlightedDir = itsBrowsedDir;
 			itsBrowsedDir = Dirs->current()->value().second;
 			Dirs->clear();
