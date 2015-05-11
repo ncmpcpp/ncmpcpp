@@ -87,7 +87,7 @@ extern size_t FooterStartY;
 
 struct BaseAction
 {
-	BaseAction(Type type_, const char *name_) : m_type(type_), m_name(name_) { }
+	BaseAction(Type type_, const char *name_): m_type(type_), m_name(name_) { }
 	
 	const char *name() const { return m_name; }
 	Type type() const { return m_type; }
@@ -104,10 +104,9 @@ struct BaseAction
 		return false;
 	}
 	
-protected:
-	virtual void run() = 0;
-	
 private:
+	virtual void run() = 0;
+
 	Type m_type;
 	const char *m_name;
 };
@@ -115,1076 +114,1064 @@ private:
 BaseAction &get(Type at);
 BaseAction *get(const std::string &name);
 
-struct Dummy : public BaseAction
+struct Dummy: BaseAction
 {
-	Dummy() : BaseAction(Type::Dummy, "dummy") { }
+	Dummy(): BaseAction(Type::Dummy, "dummy") { }
 	
-protected:
-	virtual void run() { }
+private:
+	virtual void run() OVERRIDE { }
 };
 
-struct MouseEvent : public BaseAction
+struct MouseEvent: BaseAction
 {
-	MouseEvent() : BaseAction(Type::MouseEvent, "mouse_event")
+	MouseEvent(): BaseAction(Type::MouseEvent, "mouse_event")
 	{
 		m_old_mouse_event.bstate = 0;
 		m_mouse_event.bstate = 0;
 	}
 	
-protected:
-	virtual bool canBeRun();
-	virtual void run();
+private:
+	virtual bool canBeRun() OVERRIDE;
+	virtual void run() OVERRIDE;
 	
 	private:
 		MEVENT m_mouse_event;
 		MEVENT m_old_mouse_event;
 };
 
-struct ScrollUp : public BaseAction
+struct ScrollUp: BaseAction
 {
-	ScrollUp() : BaseAction(Type::ScrollUp, "scroll_up") { }
+	ScrollUp(): BaseAction(Type::ScrollUp, "scroll_up") { }
 	
-protected:
-	virtual void run();
-};
-
-struct ScrollDown : public BaseAction
-{
-	ScrollDown() : BaseAction(Type::ScrollDown, "scroll_down") { }
-	
-protected:
-	virtual void run();
-};
-
-struct ScrollUpArtist : public BaseAction
-{
-	ScrollUpArtist() : BaseAction(Type::ScrollUpArtist, "scroll_up_artist") { }
-	
-protected:
-	virtual bool canBeRun();
-	virtual void run();
-
 private:
+	virtual void run() OVERRIDE;
+};
+
+struct ScrollDown: BaseAction
+{
+	ScrollDown(): BaseAction(Type::ScrollDown, "scroll_down") { }
+	
+private:
+	virtual void run() OVERRIDE;
+};
+
+struct ScrollUpArtist: BaseAction
+{
+	ScrollUpArtist(): BaseAction(Type::ScrollUpArtist, "scroll_up_artist") { }
+	
+private:
+	virtual bool canBeRun() OVERRIDE;
+	virtual void run() OVERRIDE;
+
 	NC::List *m_list;
 	SongList *m_songs;
 };
 
-struct ScrollUpAlbum : public BaseAction
+struct ScrollUpAlbum: BaseAction
 {
-	ScrollUpAlbum() : BaseAction(Type::ScrollUpAlbum, "scroll_up_album") { }
+	ScrollUpAlbum(): BaseAction(Type::ScrollUpAlbum, "scroll_up_album") { }
 	
-protected:
-	virtual bool canBeRun();
-	virtual void run();
-
 private:
+	virtual bool canBeRun() OVERRIDE;
+	virtual void run() OVERRIDE;
+
 	NC::List *m_list;
 	SongList *m_songs;
 };
 
-struct ScrollDownArtist : public BaseAction
+struct ScrollDownArtist: BaseAction
 {
-	ScrollDownArtist() : BaseAction(Type::ScrollDownArtist, "scroll_down_artist") { }
+	ScrollDownArtist(): BaseAction(Type::ScrollDownArtist, "scroll_down_artist") { }
 	
-protected:
-	virtual bool canBeRun();
-	virtual void run();
-
 private:
+	virtual bool canBeRun() OVERRIDE;
+	virtual void run() OVERRIDE;
+
 	NC::List *m_list;
 	SongList *m_songs;
 };
 
-struct ScrollDownAlbum : public BaseAction
+struct ScrollDownAlbum: BaseAction
 {
-	ScrollDownAlbum() : BaseAction(Type::ScrollDownAlbum, "scroll_down_album") { }
+	ScrollDownAlbum(): BaseAction(Type::ScrollDownAlbum, "scroll_down_album") { }
 	
-protected:
-	virtual bool canBeRun();
-	virtual void run();
-
 private:
+	virtual bool canBeRun() OVERRIDE;
+	virtual void run() OVERRIDE;
+
 	NC::List *m_list;
 	SongList *m_songs;
 };
 
-struct PageUp : public BaseAction
+struct PageUp: BaseAction
 {
-	PageUp() : BaseAction(Type::PageUp, "page_up") { }
+	PageUp(): BaseAction(Type::PageUp, "page_up") { }
 	
-protected:
-	virtual void run();
+private:
+	virtual void run() OVERRIDE;
 };
 
-struct PageDown : public BaseAction
+struct PageDown: BaseAction
 {
-	PageDown() : BaseAction(Type::PageDown, "page_down") { }
+	PageDown(): BaseAction(Type::PageDown, "page_down") { }
 	
-protected:
-	virtual void run();
+private:
+	virtual void run() OVERRIDE;
 };
 
-struct MoveHome : public BaseAction
+struct MoveHome: BaseAction
 {
-	MoveHome() : BaseAction(Type::MoveHome, "move_home") { }
+	MoveHome(): BaseAction(Type::MoveHome, "move_home") { }
 	
-protected:
-	virtual void run();
+private:
+	virtual void run() OVERRIDE;
 };
 
-struct MoveEnd : public BaseAction
+struct MoveEnd: BaseAction
 {
-	MoveEnd() : BaseAction(Type::MoveEnd, "move_end") { }
+	MoveEnd(): BaseAction(Type::MoveEnd, "move_end") { }
 	
-protected:
-	virtual void run();
+private:
+	virtual void run() OVERRIDE;
 };
 
-struct ToggleInterface : public BaseAction
+struct ToggleInterface: BaseAction
 {
-	ToggleInterface() : BaseAction(Type::ToggleInterface, "toggle_interface") { }
+	ToggleInterface(): BaseAction(Type::ToggleInterface, "toggle_interface") { }
 	
-protected:
-	virtual void run();
+private:
+	virtual void run() OVERRIDE;
 };
 
-struct JumpToParentDirectory : public BaseAction
+struct JumpToParentDirectory: BaseAction
 {
-	JumpToParentDirectory() : BaseAction(Type::JumpToParentDirectory, "jump_to_parent_directory") { }
+	JumpToParentDirectory(): BaseAction(Type::JumpToParentDirectory, "jump_to_parent_directory") { }
 	
-protected:
-	virtual bool canBeRun();
-	virtual void run();
+private:
+	virtual bool canBeRun() OVERRIDE;
+	virtual void run() OVERRIDE;
 };
 
-struct PressEnter : public BaseAction
+struct PressEnter: BaseAction
 {
-	PressEnter() : BaseAction(Type::PressEnter, "press_enter") { }
+	PressEnter(): BaseAction(Type::PressEnter, "press_enter") { }
 	
-protected:
-	virtual void run();
+private:
+	virtual void run() OVERRIDE;
 };
 
-struct PressSpace : public BaseAction
+struct PressSpace: BaseAction
 {
-	PressSpace() : BaseAction(Type::PressSpace, "press_space") { }
+	PressSpace(): BaseAction(Type::PressSpace, "press_space") { }
 	
-protected:
-	virtual void run();
+private:
+	virtual void run() OVERRIDE;
 };
 
-struct PreviousColumn : public BaseAction
+struct PreviousColumn: BaseAction
 {
-	PreviousColumn() : BaseAction(Type::PreviousColumn, "previous_column") { }
+	PreviousColumn(): BaseAction(Type::PreviousColumn, "previous_column") { }
 	
-protected:
-	virtual bool canBeRun();
-	virtual void run();
+private:
+	virtual bool canBeRun() OVERRIDE;
+	virtual void run() OVERRIDE;
 };
 
-struct NextColumn : public BaseAction
+struct NextColumn: BaseAction
 {
-	NextColumn() : BaseAction(Type::NextColumn, "next_column") { }
+	NextColumn(): BaseAction(Type::NextColumn, "next_column") { }
 	
-protected:
-	virtual bool canBeRun();
-	virtual void run();
+private:
+	virtual bool canBeRun() OVERRIDE;
+	virtual void run() OVERRIDE;
 };
 
-struct MasterScreen : public BaseAction
+struct MasterScreen: BaseAction
 {
-	MasterScreen() : BaseAction(Type::MasterScreen, "master_screen") { }
+	MasterScreen(): BaseAction(Type::MasterScreen, "master_screen") { }
 	
-protected:
-	virtual bool canBeRun();
-	virtual void run();
+private:
+	virtual bool canBeRun() OVERRIDE;
+	virtual void run() OVERRIDE;
 };
 
-struct SlaveScreen : public BaseAction
+struct SlaveScreen: BaseAction
 {
-	SlaveScreen() : BaseAction(Type::SlaveScreen, "slave_screen") { }
+	SlaveScreen(): BaseAction(Type::SlaveScreen, "slave_screen") { }
 	
-protected:
-	virtual bool canBeRun();
-	virtual void run();
+private:
+	virtual bool canBeRun() OVERRIDE;
+	virtual void run() OVERRIDE;
 };
 
-struct VolumeUp : public BaseAction
+struct VolumeUp: BaseAction
 {
-	VolumeUp() : BaseAction(Type::VolumeUp, "volume_up") { }
+	VolumeUp(): BaseAction(Type::VolumeUp, "volume_up") { }
 	
-protected:
-	virtual void run();
+private:
+	virtual void run() OVERRIDE;
 };
 
-struct VolumeDown : public BaseAction
+struct VolumeDown: BaseAction
 {
-	VolumeDown() : BaseAction(Type::VolumeDown, "volume_down") { }
+	VolumeDown(): BaseAction(Type::VolumeDown, "volume_down") { }
 	
-protected:
-	virtual void run();
+private:
+	virtual void run() OVERRIDE;
 };
 
-struct DeletePlaylistItems : public BaseAction
+struct DeletePlaylistItems: BaseAction
 {
-	DeletePlaylistItems() : BaseAction(Type::DeletePlaylistItems, "delete_playlist_items") { }
+	DeletePlaylistItems(): BaseAction(Type::DeletePlaylistItems, "delete_playlist_items") { }
 	
-protected:
-	virtual bool canBeRun();
-	virtual void run();
+private:
+	virtual bool canBeRun() OVERRIDE;
+	virtual void run() OVERRIDE;
 };
 
-struct DeleteStoredPlaylist : public BaseAction
+struct DeleteStoredPlaylist: BaseAction
 {
-	DeleteStoredPlaylist() : BaseAction(Type::DeleteStoredPlaylist, "delete_stored_playlist") { }
+	DeleteStoredPlaylist(): BaseAction(Type::DeleteStoredPlaylist, "delete_stored_playlist") { }
 	
-protected:
-	virtual bool canBeRun();
-	virtual void run();
+private:
+	virtual bool canBeRun() OVERRIDE;
+	virtual void run() OVERRIDE;
 };
 
-struct DeleteBrowserItems : public BaseAction
+struct DeleteBrowserItems: BaseAction
 {
-	DeleteBrowserItems() : BaseAction(Type::DeleteBrowserItems, "delete_browser_items") { }
+	DeleteBrowserItems(): BaseAction(Type::DeleteBrowserItems, "delete_browser_items") { }
 	
-protected:
-	virtual bool canBeRun();
-	virtual void run();
+private:
+	virtual bool canBeRun() OVERRIDE;
+	virtual void run() OVERRIDE;
 };
 
-struct ReplaySong : public BaseAction
+struct ReplaySong: BaseAction
 {
-	ReplaySong() : BaseAction(Type::ReplaySong, "replay_song") { }
+	ReplaySong(): BaseAction(Type::ReplaySong, "replay_song") { }
 	
-protected:
-	virtual void run();
+private:
+	virtual void run() OVERRIDE;
 };
 
-struct PreviousSong : public BaseAction
+struct PreviousSong: BaseAction
 {
-	PreviousSong() : BaseAction(Type::Previous, "previous") { }
+	PreviousSong(): BaseAction(Type::Previous, "previous") { }
 	
-protected:
-	virtual void run();
+private:
+	virtual void run() OVERRIDE;
 };
 
-struct NextSong : public BaseAction
+struct NextSong: BaseAction
 {
-	NextSong() : BaseAction(Type::Next, "next") { }
+	NextSong(): BaseAction(Type::Next, "next") { }
 	
-protected:
-	virtual void run();
+private:
+	virtual void run() OVERRIDE;
 };
 
-struct Pause : public BaseAction
+struct Pause: BaseAction
 {
-	Pause() : BaseAction(Type::Pause, "pause") { }
+	Pause(): BaseAction(Type::Pause, "pause") { }
 	
-protected:
-	virtual void run();
+private:
+	virtual void run() OVERRIDE;
 };
 
-struct Stop : public BaseAction
+struct Stop: BaseAction
 {
-	Stop() : BaseAction(Type::Stop, "stop") { }
+	Stop(): BaseAction(Type::Stop, "stop") { }
 	
-protected:
-	virtual void run();
+private:
+	virtual void run() OVERRIDE;
 };
 
-struct ExecuteCommand : public BaseAction
+struct ExecuteCommand: BaseAction
 {
-	ExecuteCommand() : BaseAction(Type::ExecuteCommand, "execute_command") { }
+	ExecuteCommand(): BaseAction(Type::ExecuteCommand, "execute_command") { }
 	
-protected:
-	virtual void run();
+private:
+	virtual void run() OVERRIDE;
 };
 
-struct SavePlaylist : public BaseAction
+struct SavePlaylist: BaseAction
 {
-	SavePlaylist() : BaseAction(Type::SavePlaylist, "save_playlist") { }
+	SavePlaylist(): BaseAction(Type::SavePlaylist, "save_playlist") { }
 	
-protected:
-	virtual void run();
+private:
+	virtual void run() OVERRIDE;
 };
 
-struct MoveSortOrderUp : public BaseAction
+struct MoveSortOrderUp: BaseAction
 {
-	MoveSortOrderUp() : BaseAction(Type::MoveSortOrderUp, "move_sort_order_up") { }
+	MoveSortOrderUp(): BaseAction(Type::MoveSortOrderUp, "move_sort_order_up") { }
 	
-protected:
-	virtual bool canBeRun();
-	virtual void run();
+private:
+	virtual bool canBeRun() OVERRIDE;
+	virtual void run() OVERRIDE;
 };
 
-struct MoveSortOrderDown : public BaseAction
+struct MoveSortOrderDown: BaseAction
 {
-	MoveSortOrderDown() : BaseAction(Type::MoveSortOrderDown, "move_sort_order_down") { }
+	MoveSortOrderDown(): BaseAction(Type::MoveSortOrderDown, "move_sort_order_down") { }
 	
-protected:
-	virtual bool canBeRun();
-	virtual void run();
+private:
+	virtual bool canBeRun() OVERRIDE;
+	virtual void run() OVERRIDE;
 };
 
-struct MoveSelectedItemsUp : public BaseAction
+struct MoveSelectedItemsUp: BaseAction
 {
-	MoveSelectedItemsUp() : BaseAction(Type::MoveSelectedItemsUp, "move_selected_items_up") { }
+	MoveSelectedItemsUp(): BaseAction(Type::MoveSelectedItemsUp, "move_selected_items_up") { }
 	
-protected:
-	virtual bool canBeRun();
-	virtual void run();
+private:
+	virtual bool canBeRun() OVERRIDE;
+	virtual void run() OVERRIDE;
 };
 
-struct MoveSelectedItemsDown : public BaseAction
+struct MoveSelectedItemsDown: BaseAction
 {
-	MoveSelectedItemsDown() : BaseAction(Type::MoveSelectedItemsDown, "move_selected_items_down") { }
+	MoveSelectedItemsDown(): BaseAction(Type::MoveSelectedItemsDown, "move_selected_items_down") { }
 	
-protected:
-	virtual bool canBeRun();
-	virtual void run();
+private:
+	virtual bool canBeRun() OVERRIDE;
+	virtual void run() OVERRIDE;
 };
 
-struct MoveSelectedItemsTo : public BaseAction
+struct MoveSelectedItemsTo: BaseAction
 {
-	MoveSelectedItemsTo() : BaseAction(Type::MoveSelectedItemsTo, "move_selected_items_to") { }
+	MoveSelectedItemsTo(): BaseAction(Type::MoveSelectedItemsTo, "move_selected_items_to") { }
 	
-protected:
-	virtual bool canBeRun();
-	virtual void run();
+private:
+	virtual bool canBeRun() OVERRIDE;
+	virtual void run() OVERRIDE;
 };
 
-struct Add : public BaseAction
+struct Add: BaseAction
 {
-	Add() : BaseAction(Type::Add, "add") { }
+	Add(): BaseAction(Type::Add, "add") { }
 	
-protected:
-	virtual bool canBeRun();
-	virtual void run();
+private:
+	virtual bool canBeRun() OVERRIDE;
+	virtual void run() OVERRIDE;
 };
 
-struct SeekForward : public BaseAction
+struct SeekForward: BaseAction
 {
-	SeekForward() : BaseAction(Type::SeekForward, "seek_forward") { }
+	SeekForward(): BaseAction(Type::SeekForward, "seek_forward") { }
 	
-protected:
-	virtual bool canBeRun();
-	virtual void run();
+private:
+	virtual bool canBeRun() OVERRIDE;
+	virtual void run() OVERRIDE;
 };
 
-struct SeekBackward : public BaseAction
+struct SeekBackward: BaseAction
 {
-	SeekBackward() : BaseAction(Type::SeekBackward, "seek_backward") { }
+	SeekBackward(): BaseAction(Type::SeekBackward, "seek_backward") { }
 	
-protected:
-	virtual bool canBeRun();
-	virtual void run();
+private:
+	virtual bool canBeRun() OVERRIDE;
+	virtual void run() OVERRIDE;
 };
 
-struct ToggleDisplayMode : public BaseAction
+struct ToggleDisplayMode: BaseAction
 {
-	ToggleDisplayMode() : BaseAction(Type::ToggleDisplayMode, "toggle_display_mode") { }
+	ToggleDisplayMode(): BaseAction(Type::ToggleDisplayMode, "toggle_display_mode") { }
 	
-protected:
-	virtual bool canBeRun();
-	virtual void run();
+private:
+	virtual bool canBeRun() OVERRIDE;
+	virtual void run() OVERRIDE;
 };
 
-struct ToggleSeparatorsBetweenAlbums : public BaseAction
+struct ToggleSeparatorsBetweenAlbums: BaseAction
 {
 	ToggleSeparatorsBetweenAlbums()
 	: BaseAction(Type::ToggleSeparatorsBetweenAlbums, "toggle_separators_between_albums") { }
 	
-protected:
-	virtual bool canBeRun();
-	virtual void run();
+private:
+	virtual bool canBeRun() OVERRIDE;
+	virtual void run() OVERRIDE;
 };
 
-struct ToggleLyricsFetcher : public BaseAction
+struct ToggleLyricsFetcher: BaseAction
 {
-	ToggleLyricsFetcher() : BaseAction(Type::ToggleLyricsFetcher, "toggle_lyrics_fetcher") { }
+	ToggleLyricsFetcher(): BaseAction(Type::ToggleLyricsFetcher, "toggle_lyrics_fetcher") { }
 	
-protected:
+private:
 #	ifndef HAVE_CURL_CURL_H
-	virtual bool canBeRun();
+	virtual bool canBeRun() OVERRIDE;
 #	endif // NOT HAVE_CURL_CURL_H
-	virtual void run();
+	virtual void run() OVERRIDE;
 };
 
-struct ToggleFetchingLyricsInBackground : public BaseAction
+struct ToggleFetchingLyricsInBackground: BaseAction
 {
 	ToggleFetchingLyricsInBackground()
 	: BaseAction(Type::ToggleFetchingLyricsInBackground, "toggle_fetching_lyrics_in_background") { }
 	
-protected:
+private:
 #	ifndef HAVE_CURL_CURL_H
-	virtual bool canBeRun();
+	virtual bool canBeRun() OVERRIDE;
 #	endif // NOT HAVE_CURL_CURL_H
-	virtual void run();
+	virtual void run() OVERRIDE;
 };
 
-struct TogglePlayingSongCentering : public BaseAction
+struct TogglePlayingSongCentering: BaseAction
 {
 	TogglePlayingSongCentering()
 	: BaseAction(Type::TogglePlayingSongCentering, "toggle_playing_song_centering") { }
 	
-protected:
-	virtual void run();
-};
-
-struct UpdateDatabase : public BaseAction
-{
-	UpdateDatabase() : BaseAction(Type::UpdateDatabase, "update_database") { }
-	
-protected:
-	virtual void run();
-};
-
-struct JumpToPlayingSong : public BaseAction
-{
-	JumpToPlayingSong() : BaseAction(Type::JumpToPlayingSong, "jump_to_playing_song") { }
-	
-protected:
-	virtual bool canBeRun();
-	virtual void run();
-};
-
-struct ToggleRepeat : public BaseAction
-{
-	ToggleRepeat() : BaseAction(Type::ToggleRepeat, "toggle_repeat") { }
-	
-protected:
-	virtual void run();
-};
-
-struct Shuffle : public BaseAction
-{
-	Shuffle() : BaseAction(Type::Shuffle, "shuffle") { }
-	
-protected:
-	virtual void run();
-};
-
-struct ToggleRandom : public BaseAction
-{
-	ToggleRandom() : BaseAction(Type::ToggleRandom, "toggle_random") { }
-	
-protected:
-	virtual void run();
-};
-
-struct StartSearching : public BaseAction
-{
-	StartSearching() : BaseAction(Type::StartSearching, "start_searching") { }
-	
-protected:
-	virtual bool canBeRun();
-	virtual void run();
-};
-
-struct SaveTagChanges : public BaseAction
-{
-	SaveTagChanges() : BaseAction(Type::SaveTagChanges, "save_tag_changes") { }
-	
-protected:
-	virtual bool canBeRun();
-	virtual void run();
-};
-
-struct ToggleSingle : public BaseAction
-{
-	ToggleSingle() : BaseAction(Type::ToggleSingle, "toggle_single") { }
-	
-protected:
-	virtual void run();
-};
-
-struct ToggleConsume : public BaseAction
-{
-	ToggleConsume() : BaseAction(Type::ToggleConsume, "toggle_consume") { }
-	
-protected:
-	virtual void run();
-};
-
-struct ToggleCrossfade : public BaseAction
-{
-	ToggleCrossfade() : BaseAction(Type::ToggleCrossfade, "toggle_crossfade") { }
-	
-protected:
-	virtual void run();
-};
-
-struct SetCrossfade : public BaseAction
-{
-	SetCrossfade() : BaseAction(Type::SetCrossfade, "set_crossfade") { }
-	
-protected:
-	virtual void run();
-};
-
-struct SetVolume : public BaseAction
-{
-	SetVolume() : BaseAction(Type::SetVolume, "set_volume") { }
-	
-protected:
-	virtual void run();
-};
-
-struct EditSong : public BaseAction
-{
-	EditSong() : BaseAction(Type::EditSong, "edit_song") { }
-	
-protected:
-	virtual bool canBeRun();
-	virtual void run();
-
 private:
+	virtual void run() OVERRIDE;
+};
+
+struct UpdateDatabase: BaseAction
+{
+	UpdateDatabase(): BaseAction(Type::UpdateDatabase, "update_database") { }
+	
+private:
+	virtual void run() OVERRIDE;
+};
+
+struct JumpToPlayingSong: BaseAction
+{
+	JumpToPlayingSong(): BaseAction(Type::JumpToPlayingSong, "jump_to_playing_song") { }
+	
+private:
+	virtual bool canBeRun() OVERRIDE;
+	virtual void run() OVERRIDE;
+};
+
+struct ToggleRepeat: BaseAction
+{
+	ToggleRepeat(): BaseAction(Type::ToggleRepeat, "toggle_repeat") { }
+	
+private:
+	virtual void run() OVERRIDE;
+};
+
+struct Shuffle: BaseAction
+{
+	Shuffle(): BaseAction(Type::Shuffle, "shuffle") { }
+	
+private:
+	virtual void run() OVERRIDE;
+};
+
+struct ToggleRandom: BaseAction
+{
+	ToggleRandom(): BaseAction(Type::ToggleRandom, "toggle_random") { }
+	
+private:
+	virtual void run() OVERRIDE;
+};
+
+struct StartSearching: BaseAction
+{
+	StartSearching(): BaseAction(Type::StartSearching, "start_searching") { }
+	
+private:
+	virtual bool canBeRun() OVERRIDE;
+	virtual void run() OVERRIDE;
+};
+
+struct SaveTagChanges: BaseAction
+{
+	SaveTagChanges(): BaseAction(Type::SaveTagChanges, "save_tag_changes") { }
+	
+private:
+	virtual bool canBeRun() OVERRIDE;
+	virtual void run() OVERRIDE;
+};
+
+struct ToggleSingle: BaseAction
+{
+	ToggleSingle(): BaseAction(Type::ToggleSingle, "toggle_single") { }
+	
+private:
+	virtual void run() OVERRIDE;
+};
+
+struct ToggleConsume: BaseAction
+{
+	ToggleConsume(): BaseAction(Type::ToggleConsume, "toggle_consume") { }
+	
+private:
+	virtual void run() OVERRIDE;
+};
+
+struct ToggleCrossfade: BaseAction
+{
+	ToggleCrossfade(): BaseAction(Type::ToggleCrossfade, "toggle_crossfade") { }
+	
+private:
+	virtual void run() OVERRIDE;
+};
+
+struct SetCrossfade: BaseAction
+{
+	SetCrossfade(): BaseAction(Type::SetCrossfade, "set_crossfade") { }
+	
+private:
+	virtual void run() OVERRIDE;
+};
+
+struct SetVolume: BaseAction
+{
+	SetVolume(): BaseAction(Type::SetVolume, "set_volume") { }
+	
+private:
+	virtual void run() OVERRIDE;
+};
+
+struct EditSong: BaseAction
+{
+	EditSong(): BaseAction(Type::EditSong, "edit_song") { }
+	
+private:
+	virtual bool canBeRun() OVERRIDE;
+	virtual void run() OVERRIDE;
+
 	const MPD::Song *m_song;
 };
 
-struct EditLibraryTag : public BaseAction
+struct EditLibraryTag: BaseAction
 {
-	EditLibraryTag() : BaseAction(Type::EditLibraryTag, "edit_library_tag") { }
+	EditLibraryTag(): BaseAction(Type::EditLibraryTag, "edit_library_tag") { }
 	
-protected:
-	virtual bool canBeRun();
-	virtual void run();
-};
-
-struct EditLibraryAlbum : public BaseAction
-{
-	EditLibraryAlbum() : BaseAction(Type::EditLibraryAlbum, "edit_library_album") { }
-	
-protected:
-	virtual bool canBeRun();
-	virtual void run();
-};
-
-struct EditDirectoryName : public BaseAction
-{
-	EditDirectoryName() : BaseAction(Type::EditDirectoryName, "edit_directory_name") { }
-	
-protected:
-	virtual bool canBeRun();
-	virtual void run();
-};
-
-struct EditPlaylistName : public BaseAction
-{
-	EditPlaylistName() : BaseAction(Type::EditPlaylistName, "edit_playlist_name") { }
-	
-protected:
-	virtual bool canBeRun();
-	virtual void run();
-};
-
-struct EditLyrics : public BaseAction
-{
-	EditLyrics() : BaseAction(Type::EditLyrics, "edit_lyrics") { }
-	
-protected:
-	virtual bool canBeRun();
-	virtual void run();
-};
-
-struct JumpToBrowser : public BaseAction
-{
-	JumpToBrowser() : BaseAction(Type::JumpToBrowser, "jump_to_browser") { }
-	
-protected:
-	virtual bool canBeRun();
-	virtual void run();
-
 private:
+	virtual bool canBeRun() OVERRIDE;
+	virtual void run() OVERRIDE;
+};
+
+struct EditLibraryAlbum: BaseAction
+{
+	EditLibraryAlbum(): BaseAction(Type::EditLibraryAlbum, "edit_library_album") { }
+	
+private:
+	virtual bool canBeRun() OVERRIDE;
+	virtual void run() OVERRIDE;
+};
+
+struct EditDirectoryName: BaseAction
+{
+	EditDirectoryName(): BaseAction(Type::EditDirectoryName, "edit_directory_name") { }
+	
+private:
+	virtual bool canBeRun() OVERRIDE;
+	virtual void run() OVERRIDE;
+};
+
+struct EditPlaylistName: BaseAction
+{
+	EditPlaylistName(): BaseAction(Type::EditPlaylistName, "edit_playlist_name") { }
+	
+private:
+	virtual bool canBeRun() OVERRIDE;
+	virtual void run() OVERRIDE;
+};
+
+struct EditLyrics: BaseAction
+{
+	EditLyrics(): BaseAction(Type::EditLyrics, "edit_lyrics") { }
+	
+private:
+	virtual bool canBeRun() OVERRIDE;
+	virtual void run() OVERRIDE;
+};
+
+struct JumpToBrowser: BaseAction
+{
+	JumpToBrowser(): BaseAction(Type::JumpToBrowser, "jump_to_browser") { }
+	
+private:
+	virtual bool canBeRun() OVERRIDE;
+	virtual void run() OVERRIDE;
+
 	const MPD::Song *m_song;
 };
 
-struct JumpToMediaLibrary : public BaseAction
+struct JumpToMediaLibrary: BaseAction
 {
-	JumpToMediaLibrary() : BaseAction(Type::JumpToMediaLibrary, "jump_to_media_library") { }
+	JumpToMediaLibrary(): BaseAction(Type::JumpToMediaLibrary, "jump_to_media_library") { }
 	
-protected:
-	virtual bool canBeRun();
-	virtual void run();
-
 private:
+	virtual bool canBeRun() OVERRIDE;
+	virtual void run() OVERRIDE;
+
 	const MPD::Song *m_song;
 };
 
-struct JumpToPlaylistEditor : public BaseAction
+struct JumpToPlaylistEditor: BaseAction
 {
-	JumpToPlaylistEditor() : BaseAction(Type::JumpToPlaylistEditor, "jump_to_playlist_editor") { }
+	JumpToPlaylistEditor(): BaseAction(Type::JumpToPlaylistEditor, "jump_to_playlist_editor") { }
 	
-protected:
-	virtual bool canBeRun();
-	virtual void run();
-};
-
-struct ToggleScreenLock : public BaseAction
-{
-	ToggleScreenLock() : BaseAction(Type::ToggleScreenLock, "toggle_screen_lock") { }
-	
-protected:
-	virtual void run();
-};
-
-struct JumpToTagEditor : public BaseAction
-{
-	JumpToTagEditor() : BaseAction(Type::JumpToTagEditor, "jump_to_tag_editor") { }
-	
-protected:
-	virtual bool canBeRun();
-	virtual void run();
-
 private:
+	virtual bool canBeRun() OVERRIDE;
+	virtual void run() OVERRIDE;
+};
+
+struct ToggleScreenLock: BaseAction
+{
+	ToggleScreenLock(): BaseAction(Type::ToggleScreenLock, "toggle_screen_lock") { }
+	
+private:
+	virtual void run() OVERRIDE;
+};
+
+struct JumpToTagEditor: BaseAction
+{
+	JumpToTagEditor(): BaseAction(Type::JumpToTagEditor, "jump_to_tag_editor") { }
+	
+private:
+	virtual bool canBeRun() OVERRIDE;
+	virtual void run() OVERRIDE;
+
 	const MPD::Song *m_song;
 };
 
-struct JumpToPositionInSong : public BaseAction
+struct JumpToPositionInSong: BaseAction
 {
-	JumpToPositionInSong() : BaseAction(Type::JumpToPositionInSong, "jump_to_position_in_song") { }
+	JumpToPositionInSong(): BaseAction(Type::JumpToPositionInSong, "jump_to_position_in_song") { }
 	
-protected:
-	virtual bool canBeRun();
-	virtual void run();
+private:
+	virtual bool canBeRun() OVERRIDE;
+	virtual void run() OVERRIDE;
 };
 
-struct SelectItem : public BaseAction
+struct SelectItem: BaseAction
 {
-	SelectItem() : BaseAction(Type::SelectItem, "select_item") { }
-
-protected:
-	virtual bool canBeRun();
-	virtual void run();
+	SelectItem(): BaseAction(Type::SelectItem, "select_item") { }
 
 private:
+	virtual bool canBeRun() OVERRIDE;
+	virtual void run() OVERRIDE;
+
 	NC::List *m_list;
 };
 
-struct ReverseSelection : public BaseAction
+struct ReverseSelection: BaseAction
 {
-	ReverseSelection() : BaseAction(Type::ReverseSelection, "reverse_selection") { }
+	ReverseSelection(): BaseAction(Type::ReverseSelection, "reverse_selection") { }
 	
-protected:
-	virtual bool canBeRun();
-	virtual void run();
-
 private:
+	virtual bool canBeRun() OVERRIDE;
+	virtual void run() OVERRIDE;
+
 	NC::List *m_list;
 };
 
-struct RemoveSelection : public BaseAction
+struct RemoveSelection: BaseAction
 {
-	RemoveSelection() : BaseAction(Type::RemoveSelection, "remove_selection") { }
+	RemoveSelection(): BaseAction(Type::RemoveSelection, "remove_selection") { }
 	
-protected:
-	virtual bool canBeRun();
-	virtual void run();
-
 private:
+	virtual bool canBeRun() OVERRIDE;
+	virtual void run() OVERRIDE;
+
 	NC::List *m_list;
 };
 
-struct SelectAlbum : public BaseAction
+struct SelectAlbum: BaseAction
 {
-	SelectAlbum() : BaseAction(Type::SelectAlbum, "select_album") { }
+	SelectAlbum(): BaseAction(Type::SelectAlbum, "select_album") { }
 	
-protected:
-	virtual bool canBeRun();
-	virtual void run();
-
 private:
+	virtual bool canBeRun() OVERRIDE;
+	virtual void run() OVERRIDE;
+
 	NC::List *m_list;
 	SongList *m_songs;
 };
 
-struct AddSelectedItems : public BaseAction
+struct AddSelectedItems: BaseAction
 {
-	AddSelectedItems() : BaseAction(Type::AddSelectedItems, "add_selected_items") { }
+	AddSelectedItems(): BaseAction(Type::AddSelectedItems, "add_selected_items") { }
 	
-protected:
-	virtual bool canBeRun();
-	virtual void run();
+private:
+	virtual bool canBeRun() OVERRIDE;
+	virtual void run() OVERRIDE;
 };
 
-struct CropMainPlaylist : public BaseAction
+struct CropMainPlaylist: BaseAction
 {
-	CropMainPlaylist() : BaseAction(Type::CropMainPlaylist, "crop_main_playlist") { }
+	CropMainPlaylist(): BaseAction(Type::CropMainPlaylist, "crop_main_playlist") { }
 	
-protected:
-	virtual void run();
+private:
+	virtual void run() OVERRIDE;
 };
 
-struct CropPlaylist : public BaseAction
+struct CropPlaylist: BaseAction
 {
-	CropPlaylist() : BaseAction(Type::CropPlaylist, "crop_playlist") { }
+	CropPlaylist(): BaseAction(Type::CropPlaylist, "crop_playlist") { }
 	
-protected:
-	virtual bool canBeRun();
-	virtual void run();
+private:
+	virtual bool canBeRun() OVERRIDE;
+	virtual void run() OVERRIDE;
 };
 
-struct ClearMainPlaylist : public BaseAction
+struct ClearMainPlaylist: BaseAction
 {
-	ClearMainPlaylist() : BaseAction(Type::ClearMainPlaylist, "clear_main_playlist") { }
+	ClearMainPlaylist(): BaseAction(Type::ClearMainPlaylist, "clear_main_playlist") { }
 	
-protected:
-	virtual void run();
+private:
+	virtual void run() OVERRIDE;
 };
 
-struct ClearPlaylist : public BaseAction
+struct ClearPlaylist: BaseAction
 {
-	ClearPlaylist() : BaseAction(Type::ClearPlaylist, "clear_playlist") { }
+	ClearPlaylist(): BaseAction(Type::ClearPlaylist, "clear_playlist") { }
 	
-protected:
-	virtual bool canBeRun();
-	virtual void run();
+private:
+	virtual bool canBeRun() OVERRIDE;
+	virtual void run() OVERRIDE;
 };
 
-struct SortPlaylist : public BaseAction
+struct SortPlaylist: BaseAction
 {
-	SortPlaylist() : BaseAction(Type::SortPlaylist, "sort_playlist") { }
+	SortPlaylist(): BaseAction(Type::SortPlaylist, "sort_playlist") { }
 	
-protected:
-	virtual bool canBeRun();
-	virtual void run();
+private:
+	virtual bool canBeRun() OVERRIDE;
+	virtual void run() OVERRIDE;
 };
 
-struct ReversePlaylist : public BaseAction
+struct ReversePlaylist: BaseAction
 {
-	ReversePlaylist() : BaseAction(Type::ReversePlaylist, "reverse_playlist") { }
+	ReversePlaylist(): BaseAction(Type::ReversePlaylist, "reverse_playlist") { }
 	
-protected:
-	virtual bool canBeRun();
-	virtual void run();
+private:
+	virtual bool canBeRun() OVERRIDE;
+	virtual void run() OVERRIDE;
 };
 
-struct Find : public BaseAction
+struct Find: BaseAction
 {
-	Find() : BaseAction(Type::Find, "find") { }
+	Find(): BaseAction(Type::Find, "find") { }
 	
-protected:
-	virtual bool canBeRun();
-	virtual void run();
+private:
+	virtual bool canBeRun() OVERRIDE;
+	virtual void run() OVERRIDE;
 };
 
-struct FindItemForward : public BaseAction
+struct FindItemForward: BaseAction
 {
-	FindItemForward() : BaseAction(Type::FindItemForward, "find_item_forward") { }
+	FindItemForward(): BaseAction(Type::FindItemForward, "find_item_forward") { }
 	
-protected:
-	virtual bool canBeRun();
-	virtual void run();
+private:
+	virtual bool canBeRun() OVERRIDE;
+	virtual void run() OVERRIDE;
 };
 
-struct FindItemBackward : public BaseAction
+struct FindItemBackward: BaseAction
 {
-	FindItemBackward() : BaseAction(Type::FindItemBackward, "find_item_backward") { }
+	FindItemBackward(): BaseAction(Type::FindItemBackward, "find_item_backward") { }
 	
-protected:
-	virtual bool canBeRun();
-	virtual void run();
+private:
+	virtual bool canBeRun() OVERRIDE;
+	virtual void run() OVERRIDE;
 };
 
-struct NextFoundItem : public BaseAction
+struct NextFoundItem: BaseAction
 {
-	NextFoundItem() : BaseAction(Type::NextFoundItem, "next_found_item") { }
+	NextFoundItem(): BaseAction(Type::NextFoundItem, "next_found_item") { }
 	
-protected:
-	virtual bool canBeRun();
-	virtual void run();
+private:
+	virtual bool canBeRun() OVERRIDE;
+	virtual void run() OVERRIDE;
 };
 
-struct PreviousFoundItem : public BaseAction
+struct PreviousFoundItem: BaseAction
 {
-	PreviousFoundItem() : BaseAction(Type::PreviousFoundItem, "previous_found_item") { }
+	PreviousFoundItem(): BaseAction(Type::PreviousFoundItem, "previous_found_item") { }
 	
-protected:
-	virtual bool canBeRun();
-	virtual void run();
+private:
+	virtual bool canBeRun() OVERRIDE;
+	virtual void run() OVERRIDE;
 };
 
-struct ToggleFindMode : public BaseAction
+struct ToggleFindMode: BaseAction
 {
-	ToggleFindMode() : BaseAction(Type::ToggleFindMode, "toggle_find_mode") { }
+	ToggleFindMode(): BaseAction(Type::ToggleFindMode, "toggle_find_mode") { }
 	
-protected:
-	virtual void run();
+private:
+	virtual void run() OVERRIDE;
 };
 
-struct ToggleReplayGainMode : public BaseAction
+struct ToggleReplayGainMode: BaseAction
 {
-	ToggleReplayGainMode() : BaseAction(Type::ToggleReplayGainMode, "toggle_replay_gain_mode") { }
+	ToggleReplayGainMode(): BaseAction(Type::ToggleReplayGainMode, "toggle_replay_gain_mode") { }
 	
-protected:
-	virtual void run();
+private:
+	virtual void run() OVERRIDE;
 };
 
-struct ToggleAddMode : public BaseAction
+struct ToggleAddMode: BaseAction
 {
-	ToggleAddMode() : BaseAction(Type::ToggleAddMode, "toggle_add_mode") { }
+	ToggleAddMode(): BaseAction(Type::ToggleAddMode, "toggle_add_mode") { }
 	
-protected:
-	virtual void run();
+private:
+	virtual void run() OVERRIDE;
 };
 
-struct ToggleMouse : public BaseAction
+struct ToggleMouse: BaseAction
 {
-	ToggleMouse() : BaseAction(Type::ToggleMouse, "toggle_mouse") { }
+	ToggleMouse(): BaseAction(Type::ToggleMouse, "toggle_mouse") { }
 	
-protected:
-	virtual void run();
+private:
+	virtual void run() OVERRIDE;
 };
 
-struct ToggleBitrateVisibility : public BaseAction
+struct ToggleBitrateVisibility: BaseAction
 {
-	ToggleBitrateVisibility() : BaseAction(Type::ToggleBitrateVisibility, "toggle_bitrate_visibility") { }
+	ToggleBitrateVisibility(): BaseAction(Type::ToggleBitrateVisibility, "toggle_bitrate_visibility") { }
 	
-protected:
-	virtual void run();
+private:
+	virtual void run() OVERRIDE;
 };
 
-struct AddRandomItems : public BaseAction
+struct AddRandomItems: BaseAction
 {
-	AddRandomItems() : BaseAction(Type::AddRandomItems, "add_random_items") { }
+	AddRandomItems(): BaseAction(Type::AddRandomItems, "add_random_items") { }
 	
-protected:
-	virtual void run();
+private:
+	virtual void run() OVERRIDE;
 };
 
-struct ToggleBrowserSortMode : public BaseAction
+struct ToggleBrowserSortMode: BaseAction
 {
-	ToggleBrowserSortMode() : BaseAction(Type::ToggleBrowserSortMode, "toggle_browser_sort_mode") { }
+	ToggleBrowserSortMode(): BaseAction(Type::ToggleBrowserSortMode, "toggle_browser_sort_mode") { }
 	
-protected:
-	virtual bool canBeRun();
-	virtual void run();
+private:
+	virtual bool canBeRun() OVERRIDE;
+	virtual void run() OVERRIDE;
 };
 
-struct ToggleLibraryTagType : public BaseAction
+struct ToggleLibraryTagType: BaseAction
 {
-	ToggleLibraryTagType() : BaseAction(Type::ToggleLibraryTagType, "toggle_library_tag_type") { }
+	ToggleLibraryTagType(): BaseAction(Type::ToggleLibraryTagType, "toggle_library_tag_type") { }
 	
-protected:
-	virtual bool canBeRun();
-	virtual void run();
+private:
+	virtual bool canBeRun() OVERRIDE;
+	virtual void run() OVERRIDE;
 };
 
-struct ToggleMediaLibrarySortMode : public BaseAction
+struct ToggleMediaLibrarySortMode: BaseAction
 {
 	ToggleMediaLibrarySortMode()
 	: BaseAction(Type::ToggleMediaLibrarySortMode, "toggle_media_library_sort_mode") { }
 	
-protected:
-	virtual bool canBeRun();
-	virtual void run();
+private:
+	virtual bool canBeRun() OVERRIDE;
+	virtual void run() OVERRIDE;
 };
 
-struct RefetchLyrics : public BaseAction
+struct RefetchLyrics: BaseAction
 {
-	RefetchLyrics() : BaseAction(Type::RefetchLyrics, "refetch_lyrics") { }
+	RefetchLyrics(): BaseAction(Type::RefetchLyrics, "refetch_lyrics") { }
 	
-protected:
-	virtual bool canBeRun();
-	virtual void run();
+private:
+	virtual bool canBeRun() OVERRIDE;
+	virtual void run() OVERRIDE;
 };
 
-struct SetSelectedItemsPriority : public BaseAction
+struct SetSelectedItemsPriority: BaseAction
 {
 	SetSelectedItemsPriority()
 	: BaseAction(Type::SetSelectedItemsPriority, "set_selected_items_priority") { }
 	
-protected:
-	virtual bool canBeRun();
-	virtual void run();
+private:
+	virtual bool canBeRun() OVERRIDE;
+	virtual void run() OVERRIDE;
 };
 
-struct SetVisualizerSampleMultiplier : public BaseAction
+struct SetVisualizerSampleMultiplier: BaseAction
 {
 	SetVisualizerSampleMultiplier()
 	: BaseAction(Type::SetVisualizerSampleMultiplier, "set_visualizer_sample_multiplier") { }
 
-protected:
-	virtual bool canBeRun();
-	virtual void run();
+private:
+	virtual bool canBeRun() OVERRIDE;
+	virtual void run() OVERRIDE;
 };
 
-struct ShowSongInfo : public BaseAction
+struct ShowSongInfo: BaseAction
 {
-	ShowSongInfo() : BaseAction(Type::ShowSongInfo, "show_song_info") { }
+	ShowSongInfo(): BaseAction(Type::ShowSongInfo, "show_song_info") { }
 	
-protected:
-	virtual void run();
+private:
+	virtual void run() OVERRIDE;
 };
 
-struct ShowArtistInfo : public BaseAction
+struct ShowArtistInfo: BaseAction
 {
-	ShowArtistInfo() : BaseAction(Type::ShowArtistInfo, "show_artist_info") { }
+	ShowArtistInfo(): BaseAction(Type::ShowArtistInfo, "show_artist_info") { }
 	
-protected:
-	virtual bool canBeRun();
-	virtual void run();
+private:
+	virtual bool canBeRun() OVERRIDE;
+	virtual void run() OVERRIDE;
 };
 
-struct ShowLyrics : public BaseAction
+struct ShowLyrics: BaseAction
 {
-	ShowLyrics() : BaseAction(Type::ShowLyrics, "show_lyrics") { }
+	ShowLyrics(): BaseAction(Type::ShowLyrics, "show_lyrics") { }
 	
-protected:
-	virtual void run();
+private:
+	virtual void run() OVERRIDE;
 };
 
-struct Quit : public BaseAction
+struct Quit: BaseAction
 {
-	Quit() : BaseAction(Type::Quit, "quit") { }
+	Quit(): BaseAction(Type::Quit, "quit") { }
 	
-protected:
-	virtual void run();
+private:
+	virtual void run() OVERRIDE;
 };
 
-struct NextScreen : public BaseAction
+struct NextScreen: BaseAction
 {
-	NextScreen() : BaseAction(Type::NextScreen, "next_screen") { }
+	NextScreen(): BaseAction(Type::NextScreen, "next_screen") { }
 	
-protected:
-	virtual void run();
+private:
+	virtual void run() OVERRIDE;
 };
 
-struct PreviousScreen : public BaseAction
+struct PreviousScreen: BaseAction
 {
-	PreviousScreen() : BaseAction(Type::PreviousScreen, "previous_screen") { }
+	PreviousScreen(): BaseAction(Type::PreviousScreen, "previous_screen") { }
 	
-protected:
-	virtual void run();
+private:
+	virtual void run() OVERRIDE;
 };
 
-struct ShowHelp : public BaseAction
+struct ShowHelp: BaseAction
 {
-	ShowHelp() : BaseAction(Type::ShowHelp, "show_help") { }
+	ShowHelp(): BaseAction(Type::ShowHelp, "show_help") { }
 	
-protected:
-	virtual bool canBeRun();
-	virtual void run();
+private:
+	virtual bool canBeRun() OVERRIDE;
+	virtual void run() OVERRIDE;
 };
 
-struct ShowPlaylist : public BaseAction
+struct ShowPlaylist: BaseAction
 {
-	ShowPlaylist() : BaseAction(Type::ShowPlaylist, "show_playlist") { }
+	ShowPlaylist(): BaseAction(Type::ShowPlaylist, "show_playlist") { }
 	
-protected:
-	virtual bool canBeRun();
-	virtual void run();
+private:
+	virtual bool canBeRun() OVERRIDE;
+	virtual void run() OVERRIDE;
 };
 
-struct ShowBrowser : public BaseAction
+struct ShowBrowser: BaseAction
 {
-	ShowBrowser() : BaseAction(Type::ShowBrowser, "show_browser") { }
+	ShowBrowser(): BaseAction(Type::ShowBrowser, "show_browser") { }
 	
-protected:
-	virtual bool canBeRun();
-	virtual void run();
+private:
+	virtual bool canBeRun() OVERRIDE;
+	virtual void run() OVERRIDE;
 };
 
-struct ChangeBrowseMode : public BaseAction
+struct ChangeBrowseMode: BaseAction
 {
-	ChangeBrowseMode() : BaseAction(Type::ChangeBrowseMode, "change_browse_mode") { }
+	ChangeBrowseMode(): BaseAction(Type::ChangeBrowseMode, "change_browse_mode") { }
 	
-protected:
-	virtual bool canBeRun();
-	virtual void run();
+private:
+	virtual bool canBeRun() OVERRIDE;
+	virtual void run() OVERRIDE;
 };
 
-struct ShowSearchEngine : public BaseAction
+struct ShowSearchEngine: BaseAction
 {
-	ShowSearchEngine() : BaseAction(Type::ShowSearchEngine, "show_search_engine") { }
+	ShowSearchEngine(): BaseAction(Type::ShowSearchEngine, "show_search_engine") { }
 	
-protected:
-	virtual bool canBeRun();
-	virtual void run();
+private:
+	virtual bool canBeRun() OVERRIDE;
+	virtual void run() OVERRIDE;
 };
 
-struct ResetSearchEngine : public BaseAction
+struct ResetSearchEngine: BaseAction
 {
-	ResetSearchEngine() : BaseAction(Type::ResetSearchEngine, "reset_search_engine") { }
+	ResetSearchEngine(): BaseAction(Type::ResetSearchEngine, "reset_search_engine") { }
 	
-protected:
-	virtual bool canBeRun();
-	virtual void run();
+private:
+	virtual bool canBeRun() OVERRIDE;
+	virtual void run() OVERRIDE;
 };
 
-struct ShowMediaLibrary : public BaseAction
+struct ShowMediaLibrary: BaseAction
 {
-	ShowMediaLibrary() : BaseAction(Type::ShowMediaLibrary, "show_media_library") { }
+	ShowMediaLibrary(): BaseAction(Type::ShowMediaLibrary, "show_media_library") { }
 	
-protected:
-	virtual bool canBeRun();
-	virtual void run();
+private:
+	virtual bool canBeRun() OVERRIDE;
+	virtual void run() OVERRIDE;
 };
 
-struct ToggleMediaLibraryColumnsMode : public BaseAction
+struct ToggleMediaLibraryColumnsMode: BaseAction
 {
 	ToggleMediaLibraryColumnsMode()
 	: BaseAction(Type::ToggleMediaLibraryColumnsMode, "toggle_media_library_columns_mode") { }
 	
-protected:
-	virtual bool canBeRun();
-	virtual void run();
+private:
+	virtual bool canBeRun() OVERRIDE;
+	virtual void run() OVERRIDE;
 };
 
-struct ShowPlaylistEditor : public BaseAction
+struct ShowPlaylistEditor: BaseAction
 {
-	ShowPlaylistEditor() : BaseAction(Type::ShowPlaylistEditor, "show_playlist_editor") { }
+	ShowPlaylistEditor(): BaseAction(Type::ShowPlaylistEditor, "show_playlist_editor") { }
 	
-protected:
-	virtual bool canBeRun();
-	virtual void run();
+private:
+	virtual bool canBeRun() OVERRIDE;
+	virtual void run() OVERRIDE;
 };
 
-struct ShowTagEditor : public BaseAction
+struct ShowTagEditor: BaseAction
 {
-	ShowTagEditor() : BaseAction(Type::ShowTagEditor, "show_tag_editor") { }
+	ShowTagEditor(): BaseAction(Type::ShowTagEditor, "show_tag_editor") { }
 	
-protected:
-	virtual bool canBeRun();
-	virtual void run();
+private:
+	virtual bool canBeRun() OVERRIDE;
+	virtual void run() OVERRIDE;
 };
 
-struct ShowOutputs : public BaseAction
+struct ShowOutputs: BaseAction
 {
-	ShowOutputs() : BaseAction(Type::ShowOutputs, "show_outputs") { }
+	ShowOutputs(): BaseAction(Type::ShowOutputs, "show_outputs") { }
 	
-protected:
-	virtual bool canBeRun();
-	virtual void run();
+private:
+	virtual bool canBeRun() OVERRIDE;
+	virtual void run() OVERRIDE;
 };
 
-struct ShowVisualizer : public BaseAction
+struct ShowVisualizer: BaseAction
 {
-	ShowVisualizer() : BaseAction(Type::ShowVisualizer, "show_visualizer") { }
+	ShowVisualizer(): BaseAction(Type::ShowVisualizer, "show_visualizer") { }
 	
-protected:
-	virtual bool canBeRun();
-	virtual void run();
+private:
+	virtual bool canBeRun() OVERRIDE;
+	virtual void run() OVERRIDE;
 };
 
-struct ShowClock : public BaseAction
+struct ShowClock: BaseAction
 {
-	ShowClock() : BaseAction(Type::ShowClock, "show_clock") { }
+	ShowClock(): BaseAction(Type::ShowClock, "show_clock") { }
 	
-protected:
-	virtual bool canBeRun();
-	virtual void run();
+private:
+	virtual bool canBeRun() OVERRIDE;
+	virtual void run() OVERRIDE;
 };
 
-struct ShowServerInfo : public BaseAction
+struct ShowServerInfo: BaseAction
 {
-	ShowServerInfo() : BaseAction(Type::ShowServerInfo, "show_server_info") { }
+	ShowServerInfo(): BaseAction(Type::ShowServerInfo, "show_server_info") { }
 	
-protected:
+private:
 #	ifdef HAVE_TAGLIB_H
-	virtual bool canBeRun();
+	virtual bool canBeRun() OVERRIDE;
 #	endif // HAVE_TAGLIB_H
-	virtual void run();
+	virtual void run() OVERRIDE;
 };
 
 }
