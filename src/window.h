@@ -35,66 +35,6 @@
 #include <tuple>
 #include <queue>
 
-// define some Ctrl-? keys
-const int KEY_CTRL_A = 1;
-const int KEY_CTRL_B = 2;
-const int KEY_CTRL_C = 3;
-const int KEY_CTRL_D = 4;
-const int KEY_CTRL_E = 5;
-const int KEY_CTRL_F = 6;
-const int KEY_CTRL_G = 7;
-const int KEY_CTRL_H = 8;
-const int KEY_CTRL_I = 9;
-const int KEY_CTRL_J = 10;
-const int KEY_CTRL_K = 11;
-const int KEY_CTRL_L = 12;
-const int KEY_CTRL_M = 13;
-const int KEY_CTRL_N = 14;
-const int KEY_CTRL_O = 15;
-const int KEY_CTRL_P = 16;
-const int KEY_CTRL_Q = 17;
-const int KEY_CTRL_R = 18;
-const int KEY_CTRL_S = 19;
-const int KEY_CTRL_T = 20;
-const int KEY_CTRL_U = 21;
-const int KEY_CTRL_V = 22;
-const int KEY_CTRL_W = 23;
-const int KEY_CTRL_X = 24;
-const int KEY_CTRL_Y = 25;
-const int KEY_CTRL_Z = 26;
-
-inline int KEY_ALT(int key)
-{
-	return key << 8;
-}
-
-// define F? keys
-const int KEY_F1 = 265;
-const int KEY_F2 = 266;
-const int KEY_F3 = 267;
-const int KEY_F4 = 268;
-const int KEY_F5 = 269;
-const int KEY_F6 = 270;
-const int KEY_F7 = 271;
-const int KEY_F8 = 272;
-const int KEY_F9 = 273;
-const int KEY_F10 = 274;
-const int KEY_F11 = 275;
-const int KEY_F12 = 276;
-
-// other handy keys
-const int KEY_ESCAPE = 27;
-const int KEY_SHIFT_TAB = 353;
-const int KEY_SPACE = 32;
-const int KEY_TAB = 9;
-
-// define alternative KEY_BACKSPACE (used in some terminal emulators)
-const int KEY_BACKSPACE_2 = 127;
-
-// KEY_ENTER is 343, which doesn't make any sense. This makes it useful.
-#undef KEY_ENTER
-const int KEY_ENTER = 13;
-
 #if NCURSES_MOUSE_VERSION == 1
 # define BUTTON5_PRESSED (1U << 27)
 #endif // NCURSES_MOUSE_VERSION == 1
@@ -106,6 +46,87 @@ const int KEY_ENTER = 13;
 /// NC namespace provides set of easy-to-use
 /// wrappers over original curses library.
 namespace NC {
+
+namespace Key {
+
+typedef const int Type;
+
+Type None = -1;
+
+// modifier masks
+Type Alt   = 1 << 16;
+Type Ctrl  = 1 << 17;
+Type Shift = 1 << 18;
+
+Type Ctrl_A            = 1;
+Type Ctrl_B            = 2;
+Type Ctrl_C            = 3;
+Type Ctrl_D            = 4;
+Type Ctrl_E            = 5;
+Type Ctrl_F            = 6;
+Type Ctrl_G            = 7;
+Type Ctrl_H            = 8;
+Type Ctrl_I            = 9;
+Type Ctrl_J            = 10;
+Type Ctrl_K            = 11;
+Type Ctrl_L            = 12;
+Type Ctrl_M            = 13;
+Type Ctrl_N            = 14;
+Type Ctrl_O            = 15;
+Type Ctrl_P            = 16;
+Type Ctrl_Q            = 17;
+Type Ctrl_R            = 18;
+Type Ctrl_S            = 19;
+Type Ctrl_T            = 20;
+Type Ctrl_U            = 21;
+Type Ctrl_V            = 22;
+Type Ctrl_W            = 23;
+Type Ctrl_X            = 24;
+Type Ctrl_Y            = 25;
+Type Ctrl_Z            = 26;
+Type Ctrl_LeftBracket  = 27;
+Type Ctrl_Backslash    = 28;
+Type Ctrl_RightBracket = 29;
+Type Ctrl_Caret        = 30;
+Type Ctrl_Underscore   = 31;
+
+Type Space     = 32;
+Type Backspace = 127;
+
+// useful duplicates
+Type Tab    = 9;
+Type Enter  = 13;
+Type Escape = 27;
+
+// special values, beyond one byte
+Type Insert   = 256;
+Type Delete   = 257;
+Type Home     = 258;
+Type End      = 259;
+Type PageUp   = 260;
+Type PageDown = 261;
+
+Type Up    = 262;
+Type Down  = 263;
+Type Left  = 264;
+Type Right = 265;
+
+Type F1  = 266;
+Type F2  = 267;
+Type F3  = 268;
+Type F4  = 269;
+Type F5  = 270;
+Type F6  = 271;
+Type F7  = 272;
+Type F8  = 273;
+Type F9  = 274;
+Type F10 = 275;
+Type F11 = 276;
+Type F12 = 277;
+
+Type Mouse = 278;
+
+}
 
 /// Thrown if Ctrl-C or Ctrl-G is pressed during the call to Window::getString()
 /// @see Window::getString()

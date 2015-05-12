@@ -51,8 +51,9 @@
 ##      picked by ncmpcpp upon next call to readKey function.
 ##      Accepted values: mouse, up, down, page_up, page_down,
 ##      home, end, space, enter, insert, delete, left, right,
-##      tab, shift_tab, ctrl_a, ctrl_b, ..., ctrl_z, f1, f2,
-##      ..., f12, backspace, backspace_2.
+##      tab, shift_tab, ctrl_a, ctrl_b, ..., ctrl_z, ctrl_[,
+##      ctrl_\\, ctrl_], ctrl_^, ctrl__, f1, f2, ..., f12,
+##      backspace.
 ##
 ##    - push_characters "string" - pushes given string into
 ##      input queue.
@@ -110,12 +111,6 @@
 ##    after you typed quit. Instead of 'deferred', 'immediate'
 ##    could be used. Then ncmpcpp will not wait for confirmation
 ##    (enter) and will execute the command the moment it sees it.
-##
-## Note: Both 'backspace' and 'backspace_2' are used because some
-##       terminals interpret backspace using keycode of 'backspace'
-##       and some the one of 'backspace_2'. You can get away with
-##       binding once if all your terminal emulators use the same
-##       value.
 ##
 ## Note: There is a difference between:
 ##
@@ -292,12 +287,6 @@
 #  jump_to_parent_directory
 #
 #def_key "backspace"
-#  replay_song
-#
-#def_key "backspace_2"
-#  jump_to_parent_directory
-#
-#def_key "backspace_2"
 #  replay_song
 #
 #def_key "f"

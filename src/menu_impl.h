@@ -189,7 +189,7 @@ void Menu<ItemT>::refresh()
 		if (m_drawn_position >= m_items.size())
 		{
 			for (; line < m_height; ++line)
-				mvwhline(m_window, line, 0, KEY_SPACE, m_width);
+				mvwhline(m_window, line, 0, NC::Key::Space, m_width);
 			break;
 		}
 		if (m_items[m_drawn_position].isSeparator())
@@ -204,7 +204,7 @@ void Menu<ItemT>::refresh()
 			*this << Format::Reverse;
 			*this << m_highlight_color;
 		}
-		mvwhline(m_window, line, 0, KEY_SPACE, m_width);
+		mvwhline(m_window, line, 0, NC::Key::Space, m_width);
 		if (m_items[m_drawn_position].isSelected())
 			*this << m_selected_prefix;
 		if (m_item_displayer)

@@ -95,7 +95,7 @@ void setProperties(NC::Menu<T> &menu, const MPD::Song &s, const SongList &list,
 	if (separate_albums)
 	{
 		menu << NC::Format::Underline;
-		mvwhline(menu.raw(), menu.getY(), 0, KEY_SPACE, menu.getWidth());
+		mvwhline(menu.raw(), menu.getY(), 0, NC::Key::Space, menu.getWidth());
 	}
 
 	is_selected = menu.drawn()->isSelected();
@@ -216,7 +216,7 @@ void showSongsInColumns(NC::Menu<T> &menu, const MPD::Song &s, const SongList &l
 		if (it->right_alignment)
 			x_off = std::max(0, width - int(wideLength(tag)));
 
-		whline(menu.raw(), KEY_SPACE, width);
+		whline(menu.raw(), NC::Key::Space, width);
 		menu.goToXY(x + x_off, y);
 		menu << tag;
 		menu.goToXY(x + width, y);
@@ -302,13 +302,13 @@ std::string Display::Columns(size_t list_width)
 		int x_off = std::max(0, width - int(wideLength(name)));
 		if (it->right_alignment)
 		{
-			result += std::string(x_off, KEY_SPACE);
+			result += std::string(x_off, NC::Key::Space);
 			result += Charset::utf8ToLocale(ToString(name));
 		}
 		else
 		{
 			result += Charset::utf8ToLocale(ToString(name));
-			result += std::string(x_off, KEY_SPACE);
+			result += std::string(x_off, NC::Key::Space);
 		}
 		
 		if (it != last)

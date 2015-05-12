@@ -319,11 +319,11 @@ void enable()
 	if (mouseEnabled)
 		return;
 	// save old highlight mouse tracking
-	printf("\e[?1001s");
+	std::printf("\e[?1001s");
 	// enable mouse tracking
-	printf("\e[?1000h");
+	std::printf("\e[?1000h");
 	// try to enable extended (urxvt) mouse tracking
-	printf("\e[?1015h");
+	std::printf("\e[?1015h");
 	mouseEnabled = true;
 }
 
@@ -332,11 +332,11 @@ void disable()
 	if (!mouseEnabled)
 		return;
 	// disable extended (urxvt) mouse tracking
-	printf("\e[?1015l");
+	std::printf("\e[?1015l");
 	// disable mouse tracking
-	printf("\e[?1000l");
+	std::printf("\e[?1000l");
 	// restore old highlight mouse tracking
-	printf("\e[?1001r");
+	std::printf("\e[?1001r");
 	mouseEnabled = false;
 }
 
@@ -380,8 +380,8 @@ void initScreen(bool enable_colors, bool enable_mouse)
 		return 0;
 	};
 	// if ctrl-c or ctrl-g is pressed, abort the prompt
-	rl_bind_key(KEY_CTRL_C, abort_prompt);
-	rl_bind_key(KEY_CTRL_G, abort_prompt);
+	rl_bind_key('\3', abort_prompt);
+	rl_bind_key('\7', abort_prompt);
 	// do not change the state of the terminal
 	rl_prep_term_function = nullptr;
 	rl_deprep_term_function = nullptr;
@@ -726,7 +726,7 @@ bool Window::FDCallbacksListEmpty() const
 int Window::getInputChar()
 {
 	int key = wgetch(m_window);
-	if (!m_escape_terminal_sequences || key != KEY_ESCAPE)
+	if (!m_escape_terminal_sequences || key != Key::Escape)
 		return key;
 	auto define_mouse_event = [this](int type) {
 		switch (type & ~28)
@@ -747,7 +747,7 @@ int Window::getInputChar()
 			m_mouse_event.bstate = BUTTON5_PRESSED;
 			break;
 		default:
-			return ERR;
+			return Key::None;
 		}
 		if (type & 4)
 			m_mouse_event.bstate |= BUTTON_SHIFT;
@@ -756,10 +756,10 @@ int Window::getInputChar()
 		if (type & 16)
 			m_mouse_event.bstate |= BUTTON_CTRL;
 		if (m_mouse_event.x < 0 || m_mouse_event.x >= COLS)
-			return ERR;
+			return Key::None;
 		if (m_mouse_event.y < 0 || m_mouse_event.y >= LINES)
-			return ERR;
-		return KEY_MOUSE;
+			return Key::None;
+		return Key::Mouse;
 	};
 	auto parse_number = [this](int &result) {
 		int x;
@@ -776,25 +776,25 @@ int Window::getInputChar()
 	switch (key)
 	{
 	case '\t': // tty
-		return KEY_SHIFT_TAB;
+		return Key::Shift | Key::Tab;
 	case 'O': // F1 to F4 in xterm
 		key = wgetch(m_window);
 		switch (key)
 		{
 		case 'P':
-			key = KEY_F1;
+			key = Key::F1;
 			break;
 		case 'Q':
-			key = KEY_F2;
+			key = Key::F2;
 			break;
 		case 'R':
-			key = KEY_F3;
+			key = Key::F3;
 			break;
 		case 'S':
-			key = KEY_F4;
+			key = Key::F4;
 			break;
 		default:
-			key = ERR;
+			key = Key::None;
 			break;
 		}
 		return key;
@@ -803,17 +803,17 @@ int Window::getInputChar()
 		switch (key)
 		{
 		case 'A':
-			return KEY_UP;
+			return Key::Up;
 		case 'B':
-			return KEY_DOWN;
+			return Key::Down;
 		case 'C':
-			return KEY_RIGHT;
+			return Key::Right;
 		case 'D':
-			return KEY_LEFT;
+			return Key::Left;
 		case 'F': // xterm
-			return KEY_END;
+			return Key::End;
 		case 'H': // xterm
-			return KEY_HOME;
+			return Key::Home;
 		case 'M':
 		{
 			key = wgetch(m_window);
@@ -825,28 +825,28 @@ int Window::getInputChar()
 			return define_mouse_event(key);
 		}
 		case 'Z':
-			return KEY_SHIFT_TAB;
+			return Key::Shift | Key::Tab;
 		case '[': // F1 to F5 in tty
 			key = wgetch(m_window);
 			switch (key)
 			{
 			case 'A':
-				key = KEY_F1;
+				key = Key::F1;
 				break;
 			case 'B':
-				key = KEY_F2;
+				key = Key::F2;
 				break;
 			case 'C':
-				key = KEY_F3;
+				key = Key::F3;
 				break;
 			case 'D':
-				key = KEY_F4;
+				key = Key::F4;
 				break;
 			case 'E':
-				key = KEY_F5;
+				key = Key::F5;
 				break;
 			default:
-				key = ERR;
+				key = Key::None;
 				break;
 			}
 			return key;
@@ -862,73 +862,77 @@ int Window::getInputChar()
 				switch (key)
 				{
 				case 1: // tty
-					return KEY_HOME;
+					return Key::Home;
 				case 11:
-					return KEY_F1;
+					return Key::F1;
 				case 12:
-					return KEY_F2;
+					return Key::F2;
 				case 13:
-					return KEY_F3;
+					return Key::F3;
 				case 14:
-					return KEY_F4;
+					return Key::F4;
 				case 15:
-					return KEY_F5;
+					return Key::F5;
 				case 17: // not a typo
-					return KEY_F6;
+					return Key::F6;
 				case 18:
-					return KEY_F7;
+					return Key::F7;
 				case 19:
-					return KEY_F8;
+					return Key::F8;
 				case 2:
-					return KEY_IC;
+					return Key::Insert;
 				case 20:
-					return KEY_F9;
+					return Key::F9;
 				case 21:
-					return KEY_F10;
+					return Key::F10;
 				case 23: // not a typo
-					return KEY_F11;
+					return Key::F11;
 				case 24:
-					return KEY_F12;
+					return Key::F12;
 				case 3:
-					return KEY_DC;
+					return Key::Delete;
 				case 4:
-					return KEY_END;
+					return Key::End;
 				case 5:
-					return KEY_PPAGE;
+					return Key::PageUp;
 				case 6:
-					return KEY_NPAGE;
+					return Key::PageDown;
 				case 7:
-					return KEY_HOME;
+					return Key::Home;
 				case 8:
-					return KEY_END;
+					return Key::End;
 				default:
-					return ERR;
+					return Key::None;
 				}
 			case ';': // urxvt mouse
 				m_mouse_event.x = 0;
 				delim = parse_number(m_mouse_event.x);
 				if (delim != ';')
-					return ERR;
+					return Key::None;
 				m_mouse_event.y = 0;
 				delim = parse_number(m_mouse_event.y);
 				if (delim != 'M')
-					return ERR;
+					return Key::None;
 				--m_mouse_event.x;
 				--m_mouse_event.y;
 				return define_mouse_event(key);
 			default:
-				return ERR;
+				return Key::None;
 			}
 		}
 		default:
-			return ERR;
+			return Key::None;
 		}
 		break;
 	case ERR:
-		return KEY_ESCAPE;
+		return Key::Escape;
 	default:
-		m_input_queue.push(key);
-		return KEY_ESCAPE;
+		// this should always succeed as we just got it
+		assert(ungetch(key) == OK);
+		key = getInputChar();
+		if (key != Key::None)
+			m_input_queue.push(key);
+		return Key::Alt;
 	}
 }
 
@@ -959,14 +963,14 @@ int Window::readKey()
 	
 	if (select(fd_max+1, &fdset, 0, 0, m_window_timeout < 0 ? 0 : &timeout) > 0)
 	{
-		result = FD_ISSET(STDIN_FILENO, &fdset) ? getInputChar() : ERR;
+		result = FD_ISSET(STDIN_FILENO, &fdset) ? getInputChar() : Key::None;
 
 		for (FDCallbacks::const_iterator it = m_fds.begin(); it != m_fds.end(); ++it)
 			if (FD_ISSET(it->first, &fdset))
 				it->second();
 	}
 	else
-		result = ERR;
+		result = Key::None;
 	return result;
 }
 

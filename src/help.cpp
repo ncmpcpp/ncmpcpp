@@ -36,59 +36,49 @@ Help *myHelp;
 
 namespace {
 
-std::string key_to_string(const Key &key, bool *print_backspace)
+std::string key_to_string(const Key &key)
 {
 	std::string result;
-	if (key == Key(KEY_UP, Key::NCurses))
+	if (key == Key(NC::Key::Up, Key::NCurses))
 		result += "Up";
-	else if (key == Key(KEY_DOWN, Key::NCurses))
+	else if (key == Key(NC::Key::Down, Key::NCurses))
 		result += "Down";
-	else if (key == Key(KEY_PPAGE, Key::NCurses))
+	else if (key == Key(NC::Key::PageUp, Key::NCurses))
 		result += "Page Up";
-	else if (key == Key(KEY_NPAGE, Key::NCurses))
+	else if (key == Key(NC::Key::PageDown, Key::NCurses))
 		result += "Page Down";
-	else if (key == Key(KEY_HOME, Key::NCurses))
+	else if (key == Key(NC::Key::Home, Key::NCurses))
 		result += "Home";
-	else if (key == Key(KEY_END, Key::NCurses))
+	else if (key == Key(NC::Key::End, Key::NCurses))
 		result += "End";
-	else if (key == Key(KEY_SPACE, Key::Standard))
+	else if (key == Key(NC::Key::Space, Key::Standard))
 		result += "Space";
-	else if (key == Key(KEY_ENTER, Key::Standard))
+	else if (key == Key(NC::Key::Enter, Key::Standard))
 		result += "Enter";
-	else if (key == Key(KEY_IC, Key::NCurses))
+	else if (key == Key(NC::Key::Insert, Key::NCurses))
 		result += "Insert";
-	else if (key == Key(KEY_DC, Key::NCurses))
+	else if (key == Key(NC::Key::Delete, Key::NCurses))
 		result += "Delete";
-	else if (key == Key(KEY_RIGHT, Key::NCurses))
+	else if (key == Key(NC::Key::Right, Key::NCurses))
 		result += "Right";
-	else if (key == Key(KEY_LEFT, Key::NCurses))
+	else if (key == Key(NC::Key::Left, Key::NCurses))
 		result += "Left";
-	else if (key == Key(KEY_TAB, Key::Standard))
+	else if (key == Key(NC::Key::Tab, Key::Standard))
 		result += "Tab";
-	else if (key == Key(KEY_SHIFT_TAB, Key::NCurses))
+	else if (key == Key(NC::Key::Shift | NC::Key::Tab, Key::NCurses))
 		result += "Shift-Tab";
-	else if (key >= Key(KEY_CTRL_A, Key::Standard) && key <= Key(KEY_CTRL_Z, Key::Standard))
+	else if (key >= Key(NC::Key::Ctrl_A, Key::Standard) && key <= Key(NC::Key::Ctrl_Z, Key::Standard))
 	{
 		result += "Ctrl-";
 		result += key.getChar()+64;
 	}
-	else if (key >= Key(KEY_F1, Key::NCurses) && key <= Key(KEY_F12, Key::NCurses))
+	else if (key >= Key(NC::Key::F1, Key::NCurses) && key <= Key(NC::Key::F12, Key::NCurses))
 	{
 		result += "F";
-		result += boost::lexical_cast<std::string>(key.getChar()-264);
+		result += boost::lexical_cast<std::string>(key.getChar()-NC::Key::F1+1);
 	}
-	else if ((key == Key(KEY_BACKSPACE, Key::NCurses) || key == Key(KEY_BACKSPACE_2, Key::Standard)))
-	{
-		// since some terminals interpret KEY_BACKSPACE as backspace and other need KEY_BACKSPACE_2,
-		// actions have to be bound to either of them, but we want to display "Backspace" only once,
-		// hance this 'print_backspace' switch.
-		if (!print_backspace || *print_backspace)
-		{
+	else if (key == Key(NC::Key::Backspace, Key::Standard))
 			result += "Backspace";
-			if (print_backspace)
-				*print_backspace = false;
-		}
-	}
 	else
 		result += ToString(std::wstring(1, key.getChar()));
 	return result;
@@ -96,7 +86,6 @@ std::string key_to_string(const Key &key, bool *print_backspace)
 
 std::string display_keys(const Actions::Type at)
 {
-	bool print_backspace = true;
 	std::string result, skey;
 	for (auto it = Bindings.begin(); it != Bindings.end(); ++it)
 	{
@@ -104,7 +93,7 @@ std::string display_keys(const Actions::Type at)
 		{
 			if (j->isSingle() && j->action()->type() == at)
 			{
-				skey = key_to_string(it->first, &print_backspace);
+				skey = key_to_string(it->first);
 				if (!skey.empty())
 				{
 					result += std::move(skey);

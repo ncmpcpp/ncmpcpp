@@ -36,47 +36,58 @@ Key stringToSpecialKey(const std::string &s)
 {
 	Key result = Key::noOp;
 	if (!s.compare("mouse"))
-		result = Key(KEY_MOUSE, Key::NCurses);
+		result = Key(NC::Key::Mouse, Key::NCurses);
 	else if (!s.compare("up"))
-		result = Key(KEY_UP, Key::NCurses);
+		result = Key(NC::Key::Up, Key::NCurses);
 	else if (!s.compare("down"))
-		result = Key(KEY_DOWN, Key::NCurses);
+		result = Key(NC::Key::Down, Key::NCurses);
 	else if (!s.compare("page_up"))
-		result = Key(KEY_PPAGE, Key::NCurses);
+		result = Key(NC::Key::PageUp, Key::NCurses);
 	else if (!s.compare("page_down"))
-		result = Key(KEY_NPAGE, Key::NCurses);
+		result = Key(NC::Key::PageDown, Key::NCurses);
 	else if (!s.compare("home"))
-		result = Key(KEY_HOME, Key::NCurses);
+		result = Key(NC::Key::Home, Key::NCurses);
 	else if (!s.compare("end"))
-		result = Key(KEY_END, Key::NCurses);
+		result = Key(NC::Key::End, Key::NCurses);
 	else if (!s.compare("space"))
-		result = Key(KEY_SPACE, Key::Standard);
+		result = Key(NC::Key::Space, Key::Standard);
 	else if (!s.compare("enter"))
-		result = Key(KEY_ENTER, Key::Standard);
+		result = Key(NC::Key::Enter, Key::Standard);
 	else if (!s.compare("insert"))
-		result = Key(KEY_IC, Key::NCurses);
+		result = Key(NC::Key::Insert, Key::NCurses);
 	else if (!s.compare("delete"))
-		result = Key(KEY_DC, Key::NCurses);
+		result = Key(NC::Key::Delete, Key::NCurses);
 	else if (!s.compare("left"))
-		result = Key(KEY_LEFT, Key::NCurses);
+		result = Key(NC::Key::Left, Key::NCurses);
 	else if (!s.compare("right"))
-		result = Key(KEY_RIGHT, Key::NCurses);
+		result = Key(NC::Key::Right, Key::NCurses);
 	else if (!s.compare("tab"))
-		result = Key(KEY_TAB, Key::Standard);
+		result = Key(NC::Key::Tab, Key::Standard);
 	else if (!s.compare("shift_tab"))
-		result = Key(KEY_SHIFT_TAB, Key::NCurses);
-	else if (!s.compare(0, 5, "ctrl_") && s.length() > 5 && s[5] >= 'a' && s[5] <= 'z')
-		result = Key(KEY_CTRL_A + (s[5] - 'a'), Key::Standard);
+		result = Key(NC::Key::Shift | NC::Key::Tab, Key::NCurses);
+	else if (!s.compare(0, 5, "ctrl_") && s.length() > 5)
+	{
+		if (s[5] >= 'a' && s[5] <= 'z')
+			result = Key(NC::Key::Ctrl_A + (s[5] - 'a'), Key::Standard);
+		else if (s[5] == '[')
+			result = Key(NC::Key::Ctrl_LeftBracket, Key::Standard);
+		else if (s[5] == '\\')
+			result = Key(NC::Key::Ctrl_Backslash, Key::Standard);
+		else if (s[5] == ']')
+			result = Key(NC::Key::Ctrl_RightBracket, Key::Standard);
+		else if (s[5] == '^')
+			result = Key(NC::Key::Ctrl_Caret, Key::Standard);
+		else if (s[5] == '_')
+			result = Key(NC::Key::Ctrl_Underscore, Key::Standard);
+	}
 	else if (s.length() > 1 && s[0] == 'f')
 	{
 		int n = atoi(s.c_str() + 1);
 		if (n >= 1 && n <= 12)
-			result = Key(KEY_F1 + n - 1, Key::NCurses);
+			result = Key(NC::Key::F1 + n - 1, Key::NCurses);
 	}
 	else if (!s.compare("backspace"))
-		result = Key(KEY_BACKSPACE, Key::NCurses);
-	else if (!s.compare("backspace_2"))
-		result = Key(KEY_BACKSPACE_2, Key::Standard);
+		result = Key(NC::Key::Backspace, Key::Standard);
 	return result;
 }
 
@@ -438,11 +449,6 @@ void BindingsConfiguration::generateDefaults()
 		bind(k, Actions::Type::ReplaySong);
 	}
 	if (notBound(k = stringToKey("backspace")))
-	{
-		bind(k, Actions::Type::JumpToParentDirectory);
-		bind(k, Actions::Type::ReplaySong);
-	}
-	if (notBound(k = stringToKey("backspace_2")))
 	{
 		bind(k, Actions::Type::JumpToParentDirectory);
 		bind(k, Actions::Type::ReplaySong);
