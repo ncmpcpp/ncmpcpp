@@ -102,6 +102,43 @@ int main(int argc, char **argv)
 	
 	if (!configure(argc, argv))
 		return 0;
+
+#ifdef ENABLE_NP
+	if (Config.is_np)
+	{
+		try
+		{
+			Mpd.Connect();
+			if (Mpd.Version() < 16)
+			{
+				Mpd.Disconnect();
+				throw MPD::ClientError(MPD_ERROR_STATE, "MPD < 0.16.0 is not supported", false);
+			}
+		}
+		catch (MPD::ClientError &e)
+		{
+			std::cout << "ncmpcpp: MPD connection error: " << e.what() << "\n";
+			exit(1);
+		}
+
+		auto st = Mpd.getStatus();
+		MPD::PlayerState ps = st.playerState();
+
+		if (ps != MPD::psStop && ps != MPD::psUnknown)
+		{
+			MPD::Song cs = Mpd.GetCurrentSong();
+
+			std::cout << cs.toString(Config.song_status_format, Config.tags_separator, "$") << "\n";
+		}
+		else
+		{
+			std::cout << "ncmpcpp: MPD is not playing anything\n";
+		}
+
+		Mpd.Disconnect();
+		exit(0);
+	}
+#endif
 	
 	// always execute these commands, even if ncmpcpp use exit function
 	atexit(do_at_exit);
