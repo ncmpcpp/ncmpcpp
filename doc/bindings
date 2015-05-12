@@ -51,9 +51,11 @@
 ##      picked by ncmpcpp upon next call to readKey function.
 ##      Accepted values: mouse, up, down, page_up, page_down,
 ##      home, end, space, enter, insert, delete, left, right,
-##      tab, shift_tab, ctrl_a, ctrl_b, ..., ctrl_z, ctrl_[,
-##      ctrl_\\, ctrl_], ctrl_^, ctrl__, f1, f2, ..., f12,
-##      backspace.
+##      tab, ctrl_a, ctrl_b, ..., ctrl_z, ctrl_[, ctrl_\\,
+##      ctrl_], ctrl_^, ctrl__, f1, f2, ..., f12, backspace.
+##      In addition, most of these names can be prefixed with
+##      alt_/ctrl_/shift_ to be recognized with the appropriate
+##      modifier key(s).
 ##
 ##    - push_characters "string" - pushes given string into
 ##      input queue.

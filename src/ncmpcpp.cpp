@@ -160,7 +160,7 @@ int main(int argc, char **argv)
 
 	// local variables
 	bool key_pressed = false;
-	Key input = Key::noOp;
+	auto input = NC::Key::None;
 	auto connect_attempt = boost::posix_time::from_time_t(0);
 	auto past = boost::posix_time::from_time_t(0);
 	
@@ -210,11 +210,13 @@ int main(int argc, char **argv)
 			
 			if (key_pressed)
 				myScreen->refreshWindow();
-			input = Key::read(*wFooter);
-			key_pressed = input != Key::noOp;
+			input = readKey(*wFooter);
+			key_pressed = input != NC::Key::None;
 			
 			if (!key_pressed)
 				continue;
+
+			Statusbar::print(ToString(keyToWString(input)));
 
 			// The reason we want to update timer here is that if the timer is updated
 			// in Status::trace, then Key::read usually blocks for 500ms and if key is

@@ -27,29 +27,8 @@
 #include "actions.h"
 #include "macro_utilities.h"
 
-/// Key for binding actions to it. Supports non-ascii characters.
-struct Key
-{
-	enum Type { Standard, NCurses };
-	
-	Key(wchar_t ch, Type ct) : m_impl(ch, ct) { }
-	
-	wchar_t getChar() const { return std::get<0>(m_impl); }
-	Type getType() const { return std::get<1>(m_impl); }
-	
-	bool operator< (const Key &rhs) const { return m_impl <  rhs.m_impl; }
-	bool operator<=(const Key &rhs) const { return m_impl <= rhs.m_impl; }
-	bool operator> (const Key &rhs) const { return m_impl >  rhs.m_impl; }
-	bool operator>=(const Key &rhs) const { return m_impl >= rhs.m_impl; }
-	bool operator==(const Key &rhs) const { return m_impl == rhs.m_impl; }
-	bool operator!=(const Key &rhs) const { return m_impl != rhs.m_impl; }
-
-	static Key read(NC::Window &w);
-	static Key noOp;
-	
-private:
-	std::tuple<wchar_t, Type> m_impl;
-};
+NC::Key::Type readKey(NC::Window &w);
+std::wstring keyToWString(const NC::Key::Type key);
 
 /// Represents either single action or chain of actions bound to a certain key
 struct Binding
@@ -100,13 +79,8 @@ private:
 /// Keybindings configuration
 class BindingsConfiguration
 {
-	struct KeyHash {
-		size_t operator()(const Key &k) const {
-			return (k.getChar() << 1) | (k.getType() == Key::Standard);
-		}
-	};
 	typedef std::unordered_map<std::string, Command> CommandsSet;
-	typedef std::unordered_map<Key, std::vector<Binding>, KeyHash> BindingsMap;
+	typedef std::unordered_map<NC::Key::Type, std::vector<Binding>> BindingsMap;
 	
 public:
 	typedef BindingsMap::value_type::second_type::iterator BindingIterator;
@@ -117,18 +91,18 @@ public:
 	void generateDefaults();
 	
 	const Command *findCommand(const std::string &name);
-	BindingIteratorPair get(const Key &k);
+	BindingIteratorPair get(const NC::Key::Type &k);
 	
 	BindingsMap::const_iterator begin() const { return m_bindings.begin(); }
 	BindingsMap::const_iterator end() const { return m_bindings.end(); }
 	
 private:
-	bool notBound(const Key &k) const {
-		return k != Key::noOp && m_bindings.find(k) == m_bindings.end();
+	bool notBound(const NC::Key::Type &k) const {
+		return k != NC::Key::None && m_bindings.find(k) == m_bindings.end();
 	}
 	
 	template <typename ArgT>
-	void bind(Key k, ArgT &&t) {
+	void bind(NC::Key::Type k, ArgT &&t) {
 		m_bindings[k].push_back(std::forward<ArgT>(t));
 	}
 	

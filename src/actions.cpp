@@ -2626,7 +2626,7 @@ void seek()
 		                 ? (Timer-t).total_seconds()/2+Config.seek_time
 		                 : Config.seek_time;
 		
-		Key input = Key::read(*wFooter);
+		NC::Key::Type input = readKey(*wFooter);
 		auto k = Bindings.get(input);
 		if (k.first == k.second || !k.first->isSingle()) // no single action?
 			break;

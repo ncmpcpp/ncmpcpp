@@ -36,74 +36,36 @@ Help *myHelp;
 
 namespace {
 
-std::string key_to_string(const Key &key)
-{
-	std::string result;
-	if (key == Key(NC::Key::Up, Key::NCurses))
-		result += "Up";
-	else if (key == Key(NC::Key::Down, Key::NCurses))
-		result += "Down";
-	else if (key == Key(NC::Key::PageUp, Key::NCurses))
-		result += "Page Up";
-	else if (key == Key(NC::Key::PageDown, Key::NCurses))
-		result += "Page Down";
-	else if (key == Key(NC::Key::Home, Key::NCurses))
-		result += "Home";
-	else if (key == Key(NC::Key::End, Key::NCurses))
-		result += "End";
-	else if (key == Key(NC::Key::Space, Key::Standard))
-		result += "Space";
-	else if (key == Key(NC::Key::Enter, Key::Standard))
-		result += "Enter";
-	else if (key == Key(NC::Key::Insert, Key::NCurses))
-		result += "Insert";
-	else if (key == Key(NC::Key::Delete, Key::NCurses))
-		result += "Delete";
-	else if (key == Key(NC::Key::Right, Key::NCurses))
-		result += "Right";
-	else if (key == Key(NC::Key::Left, Key::NCurses))
-		result += "Left";
-	else if (key == Key(NC::Key::Tab, Key::Standard))
-		result += "Tab";
-	else if (key == Key(NC::Key::Shift | NC::Key::Tab, Key::NCurses))
-		result += "Shift-Tab";
-	else if (key >= Key(NC::Key::Ctrl_A, Key::Standard) && key <= Key(NC::Key::Ctrl_Z, Key::Standard))
-	{
-		result += "Ctrl-";
-		result += key.getChar()+64;
-	}
-	else if (key >= Key(NC::Key::F1, Key::NCurses) && key <= Key(NC::Key::F12, Key::NCurses))
-	{
-		result += "F";
-		result += boost::lexical_cast<std::string>(key.getChar()-NC::Key::F1+1);
-	}
-	else if (key == Key(NC::Key::Backspace, Key::Standard))
-			result += "Backspace";
-	else
-		result += ToString(std::wstring(1, key.getChar()));
-	return result;
-}
-
 std::string display_keys(const Actions::Type at)
 {
-	std::string result, skey;
+	std::wstring result, skey;
 	for (auto it = Bindings.begin(); it != Bindings.end(); ++it)
 	{
 		for (auto j = it->second.begin(); j != it->second.end(); ++j)
 		{
 			if (j->isSingle() && j->action()->type() == at)
 			{
-				skey = key_to_string(it->first);
+				skey = keyToWString(it->first);
 				if (!skey.empty())
 				{
 					result += std::move(skey);
-					result += " ";
+					result += ' ';
 				}
 			}
 		}
 	}
-	result.resize(16, ' ');
-	return result;
+	size_t i = 0, len = 0;
+	const size_t max_len = 20;
+	for (; i < result.size(); ++i)
+	{
+		int width = std::max(1, wcwidth(result[i]));
+		if (len+width > max_len)
+			break;
+		else
+			len += width;
+	}
+	result.resize(i + max_len - len, ' ');
+	return ToString(result);
 }
 
 void section(NC::Scrollpad &w, const char *type_, const char *title_)

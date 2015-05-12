@@ -29,14 +29,14 @@ namespace Actions {
 
 struct PushCharacters: BaseAction
 {
-	PushCharacters(NC::Window **w, std::vector<int> &&queue)
+	PushCharacters(NC::Window **w, std::vector<NC::Key::Type> &&queue)
 	: BaseAction(Type::MacroUtility, ""), m_window(w), m_queue(queue) { }
 	
 private:
 	virtual void run() OVERRIDE;
 	
 	NC::Window **m_window;
-	std::vector<int> m_queue;
+	std::vector<NC::Key::Type> m_queue;
 };
 
 struct RequireRunnable: BaseAction

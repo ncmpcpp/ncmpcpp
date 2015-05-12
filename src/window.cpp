@@ -723,9 +723,8 @@ bool Window::FDCallbacksListEmpty() const
 	return m_fds.empty();
 }
 
-int Window::getInputChar()
+Key::Type Window::getInputChar(int key)
 {
-	int key = wgetch(m_window);
 	if (!m_escape_terminal_sequences || key != Key::Escape)
 		return key;
 	auto define_mouse_event = [this](int type) {
@@ -761,6 +760,36 @@ int Window::getInputChar()
 			return Key::None;
 		return Key::Mouse;
 	};
+	auto get_xterm_modifier_key = [](int ch) {
+		Key::Type modifier;
+		switch (ch)
+		{
+		case '2':
+			modifier = Key::Shift;
+			break;
+		case '3':
+			modifier = Key::Alt;
+			break;
+		case '4':
+			modifier = Key::Alt | Key::Shift;
+			break;
+		case '5':
+			modifier = Key::Ctrl;
+			break;
+		case '6':
+			modifier = Key::Ctrl | Key::Shift;
+			break;
+		case '7':
+			modifier = Key::Alt | Key::Ctrl;
+			break;
+		case '8':
+			modifier = Key::Alt | Key::Ctrl | Key::Shift;
+			break;
+		default:
+			modifier = Key::None;
+		}
+		return modifier;
+	};
 	auto parse_number = [this](int &result) {
 		int x;
 		while (true)
@@ -777,31 +806,41 @@ int Window::getInputChar()
 	{
 	case '\t': // tty
 		return Key::Shift | Key::Tab;
-	case 'O': // F1 to F4 in xterm
+	case 'O': // ctrl+arrows in rxvt, F1 to F4 in xterm
 		key = wgetch(m_window);
 		switch (key)
 		{
+		case 'a':
+			return Key::Ctrl | Key::Up;
+		case 'b':
+			return Key::Ctrl | Key::Down;
+		case 'c':
+			return Key::Ctrl | Key::Right;
+		case 'd':
+			return Key::Ctrl | Key::Left;
 		case 'P':
-			key = Key::F1;
-			break;
+			return Key::F1;
 		case 'Q':
-			key = Key::F2;
-			break;
+			return Key::F2;
 		case 'R':
-			key = Key::F3;
-			break;
+			return Key::F3;
 		case 'S':
-			key = Key::F4;
-			break;
+			return Key::F4;
 		default:
-			key = Key::None;
-			break;
+			return Key::None;
 		}
-		return key;
 	case '[':
 		key = wgetch(m_window);
 		switch (key)
 		{
+		case 'a':
+			return Key::Shift | Key::Up;
+		case 'b':
+			return Key::Shift | Key::Down;
+		case 'c':
+			return Key::Shift | Key::Right;
+		case 'd':
+			return Key::Shift | Key::Left;
 		case 'A':
 			return Key::Up;
 		case 'B':
@@ -814,7 +853,7 @@ int Window::getInputChar()
 			return Key::End;
 		case 'H': // xterm
 			return Key::Home;
-		case 'M':
+		case 'M': // standard mouse event
 		{
 			key = wgetch(m_window);
 			int raw_x = wgetch(m_window);
@@ -831,34 +870,78 @@ int Window::getInputChar()
 			switch (key)
 			{
 			case 'A':
-				key = Key::F1;
-				break;
+				return Key::F1;
 			case 'B':
-				key = Key::F2;
-				break;
+				return Key::F2;
 			case 'C':
-				key = Key::F3;
-				break;
+				return Key::F3;
 			case 'D':
-				key = Key::F4;
-				break;
+				return Key::F4;
 			case 'E':
-				key = Key::F5;
-				break;
+				return Key::F5;
 			default:
-				key = Key::None;
-				break;
+				return Key::None;
 			}
-			return key;
 		case '1': case '2': case '3':
 		case '4': case '5': case '6':
 		case '7': case '8': case '9':
 		{
 			key -= '0';
 			int delim = parse_number(key);
+			if (key >= 2 && key <= 8)
+			{
+				Key::Type modifier;
+				switch (delim)
+				{
+				case '~':
+					modifier = Key::Null;
+					break;
+				case '^':
+					modifier = Key::Ctrl;
+					break;
+				case '$':
+					modifier = Key::Shift;
+					break;
+				case '@':
+					modifier = Key::Ctrl | Key::Shift;
+					break;
+				case ';': // xterm insert/delete/page up/page down
+				{
+					int local_key = wgetch(m_window);
+					modifier = get_xterm_modifier_key(local_key);
+					local_key = wgetch(m_window);
+					if (local_key != '~' || (key != 2 && key != 3 && key != 5 && key != 6))
+						return Key::None;
+					break;
+				}
+				default:
+					return Key::None;
+				}
+				switch (key)
+				{
+				case 2:
+					return modifier | Key::Insert;
+				case 3:
+					return modifier | Key::Delete;
+				case 4:
+					return modifier | Key::End;
+				case 5:
+					return modifier | Key::PageUp;
+				case 6:
+					return modifier | Key::PageDown;
+				case 7:
+					return modifier | Key::Home;
+				case 8:
+					return modifier | Key::End;
+				default:
+					std::cerr << "Unreachable code, aborting.\n";
+					std::terminate();
+				}
+			}
 			switch (delim)
 			{
 			case '~':
+			{
 				switch (key)
 				{
 				case 1: // tty
@@ -879,8 +962,6 @@ int Window::getInputChar()
 					return Key::F7;
 				case 19:
 					return Key::F8;
-				case 2:
-					return Key::Insert;
 				case 20:
 					return Key::F9;
 				case 21:
@@ -889,33 +970,51 @@ int Window::getInputChar()
 					return Key::F11;
 				case 24:
 					return Key::F12;
-				case 3:
-					return Key::Delete;
-				case 4:
-					return Key::End;
-				case 5:
-					return Key::PageUp;
-				case 6:
-					return Key::PageDown;
-				case 7:
-					return Key::Home;
-				case 8:
-					return Key::End;
 				default:
 					return Key::None;
 				}
-			case ';': // urxvt mouse
-				m_mouse_event.x = 0;
-				delim = parse_number(m_mouse_event.x);
-				if (delim != ';')
-					return Key::None;
-				m_mouse_event.y = 0;
-				delim = parse_number(m_mouse_event.y);
-				if (delim != 'M')
-					return Key::None;
-				--m_mouse_event.x;
-				--m_mouse_event.y;
-				return define_mouse_event(key);
+			}
+			case ';':
+				switch (key)
+				{
+				case 1: // xterm
+				{
+					key = wgetch(m_window);
+					Key::Type modifier = get_xterm_modifier_key(key);
+					if (modifier == Key::None)
+						return Key::None;
+					key = wgetch(m_window);
+					switch (key)
+					{
+					case 'A':
+						return modifier | Key::Up;
+					case 'B':
+						return modifier | Key::Down;
+					case 'C':
+						return modifier | Key::Right;
+					case 'D':
+						return modifier | Key::Left;
+					case 'F':
+						return modifier | Key::End;
+					case 'H':
+						return modifier | Key::Home;
+					default:
+						return Key::None;
+					}
+				}
+				default: // urxvt mouse
+					m_mouse_event.x = 0;
+					delim = parse_number(m_mouse_event.x);
+					if (delim != ';')
+						return Key::None;
+					m_mouse_event.y = 0;
+					delim = parse_number(m_mouse_event.y);
+					if (delim != 'M')
+						return Key::None;
+					--m_mouse_event.x;
+					--m_mouse_event.y;
+					return define_mouse_event(key);
+				}
 			default:
 				return Key::None;
 			}
@@ -923,22 +1022,21 @@ int Window::getInputChar()
 		default:
 			return Key::None;
 		}
-		break;
 	case ERR:
 		return Key::Escape;
-	default:
-		// this should always succeed as we just got it
-		assert(ungetch(key) == OK);
-		key = getInputChar();
-		if (key != Key::None)
-			m_input_queue.push(key);
-		return Key::Alt;
+	default: // alt + something
+	{
+		auto key_prim = getInputChar(key);
+		if (key_prim != Key::None)
+			return Key::Alt | key_prim;
+		return Key::None;
+	}
 	}
 }
 
-int Window::readKey()
+Key::Type Window::readKey()
 {
-	int result;
+	Key::Type result;
 	// if there are characters in input queue,
 	// get them and return immediately.
 	if (!m_input_queue.empty())
@@ -963,7 +1061,10 @@ int Window::readKey()
 	
 	if (select(fd_max+1, &fdset, 0, 0, m_window_timeout < 0 ? 0 : &timeout) > 0)
 	{
-		result = FD_ISSET(STDIN_FILENO, &fdset) ? getInputChar() : Key::None;
+		if (FD_ISSET(STDIN_FILENO, &fdset))
+			result = getInputChar(wgetch(m_window));
+		else
+			result = Key::None;
 
 		for (FDCallbacks::const_iterator it = m_fds.begin(); it != m_fds.end(); ++it)
 			if (FD_ISSET(it->first, &fdset))
@@ -974,7 +1075,7 @@ int Window::readKey()
 	return result;
 }
 
-void Window::pushChar(int ch)
+void Window::pushChar(const Key::Type ch)
 {
 	m_input_queue.push(ch);
 }
