@@ -94,6 +94,11 @@ NC::Key::Type stringToSpecialKey(const std::string &s)
 	}
 	else if (!s.compare("backspace"))
 		result = NC::Key::Backspace;
+	else if (!s.compare("backspace_2"))
+	{
+		std::cerr << "WARNING: value 'backspace_2' is deprecated and will be removed in 0.8, use 'backspace' instead.\n";
+		result = NC::Key::Backspace;
+	}
 	return result;
 }
 
