@@ -227,6 +227,7 @@ AC_CHECK_HEADERS([readline/readline.h readline/history.h],
 	AC_CHECK_LIB(readline, rl_initialize, LIBS="$LIBS -lreadline",
 		AC_MSG_ERROR([readline headers found but there is no readline library to make use of])
 	),
+	AC_MSG_ERROR([no readline/readline.h header file found])
 )
 
 
@@ -237,6 +238,7 @@ AC_CHECK_HEADERS([pthread.h],
 	AC_CHECK_LIB(pthread, pthread_create, LIBS="$LIBS -lpthread",
 		AC_MSG_ERROR([pthread.h found but there is no pthread library to make use of])
 	),
+	AC_MSG_ERROR([no pthread.h header header file found])
 )
 
 dnl ========================
