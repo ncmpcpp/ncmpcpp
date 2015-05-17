@@ -114,6 +114,13 @@
 ##    could be used. Then ncmpcpp will not wait for confirmation
 ##    (enter) and will execute the command the moment it sees it.
 ##
+##    Note: while command chains are executed, internal environment
+##    update (which includes current window refresh and mpd status
+##    update) is not performed for performance reasons. However, it
+##    may be desirable to do so in some situration. Therefore it's
+##    possible to invoke by hand by performing 'update enviroment'
+##    action.
+##
 ## Note: There is a difference between:
 ##
 ##         def_key "key"

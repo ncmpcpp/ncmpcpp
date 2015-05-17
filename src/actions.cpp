@@ -190,7 +190,7 @@ void resizeScreen(bool reload_main_window)
 	using Global::MainHeight;
 	using Global::wHeader;
 	using Global::wFooter;
-	
+
 	// update internal screen dimensions
 	if (reload_main_window)
 	{
@@ -198,29 +198,29 @@ void resizeScreen(bool reload_main_window)
 		endwin();
 		refresh();
 	}
-	
+
 	MainHeight = LINES-(Config.design == Design::Alternative ? 7 : 4);
-	
+
 	validateScreenSize();
-	
+
 	if (!Config.header_visibility)
 		MainHeight += 2;
 	if (!Config.statusbar_visibility)
 		++MainHeight;
-	
+
 	setResizeFlags();
-	
+
 	applyToVisibleWindows(&BaseScreen::resize);
-	
+
 	if (Config.header_visibility || Config.design == Design::Alternative)
 		wHeader->resize(COLS, HeaderHeight);
-	
+
 	FooterStartY = LINES-(Config.statusbar_visibility ? 2 : 1);
 	wFooter->moveTo(0, FooterStartY);
 	wFooter->resize(COLS, Config.statusbar_visibility ? 2 : 1);
-	
+
 	applyToVisibleWindows(&BaseScreen::refresh);
-	
+
 	Status::Changes::elapsedTime(false);
 	Status::Changes::playerState();
 	// Note: routines for drawing separator if alternative user
@@ -299,6 +299,36 @@ BaseAction *get(const std::string &name)
 		}
 	}
 	return result;
+}
+
+UpdateEnvironment::UpdateEnvironment()
+: BaseAction(Type::UpdateEnvironment, "update_environment")
+, m_past(boost::posix_time::from_time_t(0))
+{ }
+
+void UpdateEnvironment::run(bool update_timer, bool refresh_window)
+{
+	using Global::Timer;
+
+	// update timer, status if necessary etc.
+	Status::trace(update_timer, true);
+
+	// header stuff
+	if ((myScreen == myPlaylist || myScreen == myBrowser || myScreen == myLyrics)
+	&&  (Timer - m_past > boost::posix_time::milliseconds(500))
+	)
+	{
+		drawHeader();
+		m_past = Timer;
+	}
+
+	if (refresh_window)
+		myScreen->refreshWindow();
+}
+
+void UpdateEnvironment::run()
+{
+	run(true, true);
 }
 
 bool MouseEvent::canBeRun()
@@ -2427,6 +2457,7 @@ void populateActions()
 		AvailableActions[static_cast<size_t>(a->type())] = a;
 	};
 	insert_action(new Actions::Dummy());
+	insert_action(new Actions::UpdateEnvironment());
 	insert_action(new Actions::MouseEvent());
 	insert_action(new Actions::ScrollUp());
 	insert_action(new Actions::ScrollDown());

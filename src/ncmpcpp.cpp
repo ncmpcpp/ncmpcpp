@@ -162,7 +162,9 @@ int main(int argc, char **argv)
 	bool key_pressed = false;
 	auto input = NC::Key::None;
 	auto connect_attempt = boost::posix_time::from_time_t(0);
-	auto past = boost::posix_time::from_time_t(0);
+	auto update_environment = static_cast<Actions::UpdateEnvironment &>(
+		Actions::get(Actions::Type::UpdateEnvironment)
+	);
 	
 	while (!Actions::ExitMainLoop)
 	{
@@ -189,30 +191,17 @@ int main(int argc, char **argv)
 					Status::handleClientError(e);
 				}
 			}
-			
-			// update timer, status if necessary etc.
-			Status::trace(!key_pressed, true);
 
 			if (run_resize_screen)
 			{
 				Actions::resizeScreen(true);
 				run_resize_screen = false;
 			}
-			
-			// header stuff
-			if ((myScreen == myPlaylist || myScreen == myBrowser || myScreen == myLyrics)
-			&&  (Timer - past > boost::posix_time::milliseconds(500))
-			)
-			{
-				drawHeader();
-				past = Timer;
-			}
-			
-			if (key_pressed)
-				myScreen->refreshWindow();
+
+			update_environment.run(!key_pressed, key_pressed);
+
 			input = readKey(*wFooter);
 			key_pressed = input != NC::Key::None;
-			
 			if (!key_pressed)
 				continue;
 

@@ -21,6 +21,7 @@
 #ifndef NCMPCPP_ACTIONS_H
 #define NCMPCPP_ACTIONS_H
 
+#include <boost/date_time/posix_time/posix_time_types.hpp>
 #include <boost/format.hpp>
 #include <map>
 #include <string>
@@ -34,7 +35,7 @@ namespace Actions {
 enum class Type
 {
 	MacroUtility = 0,
-	Dummy, MouseEvent, ScrollUp, ScrollDown, ScrollUpArtist, ScrollUpAlbum,
+	Dummy, UpdateEnvironment, MouseEvent, ScrollUp, ScrollDown, ScrollUpArtist, ScrollUpAlbum,
 	ScrollDownArtist, ScrollDownAlbum, PageUp, PageDown, MoveHome, MoveEnd,
 	ToggleInterface, JumpToParentDirectory, PressEnter, PressSpace, PreviousColumn,
 	NextColumn, MasterScreen, SlaveScreen, VolumeUp, VolumeDown, DeletePlaylistItems,
@@ -122,6 +123,18 @@ private:
 	virtual void run() OVERRIDE { }
 };
 
+struct UpdateEnvironment: BaseAction
+{
+	UpdateEnvironment();
+
+	void run(bool update_status, bool refresh_window);
+
+private:
+	boost::posix_time::ptime m_past;
+
+	virtual void run() OVERRIDE;
+};
+
 struct MouseEvent: BaseAction
 {
 	MouseEvent(): BaseAction(Type::MouseEvent, "mouse_event")
@@ -134,9 +147,8 @@ private:
 	virtual bool canBeRun() OVERRIDE;
 	virtual void run() OVERRIDE;
 	
-	private:
-		MEVENT m_mouse_event;
-		MEVENT m_old_mouse_event;
+	MEVENT m_mouse_event;
+	MEVENT m_old_mouse_event;
 };
 
 struct ScrollUp: BaseAction
