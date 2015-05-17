@@ -1932,8 +1932,8 @@ void Find::run()
 	Statusbar::print("Searching...");
 	auto s = static_cast<Screen<NC::Scrollpad> *>(myScreen);
 	s->main().removeProperties();
-	if (findme.empty() || s->main().setProperties(NC::Format::Reverse, findme, NC::Format::NoReverse))
-		Statusbar::print("Done");
+  if (findme.empty() || s->main().setProperties(NC::Format::Reverse, findme, NC::Format::NoReverse, Config.regex_type))
+    Statusbar::print("Done");
 	else
 		Statusbar::print("No matching patterns found");
 	s->main().flush();
