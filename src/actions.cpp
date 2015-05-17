@@ -512,11 +512,6 @@ void PressEnter::run()
 	myScreen->enterPressed();
 }
 
-void PressSpace::run()
-{
-	myScreen->spacePressed();
-}
-
 bool PreviousColumn::canBeRun()
 {
 	auto hc = hasColumns(myScreen);
@@ -591,6 +586,23 @@ void VolumeDown::run()
 {
 	int volume = std::max(int(Status::State::volume()-Config.volume_change_step), 0);
 	Mpd.SetVolume(volume);
+}
+
+bool AddItemToPlaylist::canBeRun()
+{
+	if (m_hs != static_cast<void *>(myScreen))
+		m_hs = dynamic_cast<HasSongs *>(myScreen);
+	return m_hs != nullptr;
+}
+
+void AddItemToPlaylist::run()
+{
+	bool success = m_hs->addItemToPlaylist();
+	if (success)
+	{
+		myScreen->scroll(NC::Scroll::Down);
+		listsChangeFinisher();
+	}
 }
 
 bool DeletePlaylistItems::canBeRun()
@@ -1057,6 +1069,19 @@ void ToggleSeparatorsBetweenAlbums::run()
 	Config.playlist_separate_albums = !Config.playlist_separate_albums;
 	Statusbar::printf("Separators between albums: %1%",
 		Config.playlist_separate_albums ? "on" : "off"
+	);
+}
+
+bool ToggleLyricsUpdateOnSongChange::canBeRun()
+{
+	return myScreen == myLyrics;
+}
+
+void ToggleLyricsUpdateOnSongChange::run()
+{
+	Config.now_playing_lyrics = !Config.now_playing_lyrics;
+	Statusbar::printf("Update lyrics if song changes: %1%",
+		Config.now_playing_lyrics ? "on" : "off"
 	);
 }
 
@@ -2121,6 +2146,22 @@ void SetSelectedItemsPriority::run()
 	myPlaylist->SetSelectedItemsPriority(prio);
 }
 
+bool ToggleVisualizationType::canBeRun()
+{
+#	ifdef ENABLE_VISUALIZER
+	return myScreen == myVisualizer;
+#	else
+	return false;
+#	endif // ENABLE_VISUALIZER
+}
+
+void ToggleVisualizationType::run()
+{
+#	ifdef ENABLE_VISUALIZER
+	myVisualizer->ToggleVisualizationType();
+#	endif // ENABLE_VISUALIZER
+}
+
 bool SetVisualizerSampleMultiplier::canBeRun()
 {
 #	ifdef ENABLE_VISUALIZER
@@ -2472,7 +2513,6 @@ void populateActions()
 	insert_action(new Actions::ToggleInterface());
 	insert_action(new Actions::JumpToParentDirectory());
 	insert_action(new Actions::PressEnter());
-	insert_action(new Actions::PressSpace());
 	insert_action(new Actions::SelectItem());
 	insert_action(new Actions::PreviousColumn());
 	insert_action(new Actions::NextColumn());
@@ -2480,6 +2520,7 @@ void populateActions()
 	insert_action(new Actions::SlaveScreen());
 	insert_action(new Actions::VolumeUp());
 	insert_action(new Actions::VolumeDown());
+	insert_action(new Actions::AddItemToPlaylist());
 	insert_action(new Actions::DeletePlaylistItems());
 	insert_action(new Actions::DeleteStoredPlaylist());
 	insert_action(new Actions::DeleteBrowserItems());
@@ -2500,6 +2541,7 @@ void populateActions()
 	insert_action(new Actions::SeekBackward());
 	insert_action(new Actions::ToggleDisplayMode());
 	insert_action(new Actions::ToggleSeparatorsBetweenAlbums());
+	insert_action(new Actions::ToggleLyricsUpdateOnSongChange());
 	insert_action(new Actions::ToggleLyricsFetcher());
 	insert_action(new Actions::ToggleFetchingLyricsInBackground());
 	insert_action(new Actions::TogglePlayingSongCentering());
@@ -2553,6 +2595,7 @@ void populateActions()
 	insert_action(new Actions::ToggleMediaLibrarySortMode());
 	insert_action(new Actions::RefetchLyrics());
 	insert_action(new Actions::SetSelectedItemsPriority());
+	insert_action(new Actions::ToggleVisualizationType());
 	insert_action(new Actions::SetVisualizerSampleMultiplier());
 	insert_action(new Actions::ShowSongInfo());
 	insert_action(new Actions::ShowArtistInfo());

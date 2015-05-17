@@ -243,46 +243,6 @@ void Browser::enterPressed()
 	}
 }
 
-void Browser::spacePressed()
-{
-	if (w.empty())
-		return;
-	
-	const MPD::Item &item = w.current()->value();
-	// ignore parent directory
-	if (isParentDirectory(item))
-		return;
-
-	switch (item.type())
-	{
-		case MPD::Item::Type::Directory:
-		{
-			bool success = true;
-			if (m_local_browser)
-			{
-				std::vector<MPD::Song> songs;
-				getLocalDirectoryRecursively(songs, item.directory().path());
-				success = addSongsToPlaylist(songs.begin(), songs.end(), false, -1);
-			}
-			else
-				Mpd.Add(item.directory().path());
-			Statusbar::printf("Directory \"%1%\" added%2%",
-				item.directory().path(), withErrors(success)
-			);
-			break;
-		}
-		case MPD::Item::Type::Song:
-			addSongToPlaylist(item.song(), false);
-			break;
-		case MPD::Item::Type::Playlist:
-			Mpd.LoadPlaylist(item.playlist().path());
-			Statusbar::printf("Playlist \"%1%\" loaded", item.playlist().path());
-			break;
-	}
-
-	w.scroll(NC::Scroll::Down);
-}
-
 void Browser::mouseButtonPressed(MEVENT me)
 {
 	if (w.empty() || !w.hasCoords(me.x, me.y) || size_t(me.y) >= w.size())
@@ -299,22 +259,12 @@ void Browser::mouseButtonPressed(MEVENT me)
 					drawHeader();
 				}
 				else
-				{
-					size_t pos = w.choice();
-					spacePressed();
-					if (pos < w.size()-1)
-						w.scroll(NC::Scroll::Up);
-				}
+					addItemToPlaylist();
 				break;
 			case MPD::Item::Type::Playlist:
 			case MPD::Item::Type::Song:
 				if (me.bstate & BUTTON1_PRESSED)
-				{
-					size_t pos = w.choice();
-					spacePressed();
-					if (pos < w.size()-1)
-						w.scroll(NC::Scroll::Up);
-				}
+					addItemToPlaylist();
 				else
 					enterPressed();
 				break;
@@ -350,6 +300,46 @@ bool Browser::find(SearchDirection direction, bool wrap, bool skip_current)
 }
 
 /***********************************************************************/
+
+bool Browser::addItemToPlaylist()
+{
+	bool result = false;
+	if (w.empty())
+		return result;
+
+	const MPD::Item &item = w.current()->value();
+	// ignore parent directory
+	if (isParentDirectory(item))
+		return result;
+
+	switch (item.type())
+	{
+		case MPD::Item::Type::Directory:
+		{
+			if (m_local_browser)
+			{
+				std::vector<MPD::Song> songs;
+				getLocalDirectoryRecursively(songs, item.directory().path());
+				result = addSongsToPlaylist(songs.begin(), songs.end(), false, -1);
+			}
+			else
+				Mpd.Add(item.directory().path());
+			Statusbar::printf("Directory \"%1%\" added%2%",
+				item.directory().path(), withErrors(result)
+			);
+			break;
+		}
+		case MPD::Item::Type::Song:
+			result = addSongToPlaylist(item.song(), false);
+			break;
+		case MPD::Item::Type::Playlist:
+			Mpd.LoadPlaylist(item.playlist().path());
+			Statusbar::printf("Playlist \"%1%\" loaded", item.playlist().path());
+			result = true;
+			break;
+	}
+	return result;
+}
 
 std::vector<MPD::Song> Browser::getSelectedSongs()
 {

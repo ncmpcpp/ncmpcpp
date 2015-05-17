@@ -268,15 +268,6 @@ void SearchEngine::enterPressed()
 		addSongToPlaylist(w.current()->value().song(), true);
 }
 
-void SearchEngine::spacePressed()
-{
-	if (w.current()->value().isSong())
-	{
-		addSongToPlaylist(w.current()->value().song(), false);
-		w.scroll(NC::Scroll::Down);
-	}
-}
-
 void SearchEngine::mouseButtonPressed(MEVENT me)
 {
 	if (w.empty() || !w.hasCoords(me.x, me.y) || size_t(me.y) >= w.size())
@@ -291,12 +282,7 @@ void SearchEngine::mouseButtonPressed(MEVENT me)
 		else if (w.choice() >= StaticOptions)
 		{
 			if (me.bstate & BUTTON1_PRESSED)
-			{
-				size_t pos = w.choice();
-				spacePressed();
-				if (pos < w.size()-1)
-					w.scroll(NC::Scroll::Up);
-			}
+				addItemToPlaylist();
 			else
 				enterPressed();
 		}
@@ -331,6 +317,14 @@ bool SearchEngine::find(SearchDirection direction, bool wrap, bool skip_current)
 }
 
 /***********************************************************************/
+
+bool SearchEngine::addItemToPlaylist()
+{
+	bool result = false;
+	if (!w.empty() && w.current()->value().isSong())
+		result = addSongToPlaylist(w.current()->value().song(), false);
+	return result;
+}
 
 std::vector<MPD::Song> SearchEngine::getSelectedSongs()
 {

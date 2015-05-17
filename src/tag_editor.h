@@ -63,7 +63,6 @@ struct TagEditor: Screen<NC::Window *>, HasColumns, HasSongs, Searchable, Tabbab
 	virtual void update() OVERRIDE;
 	
 	virtual void enterPressed() OVERRIDE;
-	virtual void spacePressed() OVERRIDE { }
 	virtual void mouseButtonPressed(MEVENT) OVERRIDE;
 	
 	virtual bool isLockable() OVERRIDE { return true; }
@@ -76,6 +75,7 @@ struct TagEditor: Screen<NC::Window *>, HasColumns, HasSongs, Searchable, Tabbab
 	virtual bool find(SearchDirection direction, bool wrap, bool skip_current) OVERRIDE;
 	
 	// HasSongs implementation
+	virtual bool addItemToPlaylist() OVERRIDE;
 	virtual std::vector<MPD::Song> getSelectedSongs() OVERRIDE;
 	
 	// HasColumns implementation

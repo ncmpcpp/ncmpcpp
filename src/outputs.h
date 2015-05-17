@@ -44,7 +44,6 @@ struct Outputs: Screen<NC::Menu<MPD::Output>>, Tabbable
 	virtual void update() OVERRIDE { }
 	
 	virtual void enterPressed() OVERRIDE;
-	virtual void spacePressed() OVERRIDE { }
 	virtual void mouseButtonPressed(MEVENT me) OVERRIDE;
 	
 	virtual bool isLockable() OVERRIDE { return true; }

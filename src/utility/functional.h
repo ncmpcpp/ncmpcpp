@@ -24,6 +24,36 @@
 #include <boost/locale/encoding_utf.hpp>
 #include <utility>
 
+template <typename BaseT>
+struct reversed_iteration
+{
+	reversed_iteration(BaseT &base_)
+	: base(base_) { }
+
+	BaseT &base;
+};
+
+template <typename BaseT>
+reversed_iteration<BaseT> reverse_iteration(BaseT &base_) {
+	return reversed_iteration<BaseT>(base_);
+}
+template <typename BaseT>
+auto begin(reversed_iteration<BaseT> &rev) -> decltype(rev.base.rbegin()) {
+	return rev.base.rbegin();
+}
+template <typename BaseT>
+auto begin(reversed_iteration<const BaseT> &rev) -> decltype(rev.base.rbegin()) {
+	return rev.base.rbegin();
+}
+template <typename BaseT>
+auto end(reversed_iteration<BaseT> &rev) -> decltype(rev.base.rend()) {
+	return rev.base.rend();
+}
+template <typename BaseT>
+auto end(reversed_iteration<const BaseT> &rev) -> decltype(rev.base.rend()) {
+	return rev.base.rend();
+}
+
 template <typename ValueT>
 struct pointer_extractor
 {

@@ -24,6 +24,7 @@
 #include "helpers.h"
 #include "playlist.h"
 #include "statusbar.h"
+#include "utility/functional.h"
 
 const MPD::Song *currentSong(const BaseScreen *screen)
 {
@@ -88,41 +89,36 @@ bool addSongsToPlaylist(VectorSongIterator first, VectorSongIterator last, bool 
 	return result;
 }
 
+void removeSongFromPlaylist(const SongMenu &playlist, const MPD::Song &s)
+{
+	Mpd.StartCommandsList();
+	for (auto &item : reverse_iteration(playlist))
+		if (item.value() == s)
+			Mpd.Delete(item.value().getPosition());
+	Mpd.CommitCommandsList();
+}
+
 bool addSongToPlaylist(const MPD::Song &s, bool play, int position)
 {
 	bool result = false;
-	if (Config.space_add_mode == SpaceAddMode::AddRemove && myPlaylist->checkForSong(s))
+	if (Config.space_add_mode == SpaceAddMode::AddRemove
+	&&  !play
+	&&  myPlaylist->checkForSong(s)
+	   )
 	{
-		auto &w = myPlaylist->main();
-		if (play)
-		{
-			auto song = std::find(w.beginV(), w.endV(), s);
-			assert(song != w.endV());
-			Mpd.PlayID(song->getID());
-			result = true;
-		}
-		else
-		{
-			Mpd.StartCommandsList();
-			for (auto it = w.rbeginV(); it != w.rendV(); ++it)
-				if (*it == s)
-					Mpd.Delete(it->getPosition());
-			Mpd.CommitCommandsList();
-			// we return false in this case
-		}
+		result = true;
+		removeSongFromPlaylist(myPlaylist->main(), s);
+		return result;
 	}
-	else
+	int id = Mpd.AddSong(s, position);
+	if (id >= 0)
 	{
-		int id = Mpd.AddSong(s, position);
-		if (id >= 0)
-		{
-			Statusbar::printf("Added to playlist: %s",
-				Format::stringify<char>(Config.song_status_format, &s)
-			);
-			if (play)
-				Mpd.PlayID(id);
-			result = true;
-		}
+		Statusbar::printf("Added to playlist: %s",
+			Format::stringify<char>(Config.song_status_format, &s)
+		);
+		if (play)
+			Mpd.PlayID(id);
+		result = true;
 	}
 	return result;
 }

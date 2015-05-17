@@ -39,6 +39,7 @@ struct Searchable
 
 struct HasSongs
 {
+	virtual bool addItemToPlaylist() = 0;
 	virtual std::vector<MPD::Song> getSelectedSongs() = 0;
 };
 

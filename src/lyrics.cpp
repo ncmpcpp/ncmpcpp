@@ -137,14 +137,6 @@ std::wstring Lyrics::title()
 	return result;
 }
 
-void Lyrics::spacePressed()
-{
-	Config.now_playing_lyrics = !Config.now_playing_lyrics;
-	Statusbar::printf("Reload lyrics if song changes: %1%",
-		Config.now_playing_lyrics ? "on" : "off"
-	);
-}
-
 #ifdef HAVE_CURL_CURL_H
 void Lyrics::DownloadInBackground(const MPD::Song &s)
 {

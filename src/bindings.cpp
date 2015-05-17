@@ -472,10 +472,14 @@ void BindingsConfiguration::generateDefaults()
 		bind(k, Actions::Type::MoveEnd);
 	if (notBound(k = stringToKey("insert")))
 		bind(k, Actions::Type::SelectItem);
-	if (notBound(k = stringToKey("space")))
-		bind(k, Actions::Type::PressSpace);
 	if (notBound(k = stringToKey("enter")))
 		bind(k, Actions::Type::PressEnter);
+	if (notBound(k = stringToKey("space")))
+	{
+		bind(k, Actions::Type::AddItemToPlaylist);
+		bind(k, Actions::Type::ToggleLyricsUpdateOnSongChange);
+		bind(k, Actions::Type::ToggleVisualizationType);
+	}
 	if (notBound(k = stringToKey("delete")))
 	{
 		bind(k, Actions::Type::DeletePlaylistItems);

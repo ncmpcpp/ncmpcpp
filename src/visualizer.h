@@ -50,13 +50,13 @@ struct Visualizer: Screen<NC::Window>, Tabbable
 	virtual int windowTimeout() OVERRIDE;
 
 	virtual void enterPressed() OVERRIDE { }
-	virtual void spacePressed() OVERRIDE;
 	virtual void mouseButtonPressed(MEVENT) OVERRIDE { }
 
 	virtual bool isLockable() OVERRIDE { return true; }
 	virtual bool isMergable() OVERRIDE { return true; }
 
 	// private members
+	void ToggleVisualizationType();
 	void SetFD();
 	void ResetFD();
 	void FindOutputID();

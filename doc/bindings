@@ -184,11 +184,17 @@
 #def_key "insert"
 #  select_item
 #
-#def_key "space"
-#  press_space
-#
 #def_key "enter"
 #  press_enter
+#
+#def_key "space"
+#  add_item_to_playlist
+#
+#def_key "space"
+#  toggle_lyrics_update_on_song_change
+#
+#def_key "space"
+#  toggle_visualization_type
 #
 #def_key "delete"
 #  delete_playlist_items

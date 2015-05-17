@@ -451,12 +451,7 @@ int MediaLibrary::windowTimeout()
 
 void MediaLibrary::enterPressed()
 {
-	AddToPlaylist(true);
-}
-
-void MediaLibrary::spacePressed()
-{
-	AddToPlaylist(false);
+	addItemToPlaylist(true);
 }
 
 void MediaLibrary::mouseButtonPressed(MEVENT me)
@@ -491,12 +486,7 @@ void MediaLibrary::mouseButtonPressed(MEVENT me)
 		{
 			Tags.Goto(me.y);
 			if (me.bstate & BUTTON3_PRESSED)
-			{
-				size_t pos = Tags.choice();
-				spacePressed();
-				if (pos < Tags.size()-1)
-					Tags.scroll(NC::Scroll::Up);
-			}
+				addItemToPlaylist();
 		}
 		else
 			Screen<WindowType>::mouseButtonPressed(me);
@@ -519,12 +509,7 @@ void MediaLibrary::mouseButtonPressed(MEVENT me)
 		{
 			Albums.Goto(me.y);
 			if (me.bstate & BUTTON3_PRESSED)
-			{
-				size_t pos = Albums.choice();
-				spacePressed();
-				if (pos < Albums.size()-1)
-					Albums.scroll(NC::Scroll::Up);
-			}
+				addItemToPlaylist();
 		}
 		else
 			Screen<WindowType>::mouseButtonPressed(me);
@@ -538,12 +523,7 @@ void MediaLibrary::mouseButtonPressed(MEVENT me)
 		{
 			Songs.Goto(me.y);
 			if (me.bstate & BUTTON1_PRESSED)
-			{
-				size_t pos = Songs.choice();
-				spacePressed();
-				if (pos < Songs.size()-1)
-					Songs.scroll(NC::Scroll::Up);
-			}
+				addItemToPlaylist();
 			else
 				enterPressed();
 		}
@@ -607,6 +587,11 @@ bool MediaLibrary::find(SearchDirection direction, bool wrap, bool skip_current)
 }
 
 /***********************************************************************/
+
+bool MediaLibrary::addItemToPlaylist()
+{
+	return addItemToPlaylist(false);
+}
 
 std::vector<MPD::Song> MediaLibrary::getSelectedSongs()
 {
@@ -923,10 +908,11 @@ void MediaLibrary::LocateSong(const MPD::Song &s)
 	refresh();
 }
 
-void MediaLibrary::AddToPlaylist(bool add_n_play)
+bool MediaLibrary::addItemToPlaylist(bool play)
 {
+	bool result = false;
 	if (isActiveWindow(Songs) && !Songs.empty())
-		addSongToPlaylist(Songs.current()->value(), add_n_play);
+		result = addSongToPlaylist(Songs.current()->value(), play);
 	else
 	{
 		if ((!Tags.empty() && isActiveWindow(Tags))
@@ -938,11 +924,11 @@ void MediaLibrary::AddToPlaylist(bool add_n_play)
 				std::make_move_iterator(Mpd.CommitSearchSongs()),
 				std::make_move_iterator(MPD::SongIterator())
 			);
-			bool success = addSongsToPlaylist(list.begin(), list.end(), add_n_play, -1);
+			result = addSongsToPlaylist(list.begin(), list.end(), play, -1);
 			std::string tag_type = boost::locale::to_lower(
 				tagTypeToString(Config.media_lib_primary_tag));
 			Statusbar::printf("Songs with %1% \"%2%\" added%3%",
-				tag_type, Tags.current()->value().tag(), withErrors(success)
+				tag_type, Tags.current()->value().tag(), withErrors(result)
 			);
 		}
 		else if (isActiveWindow(Albums))
@@ -951,24 +937,13 @@ void MediaLibrary::AddToPlaylist(bool add_n_play)
 				std::make_move_iterator(getSongsFromAlbum(Albums.current()->value())),
 				std::make_move_iterator(MPD::SongIterator())
 			);
-			bool success = addSongsToPlaylist(list.begin(), list.end(), add_n_play, -1);
+			result = addSongsToPlaylist(list.begin(), list.end(), play, -1);
 			Statusbar::printf("Songs from album \"%1%\" added%2%",
-				Albums.current()->value().entry().album(), withErrors(success)
+				Albums.current()->value().entry().album(), withErrors(result)
 			);
 		}
 	}
-	
-	if (!add_n_play)
-	{
-		w->scroll(NC::Scroll::Down);
-		if (isActiveWindow(Tags))
-		{
-			Albums.clear();
-			Songs.clear();
-		}
-		else if (isActiveWindow(Albums))
-			Songs.clear();
-	}
+	return result;
 }
 
 namespace {

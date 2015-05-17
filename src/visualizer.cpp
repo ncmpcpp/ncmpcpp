@@ -187,32 +187,6 @@ int Visualizer::windowTimeout()
 		return Screen<WindowType>::windowTimeout();
 }
 
-void Visualizer::spacePressed()
-{
-	switch (Config.visualizer_type)
-	{
-		case VisualizerType::Wave:
-			Config.visualizer_type = VisualizerType::WaveFilled;
-			break;
-		case VisualizerType::WaveFilled:
-#			ifdef HAVE_FFTW3_H
-			Config.visualizer_type = VisualizerType::Spectrum;
-#			else
-			Config.visualizer_type = VisualizerType::Ellipse;
-#			endif // HAVE_FFTW3_H
-			break;
-#		ifdef HAVE_FFTW3_H
-		case VisualizerType::Spectrum:
-			Config.visualizer_type = VisualizerType::Ellipse;
-			break;
-#		endif // HAVE_FFTW3_H
-		case VisualizerType::Ellipse:
-			Config.visualizer_type = VisualizerType::Wave;
-			break;
-	}
-	Statusbar::printf("Visualization type: %1%", Config.visualizer_type);
-}
-
 /**********************************************************************/
 
 void Visualizer::DrawSoundWave(int16_t *buf, ssize_t samples, size_t y_offset, size_t height)
@@ -442,6 +416,32 @@ void Visualizer::DrawFrequencySpectrumStereo(int16_t *buf_left, int16_t *buf_rig
 #endif // HAVE_FFTW3_H
 
 /**********************************************************************/
+
+void Visualizer::ToggleVisualizationType()
+{
+	switch (Config.visualizer_type)
+	{
+		case VisualizerType::Wave:
+			Config.visualizer_type = VisualizerType::WaveFilled;
+			break;
+		case VisualizerType::WaveFilled:
+#			ifdef HAVE_FFTW3_H
+			Config.visualizer_type = VisualizerType::Spectrum;
+#			else
+			Config.visualizer_type = VisualizerType::Ellipse;
+#			endif // HAVE_FFTW3_H
+			break;
+#		ifdef HAVE_FFTW3_H
+		case VisualizerType::Spectrum:
+			Config.visualizer_type = VisualizerType::Ellipse;
+			break;
+#		endif // HAVE_FFTW3_H
+		case VisualizerType::Ellipse:
+			Config.visualizer_type = VisualizerType::Wave;
+			break;
+	}
+	Statusbar::printf("Visualization type: %1%", Config.visualizer_type);
+}
 
 void Visualizer::SetFD()
 {

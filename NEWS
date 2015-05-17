@@ -24,6 +24,7 @@ ncmpcpp-0.7 (????-??-??)
 * Support for Alt, Ctrl and Shift modifiers as well as Escape key was added.
 * Action that updates the environment can now be used in bindings configuration file.
 * Searching in text fields now respects regular expression configuration.
+* Monolithic 'press_space' action was split into 'add_item_to_playlist', 'toggle_lyrics_update_on_song_change' and 'toggle_visualization_type'.
 
 ncmpcpp-0.6.4 (2015-05-02)
 

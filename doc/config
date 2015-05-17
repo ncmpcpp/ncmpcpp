@@ -377,10 +377,6 @@
 ##
 #lastfm_preferred_language = en
 #
-## Available values: add_remove, always_add.
-##
-#space_add_mode = always_add
-#
 #show_hidden_files_in_local_browser = no
 #
 ##

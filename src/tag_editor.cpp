@@ -714,8 +714,6 @@ void TagEditor::mouseButtonPressed(MEVENT me)
 			Dirs->Goto(me.y);
 			if (me.bstate & BUTTON1_PRESSED)
 				enterPressed();
-			else
-				spacePressed();
 		}
 		else
 			Screen<WindowType>::mouseButtonPressed(me);
@@ -805,6 +803,14 @@ bool TagEditor::find(SearchDirection direction, bool wrap, bool skip_current)
 }
 
 /***********************************************************************/
+
+bool TagEditor::addItemToPlaylist()
+{
+	bool result = false;
+	if (w == Tags && !Tags->empty())
+		result = addSongToPlaylist(*Tags->currentV(), false);
+	return result;
+}
 
 std::vector<MPD::Song> TagEditor::getSelectedSongs()
 {

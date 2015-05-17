@@ -43,7 +43,6 @@ struct Lyrics: Screen<NC::Scrollpad>, Tabbable
 	virtual void update() OVERRIDE;
 	
 	virtual void enterPressed() OVERRIDE { }
-	virtual void spacePressed() OVERRIDE;
 	
 	virtual bool isLockable() OVERRIDE { return false; }
 	virtual bool isMergable() OVERRIDE { return true; }
@@ -54,7 +53,7 @@ struct Lyrics: Screen<NC::Scrollpad>, Tabbable
 	
 #	ifdef HAVE_CURL_CURL_H
 	void Refetch();
-	
+
 	static void ToggleFetcher();
 	static void DownloadInBackground(const MPD::Song &s);
 #	endif // HAVE_CURL_CURL_H

@@ -37,15 +37,15 @@ enum class Type
 	MacroUtility = 0,
 	Dummy, UpdateEnvironment, MouseEvent, ScrollUp, ScrollDown, ScrollUpArtist, ScrollUpAlbum,
 	ScrollDownArtist, ScrollDownAlbum, PageUp, PageDown, MoveHome, MoveEnd,
-	ToggleInterface, JumpToParentDirectory, PressEnter, PressSpace, PreviousColumn,
-	NextColumn, MasterScreen, SlaveScreen, VolumeUp, VolumeDown, DeletePlaylistItems,
-	DeleteStoredPlaylist, DeleteBrowserItems, ReplaySong, Previous, Next, Pause,
-	Stop, ExecuteCommand, SavePlaylist, MoveSortOrderUp, MoveSortOrderDown,
+	ToggleInterface, JumpToParentDirectory, PressEnter, PreviousColumn,
+	NextColumn, MasterScreen, SlaveScreen, VolumeUp, VolumeDown, AddItemToPlaylist,
+	DeletePlaylistItems, DeleteStoredPlaylist, DeleteBrowserItems, ReplaySong, Previous,
+	Next, Pause, Stop, ExecuteCommand, SavePlaylist, MoveSortOrderUp, MoveSortOrderDown,
 	MoveSelectedItemsUp, MoveSelectedItemsDown, MoveSelectedItemsTo, Add,
 	SeekForward, SeekBackward, ToggleDisplayMode, ToggleSeparatorsBetweenAlbums,
-	ToggleLyricsFetcher, ToggleFetchingLyricsInBackground, TogglePlayingSongCentering,
-	UpdateDatabase, JumpToPlayingSong, ToggleRepeat, Shuffle, ToggleRandom,
-	StartSearching, SaveTagChanges, ToggleSingle, ToggleConsume, ToggleCrossfade,
+	ToggleLyricsUpdateOnSongChange, ToggleLyricsFetcher, ToggleFetchingLyricsInBackground,
+	TogglePlayingSongCentering, UpdateDatabase, JumpToPlayingSong, ToggleRepeat, Shuffle,
+	ToggleRandom, StartSearching, SaveTagChanges, ToggleSingle, ToggleConsume, ToggleCrossfade,
 	SetCrossfade, SetVolume, EditSong, EditLibraryTag, EditLibraryAlbum, EditDirectoryName,
 	EditPlaylistName, EditLyrics, JumpToBrowser, JumpToMediaLibrary,
 	JumpToPlaylistEditor, ToggleScreenLock, JumpToTagEditor, JumpToPositionInSong,
@@ -56,7 +56,7 @@ enum class Type
 	ToggleAddMode, ToggleMouse, ToggleBitrateVisibility,
 	AddRandomItems, ToggleBrowserSortMode, ToggleLibraryTagType,
 	ToggleMediaLibrarySortMode, RefetchLyrics,
-	SetSelectedItemsPriority, SetVisualizerSampleMultiplier,
+	SetSelectedItemsPriority, ToggleVisualizationType, SetVisualizerSampleMultiplier,
 	ShowSongInfo, ShowArtistInfo, ShowLyrics, Quit, NextScreen, PreviousScreen,
 	ShowHelp, ShowPlaylist, ShowBrowser, ChangeBrowseMode, ShowSearchEngine,
 	ResetSearchEngine, ShowMediaLibrary, ToggleMediaLibraryColumnsMode,
@@ -272,14 +272,6 @@ private:
 	virtual void run() OVERRIDE;
 };
 
-struct PressSpace: BaseAction
-{
-	PressSpace(): BaseAction(Type::PressSpace, "press_space") { }
-	
-private:
-	virtual void run() OVERRIDE;
-};
-
 struct PreviousColumn: BaseAction
 {
 	PreviousColumn(): BaseAction(Type::PreviousColumn, "previous_column") { }
@@ -330,6 +322,17 @@ struct VolumeDown: BaseAction
 	
 private:
 	virtual void run() OVERRIDE;
+};
+
+struct AddItemToPlaylist: BaseAction
+{
+	AddItemToPlaylist(): BaseAction(Type::AddItemToPlaylist, "add_item_to_playlist") { }
+
+private:
+	virtual bool canBeRun() OVERRIDE;
+	virtual void run() OVERRIDE;
+
+	HasSongs *m_hs;
 };
 
 struct DeletePlaylistItems: BaseAction
@@ -501,6 +504,16 @@ struct ToggleSeparatorsBetweenAlbums: BaseAction
 	ToggleSeparatorsBetweenAlbums()
 	: BaseAction(Type::ToggleSeparatorsBetweenAlbums, "toggle_separators_between_albums") { }
 	
+private:
+	virtual bool canBeRun() OVERRIDE;
+	virtual void run() OVERRIDE;
+};
+
+struct ToggleLyricsUpdateOnSongChange: BaseAction
+{
+	ToggleLyricsUpdateOnSongChange()
+	: BaseAction(Type::ToggleLyricsUpdateOnSongChange, "toggle_lyrics_update_on_song_change") { }
+
 private:
 	virtual bool canBeRun() OVERRIDE;
 	virtual void run() OVERRIDE;
@@ -994,6 +1007,17 @@ struct SetSelectedItemsPriority: BaseAction
 	: BaseAction(Type::SetSelectedItemsPriority, "set_selected_items_priority") { }
 	
 private:
+	virtual bool canBeRun() OVERRIDE;
+	virtual void run() OVERRIDE;
+};
+
+struct ToggleVisualizationType: BaseAction
+{
+	ToggleVisualizationType()
+	: BaseAction(Type::ToggleVisualizationType, "toggle_visualization_type") { }
+
+private:
+	
 	virtual bool canBeRun() OVERRIDE;
 	virtual void run() OVERRIDE;
 };

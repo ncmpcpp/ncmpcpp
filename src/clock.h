@@ -43,7 +43,6 @@ struct Clock: Screen<NC::Window>, Tabbable
 	virtual void scroll(NC::Scroll) OVERRIDE { }
 	
 	virtual void enterPressed() OVERRIDE { }
-	virtual void spacePressed() OVERRIDE { }
 	virtual void mouseButtonPressed(MEVENT) OVERRIDE { }
 	
 	virtual bool isLockable() OVERRIDE { return false; }

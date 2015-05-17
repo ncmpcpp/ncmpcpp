@@ -76,9 +76,6 @@ struct BaseScreen
 	/// Invoked after Enter was pressed
 	virtual void enterPressed() = 0;
 	
-	/// Invoked after Space was pressed
-	virtual void spacePressed() = 0;
-	
 	/// @see Screen::mouseButtonPressed()
 	virtual void mouseButtonPressed(MEVENT me) = 0;
 

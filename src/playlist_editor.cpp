@@ -225,34 +225,9 @@ int PlaylistEditor::windowTimeout()
 		return Screen<WindowType>::windowTimeout();
 }
 
-void PlaylistEditor::AddToPlaylist(bool add_n_play)
-{
-	if (isActiveWindow(Playlists) && !Playlists.empty())
-	{
-		std::vector<MPD::Song> list(
-			std::make_move_iterator(Mpd.GetPlaylistContent(Playlists.current()->value().path())),
-			std::make_move_iterator(MPD::SongIterator())
-		);
-		bool success = addSongsToPlaylist(list.begin(), list.end(), add_n_play, -1);
-		Statusbar::printf("Playlist \"%1%\" loaded%2%",
-			Playlists.current()->value().path(), withErrors(success)
-		);
-	}
-	else if (isActiveWindow(Content) && !Content.empty())
-		addSongToPlaylist(Content.current()->value(), add_n_play);
-	
-	if (!add_n_play)
-		w->scroll(NC::Scroll::Down);
-}
-
 void PlaylistEditor::enterPressed()
 {
-	AddToPlaylist(true);
-}
-
-void PlaylistEditor::spacePressed()
-{
-	AddToPlaylist(false);
+	addItemToPlaylist(true);
 }
 
 void PlaylistEditor::mouseButtonPressed(MEVENT me)
@@ -270,12 +245,7 @@ void PlaylistEditor::mouseButtonPressed(MEVENT me)
 		{
 			Playlists.Goto(me.y);
 			if (me.bstate & BUTTON3_PRESSED)
-			{
-				size_t pos = Playlists.choice();
-				spacePressed();
-				if (pos < Playlists.size()-1)
-					Playlists.scroll(NC::Scroll::Up);
-			}
+				addItemToPlaylist();
 		}
 		else
 			Screen<WindowType>::mouseButtonPressed(me);
@@ -294,12 +264,7 @@ void PlaylistEditor::mouseButtonPressed(MEVENT me)
 		{
 			Content.Goto(me.y);
 			if (me.bstate & BUTTON1_PRESSED)
-			{
-				size_t pos = Content.choice();
-				spacePressed();
-				if (pos < Content.size()-1)
-					Content.scroll(NC::Scroll::Up);
-			}
+				addItemToPlaylist();
 			else
 				enterPressed();
 		}
@@ -352,6 +317,11 @@ bool PlaylistEditor::find(SearchDirection direction, bool wrap, bool skip_curren
 }
 
 /***********************************************************************/
+
+bool PlaylistEditor::addItemToPlaylist()
+{
+	return addItemToPlaylist(false);
+}
 
 std::vector<MPD::Song> PlaylistEditor::getSelectedSongs()
 {
@@ -448,6 +418,25 @@ void PlaylistEditor::Locate(const MPD::Playlist &playlist)
 		Content.clear();
 		switchTo();
 	}
+}
+
+bool PlaylistEditor::addItemToPlaylist(bool play)
+{
+	bool result = false;
+	if (isActiveWindow(Playlists) && !Playlists.empty())
+	{
+		std::vector<MPD::Song> list(
+			std::make_move_iterator(Mpd.GetPlaylistContent(Playlists.current()->value().path())),
+			std::make_move_iterator(MPD::SongIterator())
+		);
+		result = addSongsToPlaylist(list.begin(), list.end(), play, -1);
+		Statusbar::printf("Playlist \"%1%\" loaded%2%",
+			Playlists.current()->value().path(), withErrors(result)
+		);
+	}
+	else if (isActiveWindow(Content) && !Content.empty())
+		result = addSongToPlaylist(Content.current()->value(), play);
+	return result;
 }
 
 namespace {

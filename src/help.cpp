@@ -246,7 +246,7 @@ void write_bindings(NC::Scrollpad &w)
 
 	key_section(w, "Browser");
 	key(w, Type::PressEnter, "Enter directory/Add item to playlist and play it");
-	key(w, Type::PressSpace, "Add item to playlist");
+	key(w, Type::AddItemToPlaylist, "Add item to playlist");
 #	ifdef HAVE_TAGLIB_H
 	key(w, Type::EditSong, "Edit song");
 #	endif // HAVE_TAGLIB_H
@@ -261,7 +261,7 @@ void write_bindings(NC::Scrollpad &w)
 
 	key_section(w, "Search engine");
 	key(w, Type::PressEnter, "Add item to playlist and play it/change option");
-	key(w, Type::PressSpace, "Add item to playlist");
+	key(w, Type::AddItemToPlaylist, "Add item to playlist");
 #	ifdef HAVE_TAGLIB_H
 	key(w, Type::EditSong, "Edit song");
 #	endif // HAVE_TAGLIB_H
@@ -273,7 +273,7 @@ void write_bindings(NC::Scrollpad &w)
 	key(w, Type::PreviousColumn, "Previous column");
 	key(w, Type::NextColumn, "Next column");
 	key(w, Type::PressEnter, "Add item to playlist and play it");
-	key(w, Type::PressSpace, "Add item to playlist");
+	key(w, Type::AddItemToPlaylist, "Add item to playlist");
 #	ifdef HAVE_TAGLIB_H
 	key(w, Type::EditSong, "Edit song");
 #	endif // HAVE_TAGLIB_H
@@ -285,7 +285,7 @@ void write_bindings(NC::Scrollpad &w)
 	key(w, Type::PreviousColumn, "Previous column");
 	key(w, Type::NextColumn, "Next column");
 	key(w, Type::PressEnter, "Add item to playlist and play it");
-	key(w, Type::PressSpace, "Add item to playlist");
+	key(w, Type::AddItemToPlaylist, "Add item to playlist");
 #	ifdef HAVE_TAGLIB_H
 	key(w, Type::EditSong, "Edit song");
 #	endif // HAVE_TAGLIB_H
@@ -298,7 +298,7 @@ void write_bindings(NC::Scrollpad &w)
 	key(w, Type::CropPlaylist, "Clear playlist except selected items");
 
 	key_section(w, "Lyrics");
-	key(w, Type::PressSpace, "Toggle reloading lyrics upon song change");
+	key(w, Type::ToggleLyricsUpdateOnSongChange, "Toggle lyrics update on song change");
 	key(w, Type::EditLyrics, "Open lyrics in external editor");
 	key(w, Type::RefetchLyrics, "Refetch lyrics");
 
@@ -322,7 +322,7 @@ void write_bindings(NC::Scrollpad &w)
 
 #	if defined(ENABLE_VISUALIZER) && defined(HAVE_FFTW3_H)
 	key_section(w, "Music visualizer");
-	key(w, Type::PressSpace, "Toggle visualization type");
+	key(w, Type::ToggleVisualizationType, "Toggle visualization type");
 	key(w, Type::SetVisualizerSampleMultiplier, "Set visualizer sample multiplier");
 #	endif // ENABLE_VISUALIZER && HAVE_FFTW3_H
 
