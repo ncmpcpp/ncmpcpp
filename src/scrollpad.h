@@ -21,7 +21,6 @@
 #ifndef NCMPCPP_SCROLLPAD_H
 #define NCMPCPP_SCROLLPAD_H
 
-#include <boost/regex.hpp>
 #include "window.h"
 #include "strbuffer.h"
 
@@ -47,8 +46,8 @@ struct Scrollpad: public Window
 	void flush();
 	void reset();
 	
-	bool setProperties(Color begin, const std::string &s, Color end, size_t id = -2, boost::regex::flag_type flags = boost::regex::icase);
-	bool setProperties(Format begin, const std::string &s, Format end, size_t id = -2, boost::regex::flag_type flags = boost::regex::icase);
+	bool setProperties(Color begin, const std::string &s, Color end, size_t flags, size_t id = -2);
+	bool setProperties(Format begin, const std::string &s, Format end, size_t flags, size_t id = -2);
 	void removeProperties(size_t id = -2);
 	
 	template <typename ItemT>

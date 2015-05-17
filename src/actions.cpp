@@ -1812,7 +1812,7 @@ void Find::run()
 	Statusbar::print("Searching...");
 	auto s = static_cast<Screen<NC::Scrollpad> *>(myScreen);
 	s->main().removeProperties();
-	if (token.empty() || s->main().setProperties(NC::Format::Reverse, token, NC::Format::NoReverse))
+	if (token.empty() || s->main().setProperties(NC::Format::Reverse, token, NC::Format::NoReverse, Config.regex_type))
 		Statusbar::print("Done");
 	else
 		Statusbar::print("No matching patterns found");

@@ -23,6 +23,7 @@ ncmpcpp-0.7 (????-??-??)
 * Selecting items no longer depends on space mode and is bound by default to Insert key.
 * Support for Alt, Ctrl and Shift modifiers as well as Escape key was added.
 * Action that updates the environment can now be used in bindings configuration file.
+* Searching in text fields now respects regular expression configuration.
 
 ncmpcpp-0.6.4 (2015-05-02)
 
