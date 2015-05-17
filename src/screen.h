@@ -120,7 +120,9 @@ bool isVisible(BaseScreen *screen);
 template <typename WindowT> struct Screen : public BaseScreen
 {
 	typedef WindowT WindowType;
-	typedef typename std::add_lvalue_reference<WindowType>::type WindowReference;
+	typedef typename std::add_lvalue_reference<
+		WindowType
+	>::type WindowReference;
 	typedef typename std::add_lvalue_reference<
 		typename std::add_const<WindowType>::type
 	>::type ConstWindowReference;
@@ -199,6 +201,9 @@ public:
 	
 	/// @return currently active window
 	WindowReference main() {
+		return w;
+	}
+	ConstWindowReference main() const {
 		return w;
 	}
 	

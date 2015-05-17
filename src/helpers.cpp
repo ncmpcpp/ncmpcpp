@@ -21,6 +21,7 @@
 #include <algorithm>
 #include <time.h>
 
+#include "enums.h"
 #include "helpers.h"
 #include "playlist.h"
 #include "statusbar.h"
