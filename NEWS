@@ -4,6 +4,7 @@ ncmpcpp-0.6.5 (????-??-??)
 * Configure script now fails if either readline or pthread specific headers are not present.
 * Searching in text fields now respects regular expression configuration.
 * When numbering tracks in tag editor all the other track tags are discarded.
+* Xiph tag DESCRIPTION is now rewritten as COMMENT when updating tags.
 
 ncmpcpp-0.6.4 (2015-05-02)
 
