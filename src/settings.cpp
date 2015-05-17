@@ -188,6 +188,14 @@ option_parser::worker border(NC::Border &arg, NC::Border value)
 	}), defaults_to(arg, std::move(value)));
 }
 
+option_parser::worker deprecated(const char *option, double version_removal)
+{
+	return option_parser::worker([option, version_removal](std::string) {
+		std::cerr << "WARNING: " << option << " is deprecated and will be removed in " << version_removal << ".\n";
+	}, [] { }
+	);
+}
+
 }
 
 bool Configuration::read(const std::vector<std::string> &config_paths, bool ignore_errors)
@@ -196,8 +204,12 @@ bool Configuration::read(const std::vector<std::string> &config_paths, bool igno
 	unsigned mpd_port;
 	std::string columns_format;
 
-	// keep the same order of variables as in configuration file
 	option_parser p;
+
+	// deprecation warnings
+	p.add("default_space_mode", deprecated("default_space_mode", 0.8));
+
+	// keep the same order of variables as in configuration file
 	p.add("ncmpcpp_directory", assign_default<std::string>(
 		ncmpcpp_directory, "~/.ncmpcpp/", adjust_directory
 	));
