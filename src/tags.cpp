@@ -183,6 +183,8 @@ void writeXiphComments(const MPD::MutableSong &s, TagLib::Ogg::XiphComment *tag)
 	tag->removeField("TRACK");
 	// remove field DISC, some taggers use it as DISCNUMBER
 	tag->removeField("DISC");
+	// remove field DESCRIPTION, it's displayed as COMMENT
+	tag->removeField("DESCRIPTION");
 	writeXiph("TITLE", tagList(s, &MPD::Song::getTitle));
 	writeXiph("ARTIST", tagList(s, &MPD::Song::getArtist));
 	writeXiph("ALBUMARTIST", tagList(s, &MPD::Song::getAlbumArtist));
