@@ -533,6 +533,8 @@ void TagEditor::enterPressed()
 				(*it)->setTrack(boost::lexical_cast<std::string>(i) + "/" + boost::lexical_cast<std::string>(EditedSongs.size()));
 			else
 				(*it)->setTrack(boost::lexical_cast<std::string>(i));
+			// discard other track number tags
+			(*it)->setTrack("", 1);
 		}
 		Statusbar::print("Tracks numbered");
 		return;
