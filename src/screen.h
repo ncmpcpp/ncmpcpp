@@ -101,6 +101,8 @@ struct BaseScreen
 	/// Unlocks a screen, ie. hides merged window (if there is one set).
 	static void unlock();
 	
+	const static int defaultWindowTimeout = 500;
+
 protected:
 	/// Gets X offset and width of current screen to be used eg. in resize() function.
 	/// @param adjust_locked_screen indicates whether this function should
@@ -187,9 +189,9 @@ public:
 	}
 	
 	/// @return timeout parameter used for the screen (in ms)
-	/// @default 500
+	/// @default defaultWindowTimeout
 	virtual int windowTimeout() OVERRIDE {
-		return 500;
+		return defaultWindowTimeout;
 	}
 
 	/// Invoked after there was one of mouse buttons pressed

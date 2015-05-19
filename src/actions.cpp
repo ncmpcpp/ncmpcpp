@@ -2686,7 +2686,7 @@ void seek()
 	auto t = Timer;
 	
 	int old_timeout = wFooter->getTimeout();
-	wFooter->setTimeout(500);
+	wFooter->setTimeout(BaseScreen::defaultWindowTimeout);
 	
 	auto seekForward = &Actions::get(Actions::Type::SeekForward);
 	auto seekBackward = &Actions::get(Actions::Type::SeekBackward);

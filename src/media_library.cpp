@@ -163,7 +163,7 @@ public:
 
 MediaLibrary::MediaLibrary()
 : m_timer(boost::posix_time::from_time_t(0))
-, m_window_timeout(Config.data_fetching_delay ? 250 : 500)
+, m_window_timeout(Config.data_fetching_delay ? 250 : BaseScreen::defaultWindowTimeout)
 , m_fetching_delay(boost::posix_time::milliseconds(Config.data_fetching_delay ? 250 : -1))
 {
 	hasTwoColumns = 0;
