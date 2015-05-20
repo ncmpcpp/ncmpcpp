@@ -18,6 +18,7 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
+#include <string> // include before boost to compile on MACOSX
 #include <boost/locale/encoding_utf.hpp>
 #include <cassert>
 #include "utility/wide_string.h"
