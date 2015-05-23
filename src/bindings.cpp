@@ -589,8 +589,12 @@ void BindingsConfiguration::generateDefaults()
 		bind(k, Actions::Type::SetCrossfade);
 	if (notBound(k = stringToKey("u")))
 		bind(k, Actions::Type::UpdateDatabase);
-	if (notBound(k = stringToKey("ctrl_v")))
+	if (notBound(k = stringToKey("ctrl_s")))
+	{
 		bind(k, Actions::Type::SortPlaylist);
+		bind(k, Actions::Type::ToggleBrowserSortMode);
+		bind(k, Actions::Type::ToggleMediaLibrarySortMode);
+	}
 	if (notBound(k = stringToKey("ctrl_r")))
 		bind(k, Actions::Type::ReversePlaylist);
 	if (notBound(k = stringToKey("/")))
@@ -648,7 +652,6 @@ void BindingsConfiguration::generateDefaults()
 	{
 		bind(k, Actions::Type::MoveSortOrderUp);
 		bind(k, Actions::Type::MoveSelectedItemsUp);
-		bind(k, Actions::Type::ToggleMediaLibrarySortMode);
 		bind(k, Actions::Type::SetVisualizerSampleMultiplier);
 	}
 	if (notBound(k = stringToKey("n")))
@@ -689,7 +692,6 @@ void BindingsConfiguration::generateDefaults()
 		bind(k, Actions::Type::ToggleScreenLock);
 	if (notBound(k = stringToKey("`")))
 	{
-		bind(k, Actions::Type::ToggleBrowserSortMode);
 		bind(k, Actions::Type::ToggleLibraryTagType);
 		bind(k, Actions::Type::RefetchLyrics);
 		bind(k, Actions::Type::AddRandomItems);

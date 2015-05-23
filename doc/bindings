@@ -352,8 +352,14 @@
 #def_key "u"
 #  update_database
 #
-#def_key "ctrl_v"
+#def_key "ctrl_s"
 #  sort_playlist
+#
+#def_key "ctrl_s"
+#  toggle_browser_sort_mode
+#
+#def_key "ctrl_s"
+#  toggle_media_library_sort_mode
 #
 #def_key "ctrl_r"
 #  reverse_playlist
@@ -440,9 +446,6 @@
 #  move_selected_items_up
 #
 #def_key "m"
-#  toggle_media_library_sort_mode
-#
-#def_key "m"
 #  set_visualizer_sample_multiplier
 #
 #def_key "n"
@@ -495,9 +498,6 @@
 #
 #def_key "ctrl_l"
 #  toggle_screen_lock
-#
-#def_key "`"
-#  toggle_browser_sort_mode
 #
 #def_key "`"
 #  toggle_library_tag_type
