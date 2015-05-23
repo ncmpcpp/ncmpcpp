@@ -433,9 +433,6 @@ void Status::Changes::playlist(unsigned previous_version)
 			// if song's already in playlist, replace it with a new one
 			MPD::Song &old_s = myPlaylist->main()[pos].value();
 			myPlaylist->unregisterSong(old_s);
-			// remove selection only if the path is different
-			if (old_s != *s)
-				myPlaylist->main()[pos].setSelected(false);
 			old_s = std::move(*s);
 		}
 		else // otherwise just add it to playlist
