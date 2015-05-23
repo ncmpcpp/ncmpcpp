@@ -113,21 +113,40 @@ std::vector<Iterator> getSelected(Iterator first, Iterator last)
 	return result;
 }
 
-/// @return selected range within given range or original range if no item is selected
+/// @return true if range that begins and ends with selected items was found
 template <typename Iterator>
-std::pair<Iterator, Iterator> getSelectedRange(Iterator first, Iterator second)
+bool findRange(Iterator &first, Iterator &last)
 {
-	auto result = std::make_pair(first, second);
-	if (hasSelected(first, second))
+	for (; first != last; ++first)
 	{
-		while (!result.first->isSelected())
-			++result.first;
-		do
-			--result.second;
-		while (!result.second->isSelected());
-		++result.second;
+		if (first->isSelected())
+			break;
 	}
-	return result;
+	if (first == last)
+		return false;
+	--last;
+	for (; first != last; --last)
+	{
+		if (last->isSelected())
+			break;
+	}
+	++last;
+	return true;
+}
+
+/// @return true if fully selected range was found, false otherwise.
+template <typename Iterator>
+bool findSelectedRange(Iterator &first, Iterator &last)
+{
+	if (!findRange(first, last))
+		return false;
+	// we have range, now check if it's filled with selected items
+	for (auto it = first; it != last; ++it)
+	{
+		if (!it->isSelected())
+			return false;
+	}
+	return true;
 }
 
 template <typename T>

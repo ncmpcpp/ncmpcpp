@@ -156,8 +156,9 @@ void SortPlaylistDialog::sort() const
 {
 	auto &pl = myPlaylist->main();
 	auto begin = pl.begin(), end = pl.end();
-	std::tie(begin, end) = getSelectedRange(begin, end);
-	
+	if (!findSelectedRange(begin, end))
+		return;
+
 	size_t start_pos = begin - pl.begin();
 	std::vector<MPD::Song> playlist;
 	playlist.reserve(end - begin);
@@ -203,7 +204,7 @@ void SortPlaylistDialog::sort() const
 	Mpd.StartCommandsList();
 	quick_sort(playlist.begin(), playlist.end());
 	Mpd.CommitCommandsList();
-	Statusbar::print("Playlist sorted");
+	Statusbar::print("Range sorted");
 	switchToPreviousScreen();
 }
 

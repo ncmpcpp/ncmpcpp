@@ -197,18 +197,6 @@ MPD::Song Playlist::nowPlayingSong()
 	return s;
 }
 
-void Playlist::Reverse()
-{
-	Statusbar::print("Reversing playlist order...");
-	auto begin = w.begin(), end = w.end();
-	std::tie(begin, end) = getSelectedRange(begin, end);
-	Mpd.StartCommandsList();
-	for (--end; begin < end; ++begin, --end)
-		Mpd.Swap(begin->value().getPosition(), end->value().getPosition());
-	Mpd.CommitCommandsList();
-	Statusbar::print("Playlist reversed");
-}
-
 void Playlist::EnableHighlighting()
 {
 	w.setHighlighting(true);

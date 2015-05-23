@@ -415,6 +415,9 @@
 #def_key "l"
 #  show_lyrics
 #
+#def_key "ctrl_v"
+#  select_range
+#
 #def_key "v"
 #  reverse_selection
 #

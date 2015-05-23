@@ -89,6 +89,15 @@ void seek();
 void findItem(const SearchDirection direction);
 void listsChangeFinisher();
 
+template <typename Iterator>
+bool findSelectedRangeAndPrintInfoIfNot(Iterator &first, Iterator &last)
+{
+	bool success = findSelectedRange(first, last);
+	if (!success)
+		Statusbar::print("No range selected");
+	return success;
+}
+
 }
 
 namespace Actions {
@@ -1173,11 +1182,19 @@ void ToggleRepeat::run()
 	Mpd.SetRepeat(!Status::State::repeat());
 }
 
+bool Shuffle::canBeRun()
+{
+	if (myScreen != myPlaylist)
+		return false;
+	m_begin = myPlaylist->main().begin();
+	m_end = myPlaylist->main().end();
+	return findSelectedRangeAndPrintInfoIfNot(m_begin, m_end);
+}
+
 void Shuffle::run()
 {
-	auto begin = myPlaylist->main().begin(), end = myPlaylist->main().end();
-	auto range = getSelectedRange(begin, end);
-	Mpd.ShuffleRange(range.first-begin, range.second-begin);
+	auto begin = myPlaylist->main().begin();
+	Mpd.ShuffleRange(m_begin-begin, m_end-begin);
 	Statusbar::print("Range shuffled");
 }
 
@@ -1654,6 +1671,23 @@ void SelectItem::run()
 	current->setSelected(!current->isSelected());
 }
 
+bool SelectRange::canBeRun()
+{
+	m_list = dynamic_cast<NC::List *>(myScreen->activeWindow());
+	if (m_list == nullptr)
+		return false;
+	m_begin = m_list->beginP();
+	m_end = m_list->endP();
+	return findRange(m_begin, m_end);
+}
+
+void SelectRange::run()
+{
+	for (; m_begin != m_end; ++m_begin)
+		m_begin->setSelected(true);
+	Statusbar::print("Range selected");
+}
+
 bool ReverseSelection::canBeRun()
 {
 	m_list = dynamic_cast<NC::List *>(myScreen->activeWindow());
@@ -1793,7 +1827,10 @@ void ClearPlaylist::run()
 
 bool SortPlaylist::canBeRun()
 {
-	return myScreen == myPlaylist;
+	if (myScreen != myPlaylist)
+		return false;
+	auto first = myPlaylist->main().begin(), last = myPlaylist->main().end();
+	return findSelectedRangeAndPrintInfoIfNot(first, last);
 }
 
 void SortPlaylist::run()
@@ -1803,12 +1840,21 @@ void SortPlaylist::run()
 
 bool ReversePlaylist::canBeRun()
 {
-	return myScreen == myPlaylist;
+	if (myScreen != myPlaylist)
+		return false;
+	m_begin = myPlaylist->main().begin();
+	m_end = myPlaylist->main().end();
+	return findSelectedRangeAndPrintInfoIfNot(m_begin, m_end);
 }
 
 void ReversePlaylist::run()
 {
-	myPlaylist->Reverse();
+	Statusbar::print("Reversing range...");
+	Mpd.StartCommandsList();
+	for (--m_end; m_begin < m_end; ++m_begin, --m_end)
+		Mpd.Swap(m_begin->value().getPosition(), m_end->value().getPosition());
+	Mpd.CommitCommandsList();
+	Statusbar::print("Range reversed");
 }
 
 bool Find::canBeRun()
@@ -2512,6 +2558,7 @@ void populateActions()
 	insert_action(new Actions::JumpToParentDirectory());
 	insert_action(new Actions::PressEnter());
 	insert_action(new Actions::SelectItem());
+	insert_action(new Actions::SelectRange());
 	insert_action(new Actions::PreviousColumn());
 	insert_action(new Actions::NextColumn());
 	insert_action(new Actions::MasterScreen());

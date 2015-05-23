@@ -62,8 +62,7 @@ struct Playlist: Screen<SongMenu>, HasSongs, Searchable, Tabbable
 	// private members
 	MPD::Song nowPlayingSong();
 	
-	void Reverse();
-	
+
 	void EnableHighlighting();
 	
 	void SetSelectedItemsPriority(int prio);

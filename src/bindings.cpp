@@ -630,6 +630,8 @@ void BindingsConfiguration::generateDefaults()
 		bind(k, Actions::Type::JumpToPositionInSong);
 	if (notBound(k = stringToKey("l")))
 		bind(k, Actions::Type::ShowLyrics);
+	if (notBound(k = stringToKey("ctrl_v")))
+		bind(k, Actions::Type::SelectRange);
 	if (notBound(k = stringToKey("v")))
 		bind(k, Actions::Type::ReverseSelection);
 	if (notBound(k = stringToKey("V")))

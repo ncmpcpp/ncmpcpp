@@ -178,6 +178,7 @@ void write_bindings(NC::Scrollpad &w)
 	w << '\n';
 	key(w, Type::ToggleAddMode, "Toggle add mode (add or remove/always add)");
 	key(w, Type::ToggleMouse, "Toggle mouse support");
+	key(w, Type::SelectRange, "Select range");
 	key(w, Type::ReverseSelection, "Reverse selection");
 	key(w, Type::RemoveSelection, "Remove selection");
 	key(w, Type::SelectItem, "Select current item");
@@ -191,7 +192,6 @@ void write_bindings(NC::Scrollpad &w)
 	key(w, Type::ToggleConsume, "Toggle consume mode");
 	key(w, Type::ToggleReplayGainMode, "Toggle replay gain mode");
 	key(w, Type::ToggleBitrateVisibility, "Toggle bitrate visibility");
-	key(w, Type::Shuffle, "Shuffle selected range in playlist");
 	key(w, Type::ToggleCrossfade, "Toggle crossfade mode");
 	key(w, Type::SetCrossfade, "Set crossfade");
 	key(w, Type::SetVolume, "Set volume");
@@ -239,8 +239,9 @@ void write_bindings(NC::Scrollpad &w)
 	key(w, Type::EditSong, "Edit song");
 #	endif // HAVE_TAGLIB_H
 	key(w, Type::SavePlaylist, "Save playlist");
-	key(w, Type::SortPlaylist, "Sort playlist");
-	key(w, Type::ReversePlaylist, "Reverse playlist");
+	key(w, Type::Shuffle, "Shuffle range");
+	key(w, Type::SortPlaylist, "Sort range");
+	key(w, Type::ReversePlaylist, "Reverse range");
 	key(w, Type::JumpToPlayingSong, "Jump to current song");
 	key(w, Type::TogglePlayingSongCentering, "Toggle playing song centering");
 
