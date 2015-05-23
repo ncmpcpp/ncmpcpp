@@ -2314,7 +2314,7 @@ void ShowArtistInfo::run()
 	
 	if (!artist.empty())
 	{
-		myLastfm->queueJob(LastFm::ArtistInfo(artist, Config.lastfm_preferred_language));
+		myLastfm->queueJob(new LastFm::ArtistInfo(artist, Config.lastfm_preferred_language));
 		myLastfm->switchTo();
 	}
 #	endif // HAVE_CURL_CURL_H
