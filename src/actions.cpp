@@ -1652,8 +1652,6 @@ void SelectItem::run()
 {
 	auto current = m_list->currentP();
 	current->setSelected(!current->isSelected());
-	myScreen->scroll(NC::Scroll::Down);
-	listsChangeFinisher();
 }
 
 bool ReverseSelection::canBeRun()
