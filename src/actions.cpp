@@ -1755,6 +1755,31 @@ void SelectAlbum::run()
 	Statusbar::print("Album around cursor position selected");
 }
 
+bool SelectFoundItems::canBeRun()
+{
+	m_list = dynamic_cast<NC::List *>(myScreen->activeWindow());
+	if (m_list == nullptr || m_list->empty())
+		return false;
+	m_searchable = dynamic_cast<Searchable *>(myScreen);
+	return m_searchable != nullptr && m_searchable->allowsSearching();
+}
+
+void SelectFoundItems::run()
+{
+	auto current_pos = m_list->choice();
+	myScreen->activeWindow()->scroll(NC::Scroll::Home);
+	bool found = m_searchable->find(SearchDirection::Forward, false, false);
+	if (found)
+	{
+		Statusbar::print("Searching for items...");
+		m_list->currentP()->setSelected(true);
+		while (m_searchable->find(SearchDirection::Forward, false, true))
+			m_list->currentP()->setSelected(true);
+		Statusbar::print("Found items selected");
+	}
+	m_list->highlight(current_pos);
+}
+
 bool AddSelectedItems::canBeRun()
 {
 	return myScreen != mySelectedItemsAdder;
@@ -2617,6 +2642,7 @@ void populateActions()
 	insert_action(new Actions::ReverseSelection());
 	insert_action(new Actions::RemoveSelection());
 	insert_action(new Actions::SelectAlbum());
+	insert_action(new Actions::SelectFoundItems());
 	insert_action(new Actions::AddSelectedItems());
 	insert_action(new Actions::CropMainPlaylist());
 	insert_action(new Actions::CropPlaylist());

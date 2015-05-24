@@ -49,9 +49,9 @@ enum class Type
 	SetCrossfade, SetVolume, EditSong, EditLibraryTag, EditLibraryAlbum, EditDirectoryName,
 	EditPlaylistName, EditLyrics, JumpToBrowser, JumpToMediaLibrary,
 	JumpToPlaylistEditor, ToggleScreenLock, JumpToTagEditor, JumpToPositionInSong,
-	SelectItem, SelectRange, ReverseSelection, RemoveSelection, SelectAlbum, AddSelectedItems,
-	CropMainPlaylist, CropPlaylist, ClearMainPlaylist, ClearPlaylist, SortPlaylist,
-	ReversePlaylist, Find, FindItemForward, FindItemBackward,
+	SelectItem, SelectRange, ReverseSelection, RemoveSelection, SelectAlbum, SelectFoundItems,
+	AddSelectedItems, CropMainPlaylist, CropPlaylist, ClearMainPlaylist, ClearPlaylist,
+	SortPlaylist, ReversePlaylist, Find, FindItemForward, FindItemBackward,
 	NextFoundItem, PreviousFoundItem, ToggleFindMode, ToggleReplayGainMode,
 	ToggleAddMode, ToggleMouse, ToggleBitrateVisibility,
 	AddRandomItems, ToggleBrowserSortMode, ToggleLibraryTagType,
@@ -825,6 +825,18 @@ private:
 
 	NC::List *m_list;
 	SongList *m_songs;
+};
+
+struct SelectFoundItems: BaseAction
+{
+	SelectFoundItems(): BaseAction(Type::SelectFoundItems, "select_found_items") { }
+
+private:
+	virtual bool canBeRun() OVERRIDE;
+	virtual void run() OVERRIDE;
+
+	NC::List *m_list;
+	Searchable *m_searchable;
 };
 
 struct AddSelectedItems: BaseAction

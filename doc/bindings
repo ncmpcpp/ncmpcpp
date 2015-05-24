@@ -364,6 +364,9 @@
 #def_key "ctrl_r"
 #  reverse_playlist
 #
+#def_key "ctrl__"
+#  select_found_items
+#
 #def_key "/"
 #  find
 #

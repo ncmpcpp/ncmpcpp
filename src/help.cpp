@@ -182,6 +182,7 @@ void write_bindings(NC::Scrollpad &w)
 	key(w, Type::ReverseSelection, "Reverse selection");
 	key(w, Type::RemoveSelection, "Remove selection");
 	key(w, Type::SelectItem, "Select current item");
+	key(w, Type::SelectFoundItems, "Select found items");
 	key(w, Type::SelectAlbum, "Select songs of album around the cursor");
 	key(w, Type::AddSelectedItems, "Add selected items to playlist");
 	key(w, Type::AddRandomItems, "Add random items to playlist");
