@@ -30,13 +30,20 @@ BindingsConfiguration Bindings;
 
 namespace {
 
+void warning(const char *msg)
+{
+	std::cerr << "WARNING: " << msg << "\n";
+}
+
 NC::Key::Type stringToKey(const std::string &s);
 
 NC::Key::Type stringToSpecialKey(const std::string &s)
 {
 	NC::Key::Type result = NC::Key::None;
-	if (!s.compare(0, 5, "ctrl_") && s.length() == 6)
+	if (!s.compare(0, 4, "ctrl") && s.length() == 6 && (s[4] == '_' || s[4] == '-'))
 	{
+		if (s[4] == '_')
+			warning("prefix 'ctrl_' is deprecated and will be removed in 0.8, use 'ctrl-' instead.");
 		if (s[5] >= 'a' && s[5] <= 'z')
 			result = NC::Key::Ctrl_A + (s[5] - 'a');
 		else if (s[5] == '[')
@@ -50,12 +57,24 @@ NC::Key::Type stringToSpecialKey(const std::string &s)
 		else if (s[5] == '_')
 			result = NC::Key::Ctrl_Underscore;
 	}
-	else if (!s.compare(0, 4, "alt_"))
+	else if (!s.compare(0, 3, "alt") && s.length() > 3 && (s[3] == '_' || s[3] == '-'))
+	{
+		if (s[3] == '_')
+			warning("prefix 'alt_' is deprecated and will be removed in 0.8, use 'alt-' instead.");
 		result = NC::Key::Alt | stringToKey(s.substr(4));
-	else if (!s.compare(0, 5, "ctrl_"))
+	}
+	else if (!s.compare(0, 4, "ctrl") && s.length() > 4 && (s[4] == '_' || s[4] == '-'))
+	{
+		if (s[4] == '_')
+			warning("prefix 'ctrl_' is deprecated and will be removed in 0.8, use 'ctrl-' instead.");
 		result = NC::Key::Ctrl | stringToKey(s.substr(5));
-	else if (!s.compare(0, 6, "shift_"))
+	}
+	else if (!s.compare(0, 5, "shift") && s.length() > 5 && (s[5] == '_' || s[5] == '-'))
+	{
+		if (s[5] == '_')
+			warning("prefix 'shift_' is deprecated and will be removed in 0.8, use 'shift-' instead.");
 		result = NC::Key::Shift | stringToKey(s.substr(6));
+	}
 	else if (!s.compare("escape"))
 		result = NC::Key::Escape;
 	else if (!s.compare("mouse"))
@@ -96,7 +115,7 @@ NC::Key::Type stringToSpecialKey(const std::string &s)
 		result = NC::Key::Backspace;
 	else if (!s.compare("backspace_2"))
 	{
-		std::cerr << "WARNING: value 'backspace_2' is deprecated and will be removed in 0.8, use 'backspace' instead.\n";
+		warning("'backspace_2' is deprecated and will be removed in 0.8, use 'backspace' instead.");
 		result = NC::Key::Backspace;
 	}
 	return result;
@@ -506,7 +525,7 @@ void BindingsConfiguration::generateDefaults()
 		bind(k, Actions::Type::ExecuteCommand);
 	if (notBound(k = stringToKey("tab")))
 		bind(k, Actions::Type::NextScreen);
-	if (notBound(k = stringToKey("shift_tab")))
+	if (notBound(k = stringToKey("shift-tab")))
 		bind(k, Actions::Type::PreviousScreen);
 	if (notBound(k = stringToKey("f1")))
 		bind(k, Actions::Type::ShowHelp);
@@ -547,7 +566,7 @@ void BindingsConfiguration::generateDefaults()
 		bind(k, Actions::Type::Next);
 	if (notBound(k = stringToKey("<")))
 		bind(k, Actions::Type::Previous);
-	if (notBound(k = stringToKey("ctrl_h")))
+	if (notBound(k = stringToKey("ctrl-h")))
 	{
 		bind(k, Actions::Type::JumpToParentDirectory);
 		bind(k, Actions::Type::ReplaySong);
@@ -589,15 +608,15 @@ void BindingsConfiguration::generateDefaults()
 		bind(k, Actions::Type::SetCrossfade);
 	if (notBound(k = stringToKey("u")))
 		bind(k, Actions::Type::UpdateDatabase);
-	if (notBound(k = stringToKey("ctrl_s")))
+	if (notBound(k = stringToKey("ctrl-s")))
 	{
 		bind(k, Actions::Type::SortPlaylist);
 		bind(k, Actions::Type::ToggleBrowserSortMode);
 		bind(k, Actions::Type::ToggleMediaLibrarySortMode);
 	}
-	if (notBound(k = stringToKey("ctrl_r")))
+	if (notBound(k = stringToKey("ctrl-r")))
 		bind(k, Actions::Type::ReversePlaylist);
-	if (notBound(k = stringToKey("ctrl__")))
+	if (notBound(k = stringToKey("ctrl-_")))
 		bind(k, Actions::Type::SelectFoundItems);
 	if (notBound(k = stringToKey("/")))
 	{
@@ -632,7 +651,7 @@ void BindingsConfiguration::generateDefaults()
 		bind(k, Actions::Type::JumpToPositionInSong);
 	if (notBound(k = stringToKey("l")))
 		bind(k, Actions::Type::ShowLyrics);
-	if (notBound(k = stringToKey("ctrl_v")))
+	if (notBound(k = stringToKey("ctrl-v")))
 		bind(k, Actions::Type::SelectRange);
 	if (notBound(k = stringToKey("v")))
 		bind(k, Actions::Type::ReverseSelection);
@@ -692,7 +711,7 @@ void BindingsConfiguration::generateDefaults()
 		bind(k, Actions::Type::ToggleLyricsFetcher);
 	if (notBound(k = stringToKey("F")))
 		bind(k, Actions::Type::ToggleFetchingLyricsInBackground);
-	if (notBound(k = stringToKey("ctrl_l")))
+	if (notBound(k = stringToKey("ctrl-l")))
 		bind(k, Actions::Type::ToggleScreenLock);
 	if (notBound(k = stringToKey("`")))
 	{
@@ -700,7 +719,7 @@ void BindingsConfiguration::generateDefaults()
 		bind(k, Actions::Type::RefetchLyrics);
 		bind(k, Actions::Type::AddRandomItems);
 	}
-	if (notBound(k = stringToKey("ctrl_p")))
+	if (notBound(k = stringToKey("ctrl-p")))
 		bind(k, Actions::Type::SetSelectedItemsPriority);
 	if (notBound(k = stringToKey("q")))
 		bind(k, Actions::Type::Quit);
