@@ -103,12 +103,20 @@ bool addSongToPlaylist(const MPD::Song &s, bool play, int position)
 {
 	bool result = false;
 	if (Config.space_add_mode == SpaceAddMode::AddRemove
-	&&  !play
 	&&  myPlaylist->checkForSong(s)
 	   )
 	{
 		result = true;
-		removeSongFromPlaylist(myPlaylist->main(), s);
+		if (play)
+		{
+			const auto begin = myPlaylist->main().beginV(), end = myPlaylist->main().endV();
+			auto it = find_map_first(begin, end, s, [](const MPD::Song &found) {
+				Mpd.PlayID(found.getID());
+			});
+			assert(it != end);
+		}
+		else
+			removeSongFromPlaylist(myPlaylist->main(), s);
 		return result;
 	}
 	int id = Mpd.AddSong(s, position);

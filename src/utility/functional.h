@@ -61,6 +61,26 @@ struct pointer_extractor
 	ValueT *operator()(ValueT &v) const { return &v; }
 };
 
+/// Map over the first element in range satisfying the predicate.
+template <typename InputIterator, typename PredicateT, typename MapT>
+InputIterator find_map_first(InputIterator first, InputIterator last, PredicateT &&p, MapT &&f)
+{
+	auto it = std::find(first, last, std::forward<PredicateT>(p));
+	if (it != last)
+		f(*it);
+	return it;
+}
+
+/// Map over all elements in range satisfying the predicate.
+template <typename InputIterator, typename PredicateT, typename MapT>
+void find_map_all(InputIterator first, InputIterator last, PredicateT &&p, MapT &&f)
+{
+	InputIterator it = first;
+	do
+		it = find_map_first(it, last, p, f);
+	while (it != last);
+}
+
 // identity function object
 struct id_
 {
