@@ -23,11 +23,21 @@ ncmpcpp-0.7 (????-??-??)
 * Selecting items no longer depends on space mode and is bound by default to Insert key.
 * Support for Alt, Ctrl and Shift modifiers as well as Escape key was added.
 * Action that updates the environment can now be used in bindings configuration file.
-* Searching in text fields now respects regular expression configuration.
 * Monolithic 'press_space' action was split into 'add_item_to_playlist', 'toggle_lyrics_update_on_song_change' and 'toggle_visualization_type'.
 * Sorting actions were rebound to Ctrl-S.
 * Support for range selection was added (bound to Ctrl-V by default). In addition, sorting, reversing and shuffling items in playlist now works on ranges.
 * Support for selecting found items was added (bound to Ctrl-_ by default).
+
+ncmpcpp-0.6.5 (????-??-??)
+
+* Description of mouse wheel usage on volume is now correct.
+* Configure script now fails if either readline or pthread specific headers are not present.
+* Searching in text fields now respects regular expression configuration.
+* When numbering tracks in tag editor all the other track tags are discarded.
+* Xiph tag DESCRIPTION is now rewritten as COMMENT when updating tags.
+* Possible access of already freed memory when downloading artist info is fixed.
+* Name of an item is now displayed correctly if present.
+* Assertion failure when resizing terminal window with no active MPD connection is fixed.
 
 ncmpcpp-0.6.4 (2015-05-02)
 

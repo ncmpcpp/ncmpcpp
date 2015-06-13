@@ -76,7 +76,9 @@ std::string Song::getName(unsigned idx) const
 	assert(m_song);
 	mpd_song *s = m_song.get();
 	const char *res = mpd_song_get_tag(s, MPD_TAG_NAME, idx);
-	if (!res && idx > 0)
+	if (res)
+		return res;
+	else if (idx > 0)
 		return "";
 	const char *uri = mpd_song_get_uri(s);
 	const char *name = strrchr(uri, '/');

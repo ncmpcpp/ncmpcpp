@@ -576,7 +576,7 @@ void Status::Changes::elapsedTime(bool update_elapsed)
 		m_kbps = st.kbps();
 	}
 
-	if (m_player_state == MPD::psStop)
+	if (m_player_state == MPD::psUnknown || m_player_state == MPD::psStop)
 	{
 		if (Statusbar::isUnlocked() && Config.statusbar_visibility)
 			*wFooter << NC::XY(0, 1) << NC::TermManip::ClearToEOL;
