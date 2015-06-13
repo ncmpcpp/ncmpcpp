@@ -6,6 +6,7 @@ ncmpcpp-0.6.5 (????-??-??)
 * When numbering tracks in tag editor all the other track tags are discarded.
 * Xiph tag DESCRIPTION is now rewritten as COMMENT when updating tags.
 * Possible access of already freed memory when downloading artist info is fixed.
+* Name of an item is now displayed correctly if present.
 
 ncmpcpp-0.6.4 (2015-05-02)
 
