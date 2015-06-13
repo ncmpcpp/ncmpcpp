@@ -18,20 +18,8 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
-#include <string> // include before boost to compile on MACOSX
-#include <boost/locale/encoding_utf.hpp>
 #include <cassert>
 #include "utility/wide_string.h"
-
-std::string ToString(const std::wstring &ws)
-{
-	return boost::locale::conv::utf_to_utf<char>(ws);
-}
-
-std::wstring ToWString(const std::string &s)
-{
-	return boost::locale::conv::utf_to_utf<wchar_t>(s);
-}
 
 size_t wideLength(const std::wstring &ws)
 {
