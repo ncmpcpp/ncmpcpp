@@ -68,4 +68,18 @@ std::string localeToUtf8(const std::string &s)
 	     : boost::locale::conv::to_utf<char>(s, Config.system_encoding);
 }
 
+std::string utf8ToLocale(std::string &&s)
+{
+	if (!Config.system_encoding.empty())
+		s = boost::locale::conv::from_utf<char>(s, Config.system_encoding);
+	return std::move(s);
+}
+
+std::string localeToUtf8(std::string &&s)
+{
+	if (!Config.system_encoding.empty())
+		s = boost::locale::conv::to_utf<char>(s, Config.system_encoding);
+	return std::move(s);
+}
+
 }

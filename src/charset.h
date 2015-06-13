@@ -32,7 +32,9 @@ std::string toUtf8From(const std::string &s, const char *charset);
 std::string fromUtf8To(const std::string &s, const char *charset);
 
 std::string utf8ToLocale(const std::string &s);
+std::string utf8ToLocale(std::string &&s);
 std::string localeToUtf8(const std::string &s);
+std::string localeToUtf8(std::string &&s);
 
 }
 
