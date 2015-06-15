@@ -78,17 +78,6 @@ unsigned m_playlist_length;
 unsigned m_total_time;
 int m_volume;
 
-MPD::Song getCurrentSong()
-{
-	MPD::Song result = myPlaylist->nowPlayingSong();
-	// It may happen that playlist wasn't yet updated
-	// and current song is not there yet. In such case
-	// try fetching it from the server.
-	if (result.empty() && m_player_state != MPD::psUnknown)
-		result = Mpd.GetCurrentSong();
-	return result;
-}
-
 void drawTitle(const MPD::Song &np)
 {
 	assert(!np.empty());
@@ -482,9 +471,13 @@ void Status::Changes::playerState()
 	switch (m_player_state)
 	{
 		case MPD::psPlay:
-			drawTitle(getCurrentSong());
+		{
+			auto np = myPlaylist->nowPlayingSong();
+			if (!np.empty())
+				drawTitle(np);
 			myPlaylist->reloadRemaining();
 			break;
+		}
 		case MPD::psStop:
 			windowTitle("ncmpcpp " VERSION);
 			if (Progressbar::isUnlocked())
@@ -543,25 +536,27 @@ void Status::Changes::songID(int song_id)
 		});
 		// if it's not there (playlist may be outdated), fetch it
 		const auto &s = it != pl.endV() ? *it : Mpd.GetCurrentSong();
-
-		GNUC_UNUSED int res;
-		if (!Config.execute_on_song_change.empty())
-			res = system(Config.execute_on_song_change.c_str());
-		
-#		ifdef HAVE_CURL_CURL_H
-		if (Config.fetch_lyrics_in_background)
-			Lyrics::DownloadInBackground(s);
-#		endif // HAVE_CURL_CURL_H
-		
-		drawTitle(s);
-		
-		if (Config.autocenter_mode)
-			pl.highlight(Status::State::currentSongPosition());
-		
-		if (Config.now_playing_lyrics && isVisible(myLyrics) && myLyrics->previousScreen() == myPlaylist)
+		if (!s.empty())
 		{
-			if (myLyrics->SetSong(s))
-				myLyrics->Reload = 1;
+			GNUC_UNUSED int res;
+			if (!Config.execute_on_song_change.empty())
+				res = system(Config.execute_on_song_change.c_str());
+
+#			ifdef HAVE_CURL_CURL_H
+			if (Config.fetch_lyrics_in_background)
+				Lyrics::DownloadInBackground(s);
+#			endif // HAVE_CURL_CURL_H
+
+			drawTitle(s);
+
+			if (Config.autocenter_mode)
+				pl.highlight(Status::State::currentSongPosition());
+
+			if (Config.now_playing_lyrics && isVisible(myLyrics) && myLyrics->previousScreen() == myPlaylist)
+			{
+				if (myLyrics->SetSong(s))
+					myLyrics->Reload = 1;
+			}
 		}
 	}
 	elapsedTime(false);
@@ -569,6 +564,15 @@ void Status::Changes::songID(int song_id)
 
 void Status::Changes::elapsedTime(bool update_elapsed)
 {
+	auto np = myPlaylist->nowPlayingSong();
+	if (m_player_state == MPD::psStop || np.empty())
+	{
+		// MPD is not playing, clear statusbar and exit.
+		if (Statusbar::isUnlocked() && Config.statusbar_visibility)
+			*wFooter << NC::XY(0, 1) << NC::TermManip::ClearToEOL;
+		return;
+	}
+
 	if (update_elapsed)
 	{
 		auto st = Mpd.getStatus();
@@ -576,14 +580,6 @@ void Status::Changes::elapsedTime(bool update_elapsed)
 		m_kbps = st.kbps();
 	}
 
-	if (m_player_state == MPD::psUnknown || m_player_state == MPD::psStop)
-	{
-		if (Statusbar::isUnlocked() && Config.statusbar_visibility)
-			*wFooter << NC::XY(0, 1) << NC::TermManip::ClearToEOL;
-		return;
-	}
-
-	MPD::Song np = getCurrentSong();
 	std::string ps = playerStateToString(m_player_state);
 	std::string tracklength;
 

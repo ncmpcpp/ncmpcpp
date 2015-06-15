@@ -369,7 +369,11 @@ Song Connection::GetCurrentSong()
 	mpd_song *s = mpd_recv_song(m_connection.get());
 	mpd_response_finish(m_connection.get());
 	checkErrors();
-	return Song(s);
+	// currentsong doesn't return error if there is no playing song.
+	if (s == nullptr)
+		return Song();
+	else
+		return Song(s);
 }
 
 Song Connection::GetSong(const std::string &path)
