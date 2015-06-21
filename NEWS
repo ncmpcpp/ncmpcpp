@@ -38,6 +38,7 @@ ncmpcpp-0.6.5 (????-??-??)
 * Possible access of already freed memory when downloading artist info is fixed.
 * Name of an item is now displayed correctly if present.
 * Assertion failure when resizing terminal window with no active MPD connection is fixed.
+* Lyrics fetchers were updated to work with sites that changed their HTML structure.
 
 ncmpcpp-0.6.4 (2015-05-02)
 
