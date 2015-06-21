@@ -98,7 +98,7 @@ struct Sing365Fetcher : public GoogleLyricsFetcher
 	virtual const char *name() { return "sing365.com"; }
 	
 protected:
-	virtual const char *regex() { return "<script src=\"//srv.tonefuse.com/showads/showad.js\"></script>(.*?)<script>\n/\\* Sing365 - Below Lyrics"; }
+	virtual const char *regex() { return "<!-Lyrics Begin->(.*?)<!-Lyrics End->"; }
 
 	virtual void postProcess(std::string &data);
 };
@@ -108,7 +108,7 @@ struct JustSomeLyricsFetcher : public GoogleLyricsFetcher
 	virtual const char *name() { return "justsomelyrics.com"; }
 	
 protected:
-	virtual const char *regex() { return "<div class=\"core-left\">(.*?)</div>"; }
+	virtual const char *regex() { return "<div class=\"content.*?</div>(.*?)</div>"; }
 };
 
 struct AzLyricsFetcher : public GoogleLyricsFetcher
@@ -116,7 +116,7 @@ struct AzLyricsFetcher : public GoogleLyricsFetcher
 	virtual const char *name() { return "azlyrics.com"; }
 	
 protected:
-	virtual const char *regex() { return "<!-- start of lyrics -->(.*?)<!-- end of lyrics -->"; }
+	virtual const char *regex() { return "<div class=\"lyricsh\">.*?</h2>.*<div>(.*?)</div>"; }
 };
 
 struct InternetLyricsFetcher : public GoogleLyricsFetcher
