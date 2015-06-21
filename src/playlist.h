@@ -53,7 +53,7 @@ struct Playlist: Screen<NC::Menu<MPD::Song>>, Filterable, HasSongs, Searchable, 
 	virtual void applyFilter(const std::string &filter) OVERRIDE;
 	
 	// Searchable implementation
-	virtual bool allowsSearching();
+	virtual bool allowsSearching() OVERRIDE;
 	virtual bool search(const std::string &constraint) OVERRIDE;
 	virtual void nextFound(bool wrap) OVERRIDE;
 	virtual void prevFound(bool wrap) OVERRIDE;
