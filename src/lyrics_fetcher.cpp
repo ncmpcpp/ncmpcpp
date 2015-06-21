@@ -102,7 +102,7 @@ std::vector<std::string> LyricsFetcher::getContent(const char *regex_, const std
 	return result;
 }
 
-void LyricsFetcher::postProcess(std::string &data)
+void LyricsFetcher::postProcess(std::string &data) const
 {
 	stripHtmlTags(data);
 	boost::trim(data);
@@ -163,7 +163,7 @@ LyricsFetcher::Result LyricwikiFetcher::fetch(const std::string &artist, const s
 	return result;
 }
 
-bool LyricwikiFetcher::notLyrics(const std::string &data)
+bool LyricwikiFetcher::notLyrics(const std::string &data) const
 {
 	return data.find("action=edit") != std::string::npos;
 }
@@ -215,7 +215,7 @@ bool GoogleLyricsFetcher::isURLOk(const std::string &url)
 
 /**********************************************************************/
 
-void Sing365Fetcher::postProcess(std::string &data)
+void Sing365Fetcher::postProcess(std::string &data) const
 {
 	// throw away ad
 	data = boost::regex_replace(data, boost::regex("<div.*</div>"), "");
@@ -224,7 +224,7 @@ void Sing365Fetcher::postProcess(std::string &data)
 
 /**********************************************************************/
 
-void MetrolyricsFetcher::postProcess(std::string &data)
+void MetrolyricsFetcher::postProcess(std::string &data) const
 {
 	// some of lyrics have both \n chars and <br />, html tags
 	// are always present whereas \n chars are not, so we need to
