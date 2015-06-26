@@ -74,7 +74,7 @@
 ## Multiply received samples by given value. Very
 ## useful for proper visualization of quiet music.
 ##
-#visualizer_sample_multipler = 1
+#visualizer_sample_multiplier = 1
 #
 ##
 ## Note: Below parameter defines how often ncmpcpp
