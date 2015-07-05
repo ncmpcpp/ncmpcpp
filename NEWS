@@ -1,4 +1,4 @@
-ncmpcpp-0.6.5 (????-??-??)
+ncmpcpp-0.6.5 (2015-07-05)
 
 * Description of mouse wheel usage on volume is now correct.
 * Configure script now fails if either readline or pthread specific headers are not present.
