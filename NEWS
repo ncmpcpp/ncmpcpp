@@ -28,7 +28,7 @@ ncmpcpp-0.7 (????-??-??)
 * Support for range selection was added (bound to Ctrl-V by default). In addition, sorting, reversing and shuffling items in playlist now works on ranges.
 * Support for selecting found items was added (bound to Ctrl-_ by default).
 
-ncmpcpp-0.6.5 (????-??-??)
+ncmpcpp-0.6.5 (2015-07-05)
 
 * Description of mouse wheel usage on volume is now correct.
 * Configure script now fails if either readline or pthread specific headers are not present.
