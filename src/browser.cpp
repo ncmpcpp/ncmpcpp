@@ -323,7 +323,10 @@ bool Browser::addItemToPlaylist()
 				result = addSongsToPlaylist(songs.begin(), songs.end(), false, -1);
 			}
 			else
+			{
 				Mpd.Add(item.directory().path());
+				result = true;
+			}
 			Statusbar::printf("Directory \"%1%\" added%2%",
 				item.directory().path(), withErrors(result)
 			);
