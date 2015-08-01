@@ -25,6 +25,7 @@
 #include <boost/lexical_cast.hpp>
 #include <iostream>
 #include <memory>
+#include <unordered_set>
 
 #include "song.h"
 #include "utility/type_conversions.h"
@@ -205,12 +206,17 @@ std::string MPD::Song::getTags(GetFunction f) const
 {
 	assert(m_song);
 	unsigned idx = 0;
+	std::unordered_set<std::string> tags;
 	std::string result;
 	for (std::string tag; !(tag = (this->*f)(idx)).empty(); ++idx)
 	{
-		if (!result.empty())
-			result += TagsSeparator;
-		result += tag;
+		auto elem = tags.insert(std::move(tag));
+		if (elem.second)
+		{
+			if (!result.empty())
+				result += TagsSeparator;
+			result += *elem.first;
+		}
 	}
 	return result;
 }
