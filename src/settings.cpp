@@ -253,6 +253,7 @@ bool Configuration::read(const std::vector<std::string> &config_paths, bool igno
 	}));
 	p.add("visualizer_sync_interval", assign_default<unsigned>(
 		visualizer_sync_interval, 30, [](unsigned v) {
+			lowerBoundCheck(v, 10u);
 			return boost::posix_time::seconds(v);
 	}));
 	p.add("visualizer_type", assign_default(
