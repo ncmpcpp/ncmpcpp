@@ -23,10 +23,11 @@
 
 #include "runnable_item.h"
 #include "interfaces.h"
+#include "regex_filter.h"
 #include "screen.h"
 #include "song.h"
 
-struct SelectedItemsAdder: Screen<NC::Menu<RunnableItem<std::string, void()>> *>, Tabbable
+struct SelectedItemsAdder: Screen<NC::Menu<RunnableItem<std::string, void()>> *>, Searchable, Tabbable
 {
 	typedef SelectedItemsAdder Self;
 	typedef typename std::remove_pointer<WindowType>::type Component;
@@ -49,6 +50,12 @@ struct SelectedItemsAdder: Screen<NC::Menu<RunnableItem<std::string, void()>> *>
 	virtual bool isLockable() OVERRIDE { return false; }
 	virtual bool isMergable() OVERRIDE { return false; }
 	
+	// Searchable implementation
+	virtual bool allowsSearching() OVERRIDE;
+	virtual void setSearchConstraint(const std::string &constraint) OVERRIDE;
+	virtual void clearConstraint() OVERRIDE;
+	virtual bool find(SearchDirection direction, bool wrap, bool skip_current) OVERRIDE;
+
 private:
 	void populatePlaylistSelector(BaseScreen *screen);
 	
@@ -75,6 +82,8 @@ private:
 	Component m_position_selector;
 	
 	std::vector<MPD::Song> m_selected_items;
+
+	Regex::ItemFilter<Entry> m_search_predicate;
 };
 
 extern SelectedItemsAdder *mySelectedItemsAdder;

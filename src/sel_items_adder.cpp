@@ -42,6 +42,14 @@ void DisplayComponent(SelectedItemsAdder::Component &menu)
 	menu << Charset::utf8ToLocale(menu.drawn()->value().item());
 }
 
+bool EntryMatcher(const Regex::Regex &rx, const NC::Menu<SelectedItemsAdder::Entry>::Item &item)
+{
+	if (!item.isSeparator())
+		return Regex::search(item.value().item(), rx);
+	else
+		return false;
+}
+
 }
 
 SelectedItemsAdder::SelectedItemsAdder()
@@ -179,6 +187,32 @@ void SelectedItemsAdder::mouseButtonPressed(MEVENT me)
 	else
 		Screen<WindowType>::mouseButtonPressed(me);
 }
+
+/***********************************************************************/
+
+bool SelectedItemsAdder::allowsSearching()
+{
+	return true;
+}
+
+void SelectedItemsAdder::setSearchConstraint(const std::string &constraint)
+{
+	m_search_predicate = Regex::ItemFilter<Entry>(
+		Regex::make(constraint, Config.regex_type), EntryMatcher
+	);
+}
+
+void SelectedItemsAdder::clearConstraint()
+{
+	m_search_predicate.clear();
+}
+
+bool SelectedItemsAdder::find(SearchDirection direction, bool wrap, bool skip_current)
+{
+	return search(*w, m_search_predicate, direction, wrap, skip_current);
+}
+
+/***********************************************************************/
 
 void SelectedItemsAdder::populatePlaylistSelector(BaseScreen *old_screen)
 {
