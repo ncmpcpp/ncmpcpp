@@ -106,7 +106,13 @@ public:
 			if (ret != 0)
 				return ret < 0;
 		}
-		return a.getTrack() < b.getTrack();
+		try {
+			int ret = boost::lexical_cast<int>(a.getTags(&MPD::Song::getTrackNumber))
+			        - boost::lexical_cast<int>(b.getTags(&MPD::Song::getTrackNumber));
+			return ret < 0;
+		} catch (boost::bad_lexical_cast &) {
+			return a.getTrackNumber() < b.getTrackNumber();
+		}
 	}
 };
 
