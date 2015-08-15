@@ -56,13 +56,18 @@ inline Regex make(StringT &&s, boost::regex_constants::syntax_option_type flags)
 template <typename StringT>
 inline bool search(StringT &&s, const Regex &rx)
 {
-	return
-#	ifdef BOOST_REGEX_ICU
-	boost::u32regex_search
-#	else
-	boost::regex_search
-#	endif // BOOST_REGEX_ICU
-	(std::forward<StringT>(s), rx);
+	try {
+		return
+#		ifdef BOOST_REGEX_ICU
+		boost::u32regex_search
+#		else
+		boost::regex_search
+#		endif // BOOST_REGEX_ICU
+		(std::forward<StringT>(s), rx);
+	} catch (std::out_of_range &) {
+		// Invalid UTF-8 sequence, ignore the string.
+		return false;
+	}
 }
 
 template <typename T>
