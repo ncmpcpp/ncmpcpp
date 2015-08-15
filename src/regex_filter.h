@@ -30,6 +30,7 @@
 #endif // BOOST_REGEX_ICU
 
 #include <cassert>
+#include <iostream>
 
 namespace Regex {
 
@@ -64,8 +65,9 @@ inline bool search(StringT &&s, const Regex &rx)
 		boost::regex_search
 #		endif // BOOST_REGEX_ICU
 		(std::forward<StringT>(s), rx);
-	} catch (std::out_of_range &) {
+	} catch (std::out_of_range &e) {
 		// Invalid UTF-8 sequence, ignore the string.
+		std::cerr << "Regex::search: error while processing \"" << s << "\": " << e.what() << "\n";
 		return false;
 	}
 }
