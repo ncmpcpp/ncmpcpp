@@ -29,6 +29,7 @@ ncmpcpp-0.7 (????-??-??)
 * Support for selecting found items was added (bound to Ctrl-_ by default).
 * Tracks in media library are now properly sorted for track numbers greater than 99.
 * Value of 'visualizer_sync_interval' is now restricted to be greater than 9.
+* Output of the visualizer now scales automatically as long as 'visualizer_sample_multiplier' is set to 1.
 
 ncmpcpp-0.6.5 (2015-07-05)
 

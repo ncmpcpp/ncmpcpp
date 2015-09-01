@@ -60,6 +60,7 @@ struct Visualizer: Screen<NC::Window>, Tabbable
 	void SetFD();
 	void ResetFD();
 	void FindOutputID();
+	void ResetAutoScaleMultiplier();
 
 private:
 	void DrawSoundWave(int16_t *, ssize_t, size_t, size_t);
@@ -78,6 +79,7 @@ private:
 
 	int m_fifo;
 	size_t m_samples;
+	double m_auto_scale_multiplier;
 #	ifdef HAVE_FFTW3_H
 	size_t m_fftw_results;
 	double *m_fftw_input;

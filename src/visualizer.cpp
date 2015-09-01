@@ -148,8 +148,23 @@ void Visualizer::update()
 	}
 
 	const ssize_t samples_read = data/sizeof(int16_t);
-	std::for_each(buf, buf+samples_read, [](int16_t &sample) {
-		int32_t tmp = sample * Config.visualizer_sample_multiplier;
+	if (Config.visualizer_sample_multiplier == 1.0)
+	{
+		m_auto_scale_multiplier += 1.0/fps;
+		std::for_each(buf, buf+samples_read, [this](int16_t &sample) {
+			double scale = std::numeric_limits<int16_t>::min();
+			scale /= sample;
+			scale = fabs(scale);
+			if (scale < m_auto_scale_multiplier)
+				m_auto_scale_multiplier = scale;
+		});
+	}
+	std::for_each(buf, buf+samples_read, [this](int16_t &sample) {
+		int32_t tmp = sample;
+		if (Config.visualizer_sample_multiplier != 1.0)
+			tmp *= Config.visualizer_sample_multiplier;
+		else if (m_auto_scale_multiplier <= 50.0) // limit the auto scale
+			tmp *= m_auto_scale_multiplier;
 		if (tmp < std::numeric_limits<int16_t>::min())
 			sample = std::numeric_limits<int16_t>::min();
 		else if (tmp > std::numeric_limits<int16_t>::max())
@@ -472,6 +487,11 @@ void Visualizer::FindOutputID()
 		if (m_output_id == -1)
 			Statusbar::printf("There is no output named \"%s\"", Config.visualizer_output_name);
 	}
+}
+
+void Visualizer::ResetAutoScaleMultiplier()
+{
+	m_auto_scale_multiplier = std::numeric_limits<double>::infinity();
 }
 
 #endif // ENABLE_VISUALIZER
