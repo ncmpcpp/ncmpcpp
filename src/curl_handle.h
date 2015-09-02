@@ -30,7 +30,7 @@
 
 namespace Curl
 {
-	CURLcode perform(std::string &data, const std::string &URL, const std::string &referer = "", unsigned timeout = 10);
+	CURLcode perform(std::string &data, const std::string &URL, const std::string &referer = "", bool follow_redirect = false, unsigned timeout = 10);
 	
 	std::string escape(const std::string &s);
 }
