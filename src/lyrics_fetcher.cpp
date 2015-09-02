@@ -118,7 +118,7 @@ LyricsFetcher::Result LyricwikiFetcher::fetch(const std::string &artist, const s
 		result.first = false;
 		
 		std::string data;
-		CURLcode code = Curl::perform(data, result.second);
+		CURLcode code = Curl::perform(data, result.second, "", 10, true);
 		
 		if (code != CURLE_OK)
 		{
@@ -193,7 +193,7 @@ LyricsFetcher::Result GoogleLyricsFetcher::fetch(const std::string &artist, cons
 		result.second = curl_easy_strerror(code);
 		return result;
 	}
-	
+
 	auto urls = getContent("<A HREF=\"(.*?)\">here</A>", data);
 	
 	if (urls.empty() || !isURLOk(urls[0]))

@@ -35,7 +35,7 @@ namespace
 	}
 }
 
-CURLcode Curl::perform(std::string &data, const std::string &URL, const std::string &referer, unsigned timeout)
+CURLcode Curl::perform(std::string &data, const std::string &URL, const std::string &referer, unsigned timeout, bool follow_redirect)
 {
 	CURLcode result;
 	CURL *c = curl_easy_init();
@@ -45,7 +45,8 @@ CURLcode Curl::perform(std::string &data, const std::string &URL, const std::str
 	curl_easy_setopt(c, CURLOPT_CONNECTTIMEOUT, timeout);
 	curl_easy_setopt(c, CURLOPT_NOSIGNAL, 1);
 	curl_easy_setopt(c, CURLOPT_USERAGENT, "ncmpcpp " VERSION);
-	curl_easy_setopt(c, CURLOPT_FOLLOWLOCATION, 1L);
+	if (follow_redirect)
+	  curl_easy_setopt(c, CURLOPT_FOLLOWLOCATION, 1L);
 	if (!referer.empty())
 		curl_easy_setopt(c, CURLOPT_REFERER, referer.c_str());
 	result = curl_easy_perform(c);
