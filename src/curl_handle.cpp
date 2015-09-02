@@ -46,7 +46,7 @@ CURLcode Curl::perform(std::string &data, const std::string &URL, const std::str
 	curl_easy_setopt(c, CURLOPT_NOSIGNAL, 1);
 	curl_easy_setopt(c, CURLOPT_USERAGENT, "ncmpcpp " VERSION);
 	if (follow_redirect)
-	  curl_easy_setopt(c, CURLOPT_FOLLOWLOCATION, 1L);
+		curl_easy_setopt(c, CURLOPT_FOLLOWLOCATION, 1L);
 	if (!referer.empty())
 		curl_easy_setopt(c, CURLOPT_REFERER, referer.c_str());
 	result = curl_easy_perform(c);
