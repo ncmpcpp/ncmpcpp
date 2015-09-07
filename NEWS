@@ -31,6 +31,10 @@ ncmpcpp-0.7 (????-??-??)
 * Value of 'visualizer_sync_interval' is now restricted to be greater than 9.
 * Output of the visualizer now scales automatically as long as 'visualizer_sample_multiplier' is set to 1.
 
+ncmpcpp-0.6.6 (2015-09-07)
+* A typo in the example configuration file was fixed.
+* Fetching lyrics from lyricwiki.com was fixed.
+
 ncmpcpp-0.6.5 (2015-07-05)
 
 * Description of mouse wheel usage on volume is now correct.
