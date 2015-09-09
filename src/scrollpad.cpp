@@ -36,8 +36,8 @@ bool regexSearch(NC::Buffer &buf, PropT begin, const std::string &ws, PropT end,
 		bool success = first != last;
 		for (; first != last; ++first)
 		{
-			buf.setProperty(first->position(), begin, id);
-			buf.setProperty(first->position() + first->length(), end, id);
+			buf.addProperty(first->position(), begin, id);
+			buf.addProperty(first->position() + first->length(), end, id);
 		}
 		return success;
 	} catch (boost::bad_expression &e) {
@@ -147,8 +147,8 @@ void Scrollpad::flush()
 	size_t i = 0;
 	
 	auto load_properties = [&]() {
-		for (; p != ps.end() && p->position() == i; ++p)
-			w << *p;
+		for (; p != ps.end() && p->first == i; ++p)
+			w << p->second;
 	};
 	auto write_whitespace = [&]() {
 		for (; i < s.length() && iswspace(s[i]); ++i)
@@ -257,7 +257,7 @@ void Scrollpad::flush()
 		}
 		// load remaining properties if there are any
 		for (; p != ps.end(); ++p)
-			w << *p;
+			w << p->second;
 		return height;
 	};
 	m_real_height = std::max(write_buffer(true), m_height);
