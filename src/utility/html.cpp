@@ -20,7 +20,6 @@
 
 #include <boost/algorithm/string/replace.hpp>
 #include "utility/html.h"
-//#include "utility/string.h"
 
 std::string unescapeHtmlUtf8(const std::string &data)
 {
@@ -51,18 +50,28 @@ std::string unescapeHtmlUtf8(const std::string &data)
 	return result;
 }
 
+void unescapeHtmlEntities(std::string &s)
+{
+	// well, at least some of them.
+	boost::replace_all(s, "&amp;", "&");
+	boost::replace_all(s, "&gt;", ">");
+	boost::replace_all(s, "&lt;", "<");
+	boost::replace_all(s, "&nbsp;", " ");
+	boost::replace_all(s, "&quot;", "\"");
+}
+
 void stripHtmlTags(std::string &s)
 {
 	bool erase = 0;
 	for (size_t i = s.find("<"); i != std::string::npos; i = s.find("<"))
 	{
 		size_t j = s.find(">", i)+1;
-		s.replace(i, j-i, "");
+		if (s.compare(i, j-i, "<p>") == 0 || s.compare(i, j-i, "</p>") == 0)
+			s.replace(i, j-i, "\n");
+		else
+			s.replace(i, j-i, "");
 	}
-	boost::replace_all(s, "&#039;", "'");
-	boost::replace_all(s, "&amp;", "&");
-	boost::replace_all(s, "&quot;", "\"");
-	boost::replace_all(s, "&nbsp;", " ");
+	unescapeHtmlEntities(s);
 	for (size_t i = 0; i < s.length(); ++i)
 	{
 		if (erase)
