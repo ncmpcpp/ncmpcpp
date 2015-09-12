@@ -30,6 +30,7 @@ ncmpcpp-0.7 (????-??-??)
 * Tracks in media library are now properly sorted for track numbers greater than 99.
 * Value of 'visualizer_sync_interval' is now restricted to be greater than 9.
 * Output of the visualizer now scales automatically as long as 'visualizer_sample_multiplier' is set to 1.
+* Command line switch that prints current song to the standard output is available once again.
 
 ncmpcpp-0.6.6 (2015-09-07)
 * A typo in the example configuration file was fixed.

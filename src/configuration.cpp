@@ -77,6 +77,7 @@ bool configure(int argc, char **argv)
 	options.add_options()
 		("host,h", po::value<std::string>()->default_value("localhost"), "connect to server at host")
 		("port,p", po::value<int>()->default_value(6600), "connect to server at port")
+		("current-song", po::value<std::string>()->implicit_value("{{{(%l) }{{%a - }%t}}|{%f}}"), "print current song using given format and exit")
 		("config,c", po::value<std::vector<std::string>>(&config_paths)->default_value(default_config_paths, join<std::string>(default_config_paths, " AND ")), "specify configuration file(s)")
 		("ignore-config-errors", "ignore unknown and invalid options in configuration files")
 		("bindings,b", po::value<std::string>(&bindings_path)->default_value("~/.ncmpcpp/bindings"), "specify bindings file")
@@ -185,6 +186,19 @@ bool configure(int argc, char **argv)
 		if (!vm["port"].defaulted())
 			Mpd.SetPort(vm["port"].as<int>());
 		Mpd.SetTimeout(Config.mpd_connection_timeout);
+
+		// print current song
+		if (vm.count("current-song"))
+		{
+			Mpd.Connect();
+			auto s = Mpd.GetCurrentSong();
+			if (!s.empty())
+			{
+				auto format = Format::parse(vm["current-song"].as<std::string>(), Format::Flags::Tag);
+				std::cout << Format::stringify<char>(format, &s);
+				return false;
+			}
+		}
 
 		// custom startup screen
 		if (vm.count("screen"))
