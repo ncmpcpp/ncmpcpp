@@ -1338,8 +1338,9 @@ Window &Window::operator<<(const char *s)
 
 Window &Window::operator<<(char c)
 {
-	// waddchr doesn't display non-ascii multibyte characters properly
-	waddnstr(m_window, &c, 1);
+	// the following causes problems: https://github.com/arybczak/ncmpcpp/issues/21
+	// waddnstr(m_window, &c, 1);
+	wprintw(m_window, "%c", c);
 	return *this;
 }
 
