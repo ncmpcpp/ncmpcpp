@@ -116,9 +116,11 @@ Service::Result ArtistInfo::processData(const std::string &data)
 			rx.assign("<link rel=\"original\" href=\"(.*?)\"");
 			if (boost::regex_search(data, what, rx))
 			{
+				std::string url = what[1], wiki;
+				// unescape &amp;s
+				unescapeHtmlEntities(url);
 				// ...try to get the content of it...
-				std::string wiki;
-				CURLcode code = Curl::perform(wiki, what[1]);
+				CURLcode code = Curl::perform(wiki, url, "", true);
 				
 				if (code != CURLE_OK)
 				{
@@ -128,7 +130,7 @@ Service::Result ArtistInfo::processData(const std::string &data)
 				else
 				{
 					// ...and filter it to get the whole description.
-					rx.assign("<div id=\"wiki\">(.*?)</div>");
+					rx.assign("<div class=\"wiki\">(.*?)</div>");
 					if (boost::regex_search(wiki, what, rx))
 						desc = unescapeHtmlUtf8(what[1]);
 				}
