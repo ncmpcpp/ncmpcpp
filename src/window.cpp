@@ -806,10 +806,20 @@ Key::Type Window::getInputChar(int key)
 	{
 	case '\t': // tty
 		return Key::Shift | Key::Tab;
-	case 'O': // ctrl+arrows in rxvt, F1 to F4 in xterm
+	case 'O':
 		key = wgetch(m_window);
 		switch (key)
 		{
+		// eterm
+		case 'A':
+			return Key::Up;
+		case 'B':
+			return Key::Down;
+		case 'C':
+			return Key::Right;
+		case 'D':
+			return Key::Left;
+		// rxvt
 		case 'a':
 			return Key::Ctrl | Key::Up;
 		case 'b':
@@ -818,6 +828,7 @@ Key::Type Window::getInputChar(int key)
 			return Key::Ctrl | Key::Right;
 		case 'd':
 			return Key::Ctrl | Key::Left;
+		// xterm
 		case 'P':
 			return Key::F1;
 		case 'Q':
