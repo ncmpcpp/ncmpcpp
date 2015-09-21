@@ -124,8 +124,8 @@ struct Printer: boost::static_visitor<Result>
 		{
 			if (st.delimiter() > 0)
 			{
-				// shorten length by chopping off the tail
-				if (st.function() == &MPD::Song::getLength)
+				// shorten date/length by simple truncation
+				if (st.function() == &MPD::Song::getDate || st.function() == &MPD::Song::getLength)
 					tags.resize(st.delimiter());
 				else
 					tags = wideShorten(tags, st.delimiter());
