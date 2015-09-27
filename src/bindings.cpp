@@ -471,8 +471,12 @@ void BindingsConfiguration::generateDefaults()
 		bind(k, Actions::Type::MouseEvent);
 	if (notBound(k = stringToKey("up")))
 		bind(k, Actions::Type::ScrollUp);
+	if (notBound(k = stringToKey("shift-up")))
+		bind(k, Binding::ActionChain({ &Actions::get(Actions::Type::SelectItem), &Actions::get(Actions::Type::ScrollUp) }));
 	if (notBound(k = stringToKey("down")))
 		bind(k, Actions::Type::ScrollDown);
+	if (notBound(k = stringToKey("shift-down")))
+		bind(k, Binding::ActionChain({ &Actions::get(Actions::Type::SelectItem), &Actions::get(Actions::Type::ScrollDown) }));
 	if (notBound(k = stringToKey("[")))
 		bind(k, Actions::Type::ScrollUpAlbum);
 	if (notBound(k = stringToKey("]")))

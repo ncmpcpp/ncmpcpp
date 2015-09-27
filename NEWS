@@ -32,6 +32,7 @@ ncmpcpp-0.7 (????-??-??)
 * Output of the visualizer now scales automatically as long as 'visualizer_sample_multiplier' is set to 1.
 * Command line switch that prints current song to the standard output is available once again.
 * Defined action chains are now shown in help screen.
+* Action chains for selecting an item and scrolling up/down are now bound to Shift-Up and Shift-Down respectively.
 
 ncmpcpp-0.6.7 (2015-09-12)
 * Fetching artist info from last.fm was fixed.
