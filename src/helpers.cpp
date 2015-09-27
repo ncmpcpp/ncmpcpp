@@ -57,6 +57,8 @@ MPD::SongIterator getDatabaseIterator(MPD::Connection &mpd)
 			mpd.Disconnect();
 			mpd.Connect();
 		}
+		else
+			throw;
 	}
 	return result;
 }
