@@ -18,10 +18,27 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
+#include "bindings.h"
 #include "global.h"
 #include "macro_utilities.h"
+#include "utility/string.h"
+#include "utility/wide_string.h"
 
 namespace Actions {
+
+PushCharacters::PushCharacters(NC::Window **w, std::vector<NC::Key::Type> &&queue)
+	: BaseAction(Type::MacroUtility, "push_characters")
+	, m_window(w)
+	, m_queue(queue)
+{
+	assert(w != nullptr);
+	std::vector<std::string> keys;
+	for (const auto &key : queue)
+		keys.push_back(ToString(keyToWString(key)));
+	m_name += " \"";
+	m_name += join<std::string>(keys, ", ");
+	m_name += "\"";
+}
 
 void PushCharacters::run()
 {
@@ -29,14 +46,42 @@ void PushCharacters::run()
 		(*m_window)->pushChar(*it);
 }
 
+RequireRunnable::RequireRunnable(BaseAction *action)
+	: BaseAction(Type::MacroUtility, "require_runnable")
+	, m_action(action)
+{
+	assert(m_action != nullptr);
+	m_name += " \"";
+	m_name += m_action->name();
+	m_name += "\"";
+}
+
 bool RequireRunnable::canBeRun()
 {
 	return m_action->canBeRun();
 }
 
+RequireScreen::RequireScreen(ScreenType screen_type)
+	: BaseAction(Type::MacroUtility, "require_screen")
+	, m_screen_type(screen_type)
+{
+	m_name += " \"";
+	m_name +=	screenTypeToString(m_screen_type);
+	m_name += "\"";
+}
+
 bool RequireScreen::canBeRun()
 {
 	return Global::myScreen->type() == m_screen_type;
+}
+
+RunExternalCommand::RunExternalCommand(std::string command)
+	: BaseAction(Type::MacroUtility, "run_external_command")
+	, m_command(std::move(command))
+{
+	m_name += " \"";
+	m_name += m_command;
+	m_name += "\"";
 }
 
 void RunExternalCommand::run()

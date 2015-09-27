@@ -36,8 +36,8 @@ struct Binding
 	typedef std::vector<Actions::BaseAction *> ActionChain;
 	
 	template <typename ArgT>
-	Binding(ArgT &&actions)
-	: m_actions(std::forward<ArgT>(actions)) {
+	Binding(ArgT &&actions_)
+	: m_actions(std::forward<ArgT>(actions_)) {
 		assert(!m_actions.empty());
 	}
 	Binding(Actions::Type at)
@@ -56,6 +56,10 @@ struct Binding
 	Actions::BaseAction *action() const {
 		assert(isSingle());
 		return m_actions[0];
+	}
+
+	const ActionChain &actions() const {
+		return m_actions;
 	}
 
 private:

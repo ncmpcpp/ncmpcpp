@@ -58,6 +58,8 @@ enum class ScreenType {
 #	endif // ENABLE_VISUALIZER
 };
 
+std::string screenTypeToString(ScreenType st);
+
 ScreenType stringtoStartupScreenType(const std::string &s);
 ScreenType stringToScreenType(const std::string &s);
 
