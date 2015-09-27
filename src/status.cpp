@@ -159,7 +159,7 @@ void initialize_status()
 
 	myBrowser->fetchSupportedExtensions();
 #	ifdef ENABLE_OUTPUTS
-	myOutputs->FetchList();
+	myOutputs->fetchList();
 #	endif // ENABLE_OUTPUTS
 #	ifdef ENABLE_VISUALIZER
 	myVisualizer->ResetFD();
@@ -760,6 +760,6 @@ void Status::Changes::mixer()
 void Status::Changes::outputs()
 {
 #	ifdef ENABLE_OUTPUTS
-	myOutputs->FetchList();
+	myOutputs->fetchList();
 #	endif // ENABLE_OUTPUTS
 }

@@ -330,7 +330,7 @@ void write_bindings(NC::Scrollpad &w)
 
 #	ifdef ENABLE_OUTPUTS
 	key_section(w, "Outputs");
-	key(w, Type::PressEnter, "Toggle output");
+	key(w, Type::ToggleOutput, "Toggle output");
 #	endif // ENABLE_OUTPUTS
 
 #	if defined(ENABLE_VISUALIZER) && defined(HAVE_FFTW3_H)

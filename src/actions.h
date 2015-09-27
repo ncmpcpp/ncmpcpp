@@ -56,7 +56,7 @@ enum class Type
 	ToggleAddMode, ToggleMouse, ToggleBitrateVisibility,
 	AddRandomItems, ToggleBrowserSortMode, ToggleLibraryTagType,
 	ToggleMediaLibrarySortMode, RefetchLyrics,
-	SetSelectedItemsPriority, ToggleVisualizationType, SetVisualizerSampleMultiplier,
+	SetSelectedItemsPriority, ToggleOutput, ToggleVisualizationType, SetVisualizerSampleMultiplier,
 	ShowSongInfo, ShowArtistInfo, ShowLyrics, Quit, NextScreen, PreviousScreen,
 	ShowHelp, ShowPlaylist, ShowBrowser, ChangeBrowseMode, ShowSearchEngine,
 	ResetSearchEngine, ShowMediaLibrary, ToggleMediaLibraryColumnsMode,
@@ -1040,6 +1040,15 @@ struct SetSelectedItemsPriority: BaseAction
 	SetSelectedItemsPriority()
 	: BaseAction(Type::SetSelectedItemsPriority, "set_selected_items_priority") { }
 	
+private:
+	virtual bool canBeRun() OVERRIDE;
+	virtual void run() OVERRIDE;
+};
+
+struct ToggleOutput: BaseAction
+{
+	ToggleOutput(): BaseAction(Type::ToggleOutput, "toggle_output") { }
+
 private:
 	virtual bool canBeRun() OVERRIDE;
 	virtual void run() OVERRIDE;

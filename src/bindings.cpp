@@ -496,7 +496,10 @@ void BindingsConfiguration::generateDefaults()
 	if (notBound(k = stringToKey("insert")))
 		bind(k, Actions::Type::SelectItem);
 	if (notBound(k = stringToKey("enter")))
+	{
+		bind(k, Actions::Type::ToggleOutput);
 		bind(k, Actions::Type::PressEnter);
+	}
 	if (notBound(k = stringToKey("space")))
 	{
 		bind(k, Actions::Type::AddItemToPlaylist);

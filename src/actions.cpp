@@ -2216,6 +2216,16 @@ void SetSelectedItemsPriority::run()
 	myPlaylist->SetSelectedItemsPriority(prio);
 }
 
+bool ToggleOutput::canBeRun()
+{
+	return myScreen == myOutputs;
+}
+
+void ToggleOutput::run()
+{
+	myOutputs->toggleOutput();
+}
+
 bool ToggleVisualizationType::canBeRun()
 {
 #	ifdef ENABLE_VISUALIZER
@@ -2667,6 +2677,7 @@ void populateActions()
 	insert_action(new Actions::ToggleMediaLibrarySortMode());
 	insert_action(new Actions::RefetchLyrics());
 	insert_action(new Actions::SetSelectedItemsPriority());
+	insert_action(new Actions::ToggleOutput());
 	insert_action(new Actions::ToggleVisualizationType());
 	insert_action(new Actions::SetVisualizerSampleMultiplier());
 	insert_action(new Actions::ShowSongInfo());

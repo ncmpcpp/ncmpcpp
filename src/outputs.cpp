@@ -69,20 +69,6 @@ std::wstring Outputs::title()
 	return L"Outputs";
 }
 
-void Outputs::enterPressed()
-{
-	if (w.current()->value().enabled())
-	{
-		Mpd.DisableOutput(w.choice());
-		Statusbar::printf("Output \"%s\" disabled", w.current()->value().name());
-	}
-	else
-	{
-		Mpd.EnableOutput(w.choice());
-		Statusbar::printf("Output \"%s\" enabled", w.current()->value().name());
-	}
-}
-
 void Outputs::mouseButtonPressed(MEVENT me)
 {
 	if (w.empty() || !w.hasCoords(me.x, me.y) || size_t(me.y) >= w.size())
@@ -97,7 +83,7 @@ void Outputs::mouseButtonPressed(MEVENT me)
 		Screen<WindowType>::mouseButtonPressed(me);
 }
 
-void Outputs::FetchList()
+void Outputs::fetchList()
 {
 	w.clear();
 	for (MPD::OutputIterator out = Mpd.GetOutputs(), end; out != end; ++out)
@@ -111,5 +97,18 @@ void Outputs::FetchList()
 		w.refresh();
 }
 
-#endif // ENABLE_OUTPUTS
+void Outputs::toggleOutput()
+{
+	if (w.current()->value().enabled())
+	{
+		Mpd.DisableOutput(w.choice());
+		Statusbar::printf("Output \"%s\" disabled", w.current()->value().name());
+	}
+	else
+	{
+		Mpd.EnableOutput(w.choice());
+		Statusbar::printf("Output \"%s\" enabled", w.current()->value().name());
+	}
+}
 
+#endif // ENABLE_OUTPUTS

@@ -43,14 +43,15 @@ struct Outputs: Screen<NC::Menu<MPD::Output>>, Tabbable
 	
 	virtual void update() OVERRIDE { }
 	
-	virtual void enterPressed() OVERRIDE;
+	virtual void enterPressed() OVERRIDE { }
 	virtual void mouseButtonPressed(MEVENT me) OVERRIDE;
 	
 	virtual bool isLockable() OVERRIDE { return true; }
 	virtual bool isMergable() OVERRIDE { return true; }
 	
 	// private members
-	void FetchList();
+	void fetchList();
+	void toggleOutput();
 };
 
 extern Outputs *myOutputs;
