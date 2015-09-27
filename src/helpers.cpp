@@ -40,6 +40,27 @@ const MPD::Song *currentSong(const BaseScreen *screen)
 	return ptr;
 }
 
+MPD::SongIterator getDatabaseIterator(MPD::Connection &mpd)
+{
+	MPD::SongIterator result;
+	try
+	{
+		result = mpd.GetDirectoryRecursive("/");
+	}
+	catch (MPD::ClientError &e)
+	{
+		if (e.code() == MPD_ERROR_CLOSED)
+		{
+			// If we can't get the database, display appropriate
+			// error message and reconnect with the MPD server.
+			Statusbar::print("Unable to fetch the data, increase max_buffer_output_size in your MPD configuration file");
+			mpd.Disconnect();
+			mpd.Connect();
+		}
+	}
+	return result;
+}
+
 typedef std::vector<MPD::Song>::const_iterator VectorSongIterator;
 bool addSongsToPlaylist(VectorSongIterator first, VectorSongIterator last, bool play, int position)
 {
