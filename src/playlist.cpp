@@ -197,7 +197,7 @@ MPD::Song Playlist::nowPlayingSong()
 	return s;
 }
 
-void Playlist::EnableHighlighting()
+void Playlist::enableHighlighting()
 {
 	w.setHighlighting(true);
 	m_timer = Global::Timer;
@@ -238,7 +238,7 @@ std::string Playlist::getTotalLength()
 	return result.str();
 }
 
-void Playlist::SetSelectedItemsPriority(int prio)
+void Playlist::setSelectedItemsPriority(int prio)
 {
 	auto list = getSelectedOrCurrent(w.begin(), w.end(), w.current());
 	Mpd.StartCommandsList();

@@ -61,11 +61,10 @@ struct Playlist: Screen<SongMenu>, HasSongs, Searchable, Tabbable
 	
 	// private members
 	MPD::Song nowPlayingSong();
-	
 
-	void EnableHighlighting();
+	void enableHighlighting();
 	
-	void SetSelectedItemsPriority(int prio);
+	void setSelectedItemsPriority(int prio);
 	
 	bool checkForSong(const MPD::Song &s);
 	void registerSong(const MPD::Song &s);

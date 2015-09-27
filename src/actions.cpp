@@ -2213,7 +2213,7 @@ void SetSelectedItemsPriority::run()
 		prio = fromString<unsigned>(wFooter->prompt());
 		boundsCheck(prio, 0u, 255u);
 	}
-	myPlaylist->SetSelectedItemsPriority(prio);
+	myPlaylist->setSelectedItemsPriority(prio);
 }
 
 bool ToggleOutput::canBeRun()

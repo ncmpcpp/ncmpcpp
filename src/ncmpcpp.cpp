@@ -234,7 +234,7 @@ int main(int argc, char **argv)
 			}
 
 			if (myScreen == myPlaylist)
-				myPlaylist->EnableHighlighting();
+				myPlaylist->enableHighlighting();
 		}
 		catch (MPD::ClientError &e)
 		{
