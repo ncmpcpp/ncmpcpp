@@ -43,7 +43,7 @@ struct Playlist: Screen<SongMenu>, HasSongs, Searchable, Tabbable
 	
 	virtual void update() OVERRIDE;
 	
-	virtual void enterPressed() OVERRIDE;
+	virtual void enterPressed() OVERRIDE { }
 	virtual void mouseButtonPressed(MEVENT me) OVERRIDE;
 	
 	virtual bool isLockable() OVERRIDE { return true; }

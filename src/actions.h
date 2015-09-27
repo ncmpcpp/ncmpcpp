@@ -41,7 +41,7 @@ enum class Type
 	NextColumn, MasterScreen, SlaveScreen, VolumeUp, VolumeDown, AddItemToPlaylist,
 	DeletePlaylistItems, DeleteStoredPlaylist, DeleteBrowserItems, ReplaySong, Previous,
 	Next, Pause, Stop, ExecuteCommand, SavePlaylist, MoveSortOrderUp, MoveSortOrderDown,
-	MoveSelectedItemsUp, MoveSelectedItemsDown, MoveSelectedItemsTo, Add,
+	MoveSelectedItemsUp, MoveSelectedItemsDown, MoveSelectedItemsTo, Add, Play,
 	SeekForward, SeekBackward, ToggleDisplayMode, ToggleSeparatorsBetweenAlbums,
 	ToggleLyricsUpdateOnSongChange, ToggleLyricsFetcher, ToggleFetchingLyricsInBackground,
 	TogglePlayingSongCentering, UpdateDatabase, JumpToPlayingSong, ToggleRepeat, Shuffle,
@@ -469,6 +469,15 @@ struct Add: BaseAction
 {
 	Add(): BaseAction(Type::Add, "add") { }
 	
+private:
+	virtual bool canBeRun() OVERRIDE;
+	virtual void run() OVERRIDE;
+};
+
+struct Play: BaseAction
+{
+	Play(): BaseAction(Type::Play, "play") { }
+
 private:
 	virtual bool canBeRun() OVERRIDE;
 	virtual void run() OVERRIDE;

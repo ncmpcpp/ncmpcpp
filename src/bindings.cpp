@@ -497,6 +497,7 @@ void BindingsConfiguration::generateDefaults()
 		bind(k, Actions::Type::SelectItem);
 	if (notBound(k = stringToKey("enter")))
 	{
+		bind(k, Actions::Type::Play);
 		bind(k, Actions::Type::ToggleOutput);
 		bind(k, Actions::Type::PressEnter);
 	}

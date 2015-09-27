@@ -131,12 +131,6 @@ void Playlist::update()
 	}
 }
 
-void Playlist::enterPressed()
-{
-	if (!w.empty())
-		Mpd.PlayID(w.current()->value().getID());
-}
-
 void Playlist::mouseButtonPressed(MEVENT me)
 {
 	if (!w.empty() && w.hasCoords(me.x, me.y))

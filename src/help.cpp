@@ -238,7 +238,7 @@ void write_bindings(NC::Scrollpad &w)
 	key(w, Type::Quit, "Quit");
 
 	key_section(w, "Playlist");
-	key(w, Type::PressEnter, "Play selected item");
+	key(w, Type::Play, "Play selected item");
 	key(w, Type::DeletePlaylistItems, "Delete selected item(s) from playlist");
 	key(w, Type::ClearMainPlaylist, "Clear playlist");
 	key(w, Type::CropMainPlaylist, "Clear playlist except selected item(s)");

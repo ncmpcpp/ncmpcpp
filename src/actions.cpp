@@ -957,6 +957,17 @@ void Add::run()
 	}
 }
 
+bool Play::canBeRun()
+{
+	return myScreen == myPlaylist
+		&& !myPlaylist->main().empty();
+}
+
+void Play::run()
+{
+	Mpd.PlayID(myPlaylist->main().current()->value().getID());
+}
+
 bool SeekForward::canBeRun()
 {
 	return Status::State::player() != MPD::psStop && Status::State::totalTime() > 0;
@@ -2618,6 +2629,7 @@ void populateActions()
 	insert_action(new Actions::MoveSelectedItemsDown());
 	insert_action(new Actions::MoveSelectedItemsTo());
 	insert_action(new Actions::Add());
+	insert_action(new Actions::Play());
 	insert_action(new Actions::SeekForward());
 	insert_action(new Actions::SeekBackward());
 	insert_action(new Actions::ToggleDisplayMode());

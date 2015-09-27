@@ -193,6 +193,9 @@
 #  select_item
 #
 #def_key "enter"
+#  play
+#
+#def_key "enter"
 #  toggle_output
 #
 #def_key "enter"
