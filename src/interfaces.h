@@ -37,9 +37,16 @@ struct Searchable
 	virtual bool find(SearchDirection direction, bool wrap, bool skip_current) = 0;
 };
 
+struct HasActions
+{
+	virtual bool actionRunnable() = 0;
+	virtual void runAction() = 0;
+};
+
 struct HasSongs
 {
-	virtual bool addItemToPlaylist() = 0;
+	virtual bool itemAvailable() = 0;
+	virtual bool addItemToPlaylist(bool play) = 0;
 	virtual std::vector<MPD::Song> getSelectedSongs() = 0;
 };
 

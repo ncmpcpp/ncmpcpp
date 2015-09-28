@@ -91,7 +91,7 @@ struct SearchEngineWindow: NC::Menu<SEItem>, SongList
 	virtual std::vector<MPD::Song> getSelectedSongs() OVERRIDE;
 };
 
-struct SearchEngine: Screen<SearchEngineWindow>, HasSongs, Searchable, Tabbable
+struct SearchEngine: Screen<SearchEngineWindow>, HasActions, HasSongs, Searchable, Tabbable
 {
 	SearchEngine();
 	
@@ -104,7 +104,6 @@ struct SearchEngine: Screen<SearchEngineWindow>, HasSongs, Searchable, Tabbable
 	
 	virtual void update() OVERRIDE { }
 	
-	virtual void enterPressed() OVERRIDE;
 	virtual void mouseButtonPressed(MEVENT me) OVERRIDE;
 	
 	virtual bool isLockable() OVERRIDE { return true; }
@@ -115,9 +114,14 @@ struct SearchEngine: Screen<SearchEngineWindow>, HasSongs, Searchable, Tabbable
 	virtual void setSearchConstraint(const std::string &constraint) OVERRIDE;
 	virtual void clearConstraint() OVERRIDE;
 	virtual bool find(SearchDirection direction, bool wrap, bool skip_current) OVERRIDE;
-	
+
+	// HasActions implementation
+	virtual bool actionRunnable() OVERRIDE;
+	virtual void runAction() OVERRIDE;
+
 	// HasSongs implementation
-	virtual bool addItemToPlaylist() OVERRIDE;
+	virtual bool itemAvailable() OVERRIDE;
+	virtual bool addItemToPlaylist(bool play) OVERRIDE;
 	virtual std::vector<MPD::Song> getSelectedSongs() OVERRIDE;
 	
 	// private members

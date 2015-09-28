@@ -225,11 +225,6 @@ int PlaylistEditor::windowTimeout()
 		return Screen<WindowType>::windowTimeout();
 }
 
-void PlaylistEditor::enterPressed()
-{
-	addItemToPlaylist(true);
-}
-
 void PlaylistEditor::mouseButtonPressed(MEVENT me)
 {
 	if (!Playlists.empty() && Playlists.hasCoords(me.x, me.y))
@@ -245,7 +240,7 @@ void PlaylistEditor::mouseButtonPressed(MEVENT me)
 		{
 			Playlists.Goto(me.y);
 			if (me.bstate & BUTTON3_PRESSED)
-				addItemToPlaylist();
+				addItemToPlaylist(false);
 		}
 		else
 			Screen<WindowType>::mouseButtonPressed(me);
@@ -263,10 +258,8 @@ void PlaylistEditor::mouseButtonPressed(MEVENT me)
 		if (size_t(me.y) < Content.size() && (me.bstate & (BUTTON1_PRESSED | BUTTON3_PRESSED)))
 		{
 			Content.Goto(me.y);
-			if (me.bstate & BUTTON1_PRESSED)
-				addItemToPlaylist();
-			else
-				enterPressed();
+			bool play = me.bstate & BUTTON3_PRESSED;
+			addItemToPlaylist(play);
 		}
 		else
 			Screen<WindowType>::mouseButtonPressed(me);
@@ -318,9 +311,32 @@ bool PlaylistEditor::find(SearchDirection direction, bool wrap, bool skip_curren
 
 /***********************************************************************/
 
-bool PlaylistEditor::addItemToPlaylist()
+bool PlaylistEditor::itemAvailable()
 {
-	return addItemToPlaylist(false);
+	if (isActiveWindow(Playlists))
+		return !Playlists.empty();
+	if (isActiveWindow(Content))
+		return !Content.empty();
+	return false;
+}
+
+bool PlaylistEditor::addItemToPlaylist(bool play)
+{
+	bool result = false;
+	if (isActiveWindow(Playlists))
+	{
+		std::vector<MPD::Song> list(
+			std::make_move_iterator(Mpd.GetPlaylistContent(Playlists.current()->value().path())),
+			std::make_move_iterator(MPD::SongIterator())
+		);
+		result = addSongsToPlaylist(list.begin(), list.end(), play, -1);
+		Statusbar::printf("Playlist \"%1%\" loaded%2%",
+			Playlists.current()->value().path(), withErrors(result)
+		);
+	}
+	else if (isActiveWindow(Content))
+		result = addSongToPlaylist(Content.current()->value(), play);
+	return result;
 }
 
 std::vector<MPD::Song> PlaylistEditor::getSelectedSongs()
@@ -418,25 +434,6 @@ void PlaylistEditor::Locate(const MPD::Playlist &playlist)
 		Content.clear();
 		switchTo();
 	}
-}
-
-bool PlaylistEditor::addItemToPlaylist(bool play)
-{
-	bool result = false;
-	if (isActiveWindow(Playlists) && !Playlists.empty())
-	{
-		std::vector<MPD::Song> list(
-			std::make_move_iterator(Mpd.GetPlaylistContent(Playlists.current()->value().path())),
-			std::make_move_iterator(MPD::SongIterator())
-		);
-		result = addSongsToPlaylist(list.begin(), list.end(), play, -1);
-		Statusbar::printf("Playlist \"%1%\" loaded%2%",
-			Playlists.current()->value().path(), withErrors(result)
-		);
-	}
-	else if (isActiveWindow(Content) && !Content.empty())
-		result = addSongToPlaylist(Content.current()->value(), play);
-	return result;
 }
 
 namespace {

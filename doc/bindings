@@ -193,13 +193,16 @@
 #  select_item
 #
 #def_key "enter"
-#  play
+#  enter_directory
 #
 #def_key "enter"
 #  toggle_output
 #
 #def_key "enter"
-#  press_enter
+#  play_item
+#
+#def_key "enter"
+#  run_action
 #
 #def_key "space"
 #  add_item_to_playlist

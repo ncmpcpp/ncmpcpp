@@ -43,7 +43,6 @@ struct MediaLibrary: Screen<NC::Window *>, HasColumns, HasSongs, Searchable, Tab
 	
 	virtual int windowTimeout() OVERRIDE;
 
-	virtual void enterPressed() OVERRIDE;
 	virtual void mouseButtonPressed(MEVENT me) OVERRIDE;
 	
 	virtual bool isLockable() OVERRIDE { return true; }
@@ -56,7 +55,8 @@ struct MediaLibrary: Screen<NC::Window *>, HasColumns, HasSongs, Searchable, Tab
 	virtual bool find(SearchDirection direction, bool wrap, bool skip_current) OVERRIDE;
 	
 	// HasSongs implementation
-	virtual bool addItemToPlaylist() OVERRIDE;
+	virtual bool itemAvailable() OVERRIDE;
+	virtual bool addItemToPlaylist(bool play) OVERRIDE;
 	virtual std::vector<MPD::Song> getSelectedSongs() OVERRIDE;
 	
 	// HasColumns implementation
@@ -133,8 +133,6 @@ struct MediaLibrary: Screen<NC::Window *>, HasColumns, HasSongs, Searchable, Tab
 	SongMenu Songs;
 	
 private:
-	bool addItemToPlaylist(bool play);
-
 	bool m_tags_update_request;
 	bool m_albums_update_request;
 	bool m_songs_update_request;

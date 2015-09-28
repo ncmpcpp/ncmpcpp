@@ -49,7 +49,6 @@ struct Visualizer: Screen<NC::Window>, Tabbable
 
 	virtual int windowTimeout() OVERRIDE;
 
-	virtual void enterPressed() OVERRIDE { }
 	virtual void mouseButtonPressed(MEVENT) OVERRIDE { }
 
 	virtual bool isLockable() OVERRIDE { return true; }

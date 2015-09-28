@@ -379,6 +379,11 @@ int Status::State::currentSongPosition()
 	return m_current_song_pos;
 }
 
+unsigned Status::State::playlistLength()
+{
+	return m_playlist_length;
+}
+
 unsigned Status::State::elapsedTime()
 {
 	return m_elapsed_time;

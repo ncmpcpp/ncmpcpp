@@ -77,7 +77,7 @@ void Outputs::mouseButtonPressed(MEVENT me)
 	{
 		w.Goto(me.y);
 		if (me.bstate & BUTTON3_PRESSED)
-			enterPressed();
+			toggleOutput();
 	}
 	else
 		Screen<WindowType>::mouseButtonPressed(me);

@@ -56,7 +56,6 @@ struct Browser: Screen<BrowserWindow>, HasSongs, Searchable, Tabbable
 	
 	virtual void update() OVERRIDE;
 	
-	virtual void enterPressed() OVERRIDE;
 	virtual void mouseButtonPressed(MEVENT me) OVERRIDE;
 	
 	virtual bool isLockable() OVERRIDE { return true; }
@@ -69,7 +68,8 @@ struct Browser: Screen<BrowserWindow>, HasSongs, Searchable, Tabbable
 	virtual bool find(SearchDirection direction, bool wrap, bool skip_current) OVERRIDE;
 	
 	// HasSongs implementation
-	virtual bool addItemToPlaylist() OVERRIDE;
+	virtual bool itemAvailable() OVERRIDE;
+	virtual bool addItemToPlaylist(bool play) OVERRIDE;
 	virtual std::vector<MPD::Song> getSelectedSongs() OVERRIDE;
 	
 	// private members
@@ -81,6 +81,7 @@ struct Browser: Screen<BrowserWindow>, HasSongs, Searchable, Tabbable
 	
 	bool isLocal() { return m_local_browser; }
 	void locateSong(const MPD::Song &s);
+	bool enterDirectory();
 	void getDirectory(std::string directory);
 	void changeBrowseMode();
 	void remove(const MPD::Item &item);

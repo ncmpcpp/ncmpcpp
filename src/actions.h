@@ -28,6 +28,7 @@
 #include "interfaces.h"
 #include "window.h"
 
+// forward declarations
 struct SongList;
 
 namespace Actions {
@@ -37,16 +38,16 @@ enum class Type
 	MacroUtility = 0,
 	Dummy, UpdateEnvironment, MouseEvent, ScrollUp, ScrollDown, ScrollUpArtist, ScrollUpAlbum,
 	ScrollDownArtist, ScrollDownAlbum, PageUp, PageDown, MoveHome, MoveEnd,
-	ToggleInterface, JumpToParentDirectory, PressEnter, PreviousColumn,
-	NextColumn, MasterScreen, SlaveScreen, VolumeUp, VolumeDown, AddItemToPlaylist,
+	ToggleInterface, JumpToParentDirectory, RunAction, PreviousColumn,
+	NextColumn, MasterScreen, SlaveScreen, VolumeUp, VolumeDown, AddItemToPlaylist, PlayItem,
 	DeletePlaylistItems, DeleteStoredPlaylist, DeleteBrowserItems, ReplaySong, Previous,
 	Next, Pause, Stop, ExecuteCommand, SavePlaylist, MoveSortOrderUp, MoveSortOrderDown,
-	MoveSelectedItemsUp, MoveSelectedItemsDown, MoveSelectedItemsTo, Add, Play,
+	MoveSelectedItemsUp, MoveSelectedItemsDown, MoveSelectedItemsTo, Add,
 	SeekForward, SeekBackward, ToggleDisplayMode, ToggleSeparatorsBetweenAlbums,
 	ToggleLyricsUpdateOnSongChange, ToggleLyricsFetcher, ToggleFetchingLyricsInBackground,
 	TogglePlayingSongCentering, UpdateDatabase, JumpToPlayingSong, ToggleRepeat, Shuffle,
 	ToggleRandom, StartSearching, SaveTagChanges, ToggleSingle, ToggleConsume, ToggleCrossfade,
-	SetCrossfade, SetVolume, EditSong, EditLibraryTag, EditLibraryAlbum, EditDirectoryName,
+	SetCrossfade, SetVolume, EnterDirectory, EditSong, EditLibraryTag, EditLibraryAlbum, EditDirectoryName,
 	EditPlaylistName, EditLyrics, JumpToBrowser, JumpToMediaLibrary,
 	JumpToPlaylistEditor, ToggleScreenLock, JumpToTagEditor, JumpToPositionInSong,
 	SelectItem, SelectRange, ReverseSelection, RemoveSelection, SelectAlbum, SelectFoundItems,
@@ -266,12 +267,15 @@ private:
 	virtual void run() OVERRIDE;
 };
 
-struct PressEnter: BaseAction
+struct RunAction: BaseAction
 {
-	PressEnter(): BaseAction(Type::PressEnter, "press_enter") { }
-	
+	RunAction(): BaseAction(Type::RunAction, "run_action") { }
+
 private:
+	virtual bool canBeRun() OVERRIDE;
 	virtual void run() OVERRIDE;
+
+	HasActions *m_ha;
 };
 
 struct PreviousColumn: BaseAction
@@ -281,6 +285,8 @@ struct PreviousColumn: BaseAction
 private:
 	virtual bool canBeRun() OVERRIDE;
 	virtual void run() OVERRIDE;
+
+	HasColumns *m_hc;
 };
 
 struct NextColumn: BaseAction
@@ -290,6 +296,8 @@ struct NextColumn: BaseAction
 private:
 	virtual bool canBeRun() OVERRIDE;
 	virtual void run() OVERRIDE;
+
+	HasColumns *m_hc;
 };
 
 struct MasterScreen: BaseAction
@@ -329,6 +337,17 @@ private:
 struct AddItemToPlaylist: BaseAction
 {
 	AddItemToPlaylist(): BaseAction(Type::AddItemToPlaylist, "add_item_to_playlist") { }
+
+private:
+	virtual bool canBeRun() OVERRIDE;
+	virtual void run() OVERRIDE;
+
+	HasSongs *m_hs;
+};
+
+struct PlayItem: BaseAction
+{
+	PlayItem(): BaseAction(Type::PlayItem, "play_item") { }
 
 private:
 	virtual bool canBeRun() OVERRIDE;
@@ -469,15 +488,6 @@ struct Add: BaseAction
 {
 	Add(): BaseAction(Type::Add, "add") { }
 	
-private:
-	virtual bool canBeRun() OVERRIDE;
-	virtual void run() OVERRIDE;
-};
-
-struct Play: BaseAction
-{
-	Play(): BaseAction(Type::Play, "play") { }
-
 private:
 	virtual bool canBeRun() OVERRIDE;
 	virtual void run() OVERRIDE;
@@ -664,6 +674,16 @@ struct SetVolume: BaseAction
 private:
 	virtual void run() OVERRIDE;
 };
+
+struct EnterDirectory: BaseAction
+{
+	EnterDirectory(): BaseAction(Type::EnterDirectory, "enter_directory") { }
+
+private:
+	virtual bool canBeRun() OVERRIDE;
+	virtual void run() OVERRIDE;
+};
+
 
 struct EditSong: BaseAction
 {

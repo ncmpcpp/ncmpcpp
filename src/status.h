@@ -46,6 +46,7 @@ bool single();
 // misc
 int currentSongID();
 int currentSongPosition();
+unsigned playlistLength();
 unsigned elapsedTime();
 MPD::PlayerState player();
 unsigned totalTime();

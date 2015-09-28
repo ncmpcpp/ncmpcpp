@@ -329,11 +329,10 @@ void TagEditor::update()
 	}
 }
 
-void TagEditor::enterPressed()
+bool TagEditor::enterDirectory()
 {
-	using Global::wFooter;
-	
-	if (w == Dirs)
+	bool result = false;
+	if (w == Dirs && !Dirs->empty())
 	{
 		MPD::DirectoryIterator directory = Mpd.GetDirectories(Dirs->current()->value().second), end;
 		bool has_subdirs = directory != end;
@@ -344,11 +343,194 @@ void TagEditor::enterPressed()
 			itsBrowsedDir = Dirs->current()->value().second;
 			Dirs->clear();
 			Dirs->reset();
+			result = true;
+		}
+	}
+	return result;
+}
+
+void TagEditor::mouseButtonPressed(MEVENT me)
+{
+	auto tryPreviousColumn = [this]() -> bool {
+		bool result = true;
+		if (w != Dirs)
+		{
+			if (previousColumnAvailable())
+				previousColumn();
+			else
+				result = false;
+		}
+		return result;
+	};
+	auto tryNextColumn = [this]() -> bool {
+		bool result = true;
+		if (w != Tags)
+		{
+			if (nextColumnAvailable())
+				nextColumn();
+			else
+				result = false;
+		}
+		return result;
+	};
+	if (w == FParserDialog)
+	{
+		if (FParserDialog->hasCoords(me.x, me.y))
+		{
+			if (me.bstate & (BUTTON1_PRESSED | BUTTON3_PRESSED))
+			{
+				FParserDialog->Goto(me.y);
+				if (me.bstate & BUTTON3_PRESSED)
+					runAction();
+			}
+			else
+				Screen<WindowType>::mouseButtonPressed(me);
+		}
+	}
+	else if (w == FParser || w == FParserHelper)
+	{
+		if (FParser->hasCoords(me.x, me.y))
+		{
+			if (w != FParser)
+			{
+				if (previousColumnAvailable())
+					previousColumn();
+				else
+					return;
+			}
+			if (size_t(me.y) < FParser->size() && (me.bstate & (BUTTON1_PRESSED | BUTTON3_PRESSED)))
+			{
+				FParser->Goto(me.y);
+				if (me.bstate & BUTTON3_PRESSED)
+					runAction();
+			}
+			else
+				Screen<WindowType>::mouseButtonPressed(me);
+		}
+		else if (FParserHelper->hasCoords(me.x, me.y))
+		{
+			if (w != FParserHelper)
+			{
+				if (nextColumnAvailable())
+					nextColumn();
+				else
+					return;
+			}
+			scrollpadMouseButtonPressed(*FParserHelper, me);
+		}
+	}
+	else if (!Dirs->empty() && Dirs->hasCoords(me.x, me.y))
+	{
+		if (!tryPreviousColumn() || !tryPreviousColumn())
+			return;
+		if (size_t(me.y) < Dirs->size() && (me.bstate & (BUTTON1_PRESSED | BUTTON3_PRESSED)))
+		{
+			Dirs->Goto(me.y);
+			if (me.bstate & BUTTON1_PRESSED)
+				enterDirectory();
 		}
 		else
-			Statusbar::print("No subdirectories found");
+			Screen<WindowType>::mouseButtonPressed(me);
+		Tags->clear();
 	}
-	else if (w == FParserDialog)
+	else if (!TagTypes->empty() && TagTypes->hasCoords(me.x, me.y))
+	{
+		if (w != TagTypes)
+		{
+			bool success;
+			if (w == Dirs)
+				success = tryNextColumn();
+			else
+				success = tryPreviousColumn();
+			if (!success)
+				return;
+		}
+		if (size_t(me.y) < TagTypes->size() && (me.bstate & (BUTTON1_PRESSED | BUTTON3_PRESSED)))
+		{
+			if (!TagTypes->Goto(me.y))
+				return;
+			TagTypes->refresh();
+			Tags->refresh();
+			if (me.bstate & BUTTON3_PRESSED)
+				runAction();
+		}
+		else
+			Screen<WindowType>::mouseButtonPressed(me);
+	}
+	else if (!Tags->empty() && Tags->hasCoords(me.x, me.y))
+	{
+		if (!tryNextColumn() || !tryNextColumn())
+			return;
+		if (size_t(me.y) < Tags->size() && (me.bstate & (BUTTON1_PRESSED | BUTTON3_PRESSED)))
+		{
+			Tags->Goto(me.y);
+			Tags->refresh();
+			if (me.bstate & BUTTON3_PRESSED)
+				runAction();
+		}
+		else
+			Screen<WindowType>::mouseButtonPressed(me);
+	}
+}
+
+/***********************************************************************/
+
+bool TagEditor::allowsSearching()
+{
+	return w == Dirs || w == Tags;
+}
+
+void TagEditor::setSearchConstraint(const std::string &constraint)
+{
+	if (w == Dirs)
+	{
+		m_directories_search_predicate = Regex::Filter<std::pair<std::string, std::string>>(
+			Regex::make(constraint, Config.regex_type),
+			std::bind(DirEntryMatcher, ph::_1, ph::_2, false)
+		);
+	}
+	else if (w == Tags)
+	{
+		m_songs_search_predicate = Regex::Filter<MPD::MutableSong>(
+			Regex::make(constraint, Config.regex_type),
+			SongEntryMatcher
+		);
+	}
+}
+
+void TagEditor::clearConstraint()
+{
+	if (w == Dirs)
+		m_directories_search_predicate.clear();
+	else if (w == Tags)
+		m_songs_search_predicate.clear();
+}
+
+bool TagEditor::find(SearchDirection direction, bool wrap, bool skip_current)
+{
+	bool result = false;
+	if (w == Dirs)
+		result = search(*Dirs, m_directories_search_predicate, direction, wrap, skip_current);
+	else if (w == Tags)
+		result = search(*Tags, m_songs_search_predicate, direction, wrap, skip_current);
+	return result;
+}
+
+/***********************************************************************/
+
+bool TagEditor::actionRunnable()
+{
+	// TODO: put something more refined here. It requires reworking
+	// runAction though, i.e. splitting it into smaller parts.
+	return (w == Tags && !Tags->empty())
+		|| w != Tags;
+}
+
+void TagEditor::runAction()
+{
+	using Global::wFooter;
+
+	if (w == FParserDialog)
 	{
 		size_t choice = FParserDialog->choice();
 		if (choice == 2) // cancel
@@ -358,9 +540,9 @@ void TagEditor::enterPressed()
 			return;
 		}
 		GetPatternList();
-		
+
 		// prepare additional windows
-		
+
 		FParserLegend->clear();
 		*FParserLegend << "%a - artist\n";
 		*FParserLegend << "%A - album artist\n";
@@ -377,7 +559,7 @@ void TagEditor::enterPressed()
 		for (auto it = EditedSongs.begin(); it != EditedSongs.end(); ++it)
 			*FParserLegend << Config.color2 << " * " << NC::Color::End << (*it)->getName() << '\n';
 		FParserLegend->flush();
-		
+
 		if (!Patterns.empty())
 			Config.pattern = Patterns.front();
 		FParser->clear();
@@ -396,7 +578,7 @@ void TagEditor::enterPressed()
 			for (std::list<std::string>::const_iterator it = Patterns.begin(); it != Patterns.end(); ++it)
 				FParser->addItem(*it);
 		}
-		
+
 		FParser->setTitle(choice == 0 ? "Get tags from filename" : "Rename files");
 		w = FParser;
 		FParserUsePreview = 1;
@@ -407,10 +589,10 @@ void TagEditor::enterPressed()
 	{
 		bool quit = 0;
 		size_t pos = FParser->choice();
-		
+
 		if (pos == 4) // save
 			FParserUsePreview = 0;
-		
+
 		if (pos == 0) // change pattern
 		{
 			std::string new_pattern;
@@ -494,7 +676,7 @@ void TagEditor::enterPressed()
 			Config.pattern = FParser->current()->value();
 			FParser->at(0).value() = "Pattern: " + Config.pattern;
 		}
-		
+
 		if (quit)
 		{
 			SavePatternList();
@@ -503,10 +685,10 @@ void TagEditor::enterPressed()
 			return;
 		}
 	}
-	
+
 	if ((w != TagTypes && w != Tags) || Tags->empty()) // after this point we start dealing with tags
 		return;
-	
+
 	EditedSongs.clear();
 	// if there are selected songs, perform operations only on them
 	if (hasSelected(Tags->begin(), Tags->end()))
@@ -520,9 +702,9 @@ void TagEditor::enterPressed()
 		for (auto it = Tags->begin(); it != Tags->end(); ++it)
 			EditedSongs.push_back(&it->value());
 	}
-	
+
 	size_t id = TagTypes->choice();
-	
+
 	if (w == TagTypes && id == 5)
 	{
 		Actions::confirmAction("Number tracks?");
@@ -539,7 +721,7 @@ void TagEditor::enterPressed()
 		Statusbar::print("Tracks numbered");
 		return;
 	}
-	
+
 	if (id < 11)
 	{
 		MPD::Song::GetFunction get = SongInfo::Tags[id].Get;
@@ -637,181 +819,19 @@ void TagEditor::enterPressed()
 	}
 }
 
-void TagEditor::mouseButtonPressed(MEVENT me)
-{
-	auto tryPreviousColumn = [this]() -> bool {
-		bool result = true;
-		if (w != Dirs)
-		{
-			if (previousColumnAvailable())
-				previousColumn();
-			else
-				result = false;
-		}
-		return result;
-	};
-	auto tryNextColumn = [this]() -> bool {
-		bool result = true;
-		if (w != Tags)
-		{
-			if (nextColumnAvailable())
-				nextColumn();
-			else
-				result = false;
-		}
-		return result;
-	};
-	if (w == FParserDialog)
-	{
-		if (FParserDialog->hasCoords(me.x, me.y))
-		{
-			if (me.bstate & (BUTTON1_PRESSED | BUTTON3_PRESSED))
-			{
-				FParserDialog->Goto(me.y);
-				if (me.bstate & BUTTON3_PRESSED)
-					enterPressed();
-			}
-			else
-				Screen<WindowType>::mouseButtonPressed(me);
-		}
-	}
-	else if (w == FParser || w == FParserHelper)
-	{
-		if (FParser->hasCoords(me.x, me.y))
-		{
-			if (w != FParser)
-			{
-				if (previousColumnAvailable())
-					previousColumn();
-				else
-					return;
-			}
-			if (size_t(me.y) < FParser->size() && (me.bstate & (BUTTON1_PRESSED | BUTTON3_PRESSED)))
-			{
-				FParser->Goto(me.y);
-				if (me.bstate & BUTTON3_PRESSED)
-					enterPressed();
-			}
-			else
-				Screen<WindowType>::mouseButtonPressed(me);
-		}
-		else if (FParserHelper->hasCoords(me.x, me.y))
-		{
-			if (w != FParserHelper)
-			{
-				if (nextColumnAvailable())
-					nextColumn();
-				else
-					return;
-			}
-			scrollpadMouseButtonPressed(*FParserHelper, me);
-		}
-	}
-	else if (!Dirs->empty() && Dirs->hasCoords(me.x, me.y))
-	{
-		if (!tryPreviousColumn() || !tryPreviousColumn())
-			return;
-		if (size_t(me.y) < Dirs->size() && (me.bstate & (BUTTON1_PRESSED | BUTTON3_PRESSED)))
-		{
-			Dirs->Goto(me.y);
-			if (me.bstate & BUTTON1_PRESSED)
-				enterPressed();
-		}
-		else
-			Screen<WindowType>::mouseButtonPressed(me);
-		Tags->clear();
-	}
-	else if (!TagTypes->empty() && TagTypes->hasCoords(me.x, me.y))
-	{
-		if (w != TagTypes)
-		{
-			bool success;
-			if (w == Dirs)
-				success = tryNextColumn();
-			else
-				success = tryPreviousColumn();
-			if (!success)
-				return;
-		}
-		if (size_t(me.y) < TagTypes->size() && (me.bstate & (BUTTON1_PRESSED | BUTTON3_PRESSED)))
-		{
-			if (!TagTypes->Goto(me.y))
-				return;
-			TagTypes->refresh();
-			Tags->refresh();
-			if (me.bstate & BUTTON3_PRESSED)
-				enterPressed();
-		}
-		else
-			Screen<WindowType>::mouseButtonPressed(me);
-	}
-	else if (!Tags->empty() && Tags->hasCoords(me.x, me.y))
-	{
-		if (!tryNextColumn() || !tryNextColumn())
-			return;
-		if (size_t(me.y) < Tags->size() && (me.bstate & (BUTTON1_PRESSED | BUTTON3_PRESSED)))
-		{
-			Tags->Goto(me.y);
-			Tags->refresh();
-			if (me.bstate & BUTTON3_PRESSED)
-				enterPressed();
-		}
-		else
-			Screen<WindowType>::mouseButtonPressed(me);
-	}
-}
 
 /***********************************************************************/
 
-bool TagEditor::allowsSearching()
+bool TagEditor::itemAvailable()
 {
-	return w == Dirs || w == Tags;
+	if (w == Tags)
+		return !Tags->empty();
+	return false;
 }
 
-void TagEditor::setSearchConstraint(const std::string &constraint)
+bool TagEditor::addItemToPlaylist(bool play)
 {
-	if (w == Dirs)
-	{
-		m_directories_search_predicate = Regex::Filter<std::pair<std::string, std::string>>(
-			Regex::make(constraint, Config.regex_type),
-			std::bind(DirEntryMatcher, ph::_1, ph::_2, false)
-		);
-	}
-	else if (w == Tags)
-	{
-		m_songs_search_predicate = Regex::Filter<MPD::MutableSong>(
-			Regex::make(constraint, Config.regex_type),
-			SongEntryMatcher
-		);
-	}
-}
-
-void TagEditor::clearConstraint()
-{
-	if (w == Dirs)
-		m_directories_search_predicate.clear();
-	else if (w == Tags)
-		m_songs_search_predicate.clear();
-}
-
-bool TagEditor::find(SearchDirection direction, bool wrap, bool skip_current)
-{
-	bool result = false;
-	if (w == Dirs)
-		result = search(*Dirs, m_directories_search_predicate, direction, wrap, skip_current);
-	else if (w == Tags)
-		result = search(*Tags, m_songs_search_predicate, direction, wrap, skip_current);
-	return result;
-}
-
-/***********************************************************************/
-
-bool TagEditor::addItemToPlaylist()
-{
-	bool result = false;
-	if (w == Tags && !Tags->empty())
-		result = addSongToPlaylist(*Tags->currentV(), false);
-	return result;
+	return addSongToPlaylist(*Tags->currentV(), play);
 }
 
 std::vector<MPD::Song> TagEditor::getSelectedSongs()

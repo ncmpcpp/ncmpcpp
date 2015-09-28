@@ -107,11 +107,6 @@ std::wstring SortPlaylistDialog::title()
 	return previousScreen()->title();
 }
 
-void SortPlaylistDialog::enterPressed()
-{
-	w.current()->value().run();
-}
-
 void SortPlaylistDialog::mouseButtonPressed(MEVENT me)
 {
 	if (w.hasCoords(me.x, me.y))
@@ -120,12 +115,26 @@ void SortPlaylistDialog::mouseButtonPressed(MEVENT me)
 		{
 			w.Goto(me.y);
 			if (me.bstate & BUTTON3_PRESSED)
-				enterPressed();
+				runAction();
 		}
 		else
 			Screen<WindowType>::mouseButtonPressed(me);
 	}
 }
+
+/**********************************************************************/
+
+bool SortPlaylistDialog::actionRunnable()
+{
+	return !w.empty();
+}
+
+void SortPlaylistDialog::runAction()
+{
+	w.current()->value().run();
+}
+
+/**********************************************************************/
 
 void SortPlaylistDialog::moveSortOrderDown()
 {

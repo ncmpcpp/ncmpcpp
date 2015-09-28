@@ -205,12 +205,66 @@ std::wstring SearchEngine::title()
 	return L"Search engine";
 }
 
-void SearchEngine::enterPressed()
+void SearchEngine::mouseButtonPressed(MEVENT me)
+{
+	if (w.empty() || !w.hasCoords(me.x, me.y) || size_t(me.y) >= w.size())
+		return;
+	if (me.bstate & (BUTTON1_PRESSED | BUTTON3_PRESSED))
+	{
+		if (!w.Goto(me.y))
+			return;
+		w.refresh();
+		if ((me.bstate & BUTTON3_PRESSED)
+		    && w.choice() < StaticOptions)
+			runAction();
+		else if (w.choice() >= StaticOptions)
+		{
+			bool play = me.bstate & BUTTON3_PRESSED;
+			addItemToPlaylist(play);
+		}
+	}
+	else
+		Screen<WindowType>::mouseButtonPressed(me);
+}
+
+/***********************************************************************/
+
+bool SearchEngine::allowsSearching()
+{
+	return w.rbegin()->value().isSong();
+}
+
+void SearchEngine::setSearchConstraint(const std::string &constraint)
+{
+	m_search_predicate = Regex::ItemFilter<SEItem>(
+		Regex::make(constraint, Config.regex_type),
+		std::bind(SEItemEntryMatcher, ph::_1, ph::_2, false)
+	);
+}
+
+void SearchEngine::clearConstraint()
+{
+	m_search_predicate.clear();
+}
+
+bool SearchEngine::find(SearchDirection direction, bool wrap, bool skip_current)
+{
+	return search(w, m_search_predicate, direction, wrap, skip_current);
+}
+
+/***********************************************************************/
+
+bool SearchEngine::actionRunnable()
+{
+	return !w.empty() && !w.current()->value().isSong();
+}
+
+void SearchEngine::runAction()
 {
 	size_t option = w.choice();
 	if (option > ConstraintsNumber && option < SearchButton)
 		w.current()->value().buffer().clear();
-	
+
 	if (option < ConstraintsNumber)
 	{
 		Statusbar::ScopedLock slock;
@@ -268,62 +322,16 @@ void SearchEngine::enterPressed()
 		addSongToPlaylist(w.current()->value().song(), true);
 }
 
-void SearchEngine::mouseButtonPressed(MEVENT me)
-{
-	if (w.empty() || !w.hasCoords(me.x, me.y) || size_t(me.y) >= w.size())
-		return;
-	if (me.bstate & (BUTTON1_PRESSED | BUTTON3_PRESSED))
-	{
-		if (!w.Goto(me.y))
-			return;
-		w.refresh();
-		if ((me.bstate & BUTTON3_PRESSED || w.choice() > ConstraintsNumber) && w.choice() < StaticOptions)
-			enterPressed();
-		else if (w.choice() >= StaticOptions)
-		{
-			if (me.bstate & BUTTON1_PRESSED)
-				addItemToPlaylist();
-			else
-				enterPressed();
-		}
-	}
-	else
-		Screen<WindowType>::mouseButtonPressed(me);
-}
-
 /***********************************************************************/
 
-bool SearchEngine::allowsSearching()
+bool SearchEngine::itemAvailable()
 {
-	return w.rbegin()->value().isSong();
+	return !w.empty() && w.current()->value().isSong();
 }
 
-void SearchEngine::setSearchConstraint(const std::string &constraint)
+bool SearchEngine::addItemToPlaylist(bool play)
 {
-	m_search_predicate = Regex::ItemFilter<SEItem>(
-		Regex::make(constraint, Config.regex_type),
-		std::bind(SEItemEntryMatcher, ph::_1, ph::_2, false)
-	);
-}
-
-void SearchEngine::clearConstraint()
-{
-	m_search_predicate.clear();
-}
-
-bool SearchEngine::find(SearchDirection direction, bool wrap, bool skip_current)
-{
-	return search(w, m_search_predicate, direction, wrap, skip_current);
-}
-
-/***********************************************************************/
-
-bool SearchEngine::addItemToPlaylist()
-{
-	bool result = false;
-	if (!w.empty() && w.current()->value().isSong())
-		result = addSongToPlaylist(w.current()->value().song(), false);
-	return result;
+	return addSongToPlaylist(w.current()->value().song(), play);
 }
 
 std::vector<MPD::Song> SearchEngine::getSelectedSongs()

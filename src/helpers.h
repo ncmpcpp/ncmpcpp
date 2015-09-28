@@ -84,16 +84,6 @@ bool search(NC::Menu<ItemT> &m, const PredicateT &pred,
 	return result;
 }
 
-inline HasColumns *hasColumns(BaseScreen *screen)
-{
-	return dynamic_cast<HasColumns *>(screen);
-}
-
-inline HasSongs *hasSongs(BaseScreen *screen)
-{
-	return dynamic_cast<HasSongs *>(screen);
-}
-
 template <typename Iterator>
 bool hasSelected(Iterator first, Iterator last)
 {

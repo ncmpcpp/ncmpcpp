@@ -27,7 +27,7 @@
 #include "screen.h"
 #include "song.h"
 
-struct SelectedItemsAdder: Screen<NC::Menu<RunnableItem<std::string, void()>> *>, Searchable, Tabbable
+struct SelectedItemsAdder: Screen<NC::Menu<RunnableItem<std::string, void()>> *>, HasActions, Searchable, Tabbable
 {
 	typedef SelectedItemsAdder Self;
 	typedef typename std::remove_pointer<WindowType>::type Component;
@@ -44,12 +44,15 @@ struct SelectedItemsAdder: Screen<NC::Menu<RunnableItem<std::string, void()>> *>
 	
 	virtual void update() OVERRIDE { }
 	
-	virtual void enterPressed() OVERRIDE;
 	virtual void mouseButtonPressed(MEVENT me) OVERRIDE;
 	
 	virtual bool isLockable() OVERRIDE { return false; }
 	virtual bool isMergable() OVERRIDE { return false; }
-	
+
+	// HasActions implemenetation
+	virtual bool actionRunnable() OVERRIDE;
+	virtual void runAction() OVERRIDE;
+
 	// Searchable implementation
 	virtual bool allowsSearching() OVERRIDE;
 	virtual void setSearchConstraint(const std::string &constraint) OVERRIDE;

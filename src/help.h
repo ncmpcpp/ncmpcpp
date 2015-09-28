@@ -37,8 +37,6 @@ struct Help: Screen<NC::Scrollpad>, Tabbable
 	
 	virtual void update() OVERRIDE { }
 	
-	virtual void enterPressed() OVERRIDE { }
-	
 	virtual bool isLockable() OVERRIDE { return true; }
 	virtual bool isMergable() OVERRIDE { return true; }
 };

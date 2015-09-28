@@ -113,7 +113,7 @@ void SelectedItemsAdder::switchTo()
 {
 	using Global::myScreen;
 	
-	auto hs = hasSongs(myScreen);
+	auto hs = dynamic_cast<HasSongs *>(myScreen);
 	if (!hs)
 		return;
 	
@@ -169,11 +169,6 @@ std::wstring SelectedItemsAdder::title()
 	return previousScreen()->title();
 }
 
-void SelectedItemsAdder::enterPressed()
-{
-	w->current()->value().run();
-}
-
 void SelectedItemsAdder::mouseButtonPressed(MEVENT me)
 {
 	if (w->empty() || !w->hasCoords(me.x, me.y) || size_t(me.y) >= w->size())
@@ -182,10 +177,22 @@ void SelectedItemsAdder::mouseButtonPressed(MEVENT me)
 	{
 		w->Goto(me.y);
 		if (me.bstate & BUTTON3_PRESSED)
-			enterPressed();
+			runAction();
 	}
 	else
 		Screen<WindowType>::mouseButtonPressed(me);
+}
+
+/***********************************************************************/
+
+bool SelectedItemsAdder::actionRunnable()
+{
+	return !w->empty();
+}
+
+void SelectedItemsAdder::runAction()
+{
+	w->current()->value().run();
 }
 
 /***********************************************************************/

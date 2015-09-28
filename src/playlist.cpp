@@ -139,7 +139,7 @@ void Playlist::mouseButtonPressed(MEVENT me)
 		{
 			w.Goto(me.y);
 			if (me.bstate & BUTTON3_PRESSED)
-				enterPressed();
+				addItemToPlaylist(true);
 		}
 		else
 			Screen<WindowType>::mouseButtonPressed(me);
@@ -171,6 +171,18 @@ bool Playlist::find(SearchDirection direction, bool wrap, bool skip_current)
 }
 
 /***********************************************************************/
+
+bool Playlist::itemAvailable()
+{
+	return !w.empty();
+}
+
+bool Playlist::addItemToPlaylist(bool play)
+{
+	if (play)
+		Mpd.PlayID(w.currentV()->getID());
+	return true;
+}
 
 std::vector<MPD::Song> Playlist::getSelectedSongs()
 {

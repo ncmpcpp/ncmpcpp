@@ -502,7 +502,7 @@ void JumpToParentDirectory::run()
 		if (!myBrowser->inRootDirectory())
 		{
 			myBrowser->main().reset();
-			myBrowser->enterPressed();
+			myBrowser->enterDirectory();
 		}
 	}
 #	ifdef HAVE_TAGLIB_H
@@ -511,37 +511,46 @@ void JumpToParentDirectory::run()
 		if (myTagEditor->CurrentDir() != "/")
 		{
 			myTagEditor->Dirs->reset();
-			myTagEditor->enterPressed();
+			myTagEditor->enterDirectory();
 		}
 	}
 #	endif // HAVE_TAGLIB_H
 }
 
-void PressEnter::run()
+bool RunAction::canBeRun()
 {
-	myScreen->enterPressed();
+	m_ha = dynamic_cast<HasActions *>(myScreen);
+	return m_ha != nullptr
+		&& m_ha->actionRunnable();
+}
+
+void RunAction::run()
+{
+	m_ha->runAction();
 }
 
 bool PreviousColumn::canBeRun()
 {
-	auto hc = hasColumns(myScreen);
-	return hc && hc->previousColumnAvailable();
+	m_hc = dynamic_cast<HasColumns *>(myScreen);
+	return m_hc != nullptr
+		&& m_hc->previousColumnAvailable();
 }
 
 void PreviousColumn::run()
 {
-	hasColumns(myScreen)->previousColumn();
+	m_hc->previousColumn();
 }
 
 bool NextColumn::canBeRun()
 {
-	auto hc = hasColumns(myScreen);
-	return hc && hc->nextColumnAvailable();
+	m_hc = dynamic_cast<HasColumns *>(myScreen);
+	return m_hc != nullptr
+		&& m_hc->nextColumnAvailable();
 }
 
 void NextColumn::run()
 {
-	hasColumns(myScreen)->nextColumn();
+	m_hc->nextColumn();
 }
 
 bool MasterScreen::canBeRun()
@@ -600,19 +609,31 @@ void VolumeDown::run()
 
 bool AddItemToPlaylist::canBeRun()
 {
-	if (m_hs != static_cast<void *>(myScreen))
-		m_hs = dynamic_cast<HasSongs *>(myScreen);
-	return m_hs != nullptr;
+	m_hs = dynamic_cast<HasSongs *>(myScreen);
+	return m_hs != nullptr && m_hs->itemAvailable();
 }
 
 void AddItemToPlaylist::run()
 {
-	bool success = m_hs->addItemToPlaylist();
+	bool success = m_hs->addItemToPlaylist(false);
 	if (success)
 	{
 		myScreen->scroll(NC::Scroll::Down);
 		listsChangeFinisher();
 	}
+}
+
+bool PlayItem::canBeRun()
+{
+	m_hs = dynamic_cast<HasSongs *>(myScreen);
+	return m_hs != nullptr && m_hs->itemAvailable();
+}
+
+void PlayItem::run()
+{
+	bool success = m_hs->addItemToPlaylist(true);
+	if (success)
+		listsChangeFinisher();
 }
 
 bool DeletePlaylistItems::canBeRun()
@@ -957,17 +978,6 @@ void Add::run()
 	}
 }
 
-bool Play::canBeRun()
-{
-	return myScreen == myPlaylist
-		&& !myPlaylist->main().empty();
-}
-
-void Play::run()
-{
-	Mpd.PlayID(myPlaylist->main().current()->value().getID());
-}
-
 bool SeekForward::canBeRun()
 {
 	return Status::State::player() != MPD::psStop && Status::State::totalTime() > 0;
@@ -1226,7 +1236,7 @@ void StartSearching::run()
 	mySearcher->main().setHighlighting(0);
 	mySearcher->main().refresh();
 	mySearcher->main().setHighlighting(1);
-	mySearcher->enterPressed();
+	mySearcher->runAction();
 }
 
 bool SaveTagChanges::canBeRun()
@@ -1245,12 +1255,12 @@ void SaveTagChanges::run()
 	if (myScreen == myTinyTagEditor)
 	{
 		myTinyTagEditor->main().highlight(myTinyTagEditor->main().size()-2); // Save
-		myTinyTagEditor->enterPressed();
+		myTinyTagEditor->runAction();
 	}
 	else if (myScreen->activeWindow() == myTagEditor->TagTypes)
 	{
 		myTagEditor->TagTypes->highlight(myTagEditor->TagTypes->size()-1); // Save
-		myTagEditor->enterPressed();
+		myTagEditor->runAction();
 	}
 #	endif // HAVE_TAGLIB_H
 }
@@ -1295,6 +1305,34 @@ void SetVolume::run()
 		Mpd.SetVolume(volume);
 	}
 	Statusbar::printf("Volume set to %1%%%", volume);
+}
+
+bool EnterDirectory::canBeRun()
+{
+	bool result = false;
+	if (myScreen == myBrowser && !myBrowser->main().empty())
+	{
+		result = myBrowser->main().current()->value().type()
+			== MPD::Item::Type::Directory;
+	}
+#ifdef HAVE_TAGLIB_H
+	else if (myScreen->activeWindow() == myTagEditor->Dirs)
+		result = true;
+#endif // HAVE_TAGLIB_H
+	return result;
+}
+
+void EnterDirectory::run()
+{
+	if (myScreen == myBrowser)
+		myBrowser->enterDirectory();
+#ifdef HAVE_TAGLIB_H
+	else if (myScreen->activeWindow() == myTagEditor->Dirs)
+	{
+		if (!myTagEditor->enterDirectory())
+			Statusbar::print("No subdirectories found");
+	}
+#endif // HAVE_TAGLIB_H
 }
 
 bool EditSong::canBeRun()
@@ -2603,7 +2641,7 @@ void populateActions()
 	insert_action(new Actions::MoveEnd());
 	insert_action(new Actions::ToggleInterface());
 	insert_action(new Actions::JumpToParentDirectory());
-	insert_action(new Actions::PressEnter());
+	insert_action(new Actions::RunAction());
 	insert_action(new Actions::SelectItem());
 	insert_action(new Actions::SelectRange());
 	insert_action(new Actions::PreviousColumn());
@@ -2629,7 +2667,7 @@ void populateActions()
 	insert_action(new Actions::MoveSelectedItemsDown());
 	insert_action(new Actions::MoveSelectedItemsTo());
 	insert_action(new Actions::Add());
-	insert_action(new Actions::Play());
+	insert_action(new Actions::PlayItem());
 	insert_action(new Actions::SeekForward());
 	insert_action(new Actions::SeekBackward());
 	insert_action(new Actions::ToggleDisplayMode());
@@ -2650,6 +2688,7 @@ void populateActions()
 	insert_action(new Actions::ToggleCrossfade());
 	insert_action(new Actions::SetCrossfade());
 	insert_action(new Actions::SetVolume());
+	insert_action(new Actions::EnterDirectory());
 	insert_action(new Actions::EditSong());
 	insert_action(new Actions::EditLibraryTag());
 	insert_action(new Actions::EditLibraryAlbum());

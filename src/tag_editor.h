@@ -49,7 +49,7 @@ struct TagsWindow: NC::Menu<MPD::MutableSong>, SongList
 	virtual std::vector<MPD::Song> getSelectedSongs() OVERRIDE;
 };
 
-struct TagEditor: Screen<NC::Window *>, HasColumns, HasSongs, Searchable, Tabbable
+struct TagEditor: Screen<NC::Window *>, HasActions, HasColumns, HasSongs, Searchable, Tabbable
 {
 	TagEditor();
 	
@@ -62,7 +62,6 @@ struct TagEditor: Screen<NC::Window *>, HasColumns, HasSongs, Searchable, Tabbab
 	virtual void refresh() OVERRIDE;
 	virtual void update() OVERRIDE;
 	
-	virtual void enterPressed() OVERRIDE;
 	virtual void mouseButtonPressed(MEVENT) OVERRIDE;
 	
 	virtual bool isLockable() OVERRIDE { return true; }
@@ -73,9 +72,14 @@ struct TagEditor: Screen<NC::Window *>, HasColumns, HasSongs, Searchable, Tabbab
 	virtual void setSearchConstraint(const std::string &constraint) OVERRIDE;
 	virtual void clearConstraint() OVERRIDE;
 	virtual bool find(SearchDirection direction, bool wrap, bool skip_current) OVERRIDE;
-	
+
+	// HasActions implementation
+	virtual bool actionRunnable() OVERRIDE;
+	virtual void runAction() OVERRIDE;
+
 	// HasSongs implementation
-	virtual bool addItemToPlaylist() OVERRIDE;
+	virtual bool itemAvailable() OVERRIDE;
+	virtual bool addItemToPlaylist(bool play) OVERRIDE;
 	virtual std::vector<MPD::Song> getSelectedSongs() OVERRIDE;
 	
 	// HasColumns implementation
@@ -86,6 +90,7 @@ struct TagEditor: Screen<NC::Window *>, HasColumns, HasSongs, Searchable, Tabbab
 	virtual void nextColumn() OVERRIDE;
 	
 	// private members
+	bool enterDirectory();
 	void LocateSong(const MPD::Song &s);
 	const std::string &CurrentDir() { return itsBrowsedDir; }
 	

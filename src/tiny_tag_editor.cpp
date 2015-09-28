@@ -99,7 +99,32 @@ std::wstring TinyTagEditor::title()
 	return L"Tiny tag editor";
 }
 
-void TinyTagEditor::enterPressed()
+void TinyTagEditor::mouseButtonPressed(MEVENT me)
+{
+	if (w.empty() || !w.hasCoords(me.x, me.y) || size_t(me.y) >= w.size())
+		return;
+	if (me.bstate & (BUTTON1_PRESSED | BUTTON3_PRESSED))
+	{
+		if (!w.Goto(me.y))
+			return;
+		if (me.bstate & BUTTON3_PRESSED)
+		{
+			w.refresh();
+			runAction();
+		}
+	}
+	else
+		Screen<WindowType>::mouseButtonPressed(me);
+}
+
+/**********************************************************************/
+
+bool TinyTagEditor::actionRunnable()
+{
+	return !w.empty();
+}
+
+void TinyTagEditor::runAction()
 {
 	size_t option = w.choice();
 	if (option < 19) // separator after comment
@@ -129,7 +154,7 @@ void TinyTagEditor::enterPressed()
 			w.at(option).value() << NC::Format::Bold << "Filename:" << NC::Format::NoBold << ' ' << (itsEdited.getNewName().empty() ? itsEdited.getName() : itsEdited.getNewName());
 		}
 	}
-	
+
 	if (option == 22)
 	{
 		Statusbar::print("Updating tags...");
@@ -153,23 +178,7 @@ void TinyTagEditor::enterPressed()
 		m_previous_screen->switchTo();
 }
 
-void TinyTagEditor::mouseButtonPressed(MEVENT me)
-{
-	if (w.empty() || !w.hasCoords(me.x, me.y) || size_t(me.y) >= w.size())
-		return;
-	if (me.bstate & (BUTTON1_PRESSED | BUTTON3_PRESSED))
-	{
-		if (!w.Goto(me.y))
-			return;
-		if (me.bstate & BUTTON3_PRESSED)
-		{
-			w.refresh();
-			enterPressed();
-		}
-	}
-	else
-		Screen<WindowType>::mouseButtonPressed(me);
-}
+/**********************************************************************/
 
 void TinyTagEditor::SetEdited(const MPD::Song &s)
 {

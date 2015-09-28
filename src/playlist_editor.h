@@ -43,7 +43,6 @@ struct PlaylistEditor: Screen<NC::Window *>, HasColumns, HasSongs, Searchable, T
 	
 	virtual int windowTimeout() OVERRIDE;
 
-	virtual void enterPressed() OVERRIDE;
 	virtual void mouseButtonPressed(MEVENT me) OVERRIDE;
 	
 	virtual bool isLockable() OVERRIDE { return true; }
@@ -56,7 +55,8 @@ struct PlaylistEditor: Screen<NC::Window *>, HasColumns, HasSongs, Searchable, T
 	virtual bool find(SearchDirection direction, bool wrap, bool skip_current) OVERRIDE;
 	
 	// HasSongs implementation
-	virtual bool addItemToPlaylist() OVERRIDE;
+	virtual bool itemAvailable() OVERRIDE;
+	virtual bool addItemToPlaylist(bool play) OVERRIDE;
 	virtual std::vector<MPD::Song> getSelectedSongs() OVERRIDE;
 	
 	// HasColumns implementation
@@ -78,8 +78,6 @@ struct PlaylistEditor: Screen<NC::Window *>, HasColumns, HasSongs, Searchable, T
 	SongMenu Content;
 	
 private:
-	bool addItemToPlaylist(bool play);
-	
 	bool m_playlists_update_requested;
 	bool m_content_update_requested;
 

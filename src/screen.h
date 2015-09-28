@@ -73,9 +73,6 @@ struct BaseScreen
 	/// somehow, it should be called by this function.
 	virtual void update() = 0;
 	
-	/// Invoked after Enter was pressed
-	virtual void enterPressed() = 0;
-	
 	/// @see Screen::mouseButtonPressed()
 	virtual void mouseButtonPressed(MEVENT me) = 0;
 

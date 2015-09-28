@@ -24,6 +24,7 @@ ncmpcpp-0.7 (????-??-??)
 * Support for Alt, Ctrl and Shift modifiers as well as Escape key was added.
 * Action that updates the environment can now be used in bindings configuration file.
 * Monolithic 'press_space' action was split into 'add_item_to_playlist', 'toggle_lyrics_update_on_song_change' and 'toggle_visualization_type'.
+* Monolithic 'press_enter' action was split into 'enter_directory', 'play_item', run_action' and 'toggle_output'.
 * Sorting actions were rebound to Ctrl-S.
 * Support for range selection was added (bound to Ctrl-V by default). In addition, sorting, reversing and shuffling items in playlist now works on ranges.
 * Support for selecting found items was added (bound to Ctrl-_ by default).

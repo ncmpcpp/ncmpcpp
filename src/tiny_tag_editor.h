@@ -29,7 +29,7 @@
 #include "mutable_song.h"
 #include "screen.h"
 
-struct TinyTagEditor: Screen<NC::Menu<NC::Buffer>>
+struct TinyTagEditor: Screen<NC::Menu<NC::Buffer>>, HasActions
 {
 	TinyTagEditor();
 	
@@ -42,12 +42,15 @@ struct TinyTagEditor: Screen<NC::Menu<NC::Buffer>>
 	
 	virtual void update() OVERRIDE { }
 	
-	virtual void enterPressed() OVERRIDE;
 	virtual void mouseButtonPressed(MEVENT me) OVERRIDE;
 	
 	virtual bool isLockable() OVERRIDE { return false; }
 	virtual bool isMergable() OVERRIDE { return true; }
-	
+
+	// HasActions implemenetation
+	virtual bool actionRunnable() OVERRIDE;
+	virtual void runAction() OVERRIDE;
+
 	// private members
 	void SetEdited(const MPD::Song &);
 	

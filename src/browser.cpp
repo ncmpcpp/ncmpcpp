@@ -209,40 +209,6 @@ void Browser::update()
 	}
 }
 
-void Browser::enterPressed()
-{
-	if (w.empty())
-		return;
-	
-	const MPD::Item &item = w.current()->value();
-	switch (item.type())
-	{
-		case MPD::Item::Type::Directory:
-		{
-			getDirectory(item.directory().path());
-			drawHeader();
-			break;
-		}
-		case MPD::Item::Type::Song:
-		{
-			addSongToPlaylist(item.song(), true, -1);
-			break;
-		}
-		case MPD::Item::Type::Playlist:
-		{
-			std::vector<MPD::Song> list(
-				std::make_move_iterator(Mpd.GetPlaylistContentNoInfo(item.playlist().path())),
-				std::make_move_iterator(MPD::SongIterator())
-			);
-			// TODO: ask on failure if we want to continue
-			bool success = addSongsToPlaylist(list.begin(), list.end(), true, -1);
-			Statusbar::printf("Playlist \"%1%\" loaded%2%",
-				item.playlist().path(), withErrors(success)
-			);
-		}
-	}
-}
-
 void Browser::mouseButtonPressed(MEVENT me)
 {
 	if (w.empty() || !w.hasCoords(me.x, me.y) || size_t(me.y) >= w.size())
@@ -254,20 +220,17 @@ void Browser::mouseButtonPressed(MEVENT me)
 		{
 			case MPD::Item::Type::Directory:
 				if (me.bstate & BUTTON1_PRESSED)
-				{
-					getDirectory(w.current()->value().directory().path());
-					drawHeader();
-				}
+					enterDirectory();
 				else
-					addItemToPlaylist();
+					addItemToPlaylist(false);
 				break;
 			case MPD::Item::Type::Playlist:
 			case MPD::Item::Type::Song:
-				if (me.bstate & BUTTON1_PRESSED)
-					addItemToPlaylist();
-				else
-					enterPressed();
+			{
+				bool play = me.bstate & BUTTON3_PRESSED;
+				addItemToPlaylist(play);
 				break;
+			}
 		}
 	}
 	else
@@ -301,17 +264,36 @@ bool Browser::find(SearchDirection direction, bool wrap, bool skip_current)
 
 /***********************************************************************/
 
-bool Browser::addItemToPlaylist()
+bool Browser::itemAvailable()
+{
+	return !w.empty()
+		// ignore parent directory
+		&& !isParentDirectory(w.current()->value());
+}
+
+bool Browser::addItemToPlaylist(bool play)
 {
 	bool result = false;
-	if (w.empty())
-		return result;
+
+	auto tryToPlay = [] {
+		// Cheap trick that might fail in presence of multiple
+		// clients modifying the playlist at the same time, but
+		// oh well, this approach correctly loads cue playlists
+		// and is much faster in general as it doesn't require
+		// fetching song data.
+		try
+		{
+			Mpd.Play(Status::State::playlistLength());
+		}
+		catch (MPD::ServerError &e)
+		{
+			// If not bad index, rethrow.
+			if (e.code() != MPD_SERVER_ERROR_ARG)
+				throw;
+		}
+	};
 
 	const MPD::Item &item = w.current()->value();
-	// ignore parent directory
-	if (isParentDirectory(item))
-		return result;
-
 	switch (item.type())
 	{
 		case MPD::Item::Type::Directory:
@@ -320,23 +302,26 @@ bool Browser::addItemToPlaylist()
 			{
 				std::vector<MPD::Song> songs;
 				getLocalDirectoryRecursively(songs, item.directory().path());
-				result = addSongsToPlaylist(songs.begin(), songs.end(), false, -1);
+				result = addSongsToPlaylist(songs.begin(), songs.end(), play, -1);
 			}
 			else
 			{
 				Mpd.Add(item.directory().path());
+				if (play)
+					tryToPlay();
 				result = true;
 			}
 			Statusbar::printf("Directory \"%1%\" added%2%",
-				item.directory().path(), withErrors(result)
-			);
+				item.directory().path(), withErrors(result));
 			break;
 		}
 		case MPD::Item::Type::Song:
-			result = addSongToPlaylist(item.song(), false);
+			result = addSongToPlaylist(item.song(), play);
 			break;
 		case MPD::Item::Type::Playlist:
 			Mpd.LoadPlaylist(item.playlist().path());
+			if (play)
+				tryToPlay();
 			Statusbar::printf("Playlist \"%1%\" loaded", item.playlist().path());
 			result = true;
 			break;
@@ -422,6 +407,22 @@ void Browser::locateSong(const MPD::Song &s)
 	auto it = std::find(begin, end, MPD::Item(s));
 	if (it != end)
 		w.highlight(it-begin);
+}
+
+bool Browser::enterDirectory()
+{
+	bool result = false;
+	if (!w.empty())
+	{
+		const auto &item = w.current()->value();
+		if (item.type() == MPD::Item::Type::Directory)
+		{
+			getDirectory(item.directory().path());
+			drawHeader();
+			result = true;
+		}
+	}
+	return result;
 }
 
 void Browser::getDirectory(std::string directory)

@@ -39,8 +39,6 @@ struct ServerInfo: Screen<NC::Scrollpad>, Tabbable
 	
 	virtual void update() OVERRIDE;
 	
-	virtual void enterPressed() OVERRIDE { }
-	
 	virtual bool isLockable() OVERRIDE { return false; }
 	virtual bool isMergable() OVERRIDE { return false; }
 	

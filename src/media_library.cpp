@@ -455,11 +455,6 @@ int MediaLibrary::windowTimeout()
 		return Screen<WindowType>::windowTimeout();
 }
 
-void MediaLibrary::enterPressed()
-{
-	addItemToPlaylist(true);
-}
-
 void MediaLibrary::mouseButtonPressed(MEVENT me)
 {
 	auto tryNextColumn = [this]() -> bool {
@@ -492,7 +487,7 @@ void MediaLibrary::mouseButtonPressed(MEVENT me)
 		{
 			Tags.Goto(me.y);
 			if (me.bstate & BUTTON3_PRESSED)
-				addItemToPlaylist();
+				addItemToPlaylist(false);
 		}
 		else
 			Screen<WindowType>::mouseButtonPressed(me);
@@ -515,7 +510,7 @@ void MediaLibrary::mouseButtonPressed(MEVENT me)
 		{
 			Albums.Goto(me.y);
 			if (me.bstate & BUTTON3_PRESSED)
-				addItemToPlaylist();
+				addItemToPlaylist(false);
 		}
 		else
 			Screen<WindowType>::mouseButtonPressed(me);
@@ -528,10 +523,8 @@ void MediaLibrary::mouseButtonPressed(MEVENT me)
 		if (size_t(me.y) < Songs.size() && (me.bstate & (BUTTON1_PRESSED | BUTTON3_PRESSED)))
 		{
 			Songs.Goto(me.y);
-			if (me.bstate & BUTTON1_PRESSED)
-				addItemToPlaylist();
-			else
-				enterPressed();
+			bool play = me.bstate & BUTTON3_PRESSED;
+			addItemToPlaylist(play);
 		}
 		else
 			Screen<WindowType>::mouseButtonPressed(me);
@@ -594,9 +587,53 @@ bool MediaLibrary::find(SearchDirection direction, bool wrap, bool skip_current)
 
 /***********************************************************************/
 
-bool MediaLibrary::addItemToPlaylist()
+bool MediaLibrary::itemAvailable()
 {
-	return addItemToPlaylist(false);
+	if (isActiveWindow(Tags))
+		return !Tags.empty();
+	if (isActiveWindow(Albums))
+		return !Albums.empty();
+	if (isActiveWindow(Songs))
+		return !Songs.empty();
+	return false;
+}
+
+bool MediaLibrary::addItemToPlaylist(bool play)
+{
+	bool result = false;
+	if (isActiveWindow(Songs))
+		result = addSongToPlaylist(Songs.current()->value(), play);
+	else
+	{
+		if (isActiveWindow(Tags)
+		||  (isActiveWindow(Albums) && Albums.current()->value().isAllTracksEntry()))
+		{
+			Mpd.StartSearch(true);
+			Mpd.AddSearch(Config.media_lib_primary_tag, Tags.current()->value().tag());
+			std::vector<MPD::Song> list(
+				std::make_move_iterator(Mpd.CommitSearchSongs()),
+				std::make_move_iterator(MPD::SongIterator())
+			);
+			result = addSongsToPlaylist(list.begin(), list.end(), play, -1);
+			std::string tag_type = boost::locale::to_lower(
+				tagTypeToString(Config.media_lib_primary_tag));
+			Statusbar::printf("Songs with %1% \"%2%\" added%3%",
+				tag_type, Tags.current()->value().tag(), withErrors(result)
+			);
+		}
+		else if (isActiveWindow(Albums))
+		{
+			std::vector<MPD::Song> list(
+				std::make_move_iterator(getSongsFromAlbum(Albums.current()->value())),
+				std::make_move_iterator(MPD::SongIterator())
+			);
+			result = addSongsToPlaylist(list.begin(), list.end(), play, -1);
+			Statusbar::printf("Songs from album \"%1%\" added%2%",
+				Albums.current()->value().entry().album(), withErrors(result)
+			);
+		}
+	}
+	return result;
 }
 
 std::vector<MPD::Song> MediaLibrary::getSelectedSongs()
@@ -912,44 +949,6 @@ void MediaLibrary::LocateSong(const MPD::Song &s)
 	else // invalid tag was added, clear the list
 		Tags.clear();
 	refresh();
-}
-
-bool MediaLibrary::addItemToPlaylist(bool play)
-{
-	bool result = false;
-	if (isActiveWindow(Songs) && !Songs.empty())
-		result = addSongToPlaylist(Songs.current()->value(), play);
-	else
-	{
-		if ((!Tags.empty() && isActiveWindow(Tags))
-		||  (isActiveWindow(Albums) && Albums.current()->value().isAllTracksEntry()))
-		{
-			Mpd.StartSearch(true);
-			Mpd.AddSearch(Config.media_lib_primary_tag, Tags.current()->value().tag());
-			std::vector<MPD::Song> list(
-				std::make_move_iterator(Mpd.CommitSearchSongs()),
-				std::make_move_iterator(MPD::SongIterator())
-			);
-			result = addSongsToPlaylist(list.begin(), list.end(), play, -1);
-			std::string tag_type = boost::locale::to_lower(
-				tagTypeToString(Config.media_lib_primary_tag));
-			Statusbar::printf("Songs with %1% \"%2%\" added%3%",
-				tag_type, Tags.current()->value().tag(), withErrors(result)
-			);
-		}
-		else if (isActiveWindow(Albums))
-		{
-			std::vector<MPD::Song> list(
-				std::make_move_iterator(getSongsFromAlbum(Albums.current()->value())),
-				std::make_move_iterator(MPD::SongIterator())
-			);
-			result = addSongsToPlaylist(list.begin(), list.end(), play, -1);
-			Statusbar::printf("Songs from album \"%1%\" added%2%",
-				Albums.current()->value().entry().album(), withErrors(result)
-			);
-		}
-	}
-	return result;
 }
 
 namespace {
