@@ -469,7 +469,7 @@ void BindingsConfiguration::generateDefaults()
 	NC::Key::Type k = NC::Key::None;
     /* quick sort of playlist */
     if (notBound(k = stringToKey("ctrl-v")))
-        bind(k, DoQuickSort)
+        bind(k, Actions::Type::QuickSort);
 	if (notBound(k = stringToKey("mouse")))
 		bind(k, Actions::Type::MouseEvent);
 	if (notBound(k = stringToKey("up")))

@@ -62,6 +62,7 @@ enum class Type
 	ResetSearchEngine, ShowMediaLibrary, ToggleMediaLibraryColumnsMode,
 	ShowPlaylistEditor, ShowTagEditor, ShowOutputs, ShowVisualizer,
 	ShowClock, ShowServerInfo,
+    QuickSort,
 	_numberOfActions // needed to dynamically calculate size of action array
 };
 
@@ -793,6 +794,16 @@ private:
 	NC::List *m_list;
 	NC::List::Iterator m_begin;
 	NC::List::Iterator m_end;
+};
+
+struct QuickSort: BaseAction{
+	QuickSort(): BaseAction(Type::QuickSort, "quick_sort") { }
+	
+private:
+	virtual bool canBeRun() OVERRIDE;
+	virtual void run() OVERRIDE;
+
+	NC::List *m_list;
 };
 
 struct ReverseSelection: BaseAction

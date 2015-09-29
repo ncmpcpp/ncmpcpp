@@ -189,6 +189,7 @@ void write_bindings(NC::Scrollpad &w)
 	w << '\n';
 	key(w, Type::ToggleAddMode, "Toggle add mode (add or remove/always add)");
 	key(w, Type::ToggleMouse, "Toggle mouse support");
+	key(w, Type::QuickSort, "Quick sort of playlist");
 	key(w, Type::SelectRange, "Select range");
 	key(w, Type::ReverseSelection, "Reverse selection");
 	key(w, Type::RemoveSelection, "Remove selection");
