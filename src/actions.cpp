@@ -122,6 +122,14 @@ void validateScreenSize()
 	}
 }
 
+void DoQuickSort()
+{
+    ReverseSelection::run();
+    mySortPlaylistDialog->switchTo();
+    mySortPlaylistDialog->sort();
+    ReverseSelection::run();
+}
+
 void initializeScreens()
 {
 	myHelp = new Help;
@@ -1828,8 +1836,8 @@ void CropPlaylist::run()
 
 void ClearMainPlaylist::run()
 {
-	if (!myPlaylist->main().empty() && Config.ask_before_clearing_playlists)
-		confirmAction("Do you really want to clear main playlist?");
+//	if (!myPlaylist->main().empty() && Config.ask_before_clearing_playlists)
+//		confirmAction("Do you really want to clear main playlist?");
 	Mpd.ClearMainPlaylist();
 	Statusbar::print("Playlist cleared");
 	myPlaylist->main().reset();

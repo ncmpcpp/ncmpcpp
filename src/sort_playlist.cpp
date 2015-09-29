@@ -50,6 +50,9 @@ SortPlaylistDialog::SortPlaylistDialog()
 	w.addItem(Entry(std::make_pair("Artist", &MPD::Song::getArtist),
 		std::bind(&Self::moveSortOrderHint, this)
 	));
+	w.addItem(Entry(std::make_pair("Filename", &MPD::Song::getURI),
+		std::bind(&Self::moveSortOrderHint, this)
+	));
 	w.addItem(Entry(std::make_pair("Album", &MPD::Song::getAlbum),
 		std::bind(&Self::moveSortOrderHint, this)
 	));
@@ -72,9 +75,6 @@ SortPlaylistDialog::SortPlaylistDialog()
 		std::bind(&Self::moveSortOrderHint, this)
 	));
 	w.addItem(Entry(std::make_pair("Title", &MPD::Song::getTitle),
-		std::bind(&Self::moveSortOrderHint, this)
-	));
-	w.addItem(Entry(std::make_pair("Filename", &MPD::Song::getURI),
 		std::bind(&Self::moveSortOrderHint, this)
 	));
 	w.addSeparator();
