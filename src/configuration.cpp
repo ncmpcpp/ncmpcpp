@@ -77,11 +77,12 @@ bool configure(int argc, char **argv)
 	options.add_options()
 		("host,h", po::value<std::string>()->default_value("localhost"), "connect to server at host")
 		("port,p", po::value<int>()->default_value(6600), "connect to server at port")
+		("current-song", po::value<std::string>()->implicit_value("{{{(%l) }{{%a - }%t}}|{%f}}"), "print current song using given format and exit")
 		("config,c", po::value<std::vector<std::string>>(&config_paths)->default_value(default_config_paths, join<std::string>(default_config_paths, " AND ")), "specify configuration file(s)")
-		("ignore-config-errors", po::value<bool>()->default_value(false), "ignore unknown and invalid options in configuration files")
+		("ignore-config-errors", "ignore unknown and invalid options in configuration files")
 		("bindings,b", po::value<std::string>(&bindings_path)->default_value("~/.ncmpcpp/bindings"), "specify bindings file")
-		("screen,s", po::value<std::string>(), "specify initial screen")
-		("slave-screen,S", po::value<std::string>(), "specify initial slave screen")
+		("screen,s", po::value<std::string>(), "specify the startup screen")
+		("slave-screen,S", po::value<std::string>(), "specify the startup slave screen")
 		("help,?", "show help message")
 		("version,v", "display version information")
 	;
@@ -151,7 +152,7 @@ bool configure(int argc, char **argv)
 
 		// read configuration
 		std::for_each(config_paths.begin(), config_paths.end(), expand_home);
-		if (Config.read(config_paths, vm["ignore-config-errors"].as<bool>()) == false)
+		if (Config.read(config_paths, vm.count("ignore-config-errors")) == false)
 			exit(1);
 
 		// if bindings file was not specified, use the one from main directory.
@@ -185,6 +186,19 @@ bool configure(int argc, char **argv)
 		if (!vm["port"].defaulted())
 			Mpd.SetPort(vm["port"].as<int>());
 		Mpd.SetTimeout(Config.mpd_connection_timeout);
+
+		// print current song
+		if (vm.count("current-song"))
+		{
+			Mpd.Connect();
+			auto s = Mpd.GetCurrentSong();
+			if (!s.empty())
+			{
+				auto format = Format::parse(vm["current-song"].as<std::string>(), Format::Flags::Tag);
+				std::cout << Format::stringify<char>(format, &s);
+				return false;
+			}
+		}
 
 		// custom startup screen
 		if (vm.count("screen"))

@@ -29,6 +29,17 @@ ncmpcpp-0.7 (????-??-??)
 * Support for selecting found items was added (bound to Ctrl-_ by default).
 * Tracks in media library are now properly sorted for track numbers greater than 99.
 * Value of 'visualizer_sync_interval' is now restricted to be greater than 9.
+* Output of the visualizer now scales automatically as long as 'visualizer_sample_multiplier' is set to 1.
+* Command line switch that prints current song to the standard output is available once again.
+* Defined action chains are now shown in help screen.
+* Action chains for selecting an item and scrolling up/down are now bound to Shift-Up and Shift-Down respectively.
+
+ncmpcpp-0.6.7 (2015-09-12)
+* Fetching artist info from last.fm was fixed.
+
+ncmpcpp-0.6.6 (2015-09-07)
+* A typo in the example configuration file was fixed.
+* Fetching lyrics from lyricwiki.com was fixed.
 
 ncmpcpp-0.6.5 (2015-07-05)
 

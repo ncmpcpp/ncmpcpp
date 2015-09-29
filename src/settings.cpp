@@ -616,9 +616,23 @@ bool Configuration::read(const std::vector<std::string> &config_paths, bool igno
 	p.add("media_library_sort_by_mtime", yes_no(
 		media_library_sort_by_mtime, false
 	));
-	p.add("enable_window_title", yes_no(
-		set_window_title, true
-	));
+	p.add("enable_window_title", [this]() {
+		// Consider this variable only if TERM variable is available
+		// and we're not in emacs terminal nor tty (through any wrapper
+		// like screen).
+		auto term = getenv("TERM");
+		if (term != nullptr
+		 && strstr(term, "linux") == nullptr
+		 && strncmp(term, "eterm", const_strlen("eterm")))
+			return yes_no(set_window_title, true);
+		else
+		{
+			set_window_title = false;
+			return option_parser::worker([](std::string) {}, [] {
+				std::clog << "Terminal doesn't support window title, skipping 'enable_window_title'.\n";
+			});
+		}
+	}());
 	p.add("search_engine_default_search_mode", assign_default<unsigned>(
 		search_engine_default_search_mode, 1, [](unsigned v) {
 			boundsCheck(v, 1u, 3u);

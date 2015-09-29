@@ -154,7 +154,15 @@
 #def_key "up"
 #  scroll_up
 #
+#def_key "shift-up"
+#  select_item
+#  scroll_up
+#
 #def_key "down"
+#  scroll_down
+#
+#def_key "shift-down"
+#  select_item
 #  scroll_down
 #
 #def_key "["

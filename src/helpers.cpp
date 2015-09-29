@@ -40,6 +40,27 @@ const MPD::Song *currentSong(const BaseScreen *screen)
 	return ptr;
 }
 
+MPD::SongIterator getDatabaseIterator(MPD::Connection &mpd)
+{
+	MPD::SongIterator result;
+	try
+	{
+		result = mpd.GetDirectoryRecursive("/");
+	}
+	catch (MPD::ClientError &e)
+	{
+		if (e.code() == MPD_ERROR_CLOSED)
+		{
+			// If we can't get the database, display appropriate
+			// error message and reconnect with the MPD server.
+			Statusbar::print("Unable to fetch the data, increase max_buffer_output_size in your MPD configuration file");
+			mpd.Disconnect();
+			mpd.Connect();
+		}
+	}
+	return result;
+}
+
 typedef std::vector<MPD::Song>::const_iterator VectorSongIterator;
 bool addSongsToPlaylist(VectorSongIterator first, VectorSongIterator last, bool play, int position)
 {
@@ -205,21 +226,21 @@ void writeCyclicBuffer(const NC::WBuffer &buf, NC::Window &w, size_t &start_pos,
 		auto p = ps.begin();
 		
 		// load attributes from before starting pos
-		for (; p != ps.end() && p->position() < start_pos; ++p)
-			w << *p;
+		for (; p != ps.end() && p->first < start_pos; ++p)
+			w << p->second;
 		
 		auto write_buffer = [&](size_t start) {
 			for (size_t i = start; i < s.length() && len < width; ++i)
 			{
-				for (; p != ps.end() && p->position() == i; ++p)
-					w << *p;
+				for (; p != ps.end() && p->first == i; ++p)
+					w << p->second;
 				len += wcwidth(s[i]);
 				if (len > width)
 					break;
 				w << s[i];
 			}
 			for (; p != ps.end(); ++p)
-				w << *p;
+				w << p->second;
 			p = ps.begin();
 		};
 		

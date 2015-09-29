@@ -39,6 +39,59 @@
 #include "tiny_tag_editor.h"
 #include "visualizer.h"
 
+std::string screenTypeToString(ScreenType st)
+{
+	switch (st)
+	{
+	case ScreenType::Browser:
+		return "browser";
+#ifdef ENABLE_CLOCK
+	case ScreenType::Clock:
+		return "clock";
+#endif // ENABLE_CLOCK
+	case ScreenType::Help:
+		return "help";
+#ifdef HAVE_CURL_CURL_H
+	case ScreenType::Lastfm:
+		return "last_fm";
+#endif // HAVE_CURL_CURL_H
+	case ScreenType::Lyrics:
+		return "lyrics";
+	case ScreenType::MediaLibrary:
+		return "media_library";
+#ifdef ENABLE_OUTPUTS
+	case ScreenType::Outputs:
+		return "outputs";
+#endif // ENABLE_OUTPUTS
+	case ScreenType::Playlist:
+		return "playlist";
+	case ScreenType::PlaylistEditor:
+		return "playlist_editor";
+	case ScreenType::SearchEngine:
+		return "search_engine";
+	case ScreenType::SelectedItemsAdder:
+		return "selected_items_adder";
+	case ScreenType::ServerInfo:
+		return "server_info";
+	case ScreenType::SongInfo:
+		return "song_info";
+	case ScreenType::SortPlaylistDialog:
+		return "sort_playlist_dialog";
+#ifdef HAVE_TAGLIB_H
+	case ScreenType::TagEditor:
+		return "tag_editor";
+	case ScreenType::TinyTagEditor:
+		return "tiny_tag_editor";
+#endif // HAVE_TAGLIB_H
+	case ScreenType::Unknown:
+		return "unknown";
+#ifdef ENABLE_VISUALIZER
+	case ScreenType::Visualizer:
+		return "visualizer";
+#endif // ENABLE_VISUALIZER
+	}
+}
+
 ScreenType stringtoStartupScreenType(const std::string &s)
 {
 	ScreenType result = ScreenType::Unknown;

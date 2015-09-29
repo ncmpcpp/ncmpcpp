@@ -25,6 +25,7 @@
 #include "help.h"
 #include "settings.h"
 #include "status.h"
+#include "utility/string.h"
 #include "utility/wide_string.h"
 #include "title.h"
 #include "screen_switcher.h"
@@ -35,6 +36,22 @@ using Global::MainStartY;
 Help *myHelp;
 
 namespace {
+
+std::string align_key_rep(std::wstring keys)
+{
+	size_t i = 0, len = 0;
+	const size_t max_len = 20;
+	for (; i < keys.size(); ++i)
+	{
+		int width = std::max(1, wcwidth(keys[i]));
+		if (len+width > max_len)
+			break;
+		else
+			len += width;
+	}
+	keys.resize(i + max_len - len, ' ');
+	return ToString(keys);
+}
 
 std::string display_keys(const Actions::Type at)
 {
@@ -54,18 +71,7 @@ std::string display_keys(const Actions::Type at)
 			}
 		}
 	}
-	size_t i = 0, len = 0;
-	const size_t max_len = 20;
-	for (; i < result.size(); ++i)
-	{
-		int width = std::max(1, wcwidth(result[i]));
-		if (len+width > max_len)
-			break;
-		else
-			len += width;
-	}
-	result.resize(i + max_len - len, ' ');
-	return ToString(result);
+	return align_key_rep(std::move(result));
 }
 
 void section(NC::Scrollpad &w, const char *type_, const char *title_)
@@ -91,6 +97,11 @@ void key(NC::Scrollpad &w, const Actions::Type at, const char *desc)
 void key(NC::Scrollpad &w, const Actions::Type at, const boost::format &desc)
 {
 	w << "    " << display_keys(at) << " : " << desc.str() << '\n';
+}
+
+void key(NC::Scrollpad &w, NC::Key::Type k, const std::string &desc)
+{
+	w << "    " << align_key_rep(keyToWString(k)) << " : " << desc << '\n';
 }
 
 /**********************************************************************/
@@ -392,6 +403,21 @@ void write_bindings(NC::Scrollpad &w)
 	mouse(w, "Left click", "Select pointed output");
 	mouse(w, "Right click", "Toggle output");
 #	endif // ENABLE_OUTPUTS
+
+	section(w, "", "Action chains");
+	for (const auto &k : Bindings)
+	{
+		for (const auto &binding : k.second)
+		{
+			if (!binding.isSingle())
+			{
+				std::vector<std::string> commands;
+				for (const auto &action : binding.actions())
+					commands.push_back(action->name());
+				key(w, k.first, join<std::string>(commands, ", "));
+			}
+		}
+	}
 
 	section(w, "", "List of available colors");
 	for (int i = 0; i < COLORS; ++i)

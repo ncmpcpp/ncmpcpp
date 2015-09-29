@@ -24,7 +24,7 @@
 #include <string>
 
 std::string unescapeHtmlUtf8(const std::string &s);
-
+void unescapeHtmlEntities(std::string &s);
 void stripHtmlTags(std::string &s);
 
 #endif // NCMPCPP_UTILITY_HTML_H

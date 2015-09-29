@@ -526,6 +526,9 @@ void Status::Changes::songID(int song_id)
 	playing_song_scroll_begin = 0;
 	first_line_scroll_begin = 0;
 	second_line_scroll_begin = 0;
+#	ifdef ENABLE_VISUALIZER
+	myVisualizer->ResetAutoScaleMultiplier();
+#	endif // ENABLE_VISUALIZER
 	if (m_player_state != MPD::psStop)
 	{
 		auto &pl = myPlaylist->main();

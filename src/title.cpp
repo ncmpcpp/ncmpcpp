@@ -28,7 +28,7 @@
 
 void windowTitle(const std::string &status)
 {
-	if (strcmp(getenv("TERM"), "linux") && Config.set_window_title)
+	if (Config.set_window_title)
 		std::cout << "\033]0;" << status << "\7" << std::flush;
 }
 

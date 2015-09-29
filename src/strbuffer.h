@@ -22,7 +22,7 @@
 #define NCMPCPP_STRBUFFER_H
 
 #include <boost/lexical_cast.hpp>
-#include <set>
+#include <map>
 #include "window.h"
 
 namespace NC {
@@ -35,34 +35,13 @@ template <typename CharT> class BasicBuffer
 	{
 		enum class Type { Color, Format };
 		
-		Property(size_t position_, NC::Color color_, int id_)
-		: m_type(Type::Color), m_position(position_), m_color(std::move(color_)), m_id(id_) { }
-		Property(size_t position_, NC::Format format_, int id_)
-		: m_type(Type::Format), m_position(position_), m_format(format_), m_id(id_) { }
+		Property(NC::Color color_, size_t id_)
+		: m_type(Type::Color), m_color(std::move(color_)), m_id(id_) { }
+		Property(NC::Format format_, size_t id_)
+		: m_type(Type::Format), m_format(format_), m_id(id_) { }
 		
-		size_t position() const { return m_position; }
 		size_t id() const { return m_id; }
-		
-		bool operator<(const Property &rhs) const
-		{
-			if (m_position != rhs.m_position)
-				return m_position < rhs.m_position;
-			if (m_type != rhs.m_type)
-				return m_type < rhs.m_type;
-			switch (m_type)
-			{
-				case Type::Color:
-					if (m_color != rhs.m_color)
-						return m_color < rhs.m_color;
-					break;
-				case Type::Format:
-					if (m_format != rhs.m_format)
-						return m_format < rhs.m_format;
-					break;
-			}
-			return m_id < rhs.m_id;
-		}
-		
+
 		template <typename OutputStreamT>
 		friend OutputStreamT &operator<<(OutputStreamT &os, const Property &p)
 		{
@@ -80,7 +59,6 @@ template <typename CharT> class BasicBuffer
 		
 	private:
 		Type m_type;
-		size_t m_position;
 		Color m_color;
 		Format m_format;
 		size_t m_id;
@@ -88,33 +66,24 @@ template <typename CharT> class BasicBuffer
 	
 public:
 	typedef std::basic_string<CharT> StringType;
-	typedef std::multiset<Property> Properties;
+	typedef std::multimap<size_t, Property> Properties;
 	
 	const StringType &str() const { return m_string; }
 	const Properties &properties() const { return m_properties; }
 	
 	template <typename PropertyT>
-	void setProperty(size_t position, PropertyT &&property, size_t id = -1)
+	void addProperty(size_t position, PropertyT &&property, size_t id = -1)
 	{
-		m_properties.insert(Property(position, std::forward<PropertyT>(property), id));
+		assert(position <= m_string.size());
+		m_properties.emplace(position, Property(std::forward<PropertyT>(property), id));
 	}
-	
-	template <typename PropertyT>
-	bool removeProperty(size_t position, PropertyT &&property, size_t id = -1)
-	{
-		auto it = m_properties.find(Property(position, std::forward<PropertyT>(property), id));
-		bool found = it != m_properties.end();
-		if (found)
-			m_properties.erase(it);
-		return found;
-	}
-	
+
 	void removeProperties(size_t id = -1)
 	{
 		auto it = m_properties.begin();
 		while (it != m_properties.end())
 		{
-			if (it->id() == id)
+			if (it->second.id() == id)
 				m_properties.erase(it++);
 			else
 				++it;
@@ -171,13 +140,13 @@ public:
 	
 	BasicBuffer<CharT> &operator<<(Color color)
 	{
-		setProperty(m_string.size(), color);
+		addProperty(m_string.size(), color);
 		return *this;
 	}
 	
 	BasicBuffer<CharT> &operator<<(Format format)
 	{
-		setProperty(m_string.size(), format);
+		addProperty(m_string.size(), format);
 		return *this;
 	}
 	
@@ -217,15 +186,15 @@ OutputStreamT &operator<<(OutputStreamT &os, const BasicBuffer<CharT> &buffer)
 		auto &s = buffer.str();
 		auto &ps = buffer.properties();
 		auto p = ps.begin();
-		for (size_t i = 0; i < s.size(); ++i)
+		for (size_t i = 0;; ++i)
 		{
-			for (; p != ps.end() && p->position() == i; ++p)
-				os << *p;
-			os << s[i];
+			for (; p != ps.end() && p->first == i; ++p)
+				os << p->second;
+			if (i < s.size())
+				os << s[i];
+			else
+				break;
 		}
-		// load remaining properties
-		for (; p != ps.end(); ++p)
-			os << *p;
 	}
 	return os;
 }
