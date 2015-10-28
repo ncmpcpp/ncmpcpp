@@ -131,7 +131,7 @@ Browser::Browser()
 : m_update_request(true)
 , m_local_browser(false)
 , m_scroll_beginning(0)
-, m_current_directory("/")
+, m_current_directory("")
 {
 	w = NC::Menu<MPD::Item>(0, MainStartY, COLS, MainHeight, Config.browser_display_mode == DisplayMode::Columns && Config.titles_visibility ? Display::Columns(COLS) : "", Config.main_color, NC::Border());
 	w.setHighlightColor(Config.main_highlight_color);
@@ -439,9 +439,6 @@ void Browser::getDirectory(std::string directory)
 		directory.resize(directory.length()-3);
 		directory = getParentDirectory(directory);
 	}
-	// when we go down to root, it can be empty
-	if (directory.empty())
-		directory = "/";
 
 	std::vector<MPD::Item> items;
 	if (m_local_browser)
