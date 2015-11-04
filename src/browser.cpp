@@ -616,16 +616,16 @@ MPD::Song getLocalSong(const fs::directory_entry &entry, bool read_tags)
 	mpd_song *s = mpd_song_begin(&pair);
 	if (s == nullptr)
 		throw std::runtime_error("invalid path: " + entry.path().native());
-#	ifdef HAVE_TAGLIB_H
 	if (read_tags)
 	{
+#ifdef HAVE_TAGLIB_H
 		Tags::setAttribute(s, "Last-Modified",
 			timeFormat("%Y-%m-%dT%H:%M:%SZ", fs::last_write_time(entry.path()))
 		);
 		// read tags
 		Tags::read(s);
+#endif // HAVE_TAGLIB_H
 	}
-#	endif // HAVE_TAGLIB_H
 	return s;
 }
 

@@ -693,7 +693,9 @@ private:
 	virtual bool canBeRun() OVERRIDE;
 	virtual void run() OVERRIDE;
 
+#ifdef HAVE_TAGLIB_H
 	const MPD::Song *m_song;
+#endif // HAVE_TAGLIB_H
 };
 
 struct EditLibraryTag: BaseAction
@@ -788,7 +790,9 @@ private:
 	virtual bool canBeRun() OVERRIDE;
 	virtual void run() OVERRIDE;
 
+#ifdef HAVE_TAGLIB_H
 	const MPD::Song *m_song;
+#endif // HAVE_TAGLIB_H
 };
 
 struct JumpToPositionInSong: BaseAction

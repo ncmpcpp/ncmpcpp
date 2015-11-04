@@ -2268,12 +2268,18 @@ void SetSelectedItemsPriority::run()
 
 bool ToggleOutput::canBeRun()
 {
+#ifdef ENABLE_OUTPUTS
 	return myScreen == myOutputs;
+#else
+	return false;
+#endif // ENABLE_OUTPUTS
 }
 
 void ToggleOutput::run()
 {
+#ifdef ENABLE_OUTPUTS
 	myOutputs->toggleOutput();
+#endif // ENABLE_OUTPUTS
 }
 
 bool ToggleVisualizationType::canBeRun()
