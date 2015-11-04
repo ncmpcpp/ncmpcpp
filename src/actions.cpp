@@ -1739,6 +1739,33 @@ void SelectRange::run()
 	Statusbar::print("Range selected");
 }
 
+bool QuickSort::canBeRun()
+{
+	m_list = dynamic_cast<NC::List *>(myScreen->activeWindow());
+
+    if(m_list == nullptr){
+        return false;
+    }
+
+	if (myScreen != myPlaylist)
+		return false;
+
+	auto first = myPlaylist->main().begin(), last = myPlaylist->main().end();
+	return findSelectedRangeAndPrintInfoIfNot(first, last);
+}
+
+void QuickSort::run()
+{
+	for (auto &p : *m_list)
+		p.setSelected(true);
+
+	mySortPlaylistDialog->switchTo();
+	mySortPlaylistDialog->sort();
+
+	for (auto &p : *m_list)
+		p.setSelected(false);
+}
+
 bool ReverseSelection::canBeRun()
 {
 	m_list = dynamic_cast<NC::List *>(myScreen->activeWindow());
@@ -1878,8 +1905,8 @@ void CropPlaylist::run()
 
 void ClearMainPlaylist::run()
 {
-	if (!myPlaylist->main().empty() && Config.ask_before_clearing_playlists)
-		confirmAction("Do you really want to clear main playlist?");
+//	if (!myPlaylist->main().empty() && Config.ask_before_clearing_playlists)
+//		confirmAction("Do you really want to clear main playlist?");
 	Mpd.ClearMainPlaylist();
 	Statusbar::print("Playlist cleared");
 	myPlaylist->main().reset();
@@ -2752,6 +2779,7 @@ void populateActions()
 	insert_action(new Actions::ShowVisualizer());
 	insert_action(new Actions::ShowClock());
 	insert_action(new Actions::ShowServerInfo());
+	insert_action(new Actions::QuickSort());
 }
 
 bool scrollTagCanBeRun(NC::List *&list, SongList *&songs)

@@ -53,10 +53,10 @@ struct SortPlaylistDialog
 	// private members
 	void moveSortOrderUp();
 	void moveSortOrderDown();
+	void sort() const;
 	
 private:
 	void moveSortOrderHint() const;
-	void sort() const;
 	void cancel() const;
 	
 	void setDimensions();
