@@ -1215,6 +1215,7 @@ bool Shuffle::canBeRun()
 
 void Shuffle::run()
 {
+	confirmAction("Do you really want to shuffle selected range?");
 	auto begin = myPlaylist->main().begin();
 	Mpd.ShuffleRange(m_begin-begin, m_end-begin);
 	Statusbar::print("Range shuffled");
