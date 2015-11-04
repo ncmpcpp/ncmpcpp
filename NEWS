@@ -7,7 +7,7 @@ ncmpcpp-0.7 (????-??-??)
 * Directories and playlists in browser can now be sorted by modification time.
 * ~ is now expanded to home directory in mpd_host configuration variable.
 * It is now possible to define startup slave screen using -S/--slave-screen command line option or startup_slave_screen configuration variable.
-* List filtering has been removed due to the major part of its functionality overlapping with find forward/backward.
+* List filtering has been removed due to the major part of its functionality overlapping with find forward/backward and obscure bugs.
 * Find backward/forward function is now incremental.
 * Support for 256 colors and customization of background colors has been added.
 * Multiple configuration files via command line arguments are now accepted. In addition, by default ncmpcpp attempts to read both $HOME/.ncmpcpp/config and $XDG_CONFIG_HOME/ncmpcpp/config (in this order).
