@@ -1,4 +1,4 @@
-ncmpcpp-0.7 (????-??-??)
+ncmpcpp-0.7_beta1 (2015-11-04)
 
 * Visualizer has now support for multiple colors (visualizer_color configuration variable takes the list of colors to be used).
 * Visualizer has now support for two more modes: sound wave filled and sound ellipse.

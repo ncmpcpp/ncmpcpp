@@ -1,7 +1,7 @@
 AC_INIT(configure.ac)
 
 AC_CONFIG_HEADERS(config.h)
-AM_INIT_AUTOMAKE(ncmpcpp, 0.7_dev)
+AM_INIT_AUTOMAKE(ncmpcpp, 0.7_beta1)
 
 AC_PREREQ(2.59)
 
