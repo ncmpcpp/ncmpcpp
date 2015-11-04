@@ -90,6 +90,8 @@ std::string screenTypeToString(ScreenType st)
 		return "visualizer";
 #endif // ENABLE_VISUALIZER
 	}
+	// silence gcc warning
+	throw std::runtime_error("unreachable");
 }
 
 ScreenType stringtoStartupScreenType(const std::string &s)
