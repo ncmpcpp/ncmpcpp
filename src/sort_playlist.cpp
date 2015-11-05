@@ -50,6 +50,9 @@ SortPlaylistDialog::SortPlaylistDialog()
 	w.addItem(Entry(std::make_pair("Artist", &MPD::Song::getArtist),
 		std::bind(&Self::moveSortOrderHint, this)
 	));
+    w.addItem(Entry(std::make_pair("Album artist", &MPD::Song::getAlbumArtist),
+        std::bind(&Self::moveSortOrderHint, this)
+    ));
 	w.addItem(Entry(std::make_pair("Album", &MPD::Song::getAlbum),
 		std::bind(&Self::moveSortOrderHint, this)
 	));
