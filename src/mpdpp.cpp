@@ -30,6 +30,16 @@ MPD::Connection Mpd;
 
 namespace {
 
+const char *mpdDirectory(const std::string &directory)
+{
+	// MPD <= 0.19 accepts "/" for a root directory whereas later
+	// versions do not, so provide a compatibility layer.
+	if (directory == "/")
+		return "";
+	else
+		return directory.c_str();
+}
+
 template <typename ObjectT, typename SourceT>
 std::function<bool(typename MPD::Iterator<ObjectT>::State &)>
 defaultFetcher(SourceT *(fetcher)(mpd_connection *))
@@ -739,7 +749,7 @@ SongIterator Connection::CommitSearchSongs()
 ItemIterator Connection::GetDirectory(const std::string &directory)
 {
 	prechecksNoCommandsList();
-	mpd_send_list_meta(m_connection.get(), directory.c_str());
+	mpd_send_list_meta(m_connection.get(), mpdDirectory(directory));
 	checkErrors();
 	return ItemIterator(m_connection.get(), defaultFetcher<Item>(mpd_recv_entity));
 }
@@ -747,7 +757,7 @@ ItemIterator Connection::GetDirectory(const std::string &directory)
 SongIterator Connection::GetDirectoryRecursive(const std::string &directory)
 {
 	prechecksNoCommandsList();
-	mpd_send_list_all_meta(m_connection.get(), directory.c_str());
+	mpd_send_list_all_meta(m_connection.get(), mpdDirectory(directory));
 	checkErrors();
 	return SongIterator(m_connection.get(), fetchItemSong);
 }
@@ -755,7 +765,7 @@ SongIterator Connection::GetDirectoryRecursive(const std::string &directory)
 DirectoryIterator Connection::GetDirectories(const std::string &directory)
 {
 	prechecksNoCommandsList();
-	mpd_send_list_meta(m_connection.get(), directory.c_str());
+	mpd_send_list_meta(m_connection.get(), mpdDirectory(directory));
 	checkErrors();
 	return DirectoryIterator(m_connection.get(), defaultFetcher<Directory>(mpd_recv_directory));
 }
@@ -763,7 +773,7 @@ DirectoryIterator Connection::GetDirectories(const std::string &directory)
 SongIterator Connection::GetSongs(const std::string &directory)
 {
 	prechecksNoCommandsList();
-	mpd_send_list_meta(m_connection.get(), directory.c_str());
+	mpd_send_list_meta(m_connection.get(), mpdDirectory(directory));
 	checkErrors();
 	return SongIterator(m_connection.get(), defaultFetcher<Song>(mpd_recv_song));
 }
