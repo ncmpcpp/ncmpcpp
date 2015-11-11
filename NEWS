@@ -1,3 +1,6 @@
+ncmpcpp-0.6.8 (????-??-??)
+* Application is now compatible with MPD >= 0.20.
+
 ncmpcpp-0.6.7 (2015-09-12)
 * Fetching artist info from last.fm was fixed.
 

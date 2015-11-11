@@ -29,6 +29,20 @@
 
 MPD::Connection Mpd;
 
+namespace {
+
+const char *mpdDirectory(const std::string &directory)
+{
+	// MPD <= 0.19 accepts "/" for a root directory whereas later
+	// versions do not, so provide a compatibility layer.
+	if (directory == "/")
+		return "";
+	else
+		return directory.c_str();
+}
+
+}
+
 namespace MPD {//
 
 Connection::Connection() : m_connection(nullptr),
@@ -694,7 +708,7 @@ void Connection::CommitSearchTags(StringConsumer f)
 void Connection::GetDirectory(const std::string &directory, ItemConsumer f)
 {
 	prechecksNoCommandsList();
-	mpd_send_list_meta(m_connection, directory.c_str());
+	mpd_send_list_meta(m_connection, mpdDirectory(directory));
 	while (mpd_entity *item = mpd_recv_entity(m_connection))
 	{
 		Item it;
@@ -725,7 +739,7 @@ void Connection::GetDirectory(const std::string &directory, ItemConsumer f)
 void Connection::GetDirectoryRecursive(const std::string &directory, SongConsumer f)
 {
 	prechecksNoCommandsList();
-	mpd_send_list_all_meta(m_connection, directory.c_str());
+	mpd_send_list_all_meta(m_connection, mpdDirectory(directory));
 	while (mpd_entity *e = mpd_recv_entity(m_connection)) {
 		if (mpd_entity_get_type(e) == MPD_ENTITY_TYPE_SONG)
 			f(Song(mpd_song_dup(mpd_entity_get_song(e))));
@@ -738,7 +752,7 @@ void Connection::GetDirectoryRecursive(const std::string &directory, SongConsume
 void Connection::GetDirectories(const std::string &directory, StringConsumer f)
 {
 	prechecksNoCommandsList();
-	mpd_send_list_meta(m_connection, directory.c_str());
+	mpd_send_list_meta(m_connection, mpdDirectory(directory));
 	while (mpd_directory *dir = mpd_recv_directory(m_connection))
 	{
 		f(std::string(mpd_directory_get_path(dir)));
@@ -751,7 +765,7 @@ void Connection::GetDirectories(const std::string &directory, StringConsumer f)
 void Connection::GetSongs(const std::string &directory, SongConsumer f)
 {
 	prechecksNoCommandsList();
-	mpd_send_list_meta(m_connection, directory.c_str());
+	mpd_send_list_meta(m_connection, mpdDirectory(directory));
 	while (mpd_song *s = mpd_recv_song(m_connection))
 		f(Song(s));
 	mpd_response_finish(m_connection);
