@@ -22,8 +22,6 @@
 #include <cstdio>
 #include <cstdlib>
 #include <iostream>
-#include <readline/history.h>
-#include <readline/readline.h>
 
 #ifdef WIN32
 # include <winsock.h>
@@ -33,6 +31,7 @@
 #endif
 
 #include "error.h"
+#include "utility/readline.h"
 #include "utility/string.h"
 #include "utility/wide_string.h"
 #include "window.h"
@@ -820,8 +819,10 @@ std::string Window::getString(const std::string &base, size_t width, bool encryp
 	curs_set(0);
 	if (input != nullptr)
 	{
+#ifdef HAVE_READLINE_HISTORY_H
 		if (!encrypted && input[0] != 0)
 			add_history(input);
+#endif // HAVE_READLINE_HISTORY_H
 		result = input;
 		free(input);
 	}

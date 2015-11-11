@@ -27,7 +27,6 @@
 #include <boost/lexical_cast.hpp>
 #include <algorithm>
 #include <iostream>
-#include <readline/readline.h>
 
 #include "actions.h"
 #include "charset.h"
@@ -55,6 +54,7 @@
 #include "server_info.h"
 #include "song_info.h"
 #include "outputs.h"
+#include "utility/readline.h"
 #include "utility/string.h"
 #include "utility/type_conversions.h"
 #include "tag_editor.h"
