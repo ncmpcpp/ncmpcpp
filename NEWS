@@ -1,4 +1,4 @@
-ncmpcpp-0.6.8 (????-??-??)
+ncmpcpp-0.6.8 (2015-11-11)
 * Application is now compatible with MPD >= 0.20.
 * Check for readline library was fixed.
 
