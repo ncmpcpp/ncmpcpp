@@ -1,7 +1,8 @@
 AC_INIT(configure.ac)
-
 AC_CONFIG_HEADERS(config.h)
 AM_INIT_AUTOMAKE(ncmpcpp, 0.7_beta2dev)
+
+m4_include([m4/ax_lib_readline.m4])
 
 AC_PREREQ(2.59)
 
@@ -223,13 +224,13 @@ PKG_CHECK_MODULES([libmpdclient], [libmpdclient >= 2.8], [
 dnl =========================
 dnl = checking for readline =
 dnl =========================
-AC_CHECK_HEADERS([readline/readline.h readline/history.h],
-	AC_CHECK_LIB(readline, rl_initialize, LIBS="$LIBS -lreadline",
-		AC_MSG_ERROR([readline headers found but there is no readline library to make use of])
-	),
-	AC_MSG_ERROR([no readline/readline.h header file found])
-)
-
+AX_LIB_READLINE
+if test "$ax_cv_lib_readline" = "no"; then
+  AC_MSG_ERROR([no readline compatible library found])
+fi
+if test "$ax_cv_lib_readline_history" = "no"; then
+  AC_MSG_WARN([readline library has no history functionality])
+fi
 
 dnl ========================
 dnl = checking for pthread =

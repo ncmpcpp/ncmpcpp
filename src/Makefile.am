@@ -63,6 +63,7 @@ noinst_HEADERS = \
 	utility/functional.h \
 	utility/html.h \
 	utility/option_parser.h \
+	utility/readline.h \
 	utility/string.h \
 	utility/type_conversions.h \
 	utility/wide_string.h \
