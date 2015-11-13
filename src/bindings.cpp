@@ -499,8 +499,8 @@ void BindingsConfiguration::generateDefaults()
 	{
 		bind(k, Actions::Type::EnterDirectory);
 		bind(k, Actions::Type::ToggleOutput);
-		bind(k, Actions::Type::PlayItem);
 		bind(k, Actions::Type::RunAction);
+		bind(k, Actions::Type::PlayItem);
 	}
 	if (notBound(k = stringToKey("space")))
 	{

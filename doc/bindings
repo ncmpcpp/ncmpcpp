@@ -199,10 +199,10 @@
 #  toggle_output
 #
 #def_key "enter"
-#  play_item
+#  run_action
 #
 #def_key "enter"
-#  run_action
+#  play_item
 #
 #def_key "space"
 #  add_item_to_playlist
