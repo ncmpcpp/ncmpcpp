@@ -108,7 +108,7 @@ MPD::MutableSong::SetFunction tagTypeToSetFunction(mpd_tag_type tag)
 		case MPD_TAG_DISC:
 			return &MPD::MutableSong::setDisc;
 		default:
-			return 0;
+			return nullptr;
 	}
 }
 
