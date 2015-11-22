@@ -322,6 +322,8 @@ void enable()
 	std::printf("\e[?1000h");
 	// try to enable extended (urxvt) mouse tracking
 	std::printf("\e[?1015h");
+	// send the above to the terminal immediately
+	std::fflush(stdout);
 }
 
 void disable()
@@ -334,6 +336,8 @@ void disable()
 	std::printf("\e[?1000l");
 	// restore old highlight mouse tracking
 	std::printf("\e[?1001r");
+	// send the above to the terminal immediately
+	std::fflush(stdout);
 }
 
 }
