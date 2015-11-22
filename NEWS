@@ -1,6 +1,7 @@
 ncmpcpp-0.7_beta2 (????-??-??)
 * Playlist sorting dialog now contains 'Album artist' option.
 * Default keybindings were corrected to allow tag edition in the right column of tag editor.
+* Mouse is properly kept disabled if it was disabled in the configuration file.
 
 ncmpcpp-0.6.8 (2015-11-11)
 * Application is now compatible with MPD >= 0.20.
