@@ -152,6 +152,7 @@ struct Configuration
 	bool use_console_editor;
 	bool use_cyclic_scrolling;
 	bool ask_before_clearing_playlists;
+	bool ask_before_shuffling_playlists;
 	bool mouse_support;
 	bool mouse_list_scroll_whole_page;
 	bool visualizer_in_stereo;
