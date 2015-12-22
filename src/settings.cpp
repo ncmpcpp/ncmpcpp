@@ -566,6 +566,9 @@ bool Configuration::read(const std::vector<std::string> &config_paths, bool igno
 	p.add("ask_before_clearing_playlists", yes_no(
 		ask_before_clearing_playlists, true
 	));
+	p.add("ask_before_shuffling_playlists", yes_no(
+		ask_before_shuffling_playlists, true
+	));
 	p.add("clock_display_seconds", yes_no(
 		clock_display_seconds, false
 	));

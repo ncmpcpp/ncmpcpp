@@ -1,5 +1,6 @@
 ncmpcpp-0.7.1 (????-??-??)
 * Selected songs in media library can now be added to playlists.
+* Confirmation before shuffling a playlist can now be disabled.
 
 ncmpcpp-0.7 (2015-11-22)
 * Playlist sorting dialog now contains 'Album artist' option.
