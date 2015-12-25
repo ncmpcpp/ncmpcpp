@@ -702,7 +702,7 @@ std::vector<MPD::Song> MediaLibrary::getSelectedSongs()
 		}
 	}
 	else if (isActiveWindow(Songs))
-		Songs.getSelectedSongs();
+		result = Songs.getSelectedSongs();
 	return result;
 }
 
