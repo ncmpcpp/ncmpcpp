@@ -49,8 +49,7 @@ std::string Song::TagsSeparator = " | ";
 std::string Song::get(mpd_tag_type type, unsigned idx) const
 {
 	std::string result;
-	const char *tag;
-	tag = mpd_song_get_tag(m_song.get(), type, idx);
+	const char *tag = mpd_song_get_tag(m_song.get(), type, idx);
 	if (tag)
 		result = tag;
 	if (isStream() && (type==MPD_TAG_ARTIST || type==MPD_TAG_TITLE))
