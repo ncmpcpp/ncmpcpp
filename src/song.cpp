@@ -49,9 +49,34 @@ std::string Song::TagsSeparator = " | ";
 std::string Song::get(mpd_tag_type type, unsigned idx) const
 {
 	std::string result;
-	const char *tag = mpd_song_get_tag(m_song.get(), type, idx);
+	const char *tag;
+	tag = mpd_song_get_tag(m_song.get(), type, idx);
 	if (tag)
 		result = tag;
+	if (isStream() && (type==MPD_TAG_ARTIST || type==MPD_TAG_TITLE))
+	{
+		const char * artist, * title;
+		std::string split_me;
+		size_t split_at;
+		std::string split_on = " - ";
+		artist = mpd_song_get_tag(m_song.get(), MPD_TAG_ARTIST, idx);
+		title = mpd_song_get_tag(m_song.get(), MPD_TAG_TITLE, idx);
+		if (artist && title)
+			return result;
+		else if (artist && !title)
+			split_me=artist;
+		else if (title && !artist)
+			split_me=title;
+		else
+			return result;
+		split_at=split_me.find(split_on);
+		if (split_at==std::string::npos)
+			return result;
+		if (type==MPD_TAG_ARTIST)
+			return split_me.substr(0,split_at);
+		else
+			return split_me.substr(split_at+split_on.length());
+	}
 	return result;
 }
 
