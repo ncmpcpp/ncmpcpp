@@ -127,7 +127,19 @@ ConstSongIterator SearchEngineWindow::endS() const
 
 std::vector<MPD::Song> SearchEngineWindow::getSelectedSongs()
 {
-	return {}; // TODO
+	std::vector<MPD::Song> result;
+	for (auto &item : *this)
+	{
+		if (item.isSelected())
+		{
+			assert(item.value().isSong());
+			result.push_back(item.value().song());
+		}
+	}
+	// If no item is selected, add the current one if it's a song.
+	if (result.empty() && !empty() && current()->value().isSong())
+		result.push_back(current()->value().song());
+	return result;
 }
 
 /**********************************************************************/
@@ -336,22 +348,7 @@ bool SearchEngine::addItemToPlaylist(bool play)
 
 std::vector<MPD::Song> SearchEngine::getSelectedSongs()
 {
-	std::vector<MPD::Song> result;
-	for (auto it = w.begin(); it != w.end(); ++it)
-	{
-		if (it->isSelected())
-		{
-			assert(it->value().isSong());
-			result.push_back(it->value().song());
-		}
-	}
-	// if no item is selected, add current one
-	if (result.empty() && !w.empty())
-	{
-		assert(w.current()->value().isSong());
-		result.push_back(w.current()->value().song());
-	}
-	return result;
+	return w.getSelectedSongs();
 }
 
 /***********************************************************************/
