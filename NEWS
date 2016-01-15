@@ -1,5 +1,6 @@
 ncmpcpp-0.7.2 (????-??-??)
 * Attempt to add non-song item to playlist from search engine doesn't trigger assertion failure anymore.
+* Fetching lyrics from metrolyrics.com was fixed.
 
 ncmpcpp-0.7.1 (2016-01-01)
 * Selected songs in media library can now be added to playlists.

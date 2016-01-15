@@ -79,7 +79,7 @@ struct MetrolyricsFetcher : public GoogleLyricsFetcher
 	virtual const char *name() const OVERRIDE { return "metrolyrics.com"; }
 	
 protected:
-	virtual const char *regex() const OVERRIDE { return "<div id=\"lyrics-body\">(.*?)</div>"; }
+	virtual const char *regex() const OVERRIDE { return "<div class=\"lyrics-body\">(.*?)</div>"; }
 	
 	virtual bool isURLOk(const std::string &url) OVERRIDE;
 	virtual void postProcess(std::string &data) const OVERRIDE;
