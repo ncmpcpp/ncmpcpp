@@ -726,7 +726,7 @@ void Status::Changes::flags()
 			*wHeader << NC::XY(COLS-switch_state.length(), 1) << NC::Format::Bold << Config.state_flags_color << switch_state << NC::Color::End << NC::Format::NoBold;
 			if (!Config.header_visibility) // in this case also draw separator
 			{
-				*wHeader << NC::Format::Bold << NC::Color::Black;
+				*wHeader << NC::Format::Bold << Config.alternative_ui_separator_color;
 				mvwhline(wHeader->raw(), 2, 0, 0, COLS);
 				*wHeader << NC::Color::End << NC::Format::NoBold;
 			}
