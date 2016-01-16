@@ -130,7 +130,7 @@ struct Printer: boost::static_visitor<Result>
 				else
 					tags = wideShorten(tags, st.delimiter());
 			}
-			output(tags);
+			output(tags, &st);
 			return Result::Ok;
 		}
 		else
@@ -177,10 +177,11 @@ private:
 	// generic version for streams (buffers, menus)
 	template <typename ValueT, typename OutputStreamT>
 	struct output_ {
-		static void exec(OutputStreamT &os, const ValueT &value) {
+		static void exec(OutputStreamT &os, const ValueT &value, const SongTag *) {
 			os << value;
 		}
 	};
+
 	// specialization for strings (input/output)
 	template <typename SomeCharT, typename OtherCharT>
 	struct output_<std::basic_string<SomeCharT>, std::basic_string<OtherCharT>> {
@@ -191,7 +192,7 @@ private:
 		static typename std::enable_if<
 			std::is_same<SomeString, OtherString>::value,
 			void
-		>::type exec(SomeString &result, const OtherString &s) {
+		>::type exec(SomeString &result, const OtherString &s, const SongTag *) {
 			result += s;
 		}
 	};
@@ -199,20 +200,43 @@ private:
 	// properties. if this code is reached, throw an exception.
 	template <typename ValueT, typename SomeCharT>
 	struct output_<ValueT, std::basic_string<SomeCharT>> {
-		static void exec(std::basic_string<CharT> &, const ValueT &) {
+		static void exec(std::basic_string<CharT> &, const ValueT &, const SongTag *) {
 			throw std::logic_error("non-string property can't be appended to the string");
 		}
 	};
 
+	// Specialization for SongTagMap.
+	template <typename SomeCharT, typename OtherCharT>
+	struct output_<std::basic_string<SomeCharT>, SongTagMap<OtherCharT> > {
+		// Compile only if string types are the same.
+		static typename std::enable_if<
+			std::is_same<SomeCharT, OtherCharT>::value,
+			void
+		>::type exec(SongTagMap<OtherCharT> &acc,
+		             const std::basic_string<SomeCharT> &s, const SongTag *st) {
+			if (st != nullptr) {
+				acc.emplace_back(*st, s);
+			}
+		}
+	};
+	// When extracting tags from a song all the other properties should
+	// be ignored. If that's not the case, throw an exception.
+	template <typename ValueT, typename SomeCharT>
+	struct output_<ValueT, SongTagMap<SomeCharT> > {
+		static void exec(SongTagMap<SomeCharT> &, const ValueT &, const SongTag *) {
+			throw std::logic_error("Non-string property can't be inserted into the SongTagMap");
+		}
+	};
+
 	template <typename ValueT>
-	void output(const ValueT &value) const
+	void output(const ValueT &value, const SongTag *st = nullptr) const
 	{
 		if (!m_no_output)
 		{
 			if (m_output_switched && m_second_os != nullptr)
-				output_<ValueT, SecondOutputT>::exec(*m_second_os, value);
+				output_<ValueT, SecondOutputT>::exec(*m_second_os, value, st);
 			else
-				output_<ValueT, OutputT>::exec(m_output, value);
+				output_<ValueT, OutputT>::exec(m_output, value, st);
 		}
 	}
 
@@ -254,6 +278,15 @@ std::basic_string<CharT> stringify(const AST<CharT> &ast, const MPD::Song *song)
 {
 	std::basic_string<CharT> result;
 	Printer<CharT, std::basic_string<CharT>> printer(result, song, &result, Flags::Tag);
+	visit(printer, ast);
+	return result;
+}
+
+template <typename CharT>
+SongTagMap<CharT> extractTags(const AST<CharT> &ast, const MPD::Song &song)
+{
+	SongTagMap<CharT> result;
+	Printer<CharT, SongTagMap<CharT> > printer(result, &song, &result, Flags::Tag);
 	visit(printer, ast);
 	return result;
 }
