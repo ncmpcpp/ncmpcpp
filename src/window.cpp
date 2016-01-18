@@ -819,6 +819,11 @@ Key::Type Window::getInputChar(int key)
 			return Key::Right;
 		case 'D':
 			return Key::Left;
+		// terminator
+		case 'F':
+			return Key::End;
+		case 'H':
+			return Key::Home;
 		// rxvt
 		case 'a':
 			return Key::Ctrl | Key::Up;
