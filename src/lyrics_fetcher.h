@@ -85,6 +85,13 @@ protected:
 	virtual void postProcess(std::string &data) const OVERRIDE;
 };
 
+struct IlDepositoFetcher : public GoogleLyricsFetcher
+{
+	virtual const char *name() const OVERRIDE { return "www.ildeposito.org"; }
+
+protected:
+	virtual const char *regex() const OVERRIDE { return "<div id=\"tabs-testo\"><p>(.*?)</p></div>"; }
+};
 struct PLyricsFetcher : public GoogleLyricsFetcher
 {
 	virtual const char *name() const OVERRIDE { return "www.plyrics.com"; }
