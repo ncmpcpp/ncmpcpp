@@ -85,6 +85,14 @@ protected:
 	virtual void postProcess(std::string &data) const OVERRIDE;
 };
 
+struct PLyricsFetcher : public GoogleLyricsFetcher
+{
+	virtual const char *name() const OVERRIDE { return "www.plyrics.com"; }
+	
+protected:
+	virtual const char *regex() const OVERRIDE { return "<div class=\"pmedia\">.*?</div>(.*?)<div class=\"pmedia\">"; }
+};
+
 struct LyricsmaniaFetcher : public GoogleLyricsFetcher
 {
 	virtual const char *name() const OVERRIDE { return "lyricsmania.com"; }
@@ -96,7 +104,7 @@ protected:
 struct Sing365Fetcher : public GoogleLyricsFetcher
 {
 	virtual const char *name() const OVERRIDE { return "sing365.com"; }
-	
+
 protected:
 	virtual const char *regex() const OVERRIDE { return "<!-Lyrics Begin->(.*?)<!-Lyrics End->"; }
 
