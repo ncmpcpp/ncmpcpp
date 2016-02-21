@@ -92,6 +92,15 @@ struct IlDepositoFetcher : public GoogleLyricsFetcher
 protected:
 	virtual const char *regex() const OVERRIDE { return "<div id=\"tabs-testo\"><p>(.*?)</p></div>"; }
 };
+
+struct JahLyricsFetcher : public GoogleLyricsFetcher
+{
+	virtual const char *name() const OVERRIDE { return "www.jah-lyrics.com"; }
+
+protected:
+	virtual const char *regex() const OVERRIDE { return "<article>.*?</h1>(.*?)<p class=\"disclaimer\">"; }
+};
+
 struct PLyricsFetcher : public GoogleLyricsFetcher
 {
 	virtual const char *name() const OVERRIDE { return "www.plyrics.com"; }

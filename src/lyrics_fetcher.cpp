@@ -44,6 +44,7 @@ LyricsFetcher *lyricsPlugins[] =
 	new MetrolyricsFetcher(),
 	new JustSomeLyricsFetcher(),
 	new IlDepositoFetcher(),
+	new JahLyricsFetcher(),
 	new InternetLyricsFetcher(),
 	0
 };
