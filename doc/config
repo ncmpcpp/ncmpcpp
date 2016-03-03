@@ -286,6 +286,14 @@
 ##
 #execute_on_song_change = ""
 #
+##
+## Note: Custom command that will be executed each
+## time player changes (e.g. play/pause events). 
+## Useful for notifications etc.
+##
+#
+#execute_on_player_change = ""
+#
 #playlist_show_mpd_host = no
 #
 #playlist_show_remaining_time = no

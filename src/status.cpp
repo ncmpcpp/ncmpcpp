@@ -473,6 +473,10 @@ void Status::Changes::database()
 
 void Status::Changes::playerState()
 {
+    GNUC_UNUSED int res;
+    if (!Config.execute_on_player_change.empty())
+        res = system(Config.execute_on_player_change.c_str());
+
 	switch (m_player_state)
 	{
 		case MPD::psPlay:
