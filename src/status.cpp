@@ -246,7 +246,7 @@ void Status::update(int event)
 	m_playlist_length = st.playlistLength();
 	m_total_time = st.totalTime();
 	m_volume = st.volume();
-	
+
 	if (event & MPD_IDLE_DATABASE)
 		Changes::database();
 	if (event & MPD_IDLE_STORED_PLAYLIST)
@@ -432,10 +432,10 @@ void Status::Changes::playlist(unsigned previous_version)
 		else // otherwise just add it to playlist
 			myPlaylist->main().addItem(std::move(*s));
 	}
-	
+
 	myPlaylist->reloadTotalLength();
 	myPlaylist->reloadRemaining();
-	
+
 	if (isVisible(myBrowser))
 		markSongsInPlaylist(myBrowser->main());
 	if (isVisible(mySearcher))
@@ -473,6 +473,24 @@ void Status::Changes::database()
 
 void Status::Changes::playerState()
 {
+	if (!Config.execute_on_player_state_change.empty())
+	{
+		auto stateToEnv = [](MPD::PlayerState st) -> const char * {
+			switch (st)
+			{
+			case MPD::psPlay:    return "play";
+			case MPD::psStop:    return "stop";
+			case MPD::psPause:   return "pause";
+			case MPD::psUnknown: return "unknown";
+			}
+			throw std::logic_error("unreachable");
+		};
+		GNUC_UNUSED int res;
+		setenv("MPD_PLAYER_STATE", stateToEnv(m_player_state), 1);
+		res = system(Config.execute_on_player_state_change.c_str());
+		unsetenv("MPD_PLAYER_STATE");
+	}
+
 	switch (m_player_state)
 	{
 		case MPD::psPlay:
@@ -503,7 +521,7 @@ void Status::Changes::playerState()
 		default:
 			break;
 	}
-	
+
 	std::string state = playerStateToString(m_player_state);
 	if (Config.design == Design::Alternative)
 	{
@@ -518,7 +536,7 @@ void Status::Changes::playerState()
 		else
 			*wFooter << NC::Format::Bold << state << NC::Format::NoBold;
 	}
-	
+
 	// needed for immediate display after starting
 	// player from stopped state or seeking
 	elapsedTime(false);
@@ -680,7 +698,7 @@ void Status::Changes::flags()
 {
 	if (!Config.header_visibility && Config.design == Design::Classic)
 		return;
-	
+
 	std::string switch_state;
 	switch (Config.design)
 	{
@@ -739,7 +757,7 @@ void Status::Changes::mixer()
 {
 	if (!Config.display_volume_level || (!Config.header_visibility && Config.design == Design::Classic))
 		return;
-	
+
 	switch (Config.design)
 	{
 		case Design::Classic:

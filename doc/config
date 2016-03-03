@@ -286,6 +286,15 @@
 ##
 #execute_on_song_change = ""
 #
+##
+## Note: Custom command that will be executed each
+## time player state changes. The environment variable
+## MPD_PLAYER_STATE is set to the current state (either
+## unknown, play, pause, or stop) for its duration.
+##
+#
+#execute_on_player_state_change = ""
+#
 #playlist_show_mpd_host = no
 #
 #playlist_show_remaining_time = no

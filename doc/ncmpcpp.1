@@ -152,6 +152,11 @@ Format for songs' list displayed in columns.
 .B execute_on_song_change = COMMAND
 Shell command to execute on song change.
 .TP
+.B execute_on_player_state_change = COMMAND
+Shell command to execute on player state change. The environment variable
+.B MPD_PLAYER_STATE
+is set to the current state (either unknown, play, pause, or stop) for its duration.
+.TP
 .B playlist_show_mpd_host = yes/no
 If enabled, current MPD host will be shown in playlist.
 .TP

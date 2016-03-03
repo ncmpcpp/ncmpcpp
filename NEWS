@@ -1,4 +1,5 @@
 ncmpcpp-0.8 (????-??-??)
+* Configuration variable 'execute_on_player_state_change' was added.
 
 ncmpcpp 0.7.4 (2016-04-17)
 * Fetching lyrics from lyricwiki.org was fixed.
