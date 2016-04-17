@@ -186,7 +186,7 @@ PKG_CHECK_MODULES([ICU], [icu-uc], [
 		CPPFLAGS="$old_CPPFLAGS"
 		LIBS="$old_LIBS",
 	)
-], [])
+], [[]])
 
 dnl =============================
 dnl = checking for boost.thread =
