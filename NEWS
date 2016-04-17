@@ -1,4 +1,5 @@
 ncmpcpp 0.7.4 (????-??-??)
+* Fetching lyrics from lyricwiki.org was fixed.
 
 ncmpcpp 0.7.3 (2016-01-20)
 * Home and End keys are now recognized in a few specific terminal emulators.
