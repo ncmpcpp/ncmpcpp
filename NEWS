@@ -1,4 +1,4 @@
-ncmpcpp 0.7.4 (????-??-??)
+ncmpcpp 0.7.4 (2016-04-17)
 * Fetching lyrics from lyricwiki.org was fixed.
 * Configure script now continues without errors if ICU library was not found.
 
