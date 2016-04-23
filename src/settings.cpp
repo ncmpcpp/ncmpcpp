@@ -375,6 +375,9 @@ bool Configuration::read(const std::vector<std::string> &config_paths, bool igno
 	p.add("execute_on_song_change", assign_default(
 		execute_on_song_change, ""
 	));
+	p.add("execute_on_player_change", assign_default(
+		execute_on_player_change, ""
+	));
 	p.add("playlist_show_mpd_host", yes_no(
 		playlist_show_mpd_host, false
 	));
