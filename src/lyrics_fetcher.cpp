@@ -126,7 +126,7 @@ LyricsFetcher::Result LyricwikiFetcher::fetch(const std::string &artist, const s
 			return result;
 		}
 		
-		auto lyrics = getContent("<div class='lyricbox'><script>.*?</script>(.*?)<!--", data);
+		auto lyrics = getContent("<div class='lyricbox'>(.*?)<!--", data);
 		
 		if (lyrics.empty())
 		{

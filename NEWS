@@ -1,5 +1,12 @@
 ncmpcpp-0.8 (????-??-??)
 
+ncmpcpp 0.7.4 (2016-04-17)
+* Fetching lyrics from lyricwiki.org was fixed.
+* Configure script now continues without errors if ICU library was not found.
+
+ncmpcpp 0.7.3 (2016-01-20)
+* Home and End keys are now recognized in a few specific terminal emulators.
+
 ncmpcpp-0.7.2 (2016-01-16)
 * Attempt to add non-song item to playlist from search engine doesn't trigger assertion failure anymore.
 * Fetching lyrics from metrolyrics.com was fixed.
