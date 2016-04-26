@@ -156,8 +156,3 @@ $AUTOMAKE --add-missing $AUTOMAKE_FLAGS || exit 1
 
 echo "  $AUTOCONF"
 $AUTOCONF || exit 1
-
-cd "$olddir"
-if test x$NOCONFIGURE = x; then
-	"$srcdir"/configure "$@" || exit 1
-fi
