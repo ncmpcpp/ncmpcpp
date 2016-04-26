@@ -1,5 +1,6 @@
 ncmpcpp-0.7.6 (????-??-??)
 * Fixed assertion failure on trying to search backwards in an empty list.
+* Updated installation instructions in INSTALL file.
 
 ncmpcpp-0.7.5 (2016-08-17)
 * Action chains can be now used for seeking.
