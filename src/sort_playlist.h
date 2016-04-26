@@ -30,19 +30,19 @@ struct SortPlaylistDialog
 	: Screen<NC::Menu<RunnableItem<std::pair<std::string, MPD::Song::GetFunction>, void()>>>, HasActions, Tabbable
 {
 	typedef SortPlaylistDialog Self;
-	
+
 	SortPlaylistDialog();
-	
+
 	virtual void switchTo() OVERRIDE;
 	virtual void resize() OVERRIDE;
-	
+
 	virtual std::wstring title() OVERRIDE;
 	virtual ScreenType type() OVERRIDE { return ScreenType::SortPlaylistDialog; }
-	
+
 	virtual void update() OVERRIDE { }
-	
+
 	virtual void mouseButtonPressed(MEVENT me) OVERRIDE;
-	
+
 	virtual bool isLockable() OVERRIDE { return false; }
 	virtual bool isMergable() OVERRIDE { return false; }
 
@@ -53,14 +53,14 @@ struct SortPlaylistDialog
 	// private members
 	void moveSortOrderUp();
 	void moveSortOrderDown();
-	
+
 private:
 	void moveSortOrderHint() const;
 	void sort() const;
 	void cancel() const;
-	
+
 	void setDimensions();
-	
+
 	size_t m_height;
 	size_t m_width;
 };

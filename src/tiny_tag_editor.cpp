@@ -88,7 +88,7 @@ void TinyTagEditor::switchTo()
 		if (itsEdited.isFromDatabase())
 			full_path += Config.mpd_music_dir;
 		full_path += itsEdited.getURI();
-		
+
 		const char msg[] = "Couldn't read file \"%1%\"";
 		Statusbar::printf(msg, wideShorten(full_path, COLS-const_strlen(msg)));
 	}
@@ -194,35 +194,35 @@ bool TinyTagEditor::getTags()
 	if (itsEdited.isFromDatabase())
 		path_to_file += Config.mpd_music_dir;
 	path_to_file += itsEdited.getURI();
-	
+
 	TagLib::FileRef f(path_to_file.c_str());
 	if (f.isNull())
 		return false;
-	
+
 	std::string ext = itsEdited.getURI();
 	ext = boost::locale::to_lower(ext.substr(ext.rfind(".")+1));
-	
+
 	w.clear();
 	w.reset();
-	
+
 	w.resizeList(24);
-	
+
 	for (size_t i = 0; i < 7; ++i)
 		w.at(i).setInactive(true);
-	
+
 	w.at(7).setSeparator(true);
 	w.at(19).setSeparator(true);
 	w.at(21).setSeparator(true);
-	
+
 	if (!Tags::extendedSetSupported(f.file()))
 	{
 		w.at(10).setInactive(true);
 		for (size_t i = 15; i <= 17; ++i)
 			w.at(i).setInactive(true);
 	}
-	
+
 	w.highlight(8);
-	
+
 	w.at(0).value() << NC::Format::Bold << Config.color1 << "Song name: " << NC::Format::NoBold << Config.color2 << itsEdited.getName() << NC::Color::End;
 	w.at(1).value() << NC::Format::Bold << Config.color1 << "Location in DB: " << NC::Format::NoBold << Config.color2;
 	ShowTag(w.at(1).value(), itsEdited.getDirectory());
@@ -231,16 +231,16 @@ bool TinyTagEditor::getTags()
 	w.at(4).value() << NC::Format::Bold << Config.color1 << "Bitrate: " << NC::Format::NoBold << Config.color2 << f.audioProperties()->bitrate() << " kbps" << NC::Color::End;
 	w.at(5).value() << NC::Format::Bold << Config.color1 << "Sample rate: " << NC::Format::NoBold << Config.color2 << f.audioProperties()->sampleRate() << " Hz" << NC::Color::End;
 	w.at(6).value() << NC::Format::Bold << Config.color1 << "Channels: " << NC::Format::NoBold << Config.color2 << (f.audioProperties()->channels() == 1 ? "Mono" : "Stereo") << NC::Color::Default;
-	
+
 	unsigned pos = 8;
 	for (const SongInfo::Metadata *m = SongInfo::Tags; m->Name; ++m, ++pos)
 	{
 		w.at(pos).value() << NC::Format::Bold << m->Name << ":" << NC::Format::NoBold << ' ';
 		ShowTag(w.at(pos).value(), itsEdited.getTags(m->Get));
 	}
-	
+
 	w.at(20).value() << NC::Format::Bold << "Filename:" << NC::Format::NoBold << ' ' << itsEdited.getName();
-	
+
 	w.at(22).value() << "Save";
 	w.at(23).value() << "Cancel";
 	return true;

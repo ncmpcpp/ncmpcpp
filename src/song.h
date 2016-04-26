@@ -38,10 +38,10 @@ struct Song
 	};
 
 	typedef std::string (Song::*GetFunction)(unsigned) const;
-	
+
 	Song() : m_hash(0) { }
 	virtual ~Song() { }
-	
+
 	Song(mpd_song *s);
 
 	Song(const Song &rhs) : m_song(rhs.m_song), m_hash(rhs.m_hash) { }
@@ -52,9 +52,9 @@ struct Song
 		m_hash = rhs.m_hash;
 		return *this;
 	}
-	
+
 	std::string get(mpd_tag_type type, unsigned idx = 0) const;
-	
+
 	virtual std::string getURI(unsigned idx = 0) const;
 	virtual std::string getName(unsigned idx = 0) const;
 	virtual std::string getDirectory(unsigned idx = 0) const;
@@ -72,20 +72,20 @@ struct Song
 	virtual std::string getComment(unsigned idx = 0) const;
 	virtual std::string getLength(unsigned idx = 0) const;
 	virtual std::string getPriority(unsigned idx = 0) const;
-	
+
 	virtual std::string getTags(GetFunction f) const;
-	
+
 	virtual unsigned getDuration() const;
 	virtual unsigned getPosition() const;
 	virtual unsigned getID() const;
 	virtual unsigned getPrio() const;
 	virtual time_t getMTime() const;
-	
+
 	virtual bool isFromDatabase() const;
 	virtual bool isStream() const;
-	
+
 	virtual bool empty() const;
-	
+
 	bool operator==(const Song &rhs) const
 	{
 		if (m_hash != rhs.m_hash)
@@ -96,7 +96,7 @@ struct Song
 	{
 		return !(operator==(rhs));
 	}
-	
+
 	const char *c_uri() const { return m_song ? mpd_song_get_uri(m_song.get()) : ""; }
 
 	static std::string ShowTime(unsigned length);

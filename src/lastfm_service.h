@@ -36,22 +36,22 @@ struct Service
 {
 	typedef std::map<std::string, std::string> Arguments;
 	typedef std::pair<bool, std::string> Result;
-	
+
 	Service(Arguments args) : m_arguments(args) { }
-	
+
 	virtual const char *name() = 0;
 	virtual Result fetch();
-	
+
 	virtual void beautifyOutput(NC::Scrollpad &w) = 0;
-	
+
 protected:
 	virtual bool argumentsOk() = 0;
 	virtual bool actionFailed(const std::string &data);
-	
+
 	virtual Result processData(const std::string &data) = 0;
-	
+
 	virtual const char *methodName() = 0;
-	
+
 	Arguments m_arguments;
 };
 
@@ -59,17 +59,17 @@ struct ArtistInfo : public Service
 {
 	ArtistInfo(std::string artist, std::string lang)
 	: Service({{"artist", artist}, {"lang", lang}}) { }
-	
+
 	virtual const char *name() { return "Artist info"; }
-	
+
 	virtual void beautifyOutput(NC::Scrollpad &w);
-	
+
 	bool operator==(const ArtistInfo &ai) const { return m_arguments == ai.m_arguments; }
-	
+
 protected:
 	virtual bool argumentsOk();
 	virtual Result processData(const std::string &data);
-	
+
 	virtual const char *methodName() { return "artist.getinfo"; }
 };
 

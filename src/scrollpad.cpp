@@ -145,7 +145,7 @@ void Scrollpad::flush()
 	const auto &ps = m_buffer.properties();
 	auto p = ps.begin();
 	size_t i = 0;
-	
+
 	auto load_properties = [&]() {
 		for (; p != ps.end() && p->first == i; ++p)
 			w << p->second;
@@ -178,7 +178,7 @@ void Scrollpad::flush()
 		{
 			// write all whitespaces.
 			write_whitespace();
-			
+
 			// if we are generating height, check difference
 			// between previous Y coord and current one and
 			// update height accordingly.
@@ -188,25 +188,25 @@ void Scrollpad::flush()
 				height += new_y - y;
 				y = new_y;
 			}
-			
+
 			if (i == s.length())
 				break;
-			
+
 			// save current string position state and get current
 			// coordinates as we are before the beginning of a word.
 			old_i = i;
 			old_p = p;
 			x = getX();
 			y = getY();
-			
+
 			// write word to test if it overflows, but do not load properties
 			// yet since if it overflows, we do not want to load them twice.
 			write_word(false);
-			
+
 			// restore previous indexes state
 			i = old_i;
 			p = old_p;
-			
+
 			// get new Y coord to see if word overflew into next line.
 			new_y = getY();
 			if (new_y != y)
@@ -223,14 +223,14 @@ void Scrollpad::flush()
 					goToXY(x, y);
 					wclrtoeol(m_window);
 				}
-				
+
 				// ...start at the beginning of next line...
 				++y;
 				goToXY(0, y);
-				
+
 				// ...write word again, this time with properties...
 				write_word(true);
-				
+
 				if (generate_height_only)
 				{
 					// ... and check for potential
@@ -245,7 +245,7 @@ void Scrollpad::flush()
 				goToXY(x, y);
 				write_word(true);
 			}
-			
+
 			if (generate_height_only)
 			{
 				// move to the first line, since when we do

@@ -33,7 +33,7 @@ struct PushCharacters: BaseAction
 
 private:
 	virtual void run() OVERRIDE;
-	
+
 	NC::Window **m_window;
 	std::vector<NC::Key::Type> m_queue;
 };
@@ -41,32 +41,32 @@ private:
 struct RequireRunnable: BaseAction
 {
 	RequireRunnable(BaseAction *action);
-	
+
 private:
 	virtual bool canBeRun() OVERRIDE;
 	virtual void run() OVERRIDE { }
-	
+
 	BaseAction *m_action;
 };
 
 struct RequireScreen: BaseAction
 {
 	RequireScreen(ScreenType screen_type);
-	
+
 private:
 	virtual bool canBeRun() OVERRIDE;
 	virtual void run() OVERRIDE { }
-	
+
 	ScreenType m_screen_type;
 };
 
 struct RunExternalCommand: BaseAction
 {
 	RunExternalCommand(std::string command);
-	
+
 private:
 	virtual void run() OVERRIDE;
-	
+
 	std::string m_command;
 };
 

@@ -36,18 +36,18 @@
 struct Lastfm: Screen<NC::Scrollpad>, Tabbable
 {
 	Lastfm();
-	
+
 	virtual void switchTo() OVERRIDE;
 	virtual void resize() OVERRIDE;
-	
+
 	virtual std::wstring title() OVERRIDE;
 	virtual ScreenType type() OVERRIDE { return ScreenType::Lastfm; }
-	
+
 	virtual void update() OVERRIDE;
-	
+
 	virtual bool isLockable() OVERRIDE { return false; }
 	virtual bool isMergable() OVERRIDE { return true; }
-	
+
 	template <typename ServiceT>
 	void queueJob(ServiceT *service)
 	{
@@ -67,9 +67,9 @@ struct Lastfm: Screen<NC::Scrollpad>, Tabbable
 
 private:
 	void getResult();
-	
+
 	std::wstring m_title;
-	
+
 	std::shared_ptr<LastFm::Service> m_service;
 	boost::future<LastFm::Service::Result> m_worker;
 };

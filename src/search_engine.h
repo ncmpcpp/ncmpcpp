@@ -94,21 +94,21 @@ struct SearchEngineWindow: NC::Menu<SEItem>, SongList
 struct SearchEngine: Screen<SearchEngineWindow>, HasActions, HasSongs, Searchable, Tabbable
 {
 	SearchEngine();
-	
+
 	// Screen<SearchEngineWindow> implementation
 	virtual void resize() OVERRIDE;
 	virtual void switchTo() OVERRIDE;
-	
+
 	virtual std::wstring title() OVERRIDE;
 	virtual ScreenType type() OVERRIDE { return ScreenType::SearchEngine; }
-	
+
 	virtual void update() OVERRIDE { }
-	
+
 	virtual void mouseButtonPressed(MEVENT me) OVERRIDE;
-	
+
 	virtual bool isLockable() OVERRIDE { return true; }
 	virtual bool isMergable() OVERRIDE { return true; }
-	
+
 	// Searchable implementation
 	virtual bool allowsSearching() OVERRIDE;
 	virtual void setSearchConstraint(const std::string &constraint) OVERRIDE;
@@ -123,28 +123,28 @@ struct SearchEngine: Screen<SearchEngineWindow>, HasActions, HasSongs, Searchabl
 	virtual bool itemAvailable() OVERRIDE;
 	virtual bool addItemToPlaylist(bool play) OVERRIDE;
 	virtual std::vector<MPD::Song> getSelectedSongs() OVERRIDE;
-	
+
 	// private members
 	void reset();
-	
+
 	static size_t StaticOptions;
 	static size_t SearchButton;
 	static size_t ResetButton;
-	
+
 private:
 	void Prepare();
 	void Search();
 
 	Regex::ItemFilter<SEItem> m_search_predicate;
-	
+
 	const char **SearchMode;
-	
+
 	static const char *SearchModes[];
-	
+
 	static const size_t ConstraintsNumber = 11;
 	static const char *ConstraintsNames[];
 	std::string itsConstraints[ConstraintsNumber];
-	
+
 	static bool MatchToPattern;
 };
 

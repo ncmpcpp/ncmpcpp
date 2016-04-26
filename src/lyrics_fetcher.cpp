@@ -52,28 +52,28 @@ LyricsFetcher::Result LyricsFetcher::fetch(const std::string &artist, const std:
 {
 	Result result;
 	result.first = false;
-	
+
 	std::string url = urlTemplate();
 	boost::replace_all(url, "%artist%", artist);
 	boost::replace_all(url, "%title%", title);
-	
+
 	std::string data;
 	CURLcode code = Curl::perform(data, url);
-	
+
 	if (code != CURLE_OK)
 	{
 		result.second = curl_easy_strerror(code);
 		return result;
 	}
-	
+
 	auto lyrics = getContent(regex(), data);
-	
+
 	if (lyrics.empty() || notLyrics(data))
 	{
 		result.second = msgNotFound;
 		return result;
 	}
-	
+
 	data.clear();
 	for (auto it = lyrics.begin(); it != lyrics.end(); ++it)
 	{
@@ -85,7 +85,7 @@ LyricsFetcher::Result LyricsFetcher::fetch(const std::string &artist, const std:
 				data += "\n\n----------\n\n";
 		}
 	}
-	
+
 	result.second = data;
 	result.first = true;
 	return result;
@@ -116,18 +116,18 @@ LyricsFetcher::Result LyricwikiFetcher::fetch(const std::string &artist, const s
 	if (result.first == true)
 	{
 		result.first = false;
-		
+
 		std::string data;
 		CURLcode code = Curl::perform(data, result.second, "", true);
-		
+
 		if (code != CURLE_OK)
 		{
 			result.second = curl_easy_strerror(code);
 			return result;
 		}
-		
+
 		auto lyrics = getContent("<div class='lyricbox'>(.*?)<!--", data);
-		
+
 		if (lyrics.empty())
 		{
 			result.second = msgNotFound;
@@ -142,7 +142,7 @@ LyricsFetcher::Result LyricwikiFetcher::fetch(const std::string &artist, const s
 			result.second = "Licence restriction";
 			return result;
 		}
-		
+
 		data.clear();
 		for (auto it = lyrics.begin(); it != lyrics.end(); ++it)
 		{
@@ -156,7 +156,7 @@ LyricsFetcher::Result LyricwikiFetcher::fetch(const std::string &artist, const s
 					data += "\n\n----------\n\n";
 			}
 		}
-		
+
 		result.second = data;
 		result.first = true;
 	}
@@ -174,36 +174,36 @@ LyricsFetcher::Result GoogleLyricsFetcher::fetch(const std::string &artist, cons
 {
 	Result result;
 	result.first = false;
-	
+
 	std::string search_str = artist;
 	search_str += "+";
 	search_str += title;
 	search_str += "+%2B";
 	search_str += siteKeyword();
-	
+
 	std::string google_url = "http://www.google.com/search?hl=en&ie=UTF-8&oe=UTF-8&q=";
 	google_url += search_str;
 	google_url += "&btnI=I%27m+Feeling+Lucky";
-	
+
 	std::string data;
 	CURLcode code = Curl::perform(data, google_url, google_url);
-	
+
 	if (code != CURLE_OK)
 	{
 		result.second = curl_easy_strerror(code);
 		return result;
 	}
-	
+
 	auto urls = getContent("<A HREF=\"(.*?)\">here</A>", data);
-	
+
 	if (urls.empty() || !isURLOk(urls[0]))
 	{
 		result.second = msgNotFound;
 		return result;
 	}
-	
+
 	data = unescapeHtmlUtf8(urls[0]);
-	
+
 	URL = data.c_str();
 	return LyricsFetcher::fetch("", "");
 }

@@ -429,7 +429,7 @@ Window::Window(size_t startx,
 	||  m_width+m_start_x > size_t(COLS)
 	||  m_height+m_start_y > size_t(LINES))
 		throw std::logic_error("constructed window doesn't fit into the terminal");
-	
+
 	if (m_border)
 	{
 		++m_start_x;
@@ -442,9 +442,9 @@ Window::Window(size_t startx,
 		m_start_y += 2;
 		m_height -= 2;
 	}
-	
+
 	m_window = newpad(m_height, m_width);
-	
+
 	setColor(m_color);
 }
 
@@ -1061,12 +1061,12 @@ Key::Type Window::readKey()
 		m_input_queue.pop();
 		return result;
 	}
-	
+
 	fd_set fdset;
 	FD_ZERO(&fdset);
 	FD_SET(STDIN_FILENO, &fdset);
 	timeval timeout = { m_window_timeout/1000, (m_window_timeout%1000)*1000 };
-	
+
 	int fd_max = STDIN_FILENO;
 	for (FDCallbacks::const_iterator it = m_fds.begin(); it != m_fds.end(); ++it)
 	{
@@ -1074,7 +1074,7 @@ Key::Type Window::readKey()
 			fd_max = it->first;
 		FD_SET(it->first, &fdset);
 	}
-	
+
 	if (select(fd_max+1, &fdset, 0, 0, m_window_timeout < 0 ? 0 : &timeout) > 0)
 	{
 		if (FD_ISSET(STDIN_FILENO, &fdset))

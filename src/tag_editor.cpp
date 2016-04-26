@@ -145,7 +145,7 @@ TagEditor::TagEditor() : FParser(0), FParserHelper(0), FParserLegend(0), FParser
 {
 	PatternsFile = Config.ncmpcpp_directory + "patterns.list";
 	SetDimensions(0, COLS);
-	
+
 	Dirs = new NC::Menu< std::pair<std::string, std::string> >(0, MainStartY, LeftColumnWidth, MainHeight, Config.titles_visibility ? "Directories" : "", Config.main_color, NC::Border());
 	Dirs->setHighlightColor(Config.active_column_color);
 	Dirs->cyclicScrolling(Config.use_cyclic_scrolling);
@@ -153,7 +153,7 @@ TagEditor::TagEditor() : FParser(0), FParserHelper(0), FParserLegend(0), FParser
 	Dirs->setItemDisplayer([](NC::Menu<std::pair<std::string, std::string>> &menu) {
 		menu << Charset::utf8ToLocale(menu.drawn()->value().first);
 	});
-	
+
 	TagTypes = new NC::Menu<std::string>(MiddleColumnStartX, MainStartY, MiddleColumnWidth, MainHeight, Config.titles_visibility ? "Tag types" : "", Config.main_color, NC::Border());
 	TagTypes->setHighlightColor(Config.main_highlight_color);
 	TagTypes->cyclicScrolling(Config.use_cyclic_scrolling);
@@ -161,7 +161,7 @@ TagEditor::TagEditor() : FParser(0), FParserHelper(0), FParserLegend(0), FParser
 	TagTypes->setItemDisplayer([](NC::Menu<std::string> &menu) {
 		menu << Charset::utf8ToLocale(menu.drawn()->value());
 	});
-	
+
 	for (const SongInfo::Metadata *m = SongInfo::Tags; m->Name; ++m)
 		TagTypes->addItem(m->Name);
 	TagTypes->addSeparator();
@@ -177,7 +177,7 @@ TagEditor::TagEditor() : FParser(0), FParserHelper(0), FParserLegend(0), FParser
 	TagTypes->addSeparator();
 	TagTypes->addItem("Reset");
 	TagTypes->addItem("Save");
-	
+
 	Tags = new TagsWindow(NC::Menu<MPD::MutableSong>(RightColumnStartX, MainStartY, RightColumnWidth, MainHeight, Config.titles_visibility ? "Tags" : "", Config.main_color, NC::Border()));
 	Tags->setHighlightColor(Config.main_highlight_color);
 	Tags->cyclicScrolling(Config.use_cyclic_scrolling);
@@ -185,11 +185,11 @@ TagEditor::TagEditor() : FParser(0), FParserHelper(0), FParserLegend(0), FParser
 	Tags->setSelectedPrefix(Config.selected_item_prefix);
 	Tags->setSelectedSuffix(Config.selected_item_suffix);
 	Tags->setItemDisplayer(Display::Tags);
-	
+
 	auto parser_display = [](NC::Menu<std::string> &menu) {
 		menu << Charset::utf8ToLocale(menu.drawn()->value());
 	};
-	
+
 	FParserDialog = new NC::Menu<std::string>((COLS-FParserDialogWidth)/2, (MainHeight-FParserDialogHeight)/2+MainStartY, FParserDialogWidth, FParserDialogHeight, "", Config.main_color, Config.window_border);
 	FParserDialog->cyclicScrolling(Config.use_cyclic_scrolling);
 	FParserDialog->centeredCursor(Config.centered_cursor);

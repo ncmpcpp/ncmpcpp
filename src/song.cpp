@@ -270,7 +270,7 @@ std::string Song::ShowTime(unsigned length)
 	int minutes = length/60;
 	length -= minutes*60;
 	int seconds = length;
-	
+
 	std::string result;
 	if (hours > 0)
 		result = (boost::format("%d:%02d:%02d") % hours % minutes % seconds).str();

@@ -31,52 +31,52 @@
 struct PlaylistEditor: Screen<NC::Window *>, HasColumns, HasSongs, Searchable, Tabbable
 {
 	PlaylistEditor();
-	
+
 	virtual void switchTo() OVERRIDE;
 	virtual void resize() OVERRIDE;
-	
+
 	virtual std::wstring title() OVERRIDE;
 	virtual ScreenType type() OVERRIDE { return ScreenType::PlaylistEditor; }
-	
+
 	virtual void refresh() OVERRIDE;
 	virtual void update() OVERRIDE;
-	
+
 	virtual int windowTimeout() OVERRIDE;
 
 	virtual void mouseButtonPressed(MEVENT me) OVERRIDE;
-	
+
 	virtual bool isLockable() OVERRIDE { return true; }
 	virtual bool isMergable() OVERRIDE { return true; }
-	
+
 	// Searchable implementation
 	virtual bool allowsSearching() OVERRIDE;
 	virtual void setSearchConstraint(const std::string &constraint) OVERRIDE;
 	virtual void clearConstraint() OVERRIDE;
 	virtual bool find(SearchDirection direction, bool wrap, bool skip_current) OVERRIDE;
-	
+
 	// HasSongs implementation
 	virtual bool itemAvailable() OVERRIDE;
 	virtual bool addItemToPlaylist(bool play) OVERRIDE;
 	virtual std::vector<MPD::Song> getSelectedSongs() OVERRIDE;
-	
+
 	// HasColumns implementation
 	virtual bool previousColumnAvailable() OVERRIDE;
 	virtual void previousColumn() OVERRIDE;
-	
+
 	virtual bool nextColumnAvailable() OVERRIDE;
 	virtual void nextColumn() OVERRIDE;
-	
+
 	// private members
 	void updateTimer();
 
 	void requestPlaylistsUpdate() { m_playlists_update_requested = true; }
 	void requestContentsUpdate() { m_content_update_requested = true; }
-	
+
 	virtual void Locate(const MPD::Playlist &playlist);
-	
+
 	NC::Menu<MPD::Playlist> Playlists;
 	SongMenu Content;
-	
+
 private:
 	bool m_playlists_update_requested;
 	bool m_content_update_requested;

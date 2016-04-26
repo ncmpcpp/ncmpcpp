@@ -600,7 +600,7 @@ bool Connection::AddRandomSongs(size_t number)
 	}
 	mpd_response_finish(m_connection.get());
 	checkErrors();
-	
+
 	if (number > files.size())
 	{
 		//if (itsErrorHandler)
@@ -820,7 +820,7 @@ StringIterator Connection::GetURLHandlers()
 
 StringIterator Connection::GetTagTypes()
 {
-	
+
 	prechecksNoCommandsList();
 	mpd_send_list_tag_types(m_connection.get());
 	checkErrors();

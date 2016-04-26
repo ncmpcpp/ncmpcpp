@@ -113,7 +113,7 @@ size_t FooterStartY;
 void validateScreenSize()
 {
 	using Global::MainHeight;
-	
+
 	if (COLS < 30 || MainHeight < 5)
 	{
 		NC::destroyScreen();
@@ -135,28 +135,28 @@ void initializeScreens()
 	mySongInfo = new SongInfo;
 	myServerInfo = new ServerInfo;
 	mySortPlaylistDialog = new SortPlaylistDialog;
-	
+
 #	ifdef HAVE_CURL_CURL_H
 	myLastfm = new Lastfm;
 #	endif // HAVE_CURL_CURL_H
-	
+
 #	ifdef HAVE_TAGLIB_H
 	myTinyTagEditor = new TinyTagEditor;
 	myTagEditor = new TagEditor;
 #	endif // HAVE_TAGLIB_H
-	
+
 #	ifdef ENABLE_VISUALIZER
 	myVisualizer = new Visualizer;
 #	endif // ENABLE_VISUALIZER
-	
+
 #	ifdef ENABLE_OUTPUTS
 	myOutputs = new Outputs;
 #	endif // ENABLE_OUTPUTS
-	
+
 #	ifdef ENABLE_CLOCK
 	myClock = new Clock;
 #	endif // ENABLE_CLOCK
-	
+
 }
 
 void setResizeFlags()
@@ -172,24 +172,24 @@ void setResizeFlags()
 	mySongInfo->hasToBeResized = 1;
 	myServerInfo->hasToBeResized = 1;
 	mySortPlaylistDialog->hasToBeResized = 1;
-	
+
 #	ifdef HAVE_CURL_CURL_H
 	myLastfm->hasToBeResized = 1;
 #	endif // HAVE_CURL_CURL_H
-	
+
 #	ifdef HAVE_TAGLIB_H
 	myTinyTagEditor->hasToBeResized = 1;
 	myTagEditor->hasToBeResized = 1;
 #	endif // HAVE_TAGLIB_H
-	
+
 #	ifdef ENABLE_VISUALIZER
 	myVisualizer->hasToBeResized = 1;
 #	endif // ENABLE_VISUALIZER
-	
+
 #	ifdef ENABLE_OUTPUTS
 	myOutputs->hasToBeResized = 1;
 #	endif // ENABLE_OUTPUTS
-	
+
 #	ifdef ENABLE_CLOCK
 	myClock->hasToBeResized = 1;
 #	endif // ENABLE_CLOCK
@@ -246,10 +246,10 @@ void setWindowsDimensions()
 {
 	using Global::MainStartY;
 	using Global::MainHeight;
-	
+
 	MainStartY = Config.design == Design::Alternative ? 5 : 2;
 	MainHeight = LINES-(Config.design == Design::Alternative ? 7 : 4);
-	
+
 	if (!Config.header_visibility)
 	{
 		MainStartY -= 2;
@@ -257,7 +257,7 @@ void setWindowsDimensions()
 	}
 	if (!Config.statusbar_visibility)
 		++MainHeight;
-	
+
 	HeaderHeight = Config.design == Design::Alternative ? (Config.header_visibility ? 5 : 3) : 1;
 	FooterStartY = LINES-(Config.statusbar_visibility ? 2 : 1);
 	FooterHeight = Config.statusbar_visibility ? 2 : 1;
@@ -557,7 +557,7 @@ bool MasterScreen::canBeRun()
 {
 	using Global::myLockedScreen;
 	using Global::myInactiveScreen;
-	
+
 	return myLockedScreen
 	    && myInactiveScreen
 	    && myLockedScreen != myScreen
@@ -568,7 +568,7 @@ void MasterScreen::run()
 {
 	using Global::myInactiveScreen;
 	using Global::myLockedScreen;
-	
+
 	myInactiveScreen = myScreen;
 	myScreen = myLockedScreen;
 	drawHeader();
@@ -578,7 +578,7 @@ bool SlaveScreen::canBeRun()
 {
 	using Global::myLockedScreen;
 	using Global::myInactiveScreen;
-	
+
 	return myLockedScreen
 	    && myInactiveScreen
 	    && myLockedScreen == myScreen
@@ -589,7 +589,7 @@ void SlaveScreen::run()
 {
 	using Global::myInactiveScreen;
 	using Global::myLockedScreen;
-	
+
 	myScreen = myInactiveScreen;
 	myInactiveScreen = myLockedScreen;
 	drawHeader();
@@ -788,7 +788,7 @@ void Pause::run()
 void SavePlaylist::run()
 {
 	using Global::wFooter;
-	
+
 	std::string playlist_name;
 	{
 		Statusbar::ScopedLock slock;
@@ -945,7 +945,7 @@ bool Add::canBeRun()
 void Add::run()
 {
 	using Global::wFooter;
-	
+
 	std::string path;
 	{
 		Statusbar::ScopedLock slock;
@@ -1285,7 +1285,7 @@ void ToggleCrossfade::run()
 void SetCrossfade::run()
 {
 	using Global::wFooter;
-	
+
 	Statusbar::ScopedLock slock;
 	Statusbar::put() << "Set crossfade to: ";
 	auto crossfade = fromString<unsigned>(wFooter->prompt());
@@ -1297,7 +1297,7 @@ void SetCrossfade::run()
 void SetVolume::run()
 {
 	using Global::wFooter;
-	
+
 	unsigned volume;
 	{
 		Statusbar::ScopedLock slock;
@@ -1674,16 +1674,16 @@ bool JumpToPositionInSong::canBeRun()
 void JumpToPositionInSong::run()
 {
 	using Global::wFooter;
-	
+
 	const MPD::Song s = myPlaylist->nowPlayingSong();
-	
+
 	std::string spos;
 	{
 		Statusbar::ScopedLock slock;
 		Statusbar::put() << "Position to go (in %/m:ss/seconds(s)): ";
 		spos = wFooter->prompt();
 	}
-	
+
 	boost::regex rx;
 	boost::smatch what;
 	if (boost::regex_match(spos, what, rx.assign("([0-9]+):([0-9]{2})"))) // mm:ss
@@ -1947,14 +1947,14 @@ bool Find::canBeRun()
 void Find::run()
 {
 	using Global::wFooter;
-	
+
 	std::string token;
 	{
 		Statusbar::ScopedLock slock;
 		Statusbar::put() << "Find: ";
 		token = wFooter->prompt();
 	}
-	
+
 	Statusbar::print("Searching...");
 	auto s = static_cast<Screen<NC::Scrollpad> *>(myScreen);
 	s->main().removeProperties();
@@ -2026,7 +2026,7 @@ void ToggleFindMode::run()
 void ToggleReplayGainMode::run()
 {
 	using Global::wFooter;
-	
+
 	char rgm = 0;
 	{
 		Statusbar::ScopedLock slock;
@@ -2117,7 +2117,7 @@ void AddRandomItems::run()
 	}
 	else
 		tag_type_str = "song";
-	
+
 	unsigned number;
 	{
 		Statusbar::ScopedLock slock;
@@ -2175,7 +2175,7 @@ bool ToggleLibraryTagType::canBeRun()
 void ToggleLibraryTagType::run()
 {
 	using Global::wFooter;
-	
+
 	char tag_type = 0;
 	{
 		Statusbar::ScopedLock slock;
@@ -2256,7 +2256,7 @@ bool SetSelectedItemsPriority::canBeRun()
 void SetSelectedItemsPriority::run()
 {
 	using Global::wFooter;
-	
+
 	unsigned prio;
 	{
 		Statusbar::ScopedLock slock;
@@ -2351,7 +2351,7 @@ void ShowArtistInfo::run()
 		myLastfm->switchTo();
 		return;
 	}
-	
+
 	std::string artist;
 	if (myScreen->isActiveWindow(myLibrary->Tags))
 	{
@@ -2365,7 +2365,7 @@ void ShowArtistInfo::run()
 		assert(s);
 		artist = s->getArtist();
 	}
-	
+
 	if (!artist.empty())
 	{
 		myLastfm->queueJob(new LastFm::ArtistInfo(artist, Config.lastfm_preferred_language));
@@ -2557,7 +2557,7 @@ bool ShowOutputs::canBeRun()
 {
 #	ifdef ENABLE_OUTPUTS
 	return myScreen != myOutputs
-#	ifdef HAVE_TAGLIB_H	
+#	ifdef HAVE_TAGLIB_H
 	    && myScreen != myTinyTagEditor
 #	endif // HAVE_TAGLIB_H
 	;
@@ -2814,34 +2814,34 @@ void seek()
 	using Global::wFooter;
 	using Global::Timer;
 	using Global::SeekingInProgress;
-	
+
 	if (!Status::State::totalTime())
 	{
 		Statusbar::print("Unknown item length");
 		return;
 	}
-	
+
 	Progressbar::ScopedLock progressbar_lock;
 	Statusbar::ScopedLock statusbar_lock;
 
 	unsigned songpos = Status::State::elapsedTime();
 	auto t = Timer;
-	
+
 	int old_timeout = wFooter->getTimeout();
 	wFooter->setTimeout(BaseScreen::defaultWindowTimeout);
-	
+
 	auto seekForward = &Actions::get(Actions::Type::SeekForward);
 	auto seekBackward = &Actions::get(Actions::Type::SeekBackward);
-	
+
 	SeekingInProgress = true;
 	while (true)
 	{
 		Status::trace();
-		
+
 		unsigned howmuch = Config.incremental_seeking
 		                 ? (Timer-t).total_seconds()/2+Config.seek_time
 		                 : Config.seek_time;
-		
+
 		NC::Key::Type input = readKey(*wFooter);
 		auto k = Bindings.get(input);
 		if (k.first == k.second || !k.first->isSingle()) // no single action?
@@ -2864,7 +2864,7 @@ void seek()
 		}
 		else
 			break;
-		
+
 		*wFooter << NC::Format::Bold;
 		std::string tracklength;
 		// FIXME: merge this with the code in status.cpp
@@ -2904,18 +2904,18 @@ void seek()
 	}
 	SeekingInProgress = false;
 	Mpd.Seek(Status::State::currentSongPosition(), songpos);
-	
+
 	wFooter->setTimeout(old_timeout);
 }
 
 void findItem(const SearchDirection direction)
 {
 	using Global::wFooter;
-	
+
 	Searchable *w = dynamic_cast<Searchable *>(myScreen);
 	assert(w != nullptr);
 	assert(w->allowsSearching());
-	
+
 	std::string constraint;
 	{
 		Statusbar::ScopedLock slock;
@@ -2925,7 +2925,7 @@ void findItem(const SearchDirection direction)
 		Statusbar::put() << (boost::format("Find %1%: ") % direction).str();
 		constraint = wFooter->prompt();
 	}
-	
+
 	try
 	{
 		if (constraint.empty())

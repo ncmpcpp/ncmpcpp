@@ -190,7 +190,7 @@ std::wstring Scroller(const std::wstring &str, size_t &pos, size_t width)
 		return s;
 	std::wstring result;
 	size_t len = wideLength(s);
-	
+
 	if (len > width)
 	{
 		s += L" ** ";
@@ -226,11 +226,11 @@ void writeCyclicBuffer(const NC::WBuffer &buf, NC::Window &w, size_t &start_pos,
 		len = 0;
 		const auto &ps = buf.properties();
 		auto p = ps.begin();
-		
+
 		// load attributes from before starting pos
 		for (; p != ps.end() && p->first < start_pos; ++p)
 			w << p->second;
-		
+
 		auto write_buffer = [&](size_t start) {
 			for (size_t i = start; i < s.length() && len < width; ++i)
 			{
@@ -245,7 +245,7 @@ void writeCyclicBuffer(const NC::WBuffer &buf, NC::Window &w, size_t &start_pos,
 				w << p->second;
 			p = ps.begin();
 		};
-		
+
 		write_buffer(start_pos);
 		size_t i = 0;
 		if (start_pos > s.length())
@@ -258,7 +258,7 @@ void writeCyclicBuffer(const NC::WBuffer &buf, NC::Window &w, size_t &start_pos,
 			w << separator[i];
 		}
 		write_buffer(0);
-		
+
 		++start_pos;
 		if (start_pos >= s.length() + separator.length())
 			start_pos = 0;

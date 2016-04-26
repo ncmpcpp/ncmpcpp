@@ -31,35 +31,35 @@ namespace NC {
 struct Scrollpad: public Window
 {
 	Scrollpad() { }
-	
+
 	Scrollpad(size_t startx, size_t starty, size_t width, size_t height,
 	          const std::string &title, Color color, Border border);
-	
+
 	// override a few Window functions
 	virtual void refresh() OVERRIDE;
 	virtual void scroll(Scroll where) OVERRIDE;
 	virtual void resize(size_t new_width, size_t new_height) OVERRIDE;
 	virtual void clear() OVERRIDE;
-	
+
 	const std::string &buffer();
-	
+
 	void flush();
 	void reset();
-	
+
 	bool setProperties(Color begin, const std::string &s, Color end, size_t flags, size_t id = -2);
 	bool setProperties(Format begin, const std::string &s, Format end, size_t flags, size_t id = -2);
 	void removeProperties(size_t id = -2);
-	
+
 	template <typename ItemT>
 	Scrollpad &operator<<(const ItemT &item)
 	{
 		m_buffer << item;
 		return *this;
 	}
-	
+
 private:
 	Buffer m_buffer;
-	
+
 	size_t m_beginning;
 	size_t m_real_height;
 };
