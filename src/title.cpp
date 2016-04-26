@@ -37,7 +37,7 @@ void drawHeader()
 	using Global::myScreen;
 	using Global::wHeader;
 	using Global::VolumeState;
-	
+
 	if (!Config.header_visibility)
 		return;
 	switch (Config.design)

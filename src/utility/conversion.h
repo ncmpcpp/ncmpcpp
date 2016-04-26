@@ -31,9 +31,9 @@
 struct ConversionError
 {
 	ConversionError(std::string source) : m_source_value(source) { }
-	
+
 	const std::string &value() { return m_source_value; }
-	
+
 private:
 	std::string m_target_type;
 	std::string m_source_value;
@@ -42,33 +42,33 @@ private:
 struct OutOfBounds : std::exception
 {
 	const std::string &errorMessage() { return m_error_message; }
-	
+
 	template <typename Type>
 	GNUC_NORETURN static void raise(const Type &value, const Type &lbound, const Type &ubound)
 	{
 		throw OutOfBounds((boost::format(
 			"value is out of bounds ([%1%, %2%] expected, %3% given)") % lbound % ubound % value).str());
 	}
-	
+
 	template <typename Type>
 	GNUC_NORETURN static void raiseLower(const Type &value, const Type &lbound)
 	{
 		throw OutOfBounds((boost::format(
 			"value is out of bounds ([%1%, ->) expected, %2% given)") % lbound % value).str());
 	}
-	
+
 	template <typename Type>
 	GNUC_NORETURN static void raiseUpper(const Type &value, const Type &ubound)
 	{
 		throw OutOfBounds((boost::format(
 			"value is out of bounds ((<-, %1%] expected, %2% given)") % ubound % value).str());
 	}
-	
+
 	virtual const char *what() const noexcept OVERRIDE { return m_error_message.c_str(); }
 
 private:
 	OutOfBounds(std::string msg) : m_error_message(msg) { }
-	
+
 	std::string m_error_message;
 };
 

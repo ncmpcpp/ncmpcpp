@@ -338,7 +338,7 @@ template <typename T> void ShowTime(T &buf, size_t length, bool short_names)
 	const unsigned HOUR = 60*MINUTE;
 	const unsigned DAY = 24*HOUR;
 	const unsigned YEAR = 365*DAY;
-	
+
 	unsigned years = length/YEAR;
 	if (years)
 	{

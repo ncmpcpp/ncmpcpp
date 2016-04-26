@@ -126,7 +126,7 @@ void SongInfo::PrepareSong(const MPD::Song &s)
 			w << NC::Format::Bold << "Bitrate: " << NC::Format::NoBold << Config.color2 << f.audioProperties()->bitrate() << " kbps\n" << NC::Color::End;
 			w << NC::Format::Bold << "Sample rate: " << NC::Format::NoBold << Config.color2 << f.audioProperties()->sampleRate() << " Hz\n" << NC::Color::End;
 			w << NC::Format::Bold << "Channels: " << NC::Format::NoBold << Config.color2 << channels << NC::Color::End << "\n";
-			
+
 			auto rginfo = Tags::readReplayGain(f.file());
 			if (!rginfo.empty())
 			{
@@ -140,7 +140,7 @@ void SongInfo::PrepareSong(const MPD::Song &s)
 	}
 #	endif // HAVE_TAGLIB_H
 	w << NC::Color::Default;
-	
+
 	for (const Metadata *m = Tags; m->Name; ++m)
 	{
 		w << NC::Format::Bold << '\n' << m->Name << ": " << NC::Format::NoBold;

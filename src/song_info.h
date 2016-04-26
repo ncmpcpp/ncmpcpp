@@ -33,24 +33,24 @@ struct SongInfo: Screen<NC::Scrollpad>, Tabbable
 		MPD::Song::GetFunction Get;
 		MPD::MutableSong::SetFunction Set;
 	};
-	
+
 	SongInfo();
-	
+
 	// Screen<NC::Scrollpad> implementation
 	virtual void switchTo() OVERRIDE;
 	virtual void resize() OVERRIDE;
-	
+
 	virtual std::wstring title() OVERRIDE;
 	virtual ScreenType type() OVERRIDE { return ScreenType::SongInfo; }
-	
+
 	virtual void update() OVERRIDE { }
-	
+
 	virtual bool isLockable() OVERRIDE { return false; }
 	virtual bool isMergable() OVERRIDE { return true; }
-	
+
 	// private members
 	static const Metadata Tags[];
-	
+
 private:
 	void PrepareSong(const MPD::Song &s);
 };

@@ -52,21 +52,21 @@ struct TagsWindow: NC::Menu<MPD::MutableSong>, SongList
 struct TagEditor: Screen<NC::Window *>, HasActions, HasColumns, HasSongs, Searchable, Tabbable
 {
 	TagEditor();
-	
+
 	virtual void resize() OVERRIDE;
 	virtual void switchTo() OVERRIDE;
-	
+
 	virtual std::wstring title() OVERRIDE;
 	virtual ScreenType type() OVERRIDE { return ScreenType::TagEditor; }
-	
+
 	virtual void refresh() OVERRIDE;
 	virtual void update() OVERRIDE;
-	
+
 	virtual void mouseButtonPressed(MEVENT) OVERRIDE;
-	
+
 	virtual bool isLockable() OVERRIDE { return true; }
 	virtual bool isMergable() OVERRIDE { return true; }
-	
+
 	// Searchable implementation
 	virtual bool allowsSearching() OVERRIDE;
 	virtual void setSearchConstraint(const std::string &constraint) OVERRIDE;
@@ -81,26 +81,26 @@ struct TagEditor: Screen<NC::Window *>, HasActions, HasColumns, HasSongs, Search
 	virtual bool itemAvailable() OVERRIDE;
 	virtual bool addItemToPlaylist(bool play) OVERRIDE;
 	virtual std::vector<MPD::Song> getSelectedSongs() OVERRIDE;
-	
+
 	// HasColumns implementation
 	virtual bool previousColumnAvailable() OVERRIDE;
 	virtual void previousColumn() OVERRIDE;
-	
+
 	virtual bool nextColumnAvailable() OVERRIDE;
 	virtual void nextColumn() OVERRIDE;
-	
+
 	// private members
 	bool enterDirectory();
 	void LocateSong(const MPD::Song &s);
 	const std::string &CurrentDir() { return itsBrowsedDir; }
-	
+
 	NC::Menu< std::pair<std::string, std::string> > *Dirs;
 	NC::Menu<std::string> *TagTypes;
 	TagsWindow *Tags;
-	
+
 private:
 	void SetDimensions(size_t, size_t);
-	
+
 	std::vector<MPD::MutableSong *> EditedSongs;
 	NC::Menu<std::string> *FParserDialog;
 	NC::Menu<std::string> *FParser;
@@ -108,7 +108,7 @@ private:
 	NC::Scrollpad *FParserLegend;
 	NC::Scrollpad *FParserPreview;
 	bool FParserUsePreview;
-	
+
 	std::string itsBrowsedDir;
 	std::string itsHighlightedDir;
 

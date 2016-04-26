@@ -254,9 +254,9 @@ void read(mpd_song *s)
 	TagLib::FileRef f(mpd_song_get_uri(s));
 	if (f.isNull())
 		return;
-	
+
 	setAttribute(s, "Time", boost::lexical_cast<std::string>(f.audioProperties()->length()));
-	
+
 	if (auto mpeg_file = dynamic_cast<TagLib::MPEG::File *>(f.file()))
 	{
 		// prefer id3v2 only if available
@@ -285,11 +285,11 @@ bool write(MPD::MutableSong &s)
 	if (s.isFromDatabase())
 		old_name += Config.mpd_music_dir;
 	old_name += s.getURI();
-	
+
 	TagLib::FileRef f(old_name.c_str());
 	if (f.isNull())
 		return false;
-	
+
 	bool saved = false;
 	if (auto mpeg_file = dynamic_cast<TagLib::MPEG::File *>(f.file()))
 	{
@@ -310,7 +310,7 @@ bool write(MPD::MutableSong &s)
 	}
 	else
 		writeCommonTags(s, f.tag());
-	
+
 	if (!saved && !f.save())
 		return false;
 

@@ -134,12 +134,12 @@ void Statusbar::tryRedraw()
 	&&  Timer - statusbar_lock_time > statusbar_lock_delay)
 	{
 		statusbar_lock_delay = boost::posix_time::seconds(-1);
-		
+
 		if (Config.statusbar_visibility)
 			statusbar_block_update = !statusbar_allow_unlock;
 		else
 			progressbar_block_update = !statusbar_allow_unlock;
-		
+
 		if (!statusbar_block_update && !progressbar_block_update)
 		{
 			switch (Config.design)

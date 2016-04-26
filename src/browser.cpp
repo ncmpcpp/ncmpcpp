@@ -389,12 +389,12 @@ void Browser::locateSong(const MPD::Song &s)
 {
 	if (s.getDirectory().empty())
 		throw std::runtime_error("Song's directory is empty");
-	
+
 	m_local_browser = !s.isFromDatabase();
-	
+
 	if (myScreen != this)
 		switchTo();
-	
+
 	// change to relevant directory
 	if (m_current_directory != s.getDirectory())
 	{
@@ -508,7 +508,7 @@ void Browser::changeBrowseMode()
 		Statusbar::print("For browsing local filesystem connection to MPD via UNIX Socket is required");
 		return;
 	}
-	
+
 	m_local_browser = !m_local_browser;
 	Statusbar::printf("Browse mode: %1%",
 		m_local_browser ? "local filesystem" : "MPD database"

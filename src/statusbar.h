@@ -107,7 +107,7 @@ private:
 struct TryExecuteImmediateCommand
 {
 	bool operator()(const char *s);
-	
+
 private:
 	std::string m_s;
 };

@@ -108,11 +108,11 @@ template <typename T> struct ItemFilter
 	typedef NC::Menu<T> MenuT;
 	typedef typename NC::Menu<T>::Item Item;
 	typedef std::function<bool(const Regex &, const Item &)> FilterFunction;
-	
+
 	ItemFilter() { }
 	ItemFilter(Regex rx, FilterFunction filter)
 	: m_rx(std::move(rx)), m_filter(std::move(filter)) { }
-	
+
 	void clear()
 	{
 		m_filter = nullptr;
@@ -121,7 +121,7 @@ template <typename T> struct ItemFilter
 	bool operator()(const Item &item) {
 		return m_filter(m_rx, item);
 	}
-	
+
 	bool defined() const
 	{
 		return m_filter.operator bool();

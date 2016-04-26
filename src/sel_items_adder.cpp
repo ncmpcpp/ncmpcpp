@@ -57,7 +57,7 @@ SelectedItemsAdder::SelectedItemsAdder()
 	using Global::MainHeight;
 	using Global::MainStartY;
 	setDimensions();
-	
+
 	m_playlist_selector = Component(
 		(COLS-m_playlist_selector_width)/2,
 		MainStartY+(MainHeight-m_playlist_selector_height)/2,
@@ -71,7 +71,7 @@ SelectedItemsAdder::SelectedItemsAdder()
 	m_playlist_selector.centeredCursor(Config.centered_cursor);
 	m_playlist_selector.setHighlightColor(Config.main_highlight_color);
 	m_playlist_selector.setItemDisplayer(DisplayComponent);
-	
+
 	m_position_selector = Component(
 		(COLS-m_position_selector_width)/2,
 		MainStartY+(MainHeight-m_position_selector_height)/2,
@@ -85,7 +85,7 @@ SelectedItemsAdder::SelectedItemsAdder()
 	m_position_selector.centeredCursor(Config.centered_cursor);
 	m_position_selector.setHighlightColor(Config.main_highlight_color);
 	m_position_selector.setItemDisplayer(DisplayComponent);
-	
+
 	m_position_selector.addItem(Entry("At the end of playlist",
 		std::bind(&Self::addAtTheEndOfPlaylist, this)
 	));
@@ -105,18 +105,18 @@ SelectedItemsAdder::SelectedItemsAdder()
 	m_position_selector.addItem(Entry("Cancel",
 		std::bind(&Self::cancel, this)
 	));
-	
+
 	w = &m_playlist_selector;
 }
 
 void SelectedItemsAdder::switchTo()
 {
 	using Global::myScreen;
-	
+
 	auto hs = dynamic_cast<HasSongs *>(myScreen);
 	if (!hs)
 		return;
-	
+
 	Statusbar::print(1, "Fetching selected songs...");
 	m_selected_items = hs->getSelectedSongs();
 	if (m_selected_items.empty())
@@ -344,10 +344,10 @@ void SelectedItemsAdder::exitSuccessfully(bool success) const
 void SelectedItemsAdder::setDimensions()
 {
 	using Global::MainHeight;
-	
+
 	m_playlist_selector_width = COLS*0.6;
 	m_playlist_selector_height = std::min(MainHeight, size_t(LINES*0.66));
-	
+
 	m_position_selector_width = std::min(size_t(35), size_t(COLS));
 	m_position_selector_height = std::min(size_t(11), MainHeight);
 }

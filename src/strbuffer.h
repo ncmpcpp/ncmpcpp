@@ -34,12 +34,12 @@ template <typename CharT> class BasicBuffer
 	struct Property
 	{
 		enum class Type { Color, Format };
-		
+
 		Property(NC::Color color_, size_t id_)
 		: m_type(Type::Color), m_color(std::move(color_)), m_id(id_) { }
 		Property(NC::Format format_, size_t id_)
 		: m_type(Type::Format), m_format(format_), m_id(id_) { }
-		
+
 		size_t id() const { return m_id; }
 
 		template <typename OutputStreamT>
@@ -56,21 +56,21 @@ template <typename CharT> class BasicBuffer
 			}
 			return os;
 		}
-		
+
 	private:
 		Type m_type;
 		Color m_color;
 		Format m_format;
 		size_t m_id;
 	};
-	
+
 public:
 	typedef std::basic_string<CharT> StringType;
 	typedef std::multimap<size_t, Property> Properties;
-	
+
 	const StringType &str() const { return m_string; }
 	const Properties &properties() const { return m_properties; }
-	
+
 	template <typename PropertyT>
 	void addProperty(size_t position, PropertyT &&property, size_t id = -1)
 	{
@@ -89,37 +89,37 @@ public:
 				++it;
 		}
 	}
-	
+
 	void clear()
 	{
 		m_string.clear();
 		m_properties.clear();
 	}
-	
+
 	BasicBuffer<CharT> &operator<<(int n)
 	{
 		m_string += boost::lexical_cast<StringType>(n);
 		return *this;
 	}
-	
+
 	BasicBuffer<CharT> &operator<<(long int n)
 	{
 		m_string += boost::lexical_cast<StringType>(n);
 		return *this;
 	}
-	
+
 	BasicBuffer<CharT> &operator<<(unsigned int n)
 	{
 		m_string += boost::lexical_cast<StringType>(n);
 		return *this;
 	}
-	
+
 	BasicBuffer<CharT> &operator<<(unsigned long int n)
 	{
 		m_string += boost::lexical_cast<StringType>(n);
 		return *this;
 	}
-	
+
 	BasicBuffer<CharT> &operator<<(CharT c)
 	{
 		m_string += c;
@@ -131,25 +131,25 @@ public:
 		m_string += s;
 		return *this;
 	}
-	
+
 	BasicBuffer<CharT> &operator<<(const StringType &s)
 	{
 		m_string += s;
 		return *this;
 	}
-	
+
 	BasicBuffer<CharT> &operator<<(Color color)
 	{
 		addProperty(m_string.size(), color);
 		return *this;
 	}
-	
+
 	BasicBuffer<CharT> &operator<<(Format format)
 	{
 		addProperty(m_string.size(), format);
 		return *this;
 	}
-	
+
 	// static variadic initializer. used instead of a proper constructor because
 	// it's too polymorphic and would end up invoked as a copy/move constructor.
 	template <typename... Args>

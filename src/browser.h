@@ -46,39 +46,39 @@ struct BrowserWindow: NC::Menu<MPD::Item>, SongList
 struct Browser: Screen<BrowserWindow>, HasSongs, Searchable, Tabbable
 {
 	Browser();
-	
+
 	// Screen<BrowserWindow> implementation
 	virtual void resize() OVERRIDE;
 	virtual void switchTo() OVERRIDE;
-	
+
 	virtual std::wstring title() OVERRIDE;
 	virtual ScreenType type() OVERRIDE { return ScreenType::Browser; }
-	
+
 	virtual void update() OVERRIDE;
-	
+
 	virtual void mouseButtonPressed(MEVENT me) OVERRIDE;
-	
+
 	virtual bool isLockable() OVERRIDE { return true; }
 	virtual bool isMergable() OVERRIDE { return true; }
-	
+
 	// Searchable implementation
 	virtual bool allowsSearching() OVERRIDE;
 	virtual void setSearchConstraint(const std::string &constraint) OVERRIDE;
 	virtual void clearConstraint() OVERRIDE;
 	virtual bool find(SearchDirection direction, bool wrap, bool skip_current) OVERRIDE;
-	
+
 	// HasSongs implementation
 	virtual bool itemAvailable() OVERRIDE;
 	virtual bool addItemToPlaylist(bool play) OVERRIDE;
 	virtual std::vector<MPD::Song> getSelectedSongs() OVERRIDE;
-	
+
 	// private members
 	void requestUpdate() { m_update_request = true; }
 
 	bool inRootDirectory();
 	bool isParentDirectory(const MPD::Item &item);
 	const std::string &currentDirectory();
-	
+
 	bool isLocal() { return m_local_browser; }
 	void locateSong(const MPD::Song &s);
 	bool enterDirectory();

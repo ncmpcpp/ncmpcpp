@@ -32,20 +32,20 @@ struct SelectedItemsAdder: Screen<NC::Menu<RunnableItem<std::string, void()>> *>
 	typedef SelectedItemsAdder Self;
 	typedef typename std::remove_pointer<WindowType>::type Component;
 	typedef Component::Item::Type Entry;
-	
+
 	SelectedItemsAdder();
-	
+
 	virtual void switchTo() OVERRIDE;
 	virtual void resize() OVERRIDE;
 	virtual void refresh() OVERRIDE;
-	
+
 	virtual std::wstring title() OVERRIDE;
 	virtual ScreenType type() OVERRIDE { return ScreenType::SelectedItemsAdder; }
-	
+
 	virtual void update() OVERRIDE { }
-	
+
 	virtual void mouseButtonPressed(MEVENT me) OVERRIDE;
-	
+
 	virtual bool isLockable() OVERRIDE { return false; }
 	virtual bool isMergable() OVERRIDE { return false; }
 
@@ -61,7 +61,7 @@ struct SelectedItemsAdder: Screen<NC::Menu<RunnableItem<std::string, void()>> *>
 
 private:
 	void populatePlaylistSelector(BaseScreen *screen);
-	
+
 	void addToCurrentPlaylist();
 	void addToNewPlaylist() const;
 	void addToExistingPlaylist(const std::string &playlist) const;
@@ -72,18 +72,18 @@ private:
 	void addAfterHighlightedSong() const;
 	void cancel();
 	void exitSuccessfully(bool success) const;
-	
+
 	void setDimensions();
-	
+
 	size_t m_playlist_selector_width;
 	size_t m_playlist_selector_height;
-	
+
 	size_t m_position_selector_width;
 	size_t m_position_selector_height;
-	
+
 	Component m_playlist_selector;
 	Component m_position_selector;
-	
+
 	std::vector<MPD::Song> m_selected_items;
 
 	Regex::ItemFilter<Entry> m_search_predicate;

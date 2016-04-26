@@ -45,7 +45,7 @@ void ServerInfo::switchTo()
 	if (myScreen != this)
 	{
 		SwitchTo::execute(this);
-		
+
 		m_url_handlers.clear();
 		std::copy(
 			std::make_move_iterator(Mpd.GetURLHandlers()),
@@ -87,13 +87,13 @@ void ServerInfo::update()
 	if (Global::Timer - m_timer < boost::posix_time::seconds(1))
 		return;
 	m_timer = Global::Timer;
-	
+
 	MPD::Statistics stats = Mpd.getStatistics();
 	if (stats.empty())
 		return;
-	
+
 	w.clear();
-	
+
 	w << NC::Format::Bold << "Version: " << NC::Format::NoBold << "0." << Mpd.Version() << ".*\n";
 	w << NC::Format::Bold << "Uptime: " << NC::Format::NoBold;
 	ShowTime(w, stats.uptime(), 1);
@@ -116,7 +116,7 @@ void ServerInfo::update()
 	w << NC::Format::Bold << "Tag Types:" << NC::Format::NoBold;
 	for (auto it = m_tag_types.begin(); it != m_tag_types.end(); ++it)
 		w << (it != m_tag_types.begin() ? ", " : " ") << *it;
-	
+
 	w.flush();
 	w.refresh();
 }

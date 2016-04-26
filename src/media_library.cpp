@@ -86,16 +86,16 @@ bool MoveToAlbum(NC::Menu<AlbumEntry> &albums, const std::string &primary_tag, c
 
 struct SortSongs {
 	typedef NC::Menu<MPD::Song>::Item SongItem;
-	
+
 	static const std::array<MPD::Song::GetFunction, 3> GetFuns;
-	
+
 	LocaleStringComparison m_cmp;
 	std::ptrdiff_t m_offset;
-	
+
 public:
 	SortSongs(bool disc_only)
 	: m_cmp(std::locale(), Config.ignore_leading_the), m_offset(disc_only ? 2 : 0) { }
-	
+
 	bool operator()(const SongItem &a, const SongItem &b) {
 		return (*this)(a.value(), b.value());
 	}
@@ -124,16 +124,16 @@ const std::array<MPD::Song::GetFunction, 3> SortSongs::GetFuns = {{
 
 class SortAlbumEntries {
 	typedef MediaLibrary::Album Album;
-	
+
 	LocaleStringComparison m_cmp;
-	
+
 public:
 	SortAlbumEntries() : m_cmp(std::locale(), Config.ignore_leading_the) { }
-	
+
 	bool operator()(const AlbumEntry &a, const AlbumEntry &b) const {
 		return (*this)(a.entry(), b.entry());
 	}
-	
+
 	bool operator()(const Album &a, const Album &b) const {
 		if (Config.media_library_sort_by_mtime)
 			return a.mtime() > b.mtime();
@@ -153,10 +153,10 @@ public:
 
 class SortPrimaryTags {
 	LocaleStringComparison m_cmp;
-	
+
 public:
 	SortPrimaryTags() : m_cmp(std::locale(), Config.ignore_leading_the) { }
-	
+
 	bool operator()(const PrimaryTag &a, const PrimaryTag &b) const {
 		if (Config.media_library_sort_by_mtime)
 			return a.mtime() > b.mtime();
@@ -178,7 +178,7 @@ MediaLibrary::MediaLibrary()
 	itsMiddleColStartX = itsLeftColWidth+1;
 	itsRightColWidth = COLS-COLS/3*2-1;
 	itsRightColStartX = itsLeftColWidth+itsMiddleColWidth+2;
-	
+
 	Tags = NC::Menu<PrimaryTag>(0, MainStartY, itsLeftColWidth, MainHeight, Config.titles_visibility ? tagTypeToString(Config.media_lib_primary_tag) + "s" : "", Config.main_color, NC::Border());
 	Tags.setHighlightColor(Config.active_column_color);
 	Tags.cyclicScrolling(Config.use_cyclic_scrolling);
@@ -192,7 +192,7 @@ MediaLibrary::MediaLibrary()
 		else
 			menu << Charset::utf8ToLocale(tag);
 	});
-	
+
 	Albums = NC::Menu<AlbumEntry>(itsMiddleColStartX, MainStartY, itsMiddleColWidth, MainHeight, Config.titles_visibility ? "Albums" : "", Config.main_color, NC::Border());
 	Albums.setHighlightColor(Config.main_highlight_color);
 	Albums.cyclicScrolling(Config.use_cyclic_scrolling);
@@ -202,7 +202,7 @@ MediaLibrary::MediaLibrary()
 	Albums.setItemDisplayer([](NC::Menu<AlbumEntry> &menu) {
 		menu << Charset::utf8ToLocale(AlbumToString(menu.drawn()->value()));
 	});
-	
+
 	Songs = NC::Menu<MPD::Song>(itsRightColStartX, MainStartY, itsRightColWidth, MainHeight, Config.titles_visibility ? "Songs" : "", Config.main_color, NC::Border());
 	Songs.setHighlightColor(Config.main_highlight_color);
 	Songs.cyclicScrolling(Config.use_cyclic_scrolling);
@@ -212,7 +212,7 @@ MediaLibrary::MediaLibrary()
 	Songs.setItemDisplayer(std::bind(
 		Display::Songs, ph::_1, std::cref(Songs), std::cref(Config.song_library_format)
 	));
-	
+
 	w = &Tags;
 }
 
@@ -236,15 +236,15 @@ void MediaLibrary::resize()
 		itsRightColStartX = x_offset+itsMiddleColWidth+1;
 		itsRightColWidth = width-itsMiddleColWidth-1;
 	}
-	
+
 	Tags.resize(itsLeftColWidth, MainHeight);
 	Albums.resize(itsMiddleColWidth, MainHeight);
 	Songs.resize(itsRightColWidth, MainHeight);
-	
+
 	Tags.moveTo(itsLeftColStartX, MainStartY);
 	Albums.moveTo(itsMiddleColStartX, MainStartY);
 	Songs.moveTo(itsRightColStartX, MainStartY);
-	
+
 	hasToBeResized = 0;
 }
 
@@ -361,7 +361,7 @@ void MediaLibrary::update()
 			std::sort(Tags.beginV(), Tags.endV(), SortPrimaryTags());
 			Tags.refresh();
 		}
-		
+
 		if (!Tags.empty()
 		&& ((Albums.empty() && Global::Timer - m_timer > m_fetching_delay) || m_albums_update_request)
 		)
@@ -409,7 +409,7 @@ void MediaLibrary::update()
 			Albums.refresh();
 		}
 	}
-	
+
 	if (!Albums.empty()
 	&& ((Songs.empty() && Global::Timer - m_timer > m_fetching_delay) || m_songs_update_request)
 	)
@@ -865,7 +865,7 @@ void MediaLibrary::LocateSong(const MPD::Song &s)
 		Statusbar::print("Song is not from the database");
 		return;
 	}
-	
+
 	if (myScreen != this)
 		switchTo();
 	Statusbar::put() << "Jumping to song...";
@@ -890,7 +890,7 @@ void MediaLibrary::LocateSong(const MPD::Song &s)
 		}
 		Albums.clear();
 	}
-	
+
 	if (Albums.empty())
 		update();
 

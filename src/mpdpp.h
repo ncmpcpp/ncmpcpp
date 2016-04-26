@@ -41,11 +41,11 @@ struct ClientError: public std::exception
 	ClientError(mpd_error code_, std::string msg, bool clearable_)
 	: m_code(code_), m_msg(msg), m_clearable(clearable_) { }
 	virtual ~ClientError() noexcept { }
-	
+
 	virtual const char *what() const noexcept { return m_msg.c_str(); }
 	mpd_error code() const { return m_code; }
 	bool clearable() const { return m_clearable; }
-	
+
 private:
 	mpd_error m_code;
 	std::string m_msg;
@@ -57,11 +57,11 @@ struct ServerError: public std::exception
 	ServerError(mpd_server_error code_, std::string msg, bool clearable_)
 	: m_code(code_), m_msg(msg), m_clearable(clearable_) { }
 	virtual ~ServerError() noexcept { }
-	
+
 	virtual const char *what() const noexcept { return m_msg.c_str(); }
 	mpd_server_error code() const { return m_code; }
 	bool clearable() const { return m_clearable; }
-	
+
 private:
 	mpd_server_error m_code;
 	std::string m_msg;
@@ -71,9 +71,9 @@ private:
 struct Statistics
 {
 	friend struct Connection;
-	
+
 	bool empty() const { return m_stats.get() == nullptr; }
-	
+
 	unsigned artists() const { return mpd_stats_get_number_of_artists(m_stats.get()); }
 	unsigned albums() const { return mpd_stats_get_number_of_albums(m_stats.get()); }
 	unsigned songs() const { return mpd_stats_get_number_of_songs(m_stats.get()); }
@@ -81,22 +81,22 @@ struct Statistics
 	unsigned long uptime() const { return mpd_stats_get_uptime(m_stats.get()); }
 	unsigned long dbUpdateTime() const { return mpd_stats_get_db_update_time(m_stats.get()); }
 	unsigned long dbPlayTime() const { return mpd_stats_get_db_play_time(m_stats.get()); }
-	
+
 private:
 	Statistics(mpd_stats *stats) : m_stats(stats, mpd_stats_free) { }
-	
+
 	std::shared_ptr<mpd_stats> m_stats;
 };
 
 struct Status
 {
 	friend struct Connection;
-	
+
 	Status() { }
-	
+
 	void clear() { m_status.reset(); }
 	bool empty() const { return m_status.get() == nullptr; }
-	
+
 	int volume() const { return mpd_status_get_volume(m_status.get()); }
 	bool repeat() const { return mpd_status_get_repeat(m_status.get()); }
 	bool random() const { return mpd_status_get_random(m_status.get()); }
@@ -115,10 +115,10 @@ struct Status
 	unsigned kbps() const { return mpd_status_get_kbit_rate(m_status.get()); }
 	unsigned updateID() const { return mpd_status_get_update_id(m_status.get()); }
 	const char *error() const { return mpd_status_get_error(m_status.get()); }
-	
+
 private:
 	Status(mpd_status *status) : m_status(status, mpd_status_free) { }
-	
+
 	std::shared_ptr<mpd_status> m_status;
 };
 
@@ -463,29 +463,29 @@ typedef Iterator<std::string> StringIterator;
 struct Connection
 {
 	Connection();
-	
+
 	void Connect();
 	bool Connected() const;
 	void Disconnect();
-	
+
 	const std::string &GetHostname() { return m_host; }
 	int GetPort() { return m_port; }
-	
+
 	unsigned Version() const;
-	
+
 	int GetFD() const { return m_fd; }
-	
+
 	void SetHostname(const std::string &);
 	void SetPort(int port) { m_port = port; }
 	void SetTimeout(int timeout) { m_timeout = timeout; }
 	void SetPassword(const std::string &password) { m_password = password; }
 	void SendPassword();
-	
+
 	Statistics getStatistics();
 	Status getStatus();
-	
+
 	void UpdateDirectory(const std::string &);
-	
+
 	void Play();
 	void Play(int);
 	void PlayID(int);
@@ -500,28 +500,28 @@ struct Connection
 	void Shuffle();
 	void ShuffleRange(unsigned start, unsigned end);
 	void ClearMainPlaylist();
-	
+
 	SongIterator GetPlaylistChanges(unsigned);
-	
+
 	Song GetCurrentSong();
 	Song GetSong(const std::string &);
 	SongIterator GetPlaylistContent(const std::string &name);
 	SongIterator GetPlaylistContentNoInfo(const std::string &name);
-	
+
 	StringIterator GetSupportedExtensions();
-	
+
 	void SetRepeat(bool);
 	void SetRandom(bool);
 	void SetSingle(bool);
 	void SetConsume(bool);
 	void SetCrossfade(unsigned);
 	void SetVolume(unsigned int vol);
-	
+
 	std::string GetReplayGainMode();
 	void SetReplayGainMode(ReplayGainMode);
-	
+
 	void SetPriority(const MPD::Song &s, int prio);
-	
+
 	int AddSong(const std::string &, int = -1); // returns id of added song
 	int AddSong(const Song &, int = -1); // returns id of added song
 	bool AddRandomTag(mpd_tag_type, size_t);
@@ -531,7 +531,7 @@ struct Connection
 	void PlaylistDelete(const std::string &playlist, unsigned int pos);
 	void StartCommandsList();
 	void CommitCommandsList();
-	
+
 	void DeletePlaylist(const std::string &name);
 	void LoadPlaylist(const std::string &name);
 	void SavePlaylist(const std::string &);
@@ -540,31 +540,31 @@ struct Connection
 	void AddToPlaylist(const std::string &, const std::string &);
 	void PlaylistMove(const std::string &path, int from, int to);
 	void Rename(const std::string &from, const std::string &to);
-	
+
 	void StartSearch(bool);
 	void StartFieldSearch(mpd_tag_type);
 	void AddSearch(mpd_tag_type item, const std::string &str) const;
 	void AddSearchAny(const std::string &str) const;
 	void AddSearchURI(const std::string &str) const;
 	SongIterator CommitSearchSongs();
-	
+
 	PlaylistIterator GetPlaylists();
 	StringIterator GetList(mpd_tag_type type);
 	ItemIterator GetDirectory(const std::string &directory);
 	SongIterator GetDirectoryRecursive(const std::string &directory);
 	SongIterator GetSongs(const std::string &directory);
 	DirectoryIterator GetDirectories(const std::string &directory);
-	
+
 	OutputIterator GetOutputs();
 	void EnableOutput(int id);
 	void DisableOutput(int id);
-	
+
 	StringIterator GetURLHandlers();
 	StringIterator GetTagTypes();
-	
+
 	void idle();
 	int noidle();
-	
+
 private:
 	struct ConnectionDeleter {
 		void operator()(mpd_connection *connection) {
@@ -579,10 +579,10 @@ private:
 
 	std::unique_ptr<mpd_connection, ConnectionDeleter> m_connection;
 	bool m_command_list_active;
-	
+
 	int m_fd;
 	bool m_idle;
-	
+
 	std::string m_host;
 	int m_port;
 	int m_timeout;

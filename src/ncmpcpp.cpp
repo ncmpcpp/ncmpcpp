@@ -55,7 +55,7 @@ namespace
 	std::ofstream errorlog;
 	std::streambuf *cerr_buffer;
 	bool run_resize_screen = false;
-	
+
 	void sighandler(int sig)
 	{
 		if (sig == SIGWINCH)
@@ -82,28 +82,28 @@ namespace
 int main(int argc, char **argv)
 {
 	using Global::myScreen;
-	
+
 	using Global::wHeader;
 	using Global::wFooter;
-	
+
 	using Global::VolumeState;
 	using Global::Timer;
-	
+
 	srand(time(nullptr));
 	std::setlocale(LC_ALL, "");
 	std::locale::global(Charset::internalLocale());
-	
+
 	if (!configure(argc, argv))
 		return 0;
-	
+
 	// always execute these commands, even if ncmpcpp use exit function
 	atexit(do_at_exit);
-	
+
 	// redirect std::cerr output to ~/.ncmpcpp/error.log file
 	errorlog.open((Config.ncmpcpp_directory + "error.log").c_str(), std::ios::app);
 	cerr_buffer = std::cerr.rdbuf();
 	std::cerr.rdbuf(errorlog.rdbuf());
-	
+
 #	ifndef WIN32
 	signal(SIGPIPE, sighandler);
 	signal(SIGWINCH, sighandler);
@@ -112,26 +112,26 @@ int main(int argc, char **argv)
 #	endif // !WIN32
 
 	NC::initScreen(Config.colors_enabled, Config.mouse_support);
-	
+
 	Actions::OriginalStatusbarVisibility = Config.statusbar_visibility;
 
 	if (Config.design == Design::Alternative)
 		Config.statusbar_visibility = 0;
-	
+
 	Actions::setWindowsDimensions();
 	Actions::validateScreenSize();
 	Actions::initializeScreens();
-	
+
 	wHeader = new NC::Window(0, 0, COLS, Actions::HeaderHeight, "", Config.header_color, NC::Border());
 	if (Config.header_visibility || Config.design == Design::Alternative)
 		wHeader->display();
-	
+
 	wFooter = new NC::Window(0, Actions::FooterStartY, COLS, Actions::FooterHeight, "", Config.statusbar_color, NC::Border());
 	wFooter->setPromptHook(Statusbar::Helpers::mainHook);
-	
+
 	// initialize global timer
 	Timer = boost::posix_time::microsec_clock::local_time();
-	
+
 	// initialize playlist
 	myPlaylist->switchTo();
 
@@ -165,7 +165,7 @@ int main(int argc, char **argv)
 	auto update_environment = static_cast<Actions::UpdateEnvironment &>(
 		Actions::get(Actions::Type::UpdateEnvironment)
 	);
-	
+
 	while (!Actions::ExitMainLoop)
 	{
 		try

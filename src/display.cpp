@@ -257,7 +257,7 @@ std::string Display::Columns(size_t list_width)
 	std::string result;
 	if (Config.columns.empty())
 		return result;
-	
+
 	int width;
 	int remained_width = list_width;
 	std::vector<Column>::const_iterator it, last = Config.columns.end() - 1;
@@ -276,11 +276,11 @@ std::string Display::Columns(size_t list_width)
 		// and next column, so we substract it now and restore later.
 		if (it != last)
 			--width;
-		
+
 		// if column doesn't fit into screen, discard it and any other after it.
 		if (remained_width-width < 0 || width < 0 /* this one may come from (*) */)
 			break;
-		
+
 		std::wstring name;
 		if (it->name.empty())
 		{
@@ -298,7 +298,7 @@ std::string Display::Columns(size_t list_width)
 		else
 			name = it->name;
 		wideCut(name, width);
-		
+
 		int x_off = std::max(0, width - int(wideLength(name)));
 		if (it->right_alignment)
 		{
@@ -310,7 +310,7 @@ std::string Display::Columns(size_t list_width)
 			result += Charset::utf8ToLocale(ToString(name));
 			result += std::string(x_off, NC::Key::Space);
 		}
-		
+
 		if (it != last)
 		{
 			// add missing width's part and restore the value.
@@ -318,7 +318,7 @@ std::string Display::Columns(size_t list_width)
 			result += ' ';
 		}
 	}
-	
+
 	return result;
 }
 

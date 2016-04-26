@@ -44,7 +44,7 @@ Service::Result Service::fetch()
 {
 	Result result;
 	result.first = false;
-	
+
 	std::string url = apiUrl;
 	url += methodName();
 	for (auto &arg : m_arguments)
@@ -54,10 +54,10 @@ Service::Result Service::fetch()
 		url += "=";
 		url += Curl::escape(arg.second);
 	}
-	
+
 	std::string data;
 	CURLcode code = Curl::perform(data, url);
-	
+
 	if (code != CURLE_OK)
 		result.second = curl_easy_strerror(code);
 	else if (actionFailed(data))
@@ -65,7 +65,7 @@ Service::Result Service::fetch()
 	else
 	{
 		result = processData(data);
-		
+
 		// if relevant part of data was not found and one of arguments
 		// was language, try to fetch it again without that parameter.
 		// otherwise just report failure.
@@ -75,7 +75,7 @@ Service::Result Service::fetch()
 			result = fetch();
 		}
 	}
-	
+
 	return result;
 }
 
@@ -103,7 +103,7 @@ Service::Result ArtistInfo::processData(const std::string &data)
 	size_t a, b;
 	Service::Result result;
 	result.first = false;
-	
+
 	boost::regex rx("<content>(.*?)</content>");
 	boost::smatch what;
 	if (boost::regex_search(data, what, rx))
@@ -121,7 +121,7 @@ Service::Result ArtistInfo::processData(const std::string &data)
 				unescapeHtmlEntities(url);
 				// ...try to get the content of it...
 				CURLcode code = Curl::perform(wiki, url, "", true);
-				
+
 				if (code != CURLE_OK)
 				{
 					result.second = curl_easy_strerror(code);
@@ -153,7 +153,7 @@ Service::Result ArtistInfo::processData(const std::string &data)
 		result.second = msgInvalidResponse;
 		return result;
 	}
-	
+
 	auto add_similars = [&result](boost::sregex_iterator &it, const boost::sregex_iterator &last) {
 		for (; it != last; ++it)
 		{
@@ -168,7 +168,7 @@ Service::Result ArtistInfo::processData(const std::string &data)
 			result.second += ")";
 		}
 	};
-	
+
 	a = data.find("<similar>");
 	b = data.find("</similar>");
 	if (a != std::string::npos && b != std::string::npos)
@@ -180,7 +180,7 @@ Service::Result ArtistInfo::processData(const std::string &data)
 			result.second += "\n\nSimilar artists:\n";
 		add_similars(it, last);
 	}
-	
+
 	a = data.find("<tags>");
 	b = data.find("</tags>");
 	if (a != std::string::npos && b != std::string::npos)
@@ -192,10 +192,10 @@ Service::Result ArtistInfo::processData(const std::string &data)
 			result.second += "\n\nSimilar tags:\n";
 		add_similars(it, last);
 	}
-	
+
 	// get artist we look for, it's the one before similar artists
 	rx.assign("<name>.*?</name>.*?<url>(.*?)</url>.*?<similar>");
-	
+
 	if (boost::regex_search(data, what, rx))
 	{
 		std::string url = what[1];
@@ -204,7 +204,7 @@ Service::Result ArtistInfo::processData(const std::string &data)
 		// add only url
 		result.second += url;
 	}
-	
+
 	result.first = true;
 	return result;
 }

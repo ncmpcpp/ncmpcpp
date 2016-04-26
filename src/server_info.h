@@ -29,27 +29,27 @@
 struct ServerInfo: Screen<NC::Scrollpad>, Tabbable
 {
 	ServerInfo();
-	
+
 	// Screen<NC::Scrollpad> implementation
 	virtual void switchTo() OVERRIDE;
 	virtual void resize() OVERRIDE;
-	
+
 	virtual std::wstring title() OVERRIDE;
 	virtual ScreenType type() OVERRIDE { return ScreenType::ServerInfo; }
-	
+
 	virtual void update() OVERRIDE;
-	
+
 	virtual bool isLockable() OVERRIDE { return false; }
 	virtual bool isMergable() OVERRIDE { return false; }
-	
+
 private:
 	void SetDimensions();
-	
+
 	boost::posix_time::ptime m_timer;
 
 	std::vector<std::string> m_url_handlers;
 	std::vector<std::string> m_tag_types;
-	
+
 	size_t m_width;
 	size_t m_height;
 };

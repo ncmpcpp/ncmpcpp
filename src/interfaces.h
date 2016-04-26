@@ -54,7 +54,7 @@ struct HasColumns
 {
 	virtual bool previousColumnAvailable() = 0;
 	virtual void previousColumn() = 0;
-	
+
 	virtual bool nextColumnAvailable() = 0;
 	virtual void nextColumn() = 0;
 };
@@ -62,7 +62,7 @@ struct HasColumns
 struct Tabbable
 {
 	Tabbable() : m_previous_screen(0) { }
-	
+
 	void switchToPreviousScreen() const {
 		if (m_previous_screen)
 			m_previous_screen->switchTo();
@@ -73,7 +73,7 @@ struct Tabbable
 	BaseScreen *previousScreen() const {
 		return m_previous_screen;
 	}
-	
+
 private:
 	BaseScreen *m_previous_screen;
 };

@@ -36,17 +36,17 @@ class SwitchTo
 				screen->setPreviousScreen(myScreen);
 		}
 	};
-	
+
 public:
 	template <typename ScreenT>
 	static void execute(ScreenT *screen)
 	{
 		using Global::myScreen;
 		using Global::myLockedScreen;
-		
+
 		const bool isScreenMergable = screen->isMergable() && myLockedScreen;
 		const bool isScreenTabbable = std::is_base_of<Tabbable, ScreenT>::value;
-		
+
 		assert(myScreen != screen);
 		if (isScreenMergable)
 			updateInactiveScreen(screen);

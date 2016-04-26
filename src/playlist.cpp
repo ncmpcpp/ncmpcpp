@@ -212,7 +212,7 @@ void Playlist::enableHighlighting()
 std::string Playlist::getTotalLength()
 {
 	std::ostringstream result;
-	
+
 	if (m_reload_total_length)
 	{
 		m_total_length = 0;
@@ -227,9 +227,9 @@ std::string Playlist::getTotalLength()
 			m_remaining_time += w[i].value().getDuration();
 		m_reload_remaining = false;
 	}
-	
+
 	result << '(' << w.size() << (w.size() == 1 ? " item" : " items");
-	
+
 	if (m_total_length)
 	{
 		result << ", length: ";

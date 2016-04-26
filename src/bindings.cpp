@@ -330,34 +330,34 @@ std::wstring keyToWString(const NC::Key::Type key)
 bool BindingsConfiguration::read(const std::string &file)
 {
 	enum class InProgress { None, Command, Key };
-	
+
 	bool result = true;
-	
+
 	std::ifstream f(file);
 	if (!f.is_open())
 		return result;
-	
+
 	// shared variables
 	InProgress in_progress = InProgress::None;
 	size_t line_no = 0;
 	std::string line;
 	Binding::ActionChain actions;
-	
+
 	// def_key specific variables
 	NC::Key::Type key = NC::Key::None;
 	std::string strkey;
-	
+
 	// def_command specific variables
 	bool cmd_immediate = false;
 	std::string cmd_name;
-	
+
 	auto error = [&]() -> std::ostream & {
 		std::cerr << file << ":" << line_no << ": error: ";
 		in_progress = InProgress::None;
 		result = false;
 		return std::cerr;
 	};
-	
+
 	auto bind_in_progress = [&]() -> bool {
 		if (in_progress == InProgress::Command)
 		{
@@ -389,16 +389,16 @@ bool BindingsConfiguration::read(const std::string &file)
 		}
 		return true;
 	};
-	
+
 	const char def_command[] = "def_command";
 	const char def_key[] = "def_key";
-	
+
 	while (!f.eof() && ++line_no)
 	{
 		getline(f, line);
 		if (line.empty() || line[0] == '#')
 			continue;
-		
+
 		// beginning of command definition
 		if (!line.compare(0, const_strlen(def_command), def_command))
 		{
@@ -732,7 +732,7 @@ void BindingsConfiguration::generateDefaults()
 		bind(k, Actions::Type::SetSelectedItemsPriority);
 	if (notBound(k = stringToKey("q")))
 		bind(k, Actions::Type::Quit);
-	
+
 	if (notBound(k = stringToKey("-")))
 		bind(k, Actions::Type::VolumeDown);
 }
