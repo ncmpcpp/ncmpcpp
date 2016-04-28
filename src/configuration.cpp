@@ -196,8 +196,8 @@ bool configure(int argc, char **argv)
 			{
 				auto format = Format::parse(vm["current-song"].as<std::string>(), Format::Flags::Tag);
 				std::cout << Format::stringify<char>(format, &s);
-				return false;
 			}
+			return false;
 		}
 
 		// custom startup screen
