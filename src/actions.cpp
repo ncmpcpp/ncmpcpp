@@ -2830,9 +2830,34 @@ void seek()
 	int old_timeout = wFooter->getTimeout();
 	wFooter->setTimeout(BaseScreen::defaultWindowTimeout);
 	
-	auto seekForward = &Actions::get(Actions::Type::SeekForward);
-	auto seekBackward = &Actions::get(Actions::Type::SeekBackward);
-	
+	// Accept single action of a given type or action chain for which all actions
+	// can be run and one of them is of the given type. This will still not work
+	// in some contrived cases, but allows for more flexibility than accepting
+	// single actions only.
+	auto hasRunnableAction = [](BindingsConfiguration::BindingIteratorPair &bindings, Actions::Type type) {
+		bool success = false;
+		for (auto binding = bindings.first; binding != bindings.second; ++binding)
+		{
+			auto &actions = binding->actions();
+			for (const auto &action : actions)
+			{
+				if (action->canBeRun())
+				{
+					if (action->type() == type)
+						success = true;
+				}
+				else
+				{
+					success = false;
+					break;
+				}
+			}
+			if (success)
+				break;
+		}
+		return success;
+	};
+
 	SeekingInProgress = true;
 	while (true)
 	{
@@ -2843,16 +2868,14 @@ void seek()
 		                 : Config.seek_time;
 		
 		NC::Key::Type input = readKey(*wFooter);
+
 		auto k = Bindings.get(input);
-		if (k.first == k.second || !k.first->isSingle()) // no single action?
-			break;
-		auto a = k.first->action();
-		if (a == seekForward)
+		if (hasRunnableAction(k, Actions::Type::SeekForward))
 		{
 			if (songpos < Status::State::totalTime())
 				songpos = std::min(songpos + howmuch, Status::State::totalTime());
 		}
-		else if (a == seekBackward)
+		else if (hasRunnableAction(k, Actions::Type::SeekBackward))
 		{
 			if (songpos > 0)
 			{
