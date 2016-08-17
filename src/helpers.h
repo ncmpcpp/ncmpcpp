@@ -35,6 +35,11 @@ template <typename Iterator, typename PredicateT>
 Iterator wrappedSearch(Iterator begin, Iterator current, Iterator end,
                        const PredicateT &pred, bool wrap, bool skip_current)
 {
+	if (begin == end)
+	{
+		assert(current == end);
+		return begin;
+	}
 	if (skip_current)
 		++current;
 	auto it = std::find_if(current, end, pred);
