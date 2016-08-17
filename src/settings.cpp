@@ -593,7 +593,7 @@ bool Configuration::read(const std::vector<std::string> &config_paths, bool igno
 		else
 			throw std::runtime_error("invalid argument: " + v);
 		regex_type |= boost::regex::icase;
-	}, defaults_to(regex_type, boost::regex::basic | boost::regex::icase)
+	}, defaults_to(regex_type, boost::regex::perl | boost::regex::icase)
 	));
 	p.add("ignore_leading_the", yes_no(
 		ignore_leading_the, false
