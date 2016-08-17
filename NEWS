@@ -1,4 +1,4 @@
-ncmpcpp-0.7.5 (????-??-??)
+ncmpcpp-0.7.5 (2016-08-17)
 * Action chains can be now used for seeking.
 * Fixed fetching artist info from last.fm.
 * Default value of regular_expressions was changed from 'basic' to 'perl' to work around boost issue (#12222).
