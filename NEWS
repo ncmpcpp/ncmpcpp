@@ -2,6 +2,7 @@ ncmpcpp-0.7.5 (????-??-??)
 * Action chains can be now used for seeking.
 * Fixed fetching artist info from last.fm.
 * Default value of regular_expressions was changed from 'basic' to 'perl' to work around boost issue (#12222).
+* Fixed crash occuring when searching backward in an empty list.
 
 ncmpcpp 0.7.4 (2016-04-17)
 * Fetching lyrics from lyricwiki.org was fixed.
