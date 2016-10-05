@@ -22,6 +22,8 @@
 #define NCMPCPP_GLOBAL_H
 
 #include <boost/date_time/posix_time/posix_time_types.hpp>
+#include <random>
+
 #include "mpdpp.h"
 #include "screen.h"
 
@@ -57,6 +59,9 @@ extern std::string VolumeState;
 
 // global timer
 extern boost::posix_time::ptime Timer;
+
+// global RNG
+extern std::mt19937 RNG;
 
 }
 
