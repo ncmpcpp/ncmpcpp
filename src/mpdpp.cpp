@@ -24,6 +24,7 @@
 #include <map>
 
 #include "charset.h"
+#include "global.h"
 #include "mpdpp.h"
 
 MPD::Connection Mpd;
@@ -570,7 +571,7 @@ bool Connection::AddRandomTag(mpd_tag_type tag, size_t number)
 	if (number > tags.size())
 		return false;
 
-	std::random_shuffle(tags.begin(), tags.end());
+	std::shuffle(tags.begin(), tags.end(), Global::rng);
 	auto it = tags.begin();
 	for (size_t i = 0; i < number && it != tags.end(); ++i)
 	{
@@ -609,7 +610,7 @@ bool Connection::AddRandomSongs(size_t number)
 	}
 	else
 	{
-		std::random_shuffle(files.begin(), files.end());
+		std::shuffle(files.begin(), files.end(), Global::rng);
 		StartCommandsList();
 		auto it = files.begin();
 		for (size_t i = 0; i < number && it != files.end(); ++i, ++it)
