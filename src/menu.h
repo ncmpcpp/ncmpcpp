@@ -353,13 +353,21 @@ template <typename ItemT> struct Menu : Window, List
 	
 	Iterator current() { return Iterator(m_items.begin() + m_highlight); }
 	ConstIterator current() const { return ConstIterator(m_items.begin() + m_highlight); }
-	ReverseIterator rcurrent() { return ReverseIterator(++current()); }
-	ConstReverseIterator rcurrent() const { return ReverseIterator(++current()); }
+	ReverseIterator rcurrent() {
+		return m_items.size() ? ReverseIterator(++current()) : m_items.rbegin();
+	}
+	ConstReverseIterator rcurrent() const {
+		return m_items.size() ? ReverseIterator(++current()) : m_items.rcbegin();
+    }
 
 	ValueIterator currentV() { return ValueIterator(m_items.begin() + m_highlight); }
 	ConstValueIterator currentV() const { return ConstValueIterator(m_items.begin() + m_highlight); }
-	ReverseValueIterator rcurrentV() { return ReverseValueIterator(++currentV()); }
-	ConstReverseValueIterator rcurrentV() const { return ConstReverseValueIterator(++currentV()); }
+	ReverseValueIterator rcurrentV() {
+		return m_items.size() ? ReverseValueIterator(++currentV()) : ReverseValueIterator(m_items.rbegin());
+	}
+	ConstReverseValueIterator rcurrentV() const {
+		return m_items.size() ? ConstReverseValueIterator(++currentV()) : ConstReverseValueIterator(m_items.rcbegin());
+	}
 	
 	Iterator begin() { return Iterator(m_items.begin()); }
 	ConstIterator begin() const { return ConstIterator(m_items.begin()); }
