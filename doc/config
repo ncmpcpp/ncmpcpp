@@ -316,6 +316,8 @@
 #
 #discard_colors_if_item_is_selected = yes
 #
+#show_duplicate_tags = true
+#
 #incremental_seeking = yes
 #
 #seek_time = 1

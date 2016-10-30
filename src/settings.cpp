@@ -405,6 +405,9 @@ bool Configuration::read(const std::vector<std::string> &config_paths, bool igno
 	p.add("discard_colors_if_item_is_selected", yes_no(
 		discard_colors_if_item_is_selected, true
 	));
+	p.add("show_duplicate_tags", yes_no(
+		MPD::Song::ShowDuplicateTags, true
+	));
 	p.add("incremental_seeking", yes_no(
 		incremental_seeking, true
 	));

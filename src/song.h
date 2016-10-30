@@ -103,6 +103,8 @@ struct Song
 
 	static std::string TagsSeparator;
 
+	static bool ShowDuplicateTags;
+
 private:
 	std::shared_ptr<mpd_song> m_song;
 	size_t m_hash;

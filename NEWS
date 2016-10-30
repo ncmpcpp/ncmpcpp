@@ -1,5 +1,6 @@
 ncmpcpp-0.8 (????-??-??)
 * Configuration variable 'execute_on_player_state_change' was added.
+* Support for controlling whether ncmpcpp should display multiple tags as-is or make an effort to hide duplicate values (show_duplicate_tags configuration variable, enabled by default).
 
 ncmpcpp-0.7.5 (2016-08-17)
 * Action chains can be now used for seeking.

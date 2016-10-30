@@ -46,6 +46,8 @@ namespace MPD {
 
 std::string Song::TagsSeparator = " | ";
 
+bool Song::ShowDuplicateTags = true;
+
 std::string Song::get(mpd_tag_type type, unsigned idx) const
 {
 	std::string result;
@@ -206,11 +208,38 @@ std::string MPD::Song::getTags(GetFunction f) const
 	assert(m_song);
 	unsigned idx = 0;
 	std::string result;
-	for (std::string tag; !(tag = (this->*f)(idx)).empty(); ++idx)
+	if (ShowDuplicateTags)
 	{
-		if (!result.empty())
-			result += TagsSeparator;
-		result += tag;
+		for (std::string tag; !(tag = (this->*f)(idx)).empty(); ++idx)
+		{
+			if (!result.empty())
+				result += TagsSeparator;
+			result += tag;
+		}
+	}
+	else
+	{
+		bool already_present;
+		// This is O(n^2), but it doesn't really matter as a list of tags will have
+		// at most 2 or 3 items the vast majority of time.
+		for (std::string tag; !(tag = (this->*f)(idx)).empty(); ++idx)
+		{
+			already_present = false;
+			for (unsigned i = 0; i < idx; ++i)
+			{
+				if ((this->*f)(i) == tag)
+				{
+					already_present = true;
+					break;
+				}
+			}
+			if (!already_present)
+			{
+				if (idx > 0)
+					result += TagsSeparator;
+				result += tag;
+			}
+		}
 	}
 	return result;
 }
