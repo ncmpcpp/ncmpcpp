@@ -25,7 +25,9 @@
 
 #include <cstdlib>
 #include <cstring>
+#include <boost/algorithm/string/join.hpp>
 #include <boost/algorithm/string/replace.hpp>
+#include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/regex.hpp>
 
@@ -105,6 +107,15 @@ std::vector<std::string> LyricsFetcher::getContent(const char *regex_, const std
 void LyricsFetcher::postProcess(std::string &data) const
 {
 	stripHtmlTags(data);
+	// Remove indentation from each line and collapse multiple newlines into one.
+	std::vector<std::string> lines;
+	boost::split(lines, data, boost::is_any_of("\r\n"));
+	for (auto &line : lines)
+		boost::trim(line);
+	std::unique(lines.begin(), lines.end(), [](std::string &a, std::string &b) {
+		return a.empty() && b.empty();
+	});
+	data = boost::algorithm::join(lines, "\n");
 	boost::trim(data);
 }
 
@@ -126,7 +137,7 @@ LyricsFetcher::Result LyricwikiFetcher::fetch(const std::string &artist, const s
 			return result;
 		}
 		
-		auto lyrics = getContent("<div class='lyricbox'>(.*?)<!--", data);
+		auto lyrics = getContent("<div class='lyricbox'>(.*?)</div>", data);
 		
 		if (lyrics.empty())
 		{
@@ -219,6 +230,14 @@ void Sing365Fetcher::postProcess(std::string &data) const
 {
 	// throw away ad
 	data = boost::regex_replace(data, boost::regex("<div.*</div>"), "");
+	LyricsFetcher::postProcess(data);
+}
+
+/**********************************************************************/
+
+void JustSomeLyricsFetcher::postProcess(std::string &data) const
+{
+	data = unescapeHtmlUtf8(data);
 	LyricsFetcher::postProcess(data);
 }
 
