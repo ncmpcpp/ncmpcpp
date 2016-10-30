@@ -23,6 +23,7 @@
 
 #include <cassert>
 #include <exception>
+#include <random>
 #include <set>
 #include <vector>
 
@@ -524,8 +525,8 @@ struct Connection
 	
 	int AddSong(const std::string &, int = -1); // returns id of added song
 	int AddSong(const Song &, int = -1); // returns id of added song
-	bool AddRandomTag(mpd_tag_type, size_t);
-	bool AddRandomSongs(size_t);
+	bool AddRandomTag(mpd_tag_type, size_t, std::mt19937 &rng);
+	bool AddRandomSongs(size_t number, std::mt19937 &rng);
 	void Add(const std::string &path);
 	void Delete(unsigned int pos);
 	void PlaylistDelete(const std::string &playlist, unsigned int pos);

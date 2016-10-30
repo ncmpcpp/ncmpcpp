@@ -108,7 +108,9 @@ struct JustSomeLyricsFetcher : public GoogleLyricsFetcher
 	virtual const char *name() const OVERRIDE { return "justsomelyrics.com"; }
 	
 protected:
-	virtual const char *regex() const OVERRIDE { return "<div class=\"content.*?</div>(.*?)</div>"; }
+	virtual const char *regex() const OVERRIDE { return "<div class=\"content.*?</div>\\s*</div>(.*?)<div"; }
+
+	virtual void postProcess(std::string &data) const OVERRIDE;
 };
 
 struct AzLyricsFetcher : public GoogleLyricsFetcher

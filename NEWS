@@ -2,6 +2,15 @@ ncmpcpp-0.8 (????-??-??)
 * Configuration variable 'execute_on_player_state_change' was added.
 * Support for controlling whether ncmpcpp should display multiple tags as-is or make an effort to hide duplicate values (show_duplicate_tags configuration variable, enabled by default).
 
+ncmpcpp-0.7.6 (2016-10-30)
+* Fixed assertion failure on trying to search backwards in an empty list.
+* Updated installation instructions in INSTALL file.
+* Make sure that stream of random numbers is not deterministic.
+* Opening playlist editor when there is no MPD playlists directory no longer freezes the application.
+* Added info about behavior of MPD_HOST and MPD_PORT environment variables to man page.
+* Tilde will now be expanded to home directory in visualizer_fifo_path, execute_on_song_change and external_editor configuration variables.
+* Fixed lyricwiki and justsomelyrics fetchers.
+
 ncmpcpp-0.7.5 (2016-08-17)
 * Action chains can be now used for seeking.
 * Fixed fetching artist info from last.fm.

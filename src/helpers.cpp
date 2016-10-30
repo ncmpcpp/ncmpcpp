@@ -53,7 +53,7 @@ MPD::SongIterator getDatabaseIterator(MPD::Connection &mpd)
 		{
 			// If we can't get the database, display appropriate
 			// error message and reconnect with the MPD server.
-			Statusbar::print("Unable to fetch the data, increase max_buffer_output_size in your MPD configuration file");
+			Statusbar::print("Unable to fetch the data, increase max_output_buffer_size in your MPD configuration file");
 			mpd.Disconnect();
 			mpd.Connect();
 		}

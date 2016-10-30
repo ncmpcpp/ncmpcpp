@@ -160,6 +160,12 @@ std::string adjust_directory(std::string s)
 	return s;
 }
 
+std::string adjust_path(std::string s)
+{
+	expand_home(s);
+	return s;
+}
+
 // parser worker for buffer
 template <typename ValueT, typename TransformT>
 option_parser::worker buffer(NC::Buffer &arg, ValueT &&value, TransformT &&map)
@@ -237,8 +243,8 @@ bool Configuration::read(const std::vector<std::string> &config_paths, bool igno
 	p.add("mpd_crossfade_time", assign_default(
 		crossfade_time, 5
 	));
-	p.add("visualizer_fifo_path", assign_default(
-		visualizer_fifo_path, "/tmp/mpd.fifo"
+	p.add("visualizer_fifo_path", assign_default<std::string>(
+		visualizer_fifo_path, "/tmp/mpd.fifo", adjust_path
 	));
 	p.add("visualizer_output_name", assign_default(
 		visualizer_output_name, "Visualizer feed"
@@ -372,8 +378,8 @@ bool Configuration::read(const std::vector<std::string> &config_paths, bool igno
 				song_columns_mode_format = columns_to_format(columns);
 				return v;
 	}));
-	p.add("execute_on_song_change", assign_default(
-		execute_on_song_change, ""
+	p.add("execute_on_song_change", assign_default<std::string>(
+		execute_on_song_change, "", adjust_path
 	));
 	p.add("execute_on_player_state_change", assign_default(
 		execute_on_player_state_change, ""
@@ -647,8 +653,8 @@ bool Configuration::read(const std::vector<std::string> &config_paths, bool igno
 			boundsCheck(v, 1u, 3u);
 			return --v;
 	}));
-	p.add("external_editor", assign_default(
-		external_editor, "nano"
+	p.add("external_editor", assign_default<std::string>(
+		external_editor, "nano", adjust_path
 	));
 	p.add("use_console_editor", yes_no(
 		use_console_editor, true

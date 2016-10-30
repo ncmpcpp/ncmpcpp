@@ -2124,11 +2124,15 @@ void AddRandomItems::run()
 		Statusbar::put() << "Number of random " << tag_type_str << "s: ";
 		number = fromString<unsigned>(wFooter->prompt());
 	}
-	if (number && (rnd_type == 's' ? Mpd.AddRandomSongs(number) : Mpd.AddRandomTag(tag_type, number)))
+	if (number > 0)
 	{
-		Statusbar::printf("%1% random %2%%3% added to playlist",
-			number, tag_type_str, number == 1 ? "" : "s"
-		);
+		bool success;
+		if (rnd_type == 's')
+			success = Mpd.AddRandomSongs(number, Global::RNG);
+		else
+			success = Mpd.AddRandomTag(tag_type, number, Global::RNG);
+		if (success)
+			Statusbar::printf("%1% random %2%%3% added to playlist", number, tag_type_str, number == 1 ? "" : "s");
 	}
 }
 

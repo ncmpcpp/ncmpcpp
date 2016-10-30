@@ -89,7 +89,6 @@ int main(int argc, char **argv)
 	using Global::VolumeState;
 	using Global::Timer;
 	
-	srand(time(nullptr));
 	std::setlocale(LC_ALL, "");
 	std::locale::global(Charset::internalLocale());
 	
@@ -131,6 +130,9 @@ int main(int argc, char **argv)
 	
 	// initialize global timer
 	Timer = boost::posix_time::microsec_clock::local_time();
+
+	// initialize global random number generator
+	Global::RNG.seed(std::random_device()());
 	
 	// initialize playlist
 	myPlaylist->switchTo();

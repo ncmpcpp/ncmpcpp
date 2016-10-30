@@ -561,7 +561,7 @@ void Connection::Add(const std::string &path)
 	}
 }
 
-bool Connection::AddRandomTag(mpd_tag_type tag, size_t number)
+bool Connection::AddRandomTag(mpd_tag_type tag, size_t number, std::mt19937 &rng)
 {
 	std::vector<std::string> tags(
 		std::make_move_iterator(GetList(tag)),
@@ -570,7 +570,7 @@ bool Connection::AddRandomTag(mpd_tag_type tag, size_t number)
 	if (number > tags.size())
 		return false;
 
-	std::random_shuffle(tags.begin(), tags.end());
+	std::shuffle(tags.begin(), tags.end(), rng);
 	auto it = tags.begin();
 	for (size_t i = 0; i < number && it != tags.end(); ++i)
 	{
@@ -588,7 +588,7 @@ bool Connection::AddRandomTag(mpd_tag_type tag, size_t number)
 	return true;
 }
 
-bool Connection::AddRandomSongs(size_t number)
+bool Connection::AddRandomSongs(size_t number, std::mt19937 &rng)
 {
 	prechecksNoCommandsList();
 	std::vector<std::string> files;
@@ -609,7 +609,7 @@ bool Connection::AddRandomSongs(size_t number)
 	}
 	else
 	{
-		std::random_shuffle(files.begin(), files.end());
+		std::shuffle(files.begin(), files.end(), rng);
 		StartCommandsList();
 		auto it = files.begin();
 		for (size_t i = 0; i < number && it != files.end(); ++i, ++it)

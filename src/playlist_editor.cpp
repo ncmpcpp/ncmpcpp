@@ -147,13 +147,23 @@ void PlaylistEditor::update()
 	{
 		m_playlists_update_requested = false;
 		size_t idx = 0;
-		for (MPD::PlaylistIterator it = Mpd.GetPlaylists(), end; it != end; ++it, ++idx)
+		try
 		{
-			if (idx < Playlists.size())
-				Playlists[idx].value() = std::move(*it);
+			for (MPD::PlaylistIterator it = Mpd.GetPlaylists(), end; it != end; ++it, ++idx)
+			{
+				if (idx < Playlists.size())
+					Playlists[idx].value() = std::move(*it);
+				else
+					Playlists.addItem(std::move(*it));
+			};
+		}
+		catch (MPD::ServerError &e)
+		{
+			if (e.code() == MPD_SERVER_ERROR_SYSTEM) // no playlists directory
+				Statusbar::print(e.what());
 			else
-				Playlists.addItem(std::move(*it));
-		};
+				throw;
+		}
 		if (idx < Playlists.size())
 			Playlists.resizeList(idx);
 		std::sort(Playlists.beginV(), Playlists.endV(),
