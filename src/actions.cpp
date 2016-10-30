@@ -258,7 +258,7 @@ void setWindowsDimensions()
 	if (!Config.statusbar_visibility)
 		++MainHeight;
 	
-	HeaderHeight = Config.design == Design::Alternative ? (Config.header_visibility ? 5 : 3) : 1;
+	HeaderHeight = Config.design == Design::Alternative ? (Config.header_visibility ? 5 : 3) : 2;
 	FooterStartY = LINES-(Config.statusbar_visibility ? 2 : 1);
 	FooterHeight = Config.statusbar_visibility ? 2 : 1;
 }

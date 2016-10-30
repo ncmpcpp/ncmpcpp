@@ -716,21 +716,14 @@ void Status::Changes::flags()
 			if (m_db_updating)
 				switch_state += m_db_updating;
 
-			// this is done by raw ncurses because creating another
-			// window only for handling this is quite silly
-			attrset(A_BOLD);
-			color_set(Config.state_line_color.pairNumber(), nullptr);
-			mvhline(1, 0, 0, COLS);
+			*wHeader << Config.state_line_color;
+			mvwhline(wHeader->raw(), 1, 0, 0, COLS);
 			if (!switch_state.empty())
-			{
-				mvprintw(1, COLS-switch_state.length()-3, "[");
-				color_set(Config.state_flags_color.pairNumber(), nullptr);
-				mvprintw(1, COLS-switch_state.length()-2, "%s", switch_state.c_str());
-				color_set(Config.state_line_color.pairNumber(), nullptr);
-				mvprintw(1, COLS-2, "]");
-			}
-			standend();
-			refresh();
+				*wHeader << NC::XY(COLS-switch_state.length()-3, 1) << "["
+								 << Config.state_flags_color
+								 << NC::Format::Bold << switch_state << NC::Format::NoBold
+								 << NC::Color::End
+								 << "]";
 			break;
 		case Design::Alternative:
 			switch_state += '[';
@@ -748,9 +741,9 @@ void Status::Changes::flags()
 				mvwhline(wHeader->raw(), 2, 0, 0, COLS);
 				*wHeader << NC::Color::End << NC::Format::NoBold;
 			}
-			wHeader->refresh();
 			break;
 	}
+	wHeader->refresh();
 }
 
 void Status::Changes::mixer()
