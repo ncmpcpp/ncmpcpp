@@ -59,10 +59,10 @@ Directory for storing ncmpcpp related files. Changing it is useful if you want t
 Directory for storing downloaded lyrics. It defaults to ~/.lyrics since other MPD clients (eg. ncmpc) also use that location.
 .TP
 .B mpd_host = HOST
-Connect to MPD running on specified host/unix socket. When HOST starts with a '/', it is assumed to be a unix socket.
+Connect to MPD running on specified host/unix socket. When HOST starts with a '/', it is assumed to be a unix socket. Note: MPD_HOST environment variable overrides this setting.
 .TP
 .B mpd_port = PORT
-Connect to MPD on the specified port.
+Connect to MPD on the specified port. Note: MPD_PORT environment variable overrides this setting.
 .TP
 .B mpd_music_dir = PATH
 Search for files in specified directory. This is needed for tag editor to work.
