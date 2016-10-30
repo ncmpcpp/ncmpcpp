@@ -4,6 +4,7 @@ ncmpcpp-0.7.6 (????-??-??)
 * Make sure that stream of random numbers is not deterministic.
 * Opening playlist editor when there is no MPD playlists directory no longer freezes the application.
 * Added info about behavior of MPD_HOST and MPD_PORT environment variables to man page.
+* Tile will now be expanded to home directory in visualizer_fifo_path, execute_on_song_change and external_editor configuration variables.
 
 ncmpcpp-0.7.5 (2016-08-17)
 * Action chains can be now used for seeking.
