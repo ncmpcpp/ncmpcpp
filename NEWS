@@ -1,4 +1,4 @@
-ncmpcpp-0.7.6 (????-??-??)
+ncmpcpp-0.7.6 (2016-10-30)
 * Fixed assertion failure on trying to search backwards in an empty list.
 * Updated installation instructions in INSTALL file.
 * Make sure that stream of random numbers is not deterministic.
