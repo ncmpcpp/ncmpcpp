@@ -109,7 +109,7 @@ void LyricsFetcher::postProcess(std::string &data) const
 	stripHtmlTags(data);
 	// Remove indentation from each line and collapse multiple newlines into one.
 	std::vector<std::string> lines;
-	boost::split(lines, data, boost::is_any_of("\r\n"));
+	boost::split(lines, data, boost::is_any_of("\n"));
 	for (auto &line : lines)
 		boost::trim(line);
 	std::unique(lines.begin(), lines.end(), [](std::string &a, std::string &b) {
