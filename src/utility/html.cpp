@@ -66,7 +66,7 @@ void stripHtmlTags(std::string &s)
 	for (size_t i = s.find("<"); i != std::string::npos; i = s.find("<"))
 	{
 		size_t j = s.find(">", i)+1;
-		if (s.compare(i, std::min(3ul, j-i), "<p ") == 0 || s.compare(i, j-i, "</p>") == 0)
+		if (s.compare(i, std::min(3ul, (unsigned long)j-i), "<p ") == 0 || s.compare(i, j-i, "</p>") == 0)
 			s.replace(i, j-i, "\n");
 		else
 			s.replace(i, j-i, "");
