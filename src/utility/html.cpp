@@ -62,29 +62,22 @@ void unescapeHtmlEntities(std::string &s)
 
 void stripHtmlTags(std::string &s)
 {
-	bool erase = 0;
+	bool is_p, is_slash_p;
 	for (size_t i = s.find("<"); i != std::string::npos; i = s.find("<"))
 	{
-		size_t j = s.find(">", i)+1;
-		if (s.compare(i, std::min(3ul, j-i), "<p ") == 0 || s.compare(i, j-i, "</p>") == 0)
-			s.replace(i, j-i, "\n");
+		size_t j = s.find(">", i);
+		if (j != std::string::npos)
+		{
+			++j;
+			is_p = s.compare(i, j-i, "<p ") == 0 || s.compare(i, j-i, "<p>") == 0;
+			is_slash_p = s.compare(i, j-i, "</p>") == 0;
+			if (is_p || is_slash_p)
+				s.replace(i, j-i, "\n");
+			else
+				s.replace(i, j-i, "");
+		}
 		else
-			s.replace(i, j-i, "");
+			break;
 	}
 	unescapeHtmlEntities(s);
-	for (size_t i = 0; i < s.length(); ++i)
-	{
-		if (erase)
-		{
-			s.erase(s.begin()+i);
-			erase = 0;
-		}
-		if (s[i] == 13) // ascii code for windows line ending, get rid of this shit
-		{
-			s[i] = '\n';
-			erase = 1;
-		}
-		else if (s[i] == '\t')
-			s[i] = ' ';
-	}
 }
