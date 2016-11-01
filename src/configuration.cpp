@@ -74,7 +74,12 @@ bool configure(int argc, char **argv)
 		xdg_config_home() + "ncmpcpp/config"
 	};
 
-	std::string bindings_path;
+	const std::vector<std::string> default_bindings_paths = {
+		"~/.ncmpcpp/bindings",
+		xdg_config_home() + "ncmpcpp/bindings"
+	};
+
+	std::vector<std::string> bindings_paths;
 	std::vector<std::string> config_paths;
 
 	po::options_description options("Options");
@@ -85,7 +90,7 @@ bool configure(int argc, char **argv)
 		("config,c", po::value<std::vector<std::string>>(&config_paths)->value_name("PATH")->default_value(default_config_paths, join<std::string>(default_config_paths, " AND ")), "specify configuration file(s)")
 		("ignore-config-errors", "ignore unknown and invalid options in configuration files")
 		("test-lyrics-fetchers", "check if lyrics fetchers work")
-		("bindings,b", po::value<std::string>(&bindings_path)->value_name("PATH")->default_value("~/.ncmpcpp/bindings"), "specify bindings file")
+		("bindings,b", po::value<std::vector<std::string>>(&bindings_paths)->value_name("PATH")->default_value(default_bindings_paths, join<std::string>(default_bindings_paths, " AND ")), "specify bindings file(s)")
 		("screen,s", po::value<std::string>()->value_name("SCREEN"), "specify the startup screen")
 		("slave-screen,S", po::value<std::string>()->value_name("SCREEN"), "specify the startup slave screen")
 		("help,?", "show help message")
@@ -190,14 +195,9 @@ bool configure(int argc, char **argv)
 		if (Config.read(config_paths, vm.count("ignore-config-errors")) == false)
 			exit(1);
 
-		// if bindings file was not specified, use the one from main directory.
-		if (vm["bindings"].defaulted())
-			bindings_path = Config.ncmpcpp_directory + "bindings";
-		else
-			expand_home(bindings_path);
-
 		// read bindings
-		if (Bindings.read(bindings_path) == false)
+		std::for_each(bindings_paths.begin(), bindings_paths.end(), expand_home);
+		if (Bindings.read(bindings_paths) == false)
 			exit(1);
 		Bindings.generateDefaults();
 
