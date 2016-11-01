@@ -467,6 +467,17 @@ bool BindingsConfiguration::read(const std::string &file)
 	return result;
 }
 
+bool BindingsConfiguration::read(const std::vector<std::string> &binding_paths)
+{
+	return std::all_of(
+		binding_paths.begin(),
+		binding_paths.end(),
+		[&](const std::string &binding_path) {
+			return read(binding_path);
+		}
+	);
+}
+
 void BindingsConfiguration::generateDefaults()
 {
 	NC::Key::Type k = NC::Key::None;
