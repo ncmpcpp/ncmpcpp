@@ -1934,6 +1934,14 @@ void ReversePlaylist::run()
 	Statusbar::print("Range reversed");
 }
 
+bool ApplyFilter::canBeRun()
+{
+	return false;
+}
+
+void ApplyFilter::run()
+{ }
+
 bool Find::canBeRun()
 {
 	return myScreen == myHelp
@@ -2724,6 +2732,7 @@ void populateActions()
 	insert_action(new Actions::ClearPlaylist());
 	insert_action(new Actions::SortPlaylist());
 	insert_action(new Actions::ReversePlaylist());
+	insert_action(new Actions::ApplyFilter());
 	insert_action(new Actions::Find());
 	insert_action(new Actions::FindItemForward());
 	insert_action(new Actions::FindItemBackward());

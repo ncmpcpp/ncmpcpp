@@ -381,6 +381,9 @@
 #def_key "ctrl-r"
 #  reverse_playlist
 #
+#def_key "ctrl-f"
+#  apply_filter
+#
 #def_key "ctrl-_"
 #  select_found_items
 #

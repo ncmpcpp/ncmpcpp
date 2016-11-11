@@ -122,6 +122,7 @@ enum class Type
 	ClearPlaylist,
 	SortPlaylist,
 	ReversePlaylist,
+	ApplyFilter,
 	Find,
 	FindItemForward,
 	FindItemBackward,
@@ -1034,6 +1035,15 @@ private:
 
 	NC::Menu<MPD::Song>::ConstIterator m_begin;
 	NC::Menu<MPD::Song>::ConstIterator m_end;
+};
+
+struct ApplyFilter: public BaseAction
+{
+	ApplyFilter(): BaseAction(Type::ApplyFilter, "apply_filter") { }
+
+private:
+	virtual bool canBeRun() OVERRIDE;
+	virtual void run() OVERRIDE;
 };
 
 struct Find: BaseAction

@@ -26,59 +26,72 @@
 namespace NC {
 
 template <typename ItemT>
-Menu<ItemT>::Menu(size_t startx,
-	size_t starty,
-	size_t width,
-	size_t height,
-	const std::string &title,
-	Color color,
-	Border border)
-	: Window(startx, starty, width, height, title, std::move(color), border),
-	m_item_displayer(0),
-	m_beginning(0),
-	m_highlight(0),
-	m_highlight_color(m_base_color),
-	m_highlight_enabled(true),
-	m_cyclic_scroll_enabled(false),
-	m_autocenter_cursor(false)
+Menu<ItemT>::Menu()
 {
+	m_items = &m_all_items;
+}
+
+template <typename ItemT>
+Menu<ItemT>::Menu(size_t startx,
+                  size_t starty,
+                  size_t width,
+                  size_t height,
+                  const std::string &title,
+                  Color color,
+                  Border border)
+	: Window(startx, starty, width, height, title, std::move(color), border)
+	, m_item_displayer(0)
+	, m_beginning(0)
+	, m_highlight(0)
+	, m_highlight_color(m_base_color)
+	, m_highlight_enabled(true)
+	, m_cyclic_scroll_enabled(false)
+	, m_autocenter_cursor(false)
+{
+	m_items = &m_all_items;
 }
 
 template <typename ItemT>
 Menu<ItemT>::Menu(const Menu &rhs)
-: Window(rhs)
-, m_item_displayer(rhs.m_item_displayer)
-, m_beginning(rhs.m_beginning)
-, m_highlight(rhs.m_highlight)
-, m_highlight_color(rhs.m_highlight_color)
-, m_highlight_enabled(rhs.m_highlight_enabled)
-, m_cyclic_scroll_enabled(rhs.m_cyclic_scroll_enabled)
-, m_autocenter_cursor(rhs.m_autocenter_cursor)
-, m_drawn_position(rhs.m_drawn_position)
-, m_selected_prefix(rhs.m_selected_prefix)
-, m_selected_suffix(rhs.m_selected_suffix)
+	: Window(rhs)
+	, m_item_displayer(rhs.m_item_displayer)
+	, m_beginning(rhs.m_beginning)
+	, m_highlight(rhs.m_highlight)
+	, m_highlight_color(rhs.m_highlight_color)
+	, m_highlight_enabled(rhs.m_highlight_enabled)
+	, m_cyclic_scroll_enabled(rhs.m_cyclic_scroll_enabled)
+	, m_autocenter_cursor(rhs.m_autocenter_cursor)
+	, m_drawn_position(rhs.m_drawn_position)
+	, m_selected_prefix(rhs.m_selected_prefix)
+	, m_selected_suffix(rhs.m_selected_suffix)
 {
-	// there is no way to properly fill m_filtered_options
-	// (if rhs is filtered), so we just don't do it.
-	m_items.reserve(rhs.m_items.size());
-	std::copy(rhs.begin(), rhs.end(), std::back_inserter(m_items));
+	// TODO: move filtered items
+	m_all_items.reserve(rhs.m_all_items.size());
+	for (const auto &item : rhs.m_all_items)
+		m_all_items.push_back(item.copy());
+	m_items = &m_all_items;
 }
 
 template <typename ItemT>
 Menu<ItemT>::Menu(Menu &&rhs)
-: Window(rhs)
-, m_item_displayer(rhs.m_item_displayer)
-, m_items(std::move(rhs.m_items))
-, m_beginning(rhs.m_beginning)
-, m_highlight(rhs.m_highlight)
-, m_highlight_color(rhs.m_highlight_color)
-, m_highlight_enabled(rhs.m_highlight_enabled)
-, m_cyclic_scroll_enabled(rhs.m_cyclic_scroll_enabled)
-, m_autocenter_cursor(rhs.m_autocenter_cursor)
-, m_drawn_position(rhs.m_drawn_position)
-, m_selected_prefix(std::move(rhs.m_selected_prefix))
-, m_selected_suffix(std::move(rhs.m_selected_suffix))
+	: Window(rhs)
+	, m_item_displayer(rhs.m_item_displayer)
+	, m_all_items(std::move(rhs.m_all_items))
+	, m_filtered_items(std::move(rhs.m_filtered_items))
+	, m_beginning(rhs.m_beginning)
+	, m_highlight(rhs.m_highlight)
+	, m_highlight_color(rhs.m_highlight_color)
+	, m_highlight_enabled(rhs.m_highlight_enabled)
+	, m_cyclic_scroll_enabled(rhs.m_cyclic_scroll_enabled)
+	, m_autocenter_cursor(rhs.m_autocenter_cursor)
+	, m_drawn_position(rhs.m_drawn_position)
+	, m_selected_prefix(std::move(rhs.m_selected_prefix))
+	, m_selected_suffix(std::move(rhs.m_selected_suffix))
 {
+	if (rhs.m_items == &rhs.m_all_items)
+		m_items = &m_all_items;
+	else
+		m_items = &m_filtered_items;
 }
 
 template <typename ItemT>
@@ -86,7 +99,8 @@ Menu<ItemT> &Menu<ItemT>::operator=(Menu rhs)
 {
 	std::swap(static_cast<Window &>(*this), static_cast<Window &>(rhs));
 	std::swap(m_item_displayer, rhs.m_item_displayer);
-	std::swap(m_items, rhs.m_items);
+	std::swap(m_all_items, rhs.m_all_items);
+	std::swap(m_filtered_items, rhs.m_filtered_items);
 	std::swap(m_beginning, rhs.m_beginning);
 	std::swap(m_highlight, rhs.m_highlight);
 	std::swap(m_highlight_color, rhs.m_highlight_color);
@@ -96,52 +110,41 @@ Menu<ItemT> &Menu<ItemT>::operator=(Menu rhs)
 	std::swap(m_drawn_position, rhs.m_drawn_position);
 	std::swap(m_selected_prefix, rhs.m_selected_prefix);
 	std::swap(m_selected_suffix, rhs.m_selected_suffix);
+	if (rhs.m_items == &rhs.m_all_items)
+		m_items = &m_all_items;
+	else
+		m_items = &m_filtered_items;
 	return *this;
 }
 
 template <typename ItemT>
 void Menu<ItemT>::resizeList(size_t new_size)
 {
-	if (new_size > m_items.size())
-	{
-		size_t old_size = m_items.size();
-		m_items.resize(new_size);
-		for (size_t i = old_size; i < new_size; ++i)
-			m_items[i] = Item();
-	}
-	else
-		m_items.resize(new_size);
+	m_all_items.resize(new_size);
 }
 
 template <typename ItemT>
 void Menu<ItemT>::addItem(ItemT item, Properties::Type properties)
 {
-	m_items.push_back(Item(std::move(item), properties));
+	m_all_items.push_back(Item(std::move(item), properties));
 }
 
 template <typename ItemT>
 void Menu<ItemT>::addSeparator()
 {
-	m_items.push_back(Item::mkSeparator());
+	m_all_items.push_back(Item::mkSeparator());
 }
 
 template <typename ItemT>
 void Menu<ItemT>::insertItem(size_t pos, ItemT item, Properties::Type properties)
 {
-	m_items.insert(m_items.begin()+pos, Item(std::move(item), properties));
+	m_all_items.insert(m_all_items.begin()+pos, Item(std::move(item), properties));
 }
 
 template <typename ItemT>
 void Menu<ItemT>::insertSeparator(size_t pos)
 {
-	m_items.insert(m_items.begin()+pos, Item::mkSeparator());
-}
-
-template <typename ItemT>
-void Menu<ItemT>::deleteItem(size_t pos)
-{
-	assert(pos < m_items.size());
-	m_items.erase(m_items.begin()+pos);
+	m_all_items.insert(m_all_items.begin()+pos, Item::mkSeparator());
 }
 
 template <typename ItemT>
@@ -156,7 +159,7 @@ bool Menu<ItemT>::Goto(size_t y)
 template <typename ItemT>
 void Menu<ItemT>::refresh()
 {
-	if (m_items.empty())
+	if (m_items->empty())
 	{
 		Window::clear();
 		Window::refresh();
@@ -164,14 +167,14 @@ void Menu<ItemT>::refresh()
 	}
 
 	size_t max_beginning = 0;
-	if (m_items.size() > m_height)
-		max_beginning = m_items.size() - m_height;
+	if (m_items->size() > m_height)
+		max_beginning = m_items->size() - m_height;
 	m_beginning = std::min(m_beginning, max_beginning);
 
 	// if highlighted position is off the screen, make it visible
 	m_highlight = std::min(m_highlight, m_beginning+m_height-1);
 	// if highlighted position is invalid, correct it
-	m_highlight = std::min(m_highlight, m_items.size()-1);
+	m_highlight = std::min(m_highlight, m_items->size()-1);
 
 	if (!isHighlightable(m_highlight))
 	{
@@ -186,18 +189,18 @@ void Menu<ItemT>::refresh()
 	for (; m_drawn_position < end_; ++m_drawn_position, ++line)
 	{
 		goToXY(0, line);
-		if (m_drawn_position >= m_items.size())
+		if (m_drawn_position >= m_items->size())
 		{
 			for (; line < m_height; ++line)
 				mvwhline(m_window, line, 0, NC::Key::Space, m_width);
 			break;
 		}
-		if (m_items[m_drawn_position].isSeparator())
+		if ((*m_items)[m_drawn_position].isSeparator())
 		{
 			mvwhline(m_window, line, 0, 0, m_width);
 			continue;
 		}
-		if (m_items[m_drawn_position].isBold())
+		if ((*m_items)[m_drawn_position].isBold())
 			*this << Format::Bold;
 		if (m_highlight_enabled && m_drawn_position == m_highlight)
 		{
@@ -205,18 +208,18 @@ void Menu<ItemT>::refresh()
 			*this << m_highlight_color;
 		}
 		mvwhline(m_window, line, 0, NC::Key::Space, m_width);
-		if (m_items[m_drawn_position].isSelected())
+		if ((*m_items)[m_drawn_position].isSelected())
 			*this << m_selected_prefix;
 		if (m_item_displayer)
 			m_item_displayer(*this);
-		if (m_items[m_drawn_position].isSelected())
+		if ((*m_items)[m_drawn_position].isSelected())
 			*this << m_selected_suffix;
 		if (m_highlight_enabled && m_drawn_position == m_highlight)
 		{
 			*this << Color::End;
 			*this << Format::NoReverse;
 		}
-		if (m_items[m_drawn_position].isBold())
+		if ((*m_items)[m_drawn_position].isBold())
 			*this << Format::NoBold;
 	}
 	Window::refresh();
@@ -225,10 +228,10 @@ void Menu<ItemT>::refresh()
 template <typename ItemT>
 void Menu<ItemT>::scroll(Scroll where)
 {
-	if (m_items.empty())
+	if (m_items->empty())
 		return;
-	size_t max_highlight = m_items.size()-1;
-	size_t max_beginning = m_items.size() < m_height ? 0 : m_items.size()-m_height;
+	size_t max_highlight = m_items->size()-1;
+	size_t max_beginning = m_items->size() < m_height ? 0 : m_items->size()-m_height;
 	size_t max_visible_highlight = m_beginning+m_height-1;
 	switch (where)
 	{
@@ -323,13 +326,15 @@ void Menu<ItemT>::reset()
 template <typename ItemT>
 void Menu<ItemT>::clear()
 {
-	m_items.clear();
+	m_all_items.clear();
+	m_filtered_items.clear();
+	m_items = &m_all_items;
 }
 
 template <typename ItemT>
 void Menu<ItemT>::highlight(size_t pos)
 {
-	assert(pos < m_items.size());
+	assert(pos < m_items->size());
 	m_highlight = pos;
 	size_t half_height = m_height/2;
 	if (pos < half_height)
@@ -343,6 +348,24 @@ size_t Menu<ItemT>::choice() const
 {
 	assert(!empty());
 	return m_highlight;
+}
+
+template <typename ItemT> template <typename FilterPredicate>
+bool Menu<ItemT>::applyFilter(FilterPredicate &&p)
+{
+	m_filtered_items.clear();
+	for (const auto &item : m_all_items)
+		if (p(item))
+			m_filtered_items.push_back(item);
+	m_items = &m_filtered_items;
+	return !m_filtered_items.empty();
+}
+
+template <typename ItemT>
+void Menu<ItemT>::clearFilter()
+{
+	m_filtered_items.clear();
+	m_items = &m_all_items;
 }
 
 }

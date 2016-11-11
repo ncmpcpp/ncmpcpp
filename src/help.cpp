@@ -210,6 +210,7 @@ void write_bindings(NC::Scrollpad &w)
 	key(w, Type::UpdateDatabase, "Start music database update");
 	w << '\n';
 	key(w, Type::ExecuteCommand, "Execute command");
+	key(w, Type::ApplyFilter, "Apply filter");
 	key(w, Type::FindItemForward, "Find item forward");
 	key(w, Type::FindItemBackward, "Find item backward");
 	key(w, Type::PreviousFoundItem, "Jump to previous found item");

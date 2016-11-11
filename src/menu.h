@@ -96,6 +96,9 @@ struct List
 		bool isInactive() const { return m_properties & Inactive; }
 		bool isSeparator() const { return m_properties & Separator; }
 
+	protected:
+		unsigned properties() const { return m_properties; }
+
 	private:
 		unsigned m_properties;
 	};
@@ -174,17 +177,26 @@ template <typename ItemT> struct Menu : Window, List
 		
 		friend struct Menu<ItemT>;
 		
-		Item() { }
-		Item(ItemT value_, Properties::Type properties)
+		Item()
+			: m_value(std::make_shared<ItemT>(ItemT()))
+		{ }
+
+		template <typename ValueT>
+		Item(ValueT &&value_, Properties::Type properties)
 		: Properties(properties)
-		, m_value(value_)
+		, m_value(std::make_shared<ItemT>(std::forward<ValueT>(value_)))
 		{ }
 		
-		ItemT &value() { return m_value; }
-		const ItemT &value() const { return m_value; }
+		ItemT &value() { return *m_value; }
+		const ItemT &value() const { return *m_value; }
 		
-		ItemT &operator*() { return m_value; }
-		const ItemT &operator*() const { return m_value; }
+		ItemT &operator*() { return *m_value; }
+		const ItemT &operator*() const { return *m_value; }
+
+		// Make a deep copy of Item.
+		Item copy() const {
+			return Item(*m_value, static_cast<Properties::Type>(properties()));
+		}
 
 	private:
 		static Item mkSeparator()
@@ -195,9 +207,9 @@ template <typename ItemT> struct Menu : Window, List
 			return item;
 		}
 		
-		ItemT m_value;
+		std::shared_ptr<ItemT> m_value;
 	};
-	
+
 	typedef typename std::vector<Item>::iterator Iterator;
 	typedef typename std::vector<Item>::const_iterator ConstIterator;
 	typedef std::reverse_iterator<Iterator> ReverseIterator;
@@ -230,7 +242,7 @@ template <typename ItemT> struct Menu : Window, List
 	/// @see setItemDisplayer()
 	typedef std::function<void(Menu<ItemT> &)> ItemDisplayer;
 	
-	Menu() { }
+	Menu();
 	
 	Menu(size_t startx, size_t starty, size_t width, size_t height,
 			const std::string &title, Color color, Border border);
@@ -260,10 +272,6 @@ template <typename ItemT> struct Menu : Window, List
 	/// @param pos initial position of inserted separator
 	void insertSeparator(size_t pos);
 	
-	/// Deletes item from given position
-	/// @param pos given position of item to be deleted
-	void deleteItem(size_t pos);
-	
 	/// Moves the highlighted position to the given line of window
 	/// @param y Y position of menu window to be highlighted
 	/// @return true if the position is reachable, false otherwise
@@ -271,10 +279,10 @@ template <typename ItemT> struct Menu : Window, List
 	
 	/// Checks if list is empty
 	/// @return true if list is empty, false otherwise
-	virtual bool empty() const OVERRIDE { return m_items.empty(); }
+	virtual bool empty() const OVERRIDE { return m_items->empty(); }
 
 	/// @return size of the list
-	virtual size_t size() const OVERRIDE { return m_items.size(); }
+	virtual size_t size() const OVERRIDE { return m_items->size(); }
 
 	/// @return currently highlighted position
 	virtual size_t choice() const OVERRIDE;
@@ -298,7 +306,24 @@ template <typename ItemT> struct Menu : Window, List
 	
 	/// Sets highlighted position to 0
 	void reset();
-	
+
+	/// Apply filter predicate to items in the menu and show the ones for which it
+	/// returned true.
+	template <typename FilterPredicate>
+	bool applyFilter(FilterPredicate &&p);
+
+	/// Clear results of applyFilter and show all items.
+	void clearFilter();
+
+	/// @return true if menu is filtered.
+	bool isFiltered() const { return m_items == &m_filtered_items; }
+
+	/// Show all items.
+	void showAllItems() { m_items = &m_all_items; }
+
+	/// Show filtered items.
+	void showFilteredItems() { m_items = &m_filtered_items; }
+
 	/// Sets prefix, that is put before each selected item to indicate its selection
 	/// Note that the passed variable is not deleted along with menu object.
 	/// @param b pointer to buffer that contains the prefix
@@ -336,23 +361,23 @@ template <typename ItemT> struct Menu : Window, List
 	/// @param pos requested position
 	/// @return reference to item at given position
 	/// @throw std::out_of_range if given position is out of range
-	Menu<ItemT>::Item &at(size_t pos) { return m_items.at(pos); }
+	Menu<ItemT>::Item &at(size_t pos) { return m_items->at(pos); }
 	
 	/// @param pos requested position
 	/// @return const reference to item at given position
 	/// @throw std::out_of_range if given position is out of range
-	const Menu<ItemT>::Item &at(size_t pos) const { return m_items.at(pos); }
+	const Menu<ItemT>::Item &at(size_t pos) const { return m_items->at(pos); }
 	
 	/// @param pos requested position
 	/// @return const reference to item at given position
-	const Menu<ItemT>::Item &operator[](size_t pos) const { return m_items[pos]; }
+	const Menu<ItemT>::Item &operator[](size_t pos) const { return (*m_items)[pos]; }
 	
 	/// @param pos requested position
 	/// @return const reference to item at given position
-	Menu<ItemT>::Item &operator[](size_t pos) { return m_items[pos]; }
+	Menu<ItemT>::Item &operator[](size_t pos) { return (*m_items)[pos]; }
 	
-	Iterator current() { return Iterator(m_items.begin() + m_highlight); }
-	ConstIterator current() const { return ConstIterator(m_items.begin() + m_highlight); }
+	Iterator current() { return Iterator(m_items->begin() + m_highlight); }
+	ConstIterator current() const { return ConstIterator(m_items->begin() + m_highlight); }
 	ReverseIterator rcurrent() {
 		if (empty())
 			return rend();
@@ -366,8 +391,8 @@ template <typename ItemT> struct Menu : Window, List
 			return ConstReverseIterator(++current());
 	}
 
-	ValueIterator currentV() { return ValueIterator(m_items.begin() + m_highlight); }
-	ConstValueIterator currentV() const { return ConstValueIterator(m_items.begin() + m_highlight); }
+	ValueIterator currentV() { return ValueIterator(m_items->begin() + m_highlight); }
+	ConstValueIterator currentV() const { return ConstValueIterator(m_items->begin() + m_highlight); }
 	ReverseValueIterator rcurrentV() {
 		if (empty())
 			return rendV();
@@ -381,10 +406,10 @@ template <typename ItemT> struct Menu : Window, List
 			return ConstReverseValueIterator(++currentV());
 	}
 	
-	Iterator begin() { return Iterator(m_items.begin()); }
-	ConstIterator begin() const { return ConstIterator(m_items.begin()); }
-	Iterator end() { return Iterator(m_items.end()); }
-	ConstIterator end() const { return ConstIterator(m_items.end()); }
+	Iterator begin() { return Iterator(m_items->begin()); }
+	ConstIterator begin() const { return ConstIterator(m_items->begin()); }
+	Iterator end() { return Iterator(m_items->end()); }
+	ConstIterator end() const { return ConstIterator(m_items->end()); }
 	
 	ReverseIterator rbegin() { return ReverseIterator(end()); }
 	ConstReverseIterator rbegin() const { return ConstReverseIterator(end()); }
@@ -402,34 +427,36 @@ template <typename ItemT> struct Menu : Window, List
 	ConstReverseValueIterator rendV() const { return ConstReverseValueIterator(beginV()); }
 	
 	virtual List::Iterator currentP() OVERRIDE {
-		return List::Iterator(PropertiesIterator(m_items.begin() + m_highlight));
+		return List::Iterator(PropertiesIterator(m_items->begin() + m_highlight));
 	}
 	virtual List::ConstIterator currentP() const OVERRIDE {
-		return List::ConstIterator(ConstPropertiesIterator(m_items.begin() + m_highlight));
+		return List::ConstIterator(ConstPropertiesIterator(m_items->begin() + m_highlight));
 	}
 	virtual List::Iterator beginP() OVERRIDE {
-		return List::Iterator(PropertiesIterator(m_items.begin()));
+		return List::Iterator(PropertiesIterator(m_items->begin()));
 	}
 	virtual List::ConstIterator beginP() const OVERRIDE {
-		return List::ConstIterator(ConstPropertiesIterator(m_items.begin()));
+		return List::ConstIterator(ConstPropertiesIterator(m_items->begin()));
 	}
 	virtual List::Iterator endP() OVERRIDE {
-		return List::Iterator(PropertiesIterator(m_items.end()));
+		return List::Iterator(PropertiesIterator(m_items->end()));
 	}
 	virtual List::ConstIterator endP() const OVERRIDE {
-		return List::ConstIterator(ConstPropertiesIterator(m_items.end()));
+		return List::ConstIterator(ConstPropertiesIterator(m_items->end()));
 	}
 
 private:
 	bool isHighlightable(size_t pos)
 	{
-		return !m_items[pos].isSeparator()
-		    && !m_items[pos].isInactive();
+		return !(*m_items)[pos].isSeparator()
+			&& !(*m_items)[pos].isInactive();
 	}
 	
 	ItemDisplayer m_item_displayer;
 	
-	std::vector<Item> m_items;
+	std::vector<Item> *m_items;
+	std::vector<Item> m_all_items;
+	std::vector<Item> m_filtered_items;
 	
 	size_t m_beginning;
 	size_t m_highlight;
