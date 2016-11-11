@@ -244,22 +244,27 @@ bool Browser::allowsSearching()
 	return true;
 }
 
+const std::string &Browser::searchConstraint()
+{
+	return m_search_predicate.constraint();
+}
+
 void Browser::setSearchConstraint(const std::string &constraint)
 {
 	m_search_predicate = Regex::Filter<MPD::Item>(
-		Regex::make(constraint, Config.regex_type),
-		std::bind(browserEntryMatcher, ph::_1, ph::_2, false)
-	);
+		constraint,
+		Config.regex_type,
+		std::bind(browserEntryMatcher, ph::_1, ph::_2, false));
 }
 
-void Browser::clearConstraint()
+void Browser::clearSearchConstraint()
 {
 	m_search_predicate.clear();
 }
 
-bool Browser::find(SearchDirection direction, bool wrap, bool skip_current)
+bool Browser::search(SearchDirection direction, bool wrap, bool skip_current)
 {
-	return search(w, m_search_predicate, direction, wrap, skip_current);
+	return ::search(w, m_search_predicate, direction, wrap, skip_current);
 }
 
 /***********************************************************************/

@@ -80,12 +80,23 @@ struct Filter
 	typedef std::function<bool(const Regex &, const T &)> FilterFunction;
 
 	Filter() { }
-	Filter(Regex rx, FilterFunction filter)
-	: m_rx(std::move(rx)), m_filter(std::move(filter)) { }
+
+	template <typename FilterT>
+	Filter(const std::string &constraint,
+	       boost::regex_constants::syntax_option_type flags,
+	       FilterT &&filter)
+		: m_rx(make(constraint, flags))
+		, m_constraint(constraint)
+		, m_filter(std::forward<FilterT>(filter))
+	{ }
 
 	void clear()
 	{
 		m_filter = nullptr;
+	}
+
+	const std::string &constraint() const {
+		return m_constraint;
 	}
 
 	bool operator()(const Item &item) const {
@@ -100,6 +111,7 @@ struct Filter
 
 private:
 	Regex m_rx;
+	std::string m_constraint;
 	FilterFunction m_filter;
 };
 
@@ -110,12 +122,23 @@ template <typename T> struct ItemFilter
 	typedef std::function<bool(const Regex &, const Item &)> FilterFunction;
 	
 	ItemFilter() { }
-	ItemFilter(Regex rx, FilterFunction filter)
-	: m_rx(std::move(rx)), m_filter(std::move(filter)) { }
+
+	template <typename FilterT>
+	ItemFilter(const std::string &constraint,
+	           boost::regex_constants::syntax_option_type flags,
+	           FilterT &&filter)
+		: m_rx(make(constraint, flags))
+		, m_constraint(constraint)
+		, m_filter(std::forward<FilterT>(filter))
+	{ }
 	
 	void clear()
 	{
 		m_filter = nullptr;
+	}
+
+	const std::string &constraint() const {
+		return m_constraint;
 	}
 
 	bool operator()(const Item &item) {
@@ -129,6 +152,7 @@ template <typename T> struct ItemFilter
 
 private:
 	Regex m_rx;
+	std::string m_constraint;
 	FilterFunction m_filter;
 };
 

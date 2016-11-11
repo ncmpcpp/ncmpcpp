@@ -480,25 +480,34 @@ bool TagEditor::allowsSearching()
 	return w == Dirs || w == Tags;
 }
 
+const std::string &TagEditor::searchConstraint()
+{
+	if (w == Dirs)
+		return m_directories_search_predicate.constraint();
+	else if (w == Tags)
+		return m_songs_search_predicate.constraint();
+	throw std::runtime_error("shouldn't happen due to condition in allowsSearching");
+}
+
 void TagEditor::setSearchConstraint(const std::string &constraint)
 {
 	if (w == Dirs)
 	{
 		m_directories_search_predicate = Regex::Filter<std::pair<std::string, std::string>>(
-			Regex::make(constraint, Config.regex_type),
-			std::bind(DirEntryMatcher, ph::_1, ph::_2, false)
-		);
+			constraint,
+			Config.regex_type,
+			std::bind(DirEntryMatcher, ph::_1, ph::_2, false));
 	}
 	else if (w == Tags)
 	{
 		m_songs_search_predicate = Regex::Filter<MPD::MutableSong>(
-			Regex::make(constraint, Config.regex_type),
-			SongEntryMatcher
-		);
+			constraint,
+			Config.regex_type,
+			SongEntryMatcher);
 	}
 }
 
-void TagEditor::clearConstraint()
+void TagEditor::clearSearchConstraint()
 {
 	if (w == Dirs)
 		m_directories_search_predicate.clear();
@@ -506,13 +515,13 @@ void TagEditor::clearConstraint()
 		m_songs_search_predicate.clear();
 }
 
-bool TagEditor::find(SearchDirection direction, bool wrap, bool skip_current)
+bool TagEditor::search(SearchDirection direction, bool wrap, bool skip_current)
 {
 	bool result = false;
 	if (w == Dirs)
-		result = search(*Dirs, m_directories_search_predicate, direction, wrap, skip_current);
+		result = ::search(*Dirs, m_directories_search_predicate, direction, wrap, skip_current);
 	else if (w == Tags)
-		result = search(*Tags, m_songs_search_predicate, direction, wrap, skip_current);
+		result = ::search(*Tags, m_songs_search_predicate, direction, wrap, skip_current);
 	return result;
 }
 

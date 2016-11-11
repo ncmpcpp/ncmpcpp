@@ -153,21 +153,27 @@ bool Playlist::allowsSearching()
 	return true;
 }
 
+const std::string &Playlist::searchConstraint()
+{
+	return m_search_predicate.constraint();
+}
+
 void Playlist::setSearchConstraint(const std::string &constraint)
 {
 	m_search_predicate = Regex::Filter<MPD::Song>(
-		Regex::make(constraint, Config.regex_type), playlistEntryMatcher
-	);
+		constraint,
+		Config.regex_type,
+		playlistEntryMatcher);
 }
 
-void Playlist::clearConstraint()
+void Playlist::clearSearchConstraint()
 {
 	m_search_predicate.clear();
 }
 
-bool Playlist::find(SearchDirection direction, bool wrap, bool skip_current)
+bool Playlist::search(SearchDirection direction, bool wrap, bool skip_current)
 {
-	return search(w, m_search_predicate, direction, wrap, skip_current);
+	return ::search(w, m_search_predicate, direction, wrap, skip_current);
 }
 
 /***********************************************************************/

@@ -228,7 +228,7 @@ bool Statusbar::Helpers::FindImmediately::operator()(const char *s)
 		if (m_w->allowsSearching() && m_s != s)
 		{
 			m_w->setSearchConstraint(s);
-			m_found = m_w->find(m_direction, Config.wrapped_search, false);
+			m_found = m_w->search(m_direction, Config.wrapped_search, false);
 			if (myScreen == myPlaylist)
 				myPlaylist->enableHighlighting();
 			myScreen->refreshWindow();

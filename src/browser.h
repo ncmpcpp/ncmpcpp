@@ -63,9 +63,10 @@ struct Browser: Screen<BrowserWindow>, HasSongs, Searchable, Tabbable
 	
 	// Searchable implementation
 	virtual bool allowsSearching() OVERRIDE;
+	virtual const std::string &searchConstraint() OVERRIDE;
 	virtual void setSearchConstraint(const std::string &constraint) OVERRIDE;
-	virtual void clearConstraint() OVERRIDE;
-	virtual bool find(SearchDirection direction, bool wrap, bool skip_current) OVERRIDE;
+	virtual void clearSearchConstraint() OVERRIDE;
+	virtual bool search(SearchDirection direction, bool wrap, bool skip_current) OVERRIDE;
 	
 	// HasSongs implementation
 	virtual bool itemAvailable() OVERRIDE;

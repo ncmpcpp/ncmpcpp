@@ -1820,12 +1820,12 @@ void SelectFoundItems::run()
 {
 	auto current_pos = m_list->choice();
 	myScreen->activeWindow()->scroll(NC::Scroll::Home);
-	bool found = m_searchable->find(SearchDirection::Forward, false, false);
+	bool found = m_searchable->search(SearchDirection::Forward, false, false);
 	if (found)
 	{
 		Statusbar::print("Searching for items...");
 		m_list->currentP()->setSelected(true);
-		while (m_searchable->find(SearchDirection::Forward, false, true))
+		while (m_searchable->search(SearchDirection::Forward, false, true))
 			m_list->currentP()->setSelected(true);
 		Statusbar::print("Found items selected");
 	}
@@ -2006,7 +2006,7 @@ void NextFoundItem::run()
 {
 	Searchable *w = dynamic_cast<Searchable *>(myScreen);
 	assert(w != nullptr);
-	w->find(SearchDirection::Forward, Config.wrapped_search, true);
+	w->search(SearchDirection::Forward, Config.wrapped_search, true);
 	listsChangeFinisher();
 }
 
@@ -2019,7 +2019,7 @@ void PreviousFoundItem::run()
 {
 	Searchable *w = dynamic_cast<Searchable *>(myScreen);
 	assert(w != nullptr);
-	w->find(SearchDirection::Backward, Config.wrapped_search, true);
+	w->search(SearchDirection::Backward, Config.wrapped_search, true);
 	listsChangeFinisher();
 }
 
@@ -2959,7 +2959,7 @@ void findItem(const SearchDirection direction)
 			Statusbar::Helpers::FindImmediately(w, direction)
 		);
 		Statusbar::put() << (boost::format("Find %1%: ") % direction).str();
-		constraint = wFooter->prompt();
+		constraint = wFooter->prompt(w->searchConstraint());
 	}
 	
 	try
@@ -2967,7 +2967,7 @@ void findItem(const SearchDirection direction)
 		if (constraint.empty())
 		{
 			Statusbar::printf("Constraint unset");
-			w->clearConstraint();
+			w->clearSearchConstraint();
 		}
 		else
 		{

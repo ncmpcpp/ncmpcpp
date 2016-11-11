@@ -202,21 +202,27 @@ bool SelectedItemsAdder::allowsSearching()
 	return true;
 }
 
+const std::string &SelectedItemsAdder::searchConstraint()
+{
+	return m_search_predicate.constraint();
+}
+
 void SelectedItemsAdder::setSearchConstraint(const std::string &constraint)
 {
 	m_search_predicate = Regex::ItemFilter<Entry>(
-		Regex::make(constraint, Config.regex_type), EntryMatcher
-	);
+		constraint,
+		Config.regex_type,
+		EntryMatcher);
 }
 
-void SelectedItemsAdder::clearConstraint()
+void SelectedItemsAdder::clearSearchConstraint()
 {
 	m_search_predicate.clear();
 }
 
-bool SelectedItemsAdder::find(SearchDirection direction, bool wrap, bool skip_current)
+bool SelectedItemsAdder::search(SearchDirection direction, bool wrap, bool skip_current)
 {
-	return search(*w, m_search_predicate, direction, wrap, skip_current);
+	return ::search(*w, m_search_predicate, direction, wrap, skip_current);
 }
 
 /***********************************************************************/

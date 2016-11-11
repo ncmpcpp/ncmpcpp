@@ -54,7 +54,7 @@ Iterator wrappedSearch(Iterator begin, Iterator current, Iterator end,
 
 template <typename ItemT, typename PredicateT>
 bool search(NC::Menu<ItemT> &m, const PredicateT &pred,
-            SearchDirection direction, bool wrap, bool skip_current)
+                  SearchDirection direction, bool wrap, bool skip_current)
 {
 	bool result = false;
 	if (pred.defined())

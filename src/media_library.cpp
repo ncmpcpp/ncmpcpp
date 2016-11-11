@@ -538,32 +538,43 @@ bool MediaLibrary::allowsSearching()
 	return true;
 }
 
+const std::string &MediaLibrary::searchConstraint()
+{
+	if (isActiveWindow(Tags))
+		return m_tags_search_predicate.constraint();
+	else if (isActiveWindow(Albums))
+		return m_albums_search_predicate.constraint();
+	else if (isActiveWindow(Songs))
+		return m_songs_search_predicate.constraint();
+	throw std::runtime_error("no active window");
+}
+
 void MediaLibrary::setSearchConstraint(const std::string &constraint)
 {
 	if (isActiveWindow(Tags))
 	{
 		m_tags_search_predicate = Regex::Filter<PrimaryTag>(
-			Regex::make(constraint, Config.regex_type),
-			TagEntryMatcher
-		);
+			constraint,
+			Config.regex_type,
+			TagEntryMatcher);
 	}
 	else if (isActiveWindow(Albums))
 	{
 		m_albums_search_predicate = Regex::ItemFilter<AlbumEntry>(
-			Regex::make(constraint, Config.regex_type),
-			std::bind(AlbumEntryMatcher, ph::_1, ph::_2, false)
-		);
+			constraint,
+			Config.regex_type,
+			std::bind(AlbumEntryMatcher, ph::_1, ph::_2, false));
 	}
 	else if (isActiveWindow(Songs))
 	{
 		m_songs_search_predicate = Regex::Filter<MPD::Song>(
-			Regex::make(constraint, Config.regex_type),
-			SongEntryMatcher
-		);
+			constraint,
+			Config.regex_type,
+			SongEntryMatcher);
 	}
 }
 
-void MediaLibrary::clearConstraint()
+void MediaLibrary::clearSearchConstraint()
 {
 	if (isActiveWindow(Tags))
 		m_tags_search_predicate.clear();
@@ -573,15 +584,15 @@ void MediaLibrary::clearConstraint()
 		m_songs_search_predicate.clear();
 }
 
-bool MediaLibrary::find(SearchDirection direction, bool wrap, bool skip_current)
+bool MediaLibrary::search(SearchDirection direction, bool wrap, bool skip_current)
 {
 	bool result = false;
 	if (isActiveWindow(Tags))
-		result = search(Tags, m_tags_search_predicate, direction, wrap, skip_current);
+		result = ::search(Tags, m_tags_search_predicate, direction, wrap, skip_current);
 	else if (isActiveWindow(Albums))
-		result = search(Albums, m_albums_search_predicate, direction, wrap, skip_current);
+		result = ::search(Albums, m_albums_search_predicate, direction, wrap, skip_current);
 	else if (isActiveWindow(Songs))
-		result = search(Songs, m_songs_search_predicate, direction, wrap, skip_current);
+		result = ::search(Songs, m_songs_search_predicate, direction, wrap, skip_current);
 	return result;
 }
 

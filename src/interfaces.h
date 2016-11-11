@@ -32,9 +32,11 @@
 struct Searchable
 {
 	virtual bool allowsSearching() = 0;
+
+	virtual const std::string &searchConstraint() = 0;
 	virtual void setSearchConstraint(const std::string &constraint) = 0;
-	virtual void clearConstraint() = 0;
-	virtual bool find(SearchDirection direction, bool wrap, bool skip_current) = 0;
+	virtual void clearSearchConstraint() = 0;
+	virtual bool search(SearchDirection direction, bool wrap, bool skip_current) = 0;
 };
 
 struct HasActions

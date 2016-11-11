@@ -283,25 +283,34 @@ bool PlaylistEditor::allowsSearching()
 	return true;
 }
 
+const std::string &PlaylistEditor::searchConstraint()
+{
+	if (isActiveWindow(Playlists))
+		return m_playlists_search_predicate.constraint();
+	else if (isActiveWindow(Content))
+		return m_content_search_predicate.constraint();
+	throw std::runtime_error("no active window");
+}
+
 void PlaylistEditor::setSearchConstraint(const std::string &constraint)
 {
 	if (isActiveWindow(Playlists))
 	{
 		m_playlists_search_predicate = Regex::Filter<MPD::Playlist>(
-			Regex::make(constraint, Config.regex_type),
-			PlaylistEntryMatcher
-		);
+			constraint,
+			Config.regex_type,
+			PlaylistEntryMatcher);
 	}
 	else if (isActiveWindow(Content))
 	{
 		m_content_search_predicate = Regex::Filter<MPD::Song>(
-			Regex::make(constraint, Config.regex_type),
-			SongEntryMatcher
-		);
+			constraint,
+			Config.regex_type,
+			SongEntryMatcher);
 	}
 }
 
-void PlaylistEditor::clearConstraint()
+void PlaylistEditor::clearSearchConstraint()
 {
 	if (isActiveWindow(Playlists))
 		m_playlists_search_predicate.clear();
@@ -309,13 +318,13 @@ void PlaylistEditor::clearConstraint()
 		m_content_search_predicate.clear();
 }
 
-bool PlaylistEditor::find(SearchDirection direction, bool wrap, bool skip_current)
+bool PlaylistEditor::search(SearchDirection direction, bool wrap, bool skip_current)
 {
 	bool result = false;
 	if (isActiveWindow(Playlists))
-		result = search(Playlists, m_playlists_search_predicate, direction, wrap, skip_current);
+		result = ::search(Playlists, m_playlists_search_predicate, direction, wrap, skip_current);
 	else if (isActiveWindow(Content))
-		result = search(Content, m_content_search_predicate, direction, wrap, skip_current);
+		result = ::search(Content, m_content_search_predicate, direction, wrap, skip_current);
 	return result;
 }
 

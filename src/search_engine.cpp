@@ -246,22 +246,27 @@ bool SearchEngine::allowsSearching()
 	return w.rbegin()->value().isSong();
 }
 
+const std::string &SearchEngine::searchConstraint()
+{
+	return m_search_predicate.constraint();
+}
+
 void SearchEngine::setSearchConstraint(const std::string &constraint)
 {
 	m_search_predicate = Regex::ItemFilter<SEItem>(
-		Regex::make(constraint, Config.regex_type),
-		std::bind(SEItemEntryMatcher, ph::_1, ph::_2, false)
-	);
+		constraint,
+		Config.regex_type,
+		std::bind(SEItemEntryMatcher, ph::_1, ph::_2, false));
 }
 
-void SearchEngine::clearConstraint()
+void SearchEngine::clearSearchConstraint()
 {
 	m_search_predicate.clear();
 }
 
-bool SearchEngine::find(SearchDirection direction, bool wrap, bool skip_current)
+bool SearchEngine::search(SearchDirection direction, bool wrap, bool skip_current)
 {
-	return search(w, m_search_predicate, direction, wrap, skip_current);
+	return ::search(w, m_search_predicate, direction, wrap, skip_current);
 }
 
 /***********************************************************************/
