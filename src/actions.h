@@ -1044,6 +1044,8 @@ struct ApplyFilter: public BaseAction
 private:
 	virtual bool canBeRun() OVERRIDE;
 	virtual void run() OVERRIDE;
+
+	Searchable *m_searchable;
 };
 
 struct Find: BaseAction

@@ -176,6 +176,27 @@ bool Playlist::search(SearchDirection direction, bool wrap, bool skip_current)
 	return ::search(w, m_search_predicate, direction, wrap, skip_current);
 }
 
+std::string Playlist::currentFilter()
+{
+	std::string result;
+	if (auto pred = w.filterPredicate<Regex::Filter<MPD::Song>>())
+		result = pred->constraint();
+	return result;
+}
+
+void Playlist::applyFilter(const std::string &constraint)
+{
+	if (!constraint.empty())
+	{
+		w.applyFilter(Regex::Filter<MPD::Song>(
+			              constraint,
+			              Config.regex_type,
+			              playlistEntryMatcher));
+	}
+	else
+		w.clearFilter();
+}
+
 /***********************************************************************/
 
 bool Playlist::itemAvailable()
@@ -202,11 +223,30 @@ MPD::Song Playlist::nowPlayingSong()
 	MPD::Song s;
 	if (Status::State::player() != MPD::psUnknown)
 	{
+		ScopedUnfilteredMenu<MPD::Song, ReapplyFilter::No> sunfilter(w);
 		auto sp = Status::State::currentSongPosition();
 		if (sp >= 0 && size_t(sp) < w.size())
 			s = w.at(sp).value();
 	}
 	return s;
+}
+
+void Playlist::moveToSong(const MPD::Song &s)
+{
+	if (!w.isFiltered())
+		w.highlight(s.getPosition());
+	else
+	{
+		auto cmp = [](const MPD::Song &a, const MPD::Song &b) {
+			return a.getPosition() < b.getPosition();
+		};
+		auto first = w.beginV(), last = w.endV();
+		auto it = std::lower_bound(first, last, s, cmp);
+		if (it != last && it->getPosition() == s.getPosition())
+			w.highlight(it - first);
+		else
+			Statusbar::print("Song is filtered out");
+	}
 }
 
 void Playlist::enableHighlighting()
@@ -228,6 +268,7 @@ std::string Playlist::getTotalLength()
 	}
 	if (Config.playlist_show_remaining_time && m_reload_remaining)
 	{
+		ScopedUnfilteredMenu<MPD::Song, ReapplyFilter::No> sunfilter(w);
 		m_remaining_time = 0;
 		for (size_t i = Status::State::currentSongPosition(); i < w.size(); ++i)
 			m_remaining_time += w[i].value().getDuration();
@@ -235,6 +276,12 @@ std::string Playlist::getTotalLength()
 	}
 	
 	result << '(' << w.size() << (w.size() == 1 ? " item" : " items");
+
+	if (w.isFiltered())
+	{
+		ScopedUnfilteredMenu<MPD::Song, ReapplyFilter::No> sunfilter(w);
+		result << " (out of " << w.size() << ")";
+	}
 	
 	if (m_total_length)
 	{
@@ -243,7 +290,7 @@ std::string Playlist::getTotalLength()
 	}
 	if (Config.playlist_show_remaining_time && m_remaining_time && w.size() > 1)
 	{
-		result << " :: remaining: ";
+		result << ", remaining: ";
 		ShowTime(result, m_remaining_time, Config.playlist_shorten_total_times);
 	}
 	result << ')';

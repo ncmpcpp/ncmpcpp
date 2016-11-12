@@ -880,7 +880,12 @@ void MoveSelectedItemsUp::run()
 {
 	if (myScreen == myPlaylist)
 	{
-		moveSelectedItemsUp(myPlaylist->main(), std::bind(&MPD::Connection::Move, ph::_1, ph::_2, ph::_3));
+		if (myPlaylist->main().isFiltered())
+			Statusbar::print("Moving items up is disabled in filtered playlist");
+		else
+			moveSelectedItemsUp(
+				myPlaylist->main(),
+				std::bind(&MPD::Connection::Move, ph::_1, ph::_2, ph::_3));
 	}
 	else if (myScreen == myPlaylistEditor)
 	{
@@ -903,7 +908,12 @@ void MoveSelectedItemsDown::run()
 {
 	if (myScreen == myPlaylist)
 	{
-		moveSelectedItemsDown(myPlaylist->main(), std::bind(&MPD::Connection::Move, ph::_1, ph::_2, ph::_3));
+		if (myPlaylist->main().isFiltered())
+			Statusbar::print("Moving items down is disabled in filtered playlist");
+		else
+			moveSelectedItemsDown(
+				myPlaylist->main(),
+				std::bind(&MPD::Connection::Move, ph::_1, ph::_2, ph::_3));
 	}
 	else if (myScreen == myPlaylistEditor)
 	{
@@ -1157,7 +1167,7 @@ void TogglePlayingSongCentering::run()
 	{
 		auto s = myPlaylist->nowPlayingSong();
 		if (!s.empty())
-			myPlaylist->main().highlight(s.getPosition());
+			myPlaylist->moveToSong(s);
 	}
 }
 
@@ -1187,7 +1197,7 @@ void JumpToPlayingSong::run()
 		return;
 	if (myScreen == myPlaylist)
 	{
-		myPlaylist->main().highlight(s.getPosition());
+		myPlaylist->moveToSong(s);
 	}
 	else if (myScreen == myBrowser)
 	{
@@ -1936,11 +1946,47 @@ void ReversePlaylist::run()
 
 bool ApplyFilter::canBeRun()
 {
-	return false;
+	m_searchable = dynamic_cast<Searchable *>(myScreen);
+	return m_searchable != nullptr
+		&& myScreen == myPlaylist;
 }
 
 void ApplyFilter::run()
-{ }
+{
+	using Global::wFooter;
+
+	std::string filter = m_searchable->currentFilter();
+	if (!filter.empty())
+	{
+		m_searchable->applyFilter(filter);
+		myScreen->refreshWindow();
+	}
+
+	try
+	{
+		Statusbar::ScopedLock slock;
+		NC::Window::ScopedPromptHook helper(
+			*wFooter,
+			Statusbar::Helpers::ApplyFilterImmediately(m_searchable));
+		Statusbar::put() << "Apply filter: ";
+		filter = wFooter->prompt(filter);
+	}
+	catch (NC::PromptAborted &)
+	{
+		m_searchable->applyFilter(filter);
+		throw;
+	}
+
+	if (filter.empty())
+		Statusbar::printf("Filtering disabled");
+	else
+		Statusbar::printf("Using filter \"%1%\"", filter);
+
+	if (myScreen == myPlaylist)
+		myPlaylist->reloadTotalLength();
+
+	listsChangeFinisher();
+}
 
 bool Find::canBeRun()
 {
@@ -2952,33 +2998,30 @@ void findItem(const SearchDirection direction)
 	assert(w != nullptr);
 	assert(w->allowsSearching());
 	
-	std::string constraint;
-	{
-		Statusbar::ScopedLock slock;
-		NC::Window::ScopedPromptHook prompt_hook(*wFooter,
-			Statusbar::Helpers::FindImmediately(w, direction)
-		);
-		Statusbar::put() << (boost::format("Find %1%: ") % direction).str();
-		constraint = wFooter->prompt(w->searchConstraint());
-	}
-	
+	std::string constraint = w->searchConstraint();
 	try
 	{
-		if (constraint.empty())
-		{
-			Statusbar::printf("Constraint unset");
-			w->clearSearchConstraint();
-		}
-		else
-		{
-			w->setSearchConstraint(constraint);
-			Statusbar::printf("Using constraint \"%1%\"", constraint);
-		}
+		Statusbar::ScopedLock slock;
+		NC::Window::ScopedPromptHook prompt_hook(
+			*wFooter,
+			Statusbar::Helpers::FindImmediately(w, direction));
+		Statusbar::put() << (boost::format("Find %1%: ") % direction).str();
+		constraint = wFooter->prompt(constraint);
 	}
-	catch (boost::bad_expression &e)
+	catch (NC::PromptAborted &)
 	{
-		Statusbar::printf("%1%", e.what());
+		w->setSearchConstraint(constraint);
+		w->search(direction, Config.wrapped_search, false);
+		throw;
 	}
+
+	if (constraint.empty())
+	{
+		Statusbar::printf("Constraint unset");
+		w->clearSearchConstraint();
+	}
+	else
+		Statusbar::printf("Using constraint \"%1%\"", constraint);
 }
 
 void listsChangeFinisher()

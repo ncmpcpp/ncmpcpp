@@ -31,6 +31,40 @@
 #include "utility/type_conversions.h"
 #include "utility/wide_string.h"
 
+enum ReapplyFilter { Yes, No };
+
+template <typename ItemT, ReapplyFilter reapplyFilter>
+struct ScopedUnfilteredMenu
+{
+	ScopedUnfilteredMenu(NC::Menu<ItemT> &menu)
+		: m_menu(menu)
+	{
+		m_is_filtered = m_menu.isFiltered();
+		if (m_is_filtered)
+			m_menu.showAllItems();
+	}
+
+	~ScopedUnfilteredMenu()
+	{
+		if (m_is_filtered)
+		{
+			switch (reapplyFilter)
+			{
+			case ReapplyFilter::Yes:
+				m_menu.reapplyFilter();
+				break;
+			case ReapplyFilter::No:
+				m_menu.showFilteredItems();
+				break;
+			}
+		}
+	}
+
+private:
+	bool m_is_filtered;
+	NC::Menu<ItemT> &m_menu;
+};
+
 template <typename Iterator, typename PredicateT>
 Iterator wrappedSearch(Iterator begin, Iterator current, Iterator end,
                        const PredicateT &pred, bool wrap, bool skip_current)

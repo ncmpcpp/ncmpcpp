@@ -220,19 +220,34 @@ bool Statusbar::Helpers::ImmediatelyReturnOneOf::operator()(const char *s) const
 	return !isOneOf(s);
 }
 
+bool Statusbar::Helpers::ApplyFilterImmediately::operator()(const char *s)
+{
+	using Global::myScreen;
+	Status::trace();
+	try {
+		if (m_w->allowsSearching() && m_w->currentFilter() != s)
+		{
+			m_w->applyFilter(s);
+			if (myScreen == myPlaylist)
+				myPlaylist->enableHighlighting();
+			myScreen->refreshWindow();
+		}
+	} catch (boost::bad_expression &) { }
+	return true;
+}
+
 bool Statusbar::Helpers::FindImmediately::operator()(const char *s)
 {
 	using Global::myScreen;
 	Status::trace();
 	try {
-		if (m_w->allowsSearching() && m_s != s)
+		if (m_w->allowsSearching() && m_w->searchConstraint() != s)
 		{
 			m_w->setSearchConstraint(s);
-			m_found = m_w->search(m_direction, Config.wrapped_search, false);
+			m_w->search(m_direction, Config.wrapped_search, false);
 			if (myScreen == myPlaylist)
 				myPlaylist->enableHighlighting();
 			myScreen->refreshWindow();
-			m_s = s;
 		}
 	} catch (boost::bad_expression &) { }
 	return true;

@@ -96,7 +96,7 @@ struct Song
 	{
 		return !(operator==(rhs));
 	}
-	
+
 	const char *c_uri() const { return m_song ? mpd_song_get_uri(m_song.get()) : ""; }
 
 	static std::string ShowTime(unsigned length);

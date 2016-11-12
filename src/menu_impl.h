@@ -40,7 +40,8 @@ Menu<ItemT>::Menu(size_t startx,
                   Color color,
                   Border border)
 	: Window(startx, starty, width, height, title, std::move(color), border)
-	, m_item_displayer(0)
+	, m_item_displayer(nullptr)
+	, m_filter_predicate(nullptr)
 	, m_beginning(0)
 	, m_highlight(0)
 	, m_highlight_color(m_base_color)
@@ -55,6 +56,7 @@ template <typename ItemT>
 Menu<ItemT>::Menu(const Menu &rhs)
 	: Window(rhs)
 	, m_item_displayer(rhs.m_item_displayer)
+	, m_filter_predicate(rhs.m_filter_predicate)
 	, m_beginning(rhs.m_beginning)
 	, m_highlight(rhs.m_highlight)
 	, m_highlight_color(rhs.m_highlight_color)
@@ -75,7 +77,8 @@ Menu<ItemT>::Menu(const Menu &rhs)
 template <typename ItemT>
 Menu<ItemT>::Menu(Menu &&rhs)
 	: Window(rhs)
-	, m_item_displayer(rhs.m_item_displayer)
+	, m_item_displayer(std::move(rhs.m_item_displayer))
+	, m_filter_predicate(std::move(rhs.m_filter_predicate))
 	, m_all_items(std::move(rhs.m_all_items))
 	, m_filtered_items(std::move(rhs.m_filtered_items))
 	, m_beginning(rhs.m_beginning)
@@ -99,6 +102,7 @@ Menu<ItemT> &Menu<ItemT>::operator=(Menu rhs)
 {
 	std::swap(static_cast<Window &>(*this), static_cast<Window &>(rhs));
 	std::swap(m_item_displayer, rhs.m_item_displayer);
+	std::swap(m_filter_predicate, rhs.m_filter_predicate);
 	std::swap(m_all_items, rhs.m_all_items);
 	std::swap(m_filtered_items, rhs.m_filtered_items);
 	std::swap(m_beginning, rhs.m_beginning);
@@ -115,6 +119,12 @@ Menu<ItemT> &Menu<ItemT>::operator=(Menu rhs)
 	else
 		m_items = &m_filtered_items;
 	return *this;
+}
+
+template <typename ItemT> template <typename ItemDisplayerT>
+void Menu<ItemT>::setItemDisplayer(ItemDisplayerT &&displayer)
+{
+	m_item_displayer = std::forward<ItemDisplayerT>(displayer);
 }
 
 template <typename ItemT>
@@ -326,9 +336,8 @@ void Menu<ItemT>::reset()
 template <typename ItemT>
 void Menu<ItemT>::clear()
 {
-	m_all_items.clear();
-	m_filtered_items.clear();
-	m_items = &m_all_items;
+	clearFilter();
+	m_items->clear();
 }
 
 template <typename ItemT>
@@ -350,20 +359,35 @@ size_t Menu<ItemT>::choice() const
 	return m_highlight;
 }
 
-template <typename ItemT> template <typename FilterPredicate>
-bool Menu<ItemT>::applyFilter(FilterPredicate &&p)
+template <typename ItemT> template <typename PredicateT>
+void Menu<ItemT>::applyFilter(PredicateT &&pred)
 {
+	m_filter_predicate = std::forward<PredicateT>(pred);
 	m_filtered_items.clear();
+
 	for (const auto &item : m_all_items)
-		if (p(item))
+		if (m_filter_predicate(item))
 			m_filtered_items.push_back(item);
+
 	m_items = &m_filtered_items;
-	return !m_filtered_items.empty();
+}
+
+template <typename ItemT>
+void Menu<ItemT>::reapplyFilter()
+{
+	applyFilter(m_filter_predicate);
+}
+
+template <typename ItemT> template <typename TargetT>
+const TargetT *Menu<ItemT>::filterPredicate() const
+{
+	return m_filter_predicate.template target<TargetT>();
 }
 
 template <typename ItemT>
 void Menu<ItemT>::clearFilter()
 {
+	m_filter_predicate = nullptr;
 	m_filtered_items.clear();
 	m_items = &m_all_items;
 }

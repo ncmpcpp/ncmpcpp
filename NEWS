@@ -1,6 +1,7 @@
 ncmpcpp-0.8 (????-??-??)
 * Configuration variable 'execute_on_player_state_change' was added.
 * Support for controlling whether ncmpcpp should display multiple tags as-is or make an effort to hide duplicate values (show_duplicate_tags configuration variable, enabled by default).
+* Support for filtering of lists was brought back from the dead.
 
 ncmpcpp-0.7.7 (2016-10-31)
 * Fixed compilation on 32bit platforms.

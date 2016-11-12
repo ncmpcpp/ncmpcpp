@@ -408,29 +408,33 @@ int Status::State::volume()
 
 void Status::Changes::playlist(unsigned previous_version)
 {
-	if (m_playlist_length < myPlaylist->main().size())
 	{
-		auto it = myPlaylist->main().begin()+m_playlist_length;
-		auto end = myPlaylist->main().end();
-		for (; it != end; ++it)
-			myPlaylist->unregisterSong(it->value());
-		myPlaylist->main().resizeList(m_playlist_length);
-	}
+		ScopedUnfilteredMenu<MPD::Song, ReapplyFilter::Yes> sunfilter(myPlaylist->main());
 
-	MPD::SongIterator s = Mpd.GetPlaylistChanges(previous_version), end;
-	for (; s != end; ++s)
-	{
-		size_t pos = s->getPosition();
-		myPlaylist->registerSong(*s);
-		if (pos < myPlaylist->main().size())
+		if (m_playlist_length < myPlaylist->main().size())
 		{
-			// if song's already in playlist, replace it with a new one
-			MPD::Song &old_s = myPlaylist->main()[pos].value();
-			myPlaylist->unregisterSong(old_s);
-			old_s = std::move(*s);
+			auto it = myPlaylist->main().begin()+m_playlist_length;
+			auto end = myPlaylist->main().end();
+			for (; it != end; ++it)
+				myPlaylist->unregisterSong(it->value());
+			myPlaylist->main().resizeList(m_playlist_length);
 		}
-		else // otherwise just add it to playlist
-			myPlaylist->main().addItem(std::move(*s));
+
+		MPD::SongIterator s = Mpd.GetPlaylistChanges(previous_version), end;
+		for (; s != end; ++s)
+		{
+			size_t pos = s->getPosition();
+			myPlaylist->registerSong(*s);
+			if (pos < myPlaylist->main().size())
+			{
+				// if song's already in playlist, replace it with a new one
+				MPD::Song &old_s = myPlaylist->main()[pos].value();
+				myPlaylist->unregisterSong(old_s);
+				old_s = std::move(*s);
+			}
+			else // otherwise just add it to playlist
+				myPlaylist->main().addItem(std::move(*s));
+		}
 	}
 
 	myPlaylist->reloadTotalLength();
@@ -576,7 +580,7 @@ void Status::Changes::songID(int song_id)
 			drawTitle(s);
 
 			if (Config.autocenter_mode)
-				pl.highlight(Status::State::currentSongPosition());
+				myPlaylist->moveToSong(s);
 
 			if (Config.now_playing_lyrics && isVisible(myLyrics) && myLyrics->previousScreen() == myPlaylist)
 			{

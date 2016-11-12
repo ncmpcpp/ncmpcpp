@@ -101,9 +101,10 @@ void setProperties(NC::Menu<T> &menu, const MPD::Song &s, const SongList &list,
 	is_selected = menu.drawn()->isSelected();
 	discard_colors = Config.discard_colors_if_item_is_selected && is_selected;
 
-	int song_pos = drawn_pos;
-	is_now_playing = Status::State::player() != MPD::psStop && myPlaylist->isActiveWindow(menu)
-	              && song_pos == Status::State::currentSongPosition();
+	int song_pos = s.getPosition();
+	is_now_playing = Status::State::player() != MPD::psStop
+		&& myPlaylist->isActiveWindow(menu)
+		&& song_pos == Status::State::currentSongPosition();
 	if (is_now_playing)
 		menu << Config.now_playing_prefix;
 }

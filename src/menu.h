@@ -21,7 +21,6 @@
 #ifndef NCMPCPP_MENU_H
 #define NCMPCPP_MENU_H
 
-#include <boost/iterator/indirect_iterator.hpp>
 #include <boost/iterator/transform_iterator.hpp>
 #include <boost/range/detail/any_iterator.hpp>
 #include <cassert>
@@ -96,9 +95,6 @@ struct List
 		bool isInactive() const { return m_properties & Inactive; }
 		bool isSeparator() const { return m_properties & Separator; }
 
-	protected:
-		unsigned properties() const { return m_properties; }
-
 	private:
 		unsigned m_properties;
 	};
@@ -154,51 +150,93 @@ inline List::ConstIterator begin(const List &list) { return list.beginP(); }
 inline List::Iterator end(List &list) { return list.endP(); }
 inline List::ConstIterator end(const List &list) { return list.endP(); }
 
-/// This template class is generic menu capable of
-/// holding any std::vector compatible values.
-template <typename ItemT> struct Menu : Window, List
+/// Generic menu capable of holding any std::vector compatible values.
+template <typename ItemT>
+struct Menu: Window, List
 {
-	struct Item : List::Properties
+	struct Item
 	{
-		template <bool Const>
-		struct PropertiesExtractor
-		{
-			typedef PropertiesExtractor type;
-
-			typedef typename std::conditional<Const, const Properties, Properties>::type Properties_;
-			typedef typename std::conditional<Const, const Item, Item>::type Item_;
-
-			Properties_ &operator()(Item_ &i) const {
-				return static_cast<Properties_ &>(i);
-			}
-		};
+		friend struct Menu<ItemT>;
 
 		typedef ItemT Type;
-		
-		friend struct Menu<ItemT>;
-		
+
 		Item()
-			: m_value(std::make_shared<ItemT>(ItemT()))
+			: m_impl(std::make_shared<std::tuple<ItemT, Properties>>())
 		{ }
 
-		template <typename ValueT>
-		Item(ValueT &&value_, Properties::Type properties)
-		: Properties(properties)
-		, m_value(std::make_shared<ItemT>(std::forward<ValueT>(value_)))
+		template <typename ValueT, typename PropertiesT>
+		Item(ValueT &&value_, PropertiesT properties_)
+			: m_impl(
+				std::make_shared<std::tuple<ItemT, List::Properties>>(
+					std::forward<ValueT>(value_),
+					std::forward<PropertiesT>(properties_)))
 		{ }
-		
-		ItemT &value() { return *m_value; }
-		const ItemT &value() const { return *m_value; }
-		
-		ItemT &operator*() { return *m_value; }
-		const ItemT &operator*() const { return *m_value; }
+
+		ItemT &value() { return std::get<0>(*m_impl); }
+		const ItemT &value() const { return std::get<0>(*m_impl); }
+
+		Properties &properties() { return std::get<1>(*m_impl); }
+		const Properties &properties() const { return std::get<1>(*m_impl); }
+
+		// Forward methods to List::Properties.
+		void setBold (bool is_bold) { properties().setBold(is_bold); }
+		void setSelectable(bool is_selectable) { properties().setSelectable(is_selectable); }
+		void setSelected (bool is_selected) { properties().setSelected(is_selected); }
+		void setInactive (bool is_inactive) { properties().setInactive(is_inactive); }
+		void setSeparator (bool is_separator) { properties().setSeparator(is_separator); }
+
+		bool isBold() const { return properties().isBold(); }
+		bool isSelectable() const { return properties().isSelectable(); }
+		bool isSelected() const { return properties().isSelected(); }
+		bool isInactive() const { return properties().isInactive(); }
+		bool isSeparator() const { return properties().isSeparator(); }
 
 		// Make a deep copy of Item.
 		Item copy() const {
-			return Item(*m_value, static_cast<Properties::Type>(properties()));
+			return Item(value(), properties());
 		}
 
 	private:
+		enum class Const { Yes, No };
+
+		template <Const const_>
+		struct ExtractProperties
+		{
+			typedef ExtractProperties type;
+
+			typedef typename std::conditional<
+				const_ == Const::Yes,
+				const Properties,
+				Properties>::type Properties_;
+			typedef typename std::conditional<
+				const_ == Const::Yes,
+				const Item,
+				Item>::type Item_;
+
+			Properties_ &operator()(Item_ &i) const {
+				return i.properties();
+			}
+		};
+
+		template <Const const_>
+		struct ExtractValue
+		{
+			typedef ExtractValue type;
+
+			typedef typename std::conditional<
+				const_ == Const::Yes,
+				const ItemT,
+				ItemT>::type Value_;
+			typedef typename std::conditional<
+				const_ == Const::Yes,
+				const Item,
+				Item>::type Item_;
+
+			Value_ &operator()(Item_ &i) const {
+				return i.value();
+			}
+		};
+
 		static Item mkSeparator()
 		{
 			Item item;
@@ -207,7 +245,7 @@ template <typename ItemT> struct Menu : Window, List
 			return item;
 		}
 		
-		std::shared_ptr<ItemT> m_value;
+		std::shared_ptr<std::tuple<ItemT, Properties>> m_impl;
 	};
 
 	typedef typename std::vector<Item>::iterator Iterator;
@@ -215,33 +253,29 @@ template <typename ItemT> struct Menu : Window, List
 	typedef std::reverse_iterator<Iterator> ReverseIterator;
 	typedef std::reverse_iterator<ConstIterator> ConstReverseIterator;
 	
-	typedef boost::indirect_iterator<
-		Iterator,
-		ItemT,
-		boost::random_access_traversal_tag
-	> ValueIterator;
-	typedef boost::indirect_iterator<
-		ConstIterator,
-		const ItemT,
-		boost::random_access_traversal_tag
-	> ConstValueIterator;
+	typedef boost::transform_iterator<
+		typename Item::template ExtractValue<Item::Const::No>,
+		Iterator> ValueIterator;
+	typedef boost::transform_iterator<
+		typename Item::template ExtractValue<Item::Const::Yes>,
+		ConstIterator> ConstValueIterator;
 	typedef std::reverse_iterator<ValueIterator> ReverseValueIterator;
 	typedef std::reverse_iterator<ConstValueIterator> ConstReverseValueIterator;
 	
 	typedef boost::transform_iterator<
-		typename Item::template PropertiesExtractor<false>,
-		Iterator
-	> PropertiesIterator;
+		typename Item::template ExtractProperties<Item::Const::No>,
+		Iterator> PropertiesIterator;
 	typedef boost::transform_iterator<
-		typename Item::template PropertiesExtractor<true>,
-		ConstIterator
-	> ConstPropertiesIterator;
+		typename Item::template ExtractProperties<Item::Const::Yes>,
+		ConstIterator> ConstPropertiesIterator;
 
 	/// Function helper prototype used to display each option on the screen.
 	/// If not set by setItemDisplayer(), menu won't display anything.
 	/// @see setItemDisplayer()
 	typedef std::function<void(Menu<ItemT> &)> ItemDisplayer;
-	
+
+	typedef std::function<bool(const Item &)> FilterPredicate;
+
 	Menu();
 	
 	Menu(size_t startx, size_t starty, size_t width, size_t height,
@@ -253,7 +287,8 @@ template <typename ItemT> struct Menu : Window, List
 	
 	/// Sets helper function that is responsible for displaying items
 	/// @param ptr function pointer that matches the ItemDisplayer prototype
-	void setItemDisplayer(const ItemDisplayer &f) { m_item_displayer = f; }
+	template <typename ItemDisplayerT>
+	void setItemDisplayer(ItemDisplayerT &&displayer);
 	
 	/// Resizes the list to given size (adequate to std::vector::resize())
 	/// @param size requested size
@@ -309,8 +344,15 @@ template <typename ItemT> struct Menu : Window, List
 
 	/// Apply filter predicate to items in the menu and show the ones for which it
 	/// returned true.
-	template <typename FilterPredicate>
-	bool applyFilter(FilterPredicate &&p);
+	template <typename PredicateT>
+	void applyFilter(PredicateT &&pred);
+
+	/// Reapply previously applied filter.
+	void reapplyFilter();
+
+	/// Get current filter predicate.
+	template <typename TargetT>
+	const TargetT *filterPredicate() const;
 
 	/// Clear results of applyFilter and show all items.
 	void clearFilter();
@@ -451,9 +493,10 @@ private:
 		return !(*m_items)[pos].isSeparator()
 			&& !(*m_items)[pos].isInactive();
 	}
-	
+
 	ItemDisplayer m_item_displayer;
-	
+	FilterPredicate m_filter_predicate;
+
 	std::vector<Item> *m_items;
 	std::vector<Item> m_all_items;
 	std::vector<Item> m_filtered_items;
