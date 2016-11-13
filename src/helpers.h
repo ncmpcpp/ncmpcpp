@@ -290,18 +290,18 @@ void moveSelectedItemsDown(NC::Menu<MPD::Song> &m, F swap_fun)
 }
 
 template <typename F>
-void moveSelectedItemsTo(NC::Menu<MPD::Song> &m, F move_fun)
+void moveSelectedItemsTo(NC::Menu<MPD::Song> &menu, F &&move_fun)
 {
-	// FIXME: make it not look like shit
-	auto cur_ptr = &m.current()->value();
+	auto cur_ptr = &menu.current()->value();
+	ScopedUnfilteredMenu<MPD::Song> sunfilter(ReapplyFilter::No, menu);
 	// this is kinda shitty, but there is no other way to know
 	// what position current item has in unfiltered menu.
 	ptrdiff_t pos = 0;
-	for (auto it = m.begin(); it != m.end(); ++it, ++pos)
+	for (auto it = menu.begin(); it != menu.end(); ++it, ++pos)
 		if (&it->value() == cur_ptr)
 			break;
-	auto begin = m.begin();
-	auto list = getSelected(m.begin(), m.end());
+	auto begin = menu.begin();
+	auto list = getSelected(menu.begin(), menu.end());
 	// we move only truly selected items
 	if (list.empty())
 		return;
@@ -322,7 +322,7 @@ void moveSelectedItemsTo(NC::Menu<MPD::Song> &m, F move_fun)
 		for (auto it = list.rbegin(); it != list.rend(); ++it, --i)
 		{
 			(*it)->setSelected(false);
-			m[pos+i].setSelected(true);
+			menu[pos+i].setSelected(true);
 		}
 	}
 	else if (diff < 0) // move up
@@ -335,7 +335,7 @@ void moveSelectedItemsTo(NC::Menu<MPD::Song> &m, F move_fun)
 		for (auto it = list.begin(); it != list.end(); ++it, ++i)
 		{
 			(*it)->setSelected(false);
-			m[pos+i].setSelected(true);
+			menu[pos+i].setSelected(true);
 		}
 	}
 }
