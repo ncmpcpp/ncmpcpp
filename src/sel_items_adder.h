@@ -35,30 +35,30 @@ struct SelectedItemsAdder: Screen<NC::Menu<RunnableItem<std::string, void()>> *>
 	
 	SelectedItemsAdder();
 	
-	virtual void switchTo() OVERRIDE;
-	virtual void resize() OVERRIDE;
-	virtual void refresh() OVERRIDE;
+	virtual void switchTo() override;
+	virtual void resize() override;
+	virtual void refresh() override;
 	
-	virtual std::wstring title() OVERRIDE;
-	virtual ScreenType type() OVERRIDE { return ScreenType::SelectedItemsAdder; }
+	virtual std::wstring title() override;
+	virtual ScreenType type() override { return ScreenType::SelectedItemsAdder; }
 	
-	virtual void update() OVERRIDE { }
+	virtual void update() override { }
 	
-	virtual void mouseButtonPressed(MEVENT me) OVERRIDE;
+	virtual void mouseButtonPressed(MEVENT me) override;
 	
-	virtual bool isLockable() OVERRIDE { return false; }
-	virtual bool isMergable() OVERRIDE { return false; }
+	virtual bool isLockable() override { return false; }
+	virtual bool isMergable() override { return false; }
 
 	// HasActions implementation
-	virtual bool actionRunnable() OVERRIDE;
-	virtual void runAction() OVERRIDE;
+	virtual bool actionRunnable() override;
+	virtual void runAction() override;
 
 	// Searchable implementation
-	virtual bool allowsSearching() OVERRIDE;
-	virtual const std::string &searchConstraint() OVERRIDE;
-	virtual void setSearchConstraint(const std::string &constraint) OVERRIDE;
-	virtual void clearSearchConstraint() OVERRIDE;
-	virtual bool search(SearchDirection direction, bool wrap, bool skip_current) OVERRIDE;
+	virtual bool allowsSearching() override;
+	virtual const std::string &searchConstraint() override;
+	virtual void setSearchConstraint(const std::string &constraint) override;
+	virtual void clearSearchConstraint() override;
+	virtual bool search(SearchDirection direction, bool wrap, bool skip_current) override;
 
 private:
 	void populatePlaylistSelector(BaseScreen *screen);

@@ -48,14 +48,14 @@ protected:
 
 struct LyricwikiFetcher : public LyricsFetcher
 {
-	virtual const char *name() const OVERRIDE { return "lyricwiki.com"; }
-	virtual Result fetch(const std::string &artist, const std::string &title) OVERRIDE;
+	virtual const char *name() const override { return "lyricwiki.com"; }
+	virtual Result fetch(const std::string &artist, const std::string &title) override;
 	
 protected:
-	virtual const char *urlTemplate() const OVERRIDE { return "http://lyrics.wikia.com/api.php?action=lyrics&fmt=xml&func=getSong&artist=%artist%&song=%title%"; }
-	virtual const char *regex() const OVERRIDE { return "<url>(.*?)</url>"; }
+	virtual const char *urlTemplate() const override { return "http://lyrics.wikia.com/api.php?action=lyrics&fmt=xml&func=getSong&artist=%artist%&song=%title%"; }
+	virtual const char *regex() const override { return "<url>(.*?)</url>"; }
 	
-	virtual bool notLyrics(const std::string &data) const OVERRIDE;
+	virtual bool notLyrics(const std::string &data) const override;
 };
 
 /**********************************************************************/
@@ -76,56 +76,56 @@ private:
 
 struct MetrolyricsFetcher : public GoogleLyricsFetcher
 {
-	virtual const char *name() const OVERRIDE { return "metrolyrics.com"; }
+	virtual const char *name() const override { return "metrolyrics.com"; }
 	
 protected:
-	virtual const char *regex() const OVERRIDE { return "<div class=\"lyrics-body\">(.*?)</div>"; }
+	virtual const char *regex() const override { return "<div class=\"lyrics-body\">(.*?)</div>"; }
 	
-	virtual bool isURLOk(const std::string &url) OVERRIDE;
+	virtual bool isURLOk(const std::string &url) override;
 };
 
 struct LyricsmaniaFetcher : public GoogleLyricsFetcher
 {
-	virtual const char *name() const OVERRIDE { return "lyricsmania.com"; }
+	virtual const char *name() const override { return "lyricsmania.com"; }
 	
 protected:
-	virtual const char *regex() const OVERRIDE { return "<div class=\"lyrics-body\".*?</strong>(.*?)</div>"; }
+	virtual const char *regex() const override { return "<div class=\"lyrics-body\".*?</strong>(.*?)</div>"; }
 };
 
 struct Sing365Fetcher : public GoogleLyricsFetcher
 {
-	virtual const char *name() const OVERRIDE { return "sing365.com"; }
+	virtual const char *name() const override { return "sing365.com"; }
 	
 protected:
-	virtual const char *regex() const OVERRIDE { return "<!-Lyrics Begin->(.*?)<!-Lyrics End->"; }
+	virtual const char *regex() const override { return "<!-Lyrics Begin->(.*?)<!-Lyrics End->"; }
 };
 
 struct JustSomeLyricsFetcher : public GoogleLyricsFetcher
 {
-	virtual const char *name() const OVERRIDE { return "justsomelyrics.com"; }
+	virtual const char *name() const override { return "justsomelyrics.com"; }
 	
 protected:
-	virtual const char *regex() const OVERRIDE { return "<div class=\"content.*?</div>\\s*</div>(.*?)<div"; }
+	virtual const char *regex() const override { return "<div class=\"content.*?</div>\\s*</div>(.*?)<div"; }
 };
 
 struct AzLyricsFetcher : public GoogleLyricsFetcher
 {
-	virtual const char *name() const OVERRIDE { return "azlyrics.com"; }
+	virtual const char *name() const override { return "azlyrics.com"; }
 	
 protected:
-	virtual const char *regex() const OVERRIDE { return "<div class=\"lyricsh\">.*?</h2>.*<div>(.*?)</div>"; }
+	virtual const char *regex() const override { return "<div class=\"lyricsh\">.*?</h2>.*<div>(.*?)</div>"; }
 };
 
 struct InternetLyricsFetcher : public GoogleLyricsFetcher
 {
-	virtual const char *name() const OVERRIDE { return "the Internet"; }
-	virtual Result fetch(const std::string &artist, const std::string &title) OVERRIDE;
+	virtual const char *name() const override { return "the Internet"; }
+	virtual Result fetch(const std::string &artist, const std::string &title) override;
 	
 protected:
-	virtual const char *siteKeyword() const OVERRIDE { return "lyrics"; }
-	virtual const char *regex() const OVERRIDE { return ""; }
+	virtual const char *siteKeyword() const override { return "lyrics"; }
+	virtual const char *regex() const override { return ""; }
 	
-	virtual bool isURLOk(const std::string &url) OVERRIDE;
+	virtual bool isURLOk(const std::string &url) override;
 	
 private:
 	std::string URL;

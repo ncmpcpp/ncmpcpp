@@ -34,17 +34,17 @@ struct MutableSong : public Song
 	MutableSong() : m_mtime(0), m_duration(0) { }
 	MutableSong(Song s) : Song(s), m_mtime(0), m_duration(0) { }
 	
-	virtual std::string getArtist(unsigned idx = 0) const OVERRIDE;
-	virtual std::string getTitle(unsigned idx = 0) const OVERRIDE;
-	virtual std::string getAlbum(unsigned idx = 0) const OVERRIDE;
-	virtual std::string getAlbumArtist(unsigned idx = 0) const OVERRIDE;
-	virtual std::string getTrack(unsigned idx = 0) const OVERRIDE;
-	virtual std::string getDate(unsigned idx = 0) const OVERRIDE;
-	virtual std::string getGenre(unsigned idx = 0) const OVERRIDE;
-	virtual std::string getComposer(unsigned idx = 0) const OVERRIDE;
-	virtual std::string getPerformer(unsigned idx = 0) const OVERRIDE;
-	virtual std::string getDisc(unsigned idx = 0) const OVERRIDE;
-	virtual std::string getComment(unsigned idx = 0) const OVERRIDE;
+	virtual std::string getArtist(unsigned idx = 0) const override;
+	virtual std::string getTitle(unsigned idx = 0) const override;
+	virtual std::string getAlbum(unsigned idx = 0) const override;
+	virtual std::string getAlbumArtist(unsigned idx = 0) const override;
+	virtual std::string getTrack(unsigned idx = 0) const override;
+	virtual std::string getDate(unsigned idx = 0) const override;
+	virtual std::string getGenre(unsigned idx = 0) const override;
+	virtual std::string getComposer(unsigned idx = 0) const override;
+	virtual std::string getPerformer(unsigned idx = 0) const override;
+	virtual std::string getDisc(unsigned idx = 0) const override;
+	virtual std::string getComment(unsigned idx = 0) const override;
 	
 	void setArtist(const std::string &value, unsigned idx = 0);
 	void setTitle(const std::string &value, unsigned idx = 0);
@@ -61,8 +61,8 @@ struct MutableSong : public Song
 	const std::string &getNewName() const;
 	void setNewName(const std::string &value);
 	
-	virtual unsigned getDuration() const OVERRIDE;
-	virtual time_t getMTime() const OVERRIDE;
+	virtual unsigned getDuration() const override;
+	virtual time_t getMTime() const override;
 	void setDuration(unsigned duration);
 	void setMTime(time_t mtime);
 	

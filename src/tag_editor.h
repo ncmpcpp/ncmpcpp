@@ -39,56 +39,56 @@ struct TagsWindow: NC::Menu<MPD::MutableSong>, SongList
 	TagsWindow(NC::Menu<MPD::MutableSong> &&base)
 	: NC::Menu<MPD::MutableSong>(std::move(base)) { }
 
-	virtual SongIterator currentS() OVERRIDE;
-	virtual ConstSongIterator currentS() const OVERRIDE;
-	virtual SongIterator beginS() OVERRIDE;
-	virtual ConstSongIterator beginS() const OVERRIDE;
-	virtual SongIterator endS() OVERRIDE;
-	virtual ConstSongIterator endS() const OVERRIDE;
+	virtual SongIterator currentS() override;
+	virtual ConstSongIterator currentS() const override;
+	virtual SongIterator beginS() override;
+	virtual ConstSongIterator beginS() const override;
+	virtual SongIterator endS() override;
+	virtual ConstSongIterator endS() const override;
 
-	virtual std::vector<MPD::Song> getSelectedSongs() OVERRIDE;
+	virtual std::vector<MPD::Song> getSelectedSongs() override;
 };
 
 struct TagEditor: Screen<NC::Window *>, HasActions, HasColumns, HasSongs, Searchable, Tabbable
 {
 	TagEditor();
 	
-	virtual void resize() OVERRIDE;
-	virtual void switchTo() OVERRIDE;
+	virtual void resize() override;
+	virtual void switchTo() override;
 	
-	virtual std::wstring title() OVERRIDE;
-	virtual ScreenType type() OVERRIDE { return ScreenType::TagEditor; }
+	virtual std::wstring title() override;
+	virtual ScreenType type() override { return ScreenType::TagEditor; }
 	
-	virtual void refresh() OVERRIDE;
-	virtual void update() OVERRIDE;
+	virtual void refresh() override;
+	virtual void update() override;
 	
-	virtual void mouseButtonPressed(MEVENT) OVERRIDE;
+	virtual void mouseButtonPressed(MEVENT) override;
 	
-	virtual bool isLockable() OVERRIDE { return true; }
-	virtual bool isMergable() OVERRIDE { return true; }
+	virtual bool isLockable() override { return true; }
+	virtual bool isMergable() override { return true; }
 	
 	// Searchable implementation
-	virtual bool allowsSearching() OVERRIDE;
-	virtual const std::string &searchConstraint() OVERRIDE;
-	virtual void setSearchConstraint(const std::string &constraint) OVERRIDE;
-	virtual void clearSearchConstraint() OVERRIDE;
-	virtual bool search(SearchDirection direction, bool wrap, bool skip_current) OVERRIDE;
+	virtual bool allowsSearching() override;
+	virtual const std::string &searchConstraint() override;
+	virtual void setSearchConstraint(const std::string &constraint) override;
+	virtual void clearSearchConstraint() override;
+	virtual bool search(SearchDirection direction, bool wrap, bool skip_current) override;
 
 	// HasActions implementation
-	virtual bool actionRunnable() OVERRIDE;
-	virtual void runAction() OVERRIDE;
+	virtual bool actionRunnable() override;
+	virtual void runAction() override;
 
 	// HasSongs implementation
-	virtual bool itemAvailable() OVERRIDE;
-	virtual bool addItemToPlaylist(bool play) OVERRIDE;
-	virtual std::vector<MPD::Song> getSelectedSongs() OVERRIDE;
+	virtual bool itemAvailable() override;
+	virtual bool addItemToPlaylist(bool play) override;
+	virtual std::vector<MPD::Song> getSelectedSongs() override;
 	
 	// HasColumns implementation
-	virtual bool previousColumnAvailable() OVERRIDE;
-	virtual void previousColumn() OVERRIDE;
+	virtual bool previousColumnAvailable() override;
+	virtual void previousColumn() override;
 	
-	virtual bool nextColumnAvailable() OVERRIDE;
-	virtual void nextColumn() OVERRIDE;
+	virtual bool nextColumnAvailable() override;
+	virtual void nextColumn() override;
 	
 	// private members
 	bool enterDirectory();

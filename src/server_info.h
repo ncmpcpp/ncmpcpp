@@ -31,16 +31,16 @@ struct ServerInfo: Screen<NC::Scrollpad>, Tabbable
 	ServerInfo();
 	
 	// Screen<NC::Scrollpad> implementation
-	virtual void switchTo() OVERRIDE;
-	virtual void resize() OVERRIDE;
+	virtual void switchTo() override;
+	virtual void resize() override;
 	
-	virtual std::wstring title() OVERRIDE;
-	virtual ScreenType type() OVERRIDE { return ScreenType::ServerInfo; }
+	virtual std::wstring title() override;
+	virtual ScreenType type() override { return ScreenType::ServerInfo; }
 	
-	virtual void update() OVERRIDE;
+	virtual void update() override;
 	
-	virtual bool isLockable() OVERRIDE { return false; }
-	virtual bool isMergable() OVERRIDE { return false; }
+	virtual bool isLockable() override { return false; }
+	virtual bool isMergable() override { return false; }
 	
 private:
 	void SetDimensions();

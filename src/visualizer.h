@@ -38,21 +38,21 @@ struct Visualizer: Screen<NC::Window>, Tabbable
 {
 	Visualizer();
 
-	virtual void switchTo() OVERRIDE;
-	virtual void resize() OVERRIDE;
+	virtual void switchTo() override;
+	virtual void resize() override;
 
-	virtual std::wstring title() OVERRIDE;
-	virtual ScreenType type() OVERRIDE { return ScreenType::Visualizer; }
+	virtual std::wstring title() override;
+	virtual ScreenType type() override { return ScreenType::Visualizer; }
 
-	virtual void update() OVERRIDE;
-	virtual void scroll(NC::Scroll) OVERRIDE { }
+	virtual void update() override;
+	virtual void scroll(NC::Scroll) override { }
 
-	virtual int windowTimeout() OVERRIDE;
+	virtual int windowTimeout() override;
 
-	virtual void mouseButtonPressed(MEVENT) OVERRIDE { }
+	virtual void mouseButtonPressed(MEVENT) override { }
 
-	virtual bool isLockable() OVERRIDE { return true; }
-	virtual bool isMergable() OVERRIDE { return true; }
+	virtual bool isLockable() override { return true; }
+	virtual bool isMergable() override { return true; }
 
 	// private members
 	void ToggleVisualizationType();

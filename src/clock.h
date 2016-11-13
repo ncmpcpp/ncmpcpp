@@ -33,19 +33,19 @@ struct Clock: Screen<NC::Window>, Tabbable
 {
 	Clock();
 	
-	virtual void resize() OVERRIDE;
-	virtual void switchTo() OVERRIDE;
+	virtual void resize() override;
+	virtual void switchTo() override;
 	
-	virtual std::wstring title() OVERRIDE;
-	virtual ScreenType type() OVERRIDE { return ScreenType::Clock; }
+	virtual std::wstring title() override;
+	virtual ScreenType type() override { return ScreenType::Clock; }
 	
-	virtual void update() OVERRIDE;
-	virtual void scroll(NC::Scroll) OVERRIDE { }
+	virtual void update() override;
+	virtual void scroll(NC::Scroll) override { }
 	
-	virtual void mouseButtonPressed(MEVENT) OVERRIDE { }
+	virtual void mouseButtonPressed(MEVENT) override { }
 	
-	virtual bool isLockable() OVERRIDE { return false; }
-	virtual bool isMergable() OVERRIDE { return true; }
+	virtual bool isLockable() override { return false; }
+	virtual bool isMergable() override { return true; }
 	
 private:
 	NC::Window m_pane;

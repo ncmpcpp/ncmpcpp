@@ -35,35 +35,35 @@ struct Playlist: Screen<SongMenu>, Filterable, HasSongs, Searchable, Tabbable
 	Playlist();
 	
 	// Screen<SongMenu> implementation
-	virtual void switchTo() OVERRIDE;
-	virtual void resize() OVERRIDE;
+	virtual void switchTo() override;
+	virtual void resize() override;
 	
-	virtual std::wstring title() OVERRIDE;
-	virtual ScreenType type() OVERRIDE { return ScreenType::Playlist; }
+	virtual std::wstring title() override;
+	virtual ScreenType type() override { return ScreenType::Playlist; }
 	
-	virtual void update() OVERRIDE;
+	virtual void update() override;
 	
-	virtual void mouseButtonPressed(MEVENT me) OVERRIDE;
+	virtual void mouseButtonPressed(MEVENT me) override;
 	
-	virtual bool isLockable() OVERRIDE { return true; }
-	virtual bool isMergable() OVERRIDE { return true; }
+	virtual bool isLockable() override { return true; }
+	virtual bool isMergable() override { return true; }
 	
 	// Searchable implementation
-	virtual bool allowsSearching() OVERRIDE;
-	virtual const std::string &searchConstraint() OVERRIDE;
-	virtual void setSearchConstraint(const std::string &constraint) OVERRIDE;
-	virtual void clearSearchConstraint() OVERRIDE;
-	virtual bool search(SearchDirection direction, bool wrap, bool skip_current) OVERRIDE;
+	virtual bool allowsSearching() override;
+	virtual const std::string &searchConstraint() override;
+	virtual void setSearchConstraint(const std::string &constraint) override;
+	virtual void clearSearchConstraint() override;
+	virtual bool search(SearchDirection direction, bool wrap, bool skip_current) override;
 
 	// Filterable implementation
-	virtual bool allowsFiltering() OVERRIDE;
-	virtual std::string currentFilter() OVERRIDE;
-	virtual void applyFilter(const std::string &filter) OVERRIDE;
+	virtual bool allowsFiltering() override;
+	virtual std::string currentFilter() override;
+	virtual void applyFilter(const std::string &filter) override;
 	
 	// HasSongs implementation
-	virtual bool itemAvailable() OVERRIDE;
-	virtual bool addItemToPlaylist(bool play) OVERRIDE;
-	virtual std::vector<MPD::Song> getSelectedSongs() OVERRIDE;
+	virtual bool itemAvailable() override;
+	virtual bool addItemToPlaylist(bool play) override;
+	virtual std::vector<MPD::Song> getSelectedSongs() override;
 	
 	// other members
 	MPD::Song nowPlayingSong();

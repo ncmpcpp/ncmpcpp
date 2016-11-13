@@ -37,16 +37,16 @@ struct Lastfm: Screen<NC::Scrollpad>, Tabbable
 {
 	Lastfm();
 	
-	virtual void switchTo() OVERRIDE;
-	virtual void resize() OVERRIDE;
+	virtual void switchTo() override;
+	virtual void resize() override;
 	
-	virtual std::wstring title() OVERRIDE;
-	virtual ScreenType type() OVERRIDE { return ScreenType::Lastfm; }
+	virtual std::wstring title() override;
+	virtual ScreenType type() override { return ScreenType::Lastfm; }
 	
-	virtual void update() OVERRIDE;
+	virtual void update() override;
 	
-	virtual bool isLockable() OVERRIDE { return false; }
-	virtual bool isMergable() OVERRIDE { return true; }
+	virtual bool isLockable() override { return false; }
+	virtual bool isMergable() override { return true; }
 	
 	template <typename ServiceT>
 	void queueJob(ServiceT *service)

@@ -137,7 +137,7 @@ struct PromptAborted : std::exception
 	PromptAborted(ArgT &&prompt)
 	: m_prompt(std::forward<ArgT>(prompt)) { }
 
-	virtual const char *what() const noexcept OVERRIDE { return m_prompt.c_str(); }
+	virtual const char *what() const noexcept override { return m_prompt.c_str(); }
 
 private:
 	std::string m_prompt;

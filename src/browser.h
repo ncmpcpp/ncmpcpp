@@ -33,14 +33,14 @@ struct BrowserWindow: NC::Menu<MPD::Item>, SongList
 	BrowserWindow(NC::Menu<MPD::Item> &&base)
 	: NC::Menu<MPD::Item>(std::move(base)) { }
 
-	virtual SongIterator currentS() OVERRIDE;
-	virtual ConstSongIterator currentS() const OVERRIDE;
-	virtual SongIterator beginS() OVERRIDE;
-	virtual ConstSongIterator beginS() const OVERRIDE;
-	virtual SongIterator endS() OVERRIDE;
-	virtual ConstSongIterator endS() const OVERRIDE;
+	virtual SongIterator currentS() override;
+	virtual ConstSongIterator currentS() const override;
+	virtual SongIterator beginS() override;
+	virtual ConstSongIterator beginS() const override;
+	virtual SongIterator endS() override;
+	virtual ConstSongIterator endS() const override;
 
-	virtual std::vector<MPD::Song> getSelectedSongs() OVERRIDE;
+	virtual std::vector<MPD::Song> getSelectedSongs() override;
 };
 
 struct Browser: Screen<BrowserWindow>, Filterable, HasSongs, Searchable, Tabbable
@@ -48,35 +48,35 @@ struct Browser: Screen<BrowserWindow>, Filterable, HasSongs, Searchable, Tabbabl
 	Browser();
 	
 	// Screen<BrowserWindow> implementation
-	virtual void resize() OVERRIDE;
-	virtual void switchTo() OVERRIDE;
+	virtual void resize() override;
+	virtual void switchTo() override;
 	
-	virtual std::wstring title() OVERRIDE;
-	virtual ScreenType type() OVERRIDE { return ScreenType::Browser; }
+	virtual std::wstring title() override;
+	virtual ScreenType type() override { return ScreenType::Browser; }
 	
-	virtual void update() OVERRIDE;
+	virtual void update() override;
 	
-	virtual void mouseButtonPressed(MEVENT me) OVERRIDE;
+	virtual void mouseButtonPressed(MEVENT me) override;
 	
-	virtual bool isLockable() OVERRIDE { return true; }
-	virtual bool isMergable() OVERRIDE { return true; }
+	virtual bool isLockable() override { return true; }
+	virtual bool isMergable() override { return true; }
 	
 	// Searchable implementation
-	virtual bool allowsSearching() OVERRIDE;
-	virtual const std::string &searchConstraint() OVERRIDE;
-	virtual void setSearchConstraint(const std::string &constraint) OVERRIDE;
-	virtual void clearSearchConstraint() OVERRIDE;
-	virtual bool search(SearchDirection direction, bool wrap, bool skip_current) OVERRIDE;
+	virtual bool allowsSearching() override;
+	virtual const std::string &searchConstraint() override;
+	virtual void setSearchConstraint(const std::string &constraint) override;
+	virtual void clearSearchConstraint() override;
+	virtual bool search(SearchDirection direction, bool wrap, bool skip_current) override;
 
 	// Filterable implemenetation
-	virtual bool allowsFiltering() OVERRIDE;
-	virtual std::string currentFilter() OVERRIDE;
-	virtual void applyFilter(const std::string &filter) OVERRIDE;
+	virtual bool allowsFiltering() override;
+	virtual std::string currentFilter() override;
+	virtual void applyFilter(const std::string &filter) override;
 
 	// HasSongs implementation
-	virtual bool itemAvailable() OVERRIDE;
-	virtual bool addItemToPlaylist(bool play) OVERRIDE;
-	virtual std::vector<MPD::Song> getSelectedSongs() OVERRIDE;
+	virtual bool itemAvailable() override;
+	virtual bool addItemToPlaylist(bool play) override;
+	virtual std::vector<MPD::Song> getSelectedSongs() override;
 	
 	// private members
 	void requestUpdate() { m_update_request = true; }

@@ -36,10 +36,10 @@ struct Scrollpad: public Window
 	          const std::string &title, Color color, Border border);
 	
 	// override a few Window functions
-	virtual void refresh() OVERRIDE;
-	virtual void scroll(Scroll where) OVERRIDE;
-	virtual void resize(size_t new_width, size_t new_height) OVERRIDE;
-	virtual void clear() OVERRIDE;
+	virtual void refresh() override;
+	virtual void scroll(Scroll where) override;
+	virtual void resize(size_t new_width, size_t new_height) override;
+	virtual void clear() override;
 	
 	const std::string &buffer();
 	

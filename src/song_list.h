@@ -65,14 +65,14 @@ struct SongMenu: NC::Menu<MPD::Song>, SongList
 	SongMenu(NC::Menu<MPD::Song> &&base)
 	: NC::Menu<MPD::Song>(std::move(base)) { }
 
-	virtual SongIterator currentS() OVERRIDE;
-	virtual ConstSongIterator currentS() const OVERRIDE;
-	virtual SongIterator beginS() OVERRIDE;
-	virtual ConstSongIterator beginS() const OVERRIDE;
-	virtual SongIterator endS() OVERRIDE;
-	virtual ConstSongIterator endS() const OVERRIDE;
+	virtual SongIterator currentS() override;
+	virtual ConstSongIterator currentS() const override;
+	virtual SongIterator beginS() override;
+	virtual ConstSongIterator beginS() const override;
+	virtual SongIterator endS() override;
+	virtual ConstSongIterator endS() const override;
 
-	virtual std::vector<MPD::Song> getSelectedSongs() OVERRIDE;
+	virtual std::vector<MPD::Song> getSelectedSongs() override;
 };
 
 #endif // NCMPCPP_SONG_LIST_H

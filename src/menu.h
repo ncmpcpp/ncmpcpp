@@ -314,30 +314,30 @@ struct Menu: Window, List
 	
 	/// Checks if list is empty
 	/// @return true if list is empty, false otherwise
-	virtual bool empty() const OVERRIDE { return m_items->empty(); }
+	virtual bool empty() const override { return m_items->empty(); }
 
 	/// @return size of the list
-	virtual size_t size() const OVERRIDE { return m_items->size(); }
+	virtual size_t size() const override { return m_items->size(); }
 
 	/// @return currently highlighted position
-	virtual size_t choice() const OVERRIDE;
+	virtual size_t choice() const override;
 
 	/// Highlights given position
 	/// @param pos position to be highlighted
-	virtual void highlight(size_t position) OVERRIDE;
+	virtual void highlight(size_t position) override;
 	
 	/// Refreshes the menu window
 	/// @see Window::refresh()
-	virtual void refresh() OVERRIDE;
+	virtual void refresh() override;
 	
 	/// Scrolls by given amount of lines
 	/// @param where indicated where exactly one wants to go
 	/// @see Window::scroll()
-	virtual void scroll(Scroll where) OVERRIDE;
+	virtual void scroll(Scroll where) override;
 	
 	/// Cleares all options, used filters etc. It doesn't reset highlighted position though.
 	/// @see reset()
-	virtual void clear() OVERRIDE;
+	virtual void clear() override;
 	
 	/// Sets highlighted position to 0
 	void reset();
@@ -468,22 +468,22 @@ struct Menu: Window, List
 	ReverseValueIterator rendV() { return ReverseValueIterator(beginV()); }
 	ConstReverseValueIterator rendV() const { return ConstReverseValueIterator(beginV()); }
 	
-	virtual List::Iterator currentP() OVERRIDE {
+	virtual List::Iterator currentP() override {
 		return List::Iterator(PropertiesIterator(m_items->begin() + m_highlight));
 	}
-	virtual List::ConstIterator currentP() const OVERRIDE {
+	virtual List::ConstIterator currentP() const override {
 		return List::ConstIterator(ConstPropertiesIterator(m_items->begin() + m_highlight));
 	}
-	virtual List::Iterator beginP() OVERRIDE {
+	virtual List::Iterator beginP() override {
 		return List::Iterator(PropertiesIterator(m_items->begin()));
 	}
-	virtual List::ConstIterator beginP() const OVERRIDE {
+	virtual List::ConstIterator beginP() const override {
 		return List::ConstIterator(ConstPropertiesIterator(m_items->begin()));
 	}
-	virtual List::Iterator endP() OVERRIDE {
+	virtual List::Iterator endP() override {
 		return List::Iterator(PropertiesIterator(m_items->end()));
 	}
-	virtual List::ConstIterator endP() const OVERRIDE {
+	virtual List::ConstIterator endP() const override {
 		return List::ConstIterator(ConstPropertiesIterator(m_items->end()));
 	}
 

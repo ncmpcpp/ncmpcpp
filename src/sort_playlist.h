@@ -33,22 +33,22 @@ struct SortPlaylistDialog
 	
 	SortPlaylistDialog();
 	
-	virtual void switchTo() OVERRIDE;
-	virtual void resize() OVERRIDE;
+	virtual void switchTo() override;
+	virtual void resize() override;
 	
-	virtual std::wstring title() OVERRIDE;
-	virtual ScreenType type() OVERRIDE { return ScreenType::SortPlaylistDialog; }
+	virtual std::wstring title() override;
+	virtual ScreenType type() override { return ScreenType::SortPlaylistDialog; }
 	
-	virtual void update() OVERRIDE { }
+	virtual void update() override { }
 	
-	virtual void mouseButtonPressed(MEVENT me) OVERRIDE;
+	virtual void mouseButtonPressed(MEVENT me) override;
 	
-	virtual bool isLockable() OVERRIDE { return false; }
-	virtual bool isMergable() OVERRIDE { return false; }
+	virtual bool isLockable() override { return false; }
+	virtual bool isMergable() override { return false; }
 
 	// HasActions implementation
-	virtual bool actionRunnable() OVERRIDE;
-	virtual void runAction() OVERRIDE;
+	virtual bool actionRunnable() override;
+	virtual void runAction() override;
 
 	// private members
 	void moveSortOrderUp();

@@ -64,7 +64,7 @@ struct OutOfBounds : std::exception
 			"value is out of bounds ((<-, %1%] expected, %2% given)") % ubound % value).str());
 	}
 	
-	virtual const char *what() const noexcept OVERRIDE { return m_error_message.c_str(); }
+	virtual const char *what() const noexcept override { return m_error_message.c_str(); }
 
 private:
 	OutOfBounds(std::string msg) : m_error_message(msg) { }

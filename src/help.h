@@ -29,16 +29,16 @@ struct Help: Screen<NC::Scrollpad>, Tabbable
 {
 	Help();
 	
-	virtual void resize() OVERRIDE;
-	virtual void switchTo() OVERRIDE;
+	virtual void resize() override;
+	virtual void switchTo() override;
 	
-	virtual std::wstring title() OVERRIDE;
-	virtual ScreenType type() OVERRIDE { return ScreenType::Help; }
+	virtual std::wstring title() override;
+	virtual ScreenType type() override { return ScreenType::Help; }
 	
-	virtual void update() OVERRIDE { }
+	virtual void update() override { }
 	
-	virtual bool isLockable() OVERRIDE { return true; }
-	virtual bool isMergable() OVERRIDE { return true; }
+	virtual bool isLockable() override { return true; }
+	virtual bool isMergable() override { return true; }
 };
 
 extern Help *myHelp;

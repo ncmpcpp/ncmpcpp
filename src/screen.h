@@ -152,7 +152,7 @@ public:
 	
 	virtual ~Screen() { }
 	
-	virtual bool isActiveWindow(const NC::Window &w_) const OVERRIDE {
+	virtual bool isActiveWindow(const NC::Window &w_) const override {
 		return &Accessor::constApply(w) == &w_;
 	}
 	
@@ -160,20 +160,20 @@ public:
 	/// it's useful to determine the one that is being
 	/// active
 	/// @return address to window object cast to void *
-	virtual NC::Window *activeWindow() OVERRIDE {
+	virtual NC::Window *activeWindow() override {
 		return &Accessor::apply(w);
 	}
-	virtual const NC::Window *activeWindow() const OVERRIDE {
+	virtual const NC::Window *activeWindow() const override {
 		return &Accessor::constApply(w);
 	}
 	
 	/// Refreshes whole screen
-	virtual void refresh() OVERRIDE {
+	virtual void refresh() override {
 		Accessor::apply(w).display();
 	}
 	
 	/// Refreshes active window of the screen
-	virtual void refreshWindow() OVERRIDE {
+	virtual void refreshWindow() override {
 		Accessor::apply(w).display();
 	}
 	
@@ -181,20 +181,20 @@ public:
 	/// if fancy scrolling feature is disabled, enters the
 	/// loop that holds main loop until user releases the key
 	/// @param where indicates where one wants to scroll
-	virtual void scroll(NC::Scroll where) OVERRIDE {
+	virtual void scroll(NC::Scroll where) override {
 		Accessor::apply(w).scroll(where);
 	}
 	
 	/// @return timeout parameter used for the screen (in ms)
 	/// @default defaultWindowTimeout
-	virtual int windowTimeout() OVERRIDE {
+	virtual int windowTimeout() override {
 		return defaultWindowTimeout;
 	}
 
 	/// Invoked after there was one of mouse buttons pressed
 	/// @param me struct that contains coords of where the click
 	/// had its place and button actions
-	virtual void mouseButtonPressed(MEVENT me) OVERRIDE {
+	virtual void mouseButtonPressed(MEVENT me) override {
 		genericMouseButtonPressed(Accessor::apply(w), me);
 	}
 	

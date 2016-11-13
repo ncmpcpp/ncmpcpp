@@ -34,16 +34,16 @@ struct Lyrics: Screen<NC::Scrollpad>, Tabbable
 	Lyrics();
 	
 	// Screen<NC::Scrollpad> implementation
-	virtual void resize() OVERRIDE;
-	virtual void switchTo() OVERRIDE;
+	virtual void resize() override;
+	virtual void switchTo() override;
 	
-	virtual std::wstring title() OVERRIDE;
-	virtual ScreenType type() OVERRIDE { return ScreenType::Lyrics; }
+	virtual std::wstring title() override;
+	virtual ScreenType type() override { return ScreenType::Lyrics; }
 	
-	virtual void update() OVERRIDE;
+	virtual void update() override;
 	
-	virtual bool isLockable() OVERRIDE { return false; }
-	virtual bool isMergable() OVERRIDE { return true; }
+	virtual bool isLockable() override { return false; }
+	virtual bool isMergable() override { return true; }
 	
 	// private members
 	bool SetSong(const MPD::Song &s);

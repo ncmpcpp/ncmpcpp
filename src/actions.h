@@ -222,7 +222,7 @@ struct Dummy: BaseAction
 	Dummy(): BaseAction(Type::Dummy, "dummy") { }
 	
 private:
-	virtual void run() OVERRIDE { }
+	virtual void run() override { }
 };
 
 struct UpdateEnvironment: BaseAction
@@ -234,7 +234,7 @@ struct UpdateEnvironment: BaseAction
 private:
 	boost::posix_time::ptime m_past;
 
-	virtual void run() OVERRIDE;
+	virtual void run() override;
 };
 
 struct MouseEvent: BaseAction
@@ -246,8 +246,8 @@ struct MouseEvent: BaseAction
 	}
 	
 private:
-	virtual bool canBeRun() OVERRIDE;
-	virtual void run() OVERRIDE;
+	virtual bool canBeRun() override;
+	virtual void run() override;
 	
 	MEVENT m_mouse_event;
 	MEVENT m_old_mouse_event;
@@ -258,7 +258,7 @@ struct ScrollUp: BaseAction
 	ScrollUp(): BaseAction(Type::ScrollUp, "scroll_up") { }
 	
 private:
-	virtual void run() OVERRIDE;
+	virtual void run() override;
 };
 
 struct ScrollDown: BaseAction
@@ -266,7 +266,7 @@ struct ScrollDown: BaseAction
 	ScrollDown(): BaseAction(Type::ScrollDown, "scroll_down") { }
 	
 private:
-	virtual void run() OVERRIDE;
+	virtual void run() override;
 };
 
 struct ScrollUpArtist: BaseAction
@@ -274,8 +274,8 @@ struct ScrollUpArtist: BaseAction
 	ScrollUpArtist(): BaseAction(Type::ScrollUpArtist, "scroll_up_artist") { }
 	
 private:
-	virtual bool canBeRun() OVERRIDE;
-	virtual void run() OVERRIDE;
+	virtual bool canBeRun() override;
+	virtual void run() override;
 
 	NC::List *m_list;
 	SongList *m_songs;
@@ -286,8 +286,8 @@ struct ScrollUpAlbum: BaseAction
 	ScrollUpAlbum(): BaseAction(Type::ScrollUpAlbum, "scroll_up_album") { }
 	
 private:
-	virtual bool canBeRun() OVERRIDE;
-	virtual void run() OVERRIDE;
+	virtual bool canBeRun() override;
+	virtual void run() override;
 
 	NC::List *m_list;
 	SongList *m_songs;
@@ -298,8 +298,8 @@ struct ScrollDownArtist: BaseAction
 	ScrollDownArtist(): BaseAction(Type::ScrollDownArtist, "scroll_down_artist") { }
 	
 private:
-	virtual bool canBeRun() OVERRIDE;
-	virtual void run() OVERRIDE;
+	virtual bool canBeRun() override;
+	virtual void run() override;
 
 	NC::List *m_list;
 	SongList *m_songs;
@@ -310,8 +310,8 @@ struct ScrollDownAlbum: BaseAction
 	ScrollDownAlbum(): BaseAction(Type::ScrollDownAlbum, "scroll_down_album") { }
 	
 private:
-	virtual bool canBeRun() OVERRIDE;
-	virtual void run() OVERRIDE;
+	virtual bool canBeRun() override;
+	virtual void run() override;
 
 	NC::List *m_list;
 	SongList *m_songs;
@@ -322,7 +322,7 @@ struct PageUp: BaseAction
 	PageUp(): BaseAction(Type::PageUp, "page_up") { }
 	
 private:
-	virtual void run() OVERRIDE;
+	virtual void run() override;
 };
 
 struct PageDown: BaseAction
@@ -330,7 +330,7 @@ struct PageDown: BaseAction
 	PageDown(): BaseAction(Type::PageDown, "page_down") { }
 	
 private:
-	virtual void run() OVERRIDE;
+	virtual void run() override;
 };
 
 struct MoveHome: BaseAction
@@ -338,7 +338,7 @@ struct MoveHome: BaseAction
 	MoveHome(): BaseAction(Type::MoveHome, "move_home") { }
 	
 private:
-	virtual void run() OVERRIDE;
+	virtual void run() override;
 };
 
 struct MoveEnd: BaseAction
@@ -346,7 +346,7 @@ struct MoveEnd: BaseAction
 	MoveEnd(): BaseAction(Type::MoveEnd, "move_end") { }
 	
 private:
-	virtual void run() OVERRIDE;
+	virtual void run() override;
 };
 
 struct ToggleInterface: BaseAction
@@ -354,7 +354,7 @@ struct ToggleInterface: BaseAction
 	ToggleInterface(): BaseAction(Type::ToggleInterface, "toggle_interface") { }
 	
 private:
-	virtual void run() OVERRIDE;
+	virtual void run() override;
 };
 
 struct JumpToParentDirectory: BaseAction
@@ -362,8 +362,8 @@ struct JumpToParentDirectory: BaseAction
 	JumpToParentDirectory(): BaseAction(Type::JumpToParentDirectory, "jump_to_parent_directory") { }
 	
 private:
-	virtual bool canBeRun() OVERRIDE;
-	virtual void run() OVERRIDE;
+	virtual bool canBeRun() override;
+	virtual void run() override;
 };
 
 struct RunAction: BaseAction
@@ -371,8 +371,8 @@ struct RunAction: BaseAction
 	RunAction(): BaseAction(Type::RunAction, "run_action") { }
 
 private:
-	virtual bool canBeRun() OVERRIDE;
-	virtual void run() OVERRIDE;
+	virtual bool canBeRun() override;
+	virtual void run() override;
 
 	HasActions *m_ha;
 };
@@ -382,8 +382,8 @@ struct PreviousColumn: BaseAction
 	PreviousColumn(): BaseAction(Type::PreviousColumn, "previous_column") { }
 	
 private:
-	virtual bool canBeRun() OVERRIDE;
-	virtual void run() OVERRIDE;
+	virtual bool canBeRun() override;
+	virtual void run() override;
 
 	HasColumns *m_hc;
 };
@@ -393,8 +393,8 @@ struct NextColumn: BaseAction
 	NextColumn(): BaseAction(Type::NextColumn, "next_column") { }
 	
 private:
-	virtual bool canBeRun() OVERRIDE;
-	virtual void run() OVERRIDE;
+	virtual bool canBeRun() override;
+	virtual void run() override;
 
 	HasColumns *m_hc;
 };
@@ -404,8 +404,8 @@ struct MasterScreen: BaseAction
 	MasterScreen(): BaseAction(Type::MasterScreen, "master_screen") { }
 	
 private:
-	virtual bool canBeRun() OVERRIDE;
-	virtual void run() OVERRIDE;
+	virtual bool canBeRun() override;
+	virtual void run() override;
 };
 
 struct SlaveScreen: BaseAction
@@ -413,8 +413,8 @@ struct SlaveScreen: BaseAction
 	SlaveScreen(): BaseAction(Type::SlaveScreen, "slave_screen") { }
 	
 private:
-	virtual bool canBeRun() OVERRIDE;
-	virtual void run() OVERRIDE;
+	virtual bool canBeRun() override;
+	virtual void run() override;
 };
 
 struct VolumeUp: BaseAction
@@ -422,7 +422,7 @@ struct VolumeUp: BaseAction
 	VolumeUp(): BaseAction(Type::VolumeUp, "volume_up") { }
 	
 private:
-	virtual void run() OVERRIDE;
+	virtual void run() override;
 };
 
 struct VolumeDown: BaseAction
@@ -430,7 +430,7 @@ struct VolumeDown: BaseAction
 	VolumeDown(): BaseAction(Type::VolumeDown, "volume_down") { }
 	
 private:
-	virtual void run() OVERRIDE;
+	virtual void run() override;
 };
 
 struct AddItemToPlaylist: BaseAction
@@ -438,8 +438,8 @@ struct AddItemToPlaylist: BaseAction
 	AddItemToPlaylist(): BaseAction(Type::AddItemToPlaylist, "add_item_to_playlist") { }
 
 private:
-	virtual bool canBeRun() OVERRIDE;
-	virtual void run() OVERRIDE;
+	virtual bool canBeRun() override;
+	virtual void run() override;
 
 	HasSongs *m_hs;
 };
@@ -449,8 +449,8 @@ struct PlayItem: BaseAction
 	PlayItem(): BaseAction(Type::PlayItem, "play_item") { }
 
 private:
-	virtual bool canBeRun() OVERRIDE;
-	virtual void run() OVERRIDE;
+	virtual bool canBeRun() override;
+	virtual void run() override;
 
 	HasSongs *m_hs;
 };
@@ -460,8 +460,8 @@ struct DeletePlaylistItems: BaseAction
 	DeletePlaylistItems(): BaseAction(Type::DeletePlaylistItems, "delete_playlist_items") { }
 	
 private:
-	virtual bool canBeRun() OVERRIDE;
-	virtual void run() OVERRIDE;
+	virtual bool canBeRun() override;
+	virtual void run() override;
 };
 
 struct DeleteStoredPlaylist: BaseAction
@@ -469,8 +469,8 @@ struct DeleteStoredPlaylist: BaseAction
 	DeleteStoredPlaylist(): BaseAction(Type::DeleteStoredPlaylist, "delete_stored_playlist") { }
 	
 private:
-	virtual bool canBeRun() OVERRIDE;
-	virtual void run() OVERRIDE;
+	virtual bool canBeRun() override;
+	virtual void run() override;
 };
 
 struct DeleteBrowserItems: BaseAction
@@ -478,8 +478,8 @@ struct DeleteBrowserItems: BaseAction
 	DeleteBrowserItems(): BaseAction(Type::DeleteBrowserItems, "delete_browser_items") { }
 	
 private:
-	virtual bool canBeRun() OVERRIDE;
-	virtual void run() OVERRIDE;
+	virtual bool canBeRun() override;
+	virtual void run() override;
 };
 
 struct ReplaySong: BaseAction
@@ -487,7 +487,7 @@ struct ReplaySong: BaseAction
 	ReplaySong(): BaseAction(Type::ReplaySong, "replay_song") { }
 	
 private:
-	virtual void run() OVERRIDE;
+	virtual void run() override;
 };
 
 struct PreviousSong: BaseAction
@@ -495,7 +495,7 @@ struct PreviousSong: BaseAction
 	PreviousSong(): BaseAction(Type::Previous, "previous") { }
 	
 private:
-	virtual void run() OVERRIDE;
+	virtual void run() override;
 };
 
 struct NextSong: BaseAction
@@ -503,7 +503,7 @@ struct NextSong: BaseAction
 	NextSong(): BaseAction(Type::Next, "next") { }
 	
 private:
-	virtual void run() OVERRIDE;
+	virtual void run() override;
 };
 
 struct Pause: BaseAction
@@ -511,7 +511,7 @@ struct Pause: BaseAction
 	Pause(): BaseAction(Type::Pause, "pause") { }
 	
 private:
-	virtual void run() OVERRIDE;
+	virtual void run() override;
 };
 
 struct Stop: BaseAction
@@ -519,7 +519,7 @@ struct Stop: BaseAction
 	Stop(): BaseAction(Type::Stop, "stop") { }
 	
 private:
-	virtual void run() OVERRIDE;
+	virtual void run() override;
 };
 
 struct ExecuteCommand: BaseAction
@@ -527,7 +527,7 @@ struct ExecuteCommand: BaseAction
 	ExecuteCommand(): BaseAction(Type::ExecuteCommand, "execute_command") { }
 	
 private:
-	virtual void run() OVERRIDE;
+	virtual void run() override;
 };
 
 struct SavePlaylist: BaseAction
@@ -535,7 +535,7 @@ struct SavePlaylist: BaseAction
 	SavePlaylist(): BaseAction(Type::SavePlaylist, "save_playlist") { }
 	
 private:
-	virtual void run() OVERRIDE;
+	virtual void run() override;
 };
 
 struct MoveSortOrderUp: BaseAction
@@ -543,8 +543,8 @@ struct MoveSortOrderUp: BaseAction
 	MoveSortOrderUp(): BaseAction(Type::MoveSortOrderUp, "move_sort_order_up") { }
 	
 private:
-	virtual bool canBeRun() OVERRIDE;
-	virtual void run() OVERRIDE;
+	virtual bool canBeRun() override;
+	virtual void run() override;
 };
 
 struct MoveSortOrderDown: BaseAction
@@ -552,8 +552,8 @@ struct MoveSortOrderDown: BaseAction
 	MoveSortOrderDown(): BaseAction(Type::MoveSortOrderDown, "move_sort_order_down") { }
 	
 private:
-	virtual bool canBeRun() OVERRIDE;
-	virtual void run() OVERRIDE;
+	virtual bool canBeRun() override;
+	virtual void run() override;
 };
 
 struct MoveSelectedItemsUp: BaseAction
@@ -561,8 +561,8 @@ struct MoveSelectedItemsUp: BaseAction
 	MoveSelectedItemsUp(): BaseAction(Type::MoveSelectedItemsUp, "move_selected_items_up") { }
 	
 private:
-	virtual bool canBeRun() OVERRIDE;
-	virtual void run() OVERRIDE;
+	virtual bool canBeRun() override;
+	virtual void run() override;
 };
 
 struct MoveSelectedItemsDown: BaseAction
@@ -570,8 +570,8 @@ struct MoveSelectedItemsDown: BaseAction
 	MoveSelectedItemsDown(): BaseAction(Type::MoveSelectedItemsDown, "move_selected_items_down") { }
 	
 private:
-	virtual bool canBeRun() OVERRIDE;
-	virtual void run() OVERRIDE;
+	virtual bool canBeRun() override;
+	virtual void run() override;
 };
 
 struct MoveSelectedItemsTo: BaseAction
@@ -579,8 +579,8 @@ struct MoveSelectedItemsTo: BaseAction
 	MoveSelectedItemsTo(): BaseAction(Type::MoveSelectedItemsTo, "move_selected_items_to") { }
 	
 private:
-	virtual bool canBeRun() OVERRIDE;
-	virtual void run() OVERRIDE;
+	virtual bool canBeRun() override;
+	virtual void run() override;
 };
 
 struct Add: BaseAction
@@ -588,8 +588,8 @@ struct Add: BaseAction
 	Add(): BaseAction(Type::Add, "add") { }
 	
 private:
-	virtual bool canBeRun() OVERRIDE;
-	virtual void run() OVERRIDE;
+	virtual bool canBeRun() override;
+	virtual void run() override;
 };
 
 struct SeekForward: BaseAction
@@ -597,8 +597,8 @@ struct SeekForward: BaseAction
 	SeekForward(): BaseAction(Type::SeekForward, "seek_forward") { }
 	
 private:
-	virtual bool canBeRun() OVERRIDE;
-	virtual void run() OVERRIDE;
+	virtual bool canBeRun() override;
+	virtual void run() override;
 };
 
 struct SeekBackward: BaseAction
@@ -606,8 +606,8 @@ struct SeekBackward: BaseAction
 	SeekBackward(): BaseAction(Type::SeekBackward, "seek_backward") { }
 	
 private:
-	virtual bool canBeRun() OVERRIDE;
-	virtual void run() OVERRIDE;
+	virtual bool canBeRun() override;
+	virtual void run() override;
 };
 
 struct ToggleDisplayMode: BaseAction
@@ -615,8 +615,8 @@ struct ToggleDisplayMode: BaseAction
 	ToggleDisplayMode(): BaseAction(Type::ToggleDisplayMode, "toggle_display_mode") { }
 	
 private:
-	virtual bool canBeRun() OVERRIDE;
-	virtual void run() OVERRIDE;
+	virtual bool canBeRun() override;
+	virtual void run() override;
 };
 
 struct ToggleSeparatorsBetweenAlbums: BaseAction
@@ -625,8 +625,8 @@ struct ToggleSeparatorsBetweenAlbums: BaseAction
 	: BaseAction(Type::ToggleSeparatorsBetweenAlbums, "toggle_separators_between_albums") { }
 	
 private:
-	virtual bool canBeRun() OVERRIDE;
-	virtual void run() OVERRIDE;
+	virtual bool canBeRun() override;
+	virtual void run() override;
 };
 
 struct ToggleLyricsUpdateOnSongChange: BaseAction
@@ -635,8 +635,8 @@ struct ToggleLyricsUpdateOnSongChange: BaseAction
 	: BaseAction(Type::ToggleLyricsUpdateOnSongChange, "toggle_lyrics_update_on_song_change") { }
 
 private:
-	virtual bool canBeRun() OVERRIDE;
-	virtual void run() OVERRIDE;
+	virtual bool canBeRun() override;
+	virtual void run() override;
 };
 
 struct ToggleLyricsFetcher: BaseAction
@@ -645,9 +645,9 @@ struct ToggleLyricsFetcher: BaseAction
 	
 private:
 #	ifndef HAVE_CURL_CURL_H
-	virtual bool canBeRun() OVERRIDE;
+	virtual bool canBeRun() override;
 #	endif // NOT HAVE_CURL_CURL_H
-	virtual void run() OVERRIDE;
+	virtual void run() override;
 };
 
 struct ToggleFetchingLyricsInBackground: BaseAction
@@ -657,9 +657,9 @@ struct ToggleFetchingLyricsInBackground: BaseAction
 	
 private:
 #	ifndef HAVE_CURL_CURL_H
-	virtual bool canBeRun() OVERRIDE;
+	virtual bool canBeRun() override;
 #	endif // NOT HAVE_CURL_CURL_H
-	virtual void run() OVERRIDE;
+	virtual void run() override;
 };
 
 struct TogglePlayingSongCentering: BaseAction
@@ -668,7 +668,7 @@ struct TogglePlayingSongCentering: BaseAction
 	: BaseAction(Type::TogglePlayingSongCentering, "toggle_playing_song_centering") { }
 	
 private:
-	virtual void run() OVERRIDE;
+	virtual void run() override;
 };
 
 struct UpdateDatabase: BaseAction
@@ -676,7 +676,7 @@ struct UpdateDatabase: BaseAction
 	UpdateDatabase(): BaseAction(Type::UpdateDatabase, "update_database") { }
 	
 private:
-	virtual void run() OVERRIDE;
+	virtual void run() override;
 };
 
 struct JumpToPlayingSong: BaseAction
@@ -684,8 +684,8 @@ struct JumpToPlayingSong: BaseAction
 	JumpToPlayingSong(): BaseAction(Type::JumpToPlayingSong, "jump_to_playing_song") { }
 	
 private:
-	virtual bool canBeRun() OVERRIDE;
-	virtual void run() OVERRIDE;
+	virtual bool canBeRun() override;
+	virtual void run() override;
 };
 
 struct ToggleRepeat: BaseAction
@@ -693,7 +693,7 @@ struct ToggleRepeat: BaseAction
 	ToggleRepeat(): BaseAction(Type::ToggleRepeat, "toggle_repeat") { }
 	
 private:
-	virtual void run() OVERRIDE;
+	virtual void run() override;
 };
 
 struct Shuffle: BaseAction
@@ -701,8 +701,8 @@ struct Shuffle: BaseAction
 	Shuffle(): BaseAction(Type::Shuffle, "shuffle") { }
 	
 private:
-	virtual bool canBeRun() OVERRIDE;
-	virtual void run() OVERRIDE;
+	virtual bool canBeRun() override;
+	virtual void run() override;
 
 	NC::Menu<MPD::Song>::ConstIterator m_begin;
 	NC::Menu<MPD::Song>::ConstIterator m_end;
@@ -713,7 +713,7 @@ struct ToggleRandom: BaseAction
 	ToggleRandom(): BaseAction(Type::ToggleRandom, "toggle_random") { }
 	
 private:
-	virtual void run() OVERRIDE;
+	virtual void run() override;
 };
 
 struct StartSearching: BaseAction
@@ -721,8 +721,8 @@ struct StartSearching: BaseAction
 	StartSearching(): BaseAction(Type::StartSearching, "start_searching") { }
 	
 private:
-	virtual bool canBeRun() OVERRIDE;
-	virtual void run() OVERRIDE;
+	virtual bool canBeRun() override;
+	virtual void run() override;
 };
 
 struct SaveTagChanges: BaseAction
@@ -730,8 +730,8 @@ struct SaveTagChanges: BaseAction
 	SaveTagChanges(): BaseAction(Type::SaveTagChanges, "save_tag_changes") { }
 	
 private:
-	virtual bool canBeRun() OVERRIDE;
-	virtual void run() OVERRIDE;
+	virtual bool canBeRun() override;
+	virtual void run() override;
 };
 
 struct ToggleSingle: BaseAction
@@ -739,7 +739,7 @@ struct ToggleSingle: BaseAction
 	ToggleSingle(): BaseAction(Type::ToggleSingle, "toggle_single") { }
 	
 private:
-	virtual void run() OVERRIDE;
+	virtual void run() override;
 };
 
 struct ToggleConsume: BaseAction
@@ -747,7 +747,7 @@ struct ToggleConsume: BaseAction
 	ToggleConsume(): BaseAction(Type::ToggleConsume, "toggle_consume") { }
 	
 private:
-	virtual void run() OVERRIDE;
+	virtual void run() override;
 };
 
 struct ToggleCrossfade: BaseAction
@@ -755,7 +755,7 @@ struct ToggleCrossfade: BaseAction
 	ToggleCrossfade(): BaseAction(Type::ToggleCrossfade, "toggle_crossfade") { }
 	
 private:
-	virtual void run() OVERRIDE;
+	virtual void run() override;
 };
 
 struct SetCrossfade: BaseAction
@@ -763,7 +763,7 @@ struct SetCrossfade: BaseAction
 	SetCrossfade(): BaseAction(Type::SetCrossfade, "set_crossfade") { }
 	
 private:
-	virtual void run() OVERRIDE;
+	virtual void run() override;
 };
 
 struct SetVolume: BaseAction
@@ -771,7 +771,7 @@ struct SetVolume: BaseAction
 	SetVolume(): BaseAction(Type::SetVolume, "set_volume") { }
 	
 private:
-	virtual void run() OVERRIDE;
+	virtual void run() override;
 };
 
 struct EnterDirectory: BaseAction
@@ -779,8 +779,8 @@ struct EnterDirectory: BaseAction
 	EnterDirectory(): BaseAction(Type::EnterDirectory, "enter_directory") { }
 
 private:
-	virtual bool canBeRun() OVERRIDE;
-	virtual void run() OVERRIDE;
+	virtual bool canBeRun() override;
+	virtual void run() override;
 };
 
 
@@ -789,8 +789,8 @@ struct EditSong: BaseAction
 	EditSong(): BaseAction(Type::EditSong, "edit_song") { }
 	
 private:
-	virtual bool canBeRun() OVERRIDE;
-	virtual void run() OVERRIDE;
+	virtual bool canBeRun() override;
+	virtual void run() override;
 
 #ifdef HAVE_TAGLIB_H
 	const MPD::Song *m_song;
@@ -802,8 +802,8 @@ struct EditLibraryTag: BaseAction
 	EditLibraryTag(): BaseAction(Type::EditLibraryTag, "edit_library_tag") { }
 	
 private:
-	virtual bool canBeRun() OVERRIDE;
-	virtual void run() OVERRIDE;
+	virtual bool canBeRun() override;
+	virtual void run() override;
 };
 
 struct EditLibraryAlbum: BaseAction
@@ -811,8 +811,8 @@ struct EditLibraryAlbum: BaseAction
 	EditLibraryAlbum(): BaseAction(Type::EditLibraryAlbum, "edit_library_album") { }
 	
 private:
-	virtual bool canBeRun() OVERRIDE;
-	virtual void run() OVERRIDE;
+	virtual bool canBeRun() override;
+	virtual void run() override;
 };
 
 struct EditDirectoryName: BaseAction
@@ -820,8 +820,8 @@ struct EditDirectoryName: BaseAction
 	EditDirectoryName(): BaseAction(Type::EditDirectoryName, "edit_directory_name") { }
 	
 private:
-	virtual bool canBeRun() OVERRIDE;
-	virtual void run() OVERRIDE;
+	virtual bool canBeRun() override;
+	virtual void run() override;
 };
 
 struct EditPlaylistName: BaseAction
@@ -829,8 +829,8 @@ struct EditPlaylistName: BaseAction
 	EditPlaylistName(): BaseAction(Type::EditPlaylistName, "edit_playlist_name") { }
 	
 private:
-	virtual bool canBeRun() OVERRIDE;
-	virtual void run() OVERRIDE;
+	virtual bool canBeRun() override;
+	virtual void run() override;
 };
 
 struct EditLyrics: BaseAction
@@ -838,8 +838,8 @@ struct EditLyrics: BaseAction
 	EditLyrics(): BaseAction(Type::EditLyrics, "edit_lyrics") { }
 	
 private:
-	virtual bool canBeRun() OVERRIDE;
-	virtual void run() OVERRIDE;
+	virtual bool canBeRun() override;
+	virtual void run() override;
 };
 
 struct JumpToBrowser: BaseAction
@@ -847,8 +847,8 @@ struct JumpToBrowser: BaseAction
 	JumpToBrowser(): BaseAction(Type::JumpToBrowser, "jump_to_browser") { }
 	
 private:
-	virtual bool canBeRun() OVERRIDE;
-	virtual void run() OVERRIDE;
+	virtual bool canBeRun() override;
+	virtual void run() override;
 
 	const MPD::Song *m_song;
 };
@@ -858,8 +858,8 @@ struct JumpToMediaLibrary: BaseAction
 	JumpToMediaLibrary(): BaseAction(Type::JumpToMediaLibrary, "jump_to_media_library") { }
 	
 private:
-	virtual bool canBeRun() OVERRIDE;
-	virtual void run() OVERRIDE;
+	virtual bool canBeRun() override;
+	virtual void run() override;
 
 	const MPD::Song *m_song;
 };
@@ -869,8 +869,8 @@ struct JumpToPlaylistEditor: BaseAction
 	JumpToPlaylistEditor(): BaseAction(Type::JumpToPlaylistEditor, "jump_to_playlist_editor") { }
 	
 private:
-	virtual bool canBeRun() OVERRIDE;
-	virtual void run() OVERRIDE;
+	virtual bool canBeRun() override;
+	virtual void run() override;
 };
 
 struct ToggleScreenLock: BaseAction
@@ -878,7 +878,7 @@ struct ToggleScreenLock: BaseAction
 	ToggleScreenLock(): BaseAction(Type::ToggleScreenLock, "toggle_screen_lock") { }
 	
 private:
-	virtual void run() OVERRIDE;
+	virtual void run() override;
 };
 
 struct JumpToTagEditor: BaseAction
@@ -886,8 +886,8 @@ struct JumpToTagEditor: BaseAction
 	JumpToTagEditor(): BaseAction(Type::JumpToTagEditor, "jump_to_tag_editor") { }
 	
 private:
-	virtual bool canBeRun() OVERRIDE;
-	virtual void run() OVERRIDE;
+	virtual bool canBeRun() override;
+	virtual void run() override;
 
 #ifdef HAVE_TAGLIB_H
 	const MPD::Song *m_song;
@@ -899,8 +899,8 @@ struct JumpToPositionInSong: BaseAction
 	JumpToPositionInSong(): BaseAction(Type::JumpToPositionInSong, "jump_to_position_in_song") { }
 	
 private:
-	virtual bool canBeRun() OVERRIDE;
-	virtual void run() OVERRIDE;
+	virtual bool canBeRun() override;
+	virtual void run() override;
 };
 
 struct SelectItem: BaseAction
@@ -908,8 +908,8 @@ struct SelectItem: BaseAction
 	SelectItem(): BaseAction(Type::SelectItem, "select_item") { }
 
 private:
-	virtual bool canBeRun() OVERRIDE;
-	virtual void run() OVERRIDE;
+	virtual bool canBeRun() override;
+	virtual void run() override;
 
 	NC::List *m_list;
 };
@@ -919,8 +919,8 @@ struct SelectRange: BaseAction
 	SelectRange(): BaseAction(Type::SelectRange, "select_range") { }
 
 private:
-	virtual bool canBeRun() OVERRIDE;
-	virtual void run() OVERRIDE;
+	virtual bool canBeRun() override;
+	virtual void run() override;
 
 	NC::List *m_list;
 	NC::List::Iterator m_begin;
@@ -932,8 +932,8 @@ struct ReverseSelection: BaseAction
 	ReverseSelection(): BaseAction(Type::ReverseSelection, "reverse_selection") { }
 	
 private:
-	virtual bool canBeRun() OVERRIDE;
-	virtual void run() OVERRIDE;
+	virtual bool canBeRun() override;
+	virtual void run() override;
 
 	NC::List *m_list;
 };
@@ -943,8 +943,8 @@ struct RemoveSelection: BaseAction
 	RemoveSelection(): BaseAction(Type::RemoveSelection, "remove_selection") { }
 	
 private:
-	virtual bool canBeRun() OVERRIDE;
-	virtual void run() OVERRIDE;
+	virtual bool canBeRun() override;
+	virtual void run() override;
 
 	NC::List *m_list;
 };
@@ -954,8 +954,8 @@ struct SelectAlbum: BaseAction
 	SelectAlbum(): BaseAction(Type::SelectAlbum, "select_album") { }
 	
 private:
-	virtual bool canBeRun() OVERRIDE;
-	virtual void run() OVERRIDE;
+	virtual bool canBeRun() override;
+	virtual void run() override;
 
 	NC::List *m_list;
 	SongList *m_songs;
@@ -966,8 +966,8 @@ struct SelectFoundItems: BaseAction
 	SelectFoundItems(): BaseAction(Type::SelectFoundItems, "select_found_items") { }
 
 private:
-	virtual bool canBeRun() OVERRIDE;
-	virtual void run() OVERRIDE;
+	virtual bool canBeRun() override;
+	virtual void run() override;
 
 	NC::List *m_list;
 	Searchable *m_searchable;
@@ -978,8 +978,8 @@ struct AddSelectedItems: BaseAction
 	AddSelectedItems(): BaseAction(Type::AddSelectedItems, "add_selected_items") { }
 	
 private:
-	virtual bool canBeRun() OVERRIDE;
-	virtual void run() OVERRIDE;
+	virtual bool canBeRun() override;
+	virtual void run() override;
 };
 
 struct CropMainPlaylist: BaseAction
@@ -987,7 +987,7 @@ struct CropMainPlaylist: BaseAction
 	CropMainPlaylist(): BaseAction(Type::CropMainPlaylist, "crop_main_playlist") { }
 	
 private:
-	virtual void run() OVERRIDE;
+	virtual void run() override;
 };
 
 struct CropPlaylist: BaseAction
@@ -995,8 +995,8 @@ struct CropPlaylist: BaseAction
 	CropPlaylist(): BaseAction(Type::CropPlaylist, "crop_playlist") { }
 	
 private:
-	virtual bool canBeRun() OVERRIDE;
-	virtual void run() OVERRIDE;
+	virtual bool canBeRun() override;
+	virtual void run() override;
 };
 
 struct ClearMainPlaylist: BaseAction
@@ -1004,7 +1004,7 @@ struct ClearMainPlaylist: BaseAction
 	ClearMainPlaylist(): BaseAction(Type::ClearMainPlaylist, "clear_main_playlist") { }
 	
 private:
-	virtual void run() OVERRIDE;
+	virtual void run() override;
 };
 
 struct ClearPlaylist: BaseAction
@@ -1012,8 +1012,8 @@ struct ClearPlaylist: BaseAction
 	ClearPlaylist(): BaseAction(Type::ClearPlaylist, "clear_playlist") { }
 	
 private:
-	virtual bool canBeRun() OVERRIDE;
-	virtual void run() OVERRIDE;
+	virtual bool canBeRun() override;
+	virtual void run() override;
 };
 
 struct SortPlaylist: BaseAction
@@ -1021,8 +1021,8 @@ struct SortPlaylist: BaseAction
 	SortPlaylist(): BaseAction(Type::SortPlaylist, "sort_playlist") { }
 	
 private:
-	virtual bool canBeRun() OVERRIDE;
-	virtual void run() OVERRIDE;
+	virtual bool canBeRun() override;
+	virtual void run() override;
 };
 
 struct ReversePlaylist: BaseAction
@@ -1030,8 +1030,8 @@ struct ReversePlaylist: BaseAction
 	ReversePlaylist(): BaseAction(Type::ReversePlaylist, "reverse_playlist") { }
 	
 private:
-	virtual bool canBeRun() OVERRIDE;
-	virtual void run() OVERRIDE;
+	virtual bool canBeRun() override;
+	virtual void run() override;
 
 	NC::Menu<MPD::Song>::ConstIterator m_begin;
 	NC::Menu<MPD::Song>::ConstIterator m_end;
@@ -1042,8 +1042,8 @@ struct ApplyFilter: public BaseAction
 	ApplyFilter(): BaseAction(Type::ApplyFilter, "apply_filter") { }
 
 private:
-	virtual bool canBeRun() OVERRIDE;
-	virtual void run() OVERRIDE;
+	virtual bool canBeRun() override;
+	virtual void run() override;
 
 	Filterable *m_filterable;
 };
@@ -1053,8 +1053,8 @@ struct Find: BaseAction
 	Find(): BaseAction(Type::Find, "find") { }
 	
 private:
-	virtual bool canBeRun() OVERRIDE;
-	virtual void run() OVERRIDE;
+	virtual bool canBeRun() override;
+	virtual void run() override;
 };
 
 struct FindItemForward: BaseAction
@@ -1062,8 +1062,8 @@ struct FindItemForward: BaseAction
 	FindItemForward(): BaseAction(Type::FindItemForward, "find_item_forward") { }
 	
 private:
-	virtual bool canBeRun() OVERRIDE;
-	virtual void run() OVERRIDE;
+	virtual bool canBeRun() override;
+	virtual void run() override;
 };
 
 struct FindItemBackward: BaseAction
@@ -1071,8 +1071,8 @@ struct FindItemBackward: BaseAction
 	FindItemBackward(): BaseAction(Type::FindItemBackward, "find_item_backward") { }
 	
 private:
-	virtual bool canBeRun() OVERRIDE;
-	virtual void run() OVERRIDE;
+	virtual bool canBeRun() override;
+	virtual void run() override;
 };
 
 struct NextFoundItem: BaseAction
@@ -1080,8 +1080,8 @@ struct NextFoundItem: BaseAction
 	NextFoundItem(): BaseAction(Type::NextFoundItem, "next_found_item") { }
 	
 private:
-	virtual bool canBeRun() OVERRIDE;
-	virtual void run() OVERRIDE;
+	virtual bool canBeRun() override;
+	virtual void run() override;
 };
 
 struct PreviousFoundItem: BaseAction
@@ -1089,8 +1089,8 @@ struct PreviousFoundItem: BaseAction
 	PreviousFoundItem(): BaseAction(Type::PreviousFoundItem, "previous_found_item") { }
 	
 private:
-	virtual bool canBeRun() OVERRIDE;
-	virtual void run() OVERRIDE;
+	virtual bool canBeRun() override;
+	virtual void run() override;
 };
 
 struct ToggleFindMode: BaseAction
@@ -1098,7 +1098,7 @@ struct ToggleFindMode: BaseAction
 	ToggleFindMode(): BaseAction(Type::ToggleFindMode, "toggle_find_mode") { }
 	
 private:
-	virtual void run() OVERRIDE;
+	virtual void run() override;
 };
 
 struct ToggleReplayGainMode: BaseAction
@@ -1106,7 +1106,7 @@ struct ToggleReplayGainMode: BaseAction
 	ToggleReplayGainMode(): BaseAction(Type::ToggleReplayGainMode, "toggle_replay_gain_mode") { }
 	
 private:
-	virtual void run() OVERRIDE;
+	virtual void run() override;
 };
 
 struct ToggleAddMode: BaseAction
@@ -1114,7 +1114,7 @@ struct ToggleAddMode: BaseAction
 	ToggleAddMode(): BaseAction(Type::ToggleAddMode, "toggle_add_mode") { }
 	
 private:
-	virtual void run() OVERRIDE;
+	virtual void run() override;
 };
 
 struct ToggleMouse: BaseAction
@@ -1122,7 +1122,7 @@ struct ToggleMouse: BaseAction
 	ToggleMouse(): BaseAction(Type::ToggleMouse, "toggle_mouse") { }
 	
 private:
-	virtual void run() OVERRIDE;
+	virtual void run() override;
 };
 
 struct ToggleBitrateVisibility: BaseAction
@@ -1130,7 +1130,7 @@ struct ToggleBitrateVisibility: BaseAction
 	ToggleBitrateVisibility(): BaseAction(Type::ToggleBitrateVisibility, "toggle_bitrate_visibility") { }
 	
 private:
-	virtual void run() OVERRIDE;
+	virtual void run() override;
 };
 
 struct AddRandomItems: BaseAction
@@ -1138,7 +1138,7 @@ struct AddRandomItems: BaseAction
 	AddRandomItems(): BaseAction(Type::AddRandomItems, "add_random_items") { }
 	
 private:
-	virtual void run() OVERRIDE;
+	virtual void run() override;
 };
 
 struct ToggleBrowserSortMode: BaseAction
@@ -1146,8 +1146,8 @@ struct ToggleBrowserSortMode: BaseAction
 	ToggleBrowserSortMode(): BaseAction(Type::ToggleBrowserSortMode, "toggle_browser_sort_mode") { }
 	
 private:
-	virtual bool canBeRun() OVERRIDE;
-	virtual void run() OVERRIDE;
+	virtual bool canBeRun() override;
+	virtual void run() override;
 };
 
 struct ToggleLibraryTagType: BaseAction
@@ -1155,8 +1155,8 @@ struct ToggleLibraryTagType: BaseAction
 	ToggleLibraryTagType(): BaseAction(Type::ToggleLibraryTagType, "toggle_library_tag_type") { }
 	
 private:
-	virtual bool canBeRun() OVERRIDE;
-	virtual void run() OVERRIDE;
+	virtual bool canBeRun() override;
+	virtual void run() override;
 };
 
 struct ToggleMediaLibrarySortMode: BaseAction
@@ -1165,8 +1165,8 @@ struct ToggleMediaLibrarySortMode: BaseAction
 	: BaseAction(Type::ToggleMediaLibrarySortMode, "toggle_media_library_sort_mode") { }
 	
 private:
-	virtual bool canBeRun() OVERRIDE;
-	virtual void run() OVERRIDE;
+	virtual bool canBeRun() override;
+	virtual void run() override;
 };
 
 struct RefetchLyrics: BaseAction
@@ -1174,8 +1174,8 @@ struct RefetchLyrics: BaseAction
 	RefetchLyrics(): BaseAction(Type::RefetchLyrics, "refetch_lyrics") { }
 	
 private:
-	virtual bool canBeRun() OVERRIDE;
-	virtual void run() OVERRIDE;
+	virtual bool canBeRun() override;
+	virtual void run() override;
 };
 
 struct SetSelectedItemsPriority: BaseAction
@@ -1184,8 +1184,8 @@ struct SetSelectedItemsPriority: BaseAction
 	: BaseAction(Type::SetSelectedItemsPriority, "set_selected_items_priority") { }
 	
 private:
-	virtual bool canBeRun() OVERRIDE;
-	virtual void run() OVERRIDE;
+	virtual bool canBeRun() override;
+	virtual void run() override;
 };
 
 struct ToggleOutput: BaseAction
@@ -1193,8 +1193,8 @@ struct ToggleOutput: BaseAction
 	ToggleOutput(): BaseAction(Type::ToggleOutput, "toggle_output") { }
 
 private:
-	virtual bool canBeRun() OVERRIDE;
-	virtual void run() OVERRIDE;
+	virtual bool canBeRun() override;
+	virtual void run() override;
 };
 
 struct ToggleVisualizationType: BaseAction
@@ -1204,8 +1204,8 @@ struct ToggleVisualizationType: BaseAction
 
 private:
 	
-	virtual bool canBeRun() OVERRIDE;
-	virtual void run() OVERRIDE;
+	virtual bool canBeRun() override;
+	virtual void run() override;
 };
 
 struct SetVisualizerSampleMultiplier: BaseAction
@@ -1214,8 +1214,8 @@ struct SetVisualizerSampleMultiplier: BaseAction
 	: BaseAction(Type::SetVisualizerSampleMultiplier, "set_visualizer_sample_multiplier") { }
 
 private:
-	virtual bool canBeRun() OVERRIDE;
-	virtual void run() OVERRIDE;
+	virtual bool canBeRun() override;
+	virtual void run() override;
 };
 
 struct ShowSongInfo: BaseAction
@@ -1223,7 +1223,7 @@ struct ShowSongInfo: BaseAction
 	ShowSongInfo(): BaseAction(Type::ShowSongInfo, "show_song_info") { }
 	
 private:
-	virtual void run() OVERRIDE;
+	virtual void run() override;
 };
 
 struct ShowArtistInfo: BaseAction
@@ -1231,8 +1231,8 @@ struct ShowArtistInfo: BaseAction
 	ShowArtistInfo(): BaseAction(Type::ShowArtistInfo, "show_artist_info") { }
 	
 private:
-	virtual bool canBeRun() OVERRIDE;
-	virtual void run() OVERRIDE;
+	virtual bool canBeRun() override;
+	virtual void run() override;
 };
 
 struct ShowLyrics: BaseAction
@@ -1240,7 +1240,7 @@ struct ShowLyrics: BaseAction
 	ShowLyrics(): BaseAction(Type::ShowLyrics, "show_lyrics") { }
 	
 private:
-	virtual void run() OVERRIDE;
+	virtual void run() override;
 };
 
 struct Quit: BaseAction
@@ -1248,7 +1248,7 @@ struct Quit: BaseAction
 	Quit(): BaseAction(Type::Quit, "quit") { }
 	
 private:
-	virtual void run() OVERRIDE;
+	virtual void run() override;
 };
 
 struct NextScreen: BaseAction
@@ -1256,7 +1256,7 @@ struct NextScreen: BaseAction
 	NextScreen(): BaseAction(Type::NextScreen, "next_screen") { }
 	
 private:
-	virtual void run() OVERRIDE;
+	virtual void run() override;
 };
 
 struct PreviousScreen: BaseAction
@@ -1264,7 +1264,7 @@ struct PreviousScreen: BaseAction
 	PreviousScreen(): BaseAction(Type::PreviousScreen, "previous_screen") { }
 	
 private:
-	virtual void run() OVERRIDE;
+	virtual void run() override;
 };
 
 struct ShowHelp: BaseAction
@@ -1272,8 +1272,8 @@ struct ShowHelp: BaseAction
 	ShowHelp(): BaseAction(Type::ShowHelp, "show_help") { }
 	
 private:
-	virtual bool canBeRun() OVERRIDE;
-	virtual void run() OVERRIDE;
+	virtual bool canBeRun() override;
+	virtual void run() override;
 };
 
 struct ShowPlaylist: BaseAction
@@ -1281,8 +1281,8 @@ struct ShowPlaylist: BaseAction
 	ShowPlaylist(): BaseAction(Type::ShowPlaylist, "show_playlist") { }
 	
 private:
-	virtual bool canBeRun() OVERRIDE;
-	virtual void run() OVERRIDE;
+	virtual bool canBeRun() override;
+	virtual void run() override;
 };
 
 struct ShowBrowser: BaseAction
@@ -1290,8 +1290,8 @@ struct ShowBrowser: BaseAction
 	ShowBrowser(): BaseAction(Type::ShowBrowser, "show_browser") { }
 	
 private:
-	virtual bool canBeRun() OVERRIDE;
-	virtual void run() OVERRIDE;
+	virtual bool canBeRun() override;
+	virtual void run() override;
 };
 
 struct ChangeBrowseMode: BaseAction
@@ -1299,8 +1299,8 @@ struct ChangeBrowseMode: BaseAction
 	ChangeBrowseMode(): BaseAction(Type::ChangeBrowseMode, "change_browse_mode") { }
 	
 private:
-	virtual bool canBeRun() OVERRIDE;
-	virtual void run() OVERRIDE;
+	virtual bool canBeRun() override;
+	virtual void run() override;
 };
 
 struct ShowSearchEngine: BaseAction
@@ -1308,8 +1308,8 @@ struct ShowSearchEngine: BaseAction
 	ShowSearchEngine(): BaseAction(Type::ShowSearchEngine, "show_search_engine") { }
 	
 private:
-	virtual bool canBeRun() OVERRIDE;
-	virtual void run() OVERRIDE;
+	virtual bool canBeRun() override;
+	virtual void run() override;
 };
 
 struct ResetSearchEngine: BaseAction
@@ -1317,8 +1317,8 @@ struct ResetSearchEngine: BaseAction
 	ResetSearchEngine(): BaseAction(Type::ResetSearchEngine, "reset_search_engine") { }
 	
 private:
-	virtual bool canBeRun() OVERRIDE;
-	virtual void run() OVERRIDE;
+	virtual bool canBeRun() override;
+	virtual void run() override;
 };
 
 struct ShowMediaLibrary: BaseAction
@@ -1326,8 +1326,8 @@ struct ShowMediaLibrary: BaseAction
 	ShowMediaLibrary(): BaseAction(Type::ShowMediaLibrary, "show_media_library") { }
 	
 private:
-	virtual bool canBeRun() OVERRIDE;
-	virtual void run() OVERRIDE;
+	virtual bool canBeRun() override;
+	virtual void run() override;
 };
 
 struct ToggleMediaLibraryColumnsMode: BaseAction
@@ -1336,8 +1336,8 @@ struct ToggleMediaLibraryColumnsMode: BaseAction
 	: BaseAction(Type::ToggleMediaLibraryColumnsMode, "toggle_media_library_columns_mode") { }
 	
 private:
-	virtual bool canBeRun() OVERRIDE;
-	virtual void run() OVERRIDE;
+	virtual bool canBeRun() override;
+	virtual void run() override;
 };
 
 struct ShowPlaylistEditor: BaseAction
@@ -1345,8 +1345,8 @@ struct ShowPlaylistEditor: BaseAction
 	ShowPlaylistEditor(): BaseAction(Type::ShowPlaylistEditor, "show_playlist_editor") { }
 	
 private:
-	virtual bool canBeRun() OVERRIDE;
-	virtual void run() OVERRIDE;
+	virtual bool canBeRun() override;
+	virtual void run() override;
 };
 
 struct ShowTagEditor: BaseAction
@@ -1354,8 +1354,8 @@ struct ShowTagEditor: BaseAction
 	ShowTagEditor(): BaseAction(Type::ShowTagEditor, "show_tag_editor") { }
 	
 private:
-	virtual bool canBeRun() OVERRIDE;
-	virtual void run() OVERRIDE;
+	virtual bool canBeRun() override;
+	virtual void run() override;
 };
 
 struct ShowOutputs: BaseAction
@@ -1363,8 +1363,8 @@ struct ShowOutputs: BaseAction
 	ShowOutputs(): BaseAction(Type::ShowOutputs, "show_outputs") { }
 	
 private:
-	virtual bool canBeRun() OVERRIDE;
-	virtual void run() OVERRIDE;
+	virtual bool canBeRun() override;
+	virtual void run() override;
 };
 
 struct ShowVisualizer: BaseAction
@@ -1372,8 +1372,8 @@ struct ShowVisualizer: BaseAction
 	ShowVisualizer(): BaseAction(Type::ShowVisualizer, "show_visualizer") { }
 	
 private:
-	virtual bool canBeRun() OVERRIDE;
-	virtual void run() OVERRIDE;
+	virtual bool canBeRun() override;
+	virtual void run() override;
 };
 
 struct ShowClock: BaseAction
@@ -1381,8 +1381,8 @@ struct ShowClock: BaseAction
 	ShowClock(): BaseAction(Type::ShowClock, "show_clock") { }
 	
 private:
-	virtual bool canBeRun() OVERRIDE;
-	virtual void run() OVERRIDE;
+	virtual bool canBeRun() override;
+	virtual void run() override;
 };
 
 struct ShowServerInfo: BaseAction
@@ -1391,9 +1391,9 @@ struct ShowServerInfo: BaseAction
 	
 private:
 #	ifdef HAVE_TAGLIB_H
-	virtual bool canBeRun() OVERRIDE;
+	virtual bool canBeRun() override;
 #	endif // HAVE_TAGLIB_H
-	virtual void run() OVERRIDE;
+	virtual void run() override;
 };
 
 }

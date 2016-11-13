@@ -34,22 +34,22 @@ struct TinyTagEditor: Screen<NC::Menu<NC::Buffer>>, HasActions
 	TinyTagEditor();
 	
 	// Screen< NC::Menu<NC::Buffer> > implementation
-	virtual void resize() OVERRIDE;
-	virtual void switchTo() OVERRIDE;
+	virtual void resize() override;
+	virtual void switchTo() override;
 	
-	virtual std::wstring title() OVERRIDE;
-	virtual ScreenType type() OVERRIDE { return ScreenType::TinyTagEditor; }
+	virtual std::wstring title() override;
+	virtual ScreenType type() override { return ScreenType::TinyTagEditor; }
 	
-	virtual void update() OVERRIDE { }
+	virtual void update() override { }
 	
-	virtual void mouseButtonPressed(MEVENT me) OVERRIDE;
+	virtual void mouseButtonPressed(MEVENT me) override;
 	
-	virtual bool isLockable() OVERRIDE { return false; }
-	virtual bool isMergable() OVERRIDE { return true; }
+	virtual bool isLockable() override { return false; }
+	virtual bool isMergable() override { return true; }
 
 	// HasActions implementation
-	virtual bool actionRunnable() OVERRIDE;
-	virtual void runAction() OVERRIDE;
+	virtual bool actionRunnable() override;
+	virtual void runAction() override;
 
 	// private members
 	void SetEdited(const MPD::Song &);

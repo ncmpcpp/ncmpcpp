@@ -28,70 +28,27 @@ if test "$clock" = "yes"; then
 fi
 
 dnl ================================
-dnl = checking for -std=c++0x flag =
+dnl = checking for -std=c++14 flag =
 dnl ================================
-AC_MSG_CHECKING([whether compiler supports -std=c++0x])
+AC_MSG_CHECKING([whether compiler supports -std=c++14])
 old_CXXFLAGS="$CXXFLAGS"
-CXXFLAGS="-std=c++0x"
+CXXFLAGS="-std=c++14"
 AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[ ]])],
 	AC_MSG_RESULT([yes])
-		std_cpp0x="-std=c++0x",
+		std_cpp14="-std=c++14",
 	AC_MSG_RESULT([no])
-		AC_MSG_ERROR([[Your compiler doesn't seem to support C++0x, please upgrade (GCC >= 4.6)]])
+		AC_MSG_ERROR([[Your compiler doesn't seem to support C++14, please upgrade (GCC >= 5)]])
 )
-CXXFLAGS="$old_CXXFLAGS $std_cpp0x"
+CXXFLAGS="$old_CXXFLAGS $std_cpp14"
 
-dnl ==========================================
-dnl = checking for initializer lists support =
-dnl ==========================================
-AC_MSG_CHECKING([whether compiler supports initializer lists])
-AC_COMPILE_IFELSE([AC_LANG_PROGRAM([#include <vector>], [[std::vector<int> test = { 1, 2, 3 }; test.push_back(4);]])],
+dnl ===================================================
+dnl = checking for generic lambda expressions support =
+dnl ===================================================
+AC_MSG_CHECKING([whether compiler supports generic lambda expressions])
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([], [[auto f = [](auto n) { return n*n; }; f(7);]])],
 	AC_MSG_RESULT([yes]),
 	AC_MSG_RESULT([no])
-		AC_MSG_ERROR([[Your compiler doesn't seem to support initializer lists, please upgrade (GCC >= 4.6)]])
-)
-
-dnl =====================================
-dnl = checking for auto keyword support =
-dnl =====================================
-AC_MSG_CHECKING([whether compiler supports auto keyword])
-AC_COMPILE_IFELSE([AC_LANG_PROGRAM([], [[auto test = new int; *test = 1;]])],
-	AC_MSG_RESULT([yes]),
-	AC_MSG_RESULT([no])
-		AC_MSG_ERROR([[Your compiler doesn't seem to support auto keyword, please upgrade (GCC >= 4.6)]])
-)
-
-dnl =========================================
-dnl = checking for lambda functions support =
-dnl =========================================
-AC_MSG_CHECKING([whether compiler supports lambda functions])
-AC_COMPILE_IFELSE([AC_LANG_PROGRAM([#include <functional>], [[int a = 5; std::function<int(int)> f = [&a](int b) { return a + b; }; f(8);]])],
-	AC_MSG_RESULT([yes]),
-	AC_MSG_RESULT([no])
-		AC_MSG_ERROR([[Your compiler doesn't seem to support lambda functions, please upgrade (GCC >= 4.6)]])
-)
-
-dnl ================================================================
-dnl = checking whether calling derived member function of object   =
-dnl = passed to lambda without explicit 'this' usage works         =
-dnl ================================================================
-AC_MSG_CHECKING([whether calling derived member function passed to lambda without explicit this usage works ])
-AC_COMPILE_IFELSE([AC_LANG_PROGRAM([#include <functional>], [[struct A { void foo() { } };  struct B : public A { void bar() { std::function<void()> f = [this]() { foo(); }; f();  } } foo; foo.bar();]])],
-	AC_MSG_RESULT([yes]),
-	AC_MSG_RESULT([no])
-		AC_MSG_ERROR([[Your compiler doesn't seem to support calling derived member function of an object passed to lambda as 'this' without explicit 'this' usage, please upgrade (GCC >= 4.6)]])
-)
-
-dnl =========================================
-dnl = checking for override keyword support =
-dnl =========================================
-AH_TEMPLATE([OVERRIDE], [override keyword used in C++11])
-AC_MSG_CHECKING([whether compiler supports override keyword])
-AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[struct A { virtual void foo() { } }; struct B : public A { virtual void foo() override { } };]], [])],
-	AC_MSG_RESULT([yes])
-		AC_DEFINE([OVERRIDE], [override]),
-	AC_MSG_RESULT([no])
-		AC_DEFINE([OVERRIDE], []),
+		AC_MSG_ERROR([[Your compiler doesn't seem to support generic lambda expressions, please upgrade (GCC >= 5)]])
 )
 
 dnl =============================
