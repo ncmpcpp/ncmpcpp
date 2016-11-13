@@ -106,6 +106,7 @@ std::vector<std::string> LyricsFetcher::getContent(const char *regex_, const std
 
 void LyricsFetcher::postProcess(std::string &data) const
 {
+	data = unescapeHtmlUtf8(data);
 	stripHtmlTags(data);
 	// Remove indentation from each line and collapse multiple newlines into one.
 	std::vector<std::string> lines;
@@ -157,7 +158,6 @@ LyricsFetcher::Result LyricwikiFetcher::fetch(const std::string &artist, const s
 		data.clear();
 		for (auto it = lyrics.begin(); it != lyrics.end(); ++it)
 		{
-			boost::replace_all(*it, "<br />", "\n");
 			stripHtmlTags(*it);
 			boost::trim(*it);
 			if (!it->empty())
@@ -225,34 +225,6 @@ bool GoogleLyricsFetcher::isURLOk(const std::string &url)
 }
 
 /**********************************************************************/
-
-void Sing365Fetcher::postProcess(std::string &data) const
-{
-	// throw away ad
-	data = boost::regex_replace(data, boost::regex("<div.*</div>"), "");
-	LyricsFetcher::postProcess(data);
-}
-
-/**********************************************************************/
-
-void JustSomeLyricsFetcher::postProcess(std::string &data) const
-{
-	data = unescapeHtmlUtf8(data);
-	LyricsFetcher::postProcess(data);
-}
-
-/**********************************************************************/
-
-void MetrolyricsFetcher::postProcess(std::string &data) const
-{
-	// some of lyrics have both \n chars and <br />, html tags
-	// are always present whereas \n chars are not, so we need to
-	// throw them away to avoid having line breaks doubled.
-	boost::replace_all(data, "&#10;", "");
-	boost::replace_all(data, "<br />", "\n");
-	data = unescapeHtmlUtf8(data);
-	LyricsFetcher::postProcess(data);
-}
 
 bool MetrolyricsFetcher::isURLOk(const std::string &url)
 {

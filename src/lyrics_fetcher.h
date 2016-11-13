@@ -82,7 +82,6 @@ protected:
 	virtual const char *regex() const OVERRIDE { return "<div class=\"lyrics-body\">(.*?)</div>"; }
 	
 	virtual bool isURLOk(const std::string &url) OVERRIDE;
-	virtual void postProcess(std::string &data) const OVERRIDE;
 };
 
 struct LyricsmaniaFetcher : public GoogleLyricsFetcher
@@ -99,8 +98,6 @@ struct Sing365Fetcher : public GoogleLyricsFetcher
 	
 protected:
 	virtual const char *regex() const OVERRIDE { return "<!-Lyrics Begin->(.*?)<!-Lyrics End->"; }
-
-	virtual void postProcess(std::string &data) const OVERRIDE;
 };
 
 struct JustSomeLyricsFetcher : public GoogleLyricsFetcher
@@ -109,8 +106,6 @@ struct JustSomeLyricsFetcher : public GoogleLyricsFetcher
 	
 protected:
 	virtual const char *regex() const OVERRIDE { return "<div class=\"content.*?</div>\\s*</div>(.*?)<div"; }
-
-	virtual void postProcess(std::string &data) const OVERRIDE;
 };
 
 struct AzLyricsFetcher : public GoogleLyricsFetcher

@@ -18,6 +18,7 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
+#include <algorithm>
 #include <boost/algorithm/string/replace.hpp>
 #include "utility/html.h"
 
@@ -58,20 +59,32 @@ void unescapeHtmlEntities(std::string &s)
 	boost::replace_all(s, "&lt;", "<");
 	boost::replace_all(s, "&nbsp;", " ");
 	boost::replace_all(s, "&quot;", "\"");
+	boost::replace_all(s, "&ndash;", "–");
+	boost::replace_all(s, "&mdash;", "—");
 }
 
 void stripHtmlTags(std::string &s)
 {
-	bool is_p, is_slash_p;
+	// Erase newlines so they don't duplicate with HTML ones.
+	s.erase(std::remove_if(s.begin(), s.end(), [](char c) {
+				return c == '\n' || c == '\r';
+			}), s.end());
+
+	bool is_newline;
 	for (size_t i = s.find("<"); i != std::string::npos; i = s.find("<"))
 	{
 		size_t j = s.find(">", i);
 		if (j != std::string::npos)
 		{
 			++j;
-			is_p = s.compare(i, j-i, "<p ") == 0 || s.compare(i, j-i, "<p>") == 0;
-			is_slash_p = s.compare(i, j-i, "</p>") == 0;
-			if (is_p || is_slash_p)
+			is_newline
+				=  s.compare(i, std::min<size_t>(3, j-i), "<p ") == 0
+				|| s.compare(i, j-i, "<p>") == 0
+				|| s.compare(i, j-i, "</p>") == 0
+				|| s.compare(i, j-i, "<br>") == 0
+				|| s.compare(i, j-i, "<br/>") == 0
+				|| s.compare(i, std::min<size_t>(4, j-i), "<br ") == 0;
+			if (is_newline)
 				s.replace(i, j-i, "\n");
 			else
 				s.replace(i, j-i, "");
