@@ -487,7 +487,7 @@ void MediaLibrary::mouseButtonPressed(MEVENT me)
 		}
 		return result;
 	};
-	if (!Tags.empty() && Tags.hasCoords(me.x, me.y))
+	if (Tags.hasCoords(me.x, me.y))
 	{
 		if (!tryPreviousColumn() || !tryPreviousColumn())
 			return;
@@ -502,7 +502,7 @@ void MediaLibrary::mouseButtonPressed(MEVENT me)
 		Albums.clear();
 		Songs.clear();
 	}
-	else if (!Albums.empty() && Albums.hasCoords(me.x, me.y))
+	else if (Albums.hasCoords(me.x, me.y))
 	{
 		if (!isActiveWindow(Albums))
 		{
@@ -524,7 +524,7 @@ void MediaLibrary::mouseButtonPressed(MEVENT me)
 			Screen<WindowType>::mouseButtonPressed(me);
 		Songs.clear();
 	}
-	else if (!Songs.empty() && Songs.hasCoords(me.x, me.y))
+	else if (Songs.hasCoords(me.x, me.y))
 	{
 		if (!tryNextColumn() || !tryNextColumn())
 			return;

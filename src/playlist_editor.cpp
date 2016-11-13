@@ -227,7 +227,7 @@ int PlaylistEditor::windowTimeout()
 
 void PlaylistEditor::mouseButtonPressed(MEVENT me)
 {
-	if (!Playlists.empty() && Playlists.hasCoords(me.x, me.y))
+	if (Playlists.hasCoords(me.x, me.y))
 	{
 		if (!isActiveWindow(Playlists))
 		{
@@ -246,7 +246,7 @@ void PlaylistEditor::mouseButtonPressed(MEVENT me)
 			Screen<WindowType>::mouseButtonPressed(me);
 		Content.clear();
 	}
-	else if (!Content.empty() && Content.hasCoords(me.x, me.y))
+	else if (Content.hasCoords(me.x, me.y))
 	{
 		if (!isActiveWindow(Content))
 		{
