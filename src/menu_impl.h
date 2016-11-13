@@ -336,8 +336,10 @@ void Menu<ItemT>::reset()
 template <typename ItemT>
 void Menu<ItemT>::clear()
 {
-	clearFilter();
-	m_items->clear();
+	// Don't clear the filter here.
+	m_all_items.clear();
+	m_filtered_items.clear();
+	m_items = &m_all_items;
 }
 
 template <typename ItemT>

@@ -269,6 +269,27 @@ bool SearchEngine::search(SearchDirection direction, bool wrap, bool skip_curren
 	return ::search(w, m_search_predicate, direction, wrap, skip_current);
 }
 
+std::string SearchEngine::currentFilter()
+{
+	std::string result;
+	if (auto pred = w.filterPredicate<Regex::ItemFilter<SEItem>>())
+		result = pred->constraint();
+	return result;
+}
+
+void SearchEngine::applyFilter(const std::string &constraint)
+{
+	if (!constraint.empty())
+	{
+		w.applyFilter(Regex::ItemFilter<SEItem>(
+			              constraint,
+			              Config.regex_type,
+			              std::bind(SEItemEntryMatcher, ph::_1, ph::_2, true)));
+	}
+	else
+		w.clearFilter();
+}
+
 /***********************************************************************/
 
 bool SearchEngine::actionRunnable()
@@ -306,6 +327,7 @@ void SearchEngine::runAction()
 	}
 	else if (option == SearchButton)
 	{
+		w.clearFilter();
 		Statusbar::print("Searching...");
 		if (w.size() > StaticOptions)
 			Prepare();

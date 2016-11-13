@@ -267,6 +267,28 @@ bool Browser::search(SearchDirection direction, bool wrap, bool skip_current)
 	return ::search(w, m_search_predicate, direction, wrap, skip_current);
 }
 
+std::string Browser::currentFilter()
+{
+	std::string result;
+	if (auto pred = w.filterPredicate<Regex::Filter<MPD::Item>>())
+		result = pred->constraint();
+	return result;
+}
+
+void Browser::applyFilter(const std::string &constraint)
+{
+	if (!constraint.empty())
+	{
+		w.applyFilter(Regex::Filter<MPD::Item>(
+			              constraint,
+			              Config.regex_type,
+			              std::bind(browserEntryMatcher, ph::_1, ph::_2, true)));
+	}
+	else
+		w.clearFilter();
+}
+
+
 /***********************************************************************/
 
 bool Browser::itemAvailable()
@@ -399,7 +421,9 @@ void Browser::locateSong(const MPD::Song &s)
 	
 	if (myScreen != this)
 		switchTo();
-	
+
+	w.clearFilter();
+
 	// change to relevant directory
 	if (m_current_directory != s.getDirectory())
 	{
@@ -432,6 +456,8 @@ bool Browser::enterDirectory()
 
 void Browser::getDirectory(std::string directory)
 {
+	ScopedUnfilteredMenu<MPD::Item, ReapplyFilter::Yes> sunfilter(w);
+
 	m_scroll_beginning = 0;
 	w.clear();
 

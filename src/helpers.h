@@ -23,6 +23,7 @@
 
 #include "interfaces.h"
 #include "mpdpp.h"
+#include "playlist.h"
 #include "screen.h"
 #include "settings.h"
 #include "song_list.h"
@@ -371,6 +372,21 @@ template <typename Iterator> std::string getSharedDirectory(Iterator first, Iter
 	return result;
 }
 
+template <typename ListT>
+void markSongsInPlaylist(ListT &list)
+{
+	ScopedUnfilteredMenu<
+		typename ListT::Item::Type,
+		ReapplyFilter::No> sunfilter(list);
+	MPD::Song *s;
+	for (auto &p : static_cast<SongList &>(list))
+	{
+		s = p.get<Bit::Song>();
+		if (s != nullptr)
+			p.get<Bit::Properties>().setBold(myPlaylist->checkForSong(*s));
+	}
+}
+
 template <typename T> void ShowTime(T &buf, size_t length, bool short_names)
 {
 	const unsigned MINUTE = 60;
@@ -441,8 +457,6 @@ MPD::SongIterator getDatabaseIterator(MPD::Connection &mpd);
 std::string timeFormat(const char *format, time_t t);
 
 std::string Timestamp(time_t t);
-
-void markSongsInPlaylist(SongList &list);
 
 std::wstring Scroller(const std::wstring &str, size_t &pos, size_t width);
 void writeCyclicBuffer(const NC::WBuffer &buf, NC::Window &w, size_t &start_pos,

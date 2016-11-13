@@ -1947,8 +1947,7 @@ void ReversePlaylist::run()
 bool ApplyFilter::canBeRun()
 {
 	m_searchable = dynamic_cast<Searchable *>(myScreen);
-	return m_searchable != nullptr
-		&& myScreen == myPlaylist;
+	return m_searchable != nullptr;
 }
 
 void ApplyFilter::run()

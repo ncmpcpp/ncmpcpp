@@ -172,17 +172,6 @@ std::string Timestamp(time_t t)
 	return result;
 }
 
-void markSongsInPlaylist(SongList &list)
-{
-	MPD::Song *s;
-	for (auto &p : list)
-	{
-		s = p.get<Bit::Song>();
-		if (s != nullptr)
-			p.get<Bit::Properties>().setBold(myPlaylist->checkForSong(*s));
-	}
-}
-
 std::wstring Scroller(const std::wstring &str, size_t &pos, size_t width)
 {
 	std::wstring s(str);
