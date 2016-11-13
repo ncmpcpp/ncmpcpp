@@ -267,6 +267,13 @@ bool Browser::search(SearchDirection direction, bool wrap, bool skip_current)
 	return ::search(w, m_search_predicate, direction, wrap, skip_current);
 }
 
+/***********************************************************************/
+
+bool Browser::allowsFiltering()
+{
+	return allowsSearching();
+}
+
 std::string Browser::currentFilter()
 {
 	std::string result;

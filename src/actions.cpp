@@ -1958,18 +1958,19 @@ void ReversePlaylist::run()
 
 bool ApplyFilter::canBeRun()
 {
-	m_searchable = dynamic_cast<Searchable *>(myScreen);
-	return m_searchable != nullptr;
+	m_filterable = dynamic_cast<Filterable *>(myScreen);
+	return m_filterable != nullptr
+		&& m_filterable->allowsFiltering();
 }
 
 void ApplyFilter::run()
 {
 	using Global::wFooter;
 
-	std::string filter = m_searchable->currentFilter();
+	std::string filter = m_filterable->currentFilter();
 	if (!filter.empty())
 	{
-		m_searchable->applyFilter(filter);
+		m_filterable->applyFilter(filter);
 		myScreen->refreshWindow();
 	}
 
@@ -1978,13 +1979,13 @@ void ApplyFilter::run()
 		Statusbar::ScopedLock slock;
 		NC::Window::ScopedPromptHook helper(
 			*wFooter,
-			Statusbar::Helpers::ApplyFilterImmediately(m_searchable));
+			Statusbar::Helpers::ApplyFilterImmediately(m_filterable));
 		Statusbar::put() << "Apply filter: ";
 		filter = wFooter->prompt(filter);
 	}
 	catch (NC::PromptAborted &)
 	{
-		m_searchable->applyFilter(filter);
+		m_filterable->applyFilter(filter);
 		throw;
 	}
 

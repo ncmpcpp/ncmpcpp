@@ -49,7 +49,7 @@ struct SelectedItemsAdder: Screen<NC::Menu<RunnableItem<std::string, void()>> *>
 	virtual bool isLockable() OVERRIDE { return false; }
 	virtual bool isMergable() OVERRIDE { return false; }
 
-	// HasActions implemenetation
+	// HasActions implementation
 	virtual bool actionRunnable() OVERRIDE;
 	virtual void runAction() OVERRIDE;
 

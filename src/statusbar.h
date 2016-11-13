@@ -91,14 +91,14 @@ private:
 
 struct ApplyFilterImmediately
 {
-	ApplyFilterImmediately(Searchable *w)
+	ApplyFilterImmediately(Filterable *w)
 		: m_w(w)
 	{ }
 
 	bool operator()(const char *s);
 
 private:
-	Searchable *m_w;
+	Filterable *m_w;
 };
 
 struct FindImmediately

@@ -225,7 +225,7 @@ bool Statusbar::Helpers::ApplyFilterImmediately::operator()(const char *s)
 	using Global::myScreen;
 	Status::trace();
 	try {
-		if (m_w->allowsSearching() && m_w->currentFilter() != s)
+		if (m_w->allowsFiltering() && m_w->currentFilter() != s)
 		{
 			m_w->applyFilter(s);
 			if (myScreen == myPlaylist)

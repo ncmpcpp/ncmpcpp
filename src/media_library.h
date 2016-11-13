@@ -28,7 +28,7 @@
 #include "screen.h"
 #include "song_list.h"
 
-struct MediaLibrary: Screen<NC::Window *>, HasColumns, HasSongs, Searchable, Tabbable
+struct MediaLibrary: Screen<NC::Window *>, Filterable, HasColumns, HasSongs, Searchable, Tabbable
 {
 	MediaLibrary();
 	
@@ -55,6 +55,8 @@ struct MediaLibrary: Screen<NC::Window *>, HasColumns, HasSongs, Searchable, Tab
 	virtual void clearSearchConstraint() OVERRIDE;
 	virtual bool search(SearchDirection direction, bool wrap, bool skip_current) OVERRIDE;
 
+	// Filterable implementation
+	virtual bool allowsFiltering() OVERRIDE;
 	virtual std::string currentFilter() OVERRIDE;
 	virtual void applyFilter(const std::string &filter) OVERRIDE;
 

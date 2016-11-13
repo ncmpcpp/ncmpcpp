@@ -269,6 +269,13 @@ bool SearchEngine::search(SearchDirection direction, bool wrap, bool skip_curren
 	return ::search(w, m_search_predicate, direction, wrap, skip_current);
 }
 
+/***********************************************************************/
+
+bool SearchEngine::allowsFiltering()
+{
+	return allowsSearching();
+}
+
 std::string SearchEngine::currentFilter()
 {
 	std::string result;

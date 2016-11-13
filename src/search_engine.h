@@ -91,7 +91,7 @@ struct SearchEngineWindow: NC::Menu<SEItem>, SongList
 	virtual std::vector<MPD::Song> getSelectedSongs() OVERRIDE;
 };
 
-struct SearchEngine: Screen<SearchEngineWindow>, HasActions, HasSongs, Searchable, Tabbable
+struct SearchEngine: Screen<SearchEngineWindow>, Filterable, HasActions, HasSongs, Searchable, Tabbable
 {
 	SearchEngine();
 	
@@ -116,6 +116,8 @@ struct SearchEngine: Screen<SearchEngineWindow>, HasActions, HasSongs, Searchabl
 	virtual void clearSearchConstraint() OVERRIDE;
 	virtual bool search(SearchDirection direction, bool wrap, bool skip_current) OVERRIDE;
 
+	// Filterable implementation
+	virtual bool allowsFiltering() OVERRIDE;
 	virtual std::string currentFilter() OVERRIDE;
 	virtual void applyFilter(const std::string &filter) OVERRIDE;
 

@@ -318,6 +318,13 @@ bool PlaylistEditor::search(SearchDirection direction, bool wrap, bool skip_curr
 	return result;
 }
 
+/***********************************************************************/
+
+bool PlaylistEditor::allowsFiltering()
+{
+	return allowsSearching();
+}
+
 std::string PlaylistEditor::currentFilter()
 {
 	std::string result;

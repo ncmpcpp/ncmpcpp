@@ -47,7 +47,7 @@ struct TinyTagEditor: Screen<NC::Menu<NC::Buffer>>, HasActions
 	virtual bool isLockable() OVERRIDE { return false; }
 	virtual bool isMergable() OVERRIDE { return true; }
 
-	// HasActions implemenetation
+	// HasActions implementation
 	virtual bool actionRunnable() OVERRIDE;
 	virtual void runAction() OVERRIDE;
 

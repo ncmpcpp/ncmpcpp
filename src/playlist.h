@@ -30,7 +30,7 @@
 #include "song.h"
 #include "song_list.h"
 
-struct Playlist: Screen<SongMenu>, HasSongs, Searchable, Tabbable
+struct Playlist: Screen<SongMenu>, Filterable, HasSongs, Searchable, Tabbable
 {
 	Playlist();
 	
@@ -55,6 +55,8 @@ struct Playlist: Screen<SongMenu>, HasSongs, Searchable, Tabbable
 	virtual void clearSearchConstraint() OVERRIDE;
 	virtual bool search(SearchDirection direction, bool wrap, bool skip_current) OVERRIDE;
 
+	// Filterable implementation
+	virtual bool allowsFiltering() OVERRIDE;
 	virtual std::string currentFilter() OVERRIDE;
 	virtual void applyFilter(const std::string &filter) OVERRIDE;
 	

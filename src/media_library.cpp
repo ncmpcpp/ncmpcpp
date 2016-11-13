@@ -604,6 +604,13 @@ bool MediaLibrary::search(SearchDirection direction, bool wrap, bool skip_curren
 	return result;
 }
 
+/***********************************************************************/
+
+bool MediaLibrary::allowsFiltering()
+{
+	return allowsSearching();
+}
+
 std::string MediaLibrary::currentFilter()
 {
 	std::string result;

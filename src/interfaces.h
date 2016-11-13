@@ -37,9 +37,13 @@ struct Searchable
 	virtual void setSearchConstraint(const std::string &constraint) = 0;
 	virtual void clearSearchConstraint() = 0;
 	virtual bool search(SearchDirection direction, bool wrap, bool skip_current) = 0;
+};
 
-	virtual std::string currentFilter() { return ""; }
-	virtual void applyFilter(const std::string &) { }
+struct Filterable
+{
+	virtual bool allowsFiltering() = 0;
+	virtual std::string currentFilter() = 0;
+	virtual void applyFilter(const std::string &constraint) = 0;
 };
 
 struct HasActions

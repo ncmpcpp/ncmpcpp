@@ -28,7 +28,7 @@
 #include "screen.h"
 #include "song_list.h"
 
-struct PlaylistEditor: Screen<NC::Window *>, HasColumns, HasSongs, Searchable, Tabbable
+struct PlaylistEditor: Screen<NC::Window *>, Filterable, HasColumns, HasSongs, Searchable, Tabbable
 {
 	PlaylistEditor();
 	
@@ -55,6 +55,8 @@ struct PlaylistEditor: Screen<NC::Window *>, HasColumns, HasSongs, Searchable, T
 	virtual void clearSearchConstraint() OVERRIDE;
 	virtual bool search(SearchDirection direction, bool wrap, bool skip_current) OVERRIDE;
 
+	// Filterable implementation
+	virtual bool allowsFiltering() OVERRIDE;
 	virtual std::string currentFilter() OVERRIDE;
 	virtual void applyFilter(const std::string &filter) OVERRIDE;
 

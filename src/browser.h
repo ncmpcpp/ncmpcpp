@@ -43,7 +43,7 @@ struct BrowserWindow: NC::Menu<MPD::Item>, SongList
 	virtual std::vector<MPD::Song> getSelectedSongs() OVERRIDE;
 };
 
-struct Browser: Screen<BrowserWindow>, HasSongs, Searchable, Tabbable
+struct Browser: Screen<BrowserWindow>, Filterable, HasSongs, Searchable, Tabbable
 {
 	Browser();
 	
@@ -68,6 +68,8 @@ struct Browser: Screen<BrowserWindow>, HasSongs, Searchable, Tabbable
 	virtual void clearSearchConstraint() OVERRIDE;
 	virtual bool search(SearchDirection direction, bool wrap, bool skip_current) OVERRIDE;
 
+	// Filterable implemenetation
+	virtual bool allowsFiltering() OVERRIDE;
 	virtual std::string currentFilter() OVERRIDE;
 	virtual void applyFilter(const std::string &filter) OVERRIDE;
 
