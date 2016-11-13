@@ -54,7 +54,10 @@ struct PlaylistEditor: Screen<NC::Window *>, HasColumns, HasSongs, Searchable, T
 	virtual void setSearchConstraint(const std::string &constraint) OVERRIDE;
 	virtual void clearSearchConstraint() OVERRIDE;
 	virtual bool search(SearchDirection direction, bool wrap, bool skip_current) OVERRIDE;
-	
+
+	virtual std::string currentFilter() OVERRIDE;
+	virtual void applyFilter(const std::string &filter) OVERRIDE;
+
 	// HasSongs implementation
 	virtual bool itemAvailable() OVERRIDE;
 	virtual bool addItemToPlaylist(bool play) OVERRIDE;
@@ -73,7 +76,7 @@ struct PlaylistEditor: Screen<NC::Window *>, HasColumns, HasSongs, Searchable, T
 	void requestPlaylistsUpdate() { m_playlists_update_requested = true; }
 	void requestContentsUpdate() { m_content_update_requested = true; }
 	
-	virtual void Locate(const MPD::Playlist &playlist);
+	void locatePlaylist(const MPD::Playlist &playlist);
 	
 	NC::Menu<MPD::Playlist> Playlists;
 	SongMenu Content;

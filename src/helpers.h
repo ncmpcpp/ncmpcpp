@@ -369,7 +369,8 @@ void cropPlaylist(NC::Menu<MPD::Song> &m, F delete_fun)
 	deleteSelectedSongs(m, delete_fun);
 }
 
-template <typename Iterator> std::string getSharedDirectory(Iterator first, Iterator last)
+template <typename Iterator>
+std::string getSharedDirectory(Iterator first, Iterator last)
 {
 	assert(first != last);
 	std::string result = first->getDirectory();
@@ -393,6 +394,56 @@ void markSongsInPlaylist(ListT &list)
 		if (s != nullptr)
 			p.get<Bit::Properties>().setBold(myPlaylist->checkForSong(*s));
 	}
+}
+
+template <typename Iterator>
+bool addSongsToPlaylist(Iterator first, Iterator last, bool play, int position)
+{
+	bool result = true;
+	auto addSongNoError = [&](Iterator it) -> int {
+		try
+		{
+			return Mpd.AddSong(*it, position);
+		}
+		catch (MPD::ServerError &e)
+		{
+			Status::handleServerError(e);
+			result = false;
+			return -1;
+		}
+	};
+
+	if (last-first >= 1)
+	{
+		int id;
+		while (true)
+		{
+			id = addSongNoError(first);
+			if (id >= 0)
+				break;
+			++first;
+			if (first == last)
+				return result;
+		}
+
+		if (position == -1)
+		{
+			++first;
+			for(; first != last; ++first)
+				addSongNoError(first);
+		}
+		else
+		{
+			++position;
+			--last;
+			for (; first != last; --last)
+				addSongNoError(last);
+		}
+		if (play)
+			Mpd.PlayID(id);
+	}
+
+	return result;
 }
 
 template <typename T> void ShowTime(T &buf, size_t length, bool short_names)
@@ -450,11 +501,6 @@ inline const char *withErrors(bool success)
 {
 	return success ? "" : " " "(with errors)";
 }
-
-
-bool addSongsToPlaylist(std::vector<MPD::Song>::const_iterator first,
-                        std::vector<MPD::Song>::const_iterator last,
-                        bool play, int position);
 
 bool addSongToPlaylist(const MPD::Song &s, bool play, int position = -1);
 

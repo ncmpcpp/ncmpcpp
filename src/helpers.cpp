@@ -63,56 +63,6 @@ MPD::SongIterator getDatabaseIterator(MPD::Connection &mpd)
 	return result;
 }
 
-typedef std::vector<MPD::Song>::const_iterator VectorSongIterator;
-bool addSongsToPlaylist(VectorSongIterator first, VectorSongIterator last, bool play, int position)
-{
-	bool result = true;
-	auto addSongNoError = [&](VectorSongIterator song) -> int {
-		try
-		{
-			return Mpd.AddSong(*song, position);
-		}
-		catch (MPD::ServerError &e)
-		{
-			Status::handleServerError(e);
-			result = false;
-			return -1;
-		}
-	};
-
-	if (last-first >= 1)
-	{
-		int id;
-		while (true)
-		{
-			id = addSongNoError(first);
-			if (id >= 0)
-				break;
-			++first;
-			if (first == last)
-				return result;
-		}
-
-		if (position == -1)
-		{
-			++first;
-			for(; first != last; ++first)
-				addSongNoError(first);
-		}
-		else
-		{
-			++position;
-			--last;
-			for (; first != last; --last)
-				addSongNoError(last);
-		}
-		if (play)
-			Mpd.PlayID(id);
-	}
-
-	return result;
-}
-
 void removeSongFromPlaylist(const SongMenu &playlist, const MPD::Song &s)
 {
 	Mpd.StartCommandsList();

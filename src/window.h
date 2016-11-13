@@ -371,11 +371,14 @@ struct Window
 	/// Refreshed whole window and its border
 	/// @see refresh()
 	void display();
-	
+
+	/// Refreshes window's border
+	void refreshBorder() const;
+
 	/// Refreshes whole window, but not the border
 	/// @see display()
 	virtual void refresh();
-	
+
 	/// Moves the window to new coordinates
 	/// @param new_x new X position of left upper corner of window
 	/// @param new_y new Y position of left upper corner of window
@@ -436,10 +439,6 @@ protected:
 	/// @param bg background color
 	///
 	void setColor(Color c);
-	
-	/// Refreshes window's border
-	///
-	void refreshBorder() const;
 	
 	/// Changes dimensions of window, called from resize()
 	/// @param width new window's width

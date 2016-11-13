@@ -878,10 +878,11 @@ bool MoveSelectedItemsUp::canBeRun()
 
 void MoveSelectedItemsUp::run()
 {
+	const char *filteredMsg = "Moving items up is disabled in filtered playlist";
 	if (myScreen == myPlaylist)
 	{
 		if (myPlaylist->main().isFiltered())
-			Statusbar::print("Moving items up is disabled in filtered playlist");
+			Statusbar::print(filteredMsg);
 		else
 			moveSelectedItemsUp(
 				myPlaylist->main(),
@@ -889,10 +890,15 @@ void MoveSelectedItemsUp::run()
 	}
 	else if (myScreen == myPlaylistEditor)
 	{
-		assert(!myPlaylistEditor->Playlists.empty());
-		std::string playlist = myPlaylistEditor->Playlists.current()->value().path();
-		auto move_fun = std::bind(&MPD::Connection::PlaylistMove, ph::_1, playlist, ph::_2, ph::_3);
-		moveSelectedItemsUp(myPlaylistEditor->Content, move_fun);
+		if (myPlaylistEditor->Content.isFiltered())
+			Statusbar::print(filteredMsg);
+		else
+		{
+			auto playlist = myPlaylistEditor->Playlists.current()->value().path();
+			moveSelectedItemsUp(
+				myPlaylistEditor->Content,
+				std::bind(&MPD::Connection::PlaylistMove, ph::_1, playlist, ph::_2, ph::_3));
+		}
 	}
 }
 
@@ -906,10 +912,11 @@ bool MoveSelectedItemsDown::canBeRun()
 
 void MoveSelectedItemsDown::run()
 {
+	const char *filteredMsg = "Moving items down is disabled in filtered playlist";
 	if (myScreen == myPlaylist)
 	{
 		if (myPlaylist->main().isFiltered())
-			Statusbar::print("Moving items down is disabled in filtered playlist");
+			Statusbar::print(filteredMsg);
 		else
 			moveSelectedItemsDown(
 				myPlaylist->main(),
@@ -917,10 +924,15 @@ void MoveSelectedItemsDown::run()
 	}
 	else if (myScreen == myPlaylistEditor)
 	{
-		assert(!myPlaylistEditor->Playlists.empty());
-		std::string playlist = myPlaylistEditor->Playlists.current()->value().path();
-		auto move_fun = std::bind(&MPD::Connection::PlaylistMove, ph::_1, playlist, ph::_2, ph::_3);
-		moveSelectedItemsDown(myPlaylistEditor->Content, move_fun);
+		if (myPlaylistEditor->Content.isFiltered())
+			Statusbar::print(filteredMsg);
+		else
+		{
+			auto playlist = myPlaylistEditor->Playlists.current()->value().path();
+			moveSelectedItemsDown(
+				myPlaylistEditor->Content,
+				std::bind(&MPD::Connection::PlaylistMove, ph::_1, playlist, ph::_2, ph::_3));
+		}
 	}
 }
 
@@ -1622,7 +1634,7 @@ bool JumpToPlaylistEditor::canBeRun()
 
 void JumpToPlaylistEditor::run()
 {
-	myPlaylistEditor->Locate(myBrowser->main().current()->value().playlist());
+	myPlaylistEditor->locatePlaylist(myBrowser->main().current()->value().playlist());
 }
 
 void ToggleScreenLock::run()

@@ -79,7 +79,7 @@ PlaylistEditor::PlaylistEditor()
 		menu << Charset::utf8ToLocale(menu.drawn()->value().path());
 	});
 	
-	Content = NC::Menu<MPD::Song>(RightColumnStartX, MainStartY, RightColumnWidth, MainHeight, Config.titles_visibility ? "Playlist content" : "", Config.main_color, NC::Border());
+	Content = NC::Menu<MPD::Song>(RightColumnStartX, MainStartY, RightColumnWidth, MainHeight, Config.titles_visibility ? "Content" : "", Config.main_color, NC::Border());
 	Content.setHighlightColor(Config.main_highlight_color);
 	Content.cyclicScrolling(Config.use_cyclic_scrolling);
 	Content.centeredCursor(Config.centered_cursor);
@@ -143,42 +143,45 @@ void PlaylistEditor::switchTo()
 
 void PlaylistEditor::update()
 {
-	if (Playlists.empty() || m_playlists_update_requested)
 	{
-		m_playlists_update_requested = false;
-		size_t idx = 0;
-		try
+		ScopedUnfilteredMenu<MPD::Playlist> sunfilter_playlists(ReapplyFilter::No, Playlists);
+		if (Playlists.empty() || m_playlists_update_requested)
 		{
-			for (MPD::PlaylistIterator it = Mpd.GetPlaylists(), end; it != end; ++it, ++idx)
+			m_playlists_update_requested = false;
+			sunfilter_playlists.set(ReapplyFilter::Yes, true);
+			size_t idx = 0;
+			try
 			{
-				if (idx < Playlists.size())
-					Playlists[idx].value() = std::move(*it);
+				for (MPD::PlaylistIterator it = Mpd.GetPlaylists(), end; it != end; ++it, ++idx)
+				{
+					if (idx < Playlists.size())
+						Playlists[idx].value() = std::move(*it);
+					else
+						Playlists.addItem(std::move(*it));
+				};
+			}
+			catch (MPD::ServerError &e)
+			{
+				if (e.code() == MPD_SERVER_ERROR_SYSTEM) // no playlists directory
+					Statusbar::print(e.what());
 				else
-					Playlists.addItem(std::move(*it));
-			};
+					throw;
+			}
+			if (idx < Playlists.size())
+				Playlists.resizeList(idx);
+			std::sort(Playlists.beginV(), Playlists.endV(),
+			          LocaleBasedSorting(std::locale(), Config.ignore_leading_the));
 		}
-		catch (MPD::ServerError &e)
-		{
-			if (e.code() == MPD_SERVER_ERROR_SYSTEM) // no playlists directory
-				Statusbar::print(e.what());
-			else
-				throw;
-		}
-		if (idx < Playlists.size())
-			Playlists.resizeList(idx);
-		std::sort(Playlists.beginV(), Playlists.endV(),
-			LocaleBasedSorting(std::locale(), Config.ignore_leading_the));
-		Playlists.refresh();
 	}
-	
-	if ((Content.empty() && Global::Timer - m_timer > m_fetching_delay)
-	||  m_content_update_requested)
+
 	{
-		m_content_update_requested = false;
-		if (Playlists.empty())
-			Content.clear();
-		else
+		ScopedUnfilteredMenu<MPD::Song> sunfilter_content(ReapplyFilter::No, Content);
+		if (!Playlists.empty()
+		    && ((Content.empty() && Global::Timer - m_timer > m_fetching_delay)
+		        || m_content_update_requested))
 		{
+			m_content_update_requested = false;
+			sunfilter_content.set(ReapplyFilter::Yes, true);
 			size_t idx = 0;
 			MPD::SongIterator s = Mpd.GetPlaylistContent(Playlists.current()->value().path()), end;
 			for (; s != end; ++s, ++idx)
@@ -202,33 +205,20 @@ void PlaylistEditor::update()
 			std::string wtitle;
 			if (Config.titles_visibility)
 			{
-				wtitle = (boost::format("Playlist content (%1%) %2%")
-					% boost::lexical_cast<std::string>(Content.size())
-					% (Content.size() == 1 ? "item" : "items")
-					).str();
+				wtitle = (boost::format("Content (%1% %2%)")
+				          % boost::lexical_cast<std::string>(Content.size())
+				          % (Content.size() == 1 ? "item" : "items")).str();
 				wtitle.resize(Content.getWidth());
 			}
 			Content.setTitle(wtitle);
+			Content.refreshBorder();
 		}
-		Content.display();
-	}
-	
-	if (isActiveWindow(Content) && Content.empty())
-	{
-		Content.setHighlightColor(Config.main_highlight_color);
-		Playlists.setHighlightColor(Config.active_column_color);
-		w = &Playlists;
-	}
-	
-	if (Playlists.empty() && Content.empty())
-	{
-		Content.Window::clear();
-		Content.Window::display();
 	}
 }
 
 int PlaylistEditor::windowTimeout()
 {
+	ScopedUnfilteredMenu<MPD::Song> sunfilter_content(ReapplyFilter::No, Content);
 	if (Content.empty())
 		return m_window_timeout;
 	else
@@ -328,6 +318,51 @@ bool PlaylistEditor::search(SearchDirection direction, bool wrap, bool skip_curr
 	return result;
 }
 
+std::string PlaylistEditor::currentFilter()
+{
+	std::string result;
+	if (isActiveWindow(Playlists))
+	{
+		if (auto pred = Playlists.filterPredicate<Regex::Filter<MPD::Playlist>>())
+			result = pred->constraint();
+	}
+	else if (isActiveWindow(Content))
+	{
+		if (auto pred = Content.filterPredicate<Regex::Filter<MPD::Song>>())
+			result = pred->constraint();
+	}
+	return result;
+}
+
+void PlaylistEditor::applyFilter(const std::string &constraint)
+{
+	if (isActiveWindow(Playlists))
+	{
+		if (!constraint.empty())
+		{
+			Playlists.applyFilter(Regex::Filter<MPD::Playlist>(
+				                      constraint,
+				                      Config.regex_type,
+				                      PlaylistEntryMatcher));
+		}
+		else
+			Playlists.clearFilter();
+	}
+	else if (isActiveWindow(Content))
+	{
+		if (!constraint.empty())
+		{
+			Content.applyFilter(Regex::Filter<MPD::Song>(
+				                    constraint,
+				                    Config.regex_type,
+				                    SongEntryMatcher));
+		}
+		else
+			Content.clearFilter();
+	}
+}
+
+
 /***********************************************************************/
 
 bool PlaylistEditor::itemAvailable()
@@ -344,14 +379,10 @@ bool PlaylistEditor::addItemToPlaylist(bool play)
 	bool result = false;
 	if (isActiveWindow(Playlists))
 	{
-		std::vector<MPD::Song> list(
-			std::make_move_iterator(Mpd.GetPlaylistContent(Playlists.current()->value().path())),
-			std::make_move_iterator(MPD::SongIterator())
-		);
-		result = addSongsToPlaylist(list.begin(), list.end(), play, -1);
+		ScopedUnfilteredMenu<MPD::Song> sunfilter_content(ReapplyFilter::No, Content);
+		result = addSongsToPlaylist(Content.beginV(), Content.endV(), play, -1);
 		Statusbar::printf("Playlist \"%1%\" loaded%2%",
-			Playlists.current()->value().path(), withErrors(result)
-		);
+		                  Playlists.current()->value().path(), withErrors(result));
 	}
 	else if (isActiveWindow(Content))
 		result = addSongToPlaylist(Content.current()->value(), play);
@@ -372,19 +403,13 @@ std::vector<MPD::Song> PlaylistEditor::getSelectedSongs()
 				std::copy(
 					std::make_move_iterator(Mpd.GetPlaylistContent(e.value().path())),
 					std::make_move_iterator(MPD::SongIterator()),
-					std::back_inserter(result)
-				);
+					std::back_inserter(result));
 			}
 		}
 		// if no item is selected, add songs from right column
+		ScopedUnfilteredMenu<MPD::Song> sunfilter_content(ReapplyFilter::No, Content);
 		if (!any_selected && !Playlists.empty())
-		{
-			std::copy(
-				std::make_move_iterator(Mpd.GetPlaylistContent(Playlists.current()->value().path())),
-				std::make_move_iterator(MPD::SongIterator()),
-				std::back_inserter(result)
-			);
-		}
+			std::copy(Content.beginV(), Content.endV(), std::back_inserter(result));
 	}
 	else if (isActiveWindow(Content))
 		result = Content.getSelectedSongs();
@@ -397,6 +422,7 @@ bool PlaylistEditor::previousColumnAvailable()
 {
 	if (isActiveWindow(Content))
 	{
+		ScopedUnfilteredMenu<MPD::Playlist> sunfilter_playlists(ReapplyFilter::No, Playlists);
 		if (!Playlists.empty())
 			return true;
 	}
@@ -418,6 +444,7 @@ bool PlaylistEditor::nextColumnAvailable()
 {
 	if (isActiveWindow(Playlists))
 	{
+		ScopedUnfilteredMenu<MPD::Song> sunfilter_content(ReapplyFilter::No, Content);
 		if (!Content.empty())
 			return true;
 	}
@@ -442,15 +469,17 @@ void PlaylistEditor::updateTimer()
 	m_timer = Global::Timer;
 }
 
-void PlaylistEditor::Locate(const MPD::Playlist &playlist)
+void PlaylistEditor::locatePlaylist(const MPD::Playlist &playlist)
 {
 	update();
-	auto begin = Playlists.beginV(), end = Playlists.endV();
-	auto it = std::find(begin, end, playlist);
-	if (it != end)
+	Playlists.clearFilter();
+	auto first = Playlists.beginV(), last = Playlists.endV();
+	auto it = std::find(first, last, playlist);
+	if (it != last)
 	{
-		Playlists.highlight(it-begin);
+		Playlists.highlight(it - first);
 		Content.clear();
+		Content.clearFilter();
 		switchTo();
 	}
 }
