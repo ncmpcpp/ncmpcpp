@@ -54,7 +54,10 @@ struct MediaLibrary: Screen<NC::Window *>, HasColumns, HasSongs, Searchable, Tab
 	virtual void setSearchConstraint(const std::string &constraint) OVERRIDE;
 	virtual void clearSearchConstraint() OVERRIDE;
 	virtual bool search(SearchDirection direction, bool wrap, bool skip_current) OVERRIDE;
-	
+
+	virtual std::string currentFilter() OVERRIDE;
+	virtual void applyFilter(const std::string &filter) OVERRIDE;
+
 	// HasSongs implementation
 	virtual bool itemAvailable() OVERRIDE;
 	virtual bool addItemToPlaylist(bool play) OVERRIDE;
@@ -67,11 +70,11 @@ struct MediaLibrary: Screen<NC::Window *>, HasColumns, HasSongs, Searchable, Tab
 	virtual bool nextColumnAvailable() OVERRIDE;
 	virtual void nextColumn() OVERRIDE;
 	
-	// private members
+	// other members
 	void updateTimer();
 	void toggleColumnsMode();
-	int Columns();
-	void LocateSong(const MPD::Song &);
+	int columns();
+	void locateSong(const MPD::Song &s);
 	void toggleSortMode();
 	
 	void requestTagsUpdate() { m_tags_update_request = true; }

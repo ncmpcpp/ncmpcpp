@@ -409,7 +409,7 @@ int Status::State::volume()
 void Status::Changes::playlist(unsigned previous_version)
 {
 	{
-		ScopedUnfilteredMenu<MPD::Song, ReapplyFilter::Yes> sunfilter(myPlaylist->main());
+		ScopedUnfilteredMenu<MPD::Song> sunfilter(ReapplyFilter::Yes, myPlaylist->main());
 
 		if (m_playlist_length < myPlaylist->main().size())
 		{
@@ -580,7 +580,7 @@ void Status::Changes::songID(int song_id)
 			drawTitle(s);
 
 			if (Config.autocenter_mode)
-				myPlaylist->moveToSong(s);
+				myPlaylist->locateSong(s);
 
 			if (Config.now_playing_lyrics && isVisible(myLyrics) && myLyrics->previousScreen() == myPlaylist)
 			{

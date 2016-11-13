@@ -66,8 +66,8 @@ struct Playlist: Screen<SongMenu>, HasSongs, Searchable, Tabbable
 	// other members
 	MPD::Song nowPlayingSong();
 
-	// Move to given song from playlist.
-	void moveToSong(const MPD::Song &s);
+	// Locate song in playlist.
+	void locateSong(const MPD::Song &s);
 
 	void enableHighlighting();
 	

@@ -456,7 +456,7 @@ bool Browser::enterDirectory()
 
 void Browser::getDirectory(std::string directory)
 {
-	ScopedUnfilteredMenu<MPD::Item, ReapplyFilter::Yes> sunfilter(w);
+	ScopedUnfilteredMenu<MPD::Item> sunfilter(ReapplyFilter::Yes, w);
 
 	m_scroll_beginning = 0;
 	w.clear();

@@ -279,9 +279,11 @@ void MediaLibrary::update()
 {
 	if (hasTwoColumns)
 	{
+		ScopedUnfilteredMenu<AlbumEntry> sunfilter_albums(ReapplyFilter::No, Albums);
 		if (Albums.empty() || m_albums_update_request)
 		{
 			m_albums_update_request = false;
+			sunfilter_albums.set(ReapplyFilter::Yes, true);
 			std::map<std::tuple<std::string, std::string, std::string>, time_t> albums;
 			for (MPD::SongIterator s = getDatabaseIterator(Mpd), end; s != end; ++s)
 			{
@@ -300,12 +302,11 @@ void MediaLibrary::update()
 			size_t idx = 0;
 			for (const auto &album : albums)
 			{
-				auto entry = AlbumEntry(Album(
-					std::move(std::get<0>(album.first)),
-					std::move(std::get<1>(album.first)),
-					std::move(std::get<2>(album.first)),
-					album.second)
-				);
+				auto entry = AlbumEntry(
+					Album(std::move(std::get<0>(album.first)),
+					      std::move(std::get<1>(album.first)),
+					      std::move(std::get<2>(album.first)),
+					      album.second));
 				if (idx < Albums.size())
 					Albums[idx].value() = std::move(entry);
 				else
@@ -315,106 +316,112 @@ void MediaLibrary::update()
 			if (idx < Albums.size())
 				Albums.resizeList(idx);
 			std::sort(Albums.beginV(), Albums.endV(), SortAlbumEntries());
-			Albums.refresh();
 		}
 	}
 	else
 	{
-		if (Tags.empty() || m_tags_update_request)
 		{
-			m_tags_update_request = false;
-			std::map<std::string, time_t> tags;
-			if (Config.media_library_sort_by_mtime)
+			ScopedUnfilteredMenu<PrimaryTag> sunfilter_tags(ReapplyFilter::No, Tags);
+			if (Tags.empty() || m_tags_update_request)
 			{
-				for (MPD::SongIterator s = getDatabaseIterator(Mpd), end; s != end; ++s)
+				m_tags_update_request = false;
+				sunfilter_tags.set(ReapplyFilter::Yes, true);
+				std::map<std::string, time_t> tags;
+				if (Config.media_library_sort_by_mtime)
 				{
-					std::string tag;
-					unsigned idx = 0;
-					while (!(tag = s->get(Config.media_lib_primary_tag, idx++)).empty())
+					for (MPD::SongIterator s = getDatabaseIterator(Mpd), end; s != end; ++s)
 					{
-						auto it = tags.find(tag);
-						if (it == tags.end())
-							tags[std::move(tag)] = s->getMTime();
-						else
-							it->second = std::max(it->second, s->getMTime());
+						std::string tag;
+						unsigned idx = 0;
+						while (!(tag = s->get(Config.media_lib_primary_tag, idx++)).empty())
+						{
+							auto it = tags.find(tag);
+							if (it == tags.end())
+								tags[std::move(tag)] = s->getMTime();
+							else
+								it->second = std::max(it->second, s->getMTime());
+						}
 					}
 				}
-			}
-			else
-			{
-				MPD::StringIterator tag = Mpd.GetList(Config.media_lib_primary_tag), end;
-				for (; tag != end; ++tag)
-					tags[std::move(*tag)] = 0;
-			}
-			size_t idx = 0;
-			for (const auto &tag : tags)
-			{
-				auto ptag = PrimaryTag(std::move(tag.first), tag.second);
-				if (idx < Tags.size())
-					Tags[idx].value() = std::move(ptag);
 				else
-					Tags.addItem(std::move(ptag));
-				++idx;
-			}
-			if (idx < Tags.size())
-				Tags.resizeList(idx);
-			std::sort(Tags.beginV(), Tags.endV(), SortPrimaryTags());
-			Tags.refresh();
-		}
-		
-		if (!Tags.empty()
-		&& ((Albums.empty() && Global::Timer - m_timer > m_fetching_delay) || m_albums_update_request)
-		)
-		{
-			m_albums_update_request = false;
-			auto &primary_tag = Tags.current()->value().tag();
-			Mpd.StartSearch(true);
-			Mpd.AddSearch(Config.media_lib_primary_tag, primary_tag);
-			std::map<std::tuple<std::string, std::string>, time_t> albums;
-			for (MPD::SongIterator s = Mpd.CommitSearchSongs(), end; s != end; ++s)
-			{
-				auto key = std::make_tuple(s->getAlbum(), s->getDate());
-				auto it = albums.find(key);
-				if (it == albums.end())
-					albums[std::move(key)] = s->getMTime();
-				else
-					it->second = std::max(it->second, s->getMTime());
-			};
-			size_t idx = 0;
-			for (const auto &album : albums)
-			{
-				auto entry = AlbumEntry(Album(
-					primary_tag,
-					std::move(std::get<0>(album.first)),
-					std::move(std::get<1>(album.first)),
-					album.second)
-				);
-				if (idx < Albums.size())
 				{
-					Albums[idx].value() = std::move(entry);
-					Albums[idx].setSeparator(false);
+					MPD::StringIterator tag = Mpd.GetList(Config.media_lib_primary_tag), end;
+					for (; tag != end; ++tag)
+						tags[std::move(*tag)] = 0;
 				}
-				else
-					Albums.addItem(std::move(entry));
-				++idx;
+				size_t idx = 0;
+				for (const auto &tag : tags)
+				{
+					auto ptag = PrimaryTag(std::move(tag.first), tag.second);
+					if (idx < Tags.size())
+						Tags[idx].value() = std::move(ptag);
+					else
+						Tags.addItem(std::move(ptag));
+					++idx;
+				}
+				if (idx < Tags.size())
+					Tags.resizeList(idx);
+				std::sort(Tags.beginV(), Tags.endV(), SortPrimaryTags());
 			}
-			if (idx < Albums.size())
-				Albums.resizeList(idx);
-			std::sort(Albums.beginV(), Albums.endV(), SortAlbumEntries());
-			if (albums.size() > 1)
+		}
+
+		{
+			ScopedUnfilteredMenu<AlbumEntry> sunfilter_albums(ReapplyFilter::No, Albums);
+			if (!Tags.empty()
+			    && ((Albums.empty() && Global::Timer - m_timer > m_fetching_delay)
+			        || m_albums_update_request))
 			{
-				Albums.addSeparator();
-				Albums.addItem(AlbumEntry::mkAllTracksEntry(primary_tag));
+				m_albums_update_request = false;
+				sunfilter_albums.set(ReapplyFilter::Yes, true);
+				auto &primary_tag = Tags.current()->value().tag();
+				Mpd.StartSearch(true);
+				Mpd.AddSearch(Config.media_lib_primary_tag, primary_tag);
+				std::map<std::tuple<std::string, std::string>, time_t> albums;
+				for (MPD::SongIterator s = Mpd.CommitSearchSongs(), end; s != end; ++s)
+				{
+					auto key = std::make_tuple(s->getAlbum(), s->getDate());
+					auto it = albums.find(key);
+					if (it == albums.end())
+						albums[std::move(key)] = s->getMTime();
+					else
+						it->second = std::max(it->second, s->getMTime());
+				};
+				size_t idx = 0;
+				for (const auto &album : albums)
+				{
+					auto entry = AlbumEntry(
+						Album(primary_tag,
+						      std::move(std::get<0>(album.first)),
+						      std::move(std::get<1>(album.first)),
+						      album.second));
+					if (idx < Albums.size())
+					{
+						Albums[idx].value() = std::move(entry);
+						Albums[idx].setSeparator(false);
+					}
+					else
+						Albums.addItem(std::move(entry));
+					++idx;
+				}
+				if (idx < Albums.size())
+					Albums.resizeList(idx);
+				std::sort(Albums.beginV(), Albums.endV(), SortAlbumEntries());
+				if (albums.size() > 1)
+				{
+					Albums.addSeparator();
+					Albums.addItem(AlbumEntry::mkAllTracksEntry(primary_tag));
+				}
 			}
-			Albums.refresh();
 		}
 	}
-	
+
+	ScopedUnfilteredMenu<MPD::Song> sunfilter_songs(ReapplyFilter::No, Songs);
 	if (!Albums.empty()
-	&& ((Songs.empty() && Global::Timer - m_timer > m_fetching_delay) || m_songs_update_request)
-	)
+	    && ((Songs.empty() && Global::Timer - m_timer > m_fetching_delay)
+	        || m_songs_update_request))
 	{
 		m_songs_update_request = false;
+		sunfilter_songs.set(ReapplyFilter::Yes, true);
 		auto &album = Albums.current()->value();
 		Mpd.StartSearch(true);
 		Mpd.AddSearch(Config.media_lib_primary_tag, album.entry().tag());
@@ -443,12 +450,13 @@ void MediaLibrary::update()
 		if (idx < Songs.size())
 			Songs.resizeList(idx);
 		std::sort(Songs.begin(), Songs.end(), SortSongs(!album.isAllTracksEntry()));
-		Songs.refresh();
 	}
 }
 
 int MediaLibrary::windowTimeout()
 {
+	ScopedUnfilteredMenu<AlbumEntry> sunfilter_albums(ReapplyFilter::No, Albums);
+	ScopedUnfilteredMenu<MPD::Song> sunfilter_songs(ReapplyFilter::No, Songs);
 	if (Albums.empty() || Songs.empty())
 		return m_window_timeout;
 	else
@@ -596,6 +604,68 @@ bool MediaLibrary::search(SearchDirection direction, bool wrap, bool skip_curren
 	return result;
 }
 
+std::string MediaLibrary::currentFilter()
+{
+	std::string result;
+	if (isActiveWindow(Tags))
+	{
+		if (auto pred = Tags.filterPredicate<Regex::Filter<PrimaryTag>>())
+			result = pred->constraint();
+	}
+	else if (isActiveWindow(Albums))
+	{
+		if (auto pred = Albums.filterPredicate<Regex::ItemFilter<AlbumEntry>>())
+			result = pred->constraint();
+	}
+	else if (isActiveWindow(Songs))
+	{
+		if (auto pred = Songs.filterPredicate<Regex::Filter<MPD::Song>>())
+			result = pred->constraint();
+	}
+	return result;
+}
+
+void MediaLibrary::applyFilter(const std::string &constraint)
+{
+	if (isActiveWindow(Tags))
+	{
+		if (!constraint.empty())
+		{
+			Tags.applyFilter(Regex::Filter<PrimaryTag>(
+				                 constraint,
+				                 Config.regex_type,
+				                 TagEntryMatcher));
+		}
+		else
+			Tags.clearFilter();
+	}
+	else if (isActiveWindow(Albums))
+	{
+		if (!constraint.empty())
+		{
+			Albums.applyFilter(Regex::ItemFilter<AlbumEntry>(
+				                   constraint,
+				                   Config.regex_type,
+				                   std::bind(AlbumEntryMatcher, ph::_1, ph::_2, true)));
+		}
+		else
+			Albums.clearFilter();
+	}
+	else if (isActiveWindow(Songs))
+	{
+		if (!constraint.empty())
+		{
+			Songs.applyFilter(Regex::Filter<MPD::Song>(
+				                  constraint,
+				                  Config.regex_type,
+				                  SongEntryMatcher));
+		}
+		else
+			Songs.clearFilter();
+
+	}
+}
+
 /***********************************************************************/
 
 bool MediaLibrary::itemAvailable()
@@ -701,6 +771,7 @@ std::vector<MPD::Song> MediaLibrary::getSelectedSongs()
 			}
 		}
 		// if no item is selected, add songs from right column
+		ScopedUnfilteredMenu<MPD::Song> sunfilter_songs(ReapplyFilter::No, Songs);
 		if (!any_selected && !Albums.empty())
 		{
 			size_t begin = result.size();
@@ -724,11 +795,13 @@ bool MediaLibrary::previousColumnAvailable()
 	assert(!hasTwoColumns || !isActiveWindow(Tags));
 	if (isActiveWindow(Songs))
 	{
-		if (!Albums.empty() && (hasTwoColumns || !Tags.empty()))
+		ScopedUnfilteredMenu<AlbumEntry> sunfilter_albums(ReapplyFilter::No, Albums);
+		if (!Albums.empty())
 			return true;
 	}
 	else if (isActiveWindow(Albums))
 	{
+		ScopedUnfilteredMenu<PrimaryTag> sunfilter_tags(ReapplyFilter::No, Tags);
 		if (!hasTwoColumns && !Tags.empty())
 			return true;
 	}
@@ -758,11 +831,13 @@ bool MediaLibrary::nextColumnAvailable()
 	assert(!hasTwoColumns || !isActiveWindow(Tags));
 	if (isActiveWindow(Tags))
 	{
-		if (!Albums.empty() && !Songs.empty())
+		ScopedUnfilteredMenu<AlbumEntry> sunfilter_albums(ReapplyFilter::No, Albums);
+		if (!Albums.empty())
 			return true;
 	}
 	else if (isActiveWindow(Albums))
 	{
+		ScopedUnfilteredMenu<MPD::Song> sunfilter_songs(ReapplyFilter::No, Songs);
 		if (!Songs.empty())
 			return true;
 	}
@@ -818,7 +893,7 @@ void MediaLibrary::toggleColumnsMode()
 	resize();
 }
 
-int MediaLibrary::Columns()
+int MediaLibrary::columns()
 {
 	if (hasTwoColumns)
 		return 2;
@@ -833,6 +908,7 @@ void MediaLibrary::toggleSortMode()
 		Config.media_library_sort_by_mtime ? "modification time" : "name");
 	if (hasTwoColumns)
 	{
+		ScopedUnfilteredMenu<AlbumEntry> sunfilter_albums(ReapplyFilter::No, Albums);
 		std::sort(Albums.beginV(), Albums.endV(), SortAlbumEntries());
 		Albums.refresh();
 		Songs.clear();
@@ -846,6 +922,7 @@ void MediaLibrary::toggleSortMode()
 	}
 	else
 	{
+		ScopedUnfilteredMenu<PrimaryTag> sunfilter_tags(ReapplyFilter::No, Tags);
 		// if we already have modification times, just resort. otherwise refetch the list.
 		if (!Tags.empty() && Tags[0].value().mtime() > 0)
 		{
@@ -853,14 +930,16 @@ void MediaLibrary::toggleSortMode()
 			Tags.refresh();
 		}
 		else
+		{
 			Tags.clear();
+		}
 		Albums.clear();
 		Songs.clear();
 	}
 	update();
 }
 
-void MediaLibrary::LocateSong(const MPD::Song &s)
+void MediaLibrary::locateSong(const MPD::Song &s)
 {
 	std::string primary_tag = s.get(Config.media_lib_primary_tag);
 	if (primary_tag.empty())
@@ -884,6 +963,7 @@ void MediaLibrary::LocateSong(const MPD::Song &s)
 
 	if (!hasTwoColumns)
 	{
+		Tags.clearFilter();
 		if (Tags.empty())
 			update();
 
@@ -901,7 +981,8 @@ void MediaLibrary::LocateSong(const MPD::Song &s)
 		}
 		Albums.clear();
 	}
-	
+
+	Albums.clearFilter();
 	if (Albums.empty())
 		update();
 
@@ -939,6 +1020,7 @@ void MediaLibrary::LocateSong(const MPD::Song &s)
 			MoveToAlbum(Albums, primary_tag, s);
 		}
 
+		Songs.clearFilter();
 		Songs.clear();
 		update();
 

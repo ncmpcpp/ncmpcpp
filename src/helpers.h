@@ -34,11 +34,11 @@
 
 enum ReapplyFilter { Yes, No };
 
-template <typename ItemT, ReapplyFilter reapplyFilter>
+template <typename ItemT>
 struct ScopedUnfilteredMenu
 {
-	ScopedUnfilteredMenu(NC::Menu<ItemT> &menu)
-		: m_menu(menu)
+	ScopedUnfilteredMenu(ReapplyFilter reapply_filter, NC::Menu<ItemT> &menu)
+		: m_refresh(false), m_reapply_filter(reapply_filter), m_menu(menu)
 	{
 		m_is_filtered = m_menu.isFiltered();
 		if (m_is_filtered)
@@ -49,7 +49,7 @@ struct ScopedUnfilteredMenu
 	{
 		if (m_is_filtered)
 		{
-			switch (reapplyFilter)
+			switch (m_reapply_filter)
 			{
 			case ReapplyFilter::Yes:
 				m_menu.reapplyFilter();
@@ -59,10 +59,20 @@ struct ScopedUnfilteredMenu
 				break;
 			}
 		}
+		if (m_refresh)
+			m_menu.refresh();
+	}
+
+	void set(ReapplyFilter reapply_filter, bool refresh)
+	{
+		m_reapply_filter = reapply_filter;
+		m_refresh = refresh;
 	}
 
 private:
 	bool m_is_filtered;
+	bool m_refresh;
+	ReapplyFilter m_reapply_filter;
 	NC::Menu<ItemT> &m_menu;
 };
 
@@ -375,9 +385,7 @@ template <typename Iterator> std::string getSharedDirectory(Iterator first, Iter
 template <typename ListT>
 void markSongsInPlaylist(ListT &list)
 {
-	ScopedUnfilteredMenu<
-		typename ListT::Item::Type,
-		ReapplyFilter::No> sunfilter(list);
+	ScopedUnfilteredMenu<typename ListT::Item::Type> sunfilter(ReapplyFilter::No, list);
 	MPD::Song *s;
 	for (auto &p : static_cast<SongList &>(list))
 	{

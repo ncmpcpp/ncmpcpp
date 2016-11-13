@@ -223,7 +223,7 @@ MPD::Song Playlist::nowPlayingSong()
 	MPD::Song s;
 	if (Status::State::player() != MPD::psUnknown)
 	{
-		ScopedUnfilteredMenu<MPD::Song, ReapplyFilter::No> sunfilter(w);
+		ScopedUnfilteredMenu<MPD::Song> sunfilter(ReapplyFilter::No, w);
 		auto sp = Status::State::currentSongPosition();
 		if (sp >= 0 && size_t(sp) < w.size())
 			s = w.at(sp).value();
@@ -231,7 +231,7 @@ MPD::Song Playlist::nowPlayingSong()
 	return s;
 }
 
-void Playlist::moveToSong(const MPD::Song &s)
+void Playlist::locateSong(const MPD::Song &s)
 {
 	if (!w.isFiltered())
 		w.highlight(s.getPosition());
@@ -268,7 +268,7 @@ std::string Playlist::getTotalLength()
 	}
 	if (Config.playlist_show_remaining_time && m_reload_remaining)
 	{
-		ScopedUnfilteredMenu<MPD::Song, ReapplyFilter::No> sunfilter(w);
+		ScopedUnfilteredMenu<MPD::Song> sunfilter(ReapplyFilter::No, w);
 		m_remaining_time = 0;
 		for (size_t i = Status::State::currentSongPosition(); i < w.size(); ++i)
 			m_remaining_time += w[i].value().getDuration();
@@ -279,7 +279,7 @@ std::string Playlist::getTotalLength()
 
 	if (w.isFiltered())
 	{
-		ScopedUnfilteredMenu<MPD::Song, ReapplyFilter::No> sunfilter(w);
+		ScopedUnfilteredMenu<MPD::Song> sunfilter(ReapplyFilter::No, w);
 		result << " (out of " << w.size() << ")";
 	}
 	

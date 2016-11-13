@@ -1167,7 +1167,7 @@ void TogglePlayingSongCentering::run()
 	{
 		auto s = myPlaylist->nowPlayingSong();
 		if (!s.empty())
-			myPlaylist->moveToSong(s);
+			myPlaylist->locateSong(s);
 	}
 }
 
@@ -1197,7 +1197,7 @@ void JumpToPlayingSong::run()
 		return;
 	if (myScreen == myPlaylist)
 	{
-		myPlaylist->moveToSong(s);
+		myPlaylist->locateSong(s);
 	}
 	else if (myScreen == myBrowser)
 	{
@@ -1205,7 +1205,7 @@ void JumpToPlayingSong::run()
 	}
 	else if (myScreen == myLibrary)
 	{
-		myLibrary->LocateSong(s);
+		myLibrary->locateSong(s);
 	}
 }
 
@@ -1611,7 +1611,7 @@ bool JumpToMediaLibrary::canBeRun()
 
 void JumpToMediaLibrary::run()
 {
-	myLibrary->LocateSong(*m_song);
+	myLibrary->locateSong(*m_song);
 }
 
 bool JumpToPlaylistEditor::canBeRun()
@@ -2226,7 +2226,7 @@ void ToggleBrowserSortMode::run()
 bool ToggleLibraryTagType::canBeRun()
 {
 	return (myScreen->isActiveWindow(myLibrary->Tags))
-	    || (myLibrary->Columns() == 2 && myScreen->isActiveWindow(myLibrary->Albums));
+	    || (myLibrary->columns() == 2 && myScreen->isActiveWindow(myLibrary->Albums));
 }
 
 void ToggleLibraryTagType::run()
@@ -2257,7 +2257,7 @@ void ToggleLibraryTagType::run()
 		std::string and_mtime = Config.media_library_sort_by_mtime ?
 		                        " and mtime" :
 		                        "";
-		if (myLibrary->Columns() == 2)
+		if (myLibrary->columns() == 2)
 		{
 			myLibrary->Songs.clear();
 			myLibrary->Albums.reset();
