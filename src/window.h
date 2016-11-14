@@ -21,6 +21,8 @@
 #ifndef NCMPCPP_WINDOW_H
 #define NCMPCPP_WINDOW_H
 
+#define NCURSES_NOMACROS 1
+
 #include "config.h"
 
 #include "curses.h"
@@ -38,10 +40,6 @@
 #if NCURSES_MOUSE_VERSION == 1
 # define BUTTON5_PRESSED (1U << 27)
 #endif // NCURSES_MOUSE_VERSION == 1
-
-// undefine macros with colliding names
-#undef border
-#undef scroll
 
 /// NC namespace provides set of easy-to-use
 /// wrappers over original curses library.
