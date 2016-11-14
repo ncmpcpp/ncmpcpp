@@ -39,11 +39,14 @@
 LyricsFetcher *lyricsPlugins[] =
 {
 	new LyricwikiFetcher(),
+	new PLyricsFetcher(),
 	new AzLyricsFetcher(),
 	new Sing365Fetcher(),
 	new LyricsmaniaFetcher(),
 	new MetrolyricsFetcher(),
 	new JustSomeLyricsFetcher(),
+	new IlDepositoFetcher(),
+	new JahLyricsFetcher(),
 	new InternetLyricsFetcher(),
 	0
 };

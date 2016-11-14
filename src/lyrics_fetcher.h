@@ -84,6 +84,30 @@ protected:
 	virtual bool isURLOk(const std::string &url) OVERRIDE;
 };
 
+struct IlDepositoFetcher : public GoogleLyricsFetcher
+{
+	virtual const char *name() const OVERRIDE { return "www.ildeposito.org"; }
+
+protected:
+	virtual const char *regex() const OVERRIDE { return "<div id=\"tabs-testo\"><p>(.*?)</p></div>"; }
+};
+
+struct JahLyricsFetcher : public GoogleLyricsFetcher
+{
+	virtual const char *name() const OVERRIDE { return "www.jah-lyrics.com"; }
+
+protected:
+	virtual const char *regex() const OVERRIDE { return "<article>.*?</h1>(.*?)<p class=\"disclaimer\">"; }
+};
+
+struct PLyricsFetcher : public GoogleLyricsFetcher
+{
+	virtual const char *name() const OVERRIDE { return "www.plyrics.com"; }
+	
+protected:
+	virtual const char *regex() const OVERRIDE { return "<div class=\"pmedia\">.*?</div>(.*?)<div class=\"pmedia\">"; }
+};
+
 struct LyricsmaniaFetcher : public GoogleLyricsFetcher
 {
 	virtual const char *name() const OVERRIDE { return "lyricsmania.com"; }
@@ -95,7 +119,7 @@ protected:
 struct Sing365Fetcher : public GoogleLyricsFetcher
 {
 	virtual const char *name() const OVERRIDE { return "sing365.com"; }
-	
+
 protected:
 	virtual const char *regex() const OVERRIDE { return "<!-Lyrics Begin->(.*?)<!-Lyrics End->"; }
 };
