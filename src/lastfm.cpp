@@ -54,8 +54,11 @@ std::wstring Lastfm::title()
 
 void Lastfm::update()
 {
-	if (m_worker.valid() && m_worker.is_ready())
+	if (m_worker.valid()
+	    && m_worker.wait_for(std::chrono::seconds(0)) == std::future_status::ready)
+	{
 		getResult();
+	}
 }
 
 void Lastfm::switchTo()
@@ -84,7 +87,7 @@ void Lastfm::getResult()
 	w.flush();
 	w.refresh();
 	// reset m_worker so it's no longer valid
-	m_worker = boost::future<LastFm::Service::Result>();
+	m_worker = std::future<LastFm::Service::Result>();
 }
 
 #endif // HVAE_CURL_CURL_H

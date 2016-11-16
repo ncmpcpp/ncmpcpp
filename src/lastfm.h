@@ -25,8 +25,8 @@
 
 #ifdef HAVE_CURL_CURL_H
 
+#include <future>
 #include <memory>
-#include <boost/thread/future.hpp>
 
 #include "interfaces.h"
 #include "lastfm_service.h"
@@ -57,7 +57,8 @@ struct Lastfm: Screen<NC::Scrollpad>, Tabbable
 			return;
 
 		m_service = std::shared_ptr<ServiceT>(service);
-		m_worker = boost::async(boost::launch::async, std::bind(&LastFm::Service::fetch, m_service));
+		m_worker = std::async(std::launch::async,
+		                      std::bind(&LastFm::Service::fetch, m_service));
 
 		w.clear();
 		w << "Fetching information...";
@@ -71,7 +72,7 @@ private:
 	std::wstring m_title;
 	
 	std::shared_ptr<LastFm::Service> m_service;
-	boost::future<LastFm::Service::Result> m_worker;
+	std::future<LastFm::Service::Result> m_worker;
 };
 
 extern Lastfm *myLastfm;
