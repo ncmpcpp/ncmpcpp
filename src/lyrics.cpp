@@ -316,6 +316,8 @@ void Lyrics::Load()
 		std::string line;
 		while (std::getline(input, line))
 		{
+			// Remove carriage returns as they mess up the display.
+			line.erase(std::remove(line.begin(), line.end(), '\r'), line.end());
 			if (!first)
 				w << '\n';
 			w << Charset::utf8ToLocale(line);
