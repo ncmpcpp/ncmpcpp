@@ -229,20 +229,20 @@ void *Lyrics::Download()
 	std::string artist = Curl::escape(itsSong.getArtist());
 	std::string title_ = Curl::escape(itsSong.getTitle());
 
-	auto fetch_lyrics = [&](auto &fetcher) {
+	auto fetch_lyrics = [&](auto &fetcher_) {
 		w << "Fetching lyrics from "
 		  << NC::Format::Bold
-		  << fetcher->name()
+		  << fetcher_->name()
 		  << NC::Format::NoBold << "... ";
-		auto result = fetcher->fetch(artist, title_);
-		if (result.first == false)
+		auto result_ = fetcher_->fetch(artist, title_);
+		if (result_.first == false)
 		{
 			w << NC::Color::Red
-			  << result.second
+			  << result_.second
 			  << NC::Color::End
 			  << '\n';
 		}
-		return result;
+		return result_;
 	};
 
 	LyricsFetcher::Result result;
