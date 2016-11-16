@@ -19,6 +19,7 @@
  ***************************************************************************/
 
 #include <algorithm>
+#include <boost/algorithm/string/trim.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/program_options.hpp>
 #include <iostream>
@@ -178,8 +179,9 @@ bool configure(int argc, char **argv)
 			Mpd.SetHostname(env_host);
 		if (env_port != nullptr)
 		{
+			auto trimmed_env_port = boost::trim_copy<std::string>(env_port);
 			try {
-				Mpd.SetPort(boost::lexical_cast<int>(env_port));
+				Mpd.SetPort(boost::lexical_cast<int>(trimmed_env_port));
 			} catch (boost::bad_lexical_cast &) {
 				throw std::runtime_error("MPD_PORT environment variable ("
 				                         + std::string(env_port)
