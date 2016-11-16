@@ -45,6 +45,7 @@ LyricsFetcher *lyricsPlugins[] =
 	new LyricsmaniaFetcher(),
 	new MetrolyricsFetcher(),
 	new JustSomeLyricsFetcher(),
+	new TekstowoLyricsFetcher(),
 	new InternetLyricsFetcher(),
 	0
 };
