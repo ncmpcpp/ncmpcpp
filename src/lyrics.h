@@ -83,7 +83,7 @@ private:
 	bool isDownloadInProgress;
 	pthread_t itsDownloader;
 	
-	static LyricsFetcher **itsFetcher;
+	static LyricsFetcher *itsFetcher;
 #	endif // HAVE_CURL_CURL_H
 	
 	size_t itsScrollBegin;

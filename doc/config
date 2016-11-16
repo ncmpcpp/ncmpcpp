@@ -368,6 +368,8 @@
 #
 #lines_scrolled = 2
 #
+#lyrics_fetchers = lyricwiki, azlyrics, genius, sing365, lyricsmania, metrolyrics, justsomelyrics, tekstowo, internet
+#
 #follow_now_playing_lyrics = no
 #
 #fetch_lyrics_for_current_song_in_background = no

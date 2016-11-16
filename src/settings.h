@@ -30,6 +30,7 @@
 
 #include "enums.h"
 #include "format.h"
+#include "lyrics_fetcher.h"
 #include "screen_type.h"
 #include "strbuffer.h"
 
@@ -195,6 +196,8 @@ struct Configuration
 	std::list<ScreenType> screen_sequence;
 
 	SortMode browser_sort_mode;
+
+	LyricsFetchers lyrics_fetchers;
 };
 
 extern Configuration Config;

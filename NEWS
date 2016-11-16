@@ -6,6 +6,7 @@ ncmpcpp-0.8 (????-??-??)
 * Lyrics from files containing DOS line endings now load properly on Linux.
 * Added support for fetching lyrics from genius.com.
 * Added support for fetching lyrics from tekstowo.pl.
+* The list of lyrics fetchers can now be set via configuration file.
 
 ncmpcpp-0.7.7 (2016-10-31)
 * Fixed compilation on 32bit platforms.

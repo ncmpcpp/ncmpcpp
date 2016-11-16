@@ -43,7 +43,7 @@ using Global::MainHeight;
 using Global::MainStartY;
 
 #ifdef HAVE_CURL_CURL_H
-LyricsFetcher **Lyrics::itsFetcher = 0;
+LyricsFetcher *Lyrics::itsFetcher = nullptr;
 std::queue<MPD::Song *> Lyrics::itsToDownload;
 pthread_mutex_t Lyrics::itsDIBLock = PTHREAD_MUTEX_INITIALIZER;
 size_t Lyrics::itsWorkersNumber = 0;
@@ -207,16 +207,20 @@ void Lyrics::DownloadInBackgroundImplHelper(const MPD::Song &s)
 	std::string title = Curl::escape(s.getTitle());
 	
 	LyricsFetcher::Result result;
-	bool fetcher_defined = itsFetcher && *itsFetcher;
-	for (LyricsFetcher **plugin = fetcher_defined ? itsFetcher : lyricsPlugins; *plugin != 0; ++plugin)
+
+	if (itsFetcher == nullptr)
 	{
-		result = (*plugin)->fetch(artist, title);
-		if (result.first)
-			break;
-		if (fetcher_defined)
-			break;
+		for (auto &fetcher : Config.lyrics_fetchers)
+		{
+			result = fetcher->fetch(artist, title);
+			if (result.first)
+				break;
+		}
 	}
-	if (result.first == true)
+	else
+		itsFetcher->fetch(artist, title);
+
+	if (result.first)
 		Save(GenerateFilename(s), result.second);
 }
 
@@ -224,25 +228,38 @@ void *Lyrics::Download()
 {
 	std::string artist = Curl::escape(itsSong.getArtist());
 	std::string title_ = Curl::escape(itsSong.getTitle());
-	
-	LyricsFetcher::Result result;
-	
-	// if one of plugins is selected, try only this one,
-	// otherwise try all of them until one of them succeeds
-	bool fetcher_defined = itsFetcher && *itsFetcher;
-	for (LyricsFetcher **plugin = fetcher_defined ? itsFetcher : lyricsPlugins; *plugin != 0; ++plugin)
-	{
-		w << "Fetching lyrics from " << NC::Format::Bold << (*plugin)->name() << NC::Format::NoBold << "... ";
-		result = (*plugin)->fetch(artist, title_);
+
+	auto fetch_lyrics = [&](auto &fetcher) {
+		w << "Fetching lyrics from "
+		  << NC::Format::Bold
+		  << fetcher->name()
+		  << NC::Format::NoBold << "... ";
+		auto result = fetcher->fetch(artist, title_);
 		if (result.first == false)
-			w << NC::Color::Red << result.second << NC::Color::End << '\n';
-		else
-			break;
-		if (fetcher_defined)
-			break;
+		{
+			w << NC::Color::Red
+			  << result.second
+			  << NC::Color::End
+			  << '\n';
+		}
+		return result;
+	};
+
+	LyricsFetcher::Result result;
+
+	if (itsFetcher == nullptr)
+	{
+		for (auto &fetcher : Config.lyrics_fetchers)
+		{
+			result = fetch_lyrics(fetcher);
+			if (result.first)
+				break;
+		}
 	}
-	
-	if (result.first == true)
+	else
+		result = fetch_lyrics(itsFetcher);
+
+	if (result.first)
 	{
 		Save(itsFilename, result.second);
 		w.clear();
@@ -401,14 +418,28 @@ void Lyrics::Refetch()
 
 void Lyrics::ToggleFetcher()
 {
-	if (itsFetcher && *itsFetcher)
-		++itsFetcher;
+	if (itsFetcher != nullptr)
+	{
+		auto fetcher = std::find_if(Config.lyrics_fetchers.begin(),
+		                            Config.lyrics_fetchers.end(),
+		                            [](auto &f) { return f.get() == itsFetcher; });
+		assert(fetcher != Config.lyrics_fetchers.end());
+		++fetcher;
+		if (fetcher != Config.lyrics_fetchers.end())
+			itsFetcher = fetcher->get();
+		else
+			itsFetcher = nullptr;
+	}
 	else
-		itsFetcher = &lyricsPlugins[0];
-	if (*itsFetcher)
-		Statusbar::printf("Using lyrics database: %s", (*itsFetcher)->name());
+	{
+		assert(!Config.lyrics_fetchers.empty());
+		itsFetcher = Config.lyrics_fetchers[0].get();
+	}
+
+	if (itsFetcher != nullptr)
+		Statusbar::printf("Using lyrics fetcher: %s", itsFetcher->name());
 	else
-		Statusbar::print("Using all lyrics databases");
+		Statusbar::print("Using all lyrics fetchers");
 }
 
 void Lyrics::Take()

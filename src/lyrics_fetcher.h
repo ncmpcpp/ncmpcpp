@@ -25,6 +25,7 @@
 
 #ifdef HAVE_CURL_CURL_H
 
+#include <memory>
 #include <string>
 
 struct LyricsFetcher
@@ -45,6 +46,12 @@ protected:
 	
 	static const char msgNotFound[];
 };
+
+typedef std::vector<std::unique_ptr<LyricsFetcher>> LyricsFetchers;
+
+std::unique_ptr<LyricsFetcher> toLyricsFetcher(const std::string &s);
+
+/**********************************************************************/
 
 struct LyricwikiFetcher : public LyricsFetcher
 {
@@ -116,7 +123,7 @@ protected:
 	virtual const char *regex() const override { return "<div class=\"lyricsh\">.*?</h2>.*<div>(.*?)</div>"; }
 };
 
-struct GeniusLyricsFetcher : public GoogleLyricsFetcher
+struct GeniusFetcher : public GoogleLyricsFetcher
 {
 	virtual const char *name() const override { return "genius.com"; }
 
@@ -124,7 +131,7 @@ protected:
 	virtual const char *regex() const override { return "<lyrics.*?>(.*?)</lyrics>"; }
 };
 
-struct TekstowoLyricsFetcher : public GoogleLyricsFetcher
+struct TekstowoFetcher : public GoogleLyricsFetcher
 {
 	virtual const char *name() const override { return "tekstowo.pl"; }
 
@@ -146,8 +153,6 @@ protected:
 private:
 	std::string URL;
 };
-
-extern LyricsFetcher *lyricsPlugins[];
 
 #endif // HAVE_CURL_CURL_H
 

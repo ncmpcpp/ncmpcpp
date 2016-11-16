@@ -503,6 +503,23 @@ bool Configuration::read(const std::vector<std::string> &config_paths, bool igno
 	p.add("lines_scrolled", assign_default(
 		lines_scrolled, 2
 	));
+		p.add("lyrics_fetchers", option_parser::worker([this](std::string v) {
+		boost::sregex_token_iterator fetcher(v.begin(), v.end(), boost::regex("\\w+")), end;
+		for (; fetcher != end; ++fetcher)
+			lyrics_fetchers.push_back(toLyricsFetcher(*fetcher));
+		if (lyrics_fetchers.empty())
+			throw std::runtime_error("empty list");
+	}, [this] {
+		lyrics_fetchers.push_back(std::make_unique<LyricwikiFetcher>());
+		lyrics_fetchers.push_back(std::make_unique<AzLyricsFetcher>());
+		lyrics_fetchers.push_back(std::make_unique<GeniusFetcher>());
+		lyrics_fetchers.push_back(std::make_unique<Sing365Fetcher>());
+		lyrics_fetchers.push_back(std::make_unique<LyricsmaniaFetcher>());
+		lyrics_fetchers.push_back(std::make_unique<MetrolyricsFetcher>());
+		lyrics_fetchers.push_back(std::make_unique<JustSomeLyricsFetcher>());
+		lyrics_fetchers.push_back(std::make_unique<TekstowoFetcher>());
+		lyrics_fetchers.push_back(std::make_unique<InternetLyricsFetcher>());
+	}));
 	p.add("follow_now_playing_lyrics", yes_no(
 		now_playing_lyrics, false
 	));

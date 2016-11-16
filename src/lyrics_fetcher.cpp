@@ -36,19 +36,28 @@
 #include "utility/html.h"
 #include "utility/string.h"
 
-LyricsFetcher *lyricsPlugins[] =
+std::unique_ptr<LyricsFetcher> toLyricsFetcher(const std::string &s)
 {
-	new LyricwikiFetcher(),
-	new GeniusLyricsFetcher(),
-	new AzLyricsFetcher(),
-	new Sing365Fetcher(),
-	new LyricsmaniaFetcher(),
-	new MetrolyricsFetcher(),
-	new JustSomeLyricsFetcher(),
-	new TekstowoLyricsFetcher(),
-	new InternetLyricsFetcher(),
-	0
-};
+	if (s == "lyricwiki")
+		return std::make_unique<LyricwikiFetcher>();
+	else if (s == "azlyrics")
+		return std::make_unique<AzLyricsFetcher>();
+	else if (s == "genius")
+		return std::make_unique<GeniusFetcher>();
+	else if (s == "sing365")
+		return std::make_unique<Sing365Fetcher>();
+	else if (s == "lyricsmania")
+		return std::make_unique<LyricsmaniaFetcher>();
+	else if (s == "metrolyrics")
+		return std::make_unique<MetrolyricsFetcher>();
+	else if (s == "justsomelyrics")
+		return std::make_unique<JustSomeLyricsFetcher>();
+	else if (s == "tekstowo")
+		return std::make_unique<TekstowoFetcher>();
+	else if (s == "internet")
+		return std::make_unique<InternetLyricsFetcher>();
+	throw std::runtime_error("no lyrics fetcher named '" + s + "'");
+}
 
 const char LyricsFetcher::msgNotFound[] = "Not found";
 
