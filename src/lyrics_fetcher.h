@@ -124,6 +124,14 @@ protected:
 	virtual const char *regex() const override { return "<lyrics.*?>(.*?)</lyrics>"; }
 };
 
+struct GeniusLyricsFetcher : public GoogleLyricsFetcher
+{
+	virtual const char *name() const OVERRIDE { return "genius.com"; }
+
+protected:
+	virtual const char *regex() const OVERRIDE { return "<div class=\"lyrics\".*?>.*?<p>(.*?)</p>.*?</div>"; }
+};
+
 struct InternetLyricsFetcher : public GoogleLyricsFetcher
 {
 	virtual const char *name() const override { return "the Internet"; }
