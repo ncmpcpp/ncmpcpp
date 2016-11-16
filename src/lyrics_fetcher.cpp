@@ -39,6 +39,7 @@
 LyricsFetcher *lyricsPlugins[] =
 {
 	new LyricwikiFetcher(),
+	new GeniusLyricsFetcher(),
 	new AzLyricsFetcher(),
 	new Sing365Fetcher(),
 	new LyricsmaniaFetcher(),

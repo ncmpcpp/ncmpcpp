@@ -4,6 +4,7 @@ ncmpcpp-0.8 (????-??-??)
 * Support for filtering of lists was brought back from the dead.
 * Require C++14 compatible compiler during compilation.
 * Lyrics from files containing DOS line endings now load properly on Linux.
+* Added support for fetching lyrics from genius.com.
 
 ncmpcpp-0.7.7 (2016-10-31)
 * Fixed compilation on 32bit platforms.
