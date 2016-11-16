@@ -177,7 +177,15 @@ bool configure(int argc, char **argv)
 		if (env_host != nullptr)
 			Mpd.SetHostname(env_host);
 		if (env_port != nullptr)
-			Mpd.SetPort(boost::lexical_cast<int>(env_port));
+		{
+			try {
+				Mpd.SetPort(boost::lexical_cast<int>(env_port));
+			} catch (boost::bad_lexical_cast &) {
+				throw std::runtime_error("MPD_PORT environment variable ("
+				                         + std::string(env_port)
+				                         + ") is not a number");
+			}
+		}
 
 		// if MPD connection details are provided as command line
 		// parameters, use them as their priority is the highest.
