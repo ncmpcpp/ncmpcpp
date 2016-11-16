@@ -72,7 +72,7 @@ private:
 	static size_t itsWorkersNumber;
 	// maximum number of worker threads. if it's reached, next lyrics requests
 	// are put into itsToDownload queue.
-	static const size_t itsMaxWorkersNumber = 4;
+	static const size_t itsMaxWorkersNumber = 1;
 	
 	void *Download();
 	static void *DownloadWrapper(void *);
