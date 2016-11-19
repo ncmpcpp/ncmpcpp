@@ -177,23 +177,19 @@ NC::Buffer buffer(const std::string &v)
 	return result;
 }
 
+/*
 void deprecated(const char *option, double version_removal)
 {
 	std::cerr << "WARNING: " << option
 	          << " is deprecated and will be removed in " << version_removal << "\n";
 }
-
+*/
 
 }
 
 bool Configuration::read(const std::vector<std::string> &config_paths, bool ignore_errors)
 {
 	option_parser p;
-
-	// deprecation warnings
-	p.add<void>("default_space_mode", nullptr, "", [](std::string) {
-			deprecated("default_space_mode", 0.8);
-		});
 
 	// keep the same order of variables as in configuration file
 	p.add("ncmpcpp_directory", &ncmpcpp_directory, "~/.ncmpcpp/", adjust_directory);

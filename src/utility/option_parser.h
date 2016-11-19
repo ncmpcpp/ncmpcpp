@@ -46,10 +46,10 @@
 }
 
 template <typename DestT>
-DestT verbose_lexical_cast(std::string v)
+DestT verbose_lexical_cast(const std::string &v)
 {
 	try {
-		return boost::lexical_cast<DestT>(std::move(v));
+		return boost::lexical_cast<DestT>(v);
 	} catch (boost::bad_lexical_cast &) {
 		invalid_value(v);
 	}
@@ -73,7 +73,7 @@ std::vector<ValueT> list_of(const std::string &v)
 	return list_of<ValueT>(v, verbose_lexical_cast<ValueT>);
 }
 
-bool yes_no(std::string v);
+bool yes_no(const std::string &v);
 
 ////////////////////////////////////////////////////////////////////////////////
 

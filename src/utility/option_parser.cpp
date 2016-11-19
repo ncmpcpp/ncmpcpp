@@ -35,7 +35,7 @@
 
 #include "utility/option_parser.h"
 
-bool yes_no(std::string v)
+bool yes_no(const std::string &v)
 {
 	if (v == "yes")
 		return true;
