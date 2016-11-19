@@ -91,7 +91,7 @@ int main(int argc, char **argv)
 	
 	std::setlocale(LC_ALL, "");
 	std::locale::global(Charset::internalLocale());
-	
+
 	if (!configure(argc, argv))
 		return 0;
 	

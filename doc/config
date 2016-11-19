@@ -390,6 +390,8 @@
 ##
 #lastfm_preferred_language = en
 #
+#space_add_mode = add_remove
+#
 #show_hidden_files_in_local_browser = no
 #
 ##

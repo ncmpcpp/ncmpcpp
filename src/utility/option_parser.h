@@ -33,152 +33,144 @@
 #ifndef NCMPCPP_UTILITY_OPTION_PARSER_H
 #define NCMPCPP_UTILITY_OPTION_PARSER_H
 
+#include <boost/algorithm/string/trim.hpp>
+#include <boost/tokenizer.hpp>
 #include <boost/lexical_cast.hpp>
 #include <cassert>
 #include <stdexcept>
 #include <unordered_map>
 
-#include "utility/functional.h"
-
-struct option_parser
+[[noreturn]] inline void invalid_value(const std::string &v)
 {
-	typedef std::function<void(std::string &&)> parser_t;
-	typedef std::function<void()> default_t;
+	throw std::runtime_error("invalid value: " + v);
+}
 
-	template <typename DestT, typename SourceT>
-	struct assign_value_once
-	{
-		typedef DestT dest_type;
-		typedef typename std::decay<SourceT>::type source_type;
+template <typename DestT>
+DestT verbose_lexical_cast(std::string v)
+{
+	try {
+		return boost::lexical_cast<DestT>(std::move(v));
+	} catch (boost::bad_lexical_cast &) {
+		invalid_value(v);
+	}
+}
 
-		template <typename ArgT>
-		assign_value_once(DestT &dest, ArgT &&value)
-		: m_dest(dest), m_source(std::make_shared<source_type>(std::forward<ArgT>(value))) { }
+template <typename ValueT, typename ConvertT>
+std::vector<ValueT> list_of(const std::string &v, ConvertT convert)
+{
+	std::vector<ValueT> result;
+	boost::tokenizer<boost::escaped_list_separator<char>> elems(v);
+	for (auto &value : elems)
+		result.push_back(convert(boost::trim_copy(value)));
+	if (result.empty())
+		throw std::runtime_error("empty list");
+	return result;
+}
 
-		void operator()()
-		{
-			assert(m_source.get() != nullptr);
-			m_dest = std::move(*m_source);
-			m_source.reset();
-		}
+template <typename ValueT>
+std::vector<ValueT> list_of(const std::string &v)
+{
+	return list_of<ValueT>(v, verbose_lexical_cast<ValueT>);
+}
 
-	private:
-		DestT &m_dest;
-		std::shared_ptr<source_type> m_source;
-	};
+bool yes_no(std::string v);
 
-	template <typename IntermediateT, typename DestT, typename TransformT>
-	struct parse_and_transform
-	{
-		template <typename ArgT>
-		parse_and_transform(DestT &dest, ArgT &&map)
-		: m_dest(dest), m_map(std::forward<ArgT>(map)) { }
+////////////////////////////////////////////////////////////////////////////////
 
-		void operator()(std::string &&v)
-		{
-			try {
-				m_dest = m_map(boost::lexical_cast<IntermediateT>(v));
-			} catch (boost::bad_lexical_cast &) {
-				throw std::runtime_error("invalid value: " + v);
-			}
-		}
-
-	private:
-		DestT &m_dest;
-		TransformT m_map;
-	};
-
+class option_parser
+{
+	template <typename DestT>
 	struct worker
 	{
-		worker() { }
+		template <typename MapT>
+		worker(DestT *dest, MapT &&map)
+			: m_dest(dest), m_map(std::forward<MapT>(map)), m_dest_set(false)
+		{ }
 
-		template <typename ParserT, typename DefaultT>
-		worker(ParserT &&p, DefaultT &&d)
-		: m_defined(false), m_parser(std::forward<ParserT>(p))
-		, m_default(std::forward<DefaultT>(d)) { }
-
-		template <typename ValueT>
-		void parse(ValueT &&value)
+		void operator()(std::string value)
 		{
-			if (m_defined)
-				throw std::runtime_error("option already defined");
-			m_parser(std::forward<ValueT>(value));
-			m_defined = true;
-		}
-
-		bool defined() const
-		{
-			return m_defined;
-		}
-
-		void run_default()
-		{
-			if (m_defined)
-				throw std::runtime_error("option already defined");
-			m_default();
-			m_defined = true;
+			if (m_dest_set)
+				throw std::runtime_error("option already set");
+			assign<DestT, void>::apply(m_dest, m_map, value);
+			m_dest_set = true;
 		}
 
 	private:
-		bool m_defined;
-		parser_t m_parser;
-		default_t m_default;
+		template <typename ValueT, typename VoidT>
+		struct assign {
+			static void apply(ValueT *dest,
+			                  std::function<DestT(std::string)> &map,
+			                  std::string &value)	{
+				*dest = map(std::move(value));
+			}
+		};
+		template <typename VoidT>
+		struct assign<void, VoidT> {
+			static void apply(void *,
+			                  std::function<void(std::string)> &map,
+			                  std::string &value) {
+				map(std::move(value));
+			}
+		};
+
+		DestT *m_dest;
+		std::function<DestT(std::string)> m_map;
+		bool m_dest_set;
 	};
 
-	template <typename ParserT, typename DefaultT>
-	void add(const std::string &option, ParserT &&p, DefaultT &&d)
+	struct parser {
+		template <typename StringT, typename SetterT>
+		parser(StringT &&default_, SetterT &&setter_)
+			: m_used(false)
+			, m_default_value(std::forward<StringT>(default_))
+			, m_worker(std::forward<SetterT>(setter_))
+		{ }
+
+		bool used() const
+		{
+			return m_used;
+		}
+
+		void parse(std::string v)
+		{
+			m_worker(std::move(v));
+			m_used = true;
+		}
+
+		void parse_default() const
+		{
+			assert(!m_used);
+			m_worker(m_default_value);
+		}
+
+	private:
+		bool m_used;
+		std::string m_default_value;
+		std::function<void(std::string)> m_worker;
+	};
+
+	std::unordered_map<std::string, parser> m_parsers;
+
+public:
+	template <typename DestT, typename MapT>
+	void add(std::string option, DestT *dest, std::string default_, MapT &&map)
 	{
 		assert(m_parsers.count(option) == 0);
-		m_parsers[option] = worker(std::forward<ParserT>(p), std::forward<DefaultT>(d));
+		m_parsers.emplace(
+			std::move(option),
+			parser(
+				std::move(default_),
+				worker<DestT>(dest, std::forward<MapT>(map))));
 	}
 
-	template <typename WorkerT>
-	void add(const std::string &option, WorkerT &&w)
+	template <typename DestT>
+	void add(std::string option, DestT *dest, std::string default_)
 	{
-		assert(m_parsers.count(option) == 0);
-		m_parsers[option] = std::forward<WorkerT>(w);
+		add(std::move(option), dest, std::move(default_), verbose_lexical_cast<DestT>);
 	}
 
-	bool run(std::istream &is, bool ignore_errors);
-	bool initialize_undefined(bool ignore_errors);
-
-private:
-	std::unordered_map<std::string, worker> m_parsers;
+	bool run(std::istream &is, bool warn_on_errors);
+	bool initialize_undefined(bool warn_on_errors);
 };
-
-template <typename IntermediateT, typename ArgT, typename TransformT>
-option_parser::parser_t assign(ArgT &arg, TransformT &&map = id_())
-{
-	return option_parser::parse_and_transform<IntermediateT, ArgT, TransformT>(
-		arg, std::forward<TransformT>(map)
-	);
-}
-
-template <typename ArgT, typename ValueT>
-option_parser::default_t defaults_to(ArgT &arg, ValueT &&value)
-{
-	return option_parser::assign_value_once<ArgT, ValueT>(
-		arg, std::forward<ValueT>(value)
-	);
-}
-
-template <typename IntermediateT, typename ArgT, typename ValueT, typename TransformT>
-option_parser::worker assign_default(ArgT &arg, ValueT &&value, TransformT &&map)
-{
-	return option_parser::worker(
-		assign<IntermediateT>(arg, std::forward<TransformT>(map)),
-		defaults_to(arg, map(std::forward<ValueT>(value)))
-	);
-}
-
-template <typename ArgT, typename ValueT>
-option_parser::worker assign_default(ArgT &arg, ValueT &&value)
-{
-	return assign_default<ArgT>(arg, std::forward<ValueT>(value), id_());
-}
-
-// workers for specific types
-
-option_parser::worker yes_no(bool &arg, bool value);
 
 #endif // NCMPCPP_UTILITY_OPTION_PARSER_H

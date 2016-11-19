@@ -35,6 +35,18 @@
 
 #include "utility/option_parser.h"
 
+bool yes_no(std::string v)
+{
+	if (v == "yes")
+		return true;
+	else if (v == "no")
+		return false;
+	else
+		invalid_value(v);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 bool option_parser::run(std::istream &is, bool ignore_errors)
 {
 	// quoted value. leftmost and rightmost quotation marks are the delimiters.
@@ -52,10 +64,14 @@ bool option_parser::run(std::istream &is, bool ignore_errors)
 			auto it = m_parsers.find(option);
 			if (it != m_parsers.end())
 			{
-				try {
+				try
+				{
 					it->second.parse(match[2]);
-				} catch (std::exception &e) {
-					std::cerr << "Error while processing option \"" << option << "\": " << e.what() << "\n";
+				}
+				catch (std::exception &e)
+				{
+					std::cerr << "Error while processing option \"" << option
+					          << "\": " << e.what() << "\n";
 					if (!ignore_errors)
 						return false;
 				}
@@ -73,30 +89,23 @@ bool option_parser::run(std::istream &is, bool ignore_errors)
 
 bool option_parser::initialize_undefined(bool ignore_errors)
 {
-	for (auto &p : m_parsers)
+	for (auto &pp : m_parsers)
 	{
-		if (!p.second.defined())
+		auto &p = pp.second;
+		if (!p.used())
 		{
-			try {
-				p.second.run_default();
-			} catch (std::exception &e) {
-				std::cerr << "Error while initializing option \"" << p.first << "\": " << e.what() << "\n";
+			try
+			{
+				p.parse_default();
+			}
+			catch (std::exception &e)
+			{
+				std::cerr << "Error while initializing option \"" << pp.first
+				          << "\": " << e.what() << "\n";
 				if (ignore_errors)
 					return false;
 			}
 		}
 	}
 	return true;
-}
-
-option_parser::worker yes_no(bool &arg, bool value)
-{
-	return option_parser::worker([&arg](std::string &&v) {
-		if (v == "yes")
-			arg = true;
-		else if (v == "no")
-			arg = false;
-		else
-			throw std::runtime_error("invalid argument: " + v);
-	}, defaults_to(arg, value));
 }

@@ -47,9 +47,11 @@ protected:
 	static const char msgNotFound[];
 };
 
-typedef std::vector<std::unique_ptr<LyricsFetcher>> LyricsFetchers;
+typedef std::unique_ptr<LyricsFetcher> LyricsFetcher_;
 
-std::unique_ptr<LyricsFetcher> toLyricsFetcher(const std::string &s);
+typedef std::vector<LyricsFetcher_> LyricsFetchers;
+
+std::istream &operator>>(std::istream &is, LyricsFetcher_ &fetcher);
 
 /**********************************************************************/
 

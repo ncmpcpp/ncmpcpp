@@ -36,27 +36,31 @@
 #include "utility/html.h"
 #include "utility/string.h"
 
-std::unique_ptr<LyricsFetcher> toLyricsFetcher(const std::string &s)
+std::istream &operator>>(std::istream &is, LyricsFetcher_ &fetcher)
 {
+	std::string s;
+	is >> s;
 	if (s == "lyricwiki")
-		return std::make_unique<LyricwikiFetcher>();
+		fetcher = std::make_unique<LyricwikiFetcher>();
 	else if (s == "azlyrics")
-		return std::make_unique<AzLyricsFetcher>();
+		fetcher = std::make_unique<AzLyricsFetcher>();
 	else if (s == "genius")
-		return std::make_unique<GeniusFetcher>();
+		fetcher = std::make_unique<GeniusFetcher>();
 	else if (s == "sing365")
-		return std::make_unique<Sing365Fetcher>();
+		fetcher = std::make_unique<Sing365Fetcher>();
 	else if (s == "lyricsmania")
-		return std::make_unique<LyricsmaniaFetcher>();
+		fetcher = std::make_unique<LyricsmaniaFetcher>();
 	else if (s == "metrolyrics")
-		return std::make_unique<MetrolyricsFetcher>();
+		fetcher = std::make_unique<MetrolyricsFetcher>();
 	else if (s == "justsomelyrics")
-		return std::make_unique<JustSomeLyricsFetcher>();
+		fetcher = std::make_unique<JustSomeLyricsFetcher>();
 	else if (s == "tekstowo")
-		return std::make_unique<TekstowoFetcher>();
+		fetcher = std::make_unique<TekstowoFetcher>();
 	else if (s == "internet")
-		return std::make_unique<InternetLyricsFetcher>();
-	throw std::runtime_error("no lyrics fetcher named '" + s + "'");
+		fetcher = std::make_unique<InternetLyricsFetcher>();
+	else
+		is.setstate(std::ios::failbit);
+	return is;
 }
 
 const char LyricsFetcher::msgNotFound[] = "Not found";

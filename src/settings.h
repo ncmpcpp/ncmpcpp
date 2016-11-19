@@ -193,7 +193,7 @@ struct Configuration
 
 	ScreenType startup_screen_type;
 	boost::optional<ScreenType> startup_slave_screen_type;
-	std::list<ScreenType> screen_sequence;
+	std::vector<ScreenType> screen_sequence;
 
 	SortMode browser_sort_mode;
 
