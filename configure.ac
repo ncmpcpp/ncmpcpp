@@ -178,6 +178,13 @@ if test "$ax_cv_lib_readline_history" = "no"; then
 fi
 
 dnl ========================
+dnl = checking for pthread =
+dnl ========================
+AC_CHECK_LIB(pthread, pthread_create, LIBS="$LIBS -lpthread",
+	AC_MSG_ERROR([pthread library is required])
+)
+
+dnl ========================
 dnl = checking for ncurses =
 dnl ========================
 if test "$unicode" = "yes" ; then
