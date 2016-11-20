@@ -1148,7 +1148,7 @@ bool ToggleLyricsFetcher::canBeRun()
 void ToggleLyricsFetcher::run()
 {
 #	ifdef HAVE_CURL_CURL_H
-	myLyrics->ToggleFetcher();
+	myLyrics->toggleFetcher();
 #	endif // HAVE_CURL_CURL_H
 }
 
@@ -1601,7 +1601,7 @@ bool EditLyrics::canBeRun()
 
 void EditLyrics::run()
 {
-	myLyrics->Edit();
+	myLyrics->edit();
 }
 
 bool JumpToBrowser::canBeRun()
@@ -2309,7 +2309,7 @@ bool RefetchLyrics::canBeRun()
 void RefetchLyrics::run()
 {
 #	ifdef HAVE_CURL_CURL_H
-	myLyrics->Refetch();
+	myLyrics->refetchCurrent();
 #	endif // HAVE_CURL_CURL_H
 }
 
@@ -2444,8 +2444,24 @@ void ShowArtistInfo::run()
 #	endif // HAVE_CURL_CURL_H
 }
 
+bool ShowLyrics::canBeRun()
+{
+	if (myScreen == myLyrics)
+	{
+		m_song = nullptr;
+		return true;
+	}
+	else
+	{
+		m_song = currentSong(myScreen);
+		return m_song != nullptr;
+	}
+}
+
 void ShowLyrics::run()
 {
+	if (m_song != nullptr)
+		myLyrics->fetch(*m_song);
 	myLyrics->switchTo();
 }
 

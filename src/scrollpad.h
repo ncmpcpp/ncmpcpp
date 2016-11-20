@@ -46,18 +46,30 @@ struct Scrollpad: public Window
 	void flush();
 	void reset();
 	
-	bool setProperties(Color begin, const std::string &s, Color end, size_t flags, size_t id = -2);
-	bool setProperties(Format begin, const std::string &s, Format end, size_t flags, size_t id = -2);
+	bool setProperties(Color begin, const std::string &s, Color end,
+	                   size_t flags, size_t id = -2);
+	bool setProperties(Format begin, const std::string &s, Format end,
+	                   size_t flags, size_t id = -2);
 	void removeProperties(size_t id = -2);
 	
+	Scrollpad &operator<<(int n) { return write(n); }
+	Scrollpad &operator<<(long int n) { return write(n); }
+	Scrollpad &operator<<(unsigned int n) { return write(n); }
+	Scrollpad &operator<<(unsigned long int n) { return write(n); }
+	Scrollpad &operator<<(char c) { return write(c); }
+	Scrollpad &operator<<(const char *s) { return write(s); }
+	Scrollpad &operator<<(const std::string &s) { return write(s); }
+	Scrollpad &operator<<(Color color) { return write(color); }
+	Scrollpad &operator<<(Format format) { return write(format); }
+
+private:
 	template <typename ItemT>
-	Scrollpad &operator<<(const ItemT &item)
+	Scrollpad &write(ItemT &&item)
 	{
-		m_buffer << item;
+		m_buffer << std::forward<ItemT>(item);
 		return *this;
 	}
-	
-private:
+
 	Buffer m_buffer;
 	
 	size_t m_beginning;

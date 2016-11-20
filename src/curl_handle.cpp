@@ -23,7 +23,6 @@
 #ifdef HAVE_CURL_CURL_H
 
 #include <cstdlib>
-#include <pthread.h>
 
 namespace
 {
@@ -65,4 +64,3 @@ std::string Curl::escape(const std::string &s)
 }
 
 #endif // HAVE_CURL_CURL_H
-

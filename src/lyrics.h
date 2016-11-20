@@ -21,13 +21,49 @@
 #ifndef NCMPCPP_LYRICS_H
 #define NCMPCPP_LYRICS_H
 
-#include <pthread.h>
+#include <boost/optional.hpp>
+#include <future>
+#include <memory>
 #include <queue>
 
 #include "interfaces.h"
 #include "lyrics_fetcher.h"
 #include "screen.h"
 #include "song.h"
+
+template <typename ResourceT>
+struct Shared
+{
+	struct Resource
+	{
+		Resource(std::mutex &mutex, ResourceT &resource)
+			: m_lock(std::unique_lock<std::mutex>(mutex)), m_resource(resource)
+		{ }
+
+		ResourceT &operator*() { return m_resource; }
+		const ResourceT &operator*() const { return m_resource; }
+
+		ResourceT *operator->() { return &m_resource; }
+		const ResourceT *operator->() const { return &m_resource; }
+
+	private:
+		std::unique_lock<std::mutex> m_lock;
+		ResourceT &m_resource;
+	};
+
+	Shared(){ }
+
+	template <typename ValueT>
+	Shared(ValueT &&value)
+		: m_resource(std::forward<ValueT>(value))
+	{ }
+
+	Resource acquire() { return Resource(m_mutex, m_resource); }
+
+private:
+	std::mutex m_mutex;
+	ResourceT m_resource;
+};
 
 struct Lyrics: Screen<NC::Scrollpad>, Tabbable
 {
@@ -44,53 +80,26 @@ struct Lyrics: Screen<NC::Scrollpad>, Tabbable
 	
 	virtual bool isLockable() override { return false; }
 	virtual bool isMergable() override { return true; }
-	
-	// private members
-	bool SetSong(const MPD::Song &s);
-	void Edit();
-	
-#	ifdef HAVE_CURL_CURL_H
-	void Refetch();
 
-	static void ToggleFetcher();
-	static void DownloadInBackground(const MPD::Song &s);
-#	endif // HAVE_CURL_CURL_H
-	
-	bool Reload;
-	
+	// other members
+	void fetch(const MPD::Song &s);
+	void refetchCurrent();
+	void edit();
+	void toggleFetcher();
+
+	void fetchInBackground(const MPD::Song &s);
+
 private:
-	void Load();
-	
-#	ifdef HAVE_CURL_CURL_H
-	static void *DownloadInBackgroundImpl(void *song_ptr);
-	static void DownloadInBackgroundImplHelper(const MPD::Song &s);
-	// lock for allowing exclusive access to itsToDownload and itsWorkersNumber
-	static pthread_mutex_t itsDIBLock;
-	// storage for songs for which lyrics are scheduled to be downloaded
-	static std::queue<MPD::Song *> itsToDownload;
-	// current worker threads (ie. downloading lyrics)
-	static size_t itsWorkersNumber;
-	// maximum number of worker threads. if it's reached, next lyrics requests
-	// are put into itsToDownload queue.
-	static const size_t itsMaxWorkersNumber = 1;
-	
-	void *Download();
-	static void *DownloadWrapper(void *);
-	static void Save(const std::string &filename, const std::string &lyrics);
-	
-	void Take();
-	bool isReadyToTake;
-	bool isDownloadInProgress;
-	pthread_t itsDownloader;
-	
-	static LyricsFetcher *itsFetcher;
-#	endif // HAVE_CURL_CURL_H
-	
-	size_t itsScrollBegin;
-	MPD::Song itsSong;
-	std::string itsFilename;
-	
-	static std::string GenerateFilename(const MPD::Song &s);
+	bool m_refresh_window;
+	size_t m_scroll_begin;
+
+	std::shared_ptr<Shared<NC::Buffer>> m_shared_buffer;
+
+	MPD::Song m_song;
+	LyricsFetcher *m_fetcher;
+	std::future<boost::optional<std::string>> m_worker;
+
+	Shared<std::pair<bool, std::queue<MPD::Song>>> m_shared_queue;
 };
 
 extern Lyrics *myLyrics;

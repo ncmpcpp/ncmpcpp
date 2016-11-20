@@ -145,17 +145,6 @@ PKG_CHECK_MODULES([ICU], [icu-uc], [
 	)
 ], [[]])
 
-dnl =============================
-dnl = checking for boost.thread =
-dnl =============================
-AC_DEFINE([BOOST_THREAD_VERSION], [3], [require boost.thread v3])
-AC_CHECK_HEADERS([boost/thread.hpp], ,
-	AC_MSG_ERROR([boost/thread.hpp is missing or your boost version is too old (boost.thread v3 is required)])
-)
-AC_CHECK_LIB(boost_thread$BOOST_LIB_SUFFIX, main, LIBS="$LIBS -lboost_thread$BOOST_LIB_SUFFIX",
-	AC_MSG_ERROR([no boost.thread library found])
-)
-
 dnl ================================
 dnl = checking for various headers =
 dnl ================================
@@ -188,16 +177,6 @@ fi
 if test "$ax_cv_lib_readline_history" = "no"; then
   AC_MSG_WARN([readline library has no history functionality])
 fi
-
-dnl ========================
-dnl = checking for pthread =
-dnl ========================
-AC_CHECK_HEADERS([pthread.h],
-	AC_CHECK_LIB(pthread, pthread_create, LIBS="$LIBS -lpthread",
-		AC_MSG_ERROR([pthread.h found but there is no pthread library to make use of])
-	),
-	AC_MSG_ERROR([no pthread.h header header file found])
-)
 
 dnl ========================
 dnl = checking for ncurses =

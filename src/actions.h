@@ -1240,7 +1240,10 @@ struct ShowLyrics: BaseAction
 	ShowLyrics(): BaseAction(Type::ShowLyrics, "show_lyrics") { }
 	
 private:
+	virtual bool canBeRun() override;
 	virtual void run() override;
+
+	const MPD::Song *m_song;
 };
 
 struct Quit: BaseAction

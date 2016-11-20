@@ -89,7 +89,12 @@ public:
 				++it;
 		}
 	}
-	
+
+	bool empty() const
+	{
+		return m_string.empty() && m_properties.empty();
+	}
+
 	void clear()
 	{
 		m_string.clear();

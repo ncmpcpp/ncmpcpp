@@ -574,7 +574,7 @@ void Status::Changes::songID(int song_id)
 
 #			ifdef HAVE_CURL_CURL_H
 			if (Config.fetch_lyrics_in_background)
-				Lyrics::DownloadInBackground(s);
+				myLyrics->fetchInBackground(s);
 #			endif // HAVE_CURL_CURL_H
 
 			drawTitle(s);
@@ -582,11 +582,10 @@ void Status::Changes::songID(int song_id)
 			if (Config.autocenter_mode)
 				myPlaylist->locateSong(s);
 
-			if (Config.now_playing_lyrics && isVisible(myLyrics) && myLyrics->previousScreen() == myPlaylist)
-			{
-				if (myLyrics->SetSong(s))
-					myLyrics->Reload = 1;
-			}
+			if (Config.now_playing_lyrics
+			    && isVisible(myLyrics)
+			    && myLyrics->previousScreen() == myPlaylist)
+				myLyrics->fetch(s);
 		}
 	}
 	elapsedTime(false);
