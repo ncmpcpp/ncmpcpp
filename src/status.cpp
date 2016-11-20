@@ -572,10 +572,8 @@ void Status::Changes::songID(int song_id)
 			if (!Config.execute_on_song_change.empty())
 				res = system(Config.execute_on_song_change.c_str());
 
-#			ifdef HAVE_CURL_CURL_H
 			if (Config.fetch_lyrics_in_background)
 				myLyrics->fetchInBackground(s);
-#			endif // HAVE_CURL_CURL_H
 
 			drawTitle(s);
 

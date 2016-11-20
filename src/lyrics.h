@@ -105,4 +105,3 @@ private:
 extern Lyrics *myLyrics;
 
 #endif // NCMPCPP_LYRICS_H
-

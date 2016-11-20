@@ -23,8 +23,6 @@
 
 #include "config.h"
 
-#ifdef HAVE_CURL_CURL_H
-
 #include <map>
 #include <string>
 
@@ -74,7 +72,5 @@ protected:
 };
 
 }
-
-#endif // HAVE_CURL_CURL_H
 
 #endif // NCMPCPP_LASTFM_SERVICE_H

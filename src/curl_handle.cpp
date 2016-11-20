@@ -20,8 +20,6 @@
 
 #include "curl_handle.h"
 
-#ifdef HAVE_CURL_CURL_H
-
 #include <cstdlib>
 
 namespace
@@ -62,5 +60,3 @@ std::string Curl::escape(const std::string &s)
 	curl_free(cs);
 	return result;
 }
-
-#endif // HAVE_CURL_CURL_H

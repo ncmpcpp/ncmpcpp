@@ -106,9 +106,6 @@ bool configure(int argc, char **argv)
 			<< " - tag editor\n"
 			<< " - tiny tag editor\n"
 	#		endif
-	#		ifdef HAVE_CURL_CURL_H
-			<< " - artist info\n"
-	#		endif
 	#		ifdef ENABLE_OUTPUTS
 			<< " - outputs\n"
 	#		endif
@@ -125,9 +122,6 @@ bool configure(int argc, char **argv)
 			<< "disabled"
 	#		endif // HAVE_LANGINFO_H
 			<< "\nbuilt with support for:"
-	#		ifdef HAVE_CURL_CURL_H
-			<< " curl"
-	#		endif
 	#		ifdef HAVE_FFTW3_H
 			<< " fftw"
 	#		endif

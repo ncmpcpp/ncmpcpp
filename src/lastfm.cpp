@@ -20,8 +20,6 @@
 
 #include "lastfm.h"
 
-#ifdef HAVE_CURL_CURL_H
-
 #include "helpers.h"
 #include "charset.h"
 #include "global.h"
@@ -89,5 +87,3 @@ void Lastfm::getResult()
 	// reset m_worker so it's no longer valid
 	m_worker = std::future<LastFm::Service::Result>();
 }
-
-#endif // HVAE_CURL_CURL_H

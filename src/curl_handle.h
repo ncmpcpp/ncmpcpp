@@ -23,8 +23,6 @@
 
 #include "config.h"
 
-#ifdef HAVE_CURL_CURL_H
-
 #include <string>
 #include "curl/curl.h"
 
@@ -35,7 +33,4 @@ namespace Curl
 	std::string escape(const std::string &s);
 }
 
-#endif // HAVE_CURL_CURL_H
-
 #endif // NCMPCPP_CURL_HANDLE_H
-

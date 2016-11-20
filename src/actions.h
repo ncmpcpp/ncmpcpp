@@ -644,9 +644,6 @@ struct ToggleLyricsFetcher: BaseAction
 	ToggleLyricsFetcher(): BaseAction(Type::ToggleLyricsFetcher, "toggle_lyrics_fetcher") { }
 	
 private:
-#	ifndef HAVE_CURL_CURL_H
-	virtual bool canBeRun() override;
-#	endif // NOT HAVE_CURL_CURL_H
 	virtual void run() override;
 };
 
@@ -656,9 +653,6 @@ struct ToggleFetchingLyricsInBackground: BaseAction
 	: BaseAction(Type::ToggleFetchingLyricsInBackground, "toggle_fetching_lyrics_in_background") { }
 	
 private:
-#	ifndef HAVE_CURL_CURL_H
-	virtual bool canBeRun() override;
-#	endif // NOT HAVE_CURL_CURL_H
 	virtual void run() override;
 };
 

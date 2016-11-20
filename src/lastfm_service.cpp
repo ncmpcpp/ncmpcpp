@@ -20,8 +20,6 @@
 
 #include "lastfm_service.h"
 
-#ifdef HAVE_CURL_CURL_H
-
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/locale/conversion.hpp>
 #include <fstream>
@@ -210,6 +208,3 @@ Service::Result ArtistInfo::processData(const std::string &data)
 }
 
 }
-
-#endif
-

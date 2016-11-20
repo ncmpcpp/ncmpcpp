@@ -21,8 +21,6 @@
 #include "config.h"
 #include "curl_handle.h"
 
-#ifdef HAVE_CURL_CURL_H
-
 #include <cstdlib>
 #include <cstring>
 #include <boost/algorithm/string/join.hpp>
@@ -264,6 +262,3 @@ bool InternetLyricsFetcher::isURLOk(const std::string &url)
 	URL = url;
 	return false;
 }
-
-#endif // HAVE_CURL_CURL_H
-

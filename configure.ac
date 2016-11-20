@@ -15,7 +15,6 @@ AC_ARG_ENABLE(visualizer, AS_HELP_STRING([--enable-visualizer], [Enable music vi
 AC_ARG_ENABLE(clock, AS_HELP_STRING([--enable-clock], [Enable clock screen @<:@default=no@:>@]), [clock=$enableval], [clock=no])
 AC_ARG_ENABLE(unicode, AS_HELP_STRING([--enable-unicode], [Enable utf8 support @<:@default=yes@:>@]), [unicode=$enableval], [unicode=yes])
 
-AC_ARG_WITH(curl, AS_HELP_STRING([--with-curl], [Enable fetching lyrics from the Internet @<:@default=auto@:>@]), [curl=$withval], [curl=auto])
 AC_ARG_WITH(fftw, AS_HELP_STRING([--with-fftw], [Enable fftw support (required for frequency spectrum vizualization) @<:@default=auto@:>@]), [fftw=$withval], [fftw=auto])
 AC_ARG_WITH(taglib, AS_HELP_STRING([--with-taglib], [Enable tag editor @<:@default=auto@:>@]), [taglib=$withval], [taglib=auto])
 
@@ -232,31 +231,42 @@ if test "$visualizer" = "yes" ; then
 	AC_DEFINE([ENABLE_VISUALIZER], [1], [enables music visualizer screen])
 fi
 
-dnl =====================
-dnl = checking for curl =
-dnl =====================
-if test "$curl" != "no" ; then
-	AC_PATH_PROG(CURL_CONFIG, curl-config)
-	if test "$CURL_CONFIG" != "" ; then
-		CPPFLAGS="$CPPFLAGS `$CURL_CONFIG --cflags`"
-		AC_CHECK_LIB(curl, curl_easy_init, LIBS="$LIBS `$CURL_CONFIG --libs`",
-			if test "$curl" = "yes" ; then
-				AC_MSG_ERROR([curl library is required])
-			fi
-		)
-		AC_CHECK_HEADERS([curl/curl.h], ,
-			if test "$curl" = "yes" ; then
-				AC_MSG_ERROR([missing curl.h header])
-			fi
-		)
-	else
-		AC_CHECK_LIB(curl, curl_easy_init, LIBS="$LIBS -lcurl",
-			if test "$curl" = "yes" ; then
-				AC_MSG_ERROR([curl library is required])
-			fi
-		)
-	fi
-fi
+dnl ========================
+dnl = checking for libcurl =
+dnl ========================
+PKG_CHECK_MODULES([libcurl], [libcurl], [
+	AC_SUBST(libcurl_CFLAGS)
+	AC_SUBST(libcurl_LIBS)
+	CPPFLAGS="$CPPFLAGS $libcurl_CFLAGS"
+	AC_CHECK_HEADERS([curl/curl.h],
+		LIBS="$LIBS $libcurl_LIBS"
+	,
+		AC_MSG_ERROR([missing curl/curl.h header])
+	)
+],
+	AC_MSG_ERROR([libcurl is required!])
+)
+
+dnl AC_PATH_PROG(CURL_CONFIG, curl-config)
+dnl if test "$CURL_CONFIG" != "" ; then
+dnl 	CPPFLAGS="$CPPFLAGS `$CURL_CONFIG --cflags`"
+dnl 	AC_CHECK_LIB(curl, curl_easy_init, LIBS="$LIBS `$CURL_CONFIG --libs`",
+dnl 		if test "$curl" = "yes" ; then
+dnl 			AC_MSG_ERROR([curl library is required])
+dnl 		fi
+dnl 	)
+dnl 	AC_CHECK_HEADERS([curl/curl.h], ,
+dnl 		if test "$curl" = "yes" ; then
+dnl 			AC_MSG_ERROR([missing curl.h header])
+dnl 		fi
+dnl 	)
+dnl else
+dnl 	AC_CHECK_LIB(curl, curl_easy_init, LIBS="$LIBS -lcurl",
+dnl 		if test "$curl" = "yes" ; then
+dnl 			AC_MSG_ERROR([curl library is required])
+dnl 		fi
+dnl 	)
+dnl fi
 
 dnl =======================
 dnl = checking for taglib =

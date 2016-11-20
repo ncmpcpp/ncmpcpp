@@ -33,9 +33,7 @@ enum class ScreenType {
 	Clock,
 #	endif // ENABLE_CLOCK
 	Help,
-#	ifdef HAVE_CURL_CURL_H
 	Lastfm,
-#	endif // HAVE_CURL_CURL_H
 	Lyrics,
 	MediaLibrary,
 #	ifdef ENABLE_OUTPUTS

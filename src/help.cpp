@@ -229,11 +229,9 @@ void write_bindings(NC::Scrollpad &w)
 	key(w, Type::ToggleSeparatorsBetweenAlbums, "Toggle displaying separators between albums");
 	key(w, Type::JumpToPositionInSong, "Jump to given position in playing song (formats: mm:ss, x%)");
 	key(w, Type::ShowSongInfo, "Show song info");
-#	ifdef HAVE_CURL_CURL_H
 	key(w, Type::ShowArtistInfo, "Show artist info");
 	key(w, Type::ToggleLyricsFetcher, "Toggle lyrics fetcher");
 	key(w, Type::ToggleFetchingLyricsInBackground, "Toggle fetching lyrics for playing songs in background");
-#	endif // HAVE_CURL_CURL_H
 	key(w, Type::ShowLyrics, "Show/hide song lyrics");
 	w << '\n';
 	key(w, Type::Quit, "Quit");

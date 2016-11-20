@@ -23,8 +23,6 @@
 
 #include "config.h"
 
-#ifdef HAVE_CURL_CURL_H
-
 #include <future>
 #include <memory>
 
@@ -77,7 +75,4 @@ private:
 
 extern Lastfm *myLastfm;
 
-#endif // HAVE_CURL_CURL_H
-
 #endif // NCMPCPP_LASTFM_H
-

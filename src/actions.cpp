@@ -135,11 +135,8 @@ void initializeScreens()
 	mySongInfo = new SongInfo;
 	myServerInfo = new ServerInfo;
 	mySortPlaylistDialog = new SortPlaylistDialog;
-	
-#	ifdef HAVE_CURL_CURL_H
 	myLastfm = new Lastfm;
-#	endif // HAVE_CURL_CURL_H
-	
+
 #	ifdef HAVE_TAGLIB_H
 	myTinyTagEditor = new TinyTagEditor;
 	myTagEditor = new TagEditor;
@@ -172,11 +169,8 @@ void setResizeFlags()
 	mySongInfo->hasToBeResized = 1;
 	myServerInfo->hasToBeResized = 1;
 	mySortPlaylistDialog->hasToBeResized = 1;
-	
-#	ifdef HAVE_CURL_CURL_H
 	myLastfm->hasToBeResized = 1;
-#	endif // HAVE_CURL_CURL_H
-	
+
 #	ifdef HAVE_TAGLIB_H
 	myTinyTagEditor->hasToBeResized = 1;
 	myTagEditor->hasToBeResized = 1;
@@ -1138,35 +1132,16 @@ void ToggleLyricsUpdateOnSongChange::run()
 	);
 }
 
-#ifndef HAVE_CURL_CURL_H
-bool ToggleLyricsFetcher::canBeRun()
-{
-	return false;
-}
-#endif // NOT HAVE_CURL_CURL_H
-
 void ToggleLyricsFetcher::run()
 {
-#	ifdef HAVE_CURL_CURL_H
 	myLyrics->toggleFetcher();
-#	endif // HAVE_CURL_CURL_H
 }
-
-#ifndef HAVE_CURL_CURL_H
-bool ToggleFetchingLyricsInBackground::canBeRun()
-{
-	return false;
-}
-#endif // NOT HAVE_CURL_CURL_H
 
 void ToggleFetchingLyricsInBackground::run()
 {
-#	ifdef HAVE_CURL_CURL_H
 	Config.fetch_lyrics_in_background = !Config.fetch_lyrics_in_background;
 	Statusbar::printf("Fetching lyrics for playing songs in background: %1%",
-		Config.fetch_lyrics_in_background ? "on" : "off"
-	);
-#	endif // HAVE_CURL_CURL_H
+	                  Config.fetch_lyrics_in_background ? "on" : "off");
 }
 
 void TogglePlayingSongCentering::run()
@@ -2003,11 +1978,8 @@ void ApplyFilter::run()
 bool Find::canBeRun()
 {
 	return myScreen == myHelp
-	    || myScreen == myLyrics
-#	ifdef HAVE_CURL_CURL_H
-	    || myScreen == myLastfm
-#	endif // HAVE_CURL_CURL_H
-	;
+		|| myScreen == myLyrics
+		|| myScreen == myLastfm;
 }
 
 void Find::run()
@@ -2299,18 +2271,12 @@ void ToggleMediaLibrarySortMode::run()
 
 bool RefetchLyrics::canBeRun()
 {
-#	ifdef HAVE_CURL_CURL_H
 	return myScreen == myLyrics;
-#	else
-	return false;
-#	endif // HAVE_CURL_CURL_H
 }
 
 void RefetchLyrics::run()
 {
-#	ifdef HAVE_CURL_CURL_H
 	myLyrics->refetchCurrent();
-#	endif // HAVE_CURL_CURL_H
 }
 
 bool SetSelectedItemsPriority::canBeRun()
@@ -2402,20 +2368,15 @@ void ShowSongInfo::run()
 
 bool ShowArtistInfo::canBeRun()
 {
-	#ifdef HAVE_CURL_CURL_H
 	return myScreen == myLastfm
-	  ||   (myScreen->isActiveWindow(myLibrary->Tags)
-	    && !myLibrary->Tags.empty()
-	    && Config.media_lib_primary_tag == MPD_TAG_ARTIST)
-	  ||   currentSong(myScreen);
-#	else
-	return false;
-#	endif // NOT HAVE_CURL_CURL_H
+		|| (myScreen->isActiveWindow(myLibrary->Tags)
+		    && !myLibrary->Tags.empty()
+		    && Config.media_lib_primary_tag == MPD_TAG_ARTIST)
+		|| currentSong(myScreen);
 }
 
 void ShowArtistInfo::run()
 {
-#	ifdef HAVE_CURL_CURL_H
 	if (myScreen == myLastfm)
 	{
 		myLastfm->switchTo();
@@ -2441,7 +2402,6 @@ void ShowArtistInfo::run()
 		myLastfm->queueJob(new LastFm::ArtistInfo(artist, Config.lastfm_preferred_language));
 		myLastfm->switchTo();
 	}
-#	endif // HAVE_CURL_CURL_H
 }
 
 bool ShowLyrics::canBeRun()

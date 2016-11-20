@@ -51,10 +51,8 @@ std::string screenTypeToString(ScreenType st)
 #endif // ENABLE_CLOCK
 	case ScreenType::Help:
 		return "help";
-#ifdef HAVE_CURL_CURL_H
 	case ScreenType::Lastfm:
 		return "last_fm";
-#endif // HAVE_CURL_CURL_H
 	case ScreenType::Lyrics:
 		return "lyrics";
 	case ScreenType::MediaLibrary:
@@ -135,10 +133,8 @@ ScreenType stringToScreenType(const std::string &s)
 	{
 		if (s == "lyrics")
 			result = ScreenType::Lyrics;
-#		ifdef HAVE_CURL_CURL_H
 		else if (s == "last_fm")
 			result = ScreenType::Lastfm;
-#		endif // HAVE_CURL_CURL_H
 		else if (s == "selected_items_adder")
 			result = ScreenType::SelectedItemsAdder;
 		else if (s == "server_info")
@@ -167,10 +163,8 @@ BaseScreen *toScreen(ScreenType st)
 #		endif // ENABLE_CLOCK
 		case ScreenType::Help:
 			return myHelp;
-#		ifdef HAVE_CURL_CURL_H
 		case ScreenType::Lastfm:
 			return myLastfm;
-#		endif // HAVE_CURL_CURL_H
 		case ScreenType::Lyrics:
 			return myLyrics;
 		case ScreenType::MediaLibrary:

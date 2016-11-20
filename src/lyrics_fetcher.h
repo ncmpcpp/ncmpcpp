@@ -23,8 +23,6 @@
 
 #include "config.h"
 
-#ifdef HAVE_CURL_CURL_H
-
 #include <memory>
 #include <string>
 
@@ -155,7 +153,5 @@ protected:
 private:
 	std::string URL;
 };
-
-#endif // HAVE_CURL_CURL_H
 
 #endif // NCMPCPP_LYRICS_FETCHER_H
