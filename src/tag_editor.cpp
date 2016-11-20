@@ -806,8 +806,8 @@ void TagEditor::runAction()
 				Statusbar::printf("Writing tags in \"%1%\"...", (*it)->getName());
 				if (!Tags::write(**it))
 				{
-					const char msg[] = "Error while writing tags in \"%1%\"";
-					Statusbar::printf(msg, wideShorten((*it)->getURI(), COLS-const_strlen(msg)).c_str());
+					Statusbar::printf("Error while writing tags to \"%1%\": %2%",
+					                  (*it)->getName(), strerror(errno));
 					success = 0;
 					break;
 				}

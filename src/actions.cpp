@@ -1392,8 +1392,8 @@ void EditLibraryTag::run()
 			if (!Tags::write(ms))
 			{
 				success = false;
-				const char msg[] = "Error while updating tags in \"%1%\"";
-				Statusbar::printf(msg, wideShorten(ms.getURI(), COLS-const_strlen(msg)));
+				Statusbar::printf("Error while writing tags to \"%1%\": %2%",
+				                  ms.getName(), strerror(errno));
 				s.finish();
 				break;
 			}

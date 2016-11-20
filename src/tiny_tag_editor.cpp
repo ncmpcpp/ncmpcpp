@@ -172,7 +172,7 @@ void TinyTagEditor::runAction()
 			}
 		}
 		else
-			Statusbar::print("Error while writing tags");
+			Statusbar::printf("Error while writing tags: %1%", strerror(errno));
 	}
 	if (option > 21)
 		m_previous_screen->switchTo();
