@@ -247,27 +247,6 @@ PKG_CHECK_MODULES([libcurl], [libcurl], [
 	AC_MSG_ERROR([libcurl is required!])
 )
 
-dnl AC_PATH_PROG(CURL_CONFIG, curl-config)
-dnl if test "$CURL_CONFIG" != "" ; then
-dnl 	CPPFLAGS="$CPPFLAGS `$CURL_CONFIG --cflags`"
-dnl 	AC_CHECK_LIB(curl, curl_easy_init, LIBS="$LIBS `$CURL_CONFIG --libs`",
-dnl 		if test "$curl" = "yes" ; then
-dnl 			AC_MSG_ERROR([curl library is required])
-dnl 		fi
-dnl 	)
-dnl 	AC_CHECK_HEADERS([curl/curl.h], ,
-dnl 		if test "$curl" = "yes" ; then
-dnl 			AC_MSG_ERROR([missing curl.h header])
-dnl 		fi
-dnl 	)
-dnl else
-dnl 	AC_CHECK_LIB(curl, curl_easy_init, LIBS="$LIBS -lcurl",
-dnl 		if test "$curl" = "yes" ; then
-dnl 			AC_MSG_ERROR([curl library is required])
-dnl 		fi
-dnl 	)
-dnl fi
-
 dnl =======================
 dnl = checking for taglib =
 dnl =======================

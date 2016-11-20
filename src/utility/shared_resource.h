@@ -18,58 +18,43 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
-#ifndef NCMPCPP_LYRICS_H
-#define NCMPCPP_LYRICS_H
+#ifndef NCMPCPP_UTILITY_SHARED_RESOURCE_H
+#define NCMPCPP_UTILITY_SHARED_RESOURCE_H
 
+#include <mutex>
 
-#include <boost/optional.hpp>
-#include <future>
-#include <memory>
-#include <queue>
-
-#include "interfaces.h"
-#include "lyrics_fetcher.h"
-#include "screen.h"
-#include "song.h"
-#include "utility/shared_resource.h"
-
-struct Lyrics: Screen<NC::Scrollpad>, Tabbable
+template <typename ResourceT>
+struct Shared
 {
-	Lyrics();
-	
-	// Screen<NC::Scrollpad> implementation
-	virtual void resize() override;
-	virtual void switchTo() override;
-	
-	virtual std::wstring title() override;
-	virtual ScreenType type() override { return ScreenType::Lyrics; }
-	
-	virtual void update() override;
-	
-	virtual bool isLockable() override { return false; }
-	virtual bool isMergable() override { return true; }
+	struct Resource
+	{
+		Resource(std::mutex &mutex, ResourceT &resource)
+			: m_lock(std::unique_lock<std::mutex>(mutex)), m_resource(resource)
+		{ }
 
-	// other members
-	void fetch(const MPD::Song &s);
-	void refetchCurrent();
-	void edit();
-	void toggleFetcher();
+		ResourceT &operator*() { return m_resource; }
+		const ResourceT &operator*() const { return m_resource; }
 
-	void fetchInBackground(const MPD::Song &s);
+		ResourceT *operator->() { return &m_resource; }
+		const ResourceT *operator->() const { return &m_resource; }
+
+	private:
+		std::unique_lock<std::mutex> m_lock;
+		ResourceT &m_resource;
+	};
+
+	Shared(){ }
+
+	template <typename ValueT>
+	Shared(ValueT &&value)
+		: m_resource(std::forward<ValueT>(value))
+	{ }
+
+	Resource acquire() { return Resource(m_mutex, m_resource); }
 
 private:
-	bool m_refresh_window;
-	size_t m_scroll_begin;
-
-	std::shared_ptr<Shared<NC::Buffer>> m_shared_buffer;
-
-	MPD::Song m_song;
-	LyricsFetcher *m_fetcher;
-	std::future<boost::optional<std::string>> m_worker;
-
-	Shared<std::pair<bool, std::queue<MPD::Song>>> m_shared_queue;
+	std::mutex m_mutex;
+	ResourceT m_resource;
 };
 
-extern Lyrics *myLyrics;
-
-#endif // NCMPCPP_LYRICS_H
+#endif // NCMPCPP_UTILITY_SHARED_RESOURCE_H
