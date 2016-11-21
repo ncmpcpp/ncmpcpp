@@ -88,6 +88,8 @@ private:
 		boost::optional<std::string> message;
 	};
 
+	void clearWorker();
+
 	bool m_refresh_window;
 	size_t m_scroll_begin;
 

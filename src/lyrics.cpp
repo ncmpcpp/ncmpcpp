@@ -227,9 +227,8 @@ void Lyrics::update()
 			}
 			else
 				w << "\nLyrics were not found.\n";
+			clearWorker();
 			m_refresh_window = true;
-			// Reset worker so it's no longer valid.
-			m_worker = std::future<boost::optional<std::string>>();
 		}
 	}
 
@@ -273,7 +272,10 @@ void Lyrics::fetch(const MPD::Song &s)
 		w.clear();
 		m_song = s;
 		if (loadLyrics(w, lyricsFilename(m_song)))
+		{
+			clearWorker();
 			m_refresh_window = true;
+		}
 		else
 		{
 			m_shared_buffer = std::make_shared<Shared<NC::Buffer>>();
@@ -295,8 +297,7 @@ void Lyrics::refetchCurrent()
 	}
 	else
 	{
-		// Get rid of current worker so fetch can restart the process.
-		m_worker = std::future<boost::optional<std::string>>();
+		clearWorker();
 		fetch(m_song);
 	}
 }
@@ -416,4 +417,10 @@ boost::optional<std::string> Lyrics::tryTakeConsumerMessage()
 		consumer->message = boost::none;
 	}
 	return result;
+}
+
+void Lyrics::clearWorker()
+{
+	m_shared_buffer.reset();
+	m_worker = std::future<boost::optional<std::string>>();
 }
