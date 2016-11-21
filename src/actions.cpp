@@ -317,6 +317,10 @@ void UpdateEnvironment::run(bool update_timer, bool refresh_window)
 	// update timer, status if necessary etc.
 	Status::trace(update_timer, true);
 
+	// show lyrics consumer notification if appropriate
+	if (auto message = myLyrics->tryTakeConsumerMessage())
+		Statusbar::print(*message);
+
 	// header stuff
 	if ((myScreen == myPlaylist || myScreen == myBrowser || myScreen == myLyrics)
 	&&  (Timer - m_past > boost::posix_time::milliseconds(500))

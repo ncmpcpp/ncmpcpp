@@ -573,7 +573,7 @@ void Status::Changes::songID(int song_id)
 				res = system(Config.execute_on_song_change.c_str());
 
 			if (Config.fetch_lyrics_in_background)
-				myLyrics->fetchInBackground(s);
+				myLyrics->fetchInBackground(s, false);
 
 			drawTitle(s);
 

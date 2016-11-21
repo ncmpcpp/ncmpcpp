@@ -190,7 +190,6 @@ Lyrics::Lyrics()
 	, m_refresh_window(false)
 	, m_scroll_begin(0)
 	, m_fetcher(nullptr)
-	, m_shared_queue(std::make_pair(false, std::queue<MPD::Song>{}))
 { }
 
 void Lyrics::resize()
@@ -359,42 +358,62 @@ void Lyrics::toggleFetcher()
 		Statusbar::print("Using all lyrics fetchers");
 }
 
-void Lyrics::fetchInBackground(const MPD::Song &s)
+void Lyrics::fetchInBackground(const MPD::Song &s, bool notify_)
 {
-	auto consumer = [this] {
+	auto consumer_impl = [this] {
 		std::string lyrics_file;
 		while (true)
 		{
-			MPD::Song qs;
+			ConsumerState::Song cs;
 			{
-				auto queue = m_shared_queue.acquire();
-				assert(queue->first);
-				if (queue->second.empty())
+				auto consumer = m_consumer_state.acquire();
+				assert(consumer->running);
+				if (consumer->songs.empty())
 				{
-					queue->first = false;
+					consumer->running = false;
 					break;
 				}
-				lyrics_file = lyricsFilename(queue->second.front());
+				lyrics_file = lyricsFilename(consumer->songs.front().song());
 				if (!boost::filesystem::exists(lyrics_file))
-					qs = queue->second.front();
-				queue->second.pop();
+				{
+					cs = consumer->songs.front();
+					if (cs.notify())
+					{
+						consumer->message = "Fetching lyrics for \""
+							+ Format::stringify<char>(Config.song_status_format, &cs.song())
+							+ "\"...";
+					}
+				}
+				consumer->songs.pop();
 			}
-			if (!qs.empty())
+			if (!cs.song().empty())
 			{
-				auto lyrics = downloadLyrics(qs, nullptr, m_fetcher);
+				auto lyrics = downloadLyrics(cs.song(), nullptr, m_fetcher);
 				if (lyrics)
 					saveLyrics(lyrics_file, *lyrics);
 			}
 		}
 	};
 
-	auto queue = m_shared_queue.acquire();
-	queue->second.push(s);
+	auto consumer = m_consumer_state.acquire();
+	consumer->songs.emplace(s, notify_);
 	// Start the consumer if it's not running.
-	if (!queue->first)
+	if (!consumer->running)
 	{
-		std::thread t(consumer);
+		std::thread t(consumer_impl);
 		t.detach();
-		queue->first = true;
+		consumer->running = true;
 	}
+}
+
+boost::optional<std::string> Lyrics::tryTakeConsumerMessage()
+{
+	boost::optional<std::string> result;
+	auto consumer = m_consumer_state.acquire();
+	if (consumer->message)
+	{
+		result = std::move(consumer->message);
+		consumer->message = boost::none;
+	}
+	return result;
 }

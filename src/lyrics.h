@@ -55,9 +55,39 @@ struct Lyrics: Screen<NC::Scrollpad>, Tabbable
 	void edit();
 	void toggleFetcher();
 
-	void fetchInBackground(const MPD::Song &s);
+	void fetchInBackground(const MPD::Song &s, bool notify_);
+	boost::optional<std::string> tryTakeConsumerMessage();
 
 private:
+	struct ConsumerState
+	{
+		struct Song
+		{
+			Song()
+				: m_notify(false)
+			{ }
+
+			Song(const MPD::Song &s, bool notify_)
+				: m_song(s), m_notify(notify_)
+			{ }
+
+			const MPD::Song &song() const { return m_song; }
+			bool notify() const { return m_notify; }
+
+		private:
+			MPD::Song m_song;
+			bool m_notify;
+		};
+
+		ConsumerState()
+			: running(false)
+		{ }
+
+		bool running;
+		std::queue<Song> songs;
+		boost::optional<std::string> message;
+	};
+
 	bool m_refresh_window;
 	size_t m_scroll_begin;
 
@@ -67,7 +97,7 @@ private:
 	LyricsFetcher *m_fetcher;
 	std::future<boost::optional<std::string>> m_worker;
 
-	Shared<std::pair<bool, std::queue<MPD::Song>>> m_shared_queue;
+	Shared<ConsumerState> m_consumer_state;
 };
 
 extern Lyrics *myLyrics;
