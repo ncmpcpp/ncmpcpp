@@ -2273,6 +2273,20 @@ void ToggleMediaLibrarySortMode::run()
 	myLibrary->toggleSortMode();
 }
 
+bool FetchLyricsInBackground::canBeRun()
+{
+	m_hs = dynamic_cast<HasSongs *>(myScreen);
+	return m_hs != nullptr && m_hs->itemAvailable();
+}
+
+void FetchLyricsInBackground::run()
+{
+	auto songs = m_hs->getSelectedSongs();
+	for (const auto &s : songs)
+		myLyrics->fetchInBackground(s, true);
+	Statusbar::print("Selected songs queued for lyrics fetching");
+}
+
 bool RefetchLyrics::canBeRun()
 {
 	return myScreen == myLyrics;
@@ -2785,6 +2799,7 @@ void populateActions()
 	insert_action(new Actions::ToggleBrowserSortMode());
 	insert_action(new Actions::ToggleLibraryTagType());
 	insert_action(new Actions::ToggleMediaLibrarySortMode());
+	insert_action(new Actions::FetchLyricsInBackground());
 	insert_action(new Actions::RefetchLyrics());
 	insert_action(new Actions::SetSelectedItemsPriority());
 	insert_action(new Actions::ToggleOutput());

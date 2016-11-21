@@ -520,6 +520,9 @@
 #  toggle_lyrics_fetcher
 #
 #def_key "F"
+#  fetch_lyrics_in_background
+#
+#def_key "alt-l"
 #  toggle_fetching_lyrics_in_background
 #
 #def_key "ctrl-l"

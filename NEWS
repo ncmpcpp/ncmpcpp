@@ -10,6 +10,7 @@ ncmpcpp-0.8 (????-??-??)
 * Lyrics can now be fetched for songs with no tags.
 * libcurl dependency is no longer optional.
 * When an attempt to write tags fails, show detailed error message.
+* Support for fetching lyrics for selected items in background was added.
 
 ncmpcpp-0.7.7 (2016-10-31)
 * Fixed compilation on 32bit platforms.

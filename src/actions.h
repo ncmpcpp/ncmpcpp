@@ -137,6 +137,7 @@ enum class Type
 	ToggleBrowserSortMode,
 	ToggleLibraryTagType,
 	ToggleMediaLibrarySortMode,
+	FetchLyricsInBackground,
 	RefetchLyrics,
 	SetSelectedItemsPriority,
 	ToggleOutput,
@@ -1161,6 +1162,18 @@ struct ToggleMediaLibrarySortMode: BaseAction
 private:
 	virtual bool canBeRun() override;
 	virtual void run() override;
+};
+
+struct FetchLyricsInBackground: BaseAction
+{
+	FetchLyricsInBackground()
+		: BaseAction(Type::FetchLyricsInBackground, "fetch_lyrics_in_background") { }
+
+private:
+	virtual bool canBeRun() override;
+	virtual void run() override;
+
+	HasSongs *m_hs;
 };
 
 struct RefetchLyrics: BaseAction
