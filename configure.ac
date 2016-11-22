@@ -14,6 +14,7 @@ AC_ARG_ENABLE(outputs, AS_HELP_STRING([--enable-outputs], [Enable outputs screen
 AC_ARG_ENABLE(visualizer, AS_HELP_STRING([--enable-visualizer], [Enable music visualizer screen @<:@default=no@:>@]), [visualizer=$enableval], [visualizer=no])
 AC_ARG_ENABLE(clock, AS_HELP_STRING([--enable-clock], [Enable clock screen @<:@default=no@:>@]), [clock=$enableval], [clock=no])
 AC_ARG_ENABLE(unicode, AS_HELP_STRING([--enable-unicode], [Enable utf8 support @<:@default=yes@:>@]), [unicode=$enableval], [unicode=yes])
+AC_ARG_ENABLE(np, AS_HELP_STRING([--enable-np], [Enable now playing command @<:@default=no@:>@]), [np=$enableval], [np=no])
 AC_ARG_WITH(curl, AS_HELP_STRING([--with-curl], [Enable fetching lyrics from the Internet @<:@default=auto@:>@]), [curl=$withval], [curl=auto])
 AC_ARG_WITH(fftw, AS_HELP_STRING([--with-fftw], [Enable fftw support (required for frequency spectrum vizualization) @<:@default=auto@:>@]), [fftw=$withval], [fftw=auto])
 AC_ARG_WITH(pdcurses, AS_HELP_STRING([--with-pdcurses[=LIBNAME]], [Link against pdcurses instead of ncurses @<:@default=XCurses@:>@]), [pdcurses=$withval], [pdcurses=no])
@@ -25,6 +26,10 @@ fi
 
 if test "$clock" = "yes"; then
 	AC_DEFINE([ENABLE_CLOCK], [1], [enables clock screen])
+fi
+
+if test "$np" = "yes"; then
+	AC_DEFINE([ENABLE_NP], [1], [enables now playing command])
 fi
 
 dnl ================================

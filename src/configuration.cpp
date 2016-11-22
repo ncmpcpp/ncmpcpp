@@ -57,6 +57,9 @@ bool configure(int argc, char **argv)
 		("ignore-config-errors", po::value<bool>()->default_value(false), "ignore unknown and invalid options in configuration file")
 		("bindings,b", po::value<std::string>(&bindings_path)->default_value("~/.ncmpcpp/bindings"), "specify bindings file")
 		("screen,s", po::value<std::string>(), "specify initial screen")
+#ifdef ENABLE_NP
+		("now-playing,n", "display currently playing track")
+#endif
 		("help,?", "show help message")
 		("version,v", "display version information")
 	;
@@ -165,6 +168,13 @@ bool configure(int argc, char **argv)
 		if (!vm["port"].defaulted())
 			Mpd.SetPort(vm["port"].as<int>());
 		Mpd.SetTimeout(Config.mpd_connection_timeout);
+
+#ifdef ENABLE_NP
+		if (vm.count("now-playing"))
+		{
+			Config.is_np = true;
+		}
+#endif
 
 		// custom startup screen
 		if (vm.count("screen"))
