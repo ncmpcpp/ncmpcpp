@@ -35,7 +35,7 @@ namespace Actions {
 
 enum class Type
 {
-	MacroUtility = 0,
+	MacroUtility = -1,
 	Dummy,
 	UpdateEnvironment,
 	MouseEvent,

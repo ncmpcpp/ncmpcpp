@@ -76,9 +76,7 @@ namespace ph = std::placeholders;
 
 namespace {
 
-boost::array<
-	Actions::BaseAction *, static_cast<size_t>(Actions::Type::_numberOfActions)
-> AvailableActions;
+std::vector<std::unique_ptr<Actions::BaseAction>> AvailableActions;
 
 void populateActions();
 
@@ -281,9 +279,9 @@ bool isMPDMusicDirSet()
 
 BaseAction &get(Actions::Type at)
 {
-	if (AvailableActions[1] == nullptr)
+	if (AvailableActions.empty())
 		populateActions();
-	BaseAction *action = AvailableActions[static_cast<size_t>(at)];
+	BaseAction *action = AvailableActions.at(static_cast<size_t>(at)).get();
 	// action should be always present if action type in queried
 	assert(action != nullptr);
 	return *action;
@@ -291,14 +289,14 @@ BaseAction &get(Actions::Type at)
 
 BaseAction *get(const std::string &name)
 {
-	BaseAction *result = 0;
-	if (AvailableActions[1] == nullptr)
+	BaseAction *result = nullptr;
+	if (AvailableActions.empty())
 		populateActions();
-	for (auto it = AvailableActions.begin(); it != AvailableActions.end(); ++it)
+	for (const auto &action : AvailableActions)
 	{
-		if (*it != nullptr && (*it)->name() == name)
+		if (action->name() == name)
 		{
-			result = *it;
+			result = action.get();
 			break;
 		}
 	}
@@ -2695,8 +2693,9 @@ namespace {
 
 void populateActions()
 {
+	AvailableActions.resize(static_cast<size_t>(Actions::Type::_numberOfActions));
 	auto insert_action = [](Actions::BaseAction *a) {
-		AvailableActions[static_cast<size_t>(a->type())] = a;
+		AvailableActions.at(static_cast<size_t>(a->type())).reset(a);
 	};
 	insert_action(new Actions::Dummy());
 	insert_action(new Actions::UpdateEnvironment());
@@ -2825,6 +2824,12 @@ void populateActions()
 	insert_action(new Actions::ShowVisualizer());
 	insert_action(new Actions::ShowClock());
 	insert_action(new Actions::ShowServerInfo());
+	for (size_t i = 0; i < AvailableActions.size(); ++i)
+	{
+		if (AvailableActions[i] == nullptr)
+			throw std::logic_error("undefined action at position "
+			                       + boost::lexical_cast<std::string>(i));
+	}
 }
 
 bool scrollTagCanBeRun(NC::List *&list, SongList *&songs)
