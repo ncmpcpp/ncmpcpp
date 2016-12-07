@@ -40,13 +40,13 @@ private:
 
 struct RequireRunnable: BaseAction
 {
-	RequireRunnable(BaseAction *action);
+	RequireRunnable(std::shared_ptr<BaseAction> action);
 	
 private:
 	virtual bool canBeRun() override;
 	virtual void run() override { }
 	
-	BaseAction *m_action;
+	std::shared_ptr<BaseAction> m_action;
 };
 
 struct RequireScreen: BaseAction
@@ -62,7 +62,7 @@ private:
 
 struct RunExternalCommand: BaseAction
 {
-	RunExternalCommand(std::string command);
+	RunExternalCommand(std::string &&command);
 	
 private:
 	virtual void run() override;

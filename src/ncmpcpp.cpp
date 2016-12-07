@@ -207,8 +207,6 @@ int main(int argc, char **argv)
 			if (!key_pressed)
 				continue;
 
-			//Statusbar::print(ToString(keyToWString(input)));
-
 			// The reason we want to update timer here is that if the timer is updated
 			// in Status::trace, then Key::read usually blocks for 500ms and if key is
 			// pressed 400ms after Key::read was called, we end up with Timer that is

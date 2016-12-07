@@ -33,7 +33,7 @@ std::wstring keyToWString(const NC::Key::Type key);
 /// Represents either single action or chain of actions bound to a certain key
 struct Binding
 {
-	typedef std::vector<Actions::BaseAction *> ActionChain;
+	typedef std::vector<std::shared_ptr<Actions::BaseAction>> ActionChain;
 	
 	template <typename ArgT>
 	Binding(ArgT &&actions_)
@@ -41,7 +41,7 @@ struct Binding
 		assert(!m_actions.empty());
 	}
 	Binding(Actions::Type at)
-	: Binding(ActionChain({&Actions::get(at)})) { }
+	: Binding(ActionChain({Actions::get_(at)})) { }
 	
 	bool execute() const {
 		return std::all_of(m_actions.begin(), m_actions.end(),
@@ -53,9 +53,10 @@ struct Binding
 		return m_actions.size() == 1;
 	}
 
-	Actions::BaseAction *action() const {
+	Actions::BaseAction &action() const {
 		assert(isSingle());
-		return m_actions[0];
+		assert(m_actions[0] != nullptr);
+		return *m_actions[0];
 	}
 
 	const ActionChain &actions() const {

@@ -216,7 +216,9 @@ private:
 };
 
 BaseAction &get(Type at);
-BaseAction *get(const std::string &name);
+
+std::shared_ptr<BaseAction> get_(Type at);
+std::shared_ptr<BaseAction> get_(const std::string &name);
 
 struct Dummy: BaseAction
 {

@@ -134,13 +134,13 @@ NC::Key::Type stringToKey(const std::string &s)
 }
 
 template <typename F>
-Actions::BaseAction *parseActionLine(const std::string &line, F error)
+std::shared_ptr<Actions::BaseAction> parseActionLine(const std::string &line, F error)
 {
-	Actions::BaseAction *result = 0;
+	std::shared_ptr<Actions::BaseAction> result;
 	size_t i = 0;
 	for (; i < line.size() && !isspace(line[i]); ++i) { }
 	if (i == line.size()) // only action name
-		result = Actions::get(line);
+		result = Actions::get_(line);
 	else // there is something else
 	{
 		std::string action_name = line.substr(0, i);
@@ -149,9 +149,11 @@ Actions::BaseAction *parseActionLine(const std::string &line, F error)
 			// push single character into input queue
 			std::string arg = getEnclosedString(line, '"', '"', 0);
 			NC::Key::Type k = stringToSpecialKey(arg);
-			auto queue = std::vector<NC::Key::Type>{ k };
 			if (k != NC::Key::None)
-				result = new Actions::PushCharacters(&Global::wFooter, std::move(queue));
+				result = std::static_pointer_cast<Actions::BaseAction>(
+					std::make_shared<Actions::PushCharacters>(
+						&Global::wFooter,
+						std::vector<NC::Key::Type>{k}));
 			else
 				error() << "invalid character passed to push_character: '" << arg << "'\n";
 		}
@@ -161,11 +163,13 @@ Actions::BaseAction *parseActionLine(const std::string &line, F error)
 			std::string arg = getEnclosedString(line, '"', '"', 0);
 			if (!arg.empty())
 			{
-				std::vector<NC::Key::Type> queue(arg.begin(), arg.end());
 				// if char is signed, erase 1s from char -> int conversion
 				for (auto it = arg.begin(); it != arg.end(); ++it)
 					*it &= 0xff;
-				result = new Actions::PushCharacters(&Global::wFooter, std::move(queue));
+				result = std::static_pointer_cast<Actions::BaseAction>(
+					std::make_shared<Actions::PushCharacters>(
+						&Global::wFooter,
+						std::vector<NC::Key::Type>{arg.begin(), arg.end()}));
 			}
 			else
 				error() << "empty argument passed to push_characters\n";
@@ -176,7 +180,8 @@ Actions::BaseAction *parseActionLine(const std::string &line, F error)
 			std::string arg = getEnclosedString(line, '"', '"', 0);
 			ScreenType screen_type = stringToScreenType(arg);
 			if (screen_type != ScreenType::Unknown)
-				result = new Actions::RequireScreen(screen_type);
+				result = std::static_pointer_cast<Actions::BaseAction>(
+					std::make_shared<Actions::RequireScreen>(screen_type));
 			else
 				error() << "unknown screen passed to require_screen: '" << arg << "'\n";
 		}
@@ -184,9 +189,10 @@ Actions::BaseAction *parseActionLine(const std::string &line, F error)
 		{
 			// require that given action is runnable
 			std::string arg = getEnclosedString(line, '"', '"', 0);
-			auto action = Actions::get(arg);
+			auto action = Actions::get_(arg);
 			if (action)
-				result = new Actions::RequireRunnable(action);
+				result = std::static_pointer_cast<Actions::BaseAction>(
+					std::make_shared<Actions::RequireRunnable>(action));
 			else
 				error() << "unknown action passed to require_runnable: '" << arg << "'\n";
 		}
@@ -194,7 +200,8 @@ Actions::BaseAction *parseActionLine(const std::string &line, F error)
 		{
 			std::string command = getEnclosedString(line, '"', '"', 0);
 			if (!command.empty())
-				result = new Actions::RunExternalCommand(std::move(command));
+				result = std::static_pointer_cast<Actions::BaseAction>(
+					std::make_shared<Actions::RunExternalCommand>(std::move(command)));
 			else
 				error() << "empty command passed to run_external_command\n";
 		}
@@ -472,11 +479,11 @@ void BindingsConfiguration::generateDefaults()
 	if (notBound(k = stringToKey("up")))
 		bind(k, Actions::Type::ScrollUp);
 	if (notBound(k = stringToKey("shift-up")))
-		bind(k, Binding::ActionChain({ &Actions::get(Actions::Type::SelectItem), &Actions::get(Actions::Type::ScrollUp) }));
+		bind(k, Binding::ActionChain({Actions::get_(Actions::Type::SelectItem), Actions::get_(Actions::Type::ScrollUp)}));
 	if (notBound(k = stringToKey("down")))
 		bind(k, Actions::Type::ScrollDown);
 	if (notBound(k = stringToKey("shift-down")))
-		bind(k, Binding::ActionChain({ &Actions::get(Actions::Type::SelectItem), &Actions::get(Actions::Type::ScrollDown) }));
+		bind(k, Binding::ActionChain({Actions::get_(Actions::Type::SelectItem), Actions::get_(Actions::Type::ScrollDown)}));
 	if (notBound(k = stringToKey("[")))
 		bind(k, Actions::Type::ScrollUpAlbum);
 	if (notBound(k = stringToKey("]")))

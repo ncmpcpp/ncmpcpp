@@ -60,7 +60,7 @@ std::string display_keys(const Actions::Type at)
 	{
 		for (auto j = it->second.begin(); j != it->second.end(); ++j)
 		{
-			if (j->isSingle() && j->action()->type() == at)
+			if (j->isSingle() && j->action().type() == at)
 			{
 				skey = keyToWString(it->first);
 				if (!skey.empty())

@@ -76,7 +76,7 @@ namespace ph = std::placeholders;
 
 namespace {
 
-std::vector<std::unique_ptr<Actions::BaseAction>> AvailableActions;
+std::vector<std::shared_ptr<Actions::BaseAction>> AvailableActions;
 
 void populateActions();
 
@@ -281,22 +281,26 @@ BaseAction &get(Actions::Type at)
 {
 	if (AvailableActions.empty())
 		populateActions();
-	BaseAction *action = AvailableActions.at(static_cast<size_t>(at)).get();
-	// action should be always present if action type in queried
-	assert(action != nullptr);
-	return *action;
+	return *AvailableActions.at(static_cast<size_t>(at));
 }
 
-BaseAction *get(const std::string &name)
+std::shared_ptr<BaseAction> get_(Actions::Type at)
 {
-	BaseAction *result = nullptr;
+	if (AvailableActions.empty())
+		populateActions();
+	return AvailableActions.at(static_cast<size_t>(at));
+}
+
+std::shared_ptr<BaseAction> get_(const std::string &name)
+{
+	std::shared_ptr<BaseAction> result;
 	if (AvailableActions.empty())
 		populateActions();
 	for (const auto &action : AvailableActions)
 	{
 		if (action->name() == name)
 		{
-			result = action.get();
+			result = action;
 			break;
 		}
 	}
