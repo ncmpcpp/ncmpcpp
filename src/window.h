@@ -47,15 +47,15 @@ namespace NC {
 
 namespace Key {
 
-typedef uint32_t Type;
+typedef uint64_t Type;
 
 const Type None = -1;
 
 // modifier masks
-const Type Special = 1 << 31;
-const Type Alt     = 1 << 30;
-const Type Ctrl    = 1 << 29;
-const Type Shift   = 1 << 28;
+const Type Special = Type{1} << 63;
+const Type Alt     = Type{1} << 62;
+const Type Ctrl    = Type{1} << 61;
+const Type Shift   = Type{1} << 60;
 
 // useful names
 const Type Null      = 0;
