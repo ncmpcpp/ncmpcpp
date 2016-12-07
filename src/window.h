@@ -124,6 +124,7 @@ const Type F10      = Special | 275;
 const Type F11      = Special | 276;
 const Type F12      = Special | 277;
 const Type Mouse    = Special | 278;
+const Type EoF      = Special | 279;
 
 }
 

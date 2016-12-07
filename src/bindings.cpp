@@ -474,6 +474,7 @@ bool BindingsConfiguration::read(const std::string &file)
 void BindingsConfiguration::generateDefaults()
 {
 	NC::Key::Type k = NC::Key::None;
+	bind(NC::Key::EoF, Actions::Type::Quit);
 	if (notBound(k = stringToKey("mouse")))
 		bind(k, Actions::Type::MouseEvent);
 	if (notBound(k = stringToKey("up")))
@@ -743,9 +744,6 @@ void BindingsConfiguration::generateDefaults()
 		bind(k, Actions::Type::SetSelectedItemsPriority);
 	if (notBound(k = stringToKey("q")))
 		bind(k, Actions::Type::Quit);
-	
-	if (notBound(k = stringToKey("-")))
-		bind(k, Actions::Type::VolumeDown);
 }
 
 const Command *BindingsConfiguration::findCommand(const std::string &name)

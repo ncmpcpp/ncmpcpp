@@ -1062,29 +1062,37 @@ Key::Type Window::readKey()
 		return result;
 	}
 	
-	fd_set fdset;
-	FD_ZERO(&fdset);
-	FD_SET(STDIN_FILENO, &fdset);
+	fd_set fds_read;
+	FD_ZERO(&fds_read);
+	FD_SET(STDIN_FILENO, &fds_read);
 	timeval timeout = { m_window_timeout/1000, (m_window_timeout%1000)*1000 };
 	
 	int fd_max = STDIN_FILENO;
-	for (FDCallbacks::const_iterator it = m_fds.begin(); it != m_fds.end(); ++it)
+	for (const auto &fd : m_fds)
 	{
-		if (it->first > fd_max)
-			fd_max = it->first;
-		FD_SET(it->first, &fdset);
+		if (fd.first > fd_max)
+			fd_max = fd.first;
+		FD_SET(fd.first, &fds_read);
 	}
-	
-	if (select(fd_max+1, &fdset, 0, 0, m_window_timeout < 0 ? 0 : &timeout) > 0)
+
+	auto tv_addr = m_window_timeout < 0 ? nullptr : &timeout;
+	int res = select(fd_max+1, &fds_read, nullptr, nullptr, tv_addr);
+	if (res > 0)
 	{
-		if (FD_ISSET(STDIN_FILENO, &fdset))
-			result = getInputChar(wgetch(m_window));
+		if (FD_ISSET(STDIN_FILENO, &fds_read))
+		{
+			int key = wgetch(m_window);
+			if (key == EOF)
+				result = Key::EoF;
+			else
+				result = getInputChar(key);
+		}
 		else
 			result = Key::None;
 
-		for (FDCallbacks::const_iterator it = m_fds.begin(); it != m_fds.end(); ++it)
-			if (FD_ISSET(it->first, &fdset))
-				it->second();
+		for (const auto &fd : m_fds)
+			if (FD_ISSET(fd.first, &fds_read))
+				fd.second();
 	}
 	else
 		result = Key::None;
