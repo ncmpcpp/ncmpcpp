@@ -140,7 +140,16 @@ std::shared_ptr<Actions::BaseAction> parseActionLine(const std::string &line, F 
 	size_t i = 0;
 	for (; i < line.size() && !isspace(line[i]); ++i) { }
 	if (i == line.size()) // only action name
-		result = Actions::get_(line);
+	{
+		if (line == "set_visualizer_sample_multiplier")
+		{
+			warning("action 'set_visualizer_sample_multiplier' is deprecated"
+			        " and will be removed in 0.9");
+			result = Actions::get_(Actions::Type::Dummy);
+		}
+		else
+			result = Actions::get_(line);
+	}
 	else // there is something else
 	{
 		std::string action_name = line.substr(0, i);
@@ -694,7 +703,6 @@ void BindingsConfiguration::generateDefaults()
 	{
 		bind(k, Actions::Type::MoveSortOrderUp);
 		bind(k, Actions::Type::MoveSelectedItemsUp);
-		bind(k, Actions::Type::SetVisualizerSampleMultiplier);
 	}
 	if (notBound(k = stringToKey("n")))
 	{

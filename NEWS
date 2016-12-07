@@ -12,6 +12,7 @@ ncmpcpp-0.8 (????-??-??)
 * When an attempt to write tags fails, show detailed error message.
 * Support for fetching lyrics for selected items in background was added.
 * Application will now exit if stdin is closed.
+* Configuration variable 'visualizer_sample_multiplier' was deprecated and will be removed in 0.9.
 
 ncmpcpp-0.7.7 (2016-10-31)
 * Fixed compilation on 32bit platforms.

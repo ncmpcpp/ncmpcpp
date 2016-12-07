@@ -177,19 +177,23 @@ NC::Buffer buffer(const std::string &v)
 	return result;
 }
 
-/*
 void deprecated(const char *option, double version_removal)
 {
-	std::cerr << "WARNING: " << option
-	          << " is deprecated and will be removed in " << version_removal << "\n";
+	std::cerr << "WARNING: Variable '" << option
+	          << "' is deprecated and will be removed in "
+	          << version_removal << "\n";
 }
-*/
 
 }
 
 bool Configuration::read(const std::vector<std::string> &config_paths, bool ignore_errors)
 {
 	option_parser p;
+
+	p.add<void>("visualizer_sample_multiplier", nullptr, "", [](std::string v) {
+			if (!v.empty())
+				deprecated("visualizer_sample_multiplier", 0.9);
+		});
 
 	// keep the same order of variables as in configuration file
 	p.add("ncmpcpp_directory", &ncmpcpp_directory, "~/.ncmpcpp/", adjust_directory);
@@ -207,12 +211,6 @@ bool Configuration::read(const std::vector<std::string> &config_paths, bool igno
 	p.add("visualizer_fifo_path", &visualizer_fifo_path, "/tmp/mpd.fifo", adjust_path);
 	p.add("visualizer_output_name", &visualizer_output_name, "Visualizer feed");
 	p.add("visualizer_in_stereo", &visualizer_in_stereo, "yes", yes_no);
-	p.add("visualizer_sample_multiplier", &visualizer_sample_multiplier, "1",
-	      [](std::string v) {
-		      double multiplier = verbose_lexical_cast<double>(v);
-		      lowerBoundCheck(multiplier, 0.0);
-		      return multiplier;
-	      });
 	p.add("visualizer_sync_interval", &visualizer_sync_interval, "30",
 	      [](std::string v) {
 		      unsigned sync_interval = verbose_lexical_cast<unsigned>(v);

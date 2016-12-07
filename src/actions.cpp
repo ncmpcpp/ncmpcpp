@@ -2355,32 +2355,6 @@ void ToggleVisualizationType::run()
 #	endif // ENABLE_VISUALIZER
 }
 
-bool SetVisualizerSampleMultiplier::canBeRun()
-{
-#	ifdef ENABLE_VISUALIZER
-	return myScreen == myVisualizer;
-#	else
-	return false;
-#	endif // ENABLE_VISUALIZER
-}
-
-void SetVisualizerSampleMultiplier::run()
-{
-#	ifdef ENABLE_VISUALIZER
-	using Global::wFooter;
-
-	double multiplier;
-	{
-		Statusbar::ScopedLock slock;
-		Statusbar::put() << "Set visualizer sample multiplier: ";
-		multiplier = fromString<double>(wFooter->prompt());
-		lowerBoundCheck(multiplier, 0.0);
-		Config.visualizer_sample_multiplier = multiplier;
-	}
-	Statusbar::printf("Visualizer sample multiplier set to %1%", multiplier);
-#	endif // ENABLE_VISUALIZER
-}
-
 void ShowSongInfo::run()
 {
 	mySongInfo->switchTo();
@@ -2807,7 +2781,6 @@ void populateActions()
 	insert_action(new Actions::SetSelectedItemsPriority());
 	insert_action(new Actions::ToggleOutput());
 	insert_action(new Actions::ToggleVisualizationType());
-	insert_action(new Actions::SetVisualizerSampleMultiplier());
 	insert_action(new Actions::ShowSongInfo());
 	insert_action(new Actions::ShowArtistInfo());
 	insert_action(new Actions::ShowLyrics());

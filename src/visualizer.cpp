@@ -148,29 +148,24 @@ void Visualizer::update()
 	}
 
 	const ssize_t samples_read = data/sizeof(int16_t);
-	if (Config.visualizer_sample_multiplier == 1.0)
-	{
-		m_auto_scale_multiplier += 1.0/fps;
-		std::for_each(buf, buf+samples_read, [this](int16_t &sample) {
+	m_auto_scale_multiplier += 1.0/fps;
+	std::for_each(buf, buf+samples_read, [this](int16_t &sample) {
 			double scale = std::numeric_limits<int16_t>::min();
 			scale /= sample;
 			scale = fabs(scale);
 			if (scale < m_auto_scale_multiplier)
 				m_auto_scale_multiplier = scale;
 		});
-	}
 	std::for_each(buf, buf+samples_read, [this](int16_t &sample) {
-		int32_t tmp = sample;
-		if (Config.visualizer_sample_multiplier != 1.0)
-			tmp *= Config.visualizer_sample_multiplier;
-		else if (m_auto_scale_multiplier <= 50.0) // limit the auto scale
-			tmp *= m_auto_scale_multiplier;
-		if (tmp < std::numeric_limits<int16_t>::min())
-			sample = std::numeric_limits<int16_t>::min();
-		else if (tmp > std::numeric_limits<int16_t>::max())
-			sample = std::numeric_limits<int16_t>::max();
-		else
-			sample = tmp;
+			int32_t tmp = sample;
+			if (m_auto_scale_multiplier <= 50.0) // limit the auto scale
+				tmp *= m_auto_scale_multiplier;
+			if (tmp < std::numeric_limits<int16_t>::min())
+				sample = std::numeric_limits<int16_t>::min();
+			else if (tmp > std::numeric_limits<int16_t>::max())
+				sample = std::numeric_limits<int16_t>::max();
+			else
+				sample = tmp;
 	});
 
 	w.clear();

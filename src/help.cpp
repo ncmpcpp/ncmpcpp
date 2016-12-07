@@ -339,7 +339,6 @@ void write_bindings(NC::Scrollpad &w)
 #	if defined(ENABLE_VISUALIZER) && defined(HAVE_FFTW3_H)
 	key_section(w, "Music visualizer");
 	key(w, Type::ToggleVisualizationType, "Toggle visualization type");
-	key(w, Type::SetVisualizerSampleMultiplier, "Set visualizer sample multiplier");
 #	endif // ENABLE_VISUALIZER && HAVE_FFTW3_H
 
 	mouse_section(w, "Global");

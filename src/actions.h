@@ -142,7 +142,6 @@ enum class Type
 	SetSelectedItemsPriority,
 	ToggleOutput,
 	ToggleVisualizationType,
-	SetVisualizerSampleMultiplier,
 	ShowSongInfo,
 	ShowArtistInfo,
 	ShowLyrics,
@@ -1213,16 +1212,6 @@ struct ToggleVisualizationType: BaseAction
 
 private:
 	
-	virtual bool canBeRun() override;
-	virtual void run() override;
-};
-
-struct SetVisualizerSampleMultiplier: BaseAction
-{
-	SetVisualizerSampleMultiplier()
-	: BaseAction(Type::SetVisualizerSampleMultiplier, "set_visualizer_sample_multiplier") { }
-
-private:
 	virtual bool canBeRun() override;
 	virtual void run() override;
 };
