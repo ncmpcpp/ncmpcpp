@@ -40,10 +40,8 @@ NC::Key::Type stringToKey(const std::string &s);
 NC::Key::Type stringToSpecialKey(const std::string &s)
 {
 	NC::Key::Type result = NC::Key::None;
-	if (!s.compare(0, 4, "ctrl") && s.length() == 6 && (s[4] == '_' || s[4] == '-'))
+	if (!s.compare(0, 4, "ctrl") && s.length() == 6 && s[4] == '-')
 	{
-		if (s[4] == '_')
-			warning("prefix 'ctrl_' is deprecated and will be removed in 0.8, use 'ctrl-' instead.");
 		if (s[5] >= 'a' && s[5] <= 'z')
 			result = NC::Key::Ctrl_A + (s[5] - 'a');
 		else if (s[5] == '[')
@@ -57,22 +55,16 @@ NC::Key::Type stringToSpecialKey(const std::string &s)
 		else if (s[5] == '_')
 			result = NC::Key::Ctrl_Underscore;
 	}
-	else if (!s.compare(0, 3, "alt") && s.length() > 3 && (s[3] == '_' || s[3] == '-'))
+	else if (!s.compare(0, 3, "alt") && s.length() > 3 && s[3] == '-')
 	{
-		if (s[3] == '_')
-			warning("prefix 'alt_' is deprecated and will be removed in 0.8, use 'alt-' instead.");
 		result = NC::Key::Alt | stringToKey(s.substr(4));
 	}
-	else if (!s.compare(0, 4, "ctrl") && s.length() > 4 && (s[4] == '_' || s[4] == '-'))
+	else if (!s.compare(0, 4, "ctrl") && s.length() > 4 && s[4] == '-')
 	{
-		if (s[4] == '_')
-			warning("prefix 'ctrl_' is deprecated and will be removed in 0.8, use 'ctrl-' instead.");
 		result = NC::Key::Ctrl | stringToKey(s.substr(5));
 	}
-	else if (!s.compare(0, 5, "shift") && s.length() > 5 && (s[5] == '_' || s[5] == '-'))
+	else if (!s.compare(0, 5, "shift") && s.length() > 5 && s[5] == '-')
 	{
-		if (s[5] == '_')
-			warning("prefix 'shift_' is deprecated and will be removed in 0.8, use 'shift-' instead.");
 		result = NC::Key::Shift | stringToKey(s.substr(6));
 	}
 	else if (!s.compare("escape"))
@@ -113,11 +105,6 @@ NC::Key::Type stringToSpecialKey(const std::string &s)
 	}
 	else if (!s.compare("backspace"))
 		result = NC::Key::Backspace;
-	else if (!s.compare("backspace_2"))
-	{
-		warning("'backspace_2' is deprecated and will be removed in 0.8, use 'backspace' instead.");
-		result = NC::Key::Backspace;
-	}
 	return result;
 }
 
