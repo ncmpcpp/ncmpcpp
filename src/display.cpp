@@ -87,8 +87,7 @@ void setProperties(NC::Menu<T> &menu, const MPD::Song &s, const SongList &list,
 		auto next = list.beginS() + drawn_pos + 1;
 		if (next != list.endS())
 		{
-			auto next_s = next->get<Bit::Song>();
-			if (next_s != nullptr && next_s->getAlbum() != s.getAlbum())
+			if (next->song() != nullptr && next->song()->getAlbum() != s.getAlbum())
 				separate_albums = true;
 		}
 	}

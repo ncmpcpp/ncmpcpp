@@ -87,51 +87,36 @@ std::string SongToString(const MPD::MutableSong &s);
 bool DirEntryMatcher(const Regex::Regex &rx, const std::pair<std::string, std::string> &dir, bool filter);
 bool SongEntryMatcher(const Regex::Regex &rx, const MPD::MutableSong &s);
 
-template <bool Const>
-struct SongExtractor
-{
-	typedef SongExtractor type;
-
-	typedef typename NC::Menu<MPD::MutableSong>::Item MenuItem;
-	typedef typename std::conditional<Const, const MenuItem, MenuItem>::type Item;
-	typedef typename std::conditional<Const, const MPD::Song, MPD::Song>::type Song;
-
-	Song *operator()(Item &item) const
-	{
-		return &item.value();
-	}
-};
-
 }
 
 SongIterator TagsWindow::currentS()
 {
-	return makeSongIterator_<MPD::MutableSong>(current(), SongExtractor<false>());
+	return makeSongIterator(current());
 }
 
 ConstSongIterator TagsWindow::currentS() const
 {
-	return makeConstSongIterator_<MPD::MutableSong>(current(), SongExtractor<true>());
+	return makeConstSongIterator(current());
 }
 
 SongIterator TagsWindow::beginS()
 {
-	return makeSongIterator_<MPD::MutableSong>(begin(), SongExtractor<false>());
+	return makeSongIterator(begin());
 }
 
 ConstSongIterator TagsWindow::beginS() const
 {
-	return makeConstSongIterator_<MPD::MutableSong>(begin(), SongExtractor<true>());
+	return makeConstSongIterator(begin());
 }
 
 SongIterator TagsWindow::endS()
 {
-	return makeSongIterator_<MPD::MutableSong>(end(), SongExtractor<false>());
+	return makeSongIterator(end());
 }
 
 ConstSongIterator TagsWindow::endS() const
 {
-	return makeConstSongIterator_<MPD::MutableSong>(end(), SongExtractor<true>());
+	return makeConstSongIterator(end());
 }
 
 std::vector<MPD::Song> TagsWindow::getSelectedSongs()

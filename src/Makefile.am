@@ -59,6 +59,7 @@ ncmpcpp_LDFLAGS = $(all_libraries)
 noinst_HEADERS = \
 	helpers/song_iterator_maker.h \
 	utility/comparators.h \
+	utility/const.h \
 	utility/conversion.h \
 	utility/functional.h \
 	utility/html.h \

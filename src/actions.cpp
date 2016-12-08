@@ -80,9 +80,9 @@ std::vector<std::shared_ptr<Actions::BaseAction>> AvailableActions;
 
 void populateActions();
 
-bool scrollTagCanBeRun(NC::List *&list, SongList *&songs);
-void scrollTagUpRun(NC::List *list, SongList *songs, MPD::Song::GetFunction get);
-void scrollTagDownRun(NC::List *list, SongList *songs, MPD::Song::GetFunction get);
+bool scrollTagCanBeRun(NC::List *&list, const SongList *&songs);
+void scrollTagUpRun(NC::List *list, const SongList *songs, MPD::Song::GetFunction get);
+void scrollTagDownRun(NC::List *list, const SongList *songs, MPD::Song::GetFunction get);
 
 void seek();
 void findItem(const SearchDirection direction);
@@ -1783,28 +1783,25 @@ bool SelectAlbum::canBeRun()
 void SelectAlbum::run()
 {
 	const auto front = m_songs->beginS(), current = m_songs->currentS(), end = m_songs->endS();
-	auto *s = current->get<Bit::Song>();
-	if (s == nullptr)
+	if (current->song() == nullptr)
 		return;
 	auto get = &MPD::Song::getAlbum;
-	const std::string tag = s->getTags(get);
+	const std::string tag = current->song()->getTags(get);
 	// go up
 	for (auto it = current; it != front;)
 	{
 		--it;
-		s = it->get<Bit::Song>();
-		if (s == nullptr || s->getTags(get) != tag)
+		if (it->song() == nullptr || it->song()->getTags(get) != tag)
 			break;
-		it->get<Bit::Properties>().setSelected(true);
+		it->properties().setSelected(true);
 	}
 	// go down
 	for (auto it = current;;)
 	{
-		it->get<Bit::Properties>().setSelected(true);
+		it->properties().setSelected(true);
 		if (++it == end)
 			break;
-		s = it->get<Bit::Song>();
-		if (s == nullptr || s->getTags(get) != tag)
+		if (it->song() == nullptr || it->song()->getTags(get) != tag)
 			break;
 	}
 	Statusbar::print("Album around cursor position selected");
@@ -2809,7 +2806,7 @@ void populateActions()
 	}
 }
 
-bool scrollTagCanBeRun(NC::List *&list, SongList *&songs)
+bool scrollTagCanBeRun(NC::List *&list, const SongList *&songs)
 {
 	auto w = myScreen->activeWindow();
 	if (list != static_cast<void *>(w))
@@ -2820,36 +2817,34 @@ bool scrollTagCanBeRun(NC::List *&list, SongList *&songs)
 	    && songs != nullptr;
 }
 
-void scrollTagUpRun(NC::List *list, SongList *songs, MPD::Song::GetFunction get)
+void scrollTagUpRun(NC::List *list, const SongList *songs, MPD::Song::GetFunction get)
 {
 	const auto front = songs->beginS();
 	auto it = songs->currentS();
-	if (auto *s = it->get<Bit::Song>())
+	if (it->song() != nullptr)
 	{
-		const std::string tag = s->getTags(get);
+		const std::string tag = it->song()->getTags(get);
 		while (it != front)
 		{
 			--it;
-			s = it->get<Bit::Song>();
-			if (s == nullptr || s->getTags(get) != tag)
+			if (it->song() == nullptr || it->song()->getTags(get) != tag)
 				break;
 		}
 		list->highlight(it-front);
 	}
 }
 
-void scrollTagDownRun(NC::List *list, SongList *songs, MPD::Song::GetFunction get)
+void scrollTagDownRun(NC::List *list, const SongList *songs, MPD::Song::GetFunction get)
 {
 	const auto front = songs->beginS(), back = --songs->endS();
 	auto it = songs->currentS();
-	if (auto *s = it->get<Bit::Song>())
+	if (it->song() != nullptr)
 	{
-		const std::string tag = s->getTags(get);
+		const std::string tag = it->song()->getTags(get);
 		while (it != back)
 		{
 			++it;
-			s = it->get<Bit::Song>();
-			if (s == nullptr || s->getTags(get) != tag)
+			if (it->song() == nullptr || it->song()->getTags(get) != tag)
 				break;
 		}
 		list->highlight(it-front);
@@ -2882,7 +2877,8 @@ void seek()
 	// can be run and one of them is of the given type. This will still not work
 	// in some contrived cases, but allows for more flexibility than accepting
 	// single actions only.
-	auto hasRunnableAction = [](BindingsConfiguration::BindingIteratorPair &bindings, Actions::Type type) {
+	auto hasRunnableAction = [](BindingsConfiguration::BindingIteratorPair &bindings,
+	                            Actions::Type type) {
 		bool success = false;
 		for (auto binding = bindings.first; binding != bindings.second; ++binding)
 		{

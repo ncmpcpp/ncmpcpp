@@ -29,6 +29,7 @@
 #include <memory>
 #include <set>
 
+#include "utility/const.h"
 #include "strbuffer.h"
 #include "window.h"
 
@@ -197,8 +198,6 @@ struct Menu: Window, List
 		}
 
 	private:
-		enum class Const { Yes, No };
-
 		template <Const const_>
 		struct ExtractProperties
 		{
@@ -254,19 +253,19 @@ struct Menu: Window, List
 	typedef std::reverse_iterator<ConstIterator> ConstReverseIterator;
 	
 	typedef boost::transform_iterator<
-		typename Item::template ExtractValue<Item::Const::No>,
+		typename Item::template ExtractValue<Const::No>,
 		Iterator> ValueIterator;
 	typedef boost::transform_iterator<
-		typename Item::template ExtractValue<Item::Const::Yes>,
+		typename Item::template ExtractValue<Const::Yes>,
 		ConstIterator> ConstValueIterator;
 	typedef std::reverse_iterator<ValueIterator> ReverseValueIterator;
 	typedef std::reverse_iterator<ConstValueIterator> ConstReverseValueIterator;
 	
 	typedef boost::transform_iterator<
-		typename Item::template ExtractProperties<Item::Const::No>,
+		typename Item::template ExtractProperties<Const::No>,
 		Iterator> PropertiesIterator;
 	typedef boost::transform_iterator<
-		typename Item::template ExtractProperties<Item::Const::Yes>,
+		typename Item::template ExtractProperties<Const::Yes>,
 		ConstIterator> ConstPropertiesIterator;
 
 	/// Function helper prototype used to display each option on the screen.

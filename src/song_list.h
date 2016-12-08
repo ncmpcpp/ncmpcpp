@@ -22,25 +22,85 @@
 #define NCMPCPP_SONG_LIST_H
 
 #include <boost/range/detail/any_iterator.hpp>
-#include <boost/tuple/tuple.hpp>
 #include "menu.h"
 #include "song.h"
+#include "utility/const.h"
 
-template <typename ValueT>
+struct SongProperties
+{
+	enum class State { Undefined, Const, Mutable };
+
+	SongProperties()
+		: m_state(State::Undefined)
+	{ }
+
+	SongProperties &assign(NC::List::Properties *properties_, MPD::Song *song_)
+	{
+		m_state = State::Mutable;
+		m_properties = properties_;
+		m_song = song_;
+		return *this;
+	}
+
+	SongProperties &assign(const NC::List::Properties *properties_, const MPD::Song *song_)
+	{
+		m_state = State::Const;
+		m_const_properties = properties_;
+		m_const_song = song_;
+		return *this;
+	}
+
+	const NC::List::Properties &properties() const
+	{
+		assert(m_state != State::Undefined);
+		return *m_const_properties;
+	}
+	const MPD::Song *song() const
+	{
+		assert(m_state != State::Undefined);
+		return m_const_song;
+	}
+
+	NC::List::Properties &properties()
+	{
+		assert(m_state == State::Mutable);
+		return *m_properties;
+	}
+	MPD::Song *song()
+	{
+		assert(m_state == State::Mutable);
+		return m_song;
+	}
+
+private:
+	State m_state;
+
+	union {
+		NC::List::Properties *m_properties;
+		const NC::List::Properties *m_const_properties;
+	};
+	union {
+		MPD::Song *m_song;
+		const MPD::Song *m_const_song;
+	};
+};
+
+template <Const const_>
 using SongIteratorT = boost::range_detail::any_iterator<
-	ValueT,
+	typename std::conditional<
+		const_ == Const::Yes,
+		const SongProperties,
+		SongProperties>::type,
 	boost::random_access_traversal_tag,
-	const ValueT, // const needed, see https://svn.boost.org/trac/boost/ticket/10493
+	typename std::conditional<
+		const_ == Const::Yes,
+		const SongProperties &,
+		SongProperties &>::type,
 	std::ptrdiff_t
->;
+	>;
 
-typedef SongIteratorT<boost::tuple<NC::List::Properties &, MPD::Song *>> SongIterator;
-typedef SongIteratorT<boost::tuple<const NC::List::Properties &, const MPD::Song *>> ConstSongIterator;
-
-namespace Bit {
-const size_t Properties = 0;
-const size_t Song = 1;
-}
+typedef SongIteratorT<Const::No> SongIterator;
+typedef SongIteratorT<Const::Yes> ConstSongIterator;
 
 struct SongList
 {

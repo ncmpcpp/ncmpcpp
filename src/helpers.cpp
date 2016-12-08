@@ -35,7 +35,7 @@ const MPD::Song *currentSong(const BaseScreen *screen)
 	{
 		const auto it = list->currentS();
 		if (it != list->endS())
-			ptr = it->get<Bit::Song>();
+			ptr = it->song();
 	}
 	return ptr;
 }

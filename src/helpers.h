@@ -387,12 +387,10 @@ template <typename ListT>
 void markSongsInPlaylist(ListT &list)
 {
 	ScopedUnfilteredMenu<typename ListT::Item::Type> sunfilter(ReapplyFilter::No, list);
-	MPD::Song *s;
 	for (auto &p : static_cast<SongList &>(list))
 	{
-		s = p.get<Bit::Song>();
-		if (s != nullptr)
-			p.get<Bit::Properties>().setBold(myPlaylist->checkForSong(*s));
+		if (p.song() != nullptr)
+			p.properties().setBold(myPlaylist->checkForSong(*p.song()));
 	}
 }
 

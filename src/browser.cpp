@@ -70,54 +70,53 @@ void clearDirectory(const std::string &directory);
 std::string itemToString(const MPD::Item &item);
 bool browserEntryMatcher(const Regex::Regex &rx, const MPD::Item &item, bool filter);
 
-template <bool Const>
-struct SongExtractor
-{
-	typedef SongExtractor type;
-
-	typedef typename NC::Menu<MPD::Item>::Item MenuItem;
-	typedef typename std::conditional<Const, const MenuItem, MenuItem>::type Item;
-	typedef typename std::conditional<Const, const MPD::Song, MPD::Song>::type Song;
-
-	Song *operator()(Item &item) const
-	{
-		Song *ptr = nullptr;
-		if (item.value().type() == MPD::Item::Type::Song)
-			ptr = const_cast<Song *>(&item.value().song());
-		return ptr;
-	}
-};
-
 }
+
+template <>
+struct SongPropertiesExtractor<MPD::Item>
+{
+	template <typename ItemT>
+	auto &operator()(ItemT &item) const
+	{
+		auto s = item.value().type() == MPD::Item::Type::Song
+			? &item.value().song()
+			: nullptr;
+		m_cache.assign(&item.properties(), s);
+		return m_cache;
+	}
+
+private:
+	mutable SongProperties m_cache;
+};
 
 SongIterator BrowserWindow::currentS()
 {
-	return makeSongIterator_<MPD::Item>(current(), SongExtractor<false>());
+	return makeSongIterator(current());
 }
 
 ConstSongIterator BrowserWindow::currentS() const
 {
-	return makeConstSongIterator_<MPD::Item>(current(), SongExtractor<true>());
+	return makeConstSongIterator(current());
 }
 
 SongIterator BrowserWindow::beginS()
 {
-	return makeSongIterator_<MPD::Item>(begin(), SongExtractor<false>());
+	return makeSongIterator(begin());
 }
 
 ConstSongIterator BrowserWindow::beginS() const
 {
-	return makeConstSongIterator_<MPD::Item>(begin(), SongExtractor<true>());
+	return makeConstSongIterator(begin());
 }
 
 SongIterator BrowserWindow::endS()
 {
-	return makeSongIterator_<MPD::Item>(end(), SongExtractor<false>());
+	return makeSongIterator(end());
 }
 
 ConstSongIterator BrowserWindow::endS() const
 {
-	return makeConstSongIterator_<MPD::Item>(end(), SongExtractor<true>());
+	return makeConstSongIterator(end());
 }
 
 std::vector<MPD::Song> BrowserWindow::getSelectedSongs()

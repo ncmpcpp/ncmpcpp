@@ -260,6 +260,23 @@ struct Item
 	{
 		return m_type;
 	}
+
+	Directory &directory()
+	{
+		return const_cast<Directory &>(
+			static_cast<const Item &>(*this).directory());
+	}
+	Song &song()
+	{
+		return const_cast<Song &>(
+			static_cast<const Item &>(*this).song());
+	}
+	Playlist &playlist()
+	{
+		return const_cast<Playlist &>(
+			static_cast<const Item &>(*this).playlist());
+	}
+
 	const Directory &directory() const
 	{
 		assert(m_type == Type::Directory);

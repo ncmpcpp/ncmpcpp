@@ -18,52 +18,9 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
-#ifndef NCMPCPP_HELPERS_SONG_ITERATOR_MAKER_H
-#define NCMPCPP_HELPERS_SONG_ITERATOR_MAKER_H
+#ifndef NCMPCPP_UTILITY_CONST_H
+#define NCMPCPP_UTILITY_CONST_H
 
-#include <boost/iterator/transform_iterator.hpp>
-#include "menu.h"
-#include "song_list.h"
+enum class Const { Yes, No };
 
-template <typename SongT>
-struct SongPropertiesExtractor
-{
-	template <typename ItemT>
-	auto &operator()(ItemT &item) const
-	{
-		return m_cache.assign(&item.properties(), &item.value());
-	}
-
-private:
-	mutable SongProperties m_cache;
-};
-
-template <typename IteratorT>
-SongIterator makeSongIterator(IteratorT it)
-{
-	typedef SongPropertiesExtractor<
-		typename IteratorT::value_type::Type
-		> Extractor;
-	static_assert(
-		std::is_convertible<
-		  typename std::result_of<Extractor(typename IteratorT::reference)>::type,
-		  SongProperties &
-		>::value, "invalid result type of SongPropertiesExtractor");
-	return SongIterator(boost::make_transform_iterator(it, Extractor{}));
-}
-
-template <typename ConstIteratorT>
-ConstSongIterator makeConstSongIterator(ConstIteratorT it)
-{
-	typedef SongPropertiesExtractor<
-		typename ConstIteratorT::value_type::Type
-		> Extractor;
-	static_assert(
-		std::is_convertible<
-		  typename std::result_of<Extractor(typename ConstIteratorT::reference)>::type,
-		  const SongProperties &
-		>::value, "invalid result type of SongPropertiesExtractor");
-	return ConstSongIterator(boost::make_transform_iterator(it, Extractor{}));
-}
-
-#endif // NCMPCPP_HELPERS_SONG_ITERATOR_MAKER_H
+#endif // NCMPCPP_UTILITY_CONST_H

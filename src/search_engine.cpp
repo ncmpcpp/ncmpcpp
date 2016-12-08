@@ -73,56 +73,56 @@ namespace pos {
 }*/
 
 std::string SEItemToString(const SEItem &ei);
-bool SEItemEntryMatcher(const Regex::Regex &rx, const NC::Menu<SEItem>::Item &item, bool filter);
-
-template <bool Const>
-struct SongExtractor
-{
-	typedef SongExtractor type;
-
-	typedef typename NC::Menu<SEItem>::Item MenuItem;
-	typedef typename std::conditional<Const, const MenuItem, MenuItem>::type Item;
-	typedef typename std::conditional<Const, const MPD::Song, MPD::Song>::type Song;
-
-	Song *operator()(Item &item) const
-	{
-		Song *ptr = nullptr;
-		if (!item.isSeparator() && item.value().isSong())
-			ptr = &item.value().song();
-		return ptr;
-	}
-};
+bool SEItemEntryMatcher(const Regex::Regex &rx,
+                        const NC::Menu<SEItem>::Item &item,
+                        bool filter);
 
 }
 
+template <>
+struct SongPropertiesExtractor<SEItem>
+{
+	template <typename ItemT>
+	auto &operator()(ItemT &item) const
+	{
+		auto s = !item.isSeparator() && item.value().isSong()
+			? &item.value().song()
+			: nullptr;
+		return m_cache.assign(&item.properties(), s);
+	}
+
+private:
+	mutable SongProperties m_cache;
+};
+
 SongIterator SearchEngineWindow::currentS()
 {
-	return makeSongIterator_<SEItem>(current(), SongExtractor<false>());
+	return makeSongIterator(current());
 }
 
 ConstSongIterator SearchEngineWindow::currentS() const
 {
-	return makeConstSongIterator_<SEItem>(current(), SongExtractor<true>());
+	return makeConstSongIterator(current());
 }
 
 SongIterator SearchEngineWindow::beginS()
 {
-	return makeSongIterator_<SEItem>(begin(), SongExtractor<false>());
+	return makeSongIterator(begin());
 }
 
 ConstSongIterator SearchEngineWindow::beginS() const
 {
-	return makeConstSongIterator_<SEItem>(begin(), SongExtractor<true>());
+	return makeConstSongIterator(begin());
 }
 
 SongIterator SearchEngineWindow::endS()
 {
-	return makeSongIterator_<SEItem>(end(), SongExtractor<false>());
+	return makeSongIterator(end());
 }
 
 ConstSongIterator SearchEngineWindow::endS() const
 {
-	return makeConstSongIterator_<SEItem>(end(), SongExtractor<true>());
+	return makeConstSongIterator(end());
 }
 
 std::vector<MPD::Song> SearchEngineWindow::getSelectedSongs()

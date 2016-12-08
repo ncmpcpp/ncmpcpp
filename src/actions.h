@@ -280,7 +280,7 @@ private:
 	virtual void run() override;
 
 	NC::List *m_list;
-	SongList *m_songs;
+	const SongList *m_songs;
 };
 
 struct ScrollUpAlbum: BaseAction
@@ -292,7 +292,7 @@ private:
 	virtual void run() override;
 
 	NC::List *m_list;
-	SongList *m_songs;
+	const SongList *m_songs;
 };
 
 struct ScrollDownArtist: BaseAction
@@ -304,7 +304,7 @@ private:
 	virtual void run() override;
 
 	NC::List *m_list;
-	SongList *m_songs;
+	const SongList *m_songs;
 };
 
 struct ScrollDownAlbum: BaseAction
@@ -316,7 +316,7 @@ private:
 	virtual void run() override;
 
 	NC::List *m_list;
-	SongList *m_songs;
+	const SongList *m_songs;
 };
 
 struct PageUp: BaseAction
