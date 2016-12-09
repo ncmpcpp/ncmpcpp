@@ -50,33 +50,33 @@
 
 namespace ph = std::placeholders;
 
-namespace
-{
-	std::ofstream errorlog;
-	std::streambuf *cerr_buffer;
-	bool run_resize_screen = false;
-	
-	void sighandler(int sig)
-	{
-		if (sig == SIGWINCH)
-		{
-			run_resize_screen = true;
-		}
-#		if defined(__sun) && defined(__SVR4)
-		// in solaris it is needed to reinstall the handler each time it's executed
-		signal(sig, sighandler);
-#		endif // __sun && __SVR4
-	}
+namespace {
 
-	void do_at_exit()
-	{
-		// restore old cerr buffer
-		std::cerr.rdbuf(cerr_buffer);
-		errorlog.close();
-		Mpd.Disconnect();
-		NC::destroyScreen();
-		windowTitle("");
-	}
+std::ofstream errorlog;
+std::streambuf *cerr_buffer;
+
+volatile bool run_resize_screen = false;
+	
+void sighandler(int sig)
+{
+	if (sig == SIGWINCH)
+		run_resize_screen = true;
+#if defined(__sun) && defined(__SVR4)
+	// in solaris it is needed to reinstall the handler each time it's executed
+	signal(sig, sighandler);
+#endif // __sun && __SVR4
+}
+
+void do_at_exit()
+{
+	// restore old cerr buffer
+	std::cerr.rdbuf(cerr_buffer);
+	errorlog.close();
+	Mpd.Disconnect();
+	NC::destroyScreen();
+	windowTitle("");
+}
+
 }
 
 int main(int argc, char **argv)
