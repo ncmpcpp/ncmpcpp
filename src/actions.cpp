@@ -199,6 +199,8 @@ void resizeScreen(bool reload_main_window)
 		rl_resize_terminal();
 		endwin();
 		refresh();
+		// Remove KEY_RESIZE from input queue, I'm not sure how these make it in.
+		getch();
 	}
 
 	MainHeight = LINES-(Config.design == Design::Alternative ? 7 : 4);

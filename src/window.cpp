@@ -33,21 +33,6 @@
 
 namespace {
 
-struct ScopedWindowTimeout
-{
-	ScopedWindowTimeout(WINDOW *w, int init_timeout, int term_timeout)
-	: m_w(w), m_term_timeout(term_timeout) {
-		wtimeout(w, init_timeout);
-	}
-	~ScopedWindowTimeout() {
-		wtimeout(m_w, m_term_timeout);
-	}
-
-private:
-	WINDOW *m_w;
-	int m_term_timeout;
-};
-
 namespace rl {
 
 bool aborted;
@@ -359,6 +344,7 @@ void initScreen(bool enable_colors, bool enable_mouse)
 	raw();
 	nonl();
 	noecho();
+	timeout(0);
 	curs_set(0);
 
 	// setup mouse
@@ -387,6 +373,7 @@ void initScreen(bool enable_colors, bool enable_mouse)
 	rl_deprep_term_function = nullptr;
 	// do not catch signals
 	rl_catch_signals = 0;
+	rl_catch_sigwinch = 0;
 	// overwrite readline callbacks
 	rl_getc_function = rl::read_key;
 	rl_redisplay_function = rl::display_string;
@@ -586,7 +573,7 @@ void Window::recreate(size_t width, size_t height)
 {
 	delwin(m_window);
 	m_window = newpad(height, width);
-	setTimeout(m_window_timeout);
+	wtimeout(m_window, 0);
 	setColor(m_color);
 }
 
@@ -701,11 +688,7 @@ void Window::altCharset(bool altcharset_state) const
 
 void Window::setTimeout(int timeout)
 {
-	if (timeout != m_window_timeout)
-	{
-		m_window_timeout = timeout;
-		wtimeout(m_window, timeout);
-	}
+	m_window_timeout = timeout;
 }
 
 void Window::addFDCallback(int fd, void (*callback)())
@@ -800,7 +783,6 @@ Key::Type Window::getInputChar(int key)
 			result = result*10 + x - '0';
 		}
 	};
-	ScopedWindowTimeout swt(m_window, 0, m_window_timeout);
 	key = wgetch(m_window);
 	switch (key)
 	{
