@@ -100,7 +100,7 @@ Optional Features
 They may also pay attention to `--with-PACKAGE' options, where PACKAGE
 is something like `gnu-as' or `x' (for the X Window System).  You can 
 find a list of `--enable-' and `--with-' options that the package 
-recognizes via `configure --help`.
+recognizes via `./configure --help`.
 
    For packages that use the X Window System, `configure' can usually
 find the X include and library files automatically, but if it doesn't,
