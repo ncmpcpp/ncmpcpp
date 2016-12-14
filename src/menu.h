@@ -251,7 +251,7 @@ struct Menu: Window, List
 	typedef typename std::vector<Item>::const_iterator ConstIterator;
 	typedef std::reverse_iterator<Iterator> ReverseIterator;
 	typedef std::reverse_iterator<ConstIterator> ConstReverseIterator;
-	
+
 	typedef boost::transform_iterator<
 		typename Item::template ExtractValue<Const::No>,
 		Iterator> ValueIterator;
@@ -267,6 +267,10 @@ struct Menu: Window, List
 	typedef boost::transform_iterator<
 		typename Item::template ExtractProperties<Const::Yes>,
 		ConstIterator> ConstPropertiesIterator;
+
+	// For compliance with boost utilities.
+	typedef Iterator iterator;
+	typedef ConstIterator const_iterator;
 
 	/// Function helper prototype used to display each option on the screen.
 	/// If not set by setItemDisplayer(), menu won't display anything.

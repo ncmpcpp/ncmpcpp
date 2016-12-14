@@ -24,43 +24,6 @@
 #include <boost/locale/encoding_utf.hpp>
 #include <utility>
 
-template <typename BaseT>
-struct reversed_iteration
-{
-	reversed_iteration(BaseT &base_)
-	: base(base_) { }
-
-	BaseT &base;
-};
-
-template <typename BaseT>
-reversed_iteration<BaseT> reverse_iteration(BaseT &base_) {
-	return reversed_iteration<BaseT>(base_);
-}
-template <typename BaseT>
-auto begin(reversed_iteration<BaseT> &rev) -> decltype(rev.base.rbegin()) {
-	return rev.base.rbegin();
-}
-template <typename BaseT>
-auto begin(reversed_iteration<const BaseT> &rev) -> decltype(rev.base.rbegin()) {
-	return rev.base.rbegin();
-}
-template <typename BaseT>
-auto end(reversed_iteration<BaseT> &rev) -> decltype(rev.base.rend()) {
-	return rev.base.rend();
-}
-template <typename BaseT>
-auto end(reversed_iteration<const BaseT> &rev) -> decltype(rev.base.rend()) {
-	return rev.base.rend();
-}
-
-template <typename ValueT>
-struct pointer_extractor
-{
-	typedef pointer_extractor type;
-	ValueT *operator()(ValueT &v) const { return &v; }
-};
-
 /// Map over the first element in range satisfying the predicate.
 template <typename InputIterator, typename PredicateT, typename MapT>
 InputIterator find_map_first(InputIterator first, InputIterator last, PredicateT &&p, MapT &&f)
@@ -80,17 +43,6 @@ void find_map_all(InputIterator first, InputIterator last, PredicateT &&p, MapT 
 		it = find_map_first(it, last, p, f);
 	while (it != last);
 }
-
-// identity function object
-struct id_
-{
-	template <typename ValueT>
-	constexpr auto operator()(ValueT &&v) const noexcept
-		-> decltype(std::forward<ValueT>(v))
-	{
-		return std::forward<ValueT>(v);
-	}
-};
 
 // convert string to appropriate type
 template <typename TargetT, typename SourceT>

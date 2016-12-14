@@ -19,6 +19,7 @@
  ***************************************************************************/
 
 #include <algorithm>
+#include <boost/range/adaptor/reversed.hpp>
 #include <time.h>
 
 #include "enums.h"
@@ -66,7 +67,7 @@ MPD::SongIterator getDatabaseIterator(MPD::Connection &mpd)
 void removeSongFromPlaylist(const SongMenu &playlist, const MPD::Song &s)
 {
 	Mpd.StartCommandsList();
-	for (auto &item : reverse_iteration(playlist))
+	for (auto &item : boost::adaptors::reverse(playlist))
 		if (item.value() == s)
 			Mpd.Delete(item.value().getPosition());
 	Mpd.CommitCommandsList();
