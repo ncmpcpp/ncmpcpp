@@ -1335,29 +1335,31 @@ Window &Window::operator<<(const char *s)
 
 Window &Window::operator<<(char c)
 {
-	// the following causes problems: https://github.com/arybczak/ncmpcpp/issues/21
-	// waddnstr(m_window, &c, 1);
-	wprintw(m_window, "%c", c);
+	// Might cause problem similar to
+	// https://github.com/arybczak/ncmpcpp/issues/21, enable for testing as the
+	// code in the ticket supposed to be culprit was rewritten.
+	waddnstr(m_window, &c, 1);
+	//wprintw(m_window, "%c", c);
 	return *this;
 }
 
 Window &Window::operator<<(const wchar_t *ws)
 {
-#	ifdef NCMPCPP_UNICODE
+#if NCURSES_WADDWSTR
 	waddwstr(m_window, ws);
-#	else
+#else
 	wprintw(m_window, "%ls", ws);
-#	endif // NCMPCPP_UNICODE
+#endif // NCURSES_WADDWSTR
 	return *this;
 }
 
 Window &Window::operator<<(wchar_t wc)
 {
-#	ifdef NCMPCPP_UNICODE
+#if NCURSES_WADDNWSTR
 	waddnwstr(m_window, &wc, 1);
-#	else
+#else
 	wprintw(m_window, "%lc", wc);
-#	endif // NCMPCPP_UNICODE
+#endif // NCURSES_WADDNWSTR
 	return *this;
 }
 
@@ -1381,11 +1383,11 @@ Window &Window::operator<<(const std::string &s)
 
 Window &Window::operator<<(const std::wstring &ws)
 {
-#	ifdef NCMPCPP_UNICODE
+#if NCURSES_WADDNWSTR
 	waddnwstr(m_window, ws.c_str(), ws.length());
-#	else
+#else
 	wprintw(m_window, "%lc", ws.c_str());
-#	endif // NCMPCPP_UNICODE
+#endif // NCURSES_WADDNWSTR
 	return *this;
 }
 

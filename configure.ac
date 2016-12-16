@@ -13,7 +13,6 @@ AM_PROG_LIBTOOL
 AC_ARG_ENABLE(outputs, AS_HELP_STRING([--enable-outputs], [Enable outputs screen @<:@default=no@:>@]), [outputs=$enableval], [outputs=no])
 AC_ARG_ENABLE(visualizer, AS_HELP_STRING([--enable-visualizer], [Enable music visualizer screen @<:@default=no@:>@]), [visualizer=$enableval], [visualizer=no])
 AC_ARG_ENABLE(clock, AS_HELP_STRING([--enable-clock], [Enable clock screen @<:@default=no@:>@]), [clock=$enableval], [clock=no])
-AC_ARG_ENABLE(unicode, AS_HELP_STRING([--enable-unicode], [Enable utf8 support @<:@default=yes@:>@]), [unicode=$enableval], [unicode=yes])
 
 AC_ARG_WITH(fftw, AS_HELP_STRING([--with-fftw], [Enable fftw support (required for frequency spectrum vizualization) @<:@default=auto@:>@]), [fftw=$withval], [fftw=auto])
 AC_ARG_WITH(taglib, AS_HELP_STRING([--with-taglib], [Enable tag editor @<:@default=auto@:>@]), [taglib=$withval], [taglib=auto])
@@ -184,34 +183,30 @@ AC_CHECK_LIB(pthread, pthread_create, LIBS="$LIBS -lpthread",
 	AC_MSG_ERROR([pthread library is required])
 )
 
-dnl ========================
-dnl = checking for ncurses =
-dnl ========================
-if test "$unicode" = "yes" ; then
-	curses_config_bin="ncursesw6-config ncursesw5-config"
-	AC_DEFINE([NCMPCPP_UNICODE], [1], [enables unicode support])
-else
-	curses_config_bin="ncurses6-config ncurses5-config"
-fi
-
-AC_PATH_PROGS(CURSES_CONFIG, $curses_config_bin)
-if test "$CURSES_CONFIG" != "" ; then
-	CPPFLAGS="$CPPFLAGS `$CURSES_CONFIG --cflags`"
-	LIBS="$LIBS `$CURSES_CONFIG --libs`"
-fi
-AC_CHECK_LIB(ncursesw, initscr,
-	curses_lib=ncursesw,
-	curses_lib=ncurses
-)
-
-AC_CHECK_LIB($curses_lib, initscr,
-	if test "$CURSES_CONFIG" = "" ; then
-		LIBS="$LIBS -l$curses_lib"
-	fi
+dnl =========================
+dnl = checking for ncursesw =
+dnl =========================
+AH_TEMPLATE([NCURSES_WADDWSTR], [ncursesw has waddwstr function])
+AH_TEMPLATE([NCURSES_WADDNWSTR], [ncursesw has waddnwstr function])
+PKG_CHECK_MODULES([ncursesw], [ncursesw], [
+	AC_SUBST(ncursesw_CFLAGS)
+	AC_SUBST(ncursesw_LIBS)
+	CPPFLAGS="$CPPFLAGS $ncursesw_CFLAGS"
+	AC_CHECK_HEADERS([curses.h],
+		LIBS="$LIBS $ncursesw_LIBS"
 	,
-	AC_MSG_ERROR([$curses_lib library is required])
+		AC_MSG_ERROR([missing curses.h header])
 	)
-AC_CHECK_HEADERS([curses.h], , AC_MSG_ERROR([missing curses.h header]))
+  AC_CHECK_LIB(ncursesw, initscr, , AC_MSG_ERROR([ncursesw doesn't provide initscr]))
+  AC_CHECK_LIB(ncursesw, waddwstr,
+    AC_DEFINE([NCURSES_WADDWSTR], [1], []),
+    AC_DEFINE([NCURSES_WADDWSTR], [0], []))
+  AC_CHECK_LIB(ncursesw, waddnwstr,
+    AC_DEFINE([NCURSES_WADDNWSTR], [1], []),
+    AC_DEFINE([NCURSES_WADDNWSTR], [0], []))
+],
+	AC_MSG_ERROR([ncursesw is required!])
+)
 
 dnl ======================
 dnl = checking for fftw3 =

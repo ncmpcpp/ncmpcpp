@@ -129,9 +129,6 @@ bool configure(int argc, char **argv)
 	#		ifdef HAVE_TAGLIB_H
 			<< " taglib"
 	#		endif
-	#		ifdef NCMPCPP_UNICODE
-			<< " unicode"
-	#		endif
 			<< "\n";
 			return false;
 		}
