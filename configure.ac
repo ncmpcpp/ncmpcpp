@@ -186,8 +186,6 @@ AC_CHECK_LIB(pthread, pthread_create, LIBS="$LIBS -lpthread",
 dnl =========================
 dnl = checking for ncursesw =
 dnl =========================
-AH_TEMPLATE([NCURSES_WADDWSTR], [ncursesw has waddwstr function])
-AH_TEMPLATE([NCURSES_WADDNWSTR], [ncursesw has waddnwstr function])
 PKG_CHECK_MODULES([ncursesw], [ncursesw], [
 	AC_SUBST(ncursesw_CFLAGS)
 	AC_SUBST(ncursesw_LIBS)
@@ -198,12 +196,8 @@ PKG_CHECK_MODULES([ncursesw], [ncursesw], [
 		AC_MSG_ERROR([missing curses.h header])
 	)
   AC_CHECK_LIB(ncursesw, initscr, , AC_MSG_ERROR([ncursesw doesn't provide initscr]))
-  AC_CHECK_LIB(ncursesw, waddwstr,
-    AC_DEFINE([NCURSES_WADDWSTR], [1], []),
-    AC_DEFINE([NCURSES_WADDWSTR], [0], []))
-  AC_CHECK_LIB(ncursesw, waddnwstr,
-    AC_DEFINE([NCURSES_WADDNWSTR], [1], []),
-    AC_DEFINE([NCURSES_WADDNWSTR], [0], []))
+  AC_CHECK_LIB(ncursesw, waddwstr, , AC_MSG_ERROR([ncursesw doesn't provide waddwstr]))
+  AC_CHECK_LIB(ncursesw, waddnwstr, , AC_MSG_ERROR([ncursesw doesn't provide waddnwstr]))
 ],
 	AC_MSG_ERROR([ncursesw is required!])
 )

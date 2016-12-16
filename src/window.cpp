@@ -1345,21 +1345,13 @@ Window &Window::operator<<(char c)
 
 Window &Window::operator<<(const wchar_t *ws)
 {
-#if NCURSES_WADDWSTR
 	waddwstr(m_window, ws);
-#else
-	wprintw(m_window, "%ls", ws);
-#endif // NCURSES_WADDWSTR
 	return *this;
 }
 
 Window &Window::operator<<(wchar_t wc)
 {
-#if NCURSES_WADDNWSTR
 	waddnwstr(m_window, &wc, 1);
-#else
-	wprintw(m_window, "%lc", wc);
-#endif // NCURSES_WADDNWSTR
 	return *this;
 }
 
@@ -1383,11 +1375,7 @@ Window &Window::operator<<(const std::string &s)
 
 Window &Window::operator<<(const std::wstring &ws)
 {
-#if NCURSES_WADDNWSTR
 	waddnwstr(m_window, ws.c_str(), ws.length());
-#else
-	wprintw(m_window, "%lc", ws.c_str());
-#endif // NCURSES_WADDNWSTR
 	return *this;
 }
 
