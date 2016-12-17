@@ -126,7 +126,7 @@ std::vector<MPD::Song> TagsWindow::getSelectedSongs()
 
 /**********************************************************************/
 
-TagEditor::TagEditor() : FParser(0), FParserHelper(0), FParserLegend(0), FParserPreview(0), itsBrowsedDir("/")
+TagEditor::TagEditor() : FParser(0), FParserHelper(0), FParserLegend(0), FParserPreview(0), itsBrowsedDir("")
 {
 	PatternsFile = Config.ncmpcpp_directory + "patterns.list";
 	SetDimensions(0, COLS);
@@ -276,10 +276,10 @@ void TagEditor::update()
 		Dirs->Window::clear();
 		Tags->clear();
 		
-		if (itsBrowsedDir != "/")
+		if (itsBrowsedDir != "")
 			Dirs->addItem(std::make_pair("..", getParentDirectory(itsBrowsedDir)));
 		else
-			Dirs->addItem(std::make_pair(".", "/"));
+			Dirs->addItem(std::make_pair(".", ""));
 		MPD::DirectoryIterator directory = Mpd.GetDirectories(itsBrowsedDir), end;
 		for (; directory != end; ++directory)
 		{
@@ -955,13 +955,11 @@ void TagEditor::LocateSong(const MPD::Song &s)
 		if (last_slash != std::string::npos)
 			itsBrowsedDir = itsBrowsedDir.substr(0, last_slash);
 		else
-			itsBrowsedDir = "/";
-		if (itsBrowsedDir.empty())
-			itsBrowsedDir = "/";
+			itsBrowsedDir = "";
 		Dirs->clear();
 		update();
 	}
-	if (itsBrowsedDir == "/")
+	if (itsBrowsedDir.empty())
 		Dirs->reset(); // go to the first pos, which is "." (music dir root)
 	
 	// highlight directory we need and get files from it
