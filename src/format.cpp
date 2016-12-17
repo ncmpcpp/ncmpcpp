@@ -188,6 +188,8 @@ expressions<CharT> parseBracket(const string<CharT> &s,
 				result.push_back(NC::Format::Bold);
 			else if (flags & Format::Flags::Format && *it == 'u')
 				result.push_back(NC::Format::Underline);
+			else if (flags & Format::Flags::Format && *it == 'i')
+				result.push_back(NC::Format::Italic);
 			else if (flags & Format::Flags::Format && *it == 'a')
 				result.push_back(NC::Format::AltCharset);
 			else if (flags & Format::Flags::Format && *it == 'r')
@@ -200,6 +202,8 @@ expressions<CharT> parseBracket(const string<CharT> &s,
 					result.push_back(NC::Format::NoBold);
 				else if (*it == 'u')
 					result.push_back(NC::Format::NoUnderline);
+				else if (*it == 'i')
+					result.push_back(NC::Format::NoItalic);
 				else if (*it == 'a')
 					result.push_back(NC::Format::NoAltCharset);
 				else if (*it == 'r')

@@ -408,6 +408,7 @@ Window::Window(size_t startx,
 		m_escape_terminal_sequences(true),
 		m_bold_counter(0),
 		m_underline_counter(0),
+		m_italic_counter(0),
 		m_reverse_counter(0),
 		m_alt_charset_counter(0)
 {
@@ -453,6 +454,7 @@ Window::Window(const Window &rhs)
 , m_escape_terminal_sequences(rhs.m_escape_terminal_sequences)
 , m_bold_counter(rhs.m_bold_counter)
 , m_underline_counter(rhs.m_underline_counter)
+, m_italic_counter(rhs.m_italic_counter)
 , m_reverse_counter(rhs.m_reverse_counter)
 , m_alt_charset_counter(rhs.m_alt_charset_counter)
 {
@@ -476,6 +478,7 @@ Window::Window(Window &&rhs)
 , m_escape_terminal_sequences(rhs.m_escape_terminal_sequences)
 , m_bold_counter(rhs.m_bold_counter)
 , m_underline_counter(rhs.m_underline_counter)
+, m_italic_counter(rhs.m_italic_counter)
 , m_reverse_counter(rhs.m_reverse_counter)
 , m_alt_charset_counter(rhs.m_alt_charset_counter)
 {
@@ -501,6 +504,7 @@ Window &Window::operator=(Window rhs)
 	std::swap(m_escape_terminal_sequences, rhs.m_escape_terminal_sequences);
 	std::swap(m_bold_counter, rhs.m_bold_counter);
 	std::swap(m_underline_counter, rhs.m_underline_counter);
+	std::swap(m_italic_counter, rhs.m_italic_counter);
 	std::swap(m_reverse_counter, rhs.m_reverse_counter);
 	std::swap(m_alt_charset_counter, rhs.m_alt_charset_counter);
 	return *this;
@@ -674,6 +678,13 @@ void Window::bold(bool bold_state) const
 void Window::underline(bool underline_state) const
 {
 	(underline_state ? wattron : wattroff)(m_window, A_UNDERLINE);
+}
+
+void Window::italic(bool italic_state) const
+{
+#ifdef A_ITALIC
+	(italic_state ? wattron : wattroff)(m_window, A_ITALIC);
+#endif
 }
 
 void Window::reverse(bool reverse_state) const
@@ -1287,6 +1298,13 @@ Window &Window::operator<<(Format format)
 		case Format::NoUnderline:
 			if (--m_underline_counter <= 0)
 				underline((m_underline_counter = 0));
+			break;
+		case Format::Italic:
+			italic(++m_italic_counter);
+			break;
+		case Format::NoItalic:
+			if (--m_italic_counter <= 0)
+				italic((m_italic_counter = 0));
 			break;
 		case Format::Reverse:
 			reverse(++m_reverse_counter);

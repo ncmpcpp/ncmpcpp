@@ -198,6 +198,7 @@ enum class Format {
 	None,
 	Bold, NoBold,
 	Underline, NoUnderline,
+     Italic, NoItalic,
 	Reverse, NoReverse,
 	AltCharset, NoAltCharset
 };
@@ -490,6 +491,11 @@ private:
 	///
 	void underline(bool underline_state) const;
 	
+	/// Sets state of italic attribute (internal use only)
+	/// @param italic_state state of italic attribute
+	///
+	void italic(bool italic_state) const;
+	
 	/// Sets state of reverse attribute (internal use only)
 	/// @param reverse_state state of reverse attribute
 	///
@@ -528,6 +534,7 @@ private:
 	/// counters for format flags
 	int m_bold_counter;
 	int m_underline_counter;
+	int m_italic_counter;
 	int m_reverse_counter;
 	int m_alt_charset_counter;
 };
