@@ -434,7 +434,7 @@ bool Configuration::read(const std::vector<std::string> &config_paths, bool igno
 	      "yes", yes_no);
 	p.add("ask_before_clearing_playlists", &ask_before_clearing_playlists,
 	      "yes", yes_no);
-	p.add("ask_before_shuffling_playlists", &ask_before_clearing_playlists,
+	p.add("ask_before_shuffling_playlists", &ask_before_shuffling_playlists,
 	      "yes", yes_no);
 	p.add("clock_display_seconds", &clock_display_seconds, "no", yes_no);
 	p.add("display_volume_level", &display_volume_level, "yes", yes_no);
