@@ -18,6 +18,7 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
+#include <atomic>
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/range/algorithm_ext/erase.hpp>
@@ -121,6 +122,7 @@ bool saveLyrics(const std::string &filename, const std::string &lyrics)
 boost::optional<std::string> downloadLyrics(
 	const MPD::Song &s,
 	std::shared_ptr<Shared<NC::Buffer>> shared_buffer,
+	std::shared_ptr<std::atomic<bool>> download_stopper,
 	LyricsFetcher *current_fetcher)
 {
 	std::string s_artist = Curl::escape(s.getArtist());
@@ -170,6 +172,8 @@ boost::optional<std::string> downloadLyrics(
 	{
 		for (auto &fetcher : Config.lyrics_fetchers)
 		{
+			if (download_stopper && download_stopper->load())
+				return boost::none;
 			fetcher_result = fetch_lyrics(fetcher);
 			if (fetcher_result.first)
 				break;
@@ -270,6 +274,7 @@ void Lyrics::fetch(const MPD::Song &s)
 {
 	if (!m_worker.valid() || s != m_song)
 	{
+		stopDownload();
 		w.clear();
 		m_song = s;
 		if (loadLyrics(w, lyricsFilename(m_song)))
@@ -279,10 +284,12 @@ void Lyrics::fetch(const MPD::Song &s)
 		}
 		else
 		{
+			m_download_stopper = std::make_shared<std::atomic<bool>>(false);
 			m_shared_buffer = std::make_shared<Shared<NC::Buffer>>();
 			m_worker = boost::async(
 				boost::launch::async,
-				std::bind(downloadLyrics, m_song, m_shared_buffer, m_fetcher));
+				std::bind(downloadLyrics,
+				          m_song, m_shared_buffer, m_download_stopper, m_fetcher));
 		}
 	}
 }
@@ -390,7 +397,7 @@ void Lyrics::fetchInBackground(const MPD::Song &s, bool notify_)
 			}
 			if (!cs.song().empty())
 			{
-				auto lyrics = downloadLyrics(cs.song(), nullptr, m_fetcher);
+				auto lyrics = downloadLyrics(cs.song(), nullptr, nullptr, m_fetcher);
 				if (lyrics)
 					saveLyrics(lyrics_file, *lyrics);
 			}
@@ -424,4 +431,10 @@ void Lyrics::clearWorker()
 {
 	m_shared_buffer.reset();
 	m_worker = boost::BOOST_THREAD_FUTURE<boost::optional<std::string>>();
+}
+
+void Lyrics::stopDownload()
+{
+	if (m_download_stopper)
+		m_download_stopper->store(true);
 }

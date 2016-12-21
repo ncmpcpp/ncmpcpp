@@ -88,11 +88,13 @@ private:
 	};
 
 	void clearWorker();
+	void stopDownload();
 
 	bool m_refresh_window;
 	size_t m_scroll_begin;
 
 	std::shared_ptr<Shared<NC::Buffer>> m_shared_buffer;
+	std::shared_ptr<std::atomic<bool>> m_download_stopper;
 
 	MPD::Song m_song;
 	LyricsFetcher *m_fetcher;
