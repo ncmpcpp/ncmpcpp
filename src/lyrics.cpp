@@ -25,6 +25,7 @@
 #include <cerrno>
 #include <cstring>
 #include <fstream>
+#include <thread>
 
 #include "browser.h"
 #include "charset.h"
@@ -213,7 +214,7 @@ void Lyrics::update()
 			m_refresh_window = true;
 		}
 
-		if (m_worker.wait_for(std::chrono::seconds(0)) == std::future_status::ready)
+		if (m_worker.is_ready())
 		{
 			auto lyrics = m_worker.get();
 			if (lyrics)
@@ -279,8 +280,8 @@ void Lyrics::fetch(const MPD::Song &s)
 		else
 		{
 			m_shared_buffer = std::make_shared<Shared<NC::Buffer>>();
-			m_worker = std::async(
-				std::launch::async,
+			m_worker = boost::async(
+				boost::launch::async,
 				std::bind(downloadLyrics, m_song, m_shared_buffer, m_fetcher));
 		}
 	}
@@ -422,5 +423,5 @@ boost::optional<std::string> Lyrics::tryTakeConsumerMessage()
 void Lyrics::clearWorker()
 {
 	m_shared_buffer.reset();
-	m_worker = std::future<boost::optional<std::string>>();
+	m_worker = boost::BOOST_THREAD_FUTURE<boost::optional<std::string>>();
 }

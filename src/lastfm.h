@@ -23,7 +23,7 @@
 
 #include "config.h"
 
-#include <future>
+#include <boost/thread/future.hpp>
 #include <memory>
 
 #include "interfaces.h"
@@ -55,8 +55,9 @@ struct Lastfm: Screen<NC::Scrollpad>, Tabbable
 			return;
 
 		m_service = std::shared_ptr<ServiceT>(service);
-		m_worker = std::async(std::launch::async,
-		                      std::bind(&LastFm::Service::fetch, m_service));
+		m_worker = boost::async(
+			boost::launch::async,
+			std::bind(&LastFm::Service::fetch, m_service));
 
 		w.clear();
 		w << "Fetching information...";
@@ -70,7 +71,7 @@ private:
 	std::wstring m_title;
 	
 	std::shared_ptr<LastFm::Service> m_service;
-	std::future<LastFm::Service::Result> m_worker;
+	boost::BOOST_THREAD_FUTURE<LastFm::Service::Result> m_worker;
 };
 
 extern Lastfm *myLastfm;

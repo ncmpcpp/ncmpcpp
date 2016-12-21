@@ -22,7 +22,7 @@
 #define NCMPCPP_LYRICS_H
 
 #include <boost/optional.hpp>
-#include <future>
+#include <boost/thread/future.hpp>
 #include <memory>
 #include <queue>
 
@@ -96,7 +96,7 @@ private:
 
 	MPD::Song m_song;
 	LyricsFetcher *m_fetcher;
-	std::future<boost::optional<std::string>> m_worker;
+	boost::BOOST_THREAD_FUTURE<boost::optional<std::string>> m_worker;
 
 	Shared<ConsumerState> m_consumer_state;
 };
