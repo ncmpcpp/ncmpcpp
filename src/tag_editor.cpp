@@ -32,7 +32,7 @@
 #include "display.h"
 #include "global.h"
 #include "helpers.h"
-#include "menu_impl.h"
+#include "curses/menu_impl.h"
 #include "playlist.h"
 #include "song_info.h"
 #include "statusbar.h"

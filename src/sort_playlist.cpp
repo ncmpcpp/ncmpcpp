@@ -18,12 +18,12 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
+#include "curses/menu_impl.h"
 #include "charset.h"
 #include "display.h"
 #include "global.h"
 #include "helpers.h"
 #include "playlist.h"
-#include "menu_impl.h"
 #include "settings.h"
 #include "sort_playlist.h"
 #include "statusbar.h"

@@ -22,6 +22,7 @@
 #include <netinet/tcp.h>
 #include <netinet/in.h>
 
+#include "curses/menu_impl.h"
 #include "browser.h"
 #include "charset.h"
 #include "format_impl.h"
@@ -29,7 +30,6 @@
 #include "helpers.h"
 #include "lyrics.h"
 #include "media_library.h"
-#include "menu_impl.h"
 #include "outputs.h"
 #include "playlist.h"
 #include "playlist_editor.h"

@@ -23,10 +23,10 @@
 
 #include <boost/variant.hpp>
 
+#include "curses/menu.h"
+#include "curses/strbuffer.h"
 #include "format.h"
-#include "menu.h"
 #include "song.h"
-#include "strbuffer.h"
 #include "utility/functional.h"
 #include "utility/wide_string.h"
 

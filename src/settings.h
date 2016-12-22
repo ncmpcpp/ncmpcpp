@@ -28,11 +28,11 @@
 #include <vector>
 #include <mpd/client.h>
 
+#include "curses/strbuffer.h"
 #include "enums.h"
 #include "format.h"
 #include "lyrics_fetcher.h"
 #include "screen_type.h"
-#include "strbuffer.h"
 
 struct Column
 {

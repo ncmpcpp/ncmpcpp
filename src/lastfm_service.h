@@ -26,7 +26,7 @@
 #include <map>
 #include <string>
 
-#include "scrollpad.h"
+#include "curses/scrollpad.h"
 
 namespace LastFm {
 

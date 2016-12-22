@@ -23,7 +23,7 @@
 
 #include <boost/variant.hpp>
 
-#include "menu.h"
+#include "curses/menu.h"
 #include "song.h"
 
 namespace Format {

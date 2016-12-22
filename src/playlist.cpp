@@ -22,10 +22,10 @@
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <sstream>
 
+#include "curses/menu_impl.h"
 #include "display.h"
 #include "global.h"
 #include "helpers.h"
-#include "menu_impl.h"
 #include "playlist.h"
 #include "screen_switcher.h"
 #include "song.h"

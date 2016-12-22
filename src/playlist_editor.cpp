@@ -23,13 +23,13 @@
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <cassert>
 
+#include "curses/menu_impl.h"
 #include "charset.h"
 #include "display.h"
 #include "global.h"
 #include "helpers.h"
 #include "playlist.h"
 #include "playlist_editor.h"
-#include "menu_impl.h"
 #include "mpdpp.h"
 #include "status.h"
 #include "statusbar.h"

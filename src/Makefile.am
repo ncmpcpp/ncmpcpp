@@ -1,5 +1,7 @@
 bin_PROGRAMS = ncmpcpp
 ncmpcpp_SOURCES = \
+	curses/scrollpad.cpp \
+	curses/window.cpp \
 	utility/comparators.cpp \
 	utility/html.cpp \
 	utility/option_parser.cpp \
@@ -33,7 +35,6 @@ ncmpcpp_SOURCES = \
 	playlist_editor.cpp \
 	screen.cpp \
 	screen_type.cpp \
-	scrollpad.cpp \
 	search_engine.cpp \
 	sel_items_adder.cpp \
 	server_info.cpp \
@@ -48,8 +49,7 @@ ncmpcpp_SOURCES = \
 	tags.cpp \
 	tiny_tag_editor.cpp \
 	title.cpp \
-	visualizer.cpp \
-	window.cpp
+	visualizer.cpp
 
 # set the include path found by configure
 INCLUDES= $(all_includes)
@@ -57,6 +57,11 @@ INCLUDES= $(all_includes)
 # the library search path.
 ncmpcpp_LDFLAGS = $(all_libraries)
 noinst_HEADERS = \
+	curses/menu.h \
+	curses/menu_impl.h \
+	curses/scrollpad.h \
+	curses/strbuffer.h \
+	curses/window.h \
 	helpers/song_iterator_maker.h \
 	utility/comparators.h \
 	utility/const.h \
@@ -89,8 +94,6 @@ noinst_HEADERS = \
 	lyrics_fetcher.h \
 	macro_utilities.h \
 	media_library.h \
-	menu.h \
-	menu_impl.h \
 	mpdpp.h \
 	mutable_song.h \
 	outputs.h \
@@ -100,7 +103,6 @@ noinst_HEADERS = \
 	screen.h \
 	screen_switcher.h \
 	screen_type.h \
-	scrollpad.h \
 	search_engine.h \
 	sel_items_adder.h \
 	server_info.h \
@@ -115,5 +117,4 @@ noinst_HEADERS = \
 	tags.h \
 	tiny_tag_editor.h \
 	title.h \
-	visualizer.h \
-	window.h
+	visualizer.h

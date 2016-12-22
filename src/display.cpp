@@ -20,12 +20,12 @@
 
 #include <cassert>
 
+#include "curses/menu_impl.h"
 #include "browser.h"
 #include "charset.h"
 #include "display.h"
 #include "format_impl.h"
 #include "helpers.h"
-#include "menu_impl.h"
 #include "song_info.h"
 #include "playlist.h"
 #include "global.h"

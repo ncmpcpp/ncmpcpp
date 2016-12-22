@@ -22,7 +22,7 @@
 #define NCMPCPP_SONG_LIST_H
 
 #include <boost/range/detail/any_iterator.hpp>
-#include "menu.h"
+#include "curses/menu.h"
 #include "song.h"
 #include "utility/const.h"
 

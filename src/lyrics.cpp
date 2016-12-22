@@ -27,6 +27,7 @@
 #include <fstream>
 #include <thread>
 
+#include "curses/scrollpad.h"
 #include "browser.h"
 #include "charset.h"
 #include "curl_handle.h"
@@ -35,7 +36,6 @@
 #include "helpers.h"
 #include "lyrics.h"
 #include "playlist.h"
-#include "scrollpad.h"
 #include "settings.h"
 #include "song.h"
 #include "statusbar.h"

@@ -22,7 +22,7 @@
 #define NCMPCPP_HELPERS_SONG_ITERATOR_MAKER_H
 
 #include <boost/iterator/transform_iterator.hpp>
-#include "menu.h"
+#include "curses/menu.h"
 #include "song_list.h"
 
 template <typename SongT>

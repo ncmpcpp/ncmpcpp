@@ -21,8 +21,8 @@
 #ifndef NCMPCPP_SCREEN_H
 #define NCMPCPP_SCREEN_H
 
-#include "menu.h"
-#include "scrollpad.h"
+#include "curses/menu.h"
+#include "curses/scrollpad.h"
 #include "screen_type.h"
 
 void drawSeparator(int x);

@@ -26,9 +26,9 @@
 #ifdef ENABLE_VISUALIZER
 
 #include <boost/date_time/posix_time/posix_time_types.hpp>
+#include "curses/window.h"
 #include "interfaces.h"
 #include "screen.h"
-#include "window.h"
 
 #ifdef HAVE_FFTW3_H
 # include <fftw3.h>

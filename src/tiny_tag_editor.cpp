@@ -28,12 +28,12 @@
 #include <fileref.h>
 #include <tag.h>
 
+#include "curses/menu_impl.h"
 #include "browser.h"
 #include "charset.h"
 #include "display.h"
 #include "helpers.h"
 #include "global.h"
-#include "menu_impl.h"
 #include "song_info.h"
 #include "playlist.h"
 #include "search_engine.h"

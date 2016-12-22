@@ -25,9 +25,9 @@
 
 #ifdef ENABLE_CLOCK
 
+#include "curses/window.h"
 #include "interfaces.h"
 #include "screen.h"
-#include "window.h"
 
 struct Clock: Screen<NC::Window>, Tabbable
 {

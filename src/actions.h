@@ -25,8 +25,8 @@
 #include <boost/format.hpp>
 #include <map>
 #include <string>
+#include "curses/window.h"
 #include "interfaces.h"
-#include "window.h"
 
 // forward declarations
 struct SongList;

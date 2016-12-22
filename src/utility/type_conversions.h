@@ -21,9 +21,9 @@
 #ifndef NCMPCPP_UTILITY_TYPE_CONVERSIONS_H
 #define NCMPCPP_UTILITY_TYPE_CONVERSIONS_H
 
+#include "curses/window.h"
 #include "mpdpp.h"
 #include "mutable_song.h"
-#include "window.h"
 #include "enums.h"
 
 NC::Color charToColor(char c);

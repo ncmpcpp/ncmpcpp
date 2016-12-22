@@ -22,10 +22,10 @@
 #define NCMPCPP_STATUSBAR_H
 
 #include <boost/format.hpp>
+#include "curses/window.h"
 #include "settings.h"
 #include "gcc.h"
 #include "interfaces.h"
-#include "window.h"
 
 namespace Progressbar {
 

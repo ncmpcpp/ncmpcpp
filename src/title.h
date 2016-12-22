@@ -21,7 +21,7 @@
 #ifndef NCMPCPP_TITLE_H
 #define NCMPCPP_TITLE_H
 
-#include "window.h"
+#include "curses/window.h"
 
 void windowTitle(const std::string &title);
 
