@@ -21,6 +21,7 @@
 #ifndef NCMPCPP_LYRICS_H
 #define NCMPCPP_LYRICS_H
 
+#include <atomic>
 #include <boost/optional.hpp>
 #include <boost/thread/future.hpp>
 #include <memory>

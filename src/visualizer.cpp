@@ -109,7 +109,7 @@ void Visualizer::update()
 	// PCM in format 44100:16:1 (for mono visualization) and
 	// 44100:16:2 (for stereo visualization) is supported.
 	int16_t buf[m_samples];
-	ssize_t data = read(m_fifo, buf, sizeof(buf));
+	ssize_t data = read(m_fifo, buf, sizeof(int16_t) * m_samples);
 	if (data < 0) // no data available in fifo
 		return;
 

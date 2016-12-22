@@ -82,11 +82,11 @@ struct Filter
 	Filter() { }
 
 	template <typename FilterT>
-	Filter(const std::string &constraint,
+	Filter(const std::string &constraint_,
 	       boost::regex_constants::syntax_option_type flags,
 	       FilterT &&filter)
-		: m_rx(make(constraint, flags))
-		, m_constraint(constraint)
+		: m_rx(make(constraint_, flags))
+		, m_constraint(constraint_)
 		, m_filter(std::forward<FilterT>(filter))
 	{ }
 
@@ -124,11 +124,11 @@ template <typename T> struct ItemFilter
 	ItemFilter() { }
 
 	template <typename FilterT>
-	ItemFilter(const std::string &constraint,
+	ItemFilter(const std::string &constraint_,
 	           boost::regex_constants::syntax_option_type flags,
 	           FilterT &&filter)
-		: m_rx(make(constraint, flags))
-		, m_constraint(constraint)
+		: m_rx(make(constraint_, flags))
+		, m_constraint(constraint_)
 		, m_filter(std::forward<FilterT>(filter))
 	{ }
 	
