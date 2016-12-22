@@ -51,9 +51,10 @@ namespace {
 
 const int fps = 25;
 
-// toColor: a scaling function for coloring. For numbers 0 to max this function returns
-// a coloring from the lowest color to the highest, and colors will not loop from 0 to max.
-const NC::Color &toColor(size_t number, size_t max, bool wrap = true)
+// toColor: a scaling function for coloring. For numbers 0 to max this function
+// returns a coloring from the lowest color to the highest, and colors will not
+// loop from 0 to max.
+const NC::FormattedColor &toColor(size_t number, size_t max, bool wrap = true)
 {
 	const auto colors_size = Config.visualizer_colors.size();
 	const auto index = (number * colors_size) / max;
@@ -216,10 +217,11 @@ void Visualizer::DrawSoundWave(int16_t *buf, ssize_t samples, size_t y_offset, s
 		return;
 
 	auto draw_point = [&](size_t x, int32_t y) {
+		auto c = toColor(std::abs(y), half_height, false);
 		w << NC::XY(x, base_y+y)
-		<< toColor(std::abs(y), half_height, false)
-		<< Config.visualizer_chars[0]
-		<< NC::Color::End;
+		  << c
+		  << Config.visualizer_chars[0]
+		  << NC::FormattedColor::End(c);
 	};
 
 	int32_t point_y, prev_point_y = 0;
@@ -263,9 +265,10 @@ void Visualizer::DrawSoundWaveStereo(int16_t *buf_left, int16_t *buf_right, ssiz
 
 /**********************************************************************/
 
-// DrawSoundWaveFill: This visualizer is very similar to DrawSoundWave, but instead of
-// a single line the entire height is filled. In stereo mode, the top half of the screen
-// is dedicated to the right channel, the bottom the left channel.
+// DrawSoundWaveFill: This visualizer is very similar to DrawSoundWave, but
+// instead of a single line the entire height is filled. In stereo mode, the top
+// half of the screen is dedicated to the right channel, the bottom the left
+// channel.
 void Visualizer::DrawSoundWaveFill(int16_t *buf, ssize_t samples, size_t y_offset, size_t height)
 {
 	// if right channel is drawn, bars descend from the top to the bottom
@@ -291,11 +294,12 @@ void Visualizer::DrawSoundWaveFill(int16_t *buf, ssize_t samples, size_t y_offse
 
 		for (int32_t j = 0; j < point_y; ++j)
 		{
+			auto c = toColor(j, height);
 			size_t y = flipped ? y_offset+j : y_offset+height-j-1;
 			w << NC::XY(x, y)
-			<< toColor(j, height)
-			<< Config.visualizer_chars[1]
-			<< NC::Color::End;
+			  << c
+			  << Config.visualizer_chars[1]
+			  << NC::FormattedColor::End(c);
 		}
 	}
 }
@@ -308,13 +312,13 @@ void Visualizer::DrawSoundWaveFillStereo(int16_t *buf_left, int16_t *buf_right, 
 
 /**********************************************************************/
 
-// draws the sound wave as an ellipse with origin in the center of the screen
+// Draws the sound wave as an ellipse with origin in the center of the screen.
 void Visualizer::DrawSoundEllipse(int16_t *buf, ssize_t samples, size_t, size_t height)
 {
 	const size_t half_width = w.getWidth()/2;
 	const size_t half_height = height/2;
 
-	// make it so that the loop goes around the ellipse exactly once
+	// Make it so that the loop goes around the ellipse exactly once.
 	const double deg_multiplier = 2*boost::math::constants::pi<double>()/samples;
 
 	int32_t x, y;
@@ -325,30 +329,33 @@ void Visualizer::DrawSoundEllipse(int16_t *buf, ssize_t samples, size_t, size_t 
 		y = half_height * std::sin(i*deg_multiplier);
 		max_radius = sqrt(x*x + y*y);
 
-		// calculate the distance of the sample from the center,
-		// where 0 is the center of the ellipse and 1 is its border
+		// Calculate the distance of the sample from the center, where 0 is the
+		// center of the ellipse and 1 is its border.
 		radius = std::abs(buf[i]);
 		radius /= 32768.0;
 
-		// appropriately scale the position
+		// Appropriately scale the position.
 		x *= radius;
 		y *= radius;
 
+		auto c = toColor(sqrt(x*x + y*y), max_radius, false);
 		w << NC::XY(half_width + x, half_height + y)
-		<< toColor(sqrt(x*x + y*y), max_radius, false)
-		<< Config.visualizer_chars[0]
-		<< NC::Color::End;
+		  << c
+		  << Config.visualizer_chars[0]
+		  << NC::FormattedColor::End(c);
 	}
 }
 
-// DrawSoundEllipseStereo: This visualizer only works in stereo. The colors form concentric
-// rings originating from the center (width/2, height/2). For any given point, the width is
-// scaled with the left channel and height is scaled with the right channel. For example,
-// if a song is entirely in the right channel, then it would just be a vertical line.
+// DrawSoundEllipseStereo: This visualizer only works in stereo. The colors form
+// concentric rings originating from the center (width/2, height/2). For any
+// given point, the width is scaled with the left channel and height is scaled
+// with the right channel. For example, if a song is entirely in the right
+// channel, then it would just be a vertical line.
 //
-// Since every font/terminal is different, the visualizer is never a perfect circle. This
-// visualizer assume the font height is twice the length of the font's width. If the font
-// is skinner or wider than this, instead of a circle it will be an ellipse.
+// Since every font/terminal is different, the visualizer is never a perfect
+// circle. This visualizer assume the font height is twice the length of the
+// font's width. If the font is skinner or wider than this, instead of a circle
+// it will be an ellipse.
 void Visualizer::DrawSoundEllipseStereo(int16_t *buf_left, int16_t *buf_right, ssize_t samples, size_t half_height)
 {
 	const size_t width = w.getWidth();
@@ -365,14 +372,16 @@ void Visualizer::DrawSoundEllipseStereo(int16_t *buf_left, int16_t *buf_right, s
 		x = buf_left[i]/32768.0 * (buf_left[i] < 0 ? left_half_width : right_half_width);
 		y = buf_right[i]/32768.0 * (buf_right[i] < 0 ? top_half_height : bottom_half_height);
 
-		// The arguments to the toColor function roughly follow a circle equation where
-		// the center is not centered around (0,0). For example (x - w)^2 + (y-h)+2 = r^2
-		// centers the circle around the point (w,h). Because fonts are not all the same
-		// size, this will not always generate a perfect circle.
-		w << toColor(sqrt(x*x + 4*y*y), radius)
-		<< NC::XY(left_half_width + x, top_half_height + y)
-		<< Config.visualizer_chars[1]
-		<< NC::Color::End;
+		// The arguments to the toColor function roughly follow a circle equation
+		// where the center is not centered around (0,0). For example (x - w)^2 +
+		// (y-h)+2 = r^2 centers the circle around the point (w,h). Because fonts
+		// are not all the same size, this will not always generate a perfect
+		// circle.
+		auto c = toColor(sqrt(x*x + 4*y*y), radius);
+		w << NC::XY(left_half_width + x, top_half_height + y)
+		  << c
+		  << Config.visualizer_chars[1]
+		  << NC::FormattedColor::End(c);
 	}
 }
 
@@ -381,7 +390,7 @@ void Visualizer::DrawSoundEllipseStereo(int16_t *buf_left, int16_t *buf_right, s
 #ifdef HAVE_FFTW3_H
 void Visualizer::DrawFrequencySpectrum(int16_t *buf, ssize_t samples, size_t y_offset, size_t height)
 {
-	// if right channel is drawn, bars descend from the top to the bottom
+	// If right channel is drawn, bars descend from the top to the bottom.
 	const bool flipped = y_offset > 0;
 
 	// copy samples to fftw input array
@@ -389,7 +398,7 @@ void Visualizer::DrawFrequencySpectrum(int16_t *buf, ssize_t samples, size_t y_o
 		m_fftw_input[i] = i < samples ? buf[i] : 0;
 	fftw_execute(m_fftw_plan);
 
-	// count magnitude of each frequency and scale it to fit the screen
+	// Count magnitude of each frequency and scale it to fit the screen.
 	for (size_t i = 0; i < m_fftw_results; ++i)
 		m_freq_magnitudes[i] = sqrt(
 			m_fftw_output[i][0]*m_fftw_output[i][0]
@@ -397,7 +406,7 @@ void Visualizer::DrawFrequencySpectrum(int16_t *buf, ssize_t samples, size_t y_o
 		)/2e4*height;
 
 	const size_t win_width = w.getWidth();
-	// cut bandwidth a little to achieve better look
+	// Cut bandwidth a little to achieve better look.
 	const double bins_per_bar = m_fftw_results/win_width * 7/10;
 	double bar_height;
 	size_t bar_bound_height;
@@ -406,19 +415,20 @@ void Visualizer::DrawFrequencySpectrum(int16_t *buf, ssize_t samples, size_t y_o
 		bar_height = 0;
 		for (int j = 0; j < bins_per_bar; ++j)
 			bar_height += m_freq_magnitudes[x*bins_per_bar+j];
-		// buff higher frequencies
+		// Buff higher frequencies.
 		bar_height *= log2(2 + x) * 100.0/win_width;
-		// moderately normalize the heights
+		// Moderately normalize the heights.
 		bar_height = pow(bar_height, 0.5);
 
 		bar_bound_height = std::min(std::size_t(bar_height/bins_per_bar), height);
 		for (size_t j = 0; j < bar_bound_height; ++j)
 		{
 			size_t y = flipped ? y_offset+j : y_offset+height-j-1;
+			auto c = toColor(j, height);
 			w << NC::XY(x, y)
-			<< toColor(j, height)
-			<< Config.visualizer_chars[1]
-			<< NC::Color::End;
+			  << c
+			  << Config.visualizer_chars[1]
+			  << NC::FormattedColor::End(c);
 		}
 	}
 }
@@ -495,5 +505,3 @@ void Visualizer::ResetAutoScaleMultiplier()
 }
 
 #endif // ENABLE_VISUALIZER
-
-/* vim: set tabstop=4 softtabstop=4 shiftwidth=4 noexpandtab : */

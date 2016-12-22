@@ -18,54 +18,66 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
-#include <cstring>
-#include <iostream>
+#include "formatted_color.h"
 
-#include "global.h"
-#include "settings.h"
-#include "title.h"
-#include "utility/wide_string.h"
+namespace {
 
-void windowTitle(const std::string &status)
+void verifyFormats(const NC::FormattedColor::Formats &formats)
 {
-	if (Config.set_window_title)
-		std::cout << "\033]0;" << status << "\7" << std::flush;
+	for (auto &fmt : formats)
+	{
+		if (fmt == NC::Format::NoBold
+		    || fmt == NC::Format::NoUnderline
+		    || fmt == NC::Format::NoReverse
+		    || fmt == NC::Format::NoAltCharset)
+			throw std::logic_error("FormattedColor can't hold disabling formats");
+	}
 }
 
-void drawHeader()
+}
+
+NC::FormattedColor::FormattedColor(Color color_, Formats formats_)
 {
-	using Global::myScreen;
-	using Global::wHeader;
-	using Global::VolumeState;
-	
-	if (!Config.header_visibility)
-		return;
-	switch (Config.design)
+	if (color_ == NC::Color::End)
+		throw std::logic_error("FormattedColor can't hold Color::End");
+	m_color = std::move(color_);
+	verifyFormats(formats_);
+	m_formats = std::move(formats_);
+}
+
+std::istream &NC::operator>>(std::istream &is, NC::FormattedColor &fc)
+{
+	NC::Color c;
+	is >> c;
+	if (!is.eof() && is.peek() == ':')
 	{
-		case Design::Classic:
-			*wHeader << NC::XY(0, 0)
-			         << NC::TermManip::ClearToEOL
-			         << NC::Format::Bold
-			         << myScreen->title()
-			         << NC::Format::NoBold
-			         << NC::XY(wHeader->getWidth()-VolumeState.length(), 0)
-			         << Config.volume_color
-			         << VolumeState
-			         << NC::FormattedColor::End(Config.volume_color);
-			break;
-		case Design::Alternative:
-			std::wstring title = myScreen->title();
-			*wHeader << NC::XY(0, 3)
-			         << NC::TermManip::ClearToEOL
-			         << Config.alternative_ui_separator_color;
-			mvwhline(wHeader->raw(), 2, 0, 0, COLS);
-			mvwhline(wHeader->raw(), 4, 0, 0, COLS);
-			*wHeader << NC::FormattedColor::End(Config.alternative_ui_separator_color)
-			         << NC::XY((COLS-wideLength(title))/2, 3)
-			         << NC::Format::Bold
-			         << title
-			         << NC::Format::NoBold;
-			break;
+		is.get();
+		NC::FormattedColor::Formats formats;
+		while (!is.eof() && isalpha(is.peek()))
+		{
+			char flag = is.get();
+			switch (flag)
+			{
+			case 'b':
+				formats.push_back(NC::Format::Bold);
+				break;
+			case 'u':
+				formats.push_back(NC::Format::Underline);
+				break;
+			case 'r':
+				formats.push_back(NC::Format::Reverse);
+				break;
+			case 'a':
+				formats.push_back(NC::Format::AltCharset);
+				break;
+			default:
+				is.setstate(std::ios::failbit);
+				break;
+			}
+		}
+		fc = NC::FormattedColor(c, std::move(formats));
 	}
-	wHeader->refresh();
+	else
+		fc = NC::FormattedColor(c, {});
+	return is;
 }

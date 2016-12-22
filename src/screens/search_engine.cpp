@@ -347,7 +347,13 @@ void SearchEngine::runAction()
 			found += 3; // don't count options inserted below
 			w.insertSeparator(ResetButton+1);
 			w.insertItem(ResetButton+2, SEItem(), NC::List::Properties::Bold | NC::List::Properties::Inactive);
-			w.at(ResetButton+2).value().mkBuffer() << Config.color1 << "Search results: " << Config.color2 << "Found " << found << (found > 1 ? " songs" : " song") << NC::Color::Default;
+			w.at(ResetButton+2).value().mkBuffer()
+				<< Config.color1
+				<< "Search results: "
+				<< NC::FormattedColor::End(Config.color1)
+				<< Config.color2
+				<< "Found " << found << (found > 1 ? " songs" : " song")
+				<< NC::FormattedColor::End(Config.color2);
 			w.insertSeparator(ResetButton+3);
 			markSongsInPlaylist(w);
 			Statusbar::print("Searching finished");

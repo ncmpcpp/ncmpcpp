@@ -687,7 +687,10 @@ void Status::Changes::elapsedTime(bool update_elapsed)
 			*wHeader << NC::XY(second_start, 1);
 			writeCyclicBuffer(second, *wHeader, second_line_scroll_begin, COLS-ps.length()-8-2, L" ** ");
 
-			*wHeader << NC::XY(wHeader->getWidth()-VolumeState.length(), 0) << Config.volume_color << VolumeState << NC::Color::End;
+			*wHeader << NC::XY(wHeader->getWidth()-VolumeState.length(), 0)
+			         << Config.volume_color
+			         << VolumeState
+			         << NC::FormattedColor::End(Config.volume_color);
 
 			flags();
 	}
@@ -719,11 +722,14 @@ void Status::Changes::flags()
 
 			*wHeader << Config.state_line_color;
 			mvwhline(wHeader->raw(), 1, 0, 0, COLS);
+			*wHeader << NC::FormattedColor::End(Config.state_line_color);
+
 			if (!switch_state.empty())
-				*wHeader << NC::XY(COLS-switch_state.length()-3, 1) << "["
+				*wHeader << NC::XY(COLS-switch_state.length()-3, 1)
+				         << "["
 								 << Config.state_flags_color
-								 << NC::Format::Bold << switch_state << NC::Format::NoBold
-								 << NC::Color::End
+								 << switch_state
+				         << NC::FormattedColor::End(Config.state_flags_color)
 								 << "]";
 			break;
 		case Design::Alternative:
@@ -735,12 +741,15 @@ void Status::Changes::flags()
 			switch_state += m_crossfade ? m_crossfade : '-';
 			switch_state += m_db_updating ? m_db_updating : '-';
 			switch_state += ']';
-			*wHeader << NC::XY(COLS-switch_state.length(), 1) << NC::Format::Bold << Config.state_flags_color << switch_state << NC::Color::End << NC::Format::NoBold;
+			*wHeader << NC::XY(COLS-switch_state.length(), 1)
+			         << Config.state_flags_color
+			         << switch_state
+			         << NC::FormattedColor::End(Config.state_flags_color);
 			if (!Config.header_visibility) // in this case also draw separator
 			{
-				*wHeader << NC::Format::Bold << Config.alternative_ui_separator_color;
+				*wHeader << Config.alternative_ui_separator_color;
 				mvwhline(wHeader->raw(), 2, 0, 0, COLS);
-				*wHeader << NC::Color::End << NC::Format::NoBold;
+				*wHeader << NC::FormattedColor::End(Config.alternative_ui_separator_color);
 			}
 			break;
 	}
@@ -749,7 +758,8 @@ void Status::Changes::flags()
 
 void Status::Changes::mixer()
 {
-	if (!Config.display_volume_level || (!Config.header_visibility && Config.design == Design::Classic))
+	if (!Config.display_volume_level
+	    || (!Config.header_visibility && Config.design == Design::Classic))
 		return;
 
 	switch (Config.design)
@@ -768,9 +778,10 @@ void Status::Changes::mixer()
 		VolumeState += boost::lexical_cast<std::string>(m_volume);
 		VolumeState += "%";
 	}
-	*wHeader << Config.volume_color;
-	*wHeader << NC::XY(wHeader->getWidth()-VolumeState.length(), 0) << VolumeState;
-	*wHeader << NC::Color::End;
+	*wHeader << NC::XY(wHeader->getWidth()-VolumeState.length(), 0)
+	         << Config.volume_color
+	         << VolumeState
+	         << NC::FormattedColor::End(Config.volume_color);
 	wHeader->refresh();
 }
 

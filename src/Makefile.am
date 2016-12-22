@@ -1,5 +1,6 @@
 bin_PROGRAMS = ncmpcpp
 ncmpcpp_SOURCES = \
+	curses/formatted_color.cpp \
 	curses/scrollpad.cpp \
 	curses/window.cpp \
 	screens/browser.cpp \
@@ -57,6 +58,7 @@ INCLUDES= $(all_includes)
 # the library search path.
 ncmpcpp_LDFLAGS = $(all_libraries)
 noinst_HEADERS = \
+	curses/formatted_color.h \
 	curses/menu.h \
 	curses/menu_impl.h \
 	curses/scrollpad.h \

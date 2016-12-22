@@ -95,11 +95,25 @@ void SongInfo::switchTo()
 
 void SongInfo::PrepareSong(const MPD::Song &s)
 {
-	w << NC::Format::Bold << Config.color1 << "Filename: " << NC::Format::NoBold << Config.color2 << s.getName() << '\n' << NC::Color::End;
-	w << NC::Format::Bold << "Directory: " << NC::Format::NoBold << Config.color2;
-	ShowTag(w, s.getDirectory());
-	w << "\n\n" << NC::Color::End;
-	w << NC::Format::Bold << "Length: " << NC::Format::NoBold << Config.color2 << s.getLength() << '\n' << NC::Color::End;
+	auto print_key_value = [this](const char *key, const auto &value) {
+		w << NC::Format::Bold
+		  << Config.color1
+		  << key
+		  << ":"
+		  << NC::FormattedColor::End(Config.color1)
+		  << NC::Format::NoBold
+		  << " "
+		  << Config.color2
+		  << value
+		  << NC::FormattedColor::End(Config.color2)
+		  << "\n";
+	};
+
+	print_key_value("Filename", s.getName());
+	print_key_value("Directory", ShowTag(s.getDirectory()));
+	w << "\n";
+	print_key_value("Length", s.getLength());
+
 #	ifdef HAVE_TAGLIB_H
 	if (!Config.mpd_music_dir.empty() && !s.isStream())
 	{
@@ -110,31 +124,23 @@ void SongInfo::PrepareSong(const MPD::Song &s)
 		TagLib::FileRef f(path_to_file.c_str());
 		if (!f.isNull())
 		{
-			std::string channels;
-			switch (f.audioProperties()->channels())
-			{
-				case 1:
-					channels = "Mono";
-					break;
-				case 2:
-					channels = "Stereo";
-					break;
-				default:
-					channels = boost::lexical_cast<std::string>(f.audioProperties()->channels());
-					break;
-			}
-			w << NC::Format::Bold << "Bitrate: " << NC::Format::NoBold << Config.color2 << f.audioProperties()->bitrate() << " kbps\n" << NC::Color::End;
-			w << NC::Format::Bold << "Sample rate: " << NC::Format::NoBold << Config.color2 << f.audioProperties()->sampleRate() << " Hz\n" << NC::Color::End;
-			w << NC::Format::Bold << "Channels: " << NC::Format::NoBold << Config.color2 << channels << NC::Color::End << "\n";
+			print_key_value(
+				"Bitrate",
+				boost::lexical_cast<std::string>(f.audioProperties()->bitrate()) + " kbps");
+			print_key_value(
+				"Sample rate",
+				boost::lexical_cast<std::string>(f.audioProperties()->sampleRate()) + " Hz");
+			print_key_value("Channels", channelsToString(f.audioProperties()->channels()));
 			
 			auto rginfo = Tags::readReplayGain(f.file());
 			if (!rginfo.empty())
 			{
-				w << NC::Format::Bold << "\nReference loudness: " << NC::Format::NoBold << Config.color2 << rginfo.referenceLoudness() << NC::Color::End << "\n";
-				w << NC::Format::Bold << "Track gain: " << NC::Format::NoBold << Config.color2 << rginfo.trackGain() << NC::Color::End << "\n";
-				w << NC::Format::Bold << "Track peak: " << NC::Format::NoBold << Config.color2 << rginfo.trackPeak() << NC::Color::End << "\n";
-				w << NC::Format::Bold << "Album gain: " << NC::Format::NoBold << Config.color2 << rginfo.albumGain() << NC::Color::End << "\n";
-				w << NC::Format::Bold << "Album peak: " << NC::Format::NoBold << Config.color2 << rginfo.albumPeak() << NC::Color::End << "\n";
+				w << "\n";
+				print_key_value("Reference loudness", rginfo.referenceLoudness());
+				print_key_value("Track gain", rginfo.trackGain());
+				print_key_value("Track peak", rginfo.trackPeak());
+				print_key_value("Album gain", rginfo.albumGain());
+				print_key_value("Album peak", rginfo.albumPeak());
 			}
 		}
 	}
@@ -143,7 +149,7 @@ void SongInfo::PrepareSong(const MPD::Song &s)
 	
 	for (const Metadata *m = Tags; m->Name; ++m)
 	{
-		w << NC::Format::Bold << '\n' << m->Name << ": " << NC::Format::NoBold;
+		w << NC::Format::Bold << "\n" << m->Name << ":" << NC::Format::NoBold << " ";
 		ShowTag(w, s.getTags(m->Get));
 	}
 }

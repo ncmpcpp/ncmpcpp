@@ -18,54 +18,64 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
-#include <cstring>
-#include <iostream>
+#ifndef NCMPCPP_FORMATTED_COLOR_H
+#define NCMPCPP_FORMATTED_COLOR_H
 
-#include "global.h"
-#include "settings.h"
-#include "title.h"
-#include "utility/wide_string.h"
+#include <boost/optional.hpp>
+#include <boost/range/adaptor/reversed.hpp>
+#include "window.h"
 
-void windowTitle(const std::string &status)
+namespace NC {
+
+struct FormattedColor
 {
-	if (Config.set_window_title)
-		std::cout << "\033]0;" << status << "\7" << std::flush;
-}
-
-void drawHeader()
-{
-	using Global::myScreen;
-	using Global::wHeader;
-	using Global::VolumeState;
-	
-	if (!Config.header_visibility)
-		return;
-	switch (Config.design)
+	struct End
 	{
-		case Design::Classic:
-			*wHeader << NC::XY(0, 0)
-			         << NC::TermManip::ClearToEOL
-			         << NC::Format::Bold
-			         << myScreen->title()
-			         << NC::Format::NoBold
-			         << NC::XY(wHeader->getWidth()-VolumeState.length(), 0)
-			         << Config.volume_color
-			         << VolumeState
-			         << NC::FormattedColor::End(Config.volume_color);
-			break;
-		case Design::Alternative:
-			std::wstring title = myScreen->title();
-			*wHeader << NC::XY(0, 3)
-			         << NC::TermManip::ClearToEOL
-			         << Config.alternative_ui_separator_color;
-			mvwhline(wHeader->raw(), 2, 0, 0, COLS);
-			mvwhline(wHeader->raw(), 4, 0, 0, COLS);
-			*wHeader << NC::FormattedColor::End(Config.alternative_ui_separator_color)
-			         << NC::XY((COLS-wideLength(title))/2, 3)
-			         << NC::Format::Bold
-			         << title
-			         << NC::Format::NoBold;
-			break;
-	}
-	wHeader->refresh();
+		End(const FormattedColor &fc)
+			: m_fc(fc)
+		{ }
+
+		const FormattedColor &base() const { return m_fc; }
+
+	private:
+		const FormattedColor &m_fc;
+	};
+
+	typedef std::vector<Format> Formats;
+
+	FormattedColor() { }
+
+	FormattedColor(Color color_, Formats formats_);
+
+	const Color &color() const { return m_color; }
+	const Formats &formats() const { return m_formats; }
+
+private:
+	Color m_color;
+	Formats m_formats;
+};
+
+std::istream &operator>>(std::istream &is, FormattedColor &fc);
+
+template <typename OutputStreamT>
+OutputStreamT &operator<<(OutputStreamT &os, const FormattedColor &fc)
+{
+	os << fc.color();
+	for (auto &fmt : fc.formats())
+		os << fmt;
+	return os;
 }
+
+template <typename OutputStreamT>
+OutputStreamT &operator<<(OutputStreamT &os, const FormattedColor::End &rfc)
+{
+	if (rfc.base().color() != Color::Default)
+		os << Color::End;
+	for (auto &fmt : boost::adaptors::reverse(rfc.base().formats()))
+		os << reverseFormat(fmt);
+	return os;
+}
+
+}
+
+#endif // NCMPCPP_FORMATTED_COLOR_H

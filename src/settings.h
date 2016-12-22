@@ -28,6 +28,7 @@
 #include <vector>
 #include <mpd/client.h>
 
+#include "curses/formatted_color.h"
 #include "curses/strbuffer.h"
 #include "enums.h"
 #include "format.h"
@@ -98,22 +99,23 @@ struct Configuration
 	NC::Buffer now_playing_suffix;
 	NC::Buffer modified_item_prefix;
 
-	NC::Color color1;
-	NC::Color color2;
-	NC::Color empty_tags_color;
 	NC::Color header_color;
-	NC::Color volume_color;
-	NC::Color state_line_color;
-	NC::Color state_flags_color;
 	NC::Color main_color;
-	NC::Color main_highlight_color;
-	NC::Color progressbar_color;
-	NC::Color progressbar_elapsed_color;
 	NC::Color statusbar_color;
-	NC::Color alternative_ui_separator_color;
+	NC::Color main_highlight_color;
 	NC::Color active_column_color;
 
-	std::vector<NC::Color> visualizer_colors;
+	NC::FormattedColor color1;
+	NC::FormattedColor color2;
+	NC::FormattedColor empty_tags_color;
+	NC::FormattedColor volume_color;
+	NC::FormattedColor state_line_color;
+	NC::FormattedColor state_flags_color;
+	NC::FormattedColor progressbar_color;
+	NC::FormattedColor progressbar_elapsed_color;
+	NC::FormattedColor alternative_ui_separator_color;
+
+	std::vector<NC::FormattedColor> visualizer_colors;
 	VisualizerType visualizer_type;
 
 	NC::Border window_border;
@@ -166,7 +168,6 @@ struct Configuration
 	bool generate_win32_compatible_filenames;
 	bool ask_for_locked_screen_width_part;
 	bool allow_for_physical_item_deletion;
-	bool progressbar_boldness;
 	bool startup_slave_screen_focus;
 
 	unsigned mpd_connection_timeout;

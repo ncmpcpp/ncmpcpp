@@ -208,41 +208,69 @@ bool TinyTagEditor::getTags()
 	w.resizeList(24);
 	
 	for (size_t i = 0; i < 7; ++i)
-		w.at(i).setInactive(true);
+		w[i].setInactive(true);
 	
-	w.at(7).setSeparator(true);
-	w.at(19).setSeparator(true);
-	w.at(21).setSeparator(true);
+	w[7].setSeparator(true);
+	w[19].setSeparator(true);
+	w[21].setSeparator(true);
 	
 	if (!Tags::extendedSetSupported(f.file()))
 	{
-		w.at(10).setInactive(true);
+		w[10].setInactive(true);
 		for (size_t i = 15; i <= 17; ++i)
-			w.at(i).setInactive(true);
+			w[i].setInactive(true);
 	}
 	
 	w.highlight(8);
-	
-	w.at(0).value() << NC::Format::Bold << Config.color1 << "Song name: " << NC::Format::NoBold << Config.color2 << itsEdited.getName() << NC::Color::End;
-	w.at(1).value() << NC::Format::Bold << Config.color1 << "Location in DB: " << NC::Format::NoBold << Config.color2;
-	ShowTag(w.at(1).value(), itsEdited.getDirectory());
-	w.at(1).value() << NC::Color::End;
-	w.at(3).value() << NC::Format::Bold << Config.color1 << "Length: " << NC::Format::NoBold << Config.color2 << itsEdited.getLength() << NC::Color::End;
-	w.at(4).value() << NC::Format::Bold << Config.color1 << "Bitrate: " << NC::Format::NoBold << Config.color2 << f.audioProperties()->bitrate() << " kbps" << NC::Color::End;
-	w.at(5).value() << NC::Format::Bold << Config.color1 << "Sample rate: " << NC::Format::NoBold << Config.color2 << f.audioProperties()->sampleRate() << " Hz" << NC::Color::End;
-	w.at(6).value() << NC::Format::Bold << Config.color1 << "Channels: " << NC::Format::NoBold << Config.color2 << (f.audioProperties()->channels() == 1 ? "Mono" : "Stereo") << NC::Color::Default;
+
+	auto print_key_value = [this](NC::Buffer &buf, const char *key, const auto &value) {
+		buf << NC::Format::Bold
+		    << Config.color1
+		    << key
+		    << ":"
+		    << NC::FormattedColor::End(Config.color1)
+		    << NC::Format::NoBold
+		    << " "
+		    << Config.color2
+		    << value
+		    << NC::FormattedColor::End(Config.color2);
+	};
+
+	print_key_value(w[0].value(), "Filename", itsEdited.getName());
+	print_key_value(w[1].value(), "Directory", ShowTag(itsEdited.getDirectory()));
+	print_key_value(w[3].value(), "Length", itsEdited.getLength());
+	print_key_value(
+		w[4].value(),
+		"Bitrate",
+		boost::lexical_cast<std::string>(f.audioProperties()->bitrate()) + " kbps");
+	print_key_value(
+		w[5].value(),
+		"Sample rate",
+		boost::lexical_cast<std::string>(f.audioProperties()->sampleRate()) + " Hz");
+	print_key_value(
+		w[6].value(),
+		"Channels",
+		channelsToString(f.audioProperties()->channels()));
 	
 	unsigned pos = 8;
 	for (const SongInfo::Metadata *m = SongInfo::Tags; m->Name; ++m, ++pos)
 	{
-		w.at(pos).value() << NC::Format::Bold << m->Name << ":" << NC::Format::NoBold << ' ';
-		ShowTag(w.at(pos).value(), itsEdited.getTags(m->Get));
+		w[pos].value() << NC::Format::Bold
+		                  << m->Name
+		                  << ":"
+		                  << NC::Format::NoBold
+		                  << " ";
+		ShowTag(w[pos].value(), itsEdited.getTags(m->Get));
 	}
 	
-	w.at(20).value() << NC::Format::Bold << "Filename:" << NC::Format::NoBold << ' ' << itsEdited.getName();
+	w[20].value() << NC::Format::Bold
+	                 << "Filename:"
+	                 << NC::Format::NoBold
+	                 << " "
+	                 << itsEdited.getName();
 	
-	w.at(22).value() << "Save";
-	w.at(23).value() << "Cancel";
+	w[22].value() << "Save";
+	w[23].value() << "Cancel";
 	return true;
 }
 

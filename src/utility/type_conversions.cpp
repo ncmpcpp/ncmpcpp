@@ -18,8 +18,22 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
+#include <boost/lexical_cast.hpp>
 #include <cassert>
 #include "utility/type_conversions.h"
+
+std::string channelsToString(int channels)
+{
+	switch (channels)
+	{
+	case 1:
+		return "Mono";
+	case 2:
+		return "Stereo";
+	default:
+		return boost::lexical_cast<std::string>(channels);
+	}
+}
 
 NC::Color charToColor(char c)
 {

@@ -487,12 +487,22 @@ template <typename T> void ShowTime(T &buf, size_t length, bool short_names)
 		buf << length << (short_names ? "s" : (length == 1 ? " second" : " seconds"));
 }
 
-template <typename BufferT> void ShowTag(BufferT &buf, const std::string &tag)
+template <typename BufferT>
+void ShowTag(BufferT &buf, const std::string &tag)
 {
 	if (tag.empty())
-		buf << Config.empty_tags_color << Config.empty_tag << NC::Color::End;
+		buf << Config.empty_tags_color
+		    << Config.empty_tag
+		    << NC::FormattedColor::End(Config.empty_tags_color);
 	else
 		buf << tag;
+}
+
+inline NC::Buffer ShowTag(const std::string &tag)
+{
+	NC::Buffer result;
+	ShowTag(result, tag);
+	return result;
 }
 
 inline const char *withErrors(bool success)

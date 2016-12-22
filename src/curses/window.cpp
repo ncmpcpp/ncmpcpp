@@ -259,34 +259,65 @@ std::istream &operator>>(std::istream &is, Color &c)
 		}
 		return result;
 	};
-	std::string sc;
-	is >> sc;
+
+	auto get_color = [](std::istream &is_) {
+		std::string result;
+		while (!is_.eof() && isalnum(is_.peek()))
+			result.push_back(is_.get());
+		return result;
+	};
+
+	std::string sc = get_color(is);
+
 	if (sc == "default")
-			c = Color::Default;
+		c = Color::Default;
 	else if (sc == "end")
 		c = Color::End;
 	else
 	{
-		short value = get_single_color(sc, false);
-		if (value != -1)
-			c = Color(value, NC::Color::transparent);
-		else
+		short fg = get_single_color(sc, false);
+		if (fg == -1)
+			is.setstate(std::ios::failbit);
+		// Check if there is background color
+		else if (!is.eof() && is.peek() == '_')
 		{
-			size_t underscore = sc.find('_');
-			if (underscore != std::string::npos)
-			{
-				short fg = get_single_color(sc.substr(0, underscore), false);
-				short bg = get_single_color(sc.substr(underscore+1), true);
-				if (fg != -1 && bg != -1)
-					c = Color(fg, bg);
-				else
-					is.setstate(std::ios::failbit);
-			}
-			else
+			is.get();
+			sc = get_color(is);
+			short bg = get_single_color(sc, true);
+			if (bg == -1)
 				is.setstate(std::ios::failbit);
+			else
+				c = Color(fg, bg);
 		}
+		else
+			c = Color(fg, NC::Color::transparent);
 	}
 	return is;
+}
+
+NC::Format reverseFormat(NC::Format fmt)
+{
+	switch (fmt)
+	{
+	case NC::Format::Bold:
+		return NC::Format::NoBold;
+	case NC::Format::NoBold:
+		return NC::Format::Bold;
+	case NC::Format::Underline:
+		return NC::Format::NoUnderline;
+	case NC::Format::NoUnderline:
+		return NC::Format::Underline;
+	case NC::Format::Reverse:
+		return NC::Format::NoReverse;
+	case NC::Format::NoReverse:
+		return NC::Format::Reverse;
+	case NC::Format::AltCharset:
+		return NC::Format::NoAltCharset;
+	case NC::Format::NoAltCharset:
+		return NC::Format::AltCharset;
+	}
+	// Unreachable, silence GCC.
+	return fmt;
 }
 
 namespace Mouse {

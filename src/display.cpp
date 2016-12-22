@@ -349,7 +349,9 @@ void Display::Tags(NC::Menu<MPD::MutableSong> &menu)
 			menu << Charset::utf8ToLocale(s.getName());
 		else
 			menu << Charset::utf8ToLocale(s.getName())
-			     << Config.color2 << " -> " << NC::Color::End
+			     << Config.color2
+			     << " -> "
+			     << NC::FormattedColor::End(Config.color2)
 			     << Charset::utf8ToLocale(s.getNewName());
 	}
 }

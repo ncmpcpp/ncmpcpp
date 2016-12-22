@@ -551,7 +551,11 @@ void TagEditor::runAction()
 		*FParserLegend << "%C - comment\n\n";
 		*FParserLegend << NC::Format::Bold << "Files:\n" << NC::Format::NoBold;
 		for (auto it = EditedSongs.begin(); it != EditedSongs.end(); ++it)
-			*FParserLegend << Config.color2 << " * " << NC::Color::End << (*it)->getName() << '\n';
+			*FParserLegend << Config.color2
+			               << " * "
+			               << NC::FormattedColor::End(Config.color2)
+			               << (*it)->getName()
+			               << "\n";
 		FParserLegend->flush();
 
 		if (!Patterns.empty())
@@ -631,9 +635,14 @@ void TagEditor::runAction()
 					}
 					if (!FParserUsePreview)
 						s.setNewName(new_file + extension);
-					*FParserPreview << file << Config.color2 << " -> " << NC::Color::End;
+					*FParserPreview << file
+					                << Config.color2
+					                << " -> "
+					                << NC::FormattedColor::End(Config.color2);
 					if (new_file.empty())
-						*FParserPreview << Config.empty_tags_color << Config.empty_tag << NC::Color::End;
+						*FParserPreview << Config.empty_tags_color
+						                << Config.empty_tag
+						                << NC::FormattedColor::End(Config.empty_tags_color);
 					else
 						*FParserPreview << new_file << extension;
 					*FParserPreview << "\n\n";

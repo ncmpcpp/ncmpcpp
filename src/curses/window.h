@@ -149,7 +149,7 @@ struct Color
 	static const short transparent;
 	static const short previous;
 
-	Color() : m_impl(0, transparent, true, false) { }
+	Color() : m_impl(0, 0, true, false) { }
 	Color(short foreground_value, short background_value,
 			 bool is_default = false, bool is_end = false)
 	: m_impl(foreground_value, background_value, is_default, is_end)
@@ -200,6 +200,8 @@ enum class Format {
 	Reverse, NoReverse,
 	AltCharset, NoAltCharset
 };
+
+NC::Format reverseFormat(NC::Format fmt);
 
 /// This indicates how much the window has to be scrolled
 enum class Scroll { Up, Down, PageUp, PageDown, Home, End };

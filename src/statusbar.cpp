@@ -59,8 +59,6 @@ void Progressbar::draw(unsigned int elapsed, unsigned int time)
 {
 	unsigned pb_width = wFooter->getWidth();
 	unsigned howlong = time ? pb_width*elapsed/time : 0;
-	if (Config.progressbar_boldness)
-		*wFooter << NC::Format::Bold;
 	*wFooter << Config.progressbar_color;
 	if (Config.progressbar[2] != '\0')
 	{
@@ -71,6 +69,7 @@ void Progressbar::draw(unsigned int elapsed, unsigned int time)
 	}
 	else
 		mvwhline(wFooter->raw(), 0, 0, 0, pb_width);
+	*wFooter << NC::FormattedColor::End(Config.progressbar_color);
 	if (time)
 	{
 		*wFooter << Config.progressbar_elapsed_color;
@@ -79,11 +78,8 @@ void Progressbar::draw(unsigned int elapsed, unsigned int time)
 			*wFooter << Config.progressbar[0];
 		if (howlong < wFooter->getWidth())
 			*wFooter << Config.progressbar[1];
-		*wFooter << NC::Color::End;
+		*wFooter << NC::FormattedColor::End(Config.progressbar_elapsed_color);
 	}
-	*wFooter << NC::Color::End;
-	if (Config.progressbar_boldness)
-		*wFooter << NC::Format::NoBold;
 }
 
 Statusbar::ScopedLock::ScopedLock() noexcept

@@ -177,11 +177,14 @@ NC::Buffer buffer(const std::string &v)
 	return result;
 }
 
-void deprecated(const char *option, double version_removal)
+void deprecated(const char *option, double version_removal, const char *advice)
 {
 	std::cerr << "WARNING: Variable '" << option
 	          << "' is deprecated and will be removed in "
-	          << version_removal << "\n";
+	          << version_removal;
+	if (advice)
+		std::cerr << " (" << advice << ")";
+	std::cerr << ".\n";
 }
 
 }
@@ -192,7 +195,17 @@ bool Configuration::read(const std::vector<std::string> &config_paths, bool igno
 
 	p.add<void>("visualizer_sample_multiplier", nullptr, "", [](std::string v) {
 			if (!v.empty())
-				deprecated("visualizer_sample_multiplier", 0.9);
+				deprecated(
+					"visualizer_sample_multiplier",
+					0.9,
+					"visualizer scales automatically");
+		});
+	p.add<void>("progressbar_boldness", nullptr, "", [](std::string v) {
+			if (!v.empty())
+				deprecated(
+					"progressbar_boldness",
+					0.9,
+					"use extended progressbar_color and progressbar_elapsed_color instead");
 		});
 
 	// keep the same order of variables as in configuration file
@@ -224,7 +237,7 @@ bool Configuration::read(const std::vector<std::string> &config_paths, bool igno
 			return result;
 	});
 	p.add("visualizer_color", &visualizer_colors,
-	      "blue, cyan, green, yellow, magenta, red", list_of<NC::Color>);
+	      "blue, cyan, green, yellow, magenta, red", list_of<NC::FormattedColor>);
 	p.add("system_encoding", &system_encoding, "", [](std::string encoding) {
 #ifdef HAVE_LANGINFO_H
 			// try to autodetect system encoding
@@ -334,7 +347,6 @@ bool Configuration::read(const std::vector<std::string> &config_paths, bool igno
 			result.resize(3);
 			return result;
 	});
-	p.add("progressbar_boldness", &progressbar_boldness, "yes", yes_no);
 	p.add("default_place_to_search_in", &search_in_db, "database", [](std::string v) {
 			if (v == "database")
 				return true;
@@ -488,15 +500,15 @@ bool Configuration::read(const std::vector<std::string> &config_paths, bool igno
 	p.add("header_window_color", &header_color, "default");
 	p.add("volume_color", &volume_color, "default");
 	p.add("state_line_color", &state_line_color, "default");
-	p.add("state_flags_color", &state_flags_color, "default");
+	p.add("state_flags_color", &state_flags_color, "default:b");
 	p.add("main_window_color", &main_color, "yellow");
 	p.add("color1", &color1, "white");
 	p.add("color2", &color2, "green");
 	p.add("main_window_highlight_color", &main_highlight_color, "yellow");
-	p.add("progressbar_color", &progressbar_color, "black");
-	p.add("progressbar_elapsed_color", &progressbar_elapsed_color, "green");
+	p.add("progressbar_color", &progressbar_color, "black:b");
+	p.add("progressbar_elapsed_color", &progressbar_elapsed_color, "green:b");
 	p.add("statusbar_color", &statusbar_color, "default");
-	p.add("alternative_ui_separator_color", &alternative_ui_separator_color, "black");
+	p.add("alternative_ui_separator_color", &alternative_ui_separator_color, "black:b");
 	p.add("active_column_color", &active_column_color, "red");
 	p.add("window_border_color", &window_border, "green", verbose_lexical_cast<NC::Color>);
 	p.add("active_window_border", &active_window_border, "red",

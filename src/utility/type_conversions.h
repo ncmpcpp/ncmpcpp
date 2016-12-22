@@ -26,6 +26,8 @@
 #include "mutable_song.h"
 #include "enums.h"
 
+std::string channelsToString(int channels);
+
 NC::Color charToColor(char c);
 
 std::string tagTypeToString(mpd_tag_type tag);
