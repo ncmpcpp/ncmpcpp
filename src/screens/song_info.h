@@ -18,47 +18,44 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
-#include "helpers/song_iterator_maker.h"
-#include "screens/song_info.h"
-#include "utility/functional.h"
+#ifndef NCMPCPP_SONG_INFO_H
+#define NCMPCPP_SONG_INFO_H
 
-SongIterator SongMenu::currentS()
-{
-	return makeSongIterator(current());
-}
+#include "interfaces.h"
+#include "mutable_song.h"
+#include "screens/screen.h"
 
-ConstSongIterator SongMenu::currentS() const
+struct SongInfo: Screen<NC::Scrollpad>, Tabbable
 {
-	return makeConstSongIterator(current());
-}
+	struct Metadata
+	{
+		const char *Name;
+		MPD::Song::GetFunction Get;
+		MPD::MutableSong::SetFunction Set;
+	};
+	
+	SongInfo();
+	
+	// Screen<NC::Scrollpad> implementation
+	virtual void switchTo() override;
+	virtual void resize() override;
+	
+	virtual std::wstring title() override;
+	virtual ScreenType type() override { return ScreenType::SongInfo; }
+	
+	virtual void update() override { }
+	
+	virtual bool isLockable() override { return false; }
+	virtual bool isMergable() override { return true; }
+	
+	// private members
+	static const Metadata Tags[];
+	
+private:
+	void PrepareSong(const MPD::Song &s);
+};
 
-SongIterator SongMenu::beginS()
-{
-	return makeSongIterator(begin());
-}
+extern SongInfo *mySongInfo;
 
-ConstSongIterator SongMenu::beginS() const
-{
-	return makeConstSongIterator(begin());
-}
+#endif // NCMPCPP_SONG_INFO_H
 
-SongIterator SongMenu::endS()
-{
-	return makeSongIterator(end());
-}
-
-ConstSongIterator SongMenu::endS() const
-{
-	return makeConstSongIterator(end());
-}
-
-std::vector<MPD::Song> SongMenu::getSelectedSongs()
-{
-	std::vector<MPD::Song> result;
-	for (auto it = begin(); it != end(); ++it)
-		if (it->isSelected())
-			result.push_back(it->value());
-	if (result.empty() && !empty())
-		result.push_back(current()->value());
-	return result;
-}

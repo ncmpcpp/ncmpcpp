@@ -25,7 +25,7 @@
 #include <random>
 
 #include "mpdpp.h"
-#include "screen.h"
+#include "screens/screen.h"
 
 namespace Global {
 

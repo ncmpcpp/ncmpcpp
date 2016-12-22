@@ -18,47 +18,62 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
-#include "helpers/song_iterator_maker.h"
-#include "screens/song_info.h"
-#include "utility/functional.h"
+#ifndef NCMPCPP_LASTFM_H
+#define NCMPCPP_LASTFM_H
 
-SongIterator SongMenu::currentS()
-{
-	return makeSongIterator(current());
-}
+#include "config.h"
 
-ConstSongIterator SongMenu::currentS() const
-{
-	return makeConstSongIterator(current());
-}
+#include <boost/thread/future.hpp>
+#include <memory>
 
-SongIterator SongMenu::beginS()
-{
-	return makeSongIterator(begin());
-}
+#include "interfaces.h"
+#include "lastfm_service.h"
+#include "screens/screen.h"
+#include "utility/wide_string.h"
 
-ConstSongIterator SongMenu::beginS() const
+struct Lastfm: Screen<NC::Scrollpad>, Tabbable
 {
-	return makeConstSongIterator(begin());
-}
+	Lastfm();
+	
+	virtual void switchTo() override;
+	virtual void resize() override;
+	
+	virtual std::wstring title() override;
+	virtual ScreenType type() override { return ScreenType::Lastfm; }
+	
+	virtual void update() override;
+	
+	virtual bool isLockable() override { return false; }
+	virtual bool isMergable() override { return true; }
+	
+	template <typename ServiceT>
+	void queueJob(ServiceT *service)
+	{
+		auto old_service = dynamic_cast<ServiceT *>(m_service.get());
+		// if the same service and arguments were used, leave old info
+		if (old_service != nullptr && *old_service == *service)
+			return;
 
-SongIterator SongMenu::endS()
-{
-	return makeSongIterator(end());
-}
+		m_service = std::shared_ptr<ServiceT>(service);
+		m_worker = boost::async(
+			boost::launch::async,
+			std::bind(&LastFm::Service::fetch, m_service));
 
-ConstSongIterator SongMenu::endS() const
-{
-	return makeConstSongIterator(end());
-}
+		w.clear();
+		w << "Fetching information...";
+		w.flush();
+		m_title = ToWString(m_service->name());
+	}
 
-std::vector<MPD::Song> SongMenu::getSelectedSongs()
-{
-	std::vector<MPD::Song> result;
-	for (auto it = begin(); it != end(); ++it)
-		if (it->isSelected())
-			result.push_back(it->value());
-	if (result.empty() && !empty())
-		result.push_back(current()->value());
-	return result;
-}
+private:
+	void getResult();
+	
+	std::wstring m_title;
+	
+	std::shared_ptr<LastFm::Service> m_service;
+	boost::BOOST_THREAD_FUTURE<LastFm::Service::Result> m_worker;
+};
+
+extern Lastfm *myLastfm;
+
+#endif // NCMPCPP_LASTFM_H

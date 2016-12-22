@@ -18,47 +18,50 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
-#include "helpers/song_iterator_maker.h"
-#include "screens/song_info.h"
-#include "utility/functional.h"
+#ifndef NCMPCPP_CLOCK_H
+#define NCMPCPP_CLOCK_H
 
-SongIterator SongMenu::currentS()
-{
-	return makeSongIterator(current());
-}
+#include "config.h"
 
-ConstSongIterator SongMenu::currentS() const
-{
-	return makeConstSongIterator(current());
-}
+#ifdef ENABLE_CLOCK
 
-SongIterator SongMenu::beginS()
-{
-	return makeSongIterator(begin());
-}
+#include "curses/window.h"
+#include "interfaces.h"
+#include "screens/screen.h"
 
-ConstSongIterator SongMenu::beginS() const
+struct Clock: Screen<NC::Window>, Tabbable
 {
-	return makeConstSongIterator(begin());
-}
+	Clock();
+	
+	virtual void resize() override;
+	virtual void switchTo() override;
+	
+	virtual std::wstring title() override;
+	virtual ScreenType type() override { return ScreenType::Clock; }
+	
+	virtual void update() override;
+	virtual void scroll(NC::Scroll) override { }
+	
+	virtual void mouseButtonPressed(MEVENT) override { }
+	
+	virtual bool isLockable() override { return false; }
+	virtual bool isMergable() override { return true; }
+	
+private:
+	NC::Window m_pane;
+	
+	static void Prepare();
+	static void Set(int, int);
+	
+	static short disp[11];
+	static long older[6], next[6], newer[6], mask;
+	
+	static size_t Width;
+	static const size_t Height;
+};
 
-SongIterator SongMenu::endS()
-{
-	return makeSongIterator(end());
-}
+extern Clock *myClock;
 
-ConstSongIterator SongMenu::endS() const
-{
-	return makeConstSongIterator(end());
-}
+#endif // ENABLE_CLOCK
 
-std::vector<MPD::Song> SongMenu::getSelectedSongs()
-{
-	std::vector<MPD::Song> result;
-	for (auto it = begin(); it != end(); ++it)
-		if (it->isSelected())
-			result.push_back(it->value());
-	if (result.empty() && !empty())
-		result.push_back(current()->value());
-	return result;
-}
+#endif // NCMPCPP_CLOCK_H

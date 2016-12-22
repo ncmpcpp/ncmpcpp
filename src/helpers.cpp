@@ -24,7 +24,7 @@
 
 #include "enums.h"
 #include "helpers.h"
-#include "playlist.h"
+#include "screens/playlist.h"
 #include "statusbar.h"
 #include "utility/functional.h"
 

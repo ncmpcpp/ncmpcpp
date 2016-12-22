@@ -2,6 +2,25 @@ bin_PROGRAMS = ncmpcpp
 ncmpcpp_SOURCES = \
 	curses/scrollpad.cpp \
 	curses/window.cpp \
+	screens/browser.cpp \
+	screens/clock.cpp \
+	screens/help.cpp \
+	screens/lastfm.cpp \
+	screens/lyrics.cpp \
+	screens/media_library.cpp \
+	screens/outputs.cpp \
+	screens/playlist.cpp \
+	screens/playlist_editor.cpp \
+	screens/screen.cpp \
+	screens/screen_type.cpp \
+	screens/search_engine.cpp \
+	screens/sel_items_adder.cpp \
+	screens/server_info.cpp \
+	screens/song_info.cpp \
+	screens/sort_playlist.cpp \
+	screens/tag_editor.cpp \
+	screens/tiny_tag_editor.cpp \
+	screens/visualizer.cpp \
 	utility/comparators.cpp \
 	utility/html.cpp \
 	utility/option_parser.cpp \
@@ -10,46 +29,27 @@ ncmpcpp_SOURCES = \
 	utility/wide_string.cpp \
 	actions.cpp \
 	bindings.cpp \
-	browser.cpp \
 	charset.cpp \
-	clock.cpp \
 	configuration.cpp \
 	curl_handle.cpp \
 	display.cpp \
 	enums.cpp \
 	format.cpp \
 	global.cpp \
-	help.cpp \
 	helpers.cpp \
-	lastfm.cpp \
 	lastfm_service.cpp \
-	lyrics.cpp \
 	lyrics_fetcher.cpp \
 	macro_utilities.cpp \
-	media_library.cpp \
 	mpdpp.cpp \
 	mutable_song.cpp \
 	ncmpcpp.cpp \
-	outputs.cpp \
-	playlist.cpp \
-	playlist_editor.cpp \
-	screen.cpp \
-	screen_type.cpp \
-	search_engine.cpp \
-	sel_items_adder.cpp \
-	server_info.cpp \
 	settings.cpp \
 	song.cpp \
-	song_info.cpp \
 	song_list.cpp \
-	sort_playlist.cpp \
 	status.cpp \
 	statusbar.cpp \
-	tag_editor.cpp \
 	tags.cpp \
-	tiny_tag_editor.cpp \
-	title.cpp \
-	visualizer.cpp
+	title.cpp
 
 # set the include path found by configure
 INCLUDES= $(all_includes)
@@ -62,7 +62,25 @@ noinst_HEADERS = \
 	curses/scrollpad.h \
 	curses/strbuffer.h \
 	curses/window.h \
-	helpers/song_iterator_maker.h \
+	screens/browser.h \
+	screens/clock.h \
+	screens/help.h \
+	screens/lastfm.h \
+	screens/lyrics.h \
+	screens/media_library.h \
+	screens/outputs.h \
+	screens/playlist_editor.h \
+	screens/screen.h \
+	screens/screen_switcher.h \
+	screens/screen_type.h \
+	screens/search_engine.h \
+	screens/sel_items_adder.h \
+	screens/server_info.h \
+	screens/song_info.h \
+	screens/sort_playlist.h \
+	screens/tag_editor.h \
+	screens/tiny_tag_editor.h \
+	screens/visualizer.h \
 	utility/comparators.h \
 	utility/const.h \
 	utility/conversion.h \
@@ -75,9 +93,7 @@ noinst_HEADERS = \
 	utility/type_conversions.h \
 	utility/wide_string.h \
 	bindings.h \
-	browser.h \
 	charset.h \
-	clock.h \
 	configuration.h \
 	curl_handle.h \
 	display.h \
@@ -85,36 +101,20 @@ noinst_HEADERS = \
 	format.h \
 	format_impl.h \
 	global.h \
-	help.h \
 	helpers.h \
+	helpers/song_iterator_maker.h \
 	interfaces.h \
-	lastfm.h \
 	lastfm_service.h \
-	lyrics.h \
 	lyrics_fetcher.h \
 	macro_utilities.h \
-	media_library.h \
 	mpdpp.h \
 	mutable_song.h \
-	outputs.h \
-	playlist_editor.h \
 	regex_filter.h \
 	runnable_item.h \
-	screen.h \
-	screen_switcher.h \
-	screen_type.h \
-	search_engine.h \
-	sel_items_adder.h \
-	server_info.h \
 	settings.h \
 	song.h \
-	song_info.h \
 	song_list.h \
-	sort_playlist.h \
 	status.h \
 	statusbar.h \
-	tag_editor.h \
 	tags.h \
-	tiny_tag_editor.h \
-	title.h \
-	visualizer.h
+	title.h

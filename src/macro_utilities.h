@@ -23,7 +23,7 @@
 
 #include <cassert>
 #include "actions.h"
-#include "screen_type.h"
+#include "screens/screen_type.h"
 
 namespace Actions {
 

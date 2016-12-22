@@ -18,47 +18,30 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
-#include "helpers/song_iterator_maker.h"
-#include "screens/song_info.h"
-#include "utility/functional.h"
+#ifndef NCMPCPP_HELP_H
+#define NCMPCPP_HELP_H
 
-SongIterator SongMenu::currentS()
-{
-	return makeSongIterator(current());
-}
+#include "actions.h"
+#include "interfaces.h"
+#include "screens/screen.h"
 
-ConstSongIterator SongMenu::currentS() const
+struct Help: Screen<NC::Scrollpad>, Tabbable
 {
-	return makeConstSongIterator(current());
-}
+	Help();
+	
+	virtual void resize() override;
+	virtual void switchTo() override;
+	
+	virtual std::wstring title() override;
+	virtual ScreenType type() override { return ScreenType::Help; }
+	
+	virtual void update() override { }
+	
+	virtual bool isLockable() override { return true; }
+	virtual bool isMergable() override { return true; }
+};
 
-SongIterator SongMenu::beginS()
-{
-	return makeSongIterator(begin());
-}
+extern Help *myHelp;
 
-ConstSongIterator SongMenu::beginS() const
-{
-	return makeConstSongIterator(begin());
-}
+#endif // NCMPCPP_HELP_H
 
-SongIterator SongMenu::endS()
-{
-	return makeSongIterator(end());
-}
-
-ConstSongIterator SongMenu::endS() const
-{
-	return makeConstSongIterator(end());
-}
-
-std::vector<MPD::Song> SongMenu::getSelectedSongs()
-{
-	std::vector<MPD::Song> result;
-	for (auto it = begin(); it != end(); ++it)
-		if (it->isSelected())
-			result.push_back(it->value());
-	if (result.empty() && !empty())
-		result.push_back(current()->value());
-	return result;
-}

@@ -18,47 +18,44 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
-#include "helpers/song_iterator_maker.h"
-#include "screens/song_info.h"
-#include "utility/functional.h"
+#ifndef NCMPCPP_OUTPUTS_H
+#define NCMPCPP_OUTPUTS_H
 
-SongIterator SongMenu::currentS()
-{
-	return makeSongIterator(current());
-}
+#include "config.h"
 
-ConstSongIterator SongMenu::currentS() const
-{
-	return makeConstSongIterator(current());
-}
+#ifdef ENABLE_OUTPUTS
 
-SongIterator SongMenu::beginS()
-{
-	return makeSongIterator(begin());
-}
+#include "interfaces.h"
+#include "menu.h"
+#include "mpdpp.h"
+#include "screens/screen.h"
 
-ConstSongIterator SongMenu::beginS() const
+struct Outputs: Screen<NC::Menu<MPD::Output>>, Tabbable
 {
-	return makeConstSongIterator(begin());
-}
+	Outputs();
+	
+	// Screen< NC::Menu<MPD::Output> > implementation
+	virtual void switchTo() override;
+	virtual void resize() override;
+	
+	virtual std::wstring title() override;
+	virtual ScreenType type() override { return ScreenType::Outputs; }
+	
+	virtual void update() override { }
+	
+	virtual void mouseButtonPressed(MEVENT me) override;
+	
+	virtual bool isLockable() override { return true; }
+	virtual bool isMergable() override { return true; }
+	
+	// private members
+	void fetchList();
+	void toggleOutput();
+};
 
-SongIterator SongMenu::endS()
-{
-	return makeSongIterator(end());
-}
+extern Outputs *myOutputs;
 
-ConstSongIterator SongMenu::endS() const
-{
-	return makeConstSongIterator(end());
-}
+#endif // ENABLE_OUTPUTS
 
-std::vector<MPD::Song> SongMenu::getSelectedSongs()
-{
-	std::vector<MPD::Song> result;
-	for (auto it = begin(); it != end(); ++it)
-		if (it->isSelected())
-			result.push_back(it->value());
-	if (result.empty() && !empty())
-		result.push_back(current()->value());
-	return result;
-}
+#endif // NCMPCPP_OUTPUTS_H
+

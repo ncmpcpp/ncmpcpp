@@ -18,47 +18,51 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
-#include "helpers/song_iterator_maker.h"
-#include "screens/song_info.h"
-#include "utility/functional.h"
+#ifndef NCMPCPP_TINY_TAG_EDITOR_H
+#define NCMPCPP_TINY_TAG_EDITOR_H
 
-SongIterator SongMenu::currentS()
-{
-	return makeSongIterator(current());
-}
+#include "config.h"
 
-ConstSongIterator SongMenu::currentS() const
-{
-	return makeConstSongIterator(current());
-}
+#ifdef HAVE_TAGLIB_H
 
-SongIterator SongMenu::beginS()
-{
-	return makeSongIterator(begin());
-}
+#include "interfaces.h"
+#include "mutable_song.h"
+#include "screens/screen.h"
 
-ConstSongIterator SongMenu::beginS() const
+struct TinyTagEditor: Screen<NC::Menu<NC::Buffer>>, HasActions
 {
-	return makeConstSongIterator(begin());
-}
+	TinyTagEditor();
+	
+	// Screen< NC::Menu<NC::Buffer> > implementation
+	virtual void resize() override;
+	virtual void switchTo() override;
+	
+	virtual std::wstring title() override;
+	virtual ScreenType type() override { return ScreenType::TinyTagEditor; }
+	
+	virtual void update() override { }
+	
+	virtual void mouseButtonPressed(MEVENT me) override;
+	
+	virtual bool isLockable() override { return false; }
+	virtual bool isMergable() override { return true; }
 
-SongIterator SongMenu::endS()
-{
-	return makeSongIterator(end());
-}
+	// HasActions implementation
+	virtual bool actionRunnable() override;
+	virtual void runAction() override;
 
-ConstSongIterator SongMenu::endS() const
-{
-	return makeConstSongIterator(end());
-}
+	// private members
+	void SetEdited(const MPD::Song &);
+	
+private:
+	bool getTags();
+	MPD::MutableSong itsEdited;
+	BaseScreen *m_previous_screen;
+};
 
-std::vector<MPD::Song> SongMenu::getSelectedSongs()
-{
-	std::vector<MPD::Song> result;
-	for (auto it = begin(); it != end(); ++it)
-		if (it->isSelected())
-			result.push_back(it->value());
-	if (result.empty() && !empty())
-		result.push_back(current()->value());
-	return result;
-}
+extern TinyTagEditor *myTinyTagEditor;
+
+#endif // HAVE_TAGLIB_H
+
+#endif // NCMPCPP_TINY_TAG_EDITOR_H
+

@@ -18,47 +18,43 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
-#include "helpers/song_iterator_maker.h"
-#include "screens/song_info.h"
-#include "utility/functional.h"
+#ifndef NCMPCPP_SERVER_INFO_H
+#define NCMPCPP_SERVER_INFO_H
 
-SongIterator SongMenu::currentS()
-{
-	return makeSongIterator(current());
-}
+#include <boost/date_time/posix_time/posix_time_types.hpp>
 
-ConstSongIterator SongMenu::currentS() const
-{
-	return makeConstSongIterator(current());
-}
+#include "interfaces.h"
+#include "screens/screen.h"
 
-SongIterator SongMenu::beginS()
+struct ServerInfo: Screen<NC::Scrollpad>, Tabbable
 {
-	return makeSongIterator(begin());
-}
+	ServerInfo();
+	
+	// Screen<NC::Scrollpad> implementation
+	virtual void switchTo() override;
+	virtual void resize() override;
+	
+	virtual std::wstring title() override;
+	virtual ScreenType type() override { return ScreenType::ServerInfo; }
+	
+	virtual void update() override;
+	
+	virtual bool isLockable() override { return false; }
+	virtual bool isMergable() override { return false; }
+	
+private:
+	void SetDimensions();
+	
+	boost::posix_time::ptime m_timer;
 
-ConstSongIterator SongMenu::beginS() const
-{
-	return makeConstSongIterator(begin());
-}
+	std::vector<std::string> m_url_handlers;
+	std::vector<std::string> m_tag_types;
+	
+	size_t m_width;
+	size_t m_height;
+};
 
-SongIterator SongMenu::endS()
-{
-	return makeSongIterator(end());
-}
+extern ServerInfo *myServerInfo;
 
-ConstSongIterator SongMenu::endS() const
-{
-	return makeConstSongIterator(end());
-}
+#endif // NCMPCPP_SERVER_INFO_H
 
-std::vector<MPD::Song> SongMenu::getSelectedSongs()
-{
-	std::vector<MPD::Song> result;
-	for (auto it = begin(); it != end(); ++it)
-		if (it->isSelected())
-			result.push_back(it->value());
-	if (result.empty() && !empty())
-		result.push_back(current()->value());
-	return result;
-}

@@ -26,7 +26,7 @@
 #include <string>
 #include "enums.h"
 #include "gcc.h"
-#include "screen.h"
+#include "screens/screen.h"
 #include "song.h"
 
 struct Searchable

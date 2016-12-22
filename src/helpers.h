@@ -23,8 +23,8 @@
 
 #include "interfaces.h"
 #include "mpdpp.h"
-#include "playlist.h"
-#include "screen.h"
+#include "screens/playlist.h"
+#include "screens/screen.h"
 #include "settings.h"
 #include "song_list.h"
 #include "status.h"

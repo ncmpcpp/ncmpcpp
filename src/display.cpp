@@ -21,15 +21,15 @@
 #include <cassert>
 
 #include "curses/menu_impl.h"
-#include "browser.h"
+#include "screens/browser.h"
 #include "charset.h"
 #include "display.h"
 #include "format_impl.h"
 #include "helpers.h"
-#include "song_info.h"
-#include "playlist.h"
+#include "screens/song_info.h"
+#include "screens/playlist.h"
 #include "global.h"
-#include "tag_editor.h"
+#include "screens/tag_editor.h"
 #include "utility/string.h"
 #include "utility/type_conversions.h"
 

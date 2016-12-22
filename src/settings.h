@@ -32,7 +32,7 @@
 #include "enums.h"
 #include "format.h"
 #include "lyrics_fetcher.h"
-#include "screen_type.h"
+#include "screens/screen_type.h"
 
 struct Column
 {

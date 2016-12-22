@@ -25,7 +25,7 @@
 #include "format.h"
 #include "menu.h"
 #include "mutable_song.h"
-#include "search_engine.h"
+#include "screens/search_engine.h"
 #include "song_list.h"
 
 namespace Display {

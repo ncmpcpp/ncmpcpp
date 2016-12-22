@@ -18,47 +18,69 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
-#include "helpers/song_iterator_maker.h"
-#include "screens/song_info.h"
-#include "utility/functional.h"
+#include "screens/lastfm.h"
 
-SongIterator SongMenu::currentS()
+#include "helpers.h"
+#include "charset.h"
+#include "global.h"
+#include "statusbar.h"
+#include "title.h"
+#include "screens/screen_switcher.h"
+
+using Global::MainHeight;
+using Global::MainStartY;
+
+Lastfm *myLastfm;
+
+Lastfm::Lastfm()
+: Screen(NC::Scrollpad(0, MainStartY, COLS, MainHeight, "", Config.main_color, NC::Border()))
+{ }
+
+void Lastfm::resize()
 {
-	return makeSongIterator(current());
+	size_t x_offset, width;
+	getWindowResizeParams(x_offset, width);
+	w.resize(width, MainHeight);
+	w.moveTo(x_offset, MainStartY);
+	hasToBeResized = 0;
 }
 
-ConstSongIterator SongMenu::currentS() const
+std::wstring Lastfm::title()
 {
-	return makeConstSongIterator(current());
+	return m_title;
 }
 
-SongIterator SongMenu::beginS()
+void Lastfm::update()
 {
-	return makeSongIterator(begin());
+	if (m_worker.valid() && m_worker.is_ready())
+		getResult();
 }
 
-ConstSongIterator SongMenu::beginS() const
+void Lastfm::switchTo()
 {
-	return makeConstSongIterator(begin());
+	using Global::myScreen;
+	if (myScreen != this)
+	{
+		SwitchTo::execute(this);
+		drawHeader();
+	}
+	else
+		switchToPreviousScreen();
 }
 
-SongIterator SongMenu::endS()
+void Lastfm::getResult()
 {
-	return makeSongIterator(end());
-}
-
-ConstSongIterator SongMenu::endS() const
-{
-	return makeConstSongIterator(end());
-}
-
-std::vector<MPD::Song> SongMenu::getSelectedSongs()
-{
-	std::vector<MPD::Song> result;
-	for (auto it = begin(); it != end(); ++it)
-		if (it->isSelected())
-			result.push_back(it->value());
-	if (result.empty() && !empty())
-		result.push_back(current()->value());
-	return result;
+	auto result = m_worker.get();
+	if (result.first)
+	{
+		w.clear();
+		w << Charset::utf8ToLocale(result.second);
+		m_service->beautifyOutput(w);
+	}
+	else
+		w << " " << NC::Color::Red << result.second << NC::Color::End;
+	w.flush();
+	w.refresh();
+	// reset m_worker so it's no longer valid
+	m_worker = boost::BOOST_THREAD_FUTURE<LastFm::Service::Result>();
 }

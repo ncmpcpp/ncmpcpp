@@ -18,47 +18,53 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
-#include "helpers/song_iterator_maker.h"
-#include "screens/song_info.h"
-#include "utility/functional.h"
+#ifndef NCMPCPP_SORT_PLAYLIST_H
+#define NCMPCPP_SORT_PLAYLIST_H
 
-SongIterator SongMenu::currentS()
-{
-	return makeSongIterator(current());
-}
+#include "runnable_item.h"
+#include "interfaces.h"
+#include "screens/screen.h"
+#include "song.h"
 
-ConstSongIterator SongMenu::currentS() const
+struct SortPlaylistDialog
+	: Screen<NC::Menu<RunnableItem<std::pair<std::string, MPD::Song::GetFunction>, void()>>>, HasActions, Tabbable
 {
-	return makeConstSongIterator(current());
-}
+	typedef SortPlaylistDialog Self;
+	
+	SortPlaylistDialog();
+	
+	virtual void switchTo() override;
+	virtual void resize() override;
+	
+	virtual std::wstring title() override;
+	virtual ScreenType type() override { return ScreenType::SortPlaylistDialog; }
+	
+	virtual void update() override { }
+	
+	virtual void mouseButtonPressed(MEVENT me) override;
+	
+	virtual bool isLockable() override { return false; }
+	virtual bool isMergable() override { return false; }
 
-SongIterator SongMenu::beginS()
-{
-	return makeSongIterator(begin());
-}
+	// HasActions implementation
+	virtual bool actionRunnable() override;
+	virtual void runAction() override;
 
-ConstSongIterator SongMenu::beginS() const
-{
-	return makeConstSongIterator(begin());
-}
+	// private members
+	void moveSortOrderUp();
+	void moveSortOrderDown();
+	
+private:
+	void moveSortOrderHint() const;
+	void sort() const;
+	void cancel() const;
+	
+	void setDimensions();
+	
+	size_t m_height;
+	size_t m_width;
+};
 
-SongIterator SongMenu::endS()
-{
-	return makeSongIterator(end());
-}
+extern SortPlaylistDialog *mySortPlaylistDialog;
 
-ConstSongIterator SongMenu::endS() const
-{
-	return makeConstSongIterator(end());
-}
-
-std::vector<MPD::Song> SongMenu::getSelectedSongs()
-{
-	std::vector<MPD::Song> result;
-	for (auto it = begin(); it != end(); ++it)
-		if (it->isSelected())
-			result.push_back(it->value());
-	if (result.empty() && !empty())
-		result.push_back(current()->value());
-	return result;
-}
+#endif // NCMPCPP_SORT_PLAYLIST_H
