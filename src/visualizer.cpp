@@ -40,6 +40,8 @@
 #include "status.h"
 #include "enums.h"
 
+using Samples = std::vector<int16_t>;
+
 using Global::MainStartY;
 using Global::MainHeight;
 
@@ -108,8 +110,9 @@ void Visualizer::update()
 
 	// PCM in format 44100:16:1 (for mono visualization) and
 	// 44100:16:2 (for stereo visualization) is supported.
-	int16_t buf[m_samples];
-	ssize_t data = read(m_fifo, buf, sizeof(int16_t) * m_samples);
+	Samples samples(m_samples);
+	ssize_t data = read(m_fifo, samples.data(),
+	                    samples.size() * sizeof(Samples::value_type));
 	if (data < 0) // no data available in fifo
 		return;
 
@@ -149,24 +152,26 @@ void Visualizer::update()
 
 	const ssize_t samples_read = data/sizeof(int16_t);
 	m_auto_scale_multiplier += 1.0/fps;
-	std::for_each(buf, buf+samples_read, [this](int16_t &sample) {
-			double scale = std::numeric_limits<int16_t>::min();
-			scale /= sample;
-			scale = fabs(scale);
-			if (scale < m_auto_scale_multiplier)
-				m_auto_scale_multiplier = scale;
-		});
-	std::for_each(buf, buf+samples_read, [this](int16_t &sample) {
-			int32_t tmp = sample;
-			if (m_auto_scale_multiplier <= 50.0) // limit the auto scale
-				tmp *= m_auto_scale_multiplier;
-			if (tmp < std::numeric_limits<int16_t>::min())
-				sample = std::numeric_limits<int16_t>::min();
-			else if (tmp > std::numeric_limits<int16_t>::max())
-				sample = std::numeric_limits<int16_t>::max();
-			else
-				sample = tmp;
-	});
+	for (auto &sample : samples)
+	{
+		double scale = std::numeric_limits<int16_t>::min();
+		scale /= sample;
+		scale = fabs(scale);
+		if (scale < m_auto_scale_multiplier)
+			m_auto_scale_multiplier = scale;
+	}
+	for (auto &sample : samples)
+	{
+		int32_t tmp = sample;
+		if (m_auto_scale_multiplier <= 50.0) // limit the auto scale
+			tmp *= m_auto_scale_multiplier;
+		if (tmp < std::numeric_limits<int16_t>::min())
+			sample = std::numeric_limits<int16_t>::min();
+		else if (tmp > std::numeric_limits<int16_t>::max())
+			sample = std::numeric_limits<int16_t>::max();
+		else
+			sample = tmp;
+	}
 
 	w.clear();
 	if (Config.visualizer_in_stereo)
@@ -175,8 +180,8 @@ void Visualizer::update()
 		int16_t buf_left[chan_samples], buf_right[chan_samples];
 		for (ssize_t i = 0, j = 0; i < samples_read; i += 2, ++j)
 		{
-			buf_left[j] = buf[i];
-			buf_right[j] = buf[i+1];
+			buf_left[j] = samples[i];
+			buf_right[j] = samples[i+1];
 		}
 		size_t half_height = w.getHeight()/2;
 
@@ -184,7 +189,7 @@ void Visualizer::update()
 	}
 	else
 	{
-		(this->*draw)(buf, samples_read, 0, w.getHeight());
+		(this->*draw)(samples.data(), samples_read, 0, w.getHeight());
 	}
 	w.refresh();
 }
