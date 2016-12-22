@@ -195,7 +195,6 @@ enum class TermManip { ClearToEOL };
 
 /// Format flags used by NCurses
 enum class Format {
-	None,
 	Bold, NoBold,
 	Underline, NoUnderline,
 	Reverse, NoReverse,

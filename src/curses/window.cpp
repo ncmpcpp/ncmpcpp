@@ -1267,40 +1267,43 @@ Window &Window::operator<<(const Color &c)
 
 Window &Window::operator<<(Format format)
 {
+	auto increase_flag = [](Window &w, int &flag, auto set) {
+		++flag;
+		(w.*set)(true);
+	};
+	auto decrease_flag = [](Window &w, int &flag, auto set) {
+		if (flag > 0)
+		{
+			--flag;
+			if (flag == 0)
+				(w.*set)(false);
+		}
+	};
 	switch (format)
 	{
-		case Format::None:
-			bold((m_bold_counter = 0));
-			reverse((m_reverse_counter = 0));
-			altCharset((m_alt_charset_counter = 0));
-			break;
 		case Format::Bold:
-			bold(++m_bold_counter);
+			increase_flag(*this, m_bold_counter, &Window::bold);
 			break;
 		case Format::NoBold:
-			if (--m_bold_counter <= 0)
-				bold((m_bold_counter = 0));
+			decrease_flag(*this, m_bold_counter, &Window::bold);
 			break;
 		case Format::Underline:
-			underline(++m_underline_counter);
+			increase_flag(*this, m_underline_counter, &Window::underline);
 			break;
 		case Format::NoUnderline:
-			if (--m_underline_counter <= 0)
-				underline((m_underline_counter = 0));
+			decrease_flag(*this, m_underline_counter, &Window::underline);
 			break;
 		case Format::Reverse:
-			reverse(++m_reverse_counter);
+			increase_flag(*this, m_reverse_counter, &Window::reverse);
 			break;
 		case Format::NoReverse:
-			if (--m_reverse_counter <= 0)
-				reverse((m_reverse_counter = 0));
+			decrease_flag(*this, m_reverse_counter, &Window::reverse);
 			break;
 		case Format::AltCharset:
-			altCharset(++m_alt_charset_counter);
+			increase_flag(*this, m_alt_charset_counter, &Window::altCharset);
 			break;
 		case Format::NoAltCharset:
-			if (--m_alt_charset_counter <= 0)
-				altCharset((m_alt_charset_counter = 0));
+			decrease_flag(*this, m_alt_charset_counter, &Window::altCharset);
 			break;
 	}
 	return *this;
