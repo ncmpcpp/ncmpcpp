@@ -187,6 +187,10 @@ int add_base()
 }
 
 }
+
+int color_pair_counter;
+std::vector<int> color_pair_map;
+
 }
 
 namespace NC {
@@ -195,42 +199,56 @@ const short Color::transparent = -1;
 const short Color::previous = -2;
 
 Color Color::Default(0, 0, true, false);
-Color Color::Black(COLOR_BLACK, Color::transparent);
-Color Color::Red(COLOR_RED, Color::transparent);
-Color Color::Green(COLOR_GREEN, Color::transparent);
-Color Color::Yellow(COLOR_YELLOW, Color::transparent);
-Color Color::Blue(COLOR_BLUE, Color::transparent);
-Color Color::Magenta(COLOR_MAGENTA, Color::transparent);
-Color Color::Cyan(COLOR_CYAN, Color::transparent);
-Color Color::White(COLOR_WHITE, Color::transparent);
+Color Color::Black(COLOR_BLACK, Color::previous);
+Color Color::Red(COLOR_RED, Color::previous);
+Color Color::Green(COLOR_GREEN, Color::previous);
+Color Color::Yellow(COLOR_YELLOW, Color::previous);
+Color Color::Blue(COLOR_BLUE, Color::previous);
+Color Color::Magenta(COLOR_MAGENTA, Color::previous);
+Color Color::Cyan(COLOR_CYAN, Color::previous);
+Color Color::White(COLOR_WHITE, Color::previous);
 Color Color::End(0, 0, false, true);
 
 int Color::pairNumber() const
 {
-	int result;
-	if (isDefault())
-		result = 0;
-	else if (previousBackground())
-		throw std::logic_error("color depends on the previous background value");
-	else if (isEnd())
+	int result = 0;
+	if (isEnd())
 		throw std::logic_error("'end' doesn't have a corresponding pair number");
-	else
+	else if (!isDefault())
 	{
-		// colors start with 0, but pairs start with 1. additionally
-		// first pairs are for transparent background, which has a
-		// value of -1, so we need to add 1 to both foreground and
-		// background value.
-		result = background() + 1;
-		result *= COLORS;
-		result += foreground() + 1;
+		if (!previousBackground())
+			result = background() + 1;
+		result *= 256;
+		result += foreground();
+
+		assert(result < int(color_pair_map.size()));
+
+		// NCurses allows for a limited number of color pairs to be registered, so
+		// in order to be able to support all the combinations we want to, we need
+		// to dynamically register only pairs of colors we're actually using.
+		if (!color_pair_map[result])
+		{
+			// Check if there are any unused pairs left and either register the one
+			// that was requested or return a default one if there is no space left.
+			if (color_pair_counter >= COLOR_PAIRS)
+				result = 0;
+			else
+			{
+				init_pair(color_pair_counter, foreground(), background());
+				color_pair_map[result] = color_pair_counter;
+				++color_pair_counter;
+			}
+		}
+		result = color_pair_map[result];
 	}
 	return result;
 }
 
 std::istream &operator>>(std::istream &is, Color &c)
 {
+	const short invalid_color_value = -1337;
 	auto get_single_color = [](const std::string &s, bool background) {
-		short result = -1;
+		short result = invalid_color_value;
 		if (s == "black")
 			result = COLOR_BLACK;
 		else if (s == "red")
@@ -247,13 +265,15 @@ std::istream &operator>>(std::istream &is, Color &c)
 			result = COLOR_CYAN;
 		else if (s == "white")
 			result = COLOR_WHITE;
+		else if (background && s == "transparent")
+			result = NC::Color::transparent;
 		else if (background && s == "previous")
 			result = NC::Color::previous;
 		else if (std::all_of(s.begin(), s.end(), isdigit))
 		{
 			result = atoi(s.c_str());
-			if (result < 1 || result > 256)
-				result = -1;
+			if (result < (background ? 0 : 1) || result > 256)
+				result = invalid_color_value;
 			else
 				--result;
 		}
@@ -276,7 +296,7 @@ std::istream &operator>>(std::istream &is, Color &c)
 	else
 	{
 		short fg = get_single_color(sc, false);
-		if (fg == -1)
+		if (fg == invalid_color_value)
 			is.setstate(std::ios::failbit);
 		// Check if there is background color
 		else if (!is.eof() && is.peek() == '_')
@@ -284,13 +304,13 @@ std::istream &operator>>(std::istream &is, Color &c)
 			is.get();
 			sc = get_color(is);
 			short bg = get_single_color(sc, true);
-			if (bg == -1)
+			if (bg == invalid_color_value)
 				is.setstate(std::ios::failbit);
 			else
 				c = Color(fg, bg);
 		}
 		else
-			c = Color(fg, NC::Color::transparent);
+			c = Color(fg, NC::Color::previous);
 	}
 	return is;
 }
@@ -365,11 +385,16 @@ void initScreen(bool enable_colors, bool enable_mouse)
 	{
 		start_color();
 		use_default_colors();
-		int npair = 1;
-		for (int bg = -1; bg < COLORS; ++bg)
+		color_pair_map.resize(256 * 256, 0);
+
+		// Predefine pairs for colors with transparent background, all the other
+		// ones will be dynamically registered in Color::pairNumber when they're
+		// used.
+		color_pair_counter = 1;
+		for (int fg = 0; fg < COLORS; ++fg, ++color_pair_counter)
 		{
-			for (int fg = 0; npair < COLOR_PAIRS && fg < COLORS; ++fg, ++npair)
-				init_pair(npair, fg, bg);
+			init_pair(color_pair_counter, fg, -1);
+			color_pair_map[fg] = color_pair_counter;
 		}
 	}
 	raw();
@@ -418,36 +443,29 @@ void destroyScreen()
 	endwin();
 }
 
-Window::Window(size_t startx,
-		size_t starty,
-		size_t width,
-		size_t height,
-		std::string title,
-		Color color,
-		Border border)
-		: m_window(nullptr),
-		m_start_x(startx),
-		m_start_y(starty),
-		m_width(width),
-		m_height(height),
-		m_window_timeout(-1),
-		m_color(color),
-		m_base_color(color),
-		m_border(std::move(border)),
-		m_prompt_hook(0),
-		m_title(std::move(title)),
-		m_escape_terminal_sequences(true),
-		m_bold_counter(0),
-		m_underline_counter(0),
-		m_reverse_counter(0),
-		m_alt_charset_counter(0)
+Window::Window(size_t startx, size_t starty, size_t width, size_t height,
+               std::string title, Color color, Border border)
+	: m_window(nullptr),
+	  m_start_x(startx),
+	  m_start_y(starty),
+	  m_width(width),
+	  m_height(height),
+	  m_window_timeout(-1),
+	  m_border(std::move(border)),
+	  m_prompt_hook(0),
+	  m_title(std::move(title)),
+	  m_escape_terminal_sequences(true),
+	  m_bold_counter(0),
+	  m_underline_counter(0),
+	  m_reverse_counter(0),
+	  m_alt_charset_counter(0)
 {
 	if (m_start_x > size_t(COLS)
-	||  m_start_y > size_t(LINES)
-	||  m_width+m_start_x > size_t(COLS)
-	||  m_height+m_start_y > size_t(LINES))
+	    ||  m_start_y > size_t(LINES)
+	    ||  m_width+m_start_x > size_t(COLS)
+	    ||  m_height+m_start_y > size_t(LINES))
 		throw std::logic_error("constructed window doesn't fit into the terminal");
-	
+
 	if (m_border)
 	{
 		++m_start_x;
@@ -462,8 +480,9 @@ Window::Window(size_t startx,
 	}
 	
 	m_window = newpad(m_height, m_width);
-	
-	setColor(m_color);
+
+	setBaseColor(color);
+	setColor(m_base_color);
 }
 
 Window::Window(const Window &rhs)
@@ -548,8 +567,7 @@ void Window::setColor(Color c)
 		c = m_base_color;
 	if (c != Color::Default)
 	{
-		if (c.previousBackground())
-			c = Color(c.foreground(), m_color.background());
+		assert(!c.previousBackground());
 		wcolor_set(m_window, c.pairNumber(), nullptr);
 	}
 	else
@@ -557,9 +575,12 @@ void Window::setColor(Color c)
 	m_color = std::move(c);
 }
 
-void Window::setBaseColor(Color c)
+void Window::setBaseColor(const Color &color)
 {
-	m_base_color = std::move(c);
+	if (color.previousBackground())
+		m_base_color = Color(color.foreground(), Color::transparent);
+	else
+		m_base_color = color;
 }
 
 void Window::setBorder(Border border)
@@ -1290,8 +1311,20 @@ Window &Window::operator<<(const Color &c)
 	}
 	else
 	{
-		setColor(c);
-		m_color_stack.push(c);
+		if (c.previousBackground())
+		{
+			short background = m_color.isDefault()
+				? Color::transparent
+				: m_color.background();
+			Color cc = Color(c.foreground(), background);
+			setColor(cc);
+			m_color_stack.push(cc);
+		}
+		else
+		{
+			setColor(c);
+			m_color_stack.push(c);
+		}
 	}
 	return *this;
 }

@@ -217,11 +217,11 @@ void Menu<ItemT>::refresh()
 			*this << Format::Reverse;
 			*this << m_highlight_color;
 		}
-		mvwhline(m_window, line, 0, NC::Key::Space, m_width);
 		if ((*m_items)[m_drawn_position].isSelected())
 			*this << m_selected_prefix;
 		if (m_item_displayer)
 			m_item_displayer(*this);
+		*this << NC::TermManip::ClearToEOL;
 		if ((*m_items)[m_drawn_position].isSelected())
 			*this << m_selected_suffix;
 		if (m_highlight_enabled && m_drawn_position == m_highlight)

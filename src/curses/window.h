@@ -354,7 +354,7 @@ struct Window
 	/// Sets window's base color
 	/// @param fg foregound base color
 	/// @param bg background base color
-	void setBaseColor(Color c);
+	void setBaseColor(const Color &color);
 	
 	/// Sets window's border
 	/// @param border new window's border

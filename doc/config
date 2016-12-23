@@ -503,11 +503,10 @@
 ## progressbar_color, progressbar_elapsed_color,
 ## alternative_ui_separator_color.
 ##
-## Note: due to technical limitations of ncurses, if 256 colors
-## are used, it is possible to either use only the colors with
-## default background color, or all pairs from 1_1 up to 254_127,
-## depending on the ncurses version used.
-##
+## Note: due to technical limitations of older ncurses
+## versionw, if 256 colors are used there is a possibility
+## that you'll be able to use only colors with transparent
+## background.
 #
 #colors_enabled = yes
 #
