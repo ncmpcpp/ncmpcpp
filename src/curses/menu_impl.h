@@ -219,9 +219,9 @@ void Menu<ItemT>::refresh()
 		}
 		if ((*m_items)[m_drawn_position].isSelected())
 			*this << m_selected_prefix;
+		*this << NC::TermManip::ClearToEOL;
 		if (m_item_displayer)
 			m_item_displayer(*this);
-		*this << NC::TermManip::ClearToEOL;
 		if ((*m_items)[m_drawn_position].isSelected())
 			*this << m_selected_suffix;
 		if (m_highlight_enabled && m_drawn_position == m_highlight)
