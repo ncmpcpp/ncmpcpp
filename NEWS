@@ -15,6 +15,7 @@ ncmpcpp-0.8 (????-??-??)
 * Configuration variable 'visualizer_sample_multiplier' was deprecated and will be removed in 0.9.
 * Wide character version of ncurses is now required.
 * Added 'statusbar_time_color' and 'player_state_color' configuration variables for further customization of statusbar.
+* Format information can now be attached to selected color variables in the configuration file. Because of that variable 'progressbar_boldness' is now deprecated in favor of extended 'progressbar_color' and 'progressbar_elapsed_color' (for more information see example configuration file).
 
 ncmpcpp-0.7.7 (2016-10-31)
 * Fixed compilation on 32bit platforms.
