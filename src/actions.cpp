@@ -2934,7 +2934,6 @@ void seek()
 		else
 			break;
 		
-		*wFooter << NC::Format::Bold;
 		std::string tracklength;
 		// FIXME: merge this with the code in status.cpp
 		switch (Config.design)
@@ -2951,7 +2950,10 @@ void seek()
 				tracklength += "/";
 				tracklength += MPD::Song::ShowTime(Status::State::totalTime());
 				tracklength += "]";
-				*wFooter << NC::XY(wFooter->getWidth()-tracklength.length(), 1) << tracklength;
+				*wFooter << NC::XY(wFooter->getWidth()-tracklength.length(), 1)
+				         << Config.statusbar_time_color
+				         << tracklength
+				         << NC::FormattedColor::End(Config.statusbar_time_color);
 				break;
 			case Design::Alternative:
 				if (Config.display_remaining_time)
@@ -2963,11 +2965,14 @@ void seek()
 					tracklength = MPD::Song::ShowTime(songpos);
 				tracklength += "/";
 				tracklength += MPD::Song::ShowTime(Status::State::totalTime());
-				*wHeader << NC::XY(0, 0) << tracklength << " ";
+				*wHeader << NC::XY(0, 0)
+				         << Config.statusbar_time_color
+				         << tracklength
+				         << NC::FormattedColor::End(Config.statusbar_time_color)
+				         << " ";
 				wHeader->refresh();
 				break;
 		}
-		*wFooter << NC::Format::NoBold;
 		Progressbar::draw(songpos, Status::State::totalTime());
 		wFooter->refresh();
 	}

@@ -113,6 +113,8 @@ struct Configuration
 	NC::FormattedColor state_flags_color;
 	NC::FormattedColor progressbar_color;
 	NC::FormattedColor progressbar_elapsed_color;
+	NC::FormattedColor player_state_color;
+	NC::FormattedColor statusbar_time_color;
 	NC::FormattedColor alternative_ui_separator_color;
 
 	std::vector<NC::FormattedColor> visualizer_colors;

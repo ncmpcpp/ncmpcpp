@@ -507,7 +507,9 @@ bool Configuration::read(const std::vector<std::string> &config_paths, bool igno
 	p.add("main_window_highlight_color", &main_highlight_color, "yellow");
 	p.add("progressbar_color", &progressbar_color, "black:b");
 	p.add("progressbar_elapsed_color", &progressbar_elapsed_color, "green:b");
+	p.add("player_state_color", &player_state_color, "default:b");
 	p.add("statusbar_color", &statusbar_color, "default");
+	p.add("statusbar_time_color", &statusbar_time_color, "default:b");
 	p.add("alternative_ui_separator_color", &alternative_ui_separator_color, "black:b");
 	p.add("active_column_color", &active_column_color, "red");
 	p.add("window_border_color", &window_border, "green", verbose_lexical_cast<NC::Color>);

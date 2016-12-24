@@ -596,7 +596,8 @@ void Status::Changes::elapsedTime(bool update_elapsed)
 	{
 		// MPD is not playing, clear statusbar and exit.
 		if (Statusbar::isUnlocked() && Config.statusbar_visibility)
-			*wFooter << NC::XY(0, 1) << NC::TermManip::ClearToEOL;
+			*wFooter << NC::XY(0, 1)
+			         << NC::TermManip::ClearToEOL;
 		return;
 	}
 
@@ -640,9 +641,19 @@ void Status::Changes::elapsedTime(bool update_elapsed)
 				tracklength += "]";
 				NC::WBuffer np_song;
 				Format::print(Config.song_status_wformat, np_song, &np);
-				*wFooter << NC::XY(0, 1) << NC::TermManip::ClearToEOL << NC::Format::Bold << ps << ' ' << NC::Format::NoBold;
-				writeCyclicBuffer(np_song, *wFooter, playing_song_scroll_begin, wFooter->getWidth()-ps.length()-tracklength.length()-2, L" ** ");
-				*wFooter << NC::Format::Bold << NC::XY(wFooter->getWidth()-tracklength.length(), 1) << tracklength << NC::Format::NoBold;
+				*wFooter << NC::XY(0, 1)
+				         << NC::TermManip::ClearToEOL
+				         << Config.player_state_color
+				         << ps
+				         << NC::FormattedColor::End(Config.player_state_color)
+				         << " ";
+				writeCyclicBuffer(
+					np_song, *wFooter, playing_song_scroll_begin,
+					wFooter->getWidth()-ps.length()-tracklength.length()-2, L" ** ");
+				*wFooter << NC::XY(wFooter->getWidth()-tracklength.length(), 1)
+				         << Config.statusbar_time_color
+				         << tracklength
+				         << NC::FormattedColor::End(Config.statusbar_time_color);
 			}
 			break;
 		case Design::Alternative:
@@ -671,21 +682,36 @@ void Status::Changes::elapsedTime(bool update_elapsed)
 			Format::print(Config.new_header_second_line, second, &np);
 
 			size_t first_len = wideLength(first.str());
-			size_t first_margin = (std::max(tracklength.length()+1, VolumeState.length()))*2;
-			size_t first_start = first_len < COLS-first_margin ? (COLS-first_len)/2 : tracklength.length()+1;
-
+			size_t first_margin = std::max(tracklength.length()+1, VolumeState.length())*2;
+			size_t first_start = first_len < COLS-first_margin
+			                                 ? (COLS-first_len)/2
+			                                 : tracklength.length()+1;
 			size_t second_len = wideLength(second.str());
 			size_t second_margin = (std::max(ps.length(), size_t(8))+1)*2;
-			size_t second_start = second_len < COLS-second_margin ? (COLS-second_len)/2 : ps.length()+1;
-
+			size_t second_start = second_len < COLS-second_margin
+			                                   ? (COLS-second_len)/2
+			                                   : ps.length()+1;
 			if (!Global::SeekingInProgress)
-				*wHeader << NC::XY(0, 0) << NC::TermManip::ClearToEOL << tracklength;
-			*wHeader << NC::XY(first_start, 0);
-			writeCyclicBuffer(first, *wHeader, first_line_scroll_begin, COLS-tracklength.length()-VolumeState.length()-1, L" ** ");
+				*wHeader << NC::XY(0, 0)
+				         << NC::TermManip::ClearToEOL
+				         << Config.statusbar_time_color
+				         << tracklength
+				         << NC::FormattedColor::End(Config.statusbar_time_color);
 
-			*wHeader << NC::XY(0, 1) << NC::TermManip::ClearToEOL << NC::Format::Bold << ps << NC::Format::NoBold;
-			*wHeader << NC::XY(second_start, 1);
-			writeCyclicBuffer(second, *wHeader, second_line_scroll_begin, COLS-ps.length()-8-2, L" ** ");
+			*wHeader << NC::XY(first_start, 0);
+
+			writeCyclicBuffer(first, *wHeader, first_line_scroll_begin,
+			                  COLS-tracklength.length()-VolumeState.length()-1, L" ** ");
+
+			*wHeader << NC::XY(0, 1)
+			         << NC::TermManip::ClearToEOL
+			         << Config.player_state_color
+			         << ps
+			         << NC::FormattedColor::End(Config.player_state_color)
+			         << NC::XY(second_start, 1);
+
+			writeCyclicBuffer(second, *wHeader, second_line_scroll_begin,
+			                  COLS-ps.length()-8-2, L" ** ");
 
 			*wHeader << NC::XY(wHeader->getWidth()-VolumeState.length(), 0)
 			         << Config.volume_color

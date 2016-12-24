@@ -501,6 +501,7 @@
 ## visualizer_color, color1, color2, empty_tag_color,
 ## volume_color, state_line_color, state_flags_color,
 ## progressbar_color, progressbar_elapsed_color,
+## player_state_color, statusbar_time_color,
 ## alternative_ui_separator_color.
 ##
 ## Note: due to technical limitations of older ncurses
@@ -533,6 +534,10 @@
 #progressbar_elapsed_color = green:b
 #
 #statusbar_color = default
+#
+#statusbar_time_color = default:b
+#
+#player_state_color = default:b
 #
 #alternative_ui_separator_color = black:b
 #
