@@ -33,7 +33,8 @@ using Global::MainStartY;
 Lastfm *myLastfm;
 
 Lastfm::Lastfm()
-: Screen(NC::Scrollpad(0, MainStartY, COLS, MainHeight, "", Config.main_color, NC::Border()))
+	: Screen(NC::Scrollpad(0, MainStartY, COLS, MainHeight, "", Config.main_color, NC::Border()))
+	, m_refresh_window(false)
 { }
 
 void Lastfm::resize()
@@ -47,13 +48,36 @@ void Lastfm::resize()
 
 std::wstring Lastfm::title()
 {
-	return m_title;
+	if (m_title.empty())
+		return L"Last.fm";
+	else
+		return m_title;
 }
 
 void Lastfm::update()
 {
 	if (m_worker.valid() && m_worker.is_ready())
-		getResult();
+	{
+		auto result = m_worker.get();
+		if (result.first)
+		{
+			w.clear();
+			w << Charset::utf8ToLocale(result.second);
+			m_service->beautifyOutput(w);
+		}
+		else
+			w << " " << NC::Color::Red << result.second << NC::Color::End;
+		// reset m_worker so it's no longer valid
+		m_worker = boost::BOOST_THREAD_FUTURE<LastFm::Service::Result>();
+		m_refresh_window = true;
+	}
+
+	if (m_refresh_window)
+	{
+		m_refresh_window = false;
+		w.flush();
+		w.refresh();
+	}
 }
 
 void Lastfm::switchTo()
@@ -66,21 +90,4 @@ void Lastfm::switchTo()
 	}
 	else
 		switchToPreviousScreen();
-}
-
-void Lastfm::getResult()
-{
-	auto result = m_worker.get();
-	if (result.first)
-	{
-		w.clear();
-		w << Charset::utf8ToLocale(result.second);
-		m_service->beautifyOutput(w);
-	}
-	else
-		w << " " << NC::Color::Red << result.second << NC::Color::End;
-	w.flush();
-	w.refresh();
-	// reset m_worker so it's no longer valid
-	m_worker = boost::BOOST_THREAD_FUTURE<LastFm::Service::Result>();
 }

@@ -36,7 +36,7 @@ struct Service
 	typedef std::pair<bool, std::string> Result;
 	
 	Service(Arguments args) : m_arguments(args) { }
-	
+
 	virtual const char *name() = 0;
 	virtual Result fetch();
 	

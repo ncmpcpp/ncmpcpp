@@ -123,6 +123,10 @@ ScreenType stringtoStartupScreenType(const std::string &s)
 	else if (s == "visualizer")
 		result = ScreenType::Visualizer;
 #	endif // ENABLE_VISUALIZER
+	else if (s == "lyrics")
+		result = ScreenType::Lyrics;
+	else if (s == "last_fm")
+		result = ScreenType::Lastfm;
 	return result;
 }
 

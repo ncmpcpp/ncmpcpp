@@ -392,8 +392,9 @@
 ## - "previous" - switch between the current and previous screen.
 ## - "screen1,...,screenN" - switch between given sequence of screens.
 ##
-## Screens available for use: help, playlist, browser, search_engine,
-## media_library, playlist_editor, tag_editor, outputs, visualizer, clock.
+## Screens available for use: help, playlist, browser,
+## search_engine, media_library, playlist_editor, tag_editor,
+## outputs, visualizer, clock, lyrics, last_fm.
 ##
 #screen_switcher_mode = playlist, browser
 #

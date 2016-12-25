@@ -43,7 +43,7 @@ struct Lastfm: Screen<NC::Scrollpad>, Tabbable
 	
 	virtual void update() override;
 	
-	virtual bool isLockable() override { return false; }
+	virtual bool isLockable() override { return true; }
 	virtual bool isMergable() override { return true; }
 	
 	template <typename ServiceT>
@@ -61,14 +61,13 @@ struct Lastfm: Screen<NC::Scrollpad>, Tabbable
 
 		w.clear();
 		w << "Fetching information...";
-		w.flush();
+		m_refresh_window = true;
 		m_title = ToWString(m_service->name());
 	}
 
 private:
-	void getResult();
-	
 	std::wstring m_title;
+	bool m_refresh_window;
 	
 	std::shared_ptr<LastFm::Service> m_service;
 	boost::BOOST_THREAD_FUTURE<LastFm::Service::Result> m_worker;

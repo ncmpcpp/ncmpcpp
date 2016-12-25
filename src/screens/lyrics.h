@@ -46,7 +46,7 @@ struct Lyrics: Screen<NC::Scrollpad>, Tabbable
 	
 	virtual void update() override;
 	
-	virtual bool isLockable() override { return false; }
+	virtual bool isLockable() override { return true; }
 	virtual bool isMergable() override { return true; }
 
 	// other members

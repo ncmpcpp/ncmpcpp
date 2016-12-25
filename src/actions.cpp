@@ -97,6 +97,22 @@ bool findSelectedRangeAndPrintInfoIfNot(Iterator &first, Iterator &last)
 	return success;
 }
 
+template <typename Iterator>
+Iterator nextScreenTypeInSequence(Iterator first, Iterator last, ScreenType type)
+{
+	auto it = std::find(first, last, type);
+	if (it == last)
+		return first;
+	else
+	{
+		++it;
+		if (it == last)
+			return first;
+		else
+			return it;
+	}
+}
+
 }
 
 namespace Actions {
@@ -2393,7 +2409,8 @@ void ShowArtistInfo::run()
 	if (!artist.empty())
 	{
 		myLastfm->queueJob(new LastFm::ArtistInfo(artist, Config.lastfm_preferred_language));
-		myLastfm->switchTo();
+		if (!isVisible(myLastfm))
+			myLastfm->switchTo();
 	}
 }
 
@@ -2415,7 +2432,8 @@ void ShowLyrics::run()
 {
 	if (m_song != nullptr)
 		myLyrics->fetch(*m_song);
-	myLyrics->switchTo();
+	if (myScreen == myLyrics || !isVisible(myLyrics))
+		myLyrics->switchTo();
 }
 
 void Quit::run()
@@ -2432,12 +2450,11 @@ void NextScreen::run()
 	}
 	else if (!Config.screen_sequence.empty())
 	{
-		const auto &seq = Config.screen_sequence;
-		auto screen_type = std::find(seq.begin(), seq.end(), myScreen->type());
-		if (++screen_type == seq.end())
-			toScreen(seq.front())->switchTo();
-		else
-			toScreen(*screen_type)->switchTo();
+		auto screen = nextScreenTypeInSequence(
+			Config.screen_sequence.begin(),
+			Config.screen_sequence.end(),
+			myScreen->type());
+		toScreen(*screen)->switchTo();
 	}
 }
 
@@ -2450,12 +2467,11 @@ void PreviousScreen::run()
 	}
 	else if (!Config.screen_sequence.empty())
 	{
-		const auto &seq = Config.screen_sequence;
-		auto screen_type = std::find(seq.begin(), seq.end(), myScreen->type());
-		if (screen_type == seq.begin())
-			toScreen(seq.back())->switchTo();
-		else
-			toScreen(*--screen_type)->switchTo();
+		auto screen = nextScreenTypeInSequence(
+			Config.screen_sequence.rbegin(),
+			Config.screen_sequence.rend(),
+			myScreen->type());
+		toScreen(*screen)->switchTo();
 	}
 }
 
