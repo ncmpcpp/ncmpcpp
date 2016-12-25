@@ -144,9 +144,22 @@ void showSongsInColumns(NC::Menu<T> &menu, const MPD::Song &s, const SongList &l
 	bool separate_albums, is_now_playing, is_selected, discard_colors;
 	setProperties(menu, s, list, separate_albums, is_now_playing, is_selected, discard_colors);
 
+	int menu_width = menu.getWidth();
+	if (is_now_playing)
+	{
+		menu_width -= Config.now_playing_prefix_length;
+		menu_width -= Config.now_playing_suffix_length;
+	}
+	if (is_selected)
+	{
+		menu_width -= Config.selected_item_prefix_length;
+		menu_width -= Config.selected_item_suffix_length;
+	}
+
 	int width;
 	int y = menu.getY();
-	int remained_width = menu.getWidth();
+	int remained_width = menu_width;
+
 	std::vector<Column>::const_iterator it, last = Config.columns.end() - 1;
 	for (it = Config.columns.begin(); it != Config.columns.end(); ++it)
 	{
@@ -157,7 +170,7 @@ void showSongsInColumns(NC::Menu<T> &menu, const MPD::Song &s, const SongList &l
 		if (it->stretch_limit >= 0) // (*)
 			width = remained_width - it->stretch_limit;
 		else
-			width = it->fixed ? it->width : it->width * menu.getWidth() * 0.01;
+			width = it->fixed ? it->width : it->width * menu_width * 0.01;
 		// columns with relative width may shrink to 0, omit them
 		if (width == 0)
 			continue;
@@ -165,30 +178,6 @@ void showSongsInColumns(NC::Menu<T> &menu, const MPD::Song &s, const SongList &l
 		// and next column, so we substract it now and restore later.
 		if (it != last)
 			--width;
-
-		if (it == Config.columns.begin() && (is_now_playing || is_selected))
-		{
-			// here comes the shitty part. if we applied now playing or selected
-			// prefix, first column's width needs to be properly modified, so
-			// next column is not affected by them. if prefixes fit, we just
-			// subtract their width from allowed column's width. if they don't,
-			// then we pretend that they do, but we adjust current cursor position
-			// so part of them will be overwritten by next column.
-			int offset = 0;
-			if (is_now_playing)
-				offset += Config.now_playing_prefix_length;
-			if (is_selected)
-				offset += Config.selected_item_prefix_length;
-			if (width-offset < 0)
-			{
-				remained_width -= width + 1;
-				menu.goToXY(width, y);
-				menu << ' ';
-				continue;
-			}
-			width -= offset;
-			remained_width -= offset;
-		}
 
 		// if column doesn't fit into screen, discard it and any other after it.
 		if (remained_width-width < 0 || width < 0 /* this one may come from (*) */)
@@ -231,21 +220,8 @@ void showSongsInColumns(NC::Menu<T> &menu, const MPD::Song &s, const SongList &l
 			menu << NC::Color::End;
 	}
 
-	// here comes the shitty part, second chapter. here we apply
-	// now playing suffix or/and make room for selected suffix
-	// (as it will be applied in Menu::Refresh when this function
-	// returns there).
 	if (is_now_playing)
-	{
-		int np_x = menu.getWidth() - Config.now_playing_suffix_length;
-		if (is_selected)
-			np_x -= Config.selected_item_suffix_length;
-		menu.goToXY(np_x, y);
 		menu << Config.now_playing_suffix;
-	}
-	if (is_selected)
-		menu.goToXY(menu.getWidth() - Config.selected_item_suffix_length, y);
-
 	if (separate_albums)
 		menu << NC::Format::NoUnderline;
 }
