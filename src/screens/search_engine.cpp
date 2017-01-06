@@ -208,7 +208,6 @@ void SearchEngine::switchTo()
 	SwitchTo::execute(this);
 	if (w.empty())
 		Prepare();
-	markSongsInPlaylist(w);
 	drawHeader();
 }
 
@@ -346,17 +345,18 @@ void SearchEngine::runAction()
 			size_t found = w.size()-SearchEngine::StaticOptions;
 			found += 3; // don't count options inserted below
 			w.insertSeparator(ResetButton+1);
-			w.insertItem(ResetButton+2, SEItem(), NC::List::Properties::Bold | NC::List::Properties::Inactive);
+			w.insertItem(ResetButton+2, SEItem(), NC::List::Properties::Inactive);
 			w.at(ResetButton+2).value().mkBuffer()
+				<< NC::Format::Bold
 				<< Config.color1
 				<< "Search results: "
 				<< NC::FormattedColor::End(Config.color1)
 				<< Config.color2
 				<< "Found " << found << (found > 1 ? " songs" : " song")
-				<< NC::FormattedColor::End(Config.color2);
+				<< NC::FormattedColor::End(Config.color2)
+				<< NC::Format::NoBold;
 			w.insertSeparator(ResetButton+3);
-			markSongsInPlaylist(w);
-			Statusbar::print("Searching finished");
+				Statusbar::print("Searching finished");
 			if (Config.block_search_constraints_change)
 				for (size_t i = 0; i < StaticOptions-4; ++i)
 					w.at(i).setInactive(true);

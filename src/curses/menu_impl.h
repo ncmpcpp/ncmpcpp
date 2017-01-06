@@ -210,8 +210,6 @@ void Menu<ItemT>::refresh()
 			mvwhline(m_window, line, 0, 0, m_width);
 			continue;
 		}
-		if ((*m_items)[m_drawn_position].isBold())
-			*this << Format::Bold;
 		if (m_highlight_enabled && m_drawn_position == m_highlight)
 		{
 			*this << Format::Reverse;
@@ -229,8 +227,6 @@ void Menu<ItemT>::refresh()
 			*this << Color::End;
 			*this << Format::NoReverse;
 		}
-		if ((*m_items)[m_drawn_position].isBold())
-			*this << Format::NoBold;
 	}
 	Window::refresh();
 }

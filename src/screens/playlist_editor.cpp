@@ -136,7 +136,6 @@ void PlaylistEditor::refresh()
 void PlaylistEditor::switchTo()
 {
 	SwitchTo::execute(this);
-	markSongsInPlaylist(Content);
 	drawHeader();
 	refresh();
 }
@@ -186,19 +185,10 @@ void PlaylistEditor::update()
 			MPD::SongIterator s = Mpd.GetPlaylistContent(Playlists.current()->value().path()), end;
 			for (; s != end; ++s, ++idx)
 			{
-				bool in_playlist = myPlaylist->checkForSong(*s);
 				if (idx < Content.size())
-				{
-					Content[idx].setBold(in_playlist);
 					Content[idx].value() = std::move(*s);
-				}
 				else
-				{
-					auto properties = NC::List::Properties::Selectable;
-					if (in_playlist)
-						properties |= NC::List::Properties::Bold;
-					Content.addItem(std::move(*s), properties);
-				}
+					Content.addItem(std::move(*s));
 			}
 			if (idx < Content.size())
 				Content.resizeList(idx);

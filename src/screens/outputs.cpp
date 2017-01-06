@@ -45,7 +45,12 @@ Outputs::Outputs()
 	w.centeredCursor(Config.centered_cursor);
 	w.setHighlightColor(Config.main_highlight_color);
 	w.setItemDisplayer([](NC::Menu<MPD::Output> &menu) {
-		menu << Charset::utf8ToLocale(menu.drawn()->value().name());
+			auto &output = menu.drawn()->value();
+			if (output.enabled())
+				menu << NC::Format::Bold;
+			menu << Charset::utf8ToLocale(output.name());
+			if (output.enabled())
+				menu << NC::Format::NoBold;
 	});
 }
 
@@ -87,14 +92,7 @@ void Outputs::fetchList()
 {
 	w.clear();
 	for (MPD::OutputIterator out = Mpd.GetOutputs(), end; out != end; ++out)
-	{
-		auto properties = NC::List::Properties::Selectable;
-		if (out->enabled())
-			properties |= NC::List::Properties::Bold;
-		w.addItem(std::move(*out), properties);
-	}
-	if (myScreen == this)
-		w.refresh();
+		w.addItem(std::move(*out));
 }
 
 void Outputs::toggleOutput()

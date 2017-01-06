@@ -78,7 +78,8 @@ const wchar_t *toColumnName(char c)
 
 template <typename T>
 void setProperties(NC::Menu<T> &menu, const MPD::Song &s, const SongList &list,
-	bool &separate_albums, bool &is_now_playing, bool &is_selected, bool &discard_colors)
+                   bool &separate_albums, bool &is_now_playing, bool &is_selected,
+                   bool &is_in_playlist, bool &discard_colors)
 {
 	size_t drawn_pos = menu.drawn() - menu.begin();
 	separate_albums = false;
@@ -97,22 +98,42 @@ void setProperties(NC::Menu<T> &menu, const MPD::Song &s, const SongList &list,
 		mvwhline(menu.raw(), menu.getY(), 0, NC::Key::Space, menu.getWidth());
 	}
 
-	is_selected = menu.drawn()->isSelected();
-	discard_colors = Config.discard_colors_if_item_is_selected && is_selected;
-
 	int song_pos = s.getPosition();
 	is_now_playing = Status::State::player() != MPD::psStop
 		&& myPlaylist->isActiveWindow(menu)
 		&& song_pos == Status::State::currentSongPosition();
 	if (is_now_playing)
 		menu << Config.now_playing_prefix;
+
+	is_in_playlist = !myPlaylist->isActiveWindow(menu)
+		&& myPlaylist->checkForSong(s);
+	if (is_in_playlist)
+		menu << NC::Format::Bold;
+
+	is_selected = menu.drawn()->isSelected();
+	discard_colors = Config.discard_colors_if_item_is_selected && is_selected;
+}
+
+template <typename T>
+void unsetProperties(NC::Menu<T> &menu, bool separate_albums, bool is_now_playing,
+                     bool is_in_playlist)
+{
+	if (is_in_playlist)
+		menu << NC::Format::NoBold;
+
+	if (is_now_playing)
+		menu << Config.now_playing_suffix;
+
+	if (separate_albums)
+		menu << NC::Format::NoUnderline;
 }
 
 template <typename T>
 void showSongs(NC::Menu<T> &menu, const MPD::Song &s, const SongList &list, const Format::AST<char> &ast)
 {
-	bool separate_albums, is_now_playing, is_selected, discard_colors;
-	setProperties(menu, s, list, separate_albums, is_now_playing, is_selected, discard_colors);
+	bool separate_albums, is_now_playing, is_selected, is_in_playlist, discard_colors;
+	setProperties(menu, s, list, separate_albums, is_now_playing, is_selected,
+	              is_in_playlist, discard_colors);
 
 	const size_t y = menu.getY();
 	NC::Buffer right_aligned;
@@ -129,10 +150,7 @@ void showSongs(NC::Menu<T> &menu, const MPD::Song &s, const SongList &list, cons
 		menu << NC::TermManip::ClearToEOL << NC::XY(x_off, y) << right_aligned;
 	}
 
-	if (is_now_playing)
-		menu << Config.now_playing_suffix;
-	if (separate_albums)
-		menu << NC::Format::NoUnderline;
+	unsetProperties(menu, separate_albums, is_now_playing, is_in_playlist);
 }
 
 template <typename T>
@@ -141,8 +159,9 @@ void showSongsInColumns(NC::Menu<T> &menu, const MPD::Song &s, const SongList &l
 	if (Config.columns.empty())
 		return;
 
-	bool separate_albums, is_now_playing, is_selected, discard_colors;
-	setProperties(menu, s, list, separate_albums, is_now_playing, is_selected, discard_colors);
+	bool separate_albums, is_now_playing, is_selected, is_in_playlist, discard_colors;
+	setProperties(menu, s, list, separate_albums, is_now_playing, is_selected,
+	              is_in_playlist, discard_colors);
 
 	int menu_width = menu.getWidth();
 	if (is_now_playing)
@@ -220,10 +239,7 @@ void showSongsInColumns(NC::Menu<T> &menu, const MPD::Song &s, const SongList &l
 			menu << NC::Color::End;
 	}
 
-	if (is_now_playing)
-		menu << Config.now_playing_suffix;
-	if (separate_albums)
-		menu << NC::Format::NoUnderline;
+	unsetProperties(menu, separate_albums, is_now_playing, is_in_playlist);
 }
 
 }

@@ -154,7 +154,7 @@ TagEditor::TagEditor() : FParser(0), FParserHelper(0), FParserLegend(0), FParser
 	TagTypes->addSeparator();
 	if (Config.titles_visibility)
 	{
-		TagTypes->addItem("Options", NC::List::Properties::Bold | NC::List::Properties::Inactive);
+		TagTypes->addItem("Options", NC::List::Properties::Inactive);
 		TagTypes->addSeparator();
 	}
 	TagTypes->addItem("Capitalize First Letters");
@@ -571,7 +571,7 @@ void TagEditor::runAction()
 		if (!Patterns.empty())
 		{
 			FParser->addSeparator();
-			FParser->addItem("Recent patterns", NC::List::Properties::Bold | NC::List::Properties::Inactive);
+			FParser->addItem("Recent patterns", NC::List::Properties::Inactive);
 			FParser->addSeparator();
 			for (std::list<std::string>::const_iterator it = Patterns.begin(); it != Patterns.end(); ++it)
 				FParser->addItem(*it);

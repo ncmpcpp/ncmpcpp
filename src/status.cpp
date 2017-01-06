@@ -439,21 +439,6 @@ void Status::Changes::playlist(unsigned previous_version)
 
 	myPlaylist->reloadTotalLength();
 	myPlaylist->reloadRemaining();
-
-	if (isVisible(myBrowser))
-		markSongsInPlaylist(myBrowser->main());
-	if (isVisible(mySearcher))
-		markSongsInPlaylist(mySearcher->main());
-	if (isVisible(myLibrary))
-	{
-		markSongsInPlaylist(myLibrary->Songs);
-		myLibrary->Songs.refresh();
-	}
-	if (isVisible(myPlaylistEditor))
-	{
-		markSongsInPlaylist(myPlaylistEditor->Content);
-		myPlaylistEditor->Content.refresh();
-	}
 }
 
 void Status::Changes::storedPlaylists()
@@ -815,5 +800,7 @@ void Status::Changes::outputs()
 {
 #	ifdef ENABLE_OUTPUTS
 	myOutputs->fetchList();
+	if (isVisible(myOutputs))
+		myOutputs->refreshWindow();
 #	endif // ENABLE_OUTPUTS
 }

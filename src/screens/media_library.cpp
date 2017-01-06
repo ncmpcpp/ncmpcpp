@@ -265,7 +265,6 @@ void MediaLibrary::refresh()
 void MediaLibrary::switchTo()
 {
 	SwitchTo::execute(this);
-	markSongsInPlaylist(Songs);
 	drawHeader();
 	refresh();
 }
@@ -433,19 +432,10 @@ void MediaLibrary::update()
 		size_t idx = 0;
 		for (MPD::SongIterator s = Mpd.CommitSearchSongs(), end; s != end; ++s, ++idx)
 		{
-			bool in_playlist = myPlaylist->checkForSong(*s);
 			if (idx < Songs.size())
-			{
 				Songs[idx].value() = std::move(*s);
-				Songs[idx].setBold(in_playlist);
-			}
 			else
-			{
-				auto properties = NC::List::Properties::Selectable;
-				if (in_playlist)
-					properties |= NC::List::Properties::Bold;
-				Songs.addItem(std::move(*s), properties);
-			}
+				Songs.addItem(std::move(*s));
 		};
 		if (idx < Songs.size())
 			Songs.resizeList(idx);

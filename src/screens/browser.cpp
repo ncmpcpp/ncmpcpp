@@ -165,7 +165,6 @@ void Browser::resize()
 void Browser::switchTo()
 {
 	SwitchTo::execute(this);
-	markSongsInPlaylist(w);
 	drawHeader();
 }
 
@@ -527,10 +526,7 @@ void Browser::getDirectory(std::string directory)
 			}
 			case MPD::Item::Type::Song:
 			{
-				auto properties = NC::List::Properties::Selectable;
-				if (myPlaylist->checkForSong(item.song()))
-					properties |= NC::List::Properties::Bold;
-				w.addItem(std::move(item), properties);
+				w.addItem(std::move(item));
 				break;
 			}
 		}

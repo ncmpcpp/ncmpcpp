@@ -41,24 +41,16 @@ struct List
 	{
 		enum Type {
 			None       = 0,
-			Bold       = (1 << 0),
-			Selectable = (1 << 1),
-			Selected   = (1 << 2),
-			Inactive   = (1 << 3),
-			Separator  = (1 << 4)
+			Selectable = (1 << 0),
+			Selected   = (1 << 1),
+			Inactive   = (1 << 2),
+			Separator  = (1 << 3)
 		};
 
 		Properties(Type properties = Selectable)
 		: m_properties(properties)
 		{ }
 
-		void setBold(bool is_bold)
-		{
-			if (is_bold)
-				m_properties |= Bold;
-			else
-				m_properties &= ~Bold;
-		}
 		void setSelectable(bool is_selectable)
 		{
 			if (is_selectable)
@@ -90,7 +82,6 @@ struct List
 				m_properties &= ~Separator;
 		}
 
-		bool isBold() const { return m_properties & Bold; }
 		bool isSelectable() const { return m_properties & Selectable; }
 		bool isSelected() const { return m_properties & Selected; }
 		bool isInactive() const { return m_properties & Inactive; }
@@ -180,13 +171,11 @@ struct Menu: Window, List
 		const Properties &properties() const { return std::get<1>(*m_impl); }
 
 		// Forward methods to List::Properties.
-		void setBold (bool is_bold) { properties().setBold(is_bold); }
 		void setSelectable(bool is_selectable) { properties().setSelectable(is_selectable); }
 		void setSelected (bool is_selected) { properties().setSelected(is_selected); }
 		void setInactive (bool is_inactive) { properties().setInactive(is_inactive); }
 		void setSeparator (bool is_separator) { properties().setSeparator(is_separator); }
 
-		bool isBold() const { return properties().isBold(); }
 		bool isSelectable() const { return properties().isSelectable(); }
 		bool isSelected() const { return properties().isSelected(); }
 		bool isInactive() const { return properties().isInactive(); }
