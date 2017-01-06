@@ -161,8 +161,7 @@ int main(int argc, char **argv)
 	auto input = NC::Key::None;
 	auto connect_attempt = boost::posix_time::from_time_t(0);
 	auto update_environment = static_cast<Actions::UpdateEnvironment &>(
-		Actions::get(Actions::Type::UpdateEnvironment)
-	);
+		Actions::get(Actions::Type::UpdateEnvironment));
 	
 	while (!Actions::ExitMainLoop)
 	{
@@ -196,7 +195,7 @@ int main(int argc, char **argv)
 				run_resize_screen = false;
 			}
 
-			update_environment.run(!key_pressed, key_pressed);
+			update_environment.run(!key_pressed, key_pressed, false);
 
 			input = readKey(*wFooter);
 			key_pressed = input != NC::Key::None;

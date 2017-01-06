@@ -330,7 +330,7 @@ UpdateEnvironment::UpdateEnvironment()
 , m_past(boost::posix_time::from_time_t(0))
 { }
 
-void UpdateEnvironment::run(bool update_timer, bool refresh_window)
+void UpdateEnvironment::run(bool update_timer, bool refresh_window, bool mpd_sync)
 {
 	using Global::Timer;
 
@@ -352,11 +352,19 @@ void UpdateEnvironment::run(bool update_timer, bool refresh_window)
 
 	if (refresh_window)
 		myScreen->refreshWindow();
+
+	// We want to synchronize with MPD during execution of an action chain.
+	if (mpd_sync)
+	{
+		int flags = Mpd.noidle();
+		if (flags)
+			Status::update(flags);
+	}
 }
 
 void UpdateEnvironment::run()
 {
-	run(true, true);
+	run(true, true, true);
 }
 
 bool MouseEvent::canBeRun()

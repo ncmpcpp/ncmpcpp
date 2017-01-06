@@ -231,7 +231,7 @@ struct UpdateEnvironment: BaseAction
 {
 	UpdateEnvironment();
 
-	void run(bool update_status, bool refresh_window);
+	void run(bool update_status, bool refresh_window, bool mpd_sync);
 
 private:
 	boost::posix_time::ptime m_past;

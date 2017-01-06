@@ -17,6 +17,7 @@ ncmpcpp-0.8 (????-??-??)
 * Added 'statusbar_time_color' and 'player_state_color' configuration variables for further customization of statusbar.
 * Format information can now be attached to selected color variables in the configuration file. Because of that variable 'progressbar_boldness' is now deprecated in favor of extended 'progressbar_color' and 'progressbar_elapsed_color' (for more information see example configuration file).
 * Lyrics and last_fm can now be startup screens and are lockable.
+* Action 'update_environment' now also synchronizes status with MPD.
 
 ncmpcpp-0.7.7 (2016-10-31)
 * Fixed compilation on 32bit platforms.
