@@ -189,6 +189,11 @@ int Connection::noidle()
 	return flags;
 }
 
+void Connection::setNoidleCallback(NoidleCallback callback)
+{
+	m_noidle_callback = std::move(callback);
+}
+
 Statistics Connection::getStatistics()
 {
 	prechecks();
@@ -846,7 +851,9 @@ void Connection::checkConnection() const
 void Connection::prechecks()
 {
 	checkConnection();
-	noidle();
+	int flags = noidle();
+	if (flags && m_noidle_callback)
+		m_noidle_callback(flags);
 }
 
 void Connection::prechecksNoCommandsList()

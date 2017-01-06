@@ -106,6 +106,8 @@ int main(int argc, char **argv)
 	sigignore(SIGPIPE);
 	signal(SIGWINCH, sighandler);
 
+	Mpd.setNoidleCallback(Status::update);
+
 	NC::initScreen(Config.colors_enabled, Config.mouse_support);
 	
 	Actions::OriginalStatusbarVisibility = Config.statusbar_visibility;

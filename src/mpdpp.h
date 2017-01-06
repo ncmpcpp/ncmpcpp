@@ -480,6 +480,8 @@ typedef Iterator<std::string> StringIterator;
 
 struct Connection
 {
+	typedef std::function<void(int)> NoidleCallback;
+
 	Connection();
 	
 	void Connect();
@@ -582,6 +584,7 @@ struct Connection
 	
 	void idle();
 	int noidle();
+	void setNoidleCallback(NoidleCallback callback);
 	
 private:
 	struct ConnectionDeleter {
@@ -595,6 +598,7 @@ private:
 	void prechecksNoCommandsList();
 	void checkErrors() const;
 
+	NoidleCallback m_noidle_callback;
 	std::unique_ptr<mpd_connection, ConnectionDeleter> m_connection;
 	bool m_command_list_active;
 	
