@@ -461,74 +461,60 @@ bool Browser::enterDirectory()
 
 void Browser::getDirectory(std::string directory)
 {
-	ScopedUnfilteredMenu<MPD::Item> sunfilter(ReapplyFilter::Yes, w);
-
-	m_scroll_beginning = 0;
-	w.clear();
-
-	// reset the position if we change directories
-	if (m_current_directory != directory)
-		w.reset();
-
-	// check if it's a parent directory
-	if (isStringParentDirectory(directory))
 	{
-		directory.resize(directory.length()-3);
-		directory = getParentDirectory(directory);
-	}
-	// when we go down to root, it can be empty
-	if (directory.empty())
-		directory = "/";
+		ScopedUnfilteredMenu<MPD::Item> sunfilter(ReapplyFilter::Yes, w);
 
-	std::vector<MPD::Item> items;
-	if (m_local_browser)
-		getLocalDirectory(items, directory);
-	else
-	{
-		std::copy(
-			std::make_move_iterator(Mpd.GetDirectory(directory)),
-			std::make_move_iterator(MPD::ItemIterator()),
-			std::back_inserter(items)
-		);
-	}
+		m_scroll_beginning = 0;
+		w.clear();
 
-	// sort items
-	if (Config.browser_sort_mode != SortMode::NoOp)
-	{
-		std::sort(items.begin(), items.end(),
-			LocaleBasedItemSorting(std::locale(), Config.ignore_leading_the, Config.browser_sort_mode)
-		);
-	}
+		// Reset the position if we change directories.
+		if (m_current_directory != directory)
+			w.reset();
 
-	// if the requested directory is not root, add parent directory
-	if (!isRootDirectory(directory))
-	{
-		// make it so that display function doesn't have to handle special cases
-		w.addItem(MPD::Directory(directory + "/.."), NC::List::Properties::None);
-	}
-
-	for (const auto &item : items)
-	{
-		switch (item.type())
+		// Check if it's a parent directory.
+		if (isStringParentDirectory(directory))
 		{
-			case MPD::Item::Type::Playlist:
-			{
-				w.addItem(std::move(item));
-				break;
-			}
-			case MPD::Item::Type::Directory:
-			{
-				bool is_current = item.directory().path() == m_current_directory;
-				w.addItem(std::move(item));
-				if (is_current)
-					w.highlight(w.size()-1);
-				break;
-			}
-			case MPD::Item::Type::Song:
-			{
-				w.addItem(std::move(item));
-				break;
-			}
+			directory.resize(directory.length()-3);
+			directory = getParentDirectory(directory);
+		}
+		// When we go down to root, it can be empty.
+		if (directory.empty())
+			directory = "/";
+
+		std::vector<MPD::Item> items;
+		if (m_local_browser)
+			getLocalDirectory(items, directory);
+		else
+		{
+			std::copy(std::make_move_iterator(Mpd.GetDirectory(directory)),
+			          std::make_move_iterator(MPD::ItemIterator()),
+			          std::back_inserter(items));
+		}
+
+		if (Config.browser_sort_mode != SortMode::NoOp)
+		{
+			std::sort(items.begin(), items.end(),
+			          LocaleBasedItemSorting(std::locale(), Config.ignore_leading_the, Config.browser_sort_mode));
+		}
+
+		// If the requested directory is not root, add parent directory.
+		if (!isRootDirectory(directory))
+		{
+			// Make it so that display function doesn't have to handle special cases.
+			w.addItem(MPD::Directory(directory + "/.."), NC::List::Properties::None);
+		}
+
+		for (const auto &item : items)
+			w.addItem(std::move(item));
+	}
+
+	for (size_t i = 0; i < w.size(); ++i)
+	{
+		if (w[i].value().type() == MPD::Item::Type::Directory
+		    && w[i].value().directory().path() == m_current_directory)
+		{
+			w.highlight(i);
+			break;
 		}
 	}
 	m_current_directory = directory;
