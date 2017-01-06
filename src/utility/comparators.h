@@ -87,7 +87,9 @@ public:
 	
 	bool operator()(const MPD::Item &a, const MPD::Item &b) const;
 	
-	bool operator()(const NC::Menu<MPD::Item>::Item &a, const NC::Menu<MPD::Item>::Item &b) const {
+	bool operator()(const NC::Menu<MPD::Item>::Item &a,
+	                const NC::Menu<MPD::Item>::Item &b) const
+	{
 		return (*this)(a.value(), b.value());
 	}
 };

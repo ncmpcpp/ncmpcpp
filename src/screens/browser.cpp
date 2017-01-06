@@ -63,8 +63,9 @@ bool isRootDirectory(const std::string &directory);
 bool isHidden(const fs::directory_iterator &entry);
 bool hasSupportedExtension(const fs::directory_entry &entry);
 MPD::Song getLocalSong(const fs::directory_entry &entry, bool read_tags);
-void getLocalDirectory(std::vector<MPD::Item> &items, const std::string &directory);
-void getLocalDirectoryRecursively(std::vector<MPD::Song> &songs, const std::string &directory);
+void getLocalDirectory(NC::Menu<MPD::Item> &menu, const std::string &directory);
+void getLocalDirectoryRecursively(std::vector<MPD::Song> &songs,
+                                  const std::string &directory);
 void clearDirectory(const std::string &directory);
 
 std::string itemToString(const MPD::Item &item);
@@ -481,31 +482,28 @@ void Browser::getDirectory(std::string directory)
 		if (directory.empty())
 			directory = "/";
 
-		std::vector<MPD::Item> items;
-		if (m_local_browser)
-			getLocalDirectory(items, directory);
-		else
-		{
-			std::copy(std::make_move_iterator(Mpd.GetDirectory(directory)),
-			          std::make_move_iterator(MPD::ItemIterator()),
-			          std::back_inserter(items));
-		}
-
-		if (Config.browser_sort_mode != SortMode::NoOp)
-		{
-			std::sort(items.begin(), items.end(),
-			          LocaleBasedItemSorting(std::locale(), Config.ignore_leading_the, Config.browser_sort_mode));
-		}
-
+		bool is_root = isRootDirectory(directory);
 		// If the requested directory is not root, add parent directory.
-		if (!isRootDirectory(directory))
+		if (!is_root)
 		{
 			// Make it so that display function doesn't have to handle special cases.
 			w.addItem(MPD::Directory(directory + "/.."), NC::List::Properties::None);
 		}
 
-		for (const auto &item : items)
-			w.addItem(std::move(item));
+		if (m_local_browser)
+			getLocalDirectory(w, directory);
+		else
+		{
+			MPD::ItemIterator end;
+			for (auto dir = Mpd.GetDirectory(directory); dir != end; ++dir)
+				w.addItem(std::move(*dir));
+		}
+
+		if (Config.browser_sort_mode != SortMode::NoOp)
+		{
+			std::sort(w.begin() + (is_root ? 0 : 1), w.end(),
+			          LocaleBasedItemSorting(std::locale(), Config.ignore_leading_the, Config.browser_sort_mode));
+		}
 	}
 
 	for (size_t i = 0; i < w.size(); ++i)
@@ -648,7 +646,7 @@ MPD::Song getLocalSong(const fs::directory_entry &entry, bool read_tags)
 	return s;
 }
 
-void getLocalDirectory(std::vector<MPD::Item> &items, const std::string &directory)
+void getLocalDirectory(NC::Menu<MPD::Item> &menu, const std::string &directory)
 {
 	for (fs::directory_iterator entry(directory), end; entry != end; ++entry)
 	{
@@ -657,13 +655,11 @@ void getLocalDirectory(std::vector<MPD::Item> &items, const std::string &directo
 
 	if (fs::is_directory(*entry))
 	{
-		items.push_back(MPD::Directory(
-			entry->path().native(),
-			fs::last_write_time(entry->path())
-		));
+		menu.addItem(MPD::Directory(entry->path().native(),
+		                            fs::last_write_time(entry->path())));
 	}
 	else if (hasSupportedExtension(*entry))
-		items.push_back(getLocalSong(*entry, true));
+		menu.addItem(getLocalSong(*entry, true));
 	}
 }
 
