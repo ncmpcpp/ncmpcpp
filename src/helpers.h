@@ -341,22 +341,37 @@ void moveSelectedItemsTo(NC::Menu<MPD::Song> &menu, F &&move_fun)
 }
 
 template <typename F>
-void deleteSelectedSongs(NC::Menu<MPD::Song> &m, F delete_fun)
+void deleteSelectedSongs(NC::Menu<MPD::Song> &menu, F &&delete_fun)
 {
-	selectCurrentIfNoneSelected(m);
-	// ok, this is tricky. we need to operate on whole playlist
-	// to get positions right, but at the same time we need to
-	// ignore all songs that are not filtered. we use the fact
-	// that both ranges share the same values, ie. we can compare
-	// pointers to check whether an item belongs to filtered range.
-	auto begin = ++m.begin();
-	Mpd.StartCommandsList();
-	for (auto it = m.rbegin(); it != m.rend(); ++it)
+	selectCurrentIfNoneSelected(menu);
+	// We need to operate on the whole playlist to get positions right, but at the
+	// same time we need to ignore all songs that are not filtered. We abuse the
+	// fact that both ranges share the same values, i.e. we can compare addresses
+	// of item values to check whether an item belongs to filtered range. TODO: do
+	// something more sane here.
+	NC::Menu<MPD::Song>::Iterator begin;
+	NC::Menu<MPD::Song>::ReverseIterator real_begin, real_end;
 	{
-		if (it->isSelected())
+		ScopedUnfilteredMenu<MPD::Song> sunfilter(ReapplyFilter::No, menu);
+		// obtain iterators for unfiltered range
+		begin = menu.begin() + 1; // cancel reverse iterator's offset
+		real_begin = menu.rbegin();
+		real_end = menu.rend();
+	};
+	// get iterator to filtered range
+	auto cur_filtered = menu.rbegin();
+	Mpd.StartCommandsList();
+	for (auto it = real_begin; it != real_end; ++it)
+	{
+		// current iterator belongs to filtered range, proceed
+		if (&it->value() == &cur_filtered->value())
 		{
-			it->setSelected(false);
-			delete_fun(Mpd, it.base() - begin);
+			if (it->isSelected())
+			{
+				it->setSelected(false);
+				delete_fun(Mpd, it.base() - begin);
+			}
+			++cur_filtered;
 		}
 	}
 	Mpd.CommitCommandsList();
