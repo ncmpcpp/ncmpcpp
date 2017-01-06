@@ -217,9 +217,9 @@ int Color::pairNumber() const
 	else if (!isDefault())
 	{
 		if (!previousBackground())
-			result = background() + 1;
+			result = (background() + 1) % COLORS;
 		result *= 256;
-		result += foreground();
+		result += foreground() % COLORS;
 
 		assert(result < int(color_pair_map.size()));
 
