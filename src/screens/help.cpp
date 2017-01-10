@@ -268,7 +268,7 @@ void write_bindings(NC::Scrollpad &w)
 	key(w, Type::EditPlaylistName, "Edit playlist name");
 	key(w, Type::ChangeBrowseMode, "Browse MPD database/local filesystem");
 	key(w, Type::ToggleBrowserSortMode, "Toggle sort mode");
-	key(w, Type::JumpToPlayingSong, "Locate playing song");
+	key(w, Type::JumpToPlayingSong, "Locate current song");
 	key(w, Type::JumpToParentDirectory, "Jump to parent directory");
 	key(w, Type::DeleteBrowserItems, "Delete selected items from disk");
 	key(w, Type::JumpToPlaylistEditor, "Jump to playlist editor (playlists only)");
@@ -289,6 +289,7 @@ void write_bindings(NC::Scrollpad &w)
 	key(w, Type::NextColumn, "Next column");
 	key(w, Type::PlayItem, "Add item to playlist and play it");
 	key(w, Type::AddItemToPlaylist, "Add item to playlist");
+	key(w, Type::JumpToPlayingSong, "Locate current song");
 #	ifdef HAVE_TAGLIB_H
 	key(w, Type::EditSong, "Edit song");
 #	endif // HAVE_TAGLIB_H
@@ -301,6 +302,7 @@ void write_bindings(NC::Scrollpad &w)
 	key(w, Type::NextColumn, "Next column");
 	key(w, Type::PlayItem, "Add item to playlist and play it");
 	key(w, Type::AddItemToPlaylist, "Add item to playlist");
+	key(w, Type::JumpToPlayingSong, "Locate current song");
 #	ifdef HAVE_TAGLIB_H
 	key(w, Type::EditSong, "Edit song");
 #	endif // HAVE_TAGLIB_H
