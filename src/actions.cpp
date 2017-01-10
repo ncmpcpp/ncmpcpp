@@ -1205,8 +1205,9 @@ void UpdateDatabase::run()
 bool JumpToPlayingSong::canBeRun()
 {
 	return myScreen == myPlaylist
-	    || myScreen == myBrowser
-	    || myScreen == myLibrary;
+			|| myScreen == myPlaylistEditor
+			|| myScreen == myBrowser
+			|| myScreen == myLibrary;
 }
 
 void JumpToPlayingSong::run()
@@ -1217,6 +1218,10 @@ void JumpToPlayingSong::run()
 	if (myScreen == myPlaylist)
 	{
 		myPlaylist->locateSong(s);
+	}
+	else if (myScreen == myPlaylistEditor)
+	{
+		myPlaylistEditor->locateSong(s);
 	}
 	else if (myScreen == myBrowser)
 	{
