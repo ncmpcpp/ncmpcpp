@@ -484,14 +484,17 @@ void PlaylistEditor::locatePlaylist(const MPD::Playlist &playlist)
 
 void PlaylistEditor::gotoSong(size_t playlist_index, size_t song_index)
 {
-	previousColumn();
 	Playlists.clearFilter();
 	Playlists.highlight(playlist_index);
 	Content.clear();
 	Content.clearFilter();
 	update();
 	Content.highlight(song_index);
-	nextColumn();
+
+	if (isActiveWindow(Playlists))
+		nextColumn();
+	else
+		Playlists.refresh();
 }
 
 void PlaylistEditor::locateSong(const MPD::Song &s)
@@ -503,6 +506,7 @@ void PlaylistEditor::locateSong(const MPD::Song &s)
 		if (song_it != Content.endV())
 		{
 			Content.highlight(song_it - Content.beginV());
+			nextColumn();
 			return;
 		}
 	}
