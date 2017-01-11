@@ -513,7 +513,7 @@ void PlaylistEditor::locateSong(const MPD::Song &s)
 
 	if (Playlists.size() != 0)
 	{
-		Statusbar::printf("Jumping to song...");
+		Statusbar::print("Jumping to song...");
 		// Search the playlists after current playlist
 		for (auto pl_it = Playlists.currentV() + 1; pl_it != Playlists.endV(); ++pl_it)
 		{
@@ -537,7 +537,7 @@ void PlaylistEditor::locateSong(const MPD::Song &s)
 		}
 	}
 
-	Statusbar::printf("Song is not from playlists");
+	Statusbar::print("Song is not from playlists");
 }
 
 namespace {
