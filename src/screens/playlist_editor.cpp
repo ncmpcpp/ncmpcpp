@@ -497,33 +497,39 @@ void PlaylistEditor::gotoSong(size_t playlist_index, size_t song_index)
 void PlaylistEditor::locateSong(const MPD::Song &s)
 {
 	// Search in current playlist first
-	auto song_it = std::find(Content.currentV() + 1, Content.endV(), s);
-	if (song_it != Content.endV())
+  if (Content.size() != 0)
   {
-		Content.highlight(song_it - Content.beginV());
-		return;
-	}
-
-	// Search the playlists after current playlist
-	Statusbar::printf("Jumping to song...");
-	for (auto pl_it = Playlists.currentV() + 1; pl_it != Playlists.endV(); ++pl_it)
-  {
-    size_t song_index = GetSongIndexInPlaylist(*pl_it, s);
-		if (song_index != static_cast<size_t>(-1))
+    auto song_it = std::find(Content.currentV() + 1, Content.endV(), s);
+    if (song_it != Content.endV())
     {
-			gotoSong(pl_it - Playlists.beginV(), song_index);
-			return;
-		}
-	}
-
-	// Search from the beginning of the playlists
-	for (auto pl_it = Playlists.beginV(); pl_it != Playlists.currentV(); ++pl_it)
-  {
-    size_t song_index = GetSongIndexInPlaylist(*pl_it, s);
-    if (song_index != static_cast<size_t>(-1))
-    {
-      gotoSong(pl_it - Playlists.beginV(), song_index);
+      Content.highlight(song_it - Content.beginV());
       return;
+    }
+  }
+
+  if (Playlists.size() != 0)
+  {
+    Statusbar::printf("Jumping to song...");
+    // Search the playlists after current playlist
+    for (auto pl_it = Playlists.currentV() + 1; pl_it != Playlists.endV(); ++pl_it)
+    {
+      size_t song_index = GetSongIndexInPlaylist(*pl_it, s);
+      if (song_index != static_cast<size_t>(-1))
+      {
+        gotoSong(pl_it - Playlists.beginV(), song_index);
+        return;
+      }
+    }
+
+    // Search from the beginning of the playlists
+    for (auto pl_it = Playlists.beginV(); pl_it != Playlists.currentV(); ++pl_it)
+    {
+      size_t song_index = GetSongIndexInPlaylist(*pl_it, s);
+      if (song_index != static_cast<size_t>(-1))
+      {
+        gotoSong(pl_it - Playlists.beginV(), song_index);
+        return;
+      }
     }
   }
 
