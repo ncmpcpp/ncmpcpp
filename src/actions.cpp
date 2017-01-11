@@ -1207,7 +1207,7 @@ bool JumpToPlayingSong::canBeRun()
 	m_song = myPlaylist->nowPlayingSong();
 	return !m_song.empty()
 		&& (myScreen == myPlaylist
-				|| myScreen == myPlaylistEditor
+		    || myScreen == myPlaylistEditor
 		    || myScreen == myBrowser
 		    || myScreen == myLibrary);
 }
