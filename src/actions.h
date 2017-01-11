@@ -682,6 +682,8 @@ struct JumpToPlayingSong: BaseAction
 private:
 	virtual bool canBeRun() override;
 	virtual void run() override;
+
+	MPD::Song m_song;
 };
 
 struct ToggleRepeat: BaseAction

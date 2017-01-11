@@ -19,6 +19,7 @@ ncmpcpp-0.8 (????-??-??)
 * Lyrics and last_fm can now be startup screens and are lockable.
 * Action 'update_environment' now also synchronizes status with MPD.
 * Fixed an issue that could cause some MPD events to be missed.
+* ACtion 'jump_to_playing_song' is not runnable now if there is no playing song.
 
 ncmpcpp-0.7.7 (2016-10-31)
 * Fixed compilation on 32bit platforms.
