@@ -1204,27 +1204,26 @@ void UpdateDatabase::run()
 
 bool JumpToPlayingSong::canBeRun()
 {
-	return myScreen == myPlaylist
-	    || myScreen == myBrowser
-	    || myScreen == myLibrary;
+	m_song = myPlaylist->nowPlayingSong();
+	return !m_song.empty()
+		&& (myScreen == myPlaylist
+		    || myScreen == myBrowser
+		    || myScreen == myLibrary);
 }
 
 void JumpToPlayingSong::run()
 {
-	auto s = myPlaylist->nowPlayingSong();
-	if (s.empty())
-		return;
 	if (myScreen == myPlaylist)
 	{
-		myPlaylist->locateSong(s);
+		myPlaylist->locateSong(m_song);
 	}
 	else if (myScreen == myBrowser)
 	{
-		myBrowser->locateSong(s);
+		myBrowser->locateSong(m_song);
 	}
 	else if (myScreen == myLibrary)
 	{
-		myLibrary->locateSong(s);
+		myLibrary->locateSong(m_song);
 	}
 }
 
