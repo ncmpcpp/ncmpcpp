@@ -537,6 +537,24 @@ void PlaylistEditor::locateSong(const MPD::Song &s)
 		}
 	}
 
+	// Wrap back to the beginning of current playlist
+	if (Content.size() != 0)
+	{
+		auto song_it = std::find(Content.beginV(), Content.currentV(), s);
+		if (song_it != Content.currentV())
+		{
+			Content.highlight(song_it - Content.beginV());
+			nextColumn();
+			return;
+		}
+
+		if (*Content.currentV() == s)
+		{
+			Statusbar::print("Song occurs only once in playlists");
+			return;
+		}
+	}
+
 	Statusbar::print("Song is not from playlists");
 }
 
