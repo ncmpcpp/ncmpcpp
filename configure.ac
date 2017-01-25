@@ -1,6 +1,7 @@
-AC_INIT(configure.ac)
+AC_INIT([ncmcpp], [0.8_dev])
+AC_CONFIG_SRCDIR([configure.ac])
 AC_CONFIG_HEADERS(config.h)
-AM_INIT_AUTOMAKE(ncmpcpp, 0.8_dev)
+AM_INIT_AUTOMAKE([subdir-objects])
 
 m4_include([m4/ax_lib_readline.m4])
 

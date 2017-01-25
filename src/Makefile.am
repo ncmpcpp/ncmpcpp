@@ -53,7 +53,7 @@ ncmpcpp_SOURCES = \
 	title.cpp
 
 # set the include path found by configure
-INCLUDES= $(all_includes)
+AM_CPPFLAGS= $(all_includes)
 
 # the library search path.
 ncmpcpp_LDFLAGS = $(all_libraries)
