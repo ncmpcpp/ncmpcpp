@@ -1,5 +1,7 @@
 # NCurses Music Player Client (Plus Plus)
 
+Project page - http://rybczak.net/ncmpcpp/
+
 ## ncmpcpp – featureful ncurses based MPD client inspired by ncmpc
 
 ### Main features:
