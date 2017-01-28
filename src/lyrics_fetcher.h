@@ -112,7 +112,7 @@ struct JustSomeLyricsFetcher : public GoogleLyricsFetcher
 	virtual const char *name() const override { return "justsomelyrics.com"; }
 	
 protected:
-	virtual const char *regex() const override { return "<div class=\"content.*?</div>\\s*</div>(.*?)<div"; }
+	virtual const char *regex() const override { return "<div class=\"content.*?</div>(.*?)See also"; }
 };
 
 struct AzLyricsFetcher : public GoogleLyricsFetcher
