@@ -22,6 +22,7 @@
 #define NCMPCPP_STRBUFFER_H
 
 #include <boost/lexical_cast.hpp>
+#include <boost/variant.hpp>
 #include <map>
 #include "window.h"
 
@@ -33,34 +34,21 @@ template <typename CharT> class BasicBuffer
 {
 	struct Property
 	{
-		enum class Type { Color, Format };
-		
-		Property(NC::Color color_, size_t id_)
-		: m_type(Type::Color), m_color(std::move(color_)), m_id(id_) { }
-		Property(NC::Format format_, size_t id_)
-		: m_type(Type::Format), m_format(format_), m_id(id_) { }
+		template <typename ArgT>
+		Property(ArgT &&arg, size_t id_)
+		: m_impl(std::forward<ArgT>(arg)), m_id(id_) { }
 		
 		size_t id() const { return m_id; }
 
 		template <typename OutputStreamT>
 		friend OutputStreamT &operator<<(OutputStreamT &os, const Property &p)
 		{
-			switch (p.m_type)
-			{
-				case Type::Color:
-					os << p.m_color;
-					break;
-				case Type::Format:
-					os << p.m_format;
-					break;
-			}
+			boost::apply_visitor([&os](const auto &v) { os << v; }, p.m_impl);
 			return os;
 		}
 		
 	private:
-		Type m_type;
-		Color m_color;
-		Format m_format;
+		boost::variant<Color, Format> m_impl;
 		size_t m_id;
 	};
 	
