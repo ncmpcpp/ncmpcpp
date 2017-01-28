@@ -124,8 +124,8 @@ boost::optional<std::string> downloadLyrics(
 	std::shared_ptr<std::atomic<bool>> download_stopper,
 	LyricsFetcher *current_fetcher)
 {
-	std::string s_artist = Curl::escape(s.getArtist());
-	std::string s_title  = Curl::escape(s.getTitle());
+	std::string s_artist = s.getArtist();
+	std::string s_title  = s.getTitle();
 	// If artist or title is empty, use filename. This should give reasonable
 	// results for google search based lyrics fetchers.
 	if (s_artist.empty() || s_title.empty())
@@ -137,7 +137,6 @@ boost::optional<std::string> downloadLyrics(
 		size_t dot = s_title.rfind('.');
 		if (dot != std::string::npos)
 			s_title.resize(dot);
-		s_title = Curl::escape(s_title);
 	}
 
 	auto fetch_lyrics = [&](auto &fetcher_) {

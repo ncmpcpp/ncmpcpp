@@ -52,6 +52,10 @@ std::istream &operator>>(std::istream &is, LyricsFetcher_ &fetcher)
 		fetcher = std::make_unique<MetrolyricsFetcher>();
 	else if (s == "justsomelyrics")
 		fetcher = std::make_unique<JustSomeLyricsFetcher>();
+	else if (s == "jahlyrics")
+		fetcher = std::make_unique<JahLyricsFetcher>();
+	else if (s == "plyrics")
+		fetcher = std::make_unique<PLyricsFetcher>();
 	else if (s == "tekstowo")
 		fetcher = std::make_unique<TekstowoFetcher>();
 	else if (s == "internet")
@@ -63,14 +67,15 @@ std::istream &operator>>(std::istream &is, LyricsFetcher_ &fetcher)
 
 const char LyricsFetcher::msgNotFound[] = "Not found";
 
-LyricsFetcher::Result LyricsFetcher::fetch(const std::string &artist, const std::string &title)
+LyricsFetcher::Result LyricsFetcher::fetch(const std::string &artist,
+                                           const std::string &title)
 {
 	Result result;
 	result.first = false;
 	
 	std::string url = urlTemplate();
-	boost::replace_all(url, "%artist%", artist);
-	boost::replace_all(url, "%title%", title);
+	boost::replace_all(url, "%artist%", Curl::escape(artist));
+	boost::replace_all(url, "%title%", Curl::escape(title));
 	
 	std::string data;
 	CURLcode code = Curl::perform(data, url);
@@ -106,7 +111,8 @@ LyricsFetcher::Result LyricsFetcher::fetch(const std::string &artist, const std:
 	return result;
 }
 
-std::vector<std::string> LyricsFetcher::getContent(const char *regex_, const std::string &data)
+std::vector<std::string> LyricsFetcher::getContent(const char *regex_,
+                                                   const std::string &data)
 {
 	std::vector<std::string> result;
 	boost::regex rx(regex_);
@@ -135,7 +141,8 @@ void LyricsFetcher::postProcess(std::string &data) const
 
 /***********************************************************************/
 
-LyricsFetcher::Result LyricwikiFetcher::fetch(const std::string &artist, const std::string &title)
+LyricsFetcher::Result LyricwikiFetcher::fetch(const std::string &artist,
+                                              const std::string &title)
 {
 	LyricsFetcher::Result result = LyricsFetcher::fetch(artist, title);
 	if (result.first == true)
@@ -194,16 +201,17 @@ bool LyricwikiFetcher::notLyrics(const std::string &data) const
 
 /**********************************************************************/
 
-LyricsFetcher::Result GoogleLyricsFetcher::fetch(const std::string &artist, const std::string &title)
+LyricsFetcher::Result GoogleLyricsFetcher::fetch(const std::string &artist,
+                                                 const std::string &title)
 {
 	Result result;
 	result.first = false;
 	
-	std::string search_str = artist;
+	std::string search_str = Curl::escape(artist);
 	search_str += "+";
-	search_str += title;
+	search_str += Curl::escape(title);
 	search_str += "+%2B";
-	search_str += siteKeyword();
+	search_str += Curl::escape(siteKeyword());
 	
 	std::string google_url = "http://www.google.com/search?hl=en&ie=UTF-8&oe=UTF-8&q=";
 	google_url += search_str;
@@ -217,9 +225,9 @@ LyricsFetcher::Result GoogleLyricsFetcher::fetch(const std::string &artist, cons
 		result.second = curl_easy_strerror(code);
 		return result;
 	}
-	
+
 	auto urls = getContent("<A HREF=\"(.*?)\">here</A>", data);
-	
+
 	if (urls.empty() || !isURLOk(urls[0]))
 	{
 		result.second = msgNotFound;
@@ -247,7 +255,8 @@ bool MetrolyricsFetcher::isURLOk(const std::string &url)
 
 /**********************************************************************/
 
-LyricsFetcher::Result InternetLyricsFetcher::fetch(const std::string &artist, const std::string &title)
+LyricsFetcher::Result InternetLyricsFetcher::fetch(const std::string &artist,
+                                                   const std::string &title)
 {
 	GoogleLyricsFetcher::fetch(artist, title);
 	LyricsFetcher::Result result;

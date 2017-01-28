@@ -139,25 +139,27 @@ bool configure(int argc, char **argv)
 
 		if (vm.count("test-lyrics-fetchers"))
 		{
-			std::vector<std::string> fetcher_names = {
-				"lyricwiki",
-				"azlyrics",
-				"genius",
-				"sing365",
-				"lyricsmania",
-				"metrolyrics",
-				"justsomelyrics",
-				"tekstowo",
+			std::vector<std::tuple<std::string, std::string, std::string>> fetcher_data = {
+				std::make_tuple("lyricwiki", "rihanna", "umbrella"),
+				std::make_tuple("azlyrics", "rihanna", "umbrella"),
+				std::make_tuple("genius", "rihanna", "umbrella"),
+				std::make_tuple("sing365", "rihanna", "umbrella"),
+				std::make_tuple("lyricsmania", "rihanna", "umbrella"),
+				std::make_tuple("metrolyrics", "rihanna", "umbrella"),
+				std::make_tuple("justsomelyrics", "rihanna", "umbrella"),
+				std::make_tuple("jahlyrics", "sean kingston", "dry your eyes"),
+				std::make_tuple("plyrics", "offspring", "genocide"),
+				std::make_tuple("tekstowo", "rihanna", "umbrella"),
 			};
-			for (auto &name : fetcher_names)
+			for (auto &data : fetcher_data)
 			{
-				auto fetcher = boost::lexical_cast<LyricsFetcher_>(name);
+				auto fetcher = boost::lexical_cast<LyricsFetcher_>(std::get<0>(data));
 				std::cout << std::setw(20)
 				          << std::left
 				          << fetcher->name()
 				          << " : "
 				          << std::flush;
-				auto result = fetcher->fetch("rihanna", "umbrella");
+				auto result = fetcher->fetch(std::get<1>(data), std::get<2>(data));
 				std::cout << (result.first ? "ok" : "failed")
 				          << "\n";
 			}

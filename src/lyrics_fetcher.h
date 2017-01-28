@@ -131,6 +131,22 @@ protected:
 	virtual const char *regex() const override { return "<lyrics.*?>(.*?)</lyrics>"; }
 };
 
+struct JahLyricsFetcher : public GoogleLyricsFetcher
+{
+	virtual const char *name() const override { return "jah-lyrics.com"; }
+
+protected:
+	virtual const char *regex() const override { return "<div class=\"song-header\">.*?</div>(.*?)<p class=\"disclaimer\">"; }
+};
+
+struct PLyricsFetcher : public GoogleLyricsFetcher
+{
+	virtual const char *name() const override { return "plyrics.com"; }
+
+protected:
+	virtual const char *regex() const override { return "<!-- start of lyrics -->(.*?)<!-- end of lyrics -->"; }
+};
+
 struct TekstowoFetcher : public GoogleLyricsFetcher
 {
 	virtual const char *name() const override { return "tekstowo.pl"; }
