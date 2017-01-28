@@ -22,6 +22,7 @@
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/program_options.hpp>
+#include <iomanip>
 #include <iostream>
 
 #include "bindings.h"
@@ -81,6 +82,7 @@ bool configure(int argc, char **argv)
 		("current-song", po::value<std::string>()->implicit_value("{{{(%l) }{{%a - }%t}}|{%f}}"), "print current song using given format and exit")
 		("config,c", po::value<std::vector<std::string>>(&config_paths)->default_value(default_config_paths, join<std::string>(default_config_paths, " AND ")), "specify configuration file(s)")
 		("ignore-config-errors", "ignore unknown and invalid options in configuration files")
+		("test-lyrics-fetchers", "check if lyrics fetchers work")
 		("bindings,b", po::value<std::string>(&bindings_path)->default_value("~/.ncmpcpp/bindings"), "specify bindings file")
 		("screen,s", po::value<std::string>(), "specify the startup screen")
 		("slave-screen,S", po::value<std::string>(), "specify the startup slave screen")
@@ -134,6 +136,34 @@ bool configure(int argc, char **argv)
 		}
 
 		po::notify(vm);
+
+		if (vm.count("test-lyrics-fetchers"))
+		{
+			std::vector<std::string> fetcher_names = {
+				"lyricwiki",
+				"azlyrics",
+				"genius",
+				"sing365",
+				"lyricsmania",
+				"metrolyrics",
+				"justsomelyrics",
+				"tekstowo",
+			};
+			for (auto &name : fetcher_names)
+			{
+				auto fetcher = boost::lexical_cast<LyricsFetcher_>(name);
+				std::cout << std::setw(20)
+				          << std::left
+				          << fetcher->name()
+				          << " : "
+				          << std::flush;
+				auto result = fetcher->fetch("rihanna", "umbrella");
+				std::cout << (result.first ? "ok" : "failed")
+				          << "\n";
+			}
+			exit(0);
+		}
+
 		// get home directory
 		env_home = getenv("HOME");
 		if (env_home == nullptr)
