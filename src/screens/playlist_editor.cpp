@@ -20,6 +20,7 @@
 
 #include <algorithm>
 #include <boost/lambda/bind.hpp>
+#include <boost/optional.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <cassert>
 
@@ -57,8 +58,7 @@ size_t RightColumnWidth;
 std::string SongToString(const MPD::Song &s);
 bool PlaylistEntryMatcher(const Regex::Regex &rx, const MPD::Playlist &playlist);
 bool SongEntryMatcher(const Regex::Regex &rx, const MPD::Song &s);
-size_t GetSongIndexInPlaylist(MPD::Playlist playlist, const MPD::Song &song);
-
+boost::optional<size_t> GetSongIndexInPlaylist(MPD::Playlist playlist, const MPD::Song &song);
 }
 
 PlaylistEditor::PlaylistEditor()
@@ -515,27 +515,18 @@ void PlaylistEditor::locateSong(const MPD::Song &s)
 	if (!Playlists.empty())
 	{
 		Statusbar::print("Jumping to song...");
-		// Search the playlists after current playlist
-		for (auto pl_it = Playlists.currentV() + 1; pl_it != Playlists.endV(); ++pl_it)
-		{
-			size_t song_index = GetSongIndexInPlaylist(*pl_it, s);
-			if (song_index != static_cast<size_t>(-1))
-			{
-				gotoSong(pl_it - Playlists.beginV(), song_index);
-				return;
+		auto locateAndSwitch = [this, &s](auto pl_it) -> bool {
+			if (auto song_index = GetSongIndexInPlaylist(*pl_it, s)) {
+				this->gotoSong(pl_it - Playlists.beginV(), *song_index);
+				return true;
 			}
-		}
+			return false;
+		};
 
-		// Search from the beginning of the playlists
+		for (auto pl_it = Playlists.currentV() + 1; pl_it != Playlists.endV(); ++pl_it)
+			if (locateAndSwitch(pl_it)) return;
 		for (auto pl_it = Playlists.beginV(); pl_it != Playlists.currentV(); ++pl_it)
-		{
-			size_t song_index = GetSongIndexInPlaylist(*pl_it, s);
-			if (song_index != static_cast<size_t>(-1))
-			{
-				gotoSong(pl_it - Playlists.beginV(), song_index);
-				return;
-			}
-		}
+			if (locateAndSwitch(pl_it)) return;
 	}
 
 	// Wrap back to the beginning of current playlist
@@ -580,7 +571,7 @@ bool SongEntryMatcher(const Regex::Regex &rx, const MPD::Song &s)
 	return Regex::search(SongToString(s), rx);
 }
 
-size_t GetSongIndexInPlaylist(MPD::Playlist playlist, const MPD::Song &song)
+boost::optional<size_t> GetSongIndexInPlaylist(MPD::Playlist playlist, const MPD::Song &song)
 {
 	size_t index = 0;
 	MPD::SongIterator it = Mpd.GetPlaylistContentNoInfo(playlist.path()), end;
@@ -588,7 +579,7 @@ size_t GetSongIndexInPlaylist(MPD::Playlist playlist, const MPD::Song &song)
 	for (;;)
 	{
 		if (it == end)
-			return -1;
+			return boost::none;
 		if (*it == song)
 			return index;
 
