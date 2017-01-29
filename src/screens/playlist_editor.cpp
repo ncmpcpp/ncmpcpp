@@ -484,10 +484,8 @@ void PlaylistEditor::locatePlaylist(const MPD::Playlist &playlist)
 
 void PlaylistEditor::gotoSong(size_t playlist_index, size_t song_index)
 {
-	Playlists.clearFilter();
 	Playlists.highlight(playlist_index);
 	Content.clear();
-	Content.clearFilter();
 	update();
 	Content.highlight(song_index);
 
@@ -499,6 +497,9 @@ void PlaylistEditor::gotoSong(size_t playlist_index, size_t song_index)
 
 void PlaylistEditor::locateSong(const MPD::Song &s)
 {
+	Content.clearFilter();
+	Playlists.clearFilter();
+
 	// Search in current playlist first
 	if (!Content.empty())
 	{
