@@ -514,7 +514,7 @@ void PlaylistEditor::locateSong(const MPD::Song &s)
 	if (!Playlists.empty())
 	{
 		Statusbar::print("Jumping to song...");
-		auto locateAndSwitch = [this, &s](auto pl_it) -> bool {
+		auto locate_and_switch_playlist = [this, &s](auto pl_it) -> bool {
 			if (auto song_index = GetSongIndexInPlaylist(*pl_it, s)) {
 				this->gotoSong(pl_it - Playlists.beginV(), *song_index);
 				return true;
@@ -523,9 +523,9 @@ void PlaylistEditor::locateSong(const MPD::Song &s)
 		};
 
 		for (auto pl_it = Playlists.currentV() + 1; pl_it != Playlists.endV(); ++pl_it)
-			if (locateAndSwitch(pl_it)) return;
+			if (locate_and_switch_playlist(pl_it)) return;
 		for (auto pl_it = Playlists.beginV(); pl_it != Playlists.currentV(); ++pl_it)
-			if (locateAndSwitch(pl_it)) return;
+			if (locate_and_switch_playlist(pl_it)) return;
 	}
 
 	if (!Content.empty())
