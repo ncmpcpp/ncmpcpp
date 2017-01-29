@@ -500,7 +500,6 @@ void PlaylistEditor::locateSong(const MPD::Song &s)
 	Content.clearFilter();
 	Playlists.clearFilter();
 
-	// Search in current playlist first
 	if (!Content.empty())
 	{
 		auto song_it = std::find(Content.currentV() + 1, Content.endV(), s);
@@ -529,7 +528,6 @@ void PlaylistEditor::locateSong(const MPD::Song &s)
 			if (locateAndSwitch(pl_it)) return;
 	}
 
-	// Wrap back to the beginning of current playlist
 	if (!Content.empty())
 	{
 		auto song_it = std::find(Content.beginV(), Content.currentV(), s);
