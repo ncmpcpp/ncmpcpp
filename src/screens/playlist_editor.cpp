@@ -588,7 +588,7 @@ bool SongEntryMatcher(const Regex::Regex &rx, const MPD::Song &s)
 size_t GetSongIndexInPlaylist(MPD::Playlist playlist, const MPD::Song &song)
 {
 	size_t index = 0;
-	MPD::SongIterator it = Mpd.GetPlaylistContent(playlist.path()), end;
+	MPD::SongIterator it = Mpd.GetPlaylistContentNoInfo(playlist.path()), end;
 
 	for (;;)
 	{
