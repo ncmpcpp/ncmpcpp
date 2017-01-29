@@ -547,12 +547,6 @@ void PlaylistEditor::locateSong(const MPD::Song &s)
 			nextColumn();
 			return;
 		}
-
-		if (*Content.currentV() == s)
-		{
-			Statusbar::print("Song occurs only once in playlists");
-			return;
-		}
 	}
 
 	Statusbar::print("Song is not from playlists");
