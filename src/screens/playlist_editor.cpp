@@ -500,7 +500,7 @@ void PlaylistEditor::gotoSong(size_t playlist_index, size_t song_index)
 void PlaylistEditor::locateSong(const MPD::Song &s)
 {
 	// Search in current playlist first
-	if (Content.size() != 0)
+	if (!Content.empty())
 	{
 		auto song_it = std::find(Content.currentV() + 1, Content.endV(), s);
 		if (song_it != Content.endV())
@@ -511,7 +511,7 @@ void PlaylistEditor::locateSong(const MPD::Song &s)
 		}
 	}
 
-	if (Playlists.size() != 0)
+	if (!Playlists.empty())
 	{
 		Statusbar::print("Jumping to song...");
 		// Search the playlists after current playlist
@@ -538,7 +538,7 @@ void PlaylistEditor::locateSong(const MPD::Song &s)
 	}
 
 	// Wrap back to the beginning of current playlist
-	if (Content.size() != 0)
+	if (!Content.empty())
 	{
 		auto song_it = std::find(Content.beginV(), Content.currentV(), s);
 		if (song_it != Content.currentV())
