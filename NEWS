@@ -19,7 +19,11 @@ ncmpcpp-0.8 (????-??-??)
 * Lyrics and last_fm can now be startup screens and are lockable.
 * Action 'update_environment' now also synchronizes status with MPD.
 * Fixed an issue that could cause some MPD events to be missed.
-* ACtion 'jump_to_playing_song' is not runnable now if there is no playing song.
+* Action 'jump_to_playing_song' is not runnable now if there is no playing song.
+* Fixed fetching artist info in language other than English.
+* Added test that checks if lyrics fetchers work (available via command line parameter --test-lyrics-fetchers).
+* Fixed fetching lyrics from justsomelyrics.com.
+* Added support for fetching lyrics from jah-lyrics.com and plyrics.com.
 
 ncmpcpp-0.7.7 (2016-10-31)
 * Fixed compilation on 32bit platforms.
