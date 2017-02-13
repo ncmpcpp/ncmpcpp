@@ -254,6 +254,25 @@ struct Window
 		PromptHook m_hook;
 	};
 
+	struct ScopedTimeout
+	{
+		ScopedTimeout(Window &w, int new_timeout)
+			: m_w(w)
+		{
+			m_timeout = w.getTimeout();
+			w.setTimeout(new_timeout);
+		}
+
+		~ScopedTimeout()
+		{
+			m_w.setTimeout(m_timeout);
+		}
+
+	private:
+		Window &m_w;
+		int m_timeout;
+	};
+
 	Window() : m_window(nullptr) { }
 	
 	/// Constructs an empty window with given parameters

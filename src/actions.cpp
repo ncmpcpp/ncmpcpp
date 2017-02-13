@@ -2895,8 +2895,7 @@ void seek(SearchDirection sd)
 	unsigned songpos = Status::State::elapsedTime();
 	auto t = Timer;
 
-	int old_timeout = wFooter->getTimeout();
-	wFooter->setTimeout(BaseScreen::defaultWindowTimeout);
+	NC::Window::ScopedTimeout stimeout{*wFooter, BaseScreen::defaultWindowTimeout};
 	
 	// Accept single action of a given type or action chain for which all actions
 	// can be run and one of them is of the given type. This will still not work
@@ -3007,8 +3006,6 @@ void seek(SearchDirection sd)
 	}
 	SeekingInProgress = false;
 	Mpd.Seek(Status::State::currentSongPosition(), songpos);
-	
-	wFooter->setTimeout(old_timeout);
 }
 
 void findItem(const SearchDirection direction)
