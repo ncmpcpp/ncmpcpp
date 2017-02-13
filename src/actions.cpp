@@ -84,7 +84,7 @@ bool scrollTagCanBeRun(NC::List *&list, const SongList *&songs);
 void scrollTagUpRun(NC::List *list, const SongList *songs, MPD::Song::GetFunction get);
 void scrollTagDownRun(NC::List *list, const SongList *songs, MPD::Song::GetFunction get);
 
-void seek();
+void seek(SearchDirection sd);
 void findItem(const SearchDirection direction);
 void listsChangeFinisher();
 
@@ -1033,7 +1033,7 @@ bool SeekForward::canBeRun()
 
 void SeekForward::run()
 {
-	seek();
+	seek(SearchDirection::Forward);
 }
 
 bool SeekBackward::canBeRun()
@@ -1043,7 +1043,7 @@ bool SeekBackward::canBeRun()
 
 void SeekBackward::run()
 {
-	seek();
+	seek(SearchDirection::Backward);
 }
 
 bool ToggleDisplayMode::canBeRun()
@@ -2876,7 +2876,7 @@ void scrollTagDownRun(NC::List *list, const SongList *songs, MPD::Song::GetFunct
 	}
 }
 
-void seek()
+void seek(SearchDirection sd)
 {
 	using Global::wHeader;
 	using Global::wFooter;
@@ -2894,7 +2894,7 @@ void seek()
 
 	unsigned songpos = Status::State::elapsedTime();
 	auto t = Timer;
-	
+
 	int old_timeout = wFooter->getTimeout();
 	wFooter->setTimeout(BaseScreen::defaultWindowTimeout);
 	
@@ -2938,14 +2938,9 @@ void seek()
 		
 		NC::Key::Type input = readKey(*wFooter);
 
-		auto k = Bindings.get(input);
-		if (hasRunnableAction(k, Actions::Type::SeekForward))
+		switch (sd)
 		{
-			if (songpos < Status::State::totalTime())
-				songpos = std::min(songpos + howmuch, Status::State::totalTime());
-		}
-		else if (hasRunnableAction(k, Actions::Type::SeekBackward))
-		{
+		case SearchDirection::Backward:
 			if (songpos > 0)
 			{
 				if (songpos < howmuch)
@@ -2953,10 +2948,13 @@ void seek()
 				else
 					songpos -= howmuch;
 			}
-		}
-		else
 			break;
-		
+		case SearchDirection::Forward:
+			if (songpos < Status::State::totalTime())
+				songpos = std::min(songpos + howmuch, Status::State::totalTime());
+			break;
+		};
+
 		std::string tracklength;
 		// FIXME: merge this with the code in status.cpp
 		switch (Config.design)
@@ -2998,6 +2996,14 @@ void seek()
 		}
 		Progressbar::draw(songpos, Status::State::totalTime());
 		wFooter->refresh();
+
+		auto k = Bindings.get(input);
+		if (hasRunnableAction(k, Actions::Type::SeekBackward))
+			sd = SearchDirection::Backward;
+		else if (hasRunnableAction(k, Actions::Type::SeekForward))
+			sd = SearchDirection::Forward;
+		else
+			break;
 	}
 	SeekingInProgress = false;
 	Mpd.Seek(Status::State::currentSongPosition(), songpos);

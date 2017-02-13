@@ -24,6 +24,7 @@ ncmpcpp-0.8 (????-??-??)
 * Added test that checks if lyrics fetchers work (available via command line parameter --test-lyrics-fetchers).
 * Fixed fetching lyrics from justsomelyrics.com.
 * Added support for fetching lyrics from jah-lyrics.com and plyrics.com.
+* Seek immediately after invoking appropriate action once.
 
 ncmpcpp-0.7.7 (2016-10-31)
 * Fixed compilation on 32bit platforms.
