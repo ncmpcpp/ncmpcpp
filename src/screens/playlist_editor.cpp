@@ -20,6 +20,7 @@
 
 #include <algorithm>
 #include <boost/lambda/bind.hpp>
+#include <boost/optional.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <cassert>
 
@@ -57,7 +58,7 @@ size_t RightColumnWidth;
 std::string SongToString(const MPD::Song &s);
 bool PlaylistEntryMatcher(const Regex::Regex &rx, const MPD::Playlist &playlist);
 bool SongEntryMatcher(const Regex::Regex &rx, const MPD::Song &s);
-
+boost::optional<size_t> GetSongIndexInPlaylist(MPD::Playlist playlist, const MPD::Song &song);
 }
 
 PlaylistEditor::PlaylistEditor()
@@ -481,6 +482,66 @@ void PlaylistEditor::locatePlaylist(const MPD::Playlist &playlist)
 	}
 }
 
+void PlaylistEditor::gotoSong(size_t playlist_index, size_t song_index)
+{
+	Playlists.highlight(playlist_index);
+	Content.clear();
+	update();
+	Content.highlight(song_index);
+
+	if (isActiveWindow(Playlists))
+		nextColumn();
+	else
+		Playlists.refresh();
+}
+
+void PlaylistEditor::locateSong(const MPD::Song &s)
+{
+	Content.clearFilter();
+	Playlists.clearFilter();
+
+	if (!Content.empty())
+	{
+		auto song_it = std::find(Content.currentV() + 1, Content.endV(), s);
+		if (song_it != Content.endV())
+		{
+			Content.highlight(song_it - Content.beginV());
+			nextColumn();
+			return;
+		}
+	}
+
+	if (!Playlists.empty())
+	{
+		Statusbar::print("Jumping to song...");
+		auto locate_and_switch_playlist = [this, &s](auto pl_it) -> bool {
+			if (auto song_index = GetSongIndexInPlaylist(*pl_it, s)) {
+				this->gotoSong(pl_it - Playlists.beginV(), *song_index);
+				return true;
+			}
+			return false;
+		};
+
+		for (auto pl_it = Playlists.currentV() + 1; pl_it != Playlists.endV(); ++pl_it)
+			if (locate_and_switch_playlist(pl_it)) return;
+		for (auto pl_it = Playlists.beginV(); pl_it != Playlists.currentV(); ++pl_it)
+			if (locate_and_switch_playlist(pl_it)) return;
+	}
+
+	if (!Content.empty())
+	{
+		auto song_it = std::find(Content.beginV(), Content.currentV(), s);
+		if (song_it != Content.currentV())
+		{
+			Content.highlight(song_it - Content.beginV());
+			nextColumn();
+			return;
+		}
+	}
+
+	Statusbar::print("Song is not from playlists");
+}
+
 namespace {
 
 std::string SongToString(const MPD::Song &s)
@@ -506,6 +567,22 @@ bool PlaylistEntryMatcher(const Regex::Regex &rx, const MPD::Playlist &playlist)
 bool SongEntryMatcher(const Regex::Regex &rx, const MPD::Song &s)
 {
 	return Regex::search(SongToString(s), rx);
+}
+
+boost::optional<size_t> GetSongIndexInPlaylist(MPD::Playlist playlist, const MPD::Song &song)
+{
+	size_t index = 0;
+	MPD::SongIterator it = Mpd.GetPlaylistContentNoInfo(playlist.path()), end;
+
+	for (;;)
+	{
+		if (it == end)
+			return boost::none;
+		if (*it == song)
+			return index;
+
+		++it, ++index;
+	}
 }
 
 }

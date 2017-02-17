@@ -1207,6 +1207,7 @@ bool JumpToPlayingSong::canBeRun()
 	m_song = myPlaylist->nowPlayingSong();
 	return !m_song.empty()
 		&& (myScreen == myPlaylist
+		    || myScreen == myPlaylistEditor
 		    || myScreen == myBrowser
 		    || myScreen == myLibrary);
 }
@@ -1216,6 +1217,10 @@ void JumpToPlayingSong::run()
 	if (myScreen == myPlaylist)
 	{
 		myPlaylist->locateSong(m_song);
+	}
+	else if (myScreen == myPlaylistEditor)
+	{
+		myPlaylistEditor->locateSong(m_song);
 	}
 	else if (myScreen == myBrowser)
 	{
