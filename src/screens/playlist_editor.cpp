@@ -523,10 +523,13 @@ void PlaylistEditor::locateSong(const MPD::Song &s)
 			return false;
 		};
 
-		for (auto pl_it = Playlists.currentV() + 1; pl_it != Playlists.endV(); ++pl_it)
+		auto begin = Playlists.beginV(), end = Playlists.endV();
+		auto current_successor = ++Playlists.currentV();
+
+		for (auto pl_it = current_successor; pl_it != end; ++pl_it)
 			if (locate_and_switch_playlist(pl_it))
 				return;
-		for (auto pl_it = Playlists.beginV(); pl_it != Playlists.currentV(); ++pl_it)
+		for (auto pl_it = begin; pl_it != current_successor; ++pl_it)
 			if (locate_and_switch_playlist(pl_it))
 				return;
 	}
