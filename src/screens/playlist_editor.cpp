@@ -485,7 +485,7 @@ void PlaylistEditor::locatePlaylist(const MPD::Playlist &playlist)
 void PlaylistEditor::gotoSong(size_t playlist_index, size_t song_index)
 {
 	Playlists.highlight(playlist_index);
-	Content.clear();
+	requestContentsUpdate();
 	update();
 	Content.highlight(song_index);
 
