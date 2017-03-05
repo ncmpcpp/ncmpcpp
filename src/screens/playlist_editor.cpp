@@ -529,7 +529,7 @@ void PlaylistEditor::locateSong(const MPD::Song &s)
 		for (auto pl_it = current_successor; pl_it != end; ++pl_it)
 			if (locate_and_switch_playlist(pl_it))
 				return;
-		for (auto pl_it = begin; pl_it != current_successor; ++pl_it)
+		for (auto pl_it = begin; pl_it != Playlists.currentV(); ++pl_it)
 			if (locate_and_switch_playlist(pl_it))
 				return;
 	}
@@ -545,19 +545,9 @@ void PlaylistEditor::locateSong(const MPD::Song &s)
 		}
 	}
 
-	// Wrap back to the beginning of current playlist
-	if (Content.size() != 0)
-	{
-		auto song_it = std::find(Content.beginV(), Content.currentV(), s);
-		if (song_it != Content.currentV())
-		{
-			Content.highlight(song_it - Content.beginV());
-			nextColumn();
-			return;
-		}
-	}
-
-	Statusbar::print("Song is not from playlists");
+	// If the currently highlighted song is what we are looking for, don't show error
+	if (Content.currentV() == Content.endV() || *Content.currentV() != s)
+		Statusbar::print("Song is not from playlists");
 }
 
 namespace {
