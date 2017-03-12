@@ -33,6 +33,15 @@
 
 namespace {
 
+// Prepend '0' if the tag is a single digit number so that we get "expected"
+// sort order with regular string comparison.
+void format_numeric_tag(std::string &s)
+{
+	if ((s.length() == 1 && s[0] != '0')
+	    || (s.length() > 3 && s[1] == '/'))
+		s = "0"+s;
+}
+
 size_t calc_hash(const char *s, size_t seed = 0)
 {
 	for (; *s != '\0'; ++s)
@@ -131,9 +140,7 @@ std::string Song::getTrack(unsigned idx) const
 {
 	assert(m_song);
 	std::string track = get(MPD_TAG_TRACK, idx);
-	if ((track.length() == 1 && track[0] != '0')
-	||  (track.length() > 3  && track[1] == '/'))
-		track = "0"+track;
+	format_numeric_tag(track);
 	return track;
 }
 
@@ -174,7 +181,9 @@ std::string Song::getPerformer(unsigned idx) const
 std::string Song::getDisc(unsigned idx) const
 {
 	assert(m_song);
-	return get(MPD_TAG_DISC, idx);
+	std::string disc = get(MPD_TAG_DISC, idx);
+	format_numeric_tag(disc);
+	return disc;
 }
 
 std::string Song::getComment(unsigned idx) const
