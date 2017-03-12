@@ -962,7 +962,10 @@ void MediaLibrary::locateSong(const MPD::Song &s)
 	{
 		Tags.clearFilter();
 		if (Tags.empty())
+		{
+			requestTagsUpdate();
 			update();
+		}
 
 		if (!MoveToTag(Tags, primary_tag))
 		{
@@ -981,7 +984,10 @@ void MediaLibrary::locateSong(const MPD::Song &s)
 
 	Albums.clearFilter();
 	if (Albums.empty())
+	{
+		requestAlbumsUpdate();
 		update();
+	}
 
 	// When you locate a song in the media library, if no albums or no songs
 	// are found, set the active column to the previous one (tags if no albums,
@@ -1018,7 +1024,7 @@ void MediaLibrary::locateSong(const MPD::Song &s)
 		}
 
 		Songs.clearFilter();
-		Songs.clear();
+		requestSongsUpdate();
 		update();
 
 		if (!Songs.empty())
