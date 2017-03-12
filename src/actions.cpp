@@ -623,14 +623,12 @@ void SlaveScreen::run()
 
 void VolumeUp::run()
 {
-	int volume = std::min(Status::State::volume()+Config.volume_change_step, 100u);
-	Mpd.SetVolume(volume);
+	Mpd.ChangeVolume(static_cast<int>(Config.volume_change_step));
 }
 
 void VolumeDown::run()
 {
-	int volume = std::max(int(Status::State::volume()-Config.volume_change_step), 0);
-	Mpd.SetVolume(volume);
+	Mpd.ChangeVolume(-static_cast<int>(Config.volume_change_step));
 }
 
 bool AddItemToPlaylist::canBeRun()

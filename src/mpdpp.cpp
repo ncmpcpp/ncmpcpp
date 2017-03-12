@@ -472,6 +472,14 @@ void Connection::SetVolume(unsigned vol)
 	checkErrors();
 }
 
+void Connection::ChangeVolume(int change)
+{
+	prechecksNoCommandsList();
+	mpd_run_change_volume(m_connection.get(), change);
+	checkErrors();
+}
+
+
 std::string Connection::GetReplayGainMode()
 {
 	prechecksNoCommandsList();

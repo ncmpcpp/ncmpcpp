@@ -536,7 +536,8 @@ struct Connection
 	void SetConsume(bool);
 	void SetCrossfade(unsigned);
 	void SetVolume(unsigned int vol);
-	
+	void ChangeVolume(int change);
+
 	std::string GetReplayGainMode();
 	void SetReplayGainMode(ReplayGainMode);
 	
