@@ -26,6 +26,7 @@ ncmpcpp-0.8 (????-??-??)
 * Added support for fetching lyrics from jah-lyrics.com and plyrics.com.
 * Seek immediately after invoking appropriate action once.
 * Added support for locating current song in playlist editor.
+* Disable autocenter mode while searching and filtering.
 
 ncmpcpp-0.7.7 (2016-10-31)
 * Fixed compilation on 32bit platforms.

@@ -90,6 +90,7 @@ noinst_HEADERS = \
 	utility/html.h \
 	utility/option_parser.h \
 	utility/readline.h \
+	utility/scoped_value.h \
 	utility/shared_resource.h \
 	utility/string.h \
 	utility/type_conversions.h \

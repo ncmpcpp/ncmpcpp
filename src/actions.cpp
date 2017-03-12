@@ -39,6 +39,7 @@
 #include "statusbar.h"
 #include "utility/comparators.h"
 #include "utility/conversion.h"
+#include "utility/scoped_value.h"
 
 #include "curses/menu_impl.h"
 #include "bindings.h"
@@ -1982,6 +1983,7 @@ void ApplyFilter::run()
 
 	try
 	{
+		ScopedValue<bool> disabled_autocenter_mode(Config.autocenter_mode, false);
 		Statusbar::ScopedLock slock;
 		NC::Window::ScopedPromptHook helper(
 			*wFooter,
@@ -3022,6 +3024,7 @@ void findItem(const SearchDirection direction)
 	std::string constraint = w->searchConstraint();
 	try
 	{
+		ScopedValue<bool> disabled_autocenter_mode(Config.autocenter_mode, false);
 		Statusbar::ScopedLock slock;
 		NC::Window::ScopedPromptHook prompt_hook(
 			*wFooter,
