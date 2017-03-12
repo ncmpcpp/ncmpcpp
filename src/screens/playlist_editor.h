@@ -80,8 +80,7 @@ struct PlaylistEditor: Screen<NC::Window *>, Filterable, HasColumns, HasSongs, S
 	
 	void locatePlaylist(const MPD::Playlist &playlist);
 	void locateSong(const MPD::Song &s);
-	void gotoSong(size_t playlist_index, size_t song_index);
-	
+
 	NC::Menu<MPD::Playlist> Playlists;
 	SongMenu Content;
 	

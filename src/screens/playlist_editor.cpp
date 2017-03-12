@@ -482,72 +482,61 @@ void PlaylistEditor::locatePlaylist(const MPD::Playlist &playlist)
 	}
 }
 
-void PlaylistEditor::gotoSong(size_t playlist_index, size_t song_index)
-{
-	Playlists.highlight(playlist_index);
-	requestContentsUpdate();
-	update();
-	Content.highlight(song_index);
-
-	if (isActiveWindow(Playlists))
-		nextColumn();
-	else
-		Playlists.refresh();
-}
-
 void PlaylistEditor::locateSong(const MPD::Song &s)
 {
+	if (Playlists.empty())
+		return;
+
 	Content.clearFilter();
 	Playlists.clearFilter();
 
-	if (!Content.empty())
-	{
-		auto song_it = std::find(Content.currentV() + 1, Content.endV(), s);
-		if (song_it != Content.endV())
+	auto locate_song_in_current_playlist = [this, &s](auto front, auto back) {
+		if (!Content.empty())
 		{
-			Content.highlight(song_it - Content.beginV());
-			nextColumn();
-			return;
-		}
-	}
-
-	if (!Playlists.empty())
-	{
-		Statusbar::print("Jumping to song...");
-		auto locate_and_switch_playlist = [this, &s](auto pl_it) -> bool {
-			if (auto song_index = GetSongIndexInPlaylist(*pl_it, s))
+			auto it = std::find(front, back, s);
+			if (it != back)
 			{
-				this->gotoSong(pl_it - Playlists.beginV(), *song_index);
+				Content.highlight(it - Content.beginV());
+				nextColumn();
 				return true;
 			}
-			return false;
-		};
-
-		auto begin = Playlists.beginV(), end = Playlists.endV();
-		auto current_successor = ++Playlists.currentV();
-
-		for (auto pl_it = current_successor; pl_it != end; ++pl_it)
-			if (locate_and_switch_playlist(pl_it))
-				return;
-		for (auto pl_it = begin; pl_it != Playlists.currentV(); ++pl_it)
-			if (locate_and_switch_playlist(pl_it))
-				return;
-	}
-
-	if (!Content.empty())
-	{
-		auto song_it = std::find(Content.beginV(), Content.currentV(), s);
-		if (song_it != Content.currentV())
-		{
-			Content.highlight(song_it - Content.beginV());
-			nextColumn();
-			return;
 		}
-	}
+		return false;
+	};
+	auto locate_song_in_playlists = [this, &s](auto front, auto back) {
+		for (auto it = front; it != back; ++it)
+		{
+			if (auto song_index = GetSongIndexInPlaylist(*it, s))
+			{
+				Playlists.highlight(it - Playlists.beginV());
+				Playlists.refresh();
 
-	// If the currently highlighted song is what we are looking for, don't show error
-	if (Content.currentV() == Content.endV() || *Content.currentV() != s)
-		Statusbar::print("Song is not from playlists");
+				requestContentsUpdate();
+				update();
+				Content.highlight(*song_index);
+				nextColumn();
+
+				return true;
+			}
+		}
+		return false;
+	};
+
+	Statusbar::print("Jumping to song...");
+
+	if (locate_song_in_current_playlist(Content.currentV() + 1, Content.endV()))
+		return;
+	if (locate_song_in_playlists(Playlists.currentV() + 1, Playlists.endV()))
+		return;
+	if (locate_song_in_playlists(Playlists.beginV(), Playlists.currentV()))
+		return;
+	if (locate_song_in_current_playlist(Content.beginV(), Content.currentV()))
+		return;
+
+	// Highlighted song was skipped, so if that's the one we're looking for, we're
+	// good.
+	if (Content.empty() || *Content.currentV() != s)
+		Statusbar::print("Song was not found in playlists");
 }
 
 namespace {
