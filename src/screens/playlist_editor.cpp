@@ -511,7 +511,7 @@ void PlaylistEditor::locateSong(const MPD::Song &s)
 				Playlists.highlight(it - Playlists.beginV());
 				Playlists.refresh();
 
-				requestContentsUpdate();
+				requestContentUpdate();
 				update();
 				Content.highlight(*song_index);
 				nextColumn();

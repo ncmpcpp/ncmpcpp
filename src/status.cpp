@@ -444,7 +444,7 @@ void Status::Changes::playlist(unsigned previous_version)
 void Status::Changes::storedPlaylists()
 {
 	myPlaylistEditor->requestPlaylistsUpdate();
-	myPlaylistEditor->requestContentsUpdate();
+	myPlaylistEditor->requestContentUpdate();
 	if (!myBrowser->isLocal() && myBrowser->inRootDirectory())
 		myBrowser->requestUpdate();
 }

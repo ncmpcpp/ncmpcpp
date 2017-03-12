@@ -76,7 +76,7 @@ struct PlaylistEditor: Screen<NC::Window *>, Filterable, HasColumns, HasSongs, S
 	void updateTimer();
 
 	void requestPlaylistsUpdate() { m_playlists_update_requested = true; }
-	void requestContentsUpdate() { m_content_update_requested = true; }
+	void requestContentUpdate() { m_content_update_requested = true; }
 	
 	void locatePlaylist(const MPD::Playlist &playlist);
 	void locateSong(const MPD::Song &s);
