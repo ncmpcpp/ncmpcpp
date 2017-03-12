@@ -522,10 +522,10 @@ void PlaylistEditor::locateSong(const MPD::Song &s)
 		return false;
 	};
 
-	Statusbar::print("Jumping to song...");
 
 	if (locate_song_in_current_playlist(Content.currentV() + 1, Content.endV()))
 		return;
+	Statusbar::print("Jumping to song...");
 	if (locate_song_in_playlists(Playlists.currentV() + 1, Playlists.endV()))
 		return;
 	if (locate_song_in_playlists(Playlists.beginV(), Playlists.currentV()))
